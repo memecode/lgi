@@ -2,12 +2,12 @@
 #include "lgi/common/DragAndDrop.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GDragFormats::GDragFormats(bool source)
+LDragFormats::LDragFormats(bool source)
 {
 	Source = source;
 }
 
-LString GDragFormats::ToString()
+LString LDragFormats::ToString()
 {
 	LStringPipe p(256);
 	p.Print("{");
@@ -17,7 +17,7 @@ LString GDragFormats::ToString()
 	return p.NewGStr();
 }
 
-void GDragFormats::SupportsFileDrops()
+void LDragFormats::SupportsFileDrops()
 {
 	#ifdef MAC
 	Supports("NSFilenamesPboardType");
@@ -25,12 +25,12 @@ void GDragFormats::SupportsFileDrops()
 	Supports(LGI_FileDropFormat);
 }
 
-void GDragFormats::SupportsFileStreams()
+void LDragFormats::SupportsFileStreams()
 {
 	Supports(LGI_StreamDropFormat);
 }
 
-bool GDragFormats::HasFormat(const char *Fmt)
+bool LDragFormats::HasFormat(const char *Fmt)
 {
 	for (auto f: Formats)
 		if (f.Equals(Fmt))
@@ -38,7 +38,7 @@ bool GDragFormats::HasFormat(const char *Fmt)
 	return false;
 }
 
-void GDragFormats::Supports(LString Fmt)
+void LDragFormats::Supports(LString Fmt)
 {
 	if (Source)
 	{
@@ -57,7 +57,7 @@ void GDragFormats::Supports(LString Fmt)
 	}
 }
 
-LString::Array GDragFormats::GetSupported()
+LString::Array LDragFormats::GetSupported()
 {
 	LString::Array a;
 	a.SetFixedLength(false);

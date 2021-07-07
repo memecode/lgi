@@ -41,8 +41,8 @@ class
 	LRichTextEdit :
 	public GDocView,
 	public ResObject,
-	public GDragDropTarget,
-	public GCapabilityClient
+	public LDragDropTarget,
+	public LCapabilityClient
 {
 	friend bool RichText_FindCallback(GFindReplaceCommon *Dlg, bool Replace, void *User);
 
@@ -65,7 +65,7 @@ protected:
 	virtual void PourText(ssize_t Start, ssize_t Length);
 	virtual void PourStyle(ssize_t Start, ssize_t Length);
 	virtual void OnFontChange();
-	virtual void OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour);
+	virtual void OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour);
 
 public:
 	// Construction
@@ -218,8 +218,8 @@ public:
 	bool OnLayout(LViewLayoutInfo &Inf);
 
 	// D'n'd target
-	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState);
-	int OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState);
+	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState);
+	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState);
 
 	// Virtuals
 	virtual bool Insert(int At, char16 *Data, int Len);

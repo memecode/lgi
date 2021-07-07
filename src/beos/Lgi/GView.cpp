@@ -775,14 +775,14 @@ GMessage::Result LView::OnEvent(GMessage *Msg)
 		}
 		case M_DRAG_DROP:
 		{
-			GDragDropSource *Source = 0;
-			if (Msg->FindPointer("GDragDropSource", (void**) &Source) == B_OK)
+			LDragDropSource *Source = 0;
+			if (Msg->FindPointer("LDragDropSource", (void**) &Source) == B_OK)
 			{
 				LMouse m;
 				GetMouse(m);
 			
 				LView *TargetView = _lgi_search_children(this, m.x, m.y);
-				GDragDropTarget *Target = dynamic_cast<GDragDropTarget*>(TargetView);
+				LDragDropTarget *Target = dynamic_cast<LDragDropTarget*>(TargetView);
 				if (Target)
 				{
 					LPoint MousePt(m.x, m.y);

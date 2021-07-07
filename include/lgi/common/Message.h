@@ -166,7 +166,7 @@ enum LgiMessages
 	M_LOG_TEXT,
 	M_ASSERT_UI,
 	M_INVALIDATE, // A=(LRect*)Rectangle, B=(LView*)this
-	M_RESIZE_TO_CONTENT, // GItemContainer
+	M_RESIZE_TO_CONTENT, // LItemContainer
 	M_SCROLL_TO, // LTreeItem->LTree
 
 	#ifdef WINDOWS

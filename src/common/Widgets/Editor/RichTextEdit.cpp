@@ -66,7 +66,7 @@ LRichTextEdit::LRichTextEdit(	int Id,
 	d->Padding(LCss::Len(LCss::LenPx, 4));
 	
 	#if 0
-	d->BackgroundColor(LCss::ColorDef(GColour::Green));
+	d->BackgroundColor(LCss::ColorDef(LColour::Green));
 	#else
 	d->BackgroundColor(LColour(L_WORKSPACE));
 	#endif
@@ -625,7 +625,7 @@ bool LRichTextEdit::Cut()
 	bool Status = true;
 	if (Txt)
 	{
-		GClipBoard Cb(this);
+		LClipBoard Cb(this);
 		Status = Cb.TextW(Txt);
 		DeleteArray(Txt);
 	}
@@ -646,7 +646,7 @@ bool LRichTextEdit::Copy()
 		return false;
 
 	// Put on the clipboard
-	GClipBoard Cb(this);
+	LClipBoard Cb(this);
 	bool Status = Cb.TextW(PlainText.AddressOf());
 	Cb.Html(Html, false);
 	return Status;
@@ -659,7 +659,7 @@ bool LRichTextEdit::Paste()
 	LAutoPtr<LSurface> Img;
 
 	{
-		GClipBoard Cb(this);	
+		LClipBoard Cb(this);	
 		Html = Cb.Html();
 		if (!Html)
 		{
@@ -814,7 +814,7 @@ bool LRichTextEdit::ClearDirty(bool Ask, const char *FileName)
 bool LRichTextEdit::Open(const char *Name, const char *CharSet)
 {
 	bool Status = false;
-	GFile f;
+	LFile f;
 
 	if (f.Open(Name, O_READ|O_SHARE))
 	{
@@ -859,7 +859,7 @@ bool LRichTextEdit::Open(const char *Name, const char *CharSet)
 
 bool LRichTextEdit::Save(const char *FileName, const char *CharSet)
 {
-	GFile f;
+	LFile f;
 	if (!FileName || !f.Open(FileName, O_WRITE))
 		return false;
 
@@ -1089,7 +1089,7 @@ void LRichTextEdit::OnPosChange()
 	LLayout::OnPosChange();
 }
 
-int LRichTextEdit::WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
+int LRichTextEdit::WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
 {
 	Formats.SupportsFileDrops();
 	#ifdef WINDOWS
@@ -1099,13 +1099,13 @@ int LRichTextEdit::WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
 	return Formats.Length() ? DROPEFFECT_COPY : DROPEFFECT_NONE;
 }
 
-int LRichTextEdit::OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState)
+int LRichTextEdit::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 {
 	int Effect = DROPEFFECT_NONE;
 
 	for (unsigned i=0; i<Data.Length(); i++)
 	{
-		GDragData &dd = Data[i];
+		LDragData &dd = Data[i];
 		if (dd.IsFileDrop() && d->Areas[ContentArea].Overlap(Pt.x, Pt.y))
 		{
 			int AddIndex = -1;
@@ -1252,7 +1252,7 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 	LSubMenu RClick;
 	LAutoString ClipText;
 	{
-		GClipBoard Clip(this);
+		LClipBoard Clip(this);
 		ClipText.Reset(NewStr(Clip.Text()));
 	}
 
@@ -1391,13 +1391,13 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 		}
 		case IDM_COPY_ORIGINAL:
 		{
-			GClipBoard c(this);
+			LClipBoard c(this);
 			c.Text(d->OriginalText);
 			break;
 		}
 		case IDM_COPY_CURRENT:
 		{
-			GClipBoard c(this);
+			LClipBoard c(this);
 			c.Text(Name());
 			break;
 		}
@@ -2432,7 +2432,7 @@ void LRichTextEdit::OnEnter(LKey &k)
 	}
 }
 
-void LRichTextEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour)
+void LRichTextEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
 {
 	pDC->Colour(colour);
 	pDC->Rectangle(&r);
@@ -2445,13 +2445,13 @@ void LRichTextEdit::OnPaint(LSurface *pDC)
 		return;
 
 	#if 0
-	pDC->Colour(GColour(255, 0, 255));
+	pDC->Colour(LColour(255, 0, 255));
 	pDC->Rectangle();
 	#endif
 
 	int FontY = GetFont()->GetHeight();
 
-	GCssTools ct(d, d->Font);
+	LCssTools ct(d, d->Font);
 	r = ct.PaintBorder(pDC, r);
 
 	bool HasSpace = r.Y() > (FontY * 3);
@@ -2777,7 +2777,7 @@ SelectColour::SelectColour(LRichTextPriv *priv, LPoint p, LRichTextEdit::RectTyp
 	{
 		for (int hue=0; hue<8; hue++)
 		{
-			GColour c;
+			LColour c;
 			c.SetHLS(hue * HueStep, SatStart - ((sat * SatRange) / 7), 255);
 			c.ToRGB();
 

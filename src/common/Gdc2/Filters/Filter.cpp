@@ -436,7 +436,7 @@ GFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, LStream *In)
 			Meter->SetRange(LRange(0, pMem->y));
 		}
 		
-		GColourSpace SrcCs = CsNone;
+		LColourSpace SrcCs = CsNone;
 
 		switch (ActualBits)
 		{
@@ -479,7 +479,7 @@ GFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, LStream *In)
 				Cs.All |= (c.Type << 4) | c.Bits;
 			}
 			
-			SrcCs = (GColourSpace) Cs.All;
+			SrcCs = (LColourSpace) Cs.All;
 		}
 		#endif
 
@@ -560,7 +560,7 @@ GFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, LStream *In)
 			}
 			default:
 			{
-				GColourSpace DstCs = pDC->GetColourSpace();
+				LColourSpace DstCs = pDC->GetColourSpace();
 				for (int i=pMem->y-1; i>=0; i--)
 				{
 					uint8_t *Ptr = pMem->Base + (pMem->Line * i);
@@ -1392,7 +1392,7 @@ LSurface *GdcDevice::Load(const char *Name, bool UseOSLoader)
 				uchar *Ptr = (uchar*) LockResource(hMem);
 				if (Ptr)
 				{
-					GClipBoard Clip(NULL);
+					LClipBoard Clip(NULL);
 					LSurface *pDC = Clip.ConvertFromPtr(Ptr);
 					GlobalUnlock(hMem);
 					return pDC;
@@ -1403,7 +1403,7 @@ LSurface *GdcDevice::Load(const char *Name, bool UseOSLoader)
 		return NULL;
 	}
 
-	GFile File;
+	LFile File;
 	if (!File.Open(Name, O_READ))
 	{
 		LgiTrace("%s:%i - Couldn't open '%s' for reading.\n", _FL, Name);
@@ -1642,7 +1642,7 @@ bool GdcDevice::Save(const char *Name, LSurface *pDC)
 	if (!Name || !pDC)
 		return false;
 
-	GFile File;
+	LFile File;
 	if (!File.Open(Name, O_WRITE))
 	{
 		LgiTrace("%s:%i - Can't open '%s'\n", _FL, Name);

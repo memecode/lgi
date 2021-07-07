@@ -340,7 +340,7 @@ DumpTime("init common ctrls");
 
 DumpTime("font sys");
 
-	d->FileSystem = new GFileSystem;
+	d->FileSystem = new LFileSystem;
 
 DumpTime("file sys");
 
@@ -393,7 +393,7 @@ DumpTime("fonts");
 
 DumpTime("cursor/rand/msg");
 
-	GColour::OnChange();
+	LColour::OnChange();
 
 DumpTime("colours");
 

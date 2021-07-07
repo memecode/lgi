@@ -55,7 +55,7 @@ bool GWordStore::Serialize(const char *FileName, bool Load)
 {
 	static const char *ObjName = "GWordStore";
 	bool Status = false;
-	GFile f;
+	LFile f;
 	
 	const char *Name = FileName ? FileName : d->File;
 	if (Load)

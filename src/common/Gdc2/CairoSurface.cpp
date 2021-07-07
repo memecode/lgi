@@ -27,7 +27,7 @@ public:
 	::LArray<LRect> Client;
 	cairo_t *cr;
 	LCairoSurfaceT Img;
-	GColourSpace CreateCs;
+	LColourSpace CreateCs;
 
     LCairoSurfacePriv()
     {
@@ -51,7 +51,7 @@ public:
 	}
 };
 
-LCairoSurface::LCairoSurface(int x, int y, GColourSpace cs, int flags)
+LCairoSurface::LCairoSurface(int x, int y, LColourSpace cs, int flags)
 {
 	d = new LCairoSurfacePriv;
 	if (cs != CsNone)
@@ -268,14 +268,14 @@ void LCairoSurface::SetOrigin(int x, int y)
 	}
 }
 
-GColourSpace LCairoSurface::GetCreateCs()
+LColourSpace LCairoSurface::GetCreateCs()
 {
 	// Sometimes the colour space we get is different to the requested colour space.
 	// This function returns the original requested colour space.
 	return d->CreateCs;
 }
 
-bool LCairoSurface::Create(int x, int y, GColourSpace Cs, int Flags)
+bool LCairoSurface::Create(int x, int y, LColourSpace Cs, int Flags)
 {
 	int Bits = GColourSpaceToBits(Cs);
 	if (x < 1 || y < 1 || Bits < 1)

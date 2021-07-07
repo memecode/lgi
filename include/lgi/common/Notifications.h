@@ -5,7 +5,7 @@ enum GNotifyType
 {
 	GNotifyNull,
 
-	// GItemContainer notification flags
+	// LItemContainer notification flags
 	/// Item inserted
 	/// \sa LList, LView::OnNotify
 	GNotifyItem_Insert = 0x100,

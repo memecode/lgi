@@ -42,7 +42,7 @@ public:
 			for (unsigned i=0; i<Colour->Presets.Length(); i++)
 			{
 				int y = r.y1 + ((i+1) * Ly);
-				GColour p = Colour->Presets[i];
+				LColour p = Colour->Presets[i];
 
 				pDC->Colour(p);
 				pDC->Rectangle(r.x1+1, y+1, r.x1+Ly-1, y+Ly-1);
@@ -78,7 +78,7 @@ public:
 	void Value(int64 i) { Colour->Value(i); }
 };
 
-LColourSelect::LColourSelect(LArray<GColour> *cols) :
+LColourSelect::LColourSelect(LArray<LColour> *cols) :
 	LDropDown(-1, 0, 0, 10, 10, 0), ResObject(Res_Custom)
 {
 	c.Rgb(0, 0, 255);
@@ -88,7 +88,7 @@ LColourSelect::LColourSelect(LArray<GColour> *cols) :
 		SetColourList(cols);
 }
 
-void LColourSelect::SetColourList(LArray<GColour> *cols)
+void LColourSelect::SetColourList(LArray<LColour> *cols)
 {
 	if (cols)
 	{
@@ -107,7 +107,7 @@ int64 LColourSelect::Value()
 	return c.c32();
 }
 
-void LColourSelect::Value(GColour set)
+void LColourSelect::Value(LColour set)
 {
 	if (c != set)
 	{

@@ -180,7 +180,7 @@ bool LPanel::Pour(LRegion &r)
 					css->Height() == LCss::LenAuto)
 				{
 					LRect c = GetClient();
-					GCssTools tools(css, v->GetFont());
+					LCssTools tools(css, v->GetFont());
 					c = tools.ApplyMargin(c);
 					v->SetPos(c);
 					break;
@@ -207,9 +207,9 @@ int LPanel::OnNotify(LViewI *Ctrl, int Flags)
 void LPanel::OnPaint(LSurface *pDC)
 {
 	LRect r = GetClient();
-	GCssTools Tools(this);
-	GColour cFore = Tools.GetFore();
-	GColour cBack = Tools.GetBack();
+	LCssTools Tools(this);
+	LColour cFore = Tools.GetFore();
+	LColour cBack = Tools.GetBack();
 	Tools.PaintContent(pDC, r);
 
 	auto BackImg = Tools.GetBackImage();

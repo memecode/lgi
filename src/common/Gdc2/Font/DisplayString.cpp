@@ -1329,7 +1329,7 @@ bool CompositeText8Alpha(LSurface *Out, LSurface *In, LFont *Font, int px, int p
 
 	// Create colour map of the foreground/background colours		
 	uint8_t *Div255 = Div255Lut;
-	GColour fore = Font->Fore();
+	LColour fore = Font->Fore();
 	GRgb24 fore_px;
 	fore_px.r = fore.r();
 	fore_px.g = fore.g();
@@ -1346,7 +1346,7 @@ bool CompositeText8Alpha(LSurface *Out, LSurface *In, LFont *Font, int px, int p
 	}
 	else
 	{
-		GColour back = Font->Back();
+		LColour back = Font->Back();
 		GRgb24 back_px;
 		back_px.r = back.r();
 		back_px.g = back.g();
@@ -1431,7 +1431,7 @@ bool CompositeText8NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int
 
 	// Create colour map of the foreground/background colours		
 	uint8_t *DivLut = Div255Lut;
-	GColour fore = Font->Fore();
+	LColour fore = Font->Fore();
 	GRgb24 fore_px;
 	fore_px.r = fore.r();
 	fore_px.g = fore.g();
@@ -1448,7 +1448,7 @@ bool CompositeText8NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int
 	}
 	else
 	{
-		GColour back = Font->Back();
+		LColour back = Font->Back();
 		GRgb24 back_px;
 		back_px.r = back.r();
 		back_px.g = back.g();
@@ -1543,7 +1543,7 @@ bool CompositeText5NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int
 
 	// Create colour map of the foreground/background colours		
 	uint8_t *Div255 = Div255Lut;
-	GColour fore = Font->Fore();
+	LColour fore = Font->Fore();
 	GRgb24 fore_px;
 	fore_px.r = fore.r();
 	fore_px.g = fore.g();
@@ -1559,7 +1559,7 @@ bool CompositeText5NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int
 	}
 	else
 	{
-		GColour back = Font->Back();
+		LColour back = Font->Back();
 		GRgb24 back_px;
 		back_px.r = back.r();
 		back_px.g = back.g();
@@ -1685,7 +1685,7 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 		int Ox = 0, Oy = 0;
 		pDC->GetOrigin(Ox, Oy);
 		GBlitRegions Clip(pDC, px-Ox, py-Oy, Img, r);
-		GColourSpace DstCs = pDC->GetColourSpace();
+		LColourSpace DstCs = pDC->GetColourSpace();
 		switch (DstCs)
 		{
 			#define DspStrCase(px_fmt, comp)											\
@@ -1725,9 +1725,9 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 		COLOUR Old = pDC->Colour();
 		int TabSize = Font->TabSize() ? Font->TabSize() : 32;
 		int Ox = px;
-		GColour cFore = Font->Fore();
-		GColour cBack = Font->Back();
-		GColour cWhitespace;
+		LColour cFore = Font->Fore();
+		LColour cBack = Font->Back();
+		LColour cWhitespace;
 
 		if (VisibleTab)
 		{
@@ -1806,7 +1806,7 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 					else
 					{
 						// Draw the character(s)
-						GColour Fg = f->Fore();
+						LColour Fg = f->Fore();
 						LgiAssert(Fg.IsValid());
 						f->_Draw(pDC, px, py, Info[i].Str, Info[i].Len, &b, Fg);
 						
@@ -1860,7 +1860,7 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 				b.y2 = py + Y() - 1;
 			}
 
-			GColour Fg = Font->Fore();
+			LColour Fg = Font->Fore();
 			Font->_Draw(pDC, px, py, GDisplayStringDots, 3, &b, Fg);
 		}
 
@@ -1938,7 +1938,7 @@ void LDisplayString::FDraw(LSurface *pDC, int fx, int fy, LRect *frc, bool Debug
 		pango_context_set_font_description(LFontSystem::Inst()->GetContext(), Font->Handle());
 		cairo_save(cr);
 
-		GColour b = Font->Back();
+		LColour b = Font->Back();
 		double Dx = ((double)fx / FScale);
 		double Dy = ((double)fy / FScale);
 		double rx, ry, rw, rh;
@@ -1972,7 +1972,7 @@ void LDisplayString::FDraw(LSurface *pDC, int fx, int fy, LRect *frc, bool Debug
 
 		cairo_translate(cr, Dx, Dy);
 
-		GColour f = Font->Fore();
+		LColour f = Font->Fore();
 		for (auto &b: d->Blocks)
 		{
 			double Bx = ((double)b.X()) / FScale;
@@ -2044,7 +2044,7 @@ void LDisplayString::FDraw(LSurface *pDC, int fx, int fy, LRect *frc, bool Debug
 
 		if (pDC && !Font->Transparent())
 		{
-			GColour Old = pDC->Colour(Font->Back());
+			LColour Old = pDC->Colour(Font->Back());
 			if (frc)
 			{
 				pDC->Rectangle(&rc);
@@ -2118,7 +2118,7 @@ void LDisplayString::FDraw(LSurface *pDC, int fx, int fy, LRect *frc, bool Debug
 				{
 					// Set style attr
 					ATSURGBAlphaColor c;
-					GColour Fore = Font->Fore();
+					LColour Fore = Font->Fore();
 					c.red	= (double) Fore.r() / 255.0;
 					c.green = (double) Fore.g() / 255.0;
 					c.blue	= (double) Fore.b() / 255.0;

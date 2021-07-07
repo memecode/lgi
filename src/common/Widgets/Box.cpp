@@ -220,10 +220,10 @@ void LBox::OnPaint(LSurface *pDC)
 	}
 
 	LRect cli = GetClient();
-	GCssTools tools(GetCss(), GetFont());
+	LCssTools tools(GetCss(), GetFont());
 	cli = tools.PaintBorderAndPadding(pDC, cli);
 
-	GColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
+	LColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 
 	size_t ChildViews = Children.Length();
 	if (ChildViews == 0)
@@ -234,7 +234,7 @@ void LBox::OnPaint(LSurface *pDC)
 	else
 	{
 		#if 0 // coverage check...
-		pDC->Colour(GColour(255, 0, 255));
+		pDC->Colour(LColour(255, 0, 255));
 		pDC->Rectangle(&cli);
 		#endif
 		LRegion Painted(cli);
@@ -276,7 +276,7 @@ struct BoxRange
 
 void LBox::OnPosChange()
 {
-	GCssTools tools(GetCss(), GetFont());
+	LCssTools tools(GetCss(), GetFont());
 	LRect client = GetClient();
 	if (!client.Valid())
 		return;
@@ -546,7 +546,7 @@ void LBox::OnMouseMove(LMouse &m)
 
 	LViewI *Next = DragIndex < Children.Length() ? Children[DragIndex+1] : NULL;
 
-	GCssTools tools(GetCss(), GetFont());
+	LCssTools tools(GetCss(), GetFont());
 	LRect Content = tools.ApplyMargin(GetClient());
 	int ContentPx = d->GetBox(Content);
 

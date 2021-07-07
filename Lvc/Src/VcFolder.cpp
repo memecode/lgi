@@ -15,7 +15,7 @@
 #define PROF(s)
 #endif
 
-class TmpFile : public GFile
+class TmpFile : public LFile
 {
 	int Status;
 	LString Hint;
@@ -30,9 +30,9 @@ public:
 			Hint = "_lvc";
 	}
 	
-	GFile &Create()
+	LFile &Create()
 	{
-		GFile::Path p(LSP_TEMP);
+		LFile::Path p(LSP_TEMP);
 		p += Hint;
 		
 		do
@@ -43,7 +43,7 @@ public:
 		}
 		while (p.Exists());
 	
-		Status = GFile::Open(p.GetFull(), O_READWRITE);
+		Status = LFile::Open(p.GetFull(), O_READWRITE);
 		return *this;
 	}
 };
@@ -57,7 +57,7 @@ bool TerminalAt(LString Path)
 		auto r = GetWindowsDirectory(w, CountOf(w));
 		if (r > 0)
 		{
-			GFile::Path p = LString(w);
+			LFile::Path p = LString(w);
 			p += "system32\\cmd.exe";
 			FileDev->SetCurrentFolder(Path);
 			return LExecute(p);
@@ -1525,7 +1525,7 @@ void VcFolder::OnCmdError(LString Output, const char *Msg)
 				
 	CmdErrors++;
 	d->Tabs->Value(1);
-	GetCss(true)->Color(GColour::Red);
+	GetCss(true)->Color(LColour::Red);
 }
 
 void VcFolder::ClearError()
@@ -2070,7 +2070,7 @@ void VcFolder::Empty()
 	d->Files->Empty();
 
 	if (!Uri.IsFile())	
-		GetCss(true)->Color(GColour::Blue);
+		GetCss(true)->Color(LColour::Blue);
 }
 
 void VcFolder::OnMouseClick(LMouse &m)
@@ -2285,7 +2285,7 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 	if (u.IsFile())
 	{
 		// Read child items
-		GDirectory Dir;
+		LDirectory Dir;
 		for (int b = Dir.First(u.LocalPath()); b; b = Dir.Next())
 		{
 			if (Dir.IsDir())
@@ -2469,7 +2469,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 			}
 
 			#if 0
-			GFile Tmp("C:\\tmp\\output.txt", O_WRITE);
+			LFile Tmp("C:\\tmp\\output.txt", O_WRITE);
 			Tmp.Write(s);
 			Tmp.Close();
 			#endif
@@ -2659,7 +2659,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 	if ((Unpushed = Ins.Length() > 0))
 	{
 		if (CmdErrors == 0)
-			GetCss(true)->Color(GColour(255, 128, 0));
+			GetCss(true)->Color(LColour(255, 128, 0));
 	}
 	else if (Unpulled == 0)
 	{
@@ -2723,7 +2723,7 @@ void VcFolder::FolderStatus(const char *uri, VcLeaf *Notify)
 	LUri Uri(uri);
 	if (Uri.IsFile() && Uri.sPath)
 	{
-		GFile::Path p(Uri.sPath(1,-1));
+		LFile::Path p(Uri.sPath(1,-1));
 		if (!p.IsFolder())
 		{
 			LgiAssert(!"Needs to be a folder.");
@@ -2963,7 +2963,7 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 			{
 				Unpushed = 0;
 				Update();
-				GetCss(true)->Color(GColour::Green);
+				GetCss(true)->Color(LColour::Green);
 			}
 			break;
 		}
@@ -2980,7 +2980,7 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 				if (Params && Params->Str.Find("Push") >= 0)
 					Push();
 				else
-					GetCss(true)->Color(GColour::Green);
+					GetCss(true)->Color(LColour::Green);
 			}
 			break;
 		}
@@ -2993,7 +2993,7 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 			{
 				Unpushed = 0;
 				Update();
-				GetCss(true)->Color(GColour::Green);
+				GetCss(true)->Color(LColour::Green);
 			}
 			break;
 		}
@@ -3185,7 +3185,7 @@ bool VcFolder::ParsePush(int Result, LString s, ParseParams *Params)
 		}
 
 		Unpushed = 0;
-		GetCss(true)->Color(GColour::Green);
+		GetCss(true)->Color(LColour::Green);
 		Update();
 		Status = true;
 	}
@@ -3267,7 +3267,7 @@ bool VcFolder::ParsePull(int Result, LString s, ParseParams *Params)
 				}
 			}
 			if (HasUpdates)
-				GetCss(true)->Color(GColour::Green);
+				GetCss(true)->Color(LColour::Green);
 			else
 				GetCss(true)->Color(LCss::ColorInherit);
 			break;
@@ -3398,7 +3398,7 @@ bool VcFolder::ParseClean(int Result, LString s, ParseParams *Params)
 	return false;
 }
 
-GColour VcFolder::BranchColour(const char *Name)
+LColour VcFolder::BranchColour(const char *Name)
 {
 	if (!Name)
 		return GetPaletteColour(0);
@@ -3990,7 +3990,7 @@ void VcLeaf::OnBrowse()
 
 	LList *Files = d->Files;
 	Files->Empty();
-	GDirectory Dir;
+	LDirectory Dir;
 	for (int b = Dir.First(full); b; b = Dir.Next())
 	{
 		if (Dir.IsDir())

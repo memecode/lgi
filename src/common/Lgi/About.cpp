@@ -18,7 +18,7 @@ enum Ctrls
 	IDC_MESSAGE,
 };
 
-GAbout::GAbout(	LView *parent,
+LAbout::LAbout(	LView *parent,
 				const char *AppName,
 				const char *Ver,
 				const char *Text,
@@ -58,7 +58,7 @@ GAbout::GAbout(	LView *parent,
 	if (Email) p.Print("Email:\n\t%s\n", Email);
 	if (Text) p.Write((char*)Text, strlen(Text));
 
-	GColour cBack(L_MED);
+	LColour cBack(L_MED);
 	LTableLayout *Tbl = new LTableLayout(IDC_TABLE);
 	AddView(Tbl);
 	Tbl->GetCss(true)->Padding("0.5em");
@@ -99,7 +99,7 @@ GAbout::GAbout(	LView *parent,
 	DoModal();
 }
 
-int GAbout::OnNotify(LViewI *Ctrl, int Flags)
+int LAbout::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (!Ctrl) return 0;
 	

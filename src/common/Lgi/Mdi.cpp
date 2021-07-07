@@ -250,7 +250,7 @@ void GMdiChild::OnPaintButton(LSurface *pDC, LRect &rc)
 {
 	// Default: Draw little 'x' for closing the MDI child
 	LRect r = rc;
-	pDC->Colour(GColour(192,192,192));
+	pDC->Colour(LColour(192,192,192));
 	
 	r.Size(3, 3);
 	pDC->Line(r.x1, r.y1, r.x2, r.y2);
@@ -683,7 +683,7 @@ void GMdiParent::OnPaint(LSurface *pDC)
 	// Draw tabs...
 	LFont *Fnt = GetFont();
 	
-	GColour Back(L_LOW), Black(L_BLACK);
+	LColour Back(L_LOW), Black(L_BLACK);
 	int Cx = 5;
 	pDC->Colour(Back);
 	pDC->Rectangle(d->Tabs.x1, d->Tabs.y1, d->Tabs.x1 + Cx - 1, d->Tabs.y2 - 1);
@@ -695,8 +695,8 @@ void GMdiParent::OnPaint(LSurface *pDC)
 	::LArray<GMdiChild*> Views;
 	GMdiChild *Last = dynamic_cast<GMdiChild*>(d->Children.Last());
 	GetChildren(Views);
-	GColour cActive(L_WORKSPACE);
-	GColour cInactive(LColour(L_MED).Mix(cActive));
+	LColour cActive(L_WORKSPACE);
+	LColour cInactive(LColour(L_MED).Mix(cActive));
 	
 	for (int Idx=0; Idx<Views.Length(); Idx++)
 	{
@@ -718,9 +718,9 @@ void GMdiParent::OnPaint(LSurface *pDC)
 		else c->d->Btn.ZOff(-1, -1);
 		
 		c->Visible(Active);
-		GColour Bk(Active ? cActive : cInactive);
-		GColour Edge(L_BLACK);
-		GColour Txt(L_TEXT);
+		LColour Bk(Active ? cActive : cInactive);
+		LColour Edge(L_BLACK);
+		LColour Txt(L_TEXT);
 		
 		LRect r = c->d->Tab;
 		if (Active)

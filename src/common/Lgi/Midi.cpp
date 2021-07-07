@@ -367,7 +367,7 @@ GMidi::GMidi() : LMutex("GMidi")
 	
 	#elif defined(LINUX)
 	
-		GDirectory Dir;
+		LDirectory Dir;
 		const char *Path = "/dev";
 		for (int b = Dir.First(Path); b; b = Dir.Next())
 		{

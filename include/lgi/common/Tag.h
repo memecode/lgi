@@ -32,7 +32,7 @@ public:
 	GNamedVariant *GetNamed(char *Name);
 	void Empty();
 	bool Read(LXmlTag *t);
-	void Write(GFile &f);
+	void Write(LFile &f);
 	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
 	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
 	void SerializeUI(LView *Dlg, GMap<char*,int> &Fields, bool To);

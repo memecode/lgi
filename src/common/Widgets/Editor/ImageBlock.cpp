@@ -89,7 +89,7 @@ public:
 					return PostSink(M_IMAGE_ERROR);
 				}
 
-				if (!In.Reset(new GFile) ||
+				if (!In.Reset(new LFile) ||
 					!In->Open(File, O_READ))
 				{
 					#if LOADER_THREAD_LOGGING
@@ -633,7 +633,7 @@ bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<GDocView::ContentMedia
 			Cm.MimeType = LgiApp->GetFileMimeType(Source);
 			Cm.FileName = LgiGetLeaf(Source);
 
-			GFile *f = new GFile;
+			LFile *f = new LFile;
 			if (f)
 			{
 				if (f->Open(Source, O_READ))
@@ -739,7 +739,7 @@ void LRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 	LCss::ColorDef BorderStyle;
 	if (Style)
 		BorderStyle = Style->BorderLeft().Color;
-	GColour BorderCol(222, 222, 222);
+	LColour BorderCol(222, 222, 222);
 	if (BorderStyle.Type == LCss::ColorRgb)
 		BorderCol.Set(BorderStyle.Rgb32, 32);
 
@@ -781,7 +781,7 @@ void LRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 					SelectImg->Blt(0, 0, Src);
 
 					int Op = SelectImg->Op(GDC_ALPHA);
-					GColour c = Ctx.Colours[LRichTextPriv::Selected].Back;
+					LColour c = Ctx.Colours[LRichTextPriv::Selected].Back;
 					c.Rgb(c.r(), c.g(), c.b(), 0xa0);
 					SelectImg->Colour(c);
 					SelectImg->Rectangle();
@@ -800,7 +800,7 @@ void LRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 	{
 		// Drag missing image...
 		r = ImgPos;
-		GColour cBack(245, 245, 245);
+		LColour cBack(245, 245, 245);
 		Ctx.pDC->Colour(ImgSelected ? cBack.Mix(Ctx.Colours[Selected].Back) : cBack);
 		Ctx.pDC->Rectangle(&r);
 
@@ -811,7 +811,7 @@ void LRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 
 		int Cx = r.x1 + (r.X() >> 1);
 		int Cy = r.y1 + (r.Y() >> 1);
-		Ctx.pDC->Colour(GColour::Red);
+		Ctx.pDC->Colour(LColour::Red);
 		int Sz = 5;
 		Ctx.pDC->Line(Cx - Sz, Cy - Sz, Cx + Sz, Cy + Sz);
 		Ctx.pDC->Line(Cx - Sz, Cy - Sz + 1, Cx + Sz - 1, Cy + Sz);

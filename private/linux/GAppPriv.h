@@ -25,7 +25,7 @@ public:
 	GtkApplication *App;
 	LAutoPtr<LJson> Config;
 	LAutoPtr<GApp::KeyModFlags> ModFlags;
-	GFileSystem *FileSystem;
+	LFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
 	OsAppArguments Args;
 	GLibrary *SkinLib;

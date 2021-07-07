@@ -546,7 +546,7 @@ void LCombo::OnPaint(LSurface *pDC)
 			d->SetText(new LDisplayString(GetFont(), n), _FL);
 	}
 
-	GColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
+	LColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 
 	#if defined LGI_CARBON
 
@@ -588,7 +588,7 @@ void LCombo::OnPaint(LSurface *pDC)
 			Ds->Draw(pDC, Txt.x1, y);
 			
 			#if 0
-			pDC->Colour(GColour(255, 0, 0));
+			pDC->Colour(LColour(255, 0, 0));
 			pDC->Box(Txt.x1, y, Txt.x1 + Ds->X()-1, y + Ds->Y() - 1);
 			#endif
 		}

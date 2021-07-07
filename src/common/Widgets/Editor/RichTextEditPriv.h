@@ -109,7 +109,7 @@ enum RteCommands
 #define IntToFixed(val)					((val)<<LDisplayString::FShift)
 
 #define CursorColour					LColour(L_TEXT)
-#define TextColour						GColour::Black
+#define TextColour						LColour::Black
 
 //////////////////////////////////////////////////////////////////////
 #include "lgi/common/Range.h"
@@ -226,7 +226,7 @@ class SelectColour : public LPopup
 	struct Entry
 	{
 		LRect r;
-		GColour c;
+		LColour c;
 	};
 	LArray<Entry> e;
 
@@ -427,7 +427,7 @@ public:
 
 	struct ColourPair
 	{
-		GColour Fore, Back;
+		LColour Fore, Back;
 		
 		void Empty()
 		{
@@ -476,17 +476,17 @@ public:
 			CurEndPoint = 0;
 		}
 		
-		GColour &Fore()
+		LColour &Fore()
 		{
 			return Colours[Type].Fore;
 		}
 
-		GColour &Back()
+		LColour &Back()
 		{
 			return Colours[Type].Back;
 		}
 
-		void DrawBox(LRect &r, LRect &Edge, GColour &c)
+		void DrawBox(LRect &r, LRect &Edge, LColour &c)
 		{
 			if (Edge.x1 > 0 ||
 				Edge.x2 > 0 ||
@@ -951,7 +951,7 @@ public:
 			return c;
 		}
 
-		virtual void Paint(LSurface *pDC, int &FixX, int FixY, GColour &Back)
+		virtual void Paint(LSurface *pDC, int &FixX, int FixY, LColour &Back)
 		{
 			FDraw(pDC, FixX, FixY);
 			FixX += FX();
@@ -978,7 +978,7 @@ public:
 
 		EmojiDisplayStr(StyleText *src, LSurface *img, LFont *f, const uint32_t *s, ssize_t l = -1);
 		LAutoPtr<DisplayStr> Clone(ssize_t Start, ssize_t Len = -1);
-		void Paint(LSurface *pDC, int &FixX, int FixY, GColour &Back);
+		void Paint(LSurface *pDC, int &FixX, int FixY, LColour &Back);
 		double GetAscent();
 		ssize_t PosToIndex(int XPos, bool Nearest);
 	};
@@ -1013,7 +1013,7 @@ public:
 		LSpellCheck::SpellingError *SpErr;
 
 		bool PreEdit(Transaction *Trans);
-		void DrawDisplayString(LSurface *pDC, DisplayStr *Ds, int &FixX, int FixY, GColour &Bk, int &Pos);
+		void DrawDisplayString(LSurface *pDC, DisplayStr *Ds, int &FixX, int FixY, LColour &Bk, int &Pos);
 	
 	public:
 		// Runs of characters in the same style: pre-layout.

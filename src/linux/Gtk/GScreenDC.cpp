@@ -19,7 +19,7 @@ class LScreenPrivate
 public:
 	int x, y, Bits;
 	bool Own;
-	GColour Col;
+	LColour Col;
 	LRect Client;
 
 	LView *View;
@@ -278,9 +278,9 @@ COLOUR LScreenDC::Colour(COLOUR c, int Bits)
 	return Colour(d->Col).Get(b);
 }
 
-GColour LScreenDC::Colour(GColour c)
+LColour LScreenDC::Colour(LColour c)
 {
-	GColour Prev = d->Col;
+	LColour Prev = d->Col;
 	d->Col = c;
 
 	if (d->cr)

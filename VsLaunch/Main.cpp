@@ -86,7 +86,7 @@ public:
 			const char *Ext = LgiGetExtension(File);
 			if (Ext && !_stricmp(Ext, "sln"))
 			{
-				GFile f;
+				LFile f;
 				if (f.Open(File, O_READ))
 				{
 					LString::Array a = f.Read().Split("\n");
@@ -126,7 +126,7 @@ public:
 					if (VsVersion > 0.0)
 					{
 						// C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE\devenv.exe
-						GFile::Path p(LSP_USER_APPS, 32);
+						LFile::Path p(LSP_USER_APPS, 32);
 						LString v;
 
 						if (VsVersion >= 16.0)

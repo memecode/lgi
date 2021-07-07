@@ -340,7 +340,7 @@ void LButton::OnPaint(LSurface *pDC)
 		// Fall back drawing code
 		pDC->Colour(L_MED);
 		pDC->Rectangle();
-		pDC->Colour(GColour::Red);
+		pDC->Colour(LColour::Red);
 		LRect c = GetClient();
 		pDC->Line(0, 0, c.X()-1, c.Y()-1); 
 		pDC->Line(c.X()-1, 0, 0, c.Y()-1); 

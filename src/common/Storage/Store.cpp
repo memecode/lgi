@@ -43,7 +43,7 @@ StorageItemImpl::~StorageItemImpl()
 	{
 		if (Object->GetDirty())
 		{
-			GFile *f = 0;
+			LFile *f = 0;
 			if (Tree)
 			{
 				f = &Tree->File;
@@ -71,7 +71,7 @@ StorageItemImpl::~StorageItemImpl()
 	}
 }
 
-bool StorageItemImpl::EndOfObj(GFile &f)
+bool StorageItemImpl::EndOfObj(LFile &f)
 {
 	int Pos = f.GetPos();
 	int ObjStart = StoreLoc + sizeof(StorageItemHeader);
@@ -79,7 +79,7 @@ bool StorageItemImpl::EndOfObj(GFile &f)
 	return Status;
 }
 
-bool StorageItemImpl::WriteHeader(GFile &f)
+bool StorageItemImpl::WriteHeader(LFile &f)
 {
 	StorageItemHeader ItemHeader;
 
@@ -132,7 +132,7 @@ bool StorageItemImpl::MoveToLoc(int NewLoc)
 			int DestLoc = NewLoc + sizeof(StorageItemHeader);
 			StorageItemImpl *Item;
 
-			GFile &File = Tree->File;
+			LFile &File = Tree->File;
 			int Type = StoreType;
 			Status = true;
 
@@ -213,7 +213,7 @@ bool StorageItemImpl::MoveToLoc(int NewLoc)
 	return Status;
 }
 
-GFile *StorageItemImpl::GotoObject(const char *file, int line)
+LFile *StorageItemImpl::GotoObject(const char *file, int line)
 {
 	GSubFilePtr *f = 0;
 	
@@ -237,7 +237,7 @@ GFile *StorageItemImpl::GotoObject(const char *file, int line)
 	return f;
 }
 
-bool StorageItemImpl::Serialize(GFile &f, bool Write, int Flags)
+bool StorageItemImpl::Serialize(LFile &f, bool Write, int Flags)
 {
 	bool Status = false;
 	StorageItemHeader ItemHeader;
@@ -312,7 +312,7 @@ bool StorageItemImpl::Save()
 {
 	if (SetSize(Object->Sizeof()))
 	{
-		GFile *f = GotoObject(__FILE__, __LINE__);
+		LFile *f = GotoObject(__FILE__, __LINE__);
 		if (f)
 		{
 			bool Status = Object->Serialize(*f, true);
@@ -335,7 +335,7 @@ bool StorageItemImpl::SetSize(int NewSize)
 			StorageItemHeader ItemHeader;
 			StorageItemImpl *Item;
 
-			GFile &File = Tree->File;
+			LFile &File = Tree->File;
 			int Type = StoreType;
 
 			// turn current object into free space
@@ -756,7 +756,7 @@ StorageItemImpl *StorageKitImpl::CreateItem(StorageObj *Obj)
 			if (Item->Serialize(File, true))
 			{
 				// write the object to disk for the first time
-				GFile *f = Item->GotoObject(__FILE__, __LINE__);
+				LFile *f = Item->GotoObject(__FILE__, __LINE__);
 				if (f)
 				{
 					bool Status = Item->Object->Serialize(*f, true);
@@ -1049,7 +1049,7 @@ StorageItemImpl *StorageKitImpl::LoadLocation(int Loc)
 	return Item;
 }
 
-bool StorageKitImpl::Serialize(GFile &f, bool Write)
+bool StorageKitImpl::Serialize(LFile &f, bool Write)
 {
 	bool Status = false;
 	StorageHeader Header;

@@ -42,7 +42,7 @@
 	// #define DEBUG_LOG		Log.Print
 #endif
 #ifdef DEBUG_LOG
-	GFile Log;
+	LFile Log;
 #endif
 
 #ifdef _MSC_VER

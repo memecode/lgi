@@ -45,7 +45,7 @@ namespace Storage2
 
 		// file io
 		StorageItemHeader();
-		bool Serialize(GFile &f, bool Write);
+		bool Serialize(LFile &f, bool Write);
 		void SwapBytes();
 	};
 
@@ -75,7 +75,7 @@ namespace Storage2
 		bool DirChange();
 
 		bool SetDirty(bool Dirty);
-		bool SerializeHeader(GFile &f, bool Write);
+		bool SerializeHeader(LFile &f, bool Write);
 		bool SerializeObject(GSubFilePtr &f, bool Write);
 		
 		/// Saves this object and all it's children.
@@ -106,8 +106,8 @@ namespace Storage2
 		StorageKit *GetTree();
 
 		// Impl
-		GFile *GotoObject(const char *file, int line);
-		bool EndOfObj(GFile &f);
+		LFile *GotoObject(const char *file, int line);
+		bool EndOfObj(LFile &f);
 		bool Save();
 		
 		// Debug
@@ -163,7 +163,7 @@ namespace Storage2
 		StorageItemImpl *Root;
 
 		bool _ValidLoc(int64 Loc);
-		bool _Serialize(GFile &f, bool Write);
+		bool _Serialize(LFile &f, bool Write);
 		
 	public:
 		StorageKitImpl(char *FileName);

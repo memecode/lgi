@@ -71,7 +71,7 @@ char Src[] =
 
 #endif
 
-class GCapabilityInstallTarget : public GCapabilityTarget
+class GCapabilityInstallTarget : public LCapabilityTarget
 {
 public:
 	virtual void StartInstall(CapsHash *Caps) = 0;
@@ -80,11 +80,11 @@ public:
 class CapsBar : public LView
 {
 	GCapabilityInstallTarget *App;
-	GCapabilityTarget::CapsHash *Caps;
+	LCapabilityTarget::CapsHash *Caps;
 	LButton *Ok, *Install;
 
 public:
-	CapsBar(GCapabilityInstallTarget *Parent, GCapabilityTarget::CapsHash *caps)
+	CapsBar(GCapabilityInstallTarget *Parent, LCapabilityTarget::CapsHash *caps)
 	{
 		App = Parent;
 		Caps = caps;
@@ -124,10 +124,10 @@ public:
 
 	void OnPaint(LSurface *pDC)
 	{
-		pDC->Colour(GColour::Red);
+		pDC->Colour(LColour::Red);
 		pDC->Rectangle();
 
-		SysFont->Colour(GColour::White, GColour::Red);
+		SysFont->Colour(LColour::White, LColour::Red);
 		SysFont->Transparent(true);
 
 		LString s = "Missing components: ";
@@ -224,7 +224,7 @@ public:
 							LgiMakePath(p, sizeof(p), LGetExeFile(), "..");
 							LgiMakePath(p, sizeof(p), p, LgiGetLeaf(Link));
 
-							GFile f;
+							LFile f;
 							if (f.Open(p, O_WRITE))
 							{
 								f.SetSize(0);
@@ -270,9 +270,9 @@ public:
 	{
 		if (m.Left() && m.Double())
 		{
-			GFile::Path p(LSP_TEMP);
+			LFile::Path p(LSP_TEMP);
 			p += Cm->FileName;
-			GFile f;
+			LFile f;
 			if (f.Open(p, O_WRITE))
 			{
 				if (Cm->Stream)
@@ -338,7 +338,7 @@ class App : public LWindow, public GCapabilityInstallTarget
 
 	LAutoPtr<LSpellCheck> Speller;
 	CapsBar *Bar;
-	GCapabilityTarget::CapsHash Caps;
+	LCapabilityTarget::CapsHash Caps;
 	LAutoPtr<LEventTargetThread> Installer;
 	GOptionsFile Options;
 	LArray<GDocView::ContentMedia> Media;
@@ -571,7 +571,7 @@ public:
 				break;
 			case IDC_VIEW_IN_BROWSER:
 			{
-				GFile::Path p(LSP_TEMP);
+				LFile::Path p(LSP_TEMP);
 				p += "export.html";
 				if (Edit->Save(p))
 				{
@@ -596,12 +596,12 @@ public:
 					LArray<GDocView::ContentMedia> Media;
 					if (Edit->GetFormattedContent("text/html", Html, &Media))
 					{
-						GFile::Path p(LSP_APP_INSTALL);
+						LFile::Path p(LSP_APP_INSTALL);
 						p += "Output";
 						if (!p.IsFolder())
 							FileDev->CreateFolder(p);
 						p += "output.html";
-						GFile f;
+						LFile f;
 						if (f.Open(p, O_WRITE))
 						{
 							f.SetSize(0);
@@ -712,7 +712,7 @@ public:
 			LAutoPtr<LString> c((LString*)m->A());
 			if (c)
 			{
-				GCapabilityTarget::CapsHash h;
+				LCapabilityTarget::CapsHash h;
 				h.Add(*c, true);
 				OnInstall(&h, true);
 			}

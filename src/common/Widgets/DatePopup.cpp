@@ -120,7 +120,7 @@ void LDatePopup::OnPaint(LSurface *pDC)
 			{
 				if (Mv.IsToday())
 				{
-					SysFont->Colour(GColour(192, 0, 0), LColour(L_WORKSPACE));
+					SysFont->Colour(LColour(192, 0, 0), LColour(L_WORKSPACE));
 				}
 				else
 				{

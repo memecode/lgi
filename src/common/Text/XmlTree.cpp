@@ -1479,7 +1479,7 @@ bool LXmlTree::Read(LXmlTag *Root, LStreamI *File, LXmlFactory *Factory)
 
 					#ifdef _DEBUG
 					LXmlTree Dbg;
-					GFile Out;
+					LFile Out;
 					if (Out.Open("c:\\temp\\out.xml", O_WRITE))
 					{
 						Dbg.Write(Root, &Out);

@@ -207,7 +207,7 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////
-void DrawGoobers(LSurface *pDC, LRect &r, LRect *Goobers, GColour c, int OverIdx)
+void DrawGoobers(LSurface *pDC, LRect &r, LRect *Goobers, LColour c, int OverIdx)
 {
 	int Mx = (r.x2 + r.x1) / 2 - (GOOBER_SIZE / 2);
 	int My = (r.y2 + r.y1) / 2 - (GOOBER_SIZE / 2);
@@ -688,7 +688,7 @@ void ResDialogCtrl::OnMouseClick(LMouse &m)
 					DebugOverlay.Reset(new LMemDC(Dlg->X(), Dlg->Y(), System32BitColourSpace));
 					DebugOverlay->Colour(0, 32);
 					DebugOverlay->Rectangle();
-					DebugOverlay->Colour(GColour(64, 192, 64));
+					DebugOverlay->Colour(LColour(64, 192, 64));
 				}
 				#endif
 
@@ -750,7 +750,7 @@ void ResDialogCtrl::OnMouseClick(LMouse &m)
 			CtrlButton *Btn = dynamic_cast<CtrlButton*>(this);
 
 			{
-				GClipBoard c(Dlg);
+				LClipBoard c(Dlg);
 				char *Clip = c.Text();
 				if (Clip)
 				{
@@ -2829,7 +2829,7 @@ void ResDialog::Copy(bool Delete)
 		{
 			char *s = Xml.NewStr();
 			{
-				GClipBoard Clip(Ui);
+				LClipBoard Clip(Ui);
 
 				char16 *w = Utf8ToWide(s);
 				Clip.TextW(w);
@@ -2917,7 +2917,7 @@ void ResDialog::Paste()
 	char *Mem = 0;
 	char *Data = 0;
 	{
-		GClipBoard Clip(Ui);
+		LClipBoard Clip(Ui);
 		char16 *w = Clip.TextW();
 		if (w)
 			Data = Mem = WideToUtf8(w);
@@ -3500,8 +3500,8 @@ void ResDialog::DrawSelection(LSurface *pDC)
 	for (auto Ctrl: Selection)
 	{
 		LRect r = Ctrl->AbsPos();
-		GColour s(255, 0, 0);
-		GColour c = GetParent()->Focus() ? s : s.Mix(LColour(L_MED), 0.4);
+		LColour s(255, 0, 0);
+		LColour c = GetParent()->Focus() ? s : s.Mix(LColour(L_MED), 0.4);
 		DrawGoobers(pDC, r, Ctrl->Goobers, c, Ctrl->OverGoober);
 	}
 }
@@ -4103,7 +4103,7 @@ void ResDialog::OnCommand(int Cmd)
 				char *Text = Buf.NewStr();
 				if (Text)
 				{
-					GClipBoard Clip(Ui);
+					LClipBoard Clip(Ui);
 					Clip.Text(Text);
 					DeleteArray(Text);
 				}
@@ -4117,7 +4117,7 @@ void ResDialog::OnCommand(int Cmd)
 			Select.Type("Text", "*.txt");
 			if (Select.Save())
 			{
-				GFile F;
+				LFile F;
 				if (F.Open(Select.Name(), O_WRITE))
 				{
 					F.SetSize(0);

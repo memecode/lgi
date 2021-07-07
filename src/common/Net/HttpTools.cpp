@@ -1119,7 +1119,7 @@ LSurface *GetHttpImage(char *Uri)
 					}
 					while (LFileExists(n));
 
-					GFile f;
+					LFile f;
 					if (f.Open(n, O_WRITE))
 					{
 						GCopyStreamer c;

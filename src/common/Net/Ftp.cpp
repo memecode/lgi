@@ -28,7 +28,7 @@ public:
 	FtpTransferMode CurMode;
 	LAutoPtr<LSocket> Listen;	// listen for data
 	LAutoPtr<LSocketI> Data;	// get data
-	GFile *F;
+	LFile *F;
 	char *Charset;
 	LString ErrBuf;
 	IFtpCallback *Callback;
@@ -773,7 +773,7 @@ bool IFtp::ListDir(LArray<IFtpEntry*> &Dir)
 				if (Text)
 				{
 					#ifdef LOG_LISTINGS
-					GFile F;
+					LFile F;
 					if (F.Open("c:\\temp\\ftplog.txt", O_WRITE))
 					{
 						F.Write(Text, Len);
@@ -923,7 +923,7 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 	bool Status = false;
 	bool Aborted = false;
 
-	d->F = new GFile;
+	d->F = new LFile;
 	
 	try
 	{

@@ -102,7 +102,7 @@ void LRichTextPriv::HorzRuleBlock::OnPaint(PaintContext &Ctx)
 {
 	Ctx.SelectBeforePaint(this);
 
-	GColour Fore, Back = Ctx.Back();
+	LColour Fore, Back = Ctx.Back();
 	Fore = Ctx.Fore().Mix(Back, 0.75f);
 	Ctx.pDC->Colour(Back);
 	Ctx.pDC->Rectangle(&Pos);

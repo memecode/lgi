@@ -509,7 +509,7 @@ WindowManager LGetWindowManager()
 
 	if (Status == WM_Unknown)
 	{
-		GDirectory d;
+		LDirectory d;
 
 		for (bool b=d.First("/proc"); b && Status == WM_Unknown; b=d.Next())
 		{
@@ -519,7 +519,7 @@ WindowManager LGetWindowManager()
 				d.Path(Path, sizeof(Path));
 				LgiMakePath(Path, sizeof(Path), Path, "status");
 				
-				GFile s;
+				LFile s;
 				if (s.Open(Path, O_READ))
 				{
 					char Buf[256];

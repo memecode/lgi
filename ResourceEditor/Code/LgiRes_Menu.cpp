@@ -76,7 +76,7 @@ void ResMenuItem::OnMouseClick(LMouse &m)
 			bool PasteTranslations = false;
 
 			{
-				GClipBoard c(Tree);
+				LClipBoard c(Tree);
 				char *Clip = c.Text();
 				if (Clip)
 				{

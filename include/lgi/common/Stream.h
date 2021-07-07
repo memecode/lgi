@@ -231,7 +231,7 @@ class LgiClass GTempStream : public GProxyStream
 
 protected:
 	class GMemStream *Mem;
-	class GFile *Tmp;
+	class LFile *Tmp;
 	LString TmpFolder;
 
 public:

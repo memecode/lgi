@@ -152,7 +152,7 @@ bool IdeCommon::AddFiles(AddFilesProgress *Prog, const char *Path)
 		IdeCommon *Sub = GetSubFolder(Project, a.Last(), true);
 		if (Sub)
 		{
-			GDirectory d;
+			LDirectory d;
 			for (int b = d.First(Path); b && !Prog->Cancel; b = d.Next())
 			{
 				char p[MAX_PATH];

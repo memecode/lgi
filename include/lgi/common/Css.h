@@ -406,7 +406,7 @@ public:
 			Rgb32 = rgb32;
 		}
 
-		ColorDef(const GColour &col)
+		ColorDef(const LColour &col)
 		{
 			Type = ColorRgb;
 			Rgb32 = col.c32();
@@ -424,9 +424,9 @@ public:
 			Rgb32 = Rgb24To32(col);
 		}
 		
-		operator GColour()
+		operator LColour()
 		{
-			GColour c;
+			LColour c;
 			if (Type == ColorRgb)
 				c.Set(Rgb32, 32);
 			return c;

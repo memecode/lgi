@@ -384,7 +384,7 @@ bool LRecursiveFileSearch(const char *Root,
 	if (!Root) return 0;
 
 	// get directory enumerator
-	GDirectory Dir;
+	LDirectory Dir;
 	Status = true;
 
 	// enumerate the directory contents
@@ -499,7 +499,7 @@ bool LgiTraceGetFilePath(char *LogPath, int BufLen)
 				sprintf_s(LogPath, BufLen, "%s.txt", Exe.Get());
 		}
 
-		GFile f;		
+		LFile f;		
 		if (f.Open(LogPath, O_WRITE))
 		{
 			f.Close();
@@ -520,7 +520,7 @@ bool LgiTraceGetFilePath(char *LogPath, int BufLen)
 		}
 		
 		#if 0
-		GFile tmp;
+		LFile tmp;
 		if (tmp.Open("c:\\temp\\log.txt", O_WRITE))
 		{
 			tmp.SetSize(0);
@@ -556,7 +556,7 @@ void LgiTrace(const char *Msg, ...)
 
 	char Buffer[2049] = "";
 	#ifdef LGI_TRACE_TO_FILE
-		static GFile f;
+		static LFile f;
 		static char LogPath[MAX_PATH] = "";
 	
 		if (!_LgiTraceStream && LogPath[0] == 0)
@@ -629,7 +629,7 @@ void LgiStackTrace(const char *Msg, ...)
 	if (Msg)
 	{
 		#ifdef LGI_TRACE_TO_FILE
-			static GFile f;
+			static LFile f;
 			static char LogPath[MAX_PATH] = "";
 		
 			if (!_LgiTraceStream)
@@ -840,7 +840,7 @@ bool LGetSystemPath(LgiSystemPath Which, char *Dst, ssize_t DstSize)
 	if (!Dst || DstSize <= 0)
 		return false;
 
-	GFile::Path p;
+	LFile::Path p;
 	LString s = p.GetSystem(Which, 0);
 	if (!s)
 		return false;
@@ -851,11 +851,11 @@ bool LGetSystemPath(LgiSystemPath Which, char *Dst, ssize_t DstSize)
 
 LString LGetSystemPath(LgiSystemPath Which, int WordSize)
 {
-	GFile::Path p;
+	LFile::Path p;
 	return p.GetSystem(Which, WordSize);
 }
 
-GFile::Path::State GFile::Path::Exists()
+LFile::Path::State LFile::Path::Exists()
 {
 	if (Length() == 0)
 		return TypeNone;
@@ -887,7 +887,7 @@ GFile::Path::State GFile::Path::Exists()
 	return TypeNone;
 }
 
-LString GFile::Path::PrintAll()
+LString LFile::Path::PrintAll()
 {
 	LStringPipe p;
 	
@@ -972,7 +972,7 @@ LString GFile::Path::PrintAll()
 	return p.NewGStr();
 }
 
-LString GFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
+LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 {
 	LString Path;
 
@@ -2365,14 +2365,14 @@ LString::Array LGetPath()
 		// The GUI application path is NOT the same as what is configured for the terminal.
 		// At least in 10.12. And I don't know how to make them the same. This works around
 		// that for the time being.
-		GFile::Path Home(LSP_HOME);
+		LFile::Path Home(LSP_HOME);
 		Home += ".profile";
 		if (!Home.Exists())
 		{
 			Home--;
 			Home += ".zprofile";
 		}
-		auto Profile = GFile(Home, O_READ).Read().Split("\n");
+		auto Profile = LFile(Home, O_READ).Read().Split("\n");
 		for (auto Ln : Profile)
 		{
 			auto p = Ln.SplitDelimit(" =", 2);
@@ -2431,20 +2431,20 @@ bool DoEvery::DoNow()
 }
 
 //////////////////////////////////////////////////////////////////////
-bool GCapabilityClient::NeedsCapability(const char *Name, const char *Param)
+bool LCapabilityClient::NeedsCapability(const char *Name, const char *Param)
 {
     for (int i=0; i<Targets.Length(); i++)
         Targets[i]->NeedsCapability(Name, Param);
     return Targets.Length() > 0;
 }
 
-GCapabilityClient::~GCapabilityClient()
+LCapabilityClient::~LCapabilityClient()
 {
     for (int i=0; i<Targets.Length(); i++)
         Targets[i]->Clients.Delete(this);
 }
 
-void GCapabilityClient::Register(GCapabilityTarget *t)
+void LCapabilityClient::Register(LCapabilityTarget *t)
 {
     if (t && !Targets.HasItem(t))
     {
@@ -2453,7 +2453,7 @@ void GCapabilityClient::Register(GCapabilityTarget *t)
     }
 }
 
-GCapabilityTarget::~GCapabilityTarget()
+LCapabilityTarget::~LCapabilityTarget()
 {
     for (int i=0; i<Clients.Length(); i++)
         Clients[i]->Targets.Delete(this);
@@ -2711,7 +2711,7 @@ LString LGetAppForProtocol(const char *Protocol)
 		LString::Array a = Path.SplitDelimit(LGI_PATH_SEPARATOR);
 		for (auto i : a)
 		{
-			GFile::Path t(i);
+			LFile::Path t(i);
 			t += p;
 			if (t.Exists())
 			{

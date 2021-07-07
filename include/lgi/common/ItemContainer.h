@@ -6,7 +6,7 @@
 #include "lgi/common/Css.h"
 #include "lgi/common/ImageList.h"
 
-class GItemContainer;
+class LItemContainer;
 #define DragColumnColour				LColour(L_LOW)
 
 /// Base class for items in widget containers
@@ -24,9 +24,9 @@ public:
 		LSurface *pDC;
 
 		/// Current foreground colour
-		GColour Fore;
+		LColour Fore;
 		/// Current background colour
-		GColour TxtBack, Back;
+		LColour TxtBack, Back;
 		
 		// Horizontal alignment of content
 		LCss::Len Align;
@@ -53,7 +53,7 @@ public:
         return *this;
     }
 
-	virtual GItemContainer *GetContainer() = 0;
+	virtual LItemContainer *GetContainer() = 0;
 
 	// Events
 	
@@ -156,28 +156,28 @@ public:
 
 
 /// No marking
-/// \sa GItemColumn::Mark
+/// \sa LItemColumn::Mark
 #define GLI_MARK_NONE				0
 /// Up arrow mark
-/// \sa GItemColumn::Mark
+/// \sa LItemColumn::Mark
 #define GLI_MARK_UP_ARROW			1
 /// Down arrow mark
-/// \sa GItemColumn::Mark
+/// \sa LItemColumn::Mark
 #define GLI_MARK_DOWN_ARROW			2
 
 /// Item container column
-class LgiClass GItemColumn :
+class LgiClass LItemColumn :
 	public ResObject,
 	public LCss
 {
-	class GItemColumnPrivate *d;
-	friend class GDragColumn;
+	class LItemColumnPrivate *d;
+	friend class LDragColumn;
 	friend class LListItem;
-	friend class GItemContainer;
+	friend class LItemContainer;
 
 public:
-	GItemColumn(GItemContainer *parent, const char *name, int width);
-	virtual ~GItemColumn();
+	LItemColumn(LItemContainer *parent, const char *name, int width);
+	virtual ~LItemColumn();
 
 	// properties
 	bool InDrag();
@@ -225,7 +225,7 @@ public:
 	/// Returns the size of the content in this column
 	int GetContentSize();
 	/// Returns the list
-	GItemContainer *GetList();
+	LItemContainer *GetList();
 
 	/// Paint the column header.
 	void OnPaint(LSurface *pDC, LRect &r);
@@ -256,11 +256,11 @@ public:
 #define CLICK_ITEM					6
 #define DEFAULT_COLUMN_SPACING		12
 
-class LgiClass GItemContainer :
+class LgiClass LItemContainer :
 	public LLayout,
 	public GImageListOwner
 {
-	friend class GItemColumn;
+	friend class LItemColumn;
 	friend class GItem;
 	friend class GItemEdit;
 
@@ -268,7 +268,7 @@ public:
 	struct ColInfo
 	{
 		int Idx, ContentPx, WidthPx;
-		GItemColumn *Col;
+		LItemColumn *Col;
 		int GrowPx() { return WidthPx < ContentPx ? ContentPx - WidthPx : 0; }
 	};
 	
@@ -288,9 +288,9 @@ protected:
 	LMouse ColMouse;
 	GItemEdit *ItemEdit;
 
-	LArray<GItemColumn*> Columns;
-	LAutoPtr<GItemColumn> IconCol;
-	class GDragColumn *DragCol;
+	LArray<LItemColumn*> Columns;
+	LAutoPtr<LItemColumn> IconCol;
+	class LDragColumn *DragCol;
 
 	/// Returns size information for columns
 	void GetColumnSizes(ColSizes &cs);
@@ -302,8 +302,8 @@ protected:
 	virtual void ClearDs(int Col) = 0;
 
 public:
-	GItemContainer();
-	virtual ~GItemContainer();
+	LItemContainer();
+	virtual ~LItemContainer();
 
 	// Props
 	bool OwnerDraw() { return TestFlag(Flags, GIC_OWNER_DRAW); }
@@ -327,7 +327,7 @@ public:
 	void ShowColumnHeader(bool Show) { ColumnHeaders = Show; }
 		
 	/// Adds a column to the list
-	GItemColumn *AddColumn
+	LItemColumn *AddColumn
 	(
 		/// The text for the column or NULL for no text
 		const char *Name,
@@ -341,22 +341,22 @@ public:
 	bool AddColumn
 	(
 		/// The column object. The object once added is owned by the LList
-		GItemColumn *Col,
+		LItemColumn *Col,
 		/// The location to insert or -1 to append
 		int Where = -1
 	);
 	
 	/// Deletes a column from the LList
-	bool DeleteColumn(GItemColumn *Col);
+	bool DeleteColumn(LItemColumn *Col);
 	
 	/// Deletes all the columns of the LList
 	void EmptyColumns();
 	
 	/// Returns the column at index 'Index'
-	GItemColumn *ColumnAt(unsigned i) { return i < Columns.Length() ? Columns[i] : NULL; }
+	LItemColumn *ColumnAt(unsigned i) { return i < Columns.Length() ? Columns[i] : NULL; }
 	
 	/// Returns the column at horizontal offset 'x', or -1 if none matches.
-	int ColumnAtX(int X, GItemColumn **Col = 0, int *Offset = 0);
+	int ColumnAtX(int X, LItemColumn **Col = 0, int *Offset = 0);
 	
 	/// Returns the number of columns
 	int GetColumns() { return (int)Columns.Length(); }
@@ -368,7 +368,7 @@ public:
 	/// Returns the last column click info
 	bool GetColumnClickInfo(int &Col, LMouse &m);
 
-	int HitColumn(int x, int y, GItemColumn *&Resize, GItemColumn *&Over);
+	int HitColumn(int x, int y, LItemColumn *&Resize, LItemColumn *&Over);
 
 	/// Called when a column is clicked
 	virtual void OnColumnClick
@@ -387,7 +387,7 @@ public:
 
 	GMessage::Result OnEvent(GMessage *Msg);
 
-	GItemContainer &operator =(const GItemContainer &i)
+	LItemContainer &operator =(const LItemContainer &i)
 	{
 		LgiAssert(!"Not impl..");
 		return *this;
@@ -398,10 +398,10 @@ public:
 #define DRAG_COL_ALPHA					0xc0
 #define LINUX_TRANS_COL					0
 
-class GDragColumn : public LWindow
+class LDragColumn : public LWindow
 {
-	GItemContainer *List;
-	GItemColumn *Col;
+	LItemContainer *List;
+	LItemColumn *Col;
 	int Index;
 	int Offset;
 	LPoint ListScrPos;
@@ -413,10 +413,10 @@ class GDragColumn : public LWindow
 public:
 	int GetOffset() { return Offset; }
 	int GetIndex() { return Index; }
-	GItemColumn *GetColumn() { return Col; }
+	LItemColumn *GetColumn() { return Col; }
 
-	GDragColumn(GItemContainer *list, int col);
-	~GDragColumn();
+	LDragColumn(LItemContainer *list, int col);
+	~LDragColumn();
 
 	void OnPaint(LSurface *pScreen);
 };

@@ -72,7 +72,7 @@ public:
             m.ToScreen();
             if (s.Float(GetList(), m.x, m.y, m.Left()) == 100)
             {
-                GClipBoard c(GetList());
+                LClipBoard c(GetList());
                 char Path[MAX_PATH];
                 LgiMakePath(Path, sizeof(Path), Base, GetText(0));
                 c.Text(Path);
@@ -276,7 +276,7 @@ class AppWnd : public LWindow, public GDefaultDocumentEnv
 				if (Ext.Equals("css") ||
 					Ext.Equals("html"))
 				{
-					LAutoPtr<GFile> f(new GFile);
+					LAutoPtr<LFile> f(new LFile);
 					if (f && f->Open(p, O_READ))
 					{
 						j->Stream.Reset(f.Release());
@@ -380,7 +380,7 @@ public:
 					#endif
 
 					List<FileInf> Files;
-					GDirectory *d = new GDirectory;
+					LDirectory *d = new LDirectory;
 					if (d)
 					{
 						LgiMakePath(Base, sizeof(Base), Base, "Files");
@@ -498,7 +498,7 @@ public:
 						Html1::GHtml Html(100, 0, 0, PageSize.x, PageSize.y, this);
 						Html.Name(Content);
 						LMemDC Screen(PageSize.x, PageSize.y, System24BitColourSpace);
-						Screen.Colour(GColour(255, 255, 255));
+						Screen.Colour(LColour(255, 255, 255));
 						Screen.Rectangle();
 						Html.OnPaint(&Screen);
 						if (!GdcD->Save(p, &Screen))

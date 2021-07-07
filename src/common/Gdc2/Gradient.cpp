@@ -1,7 +1,7 @@
 #include <math.h>
 #include "Gdc2.h"
 
-class GGradient : public GApplicator
+class GGradient : public LApplicator
 {
 protected:
 	int Sx, Sy;
@@ -346,7 +346,7 @@ public:
 class GGradientFactory : public GApplicatorFactory
 {
 public:
-	GApplicator *Create(GColourSpace Cs, int Op)
+	LApplicator *Create(LColourSpace Cs, int Op)
 	{
 		if (Op == 5)
 		{

@@ -2,9 +2,9 @@
 #include "lgi/common/ProgressView.h"
 #include "lgi/common/Css.h"
 
-GColour LProgressView::cNormal(50, 150, 255);
-GColour LProgressView::cPaused(222, 160, 0);
-GColour LProgressView::cError(255, 0, 0);
+LColour LProgressView::cNormal(50, 150, 255);
+LColour LProgressView::cPaused(222, 160, 0);
+LColour LProgressView::cError(255, 0, 0);
 
 LProgressView::LProgressView(int id, int x, int y, int cx, int cy, const char *name) :
 	ResObject(Res_Progress)
@@ -21,14 +21,14 @@ LProgressView::~LProgressView()
 {
 }
 
-bool LProgressView::Colour(GColour Col)
+bool LProgressView::Colour(LColour Col)
 {
 	c = Col;
 	Invalidate();
 	return true;
 }
 
-GColour LProgressView::Colour()
+LColour LProgressView::Colour()
 {
 	return c;
 }
@@ -100,8 +100,8 @@ void LProgressView::OnPaint(LSurface *pDC)
 		// printf("Prog Paint v=%f val=%i range=%i-%i pos=%i\n", v, (int)Val, (int)Low, (int)High, Pos);
 		if (Pos > 0)
 		{
-			GColour High = c.Mix(GColour::White);
-			GColour Low = c.Mix(GColour::Black);
+			LColour High = c.Mix(LColour::White);
+			LColour Low = c.Mix(LColour::Black);
 			LRect p = r;
 
 			p.x2 = p.x1 + Pos - 1;

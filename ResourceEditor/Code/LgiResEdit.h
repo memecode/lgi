@@ -769,7 +769,7 @@ public:
 	bool SaveWin32();
 	void ImportLang();
 	void Compare();
-	bool WriteDefines(GFile &Defs);
+	bool WriteDefines(LFile &Defs);
 
 	bool OpenFile(const char *FileName, bool Ro);
 	bool SaveFile(const char *FileName);

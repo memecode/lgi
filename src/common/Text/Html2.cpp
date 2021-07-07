@@ -11,7 +11,7 @@
 #include "LVariant.h"
 #include "GFindReplaceDlg.h"
 #include "Emoji.h"
-#include "GClipBoard.h"
+#include "LClipBoard.h"
 #include "LButton.h"
 #include "LEdit.h"
 #include "GCombo.h"
@@ -1981,7 +1981,7 @@ bool GTag::OnMouseClick(LMouse &m)
 				{
 					case IDM_COPY_LINK:
 					{
-						GClipBoard Clip(Html);
+						LClipBoard Clip(Html);
 						Clip.Text(Uri);
 						break;
 					}
@@ -6116,8 +6116,8 @@ void GTag::OnPaint(LSurface *pDC)
 			else if (Size.x > 1 && Size.y > 1)
 			{
 				LRect b(0, 0, Size.x-1, Size.y-1);
-				GColour Fill(GdcMixColour(LC_MED, LC_LIGHT, 0.2f), 24);
-				GColour Border(LC_MED, 24);
+				LColour Fill(GdcMixColour(LC_MED, LC_LIGHT, 0.2f), 24);
+				LColour Border(LC_MED, 24);
 
 				// Border
 				pDC->Colour(Border);
@@ -6129,7 +6129,7 @@ void GTag::OnPaint(LSurface *pDC)
 				pDC->Rectangle(&b);
 
 				const char *Alt;
-				GColour Red(GdcMixColour(Rgb24(255, 0, 0), Fill.c24(), 0.3f), 24);
+				LColour Red(GdcMixColour(Rgb24(255, 0, 0), Fill.c24(), 0.3f), 24);
 				if (Get("alt", Alt) && ValidStr(Alt))
 				{
 					LDisplayString Ds(Html->GetFont(), Alt);
@@ -6474,7 +6474,7 @@ void GTag::OnPaint(LSurface *pDC)
 						
 						#if 0
 						int Y = ds.Y();
-						pDC->Colour(GColour(0, 0, 255));
+						pDC->Colour(LColour(0, 0, 255));
 						pDC->Box(Tr->x1, Tr->y1 + LineHtOff, Tr->x2, Tr->y1 + LineHtOff + Y - 1);
 						#endif
 					}
@@ -6719,7 +6719,7 @@ bool GHtml2::Name(const char *s)
 	d->DocumentUid++;
 
 	#if 0
-	GFile Out;
+	LFile Out;
 	if (s && Out.Open("~\\Desktop\\html-input.html", O_WRITE))
 	{
 		Out.SetSize(0);
@@ -6755,7 +6755,7 @@ bool GHtml2::Name(const char *s)
 		}
 
 		#if 0
-		GFile f;
+		LFile f;
 		f.Open("c:\\temp\\broken.html", O_WRITE);
 		{
 			f.Write(Source, strlen(Source));
@@ -7245,7 +7245,7 @@ bool GHtml2::Copy()
 	LAutoString s(GetSelection());
 	if (s)
 	{
-		GClipBoard c(this);
+		LClipBoard c(this);
 		
 		LAutoWString w(LgiNewUtf8To16(s));
 		if (w) c.TextW(w);
@@ -7600,7 +7600,7 @@ void GHtml2::OnMouseClick(LMouse &m)
 				if (Cs)
 				{
 					int n=0;
-					for (GCharset *c = LgiGetCsList(); c->Charset; c++, n++)
+					for (LCharset *c = LgiGetCsList(); c->Charset; c++, n++)
 					{
 						Cs->AppendItem(c->Charset, IDM_CHARSET_BASE + n, c->IsAvailable());
 					}
@@ -7642,7 +7642,7 @@ void GHtml2::OnMouseClick(LMouse &m)
 						{
 							if (Source)
 							{
-								GClipBoard c(this);
+								LClipBoard c(this);
 								if (Is8Bit(Source))
 								{
 									LAutoWString w((char16*)LNewConvertCp(LGI_WideCharset, Source, DocCharSet ? DocCharSet : (char*)"windows-1252"));
@@ -7668,7 +7668,7 @@ void GHtml2::OnMouseClick(LMouse &m)
 								char *s = Tag->Dump();
 								if (s)
 								{
-									GClipBoard c(this);
+									LClipBoard c(this);
 									c.Text(s);
 									DeleteObj(s);
 								}
@@ -7686,7 +7686,7 @@ void GHtml2::OnMouseClick(LMouse &m)
 								
 								LgiCheckHeap();
 
-								GFile F;
+								LFile F;
 								if (F.Open(Path, O_WRITE))
 								{
 									LStringPipe Ex;
@@ -7788,7 +7788,7 @@ void GHtml2::OnMouseClick(LMouse &m)
 						{
 							if (Id >= IDM_CHARSET_BASE)
 							{
-								GCharset *c = LgiGetCsList() + (Id - IDM_CHARSET_BASE);
+								LCharset *c = LgiGetCsList() + (Id - IDM_CHARSET_BASE);
 								if (c->Charset)
 								{
 									Charset.Reset(NewStr(c->Charset));
@@ -8105,7 +8105,7 @@ bool GHtml2::GetFormattedContent(char *MimeType, LAutoString &Out, LArray<GDocVi
 
 				if (Src && Cid)
 				{
-					GFile *f = new GFile;
+					LFile *f = new LFile;
 					if (f)
 					{
 						if (f->Open(Src, O_READ))

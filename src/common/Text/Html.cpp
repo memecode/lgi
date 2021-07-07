@@ -1691,14 +1691,14 @@ void GTag::SetTag(const char *NewTag)
 	SetStyle();
 }
 
-GColour GTag::_Colour(bool f)
+LColour GTag::_Colour(bool f)
 {
 	for (GTag *t = this; t; t = ToTag(t->Parent))
 	{
 		ColorDef c = f ? t->Color() : t->BackgroundColor();
 		if (c.Type != ColorInherit)
 		{
-			return GColour(c.Rgb32, 32);
+			return LColour(c.Rgb32, 32);
 		}
 
 		#if 1
@@ -1712,7 +1712,7 @@ GColour GTag::_Colour(bool f)
 		#endif
 	}
 
-	return GColour();
+	return LColour();
 }
 
 void GTag::CopyClipboard(GMemQueue &p, bool &InSelection)
@@ -2048,13 +2048,13 @@ bool GTag::OnMouseClick(LMouse &m)
 				{
 					case IDM_COPY_LINK:
 					{
-						GClipBoard Clip(Html);
+						LClipBoard Clip(Html);
 						Clip.Text(Uri);
 						break;
 					}
 					case IDM_COPY_IMG:
 					{
-						GClipBoard Clip(Html);						
+						LClipBoard Clip(Html);						
 						Clip.Text(ImgSrc);
 						break;
 					}
@@ -5299,7 +5299,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 	Size.x = 0;
 	Size.y = 0;
 	
-	GCssTools Tools(this, f);
+	LCssTools Tools(this, f);
 	LRect rc(Flow->X(), Html->Y());
 	PadPx = Tools.GetPadding(rc);
 
@@ -6094,7 +6094,7 @@ public:
 	CornersImg(	float RadPx,
 				LRect *BorderPx,
 				LCss::BorderDef **defs,
-				GColour &Back,
+				LColour &Back,
 				bool DrawBackground)
 	{
 		Px = 0;
@@ -6111,7 +6111,7 @@ public:
 				#if 1
 				Colour(0, 32);
 				#else
-				Colour(GColour(255, 0, 255));
+				Colour(LColour(255, 0, 255));
 				#endif
 				Rectangle();
 
@@ -6201,7 +6201,7 @@ public:
 	}
 };
 
-void GTag::PaintBorderAndBackground(LSurface *pDC, GColour &Back, LRect *BorderPx)
+void GTag::PaintBorderAndBackground(LSurface *pDC, LColour &Back, LRect *BorderPx)
 {
 	LArray<LRect> r;
 	LRect BorderPxRc;
@@ -6324,11 +6324,11 @@ void GTag::PaintBorderAndBackground(LSurface *pDC, GColour &Back, LRect *BorderP
 				pDC->Rectangle(rc.x1, rc.y1+Px, rc.x1+Px-1, rc.y2-Px);
 				pDC->Rectangle(rc.x2-Px+1, rc.y1+Px, rc.x2, rc.y2-Px);
 				#else
-				pDC->Colour(GColour(255, 0, 0, 0x80));
+				pDC->Colour(LColour(255, 0, 0, 0x80));
 				pDC->Rectangle(rc.x1+Px, rc.y1, rc.x2-Px, rc.y2);
-				pDC->Colour(GColour(0, 255, 0, 0x80));
+				pDC->Colour(LColour(0, 255, 0, 0x80));
 				pDC->Rectangle(rc.x1, rc.y1+Px, rc.x1+Px-1, rc.y2-Px);
-				pDC->Colour(GColour(0, 0, 255, 0x80));
+				pDC->Colour(LColour(0, 0, 255, 0x80));
 				pDC->Rectangle(rc.x2-Px+1, rc.y1+Px, rc.x2, rc.y2-Px);
 				#endif
 			}
@@ -6475,7 +6475,7 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 				Sy *= LineY;
 				
 				LRect r(0, 0, Size.x-1, Size.y-1), Px;
-				GColour back = _Colour(false);
+				LColour back = _Colour(false);
 				PaintBorderAndBackground(pDC, back, &Px);
 				if (!dynamic_cast<LButton*>(Ctrl))
 				{
@@ -6545,7 +6545,7 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 				{
 					ImageResized = true;
 
-					GColourSpace Cs = Image->GetColourSpace();
+					LColourSpace Cs = Image->GetColourSpace();
 					if (Cs == CsIndex8 &&
 						Image->AlphaDC())
 						Cs = System32BitColourSpace;
@@ -6568,8 +6568,8 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 			else if (Size.x > 1 && Size.y > 1)
 			{
 				LRect b(0, 0, Size.x-1, Size.y-1);
-				GColour Fill(LColour(L_MED).Mix(LColour(L_LIGHT), 0.2f));
-				GColour Border(L_MED);
+				LColour Fill(LColour(L_MED).Mix(LColour(L_LIGHT), 0.2f));
+				LColour Border(L_MED);
 
 				// Border
 				pDC->Colour(Border);
@@ -6581,7 +6581,7 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 				pDC->Rectangle(&b);
 
 				const char *Alt;
-				GColour Red(GColour(255, 0, 0).Mix(Fill, 0.3f));
+				LColour Red(LColour(255, 0, 0).Mix(Fill, 0.3f));
 				if (Get("alt", Alt) && ValidStr(Alt))
 				{
 					LDisplayString Ds(Html->GetFont(), Alt);
@@ -6610,8 +6610,8 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 		}
 		default:
 		{
-			GColour fore = _Colour(true);
-			GColour back = _Colour(false);
+			LColour fore = _Colour(true);
+			LColour back = _Colour(false);
 
 			if (Display() == DispBlock && Html->Environment)
 			{
@@ -6655,10 +6655,10 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 						f->Colour(L_FOCUS_SEL_FORE, L_FOCUS_SEL_BACK); \
 					else \
 					{ \
-						GColour bk(back.IsTransparent() ? GColour(L_WORKSPACE) : back);			\
-						GColour fr(fore.IsTransparent() ? GColour(DefaultTextColour) : fore);		\
+						LColour bk(back.IsTransparent() ? LColour(L_WORKSPACE) : back);			\
+						LColour fr(fore.IsTransparent() ? LColour(DefaultTextColour) : fore);		\
 						if (IsEditor)																\
-							bk = bk.Mix(GColour::Black, 0.05f);									\
+							bk = bk.Mix(LColour::Black, 0.05f);									\
 						f->Colour(fr, bk);															\
 					}
 
@@ -6876,7 +6876,7 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 			Tbl = Tbl->Parent;
 		if (Tbl && Tbl->TagId == TAG_TABLE && Tbl->Debug)
 		{
-			pDC->Colour(GColour(255, 0, 0));
+			pDC->Colour(LColour(255, 0, 0));
 			pDC->Box(0, 0, Size.x-1, Size.y-1);
 		}
 	}
@@ -6899,7 +6899,7 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 		if (Tbl && Tbl->Debug)
 		{
 			int Ls = pDC->LineStyle(LSurface::LineDot);
-			pDC->Colour(GColour::Blue);
+			pDC->Colour(LColour::Blue);
 			pDC->Box(0, 0, Size.x-1, Size.y-1);
 			pDC->LineStyle(Ls);
 		}
@@ -6999,7 +6999,7 @@ void GHtml::OnAddStyle(const char *MimeType, const char *Styles)
 		{
 			char p[MAX_PATH];
 			sprintf_s(p, sizeof(p), "c:\\temp\\css_parse_failure_%i.txt", LRand());
-			GFile f;
+			LFile f;
 			if (f.Open(p, O_WRITE))
 			{
 				f.SetSize(0);
@@ -7015,7 +7015,7 @@ void GHtml::OnAddStyle(const char *MimeType, const char *Styles)
 			LStringPipe p;
 			CssStore.Dump(p);
 			LAutoString a(p.NewStr());
-			GFile f;
+			LFile f;
 			if (f.Open("C:\\temp\\css.txt", O_WRITE))
 			{
 				f.Write(a, strlen(a));
@@ -7483,7 +7483,7 @@ void GHtml::OnPaint(LSurface *ScreenDC)
 	{
 		MemDC->ClipRgn(NULL);
 		#if 0//def _DEBUG
-		MemDC->Colour(GColour(255, 0, 255));
+		MemDC->Colour(LColour(255, 0, 255));
 		MemDC->Rectangle();
 		#endif
 	}
@@ -7501,7 +7501,7 @@ void GHtml::OnPaint(LSurface *ScreenDC)
 		Offset.x, Offset.y);
 	#endif
 
-	GColour cBack;
+	LColour cBack;
 	if (GetCss())
 	{
 		LCss::ColorDef Bk = GetCss()->BackgroundColor();
@@ -7780,7 +7780,7 @@ bool GHtml::Copy()
 	LAutoString s(GetSelection());
 	if (s)
 	{
-		GClipBoard c(this);
+		LClipBoard c(this);
 		
 		LAutoWString w;
 		#ifndef MAC
@@ -8197,7 +8197,7 @@ void GHtml::OnMouseClick(LMouse &m)
 			if (Cs)
 			{
 				int n=0;
-				for (GCharset *c = LgiGetCsList(); c->Charset; c++, n++)
+				for (LCharset *c = LgiGetCsList(); c->Charset; c++, n++)
 				{
 					Cs->AppendItem(c->Charset, IDM_CHARSET_BASE + n, c->IsAvailable());
 				}
@@ -8245,7 +8245,7 @@ void GHtml::OnMouseClick(LMouse &m)
 					{
 						if (Source)
 						{
-							GClipBoard c(this);
+							LClipBoard c(this);
 							const char *ViewCs = GetCharset();
 							if (ViewCs)
 							{
@@ -8269,7 +8269,7 @@ void GHtml::OnMouseClick(LMouse &m)
 							LAutoWString s = Tag->DumpW();
 							if (s)
 							{
-								GClipBoard c(this);
+								LClipBoard c(this);
 								c.TextW(s);
 							}
 						}
@@ -8294,7 +8294,7 @@ void GHtml::OnMouseClick(LMouse &m)
 						sprintf_s(f, sizeof(f), "_%i.html", LRand(1000000));
 						LgiMakePath(Path, sizeof(Path), Path, f);
 						
-						GFile F;
+						LFile F;
 						if (!F.Open(Path, O_WRITE))
 						{
 							LgiTrace("%s:%i - Failed to open '%s' for writing.\n", _FL, Path);
@@ -8420,7 +8420,7 @@ void GHtml::OnMouseClick(LMouse &m)
 					{
 						if (Id >= IDM_CHARSET_BASE)
 						{
-							GCharset *c = LgiGetCsList() + (Id - IDM_CHARSET_BASE);
+							LCharset *c = LgiGetCsList() + (Id - IDM_CHARSET_BASE);
 							if (c->Charset)
 							{
 								Charset = c->Charset;
@@ -8775,7 +8775,7 @@ bool GHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<GDocV
 
 				if (Src && Cid)
 				{
-					GFile *f = new GFile;
+					LFile *f = new LFile;
 					if (f)
 					{
 						if (f->Open(Src, O_READ))

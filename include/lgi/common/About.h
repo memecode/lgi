@@ -7,11 +7,11 @@
 #include "lgi/common/DocView.h"
 
 /// A simple about dialog
-class GAbout : public LDialog, public GDefaultDocumentEnv
+class LAbout : public LDialog, public GDefaultDocumentEnv
 {
 public:
 	/// Constructor
-	GAbout
+	LAbout
 	(
 		/// The parent window
 		LView *parent,

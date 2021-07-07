@@ -115,7 +115,7 @@ void VcFile::OnMouseClick(LMouse &m)
 
 		if (Uri.IsProtocol("file"))
 		{
-			GFile::Path p = Uri.sPath ? Uri.sPath(1,-1).Get() : Owner->LocalPath();
+			LFile::Path p = Uri.sPath ? Uri.sPath(1,-1).Get() : Owner->LocalPath();
 			p += File;
 			LocalPath = p.GetFull();
 		}
@@ -245,13 +245,13 @@ void VcFile::OnMouseClick(LMouse &m)
 			}
 			case IDM_COPY_LEAF:
 			{
-				GClipBoard c(GetList());
+				LClipBoard c(GetList());
 				c.Text(FileParts.Last());
 				break;
 			}
 			case IDM_COPY_PATH:
 			{
-				GClipBoard c(GetList());
+				LClipBoard c(GetList());
 				c.Text(File);
 				break;
 			}
@@ -266,7 +266,7 @@ void VcFile::OnMouseClick(LMouse &m)
 
 bool ConvertEol(const char *Path, bool Cr)
 {
-	GFile f;
+	LFile f;
 	if (!f.Open(Path, O_READWRITE))
 		return false;
 	LString s = f.Read();
@@ -280,7 +280,7 @@ bool ConvertEol(const char *Path, bool Cr)
 
 int GetEol(const char *Path)
 {
-	GFile f;
+	LFile f;
 	if (!f.Open(Path, O_READ))
 		return false;
 	LString s = f.Read();

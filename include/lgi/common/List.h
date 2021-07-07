@@ -40,7 +40,7 @@ class LgiClass LListItemPainter
 {
 public:
 	// Overridable
-	virtual void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c) = 0;
+	virtual void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c) = 0;
 };
 
 class LgiClass LListItemColumn : public LBase, public GItem, public LListItemPainter
@@ -61,7 +61,7 @@ public:
 	// Other objects
 	LListItem *GetItem() { return _Item; }
 	LList *GetList();
-	GItemContainer *GetContainer();
+	LItemContainer *GetContainer();
 
 	// Props
 	int GetColumn() { return _Column; }
@@ -75,7 +75,7 @@ class LgiClass LListItem : public GItem, public LListItemPainter
 {
 	friend class LList;
 	friend class LListItemColumn;
-	friend class GItemColumn;
+	friend class LItemColumn;
 
 protected:
 	// Data
@@ -99,7 +99,7 @@ public:
 	LListItem();
 	virtual ~LListItem();
 
-	GItemContainer *GetContainer() override;
+	LItemContainer *GetContainer() override;
 	/// Get the owning list
 	LList *GetList() { return Parent; }
 	/// Gets the LListItemColumn's.
@@ -149,7 +149,7 @@ public:
 	void OnMeasure(LPoint *Info) override;
 	void OnPaint(LSurface *pDC) override { LgiAssert(0); }
 	void OnPaint(GItem::ItemPaintCtx &Ctx) override;
-	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c) override;
+	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c) override;
 
 	// Over-ridable
 	virtual int Compare(LListItem *To, ssize_t Field = 0) { return 0; }
@@ -250,12 +250,12 @@ public:
 
 /// List widget
 class LgiClass LList :
-	public GItemContainer,
+	public LItemContainer,
 	public ResObject,
 	public LListItems
 {
 	friend class LListItem;
-	friend class GItemColumn;
+	friend class LItemColumn;
 	friend class LListItemColumn;
 
 	#ifdef WIN32
@@ -351,7 +351,7 @@ public:
 	virtual bool OnColumnReindex
 	(
 		/// The column dropped
-		GItemColumn *Col,
+		LItemColumn *Col,
 		/// The old index
 		int OldIndex,
 		/// The new index

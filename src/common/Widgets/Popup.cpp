@@ -1007,7 +1007,7 @@ void LDropDown::OnPaint(LSurface *pDC)
 		return;
 
 	#if defined(LGI_CARBON)
-	GColour NoPaintColour(L_MED);
+	LColour NoPaintColour(L_MED);
 	if (GetCss())
 	{
 		LCss::ColorDef NoPaint = GetCss()->NoPaintColor();

@@ -761,7 +761,7 @@ public:
 		}
 		
 		{
-			GDirectory SrcD, ObjD;
+			LDirectory SrcD, ObjD;
 			bool OutOfDate = true;
 			if (LFileExists(SourceFileName) &&
 				SrcD.First(SourceFileName, NULL) != 0 &&
@@ -771,7 +771,7 @@ public:
 			}			
 			if (OutOfDate || Debugger)
 			{
-				GFile f;
+				LFile f;
 				LStringPipe p;
 				LStream *Out = NULL;
 			
@@ -1312,7 +1312,7 @@ public:
 	int GetAddr();
 	void ScrollToCurLine();
 	void PourText(size_t Start, ssize_t Length) override;
-	void OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour) override;
+	void OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour) override;
 	void OnPaint(LSurface *pDC) override;
 	bool Breakpoint(int Addr);
 };
@@ -1437,11 +1437,11 @@ bool GDebugView::Breakpoint(int Addr)
 	}
 }
 
-void GDebugView::OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour)
+void GDebugView::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
 {
 	LTextView3::OnPaintLeftMargin(pDC, r, colour);
 
-	pDC->Colour(GColour(192, 0, 0));
+	pDC->Colour(LColour(192, 0, 0));
 	LFont *f = GetFont();
 	f->Colour(L_LOW, L_WORKSPACE);
 	f->Transparent(true);
@@ -1491,7 +1491,7 @@ void GDebugView::OnPaint(LSurface *pDC)
 		r.Size(-Pad, -Pad);
 		r.Offset(c.X()-r.X(), Ln ? Ln->r.y1 - ScrollYPixel(): 0);
 		f->Transparent(false);
-		f->Colour(GColour::White, GColour::Red);
+		f->Colour(LColour::White, LColour::Red);
 		Ds.Draw(pDC, r.x1 + Pad, r.y1 + Pad, &r);
 	}
 }
@@ -1647,7 +1647,7 @@ LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmDebuggerCallback *Callback, LVi
 		{
 			char p[MAX_PATH];
 			LgiMakePath(p, sizeof(p), LGetExePath(), "../Scripts");
-			GDirectory dir;
+			LDirectory dir;
 			LListItem *Match = NULL;
 
 			d->SourceLst->MultiSelect(false);
@@ -1933,7 +1933,7 @@ void LVmDebuggerWnd::LoadFile(const char *File)
 		return;
 	}
 
-	GFile f;
+	LFile f;
 	if (f.Open(File, O_READ))
 		d->Script = f.Read();
 	else

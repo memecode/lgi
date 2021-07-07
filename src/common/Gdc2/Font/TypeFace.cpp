@@ -71,7 +71,7 @@ void LTypeFace::Quality(int i)
 	}
 }
 
-GColour LTypeFace::WhitespaceColour()
+LColour LTypeFace::WhitespaceColour()
 {
 	if (d->WhiteSpace.IsValid())
 		return d->WhiteSpace;
@@ -79,7 +79,7 @@ GColour LTypeFace::WhitespaceColour()
 	return d->_Back.Mix(d->_Fore, LGI_WHITESPACE_WEIGHT);
 }
 
-void LTypeFace::WhitespaceColour(GColour c)
+void LTypeFace::WhitespaceColour(LColour c)
 {
 	d->WhiteSpace = c;
 	_OnPropChange(false);
@@ -91,7 +91,7 @@ void LTypeFace::Fore(LSystemColour c)
 	_OnPropChange(false);
 }
 
-void LTypeFace::Fore(GColour c)
+void LTypeFace::Fore(LColour c)
 {
 	d->_Fore = c;
 	_OnPropChange(false);
@@ -103,7 +103,7 @@ void LTypeFace::Back(LSystemColour c)
 	_OnPropChange(false);
 }
 
-void LTypeFace::Back(GColour c)
+void LTypeFace::Back(LColour c)
 {
 	d->_Back = c;
 	_OnPropChange(false);
@@ -149,7 +149,7 @@ void LTypeFace::Colour(LSystemColour Fore, LSystemColour Back)
 	_OnPropChange(false);
 }
 
-void LTypeFace::Colour(GColour Fore, GColour Back)
+void LTypeFace::Colour(LColour Fore, LColour Back)
 {
 	LgiAssert(Fore.IsValid());
 	d->_Fore = Fore;
@@ -201,12 +201,12 @@ int LTypeFace::Quality()
 	return d->_Quality;
 }
 
-GColour LTypeFace::Fore()
+LColour LTypeFace::Fore()
 {
 	return d->_Fore;
 }
 
-GColour LTypeFace::Back()
+LColour LTypeFace::Back()
 {
 	return d->_Back;
 }

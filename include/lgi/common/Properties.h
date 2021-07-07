@@ -79,8 +79,8 @@ public:
 	bool operator ==(Prop &p);
 	bool operator ==(const char *n);
 
-	bool Serialize(GFile &f, bool Write);
-	bool SerializeText(GFile &f, bool Write);
+	bool Serialize(LFile &f, bool Write);
+	bool SerializeText(LFile &f, bool Write);
 };
 
 class ObjTree;
@@ -162,8 +162,8 @@ public:
 	bool Get(Prop *&p);
 	bool GetValue(const char *Name, LVariant &v);
 
-	bool Serialize(GFile &f, bool Write);
-	bool SerializeText(GFile &f, bool Write);
+	bool Serialize(LFile &f, bool Write);
+	bool SerializeText(LFile &f, bool Write);
 };
 
 class ObjTree : public LBase
@@ -186,9 +186,9 @@ public:
 	bool Get(char *Name, char *&n);
 
 	void Print();
-	bool Serialize(GFile &f, bool Write);
-	bool SerializeObj(GFile &f, bool Write);
-	bool SerializeText(GFile &f, bool Write);
+	bool Serialize(LFile &f, bool Write);
+	bool SerializeObj(LFile &f, bool Write);
+	bool SerializeText(LFile &f, bool Write);
 };
 
 #endif

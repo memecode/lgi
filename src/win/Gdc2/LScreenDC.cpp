@@ -425,9 +425,9 @@ COLOUR LScreenDC::Colour(COLOUR c, int Bits)
 	return Prev;
 }
 
-GColour LScreenDC::Colour(GColour c)
+LColour LScreenDC::Colour(LColour c)
 {
-	GColour cPrev(d->Col, GetBits());
+	LColour cPrev(d->Col, GetBits());
 	Colour(c.c32(), 32);
 	return cPrev;
 }
@@ -764,7 +764,7 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 		LMemDC Tmp;
 		if (!hSrcDC)
 		{
-			GColourSpace Cs = GdcD->GetColourSpace();
+			LColourSpace Cs = GdcD->GetColourSpace();
 			if (!Tmp.Create(b.X(), b.Y(), Cs))
 			{
 				return;

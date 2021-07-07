@@ -29,7 +29,7 @@ public:
 
 	void Update(int Flags);
 	void Draw(LSurface *Dest, int x, int y);
-	BOOL Read(GFile &F);
-	BOOL Write(GFile &F);
+	BOOL Read(LFile &F);
+	BOOL Write(LFile &F);
 };
 

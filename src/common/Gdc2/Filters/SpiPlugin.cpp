@@ -126,7 +126,7 @@ public:
 		{
 			for (SpiPlugin *p=Plugins.First(); p; p=Plugins.Next())
 			{
-				GFile f;
+				LFile f;
 				if (f.Open(File, O_READ))
 				{
 					if (p->IsSupported(0, (int)f.Handle()))

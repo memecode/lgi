@@ -59,7 +59,7 @@ public:
 			{
 				if (!charset)
 					charset = "utf-8";
-				for (GCharset *cs = LgiGetCsList(); cs->Charset; cs++)
+				for (LCharset *cs = LgiGetCsList(); cs->Charset; cs++)
 				{
 					c->Insert(cs->Charset);
 					if (!Stricmp(charset, cs->Charset))
@@ -365,17 +365,17 @@ IdeProject *ProjectNode::GetProject()
 	return Project;
 }
 
-bool ProjectNode::GetFormats(GDragFormats &Formats)
+bool ProjectNode::GetFormats(LDragFormats &Formats)
 {
 	Formats.Supports(NODE_DROP_FORMAT);
 	return true;
 }
 
-bool ProjectNode::GetData(LArray<GDragData> &Data)
+bool ProjectNode::GetData(LArray<LDragData> &Data)
 {
 	for (unsigned i=0; i<Data.Length(); i++)
 	{
-		GDragData &dd = Data[i];
+		LDragData &dd = Data[i];
 		if (dd.IsFormat(NODE_DROP_FORMAT))
 		{
 			void *t = this;
@@ -1427,7 +1427,7 @@ void ProjectNode::OnProperties()
 				}
 				case IDC_COPY_PATH:
 				{
-					GClipBoard Clip(Tree);
+					LClipBoard Clip(Tree);
 					Clip.Text(Path);
 					break;
 				}

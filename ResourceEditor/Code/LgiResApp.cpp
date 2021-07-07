@@ -423,7 +423,7 @@ void ObjTreeItem::OnMouseClick(LMouse &m)
 					Select.Type("Text", "*.txt");
 					if (Select.Open())
 					{
-						GFile F;
+						LFile F;
 						if (F.Open(Select.Name(), O_READ))
 						{
 							SerialiseContext Ctx;
@@ -827,7 +827,7 @@ int FieldView::OnNotify(LViewI *Ctrl, int Flags)
 						auto File = App->GetCurFile();
 						if (File)
 						{
-							GFile::Path p = File;
+							LFile::Path p = File;
 							p--;
 							LAutoString Rel = LgiMakeRelativePath(p, s.Name());
 							if (Rel)
@@ -1436,7 +1436,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		}
 		case IDM_ABOUT:
 		{
-			GAbout Dlg(	this,
+			LAbout Dlg(	this,
 						AppName,
 						APP_VER,
 						"\nLgi Resource Editor (lr8 files).",
@@ -2032,7 +2032,7 @@ public:
 				LXmlTag *t2 = new LXmlTag;
 				if (t1 && File1)
 				{
-					GFile f;
+					LFile f;
 					if (f.Open(File1, O_READ))
 					{
 						LXmlTree x(GXT_NO_ENTITIES);
@@ -2048,7 +2048,7 @@ public:
 				}
 				if (t2 && File2)
 				{
-					GFile f;
+					LFile f;
 					if (f.Open(File2, O_READ))
 					{
 						LXmlTree x(GXT_NO_ENTITIES);
@@ -2254,7 +2254,7 @@ void AppWnd::ImportLang()
 
 	if (Select.Open())
 	{
-		GFile F;
+		LFile F;
 		if (F.Open(Select.Name(), O_READ))
 		{
 			SerialiseContext Ctx;
@@ -2605,7 +2605,7 @@ bool AppWnd::LoadLgi(const char *FileName)
 	{
 		// ResFileFormat Format = GetFormat(FileName);
 
-		GFile f;
+		LFile f;
 		if (f.Open(FileName, O_READ))
 		{
 			LProgressDlg Progress(this);
@@ -2911,7 +2911,7 @@ int PairCmp(DefinePair *a, DefinePair *b)
 	return a->Value - b->Value;
 }
 
-bool AppWnd::WriteDefines(GFile &Defs)
+bool AppWnd::WriteDefines(LFile &Defs)
 {
 	bool Status = false;
 	ResTree Tree;
@@ -3080,8 +3080,8 @@ bool AppWnd::SaveLgi(const char *FileName)
 	// Save the file to xml
 	if (FileName)
 	{
-		GFile f, Defs;		
-		GFile::Path DefsName = FileName;
+		LFile f, Defs;		
+		LFile::Path DefsName = FileName;
 		DefsName += "../resdefs.h";
 
 		if (f.Open(FileName, O_WRITE) &&
@@ -3327,7 +3327,7 @@ public:
 				{
 					NestLevel++;
 
-					GFile F;
+					LFile F;
 					if (T.Length() > 1)
 					{
 						for (auto IncPath: IncludeDirs)

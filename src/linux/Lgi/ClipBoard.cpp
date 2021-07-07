@@ -20,16 +20,16 @@ struct ClipData : public LMutex
 	
 }	Data;
 
-class GClipBoardPriv
+class LClipBoardPriv
 {
 public:
 	GtkClipboard *c;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GClipBoard::GClipBoard(LView *o)
+LClipBoard::LClipBoard(LView *o)
 {
-	d = new GClipBoardPriv;
+	d = new LClipBoardPriv;
 	Owner = o;
 	Open = false;
 	d->c = gtk_clipboard_get(GDK_NONE); // gdk_atom_intern("CLIPBOARD", false)
@@ -40,13 +40,13 @@ GClipBoard::GClipBoard(LView *o)
 	#endif
 }
 
-GClipBoard::~GClipBoard()
+LClipBoard::~LClipBoard()
 {
 	d->c = 0;
 	DeleteObj(d);
 }
 
-bool GClipBoard::Empty()
+bool LClipBoard::Empty()
 {
 	if (d->c)
 	{
@@ -60,22 +60,22 @@ bool GClipBoard::Empty()
 	return false;
 }
 
-bool GClipBoard::EnumFormats(::LArray<FormatType> &Formats)
+bool LClipBoard::EnumFormats(::LArray<FormatType> &Formats)
 {
 	return false;
 }
 
-bool GClipBoard::Html(const char *doc, bool AutoEmpty)
+bool LClipBoard::Html(const char *doc, bool AutoEmpty)
 {
 	return false;
 }
 
-::LString GClipBoard::Html()
+::LString LClipBoard::Html()
 {
 	return ::LString();
 }
 
-bool GClipBoard::Text(const char *Str, bool AutoEmpty)
+bool LClipBoard::Text(const char *Str, bool AutoEmpty)
 {
 	bool Status = false;
 
@@ -96,7 +96,7 @@ bool GClipBoard::Text(const char *Str, bool AutoEmpty)
 	return Status;
 }
 
-char *GClipBoard::Text()
+char *LClipBoard::Text()
 {
 	char *t = 0;
 	
@@ -119,19 +119,19 @@ char *GClipBoard::Text()
 	return t;
 }
 
-bool GClipBoard::TextW(const char16 *Str, bool AutoEmpty)
+bool LClipBoard::TextW(const char16 *Str, bool AutoEmpty)
 {
 	LAutoString u(WideToUtf8(Str));
 	return Text(u, AutoEmpty);
 }
 
-char16 *GClipBoard::TextW()
+char16 *LClipBoard::TextW()
 {
 	LAutoString u(Text());
 	return Utf8ToWide(u);
 }
 
-bool GClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
+bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 {
 	bool Status = false;
 	if (pDC && d->c)
@@ -160,7 +160,7 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LAutoPtr<LS
 {
 	auto chan = gdk_pixbuf_get_n_channels(Img);
 	auto alpha = gdk_pixbuf_get_has_alpha(Img);
-	GColourSpace cs = System32BitColourSpace;
+	LColourSpace cs = System32BitColourSpace;
 	if (chan == 3)
 	{
 		if (alpha)
@@ -233,7 +233,7 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LAutoPtr<LS
 	}
 }
 
-LSurface *GClipBoard::Bitmap()
+LSurface *LClipBoard::Bitmap()
 {
 	pDC.Reset();
 	gtk_clipboard_request_image(d->c, (GtkClipboardImageReceivedFunc) ClipboardImageReceived, &pDC);
@@ -295,7 +295,7 @@ void LgiClipboardClearFunc(GtkClipboard *clipboard,
 	}
 }
 
-bool GClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmpty)
+bool LClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmpty)
 {
 	if (!Ptr || Len <= 0)
 		return false;
@@ -342,13 +342,13 @@ bool GClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	return r;
 }
 
-::LString::Array GClipBoard::Files()
+::LString::Array LClipBoard::Files()
 {
 	::LString::Array a;
 	return a;
 }
 
-bool GClipBoard::Files(::LString::Array &a, bool AutoEmpty)
+bool LClipBoard::Files(::LString::Array &a, bool AutoEmpty)
 {
 	return false;
 }
@@ -394,7 +394,7 @@ void LgiClipboardReceivedFunc(GtkClipboard *clipboard,
 	#endif
 }
 
-bool GClipBoard::Binary(FormatType Format, LAutoPtr<uint8_t,true> &Ptr, ssize_t *Len)
+bool LClipBoard::Binary(FormatType Format, LAutoPtr<uint8_t,true> &Ptr, ssize_t *Len)
 {
 	ReceiveData r = {&Ptr, Len};
 
@@ -415,7 +415,7 @@ bool GClipBoard::Binary(FormatType Format, LAutoPtr<uint8_t,true> &Ptr, ssize_t 
 	while (LgiCurrentTime() - Start > LGI_RECEIVE_CLIPBOARD_TIMEOUT);
 
 	#if DEBUG_CLIPBOARD
-	printf("%s:%i - GClipBoard::Binary %p, %i\n", _FL, r.Ptr->Get(), Len ? *Len : -1);
+	printf("%s:%i - LClipBoard::Binary %p, %i\n", _FL, r.Ptr->Get(), Len ? *Len : -1);
 	#endif
 
 	return r.Ptr->Get() != NULL;

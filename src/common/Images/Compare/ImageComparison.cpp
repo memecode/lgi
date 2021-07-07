@@ -893,7 +893,7 @@ ImageCompareDlg::ImageCompareDlg(LView *p, const char *OutPath)
 		return;
 	}
 
-	GFile::Path ResFile(__FILE__);
+	LFile::Path ResFile(__FILE__);
 	ResFile--;
 	ResFile += "ImageComparison.lr8";
 	if (!ResFile.Exists())
@@ -925,7 +925,7 @@ ImageCompareDlg::ImageCompareDlg(LView *p, const char *OutPath)
 				GetViewById(IDC_RIGHT, d->r) &&
 				GetViewById(IDC_LIST, d->lst))
 			{			
-				GDirectory dir;
+				LDirectory dir;
 				for (bool b = dir.First(OutPath); b; b = dir.Next())
 				{
 					if (dir.IsDir())
@@ -1004,7 +1004,7 @@ int ImageCompareDlg::OnNotify(LViewI *Ctrl, int Flags)
 		case IDC_COMPARE:
 		{
 			LHashTbl<StrKey<char,false>, char*> Left;
-			GDirectory LDir, RDir;
+			LDirectory LDir, RDir;
 			char p[MAX_PATH];				
 			for (bool b=LDir.First(d->l->Name()); b; b=LDir.Next())
 			{

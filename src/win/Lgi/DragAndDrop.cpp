@@ -16,14 +16,14 @@
 
 // #define DND_DEBUG_TRACE
 
-class GDataObject : public GUnknownImpl<IDataObject>
+class LDataObject : public GUnknownImpl<IDataObject>
 {
 	friend class GDndSourcePriv;
-	GDragDropSource *Source;
+	LDragDropSource *Source;
 
 public:
-	GDataObject(GDragDropSource *source);
-	~GDataObject();
+	LDataObject(LDragDropSource *source);
+	~LDataObject();
 
 	// IDataObject
 	HRESULT STDMETHODCALLTYPE GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium);
@@ -42,8 +42,8 @@ public:
 class GDndSourcePriv
 {
 public:
-	LArray<GDragData> CurData;
-	GDataObject *InDrag;
+	LArray<LDragData> CurData;
+	LDataObject *InDrag;
 
 	GDndSourcePriv()
 	{
@@ -86,7 +86,7 @@ char *FormatToStr(int f)
 	return 0;
 }
 
-GDataObject::GDataObject(GDragDropSource *source)
+LDataObject::LDataObject(LDragDropSource *source)
 {
 	AddInterface(IID_IDataObject, this);
 	Source = source;
@@ -94,7 +94,7 @@ GDataObject::GDataObject(GDragDropSource *source)
 	Source->OnStartData();
 }
 
-GDataObject::~GDataObject()
+LDataObject::~LDataObject()
 {
 	if (Source)
 	{
@@ -103,18 +103,18 @@ GDataObject::~GDataObject()
 	}
 }
 
-HRESULT GDataObject::EnumFormatEtc(DWORD dwDirection, IEnumFORMATETC **ppFormatEtc)
+HRESULT LDataObject::EnumFormatEtc(DWORD dwDirection, IEnumFORMATETC **ppFormatEtc)
 {
 	*ppFormatEtc = dynamic_cast<IEnumFORMATETC*>(Source);
 	return (*ppFormatEtc) ? S_OK : E_OUTOFMEMORY;
 }
 
-HRESULT GDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
+HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
 {
 	HRESULT Ret = E_INVALIDARG;
 
 	int CurFormat = 0;
-	GDragFormats Formats(true);
+	LDragFormats Formats(true);
 	Source->d->CurData.Length(0);
 	Source->GetFormats(Formats);
 	for (auto f: Formats.Formats)
@@ -124,7 +124,7 @@ HRESULT GDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
 		if (n == pFormatEtc->cfFormat)
 		{
 			CurFormat = n;
-			GDragData &CurData = Source->d->CurData.New();
+			LDragData &CurData = Source->d->CurData.New();
 			CurData.Format = f;
 		}
 	}
@@ -152,7 +152,7 @@ HRESULT GDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
 
 		uchar *Ptr = 0;
 		ssize_t Size = 0;
-		GDragData &CurData = Source->d->CurData[0];
+		LDragData &CurData = Source->d->CurData[0];
 		if (CurData.Data.Length() > 0)
 		{
 			if (CurData.IsFileStream())
@@ -241,7 +241,7 @@ HRESULT GDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
 	return Ret;
 }
 
-HRESULT GDataObject::QueryGetData(FORMATETC *pFormatEtc)
+HRESULT LDataObject::QueryGetData(FORMATETC *pFormatEtc)
 {
 	HRESULT Ret = E_INVALIDARG;
 
@@ -249,7 +249,7 @@ HRESULT GDataObject::QueryGetData(FORMATETC *pFormatEtc)
 	{
 		Ret = S_OK;
 
-		GDragFormats Formats(true);
+		LDragFormats Formats(true);
 		Source->GetFormats(Formats);
 		bool HaveFormat = false;
 		for (auto i: Formats.Formats)
@@ -282,7 +282,7 @@ HRESULT GDataObject::QueryGetData(FORMATETC *pFormatEtc)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-GDragDropSource::GDragDropSource()
+LDragDropSource::LDragDropSource()
 {
 	d = new GDndSourcePriv;
 	Index = 0;
@@ -290,12 +290,12 @@ GDragDropSource::GDragDropSource()
 	OnRegister(true);
 }
 
-GDragDropSource::~GDragDropSource()
+LDragDropSource::~LDragDropSource()
 {
 	DeleteObj(d);
 }
 
-bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, LString::Array &Files)
+bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, LString::Array &Files)
 {
 	if (!OutputData || !Files.First())
 		return false;
@@ -346,12 +346,12 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, LString::
 	return Status;
 }
 
-bool GDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
+bool LDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
 {
 	return false;
 }
 
-int GDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
+int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
 {
 	LgiAssert(SourceWnd != 0);
 	if (!SourceWnd)
@@ -375,20 +375,20 @@ int GDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 }
 
 ULONG STDMETHODCALLTYPE
-GDragDropSource::AddRef()
+LDragDropSource::AddRef()
 {
 	return 1;
 }
 
 ULONG STDMETHODCALLTYPE
-GDragDropSource::Release()
+LDragDropSource::Release()
 {
 	return 0;
 }
 
 HRESULT
 STDMETHODCALLTYPE
-GDragDropSource::QueryInterface(REFIID iid, void **ppv)
+LDragDropSource::QueryInterface(REFIID iid, void **ppv)
 {
 	*ppv=NULL;
 	if (IID_IUnknown==iid)
@@ -403,7 +403,7 @@ GDragDropSource::QueryInterface(REFIID iid, void **ppv)
 
 	if (IID_IDataObject==iid)
 	{
-		GDataObject *Obj = new GDataObject(this);
+		LDataObject *Obj = new LDataObject(this);
 		if (Obj)
 		{
 			*ppv= (void*)Obj;
@@ -432,7 +432,7 @@ GDragDropSource::QueryInterface(REFIID iid, void **ppv)
 }
 
 HRESULT STDMETHODCALLTYPE
-GDragDropSource::Next(ULONG celt, FORMATETC *rgelt, ULONG *pceltFetched)
+LDragDropSource::Next(ULONG celt, FORMATETC *rgelt, ULONG *pceltFetched)
 {
 	HRESULT Ret = S_FALSE;
 
@@ -440,7 +440,7 @@ GDragDropSource::Next(ULONG celt, FORMATETC *rgelt, ULONG *pceltFetched)
 	LgiTrace("Next[%i]=", Index);
 	#endif
 
-	GDragFormats Formats(true);
+	LDragFormats Formats(true);
 	if (rgelt &&
 		GetFormats(Formats))
 	{
@@ -472,7 +472,7 @@ GDragDropSource::Next(ULONG celt, FORMATETC *rgelt, ULONG *pceltFetched)
 }
 
 HRESULT STDMETHODCALLTYPE
-GDragDropSource::Skip(ULONG celt)
+LDragDropSource::Skip(ULONG celt)
 {
 	Index += celt;
 	#ifdef DND_DEBUG_TRACE
@@ -482,7 +482,7 @@ GDragDropSource::Skip(ULONG celt)
 }
 
 HRESULT STDMETHODCALLTYPE
-GDragDropSource::Reset()
+LDragDropSource::Reset()
 {
 	Index = 0;
 	#ifdef DND_DEBUG_TRACE
@@ -492,7 +492,7 @@ GDragDropSource::Reset()
 }
 
 HRESULT STDMETHODCALLTYPE
-GDragDropSource::Clone(IEnumFORMATETC **ppenum)
+LDragDropSource::Clone(IEnumFORMATETC **ppenum)
 {
 	if (ppenum)
 	{
@@ -508,7 +508,7 @@ GDragDropSource::Clone(IEnumFORMATETC **ppenum)
 
 HRESULT
 STDMETHODCALLTYPE
-GDragDropSource::QueryContinueDrag(BOOL fEscapePressed, DWORD InputState)
+LDragDropSource::QueryContinueDrag(BOOL fEscapePressed, DWORD InputState)
 {
 	HRESULT Ret = S_OK;
 
@@ -530,13 +530,13 @@ GDragDropSource::QueryContinueDrag(BOOL fEscapePressed, DWORD InputState)
 
 HRESULT
 STDMETHODCALLTYPE
-GDragDropSource::GiveFeedback(DWORD dwEffect)
+LDragDropSource::GiveFeedback(DWORD dwEffect)
 {
 	return DRAGDROP_S_USEDEFAULTCURSORS;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-GDragDropTarget::GDragDropTarget() : Formats(true)
+LDragDropTarget::LDragDropTarget() : Formats(true)
 {
 	To = 0;
 
@@ -546,11 +546,11 @@ GDragDropTarget::GDragDropTarget() : Formats(true)
 	#endif
 }
 
-GDragDropTarget::~GDragDropTarget()
+LDragDropTarget::~LDragDropTarget()
 {
 }
 
-void GDragDropTarget::SetWindow(LView *to)
+void LDragDropTarget::SetWindow(LView *to)
 {
 	bool Status = false;
 	To = to;
@@ -573,17 +573,17 @@ void GDragDropTarget::SetWindow(LView *to)
 	}
 }
 
-ULONG STDMETHODCALLTYPE GDragDropTarget::AddRef()
+ULONG STDMETHODCALLTYPE LDragDropTarget::AddRef()
 {
 	return InterlockedIncrement(&Refs); 
 }
 
-ULONG STDMETHODCALLTYPE GDragDropTarget::Release()
+ULONG STDMETHODCALLTYPE LDragDropTarget::Release()
 {
 	return InterlockedDecrement(&Refs); 
 }
 
-HRESULT STDMETHODCALLTYPE GDragDropTarget::QueryInterface(REFIID iid, void **ppv)
+HRESULT STDMETHODCALLTYPE LDragDropTarget::QueryInterface(REFIID iid, void **ppv)
 {
 	*ppv=NULL;
 
@@ -607,7 +607,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::QueryInterface(REFIID iid, void **ppv
 	return NOERROR;
 }
 
-HRESULT STDMETHODCALLTYPE GDragDropTarget::DragEnter(IDataObject *pDataObject, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
+HRESULT STDMETHODCALLTYPE LDragDropTarget::DragEnter(IDataObject *pDataObject, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
 {
 	HRESULT Result = E_UNEXPECTED;
 
@@ -660,7 +660,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::DragEnter(IDataObject *pDataObject, D
 	return Result;
 }
 
-HRESULT STDMETHODCALLTYPE GDragDropTarget::DragOver(DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
+HRESULT STDMETHODCALLTYPE LDragDropTarget::DragOver(DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
 {
 	if (pdwEffect)
 	{
@@ -675,14 +675,14 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::DragOver(DWORD grfKeyState, POINTL pt
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE GDragDropTarget::DragLeave()
+HRESULT STDMETHODCALLTYPE LDragDropTarget::DragLeave()
 {
 	OnDragExit();
 	return S_OK;
 }
 
 /*
-int GDragDropTarget::OnDrop(LArray<GDragData> &DropData,
+int LDragDropTarget::OnDrop(LArray<LDragData> &DropData,
 							LPoint Pt,
 							int KeyState)
 {
@@ -696,7 +696,7 @@ int GDragDropTarget::OnDrop(LArray<GDragData> &DropData,
 }
 */
 
-HRESULT STDMETHODCALLTYPE GDragDropTarget::Drop(IDataObject *pDataObject, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
+HRESULT STDMETHODCALLTYPE LDragDropTarget::Drop(IDataObject *pDataObject, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
 {
 	HRESULT Result = E_UNEXPECTED;
 
@@ -710,13 +710,13 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::Drop(IDataObject *pDataObject, DWORD 
 	ScreenToClient(To->Handle(), &p);
 	LPoint Pt(p.x, p.y);
 
-	LArray<GDragData> Data;	
+	LArray<LDragData> Data;	
 	for (auto FormatName: Formats.Formats)
 	{
 		LString Str;
 		bool IsStreamDrop = !_stricmp(FormatName, Str = LGI_StreamDropFormat);
 		bool IsFileContents = !_stricmp(FormatName, Str = CFSTR_FILECONTENTS);
-		GDragData &CurData = Data.New();
+		LDragData &CurData = Data.New();
 		CurData.Format = FormatName;
 
 		FORMATETC Format;
@@ -821,7 +821,7 @@ HRESULT STDMETHODCALLTYPE GDragDropTarget::Drop(IDataObject *pDataObject, DWORD 
 	return Result;
 }
 
-bool GDragDropTarget::OnDropFileGroupDescriptor(FILEGROUPDESCRIPTOR *Data, LString::Array &Files)
+bool LDragDropTarget::OnDropFileGroupDescriptor(FILEGROUPDESCRIPTOR *Data, LString::Array &Files)
 {
 	bool Status = false;
 
@@ -878,7 +878,7 @@ bool GDragDropTarget::OnDropFileGroupDescriptor(FILEGROUPDESCRIPTOR *Data, LStri
 					LGetSystemPath(LSP_TEMP, Path, sizeof(Path));
 					LgiMakePath(Path, sizeof(Path), Path, Str = Data->fgd[i].cFileName);
 
-					GFile f;
+					LFile f;
 					if (f.Open(Path, O_WRITE))
 					{
 						f.Write(Ptr, Size);

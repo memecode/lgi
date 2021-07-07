@@ -24,7 +24,7 @@ struct LLayoutRun : public LCss
 struct LLayoutString : public LDisplayString
 {
 	int Fx, y, Line;
-	GColour Fore, Back;
+	LColour Fore, Back;
 	ssize_t Offset;
 	LLayoutRun *Src;
 	
@@ -109,7 +109,7 @@ public:
 	/// Paints the laid out strings at 'pt'.
 	void Paint(	LSurface *pDC,
 				LPoint pt,
-				GColour Back,
+				LColour Back,
 				LRect &rc,
 				bool Enabled,
 				bool Focused);

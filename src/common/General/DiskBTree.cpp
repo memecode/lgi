@@ -113,7 +113,7 @@ public:
 class GDiskBTreePrivate
 {
 public:
-	GFile F;
+	LFile F;
 	int DataSize;
 	int64 Size;
 	BNode *Root;

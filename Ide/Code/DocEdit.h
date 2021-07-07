@@ -102,7 +102,7 @@ protected:
 			View = view;
 		}
 
-		void StyleString(char16 *&s, char16 *e, GColour c, LUnrolledList<LTextView3::LStyle> *Out = NULL)
+		void StyleString(char16 *&s, char16 *e, LColour c, LUnrolledList<LTextView3::LStyle> *Out = NULL)
 		{
 			if (!Out)
 				Out = &Styles;
@@ -150,7 +150,7 @@ protected:
 
 public:
 	DocEditStyling(DocEdit *view);
-	GColour ColourFromType(DocType t);
+	LColour ColourFromType(DocType t);
 };
 
 class DocEdit :
@@ -183,7 +183,7 @@ public:
 	// Overrides
 	bool AppendItems(LSubMenu *Menu, const char *Param, int Base) override;
 	bool DoGoto() override;
-	void OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour) override;
+	void OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour) override;
 	void OnMouseClick(LMouse &m) override;
 	bool OnKey(LKey &k) override;	
 	bool OnMenu(GDocView *View, int Id, void *Context) override;

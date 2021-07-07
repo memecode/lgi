@@ -3,7 +3,7 @@
 #include "lgi/common/List.h"
 #include "lgi/common/DragAndDrop.h"
 
-class LDataGrid : public LList, public GDragDropSource, public GDragDropTarget
+class LDataGrid : public LList, public LDragDropSource, public LDragDropTarget
 {
 	struct LDataGridPriv *d;
 
@@ -44,10 +44,10 @@ public:
 	// D'n'd
 	void SetDndFormats(char *SrcFmt, char *AcceptFmt);
 	void OnItemBeginDrag(LListItem *Item, LMouse &m);
-	bool GetData(LArray<GDragData> &Data);
-	bool GetFormats(GDragFormats &Formats);
-	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState);
-	int OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState);
+	bool GetData(LArray<LDragData> &Data);
+	bool GetFormats(LDragFormats &Formats);
+	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState);
+	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState);
 	ItemArray *GetDroppedItems();
 };
 

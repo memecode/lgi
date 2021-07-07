@@ -39,7 +39,7 @@ void GStringTest()
 	
 }
 
-GColourSpace RgbColourSpaces[] =
+LColourSpace RgbColourSpaces[] =
 {
 	/*
 	CsIndex1,
@@ -78,7 +78,7 @@ class BltTest : public LWindow
 {
 	struct Test
 	{
-		GColourSpace Src, Dst;
+		LColourSpace Src, Dst;
 		LMemDC Result;
 		
 		void Create()
@@ -167,12 +167,12 @@ public:
 	{
 	}
 
-	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
+	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
 	{
 		return DROPEFFECT_COPY;
 	}
 
-	int OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState)
+	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 	{
 		LString Keys;
 		if (KeyState & LGI_EF_CTRL)
@@ -262,7 +262,7 @@ public:
 			c->Add(Txt = new LTextLabel(IDC_TXT, 0, 0, -1, -1, "This is a test string. &For like\ntesting and stuff. "
 																"It has multiple\nlines to test wrapping."));
 			Txt->SetWrap(true);
-			//Txt->GetCss(true)->Color(LCss::ColorDef(GColour::Red));
+			//Txt->GetCss(true)->Color(LCss::ColorDef(LColour::Red));
 			// Txt->GetCss(true)->FontWeight(LCss::FontWeightBold);
 			// Txt->GetCss(true)->FontStyle(LCss::FontStyleItalic);
 			Txt->GetCss(true)->FontSize(LCss::Len("22pt"));
@@ -302,7 +302,7 @@ public:
 		pDC->Rectangle();
 		
 		#if 0
-		pDC->Colour(GColour::Red);
+		pDC->Colour(LColour::Red);
 		pDC->Line(0, 0, c.X()-1, c.Y()-1);
 		#endif
 	}
@@ -341,10 +341,10 @@ bool DbTesting()
 	const char *BaseFolder = "C:\\Users\\matthew\\AppData\\Roaming\\Scribe\\ImapCache\\378651814\\INBOX";
 	#endif
 
-	GFile::Path FileXml(BaseFolder, "Folder.xml");
-	GFile::Path FileDb(BaseFolder, "Folder.db");
-	GFile::Path FileDebug(BaseFolder, "Debug.txt");
-	GFile In;
+	LFile::Path FileXml(BaseFolder, "Folder.xml");
+	LFile::Path FileDb(BaseFolder, "Folder.db");
+	LFile::Path FileDebug(BaseFolder, "Debug.txt");
+	LFile In;
 	if (!In.Open(FileXml, O_READ))
 		return false;	
 	
@@ -421,7 +421,7 @@ bool DbTesting()
 	uint64 SortTime = LgiMicroTime() - Start;
 	if (Idx)
 	{
-		GFile Out;
+		LFile Out;
 		if (Out.Open(FileDebug, O_WRITE))
 		{
 			Out.SetSize(0);

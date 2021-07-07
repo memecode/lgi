@@ -108,15 +108,15 @@ public:
 
 	/// Sets the foreground colour as a 24 bit RGB value
 	void Fore(LSystemColour c);
-	void Fore(GColour c);
+	void Fore(LColour c);
 
 	void Back(LSystemColour c);
-	void Back(GColour c);
+	void Back(LColour c);
 
     /// Get the whitespace rendering colour
-    GColour WhitespaceColour();
+    LColour WhitespaceColour();
     /// Sets the rendering colour of whitespace characters when LDisplayString::ShowVisibleTab() is true.
-    void WhitespaceColour(GColour c);
+    void WhitespaceColour(LColour c);
 
 	/// Sets the font's weight, use one the weight defines in LFont.h, e.g. #FW_NORMAL, #FW_BOLD
 	void SetWeight(int Weight);
@@ -142,9 +142,9 @@ public:
 	/// \returns the quality setting
 	int Quality();
 	/// \returns the foreground colour.
-	GColour Fore();
+	LColour Fore();
 	/// \returns the background colour.
-	GColour Back();
+	LColour Back();
 	/// \returns the font weight.
 	int GetWeight();
 	/// \returns true if this is a bold font.
@@ -172,7 +172,7 @@ public:
 	virtual void Colour(LSystemColour Fore, LSystemColour Back = L_TRANSPARENT);
 
 	/// Set the foreground and background colour.
-	virtual void Colour(GColour Fore, GColour Back);
+	virtual void Colour(LColour Fore, LColour Back);
 };
 
 /// \brief Font class.
@@ -193,7 +193,7 @@ protected:
 
 	virtual void _Measure(int &x, int &y, OsChar *Str, int Len);
 	virtual int _CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type);
-	virtual void _Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore);
+	virtual void _Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, LColour &fore);
 
 public:
 	/// Construct from face/pt size.
@@ -323,7 +323,7 @@ public:
 };
 
 /// Charset definitions
-enum GCharSetType
+enum LCharSetType
 {
 	CpNone,
 	CpMapped,
@@ -335,7 +335,7 @@ enum GCharSetType
 };
 
 /// Charset information class
-class LgiClass GCharset
+class LgiClass LCharset
 {
 public:
 	/// Standard charset name
@@ -349,10 +349,10 @@ public:
 	/// Comma separated list of alternate names used for this charset
 	const char *AlternateNames;
 	/// General type of the charset
-	GCharSetType Type;
+	LCharSetType Type;
 
 	/// Constructor
-	GCharset(const char *cp = 0, const char *des = 0, short *map = 0, const char *alt = 0);
+	LCharset(const char *cp = 0, const char *des = 0, short *map = 0, const char *alt = 0);
 
 	/// Returns true if the charset is a unicode variant
 	bool IsUnicode();
@@ -363,24 +363,24 @@ public:
 };
 
 /// Charset table manager class
-class LgiClass GCharsetSystem
+class LgiClass LCharsetSystem
 {
-	struct GCharsetSystemPriv *d;
+	struct LCharsetSystemPriv *d;
 
 public:
-	GCharsetSystem();
-	~GCharsetSystem();
+	LCharsetSystem();
+	~LCharsetSystem();
 
 	// Get the charset info
-	GCharset *GetCsInfo(const char *Cp);
-	GCharset *GetCsList();
+	LCharset *GetCsInfo(const char *Cp);
+	LCharset *GetCsList();
 };
 
 /// Returns information about a charset.
-LgiFunc GCharset *LgiGetCsInfo(const char *Cs);
+LgiFunc LCharset *LgiGetCsInfo(const char *Cs);
 /// Returns the start of an array of supported charsets, terminated by
 /// one with a NULL 'Charset' member. 
-LgiFunc GCharset *LgiGetCsList();
+LgiFunc LCharset *LgiGetCsList();
 /// Returns the charset that best fits the input data
 LgiFunc const char *LgiDetectCharset
 (
@@ -394,7 +394,7 @@ LgiFunc const char *LgiDetectCharset
 
 #ifndef LGI_STATIC
 /// Overall font system class
-class LgiClass LFontSystem : public GCapabilityClient
+class LgiClass LFontSystem : public LCapabilityClient
 {
 	friend class GApp;
 	friend class LDisplayString;

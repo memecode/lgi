@@ -94,7 +94,7 @@ public:
 		ResMax
 	};
 	LAutoPtr<LSurface> Corners[ResMax];
-	GColour cBack, cBorder, cFill, cSelUnfoc, cTopEdge, cBottomEdge;
+	LColour cBack, cBorder, cFill, cSelUnfoc, cTopEdge, cBottomEdge;
 	
 	// Scrolling
 	int Scroll;			// number of buttons scrolled off the left of the control
@@ -124,18 +124,18 @@ public:
 		return (uint8_t)i;
 	}
 
-	GColour Tint(double amt)
+	LColour Tint(double amt)
 	{
 		auto Bk = cBack.GetGray();
 		double Ratio = Bk < 100 ? 1.0 / amt : amt;
 
-		GColour c(	Clamp((int)(Ratio * cBack.r())),
+		LColour c(	Clamp((int)(Ratio * cBack.r())),
 					Clamp((int)(Ratio * cBack.g())),
 					Clamp((int)(Ratio  * cBack.b())));
 		return c;
 	}
 
-	bool DrawCircle(LAutoPtr<LSurface> &Dc, GColour c)
+	bool DrawCircle(LAutoPtr<LSurface> &Dc, LColour c)
 	{
 		if (Dc)
 			return true;
@@ -752,7 +752,7 @@ void LTabView::OnStyleChange()
 {
 	if (!d->cBack.IsValid())
 	{
-		GCssTools Tools(this);
+		LCssTools Tools(this);
 		d->cBack = Tools.GetBack();
 		d->cTopEdge = d->Tint(0.845);
 		d->cBottomEdge = d->Tint(0.708);
@@ -785,7 +785,7 @@ void LTabView::OnPaint(LSurface *pDC)
 {
 	if (!d->cBack.IsValid())
 		OnStyleChange();
-	GCssTools Tools(this);
+	LCssTools Tools(this);
 
 	TabIterator it(Children);
 	if (d->Current >= it.Length())
@@ -796,7 +796,7 @@ void LTabView::OnPaint(LSurface *pDC)
 		CalcInset();
 
 		LView *Pv = GetParent() ? GetParent()->GetGView() : NULL;
-		GColour NoPaint = (Pv ? Pv : this)->StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
+		LColour NoPaint = (Pv ? Pv : this)->StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 		if (!NoPaint.IsTransparent())
 		{
 			pDC->Colour(NoPaint);
@@ -874,8 +874,8 @@ void LTabView::OnPaint(LSurface *pDC)
 			
 			#else
 
-				GColour cTabFill = IsCurrent ? (Foc ? cFocusBack : d->cSelUnfoc) : LColour(L_WORKSPACE);
-				GColour cInterTabBorder = d->Tint(0.9625);
+				LColour cTabFill = IsCurrent ? (Foc ? cFocusBack : d->cSelUnfoc) : LColour(L_WORKSPACE);
+				LColour cInterTabBorder = d->Tint(0.9625);
 				LRect b = r;
 
 				#if MAC_DBL_BUF
@@ -928,9 +928,9 @@ void LTabView::OnPaint(LSurface *pDC)
 					#if MAC_DBL_BUF
 					// Erase the areas we will paint over
 					pDC->Op(GDC_SET);
-					pDC->Colour(pScreen->SupportsAlphaCompositing() ? GColour(0, 32) : NoPaint);
+					pDC->Colour(pScreen->SupportsAlphaCompositing() ? LColour(0, 32) : NoPaint);
 					pDC->Rectangle(&Clip00);
-					pDC->Colour(pScreen->SupportsAlphaCompositing() ? GColour(0, 32) : d->cFill);
+					pDC->Colour(pScreen->SupportsAlphaCompositing() ? LColour(0, 32) : d->cFill);
 					pDC->Rectangle(&Clip01);
 					#endif
 					
@@ -948,9 +948,9 @@ void LTabView::OnPaint(LSurface *pDC)
 					#if MAC_DBL_BUF
 					// Erase the areas we will paint over
 					pDC->Op(GDC_SET);
-					pDC->Colour(pScreen->SupportsAlphaCompositing() ? GColour(0, 32) : NoPaint);
+					pDC->Colour(pScreen->SupportsAlphaCompositing() ? LColour(0, 32) : NoPaint);
 					pDC->Rectangle(&Clip10);
-					pDC->Colour(pScreen->SupportsAlphaCompositing() ? GColour(0, 32) : d->cFill);
+					pDC->Colour(pScreen->SupportsAlphaCompositing() ? LColour(0, 32) : d->cFill);
 					pDC->Rectangle(&Clip11);
 					#endif
 					
@@ -980,7 +980,7 @@ void LTabView::OnPaint(LSurface *pDC)
 			LCss::ColorDef Fore;
 			if (Tab->GetCss())
 				Fore = Tab->GetCss()->Color();
-			tf->Fore(Fore.IsValid() ? (GColour)Fore : 
+			tf->Fore(Fore.IsValid() ? (LColour)Fore : 
 					IsCurrent && Foc ? cFocusFore : Tools.GetFore());
 			
 			int DsX = r.x1 + TAB_MARGIN_X;
@@ -1003,7 +1003,7 @@ void LTabView::OnPaint(LSurface *pDC)
 		}
 		
 		#if 0
-		pDC->Colour(GColour::Green);
+		pDC->Colour(LColour::Green);
 		pDC->Line(0, 0, pDC->X()-1, pDC->Y()-1);
 		#endif
 	}
@@ -1255,8 +1255,8 @@ void LTabPage::OnButtonPaint(LSurface *pDC)
 	#else
 	
 	// The default is a close button
-	GColour Low(L_LOW);
-	GColour Mid(L_MED);
+	LColour Low(L_LOW);
+	LColour Mid(L_MED);
 	Mid = Mid.Mix(Low);
 	
 	pDC->Colour(Mid);
@@ -1449,10 +1449,10 @@ bool LTabPage::Remove(LViewI *Wnd)
 	return false;
 }
 
-GColour LTabPage::GetBackground()
+LColour LTabPage::GetBackground()
 {
 	if (TabCtrl && TabCtrl->d->Style == TvMac)
-		return GColour(226, 226, 226); // 207?
+		return LColour(226, 226, 226); // 207?
 	else
 		return LColour(L_MED);
 }
@@ -1473,12 +1473,12 @@ void LTabPage::SetFont(LFont *Font, bool OwnIt)
 void LTabPage::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
-	GColour Bk = StyleColour(LCss::PropBackgroundColor, TabCtrl ? TabCtrl->d->cFill : LColour(L_MED), 1);
+	LColour Bk = StyleColour(LCss::PropBackgroundColor, TabCtrl ? TabCtrl->d->cFill : LColour(L_MED), 1);
 	pDC->Colour(Bk);
 	pDC->Rectangle(&r);
 	
 	#if 0
-	pDC->Colour(GColour::Red);
+	pDC->Colour(LColour::Red);
 	pDC->Line(0, 0, pDC->X()-1, pDC->Y()-1);
 	#endif
 }

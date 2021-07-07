@@ -68,7 +68,7 @@ void CreatePaletteLut(T *c, GPalette *Pal, int Scale = 255)
 }
 
 /// Alpha blending applicators
-class GAlphaApp : public GApplicator
+class GAlphaApp : public LApplicator
 {
 protected:
 	uchar alpha, oma;
@@ -359,8 +359,8 @@ public:
 	}
 };
 
-template<typename Pixel, GColourSpace ColourSpace>
-class GdcAlpha : public GApplicator
+template<typename Pixel, LColourSpace ColourSpace>
+class GdcAlpha : public LApplicator
 {
 protected:
 	union {
@@ -450,7 +450,7 @@ public:
 	}
 };
 
-template<typename Pixel, GColourSpace ColourSpace>
+template<typename Pixel, LColourSpace ColourSpace>
 class GdcAlpha15 : public GdcAlpha<Pixel, ColourSpace>
 {
 public:
@@ -565,7 +565,7 @@ public:
 
 };
 
-template<typename Pixel, GColourSpace ColourSpace>
+template<typename Pixel, LColourSpace ColourSpace>
 class GdcAlpha16 : public GdcAlpha<Pixel, ColourSpace>
 {
 public:
@@ -680,7 +680,7 @@ public:
 	}
 };
 
-template<typename Pixel, GColourSpace ColourSpace>
+template<typename Pixel, LColourSpace ColourSpace>
 class GdcAlpha24 : public GdcAlpha<Pixel, ColourSpace>
 {
 public:
@@ -941,7 +941,7 @@ public:
 	}
 };
 
-template<typename Pixel, GColourSpace ColourSpace>
+template<typename Pixel, LColourSpace ColourSpace>
 class GdcAlpha32 : public GdcAlpha<Pixel, ColourSpace>
 {
 public:
@@ -1344,7 +1344,7 @@ public:
 	}
 };
 
-GApplicator *GAlphaFactory::Create(GColourSpace Cs, int Op)
+LApplicator *GAlphaFactory::Create(LColourSpace Cs, int Op)
 {
 	if (Op != GDC_ALPHA)
 		return NULL;

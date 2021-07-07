@@ -647,7 +647,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 							Buf.Length(img.width);
 							uint32_t *b = &Buf[0];
 							LgiAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
-							GColourSpace DestCs = pDC->GetColourSpace();
+							LColourSpace DestCs = pDC->GetColourSpace();
 
 							for (unsigned y=0; y<img.height; y++)
 							{

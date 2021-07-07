@@ -38,7 +38,7 @@ const char sMultipartRelated[] = "multipart/related";
 const char sAppOctetStream[] = "application/octet-stream";
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-LogEntry::LogEntry(GColour col)
+LogEntry::LogEntry(LColour col)
 {
 	c = col;
 }
@@ -1636,7 +1636,7 @@ bool MailSmtp::ReadReply(const char *Str, LStringPipe *Pipe, MailProtocolError *
 class Mail2Folder : public LStringPipe
 {
 	char File[256];
-	GFile F;
+	LFile F;
 
 public:
 	Mail2Folder(char *Path, List<AddressDescriptor> &To)
@@ -1803,7 +1803,7 @@ bool MailReceiveFolder::Open(LSocketI *S, const char *RemoteHost, int Port, cons
 	if (!LDirExists(d->Path))
 		return false;
 	
-	GDirectory Dir;
+	LDirectory Dir;
 
 	// Loop through files, looking for email
 	for (int b = Dir.First(d->Path, LGI_ALL_FILES); b; b = Dir.Next())
@@ -1848,7 +1848,7 @@ bool MailReceiveFolder::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *
 			MailItem *m = d->Mail[t->Index];
 			if (m)
 			{
-				GFile i;
+				LFile i;
 				if (i.Open(m->File, O_READ))
 				{
 					GCopyStreamer c;
@@ -1943,7 +1943,7 @@ char *MailReceiveFolder::GetHeaders(int Message)
 	MailItem *m = d->Mail[Message];
 	if (m)
 	{
-		GFile i;
+		LFile i;
 		if (i.Open(m->File, O_READ))
 		{
 			LStringPipe o;

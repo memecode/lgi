@@ -48,7 +48,7 @@ class WindowsSpellCheck : public LSpellCheck
 			File = f.Get();
 		}
 
-		GFile f;
+		LFile f;
 		if (!f.Open(File, O_READ))
 			return false;
 		LString::Array Lines = f.Read().SplitDelimit("\r\n");

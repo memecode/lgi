@@ -32,7 +32,7 @@ class LgiClass LWindow :
 	#ifndef LGI_SDL
 	virtual
 	#endif
-	public GDragDropTarget
+	public LDragDropTarget
 {
 	friend class BViewRedir;
 	friend class GApp;
@@ -243,8 +243,8 @@ public:
 	LPointF GetDpiScale();
 	
 	// D'n'd
-	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState) override;
-	int OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState) override;
+	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState) override;
+	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState) override;
 
 	#if !WINNATIVE
 	

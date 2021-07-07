@@ -278,8 +278,8 @@ public:
 				}
 				else
 				{
-					GFile *f;
-					if (j->Stream.Reset(f = new GFile))
+					LFile *f;
+					if (j->Stream.Reset(f = new LFile))
 					{
 						if (!f->Open(p, O_READ))
 						{

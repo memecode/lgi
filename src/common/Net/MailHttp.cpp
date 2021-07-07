@@ -87,7 +87,7 @@ class MailSocket : public LSocket
 	MailProtocol *Log;
 	LStringPipe ReadBuf, WriteBuf;
 	bool InData;
-	GFile *Temp;
+	LFile *Temp;
 	ssize_t SepLen;
 	bool OwnSocket;
 

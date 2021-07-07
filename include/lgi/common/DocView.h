@@ -138,7 +138,7 @@ public:
 		{
 			if (!Stream && Filename)
 			{
-				GFile *file = new GFile;
+				LFile *file = new LFile;
 				if (file && file->Open(Filename, O_READ))
 					Stream.Reset(file);
 				else

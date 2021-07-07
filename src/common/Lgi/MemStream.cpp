@@ -106,7 +106,7 @@ GMemStream::~GMemStream()
 
 int GMemStream::Open(const char *Str, int Int)
 {
-	GFile f;
+	LFile f;
 	if (f.Open(Str, O_READ))
 	{
 		Close();
@@ -322,7 +322,7 @@ ssize_t GTempStream::Write(const void *Buffer, ssize_t Size, int Flags)
 		while (LFileExists(c));
 
 		LgiAssert(Tmp == 0);
-		if ((Tmp = new GFile))
+		if ((Tmp = new LFile))
 		{
 			int64 Len = Mem->GetSize();
 			if (!Tmp->Open(c, O_READWRITE))

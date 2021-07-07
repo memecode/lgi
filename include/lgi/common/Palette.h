@@ -49,8 +49,8 @@ public:
 	int MatchRgb(uint32_t Rgb);
 	void CreateCube();
 	void CreateGreyScale();
-	bool Load(GFile &F);
-	bool Save(GFile &F, int Format);
+	bool Load(LFile &F);
+	bool Save(LFile &F, int Format);
 	uchar *MakeLut(int Bits = 16);
 
 	bool operator ==(GPalette &p);

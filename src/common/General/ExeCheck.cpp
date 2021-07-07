@@ -212,7 +212,7 @@ public:
 		Name = NewStr(FileName);
 		OwnFile = true;
 		Start = Len = 0;
-		File = new GFile;
+		File = new LFile;
 		if (File && FileName)
 		{
 			if (File->Open(FileName, O_READ))

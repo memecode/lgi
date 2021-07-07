@@ -45,7 +45,7 @@ extern int RevStrLen(char *c);
 class Document {
 protected:
 	char *File;
-	GFile F;
+	LFile F;
 
 	bool Open(char *FileName, int Attrib);
 

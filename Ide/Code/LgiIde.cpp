@@ -390,7 +390,7 @@ public:
 					char *s = p.NewStr();
 					if (s)
 					{
-						GClipBoard c(this);
+						LClipBoard c(this);
 						c.Text(s);
 						DeleteArray(s);
 					}
@@ -1820,7 +1820,7 @@ public:
 				bool Found = false;
 				for (auto s : Path)
 				{
-					GFile::Path c(s);
+					LFile::Path c(s);
 					c += f.Get();
 					if (c.IsFile())
 					{
@@ -1996,7 +1996,7 @@ void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 		)
 		{
 			// dumpbin /exports csp.dll
-			GFile::Path Docs(LSP_USER_DOCUMENTS);
+			LFile::Path Docs(LSP_USER_DOCUMENTS);
 			LString Name;
 			Name.Printf("%s.txt", Files[i]);
 			Docs += Name;
@@ -2083,7 +2083,7 @@ struct LFileInfo
 
 	bool Save()
 	{
-		GFile f;
+		LFile f;
 		if (!f.Open(Path, O_WRITE))
 			return false;
 
@@ -2178,7 +2178,7 @@ void AppWnd::OnFixBuildErrors()
 				}
 				if (!Fi)
 				{
-					GFile f(Full, O_READ);
+					LFile f(Full, O_READ);
 					if (f.IsOpen())
 					{
 						Fi = &Files.New();
@@ -3279,7 +3279,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_ABOUT:
 		{
-			GAbout a(this,
+			LAbout a(this,
 					AppName, APP_VER,
 					"\nLGI Integrated Development Environment",
 					"icon128.png",
@@ -4138,7 +4138,7 @@ bool AppWnd::GetSystemIncludePaths(::LArray<LString> &Paths)
 		LgiMakePath(p, sizeof(p), p, "Visual Studio 2008\\Settings\\CurrentSettings.xml");
 		if (LFileExists(p))
 		{
-			GFile f;
+			LFile f;
 			if (f.Open(p, O_READ))
 			{
 				LXmlTree t;

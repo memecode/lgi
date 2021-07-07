@@ -257,7 +257,7 @@ void LControlTree::Item::Select(bool b)
 
 			if (Ctrl)
 			{
-				GColour Ws = LColour(L_WORKSPACE);
+				LColour Ws = LColour(L_WORKSPACE);
 				Ctrl->SetColour(Ws, false);
 				Ctrl->Visible(false);
 				Ctrl->Attach(GetTree());
@@ -306,7 +306,7 @@ void LControlTree::Item::OnPaint(ItemPaintCtx &Ctx)
 
 	if (!Ctrl)
 	{
-		GCssTools Tools(GetTree());
+		LCssTools Tools(GetTree());
 		auto Ws = LColour(L_WORKSPACE);
 		SysBold->Colour(Tools.GetFore(), Tools.GetBack(&Ws, 0));
 		SysBold->Transparent(true);

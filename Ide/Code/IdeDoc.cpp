@@ -753,7 +753,7 @@ public:
 		{
 			IdeProject *Proj = Obj->GetProject();
 			LAutoString Base = Proj->GetBasePath();
-			GFile::Path p(Base);
+			LFile::Path p(Base);
 			p += Fn;
 			App->GotoReference(p, 1, false);			
 		}
@@ -1235,14 +1235,14 @@ void IdeDoc::OnTitleClick(LMouse &m)
 			{
 				if (Dir)
 				{
-					GClipBoard c(this);
+					LClipBoard c(this);
 					c.Text(Dir + 1);
 				}
 				break;
 			}
 			case IDM_COPY_PATH:
 			{
-				GClipBoard c(this);
+				LClipBoard c(this);
 				c.Text(Full);
 				break;
 			}

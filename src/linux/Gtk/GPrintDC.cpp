@@ -13,7 +13,7 @@ public:
 	LString PrintJobName;
 	LString PrinterName;
 	int Pages;
-	GColour c;
+	LColour c;
 	LRect Clip;
 	Gtk::cairo_t *cr;
 	
@@ -107,13 +107,13 @@ COLOUR LPrintDC::Colour()
 
 COLOUR LPrintDC::Colour(COLOUR c, int Bits)
 {
-	GColour col(c, Bits);
+	LColour col(c, Bits);
 	return Colour(col).c24();
 }
 
-GColour LPrintDC::Colour(GColour c)
+LColour LPrintDC::Colour(LColour c)
 {
-	GColour Prev = d->c;
+	LColour Prev = d->c;
 	d->c = c;
 	if (d->cr)
 		cairo_set_source_rgb(d->cr,

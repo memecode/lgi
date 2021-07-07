@@ -118,9 +118,9 @@ public:
 	// existing functions change order or be removed.
 	virtual uint32_t GetFeatures() { return 0; }	
 
-	// Return the GColour for the L_??? colour index
+	// Return the LColour for the L_??? colour index
 	// Will only be called if you return GSKIN_COLOUR from GetFeatures()
-	virtual GColour GetColour(LSystemColour i) { return GColour(); }
+	virtual LColour GetColour(LSystemColour i) { return LColour(); }
 
 	// Do painting for the various controls, the relevant GSKIN_??? flag needs to
 	// be returned from GetFeatures before you can call any of these.
@@ -147,10 +147,10 @@ public:
 	virtual LFont *GetDefaultFont(char *Class) { return SysFont; }
 
 	// Fills an abitary path with the skin's default fill...
-	virtual void FillPath(class LPath *Path, LSurface *pDC, GColour Back, bool Down, bool Enabled = true) {}
+	virtual void FillPath(class LPath *Path, LSurface *pDC, LColour Back, bool Down, bool Enabled = true) {}
 
 	// Draws a button
-	virtual void DrawBtn(LSurface *pDC, LRect &r, GColour Back, bool Down, bool Enabled, bool Default = false) = 0;
+	virtual void DrawBtn(LSurface *pDC, LRect &r, LColour Back, bool Down, bool Enabled, bool Default = false) = 0;
 
 	///////////////////////////////////////////////////////////////////////////////
 	// Add new features down here with an associated feature flag defined above. //

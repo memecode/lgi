@@ -32,7 +32,7 @@ void LToolTab::OnPaint(LSurface *pDC)
 	#if 1
 	pDC->Colour(L_MED);
 	#else
-	pDC->Colour(GColour(255, 0, 255));
+	pDC->Colour(LColour(255, 0, 255));
 	#endif
 	pDC->Rectangle();
 }
@@ -164,7 +164,7 @@ void LToolTabBar::OnChange(LToolButton *Btn)
 void LToolTabBar::_PaintTab(LSurface *pDC, LToolTab *Tab)
 {
 	LRect t = Tab->TabPos;
-	GColour Background(L_MED);
+	LColour Background(L_MED);
 
 	if (Tab->Value())
 	{
@@ -298,7 +298,7 @@ void LToolTabBar::OnPaint(LSurface *pScreen)
 		}
 	}
 
-	GColour c;
+	LColour c;
 	if (Down.Length() > 1)
 		c.Rgb(255, 0, 0);
 	else

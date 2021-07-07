@@ -471,7 +471,7 @@ lgi_widget_drag_leave(GtkWidget	       *widget,
 		return;
 	}
 	
-	GDragDropTarget *Target = v->target->DropTarget();
+	LDragDropTarget *Target = v->target->DropTarget();
 	if (!Target)
 	{
 		// printf("%s:%i - View '%s' doesn't have drop target.\n", _FL, v->target->GetClass());
@@ -501,7 +501,7 @@ lgi_widget_drag_motion(GtkWidget	   *widget,
 	printf("%s:%i - DragMotion %s\n", _FL, view->GetClass());
 	#endif
 
-	GDragDropTarget *Target = view->DropTarget();
+	LDragDropTarget *Target = view->DropTarget();
 	while (view && !Target)
 	{
 		view = view->GetParent();
@@ -525,7 +525,7 @@ lgi_widget_drag_motion(GtkWidget	   *widget,
 	// printf("%s:%i - DragMotion(%s): ", _FL, v->target->GetClass());
 	#endif
 	
-	GDragFormats Formats(true);
+	LDragFormats Formats(true);
 	for (Gtk::GList *Types = gdk_drag_context_list_targets(context); Types; Types = Types->next)
 	{
 		gchar *Type = gdk_atom_name((GdkAtom)Types->data);
@@ -575,7 +575,7 @@ lgi_widget_drag_drop(GtkWidget	       *widget,
 	}
 	
 	LViewI *view = v->target;
-	GDragDropTarget *Target = view->DropTarget();
+	LDragDropTarget *Target = view->DropTarget();
 	while (view && !Target)
 	{
 		view = view->GetParent();
@@ -591,7 +591,7 @@ lgi_widget_drag_drop(GtkWidget	       *widget,
 	}
 
 	// Convert the GTK list of formats to our own List
-	GDragFormats Formats(true);
+	LDragFormats Formats(true);
 	for (Gtk::GList *Types = gdk_drag_context_list_targets(context); Types; Types = Types->next)
 	{
 		gchar *Type = gdk_atom_name((GdkAtom)Types->data);
@@ -641,7 +641,7 @@ lgi_widget_drag_data_received(	GtkWidget			*widget,
 	}
 	
 	LViewI *view = v->target;
-	GDragDropTarget *Target = view->DropTarget();
+	LDragDropTarget *Target = view->DropTarget();
 	while (view && !Target)
 	{
 		view = view->GetParent();
@@ -678,7 +678,7 @@ lgi_widget_drag_data_received(	GtkWidget			*widget,
 		return;
 	}
 
-	::LArray<GDragData> dd;
+	::LArray<LDragData> dd;
 	dd[0].Format = Type;
 	dd[0].Data[0].SetBinary(Len, (void*)Ptr);
 	
@@ -842,7 +842,7 @@ lgi_widget_draw(GtkWidget *widget, cairo_t *cr)
 		p->target->OnPaint(&Dc);
 
 	#if 0
-	Dc.Colour(GColour::Red);
+	Dc.Colour(LColour::Red);
 	Dc.Line(0, 0, Dc.X()-1, Dc.Y()-1);
 	Dc.Line(Dc.X()-1, 0, 0, Dc.Y()-1);
 	#endif

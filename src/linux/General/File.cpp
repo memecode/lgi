@@ -48,7 +48,7 @@
 
 /****************************** Globals ***********************************/
 
-LString GFile::Path::Sep(DIR_STR);
+LString LFile::Path::Sep(DIR_STR);
 
 struct ErrorCodeType
 {
@@ -312,7 +312,7 @@ const char *GetErrorDesc(int e)
 char *ReadTextFile(const char *File)
 {
 	char *s = 0;
-	GFile f;
+	LFile f;
 	if (File && f.Open(File, O_READ))
 	{
 		int Len = f.GetSize();
@@ -445,7 +445,7 @@ bool ResolveShortcut(const char *LinkFile, char *Path, ssize_t Len)
 	return Status;
 }
 
-void WriteStr(GFile &f, const char *s)
+void WriteStr(LFile &f, const char *s)
 {
 	ulong Len = (s) ? strlen(s) : 0;
 	f << Len;
@@ -455,7 +455,7 @@ void WriteStr(GFile &f, const char *s)
 	}
 }
 
-char *ReadStr(GFile &f DeclDebugArgs)
+char *ReadStr(LFile &f DeclDebugArgs)
 {
 	char *s = 0;
 
@@ -528,14 +528,14 @@ bool LgiGetDriveInfo
 #include <sys/types.h>
 #include <pwd.h>
 
-struct GVolumePriv
+struct LVolumePriv
 {
 	int64 _Size, _Free;
 	int _Type, _Flags;
 	LgiSystemPath SysPath;
 	LString _Name, _Path;
-	List<GVolume> _Sub;
-	List<GVolume>::I _It;
+	List<LVolume> _Sub;
+	List<LVolume>::I _It;
 
 	void Init()
 	{
@@ -546,7 +546,7 @@ struct GVolumePriv
 		_Free = 0;
 	}
 
-	GVolumePriv(const char *path) : _It(_Sub.end())
+	LVolumePriv(const char *path) : _It(_Sub.end())
 	{
 		Init();
 		
@@ -555,7 +555,7 @@ struct GVolumePriv
 		_Type = VT_FOLDER;
 	}
 
-	GVolumePriv(LgiSystemPath sys, const char *name) : _It(_Sub.end())
+	LVolumePriv(LgiSystemPath sys, const char *name) : _It(_Sub.end())
 	{
 		Init();
 		SysPath = sys;
@@ -571,24 +571,24 @@ struct GVolumePriv
 		}
 	}
 	
-	~GVolumePriv()
+	~LVolumePriv()
 	{
 		_Sub.DeleteObjects();
 	}
 
-	GVolume *First()
+	LVolume *First()
 	{
 		if (SysPath == LSP_DESKTOP && !_Sub.Length())
 		{
 			// Get various shortcuts to points of interest
-			GVolume *v = new GVolume(LSP_ROOT, "Root");
+			LVolume *v = new LVolume(LSP_ROOT, "Root");
 			if (v)
 				_Sub.Insert(v);
 
 			struct passwd *pw = getpwuid(getuid());
 			if (pw)
 			{
-				v = new GVolume(LSP_HOME, "Home");
+				v = new LVolume(LSP_HOME, "Home");
 				if (v)
 					_Sub.Insert(v);
 			}
@@ -597,7 +597,7 @@ struct GVolumePriv
 			// this is just a hack at this stage to establish some base
 			// functionality. I would appreciate someone telling me how
 			// to do this properly. Till then...
-			GFile f;
+			LFile f;
 			if (f.Open("/etc/fstab", O_READ))
 			{
 				auto Buf= f.Read();
@@ -624,7 +624,7 @@ struct GVolumePriv
 							!FileSys.Equals("swap")
 						)
 						{
-							v = new GVolume(0);
+							v = new LVolume(0);
 							if (v)
 							{
 								char *MountName = strrchr(Mount, '/');
@@ -659,7 +659,7 @@ struct GVolumePriv
 			{
 				LString Path = LGetSystemPath(p[i]);
 				if (Path &&
-					(v = new GVolume(0)))
+					(v = new LVolume(0)))
 				{
 					auto Parts = Path.Split("/");
 					v->d->_Path = Path;
@@ -674,93 +674,93 @@ struct GVolumePriv
 		return *_It;
 	}
 
-	GVolume *Next()
+	LVolume *Next()
 	{
 		return *(++_It);
 	}
 };
 
-GVolume::GVolume(const char *Path = NULL)
+LVolume::LVolume(const char *Path = NULL)
 {
-	d = new GVolumePriv(Path);
+	d = new LVolumePriv(Path);
 }
 
-GVolume::GVolume(LgiSystemPath SysPath, const char *Name)
+LVolume::LVolume(LgiSystemPath SysPath, const char *Name)
 {
-	d = new GVolumePriv(SysPath, Name);
+	d = new LVolumePriv(SysPath, Name);
 }
 
-GVolume::~GVolume()
+LVolume::~LVolume()
 {
 	DeleteObj(d);
 }
 
-const char *GVolume::Name()
+const char *LVolume::Name()
 {
     return d->_Name;
 }
 
-const char *GVolume::Path()
+const char *LVolume::Path()
 {
     return d->_Path;
 }
 
-int GVolume::Type()
+int LVolume::Type()
 {
     return d->_Type;
 }
 
-int GVolume::Flags()
+int LVolume::Flags()
 {
     return d->_Flags;
 }
 
-uint64 GVolume::Size()
+uint64 LVolume::Size()
 {
     return d->_Size;
 }
 
-uint64 GVolume::Free()
+uint64 LVolume::Free()
 {
     return d->_Free;
 }
 
-LSurface *GVolume::Icon()
+LSurface *LVolume::Icon()
 {
     return NULL;
 }
 
-bool GVolume::IsMounted()
+bool LVolume::IsMounted()
 {
     return true;
 }
 
-bool GVolume::SetMounted(bool Mount)
+bool LVolume::SetMounted(bool Mount)
 {
     return Mount;
 }
 
-GVolume *GVolume::First()
+LVolume *LVolume::First()
 {
     return d->First();
 }
 
-GVolume *GVolume::Next()
+LVolume *LVolume::Next()
 {
     return d->Next();
 }
 
-void GVolume::Insert(LAutoPtr<GVolume> v)
+void LVolume::Insert(LAutoPtr<LVolume> v)
 {
     d->_Sub.Insert(v.Release());
 }
 
-GDirectory *GVolume::GetContents()
+LDirectory *LVolume::GetContents()
 {
-	GDirectory *Dir = 0;
+	LDirectory *Dir = 0;
 	if (d->_Path)
 	{
-		Dir = new GDirectory;
+		Dir = new LDirectory;
 		if (Dir && !Dir->First(d->_Path))
 			DeleteObj(Dir);
 	}
@@ -768,32 +768,32 @@ GDirectory *GVolume::GetContents()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-GFileSystem *GFileSystem::Instance = 0;
+LFileSystem *LFileSystem::Instance = 0;
 
-GFileSystem::GFileSystem()
+LFileSystem::LFileSystem()
 {
 	Instance = this;
 	Root = 0;
 }
 
-GFileSystem::~GFileSystem()
+LFileSystem::~LFileSystem()
 {
 	DeleteObj(Root);
 }
 
-void GFileSystem::OnDeviceChange(char *Reserved)
+void LFileSystem::OnDeviceChange(char *Reserved)
 {
 }
 
-GVolume *GFileSystem::GetRootVolume()
+LVolume *LFileSystem::GetRootVolume()
 {
 	if (!Root)
-		Root = new GVolume(LSP_DESKTOP, "Desktop");
+		Root = new LVolume(LSP_DESKTOP, "Desktop");
 
 	return Root;
 }
 
-bool GFileSystem::Copy(const char *From, const char *To, LError *Status, CopyFileCallback Callback, void *Token)
+bool LFileSystem::Copy(const char *From, const char *To, LError *Status, CopyFileCallback Callback, void *Token)
 {
 	LArray<char> Buf;
 
@@ -802,7 +802,7 @@ bool GFileSystem::Copy(const char *From, const char *To, LError *Status, CopyFil
 
 	if (Buf.Length(2 << 20))
 	{
-		GFile In, Out;
+		LFile In, Out;
 		if (!In.Open(From, O_READ))
 		{
 			if (Status)
@@ -847,7 +847,7 @@ bool GFileSystem::Copy(const char *From, const char *To, LError *Status, CopyFil
 	return false;
 }
 
-bool GFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, bool ToTrash)
+bool LFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, bool ToTrash)
 {
 	bool Error = false;
 
@@ -896,7 +896,7 @@ bool GFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, boo
 	return !Error;
 }
 
-bool GFileSystem::Delete(const char *FileName, bool ToTrash)
+bool LFileSystem::Delete(const char *FileName, bool ToTrash)
 {
 	if (FileName)
 	{
@@ -907,7 +907,7 @@ bool GFileSystem::Delete(const char *FileName, bool ToTrash)
 	return false;
 }
 
-bool GFileSystem::CreateFolder(const char *PathName, bool CreateParentTree, LError *ErrorCode)
+bool LFileSystem::CreateFolder(const char *PathName, bool CreateParentTree, LError *ErrorCode)
 {
 	int r = mkdir(PathName, S_IRWXU | S_IXGRP | S_IXOTH);
 	if (r)
@@ -917,11 +917,11 @@ bool GFileSystem::CreateFolder(const char *PathName, bool CreateParentTree, LErr
 
 		if (CreateParentTree)
 		{
-			GFile::Path p(PathName);
+			LFile::Path p(PathName);
 			LString dir = DIR_STR;
 			for (size_t i=1; i<=p.Length(); i++)
 			{
-				GFile::Path Par(dir + dir.Join(p.Slice(0, i)));
+				LFile::Path Par(dir + dir.Join(p.Slice(0, i)));
 				if (!Par.Exists())
 				{
 					const char *ParDir = Par;
@@ -945,11 +945,11 @@ bool GFileSystem::CreateFolder(const char *PathName, bool CreateParentTree, LErr
 	return r == 0;
 }
 
-bool GFileSystem::RemoveFolder(const char *PathName, bool Recurse)
+bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse)
 {
 	if (Recurse)
 	{
-		GDirectory *Dir = new GDirectory;
+		LDirectory *Dir = new LDirectory;
 		if (Dir && Dir->First(PathName))
 		{
 			do
@@ -974,7 +974,7 @@ bool GFileSystem::RemoveFolder(const char *PathName, bool Recurse)
 	return rmdir(PathName) == 0;
 }
 
-bool GFileSystem::Move(const char *OldName, const char *NewName, LError *Err)
+bool LFileSystem::Move(const char *OldName, const char *NewName, LError *Err)
 {
 	if (rename(OldName, NewName))
 	{
@@ -1039,7 +1039,7 @@ int LeapYear(int year)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-bool GDirectory::ConvertToTime(char *Str, int SLen, uint64 Time) const
+bool LDirectory::ConvertToTime(char *Str, int SLen, uint64 Time) const
 {
 	time_t k = Time;
 	struct tm *t = localtime(&k);
@@ -1051,7 +1051,7 @@ bool GDirectory::ConvertToTime(char *Str, int SLen, uint64 Time) const
 	return false;
 }
 
-bool GDirectory::ConvertToDate(char *Str, int SLen, uint64 Time) const
+bool LDirectory::ConvertToDate(char *Str, int SLen, uint64 Time) const
 {
 	time_t k = Time;
 	struct tm *t = localtime(&k);
@@ -1066,7 +1066,7 @@ bool GDirectory::ConvertToDate(char *Str, int SLen, uint64 Time) const
 /////////////////////////////////////////////////////////////////////////////////
 //////////////////////////// Directory //////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
-struct GDirectoryPriv
+struct LDirectoryPriv
 {
 	char			BasePath[MAX_PATH];
 	DIR				*Dir;
@@ -1074,7 +1074,7 @@ struct GDirectoryPriv
 	struct stat		Stat;
 	char			*Pattern;
 
-	GDirectoryPriv()
+	LDirectoryPriv()
 	{	
 		Dir = 0;
 		De = 0;
@@ -1082,7 +1082,7 @@ struct GDirectoryPriv
 		Pattern = 0;
 	}
 	
-	~GDirectoryPriv()
+	~LDirectoryPriv()
 	{
 		DeleteArray(Pattern);
 	}
@@ -1105,23 +1105,23 @@ struct GDirectoryPriv
 	}
 };
 
-GDirectory::GDirectory()
+LDirectory::LDirectory()
 {
-	d = new GDirectoryPriv;
+	d = new LDirectoryPriv;
 }
 
-GDirectory::~GDirectory()
+LDirectory::~LDirectory()
 {
 	Close();
 	DeleteObj(d);
 }
 
-GDirectory *GDirectory::Clone()
+LDirectory *LDirectory::Clone()
 {
-	return new GDirectory;
+	return new LDirectory;
 }
 
-int GDirectory::First(const char *Name, const char *Pattern)
+int LDirectory::First(const char *Name, const char *Pattern)
 {
 	Close();
 
@@ -1173,7 +1173,7 @@ int GDirectory::First(const char *Name, const char *Pattern)
 	return d->Dir != 0 && d->De != 0;
 }
 
-int GDirectory::Next()
+int LDirectory::Next()
 {
 	int Status = false;
 
@@ -1195,7 +1195,7 @@ int GDirectory::Next()
 	return Status;
 }
 
-int GDirectory::Close()
+int LDirectory::Close()
 {
 	if (d->Dir)
 	{
@@ -1207,7 +1207,7 @@ int GDirectory::Close()
 	return true;
 }
 
-const char *GDirectory::FullPath()
+const char *LDirectory::FullPath()
 {
 	static char s[MAX_PATH];
 	#warning this should really be optimized, and thread safe...
@@ -1215,12 +1215,12 @@ const char *GDirectory::FullPath()
 	return s;
 }
 
-LString GDirectory::FileName() const
+LString LDirectory::FileName() const
 {
 	return GetName();
 }
 
-bool GDirectory::Path(char *s, int BufLen) const
+bool LDirectory::Path(char *s, int BufLen) const
 {
 	if (!s)
 	{
@@ -1230,12 +1230,12 @@ bool GDirectory::Path(char *s, int BufLen) const
 	return LgiMakePath(s, BufLen, d->BasePath, GetName());
 }
 
-int GDirectory::GetType() const
+int LDirectory::GetType() const
 {
 	return IsDir() ? VT_FOLDER : VT_FILE;
 }
 
-int GDirectory::GetUser(bool Group) const
+int LDirectory::GetUser(bool Group) const
 {
 	if (Group)
 	{
@@ -1247,7 +1247,7 @@ int GDirectory::GetUser(bool Group) const
 	}
 }
 
-bool GDirectory::IsReadOnly() const
+bool LDirectory::IsReadOnly() const
 {
 	if (getuid() == d->Stat.st_uid)
 	{
@@ -1264,54 +1264,54 @@ bool GDirectory::IsReadOnly() const
 	return !TestFlag(GetAttributes(), S_IWOTH);
 }
 
-bool GDirectory::IsHidden() const
+bool LDirectory::IsHidden() const
 {
 	return GetName() && GetName()[0] == '.';
 }
 
-bool GDirectory::IsDir() const
+bool LDirectory::IsDir() const
 {
 	int a = GetAttributes();
 	return !S_ISLNK(a) && S_ISDIR(a);
 }
 
-bool GDirectory::IsSymLink() const
+bool LDirectory::IsSymLink() const
 {
 	int a = GetAttributes();
 	return S_ISLNK(a);
 }
 
-long GDirectory::GetAttributes() const
+long LDirectory::GetAttributes() const
 {
 	return d->Stat.st_mode;
 }
 
-char *GDirectory::GetName() const
+char *LDirectory::GetName() const
 {
 	return (d->De) ? d->De->d_name : 0;
 }
 
-uint64 GDirectory::GetCreationTime() const
+uint64 LDirectory::GetCreationTime() const
 {
 	return (uint64) d->Stat.st_ctime * LDateTime::Second64Bit;
 }
 
-uint64 GDirectory::GetLastAccessTime() const
+uint64 LDirectory::GetLastAccessTime() const
 {
 	return (uint64) d->Stat.st_atime * LDateTime::Second64Bit;
 }
 
-uint64 GDirectory::GetLastWriteTime() const
+uint64 LDirectory::GetLastWriteTime() const
 {
 	return (uint64) d->Stat.st_mtime * LDateTime::Second64Bit;
 }
 
-uint64 GDirectory::GetSize() const
+uint64 LDirectory::GetSize() const
 {
 	return (uint32_t)d->Stat.st_size;
 }
 
-int64 GDirectory::GetSizeOnDisk()
+int64 LDirectory::GetSizeOnDisk()
 {
 	return (uint32_t)d->Stat.st_size;
 }
@@ -1319,7 +1319,7 @@ int64 GDirectory::GetSizeOnDisk()
 /////////////////////////////////////////////////////////////////////////////////
 //////////////////////////// File ///////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
-class GFilePrivate
+class LFilePrivate
 {
 public:
 	int hFile;
@@ -1329,7 +1329,7 @@ public:
 	int Attributes;
 	int ErrorCode;
 	
-	GFilePrivate()
+	LFilePrivate()
 	{
 		hFile = INVALID_HANDLE;
 		Name = 0;
@@ -1339,20 +1339,20 @@ public:
 		ErrorCode = 0;
 	}
 	
-	~GFilePrivate()
+	~LFilePrivate()
 	{
 		DeleteArray(Name);
 	}
 };
 
-GFile::GFile(const char *Path, int Mode)
+LFile::LFile(const char *Path, int Mode)
 {
-	d = new GFilePrivate;
+	d = new LFilePrivate;
 	if (Path)
 		Open(Path, Mode);
 }
 
-GFile::~GFile()
+LFile::~LFile()
 {
 	if (d && ValidHandle(d->hFile))
 	{
@@ -1361,17 +1361,17 @@ GFile::~GFile()
 	DeleteObj(d);
 }
 
-OsFile GFile::Handle()
+OsFile LFile::Handle()
 {
 	return d->hFile;
 }
 
-int GFile::GetError()
+int LFile::GetError()
 {
 	return d->ErrorCode;
 }
 
-bool GFile::IsOpen()
+bool LFile::IsOpen()
 {
 	return ValidHandle(d->hFile);
 }
@@ -1380,10 +1380,10 @@ bool GFile::IsOpen()
 
 #if DEBUG_OPEN_FILES
 LMutex Lck;
-LArray<GFile*> OpenFiles;
+LArray<LFile*> OpenFiles;
 #endif
 
-int GFile::Open(const char *File, int Mode)
+int LFile::Open(const char *File, int Mode)
 {
 	int Status = false;
 
@@ -1434,7 +1434,7 @@ int GFile::Open(const char *File, int Mode)
 			}
 			#endif
 
-			printf("GFile::Open failed\n\topen(%s,%08.8x) = %i\n\terrno=%s (%s)\n",
+			printf("LFile::Open failed\n\topen(%s,%08.8x) = %i\n\terrno=%s (%s)\n",
 				File, 
 				Mode, 
 				d->hFile,
@@ -1446,7 +1446,7 @@ int GFile::Open(const char *File, int Mode)
 	return Status;
 }
 
-int GFile::Close()
+int LFile::Close()
 {
 	if (ValidHandle(d->hFile))
 	{
@@ -1466,13 +1466,13 @@ int GFile::Close()
 	return true;
 }
 
-void GFile::ChangeThread()
+void LFile::ChangeThread()
 {
 }
 
 #define CHUNK		0xFFF0
 
-ssize_t GFile::Read(void *Buffer, ssize_t Size, int Flags)
+ssize_t LFile::Read(void *Buffer, ssize_t Size, int Flags)
 {
 	int Red = 0;
 
@@ -1485,7 +1485,7 @@ ssize_t GFile::Read(void *Buffer, ssize_t Size, int Flags)
 	return MAX(Red, 0);
 }
 
-ssize_t GFile::Write(const void *Buffer, ssize_t Size, int Flags)
+ssize_t LFile::Write(const void *Buffer, ssize_t Size, int Flags)
 {
 	int Written = 0;
 
@@ -1502,7 +1502,7 @@ ssize_t GFile::Write(const void *Buffer, ssize_t Size, int Flags)
 #define LINUX64 	1
 #endif
 
-int64 GFile::Seek(int64 To, int Whence)
+int64 LFile::Seek(int64 To, int Whence)
 {
 	#if LINUX64
 	return lseek64(d->hFile, To, Whence); // If this doesn't compile, switch off LINUX64
@@ -1511,7 +1511,7 @@ int64 GFile::Seek(int64 To, int Whence)
 	#endif
 }
 
-int64 GFile::SetPos(int64 Pos)
+int64 LFile::SetPos(int64 Pos)
 {
 	#if LINUX64
 	int64 p = lseek64(d->hFile, Pos, SEEK_SET);
@@ -1528,7 +1528,7 @@ int64 GFile::SetPos(int64 Pos)
 	#endif
 }
 
-int64 GFile::GetPos()
+int64 LFile::GetPos()
 {
 	#if LINUX64
 	int64 p = lseek64(d->hFile, 0, SEEK_CUR);
@@ -1546,7 +1546,7 @@ int64 GFile::GetPos()
 	#endif	
 }
 
-int64 GFile::GetSize()
+int64 LFile::GetSize()
 {
 	int64 Here = GetPos();
 	#if LINUX64
@@ -1558,7 +1558,7 @@ int64 GFile::GetSize()
 	return Ret;
 }
 
-int64 GFile::SetSize(int64 Size)
+int64 LFile::SetSize(int64 Size)
 {
 	if (ValidHandle(d->hFile))
 	{
@@ -1579,12 +1579,12 @@ int64 GFile::SetSize(int64 Size)
 	return GetSize();
 }
 
-bool GFile::Eof()
+bool LFile::Eof()
 {
 	return GetPos() >= GetSize();
 }
 
-ssize_t GFile::SwapRead(uchar *Buf, ssize_t Size)
+ssize_t LFile::SwapRead(uchar *Buf, ssize_t Size)
 {
 	ssize_t i = 0;
 	ssize_t r = 0;
@@ -1597,7 +1597,7 @@ ssize_t GFile::SwapRead(uchar *Buf, ssize_t Size)
 	return i;
 }
 
-ssize_t GFile::SwapWrite(uchar *Buf, ssize_t Size)
+ssize_t LFile::SwapWrite(uchar *Buf, ssize_t Size)
 {
 	ssize_t i = 0;
 	ssize_t w = 0;
@@ -1610,7 +1610,7 @@ ssize_t GFile::SwapWrite(uchar *Buf, ssize_t Size)
 	return i;
 }
 
-ssize_t GFile::ReadStr(char *Buf, ssize_t Size)
+ssize_t LFile::ReadStr(char *Buf, ssize_t Size)
 {
 	ssize_t i = 0;
 	ssize_t r = 0;
@@ -1639,7 +1639,7 @@ ssize_t GFile::ReadStr(char *Buf, ssize_t Size)
 	return i;
 }
 
-ssize_t GFile::WriteStr(char *Buf, ssize_t Size)
+ssize_t LFile::WriteStr(char *Buf, ssize_t Size)
 {
 	ssize_t i = 0;
 	ssize_t w;
@@ -1655,46 +1655,46 @@ ssize_t GFile::WriteStr(char *Buf, ssize_t Size)
 	return i;
 }
 
-void GFile::SetStatus(bool s)
+void LFile::SetStatus(bool s)
 {
 	d->Status = s;
 }
 
-bool GFile::GetStatus()
+bool LFile::GetStatus()
 {
 	return d->Status;
 }
 
-void GFile::SetSwap(bool s)
+void LFile::SetSwap(bool s)
 {
 	d->Swap = s;
 }
 
-bool GFile::GetSwap()
+bool LFile::GetSwap()
 {
 	return d->Swap;
 }
 
-int GFile::GetOpenMode()
+int LFile::GetOpenMode()
 {
 	return d->Attributes;
 }
 
-const char *GFile::GetName()
+const char *LFile::GetName()
 {
 	return d->Name;
 }
 
-#define GFileOp(type)	GFile &GFile::operator >> (type &i) { d->Status |= ((d->Swap) ? SwapRead((uchar*) &i, sizeof(i)) : Read(&i, sizeof(i))) != sizeof(i); return *this; }
+#define GFileOp(type)	LFile &LFile::operator >> (type &i) { d->Status |= ((d->Swap) ? SwapRead((uchar*) &i, sizeof(i)) : Read(&i, sizeof(i))) != sizeof(i); return *this; }
 GFileOps();
 #undef GFileOp
 
-#define GFileOp(type)	GFile &GFile::operator << (type i) { d->Status |= ((d->Swap) ? SwapWrite((uchar*) &i, sizeof(i)) : Write(&i, sizeof(i))) != sizeof(i); return *this; }
+#define GFileOp(type)	LFile &LFile::operator << (type i) { d->Status |= ((d->Swap) ? SwapWrite((uchar*) &i, sizeof(i)) : Write(&i, sizeof(i))) != sizeof(i); return *this; }
 GFileOps();
 #undef GFileOp
 
 //////////////////////////////////////////////////////////////////////////////
-bool GFile::Path::FixCase()
+bool LFile::Path::FixCase()
 {
 	LString Prev;
 	bool Changed = false;
@@ -1710,7 +1710,7 @@ bool GFile::Path::FixCase()
 		// printf("[%i] %s=%i\n", (int)i, Next.Get(), r);
 		if (r)
 		{
-			GDirectory Dir;
+			LDirectory Dir;
 			for (auto b=Dir.First(Prev); b; b=Dir.Next())
 			{
 				auto Name = Dir.GetName();

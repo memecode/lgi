@@ -166,10 +166,10 @@ void LWideBorder(LSurface *pDC, LRect &r, LgiEdge Type)
 {
 	if (!pDC) return;
 	COLOUR Old = pDC->Colour();
-	GColour VLow = LColour(L_SHADOW);
-	GColour Low = LColour(L_LOW);
-	GColour High = LColour(L_HIGH);
-	GColour VHigh = LColour(L_LIGHT);
+	LColour VLow = LColour(L_SHADOW);
+	LColour Low = LColour(L_LOW);
+	LColour High = LColour(L_HIGH);
+	LColour VHigh = LColour(L_LIGHT);
 	
 	switch (Type)
 	{
@@ -237,12 +237,12 @@ void LWideBorder(LSurface *pDC, LRect &r, LgiEdge Type)
 			bool Focus = Type == EdgeWin7FocusSunken;
 			
 			// Win7 theme
-			GColour Med(L_MED), Ws(L_WORKSPACE);
-			GColour Mixer = Med.GetGray() >= 128 ? GColour::Black : GColour::White;
-			GColour TopLeft, RightBottom;
+			LColour Med(L_MED), Ws(L_WORKSPACE);
+			LColour Mixer = Med.GetGray() >= 128 ? LColour::Black : LColour::White;
+			LColour TopLeft, RightBottom;
 			if (Focus)
 			{
-				GColour Focus(L_FOCUS_SEL_BACK);
+				LColour Focus(L_FOCUS_SEL_BACK);
 				TopLeft = Med.Mix(Focus, 0.4f);
 				RightBottom = Ws.Mix(Focus, 0.2f);
 			}
@@ -362,7 +362,7 @@ void LgiFillGradient(LSurface *pDC, LRect &r, bool Vert, LArray<GColourStop> &St
 	int Limit = Vert ? r.Y() : r.X();
 	for (int n=0; n<Limit; n++)
 	{
-		GColour c(0, 32);
+		LColour c(0, 32);
 		float p = (float)n/Limit;
 		if (This)
 		{
@@ -416,7 +416,7 @@ LSurface *ConvertDC(LSurface *pDC, int Bits)
 	return pDC;
 }
 
-GColour GdcMixColour(GColour c1, GColour c2, float HowMuchC1)
+LColour GdcMixColour(LColour c1, LColour c2, float HowMuchC1)
 {
 	float HowMuchC2 = 1.0f - HowMuchC1;
 
@@ -425,7 +425,7 @@ GColour GdcMixColour(GColour c1, GColour c2, float HowMuchC1)
 	uint8_t b = (uint8_t) ((c1.b()*HowMuchC1) + (c2.b()*HowMuchC2));
 	uint8_t a = (uint8_t) ((c1.a()*HowMuchC1) + (c2.a()*HowMuchC2));
 	
-	return GColour(r, g, b, a);
+	return LColour(r, g, b, a);
 }
 
 COLOUR CBit(int DstBits, COLOUR c, int SrcBits, GPalette *Pal)
@@ -617,7 +617,7 @@ COLOUR CBit(int DstBits, COLOUR c, int SrcBits, GPalette *Pal)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-const char *GColourSpaceToString(GColourSpace cs)
+const char *GColourSpaceToString(LColourSpace cs)
 {
 	#define CS_STR_BUF 4
 	static int Cur = 0;
@@ -677,7 +677,7 @@ const char *GColourSpaceToString(GColourSpace cs)
 	return start;
 }
 
-int GColourSpaceChannels(GColourSpace Cs)
+int GColourSpaceChannels(LColourSpace Cs)
 {
 	int Channels = 0;
 	
@@ -694,7 +694,7 @@ int GColourSpaceChannels(GColourSpace Cs)
 	return Channels;
 }
 
-bool GColourSpaceHasAlpha(GColourSpace Cs)
+bool GColourSpaceHasAlpha(LColourSpace Cs)
 {
 	while (Cs)
 	{
@@ -709,7 +709,7 @@ bool GColourSpaceHasAlpha(GColourSpace Cs)
 	return false;
 }
 
-int GColourSpaceToBits(GColourSpace ColourSpace)
+int GColourSpaceToBits(LColourSpace ColourSpace)
 {
 	uint32_t c = ColourSpace;
 	int bits = 0;
@@ -725,7 +725,7 @@ int GColourSpaceToBits(GColourSpace ColourSpace)
 	return bits;
 }
 
-GColourSpace GStringToColourSpace(const char *c)
+LColourSpace GStringToColourSpace(const char *c)
 {
 	if (!c)
 		return CsNone;
@@ -848,7 +848,7 @@ GColourSpace GStringToColourSpace(const char *c)
 				else return CsNone;
 			}
 			
-			GColourSpace Cs = (GColourSpace)a.All;
+			LColourSpace Cs = (LColourSpace)a.All;
 			return Cs;
 		}
 	}
@@ -864,7 +864,7 @@ GColourSpace GStringToColourSpace(const char *c)
 	return CsNone;
 }
 
-GColourSpace GBitsToColourSpace(int Bits)
+LColourSpace GBitsToColourSpace(int Bits)
 {
 	switch (Bits)
 	{
@@ -1039,7 +1039,7 @@ LSurface *GInlineBmp::Create(uint32_t TransparentPx)
 /////////////////////////////////////////////////////////////////////////////////////////////
 #include "lgi/common/Rops.h"
 
-bool LgiRopRgb(uint8_t *d, GColourSpace DstCs, uint8_t *s, GColourSpace SrcCs, int x, bool Composite)
+bool LgiRopRgb(uint8_t *d, LColourSpace DstCs, uint8_t *s, LColourSpace SrcCs, int x, bool Composite)
 {
 	// This is just a huge switch statement that takes care of all possible combinations
 	// of src and dst RGB colour space formats. The 'GRopsCases.cpp' code is generated

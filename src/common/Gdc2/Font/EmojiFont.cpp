@@ -77,7 +77,7 @@ int LEmojiFont::_CharAt(int xPos, OsChar *Str, int len, LgiPxToIndexType Type)
 	return -1;
 }
 
-void LEmojiFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int len, LRect *r, GColour &fore)
+void LEmojiFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int len, LRect *r, LColour &fore)
 {
 	if (!priv->Img)
 		return;
@@ -148,7 +148,7 @@ bool LEmojiFont::Create(const char *Face, LCss::Len Sz, LSurface *pSurface)
 		priv->Fn = LFindFile(FILE_NAME);
 		if (!priv->Fn)
 		{
-			GFile::Path p(LSP_APP_INSTALL);
+			LFile::Path p(LSP_APP_INSTALL);
 			p += "..\\Lgi\\trunk\\src\\common\\Text\\Emoji\\EmojiMap.png";
 			if (p.Exists())
 				priv->Fn = p.GetFull();

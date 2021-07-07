@@ -152,7 +152,7 @@ public:
 	void OnPaint(LSurface *pDC)
 	{
 		// Draw the CSS border... (the default value is set in the constructor)
-		GCssTools t(GetCss(true), GetFont());
+		LCssTools t(GetCss(true), GetFont());
 		LRect c = GetClient();
 		c = t.PaintBorder(pDC, c);
 		

@@ -371,7 +371,7 @@ bool SystemFunctions::WriteTextFile(LScriptArguments &Args)
 {
 	if (Args.Length() == 2)
 	{
-		GFile f;
+		LFile f;
 		if (f.Open(Args[0]->CastString(), O_WRITE))
 		{
 			f.SetSize(0);
@@ -638,12 +638,12 @@ bool SystemFunctions::New(LScriptArguments &Args)
 			
 			#if 1
 			Ret->Type = GV_STREAM;
-			Ret->Value.Stream.Ptr = new GFile;
+			Ret->Value.Stream.Ptr = new LFile;
 			if (Ret->Value.Stream.Ptr)
 				Ret->Value.Stream.Own = true;
 			#else
 			Ret->Type = GV_GFILE;
-			if ((Ret->Value.File.Ptr = new GFile))
+			if ((Ret->Value.File.Ptr = new LFile))
 			{
 				Ret->Value.File.Ptr->AddRef();
 				Ret->Value.File.Own = true;
@@ -713,7 +713,7 @@ class GFileListEntry : public GDom
 	LDateTime Modified;
 
 public:
-	GFileListEntry(GDirectory *d)
+	GFileListEntry(LDirectory *d)
 	{
 		Folder = d->IsDir();
 		Name = d->GetName();
@@ -775,7 +775,7 @@ bool SystemFunctions::PathExists(LScriptArguments &Args)
 	if (Args.Length() == 0)
 		return false;
 		
-	GDirectory d;
+	LDirectory d;
 	if (d.First(Args[0]->CastString(), NULL))
 	{
 		if (d.IsDir())
@@ -822,7 +822,7 @@ bool SystemFunctions::ListFiles(LScriptArguments &Args)
 		return false;
 
 	Args.GetReturn()->SetList();
-	GDirectory d;
+	LDirectory d;
 	char *Pattern = Args.Length() > 1 ? Args[1]->CastString() : 0;
 	
 	char *Folder = Args[0]->CastString();
@@ -846,7 +846,7 @@ bool SystemFunctions::CreateSurface(LScriptArguments &Args)
 
 	int x = Args[0]->CastInt32();
 	int y = Args[1]->CastInt32();
-	GColourSpace Cs = CsNone;
+	LColourSpace Cs = CsNone;
 
 	if (Args.Length() > 2)
 	{

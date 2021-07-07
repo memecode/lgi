@@ -18,7 +18,7 @@
 #define NonPreMulOver24(c)	d->c = ((s->c * sa) + (DivLut[d->c * 255] * o)) / 255
 
 /// 24 bit rgb applicators
-class LgiClass GdcApp24 : public GApplicator
+class LgiClass GdcApp24 : public LApplicator
 {
 protected:
 	union
@@ -78,8 +78,8 @@ public:
 	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
 };
 
-template<typename Pixel, GColourSpace ColourSpace>
-class App24 : public GApplicator
+template<typename Pixel, LColourSpace ColourSpace>
+class App24 : public LApplicator
 {
 	union
 	{
@@ -343,7 +343,7 @@ public:
 	}
 };
 
-GApplicator *GApp24::Create(GColourSpace Cs, int Op)
+LApplicator *GApp24::Create(LColourSpace Cs, int Op)
 {
 	if (Cs == System24BitColourSpace)
 	{

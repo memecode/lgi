@@ -21,9 +21,9 @@ public:
 	int _Quality;
 
 	// Output
-	GColour _Fore;
-	GColour _Back;
-	GColour WhiteSpace; // Can be empty (if so it's calculated)
+	LColour _Fore;
+	LColour _Back;
+	LColour WhiteSpace; // Can be empty (if so it's calculated)
 	int _TabSize;
 	bool _Transparent;
 	bool _SubGlyphs;

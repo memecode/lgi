@@ -9,7 +9,7 @@ public:
 	// Common
 	OsAppArguments Args;
 	LXmlTag *Config;
-	GFileSystem *FileSystem;
+	LFileSystem *FileSystem;
 	GLibrary *SkinLib;
 	GdcDevice *GdcSystem;
 	LAutoPtr<GFontCache> FontCache;
@@ -76,7 +76,7 @@ GApp::GApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : B
 
 	// Setup LGI Sub-systems
 	LFontSystem::Inst();
-	d->FileSystem = new GFileSystem;
+	d->FileSystem = new LFileSystem;
 	d->GdcSystem = new GdcDevice;
 
 	srand(system_time());
@@ -287,7 +287,7 @@ LXmlTag *GApp::GetConfig(const char *Tag)
 				d->Config = new LXmlTag("Config");
 				if (d->Config)
 				{
-					GFile f;
+					LFile f;
 					if (f.Open(Path, O_READ))
 					{
 						LXmlTree t;

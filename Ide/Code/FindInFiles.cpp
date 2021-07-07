@@ -244,7 +244,7 @@ void FindInFilesThread::SearchFile(char *File)
 	if (!File || !ValidStr(d->Params->Text))
 		return;
 
-	GFile f;
+	LFile f;
 	if (!f.Open(File, O_READ))
 	{
 		LString s;
@@ -324,7 +324,7 @@ void FindInFilesThread::SearchFile(char *File)
 	}
 }
 
-bool FindInFilesCallback(void *UserData, char *Path, GDirectory *Dir)
+bool FindInFilesCallback(void *UserData, char *Path, LDirectory *Dir)
 {
 	if (Dir->IsDir())
 	{

@@ -34,9 +34,9 @@ struct ZoomTile : public LMemDC
 {
 	bool Dirty;
 	
-	GColourSpace MapBits(int Bits)
+	LColourSpace MapBits(int Bits)
 	{
-		GColourSpace Cs;
+		LColourSpace Cs;
 		#ifdef LINUX
 		Cs = GdcD->GetColourSpace();
 		#else
@@ -417,7 +417,7 @@ public:
 	}
 
 	template <typename InPx>
-	void ScaleDown24(GColourSpace outCs, void *out, InPx *in, int len, int Factor)
+	void ScaleDown24(LColourSpace outCs, void *out, InPx *in, int len, int Factor)
 	{
 		switch (outCs)
 		{
@@ -455,7 +455,7 @@ public:
 		uchar *DivLut = Div255Lut;
 
 		#if 0 // def _DEBUG
-		Dst->Colour(GColour(255, 0, 255));
+		Dst->Colour(LColour(255, 0, 255));
 		Dst->Rectangle();
 		#endif
 		
@@ -1148,7 +1148,7 @@ public:
 				dd.Bound(&Src->Bounds());
 				dd.Offset(-x * TileSize, -y * TileSize);
 
-				Dst->Colour(GColour(0xbb, 0, 0xbb));
+				Dst->Colour(LColour(0xbb, 0, 0xbb));
 				Dst->Rectangle();
 				if (s.y2 > Src->Y())
 				{
@@ -1705,7 +1705,7 @@ void LZoomView::OnPaint(LSurface *pDC)
 {
 	#if 0
 	// coverage test
-	pDC->Colour(GColour(255, 0, 255));
+	pDC->Colour(LColour(255, 0, 255));
 	pDC->Rectangle();
 	#endif
 
@@ -1816,7 +1816,7 @@ void LZoomView::OnPaint(LSurface *pDC)
 
 						#if DEBUG_TILE_BOUNDARIES
 						uint32_t old = pDC->LineStyle(LSurface::LineAlternate);
-						pDC->Colour(GColour(0, 0, 255));
+						pDC->Colour(LColour(0, 0, 255));
 						pDC->Box(&screen_source);
 						pDC->LineStyle(old);
 						#endif
@@ -1830,7 +1830,7 @@ void LZoomView::OnPaint(LSurface *pDC)
 						pDC->Blt(px, py, d->Tile[x][y]);
 
 						#if DEBUG_TILE_BOUNDARIES
-						pDC->Colour(GColour(64, 0, 255));
+						pDC->Colour(LColour(64, 0, 255));
 						pDC->Box(&r);
 						#endif
 
@@ -1849,7 +1849,7 @@ void LZoomView::OnPaint(LSurface *pDC)
 		pDC->Colour(L_MED);
 		pDC->Rectangle(r);
 		#if 0
-		pDC->Colour(GColour(255, 0, 255));
+		pDC->Colour(LColour(255, 0, 255));
 		pDC->Box(r);
 		#endif
 	}

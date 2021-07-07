@@ -47,7 +47,7 @@ class XApplication : public XEventSink, public GSemaphore
 	
 	// Dnd
 	List<char> DndTypes, DndAccepted;
-	class GDragDropTarget *DndTarget;
+	class LDragDropTarget *DndTarget;
 	
 	// Methods	
 	void OnDeleteWidget(XWidget *w);

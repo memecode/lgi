@@ -434,7 +434,7 @@ struct GSourceFile
 	{
 		#if 1
 		LXmlTree t;
-		GFile f;
+		LFile f;
 		char *Leaf = strrchr(Path, DIR_CHAR);
 		char Out[MAX_PATH];
 		LgiMakePath(Out, sizeof(Out), "c:\\temp", Leaf + 1);
@@ -678,7 +678,7 @@ char *GCppParserWorker::FindInclude(char *File)
 	{
 		for (int i=0; i<w->IncludePaths.Length(); i++)
 		{
-			GDirectory dir;
+			LDirectory dir;
 			char p[MAX_PATH];
 			for (bool b=dir.First(w->IncludePaths[i]); b; b=dir.Next())
 			{

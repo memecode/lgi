@@ -113,7 +113,7 @@ bool GBlockArray::Add(const char *File, uint32 id)
 	}
 	
 	n->File.Reset(NewStr(File));
-	GFile f;
+	LFile f;
 	if (!f.Open(File, O_READ))
 	{
 		DeleteObj(n);
@@ -297,7 +297,7 @@ bool GIndexFile::Delete()
 bool GIndexFile::Serialize(bool Write)
 {
 	/*
-	GFile f;
+	LFile f;
 	if (!f.Open(FileName, Write ? O_WRITE : O_READ))
 	{
 		Table->Db->Msg(	"%s:%i - Failed to open '%s' for %s\n",
@@ -525,7 +525,7 @@ bool GTableDb::Open(const char *BaseFolder)
 {
 	Empty();
 	
-	GDirectory Dir;
+	LDirectory Dir;
 	GHashTbl<char*, Table*> Tables;
 	
 	char p[MAX_PATH];

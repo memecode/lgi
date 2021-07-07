@@ -139,13 +139,13 @@ public:
 	struct CacheDC : public LMemDC
 	{
 		bool Disabled;
-		GColour Back;
+		LColour Back;
 	};
 
 	LArray<CacheDC*> Cache;
 	LArray<LRect> Bounds;
 
-	CacheDC *GetCache(GColour Back, bool Disabled)
+	CacheDC *GetCache(LColour Back, bool Disabled)
 	{
 		if (Back.IsTransparent())
 			return NULL;
@@ -213,7 +213,7 @@ public:
 	}
 };
 
-static bool HasPad(GColourSpace cs)
+static bool HasPad(LColourSpace cs)
 {
 	if (cs == CsRgbx32 ||
 		cs == CsBgrx32 ||
@@ -310,7 +310,7 @@ LImageList::~LImageList()
 	DeleteObj(d);
 }
 
-void LImageList::Draw(LSurface *pDC, int Dx, int Dy, int Image, GColour Background, bool Disabled)
+void LImageList::Draw(LSurface *pDC, int Dx, int Dy, int Image, LColour Background, bool Disabled)
 {
 	if (!pDC)
 		return;
@@ -328,7 +328,7 @@ void LImageList::Draw(LSurface *pDC, int Dx, int Dy, int Image, GColour Backgrou
 
 		pDC->Colour(Background);
 		pDC->Rectangle(&rDst);
-		pDC->Colour(GColour(255, 0, 0));
+		pDC->Colour(LColour(255, 0, 0));
 		pDC->Line(rDst.x1, rDst.y1, rDst.x2, rDst.y2);
 		pDC->Line(rDst.x2, rDst.y1, rDst.x1, rDst.y2);
 		return;
@@ -616,22 +616,22 @@ void LToolButton::OnPaint(LSurface *pDC)
 		LRect p = GetClient();
 		
 		#if 0 // def _DEBUG
-		pDC->Colour(GColour(255, 0, 255));
+		pDC->Colour(LColour(255, 0, 255));
 		pDC->Rectangle();
 		#endif
 
-		GCssTools Tools(this);
-		GColour cBack = Tools.GetBack();
+		LCssTools Tools(this);
+		LColour cBack = Tools.GetBack();
 		auto BackImg = Tools.GetBackImage();
 		bool Hilight = e && Over;
 		if (Hilight)
-			cBack = cBack.Mix(GColour::White);
+			cBack = cBack.Mix(LColour::White);
 
 		// Draw Background
 		if (GetId() >= 0)
 		{
 			// Draw border
-			GColour Background;
+			LColour Background;
 			if (Down) // Sunken if the button is pressed
 				LThinBorder(pDC, p, DefaultSunkenEdge);
 
@@ -643,7 +643,7 @@ void LToolButton::OnPaint(LSurface *pDC)
 				{
 					// Draw translucent white over image...
 					pDC->Op(GDC_ALPHA);
-					pDC->Colour(GColour(255, 255, 255, 128));
+					pDC->Colour(LColour(255, 255, 255, 128));
 					pDC->Rectangle(&p);
 				}
 			}
@@ -702,7 +702,7 @@ void LToolButton::OnPaint(LSurface *pDC)
 					// Draw a red cross indicating no icons.
 					pDC->Colour(Background);
 					pDC->Rectangle(&p);
-					pDC->Colour(GColour::Red);
+					pDC->Colour(LColour::Red);
 					pDC->Line(IconPos.x1, IconPos.y1, IconPos.x2, IconPos.y2);
 					pDC->Line(IconPos.x2, IconPos.y1, IconPos.x1, IconPos.y2);
 				}
@@ -724,8 +724,8 @@ void LToolButton::OnPaint(LSurface *pDC)
 				{
 					// Write each word centered on a different line
 					int Ty = Down + Par->d->By + 2;
-					GColour a = Tools.GetFore();
-					GColour b = Tools.GetBack();
+					LColour a = Tools.GetFore();
+					LColour b = Tools.GetBack();
 					if (!e)
 						a = b.Mix(a);
 
@@ -753,8 +753,8 @@ void LToolButton::OnPaint(LSurface *pDC)
 				pDC->Rectangle();
 			}
 
-			GColour cLow = cBack.Mix(GColour::Black);
-			GColour cHigh = cBack.Mix(GColour::White, 0.8f);
+			LColour cLow = cBack.Mix(LColour::Black);
+			LColour cHigh = cBack.Mix(LColour::White, 0.8f);
 
 			if (X() > Y())
 			{
@@ -776,7 +776,7 @@ void LToolButton::OnPaint(LSurface *pDC)
 	}
 
 	#if 0 // def _DEBUG
-	pDC->Colour(GColour(255, 0, 255));
+	pDC->Colour(LColour(255, 0, 255));
 	pDC->Box();
 	#endif
 }
@@ -1024,7 +1024,7 @@ LToolBar::LToolBar()
 	d->OwnImgList = false;
 	d->ImgList = 0;
 
-	GetCss(true)->BackgroundColor(LColour(L_MED).Mix(GColour::Black, 0.05f));
+	GetCss(true)->BackgroundColor(LColour(L_MED).Mix(LColour::Black, 0.05f));
 	LResources::StyleElement(this);
 }
 
@@ -1217,7 +1217,7 @@ bool LToolBar::Pour(LRegion &r)
 	int EndX = 0;
 	int EndY = 0;
 	int MaxDim = 0;
-	GCssTools Tools(this);
+	LCssTools Tools(this);
 	LRect Border = Tools.GetBorder(r);
 	LRect Padding = Tools.GetPadding(r);
 	int PosX = BorderSpacing + Border.x1 + Padding.x1;
@@ -1414,7 +1414,7 @@ GMessage::Result LToolBar::OnEvent(GMessage *Msg)
 void LToolBar::OnPaint(LSurface *pDC)
 {
 	LRect c = GetClient();
-	GCssTools Tools(this);
+	LCssTools Tools(this);
 	Tools.PaintBorder(pDC, c);
 	Tools.PaintPadding(pDC, c);
 	Tools.PaintContent(pDC, c);

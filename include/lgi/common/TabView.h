@@ -127,7 +127,7 @@ public:
 	~LTabPage();
 
 	const char *GetClass() override { return "LTabPage"; }
-	GColour GetBackground();
+	LColour GetBackground();
 
 	const char *Name() override;
 	bool Name(const char *n) override;

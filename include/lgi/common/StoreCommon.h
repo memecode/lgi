@@ -17,7 +17,7 @@ enum NodeRelation
 #define GSUBFILE_NOBUFFERING		0
 
 class GSubFilePtr;
-class GSubFile : public GFile
+class GSubFile : public LFile
 {
 	LMutex *Lck;
 	LArray<GSubFilePtr*> Ptrs;
@@ -53,7 +53,7 @@ public:
 	#endif
 };
 
-class GSubFilePtr : public GFile
+class GSubFilePtr : public LFile
 {
 	friend class GSubFile;
 	GSubFile *File;
@@ -99,7 +99,7 @@ public:
 	/// Removes the sub region so you can access the entire file.
 	void ClearSub();
 	
-	// GFile stuff
+	// LFile stuff
 	int Open(const char *Str = 0, int Int = 0);
 	bool IsOpen();
 	int Close();
@@ -145,8 +145,8 @@ public:
 
 	// Impl
 	virtual bool Save() = 0;
-	virtual GFile *GotoObject(const char *file, int line) = 0;
-	virtual bool EndOfObj(GFile &f) = 0;
+	virtual LFile *GotoObject(const char *file, int line) = 0;
+	virtual bool EndOfObj(LFile &f) = 0;
 };
 
 class StorageObj
@@ -177,7 +177,7 @@ public:
 
 	virtual int Type() = 0;
 	virtual int Sizeof() = 0;
-	virtual bool Serialize(GFile &f, bool Write) = 0;
+	virtual bool Serialize(LFile &f, bool Write) = 0;
 	virtual bool SetDirty(bool d = true) { StoreDirty = d; return true; }
 };
 

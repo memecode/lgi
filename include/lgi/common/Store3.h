@@ -525,7 +525,7 @@ extern GDataStoreI *OpenImap
 	GDataEventsI *Callback,
 	/// This allows the IMAP client to request SSL support from the
 	/// parent applications.
-	GCapabilityClient *caps,
+	LCapabilityClient *caps,
 	/// Pointers to the progress info bars, or NULL if not needed.
 	MailProtocolProgress *prog[2],
 	/// The logging stream.

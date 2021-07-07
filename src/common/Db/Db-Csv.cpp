@@ -493,7 +493,7 @@ void SvRecordset::Read()
 
 void SvRecordset::Write()
 {
-	GFile f;
+	LFile f;
 	if (FileName && f.Open(FileName, O_WRITE))
 	{
 		char s[256];

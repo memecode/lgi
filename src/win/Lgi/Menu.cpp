@@ -21,9 +21,9 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////
 #define LGI_OWNER_DRAW_MENUS
 
-GColour LGetSysColor(int nIndex)
+LColour LGetSysColor(int nIndex)
 {
-	GColour c;
+	LColour c;
 	auto i = GetSysColor(nIndex);
 	c.Rgb(GetRValue(i), GetGValue(i), GetBValue(i));
 	return c;
@@ -32,7 +32,7 @@ GColour LGetSysColor(int nIndex)
 class LMenuPrivate
 {
 public:
-	GColour RootMenuBack;
+	LColour RootMenuBack;
 	
 	LMenuPrivate()
 	{
@@ -565,8 +565,8 @@ void LMenuItem::_Paint(LSurface *pDC, int Flags)
 	else
 	{
 		// paint a text menu item
-		GColour Fore(Selected ? L_FOCUS_SEL_FORE : L_MENU_TEXT);
-		GColour Back(BaseMenu ? Menu->d->RootMenuBack : (Selected ? LColour(L_FOCUS_SEL_BACK) : LColour(L_MENU_BACKGROUND)));
+		LColour Fore(Selected ? L_FOCUS_SEL_FORE : L_MENU_TEXT);
+		LColour Back(BaseMenu ? Menu->d->RootMenuBack : (Selected ? LColour(L_FOCUS_SEL_BACK) : LColour(L_MENU_BACKGROUND)));
 		int x = IconX;
 		LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
 		int y = (pDC->Y() - Font->GetHeight()) >> 1;

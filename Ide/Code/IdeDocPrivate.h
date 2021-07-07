@@ -78,7 +78,7 @@ public:
 		auto Full = nSrc ? nSrc->GetFullPath() : FileName;
 		if (Full)
 		{
-			GDirectory Dir;
+			LDirectory Dir;
 			if (Dir.First(Full, NULL))
 				Ts.Set(Dir.GetLastWriteTime());
 		}

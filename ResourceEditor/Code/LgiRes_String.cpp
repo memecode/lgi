@@ -688,7 +688,7 @@ void ResString::OnMouseClick(LMouse &m)
 			char *Clip;
 
 			{
-				GClipBoard c(Parent);
+				LClipBoard c(Parent);
 				Clip = c.Text();
 				if (Clip)
 					PasteTranslations = strstr(Clip, TranslationStrMagic);
@@ -818,7 +818,7 @@ void ResString::CopyText()
 		char *All = p.NewStr();
 		if (All)
 		{
-			GClipBoard Clip(Parent);
+			LClipBoard Clip(Parent);
 
 			Clip.Text(All);
 
@@ -837,7 +837,7 @@ void ResString::CopyText()
 
 void ResString::PasteText()
 {
-	GClipBoard c(Parent);
+	LClipBoard c(Parent);
 	
 	char *Clip = 0;
 	char16 *w = c.TextW();
@@ -1493,7 +1493,7 @@ void ResStringGroup::OnCommand(int Cmd)
 			Select.Type("Text", "*.txt");
 			if (Select.Open())
 			{
-				GFile F;
+				LFile F;
 				if (F.Open(Select.Name(), O_READ))
 				{
 					SerialiseContext Ctx;
@@ -1518,7 +1518,7 @@ void ResStringGroup::OnCommand(int Cmd)
 			Select.Type("Text", "*.txt");
 			if (Select.Save())
 			{
-				GFile F;
+				LFile F;
 				if (F.Open(Select.Name(), O_WRITE))
 				{
 					F.SetSize(0);

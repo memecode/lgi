@@ -167,7 +167,7 @@ class GAppPrivate : public LSymLookup, public LMutex
 public:
 	// Common
 	LXmlTag *Config;
-	GFileSystem *FileSystem;
+	LFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
 	OsAppArguments Args;
 	GLibrary *SkinLib;
@@ -284,7 +284,7 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	SetAppArgs(AppArgs);
 
 	// Setup the file and graphics sub-systems
-	d->FileSystem = new GFileSystem;
+	d->FileSystem = new LFileSystem;
 	d->GdcSystem = new GdcDevice;
 
 	srand(LgiCurrentTime());
@@ -757,7 +757,7 @@ LXmlTag *GApp::GetConfig(const char *Tag)
 				d->Config = new LXmlTag("Config");
 				if (d->Config)
 				{
-					GFile f;
+					LFile f;
 					if (f.Open(Path, O_READ))
 					{
 						LXmlTree t;

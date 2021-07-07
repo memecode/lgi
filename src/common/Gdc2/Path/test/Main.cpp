@@ -36,14 +36,14 @@ public:
 
 		p.Circle(r, r, r);
 		p.SetFillRule(FILLRULE_ODDEVEN);
-		LSolidBrush s(GColour::White);
+		LSolidBrush s(LColour::White);
 		p.Fill(&img, s);
 		p.Empty();
 
 		p.Circle(r, r, r);
 		p.Circle(r, r, r - 1.0);
 		p.SetFillRule(FILLRULE_ODDEVEN);
-		LSolidBrush s2(GColour(0xcb, 0xcb, 0xcb));
+		LSolidBrush s2(LColour(0xcb, 0xcb, 0xcb));
 		p.Fill(&img, s2);
 
 		img.ConvertPreMulAlpha(true);

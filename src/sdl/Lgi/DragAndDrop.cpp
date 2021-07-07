@@ -31,23 +31,23 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
-GDragDropSource::GDragDropSource()
+LDragDropSource::LDragDropSource()
 {
 	d = new GDndSourcePriv;
 	OnRegister(true);
 }
 
-GDragDropSource::~GDragDropSource()
+LDragDropSource::~LDragDropSource()
 {
 	DeleteObj(d);
 }
 
-bool GDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
+bool LDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
 {
 	return false;
 }
 
-bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, LString::Array &Files)
+bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, LString::Array &Files)
 {
 	if (OutputData && Files.First())
 	{
@@ -72,7 +72,7 @@ bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, LString::
 	return false;
 }
 
-int GDragDropSource::Drag(LView *SourceWnd, int Effect)
+int LDragDropSource::Drag(LView *SourceWnd, int Effect)
 {
 	LgiAssert(SourceWnd);
 	if (!SourceWnd)
@@ -97,17 +97,17 @@ int GDragDropSource::Drag(LView *SourceWnd, int Effect)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-GDragDropTarget::GDragDropTarget()
+LDragDropTarget::LDragDropTarget()
 {
 	To = 0;
 }
 
-GDragDropTarget::~GDragDropTarget()
+LDragDropTarget::~LDragDropTarget()
 {
 	Formats.DeleteArrays();
 }
 
-void GDragDropTarget::SetWindow(LView *to)
+void LDragDropTarget::SetWindow(LView *to)
 {
 	bool Status = false;
 	To = to;

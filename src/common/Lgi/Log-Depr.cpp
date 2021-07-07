@@ -17,7 +17,7 @@
 #include "LDisplayString.h"
 
 ////////////////////////////////////////////////////////////////////
-RLogEntry::RLogEntry(const char *t, const char *desc, int Len, GColour *Col)
+RLogEntry::RLogEntry(const char *t, const char *desc, int Len, LColour *Col)
 {
 	if (Col)
 		c = *Col;
@@ -294,7 +294,7 @@ void GLog::SetView(RLogView *View)
 	LogView = View;
 }
 
-void GLog::Write(GColour c, const char *Buffer, int Len, char *Desc)
+void GLog::Write(LColour c, const char *Buffer, int Len, char *Desc)
 {
 	if (Buffer)
 	{
@@ -302,7 +302,7 @@ void GLog::Write(GColour c, const char *Buffer, int Len, char *Desc)
 		Entries.Insert(Entry = new RLogEntry(Buffer, Desc, Len, &c));
 		if (Entry && FileName)
 		{
-			GFile F;
+			LFile F;
 			if (F.Open(FileName, O_WRITE))
 			{
 				F.Seek(F.GetSize(), SEEK_SET);
@@ -325,7 +325,7 @@ void GLog::Write(GColour c, const char *Buffer, int Len, char *Desc)
 	}
 }
 
-void GLog::Print(GColour c, const char *Str, ...)
+void GLog::Print(LColour c, const char *Str, ...)
 {
 	if (Str)
 	{

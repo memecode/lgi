@@ -104,7 +104,7 @@ protected:
 				LgiMakePath(o, sizeof(o), ExtractTo, f.Name);
 			}
 			
-			GFile Out;
+			LFile Out;
 			if (Out.Open(o, O_WRITE))
 			{
 				char Buf[512];

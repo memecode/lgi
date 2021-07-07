@@ -9,15 +9,15 @@
 #else
 	#define PROF(str)
 #endif
-#define ColourComment			GColour(0, 140, 0)
-#define ColourHashDef			GColour(0, 0, 222)
-#define ColourLiteral			GColour(192, 0, 0)
-#define ColourKeyword			GColour::Black
-#define ColourType				GColour(0, 0, 222)
-#define ColourCode				GColour(140, 140, 180)
-#define ColourHtml				GColour(80, 80, 255)
-#define ColourPre				GColour(150, 110, 110)
-#define ColourStyle				GColour(110, 110, 150)
+#define ColourComment			LColour(0, 140, 0)
+#define ColourHashDef			LColour(0, 0, 222)
+#define ColourLiteral			LColour(192, 0, 0)
+#define ColourKeyword			LColour::Black
+#define ColourType				LColour(0, 0, 222)
+#define ColourCode				LColour(140, 140, 180)
+#define ColourHtml				LColour(80, 80, 255)
+#define ColourPre				LColour(150, 110, 110)
+#define ColourStyle				LColour(110, 110, 150)
 #define IsSymbolChar(ch)		(IsAlpha(ch) || (ch) == '_')
 #define DetectKeyword()			\
 	Node *n = &Root;			\
@@ -833,12 +833,12 @@ void DocEditStyling::StyleXml(StylingParams &p)
 		}
 	}
 }
-GColour DocEditStyling::ColourFromType(DocType t)
+LColour DocEditStyling::ColourFromType(DocType t)
 {
 	switch (t)
 	{
 		default:
-			return GColour::Black;
+			return LColour::Black;
 		case CodePhp:
 		case CodeJavascript:
 			return ColourCode;

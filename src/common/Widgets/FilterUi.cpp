@@ -12,10 +12,10 @@
 
 #define FILTER_DRAG_FORMAT	"Scribe.FilterItem"
 #define IconSize			15
-static GColour TransparentBlk(0, 0, 0, 0);
-static GColour White(255, 255, 255);
-static GColour Black(0, 0, 0);
-static GColour ContentColour(0, 0, 0, 160);
+static LColour TransparentBlk(0, 0, 0, 0);
+static LColour White(255, 255, 255);
+static LColour Black(0, 0, 0);
+static LColour ContentColour(0, 0, 0, 160);
 
 // Field size
 #define SIZE_NOT			45
@@ -44,18 +44,18 @@ enum FilterIcon
 
 #define IconAlpha	255
 
-static GColour IconColour[IconMax] =
+static LColour IconColour[IconMax] =
 {
-	GColour(192, 192, 192, IconAlpha), // new condition
-	GColour(118, 160, 230, IconAlpha), // new and
-	GColour(32, 224, 32, IconAlpha), // new or
-	GColour(230, 90, 65, IconAlpha), // delete
-	GColour(192, 192, 192, IconAlpha), // up
-	GColour(192, 192, 192, IconAlpha), // down
-	GColour(192, 192, 192, IconAlpha), // options
-	GColour(192, 192, 192, IconAlpha), // drop down
-	GColour(255, 192, 0, IconAlpha), // bool false
-	GColour(255, 192, 0, IconAlpha), // bool true
+	LColour(192, 192, 192, IconAlpha), // new condition
+	LColour(118, 160, 230, IconAlpha), // new and
+	LColour(32, 224, 32, IconAlpha), // new or
+	LColour(230, 90, 65, IconAlpha), // delete
+	LColour(192, 192, 192, IconAlpha), // up
+	LColour(192, 192, 192, IconAlpha), // down
+	LColour(192, 192, 192, IconAlpha), // options
+	LColour(192, 192, 192, IconAlpha), // drop down
+	LColour(255, 192, 0, IconAlpha), // bool false
+	LColour(255, 192, 0, IconAlpha), // bool true
 };
 
 static const char *IconName[IconMax];
@@ -80,7 +80,7 @@ static const char **GetIconNames()
 	return IconName;
 }
 
-class LFilterTree : public LTree, public GDragDropTarget
+class LFilterTree : public LTree, public LDragDropTarget
 {
 	friend class LFilterItem;
 
@@ -104,7 +104,7 @@ public:
 	}
 
 	// Dnd
-	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
+	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
 	{
 		LFilterItem *i = dynamic_cast<LFilterItem*>(ItemAtPoint(Pt.x, Pt.y));
 		if (!i || i->GetNode() == LNODE_NEW)
@@ -115,7 +115,7 @@ public:
 		return DROPEFFECT_MOVE;
 	}
 	
-	int OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState)
+	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 	{
 		SelectDropTarget(NULL);
 		
@@ -132,7 +132,7 @@ public:
 		
 		for (unsigned i=0; i<Data.Length(); i++)
 		{
-			GDragData &dd = Data[i];
+			LDragData &dd = Data[i];
 			if (dd.IsFormat(FILTER_DRAG_FORMAT) &&
 				dd.Data.Length() == 1)
 			{
@@ -230,7 +230,7 @@ public:
 		OpNames.DeleteArrays();
 	}
 
-	void Draw(LSurface *pDC, GColour c, FilterIcon Icon)
+	void Draw(LSurface *pDC, LColour c, FilterIcon Icon)
 	{
 		// Clear to transparent black
 		pDC->Colour(TransparentBlk);
@@ -640,8 +640,8 @@ void LFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 	// Draw the background
 	double ox = 1, oy = 1;
 	double r = (double)(Pos->Y() - (oy * 2)) / 2;
-	GColour BackCol = TransparentBlk;
-	GColour Workspace(L_WORKSPACE);
+	LColour BackCol = TransparentBlk;
+	LColour Workspace(L_WORKSPACE);
 	switch (d->Node)
 	{
 		case LNODE_NEW:
@@ -788,7 +788,7 @@ void LFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 			Buf.Op(GDC_SET);
 
 			SysFont->Transparent(true);
-			SysFont->Colour(GColour(L_TEXT), Ctx.Back);
+			SysFont->Colour(LColour(L_TEXT), Ctx.Back);
 			d->Data->dsNot->Draw(&Buf, d->NotBtn.x2 + 3, d->NotBtn.y1);
 
 			ShowControls(Select());
@@ -924,15 +924,15 @@ bool LFilterItem::OnBeginDrag(LMouse &m)
 	return true;
 }
 
-bool LFilterItem::GetFormats(GDragFormats &Formats)
+bool LFilterItem::GetFormats(LDragFormats &Formats)
 {
 	Formats.Supports(FILTER_DRAG_FORMAT);
 	return true;
 }
 
-bool LFilterItem::GetData(LArray<GDragData> &Data)
+bool LFilterItem::GetData(LArray<LDragData> &Data)
 {
-	GDragData &dd = Data[0];
+	LDragData &dd = Data[0];
 	
 	dd.Format = FILTER_DRAG_FORMAT;
 	LVariant &v = dd.Data[0];

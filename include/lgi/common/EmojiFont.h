@@ -15,7 +15,7 @@ class LEmojiFont : public LFont
 
 	void _Measure(int &x, int &y, OsChar *Str, int Len) override;
 	int _CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type) override;
-	void _Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore) override;
+	void _Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, LColour &fore) override;
 
 public:
 	LEmojiFont();

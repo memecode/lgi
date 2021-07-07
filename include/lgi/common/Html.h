@@ -33,7 +33,7 @@ class GHtml :
 	public GDocView,
 	public ResObject,
 	public GHtmlParser,
-	public GCapabilityClient
+	public LCapabilityClient
 {
 	friend class GTag;
 	friend class GFlowRegion;

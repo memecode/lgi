@@ -118,7 +118,7 @@ public:
 
 	void OnPaint(LSurface *pDC)
 	{
-		GColour SlideCol(L_MED);
+		LColour SlideCol(L_MED);
 		SlideCol.Rgb(	(255 + SlideCol.r()) >> 1,
 						(255 + SlideCol.g()) >> 1,
 						(255 + SlideCol.b()) >> 1);
@@ -527,7 +527,7 @@ void LScrollBar::OnPaint(LSurface *pDC)
 	#if MAC_SKIN
 
 		#if 0
-		pDC->Colour(GColour(255, 0, 255));
+		pDC->Colour(LColour(255, 0, 255));
 		pDC->Rectangle();
 		#endif
 	

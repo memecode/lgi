@@ -10,7 +10,7 @@ public:
 	// Common
 	GApp *Owner;
 	LAutoPtr<LJson> Config;
-	GFileSystem *FileSystem;
+	LFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
 	OsAppArguments Args;
 	GLibrary *SkinLib;

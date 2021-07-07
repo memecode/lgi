@@ -51,7 +51,7 @@ public:
 
 	void OnPaint(LSurface *pDC)
 	{
-		pDC->Colour(GColour::Black);
+		pDC->Colour(LColour::Black);
 		pDC->Box();
 	}
 

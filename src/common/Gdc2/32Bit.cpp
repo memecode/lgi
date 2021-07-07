@@ -18,8 +18,8 @@
 #undef NonPreMulAlpha
 
 /////////////////////////////////////////////////////////////////////////////////////////
-template<typename Pixel, GColourSpace ColourSpace>
-class App32Base : public GApplicator
+template<typename Pixel, LColourSpace ColourSpace>
+class App32Base : public LApplicator
 {
 protected:
 	union
@@ -75,7 +75,7 @@ public:
 	}
 };
 
-template<typename Pixel, GColourSpace ColourSpace>
+template<typename Pixel, LColourSpace ColourSpace>
 class App32NoAlpha : public App32Base<Pixel, ColourSpace>
 {
 public:
@@ -262,7 +262,7 @@ public:
 	}
 };
 
-template<typename Pixel, GColourSpace ColourSpace>
+template<typename Pixel, LColourSpace ColourSpace>
 class App32Alpha : public App32Base<Pixel, ColourSpace>
 {
 public:
@@ -605,7 +605,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////////
  //, a = this->p32.a
 #define CreateOpNoAlpha(name, opcode, alpha)													\
-	template<typename Pixel, GColourSpace ColourSpace>											\
+	template<typename Pixel, LColourSpace ColourSpace>											\
 	class App32##name##alpha : public App32Base<Pixel, ColourSpace>								\
 	{																							\
 	public:																						\
@@ -641,7 +641,7 @@ public:
 	};
 
 #define CreateOpAlpha(name, opcode, alpha)														\
-	template<typename Pixel, GColourSpace ColourSpace>											\
+	template<typename Pixel, LColourSpace ColourSpace>											\
 	class App32##name##alpha : public App32Base<Pixel, ColourSpace>								\
 	{																							\
 	public:																						\
@@ -687,7 +687,7 @@ CreateOpNoAlpha(Xor, ^=, NoAlpha)
 CreateOpAlpha(Xor, ^=, Alpha)
 
 /////////////////////////////////////////////////////////////////////////////////////////
-GApplicator *GApp32::Create(GColourSpace Cs, int Op)
+LApplicator *GApp32::Create(LColourSpace Cs, int Op)
 {
 	if (Op == GDC_SET)
 	{

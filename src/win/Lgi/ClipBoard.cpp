@@ -4,7 +4,7 @@
 #include "lgi/common/Palette.h"
 #include "lgi/common/Com.h"
 
-class GClipBoardPriv
+class LClipBoardPriv
 {
 public:
 	LString Utf8;
@@ -15,10 +15,10 @@ public:
 class LFileEnum : public GUnknownImpl<IEnumFORMATETC>
 {
 	int Idx;
-	LArray<GClipBoard::FormatType> Types;
+	LArray<LClipBoard::FormatType> Types;
 
 public:
-	LFileEnum(GClipBoard::FormatType type)
+	LFileEnum(LClipBoard::FormatType type)
 	{
 		Idx = 0;
 		// Types.Add(type);
@@ -46,7 +46,7 @@ public:
 		if (pceltFetched) *pceltFetched = 1;
 		Idx += celt;
 
-		LgiTrace("%s:%i - Next(%i) returned '%s'\n", _FL, celt, GClipBoard::FmtToStr(fmt->cfFormat).Get());
+		LgiTrace("%s:%i - Next(%i) returned '%s'\n", _FL, celt, LClipBoard::FmtToStr(fmt->cfFormat).Get());
 		return S_OK;
 	}
         
@@ -86,7 +86,7 @@ struct LFileName : public GUnknownImpl<IUnknown>
 class LFileData : public GUnknownImpl<IDataObject>
 {
 	int Cur;
-	GClipBoard::FormatType Type, PrefDrop, ShellIdList;
+	LClipBoard::FormatType Type, PrefDrop, ShellIdList;
 
 public:
 	LString::Array Files;
@@ -94,9 +94,9 @@ public:
 	LFileData(LString::Array &files) : Files(files)
 	{
 		// TraceRefs = true;
-		Type = GClipBoard::StrToFmt(CFSTR_FILENAMEA);
-		PrefDrop = GClipBoard::StrToFmt(CFSTR_PREFERREDDROPEFFECT);
-		ShellIdList = GClipBoard::StrToFmt(CFSTR_SHELLIDLIST);
+		Type = LClipBoard::StrToFmt(CFSTR_FILENAMEA);
+		PrefDrop = LClipBoard::StrToFmt(CFSTR_PREFERREDDROPEFFECT);
+		ShellIdList = LClipBoard::StrToFmt(CFSTR_SHELLIDLIST);
 		Cur = 0;
 		AddInterface(IID_IDataObject, (IDataObject*)this);
 
@@ -110,7 +110,7 @@ public:
 
 	HRESULT STDMETHODCALLTYPE GetData(FORMATETC *Fmt, STGMEDIUM *Med)
 	{
-		LString sFmt = GClipBoard::FmtToStr(Fmt->cfFormat);
+		LString sFmt = LClipBoard::FmtToStr(Fmt->cfFormat);
 		LgiTrace("%s:%i - GetData(%s) starting...\n", _FL, sFmt.Get());
 		
 		if (!Med)
@@ -131,8 +131,8 @@ public:
 		}
 		else if (Fmt->cfFormat == CF_HDROP)
 		{
-			GDragDropSource Src;
-			GDragData Data;
+			LDragDropSource Src;
+			LDragData Data;
 			LMouse m;
 			if (!Src.CreateFileDrop(&Data, m, Files))
 			{
@@ -206,7 +206,7 @@ public:
 			Fmt->cfFormat == CF_HDROP)
 			return S_OK;
 		
-		LString sFmt = GClipBoard::FmtToStr(Fmt->cfFormat);
+		LString sFmt = LClipBoard::FmtToStr(Fmt->cfFormat);
 		LgiTrace("%s:%i - QueryGetData(%s) not supported.\n", _FL, sFmt.Get());
 		return DV_E_FORMATETC;
 	}
@@ -219,7 +219,7 @@ public:
 
 	HRESULT STDMETHODCALLTYPE SetData(FORMATETC *Fmt, STGMEDIUM *pmedium, BOOL fRelease)
 	{
-		LString sFmt = GClipBoard::FmtToStr(Fmt->cfFormat);
+		LString sFmt = LClipBoard::FmtToStr(Fmt->cfFormat);
 		LgiTrace("%s:%i - SetData(%s)\n", _FL, sFmt.Get());		
 		return S_OK;
 	}
@@ -261,7 +261,7 @@ public:
 };
 #endif
 
-LString::Array GClipBoard::Files()
+LString::Array LClipBoard::Files()
 {
 	LString::Array f;
 
@@ -368,10 +368,10 @@ LString::Array GClipBoard::Files()
 	return f;
 }
 
-bool GClipBoard::Files(LString::Array &Paths, bool AutoEmpty)
+bool LClipBoard::Files(LString::Array &Paths, bool AutoEmpty)
 {
-	GDragDropSource Src;
-	GDragData Output;
+	LDragDropSource Src;
+	LDragData Output;
 	LMouse m;
 	if (Owner)
 		Owner->GetMouse(m, true);
@@ -398,7 +398,7 @@ bool GClipBoard::Files(LString::Array &Paths, bool AutoEmpty)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-LString GClipBoard::FmtToStr(FormatType Fmt)
+LString LClipBoard::FmtToStr(FormatType Fmt)
 {
 	TCHAR n[256] = {0};
 	int r = GetClipboardFormatName(Fmt, n, CountOf(n));
@@ -423,22 +423,22 @@ LString GClipBoard::FmtToStr(FormatType Fmt)
 	return n;
 }
 
-GClipBoard::FormatType GClipBoard::StrToFmt(LString Fmt)
+LClipBoard::FormatType LClipBoard::StrToFmt(LString Fmt)
 {
 	return RegisterClipboardFormatA(Fmt);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GClipBoard::GClipBoard(LView *o)
+LClipBoard::LClipBoard(LView *o)
 {
-    d = new GClipBoardPriv;
+    d = new LClipBoardPriv;
 	Open = false;
 	Owner = o;
 	if (Owner)
 		Open = OpenClipboard(Owner->Handle()) != 0;
 }
 
-GClipBoard::~GClipBoard()
+LClipBoard::~LClipBoard()
 {
 	if (Open)
 	{
@@ -448,13 +448,13 @@ GClipBoard::~GClipBoard()
 	DeleteObj(d);
 }
 
-GClipBoard &GClipBoard::operator =(GClipBoard &c)
+LClipBoard &LClipBoard::operator =(LClipBoard &c)
 {
     LgiAssert(0);
     return *this;
 }
 
-bool GClipBoard::EnumFormats(LArray<FormatType> &Formats)
+bool LClipBoard::EnumFormats(LArray<FormatType> &Formats)
 {
 	UINT Idx = 0;
 	UINT Fmt;
@@ -466,7 +466,7 @@ bool GClipBoard::EnumFormats(LArray<FormatType> &Formats)
 	return Formats.Length() > 0;
 }
 
-bool GClipBoard::Empty()
+bool LClipBoard::Empty()
 {
 	d->Utf8.Empty();
 	d->Wide.Reset();
@@ -475,7 +475,7 @@ bool GClipBoard::Empty()
 }
 
 // Text
-bool GClipBoard::Text(const char *Str, bool AutoEmpty)
+bool LClipBoard::Text(const char *Str, bool AutoEmpty)
 {
 	bool Status = false;
 
@@ -493,7 +493,7 @@ bool GClipBoard::Text(const char *Str, bool AutoEmpty)
 	return Status;
 }
 
-char *GClipBoard::Text()
+char *LClipBoard::Text()
 {
 	ssize_t Len = 0;
 	LAutoPtr<uint8_t,true> Str;
@@ -506,7 +506,7 @@ char *GClipBoard::Text()
 	return NULL;
 }
 
-bool GClipBoard::TextW(const char16 *Str, bool AutoEmpty)
+bool LClipBoard::TextW(const char16 *Str, bool AutoEmpty)
 {
 	if (Str)
 	{
@@ -517,7 +517,7 @@ bool GClipBoard::TextW(const char16 *Str, bool AutoEmpty)
 	return false;
 }
 
-char16 *GClipBoard::TextW()
+char16 *LClipBoard::TextW()
 {
 	ssize_t Len = 0;
 	LAutoPtr<uint8_t,true> Str;
@@ -534,7 +534,7 @@ char16 *GClipBoard::TextW()
 #define CF_HTML RegisterClipboardFormatA("HTML Format")
 #endif
 
-bool GClipBoard::Html(const char *Doc, bool AutoEmpty)
+bool LClipBoard::Html(const char *Doc, bool AutoEmpty)
 {
 	if (!Doc)
 		return false;
@@ -561,7 +561,7 @@ bool GClipBoard::Html(const char *Doc, bool AutoEmpty)
 	return Binary(CF_HTML, (uchar*) s.Get(), s.Length(), AutoEmpty);
 }
 
-LString GClipBoard::Html()
+LString LClipBoard::Html()
 {
 	LAutoPtr<uint8_t,true> Buf;
 	ssize_t Len;
@@ -589,7 +589,7 @@ LString GClipBoard::Html()
 
 
 // Bitmap
-bool GClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
+bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 {
 	bool Status = FALSE;
 
@@ -692,7 +692,7 @@ bool GClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 				}
 
 				#if 0
-				GFile f;
+				LFile f;
 				if (f.Open("c:\\tmp\\out.bmp", O_WRITE))
 				{
 					f.SetSize(0);
@@ -712,7 +712,7 @@ bool GClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 	return Status;
 }
 
-LSurface *GClipBoard::ConvertFromPtr(void *Ptr)
+LSurface *LClipBoard::ConvertFromPtr(void *Ptr)
 {
 	LSurface *pDC = NULL;
 	if (Ptr)
@@ -787,7 +787,7 @@ LSurface *GClipBoard::ConvertFromPtr(void *Ptr)
 	return pDC;
 }
 
-LSurface *GClipBoard::Bitmap()
+LSurface *LClipBoard::Bitmap()
 {
 	HGLOBAL hMem = GetClipboardData(CF_DIB);
 	void *Ptr = GlobalLock(hMem);
@@ -796,7 +796,7 @@ LSurface *GClipBoard::Bitmap()
 	{
 		#if 0
 		SIZE_T TotalSize = GlobalSize(hMem);
-		GFile f;
+		LFile f;
 		if (f.Open("c:\\tmp\\in.bmp", O_WRITE))
 		{
 			f.SetSize(0);
@@ -811,7 +811,7 @@ LSurface *GClipBoard::Bitmap()
 	return pDC;
 }
 
-bool GClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmpty)
+bool LClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmpty)
 {
 	bool Status = FALSE;
 
@@ -846,7 +846,7 @@ bool GClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	return Status;
 }
 
-bool GClipBoard::Binary(FormatType Format, LAutoPtr<uint8_t,true> &Ptr, ssize_t *Length)
+bool LClipBoard::Binary(FormatType Format, LAutoPtr<uint8_t,true> &Ptr, ssize_t *Length)
 {
 	bool Status = false;
 

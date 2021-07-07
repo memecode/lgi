@@ -96,7 +96,7 @@ class GDbfRecordset : public GDbRecordset
 	friend class GDbfField;
 
 	char *FileName;				// Name of DBF file
-	GFile *File;					// Open file
+	LFile *File;					// Open file
 	
 	int MemLength; // memory record length
 	ushort DiskLength; // disk record length
@@ -424,7 +424,7 @@ bool GDbfField::Get(LVariant &v)
 GDbfRecordset::GDbfRecordset(char *file)
 {
 	FileName = NewStr(file);
-	File = (FileName) ? new GFile : 0;
+	File = (FileName) ? new LFile : 0;
 	DiskLength = 0;
 	MemLength = 0;
 	HeaderLength = 0;

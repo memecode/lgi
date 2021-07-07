@@ -25,7 +25,7 @@ public:
 	// LRect Client;
 	cairo_t *cr;
 	LCairoSurfaceT Img;
-	GColourSpace CreateCs;
+	LColourSpace CreateCs;
 
     LMemDCPrivate()
     {
@@ -49,7 +49,7 @@ public:
 	}
 };
 
-LMemDC::LMemDC(int x, int y, GColourSpace cs, int flags)
+LMemDC::LMemDC(int x, int y, LColourSpace cs, int flags)
 {
 	d = new LMemDCPrivate;
 	if (cs != CsNone)
@@ -261,14 +261,14 @@ void LMemDC::SetOrigin(int x, int y)
 	}
 }
 
-GColourSpace LMemDC::GetCreateCs()
+LColourSpace LMemDC::GetCreateCs()
 {
 	// Sometimes the colour space we get is different to the requested colour space.
 	// This function returns the original requested colour space.
 	return d->CreateCs;
 }
 
-bool LMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
+bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 {
 	int Bits = GColourSpaceToBits(Cs);
 	if (x < 1 || y < 1 || Bits < 1)

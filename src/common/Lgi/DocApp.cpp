@@ -167,7 +167,7 @@ public:
 		bool Status = false;
 		if (p)
 		{
-			GFile f;
+			LFile f;
 			if (f.Open(OptionsFile, Write?O_WRITE:O_READ))
 			{
 				if (Write)
@@ -199,7 +199,7 @@ GDocApp<OptionsFmt>::GDocApp(const char *appname, LIcon icon, char *optsname)
 	if (LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p)))
 	{
 		LgiMakePath(p, sizeof(p), p, "_write_test.txt");
-		GFile f;
+		LFile f;
 		if (!f.Open(p, O_WRITE))
 		{
 			d->Mode = InstallDesktop;

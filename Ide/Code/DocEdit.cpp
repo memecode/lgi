@@ -127,14 +127,14 @@ void DocEdit::InvalidateLine(int Idx)
 	}
 }
 	
-void DocEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour)
+void DocEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
 {
-	GColour GutterColour(0xfa, 0xfa, 0xfa);
+	LColour GutterColour(0xfa, 0xfa, 0xfa);
 	LTextView3::OnPaintLeftMargin(pDC, r, GutterColour);
 	int Y = ScrollYLine();
 		
 	int TopPaddingPx = GetTopPaddingPx();
-	pDC->Colour(GColour(200, 0, 0));
+	pDC->Colour(LColour(200, 0, 0));
 	List<LTextLine>::I it = LTextView3::Line.begin(Y);
 	int DocOffset = (*it)->r.y1;
 	for (LTextLine *l = *it; l; l = *++it, Y++)

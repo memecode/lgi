@@ -74,7 +74,7 @@ public:
 		int y = 0,
 		/// The colour space to use. CsNone will default to the 
 		/// current screen colour space.
-		GColourSpace cs = CsNone,
+		LColourSpace cs = CsNone,
 		/// Optional creation flags
 		int Flags = SurfaceCreateNone
 	);
@@ -131,7 +131,7 @@ public:
 	LRect ClipRgn(LRect *Rgn);
 	void SetClient(LRect *c);
 	LPoint GetSize();
-	GColourSpace GetCreateCs();
+	LColourSpace GetCreateCs();
 
 	/// Locks the bits for access. LCairoSurface's start in the locked state.
 	bool Lock();
@@ -147,7 +147,7 @@ public:
 	bool SupportsAlphaCompositing();
 	bool SwapRedAndBlue();
 	
-	bool Create(int x, int y, GColourSpace Cs, int Flags = SurfaceCreateNone);
+	bool Create(int x, int y, LColourSpace Cs, int Flags = SurfaceCreateNone);
 	void Blt(int x, int y, LSurface *Src, LRect *a = NULL);
 	void StretchBlt(LRect *d, LSurface *Src, LRect *s = NULL);
 

@@ -675,7 +675,7 @@ LWindowUnrealize(GtkWidget *widget, LWindow *wnd)
 	// printf("%s:%i - LWindowUnrealize %s\n", _FL, wnd->GetClass());
 }
 
-bool DndPointMap(LViewI *&v, LPoint &p, GDragDropTarget *&t, LWindow *Wnd, int x, int y)
+bool DndPointMap(LViewI *&v, LPoint &p, LDragDropTarget *&t, LWindow *Wnd, int x, int y)
 {
 	LRect cli = Wnd->GetClient();
 	t = NULL;
@@ -722,7 +722,7 @@ LWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint
 {
 	LPoint p;
 	LViewI *v;
-	GDragDropTarget *t;
+	LDragDropTarget *t;
 	if (!DndPointMap(v, p, t, Wnd, x, y))
 		return;
 
@@ -742,10 +742,10 @@ LWindowDragDataReceived(GtkWidget *widget, GdkDragContext *context, gint x, gint
 	}
 }
 
-int GetAcceptFmts(::LString::Array &Formats, GdkDragContext *context, GDragDropTarget *t, LPoint &p)
+int GetAcceptFmts(::LString::Array &Formats, GdkDragContext *context, LDragDropTarget *t, LPoint &p)
 {
 	int KeyState = 0;
-	GDragFormats Fmts(true);
+	LDragFormats Fmts(true);
 	int Flags = DROPEFFECT_NONE;
 
 	GList *targets = gdk_drag_context_list_targets(context);
@@ -774,13 +774,13 @@ LWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, 
 	// Map the point to a view...
 	LPoint p;
 	LViewI *v;
-	GDragDropTarget *t;
+	LDragDropTarget *t;
 	if (!DndPointMap(v, p, t, Wnd, x, y))
 		return false;
 	t->Data.Length(0);
 
 	// Request the data...
-	::LArray<GDragData> Data;
+	::LArray<LDragData> Data;
 	::LString::Array Formats;
 	int KeyState = 0;
 	int Flags = GetAcceptFmts(Formats, context, t, p);
@@ -833,7 +833,7 @@ LWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, gu
 {
 	LPoint p;
 	LViewI *v;
-	GDragDropTarget *t;
+	LDragDropTarget *t;
 	if (!DndPointMap(v, p, t, Wnd, x, y))
 		return false;
 

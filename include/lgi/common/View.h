@@ -28,7 +28,7 @@ class LgiClass LView : virtual public LViewI, virtual public LBase
 	friend		class LScrollBar;
 	friend		class GFileTarget;
 	friend		class LDialog;
-	friend		class GDragDropTarget;
+	friend		class LDragDropTarget;
 	friend		class LPopup;
 	friend		class LWindowPrivate;
 
@@ -347,10 +347,10 @@ public:
 	void Focus(bool f) override;
 	
 	/// Get/Set the drop source
-	GDragDropSource *DropSource(GDragDropSource *Set = NULL) override;
+	LDragDropSource *DropSource(LDragDropSource *Set = NULL) override;
 
 	/// Get/Set the drop target
-	GDragDropTarget *DropTarget(GDragDropTarget *Set = NULL) override;
+	LDragDropTarget *DropTarget(LDragDropTarget *Set = NULL) override;
 	
 	/// Sets the drop target state of this view
 	bool DropTarget(bool t) override;
@@ -467,12 +467,12 @@ public:
 
 	/// Resolve a CSS colour, e.g.:
 	/// auto Back = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
-	GColour StyleColour(int CssPropType, GColour Default, int Depth = 5);
+	LColour StyleColour(int CssPropType, LColour Default, int Depth = 5);
 
     /// Sets the style of the control (will take ownership of 'css')
     void SetCss(LCss *css) override;
     /// Sets the CSS foreground or background colour
-	bool SetColour(GColour &c, bool Fore) override;
+	bool SetColour(LColour &c, bool Fore) override;
 
 	/// The class' name. Should be overriden in child classes to return the
 	/// right class name. Mostly used for debugging, but in the win32 port it

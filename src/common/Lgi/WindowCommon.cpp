@@ -164,13 +164,13 @@ bool LWindow::MoveSameScreen(LViewI *View)
 	return true;
 }
 
-int LWindow::WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
+int LWindow::WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
 {
 	Formats.SupportsFileDrops();
 	return true;
 }
 
-int LWindow::OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState)
+int LWindow::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 {
 	int Status = DROPEFFECT_NONE;
 	

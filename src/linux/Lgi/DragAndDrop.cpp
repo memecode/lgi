@@ -101,25 +101,25 @@ void RemoveExistingSignals(OsView w)
 	}
 }
 
-GDragDropSource::GDragDropSource()
+LDragDropSource::LDragDropSource()
 {
 	d = new GDndSourcePriv;
 	OnRegister(true);
 }
 
-GDragDropSource::~GDragDropSource()
+LDragDropSource::~LDragDropSource()
 {
 	if (d->SignalWnd)
 		RemoveExistingSignals(d->SignalWnd);
 	DeleteObj(d);
 }
 
-bool GDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
+bool LDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
 {
 	return false;
 }
 
-bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, ::LString::Array &Files)
+bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, ::LString::Array &Files)
 {
 	if (!OutputData || !Files.First())
 		return false;
@@ -167,14 +167,14 @@ LgiDragDataGet(GtkWidget        *widget,
                guint             time,
                gpointer          data)
 {
-	GDragDropSource *Src = (GDragDropSource*)data;
+	LDragDropSource *Src = (LDragDropSource*)data;
 
 	// Iterate over the targets and put their formats into 'dd'
 	Gtk::GList *targets = gdk_drag_context_list_targets(context);
 	Gtk::GList *node;
 	if (targets)
 	{
-		::LArray<GDragData> dd;
+		::LArray<LDragData> dd;
 		for (node = g_list_first(targets); node != NULL; node = ((node) ? (((Gtk::GList *)(node))->next) : NULL))
         {
 			gchar *format = gdk_atom_name((GdkAtom)node->data);
@@ -256,7 +256,7 @@ uint32_t DefaultIcon[] = {
 };
 GInlineBmp DefIcon = { 32, 32, 32, DefaultIcon };
 
-int GDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
+int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
 {
 	LgiAssert(SourceWnd);
 	if (!SourceWnd)
@@ -272,7 +272,7 @@ int GDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 		return -1;
 	}
 
-	GDragFormats Formats(true);
+	LDragFormats Formats(true);
 	if (!GetFormats(Formats))
 	{
 		LgiTrace("%s:%i - Error: Failed to get source formats.\n", _FL);
@@ -335,7 +335,7 @@ int GDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 	auto MemIco = dynamic_cast<LMemDC*>(Icon ? Icon : d->Ico.Get());
 	if (MemIco)
 	{
-		MemIco->Colour(GColour::Red);
+		MemIco->Colour(LColour::Red);
 		MemIco->Line(0, 0, 31, 31);
 		auto Surface = MemIco->GetSurface();
 		gtk_drag_set_icon_surface(d->Ctx, Surface);
@@ -347,16 +347,16 @@ int GDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-GDragDropTarget::GDragDropTarget() : Formats(true)
+LDragDropTarget::LDragDropTarget() : Formats(true)
 {
 	To = 0;
 }
 
-GDragDropTarget::~GDragDropTarget()
+LDragDropTarget::~LDragDropTarget()
 {
 }
 
-void GDragDropTarget::SetWindow(LView *to)
+void LDragDropTarget::SetWindow(LView *to)
 {
 	bool Status = false;
 	To = to;

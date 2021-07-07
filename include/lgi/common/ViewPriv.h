@@ -106,8 +106,8 @@ class GViewPrivate
 public:
 	// General
 	int				CtrlId;
-	GDragDropSource	*DropSource;
-	GDragDropTarget	*DropTarget;
+	LDragDropSource	*DropSource;
+	LDragDropTarget	*DropTarget;
 	bool			IsThemed;
 
 	// Heirarchy

@@ -591,7 +591,7 @@ void GMenuItem::_Paint(LSurface *pDC, int Flags)
 		if (Parent &&
 			Parent->GetImageList())
 		{
-			GColour Back(LC_MED, 24);
+			LColour Back(LC_MED, 24);
 			Parent->GetImageList()->Draw(pDC, -16, 0, _Icon, Back);
 		}
 	}

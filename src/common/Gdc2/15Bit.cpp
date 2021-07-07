@@ -14,8 +14,8 @@
 #include "lgi/common/Palette.h"
 
 /// 15 bit rgb applicators
-template<typename Pixel, GColourSpace Cs>
-class GdcApp15 : public GApplicator
+template<typename Pixel, LColourSpace Cs>
+class GdcApp15 : public LApplicator
 {
 protected:
 	union
@@ -86,7 +86,7 @@ public:
 	}
 };
 
-template<typename Pixel, GColourSpace Cs>
+template<typename Pixel, LColourSpace Cs>
 class GdcApp15Set : public GdcApp15<Pixel, Cs>
 {
 public:
@@ -197,7 +197,7 @@ public:
 	}
 };
 
-GApplicator *GApp15::Create(GColourSpace Cs, int Op)
+LApplicator *GApp15::Create(LColourSpace Cs, int Op)
 {
 	if (Op == GDC_SET)
 	{

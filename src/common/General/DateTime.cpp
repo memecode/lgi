@@ -283,7 +283,7 @@ LDateTime ConvertSysTime(SYSTEMTIME &st, int year)
 	return n;
 }
 
-int GDateCmp(LDateTime *a, LDateTime *b)
+static int LDateCmp(LDateTime *a, LDateTime *b)
 {
 	return a->Compare(b);
 }
@@ -1297,7 +1297,7 @@ int LDateTime::Sizeof()
 	return sizeof(int) * 7;
 }
 
-bool LDateTime::Serialize(GFile &f, bool Write)
+bool LDateTime::Serialize(LFile &f, bool Write)
 {
 	int32 i;
 

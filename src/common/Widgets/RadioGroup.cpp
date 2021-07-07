@@ -330,8 +330,8 @@ void LRadioGroup::OnPaint(LSurface *pDC)
 	}
 	else
 	{
-		// GColour Fore = StyleColour(LCss::PropColor, LC_TEXT);
-		GColour Back = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
+		// LColour Fore = StyleColour(LCss::PropColor, LC_TEXT);
+		LColour Back = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 		if (!Back.IsTransparent())
 		{
 			pDC->Colour(Back);
@@ -369,7 +369,7 @@ public:
 	bool Val;
 	bool Over;
 	LRect Btn;
-	GColour BackCol;
+	LColour BackCol;
 
 	LRadioButtonPrivate(LRadioButton *c) :
 		LMutex("LRadioButtonPrivate"),
@@ -724,7 +724,7 @@ void LRadioButton::OnPaint(LSurface *pDC)
 		State.View = this;
 		State.Rect = d->GetBtn();
 
-		GColour Back = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
+		LColour Back = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 		State.ForceUpdate = d->BackCol != Back;
 		d->BackCol = Back;
 
@@ -734,8 +734,8 @@ void LRadioButton::OnPaint(LSurface *pDC)
 	{
 		LRect r(0, 0, X()-1, Y()-1);
 		LRect c(0, 0, 12, 12);
-		// GColour Fore = StyleColour(LCss::PropColor, LC_TEXT, 4);
-		GColour Back = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
+		// LColour Fore = StyleColour(LCss::PropColor, LC_TEXT, 4);
+		LColour Back = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 		
 		// bool e = Enabled();
 		LRect fill(c.x2 + 1, r.y1, r.x2, r.x2);

@@ -42,7 +42,7 @@ LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterNa
 		if (PrinterName &&
 			stristr(PrinterName, "XPS"))
 		{
-			GFile::Path p(LSP_USER_DOCUMENTS);
+			LFile::Path p(LSP_USER_DOCUMENTS);
 			LString FileName;
 			FileName.Printf("%s.xps", PrintJobName);
 			p += FileName;

@@ -60,7 +60,7 @@ public:
 	LArray<VcEdge*> Edges;
 	int NodeIdx;
 	int Idx;
-	GColour NodeColour;
+	LColour NodeColour;
 	LHashTbl<PtrKey<VcEdge*>, int> Pos;
 
 	VcCommit(AppPriv *priv, VcFolder *folder);
@@ -76,7 +76,7 @@ public:
 	LDateTime &GetTs() { return Ts; }
 
 	void SetCurrent(bool b);
-	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c);
+	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c);
 	const char *GetText(int Col);
 	const char *GetFieldText(CommitField Fld);
 	bool GitParse(LString s, bool RevList);

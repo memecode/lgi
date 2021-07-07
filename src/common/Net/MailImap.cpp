@@ -338,7 +338,7 @@ bool MailIMap::Http(LSocketI *S,
 	else return false;
 
 	#ifndef _DEBUG
-	GFile f;
+	LFile f;
 	if (f.Open("c:\\temp\\http.html", O_WRITE))
 	{
 		f.SetSize(0);

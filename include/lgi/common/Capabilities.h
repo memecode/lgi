@@ -8,35 +8,35 @@
 
 #define DEBUG_CAPABILITIES		0
 
-class GCapabilityTarget;
+class LCapabilityTarget;
 
 /// This class is a parent for objects that need external dependencies 
 /// to be installed by an external source.
-class LgiClass GCapabilityClient
+class LgiClass LCapabilityClient
 {
-	friend class GCapabilityTarget;
-	LArray<GCapabilityTarget*> Targets;
+	friend class LCapabilityTarget;
+	LArray<LCapabilityTarget*> Targets;
 
 public:
-	virtual ~GCapabilityClient();
+	virtual ~LCapabilityClient();
 	
 	/// Call this when you need to fulfill an external dependency.
 	bool NeedsCapability(const char *Name, const char *Param = NULL);
 
 	/// Call this to register a target that can install dependencies.
-	void Register(GCapabilityTarget *t);
+	void Register(LCapabilityTarget *t);
 };
 
-class LgiClass GCapabilityTarget
+class LgiClass LCapabilityTarget
 {
-	friend class GCapabilityClient;
-	LArray<GCapabilityClient*> Clients;
+	friend class LCapabilityClient;
+	LArray<LCapabilityClient*> Clients;
 
 public:
 	LHashTbl<ConstStrKey<char,false>, bool> Map;
 	typedef LHashTbl<ConstStrKey<char,false>, bool> CapsHash;
 
-	virtual ~GCapabilityTarget();
+	virtual ~LCapabilityTarget();
 	
 	/// This is called to install a dependency.
 	virtual bool NeedsCapability(const char *Name, const char *Param) = 0;

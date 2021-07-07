@@ -24,7 +24,7 @@ public:
 	
 	void Add(LTreeNode *t, const char *path)
 	{
-		GDirectory d;
+		LDirectory d;
 		for (auto b=d.First(path); b; b=d.Next())
 		{
 			auto Full = d.FullPath();
@@ -66,7 +66,7 @@ LString GetPython3()
 	auto Path = LGetPath();
 	for (auto i: Path)
 	{
-		GFile::Path p(i);
+		LFile::Path p(i);
 		p += "python" LGI_EXECUTABLE_EXT;
 		if (p.Exists())
 		{
@@ -108,9 +108,9 @@ bool CreateProject(const char *Name, const char *Template, const char *Folder)
 	}
 	// Copy in script...
 	auto CreateProjectPy = "create_project.py";
-	GFile::Path ScriptIn(TemplatesPath);
+	LFile::Path ScriptIn(TemplatesPath);
 	ScriptIn += CreateProjectPy;
-	GFile::Path ScriptOut(Folder);
+	LFile::Path ScriptOut(Folder);
 	ScriptOut += CreateProjectPy;
 	if (!FileDev->Copy(ScriptIn, ScriptOut))
 	{
@@ -136,7 +136,7 @@ bool CreateProject(const char *Name, const char *Template, const char *Folder)
 }
 void NewProjectFromTemplate(LViewI *parent)
 {
-	GFile::Path p(LSP_APP_INSTALL);
+	LFile::Path p(LSP_APP_INSTALL);
 	p +=
 		#ifdef MAC
 		"../../"

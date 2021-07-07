@@ -165,10 +165,10 @@ COLOUR LScreenDC::Colour()
 	return CBit(GetBits(), Rgb24(Rgb.red, Rgb.green, Rgb.blue), 24);
 }
 
-GColour LScreenDC::Colour(GColour c)
+LColour LScreenDC::Colour(LColour c)
 {
 	rgb_color Rgb = d->View->HighColor();
-	GColour Prev(Rgb.red, Rgb.green, Rgb.blue);
+	LColour Prev(Rgb.red, Rgb.green, Rgb.blue);
 
 	Rgb.red = c.r();
 	Rgb.green = c.g();

@@ -345,7 +345,7 @@ bool LSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *W
 	else
 		LgiMakePath(Tmp, sizeof(Tmp), LGetSystemPath(LSP_TEMP), File);
 
-	GFile Local;
+	LFile Local;
 	if (!Local.Open(Tmp, O_WRITE))
 	{
 		d->SetError(L_ERROR_OPENING_TEMP_FILE, "Can't open local temp file.");

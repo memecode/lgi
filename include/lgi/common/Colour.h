@@ -1,8 +1,7 @@
 /// \file
 /// \author Matthew Allen
 /// \created 3/2/2011
-#ifndef _GCOLOUR_H_
-#define _GCOLOUR_H_
+#pragma once
 
 #include "lgi/common/ColourSpace.h"
 
@@ -44,7 +43,7 @@ enum LSystemColour
 };
 
 /// A colour definition
-class LgiClass GColour
+class LgiClass LColour
 {
 protected:
 	class GPalette *pal;
@@ -54,49 +53,49 @@ protected:
 		System32BitPixel rgb;
 		GHls32 hls;
 	};
-	GColourSpace space;
+	LColourSpace space;
 
 	int HlsValue(double fN1, double fN2, double fHue) const;
 
 public:
-	static const GColour Black;
-	static const GColour White;
-	static const GColour Red;
-	static const GColour Green;
-	static const GColour Blue;
+	static const LColour Black;
+	static const LColour White;
+	static const LColour Red;
+	static const LColour Green;
+	static const LColour Blue;
 
 	/// Call if the system defined colours changed.
 	static void OnChange();
 	/// Gets a colour from the LGI config (not available in LGI_STATIC)
-	static bool GetConfigColour(const char *Tag, GColour &c);
+	static bool GetConfigColour(const char *Tag, LColour &c);
 
 	/// Transparent
-	GColour();
+	LColour();
 	/// System colour
-	GColour(LSystemColour sc);
+	LColour(LSystemColour sc);
 	/// Indexed colour
-	GColour(uint8_t idx8, GPalette *palette);
+	LColour(uint8_t idx8, GPalette *palette);
 	/// True colour
-	GColour(int r, int g, int b, int a = 255);
+	LColour(int r, int g, int b, int a = 255);
 	/// Conversion from COLOUR
-	GColour(uint32_t c, int bits, GPalette *palette = NULL);
+	LColour(uint32_t c, int bits, GPalette *palette = NULL);
 	/// Web colour
-	GColour(const char *Str);
+	LColour(const char *Str);
 	#ifdef __GTK_H__
-	GColour(Gtk::GdkRGBA c);
+	LColour(Gtk::GdkRGBA c);
 	#endif
-	GColourSpace GetColourSpace();
-	bool SetColourSpace(GColourSpace cs);
+	LColourSpace GetColourSpace();
+	bool SetColourSpace(LColourSpace cs);
 	
-	bool operator ==(const GColour &c)
+	bool operator ==(const LColour &c)
 	{
 		return c32() == c.c32();
 	}
-	bool operator !=(const GColour &c)
+	bool operator !=(const LColour &c)
 	{
 		return c32() != c.c32();
 	}
-	int operator -(const GColour &c)
+	int operator -(const LColour &c)
 	{
 		auto Diff = GetGray() - c.GetGray();
 		return abs(Diff);
@@ -144,9 +143,9 @@ public:
 	void c32(uint32_t c);
 	/// Mixes 'Tint' with the current colour and returns it 
 	/// without modifying the object.
-	GColour Mix(GColour Tint, float RatioOfTint = 0.5) const;
+	LColour Mix(LColour Tint, float RatioOfTint = 0.5) const;
 	/// Return the inverted form
-	GColour Invert();
+	LColour Invert();
 	
 	// Hue Lum Sat methods	
 		/// Returns the hue value (0-359)
@@ -192,9 +191,8 @@ public:
 };
 
 // Get a system colour
-LgiExtern GColour LColour(LSystemColour Colour);
+LgiExtern LColour LSysColour(LSystemColour Colour);
 
 // Load theme colours
 LgiExtern bool LColourLoad(const char *Json);
 
-#endif

@@ -25,7 +25,7 @@ public:
 		Value(value);
 	}
 
-	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *Col)
+	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *Col)
 	{
 		LSurface *pDC = Ctx.pDC;
 		LRect c(0, 0, 10, 10);

@@ -16,8 +16,8 @@
 #undef NonPreMulOver64
 #define NonPreMulOver64(c)	d->c = ((s->c * sa) + ((d->c * 0xffff) / 0xffff * o)) / 0xffff
 
-template<typename Pixel, GColourSpace ColourSpace>
-class App64 : public GApplicator
+template<typename Pixel, LColourSpace ColourSpace>
+class App64 : public LApplicator
 {
 	union
 	{
@@ -383,7 +383,7 @@ public:
 class G64BitFactory : public GApplicatorFactory
 {
 public:
-	GApplicator *Create(GColourSpace Cs, int Op)
+	LApplicator *Create(LColourSpace Cs, int Op)
 	{
 		switch (Cs)
 		{

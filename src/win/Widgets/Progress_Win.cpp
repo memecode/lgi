@@ -27,11 +27,11 @@ LProgressView::~LProgressView()
 {
 }
 
-GColour LProgressView::cNormal(0, 222, 0);
-GColour LProgressView::cPaused(255, 222, 0);
-GColour LProgressView::cError(255, 0, 0);
+LColour LProgressView::cNormal(0, 222, 0);
+LColour LProgressView::cPaused(255, 222, 0);
+LColour LProgressView::cError(255, 0, 0);
 
-bool LProgressView::Colour(GColour Col)
+bool LProgressView::Colour(LColour Col)
 {
 	c = Col;
 	if (!_View)
@@ -51,7 +51,7 @@ bool LProgressView::Colour(GColour Col)
 	return true;
 }
 
-GColour LProgressView::Colour()
+LColour LProgressView::Colour()
 {
 	return c;
 }

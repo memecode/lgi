@@ -223,7 +223,7 @@ void LSplitter::CalcRegions(bool Follow)
 	d->PosA = Rect;
 
 	LRect r = GetClient();
-	GCssTools Tools(this);
+	LCssTools Tools(this);
 	d->PosA = Tools.ApplyBorder(d->PosA);
 	d->PosA = Tools.ApplyPadding(d->PosA);
 	d->PosB = d->PosA;
@@ -337,7 +337,7 @@ void ClipDC(HDC hDC, RECT rc)
 void LSplitter::OnPaint(LSurface *pDC)
 {
 	LRect r = GetClient();
-	GCssTools Tools(this);
+	LCssTools Tools(this);
 	
 	r = Tools.PaintBorder(pDC, r);
 	r = Tools.PaintPadding(pDC, r);

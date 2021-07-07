@@ -687,7 +687,7 @@ bool TableCell::SetVariant(const char *Name, LVariant &Value, char *Array)
 int TableCell::MaxCellWidth()
 {
 	// Table size minus padding
-	GCssTools t(Table->GetCss(), Table->GetFont());
+	LCssTools t(Table->GetCss(), Table->GetFont());
 	LRect cli = Table->GetClient();
 	cli = t.ApplyPadding(cli);
 	
@@ -1351,11 +1351,11 @@ void TableCell::PostLayout()
 
 void TableCell::OnPaint(LSurface *pDC)
 {
-	GCssTools t(this, Table->GetFont());
+	LCssTools t(this, Table->GetFont());
 	LRect r = Pos;	
 	t.PaintBorder(pDC, r);
 
-	GColour Trans;
+	LColour Trans;
 	auto bk = t.GetBack(&Trans);
 	if (bk.IsValid())
 	{
@@ -2083,7 +2083,7 @@ void LTableLayout::OnPosChange()
 		{		
 			if (GetCss())
 			{
-				GCssTools t(GetCss(), GetFont());
+				LCssTools t(GetCss(), GetFont());
 				r = t.ApplyPadding(r);
 			}
 			
@@ -2158,7 +2158,7 @@ void LTableLayout::OnPaint(LSurface *pDC)
 	}
 
 	d->Dpi = GetWindow()->GetDpi();
-	GCssTools Tools(this);
+	LCssTools Tools(this);
 	LRect Client = GetClient();
 	Tools.PaintContent(pDC, Client);
 
@@ -2169,7 +2169,7 @@ void LTableLayout::OnPaint(LSurface *pDC)
 	}
 
 	#if 0 // DEBUG_DRAW_CELLS
-	pDC->Colour(GColour(255, 0, 0));
+	pDC->Colour(LColour(255, 0, 0));
 	pDC->Box();
 	#endif
 

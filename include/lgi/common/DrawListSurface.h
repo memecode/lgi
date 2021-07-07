@@ -6,7 +6,7 @@ class GDrawListSurface : public LSurface
 	struct GDrawListSurfacePriv *d;
 
 public:
-	GDrawListSurface(int Width, int Height, GColourSpace Cs = CsRgba32);
+	GDrawListSurface(int Width, int Height, LColourSpace Cs = CsRgba32);
 	GDrawListSurface(LSurface *FromSurface);
 	~GDrawListSurface();
 
@@ -15,8 +15,8 @@ public:
 	bool OnPaint(LSurface *Dest);
 	LFont *GetFont();
 	void SetFont(LFont *Font);
-	GColour Background();
-	GColour Background(GColour c);
+	LColour Background();
+	LColour Background(LColour c);
 	LDisplayString *Text(int x, int y, const char *Str, int Len = -1);
 	
 	// Calls that are stored and played back:
@@ -24,7 +24,7 @@ public:
 	LRect ClipRgn(LRect *Rgn);
 	COLOUR Colour();
 	COLOUR Colour(COLOUR c, int Bits = 0);
-	GColour Colour(GColour c);
+	LColour Colour(LColour c);
 	int Op() { return GDC_SET; }
 	int Op(int Op, NativeInt Param = -1) { return GDC_SET; }
 	int X();
@@ -64,8 +64,8 @@ public:
 	// Stubs that don't work here..
 	bool HasAlpha() { return false; }
 	bool HasAlpha(bool b) { return false; }
-	bool Applicator(GApplicator *pApp) { return false; }
-	GApplicator *Applicator() { return NULL; }
+	bool Applicator(LApplicator *pApp) { return false; }
+	LApplicator *Applicator() { return NULL; }
 	GPalette *Palette() { return NULL; }
 	void Palette(GPalette *pPal, bool bOwnIt = true) { }
 };

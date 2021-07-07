@@ -577,7 +577,7 @@ bool LEdit::SysEmptyText()
 	if (Empty)
 	{
 		// Show empty text
-		GColour c(L_LOW);
+		LColour c(L_LOW);
 		if (!d->InEmptyMode)
 		{
 			d->NonEmptyColor = GetCss(true)->Color();

@@ -387,7 +387,7 @@ void LButton::OnPaint(LSurface *pDC)
 {
 	#if defined LGI_CARBON
 
-		GColour NoPaintColour = StyleColour(LCss::PropBackgroundColor, GColour(L_MED));
+		LColour NoPaintColour = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 		if (!NoPaintColour.IsTransparent())
 		{
 			pDC->Colour(NoPaintColour);
@@ -421,7 +421,7 @@ void LButton::OnPaint(LSurface *pDC)
 			LRect r = GetClient();
 			pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
 			pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
-			d->Paint(pDC, pt, GColour(), r, Enabled(), Info.state == kThemeStatePressed);
+			d->Paint(pDC, pt, LColour(), r, Enabled(), Info.state == kThemeStatePressed);
 		}
 	
 	#else
@@ -442,19 +442,19 @@ void LButton::OnPaint(LSurface *pDC)
 			LRect r = GetClient();
 			pt.x = r.x1 + ((r.X()-d->TxtSz.X())/2) + (d->Pressed != 0);
 			pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
-			d->Paint(pDC, pt, GColour(), r, Enabled(), false);
+			d->Paint(pDC, pt, LColour(), r, Enabled(), false);
 			if (Focus())
 			{
 				LRect r = GetClient();
 				r.Size(5, 3);
-				pDC->Colour(GColour(180, 180, 180));
+				pDC->Colour(LColour(180, 180, 180));
 				pDC->LineStyle(LSurface::LineAlternate);
 				pDC->Box(&r);
 			}
 		}
 		else
 		{
-			GColour Back(d->Over ? L_HIGH : L_MED);
+			LColour Back(d->Over ? L_HIGH : L_MED);
 			LRect r(0, 0, X()-1, Y()-1);
 			if (Default())
 			{
@@ -522,7 +522,7 @@ bool LButton::OnLayout(LViewLayoutInfo &Inf)
 	LPoint Dpi(96, 96);
 	auto Css = GetCss();
 	auto Font = GetFont();
-	GCssTools Tools(Css, Font);
+	LCssTools Tools(Css, Font);
 	auto c = GetClient();
 	auto TxtMin = d->GetMin();
 	auto TxtMax = d->GetMax();

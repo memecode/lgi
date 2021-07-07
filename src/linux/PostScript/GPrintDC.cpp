@@ -115,7 +115,7 @@ public:
 	COLOUR c;
 	
 	char *FileName;
-	GFile Ps;
+	LFile Ps;
 	
 	GPrintDCPrivate()
 	{
@@ -272,7 +272,7 @@ public:
 	void drawRect(int x, int y, int wid, int height) {}
 	// void drawImage(int x, int y, XBitmapImage &image, int sx, int sy, int sw, int sh, XBitmapImage::BlitOp op) {}
 	
-	GFile &File()
+	LFile &File()
 	{
 		return pDC->d->Ps;
 	}
@@ -583,9 +583,9 @@ COLOUR LPrintDC::Colour()
 	return d->c;
 }
 
-GColour LPrintDC::Colour(GColour c)
+LColour LPrintDC::Colour(LColour c)
 {
-	GColour Prev(d->c, 24);
+	LColour Prev(d->c, 24);
 	COLOUR c24 = c.c24();
 	if (c24 != d->c)
 	{

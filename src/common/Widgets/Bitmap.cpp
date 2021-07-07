@@ -122,7 +122,7 @@ void LBitmap::SetDC(LSurface *pNewDC)
 		pDC = new LMemDC;
 		if (pDC && pDC->Create(pNewDC->X(), pNewDC->Y(), GdcD->GetColourSpace()))
 		{
-			GColour Bk = LColour(L_WORKSPACE);
+			LColour Bk = LColour(L_WORKSPACE);
 			if (GetCss())
 			{
 				LCss::ColorDef b = GetCss()->BackgroundColor();
@@ -168,7 +168,7 @@ GMessage::Result LBitmap::OnEvent(GMessage *Msg)
 
 void LBitmap::OnPaint(LSurface *pScreen)
 {
-	GColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
+	LColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 
 	LRect a = GetClient();
 	pScreen->Colour(cBack);

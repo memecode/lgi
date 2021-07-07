@@ -51,7 +51,7 @@ public:
 		GOptionsFile::PortableType IsPortable;
 		LString OptionsPath;
 		LString Lang, Dict;
-		GCapabilityTarget *CapTarget;
+		LCapabilityTarget *CapTarget;
 		
 		Params()
 		{

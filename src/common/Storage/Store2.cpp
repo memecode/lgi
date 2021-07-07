@@ -73,7 +73,7 @@ StorageItemHeader::StorageItemHeader()
 	DirAlloc = 0;
 }
 
-bool StorageItemHeader::Serialize(GFile &f, bool Write)
+bool StorageItemHeader::Serialize(LFile &f, bool Write)
 {
 	bool Status = true;
 	int64 Here = f.GetPos();
@@ -235,7 +235,7 @@ StorageKit *StorageItemImpl::GetTree()
 	return Tree;
 }
 
-bool StorageItemImpl::EndOfObj(GFile &f)
+bool StorageItemImpl::EndOfObj(LFile &f)
 {
 	if (!Header)
 	{
@@ -249,7 +249,7 @@ bool StorageItemImpl::EndOfObj(GFile &f)
 	return Before || After;
 }
 
-GFile *StorageItemImpl::GotoObject(const char *file, int line)
+LFile *StorageItemImpl::GotoObject(const char *file, int line)
 {
 	GSubFilePtr *f = 0;
 	
@@ -322,7 +322,7 @@ bool StorageItemImpl::SetDirty(bool Dirty)
 	return Status;
 }
 
-bool StorageItemImpl::SerializeHeader(GFile &f, bool Write)
+bool StorageItemImpl::SerializeHeader(LFile &f, bool Write)
 {
 	bool Status = false;
 
@@ -2057,7 +2057,7 @@ bool StorageKitImpl::Compact(Progress *p, bool Interactive, StorageValidator *va
 		int Reserved3[4];		// 0x0
 	};
 */
-bool StorageKitImpl::_Serialize(GFile &f, bool Write)
+bool StorageKitImpl::_Serialize(LFile &f, bool Write)
 {
 	bool Status = false;
 	StorageHeader Header;

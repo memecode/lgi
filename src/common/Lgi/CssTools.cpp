@@ -21,7 +21,7 @@ struct CssImageCache
 		auto ThemeFolder = Res ? Res->GetThemeFolder() : NULL;
 		if (ThemeFolder)
 		{
-			GFile::Path p = ThemeFolder;
+			LFile::Path p = ThemeFolder;
 			p += Uri;
 			if (p.Exists())
 				File = p.GetFull();
@@ -44,7 +44,7 @@ struct CssImageCache
 	}
 }	Cache;
 
-GColour &GCssTools::GetFore(GColour *Default)
+LColour &LCssTools::GetFore(LColour *Default)
 {
 	if (!ForeInit)
 	{
@@ -71,7 +71,7 @@ GColour &GCssTools::GetFore(GColour *Default)
 	return Fore;
 }
 	
-GColour &GCssTools::GetBack(GColour *Default, int Depth)
+LColour &LCssTools::GetBack(LColour *Default, int Depth)
 {
 	if (!BackInit)
 	{
@@ -99,7 +99,7 @@ GColour &GCssTools::GetBack(GColour *Default, int Depth)
 	return Back;
 }
 
-LRect GCssTools::ApplyMargin(LRect &in)
+LRect LCssTools::ApplyMargin(LRect &in)
 {
 	if (!Css)
 		return in;
@@ -119,7 +119,7 @@ LRect GCssTools::ApplyMargin(LRect &in)
 	return r;
 }
 
-LRect GCssTools::GetPadding(LRect &box, LRect *def)
+LRect LCssTools::GetPadding(LRect &box, LRect *def)
 {
 	LRect r(0, 0, 0, 0);
 	if (Css)
@@ -145,7 +145,7 @@ LRect GCssTools::GetPadding(LRect &box, LRect *def)
 	return r;
 }
 
-LRect GCssTools::GetBorder(LRect &box, LRect *def)
+LRect LCssTools::GetBorder(LRect &box, LRect *def)
 {
 	LRect r(0, 0, 0, 0);
 	if (Css)
@@ -171,7 +171,7 @@ LRect GCssTools::GetBorder(LRect &box, LRect *def)
 	return r;
 }
 
-LRect GCssTools::ApplyBorder(LRect &in)
+LRect LCssTools::ApplyBorder(LRect &in)
 {
 	if (!Css)
 		return in;
@@ -184,7 +184,7 @@ LRect GCssTools::ApplyBorder(LRect &in)
 				 in.y2 - b.y2);
 }
 
-LRect GCssTools::ApplyPadding(LRect &in)
+LRect LCssTools::ApplyPadding(LRect &in)
 {
 	if (!Css)
 		return in;
@@ -197,7 +197,7 @@ LRect GCssTools::ApplyPadding(LRect &in)
 				 in.y2 - pad.y2);
 }
 
-bool GCssTools::SetLineStyle(LSurface *pDC, LCss::BorderDef &b)
+bool LCssTools::SetLineStyle(LSurface *pDC, LCss::BorderDef &b)
 {
 	if (b.Color.Type == LCss::ColorRgb)
 	{
@@ -221,7 +221,7 @@ bool GCssTools::SetLineStyle(LSurface *pDC, LCss::BorderDef &b)
 	return true;
 }
 
-LRect GCssTools::PaintBorder(LSurface *pDC, LRect &in)
+LRect LCssTools::PaintBorder(LSurface *pDC, LRect &in)
 {
 	LRect Content = in;
 	if (!Css)
@@ -327,7 +327,7 @@ LRect GCssTools::PaintBorder(LSurface *pDC, LRect &in)
 	return Content;
 }
 
-LRect GCssTools::PaintPadding(LSurface *pDC, LRect &in)
+LRect LCssTools::PaintPadding(LSurface *pDC, LRect &in)
 {
 	LRect Content = in;
 	if (!Css)
@@ -338,7 +338,7 @@ LRect GCssTools::PaintPadding(LSurface *pDC, LRect &in)
 	if (r != Content)
 	{
 		// Draw the padding in the background colour
-		GColour Background = GetBack();
+		LColour Background = GetBack();
 		pDC->Colour(Background);
 
 		if (r.x1 > Content.x1)
@@ -356,12 +356,12 @@ LRect GCssTools::PaintPadding(LSurface *pDC, LRect &in)
 	return Content;
 }
 
-LSurface *GCssTools::GetCachedImage(const char *Uri)
+LSurface *LCssTools::GetCachedImage(const char *Uri)
 {
 	return Cache.Get(Uri);
 }
 
-bool GCssTools::Tile(LSurface *pDC, LRect in, LSurface *Img, int Ox, int Oy)
+bool LCssTools::Tile(LSurface *pDC, LRect in, LSurface *Img, int Ox, int Oy)
 {
 	if (!pDC || !Img)
 		return false;
@@ -373,7 +373,7 @@ bool GCssTools::Tile(LSurface *pDC, LRect in, LSurface *Img, int Ox, int Oy)
 	return true;
 }
 
-LSurface *GCssTools::GetBackImage()
+LSurface *LCssTools::GetBackImage()
 {
 	LCss::ImageDef BackDef;
 	auto Parent = View ? View->GetParent() : NULL;
@@ -394,7 +394,7 @@ LSurface *GCssTools::GetBackImage()
 	return BackImg;
 }
 
-void GCssTools::PaintContent(LSurface *pDC, LRect &in, const char *utf8, LSurface *img)
+void LCssTools::PaintContent(LSurface *pDC, LRect &in, const char *utf8, LSurface *img)
 {
 	bool BackgroundDrawn = false;
 	auto BkImg = GetBackImage();
@@ -402,7 +402,7 @@ void GCssTools::PaintContent(LSurface *pDC, LRect &in, const char *utf8, LSurfac
 		BackgroundDrawn = Tile(pDC, in, BkImg, BackPos.x1, BackPos.y1);
 	if (!BackgroundDrawn)
 	{
-		GColour Background = GetBack();
+		LColour Background = GetBack();
 		if (Background)
 		{
 			pDC->Colour(Background);
@@ -441,7 +441,7 @@ void GCssTools::PaintContent(LSurface *pDC, LRect &in, const char *utf8, LSurfac
 			LCss::ColorDef Fore;
 			if (Css)
 				Fore = Css->Color();
-			GColour ForeCol(L_TEXT);
+			LColour ForeCol(L_TEXT);
 			if (Fore.IsValid())
 				ForeCol = Fore;
 			Fnt->Fore(ForeCol);

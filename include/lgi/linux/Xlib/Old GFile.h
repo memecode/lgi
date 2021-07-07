@@ -192,7 +192,7 @@ public:
 
 class FileDevice
 {
-	friend class GFile;
+	friend class LFile;
 
 	char CurDir[256];
 	int NumDrive;
@@ -219,7 +219,7 @@ public:
 	bool GetVolumeInfomation(char Drive, VolumeInfo *pInfo);
 };
 
-class GFile {
+class LFile {
 protected:
 	char	*Name;
 	bool	Swap;
@@ -239,8 +239,8 @@ protected:
 	int SwapWrite(uchar *Buf, int Size);
 
 public:
-	GFile();
-	virtual ~GFile();
+	LFile();
+	virtual ~LFile();
 
 	virtual bool Open(char *Name, int Attrib);
 	virtual bool Open();
@@ -266,34 +266,34 @@ public:
 	int Print(char *Format, ...);
 
 	// Read
-	virtual GFile &operator >> (char		&i);
-	virtual GFile &operator >> (signed char		&i);
-	virtual GFile &operator >> (unsigned char	&i);
-	virtual GFile &operator >> (signed short	&i);
-	virtual GFile &operator >> (unsigned short	&i);
-	virtual GFile &operator >> (signed int		&i);
-	virtual GFile &operator >> (unsigned int	&i);
-	virtual GFile &operator >> (signed long		&i);
-	virtual GFile &operator >> (unsigned long	&i);
-	virtual GFile &operator >> (float		&i);
-	virtual GFile &operator >> (double		&i);
-	virtual GFile &operator >> (long double		&i);
-	virtual GFile &operator >> (quad		&i);
+	virtual LFile &operator >> (char		&i);
+	virtual LFile &operator >> (signed char		&i);
+	virtual LFile &operator >> (unsigned char	&i);
+	virtual LFile &operator >> (signed short	&i);
+	virtual LFile &operator >> (unsigned short	&i);
+	virtual LFile &operator >> (signed int		&i);
+	virtual LFile &operator >> (unsigned int	&i);
+	virtual LFile &operator >> (signed long		&i);
+	virtual LFile &operator >> (unsigned long	&i);
+	virtual LFile &operator >> (float		&i);
+	virtual LFile &operator >> (double		&i);
+	virtual LFile &operator >> (long double		&i);
+	virtual LFile &operator >> (quad		&i);
 
 	// Write
-	virtual GFile &operator << (char		i);
-	virtual GFile &operator << (signed char		i);
-	virtual GFile &operator << (unsigned char	i);
-	virtual GFile &operator << (signed short	i);
-	virtual GFile &operator << (unsigned short	i);
-	virtual GFile &operator << (signed int		i);
-	virtual GFile &operator << (unsigned int	i);
-	virtual GFile &operator << (signed long		i);
-	virtual GFile &operator << (unsigned long	i);
-	virtual GFile &operator << (float		i);
-	virtual GFile &operator << (double		i);
-	virtual GFile &operator << (long double		i);
-	virtual GFile &operator << (quad		i);
+	virtual LFile &operator << (char		i);
+	virtual LFile &operator << (signed char		i);
+	virtual LFile &operator << (unsigned char	i);
+	virtual LFile &operator << (signed short	i);
+	virtual LFile &operator << (unsigned short	i);
+	virtual LFile &operator << (signed int		i);
+	virtual LFile &operator << (unsigned int	i);
+	virtual LFile &operator << (signed long		i);
+	virtual LFile &operator << (unsigned long	i);
+	virtual LFile &operator << (float		i);
+	virtual LFile &operator << (double		i);
+	virtual LFile &operator << (long double		i);
+	virtual LFile &operator << (quad		i);
 };
 
 // C functions
@@ -302,8 +302,8 @@ extern bool ResolveShortcut(char *LinkFile, char *Path, int Length);
 extern int FileSize(char *FileName);
 extern bool FileExists(char *Name);
 extern int SizeofStr(char *s);
-extern void WriteStr(GFile &f, char *s);
-extern char *ReadStr(GFile &f);
+extern void WriteStr(LFile &f, char *s);
+extern char *ReadStr(LFile &f);
 extern bool TrimDir(char *Path);
 
 #endif

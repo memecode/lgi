@@ -12,7 +12,7 @@ struct GDrawListSurfacePriv : public LArray<LCmd*>
 {
 	int x, y, Bits;
 	int DpiX, DpiY;
-	GColour Fore, Back;
+	LColour Fore, Back;
 	LSurface *CreationSurface;
 	LFont *Font;
 
@@ -136,9 +136,9 @@ struct LCmdPixel : public LCmd
 
 struct LCmdColour : public LCmd
 {
-	GColour c;
+	LColour c;
 	
-	LCmdColour(GColour &col)
+	LCmdColour(LColour &col)
 	{
 		c = col;
 	}
@@ -165,14 +165,14 @@ struct LCmdLine : public LCmd
 	}
 };
 
-GDrawListSurface::GDrawListSurface(int Width, int Height, GColourSpace Cs)
+GDrawListSurface::GDrawListSurface(int Width, int Height, LColourSpace Cs)
 {
 	d = new GDrawListSurfacePriv;
 	d->x = Width;
 	d->y = Height;
 	d->DpiX = d->DpiY = LgiScreenDpi();
 	d->Bits = GColourSpaceToBits(Cs);
-	d->Fore = GColour::Black;
+	d->Fore = LColour::Black;
 	ColourSpace = Cs;
 }
 
@@ -185,7 +185,7 @@ GDrawListSurface::GDrawListSurface(LSurface *FromSurface)
 	d->DpiY = FromSurface->DpiX();
 	ColourSpace = FromSurface->GetColourSpace();
 	d->Bits = GColourSpaceToBits(ColourSpace);
-	d->Fore = GColour::Black;
+	d->Fore = LColour::Black;
 	d->CreationSurface = FromSurface;
 }
 
@@ -214,14 +214,14 @@ void GDrawListSurface::SetFont(LFont *Font)
 	d->Font = Font;
 }
 
-GColour GDrawListSurface::Background()
+LColour GDrawListSurface::Background()
 {
 	return d->Back;
 }
 
-GColour GDrawListSurface::Background(GColour c)
+LColour GDrawListSurface::Background(LColour c)
 {
-	GColour Prev = d->Back;
+	LColour Prev = d->Back;
 	d->Back = c;
 	return Prev;	
 }
@@ -295,9 +295,9 @@ COLOUR GDrawListSurface::Colour(COLOUR c, int Bits)
 	return Prev;
 }
 
-GColour GDrawListSurface::Colour(GColour c)
+LColour GDrawListSurface::Colour(LColour c)
 {
-	GColour Prev = d->Fore;
+	LColour Prev = d->Fore;
 	d->Fore = c;
 
 	LCmdColour *cmd = new LCmdColour(d->Fore);

@@ -23,7 +23,7 @@ enum NodeType
 extern int NodeSort(LTreeItem *a, LTreeItem *b, NativeInt d);
 extern DeclGArrayCompare(XmlSort, LXmlTag*, NativeInt);
 
-class ProjectNode : public IdeCommon, public GDragDropSource, public FtpCallback, public NodeSource
+class ProjectNode : public IdeCommon, public LDragDropSource, public FtpCallback, public NodeSource
 {
 	NodeType Type;
 	int NodeId;
@@ -74,8 +74,8 @@ public:
 	const char *GetCharset() override { return Charset; }
 	
 	// Dnd
-	bool GetFormats(GDragFormats &Formats) override;
-	bool GetData(LArray<GDragData> &Data) override;
+	bool GetFormats(LDragFormats &Formats) override;
+	bool GetData(LArray<LDragData> &Data) override;
 	
 	// Ui events
 	bool OnBeginDrag(LMouse &m) override;

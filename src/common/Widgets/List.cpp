@@ -142,7 +142,7 @@ LList *LListItemColumn::GetList()
 	return _Item ? _Item->Parent : 0;
 }
 
-GItemContainer *LListItemColumn::GetContainer()
+LItemContainer *LListItemColumn::GetContainer()
 {
 	return GetList();
 }
@@ -206,7 +206,7 @@ int LListItem::GetImage(int Flags)
 	return d->ListItem_Image;
 }
 
-GItemContainer *LListItem::GetContainer()
+LItemContainer *LListItem::GetContainer()
 {
 	return Parent;
 }
@@ -260,7 +260,7 @@ LRect *LListItem::GetPos(int Col)
 	{
 		if (Col >= 0)
 		{
-			GItemColumn *Column = 0;
+			LItemColumn *Column = 0;
 
 			int Cx = Parent->GetImageList() ? 16 : 0;
 			for (int c=0; c<Col; c++)
@@ -447,7 +447,7 @@ void LListItem::ClearDs(int Col)
 	}
 }
 
-void LListItem::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
+void LListItem::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 {
 	LSurface *&pDC = Ctx.pDC;
 	if (pDC && c)
@@ -461,13 +461,13 @@ void LListItem::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 		}
 		else
 		{
-			GColour Background = Ctx.Back;
+			LColour Background = Ctx.Back;
 
 			if (Parent->GetMode() == LListDetails &&
 				c->Mark() &&
 				!d->Selected)
 			{
-				Background = GdcMixColour(GColour(0, 24), Background, (double)1/32);
+				Background = GdcMixColour(LColour(0, 24), Background, (double)1/32);
 			}
 
 			if (GridLines())
@@ -573,7 +573,7 @@ void LListItem::OnPaint(GItem::ItemPaintCtx &Ctx)
 	
 	for (int i=0; i<Parent->Columns.Length(); i++)
 	{
-		GItemColumn *c = Parent->Columns[i];
+		LItemColumn *c = Parent->Columns[i];
 		if (Parent->GetMode() == LListColumns)
 			ColCtx.Set(x, Ctx.y1, Ctx.x2, Ctx.y2);
 		else
@@ -714,7 +714,7 @@ void LList::OnItemSelect(LArray<LListItem*> &It)
 	SendNotify(GNotifyItem_Select);
 }
 
-bool GItemContainer::DeleteColumn(GItemColumn *Col)
+bool LItemContainer::DeleteColumn(LItemColumn *Col)
 {
 	bool Status = false;
 
@@ -1221,7 +1221,7 @@ bool LList::OnKey(LKey &k)
 								bool Ascend = true;
 								for (int i=0; i<Columns.Length(); i++)
 								{
-									GItemColumn *c = Columns[i];
+									LItemColumn *c = Columns[i];
 									if (c->Mark())
 									{
 										Col = i;
@@ -1273,7 +1273,7 @@ bool LList::OnKey(LKey &k)
 
 LgiCursor LList::GetCursor(int x, int y)
 {
-	GItemColumn *Resize, *Over;
+	LItemColumn *Resize, *Over;
 	HitColumn(x, y, Resize, Over);
 	if (Resize)
 		return LCUR_SizeHor;
@@ -1299,7 +1299,7 @@ void LList::OnMouseClick(LMouse &m)
 				ColumnHeader.Overlap(m.x, m.y))
 			{
 				// Clicked on a column heading
-				GItemColumn *Resize, *Over;
+				LItemColumn *Resize, *Over;
 				int Index = HitColumn(m.x, m.y, Resize, Over);
 
 				if (Resize)
@@ -1524,7 +1524,7 @@ void LList::OnMouseClick(LMouse &m)
 					if (d->DragData < 0)
 						break;
 					
-					GItemColumn *c = Columns[d->DragData];
+					LItemColumn *c = Columns[d->DragData];
 					if (c)
 					{
 						c->Value(false);
@@ -1593,7 +1593,7 @@ void LList::OnMouseClick(LMouse &m)
 						int Best = 100000000, NewIndex = OldIndex, i=0, delta;
 						for (i=0; i<Columns.Length(); i++)
 						{
-							GItemColumn *Col = Columns[i];
+							LItemColumn *Col = Columns[i];
 							delta = abs(p.x - Col->GetPos().x1);
 							if (delta < Best)
 							{
@@ -1607,7 +1607,7 @@ void LList::OnMouseClick(LMouse &m)
 							NewIndex = i;
 						}
 
-						GItemColumn *Col = DragCol->GetColumn();
+						LItemColumn *Col = DragCol->GetColumn();
 						if (OldIndex != NewIndex &&
 							OnColumnReindex(Col, OldIndex, NewIndex))
 						{
@@ -1784,7 +1784,7 @@ void LList::OnMouseMove(LMouse &m)
 		}
 		case RESIZE_COLUMN:
 		{
-			GItemColumn *c = Columns[d->DragData];
+			LItemColumn *c = Columns[d->DragData];
 			if (c)
 			{
 				// int OldWidth = c->Width();
@@ -1801,7 +1801,7 @@ void LList::OnMouseMove(LMouse &m)
 			if (d->DragData < 0 || d->DragData >= Columns.Length())
 				break;
 				
-			GItemColumn *c = Columns[d->DragData];
+			LItemColumn *c = Columns[d->DragData];
 			if (c)
 			{
 				if (abs(m.x - d->DragStart.x) > DRAG_THRESHOLD ||
@@ -2502,10 +2502,10 @@ void LList::PourAll()
 	}
 }
 
-static GColour Tint(GColour back, double amt)
+static LColour Tint(LColour back, double amt)
 {
 	bool Darken = back.GetGray() >= 128;
-	GColour Mixer = Darken ? GColour::Black : GColour::White;
+	LColour Mixer = Darken ? LColour::Black : LColour::White;
 	return back.Mix(Mixer, (float)(1.0f - amt));
 }
 
@@ -2518,18 +2518,18 @@ void LList::OnPaint(LSurface *pDC)
 	if (!Lock(_FL))
 		return;
 
-	GCssTools Tools(this);
-	GColour DisabledTint(L_MED);
-	GColour Workspace(L_WORKSPACE);
-	GColour NonFocusBack(L_NON_FOCUS_SEL_BACK);	
+	LCssTools Tools(this);
+	LColour DisabledTint(L_MED);
+	LColour Workspace(L_WORKSPACE);
+	LColour NonFocusBack(L_NON_FOCUS_SEL_BACK);	
 	
-	GColour Fore = Enabled() ? Tools.GetFore() : Tools.GetFore().Mix(DisabledTint);
-	GColour Back = Tools.GetBack(&Workspace, 0);
+	LColour Fore = Enabled() ? Tools.GetFore() : Tools.GetFore().Mix(DisabledTint);
+	LColour Back = Tools.GetBack(&Workspace, 0);
 	double NonFocusBackAmt = (double)NonFocusBack.GetGray() / Workspace.GetGray();
 	if (!Enabled())
 		Back = Back.Mix(DisabledTint);
-	GColour SelFore(Focus() ? L_FOCUS_SEL_FORE : L_NON_FOCUS_SEL_FORE);
-	GColour SelBack(Focus() ? L_FOCUS_SEL_BACK : (Enabled() ? Tint(Back, NonFocusBackAmt) : DisabledTint));
+	LColour SelFore(Focus() ? L_FOCUS_SEL_FORE : L_NON_FOCUS_SEL_FORE);
+	LColour SelBack(Focus() ? L_FOCUS_SEL_BACK : (Enabled() ? Tint(Back, NonFocusBackAmt) : DisabledTint));
 	PourAll();
 	
 	// printf("ListPaint SelFore=%s SelBack=%s Back=%s %f NonFocusBack=%s\n", SelFore.GetStr(), SelBack.GetStr(), Back.GetStr(), NonFocusBackAmt, NonFocusBack.GetStr());
@@ -2541,7 +2541,7 @@ void LList::OnPaint(LSurface *pDC)
 	// Check icon column status then draw
 	if (AskImage() && !IconCol)
 	{
-		IconCol.Reset(new GItemColumn(this, 0, 18));
+		IconCol.Reset(new LItemColumn(this, 0, 18));
 		if (IconCol)
 		{
 			IconCol->Resizable(false);
@@ -2717,7 +2717,7 @@ int LList::GetContentSize(int Index)
 	}
 	
 	// Measure the heading too
-	GItemColumn *Col = Columns[Index];
+	LItemColumn *Col = Columns[Index];
 	LFont *f = GetFont();
 	LgiAssert(f != 0);
 	if (f)

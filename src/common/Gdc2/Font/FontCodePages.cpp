@@ -603,7 +603,7 @@ short _gdc_koi8ru_mapping[128] =
 
 #endif
 
-GCharset::GCharset(const char *cp, const char *des, short *map, const char *alt)
+LCharset::LCharset(const char *cp, const char *des, short *map, const char *alt)
 {
 	Charset = cp;
 	Description = des;
@@ -648,19 +648,19 @@ GCharset::GCharset(const char *cp, const char *des, short *map, const char *alt)
 	}
 }
 
-bool GCharset::IsUnicode()
+bool LCharset::IsUnicode()
 {
 	return	(Type == CpUtf8) ||
 			(Type == CpUtf16) ||
 			(Type == CpUtf32);
 }
 
-const char *GCharset::GetIconvName()
+const char *LCharset::GetIconvName()
 {
 	return IconvName ? IconvName : Charset;
 }
 
-bool GCharset::IsAvailable()
+bool LCharset::IsAvailable()
 {
 	if (Type != CpIconv)
 		return true;
@@ -674,108 +674,108 @@ bool GCharset::IsAvailable()
 	return false;
 }
 
-static GCharset LgiCharsets[] = {
+static LCharset LgiCharsets[] = {
 
 // Good 'ol ascii
-GCharset("us-ascii",		"ASCII",						_gdc_usascii_mapping, "ascii-us,iso-ir-6,ANSI_X3.4-1986,ISO_646.irv,ASCII,ISO646-US,us,IBM367,cp367,csASCII"),
+LCharset("us-ascii",		"ASCII",						_gdc_usascii_mapping, "ascii-us,iso-ir-6,ANSI_X3.4-1986,ISO_646.irv,ASCII,ISO646-US,us,IBM367,cp367,csASCII"),
 
 // Unicode (up here so they get found first)
-GCharset("utf-8",			"Utf-8"),
-GCharset("utf-16",			"Utf-16"),
-GCharset("utf-32",			"Utf-32"),
-GCharset("ucs-2",			"Ucs-2"),
+LCharset("utf-8",			"Utf-8"),
+LCharset("utf-16",			"Utf-16"),
+LCharset("utf-32",			"Utf-32"),
+LCharset("ucs-2",			"Ucs-2"),
 
 // ISO (get prefered over windows charsets by being first in this list)
-GCharset("iso-8859-1",		"ISO 8859-1 (West Europe)",		_gdc_ISO_8859_identity_mapping, "iso-ir-100,ISO_8859-1,latin1,l1,IBM819,CP819,csISOLatin1,iso8859-1"),
-GCharset("iso-8859-2",		"ISO 8859-2 (East Europe)",		_gdc_ISO_8859_2_mapping, "iso-ir-101,ISO_8859-2,latin2,l2,csISOLatin2"),
-GCharset("iso-8859-3",		"ISO 8859-3 (Latin Script)",	_gdc_ISO_8859_3_mapping, "iso-ir-109,ISO_8859-3,latin3,l3,csISOLatin3"),
-GCharset("iso-8859-4",		"ISO 8859-4 (Baltic)",			_gdc_ISO_8859_4_mapping, "iso-ir-110,ISO_8859-4,latin4,l4,csISOLatin4"),
-GCharset("iso-8859-5",		"ISO 8859-5 (Russian)",			_gdc_ISO_8859_5_mapping, "iso-ir-144,ISO_8859-5,cyrillic,csISOLatinCyrillic"),
-GCharset("iso-8859-6",		"ISO 8859-6 (Arabic)",			_gdc_ISO_8859_6_mapping, "iso-ir-127,ISO_8859-6,ECMA-114,ASMO-708,arabic,csISOLatinArabic"),
-GCharset("iso-8859-7",		"ISO 8859-7 (Greek)",			_gdc_ISO_8859_7_mapping, "iso-ir-126,ISO_8859-7,ELOT_928,ECMA-118,greek,greek8,csISOLatinGreek"),
-GCharset("iso-8859-8",		"ISO 8859-8 (Hebrew)",			_gdc_ISO_8859_8_mapping, "iso-ir-138,ISO_8859-8,hebrew,csISOLatinHebrew,iso-8859-8-i"),
-GCharset("iso-8859-9",		"ISO 8859-9 (Turkish)",			_gdc_ISO_8859_9_mapping, "iso-ir-148,ISO_8859-9,latin5,l5,csISOLatin5"),
-GCharset("iso-8859-13",		"ISO 8859-13 (Baltik)",			_gdc_ISO_8859_13_mapping, "ISO_8859-9"),
-GCharset("iso-8859-15",		"ISO 8859-15 (Latic 9)",		_gdc_ISO_8859_15_mapping, "ISO_8859-15"),
+LCharset("iso-8859-1",		"ISO 8859-1 (West Europe)",		_gdc_ISO_8859_identity_mapping, "iso-ir-100,ISO_8859-1,latin1,l1,IBM819,CP819,csISOLatin1,iso8859-1"),
+LCharset("iso-8859-2",		"ISO 8859-2 (East Europe)",		_gdc_ISO_8859_2_mapping, "iso-ir-101,ISO_8859-2,latin2,l2,csISOLatin2"),
+LCharset("iso-8859-3",		"ISO 8859-3 (Latin Script)",	_gdc_ISO_8859_3_mapping, "iso-ir-109,ISO_8859-3,latin3,l3,csISOLatin3"),
+LCharset("iso-8859-4",		"ISO 8859-4 (Baltic)",			_gdc_ISO_8859_4_mapping, "iso-ir-110,ISO_8859-4,latin4,l4,csISOLatin4"),
+LCharset("iso-8859-5",		"ISO 8859-5 (Russian)",			_gdc_ISO_8859_5_mapping, "iso-ir-144,ISO_8859-5,cyrillic,csISOLatinCyrillic"),
+LCharset("iso-8859-6",		"ISO 8859-6 (Arabic)",			_gdc_ISO_8859_6_mapping, "iso-ir-127,ISO_8859-6,ECMA-114,ASMO-708,arabic,csISOLatinArabic"),
+LCharset("iso-8859-7",		"ISO 8859-7 (Greek)",			_gdc_ISO_8859_7_mapping, "iso-ir-126,ISO_8859-7,ELOT_928,ECMA-118,greek,greek8,csISOLatinGreek"),
+LCharset("iso-8859-8",		"ISO 8859-8 (Hebrew)",			_gdc_ISO_8859_8_mapping, "iso-ir-138,ISO_8859-8,hebrew,csISOLatinHebrew,iso-8859-8-i"),
+LCharset("iso-8859-9",		"ISO 8859-9 (Turkish)",			_gdc_ISO_8859_9_mapping, "iso-ir-148,ISO_8859-9,latin5,l5,csISOLatin5"),
+LCharset("iso-8859-13",		"ISO 8859-13 (Baltik)",			_gdc_ISO_8859_13_mapping, "ISO_8859-9"),
+LCharset("iso-8859-15",		"ISO 8859-15 (Latic 9)",		_gdc_ISO_8859_15_mapping, "ISO_8859-15"),
 
 // Windows
-GCharset("windows-874",		"Windows 874 (Thai)",			_gdc_win_874_mapping, "iso-8859-11,cp874"),
-GCharset("windows-932",		"Windows 932 (Japanese)"),
-GCharset("windows-936",		"Windows 936 (Chinese)"),
-GCharset("windows-949",		"Windows 949 (Korean)"),
-GCharset("windows-950",		"Windows 950 (Chinese)"),
-GCharset("windows-1250",	"Windows 1250 (Latin 2)",		_gdc_win_1250_mapping, "x-cp1250,cp1250"),
-GCharset("windows-1251",	"Windows 1251 (Cyrillic)",		_gdc_win_1251_mapping, "x-cp1251,cp1251"),
-GCharset("windows-1252",	"Windows 1252 (Latin 1)",		_gdc_win_1252_mapping, "x-cp1252,cp1252"),
-GCharset("windows-1253",	"Windows 1253 (Greek)",			_gdc_win_1253_mapping, "x-cp1253,cp1253"),
-GCharset("windows-1254",	"Windows 1254 (Turkish)",		_gdc_win_1254_mapping, "x-cp1254,cp1254"),
-GCharset("windows-1255",	"Windows 1255 (Hebrew)",		_gdc_win_1255_mapping, "x-cp1255,cp1255"),
-GCharset("windows-1256",	"Windows 1256 (Arabic)",		_gdc_win_1256_mapping, "x-cp1256,cp1256"),
-GCharset("windows-1257",	"Windows 1257 (Baltic)",		_gdc_win_1257_mapping, "x-cp1257,cp1257"),
-GCharset("windows-1258",	"Windows 1258 (Veitnam)",		_gdc_win_1258_mapping, "x-cp1258,cp1258"),
+LCharset("windows-874",		"Windows 874 (Thai)",			_gdc_win_874_mapping, "iso-8859-11,cp874"),
+LCharset("windows-932",		"Windows 932 (Japanese)"),
+LCharset("windows-936",		"Windows 936 (Chinese)"),
+LCharset("windows-949",		"Windows 949 (Korean)"),
+LCharset("windows-950",		"Windows 950 (Chinese)"),
+LCharset("windows-1250",	"Windows 1250 (Latin 2)",		_gdc_win_1250_mapping, "x-cp1250,cp1250"),
+LCharset("windows-1251",	"Windows 1251 (Cyrillic)",		_gdc_win_1251_mapping, "x-cp1251,cp1251"),
+LCharset("windows-1252",	"Windows 1252 (Latin 1)",		_gdc_win_1252_mapping, "x-cp1252,cp1252"),
+LCharset("windows-1253",	"Windows 1253 (Greek)",			_gdc_win_1253_mapping, "x-cp1253,cp1253"),
+LCharset("windows-1254",	"Windows 1254 (Turkish)",		_gdc_win_1254_mapping, "x-cp1254,cp1254"),
+LCharset("windows-1255",	"Windows 1255 (Hebrew)",		_gdc_win_1255_mapping, "x-cp1255,cp1255"),
+LCharset("windows-1256",	"Windows 1256 (Arabic)",		_gdc_win_1256_mapping, "x-cp1256,cp1256"),
+LCharset("windows-1257",	"Windows 1257 (Baltic)",		_gdc_win_1257_mapping, "x-cp1257,cp1257"),
+LCharset("windows-1258",	"Windows 1258 (Veitnam)",		_gdc_win_1258_mapping, "x-cp1258,cp1258"),
 
 // Russian
-GCharset("koi8-r",			"KOI8-R",						_gdc_koi8r_mapping, "csKOI8R"),
-GCharset("koi8-u",			"KOI8-U",						_gdc_koi8u_mapping, "csKOI8U"),
-GCharset("koi8-ru",			"KOI8-RU",						_gdc_koi8ru_mapping, "csKOI8RU"),
-GCharset("koi8-t",			"KOI8-T (Tajik)"),
+LCharset("koi8-r",			"KOI8-R",						_gdc_koi8r_mapping, "csKOI8R"),
+LCharset("koi8-u",			"KOI8-U",						_gdc_koi8u_mapping, "csKOI8U"),
+LCharset("koi8-ru",			"KOI8-RU",						_gdc_koi8ru_mapping, "csKOI8RU"),
+LCharset("koi8-t",			"KOI8-T (Tajik)"),
 
 // Codepages
-GCharset("cp850",			"Cp850", 0, "IBM850,850,csPC850Multilingual"),
-GCharset("cp862",			"Cp862", 0, "IBM862,862,csPC862LatinHebrew"),
-GCharset("cp866",			"Cp866", 0, "IBM866,866,csIBM866"),
-GCharset("cp1133",			"Cp1133 (Laotian)"),
+LCharset("cp850",			"Cp850", 0, "IBM850,850,csPC850Multilingual"),
+LCharset("cp862",			"Cp862", 0, "IBM862,862,csPC862LatinHebrew"),
+LCharset("cp866",			"Cp866", 0, "IBM866,866,csIBM866"),
+LCharset("cp1133",			"Cp1133 (Laotian)"),
 
 // Japanese
-GCharset("euc-jp",			"EUC-JP", 0, "csEUCPkdFmtJapanese"),
-GCharset("shift_jis",		"SHIFT_JIS", 0, "MS_Kanji,csShiftJIS"),
-GCharset("cp932",			"cp932", 0, 0),
-GCharset("iso-2022-jp",		"ISO-2022-JP", 0, "csISO2022JP"),
-GCharset("iso-2022-jp-1",	"ISO-2022-JP-1"),
-GCharset("iso-2022-jp-2",	"ISO-2022-JP-2", 0, "csISO2022JP2"),
+LCharset("euc-jp",			"EUC-JP", 0, "csEUCPkdFmtJapanese"),
+LCharset("shift_jis",		"SHIFT_JIS", 0, "MS_Kanji,csShiftJIS"),
+LCharset("cp932",			"cp932", 0, 0),
+LCharset("iso-2022-jp",		"ISO-2022-JP", 0, "csISO2022JP"),
+LCharset("iso-2022-jp-1",	"ISO-2022-JP-1"),
+LCharset("iso-2022-jp-2",	"ISO-2022-JP-2", 0, "csISO2022JP2"),
 
 // Chinese
-GCharset("euc-cn",			"EUC-CN (Chinese)"),
-GCharset("hz-gb-2312",		"HZ (Chinese)", 0, "hz"),
-GCharset("gbk",				"GBK (Chinese)", 0, "CP936,MS936,windows-936,x-gbk,gb2312,GB-2312,csGB2312,GB2312_CHARSET"),
-GCharset("gb18030",			"GB18030 (Chinese)"),
-GCharset("euc-tw",			"EUC-TW (Chinese)"),
-GCharset("big5",			"BIG5 (Chinese)", 0, "csBig5"),
-GCharset("big5-hkscs",		"BIG5-HKSCS (Chinese)"),
-// GCharset("gb2312",		"GB-2312 (Chinese)", 0, "GB-2312,csGB2312"),
-GCharset("iso-2022-cn",		"ISO-2022-CN (Chinese)"),
-GCharset("iso-2022-cn-eXT","ISO-2022-CN-EXT (Chinese)"),
+LCharset("euc-cn",			"EUC-CN (Chinese)"),
+LCharset("hz-gb-2312",		"HZ (Chinese)", 0, "hz"),
+LCharset("gbk",				"GBK (Chinese)", 0, "CP936,MS936,windows-936,x-gbk,gb2312,GB-2312,csGB2312,GB2312_CHARSET"),
+LCharset("gb18030",			"GB18030 (Chinese)"),
+LCharset("euc-tw",			"EUC-TW (Chinese)"),
+LCharset("big5",			"BIG5 (Chinese)", 0, "csBig5"),
+LCharset("big5-hkscs",		"BIG5-HKSCS (Chinese)"),
+// LCharset("gb2312",		"GB-2312 (Chinese)", 0, "GB-2312,csGB2312"),
+LCharset("iso-2022-cn",		"ISO-2022-CN (Chinese)"),
+LCharset("iso-2022-cn-eXT","ISO-2022-CN-EXT (Chinese)"),
 
 // Korean
-GCharset("euc-kr",			"EUC-KR", 0, "csEUCKR"),
-GCharset("iso-2022-kr",		"ISO-2022-KR", 0, "csISO2022KR"),
-GCharset("johab",			"JOHAB"),
-GCharset("cp949",			"CP949", 0, "ks_c_5601-1987,ks_c_5601"),
+LCharset("euc-kr",			"EUC-KR", 0, "csEUCKR"),
+LCharset("iso-2022-kr",		"ISO-2022-KR", 0, "csISO2022KR"),
+LCharset("johab",			"JOHAB"),
+LCharset("cp949",			"CP949", 0, "ks_c_5601-1987,ks_c_5601"),
 
 // Armenian
-// GCharset("armscii-8",		"ARMSCII-8 (Armenian)"),
+// LCharset("armscii-8",		"ARMSCII-8 (Armenian)"),
 
 // Georgian
-GCharset("Georgian-Academy","Georgian-Academy"),
-GCharset("Georgian-PS",	"	Georgian-PS"),
+LCharset("Georgian-Academy","Georgian-Academy"),
+LCharset("Georgian-PS",	"	Georgian-PS"),
 
 // Thai
-GCharset("tis-620",			"TIS-620 (Thai)"),
+LCharset("tis-620",			"TIS-620 (Thai)"),
 
 // Laotian
-GCharset("mulelao-1",		"MuleLao-1"),
+LCharset("mulelao-1",		"MuleLao-1"),
 
 // Vietnamese
-GCharset("viscii",			"VISCII (Vietnamese)", 0, "csVISCII"),
-GCharset("tcvn",			"TCVN (Vietnamese)"),
+LCharset("viscii",			"VISCII (Vietnamese)", 0, "csVISCII"),
+LCharset("tcvn",			"TCVN (Vietnamese)"),
 
 // EOF marker
-GCharset()
+LCharset()
 };
 
-static GCharsetSystem CharsetSystem;
+static LCharsetSystem CharsetSystem;
 
-GCharset *LgiGetCpInfo(const char *Cs)
+LCharset *LgiGetCpInfo(const char *Cs)
 {
 	return CharsetSystem.GetCsInfo(Cs);
 }
@@ -801,8 +801,8 @@ ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *
 
 	if (Out && OutCp && In && InCp)
 	{
-		GCharset *InInfo = LgiGetCpInfo(InCp);
-		GCharset *OutInfo = LgiGetCpInfo(OutCp);
+		LCharset *InInfo = LgiGetCpInfo(InCp);
+		LCharset *OutInfo = LgiGetCpInfo(OutCp);
 
 		if (InInfo && OutInfo)
 		{
@@ -1069,8 +1069,8 @@ LString LStrConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 	if (!OutCp || !In || !InCp)
 		return LString();
 
-	GCharset *InInfo = LgiGetCpInfo(InCp);
-	GCharset *OutInfo = LgiGetCpInfo(OutCp);
+	LCharset *InInfo = LgiGetCpInfo(InCp);
+	LCharset *OutInfo = LgiGetCpInfo(OutCp);
 	if (!InInfo || !OutInfo)
 		return LString();
 
@@ -1150,8 +1150,8 @@ void *LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t
 	if (!OutCp || !In || !InCp)
 		return NULL;
 
-	GCharset *InInfo = LgiGetCpInfo(InCp);
-	GCharset *OutInfo = LgiGetCpInfo(OutCp);
+	LCharset *InInfo = LgiGetCpInfo(InCp);
+	LCharset *OutInfo = LgiGetCpInfo(OutCp);
 	if (!InInfo || !OutInfo)
 		return NULL;
 
@@ -1252,7 +1252,7 @@ int LCharLen(const void *Str, const char *Cp, int Bytes)
 {
 	if (Str && Cp)
 	{
-		GCharset *InInfo = LgiGetCpInfo(Cp);
+		LCharset *InInfo = LgiGetCpInfo(Cp);
 		if (InInfo)
 		{
 			switch (InInfo->Type)
@@ -1455,7 +1455,7 @@ const char *LgiDetectCharset(const char *Utf8, ssize_t Len, List<char> *Prefs)
 		{
 			for (auto p: *Prefs)
 			{
-				GCharset *Cp = CharsetSystem.GetCsInfo(p);
+				LCharset *Cp = CharsetSystem.GetCsInfo(p);
 				if (Cp &&
 					stricmp(Cp->Charset, "us-ascii") != 0 &&
 					Cp->UnicodeMap)
@@ -1473,7 +1473,7 @@ const char *LgiDetectCharset(const char *Utf8, ssize_t Len, List<char> *Prefs)
 			}
 		}
 
-		for (GCharset *Cp = LgiCharsets + 1; Cp->Charset; Cp++)
+		for (LCharset *Cp = LgiCharsets + 1; Cp->Charset; Cp++)
 		{
 			if (Cp->UnicodeMap)
 			{
@@ -1500,7 +1500,7 @@ LString LToNativeCp(const char *In, ssize_t InLen)
 	LString s;
 
 	#ifdef WIN32
-	GCharset *CpInfo = LgiGetCpInfo(Cp);
+	LCharset *CpInfo = LgiGetCpInfo(Cp);
 	if (!CpInfo || CpInfo->Type == CpWindowsDb)
 	{
 		if (In)
@@ -1539,7 +1539,7 @@ LString LFromNativeCp(const char *In, ssize_t InLen)
 	LString s;
 
 	#ifdef WIN32
-	GCharset *CpInfo = LgiGetCpInfo(Cp);
+	LCharset *CpInfo = LgiGetCpInfo(Cp);
 	if (!CpInfo || CpInfo->Type == CpWindowsDb)
 	{
 		if (In)
@@ -1601,29 +1601,29 @@ LString LFromNativeCp(const char *In, ssize_t InLen)
 }
 
 ///////////////////////////////////////////////////////////////////////////
-struct GCharsetSystemPriv
+struct LCharsetSystemPriv
 {
-	GCharset *Utf8;
-	GCharset *Utf16; 
-	LHashTbl<ConstStrKeyPool<char,false>, GCharset*> Charsets;
+	LCharset *Utf8;
+	LCharset *Utf16; 
+	LHashTbl<ConstStrKeyPool<char,false>, LCharset*> Charsets;
 
-	GCharsetSystemPriv() : Charsets(512)
+	LCharsetSystemPriv() : Charsets(512)
 	{
 		Utf8 = 0;
 		Utf16 = 0;
 	}
 };
 
-GCharsetSystem::GCharsetSystem()
+LCharsetSystem::LCharsetSystem()
 {
 	char l[256];
 
 	// Charset setup, store all the charset pointers
 	// in a hash table for O(1) lookup.
-	d = new GCharsetSystemPriv;
+	d = new LCharsetSystemPriv;
 	LgiAssert(LgiCharsets->Charset != NULL);
 
-	for (GCharset *Cs = LgiCharsets; Cs->Charset; Cs++)
+	for (LCharset *Cs = LgiCharsets; Cs->Charset; Cs++)
 	{
 		strcpy_s(l, sizeof(l), Cs->Charset);
 		#ifdef _MSC_VER
@@ -1654,12 +1654,12 @@ GCharsetSystem::GCharsetSystem()
 	}
 }
 
-GCharsetSystem::~GCharsetSystem()
+LCharsetSystem::~LCharsetSystem()
 {
 	DeleteObj(d);
 }
 
-GCharset *GCharsetSystem::GetCsInfo(const char *Cp)
+LCharset *LCharsetSystem::GetCsInfo(const char *Cp)
 {
 	if (Cp && d)
 	{
@@ -1677,7 +1677,7 @@ GCharset *GCharsetSystem::GetCsInfo(const char *Cp)
 		else if (!stricmp(l, "utf-16"))
 			return d->Utf16;
 		
-		GCharset *Cs = (GCharset*) d->Charsets.Find(l);
+		LCharset *Cs = (LCharset*) d->Charsets.Find(l);
 		if (Cs)
 		{
 			return Cs;
@@ -1692,17 +1692,17 @@ GCharset *GCharsetSystem::GetCsInfo(const char *Cp)
 	return 0;
 }
 
-GCharset *LgiGetCsInfo(const char *Cs)
+LCharset *LgiGetCsInfo(const char *Cs)
 {
 	return CharsetSystem.GetCsInfo(Cs);
 }
 
-GCharset *GCharsetSystem::GetCsList()
+LCharset *LCharsetSystem::GetCsList()
 {
 	return LgiCharsets;
 }
 
-GCharset *LgiGetCsList()
+LCharset *LgiGetCsList()
 {
 	return LgiCharsets;
 }

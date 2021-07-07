@@ -7,7 +7,7 @@ static FtpThread *Ftp = 0;
 
 class Line : public LListItem
 {
-	GColour c;
+	LColour c;
 
 public:
 	Line(const char *s, COLOUR col)

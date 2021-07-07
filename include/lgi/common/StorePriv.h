@@ -17,7 +17,7 @@ enum NodeRelation
 #define GSUBFILE_NOBUFFERING		0
 
 class GSubFilePtr;
-class GSubFile : public GFile
+class GSubFile : public LFile
 {
 	GSemaphore *Lck;
 	LArray<GSubFilePtr*> Ptrs;
@@ -53,7 +53,7 @@ public:
 	#endif
 };
 
-class GSubFilePtr : public GFile
+class GSubFilePtr : public LFile
 {
 	friend class GSubFile;
 	GSubFile *File;
@@ -95,7 +95,7 @@ public:
 	/// Removes the sub region so you can access the entire file.
 	void ClearSub();
 	
-	// GFile stuff
+	// LFile stuff
 	int Open(char *Str = 0, int Int = 0);
 	bool IsOpen();
 	int Close();

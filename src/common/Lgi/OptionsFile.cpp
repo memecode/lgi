@@ -122,7 +122,7 @@ bool GOptionsFile::SerializeFile(bool Write)
 
 	if (File && Lock(_FL))
 	{
-		GFile f;
+		LFile f;
 		if
 		(
 			(

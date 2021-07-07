@@ -1160,12 +1160,12 @@ void LView::DrawThemeBorder(LSurface *pDC, LRect &r)
 		clip[2] = LRect(r.x2 - 1, r.y1, r.x2, r.y2);  // right
 		clip[3] = LRect(r.x1 + 2, r.y2 - 1, r.x2 - 2, r.y2); // bottom
 		
-		GColour cols[4] = 
+		LColour cols[4] = 
 		{
-			GColour(255, 0, 0),
-			GColour(0, 255, 0),
-			GColour(0, 0, 255),
-			GColour(255, 255, 0)
+			LColour(255, 0, 0),
+			LColour(0, 255, 0),
+			LColour(0, 0, 255),
+			LColour(255, 255, 0)
 		};
 		
 		for (int i=0; i<CountOf(clip); i++)
@@ -1281,8 +1281,8 @@ GMessage::Result LView::OnEvent(GMessage *Msg)
 				if (gv)
 				{
 					int Depth = dynamic_cast<LEdit*>(gv) ? 1 : 10;
-					GColour Fore = gv->StyleColour(LCss::PropColor, GColour(), Depth);
-					GColour Back = gv->StyleColour(LCss::PropBackgroundColor, GColour(), Depth);
+					LColour Fore = gv->StyleColour(LCss::PropColor, LColour(), Depth);
+					LColour Back = gv->StyleColour(LCss::PropBackgroundColor, LColour(), Depth);
 						
 					if (Fore.IsValid())
 					{
@@ -1357,7 +1357,7 @@ GMessage::Result LView::OnEvent(GMessage *Msg)
 									LRect c = di->rcItem;
 									LMemDC m(c.X(), c.Y(), GdcD->GetColourSpace());
 									HDC hdc = m.StartDC();
-									m.Colour(GColour(255, 0, 255));
+									m.Colour(LColour(255, 0, 255));
 									m.Line(0, 0, m.X()-1, m.Y()-1);
 
 									LONG s = GetWindowLong(_View, GWL_STYLE);

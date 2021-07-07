@@ -433,8 +433,8 @@ public:
 	virtual void Visible(bool v) = 0;
 	virtual bool Focus() = 0;
 	virtual void Focus(bool f) = 0;
-	virtual class GDragDropSource *DropSource(GDragDropSource *Set = NULL) = 0;
-	virtual class GDragDropTarget *DropTarget(GDragDropTarget *Set = NULL) = 0;
+	virtual class LDragDropSource *DropSource(LDragDropSource *Set = NULL) = 0;
+	virtual class LDragDropTarget *DropTarget(LDragDropTarget *Set = NULL) = 0;
 	virtual bool DropTarget(bool t) = 0;
 	virtual bool Sunken() = 0;
 	virtual void Sunken(bool i) = 0;
@@ -448,7 +448,7 @@ public:
 	// Style
     virtual LCss *GetCss(bool Create = false) = 0;
     virtual void SetCss(LCss *css) = 0;
-    virtual bool SetColour(GColour &c, bool Fore) = 0;
+    virtual bool SetColour(LColour &c, bool Fore) = 0;
 	virtual LString CssStyles(const char *Set = NULL) { return LString(); }
 	virtual LString::Array *CssClasses() { return NULL; }
 	virtual LFont *GetFont() = 0;

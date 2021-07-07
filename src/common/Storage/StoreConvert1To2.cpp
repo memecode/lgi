@@ -8,7 +8,7 @@ class ReaderItem : public StorageObj
 {
 	int Type() { LgiAssert(0); return 0; }
 	int Sizeof() { LgiAssert(0); return 0; }
-	bool Serialize(GFile &f, bool Write) { LgiAssert(0); return 0; }
+	bool Serialize(LFile &f, bool Write) { LgiAssert(0); return 0; }
 
 public:
 	int Len;
@@ -21,7 +21,7 @@ public:
 		Store = Item;
 		Store->Object = this;
 
-		GFile *f = Store->GotoObject(__FILE__, __LINE__);
+		LFile *f = Store->GotoObject(__FILE__, __LINE__);
 		if (f)
 		{
 			Len = ((Storage1::StorageItemImpl*)Store)->StoreSize;
@@ -73,7 +73,7 @@ public:
 		return 0;
 	}
 
-	bool Serialize(GFile &f, bool Write)
+	bool Serialize(LFile &f, bool Write)
 	{
 		if (Data && Write)
 		{

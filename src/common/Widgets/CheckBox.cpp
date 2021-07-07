@@ -334,7 +334,7 @@ int LCheckBox::BoxSize()
 void LCheckBox::OnPaint(LSurface *pDC)
 {
 	#if 0
-	pDC->Colour(GColour(255, 0, 255));
+	pDC->Colour(LColour(255, 0, 255));
 	pDC->Rectangle();
 	#endif
 	
@@ -372,8 +372,8 @@ void LCheckBox::OnPaint(LSurface *pDC)
 
 		LRect t = r;
 		t.x1 = d->ValuePos.x2 + 1;
-		// GColour cFore = StyleColour(LCss::PropColor, LC_TEXT);
-		GColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
+		// LColour cFore = StyleColour(LCss::PropColor, LC_TEXT);
+		LColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 
 		if (d->Lock(_FL))
 		{
@@ -394,7 +394,7 @@ void LCheckBox::OnPaint(LSurface *pDC)
 		
 			LRect c = GetClient();
 			#if 0
-			pDC->Colour(GColour(255, 0, 0));
+			pDC->Colour(LColour(255, 0, 0));
 			pDC->Box(&c);
 			pDC->Line(c.x1, c.y1, c.x2, c.y2);
 			pDC->Line(c.x2, c.y1, c.x1, c.y2);

@@ -37,7 +37,7 @@ public:
 	
 	void OnPaint(LSurface *pDC)
 	{
-		pDC->Colour(GColour(0, 0, 0));
+		pDC->Colour(LColour(0, 0, 0));
 		pDC->Rectangle();
 	}
 };
@@ -227,7 +227,7 @@ int GFindInFiles::OnNotify(LViewI *Ctrl, int Flags)
 			s.Parent(this);
 			if (s.Open())
 			{
-				GFile::Path p = s.Name();
+				LFile::Path p = s.Name();
 				if (p.IsFile())
 					p--;
 				SetCtrlName(IDC_WHERE, p.GetFull());

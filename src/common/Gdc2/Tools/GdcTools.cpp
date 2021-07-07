@@ -647,8 +647,8 @@ bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *FromRgn, Progress *Prog)
 
 	// For each destination pixel
 	LSurface *pAlpha = pSrc->AlphaDC();
-	GColourSpace SrcCs = pSrc->GetColourSpace();
-	GColourSpace DstCs = pDest->GetColourSpace();
+	LColourSpace SrcCs = pSrc->GetColourSpace();
+	LColourSpace DstCs = pDest->GetColourSpace();
 	bool HasSrcAlpha = GColourSpaceHasAlpha(SrcCs);
 	bool HasDestAlpha = GColourSpaceHasAlpha(DstCs);
 	bool ProcessAlpha = HasSrcAlpha && HasDestAlpha;

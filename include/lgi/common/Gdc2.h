@@ -190,7 +190,7 @@ public:
 	uchar *Base;
 	int x, y;
 	ssize_t Line;
-	GColourSpace Cs;
+	LColourSpace Cs;
 	int Flags;
 
 	GBmpMem();
@@ -268,7 +268,7 @@ public:
 /// This class assumes that all clipping is done by the layer above.
 /// It can then implement very simple loops to do the work of filling
 /// pixels
-class LgiClass GApplicator
+class LgiClass LApplicator
 {
 protected:
 	GBmpMem *Dest;
@@ -284,18 +284,18 @@ public:
 		System32BitPixel p32;
 	};
 
-	GApplicator() { c = 0; Dest = NULL; Alpha = NULL; Pal = NULL; }
-	GApplicator(COLOUR Colour) { c = Colour; }
-	virtual ~GApplicator() { }
+	LApplicator() { c = 0; Dest = NULL; Alpha = NULL; Pal = NULL; }
+	LApplicator(COLOUR Colour) { c = Colour; }
+	virtual ~LApplicator() { }
 
-	virtual const char *GetClass() { return "GApplicator"; }
+	virtual const char *GetClass() { return "LApplicator"; }
 
 	/// Get a parameter
 	virtual int GetVar(int Var) { return 0; }
 	/// Set a parameter
 	virtual int SetVar(int Var, NativeInt Value) { return 0; }
 
-	GColourSpace GetColourSpace() { return Dest ? Dest->Cs : CsNone; }
+	LColourSpace GetColourSpace() { return Dest ? Dest->Cs : CsNone; }
 
 	/// Sets the operator
 	void SetOp(int o, int Param = -1) { Op = o; }
@@ -339,44 +339,44 @@ public:
 	virtual ~GApplicatorFactory();
 
 	/// Find the application factory and create the appropriate object.
-	static GApplicator *NewApp(GColourSpace Cs, int Op);
-	virtual GApplicator *Create(GColourSpace Cs, int Op) = 0;
+	static LApplicator *NewApp(LColourSpace Cs, int Op);
+	virtual LApplicator *Create(LColourSpace Cs, int Op) = 0;
 };
 
 class LgiClass GApp15 : public GApplicatorFactory
 {
 public:
-	GApplicator *Create(GColourSpace Cs, int Op);
+	LApplicator *Create(LColourSpace Cs, int Op);
 };
 
 class LgiClass GApp16 : public GApplicatorFactory
 {
 public:
-	GApplicator *Create(GColourSpace Cs, int Op);
+	LApplicator *Create(LColourSpace Cs, int Op);
 };
 
 class LgiClass GApp24 : public GApplicatorFactory
 {
 public:
-	GApplicator *Create(GColourSpace Cs, int Op);
+	LApplicator *Create(LColourSpace Cs, int Op);
 };
 
 class LgiClass GApp32 : public GApplicatorFactory
 {
 public:
-	GApplicator *Create(GColourSpace Cs, int Op);
+	LApplicator *Create(LColourSpace Cs, int Op);
 };
 
 class LgiClass GApp8 : public GApplicatorFactory
 {
 public:
-	GApplicator *Create(GColourSpace Cs, int Op);
+	LApplicator *Create(LColourSpace Cs, int Op);
 };
 
 class GAlphaFactory : public GApplicatorFactory
 {
 public:
-	GApplicator *Create(GColourSpace Cs, int Op);
+	LApplicator *Create(LColourSpace Cs, int Op);
 };
 
 #define OrgX(x)			x -= OriginX
@@ -401,16 +401,16 @@ protected:
 	int				Flags;
 	int				PrevOp;
 	LRect			Clip;
-	GColourSpace	ColourSpace;
+	LColourSpace	ColourSpace;
 	GBmpMem			*pMem;
 	LSurface		*pAlphaDC;
 	GPalette		*pPalette;
-	GApplicator		*pApp;
-	GApplicator		*pAppCache[GDC_CACHE_SIZE];
+	LApplicator		*pApp;
+	LApplicator		*pAppCache[GDC_CACHE_SIZE];
 	int				OriginX, OriginY;
 
 	// Protected functions
-	GApplicator		*CreateApplicator(int Op, GColourSpace Cs = CsNone);
+	LApplicator		*CreateApplicator(int Op, LColourSpace Cs = CsNone);
 	uint32_t			LineBits;
 	uint32_t			LineMask;
 	uint32_t			LineReset;
@@ -459,7 +459,7 @@ public:
 		SurfaceRequireNative,
 		SurfaceRequireExactCs,
 	};
-	virtual bool Create(int x, int y, GColourSpace Cs, int Flags = SurfaceCreateNone) { return false; }
+	virtual bool Create(int x, int y, LColourSpace Cs, int Flags = SurfaceCreateNone) { return false; }
 	virtual void Update(int Flags) {}
 
 	// Alpha channel	
@@ -487,8 +487,8 @@ public:
 	}
 
 	// Applicator
-	virtual bool Applicator(GApplicator *pApp);
-	virtual GApplicator *Applicator();
+	virtual bool Applicator(LApplicator *pApp);
+	virtual LApplicator *Applicator();
 
 	// Palette
 	virtual GPalette *Palette();
@@ -509,13 +509,13 @@ public:
 		int Bits = 0
 	);
 	/// Sets the current colour
-	virtual GColour Colour
+	virtual LColour Colour
 	(
 		/// The new colour
-		GColour c
+		LColour c
 	);
 	/// Sets the colour to a system colour
-	virtual GColour Colour(LSystemColour SysCol);
+	virtual LColour Colour(LSystemColour SysCol);
 	/// Gets the current blending mode in operation
 	virtual int Op() { return (pApp) ? pApp->GetOp() : GDC_SET; }
 	/// Sets the current blending mode in operation
@@ -536,7 +536,7 @@ public:
 	/// Gets the bits per pixel
 	virtual int GetBits() { return (pMem) ? GColourSpaceToBits(pMem->Cs) : 0; }
 	/// Gets the colour space of the pixels
-	virtual GColourSpace GetColourSpace() { return ColourSpace; }
+	virtual LColourSpace GetColourSpace() { return ColourSpace; }
 	/// Gets any flags associated with the surface
 	virtual int GetFlags() { return Flags; }
 	/// Returns true if the surface is on the screen
@@ -778,7 +778,7 @@ public:
 	LRect ClipRgn(LRect *Rgn);
 	COLOUR Colour();
 	COLOUR Colour(COLOUR c, int Bits = 0);
-	GColour Colour(GColour c);
+	LColour Colour(LColour c);
 	LString Dump();
 
 	int Op();
@@ -943,7 +943,7 @@ public:
 		int y = 0,
 		/// The colour space to use. CsNone will default to the 
 		/// current screen colour space.
-		GColourSpace cs = CsNone,
+		LColourSpace cs = CsNone,
 		/// Optional creation flags
 		int Flags = SurfaceCreateNone
 	);
@@ -972,7 +972,7 @@ public:
 			/// calling cairo_surface_destroy
 			LCairoSurfaceT GetSubImage(LRect &r);
 			
-			GColourSpace GetCreateCs();
+			LColourSpace GetCreateCs();
 			Gtk::GdkPixbuf *CreatePixBuf();
 
 		#elif defined MAC
@@ -1020,7 +1020,7 @@ public:
 	bool SupportsAlphaCompositing();
 	bool SwapRedAndBlue();
 	
-	bool Create(int x, int y, GColourSpace Cs, int Flags = SurfaceCreateNone);
+	bool Create(int x, int y, LColourSpace Cs, int Flags = SurfaceCreateNone);
 	void Blt(int x, int y, LSurface *Src, LRect *a = NULL);
 	void StretchBlt(LRect *d, LSurface *Src, LRect *s = NULL);
 
@@ -1068,7 +1068,7 @@ public:
 	LRect ClipRgn();
 	COLOUR Colour();
 	COLOUR Colour(COLOUR c, int Bits = 0);
-	GColour Colour(GColour c);
+	LColour Colour(LColour c);
 
 	void Set(int x, int y);
 
@@ -1169,7 +1169,7 @@ typedef int (__stdcall *MsImg32_AlphaBlend)(HDC,int,int,int,int,HDC,int,int,int,
 #endif
 
 /// Main singleton graphics device class. Holds all global data for graphics rendering.
-class LgiClass GdcDevice : public GCapabilityClient
+class LgiClass GdcDevice : public LCapabilityClient
 {
 	friend class LScreenDC;
 	friend class LMemDC;
@@ -1188,7 +1188,7 @@ public:
 	static GdcDevice *GetInst() { return pInstance; }
 
 	/// Returns the colour space of the screen
-	GColourSpace GetColourSpace();
+	LColourSpace GetColourSpace();
 	/// Returns the current screen bit depth
 	int GetBits();
 	/// Returns the current screen width
@@ -1328,7 +1328,7 @@ LgiFunc COLOUR CBit(int DstBits, COLOUR c, int SrcBits = 24, GPalette *Pal = 0);
 
 #ifdef __cplusplus
 /// blends 2 colours by the amount specified
-LgiClass GColour GdcMixColour(GColour a, GColour b, float HowMuchA = 0.5);
+LgiClass LColour GdcMixColour(LColour a, LColour b, float HowMuchA = 0.5);
 #endif
 
 /// Colour reduction option to define what palette to go to
@@ -1379,10 +1379,10 @@ LgiFunc bool GReduceBitDepth(LSurface *pDC, int Bits, GPalette *Pal = 0, GReduce
 
 struct GColourStop
 {
-	GColour Colour;
+	LColour Colour;
 	float Pos;
 	
-	void Set(float p, GColour c)
+	void Set(float p, LColour c)
 	{
 		Pos = p;
 		Colour = c;
@@ -1403,11 +1403,11 @@ LgiFunc bool LgiRopRgb
 	// Pointer to destination pixel buffer
 	uint8_t *Dst,
 	// Destination colour space (must be 8bit components)
-	GColourSpace DstCs,
+	LColourSpace DstCs,
 	// Pointer to source pixel buffer (if this overlaps 'Dst', set 'Overlap' to true)
 	uint8_t *Src,
 	// Source colour space (must be 8bit components)
-	GColourSpace SrcCs,
+	LColourSpace SrcCs,
 	// Number of pixels to convert
 	int Px,
 	// Whether to composite using alpha or copy blt
@@ -1432,7 +1432,7 @@ LgiFunc bool LgiFindBounds
 );
 
 #if defined(LGI_SDL)
-LgiFunc GColourSpace PixelFormat2ColourSpace(SDL_PixelFormat *pf);
+LgiFunc LColourSpace PixelFormat2ColourSpace(SDL_PixelFormat *pf);
 #endif
 
 #endif

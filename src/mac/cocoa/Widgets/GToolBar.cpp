@@ -445,7 +445,7 @@ void LImageList::Draw(LSurface *pDest, int Dx, int Dy, int Image, int Flags)
 					Blend.BlendFlags = 0;
 					Blend.AlphaFormat = AC_SRC_ALPHA;
 
-					GApplicator *pApp;
+					LApplicator *pApp;
 					if (pDest->Op() == GDC_ALPHA &&
 						(pApp = pDest->Applicator()) != 0)
 					{
@@ -1460,7 +1460,7 @@ void LToolBar::_BuildCache(LImageList *From)
 
 				// Draw the alpha blended icons
 				r->Op(GDC_ALPHA);
-				GApplicator *pApp = r->Applicator();
+				LApplicator *pApp = r->Applicator();
 				if (pApp)
 				{
 					pApp->SetVar(GAPP_ALPHA_A, 40);
@@ -1540,7 +1540,7 @@ void LToolBar::_BuildCache(LImageList *From)
 				d->pDisabled->Rectangle();
 
 				d->pDisabled->Op(GDC_ALPHA);
-				GApplicator *pApp = d->pDisabled->Applicator();
+				LApplicator *pApp = d->pDisabled->Applicator();
 				if (pApp)
 				{
 					pApp->SetVar(GAPP_ALPHA_A, 40);

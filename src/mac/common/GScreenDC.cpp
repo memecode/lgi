@@ -13,7 +13,7 @@ public:
 	LView *View;
 	LRect Rc;
 	LArray<LRect> Stack;
-	GColour c;
+	LColour c;
 	int Bits;
 	int Op;
 	NativeInt ConstAlpha;
@@ -327,9 +327,9 @@ LRect LScreenDC::ClipRgn()
 	return Clip;
 }
 
-GColour LScreenDC::Colour(GColour c)
+LColour LScreenDC::Colour(LColour c)
 {
-	GColour Prev = d->c;
+	LColour Prev = d->c;
 
 	d->c = c;
 
@@ -349,7 +349,7 @@ GColour LScreenDC::Colour(GColour c)
 
 COLOUR LScreenDC::Colour(COLOUR c, int Bits)
 {
-	GColour Prev = d->c;
+	LColour Prev = d->c;
 
 	d->c.Set(c, Bits ? Bits : GetBits());
 	if (d->Ctx)

@@ -47,7 +47,7 @@ CalcTableChecksum(ulong *Table, ulong Length)
 	return Sum;
 }
 
-ushort *ReadUShortArray(GFile &F, int Size)
+ushort *ReadUShortArray(LFile &F, int Size)
 {
 	ushort *Data = new ushort[Size];
 	if (Data)
@@ -60,7 +60,7 @@ ushort *ReadUShortArray(GFile &F, int Size)
 	return Data;
 }
 
-short *ReadShortArray(GFile &F, int Size)
+short *ReadShortArray(LFile &F, int Size)
 {
 	short *Data = new short[Size];
 	if (Data)
@@ -389,7 +389,7 @@ void *TtfObj::FindTag(char *t)
 	return (tbl) ? tbl->Table : 0;
 }
 
-bool TtfFileHeader::Read(GFile &F)
+bool TtfFileHeader::Read(LFile &F)
 {
 	F >> Version;
 	F >> NumTables;
@@ -399,7 +399,7 @@ bool TtfFileHeader::Read(GFile &F)
 	return !F.GetStatus();
 }
 
-bool TtfFileHeader::Write(GFile &F)
+bool TtfFileHeader::Write(LFile &F)
 {
 	F << Version;
 	F << NumTables;
@@ -419,7 +419,7 @@ void TtfFileHeader::Dump()
 	printf("\n");
 }
 
-bool TtfTable::Read(GFile &F)
+bool TtfTable::Read(LFile &F)
 {
 	F.Read(Tag, sizeof(Tag));
 	F >> CheckSum;
@@ -428,7 +428,7 @@ bool TtfTable::Read(GFile &F)
 	return !F.GetStatus();
 }
 
-bool TtfTable::Write(GFile &F)
+bool TtfTable::Write(LFile &F)
 {
 	F.Write(Tag, sizeof(Tag));
 	F << CheckSum;
@@ -446,7 +446,7 @@ void TtfTable::Dump()
 	printf("\n");
 }
 
-bool TtfHeader::Read(GFile &F)
+bool TtfHeader::Read(LFile &F)
 {
 	int32 h, l;
 
@@ -478,7 +478,7 @@ bool TtfHeader::Read(GFile &F)
 	return !F.GetStatus();
 }
 
-bool TtfHeader::Write(GFile &F)
+bool TtfHeader::Write(LFile &F)
 {
 	F << Version;
 	F << Revision;
@@ -554,7 +554,7 @@ void TtfHeader::Dump()
 	printf("\n");
 }
 
-bool TtfMaxProfile::Read(GFile &F)
+bool TtfMaxProfile::Read(LFile &F)
 {
 	F >> Version;
 	F >> NumGlyphs;
@@ -575,7 +575,7 @@ bool TtfMaxProfile::Read(GFile &F)
 	return !F.GetStatus();
 }
 
-bool TtfMaxProfile::Write(GFile &F)
+bool TtfMaxProfile::Write(LFile &F)
 {
 	F << Version;
 	F << NumGlyphs;
@@ -658,7 +658,7 @@ int TtfLocation::operator [](int i)
 	return 0;
 }
 
-bool TtfLocation::Read(GFile &F)
+bool TtfLocation::Read(LFile &F)
 {
 	bool Status = FALSE;
 	TtfHeader *Header = (TtfHeader*) FindTag("head");
@@ -697,7 +697,7 @@ bool TtfLocation::Read(GFile &F)
 	return Status;
 }
 
-bool TtfLocation::Write(GFile &F)
+bool TtfLocation::Write(LFile &F)
 {
 	bool Status = FALSE;
 	TtfHeader *Header = (TtfHeader*) FindTag("head");
@@ -769,7 +769,7 @@ TtfGlyph::~TtfGlyph()
 #define XSame				0x0010
 #define YSame				0x0020
 
-bool TtfGlyph::Read(GFile &F)
+bool TtfGlyph::Read(LFile &F)
 {
 	Points = 0;
 
@@ -889,7 +889,7 @@ bool TtfGlyph::Read(GFile &F)
 	return !F.GetStatus();
 }
 
-bool TtfGlyph::Write(GFile &F)
+bool TtfGlyph::Write(LFile &F)
 {
 	return FALSE;
 }
@@ -1620,7 +1620,7 @@ TtfCMapTable::~TtfCMapTable()
 	DeleteObj(Map);
 }
 
-bool TtfCMapTable::Read(GFile &F)
+bool TtfCMapTable::Read(LFile &F)
 {
 	F >> PlatformID;
 	F >> EncodingID;
@@ -1628,7 +1628,7 @@ bool TtfCMapTable::Read(GFile &F)
 	return !F.GetStatus();
 }
 
-bool TtfCMapTable::Write(GFile &F)
+bool TtfCMapTable::Write(LFile &F)
 {
 	F << PlatformID;
 	F << EncodingID;
@@ -1666,7 +1666,7 @@ int TtfCMapByteEnc::operator[](int i)
 	return (i >= 0 AND i < sizeof(Map)) ? Map[i] : 0;
 }
 
-bool TtfCMapByteEnc::Read(GFile &F)
+bool TtfCMapByteEnc::Read(LFile &F)
 {
 	F >> Format;
 	F >> Length;
@@ -1675,7 +1675,7 @@ bool TtfCMapByteEnc::Read(GFile &F)
 	return !F.GetStatus();
 }
 
-bool TtfCMapByteEnc::Write(GFile &F)
+bool TtfCMapByteEnc::Write(LFile &F)
 {
 	F << Format;
 	F << Length;
@@ -1731,7 +1731,7 @@ int TtfCMapSegDelta::operator[](int c)
 	return 0;
 }
 
-bool TtfCMapSegDelta::Read(GFile &F)
+bool TtfCMapSegDelta::Read(LFile &F)
 {
 	F >> Format;
 	F >> Length;
@@ -1763,7 +1763,7 @@ bool TtfCMapSegDelta::Read(GFile &F)
 			IdRangeOffset;
 }
 
-bool TtfCMapSegDelta::Write(GFile &F)
+bool TtfCMapSegDelta::Write(LFile &F)
 {
 	return FALSE;
 }
@@ -1804,7 +1804,7 @@ TtfCMap::~TtfCMap()
 	DeleteArray(Table);
 }
 
-bool TtfCMap::Read(GFile &F)
+bool TtfCMap::Read(LFile &F)
 {
 	bool Status = FALSE;
 	int StartAddress = F.GetPosition();
@@ -1857,7 +1857,7 @@ bool TtfCMap::Read(GFile &F)
 	return Status;
 }
 
-bool TtfCMap::Write(GFile &F)
+bool TtfCMap::Write(LFile &F)
 {
 	bool Status = FALSE;
 
@@ -2165,7 +2165,7 @@ TtfTable *GdcTtf::FindTag(char *t)
 	return NULL;
 }
 
-TtfTable *GdcTtf::SeekTag(char *t, GFile *F)
+TtfTable *GdcTtf::SeekTag(char *t, LFile *F)
 {
 	TtfTable *Info = NULL;
 	if (TableList)
@@ -2179,7 +2179,7 @@ TtfTable *GdcTtf::SeekTag(char *t, GFile *F)
 	return Info;
 }
 
-bool GdcTtf::Load(GFile &F)
+bool GdcTtf::Load(LFile &F)
 {
 	bool Status = FALSE;
 	TtfFileHeader FileHeader;
@@ -2291,7 +2291,7 @@ bool GdcTtf::Load(GFile &F)
 	return Status;
 }
 
-bool GdcTtf::Save(GFile &F)
+bool GdcTtf::Save(LFile &F)
 {
 	return FALSE;
 }
@@ -2439,7 +2439,7 @@ void StretchBlt(	LSurface *pDest,
 int GlyphX, GlyphY;
 int SDiff, DDiff;
 
-class GdcFontApp : public GApplicator
+class GdcFontApp : public LApplicator
 {
 
 	uchar *Ptr;
@@ -2582,7 +2582,7 @@ void GdcTtf::Text(LSurface *pDC, int x, int y, char *Str, int Len)
 			GdcFontApp *Pen = new GdcFontApp;
 			if (Pen)
 			{
-				GApplicator *pOldApp = pDC->Applicator();
+				LApplicator *pOldApp = pDC->Applicator();
 				pDC->Applicator(Pen);
 				Pen->c = ForeCol;
 

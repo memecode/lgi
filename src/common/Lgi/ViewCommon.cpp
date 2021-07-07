@@ -459,7 +459,7 @@ void LView::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 void LView::OnPaint(LSurface *pDC)
 {
 	auto c = GetClient();
-	GCssTools Tools(this);
+	LCssTools Tools(this);
 	Tools.PaintContent(pDC, c);
 }
 
@@ -537,7 +537,7 @@ void LView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 
 	#if 0
 	// This is useful for coverage checking
-	pDC->Colour(GColour(255, 0, 255));
+	pDC->Colour(LColour(255, 0, 255));
 	pDC->Rectangle();
 	#endif
 
@@ -636,7 +636,7 @@ void LView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 
 	#if 0
 	// This is useful for coverage checking
-	pDC->Colour(GColour(255, 0, 255));
+	pDC->Colour(LColour(255, 0, 255));
 	pDC->Rectangle();
 	#endif
 
@@ -1345,7 +1345,7 @@ void LView::Focus(bool i)
 	}
 }
 
-GDragDropSource *LView::DropSource(GDragDropSource *Set)
+LDragDropSource *LView::DropSource(LDragDropSource *Set)
 {
 	if (Set)
 		d->DropSource = Set;
@@ -1353,7 +1353,7 @@ GDragDropSource *LView::DropSource(GDragDropSource *Set)
 	return d->DropSource;
 }
 
-GDragDropTarget *LView::DropTarget(GDragDropTarget *Set)
+LDragDropTarget *LView::DropTarget(LDragDropTarget *Set)
 {
 	if (Set)
 		d->DropTarget = Set;
@@ -1900,9 +1900,9 @@ LViewI *LView::WindowFromPoint(int x, int y, int DebugDepth)
 	return NULL;
 }
 
-GColour LView::StyleColour(int CssPropType, GColour Default, int Depth)
+LColour LView::StyleColour(int CssPropType, LColour Default, int Depth)
 {
-	GColour c = Default;
+	LColour c = Default;
 
 	if ((CssPropType >> 8) == LCss::TypeColor)
 	{
@@ -2159,7 +2159,7 @@ void LView::SetMinimumSize(LPoint Size)
 	}
 }
 
-bool LView::SetColour(GColour &c, bool Fore)
+bool LView::SetColour(LColour &c, bool Fore)
 {
 	LCss *css = GetCss(true);
 	if (!css)

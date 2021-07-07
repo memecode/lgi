@@ -118,7 +118,7 @@ LONG __stdcall GApp::_ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId)
 
 	LgiTrace("GApp::_ExceptionFilter, Crash dump path '%s'\n", p);
 	
-	GFile File;
+	LFile File;
 	if (File.Open(p, O_READWRITE))
 	{
 		DbgHelp Help;

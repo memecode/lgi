@@ -554,7 +554,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 		#else
 		#error "Put your font path here"
 		#endif
-		GFile::Path p = FontPath.Get();
+		LFile::Path p = FontPath.Get();
 		FaceName.Printf("%s.%s", Face(), Ext);
 		p += FaceName;
 		LString Full = p.GetFull();
@@ -1270,7 +1270,7 @@ int LFont::_CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type)
 	return Fit;
 }
 
-void LFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore)
+void LFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, LColour &fore)
 {
 	if (!Handle())
 		return;
@@ -1342,7 +1342,7 @@ int LFont::_CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type)
 	return -1;
 }
 
-void LFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, GColour &fore)
+void LFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, LColour &fore)
 {
 }
 

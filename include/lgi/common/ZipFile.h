@@ -13,7 +13,7 @@ public:
 	bool Open(char *Zip, int Mode);
 	void Close();
 	
-	GDirectory *List();
+	LDirectory *List();
 	bool Decompress(char *File, LStream *To);
 	bool Compress(char *File, LStream *From);
 	bool Delete(char *File);

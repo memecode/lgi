@@ -56,7 +56,7 @@
 /// formats for that 64bit int values. On windows the system times are in 100-nanosecond intervals since 
 /// January 1, 1601 (UTC), as per the FILETIME structure, on Posix systems (Linux/Mac) the 64bit values
 /// are in milliseconds since January 1, 1970 UTC. This is just unix time * 1000. If you are serializing
-/// these 64bit values you should take that into account, they are NOT cross platform. The GDirectory class
+/// these 64bit values you should take that into account, they are NOT cross platform. The LDirectory class
 /// uses the same 64bit values as accepted here for the file's last modified timestamp etc. To convert the
 /// 64bit values to seconds, divide by LDateTime::Second64Bit, useful for calculating the time in seconds
 /// between 2 LDateTime objects.
@@ -336,7 +336,7 @@ public:
 	
 	// File
 	int Sizeof();
-	bool Serialize(class GFile &f, bool Write);
+	bool Serialize(class LFile &f, bool Write);
 	bool Serialize(class GDom *Props, char *Name, bool Write);
 
 	// operators

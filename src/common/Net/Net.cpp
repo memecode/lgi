@@ -973,7 +973,7 @@ void LSocket::Log(const char *Msg, ssize_t Ret, const char *Buf, ssize_t Len)
 {
 	if (d->LogFile)
 	{
-		GFile f;
+		LFile f;
 		if (f.Open(d->LogFile, O_WRITE))
 		{
 			f.Seek(f.GetSize(), SEEK_SET);

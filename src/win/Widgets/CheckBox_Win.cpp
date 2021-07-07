@@ -8,7 +8,7 @@
 #include "LSkinEngine.h"
 #include "LCheckBox.h"
 #include "LgiRes.h"
-#include "GCssTools.h"
+#include "LCssTools.h"
 
 class GCheckBoxPrivate
 {
@@ -150,7 +150,7 @@ GMessage::Result LCheckBox::OnEvent(GMessage *Msg)
 		case WM_ERASEBKGND:
 		{
 			LScreenDC Dc((HDC)Msg->A(), _View);
-			GCssTools Tools(this);
+			LCssTools Tools(this);
 			Dc.Colour(Tools.GetBack());
 			Dc.Rectangle();
 			return true;

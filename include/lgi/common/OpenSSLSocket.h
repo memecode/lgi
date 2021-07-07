@@ -38,7 +38,7 @@ public:
 	static bool DebugLogging;
 	static LString Random(int Len);
 
-	SslSocket(LStreamI *logger = NULL, GCapabilityClient *caps = NULL, bool SslOnConnect = false, bool RawLFCheck = false);
+	SslSocket(LStreamI *logger = NULL, LCapabilityClient *caps = NULL, bool SslOnConnect = false, bool RawLFCheck = false);
 	~SslSocket();
 
 	void SetLogger(LStreamI *logger);

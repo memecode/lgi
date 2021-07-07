@@ -230,7 +230,7 @@ LgiFunc bool LGetSystemPath
 
 /// Returns 0 to end search
 /// \ingroup Base
-typedef bool (*RecursiveFileSearch_Callback)(void *UserData, char *Path, class GDirectory *Dir);
+typedef bool (*RecursiveFileSearch_Callback)(void *UserData, char *Path, class LDirectory *Dir);
 
 /// \brief Recursively search for files
 /// \return Non zero if something was found

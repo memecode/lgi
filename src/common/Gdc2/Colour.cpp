@@ -1,21 +1,22 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Palette.h"
 #include "lgi/common/SkinEngine.h"
+#include "lgi/common/Json.h"
 
-const GColour GColour::Black(0, 0, 0);
-const GColour GColour::White(255, 255, 255);
-const GColour GColour::Red(255, 0, 0);
-const GColour GColour::Green(0, 192, 0);
-const GColour GColour::Blue(0, 0, 255);
+const LColour LColour::Black(0, 0, 0);
+const LColour LColour::White(255, 255, 255);
+const LColour LColour::Red(255, 0, 0);
+const LColour LColour::Green(0, 192, 0);
+const LColour LColour::Blue(0, 0, 255);
 
-GColour::GColour()
+LColour::LColour()
 {
 	space = CsNone;
 	flat = 0;
 	pal = NULL;
 }
 
-GColour::GColour(const char *Str)
+LColour::LColour(const char *Str)
 {
 	space = CsNone;
 	flat = 0;
@@ -23,13 +24,13 @@ GColour::GColour(const char *Str)
 	SetStr(Str);
 }
 
-GColour::GColour(uint8_t idx8, GPalette *palette)
+LColour::LColour(uint8_t idx8, GPalette *palette)
 {
 	pal = NULL;
 	c8(idx8, palette);
 }
 
-GColour::GColour(int r, int g, int b, int a)
+LColour::LColour(int r, int g, int b, int a)
 {
 	pal = NULL;
 	space = System32BitColourSpace;
@@ -39,21 +40,21 @@ GColour::GColour(int r, int g, int b, int a)
 	rgb.a = limit(a, 0, 255);
 }
 
-GColour::GColour(uint32_t c, int bits, GPalette *palette)
+LColour::LColour(uint32_t c, int bits, GPalette *palette)
 {
 	pal = NULL;
 	Set(c, bits, palette);
 }
 
 #ifdef __GTK_H__
-GColour::GColour(Gtk::GdkRGBA gtk)
+LColour::LColour(Gtk::GdkRGBA gtk)
 {
 	pal = NULL;
 	Rgb(gtk.red * 255.0, gtk.green * 255.0, gtk.blue * 255.0, gtk.alpha * 255.0);
 }
 #endif
 
-int GColour::HlsValue(double fN1, double fN2, double fHue) const
+int LColour::HlsValue(double fN1, double fN2, double fHue) const
 {
 	if (fHue > 360.0) fHue -= 360.0;
 	else if (fHue < 0.0) fHue += 360.0;
@@ -65,12 +66,12 @@ int GColour::HlsValue(double fN1, double fN2, double fHue) const
 	return (int) ((fN1 * 255.0) + 0.5);
 }
 
-GColourSpace GColour::GetColourSpace()
+LColourSpace LColour::GetColourSpace()
 {
 	return space;
 }
 
-bool GColour::SetColourSpace(GColourSpace cs)
+bool LColour::SetColourSpace(LColourSpace cs)
 {
 	if (space == CsNone)
 	{
@@ -86,17 +87,17 @@ bool GColour::SetColourSpace(GColourSpace cs)
 	return false;
 }
 
-bool GColour::IsValid() const
+bool LColour::IsValid() const
 {
 	return space != CsNone;
 }
 
-void GColour::Empty()
+void LColour::Empty()
 {
 	space = CsNone;
 }
 
-bool GColour::IsTransparent()
+bool LColour::IsTransparent()
 {
 	if (space == System32BitColourSpace)
 		return rgb.a == 0;
@@ -105,17 +106,17 @@ bool GColour::IsTransparent()
 	return space == CsNone;
 }
 
-void GColour::Rgb(int r, int g, int b, int a)
+void LColour::Rgb(int r, int g, int b, int a)
 {
 	c32(Rgba32(r, g, b, a));
 }
 
-void GColour::Set(LSystemColour c)
+void LColour::Set(LSystemColour c)
 {
 	*this = LColour(c);
 }
 
-void GColour::Set(uint32_t c, int bits, GPalette *palette)
+void LColour::Set(uint32_t c, int bits, GPalette *palette)
 {
 	pal = 0;
 	switch (bits)
@@ -175,7 +176,7 @@ void GColour::Set(uint32_t c, int bits, GPalette *palette)
 	}
 }
 
-uint32_t GColour::Get(int bits)
+uint32_t LColour::Get(int bits)
 {
 	switch (bits)
 	{
@@ -193,12 +194,12 @@ uint32_t GColour::Get(int bits)
 	return 0;
 }
 
-uint8_t GColour::r() const
+uint8_t LColour::r() const
 {
 	return R32(c32());
 }
 
-void GColour::r(uint8_t i)
+void LColour::r(uint8_t i)
 {
 	if (SetColourSpace(System32BitColourSpace))
 		rgb.r = i;
@@ -206,12 +207,12 @@ void GColour::r(uint8_t i)
 		LgiAssert(0);
 }
 
-uint8_t GColour::g() const
+uint8_t LColour::g() const
 {
 	return G32(c32());
 }
 
-void GColour::g(uint8_t i)
+void LColour::g(uint8_t i)
 {
 	if (SetColourSpace(System32BitColourSpace))
 		rgb.g = i;
@@ -219,12 +220,12 @@ void GColour::g(uint8_t i)
 		LgiAssert(0);
 }
 
-uint8_t GColour::b() const
+uint8_t LColour::b() const
 {
 	return B32(c32());
 }
 
-void GColour::b(uint8_t i)
+void LColour::b(uint8_t i)
 {
 	if (SetColourSpace(System32BitColourSpace))
 		rgb.b = i;
@@ -232,12 +233,12 @@ void GColour::b(uint8_t i)
 		LgiAssert(0);
 }
 
-uint8_t GColour::a() const
+uint8_t LColour::a() const
 {
 	return A32(c32());
 }
 
-void GColour::a(uint8_t i)
+void LColour::a(uint8_t i)
 {
 	if (SetColourSpace(System32BitColourSpace))
 		rgb.a = i;
@@ -245,19 +246,19 @@ void GColour::a(uint8_t i)
 		LgiAssert(0);
 }
 
-uint8_t GColour::c8() const
+uint8_t LColour::c8() const
 {
 	return index;
 }
 
-void GColour::c8(uint8_t c, GPalette *p)
+void LColour::c8(uint8_t c, GPalette *p)
 {
 	space = CsIndex8;
 	pal = p;
 	index = c;
 }
 
-uint32_t GColour::c24() const
+uint32_t LColour::c24() const
 {
 	if (space == System32BitColourSpace)
 	{
@@ -291,7 +292,7 @@ uint32_t GColour::c24() const
 	return 0;
 }
 
-void GColour::c24(uint32_t c)
+void LColour::c24(uint32_t c)
 {
 	space = System32BitColourSpace;
 	rgb.r = R24(c);
@@ -301,7 +302,7 @@ void GColour::c24(uint32_t c)
 	pal = NULL;
 }
 
-uint32_t GColour::c32() const
+uint32_t LColour::c32() const
 {
 	if (space == System32BitColourSpace)
 	{
@@ -329,7 +330,7 @@ uint32_t GColour::c32() const
 	else if (space == CsHls32)
 	{
 		// Convert from HLS back to RGB
-		GColour tmp = *this;
+		LColour tmp = *this;
 		tmp.ToRGB();
 		return tmp.c32();
 	}
@@ -338,7 +339,7 @@ uint32_t GColour::c32() const
 	return 0;
 }
 
-void GColour::c32(uint32_t c)
+void LColour::c32(uint32_t c)
 {
 	space = System32BitColourSpace;
 	pal = NULL;
@@ -348,13 +349,13 @@ void GColour::c32(uint32_t c)
 	rgb.a = A32(c);
 }
 
-GColour GColour::Invert()
+LColour LColour::Invert()
 {
-	GColour i(255-r(), 255-g(), 255-b());
+	LColour i(255-r(), 255-g(), 255-b());
 	return i;
 }
 
-GColour GColour::Mix(GColour Tint, float RatioOfTint) const
+LColour LColour::Mix(LColour Tint, float RatioOfTint) const
 {
 	COLOUR c1 = c32();
 	COLOUR c2 = Tint.c32();
@@ -366,34 +367,34 @@ GColour GColour::Mix(GColour Tint, float RatioOfTint) const
 	int b = (int) ((RatioThis * B32(c1)) + (RatioOfTint * B32(c2)) + 0.5f);
 	int a = (int) ((RatioThis * A32(c1)) + (RatioOfTint * A32(c2)) + 0.5f);
 	
-	return GColour(r, g, b, a);
+	return LColour(r, g, b, a);
 }
 
-uint32_t GColour::GetH()
+uint32_t LColour::GetH()
 {
 	ToHLS();
 	return hls.h;
 }
 
-bool GColour::HueIsUndefined()
+bool LColour::HueIsUndefined()
 {
 	ToHLS();
 	return hls.h == HUE_UNDEFINED;
 }
 
-uint32_t GColour::GetL()
+uint32_t LColour::GetL()
 {
 	ToHLS();
 	return hls.l;
 }
 
-uint32_t GColour::GetS()
+uint32_t LColour::GetS()
 {
 	ToHLS();
 	return hls.s;
 }
 
-bool GColour::ToHLS()
+bool LColour::ToHLS()
 {
 	if (space == CsHls32)
 		return true;
@@ -433,7 +434,7 @@ bool GColour::ToHLS()
 	return true;
 }
 
-void GColour::SetHLS(uint16 h, uint8_t l, uint8_t s)
+void LColour::SetHLS(uint16 h, uint8_t l, uint8_t s)
 {
 	space = CsHls32;
 	hls.h = h;
@@ -441,7 +442,7 @@ void GColour::SetHLS(uint16 h, uint8_t l, uint8_t s)
 	hls.s = s;
 }
 
-void GColour::ToRGB()
+void LColour::ToRGB()
 {
 	GHls32 Hls = hls;
 	if (Hls.s == 0)
@@ -472,7 +473,7 @@ void GColour::ToRGB()
 	}
 }
 
-int GColour::GetGray(int BitDepth) const
+int LColour::GetGray(int BitDepth) const
 {
 	if (BitDepth == 8)
 	{
@@ -489,7 +490,7 @@ int GColour::GetGray(int BitDepth) const
 	return (R + G + B) >> BitDepth;
 }
 
-uint32_t GColour::GetNative()
+uint32_t LColour::GetNative()
 {
 	#ifdef WIN32
 	if (space == CsIndex8)
@@ -511,7 +512,7 @@ uint32_t GColour::GetNative()
 	}
 	else if (space == CsHls32)
 	{
-		GColour c(*this);
+		LColour c(*this);
 		c.ToRGB();
 		return RGB(c.r(), c.g(), c.b());
 	}
@@ -525,7 +526,7 @@ uint32_t GColour::GetNative()
 	return c32();
 }
 
-char *GColour::GetStr()
+char *LColour::GetStr()
 {
 	static char Buf[4][32];
 	static int Idx = 0;
@@ -574,7 +575,7 @@ char *GColour::GetStr()
 	return Buf[b];
 }
 
-bool GColour::SetStr(const char *str)
+bool LColour::SetStr(const char *str)
 {
 	if (!str)
 		return false;
@@ -646,11 +647,11 @@ bool GColour::SetStr(const char *str)
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-static GColour _LgiColours[L_MAXIMUM];
+static LColour _LgiColours[L_MAXIMUM];
 
-#define ReadColourConfig(def)	GColour::GetConfigColour("Colour."#def, _LgiColours[def])
+#define ReadColourConfig(def)	LColour::GetConfigColour("Colour."#def, _LgiColours[def])
 
-bool GColour::GetConfigColour(const char *Tag, GColour &c)
+bool LColour::GetConfigColour(const char *Tag, LColour &c)
 {
 	#ifdef LGI_STATIC
 	return false;
@@ -677,13 +678,13 @@ COLOUR ColTo24(Gtk::GdkColor &c)
 #endif
 
 #if defined(WINDOWS)
-static GColour ConvertWinColour(uint32_t c)
+static LColour ConvertWinColour(uint32_t c)
 {
-	return GColour(GetRValue(c), GetGValue(c), GetBValue(c));
+	return LColour(GetRValue(c), GetGValue(c), GetBValue(c));
 }
 #endif
 
-void GColour::OnChange()
+void LColour::OnChange()
 {
 	// Basic colours
 	_LgiColours[L_BLACK].Rgb(0, 0, 0); // LC_BLACK
@@ -757,12 +758,12 @@ void GColour::OnChange()
 			// printf("Color %s = %x\n", var, c24);
 		}
 	}
-	#define LookupColour(name, default) ((Colours.Find(name) >= 0) ? GColour(Colours.Find(name),24) : default)
+	#define LookupColour(name, default) ((Colours.Find(name) >= 0) ? LColour(Colours.Find(name),24) : default)
 
-	GColour Med = LookupColour("bg_color", GColour(0xe8, 0xe8, 0xe8));
-	GColour White(255, 255, 255);
-	GColour Black(0, 0, 0);
-	GColour Sel(0x33, 0x99, 0xff);
+	LColour Med = LookupColour("bg_color", LColour(0xe8, 0xe8, 0xe8));
+	LColour White(255, 255, 255);
+	LColour Black(0, 0, 0);
+	LColour Sel(0x33, 0x99, 0xff);
 	_LgiColours[L_SHADOW] = GdcMixColour(Med, Black, 0.25); // LC_SHADOW
 	_LgiColours[L_LOW] = GdcMixColour(Med, Black, 0.5); // LC_LOW
 	_LgiColours[L_MED] = Med; // LC_MED
@@ -879,18 +880,17 @@ void GColour::OnChange()
 	#endif
 }
 
-GColour::GColour(LSystemColour sc)
+LColour::LColour(LSystemColour sc)
 {
 	if (sc < L_MAXIMUM)
 		*this = _LgiColours[sc];
 }
 
-GColour LColour(LSystemColour Colour)
+LColour LSysColour(LSystemColour Colour)
 {
-	return Colour < L_MAXIMUM ? _LgiColours[Colour] : GColour();
+	return Colour < L_MAXIMUM ? _LgiColours[Colour] : LColour();
 }
 
-#include "lgi/common/Json.h"
 bool LColourLoad(const char *Json)
 {
 	#ifdef LGI_STATIC
@@ -905,7 +905,7 @@ bool LColourLoad(const char *Json)
 		_SystemColour();
 		#undef _
 
-		GFile f(Json, O_READ);
+		LFile f(Json, O_READ);
 		if (!f.IsOpen())
 			return false;
 		LJson j(f.Read());

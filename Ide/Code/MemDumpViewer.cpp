@@ -212,11 +212,11 @@ public:
 		Except.Add("LVariant.cpp", true);
 		Except.Add("GContainers.cpp", true);
 		Except.Add("GContainers.h", true);
-		Except.Add("GFile.cpp", true);
+		Except.Add("LFile.cpp", true);
 		Except.Add("Mail.h", true);
 		Except.Add("LArray.h", true);
 
-		GFile f;
+		LFile f;
 		if (!f.Open(File, O_READ))
 			LgiMsg(this, "Couldn't read '%s'", AppName, MB_OK, File);
 		else

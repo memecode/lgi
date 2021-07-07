@@ -3,9 +3,9 @@
 #define _GCLIPBOARD_H
 
 /// Clipboard API
-class LgiClass GClipBoard
+class LgiClass LClipBoard
 {
-	class GClipBoardPriv *d;
+	class LClipBoardPriv *d;
 	LView *Owner;
 	bool Open;
 	LAutoPtr<LSurface> pDC;
@@ -24,11 +24,11 @@ public:
 	static FormatType StrToFmt(LString Fmt);
 
 	/// Creates the clipboard access object.
-	GClipBoard(LView *o);
-	~GClipBoard();
+	LClipBoard(LView *o);
+	~LClipBoard();
 
 	bool IsOpen() { return Open; }
-	GClipBoard &operator =(GClipBoard &c);
+	LClipBoard &operator =(LClipBoard &c);
 
 	/// Empties the clipboard of it's current content.
 	bool Empty();

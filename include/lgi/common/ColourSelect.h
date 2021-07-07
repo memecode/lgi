@@ -13,8 +13,8 @@ class LColourSelect :
 {
 	friend class LColourSelectPopup;
 
-	GColour c;
-	LArray<GColour> Presets;
+	LColour c;
+	LArray<LColour> Presets;
 
 public:
 	enum
@@ -22,15 +22,15 @@ public:
 		Transparent = 0
 	};
 
-	LColourSelect(LArray<GColour> *c32 = 0);
+	LColourSelect(LArray<LColour> *c32 = 0);
 
 	// Methods
-	void SetColourList(LArray<GColour> *c32 = 0);
+	void SetColourList(LArray<LColour> *c32 = 0);
 
 	// LView
 	int64 Value();
 	void Value(int64 i);
-	void Value(GColour c);
+	void Value(LColour c);
 	void OnPaint(LSurface *pDC);
 	bool OnLayout(LViewLayoutInfo &Inf);
 };

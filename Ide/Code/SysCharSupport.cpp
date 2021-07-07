@@ -20,7 +20,7 @@ public:
 		DeleteObj(pDC);
 	}
 
-	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
+	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 	{
 		LListItem::OnPaintColumn(Ctx, i, c);
 

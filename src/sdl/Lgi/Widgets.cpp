@@ -485,13 +485,13 @@ void LBitmap::OnMouseClick(LMouse &m)
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 /*
-GItemContainer::GItemContainer()
+LItemContainer::LItemContainer()
 {
 	Flags = 0;
 	ImageList = 0;
 }
 
-GItemContainer::~GItemContainer()
+LItemContainer::~LItemContainer()
 {
 	if (OwnList())
 	{
@@ -503,7 +503,7 @@ GItemContainer::~GItemContainer()
 	}
 }
 
-bool GItemContainer::SetImageList(LImageList *list, bool Own)
+bool LItemContainer::SetImageList(LImageList *list, bool Own)
 {
 	ImageList = list;
 	OwnList(Own);

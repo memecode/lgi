@@ -542,7 +542,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 	
 void LStringLayout::Paint(	LSurface *pDC,
 							LPoint pt,
-							GColour Back,
+							LColour Back,
 							LRect &rc,
 							bool Enabled,
 							bool Focused)
@@ -562,14 +562,14 @@ void LStringLayout::Paint(	LSurface *pDC,
 	int Shift = LDisplayString::FShift;
 	#endif		
 	
-	GColour FocusFore = LColour(L_FOCUS_SEL_FORE);
+	LColour FocusFore = LColour(L_FOCUS_SEL_FORE);
 	
 	// Draw all the text
 	for (auto ds: Strs)
 	{
 		LLayoutString *s = dynamic_cast<LLayoutString*>(ds);
 		LFont *f = s->GetFont();
-		GColour Bk = s->Back.IsTransparent() ? Back : s->Back;
+		LColour Bk = s->Back.IsTransparent() ? Back : s->Back;
 
 		#ifdef WINNATIVE
 		int y = pt.y + s->y;

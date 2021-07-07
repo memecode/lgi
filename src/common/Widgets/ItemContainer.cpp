@@ -23,14 +23,14 @@
 	typedef BOOL (__stdcall *_SetLayeredWindowAttributes)(HWND hwnd, COLORREF crKey, BYTE bAlpha, DWORD dwFlags);
 #endif
 
-class GItemColumnPrivate
+class LItemColumnPrivate
 {
 public:
 	LRect Pos;
 	bool Down;
 	bool Drag;
 
-	GItemContainer *Parent;
+	LItemContainer *Parent;
 	char *cName;
 	LDisplayString *Txt;
 	int cWidth;
@@ -41,7 +41,7 @@ public:
 	bool OwnIcon;
 	bool CanResize;
 
-	GItemColumnPrivate(GItemContainer *parent)
+	LItemColumnPrivate(LItemContainer *parent)
 	{
 		Parent = parent;
 		Txt = 0;
@@ -57,7 +57,7 @@ public:
 		Drag = false;
 	}
 
-	~GItemColumnPrivate()
+	~LItemColumnPrivate()
 	{
 		DeleteArray(cName);
 		if (OwnIcon)
@@ -68,24 +68,24 @@ public:
 	}
 };
 
-static GColour cActiveCol(0x86, 0xba, 0xe9);
+static LColour cActiveCol(0x86, 0xba, 0xe9);
 static void FillStops(LArray<GColourStop> &Stops, LRect &r, bool Active)
 {
 	if (Active)
 	{
-		Stops[0].Set(0.0f, GColour(0xd0, 0xe2, 0xf5));
-		Stops[1].Set(2.0f / (r.Y() - 2), GColour(0x98, 0xc1, 0xe9));
-		Stops[2].Set(0.5f, GColour(0x86, 0xba, 0xe9));
-		Stops[3].Set(0.51f, GColour(0x68, 0xaf, 0xea));
-		Stops[4].Set(1.0f, GColour(0xbb, 0xfc, 0xff));
+		Stops[0].Set(0.0f, LColour(0xd0, 0xe2, 0xf5));
+		Stops[1].Set(2.0f / (r.Y() - 2), LColour(0x98, 0xc1, 0xe9));
+		Stops[2].Set(0.5f, LColour(0x86, 0xba, 0xe9));
+		Stops[3].Set(0.51f, LColour(0x68, 0xaf, 0xea));
+		Stops[4].Set(1.0f, LColour(0xbb, 0xfc, 0xff));
 	}
 	else
 	{
-		GColour cMed(L_MED), cWs(L_WORKSPACE);
+		LColour cMed(L_MED), cWs(L_WORKSPACE);
 		if (cWs.GetGray() < 96)
 		{
-			cMed = cMed.Mix(GColour::White, 0.25f);
-			cWs = cWs.Mix(GColour::White, 0.25f);
+			cMed = cMed.Mix(LColour::White, 0.25f);
+			cWs = cWs.Mix(LColour::White, 0.25f);
 		}
 		Stops[0].Set(0.0f, cWs);
 		Stops[1].Set(0.5f, cMed.Mix(cWs));
@@ -96,7 +96,7 @@ static void FillStops(LArray<GColourStop> &Stops, LRect &r, bool Active)
 
 
 //////////////////////////////////////////////////////////////////////////////////////
-GItemContainer::GItemContainer()
+LItemContainer::LItemContainer()
 {
 	Flags = 0;
 	DragMode = 0;
@@ -108,14 +108,14 @@ GItemContainer::GItemContainer()
 	ItemEdit = NULL;
 }
 
-GItemContainer::~GItemContainer()
+LItemContainer::~LItemContainer()
 {
 	DeleteObj(ItemEdit);
 	DeleteObj(DragCol);
 	Columns.DeleteObjects();
 }
 
-void GItemContainer::PaintColumnHeadings(LSurface *pDC)
+void LItemContainer::PaintColumnHeadings(LSurface *pDC)
 {
 	// Draw column headings
 	if (!ColumnHeaders || !ColumnHeader.Valid())
@@ -154,7 +154,7 @@ void GItemContainer::PaintColumnHeadings(LSurface *pDC)
 	// Draw other columns
 	for (int i=0; i<Columns.Length(); i++)
 	{
-		GItemColumn *c = Columns[i];
+		LItemColumn *c = Columns[i];
 		if (c)
 		{
 			cr.x1 = cx;
@@ -209,13 +209,13 @@ void GItemContainer::PaintColumnHeadings(LSurface *pDC)
 		pDC->ClipRgn(0);
 }
 
-GItemColumn *GItemContainer::AddColumn(const char *Name, int Width, int Where)
+LItemColumn *LItemContainer::AddColumn(const char *Name, int Width, int Where)
 {
-	GItemColumn *c = 0;
+	LItemColumn *c = 0;
 
 	if (Lock(_FL))
 	{
-		c = new GItemColumn(this, Name, Width);
+		c = new LItemColumn(this, Name, Width);
 		if (c)
 		{
 			Columns.SetFixedLength(false);
@@ -231,7 +231,7 @@ GItemColumn *GItemContainer::AddColumn(const char *Name, int Width, int Where)
 	return c;
 }
 
-bool GItemContainer::AddColumn(GItemColumn *Col, int Where)
+bool LItemContainer::AddColumn(LItemColumn *Col, int Where)
 {
 	bool Status = false;
 
@@ -253,13 +253,13 @@ bool GItemContainer::AddColumn(GItemColumn *Col, int Where)
 	return Status;
 }
 
-void GItemContainer::DragColumn(int Index)
+void LItemContainer::DragColumn(int Index)
 {
 	DeleteObj(DragCol);
 
 	if (Index >= 0)
 	{
-		DragCol = new GDragColumn(this, Index);
+		DragCol = new LDragColumn(this, Index);
 		if (DragCol)
 		{
 			Capture(true);
@@ -268,9 +268,9 @@ void GItemContainer::DragColumn(int Index)
 	}
 }
 
-int GItemContainer::ColumnAtX(int x, GItemColumn **Col, int *Offset)
+int LItemContainer::ColumnAtX(int x, LItemColumn **Col, int *Offset)
 {
-	GItemColumn *Column = 0;
+	LItemColumn *Column = 0;
 	if (!Col) Col = &Column;
 
 	int Cx = GetImageList() ? 16 : 0;
@@ -290,14 +290,14 @@ int GItemContainer::ColumnAtX(int x, GItemColumn **Col, int *Offset)
 	return -1;
 }
 
-void GItemContainer::EmptyColumns()
+void LItemContainer::EmptyColumns()
 {
 	Columns.DeleteObjects();
 	Invalidate(&ColumnHeader);
 	SendNotify(GNotifyItem_ColumnsChanged);
 }
 
-int GItemContainer::HitColumn(int x, int y, GItemColumn *&Resize, GItemColumn *&Over)
+int LItemContainer::HitColumn(int x, int y, LItemColumn *&Resize, LItemColumn *&Over)
 {
 	int Index = -1;
 
@@ -312,7 +312,7 @@ int GItemContainer::HitColumn(int x, int y, GItemColumn *&Resize, GItemColumn *&
 		
 		for (int n = 0; n < Columns.Length(); n++)
 		{
-			GItemColumn *c = Columns[n];
+			LItemColumn *c = Columns[n];
 			cx += c->Width();
 			if (abs(x-cx) < 5)
 			{
@@ -335,21 +335,21 @@ int GItemContainer::HitColumn(int x, int y, GItemColumn *&Resize, GItemColumn *&
 	return Index;
 }
 
-DeclGArrayCompare(ColInfoCmp, GItemContainer::ColInfo, void)
+DeclGArrayCompare(ColInfoCmp, LItemContainer::ColInfo, void)
 {
 	int AGrowPx = a->GrowPx();
 	int BGrowPx = b->GrowPx();
 	return AGrowPx - BGrowPx;
 }
 
-void GItemContainer::OnColumnClick(int Col, LMouse &m)
+void LItemContainer::OnColumnClick(int Col, LMouse &m)
 {
 	ColClick = Col;
 	ColMouse = m;
 	SendNotify(GNotifyItem_ColumnClicked);
 }
 
-bool GItemContainer::GetColumnClickInfo(int &Col, LMouse &m)
+bool LItemContainer::GetColumnClickInfo(int &Col, LMouse &m)
 {
 	if (ColClick >= 0)
 	{
@@ -361,14 +361,14 @@ bool GItemContainer::GetColumnClickInfo(int &Col, LMouse &m)
 	return false;	
 }
 
-void GItemContainer::GetColumnSizes(ColSizes &cs)
+void LItemContainer::GetColumnSizes(ColSizes &cs)
 {
 	// Read in the current sizes
 	cs.FixedPx = 0;
 	cs.ResizePx = 0;
 	for (int i=0; i<Columns.Length(); i++)
 	{
-		GItemColumn *c = Columns[i];
+		LItemColumn *c = Columns[i];
 		if (c->Resizable())
 		{
 			ColInfo &Inf = cs.Info.New();
@@ -386,7 +386,7 @@ void GItemContainer::GetColumnSizes(ColSizes &cs)
 	}
 }
 
-GMessage::Result GItemContainer::OnEvent(GMessage *Msg)
+GMessage::Result LItemContainer::OnEvent(GMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -402,7 +402,7 @@ GMessage::Result GItemContainer::OnEvent(GMessage *Msg)
 	return LLayout::OnEvent(Msg);
 }
 
-void GItemContainer::ResizeColumnsToContent(int Border)
+void LItemContainer::ResizeColumnsToContent(int Border)
 {
 	if (!InThread())
 	{
@@ -461,7 +461,7 @@ void GItemContainer::ResizeColumnsToContent(int Border)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-GDragColumn::GDragColumn(GItemContainer *list, int col)
+LDragColumn::LDragColumn(LItemContainer *list, int col)
 {
 	List = list;
 	Index = col;
@@ -539,7 +539,7 @@ GDragColumn::GDragColumn(GItemContainer *list, int col)
 	}
 }
 
-GDragColumn::~GDragColumn()
+LDragColumn::~LDragColumn()
 {
 	Visible(false);
 
@@ -552,13 +552,13 @@ GDragColumn::~GDragColumn()
 }
 
 #if LINUX_TRANS_COL
-void GDragColumn::OnPosChange()
+void LDragColumn::OnPosChange()
 {
 	Invalidate();
 }
 #endif
 
-void GDragColumn::OnPaint(LSurface *pScreen)
+void LDragColumn::OnPaint(LSurface *pScreen)
 {
 	#if LINUX_TRANS_COL
 	LSurface *Buf = new LMemDC(X(), Y(), GdcD->GetBits());
@@ -583,7 +583,7 @@ void GDragColumn::OnPaint(LSurface *pScreen)
 
 		// Draw painted column over the back with alpha
 		Buf->Op(GDC_ALPHA);
-		GApplicator *App = Buf->Applicator();
+		LApplicator *App = Buf->Applicator();
 		if (App)
 		{
 			App->SetVar(GAPP_ALPHA_A, DRAG_COL_ALPHA);
@@ -601,16 +601,16 @@ void GDragColumn::OnPaint(LSurface *pScreen)
 ///////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
 // List column
-GItemColumn::GItemColumn(GItemContainer *parent, const char *name, int width)
+LItemColumn::LItemColumn(LItemContainer *parent, const char *name, int width)
 	: ResObject(Res_Column)
 {
-	d = new GItemColumnPrivate(parent);
+	d = new LItemColumnPrivate(parent);
 	d->cWidth = width;
 	if (name)
 		Name(name);
 }
 
-GItemColumn::~GItemColumn()
+LItemColumn::~LItemColumn()
 {
 	if (d->Drag)
 	{
@@ -620,47 +620,47 @@ GItemColumn::~GItemColumn()
 	DeleteObj(d);
 }
 
-GItemContainer *GItemColumn::GetList()
+LItemContainer *LItemColumn::GetList()
 {
 	return d->Parent;
 }
 
-void GItemColumn::Image(int i)
+void LItemColumn::Image(int i)
 {
 	d->cImage = i;
 }
 
-int GItemColumn::Image()
+int LItemColumn::Image()
 {
 	return d->cImage;
 }
 
-bool GItemColumn::Resizable()
+bool LItemColumn::Resizable()
 {
 	return d->CanResize;
 }
 
-void GItemColumn::Resizable(bool i)
+void LItemColumn::Resizable(bool i)
 {
 	d->CanResize = i;
 }
 
-bool GItemColumn::InDrag()
+bool LItemColumn::InDrag()
 {
 	return d->Drag;
 }
 
-LRect GItemColumn::GetPos()
+LRect LItemColumn::GetPos()
 {
 	return d->Pos;
 }
 
-void GItemColumn::SetPos(LRect &r)
+void LItemColumn::SetPos(LRect &r)
 {
 	d->Pos = r;
 }
 
-void GItemColumn::Name(const char *n)
+void LItemColumn::Name(const char *n)
 {
 	DeleteArray(d->cName);
 	DeleteObj(d->Txt);
@@ -679,12 +679,12 @@ void GItemColumn::Name(const char *n)
 	}
 }
 
-char *GItemColumn::Name()
+char *LItemColumn::Name()
 {
 	return d->cName;
 }
 
-int GItemColumn::GetIndex()
+int LItemColumn::GetIndex()
 {
 	if (d->Parent)
 	{
@@ -694,12 +694,12 @@ int GItemColumn::GetIndex()
 	return -1;
 }
 
-int GItemColumn::GetContentSize()
+int LItemColumn::GetContentSize()
 {
 	return d->Parent->GetContentSize(GetIndex());
 }
 
-void GItemColumn::Width(int i)
+void LItemColumn::Width(int i)
 {
 	if (d->cWidth != i)
 	{
@@ -733,12 +733,12 @@ void GItemColumn::Width(int i)
 	}
 }
 
-int GItemColumn::Width()
+int LItemColumn::Width()
 {
 	return d->cWidth;
 }
 
-void GItemColumn::Mark(int i)
+void LItemColumn::Mark(int i)
 {
 	d->cMark = i;
 	if (d->Parent)
@@ -747,12 +747,12 @@ void GItemColumn::Mark(int i)
 	}
 }
 
-int GItemColumn::Mark()
+int LItemColumn::Mark()
 {
 	return d->cMark;
 }
 
-void GItemColumn::Type(int i)
+void LItemColumn::Type(int i)
 {
 	d->cType = i;
 	if (d->Parent)
@@ -761,12 +761,12 @@ void GItemColumn::Type(int i)
 	}
 }
 
-int GItemColumn::Type()
+int LItemColumn::Type()
 {
 	return d->cType;
 }
 
-void GItemColumn::Icon(LSurface *i, bool Own)
+void LItemColumn::Icon(LSurface *i, bool Own)
 {
 	if (d->OwnIcon)
 	{
@@ -781,26 +781,26 @@ void GItemColumn::Icon(LSurface *i, bool Own)
 	}
 }
 
-LSurface *GItemColumn::Icon()
+LSurface *LItemColumn::Icon()
 {
 	return d->cIcon;
 }
 
-bool GItemColumn::Value()
+bool LItemColumn::Value()
 {
 	return d->Down;
 }
 
-void GItemColumn::Value(bool i)
+void LItemColumn::Value(bool i)
 {
 	d->Down = i;
 }
 
-void GItemColumn::OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground)
+void LItemColumn::OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground)
 {
 	if (!d->Drag)
 	{
-		GCssTools Tools(d->Parent);
+		LCssTools Tools(d->Parent);
 		auto Fore = Tools.GetFore();
 		auto cMed = LColour(L_MED);
 		int Off = d->Down ? 1 : 0;
@@ -826,7 +826,7 @@ void GItemColumn::OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground)
 		}
 		else if (d->cImage >= 0 && d->Parent)
 		{
-			GColour Background = cMed;
+			LColour Background = cMed;
 			if (FillBackground)
 			{
 				pDC->Colour(Background);
@@ -866,7 +866,7 @@ void GItemColumn::OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground)
 				return;
 			}
 
-			GColour cText = Fore;
+			LColour cText = Fore;
 			#ifdef MAC
 			// Contrast check
 			if (d->cMark && (cText - cActiveCol) < 64)
@@ -927,10 +927,10 @@ void GItemColumn::OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground)
 
 void ColumnPaint(void *UserData, LSurface *pDC, LRect &r, bool FillBackground)
 {
-	((GItemColumn*)UserData)->OnPaint_Content(pDC, r, FillBackground);
+	((LItemColumn*)UserData)->OnPaint_Content(pDC, r, FillBackground);
 }
 
-void GItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
+void LItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
 {
 	LRect r = Rgn;
 
@@ -1004,7 +1004,7 @@ GItem::~GItem()
 
 LView *GItem::EditLabel(int Col)
 {
-	GItemContainer *c = GetContainer();
+	LItemContainer *c = GetContainer();
 	if (!c)
 		return NULL;
 	
@@ -1020,7 +1020,7 @@ LView *GItem::EditLabel(int Col)
 
 void GItem::OnEditLabelEnd()
 {
-	GItemContainer *c = GetContainer();
+	LItemContainer *c = GetContainer();
 	if (c)
 		c->ItemEdit = NULL;
 }
@@ -1176,7 +1176,7 @@ GItemEdit::~GItemEdit()
 				d->Index, Str);
 			#endif
 
-			GItemContainer *c = d->Item->GetContainer();
+			LItemContainer *c = d->Item->GetContainer();
 			if (d->Item->SetText(Str, d->Index))
 			{
 				d->Item->Update();

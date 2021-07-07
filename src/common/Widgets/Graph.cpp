@@ -540,7 +540,7 @@ void LGraph::OnMouseClick(LMouse &m)
                 if (!s.Save())
                     break;
 
-                GFile o;
+                LFile o;
                 if (!o.Open(s.Name(), O_WRITE))
                 {
                     LgiMsg(this, "Failed to open file for writing.", "LGraph");
@@ -611,7 +611,7 @@ void LGraph::OnPaint(LSurface *pDC)
 	x.y1 = x.y2 - 60;
 	y.y2 = data.y2 = x.y1 - 1;	
 	
-	pDC->Colour(GColour(222, 222, 222));
+	pDC->Colour(LColour(222, 222, 222));
 	pDC->Box(&data);
 
 	// Draw axis
@@ -620,7 +620,7 @@ void LGraph::OnPaint(LSurface *pDC)
 	
 	// Draw data
 	int cx, cy, px, py;
-	pDC->Colour(GColour(0, 0, 222));
+	pDC->Colour(LColour(0, 0, 222));
 
     if (d->Average && !d->Ave.Length())
     {
@@ -671,7 +671,7 @@ void LGraph::OnPaint(LSurface *pDC)
 	        if (d->Average)
 	        {
 	            int px = -1, py = -1;
-	            pDC->Colour(GColour(255, 0, 0));
+	            pDC->Colour(LColour(255, 0, 0));
 	            for (int b=0; b<d->BucketSize; b++)
 	            {
 	                if (d->Ave[b].Count)

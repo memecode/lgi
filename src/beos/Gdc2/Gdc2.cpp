@@ -616,7 +616,7 @@ void GPalette::CreateCube()
 
 
 extern void TrimWhite(char *s);
-bool GPalette::Load(GFile &F)
+bool GPalette::Load(LFile &F)
 {
 	bool Status = FALSE;
 	char Buf[256];
@@ -655,7 +655,7 @@ bool GPalette::Load(GFile &F)
 	return Status;
 }
 
-bool GPalette::Save(GFile &F, int Format)
+bool GPalette::Save(LFile &F, int Format)
 {
 	bool Status = FALSE;
 
@@ -743,7 +743,7 @@ public:
 	int ScrX;
 	int ScrY;
 	int ScrBits;
-	GColourSpace ScrCs;
+	LColourSpace ScrCs;
 
 	// Palette
 	double GammaCorrection;
@@ -906,7 +906,7 @@ int GdcDevice::SetOption(int Opt, int Value)
 	return Prev;
 }
 
-GColourSpace GdcDevice::GetColourSpace()
+LColourSpace GdcDevice::GetColourSpace()
 {
 	return d->ScrCs;
 }
@@ -1158,12 +1158,12 @@ GApplicatorFactory::~GApplicatorFactory()
 	}
 }
 
-GApplicator *GApplicatorFactory::NewApp(GColourSpace Cs, int Op)
+LApplicator *GApplicatorFactory::NewApp(LColourSpace Cs, int Op)
 {
 	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)
 	{
-		GApplicator *a = _Factory[i]->Create(Cs, Op);
+		LApplicator *a = _Factory[i]->Create(Cs, Op);
 		if (a) return a;
 	}
 

@@ -560,7 +560,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
                         Path = LGetPath();
                     for (auto s: Path)
                     {
-                        GFile::Path p(s, d->Exe);
+                        LFile::Path p(s, d->Exe);
                         if (p.Exists())
                         {
                             d->Exe = p.GetFull();

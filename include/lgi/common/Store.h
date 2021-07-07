@@ -48,12 +48,12 @@ namespace Storage1
 		int Sizeof();
 		bool SetSize(int NewSize);
 		bool MoveToLoc(int NewLoc);
-		bool WriteHeader(GFile &f);
+		bool WriteHeader(LFile &f);
 
 		StorageKitImpl *Tree;
 
 	public:
-		bool Serialize(GFile &f, bool Write, int Flags = 0);
+		bool Serialize(LFile &f, bool Write, int Flags = 0);
 
 		int StoreType;
 		int StoreSize;
@@ -93,8 +93,8 @@ namespace Storage1
 
 		// Impl
 		bool Save();
-		GFile *GotoObject(const char *file, int line);
-		bool EndOfObj(GFile &f);
+		LFile *GotoObject(const char *file, int line);
+		bool EndOfObj(LFile &f);
 	};
 
 	class Block {
@@ -133,7 +133,7 @@ namespace Storage1
 						List<Block> &Blocks);
 		StorageItemImpl *CreateItem(StorageObj *Obj);
 		StorageItemImpl *LoadLocation(int Loc);
-		bool Serialize(GFile &f, bool Write);
+		bool Serialize(LFile &f, bool Write);
 		bool SerializeItem(StorageItem *Item, bool Write, int Flags = 0)
 		{
 			return (Item) ? ((StorageItemImpl*)Item)->Serialize(File, Write, Flags) : 0;

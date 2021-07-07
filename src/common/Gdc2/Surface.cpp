@@ -1546,9 +1546,9 @@ bool LSurface::DrawOnAlpha(bool Draw)
 	return Prev;
 }
 
-GApplicator *LSurface::CreateApplicator(int Op, GColourSpace Cs)
+LApplicator *LSurface::CreateApplicator(int Op, LColourSpace Cs)
 {
-	GApplicator *pA = NULL;
+	LApplicator *pA = NULL;
 
 	if (!Cs)
 	{
@@ -1601,7 +1601,7 @@ GApplicator *LSurface::CreateApplicator(int Op, GColourSpace Cs)
 	return pA;
 }
 
-bool LSurface::Applicator(GApplicator *pApplicator)
+bool LSurface::Applicator(LApplicator *pApplicator)
 {
 	bool Status = false;
 
@@ -1632,7 +1632,7 @@ bool LSurface::Applicator(GApplicator *pApplicator)
 	return Status;
 }
 
-GApplicator *LSurface::Applicator()
+LApplicator *LSurface::Applicator()
 {
 	return pApp;
 }
@@ -1664,18 +1664,18 @@ LRect LSurface::ClipRgn()
 	return Clip;
 }
 
-GColour LSurface::Colour(LSystemColour SysCol)
+LColour LSurface::Colour(LSystemColour SysCol)
 {
 	return Colour(LColour(SysCol));
 }
 
-GColour LSurface::Colour(GColour c)
+LColour LSurface::Colour(LColour c)
 {
 	LgiAssert(pApp != NULL);
-	GColour cPrev;
+	LColour cPrev;
 
 	uint32_t c32 = c.c32();
-	GColourSpace Cs = pApp->GetColourSpace();
+	LColourSpace Cs = pApp->GetColourSpace();
 	switch (Cs)
 	{
 		case CsIndex8:
@@ -1769,8 +1769,8 @@ GColour LSurface::Colour(GColour c)
 
 COLOUR LSurface::Colour(COLOUR c, int Bits)
 {
-	GColour n(c, Bits ? Bits : GetBits());
-	GColour Prev = Colour(n);
+	LColour n(c, Bits ? Bits : GetBits());
+	LColour Prev = Colour(n);
 	switch (GetBits())
 	{
 		case 8:

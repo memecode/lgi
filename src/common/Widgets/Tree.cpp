@@ -187,7 +187,7 @@ void LTreeNode::_ClearDs(int Col)
 	}
 }
 
-GItemContainer *LTreeItem::GetContainer()
+LItemContainer *LTreeItem::GetContainer()
 {
 	return Tree;
 }
@@ -508,7 +508,7 @@ LRect *LTreeItem::GetPos(int Col)
 
 	if (Col >= 0)
 	{
-		GItemColumn *Column = 0;
+		LItemColumn *Column = 0;
 
 		int Cx = Tree->GetImageList() ? 16 : 0;
 		for (int c=0; c<Col; c++)
@@ -887,8 +887,8 @@ void LTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	Pos.x2 = Pos.x1 + Ctx.ColPx[0] - 1;
 
 	int x = 0;
-	GColour Ws(L_WORKSPACE);
-	GColour Lines = Ws.Invert().Mix(Ws);
+	LColour Ws(L_WORKSPACE);
+	LColour Lines = Ws.Invert().Mix(Ws);
 
 	pDC->Colour(Lines);
 	if (Tree->d->JoiningLines)
@@ -1032,12 +1032,12 @@ void LTreeItem::OnPaint(ItemPaintCtx &Ctx)
 		x += d->Icon.X();
 	}
 
-	GColour SelFore(Tree->Focus() ? L_FOCUS_SEL_FORE : L_NON_FOCUS_SEL_FORE);
-	GColour SelBack(Tree->Focus() ? L_FOCUS_SEL_BACK : L_NON_FOCUS_SEL_BACK);
+	LColour SelFore(Tree->Focus() ? L_FOCUS_SEL_FORE : L_NON_FOCUS_SEL_FORE);
+	LColour SelBack(Tree->Focus() ? L_FOCUS_SEL_BACK : L_NON_FOCUS_SEL_BACK);
 
 	bool IsSelected = (Tree->d->DropTarget == this) || (Tree->d->DropTarget == NULL && Select());
-	GColour Fore = Ctx.Fore;
-	GColour TxtBack = Ctx.TxtBack;
+	LColour Fore = Ctx.Fore;
+	LColour TxtBack = Ctx.TxtBack;
 	auto Css = GetCss();
 	LCss::ColorDef f, b;
 	if (Css)
@@ -1047,8 +1047,8 @@ void LTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	}
 
 	// text: first column
-	Ctx.Fore = f.Type == LCss::ColorRgb ? (GColour)f : (IsSelected ? SelFore : Fore);
-	Ctx.TxtBack = b.Type == LCss::ColorRgb ? (GColour)b : (IsSelected ? SelBack : Ctx.Back);
+	Ctx.Fore = f.Type == LCss::ColorRgb ? (LColour)f : (IsSelected ? SelFore : Fore);
+	Ctx.TxtBack = b.Type == LCss::ColorRgb ? (LColour)b : (IsSelected ? SelBack : Ctx.Back);
 
 	auto ColourDiff = abs(Ctx.Fore.GetGray() - Ctx.TxtBack.GetGray());
 	if (ColourDiff < 32) // Check if the colours are too similar and then disambiguate...
@@ -1067,8 +1067,8 @@ void LTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	x = Pos.x2 + 1;
 
 	// text: other columns
-	Ctx.Fore = f.Type == LCss::ColorRgb ? (GColour)f : Fore;
-	Ctx.TxtBack = b.Type == LCss::ColorRgb ? (GColour)b : Ctx.Back;
+	Ctx.Fore = f.Type == LCss::ColorRgb ? (LColour)f : Fore;
+	Ctx.TxtBack = b.Type == LCss::ColorRgb ? (LColour)b : Ctx.Back;
 	for (int i=1; i<Ctx.Columns; i++)
 	{
 		Ctx.Set(x, Pos.y1, x + Ctx.ColPx[i] - 1, Pos.y2);
@@ -1097,7 +1097,7 @@ void LTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	}
 }
 
-void LTreeItem::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
+void LTreeItem::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 {
 	LDisplayString *ds = d->GetDs(i, Ctx.ColPx[i]);
 	if (ds)
@@ -1312,7 +1312,7 @@ void LTree::_Pour()
 	{
 		for (int i=0; i<Columns.Length(); i++)
 		{
-			GItemColumn *c = Columns[i];
+			LItemColumn *c = Columns[i];
 			ColumnPx += c->Width();
 		}
 	}
@@ -1668,8 +1668,8 @@ void LTree::OnMouseClick(LMouse &m)
 			d->DragStart.y = m.y;
 
 			// Clicked on a column heading
-			GItemColumn *Resize;
-			GItemColumn *Over = NULL;
+			LItemColumn *Resize;
+			LItemColumn *Over = NULL;
 			HitColumn(m.x, m.y, Resize, Over);
 
 			if (Resize)
@@ -1778,7 +1778,7 @@ void LTree::OnMouseMove(LMouse &m)
 		*/
 		case RESIZE_COLUMN:
 		{
-			GItemColumn *c = Columns[d->DragData];
+			LItemColumn *c = Columns[d->DragData];
 			if (c)
 			{
 				// int OldWidth = c->Width();
@@ -1820,10 +1820,10 @@ void LTree::OnPosChange()
 void LTree::OnPaint(LSurface *pDC)
 {
 	TREELOCK
-	GCssTools Tools(this);
+	LCssTools Tools(this);
 
 	#if 0 // coverage testing...
-	pDC->Colour(GColour(255, 0, 255));
+	pDC->Colour(LColour(255, 0, 255));
 	pDC->Rectangle();
 	#endif
 
@@ -1843,8 +1843,8 @@ void LTree::OnPaint(LSurface *pDC)
 	d->IconTextGap = GetFont()->GetHeight() / 6;
 	auto cText = LColour(L_TEXT);
 	auto cWs = LColour(L_WORKSPACE);
-	GColour Fore = Tools.GetFore(&cText);
-	GColour Background = Tools.GetBack(&cWs, 0);
+	LColour Fore = Tools.GetFore(&cText);
+	LColour Background = Tools.GetBack(&cWs, 0);
 
 	// icon cache
 	if (GetImageList() &&
@@ -1902,8 +1902,8 @@ void LTree::OnPaint(LSurface *pDC)
 	Ctx.Fore = Fore;
 	Ctx.Back = Background;
 	Ctx.TxtBack = Background;
-	GColour SelFore(Focus() ? L_FOCUS_SEL_FORE : L_NON_FOCUS_SEL_FORE);
-	GColour SelBack(Focus() ? L_FOCUS_SEL_BACK : L_NON_FOCUS_SEL_BACK);
+	LColour SelFore(Focus() ? L_FOCUS_SEL_FORE : L_NON_FOCUS_SEL_FORE);
+	LColour SelBack(Focus() ? L_FOCUS_SEL_BACK : L_NON_FOCUS_SEL_BACK);
 
 	// layout items
 	if (d->LayoutDirty)
@@ -2131,7 +2131,7 @@ LgiCursor LTree::GetCursor(int x, int y)
 {
 	TREELOCK
 		
-	GItemColumn *Resize = NULL, *Over = NULL;
+	LItemColumn *Resize = NULL, *Over = NULL;
 	HitColumn(x, y, Resize, Over);
 
 	return (Resize) ? LCUR_SizeHor : LCUR_Normal;

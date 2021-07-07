@@ -66,7 +66,7 @@ _(ContainerSpan, "Span")
 _(ContainerAlign, "Align")
 _(ContainerVAlign, "VAlign")
 	
-// GFile
+// LFile
 _(FileOpen, "Open")
 _(FileRead, "Read")
 _(FileWrite, "Write")

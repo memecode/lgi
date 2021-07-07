@@ -38,7 +38,7 @@ protected:
 		int Len;
 		int x, y;
 
-		GColourSpace Cs;
+		LColourSpace Cs;
 		int BytesPerPixel;
 
 		LSurface *pDC;
@@ -96,7 +96,7 @@ public:
 		MakeAlphaLut();
 	}
 
-	LSolidBrush(GColour c)
+	LSolidBrush(LColour c)
 	{
 		c32 = c.c32();
 		MakeAlphaLut();

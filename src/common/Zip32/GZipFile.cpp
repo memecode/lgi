@@ -58,7 +58,7 @@ public:
 class GZipFilePrivate
 {
 public:
-	GFile Zip;
+	LFile Zip;
 	LArray<ZipLocalHeader*> Files;
 
 	GZipFilePrivate()
@@ -96,7 +96,7 @@ public:
 	}
 };
 
-class GZipDir : public GDirectory
+class GZipDir : public LDirectory
 {
 	int Cur;
 	LArray<ZipLocalHeader*> *Files;
@@ -164,7 +164,7 @@ public:
 	bool IsDir() { return false; }
 	bool IsReadOnly() { return false; }
 	bool IsHidden() { return false; }
-	GDirectory *Clone() { return new GZipDir(Files); }
+	LDirectory *Clone() { return new GZipDir(Files); }
 	int GetType() { return VT_FILE; }
 };
 
@@ -272,7 +272,7 @@ void GZipFile::Close()
 	}
 }
 
-GDirectory *GZipFile::List()
+LDirectory *GZipFile::List()
 {
 	return new GZipDir(&d->Files);
 }

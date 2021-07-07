@@ -25,7 +25,7 @@ enum Cmds
 	IDM_INSERT_COL,
 };
 
-static GColour Blue(0, 30, 222);
+static LColour Blue(0, 30, 222);
 
 /////////////////////////////////////////////////////////////////////
 struct Pair { int Pos, Size; };
@@ -369,10 +369,10 @@ struct OpHandle : public LRect
 		int cx = X() >> 1;
 		int cy = Y() >> 1;
 
-		pDC->Colour(Over ? GColour::Red : Blue);
+		pDC->Colour(Over ? LColour::Red : Blue);
 		pDC->Rectangle(this);
 
-		pDC->Colour(GColour::White);
+		pDC->Colour(LColour::White);
 		switch (Type)
 		{
 			case LSizeRow:
@@ -1038,7 +1038,7 @@ void CtrlTable::OnPaint(LSurface *pDC)
 					pDC->Applicator()->SetVar(GAPP_ALPHA_A, 0x20);
 				}
 				else
-					pDC->Colour(GColour(Blue.r(), Blue.g(), Blue.b(), 0x20));
+					pDC->Colour(LColour(Blue.r(), Blue.g(), Blue.b(), 0x20));
 				pDC->Rectangle(c->Pos.x1 + 1, c->Pos.y1 + 1, c->Pos.x2 - 1, c->Pos.y2 - 1);
 				pDC->Op(Op);
 				pDC->Colour(Blue);

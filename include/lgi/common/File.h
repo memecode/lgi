@@ -57,10 +57,10 @@
 
 /////////////////////////////////////////////////////////////////////
 // Defines
-#define FileDev							(GFileSystem::GetInstance())
+#define FileDev							(LFileSystem::GetInstance())
 #define MAX_PATH						260
 
-// File system types (used by GDirectory and GVolume)
+// File system types (used by LDirectory and LVolume)
 enum LVolumeTypes
 {
 	VT_NONE,
@@ -106,13 +106,13 @@ enum LVolumeTypes
 // Abstract classes
 
 /// Generic directory iterator
-class LgiClass GDirectory
+class LgiClass LDirectory
 {
-	struct GDirectoryPriv *d;
+	struct LDirectoryPriv *d;
 
 public:
-	GDirectory();
-	virtual ~GDirectory();
+	LDirectory();
+	virtual ~LDirectory();
 
 	/// \brief Starts the search. The entries '.' and '..' are never returned.
 	/// The default pattern returns all files.
@@ -188,8 +188,8 @@ public:
 	/// This is equivilant to a attribute flag on win32 and a leading '.' on unix.
 	virtual bool IsHidden() const;
 
-	/// Creates an copy of this type of GDirectory class.
-	virtual GDirectory *Clone();
+	/// Creates an copy of this type of LDirectory class.
+	virtual LDirectory *Clone();
 	
 	/// Gets the type code of the current entry. See the VT_?? defines for possible values.
 	virtual int GetType() const;
@@ -202,18 +202,18 @@ public:
 };
 
 /// Describes a volume connected to the system
-class LgiClass GVolume
+class LgiClass LVolume
 {
-	friend class GFileSystem;
-	friend struct GVolumePriv;
+	friend class LFileSystem;
+	friend struct LVolumePriv;
 
 protected:
-	struct GVolumePriv *d;
+	struct LVolumePriv *d;
 
 public:
-	GVolume(const char *Path = NULL);
-	GVolume(LgiSystemPath SysPath, const char *Name);
-	virtual ~GVolume();
+	LVolume(const char *Path = NULL);
+	LVolume(LgiSystemPath SysPath, const char *Name);
+	virtual ~LVolume();
 
 	const char *Name();
 	const char *Path();
@@ -225,36 +225,36 @@ public:
 
 	virtual bool IsMounted();
 	virtual bool SetMounted(bool Mount);
-	virtual GVolume *First();
-	virtual GVolume *Next();
-	virtual GDirectory *GetContents();
-	virtual void Insert(LAutoPtr<GVolume> v);
+	virtual LVolume *First();
+	virtual LVolume *Next();
+	virtual LDirectory *GetContents();
+	virtual void Insert(LAutoPtr<LVolume> v);
 };
 
 typedef int (*CopyFileCallback)(void *token, int64 Done, int64 Total);
 
 /// A singleton class for accessing the file system
-class LgiClass GFileSystem
+class LgiClass LFileSystem
 {
-	friend class GFile;
-	static GFileSystem *Instance;
+	friend class LFile;
+	static LFileSystem *Instance;
 	class GFileSystemPrivate *d;
 
-	GVolume *Root;
+	LVolume *Root;
 
 public:
-	GFileSystem();
-	~GFileSystem();
+	LFileSystem();
+	~LFileSystem();
 	
 	/// Return the current instance of the file system. The shorthand for this is "FileDev".
-	static GFileSystem *GetInstance() { return Instance; }
+	static LFileSystem *GetInstance() { return Instance; }
 
 	/// Call this when the devices on the system change. For instance on windows
 	/// when you receive WM_DEVICECHANGE.
 	void OnDeviceChange(char *Reserved = 0);
 
 	/// Gets the root volume of the system.
-	GVolume *GetRootVolume();
+	LVolume *GetRootVolume();
 	
 	/// Copies a file
 	bool Copy
@@ -353,17 +353,17 @@ public:
 #endif
 
 /// Generic file access class
-class LgiClass GFile : public LStream, public GRefCount
+class LgiClass LFile : public LStream, public GRefCount
 {
 protected:
-	class GFilePrivate *d;
+	class LFilePrivate *d;
 
 	ssize_t SwapRead(uchar *Buf, ssize_t Size);
 	ssize_t SwapWrite(uchar *Buf, ssize_t Size);
 
 public:
-	GFile(const char *Path = NULL, int Mode = O_READ);
-	virtual ~GFile();
+	LFile(const char *Path = NULL, int Mode = O_READ);
+	virtual ~LFile();
 
 	OsFile Handle();
 	void ChangeThread() override;
@@ -451,11 +451,11 @@ public:
 	}
 
 	// Operators
-	#define GFileOp(type)		virtual GFile &operator >> (type &i);
+	#define GFileOp(type)		virtual LFile &operator >> (type &i);
 	GFileOps();
 	#undef GFileOp
 
-	#define GFileOp(type)		virtual GFile &operator << (type i);
+	#define GFileOp(type)		virtual LFile &operator << (type i);
 	GFileOps();
 	#undef GFileOp
 
@@ -615,9 +615,9 @@ public:
 			return false;
 		}
 		
-		GFile::Path Absolute()
+		LFile::Path Absolute()
 		{
-			GFile::Path p = *this;
+			LFile::Path p = *this;
 			p.SetFixedLength(false);
 			
 			for (size_t i=0; i<p.Length(); i++)
@@ -669,8 +669,8 @@ public:
 
 	/// Sets the file to zero size.
 	/// Useful for this sort of thing:
-	/// GFile(MyPath, O_WRITE).Empty().Write(MyData);
-	GFile &Empty()
+	/// LFile(MyPath, O_WRITE).Empty().Write(MyData);
+	LFile &Empty()
 	{
 		SetSize(0);
 		return *this;
@@ -687,8 +687,8 @@ LgiFunc bool LFileExists(const char *File, char *CorrectCase = NULL);
 LgiFunc bool LDirExists(const char *Dir, char *CorrectCase = NULL);
 
 LgiFunc bool ResolveShortcut(const char *LinkFile, char *Path, ssize_t Len);
-LgiFunc void WriteStr(GFile &f, const char *s);
-LgiFunc char *ReadStr(GFile &f DeclDebugArgs);
+LgiFunc void WriteStr(LFile &f, const char *s);
+LgiFunc char *ReadStr(LFile &f DeclDebugArgs);
 LgiFunc ssize_t SizeofStr(const char *s);
 LgiFunc char *ReadTextFile(const char *File);
 LgiFunc bool LgiTrimDir(char *Path);

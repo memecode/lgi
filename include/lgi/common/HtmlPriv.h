@@ -302,7 +302,7 @@ protected:
 	bool OnUnhandledColor(LCss::ColorDef *def, const char *&s);
 	void CenterText();
 	bool Serialize(LXmlTag *t, bool Write);
-	GColour _Colour(bool Fore);
+	LColour _Colour(bool Fore);
 
 public:
 	// Object
@@ -414,7 +414,7 @@ public:
 		/// The surface to paint on
 		LSurface *pDC,
 		/// The background colour (transparent is OK)
-		GColour &Back,
+		LColour &Back,
 		/// [Optional] The size of the border painted
 		LRect *Px = NULL);
 	/// This fills 'rgn' with all the rectangles making up the inline tags region

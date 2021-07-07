@@ -70,8 +70,8 @@ public:
 		TabSize = tabsize;
 	}
 
-	virtual bool Load(GFile &F) { return FALSE; }
-	virtual bool Save(GFile &F) { return FALSE; }
+	virtual bool Load(LFile &F) { return FALSE; }
+	virtual bool Save(LFile &F) { return FALSE; }
 };
 
 typedef unsigned long				TTF_FIXED;
@@ -87,8 +87,8 @@ public:
 	ushort	EntrySelector;			// Log2(maximum power of 2 £ numTables).
 	ushort	RangeShift;			// NumTables x 16-searchRange.
 
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
 };
 
@@ -101,8 +101,8 @@ public:
 
 	void	*Table;
 
-	virtual bool Read(GFile &F);
-	virtual bool Write(GFile &F);
+	virtual bool Read(LFile &F);
+	virtual bool Write(LFile &F);
 	virtual void Dump();
 };
 
@@ -145,8 +145,8 @@ public:
 						// 1 for long.
 	short	GlyphDataFormat;		// 0 for current format.
 
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
 };
 
@@ -168,8 +168,8 @@ public:
 	ushort	MaxComponentElements;		// Maximum number of components referenced at "top level" for any composite glyph.
 	ushort	MaxComponentDepth;		// Maximum levels of recursion; 1 for simple components.
 
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
 };
 
@@ -184,8 +184,8 @@ public:
 	virtual ~TtfLocation();
 
 	int operator [](int i);
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
 };
 
@@ -313,8 +313,8 @@ public:
 	int GetX() { return xMax - xMin; }
 	int GetY() { return yMax - yMin; }
 
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
 	void Draw(LSurface *pDC, int x, int y, int Scale);
 	int DrawEm(LSurface *pDC, int X, int Y, int EmUnits, double PixelsPerEm);
@@ -330,8 +330,8 @@ public:
 	TtfMap() {}
 	virtual ~TtfMap() {}
 	virtual int operator[](int i) { return 0; }
-	virtual bool Read(GFile &F) { return FALSE; }
-	virtual bool Write(GFile &F) { return FALSE; }
+	virtual bool Read(LFile &F) { return FALSE; }
+	virtual bool Write(LFile &F) { return FALSE; }
 	virtual void Dump() {}
 };
 
@@ -347,8 +347,8 @@ public:
 	ushort Format;
 	TtfMap	*Map;
 
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
 };
 
@@ -361,8 +361,8 @@ class LgiClass TtfCMapByteEnc : public TtfMap {
 
 public:
 	int operator[](int i);
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
 };
 
@@ -386,8 +386,8 @@ class LgiClass TtfCMapHighByte : public TtfMap {
 
 public:
 	int operator[](int i) { return 0; }
-	bool Read(GFile &F) { return FALSE; }
-	bool Write(GFile &F) { return FALSE; }
+	bool Read(LFile &F) { return FALSE; }
+	bool Write(LFile &F) { return FALSE; }
 	void Dump() {}
 };
 
@@ -415,8 +415,8 @@ public:
 	~TtfCMapSegDelta();
 
 	int operator[](int i);
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
 };
 
@@ -432,8 +432,8 @@ public:
 	TtfCMap();
 	~TtfCMap();
 	int operator[](int i) { return (Fravorite) ? (*Fravorite)[i] : 0; }
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
 };
 
@@ -467,7 +467,7 @@ protected:
 	int Tables;
 	TtfTable *TableList;
 	TtfTable *FindTag(char *t);
-	TtfTable *SeekTag(char *t, GFile *F);
+	TtfTable *SeekTag(char *t, LFile *F);
 
 	TtfHeader Header;
 	TtfMaxProfile Profile;
@@ -483,8 +483,8 @@ public:
 	GdcTtf();
 	virtual ~GdcTtf();
 
-	virtual bool Load(GFile &F);
-	virtual bool Save(GFile &F);
+	virtual bool Load(LFile &F);
+	virtual bool Save(LFile &F);
 	virtual bool Rasterize(	int Point,
 							int StyleFlags,
 							int OverSample = 2,
@@ -518,8 +518,8 @@ public:
 
 	HFONT Handle() { return hFont; }
 
-	bool Load(GFile &F) { return TRUE; }
-	bool Save(GFile &F) { return FALSE; }
+	bool Load(LFile &F) { return TRUE; }
+	bool Save(LFile &F) { return FALSE; }
 
 	bool Create(char *Face,
 				int Height,

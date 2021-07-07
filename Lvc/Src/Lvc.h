@@ -225,7 +225,7 @@ public:
 extern bool ConvertEol(const char *Path, bool Cr);
 extern int GetEol(const char *Path);
 extern LString::Array GetProgramsInPath(const char *Program);
-extern GColour GetPaletteColour(int i);
+extern LColour GetPaletteColour(int i);
 
 #include "VcFile.h"
 #include "VcCommit.h"

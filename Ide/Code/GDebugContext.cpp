@@ -166,7 +166,7 @@ GDebugContext::GDebugContext(AppWnd *App, IdeProject *Proj, const char *Exe, con
 	
 	if (d->Db.Reset(CreateGdbDebugger(App->GetDebugLog())))
 	{
-		GFile::Path p;
+		LFile::Path p;
 		if (InitDir)
 		{
 			p = InitDir;

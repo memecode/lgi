@@ -15,7 +15,7 @@
 #include "GPalette.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-GColourSpace BeosColourSpaceToLgi(color_space cs)
+LColourSpace BeosColourSpaceToLgi(color_space cs)
 {
 	switch (cs)
 	{
@@ -151,7 +151,7 @@ public:
 	}
 };
 
-LMemDC::LMemDC(int x, int y, GColourSpace cs)
+LMemDC::LMemDC(int x, int y, LColourSpace cs)
 {
 	d = new LMemDCPrivate;
 	if (x && y && cs)
@@ -206,7 +206,7 @@ void LMemDC::SetOrigin(int x, int y)
 	LSurface::SetOrigin(x, y);
 }
 
-bool LMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
+bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 {
 	bool Status = FALSE;
 	

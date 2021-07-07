@@ -929,7 +929,7 @@ DbArrayIndex *LDbTable::Sort(int Id, bool Ascending)
 
 bool LDbTable::Serialize(const char *Path, bool Write)
 {
-	GFile f;
+	LFile f;
 	if (!f.Open(Path, Write ? O_WRITE : O_READ))
 		return false;
 

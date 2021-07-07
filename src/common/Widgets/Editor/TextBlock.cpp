@@ -119,7 +119,7 @@ LAutoPtr<LRichTextPriv::DisplayStr> LRichTextPriv::EmojiDisplayStr::Clone(ssize_
 	return s;
 }
 
-void LRichTextPriv::EmojiDisplayStr::Paint(LSurface *pDC, int &FixX, int FixY, GColour &Back)
+void LRichTextPriv::EmojiDisplayStr::Paint(LSurface *pDC, int &FixX, int FixY, LColour &Back)
 {
 	LRect f(0, 0, x-1, y-1);
 	f.Offset(FixedToInt(FixX), FixedToInt(FixY));
@@ -314,7 +314,7 @@ HtmlTag IsDefaultStyle(HtmlTag Id, LCss *Css)
 	if (Css->Length() == 2)
 	{
 		LCss::ColorDef c = Css->Color();
-		if ((GColour)c != GColour::Blue)
+		if ((LColour)c != LColour::Blue)
 			return CONTENT;
 				
 		LCss::TextDecorType td = Css->TextDecoration();
@@ -648,7 +648,7 @@ bool LRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
 
 void DrawDecor(LSurface *pDC, LRichTextPriv::DisplayStr *Ds, int Fx, int Fy, ssize_t Start, ssize_t Len)
 {
-	// GColour Old = pDC->Colour(GColour::Red);
+	// LColour Old = pDC->Colour(LColour::Red);
 	LDisplayString ds1(Ds->GetFont(), (const char16*)(*Ds), Start);
 	LDisplayString ds2(Ds->GetFont(), (const char16*)(*Ds), Start+Len);
 
@@ -656,7 +656,7 @@ void DrawDecor(LSurface *pDC, LRichTextPriv::DisplayStr *Ds, int Fx, int Fy, ssi
 	int y = (Fy >> LDisplayString::FShift) + (int)Ds->GetAscent() + 1;
 	int End = x + ds2.X();
 	x += ds1.X();
-	pDC->Colour(GColour::Red);
+	pDC->Colour(LColour::Red);
 	while (x < End)
 	{
 		pDC->Set(x, y+(x%2));
@@ -675,7 +675,7 @@ bool Overlap(LSpellCheck::SpellingError *e, int start, ssize_t len)
 	return true;
 }
 
-void LRichTextPriv::TextBlock::DrawDisplayString(LSurface *pDC, DisplayStr *Ds, int &FixX, int FixY, GColour &Bk, int &Pos)
+void LRichTextPriv::TextBlock::DrawDisplayString(LSurface *pDC, DisplayStr *Ds, int &FixX, int FixY, LColour &Bk, int &Pos)
 {
 	int OldX = FixX;
 
@@ -746,7 +746,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 	LCss::ColorDef BorderStyle;
 	if (Style)
 		BorderStyle = Style->BorderLeft().Color;
-	GColour BorderCol(222, 222, 222);
+	LColour BorderCol(222, 222, 222);
 	if (BorderStyle.Type == LCss::ColorRgb)
 		BorderCol.Set(BorderStyle.Rgb32, 32);
 
@@ -839,7 +839,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 				LAutoPtr<DisplayStr> ds1 = Ds->Clone(0, Ch);
 						
 				// First part...
-				GColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
+				LColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
 				if (DsFnt)
 					DsFnt->Colour(Ctx.Type == Unselected && Cols.Fore.IsValid() ? Cols.Fore : Ctx.Fore(), Bk);
 				if (ds1)
@@ -865,7 +865,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 
 					// Part 2
 					LAutoPtr<DisplayStr> ds2 = Ds->Clone(Ch, Ch2 - Ch);
-					GColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
+					LColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
 					if (DsFnt)
 						DsFnt->Colour(Ctx.Type == Unselected && Cols.Fore.IsValid() ? Cols.Fore : Ctx.Fore(), Bk);
 					if (ds2)
@@ -888,7 +888,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 				{
 					// No... draw 2nd part
 					LAutoPtr<DisplayStr> ds2 = Ds->Clone(Ch);
-					GColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
+					LColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
 					if (DsFnt)
 						DsFnt->Colour(Ctx.Type == Unselected && Cols.Fore.IsValid() ? Cols.Fore : Ctx.Fore(), Bk);
 					if (ds2)	
@@ -898,7 +898,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 			else
 			{
 				// No selection changes... draw the whole string
-				GColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
+				LColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
 				if (DsFnt)
 					DsFnt->Colour(Ctx.Type == Unselected && Cols.Fore.IsValid() ? Cols.Fore : Ctx.Fore(), Bk);
 						
@@ -916,7 +916,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 				{
 					LRect r(0, 0, Ds->X()-1, Ds->Y()-1);
 					r.Offset(FixedToInt(OldFixX), FixedToInt(FixY));
-					Ctx.pDC->Colour(GColour::Red);
+					Ctx.pDC->Colour(LColour::Red);
 					Ctx.pDC->Box(&r);
 				}
 				#endif
@@ -925,7 +925,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 			#if DEBUG_OUTLINE_CUR_STYLE_TEXT
 			if (r.Valid())
 			{
-				Ctx.pDC->Colour(GColour(192, 192, 192));
+				Ctx.pDC->Colour(LColour(192, 192, 192));
 				Ctx.pDC->LineStyle(LSurface::LineDot);
 				Ctx.pDC->Box(&r);
 				Ctx.pDC->LineStyle(LSurface::LineSolid);
@@ -958,11 +958,11 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 
 		#if DEBUG_NUMBERED_LAYOUTS
 		LDisplayString Ds(SysFont, s);
-		SysFont->Colour(GColour::Green, GColour::White);
+		SysFont->Colour(LColour::Green, LColour::White);
 		SysFont->Transparent(false);
 		Ds.Draw(Ctx.pDC, LinePos.x1, LinePos.y1);
 		/*
-		Ctx.pDC->Colour(GColour::Blue);
+		Ctx.pDC->Colour(LColour::Blue);
 		Ctx.pDC->Line(LinePos.x1, LinePos.y1,LinePos.x2,LinePos.y2);
 		*/
 		#endif
@@ -993,7 +993,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 	if (Ctx.Select &&
 		Ctx.Select->Blk == this)
 	{
-		Ctx.pDC->Colour(GColour(255, 0, 0));
+		Ctx.pDC->Colour(LColour(255, 0, 0));
 		Ctx.pDC->Rectangle(&Ctx.Select->Pos);
 	}
 	#endif

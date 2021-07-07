@@ -747,7 +747,7 @@ GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 				int ColourType = LIBPNG png_get_color_type(png_ptr, info_ptr);
 				int Channels = LIBPNG png_get_channels(png_ptr, info_ptr);
 				int RequestBits = FinalBits * Channels;
-				GColourSpace InCs = ColourType == PNG_COLOR_TYPE_GRAY_ALPHA ?
+				LColourSpace InCs = ColourType == PNG_COLOR_TYPE_GRAY_ALPHA ?
 										CsIndex8 :
 										GBitsToColourSpace(MAX(RequestBits, 8));
 				
@@ -783,7 +783,7 @@ GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 					int ActualBits = pDC->GetBits();
 					int ScanLen = LIBPNG png_get_image_width(png_ptr, info_ptr) * ActualBits / 8;
 					
-					GColourSpace OutCs = pDC->GetColourSpace();
+					LColourSpace OutCs = pDC->GetColourSpace();
 					for (int y=0; y<pDC->Y() && !Error; y++)
 					{
 						uchar *Scan = (*pDC)[y];

@@ -14,7 +14,7 @@
 #include "lgi/common/Palette.h"
 
 /// 8 bit paletted applicators
-class LgiClass GdcApp8 : public GApplicator
+class LgiClass GdcApp8 : public LApplicator
 {
 protected:
 	uchar *Ptr;
@@ -76,7 +76,7 @@ public:
 	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
 };
 
-GApplicator *GApp8::Create(GColourSpace Cs, int Op)
+LApplicator *GApp8::Create(LColourSpace Cs, int Op)
 {
 	if (Cs == CsIndex8 ||
 		Cs == CsAlpha8)
@@ -295,7 +295,7 @@ uchar Mul6[6] = {0, 6, 12, 18, 24, 30};
 uchar Mul36[6] = {0, 36, 72, 108, 144, 180};
 
 template<typename OutPx, typename InPx>
-void GConvertIndexed(OutPx *out, InPx *in, int len, GColourSpace inCs, GPalette *pal)
+void GConvertIndexed(OutPx *out, InPx *in, int len, LColourSpace inCs, GPalette *pal)
 {
 	switch (inCs)
 	{
@@ -336,7 +336,7 @@ void GConvertIndexed(OutPx *out, InPx *in, int len, GColourSpace inCs, GPalette 
 }
 
 template<typename OutPx, typename InPx>
-void GConvertRgb24(OutPx *out, InPx *in, int len, GColourSpace inCs, GPalette *pal)
+void GConvertRgb24(OutPx *out, InPx *in, int len, LColourSpace inCs, GPalette *pal)
 {
 	switch (inCs)
 	{

@@ -202,7 +202,7 @@ public:
 	void OnMouseClick(LMouse &m);
 };
 
-class IdeTree : public LTree, public GDragDropTarget
+class IdeTree : public LTree, public LDragDropTarget
 {
 	LTreeItem *Hit;
 
@@ -211,8 +211,8 @@ public:
 	
 	void OnCreate();
 	void OnDragExit();
-	int WillAccept(GDragFormats &Formats, LPoint p, int KeyState);
-	int OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState);
+	int WillAccept(LDragFormats &Formats, LPoint p, int KeyState);
+	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState);
 };
 
 extern const char TagSettings[];

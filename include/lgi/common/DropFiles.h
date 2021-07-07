@@ -19,7 +19,7 @@ class GDropFiles : public LArray<const char*>
 	LString Fmt;
 
 public:
-	GDropFiles(GDragData &dd)
+	GDropFiles(LDragData &dd)
 	{
 		if (dd.IsFileDrop())
 		{
@@ -106,7 +106,7 @@ public:
 					*out++ = 0;
 
 					// Check file exists..
-					GFile::Path p(File);
+					LFile::Path p(File);
 					if (p.Exists())
 					{
 						#ifdef WINDOWS
@@ -212,7 +212,7 @@ public:
 class GDropStreams : public LArray<LStreamI*>
 {
 public:
-	GDropStreams(GDragData &dd)
+	GDropStreams(LDragData &dd)
 	{
 		#if defined(WINDOWS)
 		for (unsigned i=0; i<dd.Data.Length(); i++)

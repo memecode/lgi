@@ -88,7 +88,7 @@ public:
 		{
 			if (File)
 			{
-				GFile f;
+				LFile f;
 				if (f.Open(File, O_READ))
 				{
 					LXmlTree t(GXT_NO_ENTITIES);
@@ -166,7 +166,7 @@ public:
 				RemoveLangs(Tree);
 
 				// write the remaining tree out to a file...
-				GFile f;
+				LFile f;
 				if (f.Open(File, O_WRITE))
 				{
 					f.SetSize(0);

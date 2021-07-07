@@ -157,16 +157,16 @@ struct Box
 	}
 };
 
-int HueSort(GColour *a, GColour *b)
+int HueSort(LColour *a, LColour *b)
 {
-	GColour A = *a;
-	// GColour B = *b;
+	LColour A = *a;
+	// LColour B = *b;
 	return A.GetH() - b->GetH();
 }
 
-int LumaSort(GColour *a, GColour *b)
+int LumaSort(LColour *a, LColour *b)
 {
-	GColour A = *a;
+	LColour A = *a;
 	return A.GetL() - b->GetL();
 }
 
@@ -470,14 +470,14 @@ public:
 				else return false;
 			}
 			
-			LArray<GColour> Colours;
+			LArray<LColour> Colours;
 			for (unsigned i=0; i<Boxes.Length(); i++)
 			{
 				Box *in = Boxes[i];
 				int avg[DIMENSIONS];
 				in->Average(avg);
 				
-				GColour p(avg[0], avg[1], avg[2]);
+				LColour p(avg[0], avg[1], avg[2]);
 				Colours.Add(p);
 			}
 			
@@ -486,7 +486,7 @@ public:
 			Out->SetSize(DestSize);
 			for (unsigned i=0; i<Colours.Length(); i++)
 			{
-				GColour &in = Colours[i];
+				LColour &in = Colours[i];
 				GdcRGB *out = (*Out)[i];
 				if (out)
 				{

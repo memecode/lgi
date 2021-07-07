@@ -4,10 +4,10 @@
 ::LString GApp::GetConfigPath()
 {
 	#if defined(LINUX)
-	::GFile::Path p(LSP_HOME);
+	::LFile::Path p(LSP_HOME);
 	p += ".config";
 	#else
-	::GFile::Path p(LSP_USER_APP_DATA);
+	::LFile::Path p(LSP_USER_APP_DATA);
 	p += "MemecodeLgi";
 	if (!p.Exists())
 		FileDev->CreateFolder(p);
@@ -45,7 +45,7 @@ LJson *GAppPrivate::GetConfig()
 		auto Path = Owner->GetConfigPath();
 		if (Config.Reset(new LJson()))
 		{
-			::GFile f;
+			::LFile f;
 			if (f.Open(Path, O_READ))
 				Config->SetJson(f.Read());
 				
@@ -92,7 +92,7 @@ bool GAppPrivate::SaveConfig()
 	if (!Path || !Config)
 		return false;
 			
-	::GFile f;
+	::LFile f;
 	if (!f.Open(Path, O_WRITE))
 		return false;
 			

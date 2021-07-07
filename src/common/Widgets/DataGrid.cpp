@@ -2,7 +2,7 @@
 #include "DataGrid.h"
 #include "LEdit.h"
 #include "GCombo.h"
-#include "GClipBoard.h"
+#include "LClipBoard.h"
 
 enum LDataGridControls
 {
@@ -442,7 +442,7 @@ void LDataGrid::OnItemClick(LListItem *Item, LMouse &m)
 					}
 					p.Print("\n");
 				}
-				GClipBoard cb(this);
+				LClipBoard cb(this);
 				LAutoString a(p.NewStr());
 				cb.Text(a);
 				break;
@@ -592,7 +592,7 @@ void LDataGrid::SetDndFormats(char *SrcFmt, char *AcceptFmt)
 	d->AcceptFmt = AcceptFmt;
 }
 
-int LDataGrid::WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
+int LDataGrid::WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
 {
 	Formats.Supports(d->AcceptFmt);
 	return Formats.GetSupported().Length() ? DROPEFFECT_COPY : DROPEFFECT_NONE;
@@ -608,14 +608,14 @@ LDataGrid::IndexArray *LDataGrid::GetDeletedItems()
 	return &d->Deleted;
 }
 
-int LDataGrid::OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState)
+int LDataGrid::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 {
 	if (!d->AcceptFmt)
 		return DROPEFFECT_NONE;
 	
 	for (unsigned n=0; n<Data.Length(); n++)
 	{
-		GDragData &dd = Data[n];
+		LDragData &dd = Data[n];
 		if (dd.IsFormat(d->AcceptFmt))
 		{
 			LVariant *Data = &dd.Data.First();
@@ -642,7 +642,7 @@ void LDataGrid::OnItemBeginDrag(LListItem *Item, LMouse &m)
 	Drag(this, m.Event, DROPEFFECT_COPY);
 }
 
-bool LDataGrid::GetFormats(GDragFormats &Formats)
+bool LDataGrid::GetFormats(LDragFormats &Formats)
 {
 	if (!d->SrcFmt)
 		return false;
@@ -651,7 +651,7 @@ bool LDataGrid::GetFormats(GDragFormats &Formats)
 	return true;
 }
 
-bool LDataGrid::GetData(LArray<GDragData> &Data)
+bool LDataGrid::GetData(LArray<LDragData> &Data)
 {
 	for (unsigned i=0; i<Data.Length(); i++)
 	{

@@ -114,7 +114,7 @@ protected:
 	virtual void _PourText(LPoint &Size);
 	virtual void _PaintText(GItem::ItemPaintCtx &Ctx);
 	void _ClearDs(int Col) override;
-	virtual void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c);
+	virtual void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c);
 	int GetColumnSize(int Col);
 
 protected:
@@ -125,7 +125,7 @@ public:
 	LTreeItem();
 	virtual ~LTreeItem();
 
-	GItemContainer *GetContainer() override;
+	LItemContainer *GetContainer() override;
 	
 	/// \brief Get the text for the node
 	///
@@ -172,7 +172,7 @@ public:
 
 /// A tree control.
 class LgiClass LTree :
-	public GItemContainer,
+	public LItemContainer,
 	public ResObject,
 	public LTreeNode
 {

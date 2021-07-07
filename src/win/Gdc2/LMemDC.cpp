@@ -42,7 +42,7 @@ public:
 	}
 };
 
-LMemDC::LMemDC(int x, int y, GColourSpace cs, int Flags)
+LMemDC::LMemDC(int x, int y, LColourSpace cs, int Flags)
 {
 	d = new LMemDCPrivate;
 	ColourSpace = CsNone;
@@ -254,7 +254,7 @@ enum BmpComp
 	BmpAlp	
 };
 
-bool LMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
+bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 {
 	bool Status = FALSE;
 	HBITMAP hOldBmp = hBmp;

@@ -425,14 +425,14 @@ void LResources::SetThemeFolder(const char *f)
 {
 	d->ThemeFolder = f;
 
-	GFile::Path Colours(f, "colours.json");
+	LFile::Path Colours(f, "colours.json");
 	if (Colours.Exists())
 		DefaultColours = !LColourLoad(Colours.GetFull());
 
-	GFile::Path Css(f, "styles.css");
+	LFile::Path Css(f, "styles.css");
 	if (Css.Exists())
 	{
-		GFile in(Css, O_READ);
+		LFile in(Css, O_READ);
 		if (in.IsOpen())
 		{
 			auto s = in.Read();
@@ -509,7 +509,7 @@ bool LResources::Load(const char *FileName)
 		return false;
 	}
 
-	GFile F;
+	LFile F;
 	if (!F.Open(FileName, O_READ))
 	{
 		LgiTrace("%s:%i - Couldn't open '%s'.\n", _FL, FileName);
@@ -696,9 +696,9 @@ public:
     void OnPaint(LSurface *pDC)
     {
         LRect c = GetClient();
-        pDC->Colour(GColour(0xcc, 0xcc, 0xcc));
+        pDC->Colour(LColour(0xcc, 0xcc, 0xcc));
         pDC->Rectangle();
-        pDC->Colour(GColour(0xff, 0, 0));
+        pDC->Colour(LColour(0xff, 0, 0));
         pDC->Line(c.x1, c.y1, c.x2, c.y2);
         pDC->Line(c.x2, c.y1, c.x1, c.y2);
         LDisplayString ds(SysFont, n);
@@ -851,7 +851,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 
 void LResources::Res_SetPos(ResObject *Obj, int x1, int y1, int x2, int y2)
 {
-	GItemColumn *Col = dynamic_cast<GItemColumn*>(Obj);
+	LItemColumn *Col = dynamic_cast<LItemColumn*>(Obj);
 	if (Col)
 	{
 		Col->Width(x2-x1);
@@ -1012,7 +1012,7 @@ bool LResources::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
 	}
 	else if (Obj)
 	{
-		GItemColumn *Col = dynamic_cast<GItemColumn*>(Obj);
+		LItemColumn *Col = dynamic_cast<LItemColumn*>(Obj);
 		if (Col)
 		{
 			Col->Name(s->Str);
@@ -1084,7 +1084,7 @@ void LResources::Res_Append(ResObject *Obj, ResObject *Parent)
 {
 	if (Obj && Parent)
 	{
-		GItemColumn *Col = dynamic_cast<GItemColumn*>(Obj);
+		LItemColumn *Col = dynamic_cast<LItemColumn*>(Obj);
 		LList *Lst = dynamic_cast<LList*>(Parent);
 		if (Lst && Col)
 		{

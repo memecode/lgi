@@ -57,7 +57,7 @@ struct Result
 struct VcBranch
 {
 	bool Default;
-	GColour Colour;
+	LColour Colour;
 
 	VcBranch(const char *n)
 	{
@@ -205,7 +205,7 @@ class VcFolder : public LTreeItem
 	VcFile *FindFile(const char *Path);
 	void LinkParents();
 	LString CurrentRev();
-	GColour BranchColour(const char *Name);
+	LColour BranchColour(const char *Name);
 	void Empty();
 
 	bool ParseDiffs(LString s, LString Rev, bool IsWorking);

@@ -33,7 +33,7 @@ typedef int (*FilterUi_Menu)(LFilterView *View,
 							 LArray<char*> *GetList,
 							 void *UserData);
 
-class LFilterItem : public LTreeItem, public GDragDropSource
+class LFilterItem : public LTreeItem, public LDragDropSource
 {
 	class LFilterItemPrivate *d;
 
@@ -65,8 +65,8 @@ public:
 
 	// Dnd
 	bool OnBeginDrag(LMouse &m);
-	bool GetFormats(GDragFormats &Formats);
-	bool GetData(LArray<GDragData> &Data);
+	bool GetFormats(LDragFormats &Formats);
+	bool GetData(LArray<LDragData> &Data);
 };
 
 /// Filter user interface using a tree structure.

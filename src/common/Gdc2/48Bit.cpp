@@ -16,8 +16,8 @@
 #undef NonPreMulOver48
 #define NonPreMulOver48(c)	d->c = ((s->c * sa) + ((d->c * 0xffff) / 0xffff * o)) / 0xffff
 
-template<typename Pixel, GColourSpace ColourSpace>
-class App48 : public GApplicator
+template<typename Pixel, LColourSpace ColourSpace>
+class App48 : public LApplicator
 {
 	union
 	{
@@ -301,7 +301,7 @@ public:
 class G48BitFactory : public GApplicatorFactory
 {
 public:
-	GApplicator *Create(GColourSpace Cs, int Op)
+	LApplicator *Create(LColourSpace Cs, int Op)
 	{
 		switch (Cs)
 		{

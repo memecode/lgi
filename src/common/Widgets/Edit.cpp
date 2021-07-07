@@ -176,7 +176,7 @@ void LEdit::OnPaint(LSurface *pDC)
         
         static int diff = -1;
         if (diff < 0)
-        	diff = abs(GColour(L_MED).GetGray()-GColour(L_WORKSPACE).GetGray());
+        	diff = abs(LColour(L_MED).GetGray()-LColour(L_WORKSPACE).GetGray());
         
         f->Colour(diff < 30 ? L_LOW : L_MED, L_WORKSPACE);
         f->Transparent(true);
@@ -248,7 +248,7 @@ void LEdit::OnEnter(LKey &k)
 
 bool LEdit::Paste()
 {
-	GClipBoard Clip(this);
+	LClipBoard Clip(this);
 
 	LAutoWString Mem;
 	char16 *t = Clip.TextW();

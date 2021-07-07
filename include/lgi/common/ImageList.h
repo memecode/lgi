@@ -53,7 +53,7 @@ public:
 		/// A 0 based index into the list to draw
 		int Image,
 		/// The background colour if not alpha compositing is available
-		GColour Background,
+		LColour Background,
 		/// Draw in disabled mode...
 		bool Disabled = false
 	);

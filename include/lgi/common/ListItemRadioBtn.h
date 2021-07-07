@@ -33,7 +33,7 @@ public:
 		LListItemColumn::Value(value);
 	}
 
-	void OnPaintColumn(ItemPaintCtx &r, int i, GItemColumn *Col)
+	void OnPaintColumn(ItemPaintCtx &r, int i, LItemColumn *Col)
 	{
 		LSurface *pDC = r.pDC;
 		LRect c(0, 0, 10, 10);

@@ -6,9 +6,9 @@
 
 const char *sPalette[] = { "9696ff", "ff8787", "ff934b", "a8d200", "00f0c0", "87e7ff", "a5a5ff", "f3c3ff", "b40090", "00b400" };
 
-GColour GetPaletteColour(int i)
+LColour GetPaletteColour(int i)
 {
-	GColour c;
+	LColour c;
 	const char *s = sPalette[i % CountOf(sPalette)];
 	#define Comp(comp, off) { const char h[3] = {s[off], s[off+1], 0}; c.comp(htoi(h)); }
 	Comp(r, 0);
@@ -88,7 +88,7 @@ void VcCommit::SetCurrent(bool b)
 	Current = b;
 }
 
-void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
+void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 {
 	if (i == 0)
 	{
@@ -113,7 +113,7 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 		double r = Half - 1;
 
 		double x = MAP(NodeIdx);
-		Mem.Colour(GColour::Black);
+		Mem.Colour(LColour::Black);
 		
 		VcCommit *Prev = NULL, *Next = NULL;
 		Prev = Folder->Log.IdxCheck(Idx - 1) ? Folder->Log[Idx - 1] : NULL;
@@ -142,9 +142,9 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 				}
 				else
 				{
-					Mem.Colour(GColour::Red);
+					Mem.Colour(LColour::Red);
 					Mem.Line(I(CurX), I(Ht/2), I(CurX), I(Ht/2-5));
-					Mem.Colour(GColour::Black);
+					Mem.Colour(LColour::Black);
 				}
 			}
 
@@ -158,9 +158,9 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 				}
 				else
 				{
-					Mem.Colour(GColour::Red);
+					Mem.Colour(LColour::Red);
 					Mem.Line(I(CurX), I(Ht/2), I(CurX), I(Ht/2+5));
-					Mem.Colour(GColour::Black);
+					Mem.Colour(LColour::Black);
 				}
 			}
 		}
@@ -172,7 +172,7 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 			{
 				LPath p;
 				p.Circle(Cx, Cy, r + (Current ? 1 : 0));
-				LSolidBrush sb(GColour::Black);
+				LSolidBrush sb(LColour::Black);
 				p.Fill(&Mem, sb);
 			}
 			{
@@ -494,7 +494,7 @@ void VcCommit::OnMouseClick(LMouse &m)
 			}
 			case IDM_COPY_REV:
 			{
-				GClipBoard c(GetList());
+				LClipBoard c(GetList());
 
 				LString::Array a;
 				a.SetFixedLength(false);
@@ -506,7 +506,7 @@ void VcCommit::OnMouseClick(LMouse &m)
 			}
 			case IDM_COPY_INDEX:
 			{
-				GClipBoard c(GetList());
+				LClipBoard c(GetList());
 				LString b;
 				b.Printf(LPrintfInt64, Index);
 				c.Text(b);

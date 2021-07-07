@@ -308,7 +308,7 @@ GSubFile::SubLock GSubFile::Lock(const char *file, int line)
 #if GSUBFILE_NOBUFFERING
 int GSubFile::Open(char *Str, int Int)
 {
-	int s = GFile::Open(Str, Int | (!Buffer ? O_NO_CACHE : 0));
+	int s = LFile::Open(Str, Int | (!Buffer ? O_NO_CACHE : 0));
 	if (s && !Buffer)
 	{
 		Block = GetBlockSize();
@@ -354,7 +354,7 @@ int GSubFile::Read(void *OutBuf, int Size, int Flags)
 	}
 	else
 	{
-		Status = GFile::Read(OutBuf, Size, Flags);
+		Status = LFile::Read(OutBuf, Size, Flags);
 		if (Status > 0)
 		{
 			Pos += Status;
@@ -398,7 +398,7 @@ int GSubFile::Write(const void *InBuf, int Size, int Flags)
 	}
 	else
 	{
-		Status = GFile::Write(InBuf, Size, Flags);
+		Status = LFile::Write(InBuf, Size, Flags);
 		if (Status > 0)
 		{
 			Pos += Status;
@@ -426,8 +426,8 @@ bool GSubFile::SetBlock(int64 Blk)
 
 		if (Dirty)
 		{
-			p = GFile::SetPos(Cur << Shift);
-			n = GFile::Write(Buf, Block);
+			p = LFile::SetPos(Cur << Shift);
+			n = LFile::Write(Buf, Block);
 			if (n != Block)
 				return false;
 			
@@ -436,8 +436,8 @@ bool GSubFile::SetBlock(int64 Blk)
 
 		Cur = Blk;
 
-		p = GFile::SetPos(Cur << Shift);
-		n = GFile::Read(Buf, Block);
+		p = LFile::SetPos(Cur << Shift);
+		n = LFile::Read(Buf, Block);
 
 		return n > 0;
 	}

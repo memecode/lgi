@@ -46,7 +46,7 @@ class LgiClass
 	LTextView3 :
 	public GDocView,
 	public ResObject,
-	public GDragDropTarget
+	public LDragDropTarget
 {
 	friend struct LTextView3Undo;
 	friend bool Text3_FindCallback(GFindReplaceCommon *Dlg, bool Replace, void *User);
@@ -73,13 +73,13 @@ public:
 		LFont *Font;
 		/// The colour to draw with. If transparent, then the default 
 		/// line colour is used.
-		GColour Fore, Back;
+		LColour Fore, Back;
 		/// Cursor
 		LgiCursor Cursor;		
 		/// Optional extra decor not supported by the fonts
 		LCss::TextDecorType Decor;
 		/// Colour for the optional decor.
-		GColour DecorColour;
+		LColour DecorColour;
 
 		/// Application base data
 		LVariant Data;
@@ -203,8 +203,8 @@ protected:
 		ssize_t Len;	// length of text
 		*/
 		LRect r;		// Screen location
-		GColour c;		// Colour of line... transparent = default colour
-		GColour Back;	// Background colour or transparent
+		LColour c;		// Colour of line... transparent = default colour
+		LColour Back;	// Background colour or transparent
 
 		LTextLine()
 		{
@@ -299,7 +299,7 @@ protected:
 	virtual void PourText(size_t Start, ssize_t Length);
 	virtual void PourStyle(size_t Start, ssize_t Length);
 	virtual void OnFontChange();
-	virtual void OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour);
+	virtual void OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour);
 	virtual char16 *MapText(char16 *Str, ssize_t Len, bool RtlTrailingSpace = false);
 
 	#ifdef _DEBUG
@@ -429,8 +429,8 @@ public:
 	void OnPulse() override;
 	int OnHitTest(int x, int y) override;
 	bool OnLayout(LViewLayoutInfo &Inf) override;
-	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState) override;
-	int OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState) override;
+	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState) override;
+	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState) override;
 	LgiCursor GetCursor(int x, int y) override;
 
 	// Virtuals

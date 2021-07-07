@@ -79,7 +79,7 @@ enum Cmds
 
 #define PAINT_BORDER				Back
 #if DRAW_LINE_BOXES
-	#define PAINT_AFTER_LINE			GColour(240, 240, 240)
+	#define PAINT_AFTER_LINE			LColour(240, 240, 240)
 #else
 	#define PAINT_AFTER_LINE			Back
 #endif
@@ -134,7 +134,7 @@ public:
 	int PourX;
 	bool LayoutDirty;
 	ssize_t DirtyStart, DirtyLen;
-	GColour UrlColour;
+	LColour UrlColour;
 	bool CenterCursor;
 	ssize_t WordSelectMode;
 	LString Eol;
@@ -169,7 +169,7 @@ public:
 		VScrollCache = -1;
 		DirtyStart = DirtyLen = 0;
 		UrlColour.Rgb(0, 0, 255);		
-		GColour::GetConfigColour("colour.L_URL", UrlColour);
+		LColour::GetConfigColour("colour.L_URL", UrlColour);
 
 		CenterCursor = false;
 		
@@ -207,7 +207,7 @@ public:
 			Prop == LCss::PropPaddingTop ||
 			Prop == LCss::PropPaddingBottom)
 		{
-			GCssTools t(this, View->GetFont());
+			LCssTools t(this, View->GetFont());
 			rPadding.ZOff(0, 0);
 			rPadding = t.ApplyPadding(rPadding);
 		}
@@ -2215,7 +2215,7 @@ bool LTextView3::Cut()
 		#endif
 		char *Txt8 = (char*)LNewConvertCp(LAnsiToLgiCp(), Txt16, LGI_WideCharset);
 
-		GClipBoard Clip(this);
+		LClipBoard Clip(this);
 
 		Clip.Text(Txt8);
 		Status = Clip.TextW(Txt16, false);
@@ -2244,7 +2244,7 @@ bool LTextView3::Copy()
 		char *Txt8 = (char*)LNewConvertCp("utf-8", Text+Min, LGI_WideCharset, (Max-Min)*sizeof(*Text));
 		#endif
 
-		GClipBoard Clip(this);
+		LClipBoard Clip(this);
 		
 		Clip.Text(Txt8);
 		#ifdef WIN32
@@ -2261,7 +2261,7 @@ bool LTextView3::Copy()
 
 bool LTextView3::Paste()
 {
-	GClipBoard Clip(this);
+	LClipBoard Clip(this);
 
 	LAutoWString Mem;
 	char16 *t = Clip.TextW();
@@ -2334,7 +2334,7 @@ bool LTextView3::ClearDirty(bool Ask, const char *FileName)
 bool LTextView3::Open(const char *Name, const char *CharSet)
 {
 	bool Status = false;
-	GFile f;
+	LFile f;
 
 	if (f.Open(Name, O_READ|O_SHARE))
 	{
@@ -2437,7 +2437,7 @@ bool LTextView3::Open(const char *Name, const char *CharSet)
 }
 
 template<typename T>
-bool WriteToStream(GFile &out, T *in, size_t len, bool CrLf)
+bool WriteToStream(LFile &out, T *in, size_t len, bool CrLf)
 {
 	if (!in)
 		return false;
@@ -2490,7 +2490,7 @@ bool WriteToStream(GFile &out, T *in, size_t len, bool CrLf)
 
 bool LTextView3::Save(const char *Name, const char *CharSet)
 {
-	GFile f;
+	LFile f;
 	LString TmpName;
 	bool Status = false;
 	
@@ -3275,7 +3275,7 @@ void LTextView3::OnPosChange()
 	}
 }
 
-int LTextView3::WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
+int LTextView3::WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
 {
 	Formats.Supports("text/uri-list");
 	Formats.Supports("text/html");
@@ -3283,13 +3283,13 @@ int LTextView3::WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
 	return Formats.Length() ? DROPEFFECT_COPY : DROPEFFECT_NONE;
 }
 
-int LTextView3::OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState)
+int LTextView3::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 {
 	int Status = DROPEFFECT_NONE;
 	
 	for (unsigned i=0; i<Data.Length(); i++)
 	{
-		GDragData &dd = Data[i];
+		LDragData &dd = Data[i];
 		if (dd.Data.Length() <= 0)
 			continue;
 		
@@ -3334,7 +3334,7 @@ int LTextView3::OnDrop(LArray<GDragData> &Data, LPoint Pt, int KeyState)
 			// We don't directly handle file drops... pass up to the parent
 			for (LViewI *p = GetParent(); p; p = p->GetParent())
 			{
-				GDragDropTarget *t = p->DropTarget();
+				LDragDropTarget *t = p->DropTarget();
 				if (t)
 				{
 					Status = t->OnDrop(Data, Pt, KeyState);
@@ -3467,7 +3467,7 @@ void LTextView3::DoContextMenu(LMouse &m)
 	LSubMenu RClick;
 	LAutoString ClipText;
 	{
-		GClipBoard Clip(this);
+		LClipBoard Clip(this);
 		ClipText.Reset(NewStr(Clip.Text()));
 	}
 
@@ -3681,7 +3681,7 @@ void LTextView3::OnStyleMenuClick(LStyle *style, int i)
 				{
 					if (s)
 					{
-						GClipBoard Clip(this);
+						LClipBoard Clip(this);
 						Clip.Text(s);
 					}
 					break;
@@ -4757,7 +4757,7 @@ LRect LTextView3::DocToScreen(LRect r)
 	return r;
 }
 
-void LTextView3::OnPaintLeftMargin(LSurface *pDC, LRect &r, GColour &colour)
+void LTextView3::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
 {
 	pDC->Colour(colour);
 	pDC->Rectangle(&r);
@@ -4812,8 +4812,8 @@ void LTextView3::OnPaint(LSurface *pDC)
 		
 		bool HasFocus = Focus();
 		// printf("%s:%i - HasFocus = %i\n", _FL, HasFocus);
-		GColour SelectedText(HasFocus ? LColour(L_FOCUS_SEL_FORE) : LColour(L_NON_FOCUS_SEL_FORE));
-		GColour SelectedBack(HasFocus ? LColour(L_FOCUS_SEL_BACK) : LColour(L_NON_FOCUS_SEL_BACK));
+		LColour SelectedText(HasFocus ? LColour(L_FOCUS_SEL_FORE) : LColour(L_NON_FOCUS_SEL_FORE));
+		LColour SelectedBack(HasFocus ? LColour(L_FOCUS_SEL_BACK) : LColour(L_NON_FOCUS_SEL_BACK));
 
 		LCss::ColorDef ForeDef, BkDef;
 		if (GetCss())
@@ -4822,17 +4822,17 @@ void LTextView3::OnPaint(LSurface *pDC)
 			BkDef = GetCss()->BackgroundColor();
 		}
 		
-		GColour Fore(ForeDef.Type ==  LCss::ColorRgb ? GColour(ForeDef.Rgb32, 32) : LColour(L_TEXT));
-		GColour Back
+		LColour Fore(ForeDef.Type ==  LCss::ColorRgb ? LColour(ForeDef.Rgb32, 32) : LColour(L_TEXT));
+		LColour Back
 		(
 			/*!ReadOnly &&*/ BkDef.Type == LCss::ColorRgb
 			?
-			GColour(BkDef.Rgb32, 32)
+			LColour(BkDef.Rgb32, 32)
 			:
 			Enabled() ? LColour(L_WORKSPACE) : LColour(L_MED)
 		);
 
-		// GColour Whitespace = Fore.Mix(Back, 0.85f);
+		// LColour Whitespace = Fore.Mix(Back, 0.85f);
 		if (!Enabled())
 		{
 			Fore = LColour(L_LOW);
@@ -4925,8 +4925,8 @@ void LTextView3::OnPaint(LSurface *pDC)
 				}
 				else
 				{
-					GColour fore = l->c.IsValid() ? l->c : Fore;
-					GColour back = l->Back.IsValid() ? l->Back : Back;
+					LColour fore = l->c.IsValid() ? l->c : Fore;
+					LColour back = l->Back.IsValid() ? l->Back : Back;
 					Font->Colour(fore, back);
 				}
 
@@ -5028,8 +5028,8 @@ void LTextView3::OnPaint(LSurface *pDC)
 
 							FX += Ds.FX();
 
-							GColour fore = l->c.IsValid() ? l->c : Fore;
-							GColour back = l->Back.IsValid() ? l->Back : Back;
+							LColour fore = l->c.IsValid() ? l->c : Fore;
+							LColour back = l->Back.IsValid() ? l->Back : Back;
 							Sf->Colour(fore, back);
 						}
 						else LgiAssert(0);
@@ -5067,8 +5067,8 @@ void LTextView3::OnPaint(LSurface *pDC)
 						}
 						else
 						{
-							GColour fore = l->c.IsValid() ? l->c : Fore;
-							GColour back = l->Back.IsValid() ? l->Back : Back;
+							LColour fore = l->c.IsValid() ? l->c : Fore;
+							LColour back = l->Back.IsValid() ? l->Back : Back;
 							Font->Colour(fore, back);
 						}
 						NextSelection = (NextSelection == SelMin) ? SelMax : -1;
@@ -5085,7 +5085,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 				if (EndOfLine >= SelMin && EndOfLine < SelMax)
 				{
 					// draw the '\n' at the end of the line as selected
-					// GColour bk = Font->Back();
+					// LColour bk = Font->Back();
 					pOut->Colour(Font->Back());
 					pOut->Rectangle(Tr.x2, Tr.y1, Tr.x2+7, Tr.y2);
 					Tr.x2 += 7;
@@ -5136,7 +5136,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 							c.Offset(-d->rPadding.x1, -y);
 							#endif
 
-							pOut->Colour(!ReadOnly ? Fore : GColour(192, 192, 192));
+							pOut->Colour(!ReadOnly ? Fore : LColour(192, 192, 192));
 							pOut->Rectangle(&c);
 						}
 
@@ -5158,7 +5158,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 				#if DRAW_LINE_BOXES
 				{
 					uint Style = pDC->LineStyle(LSurface::LineAlternate);
-					GColour Old = pDC->Colour(GColour::Red);
+					LColour Old = pDC->Colour(LColour::Red);
 					pDC->Box(&OldTr);
 					pDC->Colour(Old);
 					pDC->LineStyle(Style);
@@ -5185,7 +5185,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 			if (y <= r.y2)
 			{
 				pDC->Colour(Back);
-				// pDC->Colour(GColour(255, 0, 255));
+				// pDC->Colour(LColour(255, 0, 255));
 				pDC->Rectangle(d->rPadding.x1, y, r.x2, r.y2);
 			}
 

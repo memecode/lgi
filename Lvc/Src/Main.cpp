@@ -317,7 +317,7 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 			return type;
 
 		c->DetectVcs(Fld);
-		Fld->GetCss(true)->Color(GColour::Blue);
+		Fld->GetCss(true)->Color(LColour::Blue);
 		Fld->Update();
 		return VcPending;
 	}
@@ -365,12 +365,12 @@ public:
 				
 				if (*t == '+')
 				{
-					ln->c = GColour::Green;
+					ln->c = LColour::Green;
 					ln->Back.Rgb(245, 255, 245);
 				}
 				else if (*t == '-')
 				{
-					ln->c = GColour::Red;
+					ln->c = LColour::Red;
 					ln->Back.Rgb(255, 245, 245);
 				}
 				else if (*t == '@')
@@ -490,7 +490,7 @@ LString::Array GetProgramsInPath(const char *Program)
 	LString::Array a = LGetPath();
 	for (auto p : a)
 	{
-		GFile::Path c(p, Prog);
+		LFile::Path c(p, Prog);
 		if (c.Exists())
 			Bin.New() = c.GetFull();
 	}
@@ -896,7 +896,7 @@ public:
 			d->Files->Empty();
 			d->Diff->Name(NULL);
 			
-			GFile in(File, O_READ);
+			LFile in(File, O_READ);
 			LString s = in.Read();
 			if (!s)
 				return;
@@ -1114,7 +1114,7 @@ public:
 			Tree->SetPos(Large);
 			Tree->ResizeColumnsToContent();
 			
-			GItemColumn *c;
+			LItemColumn *c;
 			int i = 0, px = 0;
 			while ((c = Tree->ColumnAt(i++)))
 			{

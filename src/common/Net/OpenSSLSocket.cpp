@@ -533,7 +533,7 @@ void EndSSL()
 
 struct SslSocketPriv : public LCancel
 {
-	GCapabilityClient *Caps;
+	LCapabilityClient *Caps;
 	bool SslOnConnect;
 	bool IsSSL;
 	bool UseSSLrw;
@@ -568,7 +568,7 @@ struct SslSocketPriv : public LCancel
 
 bool SslSocket::DebugLogging = false;
 
-SslSocket::SslSocket(LStreamI *logger, GCapabilityClient *caps, bool sslonconnect, bool RawLFCheck)
+SslSocket::SslSocket(LStreamI *logger, LCapabilityClient *caps, bool sslonconnect, bool RawLFCheck)
 {
 	d = new SslSocketPriv;
 	Bio = 0;
@@ -667,7 +667,7 @@ LStream *SslSocket::GetLogStream()
 {
 	if (!d->LogStream && d->LogFile)
 	{
-		if (!d->LogStream.Reset(new GFile))
+		if (!d->LogStream.Reset(new LFile))
 			return NULL;
 		
 		if (!d->LogStream->Open(d->LogFile, O_WRITE))

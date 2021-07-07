@@ -255,7 +255,7 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	int WCharSz = sizeof(wchar_t);
 	#if defined(_MSC_VER)
 	LgiAssert(WCharSz == 2);
-	::GFile::Path Dlls(LgiArgsAppPath);
+	::LFile::Path Dlls(LgiArgsAppPath);
 	Dlls--;
 	SetDllDirectoryA(Dlls);
 	#else
@@ -272,13 +272,13 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	setvbuf(stdout,(char *)NULL,_IONBF,0); // print mesgs immediately.
 
 	// Setup the file and graphics sub-systems
-	d->FileSystem = new GFileSystem;
+	d->FileSystem = new LFileSystem;
 	d->GdcSystem = new GdcDevice;
 
 	SetAppArgs(AppArgs);
 
 	srand(LgiCurrentTime());
-	GColour::OnChange();
+	LColour::OnChange();
 	AppWnd = NULL;
 
 	Gtk::gchar id[256];
@@ -314,11 +314,11 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 		double Dpi = 96.0;
 		#endif
 
-		::GFile::Path p(LSP_APP_ROOT);
+		::LFile::Path p(LSP_APP_ROOT);
 		p += "lgi-conf.json";
 		if (p.IsFile())
 		{
-			::GFile f(p, O_READ);
+			::LFile f(p, O_READ);
 			LJson j(f.Read());
 			auto sDpi = j.Get("DPI");
 			if (sDpi)
@@ -1105,11 +1105,11 @@ GApp::DesktopInfo::DesktopInfo(const char *file)
 
 bool GApp::DesktopInfo::Serialize(bool Write)
 {
-	::GFile f;
+	::LFile f;
 	
 	if (Write)
 	{
-		::GFile::Path p(File);
+		::LFile::Path p(File);
 		p--;
 		if (!p.Exists())
 			return false;
@@ -1240,8 +1240,8 @@ bool GApp::DesktopInfo::Set(const char *Field, const char *Value, const char *Se
 GApp::DesktopInfo *GApp::GetDesktopInfo()
 {
 	auto sExe = LGetExeFile();
-	::GFile::Path Exe(sExe);
-	::GFile::Path Desktop(LSP_HOME);
+	::LFile::Path Exe(sExe);
+	::LFile::Path Desktop(LSP_HOME);
 	::LString Leaf;
 	Leaf.Printf("%s.desktop", Exe.Last().Get());
 	

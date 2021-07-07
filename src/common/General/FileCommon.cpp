@@ -9,7 +9,7 @@
 #include "lgi/common/Variant.h"
 
 /////////////////////////////////////////////////////////////////////////////////
-bool GFileSystem::SetCurrentFolder(const char *PathName)
+bool LFileSystem::SetCurrentFolder(const char *PathName)
 {
 	#ifdef WINDOWS
 		bool Status = false;
@@ -22,7 +22,7 @@ bool GFileSystem::SetCurrentFolder(const char *PathName)
 	#endif
 }
 
-LString GFileSystem::GetCurrentFolder()
+LString LFileSystem::GetCurrentFolder()
 {
 	LString Cwd;
 
@@ -40,7 +40,7 @@ LString GFileSystem::GetCurrentFolder()
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-bool GFile::GetVariant(const char *Name, LVariant &Value, char *Array)
+bool LFile::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)
@@ -64,7 +64,7 @@ bool GFile::GetVariant(const char *Name, LVariant &Value, char *Array)
 	return true;
 }
 
-bool GFile::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool LFile::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)
@@ -82,7 +82,7 @@ bool GFile::SetVariant(const char *Name, LVariant &Value, char *Array)
 	return true;
 }
 
-bool GFile::CallMethod(const char *Name, LVariant *Dst, LArray<LVariant*> &Arg)
+bool LFile::CallMethod(const char *Name, LVariant *Dst, LArray<LVariant*> &Arg)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)

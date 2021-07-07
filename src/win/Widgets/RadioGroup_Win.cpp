@@ -82,7 +82,7 @@ GMessage::Result LRadioGroup::OnEvent(GMessage *Msg)
 		case WM_ERASEBKGND:
 		{
 			LScreenDC Dc((HDC)Msg->A(), _View);
-			GColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
+			LColour cBack = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 			Dc.Colour(cBack);
 			Dc.Rectangle();
 			return true;

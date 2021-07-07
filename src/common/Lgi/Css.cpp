@@ -2823,7 +2823,7 @@ bool LCss::Store::Dump(LStream &out)
 
 
 
-int GCssSelectorCmp(class LCss::Selector **a, LCss::Selector **b)
+int LCssSelectorCmp(class LCss::Selector **a, LCss::Selector **b)
 {
 	uint32_t as = (*a)->GetSpecificity();
 	uint32_t bs = (*b)->GetSpecificity();
@@ -2835,7 +2835,7 @@ int GCssSelectorCmp(class LCss::Selector **a, LCss::Selector **b)
 void LCss::Store::SortStyles(LCss::SelArray &Styles)
 {
 	if (Styles.Length() > 1)
-		Styles.Sort(GCssSelectorCmp);
+		Styles.Sort(LCssSelectorCmp);
 }
 
 bool LCss::Store::ToString(LStream &p)

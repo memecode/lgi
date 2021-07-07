@@ -3,13 +3,13 @@
 
 #include "lgi/common/Css.h"
 
-class LgiClass GCssTools
+class LgiClass LCssTools
 {
 	LView *View;
 	LCss *Css;
 	LFont *Font;
 	
-	GColour Fore, Back;
+	LColour Fore, Back;
 	uint8_t ForeInit : 1, BackInit : 1;
 	LSurface *BackImg;
 	LRect BackPos;
@@ -17,7 +17,7 @@ class LgiClass GCssTools
 	bool SetLineStyle(LSurface *pDC, LCss::BorderDef &d);
 	
 public:
-	GCssTools(LCss *css, LFont *font)
+	LCssTools(LCss *css, LFont *font)
 	{
 		View = NULL;
 		Css = css;
@@ -27,7 +27,7 @@ public:
 		BackImg = NULL;
 	}
 	
-	GCssTools(LView *view)
+	LCssTools(LView *view)
 	{
 		LgiAssert(view != NULL);
 		View = view;
@@ -39,10 +39,10 @@ public:
 	}
 		
 	/// Gets the foreground colour for text
-	GColour &GetFore(GColour *Default = NULL);
+	LColour &GetFore(LColour *Default = NULL);
 	
 	/// Gets the background colour for filling
-	GColour &GetBack(GColour *Default = NULL, int Depth = -1);
+	LColour &GetBack(LColour *Default = NULL, int Depth = -1);
 
 	/// Gets the background image for filling
 	LSurface *GetBackImage();

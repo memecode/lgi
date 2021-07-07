@@ -13,15 +13,15 @@ class LgiClass LProgressView
 	, public Progress
 	, public ResObject
 {
-	GColour c;
+	LColour c;
 	#ifdef WIN32
 	int Shift;
 	#endif
 
 public:
-	static GColour cNormal;
-	static GColour cPaused;
-	static GColour cError;
+	static LColour cNormal;
+	static LColour cPaused;
+	static LColour cError;
 
 	LProgressView(int id, int x, int y, int cx, int cy, const char *name);
 	virtual ~LProgressView();
@@ -33,8 +33,8 @@ public:
 	GMessage::Result OnEvent(GMessage *Msg) override;
 	bool OnLayout(LViewLayoutInfo &Inf) override;
 	bool Pour(LRegion &r) override;
-	bool Colour(GColour Col);
-	GColour Colour();
+	bool Colour(LColour Col);
+	LColour Colour();
 
 	#if WINNATIVE
 	LString CssStyles(const char *CssStyle = NULL);

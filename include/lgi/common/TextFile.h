@@ -1,7 +1,7 @@
 #ifndef _TEXT_FILE_H_
 #define _TEXT_FILE_H_
 
-class GTextFile : public GFile
+class GTextFile : public LFile
 {
 public:
 	enum EncodingType
@@ -62,7 +62,7 @@ public:
 			return true;
 		}
 		
-		return GFile::GetVariant(Name, Value, Array);
+		return LFile::GetVariant(Name, Value, Array);
 	}
 	
 	/// Read the whole file as utf-8
@@ -128,7 +128,7 @@ public:
 		
 	ssize_t Read(void *Buffer, ssize_t Size, int Flags = 0)
 	{
-		ssize_t Rd = GFile::Read(Buffer, Size, Flags);
+		ssize_t Rd = LFile::Read(Buffer, Size, Flags);
 		if (First)
 		{
 			if (Rd < 4)

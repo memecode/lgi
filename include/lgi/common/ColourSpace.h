@@ -38,7 +38,7 @@ enum GComponentType
 	)
 
 /// Defines a specific colour space
-enum GColourSpace
+enum LColourSpace
 {
 	CsNone = 0,
 
@@ -363,23 +363,23 @@ union GColourSpaceBits
 #endif
 
 /// Converts a colour space into a string for debugging/reporting.
-LgiFunc const char *GColourSpaceToString(GColourSpace cs);
+LgiFunc const char *GColourSpaceToString(LColourSpace cs);
 
 /// Works out how many bits required for a pixel in a particular colour space.
-LgiFunc int GColourSpaceToBits(GColourSpace ColourSpace);
+LgiFunc int GColourSpaceToBits(LColourSpace ColourSpace);
 
 /// /returns the number of channels in the colour space
-LgiFunc int GColourSpaceChannels(GColourSpace Cs);
+LgiFunc int GColourSpaceChannels(LColourSpace Cs);
 
 /// /returns true if the colour space has an alpha channel
-LgiFunc bool GColourSpaceHasAlpha(GColourSpace Cs);
+LgiFunc bool GColourSpaceHasAlpha(LColourSpace Cs);
 
 /// Converts a bit-depth into the default colour space for that depth. Used mostly
 /// in interfacing old bit-depth based code to newer colour space code.
-LgiFunc GColourSpace GBitsToColourSpace(int Bits);
+LgiFunc LColourSpace GBitsToColourSpace(int Bits);
 
 /// Converts a string representation into a colour space.
-LgiFunc GColourSpace GStringToColourSpace(const char *c);
+LgiFunc LColourSpace GStringToColourSpace(const char *c);
 
 /// Tests that the bit and byte ordering of the pixel structures are compiled correctly.
 /// \return true if #LEAST_SIG_BIT_FIRST and #LEAST_SIG_BYTE_FIRST are correct for this platform.
@@ -387,11 +387,11 @@ LgiFunc bool GColourSpaceTest();
 
 #ifdef __GTK_H__
 /// Converts a GTK visual to a Lgi colour space.
-LgiFunc GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits);
+LgiFunc LColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits);
 #endif
 
 // These definitions are provide as a convenience when converting old code to the
-// GColourSpace system. However you should not use them for new code, as some systems
+// LColourSpace system. However you should not use them for new code, as some systems
 // can have different colour spaces depending on OS version or hardware configuration.
 #if defined(WIN32) || defined(LINUX) || defined(BEOS)
 

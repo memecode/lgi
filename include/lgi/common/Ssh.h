@@ -218,7 +218,7 @@ public:
 		auto r = ssh_scp_init(Scp);
 		if (r == SSH_OK)
 		{
-			GFile local(To, O_WRITE);
+			LFile local(To, O_WRITE);
 			if (local.IsOpen())
 			{
 				size_t BufLen = 1 << 20;
@@ -286,7 +286,7 @@ public:
 			r = ssh_scp_push_file(Scp, Parts[1], length, 0644);
 			if (r == SSH_OK)
 			{
-				GFile in(From, O_READ);
+				LFile in(From, O_READ);
 				if (in.IsOpen())
 				{
 					size_t BufLen = 128<<10;

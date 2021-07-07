@@ -171,7 +171,7 @@
 		<li> LProgressViewDlg
 		<li> GFindDlg
 		<li> GReplaceDlg
-		<li> GAbout
+		<li> LAbout
 	</ul>
 	To create your own custom dialog you derive from:
 	<ul>

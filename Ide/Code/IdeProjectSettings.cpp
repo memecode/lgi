@@ -668,8 +668,8 @@ public:
 						LFileSelect s;
 						s.Parent(this);
 
-						GFile::Path Path(d->Project->GetBasePath());
-						GFile::Path Cur(e->Name());
+						LFile::Path Path(d->Project->GetBasePath());
+						LFile::Path Cur(e->Name());
 						Path.Join(Cur.GetFull());
 						Path--;
 						if (Path.Exists())
@@ -681,7 +681,7 @@ public:
 							LAutoString Rel;
 							if (Base)
 							{
-								GFile::Path p = Base;
+								LFile::Path p = Base;
 								Rel = LgiMakeRelativePath(--p, s.Name());
 							}
 							e->Name(Rel ? Rel : s.Name());

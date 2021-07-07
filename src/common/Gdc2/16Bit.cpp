@@ -14,8 +14,8 @@
 #include "lgi/common/Palette.h"
 
 /// 16 bit rgb applicators
-template<typename Pixel, GColourSpace Cs>
-class GdcApp16 : public GApplicator
+template<typename Pixel, LColourSpace Cs>
+class GdcApp16 : public LApplicator
 {
 protected:
 	union
@@ -76,7 +76,7 @@ public:
 	}
 };
 
-template<typename Pixel, GColourSpace Cs>
+template<typename Pixel, LColourSpace Cs>
 class GdcApp16Set : public GdcApp16<Pixel, Cs>
 {
 public:
@@ -201,7 +201,7 @@ public:
 	
 };
 
-template<typename Pixel, GColourSpace Cs>
+template<typename Pixel, LColourSpace Cs>
 class GdcApp16And : public GdcApp16<Pixel, Cs> {
 public:
 	const char *GetClass() { return "GdcApp16And"; }
@@ -211,7 +211,7 @@ public:
 	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
 };
 
-template<typename Pixel, GColourSpace Cs>
+template<typename Pixel, LColourSpace Cs>
 class GdcApp16Or : public GdcApp16<Pixel, Cs> {
 public:
 	const char *GetClass() { return "GdcApp16Or"; }
@@ -221,7 +221,7 @@ public:
 	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
 };
 
-template<typename Pixel, GColourSpace Cs>
+template<typename Pixel, LColourSpace Cs>
 class GdcApp16Xor : public GdcApp16<Pixel, Cs> {
 public:
 	const char *GetClass() { return "GdcApp16Xor"; }
@@ -231,7 +231,7 @@ public:
 	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
 };
 
-GApplicator *GApp16::Create(GColourSpace Cs, int Op)
+LApplicator *GApp16::Create(LColourSpace Cs, int Op)
 {
 	if (Cs == CsRgb16)
 	{

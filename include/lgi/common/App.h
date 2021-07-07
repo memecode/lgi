@@ -129,7 +129,7 @@ protected:
 
 	#elif defined LINUX
 	
-	friend class GClipBoard;
+	friend class LClipBoard;
 	
 	// virtual void OnEvents();
 	void DeleteMeLater(LViewI *v);

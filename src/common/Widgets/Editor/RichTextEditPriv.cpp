@@ -1319,7 +1319,7 @@ bool LRichTextPriv::Layout(LScrollBar *&ScrollY)
 	Client.Offset(-Client.x1, -Client.y1);
 	DocumentExtent.x = Client.X();
 
-	GCssTools Ct(this, Font);
+	LCssTools Ct(this, Font);
 	LRect Content = Ct.ApplyPadding(Client);
 	f.Left = Content.x1;
 	f.Right = Content.x2;
@@ -1480,11 +1480,11 @@ void LRichTextPriv::PaintBtn(LSurface *pDC, LRichTextEdit::RectType t)
 	SysFont->Colour(L_TEXT, BtnState[t].MouseOver ? L_LIGHT : L_MED);
 	SysFont->Transparent(false);
 
-	GColour Low(96, 96, 96);
-	pDC->Colour(Down ? GColour::White : Low);
+	LColour Low(96, 96, 96);
+	pDC->Colour(Down ? LColour::White : Low);
 	pDC->Line(r.x1, r.y2, r.x2, r.y2);
 	pDC->Line(r.x2, r.y1, r.x2, r.y2);
-	pDC->Colour(Down ? Low : GColour::White);
+	pDC->Colour(Down ? Low : LColour::White);
 	pDC->Line(r.x1, r.y1, r.x2, r.y1);
 	pDC->Line(r.x1, r.y1, r.x1, r.y2);
 	r.Size(1, 1);
@@ -1517,7 +1517,7 @@ void LRichTextPriv::PaintBtn(LSurface *pDC, LRichTextEdit::RectType t)
 					for (int x=0; x<r.X(); x+=2)
 					{
 						int i = ((y>>1)%2) ^ ((x>>1)%2);
-						pDC->Colour(GColour(g[i],g[i],g[i]));
+						pDC->Colour(LColour(g[i],g[i],g[i]));
 						pDC->Rectangle(r.x1+x, r.y1+y, r.x1+x+1, r.y1+y+1);
 					}
 				}
@@ -1564,7 +1564,7 @@ bool LRichTextPriv::MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, LString
 		if (st.Last()->GetStyle())
 			*ns = *st.Last()->GetStyle();
 		ns->TextDecoration(LCss::TextDecorUnderline);
-		ns->Color(LCss::ColorDef(LCss::ColorRgb, GColour::Blue.c32()));
+		ns->Color(LCss::ColorDef(LCss::ColorRgb, LColour::Blue.c32()));
 		
 		LAutoPtr<Transaction> Trans(new Transaction);
 
@@ -1743,7 +1743,7 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 					*s = *Ns;
 				if (s->TextDecoration() == LCss::TextDecorUnderline)
 					s->DeleteProp(LCss::PropTextDecoration);
-				if ((GColour)s->Color() == GColour::Blue)
+				if ((LColour)s->Color() == LColour::Blue)
 					s->DeleteProp(LCss::PropColor);
 
 				Ns = AddStyleToCache(s);
@@ -1837,7 +1837,7 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 		#ifdef WIN32
 		GDoubleBuffer Buf(pDC, &t);
 		#endif
-		GColour ToolBar = LColour(L_FOCUS_SEL_BACK).Mix(LColour(L_LOW));
+		LColour ToolBar = LColour(L_FOCUS_SEL_BACK).Mix(LColour(L_LOW));
 		pDC->Colour(ToolBar);
 		pDC->Rectangle(&t);
 
@@ -1907,15 +1907,15 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 	r.Set(0, 0, DocumentExtent.x-1, DocumentExtent.y-1);
 
 	// Fill the padding...
-	GCssTools ct(this, Font);
+	LCssTools ct(this, Font);
 	r = ct.PaintPadding(pDC, r);
 
 	// Fill the background...
 	#if DEBUG_COVERAGE_CHECK
-	pDC->Colour(GColour(255, 0, 255));
+	pDC->Colour(LColour(255, 0, 255));
 	#else
 	LCss::ColorDef cBack = BackgroundColor();
-	// pDC->Colour(cBack.IsValid() ? (GColour)cBack : GColour(LC_WORKSPACE, 24));
+	// pDC->Colour(cBack.IsValid() ? (LColour)cBack : LColour(LC_WORKSPACE, 24));
 	#endif
 	pDC->Rectangle(&r);
 	if (ExtraPx)
@@ -1946,7 +1946,7 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 		{
 			b->OnPaint(Ctx);
 			#if DEBUG_OUTLINE_BLOCKS
-			pDC->Colour(GColour(192, 192, 192));
+			pDC->Colour(LColour(192, 192, 192));
 			pDC->LineStyle(LSurface::LineDot);
 			pDC->Box(&b->GetPos());
 			pDC->LineStyle(LSurface::LineSolid);
@@ -1955,7 +1955,7 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 	}
 
 	#ifdef _DEBUG
-	pDC->Colour(GColour::Green);
+	pDC->Colour(LColour::Green);
 	for (unsigned i=0; i<DebugRects.Length(); i++)
 	{
 		pDC->Box(&DebugRects[i]);
@@ -1965,7 +1965,7 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 	#if 0 // Outline the line the cursor is on
 	if (Cursor)
 	{
-		pDC->Colour(GColour::Blue);
+		pDC->Colour(LColour::Blue);
 		pDC->LineStyle(LSurface::LineDot);
 		pDC->Box(&Cursor->Line);
 	}
@@ -2164,7 +2164,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 				if (Style)
 				{
 					Style->TextDecoration(LCss::TextDecorUnderline);
-					Style->Color(LCss::ColorDef(LCss::ColorRgb, GColour::Blue.c32()));
+					Style->Color(LCss::ColorDef(LCss::ColorRgb, LColour::Blue.c32()));
 				}
 				break;
 			}

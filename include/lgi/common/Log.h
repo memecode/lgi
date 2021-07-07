@@ -22,10 +22,10 @@ friend class GLog;
 
 	char *Desc;
 	char *Text;
-	GColour c;
+	LColour c;
 
 public:
-	RLogEntry(const char *t, const char *desc = 0, int Len = -1, GColour *col = NULL);
+	RLogEntry(const char *t, const char *desc = 0, int Len = -1, LColour *col = NULL);
 	~RLogEntry();
 };
 
@@ -76,8 +76,8 @@ public:
 	~GLog();
 
 	void SetView(RLogView *View);
-	void Print(GColour c, const char *Str, ...);
-	void Write(GColour c, const char *Str, int Len = -1, char *Desc = 0);
+	void Print(LColour c, const char *Str, ...);
+	void Write(LColour c, const char *Str, int Len = -1, char *Desc = 0);
 };
 
 #endif

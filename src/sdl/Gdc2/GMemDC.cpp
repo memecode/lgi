@@ -35,7 +35,7 @@ public:
 	}
 };
 
-LMemDC::LMemDC(int x, int y, GColourSpace cs, int flags)
+LMemDC::LMemDC(int x, int y, LColourSpace cs, int flags)
 {
 	d = new LMemDCPrivate;
 	ColourSpace = CsNone;
@@ -167,7 +167,7 @@ bool LMemDC::SupportsAlphaCompositing()
 	return true;
 }
 
-bool LMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
+bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 {
 	bool Status = false;
 	GBmpMem *pOldMem = pMem;

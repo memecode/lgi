@@ -44,7 +44,7 @@ LgiFunc Gtk::GdkDragAction DropEffectToAction(int DropEffect);
 LgiFunc const char *LMimeToUti(const char *Mime);
 
 //////////////////////////////////////////////////////////////////////////////
-struct LgiClass GDragData
+struct LgiClass LDragData
 {
 	LString Format;
 	LArray<LVariant> Data;
@@ -89,11 +89,11 @@ struct LgiClass GDragData
 	}
 };
 
-class LgiClass GDragFormats
+class LgiClass LDragFormats
 {
-	friend class GDragDropSource;
-	friend class GDataObject;
-	friend class GDragDropTarget;
+	friend class LDragDropSource;
+	friend class LDataObject;
+	friend class LDragDropTarget;
 
 	bool Source;
 	
@@ -109,7 +109,7 @@ class LgiClass GDragFormats
 	LArray<Fmt> Formats;
 
 public:
-	GDragFormats(bool source);
+	LDragFormats(bool source);
 
 	bool IsSource() { return Source; }
 	void SetSource(bool s) { Source = s; }
@@ -127,12 +127,12 @@ public:
 };
 
 /// A drag source class
-class LgiClass GDragDropSource
+class LgiClass LDragDropSource
 #if WINNATIVE
 	: public IDropSource, public IEnumFORMATETC
 #endif
 {
-	friend class GDataObject;
+	friend class LDataObject;
 
 protected:
 	class GDndSourcePriv *d;
@@ -157,8 +157,8 @@ protected:
 	#endif
 
 public:
-	GDragDropSource();
-	~GDragDropSource();
+	LDragDropSource();
+	~LDragDropSource();
 
 	/// Sets the icon used to show what is being dragged.
 	bool SetIcon
@@ -187,8 +187,8 @@ public:
 	/// and return it via the LVariant.
 	virtual bool GetData
 	(
-		/// Fill out as many GDragData structures as you need.
-		LArray<GDragData> &Data
+		/// Fill out as many LDragData structures as you need.
+		LArray<LDragData> &Data
 	) { return false; }
 
 	/// This is called to see what formats your support
@@ -211,28 +211,28 @@ public:
 	(
 		/// List of format you can provide. You should keep the format
 		/// length to 4 bytes on the Mac.
-		GDragFormats &Formats
+		LDragFormats &Formats
 	)
 	{ return false; }
 
 	/// Creates a file drop
-	static bool CreateFileDrop(GDragData *OutputData, LMouse &m, LString::Array &Files);
+	static bool CreateFileDrop(LDragData *OutputData, LMouse &m, LString::Array &Files);
 };
 
 /// A drag target class
-class LgiClass GDragDropTarget
+class LgiClass LDragDropTarget
 #if WINNATIVE
 	: public IDropTarget
 #endif
 {
 private:
 	LView *To;
-	GDragFormats Formats;
+	LDragFormats Formats;
 
 	#ifdef __GTK_H__
 	friend Gtk::gboolean LWindowDragDataDrop(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::gint x, Gtk::gint y, Gtk::guint time, class LWindow *Wnd);
 	friend void LWindowDragDataReceived(Gtk::GtkWidget *widget, Gtk::GdkDragContext *context, Gtk::gint x, Gtk::gint y, Gtk::GtkSelectionData *data, Gtk::guint info, Gtk::guint time, LWindow *Wnd);
-	LArray<GDragData> Data;
+	LArray<LDragData> Data;
 	#endif
 
 	#ifdef WIN32
@@ -262,8 +262,8 @@ protected:
 	#endif
 
 public:
-	GDragDropTarget();
-	~GDragDropTarget();
+	LDragDropTarget();
+	~LDragDropTarget();
 
 	/// call this when you have a operating system view handle (e.g. HWND/Window/HIViewRef)
 	void SetWindow(LView *To);
@@ -287,7 +287,7 @@ public:
 	virtual int WillAccept
 	(
 		/// The list of formats the source provides, delete any you can't handle
-		GDragFormats &Formats,
+		LDragFormats &Formats,
 		/// The mouse pointer in view space co-ords
 		LPoint Pt,
 		/// The current keyboard mobifiers
@@ -302,7 +302,7 @@ public:
 	virtual int OnDrop
 	(
 		/// All the available data formats for this drop
-		LArray<GDragData> &Data,
+		LArray<LDragData> &Data,
 		/// The mouse coords
 		LPoint Pt,
 		/// The keyboard modifiers

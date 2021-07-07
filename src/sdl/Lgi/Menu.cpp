@@ -551,7 +551,7 @@ void GMenuItem::_Paint(LSurface *pDC, int Flags)
 				_Icon >= 0)
 		{
 			// it's an icon!
-			GColour Med(LC_MED, 24);
+			LColour Med(LC_MED, 24);
 			ImgLst->Draw(pDC, 0, 0, _Icon, Med);
 		}
 

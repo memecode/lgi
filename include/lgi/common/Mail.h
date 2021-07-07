@@ -94,13 +94,13 @@ public:
 
 class LogEntry
 {
-	GColour c;
+	LColour c;
 
 public:
 	LArray<char16> Txt;
-	LogEntry(GColour col);
+	LogEntry(LColour col);
 
-	GColour GetColour() { return c; }
+	LColour GetColour() { return c; }
 	bool Add(const char *t, ssize_t len = -1);
 };
 
@@ -114,7 +114,7 @@ protected:
 	char *ContentId;
 
 	// Read from file
-	GFile File;
+	LFile File;
 	LStreamI *Embeded;
 	bool OwnEmbeded;
 	int64 Offset;
@@ -173,7 +173,7 @@ public:
 				SizeofStr(Addr);
 	}
 
-	bool Serialize(GFile &f, bool Write)
+	bool Serialize(LFile &f, bool Write)
 	{
 		bool Status = true;
 		if (Write)

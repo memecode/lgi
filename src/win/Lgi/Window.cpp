@@ -589,7 +589,7 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 void LWindow::OnPaint(LSurface *pDC)
 {
 	auto c = GetClient();
-	GCssTools Tools(this);
+	LCssTools Tools(this);
 	Tools.PaintContent(pDC, c);
 }
 
@@ -896,7 +896,7 @@ GMessage::Result LWindow::OnEvent(GMessage *Msg)
 		}
 		case WM_SYSCOLORCHANGE:
 		{
-			GColour::OnChange();
+			LColour::OnChange();
 			break;
 		}
 		case WM_WINDOWPOSCHANGING:

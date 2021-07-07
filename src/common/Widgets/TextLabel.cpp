@@ -269,8 +269,8 @@ int LTextLabel::OnNotify(LViewI *Ctrl, int Flags)
 
 void LTextLabel::OnPaint(LSurface *pDC)
 {
-	GCssTools Tools(this);
-	GColour Back = Tools.GetBack();
+	LCssTools Tools(this);
+	LColour Back = Tools.GetBack();
 	Tools.PaintContent(pDC, GetClient());
 	if (Tools.GetBackImage())
 		Back.Empty();

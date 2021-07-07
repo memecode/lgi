@@ -371,7 +371,7 @@ void TrimWhite(char *s)
 	}
 }
 
-bool GPalette::Load(GFile &F)
+bool GPalette::Load(LFile &F)
 {
 	#if 1
 
@@ -460,7 +460,7 @@ bool GPalette::Load(GFile &F)
 	#endif
 }
 
-bool GPalette::Save(GFile &F, int Format)
+bool GPalette::Save(LFile &F, int Format)
 {
 	bool Status = FALSE;
 
@@ -697,7 +697,7 @@ bool GGlobalColour::AddBitmap(LImageList *il)
 			if (s)
 			{
 				s->Op(GDC_ALPHA);
-				GApplicator *pApp = s->Applicator();
+				LApplicator *pApp = s->Applicator();
 				if (pApp) pApp->SetVar(GAPP_ALPHA_A, 40);
 				s->Blt(0, 0, il);
 				d->Cache.Insert(s);
@@ -805,7 +805,7 @@ public:
 	int ScrX;
 	int ScrY;
 	int ScrBits;
-	GColourSpace ColourSpace;
+	LColourSpace ColourSpace;
 
 	// Palette
 	double GammaCorrection;
@@ -982,7 +982,7 @@ GGlobalColour *GdcDevice::GetGlobalColour()
 	return d->GlobalColour;
 }
 
-GColourSpace GdcDevice::GetColourSpace()
+LColourSpace GdcDevice::GetColourSpace()
 {
 	return d->ColourSpace;
 }
@@ -1208,7 +1208,7 @@ GApplicatorFactory::~GApplicatorFactory()
 	}
 }
 
-class NullApplicator : public GApplicator
+class NullApplicator : public LApplicator
 {
 public:
 	const char *GetClass() { return "NullApplicator"; }
@@ -1225,12 +1225,12 @@ public:
 	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha = 0) { return false; }
 };
 
-GApplicator *GApplicatorFactory::NewApp(GColourSpace Cs, int Op)
+LApplicator *GApplicatorFactory::NewApp(LColourSpace Cs, int Op)
 {
 	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)
 	{
-		GApplicator *a = _Factory[i]->Create(Cs, Op);
+		LApplicator *a = _Factory[i]->Create(Cs, Op);
 		if (a) return a;
 	}
 

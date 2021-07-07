@@ -1,35 +1,35 @@
 // Clipboard Implementation
 #include "Lgi.h"
 #include "LVariant.h"
-#include "GClipBoard.h"
+#include "LClipBoard.h"
 
 #define DEBUG_CLIPBOARD		0
 
-class GClipBoardPriv
+class LClipBoardPriv
 {
 public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GClipBoard::GClipBoard(LView *o)
+LClipBoard::LClipBoard(LView *o)
 {
-	d = new GClipBoardPriv;
+	d = new LClipBoardPriv;
 	Owner = o;
 	Open = false;
 	pDC = 0;
 }
 
-GClipBoard::~GClipBoard()
+LClipBoard::~LClipBoard()
 {
 	DeleteObj(d);
 }
 
-bool GClipBoard::Empty()
+bool LClipBoard::Empty()
 {
 	return false;
 }
 
-bool GClipBoard::Text(char *Str, bool AutoEmpty)
+bool LClipBoard::Text(char *Str, bool AutoEmpty)
 {
 	bool Status = false;
 
@@ -42,7 +42,7 @@ bool GClipBoard::Text(char *Str, bool AutoEmpty)
 	return Status;
 }
 
-char *GClipBoard::Text()
+char *LClipBoard::Text()
 {
     char *t = 0;
     
@@ -50,30 +50,30 @@ char *GClipBoard::Text()
 	return t;
 }
 
-bool GClipBoard::TextW(char16 *Str, bool AutoEmpty)
+bool LClipBoard::TextW(char16 *Str, bool AutoEmpty)
 {
     LAutoString u(WideToUtf8(Str));
     return Text(u, AutoEmpty);
 }
 
-char16 *GClipBoard::TextW()
+char16 *LClipBoard::TextW()
 {
     LAutoString u(Text());
     return Utf8ToWide(u);
 }
 
-bool GClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
+bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 {
 	bool Status = false;
 	return Status;
 }
 
-LSurface *GClipBoard::Bitmap()
+LSurface *LClipBoard::Bitmap()
 {
 	return pDC;
 }
 
-bool GClipBoard::Binary(FormatType Format, uint8 *Ptr, ssize_t Len, bool AutoEmpty)
+bool LClipBoard::Binary(FormatType Format, uint8 *Ptr, ssize_t Len, bool AutoEmpty)
 {
 	bool Status = false;
 
@@ -84,7 +84,7 @@ bool GClipBoard::Binary(FormatType Format, uint8 *Ptr, ssize_t Len, bool AutoEmp
 	return Status;
 }
 
-bool GClipBoard::Binary(FormatType Format, LAutoPtr<uint8> &Ptr, ssize_t *Len)
+bool LClipBoard::Binary(FormatType Format, LAutoPtr<uint8> &Ptr, ssize_t *Len)
 {
 	bool Status = false;
 

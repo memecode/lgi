@@ -358,7 +358,7 @@ public:
 			}
 		}
 		
-		GFile m;
+		LFile m;
 		if (!m.Open(MakeFile, O_WRITE))
 		{
 			Log->Print("Error: Failed to open '%s' for writing.\n", MakeFile.Get());
@@ -1233,7 +1233,7 @@ bool ReadVsProjFile(LString File, LString &Ver, LString::Array &Configs)
 	if (!Ext || _stricmp(Ext, "vcxproj"))
 		return false;
 
-	GFile f;
+	LFile f;
 	if (!f.Open(File, O_READ))
 		return false;
 
@@ -1451,7 +1451,7 @@ LString BuildThread::FindExe()
 		const char *Ext = LgiGetExtension(Makefile);
 		if (Ext && !_stricmp(Ext, "sln"))
 		{
-			GFile f;
+			LFile f;
 			if (f.Open(Makefile, O_READ))
 			{
 				LString ProjKey = "Project(";
@@ -1585,7 +1585,7 @@ LString BuildThread::FindExe()
 			{
 				BuildConfigs[i.value - 1] = i.key;
 
-				GFile f(First->File, O_READ);
+				LFile f(First->File, O_READ);
 				LXmlTree t;
 				LXmlTag r;
 				if (t.Read(&r, &f))
@@ -1623,7 +1623,7 @@ LString BuildThread::FindExe()
 		char p[MAX_PATH];
 		if (!LgiMakePath(p, sizeof(p), ProgFiles, "IAR Systems"))
 			return LString();
-		GDirectory d;
+		LDirectory d;
 		double LatestVer = 0.0;
 		LString Latest;
 		for (int b = d.First(p); b; b = d.Next())
@@ -1672,7 +1672,7 @@ LString BuildThread::FindExe()
 		}
 		n.DeleteArrays();
 
-		GFile::Path p(s, "bin\\make.exe");
+		LFile::Path p(s, "bin\\make.exe");
 		if (p.Exists())
 			return p.GetFull();
 		#endif
@@ -1848,7 +1848,7 @@ int BuildThread::Main()
 		{
 			LString Conf;
 
-			GFile f;
+			LFile f;
 			if (f.Open(Makefile, O_READ))
 			{
 				LXmlTree t;
@@ -1883,7 +1883,7 @@ int BuildThread::Main()
 		{
 			if (Compiler == Cygwin)
 			{
-				GFile::Path p(CygwinPath, "bin");
+				LFile::Path p(CygwinPath, "bin");
 				Path = p.GetFull();
 			}
 
@@ -2406,7 +2406,7 @@ GDebugContext *IdeProject::Execute(ExeAction Act)
 				{
 					if (InitDir && LgiIsRelativePath(InitDir))
 					{
-						GFile::Path p(Base);
+						LFile::Path p(Base);
 						p += InitDir;
 						InitDir = p.GetFull();
 					}
@@ -2439,7 +2439,7 @@ bool IdeProject::IsMakefileUpToDate()
 		// Is the project file modified after the makefile?
 		auto Proj = p->GetFullPath();
 		uint64 ProjModTime = 0, MakeModTime = 0;
-		GDirectory dir;
+		LDirectory dir;
 		if (dir.First(Proj))
 		{
 			ProjModTime = dir.GetLastWriteTime();
@@ -2818,7 +2818,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 	
 	Prof.Add("FileOpen");
 
-	GFile f;
+	LFile f;
 	LString FullPath = d->FileName.Get();
 	if (CheckExists(FullPath) &&
 		!f.Open(FullPath, O_READWRITE))
@@ -2853,7 +2853,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 
 	if (LFileExists(d->UserFile))
 	{
-		GFile Uf;
+		LFile Uf;
 		if (Uf.Open(d->UserFile, O_READ))
 		{
 			LString::Array Ln = Uf.Read().SplitDelimit("\n");
@@ -2904,7 +2904,7 @@ bool IdeProject::SaveFile()
 	printf("IdeProject::SaveFile %s %i\n", Full.Get(), d->Dirty);
 	if (ValidStr(Full) && d->Dirty)
 	{
-		GFile f;
+		LFile f;
 		if (f.Open(Full, O_WRITE))
 		{
 			f.SetSize(0);
@@ -2934,7 +2934,7 @@ bool IdeProject::SaveFile()
 
 	if (d->UserFileDirty)
 	{
-		GFile f;
+		LFile f;
 		LgiAssert(d->UserFile.Get());
 		if (f.Open(d->UserFile, O_WRITE))
 		{
@@ -2992,7 +2992,7 @@ int IdeProject::AllocateId()
 template<typename T, typename Fn>
 bool CheckExists(LAutoString Base, T &p, Fn Setter, bool Debug)
 {
-	GFile::Path Full;
+	LFile::Path Full;
 	bool WasRel = LgiIsRelativePath(p);
 	if (WasRel)
 	{
@@ -3007,11 +3007,11 @@ bool CheckExists(LAutoString Base, T &p, Fn Setter, bool Debug)
 		// Is the case wrong?
 		for (int i=1; i<Full.Length(); i++)
 		{
-			GFile::Path t;
+			LFile::Path t;
 			t = Full.Slice(0, i);
 			if (!t.Exists())
 			{
-				GDirectory dir;
+				LDirectory dir;
 				bool Matched = false;
 				auto &Leaf = Full[i-1];
 				auto Parent = t.GetParent();
@@ -3911,7 +3911,7 @@ void IdeTree::OnDragExit()
 	SelectDropTarget(0);
 }
 
-int IdeTree::WillAccept(GDragFormats &Formats, LPoint p, int KeyState)
+int IdeTree::WillAccept(LDragFormats &Formats, LPoint p, int KeyState)
 {
 	static bool First = true;
 	
@@ -3955,7 +3955,7 @@ int IdeTree::WillAccept(GDragFormats &Formats, LPoint p, int KeyState)
 	return DROPEFFECT_MOVE;
 }
 
-int IdeTree::OnDrop(LArray<GDragData> &Data, LPoint p, int KeyState)
+int IdeTree::OnDrop(LArray<LDragData> &Data, LPoint p, int KeyState)
 {
 	int Ret = DROPEFFECT_NONE;
 	SelectDropTarget(NULL);
@@ -3964,7 +3964,7 @@ int IdeTree::OnDrop(LArray<GDragData> &Data, LPoint p, int KeyState)
 	
 	for (unsigned n=0; n<Data.Length(); n++)
 	{
-		GDragData &dd = Data[n];
+		LDragData &dd = Data[n];
 		LVariant *Data = &dd.Data[0];
 		if (dd.IsFormat(NODE_DROP_FORMAT))
 		{

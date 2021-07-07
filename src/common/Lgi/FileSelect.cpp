@@ -148,7 +148,7 @@ public:
 	char *File;
 	bool IsDir;
 
-	GFolderItem(GFileSelectDlg *dlg, char *FullPath, GDirectory *Dir);
+	GFolderItem(GFileSelectDlg *dlg, char *FullPath, LDirectory *Dir);
 	~GFolderItem();
 
 
@@ -214,7 +214,7 @@ public:
 			LAutoPtr<LMemDC> m(new LMemDC(a->X(), a->Y(), System32BitColourSpace));
 			if (a && m)
 			{
-				GColour fore(128, 128, 128);
+				LColour fore(128, 128, 128);
 				for (int y=0; y<a->Y(); y++)
 				{
 					uint8_t *i = (uint8_t*)(*a)[y];
@@ -307,7 +307,7 @@ public:
 	void OnPaint(LSurface *pDC)
 	{
 		LRect c = GetClient();
-		GColour Background(L_MED);
+		LColour Background(L_MED);
 		c.Offset(-c.x1, -c.y1);
 		LWideBorder(pDC, c, Down ? DefaultSunkenEdge : DefaultRaisedEdge);
 		pDC->Colour(Background);
@@ -575,8 +575,8 @@ public:
 		for (unsigned i=0; i<p.Length(); i++)
 		{
 			Part *n = p.AddressOf(i);
-			GColour Fore(Cursor == i ? L_FOCUS_SEL_FORE : L_TEXT);
-			GColour Bk(	Cursor == i
+			LColour Fore(Cursor == i ? L_FOCUS_SEL_FORE : L_TEXT);
+			LColour Bk(	Cursor == i
 						?
 						LColour(L_FOCUS_SEL_BACK)
 						:
@@ -592,7 +592,7 @@ public:
 			// Layout and draw arrow
 			n->Arrow.ZOff(Arrow.X()+1, c.Y()-1);
 			n->Arrow.Offset(c.x1, c.y1);
-			f->Colour(GColour(192,192,192), Bk);
+			f->Colour(LColour(192,192,192), Bk);
 			Arrow.DrawCenter(pDC, &n->Arrow);
 			c.x1 = n->Arrow.x2 + 1;
 
@@ -609,7 +609,7 @@ public:
 		if (p.Length() == 0)
 		{
 			// Layout and draw arrow for the "root folder"
-			f->Colour(GColour(192,192,192), L_WORKSPACE);
+			f->Colour(LColour(192,192,192), L_WORKSPACE);
 			LRect a;
 			a.ZOff(Arrow.X()+1, c.Y()-1);
 			a.Offset(c.x1, c.y1);
@@ -740,7 +740,7 @@ public:
 
 		LString dir = NameAt(Level-1);
 		LSubMenu s;
-		GDirectory d;
+		LDirectory d;
 
 		LString::Array Opts;
 		for (int b = d.First(dir); b; b = d.Next())
@@ -836,7 +836,7 @@ public:
 		return false;
 	}
 	
-	void Add(LTreeItem *i, GVolume *v)
+	void Add(LTreeItem *i, LVolume *v)
 	{
 		if (!i || !v)
 			return;
@@ -854,7 +854,7 @@ public:
 			}
 		}
 		
-		for (GVolume *cv = v->First(); cv; cv = v->Next())
+		for (LVolume *cv = v->First(); cv; cv = v->Next())
 		{
 			LTreeItem *ci = new LTreeItem;
 			if (ci)
@@ -1435,7 +1435,7 @@ class GFileSystemItem : public LTreeItem
 	LString Path;
 
 public:
-	GFileSystemItem(GFileSystemPopup *popup, GVolume *vol, char *path = 0);
+	GFileSystemItem(GFileSystemPopup *popup, LVolume *vol, char *path = 0);
 
 	char *GetPath()
 	{
@@ -1467,7 +1467,7 @@ public:
 		{
 			Tree->Sunken(false);
 
-			GVolume *v = FileDev->GetRootVolume();
+			LVolume *v = FileDev->GetRootVolume();
 			if (v)
 			{
 				Tree->SetImageList(Dlg->d->BtnIcons, false);
@@ -1511,7 +1511,7 @@ public:
 	}
 };
 
-GFileSystemItem::GFileSystemItem(GFileSystemPopup *popup, GVolume *Vol, char *path)
+GFileSystemItem::GFileSystemItem(GFileSystemPopup *popup, LVolume *Vol, char *path)
 {
 	Popup = popup;
 	Expanded(true);
@@ -1544,7 +1544,7 @@ GFileSystemItem::GFileSystemItem(GFileSystemPopup *popup, GVolume *Vol, char *pa
 				break;
 		}
 
-		for (GVolume *v=Vol->First(); v; v=Vol->Next())
+		for (LVolume *v=Vol->First(); v; v=Vol->Next())
 		{
 			Insert(new GFileSystemItem(Popup, v));
 		}
@@ -1684,7 +1684,7 @@ void GFolderDrop::OnFolder()
 #define IDM_CREATE_SHORTCUT		1005
 #define IDM_DELETE				1006
 
-GFolderItem::GFolderItem(GFileSelectDlg *dlg, char *FullPath, GDirectory *Dir)
+GFolderItem::GFolderItem(GFileSelectDlg *dlg, char *FullPath, LDirectory *Dir)
 {
 	Dlg = dlg;
 	Path = NewStr(FullPath);
@@ -1979,7 +1979,7 @@ void GFolderList::OnFolder()
 {
 	Empty();
 
-	GDirectory Dir;
+	LDirectory Dir;
 	List<LListItem> New;
 
 	// Get current type
@@ -2203,7 +2203,7 @@ bool LgiGetUsersLinks(LArray<LString> &Links)
 		return false;
 	
 	#if defined(WINDOWS)
-		GDirectory d;
+		LDirectory d;
 		for (int b = d.First(Folder); b; b = d.Next())
 		{
 			char *s = d.GetName();

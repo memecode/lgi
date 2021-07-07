@@ -20,7 +20,7 @@
 #include "lgi/common/Variant.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Prop::Serialize(GFile &f, bool Write)
+bool Prop::Serialize(LFile &f, bool Write)
 {
 	uint16_t Us;
 
@@ -171,7 +171,7 @@ bool Prop::operator ==(const char *n)
 	return Status;
 }
 
-bool Prop::SerializeText(GFile &f, bool Write)
+bool Prop::SerializeText(LFile &f, bool Write)
 {
 	char Str[1024];
 
@@ -843,7 +843,7 @@ class ObjProperties {
 #define PROPLST_LEAF			0x1
 #define PROPLST_NEXT			0x2
 
-bool ObjProperties::Serialize(GFile &f, bool Write)
+bool ObjProperties::Serialize(LFile &f, bool Write)
 {
 	bool Status = false;
 	uint16_t Us;
@@ -1004,7 +1004,7 @@ int Prop_Compare(Prop *a, Prop *b, NativeInt data)
 	return _stricmp(a->Name, b->Name);
 }
 
-bool ObjProperties::SerializeText(GFile &f, bool Write)
+bool ObjProperties::SerializeText(LFile &f, bool Write)
 {
 	const char *s = "[Properties]";
 
@@ -1395,7 +1395,7 @@ void ObjTree::Print()
 	}
 }
 
-bool ObjTree::Serialize(GFile &f, bool Write)
+bool ObjTree::Serialize(LFile &f, bool Write)
 {
 	if (!Root && !Write)
 	{
@@ -1421,7 +1421,7 @@ char *Trim(char *s)
 	return s;
 }
 
-bool ObjTree::SerializeObj(GFile &f, bool Write)
+bool ObjTree::SerializeObj(LFile &f, bool Write)
 {
 	bool Status = false;
 
@@ -1559,7 +1559,7 @@ bool ObjTree::SerializeObj(GFile &f, bool Write)
 	return Status;
 }
 
-bool ObjTree::SerializeText(GFile &f, bool Write)
+bool ObjTree::SerializeText(LFile &f, bool Write)
 {
 	return SerializeObj(f, Write);
 }
