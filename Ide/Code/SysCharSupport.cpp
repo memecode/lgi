@@ -1,16 +1,16 @@
 #include <stdio.h>
 
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/List.h"
+#include "lgi/common/DisplayString.h"
 #include "LgiIde.h"
-#include "LList.h"
-#include "GDisplayString.h"
 
 class CharItem : public LListItem
 {
-	GSurface *pDC;
+	LSurface *pDC;
 
 public:
-	CharItem(GSurface *pdc)
+	CharItem(LSurface *pdc)
 	{
 		pDC = pdc;
 	}
@@ -20,7 +20,7 @@ public:
 		DeleteObj(pDC);
 	}
 
-	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
+	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 	{
 		LListItem::OnPaintColumn(Ctx, i, c);
 
@@ -38,7 +38,7 @@ public:
 	}
 };
 
-class SysCharSupportPriv : public GLgiRes
+class SysCharSupportPriv : public LResourceLoad
 {
 public:
 	LList *Match, *NonMatch;
@@ -62,15 +62,15 @@ public:
 			sprintf(msg, "%i 0x%x", c, c);
 			Match->GetWindow()->SetCtrlName(IDC_VALUE, msg);
 
-			GFontSystem *s = GFontSystem::Inst();
+			LFontSystem *s = LFontSystem::Inst();
 			if (s)
 			{
-				GString::Array Fonts;
+				LString::Array Fonts;
 				if (s->EnumerateFonts(Fonts))
 				{
 					for (auto &f : Fonts)
 					{
-						GFont *Fnt = new GFont;
+						LFont *Fnt = new LFont;
 						if (Fnt)
 						{
 							Fnt->SubGlyphs(false);
@@ -79,11 +79,11 @@ public:
 							{
 								LList *m = _HasUnicodeGlyph(Fnt->GetGlyphMap(), c) ? Match : NonMatch;
 
-								GMemDC *pDC = new GMemDC;
+								LMemDC *pDC = new LMemDC;
 								if (pDC)
 								{
 									char16 Str[] = { (char16)c, 0 };
-									GDisplayString d(Fnt, Str);
+									LDisplayString d(Fnt, Str);
 									if (pDC->Create(d.X(), d.Y(), System32BitColourSpace))
 									{
 										pDC->Colour(L_WORKSPACE);
@@ -137,8 +137,8 @@ void SysCharSupport::OnPosChange()
 	/*
 	if (d->Match)
 	{
-		GRect c = GetClient();
-		GRect r = d->Lst->GetPos();
+		LRect c = GetClient();
+		LRect r = d->Lst->GetPos();
 		r.x2 = c.x2 - r.x1;
 		r.y2 = c.y2 - r.x1;
 		d->Lst->SetPos(r);
@@ -146,7 +146,7 @@ void SysCharSupport::OnPosChange()
 	*/
 }
 
-int SysCharSupport::OnNotify(GViewI *v, int f)
+int SysCharSupport::OnNotify(LViewI *v, int f)
 {
 	switch (v->GetId())
 	{
@@ -159,4 +159,3 @@ int SysCharSupport::OnNotify(GViewI *v, int f)
 
 	return 0;
 }
-

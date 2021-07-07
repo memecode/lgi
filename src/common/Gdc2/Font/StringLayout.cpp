@@ -1,0 +1,626 @@
+#include "lgi/common/Lgi.h"
+#include "lgi/common/StringLayout.h"
+
+#define DEBUG_PROFILE_LAYOUT	0
+#define DEBUG_LAYOUT			0
+
+static char White[] = " \t\r\n";
+
+////////////////////////////////////////////////////////////////////////////////////
+void LLayoutString::Set(int LineIdx, int FixX, int YPx, LLayoutRun *Lr, ssize_t Start)
+{
+	Line = LineIdx;
+	Src = Lr;
+	Fx = FixX;
+	y = YPx;
+	Offset = Start;
+
+	LCss::ColorDef Fill = Src->Color();
+	if (Fill.Type == LCss::ColorRgb)
+		Fore.Set(Fill.Rgb32, 32);
+	else if (Fill.Type != LCss::ColorTransparent)
+		Fore = LColour(L_TEXT);
+	
+	Fill = Src->BackgroundColor();
+	if (Fill.Type == LCss::ColorRgb)
+		Back.Set(Fill.Rgb32, 32);
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+LStringLayout::LStringLayout(GFontCache *fc)
+{
+	FontCache = fc;
+	Wrap = false;
+	AmpersandToUnderline = false;
+	Debug = false;
+	Empty();
+}
+	
+LStringLayout::~LStringLayout()
+{
+	Empty();
+}
+
+void LStringLayout::Empty()
+{
+	Min.Zero();
+	Max.Zero();
+	MinLines = 0;
+	Bounds.ZOff(-1, -1);
+	Strs.DeleteObjects();
+	Text.DeleteObjects();
+}
+
+bool LStringLayout::Add(const char *Str, LCss *Style)
+{
+	if (!Str)
+		return false;
+
+	if (AmpersandToUnderline)
+	{
+		LLayoutRun *r;
+
+		for (const char *s = Str; *s; )
+		{
+			const char *e = s;
+
+			// Find '&' or end of string
+			while (*e)
+			{
+				if (e[0] == '&')
+					break;
+				e++;
+			}
+
+			if (e > s)
+			{
+				// Add text before '&'
+				r = new LLayoutRun(Style);
+				r->Text.Set(s, e - s);
+				Text.Add(r);
+			}
+			if (!*e)
+				break; // End of string
+
+			if (e[0] == '&' && e[1] == '&')
+			{
+				// '&' literal...
+				r = new LLayoutRun(Style);
+				r->Text.Set("&", 1);
+				Text.Add(r);
+				s = e + 2;
+			}
+			else
+			{
+				// Add '&'ed char
+				r = new LLayoutRun(Style);
+				r->TextDecoration(LCss::TextDecorUnderline);
+				s = e + 1; // Skip the '&' itself
+				GUtf8Ptr p(s); // Find the end of the next unicode char
+				p++;
+				if ((const char*)p.GetPtr() == s)
+					break; // No more text: exit
+				r->Text.Set(s, (const char*)p.GetPtr()-s);
+				Text.Add(r);
+				s = (const char*) p.GetPtr();
+			}
+		}
+	}
+	else // No parsing required
+	{
+		LLayoutRun *r = new LLayoutRun(Style);
+		r->Text = Str;
+		Text.Add(r);
+	}
+
+	return true;
+}
+
+uint32_t LStringLayout::NextChar(char *s)
+{
+	ssize_t Len = 0;
+	while (s[Len] && Len < 6) Len++;
+	return LgiUtf8To32((uint8_t*&)s, Len);
+}
+
+uint32_t LStringLayout::PrevChar(char *s)
+{
+	if (IsUtf8_Lead(*s) || IsUtf8_1Byte(*s))
+	{
+		s--;
+		ssize_t Len = 1;
+		while (IsUtf8_Trail(*s) && Len < 6) { s--; Len++; }
+
+		return LgiUtf8To32((uint8_t*&)s, Len);
+	}
+
+	return 0;
+}
+
+LFont *LStringLayout::GetBaseFont()
+{
+	return FontCache && FontCache->GetDefaultFont() ? FontCache->GetDefaultFont() : SysFont;
+}
+
+void LStringLayout::SetBaseFont(LFont *f)
+{
+	if (FontCache)
+		FontCache->SetDefaultFont(f);
+}
+
+LFont *LStringLayout::GetFont()
+{
+	if (Strs.Length() == 0)
+		return NULL;
+	return Strs[0]->GetFont();
+}
+
+typedef LArray<LLayoutString*> LayoutArray;
+
+// Pre-layout min/max calculation
+void LStringLayout::DoPreLayout(int32 &MinX, int32 &MaxX)
+{
+	MinX = 0;
+	MaxX = 0;
+		
+	LFont *f = GetBaseFont();
+	if (!Text.Length() || !f)
+		return;
+
+	LArray<LayoutArray> Lines;
+	int Line = 0;
+
+	for (auto Run: Text)
+	{
+		char *s = Run->Text;
+		LFont *f = FontCache ? FontCache->GetFont(Run) : SysFont;
+		LgiAssert(f != NULL);
+
+		char *Start = s;
+		while (*s)
+		{
+			if (*s == '\n')
+			{
+				Lines[Line++].Add(new LLayoutString(f, Start, s - Start));
+				Start = s + 1;
+			}
+			s++;
+		}
+		if (s > Start)
+		{
+			Lines[Line].Add(new LLayoutString(f, Start, s - Start));
+		}
+
+		s = Run->Text;
+		while (*s)
+		{
+			while (*s && strchr(White, *s))
+				s++;
+
+			char *e = s;
+			while (*e)
+			{
+				uint32_t c = NextChar(e);
+				if (c == 0)
+					break;
+				if (e > s && LGI_BreakableChar(c))
+					break;
+				
+				char *cur = e;
+				e = LSeekUtf8(e, 1);
+				if (e == cur) // sanity check...
+				{
+					LgiAssert(!"LSeekUtf8 broke.");
+					break;
+				}
+			}
+			
+			if (e == s)
+				break;
+
+			LDisplayString d(f, s, (int) (e - s));
+			MinX = MAX(d.X(), MinX);
+
+			s = e;
+		}
+	}
+
+	for (unsigned i=0; i<Lines.Length(); i++)
+	{
+		int Fx = 0;
+		LayoutArray &Ln = Lines[i];
+		for (unsigned n=0; n<Ln.Length(); n++)
+		{
+			LLayoutString *s = Ln[n];
+			Fx += s->FX();
+		}
+
+		int LineX = Fx >> LDisplayString::FShift;
+		MaxX = MAX(MaxX, LineX);
+		Ln.DeleteObjects();
+	}	
+}	
+
+struct Break
+{
+	LLayoutRun *Run;
+	ssize_t Bytes;
+
+	void Set(LLayoutRun *r, ssize_t b)
+	{
+		Run = r;
+		Bytes = b;
+	}
+};
+
+#define GotoNextLine()			\
+	LineFX = 0;					\
+	MinLines++;					\
+	y += LineHeight;			\
+	StartLine = Strs.Length();	\
+	Breaks.Empty();
+
+// Create the lines from text
+bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
+{
+	#if DEBUG_PROFILE_LAYOUT
+	LProfile Prof("LStringLayout::DoLayout");
+	char Buf[1024];
+	int Ch = 0;
+	// Prof.HideResultsIfBelow(100);
+	#endif
+
+	// Empty
+	Min.x = Max.x = 0;
+	Min.y = Max.y = 0;
+	MinLines = 0;
+	Strs.DeleteObjects();
+
+	// Param validation
+	LFont *f = GetBaseFont();
+	if (!f || !Text.Length() || Width <= 0)
+	{
+		Min.y = Max.y = MAX((f ? f : SysFont)->GetHeight(), MinYSize);
+		return false;
+	}
+
+	// Loop over input
+	int y = 0;
+	int LineFX = 0;
+	int LineHeight = 0;
+	int Shift = LDisplayString::FShift;
+
+	// By definition these potential break points are all
+	// on the same line. Clear the array on each new line.
+	LArray<Break> Breaks;
+	
+	/// Index of the display string starting the line
+	ssize_t StartLine = 0;
+
+	/// There is alway one line of text... even if it's empty
+	MinLines = 1;
+
+	#if DEBUG_LAYOUT
+	if (Debug) LgiTrace("Text.Len=%i\n", Text.Length());
+	#endif
+	for (auto Run: Text)
+	{
+		char *Start = Run->Text;
+		GUtf8Ptr s(Start);
+
+		#if DEBUG_LAYOUT
+		if (Debug) LgiTrace("    Run='%s' %p\n", s.GetPtr(), Run);
+		#endif
+		#if DEBUG_PROFILE_LAYOUT
+		Prof.Add(Buf+Ch);
+		Ch += sprintf(Buf+Ch, "[%i] Run = '%.*s'\n", (int) (Run - Text.AddressOf()), (int) max(20, Run->Text.Length()), s.GetPtr());
+		#endif
+
+		while (s)
+		{
+			GUtf8Ptr e(s);
+			ssize_t StartOffset = (char*)s.GetPtr() - Start;
+			#if DEBUG_LAYOUT
+			if (Debug) LgiTrace("    Breaks: ");
+			#endif
+			for (uint32_t Ch; (Ch = e); e++)
+			{
+				if (Ch == '\n')
+					break;
+
+				if ((char*)e.GetPtr() > Start &&
+					LGI_BreakableChar(Ch))
+				{
+					ssize_t Pos = (char*)e.GetPtr() - Start;
+					#if DEBUG_LAYOUT
+					if (Debug) LgiTrace("%i, ", (int)Pos);
+					#endif
+					Breaks.New().Set(Run, Pos);
+				}
+			}
+			#if DEBUG_LAYOUT
+			if (Debug) LgiTrace("\n");
+			#endif
+
+			ssize_t Bytes = e - s;
+
+			LFont *Fnt = NULL;
+			if (FontCache)
+				Fnt = FontCache->GetFont(Run);
+			if (!Fnt)
+				Fnt = f;
+
+			#if DEBUG_PROFILE_LAYOUT
+			Prof.Add("CreateStr");
+			#endif
+
+			// Create a display string for the segment
+			LLayoutString *n = new LLayoutString(Fnt, Bytes ? (char*)s.GetPtr() : (char*)"", Bytes ? (int)Bytes : 1);
+			if (n)
+			{
+				n->Set(MinLines - 1, LineFX, y, Run, StartOffset);
+				LineFX += n->FX();
+				
+				// Do min / max size calculation
+				Min.x = Min.x ? MIN(Min.x, LineFX) : LineFX;
+				Max.x = MAX(Max.x, LineFX);
+			
+				if (Wrap && (LineFX >> Shift) > Width)
+				{
+					// If wrapping, work out the split point and the text is too long
+					int PosPx = Width - (n->Fx >> Shift);
+					ssize_t Chars = n->CharAt(PosPx);
+
+					#if DEBUG_LAYOUT
+					if (Debug) LgiTrace("    CharAt(%i)=%i\n", PosPx, (int)Chars);
+					#endif
+
+					if (Breaks.Length() > 0)
+					{
+						#if DEBUG_PROFILE_LAYOUT
+						Prof.Add("WrapWithBreaks");
+						#endif
+
+						// Break at previous word break
+						Strs.Add(n);
+							
+						// Roll back till we get a break point that fits
+						for (ssize_t i = Breaks.Length() - 1; i >= 0; i--)
+						{
+							Break &b = Breaks[i];
+
+							#if DEBUG_LAYOUT
+							if (Debug) LgiTrace("        Testing Break %i: %p %i\n", i, b.Run, b.Bytes);
+							#endif
+
+							// Calc line width from 'StartLine' to 'Break[i]'
+							int FixX = 0;
+							LAutoPtr<LLayoutString> Broken;
+							size_t k;
+							for (k=StartLine; k<Strs.Length(); k++)
+							{
+								LLayoutString *Ls = dynamic_cast<LLayoutString*>(Strs[k]);
+								if (!Ls) return false;
+
+								if (b.Run == Ls->Src &&
+									b.Bytes >= Ls->Offset)
+								{
+									// Add just the part till the break
+									if (Broken.Reset(new LLayoutString(Ls, b.Run->Text.Get() + Ls->Offset, b.Bytes - Ls->Offset)))
+										FixX += Broken->FX();
+									break;
+								}
+								else
+									// Add whole string
+									FixX += Ls->FX();
+							}
+
+							#if DEBUG_LAYOUT
+							if (Debug) LgiTrace("        Len=%i of %i\n", FixX, Width);
+							#endif
+
+							if ((FixX >> Shift) <= Width ||
+								i == 0)
+							{
+								// Found a good fit...
+								#if DEBUG_LAYOUT
+								if (Debug)
+									LgiTrace("        Found a fit\n");
+								#endif
+
+								// So we want to keep 'StartLine' to 'k-1' as is...
+								while (Strs.Length() > k)
+								{
+									delete Strs.Last();
+									Strs.PopLast();
+								}
+
+								if (Broken)
+								{
+									// Then change out from 'k' onwards for 'Broken'
+									LineHeight = MAX(LineHeight, Broken->Y());
+									Strs.Add(Broken.Release());
+								}
+
+								LineFX = FixX;
+								s = b.Run->Text.Get() + b.Bytes;
+
+								ssize_t Idx = Text.IndexOf(b.Run);
+								if (Idx < 0)
+								{
+									LgiAssert(0);
+									return false;
+								}
+
+								Run = Text[Idx];
+								break;
+							}
+						}
+
+						// Start pouring from the break pos...
+						while (s && strchr(White, s))
+							s++;
+
+						// Move to the next line...
+						GotoNextLine();
+						continue;
+					}
+					else
+					{
+						#if DEBUG_PROFILE_LAYOUT
+						Prof.Add("WrapNoBreaks");
+						#endif
+
+						// Break at next word break
+						e = s;
+						e += Chars;
+						for (uint32_t Ch; (Ch = e); e++)
+						{
+							if (LGI_BreakableChar(Ch))
+								break;
+						}
+					}
+
+					LineFX -= n->FX();
+					DeleteObj(n);
+		
+					n = new LLayoutString(Fnt, (char*)s.GetPtr(), e - s);
+					n->Set(MinLines - 1, LineFX, y, Run, (char*)s.GetPtr() - Start);
+					LineHeight = MAX(LineHeight, n->Y());
+
+					GotoNextLine();
+				}
+
+				#if DEBUG_PROFILE_LAYOUT
+				Prof.Add("Bounds");
+				#endif
+
+				LRect Sr(0, 0, n->X()-1, n->Y()-1);
+				Sr.Offset(n->Fx >> Shift, n->y);
+				if (Strs.Length()) Bounds.Union(&Sr);
+				else Bounds = Sr;
+				LineHeight = MAX(LineHeight, Sr.Y());
+
+				Strs.Add(n);
+			}
+			
+			if (e == '\n')
+			{
+				s = ++e;
+				#if DEBUG_PROFILE_LAYOUT
+				Prof.Add("NewLine");
+				#endif
+				GotoNextLine();
+			}
+			else
+				s = e;
+		}
+	}
+
+	#if DEBUG_PROFILE_LAYOUT
+	Prof.Add("Post");
+	#endif
+
+	Min.x = (Min.x + LDisplayString::FScale - 1) >> LDisplayString::FShift;
+	Min.y = LineHeight * MinLines;
+	if (Min.y < MinYSize)
+		Min.y = MinYSize;
+
+	Max.x = (Max.x + LDisplayString::FScale - 1) >> LDisplayString::FShift;
+	Max.y = y + LineHeight;
+	if (Max.y < MinYSize)
+		Max.y = MinYSize;
+	
+	if (DebugLog)
+		LgiTrace("CreateTxtLayout(%i) min=%i,%i  max=%i,%i\n",
+			Width,
+			Min.x, Min.y,
+			Max.x, Min.y);
+
+	return true;
+}
+	
+void LStringLayout::Paint(	LSurface *pDC,
+							LPoint pt,
+							LColour Back,
+							LRect &rc,
+							bool Enabled,
+							bool Focused)
+{
+	if (!pDC)
+		return;
+
+	#ifdef WINNATIVE
+	LRegion Rgn(rc);
+	#else
+	// Fill the background...
+	if (!Back.IsTransparent())
+	{
+		pDC->Colour(Back);
+		pDC->Rectangle(&rc);
+	}
+	int Shift = LDisplayString::FShift;
+	#endif		
+	
+	LColour FocusFore = LColour(L_FOCUS_SEL_FORE);
+	
+	// Draw all the text
+	for (auto ds: Strs)
+	{
+		LLayoutString *s = dynamic_cast<LLayoutString*>(ds);
+		LFont *f = s->GetFont();
+		LColour Bk = s->Back.IsTransparent() ? Back : s->Back;
+
+		#ifdef WINNATIVE
+		int y = pt.y + s->y;
+		LRect r(pt.x + s->Fx, y,
+				pt.x + s->Fx + s->FX() - 1, y + s->Y() - 1);
+		Rgn.Subtract(&r);
+		f->Transparent(Bk.IsTransparent());
+		#else
+		f->Transparent(true);
+		#endif
+
+		// LgiTrace("'%S' @ %i,%i\n", (const char16*)(**ds), r.x1, r.y1);
+
+		if (Enabled)
+		{
+			f->Colour(Focused ? FocusFore : s->Fore, Bk);
+			#ifdef WINNATIVE
+			s->Draw(pDC, r.x1, r.y1, &r);
+			#else
+			LPoint k((pt.x << Shift) + s->Fx, (pt.y + s->y) << Shift);
+			s->FDraw(pDC, k.x, k.y);
+			#endif
+		}
+		else
+		{
+			f->Transparent(Bk.IsTransparent());
+			f->Colour(LColour(L_LIGHT), Bk);
+			#ifdef WINNATIVE
+			s->Draw(pDC, r.x1+1, r.y1+1, &r);
+			#else
+			LPoint k(((pt.x+1) << Shift) + s->Fx, (pt.y + 1 + s->y) << Shift);
+			s->FDraw(pDC, k.x, k.y);
+			#endif
+				
+			f->Transparent(true);
+			f->Colour(LColour(L_LOW), LColour(L_MED));
+			#ifdef WINNATIVE
+			s->Draw(pDC, r.x1, r.y1, &r);
+			#else
+			s->FDraw(pDC, (pt.x << Shift) + s->Fx, (pt.y + s->y) << Shift);
+			#endif
+		}
+	}
+
+	#ifdef WINNATIVE
+	// Fill any remaining area with background...
+	if (!Back.IsTransparent())
+	{
+		pDC->Colour(Back);
+		for (LRect *r=Rgn.First(); r; r=Rgn.Next())
+			pDC->Rectangle(r);
+	}
+	#endif
+}

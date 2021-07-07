@@ -1,5 +1,5 @@
 /*hdr
-**	FILE:		GTypeFace.cpp
+**	FILE:		LTypeFace.cpp
 **	AUTHOR:		Matthew Allen
 **	DATE:		5/5/97
 **	DESCRIPTION:	GDC v2.xx True Type Font Support
@@ -27,7 +27,7 @@
 
 /****************************** Locals **************************************************************************************/
 
-GSurface *pTest = 0;
+LSurface *pTest = 0;
 int CapA = 0;
 
 /****************************** Inline Assembler Routines *******************************************************************/
@@ -47,7 +47,7 @@ CalcTableChecksum(ulong *Table, ulong Length)
 	return Sum;
 }
 
-ushort *ReadUShortArray(GFile &F, int Size)
+ushort *ReadUShortArray(LFile &F, int Size)
 {
 	ushort *Data = new ushort[Size];
 	if (Data)
@@ -60,7 +60,7 @@ ushort *ReadUShortArray(GFile &F, int Size)
 	return Data;
 }
 
-short *ReadShortArray(GFile &F, int Size)
+short *ReadShortArray(LFile &F, int Size)
 {
 	short *Data = new short[Size];
 	if (Data)
@@ -86,13 +86,13 @@ int RoundNearest(double n)
 
 /****************************** Classes *************************************************************************************/
 
-GFont::GFont()
+LFont::LFont()
 {
 	hFont = 0;
 	Widths = 0;
 }
 
-GFont::~GFont()
+LFont::~LFont()
 {
 	DeleteArray(Widths);
 	if (hFont)
@@ -101,7 +101,7 @@ GFont::~GFont()
 	}
 }
 
-void GFont::SetWidths()
+void LFont::SetWidths()
 {
 	DeleteArray(Widths);
 	if (hFont)
@@ -132,7 +132,7 @@ void GFont::SetWidths()
 	}
 }
 
-bool GFont::Create(	char *Face,
+bool LFont::Create(	char *Face,
 					int Height,
 					int Width,
 					int Weight,
@@ -180,7 +180,7 @@ bool GFont::Create(	char *Face,
 	return (hFont != 0);
 }
 
-bool GFont::CreateFont(LOGFONT *LogFont)
+bool LFont::CreateFont(LOGFONT *LogFont)
 {
 	if (hFont)
 	{
@@ -197,7 +197,7 @@ bool GFont::CreateFont(LOGFONT *LogFont)
 	return (hFont != 0);
 }
 
-void GFont::Text(GSurface *pDC, int x, int y, char *Str, int Len, GRect *r)
+void LFont::Text(LSurface *pDC, int x, int y, char *Str, int Len, LRect *r)
 {
 	if (pDC AND hFont AND Str)
 	{
@@ -240,7 +240,7 @@ void GFont::Text(GSurface *pDC, int x, int y, char *Str, int Len, GRect *r)
 	}
 }
 
-void GFont::TextW(GSurface *pDC, int x, int y, ushort *Str, int Len, GRect *r)
+void LFont::TextW(LSurface *pDC, int x, int y, ushort *Str, int Len, LRect *r)
 {
 	if (pDC AND hFont AND Str)
 	{
@@ -289,7 +289,7 @@ void GFont::TextW(GSurface *pDC, int x, int y, ushort *Str, int Len, GRect *r)
 	}
 }
 
-void GFont::Size(int *x, int *y, char *Str, int Len, int Flags)
+void LFont::Size(int *x, int *y, char *Str, int Len, int Flags)
 {
 	HDC hDC = CreateCompatibleDC(NULL);
 	HFONT hFnt = (HFONT) SelectObject(hDC, hFont);
@@ -345,7 +345,7 @@ char *strnchr(char *s, char c, int Len)
 	return 0;
 }
 
-int GFont::CharAt(int x, char *Str, int Len)
+int LFont::CharAt(int x, char *Str, int Len)
 {
 	if (x < 0)
 	{
@@ -389,7 +389,7 @@ void *TtfObj::FindTag(char *t)
 	return (tbl) ? tbl->Table : 0;
 }
 
-bool TtfFileHeader::Read(GFile &F)
+bool TtfFileHeader::Read(LFile &F)
 {
 	F >> Version;
 	F >> NumTables;
@@ -399,7 +399,7 @@ bool TtfFileHeader::Read(GFile &F)
 	return !F.GetStatus();
 }
 
-bool TtfFileHeader::Write(GFile &F)
+bool TtfFileHeader::Write(LFile &F)
 {
 	F << Version;
 	F << NumTables;
@@ -419,7 +419,7 @@ void TtfFileHeader::Dump()
 	printf("\n");
 }
 
-bool TtfTable::Read(GFile &F)
+bool TtfTable::Read(LFile &F)
 {
 	F.Read(Tag, sizeof(Tag));
 	F >> CheckSum;
@@ -428,7 +428,7 @@ bool TtfTable::Read(GFile &F)
 	return !F.GetStatus();
 }
 
-bool TtfTable::Write(GFile &F)
+bool TtfTable::Write(LFile &F)
 {
 	F.Write(Tag, sizeof(Tag));
 	F << CheckSum;
@@ -446,7 +446,7 @@ void TtfTable::Dump()
 	printf("\n");
 }
 
-bool TtfHeader::Read(GFile &F)
+bool TtfHeader::Read(LFile &F)
 {
 	int32 h, l;
 
@@ -478,7 +478,7 @@ bool TtfHeader::Read(GFile &F)
 	return !F.GetStatus();
 }
 
-bool TtfHeader::Write(GFile &F)
+bool TtfHeader::Write(LFile &F)
 {
 	F << Version;
 	F << Revision;
@@ -554,7 +554,7 @@ void TtfHeader::Dump()
 	printf("\n");
 }
 
-bool TtfMaxProfile::Read(GFile &F)
+bool TtfMaxProfile::Read(LFile &F)
 {
 	F >> Version;
 	F >> NumGlyphs;
@@ -575,7 +575,7 @@ bool TtfMaxProfile::Read(GFile &F)
 	return !F.GetStatus();
 }
 
-bool TtfMaxProfile::Write(GFile &F)
+bool TtfMaxProfile::Write(LFile &F)
 {
 	F << Version;
 	F << NumGlyphs;
@@ -658,7 +658,7 @@ int TtfLocation::operator [](int i)
 	return 0;
 }
 
-bool TtfLocation::Read(GFile &F)
+bool TtfLocation::Read(LFile &F)
 {
 	bool Status = FALSE;
 	TtfHeader *Header = (TtfHeader*) FindTag("head");
@@ -697,7 +697,7 @@ bool TtfLocation::Read(GFile &F)
 	return Status;
 }
 
-bool TtfLocation::Write(GFile &F)
+bool TtfLocation::Write(LFile &F)
 {
 	bool Status = FALSE;
 	TtfHeader *Header = (TtfHeader*) FindTag("head");
@@ -769,7 +769,7 @@ TtfGlyph::~TtfGlyph()
 #define XSame				0x0010
 #define YSame				0x0020
 
-bool TtfGlyph::Read(GFile &F)
+bool TtfGlyph::Read(LFile &F)
 {
 	Points = 0;
 
@@ -889,7 +889,7 @@ bool TtfGlyph::Read(GFile &F)
 	return !F.GetStatus();
 }
 
-bool TtfGlyph::Write(GFile &F)
+bool TtfGlyph::Write(LFile &F)
 {
 	return FALSE;
 }
@@ -943,7 +943,7 @@ void TtfGlyph::Dump()
 	printf("\n");
 }
 
-void TtfGlyph::Draw(GSurface *pDC, int x, int y, int MaxSize)
+void TtfGlyph::Draw(LSurface *pDC, int x, int y, int MaxSize)
 {
 	int XSize = xMax - xMin;
 	int YSize = yMax - yMin;
@@ -959,7 +959,7 @@ void TtfGlyph::Draw(GSurface *pDC, int x, int y, int MaxSize)
 	}
 }
 
-int TtfGlyph::DrawEm(GSurface *pDC, int x, int y, int EmUnits, double PixelsPerEm)
+int TtfGlyph::DrawEm(LSurface *pDC, int x, int y, int EmUnits, double PixelsPerEm)
 {
 	int XSize = xMax - xMin + 1;
 	int YSize = yMax - yMin + 1;
@@ -1274,7 +1274,7 @@ bool TtfContour::Create(int Pts, double XScale, double YScale)
 	return Status;
 }
 
-void TtfContour::DebugDraw(GSurface *pDC, int Sx, int Sy)
+void TtfContour::DebugDraw(LSurface *pDC, int Sx, int Sy)
 {
 	if (pDC)
 	{
@@ -1463,7 +1463,7 @@ Rule 4
 #define GRID_X			5
 #define GRID_Y			5
 
-bool TtfGlyph::Rasterize(GSurface *pDC, GRect *pDest, double xppem, double yppem, int BaseLine)
+bool TtfGlyph::Rasterize(LSurface *pDC, LRect *pDest, double xppem, double yppem, int BaseLine)
 {
 	bool Status = FALSE;
 	TtfHeader *Header = (TtfHeader*) FindTag("head");
@@ -1620,7 +1620,7 @@ TtfCMapTable::~TtfCMapTable()
 	DeleteObj(Map);
 }
 
-bool TtfCMapTable::Read(GFile &F)
+bool TtfCMapTable::Read(LFile &F)
 {
 	F >> PlatformID;
 	F >> EncodingID;
@@ -1628,7 +1628,7 @@ bool TtfCMapTable::Read(GFile &F)
 	return !F.GetStatus();
 }
 
-bool TtfCMapTable::Write(GFile &F)
+bool TtfCMapTable::Write(LFile &F)
 {
 	F << PlatformID;
 	F << EncodingID;
@@ -1666,7 +1666,7 @@ int TtfCMapByteEnc::operator[](int i)
 	return (i >= 0 AND i < sizeof(Map)) ? Map[i] : 0;
 }
 
-bool TtfCMapByteEnc::Read(GFile &F)
+bool TtfCMapByteEnc::Read(LFile &F)
 {
 	F >> Format;
 	F >> Length;
@@ -1675,7 +1675,7 @@ bool TtfCMapByteEnc::Read(GFile &F)
 	return !F.GetStatus();
 }
 
-bool TtfCMapByteEnc::Write(GFile &F)
+bool TtfCMapByteEnc::Write(LFile &F)
 {
 	F << Format;
 	F << Length;
@@ -1731,7 +1731,7 @@ int TtfCMapSegDelta::operator[](int c)
 	return 0;
 }
 
-bool TtfCMapSegDelta::Read(GFile &F)
+bool TtfCMapSegDelta::Read(LFile &F)
 {
 	F >> Format;
 	F >> Length;
@@ -1763,7 +1763,7 @@ bool TtfCMapSegDelta::Read(GFile &F)
 			IdRangeOffset;
 }
 
-bool TtfCMapSegDelta::Write(GFile &F)
+bool TtfCMapSegDelta::Write(LFile &F)
 {
 	return FALSE;
 }
@@ -1804,7 +1804,7 @@ TtfCMap::~TtfCMap()
 	DeleteArray(Table);
 }
 
-bool TtfCMap::Read(GFile &F)
+bool TtfCMap::Read(LFile &F)
 {
 	bool Status = FALSE;
 	int StartAddress = F.GetPosition();
@@ -1857,7 +1857,7 @@ bool TtfCMap::Read(GFile &F)
 	return Status;
 }
 
-bool TtfCMap::Write(GFile &F)
+bool TtfCMap::Write(LFile &F)
 {
 	bool Status = FALSE;
 
@@ -1907,9 +1907,9 @@ TtfRaster::~TtfRaster()
 	DeleteObj(pDC);
 }
 
-class TtfResizeDC : public GSurface {
+class TtfResizeDC : public LSurface {
 public:
-	bool ResizeTo(GSurface *pDC)
+	bool ResizeTo(LSurface *pDC)
 	{
 		bool Status = FALSE;
 		if (pDC AND pDC->GetBits() == 8 AND GetBits() == 8)
@@ -1962,7 +1962,7 @@ bool TtfRaster::Rasterize(double xPPEm, double yPPEm, int OverSample)
 	YPixelsPerEm = yPPEm;
 	Glyphs = Profile->NumGlyphs;
 
-	pSource = new GRect[Glyphs];
+	pSource = new LRect[Glyphs];
 	BaseLine = new int[Glyphs];
 
 	if (Glyph AND pSource AND BaseLine)
@@ -1972,7 +1972,7 @@ bool TtfRaster::Rasterize(double xPPEm, double yPPEm, int OverSample)
 		double XUnits = (double) XPixelsPerEm / Header->UnitsPerEm;
 		double YUnits = (double) YPixelsPerEm / Header->UnitsPerEm;
 
-		memset(pSource, 0, sizeof(GRect) * Glyphs);
+		memset(pSource, 0, sizeof(LRect) * Glyphs);
 
 		for (int i=0; i<Glyphs; i++)
 		{
@@ -2001,8 +2001,8 @@ bool TtfRaster::Rasterize(double xPPEm, double yPPEm, int OverSample)
 			{
 				if (Glyph[i])
 				{
-					GRect a = *(pSource + i);
-					GRect b;
+					LRect a = *(pSource + i);
+					LRect b;
 
 					b.x1 = a.x1 * OverSample;
 					b.y1 = a.y1 * OverSample;
@@ -2030,7 +2030,7 @@ bool TtfRaster::Rasterize(double xPPEm, double yPPEm, int OverSample)
 				}
 			}
 
-			pDC = new GSurface;
+			pDC = new LSurface;
 			if (pDC AND pDC->Create(MaxX, TotalY, 8))
 			{
 				if (OverSample > 1)
@@ -2050,7 +2050,7 @@ bool TtfRaster::Rasterize(double xPPEm, double yPPEm, int OverSample)
 	return Status;
 }
 
-void GdcTtf::Test(GSurface *pDC)
+void GdcTtf::Test(LSurface *pDC)
 {
 	if (pDC)
 	{
@@ -2165,7 +2165,7 @@ TtfTable *GdcTtf::FindTag(char *t)
 	return NULL;
 }
 
-TtfTable *GdcTtf::SeekTag(char *t, GFile *F)
+TtfTable *GdcTtf::SeekTag(char *t, LFile *F)
 {
 	TtfTable *Info = NULL;
 	if (TableList)
@@ -2179,7 +2179,7 @@ TtfTable *GdcTtf::SeekTag(char *t, GFile *F)
 	return Info;
 }
 
-bool GdcTtf::Load(GFile &F)
+bool GdcTtf::Load(LFile &F)
 {
 	bool Status = FALSE;
 	TtfFileHeader FileHeader;
@@ -2291,7 +2291,7 @@ bool GdcTtf::Load(GFile &F)
 	return Status;
 }
 
-bool GdcTtf::Save(GFile &F)
+bool GdcTtf::Save(LFile &F)
 {
 	return FALSE;
 }
@@ -2300,7 +2300,7 @@ bool GdcTtf::Rasterize(int Point, int StyleFlags, int OverSample, int XDpi, int 
 {
 	bool Status = FALSE;
 
-	pTest = new GSurface;
+	pTest = new LSurface;
 	if (pTest)
 	{
 		pTest->Create(600, 800, 24);
@@ -2407,11 +2407,11 @@ int GdcTtf::Y(char *Str, int Len, int Flags)
 }
 
 
-void StretchBlt(	GSurface *pDest,
+void StretchBlt(	LSurface *pDest,
 			int X,
 			int Y,
-			GSurface *pSrc,
-			GRect *SRgn,
+			LSurface *pSrc,
+			LRect *SRgn,
 			int Scale)
 {
 	if (pDest AND pSrc AND SRgn)
@@ -2439,7 +2439,7 @@ void StretchBlt(	GSurface *pDest,
 int GlyphX, GlyphY;
 int SDiff, DDiff;
 
-class GdcFontApp : public GApplicator
+class GdcFontApp : public LApplicator
 {
 
 	uchar *Ptr;
@@ -2550,7 +2550,7 @@ public:
 	}
 };
 
-void GdcTtf::Text(GSurface *pDC, int x, int y, char *Str, int Len)
+void GdcTtf::Text(LSurface *pDC, int x, int y, char *Str, int Len)
 {
 	if (pDC AND Str)
 	{
@@ -2582,7 +2582,7 @@ void GdcTtf::Text(GSurface *pDC, int x, int y, char *Str, int Len)
 			GdcFontApp *Pen = new GdcFontApp;
 			if (Pen)
 			{
-				GApplicator *pOldApp = pDC->Applicator();
+				LApplicator *pOldApp = pDC->Applicator();
 				pDC->Applicator(Pen);
 				Pen->c = ForeCol;
 

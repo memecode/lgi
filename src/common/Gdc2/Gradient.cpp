@@ -1,7 +1,7 @@
 #include <math.h>
 #include "Gdc2.h"
 
-class GGradient : public GApplicator
+class GGradient : public LApplicator
 {
 protected:
 	int Sx, Sy;
@@ -9,7 +9,7 @@ protected:
 	int Bytes;
 	COLOUR Background;
 	int Angle;
-	GRect Rect;
+	LRect Rect;
 
 public:
 	const char *GetClass() { return "GGradient"; }
@@ -135,7 +135,7 @@ public:
 			{
 				if (Value)
 				{
-					Rect = *((GRect*)Value);
+					Rect = *((LRect*)Value);
 				}
 				break;
 			}
@@ -343,10 +343,10 @@ public:
 	}
 };
 
-class GGradientFactory : public GApplicatorFactory
+class GGradientFactory : public LApplicatorFactory
 {
 public:
-	GApplicator *Create(GColourSpace Cs, int Op)
+	LApplicator *Create(LColourSpace Cs, int Op)
 	{
 		if (Op == 5)
 		{

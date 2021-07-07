@@ -1,5 +1,5 @@
 /*hdr
-**	FILE:			GMemDC.h
+**	FILE:			LMemDC.h
 **	AUTHOR:			Matthew Allen
 **	DATE:			27/11/2001
 **	DESCRIPTION:	GDC v2.xx header
@@ -16,28 +16,28 @@
 #include "GPalette.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-class GMemDCPrivate
+class LMemDCPrivate
 {
 public:
 	void		*pBits;
 	bool		UpsideDown;
-	GRect		Client;
+	LRect		Client;
 
-	GMemDCPrivate()
+	LMemDCPrivate()
 	{
 		pBits = 0;
 		Client.ZOff(-1, -1);
 		UpsideDown = false;
 	}
 	
-	~GMemDCPrivate()
+	~LMemDCPrivate()
 	{
 	}
 };
 
-GMemDC::GMemDC(int x, int y, GColourSpace cs, int flags)
+LMemDC::LMemDC(int x, int y, LColourSpace cs, int flags)
 {
-	d = new GMemDCPrivate;
+	d = new LMemDCPrivate;
 	ColourSpace = CsNone;
 	pMem = 0;
 
@@ -47,9 +47,9 @@ GMemDC::GMemDC(int x, int y, GColourSpace cs, int flags)
 	}
 }
 
-GMemDC::GMemDC(GSurface *pDC)
+LMemDC::LMemDC(LSurface *pDC)
 {
-	d = new GMemDCPrivate;
+	d = new LMemDCPrivate;
 	ColourSpace = CsNone;
 	pMem = 0;
 
@@ -71,27 +71,27 @@ GMemDC::GMemDC(GSurface *pDC)
 	}
 }
 
-GMemDC::~GMemDC()
+LMemDC::~LMemDC()
 {
 	DeleteObj(pMem);
 	DeleteObj(d);
 }
 
-OsPainter GMemDC::Handle()
+OsPainter LMemDC::Handle()
 {
 	return NULL;
 }
 
-OsBitmap GMemDC::GetBitmap()
+OsBitmap LMemDC::GetBitmap()
 {
 	return NULL;
 }
 
-void GMemDC::SetClient(GRect *c)
+void LMemDC::SetClient(LRect *c)
 {
 	if (c)
 	{
-		GRect Doc(0, 0, pMem->x-1, pMem->y-1);
+		LRect Doc(0, 0, pMem->x-1, pMem->y-1);
 		Clip = d->Client = *c;
 		Clip.Bound(&Doc);
 		
@@ -108,19 +108,19 @@ void GMemDC::SetClient(GRect *c)
 	}
 }
 
-bool GMemDC::Lock()
+bool LMemDC::Lock()
 {
 	return true;
 }
 
-bool GMemDC::Unlock()
+bool LMemDC::Unlock()
 {
 	return true;
 }
 
-GRect GMemDC::ClipRgn(GRect *Rgn)
+LRect LMemDC::ClipRgn(LRect *Rgn)
 {
-	GRect Prev = Clip;
+	LRect Prev = Clip;
 
 	if (Rgn)
 	{
@@ -162,12 +162,12 @@ GRect GMemDC::ClipRgn(GRect *Rgn)
 	return Prev;
 }
 
-bool GMemDC::SupportsAlphaCompositing()
+bool LMemDC::SupportsAlphaCompositing()
 {
 	return true;
 }
 
-bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
+bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 {
 	bool Status = false;
 	GBmpMem *pOldMem = pMem;
@@ -246,7 +246,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 }
 
 
-void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
+void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 {
     LgiAssert(Src);
     if (!Src)
@@ -254,8 +254,8 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 
 	if (Src->IsScreen())
 	{
-		GRect b;
-		GRect Bounds(0, 0, GdcD->X()-1, GdcD->Y()-1);
+		LRect b;
+		LRect Bounds(0, 0, GdcD->X()-1, GdcD->Y()-1);
 		if (a)
 		{
 			b = *a;
@@ -269,15 +269,15 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	}
 	else
 	{
-		GSurface::Blt(x, y, Src, a);
+		LSurface::Blt(x, y, Src, a);
 	}
 }
 
-void GMemDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
+void LMemDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
 {
 	if (Src)
 	{
-		GRect DestR;
+		LRect DestR;
 		if (d)
 		{
 			DestR = *d;
@@ -287,7 +287,7 @@ void GMemDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
 			DestR.ZOff(X()-1, Y()-1);
 		}
 
-		GRect SrcR;
+		LRect SrcR;
 		if (s)
 		{
 			SrcR = *s;
@@ -300,7 +300,7 @@ void GMemDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
 	}
 }
 
-void GMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
+void LMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
 {
 	if (x1 > x2) LgiSwap(x1, x2);
 
@@ -332,7 +332,7 @@ void GMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
 	}
 }
 
-void GMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
+void LMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
 {
 	if (y1 > y2) LgiSwap(y1, y2);
 	
@@ -364,7 +364,7 @@ void GMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
 	}
 }
 
-void GMemDC::SetOrigin(int x, int y)
+void LMemDC::SetOrigin(int x, int y)
 {
-	GSurface::SetOrigin(x, y);
+	LSurface::SetOrigin(x, y);
 }

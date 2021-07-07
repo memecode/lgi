@@ -1,13 +1,15 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/ClipBoard.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/FileSelect.h"
 #include "LgiIde.h"
 #include "IdeProject.h"
 #include "ProjectNode.h"
 #include "AddFtpFile.h"
-#include "GToken.h"
-#include "GCombo.h"
 #include "WebFldDlg.h"
-#include "GClipBoard.h"
-#include "GTableLayout.h"
 
 #define DEBUG_SHOW_NODE_COUNTS		0
 
@@ -25,14 +27,14 @@ const char *TypeNames[NodeMax] = {
 };
 
 //////////////////////////////////////////////////////////////////////////////////
-class FileProps : public GDialog
+class FileProps : public LDialog
 {
 public:
 	NodeType Type;
-	GString Charset;
+	LString Charset;
 	int Platforms;
 
-	FileProps(GView *p, char *m, NodeType t, int plat, const char *charset)
+	FileProps(LView *p, char *m, NodeType t, int plat, const char *charset)
 	{
 		Platforms = plat;
 		Type = t;
@@ -42,7 +44,7 @@ public:
 			MoveToCenter();
 			SetCtrlName(IDC_MSG, m);
 			
-			GCombo *c;
+			LCombo *c;
 			if (GetViewById(IDC_TYPE, c))
 			{
 				for (int i=NodeNone; i<NodeMax; i++)
@@ -57,7 +59,7 @@ public:
 			{
 				if (!charset)
 					charset = "utf-8";
-				for (GCharset *cs = LgiGetCsList(); cs->Charset; cs++)
+				for (LCharset *cs = LGetCsList(); cs->Charset; cs++)
 				{
 					c->Insert(cs->Charset);
 					if (!Stricmp(charset, cs->Charset))
@@ -74,12 +76,12 @@ public:
 			OnPosChange();
 			
 			// Make sure the dialog can display the whole table...
-			GTableLayout *t;
+			LTableLayout *t;
 			if (GetViewById(IDC_TABLE, t))
 			{
-				GRect u = t->GetUsedArea();
-				u.Size(-GTableLayout::CellSpacing, -GTableLayout::CellSpacing);
-				GRect p = GetPos();
+				LRect u = t->GetUsedArea();
+				u.Size(-LTableLayout::CellSpacing, -LTableLayout::CellSpacing);
+				LRect p = GetPos();
 				if (u.X() < p.X() ||
 					u.Y() < p.Y())
 				{
@@ -91,7 +93,7 @@ public:
 		}
 	}
 	
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{
@@ -324,7 +326,7 @@ bool ProjectNode::HasNode(ProjectNode *Node)
 	return false;
 }
 
-void ProjectNode::AddNodes(GArray<ProjectNode*> &Nodes)
+void ProjectNode::AddNodes(LArray<ProjectNode*> &Nodes)
 {
 	Nodes.Add(this);
 
@@ -363,17 +365,17 @@ IdeProject *ProjectNode::GetProject()
 	return Project;
 }
 
-bool ProjectNode::GetFormats(GDragFormats &Formats)
+bool ProjectNode::GetFormats(LDragFormats &Formats)
 {
 	Formats.Supports(NODE_DROP_FORMAT);
 	return true;
 }
 
-bool ProjectNode::GetData(GArray<GDragData> &Data)
+bool ProjectNode::GetData(LArray<LDragData> &Data)
 {
 	for (unsigned i=0; i<Data.Length(); i++)
 	{
-		GDragData &dd = Data[i];
+		LDragData &dd = Data[i];
 		if (dd.IsFormat(NODE_DROP_FORMAT))
 		{
 			void *t = this;
@@ -385,7 +387,7 @@ bool ProjectNode::GetData(GArray<GDragData> &Data)
 	return false;
 }
 
-bool ProjectNode::OnBeginDrag(GMouse &m)
+bool ProjectNode::OnBeginDrag(LMouse &m)
 {
 	return Drag(Tree, m.Event, DROPEFFECT_MOVE);
 }
@@ -410,7 +412,7 @@ void ProjectNode::AutoDetectType()
 		
 	if (!Type)
 	{
-		char *Ext = LgiGetExtension(sFile);
+		char *Ext = LGetExtension(sFile);
 
 		if (stristr(sFile, "makefile") ||
 			!stricmp(sFile, "CMakeLists.txt"))
@@ -454,7 +456,7 @@ void ProjectNode::AutoDetectType()
 
 void ProjectNode::SetFileName(const char *f)
 {
-	GString Rel;
+	LString Rel;
 
 	if (sFile && Project)
 		Project->OnNode(sFile, this, false);
@@ -629,7 +631,7 @@ bool ProjectNode::Serialize(bool Write)
 			{
 				if (LFileExists(p))
 				{
-					if (!LgiIsRelativePath(File))
+					if (!LIsRelativePath(File))
 					{
 						// Try and fix up any non-relative paths that have crept in...
 						char Rel[MAX_PATH];
@@ -649,19 +651,19 @@ bool ProjectNode::Serialize(bool Write)
 				else
 				{
 					// File doesn't exist... has it moved???
-					GAutoString Path = Project->GetBasePath();
+					LAutoString Path = Project->GetBasePath();
 					if (Path)
 					{
 						// Find the file.
 						char *d = strrchr(p, DIR_CHAR);
-						GArray<char*> Files;
-						GArray<const char*> Ext;
+						LArray<char*> Files;
+						LArray<const char*> Ext;
 						Ext.Add(d ? d + 1 : p.Get());
 						if (LRecursiveFileSearch(Path, &Ext, &Files))
 						{
 							if (Files.Length())
 							{
-								GStringPipe Buf;
+								LStringPipe Buf;
 								Buf.Print(	"The file:\n"
 											"\n"
 											"\t%s\n"
@@ -674,7 +676,7 @@ bool ProjectNode::Serialize(bool Write)
 								char *Msg = Buf.NewStr();
 								if (Msg)
 								{
-									GAlert a(Project->GetApp(), "Missing File", Msg, "Yes", "No", "Browse...");
+									LAlert a(Project->GetApp(), "Missing File", Msg, "Yes", "No", "Browse...");
 									switch (a.DoModal())
 									{
 										case 1: // Yes
@@ -688,7 +690,7 @@ bool ProjectNode::Serialize(bool Write)
 										}
 										case 3: // Browse
 										{
-											GFileSelect s;
+											LFileSelect s;
 											s.Parent(Project->GetApp());
 											s.Type("Code", SourcePatterns);
 											if (s.Open())
@@ -704,7 +706,7 @@ bool ProjectNode::Serialize(bool Write)
 							}
 							else
 							{
-								GStringPipe Buf;
+								LStringPipe Buf;
 								Buf.Print(	"The file:\n"
 											"\n"
 											"\t%s\n"
@@ -714,7 +716,7 @@ bool ProjectNode::Serialize(bool Write)
 								char *Msg = Buf.NewStr();
 								if (Msg)
 								{
-									GAlert a(Project->GetApp(), "Missing File", Msg, "Skip", "Delete", "Browse...");
+									LAlert a(Project->GetApp(), "Missing File", Msg, "Skip", "Delete", "Browse...");
 									switch (a.DoModal())
 									{
 										case 1: // Skip
@@ -730,7 +732,7 @@ bool ProjectNode::Serialize(bool Write)
 										}
 										case 3: // Browse
 										{
-											GFileSelect s;
+											LFileSelect s;
 											s.Parent(Project->GetApp());
 											s.Type("Code", SourcePatterns);
 											if (s.Open())
@@ -759,18 +761,18 @@ bool ProjectNode::Serialize(bool Write)
 	return true;
 }
 
-GString ProjectNode::GetFullPath()
+LString ProjectNode::GetFullPath()
 {
-	GString FullPath;
+	LString FullPath;
 	
-	if (LgiIsRelativePath(sFile))
+	if (LIsRelativePath(sFile))
 	{
 		// Relative path
 		auto Path = Project->GetBasePath();
 		if (Path)
 		{
 			char p[MAX_PATH];
-			LgiMakePath(p, sizeof(p), Path, sFile);
+			LMakePath(p, sizeof(p), Path, sFile);
 			FullPath = p;
 		}
 	}
@@ -836,11 +838,11 @@ IdeDoc *ProjectNode::Open()
 					if (FullPath)
 					{
 						char Exe[MAX_PATH];
-						LgiMakePath(Exe, sizeof(Exe), LGetExePath(), "..");
+						LMakePath(Exe, sizeof(Exe), LGetExePath(), "..");
 						#if defined WIN32
-						LgiMakePath(Exe, sizeof(Exe), Exe, "Debug\\LgiRes.exe");
+						LMakePath(Exe, sizeof(Exe), Exe, "Debug\\LgiRes.exe");
 						#elif defined LINUX
-						LgiMakePath(Exe, sizeof(Exe), Exe, "LgiRes/lgires");
+						LMakePath(Exe, sizeof(Exe), Exe, "LgiRes/lgires");
 						#endif
 						
 						if (LFileExists(Exe))
@@ -919,7 +921,7 @@ void ProjectNode::Delete()
 {
 	if (Select())
 	{
-		GTreeItem *s = GetNext();
+		LTreeItem *s = GetNext();
 		if (s || (s = GetParent()))
 			s->Select(true);
 	}
@@ -931,11 +933,11 @@ void ProjectNode::Delete()
 	}
 
 	Project->SetDirty();
-	GXmlTag::RemoveTag();							
+	LXmlTag::RemoveTag();							
 	delete this;
 }
 
-bool ProjectNode::OnKey(GKey &k)
+bool ProjectNode::OnKey(LKey &k)
 {
 	if (k.Down())
 	{
@@ -954,9 +956,9 @@ bool ProjectNode::OnKey(GKey &k)
 	return false;
 }
 
-void ProjectNode::OnMouseClick(GMouse &m)
+void ProjectNode::OnMouseClick(LMouse &m)
 {
-	GTreeItem::OnMouseClick(m);
+	LTreeItem::OnMouseClick(m);
 	
 	if (m.IsContextMenu())
 	{
@@ -1018,14 +1020,14 @@ void ProjectNode::OnMouseClick(GMouse &m)
 			}
 			case IDM_INSERT:
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(Tree);
 				s.Type("Source", SourcePatterns);
 				s.Type("Makefiles", "*makefile");
 				s.Type("All Files", LGI_ALL_FILES);
 				s.MultiSelect(true);
 
-				GAutoString Dir = Project->GetBasePath();
+				LAutoString Dir = Project->GetBasePath();
 				if (Dir)
 				{
 					s.InitialDir(Dir);
@@ -1056,10 +1058,10 @@ void ProjectNode::OnMouseClick(GMouse &m)
 			}
 			case IDM_IMPORT_FOLDER:
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(Tree);
 
-				GAutoString Dir = Project->GetBasePath();
+				LAutoString Dir = Project->GetBasePath();
 				if (Dir)
 				{
 					s.InitialDir(Dir);
@@ -1067,8 +1069,8 @@ void ProjectNode::OnMouseClick(GMouse &m)
 
 				if (s.OpenFolder())
 				{
-					GArray<char*> Files;
-					GArray<const char*> Ext;
+					LArray<char*> Files;
+					LArray<const char*> Ext;
 					GToken e(SourcePatterns, ";");
 					for (int i=0; i<e.Length(); i++)
 					{
@@ -1170,7 +1172,7 @@ void ProjectNode::OnMouseClick(GMouse &m)
 			{
 				auto Path = GetFullPath();
 				if (Path)
-					LgiBrowseToFile(Path);
+					LBrowseToFile(Path);
 				break;
 			}
 			case IDM_OPEN_TERM:
@@ -1183,7 +1185,7 @@ void ProjectNode::OnMouseClick(GMouse &m)
 					auto Path = GetFullPath();
 					if (Path)
 					{
-						LgiTrimDir(Path);
+						LTrimDir(Path);
 						
 						#if defined LINUX
 						
@@ -1277,11 +1279,11 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 			// Match partial or full path
 			char Full[MAX_PATH] = "";
 			
-			if (LgiIsRelativePath(sFile))
+			if (LIsRelativePath(sFile))
 			{
-				GAutoString Base = Project->GetBasePath();
+				LAutoString Base = Project->GetBasePath();
 				if (Base)
-					LgiMakePath(Full, sizeof(Full), Base, sFile);
+					LMakePath(Full, sizeof(Full), Base, sFile);
 				else
 					LgiTrace("%s,%i - Couldn't get full IDoc path.\n", _FL);
 			}
@@ -1290,10 +1292,10 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 				strcpy_s(Full, sizeof(Full), sFile);
 			}
 			
-			GString MyPath(Full);
-			GString::Array MyArr = MyPath.Split(DIR_STR);
-			GString InPath(In);
-			GString::Array InArr = InPath.Split(DIR_STR);
+			LString MyPath(Full);
+			LString::Array MyArr = MyPath.Split(DIR_STR);
+			LString InPath(In);
+			LString::Array InArr = InPath.Split(DIR_STR);
 			auto Common = MIN(MyArr.Length(), InArr.Length());
 			Match = true;
 			for (int i = 0; i < Common; i++)
@@ -1323,11 +1325,11 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 			{
 				if (sFile(0) == '.')
 				{
-					GAutoString Base = Project->GetBasePath();
+					LAutoString Base = Project->GetBasePath();
 					if (Base)
 					{
 						char f[256];
-						LgiMakePath(f, sizeof(f), Base, sFile);
+						LMakePath(f, sizeof(f), Base, sFile);
 						*Full = NewStr(f);
 					}
 				}
@@ -1425,7 +1427,7 @@ void ProjectNode::OnProperties()
 				}
 				case IDC_COPY_PATH:
 				{
-					GClipBoard Clip(Tree);
+					LClipBoard Clip(Tree);
 					Clip.Text(Path);
 					break;
 				}

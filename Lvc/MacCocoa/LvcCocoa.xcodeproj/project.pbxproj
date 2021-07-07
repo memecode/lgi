@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		341EF791255A991B0045CB3B /* libssh.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 347D147E252D44EE00422DA9 /* libssh.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		341EF791255A991B0045CB3B /* libssh.4.7.2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 347D147E252D44EE00422DA9 /* libssh.4.7.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		342D52A50F0CBA2F002A1C7C /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */; };
 		3448F8C62081D2500038AE76 /* mac-icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 3448F8C52081D2500038AE76 /* mac-icon.icns */; };
 		3457FE492081CB3D00014BE4 /* BlameUi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE3E2081CB3D00014BE4 /* BlameUi.cpp */; };
@@ -16,16 +16,16 @@
 		3457FE4C2081CB3D00014BE4 /* VcCommit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE432081CB3D00014BE4 /* VcCommit.cpp */; };
 		3457FE4D2081CB3D00014BE4 /* VcFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE452081CB3D00014BE4 /* VcFile.cpp */; };
 		3457FE4E2081CB3D00014BE4 /* VcFolder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE472081CB3D00014BE4 /* VcFolder.cpp */; };
-		3457FE502081CBE500014BE4 /* GSubProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE4F2081CBE500014BE4 /* GSubProcess.cpp */; };
+		3457FE502081CBE500014BE4 /* SubProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE4F2081CBE500014BE4 /* SubProcess.cpp */; };
 		3457FE522081CC4800014BE4 /* Lvc.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 3457FE512081CC4800014BE4 /* Lvc.lr8 */; };
-		347D1484252D450500422DA9 /* libssh.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 347D147E252D44EE00422DA9 /* libssh.dylib */; };
+		347D1484252D450500422DA9 /* libssh.4.7.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 347D147E252D44EE00422DA9 /* libssh.4.7.2.dylib */; };
 		347D1487252D451C00422DA9 /* libpng15.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34CE07222327B3F900807DCB /* libpng15.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		347D1489252D453300422DA9 /* DeEscape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 347D1488252D453300422DA9 /* DeEscape.cpp */; };
-		34BD35B120C5484A0001838A /* GControlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B020C5484A0001838A /* GControlTree.cpp */; };
-		34BD35B320C548710001838A /* GXmlTreeUi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B220C548710001838A /* GXmlTreeUi.cpp */; };
+		34BD35B120C5484A0001838A /* ControlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B020C5484A0001838A /* ControlTree.cpp */; };
+		34BD35B320C548710001838A /* XmlTreeUi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B220C548710001838A /* XmlTreeUi.cpp */; };
 		34C032B32319CDE900470DF2 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C032B22319CDE900470DF2 /* Cocoa.framework */; };
 		34C032BB2319CE8C00470DF2 /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C032B92319CDFE00470DF2 /* LgiCocoa.framework */; };
-		34C032BD2319CEC100470DF2 /* GOptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C032BC2319CEC100470DF2 /* GOptionsFile.cpp */; };
+		34C032BD2319CEC100470DF2 /* OptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C032BC2319CEC100470DF2 /* OptionsFile.cpp */; };
 		34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34C032B92319CDFE00470DF2 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		34CE07102327B3B100807DCB /* Png.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CE070F2327B3B100807DCB /* Png.cpp */; };
 		34E1910C20B1898E00005243 /* image-list.png in Resources */ = {isa = PBXBuildFile; fileRef = 34E1910B20B1898E00005243 /* image-list.png */; };
@@ -107,7 +107,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 347D145B252D44EE00422DA9 /* libssh.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = C725834B731E4B398AD64F50;
+			remoteGlobalIDString = 148FADB5FEFC4DCFAFCC5A8C;
 			remoteInfo = ssh_shared;
 		};
 		34C032B82319CDFE00470DF2 /* PBXContainerItemProxy */ = {
@@ -177,7 +177,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 17762A037BFC475A977B9D61;
+			remoteGlobalIDString = A5BD8566EC9F44589879D4FC;
 			remoteInfo = libpng15;
 		};
 /* End PBXContainerItemProxy section */
@@ -189,7 +189,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				341EF791255A991B0045CB3B /* libssh.dylib in CopyFiles */,
+				341EF791255A991B0045CB3B /* libssh.4.7.2.dylib in CopyFiles */,
 				347D1487252D451C00422DA9 /* libpng15.dylib in CopyFiles */,
 				34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */,
 			);
@@ -211,16 +211,16 @@
 		3457FE462081CB3D00014BE4 /* VcFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VcFile.h; path = ../Src/VcFile.h; sourceTree = "<group>"; };
 		3457FE472081CB3D00014BE4 /* VcFolder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VcFolder.cpp; path = ../Src/VcFolder.cpp; sourceTree = "<group>"; };
 		3457FE482081CB3D00014BE4 /* VcFolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VcFolder.h; path = ../Src/VcFolder.h; sourceTree = "<group>"; };
-		3457FE4F2081CBE500014BE4 /* GSubProcess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GSubProcess.cpp; path = ../../src/common/Lgi/GSubProcess.cpp; sourceTree = "<group>"; };
+		3457FE4F2081CBE500014BE4 /* SubProcess.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = SubProcess.cpp; path = ../../src/common/Lgi/SubProcess.cpp; sourceTree = "<group>"; };
 		3457FE512081CC4800014BE4 /* Lvc.lr8 */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; name = Lvc.lr8; path = ../Resources/Lvc.lr8; sourceTree = "<group>"; };
 		347D145B252D44EE00422DA9 /* libssh.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libssh.xcodeproj; path = ../../../../../CodeLib/libssh/build/libssh.xcodeproj; sourceTree = "<group>"; };
 		347D1488252D453300422DA9 /* DeEscape.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DeEscape.cpp; path = ../../src/common/Text/DeEscape.cpp; sourceTree = "<group>"; };
 		3488EE99233C16AF00756838 /* en */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		34BD35B020C5484A0001838A /* GControlTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GControlTree.cpp; path = ../../src/common/Widgets/GControlTree.cpp; sourceTree = "<group>"; };
-		34BD35B220C548710001838A /* GXmlTreeUi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GXmlTreeUi.cpp; path = ../../src/common/Text/GXmlTreeUi.cpp; sourceTree = "<group>"; };
+		34BD35B020C5484A0001838A /* ControlTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ControlTree.cpp; path = ../../src/common/Widgets/ControlTree.cpp; sourceTree = "<group>"; };
+		34BD35B220C548710001838A /* XmlTreeUi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XmlTreeUi.cpp; path = ../../src/common/Text/XmlTreeUi.cpp; sourceTree = "<group>"; };
 		34C032B22319CDE900470DF2 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = ../../../../../../../System/Library/Frameworks/Cocoa.framework; sourceTree = "<group>"; };
 		34C032B42319CDFE00470DF2 /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = ../../src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
-		34C032BC2319CEC100470DF2 /* GOptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GOptionsFile.cpp; path = ../../src/common/Lgi/GOptionsFile.cpp; sourceTree = "<group>"; };
+		34C032BC2319CEC100470DF2 /* OptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsFile.cpp; path = ../../src/common/Lgi/OptionsFile.cpp; sourceTree = "<group>"; };
 		34CE070F2327B3B100807DCB /* Png.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Png.cpp; path = ../../src/common/Gdc2/Filters/Png.cpp; sourceTree = "<group>"; };
 		34CE07112327B3F900807DCB /* libpng.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libpng.xcodeproj; path = ../../../../../CodeLib/libpng/build/libpng.xcodeproj; sourceTree = "<group>"; };
 		34E1910B20B1898E00005243 /* image-list.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "image-list.png"; path = "../Resources/image-list.png"; sourceTree = "<group>"; };
@@ -233,7 +233,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				347D1484252D450500422DA9 /* libssh.dylib in Frameworks */,
+				347D1484252D450500422DA9 /* libssh.4.7.2.dylib in Frameworks */,
 				34C032BB2319CE8C00470DF2 /* LgiCocoa.framework in Frameworks */,
 				34C032B32319CDE900470DF2 /* Cocoa.framework in Frameworks */,
 			);
@@ -309,10 +309,10 @@
 			children = (
 				347D1488252D453300422DA9 /* DeEscape.cpp */,
 				34CE070F2327B3B100807DCB /* Png.cpp */,
-				34C032BC2319CEC100470DF2 /* GOptionsFile.cpp */,
-				34BD35B220C548710001838A /* GXmlTreeUi.cpp */,
-				34BD35B020C5484A0001838A /* GControlTree.cpp */,
-				3457FE4F2081CBE500014BE4 /* GSubProcess.cpp */,
+				34C032BC2319CEC100470DF2 /* OptionsFile.cpp */,
+				34BD35B220C548710001838A /* XmlTreeUi.cpp */,
+				34BD35B020C5484A0001838A /* ControlTree.cpp */,
+				3457FE4F2081CBE500014BE4 /* SubProcess.cpp */,
 				342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */,
 			);
 			name = Lgi;
@@ -329,7 +329,7 @@
 				347D1478252D44EE00422DA9 /* scp_download */,
 				347D147A252D44EE00422DA9 /* senddata */,
 				347D147C252D44EE00422DA9 /* ssh-client */,
-				347D147E252D44EE00422DA9 /* libssh.dylib */,
+				347D147E252D44EE00422DA9 /* libssh.4.7.2.dylib */,
 				347D1480252D44EE00422DA9 /* sshnetcat */,
 			);
 			name = Products;
@@ -486,10 +486,9 @@
 			remoteRef = 347D147B252D44EE00422DA9 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		347D147E252D44EE00422DA9 /* libssh.dylib */ = {
+		347D147E252D44EE00422DA9 /* libssh.4.7.2.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
-			name = libssh.dylib;
 			path = libssh.4.7.2.dylib;
 			remoteRef = 347D147D252D44EE00422DA9 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -601,17 +600,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				347D1489252D453300422DA9 /* DeEscape.cpp in Sources */,
-				3457FE502081CBE500014BE4 /* GSubProcess.cpp in Sources */,
-				34BD35B320C548710001838A /* GXmlTreeUi.cpp in Sources */,
+				3457FE502081CBE500014BE4 /* SubProcess.cpp in Sources */,
+				34BD35B320C548710001838A /* XmlTreeUi.cpp in Sources */,
 				3457FE4C2081CB3D00014BE4 /* VcCommit.cpp in Sources */,
 				3457FE4E2081CB3D00014BE4 /* VcFolder.cpp in Sources */,
 				3457FE4A2081CB3D00014BE4 /* DropDownBtn.cpp in Sources */,
 				3457FE4D2081CB3D00014BE4 /* VcFile.cpp in Sources */,
-				34C032BD2319CEC100470DF2 /* GOptionsFile.cpp in Sources */,
+				34C032BD2319CEC100470DF2 /* OptionsFile.cpp in Sources */,
 				3457FE492081CB3D00014BE4 /* BlameUi.cpp in Sources */,
 				342D52A50F0CBA2F002A1C7C /* LgiMain.cpp in Sources */,
 				34CE07102327B3B100807DCB /* Png.cpp in Sources */,
-				34BD35B120C5484A0001838A /* GControlTree.cpp in Sources */,
+				34BD35B120C5484A0001838A /* ControlTree.cpp in Sources */,
 				3457FE4B2081CB3D00014BE4 /* Main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -659,8 +658,8 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				HEADER_SEARCH_PATHS = (
-					../../include/common,
-					../../include/mac/cocoa,
+					../../include,
+					../../include/lgi/mac/cocoa,
 					../../../../../CodeLib/libpng,
 					../../../../../CodeLib/libpng/build,
 					../../../../../CodeLib/libssh/include,
@@ -685,8 +684,8 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				HEADER_SEARCH_PATHS = (
-					../../include/common,
-					../../include/mac/cocoa,
+					../../include,
+					../../include/lgi/mac/cocoa,
 					../../../../../CodeLib/libpng,
 					../../../../../CodeLib/libpng/build,
 					../../../../../CodeLib/libssh/include,

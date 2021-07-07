@@ -1,11 +1,11 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 
-void LgiShowFileProperties(OsView Parent, const char *Filename)
+void LShowFileProperties(OsView Parent, const char *Filename)
 {
 	LgiAssert(!"Impl me.");
 }
 
-bool LgiBrowseToFile(const char *Filename)
+bool LBrowseToFile(const char *Filename)
 {
 	if (!Filename)
 		return false;
@@ -14,7 +14,7 @@ bool LgiBrowseToFile(const char *Filename)
 	if (!LGetAppForMimeType("inode/directory", Browser, sizeof(Browser)))
 		return false;
 	
-	GString f;
+	LString f;
 	if (strchr(Filename, ' '))
 		f.Printf("\"%s\"", Filename);
 	else

@@ -13,24 +13,24 @@
 #include <time.h>
 #include <ctype.h>
 
-#include "Lgi.h"
-#include "GToken.h"
-#include "LList.h"
-#include "GTableLayout.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/List.h"
+#include "lgi/common/TableLayout.h"
 #if defined(LINUX) && !defined(LGI_SDL)
 #include "LgiWinManGlue.h"
 #endif
-#include "GVariant.h"
-#include "GDisplayString.h"
-#include "LgiRes.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/ProgressView.h"
 
 // If it is defined it will use the cross platform 
 // "res" library distributed with the LGI library.
 
-// #include "GXml.h"
-
 #define DEBUG_RES_FILE						0
-#define CastToGWnd(RObj)					((RObj != 0) ? dynamic_cast<GView*>(RObj) : 0)
+#define CastToGWnd(RObj)					((RObj != 0) ? dynamic_cast<LView*>(RObj) : 0)
 
 class TagHash : public LHashTbl<StrKey<char>,bool>, public ResReadCtx
 {
@@ -67,7 +67,7 @@ public:
 		return Result;
 	}
 
-	bool Check(GXmlTag *t)
+	bool Check(LXmlTag *t)
 	{
 		if (!t)
 			return false;
@@ -83,7 +83,7 @@ public:
 const char *LgiStringRes::CodePage = 0;
 GLanguage *LgiStringRes::CurLang = 0;
 
-LgiStringRes::LgiStringRes(LgiResources *res)
+LgiStringRes::LgiStringRes(LResources *res)
 {
 	Res = res;
 	Ref = 0;
@@ -99,7 +99,7 @@ LgiStringRes::~LgiStringRes()
 	DeleteArray(Tag);
 }
 
-bool LgiStringRes::Read(GXmlTag *t, ResFileFormat Format)
+bool LgiStringRes::Read(LXmlTag *t, ResFileFormat Format)
 {
 	if (LgiStringRes::CurLang &&
 		t &&
@@ -207,7 +207,7 @@ bool LgiStringRes::Read(GXmlTag *t, ResFileFormat Format)
 		{
 			for (int a=0; a<t->Attr.Length(); a++)
 			{
-				GXmlAttr *v = &t->Attr[a];
+				LXmlAttr *v = &t->Attr[a];
 				char *Name = v->GetName();
 
 				if (GFindLang(Name))
@@ -248,8 +248,8 @@ class LgiResourcesPrivate
 public:
 	bool Ok;
 	ResFileFormat Format;
-	GString File;
-	GString ThemeFolder;
+	LString File;
+	LString ThemeFolder;
 	LHashTbl<IntKey<int>, LgiStringRes*> StrRef;
 	LHashTbl<IntKey<int>, LgiStringRes*> Strings;
 	LHashTbl<IntKey<int>, LgiStringRes*> DlgStrings;
@@ -269,7 +269,7 @@ public:
 
 /// A collection of resources
 /// \ingroup Resources
-class GResourceContainer : public GArray<LgiResources*>
+class GResourceContainer : public LArray<LResources*>
 {
 public:
 	~GResourceContainer()
@@ -279,9 +279,9 @@ public:
 };
 
 static GResourceContainer ResourceOwner;
-bool LgiResources::LoadStyles = false;
+bool LResources::LoadStyles = false;
 
-LgiResources::LgiResources(const char *FileName, bool Warn, const char *ThemeFolder)
+LResources::LResources(const char *FileName, bool Warn, const char *ThemeFolder)
 {
 	d = new LgiResourcesPrivate;
 	ScriptEngine = 0;
@@ -289,8 +289,8 @@ LgiResources::LgiResources(const char *FileName, bool Warn, const char *ThemeFol
 	// global pointer list
 	ResourceOwner.Add(this);
 
-	GString File;
-	GString FullPath;
+	LString File;
+	LString FullPath;
 
 #if DEBUG_RES_FILE
 LgiTrace("%s:%i - Filename='%s'\n", _FL, FileName);
@@ -347,7 +347,7 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 		{
 			LgiMsg(0, LgiLoadString(L_ERROR_RES_NO_EXE_PATH,
 									"Fatal error: Couldn't get the path of the running\nexecutable. Can't find resource file."),
-									"LgiResources::LgiResources");
+									"LResources::LResources");
 			LgiTrace("%s:%i - Fatal error: Couldn't get the path of the running\nexecutable. Can't find resource file.", _FL);
 			LgiExitApp();
 		}
@@ -357,8 +357,8 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 	LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 	#endif
 
-	GString BaseFile = File;
-	GString AltFile = File.Replace(".");
+	LString BaseFile = File;
+	LString AltFile = File.Replace(".");
 	BaseFile += ".lr8";
 	AltFile += ".lr8";
 
@@ -397,7 +397,7 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 		printf("%s\n", Msg);
 		if (Warn)
 		{
-			LgiMsg(0, Msg, "LgiResources::LgiResources");
+			LgiMsg(0, Msg, "LResources::LResources");
 
 			// Exit
 			LgiExitApp();
@@ -405,7 +405,7 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 	}
 }
 
-LgiResources::~LgiResources()
+LResources::~LResources()
 {
 	ResourceOwner.Delete(this);
 	LanguageNames.DeleteArrays();
@@ -415,24 +415,24 @@ LgiResources::~LgiResources()
 	DeleteObj(d);
 }
 
-const char *LgiResources::GetThemeFolder()
+const char *LResources::GetThemeFolder()
 {
 	return d->ThemeFolder;
 }
 
-bool LgiResources::DefaultColours = true;
-void LgiResources::SetThemeFolder(const char *f)
+bool LResources::DefaultColours = true;
+void LResources::SetThemeFolder(const char *f)
 {
 	d->ThemeFolder = f;
 
-	GFile::Path Colours(f, "colours.json");
+	LFile::Path Colours(f, "colours.json");
 	if (Colours.Exists())
 		DefaultColours = !LColourLoad(Colours.GetFull());
 
-	GFile::Path Css(f, "styles.css");
+	LFile::Path Css(f, "styles.css");
 	if (Css.Exists())
 	{
-		GFile in(Css, O_READ);
+		LFile in(Css, O_READ);
 		if (in.IsOpen())
 		{
 			auto s = in.Read();
@@ -442,47 +442,47 @@ void LgiResources::SetThemeFolder(const char *f)
 	}		
 }
 
-bool LgiResources::StyleElement(GViewI *v)
+bool LResources::StyleElement(LViewI *v)
 {
 	if (!v) return false;
 	if (!LoadStyles) return true;
 
-	GCss::SelArray Selectors;
+	LCss::SelArray Selectors;
 	for (auto r: ResourceOwner)
 	{
 		GViewCssCb Ctx;
 		r->CssStore.Match(Selectors, &Ctx, v);
 	}
 	
-	GCss *Css = v->GetCss(true);
+	LCss *Css = v->GetCss(true);
 	for (auto *Sel: Selectors)
 	{
 		const char *Defs = Sel->Style;
 		if (Css && Defs)
-			Css->Parse(Defs, GCss::ParseRelaxed);
+			Css->Parse(Defs, LCss::ParseRelaxed);
 	}
 
 	auto ElemStyles = v->CssStyles();
 	if (ElemStyles)
 	{
 		const char *Defs = ElemStyles;
-		Css->Parse(Defs, GCss::ParseRelaxed);
+		Css->Parse(Defs, LCss::ParseRelaxed);
 	}
 	
 	return true;
 }
 
-ResFileFormat LgiResources::GetFormat()
+ResFileFormat LResources::GetFormat()
 {
 	return d->Format;
 }
 
-bool LgiResources::IsOk()
+bool LResources::IsOk()
 {
 	return d->Ok;
 }
 
-void LgiResources::AddLang(GLanguageId id)
+void LResources::AddLang(GLanguageId id)
 {
 	// search through id's...
 	for (int i=0; i<Languages.Length(); i++)
@@ -495,12 +495,12 @@ void LgiResources::AddLang(GLanguageId id)
 	Languages.Add(id);
 }
 
-char *LgiResources::GetFileName()
+char *LResources::GetFileName()
 {
 	return d->File;
 }
 
-bool LgiResources::Load(const char *FileName)
+bool LResources::Load(const char *FileName)
 {
 	if (!FileName)
 	{
@@ -509,7 +509,7 @@ bool LgiResources::Load(const char *FileName)
 		return false;
 	}
 
-	GFile F;
+	LFile F;
 	if (!F.Open(FileName, O_READ))
 	{
 		LgiTrace("%s:%i - Couldn't open '%s'.\n", _FL, FileName);
@@ -519,7 +519,7 @@ bool LgiResources::Load(const char *FileName)
 
 	d->File = FileName;
 	d->Format = Lr8File;
-	char *Ext = LgiGetExtension(FileName);
+	char *Ext = LGetExtension(FileName);
 	if (Ext && stricmp(Ext, "lr") == 0)
 	{
 		d->Format = CodepageFile;
@@ -539,8 +539,8 @@ bool LgiResources::Load(const char *FileName)
 		LgiStringRes::CodePage = LgiStringRes::CurLang->Charset;
 	}
 
-	GXmlTree x(0);
-	GAutoPtr<GXmlTag> Root(new GXmlTag);
+	LXmlTree x(0);
+	LAutoPtr<LXmlTag> Root(new LXmlTag);
 	if (!x.Read(Root, &F, 0))
 	{
 		LgiTrace("%s:%i - ParseXmlFile failed: %s\n", _FL, x.GetErrorMsg());
@@ -574,7 +574,7 @@ bool LgiResources::Load(const char *FileName)
 					{
 						for (int i=0; i<c->Attr.Length(); i++)
 						{
-							GXmlAttr &a = c->Attr[i];
+							LXmlAttr &a = c->Attr[i];
 							LanguageNames.Add(a.GetName(), NewStr(a.GetValue()));
 						}
 					}
@@ -646,12 +646,12 @@ bool LgiResources::Load(const char *FileName)
 	return true;
 }
 
-LgiStringRes *LgiResources::StrFromRef(int Ref)
+LgiStringRes *LResources::StrFromRef(int Ref)
 {
 	return d->StrRef.Find(Ref);
 }
 
-char *LgiResources::StringFromId(int Id)
+char *LResources::StringFromId(int Id)
 {
 	LgiStringRes *NotStr = 0;
 	LgiStringRes *sr;
@@ -665,27 +665,27 @@ char *LgiResources::StringFromId(int Id)
 	return NotStr ? NotStr->Str : 0;
 }
 
-char *LgiResources::StringFromRef(int Ref)
+char *LResources::StringFromRef(int Ref)
 {
 	LgiStringRes *s = d->StrRef.Find(Ref);
 	return s ? s->Str : 0;
 }
 
-#include "GTextLabel.h"
-#include "GEdit.h"
-#include "GCheckBox.h"
-#include "GButton.h"
-#include "GRadioGroup.h"
-#include "GTabView.h"
-#include "GCombo.h"
-#include "GBitmap.h"
-#include "GSlider.h"
-#include "GScrollBar.h"
-#include "GTree.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/RadioGroup.h"
+#include "lgi/common/TabView.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/Bitmap.h"
+#include "lgi/common/Slider.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/Tree.h"
 
-class GMissingCtrl : public GLayout, public ResObject
+class GMissingCtrl : public LLayout, public ResObject
 {
-    GAutoString n;
+    LAutoString n;
 
 public:
     GMissingCtrl(char *name) : ResObject(Res_Custom)
@@ -693,22 +693,22 @@ public:
         n.Reset(NewStr(name));
     }    
 
-    void OnPaint(GSurface *pDC)
+    void OnPaint(LSurface *pDC)
     {
-        GRect c = GetClient();
-        pDC->Colour(GColour(0xcc, 0xcc, 0xcc));
+        LRect c = GetClient();
+        pDC->Colour(LColour(0xcc, 0xcc, 0xcc));
         pDC->Rectangle();
-        pDC->Colour(GColour(0xff, 0, 0));
+        pDC->Colour(LColour(0xff, 0, 0));
         pDC->Line(c.x1, c.y1, c.x2, c.y2);
         pDC->Line(c.x2, c.y1, c.x1, c.y2);
-        GDisplayString ds(SysFont, n);
+        LDisplayString ds(SysFont, n);
         SysFont->Transparent(true);
         SysFont->Fore(LColour(L_TEXT));
         ds.Draw(pDC, 3, 0);
     }
 };
 
-ResObject *LgiResources::CreateObject(GXmlTag *t, ResObject *Parent)
+ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 {
 	ResObject *Wnd = 0;
 	if (t && t->GetTag())
@@ -717,31 +717,31 @@ ResObject *LgiResources::CreateObject(GXmlTag *t, ResObject *Parent)
 		
 		if (stricmp(t->GetTag(), Res_StaticText) == 0)
 		{
-			Wnd = new GTextLabel(0, 0, 0, -1, -1, NULL);
+			Wnd = new LTextLabel(0, 0, 0, -1, -1, NULL);
 		}
 		else if (stricmp(t->GetTag(), Res_EditBox) == 0)
 		{
-			Wnd = new GEdit(0, 0, 0, -1, -1, "");
+			Wnd = new LEdit(0, 0, 0, -1, -1, "");
 		}
 		else if (stricmp(t->GetTag(), Res_CheckBox) == 0)
 		{
-			Wnd = new GCheckBox(0, 0, 0, -1, -1, "");
+			Wnd = new LCheckBox(0, 0, 0, -1, -1, "");
 		}
 		else if (stricmp(t->GetTag(), Res_Button) == 0)
 		{
-			Wnd = new GButton(0, 0, 0, -1, -1, "");
+			Wnd = new LButton(0, 0, 0, -1, -1, "");
 		}
 		else if (stricmp(t->GetTag(), Res_Group) == 0)
 		{
-			Wnd = new GRadioGroup(0, 0, 0, -1, -1, "");
+			Wnd = new LRadioGroup(0, 0, 0, -1, -1, "");
 		}
 		else if (stricmp(t->GetTag(), Res_RadioBox) == 0)
 		{
-			Wnd = new GRadioButton(0, 0, 0, -1, -1, "");
+			Wnd = new LRadioButton(0, 0, 0, -1, -1, "");
 		}
 		else if (stricmp(t->GetTag(), Res_TabView) == 0)
 		{
-			GTabView *Tv = new GTabView(0, 10, 10, 100, 100, "GTabView");
+			LTabView *Tv = new LTabView(0, 10, 10, 100, 100, "LTabView");
 			Wnd = Tv;
 			if (Tv)
 			{
@@ -751,7 +751,7 @@ ResObject *LgiResources::CreateObject(GXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_Tab) == 0)
 		{
-			Wnd = new GTabPage(0);
+			Wnd = new LTabPage(0);
 		}
 		else if (stricmp(t->GetTag(), Res_ListView) == 0)
 		{
@@ -778,35 +778,35 @@ ResObject *LgiResources::CreateObject(GXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_ComboBox) == 0)
 		{
-			Wnd = new GCombo(0, 0, 0, 100, 20, "");
+			Wnd = new LCombo(0, 0, 0, 100, 20, "");
 		}
 		else if (stricmp(t->GetTag(), Res_Bitmap) == 0)
 		{
-			Wnd = new GBitmap(0, 0, 0, 0);
+			Wnd = new LBitmap(0, 0, 0, 0);
 		}
 		else if (stricmp(t->GetTag(), Res_Progress) == 0)
 		{
-			Wnd = new GProgress(0, 0, 0, -1, -1, "");
+			Wnd = new LProgressView(0, 0, 0, -1, -1, "");
 		}
 		else if (stricmp(t->GetTag(), Res_Slider) == 0)
 		{
-			Wnd = new GSlider(0, 0, 0, -1, -1, "", false);
+			Wnd = new LSlider(0, 0, 0, -1, -1, "", false);
 		}
 		else if (stricmp(t->GetTag(), Res_ScrollBar) == 0)
 		{
-			Wnd = new GScrollBar(0, 0, 0, 20, 100, "");
+			Wnd = new LScrollBar(0, 0, 0, 20, 100, "");
 		}
 		else if (stricmp(t->GetTag(), Res_Progress) == 0)
 		{
-			Wnd = new GProgress(0, 0, 0, 1, 1, "");
+			Wnd = new LProgressView(0, 0, 0, 1, 1, "");
 		}
 		else if (stricmp(t->GetTag(), Res_TreeView) == 0)
 		{
-			Wnd = new GTree(0, 0, 0, 1, 1, "");
+			Wnd = new LTree(0, 0, 0, 1, 1, "");
 		}
 		else if (stricmp(t->GetTag(), Res_ControlTree) == 0)
 		{
-			GView *v = GViewFactory::Create("GControlTree");
+			LView *v = LViewFactory::Create("LControlTree");
 			if (!(Wnd = dynamic_cast<ResObject*>(v)))
 			{
 				DeleteObj(v);
@@ -815,7 +815,7 @@ ResObject *LgiResources::CreateObject(GXmlTag *t, ResObject *Parent)
 		else if (stricmp(t->GetTag(), Res_Custom) == 0)
 		{
 			Control = t->GetAttr("ctrl");
-			GView *v = GViewFactory::Create(Control);
+			LView *v = LViewFactory::Create(Control);
 
 			if (!v)
 			    v = new GMissingCtrl(Control);
@@ -833,13 +833,13 @@ ResObject *LgiResources::CreateObject(GXmlTag *t, ResObject *Parent)
 		}
 		else if (stricmp(t->GetTag(), Res_Table) == 0)
 		{
-			Wnd = new GTableLayout;
+			Wnd = new LTableLayout;
 		}
 	
 		if (!Wnd)
 		{
 			printf(LgiLoadString(L_ERROR_RES_CREATE_OBJECT_FAILED,
-								"LgiResources::CreateObject(%s) failed. (Ctrl=%s)\n"),
+								"LResources::CreateObject(%s) failed. (Ctrl=%s)\n"),
 					t->GetTag(),
 					Control);
 		}
@@ -849,25 +849,25 @@ ResObject *LgiResources::CreateObject(GXmlTag *t, ResObject *Parent)
 	return Wnd;
 }
 
-void LgiResources::Res_SetPos(ResObject *Obj, int x1, int y1, int x2, int y2)
+void LResources::Res_SetPos(ResObject *Obj, int x1, int y1, int x2, int y2)
 {
-	GItemColumn *Col = dynamic_cast<GItemColumn*>(Obj);
+	LItemColumn *Col = dynamic_cast<LItemColumn*>(Obj);
 	if (Col)
 	{
 		Col->Width(x2-x1);
 	}
 	else
 	{
-		GView *w = CastToGWnd(Obj);
+		LView *w = CastToGWnd(Obj);
 		if (w)
 		{
-			GRect n(x1, y1, x2, y2);
+			LRect n(x1, y1, x2, y2);
 			w->SetPos(n);
 		}
 	}
 }
 
-void LgiResources::Res_SetPos(ResObject *Obj, char *s)
+void LResources::Res_SetPos(ResObject *Obj, char *s)
 {
 	if (Obj && s)
 	{
@@ -879,16 +879,16 @@ void LgiResources::Res_SetPos(ResObject *Obj, char *s)
 	}
 }
 
-bool LgiResources::Res_GetProperties(ResObject *Obj, GDom *Props)
+bool LResources::Res_GetProperties(ResObject *Obj, GDom *Props)
 {
 	// this is a read-only system...
 	return false;
 }
 
-struct ResObjectCallback : public GCss::ElementCallback<ResObject>
+struct ResObjectCallback : public LCss::ElementCallback<ResObject>
 {
 	GDom *Props;
-	GVariant v;
+	LVariant v;
 	
 	ResObjectCallback(GDom *props)
 	{
@@ -907,7 +907,7 @@ struct ResObjectCallback : public GCss::ElementCallback<ResObject>
 		return v.Str();
 	}
 	
-	bool GetClasses(GString::Array &Classes, ResObject *obj)
+	bool GetClasses(LString::Array &Classes, ResObject *obj)
 	{
 		if (Props->GetValue("class", v))
 			Classes.New() = v.Str();
@@ -920,20 +920,20 @@ struct ResObjectCallback : public GCss::ElementCallback<ResObject>
 		return NULL;
 	}
 	
-	GArray<ResObject*> GetChildren(ResObject *obj)
+	LArray<ResObject*> GetChildren(ResObject *obj)
 	{
-		GArray<ResObject*> a;
+		LArray<ResObject*> a;
 		return a;
 	}
 };
 
-bool LgiResources::Res_SetProperties(ResObject *Obj, GDom *Props)
+bool LResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 {
-	GView *v = dynamic_cast<GView*>(Obj);
+	LView *v = dynamic_cast<LView*>(Obj);
 	if (!v || !Props)
 		return false;
 
-	GVariant i;
+	LVariant i;
 	if (Props->GetValue("enabled", i))
 		v->Enabled(i.CastInt32() != 0);
 
@@ -945,15 +945,15 @@ bool LgiResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 
 	if (Props->GetValue("class", i))
 	{
-		GString::Array *a = v->CssClasses();
+		LString::Array *a = v->CssClasses();
 		if (a)
-			(*a) = GString(i.Str()).SplitDelimit(" \t");
+			(*a) = LString(i.Str()).SplitDelimit(" \t");
 	}
 
 	if (Props->GetValue("image", i))
-		v->GetCss(true)->BackgroundImage(GCss::ImageDef(i.Str()));
+		v->GetCss(true)->BackgroundImage(LCss::ImageDef(i.Str()));
 
-	auto e = dynamic_cast<GEdit*>(v);
+	auto e = dynamic_cast<LEdit*>(v);
 	if (e)
 	{
 		if (Props->GetValue("pw", i))
@@ -963,11 +963,11 @@ bool LgiResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 			e->MultiLine(i.CastInt32() != 0);
 	}
 
-	auto b = dynamic_cast<GButton*>(v);
+	auto b = dynamic_cast<LButton*>(v);
 	if (b)
 	{
 		if (Props->GetValue("image", i))
-			b->GetCss(true)->BackgroundImage(GCss::ImageDef(i.Str()));
+			b->GetCss(true)->BackgroundImage(LCss::ImageDef(i.Str()));
 
 		if (Props->GetValue("toggle", i))
 			b->SetIsToggle(i.CastInt32()!=0);
@@ -976,23 +976,23 @@ bool LgiResources::Res_SetProperties(ResObject *Obj, GDom *Props)
 	return true;
 }
 
-GRect LgiResources::Res_GetPos(ResObject *Obj)
+LRect LResources::Res_GetPos(ResObject *Obj)
 {
-	GView *w = CastToGWnd(Obj);
+	LView *w = CastToGWnd(Obj);
 	if (w)
 	{
 		return w->GetPos();
 	}
 
-	return GRect(0, 0, 0, 0);
+	return LRect(0, 0, 0, 0);
 }
 
-int LgiResources::Res_GetStrRef(ResObject *Obj)
+int LResources::Res_GetStrRef(ResObject *Obj)
 {
 	return 0;
 }
 
-bool LgiResources::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
+bool LResources::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
 {
 	LgiStringRes *s = d->StrRef.Find(Ref);
 	if (!s)
@@ -1001,7 +1001,7 @@ bool LgiResources::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
 	if (Ctx && !Ctx->Check(s->Tag))
 		return false;
 
-	GView *w = CastToGWnd(Obj);
+	LView *w = CastToGWnd(Obj);
 	if (w)
 	{
 		w->SetId(s->Id);
@@ -1012,14 +1012,14 @@ bool LgiResources::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
 	}
 	else if (Obj)
 	{
-		GItemColumn *Col = dynamic_cast<GItemColumn*>(Obj);
+		LItemColumn *Col = dynamic_cast<LItemColumn*>(Obj);
 		if (Col)
 		{
 			Col->Name(s->Str);
 		}
 		else
 		{
-			GTabPage *Page = dynamic_cast<GTabPage*>(Obj);
+			LTabPage *Page = dynamic_cast<LTabPage*>(Obj);
 			if (Page)
 			{
 				Page->Name(s->Str);
@@ -1030,18 +1030,18 @@ bool LgiResources::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
 	return true;
 }
 
-void LgiResources::Res_Attach(ResObject *Obj, ResObject *Parent)
+void LResources::Res_Attach(ResObject *Obj, ResObject *Parent)
 {
-	GView *o = CastToGWnd(Obj);
-	GView *p = CastToGWnd(Parent);
-	GTabPage *Tab = dynamic_cast<GTabPage*>(Parent);
+	LView *o = CastToGWnd(Obj);
+	LView *p = CastToGWnd(Parent);
+	LTabPage *Tab = dynamic_cast<LTabPage*>(Parent);
 	if (o)
 	{
 		if (Tab)
 		{
 			if (Tab)
 			{
-				GRect r = o->GetPos();
+				LRect r = o->GetPos();
 				r.Offset(-4, -24);
 				o->SetPos(r);
 
@@ -1064,12 +1064,12 @@ void LgiResources::Res_Attach(ResObject *Obj, ResObject *Parent)
 	}
 }
 
-bool LgiResources::Res_GetChildren(ResObject *Obj, List<ResObject> *l, bool Deep)
+bool LResources::Res_GetChildren(ResObject *Obj, List<ResObject> *l, bool Deep)
 {
-	GView *o = CastToGWnd(Obj);
+	LView *o = CastToGWnd(Obj);
 	if (o && l)
 	{
-		for (GViewI *w: o->IterateViews())
+		for (LViewI *w: o->IterateViews())
 		{
 			ResObject *n = dynamic_cast<ResObject*>(w);
 			if (n)
@@ -1080,19 +1080,19 @@ bool LgiResources::Res_GetChildren(ResObject *Obj, List<ResObject> *l, bool Deep
 	return false;
 }
 
-void LgiResources::Res_Append(ResObject *Obj, ResObject *Parent)
+void LResources::Res_Append(ResObject *Obj, ResObject *Parent)
 {
 	if (Obj && Parent)
 	{
-		GItemColumn *Col = dynamic_cast<GItemColumn*>(Obj);
+		LItemColumn *Col = dynamic_cast<LItemColumn*>(Obj);
 		LList *Lst = dynamic_cast<LList*>(Parent);
 		if (Lst && Col)
 		{
 			Lst->AddColumn(Col);
 		}
 
-		GTabView *Tab = dynamic_cast<GTabView*>(Obj);
-		GTabPage *Page = dynamic_cast<GTabPage*>(Parent);
+		LTabView *Tab = dynamic_cast<LTabView*>(Obj);
+		LTabPage *Page = dynamic_cast<LTabPage*>(Parent);
 		if (Tab && Page)
 		{
 			Tab->Append(Page);
@@ -1100,7 +1100,7 @@ void LgiResources::Res_Append(ResObject *Obj, ResObject *Parent)
 	}
 }
 
-bool LgiResources::Res_GetItems(ResObject *Obj, List<ResObject> *l)
+bool LResources::Res_GetItems(ResObject *Obj, List<ResObject> *l)
 {
 	if (Obj && l)
 	{
@@ -1114,7 +1114,7 @@ bool LgiResources::Res_GetItems(ResObject *Obj, List<ResObject> *l)
 			return true;
 		}
 
-		GTabView *Tabs = dynamic_cast<GTabView*>(Obj);
+		LTabView *Tabs = dynamic_cast<LTabView*>(Obj);
 		if (Tabs)
 		{
 			for (int i=0; i<Tabs->GetTabs(); i++)
@@ -1127,13 +1127,13 @@ bool LgiResources::Res_GetItems(ResObject *Obj, List<ResObject> *l)
 	return false;
 }
 
-GDom *LgiResources::Res_GetDom(ResObject *Obj)
+GDom *LResources::Res_GetDom(ResObject *Obj)
 {
 	return dynamic_cast<GDom*>(Obj);
 }
 
 ///////////////////////////////////////////////////////
-LgiDialogRes::LgiDialogRes(LgiResources *res)
+LgiDialogRes::LgiDialogRes(LResources *res)
 {
 	Res = res;
 	Dialog = 0;
@@ -1145,7 +1145,7 @@ LgiDialogRes::~LgiDialogRes()
 	DeleteObj(Dialog);
 }
 
-bool LgiDialogRes::Read(GXmlTag *t, ResFileFormat Format)
+bool LgiDialogRes::Read(LXmlTag *t, ResFileFormat Format)
 {
 	if ((Dialog = t))
 	{
@@ -1172,7 +1172,7 @@ bool LgiDialogRes::Read(GXmlTag *t, ResFileFormat Format)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-LgiMenuRes::LgiMenuRes(LgiResources *res)
+LgiMenuRes::LgiMenuRes(LResources *res)
 {
 	Res = res;
 	Tag = 0;
@@ -1184,7 +1184,7 @@ LgiMenuRes::~LgiMenuRes()
 	DeleteObj(Tag);
 }
 
-bool LgiMenuRes::Read(GXmlTag *t, ResFileFormat Format)
+bool LgiMenuRes::Read(LXmlTag *t, ResFileFormat Format)
 {
 	Tag = t;
 	if (t && stricmp(t->GetTag(), "menu") == 0)
@@ -1192,7 +1192,7 @@ bool LgiMenuRes::Read(GXmlTag *t, ResFileFormat Format)
 		char *n;
 		if ((n = t->GetAttr("name")))
 		{
-			GBase::Name(n);
+			LBase::Name(n);
 		}
 
 		for (auto c: t->Children)
@@ -1224,7 +1224,7 @@ bool LgiMenuRes::Read(GXmlTag *t, ResFileFormat Format)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Dialog
-bool GLgiRes::LoadFromResource(int Resource, GViewI *Parent, GRect *Pos, GAutoString *Name, char *TagList)
+bool LResourceLoad::LoadFromResource(int Resource, LViewI *Parent, LRect *Pos, LAutoString *Name, char *TagList)
 {
 	LgiGetResObj();
 
@@ -1313,8 +1313,8 @@ GLanguage *LGetLanguageId()
 	char Path[256];
 	if (LgiGetSystemPath(LSP_HOME, Path, sizeof(Path)))
 	{
-		LgiMakePath(Path, sizeof(Path), Path, ".kde/share/config/kdeglobals");
-		char *Txt = ReadTextFile(Path);
+		LMakePath(Path, sizeof(Path), Path, ".kde/share/config/kdeglobals");
+		char *Txt = LReadTextFile(Path);
 
 		if (Txt)
 		{
@@ -1352,7 +1352,7 @@ GLanguage *LGetLanguageId()
 const char *LgiLoadString(int Res, const char *Default)
 {
 	char *s = 0;
-	LgiResources *r = LgiGetResObj();
+	LResources *r = LgiGetResObj();
 	if (r)
 	{
 		// use to test for non-resource strings
@@ -1366,7 +1366,7 @@ const char *LgiLoadString(int Res, const char *Default)
 	return Default;
 }
 
-bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoString *Name, GEventsI *Engine, char *TagList)
+bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, LAutoString *Name, LEventsI *Engine, char *TagList)
 {
 	bool Status = false;
 
@@ -1379,7 +1379,7 @@ bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStr
 		{
 			if (Dlg->Id() == ((int) Resource))
 			{
-				// GProfile p("LoadDialog");
+				// LProfile p("LoadDialog");
 			
 				// found the dialog to load, set properties
 				if (Dlg->Name())
@@ -1401,13 +1401,13 @@ bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStr
 
 					// Do some scaling for the monitor's DPI
 					LPoint Dpi;
-					GWindow *Wnd = Parent ? Parent->GetWindow() : NULL;
+					auto *Wnd = Parent ? Parent->GetWindow() : NULL;
 					if (Wnd)
 						Dpi = Wnd->GetDpi();
 					else
 					{
-						GArray<GDisplayInfo*> Displays;
-						if (LgiGetDisplays(Displays))
+						LArray<GDisplayInfo*> Displays;
+						if (LGetDisplays(Displays))
 						{
 							for (auto d: Displays)
 							{
@@ -1424,9 +1424,9 @@ bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStr
 										(int) (s.y * Pos->Y()));
 					}
 				}
-				else if (Parent && stricmp(Parent->GetClass(), "GTabPage"))
+				else if (Parent && stricmp(Parent->GetClass(), "LTabPage"))
 				{
-					GRect r = Parent->GetPos();
+					LRect r = Parent->GetPos();
 					r.Dimension(x, y);
 					Parent->SetPos(r);
 				}
@@ -1443,7 +1443,7 @@ bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStr
 						{
 							if (Res_Read(Obj, t, Tags))
 							{
-								GView *w = dynamic_cast<GView*>(Obj);
+								LView *w = dynamic_cast<LView*>(Obj);
 								if (w)
 									Parent->AddView(w);
 							}
@@ -1452,7 +1452,7 @@ bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStr
 								LgiMsg(	NULL,
 										LgiLoadString(	L_ERROR_RES_RESOURCE_READ_FAILED,
 														"Resource read error, tag: %s"),
-										"LgiResources::LoadDialog",
+										"LResources::LoadDialog",
 										MB_OK,
 										t->GetTag());
 								break;
@@ -1476,7 +1476,7 @@ bool LgiResources::LoadDialog(int Resource, GViewI *Parent, GRect *Pos, GAutoStr
 
 //////////////////////////////////////////////////////////////////////
 // Menus
-LgiStringRes *LgiMenuRes::GetString(GXmlTag *Tag)
+LgiStringRes *LgiMenuRes::GetString(LXmlTag *Tag)
 {
 	if (Tag)
 	{
@@ -1493,7 +1493,7 @@ LgiStringRes *LgiMenuRes::GetString(GXmlTag *Tag)
 	return 0;
 }
 
-bool LMenuLoader::Load(LgiMenuRes *MenuRes, GXmlTag *Tag, ResFileFormat Format, TagHash *TagList)
+bool LMenuLoader::Load(LgiMenuRes *MenuRes, LXmlTag *Tag, ResFileFormat Format, TagHash *TagList)
 {
 	bool Status = false;
 
@@ -1584,11 +1584,11 @@ bool LMenuLoader::Load(LgiMenuRes *MenuRes, GXmlTag *Tag, ResFileFormat Format, 
 	return Status;
 }
 
-bool LMenu::Load(GView *w, const char *Res, const char *TagList)
+bool LMenu::Load(LView *w, const char *Res, const char *TagList)
 {
 	bool Status = false;
 
-	LgiResources *r = LgiGetResObj();
+	LResources *r = LgiGetResObj();
 	if (r)
 	{
 		TagHash Tags(TagList);
@@ -1609,7 +1609,7 @@ bool LMenu::Load(GView *w, const char *Res, const char *TagList)
 	return Status;
 }
 
-LgiResources *LgiGetResObj(bool Warn, const char *filename, bool LoadOnDemand)
+LResources *LgiGetResObj(bool Warn, const char *filename, bool LoadOnDemand)
 {
 	// Look for existing file?
 	if (filename && LoadOnDemand)
@@ -1619,7 +1619,7 @@ LgiResources *LgiGetResObj(bool Warn, const char *filename, bool LoadOnDemand)
 				return r;
 
 		// Load the new file...
-		return new LgiResources(filename, Warn);
+		return new LResources(filename, Warn);
 	}
 
 	if (ResourceOwner.Length())
@@ -1627,5 +1627,5 @@ LgiResources *LgiGetResObj(bool Warn, const char *filename, bool LoadOnDemand)
 	if (!LoadOnDemand)
 		return NULL;
 
-	return new LgiResources(filename, Warn);
+	return new LResources(filename, Warn);
 }

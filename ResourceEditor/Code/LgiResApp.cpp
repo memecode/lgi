@@ -12,16 +12,18 @@
 #include "LgiResEdit.h"
 #include "LgiRes_Dialog.h"
 #include "LgiRes_Menu.h"
-#include "GAbout.h"
-#include "GTextLabel.h"
-#include "GEdit.h"
-#include "GCheckBox.h"
-#include "GProgressDlg.h"
-#include "GTextView3.h"
+#include "lgi/common/About.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/ProgressDlg.h"
+#include "lgi/common/TextView3.h"
 #include "resdefs.h"
-#include "GToken.h"
-#include "GDataDlg.h"
-#include "GButton.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/DataDlg.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/StatusBar.h"
 
 char AppName[]				= "Lgi Resource Editor";
 char HelpFile[]				= "Help.html";
@@ -54,7 +56,7 @@ const char *TypeNames[] = {
 ResFileFormat GetFormat(const char *File)
 {
 	ResFileFormat Format = Lr8File;
-	char *Ext = LgiGetExtension(File);
+	char *Ext = LGetExtension(File);
 	if (Ext)
 	{
 		if (stricmp(Ext, "lr") == 0) Format = CodepageFile;
@@ -69,7 +71,7 @@ char *EncodeXml(const char *Str, int Len)
 	
 	if (Str)
 	{
-		GStringPipe p;
+		LStringPipe p;
 		
 		const char *s = Str;
 		for (const char *e = Str; e && *e && (Len < 0 || ((e-Str) < Len)); )
@@ -144,7 +146,7 @@ char *DecodeXml(const char *Str, int Len)
 {
 	if (Str)
 	{
-		GStringPipe p;
+		LStringPipe p;
 		
 		const char *s = Str;
 		for (const char *e = Str; e && *e && (Len < 0 || ((e-Str) < Len)); )
@@ -274,9 +276,9 @@ bool Resource::IsSelected()
 	return Item?Item->Select():false;
 }
 
-bool Resource::Attach(GViewI *Parent)
+bool Resource::Attach(LViewI *Parent)
 {
-	GView *w = Wnd();
+	LView *w = Wnd();
 	if (w)
 	{
 		return w->Attach(Parent);
@@ -346,7 +348,7 @@ void ObjTreeItem::OnSelect()
 	}
 }
 
-void ObjTreeItem::OnMouseClick(GMouse &m)
+void ObjTreeItem::OnMouseClick(LMouse &m)
 {
 	if (!Obj) return;
 	if (m.IsContextMenu())
@@ -416,12 +418,12 @@ void ObjTreeItem::OnMouseClick(GMouse &m)
 				}
 				case IDM_IMPORT:
 				{
-					GFileSelect Select;
+					LFileSelect Select;
 					Select.Parent(Obj->App());
 					Select.Type("Text", "*.txt");
 					if (Select.Open())
 					{
-						GFile F;
+						LFile F;
 						if (F.Open(Select.Name(), O_READ))
 						{
 							SerialiseContext Ctx;
@@ -496,7 +498,7 @@ void FieldView::Serialize(bool Write)
 	/*
 	for (DataDlgField *f=Fields.First(); f; f=Fields.Next())
 	{
-		GViewI *v;
+		LViewI *v;
 		if (GetViewById(f->GetCtrl(), v))
 		{
 			switch (f->GetType())
@@ -576,7 +578,7 @@ void FieldView::Serialize(bool Write)
 	Ignore = false;
 }
 
-class TextViewEdit : public GTextView3
+class TextViewEdit : public LTextView3
 {
 public:
     bool Multiline;
@@ -586,8 +588,8 @@ public:
 					int y,
 					int cx,
 					int cy,
-					GFontType *FontInfo = 0) :
-		GTextView3(Id, x, y, cx, cy, FontInfo)
+					LFontType *FontInfo = 0) :
+		LTextView3(Id, x, y, cx, cy, FontInfo)
 	{
 	    Multiline = false;
 		#ifdef WIN32
@@ -595,33 +597,33 @@ public:
 		#endif
 	}
 
-	bool OnKey(GKey &k)
+	bool OnKey(LKey &k)
 	{
 		if (!Multiline && (k.c16 == '\t' || k.c16 == LK_RETURN))
 		{
 			return false;
 		}
 
-		return GTextView3::OnKey(k);
+		return LTextView3::OnKey(k);
 	}
 };
 
-class Hr : public GView
+class Hr : public LView
 {
 public:
 	Hr(int x1, int y, int x2)
 	{
-		GRect r(x1, y, x2, y+1);
+		LRect r(x1, y, x2, y+1);
 		SetPos(r);
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
-		GRect c = GetClient();
-		LgiThinBorder(pDC, c, DefaultSunkenEdge);
+		LRect c = GetClient();
+		LThinBorder(pDC, c, DefaultSunkenEdge);
 	}
 
-	bool OnLayout(GViewLayoutInfo &Inf)
+	bool OnLayout(LViewLayoutInfo &Inf)
 	{
 		if (Inf.Width.Min)
 			Inf.Height.Min = Inf.Height.Max = 2;
@@ -640,7 +642,7 @@ void FieldView::OnDelete(FieldSource *s)
 		Fields.Empty();
 
 		// remove all children
-		GViewI *c;
+		LViewI *c;
 		while ((c = Children[0]))
 		{
 			c->Detach();
@@ -664,7 +666,7 @@ void FieldView::OnSelect(FieldSource *s)
 		Fields.Empty();
 
 		// remove all children
-		GViewI *c;
+		LViewI *c;
 		while ((c = Children[0]))
 		{
 			c->Detach();
@@ -682,15 +684,15 @@ void FieldView::OnSelect(FieldSource *s)
 
 		if (Source->GetFields(Fields))
 		{
-			GFontType Sys;
+			LFontType Sys;
 			Sys.GetSystemFont("System");
 
-			GTableLayout *t = new GTableLayout(IDC_TABLE);
+			LTableLayout *t = new LTableLayout(IDC_TABLE);
 
 			int Row = 0;
 			GLayoutCell *Cell;
 
-			GArray<FieldTree::FieldArr*> a;
+			LArray<FieldTree::FieldArr*> a;
 			Fields.GetAll(a);
 			for (int i=0; i<a.Length(); i++)
 			{
@@ -707,8 +709,8 @@ void FieldView::OnSelect(FieldSource *s)
 						case DATA_FILENAME:
 						{
 							Cell = t->GetCell(0, Row);
-							Cell->VerticalAlign(GCss::VerticalMiddle);
-							Cell->Add(new GTextLabel(-1, 0, 0, -1, -1, c->Label));
+							Cell->VerticalAlign(LCss::VerticalMiddle);
+							Cell->Add(new LTextLabel(-1, 0, 0, -1, -1, c->Label));
 
 							TextViewEdit *Tv;
 							Cell = t->GetCell(1, Row, true, c->Type == DATA_FILENAME ? 1 : 2);
@@ -716,7 +718,7 @@ void FieldView::OnSelect(FieldSource *s)
 							if (Tv)
 							{
 								Tv->Multiline = c->Multiline;
-								Tv->GetCss(true)->Height(GCss::Len(GCss::LenPx, c->Multiline ? SysFont->GetHeight() * 8 : SysFont->GetHeight() + 8));
+								Tv->GetCss(true)->Height(LCss::Len(LCss::LenPx, c->Multiline ? SysFont->GetHeight() * 8 : SysFont->GetHeight() + 8));
 								Tv->SetWrapType(TEXTED_WRAP_NONE);
 								Tv->Sunken(true);
 							}
@@ -724,14 +726,14 @@ void FieldView::OnSelect(FieldSource *s)
 							if (c->Type == DATA_FILENAME)
 							{
 								Cell = t->GetCell(2, Row);
-								Cell->Add(new GButton(-c->Id, 0, 0, 21, 21, "..."));
+								Cell->Add(new LButton(-c->Id, 0, 0, 21, 21, "..."));
 							}
 							break;
 						}
 						case DATA_BOOL:
 						{
 							Cell = t->GetCell(1, Row, true, 2);
-							Cell->Add(new GCheckBox(c->Id, 0, 0, -1, -1, c->Label));
+							Cell->Add(new LCheckBox(c->Id, 0, 0, -1, -1, c->Label));
 							break;
 						}
 						default:
@@ -760,10 +762,10 @@ void FieldView::OnSelect(FieldSource *s)
 
 void FieldView::OnPosChange()
 {
-	GRect c = GetClient();
+	LRect c = GetClient();
 	c.Size(6, 6);
 
-	GViewI *v;
+	LViewI *v;
 	if (GetViewById(IDC_TABLE, v))
 		v->SetPos(c);
 }
@@ -786,20 +788,20 @@ GMessage::Result FieldView::OnEvent(GMessage *m)
 		}
 	}
 
-	return GLayout::OnEvent(m);
+	return LLayout::OnEvent(m);
 }
 
-int FieldView::OnNotify(GViewI *Ctrl, int Flags)
+int FieldView::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (!Ignore)
 	{
-		GTextView3 *Tv = dynamic_cast<GTextView3*>(Ctrl);
+		LTextView3 *Tv = dynamic_cast<LTextView3*>(Ctrl);
 		if (Tv && Flags == GNotifyCursorChanged)
 		{
 			return 0;
 		}
 
-		GArray<FieldTree::FieldArr*> a;
+		LArray<FieldTree::FieldArr*> a;
 		Fields.GetAll(a);
 		for (int i=0; i<a.Length(); i++)
 		{
@@ -818,16 +820,16 @@ int FieldView::OnNotify(GViewI *Ctrl, int Flags)
 				}
 				else if (c->Id == -Ctrl->GetId())
 				{
-					GFileSelect s;
+					LFileSelect s;
 					s.Parent(this);
 					if (s.Open())
 					{
 						auto File = App->GetCurFile();
 						if (File)
 						{
-							GFile::Path p = File;
+							LFile::Path p = File;
 							p--;
-							GAutoString Rel = LgiMakeRelativePath(p, s.Name());
+							LAutoString Rel = LMakeRelativePath(p, s.Name());
 							if (Rel)
 								SetCtrlName(c->Id, Rel);
 							else
@@ -849,7 +851,7 @@ int FieldView::OnNotify(GViewI *Ctrl, int Flags)
 	return 0;
 }
 
-void FieldView::OnPaint(GSurface *pDC)
+void FieldView::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(L_MED);
 	pDC->Rectangle();
@@ -857,7 +859,7 @@ void FieldView::OnPaint(GSurface *pDC)
 
 //////////////////////////////////////////////////////////////////////////////
 ObjContainer::ObjContainer(AppWnd *w) :
-	GTree(100, 0, 0, 100, 100, "LgiResObjTree")
+	LTree(100, 0, 0, 100, 100, "LgiResObjTree")
 {
 	Window = w;
 	Sunken(true);
@@ -871,7 +873,7 @@ ObjContainer::ObjContainer(AppWnd *w) :
 	auto f = LFindFile(IconFile);
 	if (f)
 	{
-		Images = LgiLoadImageList(f, 16, 16);
+		Images = LLoadImageList(f, 16, 16);
 		if (Images)
 			SetImageList(Images, false);
 		else
@@ -889,7 +891,7 @@ bool ObjContainer::AppendChildren(ObjTreeItem *Res, List<Resource> &Lst)
 	bool Status = true;
 	if (Res)
 	{
-		GTreeItem *Item = Res->GetChild();
+		LTreeItem *Item = Res->GetChild();
 		while (Item)
 		{
 			ObjTreeItem *i = dynamic_cast<ObjTreeItem*>(Item);
@@ -927,7 +929,7 @@ const char *Icon = "icon64.png";
 #endif
 
 AppWnd::AppWnd() :
-	GDocApp<GOptionsFile>(AppName, Icon)
+	GDocApp<LOptionsFile>(AppName, Icon)
 {
 	LastRes = 0;
 	Fields = 0;
@@ -941,7 +943,7 @@ AppWnd::AppWnd() :
 
 	if (_Create())
 	{
-		GVariant Langs;
+		LVariant Langs;
 		if (GetOptions()->GetValue(OPT_ShowLanguages, Langs))
 		{
 			ShowLanguages.Empty();
@@ -985,12 +987,12 @@ void AppWnd::OnCreate()
 	Status = 0;
 	StatusInfo[0] = StatusInfo[1] = 0;
 
-	HBox = new GBox(IDC_HBOX);
+	HBox = new LBox(IDC_HBOX);
 	if (HBox)
 	{
 		HBox->GetCss(true)->Padding("5px");
 
-		VBox = new GBox(IDC_VBOX, true);
+		VBox = new LBox(IDC_VBOX, true);
 		if (VBox)
 		{
 			HBox->AddView(VBox);
@@ -1010,7 +1012,7 @@ void AppWnd::OnCreate()
 
 	DropTarget(true);
 
-	GString Open;
+	LString Open;
 	if (LgiApp->GetOption("o", Open))
 		LoadLgi(Open);
 }
@@ -1090,7 +1092,7 @@ void AppWnd::ShowLang(GLanguageId Lang, bool Show)
 	}
 
 	// Store the setting for next time
-	GStringPipe p;
+	LStringPipe p;
 	// const char *L;
 	// for (bool i = ShowLanguages.First(&L); i; i = ShowLanguages.Next(&L))
 	for (auto i : ShowLanguages)
@@ -1101,7 +1103,7 @@ void AppWnd::ShowLang(GLanguageId Lang, bool Show)
 	char *Langs = p.NewStr();
 	if (Langs)
 	{
-		GVariant v;
+		LVariant v;
 		GetOptions()->SetValue(OPT_ShowLanguages, v = Langs);
 		DeleteArray(Langs);
 	}
@@ -1149,12 +1151,12 @@ void AppWnd::SetCurLang(GLanguage *L)
 	}
 }
 
-GArray<GLanguage*> *AppWnd::GetLanguages()
+LArray<GLanguage*> *AppWnd::GetLanguages()
 {
 	return &Languages;
 }
 
-class Test : public GView
+class Test : public LView
 {
 	COLOUR c;
 
@@ -1162,13 +1164,13 @@ public:
 	Test(COLOUR col, int x1, int y1, int x2, int y2)
 	{
 		c = col;
-		GRect r(x1, y1, x2, y2);
+		LRect r(x1, y1, x2, y2);
 		SetPos(r);
 		_BorderSize = 1;
 		Sunken(true);
 	}
 	
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		pDC->Colour(c, 24);
 		pDC->Rectangle();
@@ -1183,7 +1185,7 @@ GMessage::Result AppWnd::OnEvent(GMessage *m)
 	{
 		case M_CHANGE:
 		{
-			return OnNotify((GViewI*) m->A(), (int)m->B());
+			return OnNotify((LViewI*) m->A(), (int)m->B());
 		}
 		case M_DESCRIBE:
 		{
@@ -1195,10 +1197,10 @@ GMessage::Result AppWnd::OnEvent(GMessage *m)
 			break;
 		}
 	}
-	return GWindow::OnEvent(m);
+	return LWindow::OnEvent(m);
 }
 
-#include "GToken.h"
+#include "lgi/common/Token.h"
 void _CountGroup(ResStringGroup *Grp, int &Words, int &Multi)
 {
 	for (auto s: *Grp->GetStrs())
@@ -1410,11 +1412,11 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 			while (strchr(ExeName, DIR_CHAR) && strlen(ExeName) > 3)
 			{
 				char p[256];
-				LgiMakePath(p, sizeof(p), ExeName, "index.html");
+				LMakePath(p, sizeof(p), ExeName, "index.html");
 				if (!LFileExists(p))
 				{
-					LgiMakePath(p, sizeof(p), ExeName, "help");
-					LgiMakePath(p, sizeof(p), p, "index.html");
+					LMakePath(p, sizeof(p), ExeName, "help");
+					LMakePath(p, sizeof(p), p, "index.html");
 				}
 				if (LFileExists(p))
 				{
@@ -1422,7 +1424,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 					break;
 				}
 				
-				LgiTrimDir(ExeName);
+				LTrimDir(ExeName);
 			}
 			break;
 		}
@@ -1434,7 +1436,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		}
 		case IDM_ABOUT:
 		{
-			GAbout Dlg(	this,
+			LAbout Dlg(	this,
 						AppName,
 						APP_VER,
 						"\nLgi Resource Editor (lr8 files).",
@@ -1479,10 +1481,10 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		}
 	}
 
-	return GDocApp<GOptionsFile>::OnCommand(Cmd, Event, Handle);
+	return GDocApp<LOptionsFile>::OnCommand(Cmd, Event, Handle);
 }
 
-int AppWnd::OnNotify(GViewI *Ctrl, int Flags)
+int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{
@@ -1588,7 +1590,7 @@ int AppWnd::GetUniqueStrRef(int	Start)
 		return -1;
 
 	LHashTbl<IntKey<int>, ResString*> Map;
-	GArray<ResString*> Dupes;
+	LArray<ResString*> Dupes;
 
 	for (auto r: l)
 	{
@@ -1692,7 +1694,7 @@ ResStringGroup *AppWnd::GetDialogSymbols()
 	return NULL;
 }
 
-void AppWnd::OnReceiveFiles(GArray<const char*> &Files)
+void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 {
 	auto f = Files.Length() ? Files[0] : 0;
 	if (f)
@@ -1709,7 +1711,7 @@ void AppWnd::SetStatusText(char *Text, int Pane)
 	}
 }
 
-Resource *AppWnd::NewObject(SerialiseContext ctx, GXmlTag *load, int Type, bool Select)
+Resource *AppWnd::NewObject(SerialiseContext ctx, LXmlTag *load, int Type, bool Select)
 {
 	Resource *r = 0;
 	ObjTreeItem *Dir = 0;
@@ -1832,9 +1834,9 @@ void AppWnd::DelObject(Resource *r)
 	DeleteObj(r);
 }
 
-ObjTreeItem *GetTreeItem(GTreeItem *ti, Resource *r)
+ObjTreeItem *GetTreeItem(LTreeItem *ti, Resource *r)
 {
-	for (GTreeItem *i=ti->GetChild(); i; i=i->GetNext())
+	for (LTreeItem *i=ti->GetChild(); i; i=i->GetNext())
 	{
 		ObjTreeItem *o = dynamic_cast<ObjTreeItem*>(i);
 		if (o)
@@ -1849,9 +1851,9 @@ ObjTreeItem *GetTreeItem(GTreeItem *ti, Resource *r)
 	return 0;
 }
 
-ObjTreeItem *GetTreeItem(GTree *ti, Resource *r)
+ObjTreeItem *GetTreeItem(LTree *ti, Resource *r)
 {
-	for (GTreeItem *i=ti->GetChild(); i; i=i->GetNext())
+	for (LTreeItem *i=ti->GetChild(); i; i=i->GetNext())
 	{
 		ObjTreeItem *o = dynamic_cast<ObjTreeItem*>(i);
 		if (o)
@@ -1908,7 +1910,7 @@ void AppWnd::GotoObject(ResString *s,
 				}
 				else if (m)
 				{
-					for (GTreeItem *i=m; i; i=i->GetParent())
+					for (LTreeItem *i=m; i; i=i->GetParent())
 					{
 						i->Expanded(true);
 					}
@@ -1986,10 +1988,10 @@ void AppWnd::OnResourceSelect(Resource *r)
 	}
 }
 
-char *TagName(GXmlTag *t)
+char *TagName(LXmlTag *t)
 {
 	static char Buf[1024];
-	GArray<GXmlTag*> Tags;
+	LArray<LXmlTag*> Tags;
 	for (; t; t = t->Parent)
 	{
 		Tags.AddAt(0, t);
@@ -2003,7 +2005,7 @@ char *TagName(GXmlTag *t)
 	return Buf;
 }
 
-class ResCompare : public GWindow, public GLgiRes
+class ResCompare : public LWindow, public LResourceLoad
 {
 	LList *Lst;
 
@@ -2011,8 +2013,8 @@ public:
 	ResCompare(const char *File1, const char *File2)
 	{
 		Lst = 0;
-		GRect p;
-		GAutoString n;
+		LRect p;
+		LAutoString n;
 
 		if (LoadFromResource(IDD_COMPARE, this, &p, &n))
 		{
@@ -2026,14 +2028,14 @@ public:
 				Visible(true);
 				AttachChildren();
 
-				GXmlTag *t1 = new GXmlTag;
-				GXmlTag *t2 = new GXmlTag;
+				LXmlTag *t1 = new LXmlTag;
+				LXmlTag *t2 = new LXmlTag;
 				if (t1 && File1)
 				{
-					GFile f;
+					LFile f;
 					if (f.Open(File1, O_READ))
 					{
-						GXmlTree x(GXT_NO_ENTITIES);
+						LXmlTree x(GXT_NO_ENTITIES);
 						if (!x.Read(t1, &f, 0))
 						{
 							DeleteObj(t1);
@@ -2046,10 +2048,10 @@ public:
 				}
 				if (t2 && File2)
 				{
-					GFile f;
+					LFile f;
 					if (f.Open(File2, O_READ))
 					{
-						GXmlTree x(GXT_NO_ENTITIES);
+						LXmlTree x(GXT_NO_ENTITIES);
 						if (!x.Read(t2, &f, 0))
 						{
 							DeleteObj(t2);
@@ -2074,7 +2076,7 @@ public:
 		}
 	}
 
-	void Compare(GXmlTag *t1, GXmlTag *t2)
+	void Compare(LXmlTag *t1, LXmlTag *t2)
 	{
 		char s[1024];
 
@@ -2090,17 +2092,17 @@ public:
 			}
 		}
 
-		LHashTbl<StrKey<char,false>,GXmlAttr*> a;
+		LHashTbl<StrKey<char,false>,LXmlAttr*> a;
 		for (int i=0; i<t1->Attr.Length(); i++)
 		{
-			GXmlAttr *a1 = &t1->Attr[i];
+			LXmlAttr *a1 = &t1->Attr[i];
 			a.Add(a1->GetName(), a1);
 		}
 
 		for (int n=0; n<t2->Attr.Length(); n++)
 		{
-			GXmlAttr *a2 = &t2->Attr[n];
-			GXmlAttr *a1 = (GXmlAttr*) a.Find(a2->GetName());
+			LXmlAttr *a2 = &t2->Attr[n];
+			LXmlAttr *a1 = (LXmlAttr*) a.Find(a2->GetName());
 			if (a1)
 			{
 				if (strcmp(a1->GetValue(), a2->GetValue()) != 0)
@@ -2135,7 +2137,7 @@ public:
 		// for (void *v = a.First(&Key); v; v = a.Next(&Key))
 		for (auto v : a)
 		{
-			GXmlAttr *a1 = v.value;
+			LXmlAttr *a1 = v.value;
 			sprintf(s, "[Left] Missing Attr: '%s' = '%s'", a1->GetName(), a1->GetValue());
 			LListItem *i = new LListItem;
 			if (i)
@@ -2148,7 +2150,7 @@ public:
 
 		if (t1->IsTag("string-group"))
 		{
-			GArray<GXmlTag*> r1, r2;
+			LArray<LXmlTag*> r1, r2;
 			for (auto t: t1->Children)
 			{
 				char *Ref;
@@ -2207,8 +2209,8 @@ public:
 		}
 		else
 		{
-			GXmlTag *c1 = t1->Children[0];
-			GXmlTag *c2 = t2->Children[0];
+			LXmlTag *c1 = t1->Children[0];
+			LXmlTag *c2 = t2->Children[0];
 			while (c1 && c2)
 			{
 				Compare(c1, c2);
@@ -2222,7 +2224,7 @@ public:
 
 	void OnPosChange()
 	{
-		GRect c = GetClient();
+		LRect c = GetClient();
 		if (Lst)
 		{
 			c.Size(7, 7);
@@ -2233,7 +2235,7 @@ public:
 
 void AppWnd::Compare()
 {
-	GFileSelect s;
+	LFileSelect s;
 	s.Parent(this);
 	s.Type("Lgi Resource", "*.lr8");
 	if (s.Open())
@@ -2245,24 +2247,24 @@ void AppWnd::Compare()
 void AppWnd::ImportLang()
 {
 	// open dialog
-	GFileSelect Select;
+	LFileSelect Select;
 
 	Select.Parent(this);
 	Select.Type("Lgi Resources", "*.lr8;*.xml");
 
 	if (Select.Open())
 	{
-		GFile F;
+		LFile F;
 		if (F.Open(Select.Name(), O_READ))
 		{
 			SerialiseContext Ctx;
 			Ctx.Format = GetFormat(Select.Name());
 
 			// convert file to Xml objects
-			GXmlTag *Root = new GXmlTag;
+			LXmlTag *Root = new LXmlTag;
 			if (Root)
 			{
-				GXmlTree Tree(GXT_NO_ENTITIES);
+				LXmlTree Tree(GXT_NO_ENTITIES);
 				if (Tree.Read(Root, &F, 0))
 				{
 					List<ResMenu> Menus;
@@ -2334,7 +2336,7 @@ void AppWnd::ImportLang()
 						if (Dlg.DoModal() == IDOK &&
 							Dlg.Lang)
 						{
-							GStringPipe Errors;
+							LStringPipe Errors;
 							
 							int Matches = 0;
 							int NotFound = 0;
@@ -2547,7 +2549,7 @@ bool AppWnd::SaveFile(const char *FileName)
 	return false;
 }
 
-void AppWnd::GetFileTypes(GFileSelect *Dlg, bool Write)
+void AppWnd::GetFileTypes(LFileSelect *Dlg, bool Write)
 {
 	Dlg->Type("Lgi Resources", "*.lr8;*.xml");
 	if (!Write)
@@ -2572,7 +2574,7 @@ bool AppWnd::TestLgi(bool Quite)
 
 		if (Errors.StrErr.Length() > 0)
 		{
-			GStringPipe Sample;
+			LStringPipe Sample;
 			for (int i=0; i<Errors.StrErr.Length(); i++)
 			{
 				ResString *s = Errors.StrErr[i].Str;
@@ -2603,19 +2605,19 @@ bool AppWnd::LoadLgi(const char *FileName)
 	{
 		// ResFileFormat Format = GetFormat(FileName);
 
-		GFile f;
+		LFile f;
 		if (f.Open(FileName, O_READ))
 		{
-			GProgressDlg Progress(this);
+			LProgressDlg Progress(this);
 
 			Progress.SetDescription("Initializing...");
 			Progress.SetType("Tags");
 
-			GXmlTag *Root = new GXmlTag;
+			LXmlTag *Root = new LXmlTag;
 			if (Root)
 			{				
 				// convert file to Xml objects
-				GXmlTree Xml(0);
+				LXmlTree Xml(0);
 				Progress.SetDescription("Lexing...");
 				if (Xml.Read(Root, &f, 0))
 				{
@@ -2743,7 +2745,7 @@ void SerialiseContext::PostLoad(AppWnd *App)
 		Log.Print("Repaired CtrlId of string ref %i to %i\n", s->GetRef(), Id);
 	}
 	
-	GAutoString a(Log.NewStr());
+	LAutoString a(Log.NewStr());
 	if (ValidStr(a))
 	{
 		LgiMsg(App, "%s", "Load Warnings", MB_OK, a.Get());
@@ -2909,7 +2911,7 @@ int PairCmp(DefinePair *a, DefinePair *b)
 	return a->Value - b->Value;
 }
 
-bool AppWnd::WriteDefines(GFile &Defs)
+bool AppWnd::WriteDefines(LFile &Defs)
 {
 	bool Status = false;
 	ResTree Tree;
@@ -2998,7 +3000,7 @@ bool AppWnd::WriteDefines(GFile &Defs)
 		}
 
 		// write the list out
-		GArray<DefinePair> Pairs;
+		LArray<DefinePair> Pairs;
 		// char *s = 0;
 		// for (int i = Def.First(&s); i; i = Def.Next(&s))
 		for (auto i : Def)
@@ -3064,7 +3066,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 	{
 		char Bak[MAX_PATH];
 		strcpy_s(Bak, sizeof(Bak), FileName);
-		char *e = LgiGetExtension(Bak);
+		char *e = LGetExtension(Bak);
 		if (e)
 		{
 			strcpy(e, "bak");
@@ -3078,8 +3080,8 @@ bool AppWnd::SaveLgi(const char *FileName)
 	// Save the file to xml
 	if (FileName)
 	{
-		GFile f, Defs;		
-		GFile::Path DefsName = FileName;
+		LFile f, Defs;		
+		LFile::Path DefsName = FileName;
 		DefsName += "../resdefs.h";
 
 		if (f.Open(FileName, O_WRITE) &&
@@ -3107,7 +3109,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 				// write defines
 				WriteDefines(Defs);
 
-				GXmlTag Root("resources");
+				LXmlTag Root("resources");
 				// Write all string lists out first so that when we load objects
 				// back in again the strings will already be loaded and can
 				// be referenced
@@ -3115,7 +3117,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 				{
 					if (r->Type() == TYPE_STRING)
 					{
-						GXmlTag *c = new GXmlTag;
+						LXmlTag *c = new LXmlTag;
 						if (c && r->Write(c, Ctx))
 						{
 							Root.InsertTag(c);
@@ -3133,7 +3135,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 				{
 					if (r->Type() != TYPE_STRING)
 					{
-						GXmlTag *c = new GXmlTag;
+						LXmlTag *c = new LXmlTag;
 						if (c && r->Write(c, Ctx))
 						{
 							Root.InsertTag(c);
@@ -3155,7 +3157,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 				// root element.
 				Root.SetAttr("Offset", 1);
 
-				GXmlTree Tree(GXT_NO_ENTITIES);
+				LXmlTree Tree(GXT_NO_ENTITIES);
 				Status = Tree.Write(&Root, &f);
 			}
 		}
@@ -3187,7 +3189,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 #define IMP_MODE_STRINGS			3
 #define IMP_MODE_MENU				4
 
-#include "GToken.h"
+#include "lgi/common/Token.h"
 
 class ImportDefine
 {
@@ -3325,7 +3327,7 @@ public:
 				{
 					NestLevel++;
 
-					GFile F;
+					LFile F;
 					if (T.Length() > 1)
 					{
 						for (auto IncPath: IncludeDirs)
@@ -3403,7 +3405,7 @@ public:
 	}
 };
 
-void TokLine(GArray<char*> &T, char *Line)
+void TokLine(LArray<char*> &T, char *Line)
 {
 	if (Line)
 	{
@@ -3432,7 +3434,7 @@ void TokLine(GArray<char*> &T, char *Line)
 bool AppWnd::LoadWin32(const char *FileName)
 {
 	bool Status = false;
-	GFileSelect Select;
+	LFileSelect Select;
 	LHashTbl<ConstStrKey<char,false>,bool> CtrlNames;
 	CtrlNames.Add("LTEXT", true);
 	CtrlNames.Add("EDITTEXT", true);
@@ -3459,13 +3461,13 @@ bool AppWnd::LoadWin32(const char *FileName)
 
 	if (FileName)
 	{
-		GProgressDlg Progress(this);
+		LProgressDlg Progress(this);
 
 		Progress.SetDescription("Initializing...");
 		Progress.SetType("K");
 		Progress.SetScale(1.0/1024.0);
 
-		char *FileTxt = ReadTextFile(Select.Name());
+		char *FileTxt = LReadTextFile(Select.Name());
 		if (FileTxt)
 		{
 			GToken Lines(FileTxt, "\r\n");
@@ -3495,7 +3497,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 			// Include defines
 			char IncPath[256];
 			strcpy(IncPath, Select.Name());
-			LgiTrimDir(IncPath);
+			LTrimDir(IncPath);
 			Defines.IncludeDirs.Insert(NewStr(IncPath));
 
 			Defines.DefineSymbol("_WIN32");
@@ -3524,7 +3526,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 				Defines.ProcessLine(Line);
 
 				// Tokenize
-				GArray<char*> T;
+				LArray<char*> T;
 				TokLine(T, Line);
 
 				// Process line
@@ -3569,7 +3571,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 												}
 											}
 
-											GRect r(Pos[0], Pos[1], Pos[0]+(Pos[2]*DIALOG_X), Pos[1]+(Pos[3]*DIALOG_Y));
+											LRect r(Pos[0], Pos[1], Pos[0]+(Pos[2]*DIALOG_X), Pos[1]+(Pos[3]*DIALOG_Y));
 											r.Offset(7, 7);
 											Dlg->ResDialogCtrl::SetPos(r);
 											Dlg->GetStr()->SetDefine(T[0]);
@@ -3708,7 +3710,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
-										GRect r;
+										LRect r;
 										r.ZOff(atoi(T[5])*CTRL_X, atoi(T[6])*CTRL_Y);
 										r.Offset(atoi(T[3])*CTRL_X+ADJUST_CTRLS_X, atoi(T[4])*CTRL_Y+ADJUST_CTRLS_Y);
 										Ctrl->ResDialogCtrl::SetPos(r);
@@ -3731,7 +3733,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
-										GRect r;
+										LRect r;
 										r.ZOff(atoi(T[4])*CTRL_X, atoi(T[5])*CTRL_Y);
 										r.Offset(atoi(T[2])*CTRL_X+ADJUST_CTRLS_X, atoi(T[3])*CTRL_Y+ADJUST_CTRLS_Y);
 										Ctrl->ResDialogCtrl::SetPos(r);
@@ -3754,7 +3756,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
-										GRect r;
+										LRect r;
 										r.ZOff(atoi(T[4])*CTRL_X, atoi(T[5])*CTRL_Y);
 										r.Offset(atoi(T[2])*CTRL_X+ADJUST_CTRLS_X, atoi(T[3])*CTRL_Y+ADJUST_CTRLS_Y);
 										Ctrl->ResDialogCtrl::SetPos(r);
@@ -3777,7 +3779,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
-										GRect r;
+										LRect r;
 										r.ZOff(atoi(T[4])*CTRL_X, atoi(T[5])*CTRL_Y);
 										r.Offset(atoi(T[2])*CTRL_X+ADJUST_CTRLS_X, atoi(T[3])*CTRL_Y+ADJUST_CTRLS_Y);
 										Ctrl->ResDialogCtrl::SetPos(r);
@@ -3801,7 +3803,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
-										GRect r;
+										LRect r;
 										r.ZOff(atoi(T[5])*CTRL_X, atoi(T[6])*CTRL_Y);
 										r.Offset(atoi(T[3])*CTRL_X+ADJUST_CTRLS_X, atoi(T[4])*CTRL_Y+ADJUST_CTRLS_Y);
 										Ctrl->ResDialogCtrl::SetPos(r);
@@ -3826,7 +3828,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
-										GRect r;
+										LRect r;
 										r.ZOff(atoi(T[5])*CTRL_X, atoi(T[6])*CTRL_Y);
 										r.Offset(atoi(T[3])*CTRL_X+ADJUST_CTRLS_X, atoi(T[4])*CTRL_Y+ADJUST_CTRLS_Y);
 										Ctrl->ResDialogCtrl::SetPos(r);
@@ -3868,7 +3870,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 										}
 									}
 
-									GRect r(0, 0, 0, 0);
+									LRect r(0, 0, 0, 0);
 									if (i + 3 < T.Length() && Type)
 									{
 										ResDialogCtrl *Ctrl = 0;
@@ -3921,7 +3923,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
-										GRect r;
+										LRect r;
 										r.ZOff(atoi(T[5])*CTRL_X, atoi(T[6])*CTRL_Y);
 										r.Offset(atoi(T[3])*CTRL_X+ADJUST_CTRLS_X, atoi(T[4])*CTRL_Y+ADJUST_CTRLS_Y);
 										Ctrl->ResDialogCtrl::SetPos(r);
@@ -3944,7 +3946,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 											Ctrl->GetStr()->SetId(atoi(Def->Value));
 										}
 
-										GRect r;
+										LRect r;
 										r.ZOff(atoi(T[4])*CTRL_X, atoi(T[5])*CTRL_Y);
 										r.Offset(atoi(T[2])*CTRL_X+ADJUST_CTRLS_X, atoi(T[3])*CTRL_Y+ADJUST_CTRLS_Y);
 										Ctrl->ResDialogCtrl::SetPos(r);
@@ -3962,7 +3964,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 								for (auto d: DlLList)
 								{
 									auto It = d->IterateViews();
-									GViewI *Wnd = It[0];
+									LViewI *Wnd = It[0];
 									if (Wnd)
 									{
 										CtrlDlg *Obj = dynamic_cast<CtrlDlg*>(Wnd);
@@ -4021,9 +4023,9 @@ bool AppWnd::LoadWin32(const char *FileName)
 											List<ResDialogCtrl> Overlapping;
 											for (auto Mc: Old)
 											{
-												GRect a = Mc->View()->GetPos();
-												GRect b = c->View()->GetPos();
-												GRect c = a;
+												LRect a = Mc->View()->GetPos();
+												LRect b = c->View()->GetPos();
+												LRect c = a;
 												c.Bound(&b);
 												if (c.Valid())
 												{
@@ -4179,7 +4181,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 										{
 											if (MenuNewLang)
 											{
-												GTreeItem *Ri = 0;
+												LTreeItem *Ri = 0;
 												if (MenuItem[MenuLevel])
 												{
 													Ri = MenuItem[MenuLevel]->GetNext();
@@ -4237,7 +4239,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 														int Id = atoi(id->Value);
 
 														int n = 0;
-														for (GTreeItem *o = MenuItem[MenuLevel-1]->GetChild(); o; o = o->GetNext(), n++)
+														for (LTreeItem *o = MenuItem[MenuLevel-1]->GetChild(); o; o = o->GetNext(), n++)
 														{
 															ResMenuItem *Res = dynamic_cast<ResMenuItem*>(o);
 															if (Res && Res->GetStr()->GetId() == Id)
@@ -4350,9 +4352,9 @@ void ResFrame::OnFocus(bool b)
 	Child->Wnd()->Invalidate();
 }
 
-bool ResFrame::Attach(GViewI *p)
+bool ResFrame::Attach(LViewI *p)
 {
-	bool Status = GLayout::Attach(p);
+	bool Status = LLayout::Attach(p);
 	if (Status && Child)
 	{
 		Child->Attach(this);
@@ -4361,9 +4363,9 @@ bool ResFrame::Attach(GViewI *p)
 	return Status;
 }
 
-bool ResFrame::Pour(GRegion &r)
+bool ResFrame::Pour(LRegion &r)
 {
-	GRect *Best = FindLargest(r);
+	LRect *Best = FindLargest(r);
 	if (Best)
 	{
 		SetPos(*Best);
@@ -4372,7 +4374,7 @@ bool ResFrame::Pour(GRegion &r)
 	return false;
 }
 
-bool ResFrame::OnKey(GKey &k)
+bool ResFrame::OnKey(LKey &k)
 {
 	bool Status = false;
 	
@@ -4442,28 +4444,28 @@ bool ResFrame::OnKey(GKey &k)
 	return Child->Wnd()->OnKey(k) || Status;
 }
 
-void ResFrame::OnPaint(GSurface *pDC)
+void ResFrame::OnPaint(LSurface *pDC)
 {
 	// Draw nice frame
-	GRect r(0, 0, X()-1, Y()-1);
-	LgiThinBorder(pDC, r, DefaultRaisedEdge);
+	LRect r(0, 0, X()-1, Y()-1);
+	LThinBorder(pDC, r, DefaultRaisedEdge);
 	pDC->Colour(L_MED);
-	LgiFlatBorder(pDC, r, 4);
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LFlatBorder(pDC, r, 4);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 
 	// Set the child to the client area
 	Child->Wnd()->SetPos(r);
 
 	// Draw the dialog & controls
-	GView::OnPaint(pDC);
+	LView::OnPaint(pDC);
 }
 
 ////////////////////////////////////////////////////////////////////
 LgiFunc char *_LgiGenLangLookup();
-#include "GAutoPtr.h"
-#include "GVariant.h"
-#include "GCss.h"
-#include "GTableLayout.h"
+#include "lgi/common/AutoPtr.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Css.h"
+#include "lgi/common/TableLayout.h"
 
 class Foo : public GLayoutCell
 {
@@ -4473,15 +4475,15 @@ public:
 		TextAlign(AlignLeft);
 	}
 
-	bool Add(GView *v) { return false; }
-	bool Remove(GView *v) { return false; }
+	bool Add(LView *v) { return false; }
+	bool Remove(LView *v) { return false; }
 };
 
 //////////////////////////////////////////////////////////////////////
 ShortCutView::ShortCutView(AppWnd *app)
 {
 	App = app;
-	GRect r(0, 0, 300, 600);
+	LRect r(0, 0, 300, 600);
 	SetPos(r);
 	MoveSameScreen(App);
 	Name("Dialog Shortcuts");
@@ -4503,9 +4505,9 @@ ShortCutView::~ShortCutView()
 	App->OnCloseView(this);
 }
 
-void FindShortCuts(LList *Out, GViewI *In)
+void FindShortCuts(LList *Out, LViewI *In)
 {
-	for (GViewI *c: In->IterateViews())
+	for (LViewI *c: In->IterateViews())
 	{
 		ResDialogCtrl *rdc = dynamic_cast<ResDialogCtrl*>(c);
 		if (!rdc || !rdc->GetStr())
@@ -4518,8 +4520,8 @@ void FindShortCuts(LList *Out, GViewI *In)
 			if (a && a[1] != '&')
 			{
 				LListItem *li = new LListItem;
-				GString s(++a, 1);
-				GString id;
+				LString s(++a, 1);
+				LString id;
 				id.Printf("%i", rdc->GetStr()->GetRef());
 				li->SetText(s.Upper(), 0);
 				li->SetText(id, 1);
@@ -4533,7 +4535,7 @@ void FindShortCuts(LList *Out, GViewI *In)
 	}
 }
 
-int ShortCutView::OnNotify(GViewI *Ctrl, int Flags)
+int ShortCutView::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (Ctrl->GetId() == Lst->GetId())
 	{
@@ -4544,7 +4546,7 @@ int ShortCutView::OnNotify(GViewI *Ctrl, int Flags)
 				LListItem *li = Lst->GetSelected();
 				if (li)
 				{
-					GString s = li->GetText(1);
+					LString s = li->GetText(1);
 					ResDialogCtrl *c = (ResDialogCtrl*) li->_UserPtr;
 					if (c)
 						App->GotoObject(c->GetStr(), NULL, c->GetDlg(), NULL, c);
@@ -4554,7 +4556,7 @@ int ShortCutView::OnNotify(GViewI *Ctrl, int Flags)
 		}
 	}
 
-	return GWindow::OnNotify(Ctrl, Flags);
+	return LWindow::OnNotify(Ctrl, Flags);
 }
 
 void ShortCutView::OnDialogChange(ResDialog *Dlg)
@@ -4592,13 +4594,13 @@ void TestFunc()
 		printf("[%i]=%p\n", i, p[i]);
 	}
 
-	c.OnChange(GCss::PropBackground);
+	c.OnChange(LCss::PropBackground);
 	*/
 }
 
 int LgiMain(OsAppArguments &AppArgs)
 {
-	GApp a(AppArgs, "LgiRes");
+	LApp a(AppArgs, "LgiRes");
 	if (a.IsOk())
 	{
 		if ((a.AppWnd = new AppWnd))

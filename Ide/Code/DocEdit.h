@@ -1,7 +1,7 @@
 #ifndef _DOC_EDIT_H_
 #define _DOC_EDIT_H_
 
-#include "GTextView3.h"
+#include "lgi/common/TextView3.h"
 #include "IdeDoc.h"
 
 #define IDM_FILE_COMMENT			100
@@ -87,22 +87,22 @@ protected:
 
 	struct StylingParams
 	{
-		GTextView3 *View;
+		LTextView3 *View;
 		size_t PourStart;
 		ssize_t PourSize;
-		GArray<char16> Text;
-		GString FileName;
-		LUnrolledList<GTextView3::GStyle> Styles;
-		GTextView3::GStyle Visible;
-		GTextView3::GStyle Dirty;
+		LArray<char16> Text;
+		LString FileName;
+		LUnrolledList<LTextView3::LStyle> Styles;
+		LTextView3::LStyle Visible;
+		LTextView3::LStyle Dirty;
 
-		StylingParams(GTextView3 *view) :
+		StylingParams(LTextView3 *view) :
 			Dirty(STYLE_NONE)
 		{
 			View = view;
 		}
 
-		void StyleString(char16 *&s, char16 *e, GColour c, LUnrolledList<GTextView3::GStyle> *Out = NULL)
+		void StyleString(char16 *&s, char16 *e, LColour c, LUnrolledList<LTextView3::LStyle> *Out = NULL)
 		{
 			if (!Out)
 				Out = &Styles;
@@ -132,7 +132,7 @@ protected:
 	// EndLock
 	// Thread only
 		Node Root;
-		LUnrolledList<GTextView3::GStyle> PrevStyle;
+		LUnrolledList<LTextView3::LStyle> PrevStyle;
 	// End Thread only
 
 	// Styling functions..
@@ -150,11 +150,11 @@ protected:
 
 public:
 	DocEditStyling(DocEdit *view);
-	GColour ColourFromType(DocType t);
+	LColour ColourFromType(DocType t);
 };
 
 class DocEdit :
-	public GTextView3,
+	public LTextView3,
 	public GDocumentEnv,
 	public DocEditStyling
 {
@@ -167,30 +167,30 @@ class DocEdit :
 
 public:
 	static int LeftMarginPx;
-	DocEdit(IdeDoc *d, GFontType *f);
+	DocEdit(IdeDoc *d, LFontType *f);
 	~DocEdit();
 
 	const char *GetClass() override { return "DocEdit"; }
-	const char *Name() override { return GTextView3::Name(); }
-	bool Name(const char *s) override { return GTextView3::Name(s); }
+	const char *Name() override { return LTextView3::Name(); }
+	bool Name(const char *s) override { return LTextView3::Name(s); }
 	bool SetPourEnabled(bool b);
 	int GetTopPaddingPx();
 	void InvalidateLine(int Idx);
 	char *TemplateMerge(const char *Template, const char *Name, List<char> *Params);
-	bool GetVisible(GStyle &s);
+	bool GetVisible(LStyle &s);
 	void OnCreate() override;
 
 	// Overrides
 	bool AppendItems(LSubMenu *Menu, const char *Param, int Base) override;
 	bool DoGoto() override;
-	void OnPaintLeftMargin(GSurface *pDC, GRect &r, GColour &colour) override;
-	void OnMouseClick(GMouse &m) override;
-	bool OnKey(GKey &k) override;	
+	void OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour) override;
+	void OnMouseClick(LMouse &m) override;
+	bool OnKey(LKey &k) override;	
 	bool OnMenu(GDocView *View, int Id, void *Context) override;
 	GMessage::Result OnEvent(GMessage *m) override;
 	void SetCaret(size_t i, bool Select, bool ForceFullUpdate = false) override;
 	void PourStyle(size_t Start, ssize_t EditSize) override;
-	bool Pour(GRegion &r) override;
+	bool Pour(LRegion &r) override;
 	bool Insert(size_t At, const char16 *Data, ssize_t Len) override;
 	bool Delete(size_t At, ssize_t Len) override;
 };

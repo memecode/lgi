@@ -1,12 +1,12 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "AddFtpFile.h"
 #include "resdefs.h"
 #include "FtpFile.h"
 
-AddFtpFile::AddFtpFile(GViewI *p, char *ftp)
+AddFtpFile::AddFtpFile(LViewI *p, char *ftp)
 {
 	SetParent(p);
-	Base = new GUri(ftp);
+	Base = new LUri(ftp);
 	Thread = 0;
 	Files = Log = 0;
 	if (LoadFromResource(IDD_FTP_FILE))
@@ -44,7 +44,7 @@ void AddFtpFile::OnCmdComplete(FtpCmd *Cmd)
 		{
 			if (e->Name && !e->IsDir())
 			{
-				GUri fu(Cmd->Uri);
+				LUri fu(Cmd->Uri);
 				char path[256];
 				if (Base->sPath)
 					sprintf(path, "%s/%s", Base->sPath.Get(), e->Name.Get());
@@ -59,7 +59,7 @@ void AddFtpFile::OnCmdComplete(FtpCmd *Cmd)
 	}
 }
 
-int AddFtpFile::OnNotify(GViewI *c, int f)
+int AddFtpFile::OnNotify(LViewI *c, int f)
 {
 	switch (c->GetId())
 	{

@@ -1,18 +1,17 @@
-#include "Lgi.h"
-#include "GButton.h"
-#include "GEdit.h"
-#include "GCombo.h"
-// #include "LgiSkinGel.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/Combo.h"
 
 #define IDM_EXIT 4
 
-class Test : public GDialog
+class Test : public LDialog
 {
 public:
-    Test(GViewI *p)
+    Test(LViewI *p)
     {
         SetParent(p);
-        SetPos(GRect(0, 0, 300, 300));
+        SetPos(LRect(0, 0, 300, 300));
         MoveToCenter();
         
 		GCombo *c;
@@ -21,7 +20,7 @@ public:
 		c->Insert("Two");
 		c->Insert("Three");
 
-		AddView(new GButton(50, 10, 10, -1, -1, "Open"));
+		AddView(new LButton(50, 10, 10, -1, -1, "Open"));
 
         /*
 		AddView(c = new GCombo(200, 10, 140, 100, 20, ""));
@@ -33,7 +32,7 @@ public:
         DoModal();
     }
     
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{
@@ -47,17 +46,17 @@ public:
 	}
 };
 
-class App : public GWindow
+class App : public LWindow
 {
-    GImageList *i;
+    LImageList *i;
     
 public:
     App()
     {
-        i = LgiLoadImageList("cmds.png", 16, 16);
+        i = LLoadImageList("cmds.png", 16, 16);
         Name("Gtk Test");
         SetQuitOnClose(true);
-        GRect r(0, 0, 1000, 800);
+        LRect r(0, 0, 1000, 800);
         SetPos(r);
         MoveToCenter();
         if (Attach(0))
@@ -82,7 +81,7 @@ public:
             s->AppendItem("About", 31, true);
             #endif
 
-			GToolBar *t = new GToolBar;
+			LToolBar *t = new LToolBar;
             t->SetImageList(i, 16, 16);
             t->AppendButton("New", 1);
             t->AppendButton("Open", 2);
@@ -90,7 +89,7 @@ public:
             AddView(t);
 
             #if 1
-            GSplitter *split = new GSplitter();
+            LSplitter *split = new LSplitter();
             split->Raised(true);
             split->IsVertical(true);
             split->Border(true);
@@ -99,7 +98,7 @@ public:
             #endif
 			*/
 			
-			AddView(new GButton(50, 10, 10, -1, -1, "Open"));
+			AddView(new LButton(50, 10, 10, -1, -1, "Open"));
 
 		    GCombo *c;
 		    AddView(c = new GCombo(100, 10, 40, 100, 20, ""));
@@ -125,7 +124,7 @@ public:
 		return 0;
 	}
 	
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{
@@ -141,7 +140,7 @@ public:
 
 int LgiMain(OsAppArguments &AppArgs)
 {
-    GApp a("application/x-gtk-test", AppArgs);
+    LApp a("application/x-gtk-test", AppArgs);
     if (a.IsOk())
     {
         // a.SkinEngine = CreateSkinEngine(&a);

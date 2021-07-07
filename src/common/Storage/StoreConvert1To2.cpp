@@ -8,7 +8,7 @@ class ReaderItem : public StorageObj
 {
 	int Type() { LgiAssert(0); return 0; }
 	int Sizeof() { LgiAssert(0); return 0; }
-	bool Serialize(GFile &f, bool Write) { LgiAssert(0); return 0; }
+	bool Serialize(LFile &f, bool Write) { LgiAssert(0); return 0; }
 
 public:
 	int Len;
@@ -21,7 +21,7 @@ public:
 		Store = Item;
 		Store->Object = this;
 
-		GFile *f = Store->GotoObject(__FILE__, __LINE__);
+		LFile *f = Store->GotoObject(__FILE__, __LINE__);
 		if (f)
 		{
 			Len = ((Storage1::StorageItemImpl*)Store)->StoreSize;
@@ -73,7 +73,7 @@ public:
 		return 0;
 	}
 
-	bool Serialize(GFile &f, bool Write)
+	bool Serialize(LFile &f, bool Write)
 	{
 		if (Data && Write)
 		{
@@ -158,7 +158,7 @@ public:
 		return Status;
 	}
 
-	bool Convert(GView *Parent)
+	bool Convert(LView *Parent)
 	{
 		bool Status = false;
 		GProgressDlg Dlg(Parent);
@@ -204,7 +204,7 @@ public:
 			}
 			else
 			{
-				GStatusPane *Wnd = dynamic_cast<GStatusPane*>(Prog);
+				LStatusPane *Wnd = dynamic_cast<LStatusPane*>(Prog);
 				LgiMsg(	Wnd,
 						"The input folders failed to load correctly.\n"
 						"Most likely because they are not v1 folders or\n"
@@ -221,9 +221,9 @@ public:
 	}
 };
 
-bool ConvertStorage1To2(GView *Parent, char *InFile, char *OutFile)
+bool ConvertStorage1To2(LView *Parent, char *InFile, char *OutFile)
 {
-	GFileSelect In;
+	LFileSelect In;
 	In.Parent(Parent);
 	In.Type("Mail folders", "*.mail");
 	if (!InFile &&
@@ -234,7 +234,7 @@ bool ConvertStorage1To2(GView *Parent, char *InFile, char *OutFile)
 
 	if (InFile)
 	{
-		GFileSelect Out;
+		LFileSelect Out;
 		Out.Parent(Parent);
 		Out.Type("Mail folders", "*.mail2");
 		if ((!OutFile || strlen(OutFile) == 0) &&

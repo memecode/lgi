@@ -1,5 +1,5 @@
 /*hdr
-**	FILE:			GMemDC.h
+**	FILE:			LMemDC.h
 **	AUTHOR:			Matthew Allen
 **	DATE:			27/11/2001
 **	DESCRIPTION:	GDC v2.xx header
@@ -11,9 +11,9 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "Gdc2.h"
-#include "GdiLeak.h"
-#include "GPalette.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/GdiLeak.h"
+#include "lgi/common/Palette.h"
 #import <AppKit/NSCursor.h>
 
 #define AlphaType		kCGImageAlphaPremultipliedLast
@@ -22,7 +22,7 @@
 class CGImgPriv
 {
 public:
-	GAutoPtr<uint8> Data;
+	LAutoPtr<uint8> Data;
 	CGImageRef Img;
 	CGColorSpaceRef Cs;
 	CGDataProviderRef Prov;
@@ -62,7 +62,7 @@ void ReleaseCGImg(void *info, const void *data, size_t size)
 {
 }
 
-CGImg::CGImg(GSurface *pDC)
+CGImg::CGImg(LSurface *pDC)
 {
 	d = new CGImgPriv;
 	if (pDC)
@@ -74,7 +74,7 @@ CGImg::CGImg(GSurface *pDC)
 	}
 }
 
-CGImg::CGImg(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, GRect *r, int Debug)
+CGImg::CGImg(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, LRect *r, int Debug)
 {
 	d = new CGImgPriv;
 	d->Debug = Debug;
@@ -83,10 +83,10 @@ CGImg::CGImg(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, 
 
 #define COPY_MODE		1
 
-void CGImg::Create(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, GRect *r)
+void CGImg::Create(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, LRect *r)
 {
-	GRect All(0, 0, x-1, y-1);
-	GRect B;
+	LRect All(0, 0, x-1, y-1);
+	LRect B;
 	if (r)
 	{
 		B = *r;
@@ -192,23 +192,23 @@ CGImg::operator CGImageRef()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-class GMemDCPrivate
+class LMemDCPrivate
 {
 public:
 	uchar *Data;
 	CGContextRef Bmp;
 	CGColorSpaceRef Cs;
-	GArray<GRect> Client;
-	GAutoPtr<uchar, true> BitsMem;
+	LArray<LRect> Client;
+	LAutoPtr<uchar, true> BitsMem;
 
-	GMemDCPrivate()
+	LMemDCPrivate()
 	{
 		Cs = NULL;
 		Data = NULL;
 		Bmp = NULL;
 	}
 	
-	~GMemDCPrivate()
+	~LMemDCPrivate()
 	{
 		Empty();
 	}
@@ -232,9 +232,9 @@ public:
 	}
 };
 
-GMemDC::GMemDC(int x, int y, GColourSpace cs, int flags)
+LMemDC::LMemDC(int x, int y, LColourSpace cs, int flags)
 {
-	d = new GMemDCPrivate;
+	d = new LMemDCPrivate;
 	pMem = 0;
 
 	if (x && y && cs)
@@ -243,9 +243,9 @@ GMemDC::GMemDC(int x, int y, GColourSpace cs, int flags)
 	}
 }
 
-GMemDC::GMemDC(GSurface *pDC)
+LMemDC::LMemDC(LSurface *pDC)
 {
-	d = new GMemDCPrivate;
+	d = new LMemDCPrivate;
 	pMem = 0;
 
 	if (pDC &&
@@ -266,7 +266,7 @@ GMemDC::GMemDC(GSurface *pDC)
 	}
 }
 
-GMemDC::~GMemDC()
+LMemDC::~LMemDC()
 {
 	Empty();
 	DeleteObj(d);
@@ -279,9 +279,9 @@ void MemRelease(void * __nullable info, const void *  data, size_t size)
 }
 
 #if LGI_COCOA
-GMemDC::GMemDC(NSImage *img)
+LMemDC::LMemDC(NSImage *img)
 {
-	d = new GMemDCPrivate;
+	d = new LMemDCPrivate;
 	pMem = 0;
 
 	if (img &&
@@ -297,12 +297,12 @@ GMemDC::GMemDC(NSImage *img)
 	}
 }
 
-NSImage *GMemDC::NsImage(GRect *rc)
+NSImage *LMemDC::NsImage(LRect *rc)
 {
 	if (!pMem || !pMem->Base)
 		return nil;
 
-	GRect r;
+	LRect r;
 	if (rc)
 		r = *rc;
 	else
@@ -313,8 +313,8 @@ NSImage *GMemDC::NsImage(GRect *rc)
 	size_t bytesPerRow = (bitsPerPixel * r.X() + 7) / bitsPerComponent;
 	CGDataProviderRef provider = nil;
 	
-	GArray<uint8_t> Mem;
-	GAutoPtr<GSurface> Sub(SubImage(r));
+	LArray<uint8_t> Mem;
+	LAutoPtr<LSurface> Sub(SubImage(r));
 	if (!Sub)
 		return nil;
 	auto p = Sub->pMem;
@@ -338,8 +338,8 @@ NSImage *GMemDC::NsImage(GRect *rc)
 	provider = CGDataProviderCreateWithData(NULL, Mem.Release(), len, MemRelease);
 	
 	CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
-	// CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast;
-	CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaLast;
+	// CLBitmapInfo bitmapInfo = kCLBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast;
+	auto bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaLast;
 	CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
 
 	CGImageRef iref = CGImageCreate(r.X(), r.Y(),
@@ -359,23 +359,23 @@ NSImage *GMemDC::NsImage(GRect *rc)
 }
 #endif
 
-void GMemDC::Empty()
+void LMemDC::Empty()
 {
 	DeleteObj(pMem);
 }
 
-bool GMemDC::SupportsAlphaCompositing()
+bool LMemDC::SupportsAlphaCompositing()
 {
 	return true;
 }
 
-GRect GMemDC::ClipRgn(GRect *Rgn)
+LRect LMemDC::ClipRgn(LRect *Rgn)
 {
-	GRect Old = Clip;
+	LRect Old = Clip;
 	
 	if (Rgn)
 	{
-		GRect Dc(0, 0, X()-1, Y()-1);
+		LRect Dc(0, 0, X()-1, Y()-1);
 		
 		Clip = *Rgn;
 		Clip.Offset(-OriginX, -OriginY);
@@ -389,7 +389,7 @@ GRect GMemDC::ClipRgn(GRect *Rgn)
 	return Old;
 }
 
-CGImg *GMemDC::GetImg(GRect *Sub, int Debug)
+CGImg *LMemDC::GetImg(LRect *Sub, int Debug)
 {
 	if (!pMem)
 		return 0;
@@ -409,27 +409,27 @@ CGImg *GMemDC::GetImg(GRect *Sub, int Debug)
 				);
 }
 
-OsBitmap GMemDC::GetBitmap()
+OsBitmap LMemDC::GetBitmap()
 {
 	return 0;
 }
 
-OsPainter GMemDC::Handle()
+OsPainter LMemDC::Handle()
 {
 	return d->Bmp;
 }
 
-bool GMemDC::Lock()
+bool LMemDC::Lock()
 {
 	return true;
 }
 
-bool GMemDC::Unlock()
+bool LMemDC::Unlock()
 {
 	return true;
 }
 
-bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
+bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 {
 	bool Status = false;
 
@@ -512,7 +512,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 				}
 				
 				if (pMem->Cs != Cs &&
-					Flags == GSurface::SurfaceRequireExactCs)
+					Flags == LSurface::SurfaceRequireExactCs)
 				{
 					// Surface type mismatch... throw away the system bitmap and allocate
 					// the exact type just in our memory.
@@ -565,12 +565,12 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	return Status;
 }
 
-CGColorSpaceRef GMemDC::GetColourSpaceRef()
+CGColorSpaceRef LMemDC::GetColourSpaceRef()
 {
 	return d->Cs;
 }
 
-void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
+void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 {
 	if (!Src)
 		return;
@@ -586,7 +586,7 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 		CGImageRef Img = CGWindowListCreateImage(r, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
 		if (Img)
 		{
-			GRect dr(0, 0, (int)CGImageGetWidth(Img)-1, (int)CGImageGetHeight(Img)-1);
+			LRect dr(0, 0, (int)CGImageGetWidth(Img)-1, (int)CGImageGetHeight(Img)-1);
 			CGContextDrawImage(d->Bmp, dr, Img);
 			CGImageRelease(Img);
 
@@ -606,7 +606,7 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 					// NSPoint hotSpot = [[NSCursor currentSystemCursor] hotSpot];
 					HIPoint p;
 					HIGetMousePosition(kHICoordSpaceScreenPixel, NULL, &p);
-					GRect msr(0, 0, (int)cursor.size.width-1, (int)cursor.size.height-1);
+					LRect msr(0, 0, (int)cursor.size.width-1, (int)cursor.size.height-1);
 					msr.Offset(p.x - (int)r.origin.x, p.y - (int)r.origin.y);
 
 					printf("msr=%s\n", msr.GetStr());
@@ -621,15 +621,15 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	}
 	else
 	{
-		GSurface::Blt(x, y, Src, a);
+		LSurface::Blt(x, y, Src, a);
 	}
 }
 
-void GMemDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
+void LMemDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
 {
 	if (Src)
 	{
-		GRect DestR;
+		LRect DestR;
 		if (d)
 		{
 			DestR = *d;
@@ -639,7 +639,7 @@ void GMemDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
 			DestR.ZOff(X()-1, Y()-1);
 		}
 
-		GRect SrcR;
+		LRect SrcR;
 		if (s)
 		{
 			SrcR = *s;
@@ -652,7 +652,7 @@ void GMemDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
 	}
 }
 
-void GMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
+void LMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
 {
 	if (x1 > x2) LgiSwap(x1, x2);
 
@@ -684,7 +684,7 @@ void GMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
 	}
 }
 
-void GMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
+void LMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
 {
 	if (y1 > y2) LgiSwap(y1, y2);
 	
@@ -716,22 +716,22 @@ void GMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
 	}
 }
 
-void GMemDC::SetOrigin(int x, int y)
+void LMemDC::SetOrigin(int x, int y)
 {
-	GSurface::SetOrigin(x, y);
+	LSurface::SetOrigin(x, y);
 }
 
-void GMemDC::SetClient(GRect *c)
+void LMemDC::SetClient(LRect *c)
 {
 	if (c)
 	{
-		GRect Doc;
+		LRect Doc;
 		if (d->Client.Length())
 			Doc = d->Client.Last();
 		else
 			Doc = Bounds();
 		
-		GRect r = *c;
+		LRect r = *c;
 		//r.Offset(Doc.x1, Doc.y1);
 		r.Bound(&Doc);
 		d->Client.Add(r);

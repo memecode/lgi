@@ -15,11 +15,14 @@
 #include <stdlib.h>
 #include "LgiResEdit.h"
 #include "LgiRes_Dialog.h"
-#include "GButton.h"
-#include "GVariant.h"
-#include "GToken.h"
-#include "GDisplayString.h"
-#include "GClipBoard.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/ClipBoard.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/StatusBar.h"
+#include "lgi/common/ToolBar.h"
 #include "resdefs.h"
 
 ////////////////////////////////////////////////////////////////////
@@ -39,26 +42,26 @@ public:
 }
 NameMap[] =
 {
-	// ID				Lgi's name		Resource editor name
-	{UI_DIALOG,			"GDialog",		Res_Dialog,			false},
-	{UI_TABLE,			"GTableLayout",	Res_Table,			true},
-	{UI_TEXT,			"GText",		Res_StaticText,		true},
-	{UI_EDITBOX,		"GEdit",		Res_EditBox,		true},
-	{UI_CHECKBOX,		"GCheckBox",	Res_CheckBox,		true},
-	{UI_BUTTON,			"GButton",		Res_Button,			true},
-	{UI_GROUP,			"GRadioGroup",	Res_Group,			true},
-	{UI_RADIO,			"GRadioButton",	Res_RadioBox,		true},
-	{UI_TABS,			"GTabView",		Res_TabView,		true},
-	{UI_TAB,			"GTabPage",		Res_Tab,			false},
-	{UI_LIST,			"LList",		Res_ListView,		true},
-	{UI_COLUMN,			"LListColumn",	Res_Column,			false},
-	{UI_COMBO,			"GCombo",		Res_ComboBox,		true},
-	{UI_TREE,			"GTree",		Res_TreeView,		true},
-	{UI_BITMAP,			"GBitmap",		Res_Bitmap,			true},
-	{UI_PROGRESS,		"GProgress",	Res_Progress,		true},
-	{UI_SCROLL_BAR,		"GScrollBar",	Res_ScrollBar,		true},
-	{UI_CUSTOM,			"GCustom",		Res_Custom,			true},
-	{UI_CONTROL_TREE,	"GControlTree", Res_ControlTree,	true},
+	// ID				Lgi's name			Resource editor name
+	{UI_DIALOG,			"LDialog",			Res_Dialog,			false},
+	{UI_TABLE,			"LTableLayout",		Res_Table,			true},
+	{UI_TEXT,			"LText",			Res_StaticText,		true},
+	{UI_EDITBOX,		"LEdit",			Res_EditBox,		true},
+	{UI_CHECKBOX,		"LCheckBox",		Res_CheckBox,		true},
+	{UI_BUTTON,			"LButton",			Res_Button,			true},
+	{UI_GROUP,			"LRadioGroup",		Res_Group,			true},
+	{UI_RADIO,			"LRadioButton",		Res_RadioBox,		true},
+	{UI_TABS,			"LTabView",			Res_TabView,		true},
+	{UI_TAB,			"LTabPage",			Res_Tab,			false},
+	{UI_LIST,			"LList",			Res_ListView,		true},
+	{UI_COLUMN,			"LListColumn",		Res_Column,			false},
+	{UI_COMBO,			"LCombo",			Res_ComboBox,		true},
+	{UI_TREE,			"LTree",			Res_TreeView,		true},
+	{UI_BITMAP,			"LBitmap",			Res_Bitmap,			true},
+	{UI_PROGRESS,		"LProgressView",	Res_Progress,		true},
+	{UI_SCROLL_BAR,		"LScrollBar",		Res_ScrollBar,		true},
+	{UI_CUSTOM,			"LCustom",			Res_Custom,			true},
+	{UI_CONTROL_TREE,	"LControlTree",		Res_ControlTree,	true},
 
 	// If you add a new control here update ResDialog::CreateCtrl(int Tool) as well
 
@@ -98,28 +101,28 @@ public:
 	}
 };
 
-class TabOrder : public GDialog
+class TabOrder : public LDialog
 {
 	ResDialogCtrl *Top;
 	LList *Lst;
-	GButton *Ok;
-	GButton *Cancel;
-	GButton *Up;
-	GButton *Down;
+	LButton *Ok;
+	LButton *Cancel;
+	LButton *Up;
+	LButton *Down;
 
 public:
-	TabOrder(GView *Parent, ResDialogCtrl *top)
+	TabOrder(LView *Parent, ResDialogCtrl *top)
 	{
 		Top = top;
 		SetParent(Parent);
 
 		Children.Insert(Lst = new LList(IDC_LIST, 10, 10, 350, 300));
-		Children.Insert(Ok = new GButton(IDOK, Lst->GetPos().x2 + 10, 10, 60, 20, "Ok"));
-		Children.Insert(Cancel = new GButton(IDCANCEL, Lst->GetPos().x2 + 10, Ok->GetPos().y2 + 5, 60, 20, "Cancel"));
-		Children.Insert(Up = new GButton(IDC_UP, Lst->GetPos().x2 + 10, Cancel->GetPos().y2 + 15, 60, 20, "Up"));
-		Children.Insert(Down = new GButton(IDC_DOWN, Lst->GetPos().x2 + 10, Up->GetPos().y2 + 5, 60, 20, "Down"));
+		Children.Insert(Ok = new LButton(IDOK, Lst->GetPos().x2 + 10, 10, 60, 20, "Ok"));
+		Children.Insert(Cancel = new LButton(IDCANCEL, Lst->GetPos().x2 + 10, Ok->GetPos().y2 + 5, 60, 20, "Cancel"));
+		Children.Insert(Up = new LButton(IDC_UP, Lst->GetPos().x2 + 10, Cancel->GetPos().y2 + 15, 60, 20, "Up"));
+		Children.Insert(Down = new LButton(IDC_DOWN, Lst->GetPos().x2 + 10, Up->GetPos().y2 + 5, 60, 20, "Down"));
 
-		GRect r(0, 0, Ok->GetPos().x2 + 17, Lst->GetPos().y2 + 40);
+		LRect r(0, 0, Ok->GetPos().x2 + 17, Lst->GetPos().y2 + 40);
 		SetPos(r);
 		MoveToCenter();
 
@@ -146,7 +149,7 @@ public:
 		}
 	}
 
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		int MoveDir = 1;
 		switch (Ctrl->GetId())
@@ -204,7 +207,7 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////
-void DrawGoobers(GSurface *pDC, GRect &r, GRect *Goobers, GColour c, int OverIdx)
+void DrawGoobers(LSurface *pDC, LRect &r, LRect *Goobers, LColour c, int OverIdx)
 {
 	int Mx = (r.x2 + r.x1) / 2 - (GOOBER_SIZE / 2);
 	int My = (r.y2 + r.y1) / 2 - (GOOBER_SIZE / 2);
@@ -263,7 +266,7 @@ void DrawGoobers(GSurface *pDC, GRect &r, GRect *Goobers, GColour c, int OverIdx
 ////////////////////////////////////////////////////////////////////
 int ResDialogCtrl::TabDepth = 0;
 
-ResDialogCtrl::ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, GXmlTag *load) :
+ResDialogCtrl::ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, LXmlTag *load) :
 	ResObject(CtrlTypeName)
 {
 	Dlg = dlg;
@@ -343,7 +346,7 @@ char *ResDialogCtrl::GetRefText()
 
 void ResDialogCtrl::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 {
-	for (GViewI *w: View()->IterateViews())
+	for (LViewI *w: View()->IterateViews())
 	{
 		ResDialogCtrl *c = dynamic_cast<ResDialogCtrl*>(w);
 		LgiAssert(c);
@@ -358,17 +361,17 @@ void ResDialogCtrl::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 	}
 }
 
-GRect ResDialogCtrl::GetMinSize()
+LRect ResDialogCtrl::GetMinSize()
 {
-	GRect m(0, 0, GRID_X-1, GRID_Y-1);
+	LRect m(0, 0, GRID_X-1, GRID_Y-1);
 
 	if (IsContainer())
 	{
-		GRect cli = View()->GetClient(false);
+		LRect cli = View()->GetClient(false);
 
-		for (GViewI *c: View()->IterateViews())
+		for (LViewI *c: View()->IterateViews())
 		{
-			GRect cpos = c->GetPos();
+			LRect cpos = c->GetPos();
 			cpos.Offset(cli.x1, cli.y1);
 			m.Union(&cpos);
 		}
@@ -377,9 +380,9 @@ GRect ResDialogCtrl::GetMinSize()
 	return m;
 }
 
-bool ResDialogCtrl::SetPos(GRect &p, bool Repaint)
+bool ResDialogCtrl::SetPos(LRect &p, bool Repaint)
 {
-	GRect m = GetMinSize();
+	LRect m = GetMinSize();
 	if (m.X() > p.X()) p.x2 = p.x1 + m.X() - 1;
 	if (m.Y() > p.Y()) p.y2 = p.y1 + m.Y() - 1;
 
@@ -406,7 +409,7 @@ bool ResDialogCtrl::SetPos(GRect &p, bool Repaint)
 		// tell everyone else about the change
 		OnFieldChange();
 
-		GRect r(0, 0, p.X()-1, p.Y()-1);
+		LRect r(0, 0, p.X()-1, p.Y()-1);
 		r.Size(-GOOBER_BORDER, -GOOBER_BORDER);
 		View()->Invalidate(&r, false, true);
 		
@@ -414,7 +417,7 @@ bool ResDialogCtrl::SetPos(GRect &p, bool Repaint)
 		ResDialogCtrl *Par = ParentCtrl();
 		if (Par)
 		{
-			GRect t = Par->View()->GetPos();
+			LRect t = Par->View()->GetPos();
 			Par->ResDialogCtrl::SetPos(t, true);
 		}
 		
@@ -473,20 +476,20 @@ void ResDialogCtrl::TabString(char *Str)
 	Str[TabDepth] = 0;
 }
 
-GRect ResDialogCtrl::AbsPos()
+LRect ResDialogCtrl::AbsPos()
 {
-	GViewI *w = View();
-	GRect r = w->GetPos();
+	LViewI *w = View();
+	LRect r = w->GetPos();
 	r.Offset(-r.x1, -r.y1);
 
 	for (; w && w != Dlg; w = w->GetParent())
 	{
-		GRect pos = w->GetPos();
+		LRect pos = w->GetPos();
 		if (w->GetParent())
 		{
-			// GView *Ctrl = w->GetParent()->GetGView();
+			// LView *Ctrl = w->GetParent()->GetGView();
 
-			GRect client = w->GetParent()->GetClient(false);
+			LRect client = w->GetParent()->GetClient(false);
 			r.Offset(pos.x1 + client.x1, pos.y1 + client.y1);
 		}
 		else
@@ -557,7 +560,7 @@ bool ResDialogCtrl::Serialize(FieldTree &Fields)
 		GetStr()->Serialize(Fields);
 	}
 
-	GRect r = View()->GetPos(), Old = View()->GetPos();
+	LRect r = View()->GetPos(), Old = View()->GetPos();
 	bool e = true;
 
 	if (Fields.GetMode() == FieldTree::ObjToUi ||
@@ -607,7 +610,7 @@ void ResDialogCtrl::PasteText()
 	}
 }
 
-bool ResDialogCtrl::AttachCtrl(ResDialogCtrl *Ctrl, GRect *r)
+bool ResDialogCtrl::AttachCtrl(ResDialogCtrl *Ctrl, LRect *r)
 {
 	bool Status = false;
 	if (Ctrl)
@@ -634,27 +637,27 @@ bool ResDialogCtrl::AttachCtrl(ResDialogCtrl *Ctrl, GRect *r)
 	return Status;
 }
 
-void ResDialogCtrl::OnPaint(GSurface *pDC)
+void ResDialogCtrl::OnPaint(LSurface *pDC)
 {
 	if (DragCtrl >= 0)
 	{
-		GRect r = DragRgn;
+		LRect r = DragRgn;
 		r.Normal();
 		pDC->Colour(L_FOCUS_SEL_BACK);
 		pDC->Box(&r);
 	}
 }
 
-GMouse ResDialogCtrl::MapToDialog(GMouse m)
+LMouse ResDialogCtrl::MapToDialog(LMouse m)
 {
 	// Convert co-ords from out own local space to be relative to 'Dlg'
 	// the parent dialog.
-	GMouse Ms = m;
-	GViewI *Parent;
-	for (GViewI *i = View(); i && i != (GViewI*)Dlg; i = Parent)
+	LMouse Ms = m;
+	LViewI *Parent;
+	for (LViewI *i = View(); i && i != (LViewI*)Dlg; i = Parent)
 	{
 		Parent = i->GetParent();
-		GRect Pos = i->GetPos(), Cli = i->GetClient(false);
+		LRect Pos = i->GetPos(), Cli = i->GetClient(false);
 
 		#if DEBUG_OVERLAY
 		LgiTrace("%s %i,%i + %i,%i + %i,%i = %i,%i\n",
@@ -668,7 +671,7 @@ GMouse ResDialogCtrl::MapToDialog(GMouse m)
 	return Ms;
 }
 
-void ResDialogCtrl::OnMouseClick(GMouse &m)
+void ResDialogCtrl::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -682,20 +685,20 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 				auto &DebugOverlay = Dlg->DebugOverlay;
 				if (!DebugOverlay)
 				{
-					DebugOverlay.Reset(new GMemDC(Dlg->X(), Dlg->Y(), System32BitColourSpace));
+					DebugOverlay.Reset(new LMemDC(Dlg->X(), Dlg->Y(), System32BitColourSpace));
 					DebugOverlay->Colour(0, 32);
 					DebugOverlay->Rectangle();
-					DebugOverlay->Colour(GColour(64, 192, 64));
+					DebugOverlay->Colour(LColour(64, 192, 64));
 				}
 				#endif
 
 				bool Processed = false;
-				GRect c = View()->GetClient();
+				LRect c = View()->GetClient();
 				bool ClickedThis = c.Overlap(m.x, m.y);
 
 				// Convert co-ords from out own local space to be relative to 'Dlg'
 				// the parent dialog.
-				GMouse Ms = MapToDialog(m);
+				LMouse Ms = MapToDialog(m);
 				#if DEBUG_OVERLAY
 				if (DebugOverlay)
 				{
@@ -747,7 +750,7 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 			CtrlButton *Btn = dynamic_cast<CtrlButton*>(this);
 
 			{
-				GClipBoard c(Dlg);
+				LClipBoard c(Dlg);
 				char *Clip = c.Text();
 				if (Clip)
 				{
@@ -882,7 +885,7 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 		
 		if (SelectMode > SelNone)
 		{
-			GRect r = View()->GetPos();
+			LRect r = View()->GetPos();
 			if (SelectStart == r)
 			{
 				Dlg->OnSelect(this, SelectMode != SelAdd);
@@ -892,12 +895,12 @@ void ResDialogCtrl::OnMouseClick(GMouse &m)
 	}
 }
 
-void ResDialogCtrl::OnMouseMove(GMouse &m)
+void ResDialogCtrl::OnMouseMove(LMouse &m)
 {
 	// Drag a rubber band...
 	if (DragCtrl >= 0)
 	{
-		GRect Old = DragRgn;
+		LRect Old = DragRgn;
 
 		DragRgn.x1 = DragStart.x;
 		DragRgn.y1 = DragStart.y;
@@ -915,7 +918,7 @@ void ResDialogCtrl::OnMouseMove(GMouse &m)
 
 	if (Dlg)
 	{
-		GMouse Ms = MapToDialog(m);
+		LMouse Ms = MapToDialog(m);
 		Dlg->OnMouseMove(Ms);
 	}
 	
@@ -932,8 +935,8 @@ void ResDialogCtrl::OnMouseMove(GMouse &m)
 				Dlg->OnSelect(this);
 			}
 
-			GRect Old = View()->GetPos();
-			GRect New = Old;
+			LRect Old = View()->GetPos();
+			LRect New = Old;
 			New.Offset(	m.x - DragRgn.x1,
 						m.y - DragRgn.y1);
 
@@ -969,7 +972,7 @@ void ResDialogCtrl::ReadPos(char *Str)
 		char *s = NewStr(Str);
 		if (s)
 		{
-			GRect r = View()->GetPos();
+			LRect r = View()->GetPos();
 
 			char *p = ReadInt(s, r.x1);
 			if (p) p = ReadInt(p, r.y1);
@@ -982,7 +985,7 @@ void ResDialogCtrl::ReadPos(char *Str)
 }
 
 ////////////////////////////////////////////////////////////////////
-CtrlDlg::CtrlDlg(ResDialog *dlg, GXmlTag *load) :
+CtrlDlg::CtrlDlg(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Dialog, load)
 {
 	Movable = false;
@@ -993,9 +996,9 @@ CtrlDlg::CtrlDlg(ResDialog *dlg, GXmlTag *load) :
 
 IMPL_DIALOG_CTRL(CtrlDlg)
 
-GRect &CtrlDlg::GetClient(bool InClientSpace)
+LRect &CtrlDlg::GetClient(bool InClientSpace)
 {
-	static GRect r;
+	static LRect r;
 	
 	Client.Set(0, 0, View()->X()-1, View()->Y()-1);
 	Client.Size(2, 2);
@@ -1010,20 +1013,20 @@ GRect &CtrlDlg::GetClient(bool InClientSpace)
 	return r;
 }
 
-void CtrlDlg::OnNcPaint(GSurface *pDC, GRect &r)
+void CtrlDlg::OnNcPaint(LSurface *pDC, LRect &r)
 {
 	// Draw the border
-	LgiWideBorder(pDC, r, DefaultRaisedEdge);
+	LWideBorder(pDC, r, DefaultRaisedEdge);
 
 	// Draw the title bar
 	int TitleY = LgiApp->GetMetric(LGI_MET_DECOR_CAPTION);
-	GRect t = r;
+	LRect t = r;
 	t.y2 = t.y1 + TitleY - 1;
 	pDC->Colour(L_ACTIVE_TITLE);
 	pDC->Rectangle(&t);
 	if (GetStr())
 	{
-		GDisplayString ds(SysFont, GetStr()->Get());
+		LDisplayString ds(SysFont, GetStr()->Get());
 		SysFont->Fore(L_ACTIVE_TITLE_TEXT);
 		SysFont->Transparent(true);
 		ds.Draw(pDC, t.x1 + 10, t.y1 + ((t.Y()-ds.Y())/2));
@@ -1032,7 +1035,7 @@ void CtrlDlg::OnNcPaint(GSurface *pDC, GRect &r)
 	r.y1 = t.y2 + 1;
 }
 
-void CtrlDlg::OnPaint(GSurface *pDC)
+void CtrlDlg::OnPaint(LSurface *pDC)
 {
 	Client = GetClient();
 
@@ -1051,7 +1054,7 @@ void CtrlDlg::OnPaint(GSurface *pDC)
 
 /////////////////////////////////////////////////////////////////////
 // Text box
-CtrlText::CtrlText(ResDialog *dlg, GXmlTag *load) :
+CtrlText::CtrlText(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_StaticText, load)
 {
 	if (GetStr() && !load)
@@ -1062,7 +1065,7 @@ CtrlText::CtrlText(ResDialog *dlg, GXmlTag *load) :
 
 IMPL_DIALOG_CTRL(CtrlText)
 
-void CtrlText::OnPaint(GSurface *pDC)
+void CtrlText::OnPaint(LSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
 	char *Text = GetStr()->Get();
@@ -1071,7 +1074,7 @@ void CtrlText::OnPaint(GSurface *pDC)
 
 	if (Text)
 	{
-		GRect Client = GetClient();
+		LRect Client = GetClient();
 
 		int y = 0;
 		char *Start = Text;
@@ -1079,7 +1082,7 @@ void CtrlText::OnPaint(GSurface *pDC)
 		{
 			if ((*s == '\\' && *(s+1) == 'n') || (*s == 0))
 			{
-				GDisplayString ds(SysFont, Start, s - Start);
+				LDisplayString ds(SysFont, Start, s - Start);
 				ds.Draw(pDC, 0, y, &Client);
 				y += 15;
 				Start = s + 2;
@@ -1093,7 +1096,7 @@ void CtrlText::OnPaint(GSurface *pDC)
 
 // Editbox
 
-CtrlEditbox::CtrlEditbox(ResDialog *dlg, GXmlTag *load) :
+CtrlEditbox::CtrlEditbox(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_EditBox, load)
 {
 	Password = false;
@@ -1102,13 +1105,13 @@ CtrlEditbox::CtrlEditbox(ResDialog *dlg, GXmlTag *load) :
 
 IMPL_DIALOG_CTRL(CtrlEditbox)
 
-void CtrlEditbox::OnPaint(GSurface *pDC)
+void CtrlEditbox::OnPaint(LSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 	
 	// Draw the ctrl
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 	pDC->Colour(Enabled() ? L_WORKSPACE : L_MED);
 	pDC->Rectangle(&r);
 
@@ -1123,14 +1126,14 @@ void CtrlEditbox::OnPaint(GSurface *pDC)
 			if (t)
 			{
 				for (char *p = t; *p; p++) *p = '*';
-				GDisplayString ds(SysFont, t);
+				LDisplayString ds(SysFont, t);
 				ds.Draw(pDC, 4, 4);
 				DeleteArray(t);
 			}
 		}
 		else
 		{
-			GDisplayString ds(SysFont, Text);
+			LDisplayString ds(SysFont, Text);
 			ds.Draw(pDC, 4, 4);
 		}
 	}
@@ -1165,20 +1168,20 @@ bool CtrlEditbox::Serialize(FieldTree &Fields)
 }
 
 // Check box
-CtrlCheckbox::CtrlCheckbox(ResDialog *dlg, GXmlTag *load) :
+CtrlCheckbox::CtrlCheckbox(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_CheckBox, load)
 {
 }
 
 IMPL_DIALOG_CTRL(CtrlCheckbox)
 
-void CtrlCheckbox::OnPaint(GSurface *pDC)
+void CtrlCheckbox::OnPaint(LSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
-	GRect r(0, 0, 12, 12);
+	LRect r(0, 0, 12, 12);
 	
 	// Draw the ctrl
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle(&r);
 
@@ -1198,7 +1201,7 @@ void CtrlCheckbox::OnPaint(GSurface *pDC)
 	{
 		SysFont->Fore(L_TEXT);
 		SysFont->Transparent(true);
-		GDisplayString ds(SysFont, Text);
+		LDisplayString ds(SysFont, Text);
 		ds.Draw(pDC, r.x2 + 10, r.y1-2);
 	}
 
@@ -1208,7 +1211,7 @@ void CtrlCheckbox::OnPaint(GSurface *pDC)
 
 // Button
 
-CtrlButton::CtrlButton(ResDialog *dlg, GXmlTag *load) :
+CtrlButton::CtrlButton(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Button, load)
 {
 	IsToggle = false;
@@ -1238,14 +1241,14 @@ bool CtrlButton::Serialize(FieldTree &Fields)
 	return Status;
 }
 
-void CtrlButton::OnPaint(GSurface *pDC)
+void CtrlButton::OnPaint(LSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
-	GRect r = Client;
+	LRect r = Client;
 	char *Text = GetStr()->Get();
 	
 	// Draw the ctrl
-	LgiWideBorder(pDC, r, DefaultRaisedEdge);
+	LWideBorder(pDC, r, DefaultRaisedEdge);
 	SysFont->Fore(L_TEXT);
 
 	if (ValidStr(Text))
@@ -1253,7 +1256,7 @@ void CtrlButton::OnPaint(GSurface *pDC)
 		SysFont->Back(L_MED);
 		SysFont->Transparent(false);
 
-		GDisplayString ds(SysFont, Text);
+		LDisplayString ds(SysFont, Text);
 		ds.Draw(pDC, r.x1 + ((r.X()-ds.X())/2), r.y1 + ((r.Y()-ds.Y())/2), &r);
 	}
 	else
@@ -1268,7 +1271,7 @@ void CtrlButton::OnPaint(GSurface *pDC)
 
 // Group
 
-CtrlGroup::CtrlGroup(ResDialog *dlg, GXmlTag *load) :
+CtrlGroup::CtrlGroup(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Group, load)
 {
 	AcceptChildren = true;
@@ -1281,24 +1284,24 @@ CtrlGroup::CtrlGroup(ResDialog *dlg, GXmlTag *load) :
 
 IMPL_DIALOG_CTRL(CtrlGroup)
 
-void CtrlGroup::OnPaint(GSurface *pDC)
+void CtrlGroup::OnPaint(LSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
-	GRect r = Client;
+	LRect r = Client;
 	
 	// Draw the ctrl
 	r.y1 += 5;
-	LgiWideBorder(pDC, r, EdgeXpChisel);
+	LWideBorder(pDC, r, EdgeXpChisel);
 	r.y1 -= 5;
 	SysFont->Fore(L_TEXT);
 	SysFont->Back(L_MED);
 	SysFont->Transparent(false);
 	char *Text = GetStr()->Get();
-	GDisplayString ds(SysFont, Text);
+	LDisplayString ds(SysFont, Text);
 	ds.Draw(pDC, r.x1 + 8, r.y1 - 2);
 
 	// Draw children
-	//GWindow::OnPaint(pDC);
+	//LWindow::OnPaint(pDC);
 
 	// Draw any rubber band
 	ResDialogCtrl::OnPaint(pDC);
@@ -1322,10 +1325,10 @@ uint32_t RadioBmp[] = {
 0xFFFFFFFF, 0xC0C0FFFF, 0xC0C0C0C0, 0xC0C0C0C0, 0xC0C0C0C0, 0xC0C0C0C0, 0xFFFFFFFF, 0xFFFFFFFF, 
 0xFFFFFFFF, 0xC0C0C0C0, 0xC0C0C0C0, 0xC0C0C0C0};
 
-CtrlRadio::CtrlRadio(ResDialog *dlg, GXmlTag *load) :
+CtrlRadio::CtrlRadio(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_RadioBox, load)
 {
-	Bmp = new GMemDC;
+	Bmp = new LMemDC;
 	if (Bmp && Bmp->Create(12, 12, GdcD->GetColourSpace()))
 	{
 		int Len = ((Bmp->X()*24)+31)/32*4;
@@ -1348,10 +1351,10 @@ CtrlRadio::~CtrlRadio()
 
 IMPL_DIALOG_CTRL(CtrlRadio)
 
-void CtrlRadio::OnPaint(GSurface *pDC)
+void CtrlRadio::OnPaint(LSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
-	GRect r(0, 0, 12, 12);
+	LRect r(0, 0, 12, 12);
 	
 	// Draw the ctrl
 	if (Bmp)
@@ -1362,7 +1365,7 @@ void CtrlRadio::OnPaint(GSurface *pDC)
 	{
 		SysFont->Fore(L_TEXT);
 		SysFont->Transparent(true);
-		GDisplayString ds(SysFont, Text);
+		LDisplayString ds(SysFont, Text);
 		ds.Draw(pDC, r.x2 + 10, r.y1-2);
 	}
 
@@ -1372,7 +1375,7 @@ void CtrlRadio::OnPaint(GSurface *pDC)
 
 // Tab
 
-CtrlTab::CtrlTab(ResDialog *dlg, GXmlTag *load) :
+CtrlTab::CtrlTab(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Tab, load)
 {
 	GetStr()->UpdateWnd = this;
@@ -1380,7 +1383,7 @@ CtrlTab::CtrlTab(ResDialog *dlg, GXmlTag *load) :
 
 IMPL_DIALOG_CTRL(CtrlTab)
 
-void CtrlTab::OnPaint(GSurface *pDC)
+void CtrlTab::OnPaint(LSurface *pDC)
 {
 }
 
@@ -1393,7 +1396,7 @@ void CtrlTab::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 	auto MyIndex = Par->Tabs.IndexOf(this);
 	LgiAssert(MyIndex >= 0);
 
-	List<GViewI> *CList = (Par->Current == MyIndex) ? &Par->Children : &Children;
+	List<LViewI> *CList = (Par->Current == MyIndex) ? &Par->Children : &Children;
 	for (auto w: *CList)
 	{
 		ResDialogCtrl *c = dynamic_cast<ResDialogCtrl*>(w);
@@ -1410,7 +1413,7 @@ void CtrlTab::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 
 // Tab control
 
-CtrlTabs::CtrlTabs(ResDialog *dlg, GXmlTag *load) :
+CtrlTabs::CtrlTabs(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_TabView, load)
 {
 	AcceptChildren = true;
@@ -1445,7 +1448,7 @@ CtrlTabs::~CtrlTabs()
 	Empty();
 }
 
-void CtrlTabs::OnMouseMove(GMouse &m)
+void CtrlTabs::OnMouseMove(LMouse &m)
 {
 	ResDialogCtrl::OnMouseMove(m);
 }
@@ -1476,12 +1479,12 @@ void CtrlTabs::EnumCtrls(List<ResDialogCtrl> &Ctrls)
 	ResDialogCtrl::EnumCtrls(Ctrls);
 }
 
-GRect CtrlTabs::GetMinSize()
+LRect CtrlTabs::GetMinSize()
 {
 	List<ResDialogCtrl> l;
 	ListChildren(l, false);
 
-	GRect r(0, 0, GRID_X-1, GRID_Y-1);
+	LRect r(0, 0, GRID_X-1, GRID_Y-1);
 
 	/*
 	// don't resize smaller than the tabs
@@ -1494,10 +1497,10 @@ GRect CtrlTabs::GetMinSize()
 
 	// don't resize smaller than any of the children
 	// on any of the tabs
-	GRect cli = GetClient(false);
+	LRect cli = GetClient(false);
 	for (auto c: l)
 	{
-		GRect cpos = c->View()->GetPos();
+		LRect cpos = c->View()->GetPos();
 		cpos.Offset(cli.x1, cli.y1);
 		r.Union(&cpos);
 	}
@@ -1512,8 +1515,8 @@ void CtrlTabs::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 	{
 	    l.Add(t);
 	    
-		auto It = (Current == n ? (GViewI*)this : (GViewI*)t)->IterateViews();
-		for (GViewI *w: It)
+		auto It = (Current == n ? (LViewI*)this : (LViewI*)t)->IterateViews();
+		for (LViewI *w: It)
 		{
 			ResDialogCtrl *c = dynamic_cast<ResDialogCtrl*>(w);
 			if (c)
@@ -1532,14 +1535,14 @@ void CtrlTabs::Empty()
 	Tabs.DeleteObjects();
 }
 
-void CtrlTabs::OnPaint(GSurface *pDC)
+void CtrlTabs::OnPaint(LSurface *pDC)
 {
 	// Draw the ctrl
 	Title.ZOff(X()-1, 17);
 	Client.ZOff(X()-1, Y()-1);
 	Client.y1 = Title.y2;
-	GRect r = Client;
-	LgiWideBorder(pDC, r, DefaultRaisedEdge);
+	LRect r = Client;
+	LWideBorder(pDC, r, DefaultRaisedEdge);
 
 	// Draw the tabs
 	int i = 0;
@@ -1547,10 +1550,10 @@ void CtrlTabs::OnPaint(GSurface *pDC)
 	for (auto Tab: Tabs)
 	{
 		char *Str = Tab->GetStr() ? Tab->GetStr()->Get() : 0;
-		GDisplayString ds(SysFont, Str);
+		LDisplayString ds(SysFont, Str);
 
 		int Width = 12 + ds.X();
-		GRect t(x, Title.y1 + 2, x + Width - 1, Title.y2 - 1);
+		LRect t(x, Title.y1 + 2, x + Width - 1, Title.y2 - 1);
 
 		if (Current == i)
 		{
@@ -1590,7 +1593,7 @@ void CtrlTabs::OnPaint(GSurface *pDC)
 	}
 
 	// Draw children
-	//GWindow::OnPaint(pDC);
+	//LWindow::OnPaint(pDC);
 
 	// Draw any rubber band
 	ResDialogCtrl::OnPaint(pDC);
@@ -1635,7 +1638,7 @@ void CtrlTabs::FromTab()
 	}
 }
 
-void CtrlTabs::OnMouseClick(GMouse &m)
+void CtrlTabs::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -1777,7 +1780,7 @@ void CtrlTabs::OnMouseClick(GMouse &m)
 
 // List column
 
-ListCol::ListCol(ResDialog *dlg, GXmlTag *load, char *s, int Width) :
+ListCol::ListCol(ResDialog *dlg, LXmlTag *load, char *s, int Width) :
 	ResDialogCtrl(dlg, Res_Column, load)
 {
 	if (s && GetStr())
@@ -1785,18 +1788,18 @@ ListCol::ListCol(ResDialog *dlg, GXmlTag *load, char *s, int Width) :
 		GetStr()->Set(s);
 	}
 	
-	GRect r(0, 0, Width-1, 18);
+	LRect r(0, 0, Width-1, 18);
 	ResDialogCtrl::SetPos(r);
 }
 
 IMPL_DIALOG_CTRL(ListCol)
-void ListCol::OnPaint(GSurface *pDC)
+void ListCol::OnPaint(LSurface *pDC)
 {
 }
 
 // List control
 
-CtrlList::CtrlList(ResDialog *dlg, GXmlTag *load) :
+CtrlList::CtrlList(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_ListView, load)
 {
 	DragCol = -1;
@@ -1832,7 +1835,7 @@ void CtrlList::Empty()
 	Cols.Empty();
 }
 
-void CtrlList::OnMouseClick(GMouse &m)
+void CtrlList::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -1979,7 +1982,7 @@ void CtrlList::OnMouseClick(GMouse &m)
 	ResDialogCtrl::OnMouseClick(m);
 }
 
-void CtrlList::OnMouseMove(GMouse &m)
+void CtrlList::OnMouseMove(LMouse &m)
 {
 	if (DragCol >= 0)
 	{
@@ -1990,7 +1993,7 @@ void CtrlList::OnMouseMove(GMouse &m)
 			{
 				int Dx = (m.x - x - Title.x1);
 				
-				GRect r = Col->GetPos();
+				LRect r = Col->GetPos();
 				r.x2 = r.x1 + Dx;
 				Col->ResDialogCtrl::SetPos(r);
 				break;
@@ -2006,12 +2009,12 @@ void CtrlList::OnMouseMove(GMouse &m)
 	ResDialogCtrl::OnMouseMove(m);
 }
 
-void CtrlList::OnPaint(GSurface *pDC)
+void CtrlList::OnPaint(LSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 
 	// Draw the ctrl
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 	Title = r;
 	Title.y2 = Title.y1 + 15;
 	Client = r;
@@ -2025,12 +2028,12 @@ void CtrlList::OnPaint(GSurface *pDC)
 	{
 		int Width = c->r().X();
 		c->r().Set(x, Title.y1, x + Width - 1, Title.y2);
-		GRect r = c->r();
+		LRect r = c->r();
 		r.x2 = MIN(r.x2, Title.x2);
 		x = r.x2 + 1;
 		if (r.Valid())
 		{
-			LgiWideBorder(pDC, r, DefaultRaisedEdge);
+			LWideBorder(pDC, r, DefaultRaisedEdge);
 
 			SysFont->Fore(L_TEXT);
 			SysFont->Back(L_MED);
@@ -2038,15 +2041,15 @@ void CtrlList::OnPaint(GSurface *pDC)
 
 			const char *Str = c->GetStr()->Get();
 			if (!Str) Str = "";
-			GDisplayString ds(SysFont, Str);
+			LDisplayString ds(SysFont, Str);
 			ds.Draw(pDC, r.x1 + 2, r.y1 + ((r.Y()-ds.Y())/2) - 1, &r);
 		}
 	}
 
-	GRect Client(x, Title.y1, Title.x2, Title.y2);
+	LRect Client(x, Title.y1, Title.x2, Title.y2);
 	if (Client.Valid())
 	{
-		LgiWideBorder(pDC, Client, DefaultRaisedEdge);
+		LWideBorder(pDC, Client, DefaultRaisedEdge);
 		pDC->Colour(L_MED);;
 		pDC->Rectangle(&Client);
 	}
@@ -2056,25 +2059,25 @@ void CtrlList::OnPaint(GSurface *pDC)
 }
 
 // Combo box
-CtrlComboBox::CtrlComboBox(ResDialog *dlg, GXmlTag *load) :
+CtrlComboBox::CtrlComboBox(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_ComboBox, load)
 {
 }
 
 IMPL_DIALOG_CTRL(CtrlComboBox)
 
-void CtrlComboBox::OnPaint(GSurface *pDC)
+void CtrlComboBox::OnPaint(LSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 	
 	// Draw the ctrl
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 	
 	// Allocate space
-	GRect e = r;
+	LRect e = r;
 	e.x2 -= 15;
-	GRect d = r;
+	LRect d = r;
 	d.x1 = e.x2 + 1;
 
 	// Draw edit
@@ -2082,7 +2085,7 @@ void CtrlComboBox::OnPaint(GSurface *pDC)
 	pDC->Rectangle(&e);
 
 	// Draw drap down
-	LgiWideBorder(pDC, d, DefaultRaisedEdge);
+	LWideBorder(pDC, d, DefaultRaisedEdge);
 	pDC->Colour(L_MED);
 	pDC->Rectangle(&d);
 
@@ -2101,7 +2104,7 @@ void CtrlComboBox::OnPaint(GSurface *pDC)
 	SysFont->Transparent(true);
 	if (Text)
 	{
-		GDisplayString ds(SysFont, Text);
+		LDisplayString ds(SysFont, Text);
 		ds.Draw(pDC, 4, 4);
 	}
 
@@ -2110,22 +2113,22 @@ void CtrlComboBox::OnPaint(GSurface *pDC)
 }
 
 ////////////////////////////////////////////////////////////////////
-CtrlScrollBar::CtrlScrollBar(ResDialog *dlg, GXmlTag *load) :
+CtrlScrollBar::CtrlScrollBar(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_ScrollBar, load)
 {
 }
 
 IMPL_DIALOG_CTRL(CtrlScrollBar)
 
-void CtrlScrollBar::OnPaint(GSurface *pDC)
+void CtrlScrollBar::OnPaint(LSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 	
 	// Draw the ctrl
 	bool Vertical = r.Y() > r.X();
 	int ButSize = Vertical ? r.X() : r.Y();
-	GRect a, b, c;
+	LRect a, b, c;
 	if (Vertical)
 	{
 		a.Set(r.x1, r.y1, r.x2, r.y1 + ButSize);
@@ -2140,8 +2143,8 @@ void CtrlScrollBar::OnPaint(GSurface *pDC)
 	}
 
 	// Buttons
-	LgiWideBorder(pDC, a, DefaultRaisedEdge);
-	LgiWideBorder(pDC, c, DefaultRaisedEdge);
+	LWideBorder(pDC, a, DefaultRaisedEdge);
+	LWideBorder(pDC, c, DefaultRaisedEdge);
 	pDC->Colour(L_MED);
 	pDC->Rectangle(&a);
 	pDC->Rectangle(&c);
@@ -2171,24 +2174,24 @@ void CtrlScrollBar::OnPaint(GSurface *pDC)
 }
 
 ////////////////////////////////////////////////////////////////////
-CtrlTree::CtrlTree(ResDialog *dlg, GXmlTag *load) :
+CtrlTree::CtrlTree(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_TreeView, load)
 {
 }
 
 IMPL_DIALOG_CTRL(CtrlTree)
 
-void CtrlTree::OnPaint(GSurface *pDC)
+void CtrlTree::OnPaint(LSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 	pDC->Colour(Rgb24(255, 255, 255), 24);
 	pDC->Rectangle(&r);
 	SysFont->Colour(L_TEXT, L_WORKSPACE);
 	SysFont->Transparent(true);
-	GDisplayString ds(SysFont, "Tree");
+	LDisplayString ds(SysFont, "Tree");
 	ds.Draw(pDC, r.x1 + 3, r.y1 + 3, &r);
 
 	// Draw any rubber band
@@ -2196,19 +2199,19 @@ void CtrlTree::OnPaint(GSurface *pDC)
 }
 
 ////////////////////////////////////////////////////////////////////
-CtrlBitmap::CtrlBitmap(ResDialog *dlg, GXmlTag *load) :
+CtrlBitmap::CtrlBitmap(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Bitmap, load)
 {
 }
 
 IMPL_DIALOG_CTRL(CtrlBitmap)
 
-void CtrlBitmap::OnPaint(GSurface *pDC)
+void CtrlBitmap::OnPaint(LSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 	pDC->Colour(Rgb24(255, 255, 255), 24);
 	pDC->Rectangle(&r);
 	pDC->Colour(0, 24);
@@ -2220,19 +2223,19 @@ void CtrlBitmap::OnPaint(GSurface *pDC)
 }
 
 ////////////////////////////////////////////////////////////////////
-CtrlProgress::CtrlProgress(ResDialog *dlg, GXmlTag *load) :
+CtrlProgress::CtrlProgress(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Progress, load)
 {
 }
 
 IMPL_DIALOG_CTRL(CtrlProgress)
 
-void CtrlProgress::OnPaint(GSurface *pDC)
+void CtrlProgress::OnPaint(LSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 
 	COLOUR Flat = Rgb24(0x7f, 0x7f, 0x7f);
 	COLOUR White = Rgb24(0xff, 0xff, 0xff);
@@ -2250,7 +2253,7 @@ void CtrlProgress::OnPaint(GSurface *pDC)
 }
 
 ////////////////////////////////////////////////////////////////////
-CtrlCustom::CtrlCustom(ResDialog *dlg, GXmlTag *load) :
+CtrlCustom::CtrlCustom(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Custom, load)
 {
 	Control = 0;
@@ -2263,12 +2266,12 @@ CtrlCustom::~CtrlCustom()
 	DeleteArray(Control);
 }
 
-void CtrlCustom::OnPaint(GSurface *pDC)
+void CtrlCustom::OnPaint(LSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 	Client = r;
 
-	LgiWideBorder(pDC, r, DefaultSunkenEdge);
+	LWideBorder(pDC, r, DefaultSunkenEdge);
 
 	COLOUR White = Rgb24(0xff, 0xff, 0xff);
 
@@ -2282,7 +2285,7 @@ void CtrlCustom::OnPaint(GSurface *pDC)
 	}
 
 	SysFont->Colour(L_TEXT, L_WORKSPACE);
-	GDisplayString ds(SysFont, s);
+	LDisplayString ds(SysFont, s);
 	ds.Draw(pDC, r.x1+2, r.y1+1, &r);
 
 	// Draw any rubber band
@@ -2329,7 +2332,7 @@ void ResDialogCtrl::EnumCtrls(List<ResDialogCtrl> &Ctrls)
 {
 	Ctrls.Insert(this);
 
-	for (GViewI *c: View()->IterateViews())
+	for (LViewI *c: View()->IterateViews())
 	{
 		ResDialogCtrl *dc = dynamic_cast<ResDialogCtrl*>(c);
 		LgiAssert(dc);
@@ -2417,14 +2420,14 @@ void ResDialog::OnShowLanguages()
 	OnLanguageChange();
 }
 
-void ResDialog::OnChildrenChanged(GViewI *Wnd, bool Attaching)
+void ResDialog::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	printf("ResDialog::OnChildrenChanged %p, %i\n", Wnd, Attaching);
 }
 
 const char *ResDialog::Name()
 {
-	GViewI *v = Children[0];
+	LViewI *v = Children[0];
 	
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(v);
 	if (!Ctrl)
@@ -2505,7 +2508,7 @@ bool ResDialog::Res_SetProperties(ResObject *Obj, GDom *Props)
 	return false;
 }
 
-ResObject *ResDialog::CreateObject(GXmlTag *Tag, ResObject *Parent)
+ResObject *ResDialog::CreateObject(LXmlTag *Tag, ResObject *Parent)
 {
 	return dynamic_cast<ResObject*>(CreateCtrl(Tag));
 }
@@ -2517,7 +2520,7 @@ void ResDialog::Res_SetPos(ResObject *Obj, int x1, int y1, int x2, int y2)
 		ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>((ResDialogCtrl*)Obj);
 		if (Ctrl)
 		{
-			GRect r(x1, y1, x2, y2);
+			LRect r(x1, y1, x2, y2);
 			Ctrl->SetPos(r);
 		}
 	}
@@ -2535,7 +2538,7 @@ void ResDialog::Res_SetPos(ResObject *Obj, char *s)
 	}
 }
 
-GRect ResDialog::Res_GetPos(ResObject *Obj)
+LRect ResDialog::Res_GetPos(ResObject *Obj)
 {
 	if (Obj)
 	{
@@ -2546,7 +2549,7 @@ GRect ResDialog::Res_GetPos(ResObject *Obj)
 			return Ctrl->View()->GetPos();
 		}
 	}
-	return GRect(0, 0, 0, 0);
+	return LRect(0, 0, 0, 0);
 }
 
 int ResDialog::Res_GetStrRef(ResObject *Obj)
@@ -2670,12 +2673,12 @@ bool ResDialog::Res_GetItems(ResObject *Obj, List<ResObject> *l)
 	return false;
 }
 
-void ResDialog::Create(GXmlTag *load, SerialiseContext *Ctx)
+void ResDialog::Create(LXmlTag *load, SerialiseContext *Ctx)
 {
 	CtrlDlg *Dlg = new CtrlDlg(this, load);
 	if (Dlg)
 	{
-		GRect r = DlgPos;
+		LRect r = DlgPos;
 		r.Offset(GOOBER_BORDER, GOOBER_BORDER);
 		Children.Insert(Dlg);
 		Dlg->SetParent(this);
@@ -2710,7 +2713,7 @@ void ResDialog::Delete()
 	}
 
 	// Repaint
-	GView::Invalidate();
+	LView::Invalidate();
 }
 
 bool IsChild(ResDialogCtrl *Parent, ResDialogCtrl *Child)
@@ -2770,7 +2773,7 @@ void ResDialog::Copy(bool Delete)
 	// ok we have a top level list of ctrls
 	// write them to the file
 	List<ResDialogCtrl> All;
-	GXmlTag *Root = new GXmlTag("Resources");
+	LXmlTag *Root = new LXmlTag("Resources");
 	if (Root)
 	{
 		if (Delete)
@@ -2793,7 +2796,7 @@ void ResDialog::Copy(bool Delete)
 		for (auto c: All)
 		{
 			// Write the string out
-			GXmlTag *t = new GXmlTag;
+			LXmlTag *t = new LXmlTag;
 			if (t && c->GetStr()->Write(t, Ctx))
 			{
 				Root->InsertTag(t);
@@ -2807,7 +2810,7 @@ void ResDialog::Copy(bool Delete)
 		// write the objects themselves
 		for (auto c: Top)
 		{
-			GXmlTag *t = new GXmlTag;
+			LXmlTag *t = new LXmlTag;
 			if (t && Res_Write(c, t))
 			{
 				Root->InsertTag(t);
@@ -2820,13 +2823,13 @@ void ResDialog::Copy(bool Delete)
 
 
 		// Read the file in and copy to the clipboard
-		GStringPipe Xml;
-		GXmlTree Tree;
+		LStringPipe Xml;
+		LXmlTree Tree;
 		if (Tree.Write(Root, &Xml))
 		{
 			char *s = Xml.NewStr();
 			{
-				GClipBoard Clip(Ui);
+				LClipBoard Clip(Ui);
 
 				char16 *w = Utf8ToWide(s);
 				Clip.TextW(w);
@@ -2854,7 +2857,7 @@ void ResDialog::Copy(bool Delete)
 		}
 
 		// Repaint
-		GView::Invalidate();
+		LView::Invalidate();
 	}
 }
 
@@ -2866,7 +2869,7 @@ public:
 	int NewRef;
 };
 
-void RemapAllRefs(GXmlTag *t, List<StringId> &Strs)
+void RemapAllRefs(LXmlTag *t, List<StringId> &Strs)
 {
 	char *RefStr;
 	if ((RefStr = t->GetAttr("Ref")))
@@ -2914,7 +2917,7 @@ void ResDialog::Paste()
 	char *Mem = 0;
 	char *Data = 0;
 	{
-		GClipBoard Clip(Ui);
+		LClipBoard Clip(Ui);
 		char16 *w = Clip.TextW();
 		if (w)
 			Data = Mem = WideToUtf8(w);
@@ -2949,14 +2952,14 @@ void ResDialog::Paste()
 
 			// Parse the data
 			List<ResString> NewStrs;
-			GXmlTree Tree;
-			GStringPipe p;
+			LXmlTree Tree;
+			LStringPipe p;
 			p.Push(Data);
 			
 			// Create the new controls, strings first
 			// that way we can setup the remapping properly to avoid
 			// string ref duplicates
-			GXmlTag Root;
+			LXmlTag Root;
 			if (Tree.Read(&Root, &p, 0))
 			{
 				for (auto t: Root.Children)
@@ -3026,7 +3029,7 @@ void ResDialog::Paste()
 				ResDialogCtrl *c = *It;
 				if (c)
 				{
-					GRect All = c->View()->GetPos();
+					LRect All = c->View()->GetPos();
 					while ((c = *(++It)))
 					{
 						All.Union(&c->View()->GetPos());
@@ -3035,8 +3038,8 @@ void ResDialog::Paste()
 					// now paste in the controls
 					for (auto c: NewCtrls)
 					{
-						GRect *Preference = Container->GetPasteArea();
-						GRect p = c->View()->GetPos();
+						LRect *Preference = Container->GetPasteArea();
+						LRect p = c->View()->GetPos();
 						p.Offset(-All.x1, -All.y1);
 
 						p.Offset(Preference ? Preference->x1 : Container->Client.x1 + GRID_X,
@@ -3047,7 +3050,7 @@ void ResDialog::Paste()
 					}
 
 					// reset parent size to fit
-					GRect cp = Container->View()->GetPos();
+					LRect cp = Container->View()->GetPos();
 					Container->SetPos(cp, true);
 				}
 
@@ -3059,7 +3062,7 @@ void ResDialog::Paste()
 			}
 
 			// Repaint
-			GView::Invalidate();
+			LView::Invalidate();
 		}
 	}
 	DeleteArray(Mem);
@@ -3072,10 +3075,10 @@ void ResDialog::SnapPoint(LPoint *p, ResDialogCtrl *From)
 	{
 		int Ox = 0; // -Ctrl->Client.x1;
 		int Oy = 0; // -Ctrl->Client.y1;
-		GView *Parent = dynamic_cast<GView*>(Ctrl);
+		LView *Parent = dynamic_cast<LView*>(Ctrl);
 		if (From)
 		{
-			for (GViewI *w = From->View(); w && w != Parent; w = w->GetParent())
+			for (LViewI *w = From->View(); w && w != Parent; w = w->GetParent())
 			{
 				Ox += w->GetPos().x1;
 				Oy += w->GetPos().y1;
@@ -3093,15 +3096,15 @@ void ResDialog::SnapPoint(LPoint *p, ResDialogCtrl *From)
 	}
 }
 
-void ResDialog::SnapRect(GRect *r, ResDialogCtrl *From)
+void ResDialog::SnapRect(LRect *r, ResDialogCtrl *From)
 {
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
 	if (r && Ctrl)
 	{
 		int Ox = 0; // -Ctrl->Client.x1;
 		int Oy = 0; // -Ctrl->Client.y1;
-		GView *Parent = dynamic_cast<GView*>(Ctrl);
-		for (GViewI *w = From->View(); w && w != Parent; w = w->GetParent())
+		LView *Parent = dynamic_cast<LView*>(Ctrl);
+		for (LViewI *w = From->View(); w && w != Parent; w = w->GetParent())
 		{
 			Ox += w->GetPos().x1;
 			Oy += w->GetPos().y1;
@@ -3141,12 +3144,12 @@ void ResDialog::MoveSelection(int Dx, int Dy)
 		return;
 
 	// find dimensions of group
-	GRect All = w->View()->GetPos();
+	LRect All = w->View()->GetPos();
 	for (; w; w = *(++It))
 		All.Union(&w->View()->GetPos());
 
 	// limit the move to the top-left corner of the parent's client
-	GRect ParentClient = Parent->Client;
+	LRect ParentClient = Parent->Client;
 	if (dynamic_cast<CtrlDlg*>(Parent))
 		ParentClient.ZOff(-ParentClient.x1, -ParentClient.y1);
 
@@ -3156,15 +3159,15 @@ void ResDialog::MoveSelection(int Dx, int Dy)
 		Dy = ParentClient.y1 - All.y1;
 
 	// move the ctrls
-	GRegion Update;
+	LRegion Update;
 	for (auto w: Selection)
 	{
-		GRect Old = w->View()->GetPos();
-		GRect New = Old;
+		LRect Old = w->View()->GetPos();
+		LRect New = Old;
 		New.Offset(Dx, Dy);
 
 		// optionally limit the move to the containers bounds
-		GRect *b = w->ParentCtrl()->GetChildArea(w);
+		LRect *b = w->ParentCtrl()->GetChildArea(w);
 		if (b)
 		{
 			if (New.x1 < b->x1)
@@ -3177,7 +3180,7 @@ void ResDialog::MoveSelection(int Dx, int Dy)
 				New.Offset(0, b->y2 - New.y2);
 		}
 
-		GRect Up = w->AbsPos();
+		LRect Up = w->AbsPos();
 		Up.Size(-GOOBER_BORDER, -GOOBER_BORDER);
 		Update.Union(&Up);
 
@@ -3198,9 +3201,9 @@ void ResDialog::SelectCtrl(ResDialogCtrl *c)
 	{
 		bool IsMine = false;
 		
-		for (GViewI *p = c->View(); p; p = p->GetParent())
+		for (LViewI *p = c->View(); p; p = p->GetParent())
 		{
-			if ((GViewI*)this == p)
+			if ((LViewI*)this == p)
 			{
 				IsMine = true;
 				break;
@@ -3213,7 +3216,7 @@ void ResDialog::SelectCtrl(ResDialogCtrl *c)
 			
 			// int TabIdx = -1;
 			ResDialogCtrl *Prev = 0;
-			for (GViewI *p = c->View()->GetParent(); p; p = p->GetParent())
+			for (LViewI *p = c->View()->GetParent(); p; p = p->GetParent())
 			{
 				ResDialogCtrl *c = dynamic_cast<ResDialogCtrl*>(p);
 				if (c)
@@ -3244,7 +3247,7 @@ void ResDialog::SelectNone()
 	}
 }
 
-void ResDialog::SelectRect(ResDialogCtrl *Parent, GRect *r, bool ClearPrev)
+void ResDialog::SelectRect(ResDialogCtrl *Parent, LRect *r, bool ClearPrev)
 {
 	if (ClearPrev)
 	{
@@ -3253,7 +3256,7 @@ void ResDialog::SelectRect(ResDialogCtrl *Parent, GRect *r, bool ClearPrev)
 
 	if (Parent && r)
 	{
-		for (GViewI *c: Parent->View()->IterateViews())
+		for (LViewI *c: Parent->View()->IterateViews())
 		{
 			if (c->GetPos().Overlap(r))
 			{
@@ -3328,7 +3331,7 @@ void ResDialog::OnDeselect(ResDialogCtrl *Wnd)
 	}
 }
 
-ResDialogCtrl *ResDialog::CreateCtrl(GXmlTag *t)
+ResDialogCtrl *ResDialog::CreateCtrl(LXmlTag *t)
 {
 	if (t)
 	{
@@ -3344,7 +3347,7 @@ ResDialogCtrl *ResDialog::CreateCtrl(GXmlTag *t)
 	return 0;
 }
 
-ResDialogCtrl *ResDialog::CreateCtrl(int Tool, GXmlTag *load)
+ResDialogCtrl *ResDialog::CreateCtrl(int Tool, LXmlTag *load)
 {
 	ResDialogCtrl *Ctrl = 0;
 
@@ -3483,12 +3486,12 @@ ResDialogCtrl *ResDialog::CreateCtrl(int Tool, GXmlTag *load)
 	return Ctrl;
 }
 
-GView *ResDialog::CreateUI()
+LView *ResDialog::CreateUI()
 {
 	return Ui = new ResDialogUi(this);
 }
 
-void ResDialog::DrawSelection(GSurface *pDC)
+void ResDialog::DrawSelection(LSurface *pDC)
 {
     if (Selection.Length() == 0)
         return;
@@ -3496,9 +3499,9 @@ void ResDialog::DrawSelection(GSurface *pDC)
 	// Draw selection
 	for (auto Ctrl: Selection)
 	{
-		GRect r = Ctrl->AbsPos();
-		GColour s(255, 0, 0);
-		GColour c = GetParent()->Focus() ? s : s.Mix(LColour(L_MED), 0.4);
+		LRect r = Ctrl->AbsPos();
+		LColour s(255, 0, 0);
+		LColour c = GetParent()->Focus() ? s : s.Mix(LColour(L_MED), 0.4);
 		DrawGoobers(pDC, r, Ctrl->Goobers, c, Ctrl->OverGoober);
 	}
 }
@@ -3509,13 +3512,13 @@ void ResDialog::DrawSelection(GSurface *pDC)
 #define USE_MEM_DC		0
 #endif
 
-void ResDialog::_Paint(GSurface *pDC, LPoint *Offset, GRect *Update)
+void ResDialog::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 {
 	// Create temp DC if needed...
-	GAutoPtr<GSurface> Local;
+	LAutoPtr<LSurface> Local;
 	if (!pDC)
 	{
-		if (!Local.Reset(new GScreenDC(this))) return;
+		if (!Local.Reset(new LScreenDC(this))) return;
 		pDC = Local;
 	}
 
@@ -3523,12 +3526,12 @@ void ResDialog::_Paint(GSurface *pDC, LPoint *Offset, GRect *Update)
 	GDoubleBuffer DblBuf(pDC);
 	#endif
 	
-	GView::_Paint(pDC, Offset, Update);
+	LView::_Paint(pDC, Offset, Update);
 
 	if (GetParent())
 	{
 		#ifndef WIN32
-		GRect p = GetPos();
+		LRect p = GetPos();
 		if (Offset) p.Offset(Offset);
 		pDC->SetClient(&p);
 		#endif
@@ -3546,7 +3549,7 @@ void ResDialog::_Paint(GSurface *pDC, LPoint *Offset, GRect *Update)
 	}
 }
 
-void ResDialog::OnPaint(GSurface *pDC)
+void ResDialog::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle();
@@ -3570,7 +3573,7 @@ void ResDialog::OnLanguageChange()
 	}
 }
 
-bool ResDialog::OnKey(GKey &k)
+bool ResDialog::OnKey(LKey &k)
 {
 	if (k.Ctrl())
 	{
@@ -3620,7 +3623,7 @@ bool ResDialog::OnKey(GKey &k)
 	return false;
 }
 
-void ResDialog::OnMouseClick(GMouse &m)
+void ResDialog::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{	
@@ -3706,7 +3709,7 @@ void ResDialog::OnMouseClick(GMouse &m)
 	}
 }
 
-void ResDialog::OnMouseMove(GMouse &m)
+void ResDialog::OnMouseMove(LMouse &m)
 {
 	// This code hilights the goober when the mouse is over it.
 	for (auto c: Selection)
@@ -3733,8 +3736,8 @@ void ResDialog::OnMouseMove(GMouse &m)
 			*DragY = m.y - DragOy;
 
 		// DragRgn in real coords
-		GRect Old = DragCtrl->View()->GetPos();
-		GRect New = DragRgn;
+		LRect Old = DragCtrl->View()->GetPos();
+		LRect New = DragRgn;
 		
 		auto It = IterateViews();
 		if (DragCtrl->View() != It[0])
@@ -3745,20 +3748,20 @@ void ResDialog::OnMouseMove(GMouse &m)
 		// If that means the dragging control changes then
 		if (New != Old)
 		{
-			GRegion Update;
+			LRegion Update;
 
 			// change everyone else by the same amount
 			for (auto c: Selection)
 			{
-				GRect OldPos = c->View()->GetPos();
-				GRect NewPos = OldPos;
+				LRect OldPos = c->View()->GetPos();
+				LRect NewPos = OldPos;
 
 				NewPos.x1 += New.x1 - Old.x1;
 				NewPos.y1 += New.y1 - Old.y1;
 				NewPos.x2 += New.x2 - Old.x2;
 				NewPos.y2 += New.y2 - Old.y2;
 
-				GRect Up = c->AbsPos();
+				LRect Up = c->AbsPos();
 				Up.Size(-GOOBER_BORDER, -GOOBER_BORDER);
 				Update.Union(&Up);
 				
@@ -3779,7 +3782,7 @@ bool ResDialog::Test(ErrorCollection *e)
 	return true;
 }
 
-bool ResDialog::Read(GXmlTag *t, SerialiseContext &Ctx)
+bool ResDialog::Read(LXmlTag *t, SerialiseContext &Ctx)
 {
 	bool Status = false;
 
@@ -3832,7 +3835,7 @@ void ResDialog::CleanSymbols()
 	}
 }
 
-bool ResDialog::Write(GXmlTag *t, SerialiseContext &Ctx)
+bool ResDialog::Write(LXmlTag *t, SerialiseContext &Ctx)
 {
 	bool Status = false;
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
@@ -3879,7 +3882,7 @@ const char *TypeOfRes(ResDialogCtrl *Ctrl)
 {
 
 	// the default
-	return "GWindow";
+	return "LWindow";
 }
 
 const char *TextOfCtrl(ResDialogCtrl *Ctrl)
@@ -3925,15 +3928,15 @@ const char *TextOfCtrl(ResDialogCtrl *Ctrl)
 	return "";
 }
 
-void OutputCtrl(GStringPipe &Def,
-				GStringPipe &Var,
-				GStringPipe &Inst,
+void OutputCtrl(LStringPipe &Def,
+				LStringPipe &Var,
+				LStringPipe &Inst,
 				ResDialogCtrl *Ctrl,
 				ResDialogCtrl *Parent,
 				int &Index)
 {
 	char Str[256];
-	const char *Type = "GView";
+	const char *Type = "LView";
 
 	for (LgiObjectName *on=NameMap; on->Type; on++)
 	{
@@ -3944,7 +3947,7 @@ void OutputCtrl(GStringPipe &Def,
 		}
 	}
 
-	if (stricmp(Type, "GDialog"))
+	if (stricmp(Type, "LDialog"))
 	{
 		if (ValidStr(Ctrl->GetStr()->GetDefine()) &&
 			stricmp(Ctrl->GetStr()->GetDefine(), "IDOK") &&
@@ -4002,8 +4005,8 @@ void ResDialog::OnCommand(int Cmd)
 	{
 		case IDM_DUMP:
 		{
-			GStringPipe Def, Var, Inst;
-			GStringPipe Buf;
+			LStringPipe Def, Var, Inst;
+			LStringPipe Buf;
 			char Str[256];
 
 			ResDialogCtrl *Dlg = dynamic_cast<ResDialogCtrl*>(Children[0]);
@@ -4022,7 +4025,7 @@ void ResDialog::OnCommand(int Cmd)
 				}
 
 				// Class def
-				Buf.Push(	"\nclass Dlg : public GDialog\n"
+				Buf.Push(	"\nclass Dlg : public LDialog\n"
 							"{\n");
 
 				// Variables
@@ -4036,15 +4039,15 @@ void ResDialog::OnCommand(int Cmd)
 				// Member functions
 				Buf.Push(	"\n"
 							"public:\n"
-							"\tDlg(GView *Parent);\n"
+							"\tDlg(LView *Parent);\n"
 							"\t~Dlg();\n"
 							"\n"
-							"\tint OnNotify(GViewI *Ctrl, int Flags);\n"
+							"\tint OnNotify(LViewI *Ctrl, int Flags);\n"
 							"};\n"
 							"\n");
 
 				// Class impl
-				Buf.Push(	"Dlg::Dlg(GView *Parent)\n"
+				Buf.Push(	"Dlg::Dlg(LView *Parent)\n"
 							"{\n"
 							"\tSetParent(Parent);\n");
 
@@ -4076,7 +4079,7 @@ void ResDialog::OnCommand(int Cmd)
 							"\n");
 
 				// ::OnNotify
-				Buf.Push(	"int Dlg::OnNotify(GViewI *Ctrl, int Flags)\n"
+				Buf.Push(	"int Dlg::OnNotify(LViewI *Ctrl, int Flags)\n"
 							"{\n"
 							"\tswitch (Ctrl->GetId())\n"
 							"\t{\n"
@@ -4100,7 +4103,7 @@ void ResDialog::OnCommand(int Cmd)
 				char *Text = Buf.NewStr();
 				if (Text)
 				{
-					GClipBoard Clip(Ui);
+					LClipBoard Clip(Ui);
 					Clip.Text(Text);
 					DeleteArray(Text);
 				}
@@ -4109,12 +4112,12 @@ void ResDialog::OnCommand(int Cmd)
 		}
 		case IDM_EXPORT:
 		{
-			GFileSelect Select;
+			LFileSelect Select;
 			Select.Parent(AppWindow);
 			Select.Type("Text", "*.txt");
 			if (Select.Save())
 			{
-				GFile F;
+				LFile F;
 				if (F.Open(Select.Name(), O_WRITE))
 				{
 					F.SetSize(0);
@@ -4206,17 +4209,17 @@ ResDialogUi::~ResDialogUi()
 	}
 }
 
-void ResDialogUi::OnPaint(GSurface *pDC)
+void ResDialogUi::OnPaint(LSurface *pDC)
 {
-	GRegion Client(0, 0, X()-1, Y()-1);
+	LRegion Client(0, 0, X()-1, Y()-1);
 	for (auto w: Children)
 	{
-		GRect r = w->GetPos();
+		LRect r = w->GetPos();
 		Client.Subtract(&r);
 	}
 
 	pDC->Colour(L_MED);
-	for (GRect *r = Client.First(); r; r = Client.Next())
+	for (LRect *r = Client.First(); r; r = Client.Next())
 	{
 		pDC->Rectangle(r);
 	}
@@ -4224,12 +4227,12 @@ void ResDialogUi::OnPaint(GSurface *pDC)
 
 void ResDialogUi::PourAll()
 {
-	GRegion Client(GetClient());
-	GRegion Update;
+	LRegion Client(GetClient());
+	LRegion Update;
 
 	for (auto v: Children)
 	{
-		GRect OldPos = v->GetPos();
+		LRect OldPos = v->GetPos();
 		Update.Union(&OldPos);
 
 		if (v->Pour(Client))
@@ -4268,7 +4271,7 @@ void ResDialogUi::OnPosChange()
 
 void ResDialogUi::OnCreate()
 {
-	Tools = new GToolBar;
+	Tools = new LToolBar;
 	if (Tools)
 	{
 		auto FileName = LFindFile("_DialogIcons.gif");
@@ -4296,7 +4299,7 @@ void ResDialogUi::OnCreate()
 		}
 	}
 
-	Status = new GStatusBar;
+	Status = new LStatusBar;
 	if (Status)
 	{
 		Status->Attach(this);
@@ -4319,7 +4322,7 @@ int ResDialogUi::CurrentTool()
 		auto It = Tools->IterateViews();
 		for (size_t i=0; i<It.Length(); i++)
 		{
-			GToolButton *But = dynamic_cast<GToolButton*>(It[i]);
+			LToolButton *But = dynamic_cast<LToolButton*>(It[i]);
 			if (But && But->Value())
 				return But->GetId();
 		}
@@ -4333,10 +4336,10 @@ void ResDialogUi::SelectTool(int i)
 	if (Tools)
 	{
 		auto It = Tools->IterateViews();
-		GViewI *w = It[i];
+		LViewI *w = It[i];
 		if (w)
 		{
-			GToolButton *But = dynamic_cast<GToolButton*>(w);
+			LToolButton *But = dynamic_cast<LToolButton*>(w);
 			if (But)
 				But->Value(true);
 		}
@@ -4363,5 +4366,5 @@ GMessage::Result ResDialogUi::OnEvent(GMessage *Msg)
 		}
 	}
 
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }

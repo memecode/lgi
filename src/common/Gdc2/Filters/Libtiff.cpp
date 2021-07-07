@@ -17,7 +17,7 @@
 
 #include "Lgi.h"
 #include "Lzw.h"
-#include "GVariant.h"
+#include "LVariant.h"
 #include "GLibraryUtils.h"
 #include "GPalette.h"
 
@@ -91,7 +91,7 @@ public:
 
 class GdcLibTiff : public GFilter
 {
-	GAutoPtr<LibTiff> Lib;
+	LAutoPtr<LibTiff> Lib;
 
 public:
 	GdcLibTiff();
@@ -101,10 +101,10 @@ public:
 	Format GetFormat() { return FmtTiff; }
 	bool IsOk() { return Lib ? Lib->IsLoaded() : false; }
 
-	IoStatus ReadImage(GSurface *pDC, GStream *In);
-	IoStatus WriteImage(GStream *Out, GSurface *pDC);
+	IoStatus ReadImage(LSurface *pDC, LStream *In);
+	IoStatus WriteImage(LStream *Out, LSurface *pDC);
 
-	bool GetVariant(const char *n, GVariant &v, char *a)
+	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
 		if (!_stricmp(n, LGI_FILTER_TYPE))
 		{
@@ -144,21 +144,21 @@ class GdcTiffFactory : public GFilterFactory
 
 static t::tsize_t TRead(t::thandle_t Hnd, t::tdata_t Ptr, t::tsize_t Size)
 {
-	GStream *s = (GStream*)Hnd;
+	LStream *s = (LStream*)Hnd;
 	int r = s->Read(Ptr, Size);
 	return r;
 }
 
 static t::tsize_t TWrite(t::thandle_t Hnd, t::tdata_t Ptr, t::tsize_t Size)
 {
-	GStream *s = (GStream*)Hnd;
+	LStream *s = (LStream*)Hnd;
 	int w = s->Write(Ptr, Size);
 	return w; 
 }
 
 static t::toff_t TSeek(t::thandle_t Hnd, t::toff_t Where, int Whence)
 {
-	GStream *s = (GStream*)Hnd;
+	LStream *s = (LStream*)Hnd;
 
 	switch (Whence)
 	{
@@ -178,13 +178,13 @@ static t::toff_t TSeek(t::thandle_t Hnd, t::toff_t Where, int Whence)
 
 static int TClose(t::thandle_t Hnd)
 {
-	GStream *s = (GStream*)Hnd;
+	LStream *s = (LStream*)Hnd;
 	return !s->Close();
 }
 
 static t::toff_t TSize(t::thandle_t Hnd)
 {
-	GStream *s = (GStream*)Hnd;
+	LStream *s = (LStream*)Hnd;
 	t::toff_t size = (t::toff_t) s->GetSize();
 	return size;
 }
@@ -211,7 +211,7 @@ GdcLibTiff::~GdcLibTiff()
 /// This swaps the R and B components as well as flips the image on the Y
 /// axis. Which is the required format to read and write TIFF's. Use it a
 /// 2nd time to restore the image to it's original state.
-void SwapRBandY(GSurface *pDC)
+void SwapRBandY(LSurface *pDC)
 {
 	for (int y1=0, y2 = pDC->Y()-1; y1<=y2; y1++, y2--)
 	{
@@ -304,7 +304,7 @@ void SwapRBandY(GSurface *pDC)
 	}
 }
 
-void SwapRB(GSurface *pDC)
+void SwapRB(LSurface *pDC)
 {
 	for (int y1=0; y1<pDC->Y(); y1++)
 	{
@@ -443,9 +443,9 @@ void CmykToRgb32(D *d, S *s, int width)
 	}
 }
 
-GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
+GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 {
-	GVariant v;
+	LVariant v;
 	if (!pDC || !In)
 	{
 		Props->SetValue(LGI_FILTER_ERROR, v = "Parameter error.");
@@ -481,7 +481,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 			if (img.samplesperpixel == 5)
 			{
 				int rowlen = img.width * img.samplesperpixel * img.bitspersample / 8;
-				GArray<uint8_t> a;
+				LArray<uint8_t> a;
 				if (a.Length(rowlen) &&
 					pDC->Create(img.width, img.height, System32BitColourSpace))
 				{
@@ -536,7 +536,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 						}
 						case 1:
 						{
-							GArray<uint8_t> Buf;
+							LArray<uint8_t> Buf;
 							Buf.Length(img.width + 7 / 8);
 							
 							for (unsigned y=0; y<img.height; y++)
@@ -600,9 +600,9 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 						}
 						case 24:
 						{
-							GArray<GRgb24> Buf;
+							LArray<LRgb24> Buf;
 							Buf.Length(img.width);
-							GRgb24 *b = &Buf[0];
+							LRgb24 *b = &Buf[0];
 							LgiAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
 
 							LgiAssert(Photometric == PHOTOMETRIC_RGB); // we don't support anything else yet.
@@ -643,11 +643,11 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 						}
 						case 32:
 						{
-							GArray<uint32_t> Buf;
+							LArray<uint32_t> Buf;
 							Buf.Length(img.width);
 							uint32_t *b = &Buf[0];
 							LgiAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
-							GColourSpace DestCs = pDC->GetColourSpace();
+							LColourSpace DestCs = pDC->GetColourSpace();
 
 							for (unsigned y=0; y<img.height; y++)
 							{
@@ -659,7 +659,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 									switch (DestCs)
 									{
 										#define TiffCase(name, bits) \
-											case Cs##name: CmykToRgb##bits((G##name*)d, (GCmyk32*)b, pDC->X()); break
+											case Cs##name: CmykToRgb##bits((G##name*)d, (LCmyk32*)b, pDC->X()); break
 
 										TiffCase(Rgb24, 24);
 										TiffCase(Bgr24, 24);
@@ -684,7 +684,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 									switch (DestCs)
 									{
 										#define TiffCase(name, bits) \
-											case Cs##name: TiffProcess##bits((G##name*)d, (GRgba32*)b, pDC->X()); break
+											case Cs##name: TiffProcess##bits((G##name*)d, (LRgba32*)b, pDC->X()); break
 										
 										TiffCase(Rgb24, 24);
 										TiffCase(Bgr24, 24);
@@ -714,9 +714,9 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 						}
 						case 48:
 						{
-							GArray<GRgb48> Buf;
+							LArray<LRgb48> Buf;
 							Buf.Length(img.width);
-							GRgb48 *b = &Buf[0];
+							LRgb48 *b = &Buf[0];
 							LgiAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
 
 							for (unsigned y=0; y<img.height; y++)
@@ -746,9 +746,9 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 						}
 						case 64:
 						{
-							GArray<GRgba64> Buf;
+							LArray<LRgba64> Buf;
 							Buf.Length(img.width);
-							GRgba64 *b = &Buf[0];
+							LRgba64 *b = &Buf[0];
 							LgiAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
 
 							for (unsigned y=0; y<img.height; y++)
@@ -759,7 +759,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 								switch (pDC->GetColourSpace())
 								{
 									#define TiffCase64(name, bits) \
-										case Cs##name: TiffProcess##bits((G##name*)d, (GRgba32*)b, pDC->X()); break
+										case Cs##name: TiffProcess##bits((G##name*)d, (LRgba32*)b, pDC->X()); break
 									
 									TiffCase64(Rgba64, 32);
 									TiffCase64(Bgra64, 32);
@@ -799,9 +799,9 @@ GFilter::IoStatus GdcLibTiff::ReadImage(GSurface *pDC, GStream *In)
 	return Status;
 }
 
-GFilter::IoStatus GdcLibTiff::WriteImage(GStream *Out, GSurface *pDC)
+GFilter::IoStatus GdcLibTiff::WriteImage(LStream *Out, LSurface *pDC)
 {
-	GVariant v;
+	LVariant v;
 	if (!pDC || !Out)
 	{
 		Props->SetValue(LGI_FILTER_ERROR, v = "Parameter error.");

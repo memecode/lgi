@@ -1,11 +1,11 @@
-#include "Lgi.h"
-#include "Store3Defs.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Store3Defs.h"
 
-GString EmailFlagsToStr(int flags)
+LString EmailFlagsToStr(int flags)
 {
 	if (flags == 0)
 		return "(none)";
-	GString::Array a;
+	LString::Array a;
 	a.SetFixedLength(false);
 	#define _(s) if (flags & s) a.New() = #s + 5;
 	_(MAIL_SENT)
@@ -26,5 +26,5 @@ GString EmailFlagsToStr(int flags)
 	_(MAIL_BAYES_SPAM)
 	_(MAIL_NEW)
 	_(MAIL_STORED_FLAT)
-	return GString(",").Join(a);
+	return LString(",").Join(a);
 }

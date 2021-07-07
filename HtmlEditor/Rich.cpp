@@ -1,19 +1,21 @@
-#include "Lgi.h"
-#include "GTextView3.h"
-#include "GTree.h"
-#include "GTabView.h"
-#include "GBox.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/TextView3.h"
+#include "lgi/common/Tree.h"
+#include "lgi/common/TabView.h"
+#include "lgi/common/Box.h"
 #include "resource.h"
-#include "LgiSpellCheck.h"
-#include "GDisplayString.h"
-#include "GButton.h"
-#include "IHttp.h"
-#include "GOptionsFile.h"
-#include "LList.h"
+#include "lgi/common/SpellCheck.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Http.h"
+#include "lgi/common/OptionsFile.h"
+#include "lgi/common/List.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/FileSelect.h"
 
 #if 1
-#include "GRichTextEdit.h"
-typedef GRichTextEdit EditCtrl;
+#include "lgi/common/RichTextEdit.h"
+typedef LRichTextEdit EditCtrl;
 #else
 #include "GHtmlEdit.h"
 typedef GHtmlEdit EditCtrl;
@@ -69,40 +71,40 @@ char Src[] =
 
 #endif
 
-class GCapabilityInstallTarget : public GCapabilityTarget
+class GCapabilityInstallTarget : public LCapabilityTarget
 {
 public:
 	virtual void StartInstall(CapsHash *Caps) = 0;
 };
 
-class CapsBar : public GView
+class CapsBar : public LView
 {
 	GCapabilityInstallTarget *App;
-	GCapabilityTarget::CapsHash *Caps;
-	GButton *Ok, *Install;
+	LCapabilityTarget::CapsHash *Caps;
+	LButton *Ok, *Install;
 
 public:
-	CapsBar(GCapabilityInstallTarget *Parent, GCapabilityTarget::CapsHash *caps)
+	CapsBar(GCapabilityInstallTarget *Parent, LCapabilityTarget::CapsHash *caps)
 	{
 		App = Parent;
 		Caps = caps;
-		Ok = new GButton(IDOK, 0, 0, -1, -1, "Ok");
-		Install = new GButton(IDC_INSTALL, 0, 0, -1, -1, "Install");
+		Ok = new LButton(IDOK, 0, 0, -1, -1, "Ok");
+		Install = new LButton(IDC_INSTALL, 0, 0, -1, -1, "Install");
 	}
 
-	bool Pour(GRegion &r)
+	bool Pour(LRegion &r)
 	{
-		GRect *rc = FindLargestEdge(r, GV_EDGE_TOP);
+		LRect *rc = FindLargestEdge(r, GV_EDGE_TOP);
 		if (!rc)
 			return false;
 
-		GRect p = *rc;
+		LRect p = *rc;
 		p.y2 = p.y1 + SysFont->GetHeight() + 11;
 		SetPos(p);
 		return true;	
 	}
 
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		switch (Ctrl->GetId())
 		{
@@ -120,15 +122,15 @@ public:
 		return 0;
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
-		pDC->Colour(GColour::Red);
+		pDC->Colour(LColour::Red);
 		pDC->Rectangle();
 
-		SysFont->Colour(GColour::White, GColour::Red);
+		SysFont->Colour(LColour::White, LColour::Red);
 		SysFont->Transparent(true);
 
-		GString s = "Missing components: ";
+		LString s = "Missing components: ";
 		// const char *k;
 		// for (bool b = Caps->First(&k); b; b = Caps->Next(&k))
 		for (auto k : *Caps)
@@ -137,7 +139,7 @@ public:
 			s += " ";
 		}
 
-		GDisplayString d(SysFont, s);
+		LDisplayString d(SysFont, s);
 		d.Draw(pDC, 6, 6);
 
 		if (Ok && Install)
@@ -145,7 +147,7 @@ public:
 			int x = GetClient().x2 - 6;
 			if (!Ok->IsAttached())
 				Ok->Attach(this);
-			GRect r;
+			LRect r;
 			r.Set(0, 0, Ok->X()-1, Ok->Y()-1);
 			r.Offset(x - r.X(), (Y() - r.Y()) >> 1);
 			Ok->SetPos(r);			
@@ -160,12 +162,12 @@ public:
 	}
 };
 
-class InstallThread : public GEventTargetThread, public LCancel
+class InstallThread : public LEventTargetThread, public LCancel
 {
 	int AppHnd;
 
 public:
-	InstallThread(int appHnd) : GEventTargetThread("InstallThread")
+	InstallThread(int appHnd) : LEventTargetThread("InstallThread")
 	{
 		AppHnd = appHnd;
 	}
@@ -176,9 +178,9 @@ public:
 		{
 			case M_INSTALL:
 			{
-				GAutoPtr<GString> Component((GString*)m->A());
+				LAutoPtr<LString> Component((LString*)m->A());
 				const char *Base = "http://memecode.com/components/lookup.php?app=Scribe&wordsize=%i&component=%s&os=win64&version=2.2.0";
-				GString s;
+				LString s;
 				s.Printf(Base, sizeof(NativeInt)*8, Component->Get());
 				#if _MSC_VER == _MSC_VER_VS2013
 				s += "&tags=vc12";
@@ -187,7 +189,7 @@ public:
 				#endif
 
 				GMemStream o(1024);
-				GString err;
+				LString err;
 				int Installed = 0;
 				if (!LgiGetUri(this, &o, &err, s))
 				{
@@ -195,8 +197,8 @@ public:
 					break;
 				}
 
-				GXmlTree t;
-				GXmlTag r;
+				LXmlTree t;
+				LXmlTag r;
 				o.SetPos(0);
 				if (!t.Read(&r, &o))
 				{
@@ -219,16 +221,16 @@ public:
 						if (LgiGetUri(this, &File, &err, Link))
 						{
 							char p[MAX_PATH];
-							LgiMakePath(p, sizeof(p), LGetExeFile(), "..");
-							LgiMakePath(p, sizeof(p), p, LgiGetLeaf(Link));
+							LMakePath(p, sizeof(p), LGetExeFile(), "..");
+							LMakePath(p, sizeof(p), p, LGetLeaf(Link));
 
-							GFile f;
+							LFile f;
 							if (f.Open(p, O_WRITE))
 							{
 								f.SetSize(0);
 								if (f.Write(File.GetBasePtr(), File.GetSize()) == File.GetSize())
 								{
-									GAutoPtr<GString> comp(new GString(*Component));
+									LAutoPtr<LString> comp(new LString(*Component));
 									PostObject(AppHnd, M_INSTALL, comp);
 									Installed++;
 								}
@@ -256,7 +258,7 @@ public:
 class MediaItem : public LListItem
 {
 	GDocView::ContentMedia *Cm;
-	GString sSize;
+	LString sSize;
 
 public:
 	MediaItem(GDocView::ContentMedia *cm)
@@ -264,13 +266,13 @@ public:
 		Cm = cm;
 	}
 
-	void OnMouseClick(GMouse &m)
+	void OnMouseClick(LMouse &m)
 	{
 		if (m.Left() && m.Double())
 		{
-			GFile::Path p(LSP_TEMP);
+			LFile::Path p(LSP_TEMP);
 			p += Cm->FileName;
-			GFile f;
+			LFile f;
 			if (f.Open(p, O_WRITE))
 			{
 				if (Cm->Stream)
@@ -323,26 +325,26 @@ public:
 	}
 };
 
-class App : public GWindow, public GCapabilityInstallTarget
+class App : public LWindow, public GCapabilityInstallTarget
 {
-	GBox *Split;
-	GTextView3 *Txt;
+	LBox *Split;
+	LTextView3 *Txt;
 	LList *Imgs;
-	GTabView *Tabs;
-	GTree *Tree;
+	LTabView *Tabs;
+	LTree *Tree;
 	uint64 LastChange;
 
 	EditCtrl *Edit;
 
-	GAutoPtr<GSpellCheck> Speller;
+	LAutoPtr<LSpellCheck> Speller;
 	CapsBar *Bar;
-	GCapabilityTarget::CapsHash Caps;
-	GAutoPtr<GEventTargetThread> Installer;
-	GOptionsFile Options;
-	GArray<GDocView::ContentMedia> Media;
+	LCapabilityTarget::CapsHash Caps;
+	LAutoPtr<LEventTargetThread> Installer;
+	LOptionsFile Options;
+	LArray<GDocView::ContentMedia> Media;
 
 public:
-	App() : Options(GOptionsFile::PortableMode, AppName)
+	App() : Options(LOptionsFile::PortableMode, AppName)
 	{
 		LastChange = 0;
 		Edit = 0;
@@ -356,7 +358,7 @@ public:
 		if (!Options.SerializeFile(false) ||
 			!SerializeState(&Options, "WndState", true))
 		{
-			GRect r(0, 0, 1200, 800);
+			LRect r(0, 0, 1200, 800);
 			SetPos(r);
 			MoveToCenter();
 		}
@@ -391,7 +393,7 @@ public:
 				s->AppendItem("E&xit", IDC_EXIT, true, -1, "Ctrl+W");
 			}
 
-			AddView(Split = new GBox);
+			AddView(Split = new LBox);
 			if (Split)
 			{
 				// Split->Debug();
@@ -401,7 +403,7 @@ public:
 				{
 					if (Speller)
 					{
-						GVariant v;
+						LVariant v;
 						Edit->SetValue("SpellCheckLanguage", v = "English");
 						Edit->SetValue("SpellCheckDictionary", v = "AU");
 						Edit->SetSpellCheck(Speller);
@@ -409,7 +411,7 @@ public:
 					Edit->Sunken(true);
 					Edit->SetId(IDC_EDITOR);
 					Edit->Register(this);
-					GVariant v;
+					LVariant v;
 					Edit->SetValue("HtmlImagesLinkCid", v = true);
 
 					#if LOAD_DOC
@@ -418,30 +420,30 @@ public:
 					#else
 					char p[MAX_PATH];
 					LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
-					LgiMakePath(p, sizeof(p), p, "Test");
-					LgiMakePath(p, sizeof(p), p, SrcFileName);
-					GAutoString html(ReadTextFile(p));
+					LMakePath(p, sizeof(p), p, "Test");
+					LMakePath(p, sizeof(p), p, SrcFileName);
+					LAutoString html(LReadTextFile(p));
 					if (html)
 						Edit->Name(html);
 					#endif
 					#endif
 				}
 
-				Split->AddView(Tabs = new GTabView(IDC_TABS));
+				Split->AddView(Tabs = new LTabView(IDC_TABS));
 				if (Tabs)
 				{
 					// Tabs->Debug();
 					
-					GTabPage *p = Tabs->Append("Html Output");
+					LTabPage *p = Tabs->Append("Html Output");
 					if (p)
 					{
-						GBox *b = new GBox(IDC_HTML_BOX);
+						LBox *b = new LBox(IDC_HTML_BOX);
 						b->SetVertical(true);
 						
-						b->AddView(Txt = new GTextView3(IDC_HTML, 0, 0, 100, 100));
+						b->AddView(Txt = new LTextView3(IDC_HTML, 0, 0, 100, 100));
 						Txt->SetPourLargest(true);
 						b->AddView(Imgs = new LList(IDC_IMAGES));
-						Imgs->GetCss(true)->Height(GCss::Len("150px"));
+						Imgs->GetCss(true)->Height(LCss::Len("150px"));
 						Imgs->AddColumn("Filename", 200);
 						Imgs->AddColumn("Size", 100);
 						Imgs->AddColumn("MimeType", 100);
@@ -453,7 +455,7 @@ public:
 					p = Tabs->Append("Node View");
 					if (p)
 					{
-						p->AddView(Tree = new GTree(IDC_TREE, 0, 0, 100, 100));
+						p->AddView(Tree = new LTree(IDC_TREE, 0, 0, 100, 100));
 						Tree->SetPourLargest(true);
 					}
 				}
@@ -509,7 +511,7 @@ public:
 			// for (bool b = Caps->First(&c); b; b = Caps->Next(&c))
 			for (auto c : *Caps)
 			{
-				GAutoPtr<GString> s(new GString(c.key));
+				LAutoPtr<LString> s(new LString(c.key));
 				Installer->PostObject(Installer->GetHandle(), M_INSTALL, s);
 			}
 		}
@@ -523,7 +525,7 @@ public:
 			// const char *k;
 			// for (bool b = Caps->First(&k); b; b = Caps->Next(&k))
 			for (auto k : *Caps)
-				Edit->PostEvent(M_COMPONENT_INSTALLED, new GString(k.key));
+				Edit->PostEvent(M_COMPONENT_INSTALLED, new LString(k.key));
 		}
 		PourAll();
 	}
@@ -545,7 +547,7 @@ public:
 			{
 				Tabs->Value(0);
 
-				GString Out;
+				LString Out;
 				Imgs->Empty();
 				Media.Empty();
 				if (Edit->GetFormattedContent("text/html", Out, &Media))
@@ -569,7 +571,7 @@ public:
 				break;
 			case IDC_VIEW_IN_BROWSER:
 			{
-				GFile::Path p(LSP_TEMP);
+				LFile::Path p(LSP_TEMP);
 				p += "export.html";
 				if (Edit->Save(p))
 				{
@@ -579,7 +581,7 @@ public:
 			}
 			case IDC_SAVE_FILE:
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(this);
 				s.Type("HTML", "*.html");
 				if (s.Save())
@@ -590,23 +592,23 @@ public:
 			{
 				if (Edit)
 				{
-					GString Html;
-					GArray<GDocView::ContentMedia> Media;
+					LString Html;
+					LArray<GDocView::ContentMedia> Media;
 					if (Edit->GetFormattedContent("text/html", Html, &Media))
 					{
-						GFile::Path p(LSP_APP_INSTALL);
+						LFile::Path p(LSP_APP_INSTALL);
 						p += "Output";
 						if (!p.IsFolder())
 							FileDev->CreateFolder(p);
 						p += "output.html";
-						GFile f;
+						LFile f;
 						if (f.Open(p, O_WRITE))
 						{
 							f.SetSize(0);
 							f.Write(Html);
 							f.Close();
 							
-							GString FileName = p.GetFull();
+							LString FileName = p.GetFull();
 							
 							for (unsigned i=0; i<Media.Length(); i++)
 							{
@@ -638,10 +640,10 @@ public:
 			}
 		}
 
-		return GWindow::OnCommand(Cmd, Event, Wnd);
+		return LWindow::OnCommand(Cmd, Event, Wnd);
 	}
 
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{
@@ -658,15 +660,15 @@ public:
 			case IDC_TREE:
 			{
 				GNotifyType ft = (GNotifyType)f;
-				GTreeItem *i = Tree->Selection();
+				LTreeItem *i = Tree->Selection();
 				
-				LHashTbl<ConstStrKey<char>,GString> vars;
+				LHashTbl<ConstStrKey<char>,LString> vars;
 				if (i)
 				{
-					auto p = GString(i->GetText()).Split(",");
+					auto p = LString(i->GetText()).Split(",");
 					for (auto i : p)
 					{
-						GString::Array a = i.Strip().Split("=");
+						LString::Array a = i.Strip().Split("=");
 						if (a.Length() == 2)
 							vars.Add(a[0], a[1]);
 					}
@@ -677,7 +679,7 @@ public:
 					case GNotifyItem_Select:
 					{
 						#ifdef _DEBUG
-						GString Ptr = vars.Find("ptr");
+						LString Ptr = vars.Find("ptr");
 						if (Ptr)
 							Edit->SelectNode(Ptr);
 						#endif
@@ -693,11 +695,11 @@ public:
 		return 0;
 	}
 	
-	void OnReceiveFiles(GArray<const char*> &Files)
+	void OnReceiveFiles(LArray<const char*> &Files)
 	{
 		if (Edit && Files.Length() > 0)
 		{
-			GAutoString t(ReadTextFile(Files[0]));
+			LAutoString t(LReadTextFile(Files[0]));
 			if (t)
 				Edit->Name(t);
 		}
@@ -707,22 +709,22 @@ public:
 	{
 		if (m->Msg() == M_INSTALL)
 		{
-			GAutoPtr<GString> c((GString*)m->A());
+			LAutoPtr<LString> c((LString*)m->A());
 			if (c)
 			{
-				GCapabilityTarget::CapsHash h;
+				LCapabilityTarget::CapsHash h;
 				h.Add(*c, true);
 				OnInstall(&h, true);
 			}
 		}
 
-		return GWindow::OnEvent(m);
+		return LWindow::OnEvent(m);
 	}
 };
 
 int LgiMain(OsAppArguments &AppArgs)
 {
-	GApp a(AppArgs, "RichEditTest");
+	LApp a(AppArgs, "RichEditTest");
 	a.AppWnd = new App;
 	a.Run();
 	return 0;

@@ -11,10 +11,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include "Lgi.h"
-#include "Lzw.h"
-#include "GVariant.h"
-#include "GPalette.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Lzw.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Palette.h"
 
 #ifdef FILTER_UI
 // define the symbol FILTER_UI to access the gif save options dialog
@@ -25,8 +25,8 @@
 
 class GdcGif : public GFilter
 {
-	GSurface *pDC;
-	GStream *s;
+	LSurface *pDC;
+	LStream *s;
 	int ProcessedScanlines;
 
 	// Old GIF coder stuff
@@ -60,10 +60,10 @@ public:
 
 	Format GetFormat() { return FmtGif; }
 	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
-	IoStatus ReadImage(GSurface *pDC, GStream *In);
-	IoStatus WriteImage(GStream *Out, GSurface *pDC);
+	IoStatus ReadImage(LSurface *pDC, LStream *In);
+	IoStatus WriteImage(LStream *Out, LSurface *pDC);
 
-	bool GetVariant(const char *n, GVariant &v, char *a)
+	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
 		if (!_stricmp(n, LGI_FILTER_TYPE))
 		{
@@ -159,8 +159,8 @@ int GdcGif::out_line(uchar *pixels, int linewidth, int interlaced, int BitDepth)
 	    }
 	    case CsBgr16:
 	    {
-	        GBgr16 *s = (GBgr16*) (*pDC)[lines];
-	        GBgr16 *e = s + pDC->X();
+	        LBgr16 *s = (LBgr16*) (*pDC)[lines];
+	        LBgr16 *e = s + pDC->X();
 	        GPalette *pal = pDC->Palette();
         	GdcRGB *p = (*pal)[0], *pix;
         	
@@ -176,8 +176,8 @@ int GdcGif::out_line(uchar *pixels, int linewidth, int interlaced, int BitDepth)
 	    }
 	    case CsRgb16:
 	    {
-	        GRgb16 *s = (GRgb16*) (*pDC)[lines];
-	        GRgb16 *e = s + pDC->X();
+	        LRgb16 *s = (LRgb16*) (*pDC)[lines];
+	        LRgb16 *e = s + pDC->X();
 	        GPalette *pal = pDC->Palette();
         	GdcRGB *p = (*pal)[0], *pix;
         	
@@ -614,9 +614,9 @@ union GfxCtrlExtBits
 	};
 };
 
-bool GifLoadPalette(GStream *s, GSurface *pDC, int TableBits)
+bool GifLoadPalette(LStream *s, LSurface *pDC, int TableBits)
 {
-	GRgb24 Rgb[256];
+	LRgb24 Rgb[256];
 
 	int Colours = 1 << (TableBits + 1);
 	int Bytes = Colours * sizeof(Rgb[0]);
@@ -632,7 +632,7 @@ bool GifLoadPalette(GStream *s, GSurface *pDC, int TableBits)
 	return true;
 }
 
-GFilter::IoStatus GdcGif::ReadImage(GSurface *pdc, GStream *in)
+GFilter::IoStatus GdcGif::ReadImage(LSurface *pdc, LStream *in)
 {
 	GFilter::IoStatus Status = IoError;
 	pDC = pdc;
@@ -718,7 +718,7 @@ GFilter::IoStatus GdcGif::ReadImage(GSurface *pdc, GStream *in)
 							if (Meter)
 							{
 								Meter->SetDescription("scanlines");
-								Meter->SetRange(GRange(0, sy));
+								Meter->SetRange(LRange(0, sy));
 							}
 
 							// Decode image
@@ -730,7 +730,7 @@ GFilter::IoStatus GdcGif::ReadImage(GSurface *pdc, GStream *in)
 							{
 								// Setup alpha channel
 								pDC->HasAlpha(true);
-								GSurface *Alpha = pDC->AlphaDC();
+								LSurface *Alpha = pDC->AlphaDC();
 								if (Alpha)
 								{
 									for (int y=0; y<pDC->Y(); y++)
@@ -814,11 +814,11 @@ GFilter::IoStatus GdcGif::ReadImage(GSurface *pdc, GStream *in)
 	return Status;
 }
 
-GFilter::IoStatus GdcGif::WriteImage(GStream *Out, GSurface *pDC)
+GFilter::IoStatus GdcGif::WriteImage(LStream *Out, LSurface *pDC)
 {
-	GVariant Transparent;
+	LVariant Transparent;
 	int Back = -1;
-	GVariant v;
+	LVariant v;
 
 	if (!Out || !pDC)
 		return GFilter::IoError;
@@ -831,7 +831,7 @@ GFilter::IoStatus GdcGif::WriteImage(GStream *Out, GSurface *pDC)
 	}
 
 	#ifdef FILTER_UI
-	GVariant Parent;
+	LVariant Parent;
 
 	if (Props)
 	{
@@ -890,7 +890,7 @@ GFilter::IoStatus GdcGif::WriteImage(GStream *Out, GSurface *pDC)
 		    else
 		    {
 			    // put up a dialog to ask about transparent colour
-			    GTransparentDlg Dlg((GView*)Parent.Value.Ptr, &Transparent);
+			    GTransparentDlg Dlg((LView*)Parent.Value.Ptr, &Transparent);
 			    if (!Dlg.DoModal())
 			    {
 				    Props->SetValue("Cancel", v = 1);

@@ -1,0 +1,2509 @@
+#include "lgi/common/Lgi.h"
+#include "lgi/common/RichTextEdit.h"
+#include "RichTextEditPriv.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/CssTools.h"
+#include "lgi/common/Menu.h"
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+bool Utf16to32(LArray<uint32_t> &Out, const uint16_t *In, int WordLen)
+{
+	if (WordLen == 0)
+	{
+		Out.Length(0);
+		return true;
+	}
+
+	// Count the length of utf32 chars...
+	const uint16 *Ptr = In;
+	ssize_t Bytes = sizeof(*In) * WordLen;
+	int Chars = 0;
+	while (	Bytes >= sizeof(*In) &&
+			LgiUtf16To32(Ptr, Bytes) > 0)
+		Chars++;
+	
+	// Set the output buffer size..
+	if (!Out.Length(Chars))
+		return false;
+
+	// Convert the string...
+	Ptr = (uint16*)In;
+	Bytes = sizeof(*In) * WordLen;
+	uint32_t *o = &Out[0];
+	#ifdef _DEBUG
+	uint32_t *e = o + Out.Length();
+	#endif
+	while (	Bytes >= sizeof(*In))
+	{
+		*o++ = LgiUtf16To32(Ptr, Bytes);
+	}
+	
+	LgiAssert(o == e);
+	return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+const char *LRichEditElemContext::GetElement(LRichEditElem *obj)
+{
+	return obj->Tag;
+}
+	
+const char *LRichEditElemContext::GetAttr(LRichEditElem *obj, const char *Attr)
+{
+	const char *a = NULL;
+	obj->Get(Attr, a);
+	return a;
+}
+
+bool LRichEditElemContext::GetClasses(LString::Array &Classes, LRichEditElem *obj)
+{
+	const char *c;
+	if (!obj->Get("class", c))
+		return false;
+		
+	LString cls = c;
+	Classes = cls.Split(" ");
+	return Classes.Length() > 0;
+}
+
+LRichEditElem *LRichEditElemContext::GetParent(LRichEditElem *obj)
+{
+	return dynamic_cast<LRichEditElem*>(obj->Parent);
+}
+
+LArray<LRichEditElem*> LRichEditElemContext::GetChildren(LRichEditElem *obj)
+{
+	LArray<LRichEditElem*> a;
+	for (unsigned i=0; i<obj->Children.Length(); i++)
+		a.Add(dynamic_cast<LRichEditElem*>(obj->Children[i]));
+	return a;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+GCssCache::GCssCache()
+{
+	Idx = 1;
+}
+	
+GCssCache::~GCssCache()
+{
+	Styles.DeleteObjects();
+}
+
+uint32_t GCssCache::GetStyles()
+{
+	uint32_t c = 0;
+	for (unsigned i=0; i<Styles.Length(); i++)
+	{
+		c += Styles[i]->RefCount != 0;
+	}
+	return c;
+}
+
+void GCssCache::ZeroRefCounts()
+{
+	for (unsigned i=0; i<Styles.Length(); i++)
+	{
+		Styles[i]->RefCount = 0;
+	}
+}
+
+bool GCssCache::OutputStyles(LStream &s, int TabDepth)
+{
+	char Tabs[64];
+	memset(Tabs, '\t', TabDepth);
+	Tabs[TabDepth] = 0;
+		
+	for (unsigned i=0; i<Styles.Length(); i++)
+	{
+		LNamedStyle *ns = Styles[i];
+		if (ns && ns->RefCount > 0)
+		{
+			s.Print("%s.%s {\n", Tabs, ns->Name.Get());
+				
+			LAutoString a = ns->ToString();
+			LString all = a.Get();
+			LString::Array lines = all.Split("\n");
+			for (unsigned n=0; n<lines.Length(); n++)
+			{
+				s.Print("%s%s\n", Tabs, lines[n].Get());
+			}
+				
+			s.Print("%s}\n\n", Tabs);
+		}
+	}
+		
+	return true;
+}
+
+LNamedStyle *GCssCache::AddStyleToCache(LAutoPtr<LCss> &s)
+{
+	if (!s)
+		return NULL;
+
+	// Look through existing styles for a match...			
+	for (unsigned i=0; i<Styles.Length(); i++)
+	{
+		LNamedStyle *ns = Styles[i];
+		if (*ns == *s)
+			return ns;
+	}
+		
+	// Not found... create new...
+	LNamedStyle *ns = new LNamedStyle;
+	if (ns)
+	{
+		char *p = Prefix;
+		ns->Name.Printf("%sStyle%i", p?p:"", Idx++);
+		*(LCss*)ns = *s.Get();
+		Styles.Add(ns);
+
+		#if 0 // _DEBUG
+		LAutoString ss = ns->ToString();
+		if (ss)
+			LgiTrace("%s = %s\n", ns->Name.Get(), ss.Get());
+		#endif
+	}
+		
+	return ns;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+BlockCursorState::BlockCursorState(bool cursor, LRichTextPriv::BlockCursor *c)
+{
+	Cursor = cursor;
+	Offset = c->Offset;
+	LineHint = c->LineHint;
+	BlockUid = c->Blk->GetUid();
+}
+
+bool BlockCursorState::Apply(LRichTextPriv *Ctx, bool Forward)
+{
+	LAutoPtr<LRichTextPriv::BlockCursor> &Bc = Cursor ? Ctx->Cursor : Ctx->Selection;
+	if (!Bc)
+		return false;
+
+	ssize_t o = Bc->Offset;
+	int lh = Bc->LineHint;
+	int uid = Bc->Blk->GetUid();
+
+	int Index;
+	LRichTextPriv::Block *b;
+	if (!Ctx->GetBlockByUid(b, BlockUid, &Index))
+		return false;
+
+	if (b != Bc->Blk)
+		Bc.Reset(new LRichTextPriv::BlockCursor(b, Offset, LineHint));
+	else
+	{
+		Bc->Offset = Offset;
+		Bc->LineHint = LineHint;
+	}
+
+	Offset = o;
+	LineHint = lh;
+	BlockUid = uid;
+	return true;
+}
+
+/// This is the simplest form of undo, just save the entire block state, and restore it if needed
+CompleteTextBlockState::CompleteTextBlockState(LRichTextPriv *Ctx, LRichTextPriv::TextBlock *Tb)
+{
+	if (Ctx->Cursor)
+		Cur.Reset(new BlockCursorState(true, Ctx->Cursor));
+	if (Ctx->Selection)
+		Sel.Reset(new BlockCursorState(false, Ctx->Selection));
+	if (Tb)
+	{
+		Uid = Tb->GetUid();
+		Blk.Reset(new LRichTextPriv::TextBlock(Tb));
+	}
+}
+
+bool CompleteTextBlockState::Apply(LRichTextPriv *Ctx, bool Forward)
+{
+	int Index;
+	LRichTextPriv::TextBlock *b;
+	if (!Ctx->GetBlockByUid(b, Uid, &Index))
+		return false;
+
+	// Swap the local state with the block in the ctx
+	Blk->UpdateSpellingAndLinks(NULL, LRange(0, Blk->Length()));
+	Ctx->Blocks[Index] = Blk.Release();
+	Blk.Reset(b);
+
+	// Update cursors
+	if (Cur)
+		Cur->Apply(Ctx, Forward);
+	if (Sel)
+		Sel->Apply(Ctx, Forward);
+	return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+MultiBlockState::MultiBlockState(LRichTextPriv *ctx, ssize_t Start)
+{
+	Ctx = ctx;
+	Index = Start;
+	Length = -1;
+}
+
+bool MultiBlockState::Apply(LRichTextPriv *Ctx, bool Forward)
+{
+	if (Index < 0 || Length < 0)
+	{
+		LgiAssert(!"Missing parameters");
+		return false;
+	}
+	
+	// Undo: Swap 'Length' blocks Ctx->Blocks with Blks
+	ssize_t OldLen = Blks.Length();
+	bool Status = Blks.SwapRange(LRange(0, OldLen), Ctx->Blocks, LRange(Index, Length));
+	if (Status)
+		Length = OldLen;
+	
+	return Status;
+}
+
+bool MultiBlockState::Copy(ssize_t Idx)
+{
+	if (!Ctx->Blocks.AddressOf(Idx))
+		return false;
+
+	LRichTextPriv::Block *b = Ctx->Blocks[Idx]->Clone();
+	if (!b)
+		return false;
+
+	Blks.Add(b);
+	return true;
+}
+
+bool MultiBlockState::Cut(ssize_t Idx)
+{
+	if (!Ctx->Blocks.AddressOf(Idx))
+		return false;
+
+	LRichTextPriv::Block *b = Ctx->Blocks[Idx];
+	if (!b)
+		return false;
+
+	Blks.Add(b);
+
+	return Ctx->Blocks.DeleteAt(Idx, true);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+LRichTextPriv::LRichTextPriv(LRichTextEdit *view, LRichTextPriv **Ptr) :
+	GHtmlParser(view),
+	GFontCache(SysFont)
+{
+	if (Ptr) *Ptr = this;
+	BlinkTs = 0;
+	View = view;
+	Log = &LogBuffer;
+	NextUid = 1;
+	UndoPos = 0;
+	UndoPosLock = false;
+	WordSelectMode = false;
+	Dirty = false;
+	ScrollOffsetPx = 0;
+	ShowTools = true;
+	ScrollChange = false;
+	DocumentExtent.x = 0;
+	DocumentExtent.y = 0;
+	SpellCheck = NULL;
+	SpellDictionaryLoaded = false;
+	HtmlLinkAsCid = false;
+	ScrollLinePx = SysFont->GetHeight();
+	if (Font.Reset(new LFont))
+		*Font = *SysFont;
+
+	for (unsigned i=0; i<CountOf(Areas); i++)
+	{
+		Areas[i].ZOff(-1, -1);
+	}
+
+	ClickedBtn = LRichTextEdit::MaxArea;
+	OverBtn = LRichTextEdit::MaxArea;
+	ZeroObj(BtnState);
+
+	Values[LRichTextEdit::FontFamilyBtn] = "FontName";
+	BtnState[LRichTextEdit::FontFamilyBtn].IsMenu = true;
+	Values[LRichTextEdit::FontSizeBtn] = "14";
+	BtnState[LRichTextEdit::FontSizeBtn].IsMenu = true;
+
+	Values[LRichTextEdit::BoldBtn] = true;
+	BtnState[LRichTextEdit::BoldBtn].IsPress = true;
+	Values[LRichTextEdit::ItalicBtn] = false;
+	BtnState[LRichTextEdit::ItalicBtn].IsPress = true;
+	Values[LRichTextEdit::UnderlineBtn] = false;
+	BtnState[LRichTextEdit::UnderlineBtn].IsPress = true;
+		
+	Values[LRichTextEdit::ForegroundColourBtn] = (int64)LColour(L_TEXT).c32();
+	BtnState[LRichTextEdit::ForegroundColourBtn].IsMenu = true;
+	Values[LRichTextEdit::BackgroundColourBtn] = (int64)LColour(L_WORKSPACE).c32();
+	BtnState[LRichTextEdit::BackgroundColourBtn].IsMenu = true;
+
+	Values[LRichTextEdit::MakeLinkBtn] = TEXT_LINK;
+	BtnState[LRichTextEdit::MakeLinkBtn].IsPress = true;
+	Values[LRichTextEdit::RemoveLinkBtn] = TEXT_REMOVE_LINK;
+	BtnState[LRichTextEdit::RemoveLinkBtn].IsPress = true;
+	Values[LRichTextEdit::RemoveStyleBtn] = TEXT_REMOVE_STYLE;
+	BtnState[LRichTextEdit::RemoveStyleBtn].IsPress = true;
+	//Values[LRichTextEdit::CapabilityBtn] = TEXT_CAP_BTN;
+	//BtnState[LRichTextEdit::CapabilityBtn].IsPress = true;
+	Values[LRichTextEdit::EmojiBtn] = TEXT_EMOJI;
+	BtnState[LRichTextEdit::EmojiBtn].IsPress = true;
+	Values[LRichTextEdit::HorzRuleBtn] = TEXT_HORZRULE;
+	BtnState[LRichTextEdit::HorzRuleBtn].IsPress = true;
+
+	Padding(LCss::Len(LCss::LenPx, 4));
+	EmptyDoc();
+}
+	
+LRichTextPriv::~LRichTextPriv()
+{
+	if (IsBusy(true))
+	{
+		uint64 Start = LgiCurrentTime();
+		uint64 Msg = Start;
+		while (IsBusy())
+		{
+			uint64 Now = LgiCurrentTime();
+			LgiSleep(10);
+			LgiYield();
+
+			if (Now - Msg > 1000)
+			{
+				LgiTrace("%s:%i - Waiting for blocks: %i\n", _FL, (int)(Now-Start));
+				Msg = Now;
+			}
+
+			if (Now - Start > 10000)
+			{
+				LgiAssert(0);
+				Start = Now;
+			}
+		}
+	}
+	
+	Empty();
+}
+	
+bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
+{
+	if (!Cursor || !Selection)
+		return false;
+
+	LArray<uint32_t> DeletedText;
+	LArray<uint32_t> *DelTxt = Cut ? &DeletedText : NULL;
+
+	bool Cf = CursorFirst();
+	LRichTextPriv::BlockCursor *Start = Cf ? Cursor : Selection;
+	LRichTextPriv::BlockCursor *End = Cf ? Selection : Cursor;
+	if (Start->Blk == End->Blk)
+	{
+		// In the same block... just delete the text
+		ssize_t Len = End->Offset - Start->Offset;
+		LRichTextPriv::Block *NextBlk = Next(Start->Blk);
+		if (Len >= Start->Blk->Length() && NextBlk)
+		{
+			// Delete entire block
+			ssize_t i = Blocks.IndexOf(Start->Blk);
+			LAutoPtr<MultiBlockState> MultiState(new MultiBlockState(this, i));
+			MultiState->Cut(i);
+			MultiState->Length = 0;
+			Start->Set(NextBlk, 0, 0);
+			Trans->Add(MultiState.Release());
+		}
+		else
+		{
+			Start->Blk->DeleteAt(Trans, Start->Offset, Len, DelTxt);
+		}
+	}
+	else
+	{
+		// Multi-block delete...
+		ssize_t i = Blocks.IndexOf(Start->Blk);
+		ssize_t e = Blocks.IndexOf(End->Blk);
+		LAutoPtr<MultiBlockState> MultiState(new MultiBlockState(this, i));
+
+		// 1) Delete all the content to the end of the first block
+		ssize_t StartLen = Start->Blk->Length();
+		if (Start->Offset < StartLen)
+		{
+			MultiState->Copy(i++);
+			Start->Blk->DeleteAt(NoTransaction, Start->Offset, StartLen - Start->Offset, DelTxt);
+		}
+		else if (Start->Offset == StartLen)
+		{
+			// This can happen because there is an implied '\n' at the end of each block. The
+			// next block always starts on a new line. We just increment the index 'i' to avoid
+			// the next loop deleting the start block.
+			i++;
+
+			// If the start and end blocks can be merged, the new line will eventually get removed
+			// then. If not, then... well whatevs.
+		}
+		else
+		{
+			LgiAssert(0);
+			return Error(_FL, "Cursor outside start block.");
+		}
+
+		// 2) Delete any blocks between 'Start' and 'End'
+		if (i >= 0)
+		{
+			while (Blocks[i] != End->Blk && i < (int)Blocks.Length())
+			{
+				LRichTextPriv::Block *b = Blocks[i];
+				b->CopyAt(0, -1, DelTxt);
+				printf("%s:%i - inter, %i\n", _FL, (int)i);
+				MultiState->Cut(i);
+				e--;
+			}
+		}
+		else
+		{
+			LgiAssert(0);
+			return Error(_FL, "Start block has no index.");;
+		}
+
+		if (End->Offset > 0)
+		{
+			// 3) Delete any text up to the Cursor in the 'End' block
+			MultiState->Copy(i);
+			printf("%s:%i - end, %i-%i, %i\n", _FL, (int)0, (int)End->Offset, (int)End->Blk->Length());
+			End->Blk->DeleteAt(NoTransaction, 0, End->Offset, DelTxt);
+		}
+
+		// Try and merge the start and end blocks
+		bool MergeOk = Merge(NoTransaction, Start->Blk, End->Blk);
+		MultiState->Length = MergeOk ? 1 : 2;
+		Trans->Add(MultiState.Release());
+	}
+
+	// Set the cursor and update the screen
+	Cursor->Set(Start->Blk, Start->Offset, Start->LineHint);
+	Selection.Reset();
+	View->Invalidate();
+
+	if (Cut)
+	{
+		DelTxt->Add(0);
+		*Cut = (char16*)LNewConvertCp(LGI_WideCharset, &DelTxt->First(), "utf-32", DelTxt->Length()*sizeof(uint32_t));
+	}
+
+	return true;
+}
+
+
+LRichTextPriv::Block *LRichTextPriv::Next(Block *b)
+{
+	ssize_t Idx = Blocks.IndexOf(b);
+	if (Idx < 0)
+		return NULL;
+	if (++Idx >= (int)Blocks.Length())
+		return NULL;
+	return Blocks[Idx];
+}
+
+LRichTextPriv::Block *LRichTextPriv::Prev(Block *b)
+{
+	ssize_t Idx = Blocks.IndexOf(b);
+	if (Idx <= 0)
+		return NULL;
+	return Blocks[--Idx];
+}
+
+bool LRichTextPriv::AddTrans(LAutoPtr<Transaction> &t)
+{
+	if (t)
+	{
+		if (UndoPosLock)
+		{
+			LgiTrace("%s:%i - AddTrans failed - UndoPosLocked.\n", _FL);
+			return false;
+		}
+
+		// Delete any transaction history after 'UndoPos'
+		for (ssize_t i=UndoPos; i<UndoQue.Length(); i++)
+		{
+			delete UndoQue[i];
+		}
+		UndoQue.Length(UndoPos);
+
+		// Now add the new transaction
+		UndoQue.Add(t.Release());
+
+		// And the position is now at the end of the que
+		UndoPos = UndoQue.Length();
+	}
+
+	return true;
+}
+
+bool LRichTextPriv::SetUndoPos(ssize_t Pos)
+{
+	if (UndoPosLock)
+		return false;
+
+	Pos = limit(Pos, 0, (int)UndoQue.Length());
+	if (UndoQue.Length() == 0)
+		return true;
+
+	while (Pos != UndoPos)
+	{
+		auto Prev = UndoPos;
+		if (Pos > UndoPos)
+		{
+			// Forward in queue
+			Transaction *t = UndoQue[UndoPos];
+
+			UndoPosLock = true;
+			if (!t->Apply(this, true))
+				goto ApplyError;
+			UndoPosLock = false;
+
+			LgiAssert(UndoPos == Prev);
+			UndoPos++;
+		}
+		else if (Pos < UndoPos)
+		{
+			// Back in queue
+			Transaction *t = UndoQue[UndoPos-1];
+
+			UndoPosLock = true;
+			if (!t->Apply(this, false))
+				goto ApplyError;
+			UndoPosLock = false;
+
+			LgiAssert(UndoPos == Prev);
+			UndoPos--;
+		}
+		else break; // We are done
+	}
+
+	Dirty = true;
+	InvalidateDoc(NULL);
+	return true;
+
+ApplyError:
+	UndoPosLock = false;
+	return false;	
+}
+
+bool LRichTextPriv::IsBusy(bool Stop)
+{
+	for (unsigned i=0; i<Blocks.Length(); i++)
+	{
+		if (Blocks[i]->IsBusy(Stop))
+			return true;
+	}
+	return false;
+}
+
+bool LRichTextPriv::Error(const char *file, int line, const char *fmt, ...)
+{
+	va_list Arg;
+	va_start(Arg, fmt);
+	LString s;
+	LgiPrintf(s, fmt, Arg);
+	va_end(Arg);
+
+	LString Err;
+	Err.Printf("%s:%i - Error: %s\n", file, line, s.Get());
+	Log->Write(Err, Err.Length());
+
+	Err = LogBuffer.NewGStr();
+	LgiTrace("%.*s", Err.Length(), Err.Get());
+		
+	LgiAssert(0);
+	return false;
+}
+
+void LRichTextPriv::UpdateStyleUI()
+{
+	if (!Cursor || !Cursor->Blk)
+	{
+		Error(_FL, "Not a valid cursor.");
+		return;
+	}
+
+	TextBlock *b = dynamic_cast<TextBlock*>(Cursor->Blk);
+
+	LArray<StyleText*> Styles;
+	if (b)
+		b->GetTextAt(Cursor->Offset, Styles);
+	StyleText *st = Styles.Length() ? Styles.First() : NULL;
+
+	LFont *f = NULL;
+	if (st)
+		f = GetFont(st->GetStyle());
+	else if (View)
+		f = View->GetFont();
+	else if (LgiApp)
+		f = SysFont;
+		
+	if (f)
+	{
+		Values[LRichTextEdit::FontFamilyBtn] = f->Face();
+		Values[LRichTextEdit::FontSizeBtn] = f->PointSize();
+		Values[LRichTextEdit::FontSizeBtn].CastString();
+		Values[LRichTextEdit::BoldBtn] = f->Bold();
+		Values[LRichTextEdit::ItalicBtn] = f->Italic();
+		Values[LRichTextEdit::UnderlineBtn] = f->Underline();
+	}
+	else
+	{
+		Values[LRichTextEdit::FontFamilyBtn] = "(Unknown)";
+	}
+		
+	Values[LRichTextEdit::ForegroundColourBtn] = (int64) (st && st->Colours.Fore.IsValid() ? st->Colours.Fore.c32() : TextColour.c32());
+	Values[LRichTextEdit::BackgroundColourBtn] = (int64) (st && st->Colours.Back.IsValid() ? st->Colours.Back.c32() : 0);
+
+	if (View)
+		View->Invalidate(Areas + LRichTextEdit::ToolsArea);
+}
+
+void LRichTextPriv::ScrollTo(LRect r)
+{
+	LRect Content = Areas[LRichTextEdit::ContentArea];
+	Content.Offset(-Content.x1, ScrollOffsetPx-Content.y1);
+
+	if (ScrollLinePx > 0)
+	{
+		if (r.y1 < Content.y1)
+		{
+			int OffsetPx = MAX(r.y1, 0);
+			View->SetScrollPos(0, OffsetPx / ScrollLinePx);
+			InvalidateDoc(NULL);
+		}
+		if (r.y2 > Content.y2)
+		{
+			int OffsetPx = r.y2 - Content.Y();
+			View->SetScrollPos(0, (OffsetPx + ScrollLinePx - 1) / ScrollLinePx);
+			InvalidateDoc(NULL);
+		}
+	}
+}
+
+void LRichTextPriv::InvalidateDoc(LRect *r)
+{
+	// Transform the coordinates from doc to screen space
+	LRect &c = Areas[LRichTextEdit::ContentArea];
+	if (r)
+	{
+		LRect t = *r;
+		t.Offset(c.x1, c.y1 - ScrollOffsetPx);
+		View->Invalidate(&t);
+	}
+	else View->Invalidate(&c);
+}
+
+void LRichTextPriv::EmptyDoc()
+{
+	Block *Def = new TextBlock(this);
+	if (Def)
+	{			
+		Blocks.Add(Def);
+		Cursor.Reset(new BlockCursor(Def, 0, 0));
+		UpdateStyleUI();
+	}
+}
+	
+void LRichTextPriv::Empty()
+{
+	// Delete cursors first to avoid hanging references
+	Cursor.Reset();
+	Selection.Reset();
+		
+	// Clear the block list..
+	Blocks.DeleteObjects();
+}
+
+bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
+{
+	if (!In || !In->Blk || Blocks.Length() == 0)
+		return Error(_FL, "Not a valid 'In' cursor, Blks=%i", Blocks.Length());
+		
+	LAutoPtr<BlockCursor> c;
+
+	bool Status = false;
+	switch (Dir)
+	{
+		case SkLineEnd:
+		case SkLineStart:
+		case SkUpLine:
+		case SkDownLine:
+		{
+			if (!c.Reset(new BlockCursor(*In)))
+				break;
+
+			Block *b = c->Blk;
+			Status = b->Seek(Dir, *c);
+			if (Status)
+				break;
+
+			if (Dir == SkUpLine)
+			{
+				// No more lines in the current block...
+				// Move to the next block.
+				ssize_t CurIdx = Blocks.IndexOf(b);
+				ssize_t NewIdx = CurIdx - 1;
+				if (NewIdx >= 0)
+				{
+					Block *b = Blocks[NewIdx];
+					if (!b)
+						return Error(_FL, "No block at %i", NewIdx);
+						
+					c.Reset(new BlockCursor(b, b->Length(), b->GetLines() - 1));
+					LgiAssert(c->Offset >= 0);
+					Status = true;							
+				}
+			}
+			else if (Dir == SkDownLine)
+			{
+				// No more lines in the current block...
+				// Move to the next block.
+				ssize_t CurIdx = Blocks.IndexOf(b);
+				ssize_t NewIdx = CurIdx + 1;
+				if ((unsigned)NewIdx < Blocks.Length())
+				{
+					Block *b = Blocks[NewIdx];
+					if (!b)
+						return Error(_FL, "No block at %i", NewIdx);
+						
+					c.Reset(new BlockCursor(b, 0, 0));
+					LgiAssert(c->Offset >= 0);
+					Status = true;							
+				}
+			}
+			break;
+		}
+		case SkDocStart:
+		{
+			if (!c.Reset(new BlockCursor(Blocks[0], 0, 0)))
+				break;
+
+			Status = true;
+			break;
+		}
+		case SkDocEnd:
+		{
+			if (Blocks.Length() == 0)
+				break;
+
+			Block *l = Blocks.Last();
+			if (!c.Reset(new BlockCursor(l, l->Length(), -1)))
+				break;
+
+			Status = true;
+			break;
+		}
+		case SkLeftChar:
+		{
+			if (!c.Reset(new BlockCursor(*In)))
+				break;
+
+			if (c->Offset > 0)
+			{
+				LArray<int> Ln;
+				c->Blk->OffsetToLine(c->Offset, NULL, &Ln);
+				if (Ln.Length() == 2 &&
+					c->LineHint == Ln.Last())
+				{
+					c->LineHint = Ln.First();
+				}
+				else
+				{
+					c->Offset--;
+					if (c->Blk->OffsetToLine(c->Offset, NULL, &Ln))
+						c->LineHint = Ln.First();
+				}
+
+				Status = true;
+			}
+			else // Seek to previous block
+			{
+				SeekPrevBlock:
+				ssize_t Idx = Blocks.IndexOf(c->Blk);
+				if (Idx < 0)
+				{
+					LgiAssert(0);
+					break;
+				}
+
+				if (Idx == 0)
+					break; // Beginning of document
+				
+				Block *b = Blocks[--Idx];
+				if (!b)
+				{
+					LgiAssert(0);
+					break;
+				}
+
+				if (!c.Reset(new BlockCursor(b, b->Length(), b->GetLines()-1)))
+					break;
+
+				Status = true;
+			}
+			break;
+		}
+		case SkLeftWord:
+		{
+			if (!c.Reset(new BlockCursor(*In)))
+				break;
+
+			if (c->Offset > 0)
+			{
+				LArray<uint32_t> a;
+				c->Blk->CopyAt(0, c->Offset, &a);
+					
+				ssize_t i = c->Offset;
+				while (i > 0 && IsWordBreakChar(a[i-1]))
+					i--;
+				while (i > 0 && !IsWordBreakChar(a[i-1]))
+					i--;
+
+				c->Offset = i;
+
+				LArray<int> Ln;
+				if (c->Blk->OffsetToLine(c->Offset, NULL, &Ln))
+					c->LineHint = Ln[0];
+
+				Status = true;
+			}
+			else // Seek into previous block?
+			{
+				goto SeekPrevBlock;
+			}
+			break;
+		}
+		case SkRightChar:
+		{
+			if (!c.Reset(new BlockCursor(*In)))
+				break;
+
+			if (c->Offset < c->Blk->Length())
+			{
+				LArray<int> Ln;
+				if (c->Blk->OffsetToLine(c->Offset, NULL, &Ln) &&
+					Ln.Length() == 2 &&
+					c->LineHint == Ln.First())
+				{
+					c->LineHint = Ln.Last();
+				}
+				else
+				{
+					c->Offset++;
+					if (c->Blk->OffsetToLine(c->Offset, NULL, &Ln))
+						c->LineHint = Ln.First();
+				}
+
+				Status = true;
+			}
+			else // Seek to next block
+			{
+				SeekNextBlock:
+				ssize_t Idx = Blocks.IndexOf(c->Blk);
+				if (Idx < 0)
+					return Error(_FL, "Block ptr index error.");
+
+				if (Idx >= (int)Blocks.Length() - 1)
+					break; // End of document
+				
+				Block *b = Blocks[++Idx];
+				if (!b)
+					return Error(_FL, "No block at %i.", Idx);
+
+				if (!c.Reset(new BlockCursor(b, 0, 0)))
+					break;
+
+				Status = true;
+			}
+			break;
+		}
+		case SkRightWord:
+		{
+			if (!c.Reset(new BlockCursor(*In)))
+				break;
+
+			if (c->Offset < c->Blk->Length())
+			{
+				LArray<uint32_t> a;
+				ssize_t RemainingCh = c->Blk->Length() - c->Offset;
+				c->Blk->CopyAt(c->Offset, RemainingCh, &a);
+					
+				int i = 0;
+				while (i < RemainingCh && !IsWordBreakChar(a[i]))
+					i++;
+				while (i < RemainingCh && IsWordBreakChar(a[i]))
+					i++;
+
+				c->Offset += i;
+				
+				LArray<int> Ln;
+				if (c->Blk->OffsetToLine(c->Offset, NULL, &Ln))
+					c->LineHint = Ln.Last();
+				else
+					c->LineHint = -1;
+				Status = true;
+			}
+			else // Seek into next block?
+			{
+				goto SeekNextBlock;
+			}
+			break;
+		}
+		case SkUpPage:
+		{
+			LRect &Content = Areas[LRichTextEdit::ContentArea];
+			int LineHint = -1;
+			int TargetY = In->Pos.y1 - Content.Y();
+			ssize_t Idx = HitTest(In->Pos.x1, MAX(TargetY, 0), LineHint);
+			if (Idx >= 0)
+			{
+				ssize_t Offset = -1;
+				Block *b = GetBlockByIndex(Idx, &Offset);
+				if (b)
+				{
+					if (!c.Reset(new BlockCursor(b, Offset, LineHint)))
+						break;
+
+					Status = true;
+				}
+			}
+			break;
+		}
+		case SkDownPage:
+		{
+			LRect &Content = Areas[LRichTextEdit::ContentArea];
+			int LineHint = -1;
+			int TargetY = In->Pos.y1 + Content.Y();
+			ssize_t Idx = HitTest(In->Pos.x1, MIN(TargetY, DocumentExtent.y-1), LineHint);
+			if (Idx >= 0)
+			{
+				ssize_t Offset = -1;
+				int BlkIdx = -1;
+				ssize_t CursorBlkIdx = Blocks.IndexOf(Cursor->Blk);
+				Block *b = GetBlockByIndex(Idx, &Offset, &BlkIdx);
+
+				if (!b ||
+					BlkIdx < CursorBlkIdx ||
+					(BlkIdx == CursorBlkIdx && Offset < Cursor->Offset))
+				{
+					LgiAssert(!"GetBlockByIndex failed.\n");
+					LgiTrace("%s:%i - GetBlockByIndex failed.\n", _FL);
+				}
+
+				if (b)
+				{
+					if (!c.Reset(new BlockCursor(b, Offset, LineHint)))
+						break;
+
+					Status = true;
+				}
+			}
+			break;
+		}
+		default:
+		{
+			return Error(_FL, "Unknown seek type.");
+		}
+	}
+		
+	if (Status)
+		SetCursor(c, Select);
+		
+	return Status;
+}
+	
+bool LRichTextPriv::CursorFirst()
+{
+	if (!Cursor || !Selection)
+		return true;
+		
+	ssize_t CIdx = Blocks.IndexOf(Cursor->Blk);
+	ssize_t SIdx = Blocks.IndexOf(Selection->Blk);
+	if (CIdx != SIdx)
+		return CIdx < SIdx;
+		
+	return Cursor->Offset < Selection->Offset;
+}
+	
+bool LRichTextPriv::SetCursor(LAutoPtr<BlockCursor> c, bool Select)
+{
+	LRect InvalidRc(0, 0, -1, -1);
+
+	if (!c || !c->Blk)
+		return Error(_FL, "Invalid cursor.");
+
+	if (Select && !Selection)
+	{
+		// Selection starting... save cursor as selection end point
+		if (Cursor)
+			InvalidRc = Cursor->Line;
+		Selection = Cursor;
+	}
+	else if (!Select && Selection)
+	{
+		// Selection ending... invalidate selection region and delete 
+		// selection end point
+		LRect r = SelectionRect();
+		InvalidateDoc(&r);
+		Selection.Reset();
+
+		// LgiTrace("Ending selection delete(sel) Idx=%i\n", i);
+	}
+	else if (Select && Cursor)
+	{
+		// Changing selection...
+		InvalidRc = Cursor->Line;
+	}
+
+	if (Cursor && !Select)
+	{
+		// Just moving cursor
+		InvalidateDoc(&Cursor->Pos);
+	}
+
+	if (!Cursor)
+		Cursor.Reset(new BlockCursor(*c));
+	else
+		Cursor = c;
+
+	// LgiTrace("%s:%i - SetCursor: %i, line: %i\n", _FL, Cursor->Offset, Cursor->LineHint);
+	
+	if (Cursor &&
+		Selection &&
+		*Cursor == *Selection)
+		Selection.Reset();
+
+	Cursor->Blk->GetPosFromIndex(Cursor);
+	UpdateStyleUI();
+	
+	#if DEBUG_OUTLINE_CUR_DISPLAY_STR || DEBUG_OUTLINE_CUR_STYLE_TEXT
+	InvalidateDoc(NULL);
+	#else
+	if (Select)
+		InvalidRc.Union(&Cursor->Line);
+	else
+		InvalidateDoc(&Cursor->Pos);
+		
+	if (InvalidRc.Valid())
+	{
+		// Update the screen
+		InvalidateDoc(&InvalidRc);
+	}
+	#endif
+
+	// Check the cursor is on the visible part of the document.
+	if (Cursor->Pos.Valid())
+		ScrollTo(Cursor->Pos);
+
+	return true;
+}
+
+LRect LRichTextPriv::SelectionRect()
+{
+	LRect SelRc;
+	if (Cursor)
+	{
+		SelRc = Cursor->Line;
+		if (Selection)
+			SelRc.Union(&Selection->Line);
+	}
+	else if (Selection)
+	{
+		SelRc = Selection->Line;
+	}
+	return SelRc;
+}
+
+ssize_t LRichTextPriv::IndexOfCursor(BlockCursor *c)
+{
+	if (!c || !c->Blk)
+	{
+		Error(_FL, "Invalid cursor param.");
+		return -1;
+	}
+
+	int CharPos = 0;
+	for (unsigned i=0; i<Blocks.Length(); i++)
+	{
+		Block *b = Blocks[i];
+		if (c->Blk == b)
+			return CharPos + c->Offset;			
+		CharPos += b->Length();
+	}
+		
+	LgiAssert(0);
+	return -1;
+}
+
+LPoint LRichTextPriv::ScreenToDoc(int x, int y)
+{
+	LRect &Content = Areas[LRichTextEdit::ContentArea];
+	return LPoint(x - Content.x1, y - Content.y1 + ScrollOffsetPx);
+}
+
+LPoint LRichTextPriv::DocToScreen(int x, int y)
+{
+	LRect &Content = Areas[LRichTextEdit::ContentArea];
+	return LPoint(x + Content.x1, y + Content.y1 - ScrollOffsetPx);
+}
+
+bool LRichTextPriv::Merge(Transaction *Trans, Block *a, Block *b)
+{
+	TextBlock *ta = dynamic_cast<TextBlock*>(a);
+	TextBlock *tb = dynamic_cast<TextBlock*>(b);
+	if (!ta || !tb)
+		return false;
+
+	ta->Txt.Add(tb->Txt);
+	ta->LayoutDirty = true;
+	ta->Len += tb->Len;
+	tb->Txt.Length(0);
+
+	Blocks.Delete(b, true);
+	Dirty = true;
+
+	return true;
+}
+
+LSurface *GEmojiContext::GetEmojiImage()
+{
+	if (!EmojiImg)
+	{
+		LString p = LGetSystemPath(LSP_APP_INSTALL);
+		if (!p)
+		{
+			LgiTrace("%s:%i - No app install path.\n", _FL);
+			return NULL;
+		}
+
+		char File[MAX_PATH] = "";
+		LMakePath(File, sizeof(File), p, "..\\src\\common\\Text\\Emoji\\EmojiMap.png");
+		LString a;
+		if (!LFileExists(File))
+			a = LFindFile("EmojiMap.png");
+		
+		EmojiImg.Reset(GdcD->Load(a ? a : File, false));
+		
+	}
+
+	return EmojiImg;
+}
+
+ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk)
+{
+	int CharPos = 0;
+	HitTestResult r(x, y);
+
+	if (Blocks.Length() == 0)
+	{
+		Error(_FL, "No blocks.");
+		return -1;
+	}
+
+	Block *b = Blocks.First();
+	LRect rc = b->GetPos();
+	if (y < rc.y1)
+	{
+		if (Blk) *Blk = b;
+		return 0;
+	}
+
+	for (unsigned i=0; i<Blocks.Length(); i++)
+	{
+		b = Blocks[i];
+		LRect p = b->GetPos();
+		bool Over = y >= p.y1 && y <= p.y2;
+		if (b->HitTest(r))
+		{
+			LineHint = r.LineHint;
+			if (Blk) *Blk = b;
+			return CharPos + r.Idx;
+		}
+		else if (Over)
+		{
+			Error(_FL, "Block failed to hit, i=%i, pos=%s, y=%i.", i, p.GetStr(), y);
+		}
+			
+		CharPos += b->Length();
+	}
+
+	b = Blocks.Last();
+	rc = b->GetPos();
+	if (y > rc.y2)
+	{
+		if (Blk) *Blk = b;
+		return CharPos + b->Length();
+	}
+		
+	return -1;
+}
+	
+bool LRichTextPriv::CursorFromPos(int x, int y, LAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx)
+{
+	int CharPos = 0;
+	HitTestResult r(x, y);
+
+	for (unsigned i=0; i<Blocks.Length(); i++)
+	{
+		Block *b = Blocks[i];
+		if (b->HitTest(r))
+		{
+			if (Cursor)
+				Cursor->Reset(new BlockCursor(b, r.Idx, r.LineHint));
+			if (GlobalIdx)
+				*GlobalIdx = CharPos + r.Idx;
+
+			return true;
+		}
+			
+		CharPos += b->Length();
+	}
+		
+	return false;
+}
+
+LRichTextPriv::Block *LRichTextPriv::GetBlockByIndex(ssize_t Index, ssize_t *Offset, int *BlockIdx, int *LineCount)
+{
+	int CharPos = 0;
+	int Lines = 0;
+		
+	for (unsigned i=0; i<Blocks.Length(); i++)
+	{
+		Block *b = Blocks[i];
+		ssize_t Len = b->Length();
+		int Ln = b->GetLines();
+
+		if (Index >= CharPos &&
+			Index < CharPos + Len)
+		{
+			if (BlockIdx)
+				*BlockIdx = i;
+			if (Offset)
+				*Offset = Index - CharPos;
+			return b;
+		}
+			
+		CharPos += b->Length();
+		Lines += Ln;
+	}
+
+	Block *b = Blocks.Last();
+	if (Offset)
+		*Offset = b->Length();
+	if (BlockIdx)
+		*BlockIdx = (int)Blocks.Length() - 1;
+	if (LineCount)
+		*LineCount = Lines;
+
+	return b;
+}
+	
+bool LRichTextPriv::Layout(LScrollBar *&ScrollY)
+{
+	Flow f(this);
+	
+	ScrollLinePx = View->GetFont()->GetHeight();
+	LgiAssert(ScrollLinePx > 0);
+	if (ScrollLinePx <= 0)
+		ScrollLinePx = 16;
+
+	LRect Client = Areas[LRichTextEdit::ContentArea];
+	Client.Offset(-Client.x1, -Client.y1);
+	DocumentExtent.x = Client.X();
+
+	LCssTools Ct(this, Font);
+	LRect Content = Ct.ApplyPadding(Client);
+	f.Left = Content.x1;
+	f.Right = Content.x2;
+	f.Top = f.CurY = Content.y1;
+
+	for (unsigned i=0; i<Blocks.Length(); i++)
+	{
+		Block *b = Blocks[i];
+		b->OnLayout(f);
+
+		if ((f.CurY > Client.Y()) && ScrollY==NULL && !ScrollChange)
+		{
+			// We need to add a scroll bar
+			View->SetScrollBars(false, true);
+			View->Invalidate();
+			ScrollChange = true;
+			return false;
+		}
+	}
+	DocumentExtent.y = f.CurY + (Client.y2 - Content.y2);
+
+	if (ScrollY)
+	{
+		int Lines = (f.CurY + ScrollLinePx - 1) / ScrollLinePx;
+		int PageLines = (Client.Y() + ScrollLinePx - 1) / ScrollLinePx;
+		ScrollY->SetPage(PageLines);
+		ScrollY->SetLimits(0, Lines);
+	}
+		
+	if (Cursor)
+	{
+		LgiAssert(Cursor->Blk != NULL);
+		if (Cursor->Blk)
+			Cursor->Blk->GetPosFromIndex(Cursor);
+	}
+
+	return true;
+}
+
+void LRichTextPriv::OnStyleChange(LRichTextEdit::RectType t)
+{
+	LCss s;
+	switch (t)
+	{
+		case LRichTextEdit::FontFamilyBtn:
+		{
+			LCss::StringsDef Fam(Values[t].Str());
+			s.FontFamily(Fam);
+			if (!ChangeSelectionStyle(&s, true))
+				StyleDirty.Add(t);
+			break;
+		}
+		case LRichTextEdit::FontSizeBtn:
+		{
+			double Pt = Values[t].CastDouble();
+			s.FontSize(LCss::Len(LCss::LenPt, (float)Pt));
+			if (!ChangeSelectionStyle(&s, true))
+				StyleDirty.Add(t);
+			break;
+		}
+		case LRichTextEdit::BoldBtn:
+		{
+			s.FontWeight(LCss::FontWeightBold);
+			if (!ChangeSelectionStyle(&s, Values[t].CastBool()))
+				StyleDirty.Add(t);
+			break;
+		}
+		case LRichTextEdit::ItalicBtn:
+		{
+			s.FontStyle(LCss::FontStyleItalic);
+			if (!ChangeSelectionStyle(&s, Values[t].CastBool()))
+				StyleDirty.Add(t);
+			break;
+		}
+		case LRichTextEdit::UnderlineBtn:
+		{
+			s.TextDecoration(LCss::TextDecorUnderline);
+			if (ChangeSelectionStyle(&s, Values[t].CastBool()))
+				StyleDirty.Add(t);
+			break;
+		}
+		case LRichTextEdit::ForegroundColourBtn:
+		{
+			s.Color(LCss::ColorDef(LCss::ColorRgb, (uint32_t) Values[t].Value.Int64));
+			if (!ChangeSelectionStyle(&s, true))
+				StyleDirty.Add(t);
+			break;
+		}
+		case LRichTextEdit::BackgroundColourBtn:
+		{
+			s.BackgroundColor(LCss::ColorDef(LCss::ColorRgb, (uint32_t) Values[t].Value.Int64));
+			if (!ChangeSelectionStyle(&s, true))
+				StyleDirty.Add(t);
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+bool LRichTextPriv::ChangeSelectionStyle(LCss *Style, bool Add)
+{
+	if (!Selection)
+		return false;
+
+	LAutoPtr<Transaction> Trans(new Transaction);
+	bool Cf = CursorFirst();
+	LRichTextPriv::BlockCursor *Start = Cf ? Cursor : Selection;
+	LRichTextPriv::BlockCursor *End = Cf ? Selection : Cursor;
+	if (Start->Blk == End->Blk)
+	{
+		// Change style in the same block...
+		ssize_t Len = End->Offset - Start->Offset;
+		if (!Start->Blk->ChangeStyle(Trans, Start->Offset, Len, Style, Add))
+			return false;
+	}
+	else
+	{
+		// Multi-block style change...
+
+		// 1) Change style on the content to the end of the first block
+		Start->Blk->ChangeStyle(Trans, Start->Offset, -1, Style, Add);
+
+		// 2) Change style on blocks between 'Start' and 'End'
+		ssize_t i = Blocks.IndexOf(Start->Blk);
+		if (i >= 0)
+		{
+			for (++i; Blocks[i] != End->Blk && i < (int)Blocks.Length(); i++)
+			{
+				LRichTextPriv::Block *&b = Blocks[i];
+				if (!b->ChangeStyle(Trans, 0, -1, Style, Add))
+					return false;
+			}
+		}
+		else
+		{
+			return Error(_FL, "Start block has no index.");
+		}
+
+		// 3) Change style up to the Cursor in the 'End' block
+		if (!End->Blk->ChangeStyle(Trans, 0, End->Offset, Style, Add))
+			return false;
+	}
+
+	Cursor->Pos.ZOff(-1, -1);
+	InvalidateDoc(NULL);
+	AddTrans(Trans);
+	return true;
+}
+
+void LRichTextPriv::PaintBtn(LSurface *pDC, LRichTextEdit::RectType t)
+{
+	LRect r = Areas[t];
+	LVariant &v = Values[t];
+	bool Down = (v.Type == GV_BOOL && v.Value.Bool) ||
+				(BtnState[t].IsPress && BtnState[t].Pressed && BtnState[t].MouseOver);
+
+	SysFont->Colour(L_TEXT, BtnState[t].MouseOver ? L_LIGHT : L_MED);
+	SysFont->Transparent(false);
+
+	LColour Low(96, 96, 96);
+	pDC->Colour(Down ? LColour::White : Low);
+	pDC->Line(r.x1, r.y2, r.x2, r.y2);
+	pDC->Line(r.x2, r.y1, r.x2, r.y2);
+	pDC->Colour(Down ? Low : LColour::White);
+	pDC->Line(r.x1, r.y1, r.x2, r.y1);
+	pDC->Line(r.x1, r.y1, r.x1, r.y2);
+	r.Size(1, 1);
+	
+	switch (v.Type)
+	{
+		case GV_STRING:
+		{
+			LDisplayString Ds(SysFont, v.Str());
+			Ds.Draw(pDC,
+					r.x1 + ((r.X()-Ds.X())>>1) + Down,
+					r.y1 + ((r.Y()-Ds.Y())>>1) + Down,
+					&r);
+			break;
+		}
+		case GV_INT64:
+		{
+			if (v.Value.Int64)
+			{
+				pDC->Colour((uint32_t)v.Value.Int64, 32);
+				pDC->Rectangle(&r);
+			}
+			else
+			{
+				// Transparent
+				int g[2] = { 128, 192 };
+				pDC->ClipRgn(&r);
+				for (int y=0; y<r.Y(); y+=2)
+				{
+					for (int x=0; x<r.X(); x+=2)
+					{
+						int i = ((y>>1)%2) ^ ((x>>1)%2);
+						pDC->Colour(LColour(g[i],g[i],g[i]));
+						pDC->Rectangle(r.x1+x, r.y1+y, r.x1+x+1, r.y1+y+1);
+					}
+				}
+				pDC->ClipRgn(NULL);
+			}
+			break;
+		}
+		case GV_BOOL:
+		{
+			const char *Label = NULL;
+			switch (t)
+			{
+				case LRichTextEdit::BoldBtn: Label = "B"; break;
+				case LRichTextEdit::ItalicBtn: Label = "I"; break;
+				case LRichTextEdit::UnderlineBtn: Label = "U"; break;
+				default:
+					break;
+			}
+			if (!Label) break;
+			LDisplayString Ds(SysFont, Label);
+			Ds.Draw(pDC,
+					r.x1 + ((r.X()-Ds.X())>>1) + Down,
+					r.y1 + ((r.Y()-Ds.Y())>>1) + Down,
+					&r);
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+bool LRichTextPriv::MakeLink(TextBlock *tb, ssize_t Offset, ssize_t Len, LString Link)
+{
+	if (!tb)
+		return false;
+
+	LArray<StyleText*> st;
+	if (!tb->GetTextAt(Offset, st))
+		return false;
+	
+	LAutoPtr<LNamedStyle> ns(new LNamedStyle);
+	if (ns)
+	{
+		if (st.Last()->GetStyle())
+			*ns = *st.Last()->GetStyle();
+		ns->TextDecoration(LCss::TextDecorUnderline);
+		ns->Color(LCss::ColorDef(LCss::ColorRgb, LColour::Blue.c32()));
+		
+		LAutoPtr<Transaction> Trans(new Transaction);
+
+		tb->ChangeStyle(Trans, Offset, Len, ns, true);
+
+		if (tb->GetTextAt(Offset + 1, st))
+		{
+			st.First()->Element = TAG_A;
+			st.First()->Param = Link;
+		}
+
+		AddTrans(Trans);
+	}
+
+	return true;
+}
+
+bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
+{
+	switch (t)
+	{
+		case LRichTextEdit::FontFamilyBtn:
+		{
+			LString::Array Fonts;
+			if (!LFontSystem::Inst()->EnumerateFonts(Fonts))
+				return Error(_FL, "EnumerateFonts failed.");
+
+			bool UseSub = (SysFont->GetHeight() * Fonts.Length()) > (GdcD->Y() * 0.8);
+
+			LSubMenu s;
+			LSubMenu *Cur = NULL;
+			int Idx = 1;
+			char Last = 0;
+			for (unsigned i=0; i<Fonts.Length(); i++)
+			{
+				LString &f = Fonts[i];
+				if (f(0) == '@')
+				{
+					Fonts.DeleteAt(i--);
+				}
+				else if (UseSub)
+				{
+					if (f(0) != Last || Cur == NULL)
+					{
+						LString str;
+						str.Printf("%c...", Last = f(0));
+						Cur = s.AppendSub(str);
+					}
+					if (Cur)
+						Cur->AppendItem(f, Idx++);
+					else
+						break;
+				}
+				else
+				{
+					s.AppendItem(f, Idx++);
+				}
+			}
+
+			LPoint p(Areas[t].x1, Areas[t].y2 + 1);
+			View->PointToScreen(p);
+			int Result = s.Float(View, p.x, p.y, true);
+			if (Result)
+			{
+				Values[t] = Fonts[Result-1];
+				View->Invalidate(Areas+t);
+				OnStyleChange(t);
+			}
+			break;
+		}
+		case LRichTextEdit::FontSizeBtn:
+		{
+			static const char *Sizes[] = { "6", "7", "8", "9", "10", "11", "12", "14", "16", "18", "20", "24",
+											"28", "32", "40", "50", "60", "80", "100", "120", 0 };
+			LSubMenu s;
+			for (int Idx = 0; Sizes[Idx]; Idx++)
+				s.AppendItem(Sizes[Idx], Idx+1);
+
+			LPoint p(Areas[t].x1, Areas[t].y2 + 1);
+			View->PointToScreen(p);
+			int Result = s.Float(View, p.x, p.y, true);
+			if (Result)
+			{
+				Values[t] = Sizes[Result-1];
+				View->Invalidate(Areas+t);
+				OnStyleChange(t);
+			}
+			break;
+		}
+		case LRichTextEdit::BoldBtn:
+		case LRichTextEdit::ItalicBtn:
+		case LRichTextEdit::UnderlineBtn:
+		{
+			Values[t] = !Values[t].CastBool();
+			View->Invalidate(Areas+t);
+			OnStyleChange(t);
+			break;
+		}
+		case LRichTextEdit::ForegroundColourBtn:
+		case LRichTextEdit::BackgroundColourBtn:
+		{
+			LPoint p(Areas[t].x1, Areas[t].y2 + 1);
+			View->PointToScreen(p);
+			new SelectColour(this, p, t);
+			break;
+		}
+		case LRichTextEdit::MakeLinkBtn:
+		{
+			if (!Cursor || !Cursor->Blk)
+				break;
+
+			TextBlock *tb = dynamic_cast<TextBlock*>(Cursor->Blk);
+			if (!tb)
+				break;
+
+			LArray<StyleText*> st;
+			if (!tb->GetTextAt(Cursor->Offset, st))
+				break;
+
+			StyleText *a = st.Length() > 1 && st[1]->Element == TAG_A ? st[1] : st.First()->Element == TAG_A ? st[0] : NULL;
+			if (a)
+			{
+				// Edit the existing link...
+				GInput i(View, a->Param, "Edit link:", "Link");
+				if (i.DoModal())
+				{
+					a->Param = i.GetStr();
+				}
+			}
+			else if (Selection)
+			{
+				// Turn current selection into link
+				GInput i(View, NULL, "Edit link:", "Link");
+				if (i.DoModal())
+				{
+					BlockCursor *Start = CursorFirst() ? Cursor : Selection;
+					BlockCursor *End = CursorFirst() ? Selection : Cursor;
+					if (!Start || !End) return false;
+					if (Start->Blk != End->Blk)
+					{
+						LgiMsg(View, "Selection too large.", "Error");
+						return false;
+					}
+					
+					MakeLink(tb,
+							Start->Offset,
+							End->Offset - Start->Offset,
+							i.GetStr());
+				}
+			}
+			break;
+		}
+		case LRichTextEdit::RemoveLinkBtn:
+		{
+			if (!Cursor || !Cursor->Blk)
+				break;
+
+			TextBlock *tb = dynamic_cast<TextBlock*>(Cursor->Blk);
+			if (!tb)
+				break;
+
+			LArray<StyleText*> st;
+			if (!tb->GetTextAt(Cursor->Offset, st))
+				break;
+
+			StyleText *a = st.Length() > 1 && st[1]->Element == TAG_A ? st[1] : st.First()->Element == TAG_A ? st[0] : NULL;
+			if (a)
+			{
+				// Remove the existing link...
+				a->Element = CONTENT;
+				a->Param.Empty();
+
+				LAutoPtr<LCss> s(new LCss);
+				LNamedStyle *Ns = a->GetStyle();
+				if (Ns)
+					*s = *Ns;
+				if (s->TextDecoration() == LCss::TextDecorUnderline)
+					s->DeleteProp(LCss::PropTextDecoration);
+				if ((LColour)s->Color() == LColour::Blue)
+					s->DeleteProp(LCss::PropColor);
+
+				Ns = AddStyleToCache(s);
+				a->SetStyle(Ns);
+
+				tb->LayoutDirty = true;
+				InvalidateDoc(NULL);
+			}
+			break;			
+		}
+		case LRichTextEdit::RemoveStyleBtn:
+		{
+			LCss s;
+			ChangeSelectionStyle(&s, false);
+			break;
+		}
+		/*
+		case LRichTextEdit::CapabilityBtn:
+		{
+			View->OnCloseInstaller();
+			break;
+		}
+		*/
+		case LRichTextEdit::EmojiBtn:
+		{
+			LPoint p(Areas[t].x1, Areas[t].y2 + 1);
+			View->PointToScreen(p);
+			new EmojiMenu(this, p);
+			break;
+		}
+		case LRichTextEdit::HorzRuleBtn:
+		{
+			InsertHorzRule();
+			break;
+		}
+		default:
+			return false;
+	}
+
+	return true;
+}
+
+bool LRichTextPriv::InsertHorzRule()
+{
+	if (!Cursor || !Cursor->Blk)
+		return false;
+
+	TextBlock *tb = dynamic_cast<TextBlock*>(Cursor->Blk);
+	if (!tb)
+		return false;
+
+	LAutoPtr<Transaction> Trans(new Transaction);
+
+	DeleteSelection(Trans, NULL);
+
+	ssize_t InsertIdx = Blocks.IndexOf(tb) + 1;
+	LRichTextPriv::Block *After = NULL;
+	if (Cursor->Offset == 0)
+	{
+		InsertIdx--;
+	}
+	else if (Cursor->Offset < tb->Length())
+	{
+		After = tb->Split(Trans, Cursor->Offset);
+		if (!After)
+			return false;
+		tb->StripLast(Trans);
+	}
+
+	HorzRuleBlock *Hr = new HorzRuleBlock(this);
+	if (!Hr)
+		return false;
+
+	Blocks.AddAt(InsertIdx++, Hr);
+	if (After)
+		Blocks.AddAt(InsertIdx++, After);
+
+	AddTrans(Trans);
+	InvalidateDoc(NULL);
+
+	LAutoPtr<BlockCursor> c(new BlockCursor(Hr, 0, 0));
+	return SetCursor(c);
+}
+	
+void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
+{
+	if (Areas[LRichTextEdit::ToolsArea].Valid())
+	{
+		// Draw tools area...
+		LRect &t = Areas[LRichTextEdit::ToolsArea];
+		#ifdef WIN32
+		GDoubleBuffer Buf(pDC, &t);
+		#endif
+		LColour ToolBar = LColour(L_FOCUS_SEL_BACK).Mix(LColour(L_LOW));
+		pDC->Colour(ToolBar);
+		pDC->Rectangle(&t);
+
+		LRect r = t;
+		r.Size(3, 3);
+		#define AllocPx(sz, border) \
+			LRect(r.x1, r.y1, r.x1 + (int)(sz) - 1, r.y2); r.x1 += (int)(sz) + border
+
+		Areas[LRichTextEdit::FontFamilyBtn] = AllocPx(130, 6);
+		Areas[LRichTextEdit::FontSizeBtn] = AllocPx(40, 6);
+
+		Areas[LRichTextEdit::BoldBtn] = AllocPx(r.Y(), 0);
+		Areas[LRichTextEdit::ItalicBtn] = AllocPx(r.Y(), 0);
+		Areas[LRichTextEdit::UnderlineBtn] = AllocPx(r.Y(), 6);
+
+		Areas[LRichTextEdit::ForegroundColourBtn] = AllocPx(r.Y()*1.5, 0);
+		Areas[LRichTextEdit::BackgroundColourBtn] = AllocPx(r.Y()*1.5, 6);
+
+		{
+			LDisplayString Ds(SysFont, TEXT_LINK);
+			Areas[LRichTextEdit::MakeLinkBtn] = AllocPx(Ds.X() + 12, 0);
+		}
+		{
+			LDisplayString Ds(SysFont, TEXT_REMOVE_LINK);
+			Areas[LRichTextEdit::RemoveLinkBtn] = AllocPx(Ds.X() + 12, 6);
+		}
+		{
+			LDisplayString Ds(SysFont, TEXT_REMOVE_STYLE);
+			Areas[LRichTextEdit::RemoveStyleBtn] = AllocPx(Ds.X() + 12, 6);
+		}
+		for (unsigned int i=LRichTextEdit::EmojiBtn; i<LRichTextEdit::MaxArea; i++)
+		{
+			LDisplayString Ds(SysFont, Values[i].Str());
+			Areas[i] = AllocPx(Ds.X() + 12, 6);
+		}
+
+		for (unsigned i = LRichTextEdit::FontFamilyBtn; i < LRichTextEdit::MaxArea; i++)
+		{
+			PaintBtn(pDC, (LRichTextEdit::RectType) i);
+		}
+	}
+
+	LPoint Origin;
+	
+	LRect r = Areas[LRichTextEdit::ContentArea];
+	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF
+	LMemDC Mem;
+	if (!Mem.Create(r.X(), r.Y(), pDC->GetColourSpace()))
+	{
+		LgiAssert(!"MemDC creation failed.");
+		return;
+	}
+	LSurface *pScreen = pDC;
+	pDC = &Mem;
+	r.Offset(-r.x1, -r.y1);
+	#else
+	pDC->GetOrigin(Origin.x, Origin.y);
+	pDC->ClipRgn(&r);
+	#endif
+
+	ScrollOffsetPx = ScrollY ? (int)(ScrollY->Value() * ScrollLinePx) : 0;
+	pDC->SetOrigin(Origin.x-r.x1, Origin.y-r.y1+ScrollOffsetPx);
+
+	int DrawPx = ScrollOffsetPx + Areas[LRichTextEdit::ContentArea].Y();
+	int ExtraPx = DrawPx > DocumentExtent.y ? DrawPx - DocumentExtent.y : 0;
+
+	r.Set(0, 0, DocumentExtent.x-1, DocumentExtent.y-1);
+
+	// Fill the padding...
+	LCssTools ct(this, Font);
+	r = ct.PaintPadding(pDC, r);
+
+	// Fill the background...
+	#if DEBUG_COVERAGE_CHECK
+	pDC->Colour(LColour(255, 0, 255));
+	#else
+	LCss::ColorDef cBack = BackgroundColor();
+	// pDC->Colour(cBack.IsValid() ? (LColour)cBack : LColour(LC_WORKSPACE, 24));
+	#endif
+	pDC->Rectangle(&r);
+	if (ExtraPx)
+		pDC->Rectangle(0, DocumentExtent.y, DocumentExtent.x-1, DocumentExtent.y+ExtraPx);
+
+	PaintContext Ctx;
+	Ctx.pDC = pDC;
+	Ctx.Cursor = Cursor;
+	Ctx.Select = Selection;
+	Ctx.Colours[Unselected].Fore.Set(L_TEXT);
+	Ctx.Colours[Unselected].Back.Set(L_WORKSPACE);
+		
+	if (View->Focus())
+	{
+		Ctx.Colours[Selected].Fore.Set(L_FOCUS_SEL_FORE);
+		Ctx.Colours[Selected].Back.Set(L_FOCUS_SEL_BACK);
+	}
+	else
+	{
+		Ctx.Colours[Selected].Fore.Set(L_NON_FOCUS_SEL_FORE);
+		Ctx.Colours[Selected].Back.Set(L_NON_FOCUS_SEL_BACK);
+	}
+		
+	for (unsigned i=0; i<Blocks.Length(); i++)
+	{
+		Block *b = Blocks[i];
+		if (b)
+		{
+			b->OnPaint(Ctx);
+			#if DEBUG_OUTLINE_BLOCKS
+			pDC->Colour(LColour(192, 192, 192));
+			pDC->LineStyle(LSurface::LineDot);
+			pDC->Box(&b->GetPos());
+			pDC->LineStyle(LSurface::LineSolid);
+			#endif
+		}
+	}
+
+	#ifdef _DEBUG
+	pDC->Colour(LColour::Green);
+	for (unsigned i=0; i<DebugRects.Length(); i++)
+	{
+		pDC->Box(&DebugRects[i]);
+	}
+	#endif
+
+	#if 0 // Outline the line the cursor is on
+	if (Cursor)
+	{
+		pDC->Colour(LColour::Blue);
+		pDC->LineStyle(LSurface::LineDot);
+		pDC->Box(&Cursor->Line);
+	}
+	#endif
+
+	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF
+	Mem.SetOrigin(0, 0);
+	pScreen->Blt(Areas[LRichTextEdit::ContentArea].x1, Areas[LRichTextEdit::ContentArea].y1, &Mem);
+	#else
+	pDC->ClipRgn(NULL);
+	#endif
+}
+	
+LHtmlElement *LRichTextPriv::CreateElement(LHtmlElement *Parent)
+{
+	return new LRichEditElem(Parent);
+}
+
+bool LRichTextPriv::ToHtml(LArray<GDocView::ContentMedia> *Media, BlockCursor *From, BlockCursor *To)
+{
+	UtfNameCache.Reset();
+	if (!Blocks.Length())
+		return false;
+
+	LStringPipe p(256);
+
+	p.Print("<html>\n"
+			"<head>\n"
+			"\t<meta name=\"charset\" content=\"utf-8\">\n");
+	
+	ZeroRefCounts();
+
+	ssize_t Start = From ? Blocks.IndexOf(From->Blk) : 0;
+	ssize_t End = To ? Blocks.IndexOf(To->Blk) : Blocks.Length() - 1;
+	ssize_t StartIdx = From ? From->Offset : 0;
+	ssize_t EndIdx = To ? To->Offset : Blocks.Last()->Length();
+
+	for (size_t i=Start; i<=End; i++)
+	{
+		Blocks[i]->IncAllStyleRefs();
+	}
+
+	if (GetStyles())
+	{
+		p.Print("\t<style>\n");
+		OutputStyles(p, 1);		
+		p.Print("\t</style>\n");
+	}
+
+	p.Print("</head>\n"
+			"<body>\n");
+		
+	for (size_t i=Start; i<=End; i++)
+	{
+		Block *b = Blocks[i];
+		LRange r;
+		if (i == Start)
+			r.Start = StartIdx;
+		if (i == End)
+			r.Len = EndIdx - r.Start;
+
+		b->ToHtml(p, Media, r.Valid() ? &r : NULL);
+	}
+		
+	p.Print("</body>\n</html>\n");
+	LAutoString a(p.NewStr());
+	UtfNameCache = a;
+	return UtfNameCache.Get() != NULL;
+}
+	
+void LRichTextPriv::DumpBlocks()
+{
+	LgiTrace("LRichTextPriv Blocks=%i\n", Blocks.Length());
+	for (unsigned i=0; i<Blocks.Length(); i++)
+	{
+		Block *b = Blocks[i];
+		LgiTrace("%p::%s style=%p/%s {\n",
+			b,
+			b->GetClass(),
+			b->GetStyle(),
+			b->GetStyle() ? b->GetStyle()->Name.Get() : NULL);
+		b->Dump();
+		LgiTrace("}\n");
+	}
+}
+
+struct HtmlElementCb : public LCss::ElementCallback<LHtmlElement>
+{
+	const char *GetElement(LHtmlElement *obj)
+	{
+		return obj->Tag;
+	}
+
+	const char *GetAttr(LHtmlElement *obj, const char *Attr)
+	{
+		const char *Val = NULL;
+		return obj->Get(Attr, Val) ? Val : NULL;
+	}
+
+	bool GetClasses(LString::Array &Classes, LHtmlElement *obj)
+	{
+		const char *Cls = NULL;
+		if (!obj->Get("class", Cls))
+			return false;
+
+		Classes = LString(Cls).SplitDelimit();
+		return true;
+	}
+
+	LHtmlElement *GetParent(LHtmlElement *obj)
+	{
+		return obj->Parent;
+	}
+
+	LArray<LHtmlElement*> GetChildren(LHtmlElement *obj)
+	{
+		return obj->Children;
+	}
+};
+
+bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentStyle, int Depth)
+{
+	char Sp[48];
+	int SpLen = MIN(Depth << 1, sizeof(Sp) - 1);
+	memset(Sp, ' ', SpLen);
+	Sp[SpLen] = 0;
+		
+	for (unsigned i = 0; i < e->Children.Length(); i++)
+	{
+		LHtmlElement *c = e->Children[i];
+		LAutoPtr<LCss> Style;
+		if (ParentStyle)
+			Style.Reset(new LCss(*ParentStyle));
+
+		LCss::SelArray Matches;
+		HtmlElementCb Cb;
+		if (ctx.StyleStore.Match(Matches, &Cb, c) &&
+			Matches.Length() > 0 &&
+			(Style.Get() || Style.Reset(new LCss)))
+		{
+			for (auto s : Matches)
+			{
+				const char *p = s->Style;
+				Style->Parse(p, LCss::ParseRelaxed);
+			}
+		}
+			
+		// Check to see if the element is block level and end the previous
+		// paragraph if so.
+		c->Info = c->Tag ? GHtmlStatic::Inst->GetTagInfo(c->Tag) : NULL;
+		bool IsBlock =	c->Info != NULL && c->Info->Block();
+		switch (c->TagId) 
+		{
+			case TAG_STYLE:
+			{
+				char16 *Style = e->GetText();
+				if (ValidStrW(Style))
+					LgiAssert(!"Impl me.");
+				continue;
+				break;
+			}
+			case TAG_B:
+			{
+				if (!Style)
+					Style.Reset(new LCss);
+				if (Style)
+					Style->FontWeight(LCss::FontWeightBold);
+				break;
+			}
+			case TAG_I:
+			{
+				if (!Style)
+					Style.Reset(new LCss);
+				if (Style)
+					Style->FontStyle(LCss::FontStyleItalic);
+				break;
+			}
+			case TAG_BLOCKQUOTE:
+			{
+				if (!Style)
+					Style.Reset(new LCss);
+				if (Style)
+				{
+					Style->MarginTop(LCss::Len("0.5em"));
+					Style->MarginBottom(LCss::Len("0.5em"));
+					Style->MarginLeft(LCss::Len("1em"));
+					if (ctx.Tb)
+						ctx.Tb->StripLast(NoTransaction);
+				}
+				break;
+			}
+			case TAG_A:
+			{
+				if (!Style)
+					Style.Reset(new LCss);
+				if (Style)
+				{
+					Style->TextDecoration(LCss::TextDecorUnderline);
+					Style->Color(LCss::ColorDef(LCss::ColorRgb, LColour::Blue.c32()));
+				}
+				break;
+			}
+			case TAG_HR:
+			{
+				if (ctx.Tb)
+					ctx.Tb->StripLast(NoTransaction);
+				// Fall through
+			}
+			case TAG_IMG:
+			{
+				ctx.Tb = NULL;
+				IsBlock = true;
+				break;
+			}
+			default:
+			{
+				break;
+			}
+		}
+			
+		const char *Css, *Class;
+		if (c->Get("style", Css))
+		{
+			if (!Style)
+				Style.Reset(new LCss);
+			if (Style)
+				Style->Parse(Css, ParseRelaxed);
+		}
+		if (c->Get("class", Class))
+		{
+			LCss::SelArray Selectors;
+			LRichEditElemContext StyleCtx;
+			if (ctx.StyleStore.Match(Selectors, &StyleCtx, dynamic_cast<LRichEditElem*>(c)))
+			{
+				for (unsigned n=0; n<Selectors.Length(); n++)
+				{
+					LCss::Selector *sel = Selectors[n];
+					if (sel)
+					{
+						const char *s = sel->Style;
+						if (s)
+						{
+							if (!Style)
+								Style.Reset(new LCss);
+							if (Style)
+								Style->Parse(s, LCss::ParseRelaxed);
+						}
+					}
+				}
+			}
+		}
+
+		LNamedStyle *CachedStyle = AddStyleToCache(Style);			
+
+		if
+		(
+			(IsBlock && ctx.LastChar != '\n')
+			||
+			c->TagId == TAG_BR
+		)
+		{
+			if (!ctx.Tb && c->TagId == TAG_BR)
+			{
+				// Don't do this for IMG and HR layout.
+				Blocks.Add(ctx.Tb = new TextBlock(this));
+				if (CachedStyle && ctx.Tb)
+					ctx.Tb->SetStyle(CachedStyle);
+			}
+
+			if (ctx.Tb)
+			{
+				const uint32_t Nl[] = {'\n', 0};
+				ctx.Tb->AddText(NoTransaction, -1, Nl, 1, NULL);
+				ctx.LastChar = '\n';
+				ctx.StartOfLine = true;
+			}
+		}
+		
+		bool EndStyleChange = false;
+
+		if (c->TagId == TAG_IMG)
+		{
+			Blocks.Add(ctx.Ib = new ImageBlock(this));
+			if (ctx.Ib)
+			{
+				const char *s;
+				if (c->Get("src", s))
+					ctx.Ib->Source = s;
+
+				if (c->Get("width", s))
+				{
+					LCss::Len Sz(s);
+					int Px = Sz.ToPx();
+					if (Px) ctx.Ib->Size.x = Px;
+				}
+
+				if (c->Get("height", s))
+				{
+					LCss::Len Sz(s);
+					int Px = Sz.ToPx();
+					if (Px) ctx.Ib->Size.y = Px;
+				}
+
+				if (CachedStyle)
+					ctx.Ib->SetStyle(CachedStyle);
+
+				ctx.Ib->Load();
+			}
+		}
+		else if (c->TagId == TAG_HR)
+		{
+			Blocks.Add(ctx.Hrb = new HorzRuleBlock(this));
+		}
+		else if (c->TagId == TAG_A)
+		{
+			ctx.StartOfLine |= ctx.AddText(CachedStyle, c->GetText());
+			
+			if (ctx.Tb &&
+				ctx.Tb->Txt.Length())
+			{
+				StyleText *st = ctx.Tb->Txt.Last();
+
+				st->Element = TAG_A;
+			
+				const char *Link;
+				if (c->Get("href", Link))
+					st->Param = Link;
+			}
+		}
+		else
+		{
+			if (IsBlock && ctx.Tb != NULL)
+			{
+				if (CachedStyle != ctx.Tb->GetStyle())
+				{
+					if (ctx.Tb->Length() == 0)
+					{
+						ctx.Tb->SetStyle(CachedStyle);
+					}
+					else
+					{
+						// Start a new block because the styles are different...
+						EndStyleChange = true;
+						auto Idx = Blocks.IndexOf(ctx.Tb);
+						ctx.Tb = new TextBlock(this);
+						if (Idx >= 0)
+							Blocks.AddAt(Idx+1, ctx.Tb);
+						else
+							Blocks.Add(ctx.Tb);
+
+						if (CachedStyle)
+							ctx.Tb->SetStyle(CachedStyle);
+					}
+				}
+			}
+
+			char16 *Txt = c->GetText();
+			if
+			(
+				Txt
+				&&
+				(
+					!ctx.StartOfLine
+					|| 
+					ValidStrW(Txt)
+				)
+			)
+			{
+				if (!ctx.Tb)
+				{
+					Blocks.Add(ctx.Tb = new TextBlock(this));
+					ctx.Tb->SetStyle(CachedStyle);
+				}
+
+				#ifdef __GTK_H__
+				for (auto *i = Txt; *i; i++)
+					if (*i == 0xa0)
+						*i = ' ';
+				#endif
+			
+				ctx.AddText(CachedStyle, Txt);
+				ctx.StartOfLine = false;
+			}
+		}
+			
+		if (!FromHtml(c, ctx, Style, Depth + 1))
+			return false;
+			
+		if (EndStyleChange)
+			ctx.Tb = NULL;
+		if (IsBlock)
+			ctx.StartOfLine = true;
+	}
+
+	return true;
+}
+
+bool LRichTextPriv::GetSelection(LArray<char16> *Text, LAutoString *Html)
+{
+	if (!Text && !Html)
+		return false;
+
+	LArray<uint32_t> Utf32;
+
+	bool Cf = CursorFirst();
+	LRichTextPriv::BlockCursor *Start = Cf ? Cursor : Selection;
+	LRichTextPriv::BlockCursor *End = Cf ? Selection : Cursor;
+
+	if (Html)
+	{		
+		if (ToHtml(NULL, Start, End))
+			*Html = UtfNameCache;
+	}
+	
+	if (Text)
+	{
+		if (Start->Blk == End->Blk)
+		{
+			// In the same block... just copy
+			ssize_t Len = End->Offset - Start->Offset;
+			Start->Blk->CopyAt(Start->Offset, Len, &Utf32);
+		}
+		else
+		{
+			// Multi-block copy...
+
+			// 1) Copy the content to the end of the first block
+			Start->Blk->CopyAt(Start->Offset, -1, &Utf32);
+
+			// 2) Copy any blocks between 'Start' and 'End'
+			ssize_t i = Blocks.IndexOf(Start->Blk);
+			ssize_t EndIdx = Blocks.IndexOf(End->Blk);
+			if (i >= 0 && EndIdx >= i)
+			{
+				for (++i; Blocks[i] != End->Blk && i < (int)Blocks.Length(); i++)
+				{
+					LRichTextPriv::Block *&b = Blocks[i];
+					b->CopyAt(0, -1, &Utf32);
+				}
+			}
+			else return Error(_FL, "Blocks missing index: %i, %i.", i, EndIdx);
+
+			// 3) Delete any text up to the Cursor in the 'End' block
+			End->Blk->CopyAt(0, End->Offset, &Utf32);
+		}
+
+		char16 *w = (char16*)LNewConvertCp(LGI_WideCharset, &Utf32[0], "utf-32", Utf32.Length() * sizeof(uint32_t));
+		if (!w)
+			return Error(_FL, "Failed to convert %i utf32 to wide.", Utf32.Length());
+
+		Text->Add(w, Strlen(w));
+		Text->Add(0);
+	}
+
+	return true;
+}
+
+LRichTextEdit::RectType LRichTextPriv::PosToButton(LMouse &m)
+{
+	if (Areas[LRichTextEdit::ToolsArea].Overlap(m.x, m.y)
+		// || Areas[LRichTextEdit::CapabilityArea].Overlap(m.x, m.y)
+		)
+	{
+		for (unsigned i=LRichTextEdit::FontFamilyBtn; i<LRichTextEdit::MaxArea; i++)
+		{
+			if (Areas[i].Valid() &&
+				Areas[i].Overlap(m.x, m.y))
+			{
+				return (LRichTextEdit::RectType)i;
+				break;
+			}
+		}
+	}
+
+	return LRichTextEdit::MaxArea;
+}
+
+void LRichTextPriv::OnComponentInstall(LString Name)
+{
+	for (unsigned i=0; i<Blocks.Length(); i++)
+	{
+		Blocks[i]->OnComponentInstall(Name);
+	}
+}
+
+#ifdef _DEBUG
+void LRichTextPriv::DumpNodes(LTree *Root)
+{
+	if (Cursor)
+	{
+		LTreeItem *ti = new LTreeItem;
+		ti->SetText("Cursor");
+		PrintNode(ti, "Offset=%i", Cursor->Offset);
+		PrintNode(ti, "Pos=%s", Cursor->Pos.GetStr());
+		PrintNode(ti, "LineHint=%i", Cursor->LineHint);
+		PrintNode(ti, "Blk=%i", Cursor->Blk ? Blocks.IndexOf(Cursor->Blk) : -2);
+		Root->Insert(ti);
+	}
+	if (Selection)
+	{
+		LTreeItem *ti = new LTreeItem;
+		ti->SetText("Selection");
+		PrintNode(ti, "Offset=%i", Selection->Offset);
+		PrintNode(ti, "Pos=%s", Selection->Pos.GetStr());
+		PrintNode(ti, "LineHint=%i", Selection->LineHint);
+		PrintNode(ti, "Blk=%i", Selection->Blk ? Blocks.IndexOf(Selection->Blk) : -2);
+		Root->Insert(ti);
+	}
+
+	for (unsigned i=0; i<Blocks.Length(); i++)
+	{
+		LTreeItem *ti = new LTreeItem;
+		Block *b = Blocks[i];
+		b->DumpNodes(ti);
+
+		LString s;
+		s.Printf("[%i] %s", i, ti->GetText());
+		ti->SetText(s);
+
+		Root->Insert(ti);
+	}
+}
+
+LTreeItem *PrintNode(LTreeItem *Parent, const char *Fmt, ...)
+{
+	LTreeItem *i = new LTreeItem;
+	LString s;
+
+	va_list Arg;
+	va_start(Arg, Fmt);
+	s.Printf(Arg, Fmt);
+	va_end(Arg);
+	s = s.Replace("\n", "\\n");
+
+	i->SetText(s);
+	Parent->Insert(i);
+	return i;
+}
+
+#endif
+

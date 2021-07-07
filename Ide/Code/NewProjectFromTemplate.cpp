@@ -1,36 +1,36 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Tree.h"
+#include "lgi/common/SubProcess.h"
+#include "lgi/common/FileSelect.h"
 #include "LgiIde.h"
-#include "GTree.h"
 #include "resdefs.h"
-#include "GSubProcess.h"
 
-static GString TemplatesPath;
-
-class NewProjFromTemplate : public GDialog
+static LString TemplatesPath;
+class NewProjFromTemplate : public LDialog
 {
 public:
-	NewProjFromTemplate(GViewI *parent)
+	NewProjFromTemplate(LViewI *parent)
 	{
 		SetParent(parent);
 		if (LoadFromResource(IDD_NEW_PROJ_FROM_TEMPLATE))
 		{
 			MoveSameScreen(parent);
 			
-			GTree *t;
+			LTree *t;
 			if (TemplatesPath && GetViewById(IDC_TEMPLATES, t))
 				Add(t, TemplatesPath);
 		}
 	}
 	
-	void Add(GTreeNode *t, const char *path)
+	void Add(LTreeNode *t, const char *path)
 	{
-		GDirectory d;
+		LDirectory d;
 		for (auto b=d.First(path); b; b=d.Next())
 		{
 			auto Full = d.FullPath();
 			if (d.IsDir())
 			{
-				GTreeItem *c = new GTreeItem;
+				LTreeItem *c = new LTreeItem;
 				
 				c->SetText(d.GetName());
 				c->SetText(Full, 1);
@@ -40,13 +40,13 @@ public:
 		}
 	}
 	
-	int OnNotify(GViewI *c, int flags)
+	int OnNotify(LViewI *c, int flags)
 	{
 		switch (c->GetId())
 		{
 			case IDC_BROWSE_OUTPUT:
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(this);
 				if (s.OpenFolder())
 					SetCtrlName(IDC_FOLDER, s.Name());
@@ -61,23 +61,22 @@ public:
 		return 0;
 	}
 };
-
-GString GetPython3()
+LString GetPython3()
 {
 	auto Path = LGetPath();
 	for (auto i: Path)
 	{
-		GFile::Path p(i);
+		LFile::Path p(i);
 		p += "python" LGI_EXECUTABLE_EXT;
 		if (p.Exists())
 		{
 			printf("Got python '%s'\n", p.GetFull().Get());
 			
 			// But what version is it?
-			GSubProcess sp(p, "--version");
+			LSubProcess sp(p, "--version");
 			if (sp.Start())
 			{
-				GStringPipe out;
+				LStringPipe out;
 				sp.Communicate(&out);
 				auto s = out.NewGStr();
 				// printf("out=%s\n", s.Get());
@@ -87,9 +86,8 @@ GString GetPython3()
 		}
 	}
 	
-	return GString();
+	return LString();
 }
-
 bool CreateProject(const char *Name, const char *Template, const char *Folder)
 {
 	auto Py3 = GetPython3();
@@ -108,55 +106,50 @@ bool CreateProject(const char *Name, const char *Template, const char *Folder)
 			return false;
 		}
 	}
-
 	// Copy in script...
 	auto CreateProjectPy = "create_project.py";
-	GFile::Path ScriptIn(TemplatesPath);
+	LFile::Path ScriptIn(TemplatesPath);
 	ScriptIn += CreateProjectPy;
-	GFile::Path ScriptOut(Folder);
+	LFile::Path ScriptOut(Folder);
 	ScriptOut += CreateProjectPy;
 	if (!FileDev->Copy(ScriptIn, ScriptOut))
 	{
 		LgiTrace("%s:%i - Copy '%s' to '%s' failed.\n", _FL, ScriptIn.GetFull().Get(), ScriptOut.GetFull().Get());
 		return false;
 	}
-
 	// Call the script
-	GString Args;
+	LString Args;
 	Args.Printf("\"%s\" \"%s\" \"%s\"", ScriptOut.GetFull().Get(), Template, Name);
-	GSubProcess p(Py3, Args);
+	LSubProcess p(Py3, Args);
 	if (!p.Start())
 	{
 		LgiTrace("%s:%i - Start process failed.\n", _FL);
 		return false;
 	}
 	
-	GStringPipe Out;
+	LStringPipe Out;
 	p.Communicate(&Out);
 	LgiTrace("Out=%s\n", Out.NewGStr().Get());
 	
 	FileDev->Delete(ScriptOut);
 	return true;
 }
-
-void NewProjectFromTemplate(GViewI *parent)
+void NewProjectFromTemplate(LViewI *parent)
 {
-	GFile::Path p(LSP_APP_INSTALL);
+	LFile::Path p(LSP_APP_INSTALL);
 	p +=
 		#ifdef MAC
 		"../../"
 		#endif
 		"../templates";
 	TemplatesPath = p;
-
 	NewProjFromTemplate Dlg(parent);
 	if (!Dlg.DoModal())
 	{
 		LgiTrace("%s:%i - Dialog cancelled.\n", _FL);
 		return;
 	}
-
-	GTree *t;
+	LTree *t;
 	if (!Dlg.GetViewById(IDC_TEMPLATES, t))
 	{
 		LgiTrace("%s:%i - No tree.\n", _FL);

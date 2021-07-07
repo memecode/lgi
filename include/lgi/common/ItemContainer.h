@@ -1,0 +1,425 @@
+#ifndef _ITEM_CONTAINER_H_
+#define _ITEM_CONTAINER_H_
+
+#include "lgi/common/Popup.h"
+#include "lgi/common/Notifications.h"
+#include "lgi/common/Css.h"
+#include "lgi/common/ImageList.h"
+
+class LItemContainer;
+#define DragColumnColour				LColour(L_LOW)
+
+/// Base class for items in widget containers
+class LgiClass GItem : virtual public LEventsI
+{
+protected:
+    LAutoPtr<LCss> Css;
+	int SelectionStart, SelectionEnd;
+    
+public:
+	/// Painting context
+	struct ItemPaintCtx : public LRect
+	{
+		/// The surface to draw on
+		LSurface *pDC;
+
+		/// Current foreground colour
+		LColour Fore;
+		/// Current background colour
+		LColour TxtBack, Back;
+		
+		// Horizontal alignment of content
+		LCss::Len Align;
+		
+		/// Number of columns
+		int Columns;
+		/// Width of each column
+		int *ColPx;
+	};
+	
+	GItem();
+	~GItem();
+
+    GItem &operator =(GItem &i)
+    {
+		if (i.GetCss())
+		{
+			LCss *c = GetCss(true);
+			if (c)
+			{
+				*c = *i.GetCss();
+			}
+		}
+        return *this;
+    }
+
+	virtual LItemContainer *GetContainer() = 0;
+
+	// Events
+	
+	/// Called when the item is selected
+	virtual void OnSelect() {}
+	/// Called when the item is clicked
+	virtual void OnMouseClick(LMouse &m) {}
+	/// Called when the item needs painting
+	virtual void OnPaint(ItemPaintCtx &Ctx) = 0;
+	/// Called when the item is dragged
+	virtual bool OnBeginDrag(LMouse &m) { return false; }
+	/// Called when the owning container needs to know the size of the item
+	virtual void OnMeasure(LPoint *Info) {}
+	/// Called when the item is inserted into a new container
+	virtual void OnInsert() {}
+	/// Called when the item is removed from it's container
+	virtual void OnRemove() {}
+
+	// Methods
+
+	/// Call to tell the container that the data displayed by the item has changed
+	virtual void Update() {}
+	/// Moves the item onscreen
+	virtual void ScrollTo() {}
+	/// Shows a editable label above the item allowing the user to change the value associated with the column 'Col'
+	virtual LView *EditLabel(int Col = -1);
+	/// Event called when the edit label ends
+	virtual void OnEditLabelEnd();
+	/// Sets the default selection of text when editing a label
+	void SetEditLabelSelection(int SelStart, int SelEnd); // call before 'EditLabel'
+
+	// Data
+
+	/// True if the item is selected
+	virtual bool Select() { return false; }
+	/// Select/Deselect the item
+	virtual void Select(bool b) {}
+	/// Gets the text associated with the column 'Col'
+	virtual const char *GetText(int Col = 0) { return 0; }
+	/// Sets the text associated with the column 'Col'
+	virtual bool SetText(const char *s, int Col=0) { return false; }
+	/// Gets the icon index
+	virtual int GetImage(int Flags = 0) { return -1; }
+	/// Sets the icon index
+	virtual void SetImage(int Col) {}
+	/// Gets the position
+	virtual LRect *GetPos(int Col = -1) { return 0; }
+	/// Gets the font for the item
+	virtual LFont *GetFont() { return 0; }
+	
+	/// Reads / writes list item to XML
+	virtual bool XmlIo(class LXmlTag *Tag, bool Write) { return false; }
+
+	bool OnScriptEvent(LViewI *Ctrl) { return false; }
+	GMessage::Result OnEvent(GMessage *Msg) { return 0; }
+	void OnMouseEnter(LMouse &m) {}
+	void OnMouseExit(LMouse &m) {}
+	void OnMouseMove(LMouse &m) {}
+	bool OnMouseWheel(double Lines) { return false; }
+	bool OnKey(LKey &k) { return false; }
+	void OnAttach() {}
+	void OnCreate() {}
+	void OnDestroy() {}
+	void OnFocus(bool f) {}
+	void OnPulse() {}
+	void OnPosChange() {}
+	bool OnRequestClose(bool OsShuttingDown) { return false; }
+	int OnHitTest(int x, int y) { return 0; }
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching) {}
+	int OnNotify(LViewI *Ctrl, int Flags) { return 0; }
+	int OnCommand(int Cmd, int Event, OsView Wnd) { return 0; }
+	void OnPaint(LSurface *pDC) { LgiAssert(0); }
+
+	// Style access
+	LCss *GetCss(bool Create = false)
+	{
+		if (!Css && Create) Css.Reset(new LCss);
+		return Css;
+	}
+};
+
+/// The popup label for GItem's
+class GItemEdit : public LPopup
+{
+	class GItemEditPrivate *d;
+
+public:
+	GItemEdit(LView *parent, GItem *item, int index, int selstart, int selend);
+	~GItemEdit();
+	
+	GItem *GetItem();
+	void OnPaint(LSurface *pDC);
+	int OnNotify(LViewI *v, int f);
+	void Visible(bool i);
+	GMessage::Result OnEvent(GMessage *Msg);
+
+	bool OnKey(LKey &k);
+	void OnFocus(bool f);
+};
+
+
+/// No marking
+/// \sa LItemColumn::Mark
+#define GLI_MARK_NONE				0
+/// Up arrow mark
+/// \sa LItemColumn::Mark
+#define GLI_MARK_UP_ARROW			1
+/// Down arrow mark
+/// \sa LItemColumn::Mark
+#define GLI_MARK_DOWN_ARROW			2
+
+/// Item container column
+class LgiClass LItemColumn :
+	public ResObject,
+	public LCss
+{
+	class LItemColumnPrivate *d;
+	friend class LDragColumn;
+	friend class LListItem;
+	friend class LItemContainer;
+
+public:
+	LItemColumn(LItemContainer *parent, const char *name, int width);
+	virtual ~LItemColumn();
+
+	// properties
+	bool InDrag();
+	LRect GetPos();
+	void SetPos(LRect &r);
+	
+	/// Sets the text
+	void Name(const char *n);
+	/// Gets the text
+	char *Name();
+	/// Sets the width
+	void Width(int i);
+	/// Gets the width
+	int Width();
+	/// Sets the type of content in the header. Use one of #GIC_ASK_TEXT, #GIC_OWNER_DRAW, #GIC_ASK_IMAGE.
+	///
+	/// Is this used??
+	void Type(int i);
+	/// Gets the type of content.
+	int Type();
+	/// Sets the marking, one of #GLI_MARK_NONE, #GLI_MARK_UP_ARROW or #GLI_MARK_DOWN_ARROW
+	void Mark(int i);
+	/// Gets the marking, one of #GLI_MARK_NONE, #GLI_MARK_UP_ARROW or #GLI_MARK_DOWN_ARROW
+	int Mark();
+	/// Sets the icon to display
+	void Icon(LSurface *i, bool Own = true);
+	/// Gets the icon displayed
+	LSurface *Icon();
+	/// True if clicked
+	bool Value();
+	/// Set clicked
+	void Value(bool i);
+	
+	/// Sets the index into the parent containers LImageList
+	void Image(int i);
+	/// Gets the index into the parent containers LImageList
+	int Image();
+	/// true if resizable
+	bool Resizable();
+	/// Sets whether the user can resize the column
+	void Resizable(bool i);
+
+	/// Returns the index of the column if attached to a list
+	int GetIndex();
+	/// Returns the size of the content in this column
+	int GetContentSize();
+	/// Returns the list
+	LItemContainer *GetList();
+
+	/// Paint the column header.
+	void OnPaint(LSurface *pDC, LRect &r);
+
+	/// Draws the just the icon, text and mark.
+	void OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground); 
+};
+
+/// Client draws the content.
+#define GIC_OWNER_DRAW				0x01
+/// Column header is text.
+#define GIC_ASK_TEXT				0x02
+/// Column header is an image.
+#define GIC_ASK_IMAGE				0x04
+/// Not used.
+#define GIC_OWN_LIST				0x08
+/// Drag is over the control
+#define GIC_IN_DRAG_OP				0x10
+/// Multiple item select allowed
+#define GIC_MULTI_SELECT			0x20
+
+#define DRAG_NONE					0
+#define SELECT_ITEMS				1
+#define RESIZE_COLUMN				2
+#define DRAG_COLUMN					3
+#define CLICK_COLUMN				4
+#define TOGGLE_ITEMS				5
+#define CLICK_ITEM					6
+#define DEFAULT_COLUMN_SPACING		12
+
+class LgiClass LItemContainer :
+	public LLayout,
+	public GImageListOwner
+{
+	friend class LItemColumn;
+	friend class GItem;
+	friend class GItemEdit;
+
+public:
+	struct ColInfo
+	{
+		int Idx, ContentPx, WidthPx;
+		LItemColumn *Col;
+		int GrowPx() { return WidthPx < ContentPx ? ContentPx - WidthPx : 0; }
+	};
+	
+	struct ColSizes
+	{
+		LArray<ColInfo> Info;
+		int FixedPx;
+		int ResizePx;
+	};
+	
+protected:
+	int Flags;
+	int DragMode;
+	bool ColumnHeaders;
+	LRect ColumnHeader;
+	int ColClick;
+	LMouse ColMouse;
+	GItemEdit *ItemEdit;
+
+	LArray<LItemColumn*> Columns;
+	LAutoPtr<LItemColumn> IconCol;
+	class LDragColumn *DragCol;
+
+	/// Returns size information for columns
+	void GetColumnSizes(ColSizes &cs);
+	
+	/// Paints all the column headings
+	void PaintColumnHeadings(LSurface *pDC);
+	
+	/// This clears all the display string cache for a given column
+	virtual void ClearDs(int Col) = 0;
+
+public:
+	LItemContainer();
+	virtual ~LItemContainer();
+
+	// Props
+	bool OwnerDraw() { return TestFlag(Flags, GIC_OWNER_DRAW); }
+	void OwnerDraw(bool b) { if (b) SetFlag(Flags, GIC_OWNER_DRAW); else ClearFlag(Flags, GIC_OWNER_DRAW); }
+	bool AskText() { return TestFlag(Flags, GIC_ASK_TEXT); }
+	void AskText(bool b) { if (b) SetFlag(Flags, GIC_ASK_TEXT); else ClearFlag(Flags, GIC_ASK_TEXT); }
+	bool AskImage() { return TestFlag(Flags, GIC_ASK_IMAGE); }
+	void AskImage(bool b) { if (b) SetFlag(Flags, GIC_ASK_IMAGE); else ClearFlag(Flags, GIC_ASK_IMAGE); }
+	bool InsideDragOp() { return TestFlag(Flags, GIC_IN_DRAG_OP); }
+	void InsideDragOp(bool b) { if (b) SetFlag(Flags, GIC_IN_DRAG_OP); else ClearFlag(Flags, GIC_IN_DRAG_OP); }
+
+	/// Returns whether the user can select multiple items at the same time
+	bool MultiSelect() { return TestFlag(Flags, GIC_MULTI_SELECT); }
+	/// Sets whether the user can select multiple items at the same time
+	void MultiSelect(bool b) { if (b) SetFlag(Flags, GIC_MULTI_SELECT); else ClearFlag(Flags, GIC_MULTI_SELECT); }
+
+	/// Returns whether display of column headers is switched on
+	bool ShowColumnHeader() { return ColumnHeaders; }
+
+	/// Turns on display of column headers
+	void ShowColumnHeader(bool Show) { ColumnHeaders = Show; }
+		
+	/// Adds a column to the list
+	LItemColumn *AddColumn
+	(
+		/// The text for the column or NULL for no text
+		const char *Name,
+		/// The width of the column
+		int Width = 50,
+		/// The index to insert at, or -1 to append to the end
+		int Where = -1
+	);
+	
+	/// Adds a preexisting column to the control
+	bool AddColumn
+	(
+		/// The column object. The object once added is owned by the LList
+		LItemColumn *Col,
+		/// The location to insert or -1 to append
+		int Where = -1
+	);
+	
+	/// Deletes a column from the LList
+	bool DeleteColumn(LItemColumn *Col);
+	
+	/// Deletes all the columns of the LList
+	void EmptyColumns();
+	
+	/// Returns the column at index 'Index'
+	LItemColumn *ColumnAt(unsigned i) { return i < Columns.Length() ? Columns[i] : NULL; }
+	
+	/// Returns the column at horizontal offset 'x', or -1 if none matches.
+	int ColumnAtX(int X, LItemColumn **Col = 0, int *Offset = 0);
+	
+	/// Returns the number of columns
+	int GetColumns() { return (int)Columns.Length(); }
+	
+	/// Starts a column d'n'd operation with the column at index 'Index'
+	/// \sa OnColumnReindex is called when the user drops the column
+	void DragColumn(int Index);
+	
+	/// Returns the last column click info
+	bool GetColumnClickInfo(int &Col, LMouse &m);
+
+	int HitColumn(int x, int y, LItemColumn *&Resize, LItemColumn *&Over);
+
+	/// Called when a column is clicked
+	virtual void OnColumnClick
+	(
+		/// The index of the column
+		int Col,
+		/// The mouse parameters at the time
+		LMouse &m
+	);
+
+	virtual void UpdateAllItems() = 0;
+	virtual int GetContentSize(int ColumnIdx) = 0;
+
+	/// Resizes all the columns to their content, allowing a little extra space for visual effect
+	virtual void ResizeColumnsToContent(int Border = DEFAULT_COLUMN_SPACING);
+
+	GMessage::Result OnEvent(GMessage *Msg);
+
+	LItemContainer &operator =(const LItemContainer &i)
+	{
+		LgiAssert(!"Not impl..");
+		return *this;
+	}
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////
+#define DRAG_COL_ALPHA					0xc0
+#define LINUX_TRANS_COL					0
+
+class LDragColumn : public LWindow
+{
+	LItemContainer *List;
+	LItemColumn *Col;
+	int Index;
+	int Offset;
+	LPoint ListScrPos;
+	
+	#ifdef LINUX
+	LSurface *Back;
+	#endif
+
+public:
+	int GetOffset() { return Offset; }
+	int GetIndex() { return Index; }
+	LItemColumn *GetColumn() { return Col; }
+
+	LDragColumn(LItemContainer *list, int col);
+	~LDragColumn();
+
+	void OnPaint(LSurface *pScreen);
+};
+
+
+#endif

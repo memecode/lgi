@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "RtfHtml.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/RtfHtml.h"
 
 #define SkipWs(s) while (*s && strchr(Ws, *s)) s++;
 #define SkipNotWs(s) while (*s && !strchr(Ws, *s)) s++;
@@ -16,7 +16,7 @@ bool HasTag(List<char> &Tags, const char *Tag)
 	return false;
 }
 
-void ParseRtf(GStringPipe &p, char *&s)
+void ParseRtf(LStringPipe &p, char *&s)
 {
 	List<char> Tags;
 
@@ -76,7 +76,7 @@ void ParseRtf(GStringPipe &p, char *&s)
 
 char *MsRtfToHtml(char *s)
 {
-	GStringPipe p;
+	LStringPipe p;
 	ParseRtf(p, s);
 	return p.NewStr();
 }

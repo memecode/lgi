@@ -5,8 +5,8 @@
 #include <string.h>
 #include <math.h>
 
-#include "Lgi.h"
-#include "GPalette.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Palette.h"
 
 #define LGI_PI				3.141592654
 #define LGI_RAD				(360/(2*LGI_PI))
@@ -286,7 +286,7 @@ void TrimWhite(char *s)
 	}
 }
 
-bool GPalette::Load(GFile &F)
+bool GPalette::Load(LFile &F)
 {
 	bool Status = false;
 	char Buf[256];
@@ -325,7 +325,7 @@ bool GPalette::Load(GFile &F)
 	return Status;
 }
 
-bool GPalette::Save(GFile &F, int Format)
+bool GPalette::Save(LFile &F, int Format)
 {
 	bool Status = false;
 
@@ -413,7 +413,7 @@ public:
 	int ScrX;
 	int ScrY;
 	int ScrBits;
-	GColourSpace ScrColourSpace;
+	LColourSpace ScrColourSpace;
 
 	// Palette
 	double GammaCorrection;
@@ -552,7 +552,7 @@ GGlobalColour *GdcDevice::GetGlobalColour()
 	return d->GlobalColour;
 }
 
-GColourSpace GdcDevice::GetColourSpace()
+LColourSpace GdcDevice::GetColourSpace()
 {
 	return d->ScrColourSpace;
 }
@@ -668,7 +668,7 @@ void GdcDevice::SetColourPaletteType(int Type)
 	*/
 }
 
-COLOUR GdcDevice::GetColour(COLOUR Rgb24, GSurface *pDC)
+COLOUR GdcDevice::GetColour(COLOUR Rgb24, LSurface *pDC)
 {
 	int Bits = (pDC) ? pDC->GetBits() : GetBits();
 	COLOUR C;
@@ -743,7 +743,7 @@ COLOUR GdcDevice::GetColour(COLOUR Rgb24, GSurface *pDC)
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 static int _Factories;
-static GApplicatorFactory *_Factory[16];
+static LApplicatorFactory *_Factory[16];
 
 GApp8 Factory8;
 GApp15 Factory15;
@@ -752,7 +752,7 @@ GApp24 Factory24;
 GApp32 Factory32;
 GAlphaFactory FactoryAlpha;
 
-GApplicatorFactory::GApplicatorFactory()
+LApplicatorFactory::LApplicatorFactory()
 {
 	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	if (_Factories < CountOf(_Factory) - 1)
@@ -761,7 +761,7 @@ GApplicatorFactory::GApplicatorFactory()
 	}
 }
 
-GApplicatorFactory::~GApplicatorFactory()
+LApplicatorFactory::~LApplicatorFactory()
 {
 	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)
@@ -775,12 +775,12 @@ GApplicatorFactory::~GApplicatorFactory()
 	}
 }
 
-GApplicator *GApplicatorFactory::NewApp(GColourSpace Cs, int Op)
+LApplicator *LApplicatorFactory::NewApp(LColourSpace Cs, int Op)
 {
 	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)
 	{
-		GApplicator *a = _Factory[i]->Create(Cs, Op);
+		LApplicator *a = _Factory[i]->Create(Cs, Op);
 		if (a) return a;
 	}
 
@@ -808,7 +808,7 @@ class GGlobalColourPrivate
 public:
 	GlobalColourEntry c[256];
 	GPalette *Global;
-	List<GSurface> Cache;
+	List<LSurface> Cache;
 	int FirstUnused;
 	
 	int FreeColours()
@@ -851,12 +851,12 @@ COLOUR GGlobalColour::AddColour(COLOUR c24)
 	return c24;
 }
 
-bool GGlobalColour::AddBitmap(GSurface *pDC)
+bool GGlobalColour::AddBitmap(LSurface *pDC)
 {
 	return false;
 }
 
-bool GGlobalColour::AddBitmap(GImageList *il)
+bool GGlobalColour::AddBitmap(LImageList *il)
 {
 	return false;
 }
@@ -876,7 +876,7 @@ COLOUR GGlobalColour::GetColour(COLOUR c24)
 	return c24;
 }
 
-bool GGlobalColour::RemapBitmap(GSurface *pDC)
+bool GGlobalColour::RemapBitmap(LSurface *pDC)
 {
 	return false;
 }
@@ -890,7 +890,7 @@ union EndianTest
 
 #define VisualToColourSpaceDebug	0
 
-GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
+LColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 {
 	uint32_t c = CsNone;
 	if (v)
@@ -953,7 +953,7 @@ GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 					c = (blue << 16) | (green << 8) | red;
 				}
 	
-				int bits = GColourSpaceToBits((GColourSpace) c);
+				int bits = GColourSpaceToBits((LColourSpace) c);
 	
 				#if VisualToColourSpaceDebug
 				{
@@ -1009,7 +1009,7 @@ GColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 		#endif
 	}
 	
-	GColourSpace Cs = (GColourSpace)c;
+	LColourSpace Cs = (LColourSpace)c;
 	#if VisualToColourSpaceDebug
 	printf("GdkVisualToColourSpace %x %s\n", Cs, GColourSpaceToString(Cs));
 	#endif

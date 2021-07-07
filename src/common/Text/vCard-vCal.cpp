@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "Lgi.h"
-#include "vCard-vCal.h"
-#include "GToken.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/vCard-vCal.h"
+#include "lgi/common/Token.h"
 #include "ScribeDefs.h"
-#include "LJson.h"
+#include "lgi/common/Json.h"
 
 #define DEBUG_LOGGING			0
 
@@ -116,7 +116,7 @@ char *DeEscape(char *s, bool QuotedPrintable)
 class VIoPriv
 {
 public:
-	GStringPipe Buf;
+	LStringPipe Buf;
 };
 
 VIo::VIo() : d(new VIoPriv)
@@ -226,7 +226,7 @@ bool VIo::ParseDuration(LDateTime &Out, int &Sign, char *In)
 	return Status;
 }
 
-void VIo::Fold(GStreamI &o, const char *i, int pre_chars)
+void VIo::Fold(LStreamI &o, const char *i, int pre_chars)
 {
 	int x = pre_chars;
 	for (const char *s=i; s && *s;)
@@ -243,7 +243,7 @@ void VIo::Fold(GStreamI &o, const char *i, int pre_chars)
 		{
 			// quoted printable
 			o.Write(i, (int)(s-i));
-			GStreamPrint(&o, "=%02.2x", (uint8_t)*s);
+			LStreamPrint(&o, "=%02.2x", (uint8_t)*s);
 			x += 3;
 			i = ++s;
 		}
@@ -273,7 +273,7 @@ char *VIo::Unfold(char *In)
 {
 	if (In)
 	{
-		GStringPipe p(256);
+		LStringPipe p(256);
 
 		for (char *i=In; i && *i; i++)
 		{
@@ -304,7 +304,7 @@ char *VIo::UnMultiLine(char *In)
 {
 	if (In)
 	{
-		GStringPipe p;
+		LStringPipe p;
 		char *n;
 		for (char *i=In; i && *i; i=n)
 		{
@@ -329,19 +329,19 @@ char *VIo::UnMultiLine(char *In)
 
 /////////////////////////////////////////////////////////////
 // VCard class
-bool VCard::Import(GDataPropI *c, GStreamI *s)
+bool VCard::Import(GDataPropI *c, LStreamI *s)
 {
 	bool Status = false;
 
 	if (!c || !s)
 		return false;
 
-	GString Field;
+	LString Field;
 	ParamArray Params;
-	GString Data;
+	LString Data;
 
 	ssize_t PrefEmail = -1;
-	GArray<char*> Emails;
+	LArray<char*> Emails;
 
 	while (ReadField(*s, Field, &Params, Data))
 	{
@@ -496,11 +496,11 @@ bool VCard::Import(GDataPropI *c, GStreamI *s)
 				{
 					size_t B64Len = strlen(Data);
 					ssize_t BinLen = BufferLen_64ToBin(B64Len);
-					GAutoPtr<uint8_t> Bin(new uint8_t[BinLen]);
+					LAutoPtr<uint8_t> Bin(new uint8_t[BinLen]);
 					if (Bin)
 					{
 						ssize_t Bytes = ConvertBase64ToBinary(Bin.Get(), BinLen, Data, B64Len);
-						GVariant v;
+						LVariant v;
 						if (v.SetBinary(Bytes, Bin.Release(), true))
 						{
 							c->SetVar(FIELD_CONTACT_IMAGE, &v);
@@ -522,7 +522,7 @@ bool VCard::Import(GDataPropI *c, GStreamI *s)
 
 		if (Emails.Length())
 		{
-			GStringPipe p;
+			LStringPipe p;
 			for (uint32_t i=0; i<Emails.Length(); i++)
 			{
 				if (i) p.Print(",%s", Emails[i]);
@@ -543,7 +543,7 @@ bool VCard::Import(GDataPropI *c, GStreamI *s)
 	return Status;
 }
 
-bool VIo::ReadField(GStreamI &s, GString &Name, ParamArray *Params, GString &Data)
+bool VIo::ReadField(LStreamI &s, LString &Name, ParamArray *Params, LString &Data)
 {
 	bool Status = false;
 	ParamArray LocalParams;
@@ -555,7 +555,7 @@ bool VIo::ReadField(GStreamI &s, GString &Name, ParamArray *Params, GString &Dat
 	else Params = &LocalParams;
 
 	char Temp[256];
-	GArray<char> p;
+	LArray<char> p;
 	bool Done = false;
 
 	while (!Done)
@@ -678,7 +678,7 @@ bool VIo::ReadField(GStreamI &s, GString &Name, ParamArray *Params, GString &Dat
 		const char *Charset = Params->Find("charset");
 		if (Charset)
 		{
-			GAutoString u((char*)LNewConvertCp("utf-8", e, Charset));
+			LAutoString u((char*)LNewConvertCp("utf-8", e, Charset));
 			Data = u.Get();
 		}
 		else
@@ -692,19 +692,19 @@ bool VIo::ReadField(GStreamI &s, GString &Name, ParamArray *Params, GString &Dat
 	return Status;
 }
 
-void VIo::WriteField(GStreamI &s, const char *Name, ParamArray *Params, const char *Data)
+void VIo::WriteField(LStreamI &s, const char *Name, ParamArray *Params, const char *Data)
 {
 	if (Name && Data)
 	{
 		int64 Size = s.GetSize();
 
-		GStreamPrint(&s, "%s", Name);
+		LStreamPrint(&s, "%s", Name);
 		if (Params)
 		{
 			for (uint32_t i=0; i<Params->Length(); i++)
 			{
 				Parameter &p = (*Params)[i];
-				GStreamPrint(&s, "%s%s=%s", i?"":";", p.Field.Get(), p.Value.Get());
+				LStreamPrint(&s, "%s%s=%s", i?"":";", p.Field.Get(), p.Value.Get());
 			}
 		}
 		
@@ -733,7 +733,7 @@ void VIo::WriteField(GStreamI &s, const char *Name, ParamArray *Params, const ch
 	}	
 }
 
-bool VCard::Export(GDataPropI *c, GStreamI *o)
+bool VCard::Export(GDataPropI *c, LStreamI *o)
 {
 	if (!c || !o)
 		return false;
@@ -797,7 +797,7 @@ bool VCard::Export(GDataPropI *c, GStreamI *o)
 	const char * Uid;
 	if ((Uid = c->GetStr(FIELD_UID)))
 	{
-		GStreamPrint(o, "UID:%s\r\n", Uid);
+		LStreamPrint(o, "UID:%s\r\n", Uid);
 	}
 
 	const char *Street, *Suburb, *PostCode, *State, *Country;
@@ -862,17 +862,17 @@ bool VCard::Export(GDataPropI *c, GStreamI *o)
 		WriteField(*o, "note", 0, Note);
 	}
 	
-	const GVariant *Photo = c->GetVar(FIELD_CONTACT_IMAGE);
+	const LVariant *Photo = c->GetVar(FIELD_CONTACT_IMAGE);
 	if (Photo && Photo->Type == GV_BINARY)
 	{
 		ssize_t B64Len = BufferLen_BinTo64(Photo->Value.Binary.Length);
-		GAutoPtr<char> B64Buf(new char[B64Len]);
+		LAutoPtr<char> B64Buf(new char[B64Len]);
 		if (B64Buf)
 		{
 			ssize_t Bytes = ConvertBinaryToBase64(B64Buf, B64Len, (uchar*)Photo->Value.Binary.Data, Photo->Value.Binary.Length);
 			if (Bytes > 0)
 			{
-				GStreamPrint(o, "photo;type=jpeg;encoding=base64:\r\n");
+				LStreamPrint(o, "photo;type=jpeg;encoding=base64:\r\n");
 				
 				int LineChar = 76;
 				for (int i=0; i<Bytes; )
@@ -911,11 +911,11 @@ int StringToWeekDay(const char *s)
 
 bool EvalRule(LDateTime &out, VIo::TimeZoneSection &tz, int yr)
 {
-	GString::Array p = tz.Rule.SplitDelimit(";");
+	LString::Array p = tz.Rule.SplitDelimit(";");
 	VIo::ParamArray Params;
 	for (unsigned i=0; i<p.Length(); i++)
 	{
-		GString::Array v = p[i].SplitDelimit("=", 1);
+		LString::Array v = p[i].SplitDelimit("=", 1);
 		if (v.Length() == 2)
 			Params.New().Set(v[0], v[1]);
 	}
@@ -988,9 +988,9 @@ struct LAlarm
 			X-PARAM:SomeParam
 			END:VALARM */
 
-	GString Action, Desc, Trigger, Param;
+	LString Action, Desc, Trigger, Param;
 
-	GString GetStr()
+	LString GetStr()
 	{
 		// Fields are: Number, CalendarReminderUnits, CalendarReminderType, Param
 		CalendarReminderType Type = CalMaxType;
@@ -1017,35 +1017,35 @@ struct LAlarm
 		if (!Trigger)
 			return NULL;
 
-		GString s;
+		LString s;
 		s.Printf(LPrintfInt64 ",%i,%i,%s", -Atoi(Buf), (int)Units, (int)Type, Param?Param.Get():"");
 		return s;
 	}
 };
 
-bool VCal::Import(GDataPropI *c, GStreamI *In)
+bool VCal::Import(GDataPropI *c, LStreamI *In)
 {
 	bool Status = false;
 
 	if (!c || !In)
 		return false;
 
-	GString Field, Data;
+	LString Field, Data;
 	ParamArray Params;
 
 	bool IsEvent = false;
 	bool IsTimeZone = false;
 	bool IsAlarm = false;
-	GString SectionType;
+	LString SectionType;
 	LDateTime EventStart, EventEnd;
 	
-	GString StartTz, EndTz;
-	GArray<TimeZoneInfo> TzInfos;
+	LString StartTz, EndTz;
+	LArray<TimeZoneInfo> TzInfos;
 	TimeZoneInfo *TzInfo = NULL;
 	bool IsNormalTz = false, IsDaylightTz = false;
 	LJson To;
 	int Attendee = 0;
-	GArray<LAlarm> Alarms;
+	LArray<LAlarm> Alarms;
 	int AlarmIdx = -1;
 
 	while (ReadField(*In, Field, &Params, Data))
@@ -1133,7 +1133,7 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 			}
 			else if (IsVar(Field, "description"))
 			{
-				GAutoString Sum(UnMultiLine(Data));
+				LAutoString Sum(UnMultiLine(Data));
 				if (Sum)
 					c->SetStr(FIELD_CAL_NOTES, Sum);
 			}
@@ -1166,7 +1166,7 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 					const char *Name = Params.Find("CN");
 					const char *Role = Params.Find("Role");
 					
-					GString k;
+					LString k;
 					k.Printf("[%i].email", Attendee);
 					To.Set(k, Email);
 
@@ -1281,7 +1281,7 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 				#endif
 				
 				EffectiveTz = IsDst ? Match->Daylight.To : Match->Normal.To;
-				GString sTz;
+				LString sTz;
 				sTz.Printf("%4.4i,%s", EffectiveTz, StartTz.Get());
 				c->SetStr(FIELD_CAL_TIMEZONE, sTz);
 			}
@@ -1295,7 +1295,7 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 				c->SetStr(FIELD_CAL_TIMEZONE, StartTz);
 			else if (StartTz.Get() && EndTz.Get())
 			{
-				GString s;
+				LString s;
 				s.Printf("%s,%s", StartTz.Get(), EndTz.Get());
 				c->SetStr(FIELD_CAL_TIMEZONE, s);
 			}
@@ -1339,15 +1339,15 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 
 	if (Alarms.Length())
 	{
-		GString::Array s;
+		LString::Array s;
 		for (LAlarm &a: Alarms)
 		{
-			GString r = a.GetStr();
+			LString r = a.GetStr();
 			if (r) s.Add(r);
 		}
 		if (s.Length())
 		{
-			c->SetStr(FIELD_CAL_REMINDERS, GString("\n").Join(s));
+			c->SetStr(FIELD_CAL_REMINDERS, LString("\n").Join(s));
 		}
 	}
 
@@ -1356,16 +1356,16 @@ bool VCal::Import(GDataPropI *c, GStreamI *In)
 	return Status;
 }
 
-GString ToString(LDateTime &dt)
+LString ToString(LDateTime &dt)
 {
-	GString s;
+	LString s;
 	s.Printf("%04.4i%02.2i%02.2iT%02.2i%02.2i%02.2i%s",
 		dt.Year(), dt.Month(), dt.Day(), dt.Hours(), dt.Minutes(), dt.Seconds(),
 		dt.GetTimeZone() ? "" : "Z");
 	return s;
 }
 
-bool VCal::Export(GDataPropI *c, GStreamI *o)
+bool VCal::Export(GDataPropI *c, LStreamI *o)
 {
 	if (!c || !o)
 		return false;
@@ -1381,7 +1381,7 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 
 	if (c)
 	{
-		GStreamPrint(o, "BEGIN:%s\r\n", TypeStr);
+		LStreamPrint(o, "BEGIN:%s\r\n", TypeStr);
 
 		#define OutputStr(Field, Name)						\
 		{													\
@@ -1395,7 +1395,7 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 		LDateTime Now;
 		Now.SetNow();
 		Now.ToUtc();
-		GStreamPrint(o, "DTSTAMP:%s\r\n", ToString(Now).Get());
+		LStreamPrint(o, "DTSTAMP:%s\r\n", ToString(Now).Get());
 
 		OutputStr(FIELD_CAL_SUBJECT, "SUMMARY");
 		OutputStr(FIELD_CAL_LOCATION, "LOCATION");
@@ -1426,7 +1426,7 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 		const char *Uid;
 		if ((Uid = c->GetStr(FIELD_UID)))
 		{
-			GStreamPrint(o, "UID:%s\r\n", Uid);
+			LStreamPrint(o, "UID:%s\r\n", Uid);
 		}
 
 		const LDateTime *Dt;
@@ -1434,19 +1434,19 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 		{
 			LDateTime dt = *Dt;
 			dt.ToUtc();
-			GStreamPrint(o, "DTSTART:%s\r\n", ToString(dt).Get());
+			LStreamPrint(o, "DTSTART:%s\r\n", ToString(dt).Get());
 		}
 		if ((Dt = c->GetDate(FIELD_CAL_END_UTC)))
 		{
 			LDateTime dt = *Dt;
 			dt.ToUtc();
-			GStreamPrint(o, "DTEND:%s\r\n", ToString(dt).Get());
+			LStreamPrint(o, "DTEND:%s\r\n", ToString(dt).Get());
 		}
 
 		const char *Reminders;
 		if ((Reminders = c->GetStr(FIELD_CAL_REMINDERS)))
 		{
-			auto Lines = GString(Reminders).SplitDelimit("\n");
+			auto Lines = LString(Reminders).SplitDelimit("\n");
 			for (auto Ln: Lines)
 			{
 				// Fields are: Number, CalendarReminderUnits, CalendarReminderType, Param
@@ -1473,7 +1473,7 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 
 					if (Action && Duration)
 					{
-						GString s;
+						LString s;
 						s.Printf(	"BEGIN:VALARM\r\n"
 									"ACTION:%s\r\n"
 									"DESCRIPTION:REMINDER\r\n"
@@ -1482,7 +1482,7 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 									Count, Duration
 								);
 						if (p.Length() > 3)
-							s += GString("X-PARAM: ") + p[3];
+							s += LString("X-PARAM: ") + p[3];
 						s += "END:VALARM\r\n";
 						o->Write(s.Get(), s.Length());
 					}
@@ -1512,7 +1512,7 @@ bool VCal::Export(GDataPropI *c, GStreamI *o)
 			}				
 		}
 
-		GStreamPrint(o, "END:%s\r\n", TypeStr);
+		LStreamPrint(o, "END:%s\r\n", TypeStr);
 	}
 
 	o->Push((char*)"END:VCALENDAR\r\n");

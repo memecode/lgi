@@ -1,5 +1,5 @@
 /*hdr
-**	FILE:			GMemDC.cpp
+**	FILE:			LMemDC.cpp
 **	AUTHOR:			Matthew Allen
 **	DATE:			14/10/2000
 **	DESCRIPTION:	GDC v2.xx header
@@ -11,29 +11,29 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "Gdc2.h"
-#include "GString.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/String.h"
 using namespace Gtk;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 #define ROUND_UP(bits) (((bits) + 7) / 8)
 
-class GMemDCPrivate
+class LMemDCPrivate
 {
 public:
-	::GArray<GRect> Client;
-	// GRect Client;
+	::LArray<LRect> Client;
+	// LRect Client;
 	cairo_t *cr;
 	LCairoSurfaceT Img;
-	GColourSpace CreateCs;
+	LColourSpace CreateCs;
 
-    GMemDCPrivate()
+    LMemDCPrivate()
     {
 		cr = NULL;
 		CreateCs = CsNone;
     }
 
-    ~GMemDCPrivate()
+    ~LMemDCPrivate()
     {
     	Empty();
 	}
@@ -49,16 +49,16 @@ public:
 	}
 };
 
-GMemDC::GMemDC(int x, int y, GColourSpace cs, int flags)
+LMemDC::LMemDC(int x, int y, LColourSpace cs, int flags)
 {
-	d = new GMemDCPrivate;
+	d = new LMemDCPrivate;
 	if (cs != CsNone)
 		Create(x, y, cs, flags);
 }
 
-GMemDC::GMemDC(GSurface *pDC)
+LMemDC::LMemDC(LSurface *pDC)
 {
-	d = new GMemDCPrivate;
+	d = new LMemDCPrivate;
 	
 	if (pDC &&
 		Create(pDC->X(), pDC->Y(), pDC->GetColourSpace()))
@@ -67,18 +67,18 @@ GMemDC::GMemDC(GSurface *pDC)
 	}
 }
 
-GMemDC::~GMemDC()
+LMemDC::~LMemDC()
 {
 	Empty();
 	DeleteObj(d);
 }
 
-cairo_surface_t *GMemDC::GetSurface()
+cairo_surface_t *LMemDC::GetSurface()
 {
 	return d->Img;
 }
 
-LCairoSurfaceT GMemDC::GetSubImage(GRect &r)
+LCairoSurfaceT LMemDC::GetSubImage(LRect &r)
 {
 	LCairoSurfaceT s;
 
@@ -96,7 +96,7 @@ LCairoSurfaceT GMemDC::GetSubImage(GRect &r)
 	return s;
 }
 
-OsPainter GMemDC::Handle()
+OsPainter LMemDC::Handle()
 {
 	if (!d->cr)
 	{
@@ -113,14 +113,14 @@ OsPainter GMemDC::Handle()
 	return d->cr;
 }
 
-void FreeMemDC(guchar *pixels, GMemDC *data)
+void FreeMemDC(guchar *pixels, LMemDC *data)
 {
 	delete data;	
 }
 
-GdkPixbuf *GMemDC::CreatePixBuf()
+GdkPixbuf *LMemDC::CreatePixBuf()
 {
-	GMemDC *Tmp = new GMemDC(X(), Y(), CsRgba32, SurfaceRequireExactCs);
+	LMemDC *Tmp = new LMemDC(X(), Y(), CsRgba32, SurfaceRequireExactCs);
 	if (!Tmp)
 		return NULL;
 
@@ -145,24 +145,24 @@ GdkPixbuf *GMemDC::CreatePixBuf()
 	return Pb;
 }
 
-bool GMemDC::SupportsAlphaCompositing()
+bool LMemDC::SupportsAlphaCompositing()
 {
 	// We can blend RGBA into memory buffers, mostly because the code is in Lgi not GTK.
 	return true;
 }
 
-LPoint GMemDC::GetSize()
+LPoint LMemDC::GetSize()
 {
 	return LPoint(pMem->x, pMem->y);
 }
 
-GRect GMemDC::ClipRgn(GRect *Rgn)
+LRect LMemDC::ClipRgn(LRect *Rgn)
 {
-	GRect Old = Clip;
+	LRect Old = Clip;
 	
 	if (Rgn)
 	{
-		GRect Dc(0, 0, X()-1, Y()-1);
+		LRect Dc(0, 0, X()-1, Y()-1);
 		
 		Clip = *Rgn;
 		Clip.Offset(-OriginX, -OriginY);
@@ -176,19 +176,19 @@ GRect GMemDC::ClipRgn(GRect *Rgn)
 	return Old;
 }
 
-void GMemDC::SetClient(GRect *c)
+void LMemDC::SetClient(LRect *c)
 {
 	if (c)
 	{
 		Handle();
 
-		GRect Doc;
+		LRect Doc;
 		if (d->Client.Length())
 			Doc = d->Client.Last();
 		else
 			Doc = Bounds();
 		
-		GRect r = *c;
+		LRect r = *c;
 		r.Bound(&Doc);
 		d->Client.Add(r);
 		
@@ -225,31 +225,31 @@ void GMemDC::SetClient(GRect *c)
 }
 
 
-void GMemDC::Empty()
+void LMemDC::Empty()
 {
 	d->Empty();
 	DeleteObj(pMem);
 }
 
-bool GMemDC::Lock()
+bool LMemDC::Lock()
 {
 	return false;
 }
 
-bool GMemDC::Unlock()
+bool LMemDC::Unlock()
 {
 	return false;
 }
 
-void GMemDC::GetOrigin(int &x, int &y)
+void LMemDC::GetOrigin(int &x, int &y)
 {
-	GSurface::GetOrigin(x, y);
+	LSurface::GetOrigin(x, y);
 }
 
-void GMemDC::SetOrigin(int x, int y)
+void LMemDC::SetOrigin(int x, int y)
 {
 	Handle();
-	GSurface::SetOrigin(x, y);
+	LSurface::SetOrigin(x, y);
 
 	if (d->cr)
 	{		
@@ -261,14 +261,14 @@ void GMemDC::SetOrigin(int x, int y)
 	}
 }
 
-GColourSpace GMemDC::GetCreateCs()
+LColourSpace LMemDC::GetCreateCs()
 {
 	// Sometimes the colour space we get is different to the requested colour space.
 	// This function returns the original requested colour space.
 	return d->CreateCs;
 }
 
-bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
+bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 {
 	int Bits = GColourSpaceToBits(Cs);
 	if (x < 1 || y < 1 || Bits < 1)
@@ -384,7 +384,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 
 	if (!pApp)
 	{
-		printf("GMemDC::Create(%i,%i,%i) No Applicator.\n", x, y, Bits);
+		printf("LMemDC::Create(%i,%i,%i) No Applicator.\n", x, y, Bits);
 		LgiAssert(0);
 	}
 
@@ -393,7 +393,7 @@ bool GMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 	return true;
 }
 
-void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
+void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 {
 	if (!Src)
 		return;
@@ -403,7 +403,7 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	if (!br.Valid())
 		return;
 
-	GScreenDC *Screen;
+	LScreenDC *Screen;
 	if ((Screen = Src->IsScreen()))
 	{
 		if (pMem->Base)
@@ -436,16 +436,16 @@ void GMemDC::Blt(int x, int y, GSurface *Src, GRect *a)
 	else if ((*Src)[0])
 	{
 		// Memory -> Memory (Source alpha used)
-		GSurface::Blt(x, y, Src, a);
+		LSurface::Blt(x, y, Src, a);
 	}
 }
 
-void GMemDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
+void LMemDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
 {
     LgiAssert(!"Not implemented");
 }
 
-void GMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
+void LMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
 {
 	if (x1 > x2) LgiSwap(x1, x2);
 
@@ -478,7 +478,7 @@ void GMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
 	}
 }
 
-void GMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
+void LMemDC::VertLine(int x, int y1, int y2, COLOUR a, COLOUR b)
 {
 	if (y1 > y2) LgiSwap(y1, y2);
 	

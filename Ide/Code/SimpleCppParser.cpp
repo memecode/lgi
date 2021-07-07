@@ -33,7 +33,7 @@ Known bugs:
 	
 
 */
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "ParserCommon.h"
 
 #if 0
@@ -58,7 +58,7 @@ const char *TypeToStr(DefnType t)
 	}
 }
 
-bool IsFirst(GArray<int> &a, int depth)
+bool IsFirst(LArray<int> &a, int depth)
 {
 	if (depth == 0)
 		return true;
@@ -79,7 +79,7 @@ bool IsFuncNameChar(char c)
 
 #define IsWhiteSpace(c) (strchr(" \r\t\n", c) != NULL)
 
-bool ParseFunction(GRange &Return, GRange &Name, GRange &Args, const char *Defn)
+bool ParseFunction(LRange &Return, LRange &Name, LRange &Args, const char *Defn)
 {
 	if (!Defn)
 		return false;
@@ -156,7 +156,7 @@ bool SeekPtr(char16 *&s, char16 *end, int &Line)
 	return true;
 }
 
-bool BuildCppDefnList(const char *FileName, char16 *Cpp, GArray<DefnInfo> &Defns, int LimitTo, bool Debug)
+bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns, int LimitTo, bool Debug)
 {
 	if (!Cpp)
 		return false;
@@ -187,7 +187,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, GArray<DefnInfo> &Defns
 	bool IsEnum = 0, IsClass = false, IsStruct = false;
 	bool FnEmit = false;	// don't emit functions between a f(n) and the next '{'
 							// they are only parent class initializers
-	GArray<int> ConditionalIndex;
+	LArray<int> ConditionalIndex;
 	int ConditionalDepth = 0;
 	bool ConditionalFirst = true;
 	bool ConditionParsingErr = false;
@@ -391,7 +391,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, GArray<DefnInfo> &Defns
 				{
 					if (IsAlpha(*s)) // typedef'd enum?
 					{
-						GAutoWString t(LexCpp(s, LexStrdup));
+						LAutoWString t(LexCpp(s, LexStrdup));
 						if (t)
 							Defns.New().Set(DefnEnum, FileName, t.Get(), Line + 1);
 					}
@@ -411,7 +411,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, GArray<DefnInfo> &Defns
 					char16 *Start = s - 1;
 					while (Start > Cpp && Start[-1] != '}')
 						Start--;
-					GString TypeDef = GString(Start, s - Start - 1).Strip();
+					LString TypeDef = LString(Start, s - Start - 1).Strip();
 					if (TypeDef.Length() > 0)
 					{
 						if (LimitTo == DefnNone || (LimitTo & DefnClass) != 0)
@@ -657,7 +657,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, GArray<DefnInfo> &Defns
 							goto DefineEnum;
 						}
 						
-						GStringPipe p;
+						LStringPipe p;
 						char16 *i;
 						for (i = Start; i && *i;)
 						{
@@ -822,7 +822,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, GArray<DefnInfo> &Defns
 								LexCpp(s, LexNoReturn);
 								defnskipws(s);
 
-								GArray<char16*> a;
+								LArray<char16*> a;
 								char16 *t;
 								ssize_t StartRd = -1, EndRd = -1;
 								while ((t = LexCpp(s, LexStrdup)))
@@ -859,7 +859,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, GArray<DefnInfo> &Defns
 						IsEnum = true;
 						defnskipws(s);
 						
-						GAutoWString t(LexCpp(s, LexStrdup));
+						LAutoWString t(LexCpp(s, LexStrdup));
 						if (t && isalpha(*t))
 						{
 							Defns.New().Set(DefnEnum, FileName, t.Get(), Line + 1);
@@ -916,4 +916,3 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, GArray<DefnInfo> &Defns
 	
 	return Defns.Length() > 0;
 }
-

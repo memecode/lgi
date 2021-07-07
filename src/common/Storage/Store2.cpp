@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include "Lgi.h"
-#include "GSegmentTree.h"
+#include "LSegmentTree.h"
 #ifndef WIN32
 #include "errno.h"
 #endif
@@ -73,7 +73,7 @@ StorageItemHeader::StorageItemHeader()
 	DirAlloc = 0;
 }
 
-bool StorageItemHeader::Serialize(GFile &f, bool Write)
+bool StorageItemHeader::Serialize(LFile &f, bool Write)
 {
 	bool Status = true;
 	int64 Here = f.GetPos();
@@ -235,7 +235,7 @@ StorageKit *StorageItemImpl::GetTree()
 	return Tree;
 }
 
-bool StorageItemImpl::EndOfObj(GFile &f)
+bool StorageItemImpl::EndOfObj(LFile &f)
 {
 	if (!Header)
 	{
@@ -249,7 +249,7 @@ bool StorageItemImpl::EndOfObj(GFile &f)
 	return Before || After;
 }
 
-GFile *StorageItemImpl::GotoObject(const char *file, int line)
+LFile *StorageItemImpl::GotoObject(const char *file, int line)
 {
 	GSubFilePtr *f = 0;
 	
@@ -322,7 +322,7 @@ bool StorageItemImpl::SetDirty(bool Dirty)
 	return Status;
 }
 
-bool StorageItemImpl::SerializeHeader(GFile &f, bool Write)
+bool StorageItemImpl::SerializeHeader(LFile &f, bool Write)
 {
 	bool Status = false;
 
@@ -1153,7 +1153,7 @@ bool StorageItemImpl::DeleteChild(StorageItem *ObjVirtual)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 namespace Storage2
 {
-	class Block : public GSegment
+	class Block : public LSegment
 	{
 	public:
 		StorageItemImpl *Dir;
@@ -1280,7 +1280,7 @@ namespace Storage2
 			}						
 
 			const char *DlgTitle = "Compact Error";
-			GLayout *Wnd = dynamic_cast<GLayout*>(_Ui);
+			LLayout *Wnd = dynamic_cast<LLayout*>(_Ui);
 			char Msg[512], KeepItem1[32], KeepItem2[32];
 
 			sprintf_s(KeepItem1, sizeof(KeepItem1), Store2_LgiLoadString(IDC_STORE2_KEEP), 1);
@@ -1306,7 +1306,7 @@ namespace Storage2
 					Item1Desc,
 					Item2Desc);
 
-			GAlert Dlg(	Wnd,
+			LAlert Dlg(	Wnd,
 						DlgTitle,
 						Msg,
 						KeepItem1,
@@ -1337,7 +1337,7 @@ namespace Storage2
 			}
 		}
 
-		GSegmentTree Segs;
+		LSegmentTree Segs;
 		void AddSegs(StorageItemImpl *s)
 		{
 			if (s &&
@@ -1345,7 +1345,7 @@ namespace Storage2
 			{
 				for (StorageItemImpl *Item = s; Item; )
 				{
-					bool Insert = (Validator) ? Validator->CompactValidate(dynamic_cast<GView*>(_Ui), Item) : true;
+					bool Insert = (Validator) ? Validator->CompactValidate(dynamic_cast<LView*>(_Ui), Item) : true;
 					if (Insert)
 					{
 						if (Item->Header->DirLoc)
@@ -1359,7 +1359,7 @@ namespace Storage2
 
 								New->Length = Item->Header->DirAlloc * sizeof(StorageItemHeader);
 
-								GSegment *Conflict = 0;
+								LSegment *Conflict = 0;
 								if (!Segs.Insert(New, &Conflict))
 								{
 									ProcessConflict(New, (Block*)Conflict);
@@ -1378,7 +1378,7 @@ namespace Storage2
 								
 								New->Length = Item->Header->DataSize;
 
-								GSegment *Conflict = 0;
+								LSegment *Conflict = 0;
 								if (!Segs.Insert(New, &Conflict))
 								{
 									ProcessConflict(New, (Block*)Conflict);
@@ -1422,7 +1422,7 @@ namespace Storage2
 			{
 				for (StorageItemImpl *Item = s; Item; )
 				{
-					bool Insert = (Validator) ? Validator->CompactValidate(dynamic_cast<GView*>(_Ui), Item) : true;
+					bool Insert = (Validator) ? Validator->CompactValidate(dynamic_cast<LView*>(_Ui), Item) : true;
 					if (Insert)
 					{
 						if (Item->Header->DirLoc)
@@ -1523,7 +1523,7 @@ namespace Storage2
 						}						
 
 						char *DlgTitle = "Compact Error";
-						GLayout *Wnd = dynamic_cast<GLayout*>(_Ui);
+						LLayout *Wnd = dynamic_cast<LLayout*>(_Ui);
 						char Msg[512], KeepItem1[32], KeepItem2[32];
 
 						sprintf(KeepItem1, Store2_LgiLoadString(IDC_STORE2_KEEP), 1);
@@ -1537,7 +1537,7 @@ namespace Storage2
 								Item1Desc,
 								Item2Desc);
 
-						GAlert Dlg(	Wnd,
+						LAlert Dlg(	Wnd,
 									DlgTitle,
 									Msg,
 									KeepItem1,
@@ -2028,7 +2028,7 @@ bool StorageKitImpl::Compact(Progress *p, bool Interactive, StorageValidator *va
 		// tell the user what happened
 		if (Interactive)
 		{
-			LgiMsg(dynamic_cast<GView*>(d->_Ui), Msg, Status?(char*)"Compact Successful":(char*)"Compact Error", MB_OK);
+			LgiMsg(dynamic_cast<LView*>(d->_Ui), Msg, Status?(char*)"Compact Successful":(char*)"Compact Error", MB_OK);
 		}
 
 		// clean up
@@ -2057,7 +2057,7 @@ bool StorageKitImpl::Compact(Progress *p, bool Interactive, StorageValidator *va
 		int Reserved3[4];		// 0x0
 	};
 */
-bool StorageKitImpl::_Serialize(GFile &f, bool Write)
+bool StorageKitImpl::_Serialize(LFile &f, bool Write)
 {
 	bool Status = false;
 	StorageHeader Header;

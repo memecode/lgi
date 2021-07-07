@@ -2,30 +2,33 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "LgiIde.h"
-#include "GMdi.h"
-#include "GToken.h"
-#include "GXmlTree.h"
-#include "GPanel.h"
-#include "GButton.h"
-#include "GTabView.h"
+#include "lgi/common/Mdi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/XmlTree.h"
+#include "lgi/common/Panel.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/TabView.h"
 #include "FtpThread.h"
-#include "GClipBoard.h"
+#include "lgi/common/ClipBoard.h"
 #include "FindSymbol.h"
-#include "GBox.h"
-#include "GTextLog.h"
-#include "GEdit.h"
-#include "GTableLayout.h"
-#include "GTextLabel.h"
-#include "GCombo.h"
-#include "GCheckBox.h"
+#include "lgi/common/Box.h"
+#include "lgi/common/TextLog.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/CheckBox.h"
 #include "GDebugger.h"
-#include "LgiRes.h"
+#include "lgi/common/LgiRes.h"
 #include "ProjectNode.h"
-#include "GBox.h"
-#include "GSubProcess.h"
-#include "GAbout.h"
+#include "lgi/common/Box.h"
+#include "lgi/common/SubProcess.h"
+#include "lgi/common/About.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/ToolBar.h"
+#include "lgi/common/FileSelect.h"
 
 #define IDM_RECENT_FILE			1000
 #define IDM_RECENT_PROJECT		1100
@@ -43,7 +46,7 @@
 #define IsSymbolChar(c)			( IsDigit(c) || IsAlpha(c) || strchr("-_", c) )
 
 //////////////////////////////////////////////////////////////////////////////////////////
-class FindInProject : public GDialog
+class FindInProject : public LDialog
 {
 	AppWnd *App;
 	LList *Lst;
@@ -57,17 +60,17 @@ public:
 		{
 			MoveSameScreen(App);
 
-			GViewI *v;
+			LViewI *v;
 			if (GetViewById(IDC_TEXT, v))
 				v->Focus(true);
 			if (!GetViewById(IDC_FILES, Lst))
 				return;
 
-			RegisterHook(this, GKeyEvents, 0);
+			RegisterHook(this, LKeyEvents, 0);
 		}
 	}
 
-	bool OnViewKey(GView *v, GKey &k)
+	bool OnViewKey(LView *v, LKey &k)
 	{
 		switch (k.vkey)
 		{
@@ -114,7 +117,7 @@ public:
 		if (!p || !s)
 			return;
 		
-		GArray<ProjectNode*> Matches, Nodes;
+		LArray<ProjectNode*> Matches, Nodes;
 
 		List<IdeProject> All;
 		p->GetChildProjects(All);
@@ -130,7 +133,7 @@ public:
 		for (auto m: Matches)
 		{
 			LListItem *li = new LListItem;
-			GString Fn = m->GetFileName();
+			LString Fn = m->GetFileName();
 			#ifdef WINDOWS
 			Fn = Fn.Replace("/","\\");
 			#else
@@ -144,7 +147,7 @@ public:
 		Lst->ResizeColumnsToContent();
 	}
 
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{
@@ -202,11 +205,11 @@ char *dirchar(char *s, bool rev = false)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-class Dependency : public GTreeItem
+class Dependency : public LTreeItem
 {
 	char *File;
 	bool Loaded;
-	GTreeItem *Fake;
+	LTreeItem *Fake;
 
 public:
 	Dependency(const char *file)
@@ -214,7 +217,7 @@ public:
 		File = NewStr(file);
 		char *d = strrchr(File, DIR_CHAR);
 		Loaded = false;
-		Insert(Fake = new GTreeItem);
+		Insert(Fake = new LTreeItem);
 
 		if (LFileExists(File))
 		{
@@ -238,7 +241,7 @@ public:
 		return File;
 	}
 	
-	void Copy(GStringPipe &p, int Depth = 0)
+	void Copy(LStringPipe &p, int Depth = 0)
 	{
 		{
 			char s[1024];
@@ -250,7 +253,7 @@ public:
 		
 		if (Loaded)
 		{
-			for (GTreeItem *i=GetChild(); i; i=i->GetNext())
+			for (LTreeItem *i=GetChild(); i; i=i->GetNext())
 			{
 				((Dependency*)i)->Copy(p, Depth+1);
 			}
@@ -263,7 +266,7 @@ public:
 		for (int p=0; p<Path.Length(); p++)
 		{
 			char Full[256];
-			LgiMakePath(Full, sizeof(Full), Path[p], e);
+			LMakePath(Full, sizeof(Full), Path[p], e);
 			if (LFileExists(Full))
 			{
 				return NewStr(Full);
@@ -295,11 +298,11 @@ public:
 			Loaded = true;
 			DeleteObj(Fake);
 			
-			GStringPipe Out;
+			LStringPipe Out;
 			char Args[256];
 			sprintf(Args, "-d %s", File);
 			
-			GSubProcess p("readelf", Args);
+			LSubProcess p("readelf", Args);
 			if (p.Start())
 			{
 				p.Communicate(&Out);
@@ -339,21 +342,21 @@ public:
 };
 
 #define IDC_COPY 100
-class Depends : public GDialog
+class Depends : public LDialog
 {
 	Dependency *Root;
 
 public:
-	Depends(GView *Parent, const char *File)
+	Depends(LView *Parent, const char *File)
 	{
 		Root = 0;
 		SetParent(Parent);
-		GRect r(0, 0, 600, 700);
+		LRect r(0, 0, 600, 700);
 		SetPos(r);
 		MoveToCenter();
 		Name("Dependencies");
 		
-		GTree *t = new GTree(100, 10, 10, r.X() - 20, r.Y() - 50);
+		LTree *t = new LTree(100, 10, 10, r.X() - 20, r.Y() - 50);
 		if (t)
 		{
 			t->Sunken(true);
@@ -366,15 +369,15 @@ public:
 			}
 			
 			Children.Insert(t);
-			Children.Insert(new GButton(IDC_COPY, 10, t->GView::GetPos().y2 + 10, 60, 20, "Copy"));
-			Children.Insert(new GButton(IDOK, 80, t->GView::GetPos().y2 + 10, 60, 20, "Ok"));
+			Children.Insert(new LButton(IDC_COPY, 10, t->LView::GetPos().y2 + 10, 60, 20, "Copy"));
+			Children.Insert(new LButton(IDOK, 80, t->LView::GetPos().y2 + 10, 60, 20, "Ok"));
 		}
 		
 		
 		DoModal();
 	}
 	
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{
@@ -382,12 +385,12 @@ public:
 			{
 				if (Root)
 				{
-					GStringPipe p;
+					LStringPipe p;
 					Root->Copy(p);
 					char *s = p.NewStr();
 					if (s)
 					{
-						GClipBoard c(this);
+						LClipBoard c(this);
 						c.Text(s);
 						DeleteArray(s);
 					}
@@ -417,7 +420,7 @@ public:
 	void PourText(size_t Start, ssize_t Len) override
 	{
 		auto Ts = LgiCurrentTime();
-		GTextView3::PourText(Start, Len);
+		LTextView3::PourText(Start, Len);
 		auto Dur = LgiCurrentTime() - Ts;
 		if (Dur > 1500)
 		{
@@ -449,20 +452,20 @@ WatchItem::WatchItem(IdeOutput *out, const char *Init)
 	Expanded(false);
 	if (Init)
 		SetText(Init);
-	Insert(PlaceHolder = new GTreeItem);
+	Insert(PlaceHolder = new LTreeItem);
 }
 
 WatchItem::~WatchItem()
 {
 }
 
-bool WatchItem::SetValue(GVariant &v)
+bool WatchItem::SetValue(LVariant &v)
 {
 	char *Str = v.CastString();
 	if (ValidStr(Str))
 		SetText(Str, 2);
 	else
-		GTreeItem::SetText(NULL, 2);
+		LTreeItem::SetText(NULL, 2);
 	return true;
 }
 
@@ -470,11 +473,11 @@ bool WatchItem::SetText(const char *s, int i)
 {
 	if (ValidStr(s))
 	{
-		GTreeItem::SetText(s, i);
+		LTreeItem::SetText(s, i);
 
 		if (i == 0 && Tree && Tree->GetWindow())
 		{
-			GViewI *Tabs = Tree->GetWindow()->FindControl(IDC_DEBUG_TAB);
+			LViewI *Tabs = Tree->GetWindow()->FindControl(IDC_DEBUG_TAB);
 			if (Tabs)
 				Tabs->SendNotify(GNotifyValueChanged);
 		}
@@ -504,8 +507,8 @@ public:
 
 	void PourStyle(size_t Start, ssize_t Length)
 	{
-		List<GTextLine>::I it = GTextView3::Line.begin();
-		for (GTextLine *ln = *it; ln; ln = *++it)
+		List<LTextLine>::I it = LTextView3::Line.begin();
+		for (LTextLine *ln = *it; ln; ln = *++it)
 		{
 			if (!ln->c.IsValid())
 			{
@@ -530,29 +533,29 @@ public:
 	}
 };
 
-class IdeOutput : public GTabView
+class IdeOutput : public LTabView
 {
 public:
 	AppWnd *App;
-	GTabPage *Build;
-	GTabPage *Output;
-	GTabPage *Debug;
-	GTabPage *Find;
-	GTabPage *Ftp;
+	LTabPage *Build;
+	LTabPage *Output;
+	LTabPage *Debug;
+	LTabPage *Find;
+	LTabPage *Ftp;
 	LList *FtpLog;
 	GTextLog *Txt[3];
-	GArray<char> Buf[3];
-	GFont Small;
-	GFont Fixed;
+	LArray<char> Buf[3];
+	LFont Small;
+	LFont Fixed;
 
-	GTabView *DebugTab;
-	GBox *DebugBox;
-	GBox *DebugLog;
+	LTabView *DebugTab;
+	LBox *DebugBox;
+	LBox *DebugLog;
 	LList *Locals, *CallStack, *Threads;
-	GTree *Watch;
+	LTree *Watch;
 	GTextLog *ObjectDump, *MemoryDump, *Registers;
-	GTableLayout *MemTable;
-	GEdit *DebugEdit;
+	LTableLayout *MemTable;
+	LEdit *DebugEdit;
 	GTextLog *DebuggerLog;
 
 	IdeOutput(AppWnd *app)
@@ -579,7 +582,7 @@ public:
 		Small.Create();
 		LgiAssert(Small.Handle());
 		
-		GFontType Type;
+		LFontType Type;
 		if (Type.GetSystemFont("Fixed"))
 		{
 			Type.SetPointSize(SysFont->PointSize()-1);
@@ -617,18 +620,18 @@ public:
 			Ftp->Append(FtpLog = new LList(104, 0, 0, 100, 100));
 		if (Debug)
 		{
-			Debug->Append(DebugBox = new GBox);
+			Debug->Append(DebugBox = new LBox);
 			if (DebugBox)
 			{
 				DebugBox->SetVertical(false);
 					
-				if ((DebugTab = new GTabView(IDC_DEBUG_TAB)))
+				if ((DebugTab = new LTabView(IDC_DEBUG_TAB)))
 				{
 					DebugTab->GetCss(true)->Padding("0px");
 					DebugTab->SetFont(&Small);
 					DebugBox->AddView(DebugTab);
 
-					GTabPage *Page;
+					LTabPage *Page;
 					if ((Page = DebugTab->Append("Locals")))
 					{
 						Page->SetFont(&Small);
@@ -657,7 +660,7 @@ public:
 					if ((Page = DebugTab->Append("Watch")))
 					{
 						Page->SetFont(&Small);
-						if ((Watch = new GTree(IDC_WATCH_LIST, 0, 0, 100, 100, "Watch List")))
+						if ((Watch = new LTree(IDC_WATCH_LIST, 0, 0, 100, 100, "Watch List")))
 						{
 							Watch->SetFont(&Small);
 							Watch->ShowColumnHeader(true);
@@ -668,7 +671,7 @@ public:
 
 							Page->Append(Watch);
 								
-							GXmlTag *w = App->GetOptions()->LockTag("watches", _FL);
+							LXmlTag *w = App->GetOptions()->LockTag("watches", _FL);
 							if (!w)
 							{
 								App->GetOptions()->CreateTag("watches");
@@ -692,34 +695,34 @@ public:
 					{
 						Page->SetFont(&Small);
 							
-						if ((MemTable = new GTableLayout(IDC_MEMORY_TABLE)))
+						if ((MemTable = new LTableLayout(IDC_MEMORY_TABLE)))
 						{
-							GCombo *cbo;
-							GCheckBox *chk;
-							GTextLabel *txt;
-							GEdit *ed;
+							LCombo *cbo;
+							LCheckBox *chk;
+							LTextLabel *txt;
+							LEdit *ed;
 							MemTable->SetFont(&Small);
 							
 							int x = 0, y = 0;
 							GLayoutCell *c = MemTable->GetCell(x++, y);
 							if (c)
 							{
-								c->VerticalAlign(GCss::VerticalMiddle);
-								c->Add(txt = new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Address:"));
+								c->VerticalAlign(LCss::VerticalMiddle);
+								c->Add(txt = new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Address:"));
 								txt->SetFont(&Small);
 							}
 							c = MemTable->GetCell(x++, y);
 							if (c)
 							{
-								c->PaddingRight(GCss::Len("1em"));
-								c->Add(ed = new GEdit(IDC_MEM_ADDR, 0, 0, 60, 20));
+								c->PaddingRight(LCss::Len("1em"));
+								c->Add(ed = new LEdit(IDC_MEM_ADDR, 0, 0, 60, 20));
 								ed->SetFont(&Small);
 							}								
 							c = MemTable->GetCell(x++, y);
 							if (c)
 							{
-								c->PaddingRight(GCss::Len("1em"));
-								c->Add(cbo = new GCombo(IDC_MEM_SIZE, 0, 0, 60, 20));
+								c->PaddingRight(LCss::Len("1em"));
+								c->Add(cbo = new LCombo(IDC_MEM_SIZE, 0, 0, 60, 20));
 								cbo->SetFont(&Small);
 								cbo->Insert("1 byte");
 								cbo->Insert("2 bytes");
@@ -729,22 +732,22 @@ public:
 							c = MemTable->GetCell(x++, y);
 							if (c)
 							{
-								c->VerticalAlign(GCss::VerticalMiddle);
-								c->Add(txt = new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Page width:"));
+								c->VerticalAlign(LCss::VerticalMiddle);
+								c->Add(txt = new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Page width:"));
 								txt->SetFont(&Small);
 							}
 							c = MemTable->GetCell(x++, y);
 							if (c)
 							{
-								c->PaddingRight(GCss::Len("1em"));
-								c->Add(ed = new GEdit(IDC_MEM_ROW_LEN, 0, 0, 60, 20));
+								c->PaddingRight(LCss::Len("1em"));
+								c->Add(ed = new LEdit(IDC_MEM_ROW_LEN, 0, 0, 60, 20));
 								ed->SetFont(&Small);
 							}
 							c = MemTable->GetCell(x++, y);								
 							if (c)
 							{
-								c->VerticalAlign(GCss::VerticalMiddle);
-								c->Add(chk = new GCheckBox(IDC_MEM_HEX, 0, 0, -1, -1, "Show Hex"));
+								c->VerticalAlign(LCss::VerticalMiddle);
+								c->Add(chk = new LCheckBox(IDC_MEM_HEX, 0, 0, -1, -1, "Show Hex"));
 								chk->SetFont(&Small);
 								chk->Value(true);
 							}
@@ -803,14 +806,14 @@ public:
 					}
 				}
 					
-				if ((DebugLog = new GBox))
+				if ((DebugLog = new LBox))
 				{
 					DebugLog->SetVertical(true);
 					DebugBox->AddView(DebugLog);
 					DebugLog->AddView(DebuggerLog = new DebugTextLog(IDC_DEBUGGER_LOG));
 					DebuggerLog->SetFont(&Small);
-					DebugLog->AddView(DebugEdit = new GEdit(IDC_DEBUG_EDIT, 0, 0, 60, 20));
-					DebugEdit->GetCss(true)->Height(GCss::Len(GCss::LenPx, (float)(SysFont->GetHeight() + 8)));
+					DebugLog->AddView(DebugEdit = new LEdit(IDC_DEBUG_EDIT, 0, 0, 60, 20));
+					DebugEdit->GetCss(true)->Height(LCss::Len(LCss::LenPx, (float)(SysFont->GetHeight() + 8)));
 				}
 			}
 		}
@@ -845,7 +848,7 @@ public:
 	{
 		if (Watch)
 		{
-			GXmlTag *w = App->GetOptions()->LockTag("watches", _FL);
+			LXmlTag *w = App->GetOptions()->LockTag("watches", _FL);
 			if (!w)
 			{
 				App->GetOptions()->CreateTag("watches");
@@ -854,9 +857,9 @@ public:
 			if (w)
 			{
 				w->EmptyChildren();
-				for (GTreeItem *ti = Watch->GetChild(); ti; ti = ti->GetNext())
+				for (LTreeItem *ti = Watch->GetChild(); ti; ti = ti->GetNext())
 				{
-					GXmlTag *t = new GXmlTag("watch");
+					LXmlTag *t = new LXmlTag("watch");
 					if (t)
 					{
 						t->SetContent(ti->GetText(0));
@@ -875,7 +878,7 @@ public:
 		AttachChildren();
 	}
 
-	void RemoveAnsi(GArray<char> &a)
+	void RemoveAnsi(LArray<char> &a)
 	{
 		char *s = a.AddressOf();
 		char *e = s + a.Length();
@@ -930,7 +933,7 @@ public:
 			if (Size)
 			{
 				char *Utf = &Buf[Channel][0];
-				GAutoPtr<char16, true> w;
+				LAutoPtr<char16, true> w;
 
 				if (!LIsUtf8(Utf, (ssize_t)Size))
 				{
@@ -939,7 +942,7 @@ public:
 					// Clear out the invalid UTF?
 					uint8_t *u = (uint8_t*) Utf, *e = u + Size;
 					ssize_t len = Size;
-					GArray<wchar_t> out;
+					LArray<wchar_t> out;
 					while (u < e)
 					{
 						int32 u32 = LgiUtf8To32(u, len);
@@ -1000,7 +1003,7 @@ int DocSorter(IdeDoc *a, IdeDoc *b, NativeInt d)
 
 struct FileLoc
 {
-	GAutoString File;
+	LAutoString File;
 	int Line;
 	
 	void Set(const char *f, int l)
@@ -1015,12 +1018,12 @@ class AppWndPrivate
 public:
 	AppWnd *App;
 	GMdiParent *Mdi;
-	GOptionsFile Options;
-	GBox *HBox, *VBox;
+	LOptionsFile Options;
+	LBox *HBox, *VBox;
 	List<IdeDoc> Docs;
 	List<IdeProject> Projects;
-	GImageList *Icons;
-	GTree *Tree;
+	LImageList *Icons;
+	LTree *Tree;
 	IdeOutput *Output;
 	bool Debugging;
 	bool Running;
@@ -1029,16 +1032,16 @@ public:
 	int RebuildWait = 0;
 	LSubMenu *WindowsMenu;
 	LSubMenu *CreateMakefileMenu;
-	GAutoPtr<FindSymbolSystem> FindSym;
-	GArray<GAutoString> SystemIncludePaths;
-	GArray<GDebugger::BreakPoint> BreakPoints;
+	LAutoPtr<FindSymbolSystem> FindSym;
+	LArray<LAutoString> SystemIncludePaths;
+	LArray<GDebugger::BreakPoint> BreakPoints;
 	
 	// Debugging
 	GDebugContext *DbgContext;
 	
 	// Cursor history tracking
 	int HistoryLoc;
-	GArray<FileLoc> CursorHistory;
+	LArray<FileLoc> CursorHistory;
 	bool InHistorySeek;
 	
 	void SeekHistory(int Direction)
@@ -1058,19 +1061,19 @@ public:
 	}
 	
 	// Find in files
-	GAutoPtr<FindParams> FindParameters;
-	GAutoPtr<FindInFilesThread> Finder;
+	LAutoPtr<FindParams> FindParameters;
+	LAutoPtr<FindInFilesThread> Finder;
 	int AppHnd;
 	
 	// Mru
-	GString::Array RecentFiles;
+	LString::Array RecentFiles;
 	LSubMenu *RecentFilesMenu;
-	GString::Array RecentProjects;
+	LString::Array RecentProjects;
 	LSubMenu *RecentProjectsMenu;
 
 	// Object
 	AppWndPrivate(AppWnd *a) :
-		Options(GOptionsFile::DesktopMode, AppName),
+		Options(LOptionsFile::DesktopMode, AppName),
 		AppHnd(GEventSinkMap::Dispatch.AddSink(a))
 	{
 		FindSym.Reset(new FindSymbolSystem(AppHnd));
@@ -1088,7 +1091,7 @@ public:
 		Building = false;
 		RecentFilesMenu = 0;
 		RecentProjectsMenu = 0;
-		Icons = LgiLoadImageList("icons.png", 16, 16);
+		Icons = LLoadImageList("icons.png", 16, 16);
 
 		Options.SerializeFile(false);
 		App->SerializeState(&Options, "WndPos", true);
@@ -1118,9 +1121,9 @@ public:
 		DeleteObj(Icons);
 	}
 
-	bool FindSource(GAutoString &Full, char *File, char *Context)
+	bool FindSource(LAutoString &Full, char *File, char *Context)
 	{
-		if (!LgiIsRelativePath(File))
+		if (!LIsRelativePath(File))
 		{
 			Full.Reset(NewStr(File));
 		}
@@ -1138,10 +1141,10 @@ public:
 			
 			if (ContextPath)
 			{
-				LgiTrimDir(ContextPath);
+				LTrimDir(ContextPath);
 				
 				char p[300];
-				LgiMakePath(p, sizeof(p), ContextPath, File);
+				LMakePath(p, sizeof(p), ContextPath, File);
 				if (LFileExists(p))
 				{
 					Full.Reset(NewStr(p));
@@ -1158,11 +1161,11 @@ public:
 			List<IdeProject>::I Projs = Projects.begin();
 			for (IdeProject *p=*Projs; p; p=*++Projs)
 			{
-				GAutoString Base = p->GetBasePath();
+				LAutoString Base = p->GetBasePath();
 				if (Base)
 				{
 					char Path[MAX_PATH];
-					LgiMakePath(Path, sizeof(Path), Base, File);
+					LMakePath(Path, sizeof(Path), Base, File);
 					if (LFileExists(Path))
 					{
 						Full.Reset(NewStr(Path));
@@ -1195,7 +1198,7 @@ public:
 
 	void ViewMsg(char *File, int Line, char *Context)
 	{
-		GAutoString Full;
+		LAutoString Full;
 		if (FindSource(Full, File, Context))
 		{
 			App->GotoReference(Full, Line, false);
@@ -1252,7 +1255,7 @@ public:
 		
 	void SeekMsg(int Direction)
 	{
-		GString Comp;
+		LString Comp;
 		IdeProject *p = App->RootProject();
 		if (p)
 			p ->GetSettings()->GetStr(ProjCompiler);
@@ -1262,7 +1265,7 @@ public:
 			return;
 
 		int64 Current = Output->Value();
-		GTextView3 *o = Current < CountOf(Output->Txt) ? Output->Txt[Current] : 0;
+		LTextView3 *o = Current < CountOf(Output->Txt) ? Output->Txt[Current] : 0;
 		if (!o)
 			return;
 
@@ -1321,7 +1324,7 @@ public:
 		}
 						
 		// Store the filename
-		GAutoString File(WideToUtf8(Txt+Line, i-Line));
+		LAutoString File(WideToUtf8(Txt+Line, i-Line));
 		if (!File)
 			return;
 		char *Sep;
@@ -1334,7 +1337,7 @@ public:
 			NumIndex++;
 							
 		// Store the line number
-		GAutoString NumStr(WideToUtf8(Txt + i, NumIndex - i));
+		LAutoString NumStr(WideToUtf8(Txt + i, NumIndex - i));
 		if (!NumStr)
 			return;
 
@@ -1343,7 +1346,7 @@ public:
 		o->SetCaret(Line, false);
 		o->SetCaret(NumIndex + 1, true);
 								
-		GString Context8 = Context;
+		LString Context8 = Context;
 		ViewMsg(File, LineNumber, Context8);
 	}
 
@@ -1477,7 +1480,7 @@ public:
 	{
 		if (File)
 		{
-			GString::Array *Recent[3] = { &RecentProjects, &RecentFiles, 0 };
+			LString::Array *Recent[3] = { &RecentProjects, &RecentFiles, 0 };
 			for (int i=0; Recent[i]; i++)
 			{
 				auto &a = *Recent[i];
@@ -1531,9 +1534,9 @@ public:
 		return 0;
 	}
 
-	void SerializeStringList(const char *Opt, GString::Array *Lst, bool Write)
+	void SerializeStringList(const char *Opt, LString::Array *Lst, bool Write)
 	{
-		GVariant v;
+		LVariant v;
 		GString Sep = ":";
 		if (Write)
 		{
@@ -1560,7 +1563,7 @@ public:
 };
 
 #if 0// def LGI_COCOA
-#define Chk printf("%s:%i - Cnt=%i\n", LgiGetLeaf(__FILE__), __LINE__, (int)WindowHandle().p.retainCount)
+#define Chk printf("%s:%i - Cnt=%i\n", LGetLeaf(__FILE__), __LINE__, (int)WindowHandle().p.retainCount)
 #else
 #define Chk
 #endif
@@ -1573,7 +1576,7 @@ AppWnd::AppWnd()
 	
 Chk;
 
-	GRect r(0, 0, 1300, 900);
+	LRect r(0, 0, 1300, 900);
 	#ifdef BEOS
 	r.Offset(GdcD->X() - r.X() - 10, GdcD->Y() - r.Y() - 10);
 	SetPos(r);
@@ -1636,7 +1639,7 @@ Chk;
 
 		#if 1
 Chk;
-		GToolBar *Tools;
+		LToolBar *Tools;
 		if (GdcD->Y() > 1200)
 			Tools = LgiLoadToolbar(this, "cmds-32px.png", 32, 32);
 		else
@@ -1680,14 +1683,14 @@ Chk;
 
 		#if 1
 Chk;
-		GVariant v = 270, OutPx = 250;
+		LVariant v = 270, OutPx = 250;
 		d->Options.GetValue(OPT_SPLIT_PX, v);
 		d->Options.GetValue(OPT_OUTPUT_PX, OutPx);
 
-		AddView(d->VBox = new GBox);
+		AddView(d->VBox = new LBox);
 		d->VBox->SetVertical(true);
 
-		d->HBox = new GBox;
+		d->HBox = new LBox;
 		d->VBox->AddView(d->HBox);
 		d->VBox->AddView(d->Output = new IdeOutput(this));
 
@@ -1706,11 +1709,11 @@ Chk;
 Chk;
 		d->HBox->Value(MAX(v.CastInt32(), 20));
 
-		GRect c = GetClient();
+		LRect c = GetClient();
 		if (c.Y() > OutPx.CastInt32())
 		{
 			auto Px = OutPx.CastInt32();
-			GCss::Len y(GCss::LenPx, (float)MAX(Px, 120));
+			LCss::Len y(LCss::LenPx, (float)MAX(Px, 120));
 			d->Output->GetCss(true)->Height(y);
 		}
 		#endif
@@ -1720,7 +1723,7 @@ Chk;
 	
 Chk;
 		#ifdef LINUX
-		GString f = LgiFindFile("lgiide.png");
+		auto f = LFindFile("lgiide.png");
 		if (f)
 		{
 			// Handle()->setIcon(f);
@@ -1738,7 +1741,7 @@ Chk;
 	}
 	
 	#ifdef LINUX
-	LgiFinishXWindowsStartup(this);
+	LFinishXWindowsStartup(this);
 	#endif
 	
 	#if USE_HAIKU_PULSE_HACK
@@ -1752,12 +1755,12 @@ AppWnd::~AppWnd()
 {
 	if (d->HBox)
 	{
-		GVariant v = d->HBox->Value();
+		LVariant v = d->HBox->Value();
 		d->Options.SetValue(OPT_SPLIT_PX, v);
 	}
 	if (d->Output)
 	{
-		GVariant v = d->Output->Y();
+		LVariant v = d->Output->Y();
 		d->Options.SetValue(OPT_OUTPUT_PX, v);
 	}
 
@@ -1795,30 +1798,30 @@ GDebugContext *AppWnd::GetDebugContext()
 
 struct DumpBinThread : public LThread
 {
-	GStream *Out;
-	GString InFile;
+	LStream *Out;
+	LString InFile;
 	bool IsLib;
 
 public:
-	DumpBinThread(GStream *out, GString file) : LThread("DumpBin.Thread")
+	DumpBinThread(LStream *out, LString file) : LThread("DumpBin.Thread")
 	{
 		Out = out;
 		InFile = file;
 		DeleteOnExit = true;
 
-		auto Ext = LgiGetExtension(InFile);
+		auto Ext = LGetExtension(InFile);
 		IsLib = Ext && !stricmp(Ext, "lib");
 
 		Run();
 	}
 
-	bool DumpBin(GString Args, GStream *Str)
+	bool DumpBin(LString Args, LStream *Str)
 	{
 		char Buf[256];
 		ssize_t Rd;
 
 		const char *Prog = "c:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\dumpbin.exe";
-		GSubProcess s(Prog, Args);
+		LSubProcess s(Prog, Args);
 		if (!s.Start(true, false))
 		{
 			Out->Print("%s:%i - '%s' doesn't exist.\n", _FL, Prog);
@@ -1831,10 +1834,10 @@ public:
 		return true;
 	}
 
-	GString::Array Dependencies(const char *Executable, int Depth = 0)
+	LString::Array Dependencies(const char *Executable, int Depth = 0)
 	{
-		GString Args;
-		GStringPipe p;
+		LString Args;
+		LStringPipe p;
 		Args.Printf("/dependents \"%s\"", Executable);
 		DumpBin(Args, &p);
 
@@ -1843,7 +1846,7 @@ public:
 		memset(Spaces, ' ', Len);
 		Spaces[Len] = 0;
 
-		GString::Array Files;
+		LString::Array Files;
 		auto Parts = p.NewGStr().Replace("\r", "").Split("\n\n");
 		if (Parts.Length() > 0)
 		{
@@ -1857,7 +1860,7 @@ public:
 				bool Found = false;
 				for (auto s : Path)
 				{
-					GFile::Path c(s);
+					LFile::Path c(s);
 					c += f.Get();
 					if (c.IsFile())
 					{
@@ -1879,7 +1882,7 @@ public:
 						Files.SetFixedLength(false);
 						for (auto s: Deps)
 						{
-							GString p;
+							LString p;
 							p.Printf("%s%s", Spaces, s.Get());
 							Files.AddAt(++i, p);
 						}
@@ -1891,15 +1894,15 @@ public:
 		return Files;
 	}
 
-	GString GetArch()
+	LString GetArch()
 	{
-		GString Args;
-		GStringPipe p;
+		LString Args;
+		LStringPipe p;
 		Args.Printf("/headers \"%s\"", InFile.Get());
 		DumpBin(Args, &p);
 	
 		const char *Key = " machine ";
-		GString Arch;
+		LString Arch;
 		auto Lines = p.NewGStr().SplitDelimit("\r\n");
 		int64 Machine = 0;
 		for (auto &Ln : Lines)
@@ -1925,10 +1928,10 @@ public:
 		return Arch;
 	}
 
-	GString GetExports()
+	LString GetExports()
 	{
-		GString Args;
-		GStringPipe p;
+		LString Args;
+		LStringPipe p;
 
 		if (IsLib)
 			Args.Printf("/symbols \"%s\"", InFile.Get());
@@ -1936,13 +1939,13 @@ public:
 			Args.Printf("/exports \"%s\"", InFile.Get());
 		DumpBin(Args, &p);
 	
-		GString Exp;
+		LString Exp;
 
 		auto Sect = p.NewGStr().Replace("\r", "").Split("\n\n");
 
 		if (IsLib)
 		{
-			GString::Array Lines, Funcs;
+			LString::Array Lines, Funcs;
 			for (auto &s : Sect)
 			{
 				if (s.Find("COFF", 0, 100) == 0)
@@ -1965,7 +1968,7 @@ public:
 				}
 			}
 
-			Exp = GString("\n").Join(Funcs);
+			Exp = LString("\n").Join(Funcs);
 		}
 		else
 		{
@@ -1992,7 +1995,7 @@ public:
 		{
 			auto Deps = Dependencies(InFile);
 			if (Deps.Length())
-				Out->Print("Dependencies:\n\t%s\n\n", GString("\n\t").Join(Deps).Get());
+				Out->Print("Dependencies:\n\t%s\n\n", LString("\n\t").Join(Deps).Get());
 		}
 
 		auto Arch = GetArch();
@@ -2006,13 +2009,13 @@ public:
 	}
 };
 
-void AppWnd::OnReceiveFiles(GArray<const char*> &Files)
+void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 {
 	for (int i=0; i<Files.Length(); i++)
 	{
 		auto f = Files[i];
 		
-		auto ext = LgiGetExtension(f);
+		auto ext = LGetExtension(f);
 		if (ext && !stricmp(ext, "mem"))
 		{
 			NewMemDumpViewer(this, f);
@@ -2027,14 +2030,14 @@ void AppWnd::OnReceiveFiles(GArray<const char*> &Files)
 			;
 		else if
 		(
-			LgiIsFileNameExecutable(f)
+			LIsFileNameExecutable(f)
 			||
 			(ext != NULL && !stricmp(ext, "lib"))
 		)
 		{
 			// dumpbin /exports csp.dll
-			GFile::Path Docs(LSP_USER_DOCUMENTS);
-			GString Name;
+			LFile::Path Docs(LSP_USER_DOCUMENTS);
+			LString Name;
 			Name.Printf("%s.txt", Files[i]);
 			Docs += Name;
 			IdeDoc *Doc = NewDocWnd(NULL, NULL);
@@ -2072,7 +2075,7 @@ void AppWnd::OnDebugState(bool Debugging, bool Running)
 	PostEvent(M_DEBUG_ON_STATE, Debugging, Running);
 }
 
-bool IsVarChar(GString &s, ssize_t pos)
+bool IsVarChar(LString &s, ssize_t pos)
 {
 	if (pos < 0)
 		return false;
@@ -2082,7 +2085,7 @@ bool IsVarChar(GString &s, ssize_t pos)
 	return IsAlpha(i) || IsDigit(i) || i == '_';
 }
 
-bool ReplaceWholeWord(GString &Ln, GString Word, GString NewWord)
+bool ReplaceWholeWord(LString &Ln, LString Word, LString NewWord)
 {
 	ssize_t Pos = 0;
 	bool Status = false;
@@ -2096,7 +2099,7 @@ bool ReplaceWholeWord(GString &Ln, GString Word, GString NewWord)
 		ssize_t End = Pos + Word.Length();
 		if (!IsVarChar(Ln, Pos-1) && !IsVarChar(Ln, End))
 		{
-			GString NewLn = Ln(0,Pos) + NewWord + Ln(End,-1);
+			LString NewLn = Ln(0,Pos) + NewWord + Ln(End,-1);
 			Ln = NewLn;
 			Status = true;
 		}
@@ -2109,8 +2112,8 @@ bool ReplaceWholeWord(GString &Ln, GString Word, GString NewWord)
 
 struct LFileInfo
 {
-	GString Path;
-	GString::Array Lines;
+	LString Path;
+	LString::Array Lines;
 	bool Dirty;
 
 	LFileInfo()
@@ -2120,11 +2123,11 @@ struct LFileInfo
 
 	bool Save()
 	{
-		GFile f;
+		LFile f;
 		if (!f.Open(Path, O_WRITE))
 			return false;
 
-		GString NewFile = GString("\n").Join(Lines);
+		LString NewFile = LString("\n").Join(Lines);
 
 		f.SetSize(0);
 		f.Write(NewFile);
@@ -2137,11 +2140,11 @@ struct LFileInfo
 
 int AppWnd::OnFixBuildErrors()
 {
-	LHashTbl<StrKey<char>, GString> Map;
-	GVariant v;
+	LHashTbl<StrKey<char>, LString> Map;
+	LVariant v;
 	if (GetOptions()->GetValue(OPT_RENAMED_SYM, v))
 	{
-		auto Lines = GString(v.Str()).Split("\n");
+		auto Lines = LString(v.Str()).Split("\n");
 		for (auto Ln: Lines)
 		{
 			auto p = Ln.SplitDelimit();
@@ -2150,15 +2153,14 @@ int AppWnd::OnFixBuildErrors()
 		}
 	}
 
-	GString Raw = d->Output->Txt[AppWnd::BuildTab]->Name();
-	LgiTrace("Raw:%s\n", Raw.Get());
-	GString::Array Lines = Raw.Split("\n");
+	LString Raw = d->Output->Txt[AppWnd::BuildTab]->Name();
+	LString::Array Lines = Raw.Split("\n");
 	auto *Log = d->Output->Txt[AppWnd::OutputTab];
 
 	Log->Name(NULL);
 	Log->Print("Parsing errors...\n");
 	int Replacements = 0;
-	GArray<LFileInfo> Files;
+	LArray<LFileInfo> Files;
 	LHashTbl<StrKey<char>,bool> FixHistory;
 
 	for (int Idx=0; Idx<Lines.Length(); Idx++)
@@ -2168,9 +2170,9 @@ int AppWnd::OnFixBuildErrors()
 		if (ErrPos >= 0)
 		{
 			#ifdef WINDOWS
-			GString::Array p = Ln.SplitDelimit(">()");
+			LString::Array p = Ln.SplitDelimit(">()");
 			#else
-			GString::Array p = Ln(0, ErrPos).Strip().SplitDelimit(":");
+			LString::Array p = Ln(0, ErrPos).Strip().SplitDelimit(":");
 			#endif
 			if (p.Length() <= 2)
 			{
@@ -2180,7 +2182,7 @@ int AppWnd::OnFixBuildErrors()
 			{
 				#ifdef WINDOWS
 				int Base = p[0].IsNumeric() ? 1 : 0;
-				GString Fn = p[Base];
+				LString Fn = p[Base];
 				if (Fn.Find("Program Files") >= 0)
 				{
 					Log->Print("Is prog file\n");
@@ -2189,12 +2191,12 @@ int AppWnd::OnFixBuildErrors()
 				auto LineNo = p[Base+1].Int();
 				bool FileNotFound = Ln.Find("Cannot open include file:") > 0;
 				#else
-				GString Fn = p[0];
+				LString Fn = p[0];
 				auto LineNo = p[1].Int();
 				bool FileNotFound = false; // fixme
 				#endif
 
-				GAutoString Full;
+				LAutoString Full;
 				if (!d->FindSource(Full, Fn, NULL))
 				{
 					Log->Print("Error: Can't find Fn='%s' Line=%i\n", Fn.Get(), (int)LineNo);
@@ -2212,7 +2214,7 @@ int AppWnd::OnFixBuildErrors()
 				}
 				if (!Fi)
 				{
-					GFile f(Full, O_READ);
+					LFile f(Full, O_READ);
 					if (f.IsOpen())
 					{
 						Fi = &Files.New();
@@ -2388,7 +2390,7 @@ int AppWnd::OnFixBuildErrors()
 
 void AppWnd::OnBuildStateChanged(bool NewState)
 {
-	GVariant v;
+	LVariant v;
 	if (!NewState &&
 		GetOptions()->GetValue(OPT_FIX_RENAMED, v) &&
 		v.CastInt32())
@@ -2494,7 +2496,7 @@ void AppWnd::CloseAll()
 bool AppWnd::OnRequestClose(bool IsClose)
 {
 	SaveAll();
-	return GWindow::OnRequestClose(IsClose);
+	return LWindow::OnRequestClose(IsClose);
 }
 
 bool AppWnd::OnBreakPoint(GDebugger::BreakPoint &b, bool Add)
@@ -2588,7 +2590,7 @@ void AppWnd::DumpHistory()
 }
 
 /*
-void CheckHistory(GArray<FileLoc> &CursorHistory)
+void CheckHistory(LArray<FileLoc> &CursorHistory)
 {
 	if (CursorHistory.Length() > 0)
 	{
@@ -2658,8 +2660,8 @@ IdeDoc *AppWnd::NewDocWnd(const char *FileName, NodeSource *Src)
 	{
 		d->Docs.Insert(Doc);
 
-		GRect p = d->Mdi->NewPos();
-		Doc->GView::SetPos(p);
+		LRect p = d->Mdi->NewPos();
+		Doc->LView::SetPos(p);
 		Doc->Attach(d->Mdi);
 		Doc->Focus(true);
 		Doc->Raise();
@@ -2707,12 +2709,12 @@ IdeDoc *AppWnd::FindOpenFile(char *FileName)
 			IdeProject *p = i->GetProject();
 			if (p)
 			{
-				GAutoString Base = p->GetBasePath();
+				LAutoString Base = p->GetBasePath();
 				if (Base)
 				{
 					char Path[MAX_PATH];
 					if (*f == '.')
-						LgiMakePath(Path, sizeof(Path), Base, f);
+						LMakePath(Path, sizeof(Path), Base, f);
 					else
 						strcpy_s(Path, sizeof(Path), f);
 
@@ -2743,8 +2745,8 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 		return NULL;
 	}
 	
-	GString FullPath;
-	if (LgiIsRelativePath(File))
+	LString FullPath;
+	if (LIsRelativePath(File))
 	{
 		IdeProject *Proj = Src && Src->GetProject() ? Src->GetProject() : RootProject();
 		if (Proj)
@@ -2757,8 +2759,8 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 			{
 				auto ProjPath = Project->GetBasePath();
 				char p[MAX_PATH];
-				LgiMakePath(p, sizeof(p), ProjPath, File);
-				GString Path = p;
+				LMakePath(p, sizeof(p), ProjPath, File);
+				LString Path = p;
 				if (Project->CheckExists(Path))
 				{
 					FullPath = Path;
@@ -2782,7 +2784,7 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 			List<IdeProject>::I Proj = d->Projects.begin();
 			for (IdeProject *p=*Proj; p && !Doc; p=*++Proj)
 			{
-				p->InProject(LgiIsRelativePath(File), File, true, &Doc);				
+				p->InProject(LIsRelativePath(File), File, true, &Doc);				
 			}
 			DoingProjectFind = false;
 
@@ -2797,8 +2799,8 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 		{
 			Doc->OpenFile(File);
 
-			GRect p = d->Mdi->NewPos();
-			Doc->GView::SetPos(p);
+			LRect p = d->Mdi->NewPos();
+			Doc->LView::SetPos(p);
 			d->Docs.Insert(Doc);
 			d->OnFile(File);
 		}
@@ -2857,7 +2859,7 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 		return NULL;
 	}
 	
-	GString::Array Inc;
+	LString::Array Inc;
 	p->BuildIncludePaths(Inc, false, false, PlatformCurrent);
 	d->FindSym->SetIncludePaths(Inc);
 
@@ -3004,7 +3006,7 @@ GMessage::Result AppWnd::OnEvent(GMessage *m)
 		}
 	}
 
-	return GWindow::OnEvent(m);
+	return LWindow::OnEvent(m);
 }
 
 bool AppWnd::OnNode(const char *Path, ProjectNode *Node, FindSymbolSystem::SymAction Action)
@@ -3017,15 +3019,15 @@ bool AppWnd::OnNode(const char *Path, ProjectNode *Node, FindSymbolSystem::SymAc
 	return true;
 }
 
-GOptionsFile *AppWnd::GetOptions()
+LOptionsFile *AppWnd::GetOptions()
 {
 	return &d->Options;
 }
 
-class Options : public GDialog
+class Options : public LDialog
 {
 	AppWnd *App;
-	GFontType Font;
+	LFontType Font;
 
 public:
 	Options(AppWnd *a)
@@ -3046,7 +3048,7 @@ public:
 				SetCtrlName(IDC_FONT, s);
 			}
 
-			GVariant v;
+			LVariant v;
 			if (App->GetOptions()->GetValue(OPT_Jobs, v))
 				SetCtrlValue(IDC_JOBS, v.CastInt32());
 			else
@@ -3056,13 +3058,13 @@ public:
 		}
 	}
 	
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{
 			case IDOK:
 			{
-				GVariant v;
+				LVariant v;
 				Font.Serialize(App->GetOptions(), OPT_EditorFont, true);
 				App->GetOptions()->SetValue(OPT_Jobs, v = GetCtrlValue(IDC_JOBS));
 			}
@@ -3101,7 +3103,7 @@ void AppWnd::UpdateMemoryDump()
 	}
 }
 
-int AppWnd::OnNotify(GViewI *Ctrl, int Flags)
+int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{
@@ -3240,11 +3242,11 @@ int AppWnd::OnNotify(GViewI *Ctrl, int Flags)
 					LListItem *item = d->Output->CallStack->GetSelected();
 					if (item)
 					{
-						GAutoString File;
+						LAutoString File;
 						int Line;
 						if (d->DbgContext->ParseFrameReference(item->GetText(1), File, Line))
 						{
-							GAutoString Full;
+							LAutoString Full;
 							if (d->FindSource(Full, File, NULL))
 							{
 								GotoReference(Full, Line, false);
@@ -3266,8 +3268,8 @@ int AppWnd::OnNotify(GViewI *Ctrl, int Flags)
 			{
 				case GNotify_DeleteKey:
 				{
-					GArray<GTreeItem *> Sel;
-					for (GTreeItem *c = d->Output->Watch->GetChild(); c; c = c->GetNext())
+					LArray<LTreeItem *> Sel;
+					for (LTreeItem *c = d->Output->Watch->GetChild(); c; c = c->GetNext())
 					{
 						if (c->Select())
 							Sel.Add(c);
@@ -3304,7 +3306,7 @@ int AppWnd::OnNotify(GViewI *Ctrl, int Flags)
 					LListItem *item = d->Output->Threads->GetSelected();
 					if (item)
 					{
-						GString sId = item->GetText(0);
+						LString sId = item->GetText(0);
 						int ThreadId = (int)sId.Int();
 						if (ThreadId > 0)
 						{
@@ -3351,7 +3353,7 @@ bool AppWnd::Build()
 	return false;
 }
 
-class RenameDlg : public GDialog
+class RenameDlg : public LDialog
 {
 	AppWnd *App;
 
@@ -3366,7 +3368,7 @@ public:
 
 		if (LoadFromResource(IDC_RENAME))
 		{
-			GVariant v;
+			LVariant v;
 			if (App->GetOptions()->GetValue(OPT_FIX_RENAMED, v))
 				SetCtrlValue(IDC_FIX_RENAMED, v.CastInt32());
 			if (App->GetOptions()->GetValue(OPT_RENAMED_SYM, v))
@@ -3388,7 +3390,7 @@ public:
 		{
 			case IDC_APPLY:
 			{
-				GVariant v;
+				LVariant v;
 				App->GetOptions()->SetValue(OPT_RENAMED_SYM, v = GetCtrlName(IDC_SYM));
 				App->GetOptions()->SetValue(OPT_FIX_RENAMED, v = GetCtrlValue(IDC_FIX_RENAMED));
 				App->GetOptions()->SerializeFile(true);
@@ -3416,7 +3418,7 @@ bool AppWnd::ShowInProject(const char *Fn)
 		ProjectNode *Node = NULL;
 		if (p->FindFullPath(Fn, &Node))
 		{
-			for (GTreeItem *i = Node->GetParent(); i; i = i->GetParent())
+			for (LTreeItem *i = Node->GetParent(); i; i = i->GetParent())
 			{
 				i->Expanded(true);
 			}
@@ -3450,7 +3452,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_ABOUT:
 		{
-			GAbout a(this,
+			LAbout a(this,
 					AppName, APP_VER,
 					"\nLGI Integrated Development Environment",
 					"icon128.png",
@@ -3464,8 +3466,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			d->Docs.Insert(Doc = new IdeDoc(this, 0, 0));
 			if (Doc && d->Mdi)
 			{
-				GRect p = d->Mdi->NewPos();
-				Doc->GView::SetPos(p);
+				LRect p = d->Mdi->NewPos();
+				Doc->LView::SetPos(p);
 				Doc->Attach(d->Mdi);
 				Doc->Focus(true);
 			}
@@ -3473,7 +3475,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_OPEN:
 		{
-			GFileSelect s;
+			LFileSelect s;
 			s.Parent(this);
 			if (s.Open())
 			{
@@ -3498,7 +3500,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			IdeDoc *Top = TopDoc();
 			if (Top)
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(this);
 				if (s.Save())
 				{
@@ -3534,7 +3536,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		//
 		case IDM_UNDO:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 			{
 				Doc->Undo();
@@ -3544,7 +3546,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_REDO:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 			{
 				Doc->Redo();
@@ -3554,7 +3556,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_FIND:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 			{
 				Doc->DoFind();
@@ -3564,7 +3566,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_FIND_NEXT:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 			{
 				Doc->DoFindNext();
@@ -3574,7 +3576,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_REPLACE:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 			{
 				Doc->DoReplace();
@@ -3584,7 +3586,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_GOTO:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 				Doc->DoGoto();
 			else
@@ -3592,11 +3594,11 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				GInput Inp(this, NULL, LgiLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
 				if (Inp.DoModal())
 				{
-					GString s = Inp.GetStr();
-					GString::Array p = s.SplitDelimit(":,");
+					LString s = Inp.GetStr();
+					LString::Array p = s.SplitDelimit(":,");
 					if (p.Length() == 2)
 					{
-						GString file = p[0];
+						LString file = p[0];
 						int line = (int)p[1].Int();
 						GotoReference(file, line, false, true);
 					}
@@ -3607,21 +3609,21 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_CUT:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 				Doc->PostEvent(M_CUT);
 			break;
 		}
 		case IDM_COPY:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 				Doc->PostEvent(M_COPY);
 			break;
 		}
 		case IDM_PASTE:
 		{
-			GTextView3 *Doc = FocusEdit();
+			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 				Doc->PostEvent(M_PASTE);
 			break;
@@ -3637,20 +3639,20 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				if (!d->FindParameters &&
 					d->FindParameters.Reset(new FindParams))
 				{
-					GVariant var;
+					LVariant var;
 					if (GetOptions()->GetValue(OPT_ENTIRE_SOLUTION, var))
 						d->FindParameters->Type = var.CastInt32() ? FifSearchSolution : FifSearchDirectory;
 				}		
 
 				FindInFiles Dlg(this, d->FindParameters);
 
-				GViewI *Focus = GetFocus();
+				LViewI *Focus = GetFocus();
 				if (Focus)
 				{
-					GTextView3 *Edit = dynamic_cast<GTextView3*>(Focus);
+					LTextView3 *Edit = dynamic_cast<LTextView3*>(Focus);
 					if (Edit && Edit->HasSelection())
 					{
-						GAutoString a(Edit->GetSelection());
+						LAutoString a(Edit->GetSelection());
 						Dlg.Params->Text = a;
 					}
 				}
@@ -3658,7 +3660,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				IdeProject *p = RootProject();
 				if (p)
 				{
-					GAutoString Base = p->GetBasePath();
+					LAutoString Base = p->GetBasePath();
 					if (Base)
 						Dlg.Params->Dir = Base;
 				}
@@ -3674,19 +3676,19 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 						Projects.Insert(p);
 						p->GetChildProjects(Projects);
 
-						GArray<ProjectNode*> Nodes;
+						LArray<ProjectNode*> Nodes;
 						for (auto p: Projects)
 							p->GetAllNodes(Nodes);
 
 						for (unsigned i=0; i<Nodes.Length(); i++)
 						{
-							GString s = Nodes[i]->GetFullPath();
+							LString s = Nodes[i]->GetFullPath();
 							if (s)
 								Dlg.Params->ProjectFiles.Add(s);
 						}
 					}
 
-					GVariant var = d->FindParameters->Type == FifSearchSolution;
+					LVariant var = d->FindParameters->Type == FifSearchSolution;
 					GetOptions()->SetValue(OPT_ENTIRE_SOLUTION, var);
 
 					d->Finder->Stop();
@@ -3737,7 +3739,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_FIND_REFERENCES:
 		{
-			GViewI *f = LgiApp->GetFocus();
+			LViewI *f = LgiApp->GetFocus();
 			GDocView *doc = dynamic_cast<GDocView*>(f);
 			if (!doc)
 				break;
@@ -3746,7 +3748,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			if (c < 0)
 				break;
 
-			GString Txt = doc->Name();
+			LString Txt = doc->Name();
 			char *s = Txt.Get() + c;
 			char *e = s;
 			while (	s > Txt.Get() &&
@@ -3758,7 +3760,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			if (e <= s)
 				break;
 
-			GString Word(s, e - s);
+			LString Word(s, e - s);
 
 			if (!d->Finder)
 				d->Finder.Reset(new FindInFilesThread(d->AppHnd));
@@ -3772,11 +3774,11 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			Projects.Insert(p);
 			p->GetChildProjects(Projects);
 
-			GArray<ProjectNode*> Nodes;
+			LArray<ProjectNode*> Nodes;
 			for (auto p: Projects)
 				p->GetAllNodes(Nodes);
 
-			GAutoPtr<FindParams> Params(new FindParams);
+			LAutoPtr<FindParams> Params(new FindParams);
 			Params->Type = FifSearchSolution;
 			Params->MatchWord = true;
 			Params->Text = Word;
@@ -3822,7 +3824,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_OPEN_PROJECT:
 		{
-			GFileSelect s;
+			LFileSelect s;
 			s.Parent(this);
 			s.Type("Projects", "*.xml");
 			if (s.Open())
@@ -3841,7 +3843,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			IdeProject *p = RootProject();
 			if (p)
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(this);
 				s.Type("Developer Studio Project", "*.dsp");
 				if (s.Open())
@@ -4024,7 +4026,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			IdeProject *p = RootProject();
 			if (p)
 			{
-				GString Exe = p->GetExecutable(GetCurrentPlatform());
+				LString Exe = p->GetExecutable(GetCurrentPlatform());
 				if (LFileExists(Exe))
 				{
 					Depends Dlg(this, Exe);
@@ -4170,7 +4172,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 	return 0;
 }
 
-GTree *AppWnd::GetTree()
+LTree *AppWnd::GetTree()
 {
 	return d->Tree;
 }
@@ -4180,9 +4182,9 @@ IdeDoc *AppWnd::TopDoc()
 	return d->Mdi ? dynamic_cast<IdeDoc*>(d->Mdi->GetTop()) : NULL;
 }
 
-GTextView3 *AppWnd::FocusEdit()
+LTextView3 *AppWnd::FocusEdit()
 {
-	return dynamic_cast<GTextView3*>(GetWindow()->GetFocus());	
+	return dynamic_cast<LTextView3*>(GetWindow()->GetFocus());	
 }
 	
 IdeDoc *AppWnd::FocusDoc()
@@ -4196,7 +4198,7 @@ IdeDoc *AppWnd::FocusDoc()
 		}
 		else
 		{
-			GViewI *f = GetFocus();
+			LViewI *f = GetFocus();
 			LgiTrace("%s:%i - Edit doesn't have focus, f=%p %s doc.edit=%s\n",
 				_FL, f, f ? f->GetClass() : 0,
 				Doc->Name());
@@ -4213,7 +4215,7 @@ void AppWnd::OnProjectDestroy(IdeProject *Proj)
 
 void AppWnd::OnProjectChange()
 {
-	GArray<GMdiChild*> Views;
+	LArray<GMdiChild*> Views;
 	if (d->Mdi->GetChildren(Views))
 	{
 		for (unsigned i=0; i<Views.Length(); i++)
@@ -4250,12 +4252,12 @@ LList *AppWnd::GetFtpLog()
 	return d->Output->FtpLog;
 }
 
-GStream *AppWnd::GetBuildLog()
+LStream *AppWnd::GetBuildLog()
 {
 	return d->Output->Txt[AppWnd::BuildTab];
 }
 
-GStream *AppWnd::GetDebugLog()
+LStream *AppWnd::GetDebugLog()
 {
 	return d->Output->Txt[AppWnd::DebugTab];
 }
@@ -4265,22 +4267,22 @@ void AppWnd::FindSymbol(int ResultsSinkHnd, const char *Sym, bool AllPlatforms)
 	d->FindSym->Search(ResultsSinkHnd, Sym, AllPlatforms);
 }
 
-#include "GSubProcess.h"
-bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
+#include "lgi/common/SubProcess.h"
+bool AppWnd::GetSystemIncludePaths(::LArray<LString> &Paths)
 {
 	if (d->SystemIncludePaths.Length() == 0)
 	{
 		#if !defined(WINNATIVE)
 		// echo | gcc -v -x c++ -E -
-		GSubProcess sp1("echo");
-		GSubProcess sp2("gcc", "-v -x c++ -E -");
+		LSubProcess sp1("echo");
+		LSubProcess sp2("gcc", "-v -x c++ -E -");
 		sp1.Connect(&sp2);
 		sp1.Start(true, false);
 		
 		char Buf[256];
 		ssize_t r;
 
-		GStringPipe p;
+		LStringPipe p;
 		while ((r = sp1.Read(Buf, sizeof(Buf))) > 0)
 		{
 			p.Write(Buf, r);
@@ -4299,27 +4301,27 @@ bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
 			}
 			else if (InIncludeList)
 			{
-				GAutoString a(TrimStr(Buf));
+				LAutoString a(TrimStr(Buf));
 				d->SystemIncludePaths.New() = a;
 			}
 		}
 		#else
 		char p[MAX_PATH];
 		LGetSystemPath(LSP_USER_DOCUMENTS, p, sizeof(p));
-		LgiMakePath(p, sizeof(p), p, "Visual Studio 2008\\Settings\\CurrentSettings.xml");
+		LMakePath(p, sizeof(p), p, "Visual Studio 2008\\Settings\\CurrentSettings.xml");
 		if (LFileExists(p))
 		{
-			GFile f;
+			LFile f;
 			if (f.Open(p, O_READ))
 			{
-				GXmlTree t;
-				GXmlTag r;
+				LXmlTree t;
+				LXmlTag r;
 				if (t.Read(&r, &f))
 				{
-					GXmlTag *Opts = r.GetChildTag("ToolsOptions");
+					LXmlTag *Opts = r.GetChildTag("ToolsOptions");
 					if (Opts)
 					{
-						GXmlTag *Projects = NULL;
+						LXmlTag *Projects = NULL;
 						char *Name;
 						for (auto c: Opts->Children)
 						{
@@ -4332,7 +4334,7 @@ bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
 							}
 						}
 
-						GXmlTag *VCDirectories = NULL;
+						LXmlTag *VCDirectories = NULL;
 						if (Projects)
 							for (auto c: Projects->Children)
 							{
@@ -4377,7 +4379,7 @@ bool AppWnd::GetSystemIncludePaths(::GArray<GString> &Paths)
 }
 
 /*
-class SocketTest : public GWindow, public LThread
+class SocketTest : public LWindow, public LThread
 {
 	GTextLog *Log;
 
@@ -4386,7 +4388,7 @@ public:
 	{
 		Log = new GTextLog(100);
 
-		SetPos(GRect(200, 200, 900, 800));
+		SetPos(LRect(200, 200, 900, 800));
 		Attach(0);
 		Visible(true);
 		Log->Attach(this);
@@ -4396,7 +4398,7 @@ public:
 
 	int Main()
 	{
-		GSocket s;
+		LSocket s;
 		s.SetTimeout(15000);
 		Log->Print("Starting...\n");
 		auto r = s.Open("192.168.1.30", 7000);
@@ -4406,17 +4408,17 @@ public:
 };
 */
 
-#include "TextConvert.h"
+#include "lgi/common/TextConvert.h"
 int LgiMain(OsAppArguments &AppArgs)
 {
 	printf("LgiIde v%s\n", APP_VER);
-	GApp a(AppArgs, "LgiIde");
+	LApp a(AppArgs, "LgiIde");
 	if (a.IsOk())
 	{
 		// new SocketTest();
 		#if 0
 		auto s = "=?gb18030?B?0Nyz9sO7?=";
-		GAutoString out(DecodeRfc2047(NewStr(s)));
+		LAutoString out(DecodeRfc2047(NewStr(s)));
 		printf("out=%s\n", out.Get());
 		#endif
 

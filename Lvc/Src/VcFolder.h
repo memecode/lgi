@@ -1,7 +1,7 @@
 #ifndef _VcFolder_h_
 #define _VcFolder_h_
 
-#include "GSubProcess.h"
+#include "lgi/common/SubProcess.h"
 
 class VcLeaf;
 
@@ -28,8 +28,8 @@ enum LvcStatus
 class ReaderThread : public LThread
 {
 	VersionCtrl Vcs;
-	GStream *Out;
-	GSubProcess *Process;
+	LStream *Out;
+	LSubProcess *Process;
 	int FilterCount;
 
 	int OnLine(char *s, ssize_t len);
@@ -38,26 +38,26 @@ class ReaderThread : public LThread
 public:
 	int Result;
 
-	ReaderThread(VersionCtrl vcs, GSubProcess *p, GStream *out);
+	ReaderThread(VersionCtrl vcs, LSubProcess *p, LStream *out);
 	~ReaderThread();
 
 	int Main();
 };
 
-extern int Ver2Int(GString v);
+extern int Ver2Int(LString v);
 extern int ToolVersion[VcMax];
 extern int LstCmp(LListItem *a, LListItem *b, int Col);
 
 struct Result
 {
 	int Code;
-	GString Out;
+	LString Out;
 };
 
 struct VcBranch
 {
 	bool Default;
-	GColour Colour;
+	LColour Colour;
 
 	VcBranch(const char *n)
 	{
@@ -70,7 +70,7 @@ struct SshParams
 {
 	SshConnection *c;
 	VcFolder *f;
-	GString Exe, Args, Path, Output;
+	LString Exe, Args, Path, Output;
 	VersionCtrl Vcs;
 	ParseFn Parser;
 	ParseParams *Params;
@@ -86,24 +86,24 @@ struct SshParams
 	}
 };
 
-class VcFolder : public GTreeItem
+class VcFolder : public LTreeItem
 {
 	friend class VcCommit;
 
-	class Cmd : public GStream
+	class Cmd : public LStream
 	{
-		GString::Array Context;
-		GStringPipe Buf;
+		LString::Array Context;
+		LStringPipe Buf;
 
 	public:
 		LoggingType Logging;
-		GStream *Log;
-		GAutoPtr<LThread> Rd;
+		LStream *Log;
+		LAutoPtr<LThread> Rd;
 		ParseFn PostOp;
-		GAutoPtr<ParseParams> Params;
+		LAutoPtr<ParseParams> Params;
 		LvcError Err;
 
-		Cmd(GString::Array &context, LoggingType logging, GStream *log)
+		Cmd(LString::Array &context, LoggingType logging, LStream *log)
 		{
 			Context = context;
 			Logging = logging;
@@ -115,12 +115,12 @@ class VcFolder : public GTreeItem
 		{
 		}
 
-		GString GetBuf()
+		LString GetBuf()
 		{
-			GString s = Buf.NewGStr();
+			LString s = Buf.NewGStr();
 			if (Log && Logging == LogSilo)
 			{
-				GString m;
+				LString m;
 				m.Printf("=== %s ===\n\t%s %s\n",
 						Context[0].Get(),
 						Context[1].Get(), Context[2].Get());
@@ -162,25 +162,25 @@ class VcFolder : public GTreeItem
 
 	AppPriv *d;
 	VersionCtrl Type;
-	GUri Uri;
-	GString CurrentCommit, RepoUrl, VcCmd;
+	LUri Uri;
+	LString CurrentCommit, RepoUrl, VcCmd;
 	int64 CurrentCommitIdx;
-	GArray<VcCommit*> Log;
-	GString CurrentBranch;
+	LArray<VcCommit*> Log;
+	LString CurrentBranch;
 	LHashTbl<ConstStrKey<char>,VcBranch*> Branches;
-	GAutoPtr<UncommitedItem> Uncommit;
-	GString Cache, NewRev;
+	LAutoPtr<UncommitedItem> Uncommit;
+	LString Cache, NewRev;
 	bool CommitListDirty;
 	int Unpushed, Unpulled;
-	GString CountCache;
-	GTreeItem *Tmp;
+	LString CountCache;
+	LTreeItem *Tmp;
 	int CmdErrors;
-	GArray<CommitField> Fields;
+	LArray<CommitField> Fields;
 	
 	struct GitCommit
 	{
-		GString::Array Files;
-		GString Msg, Branch;
+		LString::Array Files;
+		LString Msg, Branch;
 		ParseParams *Param;
 		
 		GitCommit()
@@ -188,10 +188,10 @@ class VcFolder : public GTreeItem
 			Param = NULL;
 		}
 	};
-	GAutoPtr<GitCommit> PostAdd;
+	LAutoPtr<GitCommit> PostAdd;
 	void GitAdd();
 
-	GArray<Cmd*> Cmds;
+	LArray<Cmd*> Cmds;
 	bool IsLogging, IsUpdate, IsFilesCmd, IsWorkingFld, IsCommit, IsUpdatingCounts;
 	LvcStatus IsBranches, IsIdent;
 
@@ -200,60 +200,60 @@ class VcFolder : public GTreeItem
 	bool StartCmd(const char *Args, ParseFn Parser = NULL, ParseParams *Params = NULL, LoggingType Logging = LogNone);
 	Result RunCmd(const char *Args, LoggingType Logging = LogNone);
 	void OnBranchesChange();
-	void OnCmdError(GString Output, const char *Msg);
+	void OnCmdError(LString Output, const char *Msg);
 	void ClearError();
 	VcFile *FindFile(const char *Path);
 	void LinkParents();
-	GString CurrentRev();
-	GColour BranchColour(const char *Name);
+	LString CurrentRev();
+	LColour BranchColour(const char *Name);
 	void Empty();
 
-	bool ParseDiffs(GString s, GString Rev, bool IsWorking);
+	bool ParseDiffs(LString s, LString Rev, bool IsWorking);
 	
-	bool ParseRevList(int Result, GString s, ParseParams *Params);
-	bool ParseLog(int Result, GString s, ParseParams *Params);
-	bool ParseInfo(int Result, GString s, ParseParams *Params);
-	bool ParseFiles(int Result, GString s, ParseParams *Params);
-	bool ParseWorking(int Result, GString s, ParseParams *Params);
-	bool ParseUpdate(int Result, GString s, ParseParams *Params);
-	bool ParseCommit(int Result, GString s, ParseParams *Params);
-	bool ParseGitAdd(int Result, GString s, ParseParams *Params);
-	bool ParsePush(int Result, GString s, ParseParams *Params);
-	bool ParsePull(int Result, GString s, ParseParams *Params);
-	bool ParseCounts(int Result, GString s, ParseParams *Params);
-	bool ParseRevert(int Result, GString s, ParseParams *Params);
-	bool ParseResolve(int Result, GString s, ParseParams *Params);
-	bool ParseBlame(int Result, GString s, ParseParams *Params);
-	bool ParseSaveAs(int Result, GString s, ParseParams *Params);
-	bool ParseBranches(int Result, GString s, ParseParams *Params);
-	bool ParseStatus(int Result, GString s, ParseParams *Params);
-	bool ParseAddFile(int Result, GString s, ParseParams *Params);
-	bool ParseVersion(int Result, GString s, ParseParams *Params);
-	bool ParseClean(int Result, GString s, ParseParams *Params);
-	bool ParseDiff(int Result, GString s, ParseParams *Params);
-	bool ParseMerge(int Result, GString s, ParseParams *Params);
-	bool ParseCountToTip(int Result, GString s, ParseParams *Params);
-	bool ParseUpdateSubs(int Result, GString s, ParseParams *Params);
-	bool ParseRemoteFind(int Result, GString s, ParseParams *Params);
+	bool ParseRevList(int Result, LString s, ParseParams *Params);
+	bool ParseLog(int Result, LString s, ParseParams *Params);
+	bool ParseInfo(int Result, LString s, ParseParams *Params);
+	bool ParseFiles(int Result, LString s, ParseParams *Params);
+	bool ParseWorking(int Result, LString s, ParseParams *Params);
+	bool ParseUpdate(int Result, LString s, ParseParams *Params);
+	bool ParseCommit(int Result, LString s, ParseParams *Params);
+	bool ParseGitAdd(int Result, LString s, ParseParams *Params);
+	bool ParsePush(int Result, LString s, ParseParams *Params);
+	bool ParsePull(int Result, LString s, ParseParams *Params);
+	bool ParseCounts(int Result, LString s, ParseParams *Params);
+	bool ParseRevert(int Result, LString s, ParseParams *Params);
+	bool ParseResolve(int Result, LString s, ParseParams *Params);
+	bool ParseBlame(int Result, LString s, ParseParams *Params);
+	bool ParseSaveAs(int Result, LString s, ParseParams *Params);
+	bool ParseBranches(int Result, LString s, ParseParams *Params);
+	bool ParseStatus(int Result, LString s, ParseParams *Params);
+	bool ParseAddFile(int Result, LString s, ParseParams *Params);
+	bool ParseVersion(int Result, LString s, ParseParams *Params);
+	bool ParseClean(int Result, LString s, ParseParams *Params);
+	bool ParseDiff(int Result, LString s, ParseParams *Params);
+	bool ParseMerge(int Result, LString s, ParseParams *Params);
+	bool ParseCountToTip(int Result, LString s, ParseParams *Params);
+	bool ParseUpdateSubs(int Result, LString s, ParseParams *Params);
+	bool ParseRemoteFind(int Result, LString s, ParseParams *Params);
 	bool ParseStartBranch(int Result, GString s, ParseParams *Params);
 	void DoExpand();
 	
 public:
 	VcFolder(AppPriv *priv, const char *uri);
-	VcFolder(AppPriv *priv, GXmlTag *t);
+	VcFolder(AppPriv *priv, LXmlTag *t);
 	~VcFolder();
 
 	VersionCtrl GetType();
 	AppPriv *GetPriv() { return d; }
 	const char *LocalPath();
-	GUri GetUri() { return Uri; }
+	LUri GetUri() { return Uri; }
 	VcLeaf *FindLeaf(const char *Path, bool OpenTree);
 	void DefaultFields();
 	void UpdateColumns();
 	const char *GetText(int Col);
-	GArray<CommitField> &GetFields() { return Fields; }
-	bool Serialize(GXmlTag *t, bool Write);
-	GXmlTag *Save();
+	LArray<CommitField> &GetFields() { return Fields; }
+	bool Serialize(LXmlTag *t, bool Write);
+	LXmlTag *Save();
 	void Select(bool b);
 	void ListCommit(VcCommit *c);
 	void ListWorkingFolder();
@@ -263,53 +263,53 @@ public:
 	void Push(bool NewBranchOk = false);
 	void Pull(int AndUpdate = -1, LoggingType Logging = LogNormal);
 	void Clean();
-	bool Revert(GString::Array &uris, const char *Revision = NULL);
+	bool Revert(LString::Array &uris, const char *Revision = NULL);
 	bool Resolve(const char *Path);
 	bool AddFile(const char *Path, bool AsBinary = true);
 	bool Blame(const char *Path);
 	bool SaveFileAs(const char *Path, const char *Revision);
-	void ReadDir(GTreeItem *Parent, const char *Uri);
+	void ReadDir(LTreeItem *Parent, const char *Uri);
 	void SetEol(const char *Path, int Type);
 	void GetVersion();
 	void Diff(VcFile *file);
 	void DiffRange(const char *FromRev, const char *ToRev);
-	void MergeToLocal(GString Rev);
-	bool RenameBranch(GString NewName, GArray<VcCommit*> &Revs);
+	void MergeToLocal(LString Rev);
+	bool RenameBranch(LString NewName, LArray<VcCommit*> &Revs);
 	void Refresh();
 	bool GetBranches(ParseParams *Params = NULL);
 	void GetCurrentRevision(ParseParams *Params = NULL);
 	void CountToTip();
 	bool UpdateSubs(); // Clone/checkout any sub-repositries.
 	void LogFile(const char *Path);
-	GString GetFilePart(const char *uri);
+	LString GetFilePart(const char *uri);
 
 	void OnPulse();
 	void OnUpdate(const char *Rev);
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 	void OnRemove();
 	void OnExpand(bool b);
 	void OnVcsType();
 	void OnSshCmd(SshParams *p);
 };
 
-class VcLeaf : public GTreeItem
+class VcLeaf : public LTreeItem
 {
 	AppPriv *d;
 	VcFolder *Parent;
 	bool Folder;
-	GUri Uri;
-	GString Leaf;
-	GTreeItem *Tmp;
+	LUri Uri;
+	LString Leaf;
+	LTreeItem *Tmp;
 
 	void DoExpand();
 
 public:
-	GArray<VcCommit*> Log;
+	LArray<VcCommit*> Log;
 
-	VcLeaf(VcFolder *parent, GTreeItem *Item, GString uri, GString leaf, bool folder);
+	VcLeaf(VcFolder *parent, LTreeItem *Item, LString uri, LString leaf, bool folder);
 	~VcLeaf();
 
-	GString Full();
+	LString Full();
 	VcLeaf *FindLeaf(const char *Path, bool OpenTree);
 	void OnBrowse();
 	void AfterBrowse();
@@ -319,7 +319,7 @@ public:
 	int Compare(VcLeaf *b);
 	bool Select();
 	void Select(bool b);
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 	void ShowLog();
 };
 

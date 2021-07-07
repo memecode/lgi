@@ -14,15 +14,15 @@
 #include "Gdc2.h"
 #include "GPalette.h"
 
-class GScreenPrivate
+class LScreenPrivate
 {
 public:
 	int			Op;
-	GRect		Client;
+	LRect		Client;
 	uint32		Col;
 	SDL_Surface *Screen;
 	
-	GScreenPrivate()
+	LScreenPrivate()
 	{
 		Op = GDC_SET;
 		Client.ZOff(-1, -1);
@@ -30,15 +30,15 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-GScreenDC::GScreenDC()
+LScreenDC::LScreenDC()
 {
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 	ColourSpace = CsNone;
 }
 
-GScreenDC::GScreenDC(GView *view, void *Param)
+LScreenDC::LScreenDC(LView *view, void *Param)
 {
-	d = new GScreenPrivate;
+	d = new LScreenPrivate;
 	ColourSpace = CsNone;
 	
 	d->Screen = (SDL_Surface*)Param;
@@ -67,12 +67,12 @@ GScreenDC::GScreenDC(GView *view, void *Param)
 	}
 }
 
-GScreenDC::~GScreenDC()
+LScreenDC::~LScreenDC()
 {
 	if (d->Screen)
 	{
 		/*
-		GBgra32 *p = (GBgra32*) d->Screen->pixels;
+		LBgra32 *p = (LBgra32*) d->Screen->pixels;
 		memset(p, 0, 4*4);
 		p[0].r = 255;
 		p[1].g = 255;
@@ -86,28 +86,28 @@ GScreenDC::~GScreenDC()
 	DeleteObj(d);
 }
 
-OsPainter GScreenDC::Handle()
+OsPainter LScreenDC::Handle()
 {
 	return d->Screen;
 }
 
-int GScreenDC::GetFlags()
+int LScreenDC::GetFlags()
 {
 	return 0;
 }
 
-bool GScreenDC::GetClient(GRect *c)
+bool LScreenDC::GetClient(LRect *c)
 {
 	if (!c) return false;
 	*c = d->Client;
 	return true;
 }
 
-void GScreenDC::SetClient(GRect *c)
+void LScreenDC::SetClient(LRect *c)
 {
 	if (c)
 	{
-		GRect Doc(0, 0, pMem->x-1, pMem->y-1);
+		LRect Doc(0, 0, pMem->x-1, pMem->y-1);
 		Clip = *c;
 		Clip.Bound(&Doc);
 		
@@ -124,17 +124,17 @@ void GScreenDC::SetClient(GRect *c)
 	}
 }
 
-GPalette *GScreenDC::Palette()
+GPalette *LScreenDC::Palette()
 {
-	return GSurface::Palette();
+	return LSurface::Palette();
 }
 
-void GScreenDC::Palette(GPalette *pPal, bool bOwnIt)
+void LScreenDC::Palette(GPalette *pPal, bool bOwnIt)
 {
-	GSurface::Palette(pPal, bOwnIt);
+	LSurface::Palette(pPal, bOwnIt);
 }
 
-int GScreenDC::X()
+int LScreenDC::X()
 {
 	if (d->Client.Valid())
 		return d->Client.X();
@@ -142,7 +142,7 @@ int GScreenDC::X()
 	return d->Screen->w;
 }
 
-int GScreenDC::Y()
+int LScreenDC::Y()
 {
 	if (d->Client.Valid())
 		return d->Client.Y();
@@ -150,23 +150,23 @@ int GScreenDC::Y()
 	return d->Screen->h;
 }
 
-int GScreenDC::GetBits()
+int LScreenDC::GetBits()
 {
 	return d->Screen ? d->Screen->format->BitsPerPixel : 0;
 }
 
-bool GScreenDC::SupportsAlphaCompositing()
+bool LScreenDC::SupportsAlphaCompositing()
 {
 	// Windows does support blending screen content with bitmaps that have alpha
 	return true;
 }
 
-uint GScreenDC::LineStyle(uint32 Bits, uint32 Reset)
+uint LScreenDC::LineStyle(uint32 Bits, uint32 Reset)
 {
 	return LineBits = Bits;
 }
 
-uint GScreenDC::LineStyle()
+uint LScreenDC::LineStyle()
 {
 	return LineBits;
 }

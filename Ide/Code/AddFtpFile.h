@@ -3,21 +3,21 @@
 
 #include "FtpThread.h"
 
-class AddFtpFile : public GDialog, public FtpCallback
+class AddFtpFile : public LDialog, public FtpCallback
 {
-	GUri *Base;
+	LUri *Base;
 	LList *Files;
 	LList *Log;
 	FtpThread *Thread;
 
 public:
-	GArray<char*> Uris;
+	LArray<char*> Uris;
 
-	AddFtpFile(GViewI *p, char *ftp);
+	AddFtpFile(LViewI *p, char *ftp);
 	~AddFtpFile();
 
 	void OnCmdComplete(FtpCmd *Cmd);
-	int OnNotify(GViewI *c, int f);
+	int OnNotify(LViewI *c, int f);
 };
 
 #endif

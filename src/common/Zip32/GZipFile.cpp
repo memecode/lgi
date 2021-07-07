@@ -58,8 +58,8 @@ public:
 class GZipFilePrivate
 {
 public:
-	GFile Zip;
-	GArray<ZipLocalHeader*> Files;
+	LFile Zip;
+	LArray<ZipLocalHeader*> Files;
 
 	GZipFilePrivate()
 	{
@@ -96,10 +96,10 @@ public:
 	}
 };
 
-class GZipDir : public GDirectory
+class GZipDir : public LDirectory
 {
 	int Cur;
-	GArray<ZipLocalHeader*> *Files;
+	LArray<ZipLocalHeader*> *Files;
 
 	ZipLocalHeader *c()
 	{
@@ -111,7 +111,7 @@ class GZipDir : public GDirectory
 	}
 
 public:
-	GZipDir(GArray<ZipLocalHeader*> *files)
+	GZipDir(LArray<ZipLocalHeader*> *files)
 	{
 		Cur = -1;
 		Files = files;
@@ -164,7 +164,7 @@ public:
 	bool IsDir() { return false; }
 	bool IsReadOnly() { return false; }
 	bool IsHidden() { return false; }
-	GDirectory *Clone() { return new GZipDir(Files); }
+	LDirectory *Clone() { return new GZipDir(Files); }
 	int GetType() { return VT_FILE; }
 };
 
@@ -272,12 +272,12 @@ void GZipFile::Close()
 	}
 }
 
-GDirectory *GZipFile::List()
+LDirectory *GZipFile::List()
 {
 	return new GZipDir(&d->Files);
 }
 
-bool GZipFile::Decompress(char *File, GStream *To)
+bool GZipFile::Decompress(char *File, LStream *To)
 {
 	ZipLocalHeader *h = d->Find(File);
 	if (h)
@@ -331,7 +331,7 @@ bool GZipFile::Decompress(char *File, GStream *To)
 	return false;
 }
 
-bool GZipFile::Compress(char *File, GStream *From)
+bool GZipFile::Compress(char *File, LStream *From)
 {
 	return false;
 }

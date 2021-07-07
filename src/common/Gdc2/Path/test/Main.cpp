@@ -1,20 +1,20 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "resdefs.h"
-#include "GPath.h"
+#include "lgi/common/Path.h"
 
 //////////////////////////////////////////////////////////////////
 const char *AppName = "GPathTest";
 
-class App : public GWindow
+class App : public LWindow
 {
-	GPath p;
-	GMemDC img;
+	LPath p;
+	LMemDC img;
 
 public:
     App()
     {
         Name(AppName);
-        GRect r(0, 0, 1000, 800);
+        LRect r(0, 0, 1000, 800);
         SetPos(r);
         MoveToCenter();
         SetQuitOnClose(true);
@@ -36,20 +36,20 @@ public:
 
 		p.Circle(r, r, r);
 		p.SetFillRule(FILLRULE_ODDEVEN);
-		GSolidBrush s(GColour::White);
+		LSolidBrush s(LColour::White);
 		p.Fill(&img, s);
 		p.Empty();
 
 		p.Circle(r, r, r);
 		p.Circle(r, r, r - 1.0);
 		p.SetFillRule(FILLRULE_ODDEVEN);
-		GSolidBrush s2(GColour(0xcb, 0xcb, 0xcb));
+		LSolidBrush s2(LColour(0xcb, 0xcb, 0xcb));
 		p.Fill(&img, s2);
 
 		img.ConvertPreMulAlpha(true);
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		pDC->Colour(L_MED);
 		pDC->Rectangle();
@@ -62,7 +62,7 @@ public:
 //////////////////////////////////////////////////////////////////
 int LgiMain(OsAppArguments &AppArgs)
 {
-	GApp a(AppArgs, AppName);
+	LApp a(AppArgs, AppName);
 	if (a.IsOk())
 	{
 		a.AppWnd = new App;

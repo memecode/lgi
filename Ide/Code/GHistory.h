@@ -4,10 +4,10 @@
 #ifndef __GHISTORY__
 #define __GHISTORY__
 
-#include "GPopup.h"
+#include "lgi/common/Popup.h"
 
 /// A history drop down for an edit box
-class GHistory : public GDropDown, public List<char>, public ResObject
+class GHistory : public LDropDown, public List<char>, public ResObject
 {
 	class GHistoryPrivate *d;
 
@@ -28,7 +28,7 @@ public:
 	int Add(const char *s);
 	
 	// Impl
-	bool OnLayout(GViewLayoutInfo &Inf);
+	bool OnLayout(LViewLayoutInfo &Inf);
 };
 
 #endif

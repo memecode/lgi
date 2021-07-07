@@ -1,10 +1,10 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Net.h"
 #include "WebFldDlg.h"
 #include "resdefs.h"
-#include "INet.h"
 
 //////////////////////////////////////////////////////////////////////////////////
-WebFldDlg::WebFldDlg(GViewI *p, char *name, char *ftp, char *www)
+WebFldDlg::WebFldDlg(LViewI *p, char *name, char *ftp, char *www)
 {
 	Name = 0;
 	Www = 0;
@@ -13,7 +13,7 @@ WebFldDlg::WebFldDlg(GViewI *p, char *name, char *ftp, char *www)
 
 	if (ftp)
 	{
-		GUri u(ftp);
+		LUri u(ftp);
 		SetCtrlName(IDC_HOST, u.sHost);
 		SetCtrlName(IDC_USERNAME, u.sUser);
 		SetCtrlName(IDC_PASSWORD, u.sPass);
@@ -31,13 +31,13 @@ WebFldDlg::~WebFldDlg()
 	DeleteArray(Www);
 }
 
-int WebFldDlg::OnNotify(GViewI *v, int f)
+int WebFldDlg::OnNotify(LViewI *v, int f)
 {
 	switch (v->GetId())
 	{
 		case IDOK:
 		{
-			GUri u;
+			LUri u;
 			u.sHost = GetCtrlName(IDC_HOST);
 			u.sUser = GetCtrlName(IDC_USERNAME);
 			u.sPass = GetCtrlName(IDC_PASSWORD);
@@ -58,4 +58,3 @@ int WebFldDlg::OnNotify(GViewI *v, int f)
 
 	return 0;
 }
-

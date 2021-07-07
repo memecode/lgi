@@ -1,11 +1,11 @@
 #ifndef _FIND_SYMBOL_H_
 #define _FIND_SYMBOL_H_
 
-#include "GEventTargetThread.h"
+#include "lgi/common/EventTargetThread.h"
 
 struct FindSymResult
 {
-	GString Symbol, File;
+	LString Symbol, File;
 	int Line;
 	int Score;
 	
@@ -35,7 +35,7 @@ struct FindSymResult
 		if (Score > 0)
 			return 0;
 
-		char *e = LgiGetExtension(File);
+		char *e = LGetExtension(File);
 		if (!e)
 			return 3;
 		
@@ -73,8 +73,8 @@ struct FindSymResult
 struct FindSymRequest
 {
 	int SinkHnd;
-	GString Str;
-	GArray<FindSymResult*> Results;
+	LString Str;
+	LArray<FindSymResult*> Results;
 	
 	FindSymRequest(int sinkhnd)
 	{
@@ -103,16 +103,16 @@ public:
 	struct SymFileParams
 	{
 		SymAction Action;
-		GString File;
+		LString File;
 		int Platforms;
 	};
 
 	FindSymbolSystem(int AppHnd);
 	~FindSymbolSystem();
 	
-	bool SetIncludePaths(GString::Array &Paths);
+	bool SetIncludePaths(LString::Array &Paths);
 	bool OnFile(const char *Path, SymAction Action, int Platforms);
-	FindSymResult OpenSearchDlg(GViewI *Parent);
+	FindSymResult OpenSearchDlg(LViewI *Parent);
 	
 	/// This function searches the database for symbols and returns
 	/// the results as a M_FIND_SYM_REQUEST message.

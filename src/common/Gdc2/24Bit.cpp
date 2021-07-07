@@ -10,15 +10,15 @@
 #include <string.h>
 #include <math.h>
 
-#include "Gdc2.h"
-#include "GPalette.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/Palette.h"
 
 #define BytePtr	((uint8_t*&)Ptr)
 #undef NonPreMulOver24
 #define NonPreMulOver24(c)	d->c = ((s->c * sa) + (DivLut[d->c * 255] * o)) / 255
 
 /// 24 bit rgb applicators
-class LgiClass GdcApp24 : public GApplicator
+class LgiClass GdcApp24 : public LApplicator
 {
 protected:
 	union
@@ -78,8 +78,8 @@ public:
 	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
 };
 
-template<typename Pixel, GColourSpace ColourSpace>
-class App24 : public GApplicator
+template<typename Pixel, LColourSpace ColourSpace>
+class App24 : public LApplicator
 {
 	union
 	{
@@ -319,7 +319,7 @@ public:
 			switch (Src->Cs)
 			{
 				#define AlphaCase(name) \
-					case Cs##name: return AlphaBlt<G##name>(Src, SrcAlpha);
+					case Cs##name: return AlphaBlt<L##name>(Src, SrcAlpha);
 
 				AlphaCase(Rgb24);
 				AlphaCase(Bgr24);
@@ -343,7 +343,7 @@ public:
 	}
 };
 
-GApplicator *GApp24::Create(GColourSpace Cs, int Op)
+LApplicator *GApp24::Create(LColourSpace Cs, int Op)
 {
 	if (Cs == System24BitColourSpace)
 	{
@@ -368,7 +368,7 @@ GApplicator *GApp24::Create(GColourSpace Cs, int Op)
 		{
 			#define Case24(name) \
 				case Cs##name: \
-					return new App24<G##name, Cs##name>();
+					return new App24<L##name, Cs##name>();
 			
 			Case24(Rgb24);
 			Case24(Bgr24);

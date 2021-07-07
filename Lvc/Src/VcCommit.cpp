@@ -1,14 +1,14 @@
 #include "Lvc.h"
-#include "GClipBoard.h"
+#include "lgi/common/ClipBoard.h"
 #include "../Resources/resdefs.h"
-#include "GPath.h"
-#include "LHashTable.h"
+#include "lgi/common/Path.h"
+#include "lgi/common/HashTable.h"
 
 const char *sPalette[] = { "9696ff", "ff8787", "ff934b", "a8d200", "00f0c0", "87e7ff", "a5a5ff", "f3c3ff", "b40090", "00b400" };
 
-GColour GetPaletteColour(int i)
+LColour GetPaletteColour(int i)
 {
-	GColour c;
+	LColour c;
 	const char *s = sPalette[i % CountOf(sPalette)];
 	#define Comp(comp, off) { const char h[3] = {s[off], s[off+1], 0}; c.comp(htoi(h)); }
 	Comp(r, 0);
@@ -88,7 +88,7 @@ void VcCommit::SetCurrent(bool b)
 	Current = b;
 }
 
-void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
+void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 {
 	if (i == 0)
 	{
@@ -97,7 +97,7 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 		double Half = 5.5;
 		#define MAP(col) ((col) * Px + Half)
 
-		GMemDC Mem(Ctx.X(), Ctx.Y(), System32BitColourSpace);
+		LMemDC Mem(Ctx.X(), Ctx.Y(), System32BitColourSpace);
 
 		#ifdef LINUX
 		{
@@ -113,7 +113,7 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 		double r = Half - 1;
 
 		double x = MAP(NodeIdx);
-		Mem.Colour(GColour::Black);
+		Mem.Colour(LColour::Black);
 		
 		VcCommit *Prev = NULL, *Next = NULL;
 		Prev = Folder->Log.IdxCheck(Idx - 1) ? Folder->Log[Idx - 1] : NULL;
@@ -142,9 +142,9 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 				}
 				else
 				{
-					Mem.Colour(GColour::Red);
+					Mem.Colour(LColour::Red);
 					Mem.Line(I(CurX), I(Ht/2), I(CurX), I(Ht/2-5));
-					Mem.Colour(GColour::Black);
+					Mem.Colour(LColour::Black);
 				}
 			}
 
@@ -158,9 +158,9 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 				}
 				else
 				{
-					Mem.Colour(GColour::Red);
+					Mem.Colour(LColour::Red);
 					Mem.Line(I(CurX), I(Ht/2), I(CurX), I(Ht/2+5));
-					Mem.Colour(GColour::Black);
+					Mem.Colour(LColour::Black);
 				}
 			}
 		}
@@ -170,17 +170,17 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c)
 			double Cx = x;
 			double Cy = Ht / 2;
 			{
-				GPath p;
+				LPath p;
 				p.Circle(Cx, Cy, r + (Current ? 1 : 0));
-				GSolidBrush sb(GColour::Black);
+				LSolidBrush sb(LColour::Black);
 				p.Fill(&Mem, sb);
 			}
 			{
-				GPath p;
+				LPath p;
 				p.Circle(Cx, Cy, r-1);
 				LgiAssert(NodeColour.IsValid());
 				// LgiTrace("%s = %s\n", Branch.Get(), NodeColour.GetStr());
-				GSolidBrush sb(NodeColour);
+				LSolidBrush sb(NodeColour);
 				p.Fill(&Mem, sb);
 			}
 		}
@@ -242,9 +242,9 @@ const char *VcCommit::GetText(int Col)
 	return (char*)GetFieldText(Folder->Fields[Col]);
 }
 
-bool VcCommit::GitParse(GString s, bool RevList)
+bool VcCommit::GitParse(LString s, bool RevList)
 {
-	GString::Array lines = s.Split("\n");
+	LString::Array lines = s.Split("\n");
 	if (lines.Length() < 3)
 		return false;
 
@@ -259,7 +259,7 @@ bool VcCommit::GitParse(GString s, bool RevList)
 
 		for (int i=0; i<lines.Length(); i++)
 		{
-			GString &Ln = lines[i];
+			LString &Ln = lines[i];
 			if (IsWhiteSpace(Ln(0)))
 			{
 				if (Msg)
@@ -282,7 +282,7 @@ bool VcCommit::GitParse(GString s, bool RevList)
 	{
 		for (unsigned ln = 0; ln < lines.Length(); ln++)
 		{
-			GString &l = lines[ln];
+			LString &l = lines[ln];
 			if (ln == 0)
 				Rev = l.SplitDelimit().Last();
 			else if (l.Find("Author:") >= 0)
@@ -302,7 +302,7 @@ bool VcCommit::GitParse(GString s, bool RevList)
 	return Author && Rev;
 }
 
-bool VcCommit::CvsParse(LDateTime &Dt, GString Auth, GString Message)
+bool VcCommit::CvsParse(LDateTime &Dt, LString Auth, LString Message)
 {
 	Ts = Dt;
 	Ts.ToLocal();
@@ -322,15 +322,15 @@ void VcCommit::OnParse()
 	NodeColour = Folder->BranchColour(Branch);
 }
 
-bool VcCommit::HgParse(GString s)
+bool VcCommit::HgParse(LString s)
 {
-	GString::Array Lines = s.SplitDelimit("\n");
+	LString::Array Lines = s.SplitDelimit("\n");
 	if (Lines.Length() < 1)
 		return false;
 
 	for (auto Ln: Lines)
 	{
-		GString::Array f = Ln.Split(":", 1);
+		LString::Array f = Ln.Split(":", 1);
 		if (f.Length() == 2)
 		{
 			if (f[0].Equals("changeset"))
@@ -359,18 +359,18 @@ bool VcCommit::HgParse(GString s)
 	return Rev.Get() != NULL;
 }
 
-bool VcCommit::SvnParse(GString s)
+bool VcCommit::SvnParse(LString s)
 {
-	GString::Array lines = s.Split("\n");
+	LString::Array lines = s.Split("\n");
 	if (lines.Length() < 1)
 		return false;
 
 	for (unsigned ln = 0; ln < lines.Length(); ln++)
 	{
-		GString &l = lines[ln];
+		LString &l = lines[ln];
 		if (ln == 0)
 		{
-			GString::Array a = l.Split("|");
+			LString::Array a = l.Split("|");
 			if (a.Length() > 3)
 			{
 				Rev = a[0].Strip(" \tr");
@@ -397,7 +397,7 @@ bool VcCommit::SvnParse(GString s)
 
 VcFolder *VcCommit::GetFolder()
 {
-	for (GTreeItem *i = d->Tree->Selection(); i;
+	for (LTreeItem *i = d->Tree->Selection(); i;
 		i = i->GetParent())
 	{
 		auto f = dynamic_cast<VcFolder*>(i);
@@ -435,7 +435,7 @@ void VcCommit::Select(bool b)
 		{
 			d->Msg->Name(Msg);
 			
-			GWindow *w = d->Msg->GetWindow();
+			auto *w = d->Msg->GetWindow();
 			if (w)
 			{
 				w->SetCtrlEnabled(IDC_COMMIT, false);
@@ -446,13 +446,13 @@ void VcCommit::Select(bool b)
 	}
 }
 
-void VcCommit::OnMouseClick(GMouse &m)
+void VcCommit::OnMouseClick(LMouse &m)
 {
 	LListItem::OnMouseClick(m);
 
 	if (m.IsContextMenu())
 	{
-		GArray<VcCommit*> Sel;
+		LArray<VcCommit*> Sel;
 		GetList()->GetSelection(Sel);
 
 		LSubMenu s;
@@ -494,27 +494,27 @@ void VcCommit::OnMouseClick(GMouse &m)
 			}
 			case IDM_COPY_REV:
 			{
-				GClipBoard c(GetList());
+				LClipBoard c(GetList());
 
-				GString::Array a;
+				LString::Array a;
 				a.SetFixedLength(false);
 				for (auto i: Sel)
 					a.New() = i->GetRev();
 
-				c.Text(GString(",").Join(a));
+				c.Text(LString(",").Join(a));
 				break;
 			}
 			case IDM_COPY_INDEX:
 			{
-				GClipBoard c(GetList());
-				GString b;
+				LClipBoard c(GetList());
+				LString b;
 				b.Printf(LPrintfInt64, Index);
 				c.Text(b);
 				break;
 			}
 			case IDM_RENAME_BRANCH:
 			{
-				GArray<VcCommit*> Revs;
+				LArray<VcCommit*> Revs;
 				if (GetList()->GetSelection(Revs))
 				{
 					GInput Inp(GetList(), "", "New branch name:", AppName);

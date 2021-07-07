@@ -4,12 +4,12 @@
 #include "GTableDbPriv.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-static GAutoString ReadStr(GPointer &p)
+static LAutoString ReadStr(GPointer &p)
 {
 	char *e = p.s8;
 	while (*e)
 		e++;
-	GAutoString a(NewStr(p.s8, e - p.s8));
+	LAutoString a(NewStr(p.s8, e - p.s8));
 	p.s8 = e + 1;
 	return a;
 }
@@ -27,7 +27,7 @@ BaseIntegerSerialize(16)
 BaseIntegerSerialize(32)
 BaseIntegerSerialize(64)
 
-bool GTableDb::Base::Io(GAutoString &str, GPointer &p, bool write)
+bool GTableDb::Base::Io(LAutoString &str, GPointer &p, bool write)
 {
 	if (write)
 	{
@@ -70,7 +70,7 @@ GBlockArray::~GBlockArray()
 GBlockArray::Block *GBlockArray::New()
 {
 	uint32 MaxId = 0;
-	GArray<bool> Has;
+	LArray<bool> Has;
 	for (unsigned i=0; i<b.Length(); i++)
 	{
 		MaxId = max(b[i]->Id, MaxId);
@@ -113,7 +113,7 @@ bool GBlockArray::Add(const char *File, uint32 id)
 	}
 	
 	n->File.Reset(NewStr(File));
-	GFile f;
+	LFile f;
 	if (!f.Open(File, O_READ))
 	{
 		DeleteObj(n);
@@ -255,7 +255,7 @@ bool GFileBase::Delete()
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 template<typename T>
-static bool DeleteBaseFiles(GArray<T*> &a)
+static bool DeleteBaseFiles(LArray<T*> &a)
 {
 	for (int i=0; i<a.Length(); i++)
 	{
@@ -297,7 +297,7 @@ bool GIndexFile::Delete()
 bool GIndexFile::Serialize(bool Write)
 {
 	/*
-	GFile f;
+	LFile f;
 	if (!f.Open(FileName, Write ? O_WRITE : O_READ))
 	{
 		Table->Db->Msg(	"%s:%i - Failed to open '%s' for %s\n",
@@ -385,7 +385,7 @@ bool GIndexFile::Parse()
 
 					GTableDb::Field &f = Table->Fields.New();
 					f.Id = *p.u32++;
-					f.Type = (GVariantType)*p.u8++;
+					f.Type = (LVariantType)*p.u8++;
 					f.Name = ReadStr(p);
 					
 					LgiAssert(p.u8 <= Next);
@@ -453,7 +453,7 @@ bool GTableDb::Table::DeleteTable()
 	return d->DeleteTable();
 }
 
-bool GTableDb::Table::ChangeSchema(GArray<Field> &NewFields)
+bool GTableDb::Table::ChangeSchema(LArray<Field> &NewFields)
 {
 	return false;
 }
@@ -525,7 +525,7 @@ bool GTableDb::Open(const char *BaseFolder)
 {
 	Empty();
 	
-	GDirectory Dir;
+	LDirectory Dir;
 	GHashTbl<char*, Table*> Tables;
 	
 	char p[MAX_PATH];
@@ -553,12 +553,12 @@ void GTableDb::Empty()
 	d->Tables.DeleteObjects();
 }
 
-void GTableDb::SetLogStream(GStream *log)
+void GTableDb::SetLogStream(LStream *log)
 {
 	d->Log = log;
 }
 
-GArray<GTableDb::Table*> &GTableDb::Tables()
+LArray<GTableDb::Table*> &GTableDb::Tables()
 {
 	return d->Tables;
 }
@@ -593,10 +593,10 @@ bool GTableDb::IsOk()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-bool RunTableDbTest(GStream *Log)
+bool RunTableDbTest(LStream *Log)
 {
 	{	// Field serialization test
-		GArray<char> Mem;
+		LArray<char> Mem;
 		Mem.Length(4 << 10);
 		char Flds[] = {"key \1\0Key\0name\5\0Name\0data\5\0Data\0" };
 		GTableDb::Schema sc;

@@ -1,0 +1,554 @@
+/** \file
+	\author Matthew Allen
+ */
+ 
+#ifndef _LMENU_H_
+#define _LMENU_H_
+
+// Os specific declarations
+#if defined __GTK_H__
+	typedef Gtk::GtkMenuShell *OsSubMenu;
+	typedef Gtk::GtkMenuItem *OsMenuItem;
+#elif defined WINNATIVE
+	typedef HMENU OsSubMenu;
+	typedef MENUITEMINFO OsMenuItem;
+
+	#ifndef COLOR_MENUHILIGHT
+	#define COLOR_MENUHILIGHT	29
+	#endif
+	#ifndef COLOR_MENUBAR
+	#define COLOR_MENUBAR		30
+	#endif
+#elif defined(MAC) && !defined(LGI_SDL)
+	#if LGI_COCOA
+		#ifdef __OBJC__
+			#include <Cocoa/Cocoa.h>
+		#endif
+		ObjCWrapper(NSMenu, OsSubMenu)
+		ObjCWrapper(NSMenuItem, OsMenuItem)
+	#else
+		typedef MenuRef OsSubMenu;
+		typedef MenuItemIndex OsMenuItem;
+	#endif
+#else
+	#include "LMenuImpl.h"
+	typedef class MenuClickImpl *OsSubMenu;
+	typedef class MenuItemImpl *OsMenuItem;
+#endif
+
+#include "lgi/common/XmlTree.h"
+#include "lgi/common/Res.h"
+#include "lgi/common/ImageList.h"
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+// Menu wrappers
+class LgiClass LMenuLoader
+{
+	friend class LMenuItem;
+	friend class LMenu;
+	friend class LSubMenu;
+	friend class MenuImpl;
+	friend class SubMenuImplPrivate;
+
+protected:
+#ifdef WIN32
+	OsSubMenu Info;
+#endif
+	List<LMenuItem> Items;
+
+public:
+	LMenuLoader()
+	{
+		#ifdef WIN32
+		Info = 0;
+		#endif
+	}
+
+	bool Load(	class LgiMenuRes *MenuRes,
+				LXmlTag *Tag,
+				ResFileFormat Format,
+				class TagHash *TagList);
+
+	virtual LMenuItem *AppendItem(const char *Str, int Id, bool Enabled = true, int Where = -1, const char *Shortcut = 0) = 0;
+	virtual LSubMenu *AppendSub(const char *Str, int Where = -1) = 0;
+	virtual LMenuItem *AppendSeparator(int Where = -1) = 0;
+};
+
+/// Sub menu.
+class LMenu;
+class LgiClass LSubMenu :
+	public LBase,
+	public LMenuLoader,
+	public GImageListOwner,
+	public GDom
+{
+	friend class LMenuItem;
+	friend class LMenu;
+	friend class SubMenuImpl;
+	friend class MenuItemImpl;
+	friend class MenuImpl;
+	friend class LMouseHookPrivate;
+
+	// This is not called in the GUI thread
+	static void SysMouseClick(LMouse &m);
+
+	#if !WINNATIVE && !defined(__GTK_H__)
+		OsSubMenu Info;
+	#endif
+	#if LGI_COCOA
+		LAutoPtr<int> FloatResult;
+		virtual void OnActivate(LMenuItem *item);
+	#endif
+
+	#if defined(__GTK_H__)
+		GlibWrapper<Gtk::GtkMenuShell> Info;
+		friend void GtkDeactivate(Gtk::GtkMenuShell *widget, LSubMenu *Sub);
+		friend Gtk::gboolean LSubMenuClick(LMouse *m);
+		friend void SubMenuDestroy(LSubMenu *Item);
+
+		int *_ContextMenuId;
+		bool InLoop;
+		uint64 ActiveTs;
+		bool IsContext(LMenuItem *Item);
+		void OnActivate(bool a);
+	#elif defined(WINNATIVE)
+		HWND TrackHandle;
+	#else
+		bool OnKey(LKey &k);
+	#endif
+
+protected:
+	/// The parent menu item or NULL if the root menu
+	LMenuItem		*Parent;
+	/// The top level window this sub menu belongs to or NULL
+	LMenu			*Menu;
+	/// The window that the menu belongs to or NULL.
+	LViewI			*Window;
+	
+	void OnAttach(bool Attach);
+	void ClearHandle();
+
+public:
+	LSubMenu(OsSubMenu Hnd);
+	/// Constructor
+	LSubMenu
+	(
+		/// Name of the menu
+		const char *name = "",
+		/// True if it's popup
+		bool Popup = true
+	);
+	virtual ~LSubMenu();
+
+	/// Returns the OS handle
+	OsSubMenu Handle() { return Info; }
+
+	/// Detachs the OS handle and returns it
+	OsSubMenu Release()
+	{
+		OsSubMenu Hnd = Info;
+		Info = NULL;
+		return Hnd;
+	}
+	
+	/// Add a new item
+	LMenuItem *AppendItem
+	(
+		/// The text of the item.
+		///
+		/// If you put a tab control in the text, anything after the tab is considered
+		/// to be the keyboard shortcut for the menu item.
+		const char *Str,
+		/// Command ID to post to the OnCommand() handler
+		int Id,
+		/// True if the item should be enabled
+		bool Enabled = true,
+		/// The index into the list to insert at, or -1 to insert at the end
+		int Where = -1,
+		/// Shortcut if not embedded in the "Str" parameter.
+		///
+		/// The shortcut can be a combination of modifiers and keys added together with '+'.
+		///
+		/// Available modifier names are:
+		/// - Ctrl/Control
+		/// - Alt/Option
+		/// - Shift
+		/// - System/Cmd
+		/// - CtrlCmd (Ctrl on Windows/Linux, Cmd on OSX)
+		/// - AltCmd (Alt on Windows/Linux, Cmd on OSX)
+		///
+		/// Available key names are:
+		/// - Del/Delete
+		/// - Home/End
+		/// - PageUp/Page Up/Page-Up
+		/// - PageDown/Page Down/Page-Down
+		/// - Backspace
+		/// - Up/Right/Down/Left
+		/// - Esc
+		/// - Space
+		/// - Numbers or letters
+		/// - Some punctuation: ,./\\[]`;\'
+		///
+		/// Examples:
+		///	- Ctrl+S
+		/// - Shift+Modifier+F
+		/// - Alt+Left
+		const char *Shortcut = NULL
+	);
+	
+	/// Add a submenu
+	LSubMenu *AppendSub
+	(
+		/// The text of the item
+		const char *Str,
+		/// The index to insert the item, or -1 to insert on the end
+		int Where = -1
+	);
+	
+	/// Add a separator
+	LMenuItem *AppendSeparator(int Where = -1);
+	
+	/// Delete all items
+	void Empty();
+	
+	/// Detachs an item from the sub menu but doesn't delete it
+	bool RemoveItem
+	(
+		/// The index of the item to remove
+		int i
+	);
+
+	/// Detachs an item from the sub menu but doesn't delete it
+	bool RemoveItem
+	(
+		/// Pointer of the item to remove
+		LMenuItem *Item
+	);
+	
+	/// Returns numbers of items in menu
+	size_t Length();
+
+	/// Return a pointer to an item
+	LMenuItem *ItemAt
+	(
+		/// The index of the item to return
+		int i
+	);
+	
+	/// Returns a pointer to an item
+	LMenuItem *FindItem
+	(
+		/// The ID of the item to return
+		int Id
+	);
+
+	/// Returns a pointer to an sub menu
+	LSubMenu *FindSubMenu
+	(
+		/// The ID of the sub menu to return
+		int Id
+	);
+
+	enum 
+	{
+		BtnLeft = 1,
+		BtnMiddle = 2,
+		BtnRight = 3,
+	};
+
+	/// Floats the submenu anywhere on the screen
+	int Float
+	(
+		/// The parent view
+		LView *Parent,
+		/// The x coord of the top-left corner
+		int x,
+		/// The y coord of the top-left corner
+		int y,
+		/// True if the menu is tracking the left button, else it tracks the right button
+		int Button = BtnRight
+	);
+
+	int Float(LView *Parent, LMouse m)
+	{
+		int Btn = 0;
+		if (m.Left())
+			Btn = BtnLeft;
+		else if (m.Middle())
+			Btn = BtnMiddle;
+		else if (m.Right())
+			Btn = BtnRight;
+		m.ToScreen();
+		return Float(Parent, m.x, m.y, Btn);
+	}
+
+	/// Returns the parent menu item
+	LMenuItem *GetParent() { return Parent; }
+	
+	/// Returns the menu that this belongs to
+	LMenu *GetMenu() { return Menu; }
+
+	// Dom impl
+	bool GetVariant(const char *Name, LVariant &Value, char *Arr = NULL);
+	bool SetVariant(const char *Name, LVariant &Value, char *Arr = NULL);
+	bool CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args);
+};
+
+/// An item an a menu
+class LgiClass LMenuItem :
+	public LBase,
+	public GDom
+{
+	friend class LSubMenu;
+	friend class LMenu;
+	friend class LView;
+	friend class SubMenuImpl;
+	friend class MenuItemImpl;
+	friend class MenuImpl;
+	friend class SubMenuImplPrivate;
+
+private:
+	#ifdef WIN32
+	bool			Insert(int Pos);
+	bool			Update();
+	#endif
+	#if defined(__GTK_H__) || defined(LGI_SDL)
+	LString			ShortCut;
+	#endif
+
+protected:
+	LMenu			*Menu;
+	LSubMenu		*Parent;
+	LSubMenu		*Child;
+	int				Position;
+	int				_Icon;
+
+	#ifdef __GTK_H__
+	GlibWrapper<Gtk::GtkMenuItem> Info;
+	#else
+	OsMenuItem		Info;
+	#endif
+	class LMenuItemPrivate *d;
+
+	int				_Id;
+	int				_Flags;
+
+	#if defined(__GTK_H__)
+		bool InSetCheck;
+		LAutoPtr<LMemDC> IconImg;
+		bool Replace(Gtk::GtkWidget *newWid);
+	public:
+		void Handle(Gtk::GtkMenuItem *mi);
+		void OnGtkEvent(LString Event);
+		void PaintIcon(Gtk::cairo_t *cr);
+	protected:
+	#else
+		virtual void _Measure(LPoint &Size);
+		virtual void _Paint(LSurface *pDC, int Flags);
+		virtual void _PaintText(LSurface *pDC, int x, int y, int Width);
+	#endif
+
+	void OnAttach(bool Attach);
+	void ClearHandle();
+
+public:
+	LMenuItem();
+	LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int Id, int Pos, const char *Shortcut = 0);
+	virtual ~LMenuItem();
+
+	LMenuItem &operator =(const LMenuItem &m) { LgiAssert(!"This shouldn't be used anywhere"); return *this; }
+
+	/// Creates a sub menu off the item
+	LSubMenu *Create();
+	/// Removes the item from it's place in the menu but doesn't delete it
+	bool Remove();
+	/// Returns the parent sub menu
+	LSubMenu *GetParent();
+	/// Returns the parent sub menu
+	LMenu *GetMenu() { return Menu; }
+	/// Scans the text of the item for a keyboard shortcut
+	bool ScanForAccel();
+	/// Returns the OS handle for the menuitem
+	OsMenuItem Handle() { return Info; }
+
+	/// Set the id
+	void Id(int i);
+	/// Turn the item into a separator
+	void Separator(bool s);
+	/// Put a check mark on the item
+	void Checked(bool c);
+	/// \brief Set the text of the item
+	/// \sa LSubMenu::AppendItem()
+	bool Name(const char *n) override;
+	/// Enable or disable the item
+	void Enabled(bool e);
+	void Visible(bool v);
+	void Focus(bool f);
+	/// Attach a sub menu to the item
+	void Sub(LSubMenu *s);
+	/// Set the icon for the item. The icon is stored in the LMenu's image list.
+	void Icon(int i);
+
+	/// Get the id
+	int Id();
+	/// Get the text of the item
+	const char *Name() override;
+	/// Return whether this item is a separator
+	bool Separator();
+	/// Return whether this item has a check mark
+	bool Checked();
+	/// Return whether this item is enabled
+	bool Enabled();
+	bool Visible();
+	bool Focus();
+	/// Return whether this item's submenu
+	LSubMenu *Sub();
+	/// Return the icon of this this
+	int Icon();
+
+	LImageList *GetImageList();
+
+	#if LGI_COCOA
+	void OnActivate(LMenuItem *item);
+	#endif
+};
+
+/// Encapsulates a keyboard shortcut
+class LgiClass GAccelerator : public LUiEvent
+{
+	int Key;
+	int Id;
+
+public:
+	GAccelerator(int flags, int key, int id);
+	
+	int GetId() { return Id; }
+
+	/// See if the accelerator matchs a keyboard event
+	bool Match(LKey &k);
+};
+
+/** \brief Top level window menu
+
+This class contains LMenuItem's and LSubMenu's.
+
+A basic menu can be constructed inside a LWindow like this:
+\code
+Menu = new LMenu;
+if (Menu)
+{
+	Menu->Attach(this);
+
+	LSubMenu *File = Menu->AppendSub("&File");
+	if (File)
+	{
+		File->AppendItem("&Open\tCtrl+O", IDM_OPEN, true);
+		File->AppendItem("&Save All\tCtrl+S", IDM_SAVE_ALL, true);
+		File->AppendItem("Save &As", IDM_SAVEAS, true);
+		File->AppendSeparator();
+		File->AppendItem("&Options", IDM_OPTIONS, true);
+		File->AppendSeparator();
+		File->AppendItem("E&xit", IDM_EXIT, true);
+	}
+
+	LSubMenu *Help = Menu->AppendSub("&Help");
+	if (Help)
+	{
+		Help->AppendItem("&Help", IDM_HELP, true);
+		Help->AppendItem("&About", IDM_ABOUT, true);
+	}
+}
+\endcode
+
+Or you can load a menu from a resource like this:
+\code
+Menu = new LMenu;
+if (Menu)
+{
+	Menu->Attach(this);
+	Menu->Load(this, "IDM_MENU");
+}
+\endcode
+*/
+
+class LgiClass LMenu :
+	public LSubMenu
+{
+	friend class LSubMenu;
+	friend class LMenuItem;
+	friend class LWindow;
+
+	class LMenuPrivate *d;
+
+	#if defined WIN32
+	void OnChange();
+	#else
+	void OnChange() {}
+	#endif
+
+protected:
+	/// List of keyboard shortcuts in the menu items attached
+	List<GAccelerator> Accel;
+	#ifdef __GTK_H__
+	Gtk::GtkAccelGroup *AccelGrp;
+	#endif
+	#if LGI_COCOA
+	void OnActivate(LMenuItem *item);
+	#endif
+
+public:
+	/// Constructor
+	LMenu(const char *AppName = NULL);
+	
+	/// Destructor
+	virtual ~LMenu();
+
+	/// Returns the font used by the menu items
+	static LFont *GetFont();
+
+	/// Returns the top level window that this menu is attached to
+	LViewI *WindowHandle() { return Window; }
+	
+	/// Attach the menu to a window
+	bool Attach(LViewI *p);
+	
+	/// Detact the menu from the window
+	bool Detach();
+	
+	/// Load the menu from a resource file
+	bool Load
+	(
+		/// The parent view for any error message boxes
+		LView *p,
+		/// The resource to load. Will probably change to an int sometime.
+		const char *Res,
+		/// Optional list of comma or space separated tags
+		const char *Tags = 0
+	);
+	
+	/// \brief See if any of the accelerators match the key event
+	/// \return true if none of the accelerators match
+	bool OnKey
+	(
+		/// The view that will eventually receive the key event
+		LView *v,
+		/// The keyboard event details
+		LKey &k
+	);
+
+	/// This creates copies of the preference and about menu items in the
+	/// application menu. On other platforms it's a NOP.
+	bool SetPrefAndAboutItems(int PrefId, int AboutId);
+
+	#if defined(WIN32)
+	static int _OnEvent(GMessage *Msg);
+	#elif defined(MAC)
+	int GetIdForCommand(uint32_t Cmd);
+	#endif
+};
+
+#endif
+
+
+
+

@@ -1,7 +1,7 @@
-#include "Lgi.h"
-#include "TextConvert.h"
-#include "GMime.h"
-#include "Base64.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/TextConvert.h"
+#include "lgi/common/Mime.h"
+#include "lgi/common/Base64.h"
 
 // return true if there are any characters with the 0x80 bit set
 bool Is8Bit(char *Text)
@@ -97,7 +97,7 @@ char *DecodeRfc2047(char *Str)
 	if (!Str)
 		return NULL;
 	
-	GStringPipe p(256);
+	LStringPipe p(256);
 	for (char *s = Str; *s; )
 	{
 		char *e = s;
@@ -129,7 +129,7 @@ char *DecodeRfc2047(char *Str)
 			char *End    = Second ? strstr(Second + 1, "?=") : NULL;
 			if (End)
 			{
-				GString Cp(Start, First - Start);
+				LString Cp(Start, First - Start);
 				int Type = CONTENT_NONE;
 				bool StripUnderscores = false;
 				if (ToUpper(First[1]) == 'B')
@@ -176,7 +176,7 @@ char *DecodeRfc2047(char *Str)
 						}
 						else
 						{
-							GAutoString Utf8((char*)LNewConvertCp("utf-8", Block, Cp, Len));
+							LAutoString Utf8((char*)LNewConvertCp("utf-8", Block, Cp, Len));
 							if (Utf8)
 							{
 								if (LIsUtf8(Utf8))
@@ -243,7 +243,7 @@ char *EncodeRfc2047(char *Str, const char *CodePage, List<char> *CharsetPrefs, s
 		CodePage = "utf-8";
 	}
 
-	GStringPipe p(256);
+	LStringPipe p(256);
 
 	if (!Str)
 		return NULL;
@@ -256,7 +256,7 @@ char *EncodeRfc2047(char *Str, const char *CodePage, List<char> *CharsetPrefs, s
 		size_t Len = strlen(Str);;
 		if (_stricmp(CodePage, "utf-8") == 0)
 		{
-			DestCp = LgiDetectCharset(Str, Len, CharsetPrefs);
+			DestCp = LDetectCharset(Str, Len, CharsetPrefs);
 		}
 
 		int Chars = 0;

@@ -1,4 +1,5 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/FileSelect.h"
 #include "LgiIde.h"
 #include "ProjectNode.h"
 #include "levenshtein.h"
@@ -16,8 +17,8 @@ enum Msgs
 struct SearchResults
 {
 	ProjectNode *Node;
-	GString Path;
-	GString::Array Matches;
+	LString Path;
+	LString::Array Matches;
 	
 	SearchResults()
 	{
@@ -25,12 +26,12 @@ struct SearchResults
 	}
 };
 
-class FileExistsThread : public GEventTargetThread
+class FileExistsThread : public LEventTargetThread
 {
 	int Hnd;
 
 public:
-	FileExistsThread(int hnd) : GEventTargetThread("FileExistsThread")
+	FileExistsThread(int hnd) : LEventTargetThread("FileExistsThread")
 	{
 		Hnd = hnd;
 	}
@@ -41,7 +42,7 @@ public:
 		{
 			case M_CHECK_FILE:
 			{
-				GAutoPtr<SearchResults> Sr((SearchResults*)Msg->A());
+				LAutoPtr<SearchResults> Sr((SearchResults*)Msg->A());
 				bool e = LFileExists(Sr->Path);
 				// printf("Checking '%s' = %i\n", Sr->Path.Get(), e);
 				if (!e)
@@ -54,10 +55,10 @@ public:
 	}
 };
 
-bool IsParentFolder(GString p, GString c)
+bool IsParentFolder(LString p, LString c)
 {
-	GString::Array d1 = p.Split(DIR_STR);
-	GString::Array d2 = c.Split(DIR_STR);
+	LString::Array d1 = p.Split(DIR_STR);
+	LString::Array d2 = c.Split(DIR_STR);
 
 	if (d1.Length() > d2.Length())
 		return false;
@@ -72,14 +73,14 @@ bool IsParentFolder(GString p, GString c)
 	return true;
 }
 
-class SearchThread : public GEventTargetThread
+class SearchThread : public LEventTargetThread
 {
 	int Hnd;
-	GArray<GString> Search;
-	GArray<char*> Files;
+	LArray<LString> Search;
+	LArray<char*> Files;
 
 public:
-	SearchThread(int hnd) : GEventTargetThread("SearchThread")
+	SearchThread(int hnd) : LEventTargetThread("SearchThread")
 	{
 		Hnd = hnd;
 	}
@@ -95,7 +96,7 @@ public:
 		{
 			case M_ADD_SEARCH_PATH:
 			{
-				GAutoPtr<GString> p((GString*)Msg->A());
+				LAutoPtr<LString> p((LString*)Msg->A());
 				bool IsParent = false;
 				for (unsigned i=0; i<Search.Length(); i++)
 				{
@@ -117,7 +118,7 @@ public:
 			{
 				for (unsigned i=0; i<Search.Length(); i++)
 				{
-					GArray<const char*> Ext;
+					LArray<const char*> Ext;
 					Ext.Add("*.h");
 					Ext.Add("*.hpp");
 					Ext.Add("*.c");
@@ -131,11 +132,11 @@ public:
 			}
 			case M_SEARCH:
 			{
-				GAutoPtr<SearchResults> Sr((SearchResults*)Msg->A());
-				char *leaf1 = LgiGetLeaf(Sr->Path);
+				LAutoPtr<SearchResults> Sr((SearchResults*)Msg->A());
+				char *leaf1 = LGetLeaf(Sr->Path);
 				for (unsigned i=0; i<Files.Length(); i++)
 				{
-					char *leaf2 = LgiGetLeaf(Files[i]);
+					char *leaf2 = LGetLeaf(Files[i]);
 					size_t Dist = levenshtein(leaf1, leaf2);
 					if (Dist < 4)
 					{
@@ -153,13 +154,13 @@ public:
 	}
 };
 
-class MissingFiles : public GDialog
+class MissingFiles : public LDialog
 {
 	IdeProject *Proj;
 	int SearchHnd;
 	int ExistsHnd;
 	LList *Lst;
-	GArray<SearchResults*> Files;
+	LArray<SearchResults*> Files;
 
 public:
 	MissingFiles(IdeProject *proj)
@@ -188,7 +189,7 @@ public:
 			Proj->GetChildProjects(Child);
 			Child.Add(Proj);
 
-			GArray<ProjectNode*> Nodes;
+			LArray<ProjectNode*> Nodes;
 
 			for (auto p: Child)
 			{
@@ -199,7 +200,7 @@ public:
 						auto s = Node->GetFullPath();
 						if (s)
 						{
-							GString sOld = s.Get();
+							LString sOld = s.Get();
 							if (p->CheckExists(s) &&
 								Strcmp(sOld.Get(), s.Get()) != 0 &&
 								Stricmp(sOld.Get(), s.Get()) == 0)
@@ -213,8 +214,8 @@ public:
 							Sr->Path = s;
 							PostThreadEvent(ExistsHnd, M_CHECK_FILE, (GMessage::Param) Sr);
 							
-							GString Parent = s.Get();
-							LgiTrimDir(Parent);
+							LString Parent = s.Get();
+							LTrimDir(Parent);
 							Flds.Add(Parent, true);
 						}
 					}
@@ -226,7 +227,7 @@ public:
 			}
 
 			for (auto i : Flds)
-				PostThreadEvent(SearchHnd, M_ADD_SEARCH_PATH, (GMessage::Param) new GString(i.key));
+				PostThreadEvent(SearchHnd, M_ADD_SEARCH_PATH, (GMessage::Param) new LString(i.key));
 
 			PostThreadEvent(SearchHnd, M_RECURSE);
 		}
@@ -299,14 +300,14 @@ public:
 		}
 	}
 
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		switch (Ctrl->GetId())
 		{
 			case IDC_BROWSE:
 			{
-				GFileSelect s;
-				GAutoString Dir = Proj->GetBasePath();
+				LFileSelect s;
+				LAutoString Dir = Proj->GetBasePath();
 				s.Parent(this);
 				s.InitialDir(Dir);
 				if (s.Open())
@@ -352,7 +353,7 @@ public:
 		{
 			case M_MISSING_FILE:
 			{
-				GAutoPtr<SearchResults> Sr((SearchResults*)Msg->A());
+				LAutoPtr<SearchResults> Sr((SearchResults*)Msg->A());
 				if (Sr)
 				{
 					printf("Missing file '%s'\n", Sr->Path.Get());
@@ -383,7 +384,7 @@ public:
 			}
 		}
 
-		return GDialog::OnEvent(Msg);
+		return LDialog::OnEvent(Msg);
 	}
 };
 

@@ -1,13 +1,14 @@
-#include "Lgi.h"
-#include "GRichTextEdit.h"
-#include "GRichTextEditPriv.h"
-#include "Emoji.h"
-#include "GDocView.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/RichTextEdit.h"
+#include "RichTextEditPriv.h"
+#include "lgi/common/Emoji.h"
+#include "lgi/common/DocView.h"
+#include "lgi/common/Menu.h"
 
 #define DEBUG_LAYOUT				0
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-GRichTextPriv::StyleText::StyleText(const StyleText *St)
+LRichTextPriv::StyleText::StyleText(const StyleText *St)
 {
 	Emoji = St->Emoji;
 	Style = NULL;
@@ -18,7 +19,7 @@ GRichTextPriv::StyleText::StyleText(const StyleText *St)
 	Add((uint32_t*)&St->ItemAt(0), St->Length());
 }
 		
-GRichTextPriv::StyleText::StyleText(const uint32_t *t, ssize_t Chars, GNamedStyle *style)
+LRichTextPriv::StyleText::StyleText(const uint32_t *t, ssize_t Chars, LNamedStyle *style)
 {
 	Emoji = false;
 	Style = NULL;
@@ -33,7 +34,7 @@ GRichTextPriv::StyleText::StyleText(const uint32_t *t, ssize_t Chars, GNamedStyl
 	}
 }
 
-uint32_t *GRichTextPriv::StyleText::At(ssize_t i)
+uint32_t *LRichTextPriv::StyleText::At(ssize_t i)
 {
 	if (i >= 0 && i < (int)Length())
 		return &(*this)[i];
@@ -41,12 +42,12 @@ uint32_t *GRichTextPriv::StyleText::At(ssize_t i)
 	return NULL;
 }
 		
-GNamedStyle *GRichTextPriv::StyleText::GetStyle()
+LNamedStyle *LRichTextPriv::StyleText::GetStyle()
 {
 	return Style;
 }
 				
-void GRichTextPriv::StyleText::SetStyle(GNamedStyle *s)
+void LRichTextPriv::StyleText::SetStyle(LNamedStyle *s)
 {
 	if (Style != s)
 	{
@@ -55,18 +56,18 @@ void GRichTextPriv::StyleText::SetStyle(GNamedStyle *s)
 				
 		if (Style)
 		{			
-			GCss::ColorDef c = Style->Color();
-			if (c.Type == GCss::ColorRgb)
+			LCss::ColorDef c = Style->Color();
+			if (c.Type == LCss::ColorRgb)
 				Colours.Fore.Set(c.Rgb32, 32);
 			c = Style->BackgroundColor();
-			if (c.Type == GCss::ColorRgb)
+			if (c.Type == LCss::ColorRgb)
 				Colours.Back.Set(c.Rgb32, 32);
 		}				
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-GRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, GSurface *img, GFont *f, const uint32_t *s, ssize_t l) :
+LRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, LSurface *img, LFont *f, const uint32_t *s, ssize_t l) :
 	DisplayStr(src, NULL, s, l)
 {
 	Img = img;
@@ -87,7 +88,7 @@ GRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, GSurface *img, G
 		{
 			int x = Idx % EMOJI_GROUP_X;
 			int y = Idx / EMOJI_GROUP_X;
-			GRect &rc = SrcRect[i];
+			LRect &rc = SrcRect[i];
 			rc.ZOff(EMOJI_CELL_SIZE-1, EMOJI_CELL_SIZE-1);
 			rc.Offset(x * EMOJI_CELL_SIZE, y * EMOJI_CELL_SIZE);
 		}
@@ -99,7 +100,7 @@ GRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, GSurface *img, G
 	yf = IntToFixed(y);
 }
 
-GAutoPtr<GRichTextPriv::DisplayStr> GRichTextPriv::EmojiDisplayStr::Clone(ssize_t Start, ssize_t Len)
+LAutoPtr<LRichTextPriv::DisplayStr> LRichTextPriv::EmojiDisplayStr::Clone(ssize_t Start, ssize_t Len)
 {
 	if (Len < 0)
 		Len = Chars - Start;
@@ -108,7 +109,7 @@ GAutoPtr<GRichTextPriv::DisplayStr> GRichTextPriv::EmojiDisplayStr::Clone(ssize_
 				Start < (int)Utf32.Length() &&
 				Start + Len <= (int)Utf32.Length());
 	#endif
-	GAutoPtr<DisplayStr> s(new EmojiDisplayStr(Src, Img, NULL,
+	LAutoPtr<DisplayStr> s(new EmojiDisplayStr(Src, Img, NULL,
 		#if defined(_MSC_VER)
 		&Utf32[Start]
 		#else
@@ -118,9 +119,9 @@ GAutoPtr<GRichTextPriv::DisplayStr> GRichTextPriv::EmojiDisplayStr::Clone(ssize_
 	return s;
 }
 
-void GRichTextPriv::EmojiDisplayStr::Paint(GSurface *pDC, int &FixX, int FixY, GColour &Back)
+void LRichTextPriv::EmojiDisplayStr::Paint(LSurface *pDC, int &FixX, int FixY, LColour &Back)
 {
-	GRect f(0, 0, x-1, y-1);
+	LRect f(0, 0, x-1, y-1);
 	f.Offset(FixedToInt(FixX), FixedToInt(FixY));
 	pDC->Colour(Back);
 	pDC->Rectangle(&f);
@@ -135,12 +136,12 @@ void GRichTextPriv::EmojiDisplayStr::Paint(GSurface *pDC, int &FixX, int FixY, G
 	pDC->Op(Op);
 }
 
-double GRichTextPriv::EmojiDisplayStr::GetAscent()
+double LRichTextPriv::EmojiDisplayStr::GetAscent()
 {
 	return EMOJI_CELL_SIZE * 0.8;
 }
 
-ssize_t GRichTextPriv::EmojiDisplayStr::PosToIndex(int XPos, bool Nearest)
+ssize_t LRichTextPriv::EmojiDisplayStr::PosToIndex(int XPos, bool Nearest)
 {
 	if (XPos >= (int)x)
 		return Chars;
@@ -150,14 +151,14 @@ ssize_t GRichTextPriv::EmojiDisplayStr::PosToIndex(int XPos, bool Nearest)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-GRichTextPriv::TextLine::TextLine(int XOffsetPx, int WidthPx, int YOffsetPx)
+LRichTextPriv::TextLine::TextLine(int XOffsetPx, int WidthPx, int YOffsetPx)
 {
 	NewLine = 0;
 	PosOff.ZOff(0, 0);
 	PosOff.Offset(XOffsetPx, YOffsetPx);
 }
 
-int GRichTextPriv::TextLine::Length()
+int LRichTextPriv::TextLine::Length()
 {
 	int Len = NewLine;
 	for (unsigned i=0; i<Strs.Length(); i++)
@@ -168,7 +169,7 @@ int GRichTextPriv::TextLine::Length()
 /// This runs after the layout line has been filled with display strings.
 /// It measures the line and works out the right offsets for each strings
 /// so that their baselines all match up correctly.
-void GRichTextPriv::TextLine::LayoutOffsets(int DefaultFontHt)
+void LRichTextPriv::TextLine::LayoutOffsets(int DefaultFontHt)
 {
 	double BaseLine = 0.0;
 	int HtPx = 0;
@@ -200,7 +201,7 @@ void GRichTextPriv::TextLine::LayoutOffsets(int DefaultFontHt)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-GRichTextPriv::TextBlock::TextBlock(GRichTextPriv *priv) : Block(priv)
+LRichTextPriv::TextBlock::TextBlock(LRichTextPriv *priv) : Block(priv)
 {
 	LayoutDirty = false;
 	Len = 0;
@@ -214,7 +215,7 @@ GRichTextPriv::TextBlock::TextBlock(GRichTextPriv *priv) : Block(priv)
 	Padding.ZOff(0, 0);
 }
 
-GRichTextPriv::TextBlock::TextBlock(const TextBlock *Copy) : Block(Copy)
+LRichTextPriv::TextBlock::TextBlock(const TextBlock *Copy) : Block(Copy)
 {
 	LayoutDirty = true;
 	Len = Copy->Len;
@@ -232,13 +233,13 @@ GRichTextPriv::TextBlock::TextBlock(const TextBlock *Copy) : Block(Copy)
 	}
 }
 		
-GRichTextPriv::TextBlock::~TextBlock()
+LRichTextPriv::TextBlock::~TextBlock()
 {
 	LgiAssert(Cursors == 0);
 	Txt.DeleteObjects();
 }
 
-void GRichTextPriv::TextBlock::Dump()
+void LRichTextPriv::TextBlock::Dump()
 {
 	LgiTrace("    Txt.Len=%i, margin=%s, border=%s, padding=%s\n",
 				Txt.Length(),
@@ -248,7 +249,7 @@ void GRichTextPriv::TextBlock::Dump()
 	for (unsigned i=0; i<Txt.Length(); i++)
 	{
 		StyleText *t = Txt[i];
-		GString s(t->Length() ?
+		LString s(t->Length() ?
 					#ifndef WINDOWS
 					(char16*)
 					#endif
@@ -263,11 +264,11 @@ void GRichTextPriv::TextBlock::Dump()
 	}
 }
 		
-GNamedStyle *GRichTextPriv::TextBlock::GetStyle(ssize_t At)
+LNamedStyle *LRichTextPriv::TextBlock::GetStyle(ssize_t At)
 {
 	if (At >= 0)
 	{
-		GArray<StyleText*> t;
+		LArray<StyleText*> t;
 		if (GetTextAt(At, t))
 			return t[0]->GetStyle();
 	}
@@ -275,7 +276,7 @@ GNamedStyle *GRichTextPriv::TextBlock::GetStyle(ssize_t At)
 	return Style;
 }
 		
-void GRichTextPriv::TextBlock::SetStyle(GNamedStyle *s)
+void LRichTextPriv::TextBlock::SetStyle(LNamedStyle *s)
 {
 	if ((Style = s))
 	{
@@ -300,53 +301,53 @@ void GRichTextPriv::TextBlock::SetStyle(GNamedStyle *s)
 	}
 }
 
-ssize_t GRichTextPriv::TextBlock::Length()
+ssize_t LRichTextPriv::TextBlock::Length()
 {
 	return Len;
 }
 
-HtmlTag IsDefaultStyle(HtmlTag Id, GCss *Css)
+HtmlTag IsDefaultStyle(HtmlTag Id, LCss *Css)
 {
 	if (!Css)
 		return CONTENT;
 
 	if (Css->Length() == 2)
 	{
-		GCss::ColorDef c = Css->Color();
-		if ((GColour)c != GColour::Blue)
+		LCss::ColorDef c = Css->Color();
+		if ((LColour)c != LColour::Blue)
 			return CONTENT;
 				
-		GCss::TextDecorType td = Css->TextDecoration();
-		if (td != GCss::TextDecorUnderline)
+		LCss::TextDecorType td = Css->TextDecoration();
+		if (td != LCss::TextDecorUnderline)
 			return CONTENT;
 
 		return TAG_A;
 	}
 	else if (Css->Length() == 1)
 	{
-		GCss::FontWeightType fw = Css->FontWeight();
-		if (fw == GCss::FontWeightBold ||
-			fw == GCss::FontWeightBolder ||
-			fw >= GCss::FontWeight700)
+		LCss::FontWeightType fw = Css->FontWeight();
+		if (fw == LCss::FontWeightBold ||
+			fw == LCss::FontWeightBolder ||
+			fw >= LCss::FontWeight700)
 			return TAG_B;
 
-		GCss::TextDecorType td = Css->TextDecoration();
-		if (td == GCss::TextDecorUnderline)
+		LCss::TextDecorType td = Css->TextDecoration();
+		if (td == LCss::TextDecorUnderline)
 			return TAG_U;
 
-		GCss::FontStyleType fs = Css->FontStyle();
-		if (fs == GCss::FontStyleItalic)
+		LCss::FontStyleType fs = Css->FontStyle();
+		if (fs == LCss::FontStyleItalic)
 			return TAG_I;
 	}
 
 	return CONTENT;
 }
 
-bool GRichTextPriv::TextBlock::ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, GRange *Rng)
+bool LRichTextPriv::TextBlock::ToHtml(LStream &s, LArray<GDocView::ContentMedia> *Media, LRange *Rng)
 {
 	s.Print("<p>");
 
-	GRange All(0, Length());
+	LRange All(0, Length());
 	if (!Rng)
 		Rng = &All;
 
@@ -354,15 +355,15 @@ bool GRichTextPriv::TextBlock::ToHtml(GStream &s, GArray<GDocView::ContentMedia>
 	for (unsigned i=0; i<Txt.Length(); i++)
 	{
 		StyleText *t = Txt[i];
-		GNamedStyle *style = t->GetStyle();
+		LNamedStyle *style = t->GetStyle();
 		ssize_t tlen = t->Length();
 		if (!tlen)
 			continue;
-		GRange TxtRange(Pos, tlen);
-		GRange Common = TxtRange.Overlap(*Rng);
+		LRange TxtRange(Pos, tlen);
+		LRange Common = TxtRange.Overlap(*Rng);
 		if (Common.Valid())
 		{		
-			GString utf(
+			LString utf(
 				#ifndef WINDOWS
 				(char16*)
 				#endif
@@ -454,7 +455,7 @@ bool GRichTextPriv::TextBlock::ToHtml(GStream &s, GArray<GDocView::ContentMedia>
 	return true;
 }		
 
-bool GRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
+bool LRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 {
 	if (!Cursor)
 		return d->Error(_FL, "No cursor param.");
@@ -474,7 +475,7 @@ bool GRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 		TextLine *tl = Layout[i];
 		PtrCheckBreak(tl);
 
-		GRect r = tl->PosOff;
+		LRect r = tl->PosOff;
 		r.Offset(Pos.x1, Pos.y1);
 				
 		int FixX = 0;
@@ -510,8 +511,8 @@ bool GRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 				else
 				{
 					// In the middle somewhere...
-					GAutoPtr<DisplayStr> Tmp = ds->Clone(0, CharOffset);
-					// GDisplayString Tmp(ds->GetFont(), *ds, CharOffset);
+					LAutoPtr<DisplayStr> Tmp = ds->Clone(0, CharOffset);
+					// LDisplayString Tmp(ds->GetFont(), *ds, CharOffset);
 					if (Tmp)
 						Cursor->Pos.x1 = r.x1 + FixedToInt(FixX + Tmp->FX());
 				}
@@ -568,7 +569,7 @@ bool GRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 	return false;
 }
 		
-bool GRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
+bool LRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
 {
 	if (htr.In.y < Pos.y1 || htr.In.y > Pos.y2)
 		return false;
@@ -580,7 +581,7 @@ bool GRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
 		PtrCheckBreak(tl);
 		// int InitCharPos = CharPos;
 
-		GRect r = tl->PosOff;
+		LRect r = tl->PosOff;
 		r.Offset(Pos.x1, Pos.y1);
 		bool Over = r.Overlap(htr.In.x, htr.In.y);
 		bool OnThisLine =	htr.In.y >= r.y1 &&
@@ -645,17 +646,17 @@ bool GRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
 	return false;
 }
 
-void DrawDecor(GSurface *pDC, GRichTextPriv::DisplayStr *Ds, int Fx, int Fy, ssize_t Start, ssize_t Len)
+void DrawDecor(LSurface *pDC, LRichTextPriv::DisplayStr *Ds, int Fx, int Fy, ssize_t Start, ssize_t Len)
 {
-	// GColour Old = pDC->Colour(GColour::Red);
-	GDisplayString ds1(Ds->GetFont(), (const char16*)(*Ds), Start);
-	GDisplayString ds2(Ds->GetFont(), (const char16*)(*Ds), Start+Len);
+	// LColour Old = pDC->Colour(LColour::Red);
+	LDisplayString ds1(Ds->GetFont(), (const char16*)(*Ds), Start);
+	LDisplayString ds2(Ds->GetFont(), (const char16*)(*Ds), Start+Len);
 
-	int x = (Fx >> GDisplayString::FShift);
-	int y = (Fy >> GDisplayString::FShift) + (int)Ds->GetAscent() + 1;
+	int x = (Fx >> LDisplayString::FShift);
+	int y = (Fy >> LDisplayString::FShift) + (int)Ds->GetAscent() + 1;
 	int End = x + ds2.X();
 	x += ds1.X();
-	pDC->Colour(GColour::Red);
+	pDC->Colour(LColour::Red);
 	while (x < End)
 	{
 		pDC->Set(x, y+(x%2));
@@ -663,7 +664,7 @@ void DrawDecor(GSurface *pDC, GRichTextPriv::DisplayStr *Ds, int Fx, int Fy, ssi
 	}
 }
 
-bool Overlap(GSpellCheck::SpellingError *e, int start, ssize_t len)
+bool Overlap(LSpellCheck::SpellingError *e, int start, ssize_t len)
 {
 	if (!e)
 		return false;
@@ -674,7 +675,7 @@ bool Overlap(GSpellCheck::SpellingError *e, int start, ssize_t len)
 	return true;
 }
 
-void GRichTextPriv::TextBlock::DrawDisplayString(GSurface *pDC, DisplayStr *Ds, int &FixX, int FixY, GColour &Bk, int &Pos)
+void LRichTextPriv::TextBlock::DrawDisplayString(LSurface *pDC, DisplayStr *Ds, int &FixX, int FixY, LColour &Bk, int &Pos)
 {
 	int OldX = FixX;
 
@@ -711,7 +712,7 @@ void GRichTextPriv::TextBlock::DrawDisplayString(GSurface *pDC, DisplayStr *Ds, 
 }
 
 
-void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
+void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 {
 	int CharPos = 0;
 	int EndPoints = 0;
@@ -737,16 +738,16 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 	}
 	
 	// Paint margins, borders and padding...
-	GRect r = Pos;
+	LRect r = Pos;
 	r.x1 -= Margin.x1;
 	r.y1 -= Margin.y1;
 	r.x2 -= Margin.x2;
 	r.y2 -= Margin.y2;
-	GCss::ColorDef BorderStyle;
+	LCss::ColorDef BorderStyle;
 	if (Style)
 		BorderStyle = Style->BorderLeft().Color;
-	GColour BorderCol(222, 222, 222);
-	if (BorderStyle.Type == GCss::ColorRgb)
+	LColour BorderCol(222, 222, 222);
+	if (BorderStyle.Type == LCss::ColorRgb)
 		BorderCol.Set(BorderStyle.Rgb32, 32);
 
 	Ctx.DrawBox(r, Margin, Ctx.Colours[Unselected].Back);
@@ -761,7 +762,7 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 	{
 		TextLine *Line = Layout[i];
 
-		GRect LinePos = Line->PosOff;
+		LRect LinePos = Line->PosOff;
 		LinePos.Offset(Pos.x1, Pos.y1);
 		if (Line->PosOff.X() < Pos.X())
 		{
@@ -779,10 +780,10 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 		}
 
 		CurY = LinePos.y1;
-		GFont *Fnt = NULL;
+		LFont *Fnt = NULL;
 
 		#if DEBUG_NUMBERED_LAYOUTS
-		GString s;
+		LString s;
 		s.Printf("%i", Ctx.Index);
 		Ctx.Index++;
 		#endif
@@ -790,7 +791,7 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 		for (unsigned n=0; n<Line->Strs.Length(); n++)
 		{
 			DisplayStr *Ds = Line->Strs[n];
-			GFont *DsFnt = Ds->GetFont();
+			LFont *DsFnt = Ds->GetFont();
 			ColourPair &Cols = Ds->Src->Colours;
 			if (DsFnt && DsFnt != Fnt)
 			{
@@ -816,10 +817,10 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 			int FixY = IntToFixed(CurY + Ds->OffsetY);
 
 			#if DEBUG_OUTLINE_CUR_STYLE_TEXT
-			GRect r(0, 0, -1, -1);
+			LRect r(0, 0, -1, -1);
 			if (Ctx.Cursor->Blk == (Block*)this)
 			{
-				GArray<StyleText*> CurStyle;
+				LArray<StyleText*> CurStyle;
 				if (GetTextAt(Ctx.Cursor->Offset, CurStyle) && Ds->Src == CurStyle.First())
 				{
 					r.ZOff(Ds->X()-1, Ds->Y()-1);
@@ -835,10 +836,10 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 				// Process string into parts based on the selection boundaries
 				ssize_t Ch = EndPoint[CurEndPoint] - CharPos;
 				int TmpPos = CharPos;
-				GAutoPtr<DisplayStr> ds1 = Ds->Clone(0, Ch);
+				LAutoPtr<DisplayStr> ds1 = Ds->Clone(0, Ch);
 						
 				// First part...
-				GColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
+				LColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
 				if (DsFnt)
 					DsFnt->Colour(Ctx.Type == Unselected && Cols.Fore.IsValid() ? Cols.Fore : Ctx.Fore(), Bk);
 				if (ds1)
@@ -863,8 +864,8 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 					ssize_t Ch2 = EndPoint[CurEndPoint] - CharPos;
 
 					// Part 2
-					GAutoPtr<DisplayStr> ds2 = Ds->Clone(Ch, Ch2 - Ch);
-					GColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
+					LAutoPtr<DisplayStr> ds2 = Ds->Clone(Ch, Ch2 - Ch);
+					LColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
 					if (DsFnt)
 						DsFnt->Colour(Ctx.Type == Unselected && Cols.Fore.IsValid() ? Cols.Fore : Ctx.Fore(), Bk);
 					if (ds2)
@@ -875,7 +876,7 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 					// Part 3
 					if (Ch2 < Ds->Length())
 					{
-						GAutoPtr<DisplayStr> ds3 = Ds->Clone(Ch2);
+						LAutoPtr<DisplayStr> ds3 = Ds->Clone(Ch2);
 						Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
 						if (DsFnt)
 							DsFnt->Colour(Ctx.Type == Unselected && Cols.Fore.IsValid() ? Cols.Fore : Ctx.Fore(), Bk);
@@ -886,8 +887,8 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 				else if (Ch < Ds->Chars)
 				{
 					// No... draw 2nd part
-					GAutoPtr<DisplayStr> ds2 = Ds->Clone(Ch);
-					GColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
+					LAutoPtr<DisplayStr> ds2 = Ds->Clone(Ch);
+					LColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
 					if (DsFnt)
 						DsFnt->Colour(Ctx.Type == Unselected && Cols.Fore.IsValid() ? Cols.Fore : Ctx.Fore(), Bk);
 					if (ds2)	
@@ -897,7 +898,7 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 			else
 			{
 				// No selection changes... draw the whole string
-				GColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
+				LColour Bk = Ctx.Type == Unselected && Cols.Back.IsValid() ? Cols.Back : Ctx.Back();
 				if (DsFnt)
 					DsFnt->Colour(Ctx.Type == Unselected && Cols.Fore.IsValid() ? Cols.Fore : Ctx.Fore(), Bk);
 						
@@ -913,9 +914,9 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 					Ctx.Cursor->Offset >= CharPos &&
 					Ctx.Cursor->Offset < CharPos + Ds->Chars)
 				{
-					GRect r(0, 0, Ds->X()-1, Ds->Y()-1);
+					LRect r(0, 0, Ds->X()-1, Ds->Y()-1);
 					r.Offset(FixedToInt(OldFixX), FixedToInt(FixY));
-					Ctx.pDC->Colour(GColour::Red);
+					Ctx.pDC->Colour(LColour::Red);
 					Ctx.pDC->Box(&r);
 				}
 				#endif
@@ -924,10 +925,10 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 			#if DEBUG_OUTLINE_CUR_STYLE_TEXT
 			if (r.Valid())
 			{
-				Ctx.pDC->Colour(GColour(192, 192, 192));
-				Ctx.pDC->LineStyle(GSurface::LineDot);
+				Ctx.pDC->Colour(LColour(192, 192, 192));
+				Ctx.pDC->LineStyle(LSurface::LineDot);
 				Ctx.pDC->Box(&r);
-				Ctx.pDC->LineStyle(GSurface::LineSolid);
+				Ctx.pDC->LineStyle(LSurface::LineSolid);
 			}
 			#endif
 
@@ -956,12 +957,12 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 		
 
 		#if DEBUG_NUMBERED_LAYOUTS
-		GDisplayString Ds(SysFont, s);
-		SysFont->Colour(GColour::Green, GColour::White);
+		LDisplayString Ds(SysFont, s);
+		SysFont->Colour(LColour::Green, LColour::White);
 		SysFont->Transparent(false);
 		Ds.Draw(Ctx.pDC, LinePos.x1, LinePos.y1);
 		/*
-		Ctx.pDC->Colour(GColour::Blue);
+		Ctx.pDC->Colour(LColour::Blue);
 		Ctx.pDC->Line(LinePos.x1, LinePos.y1,LinePos.x2,LinePos.y2);
 		*/
 		#endif
@@ -992,13 +993,13 @@ void GRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 	if (Ctx.Select &&
 		Ctx.Select->Blk == this)
 	{
-		Ctx.pDC->Colour(GColour(255, 0, 0));
+		Ctx.pDC->Colour(LColour(255, 0, 0));
 		Ctx.pDC->Rectangle(&Ctx.Select->Pos);
 	}
 	#endif
 }
 		
-bool GRichTextPriv::TextBlock::OnLayout(Flow &flow)
+bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 {
 	if (Pos.X() == flow.X() && !LayoutDirty)
 	{
@@ -1028,7 +1029,7 @@ bool GRichTextPriv::TextBlock::OnLayout(Flow &flow)
 	flow.CurY += Border.y1 + Padding.y1;
 
 	int FixX = 0; // Current x offset (fixed point) on the current line
-	GAutoPtr<TextLine> CurLine(new TextLine(flow.Left - Pos.x1, flow.X(), flow.CurY - Pos.y1));
+	LAutoPtr<TextLine> CurLine(new TextLine(flow.Left - Pos.x1, flow.X(), flow.CurY - Pos.y1));
 	if (!CurLine)
 		return flow.d->Error(_FL, "alloc failed.");
 
@@ -1037,7 +1038,7 @@ bool GRichTextPriv::TextBlock::OnLayout(Flow &flow)
 	for (unsigned i=0; i<Txt.Length(); i++)
 	{
 		StyleText *t = Txt[i];
-		GNamedStyle *tstyle = t->GetStyle();
+		LNamedStyle *tstyle = t->GetStyle();
 		LgiAssert(t->Length() >= 0);			
 		TextSize += t->Length();
 		
@@ -1049,10 +1050,10 @@ bool GRichTextPriv::TextBlock::OnLayout(Flow &flow)
 			AvailableX = 1;
 
 		// Get the font for 't'
-		GFont *f = flow.d->GetFont(t->GetStyle());
+		LFont *f = flow.d->GetFont(t->GetStyle());
 		if (!f)
 			return flow.d->Error(_FL, "font creation failed.");
-		GCss::WordWrapType WrapType = tstyle ? tstyle->WordWrap() : GCss::WrapNormal;
+		LCss::WordWrapType WrapType = tstyle ? tstyle->WordWrap() : LCss::WrapNormal;
 		
 		uint32_t *sStart = t->At(0);
 		uint32_t *sEnd = sStart + t->Length();
@@ -1105,7 +1106,7 @@ bool GRichTextPriv::TextBlock::OnLayout(Flow &flow)
 					
 			// Add 't' to current line
 			ssize_t Chars = MIN(1024, e - s);
-			GAutoPtr<DisplayStr> Ds
+			LAutoPtr<DisplayStr> Ds
 			(
 				t->Emoji
 				?
@@ -1116,7 +1117,7 @@ bool GRichTextPriv::TextBlock::OnLayout(Flow &flow)
 			if (!Ds)
 				return flow.d->Error(_FL, "display str creation failed.");
 
-			if (WrapType != GCss::WrapNone &&
+			if (WrapType != LCss::WrapNone &&
 				FixX + Ds->FX() > IntToFixed(AvailableX))
 			{
 				#if DEBUG_LAYOUT
@@ -1221,7 +1222,7 @@ bool GRichTextPriv::TextBlock::OnLayout(Flow &flow)
 			
 	if (CurLine && CurLine->Strs.Length() > 0)
 	{
-		GFont *f = d->View ? d->View->GetFont() : SysFont;
+		LFont *f = d->View ? d->View->GetFont() : SysFont;
 		CurLine->LayoutOffsets(f->GetHeight());
 		Pos.y2 = MAX(Pos.y2, Pos.y1 + CurLine->PosOff.y2);
 		LayoutSize += CurLine->Length();
@@ -1242,7 +1243,7 @@ bool GRichTextPriv::TextBlock::OnLayout(Flow &flow)
 	return true;
 }
 		
-ssize_t GRichTextPriv::TextBlock::GetTextAt(ssize_t Offset, GArray<StyleText*> &Out)
+ssize_t LRichTextPriv::TextBlock::GetTextAt(ssize_t Offset, LArray<StyleText*> &Out)
 {
 	if (Txt.Length() == 0)
 		return 0;
@@ -1266,7 +1267,7 @@ ssize_t GRichTextPriv::TextBlock::GetTextAt(ssize_t Offset, GArray<StyleText*> &
 	return Out.Length();
 }
 
-bool GRichTextPriv::TextBlock::IsValid()
+bool LRichTextPriv::TextBlock::IsValid()
 {
 	int TxtLen = 0;
 	for (unsigned i = 0; i < Txt.Length(); i++)
@@ -1289,12 +1290,12 @@ bool GRichTextPriv::TextBlock::IsValid()
 	return true;
 }
 
-int GRichTextPriv::TextBlock::GetLines()
+int LRichTextPriv::TextBlock::GetLines()
 {
 	return (int)Layout.Length();
 }
 
-bool GRichTextPriv::TextBlock::OffsetToLine(ssize_t Offset, int *ColX, GArray<int> *LineY)
+bool LRichTextPriv::TextBlock::OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY)
 {
 	if (LayoutDirty)
 		return false;
@@ -1329,7 +1330,7 @@ bool GRichTextPriv::TextBlock::OffsetToLine(ssize_t Offset, int *ColX, GArray<in
 	return Found;
 }
 
-int GRichTextPriv::TextBlock::LineToOffset(int Line)
+int LRichTextPriv::TextBlock::LineToOffset(int Line)
 {
 	if (LayoutDirty)
 		return -1;
@@ -1351,7 +1352,7 @@ int GRichTextPriv::TextBlock::LineToOffset(int Line)
 }
 
 
-bool GRichTextPriv::TextBlock::PreEdit(Transaction *Trans)
+bool LRichTextPriv::TextBlock::PreEdit(Transaction *Trans)
 {
 	if (Trans)
 	{
@@ -1376,7 +1377,7 @@ bool GRichTextPriv::TextBlock::PreEdit(Transaction *Trans)
 	return true;
 }
 
-ssize_t GRichTextPriv::TextBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText)
+ssize_t LRichTextPriv::TextBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, LArray<uint32_t> *DeletedText)
 {
 	ssize_t Pos = 0;
 	ssize_t Deleted = 0;
@@ -1435,7 +1436,7 @@ ssize_t GRichTextPriv::TextBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset
 	if (Deleted > 0)
 	{
 		// Adjust start of existing spelling styles
-		GRange r(BlkOffset, Deleted);
+		LRange r(BlkOffset, Deleted);
 		for (auto &Err : SpellingErrors)
 		{
 			if (Err.Overlap(r).Valid())
@@ -1449,7 +1450,7 @@ ssize_t GRichTextPriv::TextBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset
 		}
 
 		LayoutDirty = true;
-		UpdateSpellingAndLinks(Trans, GRange(BlkOffset, 0));
+		UpdateSpellingAndLinks(Trans, LRange(BlkOffset, 0));
 	}
 
 	IsValid();
@@ -1457,13 +1458,13 @@ ssize_t GRichTextPriv::TextBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset
 	return Deleted;
 }
 		
-GMessage::Result GRichTextPriv::TextBlock::OnEvent(GMessage *Msg)
+GMessage::Result LRichTextPriv::TextBlock::OnEvent(GMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
 		case M_COMMAND:
 		{
-			GSpellCheck::SpellingError *e = SpellingErrors.AddressOf(ClickErrIdx);
+			LSpellCheck::SpellingError *e = SpellingErrors.AddressOf(ClickErrIdx);
 			if (e)
 			{
 				// Replacing text with spell check suggestion:
@@ -1471,14 +1472,14 @@ GMessage::Result GRichTextPriv::TextBlock::OnEvent(GMessage *Msg)
 				if (i >= 0 && i < (int)e->Suggestions.Length())
 				{
 					auto Start = e->Start;
-					GString s = e->Suggestions[i];
-					AutoTrans t(new GRichTextPriv::Transaction);
+					LString s = e->Suggestions[i];
+					AutoTrans t(new LRichTextPriv::Transaction);
 					
 					// Delete the old text...
 					DeleteAt(t, Start, e->Len); // 'e' might disappear here
 
 					// Insert the new text....
-					GAutoPtr<uint32_t,true> u((uint32_t*)LNewConvertCp("utf-32", s, "utf-8"));
+					LAutoPtr<uint32_t,true> u((uint32_t*)LNewConvertCp("utf-32", s, "utf-8"));
 					AddText(t, Start, u.Get(), Strlen(u.Get()));
 					
 					d->AddTrans(t);
@@ -1492,7 +1493,7 @@ GMessage::Result GRichTextPriv::TextBlock::OnEvent(GMessage *Msg)
 	return false;
 }
 
-bool GRichTextPriv::TextBlock::AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *InStr, ssize_t InChars, GNamedStyle *Style)
+bool LRichTextPriv::TextBlock::AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *InStr, ssize_t InChars, LNamedStyle *Style)
 {
 	if (!InStr)
 		return d->Error(_FL, "No input text.");
@@ -1501,7 +1502,7 @@ bool GRichTextPriv::TextBlock::AddText(Transaction *Trans, ssize_t AtOffset, con
 
 	PreEdit(Trans);
 	
-	GArray<int> EmojiIdx;
+	LArray<int> EmojiIdx;
 	EmojiIdx.Length(InChars);
 	for (int i=0; i<InChars; i++)
 		EmojiIdx[i] = EmojiToIconIndex(InStr + i, InChars - i);
@@ -1658,14 +1659,14 @@ bool GRichTextPriv::TextBlock::AddText(Transaction *Trans, ssize_t AtOffset, con
 	// Update layout and styling
 	LayoutDirty = true;	
 	IsValid();
-	UpdateSpellingAndLinks(Trans, GRange(InitialOffset, InChars));
+	UpdateSpellingAndLinks(Trans, LRange(InitialOffset, InChars));
 	
 	return true;
 }
 
-bool GRichTextPriv::TextBlock::OnDictionary(Transaction *Trans)
+bool LRichTextPriv::TextBlock::OnDictionary(Transaction *Trans)
 {
-	UpdateSpellingAndLinks(Trans, GRange(0, Length()));
+	UpdateSpellingAndLinks(Trans, LRange(0, Length()));
 	return true;
 }
 
@@ -1709,7 +1710,7 @@ template<typename Char>
 bool DetectUrl(Char *t, ssize_t &len)
 {
 	#ifdef _DEBUG
-	GString str(t, len);
+	LString str(t, len);
 	//char *ss = str;
 	#endif
 	
@@ -1756,12 +1757,12 @@ bool DetectUrl(Char *t, ssize_t &len)
 	return true;
 }
 
-int ErrSort(GSpellCheck::SpellingError *a, GSpellCheck::SpellingError *b)
+int ErrSort(LSpellCheck::SpellingError *a, LSpellCheck::SpellingError *b)
 {
 	return (int) (a->Start - b->Start);
 }
 
-void GRichTextPriv::TextBlock::SetSpellingErrors(GArray<GSpellCheck::SpellingError> &Errors, GRange r)
+void LRichTextPriv::TextBlock::SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r)
 {
 	// LgiTrace("%s:%i - SetSpellingErrors " LPrintfSSizeT ", " LPrintfSSizeT ":" LPrintfSSizeT "\n", _FL, Errors.Length(), r.Start, r.End());
 
@@ -1785,9 +1786,9 @@ void GRichTextPriv::TextBlock::SetSpellingErrors(GArray<GSpellCheck::SpellingErr
 
 #define IsWordChar(ch) ( IsAlpha(ch) || (ch) == '\'' )
 
-void GRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, GRange r)
+void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, LRange r)
 {
-	GArray<uint32_t> Text;
+	LArray<uint32_t> Text;
 	if (!CopyAt(0, Length(), &Text))
 		return;
 
@@ -1795,7 +1796,7 @@ void GRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, GRange
 	if (d->SpellCheck &&
 		d->SpellDictionaryLoaded)
 	{
-		GRange Rgn = r;
+		LRange Rgn = r;
 		while (Rgn.Start > 0 &&
 				IsWordChar(Text[Rgn.Start-1]))
 		{
@@ -1808,8 +1809,8 @@ void GRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, GRange
 			Rgn.Len++;
 		}
 
-		GString s(Text.AddressOf(Rgn.Start), Rgn.Len);
-		GArray<GVariant> Params;
+		LString s(Text.AddressOf(Rgn.Start), Rgn.Len);
+		LArray<LVariant> Params;
 		Params[SpellBlockPtr] = (Block*)this;
 
 		// LgiTrace("%s:%i - Check(%s) " LPrintfSSizeT ":" LPrintfSSizeT "\n", _FL, s.Get(), Rgn.Start, Rgn.End());
@@ -1829,7 +1830,7 @@ void GRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, GRange
 		r.Len++;
 
 	// Create array of words...
-	GArray<GRange> Words;
+	LArray<LRange> Words;
 	bool Ws = true;
 	for (int i = 0; i < r.Len; i++)
 	{
@@ -1839,13 +1840,13 @@ void GRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, GRange
 			Ws = w;
 			if (!w)
 			{
-				GRange &w = Words.New();
+				LRange &w = Words.New();
 				w.Start = r.Start + i;
 				// printf("StartWord=%i, %i\n", w.Start, w.Len);
 			}
 			else if (Words.Length() > 0)
 			{
-				GRange &w = Words.Last();
+				LRange &w = Words.Last();
 				w.Len = r.Start + i - w.Start;
 				// printf("EndWord=%i, %i\n", w.Start, w.Len);
 			}
@@ -1853,7 +1854,7 @@ void GRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, GRange
 	}
 	if (!Ws && Words.Length() > 0)
 	{
-		GRange &w = Words.Last();
+		LRange &w = Words.Last();
 		w.Len = r.Start + r.Len - w.Start;
 		// printf("TermWord=%i, %i Words=%i\n", w.Start, w.Len, Words.Length());
 	}
@@ -1861,14 +1862,14 @@ void GRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, GRange
 	// For each word in the range of text
 	for (unsigned i = 0; i<Words.Length(); i++)
 	{
-		GRange w = Words[i];
+		LRange w = Words[i];
 
 		// Check there is a URL at the location
 		bool IsUrl = DetectUrl(Text.AddressOf(w.Start), w.Len);
 		
 		#if 0
 		{
-			GString s(Text.AddressOf(w.Start), w.Len);
+			LString s(Text.AddressOf(w.Start), w.Len);
 			printf("DetectUrl(%s)=%i\n", s.Get(), IsUrl);
 		}
 		#endif
@@ -1883,20 +1884,20 @@ void GRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, GRange
 			}
 			
 			// Make it a link...
-			GString Link(Text.AddressOf(w.Start), w.Len);
+			LString Link(Text.AddressOf(w.Start), w.Len);
 			d->MakeLink(this, w.Start, w.Len, Link);
 			
 			// Also unlink any of the word after the URL
 			if (w.End() < Words[i].End())
 			{
-				GCss Style;
+				LCss Style;
 				ChangeStyle(Trans, w.End(), Words[i].End() - w.End(), &Style, false);
 			}
 		}
 	}
 }
 
-bool GRichTextPriv::TextBlock::StripLast(Transaction *Trans, const char *Set)
+bool LRichTextPriv::TextBlock::StripLast(Transaction *Trans, const char *Set)
 {
 	if (Txt.Length() == 0)
 		return false;
@@ -1917,14 +1918,14 @@ bool GRichTextPriv::TextBlock::StripLast(Transaction *Trans, const char *Set)
 	return true;
 }
 
-bool GRichTextPriv::TextBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling)
+bool LRichTextPriv::TextBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling)
 {
 	if (Spelling)
 	{
 		// Is there a spelling error at 'Offset'?		
 		for (unsigned i=0; i<SpellingErrors.Length(); i++)
 		{
-			GSpellCheck::SpellingError &e = SpellingErrors[i];
+			LSpellCheck::SpellingError &e = SpellingErrors[i];
 			if (Offset >= e.Start && Offset < e.End())
 			{
 				ClickErrIdx = i;
@@ -1950,7 +1951,7 @@ bool GRichTextPriv::TextBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset
 	return true;
 }
 
-bool GRichTextPriv::TextBlock::IsEmptyLine(BlockCursor *Cursor)
+bool LRichTextPriv::TextBlock::IsEmptyLine(BlockCursor *Cursor)
 {
 	if (!Cursor)
 		return false;
@@ -1963,12 +1964,12 @@ bool GRichTextPriv::TextBlock::IsEmptyLine(BlockCursor *Cursor)
 	return LineLen == 0;
 }
 
-GRichTextPriv::Block *GRichTextPriv::TextBlock::Clone()
+LRichTextPriv::Block *LRichTextPriv::TextBlock::Clone()
 {
 	return new TextBlock(this);
 }
 
-ssize_t GRichTextPriv::TextBlock::CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32_t> *Text)
+ssize_t LRichTextPriv::TextBlock::CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text)
 {
 	if (!Text)
 		return 0;
@@ -1995,7 +1996,7 @@ ssize_t GRichTextPriv::TextBlock::CopyAt(ssize_t Offset, ssize_t Chars, GArray<u
 	return Text->Length();
 }
 
-ssize_t GRichTextPriv::TextBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params)
+ssize_t LRichTextPriv::TextBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params)
 {
 	if (!Str || !Params)
 		return -1;
@@ -2018,7 +2019,7 @@ ssize_t GRichTextPriv::TextBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, 
 						Match = !Strncmp(c, Str, InLen);
 					else
 					{
-						GArray<uint32_t> tmp;
+						LArray<uint32_t> tmp;
 						if (CopyAt(CharPos + (c - s), InLen, &tmp) &&
 							tmp.Length() == InLen)
 							Match = !Strncmp(&tmp[0], Str, InLen);
@@ -2041,7 +2042,7 @@ ssize_t GRichTextPriv::TextBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, 
 						Match = !Strnicmp(c, Str, InLen);
 					else
 					{
-						GArray<uint32_t> tmp;
+						LArray<uint32_t> tmp;
 						if (CopyAt(CharPos + (c - s), InLen, &tmp) &&
 							tmp.Length() == InLen)
 							Match = !Strnicmp(&tmp[0], Str, InLen);
@@ -2060,21 +2061,21 @@ ssize_t GRichTextPriv::TextBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, 
 	return -1;
 }
 
-bool GRichTextPriv::TextBlock::DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper)
+bool LRichTextPriv::TextBlock::DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper)
 {
-	GRange Blk(0, Len);
-	GRange Inp(StartIdx, Chars < 0 ? Len - StartIdx : Chars);
-	GRange Change = Blk.Overlap(Inp);
+	LRange Blk(0, Len);
+	LRange Inp(StartIdx, Chars < 0 ? Len - StartIdx : Chars);
+	LRange Change = Blk.Overlap(Inp);
 
 	PreEdit(Trans);
 
-	GRange Run(0, 0);
+	LRange Run(0, 0);
 	bool Changed = false;
 	for (unsigned i=0; i<Txt.Length(); i++)
 	{
 		StyleText *st = Txt[i];
 		Run.Len = st->Length();
-		GRange Edit = Run.Overlap(Change);
+		LRange Edit = Run.Overlap(Change);
 		if (Edit.Len > 0)
 		{
 			uint32_t *s = st->At(Edit.Start - Run.Start);
@@ -2102,13 +2103,13 @@ bool GRichTextPriv::TextBlock::DoCase(Transaction *Trans, ssize_t StartIdx, ssiz
 	return Changed;
 }
 
-GRichTextPriv::Block *GRichTextPriv::TextBlock::Split(Transaction *Trans, ssize_t AtOffset)
+LRichTextPriv::Block *LRichTextPriv::TextBlock::Split(Transaction *Trans, ssize_t AtOffset)
 {
 	if (AtOffset < 0 || 
 		AtOffset >= Len)
 		return NULL;
 
-	GRichTextPriv::TextBlock *After = new GRichTextPriv::TextBlock(d);
+	LRichTextPriv::TextBlock *After = new LRichTextPriv::TextBlock(d);
 	if (!After)
 	{
 		d->Error(_FL, "Alloc Err");
@@ -2168,18 +2169,18 @@ GRichTextPriv::Block *GRichTextPriv::TextBlock::Split(Transaction *Trans, ssize_
 	return After;
 }
 
-void GRichTextPriv::TextBlock::IncAllStyleRefs()
+void LRichTextPriv::TextBlock::IncAllStyleRefs()
 {
 	if (Style)
 		Style->RefCount++;
 	for (unsigned i=0; i<Txt.Length(); i++)
 	{
-		GNamedStyle *s = Txt[i]->GetStyle();
+		LNamedStyle *s = Txt[i]->GetStyle();
 		if (s) s->RefCount++;
 	}
 }
 
-bool GRichTextPriv::TextBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, GCss *Style, bool Add)
+bool LRichTextPriv::TextBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add)
 {
 	if (!Style)
 		return d->Error(_FL, "No style.");
@@ -2212,7 +2213,7 @@ bool GRichTextPriv::TextBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, s
 			LgiAssert(Inside >= 0);
 
 
-			GAutoPtr<GCss> TmpStyle(new GCss);
+			LAutoPtr<LCss> TmpStyle(new LCss);
 			if (Add)
 			{
 				if (t->GetStyle())
@@ -2226,7 +2227,7 @@ bool GRichTextPriv::TextBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, s
 				*TmpStyle -= *Style;
 			}
 
-			GNamedStyle *CacheStyle = TmpStyle && TmpStyle->Length() ? d->AddStyleToCache(TmpStyle) : NULL;
+			LNamedStyle *CacheStyle = TmpStyle && TmpStyle->Length() ? d->AddStyleToCache(TmpStyle) : NULL;
 
 			if (Before && After)
 			{
@@ -2297,12 +2298,12 @@ bool GRichTextPriv::TextBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, s
 	return true;
 }
 
-bool GRichTextPriv::TextBlock::Seek(SeekType To, BlockCursor &Cur)
+bool LRichTextPriv::TextBlock::Seek(SeekType To, BlockCursor &Cur)
 {
 	int XOffset = Cur.Pos.x1 - Pos.x1;
 	int CharPos = 0;
-	GArray<int> LineOffset;
-	GArray<int> LineLen;
+	LArray<int> LineOffset;
+	LArray<int> LineLen;
 	int CurLine = -1;
 	int CurLineScore = 0;
 	
@@ -2439,13 +2440,13 @@ bool GRichTextPriv::TextBlock::Seek(SeekType To, BlockCursor &Cur)
 }
 	
 #ifdef _DEBUG
-void GRichTextPriv::TextBlock::DumpNodes(GTreeItem *Ti)
+void LRichTextPriv::TextBlock::DumpNodes(LTreeItem *Ti)
 {
-	GString s;
+	LString s;
 	s.Printf("TextBlock, style=%s, pos=%s, ptr=%p", Style?Style->Name.Get():NULL, Pos.GetStr(), this);
 	Ti->SetText(s);
 
-	GTreeItem *TxtRoot = PrintNode(Ti, "Txt(%i)", Txt.Length());
+	LTreeItem *TxtRoot = PrintNode(Ti, "Txt(%i)", Txt.Length());
 	if (TxtRoot)
 	{
 		int Pos = 0;
@@ -2453,10 +2454,10 @@ void GRichTextPriv::TextBlock::DumpNodes(GTreeItem *Ti)
 		{
 			StyleText *St = Txt[i];
 			ssize_t Len = St->Length();
-			GString u;
+			LString u;
 			if (Len)
 			{
-				GStringPipe p(256);
+				LStringPipe p(256);
 				uint32_t *Str = St->At(0);
 				p.Write("\'", 1);
 				for (int k=0; k<MIN(Len, 30); k++)
@@ -2488,14 +2489,14 @@ void GRichTextPriv::TextBlock::DumpNodes(GTreeItem *Ti)
 		}
 	}
 
-	GTreeItem *LayoutRoot = PrintNode(Ti, "Layout(%i)", Layout.Length());
+	LTreeItem *LayoutRoot = PrintNode(Ti, "Layout(%i)", Layout.Length());
 	if (LayoutRoot)
 	{
 		int Pos = 0;
 		for (unsigned i=0; i<Layout.Length(); i++)
 		{
 			TextLine *Tl = Layout[i];
-			GTreeItem *Elem = PrintNode(LayoutRoot,
+			LTreeItem *Elem = PrintNode(LayoutRoot,
 										"[%i] chars=%i-%i, len=%i + %i, pos=%s",
 										i,
 										Pos, Pos + Tl->Length() - 1,
@@ -2505,7 +2506,7 @@ void GRichTextPriv::TextBlock::DumpNodes(GTreeItem *Ti)
 			for (unsigned n=0; n<Tl->Strs.Length(); n++)
 			{
 				DisplayStr *Ds = Tl->Strs[n];
-				GNamedStyle *Style = Ds->Src ? Ds->Src->GetStyle() : NULL;
+				LNamedStyle *Style = Ds->Src ? Ds->Src->GetStyle() : NULL;
 				PrintNode(	Elem, "[%i] style=%s len=%i txt='%.20S'",
 							n,
 							Style ? Style->Name.Get() : NULL,

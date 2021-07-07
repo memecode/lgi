@@ -1,33 +1,33 @@
 #pragma once
 
-#include "LJson.h"
-#include "GSymLookup.h"
-#include "GFontCache.h"
+#include "SymLookup.h"
+#include "lgi/common/Json.h"
+#include "lgi/common/FontCache.h"
 
-class GAppPrivate
+class LAppPrivate
 {
 public:
 	// Common
-	GApp *Owner;
-	GAutoPtr<LJson> Config;
-	GFileSystem *FileSystem;
+	LApp *Owner;
+	LAutoPtr<LJson> Config;
+	LFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
 	OsAppArguments Args;
 	GLibrary *SkinLib;
 	OsThread GuiThread;
 	int LinuxWine;
-	GAutoString Mime, ProductId;
+	LAutoString Mime, ProductId;
 	bool ThemeAware;
 
 	/// Any fonts needed for styling the elements
-	GAutoPtr<GFontCache> FontCache;
+	LAutoPtr<GFontCache> FontCache;
 
 	// Win32
 	bool QuitReceived;
-	GApp::ClassContainer Classes;
-	GSymLookup *SymLookup;
+	LApp::ClassContainer Classes;
+	LSymLookup *SymLookup;
 
-	GAppPrivate(GApp *owner) : Owner(owner)
+	LAppPrivate(LApp *owner) : Owner(owner)
 	{
 		LinuxWine = -1;
 		SymLookup = 0;
@@ -44,7 +44,7 @@ public:
 		ThemeAware = true;
 	}
 
-	~GAppPrivate()
+	~LAppPrivate()
 	{
 		DeleteObj(SkinLib);
 		DeleteObj(SymLookup);

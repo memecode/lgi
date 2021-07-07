@@ -1,23 +1,24 @@
-#include "Lgi.h"
-#include "GHtml.h"
-#include "LList.h"
-#include "LDateTime.h"
-#include "GClipBoard.h"
-#include "GScripting.h"
-#include "GBox.h"
-#include "GTextView3.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Html.h"
+#include "lgi/common/List.h"
+#include "lgi/common/DateTime.h"
+#include "lgi/common/ClipBoard.h"
+#include "lgi/common/Scripting.h"
+#include "lgi/common/Box.h"
+#include "lgi/common/TextView3.h"
 #include "resdefs.h"
-#include "GProgressDlg.h"
-#include "GCombo.h"
-#include "INet.h"
-#include "IHttp.h"
-#include "GFilter.h"
-#include "INetTools.h"
-#include "ImageComparison.h"
-#include "OpenSSLSocket.h"
-#include "INet.h"
-#include "LEmojiFont.h"
-#include "IHttp.h"
+#include "lgi/common/ProgressDlg.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/Net.h"
+#include "lgi/common/Http.h"
+#include "lgi/common/Filter.h"
+#include "lgi/common/NetTools.h"
+#include "lgi/common/ImageComparison.h"
+#include "lgi/common/OpenSSLSocket.h"
+#include "lgi/common/Net.h"
+#include "lgi/common/EmojiFont.h"
+#include "lgi/common/Http.h"
+#include "lgi/common/Menu.h"
 
 #define HAS_LOG_VIEW			0
 #define HAS_IMAGE_LOADER		1
@@ -62,7 +63,7 @@ public:
         SetText(n);
     }
     
-	void OnMouseClick(GMouse &m)
+	void OnMouseClick(LMouse &m)
     {
         if (m.IsContextMenu())
         {
@@ -71,9 +72,9 @@ public:
             m.ToScreen();
             if (s.Float(GetList(), m.x, m.y, m.Left()) == 100)
             {
-                GClipBoard c(GetList());
+                LClipBoard c(GetList());
                 char Path[MAX_PATH];
-                LgiMakePath(Path, sizeof(Path), Base, GetText(0));
+                LMakePath(Path, sizeof(Path), Base, GetText(0));
                 c.Text(Path);
             }
         }
@@ -86,9 +87,9 @@ class HtmlScriptContext :
 	#else
 	public Html1::GHtml,
 	#endif
-	public GScriptContext
+	public LScriptContext
 {
-	GScriptEngine *Eng;
+	LScriptEngine *Eng;
 	
 public:
 	static GHostFunc Methods[];
@@ -103,7 +104,7 @@ public:
 	{
 		Eng = NULL;
 		
-		GFont *f = new GFont;
+		LFont *f = new LFont;
 		if (f)
 		{
 			f->Face("Times New Roman");
@@ -117,7 +118,7 @@ public:
 		return Methods;
 	}
 	
-	void SetEngine(GScriptEngine *Eng)
+	void SetEngine(LScriptEngine *Eng)
 	{		
 	}
 	
@@ -126,9 +127,9 @@ public:
 		return NULL;
 	}
 	
-	GAutoString GetDataFolder()
+	LAutoString GetDataFolder()
 	{
-		return GAutoString();
+		return LAutoString();
 	}
 };
 
@@ -139,7 +140,7 @@ GHostFunc HtmlScriptContext::Methods[] =
 
 class HtmlImageLoader : public LThread, public LMutex, public LCancel
 {
-	GArray<GDocumentEnv::LoadJob*> In;
+	LArray<GDocumentEnv::LoadJob*> In;
 
 public:
 	HtmlImageLoader() : LThread("HtmlImageLoader")
@@ -163,9 +164,9 @@ public:
 		}
 	}
 	
-	GAutoPtr<GSocketI> CreateSock(const char *Proto)
+	LAutoPtr<LSocketI> CreateSock(const char *Proto)
 	{
-		GAutoPtr<GSocketI> s;
+		LAutoPtr<LSocketI> s;
 		if (Proto && !_stricmp(Proto, "https"))
 		{
 			SslSocket *ss;
@@ -173,7 +174,7 @@ public:
 			ss->SetSslOnConnect(false);
 		}
 		else
-			s.Reset(new GSocket);
+			s.Reset(new LSocket);
 		
 		return s;
 	}
@@ -182,7 +183,7 @@ public:
 	{
 		while (!IsCancelled())
 		{
-			GAutoPtr<LThreadJob> j;
+			LAutoPtr<LThreadJob> j;
 			if (Lock(_FL))
 			{
 				if (In.Length())
@@ -196,7 +197,7 @@ public:
 			GDocumentEnv::LoadJob *Job = dynamic_cast<GDocumentEnv::LoadJob*>(j.Get());
 			if (Job)
 			{
-				GUri u(Job->Uri);
+				LUri u(Job->Uri);
 				if (u.IsFile())
 				{
 					// Local document?
@@ -213,16 +214,16 @@ public:
 				else
 				{
 					GMemQueue p(1024);
-					GString Err;
+					LString Err;
 					auto r = LgiGetUri(this, &p, &Err, Job->Uri);
 					if (r)
 					{
 						uchar Hint[16];
 						p.Peek(Hint, sizeof(Hint));
-						GAutoPtr<GFilter> Filter(GFilterFactory::New(u.sPath, FILTER_CAP_READ, Hint));
+						LAutoPtr<GFilter> Filter(GFilterFactory::New(u.sPath, FILTER_CAP_READ, Hint));
 						if (Filter)
 						{
-							GAutoPtr<GSurface> Img(new GMemDC);
+							LAutoPtr<LSurface> Img(new LMemDC);
 							GFilter::IoStatus Rd = Filter->ReadImage(Img, &p);
 							if (Rd == GFilter::IoSuccess)
 							{
@@ -252,30 +253,30 @@ public:
 	}
 };
 
-class AppWnd : public GWindow, public GDefaultDocumentEnv
+class AppWnd : public LWindow, public GDefaultDocumentEnv
 {
 	LList *Lst;
     HtmlScriptContext *Html;
-    GTextView3 *Text;
+    LTextView3 *Text;
 	char Base[256];
-	GAutoPtr<GScriptEngine> Script;
-	GAutoPtr<HtmlImageLoader> Worker;
-	GAutoPtr<LEmojiFont> Emoji;
+	LAutoPtr<LScriptEngine> Script;
+	LAutoPtr<HtmlImageLoader> Worker;
+	LAutoPtr<LEmojiFont> Emoji;
 
 	LoadType GetContent(LoadJob *&j)
 	{
-		GUri u(j->Uri);
+		LUri u(j->Uri);
 		if (!u.sProtocol)
 		{
 			char p[MAX_PATH];
-			if (LgiMakePath(p, sizeof(p), Base, j->Uri) &&
+			if (LMakePath(p, sizeof(p), Base, j->Uri) &&
 				LFileExists(p))
 			{
-				GString Ext = LgiGetExtension(p);
+				LString Ext = LGetExtension(p);
 				if (Ext.Equals("css") ||
 					Ext.Equals("html"))
 				{
-					GAutoPtr<GFile> f(new GFile);
+					LAutoPtr<LFile> f(new LFile);
 					if (f && f->Open(p, O_READ))
 					{
 						j->Stream.Reset(f.Release());
@@ -324,7 +325,7 @@ public:
 				Menu->Load(this, "IDM_MENU");
 			}
 			
-			GBox *s = new GBox;
+			LBox *s = new LBox;
 			if (s)
 			{
 				AddView(s);
@@ -335,16 +336,16 @@ public:
 				s->Value(200);
 
 				#if HAS_LOG_VIEW
-				GBox *vert = new GBox;
+				LBox *vert = new LBox;
 				vert->SetVertical(true);
 				s->AddView(vert);
 
 				vert->AddView(Html = new HtmlScriptContext(IDC_HTML, this));
 				Html->SetCssStyle("height: 70%;");
 
-				vert->AddView(Text = new GTextView3(IDC_LOG, 0, 0, 100, 100));
+				vert->AddView(Text = new LTextView3(IDC_LOG, 0, 0, 100, 100));
 				
-				GBox::Spacer *sp = s->GetSpacer(0);
+				LBox::Spacer *sp = s->GetSpacer(0);
 				if (sp)
 				{
 					sp->Colour.Rgb(64, 64, 64);
@@ -360,7 +361,7 @@ public:
 				s->AddView(Html = new HtmlScriptContext(IDC_HTML, this));
 				#endif
 
-				Script.Reset(new GScriptEngine(this, Html, NULL));
+				Script.Reset(new LScriptEngine(this, Html, NULL));
 
 				if (Html)
 					Html->SetEnv(this);
@@ -372,17 +373,17 @@ public:
 				{
 					#if defined(WIN32)
 					if (stristr(Base, "Release") || stristr(Base, "Debug"))
-						LgiTrimDir(Base);
+						LTrimDir(Base);
 					#endif
 					#if defined(MAC) && defined(__GTK_H__)
-					LgiMakePath(Base, sizeof(Base), Base, "../../../..");
+					LMakePath(Base, sizeof(Base), Base, "../../../..");
 					#endif
 
 					List<FileInf> Files;
-					GDirectory *d = new GDirectory;
+					LDirectory *d = new LDirectory;
 					if (d)
 					{
-						LgiMakePath(Base, sizeof(Base), Base, "Files");
+						LMakePath(Base, sizeof(Base), Base, "Files");
 						for (bool b = d->First(Base); b; b = d->Next())
 						{
 							if (!d->IsDir() && MatchStr("*.html", d->GetName()))
@@ -420,7 +421,7 @@ public:
 			}
 			
 			
-			GRect r(0, 0, 1200, 800);
+			LRect r(0, 0, 1200, 800);
 			SetPos(r);
 			MoveToCenter();
 			AttachChildren();
@@ -443,13 +444,13 @@ public:
 			{
 				LPoint PageSize(1000, 2000);
 				
-				GProgressDlg Prog(this, true);
+				LProgressDlg Prog(this, true);
 				Prog.SetDescription("Scanning for HTML...");
 				
 				char p[MAX_PATH];
 				LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
-				GArray<const char*> Ext;
-				GArray<char*> Files;
+				LArray<const char*> Ext;
+				LArray<char*> Files;
 				Ext.Add("*.html");
 				Ext.Add("*.htm");				
 				if (LRecursiveFileSearch(p, &Ext, &Files))
@@ -461,19 +462,19 @@ public:
 								"%.4i-%.2i-%.2i_%.2i-%.2i-%.2i",
 								Now.Year(), Now.Month(), Now.Day(),
 								Now.Hours(), Now.Minutes(), Now.Seconds());
-					LgiMakePath(OutPath, sizeof(OutPath), p, "Output");
+					LMakePath(OutPath, sizeof(OutPath), p, "Output");
 					if (!LDirExists(OutPath))
 						FileDev->CreateFolder(OutPath);
-					LgiMakePath(OutPath, sizeof(OutPath), OutPath, NowStr);
+					LMakePath(OutPath, sizeof(OutPath), OutPath, NowStr);
 					if (!LDirExists(OutPath))
 						FileDev->CreateFolder(OutPath);
 					
 					Prog.SetDescription("Saving renders...");
-					Prog.SetRange(GRange(0, Files.Length()));
+					Prog.SetRange(LRange(0, Files.Length()));
 					for (int i=0; i<Files.Length() && !Prog.IsCancelled(); i++)
 					{
 						char *File = Files[i];
-						GAutoString Content(ReadTextFile(File));
+						LAutoString Content(LReadTextFile(File));
 						if (!Content)
 						{
 							LgiAssert(0);
@@ -492,12 +493,12 @@ public:
 						char *Ext = strrchr(Png, '.');
 						if (Ext) *Ext = 0;
 						strcat_s(Png, sizeof(Png), ".png");
-						LgiMakePath(p, sizeof(p), OutPath, Png);
+						LMakePath(p, sizeof(p), OutPath, Png);
 
 						Html1::GHtml Html(100, 0, 0, PageSize.x, PageSize.y, this);
 						Html.Name(Content);
-						GMemDC Screen(PageSize.x, PageSize.y, System24BitColourSpace);
-						Screen.Colour(GColour(255, 255, 255));
+						LMemDC Screen(PageSize.x, PageSize.y, System24BitColourSpace);
+						Screen.Colour(LColour(255, 255, 255));
 						Screen.Rectangle();
 						Html.OnPaint(&Screen);
 						if (!GdcD->Save(p, &Screen))
@@ -514,13 +515,13 @@ public:
 			{
 				char p[MAX_PATH];
 				LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
-				GArray<const char*> Ext;
-				GArray<char*> Files;
+				LArray<const char*> Ext;
+				LArray<char*> Files;
 				Ext.Add("*.png");
 				// if (LRecursiveFileSearch(p, &Ext, &Files))
 
 				char OutPath[MAX_PATH];
-				LgiMakePath(OutPath, sizeof(OutPath), p, "Output");
+				LMakePath(OutPath, sizeof(OutPath), p, "Output");
 				if (!LDirExists(OutPath))
 				{
 					LgiMsg(this, "No output render folder.", "Html Test Suite");
@@ -535,7 +536,7 @@ public:
 		return 0;
 	}
 	
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{
@@ -548,10 +549,10 @@ public:
 					{
 						char p[256];
 
-						LgiMakePath(p, sizeof(p), Base, s->GetText(0));
+						LMakePath(p, sizeof(p), Base, s->GetText(0));
 						if (LFileExists(p))
 						{
-							char *h = ReadTextFile(p);
+							char *h = LReadTextFile(p);
 							if (h)
 							{
 								if (Html)
@@ -571,7 +572,7 @@ public:
 					{
 						if (Text)
 						{
-							GAutoString s(Html->GetSelection());
+							LAutoString s(Html->GetSelection());
 							if (s)
 								Text->Name(s);
 							else
@@ -603,8 +604,8 @@ void FontSz()
 {
 	for (int i=6; i<32; i++)
 	{
-		GFont f;
-		if (f.Create("verdana", GCss::Len(GCss::LenPx, i)))
+		LFont f;
+		if (f.Create("verdana", LCss::Len(LCss::LenPx, i)))
 		{
 			double a = (double) f.GetHeight() / f.Ascent();
 			LgiTrace("%i: %i, ascent=%f, a=%f\n", i, f.GetHeight(), f.Ascent(), a);
@@ -614,7 +615,7 @@ void FontSz()
 
 int LgiMain(OsAppArguments &AppArgs)
 {
-	GApp a(AppArgs, "HtmlTestSuite");
+	LApp a(AppArgs, "HtmlTestSuite");
 	if (a.IsOk())
 	{
 		//FontSz();

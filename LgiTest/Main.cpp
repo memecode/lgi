@@ -1,15 +1,15 @@
-#include "Lgi.h"
-#include "GEdit.h"
-#include "GButton.h"
-#include "GDisplayString.h"
-#include "GTextLabel.h"
-#include "GCss.h"
-#include "GTableLayout.h"
-#include "LDbTable.h"
-#include "GXmlTree.h"
-#include "GTabView.h"
-#include "GTextLog.h"
-#include "GDropFiles.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Css.h"
+#include "lgi/common/DbTable.h"
+#include "lgi/common/XmlTree.h"
+#include "lgi/common/TabView.h"
+#include "lgi/common/TextLog.h"
+#include "lgi/common/DropFiles.h"
+#include "lgi/common/TableLayout.h"
 
 const char *AppName = "Lgi Test App";
 
@@ -23,23 +23,23 @@ enum Ctrls
 
 void GStringTest()
 {
-	GString a("This<TD>is<TD>a<TD>test");
+	LString a("This<TD>is<TD>a<TD>test");
 	a.RFind("<TD>");
-	GString f = a(8,10);
-	GString end = a(-5, -1);
+	LString f = a(8,10);
+	LString end = a(-5, -1);
 	
-	GString sep(", ");
-	GString::Array parts = GString("This is a test").Split(" ");
-	GString joined = sep.Join(parts);
+	LString sep(", ");
+	LString::Array parts = LString("This is a test").Split(" ");
+	LString joined = sep.Join(parts);
 	
-	GString src("  asdwer   ");
-	GString left = src.LStrip();
-	GString right = src.RStrip();
-	GString both = src.Strip();
+	LString src("  asdwer   ");
+	LString left = src.LStrip();
+	LString right = src.RStrip();
+	LString both = src.Strip();
 	
 }
 
-GColourSpace RgbColourSpaces[] =
+LColourSpace RgbColourSpaces[] =
 {
 	/*
 	CsIndex1,
@@ -74,12 +74,12 @@ GColourSpace RgbColourSpaces[] =
 	CsNone,
 };
 
-class BltTest : public GWindow
+class BltTest : public LWindow
 {
 	struct Test
 	{
-		GColourSpace Src, Dst;
-		GMemDC Result;
+		LColourSpace Src, Dst;
+		LMemDC Result;
 		
 		void Create()
 		{
@@ -94,7 +94,7 @@ class BltTest : public GWindow
 				}
 			}
 			
-			GMemDC SrcDC;
+			LMemDC SrcDC;
 			if (!SrcDC.Create(16, 16, Src))
 				return;
 			
@@ -102,13 +102,13 @@ class BltTest : public GWindow
 		}
 	};
 	
-	GArray<Test*> a;
+	LArray<Test*> a;
 
 public:
 	BltTest()
 	{
 		Name("BltTest");
-		GRect r(0, 0, 1200, 1000);
+		LRect r(0, 0, 1200, 1000);
 		SetPos(r);
 		MoveToCenter();
 		
@@ -130,7 +130,7 @@ public:
 		}
 	}
 	
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		pDC->Colour(L_WORKSPACE);
 		pDC->Rectangle();
@@ -142,7 +142,7 @@ public:
 			char s[256];
 			Test *t = a[i];
 			sprintf_s(s, sizeof(s), "%s->%s", GColourSpaceToString(t->Src), GColourSpaceToString(t->Dst));
-			GDisplayString ds(SysFont, s);
+			LDisplayString ds(SysFont, s);
 			ds.Draw(pDC, x, y);
 			y += ds.Y();
 			if (t->Result.Y())
@@ -167,14 +167,14 @@ public:
 	{
 	}
 
-	int WillAccept(GDragFormats &Formats, LPoint Pt, int KeyState)
+	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
 	{
 		return DROPEFFECT_COPY;
 	}
 
-	int OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState)
+	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 	{
-		GString Keys;
+		LString Keys;
 		if (KeyState & LGI_EF_CTRL)
 			Keys += "LGI_EF_CTRL ";
 		if (KeyState & LGI_EF_ALT)
@@ -210,23 +210,23 @@ public:
 	}
 };
 
-class App : public GWindow
+class App : public LWindow
 {
-	GOptionsFile Opts;
-	GEdit *e;
-	GEdit *e2;
-	GTextLabel *Txt;
-	GTableLayout *Tbl;
+	LOptionsFile Opts;
+	LEdit *e;
+	LEdit *e2;
+	LTextLabel *Txt;
+	LTableLayout *Tbl;
 
 public:
-	App() : Opts(GOptionsFile::PortableMode, AppName)
+	App() : Opts(LOptionsFile::PortableMode, AppName)
 	{
 		e = 0;
 		e2 = 0;
 		Txt = 0;
 		Tbl = 0;
 
-		GRect r(0, 0, 1000, 800);
+		LRect r(0, 0, 1000, 800);
 		SetPos(r);
 		Name(AppName);
 		MoveToCenter();
@@ -239,12 +239,12 @@ public:
 		{
 			#if 1
 
-			GTabView *t = new GTabView(100);
+			LTabView *t = new LTabView(100);
 			t->Attach(this);
 			t->GetCss(true)->Padding("6px");
 
 			auto *tab = t->Append("First");
-			tab->GetCss(true)->FontStyle(GCss::FontStyleItalic);
+			tab->GetCss(true)->FontStyle(LCss::FontStyleItalic);
 			tab->Append(new DnDtarget());
 			
 			tab = t->Append("Second");
@@ -256,26 +256,26 @@ public:
 
 			#elif 0
 
-			AddView(Tbl = new GTableLayout(100));
+			AddView(Tbl = new LTableLayout(100));
 			GLayoutCell *c = Tbl->GetCell(0, 0);
 
-			c->Add(Txt = new GTextLabel(IDC_TXT, 0, 0, -1, -1, "This is a test string. &For like\ntesting and stuff. "
+			c->Add(Txt = new LTextLabel(IDC_TXT, 0, 0, -1, -1, "This is a test string. &For like\ntesting and stuff. "
 																"It has multiple\nlines to test wrapping."));
 			Txt->SetWrap(true);
-			//Txt->GetCss(true)->Color(GCss::ColorDef(GColour::Red));
-			// Txt->GetCss(true)->FontWeight(GCss::FontWeightBold);
-			// Txt->GetCss(true)->FontStyle(GCss::FontStyleItalic);
-			Txt->GetCss(true)->FontSize(GCss::Len("22pt"));
+			//Txt->GetCss(true)->Color(LCss::ColorDef(LColour::Red));
+			// Txt->GetCss(true)->FontWeight(LCss::FontWeightBold);
+			// Txt->GetCss(true)->FontStyle(LCss::FontStyleItalic);
+			Txt->GetCss(true)->FontSize(LCss::Len("22pt"));
 			Txt->OnStyleChange();
 
 			c = Tbl->GetCell(1, 0);
-			c->Add(new GEdit(IDC_EDIT1, 0, 0, -1, -1));
+			c->Add(new LEdit(IDC_EDIT1, 0, 0, -1, -1));
 
 			#elif 0
 
-			AddView(e = new GEdit(IDC_EDIT1, 10, 10, 200, 22));
-			AddView(e2 = new GEdit(IDC_EDIT1, 10, 50, 200, 22));
-			AddView(new GButton(IDC_BLT_TEST, 10, 200, -1, -1, "Blt Test"));
+			AddView(e = new LEdit(IDC_EDIT1, 10, 10, 200, 22));
+			AddView(e2 = new LEdit(IDC_EDIT1, 10, 50, 200, 22));
+			AddView(new LButton(IDC_BLT_TEST, 10, 200, -1, -1, "Blt Test"));
 			// e->Focus(true);
 			e->Password(true);
 			e->SetEmptyText("(this is a test)");
@@ -294,7 +294,7 @@ public:
 		Opts.SerializeFile(true);
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		auto c = GetClient();
 		
@@ -302,12 +302,12 @@ public:
 		pDC->Rectangle();
 		
 		#if 0
-		pDC->Colour(GColour::Red);
+		pDC->Colour(LColour::Red);
 		pDC->Line(0, 0, c.X()-1, c.Y()-1);
 		#endif
 	}
 	
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		switch (Ctrl->GetId())
 		{
@@ -341,16 +341,16 @@ bool DbTesting()
 	const char *BaseFolder = "C:\\Users\\matthew\\AppData\\Roaming\\Scribe\\ImapCache\\378651814\\INBOX";
 	#endif
 
-	GFile::Path FileXml(BaseFolder, "Folder.xml");
-	GFile::Path FileDb(BaseFolder, "Folder.db");
-	GFile::Path FileDebug(BaseFolder, "Debug.txt");
-	GFile In;
+	LFile::Path FileXml(BaseFolder, "Folder.xml");
+	LFile::Path FileDb(BaseFolder, "Folder.db");
+	LFile::Path FileDebug(BaseFolder, "Debug.txt");
+	LFile In;
 	if (!In.Open(FileXml, O_READ))
 		return false;	
 	
 	// Read XML
-	GXmlTag r;
-	GXmlTree t;
+	LXmlTag r;
+	LXmlTree t;
 	uint64 Start = LgiMicroTime();
 	if (!t.Read(&r, &In))
 		return false;
@@ -368,7 +368,7 @@ bool DbTesting()
 	Tbl.AddField(M_FILENAME, GV_STRING);
 
 	Start = LgiMicroTime();
-	GXmlTag *Emails = r.GetChildTag("Emails");
+	LXmlTag *Emails = r.GetChildTag("Emails");
 	if (!Emails)
 		return false;
 	for (auto c: Emails->Children)
@@ -401,7 +401,7 @@ bool DbTesting()
 		m->SetStr(M_LABEL, c->GetAttr("Label"));
 		m->SetInt(M_COLOUR, c->GetAsInt("Colour"));
 		m->SetInt(M_SIZE, Atoi(c->GetAttr("Size")));
-		m->SetStr(M_FILENAME, GString(c->GetContent()).Strip());
+		m->SetStr(M_FILENAME, LString(c->GetContent()).Strip());
 	}
 	uint64 ConvertTime = LgiMicroTime() - Start;
 
@@ -417,17 +417,17 @@ bool DbTesting()
 	uint64 ReadTime = LgiMicroTime() - Start;
 
 	Start = LgiMicroTime();
-	GAutoPtr<DbArrayIndex> Idx(Test.Sort(M_FILENAME));
+	LAutoPtr<DbArrayIndex> Idx(Test.Sort(M_FILENAME));
 	uint64 SortTime = LgiMicroTime() - Start;
 	if (Idx)
 	{
-		GFile Out;
+		LFile Out;
 		if (Out.Open(FileDebug, O_WRITE))
 		{
 			Out.SetSize(0);
 			for (unsigned i=0; i<Idx->Length(); i++)
 			{
-				GString s = Idx->ItemAt(i)->ToString();
+				LString s = Idx->ItemAt(i)->ToString();
 				s += "\n";
 				Out.Write(s);
 			}
@@ -454,7 +454,7 @@ bool DbTesting()
 
 int LgiMain(OsAppArguments &AppArgs)
 {
-	GApp a(AppArgs, "Lgi Test");
+	LApp a(AppArgs, "Lgi Test");
 	if (a.IsOk())
 	{
 		a.AppWnd = new App;

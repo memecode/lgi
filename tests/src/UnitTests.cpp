@@ -1,9 +1,9 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "UnitTests.h"
 
 void UnitTests()
 {
-	GArray<UnitTest*> Tests;
+	LArray<UnitTest*> Tests;
 
 	Tests.Add(new LRangeTest);
 	Tests.Add(new GContainers);
@@ -35,7 +35,7 @@ void UnitTests()
 int main(int args, char **arg)
 {
 	OsAppArguments Args(args, arg);
-	GApp a(Args, "LgiUnitTests");
+	LApp a(Args, "LgiUnitTests");
 	if (a.IsOk())
 	{
 		UnitTests();

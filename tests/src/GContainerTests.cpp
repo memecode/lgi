@@ -1,14 +1,14 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "UnitTests.h"
-#include "LUnrolledList.h"
-#include "LHashTable.h"
+#include "lgi/common/UnrolledList.h"
+#include "lgi/common/HashTable.h"
 
 class GContainersPriv
 {
 public:
 	bool ListDeleteOne(int pos, int sz)
 	{
-		GArray<int> a;
+		LArray<int> a;
 		List<int> l;
 		for (int i=0; i<sz; i++)
 		{
@@ -35,7 +35,7 @@ public:
 
 	bool ListInsert(int pos, int sz)
 	{
-		GArray<int> a;
+		LArray<int> a;
 		List<int> l;
 		for (int i=0; i<sz; i++)
 		{
@@ -75,7 +75,7 @@ bool GContainers::Run()
 	int ref[] = {1, 4, 5, 8, -1, -1};
 
 	{
-		GArray<int> a;
+		LArray<int> a;
 		a.Add(1);
 		a.Add(4);
 		a.Add(5);
@@ -164,7 +164,7 @@ bool GContainers::Run()
 		LUnrolledList<int> IntLst;
 		IntLst.Add(123);
 
-		LUnrolledList<GString> StrLst;
+		LUnrolledList<LString> StrLst;
 		StrLst.Add("Hello");
 		for (auto i : StrLst)
 		{
@@ -178,7 +178,7 @@ bool GContainers::Run()
 
 		StrLst.Sort
 		(
-			[](GString &a, GString &b, int Dir)
+			[](LString &a, LString &b, int Dir)
 			{
 				return _stricmp(a, b) * Dir;
 			},

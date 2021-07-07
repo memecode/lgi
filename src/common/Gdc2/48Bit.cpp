@@ -9,15 +9,15 @@
 #include <string.h>
 #include <math.h>
 
-#include "Gdc2.h"
-#include "GPalette.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/Palette.h"
 
 #define BytePtr	((uint8_t*&)Ptr)
 #undef NonPreMulOver48
 #define NonPreMulOver48(c)	d->c = ((s->c * sa) + ((d->c * 0xffff) / 0xffff * o)) / 0xffff
 
-template<typename Pixel, GColourSpace ColourSpace>
-class App48 : public GApplicator
+template<typename Pixel, LColourSpace ColourSpace>
+class App48 : public LApplicator
 {
 	union
 	{
@@ -274,7 +274,7 @@ public:
 			switch (Src->Cs)
 			{
 				#define AlphaCase(name) \
-					case Cs##name: return AlphaBlt<G##name>(Src, SrcAlpha);
+					case Cs##name: return AlphaBlt<L##name>(Src, SrcAlpha);
 
 				AlphaCase(Rgb24);
 				AlphaCase(Bgr24);
@@ -298,16 +298,16 @@ public:
 	}
 };
 
-class G48BitFactory : public GApplicatorFactory
+class G48BitFactory : public LApplicatorFactory
 {
 public:
-	GApplicator *Create(GColourSpace Cs, int Op)
+	LApplicator *Create(LColourSpace Cs, int Op)
 	{
 		switch (Cs)
 		{
 			#define Case48(name) \
 				case Cs##name: \
-					return new App48<G##name, Cs##name>(Op);
+					return new App48<L##name, Cs##name>(Op);
 			
 			Case48(Rgb48);
 			Case48(Bgr48);

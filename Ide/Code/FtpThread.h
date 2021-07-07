@@ -1,8 +1,9 @@
 #ifndef _FTP_THREAD_H_
 #define _FTP_THREAD_H_
 
-#include "LList.h"
-#include "IFtp.h"
+#include "lgi/common/List.h"
+#include "lgi/common/Ftp.h"
+#include "lgi/common/Thread.h"
 
 enum FtpCommand
 {
@@ -31,7 +32,7 @@ public:
 	// Output
 	bool Status;
 	char *File;
-	GArray<IFtpEntry*> Dir;
+	LArray<IFtpEntry*> Dir;
 
 	// Callback stuff
 	FtpCallback *Callback;

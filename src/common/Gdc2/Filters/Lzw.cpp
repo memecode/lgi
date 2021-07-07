@@ -2,8 +2,8 @@
 #include <string.h>
 #include <math.h>
 
-#include "Lgi.h"
-#include "Lzw.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Lzw.h"
 
 #define HasLZW
 
@@ -25,7 +25,7 @@ public:
 	int Datum;
 	int BitPos;
 	size_t BitsLeft;
-	GStream *Pipe;
+	LStream *Pipe;
 
 	// Read buffer
 	int InBufSize;
@@ -180,7 +180,7 @@ public:
 		}
 	}
 */
-	bool Decompress(GStream *Out, GStream *in, Progress *Meter, int Block)
+	bool Decompress(LStream *Out, LStream *in, Progress *Meter, int Block)
 	{
 		int Code = 0;
 
@@ -358,7 +358,7 @@ public:
 		}
 	}
 
-	bool Compress(GStream *Out, GStream *In, Progress *Meter, int Block)
+	bool Compress(LStream *Out, LStream *In, Progress *Meter, int Block)
 	{
 		bool Status = false;
 		short index, WaitingCode;
@@ -400,7 +400,7 @@ public:
 			DoEvery Do(200);
 			if (Meter)
 			{
-				Meter->SetRange(GRange(0, InputLen));
+				Meter->SetRange(LRange(0, InputLen));
 			}
 
 			for (uchar *p = Input + 1; p < End; p++)
@@ -521,12 +521,12 @@ void Lzw::SetBufSize(int i)
 {
 }
 
-bool Lzw::Decompress(GStream *out, GStream *in)
+bool Lzw::Decompress(LStream *out, LStream *in)
 {
 	return d->Decompress(out, in, Meter, MeterBlock);
 }
 
-bool Lzw::Compress(GStream *out, GStream *in)
+bool Lzw::Compress(LStream *out, LStream *in)
 {
 	return d->Compress(out, in, Meter, MeterBlock);
 }

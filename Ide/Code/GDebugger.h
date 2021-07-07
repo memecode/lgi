@@ -1,12 +1,12 @@
 #ifndef _GDEBUGGER_H_
 #define _GDEBUGGER_H_
 
-#include "GVariant.h"
-#include "GStringClass.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/StringClass.h"
 
 #define DEBUG_SESSION_LOGGING		0
 
-class GDebugEvents : public GStream
+class GDebugEvents : public LStream
 {
 public:
 	virtual ~GDebugEvents() {}
@@ -26,11 +26,11 @@ public:
 		bool Added;
 
 		// Use File:Line
-		GString File;
+		LString File;
 		ssize_t Line;
 		// -or-
 		// A symbol reference
-		GString Symbol;
+		LString Symbol;
 		
 		BreakPoint()
 		{
@@ -68,10 +68,10 @@ public:
 			Global
 		}	Scope;
 		
-		GString Name;
-		GString Type;
-		GVariant Value;
-		GString Detail;
+		LString Name;
+		LString Type;
+		LVariant Value;
+		LString Detail;
 	};
 	
 	virtual ~GDebugger() {}
@@ -80,22 +80,22 @@ public:
 	virtual bool Restart() = 0;
 	virtual bool Unload() = 0;
 	
-	virtual bool GetCallStack(GArray<GAutoString> &Stack) = 0;
-	virtual bool GetThreads(GArray<GString> &Threads, int *CurrentThread) = 0;
+	virtual bool GetCallStack(LArray<LAutoString> &Stack) = 0;
+	virtual bool GetThreads(LArray<LString> &Threads, int *CurrentThread) = 0;
 	virtual bool SetCurrentThread(int ThreadId) = 0;
-	virtual bool GetFrame(int &Frame, GAutoString &File, int &Line) = 0;
+	virtual bool GetFrame(int &Frame, LAutoString &File, int &Line) = 0;
 	virtual bool SetFrame(int Frame) = 0;
 
 	virtual bool SetBreakPoint(BreakPoint *bp) = 0;
 	virtual bool RemoveBreakPoint(BreakPoint *bp) = 0;
-	virtual bool GetBreakPoints(GArray<BreakPoint> &bps) = 0;
+	virtual bool GetBreakPoints(LArray<BreakPoint> &bps) = 0;
 
-	virtual bool GetVariables(bool Locals, GArray<Variable> &vars, bool Detailed) = 0;
-	virtual bool PrintObject(const char *Var, GStream *Output) = 0;
-	virtual bool ReadMemory(GString &BaseAddr, int Length, GArray<uint8_t> &OutBuf, GString *ErrorMsg = NULL) = 0;
-	virtual bool GetRegisters(GStream *Out) = 0;
+	virtual bool GetVariables(bool Locals, LArray<Variable> &vars, bool Detailed) = 0;
+	virtual bool PrintObject(const char *Var, LStream *Output) = 0;
+	virtual bool ReadMemory(LString &BaseAddr, int Length, LArray<uint8_t> &OutBuf, LString *ErrorMsg = NULL) = 0;
+	virtual bool GetRegisters(LStream *Out) = 0;
 
-	virtual bool GetLocation(GAutoString &File, int &Line) = 0;
+	virtual bool GetLocation(LAutoString &File, int &Line) = 0;
 	virtual bool SetLocation(const char *File, int Line) = 0;
 
 	virtual bool GetRunning() = 0;
@@ -108,6 +108,6 @@ public:
 	virtual bool UserCommand(const char *Cmd) = 0;
 };
 
-extern GDebugger *CreateGdbDebugger(GStream *Log);
+extern GDebugger *CreateGdbDebugger(LStream *Log);
 
 #endif

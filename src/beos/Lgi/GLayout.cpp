@@ -10,42 +10,42 @@
 
 #include <stdio.h>
 #include "Lgi.h"
-#include "GScrollBar.h"
+#include "LScrollBar.h"
 
 //////////////////////////////////////////////////////////////////////////////
-GLayout::GLayout() :
-	GView(new BViewRedir(this))
+LLayout::LLayout() :
+	LView(new BViewRedir(this))
 {
 	_PourLargest = false;
 	VScroll = 0;
 	HScroll = 0;
 }
 
-GLayout::~GLayout()
+LLayout::~LLayout()
 {
 	DeleteObj(HScroll);
 	DeleteObj(VScroll);
 }
 
-void GLayout::OnCreate()
+void LLayout::OnCreate()
 {
 }
 
-bool GLayout::GetPourLargest()
+bool LLayout::GetPourLargest()
 {
 	return _PourLargest;
 }
 
-void GLayout::SetPourLargest(bool i)
+void LLayout::SetPourLargest(bool i)
 {
 	_PourLargest = i;
 }
 
-bool GLayout::Pour(GRegion &r)
+bool LLayout::Pour(LRegion &r)
 {
 	if (_PourLargest)
 	{
-		GRect *Best = FindLargest(r);
+		LRect *Best = FindLargest(r);
 		if (Best)
 		{
 			SetPos(*Best, true);
@@ -56,7 +56,7 @@ bool GLayout::Pour(GRegion &r)
 	return false;
 }
 
-void GLayout::GetScrollPos(int &x, int &y)
+void LLayout::GetScrollPos(int &x, int &y)
 {
 	if (HScroll)
 	{
@@ -77,7 +77,7 @@ void GLayout::GetScrollPos(int &x, int &y)
 	}
 }
 
-void GLayout::SetScrollPos(int x, int y)
+void LLayout::SetScrollPos(int x, int y)
 {
 	if (HScroll)
 	{
@@ -90,9 +90,9 @@ void GLayout::SetScrollPos(int x, int y)
 	}
 }
 
-bool GLayout::Attach(GViewI *p)
+bool LLayout::Attach(LViewI *p)
 {
-	bool Status = GView::Attach(p);
+	bool Status = LView::Attach(p);
 	
 	if (_View)
 	{
@@ -124,12 +124,12 @@ bool GLayout::Attach(GViewI *p)
 	return Status;
 }
 
-bool GLayout::Detach()
+bool LLayout::Detach()
 {
-	return GView::Detach();
+	return LView::Detach();
 }
 
-bool GLayout::SetScrollBars(bool x, bool y)
+bool LLayout::SetScrollBars(bool x, bool y)
 {
 	if (( (HScroll!=0) ^ x ) ||
 		( (VScroll!=0) ^ y ))
@@ -138,7 +138,7 @@ bool GLayout::SetScrollBars(bool x, bool y)
 		{
 			if (!HScroll)
 			{
-				HScroll = new GScrollBar(IDC_HSCROLL, 0, 0, 100, 10, "GLayout->HScroll");
+				HScroll = new LScrollBar(IDC_HSCROLL, 0, 0, 100, 10, "LLayout->HScroll");
 				if (HScroll)
 				{
 					HScroll->SetNotify(this);
@@ -157,7 +157,7 @@ bool GLayout::SetScrollBars(bool x, bool y)
 		{
 			if (!VScroll)
 			{
-				VScroll = new GScrollBar(IDC_VSCROLL, 0, 0, 10, 100, "GLayout->VScroll");
+				VScroll = new LScrollBar(IDC_VSCROLL, 0, 0, 10, 100, "LLayout->VScroll");
 				if (VScroll)
 				{
 					VScroll->SetNotify(this);
@@ -180,11 +180,11 @@ bool GLayout::SetScrollBars(bool x, bool y)
 	return true;
 }
 
-void GLayout::OnPosChange()
+void LLayout::OnPosChange()
 {
-	GRect r = GView::GetClient();	
-	GRect v(r.x2-B_V_SCROLL_BAR_WIDTH+1, r.y1, r.x2, r.y2);
-	GRect h(r.x1, r.y2-B_H_SCROLL_BAR_HEIGHT+1, r.x2, r.y2);
+	LRect r = LView::GetClient();	
+	LRect v(r.x2-B_V_SCROLL_BAR_WIDTH+1, r.y1, r.x2, r.y2);
+	LRect h(r.x1, r.y2-B_H_SCROLL_BAR_HEIGHT+1, r.x2, r.y2);
 
 	if (VScroll)
 	{
@@ -207,11 +207,11 @@ void GLayout::OnPosChange()
 	}
 }
 
-GRect &GLayout::GetClient(bool ClientSpace)
+LRect &LLayout::GetClient(bool ClientSpace)
 {
-	static GRect r;
+	static LRect r;
 
-	r = GView::GetClient(ClientSpace);
+	r = LView::GetClient(ClientSpace);
 	
 	if (VScroll)
 	{
@@ -226,17 +226,17 @@ GRect &GLayout::GetClient(bool ClientSpace)
 	return r;
 }
 
-void GLayout::OnNcPaint(GSurface *pDC, GRect &r)
+void LLayout::OnNcPaint(LSurface *pDC, LRect &r)
 {
-	GView::OnNcPaint(pDC, r);
+	LView::OnNcPaint(pDC, r);
 }
 
-int GLayout::OnNotify(GViewI *v, int f)
+int LLayout::OnNotify(LViewI *v, int f)
 {
-	return GView::OnNotify(v, f);
+	return LView::OnNotify(v, f);
 }
 
-GMessage::Result GLayout::OnEvent(GMessage *Msg)
+GMessage::Result LLayout::OnEvent(GMessage *Msg)
 {
 	switch (MsgCode(Msg))
 	{
@@ -260,16 +260,16 @@ GMessage::Result GLayout::OnEvent(GMessage *Msg)
 	
 	if (VScroll) VScroll->OnEvent(Msg);
 	if (HScroll) HScroll->OnEvent(Msg);
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
-GViewI *GLayout::FindControl(int Id)
+LViewI *LLayout::FindControl(int Id)
 {
 	if (VScroll && VScroll->GetId() == Id)
 		return VScroll;
 	if (HScroll && HScroll->GetId() == Id)
 		return HScroll;
 
-	return GView::FindControl(Id);
+	return LView::FindControl(Id);
 }
 

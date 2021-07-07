@@ -1,0 +1,174 @@
+// Basic tokeniser
+
+#include <string.h>
+#include "lgi/common/Mem.h"
+#include "lgi/common/Containers.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/LgiString.h"
+
+/////////////////////////////////////////////////////////////////////////
+char *LgiSkipDelim(char *p, const char *Delimiter, bool NotDelim)
+{
+	if (!p)
+		return NULL;
+	
+	if (NotDelim)
+	{
+		while (*p && !strchr(Delimiter, *p))
+			p++;
+	}
+	else
+	{
+		while (*p && strchr(Delimiter, *p))
+			p++;
+	}
+	
+	return p;
+}
+
+////////////////////////////////////////////////////////////////////////
+/*
+GToken::GToken()
+{
+	Raw = 0;
+	fixed = true;
+}
+
+GToken::GToken(const char *Str, const char *Delimiters, bool GroupDelim, int Length)
+{
+	Raw = 0;
+	fixed = true;
+	Parse(Str, Delimiters, GroupDelim, Length);
+}
+
+GToken::~GToken()
+{
+	Empty();
+}
+
+void GToken::Parse(const char *Str, const char *Delimiters, bool GroupDelim, int Length)
+{
+	Empty();
+	if (Str)
+	{
+		// Prepare lookup table
+		bool Lut[256];
+		ZeroObj(Lut);
+		if (Delimiters)
+		{
+			for (const char *d=Delimiters; *d; d++)
+			{
+				Lut[(const uchar)*d] = true;
+			}
+		}
+
+		// Do tokenisation
+		Raw = NewStr(Str, Length);
+		if (Raw)
+		{
+			fixed = false;
+
+			if (Delimiters)
+			{
+				if (GroupDelim)
+				{
+					for (char *s=Raw; *s;)
+					{
+						// Skip Delimiters
+						while (*s && Lut[(uchar)*s]) *s++ = 0;
+
+						// Emit pointer
+						if (*s)
+						{
+							Add(s);
+						}
+
+						// Skip Non-delimiters
+						while (*s && !Lut[(unsigned char)*s]) s++;
+					}
+				}
+				else
+				{
+					for (char *s=Raw; *s;)
+					{
+						// Emit pointer
+						if (*s)
+						{
+							Add(Lut[(uchar)*s] ? (char*)0 : s);
+						}
+
+						// Skip Non-delimiters
+						while (*s && !Lut[(unsigned char)*s]) s++;
+
+						// Skip Delimiter
+						if (*s && Lut[(uchar)*s]) *s++ = 0;
+					}
+				}
+			}
+			else
+			{
+				Add(Raw);
+			}
+
+			fixed = true;
+		}
+	}
+}
+
+void GToken::Empty()
+{
+	DeleteArray(Raw);
+	Length(0);
+}
+
+void GToken::AppendTokens(LArray<char*> *T)
+{
+	if (T)
+	{
+		int64 Total = Length() + T->Length();
+		int Bytes = 0, i;
+		for (i=0; i<Length(); i++)
+		{
+			Bytes += strlen((*this)[i]) + 1;
+		}
+		for (i=0; i<T->Length(); i++)
+		{
+			Bytes += strlen((*T)[i]) + 1;
+		}
+
+		char *Buf = new char[Bytes];
+		if (Buf)
+		{
+			char *p = Buf;
+
+			fixed = false;
+
+			for (i=0; i<Length(); i++)
+			{
+				char *Ptr = (*this)[i];
+				size_t Len = strlen(Ptr) + 1;
+				memcpy(p, Ptr, Len);
+				(*this)[i] = p;
+				p += Len;
+			}
+
+			DeleteArray(Raw);
+			
+			for (i=0; i<T->Length(); i++)
+			{
+				char *Ptr = (*T)[i];
+				size_t Len = strlen(Ptr) + 1;
+				memcpy(p, Ptr, Len);
+				Add(p);
+				p += Len;
+			}
+
+			fixed = true;
+			Raw = Buf;
+		}
+	}
+}
+
+
+
+*/

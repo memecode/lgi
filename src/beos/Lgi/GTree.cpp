@@ -1,12 +1,12 @@
 //////////////////////////////////////////////////////////////////////////////
-GTreeItem::GTreeItem()
+LTreeItem::LTreeItem()
 {
 	Str = 0;
 	Tree = 0;
 	Parent = 0;
 }
 
-GTreeItem::~GTreeItem()
+LTreeItem::~LTreeItem()
 {
 	if (Tree)
 	{
@@ -16,18 +16,18 @@ GTreeItem::~GTreeItem()
 	DeleteArray(Str);
 }
 
-GTreeItem *GTreeItem::GetChild()
+LTreeItem *LTreeItem::GetChild()
 {
 	if (Tree)
 	{
 		BListItem *Bi = Tree->ItemUnderAt(this, TRUE, 0);
-		GTreeItem *Ti = dynamic_cast<GTreeItem*>(Bi);
+		LTreeItem *Ti = dynamic_cast<LTreeItem*>(Bi);
 		return Ti;
 	}
 	return 0;
 }
 
-GTreeItem *GTreeItem::GetNext()
+LTreeItem *LTreeItem::GetNext()
 {
 	if (Tree)
 	{
@@ -42,44 +42,44 @@ GTreeItem *GTreeItem::GetNext()
 		{
 			Tree->ItemAt(MyIndex + 1);
 		}
-		GTreeItem *Ti = dynamic_cast<GTreeItem*>(Bi);
+		LTreeItem *Ti = dynamic_cast<LTreeItem*>(Bi);
 		return Ti;
 	}
 	return 0;
 }
 
-char *GTreeItem::GetText(int i)
+char *LTreeItem::GetText(int i)
 {
 	return Str;
 }
 
-bool GTreeItem::SetText(const char *s, int i)
+bool LTreeItem::SetText(const char *s, int i)
 {
 	DeleteArray(Str);
 	Str = NewStr(s);
 	return Str != 0;
 }
 
-int GTreeItem::GetImage(int Flags)
+int LTreeItem::GetImage(int Flags)
 {
 	return Sys_Image;
 }
 
-void GTreeItem::SetImage(int i)
+void LTreeItem::SetImage(int i)
 {
 	Sys_Image = i;
 }
 
 int GTreeCompareFunc(const BListItem *a, const BListItem *b)
 {
-	return ((GTreeItem*)a)->Index - ((GTreeItem*)b)->Index;
+	return ((LTreeItem*)a)->Index - ((LTreeItem*)b)->Index;
 }
 
 #define ITEM_HEIGHT 16.0
 
-GTreeItem *GTreeItem::Insert(GTreeItem *Obj, int Pos)
+LTreeItem *LTreeItem::Insert(LTreeItem *Obj, int Pos)
 {
-	GTreeItem *NewObj = (Obj) ? Obj : new GTreeItem;
+	LTreeItem *NewObj = (Obj) ? Obj : new LTreeItem;
 	if (NewObj AND Tree)
 	{
 		bool Lock = Tree->LockLooper();
@@ -93,7 +93,7 @@ GTreeItem *GTreeItem::Insert(GTreeItem *Obj, int Pos)
 	return NewObj;
 }
 
-void GTreeItem::Update()
+void LTreeItem::Update()
 {
 	if (Parent)
 	{
@@ -112,12 +112,12 @@ void GTreeItem::Update()
 	}
 }
 
-bool GTreeItem::Selected()
+bool LTreeItem::Selected()
 {
 	return IsSelected();
 }
 
-void GTreeItem::Selected(bool b)
+void LTreeItem::Selected(bool b)
 {
 	if (Tree)
 	{
@@ -125,17 +125,17 @@ void GTreeItem::Selected(bool b)
 	}
 }
 
-bool GTreeItem::Expanded()
+bool LTreeItem::Expanded()
 {
 	return IsExpanded();
 }
 
-void GTreeItem::Expanded(bool b)
+void LTreeItem::Expanded(bool b)
 {
 	SetExpanded(b);
 }
 
-void GTreeItem::DrawItem(BView *owner, BRect frame, bool complete)
+void LTreeItem::DrawItem(BView *owner, BRect frame, bool complete)
 {
 	rgb_color color;
 	if (IsSelected())
@@ -186,7 +186,7 @@ void GTreeItem::DrawItem(BView *owner, BRect frame, bool complete)
 	}
 }
 
-void GTree::OnItemSelect(GTreeItem *Item)
+void LTree::OnItemSelect(LTreeItem *Item)
 {
 	if (Item)
 	{
@@ -194,7 +194,7 @@ void GTree::OnItemSelect(GTreeItem *Item)
 	}
 }
 
-void GTree::OnItemExpand(GTreeItem *Item, bool Expand)
+void LTree::OnItemExpand(LTreeItem *Item, bool Expand)
 {
 	if (Item)
 	{
@@ -203,7 +203,7 @@ void GTree::OnItemExpand(GTreeItem *Item, bool Expand)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-GTree::GTree(int id, int x, int y, int cx, int cy, char *name) :
+LTree::LTree(int id, int x, int y, int cx, int cy, char *name) :
 	GControl(this),
 	BOutlineListView(	BRect(x, y, x+cx-14, y+cy-14),
 						"List",
@@ -222,12 +222,12 @@ GTree::GTree(int id, int x, int y, int cx, int cy, char *name) :
 	SetViewColor(255, 255, 255);
 }
 
-GTree::~GTree()
+LTree::~LTree()
 {
 	Lines = false;
 }
 
-bool GTree::SetPos(GRect &p, bool Repaint)
+bool LTree::SetPos(LRect &p, bool Repaint)
 {
 	ScrollView->MoveTo(p.x1, p.y1);
 	ScrollView->ResizeTo(p.X()-1, p.Y()-1);
@@ -236,7 +236,7 @@ bool GTree::SetPos(GRect &p, bool Repaint)
 	return TRUE;
 }
 
-bool GTree::Attach(GViewI *parent)
+bool LTree::Attach(LViewI *parent)
 {
 	SetParent(parent);
 	if (GetParent())
@@ -269,19 +269,19 @@ bool GTree::Attach(GViewI *parent)
 	return FALSE;
 }
 
-void GTree::MouseDown(BPoint point)
+void LTree::MouseDown(BPoint point)
 {	
 	MouseClickEvent(true);
 	BOutlineListView::MouseDown(point);
 	MouseClickEvent(false);
 }
 
-void GTree::SelectionChanged()
+void LTree::SelectionChanged()
 {
 	int32 Index = FullListCurrentSelection();
 	if (Index >= 0)
 	{
-		GTreeItem *Item = (GTreeItem*) FullListItemAt(Index);
+		LTreeItem *Item = (LTreeItem*) FullListItemAt(Index);
 		if (Item)
 		{
 			OnItemSelect(Item);
@@ -289,14 +289,14 @@ void GTree::SelectionChanged()
 	}
 }
 
-void GTree::OnMouseClick(GMouse &m)
+void LTree::OnMouseClick(LMouse &m)
 {
 	if (LockLooper())
 	{
 		int32 Index = FullListCurrentSelection();
 		if (Index >= 0)
 		{
-			GTreeItem *Item = (GTreeItem*) FullListItemAt(Index);
+			LTreeItem *Item = (LTreeItem*) FullListItemAt(Index);
 			if (Item)
 			{
 				OnItemClick(Item, m);
@@ -307,14 +307,14 @@ void GTree::OnMouseClick(GMouse &m)
 	}
 }
 
-int GTree::OnEvent(BMessage *Msg)
+int LTree::OnEvent(BMessage *Msg)
 {
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
-GTreeItem *GTree::Insert(GTreeItem *Obj, int Pos)
+LTreeItem *LTree::Insert(LTreeItem *Obj, int Pos)
 {
-	GTreeItem *NewObj = (Obj) ? Obj : new GTreeItem;
+	LTreeItem *NewObj = (Obj) ? Obj : new LTreeItem;
 	if (NewObj)
 	{
 		NewObj->Tree = this;
@@ -327,7 +327,7 @@ GTreeItem *GTree::Insert(GTreeItem *Obj, int Pos)
 	return NewObj;
 }
 
-bool GTree::Remove(GTreeItem *Obj)
+bool LTree::Remove(LTreeItem *Obj)
 {
 	if (Obj)
 	{
@@ -337,12 +337,12 @@ bool GTree::Remove(GTreeItem *Obj)
 	return FALSE;
 }
 
-void GTree::RemoveAll()
+void LTree::RemoveAll()
 {
 	MakeEmpty();
 }
 
-bool GTree::Delete(GTreeItem *Obj)
+bool LTree::Delete(LTreeItem *Obj)
 {
 	bool Status = FALSE;
 	if (Obj)
@@ -352,7 +352,7 @@ bool GTree::Delete(GTreeItem *Obj)
 	return Status;
 }
 
-bool GTree::Select(GTreeItem *Obj)
+bool LTree::Select(LTreeItem *Obj)
 {
 	bool Status = FALSE;
 	if (Obj)
@@ -363,18 +363,18 @@ bool GTree::Select(GTreeItem *Obj)
 	return Status;
 }
 
-GTreeItem *GTree::Selection()
+LTreeItem *LTree::Selection()
 {
-	GTreeItem *Item = 0;
+	LTreeItem *Item = 0;
 	int Index = CurrentSelection(0);
 	if (Index >= 0)
 	{
-		Item = (GTreeItem*) ItemAt(Index);
+		Item = (LTreeItem*) ItemAt(Index);
 	}
 	return Item;
 }
 
-void GTree::OnItemClick(GTreeItem *Item, GMouse &m)
+void LTree::OnItemClick(LTreeItem *Item, LMouse &m)
 {
 	if (Item)
 	{
@@ -382,11 +382,11 @@ void GTree::OnItemClick(GTreeItem *Item, GMouse &m)
 	}
 }
 
-void GTree::OnItemBeginDrag(GTreeItem *Item, int Flags)
+void LTree::OnItemBeginDrag(LTreeItem *Item, int Flags)
 {
 	if (Item)
 	{
-		GMouse m;
+		LMouse m;
 		ZeroObj(m);
 		m.Flags = Flags;
 		Item->OnBeginDrag(m);

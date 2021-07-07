@@ -10,27 +10,26 @@
 		34319029238DF4A700DDE1F5 /* TestSuite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319027238DF4A700DDE1F5 /* TestSuite.cpp */; };
 		3431902A238DF4A700DDE1F5 /* HtmlTestSuite.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 34319028238DF4A700DDE1F5 /* HtmlTestSuite.lr8 */; };
 		3431902C238DF51B00DDE1F5 /* OpenSSLSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3431902B238DF51B00DDE1F5 /* OpenSSLSocket.cpp */; };
-		34319030238DF57C00DDE1F5 /* GHtmlCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3431902D238DF57C00DDE1F5 /* GHtmlCommon.cpp */; };
-		34319031238DF57C00DDE1F5 /* GHtmlParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3431902E238DF57C00DDE1F5 /* GHtmlParser.cpp */; };
-		34319032238DF57C00DDE1F5 /* GHtml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3431902F238DF57C00DDE1F5 /* GHtml.cpp */; };
-		34319034238DF97200DDE1F5 /* LEmojiFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319033238DF97200DDE1F5 /* LEmojiFont.cpp */; };
-		34319039238DF9C600DDE1F5 /* GParseCpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319035238DF9C600DDE1F5 /* GParseCpp.cpp */; };
-		3431903A238DF9C600DDE1F5 /* GScriptCompiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319036238DF9C600DDE1F5 /* GScriptCompiler.cpp */; };
-		3431903B238DF9C600DDE1F5 /* GScriptLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319037238DF9C600DDE1F5 /* GScriptLibrary.cpp */; };
-		3431903C238DF9C600DDE1F5 /* GScriptVM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319038238DF9C600DDE1F5 /* GScriptVM.cpp */; };
+		34319030238DF57C00DDE1F5 /* HtmlCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3431902D238DF57C00DDE1F5 /* HtmlCommon.cpp */; };
+		34319031238DF57C00DDE1F5 /* HtmlParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3431902E238DF57C00DDE1F5 /* HtmlParser.cpp */; };
+		34319032238DF57C00DDE1F5 /* Html.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3431902F238DF57C00DDE1F5 /* Html.cpp */; };
+		34319034238DF97200DDE1F5 /* EmojiFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319033238DF97200DDE1F5 /* EmojiFont.cpp */; };
+		34319039238DF9C600DDE1F5 /* ParseCpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319035238DF9C600DDE1F5 /* ParseCpp.cpp */; };
+		3431903A238DF9C600DDE1F5 /* ScriptCompiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319036238DF9C600DDE1F5 /* ScriptCompiler.cpp */; };
+		3431903B238DF9C600DDE1F5 /* ScriptLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319037238DF9C600DDE1F5 /* ScriptLibrary.cpp */; };
+		3431903C238DF9C600DDE1F5 /* ScriptVM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319038238DF9C600DDE1F5 /* ScriptVM.cpp */; };
 		3431903E238DF9FB00DDE1F5 /* ImageComparison.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3431903D238DF9FB00DDE1F5 /* ImageComparison.cpp */; };
-		34319040238DFA4B00DDE1F5 /* GZoomView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3431903F238DFA4B00DDE1F5 /* GZoomView.cpp */; };
-		34319042238DFA5800DDE1F5 /* GSubProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319041238DFA5800DDE1F5 /* GSubProcess.cpp */; };
-		34319044238DFA7300DDE1F5 /* GStatusBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319043238DFA7200DDE1F5 /* GStatusBar.cpp */; };
-		34319046238DFA8400DDE1F5 /* GLexCpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319045238DFA8400DDE1F5 /* GLexCpp.cpp */; };
+		34319040238DFA4B00DDE1F5 /* ZoomView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3431903F238DFA4B00DDE1F5 /* ZoomView.cpp */; };
+		34319044238DFA7300DDE1F5 /* StatusBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319043238DFA7200DDE1F5 /* StatusBar.cpp */; };
+		34319046238DFA8400DDE1F5 /* LexCpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319045238DFA8400DDE1F5 /* LexCpp.cpp */; };
 		34319048238DFA9100DDE1F5 /* GdcTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319047238DFA9100DDE1F5 /* GdcTools.cpp */; };
 		3431904A238DFAB000DDE1F5 /* EmojiMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319049238DFAB000DDE1F5 /* EmojiMap.cpp */; };
 		343FB8952386621600797ABC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 343FB8942386621600797ABC /* Assets.xcassets */; };
 		343FB8AB238662C500797ABC /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8AA238662C500797ABC /* LgiMain.cpp */; };
 		343FB8C62386638C00797ABC /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 343FB8A92386627A00797ABC /* LgiCocoa.framework */; };
 		343FB8C82386639C00797ABC /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 343FB8A92386627A00797ABC /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		343FB8DC2386642A00797ABC /* GOptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8DB2386642A00797ABC /* GOptionsFile.cpp */; };
-		34C81A5825DA09770053F93A /* IHttp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C81A5725DA09770053F93A /* IHttp.cpp */; };
+		343FB8DC2386642A00797ABC /* OptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8DB2386642A00797ABC /* OptionsFile.cpp */; };
+		34C81A5825DA09770053F93A /* Http.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C81A5725DA09770053F93A /* Http.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,20 +65,19 @@
 /* Begin PBXFileReference section */
 		34319027238DF4A700DDE1F5 /* TestSuite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TestSuite.cpp; path = ../TestSuite.cpp; sourceTree = "<group>"; };
 		34319028238DF4A700DDE1F5 /* HtmlTestSuite.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = HtmlTestSuite.lr8; path = ../HtmlTestSuite.lr8; sourceTree = "<group>"; };
-		3431902B238DF51B00DDE1F5 /* OpenSSLSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenSSLSocket.cpp; path = ../../src/common/INet/OpenSSLSocket.cpp; sourceTree = "<group>"; };
-		3431902D238DF57C00DDE1F5 /* GHtmlCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GHtmlCommon.cpp; path = ../../src/common/Text/GHtmlCommon.cpp; sourceTree = "<group>"; };
-		3431902E238DF57C00DDE1F5 /* GHtmlParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GHtmlParser.cpp; path = ../../src/common/Text/GHtmlParser.cpp; sourceTree = "<group>"; };
-		3431902F238DF57C00DDE1F5 /* GHtml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GHtml.cpp; path = ../../src/common/Text/GHtml.cpp; sourceTree = "<group>"; };
-		34319033238DF97200DDE1F5 /* LEmojiFont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LEmojiFont.cpp; path = ../../src/common/Gdc2/Font/LEmojiFont.cpp; sourceTree = "<group>"; };
-		34319035238DF9C600DDE1F5 /* GParseCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GParseCpp.cpp; path = ../../src/common/Coding/GParseCpp.cpp; sourceTree = "<group>"; };
-		34319036238DF9C600DDE1F5 /* GScriptCompiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GScriptCompiler.cpp; path = ../../src/common/Coding/GScriptCompiler.cpp; sourceTree = "<group>"; };
-		34319037238DF9C600DDE1F5 /* GScriptLibrary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GScriptLibrary.cpp; path = ../../src/common/Coding/GScriptLibrary.cpp; sourceTree = "<group>"; };
-		34319038238DF9C600DDE1F5 /* GScriptVM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GScriptVM.cpp; path = ../../src/common/Coding/GScriptVM.cpp; sourceTree = "<group>"; };
+		3431902B238DF51B00DDE1F5 /* OpenSSLSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenSSLSocket.cpp; path = ../../src/common/Net/OpenSSLSocket.cpp; sourceTree = "<group>"; };
+		3431902D238DF57C00DDE1F5 /* HtmlCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HtmlCommon.cpp; path = ../../src/common/Text/HtmlCommon.cpp; sourceTree = "<group>"; };
+		3431902E238DF57C00DDE1F5 /* HtmlParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HtmlParser.cpp; path = ../../src/common/Text/HtmlParser.cpp; sourceTree = "<group>"; };
+		3431902F238DF57C00DDE1F5 /* Html.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Html.cpp; path = ../../src/common/Text/Html.cpp; sourceTree = "<group>"; };
+		34319033238DF97200DDE1F5 /* EmojiFont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EmojiFont.cpp; path = ../../src/common/Gdc2/Font/EmojiFont.cpp; sourceTree = "<group>"; };
+		34319035238DF9C600DDE1F5 /* ParseCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseCpp.cpp; path = ../../src/common/Coding/ParseCpp.cpp; sourceTree = "<group>"; };
+		34319036238DF9C600DDE1F5 /* ScriptCompiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScriptCompiler.cpp; path = ../../src/common/Coding/ScriptCompiler.cpp; sourceTree = "<group>"; };
+		34319037238DF9C600DDE1F5 /* ScriptLibrary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScriptLibrary.cpp; path = ../../src/common/Coding/ScriptLibrary.cpp; sourceTree = "<group>"; };
+		34319038238DF9C600DDE1F5 /* ScriptVM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScriptVM.cpp; path = ../../src/common/Coding/ScriptVM.cpp; sourceTree = "<group>"; };
 		3431903D238DF9FB00DDE1F5 /* ImageComparison.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImageComparison.cpp; path = ../../src/common/Images/Compare/ImageComparison.cpp; sourceTree = "<group>"; };
-		3431903F238DFA4B00DDE1F5 /* GZoomView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GZoomView.cpp; path = ../../src/common/Widgets/GZoomView.cpp; sourceTree = "<group>"; };
-		34319041238DFA5800DDE1F5 /* GSubProcess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GSubProcess.cpp; path = ../../src/common/Lgi/GSubProcess.cpp; sourceTree = "<group>"; };
-		34319043238DFA7200DDE1F5 /* GStatusBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GStatusBar.cpp; path = ../../src/common/Widgets/GStatusBar.cpp; sourceTree = "<group>"; };
-		34319045238DFA8400DDE1F5 /* GLexCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GLexCpp.cpp; path = ../../src/common/Coding/GLexCpp.cpp; sourceTree = "<group>"; };
+		3431903F238DFA4B00DDE1F5 /* ZoomView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ZoomView.cpp; path = ../../src/common/Widgets/ZoomView.cpp; sourceTree = "<group>"; };
+		34319043238DFA7200DDE1F5 /* StatusBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StatusBar.cpp; path = ../../src/common/Widgets/StatusBar.cpp; sourceTree = "<group>"; };
+		34319045238DFA8400DDE1F5 /* LexCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCpp.cpp; path = ../../src/common/Coding/LexCpp.cpp; sourceTree = "<group>"; };
 		34319047238DFA9100DDE1F5 /* GdcTools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GdcTools.cpp; path = ../../src/common/Gdc2/Tools/GdcTools.cpp; sourceTree = "<group>"; };
 		34319049238DFAB000DDE1F5 /* EmojiMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EmojiMap.cpp; path = ../../src/common/Text/Emoji/EmojiMap.cpp; sourceTree = "<group>"; };
 		343FB88E2386621400797ABC /* HtmlTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HtmlTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -88,8 +86,8 @@
 		343FB89C2386621600797ABC /* HtmlTest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HtmlTest.entitlements; sourceTree = "<group>"; };
 		343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = ../../src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
 		343FB8AA238662C500797ABC /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../src/common/Lgi/LgiMain.cpp; sourceTree = "<group>"; };
-		343FB8DB2386642A00797ABC /* GOptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GOptionsFile.cpp; path = ../../src/common/Lgi/GOptionsFile.cpp; sourceTree = "<group>"; };
-		34C81A5725DA09770053F93A /* IHttp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IHttp.cpp; path = ../../src/common/INet/IHttp.cpp; sourceTree = "<group>"; };
+		343FB8DB2386642A00797ABC /* OptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsFile.cpp; path = ../../src/common/Lgi/OptionsFile.cpp; sourceTree = "<group>"; };
+		34C81A5725DA09770053F93A /* Http.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Http.cpp; path = ../../src/common/Net/Http.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -136,24 +134,23 @@
 		343FB8A32386626700797ABC /* Lgi */ = {
 			isa = PBXGroup;
 			children = (
-				34C81A5725DA09770053F93A /* IHttp.cpp */,
-				3431903F238DFA4B00DDE1F5 /* GZoomView.cpp */,
+				34C81A5725DA09770053F93A /* Http.cpp */,
+				3431903F238DFA4B00DDE1F5 /* ZoomView.cpp */,
 				34319047238DFA9100DDE1F5 /* GdcTools.cpp */,
 				3431903D238DF9FB00DDE1F5 /* ImageComparison.cpp */,
 				34319049238DFAB000DDE1F5 /* EmojiMap.cpp */,
-				34319035238DF9C600DDE1F5 /* GParseCpp.cpp */,
-				34319041238DFA5800DDE1F5 /* GSubProcess.cpp */,
-				34319036238DF9C600DDE1F5 /* GScriptCompiler.cpp */,
-				34319037238DF9C600DDE1F5 /* GScriptLibrary.cpp */,
-				34319045238DFA8400DDE1F5 /* GLexCpp.cpp */,
-				34319038238DF9C600DDE1F5 /* GScriptVM.cpp */,
-				34319043238DFA7200DDE1F5 /* GStatusBar.cpp */,
-				3431902F238DF57C00DDE1F5 /* GHtml.cpp */,
-				3431902D238DF57C00DDE1F5 /* GHtmlCommon.cpp */,
-				3431902E238DF57C00DDE1F5 /* GHtmlParser.cpp */,
+				34319035238DF9C600DDE1F5 /* ParseCpp.cpp */,
+				34319036238DF9C600DDE1F5 /* ScriptCompiler.cpp */,
+				34319037238DF9C600DDE1F5 /* ScriptLibrary.cpp */,
+				34319045238DFA8400DDE1F5 /* LexCpp.cpp */,
+				34319038238DF9C600DDE1F5 /* ScriptVM.cpp */,
+				34319043238DFA7200DDE1F5 /* StatusBar.cpp */,
+				3431902F238DF57C00DDE1F5 /* Html.cpp */,
+				3431902D238DF57C00DDE1F5 /* HtmlCommon.cpp */,
+				3431902E238DF57C00DDE1F5 /* HtmlParser.cpp */,
 				3431902B238DF51B00DDE1F5 /* OpenSSLSocket.cpp */,
-				34319033238DF97200DDE1F5 /* LEmojiFont.cpp */,
-				343FB8DB2386642A00797ABC /* GOptionsFile.cpp */,
+				34319033238DF97200DDE1F5 /* EmojiFont.cpp */,
+				343FB8DB2386642A00797ABC /* OptionsFile.cpp */,
 				343FB8AA238662C500797ABC /* LgiMain.cpp */,
 				343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */,
 			);
@@ -272,25 +269,24 @@
 			buildActionMask = 2147483647;
 			files = (
 				3431904A238DFAB000DDE1F5 /* EmojiMap.cpp in Sources */,
-				34319039238DF9C600DDE1F5 /* GParseCpp.cpp in Sources */,
-				3431903C238DF9C600DDE1F5 /* GScriptVM.cpp in Sources */,
-				34C81A5825DA09770053F93A /* IHttp.cpp in Sources */,
+				34319039238DF9C600DDE1F5 /* ParseCpp.cpp in Sources */,
+				3431903C238DF9C600DDE1F5 /* ScriptVM.cpp in Sources */,
+				34C81A5825DA09770053F93A /* Http.cpp in Sources */,
 				34319029238DF4A700DDE1F5 /* TestSuite.cpp in Sources */,
-				34319030238DF57C00DDE1F5 /* GHtmlCommon.cpp in Sources */,
-				3431903B238DF9C600DDE1F5 /* GScriptLibrary.cpp in Sources */,
-				34319032238DF57C00DDE1F5 /* GHtml.cpp in Sources */,
-				34319046238DFA8400DDE1F5 /* GLexCpp.cpp in Sources */,
-				34319042238DFA5800DDE1F5 /* GSubProcess.cpp in Sources */,
+				34319030238DF57C00DDE1F5 /* HtmlCommon.cpp in Sources */,
+				3431903B238DF9C600DDE1F5 /* ScriptLibrary.cpp in Sources */,
+				34319032238DF57C00DDE1F5 /* Html.cpp in Sources */,
+				34319046238DFA8400DDE1F5 /* LexCpp.cpp in Sources */,
 				34319048238DFA9100DDE1F5 /* GdcTools.cpp in Sources */,
-				343FB8DC2386642A00797ABC /* GOptionsFile.cpp in Sources */,
+				343FB8DC2386642A00797ABC /* OptionsFile.cpp in Sources */,
 				343FB8AB238662C500797ABC /* LgiMain.cpp in Sources */,
 				3431902C238DF51B00DDE1F5 /* OpenSSLSocket.cpp in Sources */,
-				34319034238DF97200DDE1F5 /* LEmojiFont.cpp in Sources */,
+				34319034238DF97200DDE1F5 /* EmojiFont.cpp in Sources */,
 				3431903E238DF9FB00DDE1F5 /* ImageComparison.cpp in Sources */,
-				34319031238DF57C00DDE1F5 /* GHtmlParser.cpp in Sources */,
-				3431903A238DF9C600DDE1F5 /* GScriptCompiler.cpp in Sources */,
-				34319040238DFA4B00DDE1F5 /* GZoomView.cpp in Sources */,
-				34319044238DFA7300DDE1F5 /* GStatusBar.cpp in Sources */,
+				34319031238DF57C00DDE1F5 /* HtmlParser.cpp in Sources */,
+				3431903A238DF9C600DDE1F5 /* ScriptCompiler.cpp in Sources */,
+				34319040238DFA4B00DDE1F5 /* ZoomView.cpp in Sources */,
+				34319044238DFA7300DDE1F5 /* StatusBar.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -420,12 +416,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_OBJC_ARC = NO;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = "";
 				HEADER_SEARCH_PATHS = (
-					../../include/common,
-					../../include/mac/cocoa,
+					../../include,
+					../../include/lgi/mac/cocoa,
 					../Code,
 					../Resources,
 					/opt/local/include,
@@ -451,12 +448,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_OBJC_ARC = NO;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = "";
 				HEADER_SEARCH_PATHS = (
-					../../include/common,
-					../../include/mac/cocoa,
+					../../include,
+					../../include/lgi/mac/cocoa,
 					../Code,
 					../Resources,
 					/opt/local/include,

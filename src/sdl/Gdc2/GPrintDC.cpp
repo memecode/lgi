@@ -14,36 +14,36 @@ public:
 	}
 };
 
-GPrintDC::GPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName)
+LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName)
 {
 	d = new GPrintDCPrivate;
 }
 
-GPrintDC::~GPrintDC()
+LPrintDC::~LPrintDC()
 {
 }
 
-int GPrintDC::X()
-{
-	return 0;
-}
-
-int GPrintDC::Y()
+int LPrintDC::X()
 {
 	return 0;
 }
 
-int GPrintDC::GetBits()
+int LPrintDC::Y()
 {
 	return 0;
 }
 
-int GPrintDC::DpiX()
+int LPrintDC::GetBits()
+{
+	return 0;
+}
+
+int LPrintDC::DpiX()
 {
 	return 600;
 }
 
-int GPrintDC::DpiY()
+int LPrintDC::DpiY()
 {
 	return 600;
 }

@@ -1,0 +1,81 @@
+#ifndef _OPEN_SSL_SOCKET_H_
+#define _OPEN_SSL_SOCKET_H_
+
+#include "lgi/common/LibraryUtils.h"
+#include "lgi/common/Cancel.h"
+
+// If you get a compile error on Linux:
+//		sudo apt-get install libssl-dev
+//
+// On windows:
+//		https://slproweb.com/products/Win32OpenSSL.html
+#include "openssl/bio.h"
+#include "openssl/ssl.h"
+#include "openssl/err.h"
+
+#define SslSocket_LogFile				"LogFile"
+#define SslSocket_LogFormat				"LogFmt"
+
+class SslSocket :
+	public LSocketI,
+	virtual public GDom
+{
+	friend class OpenSSL;
+	struct SslSocketPriv *d;
+	
+	LMutex Lock;
+	BIO *Bio;
+	SSL *Ssl;
+	LString ErrMsg;
+
+	// Local stuff
+	virtual void Log(const char *Str, ssize_t Bytes, SocketMsgType Type);
+	void SslError(const char *file, int line, const char *Msg);
+	LStream *GetLogStream();
+	void DebugTrace(const char *fmt, ...);
+
+public:
+	static bool DebugLogging;
+	static LString Random(int Len);
+
+	SslSocket(LStreamI *logger = NULL, LCapabilityClient *caps = NULL, bool SslOnConnect = false, bool RawLFCheck = false);
+	~SslSocket();
+
+	void SetLogger(LStreamI *logger);
+	LStreamI *GetLog();
+	void SetSslOnConnect(bool b);
+	LCancel *GetCancel();
+	void SetCancel(LCancel *c);
+	
+	// Socket
+	OsSocket Handle(OsSocket Set = INVALID_SOCKET);
+	bool IsOpen();
+	int Open(const char *HostAddr, int Port);
+	int Close();
+	bool Listen(int Port = 0);
+	void OnError(int ErrorCode, const char *ErrorDescription);
+	void OnInformation(const char *Str);
+	int GetTimeout();
+	void SetTimeout(int ms);
+
+	ssize_t Write(const void *Data, ssize_t Len, int Flags = 0);
+	ssize_t Read(void *Data, ssize_t Len, int Flags = 0);
+	void OnWrite(const char *Data, ssize_t Len);
+	void OnRead(char *Data, ssize_t Len);
+
+	bool IsReadable(int TimeoutMs = 0);
+	bool IsWritable(int TimeoutMs = 0);
+	bool IsBlocking();
+	void IsBlocking(bool block);
+
+	bool SetVariant(const char *Name, LVariant &Val, char *Arr = NULL);
+	bool GetVariant(const char *Name, LVariant &Val, char *Arr = NULL);
+
+	LStreamI *Clone();
+	const char *GetErrorString();
+};
+
+extern bool StartSSL(LAutoString &ErrorMsg, SslSocket *Sock);
+extern void EndSSL();
+
+#endif

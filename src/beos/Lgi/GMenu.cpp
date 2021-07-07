@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include "Lgi.h"
-#include "GString.h"
+#include "LString.h"
 #include "GToken.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -69,7 +69,7 @@ void LgiMenuItem::DrawContent()
 	
 	if (i)
 	{
-		GScreenDC DC(Menu());
+		LScreenDC DC(Menu());
 		BPoint p = ContentLocation();
 		DC.SetOrigin(-p.x, -p.y);
 		i->_Paint(&DC, 0);
@@ -80,12 +80,12 @@ void LgiMenuItem::DrawContent()
 status_t LgiMenuItem::Invoke(BMessage *message)
 {
 	GMenu *m = i->Menu;
-	GViewI *p = (m) ? m->WindowHandle() : 0;
+	LViewI *p = (m) ? m->WindowHandle() : 0;
 	BView *v = (p) ? p->Handle() : 0;
 	if (v)
 	{
 		SetTarget(v);
-		// printf("LgiMenuItem::Invoke Handler=%p, Looper=%p Menu=%p GView=%p BView=%p\n", h, l, m, p, v);
+		// printf("LgiMenuItem::Invoke Handler=%p, Looper=%p Menu=%p LView=%p BView=%p\n", h, l, m, p, v);
 	}
 
 	BMenuItem::Invoke(message);
@@ -223,7 +223,7 @@ bool GSubMenu::RemoveItem(GMenuItem *Item)
 	return Status;
 }
 
-GMenuItem *GSubMenu::MatchShortcut(GKey &k)
+GMenuItem *GSubMenu::MatchShortcut(LKey &k)
 {
 	for (GMenuItem *i=Items.First(); i; i=Items.Next())
 	{
@@ -283,7 +283,7 @@ void GSubMenu::_CopyMenu(BMenu *To, GSubMenu *From)
 	}
 }
 
-int GSubMenu::Float(GView *Parent, int x, int y, bool Left)
+int GSubMenu::Float(LView *Parent, int x, int y, bool Left)
 {
 	if (Info)
 	{
@@ -448,7 +448,7 @@ GMenuItem::GMenuItem(GMenu *m, GSubMenu *p, const char *txt, int Pos, const char
 	ShortcutKey = 0;
 	ShortcutMod = 0;
 	
-	GAutoString str(NewStrLessAnd(txt));
+	LAutoString str(NewStrLessAnd(txt));
 	
 	if (Info = new LgiMenuItem(this, str, d->Msg = new BMessage(M_COMMAND)))
 		ScanForAccel();
@@ -468,7 +468,7 @@ bool GMenuItem::ScanForAccel()
 	char *Sc = ShortCut;
 	if (!Sc)
 	{
-		char *n = GBase::Name();
+		char *n = LBase::Name();
 		if (n)
 		{
 			char *tab = strrchr(n, '\t');
@@ -557,7 +557,7 @@ bool GMenuItem::ScanForAccel()
 	return true;
 }
 
-GMenuItem *GMenuItem::MatchShortcut(GKey &k)
+GMenuItem *GMenuItem::MatchShortcut(LKey &k)
 {
 	if (UnsupportedShortcut && k.vkey == ShortcutKey)
 	{
@@ -584,20 +584,20 @@ void GMenuItem::_Measure(LPoint &Size)
 {
 }
 
-void GMenuItem::_Paint(GSurface *pDC, int Flags)
+void GMenuItem::_Paint(LSurface *pDC, int Flags)
 {
 	if (_Icon >= 0)
 	{
 		if (Parent &&
 			Parent->GetImageList())
 		{
-			GColour Back(LC_MED, 24);
+			LColour Back(LC_MED, 24);
 			Parent->GetImageList()->Draw(pDC, -16, 0, _Icon, Back);
 		}
 	}
 }
 
-void GMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
+void GMenuItem::_PaintText(LSurface *pDC, int x, int y, int Width)
 {
 }
 
@@ -689,10 +689,10 @@ bool GMenuItem::Checked()
 bool GMenuItem::Name(const char *n)
 {
 	bool Status = false;
-	GAutoString p((n) ? NewStrLessAnd(n) : NewStr(""));
+	LAutoString p((n) ? NewStrLessAnd(n) : NewStr(""));
 	if (p)
 	{
-		Status = GBase::Name(p);
+		Status = LBase::Name(p);
 		if (Info) Info->SetLabel(p);
 	}
 
@@ -749,7 +749,7 @@ GSubMenu *GMenuItem::Sub()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GFont *GMenu::_Font = 0;
+LFont *GMenu::_Font = 0;
 
 class GMenuPrivate
 {
@@ -782,17 +782,17 @@ GMenu::~GMenu()
 	DeleteObj(d);
 }
 
-GRect GMenu::GetPos()
+LRect GMenu::GetPos()
 {
-	GRect r(d->Bar->Frame());
+	LRect r(d->Bar->Frame());
 	return r;
 }
 
-GFont *GMenu::GetFont()
+LFont *GMenu::GetFont()
 {
 	if (!_Font)
 	{
-		GFontType Type;
+		LFontType Type;
 		if (Type.GetSystemFont("Menu"))
 		{
 			_Font = Type.Create();
@@ -802,7 +802,7 @@ GFont *GMenu::GetFont()
 	return _Font ? _Font : SysFont;
 }
 
-bool GMenu::Attach(GViewI *p)
+bool GMenu::Attach(LViewI *p)
 {
 	bool Status = false;
 	Window = p;
@@ -835,7 +835,7 @@ bool GMenu::Detach()
 	return Status;
 }
 
-bool GMenu::OnKey(GView *v, GKey &k)
+bool GMenu::OnKey(LView *v, LKey &k)
 {
 	GMenuItem *m = MatchShortcut(k);
 	if (m)
@@ -854,7 +854,7 @@ bool GMenu::OnKey(GView *v, GKey &k)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GCommand::GCommand()
+LCommand::LCommand()
 {
 	Flags = GWF_ENABLED | GWF_VISIBLE;
 	Id = 0;
@@ -864,13 +864,13 @@ GCommand::GCommand()
 	TipHelp = 0;
 }
 
-GCommand::~GCommand()
+LCommand::~LCommand()
 {
 	DeleteArray(Accelerator);
 	DeleteArray(TipHelp);
 }
 
-bool GCommand::Enabled()
+bool LCommand::Enabled()
 {
 	if (ToolButton)
 	{
@@ -884,7 +884,7 @@ bool GCommand::Enabled()
 	return false;
 }
 
-void GCommand::Enabled(bool e)
+void LCommand::Enabled(bool e)
 {
 	if (Enabled() != e)
 	{
@@ -899,7 +899,7 @@ void GCommand::Enabled(bool e)
 	}
 }
 
-bool GCommand::Value()
+bool LCommand::Value()
 {
 	bool v = FALSE;
 	if (ToolButton)
@@ -913,7 +913,7 @@ bool GCommand::Value()
 	return v;
 }
 
-void GCommand::Value(bool v)
+void LCommand::Value(bool v)
 {
 	if (ToolButton)
 	{

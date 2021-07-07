@@ -10,10 +10,10 @@
 #include <string.h>
 #include <math.h>
 
-#include "Gdc2.h"
-#include "GPath.h"
-#include "GPixelRops.h"
-#include "GPalette.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/Path.h"
+#include "lgi/common/PixelRops.h"
+#include "lgi/common/Palette.h"
 
 // #define Div255(a)	DivLut[a]
 #define Div255(a)	((a)/255)
@@ -68,7 +68,7 @@ void CreatePaletteLut(T *c, GPalette *Pal, int Scale = 255)
 }
 
 /// Alpha blending applicators
-class GAlphaApp : public GApplicator
+class GAlphaApp : public LApplicator
 {
 protected:
 	uchar alpha, oma;
@@ -318,7 +318,7 @@ public:
 			while (d < e)
 			{
 				System24BitPixel dst = dc[*d];
-				GRgba32 src = {
+				LRgba32 src = {
 					(uint8_t)(s->r >> 8),
 					(uint8_t)(s->g >> 8),
 					(uint8_t)(s->b >> 8),
@@ -359,8 +359,8 @@ public:
 	}
 };
 
-template<typename Pixel, GColourSpace ColourSpace>
-class GdcAlpha : public GApplicator
+template<typename Pixel, LColourSpace ColourSpace>
+class GdcAlpha : public LApplicator
 {
 protected:
 	union {
@@ -450,7 +450,7 @@ public:
 	}
 };
 
-template<typename Pixel, GColourSpace ColourSpace>
+template<typename Pixel, LColourSpace ColourSpace>
 class GdcAlpha15 : public GdcAlpha<Pixel, ColourSpace>
 {
 public:
@@ -565,7 +565,7 @@ public:
 
 };
 
-template<typename Pixel, GColourSpace ColourSpace>
+template<typename Pixel, LColourSpace ColourSpace>
 class GdcAlpha16 : public GdcAlpha<Pixel, ColourSpace>
 {
 public:
@@ -680,7 +680,7 @@ public:
 	}
 };
 
-template<typename Pixel, GColourSpace ColourSpace>
+template<typename Pixel, LColourSpace ColourSpace>
 class GdcAlpha24 : public GdcAlpha<Pixel, ColourSpace>
 {
 public:
@@ -908,7 +908,7 @@ public:
 				
 				#define Blt24Case(name, size) \
 					case Cs##name: \
-						CompositeBlt##size<G##name>(Src); \
+						CompositeBlt##size<L##name>(Src); \
 						break
 				
 				Blt24Case(Rgb24, 24);
@@ -941,7 +941,7 @@ public:
 	}
 };
 
-template<typename Pixel, GColourSpace ColourSpace>
+template<typename Pixel, LColourSpace ColourSpace>
 class GdcAlpha32 : public GdcAlpha<Pixel, ColourSpace>
 {
 public:
@@ -1258,16 +1258,16 @@ public:
 			switch (Src->Cs)
 			{
 				case CsRgba32:
-					PmBlt32<GRgba32>(Src);
+					PmBlt32<LRgba32>(Src);
 					return true;
 				case CsBgra32:
-					PmBlt32<GBgra32>(Src);
+					PmBlt32<LBgra32>(Src);
 					return true;
 				case CsArgb32:
-					PmBlt32<GArgb32>(Src);
+					PmBlt32<LArgb32>(Src);
 					return true;
 				case CsAbgr32:
-					PmBlt32<GAbgr32>(Src);
+					PmBlt32<LAbgr32>(Src);
 					return true;
 				default:
 					break;
@@ -1344,7 +1344,7 @@ public:
 	}
 };
 
-GApplicator *GAlphaFactory::Create(GColourSpace Cs, int Op)
+LApplicator *GAlphaFactory::Create(LColourSpace Cs, int Op)
 {
 	if (Op != GDC_ALPHA)
 		return NULL;
@@ -1353,7 +1353,7 @@ GApplicator *GAlphaFactory::Create(GColourSpace Cs, int Op)
 	{
 		#define Case(name, px) \
 			case Cs##name: \
-				return new GdcAlpha##px<G##name, Cs##name>()
+				return new GdcAlpha##px<L##name, Cs##name>()
 
 		Case(Rgb15, 15);
 		Case(Bgr15, 15);
@@ -1652,13 +1652,13 @@ bool GdcApp8Alpha::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
 			}
 			case CsBgr24:
 			{
-				GBgr24 dc[256];
+				LBgr24 dc[256];
 				CreatePaletteLut(dc, DPal, 255);
 				if (!Lut) Lut = DPal->MakeLut(15);
 
 				for (int y=0; y<Src->y; y++)
 				{
-					GBgr24 *s = (GBgr24*) (Src->Base + (y * Src->Line));
+					LBgr24 *s = (LBgr24*) (Src->Base + (y * Src->Line));
 					uchar *sa = SrcAlpha->Base + (y * SrcAlpha->Line);
 					uchar *d = Ptr;
 
@@ -1672,7 +1672,7 @@ bool GdcApp8Alpha::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
 						else if (a)
 						{
 							uchar o = 255 - a;
-							GBgr24 *dst = dc + *d;
+							LBgr24 *dst = dc + *d;
 							int r = DivLut[(dst->r * o) + (s->r * a)];
 							int g = DivLut[(dst->g * o) + (s->g * a)];
 							int b = DivLut[(dst->b * o) + (s->b * a)];
@@ -1787,7 +1787,7 @@ bool GdcApp8Alpha::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
 			
 			#define Case(Px, Sz) \
 				case Cs##Px: \
-					AlphaBlt##Sz<G##Px>(Src, DPal, Lut); \
+					AlphaBlt##Sz<L##Px>(Src, DPal, Lut); \
 					break
 
 			Case(Rgb15, 15);

@@ -273,7 +273,7 @@ void TrimWhite(char *s)
 	}
 }
 
-bool GPalette::Load(GFile &F)
+bool GPalette::Load(LFile &F)
 {
 	bool Status = false;
 	char Buf[256];
@@ -312,7 +312,7 @@ bool GPalette::Load(GFile &F)
 	return Status;
 }
 
-bool GPalette::Save(GFile &F, int Format)
+bool GPalette::Save(LFile &F, int Format)
 {
 	bool Status = false;
 
@@ -417,9 +417,9 @@ int ComponenetCmp(PfComponent *a, PfComponent *b)
 	return Diff;
 }
 
-GColourSpace PixelFormat2ColourSpace(SDL_PixelFormat *pf)
+LColourSpace PixelFormat2ColourSpace(SDL_PixelFormat *pf)
 {
-	GColourSpaceBits cs;
+	LColourSpaceBits cs;
 	
 	cs.All = 0;
 	cs[0].Type(CtIndex);
@@ -433,7 +433,7 @@ GColourSpace PixelFormat2ColourSpace(SDL_PixelFormat *pf)
 	}
 	else
 	{
-		GArray<char> Bits;
+		LArray<char> Bits;
 		Bits.Length(pf->BitsPerPixel + 1);
 		Bits[pf->BitsPerPixel] = 0;
 		memset(&Bits[0], 'x', pf->BitsPerPixel);
@@ -488,7 +488,7 @@ GColourSpace PixelFormat2ColourSpace(SDL_PixelFormat *pf)
 		}
 	}
 	
-	GColourSpace Ret = (GColourSpace)cs.All;
+	LColourSpace Ret = (LColourSpace)cs.All;
 	#if 0
 	printf("PixelFormat2ColourSpace sdl=%08x,%08x,%08x,%08x lgi=%s\n",
 		pf->Rmask,
@@ -527,7 +527,7 @@ public:
 	int ScrX;
 	int ScrY;
 	int ScrBits;
-	GColourSpace ScrColourSpace;
+	LColourSpace ScrColourSpace;
 
 	// Palette
 	double GammaCorrection;
@@ -545,11 +545,11 @@ public:
 	{
 		const SDL_VideoInfo *vi = SDL_GetVideoInfo();
 		LPoint ScreenSz(320, 240);
-		GString ScrOpt;
+		LString ScrOpt;
 		if (LgiApp->GetOption("screen", ScrOpt))
 		{
-			GString s = ScrOpt.Get();
-			GString::Array a = s.Split("x");
+			LString s = ScrOpt.Get();
+			LString::Array a = s.Split("x");
 			if (a.Length() == 2)
 			{
 				ScreenSz.x = a[0].Int();
@@ -683,7 +683,7 @@ GGlobalColour *GdcDevice::GetGlobalColour()
 	return d->GlobalColour;
 }
 
-GColourSpace GdcDevice::GetColourSpace()
+LColourSpace GdcDevice::GetColourSpace()
 {
 	return d->ScrColourSpace;
 }
@@ -799,7 +799,7 @@ void GdcDevice::SetColourPaletteType(int Type)
 	*/
 }
 
-COLOUR GdcDevice::GetColour(COLOUR Rgb24, GSurface *pDC)
+COLOUR GdcDevice::GetColour(COLOUR Rgb24, LSurface *pDC)
 {
 	int Bits = (pDC) ? pDC->GetBits() : GetBits();
 	COLOUR C;
@@ -874,7 +874,7 @@ COLOUR GdcDevice::GetColour(COLOUR Rgb24, GSurface *pDC)
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 static int _Factories;
-static GApplicatorFactory *_Factory[16];
+static LApplicatorFactory *_Factory[16];
 
 GApp8 Factory8;
 GApp15 Factory15;
@@ -883,7 +883,7 @@ GApp24 Factory24;
 GApp32 Factory32;
 GAlphaFactory FactoryAlpha;
 
-GApplicatorFactory::GApplicatorFactory()
+LApplicatorFactory::LApplicatorFactory()
 {
 	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	if (_Factories < CountOf(_Factory) - 1)
@@ -892,7 +892,7 @@ GApplicatorFactory::GApplicatorFactory()
 	}
 }
 
-GApplicatorFactory::~GApplicatorFactory()
+LApplicatorFactory::~LApplicatorFactory()
 {
 	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)
@@ -906,12 +906,12 @@ GApplicatorFactory::~GApplicatorFactory()
 	}
 }
 
-GApplicator *GApplicatorFactory::NewApp(GColourSpace Cs, int Op)
+LApplicator *LApplicatorFactory::NewApp(LColourSpace Cs, int Op)
 {
 	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)
 	{
-		GApplicator *a = _Factory[i]->Create(Cs, Op);
+		LApplicator *a = _Factory[i]->Create(Cs, Op);
 		if (a) return a;
 	}
 
@@ -939,7 +939,7 @@ class GGlobalColourPrivate
 public:
 	GlobalColourEntry c[256];
 	GPalette *Global;
-	List<GSurface> Cache;
+	List<LSurface> Cache;
 	int FirstUnused;
 	
 	int FreeColours()
@@ -982,12 +982,12 @@ COLOUR GGlobalColour::AddColour(COLOUR c24)
 	return c24;
 }
 
-bool GGlobalColour::AddBitmap(GSurface *pDC)
+bool GGlobalColour::AddBitmap(LSurface *pDC)
 {
 	return false;
 }
 
-bool GGlobalColour::AddBitmap(GImageList *il)
+bool GGlobalColour::AddBitmap(LImageList *il)
 {
 	return false;
 }
@@ -1007,7 +1007,7 @@ COLOUR GGlobalColour::GetColour(COLOUR c24)
 	return c24;
 }
 
-bool GGlobalColour::RemapBitmap(GSurface *pDC)
+bool GGlobalColour::RemapBitmap(LSurface *pDC)
 {
 	return false;
 }

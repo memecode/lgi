@@ -13,8 +13,8 @@
 #include <time.h>
 
 #include "Lgi.h"
-#include "GButton.h"
-#include "GTableLayout.h"
+#include "LButton.h"
+#include "LTableLayout.h"
 
 #define TICKS_PER_SECOND					1000000
 #define DOUBLE_CLICK_TIMEOUT				(TICKS_PER_SECOND/3)
@@ -22,14 +22,14 @@
 #define DefaultViewColour()					SetViewColor(B_TRANSPARENT_COLOR); SetFlags(Flags() & ~B_FULL_UPDATE_ON_RESIZE)
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-struct GDialogPriv
+struct LDialogPriv
 {
-	GDialog *Dlg;
+	LDialog *Dlg;
 	bool IsModal;
 	int ModalRet;
 	sem_id ModalSem;
 	
-	GDialogPriv(GDialog *dlg)
+	LDialogPriv(LDialog *dlg)
 	{
 		Dlg = dlg;
 		IsModal = true;
@@ -41,8 +41,8 @@ struct GDialogPriv
 	{
 		if (!Dlg->_Default)
 		{
-			GViewI *c = Dlg->FindControl(IDOK);
-			GButton *Def = c ? dynamic_cast<GButton*>(c) : 0;
+			LViewI *c = Dlg->FindControl(IDOK);
+			LButton *Def = c ? dynamic_cast<LButton*>(c) : 0;
 			if (Def)
 			{
 				Dlg->_Default = Def;
@@ -51,7 +51,7 @@ struct GDialogPriv
 			{
 				for (c=Dlg->Children.First(); c; c=Dlg->Children.Next())
 				{
-					Dlg->_Default = dynamic_cast<GButton*>(c);
+					Dlg->_Default = dynamic_cast<LButton*>(c);
 					if (Dlg->_Default)
 						break;
 				}
@@ -60,19 +60,19 @@ struct GDialogPriv
 	}
 };
 
-GDialog::GDialog() : ResObject(Res_Dialog)
+LDialog::LDialog() : ResObject(Res_Dialog)
 {
-	d = new GDialogPriv(this);
+	d = new LDialogPriv(this);
 	Name("Dialog");
 }
 
-GDialog::~GDialog()
+LDialog::~LDialog()
 {
 	SetParent(0);
 	DeleteObj(d);
 }
 
-void GDialog::Quit(bool DontDelete)
+void LDialog::Quit(bool DontDelete)
 {
 	if (d->IsModal)
 	{
@@ -84,27 +84,27 @@ void GDialog::Quit(bool DontDelete)
 	}	
 }
 
-void GDialog::OnPosChange()
+void LDialog::OnPosChange()
 {
     if (Children.Length() == 1)
     {
-        List<GViewI>::I it = Children.Start();
-        GTableLayout *t = dynamic_cast<GTableLayout*>((GViewI*)it.First());
+        List<LViewI>::I it = Children.Start();
+        LTableLayout *t = dynamic_cast<LTableLayout*>((LViewI*)it.First());
         if (t)
         {
-            GRect r = GetClient();
-            r.Size(GTableLayout::CellSpacing, GTableLayout::CellSpacing);
+            LRect r = GetClient();
+            r.Size(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
             t->SetPos(r);
         }
     }
     
-    GWindow::OnPosChange();
+    LWindow::OnPosChange();
 }
 
-bool GDialog::LoadFromResource(int Resource, char *Param)
+bool LDialog::LoadFromResource(int Resource, char *Param)
 {
-	GAutoString n;
-	GRect p;
+	LAutoString n;
+	LRect p;
 	bool Status = GLgiRes::LoadFromResource(Resource, this, &p, &n);
 	if (Status)
 	{
@@ -114,7 +114,7 @@ bool GDialog::LoadFromResource(int Resource, char *Param)
 	return Status;
 }
 
-bool GDialog::OnRequestClose(bool OsClose)
+bool LDialog::OnRequestClose(bool OsClose)
 {
 	if (d->IsModal)
 		EndModal(0);
@@ -124,7 +124,7 @@ bool GDialog::OnRequestClose(bool OsClose)
 	return false;
 }
 
-int GDialog::DoModal(OsView ParentHnd)
+int LDialog::DoModal(OsView ParentHnd)
 {
 	d->IsModal = true;
 	d->ModalRet = 0;
@@ -141,7 +141,7 @@ int GDialog::DoModal(OsView ParentHnd)
 		// Setup the BWindow
 		Wnd->ResizeTo(Pos.X(), Pos.Y());
 		Wnd->MoveTo(Pos.x1, Pos.y1);
-		Wnd->SetTitle(GBase::Name());
+		Wnd->SetTitle(LBase::Name());
 
 		// Add BView here to move the "OnCreate" call to the correct place
 		BRect r = Wnd->Bounds();
@@ -203,7 +203,7 @@ int GDialog::DoModal(OsView ParentHnd)
 	return d->ModalRet;
 }
 
-int GDialog::DoModeless()
+int LDialog::DoModeless()
 {
 	d->IsModal = false;
 	
@@ -214,7 +214,7 @@ int GDialog::DoModeless()
 		// Setup the BWindow
 		Wnd->ResizeTo(Pos.X(), Pos.Y());
 		Wnd->MoveTo(Pos.x1, Pos.y1);
-		Wnd->SetTitle(GBase::Name());
+		Wnd->SetTitle(LBase::Name());
 
 		// Add BView here to move the "OnCreate" call to the correct place
 		BRect r = Wnd->Bounds();
@@ -233,24 +233,24 @@ int GDialog::DoModeless()
 	return false;
 }
 
-GMessage::Result GDialog::OnEvent(GMessage *Msg)
+GMessage::Result LDialog::OnEvent(GMessage *Msg)
 {
-	return GWindow::OnEvent(Msg);
+	return LWindow::OnEvent(Msg);
 }
 
-bool GDialog::IsModal()
+bool LDialog::IsModal()
 {
 	return d->IsModal;
 }
 
 
-void GDialog::EndModal(int Code)
+void LDialog::EndModal(int Code)
 {
 	d->ModalRet = Code;
 	delete_sem(d->ModalSem); // causes DoModal to unblock
 }
 
-void GDialog::EndModeless(int Code)
+void LDialog::EndModeless(int Code)
 {
 	if (Wnd->Lock())
 	{
@@ -270,11 +270,11 @@ void GDialog::EndModeless(int Code)
 		}
 	}
 	
-	LgiTrace("GDialog::EndModeless Lock failed..\n");
+	LgiTrace("LDialog::EndModeless Lock failed..\n");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GControl::GControl(BView *view) : GView(view)
+GControl::GControl(BView *view) : LView(view)
 {
 	Pos.ZOff(10, 10);
 	SetId(0);
@@ -294,7 +294,7 @@ void GControl::MouseClickEvent(bool Down)
 {
 	static int LastX = -1, LastY = -1;
 
-	GMouse m;
+	LMouse m;
 	BPoint Pt;
 	uint32 Buttons;
 	
@@ -329,9 +329,9 @@ void GControl::MouseClickEvent(bool Down)
 
 //////////////////////////////////////////////////////////////////////////////////
 // Slider control
-#include "GSlider.h"
+#include "LSlider.h"
 
-GSlider::GSlider(int id, int x, int y, int cx, int cy, const char *name, bool vert) :
+LSlider::LSlider(int id, int x, int y, int cx, int cy, const char *name, bool vert) :
 	GControl(new BViewRedir(this)),
 	ResObject(Res_Slider)
 {
@@ -339,12 +339,12 @@ GSlider::GSlider(int id, int x, int y, int cx, int cy, const char *name, bool ve
 	
 	if (vert)
 	{
-		GRect r(x, y, x+13, y+cy);
+		LRect r(x, y, x+13, y+cy);
 		SetPos(r);
 	}
 	else
 	{
-		GRect r(x, y, x+cx, y+13);
+		LRect r(x, y, x+cx, y+13);
 		SetPos(r);
 	}
 	
@@ -357,28 +357,28 @@ GSlider::GSlider(int id, int x, int y, int cx, int cy, const char *name, bool ve
 	Thumb.ZOff(-1, -1);
 }
 
-GSlider::~GSlider()
+LSlider::~LSlider()
 {
 }
 
-void GSlider::Value(int64 i)
+void LSlider::Value(int64 i)
 {
 	Val = i;
 	Invalidate();
 }
 
-int64 GSlider::Value()
+int64 LSlider::Value()
 {
 	return Val;
 }
 
-void GSlider::GetLimits(int64 &min, int64 &max)
+void LSlider::GetLimits(int64 &min, int64 &max)
 {
 	min = Min;
 	max = Max;
 }
 
-void GSlider::SetLimits(int64 min, int64 max)
+void LSlider::SetLimits(int64 min, int64 max)
 {
 	Min = min;
 	Max = max;
@@ -386,18 +386,18 @@ void GSlider::SetLimits(int64 min, int64 max)
 	if (Val > Max) Val = Max;
 }
 
-GMessage::Result GSlider::OnEvent(GMessage *Msg)
+GMessage::Result LSlider::OnEvent(GMessage *Msg)
 {
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
 #define SLIDER_BAR_SIZE			2
 #define SLIDER_THUMB_WIDTH		10
 #define SLIDER_THUMB_HEIGHT		6
 
-void GSlider::OnPaint(GSurface *pDC)
+void LSlider::OnPaint(LSurface *pDC)
 {
-	GRect r(0, 0, X()-1, Y()-1);
+	LRect r(0, 0, X()-1, Y()-1);
 
 	// fill area
 	pDC->Colour(LC_MED, 24);
@@ -405,7 +405,7 @@ void GSlider::OnPaint(GSurface *pDC)
 
 	// draw tray
 	int Mid = (Vertical) ? r.X()/2 : r.Y()/2;
-	GRect Bar;
+	LRect Bar;
 	if (Vertical)
 	{
 		Bar.ZOff(SLIDER_BAR_SIZE, Y()-1);
@@ -417,7 +417,7 @@ void GSlider::OnPaint(GSurface *pDC)
 		Bar.Offset(0, Mid-(Bar.Y()/2));
 	}
 	
-	LgiThinBorder(pDC, Bar, SUNKEN);
+	LThinBorder(pDC, Bar, SUNKEN);
 	pDC->Colour(0);
 	pDC->Line(Bar.x1, Bar.y1, Bar.x2, Bar.y2);
 	
@@ -435,13 +435,13 @@ void GSlider::OnPaint(GSurface *pDC)
 		Thumb.Offset(Pos, Mid - (Thumb.Y()/2));
 	}
 	
-	GRect t = Thumb;
-	LgiWideBorder(pDC, t, RAISED);
+	LRect t = Thumb;
+	LWideBorder(pDC, t, RAISED);
 	pDC->Colour(LC_MED, 24);
 	pDC->Rectangle(&t);
 }
 
-void GSlider::OnMouseClick(GMouse &m)
+void LSlider::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -458,7 +458,7 @@ void GSlider::OnMouseClick(GMouse &m)
 	}
 }
 
-void GSlider::OnMouseMove(GMouse &m)
+void LSlider::OnMouseMove(LMouse &m)
 {
 	if (IsCapturing())
 	{

@@ -1,20 +1,20 @@
 // BeOS Clipboard Implementation
 #include "Lgi.h"
-#include "GClipBoard.h"
+#include "LClipBoard.h"
 #include "Clipboard.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GClipBoard::GClipBoard(GView *o)
+LClipBoard::LClipBoard(LView *o)
 {
 	Owner = o;
 	Open = be_clipboard != 0;
 }
 
-GClipBoard::~GClipBoard()
+LClipBoard::~LClipBoard()
 {
 }
 
-bool GClipBoard::Empty()
+bool LClipBoard::Empty()
 {
 	bool Status = false;
 	
@@ -29,7 +29,7 @@ bool GClipBoard::Empty()
 	return Status;
 }
 
-char16 *GClipBoard::TextW()
+char16 *LClipBoard::TextW()
 {
 	char16 *Status = 0;
 	char *c8 = Text();
@@ -41,7 +41,7 @@ char16 *GClipBoard::TextW()
 	return Status;
 }
 
-bool GClipBoard::TextW(char16 *Str, bool AutoEmpty)
+bool LClipBoard::TextW(char16 *Str, bool AutoEmpty)
 {
 	bool Status = false;
 	char *c8 = LgiNewUtf16To8(Str);
@@ -53,7 +53,7 @@ bool GClipBoard::TextW(char16 *Str, bool AutoEmpty)
 	return Status;
 }
 
-bool GClipBoard::Text(char *Str, bool AutoEmpty)
+bool LClipBoard::Text(char *Str, bool AutoEmpty)
 {
 	bool Status = false;
 	
@@ -80,7 +80,7 @@ bool GClipBoard::Text(char *Str, bool AutoEmpty)
 	return Status;
 }
 
-char *GClipBoard::Text()
+char *LClipBoard::Text()
 {
 	char *Status = 0;
 	
@@ -106,7 +106,7 @@ char *GClipBoard::Text()
 	return Status;
 }
 
-bool GClipBoard::Bitmap(GSurface *pDC, bool AutoEmpty)
+bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 {
 	bool Status = FALSE;
 	if (pDC)
@@ -115,19 +115,19 @@ bool GClipBoard::Bitmap(GSurface *pDC, bool AutoEmpty)
 	return Status;
 }
 
-GSurface *GClipBoard::Bitmap()
+LSurface *LClipBoard::Bitmap()
 {
 	return 0;
 }
 
-bool GClipBoard::Binary(FormatType Format, uint8 *Ptr, int Len, bool AutoEmpty)
+bool LClipBoard::Binary(FormatType Format, uint8 *Ptr, int Len, bool AutoEmpty)
 {
 	bool Status = false;
 
 	return Status;
 }
 
-bool GClipBoard::Binary(FormatType Format, GAutoPtr<uint8> &Ptr, int *Len)
+bool LClipBoard::Binary(FormatType Format, LAutoPtr<uint8> &Ptr, int *Len)
 {
 	bool Status = false;
 

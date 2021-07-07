@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "DeEscape.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/DeEscape.h"
 
 char *SkipEscape(char *c)
 {
@@ -27,7 +27,7 @@ char *SkipEscape(char *c)
 	return c;
 }
 
-void DeEscape(GString &s)
+void DeEscape(LString &s)
 {
 	char *c = s, *out = s;
 	while (*c)

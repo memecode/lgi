@@ -1,6 +1,6 @@
 #include "Lgi.h"
 #include "resdefs.h"
-#include "GXmlTree.h"
+#include "LXmlTree.h"
 #include "GList.h"
 #include "GListItemCheckBox.h"
 #include "GToken.h"
@@ -29,9 +29,9 @@ public:
 	bool Value() { return Inc->Value(); }
 };
 
-class App : public GDialog
+class App : public LDialog
 {
-	GXmlTag *Tree;
+	LXmlTag *Tree;
 	GList *Inc;
 
 public:
@@ -53,13 +53,13 @@ public:
 		DeleteObj(Tree);
 	}
 
-	void CollectLangs(GXmlTag *t)
+	void CollectLangs(LXmlTag *t)
 	{
 		if (t->Tag AND stricmp(t->Tag, "String") == 0)
 		{
 			for (int i=0; i<t->Attr.Length(); i++)
 			{
-				GXmlAttr &a = t->Attr[i];
+				LXmlAttr &a = t->Attr[i];
 				GLanguage *l = GFindLang(a.GetName());
 				if (l)
 				{
@@ -71,7 +71,7 @@ public:
 			}
 		}
 
-		for (GXmlTag *c = t->Children.First(); c; c = t->Children.Next())
+		for (LXmlTag *c = t->Children.First(); c; c = t->Children.Next())
 		{
 			CollectLangs(c);
 		}
@@ -83,15 +83,15 @@ public:
 
 		Langs.Empty();
 		DeleteObj(Tree);
-		Tree = new GXmlTag;
+		Tree = new LXmlTag;
 		if (Tree)
 		{
 			if (File)
 			{
-				GFile f;
+				LFile f;
 				if (f.Open(File, O_READ))
 				{
-					GXmlTree t(GXT_NO_ENTITIES);
+					LXmlTree t(GXT_NO_ENTITIES);
 					if (t.Read(Tree, &f, 0))
 					{
 						CollectLangs(Tree);
@@ -130,7 +130,7 @@ public:
 		return Status;
 	}
 
-	void RemoveLangs(GXmlTag *t)
+	void RemoveLangs(LXmlTag *t)
 	{
 		if (t->Tag AND stricmp(t->Tag, "String") == 0)
 		{
@@ -148,7 +148,7 @@ public:
 			}
 		}
 
-		for (GXmlTag *c = t->Children.First(); c; c = t->Children.Next())
+		for (LXmlTag *c = t->Children.First(); c; c = t->Children.Next())
 		{
 			RemoveLangs(c);
 		}
@@ -166,12 +166,12 @@ public:
 				RemoveLangs(Tree);
 
 				// write the remaining tree out to a file...
-				GFile f;
+				LFile f;
 				if (f.Open(File, O_WRITE))
 				{
 					f.SetSize(0);
 
-					GXmlTree t(GXT_NO_ENTITIES | GXT_NO_PRETTY_WHITESPACE);
+					LXmlTree t(GXT_NO_ENTITIES | GXT_NO_PRETTY_WHITESPACE);
 					if (t.Write(Tree, &f))
 					{
 						Status = true;
@@ -195,7 +195,7 @@ public:
 		return Status;
 	}
 
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{
@@ -218,7 +218,7 @@ public:
 			}
 			case IDC_LOAD_FILE:
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(this);
 				s.Type("Lgi Resource", "*.lr*");
 				if (s.Open())
@@ -229,7 +229,7 @@ public:
 			}
 			case IDOK:
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(this);
 				s.Type("Lgi Resource", "*.lr*");
 				if (s.Save())
@@ -277,7 +277,7 @@ public:
 
 int LgiMain(OsAppArguments &AppArgs)
 {
-	GApp a("application/lrstrip", AppArgs);
+	LApp a("application/lrstrip", AppArgs);
 	if (a.IsOk())
 	{
 		App *w;

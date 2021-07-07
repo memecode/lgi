@@ -15,10 +15,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "Lgi.h"
-#include "Lzw.h"
-#include "GVariant.h"
-#include "GPalette.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Lzw.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Palette.h"
 
 // TIFF
 #define TIFF_USE_LZW
@@ -26,7 +26,7 @@
 class TiffIo : public GFilter
 {
 public:
-	GStream *s;
+	LStream *s;
 
 	TiffIo()
 	{
@@ -85,21 +85,21 @@ class GdcTiff : public TiffIo
 	Lzw Lib;
 	#endif
 
-	IoStatus ProcessRead(GSurface *pDC);
-	IoStatus ProcessWrite(GSurface *pDC);
+	IoStatus ProcessRead(LSurface *pDC);
+	IoStatus ProcessWrite(LSurface *pDC);
 
 public:
-	GView *Parent;
+	LView *Parent;
 	OsView Handle();
 
 	GdcTiff();
 	~GdcTiff();
 
 	int GetCapabilites() { return FILTER_CAP_READ; }
-	IoStatus ReadImage(GSurface *pDC, GStream *In);
-	IoStatus WriteImage(GStream *Out, GSurface *pDC);
+	IoStatus ReadImage(LSurface *pDC, LStream *In);
+	IoStatus WriteImage(LStream *Out, LSurface *pDC);
 
-	bool GetVariant(const char *n, GVariant &v, char *a)
+	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
 		if (!stricmp(n, LGI_FILTER_TYPE))
 		{
@@ -491,7 +491,7 @@ public:
 	}
 };
 
-GFilter::IoStatus GdcTiff::ProcessRead(GSurface *pDC)
+GFilter::IoStatus GdcTiff::ProcessRead(LSurface *pDC)
 {
 	GFilter::IoStatus Status = IoError;
 	bool Error = false;
@@ -694,7 +694,7 @@ GFilter::IoStatus GdcTiff::ProcessRead(GSurface *pDC)
 							{
 								if (Props)
 								{
-									GVariant v;
+									LVariant v;
 									Props->SetValue(LGI_FILTER_ERROR, v = "This image uses a modified huffman compression,\n"
 																		"Which is not supported yet.\n");
 								}
@@ -760,7 +760,7 @@ GFilter::IoStatus GdcTiff::ProcessRead(GSurface *pDC)
 								{
 									char Msg[256];
 									sprintf_s(Msg, sizeof(Msg), "This image uses an unsupported TIFF compression method: %i", Comp);
-									GVariant v = Msg;
+									LVariant v = Msg;
 									Props->SetValue(LGI_FILTER_ERROR, v);
 								}
 								Error = true;
@@ -955,7 +955,7 @@ GFilter::IoStatus GdcTiff::ProcessRead(GSurface *pDC)
 					{
 						char Msg[256];
 						sprintf_s(Msg, sizeof(Msg), "Image currently doesn't support %i bit TIFF files", Bits);
-						GVariant v = Msg;
+						LVariant v = Msg;
 						Props->SetValue(LGI_FILTER_ERROR, v);
 					}
 					Error = true;
@@ -981,7 +981,7 @@ GFilter::IoStatus GdcTiff::ProcessRead(GSurface *pDC)
 		{
 			char Msg[256];
 			sprintf_s(Msg, sizeof(Msg), "Couldn't create bitmap of size %ix%i @ %i bpp.", X, Y, B);
-			GVariant v = Msg;
+			LVariant v = Msg;
 			Props->SetValue(LGI_FILTER_ERROR, v);
 		}
 		Error = true;
@@ -992,7 +992,7 @@ GFilter::IoStatus GdcTiff::ProcessRead(GSurface *pDC)
 	return Status;
 }
 
-GFilter::IoStatus GdcTiff::ReadImage(GSurface *pDC, GStream *In)
+GFilter::IoStatus GdcTiff::ReadImage(LSurface *pDC, LStream *In)
 {
 	GFilter::IoStatus Status = IoError;
 	ushort n16;
@@ -1073,12 +1073,12 @@ GFilter::IoStatus GdcTiff::ReadImage(GSurface *pDC, GStream *In)
 	return Status;
 }
 
-GFilter::IoStatus GdcTiff::ProcessWrite(GSurface *pDC)
+GFilter::IoStatus GdcTiff::ProcessWrite(LSurface *pDC)
 {
 	return IoUnsupportedFormat;
 }
 
-GFilter::IoStatus GdcTiff::WriteImage(GStream *Out, GSurface *pDC)
+GFilter::IoStatus GdcTiff::WriteImage(LStream *Out, LSurface *pDC)
 {
 	return ProcessWrite(pDC);
 }

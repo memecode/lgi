@@ -2,10 +2,10 @@
 class GChar : public LListItem
 {
 	ushort i;
-	GFont *Fnt;
+	LFont *Fnt;
 
 public:
-	GChar(ushort I, GFont *fnt)
+	GChar(ushort I, LFont *fnt)
 	{
 		i = I;
 		Fnt = fnt;
@@ -15,7 +15,7 @@ public:
 		SetText(Num, 0);
 	}
 
-	void OnPaintColumn(GSurface *pDC, GRect &r, int Col, GListColumn *c, COLOUR Fore, COLOUR Back)
+	void OnPaintColumn(LSurface *pDC, LRect &r, int Col, GListColumn *c, COLOUR Fore, COLOUR Back)
 	{
 		if (Col == 1)
 		{

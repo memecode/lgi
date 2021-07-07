@@ -34,17 +34,19 @@
 			<Node File="../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
 		</Node>
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" />
+	<Node File="..\Lgi.xml" Type="4" Platforms="15" />
 	<Settings>
 		<General>
 			<Makefile>
 				<Linux>Makefile.linux</Linux>
+				<Windows>.\HtmlEdit.sln</Windows>
 			</Makefile>
 			<Executable>
 				<Linux>
 					<Debug>./htmleditor</Debug>
 					<Release>./htmleditor</Release>
 				</Linux>
+				<Windows />
 			</Executable>
 			<Compiler>
 				<Linux>gcc</Linux>
@@ -55,18 +57,15 @@
 					<Release>./TestCases/test.html</Release>
 				</All>
 			</Arguments>
-			<Defines>
-				<All />
-				<Linux />
-			</Defines>
-			<DebugAdmin />
-			<CrossCompiler />
+			<Defines />
+			<CppCrossCompiler />
+			<CCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
 				<All>
-					<Debug>../include/common</Debug>
-					<Release>../include/common</Release>
+					<Debug>../include</Debug>
+					<Release>../include</Release>
 				</All>
 				<Linux>
 					<Debug>../include/linux
@@ -76,6 +75,10 @@
 ../include/linux/Gtk
 `pkg-config --cflags gtk+-2.0`</Release>
 				</Linux>
+				<Windows>
+					<Debug>../include/lgi/win</Debug>
+					<Release>../include/lgi/win</Release>
+				</Windows>
 			</IncludePaths>
 			<TargetType>
 				<All>Executable</All>
@@ -86,18 +89,23 @@
 					<Debug>pthread</Debug>
 					<Release>pthread</Release>
 				</Linux>
+				<Windows />
 			</Libraries>
 			<LibraryPaths>
 				<All />
-				<Linux />
+				<Windows />
 			</LibraryPaths>
 			<TargetName>
-				<Linux />
+				<Windows />
 			</TargetName>
 			<SystemIncludes>
-				<Linux />
+				<Windows />
 			</SystemIncludes>
 			<ApplicationIcon />
+			<Defines>
+				<All />
+				<Windows />
+			</Defines>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -115,6 +123,21 @@
 		</Editor>
 		<Advanced>
 			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Windows />
+			</PostBuildCommands>
 		</Advanced>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
 	</Settings>
 </Project>

@@ -1,34 +1,34 @@
-#include "Lgi.h"
-#include "GRichTextEdit.h"
-#include "GRichTextEditPriv.h"
-#include "GDocView.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/RichTextEdit.h"
+#include "RichTextEditPriv.h"
+#include "lgi/common/DocView.h"
 
-GRichTextPriv::HorzRuleBlock::HorzRuleBlock(GRichTextPriv *priv) : Block(priv)
+LRichTextPriv::HorzRuleBlock::HorzRuleBlock(LRichTextPriv *priv) : Block(priv)
 {
 	IsDeleted = false;
 }
 
-GRichTextPriv::HorzRuleBlock::HorzRuleBlock(const HorzRuleBlock *Copy) : Block(Copy->d)
+LRichTextPriv::HorzRuleBlock::HorzRuleBlock(const HorzRuleBlock *Copy) : Block(Copy->d)
 {
 	IsDeleted = Copy->IsDeleted;
 }
 
-GRichTextPriv::HorzRuleBlock::~HorzRuleBlock()
+LRichTextPriv::HorzRuleBlock::~HorzRuleBlock()
 {
 	LgiAssert(Cursors == 0);
 }
 
-bool GRichTextPriv::HorzRuleBlock::IsValid()
+bool LRichTextPriv::HorzRuleBlock::IsValid()
 {
 	return true;
 }
 
-int GRichTextPriv::HorzRuleBlock::GetLines()
+int LRichTextPriv::HorzRuleBlock::GetLines()
 {
 	return 1;
 }
 
-bool GRichTextPriv::HorzRuleBlock::OffsetToLine(ssize_t Offset, int *ColX, GArray<int> *LineY)
+bool LRichTextPriv::HorzRuleBlock::OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY)
 {
 	if (ColX)
 		*ColX = Offset > 0;
@@ -37,36 +37,36 @@ bool GRichTextPriv::HorzRuleBlock::OffsetToLine(ssize_t Offset, int *ColX, GArra
 	return true;
 }
 
-int GRichTextPriv::HorzRuleBlock::LineToOffset(int Line)
+int LRichTextPriv::HorzRuleBlock::LineToOffset(int Line)
 {
 	return 0;
 }
 
-void GRichTextPriv::HorzRuleBlock::Dump()
+void LRichTextPriv::HorzRuleBlock::Dump()
 {
 }
 
-GNamedStyle *GRichTextPriv::HorzRuleBlock::GetStyle(ssize_t At)
+LNamedStyle *LRichTextPriv::HorzRuleBlock::GetStyle(ssize_t At)
 {
 	return NULL;
 }
 
-void GRichTextPriv::HorzRuleBlock::SetStyle(GNamedStyle *s)
+void LRichTextPriv::HorzRuleBlock::SetStyle(LNamedStyle *s)
 {
 }
 
-ssize_t GRichTextPriv::HorzRuleBlock::Length()
+ssize_t LRichTextPriv::HorzRuleBlock::Length()
 {
 	return IsDeleted ? 0 : 1;
 }
 
-bool GRichTextPriv::HorzRuleBlock::ToHtml(GStream &s, GArray<GDocView::ContentMedia> *Media, GRange *Rng)
+bool LRichTextPriv::HorzRuleBlock::ToHtml(LStream &s, LArray<GDocView::ContentMedia> *Media, LRange *Rng)
 {
 	s.Print("<hr>\n");
 	return true;
 }
 
-bool GRichTextPriv::HorzRuleBlock::GetPosFromIndex(BlockCursor *Cursor)
+bool LRichTextPriv::HorzRuleBlock::GetPosFromIndex(BlockCursor *Cursor)
 {
 	if (!Cursor)
 		return d->Error(_FL, "No cursor param.");
@@ -81,7 +81,7 @@ bool GRichTextPriv::HorzRuleBlock::GetPosFromIndex(BlockCursor *Cursor)
 	return true;
 }
 
-bool GRichTextPriv::HorzRuleBlock::HitTest(HitTestResult &htr)
+bool LRichTextPriv::HorzRuleBlock::HitTest(HitTestResult &htr)
 {
 	if (htr.In.y < Pos.y1 || htr.In.y > Pos.y2)
 		return false;
@@ -98,11 +98,11 @@ bool GRichTextPriv::HorzRuleBlock::HitTest(HitTestResult &htr)
 	return true;
 }
 
-void GRichTextPriv::HorzRuleBlock::OnPaint(PaintContext &Ctx)
+void LRichTextPriv::HorzRuleBlock::OnPaint(PaintContext &Ctx)
 {
 	Ctx.SelectBeforePaint(this);
 
-	GColour Fore, Back = Ctx.Back();
+	LColour Fore, Back = Ctx.Back();
 	Fore = Ctx.Fore().Mix(Back, 0.75f);
 	Ctx.pDC->Colour(Back);
 	Ctx.pDC->Rectangle(&Pos);
@@ -116,7 +116,7 @@ void GRichTextPriv::HorzRuleBlock::OnPaint(PaintContext &Ctx)
 		Ctx.Cursor->Blink &&
 		d->View->Focus())
 	{
-		GRect &p = Ctx.Cursor->Pos;
+		LRect &p = Ctx.Cursor->Pos;
 		Ctx.pDC->Colour(Ctx.Fore());
 		Ctx.pDC->Rectangle(&p);
 	}
@@ -124,7 +124,7 @@ void GRichTextPriv::HorzRuleBlock::OnPaint(PaintContext &Ctx)
 	Ctx.SelectAfterPaint(this);
 }
 
-bool GRichTextPriv::HorzRuleBlock::OnLayout(Flow &flow)
+bool LRichTextPriv::HorzRuleBlock::OnLayout(Flow &flow)
 {
 	Pos.x1 = flow.Left;
 	Pos.y1 = flow.CurY;
@@ -134,17 +134,17 @@ bool GRichTextPriv::HorzRuleBlock::OnLayout(Flow &flow)
 	return true;
 }
 
-ssize_t GRichTextPriv::HorzRuleBlock::GetTextAt(ssize_t Offset, GArray<StyleText*> &t)
+ssize_t LRichTextPriv::HorzRuleBlock::GetTextAt(ssize_t Offset, LArray<StyleText*> &t)
 {
 	return 0;
 }
 
-ssize_t GRichTextPriv::HorzRuleBlock::CopyAt(ssize_t Offset, ssize_t Chars, GArray<uint32_t> *Text)
+ssize_t LRichTextPriv::HorzRuleBlock::CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text)
 {
 	return 0;
 }
 
-bool GRichTextPriv::HorzRuleBlock::Seek(SeekType To, BlockCursor &Cursor)
+bool LRichTextPriv::HorzRuleBlock::Seek(SeekType To, BlockCursor &Cursor)
 {
 	switch (To)
 	{
@@ -186,48 +186,48 @@ bool GRichTextPriv::HorzRuleBlock::Seek(SeekType To, BlockCursor &Cursor)
 	return true;
 }
 
-ssize_t GRichTextPriv::HorzRuleBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params)
+ssize_t LRichTextPriv::HorzRuleBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params)
 {
 	return 0;
 }
 
-void GRichTextPriv::HorzRuleBlock::IncAllStyleRefs()
+void LRichTextPriv::HorzRuleBlock::IncAllStyleRefs()
 {
 }
 
-bool GRichTextPriv::HorzRuleBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling)
+bool LRichTextPriv::HorzRuleBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling)
 {
 	return false;
 }
 
 #ifdef _DEBUG
-void GRichTextPriv::HorzRuleBlock::DumpNodes(GTreeItem *Ti)
+void LRichTextPriv::HorzRuleBlock::DumpNodes(LTreeItem *Ti)
 {
 	Ti->SetText("HorzRuleBlock");
 }
 #endif
 
-GRichTextPriv::Block *GRichTextPriv::HorzRuleBlock::Clone()
+LRichTextPriv::Block *LRichTextPriv::HorzRuleBlock::Clone()
 {
 	return new HorzRuleBlock(this);
 }
 
-GMessage::Result GRichTextPriv::HorzRuleBlock::OnEvent(GMessage *Msg)
+GMessage::Result LRichTextPriv::HorzRuleBlock::OnEvent(GMessage *Msg)
 {
 	return false;
 }
 
-bool GRichTextPriv::HorzRuleBlock::AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars, GNamedStyle *Style)
+bool LRichTextPriv::HorzRuleBlock::AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars, LNamedStyle *Style)
 {
 	return false;
 }
 
-bool GRichTextPriv::HorzRuleBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, GCss *Style, bool Add)
+bool LRichTextPriv::HorzRuleBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, ssize_t Chars, LCss *Style, bool Add)
 {
 	return false;
 }
 
-ssize_t GRichTextPriv::HorzRuleBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, GArray<uint32_t> *DeletedText)
+ssize_t LRichTextPriv::HorzRuleBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset, ssize_t Chars, LArray<uint32_t> *DeletedText)
 {
 	IsDeleted = BlkOffset == 0;
 	if (IsDeleted)
@@ -236,12 +236,12 @@ ssize_t GRichTextPriv::HorzRuleBlock::DeleteAt(Transaction *Trans, ssize_t BlkOf
 	return false;
 }
 
-bool GRichTextPriv::HorzRuleBlock::DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper)
+bool LRichTextPriv::HorzRuleBlock::DoCase(Transaction *Trans, ssize_t StartIdx, ssize_t Chars, bool Upper)
 {
 	return false;
 }
 
-GRichTextPriv::Block *GRichTextPriv::HorzRuleBlock::Split(Transaction *Trans, ssize_t AtOffset)
+LRichTextPriv::Block *LRichTextPriv::HorzRuleBlock::Split(Transaction *Trans, ssize_t AtOffset)
 {
 	return NULL;
 }

@@ -1,4 +1,4 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "LgiIde.h"
 #include "resdefs.h"
 #include "ProjectNode.h"
@@ -14,7 +14,7 @@ IdeCommon::~IdeCommon()
 	Remove();
 }
 
-bool IdeCommon::OnOpen(GProgressDlg *Prog, GXmlTag *Src)
+bool IdeCommon::OnOpen(LProgressDlg *Prog, LXmlTag *Src)
 {
 	if (Prog)
 		Prog->Value(Prog->Value() + 1);
@@ -76,7 +76,7 @@ IdePlatform GetCurrentPlatform()
 	#endif
 }
 
-void IdeCommon::CollectAllSource(GArray<GString> &c, IdePlatform Platform)
+void IdeCommon::CollectAllSource(LArray<LString> &c, IdePlatform Platform)
 {
 	for (auto i:*this)
 	{
@@ -94,7 +94,7 @@ void IdeCommon::CollectAllSource(GArray<GString> &c, IdePlatform Platform)
 				int Flags = p->GetPlatforms();
 				if (Flags & (1 << Platform))
 				{
-					GString path = p->GetFullPath();
+					LString path = p->GetFullPath();
 					if (path)
 					{
 						c.Add(path);
@@ -124,11 +124,11 @@ void IdeCommon::SortChildren()
 	}
 }
 
-void IdeCommon::InsertTag(GXmlTag *t)
+void IdeCommon::InsertTag(LXmlTag *t)
 {
-	GXmlTag::InsertTag(t);
+	LXmlTag::InsertTag(t);
 
-	GTreeItem *i = dynamic_cast<GTreeItem*>(t);
+	LTreeItem *i = dynamic_cast<LTreeItem*>(t);
 	if (i)
 	{
 		Insert(i);
@@ -137,7 +137,7 @@ void IdeCommon::InsertTag(GXmlTag *t)
 
 bool IdeCommon::RemoveTag()
 {
-	bool Status = GXmlTag::RemoveTag();
+	bool Status = LXmlTag::RemoveTag();
 	Detach();
 	return Status;
 }
@@ -147,19 +147,19 @@ bool IdeCommon::AddFiles(AddFilesProgress *Prog, const char *Path)
 	bool IsDir = LDirExists(Path);
 	if (IsDir)
 	{
-		GString s = Path;
-		GString::Array a = s.Split(DIR_STR);
+		LString s = Path;
+		LString::Array a = s.Split(DIR_STR);
 		IdeCommon *Sub = GetSubFolder(Project, a.Last(), true);
 		if (Sub)
 		{
-			GDirectory d;
+			LDirectory d;
 			for (int b = d.First(Path); b && !Prog->Cancel; b = d.Next())
 			{
 				char p[MAX_PATH];
 				if (d.Path(p, sizeof(p)))
 				{
 					char *Name = d.GetName();
-					char *Ext = LgiGetExtension(p);
+					char *Ext = LGetExtension(p);
 					if
 					(
 						(
@@ -193,7 +193,7 @@ bool IdeCommon::AddFiles(AddFilesProgress *Prog, const char *Path)
 	}
 	else
 	{
-		// GProfile p("IdeCommon::AddFiles");
+		// LProfile p("IdeCommon::AddFiles");
 		// p.HideResultsIfBelow(50);
 		if (!Project->InProject(false, Path, false))
 		{

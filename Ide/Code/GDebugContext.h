@@ -6,7 +6,7 @@ class GDebugContext : public GDebugEvents
 	class GDebugContextPriv *d;
 	
 public:
-	GTree *Watch;
+	LTree *Watch;
 	LList *Locals;
 	LList *CallStack;
 	LList *Threads;
@@ -20,7 +20,7 @@ public:
 	virtual ~GDebugContext();
 
 	// Impl
-	bool ParseFrameReference(const char *Frame, GAutoString &File, int &Line);
+	bool ParseFrameReference(const char *Frame, LAutoString &File, int &Line);
 	bool SetFrame(int Frame);
 	bool UpdateLocals();
 	bool UpdateWatches();

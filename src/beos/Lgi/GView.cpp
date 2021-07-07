@@ -161,7 +161,7 @@ const char *GLocker::GetLocker(int Thread)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GKey::GKey(int Vkey, int flags)
+LKey::LKey(int Vkey, int flags)
 {
 	c16 = vkey = Vkey;
 	Flags = flags;
@@ -206,37 +206,37 @@ GInlineBmp Cursors =
 struct CursorInfo
 {
 public:
-	GRect Pos;
+	LRect Pos;
 	LPoint HotSpot;
 }
 CursorMetrics[] =
 {
 	// up arrow
-	{ GRect(0, 0, 8, 15),			LPoint(4, 0) },
+	{ LRect(0, 0, 8, 15),			LPoint(4, 0) },
 	// cross hair
-	{ GRect(16, 0, 30, 13),		LPoint(23, 7) },
+	{ LRect(16, 0, 30, 13),		LPoint(23, 7) },
 	// hourglass
-	{ GRect(32, 0, 43, 15),		LPoint(37, 7) },
+	{ LRect(32, 0, 43, 15),		LPoint(37, 7) },
 	// I beam
-	{ GRect(48, 0, 54, 15),		LPoint(51, 7) },
+	{ LRect(48, 0, 54, 15),		LPoint(51, 7) },
 	// N-S arrow
-	{ GRect(64, 0, 75, 15),		LPoint(69, 7) },
+	{ LRect(64, 0, 75, 15),		LPoint(69, 7) },
 	// E-W arrow
-	{ GRect(80, 0, 95, 11),		LPoint(87, 5) },
+	{ LRect(80, 0, 95, 11),		LPoint(87, 5) },
 	// NW-SE arrow
-	{ GRect(96, 0, 108, 12),		LPoint(102, 6) },
+	{ LRect(96, 0, 108, 12),		LPoint(102, 6) },
 	// NE-SW arrow
-	{ GRect(112, 0, 124, 12),		LPoint(118, 6) },
+	{ LRect(112, 0, 124, 12),		LPoint(118, 6) },
 	// 4 way arrow
-	{ GRect(128, 0, 142, 14),		LPoint(135, 7) },
+	{ LRect(128, 0, 142, 14),		LPoint(135, 7) },
 	// Blank
-	{ GRect(0, 0, 0, 0),			LPoint(0, 0) },
+	{ LRect(0, 0, 0, 0),			LPoint(0, 0) },
 	// Vertical split
-	{ GRect(144, 0, 158, 15),		LPoint(151, 7) },
+	{ LRect(144, 0, 158, 15),		LPoint(151, 7) },
 	// Horizontal split
-	{ GRect(160, 0, 174, 15),		LPoint(167, 7) },
+	{ LRect(160, 0, 174, 15),		LPoint(167, 7) },
 	// Hand
-	{ GRect(176, 0, 189, 13),		LPoint(180, 0) },
+	{ LRect(176, 0, 189, 13),		LPoint(180, 0) },
 };
 
 
@@ -281,15 +281,15 @@ GMessage::Param MsgB(GMessage *m)
 	return i;
 }
 
-bool GView::Detach()
+bool LView::Detach()
 {
 	bool Status = false;
 
 	if (_Window)
 	{
-		GWindow *Wnd = dynamic_cast<GWindow*>(_Window);
+		LWindow *Wnd = dynamic_cast<LWindow*>(_Window);
 		if (Wnd)
-			Wnd->SetFocus(this, GWindow::ViewDelete);
+			Wnd->SetFocus(this, LWindow::ViewDelete);
 		_Window = NULL;
 	}
 	if (d->GetParent())
@@ -313,7 +313,7 @@ bool GView::Detach()
 	return Status;
 }
 
-bool GView::IsAttached()
+bool LView::IsAttached()
 {
 	BWindow *BWin = 0;
 	BView *BPar = 0;
@@ -327,9 +327,9 @@ bool GView::IsAttached()
 	return	_View && BPar;
 }
 
-void GView::Quit(bool DontDelete)
+void LView::Quit(bool DontDelete)
 {
-	if (dynamic_cast<GWindow*>(this))
+	if (dynamic_cast<LWindow*>(this))
 	{
 		BWindow *Wnd = WindowHandle();
 		if (Wnd)
@@ -344,12 +344,12 @@ void GView::Quit(bool DontDelete)
 	}
 }
 
-LgiCursor GView::GetCursor(int x, int y)
+LgiCursor LView::GetCursor(int x, int y)
 {
 	return LCUR_Normal;
 }
 
-bool GView::GetMouse(GMouse &m, bool ScreenCoords)
+bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 {
 	if (!_View)
 		return false;
@@ -391,7 +391,7 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 	return false;
 }
 
-bool GView::SetPos(GRect &p, bool Repaint)
+bool LView::SetPos(LRect &p, bool Repaint)
 {
 	Pos = p;
 
@@ -425,17 +425,17 @@ bool GView::SetPos(GRect &p, bool Repaint)
 	return TRUE;
 }
 
-GViewI *GView::FindControl(OsView hCtrl)
+LViewI *LView::FindControl(OsView hCtrl)
 {
 	if (Handle() == hCtrl)
 	{
 		return this;
 	}
 
-	List<GViewI>::I Lst = Children.Start();
-	for (GViewI *c = Lst.First(); c; c = Lst.Next())
+	List<LViewI>::I Lst = Children.Start();
+	for (LViewI *c = Lst.First(); c; c = Lst.Next())
 	{
-		GViewI *Ctrl = c->FindControl(hCtrl);
+		LViewI *Ctrl = c->FindControl(hCtrl);
 		if (Ctrl)
 		{
 			return Ctrl;
@@ -444,7 +444,7 @@ GViewI *GView::FindControl(OsView hCtrl)
 	return 0;
 }
 
-void GView::PointToScreen(LPoint &p)
+void LView::PointToScreen(LPoint &p)
 {
 	if (_View)
 	{
@@ -461,7 +461,7 @@ void GView::PointToScreen(LPoint &p)
 	}
 }
 
-void GView::PointToView(LPoint &p)
+void LView::PointToView(LPoint &p)
 {
 	if (_View)
 	{
@@ -478,7 +478,7 @@ void GView::PointToView(LPoint &p)
 	}
 }
 
-bool GView::Invalidate(GRect *r, bool Repaint, bool NonClient)
+bool LView::Invalidate(LRect *r, bool Repaint, bool NonClient)
 {
 	if (_View)
 	{
@@ -497,8 +497,8 @@ bool GView::Invalidate(GRect *r, bool Repaint, bool NonClient)
 					}
 					else
 					{
-						GRect c = GetClient(false);
-						GRect a = *r;
+						LRect c = GetClient(false);
+						LRect a = *r;
 						a.Offset(c.x1, c.y1);
 						a.Bound(&c);
 						BRect Rc = a;
@@ -523,8 +523,8 @@ bool GView::Invalidate(GRect *r, bool Repaint, bool NonClient)
 	}
 	else
 	{
-		GRect Up;
-		GView *p = this;
+		LRect Up;
+		LView *p = this;
 
 		if (r)
 		{
@@ -557,14 +557,14 @@ static void SetBeosCursor(LgiCursor c)
 #define DEBUG_MOUSE_CLICK	1
 #define DEBUG_MOUSE_MOVE	1
 
-bool GView::_Mouse(GMouse &m, bool Move)
+bool LView::_Mouse(LMouse &m, bool Move)
 {
-	GWindow *Wnd = GetWindow();
+	LWindow *Wnd = GetWindow();
 
 	#if DEBUG_MOUSE_CLICK
 	if (!Move)
 	{
-		GString s;
+		LString s;
 		s.Printf("%s.Click Capture=%s", GetClass(), _Capturing?_Capturing->GetClass():"(none)");
 		m.Trace(s);
 	}
@@ -580,13 +580,13 @@ bool GView::_Mouse(GMouse &m, bool Move)
 		
 		if (Move)
 		{
-			GViewI *c = _Capturing;
+			LViewI *c = _Capturing;
 			SetBeosCursor(c->GetCursor(m.x, m.y));
 			c->OnMouseMove(m);
 		}
 		else
 		{
-			if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<GView*>(m.Target), m))
+			if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<LView*>(m.Target), m))
 			{
 				m.Target->OnMouseClick(m);
 				#if DEBUG_MOUSE_CLICK
@@ -621,9 +621,9 @@ bool GView::_Mouse(GMouse &m, bool Move)
 			}
 		}
 			
-		GView *Target = dynamic_cast<GView*>(_Over ? _Over : this);
-		// GLayout *Lo = dynamic_cast<GLayout*>(Target);
-		GRect Client = Target->GView::GetClient(false);
+		LView *Target = dynamic_cast<LView*>(_Over ? _Over : this);
+		// LLayout *Lo = dynamic_cast<LLayout*>(Target);
+		LRect Client = Target->LView::GetClient(false);
 
 		if (!Client.Valid() || Client.Overlap(m.x, m.y))
 		{
@@ -664,7 +664,7 @@ bool GView::_Mouse(GMouse &m, bool Move)
 
 long _lgi_pulse_thread(void *ptr)
 {
-	GView *Wnd = (GView*) ptr;
+	LView *Wnd = (LView*) ptr;
 	if (Wnd)
 	{
 		while (Wnd->_PulseRate > 0)
@@ -681,7 +681,7 @@ long _lgi_pulse_thread(void *ptr)
 	else LgiTrace("%s:%i - No view?\n", _FL);
 } 
 
-void GView::SetPulse(int Length)
+void LView::SetPulse(int Length)
 {
 	if (!IsAttached())
 	{
@@ -718,7 +718,7 @@ void GView::SetPulse(int Length)
 	}
 }
 
-GMessage::Result GView::OnEvent(GMessage *Msg)
+GMessage::Result LView::OnEvent(GMessage *Msg)
 {
 	switch (MsgCode(Msg))
 	{
@@ -730,7 +730,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 		case LGI_MOUSE_EXIT:
 		{
 			BPoint p;
-			GMouse m;
+			LMouse m;
 			if (Msg->FindPoint("pos", &p) == B_OK &&
 				Msg->FindInt32("flags", (int32*)&m.Flags) == B_OK)
 			{
@@ -775,21 +775,21 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 		}
 		case M_DRAG_DROP:
 		{
-			GDragDropSource *Source = 0;
-			if (Msg->FindPointer("GDragDropSource", (void**) &Source) == B_OK)
+			LDragDropSource *Source = 0;
+			if (Msg->FindPointer("LDragDropSource", (void**) &Source) == B_OK)
 			{
-				GMouse m;
+				LMouse m;
 				GetMouse(m);
 			
-				GView *TargetView = _lgi_search_children(this, m.x, m.y);
-				GDragDropTarget *Target = dynamic_cast<GDragDropTarget*>(TargetView);
+				LView *TargetView = _lgi_search_children(this, m.x, m.y);
+				LDragDropTarget *Target = dynamic_cast<LDragDropTarget*>(TargetView);
 				if (Target)
 				{
 					LPoint MousePt(m.x, m.y);
 					List<char> Formats;
 					if (Target->WillAccept(Formats, MousePt, 0) != DROPEFFECT_NONE)
 					{
-						GVariant Data;
+						LVariant Data;
 						if (Source->GetData(&Data, Formats.First()))
 						{
 							Target->OnDrop(Formats.First(), &Data, MousePt, 0);
@@ -802,7 +802,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 		case M_CHANGE:
 		{
 			int CtrlId = MsgA(Msg);
-			GViewI *Ctrl = FindControl(CtrlId);
+			LViewI *Ctrl = FindControl(CtrlId);
 			if (Ctrl)
 			{
 				int32 Cid = -1;
@@ -837,9 +837,9 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 	return 0;
 }
 
-GRect &GView::GetClient(bool ClientSpace)
+LRect &LView::GetClient(bool ClientSpace)
 {
-	static GRect Client;
+	static LRect Client;
 
 	Client.ZOff(Pos.X()-1, Pos.Y()-1);
 	if (Sunken() || Raised())
@@ -858,7 +858,7 @@ GRect &GView::GetClient(bool ClientSpace)
 	return Client;
 }
 
-bool GView::Attach(GViewI *Wnd)
+bool LView::Attach(LViewI *Wnd)
 {
 	SetParent(Wnd);
 	if (!d->GetParent())
@@ -907,7 +907,7 @@ bool GView::Attach(GViewI *Wnd)
 		
 		_View->MoveTo(Pos.x1 + Ox, Pos.y1 + Oy);
 		_View->ResizeTo(Pos.X()-1, Pos.Y()-1);
-		if (!GView::Visible() &&
+		if (!LView::Visible() &&
 			!_View->IsHidden())
 		{
 			_View->Hide();
@@ -948,21 +948,21 @@ bool GView::Attach(GViewI *Wnd)
 	return true;
 }
 
-GView *_lgi_search_children(GView *v, int &x, int &y)
+LView *_lgi_search_children(LView *v, int &x, int &y)
 {
-	GRect r = v->GetPos();
+	LRect r = v->GetPos();
 	if (x >= r.x1 &&
 		y >= r.y1 &&
 		x < r.x2 &&
 		y < r.y2)
 	{
-		List<GViewI>::I It = v->Children.Start();
-		for (GViewI *i=It.First(); i; i=It.Next())
+		List<LViewI>::I It = v->Children.Start();
+		for (LViewI *i=It.First(); i; i=It.Next())
 		{
-			GRect p = i->GetPos();
+			LRect p = i->GetPos();
 			int Cx = x-p.x1;
 			int Cy = y-p.y1;
-			GView *Child = _lgi_search_children(v, Cx, Cy);
+			LView *Child = _lgi_search_children(v, Cx, Cy);
 			if (Child)
 			{
 				x = Cx;
@@ -977,7 +977,7 @@ GView *_lgi_search_children(GView *v, int &x, int &y)
 	return 0;
 }
 
-void GView::_Delete()
+void LView::_Delete()
 {
 	if (_PulseThread)
 	{
@@ -995,12 +995,12 @@ void GView::_Delete()
 	SetPulse();
 	Pos.ZOff(-1, -1);
 
-	GViewI *c;
+	LViewI *c;
 	while ((c = Children.First()))
 	{
-		if (c->GetParent() != (GViewI*)this)
+		if (c->GetParent() != (LViewI*)this)
 		{
-			printf("Error: ~GView, child not attached correctly: %p(%s) Parent: %p(%s)\n",
+			printf("Error: ~LView, child not attached correctly: %p(%s) Parent: %p(%s)\n",
 				c, c->Name(),
 				c->GetParent(), c->GetParent() ? c->GetParent()->Name() : "");
 			Children.Delete(c);
@@ -1009,29 +1009,29 @@ void GView::_Delete()
 		DeleteObj(c);
 	}
 
-	GWindow *w = GetWindow();
+	LWindow *w = GetWindow();
 	if (w)
-		w->SetFocus(this, GWindow::ViewDelete);
+		w->SetFocus(this, LWindow::ViewDelete);
 
 	Detach();	
 	DeleteObj(_View);
 }
 
-GView *&GView::PopupChild()
+LView *&LView::PopupChild()
 {
 	return d->Popup;
 }
 
 static int LastFunctionKey = 0;
 
-void GView::_Key(const char *bytes, int32 numBytes, bool down)
+void LView::_Key(const char *bytes, int32 numBytes, bool down)
 {
 	key_info Info;
 	get_key_info(&Info);
 
 	for (int i=0; i<numBytes; i++)
 	{
-		GKey k;
+		LKey k;
 		
 		if (bytes[i] == B_FUNCTION_KEY)
 		{
@@ -1114,7 +1114,7 @@ void GView::_Key(const char *bytes, int32 numBytes, bool down)
 
 		// k.Trace("sys down");		
 
-		GWindow *w = GetWindow();
+		LWindow *w = GetWindow();
 		if (w)
 			w->HandleViewKey(this, k);
 		else
@@ -1122,7 +1122,7 @@ void GView::_Key(const char *bytes, int32 numBytes, bool down)
 	}
 }
 
-void GView::_Focus(bool f)
+void LView::_Focus(bool f)
 {
 	if (f)
 		SetFlag(WndFlags, GWF_FOCUS);
@@ -1149,7 +1149,7 @@ void GView::_Focus(bool f)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-BViewRedir::BViewRedir(GView *wnd, uint32 Resize) :
+BViewRedir::BViewRedir(LView *wnd, uint32 Resize) :
 	BView(	BRect(0, 0, 100, 100),
 			"BViewRedir",
 			Resize,
@@ -1179,7 +1179,7 @@ void BViewRedir::DetachedFromWindow()
 
 void BViewRedir::Draw(BRect UpdateRect)
 {
-	GScreenDC DC(this);
+	LScreenDC DC(this);
 	Wnd->_Paint(&DC);
 }
 
@@ -1213,7 +1213,7 @@ void BViewRedir::MouseDown(BPoint point)
 	BPoint u;
 	GetMouse(&u, &WndBtn);
 
-	GMouse m;
+	LMouse m;
 	m.x = point.x;
 	m.y = point.y;
 	if (WndBtn == B_PRIMARY_MOUSE_BUTTON) m.Left(true);
@@ -1250,7 +1250,7 @@ void BViewRedir::MouseUp(BPoint point)
 	GetMouse(&u, &Btns);
 	int b = Btns ^ WndBtn; // what bits have changed since the down click?
 
-	GMouse m;
+	LMouse m;
 	m.Target = Wnd;
 	m.x = point.x;
 	m.y = point.y;
@@ -1273,7 +1273,7 @@ void BViewRedir::MouseMoved(BPoint point, uint32 transit, const BMessage *messag
 	else
 		Window()->CurrentMessage()->FindInt32("buttons", &Btns);
 
-	GMouse m;
+	LMouse m;
 	m.x = point.x;
 	m.y = point.y;
 	if (Btns == B_PRIMARY_MOUSE_BUTTON) m.Left(true);
@@ -1288,7 +1288,7 @@ void BViewRedir::MouseMoved(BPoint point, uint32 transit, const BMessage *messag
 
 bool BViewRedir::QuitRequested()
 {
-	GWindow *App = dynamic_cast<GWindow*>(Wnd);
+	LWindow *App = dynamic_cast<LWindow*>(Wnd);
 	return (App) ? App->QuitRequested() : true;
 }
 

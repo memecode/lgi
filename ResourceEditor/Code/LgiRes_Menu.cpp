@@ -13,7 +13,10 @@
 #include <stdlib.h>
 #include "LgiResEdit.h"
 #include "LgiRes_Menu.h"
-#include "GClipBoard.h"
+#include "lgi/common/ClipBoard.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/ToolBar.h"
+#include "lgi/common/StatusBar.h"
 
 #define IDC_TREE				100
 
@@ -61,7 +64,7 @@ bool ResMenuItem::OnNew()
 	return true;
 }
 
-void ResMenuItem::OnMouseClick(GMouse &m)
+void ResMenuItem::OnMouseClick(LMouse &m)
 {
 	if (m.IsContextMenu())
 	{
@@ -73,7 +76,7 @@ void ResMenuItem::OnMouseClick(GMouse &m)
 			bool PasteTranslations = false;
 
 			{
-				GClipBoard c(Tree);
+				LClipBoard c(Tree);
 				char *Clip = c.Text();
 				if (Clip)
 				{
@@ -106,7 +109,7 @@ void ResMenuItem::OnMouseClick(GMouse &m)
 					}
 					case IDM_NEW_ID:
 					{
-						GArray<ResMenuItem*> Sel;
+						LArray<ResMenuItem*> Sel;
 						if (GetTree() &&
 							GetTree()->GetSelection(Sel))
 						{
@@ -172,7 +175,7 @@ bool ResMenuItem::Serialize(FieldTree &Fields)
 	return true;
 }
 
-bool ResMenuItem::Read(GXmlTag *t, ResMenuItem *Parent)
+bool ResMenuItem::Read(LXmlTag *t, ResMenuItem *Parent)
 {
 	bool Status = false;
 	if (t)
@@ -238,7 +241,7 @@ bool ResMenuItem::Read(GXmlTag *t, ResMenuItem *Parent)
 	return Status;
 }
 
-bool ResMenuItem::Write(GXmlTag *t, int Tabs)
+bool ResMenuItem::Write(LXmlTag *t, int Tabs)
 {
 	bool SubMenu = GetChild() != 0;
 	t->SetTag(SubMenu ? (char*) "submenu" : (char*) "menuitem");
@@ -258,7 +261,7 @@ bool ResMenuItem::Write(GXmlTag *t, int Tabs)
 	{
 		for (ResMenuItem *i = dynamic_cast<ResMenuItem*>(GetChild()); i; i = dynamic_cast<ResMenuItem*>(i->GetNext()))
 		{
-			GXmlTag *c = new GXmlTag;
+			LXmlTag *c = new LXmlTag;
 			if (c && i->Write(c, 0))
 			{
 				t->InsertTag(c);
@@ -276,7 +279,7 @@ bool ResMenuItem::Write(GXmlTag *t, int Tabs)
 //////////////////////////////////////////////////////////////////
 ResMenu::ResMenu(AppWnd *w, int type) :
 	Resource(w, type),
-	GTree(IDC_TREE, 0, 0, 200, 200, "Menu resource")
+	LTree(IDC_TREE, 0, 0, 200, 200, "Menu resource")
 {
 	Sunken(false);
 	Group = new ResStringGroup(w);
@@ -296,9 +299,9 @@ void ResMenu::OnShowLanguages()
 	}
 }
 
-void AddChildren(GTreeItem *i, List<ResMenuItem> &Items)
+void AddChildren(LTreeItem *i, List<ResMenuItem> &Items)
 {
-	for (GTreeItem *c = i->GetChild(); c; c = c->GetNext())
+	for (LTreeItem *c = i->GetChild(); c; c = c->GetNext())
 	{
 		ResMenuItem *m = dynamic_cast<ResMenuItem*>(c);
 		if (m)
@@ -309,9 +312,9 @@ void AddChildren(GTreeItem *i, List<ResMenuItem> &Items)
 	}
 }
 
-void AddChildren(GTree *i, List<ResMenuItem> &Items)
+void AddChildren(LTree *i, List<ResMenuItem> &Items)
 {
-	for (GTreeItem *c = i->GetChild(); c; c = c->GetNext())
+	for (LTreeItem *c = i->GetChild(); c; c = c->GetNext())
 	{
 		ResMenuItem *m = dynamic_cast<ResMenuItem*>(c);
 		if (m)
@@ -327,7 +330,7 @@ void ResMenu::EnumItems(List<ResMenuItem> &Items)
 	AddChildren(this, Items);
 }
 
-void ResMenu::Create(GXmlTag *load, SerialiseContext *Ctx)
+void ResMenu::Create(LXmlTag *load, SerialiseContext *Ctx)
 {
 	Name("IDM_MENU");
 
@@ -343,29 +346,29 @@ void ResMenu::Create(GXmlTag *load, SerialiseContext *Ctx)
 	Visible(true);
 }
 
-GView *ResMenu::CreateUI()
+LView *ResMenu::CreateUI()
 {
 	return Ui = new ResMenuUi(this);
 }
 
-void ResMenu::OnItemClick(GTreeItem *Item, GMouse &m)
+void ResMenu::OnItemClick(LTreeItem *Item, LMouse &m)
 {
-	GTree::OnItemClick(Item, m);
+	LTree::OnItemClick(Item, m);
 }
 
-void ResMenu::OnItemBeginDrag(GTreeItem *Item, GMouse &m)
+void ResMenu::OnItemBeginDrag(LTreeItem *Item, LMouse &m)
 {
-	GTree::OnItemBeginDrag(Item, m);
+	LTree::OnItemBeginDrag(Item, m);
 }
 
-void ResMenu::OnItemExpand(GTreeItem *Item, bool Expand)
+void ResMenu::OnItemExpand(LTreeItem *Item, bool Expand)
 {
-	GTree::OnItemExpand(Item, Expand);
+	LTree::OnItemExpand(Item, Expand);
 }
 
-void ResMenu::OnItemSelect(GTreeItem *Item)
+void ResMenu::OnItemSelect(LTreeItem *Item)
 {
-	GTree::OnItemSelect(Item);
+	LTree::OnItemSelect(Item);
 
 	if (AppWindow)
 	{
@@ -391,7 +394,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 		case IDM_NEW_SUB:
 		{
 			ResMenuItem *Item = dynamic_cast<ResMenuItem*>(Selection());
-			GTreeItem *New = 0;
+			LTreeItem *New = 0;
 
 			ResMenuItem *NewItem = new ResMenuItem(this);
 			if (NewItem && !NewItem->OnNew())
@@ -421,8 +424,8 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 				auto n = Item->IndexOf();
 				if (n >= 0) n++;
 
-				GTreeItem *Parent = Item->GetParent();
-				GTreeItem *New = 0;
+				LTreeItem *Parent = Item->GetParent();
+				LTreeItem *New = 0;
 				ResMenuItem *NewItem = new ResMenuItem(this);
 				if (NewItem && !NewItem->OnNew())
 				{
@@ -464,7 +467,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 			ResMenuItem *Item = dynamic_cast<ResMenuItem*>(Selection());
 			if (Item)
 			{
-				GTreeNode *Parent = 0;
+				LTreeNode *Parent = 0;
 				if (Item->GetParent())
 					Parent = Item->GetParent();
 				else
@@ -489,7 +492,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 			ResMenuItem *Item = dynamic_cast<ResMenuItem*>(Selection());
 			if (Item)
 			{
-				GTreeNode *Parent = 0;
+				LTreeNode *Parent = 0;
 				if (Item->GetParent())
 					Parent = Item->GetParent();
 				else
@@ -576,7 +579,7 @@ bool ResMenu::Test(ErrorCollection *e)
 	return Group->Test(e);
 }
 
-bool ResMenu::Read(GXmlTag *t, SerialiseContext &Ctx)
+bool ResMenu::Read(LXmlTag *t, SerialiseContext &Ctx)
 {
 	bool Status = true;
 
@@ -628,7 +631,7 @@ bool ResMenu::Read(GXmlTag *t, SerialiseContext &Ctx)
 	return Status;
 }
 
-bool ResMenu::Write(GXmlTag *t, SerialiseContext &Ctx)
+bool ResMenu::Write(LXmlTag *t, SerialiseContext &Ctx)
 {
 	bool Status = true;
 
@@ -639,7 +642,7 @@ bool ResMenu::Write(GXmlTag *t, SerialiseContext &Ctx)
 	// Write group
 	if (Group)
 	{
-		GXmlTag *g = new GXmlTag;
+		LXmlTag *g = new LXmlTag;
 		if (g && Group->Write(g, Ctx))
 		{
 			t->InsertTag(g);
@@ -657,7 +660,7 @@ bool ResMenu::Write(GXmlTag *t, SerialiseContext &Ctx)
 		ResMenuItem *m = dynamic_cast<ResMenuItem*>(i);
 		if (m)
 		{
-			GXmlTag *c = new GXmlTag;
+			LXmlTag *c = new LXmlTag;
 			if (c && m->Write(c, 1))
 			{
 				t->InsertTag(c);
@@ -690,17 +693,17 @@ ResMenuUi::~ResMenuUi()
 	}
 }
 
-void ResMenuUi::OnPaint(GSurface *pDC)
+void ResMenuUi::OnPaint(LSurface *pDC)
 {
-	GRegion Client(0, 0, X()-1, Y()-1);
+	LRegion Client(0, 0, X()-1, Y()-1);
 	for (auto w: Children)
 	{
-		GRect r = w->GetPos();
+		LRect r = w->GetPos();
 		Client.Subtract(&r);
 	}
 
 	pDC->Colour(L_MED);
-	for (GRect *r = Client.First(); r; r = Client.Next())
+	for (LRect *r = Client.First(); r; r = Client.Next())
 	{
 		pDC->Rectangle(r);
 	}
@@ -708,12 +711,12 @@ void ResMenuUi::OnPaint(GSurface *pDC)
 
 void ResMenuUi::PourAll()
 {
-	GRegion Client(GetClient());
-	GRegion Update;
+	LRegion Client(GetClient());
+	LRegion Update;
 
 	for (auto v: Children)
 	{
-		GRect OldPos = v->GetPos();
+		LRect OldPos = v->GetPos();
 		Update.Union(&OldPos);
 
 		if (v->Pour(Client))
@@ -752,7 +755,7 @@ void ResMenuUi::OnPosChange()
 
 void ResMenuUi::OnCreate()
 {
-	Tools = new GToolBar;
+	Tools = new LToolBar;
 	if (Tools)
 	{
 		auto FileName = LFindFile("_MenuIcons.gif");
@@ -776,7 +779,7 @@ void ResMenuUi::OnCreate()
 		}
 	}
 
-	Status = new GStatusBar;
+	Status = new LStatusBar;
 	if (Status)
 	{
 		Status->Attach(this);
@@ -810,7 +813,7 @@ GMessage::Result ResMenuUi::OnEvent(GMessage *Msg)
 		}
 	}
 
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }
 
 int ResMenuUi::CurrentTool()

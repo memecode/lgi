@@ -1,10 +1,12 @@
 #include <stdio.h>
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/ProgressDlg.h"
+#include "lgi/common/List.h"
+#include "lgi/common/Splitter.h"
+#include "lgi/common/FileSelect.h"
 #include "LgiIde.h"
-#include "GToken.h"
-#include "GEdit.h"
-#include "GProgressDlg.h"
-#include "LList.h"
 
 #define IDC_LIST 100
 
@@ -115,24 +117,24 @@ char *Strnstr(char *s, const char *find, int len)
 }
 */
 
-class DumpView : public GWindow
+class DumpView : public LWindow
 {
 	AppWnd *App;
 	LList *Lst;
-	GEdit *Ed;
+	LEdit *Ed;
 
 public:
 	DumpView(AppWnd *app, const char *file)
 	{
 		App = app;
 		Name("Memory Dump Viewer");
-		GRect r(0, 0, 800, 600);
+		LRect r(0, 0, 800, 600);
 		SetPos(r);
 		MoveToCenter();
 		if (Attach(0))
 		{
-			GSplitter *Split;
-			Children.Insert(Split = new GSplitter);
+			LSplitter *Split;
+			Children.Insert(Split = new LSplitter);
 			Split->Value(400);
 			Split->IsVertical(false);
 
@@ -141,7 +143,7 @@ public:
 			Lst->AddColumn("Location", 300);
 			Lst->AddColumn("Count", 100);
 
-			Split->SetViewB(Ed = new GEdit(101, 0, 0, 100, 100, ""), false);
+			Split->SetViewB(Ed = new LEdit(101, 0, 0, 100, 100, ""), false);
 			Ed->Enabled(false);
 			Ed->MultiLine(true);
 
@@ -152,7 +154,7 @@ public:
 				Load(file);
 			else
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(this);
 				s.Type("Dump", "*.mem");
 				s.Type("All Files", LGI_ALL_FILES);
@@ -164,7 +166,7 @@ public:
 		}
 	}
 
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{
@@ -188,7 +190,7 @@ public:
 					case GNotifyItem_ColumnClicked:
 					{
 						int Col;
-						GMouse m;
+						LMouse m;
 						if (Lst->GetColumnClickInfo(Col, m))
 						{
 							Lst->Sort<NativeInt>(Cmp, Col);
@@ -206,21 +208,21 @@ public:
 	void Load(const char *File)
 	{
 		LHashTbl<ConstStrKey<char,false>, bool> Except(0, false);
-		Except.Add("GString.cpp", true);
-		Except.Add("GVariant.cpp", true);
+		Except.Add("LString.cpp", true);
+		Except.Add("LVariant.cpp", true);
 		Except.Add("GContainers.cpp", true);
 		Except.Add("GContainers.h", true);
-		Except.Add("GFile.cpp", true);
+		Except.Add("LFile.cpp", true);
 		Except.Add("Mail.h", true);
-		Except.Add("GArray.h", true);
+		Except.Add("LArray.h", true);
 
-		GFile f;
+		LFile f;
 		if (!f.Open(File, O_READ))
 			LgiMsg(this, "Couldn't read '%s'", AppName, MB_OK, File);
 		else
 		{
-			GProgressDlg Prog(this, true);
-			GArray<char> Buf;
+			LProgressDlg Prog(this, true);
+			LArray<char> Buf;
 			Buf.Length(1 << 20);
 			ssize_t Pos = 0, Used = 0;
 			bool First = true;
@@ -229,7 +231,7 @@ public:
 			LHashTbl<StrKeyPool<char,false>,DumpItem*> h;
 
 			Prog.SetDescription("Reading memory dump...");
-			Prog.SetRange(GRange(0, f.GetSize()));
+			Prog.SetRange(LRange(0, f.GetSize()));
 			Prog.SetScale(1.0 / 1024.0 / 1024.0);
 			Prog.SetType("MB");
 
@@ -259,7 +261,7 @@ public:
 					{
 						int Size = 0;
 						GToken Lines(Cur, "\r\n", true, End - Cur);
-						GArray<char*> Stack;
+						LArray<char*> Stack;
 						for (int i=0; i<Lines.Length(); i++)
 						{
 							char *n = Lines[i];
@@ -322,7 +324,7 @@ public:
 										h.Add(Alloc, di);
 										di->Alloc = NewStr(Alloc);
 
-										GStringPipe p;
+										LStringPipe p;
 										for (int k=0; k<Stack.Length(); k++)
 										{
 											p.Print("%s\n", Stack[k] + 1);

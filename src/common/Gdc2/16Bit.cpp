@@ -10,12 +10,12 @@
 #include <string.h>
 #include <math.h>
 
-#include "Gdc2.h"
-#include "GPalette.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/Palette.h"
 
 /// 16 bit rgb applicators
-template<typename Pixel, GColourSpace Cs>
-class GdcApp16 : public GApplicator
+template<typename Pixel, LColourSpace Cs>
+class GdcApp16 : public LApplicator
 {
 protected:
 	union
@@ -76,7 +76,7 @@ public:
 	}
 };
 
-template<typename Pixel, GColourSpace Cs>
+template<typename Pixel, LColourSpace Cs>
 class GdcApp16Set : public GdcApp16<Pixel, Cs>
 {
 public:
@@ -201,7 +201,7 @@ public:
 	
 };
 
-template<typename Pixel, GColourSpace Cs>
+template<typename Pixel, LColourSpace Cs>
 class GdcApp16And : public GdcApp16<Pixel, Cs> {
 public:
 	const char *GetClass() { return "GdcApp16And"; }
@@ -211,7 +211,7 @@ public:
 	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
 };
 
-template<typename Pixel, GColourSpace Cs>
+template<typename Pixel, LColourSpace Cs>
 class GdcApp16Or : public GdcApp16<Pixel, Cs> {
 public:
 	const char *GetClass() { return "GdcApp16Or"; }
@@ -221,7 +221,7 @@ public:
 	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
 };
 
-template<typename Pixel, GColourSpace Cs>
+template<typename Pixel, LColourSpace Cs>
 class GdcApp16Xor : public GdcApp16<Pixel, Cs> {
 public:
 	const char *GetClass() { return "GdcApp16Xor"; }
@@ -231,21 +231,21 @@ public:
 	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
 };
 
-GApplicator *GApp16::Create(GColourSpace Cs, int Op)
+LApplicator *GApp16::Create(LColourSpace Cs, int Op)
 {
 	if (Cs == CsRgb16)
 	{
 		switch (Op)
 		{
 			case GDC_SET:
-				return new GdcApp16Set<GRgb16, CsRgb16>;
+				return new GdcApp16Set<LRgb16, CsRgb16>;
 			/*
 			case GDC_AND:
-				return new GdcApp16And<GRgb16, CsRgb16>;
+				return new GdcApp16And<LRgb16, CsRgb16>;
 			case GDC_OR:
-				return new GdcApp16Or<GRgb16, CsRgb16>;
+				return new GdcApp16Or<LRgb16, CsRgb16>;
 			case GDC_XOR:
-				return new GdcApp16Xor<GRgb16, CsRgb16>;
+				return new GdcApp16Xor<LRgb16, CsRgb16>;
 			*/
 		}
 	}
@@ -254,14 +254,14 @@ GApplicator *GApp16::Create(GColourSpace Cs, int Op)
 		switch (Op)
 		{
 			case GDC_SET:
-				return new GdcApp16Set<GBgr16, CsBgr16>;
+				return new GdcApp16Set<LBgr16, CsBgr16>;
 			/*
 			case GDC_AND:
-				return new GdcApp16And<GBgr16, CsBgr16>;
+				return new GdcApp16And<LBgr16, CsBgr16>;
 			case GDC_OR:
-				return new GdcApp16Or<GBgr16, CsBgr16>;
+				return new GdcApp16Or<LBgr16, CsBgr16>;
 			case GDC_XOR:
-				return new GdcApp16Xor<GBgr16, CsBgr16>;
+				return new GdcApp16Xor<LBgr16, CsBgr16>;
 			*/
 		}
 	}

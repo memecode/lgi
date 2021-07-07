@@ -1,10 +1,10 @@
-#include "Lgi.h"
-#include "GScripting.h"
-#include "../src/common/Coding/GScriptingPriv.h"
-#include "GStringClass.h"
-#include "LgiRes.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Scripting.h"
+#include "../src/common/Coding/ScriptingPriv.h"
+#include "lgi/common/StringClass.h"
+#include "lgi/common/LgiRes.h"
 
-struct ConsoleLog : public GStream
+struct ConsoleLog : public LStream
 {
 	ssize_t Write(const void *Ptr, ssize_t Size, int Flags)
 	{
@@ -12,18 +12,18 @@ struct ConsoleLog : public GStream
 	}
 };
 
-class App : public GApp, public GScriptContext, public GVmDebuggerCallback
+class App : public LApp, public LScriptContext, public LVmDebuggerCallback
 {
-	GScriptEngine *Engine;
-	GAutoString SrcFile;
+	LScriptEngine *Engine;
+	LAutoString SrcFile;
 	ConsoleLog Log;
 
-	GVmDebugger *AttachVm(GVirtualMachine *Vm, GCompiledCode *Code, const char *Assembly)
+	LVmDebugger *AttachVm(LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly)
 	{
-		return new GVmDebuggerWnd(NULL, this, Vm, Code, Assembly);
+		return new LVmDebuggerWnd(NULL, this, Vm, Code, Assembly);
 	}
 
-	bool CompileScript(GAutoPtr<GCompiledCode> &Output, const char *FileName, const char *Source)
+	bool CompileScript(LAutoPtr<LCompiledCode> &Output, const char *FileName, const char *Source)
 	{
 		return false;
 	}
@@ -31,9 +31,9 @@ class App : public GApp, public GScriptContext, public GVmDebuggerCallback
 public:
 	int Status;
 
-	App(OsAppArguments &AppArgs) : GApp(AppArgs, "LgiScript")
+	App(OsAppArguments &AppArgs) : LApp(AppArgs, "LgiScript")
 	{
-		GFile::Path p(LSP_APP_INSTALL);
+		LFile::Path p(LSP_APP_INSTALL);
 		p += "Resources";
 		p += "LgiScript.lr8";
 		LgiGetResObj(true, p);	
@@ -43,9 +43,9 @@ public:
 	}
 
 	GHostFunc *GetCommands() { return NULL; }
-	void SetEngine(GScriptEngine *Eng) { Engine = Eng; }
+	void SetEngine(LScriptEngine *Eng) { Engine = Eng; }
 
-	void OnReceiveFiles(GArray<const char*> &Files)
+	void OnReceiveFiles(LArray<const char*> &Files)
 	{
 		for (int i=0; i<Files.Length(); i++)
 		{
@@ -59,11 +59,11 @@ public:
 	char *GetIncludeFile(char *FileName)
 	{
 		char p[MAX_PATH];
-		LgiMakePath(p, sizeof(p), SrcFile, "..");
-		LgiMakePath(p, sizeof(p), p, FileName);
+		LMakePath(p, sizeof(p), SrcFile, "..");
+		LMakePath(p, sizeof(p), p, FileName);
 		if (LFileExists(p))
 		{
-			return ::ReadTextFile(p);
+			return ::LReadTextFile(p);
 		}
 		
 		return NULL;
@@ -84,25 +84,25 @@ public:
 			return false;
 		}
 		
-		GScriptEngine Eng(NULL, NULL, this);
+		LScriptEngine Eng(NULL, NULL, this);
 		Eng.SetConsole(&Log);
 
-		GAutoString Src(::ReadTextFile(SrcFile));
+		LAutoString Src(::LReadTextFile(SrcFile));
 		if (!Src)
 		{
 			printf("Error: Failed to read '%s'.\n", SrcFile.Get());
 			return false;
 		}
 		
-		GAutoPtr<GCompiledCode> Obj;
+		LAutoPtr<LCompiledCode> Obj;
 		if (!Eng.Compile(Obj, NULL, Src, File))
 		{
 			printf("Error: Compilation failed '%s'.\n", SrcFile.Get());
 			return false;
 		}
 		
-		GVariant Ret;
-		GExecutionStatus s = Eng.Run(Obj, &Ret);
+		LVariant Ret;
+		LExecutionStatus s = Eng.Run(Obj, &Ret);
 		if (s == ScriptError)
 		{
 			printf("Error: Execution failed '%s'.\n", SrcFile.Get());
@@ -124,12 +124,12 @@ public:
 		
 		if (Disassemble)
 		{
-			GString f = File;
+			LString f = File;
 			int Idx = f.RFind(".");
 			if (Idx > 0)
 			{
 				f = f(0, Idx) + ".asm";
-				GAutoString a(ReadTextFile(f));
+				LAutoString a(LReadTextFile(f));
 				if (a)
 				{
 					printf("%s\n", a.Get());

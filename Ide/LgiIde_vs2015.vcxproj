@@ -95,7 +95,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\include\common;..\include\win32;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\win32;..\..\..\..\CodeLib\zlib\win32;.\Resources;C:\Program Files (x86)\OpenSSL-Win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\win32;..\..\..\..\CodeLib\zlib\win32;.\Resources;C:\Program Files (x86)\OpenSSL-Win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -118,7 +118,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\include\common;..\include\win32;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\win32;..\..\..\..\CodeLib\zlib\win32;.\Resources;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\win32;..\..\..\..\CodeLib\zlib\win32;.\Resources;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -140,7 +140,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\include\common;..\include\win32;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\win32;..\..\..\..\CodeLib\zlib\win32;.\Resources;C:\Program Files (x86)\OpenSSL-Win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\win32;..\..\..\..\CodeLib\zlib\win32;.\Resources;C:\Program Files (x86)\OpenSSL-Win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader />
@@ -162,7 +162,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\include\common;..\include\win32;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\win32;..\..\..\..\CodeLib\zlib\win32;.\Resources;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\win32;..\..\..\..\CodeLib\zlib\win32;.\Resources;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -211,17 +211,17 @@
     <ClInclude Include="Code\WebFldDlg.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\common\Coding\GLexCpp.cpp" />
-    <ClCompile Include="..\src\common\Coding\GParseCpp.cpp" />
-    <ClCompile Include="..\src\common\Coding\GScriptCompiler.cpp" />
-    <ClCompile Include="..\src\common\Coding\GScriptLibrary.cpp" />
-    <ClCompile Include="..\src\common\Coding\GScriptVM.cpp" />
+    <ClCompile Include="..\src\common\Coding\LexCpp.cpp" />
+    <ClCompile Include="..\src\common\Coding\ParseCpp.cpp" />
+    <ClCompile Include="..\src\common\Coding\ScriptCompiler.cpp" />
+    <ClCompile Include="..\src\common\Coding\ScriptLibrary.cpp" />
+    <ClCompile Include="..\src\common\Coding\ScriptVM.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp" />
-    <ClCompile Include="..\src\common\INet\IFtp.cpp" />
-    <ClCompile Include="..\src\common\INet\IHttp.cpp" />
-    <ClCompile Include="..\src\common\INet\OpenSSLSocket.cpp" />
-    <ClCompile Include="..\src\common\Lgi\GAbout.cpp" />
-    <ClCompile Include="..\src\common\Lgi\GMdi.cpp" />
+    <ClCompile Include="..\src\common\Net\Ftp.cpp" />
+    <ClCompile Include="..\src\common\Net\Http.cpp" />
+    <ClCompile Include="..\src\common\Net\OpenSSLSocket.cpp" />
+    <ClCompile Include="..\src\common\Lgi\About.cpp" />
+    <ClCompile Include="..\src\common\Lgi\Mdi.cpp" />
     <ClCompile Include="..\src\common\Lgi\LgiMain.cpp" />
     <ClCompile Include="Code\AddFtpFile.cpp" />
     <ClCompile Include="Code\DocEdit.cpp" />
@@ -251,7 +251,7 @@
     <ClCompile Include="Code\WebFldDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\src\win32\General\Lgi.manifest" />
+    <Manifest Include="..\src\win\General\Lgi.manifest" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resources\Script1.rc" />

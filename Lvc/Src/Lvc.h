@@ -1,18 +1,18 @@
 #ifndef _Lvc_h_
 #define _Lvc_h_
 
-#include "Lgi.h"
-#include "LList.h"
-#include "GBox.h"
-#include "GTree.h"
-#include "GOptionsFile.h"
-#include "GTextView3.h"
-#include "GTextLog.h"
-#include "GTabView.h"
-#include "GEdit.h"
-#include "LMenu.h"
-#include "LSsh.h"
-#include "GEventTargetThread.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/List.h"
+#include "lgi/common/Box.h"
+#include "lgi/common/Tree.h"
+#include "lgi/common/OptionsFile.h"
+#include "lgi/common/TextView3.h"
+#include "lgi/common/TextLog.h"
+#include "lgi/common/TabView.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/Ssh.h"
+#include "lgi/common/EventTargetThread.h"
 
 #define OPT_Folders			"Folders"
 #define OPT_Folder			"Folder"
@@ -105,8 +105,8 @@ enum VersionCtrl
 class VcFolder;
 struct ParseParams
 {
-	GString Str;
-	GString AltInitPath;
+	LString Str;
+	LString AltInitPath;
 	class VcLeaf *Leaf;
 	bool IsWorking;
 
@@ -118,26 +118,26 @@ struct ParseParams
 	}
 };
 
-typedef bool (VcFolder::*ParseFn)(int, GString, ParseParams*);
+typedef bool (VcFolder::*ParseFn)(int, LString, ParseParams*);
 class SshConnection;
 
 struct AppPriv
 {
-	GTree *Tree;
+	LTree *Tree;
 	VcFolder *CurFolder;
 	LList *Commits;
 	LList *Files;
-	GOptionsFile Opts;
-	GEdit *Msg;
+	LOptionsFile Opts;
+	LEdit *Msg;
 	GTextLog *Diff;
 	GTextLog *Log;
-	GTabView *Tabs;
+	LTabView *Tabs;
 	VersionCtrl PrevType;
 	int Resort;
 
 	LHashTbl<StrKey<char,false>,SshConnection*> Connections;
 	
-	AppPriv()  : Opts(GOptionsFile::DesktopMode, AppName)
+	AppPriv()  : Opts(LOptionsFile::DesktopMode, AppName)
 	{
 		Commits = NULL;
 		PrevType = VcNone;
@@ -161,8 +161,8 @@ struct AppPriv
 			Diff->Name(NULL);		
 	}
 
-	GArray<class VcCommit*> GetRevs(GString::Array &Revs);
-	GString::Array GetCommitRange();
+	LArray<class VcCommit*> GetRevs(LString::Array &Revs);
+	LString::Array GetCommitRange();
 	
 	bool IsMenuChecked(int Item)
 	{
@@ -175,40 +175,40 @@ struct AppPriv
 	class VcFile *FindFile(const char *Path);
 };
 
-class SshConnection : public LSsh, public GEventTargetThread
+class SshConnection : public LSsh, public LEventTargetThread
 {
 	int GuiHnd;
-	GUri Host;
-	GAutoPtr<GStream> c;
-	GString Uri, Prompt;
+	LUri Host;
+	LAutoPtr<LStream> c;
+	LString Uri, Prompt;
 	AppPriv *d;
 
 	GMessage::Result OnEvent(GMessage *Msg);
-	GStream *GetConsole();
-	bool WaitPrompt(GStream *c, GString *Data = NULL);
+	LStream *GetConsole();
+	bool WaitPrompt(LStream *c, LString *Data = NULL);
 
 public:
 	LHashTbl<StrKey<char,false>,VersionCtrl> Types;
-	GArray<VcFolder*> TypeNotify;
+	LArray<VcFolder*> TypeNotify;
 	
 	SshConnection(GTextLog *log, const char *uri, const char *prompt);
 	bool DetectVcs(VcFolder *Fld);
-	bool Command(VcFolder *Fld, GString Exe, GString Args, ParseFn Parser, ParseParams *Params);
+	bool Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Parser, ParseParams *Params);
 	
 	// This is the GUI thread message handler
 	static bool HandleMsg(GMessage *m);
 };
 
-class BlameUi : public GWindow
+class BlameUi : public LWindow
 {
 	struct BlameUiPriv *d;
 
 public:
-	BlameUi(AppPriv *priv, VersionCtrl Vc, GString Output);
+	BlameUi(AppPriv *priv, VersionCtrl Vc, LString Output);
 	~BlameUi();
 };
 
-class DropDownBtn : public GDropDown, public ResObject
+class DropDownBtn : public LDropDown, public ResObject
 {
 	struct DropDownBtnPriv *d;
 	class DropLst *Pu;
@@ -217,15 +217,15 @@ public:
 	DropDownBtn();
 	~DropDownBtn();
 
-	GString::Array GetList();
-	bool SetList(int EditCtrl, GString::Array a);
-	bool OnLayout(GViewLayoutInfo &Inf);
+	LString::Array GetList();
+	bool SetList(int EditCtrl, LString::Array a);
+	bool OnLayout(LViewLayoutInfo &Inf);
 };
 
 extern bool ConvertEol(const char *Path, bool Cr);
 extern int GetEol(const char *Path);
-extern GString::Array GetProgramsInPath(const char *Program);
-extern GColour GetPaletteColour(int i);
+extern LString::Array GetProgramsInPath(const char *Program);
+extern LColour GetPaletteColour(int i);
 
 #include "VcFile.h"
 #include "VcCommit.h"

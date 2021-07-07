@@ -1,10 +1,10 @@
 #pragma once
 
-#include "LJson.h"
+#include "lgi/common/Json.h"
 #if defined(WIN32) && defined(__GTK_H__)
-#include "../win32/GSymLookup.h"
+	#include "../win32/SymLookup.h"
 #else
-#include "GSymLookup.h"
+	#include "SymLookup.h"
 #endif
 
 #if HAS_LIB_MAGIC
@@ -14,18 +14,18 @@
 
 #include "LgiWinManGlue.h"
 
-typedef GArray<GAppInfo*> AppArray;
+typedef LArray<LAppInfo*> AppArray;
 using namespace Gtk;
 
-class GAppPrivate : public GSymLookup
+class LAppPrivate : public LSymLookup
 {
 public:
 	// Common
-	GApp *Owner;
+	LApp *Owner;
 	GtkApplication *App;
-	GAutoPtr<LJson> Config;
-	GAutoPtr<GApp::KeyModFlags> ModFlags;
-	GFileSystem *FileSystem;
+	LAutoPtr<LJson> Config;
+	LAutoPtr<LApp::KeyModFlags> ModFlags;
+	LFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
 	OsAppArguments Args;
 	GLibrary *SkinLib;
@@ -34,22 +34,22 @@ public:
 	GSharedMime *Sm;
 	#endif
 	GLibrary *WmLib;
-	LHashTbl<IntKey<int>, GView*> Handles;
+	LHashTbl<IntKey<int>, LView*> Handles;
 	OsThread GuiThread;
 	OsThreadId GuiThreadId;
 	int MessageLoopDepth;
 	int CurEvent;
 	#if DEBUG_MSG_TYPES
-	GArray<int> Types;
+	LArray<int> Types;
 	#endif
-	::GArray<GViewI*> DeleteLater;
-	GMouse LastMove;
-	GAutoString Name;
-	::GArray<Gtk::guint> IdleId;
+	::LArray<LViewI*> DeleteLater;
+	LMouse LastMove;
+	LAutoString Name;
+	::LArray<Gtk::guint> IdleId;
 	
 	#if defined(LINUX)
 	/// Desktop info
-	GAutoPtr<GApp::DesktopInfo> DesktopInfo;
+	LAutoPtr<LApp::DesktopInfo> DesktopInfo;
 	#endif
 
 	#if HAS_LIB_MAGIC
@@ -58,12 +58,12 @@ public:
 	#endif
 
 	/// Any fonts needed for styling the elements
-	GAutoPtr<GFontCache> FontCache;
+	LAutoPtr<GFontCache> FontCache;
 	
 	// Clipboard handling
 	int Clipboard, Utf8, Utf8String;
-	::GVariant ClipData;
-	LHashTbl<IntKey<int>, ::GVariant*> ClipNotify;
+	::LVariant ClipData;
+	LHashTbl<IntKey<int>, ::LVariant*> ClipNotify;
 
 	// Mouse click info
 	uint64 LastClickTime;
@@ -71,7 +71,7 @@ public:
 	int LastClickX;
 	int LastClickY;
 
-	GAppPrivate(GApp *a) : Args(0, 0), Owner(a)
+	LAppPrivate(LApp *a) : Args(0, 0), Owner(a)
 		#if HAS_LIB_MAGIC
 		, MagicLock("MagicLock")
 		#endif
@@ -98,7 +98,7 @@ public:
 		LastClickY = 0;
 	}
 
-	~GAppPrivate()
+	~LAppPrivate()
 	{
 		#if HAS_LIB_MAGIC
 		if (MagicLock.Lock(_FL))
@@ -141,9 +141,9 @@ public:
 		}
 	}
 
-	GApp::KeyModFlags *GetModFlags()
+	LApp::KeyModFlags *GetModFlags()
 	{
-		if (ModFlags.Reset(new GApp::KeyModFlags))
+		if (ModFlags.Reset(new LApp::KeyModFlags))
 		{
 			#define _(name) \
 				{ \

@@ -23,7 +23,7 @@ void LgiShowFileProperties(OsView Parent, const char *Filename)
 
 bool LgiBrowseToFile(const char *Filename)
 {
-	GString s;
+	LString s;
 	s.Printf("/usr/bin/osascript "
 			"-e 'set asd to POSIX file \"%s\" as string\n"
 			"tell application \"Finder\"\n"

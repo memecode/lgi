@@ -1,10 +1,10 @@
 // http://code.iamcal.com/php/emoji/
 #include <wchar.h>
 
-#include "Lgi.h"
-#include "Emoji.h"
-#include "GVariant.h"
-#include "GDocView.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Emoji.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/DocView.h"
 
 #ifdef WIN32
 typedef uint32_t WChar;
@@ -137,7 +137,7 @@ struct EmojiMemQ : GMemQueue
 	#ifdef WINDOWS
 	int WriteWide(const char16 *s, ssize_t bytes)
 	{
-		GAutoPtr<uint32_t> c((uint32_t*)LNewConvertCp("utf-32", s, LGI_WideCharset, bytes));
+		LAutoPtr<uint32_t> c((uint32_t*)LNewConvertCp("utf-32", s, LGI_WideCharset, bytes));
 		int len = Strlen(c.Get());
 		return GMemQueue::Write(c, len * sizeof(uint32_t));
 	}
@@ -149,10 +149,10 @@ struct EmojiMemQ : GMemQueue
 	}
 };
 
-GAutoWString TextToEmoji(uint32_t *Txt, bool IsHtml)
+LAutoWString TextToEmoji(uint32_t *Txt, bool IsHtml)
 {
 	EmojiMemQ p;
-	GArray<GLinkInfo> Links;
+	LArray<GLinkInfo> Links;
 	int Lnk = 0;
 	ssize_t Ch;
 	WChar Buf[BUF_SIZE];
@@ -160,10 +160,10 @@ GAutoWString TextToEmoji(uint32_t *Txt, bool IsHtml)
 
 	#ifdef MAC
 	LgiGetExeFile(EmojiPng, sizeof(EmojiPng));
-	LgiMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "Contents/Resources/EmojiMap.png");
+	LMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "Contents/Resources/EmojiMap.png");
 	#else
 	LGetSystemPath(LSP_APP_INSTALL, EmojiPng, sizeof(EmojiPng));
-	LgiMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "resources/EmojiMap.png");
+	LMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "resources/EmojiMap.png");
 	#endif
 
 	LgiAssert(sizeof(WChar) == sizeof(uint32_t));
@@ -217,7 +217,7 @@ GAutoWString TextToEmoji(uint32_t *Txt, bool IsHtml)
 				int XChar = IcoIdx % EMOJI_GROUP_X;
 				int YChar = IcoIdx / EMOJI_GROUP_X;
 				
-				GRect rc;
+				LRect rc;
 				rc.ZOff(EMOJI_CELL_SIZE - 1, EMOJI_CELL_SIZE - 1);
 				rc.Offset(XChar * EMOJI_CELL_SIZE, YChar * EMOJI_CELL_SIZE);
 				Ch = my_snwprintf(Buf, BUF_SIZE, img, EmojiPng, rc.GetStr());
@@ -243,8 +243,8 @@ GAutoWString TextToEmoji(uint32_t *Txt, bool IsHtml)
 			p.Write(Buf, (int) (Ch * sizeof(*Buf)));
 	}
 
-	GAutoPtr<WChar, true> WideVer( (WChar*)p.New(sizeof(*s)) );
-	GAutoWString Final( (char16*)LNewConvertCp(LGI_WideCharset, WideVer, "utf-32") );
+	LAutoPtr<WChar, true> WideVer( (WChar*)p.New(sizeof(*s)) );
+	LAutoWString Final( (char16*)LNewConvertCp(LGI_WideCharset, WideVer, "utf-32") );
 	return Final;
 }
 */

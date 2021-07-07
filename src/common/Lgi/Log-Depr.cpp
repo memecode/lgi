@@ -1,0 +1,342 @@
+/*
+**	FILE:			GLog.cpp
+**	AUTHOR:			Matthew Allen
+**	DATE:			28/6/99
+**	DESCRIPTION:	Reality logging system
+**
+**	Copyright (C) 1999, Matthew Allen
+**		fret@memecode.com
+*/
+
+#include <stdio.h>
+#include <time.h>
+
+#include "Lgi.h"
+#include "GLog.h"
+#include "LScrollBar.h"
+#include "LDisplayString.h"
+
+////////////////////////////////////////////////////////////////////
+RLogEntry::RLogEntry(const char *t, const char *desc, int Len, LColour *Col)
+{
+	if (Col)
+		c = *Col;
+	else
+		c = LColour(L_TEXT);
+
+	if (desc)
+	{
+		Desc = NewStr(desc);
+	}
+	else
+	{
+		char TimeStr[40];
+		time_t Time = time(NULL);
+
+		#ifdef _MSC_VER
+		struct tm local, *ptm = &local;
+		auto res = localtime_s(ptm, &Time);
+		#else
+		tm *ptm = localtime(&Time);
+		#endif
+
+		strftime(TimeStr, sizeof(TimeStr)-1, "%d/%m/%Y %H:%M:%S", ptm);
+
+		Desc = NewStr(TimeStr);
+	}
+
+	Text = NewStr(t, Len);
+}
+
+RLogEntry::~RLogEntry()
+{
+	DeleteArray(Desc);
+	DeleteArray(Text);
+}
+
+////////////////////////////////////////////////////////////////////
+RLogView::RLogView(GLog *log)
+{
+	Log = log;
+	HasBorder = true;
+	IsTopDown = true;
+	SplitPos = 150;
+	Sunken(true);
+	SetPourLargest(true);
+	
+	if (VScroll)
+	{
+		VScroll->SetLimits(0, -1);
+	}
+
+	#if defined(BEOS)
+	Handle()->SetViewColor(B_TRANSPARENT_COLOR);
+	#elif defined(WIN32)
+	WndFlags |= GWF_SYS_BORDER;
+	#endif
+}
+
+int RLogView::GetScreenItems()
+{
+	LRect Client = GetClient();
+	int y = SysFont->GetHeight();
+	return Client.Y() / y;
+}
+
+int RLogView::GetTotalItems()
+{
+	return (Log) ? (int)Log->Entries.Length() : 0;
+}
+
+void RLogView::OnPosChange()
+{
+	LLayout::OnPosChange();
+	UpdateScrollBar();
+}
+
+int RLogView::OnNotify(LViewI *Ctrl, int Flags)
+{
+	if (Ctrl == (LViewI*)this)
+	{
+		UpdateScrollBar();
+		if (VScroll)
+		{
+			if (TopDown())
+			{
+				int n = GetTotalItems();
+				int Screen = GetScreenItems();
+				if (n > Screen)
+				{
+					VScroll->Value(n-Screen);
+				}
+			}
+		}
+
+		// show new data
+		Invalidate();
+		#ifdef WIN32
+		if (InThread())
+			UpdateWindow(Handle());
+		#endif
+	}
+	else if (Ctrl->GetId() == IDC_VSCROLL ||
+			 Ctrl->GetId() == IDC_HSCROLL)
+	{
+		Invalidate();
+	}
+
+	return 0;
+}
+
+void RLogView::UpdateScrollBar()
+{
+	int Screen = GetScreenItems();
+	int Total = GetTotalItems();
+
+	SetScrollBars(false, Screen < Total);
+	if (VScroll && Log)
+	{
+		VScroll->SetLimits(0, Total-1);
+		VScroll->SetPage(Screen);
+		
+		auto Pos = VScroll->Value();
+		if (TopDown())
+		{
+			if (Pos > (Total - Screen))
+			{
+				VScroll->Value(Total - Screen + 1);
+			}
+		}
+	}
+}
+
+void RLogView::OnPaint(LSurface *pDC)
+{
+	LRect r(GetClient());
+	r.Offset(-r.x1, -r.y1);
+
+	pDC->Colour(L_MED);
+
+	if (Log && r.Valid())
+	{
+		SysFont->Back(L_WORKSPACE);
+		SysFont->Transparent(false);
+
+		int y = SysFont->GetHeight();
+		int Screen = GetScreenItems();
+		int Index = MAX((VScroll) ? (int)VScroll->Value() : 0, 0);
+		int n = GetTotalItems() - 1;
+		
+		List<RLogEntry>::I It = Log->Entries.end();
+		if (TopDown())
+			It = Log->Entries.begin(MAX(Index, 0));
+		else
+			It = Log->Entries.begin(MIN(Screen+Index-1, n));
+
+        auto e = *It;
+		while (e)
+		{
+			LRect t;
+
+			SysFont->Fore(e->c);
+
+			if (TopDown())
+			{
+				if (r.y1 + y >= r.y2)
+				{
+					break;
+				}
+
+				t.Set(r.x1, r.y1, r.x1 + SplitPos, r.y1+y-1);
+			}
+			else
+			{
+				if (r.y2 - y + 1 < r.y1)
+				{
+					break;
+				}
+
+				t.Set(r.x1, r.y2-y+1, r.x1 + SplitPos, r.y2);
+			}
+
+			LDisplayString ds(SysFont, e->Desc);
+			ds.Draw(pDC, t.x1, t.y1, &t);
+			t.x1 = t.x2+1;
+			t.x2 = r.x2;
+			if (ValidStr(e->Text))
+			{
+				LDisplayString ds(SysFont, e->Text);
+				ds.Draw(pDC, t.x1, t.y1, &t);
+			}
+			else
+			{
+				pDC->Colour(L_WORKSPACE);
+				pDC->Rectangle(&t);
+			}
+
+			if (TopDown())
+			{
+				r.y1 += y;
+				e = *(++It);
+			}
+			else
+			{
+				r.y2 -= y;
+				e = *(--It);
+			}
+		}
+	}
+
+	if (r.Valid())
+	{
+		pDC->Colour(L_WORKSPACE);
+		pDC->Rectangle(&r);
+	}
+}
+
+/*
+void RLogView::OnNcPaint(LSurface *pDC, LRect &r)
+{
+	// LRect r(0, 0, X()-1, Y()-1);
+	if (r.Valid())
+	{
+		pDC->Colour(LC_MED, 24);
+		if (Sunken() || Raised())
+		{
+			LWideBorder(pDC, r, Sunken() ? DefaultSunkenEdge : DefaultRaisedEdge);
+		}
+	}
+}
+
+void RLogView::OnNcCalcClient(long &x1, long &y1, long &x2, long &y2)
+{
+	int d = -2;
+
+	d += (Sunken() || Raised()) ? 2 : 0;
+
+	x1 += d;
+	y1 += d;
+	x2 -= d;
+	y2 -= d;
+
+}
+*/
+
+GMessage::Result RLogView::OnEvent(GMessage *Msg)
+{
+	return LLayout::OnEvent(Msg);
+}
+
+////////////////////////////////////////////////////////////////////
+GLog::GLog(char *File)
+{
+	LogView = 0;
+	FileName = (File) ? NewStr(File) : 0;
+	if (FileName)
+	{
+		FileDev->Delete(FileName);
+	}
+}
+
+GLog::~GLog()
+{
+	if (LogView)
+	{
+		LogView->Log = 0;
+	}
+
+	DeleteArray(FileName);
+	Entries.DeleteObjects();
+}
+
+void GLog::SetView(RLogView *View)
+{
+	LogView = View;
+}
+
+void GLog::Write(LColour c, const char *Buffer, int Len, char *Desc)
+{
+	if (Buffer)
+	{
+		RLogEntry *Entry = 0;
+		Entries.Insert(Entry = new RLogEntry(Buffer, Desc, Len, &c));
+		if (Entry && FileName)
+		{
+			LFile F;
+			if (F.Open(FileName, O_WRITE))
+			{
+				F.Seek(F.GetSize(), SEEK_SET);
+				if (Entry->Desc)
+				{
+					F.Write(Entry->Desc, strlen(Entry->Desc));
+					F.Write((char*)"   ", 3);
+				}
+				F.Write((char*)Buffer, strlen(Buffer));
+				F.Write((char*)"\r\n", 2);
+				F.Close();
+			}
+		}
+
+		if (LogView && LogView->Visible())
+		{
+		    LogView->SendNotify();
+			// LogView->OnNotify(LogView, 0);
+		}
+	}
+}
+
+void GLog::Print(LColour c, const char *Str, ...)
+{
+	if (Str)
+	{
+		char Buffer[1025];
+
+		va_list Arg;
+		va_start(Arg, Str);
+		vsprintf_s(Buffer, sizeof(Buffer), Str, Arg);
+		va_end(Arg);
+		
+		Write(c, Buffer);
+	}
+}
+

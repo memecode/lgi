@@ -1,48 +1,50 @@
 #ifndef _IdeDocPrivate_h_
 #define _IdeDocPrivate_h_
 
+#include "lgi/common/CheckBox.h"
+
 #define EDIT_CTRL_WIDTH		200
 
-class EditTray : public GLayout
+class EditTray : public LLayout
 {
-	GRect FileBtn;
-	GEdit *FileSearch;
+	LRect FileBtn;
+	LEdit *FileSearch;
 
-	GRect FuncBtn;
-	GEdit *FuncSearch;
+	LRect FuncBtn;
+	LEdit *FuncSearch;
 
-	GRect SymBtn;
-	GEdit *SymSearch;
+	LRect SymBtn;
+	LEdit *SymSearch;
 
-	GCheckBox *AllPlatforms;
+	LCheckBox *AllPlatforms;
 
-	GRect TextMsg;
+	LRect TextMsg;
 
-	GTextView3 *Ctrl;
+	LTextView3 *Ctrl;
 	IdeDoc *Doc;
 
 public:
 	int Line, Col;
 
-	EditTray(GTextView3 *ctrl, IdeDoc *doc);
+	EditTray(LTextView3 *ctrl, IdeDoc *doc);
 	~EditTray();
 	
 	const char *GetClass() override { return "EditTray"; }
 	void GotoSearch(int CtrlId, char *InitialText = NULL);	
 	void OnCreate() override;
 	void OnPosChange() override;
-	void OnPaint(GSurface *pDC) override;
-	bool Pour(GRegion &r) override;
-	void OnMouseClick(GMouse &m) override;
-	void OnHeaderList(GMouse &m);
-	void OnFunctionList(GMouse &m);
-	void OnSymbolList(GMouse &m);
+	void OnPaint(LSurface *pDC) override;
+	bool Pour(LRegion &r) override;
+	void OnMouseClick(LMouse &m) override;
+	void OnHeaderList(LMouse &m);
+	void OnFunctionList(LMouse &m);
+	void OnSymbolList(LMouse &m);
 };
 
 class IdeDocPrivate : public NodeView, public LMutex
 {
-	GString FileName;
-	GString Buffer;
+	LString FileName;
+	LString Buffer;
 
 public:
 	IdeDoc *Doc;
@@ -55,13 +57,13 @@ public:
 	class ProjFilePopup *FilePopup;
 	class ProjMethodPopup *MethodPopup;
 	class ProjSymPopup *SymPopup;
-	GString::Array WriteBuf;
-	GAutoPtr<LThread> Build;
+	LString::Array WriteBuf;
+	LAutoPtr<LThread> Build;
 	
 	IdeDocPrivate(IdeDoc *d, AppWnd *a, NodeSource *src, const char *file);
 	void OnDelete();
 	void UpdateName();
-	GString GetDisplayName();
+	LString GetDisplayName();
 	bool IsFile(const char *File);
 	const char *GetLocalFile();
 	void SetFileName(const char *f);
@@ -76,7 +78,7 @@ public:
 		auto Full = nSrc ? nSrc->GetFullPath() : FileName;
 		if (Full)
 		{
-			GDirectory Dir;
+			LDirectory Dir;
 			if (Dir.First(Full, NULL))
 				Ts.Set(Dir.GetLastWriteTime());
 		}

@@ -1,15 +1,15 @@
-#include "Lgi.h"
-#include "GRichTextEdit.h"
-#include "GRichTextEditPriv.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/RichTextEdit.h"
+#include "RichTextEditPriv.h"
 
-GRichTextPriv::BlockCursor::BlockCursor(const BlockCursor &c)
+LRichTextPriv::BlockCursor::BlockCursor(const BlockCursor &c)
 {
 	Blk = NULL;
 	Blink = true;
 	*this = c;
 }
 		
-GRichTextPriv::BlockCursor::BlockCursor(Block *b, ssize_t off, int line)
+LRichTextPriv::BlockCursor::BlockCursor(Block *b, ssize_t off, int line)
 {
 	Blk = NULL;
 	Offset = -1;
@@ -22,12 +22,12 @@ GRichTextPriv::BlockCursor::BlockCursor(Block *b, ssize_t off, int line)
 		Set(b, off, line);
 }
 		
-GRichTextPriv::BlockCursor::~BlockCursor()
+LRichTextPriv::BlockCursor::~BlockCursor()
 {
 	Set(NULL, 0, 0);
 }
 		
-GRichTextPriv::BlockCursor &GRichTextPriv::BlockCursor::operator =(const BlockCursor &c)
+LRichTextPriv::BlockCursor &LRichTextPriv::BlockCursor::operator =(const BlockCursor &c)
 {
 	Set(c.Blk, c.Offset, c.LineHint);
 	Pos = c.Pos;
@@ -38,16 +38,16 @@ GRichTextPriv::BlockCursor &GRichTextPriv::BlockCursor::operator =(const BlockCu
 	return *this;
 }
 		
-void GRichTextPriv::BlockCursor::Set(ssize_t off)
+void LRichTextPriv::BlockCursor::Set(ssize_t off)
 {
-	GArray<int> Ln;
+	LArray<int> Ln;
 	if (!Blk->OffsetToLine(off, NULL, &Ln))
 		Ln.Add(-1);
 
 	Set(Blk, off, Ln.First());
 }
 
-void GRichTextPriv::BlockCursor::Set(GRichTextPriv::Block *b, ssize_t off, int line)
+void LRichTextPriv::BlockCursor::Set(LRichTextPriv::Block *b, ssize_t off, int line)
 {
 	if (Blk != b)
 	{
@@ -58,7 +58,7 @@ void GRichTextPriv::BlockCursor::Set(GRichTextPriv::Block *b, ssize_t off, int l
 
 			#if DEBUG_LOG_CURSOR_COUNT
 			{
-				GArray<char16> Text;
+				LArray<char16> Text;
 				Blk->CopyAt(0, 20, &Text);
 				Text.Add(0);
 				LgiTrace("%s:%i - %i del cursor %p (%.20S)\n", _FL, Blk->Cursors, Blk, &Text.First());
@@ -76,7 +76,7 @@ void GRichTextPriv::BlockCursor::Set(GRichTextPriv::Block *b, ssize_t off, int l
 
 			#if DEBUG_LOG_CURSOR_COUNT
 			{
-				GArray<char16> Text;
+				LArray<char16> Text;
 				Blk->CopyAt(0, 20, &Text);
 				Text.Add(0);
 				LgiTrace("%s:%i - %i add cursor %p (%.20S)\n", _FL, Blk->Cursors, Blk, &Text.First());
@@ -89,7 +89,7 @@ void GRichTextPriv::BlockCursor::Set(GRichTextPriv::Block *b, ssize_t off, int l
 	LineHint = line;
 	if (Blk)
 	{
-		GRect Line;
+		LRect Line;
 		#ifdef _DEBUG
 		ssize_t BlkLen = Blk->Length();
 		#endif

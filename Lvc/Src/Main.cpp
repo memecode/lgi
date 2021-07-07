@@ -1,14 +1,15 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "../Resources/resdefs.h"
 #include "Lvc.h"
-#include "GTableLayout.h"
+#include "lgi/common/TableLayout.h"
 #ifdef WINDOWS
 #include "../Resources/resource.h"
 #endif
-#include "GTextLog.h"
-#include "GButton.h"
-#include "GXmlTreeUi.h"
-#include "GTree.h"
+#include "lgi/common/TextLog.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/XmlTreeUi.h"
+#include "lgi/common/Tree.h"
+#include "lgi/common/FileSelect.h"
 
 #define TIMEOUT_PROMPT			1000
 
@@ -22,7 +23,7 @@ enum SshMsgs
 
 SshConnection *AppPriv::GetConnection(const char *Uri, bool Create)
 {
-	GUri u(Uri);
+	LUri u(Uri);
 	u.sPath.Empty();
 	auto s = u.ToString();
 	auto Conn = Connections.Find(s);
@@ -31,7 +32,7 @@ SshConnection *AppPriv::GetConnection(const char *Uri, bool Create)
 	return Conn;
 }
 
-SshConnection::SshConnection(GTextLog *log, const char *uri, const char *prompt) : LSsh(log), GEventTargetThread("SshConnection")
+SshConnection::SshConnection(GTextLog *log, const char *uri, const char *prompt) : LSsh(log), LEventTargetThread("SshConnection")
 {
 	auto Wnd = log->GetWindow();
 	GuiHnd = Wnd->AddDispatch();
@@ -39,8 +40,8 @@ SshConnection::SshConnection(GTextLog *log, const char *uri, const char *prompt)
 	Host.Set(Uri = uri);
 	d = NULL;
 
-	GVariant Ret;
-	GArray<GVariant*> Args;
+	LVariant Ret;
+	LArray<LVariant*> Args;
 	if (Wnd->CallMethod(METHOD_GetContext, &Ret, Args))
 	{
 		if (Ret.Type == GV_VOID_PTR)
@@ -50,17 +51,17 @@ SshConnection::SshConnection(GTextLog *log, const char *uri, const char *prompt)
 
 bool SshConnection::DetectVcs(VcFolder *Fld)
 {
-	GAutoPtr<GString> p(new GString(Fld->GetUri().sPath(1, -1)));
+	LAutoPtr<LString> p(new LString(Fld->GetUri().sPath(1, -1)));
 	TypeNotify.Add(Fld);
 	return PostObject(GetHandle(), M_DETECT_VCS, p);
 }
 
-bool SshConnection::Command(VcFolder *Fld, GString Exe, GString Args, ParseFn Parser, ParseParams *Params)
+bool SshConnection::Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Parser, ParseParams *Params)
 {
 	if (!Fld || !Exe || !Parser)
 		return false;
 
-	GAutoPtr<SshParams> p(new SshParams(this));
+	LAutoPtr<SshParams> p(new SshParams(this));
 	p->f = Fld;
 	p->Exe = Exe;
 	p->Args = Args;
@@ -71,7 +72,7 @@ bool SshConnection::Command(VcFolder *Fld, GString Exe, GString Args, ParseFn Pa
 	return PostObject(GetHandle(), M_RUN_CMD, p);
 }
 
-GStream *SshConnection::GetConsole()
+LStream *SshConnection::GetConsole()
 {
 	if (!Connected)
 	{
@@ -105,12 +106,12 @@ public:
 		pDC->Rectangle(&Ctx);
 		
 		auto Fnt = GetList()->GetFont();
-		GDisplayString ds(Fnt, LFormatSize(v));
+		LDisplayString ds(Fnt, LFormatSize(v));
 		Fnt->Transparent(true);
 		Fnt->Colour(Ctx.Fore, Ctx.Back);
 		ds.Draw(pDC, Ctx.x1 + 10, Ctx.y1 + ((Ctx.Y() - ds.Y()) >> 1));
 
-		pDC->Colour(GProgress::cNormal);
+		pDC->Colour(LProgressView::cNormal);
 		int x1 = 120;
 		int prog = Ctx.X() - x1;
 		int x2 = (int) (v * prog / maximum);
@@ -118,10 +119,10 @@ public:
 	}
 };
 
-bool SshConnection::WaitPrompt(GStream *con, GString *Data)
+bool SshConnection::WaitPrompt(LStream *con, LString *Data)
 {
 	char buf[1024];
-	GString out;
+	LString out;
 	auto Ts = LgiCurrentTime();
 	int64 Count = 0, Total = 0;
 	ProgressListItem *Prog = NULL;
@@ -138,7 +139,7 @@ bool SshConnection::WaitPrompt(GStream *con, GString *Data)
 			continue;
 		}
 				
-		out += GString(buf, rd);
+		out += LString(buf, rd);
 		Count += rd;
 		Total += rd;
 		DeEscape(out);
@@ -150,7 +151,7 @@ bool SshConnection::WaitPrompt(GStream *con, GString *Data)
 			{
 				lines.DeleteAt(0, true);
 				lines.PopLast();
-				*Data = GString("\n").Join(lines);
+				*Data = LString("\n").Join(lines);
 			}
 			break;
 		}
@@ -181,7 +182,7 @@ bool SshConnection::HandleMsg(GMessage *m)
 	if (m->Msg() != M_RESPONSE)
 		return false;
 
-	GAutoPtr<SshParams> u((SshParams*)m->A());
+	LAutoPtr<SshParams> u((SshParams*)m->A());
 	if (!u || !u->c)
 		return false;
 
@@ -219,15 +220,15 @@ GMessage::Result SshConnection::OnEvent(GMessage *Msg)
 	{
 		case M_DETECT_VCS:
 		{
-			GAutoPtr<GString> p;
+			LAutoPtr<LString> p;
 			if (!ReceiveA(p, Msg))
 				break;
 
-			GStream *con = GetConsole();
+			LStream *con = GetConsole();
 			if (!con)
 				break;
 
-			GString ls, out;
+			LString ls, out;
 			ls.Printf("find \"%s\" -maxdepth 1 -printf \"%%f\n\"\n", p->Get());
 			auto wr = con->Write(ls, ls.Length());
 			auto pr = WaitPrompt(con, &out);
@@ -247,7 +248,7 @@ GMessage::Result SshConnection::OnEvent(GMessage *Msg)
 			}
 			if (Vcs)
 			{
-				GAutoPtr<SshParams> r(new SshParams(this));
+				LAutoPtr<SshParams> r(new SshParams(this));
 				r->Path = *p;
 				r->Vcs = Vcs;
 				PostObject(GuiHnd, M_RESPONSE, r);
@@ -256,15 +257,15 @@ GMessage::Result SshConnection::OnEvent(GMessage *Msg)
 		}
 		case M_RUN_CMD:
 		{
-			GAutoPtr<SshParams> p;
+			LAutoPtr<SshParams> p;
 			if (!ReceiveA(p, Msg))
 				break;
 
-			GStream *con = GetConsole();
+			LStream *con = GetConsole();
 			if (!con)
 				break;
 
-			GString cmd;
+			LString cmd;
 			cmd.Printf("cd \"%s\"\n", p->Path.Get());
 			auto wr = con->Write(cmd, cmd.Length());
 			auto pr = WaitPrompt(con);
@@ -275,7 +276,7 @@ GMessage::Result SshConnection::OnEvent(GMessage *Msg)
 			
 			// Log->Print("Ssh: %s\n%s\n", cmd.Get(), p->Output.Get());
 
-			GString result;
+			LString result;
 			cmd = "echo $?\n";
 			wr = con->Write(cmd, cmd.Length());
 			pr = WaitPrompt(con, &result);
@@ -303,7 +304,7 @@ const char *AppName =			"Lvc";
 VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 {
 	char p[MAX_PATH];
-	GUri u = Fld->GetUri();
+	LUri u = Fld->GetUri();
 
 	if (!u.IsFile() || !u.sPath)
 	{
@@ -316,7 +317,7 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 			return type;
 
 		c->DetectVcs(Fld);
-		Fld->GetCss(true)->Color(GColour::Blue);
+		Fld->GetCss(true)->Color(LColour::Blue);
 		Fld->Update();
 		return VcPending;
 	}
@@ -327,19 +328,19 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 		Path++;
 	#endif
 
-	if (LgiMakePath(p, sizeof(p), Path, ".git") &&
+	if (LMakePath(p, sizeof(p), Path, ".git") &&
 		LDirExists(p))
 		return VcGit;
 
-	if (LgiMakePath(p, sizeof(p), Path, ".svn") &&
+	if (LMakePath(p, sizeof(p), Path, ".svn") &&
 		LDirExists(p))
 		return VcSvn;
 
-	if (LgiMakePath(p, sizeof(p), Path, ".hg") &&
+	if (LMakePath(p, sizeof(p), Path, ".hg") &&
 		LDirExists(p))
 		return VcHg;
 
-	if (LgiMakePath(p, sizeof(p), Path, "CVS") &&
+	if (LMakePath(p, sizeof(p), Path, "CVS") &&
 		LDirExists(p))
 		return VcCvs;
 
@@ -356,7 +357,7 @@ public:
 
 	void PourStyle(size_t Start, ssize_t Length)
 	{
-		for (auto ln : GTextView3::Line)
+		for (auto ln : LTextView3::Line)
 		{
 			if (!ln->c.IsValid())
 			{
@@ -364,12 +365,12 @@ public:
 				
 				if (*t == '+')
 				{
-					ln->c = GColour::Green;
+					ln->c = LColour::Green;
 					ln->Back.Rgb(245, 255, 245);
 				}
 				else if (*t == '-')
 				{
-					ln->c = GColour::Red;
+					ln->c = LColour::Red;
 					ln->Back.Rgb(255, 245, 245);
 				}
 				else if (*t == '@')
@@ -384,13 +385,13 @@ public:
 	}
 };
 
-class ToolBar : public GLayout, public GLgiRes
+class ToolBar : public LLayout, public LResourceLoad
 {
 public:
 	ToolBar()
 	{
-		GAutoString Name;
-		GRect Pos;
+		LAutoString Name;
+		LRect Pos;
 		if (LoadFromResource(IDD_TOOLBAR, this, &Pos, &Name))
 		{
 			OnPosChange();
@@ -405,9 +406,9 @@ public:
 
 	void OnPosChange()
 	{
-		GRect Cli = GetClient();
+		LRect Cli = GetClient();
 
-		GTableLayout *v;
+		LTableLayout *v;
 		if (GetViewById(IDC_TABLE, v))
 		{
 			v->SetPos(Cli);
@@ -418,7 +419,7 @@ public:
 				r.Set(0, 0, 30, 30);
 			
 			// printf("Used = %s\n", r.GetStr());
-			GCss::Len NewSz(GCss::LenPx, (float)r.Y()+3);
+			LCss::Len NewSz(LCss::LenPx, (float)r.Y()+3);
 			auto OldSz = GetCss(true)->Height();
 			if (OldSz != NewSz)
 			{
@@ -429,27 +430,27 @@ public:
 		else LgiAssert(!"Missing table ctrl");
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		pDC->Colour(LColour(L_MED));
 		pDC->Rectangle();
 	}
 };
 
-class CommitCtrls : public GLayout, public GLgiRes
+class CommitCtrls : public LLayout, public LResourceLoad
 {
 public:
 	CommitCtrls()
 	{
-		GAutoString Name;
-		GRect Pos;
+		LAutoString Name;
+		LRect Pos;
 		if (LoadFromResource(IDD_COMMIT, this, &Pos, &Name))
 		{
-			GTableLayout *v;
+			LTableLayout *v;
 			if (GetViewById(IDC_COMMIT_TABLE, v))
 			{
 				v->GetCss(true)->PaddingRight("8px");
-				GRect r = v->GetPos();
+				LRect r = v->GetPos();
 				r.Offset(-r.x1, -r.y1);
 				r.x2++;
 				v->SetPos(r);
@@ -458,7 +459,7 @@ public:
 				r = v->GetUsedArea();
 				if (r.Y() <= 1)
 					r.Set(0, 0, 30, 30);
-				GetCss(true)->Height(GCss::Len(GCss::LenPx, (float)r.Y()));
+				GetCss(true)->Height(LCss::Len(LCss::LenPx, (float)r.Y()));
 			}
 			else LgiAssert(!"Missing table ctrl");
 		}
@@ -467,7 +468,7 @@ public:
 
 	void OnPosChange()
 	{
-		GTableLayout *v;
+		LTableLayout *v;
 		if (GetViewById(IDC_COMMIT_TABLE, v))
 			v->SetPos(GetClient());
 	}
@@ -478,18 +479,18 @@ public:
 	}
 };
 
-GString::Array GetProgramsInPath(const char *Program)
+LString::Array GetProgramsInPath(const char *Program)
 {
-	GString::Array Bin;
-	GString Prog = Program;
+	LString::Array Bin;
+	LString Prog = Program;
 	#ifdef WINDOWS
 	Prog += LGI_EXECUTABLE_EXT;
 	#endif
 
-	GString::Array a = LGetPath();
+	LString::Array a = LGetPath();
 	for (auto p : a)
 	{
-		GFile::Path c(p, Prog);
+		LFile::Path c(p, Prog);
 		if (c.Exists())
 			Bin.New() = c.GetFull();
 	}
@@ -497,12 +498,12 @@ GString::Array GetProgramsInPath(const char *Program)
 	return Bin;
 }
 
-class OptionsDlg : public GDialog, public GXmlTreeUi
+class OptionsDlg : public LDialog, public LXmlTreeUi
 {
-	GOptionsFile &Opts;
+	LOptionsFile &Opts;
 
 public:
-	OptionsDlg(GViewI *Parent, GOptionsFile &opts) : Opts(opts)
+	OptionsDlg(LViewI *Parent, LOptionsFile &opts) : Opts(opts)
 	{
 		SetParent(Parent);
 
@@ -527,7 +528,7 @@ public:
 
 	void Browse(int EditId)
 	{
-		GFileSelect s;
+		LFileSelect s;
 		s.Parent(this);
 		if (s.Open())
 		{
@@ -535,15 +536,15 @@ public:
 		}
 	}
 
-	void BrowseFiles(GViewI *Ctrl, const char *Bin, int EditId)
+	void BrowseFiles(LViewI *Ctrl, const char *Bin, int EditId)
 	{
-		GRect Pos = Ctrl->GetPos();
+		LRect Pos = Ctrl->GetPos();
 		LPoint Pt(Pos.x1, Pos.y2 + 1);
 		PointToScreen(Pt);
 		
 		LSubMenu s;
 
-		GString::Array Bins = GetProgramsInPath(Bin);
+		LString::Array Bins = GetProgramsInPath(Bin);
 		for (unsigned i=0; i<Bins.Length(); i++)
 		{
 			s.AppendItem(Bins[i], 1000+i);
@@ -566,7 +567,7 @@ public:
 				default:
 					if (Cmd >= 1000)
 					{
-						GString Bin = Bins[Cmd - 1000];
+						LString Bin = Bins[Cmd - 1000];
 						if (Bin)
 							SetCtrlName(EditId, Bin);
 					}
@@ -575,7 +576,7 @@ public:
 		}
 	}
 
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		switch (Ctrl->GetId())
 		{
@@ -601,7 +602,7 @@ public:
 			}
 		}
 
-		return GDialog::OnNotify(Ctrl, Flags);
+		return LDialog::OnNotify(Ctrl, Flags);
 	}
 };
 
@@ -612,13 +613,13 @@ int CommitDataCmp(VcCommit **_a, VcCommit **_b)
 	return a->GetTs().Compare(&b->GetTs());
 }
 
-GString::Array AppPriv::GetCommitRange()
+LString::Array AppPriv::GetCommitRange()
 {
-	GString::Array r;
+	LString::Array r;
 
 	if (Commits)
 	{
-		GArray<VcCommit*> Sel;
+		LArray<VcCommit*> Sel;
 		Commits->GetSelection(Sel);
 		if (Sel.Length() > 1)
 		{
@@ -636,9 +637,9 @@ GString::Array AppPriv::GetCommitRange()
 	return r;
 }
 
-GArray<VcCommit*> AppPriv::GetRevs(GString::Array &Revs)
+LArray<VcCommit*> AppPriv::GetRevs(LString::Array &Revs)
 {
-	GArray<VcCommit*> a;
+	LArray<VcCommit*> a;
 	
 	for (auto i = Commits->begin(); i != Commits->end(); i++)
 	{
@@ -666,10 +667,10 @@ public:
 	{
 	}
 
-	void SelectRevisions(GString::Array &Revs, const char *BranchHint = NULL)
+	void SelectRevisions(LString::Array &Revs, const char *BranchHint = NULL)
 	{
 		VcCommit *Scroll = NULL;
-		GArray<VcCommit*> Matches;
+		LArray<VcCommit*> Matches;
 		for (auto i: *this)
 		{
 			VcCommit *item = dynamic_cast<VcCommit*>(i);
@@ -718,7 +719,7 @@ public:
 			Scroll->ScrollTo();
 	}
 
-	bool OnKey(GKey &k)
+	bool OnKey(LKey &k)
 	{
 		switch (k.c16)
 		{
@@ -727,7 +728,7 @@ public:
 			{
 				if (k.Down())
 				{
-					GArray<VcCommit*> Sel;
+					LArray<VcCommit*> Sel;
 					GetSelection(Sel);
 					if (Sel.Length())
 					{
@@ -750,7 +751,7 @@ public:
 			{
 				if (k.Down())
 				{
-					GArray<VcCommit*> Sel;
+					LArray<VcCommit*> Sel;
 					GetSelection(Sel);
 					if (Sel.Length())
 					{
@@ -758,7 +759,7 @@ public:
 						for (auto s:Sel)
 							Map.Add(s->GetRev(), s);
 						
-						GString::Array n;
+						LString::Array n;
 						for (auto it = begin(); it != end(); it++)
 						{
 							VcCommit *c = dynamic_cast<VcCommit*>(*it);
@@ -840,15 +841,15 @@ public:
     int Main()
     {
         auto Path = LGetPath();
-        GSubProcess p("python", "/Users/matthew/CodeLib/test.py");
+        LSubProcess p("python", "/Users/matthew/CodeLib/test.py");
         
-        auto t = GString(LGI_PATH_SEPARATOR).Join(Path);
+        auto t = LString(LGI_PATH_SEPARATOR).Join(Path);
         for (auto s: Path)
             printf("s: %s\n", s.Get());
         p.SetEnvironment("PATH", t);
         if (p.Start())
         {
-            GStringPipe s;
+            LStringPipe s;
             p.Communicate(&s);
             printf("Test: %s\n", s.NewGStr().Get());
         }
@@ -856,29 +857,29 @@ public:
     }
 };
 
-class RemoteFolderDlg : public GDialog
+class RemoteFolderDlg : public LDialog
 {
 	class App *app;
-	GTree *tree;
+	LTree *tree;
 	struct SshHost *root, *newhost;
-	GXmlTreeUi Ui;
+	LXmlTreeUi Ui;
 
 public:
-	GString Uri;
+	LString Uri;
 
 	RemoteFolderDlg(App *application);
 	~RemoteFolderDlg();
 
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 };
 
-class VcDiffFile : public GTreeItem
+class VcDiffFile : public LTreeItem
 {
 	AppPriv *d;
-	GString File;
+	LString File;
 	
 public:
-	VcDiffFile(AppPriv *priv, GString file) : d(priv), File(file)
+	VcDiffFile(AppPriv *priv, LString file) : d(priv), File(file)
 	{
 	}
 	
@@ -889,19 +890,19 @@ public:
 	
 	void Select(bool s) override
 	{
-		GTreeItem::Select(s);
+		LTreeItem::Select(s);
 		if (s)
 		{
 			d->Files->Empty();
 			d->Diff->Name(NULL);
 			
-			GFile in(File, O_READ);
-			GString s = in.Read();
+			LFile in(File, O_READ);
+			LString s = in.Read();
 			if (!s)
 				return;
 			
-			GString::Array a = s.Replace("\r").Split("\n");
-			GString Diff;
+			LString::Array a = s.Replace("\r").Split("\n");
+			LString Diff;
 			VcFile *f = NULL;
 			bool InPreamble = false;
 			bool InDiff = false;
@@ -919,7 +920,7 @@ public:
 					InDiff = false;
 					InPreamble = false;
 
-					GString Fn = a[i].Split(":", 1).Last().Strip();
+					LString Fn = a[i].Split(":", 1).Last().Strip();
 
 					f = d->FindFile(Fn);
 					if (!f)
@@ -961,12 +962,12 @@ public:
 	}
 };
 
-class App : public GWindow, public AppPriv
+class App : public LWindow, public AppPriv
 {
-	GAutoPtr<GImageList> ImgLst;
-	GBox *FoldersBox;
+	LAutoPtr<LImageList> ImgLst;
+	LBox *FoldersBox;
 
-	bool CallMethod(const char *MethodName, GVariant *ReturnValue, GArray<GVariant*> &Args)
+	bool CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args)
 	{
 		if (!Stricmp(MethodName, METHOD_GetContext))
 		{
@@ -982,11 +983,11 @@ public:
 	{
 		FoldersBox = NULL;
 		
-		GString AppRev;
+		LString AppRev;
 		AppRev.Printf("%s v%s", AppName, APP_VERSION);
 		Name(AppRev);
 
-		GRect r(0, 0, 1400, 800);
+		LRect r(0, 0, 1400, 800);
 		SetPos(r);
 		MoveToCenter();
 		SetQuitOnClose(true);
@@ -1000,7 +1001,7 @@ public:
 		SetIcon("icon32.png");
 		#endif
 
-		ImgLst.Reset(LgiLoadImageList("image-list.png", 16, 16));
+		ImgLst.Reset(LLoadImageList("image-list.png", 16, 16));
 
 		if (Attach(0))
 		{
@@ -1011,9 +1012,9 @@ public:
 				Menu->Load(this, "IDM_MENU");
 			}
 
-			GBox *ToolsBox = new GBox(IDC_TOOLS_BOX, true, "ToolsBox");
-			FoldersBox = new GBox(IDC_FOLDERS_BOX, false, "FoldersBox");
-			GBox *CommitsBox = new GBox(IDC_COMMITS_BOX, true, "CommitsBox");
+			LBox *ToolsBox = new LBox(IDC_TOOLS_BOX, true, "ToolsBox");
+			FoldersBox = new LBox(IDC_FOLDERS_BOX, false, "FoldersBox");
+			LBox *CommitsBox = new LBox(IDC_COMMITS_BOX, true, "CommitsBox");
 
 			ToolBar *Tools = new ToolBar;
 
@@ -1021,8 +1022,8 @@ public:
 			Tools->Attach(ToolsBox);
 			FoldersBox->Attach(ToolsBox);
 
-			Tree = new GTree(IDC_TREE, 0, 0, 320, 200);
-			// Tree->GetCss(true)->Width(GCss::Len("320px"));
+			Tree = new LTree(IDC_TREE, 0, 0, 320, 200);
+			// Tree->GetCss(true)->Width(LCss::Len("320px"));
 			Tree->ShowColumnHeader(true);
 			Tree->AddColumn("Folder", 250);
 			Tree->AddColumn("Counts", 50);
@@ -1034,7 +1035,7 @@ public:
 			Commits->Attach(CommitsBox);
 			Commits->GetCss(true)->Height("40%");
 
-			GBox *FilesBox = new GBox(IDC_FILES_BOX, false);
+			LBox *FilesBox = new LBox(IDC_FILES_BOX, false);
 			FilesBox->Attach(CommitsBox);
 
 			Files = new LList(IDC_FILES, 0, 0, 200, 200);
@@ -1044,7 +1045,7 @@ public:
 			Files->AddColumn("State", 100);
 			Files->AddColumn("Name", 400);
 
-			GBox *MsgBox = new GBox(IDC_MSG_BOX, true);
+			LBox *MsgBox = new LBox(IDC_MSG_BOX, true);
 			MsgBox->Attach(FilesBox);
 			
 			CommitCtrls *Commit = new CommitCtrls;
@@ -1052,7 +1053,7 @@ public:
 			Commit->GetCss(true)->Height("25%");
 			if (Commit->GetViewById(IDC_MSG, Msg))
 			{
-				GTextView3 *Tv = dynamic_cast<GTextView3*>(Msg);
+				LTextView3 *Tv = dynamic_cast<LTextView3*>(Msg);
 				if (Tv)
 				{
 					Tv->Sunken(true);
@@ -1061,12 +1062,12 @@ public:
 			}
 			else LgiAssert(!"No ctrl?");
 
-			Tabs = new GTabView(IDC_TAB_VIEW);
+			Tabs = new LTabView(IDC_TAB_VIEW);
 			Tabs->Attach(MsgBox);
 			const char *Style = "Padding: 0px 8px 8px 0px";
 			Tabs->GetCss(true)->Parse(Style);
 
-			GTabPage *p = Tabs->Append("Diff");
+			LTabPage *p = Tabs->Append("Diff");
 			p->Append(Diff = new DiffView(IDC_TXT));
 			// Diff->Sunken(true);
 			Diff->SetWrapType(TEXTED_WRAP_NONE);
@@ -1082,7 +1083,7 @@ public:
 			Visible(true);
 		}
 
-		GXmlTag *f = Opts.LockTag(OPT_Folders, _FL);
+		LXmlTag *f = Opts.LockTag(OPT_Folders, _FL);
 		if (!f)
 		{
 			Opts.CreateTag(OPT_Folders);
@@ -1109,11 +1110,11 @@ public:
 			}
 			Opts.Unlock();
 			
-			GRect Large(0, 0, 2000, 200);
+			LRect Large(0, 0, 2000, 200);
 			Tree->SetPos(Large);
 			Tree->ResizeColumnsToContent();
 			
-			GItemColumn *c;
+			LItemColumn *c;
 			int i = 0, px = 0;
 			while ((c = Tree->ColumnAt(i++)))
 			{
@@ -1133,7 +1134,7 @@ public:
 	{
 		SerializeState(&Opts, "WndPos", false);
 
-		GXmlTag *f = Opts.LockTag(OPT_Folders, _FL);
+		LXmlTag *f = Opts.LockTag(OPT_Folders, _FL);
 		if (f)
 		{
 			f->EmptyChildren();
@@ -1153,10 +1154,10 @@ public:
 	{
 		if (Msg->Msg() == M_RESPONSE)
 			SshConnection::HandleMsg(Msg);
-		return GWindow::OnEvent(Msg);
+		return LWindow::OnEvent(Msg);
 	}
 
-	void OnReceiveFiles(GArray<const char*> &Files)
+	void OnReceiveFiles(LArray<const char*> &Files)
 	{
 		for (auto f : Files)
 		{
@@ -1181,7 +1182,7 @@ public:
 			}
 			case IDM_OPEN_DIFF:
 			{
-				GFileSelect s;
+				LFileSelect s;
 				s.Parent(this);
 				if (s.Open())
 				{
@@ -1200,7 +1201,7 @@ public:
 				GInput i(this, "", "Search string:");
 				if (i.DoModal())
 				{
-					GString::Array Revs;
+					LString::Array Revs;
 					Revs.Add(i.GetStr());
 
 					CommitList *cl;
@@ -1217,7 +1218,7 @@ public:
 
 				mi->Checked(!mi->Checked());
 
-				GArray<VcFolder*> Flds;
+				LArray<VcFolder*> Flds;
 				Tree->GetSelection(Flds);
 				for (auto f : Flds)
 				{
@@ -1227,7 +1228,7 @@ public:
 			}
 			case IDM_REFRESH:
 			{
-				GArray<VcFolder*> Flds;
+				LArray<VcFolder*> Flds;
 				Tree->GetSelection(Flds);
 				for (auto f: Flds)
 					f->Refresh();
@@ -1235,7 +1236,7 @@ public:
 			}
 			case IDM_PULL:
 			{
-				GArray<VcFolder*> Flds;
+				LArray<VcFolder*> Flds;
 				Tree->GetSelection(Flds);
 				for (auto f: Flds)
 					f->Pull();
@@ -1243,7 +1244,7 @@ public:
 			}
 			case IDM_PUSH:
 			{
-				GArray<VcFolder*> Flds;
+				LArray<VcFolder*> Flds;
 				Tree->GetSelection(Flds);
 				for (auto f: Flds)
 					f->Push();
@@ -1251,7 +1252,7 @@ public:
 			}
 			case IDM_STATUS:
 			{
-				GArray<VcFolder*> Flds;
+				LArray<VcFolder*> Flds;
 				Tree->GetSelection(Flds);
 				for (auto f: Flds)
 					f->FolderStatus();
@@ -1259,7 +1260,7 @@ public:
 			}
 			case IDM_UPDATE_SUBS:
 			{
-				GArray<VcFolder*> Flds;
+				LArray<VcFolder*> Flds;
 				Tree->GetSelection(Flds);
 				for (auto f: Flds)
 					f->UpdateSubs();
@@ -1288,7 +1289,7 @@ public:
 
 	void OpenLocalFolder(const char *Fld = NULL)
 	{
-		GFileSelect s;
+		LFileSelect s;
 
 		if (!Fld)
 		{
@@ -1301,7 +1302,7 @@ public:
 		{
 			// Check the folder isn't already loaded...
 			bool Has = false;
-			GArray<VcFolder*> Folders;
+			LArray<VcFolder*> Folders;
 			Tree->GetAll(Folders);
 			for (auto f: Folders)
 			{
@@ -1315,7 +1316,7 @@ public:
 
 			if (!Has)
 			{
-				GUri u;
+				LUri u;
 				u.SetFile(Fld);
 				Tree->Insert(new VcFolder(this, u.ToString()));
 			}
@@ -1336,7 +1337,7 @@ public:
 		Tree->Insert(new VcDiffFile(this, File));
 	}
 
-	int OnNotify(GViewI *c, int flag)
+	int OnNotify(LViewI *c, int flag)
 	{
 		switch (c->GetId())
 		{
@@ -1347,7 +1348,7 @@ public:
 					case GNotifyItem_ColumnClicked:
 					{
 						int Col = -1;
-						GMouse m;
+						LMouse m;
 						if (Files->GetColumnClickInfo(Col, m))
 						{
 							if (Col == 0)
@@ -1380,7 +1381,7 @@ public:
 				{
 					case GNotifyContainer_Click:
 					{
-						GMouse m;
+						LMouse m;
 						c->GetMouse(m);
 						if (m.Right())
 						{
@@ -1480,7 +1481,7 @@ public:
 			}
 			case IDC_PULL_ALL:
 			{
-				GArray<VcFolder*> Folders;
+				LArray<VcFolder*> Folders;
 				Tree->GetAll(Folders);
 				bool AndUpdate = GetCtrlValue(IDC_UPDATE) != 0;
 				
@@ -1492,7 +1493,7 @@ public:
 			}
 			case IDC_STATUS:
 			{
-				GArray<VcFolder*> Folders;
+				LArray<VcFolder*> Folders;
 				Tree->GetAll(Folders);
 				for (auto f : Folders)
 				{
@@ -1504,7 +1505,7 @@ public:
 			{
 				if (flag == GNotifyValueChanged)
 				{
-					auto Revs = GString(c->Name()).SplitDelimit();
+					auto Revs = LString(c->Name()).SplitDelimit();
 
 					CommitList *cl;
 					if (GetViewById(IDC_LIST, cl))
@@ -1519,7 +1520,7 @@ public:
 					case GNotifyItem_ColumnClicked:
 					{
 						int Col = -1;
-						GMouse Ms;
+						LMouse Ms;
 						Commits->GetColumnClickInfo(Col, Ms);
 						Commits->Sort(LstCmp, Col);
 						break;
@@ -1530,7 +1531,7 @@ public:
 						if (!f)
 							break;
 
-						GArray<VcCommit*> s;
+						LArray<VcCommit*> s;
 						if (Commits->GetSelection(s) && s.Length() == 1)
 							f->OnUpdate(s[0]->GetRev());
 						break;
@@ -1544,12 +1545,12 @@ public:
 	}
 };
 
-struct SshHost : public GTreeItem
+struct SshHost : public LTreeItem
 {
-	GXmlTag *t;
-	GString Host, User, Pass;
+	LXmlTag *t;
+	LString Host, User, Pass;
 
-	SshHost(GXmlTag *tag = NULL)
+	SshHost(LXmlTag *tag = NULL)
 	{
 		t = tag;
 		if (t)
@@ -1563,7 +1564,7 @@ struct SshHost : public GTreeItem
 	{
 		if (WriteToTag)
 		{
-			GUri u;
+			LUri u;
 			u.sProtocol = "ssh";
 			u.sHost = Host;
 			u.sUser = User;
@@ -1572,7 +1573,7 @@ struct SshHost : public GTreeItem
 		}
 		else
 		{
-			GUri u(t->GetContent());
+			LUri u(t->GetContent());
 			if (!Stricmp(u.sProtocol.Get(), "ssh"))
 			{
 				Host = u.sHost;
@@ -1597,7 +1598,7 @@ RemoteFolderDlg::RemoteFolderDlg(App *application) : app(application), root(NULL
 	}
 	else return;
 	
-	GViewI *v;
+	LViewI *v;
 	if (GetViewById(IDC_HOSTNAME, v))
 		v->Focus(true);
 
@@ -1605,7 +1606,7 @@ RemoteFolderDlg::RemoteFolderDlg(App *application) : app(application), root(NULL
 	Ui.Map("User", IDC_USER);
 	Ui.Map("Password", IDC_PASS);
 
-	GXmlTag *hosts = app->Opts.LockTag(OPT_Hosts, _FL);
+	LXmlTag *hosts = app->Opts.LockTag(OPT_Hosts, _FL);
 	if (hosts)
 	{
 		SshHost *h;
@@ -1625,7 +1626,7 @@ RemoteFolderDlg::~RemoteFolderDlg()
 {
 }
 
-int RemoteFolderDlg::OnNotify(GViewI *Ctrl, int Flags)
+int RemoteFolderDlg::OnNotify(LViewI *Ctrl, int Flags)
 {
 	SshHost *cur = tree ? dynamic_cast<SshHost*>(tree->Selection()) : NULL;
 
@@ -1686,7 +1687,7 @@ int RemoteFolderDlg::OnNotify(GViewI *Ctrl, int Flags)
 		}
 		case IDOK:
 		{
-			GXmlTag *hosts;
+			LXmlTag *hosts;
 			if (!(hosts = app->Opts.LockTag(OPT_Hosts, _FL)))
 			{
 				if (!(app->Opts.CreateTag(OPT_Hosts) && (hosts = app->Opts.LockTag(OPT_Hosts, _FL))))
@@ -1702,7 +1703,7 @@ int RemoteFolderDlg::OnNotify(GViewI *Ctrl, int Flags)
 
 				if (h->t)
 					;
-				else if ((h->t = new GXmlTag(OPT_Host)))
+				else if ((h->t = new LXmlTag(OPT_Host)))
 					hosts->InsertTag(cur->t);
 				else
 					return false;
@@ -1712,7 +1713,7 @@ int RemoteFolderDlg::OnNotify(GViewI *Ctrl, int Flags)
 
 			app->Opts.Unlock();
 
-			GUri u;
+			LUri u;
 			u.sProtocol = "ssh";
 			u.sHost = GetCtrlName(IDC_HOSTNAME);
 			u.sUser = GetCtrlName(IDC_USER);
@@ -1735,7 +1736,7 @@ int RemoteFolderDlg::OnNotify(GViewI *Ctrl, int Flags)
 //////////////////////////////////////////////////////////////////
 int LgiMain(OsAppArguments &AppArgs)
 {
-	GApp a(AppArgs, AppName);
+	LApp a(AppArgs, AppName);
 	if (a.IsOk())
 	{
 		a.AppWnd = new App;

@@ -7,38 +7,38 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		34109857217A9805007020CE /* LCocoaView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 34109856217A9805007020CE /* LCocoaView.mm */; };
+		34109857217A9805007020CE /* CocoaView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 34109856217A9805007020CE /* CocoaView.mm */; };
 		34114C8B23091E6E00F342B1 /* LgiClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = 34114C8A23091E6E00F342B1 /* LgiClasses.h */; };
-		3413170E23068FFE008CE982 /* GFileSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3413170D23068FFE008CE982 /* GFileSelect.cpp */; };
+		3413170E23068FFE008CE982 /* FileSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3413170D23068FFE008CE982 /* FileSelect.cpp */; };
 		34131710230694D1008CE982 /* Gel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3413170F230694D1008CE982 /* Gel.cpp */; };
-		3418EBCF25D9FEA600EA168A /* GProgress.h in Headers */ = {isa = PBXBuildFile; fileRef = 3418EBCE25D9FEA600EA168A /* GProgress.h */; };
-		3418EBD125D9FEF500EA168A /* GProgressDlg.h in Headers */ = {isa = PBXBuildFile; fileRef = 3418EBD025D9FEF500EA168A /* GProgressDlg.h */; };
-		343874B5230F46B200CF96B4 /* GWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B1230F46B200CF96B4 /* GWindow.h */; };
-		343874B6230F46B200CF96B4 /* GView.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B2230F46B200CF96B4 /* GView.h */; };
-		343874B7230F46B200CF96B4 /* GApp.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B3230F46B200CF96B4 /* GApp.h */; };
-		343874B8230F46B200CF96B4 /* GLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B4230F46B200CF96B4 /* GLayout.h */; };
-		343BE8C72355D0CE00742E21 /* GPopupList.h in Headers */ = {isa = PBXBuildFile; fileRef = 343BE8C62355D0CE00742E21 /* GPopupList.h */; };
-		344CFBC8237365B800AE6B35 /* GClipBoard.h in Headers */ = {isa = PBXBuildFile; fileRef = 344CFBC7237365B800AE6B35 /* GClipBoard.h */; };
-		345920FF1F25649000098DFD /* GFont.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FC1F25649000098DFD /* GFont.h */; };
-		345921001F25649000098DFD /* GFontCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FD1F25649000098DFD /* GFontCache.h */; };
-		345921011F25649000098DFD /* GFontSelect.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FE1F25649000098DFD /* GFontSelect.h */; };
-		345EB84E235C6C01007D05DB /* GPopup.h in Headers */ = {isa = PBXBuildFile; fileRef = 345EB84D235C6C01007D05DB /* GPopup.h */; };
-		346DDEC1240C882900751380 /* GRadioGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = 346DDEC0240C882900751380 /* GRadioGroup.h */; };
-		346FACE71D3C720B00FFEBCE /* GMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = 346FACE61D3C720B00FFEBCE /* GMessage.h */; };
-		346FACEB1D3C75AE00FFEBCE /* GUri.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 346FACE91D3C75AE00FFEBCE /* GUri.cpp */; };
+		3418EBCF25D9FEA600EA168A /* Progress.h in Headers */ = {isa = PBXBuildFile; fileRef = 3418EBCE25D9FEA600EA168A /* Progress.h */; };
+		3418EBD125D9FEF500EA168A /* ProgressDlg.h in Headers */ = {isa = PBXBuildFile; fileRef = 3418EBD025D9FEF500EA168A /* ProgressDlg.h */; };
+		343874B5230F46B200CF96B4 /* Window.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B1230F46B200CF96B4 /* Window.h */; };
+		343874B6230F46B200CF96B4 /* View.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B2230F46B200CF96B4 /* View.h */; };
+		343874B7230F46B200CF96B4 /* App.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B3230F46B200CF96B4 /* App.h */; };
+		343874B8230F46B200CF96B4 /* Layout.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B4230F46B200CF96B4 /* Layout.h */; };
+		343BE8C72355D0CE00742E21 /* PopupList.h in Headers */ = {isa = PBXBuildFile; fileRef = 343BE8C62355D0CE00742E21 /* PopupList.h */; };
+		344CFBC8237365B800AE6B35 /* ClipBoard.h in Headers */ = {isa = PBXBuildFile; fileRef = 344CFBC7237365B800AE6B35 /* ClipBoard.h */; };
+		345920FF1F25649000098DFD /* Font.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FC1F25649000098DFD /* Font.h */; };
+		345921001F25649000098DFD /* FontCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FD1F25649000098DFD /* FontCache.h */; };
+		345921011F25649000098DFD /* FontSelect.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FE1F25649000098DFD /* FontSelect.h */; };
+		345EB84E235C6C01007D05DB /* Popup.h in Headers */ = {isa = PBXBuildFile; fileRef = 345EB84D235C6C01007D05DB /* Popup.h */; };
+		346DDEC1240C882900751380 /* RadioGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = 346DDEC0240C882900751380 /* RadioGroup.h */; };
+		346FACE71D3C720B00FFEBCE /* Message.h in Headers */ = {isa = PBXBuildFile; fileRef = 346FACE61D3C720B00FFEBCE /* Message.h */; };
+		346FACEB1D3C75AE00FFEBCE /* Uri.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 346FACE91D3C75AE00FFEBCE /* Uri.cpp */; };
 		346FACEC1D3C75AE00FFEBCE /* MDStringToDigest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 346FACEA1D3C75AE00FFEBCE /* MDStringToDigest.cpp */; };
-		3471868823A9AF8900F8C952 /* GSubProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3471868723A9AF8900F8C952 /* GSubProcess.cpp */; };
+		3471868823A9AF8900F8C952 /* SubProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3471868723A9AF8900F8C952 /* SubProcess.cpp */; };
 		3477C26C1CBF020F0028B84B /* LgiProject.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C26B1CBF020F0028B84B /* LgiProject.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		3477C2751CBF07DD0028B84B /* GApp.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2741CBF07DD0028B84B /* GApp.mm */; };
-		3477C2781CBF08050028B84B /* GClipBoard.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2761CBF08050028B84B /* GClipBoard.mm */; };
-		3477C2821CBF086A0028B84B /* GGeneral.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C27A1CBF086A0028B84B /* GGeneral.mm */; };
-		3477C2831CBF086A0028B84B /* GLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C27B1CBF086A0028B84B /* GLayout.mm */; };
-		3477C2841CBF086A0028B84B /* LMenu.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C27C1CBF086A0028B84B /* LMenu.mm */; };
-		3477C2851CBF086A0028B84B /* GPrinter.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C27D1CBF086A0028B84B /* GPrinter.mm */; };
-		3477C2861CBF086A0028B84B /* LThread.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C27E1CBF086A0028B84B /* LThread.mm */; };
-		3477C2871CBF086A0028B84B /* GView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C27F1CBF086A0028B84B /* GView.mm */; };
-		3477C2881CBF086A0028B84B /* GWidgets.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2801CBF086A0028B84B /* GWidgets.mm */; };
-		3477C2891CBF086A0028B84B /* GWindow.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2811CBF086A0028B84B /* GWindow.mm */; };
+		3477C2751CBF07DD0028B84B /* App.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2741CBF07DD0028B84B /* App.mm */; };
+		3477C2781CBF08050028B84B /* ClipBoard.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2761CBF08050028B84B /* ClipBoard.mm */; };
+		3477C2821CBF086A0028B84B /* General.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C27A1CBF086A0028B84B /* General.mm */; };
+		3477C2831CBF086A0028B84B /* Layout.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C27B1CBF086A0028B84B /* Layout.mm */; };
+		3477C2841CBF086A0028B84B /* Menu.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C27C1CBF086A0028B84B /* Menu.mm */; };
+		3477C2851CBF086A0028B84B /* Printer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C27D1CBF086A0028B84B /* Printer.mm */; };
+		3477C2861CBF086A0028B84B /* Thread.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C27E1CBF086A0028B84B /* Thread.mm */; };
+		3477C2871CBF086A0028B84B /* View.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C27F1CBF086A0028B84B /* View.mm */; };
+		3477C2881CBF086A0028B84B /* Widgets.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2801CBF086A0028B84B /* Widgets.mm */; };
+		3477C2891CBF086A0028B84B /* Window.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2811CBF086A0028B84B /* Window.mm */; };
 		3477C28F1CBF08C10028B84B /* Gdc2.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C28B1CBF08C10028B84B /* Gdc2.mm */; };
 		3477C2901CBF08C10028B84B /* GMemDC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C28C1CBF08C10028B84B /* GMemDC.cpp */; };
 		3477C2911CBF08C10028B84B /* GPrintDC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C28D1CBF08C10028B84B /* GPrintDC.cpp */; };
@@ -46,70 +46,70 @@
 		3477C2971CBF09320028B84B /* GFile.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2941CBF09320028B84B /* GFile.mm */; };
 		3477C2981CBF09320028B84B /* GMem.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2951CBF09320028B84B /* GMem.mm */; };
 		3477C2991CBF09320028B84B /* ShowFileProp_Mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2961CBF09320028B84B /* ShowFileProp_Mac.mm */; };
-		3477C2A11CBF0A920028B84B /* GMem.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C29B1CBF0A920028B84B /* GMem.h */; };
-		3477C2A21CBF0A920028B84B /* GSymLookup.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C29C1CBF0A920028B84B /* GSymLookup.h */; };
+		3477C2A11CBF0A920028B84B /* Mem.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C29B1CBF0A920028B84B /* Mem.h */; };
+		3477C2A21CBF0A920028B84B /* SymLookup.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C29C1CBF0A920028B84B /* SymLookup.h */; };
 		3477C2A31CBF0A920028B84B /* LgiMac.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C29D1CBF0A920028B84B /* LgiMac.h */; };
 		3477C2A41CBF0A920028B84B /* LgiOs.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C29E1CBF0A920028B84B /* LgiOs.h */; };
 		3477C2A51CBF0A920028B84B /* LgiOsClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C29F1CBF0A920028B84B /* LgiOsClasses.h */; };
 		3477C2A61CBF0A920028B84B /* LgiOsDefs.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C2A01CBF0A920028B84B /* LgiOsDefs.h */; };
 		3477C2A81CBF0AAF0028B84B /* Lgi.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C2A71CBF0AAF0028B84B /* Lgi.h */; };
-		3477C2AA1CBF22A00028B84B /* GFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C2A91CBF22A00028B84B /* GFile.h */; };
-		3477C2AC1CBF72170028B84B /* GViewPriv.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C2AB1CBF72170028B84B /* GViewPriv.h */; };
+		3477C2AA1CBF22A00028B84B /* File.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C2A91CBF22A00028B84B /* File.h */; };
+		3477C2AC1CBF72170028B84B /* ViewPriv.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C2AB1CBF72170028B84B /* ViewPriv.h */; };
 		3477C2AF1CBF96B90028B84B /* LgiRes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2AE1CBF96B90028B84B /* LgiRes.cpp */; };
 		3477C2B11CBF96C40028B84B /* Res.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2B01CBF96C40028B84B /* Res.cpp */; };
-		3477C2B41CBF96F20028B84B /* LgiMsg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2B31CBF96F20028B84B /* LgiMsg.cpp */; };
-		3477C2B71CBF973F0028B84B /* GGuiUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2B61CBF973F0028B84B /* GGuiUtils.cpp */; };
+		3477C2B41CBF96F20028B84B /* LMsg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2B31CBF96F20028B84B /* LMsg.cpp */; };
+		3477C2B71CBF973F0028B84B /* GuiUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2B61CBF973F0028B84B /* GuiUtils.cpp */; };
 		3477C2B91CBF977F0028B84B /* LgiCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2B81CBF977F0028B84B /* LgiCommon.cpp */; };
 		3477C2BB1CBF97C80028B84B /* GdcCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2BA1CBF97C80028B84B /* GdcCommon.cpp */; };
-		3477C2C11CBF9A040028B84B /* GString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2C01CBF9A040028B84B /* GString.cpp */; };
-		3477C2C81CC046310028B84B /* GTextView3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2C41CC046310028B84B /* GTextView3.cpp */; };
-		3477C2C91CC046310028B84B /* GUnicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2C51CC046310028B84B /* GUnicode.cpp */; };
-		3477C2CA1CC046310028B84B /* GUtf8.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2C61CC046310028B84B /* GUtf8.cpp */; };
-		3477C2CB1CC046310028B84B /* GXmlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2C71CC046310028B84B /* GXmlTree.cpp */; };
-		3477C2CE1CC047BE0028B84B /* GFontCodePages.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2CD1CC047BE0028B84B /* GFontCodePages.cpp */; };
-		3477C2D01CC047F50028B84B /* GToolBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2CF1CC047F50028B84B /* GToolBar.cpp */; };
-		3477C2D31CC048100028B84B /* GContainers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2D21CC048100028B84B /* GContainers.cpp */; };
-		3477C2D51CC0481B0028B84B /* GArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C2D41CC0481B0028B84B /* GArray.h */; };
-		3477C2D71CC048390028B84B /* GPopup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2D61CC048390028B84B /* GPopup.cpp */; };
-		3477C2DB1CC048F90028B84B /* GDisplayString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2D81CC048F90028B84B /* GDisplayString.cpp */; };
-		3477C2DC1CC048F90028B84B /* GFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2D91CC048F90028B84B /* GFont.cpp */; };
-		3477C2DD1CC048F90028B84B /* GFontSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2DA1CC048F90028B84B /* GFontSystem.cpp */; };
-		3477C2DF1CC04A030028B84B /* GScrollBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2DE1CC04A030028B84B /* GScrollBar.cpp */; };
-		3477C2E11CC04A3C0028B84B /* GFontSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2E01CC04A3C0028B84B /* GFontSelect.cpp */; };
-		3477C2E31CC04A5C0028B84B /* GStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2E21CC04A5C0028B84B /* GStream.cpp */; };
-		3477C2E51CC04A7F0028B84B /* GViewCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2E41CC04A7F0028B84B /* GViewCommon.cpp */; };
-		3477C2E71CC04B1E0028B84B /* GSurface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2E61CC04B1E0028B84B /* GSurface.cpp */; };
-		3477C2E91CC04B5D0028B84B /* LgiRand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2E81CC04B5D0028B84B /* LgiRand.cpp */; };
-		3477C2EB1CC04B890028B84B /* GFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2EA1CC04B890028B84B /* GFilter.cpp */; };
-		3477C2EF1CC04BBB0028B84B /* GItemContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2EC1CC04BBB0028B84B /* GItemContainer.cpp */; };
-		3477C2F01CC04BBB0028B84B /* LList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2ED1CC04BBB0028B84B /* LList.cpp */; };
-		3477C2F11CC04BBB0028B84B /* GTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2EE1CC04BBB0028B84B /* GTree.cpp */; };
-		3477C2FF1CC04BF00028B84B /* GBitmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2F21CC04BF00028B84B /* GBitmap.cpp */; };
-		3477C3001CC04BF00028B84B /* GBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2F31CC04BF00028B84B /* GBox.cpp */; };
-		3477C3011CC04BF00028B84B /* GButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2F41CC04BF00028B84B /* GButton.cpp */; };
-		3477C3021CC04BF00028B84B /* GCheckBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2F51CC04BF00028B84B /* GCheckBox.cpp */; };
-		3477C3031CC04BF00028B84B /* GCombo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2F61CC04BF00028B84B /* GCombo.cpp */; };
-		3477C3041CC04BF00028B84B /* GEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2F71CC04BF00028B84B /* GEdit.cpp */; };
-		3477C3051CC04BF00028B84B /* GPanel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2F81CC04BF00028B84B /* GPanel.cpp */; };
-		3477C3061CC04BF00028B84B /* GProgress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2F91CC04BF00028B84B /* GProgress.cpp */; };
-		3477C3071CC04BF00028B84B /* GRadioGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2FA1CC04BF00028B84B /* GRadioGroup.cpp */; };
-		3477C3081CC04BF00028B84B /* GSplitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2FB1CC04BF00028B84B /* GSplitter.cpp */; };
-		3477C3091CC04BF00028B84B /* GTableLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2FC1CC04BF00028B84B /* GTableLayout.cpp */; };
-		3477C30A1CC04BF00028B84B /* GTabView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2FD1CC04BF00028B84B /* GTabView.cpp */; };
-		3477C30B1CC04BF00028B84B /* GTextLabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2FE1CC04BF00028B84B /* GTextLabel.cpp */; };
-		3477C30D1CC04C560028B84B /* GFindReplace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C30C1CC04C560028B84B /* GFindReplace.cpp */; };
-		3477C3101CC04C790028B84B /* GCss.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C30E1CC04C790028B84B /* GCss.cpp */; };
-		3477C3111CC04C790028B84B /* GCssTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C30F1CC04C790028B84B /* GCssTools.cpp */; };
-		3477C3131CC04CB10028B84B /* GRect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3121CC04CB10028B84B /* GRect.cpp */; };
-		3477C3161CC04CCB0028B84B /* GLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3151CC04CCB0028B84B /* GLibrary.cpp */; };
-		3477C3191CC04CF10028B84B /* LThreadCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3181CC04CF10028B84B /* LThreadCommon.cpp */; };
-		3477C31D1CC04D3F0028B84B /* INet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C31B1CC04D3F0028B84B /* INet.cpp */; };
-		3477C31E1CC04D3F0028B84B /* INetTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C31C1CC04D3F0028B84B /* INetTools.cpp */; };
-		3477C3201CC04D630028B84B /* LThreadEvent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C31F1CC04D630028B84B /* LThreadEvent.cpp */; };
-		3477C3221CC04DA00028B84B /* GColour.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3211CC04DA00028B84B /* GColour.cpp */; };
-		3477C3241CC04DD70028B84B /* GObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3231CC04DD70028B84B /* GObject.cpp */; };
-		3477C3261CC04DE20028B84B /* LMutex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3251CC04DE20028B84B /* LMutex.cpp */; };
-		3477C3281CC04E020028B84B /* GVariant.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3271CC04E020028B84B /* GVariant.cpp */; };
+		3477C2C11CBF9A040028B84B /* String.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2C01CBF9A040028B84B /* String.cpp */; };
+		3477C2C81CC046310028B84B /* TextView3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2C41CC046310028B84B /* TextView3.cpp */; };
+		3477C2C91CC046310028B84B /* Unicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2C51CC046310028B84B /* Unicode.cpp */; };
+		3477C2CA1CC046310028B84B /* Utf8.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2C61CC046310028B84B /* Utf8.cpp */; };
+		3477C2CB1CC046310028B84B /* XmlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2C71CC046310028B84B /* XmlTree.cpp */; };
+		3477C2CE1CC047BE0028B84B /* FontCodePages.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2CD1CC047BE0028B84B /* FontCodePages.cpp */; };
+		3477C2D01CC047F50028B84B /* ToolBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2CF1CC047F50028B84B /* ToolBar.cpp */; };
+		3477C2D31CC048100028B84B /* Containers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2D21CC048100028B84B /* Containers.cpp */; };
+		3477C2D51CC0481B0028B84B /* Array.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C2D41CC0481B0028B84B /* Array.h */; };
+		3477C2D71CC048390028B84B /* Popup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2D61CC048390028B84B /* Popup.cpp */; };
+		3477C2DB1CC048F90028B84B /* DisplayString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2D81CC048F90028B84B /* DisplayString.cpp */; };
+		3477C2DC1CC048F90028B84B /* Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2D91CC048F90028B84B /* Font.cpp */; };
+		3477C2DD1CC048F90028B84B /* FontSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2DA1CC048F90028B84B /* FontSystem.cpp */; };
+		3477C2DF1CC04A030028B84B /* ScrollBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2DE1CC04A030028B84B /* ScrollBar.cpp */; };
+		3477C2E11CC04A3C0028B84B /* FontSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2E01CC04A3C0028B84B /* FontSelect.cpp */; };
+		3477C2E31CC04A5C0028B84B /* Stream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2E21CC04A5C0028B84B /* Stream.cpp */; };
+		3477C2E51CC04A7F0028B84B /* ViewCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2E41CC04A7F0028B84B /* ViewCommon.cpp */; };
+		3477C2E71CC04B1E0028B84B /* Surface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2E61CC04B1E0028B84B /* Surface.cpp */; };
+		3477C2E91CC04B5D0028B84B /* Rand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2E81CC04B5D0028B84B /* Rand.cpp */; };
+		3477C2EB1CC04B890028B84B /* Filter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2EA1CC04B890028B84B /* Filter.cpp */; };
+		3477C2EF1CC04BBB0028B84B /* ItemContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2EC1CC04BBB0028B84B /* ItemContainer.cpp */; };
+		3477C2F01CC04BBB0028B84B /* List.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2ED1CC04BBB0028B84B /* List.cpp */; };
+		3477C2F11CC04BBB0028B84B /* Tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2EE1CC04BBB0028B84B /* Tree.cpp */; };
+		3477C2FF1CC04BF00028B84B /* Bitmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2F21CC04BF00028B84B /* Bitmap.cpp */; };
+		3477C3001CC04BF00028B84B /* Box.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2F31CC04BF00028B84B /* Box.cpp */; };
+		3477C3011CC04BF00028B84B /* Button.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2F41CC04BF00028B84B /* Button.cpp */; };
+		3477C3021CC04BF00028B84B /* CheckBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2F51CC04BF00028B84B /* CheckBox.cpp */; };
+		3477C3031CC04BF00028B84B /* Combo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2F61CC04BF00028B84B /* Combo.cpp */; };
+		3477C3041CC04BF00028B84B /* Edit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2F71CC04BF00028B84B /* Edit.cpp */; };
+		3477C3051CC04BF00028B84B /* Panel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2F81CC04BF00028B84B /* Panel.cpp */; };
+		3477C3061CC04BF00028B84B /* Progress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2F91CC04BF00028B84B /* Progress.cpp */; };
+		3477C3071CC04BF00028B84B /* RadioGroup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2FA1CC04BF00028B84B /* RadioGroup.cpp */; };
+		3477C3081CC04BF00028B84B /* Splitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2FB1CC04BF00028B84B /* Splitter.cpp */; };
+		3477C3091CC04BF00028B84B /* TableLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2FC1CC04BF00028B84B /* TableLayout.cpp */; };
+		3477C30A1CC04BF00028B84B /* TabView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2FD1CC04BF00028B84B /* TabView.cpp */; };
+		3477C30B1CC04BF00028B84B /* TextLabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2FE1CC04BF00028B84B /* TextLabel.cpp */; };
+		3477C30D1CC04C560028B84B /* FindReplace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C30C1CC04C560028B84B /* FindReplace.cpp */; };
+		3477C3101CC04C790028B84B /* Css.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C30E1CC04C790028B84B /* Css.cpp */; };
+		3477C3111CC04C790028B84B /* CssTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C30F1CC04C790028B84B /* CssTools.cpp */; };
+		3477C3131CC04CB10028B84B /* Rect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3121CC04CB10028B84B /* Rect.cpp */; };
+		3477C3161CC04CCB0028B84B /* Library.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3151CC04CCB0028B84B /* Library.cpp */; };
+		3477C3191CC04CF10028B84B /* ThreadCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3181CC04CF10028B84B /* ThreadCommon.cpp */; };
+		3477C31D1CC04D3F0028B84B /* Net.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C31B1CC04D3F0028B84B /* Net.cpp */; };
+		3477C31E1CC04D3F0028B84B /* NetTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C31C1CC04D3F0028B84B /* NetTools.cpp */; };
+		3477C3201CC04D630028B84B /* ThreadEvent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C31F1CC04D630028B84B /* ThreadEvent.cpp */; };
+		3477C3221CC04DA00028B84B /* Colour.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3211CC04DA00028B84B /* Colour.cpp */; };
+		3477C3241CC04DD70028B84B /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3231CC04DD70028B84B /* Object.cpp */; };
+		3477C3261CC04DE20028B84B /* Mutex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3251CC04DE20028B84B /* Mutex.cpp */; };
+		3477C3281CC04E020028B84B /* Variant.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3271CC04E020028B84B /* Variant.cpp */; };
 		3477C3311CC04E120028B84B /* 8Bit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3291CC04E120028B84B /* 8Bit.cpp */; };
 		3477C3321CC04E120028B84B /* 15Bit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C32A1CC04E120028B84B /* 15Bit.cpp */; };
 		3477C3331CC04E120028B84B /* 16Bit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C32B1CC04E120028B84B /* 16Bit.cpp */; };
@@ -118,76 +118,82 @@
 		3477C3361CC04E120028B84B /* 48Bit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C32E1CC04E120028B84B /* 48Bit.cpp */; };
 		3477C3371CC04E120028B84B /* 64Bit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C32F1CC04E120028B84B /* 64Bit.cpp */; };
 		3477C3381CC04E120028B84B /* Alpha.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3301CC04E120028B84B /* Alpha.cpp */; };
-		3477C33A1CC04ED90028B84B /* GDragAndDrop.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3391CC04ED90028B84B /* GDragAndDrop.mm */; };
-		3477C33D1CC088590028B84B /* GFileCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C33C1CC088590028B84B /* GFileCommon.cpp */; };
-		3477C33F1CC0A6780028B84B /* GToken.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C33E1CC0A6780028B84B /* GToken.cpp */; };
-		3477C3411CC0A68E0028B84B /* LDateTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3401CC0A68E0028B84B /* LDateTime.cpp */; };
-		3477C3431CC0A6B90028B84B /* GDocView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3421CC0A6B90028B84B /* GDocView.cpp */; };
-		3477C3451CC0A9DE0028B84B /* GInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3441CC0A9DE0028B84B /* GInput.cpp */; };
-		3477C3471CC0AA220028B84B /* GWindowCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3461CC0AA220028B84B /* GWindowCommon.cpp */; };
-		3477C3491CC0AA7E0028B84B /* GProgressDlg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3481CC0AA7E0028B84B /* GProgressDlg.cpp */; };
-		3477C34B1CC0AB0B0028B84B /* GToolTip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C34A1CC0AB0B0028B84B /* GToolTip.cpp */; };
+		3477C33A1CC04ED90028B84B /* DragAndDrop.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3391CC04ED90028B84B /* DragAndDrop.mm */; };
+		3477C33D1CC088590028B84B /* FileCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C33C1CC088590028B84B /* FileCommon.cpp */; };
+		3477C33F1CC0A6780028B84B /* Token.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C33E1CC0A6780028B84B /* Token.cpp */; };
+		3477C3411CC0A68E0028B84B /* DateTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3401CC0A68E0028B84B /* DateTime.cpp */; };
+		3477C3431CC0A6B90028B84B /* DocView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3421CC0A6B90028B84B /* DocView.cpp */; };
+		3477C3451CC0A9DE0028B84B /* Input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3441CC0A9DE0028B84B /* Input.cpp */; };
+		3477C3471CC0AA220028B84B /* WindowCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3461CC0AA220028B84B /* WindowCommon.cpp */; };
+		3477C3491CC0AA7E0028B84B /* ProgressDlg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3481CC0AA7E0028B84B /* ProgressDlg.cpp */; };
+		3477C34B1CC0AB0B0028B84B /* ToolTip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C34A1CC0AB0B0028B84B /* ToolTip.cpp */; };
 		3477C34D1CC0ACED0028B84B /* md5.c in Sources */ = {isa = PBXBuildFile; fileRef = 3477C34C1CC0ACED0028B84B /* md5.c */; };
 		3477C3501CC0C3D60028B84B /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3477C34F1CC0C3D60028B84B /* Cocoa.framework */; };
 		3477C35B1CC1AEEA0028B84B /* LgiInc.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C35A1CC1AEEA0028B84B /* LgiInc.h */; };
 		3477C35D1CC2253E0028B84B /* LgiInterfaces.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C35C1CC2253E0028B84B /* LgiInterfaces.h */; };
-		3477C43A1CC234750028B84B /* GMemStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C4391CC234750028B84B /* GMemStream.cpp */; };
-		3477C46D1CC26DEB0028B84B /* GAlert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C46C1CC26DEB0028B84B /* GAlert.cpp */; };
-		3477C4ED1CC27F1C0028B84B /* GTrayIcon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C4EC1CC27F1C0028B84B /* GTrayIcon.cpp */; };
-		3477C5171CC303B70028B84B /* LgiClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C5161CC303B70028B84B /* LgiClass.h */; };
-		347D192121B1F5700008C4CB /* GFont_W.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 347D192021B1F5700008C4CB /* GFont_W.cpp */; };
-		348362421F233A77003B2A6D /* GStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 348362411F233A77003B2A6D /* GStream.h */; };
+		3477C43A1CC234750028B84B /* MemStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C4391CC234750028B84B /* MemStream.cpp */; };
+		3477C46D1CC26DEB0028B84B /* Alert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C46C1CC26DEB0028B84B /* Alert.cpp */; };
+		3477C4ED1CC27F1C0028B84B /* TrayIcon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C4EC1CC27F1C0028B84B /* TrayIcon.cpp */; };
+		3477C5171CC303B70028B84B /* LgiUiBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 3477C5161CC303B70028B84B /* LgiUiBase.h */; };
+		348362421F233A77003B2A6D /* Stream.h in Headers */ = {isa = PBXBuildFile; fileRef = 348362411F233A77003B2A6D /* Stream.h */; };
 		34837C4925C677ED00D103B4 /* GAppPriv.h in Headers */ = {isa = PBXBuildFile; fileRef = 34837C4825C677ED00D103B4 /* GAppPriv.h */; };
-		348CD46A25C63E56001AA32B /* GAppCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 348CD46925C63E56001AA32B /* GAppCommon.cpp */; };
-		3491A28523678DB800604C29 /* GDropFiles.h in Headers */ = {isa = PBXBuildFile; fileRef = 3491A28423678DB700604C29 /* GDropFiles.h */; };
-		34A3ACE820568D5800B1D62A /* LStringLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A3ACE720568D5800B1D62A /* LStringLayout.cpp */; };
-		34A3ACEA20568D9700B1D62A /* LMenuCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A3ACE920568D9700B1D62A /* LMenuCommon.cpp */; };
-		34B531D822F65734002B50F7 /* LMenu.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B531D722F65734002B50F7 /* LMenu.h */; };
-		34B6B19123CFD0F100C24906 /* GDragAndDropCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34B6B19023CFD0F100C24906 /* GDragAndDropCommon.cpp */; };
-		34C072C12369878100E1E222 /* GDropFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C072C02369878100E1E222 /* GDropFiles.cpp */; };
+		348CD46A25C63E56001AA32B /* AppCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 348CD46925C63E56001AA32B /* AppCommon.cpp */; };
+		3491A28523678DB800604C29 /* DropFiles.h in Headers */ = {isa = PBXBuildFile; fileRef = 3491A28423678DB700604C29 /* DropFiles.h */; };
+		34A3ACE820568D5800B1D62A /* StringLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A3ACE720568D5800B1D62A /* StringLayout.cpp */; };
+		34A3ACEA20568D9700B1D62A /* MenuCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A3ACE920568D9700B1D62A /* MenuCommon.cpp */; };
+		34B14E1826950F59004C22CC /* StringClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B14E1726950F59004C22CC /* StringClass.h */; };
+		34B14E1B26950F6C004C22CC /* LgiString.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B14E1A26950F6C004C22CC /* LgiString.h */; };
+		34B14E2026951653004C22CC /* HashTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B14E1F26951653004C22CC /* HashTable.h */; };
+		34B14E23269516FC004C22CC /* LgiCommon.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B14E22269516FC004C22CC /* LgiCommon.h */; };
+		34B14E382695466A004C22CC /* Slider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34B14E372695466A004C22CC /* Slider.cpp */; };
+		34B14E3C269546A3004C22CC /* TypeFace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34B14E3A269546A3004C22CC /* TypeFace.cpp */; };
+		34B14E3D269546A3004C22CC /* FontType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34B14E3B269546A3004C22CC /* FontType.cpp */; };
+		34B531D822F65734002B50F7 /* Menu.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B531D722F65734002B50F7 /* Menu.h */; };
+		34B6B19123CFD0F100C24906 /* DragAndDropCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34B6B19023CFD0F100C24906 /* DragAndDropCommon.cpp */; };
+		34C072C12369878100E1E222 /* DropFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C072C02369878100E1E222 /* DropFiles.cpp */; };
 		34C81A5A25DA0AA10053F93A /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C81A5925DA0AA10053F93A /* Base64.cpp */; };
-		34CD9F7223D5768B0039F259 /* GUnicode.h in Headers */ = {isa = PBXBuildFile; fileRef = 34CD9F7123D5768B0039F259 /* GUnicode.h */; };
-		34D1B3C121748A2800BC6B58 /* GPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D1B3C021748A2800BC6B58 /* GPath.cpp */; };
-		34D21CEC217981AE003D1EA6 /* GEventTargetThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D21CEB217981AE003D1EA6 /* GEventTargetThread.h */; };
+		34CD9F7223D5768B0039F259 /* Unicode.h in Headers */ = {isa = PBXBuildFile; fileRef = 34CD9F7123D5768B0039F259 /* Unicode.h */; };
+		34D1B3C121748A2800BC6B58 /* Path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D1B3C021748A2800BC6B58 /* Path.cpp */; };
+		34D21CEC217981AE003D1EA6 /* EventTargetThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D21CEB217981AE003D1EA6 /* EventTargetThread.h */; };
 		34D6AA1722D3749A005D739E /* Gdc2.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D6AA1622D3749A005D739E /* Gdc2.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		34109853217A975E007020CE /* LCocoaView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LCocoaView.h; path = ../../../../include/mac/cocoa/LCocoaView.h; sourceTree = "<group>"; };
-		34109856217A9805007020CE /* LCocoaView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = LCocoaView.mm; path = Lgi/LCocoaView.mm; sourceTree = SOURCE_ROOT; };
-		34114C8A23091E6E00F342B1 /* LgiClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiClasses.h; path = ../../../include/common/LgiClasses.h; sourceTree = "<group>"; };
-		3413170D23068FFE008CE982 /* GFileSelect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GFileSelect.cpp; path = ../../../common/Lgi/GFileSelect.cpp; sourceTree = "<group>"; };
+		34109853217A975E007020CE /* LCocoaView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LCocoaView.h; path = ../../../../include/lgi/mac/cocoa/LCocoaView.h; sourceTree = "<group>"; };
+		34109856217A9805007020CE /* CocoaView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = CocoaView.mm; path = Lgi/CocoaView.mm; sourceTree = SOURCE_ROOT; };
+		34114C8A23091E6E00F342B1 /* LgiClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiClasses.h; path = ../../../include/lgi/common/LgiClasses.h; sourceTree = "<group>"; };
+		3413170D23068FFE008CE982 /* FileSelect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileSelect.cpp; path = ../../../common/Lgi/FileSelect.cpp; sourceTree = "<group>"; };
 		3413170F230694D1008CE982 /* Gel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Gel.cpp; path = ../../../common/Skins/Gel/Gel.cpp; sourceTree = "<group>"; };
-		3418EBCE25D9FEA600EA168A /* GProgress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GProgress.h; path = ../../../../include/common/GProgress.h; sourceTree = "<group>"; };
-		3418EBD025D9FEF500EA168A /* GProgressDlg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GProgressDlg.h; path = ../../../../include/common/GProgressDlg.h; sourceTree = "<group>"; };
-		343874B1230F46B200CF96B4 /* GWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GWindow.h; path = ../../../../include/common/GWindow.h; sourceTree = "<group>"; };
-		343874B2230F46B200CF96B4 /* GView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GView.h; path = ../../../../include/common/GView.h; sourceTree = "<group>"; };
-		343874B3230F46B200CF96B4 /* GApp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GApp.h; path = ../../../../include/common/GApp.h; sourceTree = "<group>"; };
-		343874B4230F46B200CF96B4 /* GLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLayout.h; path = ../../../../include/common/GLayout.h; sourceTree = "<group>"; };
-		343BE8C62355D0CE00742E21 /* GPopupList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GPopupList.h; path = ../../../../include/common/GPopupList.h; sourceTree = "<group>"; };
-		344CFBC7237365B800AE6B35 /* GClipBoard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GClipBoard.h; path = ../../../../include/common/GClipBoard.h; sourceTree = "<group>"; };
-		345920FC1F25649000098DFD /* GFont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GFont.h; path = ../../../../include/common/GFont.h; sourceTree = "<group>"; };
-		345920FD1F25649000098DFD /* GFontCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GFontCache.h; path = ../../../../include/common/GFontCache.h; sourceTree = "<group>"; };
-		345920FE1F25649000098DFD /* GFontSelect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GFontSelect.h; path = ../../../../include/common/GFontSelect.h; sourceTree = "<group>"; };
-		345EB84D235C6C01007D05DB /* GPopup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GPopup.h; path = ../../../../include/common/GPopup.h; sourceTree = "<group>"; };
-		346DDEC0240C882900751380 /* GRadioGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GRadioGroup.h; path = ../../../../include/common/GRadioGroup.h; sourceTree = "<group>"; };
-		346FACE61D3C720B00FFEBCE /* GMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GMessage.h; path = ../../../../include/common/GMessage.h; sourceTree = "<group>"; };
-		346FACE91D3C75AE00FFEBCE /* GUri.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GUri.cpp; path = ../../../common/INet/GUri.cpp; sourceTree = "<group>"; };
-		346FACEA1D3C75AE00FFEBCE /* MDStringToDigest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MDStringToDigest.cpp; path = ../../../common/INet/MDStringToDigest.cpp; sourceTree = "<group>"; };
-		3471868723A9AF8900F8C952 /* GSubProcess.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GSubProcess.cpp; path = ../../../common/Lgi/GSubProcess.cpp; sourceTree = "<group>"; };
+		3418EBCE25D9FEA600EA168A /* Progress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Progress.h; path = ../../../../include/lgi/common/Progress.h; sourceTree = "<group>"; };
+		3418EBD025D9FEF500EA168A /* ProgressDlg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProgressDlg.h; path = ../../../../include/lgi/common/ProgressDlg.h; sourceTree = "<group>"; };
+		343874B1230F46B200CF96B4 /* Window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Window.h; path = ../../../../include/lgi/common/Window.h; sourceTree = "<group>"; };
+		343874B2230F46B200CF96B4 /* View.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = View.h; path = ../../../../include/lgi/common/View.h; sourceTree = "<group>"; };
+		343874B3230F46B200CF96B4 /* App.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = App.h; path = ../../../../include/lgi/common/App.h; sourceTree = "<group>"; };
+		343874B4230F46B200CF96B4 /* Layout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Layout.h; path = ../../../../include/lgi/common/Layout.h; sourceTree = "<group>"; };
+		343BE8C62355D0CE00742E21 /* PopupList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PopupList.h; path = ../../../../include/lgi/common/PopupList.h; sourceTree = "<group>"; };
+		344CFBC7237365B800AE6B35 /* ClipBoard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ClipBoard.h; path = ../../../../include/lgi/common/ClipBoard.h; sourceTree = "<group>"; };
+		345920FC1F25649000098DFD /* Font.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Font.h; path = ../../../../include/lgi/common/Font.h; sourceTree = "<group>"; };
+		345920FD1F25649000098DFD /* FontCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FontCache.h; path = ../../../../include/lgi/common/FontCache.h; sourceTree = "<group>"; };
+		345920FE1F25649000098DFD /* FontSelect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FontSelect.h; path = ../../../../include/lgi/common/FontSelect.h; sourceTree = "<group>"; };
+		345EB84D235C6C01007D05DB /* Popup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Popup.h; path = ../../../../include/lgi/common/Popup.h; sourceTree = "<group>"; };
+		346DDEC0240C882900751380 /* RadioGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RadioGroup.h; path = ../../../../include/lgi/common/RadioGroup.h; sourceTree = "<group>"; };
+		346FACE61D3C720B00FFEBCE /* Message.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Message.h; path = ../../../../include/lgi/common/Message.h; sourceTree = "<group>"; };
+		346FACE91D3C75AE00FFEBCE /* Uri.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Uri.cpp; path = ../../../common/Net/Uri.cpp; sourceTree = "<group>"; };
+		346FACEA1D3C75AE00FFEBCE /* MDStringToDigest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MDStringToDigest.cpp; path = ../../../common/Net/MDStringToDigest.cpp; sourceTree = "<group>"; };
+		3471868723A9AF8900F8C952 /* SubProcess.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = SubProcess.cpp; path = ../../../common/Lgi/SubProcess.cpp; sourceTree = "<group>"; };
 		3477C2681CBF020F0028B84B /* LgiCocoa.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LgiCocoa.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3477C26B1CBF020F0028B84B /* LgiProject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LgiProject.h; path = Lgi/LgiProject.h; sourceTree = "<group>"; };
 		3477C26D1CBF020F0028B84B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Lgi/Info.plist; sourceTree = "<group>"; };
-		3477C2741CBF07DD0028B84B /* GApp.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GApp.mm; sourceTree = "<group>"; };
-		3477C2761CBF08050028B84B /* GClipBoard.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GClipBoard.mm; sourceTree = "<group>"; };
-		3477C27A1CBF086A0028B84B /* GGeneral.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GGeneral.mm; sourceTree = "<group>"; };
-		3477C27B1CBF086A0028B84B /* GLayout.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GLayout.mm; sourceTree = "<group>"; };
-		3477C27C1CBF086A0028B84B /* LMenu.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = LMenu.mm; sourceTree = "<group>"; };
-		3477C27D1CBF086A0028B84B /* GPrinter.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GPrinter.mm; sourceTree = "<group>"; };
-		3477C27E1CBF086A0028B84B /* LThread.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = LThread.mm; sourceTree = "<group>"; };
-		3477C27F1CBF086A0028B84B /* GView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GView.mm; sourceTree = "<group>"; };
-		3477C2801CBF086A0028B84B /* GWidgets.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GWidgets.mm; sourceTree = "<group>"; };
-		3477C2811CBF086A0028B84B /* GWindow.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = GWindow.mm; sourceTree = "<group>"; };
+		3477C2741CBF07DD0028B84B /* App.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = App.mm; sourceTree = "<group>"; };
+		3477C2761CBF08050028B84B /* ClipBoard.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ClipBoard.mm; sourceTree = "<group>"; };
+		3477C27A1CBF086A0028B84B /* General.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = General.mm; sourceTree = "<group>"; };
+		3477C27B1CBF086A0028B84B /* Layout.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Layout.mm; sourceTree = "<group>"; };
+		3477C27C1CBF086A0028B84B /* Menu.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Menu.mm; sourceTree = "<group>"; };
+		3477C27D1CBF086A0028B84B /* Printer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Printer.mm; sourceTree = "<group>"; };
+		3477C27E1CBF086A0028B84B /* Thread.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Thread.mm; sourceTree = "<group>"; };
+		3477C27F1CBF086A0028B84B /* View.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = View.mm; sourceTree = "<group>"; };
+		3477C2801CBF086A0028B84B /* Widgets.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Widgets.mm; sourceTree = "<group>"; };
+		3477C2811CBF086A0028B84B /* Window.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Window.mm; sourceTree = "<group>"; };
 		3477C28B1CBF08C10028B84B /* Gdc2.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = Gdc2.mm; path = Gdc2/Gdc2.mm; sourceTree = SOURCE_ROOT; };
 		3477C28C1CBF08C10028B84B /* GMemDC.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GMemDC.cpp; path = ../common/GMemDC.cpp; sourceTree = SOURCE_ROOT; };
 		3477C28D1CBF08C10028B84B /* GPrintDC.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GPrintDC.cpp; path = ../common/GPrintDC.cpp; sourceTree = SOURCE_ROOT; };
@@ -195,70 +201,70 @@
 		3477C2941CBF09320028B84B /* GFile.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = GFile.mm; path = General/GFile.mm; sourceTree = SOURCE_ROOT; };
 		3477C2951CBF09320028B84B /* GMem.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = GMem.mm; path = General/GMem.mm; sourceTree = SOURCE_ROOT; };
 		3477C2961CBF09320028B84B /* ShowFileProp_Mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ShowFileProp_Mac.mm; path = General/ShowFileProp_Mac.mm; sourceTree = SOURCE_ROOT; };
-		3477C29B1CBF0A920028B84B /* GMem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GMem.h; path = ../../../include/common/GMem.h; sourceTree = "<group>"; };
-		3477C29C1CBF0A920028B84B /* GSymLookup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GSymLookup.h; path = ../../../include/mac/cocoa/GSymLookup.h; sourceTree = "<group>"; };
-		3477C29D1CBF0A920028B84B /* LgiMac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiMac.h; path = ../../../include/mac/cocoa/LgiMac.h; sourceTree = "<group>"; };
-		3477C29E1CBF0A920028B84B /* LgiOs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiOs.h; path = ../../../include/mac/cocoa/LgiOs.h; sourceTree = "<group>"; };
-		3477C29F1CBF0A920028B84B /* LgiOsClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiOsClasses.h; path = ../../../include/mac/cocoa/LgiOsClasses.h; sourceTree = "<group>"; };
-		3477C2A01CBF0A920028B84B /* LgiOsDefs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiOsDefs.h; path = ../../../include/mac/cocoa/LgiOsDefs.h; sourceTree = "<group>"; };
-		3477C2A71CBF0AAF0028B84B /* Lgi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Lgi.h; path = ../../../include/common/Lgi.h; sourceTree = "<group>"; };
-		3477C2A91CBF22A00028B84B /* GFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GFile.h; path = ../../../../include/common/GFile.h; sourceTree = "<group>"; };
-		3477C2AB1CBF72170028B84B /* GViewPriv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GViewPriv.h; path = ../../../../include/common/GViewPriv.h; sourceTree = "<group>"; };
+		3477C29B1CBF0A920028B84B /* Mem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Mem.h; path = ../../../include/lgi/common/Mem.h; sourceTree = "<group>"; };
+		3477C29C1CBF0A920028B84B /* SymLookup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SymLookup.h; path = ../../../include/lgi/mac/cocoa/SymLookup.h; sourceTree = "<group>"; };
+		3477C29D1CBF0A920028B84B /* LgiMac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiMac.h; path = ../../../include/lgi/mac/cocoa/LgiMac.h; sourceTree = "<group>"; };
+		3477C29E1CBF0A920028B84B /* LgiOs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiOs.h; path = ../../../include/lgi/mac/cocoa/LgiOs.h; sourceTree = "<group>"; };
+		3477C29F1CBF0A920028B84B /* LgiOsClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiOsClasses.h; path = ../../../include/lgi/mac/cocoa/LgiOsClasses.h; sourceTree = "<group>"; };
+		3477C2A01CBF0A920028B84B /* LgiOsDefs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiOsDefs.h; path = ../../../include/lgi/mac/cocoa/LgiOsDefs.h; sourceTree = "<group>"; };
+		3477C2A71CBF0AAF0028B84B /* Lgi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Lgi.h; path = ../../../include/lgi/common/Lgi.h; sourceTree = "<group>"; };
+		3477C2A91CBF22A00028B84B /* File.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = File.h; path = ../../../../include/lgi/common/File.h; sourceTree = "<group>"; };
+		3477C2AB1CBF72170028B84B /* ViewPriv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ViewPriv.h; path = ../../../../include/lgi/common/ViewPriv.h; sourceTree = "<group>"; };
 		3477C2AE1CBF96B90028B84B /* LgiRes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiRes.cpp; path = ../../../common/Resource/LgiRes.cpp; sourceTree = "<group>"; };
 		3477C2B01CBF96C40028B84B /* Res.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Res.cpp; path = ../../../common/Resource/Res.cpp; sourceTree = "<group>"; };
-		3477C2B31CBF96F20028B84B /* LgiMsg.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = LgiMsg.cpp; path = ../../../common/Lgi/LgiMsg.cpp; sourceTree = "<group>"; };
-		3477C2B61CBF973F0028B84B /* GGuiUtils.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GGuiUtils.cpp; path = ../../../common/Lgi/GGuiUtils.cpp; sourceTree = "<group>"; };
+		3477C2B31CBF96F20028B84B /* LMsg.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = LMsg.cpp; path = ../../../common/Lgi/LMsg.cpp; sourceTree = "<group>"; };
+		3477C2B61CBF973F0028B84B /* GuiUtils.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GuiUtils.cpp; path = ../../../common/Lgi/GuiUtils.cpp; sourceTree = "<group>"; };
 		3477C2B81CBF977F0028B84B /* LgiCommon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = LgiCommon.cpp; path = ../../../common/Lgi/LgiCommon.cpp; sourceTree = "<group>"; };
 		3477C2BA1CBF97C80028B84B /* GdcCommon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GdcCommon.cpp; path = ../../../common/Gdc2/GdcCommon.cpp; sourceTree = "<group>"; };
-		3477C2C01CBF9A040028B84B /* GString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GString.cpp; path = ../../../common/Text/GString.cpp; sourceTree = "<group>"; };
-		3477C2C41CC046310028B84B /* GTextView3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GTextView3.cpp; path = ../../../common/Text/GTextView3.cpp; sourceTree = "<group>"; };
-		3477C2C51CC046310028B84B /* GUnicode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GUnicode.cpp; path = ../../../common/Text/GUnicode.cpp; sourceTree = "<group>"; };
-		3477C2C61CC046310028B84B /* GUtf8.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GUtf8.cpp; path = ../../../common/Text/GUtf8.cpp; sourceTree = "<group>"; };
-		3477C2C71CC046310028B84B /* GXmlTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GXmlTree.cpp; path = ../../../common/Text/GXmlTree.cpp; sourceTree = "<group>"; };
-		3477C2CD1CC047BE0028B84B /* GFontCodePages.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GFontCodePages.cpp; path = ../../../common/Gdc2/Font/GFontCodePages.cpp; sourceTree = "<group>"; };
-		3477C2CF1CC047F50028B84B /* GToolBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GToolBar.cpp; path = ../../../common/Widgets/GToolBar.cpp; sourceTree = "<group>"; };
-		3477C2D21CC048100028B84B /* GContainers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GContainers.cpp; path = ../../../common/General/GContainers.cpp; sourceTree = "<group>"; };
-		3477C2D41CC0481B0028B84B /* GArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GArray.h; path = ../../../../include/common/GArray.h; sourceTree = "<group>"; };
-		3477C2D61CC048390028B84B /* GPopup.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp.preprocessed; fileEncoding = 4; name = GPopup.cpp; path = ../../../common/Widgets/GPopup.cpp; sourceTree = "<group>"; };
-		3477C2D81CC048F90028B84B /* GDisplayString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GDisplayString.cpp; path = ../../../common/Gdc2/Font/GDisplayString.cpp; sourceTree = "<group>"; };
-		3477C2D91CC048F90028B84B /* GFont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GFont.cpp; path = ../../../common/Gdc2/Font/GFont.cpp; sourceTree = "<group>"; };
-		3477C2DA1CC048F90028B84B /* GFontSystem.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GFontSystem.cpp; path = ../../../common/Gdc2/Font/GFontSystem.cpp; sourceTree = "<group>"; };
-		3477C2DE1CC04A030028B84B /* GScrollBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GScrollBar.cpp; path = ../../../common/Widgets/GScrollBar.cpp; sourceTree = "<group>"; };
-		3477C2E01CC04A3C0028B84B /* GFontSelect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GFontSelect.cpp; path = ../../../common/Lgi/GFontSelect.cpp; sourceTree = "<group>"; };
-		3477C2E21CC04A5C0028B84B /* GStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GStream.cpp; path = ../../../common/Lgi/GStream.cpp; sourceTree = "<group>"; };
-		3477C2E41CC04A7F0028B84B /* GViewCommon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GViewCommon.cpp; path = ../../../common/Lgi/GViewCommon.cpp; sourceTree = "<group>"; };
-		3477C2E61CC04B1E0028B84B /* GSurface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GSurface.cpp; path = ../../../common/Gdc2/GSurface.cpp; sourceTree = "<group>"; };
-		3477C2E81CC04B5D0028B84B /* LgiRand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiRand.cpp; path = ../../../common/Lgi/LgiRand.cpp; sourceTree = "<group>"; };
-		3477C2EA1CC04B890028B84B /* GFilter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GFilter.cpp; path = ../../../common/Gdc2/Filters/GFilter.cpp; sourceTree = "<group>"; };
-		3477C2EC1CC04BBB0028B84B /* GItemContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GItemContainer.cpp; path = ../../../common/Widgets/GItemContainer.cpp; sourceTree = "<group>"; };
-		3477C2ED1CC04BBB0028B84B /* LList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LList.cpp; path = ../../../common/Widgets/LList.cpp; sourceTree = "<group>"; };
-		3477C2EE1CC04BBB0028B84B /* GTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GTree.cpp; path = ../../../common/Widgets/GTree.cpp; sourceTree = "<group>"; };
-		3477C2F21CC04BF00028B84B /* GBitmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GBitmap.cpp; path = ../../../common/Widgets/GBitmap.cpp; sourceTree = "<group>"; };
-		3477C2F31CC04BF00028B84B /* GBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GBox.cpp; path = ../../../common/Widgets/GBox.cpp; sourceTree = "<group>"; };
-		3477C2F41CC04BF00028B84B /* GButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GButton.cpp; path = ../../../common/Widgets/GButton.cpp; sourceTree = "<group>"; };
-		3477C2F51CC04BF00028B84B /* GCheckBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCheckBox.cpp; path = ../../../common/Widgets/GCheckBox.cpp; sourceTree = "<group>"; };
-		3477C2F61CC04BF00028B84B /* GCombo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCombo.cpp; path = ../../../common/Widgets/GCombo.cpp; sourceTree = "<group>"; };
-		3477C2F71CC04BF00028B84B /* GEdit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GEdit.cpp; path = ../../../common/Widgets/GEdit.cpp; sourceTree = "<group>"; };
-		3477C2F81CC04BF00028B84B /* GPanel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GPanel.cpp; path = ../../../common/Widgets/GPanel.cpp; sourceTree = "<group>"; };
-		3477C2F91CC04BF00028B84B /* GProgress.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GProgress.cpp; path = ../../../common/Widgets/GProgress.cpp; sourceTree = "<group>"; };
-		3477C2FA1CC04BF00028B84B /* GRadioGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GRadioGroup.cpp; path = ../../../common/Widgets/GRadioGroup.cpp; sourceTree = "<group>"; };
-		3477C2FB1CC04BF00028B84B /* GSplitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GSplitter.cpp; path = ../../../common/Widgets/GSplitter.cpp; sourceTree = "<group>"; };
-		3477C2FC1CC04BF00028B84B /* GTableLayout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GTableLayout.cpp; path = ../../../common/Widgets/GTableLayout.cpp; sourceTree = "<group>"; };
-		3477C2FD1CC04BF00028B84B /* GTabView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GTabView.cpp; path = ../../../common/Widgets/GTabView.cpp; sourceTree = "<group>"; };
-		3477C2FE1CC04BF00028B84B /* GTextLabel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GTextLabel.cpp; path = ../../../common/Widgets/GTextLabel.cpp; sourceTree = "<group>"; };
-		3477C30C1CC04C560028B84B /* GFindReplace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GFindReplace.cpp; path = ../../../common/Lgi/GFindReplace.cpp; sourceTree = "<group>"; };
-		3477C30E1CC04C790028B84B /* GCss.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCss.cpp; path = ../../../common/Lgi/GCss.cpp; sourceTree = "<group>"; };
-		3477C30F1CC04C790028B84B /* GCssTools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GCssTools.cpp; path = ../../../common/Lgi/GCssTools.cpp; sourceTree = "<group>"; };
-		3477C3121CC04CB10028B84B /* GRect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GRect.cpp; path = ../../../common/Gdc2/GRect.cpp; sourceTree = "<group>"; };
-		3477C3151CC04CCB0028B84B /* GLibrary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GLibrary.cpp; path = ../../../common/Lgi/GLibrary.cpp; sourceTree = "<group>"; };
-		3477C3181CC04CF10028B84B /* LThreadCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LThreadCommon.cpp; path = ../../../common/Lgi/LThreadCommon.cpp; sourceTree = "<group>"; };
-		3477C31B1CC04D3F0028B84B /* INet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = INet.cpp; path = ../../../common/INet/INet.cpp; sourceTree = "<group>"; };
-		3477C31C1CC04D3F0028B84B /* INetTools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = INetTools.cpp; path = ../../../common/INet/INetTools.cpp; sourceTree = "<group>"; };
-		3477C31F1CC04D630028B84B /* LThreadEvent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LThreadEvent.cpp; path = ../../../common/Lgi/LThreadEvent.cpp; sourceTree = "<group>"; };
-		3477C3211CC04DA00028B84B /* GColour.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GColour.cpp; path = ../../../common/Gdc2/GColour.cpp; sourceTree = "<group>"; };
-		3477C3231CC04DD70028B84B /* GObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GObject.cpp; path = ../../../common/Lgi/GObject.cpp; sourceTree = "<group>"; };
-		3477C3251CC04DE20028B84B /* LMutex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LMutex.cpp; path = ../../../common/Lgi/LMutex.cpp; sourceTree = "<group>"; };
-		3477C3271CC04E020028B84B /* GVariant.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GVariant.cpp; path = ../../../common/Lgi/GVariant.cpp; sourceTree = "<group>"; };
+		3477C2C01CBF9A040028B84B /* String.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = String.cpp; path = ../../../common/Text/String.cpp; sourceTree = "<group>"; };
+		3477C2C41CC046310028B84B /* TextView3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TextView3.cpp; path = ../../../common/Text/TextView3.cpp; sourceTree = "<group>"; };
+		3477C2C51CC046310028B84B /* Unicode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Unicode.cpp; path = ../../../common/Text/Unicode.cpp; sourceTree = "<group>"; };
+		3477C2C61CC046310028B84B /* Utf8.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Utf8.cpp; path = ../../../common/Text/Utf8.cpp; sourceTree = "<group>"; };
+		3477C2C71CC046310028B84B /* XmlTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XmlTree.cpp; path = ../../../common/Text/XmlTree.cpp; sourceTree = "<group>"; };
+		3477C2CD1CC047BE0028B84B /* FontCodePages.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FontCodePages.cpp; path = ../../../common/Gdc2/Font/FontCodePages.cpp; sourceTree = "<group>"; };
+		3477C2CF1CC047F50028B84B /* ToolBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ToolBar.cpp; path = ../../../common/Widgets/ToolBar.cpp; sourceTree = "<group>"; };
+		3477C2D21CC048100028B84B /* Containers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Containers.cpp; path = ../../../common/General/Containers.cpp; sourceTree = "<group>"; };
+		3477C2D41CC0481B0028B84B /* Array.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Array.h; path = ../../../../include/lgi/common/Array.h; sourceTree = "<group>"; };
+		3477C2D61CC048390028B84B /* Popup.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp.preprocessed; fileEncoding = 4; name = Popup.cpp; path = ../../../common/Widgets/Popup.cpp; sourceTree = "<group>"; };
+		3477C2D81CC048F90028B84B /* DisplayString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DisplayString.cpp; path = ../../../common/Gdc2/Font/DisplayString.cpp; sourceTree = "<group>"; };
+		3477C2D91CC048F90028B84B /* Font.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Font.cpp; path = ../../../common/Gdc2/Font/Font.cpp; sourceTree = "<group>"; };
+		3477C2DA1CC048F90028B84B /* FontSystem.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = FontSystem.cpp; path = ../../../common/Gdc2/Font/FontSystem.cpp; sourceTree = "<group>"; };
+		3477C2DE1CC04A030028B84B /* ScrollBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScrollBar.cpp; path = ../../../common/Widgets/ScrollBar.cpp; sourceTree = "<group>"; };
+		3477C2E01CC04A3C0028B84B /* FontSelect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FontSelect.cpp; path = ../../../common/Lgi/FontSelect.cpp; sourceTree = "<group>"; };
+		3477C2E21CC04A5C0028B84B /* Stream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Stream.cpp; path = ../../../common/Lgi/Stream.cpp; sourceTree = "<group>"; };
+		3477C2E41CC04A7F0028B84B /* ViewCommon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ViewCommon.cpp; path = ../../../common/Lgi/ViewCommon.cpp; sourceTree = "<group>"; };
+		3477C2E61CC04B1E0028B84B /* Surface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Surface.cpp; path = ../../../common/Gdc2/Surface.cpp; sourceTree = "<group>"; };
+		3477C2E81CC04B5D0028B84B /* Rand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Rand.cpp; path = ../../../common/Lgi/Rand.cpp; sourceTree = "<group>"; };
+		3477C2EA1CC04B890028B84B /* Filter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Filter.cpp; path = ../../../common/Gdc2/Filters/Filter.cpp; sourceTree = "<group>"; };
+		3477C2EC1CC04BBB0028B84B /* ItemContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ItemContainer.cpp; path = ../../../common/Widgets/ItemContainer.cpp; sourceTree = "<group>"; };
+		3477C2ED1CC04BBB0028B84B /* List.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = List.cpp; path = ../../../common/Widgets/List.cpp; sourceTree = "<group>"; };
+		3477C2EE1CC04BBB0028B84B /* Tree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Tree.cpp; path = ../../../common/Widgets/Tree.cpp; sourceTree = "<group>"; };
+		3477C2F21CC04BF00028B84B /* Bitmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Bitmap.cpp; path = ../../../common/Widgets/Bitmap.cpp; sourceTree = "<group>"; };
+		3477C2F31CC04BF00028B84B /* Box.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Box.cpp; path = ../../../common/Widgets/Box.cpp; sourceTree = "<group>"; };
+		3477C2F41CC04BF00028B84B /* Button.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Button.cpp; path = ../../../common/Widgets/Button.cpp; sourceTree = "<group>"; };
+		3477C2F51CC04BF00028B84B /* CheckBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CheckBox.cpp; path = ../../../common/Widgets/CheckBox.cpp; sourceTree = "<group>"; };
+		3477C2F61CC04BF00028B84B /* Combo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Combo.cpp; path = ../../../common/Widgets/Combo.cpp; sourceTree = "<group>"; };
+		3477C2F71CC04BF00028B84B /* Edit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Edit.cpp; path = ../../../common/Widgets/Edit.cpp; sourceTree = "<group>"; };
+		3477C2F81CC04BF00028B84B /* Panel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Panel.cpp; path = ../../../common/Widgets/Panel.cpp; sourceTree = "<group>"; };
+		3477C2F91CC04BF00028B84B /* Progress.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Progress.cpp; path = ../../../common/Widgets/Progress.cpp; sourceTree = "<group>"; };
+		3477C2FA1CC04BF00028B84B /* RadioGroup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RadioGroup.cpp; path = ../../../common/Widgets/RadioGroup.cpp; sourceTree = "<group>"; };
+		3477C2FB1CC04BF00028B84B /* Splitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Splitter.cpp; path = ../../../common/Widgets/Splitter.cpp; sourceTree = "<group>"; };
+		3477C2FC1CC04BF00028B84B /* TableLayout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TableLayout.cpp; path = ../../../common/Widgets/TableLayout.cpp; sourceTree = "<group>"; };
+		3477C2FD1CC04BF00028B84B /* TabView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TabView.cpp; path = ../../../common/Widgets/TabView.cpp; sourceTree = "<group>"; };
+		3477C2FE1CC04BF00028B84B /* TextLabel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TextLabel.cpp; path = ../../../common/Widgets/TextLabel.cpp; sourceTree = "<group>"; };
+		3477C30C1CC04C560028B84B /* FindReplace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FindReplace.cpp; path = ../../../common/Lgi/FindReplace.cpp; sourceTree = "<group>"; };
+		3477C30E1CC04C790028B84B /* Css.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Css.cpp; path = ../../../common/Lgi/Css.cpp; sourceTree = "<group>"; };
+		3477C30F1CC04C790028B84B /* CssTools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CssTools.cpp; path = ../../../common/Lgi/CssTools.cpp; sourceTree = "<group>"; };
+		3477C3121CC04CB10028B84B /* Rect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Rect.cpp; path = ../../../common/Gdc2/Rect.cpp; sourceTree = "<group>"; };
+		3477C3151CC04CCB0028B84B /* Library.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Library.cpp; path = ../../../common/Lgi/Library.cpp; sourceTree = "<group>"; };
+		3477C3181CC04CF10028B84B /* ThreadCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadCommon.cpp; path = ../../../common/Lgi/ThreadCommon.cpp; sourceTree = "<group>"; };
+		3477C31B1CC04D3F0028B84B /* Net.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Net.cpp; path = ../../../common/Net/Net.cpp; sourceTree = "<group>"; };
+		3477C31C1CC04D3F0028B84B /* NetTools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NetTools.cpp; path = ../../../common/Net/NetTools.cpp; sourceTree = "<group>"; };
+		3477C31F1CC04D630028B84B /* ThreadEvent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadEvent.cpp; path = ../../../common/Lgi/ThreadEvent.cpp; sourceTree = "<group>"; };
+		3477C3211CC04DA00028B84B /* Colour.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Colour.cpp; path = ../../../common/Gdc2/Colour.cpp; sourceTree = "<group>"; };
+		3477C3231CC04DD70028B84B /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Object.cpp; path = ../../../common/Lgi/Object.cpp; sourceTree = "<group>"; };
+		3477C3251CC04DE20028B84B /* Mutex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Mutex.cpp; path = ../../../common/Lgi/Mutex.cpp; sourceTree = "<group>"; };
+		3477C3271CC04E020028B84B /* Variant.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Variant.cpp; path = ../../../common/Lgi/Variant.cpp; sourceTree = "<group>"; };
 		3477C3291CC04E120028B84B /* 8Bit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = 8Bit.cpp; path = ../../../common/Gdc2/8Bit.cpp; sourceTree = "<group>"; };
 		3477C32A1CC04E120028B84B /* 15Bit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = 15Bit.cpp; path = ../../../common/Gdc2/15Bit.cpp; sourceTree = "<group>"; };
 		3477C32B1CC04E120028B84B /* 16Bit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = 16Bit.cpp; path = ../../../common/Gdc2/16Bit.cpp; sourceTree = "<group>"; };
@@ -267,38 +273,44 @@
 		3477C32E1CC04E120028B84B /* 48Bit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = 48Bit.cpp; path = ../../../common/Gdc2/48Bit.cpp; sourceTree = "<group>"; };
 		3477C32F1CC04E120028B84B /* 64Bit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = 64Bit.cpp; path = ../../../common/Gdc2/64Bit.cpp; sourceTree = "<group>"; };
 		3477C3301CC04E120028B84B /* Alpha.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Alpha.cpp; path = ../../../common/Gdc2/Alpha.cpp; sourceTree = "<group>"; };
-		3477C3391CC04ED90028B84B /* GDragAndDrop.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = GDragAndDrop.mm; sourceTree = "<group>"; };
-		3477C33C1CC088590028B84B /* GFileCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GFileCommon.cpp; path = ../../../common/General/GFileCommon.cpp; sourceTree = "<group>"; };
-		3477C33E1CC0A6780028B84B /* GToken.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GToken.cpp; path = ../../../common/Text/GToken.cpp; sourceTree = "<group>"; };
-		3477C3401CC0A68E0028B84B /* LDateTime.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = LDateTime.cpp; path = ../../../common/General/LDateTime.cpp; sourceTree = "<group>"; };
-		3477C3421CC0A6B90028B84B /* GDocView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GDocView.cpp; path = ../../../common/Text/GDocView.cpp; sourceTree = "<group>"; };
-		3477C3441CC0A9DE0028B84B /* GInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GInput.cpp; path = ../../../common/Lgi/GInput.cpp; sourceTree = "<group>"; };
-		3477C3461CC0AA220028B84B /* GWindowCommon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GWindowCommon.cpp; path = ../../../common/Lgi/GWindowCommon.cpp; sourceTree = "<group>"; };
-		3477C3481CC0AA7E0028B84B /* GProgressDlg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GProgressDlg.cpp; path = ../../../common/Widgets/GProgressDlg.cpp; sourceTree = "<group>"; };
-		3477C34A1CC0AB0B0028B84B /* GToolTip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GToolTip.cpp; path = ../../../common/Lgi/GToolTip.cpp; sourceTree = "<group>"; };
+		3477C3391CC04ED90028B84B /* DragAndDrop.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; path = DragAndDrop.mm; sourceTree = "<group>"; };
+		3477C33C1CC088590028B84B /* FileCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileCommon.cpp; path = ../../../common/General/FileCommon.cpp; sourceTree = "<group>"; };
+		3477C33E1CC0A6780028B84B /* Token.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Token.cpp; path = ../../../common/Text/Token.cpp; sourceTree = "<group>"; };
+		3477C3401CC0A68E0028B84B /* DateTime.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = DateTime.cpp; path = ../../../common/General/DateTime.cpp; sourceTree = "<group>"; };
+		3477C3421CC0A6B90028B84B /* DocView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DocView.cpp; path = ../../../common/Text/DocView.cpp; sourceTree = "<group>"; };
+		3477C3441CC0A9DE0028B84B /* Input.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Input.cpp; path = ../../../common/Lgi/Input.cpp; sourceTree = "<group>"; };
+		3477C3461CC0AA220028B84B /* WindowCommon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = WindowCommon.cpp; path = ../../../common/Lgi/WindowCommon.cpp; sourceTree = "<group>"; };
+		3477C3481CC0AA7E0028B84B /* ProgressDlg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProgressDlg.cpp; path = ../../../common/Widgets/ProgressDlg.cpp; sourceTree = "<group>"; };
+		3477C34A1CC0AB0B0028B84B /* ToolTip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ToolTip.cpp; path = ../../../common/Lgi/ToolTip.cpp; sourceTree = "<group>"; };
 		3477C34C1CC0ACED0028B84B /* md5.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = md5.c; path = ../../../common/Hash/md5/md5.c; sourceTree = "<group>"; };
 		3477C34F1CC0C3D60028B84B /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = ../../../../../../../../System/Library/Frameworks/Cocoa.framework; sourceTree = "<group>"; };
-		3477C35A1CC1AEEA0028B84B /* LgiInc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiInc.h; path = ../../../include/common/LgiInc.h; sourceTree = "<group>"; };
-		3477C35C1CC2253E0028B84B /* LgiInterfaces.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiInterfaces.h; path = ../../../include/common/LgiInterfaces.h; sourceTree = "<group>"; };
-		3477C4391CC234750028B84B /* GMemStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GMemStream.cpp; path = ../../../common/Lgi/GMemStream.cpp; sourceTree = "<group>"; };
-		3477C46C1CC26DEB0028B84B /* GAlert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GAlert.cpp; path = ../../../common/Lgi/GAlert.cpp; sourceTree = "<group>"; };
-		3477C4EC1CC27F1C0028B84B /* GTrayIcon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GTrayIcon.cpp; path = ../../../common/Lgi/GTrayIcon.cpp; sourceTree = "<group>"; };
-		3477C5161CC303B70028B84B /* LgiClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiClass.h; path = ../../../include/common/LgiClass.h; sourceTree = "<group>"; };
-		347D192021B1F5700008C4CB /* GFont_W.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GFont_W.cpp; path = ../../../common/Gdc2/Font/GFont_W.cpp; sourceTree = "<group>"; };
-		348362411F233A77003B2A6D /* GStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GStream.h; path = ../../../../include/common/GStream.h; sourceTree = "<group>"; };
+		3477C35A1CC1AEEA0028B84B /* LgiInc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiInc.h; path = ../../../include/lgi/common/LgiInc.h; sourceTree = "<group>"; };
+		3477C35C1CC2253E0028B84B /* LgiInterfaces.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiInterfaces.h; path = ../../../include/lgi/common/LgiInterfaces.h; sourceTree = "<group>"; };
+		3477C4391CC234750028B84B /* MemStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MemStream.cpp; path = ../../../common/Lgi/MemStream.cpp; sourceTree = "<group>"; };
+		3477C46C1CC26DEB0028B84B /* Alert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Alert.cpp; path = ../../../common/Lgi/Alert.cpp; sourceTree = "<group>"; };
+		3477C4EC1CC27F1C0028B84B /* TrayIcon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = TrayIcon.cpp; path = ../../../common/Lgi/TrayIcon.cpp; sourceTree = "<group>"; };
+		3477C5161CC303B70028B84B /* LgiUiBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiUiBase.h; path = ../../../include/lgi/common/LgiUiBase.h; sourceTree = "<group>"; };
+		348362411F233A77003B2A6D /* Stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Stream.h; path = ../../../../include/lgi/common/Stream.h; sourceTree = "<group>"; };
 		34837C4825C677ED00D103B4 /* GAppPriv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GAppPriv.h; path = ../../../../private/mac/GAppPriv.h; sourceTree = "<group>"; };
-		348CD46925C63E56001AA32B /* GAppCommon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GAppCommon.cpp; path = ../../../common/Lgi/GAppCommon.cpp; sourceTree = "<group>"; };
-		3491A28423678DB700604C29 /* GDropFiles.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GDropFiles.h; path = ../../../../include/common/GDropFiles.h; sourceTree = "<group>"; };
-		34A3ACE720568D5800B1D62A /* LStringLayout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LStringLayout.cpp; path = ../../../common/Gdc2/Font/LStringLayout.cpp; sourceTree = "<group>"; };
-		34A3ACE920568D9700B1D62A /* LMenuCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LMenuCommon.cpp; path = ../../../common/Lgi/LMenuCommon.cpp; sourceTree = "<group>"; };
-		34B531D722F65734002B50F7 /* LMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LMenu.h; path = ../../../../include/common/LMenu.h; sourceTree = "<group>"; };
-		34B6B19023CFD0F100C24906 /* GDragAndDropCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GDragAndDropCommon.cpp; path = ../../../common/Lgi/GDragAndDropCommon.cpp; sourceTree = "<group>"; };
-		34C072C02369878100E1E222 /* GDropFiles.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GDropFiles.cpp; path = ../../../common/Lgi/GDropFiles.cpp; sourceTree = "<group>"; };
-		34C81A5925DA0AA10053F93A /* Base64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Base64.cpp; path = ../../../common/INet/Base64.cpp; sourceTree = "<group>"; };
-		34CD9F7123D5768B0039F259 /* GUnicode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GUnicode.h; path = ../../../../include/common/GUnicode.h; sourceTree = "<group>"; };
-		34D1B3C021748A2800BC6B58 /* GPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GPath.cpp; path = ../../../common/Gdc2/Path/GPath.cpp; sourceTree = "<group>"; };
-		34D21CEB217981AE003D1EA6 /* GEventTargetThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GEventTargetThread.h; path = ../../../../include/common/GEventTargetThread.h; sourceTree = "<group>"; };
-		34D6AA1622D3749A005D739E /* Gdc2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Gdc2.h; path = ../../../../include/common/Gdc2.h; sourceTree = "<group>"; };
+		348CD46925C63E56001AA32B /* AppCommon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = AppCommon.cpp; path = ../../../common/Lgi/AppCommon.cpp; sourceTree = "<group>"; };
+		3491A28423678DB700604C29 /* DropFiles.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = DropFiles.h; path = ../../../../include/lgi/common/DropFiles.h; sourceTree = "<group>"; };
+		34A3ACE720568D5800B1D62A /* StringLayout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StringLayout.cpp; path = ../../../common/Gdc2/Font/StringLayout.cpp; sourceTree = "<group>"; };
+		34A3ACE920568D9700B1D62A /* MenuCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MenuCommon.cpp; path = ../../../common/Lgi/MenuCommon.cpp; sourceTree = "<group>"; };
+		34B14E1726950F59004C22CC /* StringClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StringClass.h; path = ../../../include/lgi/common/StringClass.h; sourceTree = "<group>"; };
+		34B14E1A26950F6C004C22CC /* LgiString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiString.h; path = ../../../include/lgi/common/LgiString.h; sourceTree = "<group>"; };
+		34B14E1F26951653004C22CC /* HashTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HashTable.h; path = ../../../include/lgi/common/HashTable.h; sourceTree = "<group>"; };
+		34B14E22269516FC004C22CC /* LgiCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiCommon.h; path = ../../../include/lgi/common/LgiCommon.h; sourceTree = "<group>"; };
+		34B14E372695466A004C22CC /* Slider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Slider.cpp; path = ../../../common/Widgets/Slider.cpp; sourceTree = "<group>"; };
+		34B14E3A269546A3004C22CC /* TypeFace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TypeFace.cpp; path = ../../../common/Gdc2/Font/TypeFace.cpp; sourceTree = "<group>"; };
+		34B14E3B269546A3004C22CC /* FontType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FontType.cpp; path = ../../../common/Gdc2/Font/FontType.cpp; sourceTree = "<group>"; };
+		34B531D722F65734002B50F7 /* Menu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Menu.h; path = ../../../../include/lgi/common/Menu.h; sourceTree = "<group>"; };
+		34B6B19023CFD0F100C24906 /* DragAndDropCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DragAndDropCommon.cpp; path = ../../../common/Lgi/DragAndDropCommon.cpp; sourceTree = "<group>"; };
+		34C072C02369878100E1E222 /* DropFiles.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = DropFiles.cpp; path = ../../../common/Lgi/DropFiles.cpp; sourceTree = "<group>"; };
+		34C81A5925DA0AA10053F93A /* Base64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Base64.cpp; path = ../../../common/Net/Base64.cpp; sourceTree = "<group>"; };
+		34CD9F7123D5768B0039F259 /* Unicode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Unicode.h; path = ../../../../include/lgi/common/Unicode.h; sourceTree = "<group>"; };
+		34D1B3C021748A2800BC6B58 /* Path.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Path.cpp; path = ../../../common/Gdc2/Path/Path.cpp; sourceTree = "<group>"; };
+		34D21CEB217981AE003D1EA6 /* EventTargetThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EventTargetThread.h; path = ../../../../include/lgi/common/EventTargetThread.h; sourceTree = "<group>"; };
+		34D6AA1622D3749A005D739E /* Gdc2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Gdc2.h; path = ../../../../include/lgi/common/Gdc2.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -365,24 +377,24 @@
 		3477C2731CBF07410028B84B /* Interface_Cocoa */ = {
 			isa = PBXGroup;
 			children = (
-				343874B3230F46B200CF96B4 /* GApp.h */,
-				3477C2741CBF07DD0028B84B /* GApp.mm */,
-				344CFBC7237365B800AE6B35 /* GClipBoard.h */,
-				3477C2761CBF08050028B84B /* GClipBoard.mm */,
-				3477C3391CC04ED90028B84B /* GDragAndDrop.mm */,
-				3477C27A1CBF086A0028B84B /* GGeneral.mm */,
-				343874B4230F46B200CF96B4 /* GLayout.h */,
-				3477C27B1CBF086A0028B84B /* GLayout.mm */,
-				3477C27D1CBF086A0028B84B /* GPrinter.mm */,
-				343874B2230F46B200CF96B4 /* GView.h */,
-				3477C27F1CBF086A0028B84B /* GView.mm */,
-				3477C2AB1CBF72170028B84B /* GViewPriv.h */,
-				3477C2801CBF086A0028B84B /* GWidgets.mm */,
-				343874B1230F46B200CF96B4 /* GWindow.h */,
-				3477C2811CBF086A0028B84B /* GWindow.mm */,
+				343874B3230F46B200CF96B4 /* App.h */,
+				3477C2741CBF07DD0028B84B /* App.mm */,
+				344CFBC7237365B800AE6B35 /* ClipBoard.h */,
+				3477C2761CBF08050028B84B /* ClipBoard.mm */,
+				3477C3391CC04ED90028B84B /* DragAndDrop.mm */,
+				3477C27A1CBF086A0028B84B /* General.mm */,
+				343874B4230F46B200CF96B4 /* Layout.h */,
+				3477C27B1CBF086A0028B84B /* Layout.mm */,
+				3477C27D1CBF086A0028B84B /* Printer.mm */,
+				343874B2230F46B200CF96B4 /* View.h */,
+				3477C27F1CBF086A0028B84B /* View.mm */,
+				3477C2AB1CBF72170028B84B /* ViewPriv.h */,
+				3477C2801CBF086A0028B84B /* Widgets.mm */,
+				343874B1230F46B200CF96B4 /* Window.h */,
+				3477C2811CBF086A0028B84B /* Window.mm */,
 				34109853217A975E007020CE /* LCocoaView.h */,
-				34109856217A9805007020CE /* LCocoaView.mm */,
-				3477C27C1CBF086A0028B84B /* LMenu.mm */,
+				34109856217A9805007020CE /* CocoaView.mm */,
+				3477C27C1CBF086A0028B84B /* Menu.mm */,
 			);
 			name = Interface_Cocoa;
 			sourceTree = "<group>";
@@ -392,11 +404,11 @@
 			children = (
 				3413170F230694D1008CE982 /* Gel.cpp */,
 				34D6AA1622D3749A005D739E /* Gdc2.h */,
-				34D1B3C021748A2800BC6B58 /* GPath.cpp */,
-				3477C3211CC04DA00028B84B /* GColour.cpp */,
+				34D1B3C021748A2800BC6B58 /* Path.cpp */,
+				3477C3211CC04DA00028B84B /* Colour.cpp */,
 				3477C2BA1CBF97C80028B84B /* GdcCommon.cpp */,
-				3477C2EA1CC04B890028B84B /* GFilter.cpp */,
-				3477C3121CC04CB10028B84B /* GRect.cpp */,
+				3477C2EA1CC04B890028B84B /* Filter.cpp */,
+				3477C3121CC04CB10028B84B /* Rect.cpp */,
 				3477C28B1CBF08C10028B84B /* Gdc2.mm */,
 				3477C2BE1CBF97E20028B84B /* Applicators */,
 				3477C2BD1CBF97DA0028B84B /* Fonts */,
@@ -410,11 +422,11 @@
 			children = (
 				34C81A5925DA0AA10053F93A /* Base64.cpp */,
 				3477C34C1CC0ACED0028B84B /* md5.c */,
-				3477C3421CC0A6B90028B84B /* GDocView.cpp */,
-				3477C3401CC0A68E0028B84B /* LDateTime.cpp */,
-				3477C3271CC04E020028B84B /* GVariant.cpp */,
-				3477C3231CC04DD70028B84B /* GObject.cpp */,
-				3477C2E81CC04B5D0028B84B /* LgiRand.cpp */,
+				3477C3421CC0A6B90028B84B /* DocView.cpp */,
+				3477C3401CC0A68E0028B84B /* DateTime.cpp */,
+				3477C3271CC04E020028B84B /* Variant.cpp */,
+				3477C3231CC04DD70028B84B /* Object.cpp */,
+				3477C2E81CC04B5D0028B84B /* Rand.cpp */,
 				3477C2951CBF09320028B84B /* GMem.mm */,
 				3477C2961CBF09320028B84B /* ShowFileProp_Mac.mm */,
 			);
@@ -424,14 +436,18 @@
 		3477C29A1CBF0A700028B84B /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				34B14E22269516FC004C22CC /* LgiCommon.h */,
+				34B14E1F26951653004C22CC /* HashTable.h */,
+				34B14E1A26950F6C004C22CC /* LgiString.h */,
+				34B14E1726950F59004C22CC /* StringClass.h */,
 				34114C8A23091E6E00F342B1 /* LgiClasses.h */,
 				3477C26B1CBF020F0028B84B /* LgiProject.h */,
-				3477C5161CC303B70028B84B /* LgiClass.h */,
+				3477C5161CC303B70028B84B /* LgiUiBase.h */,
 				3477C35C1CC2253E0028B84B /* LgiInterfaces.h */,
 				3477C35A1CC1AEEA0028B84B /* LgiInc.h */,
 				3477C2A71CBF0AAF0028B84B /* Lgi.h */,
-				3477C29B1CBF0A920028B84B /* GMem.h */,
-				3477C29C1CBF0A920028B84B /* GSymLookup.h */,
+				3477C29B1CBF0A920028B84B /* Mem.h */,
+				3477C29C1CBF0A920028B84B /* SymLookup.h */,
 				3477C29D1CBF0A920028B84B /* LgiMac.h */,
 				3477C29E1CBF0A920028B84B /* LgiOs.h */,
 				3477C29F1CBF0A920028B84B /* LgiOsClasses.h */,
@@ -452,13 +468,13 @@
 		3477C2B21CBF96E60028B84B /* Dialogs */ = {
 			isa = PBXGroup;
 			children = (
-				3413170D23068FFE008CE982 /* GFileSelect.cpp */,
-				3477C46C1CC26DEB0028B84B /* GAlert.cpp */,
-				3477C3481CC0AA7E0028B84B /* GProgressDlg.cpp */,
-				3477C3441CC0A9DE0028B84B /* GInput.cpp */,
-				3477C30C1CC04C560028B84B /* GFindReplace.cpp */,
-				3477C2E01CC04A3C0028B84B /* GFontSelect.cpp */,
-				3477C2B31CBF96F20028B84B /* LgiMsg.cpp */,
+				3413170D23068FFE008CE982 /* FileSelect.cpp */,
+				3477C46C1CC26DEB0028B84B /* Alert.cpp */,
+				3477C3481CC0AA7E0028B84B /* ProgressDlg.cpp */,
+				3477C3441CC0A9DE0028B84B /* Input.cpp */,
+				3477C30C1CC04C560028B84B /* FindReplace.cpp */,
+				3477C2E01CC04A3C0028B84B /* FontSelect.cpp */,
+				3477C2B31CBF96F20028B84B /* LMsg.cpp */,
 			);
 			name = Dialogs;
 			sourceTree = "<group>";
@@ -467,19 +483,19 @@
 			isa = PBXGroup;
 			children = (
 				34837C4825C677ED00D103B4 /* GAppPriv.h */,
-				348CD46925C63E56001AA32B /* GAppCommon.cpp */,
-				34B6B19023CFD0F100C24906 /* GDragAndDropCommon.cpp */,
-				3491A28423678DB700604C29 /* GDropFiles.h */,
-				34C072C02369878100E1E222 /* GDropFiles.cpp */,
-				34B531D722F65734002B50F7 /* LMenu.h */,
-				34A3ACE920568D9700B1D62A /* LMenuCommon.cpp */,
-				346FACE61D3C720B00FFEBCE /* GMessage.h */,
-				3477C4EC1CC27F1C0028B84B /* GTrayIcon.cpp */,
-				3477C34A1CC0AB0B0028B84B /* GToolTip.cpp */,
-				3477C3461CC0AA220028B84B /* GWindowCommon.cpp */,
-				3477C2E41CC04A7F0028B84B /* GViewCommon.cpp */,
+				348CD46925C63E56001AA32B /* AppCommon.cpp */,
+				34B6B19023CFD0F100C24906 /* DragAndDropCommon.cpp */,
+				3491A28423678DB700604C29 /* DropFiles.h */,
+				34C072C02369878100E1E222 /* DropFiles.cpp */,
+				34B531D722F65734002B50F7 /* Menu.h */,
+				34A3ACE920568D9700B1D62A /* MenuCommon.cpp */,
+				346FACE61D3C720B00FFEBCE /* Message.h */,
+				3477C4EC1CC27F1C0028B84B /* TrayIcon.cpp */,
+				3477C34A1CC0AB0B0028B84B /* ToolTip.cpp */,
+				3477C3461CC0AA220028B84B /* WindowCommon.cpp */,
+				3477C2E41CC04A7F0028B84B /* ViewCommon.cpp */,
 				3477C2B81CBF977F0028B84B /* LgiCommon.cpp */,
-				3477C2B61CBF973F0028B84B /* GGuiUtils.cpp */,
+				3477C2B61CBF973F0028B84B /* GuiUtils.cpp */,
 			);
 			name = Interface_XP;
 			sourceTree = "<group>";
@@ -487,7 +503,7 @@
 		3477C2BC1CBF97D10028B84B /* Surfaces */ = {
 			isa = PBXGroup;
 			children = (
-				3477C2E61CC04B1E0028B84B /* GSurface.cpp */,
+				3477C2E61CC04B1E0028B84B /* Surface.cpp */,
 				3477C28E1CBF08C10028B84B /* GScreenDC.cpp */,
 				3477C28C1CBF08C10028B84B /* GMemDC.cpp */,
 				3477C28D1CBF08C10028B84B /* GPrintDC.cpp */,
@@ -498,15 +514,16 @@
 		3477C2BD1CBF97DA0028B84B /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
-				347D192021B1F5700008C4CB /* GFont_W.cpp */,
-				34A3ACE720568D5800B1D62A /* LStringLayout.cpp */,
-				345920FC1F25649000098DFD /* GFont.h */,
-				345920FD1F25649000098DFD /* GFontCache.h */,
-				345920FE1F25649000098DFD /* GFontSelect.h */,
-				3477C2D81CC048F90028B84B /* GDisplayString.cpp */,
-				3477C2D91CC048F90028B84B /* GFont.cpp */,
-				3477C2DA1CC048F90028B84B /* GFontSystem.cpp */,
-				3477C2CD1CC047BE0028B84B /* GFontCodePages.cpp */,
+				34B14E3B269546A3004C22CC /* FontType.cpp */,
+				34B14E3A269546A3004C22CC /* TypeFace.cpp */,
+				34A3ACE720568D5800B1D62A /* StringLayout.cpp */,
+				345920FC1F25649000098DFD /* Font.h */,
+				345920FD1F25649000098DFD /* FontCache.h */,
+				345920FE1F25649000098DFD /* FontSelect.h */,
+				3477C2D81CC048F90028B84B /* DisplayString.cpp */,
+				3477C2D91CC048F90028B84B /* Font.cpp */,
+				3477C2DA1CC048F90028B84B /* FontSystem.cpp */,
+				3477C2CD1CC047BE0028B84B /* FontCodePages.cpp */,
 			);
 			name = Fonts;
 			sourceTree = "<group>";
@@ -529,14 +546,14 @@
 		3477C2BF1CBF99F00028B84B /* Text */ = {
 			isa = PBXGroup;
 			children = (
-				3477C30E1CC04C790028B84B /* GCss.cpp */,
-				3477C30F1CC04C790028B84B /* GCssTools.cpp */,
-				3477C2C01CBF9A040028B84B /* GString.cpp */,
-				3477C33E1CC0A6780028B84B /* GToken.cpp */,
-				3477C2C51CC046310028B84B /* GUnicode.cpp */,
-				34CD9F7123D5768B0039F259 /* GUnicode.h */,
-				3477C2C61CC046310028B84B /* GUtf8.cpp */,
-				3477C2C71CC046310028B84B /* GXmlTree.cpp */,
+				3477C30E1CC04C790028B84B /* Css.cpp */,
+				3477C30F1CC04C790028B84B /* CssTools.cpp */,
+				3477C2C01CBF9A040028B84B /* String.cpp */,
+				3477C33E1CC0A6780028B84B /* Token.cpp */,
+				3477C2C51CC046310028B84B /* Unicode.cpp */,
+				34CD9F7123D5768B0039F259 /* Unicode.h */,
+				3477C2C61CC046310028B84B /* Utf8.cpp */,
+				3477C2C71CC046310028B84B /* XmlTree.cpp */,
 			);
 			name = Text;
 			sourceTree = "<group>";
@@ -544,31 +561,32 @@
 		3477C2CC1CC046370028B84B /* Widgets */ = {
 			isa = PBXGroup;
 			children = (
-				3477C2F21CC04BF00028B84B /* GBitmap.cpp */,
-				3477C2F31CC04BF00028B84B /* GBox.cpp */,
-				3477C2F41CC04BF00028B84B /* GButton.cpp */,
-				3477C2F51CC04BF00028B84B /* GCheckBox.cpp */,
-				3477C2F61CC04BF00028B84B /* GCombo.cpp */,
-				3477C2F71CC04BF00028B84B /* GEdit.cpp */,
-				3477C2EC1CC04BBB0028B84B /* GItemContainer.cpp */,
-				3477C2F81CC04BF00028B84B /* GPanel.cpp */,
-				3477C2D61CC048390028B84B /* GPopup.cpp */,
-				345EB84D235C6C01007D05DB /* GPopup.h */,
-				343BE8C62355D0CE00742E21 /* GPopupList.h */,
-				3477C2F91CC04BF00028B84B /* GProgress.cpp */,
-				3418EBCE25D9FEA600EA168A /* GProgress.h */,
-				3418EBD025D9FEF500EA168A /* GProgressDlg.h */,
-				3477C2FA1CC04BF00028B84B /* GRadioGroup.cpp */,
-				346DDEC0240C882900751380 /* GRadioGroup.h */,
-				3477C2DE1CC04A030028B84B /* GScrollBar.cpp */,
-				3477C2FB1CC04BF00028B84B /* GSplitter.cpp */,
-				3477C2FC1CC04BF00028B84B /* GTableLayout.cpp */,
-				3477C2FD1CC04BF00028B84B /* GTabView.cpp */,
-				3477C2FE1CC04BF00028B84B /* GTextLabel.cpp */,
-				3477C2C41CC046310028B84B /* GTextView3.cpp */,
-				3477C2CF1CC047F50028B84B /* GToolBar.cpp */,
-				3477C2EE1CC04BBB0028B84B /* GTree.cpp */,
-				3477C2ED1CC04BBB0028B84B /* LList.cpp */,
+				34B14E372695466A004C22CC /* Slider.cpp */,
+				3477C2F21CC04BF00028B84B /* Bitmap.cpp */,
+				3477C2F31CC04BF00028B84B /* Box.cpp */,
+				3477C2F41CC04BF00028B84B /* Button.cpp */,
+				3477C2F51CC04BF00028B84B /* CheckBox.cpp */,
+				3477C2F61CC04BF00028B84B /* Combo.cpp */,
+				3477C2F71CC04BF00028B84B /* Edit.cpp */,
+				3477C2EC1CC04BBB0028B84B /* ItemContainer.cpp */,
+				3477C2ED1CC04BBB0028B84B /* List.cpp */,
+				3477C2F81CC04BF00028B84B /* Panel.cpp */,
+				3477C2D61CC048390028B84B /* Popup.cpp */,
+				345EB84D235C6C01007D05DB /* Popup.h */,
+				343BE8C62355D0CE00742E21 /* PopupList.h */,
+				3477C2F91CC04BF00028B84B /* Progress.cpp */,
+				3418EBCE25D9FEA600EA168A /* Progress.h */,
+				3418EBD025D9FEF500EA168A /* ProgressDlg.h */,
+				3477C2FA1CC04BF00028B84B /* RadioGroup.cpp */,
+				346DDEC0240C882900751380 /* RadioGroup.h */,
+				3477C2DE1CC04A030028B84B /* ScrollBar.cpp */,
+				3477C2FB1CC04BF00028B84B /* Splitter.cpp */,
+				3477C2FC1CC04BF00028B84B /* TableLayout.cpp */,
+				3477C2FD1CC04BF00028B84B /* TabView.cpp */,
+				3477C2FE1CC04BF00028B84B /* TextLabel.cpp */,
+				3477C2C41CC046310028B84B /* TextView3.cpp */,
+				3477C2CF1CC047F50028B84B /* ToolBar.cpp */,
+				3477C2EE1CC04BBB0028B84B /* Tree.cpp */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -576,11 +594,11 @@
 		3477C2D11CC048000028B84B /* Memory */ = {
 			isa = PBXGroup;
 			children = (
-				3477C2D41CC0481B0028B84B /* GArray.h */,
-				3477C2D21CC048100028B84B /* GContainers.cpp */,
-				3477C4391CC234750028B84B /* GMemStream.cpp */,
-				3477C2E21CC04A5C0028B84B /* GStream.cpp */,
-				348362411F233A77003B2A6D /* GStream.h */,
+				3477C2D41CC0481B0028B84B /* Array.h */,
+				3477C2D21CC048100028B84B /* Containers.cpp */,
+				3477C4391CC234750028B84B /* MemStream.cpp */,
+				3477C2E21CC04A5C0028B84B /* Stream.cpp */,
+				348362411F233A77003B2A6D /* Stream.h */,
 			);
 			name = Memory;
 			sourceTree = "<group>";
@@ -588,7 +606,7 @@
 		3477C3141CC04CC00028B84B /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				3477C3151CC04CCB0028B84B /* GLibrary.cpp */,
+				3477C3151CC04CCB0028B84B /* Library.cpp */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -596,11 +614,11 @@
 		3477C3171CC04CDE0028B84B /* Threads */ = {
 			isa = PBXGroup;
 			children = (
-				34D21CEB217981AE003D1EA6 /* GEventTargetThread.h */,
-				3477C27E1CBF086A0028B84B /* LThread.mm */,
-				3477C3251CC04DE20028B84B /* LMutex.cpp */,
-				3477C31F1CC04D630028B84B /* LThreadEvent.cpp */,
-				3477C3181CC04CF10028B84B /* LThreadCommon.cpp */,
+				34D21CEB217981AE003D1EA6 /* EventTargetThread.h */,
+				3477C27E1CBF086A0028B84B /* Thread.mm */,
+				3477C3251CC04DE20028B84B /* Mutex.cpp */,
+				3477C31F1CC04D630028B84B /* ThreadEvent.cpp */,
+				3477C3181CC04CF10028B84B /* ThreadCommon.cpp */,
 			);
 			name = Threads;
 			sourceTree = "<group>";
@@ -608,10 +626,10 @@
 		3477C31A1CC04D290028B84B /* Network */ = {
 			isa = PBXGroup;
 			children = (
-				346FACE91D3C75AE00FFEBCE /* GUri.cpp */,
+				346FACE91D3C75AE00FFEBCE /* Uri.cpp */,
 				346FACEA1D3C75AE00FFEBCE /* MDStringToDigest.cpp */,
-				3477C31B1CC04D3F0028B84B /* INet.cpp */,
-				3477C31C1CC04D3F0028B84B /* INetTools.cpp */,
+				3477C31B1CC04D3F0028B84B /* Net.cpp */,
+				3477C31C1CC04D3F0028B84B /* NetTools.cpp */,
 			);
 			name = Network;
 			sourceTree = "<group>";
@@ -619,8 +637,8 @@
 		3477C33B1CC0881E0028B84B /* Files */ = {
 			isa = PBXGroup;
 			children = (
-				3477C33C1CC088590028B84B /* GFileCommon.cpp */,
-				3477C2A91CBF22A00028B84B /* GFile.h */,
+				3477C33C1CC088590028B84B /* FileCommon.cpp */,
+				3477C2A91CBF22A00028B84B /* File.h */,
 				3477C2941CBF09320028B84B /* GFile.mm */,
 			);
 			name = Files;
@@ -637,7 +655,7 @@
 		3477C4051CC22F920028B84B /* Process */ = {
 			isa = PBXGroup;
 			children = (
-				3471868723A9AF8900F8C952 /* GSubProcess.cpp */,
+				3471868723A9AF8900F8C952 /* SubProcess.cpp */,
 			);
 			name = Process;
 			sourceTree = "<group>";
@@ -649,42 +667,46 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				344CFBC8237365B800AE6B35 /* GClipBoard.h in Headers */,
-				343874B8230F46B200CF96B4 /* GLayout.h in Headers */,
-				3477C2AC1CBF72170028B84B /* GViewPriv.h in Headers */,
+				34B14E1826950F59004C22CC /* StringClass.h in Headers */,
+				344CFBC8237365B800AE6B35 /* ClipBoard.h in Headers */,
+				343874B8230F46B200CF96B4 /* Layout.h in Headers */,
+				3477C2AC1CBF72170028B84B /* ViewPriv.h in Headers */,
 				3477C35D1CC2253E0028B84B /* LgiInterfaces.h in Headers */,
 				3477C2A51CBF0A920028B84B /* LgiOsClasses.h in Headers */,
-				3491A28523678DB800604C29 /* GDropFiles.h in Headers */,
-				34B531D822F65734002B50F7 /* LMenu.h in Headers */,
+				34B14E23269516FC004C22CC /* LgiCommon.h in Headers */,
+				3491A28523678DB800604C29 /* DropFiles.h in Headers */,
+				34B531D822F65734002B50F7 /* Menu.h in Headers */,
 				34114C8B23091E6E00F342B1 /* LgiClasses.h in Headers */,
+				34B14E2026951653004C22CC /* HashTable.h in Headers */,
 				3477C35B1CC1AEEA0028B84B /* LgiInc.h in Headers */,
-				348362421F233A77003B2A6D /* GStream.h in Headers */,
+				348362421F233A77003B2A6D /* Stream.h in Headers */,
 				3477C2A61CBF0A920028B84B /* LgiOsDefs.h in Headers */,
-				345EB84E235C6C01007D05DB /* GPopup.h in Headers */,
-				34D21CEC217981AE003D1EA6 /* GEventTargetThread.h in Headers */,
-				343BE8C72355D0CE00742E21 /* GPopupList.h in Headers */,
-				34CD9F7223D5768B0039F259 /* GUnicode.h in Headers */,
+				345EB84E235C6C01007D05DB /* Popup.h in Headers */,
+				34D21CEC217981AE003D1EA6 /* EventTargetThread.h in Headers */,
+				343BE8C72355D0CE00742E21 /* PopupList.h in Headers */,
+				34CD9F7223D5768B0039F259 /* Unicode.h in Headers */,
 				34837C4925C677ED00D103B4 /* GAppPriv.h in Headers */,
-				3477C2A11CBF0A920028B84B /* GMem.h in Headers */,
-				3477C2D51CC0481B0028B84B /* GArray.h in Headers */,
-				3477C5171CC303B70028B84B /* LgiClass.h in Headers */,
-				3477C2AA1CBF22A00028B84B /* GFile.h in Headers */,
-				343874B5230F46B200CF96B4 /* GWindow.h in Headers */,
-				3477C2A21CBF0A920028B84B /* GSymLookup.h in Headers */,
+				3477C2A11CBF0A920028B84B /* Mem.h in Headers */,
+				3477C2D51CC0481B0028B84B /* Array.h in Headers */,
+				3477C5171CC303B70028B84B /* LgiUiBase.h in Headers */,
+				3477C2AA1CBF22A00028B84B /* File.h in Headers */,
+				343874B5230F46B200CF96B4 /* Window.h in Headers */,
+				3477C2A21CBF0A920028B84B /* SymLookup.h in Headers */,
 				34D6AA1722D3749A005D739E /* Gdc2.h in Headers */,
 				3477C2A41CBF0A920028B84B /* LgiOs.h in Headers */,
-				343874B7230F46B200CF96B4 /* GApp.h in Headers */,
-				3418EBCF25D9FEA600EA168A /* GProgress.h in Headers */,
-				346DDEC1240C882900751380 /* GRadioGroup.h in Headers */,
+				343874B7230F46B200CF96B4 /* App.h in Headers */,
+				3418EBCF25D9FEA600EA168A /* Progress.h in Headers */,
+				346DDEC1240C882900751380 /* RadioGroup.h in Headers */,
 				3477C26C1CBF020F0028B84B /* LgiProject.h in Headers */,
-				345921011F25649000098DFD /* GFontSelect.h in Headers */,
-				346FACE71D3C720B00FFEBCE /* GMessage.h in Headers */,
+				345921011F25649000098DFD /* FontSelect.h in Headers */,
+				346FACE71D3C720B00FFEBCE /* Message.h in Headers */,
 				3477C2A31CBF0A920028B84B /* LgiMac.h in Headers */,
-				3418EBD125D9FEF500EA168A /* GProgressDlg.h in Headers */,
-				343874B6230F46B200CF96B4 /* GView.h in Headers */,
-				345920FF1F25649000098DFD /* GFont.h in Headers */,
+				3418EBD125D9FEF500EA168A /* ProgressDlg.h in Headers */,
+				34B14E1B26950F6C004C22CC /* LgiString.h in Headers */,
+				343874B6230F46B200CF96B4 /* View.h in Headers */,
+				345920FF1F25649000098DFD /* Font.h in Headers */,
 				3477C2A81CBF0AAF0028B84B /* Lgi.h in Headers */,
-				345921001F25649000098DFD /* GFontCache.h in Headers */,
+				345921001F25649000098DFD /* FontCache.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -757,112 +779,114 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3477C2CE1CC047BE0028B84B /* GFontCodePages.cpp in Sources */,
-				3477C3111CC04C790028B84B /* GCssTools.cpp in Sources */,
-				34A3ACE820568D5800B1D62A /* LStringLayout.cpp in Sources */,
-				3477C2DB1CC048F90028B84B /* GDisplayString.cpp in Sources */,
-				3477C33A1CC04ED90028B84B /* GDragAndDrop.mm in Sources */,
-				3477C2DC1CC048F90028B84B /* GFont.cpp in Sources */,
-				3477C2831CBF086A0028B84B /* GLayout.mm in Sources */,
+				3477C2CE1CC047BE0028B84B /* FontCodePages.cpp in Sources */,
+				3477C3111CC04C790028B84B /* CssTools.cpp in Sources */,
+				34A3ACE820568D5800B1D62A /* StringLayout.cpp in Sources */,
+				3477C2DB1CC048F90028B84B /* DisplayString.cpp in Sources */,
+				3477C33A1CC04ED90028B84B /* DragAndDrop.mm in Sources */,
+				3477C2DC1CC048F90028B84B /* Font.cpp in Sources */,
+				3477C2831CBF086A0028B84B /* Layout.mm in Sources */,
 				3477C34D1CC0ACED0028B84B /* md5.c in Sources */,
-				3477C2C81CC046310028B84B /* GTextView3.cpp in Sources */,
-				3477C2861CBF086A0028B84B /* LThread.mm in Sources */,
-				3477C2821CBF086A0028B84B /* GGeneral.mm in Sources */,
-				3477C3131CC04CB10028B84B /* GRect.cpp in Sources */,
-				3477C3451CC0A9DE0028B84B /* GInput.cpp in Sources */,
-				34B6B19123CFD0F100C24906 /* GDragAndDropCommon.cpp in Sources */,
-				3477C31D1CC04D3F0028B84B /* INet.cpp in Sources */,
+				3477C2C81CC046310028B84B /* TextView3.cpp in Sources */,
+				3477C2861CBF086A0028B84B /* Thread.mm in Sources */,
+				3477C2821CBF086A0028B84B /* General.mm in Sources */,
+				3477C3131CC04CB10028B84B /* Rect.cpp in Sources */,
+				3477C3451CC0A9DE0028B84B /* Input.cpp in Sources */,
+				34B6B19123CFD0F100C24906 /* DragAndDropCommon.cpp in Sources */,
+				3477C31D1CC04D3F0028B84B /* Net.cpp in Sources */,
 				3477C28F1CBF08C10028B84B /* Gdc2.mm in Sources */,
-				3477C30A1CC04BF00028B84B /* GTabView.cpp in Sources */,
-				3477C33F1CC0A6780028B84B /* GToken.cpp in Sources */,
-				3477C2D01CC047F50028B84B /* GToolBar.cpp in Sources */,
-				3477C3011CC04BF00028B84B /* GButton.cpp in Sources */,
-				3477C3061CC04BF00028B84B /* GProgress.cpp in Sources */,
-				347D192121B1F5700008C4CB /* GFont_W.cpp in Sources */,
-				3477C3001CC04BF00028B84B /* GBox.cpp in Sources */,
-				3477C2871CBF086A0028B84B /* GView.mm in Sources */,
-				3477C3021CC04BF00028B84B /* GCheckBox.cpp in Sources */,
+				3477C30A1CC04BF00028B84B /* TabView.cpp in Sources */,
+				3477C33F1CC0A6780028B84B /* Token.cpp in Sources */,
+				3477C2D01CC047F50028B84B /* ToolBar.cpp in Sources */,
+				3477C3011CC04BF00028B84B /* Button.cpp in Sources */,
+				3477C3061CC04BF00028B84B /* Progress.cpp in Sources */,
+				3477C3001CC04BF00028B84B /* Box.cpp in Sources */,
+				3477C2871CBF086A0028B84B /* View.mm in Sources */,
+				3477C3021CC04BF00028B84B /* CheckBox.cpp in Sources */,
 				3477C2BB1CBF97C80028B84B /* GdcCommon.cpp in Sources */,
-				3477C2E51CC04A7F0028B84B /* GViewCommon.cpp in Sources */,
+				3477C2E51CC04A7F0028B84B /* ViewCommon.cpp in Sources */,
+				34B14E382695466A004C22CC /* Slider.cpp in Sources */,
 				34131710230694D1008CE982 /* Gel.cpp in Sources */,
-				3477C2D71CC048390028B84B /* GPopup.cpp in Sources */,
-				3477C3091CC04BF00028B84B /* GTableLayout.cpp in Sources */,
-				3477C2E11CC04A3C0028B84B /* GFontSelect.cpp in Sources */,
-				3477C2DF1CC04A030028B84B /* GScrollBar.cpp in Sources */,
-				3477C2F11CC04BBB0028B84B /* GTree.cpp in Sources */,
-				3413170E23068FFE008CE982 /* GFileSelect.cpp in Sources */,
-				3477C3281CC04E020028B84B /* GVariant.cpp in Sources */,
+				3477C2D71CC048390028B84B /* Popup.cpp in Sources */,
+				3477C3091CC04BF00028B84B /* TableLayout.cpp in Sources */,
+				3477C2E11CC04A3C0028B84B /* FontSelect.cpp in Sources */,
+				3477C2DF1CC04A030028B84B /* ScrollBar.cpp in Sources */,
+				3477C2F11CC04BBB0028B84B /* Tree.cpp in Sources */,
+				3413170E23068FFE008CE982 /* FileSelect.cpp in Sources */,
+				3477C3281CC04E020028B84B /* Variant.cpp in Sources */,
 				3477C2AF1CBF96B90028B84B /* LgiRes.cpp in Sources */,
-				3471868823A9AF8900F8C952 /* GSubProcess.cpp in Sources */,
-				3477C3161CC04CCB0028B84B /* GLibrary.cpp in Sources */,
-				3477C3051CC04BF00028B84B /* GPanel.cpp in Sources */,
+				3471868823A9AF8900F8C952 /* SubProcess.cpp in Sources */,
+				3477C3161CC04CCB0028B84B /* Library.cpp in Sources */,
+				3477C3051CC04BF00028B84B /* Panel.cpp in Sources */,
 				3477C2901CBF08C10028B84B /* GMemDC.cpp in Sources */,
-				34C072C12369878100E1E222 /* GDropFiles.cpp in Sources */,
-				3477C30D1CC04C560028B84B /* GFindReplace.cpp in Sources */,
-				3477C34B1CC0AB0B0028B84B /* GToolTip.cpp in Sources */,
-				3477C3201CC04D630028B84B /* LThreadEvent.cpp in Sources */,
-				3477C3031CC04BF00028B84B /* GCombo.cpp in Sources */,
-				3477C30B1CC04BF00028B84B /* GTextLabel.cpp in Sources */,
-				3477C2B71CBF973F0028B84B /* GGuiUtils.cpp in Sources */,
+				34C072C12369878100E1E222 /* DropFiles.cpp in Sources */,
+				3477C30D1CC04C560028B84B /* FindReplace.cpp in Sources */,
+				3477C34B1CC0AB0B0028B84B /* ToolTip.cpp in Sources */,
+				3477C3201CC04D630028B84B /* ThreadEvent.cpp in Sources */,
+				3477C3031CC04BF00028B84B /* Combo.cpp in Sources */,
+				3477C30B1CC04BF00028B84B /* TextLabel.cpp in Sources */,
+				3477C2B71CBF973F0028B84B /* GuiUtils.cpp in Sources */,
 				3477C2911CBF08C10028B84B /* GPrintDC.cpp in Sources */,
 				3477C2B91CBF977F0028B84B /* LgiCommon.cpp in Sources */,
-				34D1B3C121748A2800BC6B58 /* GPath.cpp in Sources */,
-				3477C2CA1CC046310028B84B /* GUtf8.cpp in Sources */,
+				34D1B3C121748A2800BC6B58 /* Path.cpp in Sources */,
+				3477C2CA1CC046310028B84B /* Utf8.cpp in Sources */,
 				3477C2971CBF09320028B84B /* GFile.mm in Sources */,
-				3477C43A1CC234750028B84B /* GMemStream.cpp in Sources */,
-				3477C3191CC04CF10028B84B /* LThreadCommon.cpp in Sources */,
-				3477C2781CBF08050028B84B /* GClipBoard.mm in Sources */,
+				3477C43A1CC234750028B84B /* MemStream.cpp in Sources */,
+				3477C3191CC04CF10028B84B /* ThreadCommon.cpp in Sources */,
+				3477C2781CBF08050028B84B /* ClipBoard.mm in Sources */,
 				346FACEC1D3C75AE00FFEBCE /* MDStringToDigest.cpp in Sources */,
-				3477C3491CC0AA7E0028B84B /* GProgressDlg.cpp in Sources */,
-				346FACEB1D3C75AE00FFEBCE /* GUri.cpp in Sources */,
+				3477C3491CC0AA7E0028B84B /* ProgressDlg.cpp in Sources */,
+				346FACEB1D3C75AE00FFEBCE /* Uri.cpp in Sources */,
 				3477C2B11CBF96C40028B84B /* Res.cpp in Sources */,
-				3477C4ED1CC27F1C0028B84B /* GTrayIcon.cpp in Sources */,
+				3477C4ED1CC27F1C0028B84B /* TrayIcon.cpp in Sources */,
 				3477C2991CBF09320028B84B /* ShowFileProp_Mac.mm in Sources */,
 				3477C2921CBF08C10028B84B /* GScreenDC.cpp in Sources */,
 				3477C2981CBF09320028B84B /* GMem.mm in Sources */,
-				3477C2CB1CC046310028B84B /* GXmlTree.cpp in Sources */,
-				3477C2EF1CC04BBB0028B84B /* GItemContainer.cpp in Sources */,
-				3477C3081CC04BF00028B84B /* GSplitter.cpp in Sources */,
-				34109857217A9805007020CE /* LCocoaView.mm in Sources */,
-				3477C46D1CC26DEB0028B84B /* GAlert.cpp in Sources */,
+				3477C2CB1CC046310028B84B /* XmlTree.cpp in Sources */,
+				3477C2EF1CC04BBB0028B84B /* ItemContainer.cpp in Sources */,
+				3477C3081CC04BF00028B84B /* Splitter.cpp in Sources */,
+				34109857217A9805007020CE /* CocoaView.mm in Sources */,
+				3477C46D1CC26DEB0028B84B /* Alert.cpp in Sources */,
 				3477C3381CC04E120028B84B /* Alpha.cpp in Sources */,
-				3477C2EB1CC04B890028B84B /* GFilter.cpp in Sources */,
+				3477C2EB1CC04B890028B84B /* Filter.cpp in Sources */,
 				3477C3321CC04E120028B84B /* 15Bit.cpp in Sources */,
-				3477C3041CC04BF00028B84B /* GEdit.cpp in Sources */,
+				3477C3041CC04BF00028B84B /* Edit.cpp in Sources */,
 				3477C3361CC04E120028B84B /* 48Bit.cpp in Sources */,
-				3477C3261CC04DE20028B84B /* LMutex.cpp in Sources */,
-				3477C2851CBF086A0028B84B /* GPrinter.mm in Sources */,
-				3477C33D1CC088590028B84B /* GFileCommon.cpp in Sources */,
-				3477C3471CC0AA220028B84B /* GWindowCommon.cpp in Sources */,
-				3477C3071CC04BF00028B84B /* GRadioGroup.cpp in Sources */,
-				3477C2FF1CC04BF00028B84B /* GBitmap.cpp in Sources */,
-				3477C2E91CC04B5D0028B84B /* LgiRand.cpp in Sources */,
-				3477C2E71CC04B1E0028B84B /* GSurface.cpp in Sources */,
+				3477C3261CC04DE20028B84B /* Mutex.cpp in Sources */,
+				34B14E3D269546A3004C22CC /* FontType.cpp in Sources */,
+				3477C2851CBF086A0028B84B /* Printer.mm in Sources */,
+				3477C33D1CC088590028B84B /* FileCommon.cpp in Sources */,
+				3477C3471CC0AA220028B84B /* WindowCommon.cpp in Sources */,
+				3477C3071CC04BF00028B84B /* RadioGroup.cpp in Sources */,
+				3477C2FF1CC04BF00028B84B /* Bitmap.cpp in Sources */,
+				3477C2E91CC04B5D0028B84B /* Rand.cpp in Sources */,
+				3477C2E71CC04B1E0028B84B /* Surface.cpp in Sources */,
 				3477C3371CC04E120028B84B /* 64Bit.cpp in Sources */,
-				3477C3241CC04DD70028B84B /* GObject.cpp in Sources */,
-				3477C2E31CC04A5C0028B84B /* GStream.cpp in Sources */,
-				34A3ACEA20568D9700B1D62A /* LMenuCommon.cpp in Sources */,
+				3477C3241CC04DD70028B84B /* Object.cpp in Sources */,
+				3477C2E31CC04A5C0028B84B /* Stream.cpp in Sources */,
+				34A3ACEA20568D9700B1D62A /* MenuCommon.cpp in Sources */,
+				34B14E3C269546A3004C22CC /* TypeFace.cpp in Sources */,
 				3477C3341CC04E120028B84B /* 24Bit.cpp in Sources */,
 				3477C3351CC04E120028B84B /* 32Bit.cpp in Sources */,
-				3477C31E1CC04D3F0028B84B /* INetTools.cpp in Sources */,
-				3477C2881CBF086A0028B84B /* GWidgets.mm in Sources */,
-				3477C2891CBF086A0028B84B /* GWindow.mm in Sources */,
-				3477C3431CC0A6B90028B84B /* GDocView.cpp in Sources */,
-				3477C2841CBF086A0028B84B /* LMenu.mm in Sources */,
-				3477C2B41CBF96F20028B84B /* LgiMsg.cpp in Sources */,
+				3477C31E1CC04D3F0028B84B /* NetTools.cpp in Sources */,
+				3477C2881CBF086A0028B84B /* Widgets.mm in Sources */,
+				3477C2891CBF086A0028B84B /* Window.mm in Sources */,
+				3477C3431CC0A6B90028B84B /* DocView.cpp in Sources */,
+				3477C2841CBF086A0028B84B /* Menu.mm in Sources */,
+				3477C2B41CBF96F20028B84B /* LMsg.cpp in Sources */,
 				3477C3311CC04E120028B84B /* 8Bit.cpp in Sources */,
-				3477C2DD1CC048F90028B84B /* GFontSystem.cpp in Sources */,
-				3477C3101CC04C790028B84B /* GCss.cpp in Sources */,
-				3477C2C91CC046310028B84B /* GUnicode.cpp in Sources */,
-				3477C3221CC04DA00028B84B /* GColour.cpp in Sources */,
-				3477C2D31CC048100028B84B /* GContainers.cpp in Sources */,
-				3477C2F01CC04BBB0028B84B /* LList.cpp in Sources */,
+				3477C2DD1CC048F90028B84B /* FontSystem.cpp in Sources */,
+				3477C3101CC04C790028B84B /* Css.cpp in Sources */,
+				3477C2C91CC046310028B84B /* Unicode.cpp in Sources */,
+				3477C3221CC04DA00028B84B /* Colour.cpp in Sources */,
+				3477C2D31CC048100028B84B /* Containers.cpp in Sources */,
+				3477C2F01CC04BBB0028B84B /* List.cpp in Sources */,
 				3477C3331CC04E120028B84B /* 16Bit.cpp in Sources */,
-				3477C2751CBF07DD0028B84B /* GApp.mm in Sources */,
-				348CD46A25C63E56001AA32B /* GAppCommon.cpp in Sources */,
-				3477C3411CC0A68E0028B84B /* LDateTime.cpp in Sources */,
+				3477C2751CBF07DD0028B84B /* App.mm in Sources */,
+				348CD46A25C63E56001AA32B /* AppCommon.cpp in Sources */,
+				3477C3411CC0A68E0028B84B /* DateTime.cpp in Sources */,
 				34C81A5A25DA0AA10053F93A /* Base64.cpp in Sources */,
-				3477C2C11CBF9A040028B84B /* GString.cpp in Sources */,
+				3477C2C11CBF9A040028B84B /* String.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -993,8 +1017,8 @@
 				FRAMEWORK_VERSION = A;
 				GCC_C_LANGUAGE_STANDARD = c11;
 				HEADER_SEARCH_PATHS = (
-					../../../include/common,
-					../../../include/mac/cocoa,
+					../../../include,
+					../../../include/lgi/mac/cocoa,
 					../../../private/mac,
 				);
 				INFOPLIST_FILE = Lgi/Info.plist;
@@ -1038,8 +1062,8 @@
 				FRAMEWORK_VERSION = A;
 				GCC_C_LANGUAGE_STANDARD = c11;
 				HEADER_SEARCH_PATHS = (
-					../../../include/common,
-					../../../include/mac/cocoa,
+					../../../include,
+					../../../include/lgi/mac/cocoa,
 					../../../private/mac,
 				);
 				INFOPLIST_FILE = Lgi/Info.plist;

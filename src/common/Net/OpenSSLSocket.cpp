@@ -1,0 +1,1479 @@
+/*hdr
+**      FILE:           OpenSSLSocket.cpp
+**      AUTHOR:         Matthew Allen
+**      DATE:           24/9/2004
+**      DESCRIPTION:    Open SSL wrapper socket
+**
+**      Copyright (C) 2004-2014, Matthew Allen
+**              fret@memecode.com
+**
+*/
+
+#include <stdio.h>
+#ifdef WINDOWS
+#pragma comment(lib,"Ws2_32.lib")
+#else
+#include <unistd.h>
+#endif
+
+#include "lgi/common/Lgi.h"
+#include "lgi/common/OpenSSLSocket.h"
+#include <openssl/rand.h>
+#ifdef WIN32
+#include <mmsystem.h>
+#endif
+#include "lgi/common/Token.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Net.h"
+
+#define PATH_OFFSET					"../"
+#ifdef WIN32
+	#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+		#ifdef _WIN64
+			#define SSL_LIBRARY		"libssl-1_1-x64"
+			#define EAY_LIBRARY		"libcrypto-1_1-x64"
+		#else // 32bit
+			#define SSL_LIBRARY		"libssl-1_1"
+			#define EAY_LIBRARY		"libcrypto-1_1"
+		#endif
+	#else
+		#define SSL_LIBRARY			"ssleay32"
+		#define EAY_LIBRARY         "libeay32"
+	#endif
+#elif defined MAC
+// Building openssl:
+// ./configure darwin64-x86_64-cc -mmacosx-version-min=10.10
+#define SSL_LIBRARY					"libssl.1.1"
+#else
+#define SSL_LIBRARY					"libssl"
+#endif
+#define HasntTimedOut()				((To < 0) || (LgiCurrentTime() - Start < To))
+
+static const char*
+	MinimumVersion					= "1.0.1g";
+
+void
+SSL_locking_function(int mode, int n, const char *file, int line);
+
+unsigned long
+SSL_id_function();
+
+class LibSSL : public GLibrary
+{
+public:
+	LibSSL()
+	{
+		#if defined MAC
+		char p[MAX_PATH];
+		LMakePath(p, sizeof(p), LGetExeFile(), "Contents/Frameworks/" SSL_LIBRARY);
+		if (!Load(p))
+			LgiTrace("%s:%i - Failed to load '%s'\n", _FL, p);
+		#elif defined LINUX
+		char p[MAX_PATH];
+		if (LMakePath(p, sizeof(p), LGetExePath(), "libssl.so"))
+		{
+			if (LFileExists(p))
+			{
+			    LgiTrace("%s:%i - loading SSL library '%s'\n", _FL, p);
+				Load(p);
+			}
+		}
+		#endif
+
+		if (!IsLoaded())
+			Load(SSL_LIBRARY);
+
+		if (!IsLoaded())
+		{
+			#ifdef WIN32
+			char p[MAX_PATH], leaf[32];
+			int bits = sizeof(size_t)*8;
+			sprintf_s(leaf, sizeof(leaf), "OpenSSL-Win%i", bits);
+			LMakePath(p, sizeof(p), LGetSystemPath(LSP_USER_APPS, bits), leaf);
+			auto prev = FileDev->GetCurrentFolder();
+			FileDev->SetCurrentFolder(p);
+			LMakePath(p, sizeof(p), p, SSL_LIBRARY);
+			auto loaded = Load(p);
+			FileDev->SetCurrentFolder(prev);
+			#endif
+		}
+    }
+
+	#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	DynFunc0(int, OPENSSL_library_init);
+	DynFunc0(int, OPENSSL_load_error_strings);
+	DynFunc2(int, OPENSSL_init_ssl, uint64_t, opts, const OPENSSL_INIT_SETTINGS *, settings);
+	DynFunc0(const SSL_METHOD *, TLS_method);
+	DynFunc0(const SSL_METHOD *, TLS_server_method);
+	DynFunc0(const SSL_METHOD *, TLS_client_method);
+	#else
+	DynFunc0(int, SSL_library_init);
+	DynFunc0(int, SSL_load_error_strings);
+	DynFunc0(SSL_METHOD*, SSLv23_client_method);
+	DynFunc0(SSL_METHOD*, SSLv23_server_method);
+	#endif
+	DynFunc1(int, SSL_open, SSL*, s);
+	DynFunc1(int, SSL_connect, SSL*, s);
+	DynFunc4(long, SSL_ctrl, SSL*, ssl, int, cmd, long, larg, void*, parg);
+	DynFunc1(int, SSL_shutdown, SSL*, s);
+	DynFunc1(int, SSL_free, SSL*, ssl);
+	DynFunc1(int, SSL_get_fd, const SSL *, s);
+	DynFunc2(int, SSL_set_fd, SSL*, s, int, fd);
+	DynFunc1(SSL*, SSL_new, SSL_CTX*, ctx);
+	DynFunc1(BIO*, BIO_new_ssl_connect, SSL_CTX*, ctx);
+	DynFunc1(X509*, SSL_get_peer_certificate, SSL*, s);
+	DynFunc1(int, SSL_set_connect_state, SSL*, s);
+	DynFunc1(int, SSL_set_accept_state, SSL*, s);
+	DynFunc2(int, SSL_get_error, SSL*, s, int, ret_code);
+	DynFunc3(int, SSL_set_bio, SSL*, s, BIO*, rbio, BIO*, wbio);
+	DynFunc3(int, SSL_write, SSL*, ssl, const void*, buf, int, num);
+	DynFunc3(int, SSL_read, SSL*, ssl, const void*, buf, int, num);
+	DynFunc1(int, SSL_pending, SSL*, ssl);
+	DynFunc1(BIO *,	SSL_get_rbio, const SSL *, s);
+	DynFunc1(int, SSL_accept, SSL *, ssl);
+	
+  	DynFunc1(SSL_CTX*, SSL_CTX_new, const SSL_METHOD*, meth);	
+	DynFunc3(int, SSL_CTX_load_verify_locations, SSL_CTX*, ctx, const char*, CAfile, const char*, CApath);
+	DynFunc3(int, SSL_CTX_use_certificate_file, SSL_CTX*, ctx, const char*, file, int, type);
+	DynFunc3(int, SSL_CTX_use_PrivateKey_file, SSL_CTX*, ctx, const char*, file, int, type);
+	DynFunc1(int, SSL_CTX_check_private_key, const SSL_CTX*, ctx);
+	DynFunc1(int, SSL_CTX_free, SSL_CTX*, ctx);
+
+#ifdef WIN32
+// If this is freaking you out then good... openssl-win32 ships 
+// in 2 DLL's and on Linux everything is 1 shared object. Thus
+// the code reflects that.
+};
+
+class LibEAY : public GLibrary
+{
+public:
+	LibEAY() : GLibrary(EAY_LIBRARY)
+	{
+		if (!IsLoaded())
+		{
+			#ifdef WIN32
+			char p[MAX_PATH], leaf[32];
+			int bits = sizeof(size_t)*8;
+			sprintf_s(leaf, sizeof(leaf), "OpenSSL-Win%i", bits);
+			LMakePath(p, sizeof(p), LGetSystemPath(LSP_USER_APPS, bits), leaf);
+			auto prev = FileDev->GetCurrentFolder();
+			FileDev->SetCurrentFolder(p);
+			LMakePath(p, sizeof(p), p, EAY_LIBRARY);
+			auto loaded = Load(p);
+			FileDev->SetCurrentFolder(prev);
+			#endif
+		}
+	}
+#endif
+
+	typedef void (*locking_callback)(int mode,int type, const char *file,int line);
+	typedef unsigned long (*id_callback)();
+
+	DynFunc1(BIO*, BIO_new, BIO_METHOD*, type);
+	DynFunc0(BIO_METHOD*, BIO_s_socket);
+	DynFunc0(BIO_METHOD*, BIO_s_mem);
+	DynFunc1(BIO*, BIO_new_connect, char *, host_port);
+	DynFunc4(long, BIO_ctrl, BIO*, bp, int, cmd, long, larg, void*, parg);
+	DynFunc4(long, BIO_int_ctrl, BIO *, bp, int, cmd, long, larg, int, iarg);
+	DynFunc3(int, BIO_read, BIO*, b, void*, data, int, len);
+	DynFunc3(int, BIO_write, BIO*, b, const void*, data, int, len);
+	DynFunc1(int, BIO_free, BIO*, a);
+	DynFunc1(int, BIO_free_all, BIO*, a);
+	DynFunc2(int, BIO_test_flags, const BIO *, b, int, flags);
+	DynFunc1(int,  BIO_get_retry_reason, BIO *, bio);
+
+
+	DynFunc0(int, ERR_load_BIO_strings);
+	#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	DynFunc0(int, ERR_free_strings);
+	DynFunc0(int, EVP_cleanup);
+	DynFunc0(int, OPENSSL_add_all_algorithms_noconf);
+	DynFunc1(int, CRYPTO_set_locking_callback, locking_callback, func);
+	DynFunc1(int, CRYPTO_set_id_callback, id_callback, func);
+	DynFunc0(int, CRYPTO_num_locks);
+	DynFunc1(const char *, SSLeay_version, int, type);
+	#else
+	DynFunc2(int, OPENSSL_init_crypto, uint64_t, opts, const OPENSSL_INIT_SETTINGS *, settings);
+	DynFunc1(const char *, OpenSSL_version, int, type);
+	#endif
+	DynFunc1(const char *, ERR_lib_error_string, unsigned long, e);
+	DynFunc1(const char *, ERR_func_error_string, unsigned long, e);
+	DynFunc1(const char *, ERR_reason_error_string, unsigned long, e);
+	DynFunc1(int, ERR_print_errors, BIO *, bp);
+
+	DynFunc3(char*, X509_NAME_oneline, X509_NAME*, a, char*, buf, int, size);
+	DynFunc1(X509_NAME*, X509_get_subject_name, X509*, a);
+	DynFunc2(char*, ERR_error_string, unsigned long, e, char*, buf);
+	DynFunc0(unsigned long, ERR_get_error);
+
+	DynFunc2(int, RAND_bytes, unsigned char *, buf, int, num);
+};
+
+typedef LArray<int> SslVer;
+
+SslVer ParseSslVersion(const char *v)
+{
+	GToken t(v, ".");
+	SslVer out;
+	for (unsigned i=0; i<t.Length(); i++)
+	{
+		char *c = t[i];
+		if (IsDigit(*c))
+		{
+			out.Add(atoi(c));
+			while (*c && IsDigit(*c))
+				c++;
+		}
+		
+		if (IsAlpha(*c))
+		{
+			int Idx = 0;
+			while (IsAlpha(*c))
+			{
+				Idx += ToLower(*c) - 'a';
+				c++;
+			}
+			out.Add(Idx);
+		}
+	}
+	return out;
+}
+
+int CompareSslVersion(SslVer &a, SslVer &b)
+{
+	for (unsigned i=0; i<a.Length() && i<b.Length(); i++)
+	{
+		int Diff = a[i] - b[i];
+		if (Diff)
+			return Diff;
+	}
+	
+	return 0;
+}
+
+bool operator <(SslVer &a, SslVer &b)
+{
+	return CompareSslVersion(a, b) < 0;
+}
+
+bool operator >(SslVer &a, SslVer &b)
+{
+	return CompareSslVersion(a, b) > 0;
+}
+
+static const char *FileLeaf(const char *f)
+{
+	const char *l = strrchr(f, DIR_CHAR);
+	return l ? l + 1 : f;
+}
+
+#undef _FL
+#define _FL FileLeaf(__FILE__), __LINE__
+
+
+class OpenSSL :
+	#ifdef WINDOWS
+	public LibEAY,
+	#endif
+	public LibSSL
+{
+	SSL_CTX *Server;
+
+public:
+	SSL_CTX *Client;
+	LArray<LMutex*> Locks;
+	LAutoString ErrorMsg;
+
+    bool IsLoaded()
+    {
+        return LibSSL::IsLoaded()
+            #ifdef WINDOWS
+            && LibEAY::IsLoaded()
+            #endif
+            ;
+    }
+	
+    bool InitLibrary(SslSocket *sock)
+    {
+		LStringPipe Err;
+		LArray<int> Ver;
+		LArray<int> MinimumVer = ParseSslVersion(MinimumVersion);
+		GToken t;
+		int Len = 0;
+		const char *v = NULL;
+
+		if (!IsLoaded())
+		{
+			#ifdef EAY_LIBRARY
+			Err.Print("%s:%i - SSL libraries missing (%s, %s)\n", _FL, SSL_LIBRARY, EAY_LIBRARY);
+			#else
+			Err.Print("%s:%i - SSL library missing (%s)\n", _FL, SSL_LIBRARY);
+			#endif
+			goto OnError;
+		}
+		
+		SSL_library_init();
+		SSL_load_error_strings();
+		ERR_load_BIO_strings();
+		OpenSSL_add_all_algorithms();
+		
+	    Len = CRYPTO_num_locks();
+	    Locks.Length(Len);
+	    CRYPTO_set_locking_callback(SSL_locking_function);
+	    CRYPTO_set_id_callback(SSL_id_function);
+
+		v = SSLeay_version(SSLEAY_VERSION);
+		if (!v)
+		{
+			Err.Print("%s:%i - SSLeay_version failed.\n", _FL);
+			goto OnError;
+		}
+
+		t.Parse(v, " ");
+		if (t.Length() < 2)
+		{
+			Err.Print("%s:%i - SSLeay_version: no version\n", _FL);
+			goto OnError;
+		}
+
+		Ver = ParseSslVersion(t[1]);
+		if (Ver.Length() < 3)
+		{
+			Err.Print("%s:%i - SSLeay_version: not enough tokens\n", _FL);
+			goto OnError;
+		}
+
+		if (Ver < MinimumVer)
+		{
+			#if WINDOWS
+			char FileName[MAX_PATH] = "";
+			DWORD r = GetModuleFileNameA(LibEAY::Handle(), FileName, sizeof(FileName));
+			#endif
+
+			Err.Print("%s:%i - SSL version '%s' is too old (minimum '%s')\n"
+				#if WINDOWS
+				"%s\n"
+				#endif
+				,
+				_FL,
+				t[1],
+				MinimumVersion
+				#if WINDOWS
+				,FileName
+				#endif
+				);
+			goto OnError;
+		}
+		
+		Client = SSL_CTX_new(SSLv23_client_method());
+		if (!Client)
+		{
+			long e = ERR_get_error();
+			char *Msg = ERR_error_string(e, 0);
+			
+			Err.Print("%s:%i - SSL_CTX_new(client) failed with '%s' (%i)\n", _FL, Msg, e);
+			goto OnError;
+		}
+		
+		return true;
+
+	OnError:
+		ErrorMsg.Reset(Err.NewStr());
+		if (sock)
+			sock->DebugTrace("%s", ErrorMsg.Get());
+		return false;
+    }
+
+	OpenSSL()
+	{
+		Client = NULL;
+		Server = NULL;
+	}
+
+	~OpenSSL()
+	{
+		if (Client)
+		{
+			SSL_CTX_free(Client);
+			Client = NULL;
+		}
+		if (Server)
+		{
+			SSL_CTX_free(Server);
+			Server = NULL;
+		}
+		Locks.DeleteObjects();
+	}
+	
+	SSL_CTX *GetServer(SslSocket *sock, const char *CertFile, const char *KeyFile)
+	{
+		if (!Server)
+		{
+			Server = SSL_CTX_new(SSLv23_server_method());
+			if (Server)
+			{
+				if (CertFile)
+					SSL_CTX_use_certificate_file(Server, CertFile, SSL_FILETYPE_PEM);
+				if (KeyFile)
+					SSL_CTX_use_PrivateKey_file(Server, KeyFile, SSL_FILETYPE_PEM);
+				if (!SSL_CTX_check_private_key(Server))
+				{
+					LgiAssert(0);
+				}
+ 			}
+			else
+			{
+				long e = ERR_get_error();
+				char *Msg = ERR_error_string(e, 0);
+				LStringPipe p;
+				p.Print("%s:%i - SSL_CTX_new(server) failed with '%s' (%i)\n", _FL, Msg, e);
+				ErrorMsg.Reset(p.NewStr());
+				sock->DebugTrace("%s", ErrorMsg.Get());
+			}
+		}
+		return Server;
+	}
+
+	bool IsOk(SslSocket *sock)
+	{
+	    bool Loaded =
+    		#ifdef WIN32
+		    LibSSL::IsLoaded() && LibEAY::IsLoaded();
+	    	#else
+		    IsLoaded();
+		    #endif
+		if (Loaded)
+		    return true;
+
+	    // Try and load again... cause the library can be provided by install on demand.
+		#ifdef WIN32
+	    Loaded = LibSSL::Load(SSL_LIBRARY) &&
+	             LibEAY::Load(EAY_LIBRARY);
+    	#else
+		Loaded = Load(SSL_LIBRARY);
+	    #endif
+	    if (Loaded)
+	        InitLibrary(sock);
+	    return Loaded;
+	}
+};
+
+static OpenSSL *Library = 0;
+
+#if 0
+#define SSL_DEBUG_LOCKING
+#endif
+
+void
+SSL_locking_function(int mode, int n, const char *file, int line)
+{
+	LgiAssert(Library != NULL);
+	if (Library)
+	{
+		if (!Library->Locks[n])
+		{
+			#ifdef SSL_DEBUG_LOCKING
+			LgiTrace("SSL[%i] create\n", n);
+			#endif
+			Library->Locks[n] = new LMutex;
+		}
+
+		#ifdef SSL_DEBUG_LOCKING
+	    LgiTrace("SSL[%i] lock=%i, unlock=%i, re=%i, wr=%i (mode=0x%x, cnt=%i, thr=0x%x, %s:%i)\n", n,
+			TestFlag(mode, CRYPTO_LOCK),
+			TestFlag(mode, CRYPTO_UNLOCK),
+			TestFlag(mode, CRYPTO_READ),
+			TestFlag(mode, CRYPTO_WRITE),
+			mode,
+			Library->Locks[n]->GetCount(),
+			LgiGetCurrentThread(),
+			file, line);
+		#endif
+		
+		if (mode & CRYPTO_LOCK)
+			Library->Locks[n]->Lock((char*)file, line);
+		else if (mode & CRYPTO_UNLOCK)
+			Library->Locks[n]->Unlock();
+	}
+}
+
+unsigned long
+SSL_id_function()
+{
+	return (unsigned long) GetCurrentThreadId();
+}
+
+bool StartSSL(LAutoString &ErrorMsg, SslSocket *sock)
+{
+	static LMutex Lock;
+	
+	if (Lock.Lock(_FL))
+	{
+		if (!Library)
+		{
+			Library = new OpenSSL;
+			if (Library && !Library->InitLibrary(sock))
+			{
+				ErrorMsg = Library->ErrorMsg;
+				DeleteObj(Library);
+			}
+		}
+
+		Lock.Unlock();
+	}
+
+	return Library != NULL;
+}
+
+void EndSSL()
+{
+	DeleteObj(Library);
+}
+
+struct SslSocketPriv : public LCancel
+{
+	LCapabilityClient *Caps;
+	bool SslOnConnect;
+	bool IsSSL;
+	bool UseSSLrw;
+	int Timeout;
+	bool RawLFCheck;
+	#ifdef _DEBUG
+	bool LastWasCR;
+	#endif
+	bool IsBlocking;
+	LCancel *Cancel;
+
+	// This is just for the UI.
+	LStreamI *Logger;
+
+	// This is for the connection logging.
+	LAutoString LogFile;
+	LAutoPtr<LStream> LogStream;
+	int LogFormat;
+
+	SslSocketPriv()
+	{
+		#ifdef _DEBUG
+		LastWasCR = false;
+		#endif
+		Cancel = this;
+		Timeout = 20 * 1000;
+		IsSSL = false;
+		UseSSLrw = false;
+		LogFormat = 0;
+	}
+};
+
+bool SslSocket::DebugLogging = false;
+
+SslSocket::SslSocket(LStreamI *logger, LCapabilityClient *caps, bool sslonconnect, bool RawLFCheck)
+{
+	d = new SslSocketPriv;
+	Bio = 0;
+	Ssl = 0;
+	d->RawLFCheck = RawLFCheck;
+	d->SslOnConnect = sslonconnect;
+	d->Caps = caps;
+	d->Logger = logger;
+	d->IsBlocking = true;
+	
+	LAutoString ErrMsg;
+	if (StartSSL(ErrMsg, this))
+	{
+		if (Library->IsOk(this))
+		{
+			char s[MAX_PATH];
+			#ifdef WIN32
+			char n[MAX_PATH];
+			if (GetModuleFileNameA(Library->LibSSL::Handle(), n, sizeof(n)))
+			{
+				sprintf_s(s, sizeof(s), "Using '%s'", n);
+				OnInformation(s);
+			}
+			if (GetModuleFileNameA(Library->LibEAY::Handle(), n, sizeof(n)))
+			{
+				sprintf_s(s, sizeof(s), "Using '%s'", n);
+				OnInformation(s);
+			}
+			#else
+			LString fp = Library->GetFullPath();
+			if (fp)
+			{
+				sprintf_s(s, sizeof(s), "Using '%s'", fp.Get());
+				OnInformation(s);
+			}
+			#endif
+		}
+	}
+	else if (caps)
+	{
+	    caps->NeedsCapability("openssl", ErrMsg);
+	}
+	else
+	{
+		OnError(0, "Can't load or find OpenSSL library.");
+	}
+}
+
+SslSocket::~SslSocket()
+{
+	Close();
+	DeleteObj(d);
+}
+
+LStreamI *SslSocket::Clone()
+{
+	return new SslSocket(d->Logger, d->Caps, true);
+}
+
+LCancel *SslSocket::GetCancel()
+{
+	return d->Cancel;
+}
+
+void SslSocket::SetCancel(LCancel *c)
+{
+	d->Cancel = c;
+}
+
+int SslSocket::GetTimeout()
+{
+	return d->Timeout;
+}
+
+void SslSocket::SetTimeout(int ms)
+{
+	d->Timeout = ms;
+}
+
+void SslSocket::SetLogger(LStreamI *logger)
+{
+	d->Logger = logger;
+}
+
+LStreamI *SslSocket::GetLog()
+{
+	return d->Logger;
+}
+
+void SslSocket::SetSslOnConnect(bool b)
+{
+	d->SslOnConnect = b;
+}
+
+LStream *SslSocket::GetLogStream()
+{
+	if (!d->LogStream && d->LogFile)
+	{
+		if (!d->LogStream.Reset(new LFile))
+			return NULL;
+		
+		if (!d->LogStream->Open(d->LogFile, O_WRITE))
+			return NULL;
+		
+		// Seek to the end
+		d->LogStream->SetPos(d->LogStream->GetSize());
+	}
+	
+	return d->LogStream;
+}
+
+bool SslSocket::GetVariant(const char *Name, LVariant &Val, char *Arr)
+{
+	if (!Name)
+		return false;
+
+	if (!_stricmp(Name, "isSsl")) // Type: Bool
+	{
+		Val = true;
+		return true;
+	}
+
+	return false;
+}
+
+void SslSocket::Log(const char *Str, ssize_t Bytes, SocketMsgType Type)
+{
+	if (!ValidStr(Str))
+		return;
+
+	if (d->Logger)
+		d->Logger->Write(Str, Bytes<0?(int)strlen(Str):Bytes, Type);
+	else if (Type == SocketMsgError)
+		LgiTrace("%.*s", Bytes, Str);
+}
+
+const char *SslSocket::GetErrorString()
+{
+	return ErrMsg;
+}
+
+void SslSocket::SslError(const char *file, int line, const char *Msg)
+{
+	char *Part = strrchr((char*)file, DIR_CHAR);
+	#ifndef WIN32
+	printf("%s:%i - %s\n", file, line, Msg);
+	#endif
+
+	ErrMsg.Printf("Error: %s:%i - %s\n", Part ? Part + 1 : file, line, Msg);
+	Log(ErrMsg, ErrMsg.Length(), SocketMsgError);
+}
+
+OsSocket SslSocket::Handle(OsSocket Set)
+{
+	OsSocket h = INVALID_SOCKET;
+	
+	if (Set != INVALID_SOCKET)
+	{
+		long r;
+		bool IsError = false;
+		if (!Ssl)
+		{
+			Ssl = Library->SSL_new(Library->GetServer(this, NULL, NULL));
+		}
+		if (Ssl)
+		{
+			r = Library->SSL_set_fd(Ssl, (int) Set);
+			Bio = Library->SSL_get_rbio(Ssl);
+			r = Library->SSL_accept(Ssl);
+			if (r <= 0)
+				IsError = true;
+			else if (r == 1)
+				h = Set;
+		}
+		else IsError = true;
+
+		if (IsError)
+		{
+			long e = Library->ERR_get_error();
+			char *Msg = Library->ERR_error_string(e, 0);
+			Log(Msg, -1, SocketMsgError);
+			return INVALID_SOCKET;
+		}
+	}
+	else if (Bio)
+	{
+		int hnd = (int)INVALID_SOCKET;
+		Library->BIO_get_fd(Bio, &hnd);
+		h = hnd;
+	}
+	
+	return h;
+}
+
+bool SslSocket::IsOpen()
+{
+	return Bio != 0 && !d->Cancel->IsCancelled();
+}
+
+LString SslGetErrorAsString(OpenSSL *Library)
+{
+	BIO *bio = Library->BIO_new (Library->BIO_s_mem());
+	Library->ERR_print_errors (bio);
+	
+	char *buf = NULL;
+	size_t len = Library->BIO_get_mem_data (bio, &buf);
+	LString s(buf, len);
+	Library->BIO_free (bio);
+	return s;
+}
+
+int SslSocket::Open(const char *HostAddr, int Port)
+{
+	bool Status = false;
+	LMutex::Auto Lck(&Lock, _FL);
+
+DebugTrace("%s:%i - SslSocket::Open(%s,%i)\n", _FL, HostAddr, Port);
+	
+	if (Library &&
+		Library->IsOk(this) &&
+		HostAddr)
+	{
+		char h[256];
+		sprintf_s(h, sizeof(h), "%s:%i", HostAddr, Port);
+
+		// Do SSL handshake?
+		if (d->SslOnConnect)
+		{
+			// SSL connection..
+			d->IsSSL = true;
+			if (Library->Client)
+			{
+				const char *CertDir = "/u/matthew/cert";
+				int r = Library->SSL_CTX_load_verify_locations(Library->Client, 0, CertDir);
+DebugTrace("%s:%i - SSL_CTX_load_verify_locations=%i\n", _FL, r);
+				if (r > 0)
+				{
+					Bio = Library->BIO_new_ssl_connect(Library->Client);
+DebugTrace("%s:%i - BIO_new_ssl_connect=%p\n", _FL, Bio);
+					if (Bio)
+					{
+						Library->BIO_get_ssl(Bio, &Ssl);
+DebugTrace("%s:%i - BIO_get_ssl=%p\n", _FL, Ssl);
+						if (Ssl)
+						{
+							// SNI setup
+							Library->SSL_set_tlsext_host_name(Ssl, HostAddr);
+					
+							// Library->SSL_CTX_set_timeout()
+							Library->BIO_set_conn_hostname(Bio, HostAddr);
+							#if OPENSSL_VERSION_NUMBER < 0x10100000L
+							Library->BIO_set_conn_int_port(Bio, &Port);
+							#else
+							LString sPort;
+							sPort.Printf("%i", Port);
+							Library->BIO_set_conn_port(Bio, sPort.Get());
+							#endif
+
+							// Do non-block connect
+							uint64 Start = LgiCurrentTime();
+							int To = GetTimeout();
+							
+							IsBlocking(false);
+							
+							r = Library->SSL_connect(Ssl);
+DebugTrace("%s:%i - initial SSL_connect=%i\n", _FL, r);
+							while (r != 1 && !d->Cancel->IsCancelled())
+							{
+								int err = Library->SSL_get_error(Ssl, r);
+								if (err != SSL_ERROR_WANT_CONNECT)
+								{
+DebugTrace("%s:%i - SSL_get_error=%i\n", _FL, err);
+								}
+
+								LgiSleep(50);
+
+								try
+								{
+									r = Library->SSL_connect(Ssl);
+								}
+								catch (...)
+								{
+									r = -1;
+									LgiTrace("%s:%i - SSL_connect crashed.\n", _FL);
+								}
+
+DebugTrace("%s:%i - SSL_connect=%i (%i of %i ms)\n", _FL, r, (int)(LgiCurrentTime() - Start), (int)To);
+
+								bool TimeOut = !HasntTimedOut();
+								if (TimeOut)
+								{
+DebugTrace("%s:%i - SSL connect timeout, to=%i\n", _FL, To);
+									SslError(_FL, "Connection timeout.");
+									break;
+								}
+							}
+DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel->IsCancelled());
+
+							if (r == 1)
+							{
+								IsBlocking(true);
+								Library->SSL_set_mode(Ssl, SSL_MODE_AUTO_RETRY);
+								Status = true;
+								// d->UseSSLrw = true;
+								
+								char m[256];
+								sprintf_s(m, sizeof(m), "Connected to '%s' using SSL", h);
+								OnInformation(m);
+							}
+							else
+							{
+								LString Err = SslGetErrorAsString(Library).Strip();
+								if (!Err)
+									Err.Printf("BIO_do_connect(%s:%i) failed.", HostAddr, Port);
+								SslError(_FL, Err);
+							}
+						}
+						else SslError(_FL, "BIO_get_ssl failed.");
+					}
+					else SslError(_FL, "BIO_new_ssl_connect failed.");
+				}
+				else SslError(_FL, "SSL_CTX_load_verify_locations failed.");
+			}
+			else SslError(_FL, "No Ctx.");
+		}
+		else
+		{
+			Bio = Library->BIO_new_connect(h);
+DebugTrace("%s:%i - BIO_new_connect=%p\n", _FL, Bio);
+			if (Bio)
+			{
+				// Non SSL... go into non-blocking mode so that if ::Close() is called we
+				// can quit out of the connect loop.
+				IsBlocking(false);
+
+				uint64 Start = LgiCurrentTime();
+				int To = GetTimeout();
+
+				long r = Library->BIO_do_connect(Bio);
+DebugTrace("%s:%i - BIO_do_connect=%i\n", _FL, r);
+				while (r != 1 && !d->Cancel->IsCancelled())
+				{
+					if (!Library->BIO_should_retry(Bio))
+					{
+						break;
+					}
+
+					LgiSleep(50);
+					r = Library->BIO_do_connect(Bio);
+DebugTrace("%s:%i - BIO_do_connect=%i\n", _FL, r);
+
+					if (!HasntTimedOut())
+					{
+DebugTrace("%s:%i - open timeout, to=%i\n", _FL, To);
+						OnError(0, "Connection timeout.");
+						break;
+					}
+				}
+
+DebugTrace("%s:%i - open loop finished=%i\n", _FL, r);
+
+				if (r == 1)
+				{
+					IsBlocking(true);
+					Status = true;
+
+					char m[256];
+					sprintf_s(m, sizeof(m), "Connected to '%s'", h);
+					OnInformation(m);
+				}
+				else
+					SslError(_FL, "BIO_do_connect failed");
+			}
+			else SslError(_FL, "BIO_new_connect failed");
+		}
+	}
+	
+	if (!Status)
+	{
+		Close();
+	}
+
+DebugTrace("%s:%i - SslSocket::Open status=%i\n", _FL, Status);
+ 
+	return Status;
+}
+
+bool SslSocket::SetVariant(const char *Name, LVariant &Value, char *Arr)
+{
+	bool Status = false;
+
+	if (!Library || !Name)
+		return false;
+
+	if (!_stricmp(Name, SslSocket_LogFile))
+	{
+		d->LogFile.Reset(Value.ReleaseStr());
+	}
+	else if (!_stricmp(Name, SslSocket_LogFormat))
+	{
+		d->LogFormat = Value.CastInt32();
+	}
+	else if (!_stricmp(Name, LSocket_Protocol))
+	{
+		char *v = Value.CastString();
+		
+		if (v && stristr(v, "SSL"))
+		{
+			if (!Bio)
+			{
+				d->SslOnConnect = true;
+			}
+			else
+			{
+				if (!Library->Client)
+				{
+					SslError(_FL, "Library->Client is null.");
+				}
+				else
+				{
+					Ssl = Library->SSL_new(Library->Client);
+DebugTrace("%s:%i - SSL_new=%p\n", _FL, Ssl);
+					if (!Ssl)
+					{
+						SslError(_FL, "SSL_new failed.");
+					}
+					else
+					{
+						int r = Library->SSL_set_bio(Ssl, Bio, Bio);
+DebugTrace("%s:%i - SSL_set_bio=%i\n", _FL, r);
+		
+						uint64 Start = LgiCurrentTime();
+						int To = GetTimeout();
+						while (HasntTimedOut())
+						{
+							r = Library->SSL_connect(Ssl);
+DebugTrace("%s:%i - SSL_connect=%i\n", _FL, r);
+							if (r < 0)
+								LgiSleep(100);
+							else
+								break;
+						}
+
+						if (r > 0)
+						{
+							Status = d->UseSSLrw = d->IsSSL = true;
+							OnInformation("Session is now using SSL");
+
+							X509 *ServerCert = Library->SSL_get_peer_certificate(Ssl);
+DebugTrace("%s:%i - SSL_get_peer_certificate=%p\n", _FL, ServerCert);
+							if (ServerCert)
+							{
+								char Txt[256] = "";
+								Library->X509_NAME_oneline(Library->X509_get_subject_name(ServerCert), Txt, sizeof(Txt));
+DebugTrace("%s:%i - X509_NAME_oneline=%s\n", _FL, Txt);
+								OnInformation(Txt);
+							}
+
+							// SSL_get_verify_result
+						}
+						else
+						{
+							SslError(_FL, "SSL_connect failed.");
+
+							r = Library->SSL_get_error(Ssl, r);
+							char *Msg = Library->ERR_error_string(r, 0);
+							if (Msg)
+							{
+								OnError(r, Msg);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return Status;
+}
+
+int SslSocket::Close()
+{
+	bool Prev = d->Cancel->IsCancelled();
+	d->Cancel->Cancel();
+	LMutex::Auto Lck(&Lock, _FL);
+
+	bool Status = Library != NULL;
+	if (Library)
+	{
+		if (Ssl)
+		{
+DebugTrace("%s:%i - SSL_shutdown\n", _FL);
+
+			int r = 0;
+			if ((r = Library->SSL_shutdown(Ssl)) >= 0)
+			{
+				#ifdef WIN32
+				closesocket
+				#else
+				close
+				#endif
+					(Library->SSL_get_fd(Ssl));
+			}
+
+			Library->SSL_free(Ssl);
+			OnInformation("SSL connection closed.");
+
+			// I think the Ssl object "owns" the Bio object...
+			// So assume it gets fread by SSL_shutdown
+		}
+		else if (Bio)
+		{
+DebugTrace("%s:%i - BIO_free\n", _FL);
+			Library->BIO_free(Bio);
+			OnInformation("Connection closed.");
+		}
+
+		Ssl = NULL;
+		Bio = NULL;
+	}
+
+	d->Cancel->Cancel(Prev);
+
+	return Status;
+}
+
+bool SslSocket::Listen(int Port)
+{
+	return false;
+}
+
+bool SslSocket::IsBlocking()
+{
+	return d->IsBlocking;
+}
+
+void SslSocket::IsBlocking(bool block)
+{
+	d->IsBlocking = block;
+	if (Bio)
+		Library->BIO_set_nbio(Bio, !d->IsBlocking);
+}
+
+bool SslSocket::IsReadable(int TimeoutMs)
+{
+	// Assign to local var to avoid a thread changing it
+	// on us between the validity check and the select.
+	// Which is important because a socket value of -1
+	// (ie invalid) will crash the FD_SET macro.
+	OsSocket s = Handle();
+	if (!d->Cancel->IsCancelled() && ValidSocket(s))
+	{
+		struct timeval t = {TimeoutMs / 1000, (TimeoutMs % 1000) * 1000};
+
+		fd_set r;
+		FD_ZERO(&r);
+		FD_SET(s, &r);
+		
+		int v = select((int)s+1, &r, 0, 0, &t);
+		if (v > 0 && FD_ISSET(s, &r))
+		{
+			return true;
+		}
+		else if (v < 0)
+		{
+			// Error();
+		}
+	}
+	else LgiTrace("%s:%i - Not a valid socket.\n", _FL);
+
+	return false;
+}
+
+bool SslSocket::IsWritable(int TimeoutMs)
+{
+	// Assign to local var to avoid a thread changing it
+	// on us between the validity check and the select.
+	// Which is important because a socket value of -1
+	// (ie invalid) will crash the FD_SET macro.
+	OsSocket s = Handle();
+	if (!d->Cancel->IsCancelled() && ValidSocket(s))
+	{
+		struct timeval t = {TimeoutMs / 1000, (TimeoutMs % 1000) * 1000};
+
+		fd_set w;
+		FD_ZERO(&w);
+		FD_SET(s, &w);
+		
+		int v = select((int)s+1, &w, 0, 0, &t);
+		if (v > 0 && FD_ISSET(s, &w))
+		{
+			return true;
+		}
+		else if (v < 0)
+		{
+			// Error();
+		}
+	}
+	else LgiTrace("%s:%i - Not a valid socket.\n", _FL);
+
+	return false;
+}
+
+void SslSocket::OnWrite(const char *Data, ssize_t Len)
+{
+	#ifdef _DEBUG
+	if (d->RawLFCheck)
+	{
+		const char *End = Data + Len;
+		while (Data < End)
+		{
+			LgiAssert(*Data != '\n' || d->LastWasCR);
+			d->LastWasCR = *Data == '\r';
+			Data++;
+		}
+	}
+	#endif
+	
+	// Log(Data, Len, SocketMsgSend);
+}
+
+void SslSocket::OnRead(char *Data, ssize_t Len)
+{
+	#ifdef _DEBUG
+	if (d->RawLFCheck)
+	{
+		const char *End = Data + Len;
+		while (Data < End)
+		{
+			LgiAssert(*Data != '\n' || d->LastWasCR);
+			d->LastWasCR = *Data == '\r';
+			Data++;
+		}
+	}
+	#endif
+
+	// Log(Data, Len, SocketMsgReceive);
+}
+
+ssize_t SslSocket::Write(const void *Data, ssize_t Len, int Flags)
+{
+	LMutex::Auto Lck(&Lock, _FL);
+
+	if (!Library || d->Cancel->IsCancelled())
+		return -1;
+
+	if (!Bio)
+	{
+		DebugTrace("%s:%i - BIO is NULL\n", _FL);
+		return -1;
+	}
+
+	int r = 0;
+	if (d->UseSSLrw)
+	{
+		if (Ssl)
+		{
+			uint64 Start = LgiCurrentTime();
+			int To = GetTimeout();
+
+			while (HasntTimedOut())
+			{
+				r = Library->SSL_write(Ssl, Data, (int)Len);
+				if (r <= 0)
+				{
+					if (!Library->BIO_should_retry(Bio))
+						break;
+					if (d->IsBlocking)
+						LgiSleep(1);
+					else
+						break;
+				}
+				else
+				{
+					DebugTrace("%s:%i - SSL_write(%p,%i)=%i\n", _FL, Data, Len, r);
+					OnWrite((const char*)Data, r);
+					break;
+				}
+			}
+		}
+		else
+		{
+			r = -1;
+			DebugTrace("%s:%i - No SSL\n", _FL);
+		}
+	}
+	else
+	{
+		uint64 Start = LgiCurrentTime();
+		int To = GetTimeout();
+		while (HasntTimedOut())
+		{
+			if (!Library)
+				break;
+			r = Library->BIO_write(Bio, Data, (int)Len);
+			DebugTrace("%s:%i - BIO_write(%p,%i)=%i\n", _FL, Data, Len, r);
+			if (r <= 0)
+			{
+				if (!Library->BIO_should_retry(Bio))
+					break;
+				if (d->IsBlocking)
+					LgiSleep(1);
+				else
+					break;
+			}
+			else
+			{
+				OnWrite((const char*)Data, r);
+				break;
+			}
+		}			
+	}
+	
+	if (r > 0)
+	{
+		LStream *l = GetLogStream();
+		if (l)
+			l->Write(Data, r);
+	}
+	else if (Ssl)
+	{	
+		auto Err = Library->SSL_get_error(Ssl, r);
+		if (Err == SSL_ERROR_ZERO_RETURN)
+		{
+			DebugTrace("%s:%i - ::Write closing %i\n", _FL, r);
+			Close();
+		}
+		else if (Err != SSL_ERROR_WANT_WRITE &&
+				 Err != SSL_ERROR_SYSCALL)
+		{
+			char Buf[256] = "";
+			char *e = Library->ERR_error_string(Err, Buf);
+			DebugTrace("%s:%i - ::Write error %i, %s\n", _FL, Err, e);
+			OnError(Err, e ? e : "ERR_error_string failed");
+		}
+	}
+
+	return r;
+}
+
+ssize_t SslSocket::Read(void *Data, ssize_t Len, int Flags)
+{
+	LMutex::Auto Lck(&Lock, _FL);
+
+	if (!Library || d->Cancel->IsCancelled())
+		return -1;
+
+	if (Bio)
+	{
+		int r = 0;
+		if (d->UseSSLrw)
+		{
+			if (Ssl)
+			{
+				uint64 Start = LgiCurrentTime();
+				int To = GetTimeout();
+				while (HasntTimedOut())
+				{
+					r = Library->SSL_read(Ssl, Data, (int)Len);
+DebugTrace("%s:%i - SSL_read(%p,%i)=%i\n", _FL, Data, Len, r);
+					if (r < 0)
+					{
+						if (!Library->BIO_should_retry(Bio))
+						{
+DebugTrace("%s:%i - BIO_should_retry is false\n", _FL);
+							break;
+						}
+						if (d->IsBlocking)
+							LgiSleep(1);
+						else
+							break;
+					}
+					else
+					{
+						OnRead((char*)Data, r);
+						break;
+					}
+				}
+			}
+			else
+			{
+DebugTrace("%s:%i - Ssl is NULL\n", _FL);
+				r = -1;
+			}
+		}
+		else
+		{
+			uint64 Start = LgiCurrentTime();
+			int To = GetTimeout();
+			while (HasntTimedOut())
+			{
+				r = Library->BIO_read(Bio, Data, (int)Len);
+DebugTrace("%s:%i - BIO_read(%p,%i)=%i\n", _FL, Data, Len, r);
+				if (r < 0)
+				{
+					auto Retry = Library->BIO_should_retry(Bio);
+DebugTrace("%s:%i - BIO_should_retry=%i IsBlocking=%i\n", _FL, Retry, d->IsBlocking);
+					if (!Retry)
+					{
+						auto Reason = Library->BIO_get_retry_reason(Bio);
+						break;
+					}
+					if (d->IsBlocking)
+						LgiSleep(1);
+					else
+						break;
+				}
+				else
+				{
+					if (r > 0)
+						OnRead((char*)Data, r);
+					break;
+				}
+			}
+		}
+
+		if (r > 0)
+		{
+			LStream *l = GetLogStream();
+			if (l)
+				l->Write(Data, r);
+		}
+		else if (Ssl)
+		{
+			int Err = Library->SSL_get_error(Ssl, r);
+DebugTrace("%s:%i - SSL_get_error = %i\n", _FL, Err);
+			if (Err == SSL_ERROR_ZERO_RETURN)
+			{
+				DebugTrace("%s:%i - ::Read closing %i\n", _FL, r);
+				Close();
+			}
+			else if (Err != SSL_ERROR_WANT_READ &&
+					 Err != SSL_ERROR_SYSCALL)
+			{
+				char Buf[256];
+				char *e = Library->ERR_error_string(Err, Buf);
+				OnError(Err, e ? e : "ERR_error_string failed");
+			}
+		}
+		return r;
+	}
+
+	return -1;
+}
+
+void SslSocket::OnError(int ErrorCode, const char *ErrorDescription)
+{
+DebugTrace("%s:%i - OnError=%i,%s\n", _FL, ErrorCode, ErrorDescription);
+	LString s;
+	s.Printf("Error %i: %s\n", ErrorCode, ErrorDescription);
+	Log(s, s.Length(), SocketMsgError);
+}
+
+void SslSocket::DebugTrace(const char *fmt, ...)
+{
+	if (DebugLogging)
+	{
+		char Buffer[512];
+		va_list Arg;
+		va_start(Arg, fmt);
+		int Ch = vsprintf_s(Buffer, sizeof(Buffer), fmt, Arg);
+		va_end(Arg);
+		
+		if (Ch > 0)
+		{
+			#if 0
+			LgiTrace("SSL:%p: %s", this, Buffer);
+			#else
+			OnInformation(Buffer);
+			#endif
+		}
+	}
+}
+
+void SslSocket::OnInformation(const char *Str)
+{
+	while (Str && *Str)
+	{
+		LAutoString a;
+		const char *nl = Str;
+		while (*nl && *nl != '\n')
+			nl++;
+
+		int Len = (int) (nl - Str + 2);
+		a.Reset(new char[Len]);
+		char *o;
+		for (o = a; Str < nl; Str++)
+		{
+			if (*Str != '\r')
+				*o++ = *Str;
+		}
+		*o++ = '\n';
+		*o++ = 0;
+		LgiAssert((o-a) <= Len);
+				
+		Log(a, -1, SocketMsgInfo);
+		
+		Str = *nl ? nl + 1 : nl;
+	}
+}
+
+LString SslSocket::Random(int Len)
+{
+	LString s;
+	s.Length(Len);
+	auto r = Library ? Library->RAND_bytes((uint8_t*) s.Get(), Len) : 0;
+	return r ? s : NULL;
+}

@@ -1,0 +1,73 @@
+#ifndef _GDRAW_LIST_SURFACE_H_
+#define _GDRAW_LIST_SURFACE_H_
+
+class GDrawListSurface : public LSurface
+{
+	struct GDrawListSurfacePriv *d;
+
+public:
+	GDrawListSurface(int Width, int Height, LColourSpace Cs = CsRgba32);
+	GDrawListSurface(LSurface *FromSurface);
+	~GDrawListSurface();
+
+	// Calls specific to this class:
+	ssize_t Length();
+	bool OnPaint(LSurface *Dest);
+	LFont *GetFont();
+	void SetFont(LFont *Font);
+	LColour Background();
+	LColour Background(LColour c);
+	LDisplayString *Text(int x, int y, const char *Str, int Len = -1);
+	
+	// Calls that are stored and played back:
+	LRect ClipRgn();
+	LRect ClipRgn(LRect *Rgn);
+	COLOUR Colour();
+	COLOUR Colour(COLOUR c, int Bits = 0);
+	LColour Colour(LColour c);
+	int Op() { return GDC_SET; }
+	int Op(int Op, NativeInt Param = -1) { return GDC_SET; }
+	int X();
+	int Y();
+	ssize_t GetRowStep();
+	int DpiX();
+	int DpiY();
+	int GetBits();
+	uchar *operator[](int y) { return NULL; }
+	void GetOrigin(int &x, int &y) { x = OriginX; y = OriginY; }
+	void SetOrigin(int x, int y);
+	void Set(int x, int y);
+	COLOUR Get(int x, int y) { return 0; }
+
+	// Primitives
+	void HLine(int x1, int x2, int y);
+	void VLine(int x, int y1, int y2);
+	void Line(int x1, int y1, int x2, int y2);
+	uint LineStyle(uint32_t Bits, uint32_t Reset = 0x80000000);
+	void Circle(double cx, double cy, double radius);
+	void FilledCircle(double cx, double cy, double radius);
+	void Arc(double cx, double cy, double radius, double start, double end);
+	void FilledArc(double cx, double cy, double radius, double start, double end);
+	void Ellipse(double cx, double cy, double x, double y);
+	void FilledEllipse(double cx, double cy, double x, double y);
+	void Box(int x1, int y1, int x2, int y2);
+	void Box(LRect *a = NULL);
+	void Rectangle(int x1, int y1, int x2, int y2);
+	void Rectangle(LRect *a = NULL);
+	void Blt(int x, int y, LSurface *Src, LRect *a = NULL);
+	void StretchBlt(LRect *d, LSurface *Src, LRect *s);
+	void Polygon(int Points, LPoint *Data);
+	void Bezier(int Threshold, LPoint *Pt);
+	void FloodFill(int x, int y, int Mode, COLOUR Border = 0, LRect *Bounds = NULL);	
+
+
+	// Stubs that don't work here..
+	bool HasAlpha() { return false; }
+	bool HasAlpha(bool b) { return false; }
+	bool Applicator(LApplicator *pApp) { return false; }
+	LApplicator *Applicator() { return NULL; }
+	GPalette *Palette() { return NULL; }
+	void Palette(GPalette *pPal, bool bOwnIt = true) { }
+};
+
+#endif

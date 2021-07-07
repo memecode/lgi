@@ -1,9 +1,9 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "LgiResEdit.h"
-#include "GTableLayout.h"
-#include "GTextLabel.h"
-#include "GEdit.h"
-#include "GTextView3.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/TextView3.h"
 
 /////////////////////////////////////////////////////////////////////////////
 enum Ids {
@@ -11,11 +11,11 @@ enum Ids {
     IDC_NAME = 100,
     IDC_STYLE
 };
-class ResCssUi : public GTableLayout
+class ResCssUi : public LTableLayout
 {
     ResCss *Css;
-    GEdit *Name;
-    GTextView3 *Style;
+    LEdit *Name;
+    LTextView3 *Style;
     
 public:
     ResCssUi(ResCss *css)
@@ -25,20 +25,20 @@ public:
         GLayoutCell *c;
         
         if ((c = GetCell(0, y++)))
-            c->Add(new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Name:"));
+            c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Name:"));
 
         if ((c = GetCell(0, y++)))
         {
-            c->Add(Name = new GEdit(IDC_NAME, 0, 0, 80, 20, 0));
+            c->Add(Name = new LEdit(IDC_NAME, 0, 0, 80, 20, 0));
             Name->Name(Css->Name());
         }
 
         if ((c = GetCell(0, y++)))
-            c->Add(new GTextLabel(IDC_STATIC, 0, 0, -1, -1, "Style:"));
+            c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Style:"));
 
         if ((c = GetCell(0, y++)))
         {
-            c->Add(Style = new GTextView3(IDC_STYLE, 0, 0, 80, 20, 0));
+            c->Add(Style = new LTextView3(IDC_STYLE, 0, 0, 80, 20, 0));
             Style->Name(Css->Style);
             Style->Sunken(true);
         }
@@ -70,7 +70,7 @@ ResCss::~ResCss()
 {
 }
 
-void ResCss::Create(GXmlTag *load, SerialiseContext *Ctx)
+void ResCss::Create(LXmlTag *load, SerialiseContext *Ctx)
 {
     if (load && Ctx)
     {
@@ -82,7 +82,7 @@ void ResCss::OnShowLanguages()
 {
 }
 
-GView *ResCss::CreateUI()
+LView *ResCss::CreateUI()
 {
     return Ui = new ResCssUi(this);
 }
@@ -105,7 +105,7 @@ bool ResCss::Test(ErrorCollection *e)
     return true;
 }
 
-bool ResCss::Read(GXmlTag *t, SerialiseContext &Ctx)
+bool ResCss::Read(LXmlTag *t, SerialiseContext &Ctx)
 {
     if (!t->IsTag("style"))
         return false;
@@ -116,7 +116,7 @@ bool ResCss::Read(GXmlTag *t, SerialiseContext &Ctx)
     return true;
 }
 
-bool ResCss::Write(GXmlTag *t, SerialiseContext &Ctx)
+bool ResCss::Write(LXmlTag *t, SerialiseContext &Ctx)
 {
     if (Ui)
         Ui->Save();

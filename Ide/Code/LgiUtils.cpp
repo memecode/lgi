@@ -1,9 +1,9 @@
 #include <stdio.h>
 
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "LgiIde.h"
 
-char *FindHeader(char *Short, GArray<GString> &Paths)
+char *FindHeader(char *Short, LArray<LString> &Paths)
 {
 	char *Status = 0;
 	
@@ -13,7 +13,7 @@ char *FindHeader(char *Short, GArray<GString> &Paths)
 		char *Path = Paths[i];
 		
 		char f[MAX_PATH];
-		LgiMakePath(f, sizeof(f), Path, Short);
+		LMakePath(f, sizeof(f), Path, Short);
 		if (LFileExists(f))
 		{
 			Status = NewStr(f);
@@ -23,7 +23,7 @@ char *FindHeader(char *Short, GArray<GString> &Paths)
 	return Status;
 }
 
-bool BuildHeaderList(char *Cpp, GArray<char*> &Headers, GArray<GString> &IncPaths, bool Recurse)
+bool BuildHeaderList(char *Cpp, LArray<char*> &Headers, LArray<LString> &IncPaths, bool Recurse)
 {
 	char Include[] = "include";
 	
@@ -69,7 +69,7 @@ bool BuildHeaderList(char *Cpp, GArray<char*> &Headers, GArray<GString> &IncPath
 								if (Recurse)
 								{
 									// Recursively add includes...
-									char *c8 = ReadTextFile(File);
+									char *c8 = LReadTextFile(File);
 									if (c8)
 									{
 										BuildHeaderList(c8, Headers, IncPaths, Recurse);
@@ -107,4 +107,3 @@ bool BuildHeaderList(char *Cpp, GArray<char*> &Headers, GArray<GString> &IncPath
 	
 	return true;
 }
-

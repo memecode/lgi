@@ -1,0 +1,1535 @@
+/*hdr
+**      FILE:           LTabView.cpp
+**      AUTHOR:         Matthew Allen
+**      DATE:           20/10/2000
+**      DESCRIPTION:    Lgi self-drawn tab control
+**
+**      Copyright (C) 2000 Matthew Allen
+**              fret@memecode.com
+*/
+
+#include <stdio.h>
+#include "lgi/common/Lgi.h"
+#include "lgi/common/TabView.h"
+#include "lgi/common/SkinEngine.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/CssTools.h"
+#include "lgi/common/Path.h"
+
+enum TabViewStyle
+{
+	TvWinXp, // Skin
+	TvWin7,
+	TvMac,
+};
+
+#define MAC_STYLE_RADIUS		7
+#define MAC_DBL_BUF				1
+
+#if defined(__GTK_H__)
+	#define TAB_TXT_PAD				2
+#else
+	#define TAB_TXT_PAD				3
+#endif
+
+#if defined(MAC) && !LGI_COCOA && !defined(LGI_SDL)
+#define MAC_PAINT	1
+#else
+#define MAC_PAINT	0
+#endif
+
+#ifdef WIN32
+
+#ifdef TOOL_VLOW
+#undef TOOL_VLOW
+#endif
+
+#ifdef TOOL_LOW
+#undef TOOL_LOW
+#endif
+
+#ifdef TOOL_HIGH
+#undef TOOL_HIGH
+#endif
+
+#ifdef TOOL_VHIGH
+#undef TOOL_VHIGH
+#endif
+
+#define TOOL_VLOW	GetSysColor(COLOR_3DDKSHADOW)
+#define TOOL_LOW	GetSysColor(COLOR_3DSHADOW)
+#define TOOL_HIGH	GetSysColor(COLOR_3DLIGHT)
+#define TOOL_VHIGH	GetSysColor(COLOR_3DHILIGHT)
+
+#endif
+
+#define TAB_MARGIN_X		10 // Px each side of the text label on the tab
+#define CLOSE_BTN_SIZE		8
+#define CLOSE_BTN_GAP		8
+#define cFocusFore			LColour(L_FOCUS_SEL_FORE)
+#define cFocusBack			LColour(L_FOCUS_SEL_BACK)
+
+////////////////////////////////////////////////////////////////////////////////////////////
+class LTabViewPrivate
+{
+public:
+	// General
+	int Current;
+	LRect TabClient;
+	bool PourChildren;
+
+	// Painting
+	LRect Inset, Tabs;
+	int TabsHeight;
+	double TabsBaseline;
+	int Depth;
+	TabViewStyle Style;
+	enum ResType
+	{
+		ResWorkspace,
+		ResSelectedUnfocused,
+		ResSelectedFocused,
+		ResMax
+	};
+	LAutoPtr<LSurface> Corners[ResMax];
+	LColour cBack, cBorder, cFill, cSelUnfoc, cTopEdge, cBottomEdge;
+	
+	// Scrolling
+	int Scroll;			// number of buttons scrolled off the left of the control
+	LRect LeftBtn;	// scroll left button
+	LRect RightBtn;	// scroll right button
+
+	LTabViewPrivate()
+	{
+		Depth = 0;
+		TabsHeight = 0;
+		TabsBaseline = 0.0;
+		PourChildren = true;
+		Current = 0;
+		TabClient.ZOff(-1, -1);
+
+		Scroll = 0;
+		LeftBtn.ZOff(-1, -1);
+		RightBtn.ZOff(-1, -1);
+
+		Style = TvMac;
+	}
+	
+	uint8_t Clamp(int i)
+	{
+		if (i < 0) return 0;
+		if (i > 255) return 255;
+		return (uint8_t)i;
+	}
+
+	LColour Tint(double amt)
+	{
+		auto Bk = cBack.GetGray();
+		double Ratio = Bk < 100 ? 1.0 / amt : amt;
+
+		LColour c(	Clamp((int)(Ratio * cBack.r())),
+					Clamp((int)(Ratio * cBack.g())),
+					Clamp((int)(Ratio  * cBack.b())));
+		return c;
+	}
+
+	bool DrawCircle(LAutoPtr<LSurface> &Dc, LColour c)
+	{
+		if (Dc)
+			return true;
+
+		double r = 7.0;
+		int x = (int)(r * 2.0);
+		if (!Dc.Reset(new LMemDC(x, x, System32BitColourSpace)))
+			return false;
+
+		Dc->Colour(0, 32);
+		Dc->Rectangle();
+
+		LPath p;
+		p.Circle(r, r, r-0.7);
+		p.SetFillRule(FILLRULE_ODDEVEN);
+		LSolidBrush s(c);
+		p.Fill(Dc, s);
+		p.Empty();
+
+		p.Circle(r, r, r);
+		p.Circle(r, r, r - 1.0);
+		p.SetFillRule(FILLRULE_ODDEVEN);
+		LBlendStop Stops[2] = {
+			{0.0, cTopEdge.c32()},
+			{1.0, cBottomEdge.c32()}
+		};
+		LPointF a(4, 4), b(9, 9);
+		LLinearBlendBrush s2(a, b, CountOf(Stops), Stops);
+		p.Fill(Dc, s2);
+
+		Dc->ConvertPreMulAlpha(true);
+		return true;
+	}
+
+	void CreateCorners()
+	{
+		LAutoPtr<LSurface> &White = Corners[ResWorkspace];
+		LAutoPtr<LSurface> &Unfoc = Corners[ResSelectedUnfocused];
+		LAutoPtr<LSurface> &Sel = Corners[ResSelectedFocused];
+
+		DrawCircle(White, LColour(L_WORKSPACE));
+		DrawCircle(Unfoc, cSelUnfoc);
+		DrawCircle(Sel, cFocusBack);
+	}
+};
+
+struct LTabPagePriv
+{
+	LTabPage *Tab;
+	bool NonDefaultFont;
+	LAutoPtr<LDisplayString> Ds;
+
+	LTabPagePriv(LTabPage *t) : Tab(t)
+	{
+		NonDefaultFont = false;
+	}
+
+	LDisplayString *GetDs()
+	{
+		auto Text = Tab->Name();
+		if (Text && !Ds)
+		{
+			LFont *f = NULL;
+			auto s = Tab->GetCss();
+			NonDefaultFont = s ? s->HasFontStyle() : false;
+			if (NonDefaultFont)
+			{
+				if ((f = new LFont))
+				{
+					*f = *SysFont;
+
+					if (f->CreateFromCss(s))
+						Tab->SetFont(f, true);
+					else
+						DeleteObj(f);
+				}
+			}
+			else
+			{
+				f = Tab->GetFont();
+			}
+		
+			if (f)
+				Ds.Reset(new LDisplayString(f, Text));
+			else
+				LgiAssert(!"no font.");
+		}
+
+		return Ds;
+	}
+};
+
+class TabIterator : public LArray<LTabPage*>
+{
+public:
+	TabIterator(List<LViewI> &l)
+	{
+		for (auto c : l)
+		{
+			auto p = dynamic_cast<LTabPage*>(c);
+			if (p) Add(p);
+		}
+
+		fixed = true;
+	}
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// Tab Control
+LTabView::LTabView(int id, int x, int y, int cx, int cy, const char *name, int Init) :
+	ResObject(Res_TabView)
+{
+	d = new LTabViewPrivate;
+	d->Current = Init;
+
+	SetId(id);
+	LRect r(x, y, x+cx, y+cy);
+	SetPos(r);
+	Name(name);
+	_BorderSize = 0;
+	SetTabStop(true);
+	SetPourLargest(true);
+
+	#if WINNATIVE
+	SetDlgCode(DLGC_WANTARROWS);
+	#endif
+}
+
+LTabView::~LTabView()
+{
+	DeleteObj(d);
+}
+
+bool LTabView::GetPourChildren()
+{
+	return d->PourChildren;
+}
+
+void LTabView::SetPourChildren(bool b)
+{
+	d->PourChildren = b;
+}
+
+LTabPage *LTabView::TabAt(int Idx)
+{
+	TabIterator i(Children);
+	return i[Idx];
+}
+
+size_t LTabView::GetTabs()
+{
+	return Children.Length();
+}
+
+LTabPage *LTabView::GetCurrent()
+{
+	TabIterator i(Children);
+	return i[d->Current];
+}
+
+int LTabView::TabY()
+{
+	return d->TabsHeight + (TAB_TXT_PAD << 1);
+}
+
+void LTabView::OnChildrenChanged(LViewI *Wnd, bool Attaching)
+{
+	if (!Attaching)
+	{
+		TabIterator c(Children);
+		if (d->Current >= c.Length())
+			d->Current = (int)c.Length() - 1;
+
+		#if LGI_VIEW_HANDLE
+		if (Handle())
+		#endif
+			Invalidate();
+	}
+}
+
+#if defined(WINNATIVE)
+LViewI *LTabView::FindControl(HWND hCtrl)
+{
+	LViewI *Ctrl = 0;
+
+	if (hCtrl == Handle())
+	{
+		return this;
+	}
+
+	TabIterator it(Children);
+	for (int i=0; i<it.Length(); i++)
+	{
+		if (Ctrl = it[i]->FindControl(hCtrl))
+			return Ctrl;
+	}
+
+	return 0;
+}
+#endif
+
+LViewI *LTabView::FindControl(int Id)
+{
+	if (GetId() == Id)
+	{
+		return this;
+	}
+
+	LViewI *Ctrl;
+	TabIterator it(Children);
+	for (int i=0; i<it.Length(); i++)
+	{
+		if ((Ctrl = it[i]->FindControl(Id)))
+			return Ctrl;
+	}
+
+	return 0;
+}
+
+bool LTabView::Attach(LViewI *parent)
+{
+	bool Status = LView::Attach(parent);
+	if (Status)
+	{
+		TabIterator it(Children);
+		LTabPage *p = d->Current < it.Length() ? it[d->Current] : 0;
+		if (p)
+		{
+			OnPosChange();
+			p->Attach(this);
+		}
+		
+		for (int i=0; i<it.Length(); i++)
+		{
+			it[i]->_Window = _Window;
+		}
+	}
+
+	return Status;
+}
+
+int64 LTabView::Value()
+{
+	return d->Current;
+}
+
+void LTabView::OnCreate()
+{
+	LResources::StyleElement(this);			
+
+	d->Depth = 0;
+	LViewI *p = this;
+	while ((p = p->GetParent()))
+	{
+		if (p == (LViewI*)GetWindow())
+			break;
+		LTabView *tv = dynamic_cast<LTabView*>(p);
+		if (tv)
+			d->Depth++;
+	}
+
+	OnStyleChange();
+
+	TabIterator it(Children);
+	LTabPage *page = d->Current < it.Length() ? it[d->Current] : 0;
+	if (page)
+	{
+		page->Attach(this);
+		page->Visible(true);
+	}
+}
+
+void LTabView::Value(int64 i)
+{
+	if (Children.Length() > 0 &&
+		i != d->Current)
+	{
+		// change tab
+		TabIterator it(Children);
+		LTabPage *Old = it[d->Current];
+		if (Old)
+		{
+			Old->Visible(false);
+		}
+
+		d->Current = (int)MIN(i, (ssize_t)it.Length()-1);
+		OnPosChange();
+
+		LTabPage *p = it[d->Current];
+		if (p && IsAttached())
+		{
+			p->Attach(this);
+			p->Visible(true);
+		}
+
+		Invalidate();
+		SendNotify(GNotifyValueChanged);
+	}
+}
+
+GMessage::Result LTabView::OnEvent(GMessage *Msg)
+{
+	return LView::OnEvent(Msg);
+}
+
+int LTabView::OnNotify(LViewI *Ctrl, int Flags)
+{
+	if (GetParent())
+	{
+		return GetParent()->OnNotify(Ctrl, Flags);
+	}
+
+	return 0;
+}
+
+bool LTabView::Append(LTabPage *Page, int Where)
+{
+	if (Page)
+	{
+		Page->TabCtrl = this;
+		Page->_Window = _Window;
+		if (IsAttached() && Children.Length() == 1)
+		{
+			Page->Attach(this);
+			OnPosChange();
+		}
+		else
+		{
+			Page->Visible(Children.Length() == d->Current);
+			AddView(Page);
+		}
+
+		Invalidate();
+
+		return true;
+	}
+	return false;
+}
+
+LTabPage *LTabView::Append(const char *name, int Where)
+{
+	LTabPage *Page = new LTabPage(name);
+	if (Page)
+	{
+		Page->TabCtrl = this;
+		Page->_Window = _Window;
+		Page->SetParent(this);
+
+		if (IsAttached() && Children.Length() == 0)
+		{
+			Page->Attach(this);
+			OnPosChange();
+		}
+		else
+		{
+			Page->Visible(Children.Length() == d->Current);
+			AddView(Page);
+		}
+
+		Invalidate();
+	}
+	return Page;
+}
+
+bool LTabView::Delete(LTabPage *Page)
+{
+	bool Status = false;
+
+	TabIterator it(Children);
+	ssize_t Index = it.IndexOf(Page);
+	if (Index >= 0)
+	{
+		if (Index == d->Current)
+		{
+			Status = Page->Detach();
+			LgiAssert(Status);
+		}
+		else
+		{
+			Status = DelView(Page);
+			LgiAssert(Status);
+		}
+		
+		delete Page;
+		Value(Index);
+	}
+	
+	return Status;
+}
+
+LRect &LTabView::GetTabClient()
+{
+	if (d->Style == TvMac)
+	{
+		d->TabClient = CalcInset();
+		d->TabClient.Size(2, 2); // The inset border
+		d->TabClient.y1 = d->Tabs.y2 + 1; // The tab strip
+
+		LTabPage *p = Children.Length() ? GetCurrent() : NULL;
+		if (p && p->GetCss())
+		{
+			// Inset by any padding
+			LCss::Len l;
+			d->TabClient.x1 += (l = p->GetCss()->PaddingLeft()).IsValid()   ? l.ToPx(d->TabClient.X(), GetFont()) : 0;
+			d->TabClient.y1 += (l = p->GetCss()->PaddingTop()).IsValid()    ? l.ToPx(d->TabClient.Y(), GetFont()) : 0;
+			d->TabClient.x2 -= (l = p->GetCss()->PaddingRight()).IsValid()  ? l.ToPx(d->TabClient.X(), GetFont()) : 0;
+			d->TabClient.y2 -= (l = p->GetCss()->PaddingBottom()).IsValid() ? l.ToPx(d->TabClient.Y(), GetFont()) : 0;
+		}
+	}
+	else
+	{
+		d->TabClient = LView::GetClient();
+		d->TabClient.Offset(-d->TabClient.x1, -d->TabClient.y1);
+		d->TabClient.Size(2, 2);
+		d->TabClient.y1 += TabY();
+	}
+	
+
+	return d->TabClient;
+}
+
+int LTabView::HitTest(LMouse &m)
+{
+	if (d->LeftBtn.Overlap(m.x, m.y))
+	{
+		return LeftScrollBtn;
+	}
+	else if (d->RightBtn.Overlap(m.x, m.y))
+	{
+		return RightScrollBtn;
+	}
+	else
+	{
+		// int Hit = -1;
+		TabIterator it(Children);
+		for (int i=0; i<it.Length(); i++)
+		{
+			LTabPage *p = it[i];
+			if (p->TabPos.Overlap(m.x, m.y))
+				return i;
+		}
+	}
+	
+	return NoBtn;
+}
+
+void LTabView::OnMouseClick(LMouse &m)
+{
+	bool DownLeft = m.Down() || m.Left();
+	int Result = HitTest(m);
+
+	if (m.Down())
+		Focus(true);
+	
+	if (Result == LeftScrollBtn)
+	{
+		if (DownLeft)
+		{
+			d->Scroll++;
+			Invalidate();
+		}
+	}
+	else if (Result == RightScrollBtn)
+	{
+		if (DownLeft)
+		{
+			d->Scroll = MAX(0, d->Scroll-1);
+			Invalidate();
+		}
+	}
+	else if (Result >= 0)
+	{
+		TabIterator it(Children);
+		LTabPage *p = it[Result];
+		if (p)
+		{
+			if (p->HasButton() &&
+				p->BtnPos.Overlap(m.x, m.y))
+			{
+				if (DownLeft)
+				{
+					p->OnButtonClick(m);
+					// The tab can delete itself after this event
+					return;
+				}
+			}
+			else
+			{
+				// We set this before firing the event, otherwise the
+				// code seeing the notication gets the old value.
+				if (DownLeft)
+					Value(Result);
+
+				p->OnTabClick(m);
+			}
+		}
+	}
+
+	if (DownLeft)
+		Focus(true);
+}
+
+bool LTabView::OnKey(LKey &k)
+{
+	if (k.Down())
+	{
+		switch (k.vkey)
+		{
+			case LK_LEFT:
+			{
+				if (k.Alt())
+					break;
+				if (d->Current > 0)
+				{
+					TabIterator it(Children);
+					LTabPage *p = it[d->Current - 1];
+					if (p && !p->TabPos.Valid())
+					{
+						if (d->Scroll) d->Scroll--;
+					}
+
+					Value(d->Current - 1);
+				}
+				return true;
+				break;
+			}
+			case LK_RIGHT:
+			{
+				if (k.Alt())
+					break;
+				TabIterator it(Children);
+				if (d->Current < it.Length() - 1)
+				{
+					LTabPage *p = it[d->Current + 1];
+					if (p && !p->TabPos.Valid())
+					{
+						d->Scroll++;
+					}
+					
+					Value(d->Current + 1);
+				}
+				return true;
+				break;
+			}
+		}
+	}
+	
+	return false;
+}
+
+void LTabView::OnFocus(bool f)
+{
+	if (!Children.Length())
+		return;
+	TabIterator it(Children);
+	LTabPage *p = it[d->Current];
+	if (p)
+	{
+		LRect r = p->TabPos;
+		r.y2 += 2;
+		Invalidate(&r);
+	}
+}
+
+void LTabView::OnAttach()
+{
+}
+
+LRect &LTabView::CalcInset()
+{
+	LRect Padding(0, 0, 0, 0);
+	d->Inset = GetClient();
+	auto f = GetFont();
+	if (GetCss())
+	{
+		LCss::Len l;
+		if ((l = GetCss()->PaddingLeft()).IsValid())   Padding.x1 = l.ToPx(d->Inset.X(), f);
+		if ((l = GetCss()->PaddingTop()).IsValid())    Padding.y1 = l.ToPx(d->Inset.Y(), f);
+		if ((l = GetCss()->PaddingRight()).IsValid())  Padding.x2 = l.ToPx(d->Inset.X(), f);
+		if ((l = GetCss()->PaddingBottom()).IsValid()) Padding.y2 = l.ToPx(d->Inset.Y(), f);
+	}
+
+	int TabTextY = 0;
+	d->TabsBaseline = 0;
+	TabIterator Tabs(Children);
+	for (auto t : Tabs)
+	{
+		auto Ds = t->d->GetDs();
+		if (Ds)
+		{
+			TabTextY = MAX(TabTextY, Ds->Y());
+			auto Fnt = Ds->GetFont();
+			d->TabsBaseline = MAX(d->TabsBaseline, Fnt->Ascent());
+		}
+	}
+	if (!TabTextY)
+		TabTextY = f->GetHeight();
+
+	d->TabsHeight = TabTextY;
+	d->Inset.x1 += Padding.x1;
+	d->Inset.x2 -= Padding.x2;
+	d->Inset.y1 += Padding.y1;
+	d->Inset.y2 -= Padding.y2;
+
+	d->Tabs.ZOff(d->Inset.X() - 20, TabY() - 1);
+	d->Tabs.Offset(d->Inset.x1 + 10, d->Inset.y1);
+
+	d->Inset.y1 = d->Tabs.y1 + (d->Tabs.Y() / 2);
+
+	return d->Inset;
+}
+
+void LTabView::OnStyleChange()
+{
+	if (!d->cBack.IsValid())
+	{
+		LCssTools Tools(this);
+		d->cBack = Tools.GetBack();
+		d->cTopEdge = d->Tint(0.845);
+		d->cBottomEdge = d->Tint(0.708);
+		d->cSelUnfoc = LColour(L_NON_FOCUS_SEL_BACK);
+
+		auto mul = pow(0.909f, 1+d->Depth); // 240->218
+		d->cBorder = d->Tint(mul);
+			
+		mul = pow(0.959f, 1+d->Depth); // 240->230
+		d->cFill = d->Tint(mul);
+
+		auto *Css = GetCss(true);
+		if (Css)
+		{
+			if (!Css->BackgroundColor().IsValid())
+				Css->BackgroundColor(LCss::ColorDef(d->cFill));
+		}
+
+		d->CreateCorners();
+	}
+
+	TabIterator Tabs(Children);
+	for (auto t : Tabs)
+		t->OnStyleChange();
+
+	Invalidate();
+}
+
+void LTabView::OnPaint(LSurface *pDC)
+{
+	if (!d->cBack.IsValid())
+		OnStyleChange();
+	LCssTools Tools(this);
+
+	TabIterator it(Children);
+	if (d->Current >= it.Length())
+		Value(it.Length() - 1);
+
+	if (d->Style == TvMac)
+	{
+		CalcInset();
+
+		LView *Pv = GetParent() ? GetParent()->GetGView() : NULL;
+		LColour NoPaint = (Pv ? Pv : this)->StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
+		if (!NoPaint.IsTransparent())
+		{
+			pDC->Colour(NoPaint);
+			pDC->Rectangle();
+		}
+
+		#ifdef LGI_CARBON
+
+			HIRect Bounds = d->Inset;
+
+			HIThemeTabPaneDrawInfo Info;
+			Info.version = 1;
+			Info.state = Enabled() ? kThemeStateActive : kThemeStateInactive;
+			Info.direction = kThemeTabNorth;
+			Info.size = kHIThemeTabSizeNormal;
+			Info.kind = kHIThemeTabKindNormal;
+			Info.adornment = kHIThemeTabPaneAdornmentNormal;
+
+			OSStatus e = HIThemeDrawTabPane(&Bounds, &Info, pDC->Handle(), kHIThemeOrientationNormal);
+
+		#else
+
+			// Draw the inset area at 'd->Inset'
+			LRect Bounds = d->Inset;
+			pDC->Colour(d->cBorder);
+			pDC->Box(&Bounds);
+			Bounds.Size(1, 1);
+			pDC->Box(&Bounds);
+			Bounds.Size(1, 1);
+			pDC->Colour(d->cFill);
+			pDC->Rectangle(&Bounds);
+
+		#endif
+
+		int x = d->Tabs.x1, y = d->Tabs.y1;
+		#ifndef LGI_CARBON
+		LSurface *pScreen = pDC;
+		#endif
+		for (unsigned i = 0; i < it.Length(); i++)
+		{
+			auto Tab = it[i];
+			auto Foc = Focus();
+			LDisplayString *ds = Tab->d->GetDs();
+			bool First = i == 0;
+			bool Last = i == it.Length() - 1;
+			bool IsCurrent = d->Current == i;
+
+			LRect r(0, 0, Tab->GetTabPx() - 1, d->Tabs.Y() - 1);
+			r.Offset(x, y);
+
+			#ifdef LGI_CARBON
+
+				HIRect TabRc = r;
+				HIThemeTabDrawInfo TabInfo;
+				HIRect Label;
+			
+				TabInfo.version = 1;
+				TabInfo.style = IsCurrent ? (Foc ? kThemeTabFront : kThemeTabNonFrontPressed) : kThemeTabNonFront;
+				TabInfo.direction = Info.direction;
+				TabInfo.size = Info.size;
+				TabInfo.adornment = Info.adornment;
+				TabInfo.kind = Info.kind;
+				if (it.Length() == 1)
+					TabInfo.position = kHIThemeTabPositionOnly;
+				else if (First)
+					TabInfo.position = kHIThemeTabPositionFirst;
+				else if (Last)
+					TabInfo.position = kHIThemeTabPositionLast;
+				else
+					TabInfo.position = kHIThemeTabPositionMiddle;
+			
+				e = HIThemeDrawTab(&TabRc, &TabInfo, pDC->Handle(), kHIThemeOrientationNormal, &Label);
+			
+				r = Label;
+			
+			#else
+
+				LColour cTabFill = IsCurrent ? (Foc ? cFocusBack : d->cSelUnfoc) : LColour(L_WORKSPACE);
+				LColour cInterTabBorder = d->Tint(0.9625);
+				LRect b = r;
+
+				#if MAC_DBL_BUF
+				LMemDC Mem;
+				if (First || Last)
+				{
+					if (Mem.Create(r.X(), r.Y(), System32BitColourSpace))
+					{
+						pDC = &Mem;
+						b.Offset(-b.x1, -b.y1);
+					}
+				}
+				#endif
+
+				// d->CreateCorners();
+
+				pDC->Colour(d->cTopEdge);
+				pDC->Line(b.x1, b.y1, b.x2, b.y1); // top edge
+				if (i == 0)
+				{
+					pDC->Line(b.x1, b.y1, b.x1, b.y2); // left edge
+				}
+				else
+				{
+					pDC->Colour(cInterTabBorder);
+					pDC->Line(b.x1, b.y1+1, b.x1, b.y2+1); // left edge
+				}
+				pDC->Colour(d->cBottomEdge);
+				pDC->Line(b.x2, b.y2, b.x1, b.y2); // bottom edge
+				if (Last)
+				{
+					pDC->Line(b.x2, b.y2, b.x2, b.y1); // right edge
+				}
+				else
+				{
+					pDC->Colour(cInterTabBorder);
+					pDC->Line(b.x2, b.y2-1, b.x2, b.y1+1); // right edge between tabs
+				}
+				b.Size(1, 1);
+				
+				pDC->Colour(cTabFill);
+				pDC->Rectangle(&b);
+
+				LRect Clip00(0, 0, MAC_STYLE_RADIUS-1, MAC_STYLE_RADIUS-1);
+				auto Res = IsCurrent ? (Foc ? LTabViewPrivate::ResSelectedFocused : LTabViewPrivate::ResSelectedUnfocused) : LTabViewPrivate::ResWorkspace;
+				if (First)
+				{
+					LRect Clip01 = Clip00.Move(0, r.Y() - Clip00.Y());
+					
+					#if MAC_DBL_BUF
+					// Erase the areas we will paint over
+					pDC->Op(GDC_SET);
+					pDC->Colour(pScreen->SupportsAlphaCompositing() ? LColour(0, 32) : NoPaint);
+					pDC->Rectangle(&Clip00);
+					pDC->Colour(pScreen->SupportsAlphaCompositing() ? LColour(0, 32) : d->cFill);
+					pDC->Rectangle(&Clip01);
+					#endif
+					
+					// Draw in the rounded corners
+					pDC->Op(GDC_ALPHA);
+					pDC->Blt(Clip00.x1, Clip00.y1, d->Corners[Res], Clip00);
+					pDC->Blt(Clip01.x1, Clip01.y1, d->Corners[Res], Clip00.Move(0, MAC_STYLE_RADIUS));
+				}
+
+				if (Last)
+				{
+					LRect Clip10 = Clip00.Move(r.X() - Clip00.X(), 0);
+					LRect Clip11 = Clip00.Move(Clip10.x1, r.Y() - Clip00.Y());
+					
+					#if MAC_DBL_BUF
+					// Erase the areas we will paint over
+					pDC->Op(GDC_SET);
+					pDC->Colour(pScreen->SupportsAlphaCompositing() ? LColour(0, 32) : NoPaint);
+					pDC->Rectangle(&Clip10);
+					pDC->Colour(pScreen->SupportsAlphaCompositing() ? LColour(0, 32) : d->cFill);
+					pDC->Rectangle(&Clip11);
+					#endif
+					
+					// Draw in the rounded corners
+					pDC->Op(GDC_ALPHA);
+					pDC->Blt(Clip10.x1, Clip10.y1, d->Corners[Res], Clip00.Move(MAC_STYLE_RADIUS, 0));
+					pDC->Blt(Clip11.x1, Clip11.y1, d->Corners[Res], Clip00.Move(MAC_STYLE_RADIUS, MAC_STYLE_RADIUS));
+				}
+
+				#if MAC_DBL_BUF
+				if (First || Last)
+				{
+					if (pScreen->SupportsAlphaCompositing())
+						pScreen->Op(GDC_ALPHA);
+
+					pScreen->Blt(r.x1, r.y1, &Mem);
+				}
+				#endif
+				pDC = pScreen;
+
+			#endif
+			
+			LFont *tf = ds->GetFont();
+			int BaselineOff = (int) (d->TabsBaseline - tf->Ascent());
+			tf->Transparent(true);
+
+			LCss::ColorDef Fore;
+			if (Tab->GetCss())
+				Fore = Tab->GetCss()->Color();
+			tf->Fore(Fore.IsValid() ? (LColour)Fore : 
+					IsCurrent && Foc ? cFocusFore : Tools.GetFore());
+			
+			int DsX = r.x1 + TAB_MARGIN_X;
+			int DsY = r.y1 + TAB_TXT_PAD + BaselineOff;
+			ds->Draw(pDC, DsX, DsY, &r);
+			if (Tab->HasButton())
+			{
+				Tab->BtnPos.ZOff(CLOSE_BTN_SIZE-1, CLOSE_BTN_SIZE-1);
+				Tab->BtnPos.Offset(DsX + ds->X() + CLOSE_BTN_GAP, r.y1 + ((r.Y()-Tab->BtnPos.Y()) >> 1));
+				Tab->OnButtonPaint(pDC);				
+			}
+			else Tab->BtnPos.ZOff(-1, -1);
+			
+			it[i]->TabPos = r;
+			x += r.X()
+				#ifdef LGI_CARBON
+				+ (i ? -1 : 2) // Fudge factor to make it look nice, wtf apple?
+				#endif
+				;
+		}
+		
+		#if 0
+		pDC->Colour(LColour::Green);
+		pDC->Line(0, 0, pDC->X()-1, pDC->Y()-1);
+		#endif
+	}
+	else if (d->Style == TvWinXp)
+	{
+		if (LApp::SkinEngine &&
+			TestFlag(LApp::SkinEngine->GetFeatures(), GSKIN_TABVIEW))
+		{
+			LSkinState State;
+			State.pScreen = pDC;
+			State.MouseOver = false;
+			LApp::SkinEngine->OnPaint_LTabView(this, &State);
+		}
+		else
+		{
+			LRect r = GetTabClient();
+
+			r.Size(-2, -2);
+			LWideBorder(pDC, r, DefaultRaisedEdge);
+
+			pDC->Colour(L_MED);
+			pDC->Rectangle(0, 0, X()-1, d->TabClient.y1-3);
+
+			LTabPage *Sel = 0;
+			int x = r.x1;
+			
+			if (d->Scroll)
+			{
+				d->RightBtn.ZOff(12, TabY() - 2);
+				x = d->RightBtn.x2 + 4;
+			}
+			else
+			{
+				d->RightBtn.ZOff(-1, -1);
+			}
+			d->LeftBtn.ZOff(-1, -1);
+			
+			for (int n=0; n<it.Length(); n++)
+			{
+				LTabPage *p = it[n];
+				if (n < d->Scroll)
+				{
+					p->TabPos.ZOff(-1, -1);
+				}
+				else
+				{
+					int Wid = p->GetTabPx();
+					p->TabPos.ZOff(Wid, TabY()-3);
+					p->TabPos.Offset(x, 2);
+					
+					if (p->TabPos.x2 > r.x2 - 16)
+					{
+						d->LeftBtn.x2 = X()-1;
+						d->LeftBtn.x1 = d->LeftBtn.x2 - 12;
+						d->LeftBtn.y1 = 0;
+						d->LeftBtn.y2 = TabY() - 2;
+						
+						p->TabPos.ZOff(-1, -1);
+						break;
+					}
+					
+					if (d->Current != n)
+					{
+						p->PaintTab(pDC, false);
+					}
+					else
+					{
+						Sel = p;
+					}
+					x += Wid+1;
+				}
+			}
+			
+			if (!it.Length())
+			{
+				pDC->Colour(L_MED);
+				pDC->Rectangle(&r);
+			}
+			
+			if (Sel)
+			{
+				Sel->PaintTab(pDC, true);
+			}
+			
+			if (d->LeftBtn.Valid())
+			{
+				r = d->LeftBtn;
+				LWideBorder(pDC, r, DefaultRaisedEdge);
+
+				int x = r.x1 + (r.X() >> 1) + 1;
+				int y = r.y1 + (r.Y() >> 1) - 1;
+				pDC->Colour(L_TEXT);
+				for (int i=0; i<4; i++)
+				{
+					pDC->Line(x-i, y-i, x-i, y+i);
+				}
+			}
+			if (d->RightBtn.Valid())
+			{
+				r = d->RightBtn;
+				LWideBorder(pDC, r, DefaultRaisedEdge);
+
+				int x = r.x1 + (r.X() >> 1) - 2;
+				int y = r.y1 + (r.Y() >> 1) - 1;
+				pDC->Colour(L_TEXT);
+				for (int i=0; i<4; i++)
+				{
+					pDC->Line(x+i, y-i, x+i, y+i);
+				}
+			}
+		}
+	}
+	else LgiAssert(!"Not impl.");
+}
+
+void LTabView::OnPosChange()
+{
+	GetTabClient();
+	if (Children.Length())
+	{
+		TabIterator it(Children);
+		LTabPage *p = it[d->Current];
+		if (p)
+		{
+			p->SetPos(d->TabClient, true);
+			if (d->PourChildren)
+			{
+				LRect r = d->TabClient;
+				r.Offset(-r.x1, -r.y1);
+				LRegion Rgn(r);
+
+				for (LViewI *c: p->IterateViews())
+					c->Pour(Rgn);
+			}
+			else
+			{
+				auto It = p->IterateViews();
+				if (It.Length() == 1)
+				{
+					LTableLayout *tl = dynamic_cast<LTableLayout*>(It[0]);
+					if (tl)
+					{
+						LRect r = p->GetClient();
+						r.Size(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
+						tl->SetPos(r);
+					}
+				}
+			}
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+char *_lgi_gview_cmp(LView *a, LView *b)
+{
+	static char Str[256];
+	if (a && b)
+	{
+		#if !LGI_VIEW_HANDLE
+		sprintf_s(Str, sizeof(Str),
+				"LView: %p,%p",
+				dynamic_cast<LView*>(a),
+				dynamic_cast<LView*>(b));
+		#else
+		sprintf_s(Str, sizeof(Str),
+				"LView: %p,%p Hnd: %p,%p",
+				dynamic_cast<LView*>(a),
+				dynamic_cast<LView*>(b),
+				(void*)a->Handle(),
+				(void*)b->Handle());
+		#endif
+	}
+	else
+	{
+		Str[0] = 0;
+	}
+	return Str;
+}
+
+LTabPage::LTabPage(const char *name) : ResObject(Res_Tab)
+{
+	d = new LTabPagePriv(this);
+
+	LRect r(0, 0, 1000, 1000);
+	SetPos(r);
+	Name(name);
+	Button = false;
+	TabCtrl = 0;
+	TabPos.ZOff(-1, -1);
+	BtnPos.ZOff(-1, -1);
+	GetCss(true)->Padding("4px");
+
+	#if WINNATIVE
+	SetStyle(GetStyle() | WS_CLIPCHILDREN);
+	CreateClassW32(GetClass(), 0, CS_HREDRAW | CS_VREDRAW);
+	#endif
+
+	LResources::StyleElement(this);
+}
+
+LTabPage::~LTabPage()
+{
+	delete d;
+}
+
+int LTabPage::GetTabPx()
+{
+	LDisplayString *Ds = d->GetDs();
+
+	int Px = TAB_MARGIN_X << 1;
+	if (Ds)
+	{
+		Px += Ds->X();
+		if (Button)
+			Px += CLOSE_BTN_GAP + CLOSE_BTN_SIZE;
+	}
+	
+	return Px;
+}
+
+bool LTabPage::HasButton()
+{
+	return Button;
+}
+
+void LTabPage::HasButton(bool b)
+{
+	Button = b;
+	if (GetParent())
+		GetParent()->Invalidate();
+}
+
+void LTabPage::OnButtonClick(LMouse &m)
+{
+	if (GetId() > 0)
+		SendNotify(GNotifyTabPage_ButtonClick);
+}
+
+void LTabPage::OnTabClick(LMouse &m)
+{
+	LViewI *v = GetId() > 0 ? this : GetParent();
+	v->SendNotify(GNotifyItem_Click);
+}
+
+void LTabPage::OnButtonPaint(LSurface *pDC)
+{
+	#if MAC_PAINT
+	
+	#else
+	
+	// The default is a close button
+	LColour Low(L_LOW);
+	LColour Mid(L_MED);
+	Mid = Mid.Mix(Low);
+	
+	pDC->Colour(Mid);
+	pDC->Line(BtnPos.x1, BtnPos.y1+1, BtnPos.x2-1, BtnPos.y2);
+	pDC->Line(BtnPos.x1+1, BtnPos.y1, BtnPos.x2, BtnPos.y2-1);
+	pDC->Line(BtnPos.x1, BtnPos.y2-1, BtnPos.x2-1, BtnPos.y1);
+	pDC->Line(BtnPos.x1+1, BtnPos.y2, BtnPos.x2, BtnPos.y1+1);
+
+	pDC->Colour(Low);
+	pDC->Line(BtnPos.x1+1, BtnPos.y1+1, BtnPos.x2-1, BtnPos.y2-1);
+	pDC->Line(BtnPos.x2-1, BtnPos.y1+1, BtnPos.x1+1, BtnPos.y2-1);
+	
+	#endif
+}
+
+int64 LTabPage::Value()
+{
+	if (!TabCtrl)
+		return false;
+	ssize_t Idx = TabCtrl->IterateViews().IndexOf(this);
+	return TabCtrl->Value() == Idx;
+}
+
+void LTabPage::Value(int64 v)
+{
+	if (v)
+		Select();
+}
+
+const char *LTabPage::Name()
+{
+	return LBase::Name();
+}
+
+bool LTabPage::Name(const char *name)
+{
+	bool Status = LView::Name(name);
+	d->Ds.Reset();
+	if (GetParent())
+		GetParent()->Invalidate();
+	return Status;
+}
+
+void LTabPage::PaintTab(LSurface *pDC, bool Selected)
+{
+	#if MAC_PAINT
+
+	#else
+	
+	LRect r = TabPos;
+	if (Selected)
+	{
+		r.Size(-2, -2);
+	}
+	
+	pDC->Colour(L_LIGHT);
+	
+	bool First = false;
+	if (TabCtrl)
+	{
+		TabIterator it(TabCtrl->Children);
+		First = it[0] == this;
+	}
+
+	if (First)
+		pDC->Line(r.x1, r.y1+1, r.x1, r.y2);
+	else
+		pDC->Line(r.x1, r.y1+1, r.x1, r.y2-1);
+	pDC->Line(r.x1+1, r.y1, r.x2-1, r.y1);
+
+	pDC->Colour(L_HIGH);
+	pDC->Line(r.x1+1, r.y1+1, r.x1+1, r.y2);
+	pDC->Line(r.x1+1, r.y1+1, r.x2-1, r.y1+1);
+
+	pDC->Colour(L_LOW);
+	pDC->Line(r.x2-1, r.y1+1, r.x2-1, r.y2);
+
+	pDC->Colour(L_SHADOW);
+	pDC->Line(r.x2, r.y1+1, r.x2, r.y2-1);
+
+	r.x2 -= 2;
+	r.x1 += 2;
+	r.y1 += 2;
+	
+	pDC->Colour(L_MED);
+	pDC->Rectangle(&r);
+	pDC->Set(r.x1, r.y1);
+	pDC->Set(r.x2, r.y1);
+	
+	int Cx = r.x1 + TAB_MARGIN_X;
+	auto t = Name();
+	if (t)
+	{
+		LFont *f = GetFont();
+		LDisplayString ds(f, t);
+		f->Colour(L_TEXT, L_MED);
+		f->Transparent(true);
+		
+		int y = r.y1 + ((r.Y()-ds.Y())/2);
+		ds.Draw(pDC, Cx, y);
+		
+		if (TabCtrl->Focus() && Selected)
+		{
+			r.Set(Cx, y, Cx+ds.X(), y+ds.Y());
+			r.Size(-2, -1);
+			r.y1++;
+			pDC->Colour(L_LOW);
+			pDC->Box(&r);
+		}
+
+		Cx += ds.X() + CLOSE_BTN_GAP;
+	}
+	
+	if (Button)
+	{
+		BtnPos.ZOff(CLOSE_BTN_SIZE-1, CLOSE_BTN_SIZE-1);
+		BtnPos.Offset(Cx, r.y1 + ((r.Y()-BtnPos.Y()) / 2));
+		OnButtonPaint(pDC);
+	}
+	else BtnPos.ZOff(-1, -1);
+	
+	#endif
+}
+
+bool LTabPage::Attach(LViewI *parent)
+{
+	bool Status = false;
+
+	if (TabCtrl)
+	{
+		if (!IsAttached())
+		{
+			Status = LView::Attach(parent);
+		}
+		else
+		{
+			Status = true;
+		}
+		
+		for (auto w: Children)
+		{
+			if (!w->IsAttached())
+			{
+				w->Attach(this);
+				w->SetNotify(TabCtrl->GetParent());
+			}
+		}
+	}
+
+	return Status;
+}
+
+GMessage::Result LTabPage::OnEvent(GMessage *Msg)
+{
+	return LView::OnEvent(Msg);
+}
+
+void LTabPage::Append(LViewI *Wnd)
+{
+	if (Wnd)
+	{
+		Wnd->SetNotify(TabCtrl);
+
+		if (IsAttached() && TabCtrl)
+		{
+			Wnd->Attach(this);
+
+			LTabView *v = dynamic_cast<LTabView*>(GetParent());
+			if (v && v->GetPourChildren())
+			{
+				v->OnPosChange();
+			}
+		}
+		else if (!HasView(Wnd))
+		{
+			AddView(Wnd);
+		}
+		else LgiAssert(0);
+	}
+}
+
+bool LTabPage::Remove(LViewI *Wnd)
+{
+	if (Wnd)
+	{
+		LgiAssert(HasView(Wnd));
+		Wnd->Detach();
+		return true;
+	}
+	return false;
+}
+
+LColour LTabPage::GetBackground()
+{
+	if (TabCtrl && TabCtrl->d->Style == TvMac)
+		return LColour(226, 226, 226); // 207?
+	else
+		return LColour(L_MED);
+}
+
+void LTabPage::OnStyleChange()
+{
+	SetFont(SysFont, false);
+	GetParent()->Invalidate();
+}
+
+void LTabPage::SetFont(LFont *Font, bool OwnIt)
+{
+	d->Ds.Reset();
+	Invalidate();
+	return LView::SetFont(Font, OwnIt);
+}
+
+void LTabPage::OnPaint(LSurface *pDC)
+{
+	LRect r(0, 0, X()-1, Y()-1);
+	LColour Bk = StyleColour(LCss::PropBackgroundColor, TabCtrl ? TabCtrl->d->cFill : LColour(L_MED), 1);
+	pDC->Colour(Bk);
+	pDC->Rectangle(&r);
+	
+	#if 0
+	pDC->Colour(LColour::Red);
+	pDC->Line(0, 0, pDC->X()-1, pDC->Y()-1);
+	#endif
+}
+
+void LTabPage::OnFocus(bool b)
+{
+}
+
+bool LTabPage::OnKey(LKey &k)
+{
+	return false;
+}
+
+bool LTabPage::LoadFromResource(int Res)
+{
+	LAutoString n;
+
+	auto ch = IterateViews();
+	LViewI *v;
+	while ((v = ch[0]))
+	{
+		v->Detach();
+		DelView(v);
+		ch.Delete(v, true);
+	}
+	
+	bool Status = LResourceLoad::LoadFromResource(Res, this, 0, &n);
+	if (ValidStr(n))
+		Name(n);
+
+	/* This isn't needed if the controls properly inherit colours.
+	if (TabCtrl && TabCtrl->d->Style == TvMac)
+		// Sigh
+		for (auto c : Children)
+			c->GetCss(true)->BackgroundColor(LCss::ColorDef(GetBackground()));
+	*/
+
+	if (IsAttached())
+		AttachChildren();
+
+	return Status;
+}
+
+void LTabPage::Select()
+{
+	if (GetParent())
+	{
+		ssize_t Idx = GetParent()->IterateViews().IndexOf(this);
+		if (Idx >= 0)
+			GetParent()->Value(Idx);
+	}
+}
+
+	

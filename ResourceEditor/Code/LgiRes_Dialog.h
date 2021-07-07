@@ -12,7 +12,7 @@
 #ifndef __LGIRES_DIALOG_H
 #define __LGIRES_DIALOG_H
 
-#include "Res.h"
+#include "lgi/common/Res.h"
 #include "LgiRes_String.h"
 
 class ResDialog;
@@ -48,14 +48,14 @@ class ResDialogUi;
 ////////////////////////////////////////////////////////////////
 #define DECL_DIALOG_CTRL(id)	 \
 	int GetType() { return id; } \
-	GView *View() { return this; } \
-	void OnMouseClick(GMouse &m); \
-	void OnMouseMove(GMouse &m); \
-	void OnPaint(GSurface *pDC);
+	LView *View() { return this; } \
+	void OnMouseClick(LMouse &m); \
+	void OnMouseMove(LMouse &m); \
+	void OnPaint(LSurface *pDC);
 
 #define IMPL_DIALOG_CTRL(cls)	 \
-	void cls::OnMouseClick(GMouse &m) { ResDialogCtrl::OnMouseClick(m); } \
-	void cls::OnMouseMove(GMouse &m) { ResDialogCtrl::OnMouseMove(m); }
+	void cls::OnMouseClick(LMouse &m) { ResDialogCtrl::OnMouseClick(m); } \
+	void cls::OnMouseMove(LMouse &m) { ResDialogCtrl::OnMouseMove(m); }
 
 enum DlgSelectMode
 {
@@ -77,45 +77,45 @@ protected:
 	void ReadPos(char *Str);
 	char *GetRefText();
 
-	GRect Goobers[8];
+	LRect Goobers[8];
 	int OverGoober;
 
 	ResDialog *Dlg;
-	GRect Title;
-	GRect Client;
+	LRect Title;
+	LRect Client;
 	int DragCtrl;
-	GRect DragRgn;
+	LRect DragRgn;
 	LPoint DragStart;
 	bool MoveCtrl;
 	DlgSelectMode SelectMode;
-	GRect SelectStart;
+	LRect SelectStart;
 
 	bool AcceptChildren;
 	bool Movable;
 	bool Vis;
-	GAutoString CssClass;
-	GAutoString CssStyle;
+	LAutoString CssClass;
+	LAutoString CssStyle;
 
-	GMouse MapToDialog(GMouse m);
+	LMouse MapToDialog(LMouse m);
 
 public:
-	ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, GXmlTag *load);
+	ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, LXmlTag *load);
 	~ResDialogCtrl();
 
 	const char *GetClass() { return "ResDialogCtrl"; }
-	virtual GView *View() = 0;
+	virtual LView *View() = 0;
 	ResDialogCtrl *ParentCtrl() { return dynamic_cast<ResDialogCtrl*>(View()->GetParent()); }
 	ResDialog *GetDlg() { return Dlg; }
 	ResString *GetStr() { return _Str; }
 	bool SetStr(ResString *s);
 
 	bool IsContainer() { return AcceptChildren; }
-	void OnPaint(GSurface *pDC);
-	void OnMouseClick(GMouse &m);
-	void OnMouseMove(GMouse &m);
-	bool SetPos(GRect &p, bool Repaint = false);
+	void OnPaint(LSurface *pDC);
+	void OnMouseClick(LMouse &m);
+	void OnMouseMove(LMouse &m);
+	bool SetPos(LRect &p, bool Repaint = false);
 	void StrFromRef(int Id);
-	GRect AbsPos();
+	LRect AbsPos();
 	bool GetFields(FieldTree &Fields);
 
 	// Copy/Paste translations only
@@ -123,12 +123,12 @@ public:
 	void PasteText();
 
 	virtual int GetType() = 0;
-	virtual GRect GetMinSize();
+	virtual LRect GetMinSize();
 	virtual bool Serialize(FieldTree &Fields);
 	virtual void ListChildren(List<ResDialogCtrl> &l, bool Deep = true);
-	virtual bool AttachCtrl(ResDialogCtrl *Ctrl, GRect *r = 0);
-	virtual GRect *GetChildArea(ResDialogCtrl *Ctrl) { return 0; }
-	virtual GRect *GetPasteArea() { return 0; }
+	virtual bool AttachCtrl(ResDialogCtrl *Ctrl, LRect *r = 0);
+	virtual LRect *GetChildArea(ResDialogCtrl *Ctrl) { return 0; }
+	virtual LRect *GetPasteArea() { return 0; }
 	virtual void EnumCtrls(List<ResDialogCtrl> &Ctrls);
 	virtual void ShowMe(ResDialogCtrl *Child) {}
 };
@@ -138,7 +138,7 @@ public:
 #define RESIZE_X2			0x0004
 #define RESIZE_Y2			0x0008
 
-class ResDialog : public Resource, public GLayout, public ResFactory
+class ResDialog : public Resource, public LLayout, public ResFactory
 {
 	friend class ResDialogCtrl;
 	friend class ResDialogUi;
@@ -153,28 +153,28 @@ protected:
 
 	ResDialogUi *Ui;
 	List<ResDialogCtrl> Selection;
-	GRect DlgPos;
+	LRect DlgPos;
 	
 	int DragGoober;
 	int *DragX, *DragY;
 	int DragOx, DragOy;
-	GRect DragRgn;
+	LRect DragRgn;
 	ResDialogCtrl *DragCtrl;
-	void DrawSelection(GSurface *pDC);
+	void DrawSelection(LSurface *pDC);
 
 public:
-	GAutoPtr<GSurface> DebugOverlay;
+	LAutoPtr<LSurface> DebugOverlay;
 
 	ResDialog(AppWnd *w, int type = TYPE_DIALOG);
 	~ResDialog();
-	void Create(GXmlTag *load, SerialiseContext *Ctx) override;
+	void Create(LXmlTag *load, SerialiseContext *Ctx) override;
 
 	const char *GetClass() override { return "ResDialog"; }
-	GView *Wnd() override { return dynamic_cast<GView*>(this); }
+	LView *Wnd() override { return dynamic_cast<LView*>(this); }
 	static void AddLanguage(GLanguageId Id);
 	ResDialog *IsDialog() override { return this; }
 	void EnumCtrls(List<ResDialogCtrl> &Ctrls);
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching) override;
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching) override;
 
 	// GObj overrides
 	const char *Name() override;
@@ -182,13 +182,13 @@ public:
 
 	// Factory
 	char *StringFromRef(int Ref) override;
-	ResObject *CreateObject(GXmlTag *Tag, ResObject *Parent) override;
+	ResObject *CreateObject(LXmlTag *Tag, ResObject *Parent) override;
 
 	int Res_GetStrRef(ResObject *Obj) override;
 	bool Res_SetStrRef(ResObject *Obj, int Id, ResReadCtx *Ctx) override;
 	void Res_SetPos(ResObject *Obj, int x1, int y1, int x2, int y2) override;
 	void Res_SetPos(ResObject *Obj, char *s) override;
-	GRect Res_GetPos(ResObject *Obj) override;
+	LRect Res_GetPos(ResObject *Obj) override;
 	void Res_Attach(ResObject *Obj, ResObject *Parent) override;
 	bool Res_GetChildren(ResObject *Obj, List<ResObject> *l, bool Deep) override;
 	void Res_Append(ResObject *Obj, ResObject *Parent) override;
@@ -199,14 +199,14 @@ public:
 
 	// Implementation
 	int CurrentTool();
-	ResDialogCtrl *CreateCtrl(GXmlTag *Tag);
-	ResDialogCtrl *CreateCtrl(int Tool, GXmlTag *load);
+	ResDialogCtrl *CreateCtrl(LXmlTag *Tag);
+	ResDialogCtrl *CreateCtrl(int Tool, LXmlTag *load);
 	bool IsSelected(ResDialogCtrl *Ctrl);
 	bool IsDraging();
 	void SnapPoint(LPoint *p, ResDialogCtrl *From);
-	void SnapRect(GRect *r, ResDialogCtrl *From);
+	void SnapRect(LRect *r, ResDialogCtrl *From);
 	void MoveSelection(int Dx, int Dy);
-	void SelectRect(ResDialogCtrl *Parent, GRect *r, bool ClearPrev = true);
+	void SelectRect(ResDialogCtrl *Parent, LRect *r, bool ClearPrev = true);
 	void SelectNone();
 	void SelectCtrl(ResDialogCtrl *c);
 	void CleanSymbols();
@@ -219,10 +219,10 @@ public:
 	void Paste() override;
 
 	// Methods
-	GView *CreateUI() override;
-	void OnMouseClick(GMouse &m) override;
-	void OnMouseMove(GMouse &m) override;
-	bool OnKey(GKey &k) override;
+	LView *CreateUI() override;
+	void OnMouseClick(LMouse &m) override;
+	void OnMouseMove(LMouse &m) override;
+	bool OnKey(LKey &k) override;
 	void OnSelect(ResDialogCtrl *Wnd, bool ClearPrev = true);
 	void OnDeselect(ResDialogCtrl *Wnd);
 	void OnRightClick(LSubMenu *RClick) override;
@@ -230,29 +230,29 @@ public:
 	int OnCommand(int Cmd, int Event, OsView hWnd) override;
 	void OnLanguageChange();
 
-	void _Paint(GSurface *pDC = NULL, LPoint *Offset = NULL, GRect *Update = NULL) override;
-	void OnPaint(GSurface *pDC) override;
+	void _Paint(LSurface *pDC = NULL, LPoint *Offset = NULL, LRect *Update = NULL) override;
+	void OnPaint(LSurface *pDC) override;
 
 	bool Test(ErrorCollection *e) override;
-	bool Read(GXmlTag *Tag, SerialiseContext &Ctx) override;
-	bool Write(GXmlTag *Tag, SerialiseContext &Ctx) override;
+	bool Read(LXmlTag *Tag, SerialiseContext &Ctx) override;
+	bool Write(LXmlTag *Tag, SerialiseContext &Ctx) override;
 };
 
-class ResDialogUi : public GLayout
+class ResDialogUi : public LLayout
 {
 	friend class ResDialog;
 
-	GToolBar *Tools;
+	LToolBar *Tools;
 	ResDialog *Dialog;
-	GStatusBar *Status;
-	GStatusPane *StatusInfo;
+	LStatusBar *Status;
+	LStatusPane *StatusInfo;
 
 public:
 	ResDialogUi(ResDialog *Res);
 	~ResDialogUi();
 
 	const char *GetClass() { return "ResDialogUi"; }
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void PourAll();
 	void OnPosChange();
 	void OnCreate();
@@ -263,26 +263,26 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////
-class CtrlDlg : public ResDialogCtrl, public GView
+class CtrlDlg : public ResDialogCtrl, public LView
 {
 public:
-	CtrlDlg(ResDialog *dlg, GXmlTag *load);
+	CtrlDlg(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_DIALOG)
 	const char *GetClass() { return "CtrlDlg"; }
 
-	GRect &GetClient(bool InClientSpace = true);
+	LRect &GetClient(bool InClientSpace = true);
 	
-	// void _Paint(GSurface *pDC = NULL, LPoint *Offset = NULL, GRect *Update = NULL);
-	void OnNcPaint(GSurface *pDC, GRect &r);
+	// void _Paint(LSurface *pDC = NULL, LPoint *Offset = NULL, LRect *Update = NULL);
+	void OnNcPaint(LSurface *pDC, LRect &r);
 };
 
-class CtrlTable : public ResDialogCtrl, public GDom, public GView
+class CtrlTable : public ResDialogCtrl, public GDom, public LView
 {
 	class CtrlTablePrivate *d;
 
 public:
-	CtrlTable(ResDialog *dlg, GXmlTag *load);
+	CtrlTable(ResDialog *dlg, LXmlTag *load);
 	~CtrlTable();
 
 	DECL_DIALOG_CTRL(UI_TABLE)
@@ -292,10 +292,10 @@ public:
 	bool Serialize(FieldTree &Fields);
 
 	void SetAttachCell(class ResTableCell *c);
-	bool AttachCtrl(ResDialogCtrl *Ctrl, GRect *r = 0);
-	void OnChildrenChanged(GViewI *Wnd, bool Attaching);
-	GRect *GetPasteArea();
-	GRect *GetChildArea(ResDialogCtrl *Ctrl);
+	bool AttachCtrl(ResDialogCtrl *Ctrl, LRect *r = 0);
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
+	LRect *GetPasteArea();
+	LRect *GetChildArea(ResDialogCtrl *Ctrl);
 	void Layout();
 	void UnMerge(class ResTableCell *Cell);
 	void Fix();
@@ -304,26 +304,26 @@ public:
 	void EnumCtrls(List<ResDialogCtrl> &Ctrls);
 	void OnPosChange();
 
-	bool GetVariant(const char *Name, GVariant &Value, char *Array = 0);
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0);
+	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
+	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
 };
 
-class CtrlText : public ResDialogCtrl, public GView
+class CtrlText : public ResDialogCtrl, public LView
 {
 public:
-	CtrlText(ResDialog *dlg, GXmlTag *load);
+	CtrlText(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_TEXT)
 	const char *GetClass() { return "CtrlText"; }
 };
 
-class CtrlEditbox : public ResDialogCtrl, public GView
+class CtrlEditbox : public ResDialogCtrl, public LView
 {
 	bool Password;
 	bool MultiLine;
 
 public:
-	CtrlEditbox(ResDialog *dlg, GXmlTag *load);
+	CtrlEditbox(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_EDITBOX)
 	const char *GetClass() { return "CtrlEditbox"; }
@@ -332,22 +332,22 @@ public:
 	bool Serialize(FieldTree &Fields);
 };
 
-class CtrlCheckbox : public ResDialogCtrl, public GView
+class CtrlCheckbox : public ResDialogCtrl, public LView
 {
 public:
-	CtrlCheckbox(ResDialog *dlg, GXmlTag *load);
+	CtrlCheckbox(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_CHECKBOX)
 	const char *GetClass() { return "CtrlCheckbox"; }
 };
 
-class CtrlButton : public ResDialogCtrl, public GView
+class CtrlButton : public ResDialogCtrl, public LView
 {
-	GString Image;
+	LString Image;
 	bool IsToggle;
 
 public:
-	CtrlButton(ResDialog *dlg, GXmlTag *load);
+	CtrlButton(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_BUTTON)
 	const char *GetClass() { return "CtrlButton"; }
@@ -355,31 +355,31 @@ public:
 	bool Serialize(FieldTree &Fields);
 };
 
-class CtrlGroup : public ResDialogCtrl, public GView
+class CtrlGroup : public ResDialogCtrl, public LView
 {
 public:
-	CtrlGroup(ResDialog *dlg, GXmlTag *load);
+	CtrlGroup(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_GROUP)
 	const char *GetClass() { return "CtrlGroup"; }
 };
 
-class CtrlRadio : public ResDialogCtrl, public GView
+class CtrlRadio : public ResDialogCtrl, public LView
 {
-	GSurface *Bmp;
+	LSurface *Bmp;
 
 public:
-	CtrlRadio(ResDialog *dlg, GXmlTag *load);
+	CtrlRadio(ResDialog *dlg, LXmlTag *load);
 	~CtrlRadio();
 
 	DECL_DIALOG_CTRL(UI_RADIO)
 	const char *GetClass() { return "CtrlRadio"; }
 };
 
-class CtrlTab : public ResDialogCtrl, public GView
+class CtrlTab : public ResDialogCtrl, public LView
 {
 public:
-	CtrlTab(ResDialog *dlg, GXmlTag *load);
+	CtrlTab(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_TAB)
 	const char *GetClass() { return "CtrlTab"; }
@@ -387,7 +387,7 @@ public:
 	void ListChildren(List<ResDialogCtrl> &l, bool Deep);
 };
 
-class CtrlTabs : public ResDialogCtrl, public GView
+class CtrlTabs : public ResDialogCtrl, public LView
 {
 	friend class CtrlTab;
 
@@ -396,7 +396,7 @@ class CtrlTabs : public ResDialogCtrl, public GView
 public:
 	List<CtrlTab> Tabs;
 
-	CtrlTabs(ResDialog *dlg, GXmlTag *load);
+	CtrlTabs(ResDialog *dlg, LXmlTag *load);
 	~CtrlTabs();
 
 	DECL_DIALOG_CTRL(UI_TABS)
@@ -407,30 +407,30 @@ public:
 	void ToTab();
 	void FromTab();
 
-	GRect GetMinSize();
+	LRect GetMinSize();
 	void EnumCtrls(List<ResDialogCtrl> &Ctrls);
 	void ShowMe(ResDialogCtrl *Child);
 };
 
-class ListCol : public ResDialogCtrl, public GView
+class ListCol : public ResDialogCtrl, public LView
 {
 public:
-	GRect &r() { return GetPos(); }
+	LRect &r() { return GetPos(); }
 
 	DECL_DIALOG_CTRL(UI_COLUMN)
 	const char *GetClass() { return "ListCol"; }
 
-	ListCol(ResDialog *dlg, GXmlTag *load, char *Str = 0, int Width = 50);
+	ListCol(ResDialog *dlg, LXmlTag *load, char *Str = 0, int Width = 50);
 };
 
-class CtrlList : public ResDialogCtrl, public GView
+class CtrlList : public ResDialogCtrl, public LView
 {
 	ssize_t DragCol;
 
 public:
 	List<ListCol> Cols;
 
-	CtrlList(ResDialog *dlg, GXmlTag *load);
+	CtrlList(ResDialog *dlg, LXmlTag *load);
 	~CtrlList();
 
 	DECL_DIALOG_CTRL(UI_LIST)
@@ -440,57 +440,57 @@ public:
 	void Empty();
 };
 
-class CtrlComboBox : public ResDialogCtrl, public GView
+class CtrlComboBox : public ResDialogCtrl, public LView
 {
 public:
-	CtrlComboBox(ResDialog *dlg, GXmlTag *load);
+	CtrlComboBox(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_COMBO)
 	const char *GetClass() { return "CtrlComboBox"; }
 };
 
-class CtrlScrollBar : public ResDialogCtrl, public GView
+class CtrlScrollBar : public ResDialogCtrl, public LView
 {
 public:
-	CtrlScrollBar(ResDialog *dlg, GXmlTag *load);
+	CtrlScrollBar(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_SCROLL_BAR)
 	const char *GetClass() { return "CtrlScrollBar"; }
 };
 
-class CtrlTree : public ResDialogCtrl, public GView
+class CtrlTree : public ResDialogCtrl, public LView
 {
 public:
-	CtrlTree(ResDialog *dlg, GXmlTag *load);
+	CtrlTree(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_TREE)
 	const char *GetClass() { return "CtrlTree"; }
 };
 
-class CtrlBitmap : public ResDialogCtrl, public GView
+class CtrlBitmap : public ResDialogCtrl, public LView
 {
 public:
-	CtrlBitmap(ResDialog *dlg, GXmlTag *load);
+	CtrlBitmap(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_BITMAP)
 	const char *GetClass() { return "CtrlBitmap"; }
 };
 
-class CtrlProgress : public ResDialogCtrl, public GView
+class CtrlProgress : public ResDialogCtrl, public LView
 {
 public:
-	CtrlProgress(ResDialog *dlg, GXmlTag *load);
+	CtrlProgress(ResDialog *dlg, LXmlTag *load);
 
 	DECL_DIALOG_CTRL(UI_PROGRESS)
 	const char *GetClass() { return "CtrlProgress"; }
 };
 
-class CtrlCustom : public ResDialogCtrl, public GView
+class CtrlCustom : public ResDialogCtrl, public LView
 {
 	char *Control;
 
 public:
-	CtrlCustom(ResDialog *dlg, GXmlTag *load);
+	CtrlCustom(ResDialog *dlg, LXmlTag *load);
 	~CtrlCustom();
 
 	DECL_DIALOG_CTRL(UI_CUSTOM)
@@ -500,12 +500,12 @@ public:
 	bool Serialize(FieldTree &Fields);
 };
 
-class CtrlControlTree : public ResDialogCtrl, public GTree, public GDom
+class CtrlControlTree : public ResDialogCtrl, public LTree, public GDom
 {
 	class CtrlControlTreePriv *d;
 
 public:
-	CtrlControlTree(ResDialog *dlg, GXmlTag *load);
+	CtrlControlTree(ResDialog *dlg, LXmlTag *load);
 	~CtrlControlTree();
 
 	DECL_DIALOG_CTRL(UI_CONTROL_TREE)
@@ -514,8 +514,8 @@ public:
 	bool GetFields(FieldTree &Fields);
 	bool Serialize(FieldTree &Fields);
 
-	bool GetVariant(const char *Name, GVariant &Value, char *Array = 0);
-	bool SetVariant(const char *Name, GVariant &Value, char *Array = 0);
+	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
+	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
 };
 
 ////////////////////////////////////////////////////////////////

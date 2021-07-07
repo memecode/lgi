@@ -10,16 +10,16 @@
 #include <string.h>
 #include <math.h>
 
-#include "Gdc2.h"
-#include "GPalette.h"
-#include "GPixelRops.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/Palette.h"
+#include "lgi/common/PixelRops.h"
 
 #undef NonPreMulOver32
 #undef NonPreMulAlpha
 
 /////////////////////////////////////////////////////////////////////////////////////////
-template<typename Pixel, GColourSpace ColourSpace>
-class App32Base : public GApplicator
+template<typename Pixel, LColourSpace ColourSpace>
+class App32Base : public LApplicator
 {
 protected:
 	union
@@ -75,7 +75,7 @@ public:
 	}
 };
 
-template<typename Pixel, GColourSpace ColourSpace>
+template<typename Pixel, LColourSpace ColourSpace>
 class App32NoAlpha : public App32Base<Pixel, ColourSpace>
 {
 public:
@@ -236,7 +236,7 @@ public:
 			switch (Src->Cs)
 			{
 				#define AlphaCase(name) \
-					case Cs##name: return AlphaBlt<G##name>(Src, SrcAlpha);
+					case Cs##name: return AlphaBlt<L##name>(Src, SrcAlpha);
 
 				AlphaCase(Rgb24);
 				AlphaCase(Bgr24);
@@ -262,7 +262,7 @@ public:
 	}
 };
 
-template<typename Pixel, GColourSpace ColourSpace>
+template<typename Pixel, LColourSpace ColourSpace>
 class App32Alpha : public App32Base<Pixel, ColourSpace>
 {
 public:
@@ -576,7 +576,7 @@ public:
 			switch (Src->Cs)
 			{
 				#define AlphaCase(name, sz) \
-					case Cs##name: return AlphaBlt##sz<G##name>(Src, SrcAlpha);
+					case Cs##name: return AlphaBlt##sz<L##name>(Src, SrcAlpha);
 
 				AlphaCase(Rgb24, 24);
 				AlphaCase(Bgr24, 24);
@@ -605,7 +605,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////////
  //, a = this->p32.a
 #define CreateOpNoAlpha(name, opcode, alpha)													\
-	template<typename Pixel, GColourSpace ColourSpace>											\
+	template<typename Pixel, LColourSpace ColourSpace>											\
 	class App32##name##alpha : public App32Base<Pixel, ColourSpace>								\
 	{																							\
 	public:																						\
@@ -641,7 +641,7 @@ public:
 	};
 
 #define CreateOpAlpha(name, opcode, alpha)														\
-	template<typename Pixel, GColourSpace ColourSpace>											\
+	template<typename Pixel, LColourSpace ColourSpace>											\
 	class App32##name##alpha : public App32Base<Pixel, ColourSpace>								\
 	{																							\
 	public:																						\
@@ -687,14 +687,14 @@ CreateOpNoAlpha(Xor, ^=, NoAlpha)
 CreateOpAlpha(Xor, ^=, Alpha)
 
 /////////////////////////////////////////////////////////////////////////////////////////
-GApplicator *GApp32::Create(GColourSpace Cs, int Op)
+LApplicator *GApp32::Create(LColourSpace Cs, int Op)
 {
 	if (Op == GDC_SET)
 	{
 		switch (Cs)
 		{
 			#define AppCase(name, alpha) \
-				case Cs##name: return new App32##alpha<G##name, Cs##name>();
+				case Cs##name: return new App32##alpha<L##name, Cs##name>();
 			
 			AppCase(Rgba32, Alpha);
 			AppCase(Bgra32, Alpha);
@@ -714,7 +714,7 @@ GApplicator *GApp32::Create(GColourSpace Cs, int Op)
 		switch (Cs)
 		{
 			#define AppCase(name, alpha) \
-				case Cs##name: return new App32Or##alpha<G##name, Cs##name>();
+				case Cs##name: return new App32Or##alpha<L##name, Cs##name>();
 			
 			AppCase(Rgba32, Alpha);
 			AppCase(Bgra32, Alpha);
@@ -734,7 +734,7 @@ GApplicator *GApp32::Create(GColourSpace Cs, int Op)
 		switch (Cs)
 		{
 			#define AppCase(name, alpha) \
-				case Cs##name: return new App32And##alpha<G##name, Cs##name>();
+				case Cs##name: return new App32And##alpha<L##name, Cs##name>();
 			
 			AppCase(Rgba32, Alpha);
 			AppCase(Bgra32, Alpha);
@@ -754,7 +754,7 @@ GApplicator *GApp32::Create(GColourSpace Cs, int Op)
 		switch (Cs)
 		{
 			#define AppCase(name, alpha) \
-				case Cs##name: return new App32Xor##alpha<G##name, Cs##name>();
+				case Cs##name: return new App32Xor##alpha<L##name, Cs##name>();
 			
 			AppCase(Rgba32, Alpha);
 			AppCase(Bgra32, Alpha);

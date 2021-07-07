@@ -1,16 +1,16 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "Lvc.h"
-#include "GTextLog.h"
+#include "lgi/common/TextLog.h"
 
 #define OPT_WND_STATE		"BlameUiState"
 struct BlameUiPriv
 {
-	GString Output;
+	LString Output;
 	AppPriv *Priv;
 	GTextLog *Log;
 };
 
-BlameUi::BlameUi(AppPriv *priv, VersionCtrl Vc, GString Output)
+BlameUi::BlameUi(AppPriv *priv, VersionCtrl Vc, LString Output)
 {
 	d = new BlameUiPriv;
 	d->Log = NULL;
@@ -20,7 +20,7 @@ BlameUi::BlameUi(AppPriv *priv, VersionCtrl Vc, GString Output)
 
 	if (!SerializeState(&d->Priv->Opts, OPT_WND_STATE, true))
 	{
-		GRect r(0, 0, 800, 500);
+		LRect r(0, 0, 800, 500);
 		SetPos(r);
 		MoveToCenter();
 	}

@@ -1,24 +1,22 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/List.h"
 #include "GHistory.h"
-#include "LList.h"
 
 //////////////////////////////////////////////////////////////
-// GHistoryPopup
-class GHistoryPopup : public GPopup
+// LHistoryPopup
+class LHistoryPopup : public LPopup
 {
 public:
 	LList *Lst;
-	GString Str;
+	LString Str;
 	int64 Index;
 	bool Ignore;
-
-	GHistoryPopup() : GPopup(0)
+	LHistoryPopup() : LPopup(0)
 	{
 		Lst = 0;
 		Index = -1;
-		GRect r(0, 0, 300, 300);
+		LRect r(0, 0, 300, 300);
 		SetPos(r);
-
 		Children.Insert(Lst = new LList(1, 1, 1, 100, 100));
 		if (Lst)
 		{
@@ -29,7 +27,7 @@ public:
 		}
 	}
 	
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		if (Lst)
 		{
@@ -48,13 +46,13 @@ public:
 	{
 		if (Lst)
 		{
-			GRect r = GetClient();
+			LRect r = GetClient();
 			r.Size(1, 1);
 			Lst->SetPos(r);
 		}
 	}
 	
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		if (Lst && Ctrl->GetId() == 1)
 		{
@@ -78,13 +76,12 @@ public:
 		return 0;
 	} 
 };
-
 /////////////////////////////////////////////////////////////
 // GHistory
 class GHistoryPrivate
 {
 public:
-	GHistoryPopup *Popup;
+	LHistoryPopup *Popup;
 	int TargetId;
 	int64 Value;
 	
@@ -95,22 +92,19 @@ public:
 		Value = 0;
 	}
 };
-
 GHistory::GHistory() :
-	GDropDown(-1, 0, 0, 10, 10, 0),
+	LDropDown(-1, 0, 0, 10, 10, 0),
 	ResObject(Res_Custom)
 {
 	d = new GHistoryPrivate;
-	SetPopup(d->Popup = new GHistoryPopup);
+	SetPopup(d->Popup = new LHistoryPopup);
 }
-
 GHistory::~GHistory()
 {
 	DeleteObj(d);
 	DeleteArrays();
 }
-
-bool GHistory::OnLayout(GViewLayoutInfo &Inf)
+bool GHistory::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (!Inf.Width.Min)
 		Inf.Width.Min = Inf.Width.Max = 24;
@@ -119,17 +113,14 @@ bool GHistory::OnLayout(GViewLayoutInfo &Inf)
 	
 	return true;
 }
-
 int GHistory::GetTargetId()
 {
 	return d->TargetId;
 }
-
 void GHistory::SetTargetId(int id)
 {
 	d->TargetId = id;
 }
-
 int64 GHistory::Value()
 {
 	if (d && d->Popup)
@@ -137,7 +128,6 @@ int64 GHistory::Value()
 	
 	return -1;
 }
-
 void GHistory::Value(int64 i)
 {
 	if (!d || !d->Popup)
@@ -160,12 +150,10 @@ void GHistory::Value(int64 i)
 	}
 	else LgiTrace("%s:%i - No list?\n", _FL);
 }
-
 int GHistory::Add(const char *Str)
 {
 	if (!Str)
 		return -1;
-
 	int Idx = 0;
 	for (auto s: *this)
 	{
@@ -175,7 +163,6 @@ int GHistory::Add(const char *Str)
 		}
 		Idx++;
 	}
-
 	Idx = (int)Length();
 	Insert(NewStr(Str));
 	if (d->Popup && d->Popup->Lst)
@@ -187,10 +174,8 @@ int GHistory::Add(const char *Str)
 			d->Popup->Lst->Insert(li);
 		}
 	}
-
 	return Idx;
 }
-
 void GHistory::Update()
 {
 	LList *Lst = d->Popup ? d->Popup->Lst : 0;
@@ -208,7 +193,6 @@ void GHistory::Update()
 		}
 	}
 }
-
 void GHistory::OnPopupClose()
 {
 	if (!d->Popup->GetCancelled() &&
@@ -219,16 +203,15 @@ void GHistory::OnPopupClose()
 		GetWindow()->SetCtrlName(d->TargetId, d->Popup->Str);
 	}
 }
-
 ////////////////////////////////////////////////////////////
 // Factory
-class GHistoryFactory : public GViewFactory
+class GHistoryFactory : public LViewFactory
 {
 public:
-	virtual GView *NewView
+	virtual LView *NewView
 	(
 		const char *Class,
-		GRect *Pos,
+		LRect *Pos,
 		const char *Text
 	)
 	{
@@ -238,6 +221,5 @@ public:
 		}
 		return 0;
 	}
-
 	
 } HistoryFactory;

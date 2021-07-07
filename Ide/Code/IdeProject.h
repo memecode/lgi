@@ -1,13 +1,13 @@
 #ifndef _IDE_PROJECT_H_
 #define _IDE_PROJECT_H_
 
-#include "GXmlTree.h"
-#include "GDragAndDrop.h"
-#include "GTree.h"
-#include "GOptionsFile.h"
+#include "lgi/common/XmlTree.h"
+#include "lgi/common/DragAndDrop.h"
+#include "lgi/common/Tree.h"
+#include "lgi/common/OptionsFile.h"
 #include "GDebugger.h"
-#include "GProgressDlg.h"
-#include "LList.h"
+#include "lgi/common/ProgressDlg.h"
+#include "lgi/common/List.h"
 
 #define NODE_DROP_FORMAT			"com.memecode.ProjectNode"
 
@@ -54,29 +54,29 @@ enum ProjectStatus
 
 extern int PlatformCtrlId[];
 
-class AddFilesProgress : public GDialog
+class AddFilesProgress : public LDialog
 {
 	uint64 Ts;
 	uint64 v;
-	GView *Msg;
+	LView *Msg;
 
 public:
 	bool Cancel;
 	static const char *DefaultExt;
 	LHashTbl<ConstStrKey<char,false>, bool> Exts;
 
-	AddFilesProgress(GViewI *par);
+	AddFilesProgress(LViewI *par);
 
 	int64 Value();
 	void Value(int64 val);
-	int OnNotify(GViewI *c, int f);
+	int OnNotify(LViewI *c, int f);
 };
 
 extern IdePlatform GetCurrentPlatform();
 
 class AppWnd;
 class IdeProject;
-class IdeCommon : public GTreeItem, public GXmlTag
+class IdeCommon : public LTreeItem, public LXmlTag
 {
 	friend class IdeProject;
 
@@ -88,11 +88,11 @@ public:
 	~IdeCommon();
 
 	IdeProject *GetProject() { return Project; }
-	bool OnOpen(GProgressDlg *Prog, GXmlTag *Src);	
+	bool OnOpen(LProgressDlg *Prog, LXmlTag *Src);	
 	void CollectAllSubProjects(List<IdeProject> &c);
-	void CollectAllSource(GArray<GString> &c, IdePlatform Platform);
+	void CollectAllSource(LArray<LString> &c, IdePlatform Platform);
 	void SortChildren();
-	void InsertTag(GXmlTag *t) override;
+	void InsertTag(LXmlTag *t) override;
 	bool RemoveTag() override;
 	virtual bool IsWeb() = 0;	
 	virtual int GetPlatforms() = 0;
@@ -100,10 +100,10 @@ public:
 	IdeCommon *GetSubFolder(IdeProject *Project, char *Name, bool Create = false);
 };
 
-class WatchItem : public GTreeItem
+class WatchItem : public LTreeItem
 {
 	class IdeOutput *Out;
-	GTreeItem *PlaceHolder;
+	LTreeItem *PlaceHolder;
 
 public:
 	WatchItem(IdeOutput *out, const char *Init = NULL);
@@ -111,13 +111,13 @@ public:
 	
 	bool SetText(const char *s, int i = 0) override;
 	void OnExpand(bool b) override;
-	bool SetValue(GVariant &v);
+	bool SetValue(LVariant &v);
 };
 
 #include "IdeProjectSettings.h"
 #include "GDebugContext.h"
 
-class IdeProject : public GXmlFactory, public IdeCommon
+class IdeProject : public LXmlFactory, public IdeCommon
 {
 	friend class ProjectNode;
 	friend class BuildThread;
@@ -133,20 +133,20 @@ public:
 	int GetPlatforms();
 
 	const char *GetFileName(); // Can be a relative path
-	GAutoString GetFullPath(); // Always a complete path
-	GAutoString GetBasePath(); // A non-relative path to the folder containing the project
+	LAutoString GetFullPath(); // Always a complete path
+	LAutoString GetBasePath(); // A non-relative path to the folder containing the project
 
 	AppWnd *GetApp();
-	GString GetExecutable(IdePlatform Platform);
+	LString GetExecutable(IdePlatform Platform);
 	const char *GetExeArgs();
 	const char *GetIncludePaths();
 	const char *GetPreDefinedValues();
 
-	GXmlTag *Create(char *Tag);
+	LXmlTag *Create(char *Tag);
 	void Empty();
-	GString GetMakefile(IdePlatform Platform);
+	LString GetMakefile(IdePlatform Platform);
 	bool GetExePath(char *Path, int Len);
-	bool RelativePath(GString &Out, const char *In, bool Debug = false);
+	bool RelativePath(LString &Out, const char *In, bool Debug = false);
 	void Build(bool All, bool Release);
 	void StopBuild();
 	void Clean(bool All, bool Release);
@@ -158,20 +158,20 @@ public:
 	const char *GetFunctionComment();
 	bool IsMakefileUpToDate();
 	bool CreateMakefile(IdePlatform Platform, bool BuildAfterwards);
-	GString GetTargetName(IdePlatform Platform);
-	GString GetTargetFile(IdePlatform Platform);
-	bool BuildIncludePaths(GArray<GString> &Paths, bool Recurse, bool IncludeSystem, IdePlatform Platform);
+	LString GetTargetName(IdePlatform Platform);
+	LString GetTargetFile(IdePlatform Platform);
+	bool BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool IncludeSystem, IdePlatform Platform);
 	void ShowFileProperties(const char *File);
 	bool GetExpanded(int Id);
 	void SetExpanded(int Id, bool Exp);
 	int AllocateId();
-	bool CheckExists(GString &p, bool Debug = false);
-	bool CheckExists(GAutoString &p, bool Debug = false);
+	bool CheckExists(LString &p, bool Debug = false);
+	bool CheckExists(LAutoString &p, bool Debug = false);
 	void OnMakefileCreated();
 	
 	// Nodes
 	char *FindFullPath(const char *File, class ProjectNode **Node = NULL);
-	bool GetAllNodes(GArray<ProjectNode*> &Nodes);
+	bool GetAllNodes(LArray<ProjectNode*> &Nodes);
 	bool HasNode(ProjectNode *Node);
 
 	// Project heirarchy
@@ -190,8 +190,8 @@ public:
 	void ImportDsp(const char *File);
 
 	// Dependency calculation
-	bool GetAllDependencies(GArray<char*> &Files, IdePlatform Platform);
-	bool GetDependencies(const char *SourceFile, GArray<GString> &IncPaths, GArray<char*> &Files, IdePlatform Platform);
+	bool GetAllDependencies(LArray<char*> &Files, IdePlatform Platform);
+	bool GetDependencies(const char *SourceFile, LArray<LString> &IncPaths, LArray<char*> &Files, IdePlatform Platform);
 	
 	// Settings
 	IdeProjectSettings *GetSettings();
@@ -199,20 +199,20 @@ public:
 	// Impl
 	const char *GetText(int Col);
 	int GetImage(int Flags);
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 };
 
-class IdeTree : public GTree, public GDragDropTarget
+class IdeTree : public LTree, public LDragDropTarget
 {
-	GTreeItem *Hit;
+	LTreeItem *Hit;
 
 public:
 	IdeTree();
 	
 	void OnCreate();
 	void OnDragExit();
-	int WillAccept(GDragFormats &Formats, LPoint p, int KeyState);
-	int OnDrop(GArray<GDragData> &Data, LPoint Pt, int KeyState);
+	int WillAccept(LDragFormats &Formats, LPoint p, int KeyState);
+	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState);
 };
 
 extern const char TagSettings[];

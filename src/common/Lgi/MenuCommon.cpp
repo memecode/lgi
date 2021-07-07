@@ -1,0 +1,64 @@
+//
+//  LMenuCommon.cpp
+//  LgiCarbon
+//
+//  Created by Matthew Allen on 30/01/2018.
+//
+//
+
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Menu.h"
+
+bool LSubMenu::GetVariant(const char *Name, LVariant &Value, char *Array)
+{
+	GDomProperty p = LgiStringToDomProp(Name);
+	switch (p)
+	{
+		case ObjLength:
+			Value = Length();
+			break;
+		default:
+			return false;
+	}
+	return true;
+}
+
+bool LSubMenu::SetVariant(const char *Name, LVariant &Value, char *Array)
+{
+	/*
+	GDomProperty p = LgiStringToDomProp(Name);
+	switch (p)
+	{
+		default:
+			return false;
+	}
+	*/
+	return false;
+}
+
+bool LSubMenu::CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args)
+{
+	GDomProperty Method = LgiStringToDomProp(MethodName);	
+	switch (Method)
+	{
+		case ::AppendSeparator:
+		{
+			*ReturnValue = AppendSeparator();
+			break;
+		}
+		case ::AppendItem:
+		{
+			char *Str		= Args.Length() > 0 ? Args[0]->CastString() : NULL;
+			int Id			= Args.Length() > 1 ? Args[1]->CastInt32() : -1;
+			bool Enabled	= Args.Length() > 2 ? Args[2]->CastBool() : true;
+			int Where		= Args.Length() > 3 ? Args[3]->CastInt32() : -1;
+			char *ShortCut	= Args.Length() > 4 ? Args[4]->CastString() : NULL;
+
+			*ReturnValue = AppendItem(Str, Id, Enabled, Where, ShortCut);
+			break;
+		}
+		default:
+			return false;
+	}
+	return true;
+}

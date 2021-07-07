@@ -1,11 +1,11 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "UnitTests.h"
-#include "LUnrolledList.h"
-#include "LHashTable.h"
+#include "lgi/common/UnrolledList.h"
+#include "lgi/common/HashTable.h"
 
 bool LRangeTest::Run()
 {
-	GRange a, b, c;
+	LRange a, b, c;
 
 	// Overlap tests:
 
@@ -61,7 +61,7 @@ bool LRangeTest::Run()
 	a.Set(12, 10); b.Set(20, 10);
 	c = b;
 	b -= a;
-	if (b != GRange(12,8)) return FAIL(_FL, "range test 3");
+	if (b != LRange(12,8)) return FAIL(_FL, "range test 3");
 
 	// 4) a overlaps the whole of b
 	a.Set(15, 30); b.Set(20, 10);
@@ -73,19 +73,19 @@ bool LRangeTest::Run()
 	a.Set(22, 6); b.Set(20, 10);
 	c = b;
 	b -= a;
-	if (b != GRange(20, 4)) return FAIL(_FL, "range test 3");
+	if (b != LRange(20, 4)) return FAIL(_FL, "range test 3");
 
 	// 6) a overlaps part of b but matching the end
 	a.Set(25, 5); b.Set(20, 10);
 	c = b;
 	b -= a;
-	if (b != GRange(20, 5)) return FAIL(_FL, "range test 3");
+	if (b != LRange(20, 5)) return FAIL(_FL, "range test 3");
 
 	// 7) a overlaps the end and past the end of b
 	a.Set(25, 10); b.Set(20, 10);
 	c = b;
 	b -= a;
-	if (b != GRange(20, 5)) return FAIL(_FL, "range test 3");
+	if (b != LRange(20, 5)) return FAIL(_FL, "range test 3");
 
 	// 8) a's start adjoins b's end
 	a.Set(30, 10); b.Set(20, 10);

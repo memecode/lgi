@@ -10,11 +10,11 @@
 #include <string.h>
 #include <math.h>
 
-#include "Gdc2.h"
-#include "GPalette.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/Palette.h"
 
 /// 8 bit paletted applicators
-class LgiClass GdcApp8 : public GApplicator
+class LgiClass GdcApp8 : public LApplicator
 {
 protected:
 	uchar *Ptr;
@@ -76,7 +76,7 @@ public:
 	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
 };
 
-GApplicator *GApp8::Create(GColourSpace Cs, int Op)
+LApplicator *GApp8::Create(LColourSpace Cs, int Op)
 {
 	if (Cs == CsIndex8 ||
 		Cs == CsAlpha8)
@@ -295,7 +295,7 @@ uchar Mul6[6] = {0, 6, 12, 18, 24, 30};
 uchar Mul36[6] = {0, 36, 72, 108, 144, 180};
 
 template<typename OutPx, typename InPx>
-void GConvertIndexed(OutPx *out, InPx *in, int len, GColourSpace inCs, GPalette *pal)
+void GConvertIndexed(OutPx *out, InPx *in, int len, LColourSpace inCs, GPalette *pal)
 {
 	switch (inCs)
 	{
@@ -336,7 +336,7 @@ void GConvertIndexed(OutPx *out, InPx *in, int len, GColourSpace inCs, GPalette 
 }
 
 template<typename OutPx, typename InPx>
-void GConvertRgb24(OutPx *out, InPx *in, int len, GColourSpace inCs, GPalette *pal)
+void GConvertRgb24(OutPx *out, InPx *in, int len, LColourSpace inCs, GPalette *pal)
 {
 	switch (inCs)
 	{
@@ -394,7 +394,7 @@ void Convert(System24BitPixel *Dst, GBmpMem *Src, int Line, GPalette *SPal)
 	{
 		#define ConvertCase(type) \
 			case Cs##type: \
-				GConvertRgb24<System24BitPixel, G##type>(Dst, (G##type*) In, Src->x, Src->Cs, NULL); \
+				GConvertRgb24<System24BitPixel, L##type>(Dst, (L##type*) In, Src->x, Src->Cs, NULL); \
 				break
 		
 		case CsIndex8:
@@ -480,7 +480,7 @@ bool GdcApp8Set::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
 						{
 							// Create colour lookup table
 							int LookupSize = 32 << 10;
-							GAutoPtr<uchar,true> Mem(new uchar[LookupSize]);
+							LAutoPtr<uchar,true> Mem(new uchar[LookupSize]);
 							if (Mem)
 							{
     							uchar *Lookup = Mem;
@@ -518,7 +518,7 @@ bool GdcApp8Set::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
 										}
 										case CsBgr15:
 										{
-											GBgr15 *s = (GBgr15*) (Src->Base + (y * Src->Line));
+											LBgr15 *s = (LBgr15*) (Src->Base + (y * Src->Line));
 											for (int x=0; x<Src->x; x++)
 											{
 												uint16 u = LookupIdx5bit(s->r, s->g, s->b);
@@ -529,7 +529,7 @@ bool GdcApp8Set::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
 										}
 										#define Case(Px, Sz) \
 											case Cs##Px: \
-												BltNearest##Sz(Lookup, d, (G##Px*) (Src->Base + (y * Src->Line)), Src->x); \
+												BltNearest##Sz(Lookup, d, (L##Px*) (Src->Base + (y * Src->Line)), Src->x); \
 												break
 										Case(Rgb16, 16);
 										Case(Bgr16, 16);
@@ -644,7 +644,7 @@ bool GdcApp8Set::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
 
 						if (!Pal) break;
 
-						GSurface *pBuf = new GMemDC;
+						LSurface *pBuf = new LMemDC;
 						if (pBuf && pBuf->Create(Src->x+2, 2, System24BitColourSpace))
 						{
 							// Clear buffer

@@ -115,7 +115,7 @@ public:
 	COLOUR c;
 	
 	char *FileName;
-	GFile Ps;
+	LFile Ps;
 	
 	GPrintDCPrivate()
 	{
@@ -152,7 +152,7 @@ public:
 		{
 			LgiGetSystemPath(LSP_TEMP, Temp, sizeof(Temp));
 			sprintf(Part, "_lgi_printjob_%x.ps", LRand());
-			LgiMakePath(Temp, sizeof(Temp), Temp, Part);
+			LMakePath(Temp, sizeof(Temp), Temp, Part);
 		}
 		while (FileExists(Temp));
 		
@@ -235,9 +235,9 @@ public:
 ///////////////////////////////////////////////////////////////////////////////////////
 class PrintPainter
 {
-	GPrintDC *pDC;
+	LPrintDC *pDC;
 	int Fore, Back;
-	List<GRect> Clip;
+	List<LRect> Clip;
 	int Ox, Oy;
 
 	char Face[256];
@@ -245,7 +245,7 @@ class PrintPainter
 	int Ascent;
 
 public:
-	PrintPainter(GPrintDC *dc)
+	PrintPainter(LPrintDC *dc)
 	{
 		Face[0] = 0;
 		pDC = dc;
@@ -272,7 +272,7 @@ public:
 	void drawRect(int x, int y, int wid, int height) {}
 	// void drawImage(int x, int y, XBitmapImage &image, int sx, int sy, int sw, int sh, XBitmapImage::BlitOp op) {}
 	
-	GFile &File()
+	LFile &File()
 	{
 		return pDC->d->Ps;
 	}
@@ -293,7 +293,7 @@ public:
 		Back = c;
 	}
 	
-	void setFont(GFont *f)
+	void setFont(LFont *f)
 	{
 		if (File().IsOpen() &&
 			(stricmp(f->Face(), Face) != 0 || PtSize != f->PointSize()))
@@ -335,17 +335,17 @@ public:
 	
 	void PushClip(int x1, int y1, int x2, int y2)
 	{
-		GRect *Next = new GRect(Ox + x1, Oy + y1, Ox + x2, Ox + y2);
+		LRect *Next = new LRect(Ox + x1, Oy + y1, Ox + x2, Ox + y2);
 		if (Next)
 		{
-			GRect *Last = Clip.Last();
+			LRect *Last = Clip.Last();
 			if (Last)
 			{
 				Next->Bound(Last);
 			}
 			else
 			{
-				GRect r(0, 0, X()-1, Y()-1);
+				LRect r(0, 0, X()-1, Y()-1);
 				Next->Bound(&r);
 			}
 			
@@ -355,7 +355,7 @@ public:
 	
 	void PopClip()
 	{
-		GRect *Last = Clip.Last();
+		LRect *Last = Clip.Last();
 		if (Last)
 		{
 			Clip.Delete(Last);
@@ -368,11 +368,11 @@ public:
 		Clip.DeleteObjects();
 	}
 	
-	void SetClient(GRect *Client)
+	void SetClient(LRect *Client)
 	{
 	}
 	
-	void drawText(int x, int y, char16 *text, int len, int *backColour, GRect *clip)
+	void drawText(int x, int y, char16 *text, int len, int *backColour, LRect *clip)
 	{
 		if (ValidStrW(text) && File().IsOpen())
 		{
@@ -384,7 +384,7 @@ public:
 			// Encode the string to protect the '(' and ')' characters which are reserved for the syntax
 			// of the postscript language. So we escape them here.
 			char *Mem = LgiNewUtf16To8(text);
-			GStringPipe p;
+			LStringPipe p;
 			for (char *s = Mem; s && *s; )
 			{
 				char *e = s;
@@ -445,14 +445,14 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////////////
-GPrintDC::GPrintDC(void *Handle, const char *PrintJobName)
+LPrintDC::LPrintDC(void *Handle, const char *PrintJobName)
 {
 	d = new GPrintDCPrivate;
 	d->Handle = Handle;
 	d->PrintJobName = NewStr(PrintJobName);
 }
 
-GPrintDC::~GPrintDC()
+LPrintDC::~LPrintDC()
 {
 	EndPage();
 	
@@ -501,55 +501,55 @@ GPrintDC::~GPrintDC()
 	DeleteObj(d);
 }
 
-double GPrintDC::Xc(int x)
+double LPrintDC::Xc(int x)
 {
 	return (double) x / PS_SCALE;
 }
 
-double GPrintDC::Yc(int y)
+double LPrintDC::Yc(int y)
 {
 	return (double) -y / PS_SCALE;
 }
 
-OsPainter GPrintDC::Handle()
+OsPainter LPrintDC::Handle()
 {
 	return Cairo;
 }
 
-void GPrintDC::Handle(OsPainter Set)
+void LPrintDC::Handle(OsPainter Set)
 {
 	Cairo = Set;
 }
 
-int GPrintDC::X()
+int LPrintDC::X()
 {
 	return (int) (8.26 * (double)DpiX());
 }
 
-int GPrintDC::Y()
+int LPrintDC::Y()
 {
 	return (int) (10.27 * (double)DpiY()); // 11.69
 }
 
 // This is arbitary, chosen because it's easy to use.
-int GPrintDC::GetBits()
+int LPrintDC::GetBits()
 {
 	return 24;
 }
 
 // This resolution is chosen to match postscripts internal
 // user space in pt's.
-int GPrintDC::DpiX()
+int LPrintDC::DpiX()
 {
 	return 72 * PS_SCALE;
 }
 
-int GPrintDC::DpiY()
+int LPrintDC::DpiY()
 {
 	return 72 * PS_SCALE;
 }
 
-bool GPrintDC::StartPage()
+bool LPrintDC::StartPage()
 {
 	bool Status = false;
 	
@@ -566,7 +566,7 @@ bool GPrintDC::StartPage()
 	return Status;
 }
 
-void GPrintDC::EndPage()
+void LPrintDC::EndPage()
 {
 	if (d->IsOk() &&
 		d->PageOpen)
@@ -578,14 +578,14 @@ void GPrintDC::EndPage()
 
 ///////////////////////////////////////////////////////////////////////////////
 // Print primitives
-COLOUR GPrintDC::Colour()
+COLOUR LPrintDC::Colour()
 {
 	return d->c;
 }
 
-GColour GPrintDC::Colour(GColour c)
+LColour LPrintDC::Colour(LColour c)
 {
-	GColour Prev(d->c, 24);
+	LColour Prev(d->c, 24);
 	COLOUR c24 = c.c24();
 	if (c24 != d->c)
 	{
@@ -602,7 +602,7 @@ GColour GPrintDC::Colour(GColour c)
 	return Prev;
 }
 
-COLOUR GPrintDC::Colour(COLOUR c, int Bits)
+COLOUR LPrintDC::Colour(COLOUR c, int Bits)
 {
 	COLOUR c24 = CBit(24, c, Bits?Bits:24);
 	if (c24 != d->c)
@@ -620,7 +620,7 @@ COLOUR GPrintDC::Colour(COLOUR c, int Bits)
 	return c;
 }
 
-void GPrintDC::Set(int x, int y)
+void LPrintDC::Set(int x, int y)
 {
 	if (d->Ps.IsOpen())
 	{
@@ -633,12 +633,12 @@ void GPrintDC::Set(int x, int y)
 	}
 }
 
-COLOUR GPrintDC::Get(int x, int y)
+COLOUR LPrintDC::Get(int x, int y)
 {
     return -1;
 }
 
-void GPrintDC::HLine(int x1, int x2, int y)
+void LPrintDC::HLine(int x1, int x2, int y)
 {
 	if (d->Ps.IsOpen())
 	{
@@ -651,7 +651,7 @@ void GPrintDC::HLine(int x1, int x2, int y)
 	}
 }
 
-void GPrintDC::VLine(int x, int y1, int y2)
+void LPrintDC::VLine(int x, int y1, int y2)
 {
 	if (d->Ps.IsOpen())
 	{
@@ -664,7 +664,7 @@ void GPrintDC::VLine(int x, int y1, int y2)
 	}
 }
 
-void GPrintDC::Line(int x1, int y1, int x2, int y2)
+void LPrintDC::Line(int x1, int y1, int x2, int y2)
 {
 	if (d->Ps.IsOpen())
 	{
@@ -677,39 +677,39 @@ void GPrintDC::Line(int x1, int y1, int x2, int y2)
 	}
 }
 
-void GPrintDC::Circle(double cx, double cy, double radius)
+void LPrintDC::Circle(double cx, double cy, double radius)
 {
 }
 
-void GPrintDC::FilledCircle(double cx, double cy, double radius)
+void LPrintDC::FilledCircle(double cx, double cy, double radius)
 {
 }
 
-void GPrintDC::Arc(double cx, double cy, double radius, double start, double end)
+void LPrintDC::Arc(double cx, double cy, double radius, double start, double end)
 {
 }
 
-void GPrintDC::FilledArc(double cx, double cy, double radius, double start, double end)
+void LPrintDC::FilledArc(double cx, double cy, double radius, double start, double end)
 {
 }
 
-void GPrintDC::Ellipse(double cx, double cy, double x, double y)
+void LPrintDC::Ellipse(double cx, double cy, double x, double y)
 {
 }
 
-void GPrintDC::FilledEllipse(double cx, double cy, double x, double y)
+void LPrintDC::FilledEllipse(double cx, double cy, double x, double y)
 {
 }
 
-void GPrintDC::Box(int x1, int y1, int x2, int y2)
+void LPrintDC::Box(int x1, int y1, int x2, int y2)
 {
-	GRect a(x1, y1, x2, y2);
+	LRect a(x1, y1, x2, y2);
 	Box(&a);
 }
 
-void GPrintDC::Box(GRect *a)
+void LPrintDC::Box(LRect *a)
 {
-	GRect r;
+	LRect r;
 	if (a) r = *a;
 	else r.ZOff(X()-1, Y()-1);
 
@@ -729,15 +729,15 @@ void GPrintDC::Box(GRect *a)
 	}
 }
 
-void GPrintDC::Rectangle(int x1, int y1, int x2, int y2)
+void LPrintDC::Rectangle(int x1, int y1, int x2, int y2)
 {
-	GRect a(x1, y1, x2, y2);
+	LRect a(x1, y1, x2, y2);
 	Rectangle(&a);
 }
 
-void GPrintDC::Rectangle(GRect *a)
+void LPrintDC::Rectangle(LRect *a)
 {
-	GRect r;
+	LRect r;
 	if (a) r = *a;
 	else r.ZOff(X()-1, Y()-1);
 	
@@ -757,23 +757,23 @@ void GPrintDC::Rectangle(GRect *a)
 	}
 }
 
-void GPrintDC::Blt(int x, int y, GSurface *Src, GRect *a)
+void LPrintDC::Blt(int x, int y, LSurface *Src, LRect *a)
 {
 }
 
-void GPrintDC::StretchBlt(GRect *d, GSurface *Src, GRect *s)
+void LPrintDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
 {
 }
 
-void GPrintDC::Polygon(int Points, LPoint *Data)
+void LPrintDC::Polygon(int Points, LPoint *Data)
 {
 }
 
-void GPrintDC::Bezier(int Threshold, LPoint *Pt)
+void LPrintDC::Bezier(int Threshold, LPoint *Pt)
 {
 }
 
-void GPrintDC::FloodFill(int x, int y, int Mode, COLOUR Border, GRect *Bounds)
+void LPrintDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
 {
 }
 

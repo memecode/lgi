@@ -1,25 +1,27 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Net.h"
+#include "lgi/common/ClipBoard.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/List.h"
+#include "lgi/common/PopupList.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/EventTargetThread.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/Http.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/FileSelect.h"
 #include "LgiIde.h"
-#include "GToken.h"
-#include "INet.h"
-#include "GClipBoard.h"
-#include "GDisplayString.h"
-#include "GScrollBar.h"
-#include "LgiRes.h"
-#include "GEdit.h"
-#include "LList.h"
-#include "GPopupList.h"
-#include "GTableLayout.h"
 #include "ProjectNode.h"
-#include "GEventTargetThread.h"
-#include "GCheckBox.h"
 #include "SpaceTabConv.h"
 #include "DocEdit.h"
 #include "IdeDocPrivate.h"
-#include "IHttp.h"
 
 const char *Untitled = "[untitled]";
 // static const char *White = " \r\t\n";
@@ -42,7 +44,7 @@ int FileNameSorter(char **a, char **b)
 	return stricmp(A?A:*a, B?B:*b);
 }
 
-EditTray::EditTray(GTextView3 *ctrl, IdeDoc *doc)
+EditTray::EditTray(LTextView3 *ctrl, IdeDoc *doc)
 {
 	Ctrl = ctrl;
 	Doc = doc;
@@ -51,10 +53,10 @@ EditTray::EditTray(GTextView3 *ctrl, IdeDoc *doc)
 	SymBtn.ZOff(-1, -1);
 		
 	int Ht = SysFont->GetHeight() + 6;
-	AddView(FileSearch = new GEdit(IDC_FILE_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
-	AddView(FuncSearch = new GEdit(IDC_METHOD_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
-	AddView(SymSearch = new GEdit(IDC_SYMBOL_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
-	AddView(AllPlatforms = new GCheckBox(IDC_ALL_PLATFORMS, 0, 0, 20, Ht, "All Platforms"));
+	AddView(FileSearch = new LEdit(IDC_FILE_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
+	AddView(FuncSearch = new LEdit(IDC_METHOD_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
+	AddView(SymSearch = new LEdit(IDC_SYMBOL_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
+	AddView(AllPlatforms = new LCheckBox(IDC_ALL_PLATFORMS, 0, 0, 20, Ht, "All Platforms"));
 }
 	
 EditTray::~EditTray()
@@ -95,7 +97,7 @@ void EditTray::OnCreate()
 
 int MeasureText(const char *s)
 {
-	GDisplayString Ds(SysFont, s);
+	LDisplayString Ds(SysFont, s);
 	return Ds.X();
 }
 
@@ -124,7 +126,7 @@ void EditTray::OnPosChange()
 
 	if (AllPlatforms)
 	{
-		GViewLayoutInfo Inf;
+		LViewLayoutInfo Inf;
 		AllPlatforms->OnLayout(Inf);
 		c.Left(AllPlatforms, Inf.Width.Max);
 	}
@@ -132,62 +134,62 @@ void EditTray::OnPosChange()
 	c.Remaining(TextMsg);
 }
 	
-void EditTray::OnPaint(GSurface *pDC)
+void EditTray::OnPaint(LSurface *pDC)
 {
-	GRect c = GetClient();
+	LRect c = GetClient();
 	pDC->Colour(L_MED);
 	pDC->Rectangle();
 	SysFont->Colour(L_TEXT, L_MED);
 	SysFont->Transparent(true);
 		
-	GString s;
+	LString s;
 	s.Printf("Cursor: %i,%i", Col, Line + 1);
 	{
-		GDisplayString ds(SysFont, s);
+		LDisplayString ds(SysFont, s);
 		ds.Draw(pDC, TextMsg.x1, TextMsg.y1 + ((c.Y()-TextMsg.Y())/2), &TextMsg);
 	}
 
-	GRect f = FileBtn;
-	LgiThinBorder(pDC, f, DefaultRaisedEdge);
+	LRect f = FileBtn;
+	LThinBorder(pDC, f, DefaultRaisedEdge);
 	{
-		GDisplayString ds(SysFont, HEADER_BTN_LABEL);
+		LDisplayString ds(SysFont, HEADER_BTN_LABEL);
 		ds.Draw(pDC, f.x1 + 4, f.y1);
 	}
 
 	f = FuncBtn;
-	LgiThinBorder(pDC, f, DefaultRaisedEdge);
+	LThinBorder(pDC, f, DefaultRaisedEdge);
 	{
-		GDisplayString ds(SysFont, FUNCTION_BTN_LABEL);
+		LDisplayString ds(SysFont, FUNCTION_BTN_LABEL);
 		ds.Draw(pDC, f.x1 + 4, f.y1);
 	}
 
 	f = SymBtn;
-	LgiThinBorder(pDC, f, DefaultRaisedEdge);
+	LThinBorder(pDC, f, DefaultRaisedEdge);
 	{
-		GDisplayString ds(SysFont, SYMBOL_BTN_LABEL);
+		LDisplayString ds(SysFont, SYMBOL_BTN_LABEL);
 		ds.Draw(pDC, f.x1 + 4, f.y1);
 	}
 }
 
-bool EditTray::Pour(GRegion &r)
+bool EditTray::Pour(LRegion &r)
 {
-	GRect *c = FindLargest(r);
+	LRect *c = FindLargest(r);
 	if (c)
 	{
-		GRect n = *c;
+		LRect n = *c;
 		SetPos(n);		
 		return true;
 	}
 	return false;
 }
 
-void EditTray::OnHeaderList(GMouse &m)
+void EditTray::OnHeaderList(LMouse &m)
 {
 	// Header list button
-	GArray<GString> Paths;
+	LArray<LString> Paths;
 	if (Doc->BuildIncludePaths(Paths, PlatformCurrent, false))
 	{
-		GArray<char*> Headers;
+		LArray<char*> Headers;
 		if (Doc->BuildHeaderList(Ctrl->NameW(), Headers, Paths))
 		{
 			// Sort them..
@@ -201,13 +203,13 @@ void EditTray::OnHeaderList(GMouse &m)
 				int DisplayLines = GdcD->Y() / SysFont->GetHeight();
 				if (Headers.Length() > (0.9 * DisplayLines))
 				{
-					GArray<char*> Letters[26];
-					GArray<char*> Other;
+					LArray<char*> Letters[26];
+					LArray<char*> Other;
 					
 					for (int i=0; i<Headers.Length(); i++)
 					{
 						char *h = Headers[i];
-						char *f = LgiGetLeaf(h);
+						char *f = LGetLeaf(h);
 						
 						Map.Add(h, i + 1);
 						
@@ -226,8 +228,8 @@ void EditTray::OnHeaderList(GMouse &m)
 					{
 						if (Letters[i].Length() > 1)
 						{
-							char *First = LgiGetLeaf(Letters[i][0]);
-							char *Last = LgiGetLeaf(Letters[i].Last());
+							char *First = LGetLeaf(Letters[i][0]);
+							char *Last = LGetLeaf(Letters[i].Last());
 
 							char Title[256];
 							sprintf_s(Title, sizeof(Title), "%s - %s", First, Last);
@@ -239,7 +241,7 @@ void EditTray::OnHeaderList(GMouse &m)
 									char *h = Letters[i][n];
 									int Id = Map.Find(h);
 									LgiAssert(Id > 0);
-									sub->AppendItem(LgiGetLeaf(h), Id, true);
+									sub->AppendItem(LGetLeaf(h), Id, true);
 								}
 							}
 						}
@@ -248,7 +250,7 @@ void EditTray::OnHeaderList(GMouse &m)
 							char *h = Letters[i][0];
 							int Id = Map.Find(h);
 							LgiAssert(Id > 0);
-							s->AppendItem(LgiGetLeaf(h), Id, true);
+							s->AppendItem(LGetLeaf(h), Id, true);
 						}
 					}
 
@@ -259,7 +261,7 @@ void EditTray::OnHeaderList(GMouse &m)
 							char *h = Other[n];
 							int Id = Map.Find(h);
 							LgiAssert(Id > 0);
-							s->AppendItem(LgiGetLeaf(h), Id, true);
+							s->AppendItem(LGetLeaf(h), Id, true);
 						}
 					}
 				}
@@ -268,7 +270,7 @@ void EditTray::OnHeaderList(GMouse &m)
 					for (int i=0; i<Headers.Length(); i++)
 					{
 						char *h = Headers[i];
-						// char *f = LgiGetLeaf(h);
+						// char *f = LGetLeaf(h);
 						
 						Map.Add(h, i + 1);
 					}
@@ -278,7 +280,7 @@ void EditTray::OnHeaderList(GMouse &m)
 						char *h = Headers[i];
 						int Id = Map.Find(h);
 						if (Id > 0)
-							s->AppendItem(LgiGetLeaf(h), Id, true);
+							s->AppendItem(LGetLeaf(h), Id, true);
 						else
 							LgiTrace("%s:%i - Failed to get id for '%s' (map.len=%i)\n", _FL, h, Map.Length());
 					}
@@ -316,14 +318,14 @@ void EditTray::OnHeaderList(GMouse &m)
 	}
 }
 
-void EditTray::OnFunctionList(GMouse &m)
+void EditTray::OnFunctionList(LMouse &m)
 {
-	GArray<DefnInfo> Funcs;
+	LArray<DefnInfo> Funcs;
 
 	if (BuildDefnList(Doc->GetFileName(), (char16*)Ctrl->NameW(), Funcs, DefnNone /*DefnFunc | DefnClass*/))
 	{
 		LSubMenu s;
-		GArray<DefnInfo*> a;					
+		LArray<DefnInfo*> a;					
 		
 		int ScreenHt = GdcD->Y();
 		int ScreenLines = ScreenHt / SysFont->GetHeight();
@@ -364,7 +366,7 @@ void EditTray::OnFunctionList(GMouse &m)
 				{
 					if (!Cur || n % BucketSize == 0)
 					{
-						GString SubMsg;
+						LString SubMsg;
 						SubMsg.Printf("%s...", Buf);
 						Cur = s.AppendSub(SubMsg);
 					}
@@ -396,19 +398,19 @@ void EditTray::OnFunctionList(GMouse &m)
 	}
 }
 
-void EditTray::OnSymbolList(GMouse &m)
+void EditTray::OnSymbolList(LMouse &m)
 {
-	GAutoString s(Ctrl->GetSelection());
+	LAutoString s(Ctrl->GetSelection());
 	if (s)
 	{
-		GAutoWString sw(Utf8ToWide(s));
+		LAutoWString sw(Utf8ToWide(s));
 		if (sw)
 		{
 			#if USE_OLD_FIND_DEFN
 			List<DefnInfo> Matches;
 			Doc->FindDefn(sw, Ctrl->NameW(), Matches);
 			#else
-			GArray<FindSymResult> Matches;
+			LArray<FindSymResult> Matches;
 			Doc->GetApp()->FindSymbol(s, Matches);
 			#endif
 
@@ -496,7 +498,7 @@ void EditTray::OnSymbolList(GMouse &m)
 	}
 }
 
-void EditTray::OnMouseClick(GMouse &m)
+void EditTray::OnMouseClick(LMouse &m)
 {
 	if (m.Left() && m.Down())
 	{
@@ -520,14 +522,14 @@ class ProjMethodPopup : public GPopupList<DefnInfo>
 	AppWnd *App;
 
 public:
-	GArray<DefnInfo> All;
+	LArray<DefnInfo> All;
 
-	ProjMethodPopup(AppWnd *app, GViewI *target) : GPopupList(target, PopupAbove, POPUP_WIDTH)
+	ProjMethodPopup(AppWnd *app, LViewI *target) : GPopupList(target, PopupAbove, POPUP_WIDTH)
 	{
 		App = app;
 	}
 
-	GString ToString(DefnInfo *Obj)
+	LString ToString(DefnInfo *Obj)
 	{
 		return Obj->Name;
 	}
@@ -539,10 +541,10 @@ public:
 	
 	bool Name(const char *s)
 	{
-		GString InputStr = s;
-		GString::Array p = InputStr.SplitDelimit(" \t");
+		LString InputStr = s;
+		LString::Array p = InputStr.SplitDelimit(" \t");
 		
-		GArray<DefnInfo*> Matching;
+		LArray<DefnInfo*> Matching;
 		for (unsigned i=0; i<All.Length(); i++)
 		{
 			DefnInfo *Def = &All[i];
@@ -564,7 +566,7 @@ public:
 		return SetItems(Matching);
 	}
 	
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		if (Lst &&
 			Ctrl == Edit &&
@@ -584,9 +586,9 @@ class ProjSymPopup : public GPopupList<FindSymResult>
 	int CommonPathLen;
 
 public:
-	GArray<FindSymResult*> All;
+	LArray<FindSymResult*> All;
 
-	ProjSymPopup(AppWnd *app, IdeDoc *doc, GViewI *target) : GPopupList(target, PopupAbove, POPUP_WIDTH)
+	ProjSymPopup(AppWnd *app, IdeDoc *doc, LViewI *target) : GPopupList(target, PopupAbove, POPUP_WIDTH)
 	{
 		App = app;
 		Doc = doc;
@@ -595,7 +597,7 @@ public:
 	
 	void FindCommonPathLength()
 	{
-		GString s;
+		LString s;
 		
 		for (unsigned i=0; i<All.Length(); i++)
 		{
@@ -627,9 +629,9 @@ public:
 		}
 	}
 
-	GString ToString(FindSymResult *Obj)
+	LString ToString(FindSymResult *Obj)
 	{
-		GString s;
+		LString s;
 		s.Printf("%s:%i - %s",
 				CommonPathLen < Obj->File.Length()
 				?
@@ -646,14 +648,14 @@ public:
 		App->GotoReference(Obj->File, Obj->Line, false);
 	}
 	
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		if (Lst &&
 			Ctrl == Edit &&
 			(!Flags || Flags == GNotifyDocChanged))
 		{
 			// Kick off search...
-			GString s = Ctrl->Name();
+			LString s = Ctrl->Name();
 			int64 AllPlatforms = Ctrl->GetParent()->GetCtrlValue(IDC_ALL_PLATFORMS);
 			s = s.Strip();
 			if (s.Length() > 2)
@@ -664,15 +666,15 @@ public:
 	}
 };
 
-void FilterFiles(GArray<ProjectNode*> &Perfect, GArray<ProjectNode*> &Nodes, GString InputStr)
+void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LString InputStr)
 {
-	GString::Array p = InputStr.SplitDelimit(" \t");
+	LString::Array p = InputStr.SplitDelimit(" \t");
 		
 	auto InputLen = InputStr.RFind(".");
 	if (InputLen < 0)
 		InputLen = InputStr.Length();
 
-	GArray<ProjectNode*> Partial;
+	LArray<ProjectNode*> Partial;
 	auto Start = LgiCurrentTime();
 	for (unsigned i=0; i<Nodes.Length(); i++)
 	{
@@ -700,7 +702,7 @@ void FilterFiles(GArray<ProjectNode*> &Perfect, GArray<ProjectNode*> &Nodes, GSt
 			if (Match)
 			{
 				bool PerfectMatch = false;
-				auto Leaf = LgiGetLeaf(Fn);
+				auto Leaf = LGetLeaf(Fn);
 				if (Leaf)
 				{
 					auto Dot = strrchr(Leaf, '.');
@@ -732,26 +734,26 @@ class ProjFilePopup : public GPopupList<ProjectNode>
 	AppWnd *App;
 
 public:
-	GArray<ProjectNode*> Nodes;
+	LArray<ProjectNode*> Nodes;
 
-	ProjFilePopup(AppWnd *app, GViewI *target) : GPopupList(target, PopupAbove, POPUP_WIDTH)
+	ProjFilePopup(AppWnd *app, LViewI *target) : GPopupList(target, PopupAbove, POPUP_WIDTH)
 	{
 		App = app;
 	}
 
-	GString ToString(ProjectNode *Obj)
+	LString ToString(ProjectNode *Obj)
 	{
-		return GString(Obj->GetFileName());
+		return LString(Obj->GetFileName());
 	}
 	
 	void OnSelect(ProjectNode *Obj)
 	{
 		auto Fn = Obj->GetFileName();
-		if (LgiIsRelativePath(Fn))
+		if (LIsRelativePath(Fn))
 		{
 			IdeProject *Proj = Obj->GetProject();
-			GAutoString Base = Proj->GetBasePath();
-			GFile::Path p(Base);
+			LAutoString Base = Proj->GetBasePath();
+			LFile::Path p(Base);
 			p += Fn;
 			App->GotoReference(p, 1, false);			
 		}
@@ -761,14 +763,14 @@ public:
 		}
 	}
 	
-	void Update(GString InputStr)
+	void Update(LString InputStr)
 	{
-		GArray<ProjectNode*> Matches;
+		LArray<ProjectNode*> Matches;
 		FilterFiles(Matches, Nodes, InputStr);
 		SetItems(Matches);
 	}
 	
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		if (Lst &&
 			Ctrl == Edit &&
@@ -783,10 +785,10 @@ public:
 	}
 };
 
-class GStyleThread : public GEventTargetThread
+class LStyleThread : public LEventTargetThread
 {
 public:
-	GStyleThread() : GEventTargetThread("StyleThread")
+	LStyleThread() : LEventTargetThread("StyleThread")
 	{
 	}
 	
@@ -812,7 +814,7 @@ IdeDocPrivate::IdeDocPrivate(IdeDoc *d, AppWnd *a, NodeSource *src, const char *
 	Project = 0;
 	FileName = file;
 	
-	GFontType Font, *Use = 0;
+	LFontType Font, *Use = 0;
 	if (Font.Serialize(App->GetOptions(), OPT_EditorFont, false))
 	{
 		Use = &Font;
@@ -832,7 +834,7 @@ void IdeDocPrivate::UpdateName()
 {
 	char n[MAX_PATH+30];
 	
-	GString Dsp = GetDisplayName();
+	LString Dsp = GetDisplayName();
 	char *File = Dsp;
 	#if MDI_TAB_STYLE
 	char *Dir = File ? strrchr(File, DIR_CHAR) : NULL;
@@ -847,7 +849,7 @@ void IdeDocPrivate::UpdateName()
 	Doc->Name(n);
 }
 
-GString IdeDocPrivate::GetDisplayName()
+LString IdeDocPrivate::GetDisplayName()
 {
 	if (nSrc)
 	{
@@ -856,7 +858,7 @@ GString IdeDocPrivate::GetDisplayName()
 		{
 			if (stristr(Fn, "://"))
 			{
-				GUri u(nSrc->GetFileName());
+				LUri u(nSrc->GetFileName());
 				if (u.sPass)
 				{
 					u.sPass = "******";
@@ -870,15 +872,15 @@ GString IdeDocPrivate::GetDisplayName()
 			}
 		}
 
-		return GString(Fn);
+		return LString(Fn);
 	}
 
-	return GString(FileName);
+	return LString(FileName);
 }
 
 bool IdeDocPrivate::IsFile(const char *File)
 {
-	GString Mem;
+	LString Mem;
 	char *f = NULL;
 	
 	if (nSrc)
@@ -1039,7 +1041,7 @@ void IdeDocPrivate::CheckModTime()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GString IdeDoc::CurIpDoc;
+LString IdeDoc::CurIpDoc;
 int IdeDoc::CurIpLine = -1;
 
 IdeDoc::IdeDoc(AppWnd *a, NodeSource *src, const char *file)
@@ -1062,13 +1064,13 @@ IdeDoc::~IdeDoc()
 class WebBuild : public LThread
 {
 	IdeDocPrivate *d;
-	GString Uri;
+	LString Uri;
 	int64 SleepMs;
-	GStream *Log;
+	LStream *Log;
 	LCancel Cancel;
 
 public:
-	WebBuild(IdeDocPrivate *priv, GString uri, int64 sleepMs) :
+	WebBuild(IdeDocPrivate *priv, LString uri, int64 sleepMs) :
 		LThread("WebBuild"), d(priv), Uri(uri), SleepMs(sleepMs)
 	{
 		Log = d->App->GetBuildLog();
@@ -1095,8 +1097,8 @@ public:
 		}
 
 		// Download the file...
-		GStringPipe Out;
-		GString Error;
+		LStringPipe Out;
+		LString Error;
 		bool r = LgiGetUri(&Cancel, &Out, &Error, Uri, NULL/*InHdrs*/, NULL/*Proxy*/);
 		if (r)
 		{
@@ -1118,14 +1120,14 @@ bool IdeDoc::Build()
 		return false;
 
 	int64 SleepMs = -1;
-	GString s = d->Edit->Name(), Uri;
-	GString::Array Lines = s.Split("\n");
+	LString s = d->Edit->Name(), Uri;
+	LString::Array Lines = s.Split("\n");
 	for (auto Ln : Lines)
 	{
 		s = Ln.Strip();
 		if (s.Find("//") == 0)
 		{
-			GString::Array p = s(2,-1).Strip().Split(":", 1);
+			LString::Array p = s(2,-1).Strip().Split(":", 1);
 			if (p.Length() == 2)
 			{
 				if (p[0].Equals("build-sleep"))
@@ -1147,7 +1149,7 @@ bool IdeDoc::Build()
 			!d->Build->IsExited())
 		{
 			// Already building...
-			GStream *Log = d->App->GetBuildLog();
+			LStream *Log = d->App->GetBuildLog();
 			if (Log)
 				Log->Print("%s:%i - Already building...\n");
 			return false;
@@ -1166,11 +1168,11 @@ void IdeDoc::OnLineChange(int Line)
 
 void IdeDoc::OnMarginClick(int Line)
 {
-	GString Dn = d->GetDisplayName();
+	LString Dn = d->GetDisplayName();
 	d->App->ToggleBreakpoint(Dn, Line);
 }
 
-void IdeDoc::OnTitleClick(GMouse &m)
+void IdeDoc::OnTitleClick(LMouse &m)
 {
 	GMdiChild::OnTitleClick(m);
 	
@@ -1182,11 +1184,11 @@ void IdeDoc::OnTitleClick(GMouse &m)
 		if (Fn)
 		{
 			strcpy_s(Full, sizeof(Full), Fn);
-			if (LgiIsRelativePath(Fn) && p)
+			if (LIsRelativePath(Fn) && p)
 			{
-				GAutoString Base = p->GetBasePath();
+				LAutoString Base = p->GetBasePath();
 				if (Base)
-					LgiMakePath(Full, sizeof(Full), Base, Fn);
+					LMakePath(Full, sizeof(Full), Base, Fn);
 			}
 			
 			Dir = strrchr(Full, DIR_CHAR);
@@ -1233,20 +1235,20 @@ void IdeDoc::OnTitleClick(GMouse &m)
 			{
 				if (Dir)
 				{
-					GClipBoard c(this);
+					LClipBoard c(this);
 					c.Text(Dir + 1);
 				}
 				break;
 			}
 			case IDM_COPY_PATH:
 			{
-				GClipBoard c(this);
+				LClipBoard c(this);
 				c.Text(Full);
 				break;
 			}
 			case IDM_BROWSE:
 			{
-				LgiBrowseToFile(Full);
+				LBrowseToFile(Full);
 				break;
 			}
 			case IDM_SHOW_IN_PROJECT:
@@ -1289,7 +1291,7 @@ bool IdeDoc::AddBreakPoint(ssize_t Line, bool Add)
 
 void IdeDoc::GotoSearch(int CtrlId, char *InitialText)
 {
-	GString File;
+	LString File;
 
 	if (CtrlId == IDC_SYMBOL_SEARCH)
 	{
@@ -1299,10 +1301,10 @@ void IdeDoc::GotoSearch(int CtrlId, char *InitialText)
 		if (d->Edit)
 		{
 			// Get current line
-			GString Ln = (*d->Edit)[d->Edit->GetLine()];
+			LString Ln = (*d->Edit)[d->Edit->GetLine()];
 			if (Ln.Find("#include") >= 0)
 			{
-				GString::Array a = Ln.SplitDelimit(" \t", 1);
+				LString::Array a = Ln.SplitDelimit(" \t", 1);
 				if (a.Length() == 2)
 				{
 					File = a[1].Strip("\'\"<>");
@@ -1347,7 +1349,7 @@ void IdeDoc::SearchSymbol()
 		while (	Txt[End] &&
 				IsVariableChar(Txt[End]))
 			End++;
-		GString Word(Txt + Start, End - Start);
+		LString Word(Txt + Start, End - Start);
 		GotoSearch(IDC_SYMBOL_SEARCH, Word);
 	}
 }
@@ -1417,32 +1419,32 @@ bool IdeDoc::HasFocus(int Set)
 	return d->Edit->Focus();
 }
 
-void IdeDoc::SplitSelection(GString Sep)
+void IdeDoc::SplitSelection(LString Sep)
 {
 	if (!d->Edit)
 		return;
 
 	auto r = d->Edit->GetSelectionRange();
-	GString s = d->Edit->GetSelection();
+	LString s = d->Edit->GetSelection();
 	if (!s)
 		return;
 
-	GAutoWString w(Utf8ToWide(s.Replace(Sep, "\n")));
+	LAutoWString w(Utf8ToWide(s.Replace(Sep, "\n")));
 	d->Edit->DeleteSelection();
 	d->Edit->Insert(r.Start, w, StrlenW(w));
 }
 
-void IdeDoc::JoinSelection(GString Sep)
+void IdeDoc::JoinSelection(LString Sep)
 {
 	if (!d->Edit)
 		return;
 
 	auto r = d->Edit->GetSelectionRange();
-	GString s = d->Edit->GetSelection();
+	LString s = d->Edit->GetSelection();
 	if (!s)
 		return;
 
-	GAutoWString w(Utf8ToWide(s.Replace("\n", Sep)));
+	LAutoWString w(Utf8ToWide(s.Replace("\n", Sep)));
 	d->Edit->DeleteSelection();
 	d->Edit->Insert(r.Start, w, StrlenW(w));
 }
@@ -1452,31 +1454,31 @@ void IdeDoc::EscapeSelection(bool ToEscaped)
 	if (!d->Edit)
 		return;
 
-	GString s = d->Edit->GetSelection();
+	LString s = d->Edit->GetSelection();
 	if (!s)
 		return;
 
 	if (ToEscaped)
 	{
-		GMouse m;
+		LMouse m;
 		GetMouse(m);
-		GString Delim = "\r\n\\";
+		LString Delim = "\r\n\\";
 		if (m.Ctrl())
 		{
-			GInput Inp(this, GString::Escape(Delim, -1, "\\"), "Delimiter chars:", "Escape");
+			GInput Inp(this, LString::Escape(Delim, -1, "\\"), "Delimiter chars:", "Escape");
 			if (Inp.DoModal())
-				Delim = GString::UnEscape(Inp.GetStr().Get(), -1);
+				Delim = LString::UnEscape(Inp.GetStr().Get(), -1);
 		}
-		s = GString::Escape(s, -1, Delim);
+		s = LString::Escape(s, -1, Delim);
 	}
 	else
 	{
-		s = GString::UnEscape(s.Get(), -1);
+		s = LString::UnEscape(s.Get(), -1);
 	}
 
 	auto r = d->Edit->GetSelectionRange();
 
-	GAutoWString w(Utf8ToWide(s));
+	LAutoWString w(Utf8ToWide(s));
 	d->Edit->DeleteSelection();
 	d->Edit->Insert(r.Start, w, StrlenW(w));
 }
@@ -1486,7 +1488,7 @@ void IdeDoc::ConvertWhiteSpace(bool ToTabs)
 	if (!d->Edit)
 		return;
 
-	GAutoString Sp(
+	LAutoString Sp(
 		ToTabs ?
 		SpacesToTabs(d->Edit->Name(), d->Edit->GetTabSize()) :
 		TabsToSpaces(d->Edit->Name(), d->Edit->GetTabSize())
@@ -1507,7 +1509,7 @@ void IdeDoc::SetLine(int Line, bool CurIp)
 {
 	if (CurIp)
 	{
-		GString CurDoc = GetFileName();
+		LString CurDoc = GetFileName();
 		
 		if (ValidStr(CurIpDoc) ^ ValidStr(CurDoc)
 			||
@@ -1573,13 +1575,13 @@ GMessage::Result IdeDoc::OnEvent(GMessage *Msg)
 	{
 		case M_FIND_SYM_REQUEST:
 		{
-			GAutoPtr<FindSymRequest> Resp((FindSymRequest*)Msg->A());
+			LAutoPtr<FindSymRequest> Resp((FindSymRequest*)Msg->A());
 			if (Resp && d->SymPopup)
 			{
-				GViewI *SymEd;
+				LViewI *SymEd;
 				if (GetViewById(IDC_SYMBOL_SEARCH, SymEd))
 				{
-					GString Input = SymEd->Name();
+					LString Input = SymEd->Name();
 					if (Input == Resp->Str) // Is the input string still the same?
 					{
 						/*
@@ -1624,7 +1626,7 @@ void IdeDoc::OnPulse()
 			bool Pour = d->Edit->SetPourEnabled(false);
 			for (auto s: d->WriteBuf)
 			{
-				GAutoWString w(Utf8ToWide(s, s.Length()));
+				LAutoWString w(Utf8ToWide(s, s.Length()));
 				d->Edit->Insert(d->Edit->Length(), w, Strlen(w.Get()));
 			}
 			d->Edit->SetPourEnabled(Pour);
@@ -1636,7 +1638,7 @@ void IdeDoc::OnPulse()
 	}
 }
 
-GString IdeDoc::Read()
+LString IdeDoc::Read()
 {
 	return d->Edit->Name();
 }
@@ -1658,7 +1660,7 @@ void IdeDoc::OnProjectChange()
 	DeleteObj(d->SymPopup);
 }
 
-int IdeDoc::OnNotify(GViewI *v, int f)
+int IdeDoc::OnNotify(LViewI *v, int f)
 {
 	// printf("IdeDoc::OnNotify(%i, %i)\n", v->GetId(), f);
 	
@@ -1810,17 +1812,17 @@ bool IdeDoc::SetClean()
 	{
 		Status = Processing = true;
 
-		GAutoString Base;
+		LAutoString Base;
 		if (GetProject())
 			Base = GetProject()->GetBasePath();
 		
-		GString LocalPath;
+		LString LocalPath;
 		if (d->GetLocalFile() &&
-			LgiIsRelativePath(LocalPath) &&
+			LIsRelativePath(LocalPath) &&
 			Base)
 		{
 			char p[MAX_PATH];
-			LgiMakePath(p, sizeof(p), Base, d->GetLocalFile());
+			LMakePath(p, sizeof(p), Base, d->GetLocalFile());
 			LocalPath = p;
 		}
 		else
@@ -1835,7 +1837,7 @@ bool IdeDoc::SetClean()
 			!LFileExists(LocalPath))
 		{
 			// We need a valid filename to save to...			
-			GFileSelect s;
+			LFileSelect s;
 			s.Parent(this);
 			if (Base)
 				s.InitialDir(Base);
@@ -1853,13 +1855,13 @@ bool IdeDoc::SetClean()
 	return Status;
 }
 
-void IdeDoc::OnPaint(GSurface *pDC)
+void IdeDoc::OnPaint(LSurface *pDC)
 {
 	GMdiChild::OnPaint(pDC);
 	
 	#if !MDI_TAB_STYLE
-	GRect c = GetClient();
-	LgiWideBorder(pDC, c, SUNKEN);
+	LRect c = GetClient();
+	LWideBorder(pDC, c, SUNKEN);
 	#endif
 }
 
@@ -1872,7 +1874,7 @@ bool IdeDoc::OnRequestClose(bool OsShuttingDown)
 {
 	if (d->Edit->IsDirty())
 	{
-		GString Dsp = d->GetDisplayName();
+		LString Dsp = d->GetDisplayName();
 		int a = LgiMsg(this, "Save '%s'?", AppName, MB_YESNOCANCEL, Dsp ? Dsp.Get() : Untitled);
 		switch (a)
 		{
@@ -1900,13 +1902,13 @@ bool IdeDoc::OnRequestClose(bool OsShuttingDown)
 }
 
 /*
-GTextView3 *IdeDoc::GetEdit()
+LTextView3 *IdeDoc::GetEdit()
 {
 	return d->Edit;
 }
 */
 
-bool IdeDoc::BuildIncludePaths(GArray<GString> &Paths, IdePlatform Platform, bool IncludeSysPaths)
+bool IdeDoc::BuildIncludePaths(LArray<LString> &Paths, IdePlatform Platform, bool IncludeSysPaths)
 {
 	if (!GetProject())
 	{
@@ -1928,9 +1930,9 @@ bool IdeDoc::BuildIncludePaths(GArray<GString> &Paths, IdePlatform Platform, boo
 	return Status;
 }
 
-bool IdeDoc::BuildHeaderList(const char16 *Cpp, GArray<char*> &Headers, GArray<GString> &IncPaths)
+bool IdeDoc::BuildHeaderList(const char16 *Cpp, LArray<char*> &Headers, LArray<LString> &IncPaths)
 {
-	GAutoString c8(WideToUtf8(Cpp));
+	LAutoString c8(WideToUtf8(Cpp));
 	if (!c8)
 		return false;
 
@@ -1941,7 +1943,7 @@ bool MatchSymbol(DefnInfo *Def, char16 *Symbol)
 {
 	static char16 Dots[] = {':', ':', 0};
 
-	GBase o;
+	LBase o;
 	o.Name(Def->Name);
 	auto Name = o.NameW();
 
@@ -1979,12 +1981,12 @@ bool IdeDoc::FindDefn(char16 *Symbol, const char16 *Source, List<DefnInfo> &Matc
 	}
 
 	#if DEBUG_FIND_DEFN
-	GStringPipe Dbg;
+	LStringPipe Dbg;
 	LgiTrace("FindDefn(%S)\n", Symbol);
 	#endif
 
-	GString::Array Paths;
-	GArray<char*> Headers;
+	LString::Array Paths;
+	LArray<char*> Headers;
 
 	if (!BuildIncludePaths(Paths, PlatformCurrent, true))
 	{
@@ -1994,7 +1996,7 @@ bool IdeDoc::FindDefn(char16 *Symbol, const char16 *Source, List<DefnInfo> &Matc
 
 	char Local[MAX_PATH];
 	strcpy_s(Local, sizeof(Local), GetFileName());
-	LgiTrimDir(Local);
+	LTrimDir(Local);
 	Paths.New() = Local;
 
 	if (!BuildHeaderList(Source, Headers, Paths))
@@ -2004,19 +2006,19 @@ bool IdeDoc::FindDefn(char16 *Symbol, const char16 *Source, List<DefnInfo> &Matc
 	}
 
 	{
-		GArray<DefnInfo> Defns;
+		LArray<DefnInfo> Defns;
 		
 		for (int i=0; i<Headers.Length(); i++)
 		{
 			char *h = Headers[i];
-			char *c8 = ReadTextFile(h);
+			char *c8 = LReadTextFile(h);
 			if (c8)
 			{
 				char16 *c16 = Utf8ToWide(c8);
 				DeleteArray(c8);
 				if (c16)
 				{
-					GArray<DefnInfo> Defns;
+					LArray<DefnInfo> Defns;
 					if (BuildDefnList(h, c16, Defns, DefnNone, false ))
 					{
 						bool Found = false;
@@ -2066,7 +2068,7 @@ bool IdeDoc::FindDefn(char16 *Symbol, const char16 *Source, List<DefnInfo> &Matc
 
 	#if DEBUG_FIND_DEFN
 	{
-		GAutoString a(Dbg.NewStr());
+		LAutoString a(Dbg.NewStr());
 		if (a) LgiTrace("%s", a.Get());
 	}
 	#endif

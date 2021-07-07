@@ -18,6 +18,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\..\..\..\..\src\win32\General\Lgi.manifest" />
+    <Manifest Include="..\..\..\..\win\General\Lgi.manifest">
+      <Filter>Source Files</Filter>
+    </Manifest>
   </ItemGroup>
 </Project>

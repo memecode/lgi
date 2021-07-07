@@ -1,10 +1,10 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/SubProcess.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/DocView.h"
+#include "lgi/common/StringClass.h"
+#include "lgi/common/LgiString.h"
 #include "GDebugger.h"
-#include "GSubProcess.h"
-#include "GToken.h"
-#include "GDocView.h"
-#include "GStringClass.h"
-#include "GString.h"
 #ifdef POSIX
 #include <sys/types.h>
 #include <signal.h>
@@ -20,7 +20,7 @@ const char sPrompt[] = "(gdb) ";
 class Callback
 {
 public:
-	virtual GString GetResponse(const char *c) = 0;
+	virtual LString GetResponse(const char *c) = 0;
 };
 
 class Visualizer
@@ -28,21 +28,21 @@ class Visualizer
 public:
 	virtual ~Visualizer() {}
 	
-	virtual bool Match(GString s) = 0;
-	virtual bool Transform(GString name, GString val, Callback *Cb, GVariant &Value, GString &Detail) = 0;
+	virtual bool Match(LString s) = 0;
+	virtual bool Transform(LString name, LString val, Callback *Cb, LVariant &Value, LString &Detail) = 0;
 };
 
 class GStringVis : public Visualizer
 {
 public:
-	bool Match(GString s)
+	bool Match(LString s)
 	{
-		return s == "GString";
+		return s == "LString";
 	}
 	
-	bool Transform(GString name, GString val, Callback *Cb, GVariant &Value, GString &Detail)	
+	bool Transform(LString name, LString val, Callback *Cb, LVariant &Value, LString &Detail)	
 	{
-		GString::Array a = val.SplitDelimit("{} \t\r\n");
+		LString::Array a = val.SplitDelimit("{} \t\r\n");
 		if (a.Length() == 3 &&
 			a[1] == "=")
 		{
@@ -53,9 +53,9 @@ public:
 			}
 			else
 			{
-				GString cmd;
+				LString cmd;
 				cmd.Printf("p (char*)%s.Str->Str", name.Get());
-				GString r = Cb->GetResponse(cmd);
+				LString r = Cb->GetResponse(cmd);
 				auto Pos = r.Find("=");
 				if (Pos >= 0)
 					Value = r(Pos, r.Length()).Strip().Get();
@@ -71,30 +71,30 @@ public:
 class Gdb : public GDebugger, public LThread, public Callback
 {
 	GDebugEvents *Events;
-	GAutoPtr<GSubProcess> Sp;
-	GString Exe, Args, InitDir;
-	GString ChildEnv;
+	LAutoPtr<LSubProcess> Sp;
+	LString Exe, Args, InitDir;
+	LString ChildEnv;
 	bool RunAsAdmin;
 	bool AtPrompt;
 	char Line[256], *LinePtr;
 	int CurFrame;
 	bool SetAsmType;
 	bool SetPendingOn;
-	GArray<BreakPoint> BreakPoints;
+	LArray<BreakPoint> BreakPoints;
 	int BreakPointIdx;
 	int ProcessId;
 	bool SuppressNextFileLine;
-	GArray<Visualizer*> Vis;
-	GStream *Log;
+	LArray<Visualizer*> Vis;
+	LStream *Log;
 
 	LMutex StateMutex;
 	bool DebuggingProcess;
 	bool Running;
 
 	// Current location tracking
-	GString CurFile;
+	LString CurFile;
 	int CurLine;
-	GString::Array Untagged;
+	LString::Array Untagged;
 
 	// Parse state
 	enum ParseType
@@ -102,11 +102,11 @@ class Gdb : public GDebugger, public LThread, public Callback
 		ParseNone,
 		ParseBreakPoint,
 	}	ParseState;
-	GString::Array BreakInfo;
+	LString::Array BreakInfo;
 
 	// Various output modes.
-	GStream *OutStream;
-	GString::Array *OutLines;
+	LStream *OutStream;
+	LString::Array *OutLines;
 	
 	enum ThreadState
 	{
@@ -139,11 +139,11 @@ class Gdb : public GDebugger, public LThread, public Callback
 		}
 	}
 
-	bool ParseLocation(GString::Array &p)
+	bool ParseLocation(LString::Array &p)
 	{
 		for (int i=0; i<p.Length(); i++)
 		{
-			GString::Array a = p[i].SplitDelimit(WhiteSpace);
+			LString::Array a = p[i].SplitDelimit(WhiteSpace);
 			if (a.Length() > 0)
 			{
 				int At = 0;
@@ -152,7 +152,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 				
 				if (At < a.Length() - 1) // Found the 'at'
 				{
-					GString::Array ref = a[At+1].Split(":");
+					LString::Array ref = a[At+1].Split(":");
 					if (ref.Length() == 2)
 					{
 						OnFileLine(NativePath(ref[0]), (int)ref[1].Int(), true);
@@ -232,7 +232,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 		return p;
 	}
 	
-	void OnBreakPoint(GString f)
+	void OnBreakPoint(LString f)
 	{
 		if (!f.Get() || ProcessId < 0)
 		{
@@ -240,8 +240,8 @@ class Gdb : public GDebugger, public LThread, public Callback
 			return;
 		}
 		
-		GString File, Line;
-		GString::Array a = f.Split("at");
+		LString File, Line;
+		LString::Array a = f.Split("at");
 		/*
 		printf("%s:%i - a.len=%i\n", _FL, a.Length());
 		for (unsigned n=0; n<a.Length(); n++)
@@ -250,16 +250,16 @@ class Gdb : public GDebugger, public LThread, public Callback
 		
 		if (a.Length() == 2)
 		{
-			GString k = a[1].Strip();
+			LString k = a[1].Strip();
 			// printf("%s:%i - k='%s'\n", _FL, k.Get());
 			
 			if (k.Find("0x") == 0)
 			{			
-				GString::Array b = a[1].SplitDelimit(":,");
+				LString::Array b = a[1].SplitDelimit(":,");
 				// printf("%s:%i - b.len=%i\n", _FL, b.Length());
 				for (unsigned i=0; i<b.Length(); i++)
 				{
-					GString s = b[i].Strip();
+					LString s = b[i].Strip();
 					if (s.Find("file ") == 0)
 					{
 						File = s(5, -1);
@@ -280,7 +280,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 					while (e < k.Length() && IsDigit(k(e)))
 						e++;
 					// printf("%s:%i - e=%i\n", _FL, e);
-					GString::Array b = k(0, e).RSplit(":", 1);
+					LString::Array b = k(0, e).RSplit(":", 1);
 					//  printf("%s:%i - b.len=%i\n", _FL, b.Length());
 					if (b.Length() == 2)
 					{
@@ -337,7 +337,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 			if (Length > 0 && IsDigit(*Start))
 			{
 				// printf("ParsingBp.Parse=%s\n", Start);
-				GString Bp = GString(" ").Join(BreakInfo).Strip();
+				LString Bp = LString(" ").Join(BreakInfo).Strip();
 				OnBreakPoint(Bp);
 				ParseState = ParseNone;
 				BreakInfo.Length(0);
@@ -363,12 +363,12 @@ class Gdb : public GDebugger, public LThread, public Callback
 				}
 				else if (stristr(Start, "New Thread"))
 				{
-					GString s(Start, Length);
-					GString::Array a = s.SplitDelimit("[] ()");
+					LString s(Start, Length);
+					LString::Array a = s.SplitDelimit("[] ()");
 					int ThreadId = -1;
 					for (unsigned i=0; i<a.Length(); i++)
 					{
-						if (a[i] == GString("LWP") && i < a.Length() - 1)
+						if (a[i] == LString("LWP") && i < a.Length() - 1)
 						{
 							ThreadId = (int)a[i+1].Int();
 							break;
@@ -470,7 +470,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 		#else
 		const char *Path = "gdb";
 		#endif
-		GString p;
+		LString p;
 		if (RunAsAdmin)
 			p.Printf("pkexec %s --args \"%s\"", Path, Exe.Get());
 		else
@@ -480,11 +480,11 @@ class Gdb : public GDebugger, public LThread, public Callback
 			p += " ";
 			p += Args;
 		}
-		GString::Array a = p.Split(" ", 1);
+		LString::Array a = p.Split(" ", 1);
 
 		printf("Starting Debugger: %s %s\n", a[0].Get(), a[1].Get());
 
-		if (!Sp.Reset(new GSubProcess(a[0], a[1])))
+		if (!Sp.Reset(new LSubProcess(a[0], a[1])))
 			return false;
 
 		if (InitDir)
@@ -509,7 +509,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 		if (!Sp->Start(true, true, false))
 		{
 			State = ProcessError;
-			GString ErrMsg = LErrorCodeToString(Sp->GetErrorCode());
+			LString ErrMsg = LErrorCodeToString(Sp->GetErrorCode());
 			char s[256];
 			sprintf_s(s, sizeof(s), "Failed to start gdb, error: 0x%x (%s)\n", Sp->GetErrorCode(), ErrMsg.Get());
 			Events->OnError(Sp->GetErrorCode(), s);
@@ -594,7 +594,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 		return true;
 	}
 	
-	bool Cmd(const char *c, GStream *Output = NULL, GString::Array *Arr = NULL)
+	bool Cmd(const char *c, LStream *Output = NULL, LString::Array *Arr = NULL)
 	{
 		if (!ValidStr(c))
 		{
@@ -642,7 +642,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 	}
 	
 public:
-	Gdb(GStream *log) : LThread("Gdb"), Log(log)
+	Gdb(LStream *log) : LThread("Gdb"), Log(log)
 	{
 		Events = NULL;
 		State = Init;
@@ -701,7 +701,7 @@ public:
 		if (ThreadId < 1)
 			return false;
 		
-		GString c;
+		LString c;
 		c.Printf("thread %i", ThreadId);
 		if (!Cmd(c))
 			return false;
@@ -709,13 +709,13 @@ public:
 		return true;
 	}
 
-	bool GetThreads(GArray<GString> &Threads, int *pCurrentThread)
+	bool GetThreads(LArray<LString> &Threads, int *pCurrentThread)
 	{
-		GString::Array t;
+		LString::Array t;
 		if (!Cmd("info threads", NULL, &t))
 			return false;
 		
-		GString *Cur = NULL;
+		LString *Cur = NULL;
 		for (int i=0; i<t.Length(); i++)
 		{
 			char *l = t[i];			
@@ -746,7 +746,7 @@ public:
 			}
 			else if (Cur)
 			{
-				GString s;
+				LString s;
 				s.Printf("%s %s", Cur->Get(), l);
 				*Cur = s;
 			}
@@ -755,9 +755,9 @@ public:
 		return true;
 	}
 
-	bool GetCallStack(GArray<GAutoString> &Stack)
+	bool GetCallStack(LArray<LAutoString> &Stack)
 	{
-		GString::Array Bt;
+		LString::Array Bt;
 		if (!Cmd("bt", NULL, &Bt))
 			return false;
 
@@ -771,12 +771,12 @@ public:
 			else if (Stack.Length() > 0)
 			{
 				// Append to the last line..
-				GAutoString &Prev = Stack.Last();
+				LAutoString &Prev = Stack.Last();
 				char *End = Prev + strlen(Prev);
 				while (End > Prev && strchr(WhiteSpace, End[-1]))
 					*(--End) = 0;
 				
-				GString s;
+				LString s;
 				s.Printf("%s%s", Prev.Get(), l);
 				Prev.Reset(NewStr(s));
 			}
@@ -785,7 +785,7 @@ public:
 		return true;
 	}
 
-	bool GetFrame(int &Frame, GAutoString &File, int &Line)
+	bool GetFrame(int &Frame, LAutoString &File, int &Line)
 	{
 		LgiAssert(0);
 		return false;
@@ -812,7 +812,7 @@ public:
 		
 		ProcessId = -1;
 
-		GString a;
+		LString a;
 		if (Args)
 			a.Printf("r %s", Args.Get());
 		else
@@ -855,7 +855,7 @@ public:
 				Cmd("handle SIGTTIN nostop");
 			}
 			
-			GString a;
+			LString a;
 			if (DebuggingProcess)
 				a = "c";
 			else if (Args)
@@ -877,7 +877,7 @@ public:
 					
 					RemoveBreakPoint(&bp);
 					
-					GStringPipe p;
+					LStringPipe p;
 
 					#if 0 // For some reason this is returning the wrong PID... WTH gdb... WTH.
 					// Get process info
@@ -889,7 +889,7 @@ public:
 						auto Ln = s.SplitDelimit("\r\n");
 						if (Ln.Length() >= 2)
 						{
-							GString::Array a = Ln[1].SplitDelimit(" \t");
+							LString::Array a = Ln[1].SplitDelimit(" \t");
 							for (unsigned i=0; i<a.Length()-1; i++)
 							{
 								if (!a[i].Equals("process"))
@@ -966,15 +966,15 @@ public:
 			
 			BreakPointIdx = 0;
 			
-			GString::Array Lines;
+			LString::Array Lines;
 			Ret = Cmd(cmd, NULL, &Lines);
 			WaitPrompt();
 			
 			for (unsigned i=0; i<Lines.Length(); i++)
 			{
-				GString s;
+				LString s;
 				s = Lines[i];
-				GString::Array p = s.Split(" ");
+				LString::Array p = s.Split(" ");
 				if (p.Length() >= 2 &&
 					!_stricmp(p[0], "breakpoint"))
 				{
@@ -1092,16 +1092,16 @@ public:
 		return true;
 	}
 	
-	bool GetBreakPoints(GArray<BreakPoint> &bps)
+	bool GetBreakPoints(LArray<BreakPoint> &bps)
 	{
 		bps = BreakPoints;
 		return false;
 	}
 	
-	void ParseVariables(const char *a, GArray<Variable> &vars, GDebugger::Variable::ScopeType scope, bool Detailed)
+	void ParseVariables(const char *a, LArray<Variable> &vars, GDebugger::Variable::ScopeType scope, bool Detailed)
 	{
 		GToken t(a, "\r\n");
-		GString CurLine;
+		LString CurLine;
 		for (int i=0; i<t.Length(); i++)
 		{
 			CurLine = t[i];
@@ -1141,8 +1141,8 @@ public:
 				
 				if (Detailed)
 				{
-					GStringPipe typePipe, valPipe;
-					GString c;					
+					LStringPipe typePipe, valPipe;
+					LString c;					
 
 					// Get the type...
 					c.Printf("whatis %s", v.Name.Get());
@@ -1187,14 +1187,14 @@ public:
 		}
 	}
 	
-	bool GetVariables(bool Locals, GArray<Variable> &vars, bool Detailed)
+	bool GetVariables(bool Locals, LArray<Variable> &vars, bool Detailed)
 	{
-		// GProfile Prof("GetVars");
-		GStringPipe p(256);
+		// LProfile Prof("GetVars");
+		LStringPipe p(256);
 
 		if (vars.Length())
 		{
-			GString c;
+			LString c;
 
 			for (unsigned i=0; i<vars.Length(); i++)
 			{
@@ -1203,11 +1203,11 @@ public:
 				c.Printf("whatis %s", v.Name.Get());
 				if (Cmd(c, &p))
 				{
-					GString a = p.NewGStr();
+					LString a = p.NewGStr();
 					printf("Type='%s'\n", a.Get());
 					if (a.Find("=") >= 0)
 					{
-						GString::Array tmp = a.Split("=", 1);
+						LString::Array tmp = a.Split("=", 1);
 						v.Type = tmp[1].Strip().Replace("\n", " ");
 					}
 					else
@@ -1220,11 +1220,11 @@ public:
 				c.Printf("p %s", v.Name.Get());
 				if (Cmd(c, &p))
 				{
-					GString a = p.NewGStr();
-					GString Val;
+					LString a = p.NewGStr();
+					LString Val;
 					if (a.Find("=") >= 0)
 					{
-						GString::Array tmp = a.Split("=", 1);
+						LString::Array tmp = a.Split("=", 1);
 						Val = tmp[1].Strip().Replace("\n", " ").Get();
 					}
 					else
@@ -1257,7 +1257,7 @@ public:
 
 			// Prof.Add("ParseArgs");
 			
-			GAutoString a(p.NewStr());
+			LAutoString a(p.NewStr());
 			ParseVariables(a, vars, Variable::Arg, Detailed);
 
 			// Prof.Add("InfoLocals");
@@ -1274,7 +1274,7 @@ public:
 		return true;
 	}
 
-	bool GetRegisters(GStream *Out)
+	bool GetRegisters(LStream *Out)
 	{
 		if (!Out)
 			return false;
@@ -1282,12 +1282,12 @@ public:
 		return Cmd("info registers", Out);
 	}
 
-	bool PrintObject(const char *Var, GStream *Output)
+	bool PrintObject(const char *Var, LStream *Output)
 	{
 		if (!Var || !Output)
 			return false;
 	
-		GStringPipe q;
+		LStringPipe q;
 		char c[256];
 		
 		// Get type...
@@ -1297,7 +1297,7 @@ public:
 		auto Type = q.NewGStr().SplitDelimit("=").Last().Strip();
 		bool IsPtr = Type.Find("*") >= 0;
 		bool IsChar = Type.Find("const char") == 0 || Type.Find("char") == 0;
-		bool IsGString = Type.Find("GString") == 0;
+		bool IsGString = Type.Find("LString") == 0;
 
 		#if 1		
 		Output->Print("Type: %s\n", Type.Get());
@@ -1387,7 +1387,7 @@ public:
 		return true;
 	}
 
-	bool ReadMemory(GString &BaseAddr, int Length, GArray<uint8_t> &OutBuf, GString *ErrorMsg)
+	bool ReadMemory(LString &BaseAddr, int Length, LArray<uint8_t> &OutBuf, LString *ErrorMsg)
 	{
 		if (!BaseAddr)
 		{
@@ -1396,7 +1396,7 @@ public:
 		}
 		BaseAddr = BaseAddr.Strip();
 
-		GString::Array Out;
+		LString::Array Out;
 		char c[256];
 		int words = Length >> 2;
 		// int bytes = Length % 4;
@@ -1410,12 +1410,12 @@ public:
 		else
 		{
 			// Maybe it's a ptr variable?
-			GString c;
-			GString::Array r;
+			LString c;
+			LString::Array r;
 			c.Printf("p %s", BaseAddr.Get());
 			if (Cmd(c, NULL, &r))
 			{
-				GString::Array p = r[0].SplitDelimit(" \t");
+				LString::Array p = r[0].SplitDelimit(" \t");
 				for (unsigned i=0; i<p.Length(); i++)
 				{
 					if (p[i].Find("0x") >= 0)
@@ -1425,7 +1425,7 @@ public:
 					}
 					
 					/*
-					GString Msg;
+					LString Msg;
 					Msg.Printf("%s\n", p[i].Get());
 					Events->Write(Msg, Msg.Length());
 					*/
@@ -1484,7 +1484,7 @@ public:
 		return true;
 	}
 	
-	bool GetLocation(GAutoString &File, int &Line)
+	bool GetLocation(LAutoString &File, int &Line)
 	{
 		LgiAssert(0);
 		return false;
@@ -1559,17 +1559,17 @@ public:
 		return Cmd(c);
 	}
 
-	GString GetResponse(const char *c)
+	LString GetResponse(const char *c)
 	{
-		GString r;
-		GStringPipe p;
+		LString r;
+		LStringPipe p;
 		if (Cmd(c, &p))
 			r = p.NewGStr();
 		return r;
 	}
 };
 
-GDebugger *CreateGdbDebugger(GStream *Log)
+GDebugger *CreateGdbDebugger(LStream *Log)
 {
 	return new Gdb(Log);
 }

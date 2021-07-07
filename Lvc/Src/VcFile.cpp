@@ -1,7 +1,7 @@
 #include "Lvc.h"
-#include "GClipBoard.h"
+#include "lgi/common/ClipBoard.h"
 
-VcFile::VcFile(AppPriv *priv, VcFolder *owner, GString revision, bool working)
+VcFile::VcFile(AppPriv *priv, VcFolder *owner, LString revision, bool working)
 {
 	d = priv;
 	LoadDiff = false;
@@ -50,16 +50,16 @@ VcFile::FileStatus VcFile::GetStatus()
 	return Status;
 }
 
-GString VcFile::GetUri()
+LString VcFile::GetUri()
 {
 	const char *File = GetText(COL_FILENAME);
-	GUri u = Uri || !Owner ? Uri : Owner->GetUri();
+	LUri u = Uri || !Owner ? Uri : Owner->GetUri();
 	LgiAssert(u && File);
 	u += File;
 	return u.ToString();
 }
 
-void VcFile::SetUri(GString uri)
+void VcFile::SetUri(LString uri)
 {
 	Uri.Set(uri);
 }
@@ -75,7 +75,7 @@ int VcFile::Checked(int Set)
 	return (int)Chk->Value();
 }
 
-void VcFile::SetDiff(GString diff)
+void VcFile::SetDiff(LString diff)
 {
 	auto n = LFromNativeCp(diff);
 	Diff = n;
@@ -103,7 +103,7 @@ void VcFile::Select(bool b)
 	}
 }
 
-void VcFile::OnMouseClick(GMouse &m)
+void VcFile::OnMouseClick(LMouse &m)
 {
 	LListItem::OnMouseClick(m);
 
@@ -111,18 +111,18 @@ void VcFile::OnMouseClick(GMouse &m)
 	{
 		LSubMenu s;
 		const char *File = GetText(COL_FILENAME);
-		GString LocalPath;
+		LString LocalPath;
 
 		if (Uri.IsProtocol("file"))
 		{
-			GFile::Path p = Uri.sPath ? Uri.sPath(1,-1).Get() : Owner->LocalPath();
+			LFile::Path p = Uri.sPath ? Uri.sPath(1,-1).Get() : Owner->LocalPath();
 			p += File;
 			LocalPath = p.GetFull();
 		}
 		
-		GArray<VcFile*> Files;
+		LArray<VcFile*> Files;
 		GetList()->GetSelection(Files);
-		GString::Array Uris;
+		LString::Array Uris;
 		for (auto f: Files)
 			Uris.New() = f->GetUri();
 
@@ -175,8 +175,8 @@ void VcFile::OnMouseClick(GMouse &m)
 		}
 
 		s.AppendSeparator();
-		GString Fn;
-		auto FileParts = GString(File).SplitDelimit("/\\");
+		LString Fn;
+		auto FileParts = LString(File).SplitDelimit("/\\");
 		if (FileParts.Length() > 1)
 		{
 			Fn.Printf("Copy '%s'", FileParts.Last().Get());
@@ -211,7 +211,7 @@ void VcFile::OnMouseClick(GMouse &m)
 			case IDM_BROWSE:
 			{
 				if (LocalPath && LDirExists(LocalPath))
-					LgiBrowseToFile(LocalPath);
+					LBrowseToFile(LocalPath);
 				else
 					LgiMsg(GetList(), "Can't find path '%s'.", AppName, MB_OK, LocalPath.Get());
 				break;
@@ -245,13 +245,13 @@ void VcFile::OnMouseClick(GMouse &m)
 			}
 			case IDM_COPY_LEAF:
 			{
-				GClipBoard c(GetList());
+				LClipBoard c(GetList());
 				c.Text(FileParts.Last());
 				break;
 			}
 			case IDM_COPY_PATH:
 			{
-				GClipBoard c(GetList());
+				LClipBoard c(GetList());
 				c.Text(File);
 				break;
 			}
@@ -266,10 +266,10 @@ void VcFile::OnMouseClick(GMouse &m)
 
 bool ConvertEol(const char *Path, bool Cr)
 {
-	GFile f;
+	LFile f;
 	if (!f.Open(Path, O_READWRITE))
 		return false;
-	GString s = f.Read();
+	LString s = f.Read();
 	s = s.Replace("\r");
 	if (Cr)
 		s = s.Replace("\n", "\r\n");
@@ -280,10 +280,10 @@ bool ConvertEol(const char *Path, bool Cr)
 
 int GetEol(const char *Path)
 {
-	GFile f;
+	LFile f;
 	if (!f.Open(Path, O_READ))
 		return false;
-	GString s = f.Read();
+	LString s = f.Read();
 	int Cr = 0, Lf = 0;
 	if (s)
 	{

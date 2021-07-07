@@ -122,179 +122,14 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\win32\Lgi\GGeneral.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GGuiUtils.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GObject.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GOptionsFile.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Lgi\GPrinter.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GToolTip.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GTrayIcon.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Lgi\LgiException.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\LgiMsg.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GLibrary.cpp">
-      <Filter>Source Files\Core\Libraries</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Lgi\GDragAndDrop.cpp">
-      <Filter>Source Files\Core\Drag and Drop</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Lgi\LMenu.cpp">
-      <Filter>Source Files\Core\Menus</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Resource\LgiRes.cpp">
       <Filter>Source Files\Core\Resources</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Resource\Res.cpp">
       <Filter>Source Files\Core\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\GVariant.cpp">
-      <Filter>Source Files\Core\Variant</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GStream.cpp">
-      <Filter>Source Files\Core\Stream</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\General\GContainers.cpp">
-      <Filter>Source Files\Core\Memory Subsystem</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\General\GMem.cpp">
-      <Filter>Source Files\Core\Memory Subsystem</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GMemStream.cpp">
-      <Filter>Source Files\Core\Memory Subsystem</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\General\GExeCheck.cpp">
-      <Filter>Source Files\Core\File</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\General\GFile.cpp">
-      <Filter>Source Files\Core\File</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\General\GFileCommon.cpp">
-      <Filter>Source Files\Core\File</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\General\ShowFileProp_Win.cpp">
-      <Filter>Source Files\Core\File</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Skins\Gel\Gel.cpp">
       <Filter>Source Files\Core\Skin</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GBitmap.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Text\GDocView.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Lgi\GLayout.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GPanel.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GPopup.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Widgets\GProgress.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GProgressDlg.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Lgi\GScrollBar.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GSplitter.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GStatusBar.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GTabView.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GTextLabel.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Text\GTextView3.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GToolBar.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GCss.cpp">
-      <Filter>Source Files\Widgets\Css</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GCssTools.cpp">
-      <Filter>Source Files\Widgets\Css</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GBox.cpp">
-      <Filter>Source Files\Widgets\Layout</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GTableLayout.cpp">
-      <Filter>Source Files\Widgets\Layout</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GItemContainer.cpp">
-      <Filter>Source Files\Widgets\Container</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GTree.cpp">
-      <Filter>Source Files\Widgets\Container</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Widgets\GButton_Win.cpp">
-      <Filter>Source Files\Widgets\Native Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Widgets\GCheckBox_Win.cpp">
-      <Filter>Source Files\Widgets\Native Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Widgets\GCombo_Win.cpp">
-      <Filter>Source Files\Widgets\Native Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Widgets\GEdit_Win.cpp">
-      <Filter>Source Files\Widgets\Native Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Widgets\GRadioGroup_Win.cpp">
-      <Filter>Source Files\Widgets\Native Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GButton.cpp">
-      <Filter>Source Files\Widgets\Xp</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GCheckBox.cpp">
-      <Filter>Source Files\Widgets\Xp</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GCombo.cpp">
-      <Filter>Source Files\Widgets\Xp</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GEdit.cpp">
-      <Filter>Source Files\Widgets\Xp</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Widgets\GRadioGroup.cpp">
-      <Filter>Source Files\Widgets\Xp</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\INet\Base64.cpp">
-      <Filter>Source Files\General</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\LgiRand.cpp">
-      <Filter>Source Files\General</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GMru.cpp">
-      <Filter>Source Files\General\Mru</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Lgi\GClipBoard.cpp">
-      <Filter>Source Files\General\Clipboard</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Hash\md5\md5.c">
       <Filter>Source Files\General\Hash</Filter>
@@ -302,53 +137,8 @@
     <ClCompile Include="src\common\Hash\sha1\sha1.c">
       <Filter>Source Files\General\Hash</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\General\GGrowl.cpp">
-      <Filter>Source Files\General\Growl</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Text\GString.cpp">
-      <Filter>Source Files\Text</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Text\GToken.cpp">
-      <Filter>Source Files\Text</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Text\GUnicode.cpp">
-      <Filter>Source Files\Text</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Text\GUtf8.cpp">
-      <Filter>Source Files\Text</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Text\GXmlTree.cpp">
-      <Filter>Source Files\Text</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\GColour.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Gdc2\Gdc2.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Gdc2\GdcCommon.cpp">
       <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\Path\GPath.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\Font\GDisplayString.cpp">
-      <Filter>Source Files\Graphics\Font</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\Font\GFont.cpp">
-      <Filter>Source Files\Graphics\Font</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\Font\GFont_A.cpp">
-      <Filter>Source Files\Graphics\Font</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\Font\GFont_W.cpp">
-      <Filter>Source Files\Graphics\Font</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\Font\GFontCodePages.cpp">
-      <Filter>Source Files\Graphics\Font</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\Font\GFontSystem.cpp">
-      <Filter>Source Files\Graphics\Font</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Gdc2\15Bit.cpp">
       <Filter>Source Files\Graphics\Applicators</Filter>
@@ -374,403 +164,613 @@
     <ClCompile Include="src\common\Gdc2\Alpha.cpp">
       <Filter>Source Files\Graphics\Applicators</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Gdc2\Filters\GFilter.cpp">
-      <Filter>Source Files\Graphics\Filters</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\GRect.cpp">
-      <Filter>Source Files\Graphics\Rect/Region</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Gdc2\GMemDC.cpp">
-      <Filter>Source Files\Graphics\Surfaces</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Gdc2\GPrintDC.cpp">
-      <Filter>Source Files\Graphics\Surfaces</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Gdc2\GScreenDC.cpp">
-      <Filter>Source Files\Graphics\Surfaces</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\GSurface.cpp">
-      <Filter>Source Files\Graphics\Surfaces</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Gdc2\GdiLeak.cpp">
-      <Filter>Source Files\Graphics\Gdi Leak</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Gdc2\Tools\GColourReduce.cpp">
-      <Filter>Source Files\Graphics\Colour Reduction</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GAlert.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Widgets\GDialog.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Lgi\GFileSelect.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GFindReplace.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GFontSelect.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GInput.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\General\GPassword.cpp">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\INet\GUri.cpp">
-      <Filter>Source Files\Network</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\INet\INet.cpp">
-      <Filter>Source Files\Network</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\INet\INetTools.cpp">
-      <Filter>Source Files\Network</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\INet\MDStringToDigest.cpp">
-      <Filter>Source Files\Network</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\INet\MibAccess.cpp">
-      <Filter>Source Files\Network</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win32\Lgi\GApp.cpp">
+    <ClCompile Include="src\common\Lgi\WindowCommon.cpp">
       <Filter>Source Files\Interface</Filter>
     </ClCompile>
-    <ClCompile Include="src\win32\Lgi\GView.cpp">
+    <ClCompile Include="src\win\Lgi\Window.cpp">
       <Filter>Source Files\Interface</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\GViewCommon.cpp">
+    <ClCompile Include="src\common\Lgi\ViewCommon.cpp">
       <Filter>Source Files\Interface</Filter>
     </ClCompile>
-    <ClCompile Include="src\win32\Lgi\GWindow.cpp">
+    <ClCompile Include="src\win\Lgi\View.cpp">
       <Filter>Source Files\Interface</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\GWindowCommon.cpp">
+    <ClCompile Include="src\win\General\ShowFileProp_Win.cpp">
       <Filter>Source Files\Interface</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\LMutex.cpp">
-      <Filter>Source Files\Core\Mutex</Filter>
+    <ClCompile Include="src\win\Lgi\Menu.cpp">
+      <Filter>Source Files\Interface</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Widgets\LList.cpp">
-      <Filter>Source Files\Widgets\Container</Filter>
+    <ClCompile Include="src\common\Lgi\MenuCommon.cpp">
+      <Filter>Source Files\Interface</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\General\LDateTime.cpp">
-      <Filter>Source Files\Core\DateTime</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\LThreadCommon.cpp">
+    <ClCompile Include="src\win\Lgi\Thread.cpp">
       <Filter>Source Files\Core\Threads</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\LThreadEvent.cpp">
-      <Filter>Source Files\Core\Threads</Filter>
+    <ClCompile Include="src\common\Lgi\Variant.cpp">
+      <Filter>Source Files\Core\Variant</Filter>
     </ClCompile>
-    <ClCompile Include="src\win32\Lgi\LThread.cpp">
-      <Filter>Source Files\Core\Threads</Filter>
+    <ClCompile Include="src\win\Lgi\ScrollBar.cpp">
+      <Filter>Source Files\Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Gdc2\Font\LStringLayout.cpp">
-      <Filter>Source Files\Graphics\Font</Filter>
+    <ClCompile Include="src\win\Gdc2\Gdc2.cpp">
+      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\LMenuCommon.cpp">
-      <Filter>Source Files\Core\Menus</Filter>
+    <ClCompile Include="src\common\Lgi\Alert.cpp">
+      <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Lgi\LgiCommon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GSubProcess.cpp">
-      <Filter>Source Files\Core\Process</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Text\LUnicodeString.cpp">
-      <Filter>Source Files\Text</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GDropFiles.cpp">
-      <Filter>Source Files\Core\Drag and Drop</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GDragAndDropCommon.cpp">
-      <Filter>Source Files\Core\Drag and Drop</Filter>
-    </ClCompile>
-    <ClCompile Include="src\common\Lgi\GAppCommon.cpp">
+    <ClCompile Include="src\win\Lgi\App.cpp">
       <Filter>Source Files\Interface</Filter>
     </ClCompile>
-    <ClCompile Include="src\win32\Widgets\GSlider_Win.cpp">
+    <ClCompile Include="src\common\Lgi\AppCommon.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Net\Base64.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\Bitmap.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\Box.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\Button.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Widgets\Button_Win.cpp">
       <Filter>Source Files\Widgets\Native Windows</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Widgets\GSlider.cpp">
-      <Filter>Source Files\Widgets\Xp</Filter>
+    <ClCompile Include="src\common\Widgets\CheckBox.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Widgets\CheckBox_Win.cpp">
+      <Filter>Source Files\Widgets\Native Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\ClipBoard.cpp">
+      <Filter>Source Files\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Colour.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Tools\ColourReduce.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\Combo.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Widgets\Combo_Win.cpp">
+      <Filter>Source Files\Widgets\Native Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Css.cpp">
+      <Filter>Source Files\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\CssTools.cpp">
+      <Filter>Source Files\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\General\DateTime.cpp">
+      <Filter>Source Files\Core\DateTime</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Widgets\Dialog_Win.cpp">
+      <Filter>Source Files\Widgets\Native Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Font\DisplayString.cpp">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Text\DocView.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\DragAndDrop.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\DragAndDropCommon.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\DropFiles.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\Edit.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Widgets\Edit_Win.cpp">
+      <Filter>Source Files\Widgets\Native Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\General\ExeCheck.cpp">
+      <Filter>Source Files\General</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\General\File.cpp">
+      <Filter>Source Files\Core\File</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\General\FileCommon.cpp">
+      <Filter>Source Files\Core\File</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\FileSelect.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Filters\Filter.cpp">
+      <Filter>Source Files\Graphics\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\FindReplace.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Font\FontCodePages.cpp">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\FontSelect.cpp">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Font\Font.cpp">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Font\FontSystem.cpp">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Font\FontType.cpp">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Gdc2\GdiLeak.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\General.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\General\Growl.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\GuiUtils.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Input.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\ItemContainer.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\Layout.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\LgiCommon.cpp">
+      <Filter>Source Files\General</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\LgiException.cpp">
+      <Filter>Source Files\General</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Library.cpp">
+      <Filter>Source Files\Core\Libraries</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\List.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Gdc2\LMemDC.cpp">
+      <Filter>Source Files\Graphics\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Gdc2\LPrintDC.cpp">
+      <Filter>Source Files\Graphics\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\LMsg.cpp">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Gdc2\LScreenDC.cpp">
+      <Filter>Source Files\Graphics\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Net\MDStringToDigest.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\General\Mem.cpp">
+      <Filter>Source Files\Core\Memory Subsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\General\Containers.cpp">
+      <Filter>Source Files\Core\Memory Subsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\MemStream.cpp">
+      <Filter>Source Files\Core\Memory Subsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\INet\MibAccess.cpp">
+      <Filter>Source Files\General</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Mru.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Mutex.cpp">
+      <Filter>Source Files\Core\Mutex</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Net\Net.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Net\NetTools.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Object.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\OptionsFile.cpp">
+      <Filter>Source Files\General</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\Panel.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\General\Password.cpp">
+      <Filter>Source Files\General</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Path\Path.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\Popup.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Lgi\Printer.cpp">
+      <Filter>Source Files\Graphics\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Widgets\Progress_Win.cpp">
+      <Filter>Source Files\Widgets\Native Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\ProgressDlg.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\RadioGroup.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Widgets\RadioGroup_Win.cpp">
+      <Filter>Source Files\Widgets\Native Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Rand.cpp">
+      <Filter>Source Files\General</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Rect.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\Slider.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Widgets\Slider_Win.cpp">
+      <Filter>Source Files\Widgets\Native Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\Splitter.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\StatusBar.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\Stream.cpp">
+      <Filter>Source Files\Core\Memory Subsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Text\String.cpp">
+      <Filter>Source Files\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Font\StringLayout.cpp">
+      <Filter>Source Files\Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\SubProcess.cpp">
+      <Filter>Source Files\Core\Process</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Surface.cpp">
+      <Filter>Source Files\Graphics\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\TableLayout.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\TabView.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\TextLabel.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Text\TextView3.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\ThreadEvent.cpp">
+      <Filter>Source Files\Core\Threads</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\ThreadCommon.cpp">
+      <Filter>Source Files\Core\Threads</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Text\Token.cpp">
+      <Filter>Source Files\Core\Memory Subsystem</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\ToolTip.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\ToolBar.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Widgets\Tree.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Lgi\TrayIcon.cpp">
+      <Filter>Source Files\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Font\TypeFace.cpp">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Text\Unicode.cpp">
+      <Filter>Source Files\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Text\UnicodeString.cpp">
+      <Filter>Source Files\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Net\Uri.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Text\XmlTree.cpp">
+      <Filter>Source Files\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Text\Utf8.cpp">
+      <Filter>Source Files\Text</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\common\GLibrary.h">
-      <Filter>Source Files\Core\Libraries</Filter>
-    </ClInclude>
-    <ClInclude Include="include\win32\GCom.h">
-      <Filter>Source Files\Core\Drag and Drop</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GDragAndDrop.h">
-      <Filter>Source Files\Core\Drag and Drop</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GDropFiles.h">
-      <Filter>Source Files\Core\Drag and Drop</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LMenu.h">
-      <Filter>Source Files\Core\Menus</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LgiRes.h">
-      <Filter>Source Files\Core\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\Res.h">
-      <Filter>Source Files\Core\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GEventTargetThread.h">
-      <Filter>Source Files\Core\Threads</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GVariant.h">
-      <Filter>Source Files\Core\Variant</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GDom.h">
-      <Filter>Source Files\Core\Stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GStream.h">
-      <Filter>Source Files\Core\Stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GArray.h">
-      <Filter>Source Files\Core\Memory Subsystem</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GAutoPtr.h">
-      <Filter>Source Files\Core\Memory Subsystem</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GContainers.h">
-      <Filter>Source Files\Core\Memory Subsystem</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GHashTable.h">
-      <Filter>Source Files\Core\Memory Subsystem</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GMem.h">
-      <Filter>Source Files\Core\Memory Subsystem</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GFile.h">
-      <Filter>Source Files\Core\File</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GImageList.h">
-      <Filter>Source Files\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GPopup.h">
-      <Filter>Source Files\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GProgress.h">
-      <Filter>Source Files\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GScrollBar.h">
-      <Filter>Source Files\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GTabView.h">
-      <Filter>Source Files\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GTextLabel.h">
-      <Filter>Source Files\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GToolBar.h">
-      <Filter>Source Files\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GCss.h">
-      <Filter>Source Files\Widgets\Css</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GCssTools.h">
-      <Filter>Source Files\Widgets\Css</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GBox.h">
-      <Filter>Source Files\Widgets\Layout</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GDisplayStringLayout.h">
-      <Filter>Source Files\Widgets\Layout</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GTableLayout.h">
-      <Filter>Source Files\Widgets\Layout</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GItemContainer.h">
-      <Filter>Source Files\Widgets\Container</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GTree.h">
-      <Filter>Source Files\Widgets\Container</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GButton.h">
-      <Filter>Source Files\Widgets\Xp</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GCheckBox.h">
-      <Filter>Source Files\Widgets\Xp</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GCombo.h">
-      <Filter>Source Files\Widgets\Xp</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GEdit.h">
-      <Filter>Source Files\Widgets\Xp</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GRadioGroup.h">
-      <Filter>Source Files\Widgets\Xp</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GMatrix.h">
-      <Filter>Source Files\General</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GMru.h">
-      <Filter>Source Files\General\Mru</Filter>
-    </ClInclude>
     <ClInclude Include="src\common\Hash\md5\md5.h">
       <Filter>Source Files\General\Hash</Filter>
     </ClInclude>
     <ClInclude Include="src\common\Hash\sha1\sha1.h">
       <Filter>Source Files\General\Hash</Filter>
     </ClInclude>
-    <ClInclude Include="include\common\GGrowl.h">
-      <Filter>Source Files\General\Growl</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GString.h">
-      <Filter>Source Files\Text</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GUnicode.h">
-      <Filter>Source Files\Text</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GColour.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GColourSpace.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\Gdc2.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GPalette.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GPixelRops.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GRops.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GFont.h">
-      <Filter>Source Files\Graphics\Font</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GFilter.h">
-      <Filter>Source Files\Graphics\Filters</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GPoint.h">
-      <Filter>Source Files\Graphics\Rect/Region</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GRect.h">
-      <Filter>Source Files\Graphics\Rect/Region</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GdiLeak.h">
-      <Filter>Source Files\Graphics\Gdi Leak</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GFileSelect.h">
-      <Filter>Source Files\Dialogs</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\INet.h">
-      <Filter>Source Files\Network</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\INetTools.h">
-      <Filter>Source Files\Network</Filter>
-    </ClInclude>
-    <ClInclude Include="src\win32\INet\MibAccess.h">
-      <Filter>Source Files\Network</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GMessage.h">
-      <Filter>Source Files\Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GViewPriv.h">
-      <Filter>Source Files\Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GCapabilities.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GCom.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GNotifications.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\Lgi.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LgiClass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LgiClasses.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LgiCommon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LgiDefs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LgiInc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LgiInterfaces.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\win32\LgiOsClasses.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\win32\LgiOsDefs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LMutex.h">
-      <Filter>Source Files\Core\Mutex</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LList.h">
-      <Filter>Source Files\Widgets\Container</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LDateTime.h">
-      <Filter>Source Files\Core\DateTime</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LThread.h">
-      <Filter>Source Files\Core\Threads</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LThreadEvent.h">
-      <Filter>Source Files\Core\Threads</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LListItemCheckBox.h">
-      <Filter>Source Files\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LListItemRadioBtn.h">
-      <Filter>Source Files\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LStringLayout.h">
-      <Filter>Source Files\Graphics\Font</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GTextView3.h">
-      <Filter>Source Files\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LCancel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LError.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GSubProcess.h">
-      <Filter>Source Files\Core\Process</Filter>
-    </ClInclude>
-    <ClInclude Include="src\common\Gdc2\Font\GFontPriv.h">
-      <Filter>Source Files\Graphics\Font</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GView.h">
-      <Filter>Source Files\Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LDomFields.h">
-      <Filter>Source Files\Core\Stream</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\LPointF.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common\GPath.h">
-      <Filter>Source Files\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="private\win\GAppPriv.h">
       <Filter>Source Files\Interface</Filter>
     </ClInclude>
-    <ClInclude Include="include\common\GSlider.h">
-      <Filter>Source Files\Widgets\Native Windows</Filter>
+    <ClInclude Include="include\lgi\common\Array.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\AutoPtr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Box.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Button.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Capabilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\CheckBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Colour.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\ColourSpace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Com.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Combo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Containers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Css.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\CssTools.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Gdc2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\GdiLeak.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Dom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\DragAndDrop.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\DropFiles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Edit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\EventTargetThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\File.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\FileSelect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Filter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Font.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Growl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\HashTable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\ImageList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\ItemContainer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Library.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Matrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Mem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Path.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Slider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\View.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Menu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Message.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Mru.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Notifications.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Palette.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\PixelRops.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Point.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Popup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Progress.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\RadioGroup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Rect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Rops.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\ScrollBar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Stream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\String.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\SubProcess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\TableLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\TabView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\TextLabel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\TextView3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\ToolBar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Tree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Unicode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Variant.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\ViewPriv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Net.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\NetTools.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Cancel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\DateTime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\DomFields.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Error.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Lgi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\LgiClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\LgiClasses.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\LgiCommon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\LgiDefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\LgiInc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\LgiInterfaces.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\LgiRes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\List.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\ListItemCheckBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\ListItemRadioBtn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Mutex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\StringLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Thread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\ThreadEvent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Res.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\win\LgiOsClasses.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\win\LgiOsDefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\win\INet\MibAccess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\Gdc2\Font\LFontPriv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\LgiUiBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\ProgressView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\ProgressDlg.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

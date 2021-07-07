@@ -25,7 +25,7 @@ public:
 	char tmCharSet; 
 };
 
-class LgiClass GTypeFace {
+class LgiClass LTypeFace {
 protected:
 	uint Flags;			// FNT_xxx flags
 	uint Height; 
@@ -48,7 +48,7 @@ protected:
 	int TabSize;
 
 public:
-	GTypeFace()
+	LTypeFace()
 	{
 		ForeCol = 0;
 		BackCol = 0xFFFFFF;
@@ -56,7 +56,7 @@ public:
 		TabSize = 0;
 	}
 	
-	virtual ~GTypeFace() {}
+	virtual ~LTypeFace() {}
 
 	virtual void Colour(COLOUR Fore, COLOUR Back = 0xFFFFFFFF) { ForeCol = Fore; BackCol = Back; }
 	void Fore(COLOUR f) { ForeCol = f; }
@@ -70,8 +70,8 @@ public:
 		TabSize = tabsize;
 	}
 
-	virtual bool Load(GFile &F) { return FALSE; }
-	virtual bool Save(GFile &F) { return FALSE; }
+	virtual bool Load(LFile &F) { return FALSE; }
+	virtual bool Save(LFile &F) { return FALSE; }
 };
 
 typedef unsigned long				TTF_FIXED;
@@ -87,8 +87,8 @@ public:
 	ushort	EntrySelector;			// Log2(maximum power of 2 £ numTables).
 	ushort	RangeShift;			// NumTables x 16-searchRange.
 
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
 };
 
@@ -101,8 +101,8 @@ public:
 
 	void	*Table;
 
-	virtual bool Read(GFile &F);
-	virtual bool Write(GFile &F);
+	virtual bool Read(LFile &F);
+	virtual bool Write(LFile &F);
 	virtual void Dump();
 };
 
@@ -145,8 +145,8 @@ public:
 						// 1 for long.
 	short	GlyphDataFormat;		// 0 for current format.
 
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
 };
 
@@ -168,8 +168,8 @@ public:
 	ushort	MaxComponentElements;		// Maximum number of components referenced at "top level" for any composite glyph.
 	ushort	MaxComponentDepth;		// Maximum levels of recursion; 1 for simple components.
 
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
 };
 
@@ -184,8 +184,8 @@ public:
 	virtual ~TtfLocation();
 
 	int operator [](int i);
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
 };
 
@@ -280,7 +280,7 @@ public:
 	bool RasterX(int Size, DataList *List);
 	bool RasterY(int Size, DataList *List);
 
-	void DebugDraw(GSurface *pDC, int Sx, int Sy);
+	void DebugDraw(LSurface *pDC, int Sx, int Sy);
 };
 
 class LgiClass TtfGlyph : public TtfObj {
@@ -313,13 +313,13 @@ public:
 	int GetX() { return xMax - xMin; }
 	int GetY() { return yMax - yMin; }
 
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
-	void Draw(GSurface *pDC, int x, int y, int Scale);
-	int DrawEm(GSurface *pDC, int X, int Y, int EmUnits, double PixelsPerEm);
-	bool Rasterize(	GSurface *pDC,
-			GRect *pDest,
+	void Draw(LSurface *pDC, int x, int y, int Scale);
+	int DrawEm(LSurface *pDC, int X, int Y, int EmUnits, double PixelsPerEm);
+	bool Rasterize(	LSurface *pDC,
+			LRect *pDest,
 			double xppem,
 			double yppem,
 			int BaseLine);
@@ -330,8 +330,8 @@ public:
 	TtfMap() {}
 	virtual ~TtfMap() {}
 	virtual int operator[](int i) { return 0; }
-	virtual bool Read(GFile &F) { return FALSE; }
-	virtual bool Write(GFile &F) { return FALSE; }
+	virtual bool Read(LFile &F) { return FALSE; }
+	virtual bool Write(LFile &F) { return FALSE; }
 	virtual void Dump() {}
 };
 
@@ -347,8 +347,8 @@ public:
 	ushort Format;
 	TtfMap	*Map;
 
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
 };
 
@@ -361,8 +361,8 @@ class LgiClass TtfCMapByteEnc : public TtfMap {
 
 public:
 	int operator[](int i);
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
 };
 
@@ -386,8 +386,8 @@ class LgiClass TtfCMapHighByte : public TtfMap {
 
 public:
 	int operator[](int i) { return 0; }
-	bool Read(GFile &F) { return FALSE; }
-	bool Write(GFile &F) { return FALSE; }
+	bool Read(LFile &F) { return FALSE; }
+	bool Write(LFile &F) { return FALSE; }
 	void Dump() {}
 };
 
@@ -415,8 +415,8 @@ public:
 	~TtfCMapSegDelta();
 
 	int operator[](int i);
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
 };
 
@@ -432,14 +432,14 @@ public:
 	TtfCMap();
 	~TtfCMap();
 	int operator[](int i) { return (Fravorite) ? (*Fravorite)[i] : 0; }
-	bool Read(GFile &F);
-	bool Write(GFile &F);
+	bool Read(LFile &F);
+	bool Write(LFile &F);
 	void Dump();
 };
 
 class LgiClass TtfRaster : public TtfObj {
 
-	friend class GSurface;
+	friend class LSurface;
 
 	int XPixelsPerEm;
 	int YPixelsPerEm;
@@ -447,8 +447,8 @@ class LgiClass TtfRaster : public TtfObj {
 
 public:
 	int *BaseLine;			// pixels down to baseline in bitmap
-	GRect *pSource;		// where glyph is stored in the bitmap
-	GSurface *pDC;		// the bitmap
+	LRect *pSource;		// where glyph is stored in the bitmap
+	LSurface *pDC;		// the bitmap
 
 	TtfRaster();
 	~TtfRaster();
@@ -456,10 +456,10 @@ public:
 	double GetXPixelsPerEm() { return XPixelsPerEm; }
 	double GetYPixelsPerEm() { return YPixelsPerEm; }
 	bool Rasterize(double xPPEm, double yPPEm, int OverSample);
-	int DrawChar(GSurface *pDC, int x, int y, int Char);
+	int DrawChar(LSurface *pDC, int x, int y, int Char);
 };
 
-class LgiClass GdcTtf : public GTypeFace {
+class LgiClass GdcTtf : public LTypeFace {
 
 	friend class TtfObj;
 
@@ -467,7 +467,7 @@ protected:
 	int Tables;
 	TtfTable *TableList;
 	TtfTable *FindTag(char *t);
-	TtfTable *SeekTag(char *t, GFile *F);
+	TtfTable *SeekTag(char *t, LFile *F);
 
 	TtfHeader Header;
 	TtfMaxProfile Profile;
@@ -483,29 +483,29 @@ public:
 	GdcTtf();
 	virtual ~GdcTtf();
 
-	virtual bool Load(GFile &F);
-	virtual bool Save(GFile &F);
+	virtual bool Load(LFile &F);
+	virtual bool Save(LFile &F);
 	virtual bool Rasterize(	int Point,
 							int StyleFlags,
 							int OverSample = 2,
 							int XDpi = 96,
 							int YDpi = -1);
 
-	void Test(GSurface *pDC);
+	void Test(LSurface *pDC);
 	virtual void Size(int *x, int *y, char *Str, int Len = -1, int Flags = 0);
 	int X(char *Str, int Len = -1, int Flags = 0);
 	int Y(char *Str, int Len = -1, int Flags = 0);
 
 	// Text drawing functions
 	virtual bool SelectPoint(int Pt) { return FALSE; }
-	virtual void Text(GSurface *pDC, int x, int y, char *Str, int Len = -1);
+	virtual void Text(LSurface *pDC, int x, int y, char *Str, int Len = -1);
 };
 
 #define LFONT_LIGHT					FW_LIGHT
 #define LFONT_NORMAL				FW_NORMAL
 #define LFONT_BOLD					FW_BOLD
 
-class LgiClass GFont : public GdcTtf {
+class LgiClass LFont : public GdcTtf {
 
 	HFONT	hFont;
 	float	*Widths;
@@ -513,13 +513,13 @@ class LgiClass GFont : public GdcTtf {
 	void SetWidths();
 
 public:
-	GFont();
-	~GFont();
+	LFont();
+	~LFont();
 
 	HFONT Handle() { return hFont; }
 
-	bool Load(GFile &F) { return TRUE; }
-	bool Save(GFile &F) { return FALSE; }
+	bool Load(LFile &F) { return TRUE; }
+	bool Save(LFile &F) { return FALSE; }
 
 	bool Create(char *Face,
 				int Height,
@@ -538,11 +538,11 @@ public:
 
 	bool CreateFont(LOGFONT *LogFont);
 
-	void Text(	GSurface *pDC,
+	void Text(	LSurface *pDC,
 				int x, int y,
 				char *Str,
 				int Len = -1,
-				GRect *r = NULL); // ASCII version
+				LRect *r = NULL); // ASCII version
 	void Size(int *x, int *y, char *Str, int Len = -1, int Flags = 0);
 	int CharAt(int x, char *Str, int Len = -1);
 };

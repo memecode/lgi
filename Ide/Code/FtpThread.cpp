@@ -1,13 +1,13 @@
 #include <stdio.h>
 
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "FtpThread.h"
 
 static FtpThread *Ftp = 0;
 
 class Line : public LListItem
 {
-	GColour c;
+	LColour c;
 
 public:
 	Line(const char *s, COLOUR col)
@@ -24,11 +24,11 @@ public:
 	}
 };
 
-class LogSock : public GSocket
+class LogSock : public LSocket
 {
-	GStringPipe r, w;
+	LStringPipe r, w;
 
-	void Pop(GStringPipe &p, COLOUR c)
+	void Pop(LStringPipe &p, COLOUR c)
 	{
 		char s[256];
 		while (p.Pop(s, sizeof(s)))
@@ -79,13 +79,13 @@ public:
 
 struct FtpConn
 {
-	GUri *Base;
+	LUri *Base;
 	LogSock *Sock;
 	IFtp Ftp;
 
 	FtpConn(char *u)
 	{
-		Base = new GUri(u);
+		Base = new LUri(u);
 		Sock = 0;
 	}
 
@@ -97,7 +97,7 @@ struct FtpConn
 
 	bool Match (char *Uri)
 	{
-		GUri u(Uri);
+		LUri u(Uri);
 		
 		if (Base &&
 			u.sHost && Base->sHost &&
@@ -165,12 +165,12 @@ void FtpCmd::Error(const char *e)
 ////////////////////////////////////////////////////////////////////////////////////
 #define M_FTP_CMD			(M_USER + 0x4000)
 
-class FtpRedir : public GWindow
+class FtpRedir : public LWindow
 {
 public:
 	FtpRedir()
 	{
-		GRect r(-20001, -20001, -20000, -20000);
+		LRect r(-20001, -20001, -20000, -20000);
 		SetPos(r);
 		Attach(0);
 	}
@@ -184,15 +184,15 @@ public:
 			DeleteObj(c);
 		}
 
-		return GWindow::OnEvent(m);
+		return LWindow::OnEvent(m);
 	}
 };
 
 struct FtpThreadPriv : public LMutex
 {
 	bool Loop;
-	GArray<FtpConn*> Conn;
-	GArray<FtpCmd*> Cmds;
+	LArray<FtpConn*> Conn;
+	LArray<FtpCmd*> Cmds;
 	FtpRedir *Redir;
 
 	FtpThreadPriv()
@@ -314,7 +314,7 @@ int FtpThread::Main()
 						FtpConn *Conn = d->GetConn(c->Uri, c->Watch);
 						if (Conn)
 						{
-							GUri u(c->Uri);
+							LUri u(c->Uri);
 							if (u.sPath)
 							{
 								char p[256];
@@ -330,7 +330,7 @@ int FtpThread::Main()
 							}
 
 							char r[256], *d = strrchr(c->Uri, '/');
-							LgiMakePath(r, sizeof(r), LGetSystemPath(LSP_TEMP), d + 1);
+							LMakePath(r, sizeof(r), LGetSystemPath(LSP_TEMP), d + 1);
 							if (LFileExists(r))
 							{
 								FileDev->Delete(r, false);
@@ -360,7 +360,7 @@ int FtpThread::Main()
 						FtpConn *Conn = d->GetConn(c->Uri, c->Watch);
 						if (Conn)
 						{
-							GUri u(c->Uri);
+							LUri u(c->Uri);
 							if (u.sPath)
 							{
 								char p[256];
@@ -420,4 +420,3 @@ void ShutdownFtpThread()
 {
 	DeleteObj(Ftp);
 }
-

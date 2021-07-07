@@ -10,7 +10,7 @@
 #include "INet.h"
 #include "lldb_callback.h"
 
-static GSocket Conn;
+static LSocket Conn;
 
 static bool WriteBuf(void *p, int len)
 {

@@ -35,7 +35,7 @@ struct VcEdge
 
 class VcCommit : public LListItem
 {
-	GString Cache;
+	LString Cache;
 	bool Current;
 
 protected:
@@ -43,24 +43,24 @@ protected:
 	VcFolder *Folder;
 
 	// Commit Meta
-	GString Rev;
+	LString Rev;
 	int64_t Index;
-	GString::Array Parents;
-	GString Branch;
-	GString Author;
+	LString::Array Parents;
+	LString Branch;
+	LString Author;
 	LDateTime Ts;
-	GString Msg;
+	LString Msg;
 
 	void OnParse();
 
 public:
 	static size_t Instances;
 
-	GString::Array Files;
-	GArray<VcEdge*> Edges;
+	LString::Array Files;
+	LArray<VcEdge*> Edges;
 	int NodeIdx;
 	int Idx;
-	GColour NodeColour;
+	LColour NodeColour;
 	LHashTbl<PtrKey<VcEdge*>, int> Pos;
 
 	VcCommit(AppPriv *priv, VcFolder *folder);
@@ -72,21 +72,21 @@ public:
 	char *GetAuthor();
 	char *GetMsg();
 	char *GetBranch();
-	GString::Array *GetParents() { return &Parents; }
+	LString::Array *GetParents() { return &Parents; }
 	LDateTime &GetTs() { return Ts; }
 
 	void SetCurrent(bool b);
-	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, GItemColumn *c);
+	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c);
 	const char *GetText(int Col);
 	const char *GetFieldText(CommitField Fld);
-	bool GitParse(GString s, bool RevList);
-	bool SvnParse(GString s);
-	bool HgParse(GString s);
-	bool CvsParse(LDateTime &Dt, GString Auth, GString Msg);
+	bool GitParse(LString s, bool RevList);
+	bool SvnParse(LString s);
+	bool HgParse(LString s);
+	bool CvsParse(LDateTime &Dt, LString Auth, LString Msg);
 	VcFolder *GetFolder();
 
 	// Events
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 	void Select(bool b);
 };
 

@@ -10,12 +10,12 @@
 #include <string.h>
 #include <math.h>
 
-#include "Gdc2.h"
-#include "GPalette.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/Palette.h"
 
 /// 15 bit rgb applicators
-template<typename Pixel, GColourSpace Cs>
-class GdcApp15 : public GApplicator
+template<typename Pixel, LColourSpace Cs>
+class GdcApp15 : public LApplicator
 {
 protected:
 	union
@@ -86,7 +86,7 @@ public:
 	}
 };
 
-template<typename Pixel, GColourSpace Cs>
+template<typename Pixel, LColourSpace Cs>
 class GdcApp15Set : public GdcApp15<Pixel, Cs>
 {
 public:
@@ -197,20 +197,20 @@ public:
 	}
 };
 
-GApplicator *GApp15::Create(GColourSpace Cs, int Op)
+LApplicator *GApp15::Create(LColourSpace Cs, int Op)
 {
 	if (Op == GDC_SET)
 	{
 		switch (Cs)
 		{
 			case CsRgb15:
-				return new GdcApp15Set<GRgb15, CsRgb15>;
+				return new GdcApp15Set<LRgb15, CsRgb15>;
 			case CsBgr15:
-				return new GdcApp15Set<GBgr15, CsBgr15>;
+				return new GdcApp15Set<LBgr15, CsBgr15>;
 			case CsArgb15:
-				return new GdcApp15Set<GArgb15, CsArgb15>;
+				return new GdcApp15Set<LArgb15, CsArgb15>;
 			case CsAbgr15:
-				return new GdcApp15Set<GAbgr15, CsAbgr15>;
+				return new GdcApp15Set<LAbgr15, CsAbgr15>;
 			default:
 				break;
 		}

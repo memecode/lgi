@@ -1,22 +1,22 @@
 #include <Path.h>
 #include "Lgi.h"
-#include "GSkinEngine.h"
+#include "SkinEngine.h"
 #include "GFontCache.h"
 
-class GAppPrivate
+class LAppPrivate
 {
 public:
 	// Common
 	OsAppArguments Args;
-	GXmlTag *Config;
-	GFileSystem *FileSystem;
+	LXmlTag *Config;
+	LFileSystem *FileSystem;
 	GLibrary *SkinLib;
 	GdcDevice *GdcSystem;
-	GAutoPtr<GFontCache> FontCache;
+	LAutoPtr<GFontCache> FontCache;
 	OsThreadId GuiThread;
 	bool FirstRun;
 
-	GAppPrivate() : Args(0, 0)
+	LAppPrivate() : Args(0, 0)
 	{
 		FileSystem = 0;
 		GdcSystem = 0;
@@ -26,7 +26,7 @@ public:
 		FirstRun = true;
 	}
 
-	~GAppPrivate()
+	~LAppPrivate()
 	{
 		DeleteObj(Config);
 		DeleteObj(FileSystem);
@@ -36,10 +36,10 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-GApp *TheApp = 0;
-class GSkinEngine *GApp::SkinEngine = 0;
+LApp *TheApp = 0;
+class LSkinEngine *LApp::SkinEngine = 0;
 
-GApp *GApp::ObjInstance()
+LApp *LApp::ObjInstance()
 {
 	return TheApp;
 }
@@ -51,7 +51,7 @@ char *MimeFromName(char *Name)
 	return m;
 }
 
-GApp::GApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : BApplication(MimeFromName(Name))
+LApp::LApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : BApplication(MimeFromName(Name))
 {
 	// Sanity Checks
 	LgiAssert(sizeof(int8) == 1);
@@ -69,26 +69,26 @@ GApp::GApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : B
 	LgiAssert(sizeof(char16) == 4);
 
 	// Private data
-	d = new GAppPrivate;
+	d = new LAppPrivate;
 	TheApp = this;
 	d->Args = OsArgs;
-	GBase::Name(Name);
+	LBase::Name(Name);
 
 	// Setup LGI Sub-systems
-	GFontSystem::Inst();
-	d->FileSystem = new GFileSystem;
+	LFontSystem::Inst();
+	d->FileSystem = new LFileSystem;
 	d->GdcSystem = new GdcDevice;
 
 	srand(system_time());
 	LgiInitColours();
-	// MouseHook = new GMouseHook;
+	// MouseHook = new LMouseHook;
 	MouseHook = 0;
 	AppWnd = 0;
 	SetAppArgs(OsArgs);
 
 	// System font
 	SystemNormal = 0;
-	GFontType SysFontType;
+	LFontType SysFontType;
 	if (SysFontType.GetSystemFont("System"))
 	{
 		SystemNormal = SysFontType.Create();
@@ -96,7 +96,7 @@ GApp::GApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : B
 		{
 			SystemNormal->Transparent(true);
 			
-			SystemBold = new GFont;
+			SystemBold = new LFont;
 			if (SystemBold)
 			{
 				*SystemBold = *SystemNormal;
@@ -109,50 +109,50 @@ GApp::GApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : B
 
 	if (!SystemNormal)
 	{
-		LgiMsg(0, "Error: Couldn't create system font.", "Lgi Error: GApp::GApp", MB_OK);
+		LgiMsg(0, "Error: Couldn't create system font.", "Lgi Error: LApp::LApp", MB_OK);
 		LgiExitApp();
 	}
 
 	#if 1
 	if (!GetOption("noskin"))
 	{
-		extern GSkinEngine *CreateSkinEngine(GApp *App);
+		extern LSkinEngine *CreateSkinEngine(LApp *App);
 		SkinEngine = CreateSkinEngine(this);
 	}
 	#endif
 }
 
-GApp::~GApp()
+LApp::~LApp()
 {
 	TheApp = 0;
 	DeleteObj(d);
 }
 
-GSymLookup *GApp::GetSymLookup()
+LSymLookup *LApp::GetSymLookup()
 {
 	return NULL;
 }
 
-void GApp::OnUrl(const char *Url)
+void LApp::OnUrl(const char *Url)
 {
 }
 
-OsThreadId GApp::GetGuiThread()
+OsThreadId LApp::GetGuiThread()
 {
 	return d->GuiThread;
 }
 
-OsProcessId GApp::GetProcessId()
+OsProcessId LApp::GetProcessId()
 {
 	return getpid();
 }
 
-bool GApp::IsOk()
+bool LApp::IsOk()
 {
 	return true;
 }
 
-GViewI *GApp::GetFocus()
+LViewI *LApp::GetFocus()
 {
 	for (int i=0; i<CountWindows(); i++)
 	{
@@ -174,12 +174,12 @@ GViewI *GApp::GetFocus()
 	return 0;
 }
 
-int32 GApp::GetMetric(LgiSystemMetric Which)
+int32 LApp::GetMetric(LgiSystemMetric Which)
 {
 	return 0;
 }
 
-bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
+bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 {
 	if (Loop)
 	{
@@ -196,9 +196,9 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 	}
 }
 
-void GApp::RefsReceived(BMessage *Msg)
+void LApp::RefsReceived(BMessage *Msg)
 {
-	GArray<char*> Files;
+	LArray<char*> Files;
 	int32 Count = 0;
 	type_code Type = 0;
 	
@@ -229,7 +229,7 @@ void GApp::RefsReceived(BMessage *Msg)
 	Files.DeleteArrays();
 }
 
-void GApp::OnReceiveFiles(GArray<char*> &Files)
+void LApp::OnReceiveFiles(LArray<char*> &Files)
 {
 	if (AppWnd)
 	{
@@ -237,11 +237,11 @@ void GApp::OnReceiveFiles(GArray<char*> &Files)
 	}
 }
 
-void GApp::SetConfig(GXmlTag *Tag)
+void LApp::SetConfig(LXmlTag *Tag)
 {
 	if (IsOk() && Tag)
 	{
-		GXmlTag *Old = GetConfig(Tag->GetTag());
+		LXmlTag *Old = GetConfig(Tag->GetTag());
 		if (Old)
 		{
 			Old->RemoveTag();
@@ -259,7 +259,7 @@ void GApp::SetConfig(GXmlTag *Tag)
 	}
 }
 
-GXmlTag *GApp::GetConfig(const char *Tag)
+LXmlTag *LApp::GetConfig(const char *Tag)
 {
 	if (IsOk() && !d->Config)
 	{
@@ -284,13 +284,13 @@ GXmlTag *GApp::GetConfig(const char *Tag)
 
 			if (LFileExists(Path))
 			{
-				d->Config = new GXmlTag("Config");
+				d->Config = new LXmlTag("Config");
 				if (d->Config)
 				{
-					GFile f;
+					LFile f;
 					if (f.Open(Path, O_READ))
 					{
-						GXmlTree t;
+						LXmlTree t;
 						t.Read(d->Config, &f, 0);
 					}
 				}
@@ -299,7 +299,7 @@ GXmlTag *GApp::GetConfig(const char *Tag)
 
 		if (!d->Config)
 		{
-			d->Config = new GXmlTag("Options");
+			d->Config = new LXmlTag("Options");
 		}
 	}
 
@@ -311,7 +311,7 @@ GXmlTag *GApp::GetConfig(const char *Tag)
 	return 0;
 }
 
-bool GApp::GetOption(const char *Option, char *Dest, int DestLen)
+bool LApp::GetOption(const char *Option, char *Dest, int DestLen)
 {
 	if (Option)
 	{
@@ -359,21 +359,21 @@ bool GApp::GetOption(const char *Option, char *Dest, int DestLen)
 	return false;
 }
 
-void GApp::OnCommandLine()
+void LApp::OnCommandLine()
 {
 	char WhiteSpace[] = " \r\n\t";
 
-	GArray<char*> Files;
+	LArray<char*> Files;
 	for (int i = 1; i<d->Args.Args; i++)
 	{
 		const char *a = d->Args.Arg[i];
 		if (a)
 		{
-			if (LgiIsRelativePath(a))
+			if (LIsRelativePath(a))
 			{
 				char p[MAX_PATH];
 				LgiGetExePath(p, sizeof(p));
-				LgiMakePath(p, sizeof(p), p, a);
+				LMakePath(p, sizeof(p), p, a);
 				if (FileExists(a))
 				{
 					Files.Add(NewStr(a));
@@ -396,17 +396,17 @@ void GApp::OnCommandLine()
 	Files.DeleteArrays();
 }
 
-char *GApp::GetArgumentAt(int n)
+char *LApp::GetArgumentAt(int n)
 {
 	return n >= 0 && n < d->Args.Args ? NewStr(d->Args.Arg[n]) : 0;
 }
 
-OsAppArguments *GApp::GetAppArgs()
+OsAppArguments *LApp::GetAppArgs()
 {
 	return &d->Args;
 }
 
-bool GApp::GetOption(const char *Option, GAutoString &Buf)
+bool LApp::GetOption(const char *Option, LAutoString &Buf)
 {
 	if (IsOk() && Option)
 	{
@@ -461,12 +461,12 @@ bool GApp::GetOption(const char *Option, GAutoString &Buf)
 	return false;
 }
 
-void GApp::SetAppArgs(OsAppArguments &AppArgs)
+void LApp::SetAppArgs(OsAppArguments &AppArgs)
 {
 	d->Args = AppArgs;
 }
 
-void GApp::Exit(int Code)
+void LApp::Exit(int Code)
 {
 	if (Code)
 	{
@@ -481,31 +481,31 @@ void GApp::Exit(int Code)
 	}
 }
 
-GAutoString GApp::GetFileMimeType(const char *File)
+LAutoString LApp::GetFileMimeType(const char *File)
 {
 	LgiAssert(0);
-	return GAutoString();
+	return LAutoString();
 }
 
-GMouseHook *GApp::MouseHook = 0;
-GMouseHook *GApp::GetMouseHook()
+LMouseHook *LApp::MouseHook = 0;
+LMouseHook *LApp::GetMouseHook()
 {
 	return MouseHook;
 }
 
-int GApp::GetCpuCount()
+int LApp::GetCpuCount()
 {
 	return 4;	
 }
 
-GFontCache *GApp::GetFontCache()
+GFontCache *LApp::GetFontCache()
 {
 	if (!d->FontCache)
 		d->FontCache.Reset(new GFontCache(SystemNormal));
 	return d->FontCache;
 }
 
-bool GApp::IsElevated()
+bool LApp::IsElevated()
 {
 	return true;
 }
@@ -513,7 +513,7 @@ bool GApp::IsElevated()
 ////////////////////////////////////////////////////////////////////////////
 struct OsAppArgumentsPriv
 {
-	GArray<char*> Ptr;
+	LArray<char*> Ptr;
 	
 	~OsAppArgumentsPriv()
 	{

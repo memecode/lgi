@@ -41,7 +41,7 @@ extern "C"
 	bool LgiWmExit();
 
 	bool LgiWmFileToMime(char *Mime, char *File);
-	bool LgiWmMimeToApps(char *Mime, Lgi::GArray<Lgi::GAppInfo*> &Apps, int Limit);
+	bool LgiWmMimeToApps(char *Mime, Lgi::LArray<Lgi::LAppInfo*> &Apps, int Limit);
 
 	bool LgiWmGetSysFont(char *Type, char *Font, int FontLen, int &PtSize);
 	bool LgiWmGetLanguage(char *Lang);
@@ -115,7 +115,7 @@ bool LgiWmFileToMime(char *Mime, char *File)
 	return Status;
 }
 
-bool LgiWmMimeToApps(char *Mime, Lgi::GArray<Lgi::GAppInfo*> &Apps, int Limit)
+bool LgiWmMimeToApps(char *Mime, Lgi::LArray<Lgi::LAppInfo*> &Apps, int Limit)
 {
 	bool Status = false;
 
@@ -134,7 +134,7 @@ bool LgiWmMimeToApps(char *Mime, Lgi::GArray<Lgi::GAppInfo*> &Apps, int Limit)
 			{
 				GnomeVFSMimeApplication *a = (GnomeVFSMimeApplication*)lst->data;
 				
-				Lgi::GAppInfo *i = new Lgi::GAppInfo;
+				Lgi::LAppInfo *i = new Lgi::LAppInfo;
 				if (i)
 				{
 					i->Path = NewStr((char*)gnome_vfs_mime_application_get_exec(a));

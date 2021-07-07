@@ -20,22 +20,22 @@ enum NodeType
 	NodeMax, // Always last
 };
 
-extern int NodeSort(GTreeItem *a, GTreeItem *b, NativeInt d);
-extern DeclGArrayCompare(XmlSort, GXmlTag*, NativeInt);
+extern int NodeSort(LTreeItem *a, LTreeItem *b, NativeInt d);
+extern DeclGArrayCompare(XmlSort, LXmlTag*, NativeInt);
 
-class ProjectNode : public IdeCommon, public GDragDropSource, public FtpCallback, public NodeSource
+class ProjectNode : public IdeCommon, public LDragDropSource, public FtpCallback, public NodeSource
 {
 	NodeType Type;
 	int NodeId;
 	int Platforms;
-	GString sFile;
-	GString sLocalCache;
-	GString sName;
-	GString Charset;
+	LString sFile;
+	LString sLocalCache;
+	LString sName;
+	LString Charset;
 	IdeProject *Dep;
 	bool IgnoreExpand;
 	int64 ChildCount;
-	GString Label;
+	LString Label;
 
 	void OpenLocalCache(IdeDoc *&Doc);
 	void OnCmdComplete(FtpCmd *Cmd) override;
@@ -49,7 +49,7 @@ public:
 	IdeDoc *Open();
 	void Delete();
 	void SetClean();
-	void AddNodes(GArray<ProjectNode*> &Nodes);
+	void AddNodes(LArray<ProjectNode*> &Nodes);
 	bool HasNode(ProjectNode *Node);
 	
 	// Props
@@ -65,7 +65,7 @@ public:
 	void SetType(NodeType t);
 	int GetImage(int f) override;
 	const char *GetText(int c) override;
-	GString GetFullPath() override;
+	LString GetFullPath() override;
 	ProjectNode *FindFile(const char *In, char **Full);
 	/// \sa Some combination of PLATFORM_WIN32, PLATFORM_LINUX, PLATFORM_MAC, PLATFORM_HAIKU or PLATFORM_ALL
 	int GetPlatforms() override;
@@ -74,14 +74,14 @@ public:
 	const char *GetCharset() override { return Charset; }
 	
 	// Dnd
-	bool GetFormats(GDragFormats &Formats) override;
-	bool GetData(GArray<GDragData> &Data) override;
+	bool GetFormats(LDragFormats &Formats) override;
+	bool GetData(LArray<LDragData> &Data) override;
 	
 	// Ui events
-	bool OnBeginDrag(GMouse &m) override;
-	bool OnKey(GKey &k) override;
+	bool OnBeginDrag(LMouse &m) override;
+	bool OnKey(LKey &k) override;
 	void OnExpand(bool b) override;
-	void OnMouseClick(GMouse &m) override;
+	void OnMouseClick(LMouse &m) override;
 	void OnProperties();
 
 	// Serialization

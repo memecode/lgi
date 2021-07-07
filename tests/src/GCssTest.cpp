@@ -1,11 +1,11 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "UnitTests.h"
-#include "GCss.h"
+#include "lgi/common/Css.h"
 
 class GCssTestPriv
 {
 public:
-	GCss c;
+	LCss c;
 
 	bool Error(char *Fmt, ...)
 	{
@@ -24,7 +24,7 @@ public:
 		return true;
 	}
 
-	bool LenIs(GCss::Len l, float val, int type)
+	bool LenIs(LCss::Len l, float val, int type)
 	{
 		return	l.Type == type &&
 				l.Value == val;
@@ -35,58 +35,58 @@ public:
 		char *s = "display: none;";
 		if (Parse(s))
 		{
-			GCss::DisplayType dt = c.Display();
-			if (dt != GCss::DispNone)
+			LCss::DisplayType dt = c.Display();
+			if (dt != LCss::DispNone)
 				return Error("Error: Value not set %s:%i\n", _FL);
 		}
 
 		s = "display: inline;";
-		if (Parse(s) && c.Display() != GCss::DispInline)
+		if (Parse(s) && c.Display() != LCss::DispInline)
 			return Error("Error: Value not set %s:%i\n", _FL);
 
 		s = "display: none;"
 			"display: block;";
-		if (Parse(s) && c.Display() != GCss::DispBlock)
+		if (Parse(s) && c.Display() != LCss::DispBlock)
 			return Error("Error: Value not set %s:%i\n", _FL);
 
 		s = "position: static";
-		if (Parse(s) && c.Position() != GCss::PosStatic)
+		if (Parse(s) && c.Position() != LCss::PosStatic)
 			return Error("Error: Value not set %s:%i\n", _FL);
 
 		s = "position: absolute;";
-		if (Parse(s) && c.Position() != GCss::PosAbsolute)
+		if (Parse(s) && c.Position() != LCss::PosAbsolute)
 			return Error("Error: Value not set %s:%i\n", _FL);
 
 		if (Parse(s = "top: 10%;"))
 		{
-			GCss::Len t = c.Top();
-			if (t.Type != GCss::LenPercent || t.Value != 10.0)
+			LCss::Len t = c.Top();
+			if (t.Type != LCss::LenPercent || t.Value != 10.0)
 				return Error("Error: Value not set %s:%i\n", _FL);
 		}
 
 		if (Parse(s = "right: 15pt;"))
 		{
-			GCss::Len t = c.Right();
-			if (t.Type != GCss::LenPt || t.Value != 15.0)
+			LCss::Len t = c.Right();
+			if (t.Type != LCss::LenPt || t.Value != 15.0)
 				return Error("Error: Value not set %s:%i\n", _FL);
 		}
 
 		if (Parse(s = "bottom: 20px;"))
 		{
-			GCss::Len t = c.Bottom();
-			if (t.Type != GCss::LenPx || t.Value != 20.0)
+			LCss::Len t = c.Bottom();
+			if (t.Type != LCss::LenPx || t.Value != 20.0)
 				return Error("Error: Value not set %s:%i\n", _FL);
 		}
 
 		if (Parse(s = "left: 4em;"))
 		{
-			GCss::Len t = c.Left();
-			if (t.Type != GCss::LenEm || t.Value != 4.0)
+			LCss::Len t = c.Left();
+			if (t.Type != LCss::LenEm || t.Value != 4.0)
 				return Error("Error: Value not set %s:%i\n", _FL);
 		}
 
 		if (Parse(s = "float: left;") &&
-			c.Float() != GCss::FloatLeft)
+			c.Float() != LCss::FloatLeft)
 		{
 			return Error("Error: Value not set %s:%i\n", _FL);
 		}
@@ -112,17 +112,17 @@ public:
 						"min-height: 10px;"
 						"max-height: 60px;"))
 		{
-			if (!LenIs(c.Width(), 50, GCss::LenPercent))
+			if (!LenIs(c.Width(), 50, LCss::LenPercent))
 				return Error("Error %s:%i\n", _FL);
-			if (!LenIs(c.MinWidth(), 10, GCss::LenPt))
+			if (!LenIs(c.MinWidth(), 10, LCss::LenPt))
 				return Error("Error %s:%i\n", _FL);
-			if (!LenIs(c.MaxWidth(), 800, GCss::LenPx))
+			if (!LenIs(c.MaxWidth(), 800, LCss::LenPx))
 				return Error("Error %s:%i\n", _FL);
-			if (!LenIs(c.Height(), 30, GCss::LenPx))
+			if (!LenIs(c.Height(), 30, LCss::LenPx))
 				return Error("Error %s:%in", _FL);
-			if (!LenIs(c.MinHeight(), 10, GCss::LenPx))
+			if (!LenIs(c.MinHeight(), 10, LCss::LenPx))
 				return Error("Error %s:%i\n", _FL);
-			if (!LenIs(c.MaxHeight(), 60, GCss::LenPx))
+			if (!LenIs(c.MaxHeight(), 60, LCss::LenPx))
 				return Error("Error %s:%i\n", _FL);
 		}
 
@@ -132,7 +132,7 @@ public:
 						"font-weight: bold;\n"))
 		{
 			char *f;
-			GCss::StringsDef s;
+			LCss::StringsDef s;
 			s = c.FontFamily();
 			if (s.Length() != 3)
 				return Error("Not the right number of font families.", _FL);
@@ -144,7 +144,7 @@ public:
 				return Error("Wrong font family.", _FL);
 		}
 
-		GCss c2;
+		LCss c2;
 		c2 = c;
 		if (c != c2)
 			return Error("Compare failed.\n", _FL);

@@ -1,13 +1,13 @@
 #include <stdlib.h>
 
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "LgiResEdit.h"
 #include "resdefs.h"
-#include "GCombo.h"
+#include "lgi/common/Combo.h"
 #include "LgiRes_Dialog.h"
 #include "LgiRes_Menu.h"
 
-#define SetCtrlFocus(id)	{ GViewI *v = FindControl(id); if (v) v->Focus(true); }
+#define SetCtrlFocus(id)	{ LViewI *v = FindControl(id); if (v) v->Focus(true); }
 enum Msgs
 {
 	M_SEARCH = M_USER + 100,
@@ -69,7 +69,7 @@ public:
 		return 0;
 	}	
 
-	void OnMouseClick(GMouse &m)
+	void OnMouseClick(LMouse &m)
 	{
 		if (App && m.Left() && m.Down())
 			App->GotoObject(Str, Grp, Dialog, Menu, Ctrl);
@@ -175,7 +175,7 @@ Result *SearchThread::Test(ResMenuItem *mi)
 }
 
 SearchThread::SearchThread(AppWnd *app, LList *results) :
-	App(app), Results(results), GEventTargetThread("SearchThread")
+	App(app), Results(results), LEventTargetThread("SearchThread")
 {
 	App->ListObjects(Res);
 	Run();
@@ -193,7 +193,7 @@ GMessage::Result SearchThread::OnEvent(GMessage *Msg)
 	{
 		case M_SEARCH:
 		{
-			GAutoPtr<SearchParams> p;
+			LAutoPtr<SearchParams> p;
 			if (ReceiveA(p, Msg))
 				Params = *p;
 			else
@@ -268,9 +268,9 @@ GMessage::Result SearchThread::OnEvent(GMessage *Msg)
 ////////////////////////////////////////////////////////////////////////////////////
 // Search window
 
-void FillLangs(GViewI *v, int id, List<GLanguage> &l)
+void FillLangs(LViewI *v, int id, List<GLanguage> &l)
 {
-	GCombo *c;
+	LCombo *c;
 	if (!v->GetViewById(id, c))
 		return;
 	for (auto li: l)
@@ -352,7 +352,7 @@ void Search::OnCheck()
 	#endif
 }
 
-int Search::OnNotify(GViewI *c, int f)
+int Search::OnNotify(LViewI *c, int f)
 {
 	switch (c->GetId())
 	{
@@ -640,9 +640,9 @@ Results::Results(AppWnd *app, Search *params)
 	d->Running = false;
 	d->Lst = 0;
 	
-	GLgiRes r;
-	GRect p;
-	GAutoString n;
+	LResourceLoad r;
+	LRect p;
+	LAutoString n;
 	if (r.LoadFromResource(IDD_RESULTS, this, &p, &n))
 	{
 		SetPos(p);
@@ -735,12 +735,12 @@ Results::~Results()
 
 void Results::OnPosChange()
 {
-	GRect Client = GetClient();
+	LRect Client = GetClient();
 
-	GViewI *v;
+	LViewI *v;
 	if (GetViewById(IDC_LIST, v))
 	{
-		GRect r = v->GetPos();
+		LRect r = v->GetPos();
 		r.x2 = Client.x2 - 12;
 		r.y2 = Client.y2 - 40;
 		v->SetPos(r);
@@ -748,14 +748,14 @@ void Results::OnPosChange()
 		v = FindControl(IDOK);
 		if (v)
 		{
-			GRect p = v->GetPos();
+			LRect p = v->GetPos();
 			p.Offset(Client.x2 - p.X() - 12 - p.x1, r.y2 + 10 - p.y1);
 			v->SetPos(p);
 		}
 	}
 }
 
-int Results::OnNotify(GViewI *v, int f)
+int Results::OnNotify(LViewI *v, int f)
 {
 	switch (v->GetId())
 	{

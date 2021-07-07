@@ -110,7 +110,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\..\CodeLib\libssh\include;..\include\common;..\include\win32;Src;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\build64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\CodeLib\libssh\include;..\include;..\include\lgi\win;Src;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\build64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -151,7 +151,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\CodeLib\libssh\include;..\include\common;..\include\win32;Src;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\build64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\CodeLib\libssh\include;..\include;..\include\lgi\win;Src;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\build64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -175,8 +175,8 @@
     <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp" />
     <ClCompile Include="..\src\common\Lgi\LgiMain.cpp" />
     <ClCompile Include="..\src\common\Text\DeEscape.cpp" />
-    <ClCompile Include="..\src\common\Text\GXmlTreeUi.cpp" />
-    <ClCompile Include="..\src\common\Widgets\GControlTree.cpp" />
+    <ClCompile Include="..\src\common\Text\XmlTreeUi.cpp" />
+    <ClCompile Include="..\src\common\Widgets\ControlTree.cpp" />
     <ClCompile Include="Src\BlameUi.cpp" />
     <ClCompile Include="Src\DropDownBtn.cpp" />
     <ClCompile Include="Src\Main.cpp" />
@@ -185,7 +185,7 @@
     <ClCompile Include="Src\VcFolder.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\src\win32\General\Lgi.manifest" />
+    <Manifest Include="..\src\win\General\Lgi.manifest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lgi_vs2015.vcxproj">

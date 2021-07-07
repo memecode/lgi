@@ -1,0 +1,94 @@
+/// \file
+/// \author Matthew Allen (fret@memecode.com)
+/// /brief A tree/heirarchy control
+
+#ifndef __GScrollBar_h
+#define __GScrollBar_h
+
+#define SCROLL_BAR_SIZE			15
+
+/// \brief Scroll bar control
+///
+/// This control can be used as an actual free standing window or to address built in controls on a LLayout
+/// view.
+class LgiClass LScrollBar :
+	public LControl,
+	public ResObject
+{
+	friend class LLayout;
+
+protected:
+	class LScrollBarPrivate *d;
+
+	#if WINNATIVE
+	LViewI *GetMyView();
+	void Update();
+	void SetParentFlag(bool Bool);
+	#endif
+
+public:
+	/// Call this constructor for embeded scrollbar say in a window
+	LScrollBar();
+	
+	const char *GetClass() { return "LScrollBar"; }
+
+	/// Call this constructor for a control based scrollbar, say in a dialog
+	LScrollBar(int id, int x, int y, int cx, int cy, const char *name);
+	~LScrollBar();
+
+	/// Returns the size of the bar, i.e. the width if vertical or the height if horizontal
+	static int GetScrollSize();
+
+	/// True if vertical
+	bool Vertical();
+	/// Makes the scrollar vertical
+	void SetVertical(bool v);
+	/// Gets the current position of the scrollbar
+	
+	int64 Value();
+	/// Sets the position of the scrollbar
+	void Value(int64 p);
+
+	// Gets the range of the scoll bar
+	LRange GetRange() const;
+	/// Sets the range of the scroll bar
+	bool SetRange(const LRange &r);
+	
+	/// Gets the page size
+	int64 Page();
+	/// Sets the page size
+	void SetPage(int64 p);
+
+	/// Returns true if the range is valid
+	bool Valid();
+
+	#if WINNATIVE
+	bool SetPos(LRect &p, bool Repaint = false);
+	void SetParent(LViewI *p);
+	bool Invalidate(LRect *r = NULL, bool Repaint = false, bool NonClient = false);
+	#else
+	bool Attach(LViewI *p);
+	void OnPaint(LSurface *pDC);
+	void OnPosChange();
+	void OnMouseClick(LMouse &m);
+	void OnMouseMove(LMouse &m);
+	bool OnKey(LKey &k);
+	bool OnMouseWheel(double Lines);
+	void OnPulse();
+	#endif
+	
+	// events
+	GMessage::Result OnEvent(GMessage *Msg);
+
+	/// Called when the value changes
+	virtual void OnChange(int Pos) {}
+	/// Called when the Limits or Page changes
+	virtual void OnConfigure() {}
+
+	/// Gets the limits (use GetRange)
+	[[deprecated]] void Limits(int64 &Low, int64 &High);
+	/// Sets the limits (use SetRange)
+	[[deprecated]] void SetLimits(int64 Low, int64 High);
+};
+
+#endif

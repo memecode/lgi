@@ -3,7 +3,7 @@
 #include "INet.h"
 #include "lldb_callback.h"
 #include "LWebSocket.h"
-#include "GSubProcess.h"
+#include "LSubProcess.h"
 
 //////////////////////////////////////////////////////////////////
 const char *AppName = "lldb_callback";
@@ -15,11 +15,11 @@ enum LLDBState
 	LRunning,
 };
 
-class App : public GWindow, public LThread
+class App : public LWindow, public LThread
 {
 	GTextLog *Log;
 	bool Loop;
-	GSubProcess LLDB;
+	LSubProcess LLDB;
 	LLDBState State;
 
 public:
@@ -28,8 +28,8 @@ public:
     {
 		Log = NULL;
 		Loop = true;
-        GWindow::Name(AppName);
-        GRect r(0, 0, 1000, 800);
+        LWindow::Name(AppName);
+        LRect r(0, 0, 1000, 800);
         SetPos(r);
         MoveToCenter();
         SetQuitOnClose(true);
@@ -53,9 +53,9 @@ public:
 	
 	LHashTbl<PtrKey<void*>,int> Watchpoints;
 
-	GString Wait(const char *Key, const char *AltKey = NULL)
+	LString Wait(const char *Key, const char *AltKey = NULL)
 	{
-		GString r;
+		LString r;
 		int p;
 		char buf[256];
 		uint64 Start = LgiCurrentTime();
@@ -66,7 +66,7 @@ public:
 				int rd = LLDB.Read(buf, MIN(sizeof(buf),p));
 				if (rd > 0)
 				{
-					r += GString(buf, rd);
+					r += LString(buf, rd);
 					Log->Write(buf, rd);
 					
 					if (r.Find(Key) >= 0)
@@ -88,7 +88,7 @@ public:
 		{
 			case MsgSetWatch:
 			{
-				GString s;
+				LString s;
 				LLDB.Interrupt();
 				Wait("stopped");
 				s.Printf("w s e -- %p\n", in.vp);
@@ -99,7 +99,7 @@ public:
 				else
 				{
 					int Index = 0;
-					GString r = Wait("addr =", "creation failed");
+					LString r = Wait("addr =", "creation failed");
 					auto Lines = r.SplitDelimit("\n");
 					for (auto Ln : Lines)
 					{
@@ -145,7 +145,7 @@ public:
 				int Index = Watchpoints.Find(in.vp);
 				if (Index > 0)
 				{
-					GString s;
+					LString s;
 					LLDB.Interrupt();
 					Wait("stopped");
 					s.Printf("watchpoint delete %i\n", Index);
@@ -153,7 +153,7 @@ public:
 					Log->Print("Deleting watchpoint %i...\n", Index);
 					if (LLDB.Write(s))
 					{
-						GString r = Wait("watchpoints deleted", "No watchpoints exist");
+						LString r = Wait("watchpoints deleted", "No watchpoints exist");
 						if (r.Find("watchpoints deleted") >= 0)
 						{
 							out.u64 = true;
@@ -180,8 +180,8 @@ public:
 	
 	int Main()
 	{
-		GSocket Listen;
-		GSocket Client;
+		LSocket Listen;
+		LSocket Client;
 
 		bool ListenWarn = false;
 		while (!Listen.Listen(LLDB_CB_PORT))
@@ -202,7 +202,7 @@ public:
 		
 		bool b = LLDB.Start(true, true, true);
 		Log->Print("LLDB started: %i\n", b);
-		GString LBuf;
+		LString LBuf;
 		
 		while (Loop)
 		{
@@ -264,7 +264,7 @@ public:
 					{
 						case LInit:
 						{
-							LBuf += GString(Buf, Rd);
+							LBuf += LString(Buf, Rd);
 							if (LBuf.Find("Current executable set to"))
 							{
 								LBuf.Empty();
@@ -289,7 +289,7 @@ public:
 //////////////////////////////////////////////////////////////////
 int LgiMain(OsAppArguments &AppArgs)
 {
-	GApp a(AppArgs, AppName);
+	LApp a(AppArgs, AppName);
 	if (a.IsOk())
 	{
 		a.AppWnd = new App;

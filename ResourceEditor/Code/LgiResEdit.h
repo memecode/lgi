@@ -6,18 +6,18 @@
 **
 */
 
-#include "Lgi.h"
-#include "INet.h"
-#include "GDocApp.h"
-#include "GProperties.h"
-#include "GVariant.h"
-#include "GDataDlg.h"
-#include "GOptionsFile.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Net.h"
+#include "lgi/common/DocApp.h"
+#include "lgi/common/Properties.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/DataDlg.h"
+#include "lgi/common/OptionsFile.h"
 
 #include "resource.h"
-#include "GTree.h"
-#include "GBox.h"
-#include "GEventTargetThread.h"
+#include "lgi/common/Tree.h"
+#include "lgi/common/Box.h"
+#include "lgi/common/EventTargetThread.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Defines
@@ -101,7 +101,7 @@
 
 // Misc
 class AppWnd;
-#define	MainWnd						((AppWnd*)GApp::ObjInstance()->AppWnd)
+#define	MainWnd						((AppWnd*)LApp::ObjInstance()->AppWnd)
 
 // App
 enum ObjectTypes {
@@ -148,20 +148,20 @@ class ResMenuItem;
 struct ErrorInfo
 {
 	ResString *Str;
-	GAutoString Msg;
+	LAutoString Msg;
 };
 
 class ErrorCollection
 {
 public:
-	GArray<ErrorInfo> StrErr;
+	LArray<ErrorInfo> StrErr;
 };
 
 struct SerialiseContext
 {
 	ResFileFormat Format;
-	GStringPipe Log;
-	GArray<ResString*> FixId;
+	LStringPipe Log;
+	LArray<ResString*> FixId;
 	
 	SerialiseContext() : Log(512)
 	{
@@ -191,11 +191,11 @@ public:
 	void SystemObject(bool i) { SysObject = i; }
 	bool IsSelected();
 
-	virtual GView *Wnd() { return NULL; }
-	virtual bool Attach(GViewI *Parent);
+	virtual LView *Wnd() { return NULL; }
+	virtual bool Attach(LViewI *Parent);
 	virtual int Type() { return ResType; }
 	virtual void Type(int i) { ResType = i; }
-	virtual void Create(GXmlTag *load, SerialiseContext *ctx) = 0; // called when users creates
+	virtual void Create(LXmlTag *load, SerialiseContext *ctx) = 0; // called when users creates
 	virtual ResStringGroup *GetStringGroup() { return 0; }
 	
 	// Sub classes
@@ -205,8 +205,8 @@ public:
 	
 	// Serialization
 	virtual bool Test(ErrorCollection *e) = 0;
-	virtual bool Read(GXmlTag *t, SerialiseContext &Ctx) = 0;
-	virtual bool Write(GXmlTag *t, SerialiseContext &Ctx) = 0;
+	virtual bool Read(LXmlTag *t, SerialiseContext &Ctx) = 0;
+	virtual bool Write(LXmlTag *t, SerialiseContext &Ctx) = 0;
 	virtual StringList *GetStrs() { return NULL; }
 
 	// Clipboard
@@ -215,25 +215,25 @@ public:
 	virtual void Paste() {}
 
 	// UI
-	virtual GView *CreateUI() { return 0; }
+	virtual LView *CreateUI() { return 0; }
 	virtual void OnRightClick(LSubMenu *RClick) {}
 	virtual void OnCommand(int Cmd) {}
 	virtual void OnShowLanguages() {}
 };
 
-class ResFolder : public Resource, public GView
+class ResFolder : public Resource, public LView
 {
 public:
 	ResFolder(AppWnd *w, int t, bool enabled = true);
-	GView *Wnd() { return dynamic_cast<GView*>(this); }
+	LView *Wnd() { return dynamic_cast<LView*>(this); }
 
-	void Create(GXmlTag *load, SerialiseContext *ctx) { LgiAssert(0); }
+	void Create(LXmlTag *load, SerialiseContext *ctx) { LgiAssert(0); }
 	bool Test(ErrorCollection *e) { return false; }
-	bool Read(GXmlTag *t, SerialiseContext &Ctx) { return false; }
-	bool Write(GXmlTag *t, SerialiseContext &Ctx) { return false; }
+	bool Read(LXmlTag *t, SerialiseContext &Ctx) { return false; }
+	bool Write(LXmlTag *t, SerialiseContext &Ctx) { return false; }
 };
 
-class ResFrame : public GLayout
+class ResFrame : public LLayout
 {
 	Resource *Child;
 
@@ -241,14 +241,14 @@ public:
 	ResFrame(Resource *child);
 	~ResFrame();
 
-	bool Pour(GRegion &r);
-	bool OnKey(GKey &k);
-	void OnPaint(GSurface *pDC);
-	bool Attach(GViewI *p);
+	bool Pour(LRegion &r);
+	bool OnKey(LKey &k);
+	void OnPaint(LSurface *pDC);
+	bool Attach(LViewI *p);
 	void OnFocus(bool b);
 };
 
-class ObjTreeItem : public GTreeItem
+class ObjTreeItem : public LTreeItem
 {
 	friend class Resource;
 
@@ -261,10 +261,10 @@ public:
 	Resource *GetObj() { return Obj; }
 	const char *GetText(int i=0);
 	void OnSelect();
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 };
 
-class ObjContainer : public GTree
+class ObjContainer : public LTree
 {
 	friend class AppWnd;
 
@@ -273,7 +273,7 @@ class ObjContainer : public GTree
 	ObjTreeItem *Strings;
 	ObjTreeItem *Menus;
 
-	GImageList *Images;
+	LImageList *Images;
 	AppWnd *Window;
 
 	bool AppendChildren(ObjTreeItem *Item, List<Resource> &Lst);
@@ -302,8 +302,8 @@ public:
 	{
 		// Global
 		FieldTree *Tree;
-		GAutoString Label;
-		GAutoString Name;
+		LAutoString Label;
+		LAutoString Name;
 		int Type;
 		int Id;
 		bool Multiline;
@@ -319,12 +319,12 @@ public:
 		}
 	};
 
-	typedef GArray<Field*> FieldArr;
+	typedef LArray<Field*> FieldArr;
 
 protected:
 	int &NextId;
 	FieldMode Mode;
-	GViewI *View;
+	LViewI *View;
 	GDom *Store;
 	bool Deep;
 
@@ -388,7 +388,7 @@ public:
 		Mode = m;
 	}
 
-	void SetView(GViewI *v)
+	void SetView(LViewI *v)
 	{
 		View = v;
 	}
@@ -431,7 +431,7 @@ public:
 	{
 		Field *f = GetField(Token, FieldName);
 		if (!f) return;
-		GVariant v;
+		LVariant v;
 
 		switch (Mode)
 		{
@@ -457,7 +457,7 @@ public:
 	{
 		Field *f = GetField(Token, FieldName);
 		if (!f) return;
-		GVariant i;
+		LVariant i;
 
 		switch (Mode)
 		{
@@ -488,7 +488,7 @@ public:
 	{
 		Field *f = GetField(Token, FieldName);
 		if (!f) return;
-		GVariant v;
+		LVariant v;
 
 		switch (Mode)
 		{
@@ -518,11 +518,11 @@ public:
 		}
 	}
 
-	void Serialize(void *Token, const char *FieldName, GAutoString &s)
+	void Serialize(void *Token, const char *FieldName, LAutoString &s)
 	{
 		Field *f = GetField(Token, FieldName);
 		if (!f) return;
-		GVariant v;
+		LVariant v;
 
 		switch (Mode)
 		{
@@ -548,11 +548,11 @@ public:
 		}
 	}
 
-	void Serialize(void *Token, const char *FieldName, GString &s)
+	void Serialize(void *Token, const char *FieldName, LString &s)
 	{
 		Field *f = GetField(Token, FieldName);
 		if (!f) return;
-		GVariant v;
+		LVariant v;
 
 		switch (Mode)
 		{
@@ -576,11 +576,11 @@ public:
 		}
 	}
 
-	void Serialize(void *Token, const char *FieldName, GRect &r)
+	void Serialize(void *Token, const char *FieldName, LRect &r)
 	{
 		Field *f = GetField(Token, FieldName);
 		if (!f) return;
-		GVariant v;
+		LVariant v;
 
 		switch (Mode)
 		{
@@ -615,7 +615,7 @@ public:
 		return (**a)[0]->Id - (**b)[0]->Id;
 	}
 
-	void GetAll(GArray<FieldArr*> &Fields)
+	void GetAll(LArray<FieldArr*> &Fields)
 	{
 		// for (FieldArr *a = f.First(0); a; a = f.Next(0))
 		for (auto a : f)
@@ -652,7 +652,7 @@ public:
 
 #include "LgiRes_Dialog.h"
 
-class FieldView : public GLayout
+class FieldView : public LLayout
 {
 protected:
 	FieldSource *Source;
@@ -671,11 +671,11 @@ public:
 	void OnSelect(FieldSource *s);
 	void OnDelete(FieldSource *s);
 	GMessage::Result OnEvent(GMessage *m);
-	void OnPaint(GSurface *pDC);
-	int OnNotify(GViewI *Ctrl, int Flags);
+	void OnPaint(LSurface *pDC);
+	int OnNotify(LViewI *Ctrl, int Flags);
 };
 
-class ShortCutView : public GWindow
+class ShortCutView : public LWindow
 {
 	AppWnd *App;
 	LList *Lst;
@@ -685,25 +685,25 @@ public:
 	~ShortCutView();
 
 	void OnDialogChange(ResDialog *Dlg);
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 };
 
 #include "LgiRes_String.h"
 
-class AppWnd : public GDocApp<GOptionsFile>
+class AppWnd : public GDocApp<LOptionsFile>
 {
 protected:
 	// UI
-	GBox			*HBox;
-	GBox			*VBox;
-	GView			*ContentView;
+	LBox			*HBox;
+	LBox			*VBox;
+	LView			*ContentView;
 
 	LSubMenu		*Edit;
 	LSubMenu		*Help;
 	LSubMenu		*ViewMenu;
 
-	GStatusBar		*Status;
-	GStatusPane		*StatusInfo[STATUS_MAX];
+	LStatusBar		*Status;
+	LStatusPane		*StatusInfo[STATUS_MAX];
 
 	ShortCutView	*ShortCuts;
 
@@ -714,11 +714,11 @@ protected:
 	
 	// Languages
 	int				CurLang;
-	GArray<GLanguage*> Languages;
+	LArray<GLanguage*> Languages;
 	LHashTbl<ConstStrKey<char,false>, bool> ShowLanguages;
 
 	void SortDialogs();
-	void GetFileTypes(GFileSelect *Dlg, bool Write);
+	void GetFileTypes(LFileSelect *Dlg, bool Write);
 
 public:
 	AppWnd();
@@ -729,12 +729,12 @@ public:
 	void ShowLang(GLanguageId Lang, bool Show);
 	GLanguage *GetCurLang();
 	void SetCurLang(GLanguage *L);
-	GArray<GLanguage*> *GetLanguages();
+	LArray<GLanguage*> *GetLanguages();
 	void OnLanguagesChange(GLanguageId Lang, bool Add, bool Update = false);
 
 	// ---------------------------------------------------------------------
 	// Application
-	Resource *NewObject(SerialiseContext ctx, GXmlTag *load, int Type, bool Select = true);
+	Resource *NewObject(SerialiseContext ctx, LXmlTag *load, int Type, bool Select = true);
 	bool InsertObject(int Type, Resource *r, bool Select = true);
 	void DelObject(Resource *r);
 	bool ListObjects(List<Resource> &Lst);
@@ -769,17 +769,17 @@ public:
 	bool SaveWin32();
 	void ImportLang();
 	void Compare();
-	bool WriteDefines(GFile &Defs);
+	bool WriteDefines(LFile &Defs);
 
 	bool OpenFile(const char *FileName, bool Ro);
 	bool SaveFile(const char *FileName);
 
 	// ---------------------------------------------------------------------
 	// Window
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
 	GMessage::Result OnEvent(GMessage *m);
 	int OnCommand(int Cmd, int Event, OsView Handle);
-	void OnReceiveFiles(GArray<const char*> &Files);
+	void OnReceiveFiles(LArray<const char*> &Files);
 	void OnCreate();
 };
 
@@ -788,12 +788,12 @@ public:
 
 struct SearchParams
 {
-	GString Text;
+	LString Text;
 	#if NEW_UI
 	bool LimitToText;
 	bool LimitToDefine;
 	#else
-	GString Define;
+	LString Define;
 	#endif
 	GLanguageId InLang;
 	GLanguageId NotInLang;
@@ -814,7 +814,7 @@ struct SearchParams
 	}
 };
 
-class SearchThread : public GEventTargetThread, public LCancel
+class SearchThread : public LEventTargetThread, public LCancel
 {
 	List<Resource> Res;
 	AppWnd *App;
@@ -832,18 +832,18 @@ public:
 	GMessage::Result OnEvent(GMessage *Msg);
 };
 
-class Search : public GDialog, public SearchParams
+class Search : public LDialog, public SearchParams
 {
 	AppWnd *App;
-	GAutoPtr<SearchThread> Thread;
+	LAutoPtr<SearchThread> Thread;
 	void OnCheck();
 
 public:
 	Search(AppWnd *app);
-	int OnNotify(GViewI *c, int f);
+	int OnNotify(LViewI *c, int f);
 };
 
-class Results : public GWindow
+class Results : public LWindow
 {
 	class ResultsPrivate *d;
 
@@ -852,11 +852,11 @@ public:
 	~Results();
 
 	void OnPosChange();
-	int OnNotify(GViewI *v, int f);
+	int OnNotify(LViewI *v, int f);
 
 };
 
-class ShowLanguagesDlg : public GDialog
+class ShowLanguagesDlg : public LDialog
 {
 	class ShowLanguagesDlgPriv *d;
 
@@ -864,35 +864,35 @@ public:
 	ShowLanguagesDlg(AppWnd *app);
 	~ShowLanguagesDlg();
 
-	int OnNotify(GViewI *n, int f);
+	int OnNotify(LViewI *n, int f);
 };
 
-class ResCss : public Resource, public GLayout
+class ResCss : public Resource, public LLayout
 {
     friend class ResCssUi;
     
 protected:
 	class ResCssUi *Ui;
-	GAutoString Style;
+	LAutoString Style;
 
 public:
 	ResCss(AppWnd *w, int type = TYPE_CSS);
 	~ResCss();
 
-	void Create(GXmlTag *Load, SerialiseContext *Ctx);
-	GView *Wnd() { return dynamic_cast<GView*>(this); }
+	void Create(LXmlTag *Load, SerialiseContext *Ctx);
+	LView *Wnd() { return dynamic_cast<LView*>(this); }
 	void OnShowLanguages();
 
 	// Resource
-	GView *CreateUI();
+	LView *CreateUI();
 	void OnRightClick(LSubMenu *RClick);
 	void OnCommand(int Cmd);
 	int OnCommand(int Cmd, int Event, OsView hWnd);
 
 	// Serialize
 	bool Test(ErrorCollection *e);
-	bool Read(GXmlTag *t, SerialiseContext &Ctx);
-	bool Write(GXmlTag *t, SerialiseContext &Ctx);
+	bool Read(LXmlTag *t, SerialiseContext &Ctx);
+	bool Write(LXmlTag *t, SerialiseContext &Ctx);
 };
 
-extern void OpenTableLayoutTest(GViewI *p);
+extern void OpenTableLayoutTest(LViewI *p);

@@ -1,13 +1,14 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "LgiIde.h"
 #include "IdeProject.h"
-#include "GTableLayout.h"
+#include "lgi/common/TableLayout.h"
 #include "resdefs.h"
-#include "GTextLabel.h"
-#include "GEdit.h"
-#include "GCheckBox.h"
-#include "GCombo.h"
-#include "GButton.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/FileSelect.h"
 
 const char TagSettings[] = "Settings";
 
@@ -151,11 +152,11 @@ SettingInfo AllSettings[] =
 	{ProjNone,					GV_NULL,		NULL,				NULL,		{0}},
 };
 
-static void ClearEmptyTags(GXmlTag *t)
+static void ClearEmptyTags(LXmlTag *t)
 {
 	for (int i=0; i<t->Children.Length(); i++)
 	{
-		GXmlTag *c = t->Children[i];
+		LXmlTag *c = t->Children[i];
 		if (!c->GetContent() && !c->Children.Length())
 		{
 			c->RemoveTag();
@@ -177,12 +178,12 @@ public:
 	IdeProject *Project;
 	LHashTbl<IntKey<int>, SettingInfo*> Map;
 	IdeProjectSettings *Parent;
-	GXmlTag Active;
-	GXmlTag Editing;
-	GAutoString CurConfig;
-	GArray<char*> Configs;
+	LXmlTag Active;
+	LXmlTag Editing;
+	LAutoString CurConfig;
+	LArray<char*> Configs;
 	
-	GAutoString StrBuf; // Temporary storage for generated settings
+	LAutoString StrBuf; // Temporary storage for generated settings
 	
 	IdeProjectSettingsPriv(IdeProjectSettings *parent) :
 		Active(TagSettings)
@@ -258,19 +259,19 @@ public:
 	}
 };
 
-class GSettingDetail : public GLayout, public ResObject
+class GSettingDetail : public LLayout, public ResObject
 {
-	GTableLayout *Tbl;
+	LTableLayout *Tbl;
 	IdeProjectSettingsPriv *d;
 	SettingInfo *Setting;
 	int Flags;
 	
 	struct CtrlInfo
 	{
-		GTextLabel *Text;
-		GEdit *Edit;
-		GCheckBox *Chk;
-		GCombo *Cbo;
+		LTextLabel *Text;
+		LEdit *Edit;
+		LCheckBox *Chk;
+		LCombo *Cbo;
 		
 		CtrlInfo()
 		{
@@ -281,7 +282,7 @@ class GSettingDetail : public GLayout, public ResObject
 		}
 	};
 	
-	GArray<CtrlInfo> Ctrls;
+	LArray<CtrlInfo> Ctrls;
 
 public:
 	GSettingDetail() : ResObject(Res_Custom)
@@ -289,7 +290,7 @@ public:
 		Flags = 0;
 		d = NULL;
 		Setting = NULL;
-		AddView(Tbl = new GTableLayout);
+		AddView(Tbl = new LTableLayout);
 	}
 	
 	void OnCreate()
@@ -297,13 +298,13 @@ public:
 		AttachChildren();
 	}
 	
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		pDC->Colour(L_MED);
 		pDC->Rectangle();
 	}
 	
-	bool OnLayout(GViewLayoutInfo &Inf)
+	bool OnLayout(LViewLayoutInfo &Inf)
 	{
 		Inf.Width.Min = -1;
 		Inf.Width.Max = -1;
@@ -324,15 +325,15 @@ public:
 		
 		// Do label cell
 		GLayoutCell *c = Tbl->GetCell(0, CellY);
-		c->Add(Ctrls[i].Text = new GTextLabel(IDC_TEXT_BASE + i, 0, 0, -1, -1, Path = d->BuildPath(Setting->Setting, Flags, PlatformCurrent, Config)));
+		c->Add(Ctrls[i].Text = new LTextLabel(IDC_TEXT_BASE + i, 0, 0, -1, -1, Path = d->BuildPath(Setting->Setting, Flags, PlatformCurrent, Config)));
 		
 		// Do value cell
 		c = Tbl->GetCell(0, CellY + 1);
 
-		GXmlTag *t = d->Editing.GetChildTag(Path);
+		LXmlTag *t = d->Editing.GetChildTag(Path);
 		if (Setting->Type == GV_STRING)
 		{
-			Ctrls[i].Edit = new GEdit(IDC_EDIT_BASE + i, 0, 0, 60, 20);
+			Ctrls[i].Edit = new LEdit(IDC_EDIT_BASE + i, 0, 0, 60, 20);
 			Ctrls[i].Edit->MultiLine(Setting->Flag.MultiLine);
 			Ctrls[i].Edit->Password(Setting->Flag.IsPassword);
 			if (t && t->GetContent())
@@ -345,7 +346,7 @@ public:
 				c = Tbl->GetCell(1, CellY + 1);
 				int Base = Setting->Flag.FileSelect ? IDC_BROWSE_FILE : IDC_BROWSE_FOLDER;
 				if (c)
-					c->Add(new GButton(Base + i, 0, 0, -1, -1, "..."));
+					c->Add(new LButton(Base + i, 0, 0, -1, -1, "..."));
 				else
 					LgiTrace("%s:%i - No cell.\n", _FL);
 			}
@@ -355,7 +356,7 @@ public:
 			if (Setting->Flag.Enum)
 			{
 				// Enum setting
-				c->Add(Ctrls[i].Cbo = new GCombo(IDC_COMBO_BASE + i, 0, 0, 60, 20));
+				c->Add(Ctrls[i].Cbo = new LCombo(IDC_COMBO_BASE + i, 0, 0, 60, 20));
 				
 				const char **Init = GetEnumValues(Setting->Setting);
 				if (Init)
@@ -371,14 +372,14 @@ public:
 			else
 			{
 				// Straight integer
-				c->Add(Ctrls[i].Edit = new GEdit(IDC_EDIT_BASE + i, 0, 0, 60, 20));
+				c->Add(Ctrls[i].Edit = new LEdit(IDC_EDIT_BASE + i, 0, 0, 60, 20));
 				if (t)
 					Ctrls[i].Edit->Value(t->GetContent() ? atoi(t->GetContent()) : 0);
 			}
 		}
 		else if (Setting->Type == GV_BOOL)
 		{
-			c->Add(Ctrls[i].Chk  = new GCheckBox(IDC_CHECKBOX_BASE + i, 0, 0, -1, -1, NULL));
+			c->Add(Ctrls[i].Chk  = new LCheckBox(IDC_CHECKBOX_BASE + i, 0, 0, -1, -1, NULL));
 			if (t && t->GetContent())
 				Ctrls[i].Chk->Value(atoi(t->GetContent()));
 		}
@@ -402,7 +403,7 @@ public:
 					continue;
 				}
 
-				GXmlTag *t = d->Editing.GetChildTag(Path, true);
+				LXmlTag *t = d->Editing.GetChildTag(Path, true);
 				if (!t)
 				{
 					LgiAssert(0);
@@ -461,12 +462,12 @@ public:
 	}
 };
 
-class GSettingDetailFactory : public GViewFactory
+class GSettingDetailFactory : public LViewFactory
 {
-	GView *NewView
+	LView *NewView
 	(
 		const char *Class,
-		GRect *Pos,
+		LRect *Pos,
 		const char *Text
 	)
 	{
@@ -477,7 +478,7 @@ class GSettingDetailFactory : public GViewFactory
 } SettingDetailFactory;
 
 class ProjectSettingsDlg;
-class SettingItem : public GTreeItem
+class SettingItem : public LTreeItem
 {
 	ProjectSettingsDlg *Dlg;
 	
@@ -495,15 +496,15 @@ public:
 	void Select(bool b);
 };
 
-class ProjectSettingsDlg : public GDialog
+class ProjectSettingsDlg : public LDialog
 {
 	IdeProjectSettingsPriv *d;
-	GTree *Tree;
+	LTree *Tree;
 	GSettingDetail *Detail;
 	uint64 DefLockOut;
 
 public:
-	ProjectSettingsDlg(GViewI *parent, IdeProjectSettingsPriv *priv)
+	ProjectSettingsDlg(LViewI *parent, IdeProjectSettingsPriv *priv)
 	{
 		Tree = NULL;
 		Detail = NULL;
@@ -523,18 +524,18 @@ public:
 			if (GetViewById(IDC_SETTINGS, Tree))
 			{
 				const char *Section = NULL;
-				GTreeItem *SectionItem = NULL;
+				LTreeItem *SectionItem = NULL;
 				for (SettingInfo *i = AllSettings; i->Setting; i++)
 				{
 					if (!SectionItem || (Section && stricmp(i->Category, Section)))
 					{
 						Section = i->Category;
-						SectionItem = new GTreeItem();
+						SectionItem = new LTreeItem();
 						SectionItem->SetText(i->Category);
 						Tree->Insert(SectionItem);
 					}
 					
-					GTreeItem *Item = new GTreeItem();
+					LTreeItem *Item = new LTreeItem();
 					Item->SetText(i->Name);
 					SectionItem->Insert(Item);
 					SectionItem->Expanded(true);
@@ -560,21 +561,21 @@ public:
 				Detail->SetPriv(d);
 			}
 			
-			GView *Search;
+			LView *Search;
 			if (GetViewById(IDC_SEARCH, Search))
 				Search->Focus(true);
 		}
 	}
 	
-	GTreeItem *FindItem(GTreeItem *i, const char *search)
+	LTreeItem *FindItem(LTreeItem *i, const char *search)
 	{
 		const char *s = i->GetText(0);
 		if (s && search && stristr(s, search))
 			return i;
 		
-		for (GTreeItem *c = i->GetChild(); c; c = c->GetNext())
+		for (LTreeItem *c = i->GetChild(); c; c = c->GetNext())
 		{
-			GTreeItem *f = FindItem(c, search);
+			LTreeItem *f = FindItem(c, search);
 			if (f)
 				return f;
 		}
@@ -584,21 +585,21 @@ public:
 	void OnSearch(const char *s)
 	{
 		if (!Tree) return;
-		GTreeItem *f = NULL;
-		for (GTreeItem *i = Tree->GetChild(); i && !f; i = i->GetNext())
+		LTreeItem *f = NULL;
+		for (LTreeItem *i = Tree->GetChild(); i && !f; i = i->GetNext())
 		{
 			f = FindItem(i, s);
 		}
 		if (f)
 		{
 			f->Select(true);
-			for (GTreeItem *i = f; i; i = i->GetParent())
+			for (LTreeItem *i = f; i; i = i->GetParent())
 				i->Expanded(true);
 			Tree->Focus(true);
 		}
 	}
 	
-	int OnNotify(GViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, int Flags)
 	{
 		switch (Ctrl->GetId())
 		{
@@ -606,7 +607,7 @@ public:
 			{
 				const char *s = GetCtrlName(IDC_PATH);
 				if (s)
-					LgiBrowseToFile(s);
+					LBrowseToFile(s);
 				break;
 			}
 			case IDC_SEARCH:
@@ -661,14 +662,14 @@ public:
 				
 				if (BrowseIdx >= 0)
 				{
-					GEdit *e;
+					LEdit *e;
 					if (GetViewById(IDC_EDIT_BASE + BrowseIdx, e))
 					{
-						GFileSelect s;
+						LFileSelect s;
 						s.Parent(this);
 
-						GFile::Path Path(d->Project->GetBasePath());
-						GFile::Path Cur(e->Name());
+						LFile::Path Path(d->Project->GetBasePath());
+						LFile::Path Cur(e->Name());
 						Path.Join(Cur.GetFull());
 						Path--;
 						if (Path.Exists())
@@ -677,11 +678,11 @@ public:
 						if (BrowseFolder ? s.OpenFolder() : s.Open())
 						{
 							const char *Base = GetCtrlName(IDC_PATH);
-							GAutoString Rel;
+							LAutoString Rel;
 							if (Base)
 							{
-								GFile::Path p = Base;
-								Rel = LgiMakeRelativePath(--p, s.Name());
+								LFile::Path p = Base;
+								Rel = LMakeRelativePath(--p, s.Name());
 							}
 							e->Name(Rel ? Rel : s.Name());
 						}
@@ -693,7 +694,7 @@ public:
 			}
 		}
 		
-		return GDialog::OnNotify(Ctrl, Flags);
+		return LDialog::OnNotify(Ctrl, Flags);
 	}
 	
 	void OnSelect(SettingItem *si)
@@ -704,7 +705,7 @@ public:
 
 void SettingItem::Select(bool b)
 {
-	GTreeItem::Select(b);
+	LTreeItem::Select(b);
 	if (b)
 		Dlg->OnSelect(this);
 }
@@ -762,8 +763,8 @@ void IdeProjectSettings::InitAllSettings(bool ClearCurrent)
 	char *p;
 	for (SettingInfo *i = AllSettings; i->Setting; i++)
 	{
-		GVariant Default;
-		GXmlTag *t = NULL;
+		LVariant Default;
+		LXmlTag *t = NULL;
 		switch (i->Setting)
 		{
 			default:
@@ -868,7 +869,7 @@ void IdeProjectSettings::InitAllSettings(bool ClearCurrent)
 	}
 }
 
-bool IdeProjectSettings::Edit(GViewI *parent)
+bool IdeProjectSettings::Edit(LViewI *parent)
 {
 	// Copy all the settings to the edit tag...
 	d->Editing.Copy(d->Active, true);
@@ -887,7 +888,7 @@ bool IdeProjectSettings::Edit(GViewI *parent)
 	return Changed;
 }
 
-bool IdeProjectSettings::Serialize(GXmlTag *Parent, bool Write)
+bool IdeProjectSettings::Serialize(LXmlTag *Parent, bool Write)
 {
 	if (!Parent)
 	{
@@ -895,7 +896,7 @@ bool IdeProjectSettings::Serialize(GXmlTag *Parent, bool Write)
 		return false;
 	}
 
-	GXmlTag *t = Parent->GetChildTag(TagSettings, Write);
+	LXmlTag *t = Parent->GetChildTag(TagSettings, Write);
 	if (!t)
 	{
 		LgiAssert(!"Can't find settings tags?");
@@ -923,11 +924,11 @@ const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default,
 {
 	SettingInfo *s = d->Map.Find(Setting);
 	LgiAssert(s);
-	GArray<char*> Strs;
+	LArray<char*> Strs;
 	int Bytes = 0;
 	if (!s->Flag.PlatformSpecific)
 	{
-		GXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, 0, Platform));
+		LXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, 0, Platform));
 		if (t && t->GetContent())
 		{
 			Strs.Add(t->GetContent());
@@ -936,7 +937,7 @@ const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default,
 	}
 	if (!s->Flag.CrossPlatform)
 	{
-		GXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, SF_PLATFORM_SPECIFC, Platform));
+		LXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, SF_PLATFORM_SPECIFC, Platform));
 		if (t && t->GetContent())
 		{
 			Strs.Add(t->GetContent());
@@ -972,7 +973,7 @@ int IdeProjectSettings::GetInt(ProjSetting Setting, int Default, IdePlatform Pla
 	
 	if (!s->Flag.PlatformSpecific)
 	{
-		GXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, 0, Platform));
+		LXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, 0, Platform));
 		if (t)
 		{
 			Status = t->GetContent() ? atoi(t->GetContent()) : 0;
@@ -980,7 +981,7 @@ int IdeProjectSettings::GetInt(ProjSetting Setting, int Default, IdePlatform Pla
 	}
 	else if (!s->Flag.CrossPlatform)
 	{
-		GXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, SF_PLATFORM_SPECIFC, Platform));
+		LXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, SF_PLATFORM_SPECIFC, Platform));
 		if (t)
 		{
 			Status = t->GetContent() ? atoi(t->GetContent()) : 0;
@@ -995,7 +996,7 @@ bool IdeProjectSettings::Set(ProjSetting Setting, const char *Value, IdePlatform
 {
 	bool Status = false;
 	char *path = d->BuildPath(Setting, true, Platform);
-	GXmlTag *t = d->Active.GetChildTag(path, true);
+	LXmlTag *t = d->Active.GetChildTag(path, true);
 	if (t)
 	{
 		t->SetContent(Value);
@@ -1009,7 +1010,7 @@ bool IdeProjectSettings::Set(ProjSetting Setting, int Value, IdePlatform Platfor
 {
 	bool Status = false;
 	char *path = d->BuildPath(Setting, true, Platform);
-	GXmlTag *t = d->Active.GetChildTag(path, true);
+	LXmlTag *t = d->Active.GetChildTag(path, true);
 	if (t)
 	{
 		t->SetContent(Value);

@@ -1,8 +1,8 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "LgiResEdit.h"
-#include "LList.h"
-#include "GButton.h"
-#include "LListItemCheckBox.h"
+#include "lgi/common/List.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/ListItemCheckBox.h"
 
 class ShowLanguagesDlgPriv
 {
@@ -48,14 +48,14 @@ ShowLanguagesDlg::ShowLanguagesDlg(AppWnd *app)
 	d = new ShowLanguagesDlgPriv;
 	SetParent(d->App = app);
 
-	GRect r(0, 0, 300, 500);
+	LRect r(0, 0, 300, 500);
 	SetPos(r);
 	MoveToCenter();
 	Name("Show Languages");
 	r = GetClient();
 	Children.Insert(d->Lst = new LList(100, 10, 10, r.X() - 20, r.Y() - 50));
-	Children.Insert(new GButton(IDOK, r.X() - 140, r.Y() - 30, 60, 20, "Ok"));
-	Children.Insert(new GButton(IDCANCEL, r.X() - 70, r.Y() - 30, 60, 20, "Cancel"));
+	Children.Insert(new LButton(IDOK, r.X() - 140, r.Y() - 30, 60, 20, "Ok"));
+	Children.Insert(new LButton(IDCANCEL, r.X() - 70, r.Y() - 30, 60, 20, "Cancel"));
 
 	if (d->Lst)
 	{
@@ -84,7 +84,7 @@ ShowLanguagesDlg::~ShowLanguagesDlg()
 	DeleteObj(d);
 }
 
-int ShowLanguagesDlg::OnNotify(GViewI *n, int f)
+int ShowLanguagesDlg::OnNotify(LViewI *n, int f)
 {
 	switch (n->GetId())
 	{

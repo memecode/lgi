@@ -4,7 +4,7 @@
 
 #include "Lgi.h"
 #include "GToken.h"
-#include "GVariant.h"
+#include "LVariant.h"
 
 //char *PluginDir = "D:\\Documents and Settings\\Administrator.FRET\\Desktop\\Susie";
 class GdcSpiPluginFactory;
@@ -31,9 +31,9 @@ public:
 	Format GetFormat() { return FmtSpi; }
 	int OnProgress(int Num, int Denom);
 	int GetCapabilites() { return FILTER_CAP_READ; }
-	bool ReadImage(GSurface *pDC, GStream *In);
-	bool WriteImage(GStream *s, GSurface *pDC);
-	bool GetVariant(const char *n, GVariant &v, char *a);
+	bool ReadImage(LSurface *pDC, LStream *In);
+	bool WriteImage(LStream *s, LSurface *pDC);
+	bool GetVariant(const char *n, LVariant &v, char *a);
 };
 
 // Plugin
@@ -90,8 +90,8 @@ public:
 		Current = 0;
 
 		// load all the plugins...
-		GArray<char*> Files;
-		GArray<const char*> Ext;
+		LArray<char*> Files;
+		LArray<const char*> Ext;
 		Ext.Add("*.spi");
 
 		char PluginDir[256];
@@ -126,7 +126,7 @@ public:
 		{
 			for (SpiPlugin *p=Plugins.First(); p; p=Plugins.Next())
 			{
-				GFile f;
+				LFile f;
 				if (f.Open(File, O_READ))
 				{
 					if (p->IsSupported(0, (int)f.Handle()))
@@ -195,7 +195,7 @@ int GdcSpiPlugin::OnProgress(int Num, int Denom)
 	return false;
 }
 
-bool GdcSpiPlugin::ReadImage(GSurface *pDC, GStream *In)
+bool GdcSpiPlugin::ReadImage(LSurface *pDC, LStream *In)
 {
 	bool Status = false;
 
@@ -295,7 +295,7 @@ bool GdcSpiPlugin::ReadImage(GSurface *pDC, GStream *In)
 	return Status;
 }
 
-bool GdcSpiPlugin::GetVariant(const char *n, GVariant &v, char *a)
+bool GdcSpiPlugin::GetVariant(const char *n, LVariant &v, char *a)
 {
 	if (!stricmp(n, LGI_FILTER_TYPE))
 	{
@@ -317,7 +317,7 @@ bool GdcSpiPlugin::GetVariant(const char *n, GVariant &v, char *a)
 	return true;
 }
 
-bool GdcSpiPlugin::WriteImage(GStream *Out, GSurface *pDC)
+bool GdcSpiPlugin::WriteImage(LStream *Out, LSurface *pDC)
 {
 	return false;
 }

@@ -1,13 +1,15 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/DocView.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/FileSelect.h"
+
 #include "LgiIde.h"
-#include "GDocView.h"
-#include "GToken.h"
-#include "GEdit.h"
-#include "GCheckBox.h"
-#include "GTextLabel.h"
 
 #define DEBUG_HIST		0
 
@@ -48,27 +50,27 @@ FindInFiles::~FindInFiles()
 		DeleteObj(Params);
 }
 
-void SerializeHistory(GHistory *h, const char *opt, GOptionsFile *p, bool Write)
+void SerializeHistory(GHistory *h, const char *opt, LOptionsFile *p, bool Write)
 {
 	if (h && p)
 	{
-		GString last;
+		LString last;
 		last.Printf("%sSelect", opt);
-		GViewI *Edit = NULL;
+		LViewI *Edit = NULL;
 		h->GetWindow()->GetViewById(h->GetTargetId(), Edit);
 		
 		#if DEBUG_HIST
 		LgiTrace("%s:%i - SerializeHistory '%s', Write=%i\n", _FL, last.Get(), Write);
 		#endif
 
-		GVariant v;
+		LVariant v;
 		if (Write)
 		{
-			GString::Array a;
+			LString::Array a;
 			a.SetFixedLength(false);
 			int64 i = 0;
 			int64 Selected = h->Value();
-			GString EdTxt;
+			LString EdTxt;
 			if (Edit)
 				EdTxt = Edit->Name();
 
@@ -86,7 +88,7 @@ void SerializeHistory(GHistory *h, const char *opt, GOptionsFile *p, bool Write)
 				i++;
 			}
 
-			GString strs = GString("|").Join(a);
+			LString strs = LString("|").Join(a);
 			p->SetValue(opt, v = strs.Get());
 			#if DEBUG_HIST
 			LgiTrace("\tstrs='%s'\n", strs.Get());
@@ -101,8 +103,8 @@ void SerializeHistory(GHistory *h, const char *opt, GOptionsFile *p, bool Write)
 		{
 			if (p->GetValue(opt, v))
 			{
-				GString raw(v.Str());
-				GString::Array t = raw.Split("|");
+				LString raw(v.Str());
+				LString::Array t = raw.Split("|");
 				h->DeleteArrays();
 				for (unsigned i=0; i<t.Length(); i++)
 				{
@@ -144,7 +146,7 @@ void FindInFiles::OnCreate()
 		SerializeHistory(TypeHistory, "TypeHist", App->GetOptions(), false);
 		SerializeHistory(FolderHistory, "FolderHist", App->GetOptions(), false);
 
-		GEdit *v;
+		LEdit *v;
 		if (GetViewById(IDC_LOOK_FOR, v))
 		{
 			v->Focus(true);
@@ -153,13 +155,13 @@ void FindInFiles::OnCreate()
 	}
 }
 
-int FindInFiles::OnNotify(GViewI *v, int f)
+int FindInFiles::OnNotify(LViewI *v, int f)
 {
 	switch (v->GetId())
 	{
 		case IDC_SET_DIR:
 		{
-			GFileSelect s;
+			LFileSelect s;
 			s.Parent(this);
 			s.InitialDir(GetCtrlName(IDC_DIR));
 			if (s.OpenFolder())
@@ -212,13 +214,13 @@ class FindInFilesThreadPrivate
 {
 public:
 	int AppHnd;
-	GAutoPtr<FindParams> Params;
+	LAutoPtr<FindParams> Params;
 	bool Loop, Busy;
-	GStringPipe Pipe;
+	LStringPipe Pipe;
 	int64 Last;
 };
 
-FindInFilesThread::FindInFilesThread(int AppHnd) : GEventTargetThread("FindInFiles")
+FindInFilesThread::FindInFilesThread(int AppHnd) : LEventTargetThread("FindInFiles")
 {
 	d = new FindInFilesThreadPrivate;
 	d->AppHnd = AppHnd;
@@ -242,10 +244,10 @@ void FindInFilesThread::SearchFile(char *File)
 	if (!File || !ValidStr(d->Params->Text))
 		return;
 
-	GFile f;
+	LFile f;
 	if (!f.Open(File, O_READ))
 	{
-		GString s;
+		LString s;
 		s.Printf("Couldn't Read file '%s'\n", File);
 		Log(NewStr(s));
 		return;
@@ -322,7 +324,7 @@ void FindInFilesThread::SearchFile(char *File)
 	}
 }
 
-bool FindInFilesCallback(void *UserData, char *Path, GDirectory *Dir)
+bool FindInFilesCallback(void *UserData, char *Path, LDirectory *Dir)
 {
 	if (Dir->IsDir())
 	{
@@ -369,14 +371,14 @@ GMessage::Result FindInFilesThread::OnEvent(GMessage *Msg)
 				Log(NULL);
 				Log(NewStr(Msg));
 
-				GArray<const char*> Ext;
+				LArray<const char*> Ext;
 				GToken e(d->Params->Ext, ";, ");
 				for (int i=0; i<e.Length(); i++)
 				{
 					Ext.Add(e[i]);
 				}
 		
-				GArray<char*> Files;
+				LArray<char*> Files;
 				if (d->Params->Type == FifSearchSolution)
 				{
 					// Do the extension filtering...
@@ -384,7 +386,7 @@ GMessage::Result FindInFilesThread::OnEvent(GMessage *Msg)
 					{
 						if (p)
 						{
-							const char *Leaf = LgiGetLeaf(p);
+							const char *Leaf = LGetLeaf(p);
 							for (auto e: Ext)
 							{
 								if (MatchStr(e, Leaf))

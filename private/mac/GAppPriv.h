@@ -1,36 +1,36 @@
 #pragma once
 
-#include "LJson.h"
-#include "GSymLookup.h"
-#include "GFontCache.h"
+#include "lgi/common/Json.h"
+#include "SymLookup.h"
+#include "lgi/common/FontCache.h"
 
-typedef GArray<GAppInfo*> AppArray;
+typedef LArray<LAppInfo*> AppArray;
 
-class GAppPrivate
+class LAppPrivate
 {
 public:
-	GApp *Owner;
+	LApp *Owner;
 	OsApp NsApp;
 	int RunDepth;
 
 	// Common
-	GAutoPtr<LJson> Config;
-	GFileSystem *FileSystem;
+	LAutoPtr<LJson> Config;
+	LFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
 	OsAppArguments Args;
 	GLibrary *SkinLib;
 	LHashTbl<StrKey<char,false>,AppArray*> MimeToApp;
 	OsThread GuiThread;
 	OsThreadId GuiThreadId;
-	GSymLookup SymLookup;
-	GAutoString Mime;
-	GAutoString Name;
-	GAutoString UrlArg;
+	LSymLookup SymLookup;
+	LAutoString Mime;
+	LAutoString Name;
+	LAutoString UrlArg;
 	
 	/// Any fonts needed for styling the elements
-	GAutoPtr<GFontCache> FontCache;
+	LAutoPtr<GFontCache> FontCache;
 	
-	GAppPrivate(GApp *owner) : Owner(owner)
+	LAppPrivate(LApp *owner) : Owner(owner)
 	{
 		NsApp = NULL;
 		RunDepth = 0;
@@ -41,7 +41,7 @@ public:
 		GuiThreadId = GetCurrentThreadId();
 	}
 	
-	~GAppPrivate()
+	~LAppPrivate()
 	{
 		DeleteObj(SkinLib);
 		

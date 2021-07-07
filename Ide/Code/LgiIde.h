@@ -8,18 +8,19 @@
 //
 //		GCC: __GNUC__
 //
+#include "lgi/common/DocView.h"
+#include "lgi/common/OptionsFile.h"
+#include "lgi/common/StringClass.h"
+#include "lgi/common/TextView3.h"
+#include "lgi/common/List.h"
+#include "lgi/common/Tree.h"
 
+#include "resdefs.h"
+#include "FindSymbol.h"
+#include "GDebugger.h"
 #ifdef WIN32
 #include "resource.h"
 #endif
-#include "resdefs.h"
-#include "GDocView.h"
-#include "GOptionsFile.h"
-#include "FindSymbol.h"
-#include "GStringClass.h"
-#include "GDebugger.h"
-#include "GTextView3.h"
-#include "LList.h"
 
 #define APP_VER					"1.0"
 #define APP_URL					"http://www.memecode.com/lgi/ide"
@@ -38,7 +39,7 @@ enum IdeMessages
 	M_LAST_MAKEFILE_CREATED,
 	
 	/// Find symbol results message:
-	/// GAutoPtr<FindSymRequest> Req((FindSymRequest*)Msg->A());
+	/// LAutoPtr<FindSymRequest> Req((FindSymRequest*)Msg->A());
 	M_FIND_SYM_REQUEST,
 	
 	/// Send a file to the worker thread...
@@ -46,7 +47,7 @@ enum IdeMessages
 	M_FIND_SYM_FILE,
 
 	/// Send a file to the worker thread...
-	/// GAutoPtr<GString::Array> Paths((GString::Array*)Msg->A());
+	/// LAutoPtr<LString::Array> Paths((LString::Array*)Msg->A());
 	M_FIND_SYM_INC_PATHS,
 
 	/// Styling is finished
@@ -164,8 +165,8 @@ class IdeDoc;
 class IdeProject;
 
 extern char AppName[];
-extern char *FindHeader(char *Short, GArray<GString> &Paths);
-extern bool BuildHeaderList(char *Cpp, GArray<char*> &Headers, GArray<GString> &IncPaths, bool Recurse);
+extern char *FindHeader(char *Short, LArray<LString> &Paths);
+extern bool BuildHeaderList(char *Cpp, LArray<char*> &Headers, LArray<LString> &IncPaths, bool Recurse);
 
 class NodeView;
 class NodeSource
@@ -182,7 +183,7 @@ public:
 	}
 	virtual ~NodeSource();
 
-	virtual GString GetFullPath() = 0;
+	virtual LString GetFullPath() = 0;
 	virtual bool IsWeb() = 0;
 	virtual const char *GetFileName() = 0;
 	virtual const char *GetLocalCache() = 0;
@@ -215,7 +216,7 @@ public:
 	NodeSource *GetSrc() { return nSrc; }
 };
 
-class AppWnd : public GWindow
+class AppWnd : public LWindow
 {
 	class AppWndPrivate *d;
 	friend class AppWndPrivate;
@@ -256,22 +257,22 @@ public:
 	IdeProject *RootProject();
 	IdeDoc *TopDoc();
 	IdeDoc *FocusDoc();
-	GTextView3 *FocusEdit();
+	LTextView3 *FocusEdit();
 	void AppendOutput(char *Txt, Channels Channel);
 	int OnFixBuildErrors();
 	void OnBuildStateChanged(bool NewState);
 	void UpdateState(int Debugging = -1, int Building = -1);
-	void OnReceiveFiles(GArray<const char*> &Files) override;
+	void OnReceiveFiles(LArray<const char*> &Files) override;
 	int GetBuildMode();
-	GTree *GetTree();
-	GOptionsFile *GetOptions();
+	LTree *GetTree();
+	LOptionsFile *GetOptions();
 	LList *GetFtpLog();
-	GStream *GetBuildLog();
-	GStream *GetDebugLog();
+	LStream *GetBuildLog();
+	LStream *GetDebugLog();
 	IdeDoc *FindOpenFile(char *FileName);
 	IdeDoc *GotoReference(const char *File, int Line, bool CurIp, bool WithHistory = true);
 	void FindSymbol(int ResultsSinkHnd, const char *Sym, bool AllPlatforms);
-	bool GetSystemIncludePaths(GArray<GString> &Paths);
+	bool GetSystemIncludePaths(LArray<LString> &Paths);
 	bool IsReleaseMode();
 	bool ShowInProject(const char *Fn);
 	bool Build();
@@ -284,7 +285,7 @@ public:
 	void OnProjectChange();
 	void OnFile(char *File, bool IsProject = false);
 	bool OnRequestClose(bool IsClose) override;
-	int OnNotify(GViewI *Ctrl, int Flags) override;
+	int OnNotify(LViewI *Ctrl, int Flags) override;
 	GMessage::Result OnEvent(GMessage *m) override;
 	bool OnNode(const char *Path, class ProjectNode *Node, FindSymbolSystem::SymAction Action);
 	void OnPulse() override;
@@ -303,9 +304,9 @@ public:
 #include "FindInFiles.h"
 
 extern void NewMemDumpViewer(AppWnd *App, const char *file = 0);
-extern void NewProjectFromTemplate(GViewI *parent);
+extern void NewProjectFromTemplate(LViewI *parent);
 
-class SysCharSupport : public GWindow
+class SysCharSupport : public LWindow
 {
 	class SysCharSupportPriv *d;
 
@@ -313,7 +314,7 @@ public:
 	SysCharSupport(AppWnd *app);
 	~SysCharSupport();
 
-	int OnNotify(GViewI *v, int f);
+	int OnNotify(LViewI *v, int f);
 	void OnPosChange();
 };
 

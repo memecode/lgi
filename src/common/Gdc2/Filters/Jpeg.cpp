@@ -9,8 +9,8 @@
 */
 
 #include <math.h>
-#include "Lgi.h"
-#include "GPalette.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Palette.h"
 #if HAS_LIBJPEG
 
 #define XMD_H
@@ -23,7 +23,7 @@
 // sudo apt-get install libjpeg-dev
 #include "jpeglib.h"
 #include <setjmp.h>
-#include "GLibraryUtils.h"
+#include "lgi/common/LibraryUtils.h"
 
 #if LIBJPEG_SHARED
 	#define JPEGLIB d->
@@ -90,16 +90,16 @@ public:
 };
 
 LMutex JpegLibraryLock("JpegLibraryLock");
-GAutoPtr<LibJpeg> JpegLibrary;
+LAutoPtr<LibJpeg> JpegLibrary;
 #endif
 
 #include <stdio.h>
 #include <string.h>
 
-#include "GLibraryUtils.h"
-#include "GScrollBar.h"
-#include "GVariant.h"
-#include "GJpeg.h"
+#include "lgi/common/LibraryUtils.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Jpeg.h"
 
 #define IJG_JPEG_ICC_MARKER             JPEG_APP0 + 2
 #define IJG_JPEG_APP_ICC_PROFILE_LEN    0xFFFF
@@ -286,8 +286,8 @@ bool GetIccProfile(j_decompress_ptr cinfo, uchar **icc_data, uint *icc_datalen)
 
 struct JpegStream
 {
-    GStream *f;
-    GArray<JOCTET> Buf;
+    LStream *f;
+    LArray<JOCTET> Buf;
 };
 
 boolean j_fill_input_buffer(j_decompress_ptr cinfo)
@@ -344,8 +344,8 @@ GdcJpeg::GdcJpeg()
 	#endif
 }
 
-typedef GRgb24 JpegRgb;
-typedef GCmyk32 JpegCmyk;
+typedef LRgb24 JpegRgb;
+typedef LCmyk32 JpegCmyk;
 struct JpegXyz
 {
 	uint8_t x, y, z;
@@ -519,22 +519,22 @@ void CmykToRgb32(D *d, S *s, int width)
 	}
 }
 
-GFilter::IoStatus GdcJpeg::ReadImage(GSurface *pDC, GStream *In)
+GFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 {
 	GFilter::IoStatus Status = IoError;
-	GVariant v;
+	LVariant v;
 	
 	#if LIBJPEG_SHARED
 	if (!d->IsLoaded() &&
 		!d->Load(sLibrary)
 		#ifdef WIN32
-		&& !d->Load(GString(sLibrary).Strip("d"))
+		&& !d->Load(LString(sLibrary).Strip("d"))
 		#endif
 		)
 	{
 		if (Props)
 		{
-			GString s;
+			LString s;
 			s.Printf("libjpeg is missing (%s.%s)", sLibrary, LGI_LIBRARY_EXT);
 			Props->SetValue(LGI_FILTER_ERROR, v = s);
 		}
@@ -616,11 +616,11 @@ GFilter::IoStatus GdcJpeg::ReadImage(GSurface *pDC, GStream *In)
 	
 	if (Props)
 	{
-		GStringPipe s(256);
+		LStringPipe s(256);
 		s.Print("Sub-sampling: ");
 		for (int i=0; i<cinfo.comps_in_scan; i++)
 			s.Print("%s%ix%i", i ? "_" : "", cinfo.comp_info[i].h_samp_factor, cinfo.comp_info[i].v_samp_factor);
-		GAutoString ss(s.NewStr());
+		LAutoString ss(s.NewStr());
 		Props->SetValue(LGI_FILTER_INFO, v = ss.Get());
 	}
 
@@ -729,7 +729,7 @@ GFilter::IoStatus GdcJpeg::ReadImage(GSurface *pDC, GStream *In)
 								switch (pDC->GetColourSpace())
 								{
 									#define CmykCase(name, bits) \
-										case Cs##name: CmykToRgb##bits((G##name*)Ptr, (GCmyk32*)Ptr, pDC->X()); break
+										case Cs##name: CmykToRgb##bits((L##name*)Ptr, (LCmyk32*)Ptr, pDC->X()); break
 
 									CmykCase(Rgb24, 24);
 									CmykCase(Bgr24, 24);
@@ -759,7 +759,7 @@ GFilter::IoStatus GdcJpeg::ReadImage(GSurface *pDC, GStream *In)
 									switch (pDC->GetColourSpace())
 									{
 										#define YccCase(name, bits) \
-											case Cs##name: Ycc##bits((G##name*)Ptr, pDC->X(), red, green, blue, range_table); break;
+											case Cs##name: Ycc##bits((L##name*)Ptr, pDC->X(), red, green, blue, range_table); break;
 										
 										YccCase(Rgb24, 24);
 										YccCase(Bgr24, 24);
@@ -790,7 +790,7 @@ GFilter::IoStatus GdcJpeg::ReadImage(GSurface *pDC, GStream *In)
 									switch (pDC->GetColourSpace())
 									{
 										#define JpegCase(name, bits) \
-											case Cs##name: Convert##bits((G##name*)Ptr, Width); break;
+											case Cs##name: Convert##bits((L##name*)Ptr, Width); break;
 
 										JpegCase(Rgb16, 16);
 										JpegCase(Bgr16, 16);
@@ -869,9 +869,9 @@ void j_term_destination(j_compress_ptr cinfo)
 		LgiAssert(!"Write failed.");
 }
 
-GFilter::IoStatus GdcJpeg::WriteImage(GStream *Out, GSurface *pDC)
+GFilter::IoStatus GdcJpeg::WriteImage(LStream *Out, LSurface *pDC)
 {
-	GVariant v;
+	LVariant v;
 	#if LIBJPEG_SHARED
 	if (!d->IsLoaded() && !d->Load(sLibrary))
 	{
@@ -892,7 +892,7 @@ GFilter::IoStatus GdcJpeg::WriteImage(GStream *Out, GSurface *pDC)
 	// bool Ok = true;
 
 	// Setup quality setting
-	GVariant Quality(80), SubSample(Sample_1x1_1x1_1x1), DpiX, DpiY;
+	LVariant Quality(80), SubSample(Sample_1x1_1x1_1x1), DpiX, DpiY;
 	LPoint Dpi;
 	if (Props)
 	{
@@ -914,7 +914,7 @@ GFilter::IoStatus GdcJpeg::WriteImage(GStream *Out, GSurface *pDC)
 }
 
 template<typename I>
-void Rop24(GRgb24 *dst, I *p, int x)
+void Rop24(LRgb24 *dst, I *p, int x)
 {
     I *end = p + x;
 	while (p < end)
@@ -927,7 +927,7 @@ void Rop24(GRgb24 *dst, I *p, int x)
 	}
 }
 
-GFilter::IoStatus GdcJpeg::_Write(GStream *Out, GSurface *pDC, int Quality, SubSampleMode SubSample, LPoint Dpi)
+GFilter::IoStatus GdcJpeg::_Write(LStream *Out, LSurface *pDC, int Quality, SubSampleMode SubSample, LPoint Dpi)
 {
 	struct jpeg_compress_struct cinfo;
 	struct my_error_mgr jerr;
@@ -1082,8 +1082,8 @@ GFilter::IoStatus GdcJpeg::_Write(GStream *Out, GSurface *pDC, int Quality, SubS
 				}
 				case CsRgb16:
 				{
-				    GRgb16 *p = (GRgb16*)(*pDC)[cinfo.next_scanline];
-				    GRgb16 *end = p + pDC->X();
+				    LRgb16 *p = (LRgb16*)(*pDC)[cinfo.next_scanline];
+				    LRgb16 *end = p + pDC->X();
 					while (p < end)
 					{
 						dst[0] = G5bitTo8bit(p->r);
@@ -1096,8 +1096,8 @@ GFilter::IoStatus GdcJpeg::_Write(GStream *Out, GSurface *pDC, int Quality, SubS
 				}
 				case CsBgr16:
 				{
-				    GBgr16 *p = (GBgr16*)(*pDC)[cinfo.next_scanline];
-				    GBgr16 *end = p + pDC->X();
+				    LBgr16 *p = (LBgr16*)(*pDC)[cinfo.next_scanline];
+				    LBgr16 *end = p + pDC->X();
 					while (p < end)
 					{
 						dst[0] = (p->r << 3) | (p->r >> 5);
@@ -1111,7 +1111,7 @@ GFilter::IoStatus GdcJpeg::_Write(GStream *Out, GSurface *pDC, int Quality, SubS
 
 				#define Write24(cs) \
 					case Cs##cs: \
-						Rop24<G##cs>((GRgb24*)dst, (G##cs*)(*pDC)[cinfo.next_scanline], pDC->X()); \
+						Rop24<L##cs>((LRgb24*)dst, (L##cs*)(*pDC)[cinfo.next_scanline], pDC->X()); \
 						break
 				
 				Write24(Rgb24);

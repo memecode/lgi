@@ -17,7 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////
 int FontSizes[] = { 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 48, 72, 100, 0 };
 
-GSelectFont::GSelectFont(GView *parent, char *Face)
+GSelectFont::GSelectFont(LView *parent, char *Face)
 {
 	Font[0] = 0;
 	Size = 0;
@@ -98,15 +98,15 @@ GSelectFont::GSelectFont(GView *parent, char *Face)
 		CSize->Value(DefSize);
 	}
 	
-	Children.Insert(new GButton(IDOK, 20, 70, 60, 20, "Ok"));
-	Children.Insert(new GButton(IDCANCEL, 90, 70, 60, 20, "Cancel"));
+	Children.Insert(new LButton(IDOK, 20, 70, 60, 20, "Ok"));
+	Children.Insert(new LButton(IDCANCEL, 90, 70, 60, 20, "Cancel"));
 }
 
 GSelectFont::~GSelectFont()
 {
 }
 
-int GSelectFont::OnNotify(GViewI *Ctrl, int Flags)
+int GSelectFont::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{

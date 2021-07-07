@@ -1,9 +1,8 @@
-#include "GMem.h"
-#include "GContainers.h"
-
+#include "lgi/common/Mem.h"
+#include "lgi/common/Containers.h"
 char *SpacesToTabs(const char *Text, int TabSize)
 {
-	GStringPipe p(4 << 10);
+	LStringPipe p(4 << 10);
 	
 	if (Text)
 	{
@@ -59,10 +58,9 @@ char *SpacesToTabs(const char *Text, int TabSize)
 	
 	return p.NewStr();
 }
-
 char *TabsToSpaces(const char *Text, int TabSize)
 {
-	GStringPipe p(4 << 10);
+	LStringPipe p(4 << 10);
 	
 	if (Text)
 	{
@@ -101,4 +99,3 @@ char *TabsToSpaces(const char *Text, int TabSize)
 	
 	return p.NewStr();
 }
-

@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "GPalette.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Palette.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // Mem ops
@@ -59,7 +59,7 @@ void MemOr(void *d, void *s, uint l)
 }
 
 //////////////////////////////////////////////////////////////////////
-bool LgiFindBounds(GSurface *pDC, GRect *rc)
+bool LgiFindBounds(LSurface *pDC, LRect *rc)
 {
 	if (!pDC || ! rc)
 		return false;
@@ -145,7 +145,7 @@ bool LgiFindBounds(GSurface *pDC, GRect *rc)
 
 //////////////////////////////////////////////////////////////////////
 // Drawing functions
-void LgiDrawBox(GSurface *pDC, GRect &r, bool Sunken, bool Fill)
+void LDrawBox(LSurface *pDC, LRect &r, bool Sunken, bool Fill)
 {
 	if (Fill)
 	{
@@ -162,14 +162,14 @@ void LgiDrawBox(GSurface *pDC, GRect &r, bool Sunken, bool Fill)
 	pDC->Line(r.x1, r.y1, r.x2, r.y1);
 }
 
-void LgiWideBorder(GSurface *pDC, GRect &r, LgiEdge Type)
+void LWideBorder(LSurface *pDC, LRect &r, LgiEdge Type)
 {
 	if (!pDC) return;
 	COLOUR Old = pDC->Colour();
-	GColour VLow = LColour(L_SHADOW);
-	GColour Low = LColour(L_LOW);
-	GColour High = LColour(L_HIGH);
-	GColour VHigh = LColour(L_LIGHT);
+	LColour VLow = LColour(L_SHADOW);
+	LColour Low = LColour(L_LOW);
+	LColour High = LColour(L_HIGH);
+	LColour VHigh = LColour(L_LIGHT);
 	
 	switch (Type)
 	{
@@ -237,12 +237,12 @@ void LgiWideBorder(GSurface *pDC, GRect &r, LgiEdge Type)
 			bool Focus = Type == EdgeWin7FocusSunken;
 			
 			// Win7 theme
-			GColour Med(L_MED), Ws(L_WORKSPACE);
-			GColour Mixer = Med.GetGray() >= 128 ? GColour::Black : GColour::White;
-			GColour TopLeft, RightBottom;
+			LColour Med(L_MED), Ws(L_WORKSPACE);
+			LColour Mixer = Med.GetGray() >= 128 ? LColour::Black : LColour::White;
+			LColour TopLeft, RightBottom;
 			if (Focus)
 			{
-				GColour Focus(L_FOCUS_SEL_BACK);
+				LColour Focus(L_FOCUS_SEL_BACK);
 				TopLeft = Med.Mix(Focus, 0.4f);
 				RightBottom = Ws.Mix(Focus, 0.2f);
 			}
@@ -289,7 +289,7 @@ void LgiWideBorder(GSurface *pDC, GRect &r, LgiEdge Type)
 	pDC->Colour(Old);
 }
 
-void LgiThinBorder(GSurface *pDC, GRect &r, LgiEdge Type)
+void LThinBorder(LSurface *pDC, LRect &r, LgiEdge Type)
 {
 	if (!pDC) return;
 	COLOUR Old = pDC->Colour();
@@ -334,7 +334,7 @@ void LgiThinBorder(GSurface *pDC, GRect &r, LgiEdge Type)
 	pDC->Colour(Old);
 }
 
-void LgiFlatBorder(GSurface *pDC, GRect &r, int Width)
+void LFlatBorder(LSurface *pDC, LRect &r, int Width)
 {
 	pDC->Colour(LColour(L_MED));
 	if (Width < 1 || r.X() < (2 * Width) || r.Y() < (2 * Width))
@@ -352,7 +352,7 @@ void LgiFlatBorder(GSurface *pDC, GRect &r, int Width)
 	}
 }
 
-void LgiFillGradient(GSurface *pDC, GRect &r, bool Vert, GArray<GColourStop> &Stops)
+void LgiFillGradient(LSurface *pDC, LRect &r, bool Vert, LArray<GColourStop> &Stops)
 {
 	int CurStop = 0;
 	GColourStop *This = Stops.Length() > CurStop ? &Stops[CurStop] : 0;
@@ -362,7 +362,7 @@ void LgiFillGradient(GSurface *pDC, GRect &r, bool Vert, GArray<GColourStop> &St
 	int Limit = Vert ? r.Y() : r.X();
 	for (int n=0; n<Limit; n++)
 	{
-		GColour c(0, 32);
+		LColour c(0, 32);
 		float p = (float)n/Limit;
 		if (This)
 		{
@@ -404,9 +404,9 @@ void LgiFillGradient(GSurface *pDC, GRect &r, bool Vert, GArray<GColourStop> &St
 
 //////////////////////////////////////////////////////////////////////////////////
 // Other Gdc Stuff
-GSurface *ConvertDC(GSurface *pDC, int Bits)
+LSurface *ConvertDC(LSurface *pDC, int Bits)
 {
-	GSurface *pNew = new GMemDC;
+	LSurface *pNew = new LMemDC;
 	if (pNew && pNew->Create(pDC->X(), pDC->Y(), GBitsToColourSpace(Bits)))
 	{
 		pNew->Blt(0, 0, pDC);
@@ -416,7 +416,7 @@ GSurface *ConvertDC(GSurface *pDC, int Bits)
 	return pDC;
 }
 
-GColour GdcMixColour(GColour c1, GColour c2, float HowMuchC1)
+LColour GdcMixColour(LColour c1, LColour c2, float HowMuchC1)
 {
 	float HowMuchC2 = 1.0f - HowMuchC1;
 
@@ -425,7 +425,7 @@ GColour GdcMixColour(GColour c1, GColour c2, float HowMuchC1)
 	uint8_t b = (uint8_t) ((c1.b()*HowMuchC1) + (c2.b()*HowMuchC2));
 	uint8_t a = (uint8_t) ((c1.a()*HowMuchC1) + (c2.a()*HowMuchC2));
 	
-	return GColour(r, g, b, a);
+	return LColour(r, g, b, a);
 }
 
 COLOUR CBit(int DstBits, COLOUR c, int SrcBits, GPalette *Pal)
@@ -617,7 +617,7 @@ COLOUR CBit(int DstBits, COLOUR c, int SrcBits, GPalette *Pal)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-const char *GColourSpaceToString(GColourSpace cs)
+const char *GColourSpaceToString(LColourSpace cs)
 {
 	#define CS_STR_BUF 4
 	static int Cur = 0;
@@ -677,7 +677,7 @@ const char *GColourSpaceToString(GColourSpace cs)
 	return start;
 }
 
-int GColourSpaceChannels(GColourSpace Cs)
+int GColourSpaceChannels(LColourSpace Cs)
 {
 	int Channels = 0;
 	
@@ -694,7 +694,7 @@ int GColourSpaceChannels(GColourSpace Cs)
 	return Channels;
 }
 
-bool GColourSpaceHasAlpha(GColourSpace Cs)
+bool GColourSpaceHasAlpha(LColourSpace Cs)
 {
 	while (Cs)
 	{
@@ -709,7 +709,7 @@ bool GColourSpaceHasAlpha(GColourSpace Cs)
 	return false;
 }
 
-int GColourSpaceToBits(GColourSpace ColourSpace)
+int GColourSpaceToBits(LColourSpace ColourSpace)
 {
 	uint32_t c = ColourSpace;
 	int bits = 0;
@@ -725,7 +725,7 @@ int GColourSpaceToBits(GColourSpace ColourSpace)
 	return bits;
 }
 
-GColourSpace GStringToColourSpace(const char *c)
+LColourSpace GStringToColourSpace(const char *c)
 {
 	if (!c)
 		return CsNone;
@@ -747,7 +747,7 @@ GColourSpace GStringToColourSpace(const char *c)
 		}
 		else
 		{
-			GArray<GComponentType> Comp;
+			LArray<GComponentType> Comp;
 			while (*c)
 			{
 				switch (tolower(*c))
@@ -792,7 +792,7 @@ GColourSpace GStringToColourSpace(const char *c)
 				c++;
 			}
 			
-			GColourSpaceBits a;
+			LColourSpaceBits a;
 			ZeroObj(a);
 			if (Comp.Length() == 3)
 			{
@@ -848,7 +848,7 @@ GColourSpace GStringToColourSpace(const char *c)
 				else return CsNone;
 			}
 			
-			GColourSpace Cs = (GColourSpace)a.All;
+			LColourSpace Cs = (LColourSpace)a.All;
 			return Cs;
 		}
 	}
@@ -864,7 +864,7 @@ GColourSpace GStringToColourSpace(const char *c)
 	return CsNone;
 }
 
-GColourSpace GBitsToColourSpace(int Bits)
+LColourSpace GBitsToColourSpace(int Bits)
 {
 	switch (Bits)
 	{
@@ -891,9 +891,9 @@ bool GColourSpaceTest()
 	union {
 		uint8_t b4[4];
 		uint32_t u32;
-		GBgrx32 bgrx32;
-		GXrgb32 xrgb32;
-		GRgba32 rgba32;
+		LBgrx32 bgrx32;
+		LXrgb32 xrgb32;
+		LRgba32 rgba32;
 	};
 	
 	b4[0] = 1;
@@ -916,7 +916,7 @@ bool GColourSpaceTest()
 	
 	union {
 		uint16 u16;
-		GRgb16 rgb16;
+		LRgb16 rgb16;
 	};
 	
 	rgba32.r = 0xff;
@@ -939,10 +939,10 @@ bool GColourSpaceTest()
 }
 
 ////////////////////////////////////////////////////////////////////////
-GSurface *GInlineBmp::Create(uint32_t TransparentPx)
+LSurface *GInlineBmp::Create(uint32_t TransparentPx)
 {
-	GSurface *pDC = new GMemDC;
-	if (pDC->Create(X, Y, System32BitColourSpace, GSurface::SurfaceRequireExactCs))
+	LSurface *pDC = new LMemDC;
+	if (pDC->Create(X, Y, System32BitColourSpace, LSurface::SurfaceRequireExactCs))
 	{
 		GBmpMem Src, Dst;
 		
@@ -1001,8 +1001,8 @@ GSurface *GInlineBmp::Create(uint32_t TransparentPx)
 						REG uint8_t r = R24(TransparentPx);
 						REG uint8_t g = G24(TransparentPx);
 						REG uint8_t b = B24(TransparentPx);
-						REG GRgb24 *px = (GRgb24*) s.u8;
-						REG GRgb24 *e = px + X;
+						REG LRgb24 *px = (LRgb24*) s.u8;
+						REG LRgb24 *e = px + X;
 						while (px < e)
 						{
 							if (px->r == r &&
@@ -1037,9 +1037,9 @@ GSurface *GInlineBmp::Create(uint32_t TransparentPx)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-#include "GRops.h"
+#include "lgi/common/Rops.h"
 
-bool LgiRopRgb(uint8_t *d, GColourSpace DstCs, uint8_t *s, GColourSpace SrcCs, int x, bool Composite)
+bool LgiRopRgb(uint8_t *d, LColourSpace DstCs, uint8_t *s, LColourSpace SrcCs, int x, bool Composite)
 {
 	// This is just a huge switch statement that takes care of all possible combinations
 	// of src and dst RGB colour space formats. The 'GRopsCases.cpp' code is generated
@@ -1047,10 +1047,10 @@ bool LgiRopRgb(uint8_t *d, GColourSpace DstCs, uint8_t *s, GColourSpace SrcCs, i
 	#define JointCs(dst, src) (((uint64)(dst) << 32) | (src))
 	switch (JointCs(DstCs, SrcCs))
 	{
-		#include "../../src/common/Gdc2/GRopsCases.cpp"
+		#include "../../src/common/Gdc2/RopsCases.cpp"
 		default:
 		{
-			GColourSpaceBits Src, Dst;
+			LColourSpaceBits Src, Dst;
 			Src.All = SrcCs;
 			Dst.All = DstCs;
 			
@@ -1138,7 +1138,7 @@ int LgiScreenDpi()
 	#endif
 }
 
-bool GMemDC::SwapRedAndBlue()
+bool LMemDC::SwapRedAndBlue()
 {
 	switch (GetColourSpace())
 	{
@@ -1147,7 +1147,7 @@ bool GMemDC::SwapRedAndBlue()
 			{										\
 				for (int y=0; y<Y(); y++)			\
 				{									\
-					auto p = (G##cs*)((*this)[y]);	\
+					auto p = (L##cs*)((*this)[y]);	\
 					if (!p)							\
 						break;						\
 					auto e = p + X();				\

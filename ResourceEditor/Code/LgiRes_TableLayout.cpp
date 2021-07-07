@@ -1,11 +1,12 @@
 #include <stdlib.h>
 #include "LgiResEdit.h"
 #include "LgiRes_Dialog.h"
-#include "GButton.h"
-#include "GVariant.h"
-#include "GToken.h"
-#include "GTableLayout.h"
-#include "LgiRes.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/Menu.h"
 
 #define DRAW_CELL_INDEX			0
 #define DRAW_TABLE_SIZE			0
@@ -24,11 +25,11 @@ enum Cmds
 	IDM_INSERT_COL,
 };
 
-static GColour Blue(0, 30, 222);
+static LColour Blue(0, 30, 222);
 
 /////////////////////////////////////////////////////////////////////
 struct Pair { int Pos, Size; };
-void CalcCell(GArray<Pair> &p, GArray<double> &s, int Total)
+void CalcCell(LArray<Pair> &p, LArray<double> &s, int Total)
 {
 	int CurI = 0;
 	for (int i=0; i<s.Length(); i++)
@@ -44,7 +45,7 @@ void CalcCell(GArray<Pair> &p, GArray<double> &s, int Total)
 /////////////////////////////////////////////////////////////////////
 // Table layout
 template<class T>
-T SumElements(GArray<T> &a, ssize_t start, ssize_t end)
+T SumElements(LArray<T> &a, ssize_t start, ssize_t end)
 {
 	T Sum = 0;
 	for (auto i=start; i<=end; i++)
@@ -54,7 +55,7 @@ T SumElements(GArray<T> &a, ssize_t start, ssize_t end)
 	return Sum;
 }
 
-void MakeSumUnity(GArray<double> &a)
+void MakeSumUnity(LArray<double> &a)
 {
 	double s = SumElements<double>(a, 0, a.Length()-1);
 	double Diff = s - 1.0;
@@ -86,14 +87,14 @@ class ResTableCell : public GDom
 {
 public:
 	CtrlTable *Table;
-	GRect Cell;	// Cell location
-	GRect Pos;	// Pixels
+	LRect Cell;	// Cell location
+	LRect Pos;	// Pixels
 	bool Selected;
-	GArray<ResDialogCtrl*> Ctrls;
+	LArray<ResDialogCtrl*> Ctrls;
 	TableAlign AlignX;
 	TableAlign AlignY;
-	GAutoString Class; // CSS class for styling
-	GAutoString Style; // CSS styles
+	LAutoString Class; // CSS class for styling
+	LAutoString Style; // CSS styles
 
 	ResTableCell(CtrlTable *table, ssize_t cx, ssize_t cy)
 	{
@@ -117,7 +118,7 @@ public:
 			ResDialogCtrl *c = Ctrls[i];
 			if (c)
 			{
-				GRect r = c->View()->GetPos();
+				LRect r = c->View()->GetPos();
 
 				if (r.X() > Pos.X())
 				{
@@ -141,7 +142,7 @@ public:
 		}
 	}
 
-	void SetPos(GRect &p)
+	void SetPos(LRect &p)
 	{
 		int Dx = p.x1 - Pos.x1;
 		int Dy = p.y1 - Pos.y1;
@@ -150,7 +151,7 @@ public:
 			ResDialogCtrl *c = Ctrls[i];
 			if (c)
 			{
-				GRect r = c->View()->GetPos();
+				LRect r = c->View()->GetPos();
 				r.Offset(Dx, Dy);
 				c->SetPos(r);
 			}
@@ -159,7 +160,7 @@ public:
 		MoveCtrls();
 	}
 
-	bool GetVariant(const char *Name, GVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, char *Array)
 	{
 		if (stricmp(Name, VAL_Span) == 0)
 		{
@@ -167,10 +168,10 @@ public:
 		}
 		else if (stricmp(Name, VAL_Children) == 0)
 		{
-			List<GVariant> c;
+			List<LVariant> c;
 			for (int i=0; i<Ctrls.Length(); i++)
 			{
-				c.Insert(new GVariant((ResObject*)Ctrls[i]));
+				c.Insert(new LVariant((ResObject*)Ctrls[i]));
 			}
 			Value.SetList(&c);
 			c.DeleteObjects();
@@ -196,11 +197,11 @@ public:
 		return true;
 	}
 
-	bool SetVariant(const char *Name, GVariant &Value, char *Array)
+	bool SetVariant(const char *Name, LVariant &Value, char *Array)
 	{
 		if (stricmp(Name, VAL_Span) == 0)
 		{
-			GRect r;
+			LRect r;
 			if (r.SetStr(Value.Str()))
 			{
 				Cell = r;
@@ -216,7 +217,7 @@ public:
 				if (Obj)
 				{
 					Table->SetAttachCell(this);
-					GRect r = Obj->View()->GetPos();
+					LRect r = Obj->View()->GetPos();
 					Table->AttachCtrl(Obj, &r);
 					Table->SetAttachCell(0);
 				}
@@ -266,7 +267,7 @@ public:
 		return true;
 	}
 	
-	void OnMouseClick(GMouse &m)
+	void OnMouseClick(LMouse &m)
 	{
 		if (m.Down() && m.Right())
 		{
@@ -344,7 +345,7 @@ enum HandleTypes
 	LJoinCells,
 };
 
-struct OpHandle : public GRect
+struct OpHandle : public LRect
 {
 	bool Over;
 	HandleTypes Type;
@@ -362,16 +363,16 @@ struct OpHandle : public GRect
 		return *this;
 	}
 
-	void OnPaint(GSurface *pDC)
+	void OnPaint(LSurface *pDC)
 	{
 		#define OFF			1
 		int cx = X() >> 1;
 		int cy = Y() >> 1;
 
-		pDC->Colour(Over ? GColour::Red : Blue);
+		pDC->Colour(Over ? LColour::Red : Blue);
 		pDC->Rectangle(this);
 
-		pDC->Colour(GColour::White);
+		pDC->Colour(LColour::White);
 		switch (Type)
 		{
 			case LSizeRow:
@@ -416,15 +417,15 @@ public:
 	// The cell container
 	CtrlTable *Table;
 	ssize_t CellX, CellY;
-	GArray<ResTableCell*> Cells;
+	LArray<ResTableCell*> Cells;
 	ResTableCell *AttachTo;
 
 	// Column + Row sizes
-	GArray<double> ColSize;
-	GArray<double> RowSize;
+	LArray<double> ColSize;
+	LArray<double> RowSize;
 
 	// Goobers for editing the cell layout
-	GArray<OpHandle> Handles;
+	LArray<OpHandle> Handles;
 
 	int DragRowSize;
 	int DragColSize;
@@ -453,7 +454,7 @@ public:
 		Cells.DeleteObjects();
 	}
 
-	bool GetSelected(GArray<ResTableCell*> &s)
+	bool GetSelected(LArray<ResTableCell*> &s)
 	{
 		for (int i=0; i<Cells.Length(); i++)
 		{
@@ -476,7 +477,7 @@ public:
 		return 0;
 	}
 
-	void Layout(GRect c)
+	void Layout(LRect c)
 	{
 		#define ADD_BORDER		10
 		#define CELL_SPACING	1
@@ -503,7 +504,7 @@ public:
 			int AvailX = c.X();
 			int AvailY = c.Y();
 
-			GArray<Pair> XPair, YPair;
+			LArray<Pair> XPair, YPair;
 			CalcCell(XPair, ColSize, AvailX);
 			CalcCell(YPair, RowSize, AvailY);
 			XPair[CellX].Pos = AvailX;
@@ -551,7 +552,7 @@ public:
 						if (Cell->Cell.x1 == x &&
 							Cell->Cell.y1 == y)
 						{
-							GRect Pos = Cell->Pos;
+							LRect Pos = Cell->Pos;
 							
 							// Set cells pixel position, with spanning
 							int Ex = XPair[Cell->Cell.x2 + 1].Pos;
@@ -728,7 +729,7 @@ public:
 	}
 };
 
-CtrlTable::CtrlTable(ResDialog *dlg, GXmlTag *load) :
+CtrlTable::CtrlTable(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Table, load)
 {
 	d = new CtrlTablePrivate(this);
@@ -744,7 +745,7 @@ bool CtrlTable::GetFields(FieldTree &Fields)
 {
 	bool Status = ResDialogCtrl::GetFields(Fields);
 	
-	GArray<ResTableCell*> s;
+	LArray<ResTableCell*> s;
 	if (d->GetSelected(s) == 1)
 	{
 		int Id = 150;
@@ -759,7 +760,7 @@ bool CtrlTable::Serialize(FieldTree &Fields)
 {
 	bool Status = ResDialogCtrl::Serialize(Fields);
 	
-	GArray<ResTableCell*> s;
+	LArray<ResTableCell*> s;
 	ResTableCell *c;
 	if (d->GetSelected(s) == 1 && ((c = s[0])) != NULL)
 	{
@@ -784,14 +785,14 @@ void CtrlTable::EnumCtrls(List<ResDialogCtrl> &Ctrls)
 	}
 }
 
-bool CtrlTable::GetVariant(const char *Name, GVariant &Value, char *Array)
+bool CtrlTable::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)
 	{
 		case TableLayoutCols:
 		{
-			GStringPipe p;
+			LStringPipe p;
 			for (int i=0; i<d->ColSize.Length(); i++)
 			{
 				if (i) p.Push(",");
@@ -802,7 +803,7 @@ bool CtrlTable::GetVariant(const char *Name, GVariant &Value, char *Array)
 		}
 		case TableLayoutRows:
 		{
-			GStringPipe p;
+			LStringPipe p;
 			for (int i=0; i<d->RowSize.Length(); i++)
 			{
 				if (i) p.Push(",");
@@ -813,7 +814,7 @@ bool CtrlTable::GetVariant(const char *Name, GVariant &Value, char *Array)
 		}
 		case TableLayoutCell:
 		{
-			auto Coords = GString(Array).SplitDelimit(",");
+			auto Coords = LString(Array).SplitDelimit(",");
 			if (Coords.Length() != 2)
 				return false;
 
@@ -830,7 +831,7 @@ bool CtrlTable::GetVariant(const char *Name, GVariant &Value, char *Array)
 	return true;
 }
 
-bool CtrlTable::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool CtrlTable::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	GDomProperty p = LgiStringToDomProp(Name);
 	switch (p)
@@ -869,7 +870,7 @@ bool CtrlTable::SetVariant(const char *Name, GVariant &Value, char *Array)
 		}
 		case TableLayoutCell:
 		{
-			auto Coords = GString(Array).SplitDelimit(",");
+			auto Coords = LString(Array).SplitDelimit(",");
 			if (Coords.Length() != 2)
 				return false;
 
@@ -905,7 +906,7 @@ bool CtrlTable::SetVariant(const char *Name, GVariant &Value, char *Array)
 	return true;
 }
 
-GRect *CtrlTable::GetPasteArea()
+LRect *CtrlTable::GetPasteArea()
 {
 	for (int i=0; i<d->Cells.Length(); i++)
 	{
@@ -916,7 +917,7 @@ GRect *CtrlTable::GetPasteArea()
 	return 0;
 }
 
-GRect *CtrlTable::GetChildArea(ResDialogCtrl *Ctrl)
+LRect *CtrlTable::GetChildArea(ResDialogCtrl *Ctrl)
 {
 	ResTableCell *c = d->GetCell(Ctrl);
 	if (c)
@@ -924,7 +925,7 @@ GRect *CtrlTable::GetChildArea(ResDialogCtrl *Ctrl)
 	return NULL;
 }
 
-void CtrlTable::OnChildrenChanged(GViewI *Wnd, bool Attaching)
+void CtrlTable::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	if (Attaching)
 		return;
@@ -943,7 +944,7 @@ void CtrlTable::SetAttachCell(ResTableCell *c)
 	d->AttachTo = c;
 }
 
-bool CtrlTable::AttachCtrl(ResDialogCtrl *Ctrl, GRect *r)
+bool CtrlTable::AttachCtrl(ResDialogCtrl *Ctrl, LRect *r)
 {
 	if (d->AttachTo)
 	{
@@ -955,7 +956,7 @@ bool CtrlTable::AttachCtrl(ResDialogCtrl *Ctrl, GRect *r)
 		}
 
 	
-		GRect b = d->AttachTo->Pos;
+		LRect b = d->AttachTo->Pos;
 		if (r->X() > b.X())
 		{
 			r->x1 = b.x1;
@@ -1013,7 +1014,7 @@ void CtrlTable::OnPosChange()
 	Layout();
 }
 
-void CtrlTable::OnPaint(GSurface *pDC)
+void CtrlTable::OnPaint(LSurface *pDC)
 {
 	int i;
 	Client.Set(0, 0, X()-1, Y()-1);
@@ -1037,7 +1038,7 @@ void CtrlTable::OnPaint(GSurface *pDC)
 					pDC->Applicator()->SetVar(GAPP_ALPHA_A, 0x20);
 				}
 				else
-					pDC->Colour(GColour(Blue.r(), Blue.g(), Blue.b(), 0x20));
+					pDC->Colour(LColour(Blue.r(), Blue.g(), Blue.b(), 0x20));
 				pDC->Rectangle(c->Pos.x1 + 1, c->Pos.y1 + 1, c->Pos.x2 - 1, c->Pos.y2 - 1);
 				pDC->Op(Op);
 				pDC->Colour(Blue);
@@ -1069,7 +1070,7 @@ void CtrlTable::OnPaint(GSurface *pDC)
 	ResDialogCtrl::OnPaint(pDC);
 }
 
-void CtrlTable::OnMouseMove(GMouse &m)
+void CtrlTable::OnMouseMove(LMouse &m)
 {
 	bool Change = false;
 	for (auto &h: d->Handles)
@@ -1086,7 +1087,7 @@ void CtrlTable::OnMouseMove(GMouse &m)
 
 	if (IsCapturing())
 	{
-		GArray<Pair> p;
+		LArray<Pair> p;
 
 		int Fudge = 6;
 		if (d->DragRowSize >= 0)
@@ -1304,7 +1305,7 @@ void CtrlTable::UnMerge(ResTableCell *Cell)
 	}
 }
 
-void CtrlTable::OnMouseClick(GMouse &m)
+void CtrlTable::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -1365,7 +1366,7 @@ void CtrlTable::OnMouseClick(GMouse &m)
 				if (h && h->Type == LJoinCells)
 				{
 					// Do a cell merge
-					GRect u = h->a->Cell;
+					LRect u = h->a->Cell;
 					u.Union(&h->b->Cell);
 
 					d->Cells.Delete(h->a);
@@ -1475,25 +1476,25 @@ enum {
     M_FINISHED = M_USER + 1000,
 };
 
-class TableLayoutTest : public GDialog
+class TableLayoutTest : public LDialog
 {
-	GTableLayout *Tbl;
-	GView *Msg;
-	GTree *Tree;
+	LTableLayout *Tbl;
+	LView *Msg;
+	LTree *Tree;
 	class DlgContainer *View;
-	GAutoPtr<LThread> Worker;
-	GAutoString Base;
+	LAutoPtr<LThread> Worker;
+	LAutoString Base;
 	
 public:
-	TableLayoutTest(GViewI *par);
+	TableLayoutTest(LViewI *par);
 	~TableLayoutTest();
 	
 	void OnDialog(LgiDialogRes *Dlg);
-	int OnNotify(GViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int Flags);
     GMessage::Param OnEvent(GMessage *m);
 };
 
-class DlgItem : public GTreeItem
+class DlgItem : public LTreeItem
 {
     TableLayoutTest *Wnd;
 	LgiDialogRes *Dlg;
@@ -1516,7 +1517,7 @@ public:
 	}
 };
 
-static bool HasTableLayout(GXmlTag *t)
+static bool HasTableLayout(LXmlTag *t)
 {
 	if (t->IsTag("TableLayout"))
 		return true;
@@ -1528,14 +1529,14 @@ static bool HasTableLayout(GXmlTag *t)
 	return false;
 }
 
-class Lr8Item : public GTreeItem
+class Lr8Item : public LTreeItem
 {
     TableLayoutTest *Wnd;
-	GString File;
-	GAutoPtr<LgiResources> Res;
+	LString File;
+	LAutoPtr<LResources> Res;
 
 public:
-	Lr8Item(TableLayoutTest *w, GAutoPtr<LgiResources> res, char *file)
+	Lr8Item(TableLayoutTest *w, LAutoPtr<LResources> res, char *file)
 	{
 	    Wnd = w;
 		Res = res;
@@ -1566,10 +1567,10 @@ class Lr8Search : public LThread
 {
     TableLayoutTest *Wnd;
 	char *Base;
-	GTree *Tree;
+	LTree *Tree;
 	
 public:
-	Lr8Search(TableLayoutTest *w, char *base, GTree *tree) : LThread("Lr8Search")
+	Lr8Search(TableLayoutTest *w, char *base, LTree *tree) : LThread("Lr8Search")
 	{
 	    Wnd = w;
 		Base = base;
@@ -1587,15 +1588,15 @@ public:
 	
 	int Main()
 	{
-		GArray<const char*> Ext;
-		GArray<char*> Files;
+		LArray<const char*> Ext;
+		LArray<char*> Files;
 		Ext.Add("*.lr8");
 		if (LRecursiveFileSearch(Base, &Ext, &Files))
 		{
 			for (int i=0; i<Files.Length(); i++)
 			{
-            	GAutoPtr<LgiResources> Res;
-    			if (Res.Reset(new LgiResources(Files[i])))
+            	LAutoPtr<LResources> Res;
+    			if (Res.Reset(new LResources(Files[i])))
     			{
 				    List<LgiDialogRes>::I d = Res->GetDialogs();
 				    bool HasTl = false;
@@ -1609,7 +1610,7 @@ public:
 				    }
 				    if (HasTl)
 				    {
-			            GAutoString r = LgiMakeRelativePath(Base, Files[i]);
+			            LAutoString r = LMakeRelativePath(Base, Files[i]);
 			            Tree->Insert(new Lr8Item(Wnd, Res, r));
 				    }
 				}
@@ -1622,10 +1623,10 @@ public:
 	}
 };
 
-class DlgContainer : public GLayout
+class DlgContainer : public LLayout
 {
     LgiDialogRes *Dlg;
-    GRect Size;
+    LRect Size;
 
 public:
     DlgContainer(int id)
@@ -1638,7 +1639,7 @@ public:
         SetPos(Size);
     }
     
-    void OnPaint(GSurface *pDC)
+    void OnPaint(LSurface *pDC)
     {
         pDC->Colour(L_WORKSPACE);
         pDC->Rectangle();
@@ -1653,7 +1654,7 @@ public:
         {
             if (Dlg->GetRes()->LoadDialog(Dlg->Str->Id, this, &Size))
             {
-                GRect r = GetPos();
+                LRect r = GetPos();
                 r.Dimension(Size.X(), Size.Y());
                 SetPos(r);
                 AttachChildren();
@@ -1664,30 +1665,30 @@ public:
     }
 };
 
-TableLayoutTest::TableLayoutTest(GViewI *par)
+TableLayoutTest::TableLayoutTest(LViewI *par)
 {
-	GRect r(0, 0, 1000, 800);
+	LRect r(0, 0, 1000, 800);
 	SetPos(r);
 	SetParent(par);
 	
-	AddView(Tbl = new GTableLayout);
+	AddView(Tbl = new LTableLayout);
 	GLayoutCell *c;
 
 	c = Tbl->GetCell(0, 0, true, 2);
-	c->Add(Msg = new GTextLabel(100, 0, 0, -1, -1, "Searching for files..."));
+	c->Add(Msg = new LTextLabel(100, 0, 0, -1, -1, "Searching for files..."));
 
 	c = Tbl->GetCell(0, 1);
-	c->Add(Tree = new GTree(101, 0, 0, 100, 100));
+	c->Add(Tree = new LTree(101, 0, 0, 100, 100));
 	c = Tbl->GetCell(1, 1);
 	c->Add(View = new DlgContainer(102));
 
 	c = Tbl->GetCell(0, 2, true, 2);
-	c->TextAlign(GCss::AlignRight);
-	c->Add(new GButton(IDOK, 0, 0, -1, -1, "Close"));
+	c->TextAlign(LCss::AlignRight);
+	c->Add(new LButton(IDOK, 0, 0, -1, -1, "Close"));
 
 	char e[MAX_PATH];
 	LGetSystemPath(LSP_APP_INSTALL, e, sizeof(e));
-	LgiMakePath(e, sizeof(e), e, "../../..");
+	LMakePath(e, sizeof(e), e, "../../..");
 	Base.Reset(NewStr(e));
 	
 	Worker.Reset(new Lr8Search(this, Base, Tree));
@@ -1704,7 +1705,7 @@ void TableLayoutTest::OnDialog(LgiDialogRes *Dlg)
         View->OnDialog(Dlg);
 }
 
-int TableLayoutTest::OnNotify(GViewI *Ctrl, int Flags)
+int TableLayoutTest::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{
@@ -1713,7 +1714,7 @@ int TableLayoutTest::OnNotify(GViewI *Ctrl, int Flags)
 			break;
 	}
 	
-	return GDialog::OnNotify(Ctrl, Flags);
+	return LDialog::OnNotify(Ctrl, Flags);
 }
 
 GMessage::Param TableLayoutTest::OnEvent(GMessage *m)
@@ -1724,10 +1725,10 @@ GMessage::Param TableLayoutTest::OnEvent(GMessage *m)
         Msg->Name("Finished.");
         Worker.Reset();
     }
-    return GDialog::OnEvent(m);
+    return LDialog::OnEvent(m);
 }
 
-void OpenTableLayoutTest(GViewI *p)
+void OpenTableLayoutTest(LViewI *p)
 {
 	TableLayoutTest Dlg(p);
 	Dlg.DoModal();

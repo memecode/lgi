@@ -1,5 +1,5 @@
 /*
-	This file is included in both the GVirtualMachinePriv::Execute and GVirtualMachinePriv::Decompile
+	This file is included in both the LVirtualMachinePriv::Execute and LVirtualMachinePriv::Decompile
 	That way the "parsing" of instructions is the same.
 	
 	During decompile the define VM_DECOMP is active.
@@ -10,7 +10,7 @@
 
 #ifdef VM_EXECUTE
 #define Resolve()			&Scope[c.r->Scope][c.r->Index]; c.r++
-#define GResolveRef(nm)		GVariant *nm =
+#define GResolveRef(nm)		LVariant *nm =
 #else
 #define Resolve()			c.r++
 #define GResolveRef(nm)		
@@ -49,7 +49,7 @@ case ICast:
 	uint8_t Type = *c.u8++;
 	#if VM_DECOMP
 	if (Log)
-		Log->Print(" to %s\n", GVariant::TypeToString((GVariantType)Type));
+		Log->Print(" to %s\n", LVariant::TypeToString((LVariantType)Type));
 	#endif
 	#if VM_EXECUTE
 	switch (Type)
@@ -86,14 +86,14 @@ case ICast:
 		}
 		default:
 		{
-			GString s;
+			LString s;
 			s.Printf("%s ICast warning: unknown type %i/%s\n",
 							Code->AddrToSourceRef(CurrentScriptAddress),
 							Var->Type,
-							GVariant::TypeToString(Var->Type));
+							LVariant::TypeToString(Var->Type));
 			if (Log)
 				Log->Write(s, s.Length());
-			if (GVirtualMachine::BreakOnWarning)
+			if (LVirtualMachine::BreakOnWarning)
 				OnException(NULL, -1, CurrentScriptAddress, s);
 			Status = ScriptWarning;
 			break;
@@ -208,7 +208,7 @@ case IPlusEquals:
 	{
 		size_t dlen = strlen(Dst->Str());
 		char *ss;
-		GVariant SrcTmp;
+		LVariant SrcTmp;
 		
 		switch (Src->Type)
 		{
@@ -535,7 +535,7 @@ case IGreaterThanEqual:
 }
 case ICallMethod:
 {
-	GFunc *Meth = *c.fn++;
+	LFunc *Meth = *c.fn++;
 	if (!Meth)
 	{
 		Log->Print(	"%s ICallMethod error: No method struct.\n",
@@ -653,7 +653,7 @@ case ICallScript:
 	Scope[SCOPE_LOCAL] = Locals.AddressOf(LocalsPos);
 	
 	// Put the arguments of the function call into the local array
-	GArray<GVariant*> Arg;
+	LArray<LVariant*> Arg;
 	
 	#else
 	
@@ -703,7 +703,7 @@ case IRet:
 	{
 		StackFrame Sf = Frames[Frames.Length()-1];
 		GVarRef &Ret = Sf.ReturnValue;
-		GVariant *RetVar = &Scope[Ret.Scope][Ret.Index];
+		LVariant *RetVar = &Scope[Ret.Scope][Ret.Index];
 		// LgiTrace("IRet to %i:%i\n", Ret.Scope, Ret.Index);
 		if (Ret.Scope == SCOPE_LOCAL)
 			LgiAssert(Locals.PtrCheck(RetVar));
@@ -768,7 +768,7 @@ case IArrayGet:
 		case GV_LIST:
 		{
 			CheckParam(Var->Value.Lst);
-			GVariant *t = Var->Value.Lst->ItemAt(Idx->CastInt32());
+			LVariant *t = Var->Value.Lst->ItemAt(Idx->CastInt32());
 			if (t)
 			{
 				if (Var == Dst)
@@ -788,14 +788,14 @@ case IArrayGet:
 		case GV_HASHTABLE:
 		{
 			CheckParam(Var->Value.Hash);
-			GVariant *t = (GVariant*)Var->Value.Hash->Find(Idx->CastString());
+			LVariant *t = (LVariant*)Var->Value.Hash->Find(Idx->CastString());
 			if (t) *Dst = *t;
 			else Dst->Empty();
 			break;
 		}
 		case GV_CUSTOM:
 		{
-			GCustomType *T = Var->Value.Custom.Dom;
+			LCustomType *T = Var->Value.Custom.Dom;
 			size_t Sz = T->Sizeof();
 			int Index = Idx->CastInt32();
 
@@ -828,13 +828,13 @@ case IArrayGet:
 		}
 		default:
 		{
-			GString s;
+			LString s;
 			s.Printf("%s IArrayGet warning: Can't array deref variant type %i\n",
 					Code->AddrToSourceRef(CurrentScriptAddress),
 					Var->Type);
 			if (Log)
 				Log->Write(s, s.Length());
-			if (GVirtualMachine::BreakOnWarning)
+			if (LVirtualMachine::BreakOnWarning)
 				OnException(NULL, -1, CurrentScriptAddress, s);
 			Status = ScriptWarning;
 			break;
@@ -863,26 +863,26 @@ case IArraySet:
 		case GV_LIST:
 		{
 			CheckParam(Var->Value.Lst);
-			(*Var->Value.Lst).Insert(new GVariant(*Val), Idx->CastInt32());
+			(*Var->Value.Lst).Insert(new LVariant(*Val), Idx->CastInt32());
 			break;
 		}
 		case GV_HASHTABLE:
 		{
 			CheckParam(Var->Value.Hash);
-			GVariant *Old = (GVariant*)Var->Value.Hash->Find(Idx->CastString());
+			LVariant *Old = (LVariant*)Var->Value.Hash->Find(Idx->CastString());
 			DeleteObj(Old);
-			Var->Value.Hash->Add(Idx->CastString(), new GVariant(*Val));
+			Var->Value.Hash->Add(Idx->CastString(), new LVariant(*Val));
 			break;
 		}
 		default:
 		{
-			GString s;
+			LString s;
 			s.Printf("%s IArraySet warning: Can't dereference type '%s'\n",
 					Code->AddrToSourceRef(CurrentScriptAddress),
-					GVariant::TypeToString(Var->Type));
+					LVariant::TypeToString(Var->Type));
 			if (Log)
 				Log->Write(s, s.Length());
-			if (GVirtualMachine::BreakOnWarning)
+			if (LVirtualMachine::BreakOnWarning)
 				OnException(NULL, -1, CurrentScriptAddress, s);
 			Status = ScriptWarning;
 			break;
@@ -968,7 +968,7 @@ case IDomGet:
 		{
 			case GV_DOM:
 			case GV_STREAM:
-			case GV_GSURFACE:
+			case GV_LSURFACE:
 			{
 				GDom *dom = Dom->CastDom();
 				CheckParam(dom != NULL);
@@ -979,14 +979,14 @@ case IDomGet:
 				{
 					Dst->Empty();
 
-					GString s;
+					LString s;
 					s.Printf("%s IDomGet warning: Unexpected %s member '%s'.\n",
 							Code->AddrToSourceRef(CurrentScriptAddress),
-							GVariant::TypeToString(Dom->Type),
+							LVariant::TypeToString(Dom->Type),
 							sName);
 					if (Log)
 						Log->Write(s, s.Length());
-					if (GVirtualMachine::BreakOnWarning)
+					if (LVirtualMachine::BreakOnWarning)
 						OnException(NULL, -1, CurrentScriptAddress, s);
 					Status = ScriptWarning;
 				}
@@ -1001,14 +1001,14 @@ case IDomGet:
 				if (!Ret)
 				{
 					Dst->Empty();
-					GString s;
+					LString s;
 					s.Printf("%s IDomGet warning: Unexpected %s member '%s'.\n",
 							Code->AddrToSourceRef(CurrentScriptAddress),
-							GVariant::TypeToString(Dom->Type),
+							LVariant::TypeToString(Dom->Type),
 							sName);
 					if (Log)
 						Log->Write(s, s.Length());
-					if (GVirtualMachine::BreakOnWarning)
+					if (LVirtualMachine::BreakOnWarning)
 						OnException(NULL, -1, CurrentScriptAddress, s);
 					Status = ScriptWarning;
 				}
@@ -1016,7 +1016,7 @@ case IDomGet:
 			}
 			case GV_CUSTOM:
 			{
-				GCustomType *Type = Dom->Value.Custom.Dom;
+				LCustomType *Type = Dom->Value.Custom.Dom;
 				if (Type)
 				{
 					int Fld;
@@ -1084,13 +1084,13 @@ case IDomGet:
 					default:
 					{
 						Dst->Empty();
-						GString s;
+						LString s;
 						s.Printf("%s IDomGet warning: Unexpected string member '%s'.\n",
 								Code->AddrToSourceRef(CurrentScriptAddress),
 								sName);
 						if (Log)
 							Log->Write(s, s.Length());
-						if (GVirtualMachine::BreakOnWarning)
+						if (LVirtualMachine::BreakOnWarning)
 							OnException(NULL, -1, CurrentScriptAddress, s);
 						Status = ScriptWarning;
 						break;
@@ -1100,27 +1100,27 @@ case IDomGet:
 			}
 			case GV_NULL:
 			{
-				GString s;
+				LString s;
 				s.Printf("%s IDomGet warning: Can't deref NULL object.\n",
 						Code->AddrToSourceRef(CurrentScriptAddress));
 				if (Log)
 					Log->Write(s, s.Length());
-				if (GVirtualMachine::BreakOnWarning)
+				if (LVirtualMachine::BreakOnWarning)
 					OnException(NULL, -1, CurrentScriptAddress, s);
 				Status = ScriptWarning;
 				break;
 			}
 			default:
 			{
-				GString s;
+				LString s;
 				s.Printf("%s IDomGet warning: Unexpected type %s (Src=%s:%i IP=0x%x).\n",
 						Code->AddrToSourceRef(CurrentScriptAddress),
-						GVariant::TypeToString(Dom->Type),
+						LVariant::TypeToString(Dom->Type),
 						_FL,
 						CurrentScriptAddress);
 				if (Log)
 					Log->Write(s, s.Length());
-				if (GVirtualMachine::BreakOnWarning)
+				if (LVirtualMachine::BreakOnWarning)
 					OnException(NULL, -1, CurrentScriptAddress, s);
 				Status = ScriptWarning;
 				break;
@@ -1164,7 +1164,7 @@ case IDomSet:
 		case GV_DOM:
 		// case GV_GFILE:
 		case GV_STREAM:
-		case GV_GSURFACE:
+		case GV_LSURFACE:
 		{
 			GDom *dom = Dom->CastDom();
 			CheckParam(dom != NULL);
@@ -1174,7 +1174,7 @@ case IDomSet:
 				if (Log)
 					Log->Print("%s IDomSet warning: Unexpected %s member '%s'.\n",
 								Code->AddrToSourceRef(CurrentScriptAddress),
-								GVariant::TypeToString(Dom->Type),
+								LVariant::TypeToString(Dom->Type),
 								sName);
 				Status = ScriptWarning;
 			}
@@ -1189,7 +1189,7 @@ case IDomSet:
 				if (Log)
 					Log->Print("%s IDomSet warning: Unexpected %s member '%s'.\n",
 								Code->AddrToSourceRef(CurrentScriptAddress),
-								GVariant::TypeToString(Dom->Type),
+								LVariant::TypeToString(Dom->Type),
 								sName);
 				Status = ScriptWarning;
 			}
@@ -1197,7 +1197,7 @@ case IDomSet:
 		}
 		case GV_CUSTOM:
 		{
-			GCustomType *Type = Dom->Value.Custom.Dom;
+			LCustomType *Type = Dom->Value.Custom.Dom;
 			if (Type)
 			{
 				int Fld;
@@ -1269,7 +1269,7 @@ case IDomSet:
 			if (Log)
 				Log->Print("%s IDomSet warning: Unexpected type %s.\n",
 							Code->AddrToSourceRef(CurrentScriptAddress),
-							GVariant::TypeToString(Dom->Type));
+							LVariant::TypeToString(Dom->Type));
 			Status = ScriptWarning;
 			break;
 		}
@@ -1306,9 +1306,9 @@ case IDomCall:
 	{
 		#define DEBUG_CUSTOM_METHOD_CALL	1
 		
-		GCustomType *t = Dom->Value.Custom.Dom;
+		LCustomType *t = Dom->Value.Custom.Dom;
 		CheckParam(t);
-		GCustomType::Method *m = t->GetMethod(sName);
+		LCustomType::Method *m = t->GetMethod(sName);
 		CheckParam(m);
 		CheckParam(m->Params.Length() == ArgCount);
 		
@@ -1329,7 +1329,7 @@ case IDomCall:
 		size_t i = LocalsBase;
 		Locals[i++] = *Dom; // this pointer...
 		#if DEBUG_CUSTOM_METHOD_CALL
-		GString s = Locals[i-1].ToString();
+		LString s = Locals[i-1].ToString();
 		LgiTrace("This=%s, ", s.Get());
 		#endif
 		size_t end = i + ArgCount;
@@ -1355,7 +1355,7 @@ case IDomCall:
 		break;
 	}	
 
-	GArray<GVariant*> Arg;
+	LArray<LVariant*> Arg;
 	Arg.Length(ArgCount);
 	for (int i=0; i<ArgCount; i++)
 	{
@@ -1365,13 +1365,13 @@ case IDomCall:
 	GDomProperty p = LgiStringToDomProp(sName);
 	if (p == ObjType)
 	{
-		*Dst = GVariant::TypeToString(Dom->Type);
+		*Dst = LVariant::TypeToString(Dom->Type);
 	}
 	else switch (Dom->Type)
 	{
 		case GV_DOM:
 		case GV_STREAM:
-		case GV_GSURFACE:
+		case GV_LSURFACE:
 		{
 			GDom *dom = Dom->CastDom();
 			CheckParam(dom);
@@ -1419,7 +1419,7 @@ case IDomCall:
 					{
 						int Index = Arg.Length() > 1 ? Arg[1]->CastInt32() : -1;
 
-						GVariant *v = new GVariant;
+						LVariant *v = new LVariant;
 						*v = *Arg[0];
 						Dom->Value.Lst->Insert(v, Index);
 					}
@@ -1429,11 +1429,11 @@ case IDomCall:
 				{
 					for (unsigned i=0; i<Arg.Length(); i++)
 					{
-						GVariant *Idx = Arg[i];
+						LVariant *Idx = Arg[i];
 						if (Idx)
 						{
 							int32 n = Arg[i]->CastInt32();
-							GVariant *Elem = Dom->Value.Lst->ItemAt(n);
+							LVariant *Elem = Dom->Value.Lst->ItemAt(n);
 							if (Elem)
 							{
 								Dom->Value.Lst->Delete(Elem);
@@ -1458,8 +1458,8 @@ case IDomCall:
 				}
 				case ContainerSort:
 				{
-					GVariant *Param = Arg.Length() > 0 ? Arg[0] : NULL;
-					Dom->Value.Lst->Sort(GVariantCmp, (NativeInt)Param);
+					LVariant *Param = Arg.Length() > 0 ? Arg[0] : NULL;
+					Dom->Value.Lst->Sort(LVariantCmp, (NativeInt)Param);
 					break;
 				}
 				default:
@@ -1494,7 +1494,7 @@ case IDomCall:
 						char *Key = Arg[1]->Str();
 						if (Key)
 						{
-							GVariant *v = new GVariant;
+							LVariant *v = new LVariant;
 							*v = *Arg[0];
 							Dom->Value.Hash->Add(Key, v);
 						}
@@ -1509,7 +1509,7 @@ case IDomCall:
 						char *Key = Arg[0]->Str();
 						if (Key)
 						{
-							GVariant *v = (GVariant*) Dom->Value.Hash->Find(Key);
+							LVariant *v = (LVariant*) Dom->Value.Hash->Find(Key);
 							if (v)
 							{
 								Dom->Value.Hash->Delete(Key);
@@ -1579,14 +1579,14 @@ case IDomCall:
 					{
 						case GV_LIST:
 						{
-							GStringPipe p(256);
-							List<GVariant> *Lst = Arg[0]->Value.Lst;
+							LStringPipe p(256);
+							List<LVariant> *Lst = Arg[0]->Value.Lst;
 							const char *Sep = Dom->CastString();
 							auto It = Lst->begin();
-							GVariant *v = *It;
+							LVariant *v = *It;
 							if (v)
 							{
-								GVariant Tmp = *v;
+								LVariant Tmp = *v;
 								p.Print("%s", Tmp.CastString());
 								while ((v = *(++It)))
 								{
@@ -1615,7 +1615,7 @@ case IDomCall:
 						break;
 					}
 					
-					GVariant Tmp;
+					LVariant Tmp;
 					if (Dst == Dom)
 					{
 						Tmp = *Dom;
@@ -1636,7 +1636,7 @@ case IDomCall:
 						if (!next)
 							break;
 						
-						GVariant *v = new GVariant;
+						LVariant *v = new LVariant;
 						v->OwnStr(NewStr(c, next - c));
 						Dst->Value.Lst->Insert(v);
 						
@@ -1645,7 +1645,7 @@ case IDomCall:
 
 					if (c && *c)
 					{
-						GVariant *v = new GVariant;
+						LVariant *v = new LVariant;
 						v->OwnStr(NewStr(c));
 						Dst->Value.Lst->Insert(v);
 					}
@@ -1660,7 +1660,7 @@ case IDomCall:
 						break;
 					}
 					
-					GVariant Tmp;
+					LVariant Tmp;
 					if (Dst == Dom)
 					{
 						Tmp = *Dom;
@@ -1680,7 +1680,7 @@ case IDomCall:
 						while (*next && !strchr(Sep, *next))
 							next++;
 						
-						GVariant *v = new GVariant;
+						LVariant *v = new LVariant;
 						v->OwnStr(NewStr(c, next - c));
 						Dst->Add(v);
 						
@@ -1689,7 +1689,7 @@ case IDomCall:
 					}
 
 					if (c && *c)
-						Dst->Add(new GVariant(c));
+						Dst->Add(new LVariant(c));
 					break;
 				}								
 				case StrFind:
@@ -1842,7 +1842,7 @@ case IDomCall:
 		}
 		default:
 		{
-			const char *Type = GVariant::TypeToString(Dom->Type);
+			const char *Type = LVariant::TypeToString(Dom->Type);
 			char t[32];
 			if (!Type)
 			{
@@ -1866,7 +1866,7 @@ case IDomCall:
 
 	#else
 
-	GVariant *Count = NULL;
+	LVariant *Count = NULL;
 	switch (c.r->Scope)
 	{
 		case SCOPE_GLOBAL:

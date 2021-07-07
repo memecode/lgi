@@ -13,26 +13,29 @@
 #include <stdlib.h>
 #include "LgiResEdit.h"
 #include "LgiRes_String.h"
-#include "GToken.h"
-#include "GVariant.h"
-#include "GTextLabel.h"
-#include "GCombo.h"
-#include "GButton.h"
-#include "GClipBoard.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/ClipBoard.h"
+#include "lgi/common/ToolBar.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/StatusBar.h"
 #include "resdefs.h"
 
 ////////////////////////////////////////////////////////////////////////////
-LangDlg::LangDlg(GView *parent, List<GLanguage> &l, int Init)
+LangDlg::LangDlg(LView *parent, List<GLanguage> &l, int Init)
 {
 	Lang = 0;
 	SetParent((parent) ? parent : MainWnd);
-	GRect r(0, 0, 260, 90);
+	LRect r(0, 0, 260, 90);
 	SetPos(r);
 	MoveToCenter();
 	Name("Language");
 
-	Children.Insert(new GTextLabel(-1, 10, 10, -1, -1, "Select language:"));
-	Children.Insert(Sel = new GCombo(-1, 20, 30, 150, 20, ""));
+	Children.Insert(new LTextLabel(-1, 10, 10, -1, -1, "Select language:"));
+	Children.Insert(Sel = new LCombo(-1, 20, 30, 150, 20, ""));
 	if (Sel)
 	{
 		if (l.Length() > 40)
@@ -52,11 +55,11 @@ LangDlg::LangDlg(GView *parent, List<GLanguage> &l, int Init)
 		}
 	}
 
-	Children.Insert(new GButton(IDOK, 180, 5, 60, 20, "Ok"));
-	Children.Insert(new GButton(IDCANCEL, 180, 30, 60, 20, "Cancel"));
+	Children.Insert(new LButton(IDOK, 180, 5, 60, 20, "Ok"));
+	Children.Insert(new LButton(IDCANCEL, 180, 30, 60, 20, "Cancel"));
 }
 
-int LangDlg::OnNotify(GViewI *Ctrl, int Flags)
+int LangDlg::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{
@@ -374,7 +377,7 @@ bool ResString::Test(ErrorCollection *e)
 	return Status;
 }
 
-bool ResString::Read(GXmlTag *t, SerialiseContext &Ctx)
+bool ResString::Read(LXmlTag *t, SerialiseContext &Ctx)
 {
 	if (!t || !t->IsTag("string"))
 	{
@@ -421,7 +424,7 @@ bool ResString::Read(GXmlTag *t, SerialiseContext &Ctx)
 
 	for (int i=0; i<t->Attr.Length(); i++)
 	{
-		GXmlAttr *v = &t->Attr[i];
+		LXmlAttr *v = &t->Attr[i];
 		if (v->GetName())
 		{
 			GLanguage *Lang = GFindLang(v->GetName());
@@ -459,7 +462,7 @@ bool ResString::Read(GXmlTag *t, SerialiseContext &Ctx)
 	return true;
 }
 
-bool ResString::Write(GXmlTag *t, SerialiseContext &Ctx)
+bool ResString::Write(LXmlTag *t, SerialiseContext &Ctx)
 {
 	t->SetTag("String");
 	t->SetAttr("Ref", Ref);
@@ -674,7 +677,7 @@ const char *ResString::GetText(int i)
 	return NULL;
 }
 
-void ResString::OnMouseClick(GMouse &m)
+void ResString::OnMouseClick(LMouse &m)
 {
 	if (m.IsContextMenu())
 	{
@@ -685,7 +688,7 @@ void ResString::OnMouseClick(GMouse &m)
 			char *Clip;
 
 			{
-				GClipBoard c(Parent);
+				LClipBoard c(Parent);
 				Clip = c.Text();
 				if (Clip)
 					PasteTranslations = strstr(Clip, TranslationStrMagic);
@@ -799,7 +802,7 @@ void ResString::CopyText()
 {
 	if (Items.Length() > 0)
 	{
-		GStringPipe p;
+		LStringPipe p;
 
 		p.Push(TranslationStrMagic);
 		p.Push(EOL_SEQUENCE);
@@ -815,7 +818,7 @@ void ResString::CopyText()
 		char *All = p.NewStr();
 		if (All)
 		{
-			GClipBoard Clip(Parent);
+			LClipBoard Clip(Parent);
 
 			Clip.Text(All);
 
@@ -834,7 +837,7 @@ void ResString::CopyText()
 
 void ResString::PasteText()
 {
-	GClipBoard c(Parent);
+	LClipBoard c(Parent);
 	
 	char *Clip = 0;
 	char16 *w = c.TextW();
@@ -983,7 +986,7 @@ int ResStringCompareFunc(LListItem *a, LListItem *b, ssize_t Data)
 	return -1;
 }
 
-void ResStringGroup::OnColumnClick(int Col, GMouse &m)
+void ResStringGroup::OnColumnClick(int Col, LMouse &m)
 {
 	if (SortCol == Col)
 	{
@@ -1004,12 +1007,12 @@ void ResStringGroup::OnColumnClick(int Col, GMouse &m)
 	}
 }
 
-void ResStringGroup::OnItemClick(LListItem *Item, GMouse &m)
+void ResStringGroup::OnItemClick(LListItem *Item, LMouse &m)
 {
 	LList::OnItemClick(Item, m);
 }
 
-void ResStringGroup::OnItemSelect(GArray<LListItem*> &Items)
+void ResStringGroup::OnItemSelect(LArray<LListItem*> &Items)
 {
 	if (IsAttached())
 	{
@@ -1353,7 +1356,7 @@ void ResStringGroup::Paste()
 {
 }
 
-GView *ResStringGroup::CreateUI()
+LView *ResStringGroup::CreateUI()
 {
 	return Ui = new ResStringUi(this);
 }
@@ -1373,7 +1376,7 @@ bool ResStringGroup::Test(ErrorCollection *e)
 	return Status;
 }
 
-bool ResStringGroup::Read(GXmlTag *t, SerialiseContext &Ctx)
+bool ResStringGroup::Read(LXmlTag *t, SerialiseContext &Ctx)
 {
 	bool Status = false;
 
@@ -1429,7 +1432,7 @@ bool ResStringGroup::Read(GXmlTag *t, SerialiseContext &Ctx)
 	return Status;
 }
 
-bool ResStringGroup::Write(GXmlTag *t, SerialiseContext &Ctx)
+bool ResStringGroup::Write(LXmlTag *t, SerialiseContext &Ctx)
 {
 	bool Status = true;
 
@@ -1443,7 +1446,7 @@ bool ResStringGroup::Write(GXmlTag *t, SerialiseContext &Ctx)
 		ResString *s = dynamic_cast<ResString*>(i);
 		if (s && (s->Define || s->Items.Length() > 0))
 		{
-			GXmlTag *c = new GXmlTag;
+			LXmlTag *c = new LXmlTag;
 			if (c && s->Write(c, Ctx))
 			{
 				t->InsertTag(c);
@@ -1485,12 +1488,12 @@ void ResStringGroup::OnCommand(int Cmd)
 	{
 		case IDM_IMPORT:
 		{
-			GFileSelect Select;
+			LFileSelect Select;
 			Select.Parent(AppWindow);
 			Select.Type("Text", "*.txt");
 			if (Select.Open())
 			{
-				GFile F;
+				LFile F;
 				if (F.Open(Select.Name(), O_READ))
 				{
 					SerialiseContext Ctx;
@@ -1510,12 +1513,12 @@ void ResStringGroup::OnCommand(int Cmd)
 		}
 		case IDM_EXPORT:
 		{
-			GFileSelect Select;
+			LFileSelect Select;
 			Select.Parent(AppWindow);
 			Select.Type("Text", "*.txt");
 			if (Select.Save())
 			{
-				GFile F;
+				LFile F;
 				if (F.Open(Select.Name(), O_WRITE))
 				{
 					F.SetSize(0);
@@ -1531,7 +1534,7 @@ void ResStringGroup::OnCommand(int Cmd)
 	}
 }
 
-void ResStringGroup::Create(GXmlTag *load, SerialiseContext *ctx)
+void ResStringGroup::Create(LXmlTag *load, SerialiseContext *ctx)
 {
 	if (load)
 	{
@@ -1559,17 +1562,17 @@ ResStringUi::~ResStringUi()
 	}
 }
 
-void ResStringUi::OnPaint(GSurface *pDC)
+void ResStringUi::OnPaint(LSurface *pDC)
 {
-	GRegion Client(0, 0, X()-1, Y()-1);
+	LRegion Client(0, 0, X()-1, Y()-1);
 	for (auto w: Children)
 	{
-		GRect r = w->GetPos();
+		LRect r = w->GetPos();
 		Client.Subtract(&r);
 	}
 
 	pDC->Colour(L_MED);
-	for (GRect *r = Client.First(); r; r = Client.Next())
+	for (LRect *r = Client.First(); r; r = Client.Next())
 	{
 		pDC->Rectangle(r);
 	}
@@ -1577,12 +1580,12 @@ void ResStringUi::OnPaint(GSurface *pDC)
 
 void ResStringUi::PourAll()
 {
-	GRegion Client(GetClient());
-	GRegion Update;
+	LRegion Client(GetClient());
+	LRegion Update;
 
 	for (auto v: Children)
 	{
-		GRect OldPos = v->GetPos();
+		LRect OldPos = v->GetPos();
 		Update.Union(&OldPos);
 
 		if (v->Pour(Client))
@@ -1621,7 +1624,7 @@ void ResStringUi::OnPosChange()
 
 void ResStringUi::OnCreate()
 {
-	Tools = new GToolBar;
+	Tools = new LToolBar;
 	if (Tools)
 	{
 		auto FileName = LFindFile("_StringIcons.gif");
@@ -1642,7 +1645,7 @@ void ResStringUi::OnCreate()
 		}
 	}
 
-	Status = new GStatusBar;
+	Status = new LStatusBar;
 	if (Status)
 	{
 		Status->Attach(this);
@@ -1676,5 +1679,5 @@ GMessage::Result ResStringUi::OnEvent(GMessage *Msg)
 		}
 	}
 
-	return GView::OnEvent(Msg);
+	return LView::OnEvent(Msg);
 }

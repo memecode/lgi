@@ -1,16 +1,16 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "Lgi.h"
-#include "GSkinEngine.h"
-#include "GPath.h"
-#include "GButton.h"
-#include "GCombo.h"
-#include "GCheckBox.h"
-#include "GRadioGroup.h"
-#include "GDisplayString.h"
-#include "GCssTools.h"
-#include "LStringLayout.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/SkinEngine.h"
+#include "lgi/common/Path.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/RadioGroup.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/CssTools.h"
+#include "lgi/common/StringLayout.h"
 
 #if defined WINNATIVE
 	#define BTN_TEXT_OFFSET_Y	-1
@@ -40,18 +40,18 @@
 
 #define CUSTOM_COLOURS			0
 
-class GelSkin : public GSkinEngine
+class GelSkin : public LSkinEngine
 {
-	GApp *App;
-	GColour c80;
-	GColour c160;
-	GColour c172;
-	GColour c222;
-	GColour c232;
-	GColour c253;
-	GColour c255;
-	GMemDC *CheckBox[Btn_Max];
-	GMemDC *RadioBtn[Btn_Max];
+	LApp *App;
+	LColour c80;
+	LColour c160;
+	LColour c172;
+	LColour c222;
+	LColour c232;
+	LColour c253;
+	LColour c255;
+	LMemDC *CheckBox[Btn_Max];
+	LMemDC *RadioBtn[Btn_Max];
 
 	/*
 	COLOUR LgiLighten(COLOUR c32, int Amount)
@@ -73,20 +73,20 @@ class GelSkin : public GSkinEngine
 	}
 	*/
 
-	GColour Tint(GColour back, double amt)
+	LColour Tint(LColour back, double amt)
 	{
 		bool Darken = back.GetGray() >= 128;
 		// auto ff = (float)(1.0f - amt);
-		GColour Mixer = Darken ? GColour::Black : GColour::White;
+		LColour Mixer = Darken ? LColour::Black : LColour::White;
 		// printf("Darken=%i, Mixer=%s, back=%s %f\n", Darken, Mixer.GetStr(), back.GetStr(), ff);
 		return back.Mix(Mixer, (float)(1.0f - amt));
 	}
 
-	void FillPath(GPath *Path, GSurface *pDC, GColour Back, bool Down, bool Enabled = true)
+	void FillPath(LPath *Path, LSurface *pDC, LColour Back, bool Down, bool Enabled = true)
 	{
 		if (pDC)
 		{
-			GRect r(0, 0, pDC->X()-1, pDC->Y()-1);
+			LRect r(0, 0, pDC->X()-1, pDC->Y()-1);
 
 			auto Top = Tint(Back, 253.0 / 240.0);
 			auto Mid = Tint(Back, 232.0 / 240.0);
@@ -102,14 +102,14 @@ class GelSkin : public GSkinEngine
 			}
 			
 			// Draw background
-			GPath e;
+			LPath e;
 			e.Rectangle(r.x1, r.y1, r.x2+1, r.y2+1);
 			
 			LPointF c1(r.x1, r.y1);
 			LPointF d1(r.x1, r.y2+1);
 			if (Down)
 			{
-				GBlendStop s1[] =
+				LBlendStop s1[] =
 				{
 					{0.0, Rgba32(192, 192, 192, 255)},
 					{0.1, Top.c32()},
@@ -117,19 +117,19 @@ class GelSkin : public GSkinEngine
 					{0.601, Mid2.c32()},
 					{1.0, Bot.c32()},
 				};					
-				GLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
+				LLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
 				e.Fill(pDC, b1);
 			}
 			else
 			{
-				GBlendStop s1[] =
+				LBlendStop s1[] =
 				{
 					{0.0, Top.c32()},
 					{0.5, Mid.c32()},
 					{0.501, Mid2.c32()},
 					{1.0, Bot.c32()},
 				};					
-				GLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
+				LLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
 				e.Fill(pDC, b1);
 			}
 
@@ -141,7 +141,7 @@ class GelSkin : public GSkinEngine
 		}
 	}
 	
-	void DrawBtn(GSurface *pDC, GRect &r, GColour Back, bool Down, bool Enabled, bool Default = false)
+	void DrawBtn(LSurface *pDC, LRect &r, LColour Back, bool Down, bool Enabled, bool Default = false)
 	{
 		if (!pDC)
 			return;
@@ -150,7 +150,7 @@ class GelSkin : public GSkinEngine
 		
 		pDC->Colour(Base);
 		pDC->Rectangle(&r);
-		pDC->Colour(GColour(96, 96, 96));
+		pDC->Colour(LColour(96, 96, 96));
 		if (Down)
 		{
 			pDC->Line(r.x1, r.y1, r.x2, r.y1);
@@ -164,22 +164,22 @@ class GelSkin : public GSkinEngine
 		
 		#else
 			
-		GRect Client = r;
+		LRect Client = r;
 		{
 			// Edge
-			GPath e;
+			LPath e;
 			LRectF r(Client);
 			// r.y2++;
 			e.RoundRect(r, 6);
 		
 			COLOUR EdgeColour = Default ? Rgba32(40, 40, 40, 255) : Rgba32(114, 114, 114, 255);
-			GSolidBrush b(EdgeColour);
+			LSolidBrush b(EdgeColour);
 			e.Fill(pDC, b);
 		}
 
 		{
 			// Border
-			GPath e;
+			LPath e;
 			LRectF r(Client);
 			// r.y2++;
 			int Resize = Default ? 2 : 1;
@@ -192,10 +192,10 @@ class GelSkin : public GSkinEngine
 			e.RoundRect(r, 6 - Resize);
 
 			// Fill
-			GColour Top = Tint(Back, 253.0 / 240.0);
-			GColour Mid = Tint(Back, 232.0 / 240.0);
-			GColour Mid2 = Tint(Back, 222.0 / 240.0);
-			GColour Bot = Tint(Back, 255.0 / 240.0);
+			LColour Top = Tint(Back, 253.0 / 240.0);
+			LColour Mid = Tint(Back, 232.0 / 240.0);
+			LColour Mid2 = Tint(Back, 222.0 / 240.0);
+			LColour Bot = Tint(Back, 255.0 / 240.0);
 			
 			if (!Enabled)
 			{
@@ -210,7 +210,7 @@ class GelSkin : public GSkinEngine
 			LPointF d1(r.x1, r.y2);
 			if (Down)
 			{
-				GBlendStop s1[] =
+				LBlendStop s1[] =
 				{
 					{0.0, Rgba32(192, 192, 192, 255)},
 					{0.1, Top.c32()},
@@ -218,19 +218,19 @@ class GelSkin : public GSkinEngine
 					{0.601, Tint(Mid2, 230.0/240.0).c32()},
 					{1.0, Tint(Bot, 230.0/240.0).c32()},
 				};					
-				GLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
+				LLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
 				e.Fill(pDC, b1);
 			}
 			else
 			{
-				GBlendStop s1[] =
+				LBlendStop s1[] =
 				{
 					{0.0, Top.c32()},
 					{0.5, Mid.c32()},
 					{0.501, Mid2.c32()},
 					{1.0, Bot.c32()},
 				};					
-				GLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
+				LLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
 				e.Fill(pDC, b1);
 			}
 
@@ -239,7 +239,7 @@ class GelSkin : public GSkinEngine
 				Round = 0.6;
 				
 			int Sa = Down ? 128 : 50;
-			GBlendStop s3[] =
+			LBlendStop s3[] =
 			{
 				{Round, GREY32(0)},
 				{1.0, GREY32(Sa)},
@@ -248,20 +248,20 @@ class GelSkin : public GSkinEngine
 			// Rounded corners
 			LPointF c3(r.x1 + (r.X()/2), r.y1 + (r.Y()/2));
 			LPointF d3(r.x1, r.y1);
-			GRadialBlendBrush b3(c3, d3, CountOf(s3), s3);
+			LRadialBlendBrush b3(c3, d3, CountOf(s3), s3);
 			e.Fill(pDC, b3);
 		}
 		
 		#endif
 	}
 
-	GMemDC *DrawCtrl(GViewI *Ctrl, GRect *Sz, int Flags, bool Round)
+	LMemDC *DrawCtrl(LViewI *Ctrl, LRect *Sz, int Flags, bool Round)
 	{
-		GMemDC *Mem = new GMemDC;
+		LMemDC *Mem = new LMemDC;
 		if (Mem && Mem->Create(Sz ? Sz->X() : 14, Sz ? Sz->Y() : 14, OsDefaultCs))
 		{
 			// blank out background
-			GColour Back = Ctrl->GetGView()->StyleColour(GCss::PropBackgroundColor, LColour(L_MED));
+			LColour Back = Ctrl->GetGView()->StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 			Mem->Colour(Back);
 			Mem->Rectangle();
 			
@@ -276,7 +276,7 @@ class GelSkin : public GSkinEngine
 			{
 				// draw sunken border
 				LRectF r = Box;
-				GPath p;
+				LPath p;
 				if (Round)
 					p.Circle(Center, Radius);
 				else
@@ -284,12 +284,12 @@ class GelSkin : public GSkinEngine
 				
 				// gradient from 169,169,169 at the top through to 225,225,225
 				LPointF a(0, 0), b(0, 15);
-				GBlendStop s[] =
+				LBlendStop s[] =
 				{
 					{0, c172.c32()},
 					{1, c253.c32()}
 				};
-				GLinearBlendBrush c(a, b, 2, s);
+				LLinearBlendBrush c(a, b, 2, s);
 				p.Fill(Mem, c);
 			}
 			
@@ -298,7 +298,7 @@ class GelSkin : public GSkinEngine
 				// draw button center
 				LRectF r = Box;
 				r.Size(CHECK_BORDER+1, CHECK_BORDER+1);
-				GPath p;
+				LPath p;
 				if (Round)
 					p.Circle(Center, r.X()/2);
 				else
@@ -307,18 +307,18 @@ class GelSkin : public GSkinEngine
 				if (Enabled)
 				{
 					LPointF a(0, r.y1), b(0, r.y2);
-					GBlendStop s[] =
+					LBlendStop s[] =
 					{
 						{1.0/15.0, c255.c32()},
 						{1.0/14.0, c253.c32()},
 						{1, c232.c32()}
 					};
-					GLinearBlendBrush c(a, b, CountOf(s), s);
+					LLinearBlendBrush c(a, b, CountOf(s), s);
 					p.Fill(Mem, c);
 				}
 				else
 				{
-					GSolidBrush c(LColour(L_MED));
+					LSolidBrush c(LSysColour(L_MED));
 					p.Fill(Mem, c);
 				}
 			}
@@ -331,7 +331,7 @@ class GelSkin : public GSkinEngine
 				LPointF Cntr = Center;
 				Cntr.y = Cntr.y + 1;
 				
-				GPath p;
+				LPath p;
 				if (Round)
 					p.Circle(Cntr, r.X()/2);
 				else
@@ -342,7 +342,7 @@ class GelSkin : public GSkinEngine
 				else
 					p.RoundRect(r, CHECK_RADIUS-1);
 				
-				GSolidBrush c(LColour(L_LIGHT));
+				LSolidBrush c(LSysColour(L_LIGHT));
 				p.Fill(Mem, c);
 			}
 
@@ -350,7 +350,7 @@ class GelSkin : public GSkinEngine
 				// draw button outline
 				LRectF r = Box;
 				r.Size(CHECK_BORDER, CHECK_BORDER);
-				GPath p;
+				LPath p;
 				if (Round)
 					p.Circle(Center, r.X()/2);
 				else
@@ -361,7 +361,7 @@ class GelSkin : public GSkinEngine
 				else
 					p.RoundRect(r, CHECK_RADIUS-1);
 				
-				GSolidBrush c(Enabled ? c80 : c160);
+				LSolidBrush c(Enabled ? c80 : c160);
 				p.Fill(Mem, c);
 			}
 			
@@ -378,7 +378,7 @@ class GelSkin : public GSkinEngine
 				double A = r.X() / 6;
 				double B = (r.X() / 2) - A;
 
-				GPath p;
+				LPath p;
 				if (Round)
 				{
 					p.Circle(Center, r.X()/3);
@@ -404,7 +404,7 @@ class GelSkin : public GSkinEngine
 					p.LineTo(r.x1, r.y1);
 				}
 				
-				GSolidBrush c(Enabled ? c80 : c160);
+				LSolidBrush c(Enabled ? c80 : c160);
 				p.Fill(Mem, c);
 			}
 		}
@@ -412,10 +412,10 @@ class GelSkin : public GSkinEngine
 		return Mem;
 	}
 
-	void DrawText(GSkinState *State, int x, int y, GRect &rcFill, bool Enabled, GView *Ctrl, GCssTools &Tools)
+	void DrawText(LSkinState *State, int x, int y, LRect &rcFill, bool Enabled, LView *Ctrl, LCssTools &Tools)
 	{
-		GCss::ColorDef CssFore, CssBack;
-		GColour Fore = Tools.GetFore(), Back = Tools.GetBack(), Light, Low;
+		LCss::ColorDef CssFore, CssBack;
+		LColour Fore = Tools.GetFore(), Back = Tools.GetBack(), Light, Low;
 
 		if (!Enabled)
 		{
@@ -423,24 +423,24 @@ class GelSkin : public GSkinEngine
 			Low = LColour(L_LOW);
 		}
 
-		GRegion Rgn;
+		LRegion Rgn;
 		Rgn = rcFill;
-		GArray<GDisplayString*> *Text = State->AllText();
-		GSurface *pDC = State->pScreen;
+		LArray<LDisplayString*> *Text = State->AllText();
+		LSurface *pDC = State->pScreen;
 		if (Text && Text->Length() > 0 && rcFill.X() > 3)
 		{
-			GRect Bounds;
+			LRect Bounds;
 			for (unsigned i=0; i<Text->Length(); i++)
 			{
 				LLayoutString *t = dynamic_cast<LLayoutString*>((*Text)[i]);
 				if (!t)
 					break;
-				GRect c;
+				LRect c;
 				c.ZOff(t->X() - 1, t->Y() - 1);
-				c.Offset(x + (t->Fx >> GDisplayString::FShift), y + t->y);
+				c.Offset(x + (t->Fx >> LDisplayString::FShift), y + t->y);
 				Rgn.Subtract(&c);
 				
-				GFont *f = t->GetFont();
+				LFont *f = t->GetFont();
 				if (Enabled)
 				{
 					f->Colour(Fore, Back);
@@ -476,20 +476,20 @@ class GelSkin : public GSkinEngine
 		if (Back.IsValid())
 		{
 			pDC->Colour(Back);
-			for (GRect *rc = Rgn.First(); rc; rc = Rgn.Next())
+			for (LRect *rc = Rgn.First(); rc; rc = Rgn.Next())
 				pDC->Rectangle(rc);
 		}
 	}
 
 public:
-	GelSkin(GApp *a)
+	GelSkin(LApp *a)
 	{
 		// printf("Skin @ %i bits\n", GdcD->GetBits());
 		App = a;
 		ZeroObj(CheckBox);
 		ZeroObj(RadioBtn);
 
-		GColour Med = LColour(L_MED);
+		LColour Med = LColour(L_MED);
 		double Nominal = 240.0;
 		c80 = Tint(Med, 80.0/Nominal);
 		c160 = Tint(Med, 160.0/Nominal);
@@ -584,9 +584,9 @@ public:
 	}
 	#endif
 	
-	void OnPaint_GButton(GButton *Ctrl, GSkinState *State)
+	void OnPaint_LButton(LButton *Ctrl, LSkinState *State)
 	{
-		GMemDC Mem;
+		LMemDC Mem;
 		if (!Mem.Create(Ctrl->X(), Ctrl->Y(), OsDefaultCs))
 		{
 			State->pScreen->Colour(Rgb24(255, 0, 255), 24);
@@ -599,14 +599,14 @@ public:
 			Ctrl->SetFont(SysBold);
 
 		// Background
-		GCssTools Tools(Ctrl->GetCss(), Ctrl->GetFont());
-		GColour DefaultBack(L_HIGH);
-		GColour &Fore = Tools.GetFore(), &Back = Tools.GetBack(&DefaultBack);
-		GColour NoPaint(LColour(L_MED));
+		LCssTools Tools(Ctrl->GetCss(), Ctrl->GetFont());
+		LColour DefaultBack(L_HIGH);
+		LColour &Fore = Tools.GetFore(), &Back = Tools.GetBack(&DefaultBack);
+		LColour NoPaint(LSysColour(L_MED));
 		if (Ctrl->GetCss())
 		{
-			GCss::ColorDef np = Ctrl->GetCss()->NoPaintColor();
-			if (np.Type == GCss::ColorRgb)
+			LCss::ColorDef np = Ctrl->GetCss()->NoPaintColor();
+			if (np.Type == LCss::ColorRgb)
 				NoPaint.Set(np.Rgb32, 32);
 			else
 				NoPaint.Empty();
@@ -618,7 +618,7 @@ public:
 			auto p = Ctrl->GetParent();
 			NoPaint = LColour(L_MED);
 			if (p) // Use the parent's background?
-				NoPaint = p->GetGView()->StyleColour(GCss::PropBackgroundColor, NoPaint);
+				NoPaint = p->GetGView()->StyleColour(LCss::PropBackgroundColor, NoPaint);
 		}
 		#endif
 		if (NoPaint.IsValid())
@@ -634,9 +634,9 @@ public:
 				Ctrl->Enabled(),
 				Ctrl->Default());
 		
-		GSurface *Out = &Mem;
+		LSurface *Out = &Mem;
 		
-		GArray<GDisplayString*> *Txt = State->AllText();
+		LArray<LDisplayString*> *Txt = State->AllText();
 
 		int ContentX = 0;
 		int SpacingPx = 4;
@@ -666,16 +666,16 @@ public:
 		}
 		if (Txt && Txt->Length() > 0)
 		{
-			GDisplayString *First = (*Txt)[0];
+			LDisplayString *First = (*Txt)[0];
 			int sx = MaxTxt, sy = (int) Txt->Length() * First->Y();
 			int ty = (Ctrl->Y()-sy) >> 1;
 
-			GFont *f = First->GetFont();
+			LFont *f = First->GetFont();
 			f->Transparent(true);
 			
 			for (unsigned i=0; i<Txt->Length(); i++)
 			{
-				GDisplayString *Text = (*Txt)[i];
+				LDisplayString *Text = (*Txt)[i];
 				if (Ctrl->Enabled())
 				{
 					f->Colour(Fore, Back);
@@ -694,7 +694,7 @@ public:
 			
 			if (Ctrl->Focus())
 			{
-				GRect b(CurX-2, ty, CurX + sx + 1, ty + sy - 2);
+				LRect b(CurX-2, ty, CurX + sx + 1, ty + sy - 2);
 				b.Offset(Off, Off);
 				Out->Colour(Rgb24(180, 180, 180), 24);
 				Out->Box(&b);
@@ -706,20 +706,20 @@ public:
 		State->pScreen->Op(Op);
 	}
 
-	void OnPaint_ListColumn(ProcColumnPaint Callback, void *UserData, GSkinState *State)
+	void OnPaint_ListColumn(ProcColumnPaint Callback, void *UserData, LSkinState *State)
 	{
 		// Setup memory context
-		GRect r = State->Rect;
-		GMemDC Mem(r.X(), r.Y(), OsDefaultCs);
+		LRect r = State->Rect;
+		LMemDC Mem(r.X(), r.Y(), OsDefaultCs);
 		if (!Mem[0])
 			return;
 
-		GCssTools Tools(State->View);
+		LCssTools Tools(State->View);
 		auto Ws = LColour(L_WORKSPACE);
 		auto Back = Tint(Tools.GetBack(&Ws, 0), 220.0/240.0);
 		r.Offset(-r.x1, -r.y1);
 
-		GPath e;
+		LPath e;
 		e.Rectangle(r.x1, r.y1, r.x2, r.y2);
 		static bool LastEnabled = true;			
 		FillPath(&e, &Mem, Back, State ? State->Value != 0 : false, State ? LastEnabled = State->Enabled : LastEnabled);
@@ -739,9 +739,9 @@ public:
 		State->pScreen->Blt(State->Rect.x1, State->Rect.y1, &Mem);
 	}
 
-	void OnPaint_GCombo(GCombo *Ctrl, GSkinState *State)
+	void OnPaint_LCombo(LCombo *Ctrl, LSkinState *State)
 	{
-		GMemDC Mem;
+		LMemDC Mem;
 		if (Mem.Create(Ctrl->X(), Ctrl->Y(), OsDefaultCs))
 		{
 			// Font
@@ -749,9 +749,9 @@ public:
 				Ctrl->SetFont(SysBold);
 
 			// Back
-			GColour TextDefault(L_TEXT), BackDefault(L_HIGH);
-			GCssTools Tools(Ctrl->GetCss(), Ctrl->GetFont());
-			GColour &Fore = Tools.GetFore(&TextDefault), &Back = Tools.GetBack();
+			LColour TextDefault(L_TEXT), BackDefault(L_HIGH);
+			LCssTools Tools(Ctrl->GetCss(), Ctrl->GetFont());
+			LColour &Fore = Tools.GetFore(&TextDefault), &Back = Tools.GetBack();
 			if (Back.IsValid())
 			{
 				Mem.Colour(Back);
@@ -761,31 +761,31 @@ public:
 			DrawBtn(&Mem, Ctrl->GetClient(), BackDefault, false, State->Enabled);
 			
 			int n = 22;
-			GColour DkGrey(LColour(L_DKGREY));
+			LColour DkGrey(L_DKGREY);
 			
 			if (Ctrl->X() > 32)
 			{
-				GDisplayString *Text = State->FirstText();
+				LDisplayString *Text = State->FirstText();
 				if (Text)
 				{
 					int sx = Text->X(), sy = Text->Y();
-					int tx = GCombo::Pad.x1;
+					int tx = LCombo::Pad.x1;
 					int ty = (Ctrl->Y()-sy+1) >> 1;
 						
 					int Off = 0;
-					GRect c = Ctrl->GetClient();
+					LRect c = Ctrl->GetClient();
 					c.x1 += 8;
 					c.x2 -= n + 3;
 					
 					int Cx = Ctrl->X();
-					int PadX = GCombo::Pad.x1 + GCombo::Pad.x2;
+					int PadX = LCombo::Pad.x1 + LCombo::Pad.x2;
 					if (Text->X() > PadX)
 					{
 						// Make the text fit
 						Text->TruncateWithDots(Cx - PadX);
 					}
 
-					GFont *f = Text->GetFont();
+					LFont *f = Text->GetFont();
 					f->Transparent(true);
 					if (Ctrl->Enabled())
 					{
@@ -803,7 +803,7 @@ public:
 					
 					if (Ctrl->Focus() && c.X() > 4)
 					{
-						GRect b(tx-2, ty, tx + sx + 1, ty + sy - 2);
+						LRect b(tx-2, ty, tx + sx + 1, ty + sy - 2);
 						b.Offset(Off, Off);
 						c.Size(-2, 0);
 						b.Bound(&c);
@@ -834,17 +834,17 @@ public:
 		}
 	}
 
-	void OnPaint_GCheckBox(GCheckBox *Ctrl, GSkinState *State)
+	void OnPaint_LCheckBox(LCheckBox *Ctrl, LSkinState *State)
 	{
 		int Flags = (Ctrl->Value()   ? Btn_Value   : 0) |
 					(Ctrl->Enabled() ? Btn_Enabled : 0);
 		
 		// Create the bitmaps in cache if not already there
-		GCssTools Tools(Ctrl);
-		GColour &Back = Tools.GetBack();
+		LCssTools Tools(Ctrl);
+		LColour &Back = Tools.GetBack();
 
-		GMemDC *Temp = 0;
-		GMemDC *&Mem = Back.IsValid() ? Temp : CheckBox[Flags];
+		LMemDC *Temp = 0;
+		LMemDC *&Mem = Back.IsValid() ? Temp : CheckBox[Flags];
 		
 		if (Mem && (Mem->X() != State->Rect.X() || Mem->Y() != State->Rect.Y()))
 			DeleteObj(Mem);
@@ -857,11 +857,11 @@ public:
 			// Draw icon
 			// int FontY = Ctrl->GetFont()->GetHeight();
 
-			GRect &Box = State->Rect;
+			LRect &Box = State->Rect;
 			State->pScreen->Blt(Box.x1, Box.y1, Mem);
 
-			GRect Box1(Box.x1, 0, Box.x2, Box.y1 - 1);
-			GRect Box2(Box.x1, Box.y2 + 1, Box.x2, Ctrl->Y()-1);
+			LRect Box1(Box.x1, 0, Box.x2, Box.y1 - 1);
+			LRect Box2(Box.x1, Box.y2 + 1, Box.x2, Ctrl->Y()-1);
 			if (Back.IsValid())
 			{
 				State->pScreen->Colour(Back);
@@ -880,7 +880,7 @@ public:
 			}	
 
 			// Draw text
-			GRect t(Mem->X(), 0, Ctrl->X()-1, Ctrl->Y()-1);
+			LRect t(Mem->X(), 0, Ctrl->X()-1, Ctrl->Y()-1);
 			if (t.Valid())
 			{
 				DrawText(State,
@@ -900,13 +900,13 @@ public:
 		DeleteObj(Temp);
 	}
 
-	void OnPaint_GRadioButton(GRadioButton *Ctrl, GSkinState *State)
+	void OnPaint_LRadioButton(LRadioButton *Ctrl, LSkinState *State)
 	{
 		int Flags = (Ctrl->Value() ? Btn_Value : 0) |
 					(Ctrl->Enabled() ? Btn_Enabled : 0);
 		
 		// Create the bitmaps in cache if not already there
-		GMemDC *&Mem = RadioBtn[Flags];
+		LMemDC *&Mem = RadioBtn[Flags];
 		if (!Mem || State->ForceUpdate)
 		{
 			DeleteObj(Mem);
@@ -917,9 +917,9 @@ public:
 		if (Mem)
 		{
 			// Draw icon
-			GRect ico;
-			GCssTools Tools(Ctrl);
-			GColour &Back = Tools.GetBack();
+			LRect ico;
+			LCssTools Tools(Ctrl);
+			LColour &Back = Tools.GetBack();
 
 			ico.ZOff(Mem->X()-1, Mem->Y()-1);
 		    if (ico.Y() < Ctrl->Y())
@@ -935,13 +935,13 @@ public:
 			}
 
 			// Draw text
-			GRect t(Mem->X(), 0, Ctrl->X()-1, Ctrl->Y()-1);
+			LRect t(Mem->X(), 0, Ctrl->X()-1, Ctrl->Y()-1);
 			if (t.Valid())
 			{
 				int y = 0;
 				if (State->TextObjects())
 				{
-					GDisplayString *ds = State->FirstText();
+					LDisplayString *ds = State->FirstText();
 					if (ds && t.Y() > ds->Y())
 					{
 						y = (t.Y() - ds->Y()) >> 1;
@@ -963,7 +963,7 @@ public:
 		}
 	}
 
-	GFont *GetDefaultFont(char *Class)
+	LFont *GetDefaultFont(char *Class)
 	{
 		if (Class && stricmp(Class, Res_Button) == 0)
 		{
@@ -974,8 +974,8 @@ public:
 	}
 };
 
-GSkinEngine *
-CreateSkinEngine(class GApp *App)
+LSkinEngine *
+CreateSkinEngine(class LApp *App)
 {
 	return new GelSkin(App);
 }

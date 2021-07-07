@@ -9,15 +9,15 @@
 #include <string.h>
 #include <math.h>
 
-#include "Gdc2.h"
-#include "GPalette.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/Palette.h"
 
 #define BytePtr	((uint8_t*&)Ptr)
 #undef NonPreMulOver64
 #define NonPreMulOver64(c)	d->c = ((s->c * sa) + ((d->c * 0xffff) / 0xffff * o)) / 0xffff
 
-template<typename Pixel, GColourSpace ColourSpace>
-class App64 : public GApplicator
+template<typename Pixel, LColourSpace ColourSpace>
+class App64 : public LApplicator
 {
 	union
 	{
@@ -356,7 +356,7 @@ public:
 			switch (Src->Cs)
 			{
 				#define AlphaCase(name) \
-					case Cs##name: return AlphaBlt<G##name>(Src, SrcAlpha);
+					case Cs##name: return AlphaBlt<L##name>(Src, SrcAlpha);
 
 				AlphaCase(Rgb24);
 				AlphaCase(Bgr24);
@@ -380,16 +380,16 @@ public:
 	}
 };
 
-class G64BitFactory : public GApplicatorFactory
+class G64BitFactory : public LApplicatorFactory
 {
 public:
-	GApplicator *Create(GColourSpace Cs, int Op)
+	LApplicator *Create(LColourSpace Cs, int Op)
 	{
 		switch (Cs)
 		{
 			#define Case64(name) \
 				case Cs##name: \
-					return new App64<G##name, Cs##name>(Op);
+					return new App64<L##name, Cs##name>(Op);
 			
 			Case64(Rgba64);
 			Case64(Bgra64);

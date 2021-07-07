@@ -92,7 +92,7 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>include/win32;include/common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include/lgi/win;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_LIB;LGI_STATIC;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -124,7 +124,7 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>include/win32;include/common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include/lgi/win;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_LIB;LGI_STATIC;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -152,7 +152,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>include/win32;include/common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include/lgi/win;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;WIN32;_LIB;LGI_STATIC;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -184,7 +184,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>include/win32;include/common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include/lgi/win;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;WIN32;_LIB;LGI_STATIC;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -211,29 +211,28 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\common\Gdc2\Font\GFontCodePages.cpp" />
-    <ClCompile Include="src\common\General\GContainers.cpp" />
-    <ClCompile Include="src\common\General\LDateTime.cpp" />
-    <ClCompile Include="src\common\General\GFileCommon.cpp" />
-    <ClCompile Include="src\common\Lgi\GLibrary.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\FontCodePages.cpp" />
+    <ClCompile Include="src\common\General\Containers.cpp" />
+    <ClCompile Include="src\common\General\DateTime.cpp" />
+    <ClCompile Include="src\common\General\FileCommon.cpp" />
+    <ClCompile Include="src\common\Lgi\Library.cpp" />
     <ClCompile Include="src\common\Lgi\LgiCommon.cpp" />
-    <ClCompile Include="src\common\Lgi\LMutex.cpp" />
-    <ClCompile Include="src\common\Lgi\GProcess.cpp" />
-    <ClCompile Include="src\common\Lgi\GStream.cpp" />
-    <ClCompile Include="src\common\Lgi\GVariant.cpp" />
-    <ClCompile Include="src\common\Lgi\LgiMsg.cpp" />
-    <ClCompile Include="src\common\Lgi\LgiRand.cpp" />
-    <ClCompile Include="src\common\Text\GString.cpp" />
-    <ClCompile Include="src\common\Text\GToken.cpp" />
-    <ClCompile Include="src\common\Text\GUnicode.cpp" />
-    <ClCompile Include="src\win32\General\GFile.cpp" />
-    <ClCompile Include="src\win32\General\GMem.cpp" />
-    <ClCompile Include="src\win32\Lgi\GGeneral.cpp" />
-    <ClCompile Include="src\win32\Lgi\LThread.cpp" />
+    <ClCompile Include="src\common\Lgi\Mutex.cpp" />
+    <ClCompile Include="src\common\Lgi\Stream.cpp" />
+    <ClCompile Include="src\common\Lgi\Variant.cpp" />
+    <ClCompile Include="src\common\Lgi\LMsg.cpp" />
+    <ClCompile Include="src\common\Lgi\Rand.cpp" />
+    <ClCompile Include="src\common\Text\String.cpp" />
+    <ClCompile Include="src\common\Text\Token.cpp" />
+    <ClCompile Include="src\common\Text\Unicode.cpp" />
+    <ClCompile Include="src\win\General\File.cpp" />
+    <ClCompile Include="src\win\General\Mem.cpp" />
+    <ClCompile Include="src\win\Lgi\General.cpp" />
+    <ClCompile Include="src\win\Lgi\Thread.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\common\GContainers.h" />
-    <ClInclude Include="include\common\GFont.h" />
+    <ClInclude Include="include\common\Containers.h" />
+    <ClInclude Include="include\common\Font.h" />
     <ClInclude Include="include\common\LgiClasses.h" />
     <ClInclude Include="include\common\LgiCommon.h" />
     <ClInclude Include="include\common\LgiInc.h" />

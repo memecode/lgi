@@ -1,9 +1,10 @@
 #include <stdlib.h>
 #include "LgiResEdit.h"
 #include "LgiRes_Dialog.h"
-#include "GButton.h"
-#include "GVariant.h"
-#include "GToken.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Menu.h"
 
 #define IDM_NEW_CHILD		100
 #define IDM_NEW_NEXT		101
@@ -25,16 +26,16 @@ public:
 	}
 };
 
-class CtNode : public GTreeItem
+class CtNode : public LTreeItem
 {
 	CtrlControlTreePriv *d;
 
 public:
 	ResString *Str;
-	GAutoString Type;
-	GAutoString Tag;
+	LAutoString Type;
+	LAutoString Tag;
 
-	CtNode(CtrlControlTreePriv *priv, GView *update, int StringRef)
+	CtNode(CtrlControlTreePriv *priv, LView *update, int StringRef)
 	{
 		d = priv;
 		Str = 0;
@@ -60,11 +61,11 @@ public:
 	{
 		if (GetCss(true))
 		{
-			GCss::ColorDef c;
+			LCss::ColorDef c;
 			if (!Str || !Str->Get())
-				GetCss()->Color(GCss::ColorDef(GCss::ColorRgb, Rgb32(0xbb, 0xbb, 0xbb)));
+				GetCss()->Color(LCss::ColorDef(LCss::ColorRgb, Rgb32(0xbb, 0xbb, 0xbb)));
 			else
-				GetCss()->DeleteProp(GCss::PropColor);
+				GetCss()->DeleteProp(LCss::PropColor);
 		}
 
 		if (!Str)
@@ -79,7 +80,7 @@ public:
 	void Move(int Dir)
 	{
 		auto Cur = IndexOf();
-		GTreeNode *p = GetParent();
+		LTreeNode *p = GetParent();
 		if (!p)
 			p = GetTree();
 		if (Dir < 0)
@@ -95,7 +96,7 @@ public:
 		}
 	}
 
-	bool OnKey(GKey &k)
+	bool OnKey(LKey &k)
 	{
 		switch (k.vkey)
 		{
@@ -124,7 +125,7 @@ public:
 		return false;
 	}
 
-	void OnMouseClick(GMouse &m)
+	void OnMouseClick(LMouse &m)
 	{
 		if (m.IsContextMenu())
 		{
@@ -206,9 +207,9 @@ public:
 	}
 };
 
-CtrlControlTree::CtrlControlTree(ResDialog *dlg, GXmlTag *load) :
+CtrlControlTree::CtrlControlTree(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_ControlTree, load),
-	GTree(100, 0, 0, 100, 100)
+	LTree(100, 0, 0, 100, 100)
 {
 	d = new CtrlControlTreePriv(dlg);
 
@@ -223,9 +224,9 @@ CtrlControlTree::~CtrlControlTree()
 	delete d;
 }
 
-void CtrlControlTree::OnMouseClick(GMouse &m)
+void CtrlControlTree::OnMouseClick(LMouse &m)
 {
-	GTree::OnMouseClick(m);
+	LTree::OnMouseClick(m);
 
 	if (!d->DiscardClick)
 	{
@@ -234,13 +235,13 @@ void CtrlControlTree::OnMouseClick(GMouse &m)
 	else d->DiscardClick = false;
 }
 
-void CtrlControlTree::OnMouseMove(GMouse &m)
+void CtrlControlTree::OnMouseMove(LMouse &m)
 {
-	GTree::OnMouseMove(m);
+	LTree::OnMouseMove(m);
 	ResDialogCtrl::OnMouseMove(m);
 }
 
-void CtrlControlTree::OnPaint(GSurface *pDC)
+void CtrlControlTree::OnPaint(LSurface *pDC)
 {
 	if (Dlg->App()->GetCurLang()->Id != d->CurLang)
 	{
@@ -248,7 +249,7 @@ void CtrlControlTree::OnPaint(GSurface *pDC)
 		UpdateAllItems();
 	}
 
-	GTree::OnPaint(pDC);
+	LTree::OnPaint(pDC);
 }
 
 bool CtrlControlTree::GetFields(FieldTree &Fields)
@@ -284,7 +285,7 @@ bool CtrlControlTree::Serialize(FieldTree &Fields)
 	return Status;
 }
 
-void WriteTree(GXmlTag *t, GTreeNode *n)
+void WriteTree(LXmlTag *t, LTreeNode *n)
 {
 	CtNode *ct = dynamic_cast<CtNode*>(n);
 	if (ct)
@@ -294,23 +295,23 @@ void WriteTree(GXmlTag *t, GTreeNode *n)
 		t->SetAttr(VAL_ControlTag, ct->Tag);
 	}
 
-	for (GTreeNode *c = n->GetChild(); c; c = c->GetNext())
+	for (LTreeNode *c = n->GetChild(); c; c = c->GetNext())
 	{
-		GXmlTag *h = new GXmlTag;
+		LXmlTag *h = new LXmlTag;
 		WriteTree(h, c);
 		h->SetTag("Control");
 		t->InsertTag(h);
 	}
 }
 
-bool CtrlControlTree::GetVariant(const char *Name, GVariant &Value, char *Array)
+bool CtrlControlTree::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	if (!Name)
 		return false;
 
 	if (!stricmp(Name, "Tree"))
 	{
-		GXmlTag *x = new GXmlTag;
+		LXmlTag *x = new LXmlTag;
 		WriteTree(x, this);
 		Value = x;
 	}
@@ -319,7 +320,7 @@ bool CtrlControlTree::GetVariant(const char *Name, GVariant &Value, char *Array)
 	return true;
 }
 
-void ReadTree(GXmlTag *t, GTreeNode *n, CtrlControlTreePriv *d, GView *v)
+void ReadTree(LXmlTag *t, LTreeNode *n, CtrlControlTreePriv *d, LView *v)
 {
 	CtNode *ct = dynamic_cast<CtNode*>(n);
 	if (ct && ct->Str)
@@ -335,12 +336,12 @@ void ReadTree(GXmlTag *t, GTreeNode *n, CtrlControlTreePriv *d, GView *v)
 		ReadTree(c, nw, d, v);
 		n->Insert(nw);
 
-		GTreeItem *it = dynamic_cast<GTreeItem*>(n);
+		LTreeItem *it = dynamic_cast<LTreeItem*>(n);
 		if (it) it->Expanded(true);
 	}
 }
 
-bool CtrlControlTree::SetVariant(const char *Name, GVariant &Value, char *Array)
+bool CtrlControlTree::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	if (!Name)
 		return false;
@@ -352,7 +353,7 @@ bool CtrlControlTree::SetVariant(const char *Name, GVariant &Value, char *Array)
 
 		Empty();
 
-		GXmlTag *x = dynamic_cast<GXmlTag*>(Value.Value.Dom);
+		LXmlTag *x = dynamic_cast<LXmlTag*>(Value.Value.Dom);
 		if (!x)
 			LgiAssert(!"Not the right object.");
 		else

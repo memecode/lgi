@@ -119,19 +119,19 @@ Lzw::~Lzw()
 	DeleteObj(d);
 }
 
-inline int Get1(GStream *i)
+inline int Get1(LStream *i)
 {
 	uchar c = 0;
 	i->Read(&c, sizeof(c));
 	return c;
 }
 
-inline void Put1(char i, GStream *o)
+inline void Put1(char i, LStream *o)
 {
 	o->Write(&i, 1);
 }
 
-bool Lzw::Compress(GStream *output, GStream *input)
+bool Lzw::Compress(LStream *output, LStream *input)
 {
 	uint next_code = d->StartCode();  /* Next code is the next available string code*/
 	uint character;
@@ -217,7 +217,7 @@ int Lzw::find_match(int hash_prefix, uint hash_character)
 **  it to an output file.  The code here should be a fairly close match to
 **  the algorithm in the accompanying article.
 */
-bool Lzw::Decompress(GStream *output, GStream *input)
+bool Lzw::Decompress(LStream *output, LStream *input)
 {
 	uint new_code;
 	uint old_code = 0;
@@ -360,7 +360,7 @@ uchar *Lzw::decode_string(unsigned char *buffer, unsigned int code)
 ** codes.  They are written strictly for clarity, and are not
 ** particularly efficient.
 */
-int Lzw::input_code(GStream *input)
+int Lzw::input_code(LStream *input)
 {
 	while (d->input_bit_count <= 24)
 	{
@@ -377,7 +377,7 @@ int Lzw::input_code(GStream *input)
 	return return_value;
 }
 
-void Lzw::output_code(GStream *output, uint code)
+void Lzw::output_code(LStream *output, uint code)
 {
 	d->output_bit_buffer |= (unsigned long) code << (32-d->Bits-d->output_bit_count);
 	d->output_bit_count += d->Bits;

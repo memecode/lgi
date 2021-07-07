@@ -1,18 +1,18 @@
 #ifndef _IDE_DOC_H_
 #define _IDE_DOC_H_
 
-#include "GMdi.h"
-#include "GTextView3.h"
+#include "lgi/common/Mdi.h"
+#include "lgi/common/TextView3.h"
 #include "ParserCommon.h"
 
-extern void FilterFiles(GArray<ProjectNode*> &Perfect, GArray<ProjectNode*> &Nodes, GString InputStr);
+extern void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LString InputStr);
 
-class IdeDoc : public GMdiChild, public GStream
+class IdeDoc : public GMdiChild, public LStream
 {
 	friend class DocEdit;
 	class IdeDocPrivate *d;
 
-	static GString CurIpDoc;
+	static LString CurIpDoc;
 	static int CurIpLine;
 
 public:
@@ -30,7 +30,7 @@ public:
 	void SetDirty();
 	bool OnRequestClose(bool OsShuttingDown) override;
 	void OnPosChange() override;
-	void OnPaint(GSurface *pDC) override;
+	void OnPaint(LSurface *pDC) override;
 	bool IsFile(const char *File);
 	bool AddBreakPoint(ssize_t Line, bool Add);
 	
@@ -39,8 +39,8 @@ public:
 	bool HasFocus(int Set = -1);
 	void ConvertWhiteSpace(bool ToTabs);
 	void EscapeSelection(bool ToEscaped);
-	void SplitSelection(GString s);
-	void JoinSelection(GString s);
+	void SplitSelection(LString s);
+	void JoinSelection(LString s);
 	void SetCrLf(bool CrLf);
 	ssize_t GetLine();
 	void SetLine(int Line, bool CurIp);
@@ -53,8 +53,8 @@ public:
 	bool Build();
 
 	// Source tools
-	bool BuildIncludePaths(GArray<GString> &Paths, IdePlatform Platform, bool IncludeSysPaths);
-	bool BuildHeaderList(const char16 *Cpp, GArray<char*> &Headers, GArray<GString> &IncPaths);
+	bool BuildIncludePaths(LArray<LString> &Paths, IdePlatform Platform, bool IncludeSysPaths);
+	bool BuildHeaderList(const char16 *Cpp, LArray<char*> &Headers, LArray<LString> &IncPaths);
 	bool FindDefn(char16 *Def, const char16 *Source, List<DefnInfo> &Matches);
 
 	// Events
@@ -63,11 +63,11 @@ public:
 	void OnProjectChange();
 	
 	// Impl
-	void OnTitleClick(GMouse &m) override;
+	void OnTitleClick(LMouse &m) override;
 	GMessage::Result OnEvent(GMessage *Msg) override;
-	int OnNotify(GViewI *v, int f) override;
+	int OnNotify(LViewI *v, int f) override;
 	void OnPulse() override;
-	GString Read();
+	LString Read();
 	ssize_t Read(void *Ptr, ssize_t Size, int Flags = 0) override { return 0; }
 	ssize_t Write(const void *Ptr, ssize_t Size, int Flags = 0) override;
 };

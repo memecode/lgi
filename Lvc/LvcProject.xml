@@ -33,7 +33,7 @@
 		<General>
 			<Makefile>
 				<Linux>Makefile.linux</Linux>
-				<Windows>.\Makefile.linux</Windows>
+				<Windows>.\Lvc.sln</Windows>
 			</Makefile>
 			<Executable>
 				<Linux>
@@ -50,13 +50,8 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Arguments>
-				<All />
-			</Arguments>
-			<Defines>
-				<All />
-				<Windows />
-			</Defines>
+			<Arguments />
+			<Defines />
 			<CCrossCompiler />
 			<CppCrossCompiler />
 		</General>
@@ -64,9 +59,9 @@
 			<IncludePaths>
 				<All>
 					<Debug>Src
-../include/common</Debug>
+../include</Debug>
 					<Release>Src
-../include/common</Release>
+../include</Release>
 				</All>
 				<Linux>
 					<Debug>../include/linux
@@ -76,7 +71,10 @@
 ../include/linux/Gtk
 </Release>
 				</Linux>
-				<Windows />
+				<Windows>
+					<Debug>../include/lgi/win</Debug>
+					<Release>../include/lgi/win</Release>
+				</Windows>
 			</IncludePaths>
 			<SystemIncludes>
 				<Linux>
@@ -117,6 +115,10 @@
 				<Windows />
 			</TargetName>
 			<ApplicationIcon />
+			<Defines>
+				<All />
+				<Windows />
+			</Defines>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -142,5 +144,13 @@
 			<RemoteUri />
 			<RemotePass />
 		</Remote>
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
 	</Settings>
 </Project>

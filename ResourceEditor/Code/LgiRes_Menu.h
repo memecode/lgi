@@ -12,18 +12,18 @@
 #ifndef __LGIRES_MENU_H
 #define __LGIRES_MENU_H
 
-#include "Res.h"
+#include "lgi/common/Res.h"
 #include "LgiRes_String.h"
 
 class ResMenu;
 class ResMenuUi;
 
-class ResMenuItem : public GTreeItem, public FieldSource
+class ResMenuItem : public LTreeItem, public FieldSource
 {
 	ResMenu *Menu;
 	bool Sep;
 	bool Enabled;
-	GAutoString Short;
+	LAutoString Short;
 	ResString *_Str;
 
 public:
@@ -45,14 +45,14 @@ public:
 	bool GetFields(FieldTree &Fields);
 	bool Serialize(FieldTree &Fields);
 
-	bool Read(GXmlTag *t, ResMenuItem *Parent = 0);
-	bool Write(GXmlTag *t, int Tabs);
+	bool Read(LXmlTag *t, ResMenuItem *Parent = 0);
+	bool Write(LXmlTag *t, int Tabs);
 
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 	bool OnNew();
 };
 
-class ResMenu : public Resource, public GTree
+class ResMenu : public Resource, public LTree
 {
 	friend class ResMenuItem;
 	friend class AppWnd;
@@ -66,8 +66,8 @@ public:
 	ResMenu(AppWnd *w, int type = TYPE_MENU);
 	~ResMenu();
 
-	void Create(GXmlTag *load, SerialiseContext *Ctx);
-	GView *Wnd() { return dynamic_cast<GView*>(this); }
+	void Create(LXmlTag *load, SerialiseContext *Ctx);
+	LView *Wnd() { return dynamic_cast<LView*>(this); }
 	void SetLanguages() { if (Group) Group->SetLanguages(); }
 	List<ResString> *GetStrs() { return (Group)?Group->GetStrs():0; }
 	ResString *GetStringByRef(int Ref);
@@ -78,35 +78,35 @@ public:
 	ResStringGroup *GetStringGroup() { return Group; }
 
 	// Tree
-	void OnItemClick(GTreeItem *Item, GMouse &m);
-	void OnItemBeginDrag(GTreeItem *Item, GMouse &m);
-	void OnItemExpand(GTreeItem *Item, bool Expand);
-	void OnItemSelect(GTreeItem *Item);
+	void OnItemClick(LTreeItem *Item, LMouse &m);
+	void OnItemBeginDrag(LTreeItem *Item, LMouse &m);
+	void OnItemExpand(LTreeItem *Item, bool Expand);
+	void OnItemSelect(LTreeItem *Item);
 
 	// Resource
-	GView *CreateUI();
+	LView *CreateUI();
 	void OnRightClick(LSubMenu *RClick);
 	void OnCommand(int Cmd);
 	int OnCommand(int Cmd, int Event, OsView hWnd);
 
 	// Serialize
 	bool Test(ErrorCollection *e);
-	bool Read(GXmlTag *t, SerialiseContext &Ctx);
-	bool Write(GXmlTag *t, SerialiseContext &Ctx);
+	bool Read(LXmlTag *t, SerialiseContext &Ctx);
+	bool Write(LXmlTag *t, SerialiseContext &Ctx);
 };
 
-class ResMenuUi : public GLayout
+class ResMenuUi : public LLayout
 {
-	GToolBar *Tools;
+	LToolBar *Tools;
 	ResMenu *Menu;
-	GStatusBar *Status;
-	GStatusPane *StatusInfo;
+	LStatusBar *Status;
+	LStatusPane *StatusInfo;
 
 public:
 	ResMenuUi(ResMenu *Res);
 	~ResMenuUi();
 
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void PourAll();
 	void OnPosChange();
 	void OnCreate();

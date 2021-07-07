@@ -1,0 +1,369 @@
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Popup.h"
+#include "lgi/common/DateTimeCtrls.h"
+#include "lgi/common/DisplayString.h"
+
+LDatePopup::LDatePopup(LView *owner) : LPopup(owner)
+{
+	FirstPaint = true;
+	SetNotify(owner);
+	SetParent(owner);
+	Owner = owner;
+	
+	LDateTime Now;
+	if (owner)
+		Now.SetDate(owner->Name());
+	else
+		Now.SetNow();
+	Mv.Set(&Now);
+
+	LRect r(0, 0, 150, 130);
+	SetPos(r);
+}
+
+LDatePopup::~LDatePopup()
+{
+	if (Owner)
+	{
+		Owner->OnChildrenChanged(this, false);
+		Owner->Invalidate();
+	}
+}
+
+LDateTime LDatePopup::Get()
+{
+	return Mv.Get();
+}
+
+void LDatePopup::Set(LDateTime &Ts)
+{
+	Mv.Set(&Ts);
+}
+
+void LDatePopup::OnPaint(LSurface *pDC)
+{
+	if (FirstPaint)
+	{
+		Focus(true);
+		FirstPaint = false;
+	}
+
+	// Border
+	LRect r = GetClient();
+	LWideBorder(pDC, r, DefaultRaisedEdge);
+	pDC->Colour(L_MED);
+	pDC->Line(r.x2, r.y1, r.x2, r.y2);
+	pDC->Line(r.x1, r.y2, r.x2-1, r.y2);
+	r.x2--;
+	r.y2--;
+	LThinBorder(pDC, r, DefaultSunkenEdge);
+
+	// Layout
+	Caption = r;
+	Caption.y2 = Caption.y1 + SysFont->GetHeight() + 2;
+	Prev = Next = Caption;
+	Prev.x2 = Prev.x1 + Prev.Y();
+	Next.x1 = Next.x2 - Next.Y();
+	Date = r;
+	Date.y1 = Caption.y2 + 1;
+
+	// Caption bar
+	r = Caption;
+	LThinBorder(pDC, r, DefaultRaisedEdge);
+	pDC->Colour(L_MED);
+	pDC->Rectangle(&r);
+	char *Title = Mv.Title();
+	if (Title)
+	{
+		SysFont->Transparent(true);
+		SysFont->Colour(L_TEXT, L_MED);
+		LDisplayString ds(SysFont, Title);
+		ds.Draw(pDC, r.x1 + (r.X()-ds.X())/2, r.y1);
+	}
+
+	// Arrows
+	int CntY = Prev.y1 + ((Prev.Y()-8)/2);
+	int Px = Prev.x2 - 6;
+	int Nx = Next.x1 + 4;
+	pDC->Colour(L_TEXT);
+	for (int i=0; i<5; i++)
+	{
+		pDC->Line(	Px-i, CntY+i,
+					Px-i, CntY+8-i);
+		pDC->Line(	Nx+i, CntY+i,
+					Nx+i, CntY+8-i);
+	}
+
+	// Date space
+	pDC->Colour(L_WORKSPACE);
+	pDC->Rectangle(&Date);
+
+	Date.Size(3, 3);
+	r = Date;
+	Cx = r.X() / Mv.X();
+	Cy = r.Y() / Mv.Y();
+	for (int y=0; y<Mv.Y(); y++)
+	{
+		for (int x=0; x<Mv.X(); x++)
+		{
+			int Px = x * Cx;
+			int Py = y * Cy;
+			Mv.SelectCell(x, y);
+
+			if (Mv.IsSelected())
+			{
+				pDC->Colour(L_FOCUS_SEL_BACK);
+				pDC->Rectangle(r.x1 + Px, r.y1 + Py, r.x1 + Px + Cx - 2, r.y1 + Py + Cy - 2);
+				SysFont->Colour(L_FOCUS_SEL_FORE, L_FOCUS_SEL_BACK);
+			}
+			else
+			{
+				if (Mv.IsToday())
+				{
+					SysFont->Colour(LColour(192, 0, 0), LColour(L_WORKSPACE));
+				}
+				else
+				{
+					SysFont->Colour(Mv.IsMonth() ? L_TEXT : L_MED, L_WORKSPACE);
+				}
+			}
+
+			LDisplayString ds(SysFont, Mv.Day());
+			ds.Draw(pDC, r.x1 + Px + 2, r.y1 + Py + 2);
+		}
+	}
+}
+
+void LDatePopup::OnChange()
+{
+	LViewI *n = GetNotify() ? GetNotify() : GetParent();
+	if (n)
+	{
+		char s[64];
+		Mv.Get().GetDate(s, sizeof(s));
+		n->Name(s);
+		n->SendNotify(GNotifyValueChanged);
+		n->Focus(true);
+	}
+
+	Visible(false);
+
+}
+
+void LDatePopup::OnMouseClick(LMouse &m)
+{
+	if (m.Down())
+	{
+		if (Next.Overlap(m.x, m.y))
+		{
+			LDateTime &c = Mv.Get();
+			c.AddMonths(1);
+			Mv.Set(&c);
+			Invalidate();
+		}
+		else if (Prev.Overlap(m.x, m.y))
+		{
+			LDateTime &c = Mv.Get();
+			c.AddMonths(-1);
+			Mv.Set(&c);
+			Invalidate();
+		}
+		else if (Date.Overlap(m.x, m.y))
+		{
+			int x = (m.x - Date.x1) / Cx;
+			int y = (m.y - Date.y1) / Cy;
+			Mv.SetCursor(x, y);
+			Invalidate();
+		}
+	}
+	else
+	{
+		if (Date.Overlap(m.x, m.y))
+		{
+			OnChange();
+			return;
+		}
+	}
+
+	LPopup::OnMouseClick(m);
+}
+
+void LDatePopup::Move(int Dx, int Dy)
+{
+	int x = 0, y = 0;
+	Mv.GetCursor(x, y);
+	Mv.SetCursor(x + Dx, y + Dy);
+	Invalidate();
+}
+
+bool LDatePopup::OnKey(LKey &k)
+{
+	switch (k.vkey)
+	{
+		case LK_ESCAPE:
+		{
+			if (!k.Down())
+				Visible(false);
+			return true;
+			break;
+		}
+		case LK_UP:
+		{
+			if (k.Down())
+				Move(0, -1);
+			return true;
+			break;
+		}
+		case LK_DOWN:
+		{
+			if (k.Down())
+				Move(0, 1);
+			return true;
+			break;
+		}
+		case LK_LEFT:
+		{
+			if (k.Down())
+				Move(-1, 0);
+			return true;
+			break;
+		}
+		case LK_RIGHT:
+		{
+			if (k.Down())
+				Move(1, 0);
+			return true;
+			break;
+		}
+		case LK_RETURN:
+		{
+			if (k.Down() && k.IsChar)
+				OnChange();
+			return true;
+		}
+	}
+
+	if (Owner && Owner->OnKey(k))
+		return true;
+
+	return false;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+GDateDropDown::GDateDropDown() :
+	LDropDown(-1, 0, 0, 10, 10, 0),
+	ResObject(Res_Custom)
+{
+	SetPopup(Drop = new LDatePopup(this));
+}
+
+int GDateDropDown::OnNotify(LViewI *Wnd, int Flags)
+{
+	if (Wnd == (LViewI*)Drop)
+	{
+		char s[256];
+		LDateTime Ts = Drop->Get();
+		Ts.Get(s, sizeof(s));
+		SetDate(s);
+	}
+	
+	return LDropDown::OnNotify(Wnd, Flags);
+}
+
+void GDateDropDown::OnChildrenChanged(LViewI *Wnd, bool Attaching)
+{
+	if (Wnd == (LViewI*)Drop && !Attaching)
+	{
+		Drop = NULL;
+	}
+}
+
+bool GDateDropDown::OnLayout(LViewLayoutInfo &Inf)
+{
+    if (!Inf.Width.Max)
+    {
+        Inf.Width.Min = Inf.Width.Max = 20;
+    }
+    else if (!Inf.Height.Max)
+    {
+        Inf.Height.Min = Inf.Height.Max = SysFont->GetHeight() + 6;
+    }
+    else return false;
+    
+    return true;
+}
+
+void GDateDropDown::SetDate(char *d)
+{
+	LViewI *n = GetNotify();
+	if (n && d)
+	{
+		LDateTime New;
+		const char *Old = n->Name();
+		if (Old)
+		{
+			New.Set(Old);
+		}
+		else
+		{
+			New.SetTime("12:0:0");
+		}
+
+		New.SetDate(d);
+			
+		char Buf[256];
+		New.Get(Buf, sizeof(Buf));
+
+		n->Name(Buf);
+
+		LViewI *Nn = n->GetNotify() ? n->GetNotify() : n->GetParent();
+		if (Nn)
+		{
+			Nn->OnNotify(n, 0);
+		}
+	}
+}
+
+void GDateDropDown::OnMouseClick(LMouse &m)
+{
+	if (m.Down())
+	{
+		if (Drop)
+		{
+			// Set it's date from our current value
+			LViewI *n = GetNotify();
+			if (n)
+			{
+				LDateTime New;
+				const char *Old = n->Name();
+				LViewI *DateSrc = GetNotify();
+				
+				if (!ValidStr(Old) && DateSrc)
+				{
+					Old = DateSrc->Name();
+				}
+				if (Old &&
+					New.Set(Old))
+				{
+					Drop->Set(New);
+				}
+			}
+		}
+	}
+
+	LDropDown::OnMouseClick(m);
+}
+
+class GDatePopupFactory : public LViewFactory
+{
+	LView *NewView(const char *Class, LRect *Pos, const char *Text)
+	{
+		if (Class &&
+			_stricmp(Class, "GDateDropDown") == 0)
+		{
+			return new GDateDropDown;
+		}
+
+		return 0;
+	}
+} DatePopupFactory;

@@ -3,7 +3,7 @@ Known bugs:
 
 
 */
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "ParserCommon.h"
 
 #if 0
@@ -12,16 +12,16 @@ Known bugs:
 #define DEBUG_LINE		550
 #endif
 
-bool BuildPyDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Defns, int LimitTo, bool Debug)
+bool BuildPyDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Defns, int LimitTo, bool Debug)
 {
 	if (!Source)
 		return false;
 
-	GString Src = Source;
-	GString::Array Lines = Src.SplitDelimit("\n", -1, false);
+	LString Src = Source;
+	LString::Array Lines = Src.SplitDelimit("\n", -1, false);
 	int Depth = 0;
 	int Line = 1;
-	GString ClsName;
+	LString ClsName;
 
 	for (auto Ln : Lines)
 	{
@@ -40,9 +40,9 @@ bool BuildPyDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Def
 		{
 			if (ClsName)
 			{
-				GString::Array a = Ln.Strip().SplitDelimit(" \t", 1);
+				LString::Array a = Ln.Strip().SplitDelimit(" \t", 1);
 				LgiAssert(a.Length() == 2);
-				GString Fn = a[0] + " " + ClsName + "::" + a[1];
+				LString Fn = a[0] + " " + ClsName + "::" + a[1];
 				Defns.New().Set(DefnFunc, FileName, Fn, Line);
 			}
 			else
@@ -52,7 +52,7 @@ bool BuildPyDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Def
 		}
 		else if (Ln.Find("class ") == Depth)
 		{
-			GString::Array a = Ln.SplitDelimit(" \t(");
+			LString::Array a = Ln.SplitDelimit(" \t(");
 			LgiAssert(a.Length() >= 2);
 			ClsName = a[1];
 			auto ClsDesc = a[0] + " " + a[1];

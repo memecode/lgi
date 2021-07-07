@@ -1,6 +1,6 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "UnitTests.h"
-#include "GMatrix.h"
+#include "lgi/common/Matrix.h"
 
 class GMatrixTestPriv
 {

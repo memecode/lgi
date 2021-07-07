@@ -1,17 +1,17 @@
 #include <stdio.h>
 #include <ctype.h>
 
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/List.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/EventTargetThread.h"
+#include "lgi/common/TextFile.h"
 #include "LgiIde.h"
 #include "FindSymbol.h"
-#include "LList.h"
-#include "GToken.h"
-#include "GEventTargetThread.h"
-#include "GTextFile.h"
 #include "ParserCommon.h"
 
 #if 1
-#include "GParseCpp.h"
+#include "lgi/common/ParseCpp.h"
 #endif
 
 #include "resdefs.h"
@@ -25,7 +25,7 @@
 int SYM_FILE_SENT = 0;
 
 
-class FindSymbolDlg : public GDialog
+class FindSymbolDlg : public LDialog
 {
 	// AppWnd *App;
 	LList *Lst;
@@ -34,12 +34,12 @@ class FindSymbolDlg : public GDialog
 public:
 	FindSymResult Result;
 
-	FindSymbolDlg(GViewI *parent, FindSymbolSystem *sys);
+	FindSymbolDlg(LViewI *parent, FindSymbolSystem *sys);
 	~FindSymbolDlg();
 	
-	int OnNotify(GViewI *v, int f);
+	int OnNotify(LViewI *v, int f);
 	void OnCreate();
-	bool OnViewKey(GView *v, GKey &k);
+	bool OnViewKey(LView *v, LKey &k);
 	GMessage::Result OnEvent(GMessage *m);
 };
 
@@ -50,20 +50,20 @@ int ScoreCmp(FindSymResult **a, FindSymResult **b)
 
 #define USE_HASH	1
 
-struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
+struct FindSymbolSystemPriv : public LEventTargetThread, public LCancel
 {
 	struct FileSyms
 	{
-		GString Path;
+		LString Path;
 		int Platforms;
-		GString::Array *Inc;
-		GArray<DefnInfo> Defs;
+		LString::Array *Inc;
+		LArray<DefnInfo> Defs;
 		bool IsSource;
 		bool IsHeader;
 		bool IsPython;
 		bool IsJavascript;
 		
-		bool Parse(GAutoWString Source)
+		bool Parse(LAutoWString Source)
 		{
 			IsSource = false;
 			IsHeader = false;
@@ -72,7 +72,7 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 			Defs.Length(0);
 			
 			bool Status = false;
-			char *Ext = LgiGetExtension(Path);
+			char *Ext = LGetExtension(Path);
 			if (Ext)
 			{
 				IsSource =	!_stricmp(Ext, "c")
@@ -102,12 +102,12 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 
 	int hApp;
 	int MissingFiles;
-	GArray<GString::Array*> IncPaths;
+	LArray<LString::Array*> IncPaths;
 	
 	#if USE_HASH
 	LHashTbl<ConstStrKey<char,false>, FileSyms*> Files;
 	#else
-	GArray<FileSyms*> Files;
+	LArray<FileSyms*> Files;
 	#endif	
 	
 	uint32_t Tasks;
@@ -115,7 +115,7 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 	bool DoingProgress;
 	
 	FindSymbolSystemPriv(int appSinkHnd) :
-		GEventTargetThread("FindSymbolSystemPriv"),
+		LEventTargetThread("FindSymbolSystemPriv"),
 		hApp(appSinkHnd)	
 	{
 		Tasks = 0;
@@ -143,7 +143,7 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 	{
 		va_list Arg;
 		va_start(Arg, Fmt);
-		GString s;
+		LString s;
 		s.Printf(Arg, Fmt);
 		va_end(Arg);
 		
@@ -152,7 +152,7 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 	}
 	
 	#if !USE_HASH
-	int GetFileIndex(GString &Path)
+	int GetFileIndex(LString &Path)
 	{
 		for (unsigned i=0; i<Files.Length(); i++)
 		{
@@ -163,7 +163,7 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 	}
 	#endif
 	
-	bool AddFile(GString Path, int Platforms)
+	bool AddFile(LString Path, int Platforms)
 	{
 		// printf("AddFile %s\n", Path.Get());		
 		
@@ -202,7 +202,7 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 			return false;
 		}
 			
-		LgiAssert(!LgiIsRelativePath(Path));
+		LgiAssert(!LIsRelativePath(Path));
 
 		// Setup the file sym data...
 		f = new FileSyms;
@@ -226,9 +226,9 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 			return false;
 		}
 
-		GAutoString Source = Tf.Read();
-		GArray<char*> Headers;
-		GArray<GString> EmptyInc;
+		LAutoString Source = Tf.Read();
+		LArray<char*> Headers;
+		LArray<LString> EmptyInc;
 		if (BuildHeaderList(Source, Headers, f->Inc ? *f->Inc : EmptyInc, false))
 		{
 			for (unsigned i=0; i<Headers.Length(); i++)
@@ -243,10 +243,10 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 		if (Debug)
 			printf("%s:%i - About to parse '%s' containing %i chars.\n", _FL, f->Path.Get(), StrlenW(f->Source));
 		#endif
-		return f->Parse(GAutoWString(Utf8ToWide(Source)));
+		return f->Parse(LAutoWString(Utf8ToWide(Source)));
 	}
 	
-	bool ReparseFile(GString Path)
+	bool ReparseFile(LString Path)
 	{
 		#if USE_HASH
 		FileSyms *f = Files.Find(Path);
@@ -262,7 +262,7 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 		return AddFile(Path, Platform);
 	}
 	
-	bool RemoveFile(GString Path)
+	bool RemoveFile(LString Path)
 	{
 		#if USE_HASH
 		FileSyms *f = Files.Find(Path);
@@ -288,17 +288,17 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 		{
 			case M_FIND_SYM_REQUEST:
 			{
-				GAutoPtr<FindSymRequest> Req((FindSymRequest*)Msg->A());
+				LAutoPtr<FindSymRequest> Req((FindSymRequest*)Msg->A());
 				bool AllPlatforms = (bool)Msg->B();
 				if (Req && Req->SinkHnd >= 0)
 				{
-					GString::Array p = Req->Str.SplitDelimit(" \t");
+					LString::Array p = Req->Str.SplitDelimit(" \t");
 					if (p.Length() == 0)
 						break;
 					
-					GArray<FindSymResult*> ClassMatches;
-					GArray<FindSymResult*> HdrMatches;
-					GArray<FindSymResult*> SrcMatches;
+					LArray<FindSymResult*> ClassMatches;
+					LArray<FindSymResult*> HdrMatches;
+					LArray<FindSymResult*> SrcMatches;
 
 					// For each file...
 					#if USE_HASH
@@ -394,10 +394,10 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 			}
 			case M_FIND_SYM_FILE:
 			{
-				GAutoPtr<FindSymbolSystem::SymFileParams> Params((FindSymbolSystem::SymFileParams*)Msg->A());
+				LAutoPtr<FindSymbolSystem::SymFileParams> Params((FindSymbolSystem::SymFileParams*)Msg->A());
 				if (Params)
 				{
-					GString::Array Mime = LGetFileMimeType(Params->File).Split("/");
+					LString::Array Mime = LGetFileMimeType(Params->File).Split("/");
 					if (!Mime[0].Equals("image"))
 					{
 						if (Params->Action == FindSymbolSystem::FileAdd)
@@ -414,7 +414,7 @@ struct FindSymbolSystemPriv : public GEventTargetThread, public LCancel
 			}
 			case M_FIND_SYM_INC_PATHS:
 			{
-				GAutoPtr<GString::Array> Paths((GString::Array*)Msg->A());
+				LAutoPtr<LString::Array> Paths((LString::Array*)Msg->A());
 				if (Paths)
 					IncPaths.Add(Paths.Release());
 				break;
@@ -461,7 +461,7 @@ int AlphaCmp(LListItem *a, LListItem *b, NativeInt d)
 	return stricmp(a->GetText(0), b->GetText(0));
 }
 
-FindSymbolDlg::FindSymbolDlg(GViewI *parent, FindSymbolSystem *sys)
+FindSymbolDlg::FindSymbolDlg(LViewI *parent, FindSymbolSystem *sys)
 {
 	Lst = NULL;
 	Sys = sys;
@@ -470,7 +470,7 @@ FindSymbolDlg::FindSymbolDlg(GViewI *parent, FindSymbolSystem *sys)
 	{
 		MoveToCenter();
 
-		GViewI *f;
+		LViewI *f;
 		if (GetViewById(IDC_STR, f))
 			f->Focus(true);
 		GetViewById(IDC_RESULTS, Lst);
@@ -483,10 +483,10 @@ FindSymbolDlg::~FindSymbolDlg()
 
 void FindSymbolDlg::OnCreate()
 {
-	RegisterHook(this, GKeyEvents);
+	RegisterHook(this, LKeyEvents);
 }
 
-bool FindSymbolDlg::OnViewKey(GView *v, GKey &k)
+bool FindSymbolDlg::OnViewKey(LView *v, LKey &k)
 {
 	switch (k.vkey)
 	{
@@ -509,16 +509,16 @@ GMessage::Result FindSymbolDlg::OnEvent(GMessage *m)
 	{
 		case M_FIND_SYM_REQUEST:
 		{
-			GAutoPtr<FindSymRequest> Req((FindSymRequest*)m->A());
+			LAutoPtr<FindSymRequest> Req((FindSymRequest*)m->A());
 			if (Req)
 			{
-				GString Str = GetCtrlName(IDC_STR);
+				LString Str = GetCtrlName(IDC_STR);
 				if (Str == Req->Str)
 				{
 					Lst->Empty();
 					List<LListItem> Ls;
 
-					GString s;
+					LString s;
 					int CommonPathLen = 0;					
 					for (unsigned i=0; i<Req->Results.Length(); i++)
 					{
@@ -557,7 +557,7 @@ GMessage::Result FindSymbolDlg::OnEvent(GMessage *m)
 						LListItem *it = new LListItem;
 						if (it)
 						{
-							GString Ln;
+							LString Ln;
 							Ln.Printf("%i", r->Line);
 							
 							it->SetText(r->File.Get() + CommonPathLen, 0);
@@ -575,10 +575,10 @@ GMessage::Result FindSymbolDlg::OnEvent(GMessage *m)
 		}
 	}
 
-	return GDialog::OnEvent(m);
+	return LDialog::OnEvent(m);
 }
 
-int FindSymbolDlg::OnNotify(GViewI *v, int f)
+int FindSymbolDlg::OnNotify(LViewI *v, int f)
 {
 	switch (v->GetId())
 	{
@@ -625,7 +625,7 @@ int FindSymbolDlg::OnNotify(GViewI *v, int f)
 		}
 	}
 	
-	return GDialog::OnNotify(v, f);
+	return LDialog::OnNotify(v, f);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -639,16 +639,16 @@ FindSymbolSystem::~FindSymbolSystem()
 	delete d;
 }
 
-FindSymResult FindSymbolSystem::OpenSearchDlg(GViewI *Parent)
+FindSymResult FindSymbolSystem::OpenSearchDlg(LViewI *Parent)
 {
 	FindSymbolDlg Dlg(Parent, this);
 	Dlg.DoModal();
 	return Dlg.Result;	
 }
 
-bool FindSymbolSystem::SetIncludePaths(GString::Array &Paths)
+bool FindSymbolSystem::SetIncludePaths(LString::Array &Paths)
 {
-	GString::Array *a = new GString::Array;
+	LString::Array *a = new LString::Array;
 	if (!a)
 		return false;
 	*a = Paths;
@@ -661,7 +661,7 @@ bool FindSymbolSystem::OnFile(const char *Path, SymAction Action, int Platforms)
 		d->MsgTs = LgiCurrentTime();
 	d->Tasks++;
 	
-	GAutoPtr<FindSymbolSystem::SymFileParams> Params(new FindSymbolSystem::SymFileParams);
+	LAutoPtr<FindSymbolSystem::SymFileParams> Params(new FindSymbolSystem::SymFileParams);
 	Params->File = Path;
 	Params->Action = Action;
 	Params->Platforms = Platforms;

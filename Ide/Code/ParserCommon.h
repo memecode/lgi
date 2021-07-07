@@ -1,7 +1,7 @@
 #ifndef _PARSER_COMMON_H_
 #define _PARSER_COMMON_H_
 
-#include "GLexCpp.h"
+#include "lgi/common/LexCpp.h"
 
 #define isword(s)				(s && (isdigit(s) || isalpha(s) || (s) == '_') )
 #define iswhite(s)				(s && strchr(WhiteSpace, s) != 0)
@@ -22,16 +22,16 @@ enum DefnType
 	DefnVariable = 0x40,
 };
 
-extern bool ParseFunction(GRange &Return, GRange &Name, GRange &Args, const char *Defn);
+extern bool ParseFunction(LRange &Return, LRange &Name, LRange &Args, const char *Defn);
 
 class DefnInfo
 {
 public:
 	DefnType Type;
-	GString Name;
-	GString File;
+	LString Name;
+	LString File;
 	int Line;
-	GRange FnName;
+	LRange FnName;
 	
 	DefnInfo()
 	{
@@ -47,7 +47,7 @@ public:
 		Line = d.Line;
 	}
 	
-	void Set(DefnType type, const char *file, GString s, int line)
+	void Set(DefnType type, const char *file, LString s, int line)
 	{
 		if (s(0) == ')')
 			printf("%s:%i - Unexpected ')'.\n", _FL);
@@ -59,7 +59,7 @@ public:
 		Name = s.Strip();
 		if (Name && Type == DefnFunc)
 		{
-			GRange Return, Args;
+			LRange Return, Args;
 			if (ParseFunction(Return, FnName, Args, Name))
 			{
 				if (strlen(Name) > 42)
@@ -90,7 +90,7 @@ public:
 	int Find(const char *Str)
 	{
 		auto Slen = strlen(Str);
-		GString Src;
+		LString Src;
 
 		if (Type == DefnFunc)
 			Src = Name(FnName.Start, FnName.End());
@@ -132,18 +132,18 @@ extern bool BuildCppDefnList
 (
 	const char *FileName,
 	char16 *Cpp,
-	GArray<DefnInfo> &Funcs,
+	LArray<DefnInfo> &Funcs,
 	/// Use DefnType bits
 	int LimitTo,
 	bool Debug = false
 );
 
-extern bool BuildPyDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Defns, int LimitTo, bool Debug = false);
-extern bool BuildJsDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Defns, int LimitTo, bool Debug = false);
+extern bool BuildPyDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Defns, int LimitTo, bool Debug = false);
+extern bool BuildJsDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Defns, int LimitTo, bool Debug = false);
 
-inline bool BuildDefnList(const char *FileName, char16 *Source, GArray<DefnInfo> &Funcs, int LimitTo, bool Debug = false)
+inline bool BuildDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Funcs, int LimitTo, bool Debug = false)
 {
-	auto Ext = LgiGetExtension(FileName);
+	auto Ext = LGetExtension(FileName);
 	auto Fn = BuildCppDefnList;
 	
 	if (Ext)

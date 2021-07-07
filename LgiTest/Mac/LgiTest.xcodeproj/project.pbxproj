@@ -9,11 +9,11 @@
 /* Begin PBXBuildFile section */
 		34109866217ACEC8007020CE /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34109865217ACEC8007020CE /* LgiMain.cpp */; };
 		34109868217ACEE0007020CE /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34109867217ACEE0007020CE /* Main.cpp */; };
-		3410986A217ACEF0007020CE /* LDbTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34109869217ACEF0007020CE /* LDbTable.cpp */; };
+		3410986A217ACEF0007020CE /* DbTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34109869217ACEF0007020CE /* DbTable.cpp */; };
 		3417A98F21ADDB1700EF8085 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3417A98E21ADDB1700EF8085 /* Cocoa.framework */; };
 		347417BF2178B6B80097AD99 /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 347417B82178B5630097AD99 /* LgiCocoa.framework */; };
 		34AD0C1023616760008A2F24 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 347417B82178B5630097AD99 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		34AD0C12236168E3008A2F24 /* GOptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34AD0C11236168E3008A2F24 /* GOptionsFile.cpp */; };
+		34AD0C12236168E3008A2F24 /* OptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34AD0C11236168E3008A2F24 /* OptionsFile.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,12 +49,12 @@
 /* Begin PBXFileReference section */
 		34109865217ACEC8007020CE /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../src/common/Lgi/LgiMain.cpp; sourceTree = SOURCE_ROOT; };
 		34109867217ACEE0007020CE /* Main.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = Main.cpp; path = ../Main.cpp; sourceTree = SOURCE_ROOT; };
-		34109869217ACEF0007020CE /* LDbTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LDbTable.cpp; path = ../../src/common/Db/LDbTable.cpp; sourceTree = SOURCE_ROOT; };
+		34109869217ACEF0007020CE /* DbTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DbTable.cpp; path = ../../src/common/Db/DbTable.cpp; sourceTree = SOURCE_ROOT; };
 		3417A98E21ADDB1700EF8085 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = ../../../../../../../System/Library/Frameworks/Cocoa.framework; sourceTree = "<group>"; };
 		3474179C2178B50B0097AD99 /* LgiTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LgiTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		347417AD2178B50B0097AD99 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		347417B32178B5630097AD99 /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = ../../src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
-		34AD0C11236168E3008A2F24 /* GOptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GOptionsFile.cpp; path = ../../src/common/Lgi/GOptionsFile.cpp; sourceTree = "<group>"; };
+		34AD0C11236168E3008A2F24 /* OptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsFile.cpp; path = ../../src/common/Lgi/OptionsFile.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,7 +99,7 @@
 		3474179E2178B50B0097AD99 /* LgiTest */ = {
 			isa = PBXGroup;
 			children = (
-				34109869217ACEF0007020CE /* LDbTable.cpp */,
+				34109869217ACEF0007020CE /* DbTable.cpp */,
 				34109867217ACEE0007020CE /* Main.cpp */,
 				347417C52178B76D0097AD99 /* Lgi */,
 				347417A22178B50B0097AD99 /* Supporting Files */,
@@ -126,7 +126,7 @@
 		347417C52178B76D0097AD99 /* Lgi */ = {
 			isa = PBXGroup;
 			children = (
-				34AD0C11236168E3008A2F24 /* GOptionsFile.cpp */,
+				34AD0C11236168E3008A2F24 /* OptionsFile.cpp */,
 				34109865217ACEC8007020CE /* LgiMain.cpp */,
 			);
 			name = Lgi;
@@ -174,6 +174,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -218,8 +219,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				34AD0C12236168E3008A2F24 /* GOptionsFile.cpp in Sources */,
-				3410986A217ACEF0007020CE /* LDbTable.cpp in Sources */,
+				34AD0C12236168E3008A2F24 /* OptionsFile.cpp in Sources */,
+				3410986A217ACEF0007020CE /* DbTable.cpp in Sources */,
 				34109868217ACEE0007020CE /* Main.cpp in Sources */,
 				34109866217ACEC8007020CE /* LgiMain.cpp in Sources */,
 			);
@@ -349,8 +350,8 @@
 				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = c11;
 				HEADER_SEARCH_PATHS = (
-					../../include/mac/cocoa,
-					../../include/common,
+					../../include/lgi/mac/cocoa,
+					../../include,
 				);
 				INFOPLIST_FILE = ./Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -377,8 +378,8 @@
 				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = c11;
 				HEADER_SEARCH_PATHS = (
-					../../include/mac/cocoa,
-					../../include/common,
+					../../include/lgi/mac/cocoa,
+					../../include,
 				);
 				INFOPLIST_FILE = ./Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";

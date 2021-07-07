@@ -12,8 +12,9 @@
 #ifndef __LGIRES_STRING_H
 #define __LGIRES_STRING_H
 
-#include "Res.h"
-#include "LList.h"
+#include "lgi/common/Res.h"
+#include "lgi/common/List.h"
+#include "lgi/common/Combo.h"
 
 ////////////////////////////////////////////////////////////////
 class ResStringGroup;
@@ -51,15 +52,15 @@ protected:
 	char IdStr[16];
 	char **GetIndex(int i);
 	StrLang *GetLang(GLanguageId i);
-	GAutoString Define;		// #define used in code to reference
+	LAutoString Define;		// #define used in code to reference
 	int Ref;			// globally unique
 	int Id;				// numerical value used in code to reference
 
 public:
 	char *Tag;			// Optional component tag, for turning off features.
 	List<StrLang> Items;
-	GArray<class ResDialogCtrl*> Refs;
-	GView *UpdateWnd;
+	LArray<class ResDialogCtrl*> Refs;
+	LView *UpdateWnd;
 
 	ResString(ResStringGroup *group, int init_ref = -1);
 	~ResString();
@@ -84,7 +85,7 @@ public:
 	// Item
 	int GetCols();
 	const char *GetText(int i);
-	void OnMouseClick(GMouse &m);
+	void OnMouseClick(LMouse &m);
 
 	// Fields
 	bool GetFields(FieldTree &Fields);
@@ -92,8 +93,8 @@ public:
 
 	// Persistence
 	bool Test(ErrorCollection *e);
-	bool Read(GXmlTag *t, SerialiseContext &Ctx);
-	bool Write(GXmlTag *t, SerialiseContext &Ctx);
+	bool Read(LXmlTag *t, SerialiseContext &Ctx);
+	bool Write(LXmlTag *t, SerialiseContext &Ctx);
 };
 
 #define RESIZE_X1			0x0001
@@ -110,24 +111,24 @@ class ResStringGroup : public Resource, public LList
 protected:
 	ResStringUi *Ui;
 	List<ResString> Strs;
-	GArray<GLanguage*> Lang;
-	GArray<GLanguage*> Visible;
+	LArray<GLanguage*> Lang;
+	LArray<GLanguage*> Visible;
 	int SortCol;
 	int SortAscend;
 
 	void UpdateColumns();
-	void OnColumnClick(int Col, GMouse &m);
+	void OnColumnClick(int Col, LMouse &m);
 
 public:
 	ResStringGroup(AppWnd *w, int type = TYPE_STRING);
 	~ResStringGroup();
 
-	GView *Wnd() { return dynamic_cast<GView*>(this); }
-	bool Attach(GViewI *Parent) { return LList::Attach(Parent); }
+	LView *Wnd() { return dynamic_cast<LView*>(this); }
+	bool Attach(LViewI *Parent) { return LList::Attach(Parent); }
 	ResStringGroup *GetStringGroup() { return this; }
 
 	// Methods
-	void Create(GXmlTag *load, SerialiseContext *ctx);
+	void Create(LXmlTag *load, SerialiseContext *ctx);
 	ResString *CreateStr(bool User = false);
 	void DeleteStr(ResString *Str);
 	ResString *FindName(char *Name);
@@ -154,47 +155,47 @@ public:
 	void Paste();
 
 	// Resource
-	GView *CreateUI();
+	LView *CreateUI();
 	void OnRightClick(LSubMenu *RClick);
 	void OnCommand(int Cmd);
 	bool Test(ErrorCollection *e);
-	bool Read(GXmlTag *t, SerialiseContext &Ctx);
-	bool Write(GXmlTag *t, SerialiseContext &Ctx);
+	bool Read(LXmlTag *t, SerialiseContext &Ctx);
+	bool Write(LXmlTag *t, SerialiseContext &Ctx);
 	ResStringGroup *IsStringGroup() { return this; }
 
 	// LList
-	void OnItemClick(LListItem *Item, GMouse &m);
-	void OnItemSelect(GArray<LListItem*> &Items);
+	void OnItemClick(LListItem *Item, LMouse &m);
+	void OnItemSelect(LArray<LListItem*> &Items);
 };
 
-class ResStringUi : public GLayout
+class ResStringUi : public LLayout
 {
-	GToolBar *Tools;
+	LToolBar *Tools;
 	ResStringGroup *StringGrp;
-	GStatusBar *Status;
-	GStatusPane *StatusInfo;
+	LStatusBar *Status;
+	LStatusPane *StatusInfo;
 
 public:
 	ResStringUi(ResStringGroup *Res);
 	~ResStringUi();
 
-	void OnPaint(GSurface *pDC);
+	void OnPaint(LSurface *pDC);
 	void PourAll();
 	void OnPosChange();
 	void OnCreate();
 	GMessage::Result OnEvent(GMessage *Msg);
 };
 
-class LangDlg : public GDialog
+class LangDlg : public LDialog
 {
-	GCombo *Sel;
+	LCombo *Sel;
 	List<GLanguage> Langs;
 
 public:
 	GLanguage *Lang;
 
-	LangDlg(GView *parent, List<GLanguage> &l, int Init = -1);
-	int OnNotify(GViewI *Ctrl, int Flags);
+	LangDlg(LView *parent, List<GLanguage> &l, int Init = -1);
+	int OnNotify(LViewI *Ctrl, int Flags);
 };
 
 ////////////////////////////////////////////////////////////////

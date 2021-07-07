@@ -5,8 +5,8 @@
 #include <windows.h>
 #include <tchar.h>
 #include <stdio.h>
-#include "../include/common/LgiDefs.h"
-#include "../include/common/GArray.h"
+#include "../include/lgi/common/LgiDefs.h"
+#include "../include/lgi/common/Array.h"
 
 const TCHAR *AppName = _T("Updater");
 
@@ -46,7 +46,7 @@ WCHAR *NewStr(WCHAR *s, size_t len = 0)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
-	GArray<WCHAR*> Files;
+	LArray<WCHAR*> Files;
 
 	// Parse the command line for the filename(s) to copy....
 	WCHAR *CmdLine = GetCommandLineW();

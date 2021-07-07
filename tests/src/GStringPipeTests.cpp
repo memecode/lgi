@@ -1,6 +1,5 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "UnitTests.h"
-#include "GStringClass.h"
 
 class GStringPipeTestPriv
 {

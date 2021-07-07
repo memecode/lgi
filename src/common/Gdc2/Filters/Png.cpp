@@ -25,8 +25,8 @@
 #include "png.h"
 #endif
 
-#include "Lgi.h"
-#include "GPalette.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Palette.h"
 
 #ifdef __CYGWIN__ 
 #include "png.h"
@@ -36,18 +36,18 @@
 #include <string.h>
 #include <math.h>
 
-#include "GLibraryUtils.h"
+#include "lgi/common/LibraryUtils.h"
 #ifdef FILTER_UI
 #include "GTransparentDlg.h"
 #endif
-#include "GVariant.h"
+#include "lgi/common/Variant.h"
 
 // Pixel formats
 typedef uint8_t   Png8;
-typedef GRgb24  Png24;
-typedef GRgba32 Png32;
-typedef GRgb48  Png48;
-typedef GRgba64 Png64;
+typedef LRgb24  Png24;
+typedef LRgba32 Png32;
+typedef LRgb48  Png48;
+typedef LRgba64 Png64;
 
 #if PNG_LIBPNG_VER_MAJOR <= 1 && PNG_LIBPNG_VER_MINOR <= 2
 #define png_const_infop png_infop
@@ -297,7 +297,7 @@ public:
 
 class InitLibPng : public LMutex
 {
-	GAutoPtr<LibPng> Png;
+	LAutoPtr<LibPng> Png;
 
 public:
 	LibPng *Get()
@@ -327,10 +327,10 @@ class GdcPng : public GFilter
 	#endif
 	int Pos;
 	uchar *PrevScanLine;
-	GSurface *pDC;
+	LSurface *pDC;
 	GMemQueue DataPipe;
 
-	GView *Parent;
+	LView *Parent;
 	jmp_buf Here;
 
 public:
@@ -346,10 +346,10 @@ public:
 	Format GetFormat() { return FmtPng; }
 	void SetMeter(int i) { if (Meter) Meter->Value(i); }
 	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
-	IoStatus ReadImage(GSurface *pDC, GStream *In);
-	IoStatus WriteImage(GStream *Out, GSurface *pDC);
+	IoStatus ReadImage(LSurface *pDC, LStream *In);
+	IoStatus WriteImage(LStream *Out, LSurface *pDC);
 
-	bool GetVariant(const char *n, GVariant &v, char *a)
+	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
 		if (!_stricmp(n, LGI_FILTER_TYPE))
 		{
@@ -429,7 +429,7 @@ void PNGAPI LibPngError(png_structp Png, png_const_charp Msg)
 
 		if (This->Props)
 		{
-			GVariant v;
+			LVariant v;
 			This->Props->SetValue(LGI_FILTER_ERROR, v = (char*)Msg);
 		}
 
@@ -444,7 +444,7 @@ void PNGAPI LibPngWarning(png_structp Png, png_const_charp Msg)
 
 void PNGAPI LibPngRead(png_structp Png, png_bytep Ptr, png_size_t Size)
 {
-	GStream *s = (GStream*)
+	LStream *s = (LStream*)
 					#if LIBPNG_SHARED
 					CurrentLibPng.Get()->
 					#endif
@@ -462,7 +462,7 @@ void PNGAPI LibPngRead(png_structp Png, png_bytep Ptr, png_size_t Size)
 
 struct PngWriteInfo
 {
-	GStream *s;
+	LStream *s;
 	Progress *m;
 };
 
@@ -667,7 +667,7 @@ void ReadAlpha64_32(Out *o, In *i, int Len)
 	}
 }
 
-GFilter::IoStatus GdcPng::ReadImage(GSurface *pDeviceContext, GStream *In)
+GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 {
 	GFilter::IoStatus Status = IoError;
 
@@ -675,18 +675,18 @@ GFilter::IoStatus GdcPng::ReadImage(GSurface *pDeviceContext, GStream *In)
 	pDC = pDeviceContext;
 	DeleteArray(PrevScanLine);
 
-	GVariant v;
+	LVariant v;
 	if (Props &&
 		Props->GetValue(LGI_FILTER_PARENT_WND, v) &&
 		v.Type == GV_GVIEW)
 	{
-		Parent = (GView*)v.Value.Ptr;
+		Parent = (LView*)v.Value.Ptr;
 	}
 
 	#if LIBPNG_SHARED
 	if (!Lib->IsLoaded() && !Lib->Load(sLibrary))
 	{
-		GString s;
+		LString s;
 		s.Printf("libpng is missing (%s.%s)", sLibrary, LGI_LIBRARY_EXT);
 		if (Props)
 			Props->SetValue(LGI_FILTER_ERROR, v = s);
@@ -747,16 +747,16 @@ GFilter::IoStatus GdcPng::ReadImage(GSurface *pDeviceContext, GStream *In)
 				int ColourType = LIBPNG png_get_color_type(png_ptr, info_ptr);
 				int Channels = LIBPNG png_get_channels(png_ptr, info_ptr);
 				int RequestBits = FinalBits * Channels;
-				GColourSpace InCs = ColourType == PNG_COLOR_TYPE_GRAY_ALPHA ?
+				LColourSpace InCs = ColourType == PNG_COLOR_TYPE_GRAY_ALPHA ?
 										CsIndex8 :
 										GBitsToColourSpace(MAX(RequestBits, 8));
 				
 				if (!pDC->Create(	LIBPNG png_get_image_width(png_ptr, info_ptr),
 									LIBPNG png_get_image_height(png_ptr, info_ptr),
 									InCs,
-									GSurface::SurfaceRequireExactCs))
+									LSurface::SurfaceRequireExactCs))
 				{
-					printf("%s:%i - GMemDC::Create(%i, %i, %i) failed.\n",
+					printf("%s:%i - LMemDC::Create(%i, %i, %i) failed.\n",
 							_FL,
 							LIBPNG png_get_image_width(png_ptr, info_ptr),
 							LIBPNG png_get_image_height(png_ptr, info_ptr),
@@ -783,7 +783,7 @@ GFilter::IoStatus GdcPng::ReadImage(GSurface *pDeviceContext, GStream *In)
 					int ActualBits = pDC->GetBits();
 					int ScanLen = LIBPNG png_get_image_width(png_ptr, info_ptr) * ActualBits / 8;
 					
-					GColourSpace OutCs = pDC->GetColourSpace();
+					LColourSpace OutCs = pDC->GetColourSpace();
 					for (int y=0; y<pDC->Y() && !Error; y++)
 					{
 						uchar *Scan = (*pDC)[y];
@@ -858,9 +858,9 @@ GFilter::IoStatus GdcPng::ReadImage(GSurface *pDeviceContext, GStream *In)
 										case Cs##name: \
 										{ \
 											if (LIBPNG png_get_bit_depth(png_ptr, info_ptr) == 16) \
-												Read64_##bits((G##name*)Scan, (Png48*)Scan0[y], pDC->X()); \
+												Read64_##bits((L##name*)Scan, (Png48*)Scan0[y], pDC->X()); \
 											else \
-												Read32_##bits((G##name*)Scan, (Png24*)Scan0[y], pDC->X()); \
+												Read32_##bits((L##name*)Scan, (Png24*)Scan0[y], pDC->X()); \
 											break; \
 										}
 
@@ -896,9 +896,9 @@ GFilter::IoStatus GdcPng::ReadImage(GSurface *pDeviceContext, GStream *In)
 										case Cs##name: \
 										{ \
 											if (LIBPNG png_get_bit_depth(png_ptr, info_ptr) == 16) \
-												ReadAlpha64_##bits((G##name*)Scan, (Png64*)Scan0[y], pDC->X()); \
+												ReadAlpha64_##bits((L##name*)Scan, (Png64*)Scan0[y], pDC->X()); \
 											else \
-												ReadAlpha32_##bits((G##name*)Scan, (Png32*)Scan0[y], pDC->X()); \
+												ReadAlpha32_##bits((L##name*)Scan, (Png32*)Scan0[y], pDC->X()); \
 											break; \
 										}
 
@@ -985,7 +985,7 @@ GFilter::IoStatus GdcPng::ReadImage(GSurface *pDeviceContext, GStream *In)
                             if (LIBPNG png_get_tRNS(png_ptr, info_ptr, &trans_alpha, &num_trans, &trans_color))
 							{
 								pDC->HasAlpha(true);
-								GSurface *Alpha = pDC->AlphaDC();
+								LSurface *Alpha = pDC->AlphaDC();
 								if (Alpha)
 								{
 									if (trans_alpha)
@@ -1057,14 +1057,14 @@ GFilter::IoStatus GdcPng::ReadImage(GSurface *pDeviceContext, GStream *In)
 	return Status;
 }
 
-GFilter::IoStatus GdcPng::WriteImage(GStream *Out, GSurface *pDC)
+GFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 {
 	GFilter::IoStatus Status = IoError;
 	
-	GVariant Transparent;
+	LVariant Transparent;
 	bool HasTransparency = false;
 	COLOUR Back = 0;
-	GVariant v;
+	LVariant v;
 
 	if (!pDC)
 		return GFilter::IoError;
@@ -1105,7 +1105,7 @@ GFilter::IoStatus GdcPng::WriteImage(GStream *Out, GSurface *pDC)
 	}
 	else if (pDC->AlphaDC())
 	{
-		GSurface *a = pDC->AlphaDC();
+		LSurface *a = pDC->AlphaDC();
 		if (a)
 		{
 			for (int y=0; y<a->Y() && !HasTransparency; y++)
@@ -1131,7 +1131,7 @@ GFilter::IoStatus GdcPng::WriteImage(GStream *Out, GSurface *pDC)
 		if (Props->GetValue(LGI_FILTER_PARENT_WND, v) &&
 			v.Type == GV_GVIEW)
 		{
-			Parent = (GView*)v.Value.Ptr;
+			Parent = (LView*)v.Value.Ptr;
 		}
 		
 		if (Props->GetValue(LGI_FILTER_BACKGROUND, v))
@@ -1159,7 +1159,7 @@ GFilter::IoStatus GdcPng::WriteImage(GStream *Out, GSurface *pDC)
 
 	if (setjmp(Here) == 0 && pDC && Out)
 	{
-		GVariant ColProfile;
+		LVariant ColProfile;
 		if (Props)
 		{
 			Props->GetValue(LGI_FILTER_COLOUR_PROF, ColProfile);
@@ -1187,10 +1187,10 @@ GFilter::IoStatus GdcPng::WriteImage(GStream *Out, GSurface *pDC)
 				bool KeyAlpha = false;
 				bool ChannelAlpha = false;
 				
-				GMemDC *pTemp = 0;
+				LMemDC *pTemp = 0;
 				if (pDC->AlphaDC() && HasTransparency)
 				{
-					pTemp = new GMemDC(pDC->X(), pDC->Y(), System32BitColourSpace);
+					pTemp = new LMemDC(pDC->X(), pDC->Y(), System32BitColourSpace);
 					if (pTemp)
 					{
 						pTemp->Colour(0);
@@ -1280,7 +1280,7 @@ GFilter::IoStatus GdcPng::WriteImage(GStream *Out, GSurface *pDC)
 				uchar *TempBits = new uchar[pDC->Y() * TempLine];
 
 				if (Meter)
-					Meter->SetRange(GRange(0, pDC->Y()));
+					Meter->SetRange(LRange(0, pDC->Y()));
 
 				switch (pDC->GetBits())
 				{
@@ -1291,7 +1291,7 @@ GFilter::IoStatus GdcPng::WriteImage(GStream *Out, GSurface *pDC)
 						if (Pal)
 						{
 							int Colours = Pal->GetSize();
-							GAutoPtr<png_color> PngPal(new png_color[Colours]);
+							LAutoPtr<png_color> PngPal(new png_color[Colours]);
 							if (PngPal)
 							{
 							    for (int i=0; i<Colours; i++)
@@ -1524,7 +1524,7 @@ GFilter::IoStatus GdcPng::WriteImage(GStream *Out, GSurface *pDC)
 					}
 				}
 				
-				GArray<png_bytep> row;
+				LArray<png_bytep> row;
 				if (row.Length(pDC->Y()))
 				{
 					for (int y=0; y<pDC->Y(); y++)

@@ -153,7 +153,7 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>include\common;include\win32;private\win;..\..\..\CodeLib\libiconv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;include\lgi\win;private\win;..\..\..\CodeLib\libiconv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;WINDOWS;LGI_RES;LGI_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -199,7 +199,7 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>include\common;include\win32;private\win;..\..\..\CodeLib\libiconv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;include\lgi\win;private\win;..\..\..\CodeLib\libiconv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN64;NDEBUG;WINDOWS;LGI_RES;LGI_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -244,7 +244,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>include\common;include\win32;private\win;..\..\..\CodeLib\libiconv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;include\lgi\win;private\win;..\..\..\CodeLib\libiconv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>LGI_LIBRARY;_DEBUG;WIN32;WINDOWS;LGI_RES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -287,7 +287,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>include\common;include\win32;private\win;..\..\..\CodeLib\libiconv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;include\lgi\win;private\win;..\..\..\CodeLib\libiconv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN64;LGI_LIBRARY;_DEBUG;WINDOWS;LGI_RES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -332,7 +332,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>include\common;include\win32;private\win;..\..\..\CodeLib\libiconv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;include\lgi\win;private\win;..\..\..\CodeLib\libiconv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;WINDOWS;LGI_RES;LGI_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -378,7 +378,7 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>include\common;include\win32;private\win;..\..\..\CodeLib\libiconv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;include\lgi\win;private\win;..\..\..\CodeLib\libiconv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN64;NDEBUG;WINDOWS;LGI_RES;LGI_LIBRARY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -422,20 +422,20 @@
     <ClCompile Include="src\common\Gdc2\64Bit.cpp" />
     <ClCompile Include="src\common\Gdc2\8Bit.cpp" />
     <ClCompile Include="src\common\Gdc2\Alpha.cpp" />
-    <ClCompile Include="src\common\Gdc2\Filters\GFilter.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\GDisplayString.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\GFont.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\GFontCodePages.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\GFontSystem.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\GFont_A.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\GFont_W.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\LStringLayout.cpp" />
-    <ClCompile Include="src\common\Gdc2\GColour.cpp" />
+    <ClCompile Include="src\common\Gdc2\Filters\Filter.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\DisplayString.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\Font.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\FontCodePages.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\FontSystem.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\FontType.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\StringLayout.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\TypeFace.cpp" />
+    <ClCompile Include="src\common\Gdc2\Colour.cpp" />
     <ClCompile Include="src\common\Gdc2\GdcCommon.cpp" />
-    <ClCompile Include="src\common\Gdc2\GRect.cpp" />
-    <ClCompile Include="src\common\Gdc2\GSurface.cpp" />
-    <ClCompile Include="src\common\Gdc2\Path\GPath.cpp" />
-    <ClCompile Include="src\common\Gdc2\Tools\GColourReduce.cpp" />
+    <ClCompile Include="src\common\Gdc2\Rect.cpp" />
+    <ClCompile Include="src\common\Gdc2\Surface.cpp" />
+    <ClCompile Include="src\common\Gdc2\Path\Path.cpp" />
+    <ClCompile Include="src\common\Gdc2\Tools\ColourReduce.cpp" />
     <ClCompile Include="src\common\General\GContainers.cpp" />
     <ClCompile Include="src\common\General\GExeCheck.cpp" />
     <ClCompile Include="src\common\General\GFileCommon.cpp" />
@@ -449,49 +449,49 @@
     <ClCompile Include="src\common\INet\INet.cpp" />
     <ClCompile Include="src\common\INet\INetTools.cpp" />
     <ClCompile Include="src\common\INet\MDStringToDigest.cpp" />
-    <ClCompile Include="src\common\Lgi\GAlert.cpp" />
-    <ClCompile Include="src\common\Lgi\GAppCommon.cpp" />
-    <ClCompile Include="src\common\Lgi\GCss.cpp" />
-    <ClCompile Include="src\common\Lgi\GCssTools.cpp" />
-    <ClCompile Include="src\common\Lgi\GDragAndDropCommon.cpp" />
-    <ClCompile Include="src\common\Lgi\GDropFiles.cpp" />
-    <ClCompile Include="src\common\Lgi\GFindReplace.cpp" />
-    <ClCompile Include="src\common\Lgi\GFontSelect.cpp" />
-    <ClCompile Include="src\common\Lgi\GGuiUtils.cpp" />
-    <ClCompile Include="src\common\Lgi\GInput.cpp" />
-    <ClCompile Include="src\common\Lgi\GLibrary.cpp" />
-    <ClCompile Include="src\common\Lgi\GMemStream.cpp" />
-    <ClCompile Include="src\common\Lgi\LMenuCommon.cpp" />
-    <ClCompile Include="src\common\Lgi\GMru.cpp" />
-    <ClCompile Include="src\common\Lgi\GObject.cpp" />
-    <ClCompile Include="src\common\Lgi\GOptionsFile.cpp" />
-    <ClCompile Include="src\common\Lgi\GStream.cpp" />
-    <ClCompile Include="src\common\Lgi\GSubProcess.cpp" />
-    <ClCompile Include="src\common\Lgi\GToolTip.cpp" />
-    <ClCompile Include="src\common\Lgi\GTrayIcon.cpp" />
-    <ClCompile Include="src\common\Lgi\GVariant.cpp" />
-    <ClCompile Include="src\common\Lgi\GViewCommon.cpp" />
-    <ClCompile Include="src\common\Lgi\GWindowCommon.cpp" />
+    <ClCompile Include="src\common\Lgi\Alert.cpp" />
+    <ClCompile Include="src\common\Lgi\AppCommon.cpp" />
+    <ClCompile Include="src\common\Lgi\Css.cpp" />
+    <ClCompile Include="src\common\Lgi\CssTools.cpp" />
+    <ClCompile Include="src\common\Lgi\DragAndDropCommon.cpp" />
+    <ClCompile Include="src\common\Lgi\DropFiles.cpp" />
+    <ClCompile Include="src\common\Lgi\FindReplace.cpp" />
+    <ClCompile Include="src\common\Lgi\FontSelect.cpp" />
+    <ClCompile Include="src\common\Lgi\GuiUtils.cpp" />
+    <ClCompile Include="src\common\Lgi\Input.cpp" />
+    <ClCompile Include="src\common\Lgi\Library.cpp" />
+    <ClCompile Include="src\common\Lgi\MemStream.cpp" />
+    <ClCompile Include="src\common\Lgi\MenuCommon.cpp" />
+    <ClCompile Include="src\common\Lgi\Mru.cpp" />
+    <ClCompile Include="src\common\Lgi\Object.cpp" />
+    <ClCompile Include="src\common\Lgi\OptionsFile.cpp" />
+    <ClCompile Include="src\common\Lgi\Stream.cpp" />
+    <ClCompile Include="src\common\Lgi\SubProcess.cpp" />
+    <ClCompile Include="src\common\Lgi\ToolTip.cpp" />
+    <ClCompile Include="src\common\Lgi\TrayIcon.cpp" />
+    <ClCompile Include="src\common\Lgi\Variant.cpp" />
+    <ClCompile Include="src\common\Lgi\ViewCommon.cpp" />
+    <ClCompile Include="src\common\Lgi\WindowCommon.cpp" />
     <ClCompile Include="src\common\Lgi\LgiCommon.cpp" />
-    <ClCompile Include="src\common\Lgi\LgiMsg.cpp" />
-    <ClCompile Include="src\common\Lgi\LgiRand.cpp" />
-    <ClCompile Include="src\common\Lgi\LMutex.cpp" />
-    <ClCompile Include="src\common\Lgi\LThreadCommon.cpp" />
-    <ClCompile Include="src\common\Lgi\LThreadEvent.cpp" />
+    <ClCompile Include="src\common\Lgi\LMsg.cpp" />
+    <ClCompile Include="src\common\Lgi\Rand.cpp" />
+    <ClCompile Include="src\common\Lgi\Mutex.cpp" />
+    <ClCompile Include="src\common\Lgi\ThreadCommon.cpp" />
+    <ClCompile Include="src\common\Lgi\ThreadEvent.cpp" />
     <ClCompile Include="src\common\Resource\LgiRes.cpp" />
     <ClCompile Include="src\common\Resource\Res.cpp" />
     <ClCompile Include="src\common\Skins\Gel\Gel.cpp" />
-    <ClCompile Include="src\common\Text\GDocView.cpp" />
-    <ClCompile Include="src\common\Text\GString.cpp" />
-    <ClCompile Include="src\common\Text\GTextView3.cpp" />
-    <ClCompile Include="src\common\Text\GToken.cpp" />
-    <ClCompile Include="src\common\Text\GUnicode.cpp" />
-    <ClCompile Include="src\common\Text\GUtf8.cpp" />
-    <ClCompile Include="src\common\Text\GXmlTree.cpp" />
-    <ClCompile Include="src\common\Text\LUnicodeString.cpp" />
-    <ClCompile Include="src\common\Widgets\GBitmap.cpp" />
-    <ClCompile Include="src\common\Widgets\GBox.cpp" />
-    <ClCompile Include="src\common\Widgets\GButton.cpp">
+    <ClCompile Include="src\common\Text\DocView.cpp" />
+    <ClCompile Include="src\common\Text\String.cpp" />
+    <ClCompile Include="src\common\Text\TextView3.cpp" />
+    <ClCompile Include="src\common\Text\Token.cpp" />
+    <ClCompile Include="src\common\Text\Unicode.cpp" />
+    <ClCompile Include="src\common\Text\Utf8.cpp" />
+    <ClCompile Include="src\common\Text\XmlTree.cpp" />
+    <ClCompile Include="src\common\Text\UnicodeString.cpp" />
+    <ClCompile Include="src\common\Widgets\Bitmap.cpp" />
+    <ClCompile Include="src\common\Widgets\Box.cpp" />
+    <ClCompile Include="src\common\Widgets\Button.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|Win32'">true</ExcludedFromBuild>
@@ -499,7 +499,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\common\Widgets\GCheckBox.cpp">
+    <ClCompile Include="src\common\Widgets\CheckBox.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|Win32'">false</ExcludedFromBuild>
@@ -507,7 +507,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\common\Widgets\GCombo.cpp">
+    <ClCompile Include="src\common\Widgets\Combo.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|Win32'">true</ExcludedFromBuild>
@@ -515,7 +515,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\common\Widgets\GEdit.cpp">
+    <ClCompile Include="src\common\Widgets\Edit.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|Win32'">true</ExcludedFromBuild>
@@ -523,11 +523,11 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\common\Widgets\GItemContainer.cpp" />
-    <ClCompile Include="src\common\Widgets\GPanel.cpp" />
-    <ClCompile Include="src\common\Widgets\GPopup.cpp" />
-    <ClCompile Include="src\common\Widgets\GProgressDlg.cpp" />
-    <ClCompile Include="src\common\Widgets\GRadioGroup.cpp">
+    <ClCompile Include="src\common\Widgets\ItemContainer.cpp" />
+    <ClCompile Include="src\common\Widgets\Panel.cpp" />
+    <ClCompile Include="src\common\Widgets\Popup.cpp" />
+    <ClCompile Include="src\common\Widgets\ProgressDlg.cpp" />
+    <ClCompile Include="src\common\Widgets\RadioGroup.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|Win32'">false</ExcludedFromBuild>
@@ -535,7 +535,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\common\Widgets\GSlider.cpp">
+    <ClCompile Include="src\common\Widgets\Slider.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -543,38 +543,38 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\common\Widgets\GSplitter.cpp" />
-    <ClCompile Include="src\common\Widgets\GStatusBar.cpp" />
-    <ClCompile Include="src\common\Widgets\GTableLayout.cpp" />
-    <ClCompile Include="src\common\Widgets\GTabView.cpp" />
-    <ClCompile Include="src\common\Widgets\GTextLabel.cpp" />
-    <ClCompile Include="src\common\Widgets\GToolBar.cpp" />
-    <ClCompile Include="src\common\Widgets\GTree.cpp" />
-    <ClCompile Include="src\common\Widgets\LList.cpp" />
-    <ClCompile Include="src\win32\Gdc2\Gdc2.cpp" />
-    <ClCompile Include="src\win32\Gdc2\GdiLeak.cpp" />
-    <ClCompile Include="src\win32\Gdc2\GMemDC.cpp" />
-    <ClCompile Include="src\win32\Gdc2\GPrintDC.cpp" />
-    <ClCompile Include="src\win32\Gdc2\GScreenDC.cpp" />
-    <ClCompile Include="src\win32\General\GFile.cpp" />
-    <ClCompile Include="src\win32\General\GMem.cpp" />
-    <ClCompile Include="src\win32\General\ShowFileProp_Win.cpp" />
-    <ClCompile Include="src\win32\INet\MibAccess.cpp" />
-    <ClCompile Include="src\win32\Lgi\GApp.cpp" />
-    <ClCompile Include="src\win32\Lgi\GClipBoard.cpp" />
-    <ClCompile Include="src\win32\Lgi\GDragAndDrop.cpp" />
-    <ClCompile Include="src\win32\Lgi\GFileSelect.cpp" />
-    <ClCompile Include="src\win32\Lgi\GGeneral.cpp" />
-    <ClCompile Include="src\win32\Lgi\GLayout.cpp" />
-    <ClCompile Include="src\win32\Lgi\LMenu.cpp" />
-    <ClCompile Include="src\win32\Lgi\GPrinter.cpp" />
-    <ClCompile Include="src\win32\Lgi\GScrollBar.cpp" />
-    <ClCompile Include="src\win32\Lgi\GView.cpp" />
-    <ClCompile Include="src\win32\Lgi\GWindow.cpp" />
-    <ClCompile Include="src\win32\Lgi\LgiException.cpp" />
-    <ClCompile Include="src\win32\Lgi\LThread.cpp" />
-    <ClCompile Include="src\win32\Widgets\GButton_Win.cpp" />
-    <ClCompile Include="src\win32\Widgets\GCheckBox_Win.cpp">
+    <ClCompile Include="src\common\Widgets\Splitter.cpp" />
+    <ClCompile Include="src\common\Widgets\StatusBar.cpp" />
+    <ClCompile Include="src\common\Widgets\TableLayout.cpp" />
+    <ClCompile Include="src\common\Widgets\TabView.cpp" />
+    <ClCompile Include="src\common\Widgets\TextLabel.cpp" />
+    <ClCompile Include="src\common\Widgets\ToolBar.cpp" />
+    <ClCompile Include="src\common\Widgets\Tree.cpp" />
+    <ClCompile Include="src\common\Widgets\List.cpp" />
+    <ClCompile Include="src\win\Gdc2\Gdc2.cpp" />
+    <ClCompile Include="src\win\Gdc2\GdiLeak.cpp" />
+    <ClCompile Include="src\win\Gdc2\LMemDC.cpp" />
+    <ClCompile Include="src\win\Gdc2\LPrintDC.cpp" />
+    <ClCompile Include="src\win\Gdc2\LScreenDC.cpp" />
+    <ClCompile Include="src\win\General\GFile.cpp" />
+    <ClCompile Include="src\win\General\GMem.cpp" />
+    <ClCompile Include="src\win\General\ShowFileProp_Win.cpp" />
+    <ClCompile Include="src\win\INet\MibAccess.cpp" />
+    <ClCompile Include="src\win\Lgi\App.cpp" />
+    <ClCompile Include="src\win\Lgi\ClipBoard.cpp" />
+    <ClCompile Include="src\win\Lgi\DragAndDrop.cpp" />
+    <ClCompile Include="src\win\Lgi\FileSelect.cpp" />
+    <ClCompile Include="src\win\Lgi\General.cpp" />
+    <ClCompile Include="src\win\Lgi\Layout.cpp" />
+    <ClCompile Include="src\win\Lgi\Menu.cpp" />
+    <ClCompile Include="src\win\Lgi\Printer.cpp" />
+    <ClCompile Include="src\win\Lgi\ScrollBar.cpp" />
+    <ClCompile Include="src\win\Lgi\View.cpp" />
+    <ClCompile Include="src\win\Lgi\Window.cpp" />
+    <ClCompile Include="src\win\Lgi\LgiException.cpp" />
+    <ClCompile Include="src\win\Lgi\Thread.cpp" />
+    <ClCompile Include="src\win\Widgets\Button_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\CheckBox_Win.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -582,80 +582,80 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="src\win32\Widgets\GCombo_Win.cpp" />
-    <ClCompile Include="src\win32\Widgets\GDialog.cpp" />
-    <ClCompile Include="src\win32\Widgets\GEdit_Win.cpp" />
-    <ClCompile Include="src\win32\Widgets\GProgress.cpp" />
-    <ClCompile Include="src\win32\Widgets\GRadioGroup_Win.cpp" />
-    <ClCompile Include="src\win32\Widgets\GSlider_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\Combo_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\Dialog_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\Edit_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\Progress_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\RadioGroup_Win.cpp" />
+    <ClCompile Include="src\win\Widgets\Slider_Win.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\common\GArray.h" />
-    <ClInclude Include="include\common\GAutoPtr.h" />
-    <ClInclude Include="include\common\GBox.h" />
-    <ClInclude Include="include\common\GButton.h" />
-    <ClInclude Include="include\common\GCapabilities.h" />
-    <ClInclude Include="include\common\GCheckBox.h" />
-    <ClInclude Include="include\common\GColour.h" />
-    <ClInclude Include="include\common\GColourSpace.h" />
-    <ClInclude Include="include\common\GCom.h" />
-    <ClInclude Include="include\common\GCombo.h" />
-    <ClInclude Include="include\common\GContainers.h" />
-    <ClInclude Include="include\common\GCss.h" />
-    <ClInclude Include="include\common\GCssTools.h" />
+    <ClInclude Include="include\common\Array.h" />
+    <ClInclude Include="include\common\AutoPtr.h" />
+    <ClInclude Include="include\common\Box.h" />
+    <ClInclude Include="include\common\Button.h" />
+    <ClInclude Include="include\common\Capabilities.h" />
+    <ClInclude Include="include\common\CheckBox.h" />
+    <ClInclude Include="include\common\Colour.h" />
+    <ClInclude Include="include\common\ColourSpace.h" />
+    <ClInclude Include="include\common\Com.h" />
+    <ClInclude Include="include\common\Combo.h" />
+    <ClInclude Include="include\common\Containers.h" />
+    <ClInclude Include="include\common\Css.h" />
+    <ClInclude Include="include\common\CssTools.h" />
     <ClInclude Include="include\common\Gdc2.h" />
     <ClInclude Include="include\common\GdiLeak.h" />
-    <ClInclude Include="include\common\GDisplayStringLayout.h" />
-    <ClInclude Include="include\common\GDom.h" />
-    <ClInclude Include="include\common\GDragAndDrop.h" />
-    <ClInclude Include="include\common\GDropFiles.h" />
-    <ClInclude Include="include\common\GEdit.h" />
-    <ClInclude Include="include\common\GEventTargetThread.h" />
-    <ClInclude Include="include\common\GFile.h" />
-    <ClInclude Include="include\common\GFileSelect.h" />
-    <ClInclude Include="include\common\GFilter.h" />
-    <ClInclude Include="include\common\GFont.h" />
-    <ClInclude Include="include\common\GGrowl.h" />
-    <ClInclude Include="include\common\GHashTable.h" />
-    <ClInclude Include="include\common\GImageList.h" />
-    <ClInclude Include="include\common\GItemContainer.h" />
-    <ClInclude Include="include\common\GLibrary.h" />
-    <ClInclude Include="include\common\GMatrix.h" />
-    <ClInclude Include="include\common\GMem.h" />
-    <ClInclude Include="include\common\GPath.h" />
-    <ClInclude Include="include\common\GSlider.h" />
-    <ClInclude Include="include\common\GView.h" />
-    <ClInclude Include="include\common\LMenu.h" />
-    <ClInclude Include="include\common\GMessage.h" />
-    <ClInclude Include="include\common\GMru.h" />
-    <ClInclude Include="include\common\GNotifications.h" />
-    <ClInclude Include="include\common\GPalette.h" />
-    <ClInclude Include="include\common\GPixelRops.h" />
-    <ClInclude Include="include\common\GPoint.h" />
-    <ClInclude Include="include\common\GPopup.h" />
-    <ClInclude Include="include\common\GProgress.h" />
-    <ClInclude Include="include\common\GRadioGroup.h" />
-    <ClInclude Include="include\common\GRect.h" />
-    <ClInclude Include="include\common\GRops.h" />
-    <ClInclude Include="include\common\GScrollBar.h" />
-    <ClInclude Include="include\common\GStream.h" />
-    <ClInclude Include="include\common\GString.h" />
-    <ClInclude Include="include\common\GSubProcess.h" />
-    <ClInclude Include="include\common\GTableLayout.h" />
-    <ClInclude Include="include\common\GTabView.h" />
-    <ClInclude Include="include\common\GTextLabel.h" />
-    <ClInclude Include="include\common\GTextView3.h" />
-    <ClInclude Include="include\common\GToolBar.h" />
-    <ClInclude Include="include\common\GTree.h" />
-    <ClInclude Include="include\common\GUnicode.h" />
-    <ClInclude Include="include\common\GVariant.h" />
-    <ClInclude Include="include\common\GViewPriv.h" />
-    <ClInclude Include="include\common\INet.h" />
-    <ClInclude Include="include\common\INetTools.h" />
-    <ClInclude Include="include\common\LCancel.h" />
-    <ClInclude Include="include\common\LDateTime.h" />
-    <ClInclude Include="include\common\LDomFields.h" />
-    <ClInclude Include="include\common\LError.h" />
+    <ClInclude Include="include\common\DisplayStringLayout.h" />
+    <ClInclude Include="include\common\Dom.h" />
+    <ClInclude Include="include\common\DragAndDrop.h" />
+    <ClInclude Include="include\common\DropFiles.h" />
+    <ClInclude Include="include\common\Edit.h" />
+    <ClInclude Include="include\common\EventTargetThread.h" />
+    <ClInclude Include="include\common\File.h" />
+    <ClInclude Include="include\common\FileSelect.h" />
+    <ClInclude Include="include\common\Filter.h" />
+    <ClInclude Include="include\common\Font.h" />
+    <ClInclude Include="include\common\Growl.h" />
+    <ClInclude Include="include\common\HashTable.h" />
+    <ClInclude Include="include\common\ImageList.h" />
+    <ClInclude Include="include\common\ItemContainer.h" />
+    <ClInclude Include="include\common\Library.h" />
+    <ClInclude Include="include\common\Matrix.h" />
+    <ClInclude Include="include\common\Mem.h" />
+    <ClInclude Include="include\common\Path.h" />
+    <ClInclude Include="include\common\Slider.h" />
+    <ClInclude Include="include\common\View.h" />
+    <ClInclude Include="include\common\Menu.h" />
+    <ClInclude Include="include\common\Message.h" />
+    <ClInclude Include="include\common\Mru.h" />
+    <ClInclude Include="include\common\Notifications.h" />
+    <ClInclude Include="include\common\Palette.h" />
+    <ClInclude Include="include\common\PixelRops.h" />
+    <ClInclude Include="include\common\Point.h" />
+    <ClInclude Include="include\common\Popup.h" />
+    <ClInclude Include="include\common\Progress.h" />
+    <ClInclude Include="include\common\RadioGroup.h" />
+    <ClInclude Include="include\common\Rect.h" />
+    <ClInclude Include="include\common\Rops.h" />
+    <ClInclude Include="include\common\ScrollBar.h" />
+    <ClInclude Include="include\common\Stream.h" />
+    <ClInclude Include="include\common\String.h" />
+    <ClInclude Include="include\common\SubProcess.h" />
+    <ClInclude Include="include\common\TableLayout.h" />
+    <ClInclude Include="include\common\abView.h" />
+    <ClInclude Include="include\common\TextLabel.h" />
+    <ClInclude Include="include\common\TextView3.h" />
+    <ClInclude Include="include\common\ToolBar.h" />
+    <ClInclude Include="include\common\Tree.h" />
+    <ClInclude Include="include\common\Unicode.h" />
+    <ClInclude Include="include\common\Variant.h" />
+    <ClInclude Include="include\common\ViewPriv.h" />
+    <ClInclude Include="include\common\Net.h" />
+    <ClInclude Include="include\common\NetTools.h" />
+    <ClInclude Include="include\common\Cancel.h" />
+    <ClInclude Include="include\common\DateTime.h" />
+    <ClInclude Include="include\common\DomFields.h" />
+    <ClInclude Include="include\common\Error.h" />
     <ClInclude Include="include\common\Lgi.h" />
     <ClInclude Include="include\common\LgiClass.h" />
     <ClInclude Include="include\common\LgiClasses.h" />
@@ -664,23 +664,23 @@
     <ClInclude Include="include\common\LgiInc.h" />
     <ClInclude Include="include\common\LgiInterfaces.h" />
     <ClInclude Include="include\common\LgiRes.h" />
-    <ClInclude Include="include\common\LList.h" />
-    <ClInclude Include="include\common\LListItemCheckBox.h" />
-    <ClInclude Include="include\common\LListItemRadioBtn.h" />
-    <ClInclude Include="include\common\LMutex.h" />
-    <ClInclude Include="include\common\LPointF.h" />
-    <ClInclude Include="include\common\LStringLayout.h" />
-    <ClInclude Include="include\common\LThread.h" />
-    <ClInclude Include="include\common\LThreadEvent.h" />
+    <ClInclude Include="include\common\List.h" />
+    <ClInclude Include="include\common\ListItemCheckBox.h" />
+    <ClInclude Include="include\common\ListItemRadioBtn.h" />
+    <ClInclude Include="include\common\Mutex.h" />
+    <ClInclude Include="include\common\PointF.h" />
+    <ClInclude Include="include\common\StringLayout.h" />
+    <ClInclude Include="include\common\Thread.h" />
+    <ClInclude Include="include\common\ThreadEvent.h" />
     <ClInclude Include="include\common\Res.h" />
-    <ClInclude Include="include\win32\GCom.h" />
-    <ClInclude Include="include\win32\LgiOsClasses.h" />
-    <ClInclude Include="include\win32\LgiOsDefs.h" />
+    <ClInclude Include="include\win\GCom.h" />
+    <ClInclude Include="include\win\LgiOsClasses.h" />
+    <ClInclude Include="include\win\LgiOsDefs.h" />
     <ClInclude Include="private\win\GAppPriv.h" />
     <ClInclude Include="src\common\Gdc2\Font\GFontPriv.h" />
     <ClInclude Include="src\common\Hash\md5\md5.h" />
     <ClInclude Include="src\common\Hash\sha1\sha1.h" />
-    <ClInclude Include="src\win32\INet\MibAccess.h" />
+    <ClInclude Include="src\win\INet\MibAccess.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

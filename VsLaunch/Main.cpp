@@ -1,6 +1,6 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "resdefs.h"
-#include "GTextLog.h"
+#include "lgi/common/TextLog.h"
 
 //////////////////////////////////////////////////////////////////
 const char *AppName = "VsLaunch";
@@ -49,7 +49,7 @@ int VerToYear(double v)
 	return 0;
 }
 
-class App : public GWindow
+class App : public LWindow
 {
 	GTextLog *Log;
 
@@ -57,7 +57,7 @@ public:
     App()
     {
         Name(AppName);
-        GRect r(0, 0, 500, 300);
+        LRect r(0, 0, 500, 300);
         SetPos(r);
         MoveToCenter();
         SetQuitOnClose(true);
@@ -75,7 +75,7 @@ public:
 		Visible(true);
 	}
     
-	void OnReceiveFiles(GArray<const char*> &Files)
+	void OnReceiveFiles(LArray<const char*> &Files)
 	{
 		Log->Print("Got %i files...\n", Files.Length());
 		for (unsigned i=0; i<Files.Length(); i++)
@@ -83,13 +83,13 @@ public:
 			const char *File = Files[i];
 			Log->Print("\t%s...\n", File);
 	
-			const char *Ext = LgiGetExtension(File);
+			const char *Ext = LGetExtension(File);
 			if (Ext && !_stricmp(Ext, "sln"))
 			{
-				GFile f;
+				LFile f;
 				if (f.Open(File, O_READ))
 				{
-					GString::Array a = f.Read().Split("\n");
+					LString::Array a = f.Read().Split("\n");
 					f.Close();
 					
 					double FileVersion = 0.0;
@@ -99,12 +99,12 @@ public:
 					{
 						if (a[i].Find("File, Format Version") >= 0)
 						{
-							GString::Array p = a[i].Split(" ");
+							LString::Array p = a[i].Split(" ");
 							FileVersion = p.Last().Float();
 						}
 						else if (a[i](0) == '#')
 						{
-							GString::Array p = a[i].Split(" ");
+							LString::Array p = a[i].Split(" ");
 							for (auto s : p)
 							{
 								auto i = s.Int();
@@ -126,8 +126,8 @@ public:
 					if (VsVersion > 0.0)
 					{
 						// C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE\devenv.exe
-						GFile::Path p(LSP_USER_APPS, 32);
-						GString v;
+						LFile::Path p(LSP_USER_APPS, 32);
+						LString v;
 
 						if (VsVersion >= 16.0)
 							v.Printf("Microsoft Visual Studio\\%" PRIi64 "\\Community", VsYear);
@@ -154,7 +154,7 @@ public:
 //////////////////////////////////////////////////////////////////
 int LgiMain(OsAppArguments &AppArgs)
 {
-	GApp a(AppArgs, AppName);
+	LApp a(AppArgs, AppName);
 	if (a.IsOk())
 	{
 		a.AppWnd = new App;

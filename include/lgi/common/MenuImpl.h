@@ -1,0 +1,95 @@
+#ifndef _GMENU_IMPL_H_
+#define _GMENU_IMPL_H_
+
+class GSubMenu;
+class GMenuItem;
+class SubMenuImpl;
+class MenuImpl;
+
+#include "LPopup.h"
+
+class MenuClickImpl
+{
+	friend class MenuItemImpl;
+
+protected:
+	GMenuItem *Clicked;
+
+public:
+	MenuClickImpl()
+	{
+		Clicked = 0;
+	}
+	
+	virtual ~MenuClickImpl()
+	{
+	}
+	
+	GMenuItem *ItemClicked()
+	{
+		return Clicked;
+	}
+	
+	virtual LView *View() { return 0; }
+	virtual SubMenuImpl *IsSub() { return 0; }
+	virtual MenuImpl *IsMenu() { return 0; }
+};
+
+class SubMenuImpl : public LPopup, public MenuClickImpl
+{
+	class SubMenuImplPrivate *d;
+
+public:
+	SubMenuImpl(GSubMenu *Sub);
+	~SubMenuImpl();
+	
+	const char *GetClass() { return "SubMenuImpl"; }
+	bool Visible() { return LPopup::Visible(); }
+	void Visible(bool b);
+	void Layout(int x, int y);
+	void OnPaint(LSurface *pDC);
+	bool OnKey(LKey &k);
+	
+	LView *View() { return this; }
+	SubMenuImpl *IsSub() { return this; }
+	GSubMenu *GetSub();
+};
+
+class MenuImpl : public LView, public MenuClickImpl
+{
+	class MenuImplPrivate *d;
+
+public:
+	MenuImpl(GMenu *Sub);
+	~MenuImpl();
+	
+	const char *GetClass() { return "MenuImpl"; }
+	bool Pour(LRegion &r);
+    void OnPaint(LSurface *pDC);
+	bool HasSubOpen();
+    
+	LView *View() { return this; }
+	MenuImpl *IsMenu() { return this; }
+};
+
+class MenuItemImpl : public LView
+{
+	class MenuItemImplPrivate *d;
+
+public:
+	MenuItemImpl(GMenuItem *Item);
+	~MenuItemImpl();
+	
+	const char *GetClass() { return "MenuItemImpl"; }
+	GMenuItem *Item();
+	void ShowSub();
+	void HideSub(bool SetClick = false);
+	void Activate();
+	bool IsOnSubMenu();
+	void OnPaint(LSurface *pDC);
+    void OnMouseClick(LMouse &m);
+	void OnMouseEnter(LMouse &m);
+	void OnMouseExit(LMouse &m);
+};
+
+#endif

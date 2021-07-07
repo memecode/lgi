@@ -1,6 +1,6 @@
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "UnitTests.h"
-#include "LBits.h"
+#include "lgi/common/Bits.h"
 
 bool LBitsTest::Run()
 {

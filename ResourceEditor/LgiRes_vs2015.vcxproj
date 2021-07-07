@@ -90,7 +90,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\include\win32;..\include\common;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng\build32;Resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\lgi\win;..\include;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng\build32;Resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -115,7 +115,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\include\win32;..\include\common;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng\build64;Resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\lgi\win;..\include;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng\build64;Resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -137,7 +137,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\include\win32;..\include\common;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng\build32;Resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\lgi\win;..\include;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng\build32;Resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader />
@@ -162,7 +162,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\include\win32;..\include\common;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng\build64;Resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include\lgi\win;..\include;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng\build64;Resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader />
@@ -186,10 +186,10 @@
     <ClCompile Include="..\src\common\Gdc2\Filters\Gif.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Filters\Lzw.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp" />
-    <ClCompile Include="..\src\common\Lgi\GAbout.cpp" />
-    <ClCompile Include="..\src\common\Lgi\GDocApp.cpp" />
+    <ClCompile Include="..\src\common\Lgi\About.cpp" />
+    <ClCompile Include="..\src\common\Lgi\DocApp.cpp" />
     <ClCompile Include="..\src\common\Lgi\LgiMain.cpp" />
-    <ClCompile Include="..\src\common\Widgets\GControlTree.cpp" />
+    <ClCompile Include="..\src\common\Widgets\ControlTree.cpp" />
     <ClCompile Include="Code\LgiResApp.cpp" />
     <ClCompile Include="Code\LgiRes_ControlTree.cpp" />
     <ClCompile Include="Code\LgiRes_Css.cpp" />
@@ -210,7 +210,7 @@
     <ClInclude Include="Resources\resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\src\win32\General\Lgi.manifest" />
+    <Manifest Include="..\src\win\General\Lgi.manifest" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resources\Script1.rc" />
