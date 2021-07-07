@@ -13,7 +13,7 @@
 
 #include <string.h>
 #include "lgi/common/Containers.h"
-#include "lgi/common/String.h"
+#include "lgi/common/LgiString.h"
 
 #define OBJ_NULL		0
 #define OBJ_INT			1

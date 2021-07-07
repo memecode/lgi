@@ -1,10 +1,11 @@
-#ifndef _SERIALIZE_H_
-#define _SERIALIZE_H_
+#pragma once
+
+#include "lgi/common/StringClass.h"
 
 enum LSTypes
 {
 	LInt,
-	LString,
+	LStr,
 	LFloat,
 	LObject,
 	LBinary,
@@ -54,7 +55,7 @@ class LSerialize
 							return true;
 					}
 					return false;
-				case LString:
+				case LStr:
 					if (Size == 1)
 						return s.u[s.Length] == 0;
 					else if (Size == sizeof(char16))
@@ -80,7 +81,7 @@ class LSerialize
 				case LInt:
 				case LFloat:
 					return 4 + Size;
-				case LString:
+				case LStr:
 					return 8 + (Size * (s.Length + 1));
 				case LObject:
 					return 4 + u32;
@@ -154,7 +155,7 @@ protected:
 		if (ToStream)
 		{
 			Field f;
-			f.Type = LString;
+			f.Type = LStr;
 			f.Size = 1;
 			f.Id = Id;
 			f.s.Length = (uint32_t)s.Length();
@@ -167,7 +168,7 @@ protected:
 		else
 		{
 			Field *f = GetField(Id);
-			if (!f || f->Type != LString)
+			if (!f || f->Type != LStr)
 				return false;
 			return s.Set(f->s.u, f->s.Length);
 		}
@@ -249,7 +250,7 @@ public:
 				}
 			case LFloat:
 				return (int)f->f;
-			case LString:
+			case LStr:
 				if (f->Size == 1)
 					return atoi(f->s.u);
 				else if (f->Size == 2)
@@ -292,7 +293,7 @@ public:
 				else
 					LgiAssert(!"Invalid size.");
 				break;
-			case LString:
+			case LStr:
 				if (f->Size == 1)
 					return (float)atof(f->s.u);
 				else if (f->Size == 2)
@@ -315,7 +316,7 @@ public:
 	const char *GetStr(int Id, const char *Default = NULL)
 	{
 		Field *f = GetField(Id);
-		if (!f || f->Type != LString)
+		if (!f || f->Type != LStr)
 			return Default;
 		
 		if (f->Size == 1)
@@ -329,7 +330,7 @@ public:
 	const char16 *GetStrW(int Id, const char16 *Default = NULL)
 	{
 		Field *f = GetField(Id);
-		if (!f || f->Type != LString)
+		if (!f || f->Type != LStr)
 			return Default;
 		
 		if (f->Size == 2)
@@ -409,7 +410,7 @@ public:
 		if (!f)
 			return false;
 
-		f->Type = LString;
+		f->Type = LStr;
 		f->Size = 1;
 		f->s.Length = (uint32_t) (len - 1);
 		memcpy(f->s.u, u, len);
@@ -426,7 +427,7 @@ public:
 		if (!f)
 			return false;
 
-		f->Type = LString;
+		f->Type = LStr;
 		f->Size = sizeof(*w);
 		f->s.Length = (uint32_t) (len - 1);
 		memcpy(f->s.u, w, len * sizeof(*w));
@@ -517,4 +518,3 @@ public:
 };
 
 
-#endif

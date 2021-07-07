@@ -1,10 +1,10 @@
 /// \file
 #include "lgi/common/Lgi.h"
-#include "lgi\common\Scripting.h"
+#include "lgi/common/Scripting.h"
+#include "lgi/common/LexCpp.h"
+#include "lgi/common/LgiString.h"
+#include "lgi/common/Token.h"
 #include "ScriptingPriv.h"
-#include "lgi\common\LexCpp.h"
-#include "lgi\common\String.h"
-#include "lgi\common\Token.h"
 
 // #define DEBUG_SCRIPT_FILE	"Mail Filters Menu.script"
 #define GetTok(c)			((c) < Tokens.Length() ? Tokens[c] : NULL)
