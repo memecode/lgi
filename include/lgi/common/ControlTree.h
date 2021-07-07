@@ -1,8 +1,8 @@
-#ifndef _GCTRLTREE_H_
-#define _GCTRLTREE_H_
+#pragma once
 
-#include "lgi\common\Tree.h"
+#include "lgi/common/Tree.h"
 #include "lgi/common/Variant.h"
+#include "lgi/common/Button.h"
 
 class LControlTree : public LTree, public GDom
 {
@@ -75,4 +75,3 @@ public:
 	int OnNotify(LViewI *c, int f);
 };
 
-#endif
