@@ -24,7 +24,7 @@
 
 #include "lgi/common/Mem.h"
 #include "lgi/common/Array.h"
-#include "lgi/common/String.h"
+#include "lgi/common/LgiString.h"
 #include "lgi/common/StringClass.h"
 #include "lgi/common/CurrentTime.h"
 #include "lgi/common/LgiUiBase.h"

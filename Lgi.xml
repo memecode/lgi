@@ -374,25 +374,34 @@
 		<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="75">
 			<Node File=".\include\lgi\linux\Gtk\LgiOsDefs.h" Type="3" Platforms="2" />
 		</Node>
-		<Node Name="Mac" Type="1" Platforms="15" Id="1" />
+		<Node Name="Mac" Type="1" Platforms="15" Id="1">
+			<Node File="./include/lgi/mac/cocoa/LCocoaView.h" Type="3" Platforms="15" />
+			<Node File="./include/lgi/mac/cocoa/LgiMac.h" Type="3" Platforms="15" />
+			<Node File="./include/lgi/mac/cocoa/LgiOs.h" Type="3" Platforms="15" />
+			<Node File="./include/lgi/mac/cocoa/LgiOsClasses.h" Type="3" Platforms="15" />
+			<Node File="./include/lgi/mac/cocoa/LgiOsDefs.h" Type="3" Platforms="15" />
+			<Node File="./include/lgi/mac/cocoa/ObjCWrapper.h" Type="3" Platforms="15" />
+			<Node File="./include/lgi/mac/cocoa/SymLookup.h" Type="3" Platforms="15" />
+		</Node>
 		<Node Name="Win" Type="1" Platforms="15" Open="0" Id="76">
 			<Node File=".\include\lgi\win\LgiOsDefs.h" Type="3" Platforms="1" />
 		</Node>
-		<Node File=".\include\lgi\common\AutoPtr.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\Notifications.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\RefCount.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\TextLog.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\Cancel.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\Error.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\Lgi.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\LgiUiBase.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\LgiClasses.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\LgiCommon.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\LgiDefs.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\LgiInc.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\LgiInterfaces.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\LgiMsgs.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\Json.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/AutoPtr.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/Cancel.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/Error.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/Json.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/Lgi.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/LgiClasses.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/LgiCommon.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/LgiDefs.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/LgiInc.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/LgiInterfaces.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/LgiMsgs.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/LgiUiBase.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/Notifications.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/RefCount.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/TextLog.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/Token.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
 		<Node File="./Ide/Gtk3/CMakeLists.txt" Type="8" Platforms="15" />
@@ -403,6 +412,7 @@
 			<Makefile>
 				<Linux>Makefile.linux</Linux>
 				<Windows>Makefile.win64</Windows>
+				<Mac>Makefile.macosx</Mac>
 			</Makefile>
 			<Compiler>
 				<Linux>gcc</Linux>
@@ -410,7 +420,11 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Executable />
+			<Executable>
+				<Mac />
+			</Executable>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -428,6 +442,7 @@ include/lgi/linux/Gtk</Release>
 					<Debug>include/lgi/win</Debug>
 					<Release>include/lgi/win</Release>
 				</Windows>
+				<Mac />
 			</IncludePaths>
 			<SystemIncludes>
 				<Linux>
@@ -438,6 +453,7 @@ include/lgi/linux/Gtk</Release>
 /usr/include/libappindicator3-0.1
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Mac />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -450,26 +466,54 @@ appindicator3
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
+				<All />
+				<Mac />
 			</Libraries>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-gtk3</Debug>
 					<Release>lgi-gtk3</Release>
 				</Linux>
+				<Mac />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
 			</TargetType>
-			<LibraryPaths />
-			<Defines />
+			<LibraryPaths>
+				<All />
+				<Mac />
+			</LibraryPaths>
+			<Defines>
+				<All />
+				<Mac />
+			</Defines>
+			<ApplicationIcon />
 		</Build>
 		<Advanced>
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Mac />
+			</PostBuildCommands>
+			<OtherMakefileRules />
 		</Advanced>
 		<Debug>
-			<Arguments />
+			<Arguments>
+				<All />
+			</Arguments>
+			<Environment />
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
-		<Remote />
-		<Editor />
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Editor>
+			<TabSize />
+			<IndentSize />
+			<ShowWhiteSpace />
+			<UseHardTabs />
+			<CommentFile />
+			<CommentFunction />
+		</Editor>
 	</Settings>
 </Project>

@@ -1,8 +1,8 @@
 /*hdr
-**      FILE:           GView.cpp
+**      FILE:           LView.cpp
 **      AUTHOR:         Matthew Allen
 **      DATE:           23/4/98
-**      DESCRIPTION:    Linux GView Implementation
+**      DESCRIPTION:    Linux LView Implementation
 **
 **      Copyright (C) 1998-2003, Matthew Allen
 **              fret@memecode.com
@@ -11,15 +11,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Lgi.h"
-#include "GDragAndDrop.h"
-#include "GScrollBar.h"
-#include "GEdit.h"
-#include "GViewPriv.h"
-#include "GCss.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/DragAndDrop.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/ViewPriv.h"
+#include "lgi/common/Css.h"
+#include "lgi/common/Popup.h"
+#include "lgi/common/DisplayString.h"
 #include "LCocoaView.h"
-#include "GPopup.h"
-#include "GDisplayString.h"
 
 #define ADJ_LEFT					1
 #define ADJ_RIGHT					2
@@ -47,47 +47,47 @@ GInlineBmp Cursors =
 struct LgiCursorInfo
 {
 public:
-	GRect Pos;
+	LRect Pos;
 	LPoint HotSpot;
 }
 CursorMetrics[] =
 {
 	// up arrow
-	{ GRect(0, 0, 8, 15),			LPoint(4, 0) },
+	{ LRect(0, 0, 8, 15),			LPoint(4, 0) },
 	// cross hair
-	{ GRect(20, 0, 38, 18),			LPoint(29, 9) },
+	{ LRect(20, 0, 38, 18),			LPoint(29, 9) },
 	// hourglass
-	{ GRect(40, 0, 51, 15),			LPoint(45, 8) },
+	{ LRect(40, 0, 51, 15),			LPoint(45, 8) },
 	// I beam
-	{ GRect(60, 0, 66, 17),			LPoint(63, 8) },
+	{ LRect(60, 0, 66, 17),			LPoint(63, 8) },
 	// N-S arrow
-	{ GRect(80, 0, 91, 16),			LPoint(85, 8) },
+	{ LRect(80, 0, 91, 16),			LPoint(85, 8) },
 	// E-W arrow
-	{ GRect(100, 0, 116, 11),		LPoint(108, 5) },
+	{ LRect(100, 0, 116, 11),		LPoint(108, 5) },
 	// NW-SE arrow
-	{ GRect(120, 0, 132, 12),		LPoint(126, 6) },
+	{ LRect(120, 0, 132, 12),		LPoint(126, 6) },
 	// NE-SW arrow
-	{ GRect(140, 0, 152, 12),		LPoint(146, 6) },
+	{ LRect(140, 0, 152, 12),		LPoint(146, 6) },
 	// 4 way arrow
-	{ GRect(160, 0, 178, 18),		LPoint(169, 9) },
+	{ LRect(160, 0, 178, 18),		LPoint(169, 9) },
 	// Blank
-	{ GRect(0, 0, 0, 0),			LPoint(0, 0) },
+	{ LRect(0, 0, 0, 0),			LPoint(0, 0) },
 	// Vertical split
-	{ GRect(180, 0, 197, 16),		LPoint(188, 8) },
+	{ LRect(180, 0, 197, 16),		LPoint(188, 8) },
 	// Horizontal split
-	{ GRect(200, 0, 216, 17),		LPoint(208, 8) },
+	{ LRect(200, 0, 216, 17),		LPoint(208, 8) },
 	// Hand
-	{ GRect(220, 0, 233, 13),		LPoint(225, 0) },
+	{ LRect(220, 0, 233, 13),		LPoint(225, 0) },
 	// No drop
-	{ GRect(240, 0, 258, 18),		LPoint(249, 9) },
+	{ LRect(240, 0, 258, 18),		LPoint(249, 9) },
 	// Copy drop
-	{ GRect(260, 0, 279, 19),		LPoint(260, 0) },
+	{ LRect(260, 0, 279, 19),		LPoint(260, 0) },
 	// Move drop
-	{ GRect(280, 0, 299, 19),		LPoint(280, 0) },
+	{ LRect(280, 0, 299, 19),		LPoint(280, 0) },
 };
 
 ////////////////////////////////////////////////////////////////////////////
-GView *GWindowFromHandle(OsView h)
+LView *GWindowFromHandle(OsView h)
 {
 	if (!h)
 		return 0;
@@ -114,7 +114,7 @@ bool LgiMountVolume(char *Name)
 	return false;
 }
 
-GKey::GKey(int Vkey, uint32_t flags)
+LKey::LKey(int Vkey, uint32_t flags)
 {
 	c16 = vkey = Vkey;
 	Flags = flags;
@@ -126,7 +126,7 @@ GKey::GKey(int Vkey, uint32_t flags)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #if 0
 bool GViewPrivate::CursorSet = false;
-GView *GViewPrivate::LastCursor = 0;
+LView *GViewPrivate::LastCursor = 0;
 #endif
 
 GViewPrivate::GViewPrivate()
@@ -160,17 +160,17 @@ GViewPrivate::~GViewPrivate()
 	LgiAssert(Pulse == NULL);
 }
 
-const char *GView::GetClass()
+const char *LView::GetClass()
 {
-	return "GView";
+	return "LView";
 }
 
-GView *&GView::PopupChild()
+LView *&LView::PopupChild()
 {
 	return d->Popup;
 }
 
-bool GView::_Mouse(GMouse &m, bool Move)
+bool LView::_Mouse(LMouse &m, bool Move)
 {
 	#if 0
 	if (Move)
@@ -190,16 +190,16 @@ bool GView::_Mouse(GMouse &m, bool Move)
 	}
 	#endif
 
-	GWindow *Wnd = GetWindow();
+	LWindow *Wnd = GetWindow();
 
 	if (_Capturing)
 	{
 		// Convert root NSView coords to capture view coords
-		GViewI *par;
+		LViewI *par;
 		for (auto i = _Capturing; i && i != this; i = par)
 		{
 			par = i->GetParent();
-			GRect cli, p = i->GetPos();
+			LRect cli, p = i->GetPos();
 			if (par)
 				cli = i->GetClient(false);
 
@@ -211,12 +211,12 @@ bool GView::_Mouse(GMouse &m, bool Move)
 		
 		if (Move)
 		{
-			GViewI *c = _Capturing;
+			LViewI *c = _Capturing;
 			c->OnMouseMove(m);
 		}
 		else
 		{
-			if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<GView*>(_Capturing), m))
+			if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<LView*>(_Capturing), m))
 				_Capturing->OnMouseClick(m);
 		}
 	}
@@ -228,7 +228,7 @@ bool GView::_Mouse(GMouse &m, bool Move)
 		{
 			/*
 			GColour col(255, 0, 255);
-			GArray<GRect> rc;
+			GArray<LRect> rc;
 			GArray<GString> names;
 			auto w = GetWindow();
 			int yy = 200;
@@ -250,7 +250,7 @@ bool GView::_Mouse(GMouse &m, bool Move)
 				/*
 				if (Debug)
 				{
-					GRect r = p;
+					LRect r = p;
 					r.Offset(cli.x1, cli.y1);
 					rc.AddAt(0,r);
 					names.AddAt(0,i->GetClass());
@@ -298,9 +298,9 @@ bool GView::_Mouse(GMouse &m, bool Move)
 				_Over->OnMouseEnter(m);
 		}
 			
-		GView *Target = dynamic_cast<GView*>(_Over ? _Over : m.Target);
-		GLayout *Lo = dynamic_cast<GLayout*>(Target);
-		GRect Client = Lo ? Lo->GetClient(false) : Target->GView::GetClient(false);
+		auto Target = dynamic_cast<LView*>(_Over ? _Over : m.Target);
+		auto Lo = dynamic_cast<LLayout*>(Target);
+		LRect Client = Lo ? Lo->GetClient(false) : Target->LView::GetClient(false);
 
 		if (!Client.Valid() || Client.Overlap(m.x, m.y))
 		{
@@ -329,11 +329,11 @@ bool GView::_Mouse(GMouse &m, bool Move)
 	return true;
 }
 
-GRect &GView::GetClient(bool ClientSpace)
+LRect &LView::GetClient(bool ClientSpace)
 {
 	int Edge = (Sunken() || Raised()) ? _BorderSize : 0;
 
-	static GRect c;
+	static LRect c;
 	c = Pos;
 	c.Offset(-c.x1, -c.y1);
 	if (ClientSpace)
@@ -349,7 +349,7 @@ GRect &GView::GetClient(bool ClientSpace)
 	return c;
 }
 
-void GView::Quit(bool DontDelete)
+void LView::Quit(bool DontDelete)
 {
 	if (DontDelete)
 	{
@@ -362,18 +362,18 @@ void GView::Quit(bool DontDelete)
 	}
 }
 
-LPoint GView::Flip(LPoint p)
+LPoint LView::Flip(LPoint p)
 {
 	auto Parent = GetParent() ? GetParent() : GetWindow();
 	if (Parent)
 	{
-		GRect r = Parent->GetClient(false);
+		LRect r = Parent->GetClient(false);
 		p.y = r.y2 - p.y;
 	}
 	return p;
 }
 
-void GView::OnDealloc()
+void LView::OnDealloc()
 {
 	#if LGI_VIEW_HASH
 	LockHandler(this, OpDelete);
@@ -387,12 +387,12 @@ void GView::OnDealloc()
 	}
 }
 
-GRect GView::Flip(GRect p)
+LRect LView::Flip(LRect p)
 {
 	auto Parent = GetParent() ? GetParent() : GetWindow();
 	if (Parent)
 	{
-		GRect r = Parent->GetClient(false);
+		LRect r = Parent->GetClient(false);
 		int y2 = r.y2 - p.y1;
 		int y1 = y2 - p.Y() + 1;
 		p.Offset(0, y1-p.y1);
@@ -400,7 +400,7 @@ GRect GView::Flip(GRect p)
 	return p;
 }
 
-bool GView::SetPos(GRect &p, bool Repaint)
+bool LView::SetPos(LRect &p, bool Repaint)
 {
 	Pos = p;
 	OnPosChange();
@@ -408,12 +408,12 @@ bool GView::SetPos(GRect &p, bool Repaint)
 	return true;
 }
 
-bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
+bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 {
 	if (!InThread())
-		return PostEvent(M_INVALIDATE, (GMessage::Param) (rc ? new GRect(*rc) : NULL), (GMessage::Param) this);
+		return PostEvent(M_INVALIDATE, (GMessage::Param) (rc ? new LRect(*rc) : NULL), (GMessage::Param) this);
 
-	GRect r;
+	LRect r;
 	if (rc)
 		r = *rc;
 	else
@@ -422,15 +422,15 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 		return false;
 	
 	auto w = GetWindow();
-	GPopup *popup = NULL;
-	GViewI *v;
+	LPopup *popup = NULL;
+	LViewI *v;
 	for (v = this; v; v = v->GetParent())
 	{
 		if (!v->Visible())
 			return true;
-		if (v == (GViewI*)w)
+		if (v == (LViewI*)w)
 			break;
-		if ((popup = dynamic_cast<GPopup*>(v)))
+		if ((popup = dynamic_cast<LPopup*>(v)))
 			break;
 
 		auto p = v->GetPos();
@@ -455,19 +455,19 @@ bool GView::Invalidate(GRect *rc, bool Repaint, bool Frame)
 	return true;
 }
 
-void GView::SetPulse(int Length)
+void LView::SetPulse(int Length)
 {
 	DeleteObj(d->Pulse);
 	if (Length > 0)
 		d->Pulse = new GPulseThread(this, Length);
 }
 
-LgiCursor GView::GetCursor(int x, int y)
+LgiCursor LView::GetCursor(int x, int y)
 {
 	return LCUR_Normal;
 }
 
-GMessage::Result GView::OnEvent(GMessage *Msg)
+GMessage::Result LView::OnEvent(GMessage *Msg)
 {
 	switch (Msg->m)
 	{
@@ -478,7 +478,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 		}
 		case M_CHANGE:
 		{
-			GViewI *Ctrl;
+			LViewI *Ctrl;
 			if (GetViewById((int)Msg->A(), Ctrl))
 				return OnNotify(Ctrl, (int)Msg->B());
 			break;
@@ -489,7 +489,7 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 		}
 		case M_INVALIDATE:
 		{
-			GAutoPtr<GRect> rc((GRect*)Msg->A());
+			LAutoPtr<LRect> rc((LRect*)Msg->A());
 			Invalidate(rc.Get());
 			break;
 		}
@@ -502,16 +502,16 @@ GMessage::Result GView::OnEvent(GMessage *Msg)
 	return 0;
 }
 
-bool GView::PointToScreen(LPoint &p)
+bool LView::PointToScreen(LPoint &p)
 {
-	GViewI *c = this;
+	LViewI *c = this;
 
 	// Find offset to window
 	while (	c &&
-			!dynamic_cast<GWindow*>(c) &&
-			!dynamic_cast<GPopup*>(c))
+			!dynamic_cast<LWindow*>(c) &&
+			!dynamic_cast<LPopup*>(c))
 	{
-		GRect pos = c->GetPos();
+		LRect pos = c->GetPos();
 		// printf("%s pos %s\n", c->GetClass(), pos.GetStr());
 		p.x += pos.x1;
 		p.y += pos.y1;
@@ -522,11 +522,11 @@ bool GView::PointToScreen(LPoint &p)
 	{
 		NSWindow *w = c->WindowHandle();
 
-		GRect wFrame = w.frame;
-		GRect Screen(0, 0, -1, -1);
+		LRect wFrame = w.frame;
+		LRect Screen(0, 0, -1, -1);
 		for (NSScreen *s in [NSScreen screens])
 		{
-			GRect pos = s.frame;
+			LRect pos = s.frame;
 			if (wFrame.Overlap(&pos))
 			{
 				Screen = pos;
@@ -537,7 +537,7 @@ bool GView::PointToScreen(LPoint &p)
 		if (!Screen.Valid())
 			return false;
 
-		GRect cli = c->GetClient();
+		LRect cli = c->GetClient();
 		p.y = cli.Y() - p.y;
 		NSRect i = {{(double)p.x, (double)p.y}, {0.0, 0.0}};
 		NSRect o = [w convertRectToScreen:i];
@@ -549,17 +549,17 @@ bool GView::PointToScreen(LPoint &p)
 	return true;
 }
 
-bool GView::PointToView(LPoint &p)
+bool LView::PointToView(LPoint &p)
 {
-	GViewI *c = this;
+	LViewI *c = this;
 	int Ox = 0, Oy = 0;
 
 	// Find offset to window
 	while (c && c != c->GetWindow())
 	{
-		GView *gv = c->GetGView();
-		GRect cli = gv ? gv->GView::GetClient(false) : c->GetClient(false);
-		GRect pos = c->GetPos(); 
+		LView *gv = c->GetGView();
+		LRect cli = gv ? gv->LView::GetClient(false) : c->GetClient(false);
+		LRect pos = c->GetPos(); 
 		Ox += pos.x1 + cli.x1;
 		Oy += pos.y1 + cli.y1;
 		c = c->GetParent();
@@ -570,11 +570,11 @@ bool GView::PointToView(LPoint &p)
 	{
 		NSWindow *w = c->WindowHandle();
 
-		GRect wFrame = w.frame;
-		GRect Screen(0, 0, -1, -1);
+		LRect wFrame = w.frame;
+		LRect Screen(0, 0, -1, -1);
 		for (NSScreen *s in [NSScreen screens])
 		{
-			GRect pos = s.frame;
+			LRect pos = s.frame;
 			if (wFrame.Overlap(&pos))
 			{
 				Screen = pos;
@@ -595,7 +595,7 @@ bool GView::PointToView(LPoint &p)
 		#if 1
 		p = c->GetGView()->Flip(p);
 		#else
-		GRect cli = c->GetClient();
+		LRect cli = c->GetClient();
 		p.y = cli.Y() - p.y;
 		#endif
 
@@ -610,9 +610,9 @@ bool GView::PointToView(LPoint &p)
 
 #define DEBUG_GETMOUSE 0
 
-bool GView::GetMouse(GMouse &m, bool ScreenCoords)
+bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 {
-	GViewI *w = GetWindow();
+	LViewI *w = GetWindow();
 	if (!w)
 		return false;
 
@@ -655,9 +655,9 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 	m.Middle(Btns & 0x4);
 
 	// Find offset to window
-	for (GViewI *c = this; c && c != c->GetWindow(); c = c->GetParent())
+	for (LViewI *c = this; c && c != c->GetWindow(); c = c->GetParent())
 	{
-		GRect pos = c->GetPos();
+		LRect pos = c->GetPos();
 		m.x -= pos.x1;
 		m.y -= pos.y1;
 		#if DEBUG_GETMOUSE
@@ -671,9 +671,9 @@ bool GView::GetMouse(GMouse &m, bool ScreenCoords)
 	return true;
 }
 
-bool GView::IsAttached()
+bool LView::IsAttached()
 {
-	GWindow *w = GetWindow();
+	LWindow *w = GetWindow();
 	if (!w)
 		return false;
 	
@@ -689,21 +689,21 @@ bool GView::IsAttached()
 	return false;
 }
 
-void BuildTabStops(GArray<GViewI*> &Stops, GViewI *v)
+void BuildTabStops(LArray<LViewI*> &Stops, LViewI *v)
 {
 	if (v && v->Visible())
 	{
 		if (v->GetTabStop() && v->Enabled())
 			Stops.Add(v);
 
-		for (GViewI *c: v->IterateViews())
+		for (LViewI *c: v->IterateViews())
 			BuildTabStops(Stops, c);
 	}
 }
 
-void NextTabStop(GViewI *v, int dir)
+void NextTabStop(LViewI *v, int dir)
 {
-	GArray<GViewI*> Stops;
+	LArray<LViewI*> Stops;
 	BuildTabStops(Stops, v->GetWindow());
 	ssize_t Idx = Stops.IndexOf(v);
 	if (Idx >= 0)
@@ -717,9 +717,9 @@ void NextTabStop(GViewI *v, int dir)
 		Stops[Idx]->Focus(true);
 }
 
-void SetDefaultFocus(GViewI *v)
+void SetDefaultFocus(LViewI *v)
 {
-	GArray<GViewI*> Stops;
+	LArray<LViewI*> Stops;
 	BuildTabStops(Stops, v->GetWindow());
 	
 	if (Stops.Length())
@@ -837,7 +837,7 @@ int VirtualKeyToLgi(int Virt)
 }
 
 #if 0
-static int GetIsChar(GKey &k, int mods)
+static int GetIsChar(LKey &k, int mods)
 {
 	return k.IsChar =	(mods & 0x100) == 0 &&
 	(
@@ -850,7 +850,7 @@ static int GetIsChar(GKey &k, int mods)
 #endif
 
 
-bool GView::_Attach(GViewI *parent)
+bool LView::_Attach(LViewI *parent)
 {
 	LAutoPool Pool;
 	if (!parent)
@@ -872,7 +872,7 @@ bool GView::_Attach(GViewI *parent)
 	auto p = d->GetParent();
 	if (p)
 	{
-		GWindow *w = dynamic_cast<GWindow*>(p);
+		LWindow *w = dynamic_cast<LWindow*>(p);
 		NSView *ph = nil;
 		if (w)
 			ph = w->WindowHandle().p.contentView;
@@ -897,7 +897,7 @@ bool GView::_Attach(GViewI *parent)
 	return true;
 }
 
-bool GView::Attach(GViewI *parent)
+bool LView::Attach(LViewI *parent)
 {
 	if (_Attach(parent))
 	{
@@ -912,7 +912,7 @@ bool GView::Attach(GViewI *parent)
 	return false;
 }
 
-void GView::_Delete()
+void LView::_Delete()
 {
 	LAutoPool Pool;
 	if (_Over == this) _Over = 0;
@@ -926,14 +926,14 @@ void GView::_Delete()
 	SetPulse();
 	Pos.ZOff(-1, -1);
 
-	GViewI *c;
+	LViewI *c;
 	auto it = Children.begin();
 	while ((c = *it))
 	{
-		GViewI *p = c->GetParent();
-		if (p != (GViewI*)this)
+		LViewI *p = c->GetParent();
+		if (p != (LViewI*)this)
 		{
-			printf("Error: GView::_Delete, child not attached correctly: %p(%s) Parent: %p(%s)\n",
+			printf("Error: LView::_Delete, child not attached correctly: %p(%s) Parent: %p(%s)\n",
 				c, c->Name(),
 				c->GetParent(), c->GetParent() ? c->GetParent()->Name() : "");
 			Children.Delete(it);
@@ -945,7 +945,7 @@ void GView::_Delete()
 	Detach();
 }
 
-bool GView::Detach()
+bool LView::Detach()
 {
 	LAutoPool Pool;
 	bool Status = false;
@@ -953,9 +953,9 @@ bool GView::Detach()
 	// Detach view
 	if (_Window)
 	{
-		GWindow *Wnd = dynamic_cast<GWindow*>(_Window);
+		LWindow *Wnd = dynamic_cast<LWindow*>(_Window);
 		if (Wnd)
-			Wnd->SetFocus(this, GWindow::ViewDelete);
+			Wnd->SetFocus(this, LWindow::ViewDelete);
 		_Window = NULL;
 	}
 

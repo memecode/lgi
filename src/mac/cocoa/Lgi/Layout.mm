@@ -1,5 +1,5 @@
 /*
-**	FILE:			GLayout.cpp
+**	FILE:			LLayout.cpp
 **	AUTHOR:			Matthew Allen
 **	DATE:			18/7/1998
 **	DESCRIPTION:	Standard Views
@@ -9,14 +9,14 @@
 */
 
 #include <stdio.h>
-#include "Lgi.h"
-#include "GScrollBar.h"
-#include "GNotifications.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/Notifications.h"
 
 #define M_SET_SCROLL		(M_USER + 0x2000)
 
 //////////////////////////////////////////////////////////////////////////////
-GLayout::GLayout()
+LLayout::LLayout()
 {
 	_PourLargest = false;
 	VScroll = 0;
@@ -25,37 +25,37 @@ GLayout::GLayout()
 	WantY = false;
 }
 
-GLayout::~GLayout()
+LLayout::~LLayout()
 {
 	DeleteObj(HScroll);
 	DeleteObj(VScroll);
 }
 
-GViewI *GLayout::FindControl(int Id)
+LViewI *LLayout::FindControl(int Id)
 {
 	if (VScroll && VScroll->GetId() == Id)
 		return VScroll;
 	if (HScroll && HScroll->GetId() == Id)
 		return HScroll;
 
-	return GView::FindControl(Id);
+	return LView::FindControl(Id);
 }
 
-bool GLayout::GetPourLargest()
+bool LLayout::GetPourLargest()
 {
 	return _PourLargest;
 }
 
-void GLayout::SetPourLargest(bool i)
+void LLayout::SetPourLargest(bool i)
 {
 	_PourLargest = i;
 }
 
-bool GLayout::Pour(GRegion &r)
+bool LLayout::Pour(LRegion &r)
 {
 	if (_PourLargest)
 	{
-		GRect *Best = FindLargest(r);
+		auto Best = FindLargest(r);
 		if (Best)
 		{
 			SetPos(*Best);
@@ -66,7 +66,7 @@ bool GLayout::Pour(GRegion &r)
 	return false;
 }
 
-void GLayout::GetScrollPos(int64 &x, int64 &y)
+void LLayout::GetScrollPos(int64 &x, int64 &y)
 {
 	if (HScroll)
 	{
@@ -87,7 +87,7 @@ void GLayout::GetScrollPos(int64 &x, int64 &y)
 	}
 }
 
-void GLayout::SetScrollPos(int64 x, int64 y)
+void LLayout::SetScrollPos(int64 x, int64 y)
 {
 	if (HScroll)
 	{
@@ -100,25 +100,25 @@ void GLayout::SetScrollPos(int64 x, int64 y)
 	}
 }
 
-bool GLayout::Attach(GViewI *p)
+bool LLayout::Attach(LViewI *p)
 {
-	bool Status = GView::Attach(p);
+	bool Status = LView::Attach(p);
 	AttachScrollBars();
 	return Status;
 }
 
-bool GLayout::Detach()
+bool LLayout::Detach()
 {
-	return GView::Detach();
+	return LView::Detach();
 }
 
-void GLayout::OnCreate()
+void LLayout::OnCreate()
 {
 	AttachScrollBars();
 	OnPosChange();
 }
 
-void GLayout::AttachScrollBars()
+void LLayout::AttachScrollBars()
 {
 	if (HScroll && !HScroll->IsAttached())
 	{
@@ -135,7 +135,7 @@ void GLayout::AttachScrollBars()
 	}
 }
 
-bool GLayout::SetScrollBars(bool x, bool y)
+bool LLayout::SetScrollBars(bool x, bool y)
 {
 	#ifdef M_SET_SCROLL
 	/*
@@ -170,7 +170,7 @@ bool GLayout::SetScrollBars(bool x, bool y)
 	return true;
 }
 
-bool GLayout::_SetScrollBars(bool x, bool y)
+bool LLayout::_SetScrollBars(bool x, bool y)
 {
 	static bool Processing = false;
 
@@ -183,7 +183,7 @@ bool GLayout::_SetScrollBars(bool x, bool y)
 		{
 			if (!HScroll)
 			{
-				HScroll = new GScrollBar(IDC_HSCROLL, 0, 0, 100, 10, "GLayout->HScroll");
+				HScroll = new LScrollBar(IDC_HSCROLL, 0, 0, 100, 10, "LLayout->HScroll");
 				if (HScroll)
 				{
 					HScroll->SetVertical(false);
@@ -199,7 +199,7 @@ bool GLayout::_SetScrollBars(bool x, bool y)
 		{
 			if (!VScroll)
 			{
-				VScroll = new GScrollBar(IDC_VSCROLL, 0, 0, 10, 100, "GLayout->VScroll");
+				VScroll = new LScrollBar(IDC_VSCROLL, 0, 0, 10, 100, "LLayout->VScroll");
 				if (VScroll)
 				{
 					VScroll->Visible(false);
@@ -221,16 +221,16 @@ bool GLayout::_SetScrollBars(bool x, bool y)
 	return true;
 }
 
-int GLayout::OnNotify(GViewI *c, int f)
+int LLayout::OnNotify(LViewI *c, int f)
 {
-	return GView::OnNotify(c, f);
+	return LView::OnNotify(c, f);
 }
 
-void GLayout::OnPosChange()
+void LLayout::OnPosChange()
 {
-	GRect r = GView::GetClient();
-	GRect v(r.x2-SCROLL_BAR_SIZE+1, r.y1, r.x2, r.y2);
-	GRect h(r.x1, r.y2-SCROLL_BAR_SIZE+1, r.x2, r.y2);
+	auto r = LView::GetClient();
+	LRect v(r.x2-SCROLL_BAR_SIZE+1, r.y1, r.x2, r.y2);
+	LRect h(r.x1, r.y2-SCROLL_BAR_SIZE+1, r.x2, r.y2);
 	if (VScroll && HScroll)
 	{
 		h.x2 = v.x1 - 1;
@@ -249,9 +249,9 @@ void GLayout::OnPosChange()
 	}
 }
 
-void GLayout::OnNcPaint(GSurface *pDC, GRect &r)
+void LLayout::OnNcPaint(LSurface *pDC, LRect &r)
 {
-	GView::OnNcPaint(pDC, r);
+	LView::OnNcPaint(pDC, r);
 	
 	if (VScroll && VScroll->Visible())
 	{
@@ -267,17 +267,17 @@ void GLayout::OnNcPaint(GSurface *pDC, GRect &r)
 		HScroll && HScroll->Visible())
 	{
 		// Draw square at the end of each scroll bar
-		GRect s(	VScroll->GetPos().x1, HScroll->GetPos().y1,
+		LRect s(	VScroll->GetPos().x1, HScroll->GetPos().y1,
 					VScroll->GetPos().x2, HScroll->GetPos().y2);
 		pDC->Colour(L_MED);
 		pDC->Rectangle(&s);
 	}
 }
 
-GRect &GLayout::GetClient(bool ClientSpace)
+LRect &LLayout::GetClient(bool ClientSpace)
 {
-	static GRect r;
-	r = GView::GetClient(ClientSpace);
+	static LRect r;
+	r = LView::GetClient(ClientSpace);
 
 	if (VScroll && VScroll->Visible())
 	{
@@ -292,7 +292,7 @@ GRect &GLayout::GetClient(bool ClientSpace)
 	return r;
 }
 
-GMessage::Param GLayout::OnEvent(GMessage *Msg)
+GMessage::Param LLayout::OnEvent(GMessage *Msg)
 {
 	#ifdef M_SET_SCROLL
 	if (Msg->Msg() == M_SET_SCROLL)
@@ -309,7 +309,7 @@ GMessage::Param GLayout::OnEvent(GMessage *Msg)
 
 	// if (VScroll) VScroll->OnEvent(Msg);
 	// if (HScroll) HScroll->OnEvent(Msg);
-	auto Status = GView::OnEvent(Msg);
+	auto Status = LView::OnEvent(Msg);
 	if (Msg->Msg() == M_CHANGE &&
 		Status == -1 &&
 		GetParent())

@@ -3,7 +3,7 @@
 #include "lgi/common/Token.h"
 #include "lgi/common/DocView.h"
 #include "lgi/common/StringClass.h"
-#include "lgi/common/String.h"
+#include "lgi/common/LgiString.h"
 #include "GDebugger.h"
 #ifdef POSIX
 #include <sys/types.h>

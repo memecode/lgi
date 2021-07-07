@@ -12,8 +12,10 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "Lgi.h"
-#include "GToken.h"
-#include "GDisplayString.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/ToolBar.h"
 
 #define DEBUG_INFO		0
 
@@ -66,7 +68,7 @@ public:
 		Str = nil;
 		Mod = 0;
 
-		auto Keys = GString(s).SplitDelimit("+-");
+		auto Keys = LString(s).SplitDelimit("+-");
 		if (Keys.Length() <= 0)
 			return;
 		
@@ -142,11 +144,11 @@ public:
 			}
 			else if (isalpha(k[0]))
 			{
-				Key = Str = GString(k).Lower().NsStr();
+				Key = Str = LString(k).Lower().NsStr();
 			}
 			else if (isdigit(k[0]))
 			{
-				Key = Str = GString(k).NsStr();
+				Key = Str = LString(k).NsStr();
 			}
 			else if (strchr(",.", k(0)))
 			{
@@ -172,7 +174,7 @@ LSubMenu::LSubMenu(const char *name, bool Popup)
 	Menu = 0;
 	Parent = 0;
 	Info = NULL;
-	GBase::Name(name);
+	LBase::Name(name);
 	Info.p = [[NSMenu alloc] init];
 	[Info.p setAutoenablesItems:NO];
 }
@@ -232,7 +234,7 @@ LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where
 	auto Index = Items.IndexOf(i);
 	// auto Max = Info.p.numberOfItems;
 
-	GString s(i->GBase::Name());
+	LString s(i->LBase::Name());
 	auto name = s.NsStr();
 	if (!name)
 	{
@@ -315,7 +317,7 @@ LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 				LgiAssert(i->Info);
 
 				i->Name(Str);
-				GString s(i->GBase::Name());
+				LString s(i->LBase::Name());
 				[i->Child->Info.p setTitle:s.NsStr()];
 				[i->Info.p setSubmenu:i->Child->Info.p];
 				
@@ -365,7 +367,7 @@ bool LSubMenu::RemoveItem(LMenuItem *Item)
 	return false;
 }
 
-bool LSubMenu::OnKey(GKey &k)
+bool LSubMenu::OnKey(LKey &k)
 {
 	return false;
 }
@@ -383,7 +385,7 @@ void LSubMenu::OnActivate(LMenuItem *item)
 		LgiAssert(!"Should have a float result OR a parent..");
 }
 
-int LSubMenu::Float(GView *From, int x, int y, int Btns)
+int LSubMenu::Float(LView *From, int x, int y, int Btns)
 {
 	LPoint p(x, y);
 	OsView v = nil;
@@ -461,7 +463,7 @@ LMenuItem *LSubMenu::FindItem(int Id)
 class LMenuItemPrivate
 {
 public:
-	GString Shortcut;
+	LString Shortcut;
 };
 
 LMenuItem::LMenuItem()
@@ -479,7 +481,7 @@ LMenuItem::LMenuItem()
 LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *Str, int Id, int Pos, const char *Shortcut)
 {
 	d = new LMenuItemPrivate();
-	GBase::Name(Str);
+	LBase::Name(Str);
 	Menu = m;
 	Parent = p;
 	Info = NULL;
@@ -536,7 +538,7 @@ void LMenuItem::OnAttach(bool Attach)
 // the default painting behaviour if desired.
 void LMenuItem::_Measure(LPoint &Size)
 {
-	GFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+	auto Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
 	bool BaseMenu = Parent == Menu; // true if attached to a windows menu
 	// else is a submenu
 	int Ht = Font->GetHeight();
@@ -579,16 +581,16 @@ void LMenuItem::_Measure(LPoint &Size)
 		{
 			// string with accel
 			int Mx, Tx;
-			GDisplayString ds(Font, Str, Tab-Str);
+			LDisplayString ds(Font, Str, Tab-Str);
 			Mx = ds.X();
-			GDisplayString ds2(Font, Tab + 1);
+			LDisplayString ds2(Font, Tab + 1);
 			Tx = ds2.X();
 			Size.x = IconX + 32 + Mx + Tx;
 		}
 		else
 		{
 			// normal string
-			GDisplayString ds(Font, Str);
+			LDisplayString ds(Font, Str);
 			Size.x = IconX + ds.X() + 4;
 		}
 		
@@ -604,12 +606,12 @@ void LMenuItem::_Measure(LPoint &Size)
 
 #define Time(a, b) ((double)(b - a) / 1000)
 
-void LMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
+void LMenuItem::_PaintText(LSurface *pDC, int x, int y, int Width)
 {
 	auto n = Name();
 	if (n)
 	{
-		GFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+		auto Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
 		bool Underline = false;
 		const char *e = 0;
 		for (auto s=n; s && *s; s = *e ? e : 0)
@@ -621,7 +623,7 @@ void LMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
 					if (s[1] == '&')
 					{
 						e = s + 2;
-						GDisplayString d(Font, "&");
+						LDisplayString d(Font, "&");
 						d.Draw(pDC, x, y, 0);
 						x += d.X();
 					}
@@ -634,7 +636,7 @@ void LMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
 				}
 				case '\t':
 				{
-					GDisplayString ds(Font, e + 1);
+					LDisplayString ds(Font, e + 1);
 					x = Width - ds.X() - 8;
 					e = s + 1;
 					break;
@@ -658,12 +660,12 @@ void LMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
 					if (Len > 0)
 					{
 						// paint text till that point
-						GDisplayString d(Font, s, Len);
+						LDisplayString d(Font, s, Len);
 						d.Draw(pDC, x, y, 0);
 						
 						if (Underline)
 						{
-							GDisplayString ds(Font, s, 1);
+							LDisplayString ds(Font, s, 1);
 							int UnderX = ds.X();
 							int Ascent = (int)ceil(Font->Ascent());
 							pDC->Colour(Font->Fore());
@@ -681,7 +683,7 @@ void LMenuItem::_PaintText(GSurface *pDC, int x, int y, int Width)
 	
 }
 
-void LMenuItem::_Paint(GSurface *pDC, int Flags)
+void LMenuItem::_Paint(LSurface *pDC, int Flags)
 {
 	bool BaseMenu = Parent == Menu;
 	int IconX = BaseMenu ? 5 : 20;
@@ -690,9 +692,9 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 	bool Checked = TestFlag(Flags, ODS_CHECKED);
 	
 #if defined(WIN32) || defined(MAC)
-	GRect r(0, 0, pDC->X()-1, pDC->Y()-1);
+	LRect r(0, 0, pDC->X()-1, pDC->Y()-1);
 #else
-	GRect r = Info->GetClient();
+	LRect r = Info->GetClient();
 #endif
 	
 	if (Separator())
@@ -722,7 +724,7 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 		pDC->Rectangle();
 		
 		// Draw the text on top
-		GFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+		LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
 		Font->Transparent(true);
 		if (Disabled)
 		{
@@ -745,7 +747,7 @@ void LMenuItem::_Paint(GSurface *pDC, int Flags)
 			_PaintText(pDC, x, y, r.X());
 		}
 		
-		GImageList *ImgLst = (Menu && Menu->GetImageList()) ? Menu->GetImageList() : Parent ? Parent->GetImageList() : 0;
+		auto ImgLst = (Menu && Menu->GetImageList()) ? Menu->GetImageList() : Parent ? Parent->GetImageList() : 0;
 		
 		// Draw icon/check mark
 		if (Checked && IconX > 0)
@@ -957,10 +959,10 @@ bool LMenuItem::Name(const char *n)
 		*out++ = 0;
 	}
 	
-	bool Status = GBase::Name(Tmp);
+	bool Status = LBase::Name(Tmp);
 	if (Status && Info)
 	{
-		GString s(Tmp);
+		LString s(Tmp);
 		[Info.p setTitle:s.NsStr()];
 	}
 	
@@ -990,14 +992,14 @@ void LMenuItem::Icon(int i)
 {
 	_Icon = i;
 	
-	GImageList *Lst = Menu ? Menu->GetImageList() : Parent->GetImageList();
+	auto Lst = Menu ? Menu->GetImageList() : Parent->GetImageList();
 	if (!Lst || !Info)
 		return;
 
 	if (_Icon < 0 || _Icon >= Lst->GetItems())
 		return;
 
-	GRect r = Lst->GetIconRect(_Icon);
+	auto r = Lst->GetIconRect(_Icon);
 	[Info.p setImage: Lst->NsImage(&r)];
 }
 
@@ -1012,7 +1014,7 @@ int LMenuItem::Id()
 
 const char *LMenuItem::Name()
 {
-	return GBase::Name();
+	return LBase::Name();
 }
 
 bool LMenuItem::Separator()
@@ -1133,7 +1135,7 @@ bool LMenu::SetPrefAndAboutItems(int PrefId, int AboutId)
 
 struct LMenuFont
 {
-	GFont *f;
+	LFont *f;
 
 	LMenuFont()
 	{
@@ -1146,11 +1148,11 @@ struct LMenuFont
 	}
 }	MenuFont;
 
-GFont *LMenu::GetFont()
+LFont *LMenu::GetFont()
 {
 	if (!MenuFont.f)
 	{
-		GFontType Type;
+		LFontType Type;
 		if (Type.GetSystemFont("Menu"))
 		{
 			MenuFont.f = Type.Create();
@@ -1172,7 +1174,7 @@ GFont *LMenu::GetFont()
 		
 		if (!MenuFont.f)
 		{
-			MenuFont.f = new GFont;
+			MenuFont.f = new LFont;
 			if (MenuFont.f)
 				*MenuFont.f = *SysFont;
 		}
@@ -1181,11 +1183,11 @@ GFont *LMenu::GetFont()
 	return MenuFont.f ? MenuFont.f : SysFont;
 }
 
-bool LMenu::Attach(GViewI *p)
+bool LMenu::Attach(LViewI *p)
 {
 	bool Status = false;
 	
-	GWindow *w = dynamic_cast<GWindow*>(p);
+	auto w = dynamic_cast<LWindow*>(p);
 	if (w)
 	{
 		Window = p;
@@ -1211,7 +1213,7 @@ bool LMenu::Detach()
 	return Status;
 }
 
-bool LMenu::OnKey(GView *v, GKey &k)
+bool LMenu::OnKey(LView *v, LKey &k)
 {
 	if (k.Down())
 	{
@@ -1291,7 +1293,7 @@ GAccelerator::GAccelerator(int flags, int key, int id)
 	Id = id;
 }
 
-bool GAccelerator::Match(GKey &k)
+bool GAccelerator::Match(LKey &k)
 {
 	int Press = (uint) k.c16;
 	auto Up = toupper(Press);
@@ -1350,7 +1352,7 @@ bool GAccelerator::Match(GKey &k)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-GCommand::GCommand()
+LCommand::LCommand()
 {
 	Flags = GWF_VISIBLE;
 	Id = 0;
@@ -1361,13 +1363,13 @@ GCommand::GCommand()
 	PrevValue = false;
 }
 
-GCommand::~GCommand()
+LCommand::~LCommand()
 {
 	DeleteArray(Accelerator);
 	DeleteArray(TipHelp);
 }
 
-bool GCommand::Enabled()
+bool LCommand::Enabled()
 {
 	if (ToolButton)
 		return ToolButton->Enabled();
@@ -1376,7 +1378,7 @@ bool GCommand::Enabled()
 	return false;
 }
 
-void GCommand::Enabled(bool e)
+void LCommand::Enabled(bool e)
 {
 	if (ToolButton)
 	{
@@ -1388,7 +1390,7 @@ void GCommand::Enabled(bool e)
 	}
 }
 
-bool GCommand::Value()
+bool LCommand::Value()
 {
 	bool HasChanged = false;
 	
@@ -1409,7 +1411,7 @@ bool GCommand::Value()
 	return PrevValue;
 }
 
-void GCommand::Value(bool v)
+void LCommand::Value(bool v)
 {
 	if (ToolButton)
 	{

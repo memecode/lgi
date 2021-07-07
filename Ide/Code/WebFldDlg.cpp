@@ -1,7 +1,7 @@
 #include "lgi/common/Lgi.h"
+#include "lgi/common/Net.h"
 #include "WebFldDlg.h"
 #include "resdefs.h"
-#include "lgi/common/Net.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 WebFldDlg::WebFldDlg(LViewI *p, char *name, char *ftp, char *www)

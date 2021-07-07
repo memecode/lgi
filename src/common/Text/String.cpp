@@ -3,8 +3,7 @@
 #include <ctype.h>
 
 #include "lgi/common/Mem.h"
-#include "LgiOsDefs.h"
-#include "lgi/common/String.h"
+#include "lgi/common/LgiString.h"
 #include "lgi/common/Containers.h"
 #include "lgi/common/LgiCommon.h"
 

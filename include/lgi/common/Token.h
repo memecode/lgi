@@ -2,7 +2,7 @@
 #define __TOKEN_H
 
 #include "lgi/common/Array.h"
-#include "lgi/common/String.h"
+#include "lgi/common/LgiString.h"
 
 /// \returns true if the string represents a int or float number
 template<typename T>

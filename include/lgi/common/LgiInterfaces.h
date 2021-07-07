@@ -6,10 +6,10 @@
 // Includes
 #include "lgi/common/Mem.h"
 #include "lgi/common/Array.h"
-#include "LgiOsDefs.h"
 #include "lgi/common/Colour.h"
 #include "lgi/common/Cancel.h"
 #include "lgi/common/StringClass.h"
+#include "lgi/common/LgiUiBase.h"
 
 // Fwd defs
 class LXmlTag;

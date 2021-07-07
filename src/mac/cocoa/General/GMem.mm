@@ -12,8 +12,8 @@
 #include <string.h>
 
 #include "LgiOsDefs.h"
-#include "GMem.h"
-#include "LMutex.h"
+#include "lgi/common/Mem.h"
+#include "lgi/common/Mutex.h"
 
 bool LgiCheckHeap()
 {

@@ -19,7 +19,7 @@
 #include "lgi/common/File.h"
 #include "lgi/common/Net.h"
 #include "lgi/common/Token.h"
-#include "lgi/common/String.h"
+#include "lgi/common/LgiString.h"
 #include "lgi/common/LgiCommon.h"
 #include "LgiOsClasses.h"
 #include "lgi/common/RegKey.h"

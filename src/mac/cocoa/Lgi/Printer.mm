@@ -1,14 +1,14 @@
-#include "Lgi.h"
-#include "LList.h"
-#include "GButton.h"
-#include "GPrinter.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/List.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Printer.h"
 
 ////////////////////////////////////////////////////////////////////
 class GPrinterPrivate
 {
 public:
-	GString Printer;
-	GString Err;
+	LString Printer;
+	LString Err;
 	
 	GPrinterPrivate()
 	{
@@ -31,12 +31,12 @@ GPrinter::~GPrinter()
 	DeleteObj(d);
 }
 
-bool GPrinter::Browse(GView *Parent)
+bool GPrinter::Browse(LView *Parent)
 {
 	return false;
 }
 
-bool GPrinter::Serialize(GString &Str, bool Write)
+bool GPrinter::Serialize(LString &Str, bool Write)
 {
 	if (Write)
 	{
@@ -50,7 +50,7 @@ bool GPrinter::Serialize(GString &Str, bool Write)
 	return true;
 }
 
-GString GPrinter::GetErrorMsg()
+LString GPrinter::GetErrorMsg()
 {
 	return d->Err;
 }
@@ -58,13 +58,13 @@ GString GPrinter::GetErrorMsg()
 #define ErrCheck(fn) \
 if (e != noErr) \
 { \
-d->Err.Printf("%s:%i - %s failed with %i\n", _FL, fn, e); \
-LgiTrace(d->Err); \
-goto OnError; \
+	d->Err.Printf("%s:%i - %s failed with %i\n", _FL, fn, e); \
+	LgiTrace(d->Err); \
+	goto OnError; \
 }
 
 
-bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int MaxPages, GView *Parent)
+bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int MaxPages, LView *Parent)
 {
 	if (!Events)
 	{

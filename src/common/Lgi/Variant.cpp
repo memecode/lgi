@@ -311,7 +311,7 @@ LVariant &LVariant::operator =(bool i)
 	return *this;
 }
 
-#if LVariant_SIZET
+#if LVARIANT_SIZET
 LVariant &LVariant::operator =(size_t i)
 {
 	Empty();
@@ -328,7 +328,7 @@ LVariant &LVariant::operator =(size_t i)
 }
 #endif
 
-#if LVariant_SSIZET
+#if LVARIANT_SSIZET
 LVariant &LVariant::operator =(ssize_t i)
 {
 	Empty();

@@ -1,6 +1,6 @@
 // MacOSX Clipboard Implementation
-#include "Lgi.h"
-#include "GClipBoard.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ClipBoard.h"
 
 #define kClipboardTextType				"public.utf16-plain-text"
 
@@ -18,7 +18,7 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GClipBoard::GClipBoard(GView *o)
+GClipBoard::GClipBoard(LView *o)
 {
 	d = new GClipBoardPriv;
 	Owner = o;
@@ -109,30 +109,30 @@ bool GClipBoard::Html(const char *doc, bool AutoEmpty)
 	return false;
 }
 
-GString GClipBoard::Html()
+LString GClipBoard::Html()
 {
-	return GString();
+	return LString();
 }
 
-bool GClipBoard::Bitmap(GSurface *pDC, bool AutoEmpty)
+bool GClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 {
 	LgiAssert(!"Not impl.");
 	return false;
 }
 
-GSurface *GClipBoard::Bitmap()
+LSurface *GClipBoard::Bitmap()
 {
 	LgiAssert(!"Not impl.");
 	return NULL;
 }
 
-GString::Array GClipBoard::Files()
+LString::Array GClipBoard::Files()
 {
 	LgiAssert(!"Not impl.");
-	return GString::Array();
+	return LString::Array();
 }
 
-bool GClipBoard::Files(GString::Array &Paths, bool AutoEmpty)
+bool GClipBoard::Files(LString::Array &Paths, bool AutoEmpty)
 {
 	LgiAssert(!"Not impl.");
 	return false;
@@ -170,11 +170,11 @@ struct LBinaryData_Hdr
 
 @implementation LBinaryData
 
-- (id)init:(GString)fmt ptr:(uchar*)ptr len:(ssize_t)Len
+- (id)init:(LString)fmt ptr:(uchar*)ptr len:(ssize_t)Len
 {
 	if ((self = [super init]) != nil)
 	{
-		GArray<char> mem;
+		LArray<char> mem;
 		mem.Length(sizeof(LBinaryData_Hdr)+fmt.Length());
 		LBinaryData_Hdr *h = (LBinaryData_Hdr*)mem.AddressOf();
 		h->Magic = LBinaryData_Magic;
@@ -203,7 +203,7 @@ struct LBinaryData_Hdr
 }
 
 // Any of these parameters can be non-NULL if the caller doesn't care about them
-- (bool)getData:(GString*)Format data:(GAutoPtr<uint8,true>*)Ptr len:(ssize_t*)Len var:(GVariant*)Var
+- (bool)getData:(LString*)Format data:(LAutoPtr<uint8,true>*)Ptr len:(ssize_t*)Len var:(LVariant*)Var
 {
 	if (!self.data)
 	{
@@ -211,7 +211,7 @@ struct LBinaryData_Hdr
 		return false;
 	}
 
-	GArray<char> mem;
+	LArray<char> mem;
 	if (!mem.Length(MIN(self.data.length, 256)))
 	{
 		LgiTrace("%s:%i - Alloc failed.\n", _FL);
@@ -304,7 +304,7 @@ bool GClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	return r;
 }
 
-bool GClipBoard::Binary(FormatType Format, GAutoPtr<uint8,true> &Ptr, ssize_t *Len)
+bool GClipBoard::Binary(FormatType Format, LAutoPtr<uint8,true> &Ptr, ssize_t *Len)
 {
 	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
 	auto d = [pasteboard dataForType:LBinaryDataPBoardType];

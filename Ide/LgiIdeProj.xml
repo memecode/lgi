@@ -97,7 +97,7 @@
 			<Makefile>
 				<Windows>.\LgiIde_vs2015.sln</Windows>
 				<Linux>./Makefile.linux</Linux>
-				<Mac>./Gtk3/build/Makefile</Mac>
+				<Mac>./MacCocoa/LgiIde.xcodeproj</Mac>
 				<Haiku>Makefile.haiku</Haiku>
 			</Makefile>
 			<Executable>
@@ -109,6 +109,7 @@
 					<Debug>LgiIde.exe</Debug>
 					<Release>LgiIde.exe</Release>
 				</Windows>
+				<Mac />
 			</Executable>
 			<Defines>
 				<Windows>
@@ -134,6 +135,8 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -163,6 +166,10 @@ WINNATIVE</Release>
 					<Debug>../include/beos</Debug>
 					<Release>../include/beos</Release>
 				</Haiku>
+				<Mac>
+					<Debug>../include/lgi/mac/cocoa</Debug>
+					<Release>../include/lgi/mac/cocoa</Release>
+				</Mac>
 			</IncludePaths>
 			<Libraries>
 				<Windows>
@@ -183,12 +190,15 @@ pthread
 					<Debug>be</Debug>
 					<Release>be</Release>
 				</Haiku>
+				<All />
+				<Mac />
 			</Libraries>
 			<LibraryPaths>
 				<All>
 					<Debug>..\Debug</Debug>
 					<Release>..\Release</Release>
 				</All>
+				<Mac />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -206,6 +216,7 @@ pthread
 					<Debug>lgiide</Debug>
 					<Release>lgiide</Release>
 				</Linux>
+				<Mac />
 			</TargetName>
 			<SystemIncludes>
 				<Windows>
@@ -218,10 +229,15 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Mac />
 			</SystemIncludes>
 			<ApplicationIcon>
 				<Haiku>./Code/icon-haiku</Haiku>
 			</ApplicationIcon>
+			<Defines>
+				<All />
+				<Mac />
+			</Defines>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -236,12 +252,28 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Environment>
 				<All>SOME_TEST=testing</All>
 			</Environment>
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
-		<Advanced />
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Mac />
+			</PostBuildCommands>
+		</Advanced>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>

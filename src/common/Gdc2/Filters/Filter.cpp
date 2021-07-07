@@ -25,7 +25,7 @@
 #include <math.h>
 
 #include "lgi/common/Lgi.h"
-#include "lgi/common/String.h"
+#include "lgi/common/LgiString.h"
 #include "lgi/common/Variant.h"
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/Token.h"

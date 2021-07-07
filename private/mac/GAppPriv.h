@@ -1,8 +1,8 @@
 #pragma once
 
-#include "LJson.h"
-#include "LSymLookup.h"
-#include "GFontCache.h"
+#include "lgi/common/Json.h"
+#include "SymLookup.h"
+#include "lgi/common/FontCache.h"
 
 typedef LArray<LAppInfo*> AppArray;
 

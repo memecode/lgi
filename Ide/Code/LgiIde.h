@@ -8,19 +8,19 @@
 //
 //		GCC: __GNUC__
 //
-
-#ifdef WIN32
-#include "resource.h"
-#endif
-#include "resdefs.h"
 #include "lgi/common/DocView.h"
 #include "lgi/common/OptionsFile.h"
-#include "FindSymbol.h"
 #include "lgi/common/StringClass.h"
-#include "GDebugger.h"
 #include "lgi/common/TextView3.h"
 #include "lgi/common/List.h"
 #include "lgi/common/Tree.h"
+
+#include "resdefs.h"
+#include "FindSymbol.h"
+#include "GDebugger.h"
+#ifdef WIN32
+#include "resource.h"
+#endif
 
 #define APP_VER					"1.0"
 #define APP_URL					"http://www.memecode.com/lgi/ide"

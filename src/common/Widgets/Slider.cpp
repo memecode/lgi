@@ -32,7 +32,8 @@ void LSlider::Value(int64 i)
 		LViewI *n = GetNotify() ? GetNotify() : GetParent();
 		if (n)
 		{
-			n->OnNotify(this, Val);
+			n->OnNotify(this, (int)
+			Val);
 		}
 		
 		Invalidate();
@@ -53,6 +54,8 @@ bool LSlider::SetRange(const LRange &r)
 {
 	Min = r.Start;
 	Max = r.End();
+	Invalidate();
+	return true;
 }
 
 void LSlider::GetLimits(int64 &min, int64 &max)

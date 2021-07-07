@@ -237,11 +237,10 @@
 #include "lgi/common/LgiMsgs.h"
 #include "lgi/common/LgiDefs.h"
 #include "lgi/common/Mem.h"
-#include "lgi/common/String.h"
+#include "lgi/common/LgiString.h"
 #include "lgi/common/File.h"
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/Font.h"
-
 #include "lgi/common/LgiClasses.h"
 #include "lgi/common/LgiCommon.h"
 

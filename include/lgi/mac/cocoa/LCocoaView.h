@@ -13,7 +13,7 @@
 
 class LViewI;
 class LWindow;
-class GWindowPrivate;
+class LWindowPrivate;
 
 enum LCloseContext
 {
@@ -106,9 +106,9 @@ LgiExtern LRect LScreenFlip(LRect r);
 	CloseState ReqClose;
 }
 
-@property GWindowPrivate *d;
+@property LWindowPrivate *d;
 
-- (id)init:(GWindowPrivate*)priv Frame:(NSRect)rc;
+- (id)init:(LWindowPrivate*)priv Frame:(NSRect)rc;
 - (void)dealloc;
 - (BOOL)canBecomeKeyWindow;
 - (LWindow*)getWindow;

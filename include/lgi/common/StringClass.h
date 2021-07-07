@@ -5,8 +5,7 @@
  * Email: fret@memecode.com
  * Created: 16 Sept 2014
  */
-#ifndef _GSTRING_CLASS_H_
-#define _GSTRING_CLASS_H_
+#pragma once
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -29,6 +28,7 @@
 		#define PRId64 "Ld"
 	#endif
 #endif
+#include "LgiOsDefs.h"
 #include "lgi/common/Unicode.h"
 #include "lgi/common/Array.h"
 #ifndef IsDigit
@@ -1226,4 +1226,3 @@ public:
 
 };
 
-#endif

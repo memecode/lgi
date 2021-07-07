@@ -7,7 +7,7 @@
 #include "lgi/common/Token.h"
 #include "lgi/common/LgiCommon.h"
 #include "lgi/common/NetTools.h"
-#include "lgi/common/String.h"
+#include "lgi/common/LgiString.h"
 #include "lgi/common/Base64.h"
 #include "lgi/common/Variant.h"
 

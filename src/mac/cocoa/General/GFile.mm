@@ -19,13 +19,13 @@
 #include <stdarg.h>
 #include <dirent.h>
 
-#include "GFile.h"
-#include "GContainers.h"
-#include "GToken.h"
-#include "Gdc2.h"
-#include "LgiCommon.h"
-#include "GString.h"
-#include "GSubProcess.h"
+#include "lgi/common/File.h"
+#include "lgi/common/Containers.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/LgiCommon.h"
+#include "lgi/common/LgiString.h"
+#include "lgi/common/SubProcess.h"
 
 #if LGI_COCOA
 #include <Cocoa/Cocoa.h>
@@ -40,7 +40,7 @@
 
 /****************************** Globals ***********************************/
 
-GString GFile::Path::Sep(DIR_STR);
+LString GFile::Path::Sep(DIR_STR);
 
 bool GFile::Path::FixCase()
 {
@@ -290,7 +290,7 @@ int64 LFileSize(const char *FileName)
 	return 0;
 }
 
-bool DirExists(const char *FileName, char *CorrectCase)
+bool LDirExists(const char *FileName, char *CorrectCase)
 {
 	bool Status = false;
 	
@@ -308,7 +308,7 @@ bool DirExists(const char *FileName, char *CorrectCase)
 	return Status;
 }
 
-bool FileExists(const char *FileName, char *CorrectCase)
+bool LFileExists(const char *FileName, char *CorrectCase)
 {
 	bool Status = false;
 	
@@ -463,13 +463,13 @@ bool LgiGetDriveInfo
 
 struct GVolumePriv
 {
-	GString Name;
-	GString Path;
+	LString Name;
+	LString Path;
 	int Type;			// VT_??
 	int Flags;			// VA_??
 	int64 Size;
 	int64 Free;
-	GAutoPtr<GSurface> Icon;
+	LAutoPtr<LSurface> Icon;
 
 	LgiSystemPath SysPath;
 	List<GVolume> Sub;
@@ -567,7 +567,7 @@ uint64 GVolume::Free()
 	return d->Free;
 }
 
-GSurface *GVolume::Icon()
+LSurface *GVolume::Icon()
 {
 	return d->Icon;
 }
@@ -593,7 +593,7 @@ GVolume *GVolume::First()
 
 		#if 1
 
-			GString DesktopPath = LGetSystemPath(LSP_DESKTOP);
+			LString DesktopPath = LGetSystemPath(LSP_DESKTOP);
 
 			// List any favorites
 			UInt32 seed;
@@ -611,7 +611,7 @@ GVolume *GVolume::First()
 					continue;
 				
 				CFStringRef itemPath = CFURLCopyFileSystemPath(outURL,kCFURLPOSIXPathStyle);
-				GString s = itemPath;
+				LString s = itemPath;
 
 				if (!s.Equals(DesktopPath)) // This is the root item, don't duplicate
 				{
@@ -626,7 +626,7 @@ GVolume *GVolume::First()
 						if (IcoRef)
 						{
 							NSImage *img = [[NSImage alloc] initWithIconRef:IcoRef];
-							v->d->Icon.Reset(new GMemDC(img));
+							v->d->Icon.Reset(new LMemDC(img));
 							[img release];
 							CFRelease(IcoRef);
 						}
@@ -696,8 +696,8 @@ GVolume *GVolume::First()
 				  path, name, removable, writable, unmountable, description, type, size);
 			#endif
 			
-			GString s = [type UTF8String];
-			GString p = [path UTF8String];
+			LString s = [type UTF8String];
+			LString p = [path UTF8String];
 			if (!s.Equals("autofs") && p.Find("/private") < 0)
 			{
 				v = new GVolume();
@@ -732,7 +732,7 @@ bool GVolume::SetMounted(bool Mount)
 	return Mount;
 }
 
-void GVolume::Insert(GAutoPtr<GVolume> v)
+void GVolume::Insert(LAutoPtr<GVolume> v)
 {
 	d->Sub.Insert(v.Release());
 }
@@ -977,7 +977,7 @@ ExitCopyLoop:
 	 */
 }
 
-bool GFileSystem::Delete(GArray<const char*> &Files, GArray<LError> *Status, bool ToTrash)
+bool GFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, bool ToTrash)
 {
 	bool Error = false;
 	
@@ -1081,7 +1081,7 @@ bool GFileSystem::Delete(const char *FileName, bool ToTrash)
 {
 	if (FileName)
 	{
-		GArray<const char*> f;
+		LArray<const char*> f;
 		f.Add(FileName);
 		return Delete(f, 0, ToTrash);
 	}
@@ -1105,7 +1105,7 @@ bool GFileSystem::CreateFolder(const char *PathName, bool CreateParentFolders, L
 				if (!Leaf) return false;
 				*Leaf = 0;
 			}
-			while (!DirExists(Base));
+			while (!LDirExists(Base));
 			
 			GToken Parts(PathName + strlen(Base), DIR_STR);
 			for (int i=0; i<Parts.Length(); i++)
@@ -1215,7 +1215,7 @@ public:
 	char			*Pattern;
 	
 	ssize_t			CachePos;
-	GString::Array	Cache;
+	LString::Array	Cache;
 	
 	GDirectoryPriv()
 	{
@@ -1323,8 +1323,8 @@ int GDirectory::First(const char *Name, const char *Pattern)
 		{
 			// Really Apple? REALLY???
 			// Can't opendir("/")... sigh. Clearly there is more than one way to get this done.
-			GSubProcess p("ls", "-l /");
-			GStringPipe o;
+			LSubProcess p("ls", "-l /");
+			LStringPipe o;
 			if (p.Start() && p.Communicate(&o) == 0)
 			{
 				strcpy_s(d->BasePath, sizeof(d->BasePath), Name);
@@ -1528,7 +1528,7 @@ const char *GDirectory::FullPath()
 	return d->BasePath;
 }
 
-GString GDirectory::FileName() const
+LString GDirectory::FileName() const
 {
 	return GetName();
 }

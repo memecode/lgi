@@ -8,20 +8,12 @@
 //              fret@memecode.com
 //
 
-#ifndef __LGI_MAC_OS_DEFS_H
-#define __LGI_MAC_OS_DEFS_H
+#pragma once
 
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include "LgiInc.h"
-#include "LgiDefs.h"
-#include "LAutoPtr.h"
-#include "pthread.h"
-
-//////////////////////////////////////////////////////////////////
-// Includes
-#include "LgiInc.h"
+#include <pthread.h>
 
 #ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
@@ -29,8 +21,11 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreText/CoreText.h>
 
+#include "lgi/common/LgiInc.h"
+#include "lgi/common/LgiDefs.h"
+#include "lgi/common/AutoPtr.h"
+
 //////////////////////////////////////////////////////////////////
-// Typedefs
 #include "ObjCWrapper.h"
 ObjCWrapper(NSWindow, OsWindow)
 ObjCWrapper(NSView,   OsView)
@@ -45,8 +40,8 @@ typedef CGContextRef		OsPainter;
 typedef CGContextRef		OsBitmap;
 typedef CTFontRef			OsFont;
 
-#include "LgiClass.h"
-#include "GMessage.h"
+// #include "lgi/common/LgiUiBase.h"
+#include "lgi/common/Message.h"
 
 class OsAppArguments
 {
@@ -296,7 +291,6 @@ LgiFunc const char *LVirtualKeyToString(LVirtualKeys c);
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Externs
-LgiFunc LView *GWindowFromHandle(OsView hWnd);
 LgiFunc int GetMouseWheelLines();
 LgiFunc int WinPointToHeight(int Pt);
 LgiFunc int WinHeightToPoint(int Ht);
@@ -310,5 +304,3 @@ LgiFunc int FormatToInt(char *s);
 /// Convert a Os dependant integer d'n'd format to a string.
 LgiFunc char *FormatToStr(int f);
 
-
-#endif

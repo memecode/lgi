@@ -9,8 +9,8 @@
 #import "Lgi.h"
 #import <Foundation/Foundation.h>
 #import "LCocoaView.h"
-#include "GEventTargetThread.h"
-#include "GClipBoard.h"
+#include "lgi/common/EventTargetThread.h"
+#include "lgi/common/ClipBoard.h"
 
 #define Check() if (!self.w) return
 static int LCocoaView_Count = 0;
@@ -68,7 +68,7 @@ NSCursor *LCocoaCursor(LgiCursor lc)
 
 @implementation LCocoaMsg
 
-- (id)init:(GViewI*)View msg:(int)Msg a:(GMessage::Param)A b:(GMessage::Param)B
+- (id)init:(LViewI*)View msg:(int)Msg a:(GMessage::Param)A b:(GMessage::Param)B
 {
 	if ((self = [super init]) != nil)
 	{
@@ -85,7 +85,7 @@ NSCursor *LCocoaCursor(LgiCursor lc)
 
 @implementation LCocoaAssert
 
-- (id)init:(GString)m
+- (id)init:(LString)m
 {
 	if ((self = [super init]) != nil)
 	{
@@ -112,7 +112,7 @@ static NSDragOperation LgiToCocoaDragOp(int op)
 struct DndEvent
 {
 	LCocoaView *cv;
-	GViewI *v;
+	LViewI *v;
 	GDragDropTarget *target;
 	GDragFormats InputFmts, AcceptedFmts;
 	LPoint Pt;
@@ -157,11 +157,11 @@ struct DndEvent
 			return;
 
 		// Convert co-ords to view local
-		for (GViewI *view = v; view != view->GetWindow(); view = view->GetParent())
+		for (LViewI *view = v; view != view->GetWindow(); view = view->GetParent())
 		{
-			GView *gv = view->GetGView();
-			GRect cli = gv ? gv->GView::GetClient(false) : view->GetClient(false);
-			GRect pos = view->GetPos();
+			LView *gv = view->GetGView();
+			LRect cli = gv ? gv->LView::GetClient(false) : view->GetClient(false);
+			LRect pos = view->GetPos();
 			Pt.x -= pos.x1 + cli.x1;
 			Pt.y -= pos.y1 + cli.y1;
 		}
@@ -186,7 +186,7 @@ struct DndEvent
 	NSTrackingArea *tracking;
 }
 
-- (id)init:(GView*)wnd
+- (id)init:(LView*)wnd
 {
 	LAutoPool Pool;
 	LCocoaView_Count++;
@@ -237,7 +237,7 @@ struct DndEvent
 	Check();
 
 	LAutoPool Pool;
-	GScreenDC Dc(self.w);
+	LScreenDC Dc(self.w);
 	self.w->_Paint(&Dc);
 	
 	/*
@@ -256,7 +256,7 @@ struct DndEvent
 	LAutoPool Pool;
 	Check();
 	
-	GMouse m(self.w);
+	LMouse m(self.w);
 	m.SetFromEvent(ev, self);
 	m.Target->GetGView()->_Mouse(m, false);
 }
@@ -266,7 +266,7 @@ struct DndEvent
 	LAutoPool Pool;
 	Check();
 
-	GMouse m(self.w);
+	LMouse m(self.w);
 	m.SetFromEvent(ev, self);
 	m.Target->GetGView()->_Mouse(m, false);
 }
@@ -276,7 +276,7 @@ struct DndEvent
 	LAutoPool Pool;
 	Check();
 
-	GMouse m(self.w);
+	LMouse m(self.w);
 	m.SetFromEvent(ev, self);
 	m.Target->GetGView()->_Mouse(m, false);
 }
@@ -286,7 +286,7 @@ struct DndEvent
 	LAutoPool Pool;
 	Check();
 
-	GMouse m(self.w);
+	LMouse m(self.w);
 	m.SetFromEvent(ev, self);
 	m.Target->GetGView()->_Mouse(m, false);
 }
@@ -296,7 +296,7 @@ struct DndEvent
 	LAutoPool Pool;
 	Check();
 
-	GMouse m(self.w);
+	LMouse m(self.w);
 	m.SetFromEvent(ev, self);
 	
 	// m.Trace("moved");
@@ -309,7 +309,7 @@ struct DndEvent
 	LAutoPool Pool;
 	Check();
 
-	GMouse m(self.w);
+	LMouse m(self.w);
 	m.SetFromEvent(ev, self);
 	m.Target->GetGView()->_Mouse(m, true);
 }
@@ -363,11 +363,11 @@ const char *LVirtualKeyToString(LVirtualKeys c)
 	return "#undef";
 }
 
-GKey KeyEvent(NSEvent *ev)
+LKey KeyEvent(NSEvent *ev)
 {
 	LAutoPool Pool;
-	GKey k;
-	GString s = [ev.characters UTF8String];
+	LKey k;
+	LString s = [ev.characters UTF8String];
 	auto mod = ev.modifierFlags;
 	bool option = (mod & NSEventModifierFlagOption) != 0;
 	bool cmd = (mod & NSEventModifierFlagCommand) != 0;
@@ -413,10 +413,10 @@ GKey KeyEvent(NSEvent *ev)
 	LAutoPool Pool;
 	Check();
 
-	GKey k = KeyEvent(event);
+	auto k = KeyEvent(event);
 	k.Down(true);
 	
-	GWindow *wnd = dynamic_cast<GWindow*>(self.w);
+	auto wnd = dynamic_cast<LWindow*>(self.w);
 	if (wnd)
 		wnd->HandleViewKey(NULL, k);
 	else
@@ -428,8 +428,8 @@ GKey KeyEvent(NSEvent *ev)
 	LAutoPool Pool;
 	Check();
 
-	GKey k = KeyEvent(event);
-	GWindow *wnd = dynamic_cast<GWindow*>(self.w);
+	auto k = KeyEvent(event);
+	auto wnd = dynamic_cast<LWindow*>(self.w);
 	if (wnd)
 		wnd->HandleViewKey(NULL, k);
 	else
@@ -440,7 +440,7 @@ GKey KeyEvent(NSEvent *ev)
 {
 	LAutoPool Pool;
 
-	if (GView::LockHandler(msg.v, GView::OpExists))
+	if (LView::LockHandler(msg.v, LView::OpExists))
 	{
 		GMessage Msg(msg.m, msg.a, msg.b);
 		// LgiTrace("%s::OnEvent %i,%i,%i\n", msg.v->GetClass(), msg.m, msg.a, msg.b);
@@ -454,7 +454,7 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 {
 	e.AcceptedFmts.Empty();
 	e.AcceptedFmts.SetSource(true);
-	GString LgiFmt = LBinaryDataPBoardType;
+	LString LgiFmt = LBinaryDataPBoardType;
 	for (size_t i=0; i<e.InputFmts.Length(); i++)
 	{
 		auto f = e.InputFmts[i];
@@ -466,7 +466,7 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 			LBinaryData *bin = [[LBinaryData alloc] init:d];
 			if (bin)
 			{
-				GString realFmt;
+				LString realFmt;
 				[bin getData:&realFmt data:NULL len:NULL var:NULL];
 				[bin release];
 				
@@ -547,7 +547,7 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 	if (!e.target)
 		return NSDragOperationNone;
 
-	GArray<GDragData> Data;
+	LArray<GDragData> Data;
 	auto pb = sender.draggingPasteboard;
 	
 	auto Accepted = e.AcceptedFmts.GetSupported();
@@ -576,7 +576,7 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 					LBinaryData *bin = [[LBinaryData alloc] init:data];
 					if (bin)
 					{
-						GString realFmt;
+						LString realFmt;
 						if ([bin getData:&realFmt data:NULL len:NULL var:NULL])
 						{
 							if (realFmt == dd.Format)

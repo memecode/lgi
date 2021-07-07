@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "GdiLeak.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/GdiLeak.h"
 
 class GPrintDCPrivate
 {

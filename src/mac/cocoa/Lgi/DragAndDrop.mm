@@ -11,12 +11,12 @@ Useful info:
 #include <stdio.h>
 
 #include "Lgi.h"
-#include "GDragAndDrop.h"
-#include "GDisplayString.h"
-#include "INet.h"
-#include "GViewPriv.h"
-#include "GClipBoard.h"
-#include "GProgressDlg.h"
+#include "lgi/common/DragAndDrop.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/Net.h"
+#include "lgi/common/ViewPriv.h"
+#include "lgi/common/ClipBoard.h"
+#include "lgi/common/ProgressDlg.h"
 
 // #define DND_DEBUG_TRACE
 class GDndSourcePriv;
@@ -37,10 +37,10 @@ const char *LMimeToUti(const char *Mime)
 }
 
 @interface LDragItem : NSPasteboardItem
-@property (nonatomic, readonly) GString path;
+@property (nonatomic, readonly) LString path;
 @property (nonatomic, weak) NSImage *icon;
-@property (nonatomic) GAutoPtr<GStreamI> src;
-- (LDragItem*) initWithItem:(GString)item source:(GStreamI*)src;
+@property (nonatomic) LAutoPtr<LStreamI> src;
+- (LDragItem*) initWithItem:(LString)item source:(LStreamI*)src;
 - (void)dealloc;
 @end
 
@@ -48,7 +48,7 @@ const char *LMimeToUti(const char *Mime)
 {
 }
 
-- (LDragItem*) initWithItem:(GString)item source:(GStreamI*)src
+- (LDragItem*) initWithItem:(LString)item source:(LStreamI*)src
 {
 	if ((self = [super init]) != nil)
 	{
@@ -74,13 +74,13 @@ const char *LMimeToUti(const char *Mime)
 
 @interface LDragSource : NSObject<NSDraggingSource, NSPasteboardItemDataProvider>
 {
-	GArray<LDragItem*> Items;
-	GView *SourceWnd;
+	LArray<LDragItem*> Items;
+	LView *SourceWnd;
 }
 
 @property GDndSourcePriv *d;
 
-- (id)init:(GDndSourcePriv*)view wnd:(GView*)Wnd;
+- (id)init:(GDndSourcePriv*)view wnd:(LView*)Wnd;
 - (void)addItem:(LDragItem*)i;
 
 - (NSDragOperation)draggingSession:(nonnull NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context;
@@ -92,11 +92,11 @@ const char *LMimeToUti(const char *Mime)
 class GDndSourcePriv
 {
 public:
-	GAutoString CurrentFormat;
-	GSurface *ExternImg;
-	GRect ExternSubRgn;
+	LAutoString CurrentFormat;
+	LSurface *ExternImg;
+	LRect ExternSubRgn;
 	int Effect;
-	GMemDC Icon;
+	LMemDC Icon;
 	GDragFormats Formats;
 
 	GDndSourcePriv() : Formats(true)
@@ -123,15 +123,15 @@ static NSURL *ExtractPromiseDropLocation(NSPasteboard *_pasteboard)
     return result;
 }
 
-class LFileCopy : public GProgressDlg, public LThread
+class LFileCopy : public LProgressDlg, public LThread
 {
-	GString Dst;
-	GAutoPtr<GStreamI> Src;
+	LString Dst;
+	LAutoPtr<LStreamI> Src;
 	uint64_t StartTs;
 	
 public:
-	LFileCopy(GView *parent, GString dst, GAutoPtr<GStreamI> src) :
-		LThread("LFileCopy"), GProgressDlg(parent, 1000)
+	LFileCopy(LView *parent, LString dst, LAutoPtr<LStreamI> src) :
+		LThread("LFileCopy"), LProgressDlg(parent, 1000)
 	{
 		SetParent(parent);
 		Dst = dst;
@@ -145,7 +145,7 @@ public:
 	
 	void OnPulse()
 	{
-		GProgressDlg::OnPulse();
+		LProgressDlg::OnPulse();
 		if (IsExited())
 		{
 			SetPulse();
@@ -176,7 +176,7 @@ public:
 		auto len = Src->GetSize();
 		int64 written = 0;
 		if (len > 0)
-			SetRange(GRange(0, len));
+			SetRange(LRange(0, len));
 		SetScale(1.0/1024.0/1024.0);
 		SetType("MiB");
 
@@ -200,7 +200,7 @@ public:
 
 @implementation LDragSource
 
-- (id)init:(GDndSourcePriv*)d wnd:(GView*)Wnd
+- (id)init:(GDndSourcePriv*)d wnd:(LView*)Wnd
 {
 	if ((self = [super init]) != nil)
 	{
@@ -305,7 +305,7 @@ GDragDropSource::~GDragDropSource()
 	DeleteObj(d);
 }
 
-bool GDragDropSource::SetIcon(GSurface *Img, GRect *SubRgn)
+bool GDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
 {
 	d->ExternImg = Img;
 	if (SubRgn)
@@ -316,13 +316,13 @@ bool GDragDropSource::SetIcon(GSurface *Img, GRect *SubRgn)
 	return true;
 }
 
-bool GDragDropSource::CreateFileDrop(GDragData *OutputData, GMouse &m, GString::Array &Files)
+bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, LString::Array &Files)
 {
 	if (OutputData && Files.First())
 	{
 		for (auto f : Files)
 		{
-			GString s;
+			LString s;
 			s.Printf("file://%s", f.Get());
 			OutputData->Data.New().OwnStr(NewStr(s));
 		}
@@ -342,13 +342,13 @@ static NSArray* BuildImageComponentsForItem(NSPasteboardItem *_item)
 	#if 0
 		img = [NSImage imageNamed:NSImageNameApplicationIcon]; // test it works..
 	#else
-		GMemDC Mem(32, 32, System32BitColourSpace);
+		LMemDC Mem(32, 32, System32BitColourSpace);
 		Mem.Colour(0, 32);
 		Mem.Rectangle();
 	
 		for (int i=0; i<3; i++)
 		{
-			GRect r(0, 0, 11, 15);
+			LRect r(0, 0, 11, 15);
 			r.Offset(10 + (i*3), 8 + (i*3));
 			Mem.Colour(L_BLACK);
 			Mem.Box(&r);
@@ -369,7 +369,7 @@ static NSArray* BuildImageComponentsForItem(NSPasteboardItem *_item)
 	return @[ic];
 }
 
-int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface *Icon)
+int GDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
 {
 	LgiAssert(SourceWnd);
 	if (!SourceWnd || !Event)
@@ -391,7 +391,7 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 	if (!h) return DROPEFFECT_NONE;
 
 	NSImage *img = nil;
-	GMemDC *Mem = dynamic_cast<GMemDC*>(Icon);
+	auto Mem = dynamic_cast<LMemDC*>(Icon);
 	if (Mem)
 	{
 		img = Mem->NsImage();
@@ -407,7 +407,7 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 		
 		for (int i=0; i<3; i++)
 		{
-			GRect r(0, 0, 11, 15);
+			LRect r(0, 0, 11, 15);
 			r.Offset(10 + (i*3), 8 + (i*3));
 			Mem->Colour(L_BLACK);
 			Mem->Box(&r);
@@ -429,7 +429,7 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 	if (!GetFormats(Formats))
 		return DROPEFFECT_NONE;
 
-	GArray<GDragData> Data;
+	LArray<GDragData> Data;
 	for (auto f: Formats.Formats)
 		Data.New().Format = f;
 	Formats.Empty();
@@ -477,14 +477,14 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 		}
 		else if (dd.Data.Length() == 1)
 		{
-			GVariant &v = dd.Data[0];
+			LVariant &v = dd.Data[0];
 			switch (v.Type)
 			{
 				case GV_STRING:
 				{
 					auto item = [[NSPasteboardItem alloc] init];
 
-					GString str = v.Str();
+					LString str = v.Str();
 					[item setString:str.NsStr() forType:dd.Format.NsStr()];
 
 					auto drag_item = [[NSDraggingItem alloc] initWithPasteboardWriter:item];
@@ -524,7 +524,7 @@ int GDragDropSource::Drag(GView *SourceWnd, OsEvent Event, int Effect, GSurface 
 				}
 				default:
 				{
-					printf("%s:%i - Unsupported type '%s' for format '%s'.\n", _FL, GVariant::TypeToString(v.Type), dd.Format.Get());
+					printf("%s:%i - Unsupported type '%s' for format '%s'.\n", _FL, LVariant::TypeToString(v.Type), dd.Format.Get());
 					break;
 				}
 			}
@@ -555,7 +555,7 @@ GDragDropTarget::~GDragDropTarget()
 {
 }
 
-void GDragDropTarget::SetWindow(GView *to)
+void GDragDropTarget::SetWindow(LView *to)
 {
 	bool Status = false;
 	To = to;

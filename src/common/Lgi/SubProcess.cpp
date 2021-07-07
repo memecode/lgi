@@ -1253,7 +1253,7 @@ bool LIsProcess(OsProcessId Pid)
 	
 		#if LGI_COCOA
 	
-		NSRunningApplication* app = [NSRunningApplication runningApplicationWithProcessIdentifier: Pid];
+		auto app = [NSRunningApplication runningApplicationWithProcessIdentifier: Pid];
 		return app != nil;
 	
 		#elif LGI_CARBON

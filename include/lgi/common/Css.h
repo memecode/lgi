@@ -10,7 +10,7 @@
 #include "lgi/common/Mem.h"
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/AutoPtr.h"
-#include "lgi/common/String.h"
+#include "lgi/common/LgiString.h"
 #include "lgi/common/HashTable.h"
 
 #ifndef LINUX

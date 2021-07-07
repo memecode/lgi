@@ -13,7 +13,7 @@
 #include "lgi/common/DateTime.h"
 #include "lgi/common/Containers.h"
 #include "lgi/common/HashTable.h"
-#include "lgi/common/String.h"
+#include "lgi/common/LgiString.h"
 
 class LCompiledCode;
 

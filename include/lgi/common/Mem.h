@@ -9,10 +9,9 @@
 **		fret@memecode.com
 */
 
-#ifndef __MEMORY_H
-#define __MEMORY_H
+#pragma once
 
-#include "LgiInc.h"
+#include "lgi/common/LgiInc.h"
 #include "LgiOsDefs.h"
 
 #ifndef __cplusplus
@@ -90,4 +89,3 @@ LgiFunc bool LgiDumpMemoryStats(char *filename);
 
 #include <string.h>
 
-#endif

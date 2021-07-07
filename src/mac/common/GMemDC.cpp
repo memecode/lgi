@@ -11,9 +11,9 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "Gdc2.h"
-#include "GdiLeak.h"
-#include "GPalette.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/GdiLeak.h"
+#include "lgi/common/Palette.h"
 #import <AppKit/NSCursor.h>
 
 #define AlphaType		kCGImageAlphaPremultipliedLast
@@ -339,7 +339,7 @@ NSImage *LMemDC::NsImage(LRect *rc)
 	
 	CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
 	// CLBitmapInfo bitmapInfo = kCLBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast;
-	CLBitmapInfo bitmapInfo = kCLBitmapByteOrderDefault | kCGImageAlphaLast;
+	auto bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaLast;
 	CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
 
 	CGImageRef iref = CGImageCreate(r.X(), r.Y(),
@@ -442,7 +442,7 @@ bool LMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 		if (Bits > 16)
 		{
 			d->Cs = CGColorSpaceCreateDeviceRGB();
-			d->Bmp = CLBitmapContextCreate
+			d->Bmp = CGBitmapContextCreate
 				(
 					NULL,
 					x,
@@ -454,8 +454,8 @@ bool LMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 				);
 			if (d->Bmp)
 			{
-				LineLen = CLBitmapContextGetBytesPerRow(d->Bmp);
-				d->Data = (uint8*) CLBitmapContextGetData(d->Bmp);
+				LineLen = CGBitmapContextGetBytesPerRow(d->Bmp);
+				d->Data = (uint8*) CGBitmapContextGetData(d->Bmp);
 			}
 		}
 		
@@ -471,12 +471,12 @@ bool LMemDC::Create(int x, int y, GColourSpace Cs, int Flags)
 				pMem->Base = (uchar*)d->Data;
 				pMem->Line = LineLen;
 
-				switch (CLBitmapContextGetBitsPerPixel(d->Bmp))
+				switch (CGBitmapContextGetBitsPerPixel(d->Bmp))
 				{
 					case 24:
 					case 32:
 					{
-						CGImageAlphaInfo ai = CLBitmapContextGetAlphaInfo(d->Bmp);
+						CGImageAlphaInfo ai = CGBitmapContextGetAlphaInfo(d->Bmp);
 						switch (ai)
 						{
 							case kCGImageAlphaNone:

@@ -1,8 +1,8 @@
 #include "Lgi.h"
 #include "LgiOsDefs.h"
-#include "LMutex.h"
-#include "GStringClass.h"
-#include "LThread.h"
+#include "lgi/common/Mutex.h"
+#include "lgi/common/StringClass.h"
+#include "lgi/common/Thread.h"
 #include <errno.h>
 
 #include <pthread.h>

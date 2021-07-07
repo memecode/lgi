@@ -698,6 +698,9 @@ public:
 	#endif
 };
 
+LgiFunc LView *LViewFromHandle(OsView hWnd);
+
+
 /// \brief Factory for creating view's by name.
 ///
 /// Inherit from this to add a new factory to create objects. Override

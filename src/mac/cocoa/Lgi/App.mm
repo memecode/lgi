@@ -7,12 +7,14 @@
 
 #import <AppKit/AppKit.h>
 
-#include "Lgi.h"
-#include "GProcess.h"
-#include "GSkinEngine.h"
-#include "GArray.h"
-#include "GToken.h"
-#include "LThread.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Process.h"
+#include "lgi/common/SkinEngine.h"
+#include "lgi/common/Array.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/Thread.h"
+#include "lgi/common/EventTargetThread.h"
+#include "lgi/common/Menu.h"
 
 #include <sys/poll.h>
 #include <sys/types.h>
@@ -21,15 +23,14 @@
 #include <sys/wait.h>
 
 #import "LCocoaView.h"
-#include "GEventTargetThread.h"
 #include "GAppPriv.h"
 
 extern int hndstate(int hnd);
 
 struct OsAppArgumentsPriv
 {
-	GAutoString Str;
-	GArray<char*> Ptr;
+	LAutoString Str;
+	LArray<char*> Ptr;
 };
 
 OsAppArguments::OsAppArguments(int args, const char **arg)
@@ -49,8 +50,8 @@ void OsAppArguments::Set(char *CmdLine)
 	d->Str.Reset();
 	d->Ptr.Length(0);
 	
-	GArray<char> Raw;
-	GArray<size_t> Offsets;
+	LArray<char> Raw;
+	LArray<size_t> Offsets;
 	
 	auto Exe = LGetExeFile();
 	Offsets.Add(0);
@@ -106,8 +107,8 @@ void OsAppArguments::Set(char *CmdLine)
 
 OsAppArguments &OsAppArguments::operator =(OsAppArguments &a)
 {
-	GArray<char> Raw;
-	GArray<size_t> Offsets;
+	LArray<char> Raw;
+	LArray<size_t> Offsets;
 	for (int i=0; i<a.Args; i++)
 	{
 		size_t Len = strlen(a.Arg[i]) + 1;
@@ -136,7 +137,7 @@ OsAppArguments &OsAppArguments::operator =(OsAppArguments &a)
 	#define SDK_10_12(newSym, oldSym) oldSym
 #endif
 
-void GMouse::SetFromEvent(NSEvent *ev, NSView *view)
+void LMouse::SetFromEvent(NSEvent *ev, NSView *view)
 {
 	auto r = view.frame;
 	auto pt = ev.locationInWindow;
@@ -183,7 +184,7 @@ void GMouse::SetFromEvent(NSEvent *ev, NSView *view)
 	Double(ev.clickCount == 2 && Down());
 }
 
-void GUiEvent::SetModifer(uint32_t modifierKeys)
+void LUiEvent::SetModifer(uint32_t modifierKeys)
 {
 	System(modifierKeys & SDK_10_12(NSEventModifierFlagCommand, NSCommandKeyMask));
 	Shift (modifierKeys & SDK_10_12(NSEventModifierFlagShift,   NSShiftKeyMask));
@@ -349,7 +350,7 @@ void OnCrash(int i)
 
 - (void)onUrl:(NSAppleEventDescriptor *)event withReplyEvent:(NSAppleEventDescriptor *)reply
 {
-	GString s = [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
+	LString s = [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
 	if (self.d && self.d->Owner)
     	self.d->Owner->OnUrl(s);
 }
@@ -357,9 +358,9 @@ void OnCrash(int i)
 @end
 
 /////////////////////////////////////////////////////////////////////////////
-GSkinEngine *GApp::SkinEngine = 0;
+LSkinEngine *GApp::SkinEngine = 0;
 GApp *TheApp = 0;
-GMouseHook *GApp::MouseHook = 0;
+LMouseHook *GApp::MouseHook = 0;
 
 GApp::GApp(OsAppArguments &AppArgs, const char *AppName, GAppArguments *ObjArgs) :
 OsApplication(AppArgs.Args, AppArgs.Arg)
@@ -411,11 +412,11 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	GColour::OnChange();
 	
 	SetAppArgs(AppArgs);
-	MouseHook = new GMouseHook;
+	MouseHook = new LMouseHook;
 	
 	// System font setup
 	SystemNormal = 0;
-	GFontType SysFontType;
+	LFontType SysFontType;
 	
 	if (SysFontType.GetSystemFont("System"))
 	{
@@ -454,7 +455,7 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	
 	if (!GetOption("noskin"))
 	{
-		extern GSkinEngine *CreateSkinEngine(GApp *App);
+		extern LSkinEngine *CreateSkinEngine(GApp *App);
 		SkinEngine = CreateSkinEngine(this);
 	}
 	
@@ -470,7 +471,7 @@ GApp::~GApp()
 	DeleteObj(MouseHook);
 	DeleteObj(d->FileSystem);
 	DeleteObj(d->GdcSystem);
-	DeleteObj(GFontSystem::Me);
+	DeleteObj(LFontSystem::Me);
 	DeleteObj(d);
 	TheApp = 0;
 }
@@ -480,7 +481,7 @@ OsApp &GApp::Handle()
 	return d->NsApp;
 }
 
-bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param A, GMessage::Param B)
+bool GApp::PostEvent(LViewI *View, int Msg, GMessage::Param A, GMessage::Param B)
 {
 	if (!View)
 	{
@@ -488,14 +489,14 @@ bool GApp::PostEvent(GViewI *View, int Msg, GMessage::Param A, GMessage::Param B
 		return false;
 	}
 	
-	bool Exists = GView::LockHandler(View, GView::LockOp::OpExists);
+	bool Exists = LView::LockHandler(View, LView::LockOp::OpExists);
 	if (!Exists)
 	{
 		printf("%s:%i - View deleted.\n", _FL);
 		return false;
 	}
 
-	GWindow *w = View->GetWindow();
+	LWindow *w = View->GetWindow();
 	if (!w)
 	{
 		// printf("%s:%i - No window.\n", _FL);
@@ -537,7 +538,7 @@ bool GApp::IsOk()
 	return Status;
 }
 
-GMouseHook *GApp::GetMouseHook()
+LMouseHook *GApp::GetMouseHook()
 {
 	return MouseHook;
 }
@@ -576,14 +577,14 @@ int GApp::GetMetric(LgiSystemMetric Metric)
 	return 0;
 }
 
-GViewI *GApp::GetFocus()
+LViewI *GApp::GetFocus()
 {
 	auto kw = d->NsApp.p.keyWindow;
 	if (!kw)
 		return NULL;
 
 	LNsWindow *w = objc_dynamic_cast(LNsWindow, kw);
-	GWindow *gw = w ? [w getWindow] : nil;
+	LWindow *gw = w ? [w getWindow] : nil;
 	if (!gw)
 		return NULL;
 
@@ -720,7 +721,7 @@ void GApp::OnUrl(const char *Url)
 		d->UrlArg.Reset(NewStr(Url));
 }
 
-void GApp::OnReceiveFiles(GArray<const char*> &Files)
+void GApp::OnReceiveFiles(LArray<const char*> &Files)
 {
 	if (AppWnd)
 		AppWnd->OnReceiveFiles(Files);
@@ -733,7 +734,7 @@ const char *GApp::GetArgumentAt(int n)
 
 bool GApp::GetOption(const char *Option, char *Dest, int DestLen)
 {
-	GString Buf;
+	LString Buf;
 	if (GetOption(Option, Buf))
 	{
 		if (Dest)
@@ -743,7 +744,7 @@ bool GApp::GetOption(const char *Option, char *Dest, int DestLen)
 	return false;
 }
 
-bool GApp::GetOption(const char *Option, GString &Buf)
+bool GApp::GetOption(const char *Option, LString &Buf)
 {
 	if (IsOk() && Option)
 	{
@@ -800,12 +801,12 @@ bool GApp::GetOption(const char *Option, GString &Buf)
 
 void GApp::OnCommandLine()
 {
-	GArray<const char*> Files;
+	LArray<const char*> Files;
 	
 	for (int i=1; i<GetAppArgs()->Args; i++)
 	{
 		const char *a = GetAppArgs()->Arg[i];
-		if (FileExists(a))
+		if (LFileExists(a))
 		{
 			Files.Add(NewStr(a));
 		}
@@ -821,13 +822,13 @@ void GApp::OnCommandLine()
 	Files.DeleteArrays();
 }
 
-GString MimeFromData(const char *File)
+LString MimeFromData(const char *File)
 {
-	GString Ret;
+	LString Ret;
 	GFile f;
 	if (!f.Open(File, O_READ))
 		return Ret;
-	GArray<uint8_t> b;
+	LArray<uint8_t> b;
 	b.Length(1024);
 	auto r = f.Read(b.AddressOf(), b.Length());
 	if (r <= 0)
@@ -842,11 +843,11 @@ GString MimeFromData(const char *File)
 	return Ret;
 }
 
-GString GApp::GetFileMimeType(const char *File)
+LString GApp::GetFileMimeType(const char *File)
 {
-	GString Ret;
+	LString Ret;
 	
-	if (!FileExists(File))
+	if (!LFileExists(File))
 	{
 		// Look in the path
 		GToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
@@ -854,14 +855,14 @@ GString GApp::GetFileMimeType(const char *File)
 		{
 			char Full[MAX_PATH];
 			LgiMakePath(Full, sizeof(Full), p[i], File);
-			if (FileExists(Full))
+			if (LFileExists(Full))
 			{
 				break;
 			}
 		}
 	}
 	
-	auto filePath = GString(File).NsStr();
+	auto filePath = LString(File).NsStr();
 	CFStringRef fileExtension = (__bridge CFStringRef)[filePath pathExtension];
 	CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, fileExtension, NULL);
 	CFStringRef MIMEType = UTTypeCopyPreferredTagWithClass(UTI, kUTTagClassMIMEType);
@@ -880,7 +881,7 @@ GString GApp::GetFileMimeType(const char *File)
 	return Ret;
 }
 
-bool GApp::GetAppsForMimeType(char *Mime, GArray<GAppInfo*> &Apps)
+bool GApp::GetAppsForMimeType(char *Mime, LArray<LAppInfo*> &Apps)
 {
 	// Use LSCopyApplicationForMIMEType?
 	
@@ -925,7 +926,7 @@ bool GApp::GetAppsForMimeType(char *Mime, GArray<GAppInfo*> &Apps)
 	return false;
 }
 
-GSymLookup *GApp::GetSymLookup()
+LSymLookup *GApp::GetSymLookup()
 {
 	return &d->SymLookup;
 }

@@ -4,7 +4,7 @@
 #include "lgi/common/Mem.h"
 #include "LgiOsDefs.h"
 #include "lgi/common/NetTools.h"
-#include "lgi/common/String.h"
+#include "lgi/common/LgiString.h"
 
 #define IsAlpha(c)					(((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z'))
 

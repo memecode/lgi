@@ -16,7 +16,7 @@
 #include "lgi/common/LgiUiBase.h"
 #include "lgi/common/File.h"
 #include "lgi/common/Mem.h"
-#include "Core.h"
+#include "lgi/common/Core.h"
 #include "lgi/common/Containers.h"
 #include "lgi/common/Capabilities.h"
 #include "lgi/common/RefCount.h"

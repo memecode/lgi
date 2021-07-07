@@ -2,8 +2,8 @@
 #define _GLEXCPP_H_
 
 #include "lgi/common/LgiInc.h"
+#include "lgi/common/LgiString.h"
 #include "LgiOsDefs.h"
-#include "lgi/common/String.h"
 
 /// The callback type for string duplication while lexing
 typedef char16 *(*LexCppStrdup)(void *Context, const char16 *Str, ssize_t Chars);

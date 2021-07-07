@@ -1,9 +1,9 @@
 #include <stdio.h>
 
 #include "lgi/common/Lgi.h"
-#include "LgiIde.h"
 #include "lgi/common/List.h"
 #include "lgi/common/DisplayString.h"
+#include "LgiIde.h"
 
 class CharItem : public LListItem
 {

@@ -254,7 +254,7 @@ bool MacGetSystemFont(LTypeFace &Info, CTFontUIFontType Which)
 		LString face(name);
 
 		Info.Face(face);
-		Info.PointSize((int)sz + MAC_FONT_SIZE_OFFSET);
+		Info.PointSize((int)sz);
 
 		CFRelease(name);
 		Status = true;

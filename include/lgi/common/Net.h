@@ -14,7 +14,7 @@
 #include "lgi/common/Mem.h"
 #include "lgi/common/Containers.h"
 #include "lgi/common/Stream.h"
-#include "lgi/common/String.h"
+#include "lgi/common/LgiString.h"
 #include "lgi/common/Cancel.h"
 #include "lgi/common/HashTable.h"
 

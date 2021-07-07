@@ -8,11 +8,11 @@
 // #define _POSIX_TIMERS
 #include <time.h>
 
-#include "Lgi.h"
-#include "GProcess.h"
-#include "GTextLabel.h"
-#include "GButton.h"
-#include "INet.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Process.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Net.h"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -24,7 +24,7 @@ bool _lgi_check_file(char *Path)
 {
 	if (Path)
 	{
-		if (FileExists(Path))
+		if (LFileExists(Path))
 		{
 			// file is there
 			return true;
@@ -34,14 +34,14 @@ bool _lgi_check_file(char *Path)
 			// shortcut?
 			char *e = Path + strlen(Path);
 			strcpy(e, ".lnk");
-			if (FileExists(Path))
+			if (LFileExists(Path))
 			{
 				// resolve shortcut
 				char Link[256];
 				if (ResolveShortcut(Path, Link, sizeof(Link)))
 				{
 					// check destination of link
-					if (FileExists(Link))
+					if (LFileExists(Link))
 					{
 						strcpy(Path, Link);
 						return true;
@@ -104,7 +104,7 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 		
 #ifdef _DEBUG
 		
-		GStringPipe p;
+		LStringPipe p;
 		p.Print("Assert failed, file: %s, line: %i\n%s", file, line, test);
 		int Result = -1;
 		
@@ -168,17 +168,17 @@ GMessage CreateMsg(int m, GMessage::Param a, GMessage::Param b)
 	return Msg;
 }
 
-OsView DefaultOsView(GView *v)
+OsView DefaultOsView(LView *v)
 {
 	return NULL;
 }
 
-GString LGetFileMimeType(const char *File)
+LString LGetFileMimeType(const char *File)
 {
 	return LgiApp->GetFileMimeType(File);
 }
 
-#include "GToken.h"
+#include "lgi/common/Token.h"
 bool _GetIniField(char *Grp, char *Field, char *In, char *Out, int OutSize)
 {
 	if (ValidStr(In))
@@ -244,7 +244,7 @@ bool _GetIniField(char *Grp, char *Field, char *In, char *Out, int OutSize)
 	return false;
 }
 
-bool LgiGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
+bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 {
 	bool Status = false;
 	
@@ -255,12 +255,12 @@ bool LgiGetAppsForMimeType(const char *Mime, GArray<GAppInfo*> &Apps, int Limit)
 	return Status;
 }
 
-GString LGetAppForMimeType(const char *Mime)
+LString LGetAppForMimeType(const char *Mime)
 {
-	GArray<GAppInfo*> Apps;
-	if (LgiGetAppsForMimeType(Mime, Apps, 1))
+	LArray<LAppInfo*> Apps;
+	if (LGetAppsForMimeType(Mime, Apps, 1))
 		return Apps[0]->Path.Get();
-	return GString();
+	return LString();
 }
 
 int LgiRand(int Limit)
@@ -270,7 +270,7 @@ int LgiRand(int Limit)
 
 bool LgiPlaySound(const char *FileName, int ASync)
 {
-	return LgiExecute(FileName);
+	return LExecute(FileName);
 }
 
 #if LGI_CARBON
@@ -376,7 +376,7 @@ OSErr FinderLaunch(long nTargets, FSRef *targetList)
 }
 #endif
 
-GString LErrorCodeToString(uint32 ErrorCode)
+LString LErrorCodeToString(uint32 ErrorCode)
 {
 	const char *e = strerror(ErrorCode);
 	static char tmp[32];
@@ -389,13 +389,13 @@ GString LErrorCodeToString(uint32 ErrorCode)
 	return e;
 }
 
-bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *ErrorMsg)
+bool LExecute(const char *File, const char *Args, const char *Dir, LString *ErrorMsg)
 {
 	bool Status = false;
 	
 	if (File)
 	{
-		GUri uri(File);
+		LUri uri(File);
 		
 		if (uri.sProtocol)
 		{
@@ -474,11 +474,11 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *Er
 						if (Dir)
 							chdir(Dir);
 						
-						GArray<const char*> a;
+						LArray<const char*> a;
 						a.Add(File);
 						
 						char *p;
-						while ((p = LgiTokStr(Args)))
+						while ((p = LTokStr(Args)))
 						{
 							a.Add(p);
 						}
@@ -498,7 +498,7 @@ bool LgiExecute(const char *File, const char *Args, const char *Dir, GString *Er
 						if (e) printf("%s:%i - FinderLaunch faied with %i\n", _FL, (int)e);
 						else Status = true;
 					#elif LGI_COCOA
-						GString file = File;
+						LString file = File;
 						auto url = [[NSURL alloc] initFileURLWithPath:file.NsStr()];
 						Status = [[NSWorkspace sharedWorkspace] openURL:url];
 					#endif
@@ -553,7 +553,7 @@ char *CFStringToUtf8(CFStringRef r)
 	return Buffer;
 }
 
-bool LgiGetMimeTypeExtensions(const char *Mime, GArray<GString> &Ext)
+bool LgiGetMimeTypeExtensions(const char *Mime, LArray<LString> &Ext)
 {
 	size_t Start = Ext.Length();
 	
@@ -571,7 +571,7 @@ if (Ext2) Ext.Add(Ext2); }
 }
 
 
-GString LCurrentUserName()
+LString LCurrentUserName()
 {
 	struct passwd *pw = getpwuid(geteuid());
 	if (pw)

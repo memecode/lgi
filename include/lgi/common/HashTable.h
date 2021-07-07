@@ -9,7 +9,7 @@
 #include <ctype.h>
 #include "lgi/common/Mem.h"
 #include "lgi/common/Array.h"
-#include "lgi/common/String.h"
+#include "lgi/common/LgiString.h"
 
 #ifndef LHASHTBL_MAX_SIZE
 #define LHASHTBL_MAX_SIZE	(64 << 10)
