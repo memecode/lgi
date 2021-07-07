@@ -11,7 +11,7 @@
 		343FB8AB238662C500797ABC /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8AA238662C500797ABC /* LgiMain.cpp */; };
 		343FB8C62386638C00797ABC /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 343FB8A92386627A00797ABC /* LgiCocoa.framework */; };
 		343FB8C82386639C00797ABC /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 343FB8A92386627A00797ABC /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		343FB8DC2386642A00797ABC /* GOptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8DB2386642A00797ABC /* GOptionsFile.cpp */; };
+		343FB8DC2386642A00797ABC /* OptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8DB2386642A00797ABC /* OptionsFile.cpp */; };
 		34CC002823AAD2A100CCAAEA /* Search.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC001B23AAD2A100CCAAEA /* Search.cpp */; };
 		34CC002923AAD2A100CCAAEA /* LgiRes_ControlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC001C23AAD2A100CCAAEA /* LgiRes_ControlTree.cpp */; };
 		34CC002A23AAD2A100CCAAEA /* LgiRes_TableLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC001E23AAD2A100CCAAEA /* LgiRes_TableLayout.cpp */; };
@@ -21,10 +21,10 @@
 		34CC002E23AAD2A100CCAAEA /* ShowLanguages.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC002423AAD2A100CCAAEA /* ShowLanguages.cpp */; };
 		34CC002F23AAD2A100CCAAEA /* LgiRes_Dialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC002623AAD2A100CCAAEA /* LgiRes_Dialog.cpp */; };
 		34CC003023AAD2A100CCAAEA /* LgiRes_String.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC002723AAD2A100CCAAEA /* LgiRes_String.cpp */; };
-		34CC003223AAD2C100CCAAEA /* GStatusBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC003123AAD2C100CCAAEA /* GStatusBar.cpp */; };
-		34CC003423AAD2E700CCAAEA /* GMru.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC003323AAD2E700CCAAEA /* GMru.cpp */; };
-		34CC003723AAD2FE00CCAAEA /* GDocApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC003523AAD2FD00CCAAEA /* GDocApp.cpp */; };
-		34CC003823AAD2FE00CCAAEA /* GAbout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC003623AAD2FE00CCAAEA /* GAbout.cpp */; };
+		34CC003223AAD2C100CCAAEA /* StatusBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC003123AAD2C100CCAAEA /* StatusBar.cpp */; };
+		34CC003423AAD2E700CCAAEA /* Mru.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC003323AAD2E700CCAAEA /* Mru.cpp */; };
+		34CC003723AAD2FE00CCAAEA /* DocApp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC003523AAD2FD00CCAAEA /* DocApp.cpp */; };
+		34CC003823AAD2FE00CCAAEA /* About.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC003623AAD2FE00CCAAEA /* About.cpp */; };
 		34CC003C23AAD33500CCAAEA /* mac-icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 34CC003A23AAD33500CCAAEA /* mac-icon.icns */; };
 		34CC003D23AAD33500CCAAEA /* lgires.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 34CC003B23AAD33500CCAAEA /* lgires.lr8 */; };
 		34CC003F23AAD34600CCAAEA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34CC003E23AAD34600CCAAEA /* Cocoa.framework */; };
@@ -106,7 +106,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 34CC004323AAD57F00CCAAEA /* libpng.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 3A3094BF1FDC4A8E873E741D;
+			remoteGlobalIDString = A5BD8566EC9F44589879D4FC;
 			remoteInfo = libpng15;
 		};
 /* End PBXContainerItemProxy section */
@@ -132,7 +132,7 @@
 		343FB89C2386621600797ABC /* LgiRes.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LgiRes.entitlements; sourceTree = "<group>"; };
 		343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = ../../src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
 		343FB8AA238662C500797ABC /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../src/common/Lgi/LgiMain.cpp; sourceTree = "<group>"; };
-		343FB8DB2386642A00797ABC /* GOptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GOptionsFile.cpp; path = ../../src/common/Lgi/GOptionsFile.cpp; sourceTree = "<group>"; };
+		343FB8DB2386642A00797ABC /* OptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsFile.cpp; path = ../../src/common/Lgi/OptionsFile.cpp; sourceTree = "<group>"; };
 		34CC001B23AAD2A100CCAAEA /* Search.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Search.cpp; path = ../Code/Search.cpp; sourceTree = "<group>"; };
 		34CC001C23AAD2A100CCAAEA /* LgiRes_ControlTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiRes_ControlTree.cpp; path = ../Code/LgiRes_ControlTree.cpp; sourceTree = "<group>"; };
 		34CC001D23AAD2A100CCAAEA /* LgiRes_Dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiRes_Dialog.h; path = ../Code/LgiRes_Dialog.h; sourceTree = "<group>"; };
@@ -146,10 +146,10 @@
 		34CC002523AAD2A100CCAAEA /* LgiRes_Menu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiRes_Menu.h; path = ../Code/LgiRes_Menu.h; sourceTree = "<group>"; };
 		34CC002623AAD2A100CCAAEA /* LgiRes_Dialog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiRes_Dialog.cpp; path = ../Code/LgiRes_Dialog.cpp; sourceTree = "<group>"; };
 		34CC002723AAD2A100CCAAEA /* LgiRes_String.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiRes_String.cpp; path = ../Code/LgiRes_String.cpp; sourceTree = "<group>"; };
-		34CC003123AAD2C100CCAAEA /* GStatusBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GStatusBar.cpp; path = ../../src/common/Widgets/GStatusBar.cpp; sourceTree = "<group>"; };
-		34CC003323AAD2E700CCAAEA /* GMru.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GMru.cpp; path = ../../src/common/Lgi/GMru.cpp; sourceTree = "<group>"; };
-		34CC003523AAD2FD00CCAAEA /* GDocApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GDocApp.cpp; path = ../../src/common/Lgi/GDocApp.cpp; sourceTree = "<group>"; };
-		34CC003623AAD2FE00CCAAEA /* GAbout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GAbout.cpp; path = ../../src/common/Lgi/GAbout.cpp; sourceTree = "<group>"; };
+		34CC003123AAD2C100CCAAEA /* StatusBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StatusBar.cpp; path = ../../src/common/Widgets/StatusBar.cpp; sourceTree = "<group>"; };
+		34CC003323AAD2E700CCAAEA /* Mru.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Mru.cpp; path = ../../src/common/Lgi/Mru.cpp; sourceTree = "<group>"; };
+		34CC003523AAD2FD00CCAAEA /* DocApp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DocApp.cpp; path = ../../src/common/Lgi/DocApp.cpp; sourceTree = "<group>"; };
+		34CC003623AAD2FE00CCAAEA /* About.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = About.cpp; path = ../../src/common/Lgi/About.cpp; sourceTree = "<group>"; };
 		34CC003A23AAD33500CCAAEA /* mac-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "mac-icon.icns"; path = "../Resources/mac-icon.icns"; sourceTree = "<group>"; };
 		34CC003B23AAD33500CCAAEA /* lgires.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = lgires.lr8; path = ../Resources/lgires.lr8; sourceTree = "<group>"; };
 		34CC003E23AAD34600CCAAEA /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -211,11 +211,11 @@
 			children = (
 				34CC006A23AAD5FC00CCAAEA /* Gif.cpp */,
 				34CC006B23AAD5FC00CCAAEA /* Lzw.cpp */,
-				34CC003623AAD2FE00CCAAEA /* GAbout.cpp */,
-				34CC003523AAD2FD00CCAAEA /* GDocApp.cpp */,
-				34CC003323AAD2E700CCAAEA /* GMru.cpp */,
-				343FB8DB2386642A00797ABC /* GOptionsFile.cpp */,
-				34CC003123AAD2C100CCAAEA /* GStatusBar.cpp */,
+				34CC003623AAD2FE00CCAAEA /* About.cpp */,
+				34CC003523AAD2FD00CCAAEA /* DocApp.cpp */,
+				34CC003323AAD2E700CCAAEA /* Mru.cpp */,
+				343FB8DB2386642A00797ABC /* OptionsFile.cpp */,
+				34CC003123AAD2C100CCAAEA /* StatusBar.cpp */,
 				343FB8AA238662C500797ABC /* LgiMain.cpp */,
 				34CC004123AAD54200CCAAEA /* Png.cpp */,
 				343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */,
@@ -438,10 +438,10 @@
 			files = (
 				34CC002B23AAD2A100CCAAEA /* LgiRes_Menu.cpp in Sources */,
 				34CC002C23AAD2A100CCAAEA /* LgiRes_Css.cpp in Sources */,
-				343FB8DC2386642A00797ABC /* GOptionsFile.cpp in Sources */,
+				343FB8DC2386642A00797ABC /* OptionsFile.cpp in Sources */,
 				34CC002F23AAD2A100CCAAEA /* LgiRes_Dialog.cpp in Sources */,
-				34CC003723AAD2FE00CCAAEA /* GDocApp.cpp in Sources */,
-				34CC003823AAD2FE00CCAAEA /* GAbout.cpp in Sources */,
+				34CC003723AAD2FE00CCAAEA /* DocApp.cpp in Sources */,
+				34CC003823AAD2FE00CCAAEA /* About.cpp in Sources */,
 				34CC002E23AAD2A100CCAAEA /* ShowLanguages.cpp in Sources */,
 				34CC002923AAD2A100CCAAEA /* LgiRes_ControlTree.cpp in Sources */,
 				34CC003023AAD2A100CCAAEA /* LgiRes_String.cpp in Sources */,
@@ -449,11 +449,11 @@
 				34CC002823AAD2A100CCAAEA /* Search.cpp in Sources */,
 				34CC006C23AAD5FC00CCAAEA /* Gif.cpp in Sources */,
 				34CC002D23AAD2A100CCAAEA /* LgiResApp.cpp in Sources */,
-				34CC003423AAD2E700CCAAEA /* GMru.cpp in Sources */,
+				34CC003423AAD2E700CCAAEA /* Mru.cpp in Sources */,
 				34CC002A23AAD2A100CCAAEA /* LgiRes_TableLayout.cpp in Sources */,
 				34CC004223AAD54200CCAAEA /* Png.cpp in Sources */,
 				343FB8AB238662C500797ABC /* LgiMain.cpp in Sources */,
-				34CC003223AAD2C100CCAAEA /* GStatusBar.cpp in Sources */,
+				34CC003223AAD2C100CCAAEA /* StatusBar.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -593,8 +593,8 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 2AV9WN2LD8;
 				HEADER_SEARCH_PATHS = (
-					../../include/common,
-					../../include/mac/cocoa,
+					../../include,
+					../../include/lgi/mac/cocoa,
 					../Code,
 					../Resources,
 					../../../../../CodeLib/libpng/build,
@@ -623,8 +623,8 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 2AV9WN2LD8;
 				HEADER_SEARCH_PATHS = (
-					../../include/common,
-					../../include/mac/cocoa,
+					../../include,
+					../../include/lgi/mac/cocoa,
 					../Code,
 					../Resources,
 					../../../../../CodeLib/libpng/build,

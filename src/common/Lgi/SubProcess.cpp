@@ -1253,6 +1253,9 @@ bool LIsProcess(OsProcessId Pid)
 	
 		#if LGI_COCOA
 	
+		#ifndef __OBJC__
+		#error "Change this source code to ObjC++"
+		#endif
 		auto app = [NSRunningApplication runningApplicationWithProcessIdentifier: Pid];
 		return app != nil;
 	

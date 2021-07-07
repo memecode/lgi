@@ -14,6 +14,7 @@
 
 #include "lgi/common/Res.h"
 #include "lgi/common/List.h"
+#include "lgi/common/Combo.h"
 
 ////////////////////////////////////////////////////////////////
 class ResStringGroup;

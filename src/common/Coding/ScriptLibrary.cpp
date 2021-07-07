@@ -2,12 +2,12 @@
 #include <math.h>
 
 #include "lgi/common/Lgi.h"
-#include "lgi\common\Scripting.h"
+#include "lgi/common/Scripting.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/SubProcess.h"
+#include "lgi/common/LgiRes.h"
+#include "lgi/common/FileSelect.h"
 #include "ScriptingPriv.h"
-#include "lgi\common\Token.h"
-#include "lgi\common\SubProcess.h"
-#include "lgi\common\LgiRes.h"
-#include "lgi\common\FileSelect.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 char16 sChar[]		= L"char";
