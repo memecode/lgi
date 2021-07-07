@@ -807,17 +807,17 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		LgiTrace("%s:%i - Exe='%S'\n", _FL, WExe.Get());
 		#endif
 		
-		GStringPipe Args;
+		LStringPipe Args;
 		for (unsigned i=0; i<d->Args.Length(); i++)
 		{
-			char *a = d->Args[i];
-			const char *sp = i ? " " : "";
+			auto a = d->Args[i];
+			auto sp = i ? " " : "";
 			if (strchr(a, ' '))
 				Args.Print("%s\"%s\"", sp, a);
 			else
 				Args.Print("%s%s", sp, a);
 		}
-		GAutoWString WArg(Utf8ToWide(Args.NewGStr()));
+		LAutoWString WArg(Utf8ToWide(Args.NewGStr()));
 
 		#if DEBUG_SUBPROCESS || DEBUG_ARGS
 		LgiTrace("%s:%i - Args='%S'\n", _FL, WArg.Get());
