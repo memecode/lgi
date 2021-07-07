@@ -51,7 +51,7 @@ protected:
 		uint32_t flat;
 		uint8_t  index;
 		System32BitPixel rgb;
-		GHls32 hls;
+		LHls32 hls;
 	};
 	LColourSpace space;
 

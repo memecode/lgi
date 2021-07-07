@@ -444,7 +444,7 @@ void LColour::SetHLS(uint16 h, uint8_t l, uint8_t s)
 
 void LColour::ToRGB()
 {
-	GHls32 Hls = hls;
+	LHls32 Hls = hls;
 	if (Hls.s == 0)
 	{
 		Rgb(0, 0, 0);

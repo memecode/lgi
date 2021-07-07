@@ -183,14 +183,14 @@ void LItemContainer::PaintColumnHeadings(LSurface *pDC)
 			ColDC->Colour(L_LOW);
 			ColDC->Line(cr.x1, cr.y2, cr.x2, cr.y2);
 		#else
-			if (GApp::SkinEngine)
+			if (LApp::SkinEngine)
 			{
 				LSkinState State;
 				State.pScreen = ColDC;
 				State.Rect = cr;
 				State.Enabled = Enabled();
 				State.View = this;
-				GApp::SkinEngine->OnPaint_ListColumn(0, 0, &State);
+				LApp::SkinEngine->OnPaint_ListColumn(0, 0, &State);
 			}
 			else
 			{
@@ -960,7 +960,7 @@ void LItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
 
 		#else
 		
-			if (GApp::SkinEngine)
+			if (LApp::SkinEngine)
 			{
 				LSkinState State;
 				
@@ -971,7 +971,7 @@ void LItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
 				State.Enabled = GetList()->Enabled();
 				State.View = d->Parent;
 
-				GApp::SkinEngine->OnPaint_ListColumn(ColumnPaint, this, &State);
+				LApp::SkinEngine->OnPaint_ListColumn(ColumnPaint, this, &State);
 			}
 			else
 			{

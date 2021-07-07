@@ -419,7 +419,7 @@ int ComponenetCmp(PfComponent *a, PfComponent *b)
 
 LColourSpace PixelFormat2ColourSpace(SDL_PixelFormat *pf)
 {
-	GColourSpaceBits cs;
+	LColourSpaceBits cs;
 	
 	cs.All = 0;
 	cs[0].Type(CtIndex);

@@ -1,7 +1,7 @@
 #include "lgi/common/Lgi.h"
 #include "GAppPriv.h"
 
-::LString GApp::GetConfigPath()
+::LString LApp::GetConfigPath()
 {
 	#if defined(LINUX)
 	::LFile::Path p(LSP_HOME);
@@ -24,13 +24,13 @@
 	return p.GetFull();
 }
 
-::LString GApp::GetConfig(const char *Variable)
+::LString LApp::GetConfig(const char *Variable)
 {
 	auto c = d->GetConfig();
 	return c ? c->Get(Variable) : NULL;
 }
 
-void GApp::SetConfig(const char *Variable, const char *Value)
+void LApp::SetConfig(const char *Variable, const char *Value)
 {
 	auto c = d->GetConfig();
 	if (c && c->Set(Variable, Value))

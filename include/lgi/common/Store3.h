@@ -294,7 +294,7 @@ public:
 	/// \returns the system path
 	virtual bool GetSystemPath(int Folder, LVariant &Path) { return false; }
 	/// \returns the options object
-	virtual GOptionsFile *GetOptions(bool Create = false) { return 0; }
+	virtual LOptionsFile *GetOptions(bool Create = false) { return 0; }
 	/// A new item is available
 	virtual void OnNew(GDataFolderI *parent, LArray<GDataI*> &new_items, int pos, bool is_new) = 0;
 	/// When an item is deleted

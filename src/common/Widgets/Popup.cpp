@@ -1044,8 +1044,8 @@ void LDropDown::OnPaint(LSurface *pDC)
 	
 	if (e) printf("%s:%i - HIThemeDrawButton failed %li\n", _FL, e);
 	#else
-	if (GApp::SkinEngine &&
-		TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_BUTTON))
+	if (LApp::SkinEngine &&
+		TestFlag(LApp::SkinEngine->GetFeatures(), GSKIN_BUTTON))
 	{
 		LMemDC Mem(r.X(), r.Y(), System24BitColourSpace);
 
@@ -1058,7 +1058,7 @@ void LDropDown::OnPaint(LSurface *pDC)
 			Mem.Colour(L_MED);
 		Mem.Rectangle();
 
-		GApp::SkinEngine->DrawBtn(&Mem, r, LColour(L_HIGH), IsOpen(), Enabled());
+		LApp::SkinEngine->DrawBtn(&Mem, r, LColour(L_HIGH), IsOpen(), Enabled());
 		pDC->Blt(0, 0, &Mem);
 		r.Size(2, 2);
 		r.x2 -= 2;

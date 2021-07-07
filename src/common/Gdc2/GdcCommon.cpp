@@ -792,7 +792,7 @@ LColourSpace GStringToColourSpace(const char *c)
 				c++;
 			}
 			
-			GColourSpaceBits a;
+			LColourSpaceBits a;
 			ZeroObj(a);
 			if (Comp.Length() == 3)
 			{
@@ -891,9 +891,9 @@ bool GColourSpaceTest()
 	union {
 		uint8_t b4[4];
 		uint32_t u32;
-		GBgrx32 bgrx32;
-		GXrgb32 xrgb32;
-		GRgba32 rgba32;
+		LBgrx32 bgrx32;
+		LXrgb32 xrgb32;
+		LRgba32 rgba32;
 	};
 	
 	b4[0] = 1;
@@ -916,7 +916,7 @@ bool GColourSpaceTest()
 	
 	union {
 		uint16 u16;
-		GRgb16 rgb16;
+		LRgb16 rgb16;
 	};
 	
 	rgba32.r = 0xff;
@@ -1001,8 +1001,8 @@ LSurface *GInlineBmp::Create(uint32_t TransparentPx)
 						REG uint8_t r = R24(TransparentPx);
 						REG uint8_t g = G24(TransparentPx);
 						REG uint8_t b = B24(TransparentPx);
-						REG GRgb24 *px = (GRgb24*) s.u8;
-						REG GRgb24 *e = px + X;
+						REG LRgb24 *px = (LRgb24*) s.u8;
+						REG LRgb24 *e = px + X;
 						while (px < e)
 						{
 							if (px->r == r &&
@@ -1050,7 +1050,7 @@ bool LgiRopRgb(uint8_t *d, LColourSpace DstCs, uint8_t *s, LColourSpace SrcCs, i
 		#include "../../src/common/Gdc2/RopsCases.cpp"
 		default:
 		{
-			GColourSpaceBits Src, Dst;
+			LColourSpaceBits Src, Dst;
 			Src.All = SrcCs;
 			Dst.All = DstCs;
 			
@@ -1147,7 +1147,7 @@ bool LMemDC::SwapRedAndBlue()
 			{										\
 				for (int y=0; y<Y(); y++)			\
 				{									\
-					auto p = (G##cs*)((*this)[y]);	\
+					auto p = (L##cs*)((*this)[y]);	\
 					if (!p)							\
 						break;						\
 					auto e = p + X();				\

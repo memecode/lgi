@@ -782,7 +782,7 @@ LCharset *LgiGetCpInfo(const char *Cs)
 
 /////////////////////////////////////////////////////////////////////////////
 // Utf-16 conversion
-int LgiCpToAnsi(char *cp)
+int LCpToAnsi(char *cp)
 {
 	int Ansi = 0;
 
@@ -1444,7 +1444,7 @@ bool LgiMatchCharset(short *Map, char16 *Utf, bool &Has8Bit)
 	return false;
 }
 
-const char *LgiDetectCharset(const char *Utf8, ssize_t Len, List<char> *Prefs)
+const char *LDetectCharset(const char *Utf8, ssize_t Len, List<char> *Prefs)
 {
 	const char *Status = "utf-8"; // The default..
 
@@ -1692,7 +1692,7 @@ LCharset *LCharsetSystem::GetCsInfo(const char *Cp)
 	return 0;
 }
 
-LCharset *LgiGetCsInfo(const char *Cs)
+LCharset *LGetCsInfo(const char *Cs)
 {
 	return CharsetSystem.GetCsInfo(Cs);
 }
@@ -1702,7 +1702,7 @@ LCharset *LCharsetSystem::GetCsList()
 	return LgiCharsets;
 }
 
-LCharset *LgiGetCsList()
+LCharset *LGetCsList()
 {
 	return LgiCharsets;
 }

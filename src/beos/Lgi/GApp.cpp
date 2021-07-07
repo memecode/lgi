@@ -36,10 +36,10 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////
-GApp *TheApp = 0;
-class LSkinEngine *GApp::SkinEngine = 0;
+LApp *TheApp = 0;
+class LSkinEngine *LApp::SkinEngine = 0;
 
-GApp *GApp::ObjInstance()
+LApp *LApp::ObjInstance()
 {
 	return TheApp;
 }
@@ -51,7 +51,7 @@ char *MimeFromName(char *Name)
 	return m;
 }
 
-GApp::GApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : BApplication(MimeFromName(Name))
+LApp::LApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : BApplication(MimeFromName(Name))
 {
 	// Sanity Checks
 	LgiAssert(sizeof(int8) == 1);
@@ -109,50 +109,50 @@ GApp::GApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : B
 
 	if (!SystemNormal)
 	{
-		LgiMsg(0, "Error: Couldn't create system font.", "Lgi Error: GApp::GApp", MB_OK);
+		LgiMsg(0, "Error: Couldn't create system font.", "Lgi Error: LApp::LApp", MB_OK);
 		LgiExitApp();
 	}
 
 	#if 1
 	if (!GetOption("noskin"))
 	{
-		extern LSkinEngine *CreateSkinEngine(GApp *App);
+		extern LSkinEngine *CreateSkinEngine(LApp *App);
 		SkinEngine = CreateSkinEngine(this);
 	}
 	#endif
 }
 
-GApp::~GApp()
+LApp::~LApp()
 {
 	TheApp = 0;
 	DeleteObj(d);
 }
 
-LSymLookup *GApp::GetSymLookup()
+LSymLookup *LApp::GetSymLookup()
 {
 	return NULL;
 }
 
-void GApp::OnUrl(const char *Url)
+void LApp::OnUrl(const char *Url)
 {
 }
 
-OsThreadId GApp::GetGuiThread()
+OsThreadId LApp::GetGuiThread()
 {
 	return d->GuiThread;
 }
 
-OsProcessId GApp::GetProcessId()
+OsProcessId LApp::GetProcessId()
 {
 	return getpid();
 }
 
-bool GApp::IsOk()
+bool LApp::IsOk()
 {
 	return true;
 }
 
-LViewI *GApp::GetFocus()
+LViewI *LApp::GetFocus()
 {
 	for (int i=0; i<CountWindows(); i++)
 	{
@@ -174,12 +174,12 @@ LViewI *GApp::GetFocus()
 	return 0;
 }
 
-int32 GApp::GetMetric(LgiSystemMetric Which)
+int32 LApp::GetMetric(LgiSystemMetric Which)
 {
 	return 0;
 }
 
-bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
+bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 {
 	if (Loop)
 	{
@@ -196,7 +196,7 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 	}
 }
 
-void GApp::RefsReceived(BMessage *Msg)
+void LApp::RefsReceived(BMessage *Msg)
 {
 	LArray<char*> Files;
 	int32 Count = 0;
@@ -229,7 +229,7 @@ void GApp::RefsReceived(BMessage *Msg)
 	Files.DeleteArrays();
 }
 
-void GApp::OnReceiveFiles(LArray<char*> &Files)
+void LApp::OnReceiveFiles(LArray<char*> &Files)
 {
 	if (AppWnd)
 	{
@@ -237,7 +237,7 @@ void GApp::OnReceiveFiles(LArray<char*> &Files)
 	}
 }
 
-void GApp::SetConfig(LXmlTag *Tag)
+void LApp::SetConfig(LXmlTag *Tag)
 {
 	if (IsOk() && Tag)
 	{
@@ -259,7 +259,7 @@ void GApp::SetConfig(LXmlTag *Tag)
 	}
 }
 
-LXmlTag *GApp::GetConfig(const char *Tag)
+LXmlTag *LApp::GetConfig(const char *Tag)
 {
 	if (IsOk() && !d->Config)
 	{
@@ -311,7 +311,7 @@ LXmlTag *GApp::GetConfig(const char *Tag)
 	return 0;
 }
 
-bool GApp::GetOption(const char *Option, char *Dest, int DestLen)
+bool LApp::GetOption(const char *Option, char *Dest, int DestLen)
 {
 	if (Option)
 	{
@@ -359,7 +359,7 @@ bool GApp::GetOption(const char *Option, char *Dest, int DestLen)
 	return false;
 }
 
-void GApp::OnCommandLine()
+void LApp::OnCommandLine()
 {
 	char WhiteSpace[] = " \r\n\t";
 
@@ -396,17 +396,17 @@ void GApp::OnCommandLine()
 	Files.DeleteArrays();
 }
 
-char *GApp::GetArgumentAt(int n)
+char *LApp::GetArgumentAt(int n)
 {
 	return n >= 0 && n < d->Args.Args ? NewStr(d->Args.Arg[n]) : 0;
 }
 
-OsAppArguments *GApp::GetAppArgs()
+OsAppArguments *LApp::GetAppArgs()
 {
 	return &d->Args;
 }
 
-bool GApp::GetOption(const char *Option, LAutoString &Buf)
+bool LApp::GetOption(const char *Option, LAutoString &Buf)
 {
 	if (IsOk() && Option)
 	{
@@ -461,12 +461,12 @@ bool GApp::GetOption(const char *Option, LAutoString &Buf)
 	return false;
 }
 
-void GApp::SetAppArgs(OsAppArguments &AppArgs)
+void LApp::SetAppArgs(OsAppArguments &AppArgs)
 {
 	d->Args = AppArgs;
 }
 
-void GApp::Exit(int Code)
+void LApp::Exit(int Code)
 {
 	if (Code)
 	{
@@ -481,31 +481,31 @@ void GApp::Exit(int Code)
 	}
 }
 
-LAutoString GApp::GetFileMimeType(const char *File)
+LAutoString LApp::GetFileMimeType(const char *File)
 {
 	LgiAssert(0);
 	return LAutoString();
 }
 
-LMouseHook *GApp::MouseHook = 0;
-LMouseHook *GApp::GetMouseHook()
+LMouseHook *LApp::MouseHook = 0;
+LMouseHook *LApp::GetMouseHook()
 {
 	return MouseHook;
 }
 
-int GApp::GetCpuCount()
+int LApp::GetCpuCount()
 {
 	return 4;	
 }
 
-GFontCache *GApp::GetFontCache()
+GFontCache *LApp::GetFontCache()
 {
 	if (!d->FontCache)
 		d->FontCache.Reset(new GFontCache(SystemNormal));
 	return d->FontCache;
 }
 
-bool GApp::IsElevated()
+bool LApp::IsElevated()
 {
 	return true;
 }

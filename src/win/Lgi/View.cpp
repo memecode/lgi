@@ -308,7 +308,7 @@ LWindowsClass *LWindowsClass::Create(const char *ClassName)
 	if (!LgiApp)
 		return NULL;
 
-	GApp::ClassContainer *Classes = LgiApp->GetClasses();
+	LApp::ClassContainer *Classes = LgiApp->GetClasses();
 	if (!Classes)
 		return NULL;
 

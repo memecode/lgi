@@ -10,7 +10,7 @@
 #endif
 
 /// RGB Colour
-typedef GRgba32 GdcRGB;
+typedef LRgba32 GdcRGB;
 
 #ifdef WIN32
 #pragma pack(pop, before_pack)
@@ -25,7 +25,7 @@ protected:
 	LOGPALETTE	*Data;
 	#else
 	int			Size;
-	GRgba32		*Data;
+	LRgba32		*Data;
 	#endif
 	uchar *Lut;
 
@@ -57,7 +57,7 @@ public:
 	bool operator !=(GPalette &p);
 
 	#if WINNATIVE
-	GRgba32 *operator [](int i)
+	LRgba32 *operator [](int i)
 	{
 		return (i >= 0 && i < GetSize() && Data) ? (GdcRGB*) (Data->palPalEntry + i) : NULL;
 	}
@@ -67,7 +67,7 @@ public:
 		return (Data) ? Data->palNumEntries : 0;
 	}
 	#else
-	GRgba32 *operator [](int i)
+	LRgba32 *operator [](int i)
 	{
 		return (i >= 0 && i < GetSize() && Data) ? (GdcRGB*) (Data + i) : NULL;
 	}

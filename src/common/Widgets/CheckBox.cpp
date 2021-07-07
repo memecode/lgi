@@ -338,8 +338,8 @@ void LCheckBox::OnPaint(LSurface *pDC)
 	pDC->Rectangle();
 	#endif
 	
-	if (GApp::SkinEngine &&
-		TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_CHECKBOX))
+	if (LApp::SkinEngine &&
+		TestFlag(LApp::SkinEngine->GetFeatures(), GSKIN_CHECKBOX))
 	{
 		auto Fnt = GetFont();
 		int Px = BoxSize();
@@ -351,7 +351,7 @@ void LCheckBox::OnPaint(LSurface *pDC)
 		d->ValuePos.Set(0, 0, Px-1, Px-1);
 		d->ValuePos.Offset(0, (Y()-d->ValuePos.Y())>>1);
 		State.Rect = d->ValuePos;
-		GApp::SkinEngine->OnPaint_LCheckBox(this, &State);
+		LApp::SkinEngine->OnPaint_LCheckBox(this, &State);
 	}
 	else
 	{

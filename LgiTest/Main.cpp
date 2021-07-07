@@ -212,14 +212,14 @@ public:
 
 class App : public LWindow
 {
-	GOptionsFile Opts;
+	LOptionsFile Opts;
 	LEdit *e;
 	LEdit *e2;
 	LTextLabel *Txt;
 	LTableLayout *Tbl;
 
 public:
-	App() : Opts(GOptionsFile::PortableMode, AppName)
+	App() : Opts(LOptionsFile::PortableMode, AppName)
 	{
 		e = 0;
 		e2 = 0;
@@ -454,7 +454,7 @@ bool DbTesting()
 
 int LgiMain(OsAppArguments &AppArgs)
 {
-	GApp a(AppArgs, "Lgi Test");
+	LApp a(AppArgs, "Lgi Test");
 	if (a.IsOk())
 	{
 		a.AppWnd = new App;

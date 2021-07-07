@@ -528,7 +528,7 @@ public:
 	}
 	
 	template<typename Px>
-	void PixToStr15(char *s, Px *p, GRgba64 *Diff)
+	void PixToStr15(char *s, Px *p, LRgba64 *Diff)
 	{
 		sprintf(s, "%i,%i,%i (%x,%x,%x)",
 					G5bitTo8bit(p->r), G5bitTo8bit(p->g), G5bitTo8bit(p->b),
@@ -540,7 +540,7 @@ public:
 	}
 
 	template<typename Px>
-	void PixToStr16(char *s, Px *p, GRgba64 *Diff)
+	void PixToStr16(char *s, Px *p, LRgba64 *Diff)
 	{
 		sprintf(s, "%i,%i,%i (%x,%x,%x)",
 					G5bitTo8bit(p->r), G6bitTo8bit(p->g), G5bitTo8bit(p->b),
@@ -552,7 +552,7 @@ public:
 	}
 
 	template<typename Px>
-	void PixToStrRgb(char *s, Px *p, GRgba64 *Diff)
+	void PixToStrRgb(char *s, Px *p, LRgba64 *Diff)
 	{
 		sprintf(s, "%i,%i,%i (%x,%x,%x)",
 					p->r, p->g, p->b,
@@ -564,7 +564,7 @@ public:
 	}
 
 	template<typename Px>
-	void PixToStrRgba(char *s, Px *p, GRgba64 *Diff)
+	void PixToStrRgba(char *s, Px *p, LRgba64 *Diff)
 	{
 		sprintf(s, "%i,%i,%i,%i (%x,%x,%x,%x)",
 					p->r, p->g, p->b, p->a,
@@ -575,7 +575,7 @@ public:
 		Diff->a = p->a;
 	}
 
-	LAutoString DescribePixel(LSurface *pDC, LPoint Pos, GRgba64 *Diff)
+	LAutoString DescribePixel(LSurface *pDC, LPoint Pos, LRgba64 *Diff)
 	{
 		char s[256] = "No Data";
 		int ch = 0;
@@ -712,7 +712,7 @@ public:
 			LSurface *b = BView->GetSurface();
 			if (a && b)
 			{
-				GRgba64 ap, bp;
+				LRgba64 ap, bp;
 				ZeroObj(ap);
 				ZeroObj(bp);
 				

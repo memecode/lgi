@@ -265,7 +265,7 @@ public:
 	void OnReceiveFiles(LArray<const char*> &Files) override;
 	int GetBuildMode();
 	LTree *GetTree();
-	GOptionsFile *GetOptions();
+	LOptionsFile *GetOptions();
 	LList *GetFtpLog();
 	LStream *GetBuildLog();
 	LStream *GetDebugLog();

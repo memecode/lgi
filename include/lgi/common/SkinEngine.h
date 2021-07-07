@@ -158,6 +158,6 @@ public:
 };
 
 #define LgiSkinEntryPoint		"CreateSkinEngine"
-typedef LSkinEngine				*(*Proc_CreateSkinEngine)(class GApp *App);
+typedef LSkinEngine				*(*Proc_CreateSkinEngine)(class LApp *App);
 
 #endif

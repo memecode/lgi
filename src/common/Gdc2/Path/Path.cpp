@@ -1976,7 +1976,7 @@ void LSolidBrush::Rop(LRopArgs &Args)
 			break;
 
 		#define SolidCase(cs, bits) \
-			case Cs##cs: SolidRop##bits((G##cs*)Args.Pixels, Args.Len, Args.Alpha, c32); break;
+			case Cs##cs: SolidRop##bits((L##cs*)Args.Pixels, Args.Len, Args.Alpha, c32); break;
 
 		SolidCase(Rgb16, 16);
 		SolidCase(Bgr16, 16);
@@ -2101,7 +2101,7 @@ void LLinearBlendBrush::Rop(LRopArgs &Args)
 			break;
 
 		#define LinearCase(cs, bits) \
-			case Cs##cs: Linear##bits((G##cs*)Args.Pixels, Args); break;
+			case Cs##cs: Linear##bits((L##cs*)Args.Pixels, Args); break;
 
 		LinearCase(Rgb16, 16);
 		LinearCase(Bgr16, 16);
@@ -2134,7 +2134,7 @@ void LRadialBlendBrush::Rop(LRopArgs &Args)
 			break;
 
 		#define RadialCase(cs, bits) \
-			case Cs##cs: Radial##bits((G##cs*)Args.Pixels, Args); break;
+			case Cs##cs: Radial##bits((L##cs*)Args.Pixels, Args); break;
 
 		RadialCase(Rgb16, 16);
 		RadialCase(Bgr16, 16);

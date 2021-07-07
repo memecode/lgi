@@ -3011,7 +3011,7 @@ void GTag::SetStyle()
 				if (Cs &&
 					stricmp(Cs, "utf-16") != 0 &&
 					stricmp(Cs, "utf-32") != 0 &&
-					LgiGetCsInfo(Cs))
+					LGetCsInfo(Cs))
 				{
 					DeleteArray(Html->DocCharSet);
 					Html->DocCharSet = NewStr(Cs);
@@ -7600,7 +7600,7 @@ void GHtml2::OnMouseClick(LMouse &m)
 				if (Cs)
 				{
 					int n=0;
-					for (LCharset *c = LgiGetCsList(); c->Charset; c++, n++)
+					for (LCharset *c = LGetCsList(); c->Charset; c++, n++)
 					{
 						Cs->AppendItem(c->Charset, IDM_CHARSET_BASE + n, c->IsAvailable());
 					}
@@ -7788,7 +7788,7 @@ void GHtml2::OnMouseClick(LMouse &m)
 						{
 							if (Id >= IDM_CHARSET_BASE)
 							{
-								LCharset *c = LgiGetCsList() + (Id - IDM_CHARSET_BASE);
+								LCharset *c = LGetCsList() + (Id - IDM_CHARSET_BASE);
 								if (c->Charset)
 								{
 									Charset.Reset(NewStr(c->Charset));

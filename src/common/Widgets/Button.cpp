@@ -426,8 +426,8 @@ void LButton::OnPaint(LSurface *pDC)
 	
 	#else
 
-		if (GApp::SkinEngine &&
-			TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_BUTTON))
+		if (LApp::SkinEngine &&
+			TestFlag(LApp::SkinEngine->GetFeatures(), GSKIN_BUTTON))
 		{
 			LSkinState State;
 			State.pScreen = pDC;
@@ -436,7 +436,7 @@ void LButton::OnPaint(LSurface *pDC)
 			State.Image = d->Image;
 			
 			if (X() < GdcD->X() && Y() < GdcD->Y())
-				GApp::SkinEngine->OnPaint_LButton(this, &State);
+				LApp::SkinEngine->OnPaint_LButton(this, &State);
 			
 			LPoint pt;
 			LRect r = GetClient();

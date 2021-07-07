@@ -101,7 +101,7 @@
 
 // Misc
 class AppWnd;
-#define	MainWnd						((AppWnd*)GApp::ObjInstance()->AppWnd)
+#define	MainWnd						((AppWnd*)LApp::ObjInstance()->AppWnd)
 
 // App
 enum ObjectTypes {
@@ -690,7 +690,7 @@ public:
 
 #include "LgiRes_String.h"
 
-class AppWnd : public GDocApp<GOptionsFile>
+class AppWnd : public GDocApp<LOptionsFile>
 {
 protected:
 	// UI

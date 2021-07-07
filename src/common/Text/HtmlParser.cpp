@@ -693,7 +693,7 @@ char *GHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 								if (Cs &&
 									_stricmp(Cs, "utf-16") != 0 &&
 									_stricmp(Cs, "utf-32") != 0 &&
-									LgiGetCsInfo(Cs))
+									LGetCsInfo(Cs))
 								{
 									DocCharSet = Cs;
 								}

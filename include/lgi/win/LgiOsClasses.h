@@ -89,7 +89,7 @@ public:
 class LgiClass LWindowsClass : public LBase
 {
 	friend class LControl;
-	friend class GApp;
+	friend class LApp;
 
 	WNDPROC ParentProc;
 

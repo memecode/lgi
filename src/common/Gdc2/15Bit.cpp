@@ -204,13 +204,13 @@ LApplicator *GApp15::Create(LColourSpace Cs, int Op)
 		switch (Cs)
 		{
 			case CsRgb15:
-				return new GdcApp15Set<GRgb15, CsRgb15>;
+				return new GdcApp15Set<LRgb15, CsRgb15>;
 			case CsBgr15:
-				return new GdcApp15Set<GBgr15, CsBgr15>;
+				return new GdcApp15Set<LBgr15, CsBgr15>;
 			case CsArgb15:
-				return new GdcApp15Set<GArgb15, CsArgb15>;
+				return new GdcApp15Set<LArgb15, CsArgb15>;
 			case CsAbgr15:
-				return new GdcApp15Set<GAbgr15, CsAbgr15>;
+				return new GdcApp15Set<LAbgr15, CsAbgr15>;
 			default:
 				break;
 		}

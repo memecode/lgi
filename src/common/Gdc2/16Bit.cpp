@@ -238,14 +238,14 @@ LApplicator *GApp16::Create(LColourSpace Cs, int Op)
 		switch (Op)
 		{
 			case GDC_SET:
-				return new GdcApp16Set<GRgb16, CsRgb16>;
+				return new GdcApp16Set<LRgb16, CsRgb16>;
 			/*
 			case GDC_AND:
-				return new GdcApp16And<GRgb16, CsRgb16>;
+				return new GdcApp16And<LRgb16, CsRgb16>;
 			case GDC_OR:
-				return new GdcApp16Or<GRgb16, CsRgb16>;
+				return new GdcApp16Or<LRgb16, CsRgb16>;
 			case GDC_XOR:
-				return new GdcApp16Xor<GRgb16, CsRgb16>;
+				return new GdcApp16Xor<LRgb16, CsRgb16>;
 			*/
 		}
 	}
@@ -254,14 +254,14 @@ LApplicator *GApp16::Create(LColourSpace Cs, int Op)
 		switch (Op)
 		{
 			case GDC_SET:
-				return new GdcApp16Set<GBgr16, CsBgr16>;
+				return new GdcApp16Set<LBgr16, CsBgr16>;
 			/*
 			case GDC_AND:
-				return new GdcApp16And<GBgr16, CsBgr16>;
+				return new GdcApp16And<LBgr16, CsBgr16>;
 			case GDC_OR:
-				return new GdcApp16Or<GBgr16, CsBgr16>;
+				return new GdcApp16Or<LBgr16, CsBgr16>;
 			case GDC_XOR:
-				return new GdcApp16Xor<GBgr16, CsBgr16>;
+				return new GdcApp16Xor<LBgr16, CsBgr16>;
 			*/
 		}
 	}

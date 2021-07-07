@@ -94,7 +94,7 @@ enum LColourSpace
 #define LEAST_SIG_BYTE_FIRST	1
 
 
-struct GRgb15 {
+struct LRgb15 {
 	#if LEAST_SIG_BIT_FIRST
 	uint16_t b : 5;
 	uint16_t g : 5;
@@ -108,7 +108,7 @@ struct GRgb15 {
 	#endif
 };
 
-struct GArgb15 {
+struct LArgb15 {
 	#if LEAST_SIG_BIT_FIRST
 	uint16_t b : 5;
 	uint16_t g : 5;
@@ -122,7 +122,7 @@ struct GArgb15 {
 	#endif
 };
 
-struct GBgr15 {
+struct LBgr15 {
 	#if LEAST_SIG_BIT_FIRST
 	uint16_t r : 5;
 	uint16_t g : 5;
@@ -136,7 +136,7 @@ struct GBgr15 {
 	#endif
 };
 
-struct GAbgr15 {
+struct LAbgr15 {
 	#if LEAST_SIG_BIT_FIRST
 	uint16_t r : 5;
 	uint16_t g : 5;
@@ -150,7 +150,7 @@ struct GAbgr15 {
 	#endif
 };
 
-struct GRgb16 {
+struct LRgb16 {
 	#if LEAST_SIG_BIT_FIRST
 	uint16_t b : 5;
 	uint16_t g : 6;
@@ -162,7 +162,7 @@ struct GRgb16 {
 	#endif
 };
 
-struct GBgr16 {
+struct LBgr16 {
 	#if LEAST_SIG_BIT_FIRST
 	uint16_t r : 5;
 	uint16_t g : 6;
@@ -174,7 +174,7 @@ struct GBgr16 {
 	#endif
 };
 
-struct GRgb24 {
+struct LRgb24 {
 	#if LEAST_SIG_BYTE_FIRST
 	uint8_t r, g, b;
 	#else
@@ -182,7 +182,7 @@ struct GRgb24 {
 	#endif
 };
 
-struct GBgr24 {
+struct LBgr24 {
 	#if LEAST_SIG_BYTE_FIRST
 	uint8_t b, g, r;
 	#else
@@ -190,7 +190,7 @@ struct GBgr24 {
 	#endif
 };
 
-struct GRgba32 {
+struct LRgba32 {
 	#if LEAST_SIG_BYTE_FIRST
 	uint8_t r, g, b, a;
 	#else
@@ -198,7 +198,7 @@ struct GRgba32 {
 	#endif
 };
 
-struct GBgra32 {
+struct LBgra32 {
 	#if LEAST_SIG_BYTE_FIRST
 	uint8_t b, g, r, a;
 	#else
@@ -206,7 +206,7 @@ struct GBgra32 {
 	#endif
 };
 
-struct GArgb32 {
+struct LArgb32 {
 	#if LEAST_SIG_BYTE_FIRST
 	uint8_t a, r, g, b;
 	#else
@@ -214,7 +214,7 @@ struct GArgb32 {
 	#endif
 };
 
-struct GAbgr32 {
+struct LAbgr32 {
 	#if LEAST_SIG_BYTE_FIRST
 	uint8_t a, b, g, r;
 	#else
@@ -222,7 +222,7 @@ struct GAbgr32 {
 	#endif
 };
 
-struct GXrgb32 {
+struct LXrgb32 {
 	#if LEAST_SIG_BYTE_FIRST
 	uint8_t pad, r, g, b;
 	#else
@@ -230,7 +230,7 @@ struct GXrgb32 {
 	#endif
 };
 
-struct GRgbx32 {
+struct LRgbx32 {
 	#if LEAST_SIG_BYTE_FIRST
 	uint8_t r, g, b, pad;
 	#else
@@ -238,7 +238,7 @@ struct GRgbx32 {
 	#endif
 };
 
-struct GXbgr32 {
+struct LXbgr32 {
 	#if LEAST_SIG_BYTE_FIRST
 	uint8_t pad, b, g, r;
 	#else
@@ -246,7 +246,7 @@ struct GXbgr32 {
 	#endif
 };
 
-struct GBgrx32 {
+struct LBgrx32 {
 	#if LEAST_SIG_BYTE_FIRST
 	uint8_t b, g, r, pad;
 	#else
@@ -257,7 +257,7 @@ struct GBgrx32 {
 #ifdef WIN32
 #pragma pack(push, 2)
 #endif
-struct GRgb48 {
+struct LRgb48 {
 	#if LEAST_SIG_BYTE_FIRST
 	uint16_t r, g, b;
 	#else
@@ -265,7 +265,7 @@ struct GRgb48 {
 	#endif
 };
 
-struct GBgr48 {
+struct LBgr48 {
 	#if LEAST_SIG_BYTE_FIRST
 	uint16_t b, g, r;
 	#else
@@ -273,7 +273,7 @@ struct GBgr48 {
 	#endif
 };
 
-struct GRgba64 {
+struct LRgba64 {
 	#if LEAST_SIG_BYTE_FIRST
 	uint16_t r, g, b, a;
 	#else
@@ -281,7 +281,7 @@ struct GRgba64 {
 	#endif
 };
 
-struct GBgra64 {
+struct LBgra64 {
 	#if LEAST_SIG_BYTE_FIRST
 	uint16_t b, g, r, a;
 	#else
@@ -289,7 +289,7 @@ struct GBgra64 {
 	#endif
 };
 
-struct GArgb64 {
+struct LArgb64 {
 	#if LEAST_SIG_BYTE_FIRST
 	uint16_t a, r, g, b;
 	#else
@@ -297,7 +297,7 @@ struct GArgb64 {
 	#endif
 };
 
-struct GAbgr64 {
+struct LAbgr64 {
 	#if LEAST_SIG_BYTE_FIRST
 	uint16_t a, b, g, r;
 	#else
@@ -308,12 +308,12 @@ struct GAbgr64 {
 #pragma pack(pop)
 #endif
 
-struct GHls32 {
+struct LHls32 {
 	uint16_t h;
 	uint8_t l, s;
 };
 
-struct GCmyk32 {
+struct LCmyk32 {
 	#if LEAST_SIG_BYTE_FIRST
 	uint8_t c, m, y, k;
 	#else
@@ -321,7 +321,7 @@ struct GCmyk32 {
 	#endif
 };
 
-struct GColourComponent
+struct LColourComponent
 {
 	// ((type << 4) | (size))
 	uint8_t Bits;
@@ -332,17 +332,17 @@ struct GColourComponent
 	void Size(uint8_t t) { Bits = (Bits & 0xf0) | (t & 0xf); }
 };
 
-union GColourSpaceBits
+union LColourSpaceBits
 {
 	uint32_t All;
-	GColourComponent Bits[4];
+	LColourComponent Bits[4];
 	
-	GColourComponent &operator[](int i)
+	LColourComponent &operator[](int i)
 	{
 		static int Reverse = -1;
 		if (Reverse < 0)
 		{
-			GColourSpaceBits t;
+			LColourSpaceBits t;
 			t.All = 0;
 			t.Bits[0].Type(CtIndex);
 			if (t.All == 0x10)
@@ -396,34 +396,34 @@ LgiFunc LColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits);
 #if defined(WIN32) || defined(LINUX) || defined(BEOS)
 
 	#define System15BitColourSpace CsBgr15
-	typedef GBgr15 System15BitPixel;
+	typedef LBgr15 System15BitPixel;
 
 	#define System16BitColourSpace CsBgr16
-	typedef GBgr16 System16BitPixel;
+	typedef LBgr16 System16BitPixel;
 
 	#define System24BitColourSpace CsBgr24
-	typedef GBgr24 System24BitPixel;
+	typedef LBgr24 System24BitPixel;
 
 	#define System32BitColourSpace CsBgra32
-	typedef GBgra32 System32BitPixel;
+	typedef LBgra32 System32BitPixel;
 
 #else
 
 	#define System15BitColourSpace CsRgb15
-	typedef GRgb15 System15BitPixel;
+	typedef LRgb15 System15BitPixel;
 
 	#define System16BitColourSpace CsRgb16
-	typedef GRgb16 System16BitPixel;
+	typedef LRgb16 System16BitPixel;
 
 	#define System24BitColourSpace CsRgb24
-	typedef GRgb24 System24BitPixel;
+	typedef LRgb24 System24BitPixel;
 
 	#ifdef __GTK_H__
 		#define System32BitColourSpace CsBgra32
-		typedef GBgra32 System32BitPixel;
+		typedef LBgra32 System32BitPixel;
 	#else
 		#define System32BitColourSpace CsRgba32
-		typedef GRgba32 System32BitPixel;
+		typedef LRgba32 System32BitPixel;
 	#endif
 
 #endif
@@ -435,16 +435,16 @@ typedef union
 	uint32_t *u32;
 	int i;
 	
-	GRgb15  *rgb15;
-	GBgr15  *bgr15;
-	GRgb16  *rgb16;
-	GBgr16  *bgr16;
-	GRgb24  *rgb24;
-	GBgr24  *bgr24;
-	GRgba32 *rgba32;
-	GArgb32 *argb32;
-	GHls32  *hls32;
-	GCmyk32 *cmyk32;
+	LRgb15  *rgb15;
+	LBgr15  *bgr15;
+	LRgb16  *rgb16;
+	LBgr16  *bgr16;
+	LRgb24  *rgb24;
+	LBgr24  *bgr24;
+	LRgba32 *rgba32;
+	LArgb32 *argb32;
+	LHls32  *hls32;
+	LCmyk32 *cmyk32;
 	
 	System15BitPixel *s15;
 	System16BitPixel *s16;

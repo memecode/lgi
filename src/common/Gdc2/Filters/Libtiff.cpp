@@ -600,9 +600,9 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 						}
 						case 24:
 						{
-							LArray<GRgb24> Buf;
+							LArray<LRgb24> Buf;
 							Buf.Length(img.width);
-							GRgb24 *b = &Buf[0];
+							LRgb24 *b = &Buf[0];
 							LgiAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
 
 							LgiAssert(Photometric == PHOTOMETRIC_RGB); // we don't support anything else yet.
@@ -659,7 +659,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 									switch (DestCs)
 									{
 										#define TiffCase(name, bits) \
-											case Cs##name: CmykToRgb##bits((G##name*)d, (GCmyk32*)b, pDC->X()); break
+											case Cs##name: CmykToRgb##bits((G##name*)d, (LCmyk32*)b, pDC->X()); break
 
 										TiffCase(Rgb24, 24);
 										TiffCase(Bgr24, 24);
@@ -684,7 +684,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 									switch (DestCs)
 									{
 										#define TiffCase(name, bits) \
-											case Cs##name: TiffProcess##bits((G##name*)d, (GRgba32*)b, pDC->X()); break
+											case Cs##name: TiffProcess##bits((G##name*)d, (LRgba32*)b, pDC->X()); break
 										
 										TiffCase(Rgb24, 24);
 										TiffCase(Bgr24, 24);
@@ -714,9 +714,9 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 						}
 						case 48:
 						{
-							LArray<GRgb48> Buf;
+							LArray<LRgb48> Buf;
 							Buf.Length(img.width);
-							GRgb48 *b = &Buf[0];
+							LRgb48 *b = &Buf[0];
 							LgiAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
 
 							for (unsigned y=0; y<img.height; y++)
@@ -746,9 +746,9 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 						}
 						case 64:
 						{
-							LArray<GRgba64> Buf;
+							LArray<LRgba64> Buf;
 							Buf.Length(img.width);
-							GRgba64 *b = &Buf[0];
+							LRgba64 *b = &Buf[0];
 							LgiAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
 
 							for (unsigned y=0; y<img.height; y++)
@@ -759,7 +759,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 								switch (pDC->GetColourSpace())
 								{
 									#define TiffCase64(name, bits) \
-										case Cs##name: TiffProcess##bits((G##name*)d, (GRgba32*)b, pDC->X()); break
+										case Cs##name: TiffProcess##bits((G##name*)d, (LRgba32*)b, pDC->X()); break
 									
 									TiffCase64(Rgba64, 32);
 									TiffCase64(Bgra64, 32);

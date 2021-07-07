@@ -35,7 +35,7 @@ class LgiClass LWindow :
 	public LDragDropTarget
 {
 	friend class BViewRedir;
-	friend class GApp;
+	friend class LApp;
 	friend class LView;
 	friend class LButton;
 	friend class LDialog;

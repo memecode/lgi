@@ -236,7 +236,7 @@ public:
 			switch (Src->Cs)
 			{
 				#define AlphaCase(name) \
-					case Cs##name: return AlphaBlt<G##name>(Src, SrcAlpha);
+					case Cs##name: return AlphaBlt<L##name>(Src, SrcAlpha);
 
 				AlphaCase(Rgb24);
 				AlphaCase(Bgr24);
@@ -576,7 +576,7 @@ public:
 			switch (Src->Cs)
 			{
 				#define AlphaCase(name, sz) \
-					case Cs##name: return AlphaBlt##sz<G##name>(Src, SrcAlpha);
+					case Cs##name: return AlphaBlt##sz<L##name>(Src, SrcAlpha);
 
 				AlphaCase(Rgb24, 24);
 				AlphaCase(Bgr24, 24);
@@ -694,7 +694,7 @@ LApplicator *GApp32::Create(LColourSpace Cs, int Op)
 		switch (Cs)
 		{
 			#define AppCase(name, alpha) \
-				case Cs##name: return new App32##alpha<G##name, Cs##name>();
+				case Cs##name: return new App32##alpha<L##name, Cs##name>();
 			
 			AppCase(Rgba32, Alpha);
 			AppCase(Bgra32, Alpha);
@@ -714,7 +714,7 @@ LApplicator *GApp32::Create(LColourSpace Cs, int Op)
 		switch (Cs)
 		{
 			#define AppCase(name, alpha) \
-				case Cs##name: return new App32Or##alpha<G##name, Cs##name>();
+				case Cs##name: return new App32Or##alpha<L##name, Cs##name>();
 			
 			AppCase(Rgba32, Alpha);
 			AppCase(Bgra32, Alpha);
@@ -734,7 +734,7 @@ LApplicator *GApp32::Create(LColourSpace Cs, int Op)
 		switch (Cs)
 		{
 			#define AppCase(name, alpha) \
-				case Cs##name: return new App32And##alpha<G##name, Cs##name>();
+				case Cs##name: return new App32And##alpha<L##name, Cs##name>();
 			
 			AppCase(Rgba32, Alpha);
 			AppCase(Bgra32, Alpha);
@@ -754,7 +754,7 @@ LApplicator *GApp32::Create(LColourSpace Cs, int Op)
 		switch (Cs)
 		{
 			#define AppCase(name, alpha) \
-				case Cs##name: return new App32Xor##alpha<G##name, Cs##name>();
+				case Cs##name: return new App32Xor##alpha<L##name, Cs##name>();
 			
 			AppCase(Rgba32, Alpha);
 			AppCase(Bgra32, Alpha);

@@ -394,7 +394,7 @@ void Convert(System24BitPixel *Dst, GBmpMem *Src, int Line, GPalette *SPal)
 	{
 		#define ConvertCase(type) \
 			case Cs##type: \
-				GConvertRgb24<System24BitPixel, G##type>(Dst, (G##type*) In, Src->x, Src->Cs, NULL); \
+				GConvertRgb24<System24BitPixel, L##type>(Dst, (L##type*) In, Src->x, Src->Cs, NULL); \
 				break
 		
 		case CsIndex8:
@@ -518,7 +518,7 @@ bool GdcApp8Set::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
 										}
 										case CsBgr15:
 										{
-											GBgr15 *s = (GBgr15*) (Src->Base + (y * Src->Line));
+											LBgr15 *s = (LBgr15*) (Src->Base + (y * Src->Line));
 											for (int x=0; x<Src->x; x++)
 											{
 												uint16 u = LookupIdx5bit(s->r, s->g, s->b);
@@ -529,7 +529,7 @@ bool GdcApp8Set::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
 										}
 										#define Case(Px, Sz) \
 											case Cs##Px: \
-												BltNearest##Sz(Lookup, d, (G##Px*) (Src->Base + (y * Src->Line)), Src->x); \
+												BltNearest##Sz(Lookup, d, (L##Px*) (Src->Base + (y * Src->Line)), Src->x); \
 												break
 										Case(Rgb16, 16);
 										Case(Bgr16, 16);

@@ -1204,7 +1204,7 @@ void GComposite64To15(DstPx *dst, SrcPx *src, int px)
 	
 	while (Px--)
 	{
-		REG GRgb24 dst =
+		REG LRgb24 dst =
 		{
 			G5bitTo8bit(d->r),
 			G5bitTo8bit(d->g),
@@ -1232,7 +1232,7 @@ void GComposite64To16(DstPx *dst, SrcPx *src, int px)
 	
 	while (Px--)
 	{
-		REG GRgb24 dst =
+		REG LRgb24 dst =
 		{
 			G5bitTo8bit(d->r),
 			G6bitTo8bit(d->g),

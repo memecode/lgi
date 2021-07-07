@@ -91,7 +91,7 @@ typedef int OsSocket;
 LgiFunc void LgiSleep(uint32_t i);
 
 // Run the message loop to process any pending messages
-#define LgiYield()					GApp::ObjInstance()->Run(false)
+#define LgiYield()					LApp::ObjInstance()->Run(false)
 
 #define LGI_GViewMagic				0x14412662
 #define LGI_FileDropFormat			"public.file-url"

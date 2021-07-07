@@ -289,7 +289,7 @@ public:
 //////////////////////////////////////////////////////////////////
 int LgiMain(OsAppArguments &AppArgs)
 {
-	GApp a(AppArgs, AppName);
+	LApp a(AppArgs, AppName);
 	if (a.IsOk())
 	{
 		a.AppWnd = new App;

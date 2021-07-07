@@ -344,8 +344,8 @@ GdcJpeg::GdcJpeg()
 	#endif
 }
 
-typedef GRgb24 JpegRgb;
-typedef GCmyk32 JpegCmyk;
+typedef LRgb24 JpegRgb;
+typedef LCmyk32 JpegCmyk;
 struct JpegXyz
 {
 	uint8_t x, y, z;
@@ -729,7 +729,7 @@ GFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 								switch (pDC->GetColourSpace())
 								{
 									#define CmykCase(name, bits) \
-										case Cs##name: CmykToRgb##bits((G##name*)Ptr, (GCmyk32*)Ptr, pDC->X()); break
+										case Cs##name: CmykToRgb##bits((L##name*)Ptr, (LCmyk32*)Ptr, pDC->X()); break
 
 									CmykCase(Rgb24, 24);
 									CmykCase(Bgr24, 24);
@@ -759,7 +759,7 @@ GFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 									switch (pDC->GetColourSpace())
 									{
 										#define YccCase(name, bits) \
-											case Cs##name: Ycc##bits((G##name*)Ptr, pDC->X(), red, green, blue, range_table); break;
+											case Cs##name: Ycc##bits((L##name*)Ptr, pDC->X(), red, green, blue, range_table); break;
 										
 										YccCase(Rgb24, 24);
 										YccCase(Bgr24, 24);
@@ -790,7 +790,7 @@ GFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 									switch (pDC->GetColourSpace())
 									{
 										#define JpegCase(name, bits) \
-											case Cs##name: Convert##bits((G##name*)Ptr, Width); break;
+											case Cs##name: Convert##bits((L##name*)Ptr, Width); break;
 
 										JpegCase(Rgb16, 16);
 										JpegCase(Bgr16, 16);
@@ -914,7 +914,7 @@ GFilter::IoStatus GdcJpeg::WriteImage(LStream *Out, LSurface *pDC)
 }
 
 template<typename I>
-void Rop24(GRgb24 *dst, I *p, int x)
+void Rop24(LRgb24 *dst, I *p, int x)
 {
     I *end = p + x;
 	while (p < end)
@@ -1082,8 +1082,8 @@ GFilter::IoStatus GdcJpeg::_Write(LStream *Out, LSurface *pDC, int Quality, SubS
 				}
 				case CsRgb16:
 				{
-				    GRgb16 *p = (GRgb16*)(*pDC)[cinfo.next_scanline];
-				    GRgb16 *end = p + pDC->X();
+				    LRgb16 *p = (LRgb16*)(*pDC)[cinfo.next_scanline];
+				    LRgb16 *end = p + pDC->X();
 					while (p < end)
 					{
 						dst[0] = G5bitTo8bit(p->r);
@@ -1096,8 +1096,8 @@ GFilter::IoStatus GdcJpeg::_Write(LStream *Out, LSurface *pDC, int Quality, SubS
 				}
 				case CsBgr16:
 				{
-				    GBgr16 *p = (GBgr16*)(*pDC)[cinfo.next_scanline];
-				    GBgr16 *end = p + pDC->X();
+				    LBgr16 *p = (LBgr16*)(*pDC)[cinfo.next_scanline];
+				    LBgr16 *end = p + pDC->X();
 					while (p < end)
 					{
 						dst[0] = (p->r << 3) | (p->r >> 5);
@@ -1111,7 +1111,7 @@ GFilter::IoStatus GdcJpeg::_Write(LStream *Out, LSurface *pDC, int Quality, SubS
 
 				#define Write24(cs) \
 					case Cs##cs: \
-						Rop24<G##cs>((GRgb24*)dst, (G##cs*)(*pDC)[cinfo.next_scanline], pDC->X()); \
+						Rop24<L##cs>((LRgb24*)dst, (L##cs*)(*pDC)[cinfo.next_scanline], pDC->X()); \
 						break
 				
 				Write24(Rgb24);

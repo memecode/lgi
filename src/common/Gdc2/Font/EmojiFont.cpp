@@ -55,7 +55,7 @@ void LEmojiFont::_Measure(int &x, int &y, OsChar *Str, int len)
 	}
 }
 
-int LEmojiFont::_CharAt(int xPos, OsChar *Str, int len, LgiPxToIndexType Type)
+int LEmojiFont::_CharAt(int xPos, OsChar *Str, int len, LPxToIndexType Type)
 {
 	ssize_t Bytes = len * sizeof(*Str);
 

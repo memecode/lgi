@@ -83,8 +83,8 @@ void GMessage::Set(int Msg, Param A, Param B)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-static GApp *TheApp = 0;
-GApp *GApp::ObjInstance()
+static LApp *TheApp = 0;
+LApp *LApp::ObjInstance()
 {
 	return TheApp;
 }
@@ -103,9 +103,9 @@ LONG __stdcall _ExceptionFilter_Redir(LPEXCEPTION_POINTERS e)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-LSkinEngine *GApp::SkinEngine = 0;
-LMouseHook *GApp::MouseHook = 0;
-LMouseHook *GApp::GetMouseHook()
+LSkinEngine *LApp::SkinEngine = 0;
+LMouseHook *LApp::MouseHook = 0;
+LMouseHook *LApp::GetMouseHook()
 {
 	return MouseHook;
 }
@@ -221,9 +221,9 @@ void LgiInvalidParam(const wchar_t * expression,
 extern int MouseRollMsg;
 typedef HRESULT (CALLBACK *fDllGetVersion)(DLLVERSIONINFO *);
 
-GApp::GApp(OsAppArguments &AppArgs, const char *AppName, GAppArguments *Opts)
+LApp::LApp(OsAppArguments &AppArgs, const char *AppName, GAppArguments *Opts)
 {
-	// GApp instance
+	// LApp instance
 	SystemNormal = 0;
 	SystemBold = 0;
 	LgiAssert(TheApp == 0);
@@ -409,14 +409,14 @@ DumpTime("ms hook");
 		!GetOption("noskin")
 	)
 	{
-		extern LSkinEngine *CreateSkinEngine(GApp *App);
+		extern LSkinEngine *CreateSkinEngine(LApp *App);
 		SkinEngine = CreateSkinEngine(this);
 	}
 
 DumpTime("skin");
 }
 
-GApp::~GApp()
+LApp::~LApp()
 {
 	DeleteObj(AppWnd);
 	SystemNormal->WarnOnDelete(false);
@@ -439,7 +439,7 @@ GApp::~GApp()
 	DeleteCriticalSection(&StackTraceSync);
 }
 
-bool GApp::IsOk()
+bool LApp::IsOk()
 {
 	bool Status =	(this != 0) &&
 					(d != 0) &&
@@ -450,7 +450,7 @@ bool GApp::IsOk()
 	return Status;
 }
 
-int GApp::GetCpuCount()
+int LApp::GetCpuCount()
 {
 	SYSTEM_INFO si;
 	ZeroObj(si);
@@ -458,34 +458,34 @@ int GApp::GetCpuCount()
 	return si.dwNumberOfProcessors ? si.dwNumberOfProcessors : -1;
 }
 
-OsThread GApp::_GetGuiThread()
+OsThread LApp::_GetGuiThread()
 {
 	return d->GuiThread;
 }
 
-bool GApp::InThread()
+bool LApp::InThread()
 {
 	auto GuiId = GetGuiThreadId();
 	auto MyId = GetCurrentThreadId();
 	return GuiId == MyId;
 }
 
-OsThreadId GApp::GetGuiThreadId()
+OsThreadId LApp::GetGuiThreadId()
 {
 	return GetThreadId(d->GuiThread);
 }
 
-GApp::ClassContainer *GApp::GetClasses()
+LApp::ClassContainer *LApp::GetClasses()
 {
 	return IsOk() ? &d->Classes : 0;
 }
 
-OsAppArguments *GApp::GetAppArgs()
+OsAppArguments *LApp::GetAppArgs()
 {
 	return IsOk() ? &d->Args : 0;
 }
 
-const char *GApp::GetArgumentAt(int n)
+const char *LApp::GetArgumentAt(int n)
 {
 	if (d->Args.lpCmdLine)
 	{
@@ -517,7 +517,7 @@ const char *GApp::GetArgumentAt(int n)
 	return 0;
 }
 
-bool GApp::GetOption(const char *Option, LString &Buf)
+bool LApp::GetOption(const char *Option, LString &Buf)
 {
 	if (!ValidStr(Option))
 	{
@@ -570,7 +570,7 @@ bool GApp::GetOption(const char *Option, LString &Buf)
 	return false;
 }
 
-bool GApp::GetOption(const char *Option, char *Dest, int DestLen)
+bool LApp::GetOption(const char *Option, char *Dest, int DestLen)
 {
 	LString Buf;
 	if (GetOption(Option, Buf))
@@ -584,12 +584,12 @@ bool GApp::GetOption(const char *Option, char *Dest, int DestLen)
 
 // #include "GInput.h"
 
-void GApp::SetAppArgs(OsAppArguments &AppArgs)
+void LApp::SetAppArgs(OsAppArguments &AppArgs)
 {
 	d->Args = AppArgs;
 }
 
-void GApp::OnCommandLine()
+void LApp::OnCommandLine()
 {
 	char WhiteSpace[] = " \r\n\t";
 	char *CmdLine = WideToUtf8(d->Args.lpCmdLine);
@@ -651,19 +651,19 @@ void GApp::OnCommandLine()
 	DeleteArray(CmdLine);
 }
 
-void GApp::OnUrl(const char *Url)
+void LApp::OnUrl(const char *Url)
 {
 	if (AppWnd)
 		AppWnd->OnUrl(Url);
 }
 
-void GApp::OnReceiveFiles(LArray<const char*> &Files)
+void LApp::OnReceiveFiles(LArray<const char*> &Files)
 {
 	if (AppWnd)
 		AppWnd->OnReceiveFiles(Files);
 }
 
-int32 GApp::GetMetric(LgiSystemMetric Metric)
+int32 LApp::GetMetric(LgiSystemMetric Metric)
 {
 	int32 Status = 0;
 
@@ -700,7 +700,7 @@ int32 GApp::GetMetric(LgiSystemMetric Metric)
 	return Status;
 }
 
-LViewI *GApp::GetFocus()
+LViewI *LApp::GetFocus()
 {
 	HWND h = ::GetFocus();
 	if (h)
@@ -711,7 +711,7 @@ LViewI *GApp::GetFocus()
 	return 0;
 }
 
-HINSTANCE GApp::GetInstance()
+HINSTANCE LApp::GetInstance()
 {
 	if (this && IsOk())
 	{
@@ -721,7 +721,7 @@ HINSTANCE GApp::GetInstance()
 	return (HINSTANCE)GetCurrentProcess();
 }
 
-OsProcessId GApp::GetProcessId()
+OsProcessId LApp::GetProcessId()
 {
 	if (this)
 	{
@@ -731,7 +731,7 @@ OsProcessId GApp::GetProcessId()
 	return GetCurrentProcessId();
 }
 
-int GApp::GetShow()
+int LApp::GetShow()
 {
 	return IsOk() ? d->Args.nCmdShow : 0;
 }
@@ -745,7 +745,7 @@ public:
 	}
 };
 
-bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
+bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 {
 	MSG Msg;
 	bool status = true;
@@ -851,7 +851,7 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 	return Msg.message != WM_QUIT;
 }
 
-void GApp::Exit(int Code)
+void LApp::Exit(int Code)
 {
 	if (Code)
 	{
@@ -863,18 +863,18 @@ void GApp::Exit(int Code)
 	}
 }
 
-LString GApp::GetFileMimeType(const char *File)
+LString LApp::GetFileMimeType(const char *File)
 {
 	return LGetFileMimeType(File);
 }
 
-bool GApp::GetAppsForMimeType(char *Mime, LArray<LAppInfo*> &Apps)
+bool LApp::GetAppsForMimeType(char *Mime, LArray<LAppInfo*> &Apps)
 {
 	LgiAssert(!"Not impl.");
 	return false;
 }
 
-LSymLookup *GApp::GetSymLookup()
+LSymLookup *LApp::GetSymLookup()
 {
 	if (!this)
 		return 0;
@@ -885,7 +885,7 @@ LSymLookup *GApp::GetSymLookup()
 	return d->SymLookup;
 }
 
-bool GApp::IsWine()
+bool LApp::IsWine()
 {
 	if (d->LinuxWine < 0)
 	{
@@ -901,7 +901,7 @@ bool GApp::IsWine()
 	return d->LinuxWine > 0;
 }
 
-bool GApp::IsElevated()
+bool LApp::IsElevated()
 {
     bool fRet = false;
 
@@ -919,7 +919,7 @@ bool GApp::IsElevated()
     return fRet;
 }
 
-GFontCache *GApp::GetFontCache()
+GFontCache *LApp::GetFontCache()
 {
 	if (!d->FontCache)
 		d->FontCache.Reset(new GFontCache(SystemNormal));

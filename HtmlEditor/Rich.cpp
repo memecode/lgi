@@ -340,11 +340,11 @@ class App : public LWindow, public GCapabilityInstallTarget
 	CapsBar *Bar;
 	LCapabilityTarget::CapsHash Caps;
 	LAutoPtr<LEventTargetThread> Installer;
-	GOptionsFile Options;
+	LOptionsFile Options;
 	LArray<GDocView::ContentMedia> Media;
 
 public:
-	App() : Options(GOptionsFile::PortableMode, AppName)
+	App() : Options(LOptionsFile::PortableMode, AppName)
 	{
 		LastChange = 0;
 		Edit = 0;
@@ -724,7 +724,7 @@ public:
 
 int LgiMain(OsAppArguments &AppArgs)
 {
-	GApp a(AppArgs, "RichEditTest");
+	LApp a(AppArgs, "RichEditTest");
 	a.AppWnd = new App;
 	a.Run();
 	return 0;

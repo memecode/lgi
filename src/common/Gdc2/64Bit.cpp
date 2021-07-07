@@ -356,7 +356,7 @@ public:
 			switch (Src->Cs)
 			{
 				#define AlphaCase(name) \
-					case Cs##name: return AlphaBlt<G##name>(Src, SrcAlpha);
+					case Cs##name: return AlphaBlt<L##name>(Src, SrcAlpha);
 
 				AlphaCase(Rgb24);
 				AlphaCase(Bgr24);
@@ -389,7 +389,7 @@ public:
 		{
 			#define Case64(name) \
 				case Cs##name: \
-					return new App64<G##name, Cs##name>(Op);
+					return new App64<L##name, Cs##name>(Op);
 			
 			Case64(Rgba64);
 			Case64(Bgra64);

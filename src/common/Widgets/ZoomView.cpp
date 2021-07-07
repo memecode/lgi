@@ -634,9 +634,9 @@ public:
 				}
 				case CsBgr48:
 				{
-					GBgr48 *src = (GBgr48*) (*Src)[yy];
-					GBgr24 *dst = (GBgr24*) (*Dst)[y];
-					GBgr48 *end = src + Ex;
+					LBgr48 *src = (LBgr48*) (*Src)[yy];
+					LBgr24 *dst = (LBgr24*) (*Dst)[y];
+					LBgr48 *end = src + Ex;
 					src += Sx;
 
 					LgiAssert(Dst->GetColourSpace() == CsBgr24);
@@ -661,9 +661,9 @@ public:
 				}
 				case CsBgra64:
 				{
-					GBgra64 *s = (GBgra64*) (*Src)[yy];
-					GBgra32 *d = (GBgra32*) (*Dst)[y];
-					GBgra64 *end = s + Ex;
+					LBgra64 *s = (LBgra64*) (*Src)[yy];
+					LBgra32 *d = (LBgra32*) (*Dst)[y];
+					LBgra64 *end = s + Ex;
 					s += Sx;
 
 					LgiAssert(Dst->GetColourSpace() == CsBgra32);
@@ -852,8 +852,8 @@ public:
 				}
 				case CsBgr48:
 				{
-					GBgr48 *src = ((GBgr48*) (*Src)[SrcY]);
-					GBgr48 *end = src + EndX;
+					LBgr48 *src = ((LBgr48*) (*Src)[SrcY]);
+					LBgr48 *end = src + EndX;
 					src += Sx;
 					
 					while (src < end)
@@ -867,8 +867,8 @@ public:
 				}
 				case CsRgb48:
 				{
-					GRgb48 *src = ((GRgb48*) (*Src)[SrcY]);
-					GRgb48 *end = src + EndX;
+					LRgb48 *src = ((LRgb48*) (*Src)[SrcY]);
+					LRgb48 *end = src + EndX;
 					src += Sx;
 					
 					while (src < end)
@@ -882,8 +882,8 @@ public:
 				}
 				case CsRgba64:
 				{
-					GRgba64 *src = ((GRgba64*) (*Src)[SrcY]);
-					GRgba64 *end = src + EndX;
+					LRgba64 *src = ((LRgba64*) (*Src)[SrcY]);
+					LRgba64 *end = src + EndX;
 					src += Sx;
 					
 					Dst->Op(GDC_ALPHA);
@@ -898,8 +898,8 @@ public:
 				}
 				case CsBgra64:
 				{
-					GBgra64 *src = ((GBgra64*) (*Src)[SrcY]);
-					GBgra64 *end = src + EndX;
+					LBgra64 *src = ((LBgra64*) (*Src)[SrcY]);
+					LBgra64 *end = src + EndX;
 					src += Sx;
 					
 					Dst->Op(GDC_ALPHA);

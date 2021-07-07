@@ -929,7 +929,7 @@ const char *Icon = "icon64.png";
 #endif
 
 AppWnd::AppWnd() :
-	GDocApp<GOptionsFile>(AppName, Icon)
+	GDocApp<LOptionsFile>(AppName, Icon)
 {
 	LastRes = 0;
 	Fields = 0;
@@ -1481,7 +1481,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		}
 	}
 
-	return GDocApp<GOptionsFile>::OnCommand(Cmd, Event, Handle);
+	return GDocApp<LOptionsFile>::OnCommand(Cmd, Event, Handle);
 }
 
 int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
@@ -4600,7 +4600,7 @@ void TestFunc()
 
 int LgiMain(OsAppArguments &AppArgs)
 {
-	GApp a(AppArgs, "LgiRes");
+	LApp a(AppArgs, "LgiRes");
 	if (a.IsOk())
 	{
 		if ((a.AppWnd = new AppWnd))

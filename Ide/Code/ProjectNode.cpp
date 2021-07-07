@@ -59,7 +59,7 @@ public:
 			{
 				if (!charset)
 					charset = "utf-8";
-				for (LCharset *cs = LgiGetCsList(); cs->Charset; cs++)
+				for (LCharset *cs = LGetCsList(); cs->Charset; cs++)
 				{
 					c->Insert(cs->Charset);
 					if (!Stricmp(charset, cs->Charset))

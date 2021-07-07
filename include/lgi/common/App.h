@@ -11,21 +11,21 @@ typedef int							OsProcessId;
 /// Returns the current process ID
 #define LgiProcessId()				(LgiApp->GetProcessId())
 
-/// Returns a pointer to the GApp object.
+/// Returns a pointer to the LApp object.
 ///
-/// \warning Don't use this before you have created your GApp object. i.e. in a constructor
+/// \warning Don't use this before you have created your LApp object. i.e. in a constructor
 /// of a global static class which is initialized before the main begins executing.
-#define LgiApp						(GApp::ObjInstance())
+#define LgiApp						(LApp::ObjInstance())
 
 /// Returns a system font pointer.
 ///
-/// \warning Don't use this before you have created your GApp object. i.e. in a constructor
+/// \warning Don't use this before you have created your LApp object. i.e. in a constructor
 /// of a global static class which is initialized before the main begins executing.
 #define SysFont						(LgiApp->SystemNormal)
 
 /// Returns a bold system font pointer.
 ///
-/// \warning Don't use this before you have created your GApp object. i.e. in a constructor
+/// \warning Don't use this before you have created your LApp object. i.e. in a constructor
 /// of a global static class which is initialized before the main begins executing.
 #define SysBold						(LgiApp->SystemBold)
 
@@ -36,7 +36,7 @@ LgiFunc void LgiExitApp();
 
 /// Closes the application gracefully.
 ///
-/// This actually causes GApp::Run() to stop processing message and return.
+/// This actually causes LApp::Run() to stop processing message and return.
 #define LgiCloseApp()				LgiApp->Exit(false)
 
 #if defined(LINUX) && !defined(LGI_SDL)
@@ -45,7 +45,7 @@ LgiFunc void LgiExitApp();
 #define ThreadCheck()
 #endif
 
-/// Optional arguments to the GApp object
+/// Optional arguments to the LApp object
 struct GAppArguments
 {
 	/// Don't initialize the skinning engine.
@@ -97,7 +97,7 @@ ObjCWrapper(LNsApplication, OsApp)
 /// operating system. And once your initialization is complete the 'Run' method
 /// is called to enter the main application loop that processes messages for the
 /// life time of the application.
-class LgiClass GApp : virtual public LAppI,
+class LgiClass LApp : virtual public LAppI,
 	public LBase,
 	public OsApplication
 {
@@ -144,8 +144,8 @@ protected:
 public:
 	// Static publics
 	
-	/// Use 'LgiApp' to return a pointer to the GApp object
-	static GApp *ObjInstance();
+	/// Use 'LgiApp' to return a pointer to the LApp object
+	static LApp *ObjInstance();
 	static class LSkinEngine *SkinEngine;
 
 	// public member vars
@@ -159,7 +159,7 @@ public:
 	/// Pointer to the applications main window
 	LWindow *AppWnd;
 
-	/// Returns true if the GApp object initialized correctly
+	/// Returns true if the LApp object initialized correctly
 	bool IsOk();
 	
 	/// Returns this processes ID
@@ -174,7 +174,7 @@ public:
 	int GetCpuCount();
 
 	/// Construct the object
-	GApp
+	LApp
 	(
 		/// The arguments passed in by the OS.
 		OsAppArguments &AppArgs,
@@ -185,7 +185,7 @@ public:
 	);
 
 	/// Destroys the object
-	virtual ~GApp();
+	virtual ~LApp();
 
 	/// Resets the arguments
 	void SetAppArgs(OsAppArguments &AppArgs);
@@ -322,7 +322,7 @@ public:
 
 		class DesktopInfo
 		{
-			friend class GApp;
+			friend class LApp;
 			
 			LString File;
 			bool Dirty;

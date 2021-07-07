@@ -256,7 +256,7 @@ char *EncodeRfc2047(char *Str, const char *CodePage, List<char> *CharsetPrefs, s
 		size_t Len = strlen(Str);;
 		if (_stricmp(CodePage, "utf-8") == 0)
 		{
-			DestCp = LgiDetectCharset(Str, Len, CharsetPrefs);
+			DestCp = LDetectCharset(Str, Len, CharsetPrefs);
 		}
 
 		int Chars = 0;

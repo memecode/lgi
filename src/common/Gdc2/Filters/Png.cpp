@@ -44,10 +44,10 @@
 
 // Pixel formats
 typedef uint8_t   Png8;
-typedef GRgb24  Png24;
-typedef GRgba32 Png32;
-typedef GRgb48  Png48;
-typedef GRgba64 Png64;
+typedef LRgb24  Png24;
+typedef LRgba32 Png32;
+typedef LRgb48  Png48;
+typedef LRgba64 Png64;
 
 #if PNG_LIBPNG_VER_MAJOR <= 1 && PNG_LIBPNG_VER_MINOR <= 2
 #define png_const_infop png_infop
@@ -858,9 +858,9 @@ GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 										case Cs##name: \
 										{ \
 											if (LIBPNG png_get_bit_depth(png_ptr, info_ptr) == 16) \
-												Read64_##bits((G##name*)Scan, (Png48*)Scan0[y], pDC->X()); \
+												Read64_##bits((L##name*)Scan, (Png48*)Scan0[y], pDC->X()); \
 											else \
-												Read32_##bits((G##name*)Scan, (Png24*)Scan0[y], pDC->X()); \
+												Read32_##bits((L##name*)Scan, (Png24*)Scan0[y], pDC->X()); \
 											break; \
 										}
 
@@ -896,9 +896,9 @@ GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 										case Cs##name: \
 										{ \
 											if (LIBPNG png_get_bit_depth(png_ptr, info_ptr) == 16) \
-												ReadAlpha64_##bits((G##name*)Scan, (Png64*)Scan0[y], pDC->X()); \
+												ReadAlpha64_##bits((L##name*)Scan, (Png64*)Scan0[y], pDC->X()); \
 											else \
-												ReadAlpha32_##bits((G##name*)Scan, (Png32*)Scan0[y], pDC->X()); \
+												ReadAlpha32_##bits((L##name*)Scan, (Png32*)Scan0[y], pDC->X()); \
 											break; \
 										}
 

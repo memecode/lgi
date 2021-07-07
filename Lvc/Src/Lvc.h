@@ -127,7 +127,7 @@ struct AppPriv
 	VcFolder *CurFolder;
 	LList *Commits;
 	LList *Files;
-	GOptionsFile Opts;
+	LOptionsFile Opts;
 	LEdit *Msg;
 	GTextLog *Diff;
 	GTextLog *Log;
@@ -137,7 +137,7 @@ struct AppPriv
 
 	LHashTbl<StrKey<char,false>,SshConnection*> Connections;
 	
-	AppPriv()  : Opts(GOptionsFile::DesktopMode, AppName)
+	AppPriv()  : Opts(LOptionsFile::DesktopMode, AppName)
 	{
 		Commits = NULL;
 		PrevType = VcNone;

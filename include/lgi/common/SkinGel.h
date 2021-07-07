@@ -1,6 +1,6 @@
 #ifndef _GEL_H_
 #define _GEL_H_
 
-LSkinEngine *CreateSkinEngine(class GApp *App);
+LSkinEngine *CreateSkinEngine(class LApp *App);
 
 #endif

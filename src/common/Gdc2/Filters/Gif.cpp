@@ -159,8 +159,8 @@ int GdcGif::out_line(uchar *pixels, int linewidth, int interlaced, int BitDepth)
 	    }
 	    case CsBgr16:
 	    {
-	        GBgr16 *s = (GBgr16*) (*pDC)[lines];
-	        GBgr16 *e = s + pDC->X();
+	        LBgr16 *s = (LBgr16*) (*pDC)[lines];
+	        LBgr16 *e = s + pDC->X();
 	        GPalette *pal = pDC->Palette();
         	GdcRGB *p = (*pal)[0], *pix;
         	
@@ -176,8 +176,8 @@ int GdcGif::out_line(uchar *pixels, int linewidth, int interlaced, int BitDepth)
 	    }
 	    case CsRgb16:
 	    {
-	        GRgb16 *s = (GRgb16*) (*pDC)[lines];
-	        GRgb16 *e = s + pDC->X();
+	        LRgb16 *s = (LRgb16*) (*pDC)[lines];
+	        LRgb16 *e = s + pDC->X();
 	        GPalette *pal = pDC->Palette();
         	GdcRGB *p = (*pal)[0], *pix;
         	
@@ -616,7 +616,7 @@ union GfxCtrlExtBits
 
 bool GifLoadPalette(LStream *s, LSurface *pDC, int TableBits)
 {
-	GRgb24 Rgb[256];
+	LRgb24 Rgb[256];
 
 	int Colours = 1 << (TableBits + 1);
 	int Bytes = Colours * sizeof(Rgb[0]);

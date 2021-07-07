@@ -428,16 +428,16 @@ enum LgiCursor
 enum LgiSystemMetric
 {
 	/// Get the standard window horizontal border size
-	/// \sa GApp::GetMetric()
+	/// \sa LApp::GetMetric()
 	LGI_MET_DECOR_X = 1,
 	/// Get the standard window vertical border size including caption bar.
-	/// \sa GApp::GetMetric()
+	/// \sa LApp::GetMetric()
 	LGI_MET_DECOR_Y,
 	/// Get the standard window caption bar height only.
-	/// \sa GApp::GetMetric()
+	/// \sa LApp::GetMetric()
 	LGI_MET_DECOR_CAPTION,
 	/// Get the height of a single line menu bar
-	/// \sa GApp::GetMetric()
+	/// \sa LApp::GetMetric()
 	LGI_MET_MENU,
 	/// This is non-zero if the system is theme aware
 	LGI_MET_THEME_AWARE
@@ -514,11 +514,11 @@ enum LgiSystemPath
 	LSP_APP_INSTALL,
 
 	/// The app's root folder (Where config and data should be stored)
-	/// GOptionsFile uses LSP_APP_ROOT as the default location.
+	/// LOptionsFile uses LSP_APP_ROOT as the default location.
 	///		[Win32] = ~\Application Data\Roaming\$AppName
 	///		[Mac] = ~/Library/$AppName
 	///		[Linux] = ~/.$AppName
-	/// Where $AppName = GApp::GetName.
+	/// Where $AppName = LApp::GetName.
 	/// If the given folder doesn't exist it will be created.
 	LSP_APP_ROOT,
 

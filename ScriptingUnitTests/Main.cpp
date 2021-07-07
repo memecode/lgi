@@ -12,7 +12,7 @@ struct ConsoleLog : public LStream
 	}
 };
 
-class App : public GApp, public LScriptContext, public LVmDebuggerCallback
+class App : public LApp, public LScriptContext, public LVmDebuggerCallback
 {
 	LScriptEngine *Engine;
 	LAutoString SrcFile;
@@ -31,7 +31,7 @@ class App : public GApp, public LScriptContext, public LVmDebuggerCallback
 public:
 	int Status;
 
-	App(OsAppArguments &AppArgs) : GApp(AppArgs, "LgiScript")
+	App(OsAppArguments &AppArgs) : LApp(AppArgs, "LgiScript")
 	{
 		LFile::Path p(LSP_APP_INSTALL);
 		p += "Resources";

@@ -16,7 +16,7 @@ class XWidget : public XObject
 	friend class ImagePainter;
 	friend class XWidgetPrivate;
 	friend class XPopup;
-	friend class GApp;
+	friend class LApp;
 	friend class LMemDC;
 	friend class XlibEvent;
 	friend class XWidgetList;

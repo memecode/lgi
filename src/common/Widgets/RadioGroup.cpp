@@ -319,14 +319,14 @@ int LRadioGroup::OnNotify(LViewI *Ctrl, int Flags)
 
 void LRadioGroup::OnPaint(LSurface *pDC)
 {
-	if (GApp::SkinEngine &&
-		TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_GROUP))
+	if (LApp::SkinEngine &&
+		TestFlag(LApp::SkinEngine->GetFeatures(), GSKIN_GROUP))
 	{
 		LSkinState State;
 		State.pScreen = pDC;
 		State.MouseOver = false;
 		State.aText = d->GetStrs();
-		GApp::SkinEngine->OnPaint_LRadioGroup(this, &State);
+		LApp::SkinEngine->OnPaint_LRadioGroup(this, &State);
 	}
 	else
 	{
@@ -714,8 +714,8 @@ void LRadioButton::OnFocus(bool f)
 
 void LRadioButton::OnPaint(LSurface *pDC)
 {
-	if (GApp::SkinEngine &&
-		TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_RADIO))
+	if (LApp::SkinEngine &&
+		TestFlag(LApp::SkinEngine->GetFeatures(), GSKIN_RADIO))
 	{
 		LSkinState State;
 		State.pScreen = pDC;
@@ -728,7 +728,7 @@ void LRadioButton::OnPaint(LSurface *pDC)
 		State.ForceUpdate = d->BackCol != Back;
 		d->BackCol = Back;
 
-		GApp::SkinEngine->OnPaint_LRadioButton(this, &State);
+		LApp::SkinEngine->OnPaint_LRadioButton(this, &State);
 	}
 	else
 	{

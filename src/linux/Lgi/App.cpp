@@ -231,11 +231,11 @@ private:
 #include "GAppPriv.h"
 
 /////////////////////////////////////////////////////////////////////////////
-LSkinEngine *GApp::SkinEngine = 0;
-GApp *TheApp = 0;
-LMouseHook *GApp::MouseHook = 0;
+LSkinEngine *LApp::SkinEngine = 0;
+LApp *TheApp = 0;
+LMouseHook *LApp::MouseHook = 0;
 
-GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
+LApp::LApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	OsApplication(AppArgs.Args, AppArgs.Arg)
 {
 	TheApp = this;
@@ -349,18 +349,18 @@ GApp::GApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 
 	if (!SystemNormal)
 	{
-		LgiMsg(0, "Error: Couldn't create system font.", "Lgi Error: GApp::GApp", MB_OK);
+		LgiMsg(0, "Error: Couldn't create system font.", "Lgi Error: LApp::LApp", MB_OK);
 		LgiExitApp();
 	}
 	
 	if (!GetOption("noskin"))
 	{
-		extern LSkinEngine *CreateSkinEngine(GApp *App);
+		extern LSkinEngine *CreateSkinEngine(LApp *App);
 		SkinEngine = CreateSkinEngine(this);
 	}
 }
 
-GApp::~GApp()
+LApp::~LApp()
 {
 	DeleteObj(AppWnd);
 	DeleteObj(SystemNormal);
@@ -375,12 +375,12 @@ GApp::~GApp()
 	TheApp = 0;
 }
 
-GApp *GApp::ObjInstance()
+LApp *LApp::ObjInstance()
 {
 	return TheApp;
 }
 
-bool GApp::IsOk()
+bool LApp::IsOk()
 {
 	bool Status =
 		#ifndef __clang__
@@ -392,12 +392,12 @@ bool GApp::IsOk()
 	return Status;
 }
 
-LMouseHook *GApp::GetMouseHook()
+LMouseHook *LApp::GetMouseHook()
 {
 	return MouseHook;
 }
 
-int GApp::GetMetric(LgiSystemMetric Metric)
+int LApp::GetMetric(LgiSystemMetric Metric)
 {
 	switch (Metric)
 	{
@@ -414,23 +414,23 @@ int GApp::GetMetric(LgiSystemMetric Metric)
 	return 0;
 }
 
-LViewI *GApp::GetFocus()
+LViewI *LApp::GetFocus()
 {
 	// GtkWidget *w = gtk_window_get_focus(GtkWindow *window);
 	return NULL;
 }
 
-OsThread GApp::_GetGuiThread()
+OsThread LApp::_GetGuiThread()
 {
 	return d->GuiThread;
 }
 
-OsThreadId GApp::GetGuiThreadId()
+OsThreadId LApp::GetGuiThreadId()
 {
 	return d->GuiThreadId;
 }
 
-OsProcessId GApp::GetProcessId()
+OsProcessId LApp::GetProcessId()
 {
     #ifdef WIN32
 	return GetCurrentProcessId();
@@ -439,12 +439,12 @@ OsProcessId GApp::GetProcessId()
 	#endif
 }
 
-OsAppArguments *GApp::GetAppArgs()
+OsAppArguments *LApp::GetAppArgs()
 {
 	return IsOk() ? &d->Args : 0;
 }
 
-void GApp::SetAppArgs(OsAppArguments &AppArgs)
+void LApp::SetAppArgs(OsAppArguments &AppArgs)
 {
 	if (IsOk())
 	{
@@ -452,7 +452,7 @@ void GApp::SetAppArgs(OsAppArguments &AppArgs)
 	}
 }
 
-bool GApp::InThread()
+bool LApp::InThread()
 {
 	OsThreadId Me = GetCurrentThreadId();
 	OsThreadId Gui = GetGuiThreadId();
@@ -526,7 +526,7 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 }
 
 static GtkIdle idle = {0};
-bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
+bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 {
 	if (!InThread())
 	{
@@ -560,7 +560,7 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 	return true;
 }
 
-void GApp::Exit(int Code)
+void LApp::Exit(int Code)
 {
 	if (Code)
 	{
@@ -580,7 +580,7 @@ void GApp::Exit(int Code)
 	}
 }
 
-bool GApp::PostEvent(LViewI *View, int Msg, GMessage::Param a, GMessage::Param b)
+bool LApp::PostEvent(LViewI *View, int Msg, GMessage::Param a, GMessage::Param b)
 {
 	LMessageQue::MsgArray *q = MsgQue.Lock(_FL);
 	if (!q)
@@ -620,21 +620,21 @@ bool GApp::PostEvent(LViewI *View, int Msg, GMessage::Param a, GMessage::Param b
 	return true;
 }
 
-void GApp::OnUrl(const char *Url)
+void LApp::OnUrl(const char *Url)
 {
 	if (AppWnd)
 		AppWnd->OnUrl(Url);
 }
 
-void GApp::OnReceiveFiles(::LArray<const char*> &Files)
+void LApp::OnReceiveFiles(::LArray<const char*> &Files)
 {
 	if (AppWnd)
 		AppWnd->OnReceiveFiles(Files);
 	else
-		LgiAssert(!"You probably want to set 'AppWnd' before calling GApp::Run... maybe.");
+		LgiAssert(!"You probably want to set 'AppWnd' before calling LApp::Run... maybe.");
 }
 
-const char *GApp::KeyModFlags::FlagName(int Flag)
+const char *LApp::KeyModFlags::FlagName(int Flag)
 {
 	#define CHECK(f) if (Flag & f) return #f;
 	CHECK(GDK_SHIFT_MASK)
@@ -658,7 +658,7 @@ const char *GApp::KeyModFlags::FlagName(int Flag)
 	return NULL;
 }
 
-int GApp::KeyModFlags::FlagValue(const char *Name)
+int LApp::KeyModFlags::FlagValue(const char *Name)
 {
 	#define CHECK(f) if (!Stricmp(Name, #f)) return f;
 	CHECK(GDK_SHIFT_MASK)
@@ -682,7 +682,7 @@ int GApp::KeyModFlags::FlagValue(const char *Name)
 	return 0;
 }
 
-::LString GApp::KeyModFlags::FlagsToString(int s)
+::LString LApp::KeyModFlags::FlagsToString(int s)
 {
 	::LString::Array a;
 	for (int i=0; i<32; i++)
@@ -693,17 +693,17 @@ int GApp::KeyModFlags::FlagValue(const char *Name)
 	return ::LString(",").Join(a);
 }
 
-GApp::KeyModFlags *GApp::GetKeyModFlags()
+LApp::KeyModFlags *LApp::GetKeyModFlags()
 {
 	return d->GetModFlags();
 }
 
-const char *GApp::GetArgumentAt(int n)
+const char *LApp::GetArgumentAt(int n)
 {
 	return n >= 0 && n < d->Args.Args ? NewStr(d->Args.Arg[n]) : 0;
 }
 
-bool GApp::GetOption(const char *Option, char *Dest, int DestLen)
+bool LApp::GetOption(const char *Option, char *Dest, int DestLen)
 {
 	::LString Buf;
 	if (GetOption(Option, Buf))
@@ -721,7 +721,7 @@ bool GApp::GetOption(const char *Option, char *Dest, int DestLen)
 	return false;
 }
 
-bool GApp::GetOption(const char *Option, ::LString &Buf)
+bool LApp::GetOption(const char *Option, ::LString &Buf)
 {
 	if (IsOk() && Option)
 	{
@@ -777,7 +777,7 @@ bool GApp::GetOption(const char *Option, ::LString &Buf)
 	return false;
 }
 
-void GApp::OnCommandLine()
+void LApp::OnCommandLine()
 {
 	::LArray<const char*> Files;
 
@@ -800,7 +800,7 @@ void GApp::OnCommandLine()
 	Files.DeleteArrays();
 }
 
-::LString GApp::GetFileMimeType(const char *File)
+::LString LApp::GetFileMimeType(const char *File)
 {
 	::LString Status;
 	char Full[MAX_PATH] = "";
@@ -973,7 +973,7 @@ void GApp::OnCommandLine()
 	return Status;
 }
 
-bool GApp::GetAppsForMimeType(char *Mime, ::LArray<::LAppInfo*> &Apps)
+bool LApp::GetAppsForMimeType(char *Mime, ::LArray<::LAppInfo*> &Apps)
 {
 	// Find alternative version of the MIME type (e.g. x-type and type).
 	char AltMime[256];
@@ -1003,7 +1003,7 @@ bool GApp::GetAppsForMimeType(char *Mime, ::LArray<::LAppInfo*> &Apps)
 }
 
 #if defined(LINUX)
-GLibrary *GApp::GetWindowManagerLib()
+GLibrary *LApp::GetWindowManagerLib()
 {
 	if (this != NULL && !d->WmLib)
 	{
@@ -1050,29 +1050,29 @@ GLibrary *GApp::GetWindowManagerLib()
 	return d->WmLib && d->WmLib->IsLoaded() ? d->WmLib : 0;
 }
 
-void GApp::DeleteMeLater(LViewI *v)
+void LApp::DeleteMeLater(LViewI *v)
 {
 	d->DeleteLater.Add(v);
 }
 
-void GApp::SetClipBoardContent(OsView Hnd, ::LVariant &v)
+void LApp::SetClipBoardContent(OsView Hnd, ::LVariant &v)
 {
 	// Store the clipboard data we will serve
 	d->ClipData = v;
 }
 
-bool GApp::GetClipBoardContent(OsView Hnd, ::LVariant &v, ::LArray<char*> &Types)
+bool LApp::GetClipBoardContent(OsView Hnd, ::LVariant &v, ::LArray<char*> &Types)
 {
 	return false;
 }
 #endif
 
-LSymLookup *GApp::GetSymLookup()
+LSymLookup *LApp::GetSymLookup()
 {
 	return d;
 }
 
-bool GApp::IsElevated()
+bool LApp::IsElevated()
 {
 	#ifdef WIN32
 	LgiAssert(!"What API works here?");
@@ -1082,12 +1082,12 @@ bool GApp::IsElevated()
 	#endif
 }
 
-int GApp::GetCpuCount()
+int LApp::GetCpuCount()
 {
 	return 1;
 }
 
-GFontCache *GApp::GetFontCache()
+GFontCache *LApp::GetFontCache()
 {
 	if (!d->FontCache)
 		d->FontCache.Reset(new GFontCache(SystemNormal));
@@ -1095,7 +1095,7 @@ GFontCache *GApp::GetFontCache()
 }
 
 #ifdef LINUX
-GApp::DesktopInfo::DesktopInfo(const char *file)
+LApp::DesktopInfo::DesktopInfo(const char *file)
 {
 	File = file;
 	Dirty = false;
@@ -1103,7 +1103,7 @@ GApp::DesktopInfo::DesktopInfo(const char *file)
 		Serialize(false);
 }
 
-bool GApp::DesktopInfo::Serialize(bool Write)
+bool LApp::DesktopInfo::Serialize(bool Write)
 {
 	::LFile f;
 	
@@ -1175,7 +1175,7 @@ bool GApp::DesktopInfo::Serialize(bool Write)
 	return true;
 }
 
-GApp::DesktopInfo::Section *GApp::DesktopInfo::GetSection(const char *Name, bool Create)
+LApp::DesktopInfo::Section *LApp::DesktopInfo::GetSection(const char *Name, bool Create)
 {
 	for (unsigned i=0; i<Data.Length(); i++)
 	{
@@ -1198,7 +1198,7 @@ GApp::DesktopInfo::Section *GApp::DesktopInfo::GetSection(const char *Name, bool
 
 static const char *DefaultSection = "Desktop Entry";
 
-::LString GApp::DesktopInfo::Get(const char *Field, const char *Sect)
+::LString LApp::DesktopInfo::Get(const char *Field, const char *Sect)
 {
 	if (Field)
 	{
@@ -1216,7 +1216,7 @@ static const char *DefaultSection = "Desktop Entry";
 	return ::LString();
 }
 
-bool GApp::DesktopInfo::Set(const char *Field, const char *Value, const char *Sect)
+bool LApp::DesktopInfo::Set(const char *Field, const char *Value, const char *Sect)
 {
 	if (!Field)
 		return false;
@@ -1237,7 +1237,7 @@ bool GApp::DesktopInfo::Set(const char *Field, const char *Value, const char *Se
 	return true;
 }
 
-GApp::DesktopInfo *GApp::GetDesktopInfo()
+LApp::DesktopInfo *LApp::GetDesktopInfo()
 {
 	auto sExe = LGetExeFile();
 	::LFile::Path Exe(sExe);
@@ -1277,7 +1277,7 @@ GApp::DesktopInfo *GApp::GetDesktopInfo()
 	return d->DesktopInfo;
 }
 
-bool GApp::SetApplicationIcon(const char *FileName)
+bool LApp::SetApplicationIcon(const char *FileName)
 {
 	DesktopInfo *di = GetDesktopInfo();
 	if (!di)
@@ -1385,7 +1385,7 @@ bool GlibWidgetSearch(GtkWidget *p, GtkWidget *w, bool Debug, int depth)
 	return false;
 }
 
-void GApp::OnDetach(LViewI *View)
+void LApp::OnDetach(LViewI *View)
 {
 	LMessageQue::MsgArray *q = MsgQue.Lock(_FL);
 	if (!q)

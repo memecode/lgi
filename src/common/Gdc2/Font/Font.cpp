@@ -1226,7 +1226,7 @@ void LFont::_Measure(int &x, int &y, OsChar *Str, int Len)
 		DeleteDC(hDC);
 }
 
-int LFont::_CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type)
+int LFont::_CharAt(int x, OsChar *Str, int Len, LPxToIndexType Type)
 {
 	if (!Handle())
 		return -1;
@@ -1337,7 +1337,7 @@ void LFont::_Measure(int &x, int &y, OsChar *Str, int Len)
 {
 }
 
-int LFont::_CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type)
+int LFont::_CharAt(int x, OsChar *Str, int Len, LPxToIndexType Type)
 {
 	return -1;
 }

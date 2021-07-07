@@ -113,7 +113,7 @@ public:
 	{
 		uchar *DivLut = Div255Lut;
 		T *end = d + Len;
-		GRgb24 s;
+		LRgb24 s;
 
 		s.r = R32(c32);
 		s.g = G32(c32);
@@ -281,7 +281,7 @@ public:
 		int Inc = (int) (IncX * Scale);
 		
 		T *e = d + Args.Len;
-		GRgb24 s;
+		LRgb24 s;
 
 		while (d < e)
 		{
@@ -461,7 +461,7 @@ public:
 		COLOUR c32;
 		uchar sa;
 		T *End = (T*) d + Args.Len;
-		GRgb24 s;
+		LRgb24 s;
 
 		if (Radius < 0.0000000001)
 		{

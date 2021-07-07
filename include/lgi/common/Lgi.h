@@ -81,7 +81,7 @@
 	\code
 	int LgiMain(OsAppArguments &Args)
 	{
-		GApp *App = new GApp("application/x-MyProgram", Args);
+		LApp *App = new LApp("application/x-MyProgram", Args);
 		if (App && App->IsOk())
 		{
 			App->AppWnd = new MyWindow;

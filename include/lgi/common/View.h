@@ -77,7 +77,7 @@ private:
 	#if defined(LGI_SDL)
 
 		friend Uint32 SDL_PulseCallback(Uint32 interval, LView *v);
-		friend class GApp;
+		friend class LApp;
 
 	#endif
 
@@ -432,7 +432,7 @@ public:
 
 	/// \brief Gets the font this control should draw with.
 	///
-	/// The default font is the system font, owned by the GApp object.
+	/// The default font is the system font, owned by the LApp object.
 	virtual LFont *GetFont() override;
 	
 	/// \brief Sets the font for this control

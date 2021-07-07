@@ -29,7 +29,7 @@
 
 int FontSizes[] = { 8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 48, 72, 100, 0 };
 
-struct GFontSelectPriv
+struct LFontSelectPriv
 {
 	LTableLayout *Tbl;
 	LList *Lst;
@@ -37,7 +37,7 @@ struct GFontSelectPriv
 	LCombo *PtSizes;
 	bool Running;
 	
-	GFontSelectPriv()
+	LFontSelectPriv()
 	{
 		Tbl = NULL;
 		Lst = NULL;
@@ -50,7 +50,7 @@ struct GFontSelectPriv
 LFontSelect::LFontSelect(LView *Parent, void *Init, int InitLen)
 {
 	// Initialize
-	d = new GFontSelectPriv;
+	d = new LFontSelectPriv;
 	Size = 10;
 	Bold = false;
 	Underline = false;
@@ -204,8 +204,8 @@ void LFontSelect::UpdatePreview()
 						{ \
 							for (int y=0; y<Dc->Y(); y++) \
 							{ \
-								G##cs *p = (G##cs*) (*Dc)[y]; \
-								G##cs *e = p + Dc->X(); \
+								L##cs *p = (L##cs*) (*Dc)[y]; \
+								L##cs *e = p + Dc->X(); \
 								while (p < e) \
 								{ \
 									p->a = 255; \

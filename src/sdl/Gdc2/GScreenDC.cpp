@@ -72,7 +72,7 @@ LScreenDC::~LScreenDC()
 	if (d->Screen)
 	{
 		/*
-		GBgra32 *p = (GBgra32*) d->Screen->pixels;
+		LBgra32 *p = (LBgra32*) d->Screen->pixels;
 		memset(p, 0, 4*4);
 		p[0].r = 255;
 		p[1].g = 255;

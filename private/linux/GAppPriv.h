@@ -21,10 +21,10 @@ class GAppPrivate : public LSymLookup
 {
 public:
 	// Common
-	GApp *Owner;
+	LApp *Owner;
 	GtkApplication *App;
 	LAutoPtr<LJson> Config;
-	LAutoPtr<GApp::KeyModFlags> ModFlags;
+	LAutoPtr<LApp::KeyModFlags> ModFlags;
 	LFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
 	OsAppArguments Args;
@@ -49,7 +49,7 @@ public:
 	
 	#if defined(LINUX)
 	/// Desktop info
-	LAutoPtr<GApp::DesktopInfo> DesktopInfo;
+	LAutoPtr<LApp::DesktopInfo> DesktopInfo;
 	#endif
 
 	#if HAS_LIB_MAGIC
@@ -71,7 +71,7 @@ public:
 	int LastClickX;
 	int LastClickY;
 
-	GAppPrivate(GApp *a) : Args(0, 0), Owner(a)
+	GAppPrivate(LApp *a) : Args(0, 0), Owner(a)
 		#if HAS_LIB_MAGIC
 		, MagicLock("MagicLock")
 		#endif
@@ -141,9 +141,9 @@ public:
 		}
 	}
 
-	GApp::KeyModFlags *GetModFlags()
+	LApp::KeyModFlags *GetModFlags()
 	{
-		if (ModFlags.Reset(new GApp::KeyModFlags))
+		if (ModFlags.Reset(new LApp::KeyModFlags))
 		{
 			#define _(name) \
 				{ \

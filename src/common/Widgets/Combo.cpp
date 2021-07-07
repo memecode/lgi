@@ -595,14 +595,14 @@ void LCombo::OnPaint(LSurface *pDC)
 	
 	#else
 	
-	if (GApp::SkinEngine &&
-		TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_COMBO))
+	if (LApp::SkinEngine &&
+		TestFlag(LApp::SkinEngine->GetFeatures(), GSKIN_COMBO))
 	{
 		LSkinState State;
 		State.pScreen = pDC;
 		State.ptrText = d->GetTextPtr();
 		State.Enabled = Enabled();
-		GApp::SkinEngine->OnPaint_LCombo(this, &State);
+		LApp::SkinEngine->OnPaint_LCombo(this, &State);
 	}
 	else
 	{

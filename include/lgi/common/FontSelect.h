@@ -22,7 +22,7 @@
 /// \endcode
 class LFontSelect : public LDialog
 {
-	struct GFontSelectPriv *d;
+	struct LFontSelectPriv *d;
 	
 	const char *GetSelectedFace();
 	void InsertFont(const char *Face);

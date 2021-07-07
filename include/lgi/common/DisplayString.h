@@ -218,7 +218,7 @@ public:
 		/// Returns the width and height of the whole string
 		LPoint Size();
 		/// Returns the number of characters that fit in 'x' pixels.
-		ssize_t CharAt(int x, LgiPxToIndexType Type = LgiTruncate);
+		ssize_t CharAt(int x, LPxToIndexType Type = LgiTruncate);
 
 		/// Draws the string onto a device surface
 		void Draw

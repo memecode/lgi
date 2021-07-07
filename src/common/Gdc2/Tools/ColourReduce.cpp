@@ -324,14 +324,14 @@ public:
 			{
 				#define ScanCase24(type) \
 					case Cs##type: \
-						Scan24<G##type>(In, y); \
+						Scan24<L##type>(In, y); \
 						break
 				
 				case CsRgb16:
-					Scan16<GRgb16>(In, y);
+					Scan16<LRgb16>(In, y);
 					break;
 				case CsBgr16:
-					Scan16<GBgr16>(In, y);
+					Scan16<LBgr16>(In, y);
 					break;
 				
 				ScanCase24(Rgb24);

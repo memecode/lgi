@@ -96,7 +96,7 @@ HRESULT GenerateCrashDump(MINIDUMP_TYPE flags, EXCEPTION_POINTERS *seh=NULL)
 }
 */
 
-LONG __stdcall GApp::_ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId)
+LONG __stdcall LApp::_ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId)
 {
 	char *Title = "Application Crash";
 
@@ -116,7 +116,7 @@ LONG __stdcall GApp::_ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId)
 	else
 		sprintf_s(p+len, sizeof(p)-len, "%scrash-dump.dmp", DIR_STR);
 
-	LgiTrace("GApp::_ExceptionFilter, Crash dump path '%s'\n", p);
+	LgiTrace("LApp::_ExceptionFilter, Crash dump path '%s'\n", p);
 	
 	LFile File;
 	if (File.Open(p, O_READWRITE))
@@ -203,7 +203,7 @@ public:
 	}
 };
 
-LONG __stdcall GApp::_ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId)
+LONG __stdcall LApp::_ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId)
 {
 	SetUnhandledExceptionFilter(0); // We can't handle crashes within
 									// ourself, so let the default handler
@@ -219,7 +219,7 @@ LONG __stdcall GApp::_ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId)
 */
 #include "LSymLookup.h"
 
-LONG __stdcall GApp::_ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId)
+LONG __stdcall LApp::_ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId)
 {
 	SetUnhandledExceptionFilter(0); // We can't handle crashes within
 									// ourself, so let the default handler

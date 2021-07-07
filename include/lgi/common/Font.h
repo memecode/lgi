@@ -72,7 +72,7 @@
 #define MAX_UNICODE						0x10FFFF	// maximum unicode char I can handle
 #define _HasUnicodeGlyph(map, u)		( (map[(u)>>3] & (1 << ((u) & 7))) != 0  )
 
-enum LgiPxToIndexType
+enum LPxToIndexType
 {
 	LgiTruncate,
 	LgiNearest
@@ -192,7 +192,7 @@ protected:
 	bool GetOwnerUnderline();
 
 	virtual void _Measure(int &x, int &y, OsChar *Str, int Len);
-	virtual int _CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type);
+	virtual int _CharAt(int x, OsChar *Str, int Len, LPxToIndexType Type);
 	virtual void _Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, LColour &fore);
 
 public:
@@ -377,12 +377,12 @@ public:
 };
 
 /// Returns information about a charset.
-LgiFunc LCharset *LgiGetCsInfo(const char *Cs);
+LgiFunc LCharset *LGetCsInfo(const char *Cs);
 /// Returns the start of an array of supported charsets, terminated by
 /// one with a NULL 'Charset' member. 
-LgiFunc LCharset *LgiGetCsList();
+LgiFunc LCharset *LGetCsList();
 /// Returns the charset that best fits the input data
-LgiFunc const char *LgiDetectCharset
+LgiFunc const char *LDetectCharset
 (
 	/// The input text
 	const char *Utf8,
@@ -396,7 +396,7 @@ LgiFunc const char *LgiDetectCharset
 /// Overall font system class
 class LgiClass LFontSystem : public LCapabilityClient
 {
-	friend class GApp;
+	friend class LApp;
 	friend class LDisplayString;
 
 	static LFontSystem *Me;

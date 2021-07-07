@@ -18,10 +18,10 @@
 #define		IDM_EXIT			15004
 
 // Misc
-// #define		MainWnd				((AppWnd*)GApp::ObjInstance()->AppWnd)
+// #define		MainWnd				((AppWnd*)LApp::ObjInstance()->AppWnd)
 
 /// A base for a document processing application.
-/// The 2 types you can use for OptionsFmt are (ideally) GOptionsFile or (deprecated) ObjProperties.
+/// The 2 types you can use for OptionsFmt are (ideally) LOptionsFile or (deprecated) ObjProperties.
 enum GDocAppInstallMode
 {
 	InstallDesktop,

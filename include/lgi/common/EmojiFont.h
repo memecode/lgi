@@ -14,7 +14,7 @@ class LEmojiFont : public LFont
 	struct LEmojiFontPriv *priv;
 
 	void _Measure(int &x, int &y, OsChar *Str, int Len) override;
-	int _CharAt(int x, OsChar *Str, int Len, LgiPxToIndexType Type) override;
+	int _CharAt(int x, OsChar *Str, int Len, LPxToIndexType Type) override;
 	void _Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, LColour &fore) override;
 
 public:

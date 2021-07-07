@@ -18,7 +18,7 @@ class LKey;
 class LMouse;
 
 // General GUI classes
-class GApp;
+class LApp;
 class LWindow;
 class LWindowsClass;
 class LView;

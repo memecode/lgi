@@ -470,7 +470,7 @@ GFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, LStream *In)
 				Comps.New().Set(CtAlpha, Info.AlphaMask);
 			Comps.Sort(ActualBits == 16 ? DownSort : UpSort);
 
-			GColourSpaceBits Cs;
+			LColourSpaceBits Cs;
 			Cs.All = 0;
 			for (int i=0; i<Comps.Length(); i++)
 			{

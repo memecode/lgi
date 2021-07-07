@@ -277,7 +277,7 @@ public:
 
 int LgiMain(OsAppArguments &AppArgs)
 {
-	GApp a("application/lrstrip", AppArgs);
+	LApp a("application/lrstrip", AppArgs);
 	if (a.IsOk())
 	{
 		App *w;

@@ -4,7 +4,7 @@
 #define DEBUG_OPTS_FILE		0
 
 
-void GOptionsFile::_Init()
+void LOptionsFile::_Init()
 {
 	Dirty = false;
 	LockFile = NULL;
@@ -18,7 +18,7 @@ void GOptionsFile::_Init()
 	}
 }
 
-GOptionsFile::GOptionsFile(const char *FileName) : LMutex("GOptionsFile")
+LOptionsFile::LOptionsFile(const char *FileName) : LMutex("LOptionsFile")
 {
 	_Init();
 
@@ -28,18 +28,18 @@ GOptionsFile::GOptionsFile(const char *FileName) : LMutex("GOptionsFile")
 		SetMode(GuessMode(), FileName);
 }
 
-GOptionsFile::GOptionsFile(PortableType Mode, const char *BaseName) : LMutex("GOptionsFile")
+LOptionsFile::LOptionsFile(PortableType Mode, const char *BaseName) : LMutex("LOptionsFile")
 {
 	_Init();
 
 	SetMode(Mode, BaseName);
 }
 
-GOptionsFile::~GOptionsFile()
+LOptionsFile::~LOptionsFile()
 {
 }
 
-GOptionsFile::PortableType GOptionsFile::GuessMode()
+LOptionsFile::PortableType LOptionsFile::GuessMode()
 {
 	auto a = LGetExeFile().SplitDelimit(DIR_STR);
 	if (a.Length() == 0)
@@ -58,7 +58,7 @@ GOptionsFile::PortableType GOptionsFile::GuessMode()
 	return PortableMode;
 }		
 
-bool GOptionsFile::SetMode(PortableType mode, const char *BaseName)
+bool LOptionsFile::SetMode(PortableType mode, const char *BaseName)
 {
 	char FullPath[MAX_PATH];
 
@@ -81,7 +81,7 @@ bool GOptionsFile::SetMode(PortableType mode, const char *BaseName)
 	return true;
 }
 
-bool GOptionsFile::_OnAccess(bool Start)
+bool LOptionsFile::_OnAccess(bool Start)
 {
 	if (Start)
 	{
@@ -92,7 +92,7 @@ bool GOptionsFile::_OnAccess(bool Start)
 	return true;
 }
 
-bool GOptionsFile::IsValid()
+bool LOptionsFile::IsValid()
 {
 	bool Status = false;
 
@@ -110,13 +110,13 @@ bool GOptionsFile::IsValid()
 	return Status;
 }
 
-void GOptionsFile::SetFile(const char *f)
+void LOptionsFile::SetFile(const char *f)
 {
 	File = f;
 	Dirty = true;
 }
 
-bool GOptionsFile::SerializeFile(bool Write)
+bool LOptionsFile::SerializeFile(bool Write)
 {
 	bool Status = false;
 
@@ -135,7 +135,7 @@ bool GOptionsFile::SerializeFile(bool Write)
 		)
 		{
 			#if DEBUG_OPTS_FILE
-			LgiTrace("%s:%i - GOptionsFile::Serialize(%i) File='%s'\n", 
+			LgiTrace("%s:%i - LOptionsFile::Serialize(%i) File='%s'\n", 
 				_FL, Write, File.Get());
 			#endif
 			
@@ -166,7 +166,7 @@ bool GOptionsFile::SerializeFile(bool Write)
 	return Status;
 }
 
-bool GOptionsFile::DeleteValue(const char *Name)
+bool LOptionsFile::DeleteValue(const char *Name)
 {
 	bool Status = false;
 
@@ -180,7 +180,7 @@ bool GOptionsFile::DeleteValue(const char *Name)
 	return Status;
 }
 
-bool GOptionsFile::CreateTag(const char *Name)
+bool LOptionsFile::CreateTag(const char *Name)
 {
 	LXmlTag *Status = 0;
 
@@ -193,7 +193,7 @@ bool GOptionsFile::CreateTag(const char *Name)
 	return Status != 0;
 }
 
-bool GOptionsFile::DeleteTag(const char *Name)
+bool LOptionsFile::DeleteTag(const char *Name)
 {
 	bool Status = false;
 
@@ -211,7 +211,7 @@ bool GOptionsFile::DeleteTag(const char *Name)
 	return Status;
 }
 
-LXmlTag *GOptionsFile::LockTag(const char *Name, const char *File, int Line)
+LXmlTag *LOptionsFile::LockTag(const char *Name, const char *File, int Line)
 {
 	LXmlTag *t = 0;
 

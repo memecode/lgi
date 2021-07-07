@@ -615,7 +615,7 @@ void FontSz()
 
 int LgiMain(OsAppArguments &AppArgs)
 {
-	GApp a(AppArgs, "HtmlTestSuite");
+	LApp a(AppArgs, "HtmlTestSuite");
 	if (a.IsOk())
 	{
 		//FontSz();

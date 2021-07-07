@@ -140,7 +140,7 @@ public:
 
 int LgiMain(OsAppArguments &AppArgs)
 {
-    GApp a("application/x-gtk-test", AppArgs);
+    LApp a("application/x-gtk-test", AppArgs);
     if (a.IsOk())
     {
         // a.SkinEngine = CreateSkinEngine(&a);

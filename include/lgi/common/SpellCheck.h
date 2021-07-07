@@ -48,7 +48,7 @@ public:
 
 	struct Params
 	{
-		GOptionsFile::PortableType IsPortable;
+		LOptionsFile::PortableType IsPortable;
 		LString OptionsPath;
 		LString Lang, Dict;
 		LCapabilityTarget *CapTarget;

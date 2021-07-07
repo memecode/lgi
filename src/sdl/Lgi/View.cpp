@@ -21,7 +21,7 @@
 #include "LCss.h"
 
 /// This hash contains all the LView* that exist.
-/// It's used by GApp::OnSDLEvent to
+/// It's used by LApp::OnSDLEvent to
 /// check the validity of a LView pointer passed via
 /// an asynchronous message.
 LHashTbl<PtrKey<LView*>,bool> ViewMap(256);

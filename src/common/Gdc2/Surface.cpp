@@ -197,7 +197,7 @@ bool LSurface::SetConstantAlpha(uint8_t Alpha)
 			switch (pMem->Cs)
 			{
 				#define SetAlphaCase(px) \
-					case Cs##px: SetAlphaPm((G##px*)src, pMem->x, Alpha); break
+					case Cs##px: SetAlphaPm((L##px*)src, pMem->x, Alpha); break
 				SetAlphaCase(Rgba32);
 				SetAlphaCase(Bgra32);
 				SetAlphaCase(Argb32);
@@ -213,7 +213,7 @@ bool LSurface::SetConstantAlpha(uint8_t Alpha)
 			switch (pMem->Cs)
 			{
 				#define SetAlphaCase(px) \
-					case Cs##px: SetAlphaNpm((G##px*)src, pMem->x, Alpha); break
+					case Cs##px: SetAlphaNpm((L##px*)src, pMem->x, Alpha); break
 				SetAlphaCase(Rgba32);
 				SetAlphaCase(Bgra32);
 				SetAlphaCase(Argb32);
@@ -1986,7 +1986,7 @@ bool LSurface::ConvertPreMulAlpha(bool ToPreMul)
 			switch (pMem->Cs)
 			{
 				#define ToPreMulCase(px) \
-					case Cs##px: ConvertToPreMul((G##px*)src, pMem->x); break
+					case Cs##px: ConvertToPreMul((L##px*)src, pMem->x); break
 				ToPreMulCase(Rgba32);
 				ToPreMulCase(Bgra32);
 				ToPreMulCase(Argb32);
@@ -2001,7 +2001,7 @@ bool LSurface::ConvertPreMulAlpha(bool ToPreMul)
 			switch (pMem->Cs)
 			{
 				#define FromPreMulCase(px) \
-					case Cs##px: ConvertFromPreMul((G##px*)src, pMem->x); break
+					case Cs##px: ConvertFromPreMul((L##px*)src, pMem->x); break
 				FromPreMulCase(Rgba32);
 				FromPreMulCase(Bgra32);
 				FromPreMulCase(Argb32);
@@ -2052,7 +2052,7 @@ bool LSurface::MakeOpaque()
 		switch (pMem->Cs)
 		{
 			#define OpaqueCase(px, sz) \
-				case Cs##px: MakeOpaqueRop##sz((G##px*)src, pMem->x); break
+				case Cs##px: MakeOpaqueRop##sz((L##px*)src, pMem->x); break
 			OpaqueCase(Rgba32, 32);
 			OpaqueCase(Bgra32, 32);
 			OpaqueCase(Argb32, 32);

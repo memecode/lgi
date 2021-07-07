@@ -5,7 +5,7 @@
 #include "lgi/common/XmlTree.h"
 #include "lgi/common/Mutex.h"
 
-class LgiClass GOptionsFile : public LXmlTag, public LMutex
+class LgiClass LOptionsFile : public LXmlTag, public LMutex
 {
 public:
 	enum PortableType
@@ -43,9 +43,9 @@ protected:
 	virtual void _Defaults() {}
 
 public:
-	GOptionsFile(const char *FileName = 0);
-	GOptionsFile(PortableType mode, const char *BaseName = 0);
-	~GOptionsFile();
+	LOptionsFile(const char *FileName = 0);
+	LOptionsFile(PortableType mode, const char *BaseName = 0);
+	~LOptionsFile();
 
 	void SetFile(const char *f);
 	PortableType GuessMode();

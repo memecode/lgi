@@ -319,7 +319,7 @@ public:
 			switch (Src->Cs)
 			{
 				#define AlphaCase(name) \
-					case Cs##name: return AlphaBlt<G##name>(Src, SrcAlpha);
+					case Cs##name: return AlphaBlt<L##name>(Src, SrcAlpha);
 
 				AlphaCase(Rgb24);
 				AlphaCase(Bgr24);
@@ -368,7 +368,7 @@ LApplicator *GApp24::Create(LColourSpace Cs, int Op)
 		{
 			#define Case24(name) \
 				case Cs##name: \
-					return new App24<G##name, Cs##name>();
+					return new App24<L##name, Cs##name>();
 			
 			Case24(Rgb24);
 			Case24(Bgr24);

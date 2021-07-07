@@ -101,23 +101,23 @@ public:
 
 	///////////////////////////////////////////////////////////////////////////
 	// Xml Options
-	const char *GetExtension(GOptionsFile *p)
+	const char *GetExtension(LOptionsFile *p)
 	{
 		return "xml";
 	}
 
-	bool SetOpt(GOptionsFile *p, const char *opt, char *str)
+	bool SetOpt(LOptionsFile *p, const char *opt, char *str)
 	{
 		LVariant v = str;
 		return p ? p->SetValue(opt, v) : false;
 	}
 
-	bool GetOpt(GOptionsFile *p, const char *opt, LVariant &v)
+	bool GetOpt(LOptionsFile *p, const char *opt, LVariant &v)
 	{
 		return p ? p->GetValue(opt, v) : false;
 	}
 
-	bool SerializeOpts(GOptionsFile *p, bool Write)
+	bool SerializeOpts(LOptionsFile *p, bool Write)
 	{
 		if (!p) return false;
 
@@ -293,7 +293,7 @@ bool GDocApp<OptionsFmt>::_DoSerialize(bool Write)
 		if (LFileExists(d->OptionsFile))
 			Options = new OptionsFmt(d->OptionsFile);
 		else
-			Options = new OptionsFmt(GOptionsFile::PortableMode, d->OptionsParam);
+			Options = new OptionsFmt(LOptionsFile::PortableMode, d->OptionsParam);
 	}
 
 	if (Write)
@@ -304,7 +304,7 @@ bool GDocApp<OptionsFmt>::_DoSerialize(bool Write)
 		// save misc options
 		SerializeOptions(Options, true);
 
-		GOptionsFile *Of = dynamic_cast<GOptionsFile*>(Options);
+		LOptionsFile *Of = dynamic_cast<LOptionsFile*>(Options);
 		if (Of) Of->CreateTag("Mru");
 		GMru::Serialize(Options, "Mru", true);
 	}
@@ -668,7 +668,7 @@ GMessage::Result GDocApp<OptionsFmt>::OnEvent(GMessage *m)
 	return LWindow::OnEvent(m);
 }
 
-template class GDocApp<GOptionsFile>;
+template class GDocApp<LOptionsFile>;
 #ifdef __PROP_H
 template class GDocApp<ObjProperties>;
 #endif

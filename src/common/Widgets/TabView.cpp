@@ -1009,13 +1009,13 @@ void LTabView::OnPaint(LSurface *pDC)
 	}
 	else if (d->Style == TvWinXp)
 	{
-		if (GApp::SkinEngine &&
-			TestFlag(GApp::SkinEngine->GetFeatures(), GSKIN_TABVIEW))
+		if (LApp::SkinEngine &&
+			TestFlag(LApp::SkinEngine->GetFeatures(), GSKIN_TABVIEW))
 		{
 			LSkinState State;
 			State.pScreen = pDC;
 			State.MouseOver = false;
-			GApp::SkinEngine->OnPaint_LTabView(this, &State);
+			LApp::SkinEngine->OnPaint_LTabView(this, &State);
 		}
 		else
 		{

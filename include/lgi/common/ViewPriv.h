@@ -95,7 +95,7 @@ enum GViewFontType
 	GV_FontPtr,
 	/// The LView owns the font object, and must free it.
 	GV_FontOwned,
-	/// The GApp's font cache owns the object. In this case,
+	/// The LApp's font cache owns the object. In this case,
 	/// calling GetCssStyle on the LView will invalidate the
 	/// font ptr causing it to be re-calculated.
 	GV_FontCached,

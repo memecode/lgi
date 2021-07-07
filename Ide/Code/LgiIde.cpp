@@ -1016,7 +1016,7 @@ class AppWndPrivate
 public:
 	AppWnd *App;
 	GMdiParent *Mdi;
-	GOptionsFile Options;
+	LOptionsFile Options;
 	LBox *HBox, *VBox;
 	List<IdeDoc> Docs;
 	List<IdeProject> Projects;
@@ -1070,7 +1070,7 @@ public:
 
 	// Object
 	AppWndPrivate(AppWnd *a) :
-		Options(GOptionsFile::DesktopMode, AppName),
+		Options(LOptionsFile::DesktopMode, AppName),
 		AppHnd(GEventSinkMap::Dispatch.AddSink(a))
 	{
 		FindSym.Reset(new FindSymbolSystem(AppHnd));
@@ -2861,7 +2861,7 @@ bool AppWnd::OnNode(const char *Path, ProjectNode *Node, FindSymbolSystem::SymAc
 	return true;
 }
 
-GOptionsFile *AppWnd::GetOptions()
+LOptionsFile *AppWnd::GetOptions()
 {
 	return &d->Options;
 }
@@ -4239,7 +4239,7 @@ public:
 int LgiMain(OsAppArguments &AppArgs)
 {
 	printf("LgiIde v%s\n", APP_VER);
-	GApp a(AppArgs, "LgiIde");
+	LApp a(AppArgs, "LgiIde");
 	if (a.IsOk())
 	{
 		// new SocketTest();

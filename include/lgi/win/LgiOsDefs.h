@@ -119,7 +119,7 @@ public:
 
 //////////////////////////////////////////////////////////////////
 // Defines
-#define IsWin9x							(GApp::Win9x)
+#define IsWin9x							(LApp::Win9x)
 #define DefaultOsView(t)				NULL
 
 #define GWL_LGI_MAGIC					8
@@ -192,7 +192,7 @@ typedef CRITICAL_SECTION				OsSemaphore;
 typedef SOCKET							OsSocket;
 
 // Run the message loop to process any pending messages
-#define LgiYield()						GApp::ObjInstance()->Run(false)
+#define LgiYield()						LApp::ObjInstance()->Run(false)
 
 #define LGI_GViewMagic					0x14412662
 #define LGI_FileDropFormat				"CF_HDROP"

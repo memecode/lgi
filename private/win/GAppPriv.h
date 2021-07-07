@@ -8,7 +8,7 @@ class GAppPrivate
 {
 public:
 	// Common
-	GApp *Owner;
+	LApp *Owner;
 	LAutoPtr<LJson> Config;
 	LFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
@@ -24,10 +24,10 @@ public:
 
 	// Win32
 	bool QuitReceived;
-	GApp::ClassContainer Classes;
+	LApp::ClassContainer Classes;
 	LSymLookup *SymLookup;
 
-	GAppPrivate(GApp *owner) : Owner(owner)
+	GAppPrivate(LApp *owner) : Owner(owner)
 	{
 		LinuxWine = -1;
 		SymLookup = 0;

@@ -9,7 +9,7 @@ typedef LArray<LAppInfo*> AppArray;
 class GAppPrivate
 {
 public:
-	GApp *Owner;
+	LApp *Owner;
 	OsApp NsApp;
 	int RunDepth;
 
@@ -30,7 +30,7 @@ public:
 	/// Any fonts needed for styling the elements
 	LAutoPtr<GFontCache> FontCache;
 	
-	GAppPrivate(GApp *owner) : Owner(owner)
+	GAppPrivate(LApp *owner) : Owner(owner)
 	{
 		NsApp = NULL;
 		RunDepth = 0;

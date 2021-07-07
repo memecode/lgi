@@ -1023,7 +1023,7 @@ void LDisplayString::TruncateWithDots(int Width)
 	#endif
 }
 
-ssize_t LDisplayString::CharAt(int Px, LgiPxToIndexType Type)
+ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 {
 	int Status = -1;
 
@@ -1330,7 +1330,7 @@ bool CompositeText8Alpha(LSurface *Out, LSurface *In, LFont *Font, int px, int p
 	// Create colour map of the foreground/background colours		
 	uint8_t *Div255 = Div255Lut;
 	LColour fore = Font->Fore();
-	GRgb24 fore_px;
+	LRgb24 fore_px;
 	fore_px.r = fore.r();
 	fore_px.g = fore.g();
 	fore_px.b = fore.b();
@@ -1347,7 +1347,7 @@ bool CompositeText8Alpha(LSurface *Out, LSurface *In, LFont *Font, int px, int p
 	else
 	{
 		LColour back = Font->Back();
-		GRgb24 back_px;
+		LRgb24 back_px;
 		back_px.r = back.r();
 		back_px.g = back.g();
 		back_px.b = back.b();
@@ -1422,7 +1422,7 @@ bool CompositeText8Alpha(LSurface *Out, LSurface *In, LFont *Font, int px, int p
 template<typename OutPx>
 bool CompositeText8NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int py, GBlitRegions &Clip)
 {
-	GRgba32 map[256];
+	LRgba32 map[256];
 
 	if (!Out || !In || !Font)
 		return false;
@@ -1432,7 +1432,7 @@ bool CompositeText8NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int
 	// Create colour map of the foreground/background colours		
 	uint8_t *DivLut = Div255Lut;
 	LColour fore = Font->Fore();
-	GRgb24 fore_px;
+	LRgb24 fore_px;
 	fore_px.r = fore.r();
 	fore_px.g = fore.g();
 	fore_px.b = fore.b();
@@ -1449,7 +1449,7 @@ bool CompositeText8NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int
 	else
 	{
 		LColour back = Font->Back();
-		GRgb24 back_px;
+		LRgb24 back_px;
 		back_px.r = back.r();
 		back_px.g = back.g();
 		back_px.b = back.b();
@@ -1479,7 +1479,7 @@ bool CompositeText8NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int
 		uint8_t *i = (*In)[y];
 		if (!i) return false;
 		uint8_t *e = i + Clip.DstClip.X();
-		GRgba32 *src;
+		LRgba32 *src;
 
 		LgiAssert((uint8_t*)dst >= StartOfBuffer);
 		
@@ -1544,7 +1544,7 @@ bool CompositeText5NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int
 	// Create colour map of the foreground/background colours		
 	uint8_t *Div255 = Div255Lut;
 	LColour fore = Font->Fore();
-	GRgb24 fore_px;
+	LRgb24 fore_px;
 	fore_px.r = fore.r();
 	fore_px.g = fore.g();
 	fore_px.b = fore.b();
@@ -1560,7 +1560,7 @@ bool CompositeText5NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int
 	else
 	{
 		LColour back = Font->Back();
-		GRgb24 back_px;
+		LRgb24 back_px;
 		back_px.r = back.r();
 		back_px.g = back.g();
 		back_px.b = back.b();
@@ -1612,10 +1612,10 @@ bool CompositeText5NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int
 						#if 0
 						uint8_t oma = 255 - a;
 						src = map + a;
-						GRgb24 d = { G5bitTo8bit(dst->r),
+						LRgb24 d = { G5bitTo8bit(dst->r),
 									 G6bitTo8bit(dst->g),
 									 G5bitTo8bit(dst->b)};
-						GRgb24 s = { G5bitTo8bit(src->r),
+						LRgb24 s = { G5bitTo8bit(src->r),
 									 G6bitTo8bit(src->g),
 									 G5bitTo8bit(src->b)};
 						dst->r = Div255[(oma * d.r) + (a * s.r)] >> 3;

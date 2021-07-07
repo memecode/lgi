@@ -42,7 +42,7 @@
 
 class GelSkin : public LSkinEngine
 {
-	GApp *App;
+	LApp *App;
 	LColour c80;
 	LColour c160;
 	LColour c172;
@@ -482,7 +482,7 @@ class GelSkin : public LSkinEngine
 	}
 
 public:
-	GelSkin(GApp *a)
+	GelSkin(LApp *a)
 	{
 		// printf("Skin @ %i bits\n", GdcD->GetBits());
 		App = a;
@@ -975,7 +975,7 @@ public:
 };
 
 LSkinEngine *
-CreateSkinEngine(class GApp *App)
+CreateSkinEngine(class LApp *App)
 {
 	return new GelSkin(App);
 }
