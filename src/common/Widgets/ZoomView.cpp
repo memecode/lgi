@@ -423,7 +423,7 @@ public:
 		{
 			#define DownCase(type) \
 				case Cs##type: \
-					ScaleDown24((G##type*)out, in, len, Factor); \
+					ScaleDown24((L##type*)out, in, len, Factor); \
 					break;
 			DownCase(Rgb24)
 			DownCase(Bgr24)
@@ -435,7 +435,7 @@ public:
 
 			#define DownCase(type) \
 				case Cs##type: \
-					ScaleDown24To32((G##type*)out, in, len, Factor); \
+					ScaleDown24To32((L##type*)out, in, len, Factor); \
 					break;
 			DownCase(Rgba32)
 			DownCase(Bgra32)
@@ -580,7 +580,7 @@ public:
 					
 				#define ScaleDownCase(type, bits) \
 					case Cs##type: \
-						ScaleDown##bits(Dst->GetColourSpace(), (*Dst)[y], (G##type*) (*Src)[yy] + Sx, Ex - Sx, Factor); \
+						ScaleDown##bits(Dst->GetColourSpace(), (*Dst)[y], (L##type*) (*Src)[yy] + Sx, Ex - Sx, Factor); \
 						break;
 
 				ScaleDownCase(Rgbx32, 24);

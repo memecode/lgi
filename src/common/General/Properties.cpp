@@ -16,7 +16,7 @@
 #include "LgiOsDefs.h"
 #include "lgi/common/File.h"
 #include "lgi/common/Properties.h"
-#include "lgi/common/String.h"
+#include "lgi/common/LgiString.h"
 #include "lgi/common/Variant.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////

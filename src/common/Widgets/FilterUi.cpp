@@ -433,7 +433,7 @@ public:
 						switch (pDC->GetColourSpace())
 						{
 							#define HalveAlphaCase(name) \
-								case Cs##name: HalveAlpha((G##name*)(*pDC)[y], pDC->X()); break
+								case Cs##name: HalveAlpha((L##name*)(*pDC)[y], pDC->X()); break
 							
 							HalveAlphaCase(Rgba32);
 							HalveAlphaCase(Bgra32);
@@ -662,7 +662,7 @@ void LFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 	if (Select() || IsTarget)
 	{
 		LPath p;
-		LSolidBrush b(LColour(L_FOCUS_SEL_BACK));
+		LSolidBrush b(LSysColour(L_FOCUS_SEL_BACK));
 		LRectF PosF(0, 0, Pos->X()-1, Pos->Y());
 		p.RoundRect(PosF, PosF.Y()/2);
 		p.Fill(&Buf, b);
