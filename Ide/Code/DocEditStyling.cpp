@@ -855,7 +855,7 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 	char16 *Text = p.Text.AddressOf();
 	char16 *e = Text + p.Text.Length();
 	auto &Style = p.Styles;
-	LString Ext = LgiGetExtension(p.FileName);
+	LString Ext = LGetExtension(p.FileName);
 	DocType Type = CodeHtml;
 	LTextView3::LStyle *Cur = NULL;
 	#define START_CODE() \
@@ -1139,7 +1139,7 @@ void DocEdit::PourStyle(size_t Start, ssize_t EditSize)
 {
 	if (FileType == SrcUnknown)
 	{
-		char *Ext = LgiGetExtension(Doc->GetFileName());
+		char *Ext = LGetExtension(Doc->GetFileName());
 		if (!Ext)
 			FileType = SrcPlainText;
 		else if (!stricmp(Ext, "c") ||

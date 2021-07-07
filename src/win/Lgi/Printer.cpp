@@ -132,7 +132,7 @@ bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages, 
 	LString OutputFile = dc.GetOutputFileName();
 	if (LFileExists(OutputFile))
 	{
-		LgiBrowseToFile(OutputFile);
+		LBrowseToFile(OutputFile);
 	}
 	
 	return Status;

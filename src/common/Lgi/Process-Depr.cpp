@@ -363,7 +363,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 
 	#ifdef WIN32
 	char _exe[256];
-	if (!LgiGetExtension((char*)Exe))
+	if (!LGetExtension((char*)Exe))
 	{
 		sprintf_s(_exe, sizeof(_exe), "%s.exe", Exe);
 		Exe = _exe;
@@ -383,7 +383,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 			for (auto Path : p)
 			{
 				char s[MAX_PATH];
-				LgiMakePath(s, sizeof(s), Path, Exe);
+				LMakePath(s, sizeof(s), Path, Exe);
 				if (LFileExists(s))
 				{
 					NExe = s;
@@ -493,7 +493,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 					LString u = NExe.GetString();
 					if (u)
 					{
-						LgiTrimDir(u);
+						LTrimDir(u);
 						StartingPath = u;
 					}
 				}
@@ -689,7 +689,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 				GToken Path(getenv("PATH"), ":");
 				for (int i=0; i<Path.Length(); i++)
 				{
-					LgiMakePath(ExeName, sizeof(ExeName), Path[i], Exe);
+					LMakePath(ExeName, sizeof(ExeName), Path[i], Exe);
 					if (LFileExists(ExeName))
 					{
 						Exe = ExeName;

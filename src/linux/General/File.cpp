@@ -309,7 +309,7 @@ const char *GetErrorDesc(int e)
 }
 
 /****************************** Helper Functions **************************/
-char *ReadTextFile(const char *File)
+char *LReadTextFile(const char *File)
 {
 	char *s = 0;
 	LFile f;
@@ -438,7 +438,7 @@ bool LFileExists(const char *FileName, char *CorrectCase)
 	return Status;
 }
 
-bool ResolveShortcut(const char *LinkFile, char *Path, ssize_t Len)
+bool LResolveShortcut(const char *LinkFile, char *Path, ssize_t Len)
 {
 	bool Status = false;
 
@@ -502,7 +502,7 @@ ssize_t SizeofStr(const char *s)
 	return sizeof(ulong) + ((s) ? strlen(s) : 0);
 }
 
-bool LgiGetDriveInfo
+bool LGetDriveInfo
 (
 	char *Path,
 	uint64 *Free,
@@ -517,7 +517,7 @@ bool LgiGetDriveInfo
 		struct stat s;
 		if (lstat(Path, &s) == 0)
 		{
-			// printf("LgiGetDriveInfo dev=%i\n", s.st_dev);
+			// printf("LGetDriveInfo dev=%i\n", s.st_dev);
 		}
 	}
 	
@@ -551,7 +551,7 @@ struct LVolumePriv
 		Init();
 		
 		_Path = path;
-		_Name = LgiGetLeaf(path);
+		_Name = LGetLeaf(path);
 		_Type = VT_FOLDER;
 	}
 
@@ -859,7 +859,7 @@ bool LFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, boo
 			for (int i=0; i<Files.Length(); i++)
 			{
 				const char *f = strrchr(Files[i], DIR_CHAR);
-				LgiMakePath(p, sizeof(p), p, f?f+1:Files[i]);
+				LMakePath(p, sizeof(p), p, f?f+1:Files[i]);
 				if (!Move(Files[i], p))
 				{
 					if (Status)
@@ -1156,7 +1156,7 @@ int LDirectory::First(const char *Name, const char *Pattern)
 			if (d->De)
 			{
 				char s[512];
-				LgiMakePath(s, sizeof(s), d->BasePath, GetName());
+				LMakePath(s, sizeof(s), d->BasePath, GetName());
 				lstat(s, &d->Stat);
 
 				if (d->Ignore())
@@ -1182,7 +1182,7 @@ int LDirectory::Next()
 		if ((d->De = readdir(d->Dir)))
 		{
 			char s[512];
-			LgiMakePath(s, sizeof(s), d->BasePath, GetName());			
+			LMakePath(s, sizeof(s), d->BasePath, GetName());			
 			lstat(s, &d->Stat);
 			if (!d->Ignore())
 			{
@@ -1227,7 +1227,7 @@ bool LDirectory::Path(char *s, int BufLen) const
 		return false;
 	}
 
-	return LgiMakePath(s, BufLen, d->BasePath, GetName());
+	return LMakePath(s, BufLen, d->BasePath, GetName());
 }
 
 int LDirectory::GetType() const

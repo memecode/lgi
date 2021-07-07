@@ -145,7 +145,7 @@ public:
 		
 		if (IsFile)
 		{
-			LAutoString txt(ReadTextFile(u.sPath));
+			LAutoString txt(LReadTextFile(u.sPath));
 			if (txt)
 			{
 				Html->Name(txt);
@@ -253,11 +253,11 @@ public:
 		if (LoadFileName)
 		{
 			char p[MAX_PATH];
-			LgiMakePath(p, sizeof(p), !BaseUri.sPath.IsEmpty() ? BaseUri.sPath : Uri, "..");
-			LgiMakePath(p, sizeof(p), p, LoadFileName);
+			LMakePath(p, sizeof(p), !BaseUri.sPath.IsEmpty() ? BaseUri.sPath : Uri, "..");
+			LMakePath(p, sizeof(p), p, LoadFileName);
 			if (LFileExists(p))
 			{
-				char *Ext = LgiGetExtension(p);
+				char *Ext = LGetExtension(p);
 				if
 				(
 					Ext &&

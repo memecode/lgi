@@ -38,7 +38,7 @@ void LApp::SetConfig(const char *Variable, const char *Value)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
-LJson *GAppPrivate::GetConfig()
+LJson *LAppPrivate::GetConfig()
 {
 	if (!Config)
 	{
@@ -86,7 +86,7 @@ LJson *GAppPrivate::GetConfig()
 	return Config;
 }
 	
-bool GAppPrivate::SaveConfig()
+bool LAppPrivate::SaveConfig()
 {
 	auto Path = Owner->GetConfigPath();
 	if (!Path || !Config)

@@ -607,7 +607,7 @@ public:
 			{
 				const char *s = GetCtrlName(IDC_PATH);
 				if (s)
-					LgiBrowseToFile(s);
+					LBrowseToFile(s);
 				break;
 			}
 			case IDC_SEARCH:
@@ -682,7 +682,7 @@ public:
 							if (Base)
 							{
 								LFile::Path p = Base;
-								Rel = LgiMakeRelativePath(--p, s.Name());
+								Rel = LMakeRelativePath(--p, s.Name());
 							}
 							e->Name(Rel ? Rel : s.Name());
 						}

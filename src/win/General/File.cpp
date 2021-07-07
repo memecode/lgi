@@ -46,7 +46,7 @@ bool LFile::Path::FixCase()
 	return true;
 }
 
-char *ReadTextFile(const char *File)
+char *LReadTextFile(const char *File)
 {
 	char *s = 0;
 	LFile f;
@@ -224,7 +224,7 @@ int _GetLongPathName
 	return Len;
 }
 
-bool ResolveShortcut(const char *LinkFile, char *Path, ssize_t Len) 
+bool LResolveShortcut(const char *LinkFile, char *Path, ssize_t Len) 
 {
 	bool Status = false;
 
@@ -348,7 +348,7 @@ ssize_t SizeofStr(const char *s)
 	return sizeof(uint32_t) + ((s) ? strlen(s) : 0);
 }
 
-bool LgiGetDriveInfo
+bool LGetDriveInfo
 (
 	char *Path,
 	uint64 *Free,
@@ -816,7 +816,7 @@ bool LFileSystem::CreateFolder(const char *PathName, bool CreateParentFoldersIfN
 			LString::Array Parts = LString(PathName + strlen(Base)).SplitDelimit(DIR_STR);
 			for (int i=0; i<Parts.Length(); i++)
 			{
-				LgiMakePath(Base, sizeof(Base), Base, Parts[i]);
+				LMakePath(Base, sizeof(Base), Base, Parts[i]);
 				LAutoWString w(Utf8ToWide(Base));
 				Status = ::CreateDirectoryW(w, NULL) != 0;
 				if (!Status)
@@ -1132,7 +1132,7 @@ bool LDirectory::Path(char *s, int BufLen) const
 
 	if (Name && (BufLen < 0 || Len <= BufLen))
 	{
-		LgiMakePath(s, BufLen, d->BasePath, Name);
+		LMakePath(s, BufLen, d->BasePath, Name);
 		Status = true;
 	}
 	else LgiAssert(!"Not enough output buffer to write path.");
@@ -1238,7 +1238,7 @@ int LDirectory::First(const char *InName, const char *Pattern)
 	wchar_t *FindArg;
 	if (Pattern)
 	{
-		if (!LgiMakePath(Str, sizeof(Str), d->BasePath, Pattern))
+		if (!LMakePath(Str, sizeof(Str), d->BasePath, Pattern))
 			return false;
 		UnicodeCpy(FindArg = wTmp, CountOf(wTmp), Str);
 	}

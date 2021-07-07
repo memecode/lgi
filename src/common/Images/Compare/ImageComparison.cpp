@@ -971,7 +971,7 @@ int ImageCompareDlg::OnNotify(LViewI *Ctrl, int Flags)
 					#if 0
 					char p[MAX_PATH];
 					LgiGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
-					LgiMakePath(p, sizeof(p), p, "../../../../i.Mage/trunk/Win32Debug/image.exe");
+					LMakePath(p, sizeof(p), p, "../../../../i.Mage/trunk/Win32Debug/image.exe");
 					if (FileExists(p))
 					{
 						char args[MAX_PATH];

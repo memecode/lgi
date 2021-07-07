@@ -176,7 +176,7 @@ public:
 		for (int i=0; i<Path.Length(); i++)
 		{
 			char p[256];
-			LgiMakePath(p, sizeof(p), Path[i], "zip");
+			LMakePath(p, sizeof(p), Path[i], "zip");
 			if (FileExists(p))
 			{
 				HasZip = true;

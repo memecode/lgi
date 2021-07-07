@@ -72,7 +72,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread, public LCancel
 			Defs.Length(0);
 			
 			bool Status = false;
-			char *Ext = LgiGetExtension(Path);
+			char *Ext = LGetExtension(Path);
 			if (Ext)
 			{
 				IsSource =	!_stricmp(Ext, "c")
@@ -202,7 +202,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread, public LCancel
 			return false;
 		}
 			
-		LgiAssert(!LgiIsRelativePath(Path));
+		LgiAssert(!LIsRelativePath(Path));
 
 		// Setup the file sym data...
 		f = new FileSyms;

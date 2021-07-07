@@ -133,10 +133,10 @@ public:
 			case M_SEARCH:
 			{
 				LAutoPtr<SearchResults> Sr((SearchResults*)Msg->A());
-				char *leaf1 = LgiGetLeaf(Sr->Path);
+				char *leaf1 = LGetLeaf(Sr->Path);
 				for (unsigned i=0; i<Files.Length(); i++)
 				{
-					char *leaf2 = LgiGetLeaf(Files[i]);
+					char *leaf2 = LGetLeaf(Files[i]);
 					size_t Dist = levenshtein(leaf1, leaf2);
 					if (Dist < 4)
 					{
@@ -215,7 +215,7 @@ public:
 							PostThreadEvent(ExistsHnd, M_CHECK_FILE, (GMessage::Param) Sr);
 							
 							LString Parent = s.Get();
-							LgiTrimDir(Parent);
+							LTrimDir(Parent);
 							Flds.Add(Parent, true);
 						}
 					}

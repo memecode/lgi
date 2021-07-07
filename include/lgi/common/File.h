@@ -6,8 +6,7 @@
 	Copyright (C) 1995-2002, <a href="mailto:fret@memecode.com">Matthew Allen</a>
 */
 
-#ifndef __FILE_H
-#define __FILE_H
+#pragma once
 
 #include <fcntl.h>
 
@@ -680,37 +679,58 @@ public:
 // Functions
 LgiFunc int64 LFileSize(const char *FileName);
 
-/// This function checks for the existance of a file (will return false for a folder).
+/// This function checks for the existence of a file (will return false for a folder).
 LgiFunc bool LFileExists(const char *File, char *CorrectCase = NULL);
 
-/// This function checks for the existance of a directory.
+/// This function checks for the existence of a directory.
 LgiFunc bool LDirExists(const char *Dir, char *CorrectCase = NULL);
 
-LgiFunc bool ResolveShortcut(const char *LinkFile, char *Path, ssize_t Len);
-LgiFunc void WriteStr(LFile &f, const char *s);
-LgiFunc char *ReadStr(LFile &f DeclDebugArgs);
-LgiFunc ssize_t SizeofStr(const char *s);
-LgiFunc char *ReadTextFile(const char *File);
-LgiFunc bool LgiTrimDir(char *Path);
-LgiExtern const char *LgiGetLeaf(const char *Path);
-LgiExtern char *LgiGetLeaf(char *Path);
-LgiFunc bool LgiIsRelativePath(const char *Path);
-LgiClass LAutoString LgiMakeRelativePath(const char *Base, const char *Path);
-LgiFunc bool LgiMakePath(char *Str, int StrBufLen, const char *Dir, const char *File);
-LgiFunc char *LgiGetExtension(const char *File);
-LgiFunc bool LgiIsFileNameExecutable(const char *FileName);
+/// Looks up the target of a link or shortcut file.
+LgiFunc bool LResolveShortcut(const char *LinkFile, char *Path, ssize_t Len);
+
+/// Reads in a text file to a dynamically allocated string
+LgiFunc char *LReadTextFile(const char *File);
+
+/// Trims off a path segment
+LgiFunc bool LTrimDir(char *Path);
+
+/// Gets the file name part of the path
+LgiExtern const char *LGetLeaf(const char *Path);
+
+/// Gets the file name part of the path
+LgiExtern char *LGetLeaf(char *Path);
+
+/// /returns true if the path is relative as opposed to absolute.
+LgiFunc bool LIsRelativePath(const char *Path);
+
+/// Creates a relative path
+LgiClass LAutoString LMakeRelativePath(const char *Base, const char *Path);
+
+/// Appends 'File' to 'Dir' and puts the result in 'Str'. Dir and Str can be the same buffer.
+LgiFunc bool LMakePath(char *Str, int StrBufLen, const char *Dir, const char *File);
+
+/// Gets the file name's extension.
+LgiFunc char *LGetExtension(const char *File);
+
+/// \returns true if 'FileName' is an executable of some kind (looks at file name only).
+LgiFunc bool LIsFileNameExecutable(const char *FileName);
+
+/// \returns true if 'FileName' is an executable of some kind (looks at content).
 LgiFunc bool LgiIsFileExecutable(const char *FileName, LStreamI *f, int64 Start, int64 Len);
 
 /// Get information about the disk that a file resides on.
-LgiFunc bool LgiGetDriveInfo(char *Path, uint64 *Free, uint64 *Size = 0, uint64 *Available = 0);
+LgiFunc bool LGetDriveInfo(char *Path, uint64 *Free, uint64 *Size = 0, uint64 *Available = 0);
 
 /// Shows the file's properties dialog
-LgiFunc void LgiShowFileProperties(OsView Parent, const char *Filename);
+LgiFunc void LShowFileProperties(OsView Parent, const char *Filename);
 
 /// Opens to the file or folder in the OS file browser (Explorer/Finder etc)
-LgiFunc bool LgiBrowseToFile(const char *Filename);
+LgiFunc bool LBrowseToFile(const char *Filename);
 
 /// Returns the physical device a file resides on
 LgiExtern LString LGetPhysicalDevice(const char *Path);
 
-#endif
+LgiFunc [[deprecated]] void WriteStr(LFile &f, const char *s);
+LgiFunc [[deprecated]] char *ReadStr(LFile &f DeclDebugArgs);
+LgiFunc [[deprecated]] ssize_t SizeofStr(const char *s);
+

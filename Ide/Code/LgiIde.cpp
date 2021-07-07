@@ -266,7 +266,7 @@ public:
 		for (int p=0; p<Path.Length(); p++)
 		{
 			char Full[256];
-			LgiMakePath(Full, sizeof(Full), Path[p], e);
+			LMakePath(Full, sizeof(Full), Path[p], e);
 			if (LFileExists(Full))
 			{
 				return NewStr(Full);
@@ -1120,7 +1120,7 @@ public:
 
 	bool FindSource(LAutoString &Full, char *File, char *Context)
 	{
-		if (!LgiIsRelativePath(File))
+		if (!LIsRelativePath(File))
 		{
 			Full.Reset(NewStr(File));
 		}
@@ -1138,10 +1138,10 @@ public:
 			
 			if (ContextPath)
 			{
-				LgiTrimDir(ContextPath);
+				LTrimDir(ContextPath);
 				
 				char p[300];
-				LgiMakePath(p, sizeof(p), ContextPath, File);
+				LMakePath(p, sizeof(p), ContextPath, File);
 				if (LFileExists(p))
 				{
 					Full.Reset(NewStr(p));
@@ -1162,7 +1162,7 @@ public:
 				if (Base)
 				{
 					char Path[MAX_PATH];
-					LgiMakePath(Path, sizeof(Path), Base, File);
+					LMakePath(Path, sizeof(Path), Base, File);
 					if (LFileExists(Path))
 					{
 						Full.Reset(NewStr(Path));
@@ -1529,7 +1529,7 @@ public:
 };
 
 #if 0// def LGI_COCOA
-#define Chk printf("%s:%i - Cnt=%i\n", LgiGetLeaf(__FILE__), __LINE__, (int)WindowHandle().p.retainCount)
+#define Chk printf("%s:%i - Cnt=%i\n", LGetLeaf(__FILE__), __LINE__, (int)WindowHandle().p.retainCount)
 #else
 #define Chk
 #endif
@@ -1769,7 +1769,7 @@ public:
 		InFile = file;
 		DeleteOnExit = true;
 
-		auto Ext = LgiGetExtension(InFile);
+		auto Ext = LGetExtension(InFile);
 		IsLib = Ext && !stricmp(Ext, "lib");
 
 		Run();
@@ -1975,7 +1975,7 @@ void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 	{
 		auto f = Files[i];
 		
-		auto ext = LgiGetExtension(f);
+		auto ext = LGetExtension(f);
 		if (ext && !stricmp(ext, "mem"))
 		{
 			NewMemDumpViewer(this, f);
@@ -1990,7 +1990,7 @@ void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 			;
 		else if
 		(
-			LgiIsFileNameExecutable(f)
+			LIsFileNameExecutable(f)
 			||
 			(ext != NULL && !stricmp(ext, "lib"))
 		)
@@ -2556,7 +2556,7 @@ IdeDoc *AppWnd::FindOpenFile(char *FileName)
 				{
 					char Path[MAX_PATH];
 					if (*f == '.')
-						LgiMakePath(Path, sizeof(Path), Base, f);
+						LMakePath(Path, sizeof(Path), Base, f);
 					else
 						strcpy_s(Path, sizeof(Path), f);
 
@@ -2588,7 +2588,7 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 	}
 	
 	LString FullPath;
-	if (LgiIsRelativePath(File))
+	if (LIsRelativePath(File))
 	{
 		IdeProject *Proj = Src && Src->GetProject() ? Src->GetProject() : RootProject();
 		if (Proj)
@@ -2601,7 +2601,7 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 			{
 				auto ProjPath = Project->GetBasePath();
 				char p[MAX_PATH];
-				LgiMakePath(p, sizeof(p), ProjPath, File);
+				LMakePath(p, sizeof(p), ProjPath, File);
 				LString Path = p;
 				if (Project->CheckExists(Path))
 				{
@@ -2626,7 +2626,7 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 			List<IdeProject>::I Proj = d->Projects.begin();
 			for (IdeProject *p=*Proj; p && !Doc; p=*++Proj)
 			{
-				p->InProject(LgiIsRelativePath(File), File, true, &Doc);				
+				p->InProject(LIsRelativePath(File), File, true, &Doc);				
 			}
 			DoingProjectFind = false;
 
@@ -4135,7 +4135,7 @@ bool AppWnd::GetSystemIncludePaths(::LArray<LString> &Paths)
 		#else
 		char p[MAX_PATH];
 		LGetSystemPath(LSP_USER_DOCUMENTS, p, sizeof(p));
-		LgiMakePath(p, sizeof(p), p, "Visual Studio 2008\\Settings\\CurrentSettings.xml");
+		LMakePath(p, sizeof(p), p, "Visual Studio 2008\\Settings\\CurrentSettings.xml");
 		if (LFileExists(p))
 		{
 			LFile f;

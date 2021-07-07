@@ -152,7 +152,7 @@ public:
 			new IntegerConst;
 			
 			// Load the grammer
-			char *Grammar = ReadTextFile(f);
+			char *Grammar = LReadTextFile(f);
 			DeleteArray(f);
 			if (Grammar)
 			{

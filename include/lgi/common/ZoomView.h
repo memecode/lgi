@@ -9,7 +9,7 @@
 
 class LZoomView;
 
-class GZoomViewCallback
+class LZoomViewCallback
 {
 public:
 	#define DefOption(type, name, default) \
@@ -35,7 +35,7 @@ public:
 /// Zoomable and scrollable bitmap viewer.
 class LZoomView : public LLayout, public ResObject
 {
-    class GZoomViewPriv *d;
+    class LZoomViewPriv *d;
 
 public:
 	struct ViewportInfo
@@ -71,11 +71,11 @@ public:
 	};
 
 	// Notifications
-	LZoomView(GZoomViewCallback *App);
+	LZoomView(LZoomViewCallback *App);
 	~LZoomView();
 
 	// Methods
-	void SetCallback(GZoomViewCallback *cb);
+	void SetCallback(LZoomViewCallback *cb);
 	bool Convert(LPointF &p, int x, int y);
 	ViewportInfo GetViewport();
 	void SetViewport(ViewportInfo i);

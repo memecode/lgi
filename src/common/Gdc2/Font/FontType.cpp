@@ -323,10 +323,10 @@ bool LFontType::GetSystemFont(const char *Which)
 		bool ConfigFontUsed = false;
 		char p[MAX_PATH];
 		LGetSystemPath(LSP_HOME, p, sizeof(p));
-		LgiMakePath(p, sizeof(p), p, ".lgi.conf");
+		LMakePath(p, sizeof(p), p, ".lgi.conf");
 		if (LFileExists(p))
 		{
-			LAutoString a(ReadTextFile(p));
+			LAutoString a(LReadTextFile(p));
 			if (a)
 			{
 				LString s;

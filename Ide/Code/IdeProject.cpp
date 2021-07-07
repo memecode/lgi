@@ -106,7 +106,7 @@ bool FindInPath(LString &Exe)
 	for (unsigned i=0; i<Path.Length(); i++)
 	{
 		char p[MAX_PATH];
-		LgiMakePath(p, sizeof(p), Path[i], Exe);
+		LMakePath(p, sizeof(p), Path[i], Exe);
 		if (LFileExists(p))
 		{
 			Exe = p;
@@ -396,11 +396,11 @@ public:
 			LString Exe = Proj->GetExecutable(Platform);
 			if (Exe)
 			{
-				if (LgiIsRelativePath(Exe))
+				if (LIsRelativePath(Exe))
 					m.Print("Target = %s\n", Exe.Get());
 				else
 				{
-					LAutoString RelExe = LgiMakeRelativePath(Base, Exe);
+					LAutoString RelExe = LMakeRelativePath(Base, Exe);
 					if (Base && RelExe)
 					{
 						m.Print("Target = %s\n", RelExe.Get());
@@ -517,8 +517,8 @@ public:
 					else
 					{
 						LAutoString Rel;
-						if (!LgiIsRelativePath(in))
-							Rel = LgiMakeRelativePath(Base, in);
+						if (!LIsRelativePath(in))
+							Rel = LMakeRelativePath(Base, in);
 
 						LString Final = Rel ? Rel.Get() : in.Get();
 						if (!Proj->CheckExists(Final))
@@ -577,7 +577,7 @@ public:
 						LString DepPath = DepBase.Get();
 						
 						LAutoString Rel;
-						Rel = LgiMakeRelativePath(Base, DepPath);
+						Rel = LMakeRelativePath(Base, DepPath);
 
 						LString Final = Rel ? Rel.Get() : DepPath.Get();
 						Proj->CheckExists(Final);
@@ -632,7 +632,7 @@ public:
 				
 				if (n->GetFileName())
 				{
-					char *e = LgiGetExtension(n->GetFileName());
+					char *e = LGetExtension(n->GetFileName());
 					if (e && stricmp(e, "h") == 0)
 					{
 						LString Fn = n->GetFileName();
@@ -647,7 +647,7 @@ public:
 						char Path[MAX_PATH];
 						strcpy_s(Path, sizeof(Path), Fn);
 
-						LgiTrimDir(Path);
+						LTrimDir(Path);
 					
 						LString Rel;
 						if (!Proj->RelativePath(Rel, Path))
@@ -892,7 +892,7 @@ public:
 								LAutoString dep_base = d->GetBasePath();
 								d->CheckExists(dep_base);
 
-								LAutoString rel_dir = LgiMakeRelativePath(my_base, dep_base);
+								LAutoString rel_dir = LMakeRelativePath(my_base, dep_base);
 								d->CheckExists(rel_dir);
 								
 								char *mk_leaf = strrchr(mk, DIR_CHAR);
@@ -1030,7 +1030,7 @@ public:
 								SrcDeps.DeleteArrays();
 							}
 
-							char *Ext = LgiGetExtension(Src);
+							char *Ext = LGetExtension(Src);
 							const char *Compiler = Src && !stricmp(Ext, "c") ? "CC" : "CPP";
 
 							m.Print("\n"
@@ -1063,15 +1063,15 @@ public:
 						Processed.Add(Path, true);
 						
 						char Full[MAX_PATH], Rel[MAX_PATH];
-						if (LgiIsRelativePath(Path))
+						if (LIsRelativePath(Path))
 						{
-							LgiMakePath(Full, sizeof(Full), Base, Path);
+							LMakePath(Full, sizeof(Full), Base, Path);
 							strcpy_s(Rel, sizeof(Rel), Path);
 						}
 						else
 						{
 							strcpy_s(Full, sizeof(Full), Path);
-							LAutoString a = LgiMakeRelativePath(Base, Path);
+							LAutoString a = LMakeRelativePath(Base, Path);
 							if (a)
 							{
 								strcpy_s(Rel, sizeof(Rel), a);
@@ -1085,7 +1085,7 @@ public:
 							}
 						}
 						
-						LAutoString c8(ReadTextFile(Full));
+						LAutoString c8(LReadTextFile(Full));
 						if (c8)
 						{
 							LArray<char*> Headers;
@@ -1133,9 +1133,9 @@ public:
 					Proj->CheckExists(p);
 					if (p && !strchr(p, '`'))
 					{
-						if (!LgiIsRelativePath(p))
+						if (!LIsRelativePath(p))
 						{
-							LAutoString a = LgiMakeRelativePath(Base, p);
+							LAutoString a = LMakeRelativePath(Base, p);
 							m.Print("\t%s \\\n", a?a.Get():p.Get());
 						}
 						else
@@ -1229,7 +1229,7 @@ DeclGArrayCompare(XmlSort, LXmlTag*, NativeInt)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 bool ReadVsProjFile(LString File, LString &Ver, LString::Array &Configs)
 {
-	const char *Ext = LgiGetExtension(File);
+	const char *Ext = LGetExtension(File);
 	if (!Ext || _stricmp(Ext, "vcxproj"))
 		return false;
 
@@ -1277,7 +1277,7 @@ BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, bool rele
 	if (ValidStr(Cmds))
 		PostBuild = Cmds.SplitDelimit("\r\n");
 
-	auto Ext = LgiGetExtension(Makefile);
+	auto Ext = LGetExtension(Makefile);
 	if (Ext && !_stricmp(Ext, "py"))
 		Compiler = PythonScript;
 	else if (Ext && !_stricmp(Ext, "sln"))
@@ -1393,7 +1393,7 @@ LString BuildThread::FindExe()
 			for (int i=0; i<p.Length(); i++)
 			{
 				char Path[MAX_PATH];
-				LgiMakePath(Path, sizeof(Path), p[i], "python" LGI_EXECUTABLE_EXT);
+				LMakePath(Path, sizeof(Path), p[i], "python" LGI_EXECUTABLE_EXT);
 				if (LFileExists(Path))
 				{
 					// Check version
@@ -1448,7 +1448,7 @@ LString BuildThread::FindExe()
 
 		ProjInfo *First = NULL;
 		LHashTbl<StrKey<char>, ProjInfo*> Projects;
-		const char *Ext = LgiGetExtension(Makefile);
+		const char *Ext = LGetExtension(Makefile);
 		if (Ext && !_stricmp(Ext, "sln"))
 		{
 			LFile f;
@@ -1473,11 +1473,11 @@ LString BuildThread::FindExe()
 							i->Name = p[3].Strip(" \t\"");
 							i->File = p[4].Strip(" \t\'\"");
 							i->Guid = p[5].Strip(" \t\"");
-							if (LgiIsRelativePath(i->File))
+							if (LIsRelativePath(i->File))
 							{
 								char f[MAX_PATH];
-								LgiMakePath(f, sizeof(f), Makefile, "..");
-								LgiMakePath(f, sizeof(f), f, i->File);
+								LMakePath(f, sizeof(f), Makefile, "..");
+								LMakePath(f, sizeof(f), f, i->File);
 								if (LFileExists(f))
 									i->File = f;
 								else
@@ -1621,7 +1621,7 @@ LString BuildThread::FindExe()
 		
 		LString ProgFiles = LGetSystemPath(LSP_USER_APPS, 32);
 		char p[MAX_PATH];
-		if (!LgiMakePath(p, sizeof(p), ProgFiles, "IAR Systems"))
+		if (!LMakePath(p, sizeof(p), ProgFiles, "IAR Systems"))
 			return LString();
 		LDirectory d;
 		double LatestVer = 0.0;
@@ -1641,8 +1641,8 @@ LString BuildThread::FindExe()
 			}
 		}
 		if (Latest &&
-			LgiMakePath(p, sizeof(p), p, Latest) &&
-			LgiMakePath(p, sizeof(p), p, "common\\bin\\IarBuild.exe"))
+			LMakePath(p, sizeof(p), p, Latest) &&
+			LMakePath(p, sizeof(p), p, "common\\bin\\IarBuild.exe"))
 		{
 			if (LFileExists(p))
 				return p;
@@ -1692,7 +1692,7 @@ LString BuildThread::FindExe()
 		for (int i=0; i<p.Length(); i++)
 		{
 			char Exe[MAX_PATH];
-			LgiMakePath
+			LMakePath
 			(
 				Exe,
 				sizeof(Exe),
@@ -2061,10 +2061,10 @@ bool IdeProject::OnNode(const char *Path, ProjectNode *Node, bool Add)
 	}
 
 	char Full[MAX_PATH];
-	if (LgiIsRelativePath(Path))
+	if (LIsRelativePath(Path))
 	{
 		LAutoString Base = GetBasePath();
-		if (LgiMakePath(Full, sizeof(Full), Base, Path))
+		if (LMakePath(Full, sizeof(Full), Base, Path))
 		{
 			Path = Full;
 		}
@@ -2194,12 +2194,12 @@ bool IdeProject::GetExePath(char *Path, int Len)
 	const char *PExe = d->Settings.GetStr(ProjExe);
 	if (PExe)
 	{
-		if (LgiIsRelativePath(PExe))
+		if (LIsRelativePath(PExe))
 		{
 			LAutoString Base = GetBasePath();
 			if (Base)
 			{
-				LgiMakePath(Path, Len, Base, PExe);
+				LMakePath(Path, Len, Base, PExe);
 			}
 			else return false;
 		}
@@ -2219,13 +2219,13 @@ LString IdeProject::GetMakefile(IdePlatform Platform)
 	const char *PMakefile = d->Settings.GetStr(ProjMakefile, NULL, Platform);
 	if (PMakefile)
 	{
-		if (LgiIsRelativePath(PMakefile))
+		if (LIsRelativePath(PMakefile))
 		{
 			LAutoString Base = GetBasePath();
 			if (Base)
 			{
 				char p[MAX_PATH];
-				LgiMakePath(p, sizeof(p), Base, PMakefile);
+				LMakePath(p, sizeof(p), Base, PMakefile);
 				Path = p;
 			}
 		}
@@ -2316,9 +2316,9 @@ public:
 				if (ExePath)
 				{
 					char Path[MAX_PATH];
-					char *ExeLeaf = LgiGetLeaf(Exe);
+					char *ExeLeaf = LGetLeaf(Exe);
 					strcpy_s(Path, sizeof(Path), ExeLeaf ? ExeLeaf : Exe.Get());
-					LgiTrimDir(Path);
+					LTrimDir(Path);
 									
 					char *Term = 0;
 					char *WorkDir = 0;
@@ -2404,7 +2404,7 @@ GDebugContext *IdeProject::Execute(ExeAction Act)
 				int RunAsAdmin = d->Settings.GetInt(ProjDebugAdmin);
 				if (Act == ExeDebug)
 				{
-					if (InitDir && LgiIsRelativePath(InitDir))
+					if (InitDir && LIsRelativePath(InitDir))
 					{
 						LFile::Path p(Base);
 						p += InitDir;
@@ -2632,10 +2632,10 @@ LString IdeProject::GetExecutable(IdePlatform Platform)
 
 	if (Bin)
 	{
-		if (LgiIsRelativePath(Bin) && Base)
+		if (LIsRelativePath(Bin) && Base)
 		{
 			char p[MAX_PATH];
-			if (LgiMakePath(p, sizeof(p), Base, Bin))
+			if (LMakePath(p, sizeof(p), Base, Bin))
 				Bin = p;
 		}
 		
@@ -2684,8 +2684,8 @@ LString IdeProject::GetExecutable(IdePlatform Platform)
 		}
 			
 		char Path[MAX_PATH];
-		LgiMakePath(Path, sizeof(Path), Base, Name);
-		LgiMakePath(Path, sizeof(Path), Path, Bin);
+		LMakePath(Path, sizeof(Path), Base, Name);
+		LMakePath(Path, sizeof(Path), Path, Bin);
 		if (LFileExists(Path))
 			Bin = Path;
 		else
@@ -2721,7 +2721,7 @@ LAutoString IdeProject::GetFullPath()
 	IdeProject *proj = this;
 	while (	proj &&
 			proj->GetFileName() &&
-			LgiIsRelativePath(proj->GetFileName()))
+			LIsRelativePath(proj->GetFileName()))
 	{
 		sections.AddAt(0, proj->GetFileName());
 		proj = proj->GetParentProject();
@@ -2736,12 +2736,12 @@ LAutoString IdeProject::GetFullPath()
 	char p[MAX_PATH];
 	strcpy_s(p, sizeof(p), proj->GetFileName()); // Copy the base path
 	if (sections.Length() > 0)
-		LgiTrimDir(p); // Trim off the filename
+		LTrimDir(p); // Trim off the filename
 	for (int i=0; i<sections.Length(); i++) // For each relative section
 	{
-		LgiMakePath(p, sizeof(p), p, sections[i]); // Append relative path
+		LMakePath(p, sizeof(p), p, sections[i]); // Append relative path
 		if (i < sections.Length() - 1)
-			LgiTrimDir(p); // Trim filename off
+			LTrimDir(p); // Trim filename off
 	}
 	
 	Status.Reset(NewStr(p));
@@ -2751,7 +2751,7 @@ LAutoString IdeProject::GetFullPath()
 LAutoString IdeProject::GetBasePath()
 {
 	auto a = GetFullPath();
-	LgiTrimDir(a);
+	LTrimDir(a);
 	return a;
 }
 
@@ -2797,11 +2797,11 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 	Prof.Add("Init");
 
 	d->UserNodeFlags.Empty();
-	if (LgiIsRelativePath(FileName))
+	if (LIsRelativePath(FileName))
 	{
 		char p[MAX_PATH];
 		getcwd(p, sizeof(p));
-		LgiMakePath(p, sizeof(p), p, FileName);
+		LMakePath(p, sizeof(p), p, FileName);
 		d->FileName = p;
 	}
 	else
@@ -2993,7 +2993,7 @@ template<typename T, typename Fn>
 bool CheckExists(LAutoString Base, T &p, Fn Setter, bool Debug)
 {
 	LFile::Path Full;
-	bool WasRel = LgiIsRelativePath(p);
+	bool WasRel = LIsRelativePath(p);
 	if (WasRel)
 	{
 		Full = Base.Get();
@@ -3040,7 +3040,7 @@ bool CheckExists(LAutoString Base, T &p, Fn Setter, bool Debug)
 			LString Old = p.Get();
 			if (WasRel)
 			{
-				auto r = LgiMakeRelativePath(Base, Full);
+				auto r = LMakeRelativePath(Base, Full);
 				Setter(p, r);
 			}
 			else
@@ -3319,7 +3319,7 @@ bool IdeProject::InProject(bool FuzzyMatch, const char *Path, bool Open, IdeDoc 
 	if (!n && FuzzyMatch)
 	{
 		// No match, do partial matching.
-		const char *Leaf = LgiGetLeaf(Path);
+		const char *Leaf = LGetLeaf(Path);
 		auto PathLen = strlen(Path);
 		auto LeafLen = strlen(Leaf);
 		uint32_t MatchingScore = 0;
@@ -3341,7 +3341,7 @@ bool IdeProject::InProject(bool FuzzyMatch, const char *Path, bool Open, IdeDoc 
 				Score += LeafLen;
 			}
 
-			const char *pLeaf = LgiGetLeaf(Cur.key);
+			const char *pLeaf = LGetLeaf(Cur.key);
 			if (pLeaf && !stricmp(pLeaf, Leaf))
 			{
 				Score |= 0x40000000;
@@ -3389,9 +3389,9 @@ void IdeProject::ImportDsp(const char *File)
 	{
 		char Base[256];
 		strcpy(Base, File);
-		LgiTrimDir(Base);
+		LTrimDir(Base);
 		
-		char *Dsp = ReadTextFile(File);
+		char *Dsp = LReadTextFile(File);
 		if (Dsp)
 		{
 			GToken Lines(Dsp, "\r\n");
@@ -3447,7 +3447,7 @@ void IdeProject::ImportDsp(const char *File)
 						{
 							// Make absolute path
 							char Abs[256];
-							LgiMakePath(Abs, sizeof(Abs), Base, ToUnixPath(Src));
+							LMakePath(Abs, sizeof(Abs), Base, ToUnixPath(Src));
 							
 							// Make relitive path
 							New->SetFileName(Src);
@@ -3556,7 +3556,7 @@ bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool In
 				)
 			)
 			{
-				LgiMakePath(Buf, sizeof(Buf), Base, Path);
+				LMakePath(Buf, sizeof(Buf), Base, Path);
 				Full = Buf;
 			}
 			else
@@ -3593,7 +3593,7 @@ bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool In
 			auto Base = p->GetFullPath();
 			if (Base)
 			{
-				LgiTrimDir(Base);
+				LTrimDir(Base);
 
 				for (unsigned i=0; i<Nodes.Length(); i++)
 				{
@@ -3604,7 +3604,7 @@ bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool In
 						auto f = n->GetFileName();
 						char p[MAX_PATH];
 						if (f &&
-							LgiMakePath(p, sizeof(p), Base, f))
+							LMakePath(p, sizeof(p), Base, f))
 						{
 							char *l = strrchr(p, DIR_CHAR);
 							if (l)
@@ -3714,7 +3714,7 @@ LString IdeProject::GetTargetFile(IdePlatform Platform)
 				char t[MAX_PATH];
 				auto DefExt = PlatformDynamicLibraryExt(Platform);
 				strcpy_s(t, sizeof(t), Target);
-				char *ext = LgiGetExtension(t);
+				char *ext = LGetExtension(t);
 				if (!ext)
 					sprintf(t + strlen(t), ".%s", DefExt);
 				else if (stricmp(ext, DefExt))
@@ -3789,9 +3789,9 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, IdePlatform Platform)
 			
 			char *Src = d->File;
 			char Full[MAX_PATH];
-			if (LgiIsRelativePath(d->File))
+			if (LIsRelativePath(d->File))
 			{
-				LgiMakePath(Full, sizeof(Full), Base, d->File);
+				LMakePath(Full, sizeof(Full), Base, d->File);
 				Src = Full;
 			}
 
@@ -3803,9 +3803,9 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, IdePlatform Platform)
 					// Add include to dependencies...
 					char *File = SrcDeps[n];
 
-					if (LgiIsRelativePath(File))
+					if (LIsRelativePath(File))
 					{
-						LgiMakePath(Full, sizeof(Full), Base, File);
+						LMakePath(Full, sizeof(Full), Base, File);
 						File = Full;
 					}
 
@@ -3841,7 +3841,7 @@ bool IdeProject::GetDependencies(const char *InSourceFile, LArray<LString> &IncP
 		return false;
 	}
 
-	LAutoString c8(ReadTextFile(SourceFile));
+	LAutoString c8(LReadTextFile(SourceFile));
 	if (!c8)
 		return false;
 

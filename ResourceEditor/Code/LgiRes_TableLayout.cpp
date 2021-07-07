@@ -1610,7 +1610,7 @@ public:
 				    }
 				    if (HasTl)
 				    {
-			            LAutoString r = LgiMakeRelativePath(Base, Files[i]);
+			            LAutoString r = LMakeRelativePath(Base, Files[i]);
 			            Tree->Insert(new Lr8Item(Wnd, Res, r));
 				    }
 				}
@@ -1688,7 +1688,7 @@ TableLayoutTest::TableLayoutTest(LViewI *par)
 
 	char e[MAX_PATH];
 	LGetSystemPath(LSP_APP_INSTALL, e, sizeof(e));
-	LgiMakePath(e, sizeof(e), e, "../../..");
+	LMakePath(e, sizeof(e), e, "../../..");
 	Base.Reset(NewStr(e));
 	
 	Worker.Reset(new Lr8Search(this, Base, Tree));

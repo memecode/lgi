@@ -1176,7 +1176,7 @@ COLOUR GdcDevice::GetColour(COLOUR Rgb24, LSurface *pDC)
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 static int _Factories;
-static GApplicatorFactory *_Factory[16];
+static LApplicatorFactory *_Factory[16];
 
 GApp8 Factory8;
 GApp15 Factory15;
@@ -1185,7 +1185,7 @@ GApp24 Factory24;
 GApp32 Factory32;
 GAlphaFactory FactoryAlpha;
 
-GApplicatorFactory::GApplicatorFactory()
+LApplicatorFactory::LApplicatorFactory()
 {
 	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	if (_Factories < CountOf(_Factory) - 1)
@@ -1194,7 +1194,7 @@ GApplicatorFactory::GApplicatorFactory()
 	}
 }
 
-GApplicatorFactory::~GApplicatorFactory()
+LApplicatorFactory::~LApplicatorFactory()
 {
 	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)
@@ -1225,7 +1225,7 @@ public:
 	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha = 0) { return false; }
 };
 
-LApplicator *GApplicatorFactory::NewApp(LColourSpace Cs, int Op)
+LApplicator *LApplicatorFactory::NewApp(LColourSpace Cs, int Op)
 {
 	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)

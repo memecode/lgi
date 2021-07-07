@@ -613,7 +613,7 @@ public:
 			Debugger->OnAddress(Address);
 			
 			LString m;
-			m.Printf("%s (%s:%i)", Msg, LgiGetLeaf(File), Line);
+			m.Printf("%s (%s:%i)", Msg, LGetLeaf(File), Line);
 			Debugger->OnError(m);
 			
 			Debugger->Run();
@@ -732,14 +732,14 @@ public:
 			if (strchr(SourceFileName, DIR_CHAR))
 				strcpy_s(Obj, sizeof(Obj), SourceFileName);
 			else if (TempPath != NULL)
-				LgiMakePath(Obj, sizeof(Obj), TempPath, SourceFileName);
+				LMakePath(Obj, sizeof(Obj), TempPath, SourceFileName);
 			else
 			{
 				LGetSystemPath(LSP_TEMP, Obj, sizeof(Obj));
-				LgiMakePath(Obj, sizeof(Obj), Obj, SourceFileName);
+				LMakePath(Obj, sizeof(Obj), Obj, SourceFileName);
 			}
 
-			char *Ext = LgiGetExtension(Obj);
+			char *Ext = LGetExtension(Obj);
 			if (Ext)
 				strcpy_s(Ext, sizeof(Obj)-(Ext-Obj), "asm");
 			else
@@ -757,7 +757,7 @@ public:
 					DataPath.Reset(NewStr(p));
 			}
 		
-			LgiMakePath(Obj, sizeof(Obj), DataPath, "Script.asm");
+			LMakePath(Obj, sizeof(Obj), DataPath, "Script.asm");
 		}
 		
 		{
@@ -1646,7 +1646,7 @@ LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmDebuggerCallback *Callback, LVi
 		
 		{
 			char p[MAX_PATH];
-			LgiMakePath(p, sizeof(p), LGetExePath(), "../Scripts");
+			LMakePath(p, sizeof(p), LGetExePath(), "../Scripts");
 			LDirectory dir;
 			LListItem *Match = NULL;
 
@@ -1680,7 +1680,7 @@ LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmDebuggerCallback *Callback, LVi
 				LListItem *it = new LListItem;
 				if (it)
 				{
-					it->SetText(LgiGetLeaf(Code->GetFileName()), 0);
+					it->SetText(LGetLeaf(Code->GetFileName()), 0);
 					it->SetText(Code->GetFileName(), 1);
 					d->SourceLst->Insert(it);
 					it->Select(true);

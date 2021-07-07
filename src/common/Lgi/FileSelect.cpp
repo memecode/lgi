@@ -1121,7 +1121,7 @@ void GFileSelectDlg::OnUpFolder()
 		strcpy(Dir, Cur);
 		if (strlen(Dir) > 3)
 		{
-			LgiTrimDir(Dir);
+			LTrimDir(Dir);
 
 			if (!strchr(Dir, DIR_CHAR))
 				strcat(Dir, DIR_STR);
@@ -1401,7 +1401,7 @@ int GFileSelectDlg::OnNotify(LViewI *Ctrl, int Flags)
 					{
 						for (auto i: Sel)
 						{
-							LgiMakePath(f, sizeof(f), Path, i->GetText(0));
+							LMakePath(f, sizeof(f), Path, i->GetText(0));
 							d->Files.Insert(NewStr(f));
 						}
 					}
@@ -1410,7 +1410,7 @@ int GFileSelectDlg::OnNotify(LViewI *Ctrl, int Flags)
 						if (strchr(File, DIR_CHAR))
 							strcpy_s(f, sizeof(f), File);
 						else
-							LgiMakePath(f, sizeof(f), Path, File);
+							LMakePath(f, sizeof(f), Path, File);
 						d->Files.Insert(NewStr(f));
 					}
 				}
@@ -1749,7 +1749,7 @@ void GFolderItem::OnRename()
 
 		char New[256];
 		File[0] = 0;
-		LgiMakePath(New, sizeof(New), Path, Inp.GetStr());
+		LMakePath(New, sizeof(New), Path, Inp.GetStr());
 		
 		if (FileDev->Move(Old, New))
 		{
@@ -1906,7 +1906,7 @@ bool GFolderList::OnKey(LKey &k)
 						if (Cur)
 						{
 							char Path[256];
-							LgiMakePath(Path, sizeof(Path), Cur, Sel->GetText(0));
+							LMakePath(Path, sizeof(Path), Cur, Sel->GetText(0));
 							if (LDirExists(Path))
 							{
 								GetWindow()->SetCtrlName(IDC_PATH, Path);
@@ -2211,7 +2211,7 @@ bool LgiGetUsersLinks(LArray<LString> &Links)
 			{
 				char lnk[MAX_PATH];
 				if (d.Path(lnk, sizeof(lnk)) &&
-					ResolveShortcut(lnk, lnk, sizeof(lnk)))
+					LResolveShortcut(lnk, lnk, sizeof(lnk)))
 				{
 					Links.New() = lnk;
 				}
@@ -2219,7 +2219,7 @@ bool LgiGetUsersLinks(LArray<LString> &Links)
 		}		
 	#elif defined(LINUX)
 		char p[MAX_PATH];
-		if (!LgiMakePath(p, sizeof(p), Folder, "bookmarks"))
+		if (!LMakePath(p, sizeof(p), Folder, "bookmarks"))
 		{
 			LgiTrace("%s:%i - Failed to make path '%s'\n", _FL, Folder.Get());
 			return false;
@@ -2228,7 +2228,7 @@ bool LgiGetUsersLinks(LArray<LString> &Links)
 		if (!LFileExists(p))
 			return false;
 			
-		LAutoString Txt(ReadTextFile(p));
+		LAutoString Txt(LReadTextFile(p));
 		if (!Txt)
 		{
 			LgiTrace("%s:%i - failed to read '%s'\n", _FL, p);

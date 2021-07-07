@@ -1115,7 +1115,7 @@ LSurface *GetHttpImage(char *Uri)
 					do
 					{
 						sprintf_s(r, sizeof(r), "_%x", LRand());
-						LgiMakePath(n, sizeof(n), LGetSystemPath(LSP_TEMP), r);
+						LMakePath(n, sizeof(n), LGetSystemPath(LSP_TEMP), r);
 					}
 					while (LFileExists(n));
 

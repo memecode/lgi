@@ -44,7 +44,7 @@ class WindowsSpellCheck : public LSpellCheck
 		File = File.Replace(".cpp", ".csv");
 		if (!LFileExists(File))
 		{
-			auto f = LFindFile(LgiGetLeaf(File));
+			auto f = LFindFile(LGetLeaf(File));
 			File = f.Get();
 		}
 

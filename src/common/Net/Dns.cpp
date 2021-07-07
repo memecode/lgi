@@ -55,7 +55,7 @@ bool GetDnsServers(LArray<char*> &Servers)
 	
 	#else
 
-	char *s = ReadTextFile("/etc/resolv.conf");
+	char *s = LReadTextFile("/etc/resolv.conf");
 	if (s)
 	{
 		GToken t(s, "\r\n");

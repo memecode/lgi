@@ -257,7 +257,7 @@ int64 Time = LgiCurrentTime();
 DumpTime("start");
 
 	// Private data
-	d = new GAppPrivate(this);
+	d = new LAppPrivate(this);
 	char Mime[256];
 	sprintf_s(Mime, sizeof(Mime), "application/x-%s", AppName);
 	d->Mime.Reset(NewStr(Mime));
@@ -735,15 +735,6 @@ int LApp::GetShow()
 {
 	return IsOk() ? d->Args.nCmdShow : 0;
 }
-
-class GWnd
-{
-public:
-	LMutex *GetLock(LWindow *w)
-	{
-		return w->_Lock;
-	}
-};
 
 bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 {

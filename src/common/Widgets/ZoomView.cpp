@@ -61,7 +61,7 @@ struct ZoomTile : public LMemDC
 
 typedef ZoomTile *SuperTilePtr;
 
-class GZoomViewPriv // : public LThread, public LMutex
+class LZoomViewPriv // : public LThread, public LMutex
 {
 	int Zoom;
 	LAutoPtr<LMemDC> TileCache;
@@ -77,7 +77,7 @@ public:
 	LZoomView *View;
 	
 	/// The callback object...
-	GZoomViewCallback *Callback;
+	LZoomViewCallback *Callback;
 
 	/// This is the zoom factor. However:
 	///     -3 = 1/4 (scale down)
@@ -118,7 +118,7 @@ public:
 		Stopped,
 	} Mode;
 
-	GZoomViewPriv(LZoomView *view, GZoomViewCallback *callback)
+	LZoomViewPriv(LZoomView *view, LZoomViewCallback *callback)
 	{
 		View = view;
 		Callback = callback;
@@ -136,7 +136,7 @@ public:
 		DefaultZoom = LZoomView::ZoomFitBothAxis;
 	}
 	
-	~GZoomViewPriv()
+	~LZoomViewPriv()
 	{
 		if (OwnDC)
 			DeleteObj(pDC);
@@ -1184,9 +1184,9 @@ public:
 	}
 };
 
-LZoomView::LZoomView(GZoomViewCallback *callback) : ResObject(Res_Custom)
+LZoomView::LZoomView(LZoomViewCallback *callback) : ResObject(Res_Custom)
 {
-	d = new GZoomViewPriv(this, callback);
+	d = new LZoomViewPriv(this, callback);
 	// Sunken(true);
 }
 
@@ -1415,7 +1415,7 @@ void LZoomView::SetViewport(ViewportInfo i)
 	}
 }
 
-void LZoomView::SetCallback(GZoomViewCallback *cb)
+void LZoomView::SetCallback(LZoomViewCallback *cb)
 {
 	d->Callback = cb;
 }
@@ -1855,7 +1855,7 @@ void LZoomView::OnPaint(LSurface *pDC)
 	}
 }
 
-class GZoomViewFactory : public LViewFactory
+class LZoomViewFactory : public LViewFactory
 {
 public:
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
@@ -1865,4 +1865,4 @@ public:
 		
 		return NULL;
 	}
-} ZoomViewFactory;
+}	ZoomViewFactory;

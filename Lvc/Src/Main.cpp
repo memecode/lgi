@@ -328,19 +328,19 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 		Path++;
 	#endif
 
-	if (LgiMakePath(p, sizeof(p), Path, ".git") &&
+	if (LMakePath(p, sizeof(p), Path, ".git") &&
 		LDirExists(p))
 		return VcGit;
 
-	if (LgiMakePath(p, sizeof(p), Path, ".svn") &&
+	if (LMakePath(p, sizeof(p), Path, ".svn") &&
 		LDirExists(p))
 		return VcSvn;
 
-	if (LgiMakePath(p, sizeof(p), Path, ".hg") &&
+	if (LMakePath(p, sizeof(p), Path, ".hg") &&
 		LDirExists(p))
 		return VcHg;
 
-	if (LgiMakePath(p, sizeof(p), Path, "CVS") &&
+	if (LMakePath(p, sizeof(p), Path, "CVS") &&
 		LDirExists(p))
 		return VcCvs;
 

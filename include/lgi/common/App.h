@@ -67,7 +67,7 @@ struct GAppArguments
 	}
 };
 
-class GAppPrivate;
+class LAppPrivate;
 
 #if LGI_COCOA && defined __OBJC__
 #include "LCocoaView.h"
@@ -76,10 +76,10 @@ class GAppPrivate;
 {
 }
 
-@property GAppPrivate *d;
+@property LAppPrivate *d;
 
 - (id)init;
-- (void)setPriv:(nonnull GAppPrivate*)priv;
+- (void)setPriv:(nonnull LAppPrivate*)priv;
 - (void)terminate:(nullable id)sender;
 - (void)dealloc;
 - (void)assert:(nonnull LCocoaAssert*)ca;
@@ -109,7 +109,7 @@ public:
 
 protected:
 	// private member vars
-	class GAppPrivate *d;
+	class LAppPrivate *d;
 	
 	#if defined LGI_SDL
 	

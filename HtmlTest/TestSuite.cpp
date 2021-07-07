@@ -74,7 +74,7 @@ public:
             {
                 LClipBoard c(GetList());
                 char Path[MAX_PATH];
-                LgiMakePath(Path, sizeof(Path), Base, GetText(0));
+                LMakePath(Path, sizeof(Path), Base, GetText(0));
                 c.Text(Path);
             }
         }
@@ -269,10 +269,10 @@ class AppWnd : public LWindow, public GDefaultDocumentEnv
 		if (!u.sProtocol)
 		{
 			char p[MAX_PATH];
-			if (LgiMakePath(p, sizeof(p), Base, j->Uri) &&
+			if (LMakePath(p, sizeof(p), Base, j->Uri) &&
 				LFileExists(p))
 			{
-				LString Ext = LgiGetExtension(p);
+				LString Ext = LGetExtension(p);
 				if (Ext.Equals("css") ||
 					Ext.Equals("html"))
 				{
@@ -373,17 +373,17 @@ public:
 				{
 					#if defined(WIN32)
 					if (stristr(Base, "Release") || stristr(Base, "Debug"))
-						LgiTrimDir(Base);
+						LTrimDir(Base);
 					#endif
 					#if defined(MAC) && defined(__GTK_H__)
-					LgiMakePath(Base, sizeof(Base), Base, "../../../..");
+					LMakePath(Base, sizeof(Base), Base, "../../../..");
 					#endif
 
 					List<FileInf> Files;
 					LDirectory *d = new LDirectory;
 					if (d)
 					{
-						LgiMakePath(Base, sizeof(Base), Base, "Files");
+						LMakePath(Base, sizeof(Base), Base, "Files");
 						for (bool b = d->First(Base); b; b = d->Next())
 						{
 							if (!d->IsDir() && MatchStr("*.html", d->GetName()))
@@ -462,10 +462,10 @@ public:
 								"%.4i-%.2i-%.2i_%.2i-%.2i-%.2i",
 								Now.Year(), Now.Month(), Now.Day(),
 								Now.Hours(), Now.Minutes(), Now.Seconds());
-					LgiMakePath(OutPath, sizeof(OutPath), p, "Output");
+					LMakePath(OutPath, sizeof(OutPath), p, "Output");
 					if (!LDirExists(OutPath))
 						FileDev->CreateFolder(OutPath);
-					LgiMakePath(OutPath, sizeof(OutPath), OutPath, NowStr);
+					LMakePath(OutPath, sizeof(OutPath), OutPath, NowStr);
 					if (!LDirExists(OutPath))
 						FileDev->CreateFolder(OutPath);
 					
@@ -474,7 +474,7 @@ public:
 					for (int i=0; i<Files.Length() && !Prog.IsCancelled(); i++)
 					{
 						char *File = Files[i];
-						LAutoString Content(ReadTextFile(File));
+						LAutoString Content(LReadTextFile(File));
 						if (!Content)
 						{
 							LgiAssert(0);
@@ -493,7 +493,7 @@ public:
 						char *Ext = strrchr(Png, '.');
 						if (Ext) *Ext = 0;
 						strcat_s(Png, sizeof(Png), ".png");
-						LgiMakePath(p, sizeof(p), OutPath, Png);
+						LMakePath(p, sizeof(p), OutPath, Png);
 
 						Html1::GHtml Html(100, 0, 0, PageSize.x, PageSize.y, this);
 						Html.Name(Content);
@@ -521,7 +521,7 @@ public:
 				// if (LRecursiveFileSearch(p, &Ext, &Files))
 
 				char OutPath[MAX_PATH];
-				LgiMakePath(OutPath, sizeof(OutPath), p, "Output");
+				LMakePath(OutPath, sizeof(OutPath), p, "Output");
 				if (!LDirExists(OutPath))
 				{
 					LgiMsg(this, "No output render folder.", "Html Test Suite");
@@ -549,10 +549,10 @@ public:
 					{
 						char p[256];
 
-						LgiMakePath(p, sizeof(p), Base, s->GetText(0));
+						LMakePath(p, sizeof(p), Base, s->GetText(0));
 						if (LFileExists(p))
 						{
-							char *h = ReadTextFile(p);
+							char *h = LReadTextFile(p);
 							if (h)
 							{
 								if (Html)

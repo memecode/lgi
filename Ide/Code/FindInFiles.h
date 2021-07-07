@@ -28,7 +28,7 @@ public:
 		Ext = "*.c* *.h *.java";
 
 		char Exe[MAX_PATH];
-		LgiMakePath(Exe, sizeof(Exe), LGetExePath(), "..");
+		LMakePath(Exe, sizeof(Exe), LGetExePath(), "..");
 		Dir = Exe;
 		
 		MatchWord = false;

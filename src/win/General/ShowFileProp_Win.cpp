@@ -1,7 +1,7 @@
 #include <tchar.h>
 #include "lgi/common/Lgi.h"
 
-void LgiShowFileProperties(OsView Parent, const char *Filename)
+void LShowFileProperties(OsView Parent, const char *Filename)
 {
 	SHELLEXECUTEINFO info;
 	ZeroObj(info);
@@ -24,7 +24,7 @@ void LgiShowFileProperties(OsView Parent, const char *Filename)
 	ShellExecuteEx(&info);
 }
 
-bool LgiBrowseToFile(const char *Filename)
+bool LBrowseToFile(const char *Filename)
 {
 	char Args[MAX_PATH];
 	sprintf_s(Args, sizeof(Args), "/e,/select,\"%s\"", Filename);

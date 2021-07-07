@@ -486,7 +486,7 @@ bool LgiTraceGetFilePath(char *LogPath, int BufLen)
 		{
 			char Part[256];
 			strcpy_s(Part, sizeof(Part), Dir+1);
-			LgiMakePath(LogPath, BufLen, "~/Library/Logs", Dir+1);
+			LMakePath(LogPath, BufLen, "~/Library/Logs", Dir+1);
 			strcat_s(LogPath, BufLen, ".txt");
 		}
 		else
@@ -514,7 +514,7 @@ bool LgiTraceGetFilePath(char *LogPath, int BufLen)
 				LGetSystemPath(LSP_APP_ROOT, LogPath, BufLen);
 				if (!LDirExists(LogPath))
 					FileDev->CreateFolder(LogPath);
-				LgiMakePath(LogPath, BufLen, LogPath, Leaf);
+				LMakePath(LogPath, BufLen, LogPath, Leaf);
 			}
 			else goto OnError;
 		}
@@ -666,7 +666,7 @@ void LgiStackTrace(const char *Msg, ...)
 }
 #endif
 
-bool LgiTrimDir(char *Path)
+bool LTrimDir(char *Path)
 {
 	if (!Path)
 		return false;
@@ -686,7 +686,7 @@ bool LgiTrimDir(char *Path)
 	return true;
 }
 
-LAutoString LgiMakeRelativePath(const char *Base, const char *Path)
+LAutoString LMakeRelativePath(const char *Base, const char *Path)
 {
 	LStringPipe Status;
 
@@ -730,7 +730,7 @@ LAutoString LgiMakeRelativePath(const char *Base, const char *Path)
 	return LAutoString(Status.NewStr());
 }
 
-bool LgiIsRelativePath(const char *Path)
+bool LIsRelativePath(const char *Path)
 {
 	if (!Path)
 		return false;
@@ -752,7 +752,7 @@ bool LgiIsRelativePath(const char *Path)
 	return true; // Correct or not???
 }
 
-bool LgiMakePath(char *Str, int StrSize, const char *Path, const char *File)
+bool LMakePath(char *Str, int StrSize, const char *Path, const char *File)
 {
 	LgiAssert(Str != 0 &&
 			  StrSize > 0 &&
@@ -804,7 +804,7 @@ bool LgiMakePath(char *Str, int StrSize, const char *Path, const char *File)
 			if (!stricmp(T[i], "."))
 				;
 			else if (!stricmp(T[i], ".."))
-				LgiTrimDir(Str);
+				LTrimDir(Str);
 			else if (!stricmp(T[i], "~"))
 				LGetSystemPath(LSP_HOME, Str, StrSize);
 			else
@@ -1068,7 +1068,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 					if (MyDoc)
 					{
 						char Buf[MAX_PATH];
-						LgiMakePath(Buf, sizeof(Buf), MyDoc, "Downloads");
+						LMakePath(Buf, sizeof(Buf), MyDoc, "Downloads");
 						if (LDirExists(Buf))
 							Path = Buf;
 					}
@@ -1080,7 +1080,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 					if (Profile)
 					{
 						char Buf[MAX_PATH];
-						LgiMakePath(Buf, sizeof(Buf), Profile, "Downloads");
+						LMakePath(Buf, sizeof(Buf), Profile, "Downloads");
 						if (LDirExists(Buf))
 							Path = Buf;
 					}
@@ -1109,13 +1109,13 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 			#if defined(WIN32)
 
 				char p[MAX_PATH];
-				if (LgiMakePath(p, sizeof(p), Home, "Links"))
+				if (LMakePath(p, sizeof(p), Home, "Links"))
 					Path = p;
 
 			#elif defined(LINUX)
 
 				char p[MAX_PATH];
-				if (LgiMakePath(p, sizeof(p), Home, ".config/gtk-3.0"))
+				if (LMakePath(p, sizeof(p), Home, ".config/gtk-3.0"))
 					Path = p;
 			
 			#endif
@@ -1148,7 +1148,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 			// Default to ~/Pictures
 			char hm[MAX_PATH];
 			LString Home = LGetSystemPath(LSP_HOME);
-			if (LgiMakePath(hm, sizeof(hm), Home, "Pictures"))
+			if (LMakePath(hm, sizeof(hm), Home, "Pictures"))
 				Path = hm;
 			break;
 		}
@@ -1179,7 +1179,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 			// Default to ~/Documents
 			char hm[MAX_PATH];
 			LString Home = LGetSystemPath(LSP_HOME);
-			if (LgiMakePath(hm, sizeof(hm), Home, "Documents"))
+			if (LMakePath(hm, sizeof(hm), Home, "Documents"))
 				Path = hm;
 			break;
 		}
@@ -1222,7 +1222,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				// Default to ~/Music
 				char p[MAX_PATH];
 				LString Home = LGetSystemPath(LSP_HOME);
-				if (LgiMakePath(p, sizeof(p), Home, "Music"))
+				if (LMakePath(p, sizeof(p), Home, "Music"))
 					Path = p;
 			}
 			break;
@@ -1266,7 +1266,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				// Default to ~/Video
 				char p[MAX_PATH];
 				LString Home = LGetSystemPath(LSP_HOME);
-				if (LgiMakePath(p, sizeof(p), Home, "Video"))
+				if (LMakePath(p, sizeof(p), Home, "Video"))
 					Path = p;
 			}
 			break;
@@ -1351,7 +1351,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 			{
 				// Use the exe name?
 				LString Exe = LGetExeFile();
-				char *l = LgiGetLeaf(Exe);
+				char *l = LGetLeaf(Exe);
 				if (l)
 				{
 					#ifdef WIN32
@@ -1456,7 +1456,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				if (paths)
 				{
 					Path = [paths objectAtIndex:0];
-					LgiTrimDir(Path);
+					LTrimDir(Path);
 				}
 
 			#elif defined LINUX
@@ -1777,7 +1777,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 						}
 						
 						char p[MAX_PATH];
-						if (!LgiMakePath(p, sizeof(p), Home, ".local/share/Trash/files") ||
+						if (!LMakePath(p, sizeof(p), Home, ".local/share/Trash/files") ||
 							!LDirExists(p))
 						{
 							LgiTrace("%s:%i - '%s' doesn't exist.\n", _FL, p);
@@ -1952,7 +1952,7 @@ LString LGetExeFile()
 		char Dest[MAX_PATH];
 		if (LFileExists(LgiArgsAppPath))
 		{
-			LgiMakePath(Dest, sizeof(Dest), LgiArgsAppPath, "../../..");
+			LMakePath(Dest, sizeof(Dest), LgiArgsAppPath, "../../..");
 			return Dest;
 		}
 		else printf("%s:%i - No executable path.", _FL);
@@ -1990,7 +1990,7 @@ LString LGetExePath()
 	return LGetSystemPath(LSP_EXE);
 }
 
-char *LgiGetExtension(const char *File)
+char *LGetExtension(const char *File)
 {
 	if (File)
 	{
@@ -2058,14 +2058,14 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 	for (const char **Pref = PrefPath; *Pref; Pref++)
 	{
 		char Path[MAX_PATH];
-		if (LgiIsRelativePath(*Pref))
+		if (LIsRelativePath(*Pref))
 		{
-			LgiMakePath(Path, sizeof(Path), Exe, *Pref);
-			LgiMakePath(Path, sizeof(Path), Path, Name);
+			LMakePath(Path, sizeof(Path), Exe, *Pref);
+			LMakePath(Path, sizeof(Path), Path, Name);
 		}
 		else
 		{
-			LgiMakePath(Path, sizeof(Path), *Pref, Name);
+			LMakePath(Path, sizeof(Path), *Pref, Name);
 		}
 		size_t PathLen = strlen(Path);
 		LgiAssert(PathLen < sizeof(Path));
@@ -2084,7 +2084,7 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 		if (PathLen < sizeof(Path) - 4)
 		{
 			strcat(Path, ".lnk");
-			if (ResolveShortcut(Path, Path, sizeof(Path)))
+			if (LResolveShortcut(Path, Path, sizeof(Path)))
 			{
 				if (GStr)
 					*GStr = Path;

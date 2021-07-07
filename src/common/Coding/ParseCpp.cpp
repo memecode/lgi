@@ -335,7 +335,7 @@ struct GSourceFile
 		if (!Path.Reset(NewStr(path)))
 			return false;
 		
-		LAutoString f(ReadTextFile(Path));
+		LAutoString f(LReadTextFile(Path));
 		if (!f)
 			return false;
 
@@ -437,8 +437,8 @@ struct GSourceFile
 		LFile f;
 		char *Leaf = strrchr(Path, DIR_CHAR);
 		char Out[MAX_PATH];
-		LgiMakePath(Out, sizeof(Out), "c:\\temp", Leaf + 1);
-		char *Ext = LgiGetExtension(Out);
+		LMakePath(Out, sizeof(Out), "c:\\temp", Leaf + 1);
+		char *Ext = LGetExtension(Out);
 		strcpy(Ext, "xml");
 		if (f.Open(Out, O_WRITE))
 		{
@@ -685,7 +685,7 @@ char *GCppParserWorker::FindInclude(char *File)
 				char *Leaf = dir.GetName();
 				if (!dir.IsDir())
 				{
-					char *ext = LgiGetExtension(Leaf);
+					char *ext = LGetExtension(Leaf);
 					if (ext && ext[0] == 'h' && !ext[1])
 					{
 						if (dir.Path(p, sizeof(p)))
@@ -2215,10 +2215,10 @@ bool GCppParserWorker::ParsePreprocessor(GSourceFile *sf)
 			char p[MAX_PATH];
 			bool Exists = false;
 			char *IncPath = NULL;
-			if (LgiIsRelativePath(FileName8))
+			if (LIsRelativePath(FileName8))
 			{
-				LgiMakePath(p, sizeof(p), sf->Path, "..");
-				LgiMakePath(p, sizeof(p), p, FileName8);
+				LMakePath(p, sizeof(p), sf->Path, "..");
+				LMakePath(p, sizeof(p), p, FileName8);
 				if ((Exists = LFileExists(p)))
 					IncPath = p;
 			}
@@ -2260,7 +2260,7 @@ void GCppParserWorker::DoWork(WorkUnit *wk)
 		// Parse source code...
 		for (int i=0; i<w->Source.Length(); i++)
 		{
-			char *ext = LgiGetExtension(w->Source[i]);
+			char *ext = LGetExtension(w->Source[i]);
 			if (!ext)
 				continue;
 			

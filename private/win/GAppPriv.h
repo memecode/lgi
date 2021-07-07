@@ -4,7 +4,7 @@
 #include "lgi/common/Json.h"
 #include "lgi/common/FontCache.h"
 
-class GAppPrivate
+class LAppPrivate
 {
 public:
 	// Common
@@ -27,7 +27,7 @@ public:
 	LApp::ClassContainer Classes;
 	LSymLookup *SymLookup;
 
-	GAppPrivate(LApp *owner) : Owner(owner)
+	LAppPrivate(LApp *owner) : Owner(owner)
 	{
 		LinuxWine = -1;
 		SymLookup = 0;
@@ -44,7 +44,7 @@ public:
 		ThemeAware = true;
 	}
 
-	~GAppPrivate()
+	~LAppPrivate()
 	{
 		DeleteObj(SkinLib);
 		DeleteObj(SymLookup);

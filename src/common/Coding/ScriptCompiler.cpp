@@ -681,17 +681,17 @@ public:
 						}
 						else
 						{
-							if (LgiIsRelativePath(v.Str()))
+							if (LIsRelativePath(v.Str()))
 							{
 								char p[MAX_PATH];
-								LgiMakePath(p, sizeof(p), FileName, "..");
-								LgiMakePath(p, sizeof(p), p, v.Str());
+								LMakePath(p, sizeof(p), FileName, "..");
+								LMakePath(p, sizeof(p), p, v.Str());
 								v = p;
 							}
 							
 							if (LFileExists(v.Str()))
 							{
-								IncCode.Reset(ReadTextFile(v.Str()));
+								IncCode.Reset(LReadTextFile(v.Str()));
 								if (IncCode)
 									Lex(IncCode, v.Str());
 								else

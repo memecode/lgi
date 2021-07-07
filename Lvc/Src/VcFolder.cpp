@@ -2104,7 +2104,7 @@ void VcFolder::OnMouseClick(LMouse &m)
 		{
 			case IDM_BROWSE_FOLDER:
 			{
-				LgiBrowseToFile(LocalPath());
+				LBrowseToFile(LocalPath());
 				break;
 			}
 			case IDM_TERMINAL:
@@ -2262,7 +2262,7 @@ bool VcFolder::ParseRemoteFind(int Result, LString s, ParseParams *Params)
 		}
 		else if (!Dir.IsHidden())
 		{
-			char *Ext = LgiGetExtension(Dir.GetName());
+			char *Ext = LGetExtension(Dir.GetName());
 			if (!Ext) continue;
 			if (!stricmp(Ext, "c") ||
 				!stricmp(Ext, "cpp") ||
@@ -2297,7 +2297,7 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 			}
 			else if (!Dir.IsHidden())
 			{
-				char *Ext = LgiGetExtension(Dir.GetName());
+				char *Ext = LGetExtension(Dir.GetName());
 				if (!Ext) continue;
 				if (!stricmp(Ext, "c") ||
 					!stricmp(Ext, "cpp") ||
@@ -4125,7 +4125,7 @@ void VcLeaf::OnMouseClick(LMouse &m)
 			}
 			case IDM_BROWSE_FOLDER:
 			{
-				LgiBrowseToFile(Full());
+				LBrowseToFile(Full());
 				break;
 			}
 			case IDM_TERMINAL:

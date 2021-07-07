@@ -42,7 +42,7 @@ bool _lgi_check_file(char *Path)
 			{
 				// resolve shortcut
 				char Link[256];
-				if (ResolveShortcut(Path, Link, sizeof(Link)))
+				if (LResolveShortcut(Path, Link, sizeof(Link)))
 				{
 					// check destination of link
 					if (LFileExists(Link))
@@ -251,11 +251,11 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 				*(--e) = 0;
 			
 			char p[MAX_PATH];
-			if (LgiMakePath(p, sizeof(p), "/usr/share/applications", o))
+			if (LMakePath(p, sizeof(p), "/usr/share/applications", o))
 			{
 				if (LFileExists(p))
 				{
-					LAutoString txt(ReadTextFile(p));
+					LAutoString txt(LReadTextFile(p));
 					LAutoString Section;
 
 					#if DEBUG_GET_APPS_FOR_MIMETYPE
@@ -383,7 +383,7 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LString *Erro
 				GToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
 				for (int i=0; i<p.Length() && !Ok; i++)
 				{
-					LgiMakePath(Path, sizeof(Path), p[i], File);
+					LMakePath(Path, sizeof(Path), p[i], File);
 					Ok = stat(Path, &f) == 0;
 				}
 			}
@@ -517,7 +517,7 @@ WindowManager LGetWindowManager()
 			{
 				char Path[256];
 				d.Path(Path, sizeof(Path));
-				LgiMakePath(Path, sizeof(Path), Path, "status");
+				LMakePath(Path, sizeof(Path), Path, "status");
 				
 				LFile s;
 				if (s.Open(Path, O_READ))

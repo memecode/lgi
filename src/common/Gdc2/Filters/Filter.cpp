@@ -102,7 +102,7 @@ class GdcBmpFactory : public GFilterFactory
 	{
 		if (File)
 		{
-			const char *Ext = LgiGetExtension((char*)File);
+			const char *Ext = LGetExtension((char*)File);
 			if (Ext && !_stricmp(Ext, "bmp"))
 				return true;
 		}
@@ -1533,7 +1533,7 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
 		#elif WINNATIVE && defined(_MSC_VER)
 		
 		/*
-		char *Ext = LgiGetExtension((char*)Name);
+		char *Ext = LGetExtension((char*)Name);
 		if (Ext && stricmp(Ext, "gif") && stricmp(Ext, "png"))
 		*/
 		{

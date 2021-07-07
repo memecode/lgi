@@ -77,7 +77,7 @@ char *ReadStr(LFile &f DeclDebugArgs)
 	return s;
 }
 
-bool ResolveShortcut(const char *LinkFile, char *Path, int Length) 
+bool LResolveShortcut(const char *LinkFile, char *Path, int Length) 
 {
 	bool Status = FALSE;
 
@@ -143,7 +143,7 @@ bool TrimDir(char *Path)
 	return false;
 }
 
-char *ReadTextFile(const char *File)
+char *LReadTextFile(const char *File)
 {
 	if (File)
 	{
@@ -542,7 +542,7 @@ bool LDirectory::Path(char *s, int BufLen)
 		}
 	}
 
-	LgiMakePath(s, BufLen, d->BasePath, GetName());
+	LMakePath(s, BufLen, d->BasePath, GetName());
 	return true;
 }
 
@@ -970,7 +970,7 @@ const char *GetErrorName(int e)
 	return 0;
 }
 
-bool LgiGetDriveInfo(char *Path, uint64 *Free, uint64 *Size, uint64 *Available)
+bool LGetDriveInfo(char *Path, uint64 *Free, uint64 *Size, uint64 *Available)
 {
 	LgiAssert(!"Not impl.");
 	return false;

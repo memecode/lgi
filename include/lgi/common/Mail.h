@@ -10,6 +10,7 @@
 #include "lgi/common/Progress.h"
 #include "lgi/common/Variant.h"
 #include "lgi/common/OAuth2.h"
+#include "lgi/common/Store3Defs.h"	
 
 #ifndef GPL_COMPATIBLE
 #define GPL_COMPATIBLE						0
@@ -151,45 +152,20 @@ public:
 				int MimeDataLength);
 };
 
-/// Address dscriptor
-class AddressDescriptor : public LBase
+/// Address descriptor
+class AddressDescriptor
 {
 public:
-	uint8_t Status;
-	uchar CC;	// MAIL_ADDR_??
-	char *Name;
-	char *Addr;
+	uint8_t Status = false;
+	EmailAddressType CC = MAIL_ADDR_TO;
+	LString sName;
+	LString sAddr;
 	
-	void *Data; // application defined
-
-	AddressDescriptor(AddressDescriptor *Copy = 0);
-	~AddressDescriptor();
+	AddressDescriptor(const AddressDescriptor *Copy = NULL);
+	virtual ~AddressDescriptor();
+	
 	void _Delete();
-
-	void Print(char *Str, int Len);
-	ssize_t Sizeof()
-	{
-		return	SizeofStr(Name) +
-				SizeofStr(Addr);
-	}
-
-	bool Serialize(LFile &f, bool Write)
-	{
-		bool Status = true;
-		if (Write)
-		{
-			WriteStr(f, Name);
-			WriteStr(f, Addr);
-		}
-		else
-		{
-			DeleteArray(Name);
-			Name = ReadStr(f PassDebugArgs);
-			DeleteArray(Addr);
-			Addr = ReadStr(f PassDebugArgs);
-		}
-		return Status;
-	}
+	LString Print();
 };
 
 /// Base class for mail protocol implementations

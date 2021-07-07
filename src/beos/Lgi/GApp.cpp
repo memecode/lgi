@@ -3,7 +3,7 @@
 #include "SkinEngine.h"
 #include "GFontCache.h"
 
-class GAppPrivate
+class LAppPrivate
 {
 public:
 	// Common
@@ -16,7 +16,7 @@ public:
 	OsThreadId GuiThread;
 	bool FirstRun;
 
-	GAppPrivate() : Args(0, 0)
+	LAppPrivate() : Args(0, 0)
 	{
 		FileSystem = 0;
 		GdcSystem = 0;
@@ -26,7 +26,7 @@ public:
 		FirstRun = true;
 	}
 
-	~GAppPrivate()
+	~LAppPrivate()
 	{
 		DeleteObj(Config);
 		DeleteObj(FileSystem);
@@ -69,7 +69,7 @@ LApp::LApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : B
 	LgiAssert(sizeof(char16) == 4);
 
 	// Private data
-	d = new GAppPrivate;
+	d = new LAppPrivate;
 	TheApp = this;
 	d->Args = OsArgs;
 	LBase::Name(Name);
@@ -369,11 +369,11 @@ void LApp::OnCommandLine()
 		const char *a = d->Args.Arg[i];
 		if (a)
 		{
-			if (LgiIsRelativePath(a))
+			if (LIsRelativePath(a))
 			{
 				char p[MAX_PATH];
 				LgiGetExePath(p, sizeof(p));
-				LgiMakePath(p, sizeof(p), p, a);
+				LMakePath(p, sizeof(p), p, a);
 				if (FileExists(a))
 				{
 					Files.Add(NewStr(a));

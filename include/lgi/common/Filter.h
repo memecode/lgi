@@ -161,7 +161,7 @@ class LgiClass GFilterFactory
 	virtual bool CheckFile
 	(
 		/// The filename, useful for extension checking.
-		/// \sa LgiGetExtension.
+		/// \sa LGetExtension.
 		const char *File,
 		/// The access mode that is desired, either #FILTER_CAP_READ or #FILTER_CAP_WRITE.
 		int Access,

@@ -72,8 +72,8 @@ bool LOptionsFile::SetMode(PortableType mode, const char *BaseName)
 	if (!LDirExists(FullPath))
 		FileDev->CreateFolder(FullPath);
 
-	LgiMakePath(FullPath, sizeof(FullPath), FullPath, BaseName ? BaseName : (char*)"Options");
-	if (!LgiGetExtension(FullPath))
+	LMakePath(FullPath, sizeof(FullPath), FullPath, BaseName ? BaseName : (char*)"Options");
+	if (!LGetExtension(FullPath))
 		strcat_s(FullPath, sizeof(FullPath), ".xml");
 	File = FullPath;
 	Dirty = !LFileExists(File);

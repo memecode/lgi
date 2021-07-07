@@ -83,7 +83,7 @@ public:
 			const char *File = Files[i];
 			Log->Print("\t%s...\n", File);
 	
-			const char *Ext = LgiGetExtension(File);
+			const char *Ext = LGetExtension(File);
 			if (Ext && !_stricmp(Ext, "sln"))
 			{
 				LFile f;

@@ -211,7 +211,7 @@ void VcFile::OnMouseClick(LMouse &m)
 			case IDM_BROWSE:
 			{
 				if (LocalPath && LDirExists(LocalPath))
-					LgiBrowseToFile(LocalPath);
+					LBrowseToFile(LocalPath);
 				else
 					LgiMsg(GetList(), "Can't find path '%s'.", AppName, MB_OK, LocalPath.Get());
 				break;

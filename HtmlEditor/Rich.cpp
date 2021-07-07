@@ -221,8 +221,8 @@ public:
 						if (LgiGetUri(this, &File, &err, Link))
 						{
 							char p[MAX_PATH];
-							LgiMakePath(p, sizeof(p), LGetExeFile(), "..");
-							LgiMakePath(p, sizeof(p), p, LgiGetLeaf(Link));
+							LMakePath(p, sizeof(p), LGetExeFile(), "..");
+							LMakePath(p, sizeof(p), p, LGetLeaf(Link));
 
 							LFile f;
 							if (f.Open(p, O_WRITE))
@@ -420,9 +420,9 @@ public:
 					#else
 					char p[MAX_PATH];
 					LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
-					LgiMakePath(p, sizeof(p), p, "Test");
-					LgiMakePath(p, sizeof(p), p, SrcFileName);
-					LAutoString html(ReadTextFile(p));
+					LMakePath(p, sizeof(p), p, "Test");
+					LMakePath(p, sizeof(p), p, SrcFileName);
+					LAutoString html(LReadTextFile(p));
 					if (html)
 						Edit->Name(html);
 					#endif
@@ -699,7 +699,7 @@ public:
 	{
 		if (Edit && Files.Length() > 0)
 		{
-			LAutoString t(ReadTextFile(Files[0]));
+			LAutoString t(LReadTextFile(Files[0]));
 			if (t)
 				Edit->Name(t);
 		}

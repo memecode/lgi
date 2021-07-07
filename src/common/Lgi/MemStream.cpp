@@ -317,7 +317,7 @@ ssize_t GTempStream::Write(const void *Buffer, ssize_t Size, int Flags)
 				TmpFolder = LGetSystemPath(LSP_TEMP);
 			if (!TmpFolder)
 				break;
-			LgiMakePath(c, sizeof(c), TmpFolder, f);
+			LMakePath(c, sizeof(c), TmpFolder, f);
 		}
 		while (LFileExists(c));
 

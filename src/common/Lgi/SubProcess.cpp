@@ -768,7 +768,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		}
 		else
 		{
-			char *Ext = LgiGetExtension(d->Exe);
+			char *Ext = LGetExtension(d->Exe);
 			bool HasExt = Ext && _stricmp(Ext, "exe") == 0;
 			
 			#if defined(WIN32) && !defined(PLATFORM_MINGW)
@@ -785,7 +785,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			for (unsigned i=0; i<p.Length(); i++)
 			{
 				char s[MAX_PATH];
-				LgiMakePath(s, sizeof(s), p[i], d->Exe);
+				LMakePath(s, sizeof(s), p[i], d->Exe);
 				if (LFileExists(s))
 				{
 					WExe.Reset(Utf8ToWide(s));

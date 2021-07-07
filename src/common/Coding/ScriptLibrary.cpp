@@ -355,12 +355,12 @@ bool SystemFunctions::Sprintf(LScriptArguments &Args)
 	return true;
 }
 
-bool SystemFunctions::ReadTextFile(LScriptArguments &Args)
+bool SystemFunctions::LReadTextFile(LScriptArguments &Args)
 {
 	if (Args.Length() == 1 &&
 		LFileExists(Args[0]->CastString()))
 	{
-		if (Args.GetReturn()->OwnStr(::ReadTextFile(Args[0]->CastString())))
+		if (Args.GetReturn()->OwnStr(::LReadTextFile(Args[0]->CastString())))
 			return true;
 	}
 
@@ -798,7 +798,7 @@ bool SystemFunctions::PathJoin(LScriptArguments &Args)
 	{
 		char *s = Args[i]->CastString();
 		if (i)
-			LgiMakePath(p, sizeof(p), p, s);
+			LMakePath(p, sizeof(p), p, s);
 		else
 			strcpy_s(p, sizeof(p), s);
 	}
@@ -1011,7 +1011,7 @@ GHostFunc SystemLibrary[] =
 	DefFn(Delete),
 
 	// Files
-	DefFn(ReadTextFile),
+	DefFn(LReadTextFile),
 	DefFn(WriteTextFile),
 	DefFn(SelectFiles),
 	DefFn(SelectFolder),

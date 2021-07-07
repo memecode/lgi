@@ -17,7 +17,7 @@
 typedef LArray<LAppInfo*> AppArray;
 using namespace Gtk;
 
-class GAppPrivate : public LSymLookup
+class LAppPrivate : public LSymLookup
 {
 public:
 	// Common
@@ -71,7 +71,7 @@ public:
 	int LastClickX;
 	int LastClickY;
 
-	GAppPrivate(LApp *a) : Args(0, 0), Owner(a)
+	LAppPrivate(LApp *a) : Args(0, 0), Owner(a)
 		#if HAS_LIB_MAGIC
 		, MagicLock("MagicLock")
 		#endif
@@ -98,7 +98,7 @@ public:
 		LastClickY = 0;
 	}
 
-	~GAppPrivate()
+	~LAppPrivate()
 	{
 		#if HAS_LIB_MAGIC
 		if (MagicLock.Lock(_FL))

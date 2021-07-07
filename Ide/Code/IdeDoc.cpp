@@ -209,7 +209,7 @@ void EditTray::OnHeaderList(LMouse &m)
 					for (int i=0; i<Headers.Length(); i++)
 					{
 						char *h = Headers[i];
-						char *f = LgiGetLeaf(h);
+						char *f = LGetLeaf(h);
 						
 						Map.Add(h, i + 1);
 						
@@ -228,8 +228,8 @@ void EditTray::OnHeaderList(LMouse &m)
 					{
 						if (Letters[i].Length() > 1)
 						{
-							char *First = LgiGetLeaf(Letters[i][0]);
-							char *Last = LgiGetLeaf(Letters[i].Last());
+							char *First = LGetLeaf(Letters[i][0]);
+							char *Last = LGetLeaf(Letters[i].Last());
 
 							char Title[256];
 							sprintf_s(Title, sizeof(Title), "%s - %s", First, Last);
@@ -241,7 +241,7 @@ void EditTray::OnHeaderList(LMouse &m)
 									char *h = Letters[i][n];
 									int Id = Map.Find(h);
 									LgiAssert(Id > 0);
-									sub->AppendItem(LgiGetLeaf(h), Id, true);
+									sub->AppendItem(LGetLeaf(h), Id, true);
 								}
 							}
 						}
@@ -250,7 +250,7 @@ void EditTray::OnHeaderList(LMouse &m)
 							char *h = Letters[i][0];
 							int Id = Map.Find(h);
 							LgiAssert(Id > 0);
-							s->AppendItem(LgiGetLeaf(h), Id, true);
+							s->AppendItem(LGetLeaf(h), Id, true);
 						}
 					}
 
@@ -261,7 +261,7 @@ void EditTray::OnHeaderList(LMouse &m)
 							char *h = Other[n];
 							int Id = Map.Find(h);
 							LgiAssert(Id > 0);
-							s->AppendItem(LgiGetLeaf(h), Id, true);
+							s->AppendItem(LGetLeaf(h), Id, true);
 						}
 					}
 				}
@@ -270,7 +270,7 @@ void EditTray::OnHeaderList(LMouse &m)
 					for (int i=0; i<Headers.Length(); i++)
 					{
 						char *h = Headers[i];
-						// char *f = LgiGetLeaf(h);
+						// char *f = LGetLeaf(h);
 						
 						Map.Add(h, i + 1);
 					}
@@ -280,7 +280,7 @@ void EditTray::OnHeaderList(LMouse &m)
 						char *h = Headers[i];
 						int Id = Map.Find(h);
 						if (Id > 0)
-							s->AppendItem(LgiGetLeaf(h), Id, true);
+							s->AppendItem(LGetLeaf(h), Id, true);
 						else
 							LgiTrace("%s:%i - Failed to get id for '%s' (map.len=%i)\n", _FL, h, Map.Length());
 					}
@@ -702,7 +702,7 @@ void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LSt
 			if (Match)
 			{
 				bool PerfectMatch = false;
-				auto Leaf = LgiGetLeaf(Fn);
+				auto Leaf = LGetLeaf(Fn);
 				if (Leaf)
 				{
 					auto Dot = strrchr(Leaf, '.');
@@ -749,7 +749,7 @@ public:
 	void OnSelect(ProjectNode *Obj)
 	{
 		auto Fn = Obj->GetFileName();
-		if (LgiIsRelativePath(Fn))
+		if (LIsRelativePath(Fn))
 		{
 			IdeProject *Proj = Obj->GetProject();
 			LAutoString Base = Proj->GetBasePath();
@@ -1184,11 +1184,11 @@ void IdeDoc::OnTitleClick(LMouse &m)
 		if (Fn)
 		{
 			strcpy_s(Full, sizeof(Full), Fn);
-			if (LgiIsRelativePath(Fn) && p)
+			if (LIsRelativePath(Fn) && p)
 			{
 				LAutoString Base = p->GetBasePath();
 				if (Base)
-					LgiMakePath(Full, sizeof(Full), Base, Fn);
+					LMakePath(Full, sizeof(Full), Base, Fn);
 			}
 			
 			Dir = strrchr(Full, DIR_CHAR);
@@ -1248,7 +1248,7 @@ void IdeDoc::OnTitleClick(LMouse &m)
 			}
 			case IDM_BROWSE:
 			{
-				LgiBrowseToFile(Full);
+				LBrowseToFile(Full);
 				break;
 			}
 			case IDM_SHOW_IN_PROJECT:
@@ -1818,11 +1818,11 @@ bool IdeDoc::SetClean()
 		
 		LString LocalPath;
 		if (d->GetLocalFile() &&
-			LgiIsRelativePath(LocalPath) &&
+			LIsRelativePath(LocalPath) &&
 			Base)
 		{
 			char p[MAX_PATH];
-			LgiMakePath(p, sizeof(p), Base, d->GetLocalFile());
+			LMakePath(p, sizeof(p), Base, d->GetLocalFile());
 			LocalPath = p;
 		}
 		else
@@ -1996,7 +1996,7 @@ bool IdeDoc::FindDefn(char16 *Symbol, const char16 *Source, List<DefnInfo> &Matc
 
 	char Local[MAX_PATH];
 	strcpy_s(Local, sizeof(Local), GetFileName());
-	LgiTrimDir(Local);
+	LTrimDir(Local);
 	Paths.New() = Local;
 
 	if (!BuildHeaderList(Source, Headers, Paths))
@@ -2011,7 +2011,7 @@ bool IdeDoc::FindDefn(char16 *Symbol, const char16 *Source, List<DefnInfo> &Matc
 		for (int i=0; i<Headers.Length(); i++)
 		{
 			char *h = Headers[i];
-			char *c8 = ReadTextFile(h);
+			char *c8 = LReadTextFile(h);
 			if (c8)
 			{
 				char16 *c16 = Utf8ToWide(c8);

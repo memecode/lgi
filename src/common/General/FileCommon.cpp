@@ -330,7 +330,7 @@ bool LFile::CallMethod(const char *Name, LVariant *Dst, LArray<LVariant*> &Arg)
 	return true;
 }
 
-const char *LgiGetLeaf(const char *Path)
+const char *LGetLeaf(const char *Path)
 {
 	if (!Path)
 		return NULL;
@@ -345,7 +345,7 @@ const char *LgiGetLeaf(const char *Path)
 	return l ? l + 1 : Path;
 }
 
-char *LgiGetLeaf(char *Path)
+char *LGetLeaf(char *Path)
 {
 	if (!Path)
 		return NULL;

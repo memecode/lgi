@@ -241,14 +241,14 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	TheApp = this;
 	SystemNormal = 0;
 	SystemBold = 0;
-	d = new GAppPrivate(this);
+	d = new LAppPrivate(this);
 	Name(name);
 	LgiArgsAppPath = AppArgs.Arg[0];
-	if (LgiIsRelativePath(LgiArgsAppPath))
+	if (LIsRelativePath(LgiArgsAppPath))
 	{
 		char Cwd[MAX_PATH];
 		getcwd(Cwd, sizeof(Cwd));
-		LgiMakePath(Cwd, sizeof(Cwd), Cwd, LgiArgsAppPath);
+		LMakePath(Cwd, sizeof(Cwd), Cwd, LgiArgsAppPath);
 		LgiArgsAppPath = Cwd;
 	}
 
@@ -462,7 +462,7 @@ bool LApp::InThread()
 
 struct GtkIdle
 {
-	GAppPrivate *d;
+	LAppPrivate *d;
 	LAppI::OnIdleProc cb;
 	void *param;
 };
@@ -811,7 +811,7 @@ void LApp::OnCommandLine()
 		GToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
 		for (int i=0; i<p.Length(); i++)
 		{
-			LgiMakePath(Full, sizeof(Full), p[i], File);
+			LMakePath(Full, sizeof(Full), p[i], File);
 			if (LFileExists(Full))
 			{
 				File = Full;

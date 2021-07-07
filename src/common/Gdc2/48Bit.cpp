@@ -298,7 +298,7 @@ public:
 	}
 };
 
-class G48BitFactory : public GApplicatorFactory
+class G48BitFactory : public LApplicatorFactory
 {
 public:
 	LApplicator *Create(LColourSpace Cs, int Op)

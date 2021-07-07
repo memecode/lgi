@@ -341,9 +341,9 @@ bool LSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *W
 
 	char Tmp[MAX_PATH];
 	if (d->TempPath)
-		LgiMakePath(Tmp, sizeof(Tmp), d->TempPath, File);
+		LMakePath(Tmp, sizeof(Tmp), d->TempPath, File);
 	else
-		LgiMakePath(Tmp, sizeof(Tmp), LGetSystemPath(LSP_TEMP), File);
+		LMakePath(Tmp, sizeof(Tmp), LGetSystemPath(LSP_TEMP), File);
 
 	LFile Local;
 	if (!Local.Open(Tmp, O_WRITE))
@@ -391,7 +391,7 @@ bool LSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *W
 
 	if (!DownloadOnly)
 	{
-		char *Ext = LgiGetExtension(Tmp);
+		char *Ext = LGetExtension(Tmp);
 		if (Ext)
 		{
 			if (!_stricmp(Ext, "exe"))
@@ -404,7 +404,7 @@ bool LSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *W
 			{
 				// Calculate the local path...
 				char Path[MAX_PATH];
-				LgiMakePath(Path, sizeof(Path), LGetExePath(), File);
+				LMakePath(Path, sizeof(Path), LGetExePath(), File);
 
 				if (!_stricmp(Ext, "dll"))
 				{

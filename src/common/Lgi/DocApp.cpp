@@ -91,7 +91,7 @@ public:
 					}
 				}
 
-				LgiMakePath(p, sizeof(p), p, Status);
+				LMakePath(p, sizeof(p), p, Status);
 				Status = p;
 			}
 		}
@@ -198,7 +198,7 @@ GDocApp<OptionsFmt>::GDocApp(const char *appname, LIcon icon, char *optsname)
 	char p[MAX_PATH];
 	if (LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p)))
 	{
-		LgiMakePath(p, sizeof(p), p, "_write_test.txt");
+		LMakePath(p, sizeof(p), p, "_write_test.txt");
 		LFile f;
 		if (!f.Open(p, O_WRITE))
 		{
@@ -445,7 +445,7 @@ bool GDocApp<OptionsFmt>::_OpenFile(const char *File, bool ReadOnly)
 	if (SetDirty(false))
 	{
 		char RealPath[256];
-		if (ResolveShortcut(File, RealPath, sizeof(RealPath)))
+		if (LResolveShortcut(File, RealPath, sizeof(RealPath)))
 		{
 			File = RealPath;
 		}
@@ -465,7 +465,7 @@ template <typename OptionsFmt>
 bool GDocApp<OptionsFmt>::_SaveFile(const char *File)
 {
 	char RealPath[256];
-	if (ResolveShortcut(File, RealPath, sizeof(RealPath)))
+	if (LResolveShortcut(File, RealPath, sizeof(RealPath)))
 	{
 		File = RealPath;
 	}

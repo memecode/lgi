@@ -162,7 +162,7 @@ typedef LArray<LAppInfo*> AppArray;
 #define XK_Caps_Lock                     0xffe5
 #endif
 
-class GAppPrivate : public LSymLookup, public LMutex
+class LAppPrivate : public LSymLookup, public LMutex
 {
 public:
 	// Common
@@ -208,7 +208,7 @@ public:
 	int LastClickX;
 	int LastClickY;
 
-	GAppPrivate() : Args(0, 0)
+	LAppPrivate() : Args(0, 0)
 	{
 		CaptureId = 0;
 		CurEvent = 0;
@@ -229,7 +229,7 @@ public:
 		LastClickY = 0;
 	}
 
-	~GAppPrivate()
+	~LAppPrivate()
 	{
 		DeleteObj(SkinLib);
 		
@@ -265,7 +265,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	TheApp = this;
 	SystemNormal = NULL;
 	SystemBold = NULL;
-	d = new GAppPrivate;
+	d = new LAppPrivate;
 	Name(name);
 
 	if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) < 0)
@@ -909,7 +909,7 @@ LAutoString LApp::GetFileMimeType(const char *File)
 		GToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
 		for (int i=0; i<p.Length(); i++)
 		{
-			LgiMakePath(Full, sizeof(Full), p[i], File);
+			LMakePath(Full, sizeof(Full), p[i], File);
 			if (FileExists(Full))
 			{
 				File = Full;

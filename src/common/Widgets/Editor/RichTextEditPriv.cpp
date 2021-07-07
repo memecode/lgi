@@ -1185,7 +1185,7 @@ LSurface *GEmojiContext::GetEmojiImage()
 		}
 
 		char File[MAX_PATH] = "";
-		LgiMakePath(File, sizeof(File), p, "..\\src\\common\\Text\\Emoji\\EmojiMap.png");
+		LMakePath(File, sizeof(File), p, "..\\src\\common\\Text\\Emoji\\EmojiMap.png");
 		LString a;
 		if (!LFileExists(File))
 			a = LFindFile("EmojiMap.png");

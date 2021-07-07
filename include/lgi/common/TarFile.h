@@ -91,17 +91,17 @@ protected:
 			
 			if (f.Dir)
 			{
-				LgiMakePath(o, sizeof(o), ExtractTo, f.Dir);
+				LMakePath(o, sizeof(o), ExtractTo, f.Dir);
 				if (!LDirExists(o) &&
 					!FileDev->CreateFolder(o, true))
 				{
 					return false;
 				}
-				LgiMakePath(o, sizeof(o), o, f.Name);
+				LMakePath(o, sizeof(o), o, f.Name);
 			}
 			else
 			{	
-				LgiMakePath(o, sizeof(o), ExtractTo, f.Name);
+				LMakePath(o, sizeof(o), ExtractTo, f.Name);
 			}
 			
 			LFile Out;

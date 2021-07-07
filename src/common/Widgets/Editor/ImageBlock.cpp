@@ -610,7 +610,7 @@ bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<GDocView::ContentMedia
 			Cm.MimeType = Si->MimeType;
 
 			if (FileName)
-				Cm.FileName = LgiGetLeaf(FileName);
+				Cm.FileName = LGetLeaf(FileName);
 			else if (Cm.MimeType.Equals("image/jpeg"))
 				Cm.FileName.Printf("img%u.jpg", Idx);
 			else if (Cm.MimeType.Equals("image/png"))
@@ -631,7 +631,7 @@ bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<GDocView::ContentMedia
 		{
 			// Attach the original file...
 			Cm.MimeType = LgiApp->GetFileMimeType(Source);
-			Cm.FileName = LgiGetLeaf(Source);
+			Cm.FileName = LGetLeaf(Source);
 
 			LFile *f = new LFile;
 			if (f)

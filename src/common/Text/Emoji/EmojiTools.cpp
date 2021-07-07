@@ -160,10 +160,10 @@ LAutoWString TextToEmoji(uint32_t *Txt, bool IsHtml)
 
 	#ifdef MAC
 	LgiGetExeFile(EmojiPng, sizeof(EmojiPng));
-	LgiMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "Contents/Resources/EmojiMap.png");
+	LMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "Contents/Resources/EmojiMap.png");
 	#else
 	LGetSystemPath(LSP_APP_INSTALL, EmojiPng, sizeof(EmojiPng));
-	LgiMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "resources/EmojiMap.png");
+	LMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "resources/EmojiMap.png");
 	#endif
 
 	LgiAssert(sizeof(WChar) == sizeof(uint32_t));

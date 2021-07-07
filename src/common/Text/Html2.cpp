@@ -130,10 +130,10 @@ public:
 		char EmojiPng[MAX_PATH];
 		#ifdef MAC
 		LgiGetExeFile(EmojiPng, sizeof(EmojiPng));
-		LgiMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "Contents/Resources/Emoji.png");
+		LMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "Contents/Resources/Emoji.png");
 		#else
 		LGetSystemPath(LSP_APP_INSTALL, EmojiPng, sizeof(EmojiPng));
-		LgiMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "resources/emoji.png");
+		LMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "resources/emoji.png");
 		#endif
 		if (FileExists(EmojiPng))
 		{
@@ -7682,7 +7682,7 @@ void GHtml2::OnMouseClick(LMouse &m)
 							{
 								char f[32];
 								sprintf(f, "_%i.html", LRand(1000000));
-								LgiMakePath(Path, sizeof(Path), Path, f);
+								LMakePath(Path, sizeof(Path), Path, f);
 								
 								LgiCheckHeap();
 

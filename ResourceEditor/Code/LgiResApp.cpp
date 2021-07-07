@@ -56,7 +56,7 @@ const char *TypeNames[] = {
 ResFileFormat GetFormat(const char *File)
 {
 	ResFileFormat Format = Lr8File;
-	char *Ext = LgiGetExtension(File);
+	char *Ext = LGetExtension(File);
 	if (Ext)
 	{
 		if (stricmp(Ext, "lr") == 0) Format = CodepageFile;
@@ -829,7 +829,7 @@ int FieldView::OnNotify(LViewI *Ctrl, int Flags)
 						{
 							LFile::Path p = File;
 							p--;
-							LAutoString Rel = LgiMakeRelativePath(p, s.Name());
+							LAutoString Rel = LMakeRelativePath(p, s.Name());
 							if (Rel)
 								SetCtrlName(c->Id, Rel);
 							else
@@ -1412,11 +1412,11 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 			while (strchr(ExeName, DIR_CHAR) && strlen(ExeName) > 3)
 			{
 				char p[256];
-				LgiMakePath(p, sizeof(p), ExeName, "index.html");
+				LMakePath(p, sizeof(p), ExeName, "index.html");
 				if (!LFileExists(p))
 				{
-					LgiMakePath(p, sizeof(p), ExeName, "help");
-					LgiMakePath(p, sizeof(p), p, "index.html");
+					LMakePath(p, sizeof(p), ExeName, "help");
+					LMakePath(p, sizeof(p), p, "index.html");
 				}
 				if (LFileExists(p))
 				{
@@ -1424,7 +1424,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 					break;
 				}
 				
-				LgiTrimDir(ExeName);
+				LTrimDir(ExeName);
 			}
 			break;
 		}
@@ -3066,7 +3066,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 	{
 		char Bak[MAX_PATH];
 		strcpy_s(Bak, sizeof(Bak), FileName);
-		char *e = LgiGetExtension(Bak);
+		char *e = LGetExtension(Bak);
 		if (e)
 		{
 			strcpy(e, "bak");
@@ -3467,7 +3467,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 		Progress.SetType("K");
 		Progress.SetScale(1.0/1024.0);
 
-		char *FileTxt = ReadTextFile(Select.Name());
+		char *FileTxt = LReadTextFile(Select.Name());
 		if (FileTxt)
 		{
 			GToken Lines(FileTxt, "\r\n");
@@ -3497,7 +3497,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 			// Include defines
 			char IncPath[256];
 			strcpy(IncPath, Select.Name());
-			LgiTrimDir(IncPath);
+			LTrimDir(IncPath);
 			Defines.IncludeDirs.Insert(NewStr(IncPath));
 
 			Defines.DefineSymbol("_WIN32");

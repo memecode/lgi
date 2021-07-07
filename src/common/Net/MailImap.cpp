@@ -24,7 +24,7 @@
 
 
 #undef _FL
-#define _FL LgiGetLeaf(__FILE__), __LINE__
+#define _FL LGetLeaf(__FILE__), __LINE__
 
 ////////////////////////////////////////////////////////////////////////////
 #if GPL_COMPATIBLE
@@ -797,7 +797,7 @@ bool MailIMap::WriteBuf(bool ObsurePass, const char *Buffer, bool Continuation)
 		if (!Continuation && d->InCommand)
 		{
 			LString Msg;
-			Msg.Printf("%s:%i - WriteBuf failed(%s)\n", LgiGetLeaf(__FILE__), __LINE__, d->LastWrite.Strip().Get());
+			Msg.Printf("%s:%i - WriteBuf failed(%s)\n", LGetLeaf(__FILE__), __LINE__, d->LastWrite.Strip().Get());
 			Socket->OnInformation(Msg);
 
 			LgiAssert(!"Can't be issuing new commands while others are still running.");
@@ -807,7 +807,7 @@ bool MailIMap::WriteBuf(bool ObsurePass, const char *Buffer, bool Continuation)
 		else
 		{
 			LString Msg;
-			Msg.Printf("%s:%i - WriteBuf ok(%s)\n", LgiGetLeaf(__FILE__), __LINE__, d->LastWrite.Strip().Get());
+			Msg.Printf("%s:%i - WriteBuf ok(%s)\n", LGetLeaf(__FILE__), __LINE__, d->LastWrite.Strip().Get());
 			Socket->OnInformation(Msg);
 		}
 		*/
@@ -1174,7 +1174,7 @@ void MailIMap::CommandFinished()
 {
 	/*
 	LString Msg;
-	Msg.Printf("%s:%i - CommandFinished(%s)\n", LgiGetLeaf(__FILE__), __LINE__, d->LastWrite.Strip().Get());
+	Msg.Printf("%s:%i - CommandFinished(%s)\n", LGetLeaf(__FILE__), __LINE__, d->LastWrite.Strip().Get());
 	Socket->OnInformation(Msg);
 	*/
 

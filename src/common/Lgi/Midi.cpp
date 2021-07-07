@@ -375,7 +375,7 @@ GMidi::GMidi() : LMutex("GMidi")
 				stristr(Dir.GetName(), "midi"))
 			{
 				char Full[128];
-				LgiMakePath(Full, sizeof(Full), Path, Dir.GetName());
+				LMakePath(Full, sizeof(Full), Path, Dir.GetName());
 				printf("Midi[%i] = %s\n", In.Length(), Full);
 				In.New().Reset(NewStr(Full));
 				Out.New().Reset(NewStr(Full));

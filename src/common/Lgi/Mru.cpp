@@ -129,7 +129,7 @@ bool GMru::_SaveFile(const char *FileName)
 			(st = GetSelectedType()) &&
 			st->Extension())
 		{
-			char *Cur = LgiGetExtension(File);
+			char *Cur = LGetExtension(File);
 			if (!Cur)
 			{
 				// extract extension
@@ -337,7 +337,7 @@ bool GMru::OnCommand(int Cmd)
 			
 			char Path[256];
 			strcpy_s(Path, sizeof(Path), _GetCurFile());
-			LgiTrimDir(Path);
+			LTrimDir(Path);
 			if (LDirExists(Path))
 				Select.InitialDir(Path);
 		}

@@ -143,7 +143,7 @@ extern bool BuildJsDefnList(const char *FileName, char16 *Source, LArray<DefnInf
 
 inline bool BuildDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Funcs, int LimitTo, bool Debug = false)
 {
-	auto Ext = LgiGetExtension(FileName);
+	auto Ext = LGetExtension(FileName);
 	auto Fn = BuildCppDefnList;
 	
 	if (Ext)

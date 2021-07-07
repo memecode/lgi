@@ -332,48 +332,48 @@ public:
 };
 
 /// Creates applications from parameters.
-class LgiClass GApplicatorFactory
+class LgiClass LApplicatorFactory
 {
 public:
-	GApplicatorFactory();
-	virtual ~GApplicatorFactory();
+	LApplicatorFactory();
+	virtual ~LApplicatorFactory();
 
 	/// Find the application factory and create the appropriate object.
 	static LApplicator *NewApp(LColourSpace Cs, int Op);
 	virtual LApplicator *Create(LColourSpace Cs, int Op) = 0;
 };
 
-class LgiClass GApp15 : public GApplicatorFactory
+class LgiClass GApp15 : public LApplicatorFactory
 {
 public:
 	LApplicator *Create(LColourSpace Cs, int Op);
 };
 
-class LgiClass GApp16 : public GApplicatorFactory
+class LgiClass GApp16 : public LApplicatorFactory
 {
 public:
 	LApplicator *Create(LColourSpace Cs, int Op);
 };
 
-class LgiClass GApp24 : public GApplicatorFactory
+class LgiClass GApp24 : public LApplicatorFactory
 {
 public:
 	LApplicator *Create(LColourSpace Cs, int Op);
 };
 
-class LgiClass GApp32 : public GApplicatorFactory
+class LgiClass GApp32 : public LApplicatorFactory
 {
 public:
 	LApplicator *Create(LColourSpace Cs, int Op);
 };
 
-class LgiClass GApp8 : public GApplicatorFactory
+class LgiClass GApp8 : public LApplicatorFactory
 {
 public:
 	LApplicator *Create(LColourSpace Cs, int Op);
 };
 
-class GAlphaFactory : public GApplicatorFactory
+class GAlphaFactory : public LApplicatorFactory
 {
 public:
 	LApplicator *Create(LColourSpace Cs, int Op);

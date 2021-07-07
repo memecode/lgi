@@ -15,16 +15,16 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Mail.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Base64.h"
 #include "lgi/common/NetTools.h"
 #include "lgi/common/DateTime.h"
 #include "lgi/common/DocView.h"
 #include "lgi/common/Store3Defs.h"
 #include "lgi/common/LgiRes.h"
-#include "../Hash/md5/md5.h"
 #include "lgi/common/TextConvert.h"
 #include "lgi/common/Mime.h"
+#include "lgi/common/Token.h"
+#include "../Hash/md5/md5.h"
 
 const char *sTextPlain = "text/plain";
 const char *sTextHtml = "text/html";
@@ -753,13 +753,15 @@ bool FileDescriptor::Decode(char *ContentType,
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-AddressDescriptor::AddressDescriptor(AddressDescriptor *Copy)
+AddressDescriptor::AddressDescriptor(const AddressDescriptor *Copy)
 {
-	Data = 0;
-	Status = Copy ? Copy->Status : false;
-	CC = Copy ? Copy->CC : false;
-	Addr = Copy ? NewStr(Copy->Addr) : 0;
-	Name = Copy ? NewStr(Copy->Name) : 0;
+	if (Copy)
+	{
+		Status = Copy->Status;
+		CC = Copy->CC;
+		sAddr = Copy->sAddr;
+		sName = Copy->sName;
+	}
 }
 
 AddressDescriptor::~AddressDescriptor()
@@ -769,33 +771,32 @@ AddressDescriptor::~AddressDescriptor()
 
 void AddressDescriptor::_Delete()
 {
-	Data = 0;
 	Status = false;
-	CC = 0;
-	DeleteArray(Name);
-	DeleteArray(Addr);
+	CC = MAIL_ADDR_CC;
+	sName.Empty();
+	sAddr.Empty();
 }
 
-void AddressDescriptor::Print(char *Str, int Len)
+LString AddressDescriptor::Print()
 {
-	if (!Str)
+	LString s;
+	char delim = '\'';
+	if (sName)
 	{
-		LgiAssert(0);
-		return;
+		bool hasSingle = sName.Find("\'") >= 0;
+		bool hasDouble = sName.Find("\"") >= 0;
+		if (hasSingle && !hasDouble)
+			delim = '\"';
 	}
 
-	if (Addr && Name)
-	{
-		sprintf_s(Str, Len, "%s (%s)", Addr, Name);
-	}
-	else if (Addr)
-	{
-		strcpy_s(Str, Len, Addr);
-	}
-	else if (Name)
-	{
-		sprintf_s(Str, Len, "(%s)", Name);
-	}
+	if (sAddr && sName)
+		s.Printf("%c%s%c <%s>", delim, sAddr.Get(), delim, sName.Get());
+	else if (sAddr)
+		s.Printf("<%s>", sAddr.Get());
+	else if (sName)
+		s.Printf("%c%s%c", delim, sName.Get(), delim);
+
+	return s;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -984,29 +985,23 @@ bool MailSmtp::Open(LSocketI *S,
 				LArray<LString> AuthTypes;
 
 				// Look through the response for the auth line
-				char *Response = Str.NewStr();
+				LString Response = Str.NewGStr();
 				if (Response)
 				{
-					GToken Lines(Response, "\n");
-					for (uint32_t i=0; i<Lines.Length(); i++)
+					auto Lines = Response.SplitDelimit("\n");
+					for (auto &l: Lines)
 					{
-						char *l = Lines[i];
-						char *AuthStr = strstr(l, "AUTH");
+						char *AuthStr = stristr(l, "AUTH");
 						if (AuthStr)
 						{
 							// walk through AUTH types
-							GToken Types(AuthStr + 4, " ,;");
-							for (uint32_t a=0; a<Types.Length(); a++)
-							{
-								AuthTypes.Add(Types[a]);
-							}
+							auto Types = LString(AuthStr + 4).SplitDelimit(" ,;");
+							for (auto &t: Types)
+								AuthTypes.Add(t);
 						}
 						if (stristr(l, "STARTTLS"))
-						{
 							SupportsStartTLS = true;
-						}
 					}
-					DeleteArray(Response);
 				}
 
 				if (SupportsStartTLS && TestFlag(Flags, MAIL_USE_STARTTLS))
@@ -1267,23 +1262,9 @@ bool MailSmtp::WriteText(const char *Str)
 	return Status;
 }
 
-char *StripChars(char *Str, const char *Chars = "\r\n")
+void StripChars(LString &s)
 {
-	if (Str)
-	{
-		char *i = Str;
-		char *o = Str;
-		while (*i)
-		{
-			if (strchr(Chars, *i))
-				i++;
-			else
-				*o++ = *i++;
-		}
-		*o++ = 0;
-	}
-
-	return Str;
+	s = s.Strip("\r\n");
 }
 
 char *CreateAddressTag(List<AddressDescriptor> &l, int Type, List<char> *CharsetPrefs)
@@ -1309,26 +1290,26 @@ char *CreateAddressTag(List<AddressDescriptor> &l, int Type, List<char> *Charset
 			AddressDescriptor *NextA = *(++It);
 			char Buffer[256] = "";
 			
-			StripChars(a->Name);
-			StripChars(a->Addr);
+			StripChars(a->sName);
+			StripChars(a->sAddr);
 
-			if (a->Addr && strchr(a->Addr, ','))
+			if (a->sAddr && strchr(a->sAddr, ','))
 			{
 				// Multiple address format
-				GToken t(a->Addr, ",");
+				auto t = a->sAddr.SplitDelimit(",");
 				for (uint32_t i=0; i<t.Length(); i++)
 				{
-					sprintf_s(Buffer, sizeof(Buffer), "<%s>", t[i]);
+					sprintf_s(Buffer, sizeof(Buffer), "<%s>", t[i].Get());
 					if (i < t.Length()-1) strcat(Buffer, ",\r\n\t");
 					StrBuf.Push(Buffer);
 					Buffer[0] = 0;
 				}
 			}
-			else if (a->Name)
+			else if (a->sName)
 			{
 				// Name and addr
 				char *Mem = 0;
-				char *Name = a->Name;
+				char *Name = a->sName.Get();
 
 				if (Is8Bit(Name))
 				{
@@ -1336,16 +1317,16 @@ char *CreateAddressTag(List<AddressDescriptor> &l, int Type, List<char> *Charset
 				}
 
 				if (strchr(Name, '\"'))
-				    sprintf_s(Buffer, sizeof(Buffer), "'%s' <%s>", Name, a->Addr);
+				    sprintf_s(Buffer, sizeof(Buffer), "'%s' <%s>", Name, a->sAddr.Get());
 				else
-				    sprintf_s(Buffer, sizeof(Buffer), "\"%s\" <%s>", Name, a->Addr);
+				    sprintf_s(Buffer, sizeof(Buffer), "\"%s\" <%s>", Name, a->sAddr.Get());
 
 				DeleteArray(Mem);
 			}
-			else if (a->Addr)
+			else if (a->sAddr)
 			{
 				// Just addr
-				sprintf_s(Buffer, sizeof(Buffer), "<%s>", a->Addr);
+				sprintf_s(Buffer, sizeof(Buffer), "<%s>", a->sAddr.Get());
 			}
 
 			if (NextA) strcat(Buffer, ",\r\n\t");
@@ -1429,9 +1410,9 @@ bool MailSmtp::SendToFrom(List<AddressDescriptor> &To, AddressDescriptor *From, 
 	}
 
 	// send MAIL message
-	if (From && ValidStr(From->Addr))
+	if (From && ValidStr(From->sAddr))
 	{
-		sprintf_s(Buffer, sizeof(Buffer), "MAIL FROM: <%s>\r\n", From->Addr);
+		sprintf_s(Buffer, sizeof(Buffer), "MAIL FROM: <%s>\r\n", From->sAddr.Get());
 	}
 	else
 	{
@@ -1449,13 +1430,13 @@ bool MailSmtp::SendToFrom(List<AddressDescriptor> &To, AddressDescriptor *From, 
 	List<AddressDescriptor>::I Recip = To.begin();
 	for (AddressDescriptor *a = *Recip; a; a = *++Recip)
 	{
-		char *Addr = ValidStr(a->Addr) ? a->Addr : a->Name;
+		LString Addr = ValidStr(a->sAddr) ? a->sAddr : a->sName;
 		if (ValidStr(Addr))
 		{
-			GToken Parts(Addr, ",");
-			for (unsigned p=0; p<Parts.Length(); p++)
+			auto Parts = Addr.SplitDelimit(",");
+			for (auto p: Parts)
 			{
-				sprintf_s(Buffer, sizeof(Buffer), "RCPT TO: <%s>\r\n", Parts[p]);
+				sprintf_s(Buffer, sizeof(Buffer), "RCPT TO: <%s>\r\n", p.Get());
 				VERIFY_RET_VAL(Write(0, true));
 				a->Status = ReadReply("25", 0, Err);
 				AddrOk |= a->Status != 0; // at least one address is ok
@@ -1645,7 +1626,7 @@ public:
 		{
 			char n[32];
 			sprintf_s(n, sizeof(n), "%u.mail", LRand());
-			LgiMakePath(File, sizeof(File), Path, n);
+			LMakePath(File, sizeof(File), Path, n);
 		}
 		while (LFileExists(File));
 
@@ -1657,11 +1638,11 @@ public:
 			for (auto a: To)
 			{
 				a->Status = true;
-				GToken Addrs(a->Addr, ",");
+				auto Addrs = a->sAddr.SplitDelimit(",");
 				for (unsigned n=0; n<Addrs.Length(); n++, i++)
 				{
 					if (i) F.Print(",");
-					F.Print("<%s>", Addrs[n]);
+					F.Print("<%s>", Addrs[n].Get());
 				}
 			}
 

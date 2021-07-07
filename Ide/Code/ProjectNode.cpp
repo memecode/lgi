@@ -412,7 +412,7 @@ void ProjectNode::AutoDetectType()
 		
 	if (!Type)
 	{
-		char *Ext = LgiGetExtension(sFile);
+		char *Ext = LGetExtension(sFile);
 
 		if (stristr(sFile, "makefile") ||
 			!stricmp(sFile, "CMakeLists.txt"))
@@ -631,7 +631,7 @@ bool ProjectNode::Serialize(bool Write)
 			{
 				if (LFileExists(p))
 				{
-					if (!LgiIsRelativePath(File))
+					if (!LIsRelativePath(File))
 					{
 						// Try and fix up any non-relative paths that have crept in...
 						char Rel[MAX_PATH];
@@ -765,14 +765,14 @@ LString ProjectNode::GetFullPath()
 {
 	LString FullPath;
 	
-	if (LgiIsRelativePath(sFile))
+	if (LIsRelativePath(sFile))
 	{
 		// Relative path
 		auto Path = Project->GetBasePath();
 		if (Path)
 		{
 			char p[MAX_PATH];
-			LgiMakePath(p, sizeof(p), Path, sFile);
+			LMakePath(p, sizeof(p), Path, sFile);
 			FullPath = p;
 		}
 	}
@@ -838,11 +838,11 @@ IdeDoc *ProjectNode::Open()
 					if (FullPath)
 					{
 						char Exe[MAX_PATH];
-						LgiMakePath(Exe, sizeof(Exe), LGetExePath(), "..");
+						LMakePath(Exe, sizeof(Exe), LGetExePath(), "..");
 						#if defined WIN32
-						LgiMakePath(Exe, sizeof(Exe), Exe, "Debug\\LgiRes.exe");
+						LMakePath(Exe, sizeof(Exe), Exe, "Debug\\LgiRes.exe");
 						#elif defined LINUX
-						LgiMakePath(Exe, sizeof(Exe), Exe, "LgiRes/lgires");
+						LMakePath(Exe, sizeof(Exe), Exe, "LgiRes/lgires");
 						#endif
 						
 						if (LFileExists(Exe))
@@ -1172,7 +1172,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 			{
 				auto Path = GetFullPath();
 				if (Path)
-					LgiBrowseToFile(Path);
+					LBrowseToFile(Path);
 				break;
 			}
 			case IDM_OPEN_TERM:
@@ -1185,7 +1185,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 					auto Path = GetFullPath();
 					if (Path)
 					{
-						LgiTrimDir(Path);
+						LTrimDir(Path);
 						
 						#if defined LINUX
 						
@@ -1279,11 +1279,11 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 			// Match partial or full path
 			char Full[MAX_PATH] = "";
 			
-			if (LgiIsRelativePath(sFile))
+			if (LIsRelativePath(sFile))
 			{
 				LAutoString Base = Project->GetBasePath();
 				if (Base)
-					LgiMakePath(Full, sizeof(Full), Base, sFile);
+					LMakePath(Full, sizeof(Full), Base, sFile);
 				else
 					LgiTrace("%s,%i - Couldn't get full IDoc path.\n", _FL);
 			}
@@ -1329,7 +1329,7 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 					if (Base)
 					{
 						char f[256];
-						LgiMakePath(f, sizeof(f), Base, sFile);
+						LMakePath(f, sizeof(f), Base, sFile);
 						*Full = NewStr(f);
 					}
 				}

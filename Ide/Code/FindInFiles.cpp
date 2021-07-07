@@ -386,7 +386,7 @@ GMessage::Result FindInFilesThread::OnEvent(GMessage *Msg)
 					{
 						if (p)
 						{
-							const char *Leaf = LgiGetLeaf(p);
+							const char *Leaf = LGetLeaf(p);
 							for (auto e: Ext)
 							{
 								if (MatchStr(e, Leaf))

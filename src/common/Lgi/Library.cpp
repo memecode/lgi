@@ -38,7 +38,7 @@ bool GLibrary::Load(const char *File, bool Quiet)
 		// if you specify no extension in the application this will correctly set
 		// it for the OS your running thus removing the need for #ifdef's in your
 		// app. sweet!
-		char *Ext = LgiGetExtension((char*)File);
+		char *Ext = LGetExtension((char*)File);
 		if (!Ext || _stricmp(Ext, LGI_LIBRARY_EXT))
 		{
 			ch += sprintf_s(f+ch, sizeof(f)-ch, ".%s", LGI_LIBRARY_EXT);
@@ -111,7 +111,7 @@ bool GLibrary::Load(const char *File, bool Quiet)
 					int r = dlinfo(hLib, RTLD_DI_ORIGIN, Path);
 					if (r == 0)
 					{
-						LgiMakePath(Path, sizeof(Path), Path, File);
+						LMakePath(Path, sizeof(Path), Path, File);
 						printf("GLibrary loaded: '%s'\n", Path);
 					}
 					else printf("%s:%i - dlinfo failed.\n", _FL);
@@ -119,16 +119,16 @@ bool GLibrary::Load(const char *File, bool Quiet)
 				}
 				else
 				{
-					if (LgiIsRelativePath(FileName))
+					if (LIsRelativePath(FileName))
 					{
 						// Explicitly try the full path to the executable folder
 						char p[MAX_PATH];
 						#if LGI_COCOA || defined(__GTK_H__)
-						LgiMakePath(p, sizeof(p), LgiArgsAppPath, "../../Frameworks");
+						LMakePath(p, sizeof(p), LgiArgsAppPath, "../../Frameworks");
 						#else
 						strcpy_s(p, sizeof(p), LGetExePath());
 						#endif
-						LgiMakePath(p, sizeof(p), p, FileName);
+						LMakePath(p, sizeof(p), p, FileName);
 						hLib = dlopen(p, RTLD_NOW);
 						#if DEBUG_LIB_MSGS
 						printf("%s:%i - Trying '%s' = %p\n", _FL, p, hLib);
@@ -154,7 +154,7 @@ bool GLibrary::Load(const char *File, bool Quiet)
 							for (int i=0; i<t.Length(); i++)
 							{
 								char full[MAX_PATH];
-								LgiMakePath(full, sizeof(full), t[i], f);
+								LMakePath(full, sizeof(full), t[i], f);
 								if (LFileExists(full))
 								{
 									hLib = dlopen(full, RTLD_NOW);

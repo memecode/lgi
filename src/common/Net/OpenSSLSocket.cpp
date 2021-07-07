@@ -65,12 +65,12 @@ public:
 	{
 		#if defined MAC
 		char p[MAX_PATH];
-		LgiMakePath(p, sizeof(p), LGetExeFile(), "Contents/Frameworks/" SSL_LIBRARY);
+		LMakePath(p, sizeof(p), LGetExeFile(), "Contents/Frameworks/" SSL_LIBRARY);
 		if (!Load(p))
 			LgiTrace("%s:%i - Failed to load '%s'\n", _FL, p);
 		#elif defined LINUX
 		char p[MAX_PATH];
-		if (LgiMakePath(p, sizeof(p), LGetExePath(), "libssl.so"))
+		if (LMakePath(p, sizeof(p), LGetExePath(), "libssl.so"))
 		{
 			if (LFileExists(p))
 			{
@@ -89,10 +89,10 @@ public:
 			char p[MAX_PATH], leaf[32];
 			int bits = sizeof(size_t)*8;
 			sprintf_s(leaf, sizeof(leaf), "OpenSSL-Win%i", bits);
-			LgiMakePath(p, sizeof(p), LGetSystemPath(LSP_USER_APPS, bits), leaf);
+			LMakePath(p, sizeof(p), LGetSystemPath(LSP_USER_APPS, bits), leaf);
 			auto prev = FileDev->GetCurrentFolder();
 			FileDev->SetCurrentFolder(p);
-			LgiMakePath(p, sizeof(p), p, SSL_LIBRARY);
+			LMakePath(p, sizeof(p), p, SSL_LIBRARY);
 			auto loaded = Load(p);
 			FileDev->SetCurrentFolder(prev);
 			#endif
@@ -156,10 +156,10 @@ public:
 			char p[MAX_PATH], leaf[32];
 			int bits = sizeof(size_t)*8;
 			sprintf_s(leaf, sizeof(leaf), "OpenSSL-Win%i", bits);
-			LgiMakePath(p, sizeof(p), LGetSystemPath(LSP_USER_APPS, bits), leaf);
+			LMakePath(p, sizeof(p), LGetSystemPath(LSP_USER_APPS, bits), leaf);
 			auto prev = FileDev->GetCurrentFolder();
 			FileDev->SetCurrentFolder(p);
-			LgiMakePath(p, sizeof(p), p, EAY_LIBRARY);
+			LMakePath(p, sizeof(p), p, EAY_LIBRARY);
 			auto loaded = Load(p);
 			FileDev->SetCurrentFolder(prev);
 			#endif

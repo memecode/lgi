@@ -343,7 +343,7 @@ public:
 	}
 };
 
-class GGradientFactory : public GApplicatorFactory
+class GGradientFactory : public LApplicatorFactory
 {
 public:
 	LApplicator *Create(LColourSpace Cs, int Op)

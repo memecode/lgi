@@ -130,7 +130,7 @@ GDocumentEnv::LoadType GDefaultDocumentEnv::GetContent(LoadJob *&j)
 	if (FileName)
 	{
 		LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
-		LgiMakePath(p, sizeof(p), p, FileName);
+		LMakePath(p, sizeof(p), p, FileName);
 		if (LFileExists(p))
 		{
 			FullPath = p;

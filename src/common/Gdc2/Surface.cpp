@@ -1577,7 +1577,7 @@ LApplicator *LSurface::CreateApplicator(int Op, LColourSpace Cs)
 		}
 	}
 	
-	pA = GApplicatorFactory::NewApp(Cs, Op);
+	pA = LApplicatorFactory::NewApp(Cs, Op);
 	if (pA)
 	{
 		if (DrawOnAlpha())
@@ -1592,7 +1592,7 @@ LApplicator *LSurface::CreateApplicator(int Op, LColourSpace Cs)
 	}
 	else
 	{
-		GApplicatorFactory::NewApp(Cs, Op);
+		LApplicatorFactory::NewApp(Cs, Op);
 		const char *CsStr = GColourSpaceToString(Cs);
 		LgiTrace("Error: GDeviceContext::CreateApplicator(%i, %x, %s) failed.\n", Op, Cs, CsStr);
 		LgiAssert(!"No applicator");

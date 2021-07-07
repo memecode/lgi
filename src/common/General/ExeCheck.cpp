@@ -189,7 +189,7 @@ class GExecuteCheck
 	{
 		if (Name)
 		{
-			char *Ext = LgiGetExtension(Name);
+			char *Ext = LGetExtension(Name);
 			if (Ext)
 			{
 				#ifdef WIN32
@@ -248,7 +248,7 @@ public:
 	}
 };
 
-LgiFunc bool LgiIsFileNameExecutable(const char *Str)
+LgiFunc bool LIsFileNameExecutable(const char *Str)
 {
 	GExecuteCheck c(Str);
 	return c.IsExecutable();

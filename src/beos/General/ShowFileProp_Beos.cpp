@@ -1,11 +1,11 @@
 #include "Lgi.h"
 
-void LgiShowFileProperties(OsView Parent, const char *Filename)
+void LShowFileProperties(OsView Parent, const char *Filename)
 {
 	LgiAssert(!"Impl me.");
 }
 
-bool LgiBrowseToFile(const char *Filename)
+bool LBrowseToFile(const char *Filename)
 {
 	/*
 	char Args[MAX_PATH];

@@ -380,7 +380,7 @@ public:
 	}
 };
 
-class G64BitFactory : public GApplicatorFactory
+class G64BitFactory : public LApplicatorFactory
 {
 public:
 	LApplicator *Create(LColourSpace Cs, int Op)

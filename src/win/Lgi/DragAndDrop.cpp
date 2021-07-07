@@ -876,7 +876,7 @@ bool LDragDropTarget::OnDropFileGroupDescriptor(FILEGROUPDESCRIPTOR *Data, LStri
 					char Path[256];
 					LString Str;
 					LGetSystemPath(LSP_TEMP, Path, sizeof(Path));
-					LgiMakePath(Path, sizeof(Path), Path, Str = Data->fgd[i].cFileName);
+					LMakePath(Path, sizeof(Path), Path, Str = Data->fgd[i].cFileName);
 
 					LFile f;
 					if (f.Open(Path, O_WRITE))

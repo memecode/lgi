@@ -152,7 +152,7 @@ public:
 		{
 			LgiGetSystemPath(LSP_TEMP, Temp, sizeof(Temp));
 			sprintf(Part, "_lgi_printjob_%x.ps", LRand());
-			LgiMakePath(Temp, sizeof(Temp), Temp, Part);
+			LMakePath(Temp, sizeof(Temp), Temp, Part);
 		}
 		while (FileExists(Temp));
 		

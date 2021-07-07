@@ -519,7 +519,7 @@ bool LResources::Load(const char *FileName)
 
 	d->File = FileName;
 	d->Format = Lr8File;
-	char *Ext = LgiGetExtension(FileName);
+	char *Ext = LGetExtension(FileName);
 	if (Ext && stricmp(Ext, "lr") == 0)
 	{
 		d->Format = CodepageFile;
@@ -1313,8 +1313,8 @@ GLanguage *LGetLanguageId()
 	char Path[256];
 	if (LgiGetSystemPath(LSP_HOME, Path, sizeof(Path)))
 	{
-		LgiMakePath(Path, sizeof(Path), Path, ".kde/share/config/kdeglobals");
-		char *Txt = ReadTextFile(Path);
+		LMakePath(Path, sizeof(Path), Path, ".kde/share/config/kdeglobals");
+		char *Txt = LReadTextFile(Path);
 
 		if (Txt)
 		{

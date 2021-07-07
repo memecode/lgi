@@ -6,7 +6,7 @@
 
 typedef LArray<LAppInfo*> AppArray;
 
-class GAppPrivate
+class LAppPrivate
 {
 public:
 	LApp *Owner;
@@ -30,7 +30,7 @@ public:
 	/// Any fonts needed for styling the elements
 	LAutoPtr<GFontCache> FontCache;
 	
-	GAppPrivate(LApp *owner) : Owner(owner)
+	LAppPrivate(LApp *owner) : Owner(owner)
 	{
 		NsApp = NULL;
 		RunDepth = 0;
@@ -41,7 +41,7 @@ public:
 		GuiThreadId = GetCurrentThreadId();
 	}
 	
-	~GAppPrivate()
+	~LAppPrivate()
 	{
 		DeleteObj(SkinLib);
 		

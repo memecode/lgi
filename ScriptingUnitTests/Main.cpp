@@ -59,11 +59,11 @@ public:
 	char *GetIncludeFile(char *FileName)
 	{
 		char p[MAX_PATH];
-		LgiMakePath(p, sizeof(p), SrcFile, "..");
-		LgiMakePath(p, sizeof(p), p, FileName);
+		LMakePath(p, sizeof(p), SrcFile, "..");
+		LMakePath(p, sizeof(p), p, FileName);
 		if (LFileExists(p))
 		{
-			return ::ReadTextFile(p);
+			return ::LReadTextFile(p);
 		}
 		
 		return NULL;
@@ -87,7 +87,7 @@ public:
 		LScriptEngine Eng(NULL, NULL, this);
 		Eng.SetConsole(&Log);
 
-		LAutoString Src(::ReadTextFile(SrcFile));
+		LAutoString Src(::LReadTextFile(SrcFile));
 		if (!Src)
 		{
 			printf("Error: Failed to read '%s'.\n", SrcFile.Get());
@@ -129,7 +129,7 @@ public:
 			if (Idx > 0)
 			{
 				f = f(0, Idx) + ".asm";
-				LAutoString a(ReadTextFile(f));
+				LAutoString a(LReadTextFile(f));
 				if (a)
 				{
 					printf("%s\n", a.Get());

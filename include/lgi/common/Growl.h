@@ -1,32 +1,32 @@
 #ifndef _GGROWL_H_
 #define _GGROWL_H_
 
-class LgiClass GGrowl
+class LgiClass LGrowl
 {
-	class GGrowlPriv *d;
+	class LGrowlPriv *d;
 	
 public:
-	struct GNotifyType
+	struct LNotifyType
 	{
 		LString Name;
 		LString DisplayName; // Optional
 		bool Enabled;
 		LString IconUrl;
 		
-		GNotifyType()
+		LNotifyType()
 		{
 			Enabled = true;
 		}
 	};
 
-	struct GRegister
+	struct LRegister
 	{
 		LString App;
 		LString IconUrl; // Optional
-		LArray<GNotifyType> Types;
+		LArray<LNotifyType> Types;
 	};
 
-	struct GNotify
+	struct LNotify
 	{
 		LString Name;
 		LString Title;
@@ -40,7 +40,7 @@ public:
 		LString CallbackDataType; // Optional
 		LString CallbackTarget; // Optional
 		
-		GNotify()
+		LNotify()
 		{
 			Sticky = false;
 			Priority = 0;
@@ -48,11 +48,11 @@ public:
 	};
 
 
-	GGrowl(bool async = true);
-	~GGrowl();
+	LGrowl(bool async = true);
+	~LGrowl();
 
-	bool Register(LAutoPtr<GRegister> r);
-	bool Notify(LAutoPtr<GNotify> n);
+	bool Register(LAutoPtr<LRegister> r);
+	bool Notify(LAutoPtr<LNotify> n);
 };
 
 #endif

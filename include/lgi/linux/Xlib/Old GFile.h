@@ -298,7 +298,7 @@ public:
 
 // C functions
 extern bool Match(char *Name, char *Mask);
-extern bool ResolveShortcut(char *LinkFile, char *Path, int Length);
+extern bool LResolveShortcut(char *LinkFile, char *Path, int Length);
 extern int FileSize(char *FileName);
 extern bool FileExists(char *Name);
 extern int SizeofStr(char *s);

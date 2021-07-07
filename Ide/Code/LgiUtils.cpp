@@ -13,7 +13,7 @@ char *FindHeader(char *Short, LArray<LString> &Paths)
 		char *Path = Paths[i];
 		
 		char f[MAX_PATH];
-		LgiMakePath(f, sizeof(f), Path, Short);
+		LMakePath(f, sizeof(f), Path, Short);
 		if (LFileExists(f))
 		{
 			Status = NewStr(f);
@@ -69,7 +69,7 @@ bool BuildHeaderList(char *Cpp, LArray<char*> &Headers, LArray<LString> &IncPath
 								if (Recurse)
 								{
 									// Recursively add includes...
-									char *c8 = ReadTextFile(File);
+									char *c8 = LReadTextFile(File);
 									if (c8)
 									{
 										BuildHeaderList(c8, Headers, IncPaths, Recurse);

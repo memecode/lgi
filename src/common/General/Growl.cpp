@@ -3,16 +3,16 @@
 #include "lgi/common/Net.h"
 #include "lgi/common/Thread.h"
 
-class GGrowlPriv : public LThread, public LMutex
+class LGrowlPriv : public LThread, public LMutex
 {
 	bool Loop;
 	bool Async;
 	LString AppName;
-	LAutoPtr<GGrowl::GRegister> Reg;
-	LArray<GGrowl::GNotify*> Notes;
+	LAutoPtr<LGrowl::LRegister> Reg;
+	LArray<LGrowl::LNotify*> Notes;
 	
 public:
-	GGrowlPriv(bool async) : LThread("GGrowl"), LMutex("GGrowlSem")
+	LGrowlPriv(bool async) : LThread("LGrowl"), LMutex("GGrowlSem")
 	{
 	    Async = async;
 		Loop = true;
@@ -21,7 +21,7 @@ public:
 		    Run();
 	}
 	
-	~GGrowlPriv()
+	~LGrowlPriv()
 	{
 		Loop = false;
 		
@@ -33,7 +33,7 @@ public:
 		Notes.DeleteObjects();
 	}
 	
-	bool Register(LAutoPtr<GGrowl::GRegister> p)
+	bool Register(LAutoPtr<LGrowl::LRegister> p)
 	{
 		if (!Lock(_FL))
 			return false;
@@ -45,7 +45,7 @@ public:
 		}
 		else
 		{
-		    LAutoPtr<GGrowl::GNotify> n;
+		    LAutoPtr<LGrowl::LNotify> n;
 		    Status = Process(p, n);
 		}
 		
@@ -53,7 +53,7 @@ public:
 		return Status;
 	}
 
-	bool Notify(LAutoPtr<GGrowl::GNotify> n)
+	bool Notify(LAutoPtr<LGrowl::LNotify> n)
 	{
 		if (!Lock(_FL))
 			return false;
@@ -65,7 +65,7 @@ public:
 		}
 		else
 		{
-		    LAutoPtr<GGrowl::GRegister> r;
+		    LAutoPtr<LGrowl::LRegister> r;
 		    Status = Process(r, n);
 		}
 		
@@ -73,8 +73,8 @@ public:
 		return Status;
 	}
 	
-	bool Process(LAutoPtr<GGrowl::GRegister> &reg,
-			     LAutoPtr<GGrowl::GNotify> &note)
+	bool Process(LAutoPtr<LGrowl::LRegister> &reg,
+			     LAutoPtr<LGrowl::LNotify> &note)
 	{
 		LAutoPtr<LSocket> Sock(new LSocket);
 		Sock->SetTimeout(5000);
@@ -93,7 +93,7 @@ public:
 			
 			for (int i=0; i<reg->Types.Length(); i++)
 			{
-				GGrowl::GNotifyType &t = reg->Types[i];
+				auto &t = reg->Types[i];
 				p.Print("\r\n"
 						"Notification-Name: %s\r\n"
 						"Notification-Enabled: %s\r\n",
@@ -164,8 +164,8 @@ public:
 		
 		while (Loop)
 		{
-			LAutoPtr<GGrowl::GRegister> reg;
-			LAutoPtr<GGrowl::GNotify> note;
+			LAutoPtr<LGrowl::LRegister> reg;
+			LAutoPtr<LGrowl::LNotify> note;
 
 			if (LockWithTimeout(100, _FL))
 			{
@@ -193,22 +193,22 @@ public:
 	}
 };
 	
-GGrowl::GGrowl(bool async)
+LGrowl::LGrowl(bool async)
 {
-	d = new GGrowlPriv(async);
+	d = new LGrowlPriv(async);
 }
 
-GGrowl::~GGrowl()
+LGrowl::~LGrowl()
 {
 	DeleteObj(d);
 }
 
-bool GGrowl::Register(LAutoPtr<GRegister> r)
+bool LGrowl::Register(LAutoPtr<LRegister> r)
 {
 	return d->Register(r);
 }
 
-bool GGrowl::Notify(LAutoPtr<GNotify> n)
+bool LGrowl::Notify(LAutoPtr<LNotify> n)
 {
 	return d->Notify(n);
 }
