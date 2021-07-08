@@ -127,7 +127,7 @@ enum LgiStringID
 	// LControlTree
 	L_CONTROLTREE_NO_VALUE = -1200,
 
-	// GProgressDlg
+	// LProgressDlg
 	L_PROGRESSDLG_PROGRESS = -1300,
 	L_PROGRESSDLG_REQ_ABORT = -1301,
 	L_PROGRESSDLG_RATE_FMT = -1302,

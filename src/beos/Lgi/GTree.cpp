@@ -204,7 +204,7 @@ void LTree::OnItemExpand(LTreeItem *Item, bool Expand)
 
 //////////////////////////////////////////////////////////////////////////////
 LTree::LTree(int id, int x, int y, int cx, int cy, char *name) :
-	GControl(this),
+	LControl(this),
 	BOutlineListView(	BRect(x, y, x+cx-14, y+cy-14),
 						"List",
 						B_SINGLE_SELECTION_LIST),
@@ -212,7 +212,7 @@ LTree::LTree(int id, int x, int y, int cx, int cy, char *name) :
 {
 	SetId(id);
 	Pos.Set(x, y, x+cx, y+cy);
-	if (name) GControl::Name(name);
+	if (name) LControl::Name(name);
 
 	Lines = true;
 	Buttons = true;

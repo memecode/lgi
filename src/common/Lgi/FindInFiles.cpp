@@ -1,14 +1,14 @@
-#include "Lgi.h"
-#include "GFindInFiles.h"
-#include "LPopup.h"
-#include "LList.h"
-#include "LButton.h"
-#include "LTableLayout.h"
-#include "LTextLabel.h"
-#include "LEdit.h"
-#include "GCheckBox.h"
-#include "LXmlTreeUi.h"
-#include "GStringClass.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/FindInFiles.h"
+#include "lgi/common/Popup.h"
+#include "lgi/common/List.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/CheckBox.h"
+#include "lgi/common/XmlTreeUi.h"
+#include "lgi/common/FileSelect.h"
 
 enum Ctrls
 {
@@ -185,13 +185,13 @@ GFindInFiles::GFindInFiles(LViewI *Parent, LAutoString Search, GDom *Store)
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
 	c->PaddingTop(LCss::Len("0.5em"));
-	c->Add(new GCheckBox(IDC_INC_SUB_FOLDERS, 0, 0, -1, -1, "Include sub-folders"));
+	c->Add(new LCheckBox(IDC_INC_SUB_FOLDERS, 0, 0, -1, -1, "Include sub-folders"));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
-	c->Add(new GCheckBox(IDC_MATCH_CASE, 0, 0, -1, -1, "Match case"));
+	c->Add(new LCheckBox(IDC_MATCH_CASE, 0, 0, -1, -1, "Match case"));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
-	c->Add(new GCheckBox(IDC_MATCH_WHOLE_WORD, 0, 0, -1, -1, "Match whole word"));
+	c->Add(new LCheckBox(IDC_MATCH_WHOLE_WORD, 0, 0, -1, -1, "Match whole word"));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
 	c->PaddingTop(LCss::Len("1em"));
@@ -248,5 +248,5 @@ int GFindInFiles::OnNotify(LViewI *Ctrl, int Flags)
 		}
 	}
 
-	return GDialog::OnNotify(Ctrl, Flags);
+	return LDialog::OnNotify(Ctrl, Flags);
 }

@@ -2855,7 +2855,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 
 	#if DEBUG_OPEN_PROGRESS
 	int64 Nodes = r.CountTags();
-	GProgressDlg Prog(d->App, 1000);
+	LProgressDlg Prog(d->App, 1000);
 	Prog.SetDescription("Loading project...");
 	Prog.SetLimits(0, Nodes);
 	Prog.SetYieldTime(1000);

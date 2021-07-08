@@ -2,7 +2,7 @@
 #include "Store.h"
 #include "Store2.h"
 #include "StoreConvert1To2.h"
-#include "GProgressDlg.h"
+#include "LProgressDlg.h"
 
 class ReaderItem : public StorageObj
 {
@@ -161,7 +161,7 @@ public:
 	bool Convert(LView *Parent)
 	{
 		bool Status = false;
-		GProgressDlg Dlg(Parent);
+		LProgressDlg Dlg(Parent);
 
 		if (Store1 &&
 			Store2)

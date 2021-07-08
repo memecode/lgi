@@ -1,5 +1,5 @@
-#include "Gdc2.h"
-#include "GTransparentDlg.h"
+#include "lgi/common/Gdc2.h"
+#include "TransparentDlg.h"
 
 #ifdef FILTER_UI
 
@@ -9,8 +9,8 @@
 #define TRANS_DLG_Y		110
 #endif
 
-#include "LRadioGroup.h"
-#include "LButton.h"
+#include "lgi/common/RadioGroup.h"
+#include "lgi/common/Button.h"
 
 GTransparentDlg::GTransparentDlg(LView *parent, LVariant *trans)
 {

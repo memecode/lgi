@@ -1,8 +1,8 @@
 #ifndef _LTelnet_h_
 #define _LTelnet_h_
 
-#include "LThread.h"
-#include "INet.h"
+#include "lgi/common/Thread.h"
+#include "lgi/common/Net.h"
 
 class LTelnet : public LStream
 {

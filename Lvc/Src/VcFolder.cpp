@@ -2,7 +2,7 @@
 #include "../Resources/resdefs.h"
 #include "lgi/common/Combo.h"
 #include "lgi/common/ClipBoard.h"
-#include "LJson.h"
+#include "lgi/common/Json.h"
 
 #ifndef CALL_MEMBER_FN
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
@@ -3150,7 +3150,7 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 	}
 }
 
-bool VcFolder::ParseStartBranch(int Result, GString s, ParseParams *Params)
+bool VcFolder::ParseStartBranch(int Result, LString s, ParseParams *Params)
 {
 	switch (GetType())
 	{
@@ -3191,7 +3191,7 @@ void VcFolder::StartBranch(const char *BranchName, const char *OnCreated)
 	{
 		case VcHg:
 		{
-			GString a;
+			LString a;
 			a.Printf("branch \"%s\"", BranchName);
 
 			StartCmd(a, &VcFolder::ParseStartBranch, OnCreated ? new ParseParams(OnCreated) : NULL);

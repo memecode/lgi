@@ -3,10 +3,11 @@
 
 #ifdef FILTER_UI
 
-#include "Lgi.h"
-#include "LVariant.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/RadioGroup.h"
 
-class GTransparentDlg : public GDialog
+class GTransparentDlg : public LDialog
 {
 	LRadioGroup *Grp;
 	LVariant *Trans;

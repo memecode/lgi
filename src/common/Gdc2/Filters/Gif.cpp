@@ -18,7 +18,7 @@
 
 #ifdef FILTER_UI
 // define the symbol FILTER_UI to access the gif save options dialog
-#include "GTransparentDlg.h"
+#include "TransparentDlg.h"
 #endif
 
 #define MAX_CODES   				4095

@@ -1,8 +1,9 @@
-#include "Lgi.h"
-#include "DataGrid.h"
-#include "LEdit.h"
-#include "GCombo.h"
-#include "LClipBoard.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/DataGrid.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/Combo.h"
+#include "lgi/common/ClipBoard.h"
+#include "lgi/common/Menu.h"
 
 enum LDataGridControls
 {
@@ -21,7 +22,7 @@ struct LDataGridPriv
 	LView *DeleteLater;
 	LListItem *Cur;
 	bool Dirty, PosDirty;
-	LArray<LDataGrid::GDataGridFlags> Flags;
+	LArray<LDataGrid::LDataGridFlags> Flags;
 	LArray<LVariant> ColumnArgs;
 	LListItem *NewRecord;
 	LDataGrid::ItemFactory Factory;
@@ -127,12 +128,12 @@ public:
 	}
 };
 
-class LDataGridCombo : public GCombo
+class LDataGridCombo : public LCombo
 {
 	LDataGridPriv *d;
 
 public:
-	LDataGridCombo(LDataGridPriv *priv, int id, LRect &rc) : GCombo(id, rc.x1, rc.y1, rc.X(), rc.Y(), 0)
+	LDataGridCombo(LDataGridPriv *priv, int id, LRect &rc) : LCombo(id, rc.x1, rc.y1, rc.X(), rc.Y(), 0)
 	{
 		d = priv;
 	}
@@ -151,7 +152,7 @@ public:
 			}
 		}
 		
-		return GCombo::OnKey(k);
+		return LCombo::OnKey(k);
 	}
 };
 
@@ -297,7 +298,7 @@ void LDataGridPriv::Create(int NewCol)
 		if (r)
 		{
 			LDataGridEdit *Edit = 0;
-			GCombo *Combo = 0;
+			LCombo *Combo = 0;
 			LRect rc = r;
 			
 			if (!e || (NewCtrl ^ OldCtrl))
@@ -514,7 +515,7 @@ int LDataGrid::OnNotify(LViewI *c, int f)
 	return LList::OnNotify(c, f);
 }
 
-void LDataGrid::SetColFlag(int Col, GDataGridFlags Flags, LVariant *Arg)
+void LDataGrid::SetColFlag(int Col, LDataGridFlags Flags, LVariant *Arg)
 {
 	d->Flags[Col] = Flags;
 	if (Arg)

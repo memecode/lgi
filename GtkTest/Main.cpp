@@ -14,8 +14,8 @@ public:
         SetPos(LRect(0, 0, 300, 300));
         MoveToCenter();
         
-		GCombo *c;
-		AddView(c = new GCombo(100, 10, 40, 100, 20, ""));
+		LCombo *c;
+		AddView(c = new LCombo(100, 10, 40, 100, 20, ""));
 		c->Insert("One");
 		c->Insert("Two");
 		c->Insert("Three");
@@ -23,7 +23,7 @@ public:
 		AddView(new LButton(50, 10, 10, -1, -1, "Open"));
 
         /*
-		AddView(c = new GCombo(200, 10, 140, 100, 20, ""));
+		AddView(c = new LCombo(200, 10, 140, 100, 20, ""));
 		c->Insert("One");
 		c->Insert("Two");
 		c->Insert("Three");
@@ -100,8 +100,8 @@ public:
 			
 			AddView(new LButton(50, 10, 10, -1, -1, "Open"));
 
-		    GCombo *c;
-		    AddView(c = new GCombo(100, 10, 40, 100, 20, ""));
+		    LCombo *c;
+		    AddView(c = new LCombo(100, 10, 40, 100, 20, ""));
 		    c->Insert("One");
 		    c->Insert("Two");
 		    c->Insert("Three");

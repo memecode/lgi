@@ -1,7 +1,9 @@
-#include "Lgi.h"
-#include "LGraph.h"
-#include "GDocView.h"
-#include "LDisplayString.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Graph.h"
+#include "lgi/common/DocView.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/FileSelect.h"
+#include "lgi/common/Menu.h"
 #include <math.h>
 
 #define SELECTION_SIZE          2

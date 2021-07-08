@@ -1,8 +1,8 @@
 #ifndef _ICC_H_
 #define _ICC_H_
 
-#include "GDom.h"
-#include "LVariant.h"
+#include "lgi/common/Dom.h"
+#include "lgi/common/Variant.h"
 
 class GIccProfile : public GDom
 {

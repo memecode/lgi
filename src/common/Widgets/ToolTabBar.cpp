@@ -9,10 +9,10 @@
 */
 
 #include <stdio.h>
-#include "Lgi.h"
-#include "LToolTabBar.h"
-#include "GNotifications.h"
-#include "LCss.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ToolTabBar.h"
+#include "lgi/common/Notifications.h"
+#include "lgi/common/Css.h"
 
 /////////////////////////////////////////////////////////////////////////
 LToolTab::LToolTab() : LToolButton(16, 16)

@@ -2,12 +2,12 @@
 #define __GCOMBO_H
 
 // Combo Box
-class LgiClass GCombo :
+class LgiClass LCombo :
 #if defined BEOS
 	public BMenuField,
 #endif
 	public ResObject,
-	public GControl,
+	public LControl,
 	public List<char>
 {
 	#if defined WIN32
@@ -25,8 +25,8 @@ class LgiClass GCombo :
 	bool SortItems;
 
 public:
-	GCombo(int id, int x, int y, int cx, int cy, char *name);
-	~GCombo();
+	LCombo(int id, int x, int y, int cx, int cy, char *name);
+	~LCombo();
 
 	bool Sort() { return SortItems; }
 	void Sort(bool s) { SortItems = s; }

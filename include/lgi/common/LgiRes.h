@@ -124,7 +124,7 @@ public:
 /// \ingroup Resources
 class LgiClass LResources : public ResFactory
 {
-	friend class GLgiRes;
+	friend class LResourceLoad;
 	friend class LMenu;
 	friend class LgiStringRes;
 

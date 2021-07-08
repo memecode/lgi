@@ -38,7 +38,7 @@
 
 #include "lgi/common/LibraryUtils.h"
 #ifdef FILTER_UI
-#include "GTransparentDlg.h"
+#include "TransparentDlg.h"
 #endif
 #include "lgi/common/Variant.h"
 

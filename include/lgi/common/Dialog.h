@@ -73,7 +73,7 @@
 ///
 /// The resource file method of creating dialogs is arguably the easier route to take once your've got it
 /// set up. Firstly create a resource file using LgiRes with the same name as your programs executable, but
-/// a different extension ("lr8"). When you call the GLgiRes::LoadFromResource function Lgi will automatically
+/// a different extension ("lr8"). When you call the LResourceLoad::LoadFromResource function Lgi will automatically
 /// look for a file named after the running executable with the right extension and load it. Then it will
 /// find the dialog resource and instantiate all the controls specified in the resource. All the built in
 /// Lgi controls are supported directly as tags in the XML file and you can create your own custom controls
@@ -140,11 +140,11 @@
 ///		<li> LButton (Push button)
 ///		<li> LEdit (Edit box for text entry)
 ///		<li> GText (Static label)
-///		<li> GCheckBox (Independent boolean)
-///		<li> GCombo (Select one from many)
+///		<li> LCheckBox (Independent boolean)
+///		<li> LCombo (Select one from many)
 ///		<li> LSlider (Select a position)
 ///		<li> LBitmap (Display an image)
-///		<li> GProgress (Show a progress)
+///		<li> LProgressView (Show a progress)
 ///		<li> GList (List containing LListItem)
 ///		<li> LTree (Hierarchy of LTreeItem)
 ///		<li> LRadioGroup (One of many selection using LRadioButton)
@@ -155,7 +155,7 @@ class LgiClass LDialog :
 	public LResourceLoad,
 	public ResObject
 {
-	friend class GControl;
+	friend class LControl;
 
 private:
     struct LDialogPriv *d;

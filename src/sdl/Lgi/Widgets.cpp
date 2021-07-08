@@ -35,7 +35,7 @@ struct GDialogPriv
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GDialog::GDialog()
+LDialog::LDialog()
 	: ResObject(Res_Dialog)
 {
 	d = new GDialogPriv();
@@ -44,17 +44,17 @@ GDialog::GDialog()
 	_SetDynamic(false);
 }
 
-GDialog::~GDialog()
+LDialog::~LDialog()
 {
 	DeleteObj(d);
 }
 
-bool GDialog::IsModal()
+bool LDialog::IsModal()
 {
 	return d->IsModal;
 }
 
-void GDialog::Quit(bool DontDelete)
+void LDialog::Quit(bool DontDelete)
 {
 	if (d->IsModal)
 		EndModal(0);
@@ -62,7 +62,7 @@ void GDialog::Quit(bool DontDelete)
 		LView::Quit(DontDelete);
 }
 
-void GDialog::OnPosChange()
+void LDialog::OnPosChange()
 {
     if (Children.Length() == 1)
     {
@@ -77,12 +77,12 @@ void GDialog::OnPosChange()
     }
 }
 
-bool GDialog::LoadFromResource(int Resource, char *TagList)
+bool LDialog::LoadFromResource(int Resource, char *TagList)
 {
 	LAutoString n;
 	LRect p;
 
-	bool Status = GLgiRes::LoadFromResource(Resource, this, &p, &n, TagList);
+	bool Status = LResourceLoad::LoadFromResource(Resource, this, &p, &n, TagList);
 	if (Status)
 	{
 		Name(n);
@@ -91,7 +91,7 @@ bool GDialog::LoadFromResource(int Resource, char *TagList)
 	return Status;
 }
 
-bool GDialog::OnRequestClose(bool OsClose)
+bool LDialog::OnRequestClose(bool OsClose)
 {
 	if (d->IsModal)
 	{
@@ -102,7 +102,7 @@ bool GDialog::OnRequestClose(bool OsClose)
 	return true;
 }
 
-int GDialog::DoModal(OsView OverrideParent)
+int LDialog::DoModal(OsView OverrideParent)
 {
 	d->ModalStatus = -1;
 	d->IsModal = true;
@@ -122,7 +122,7 @@ int GDialog::DoModal(OsView OverrideParent)
 	return d->ModalStatus;
 }
 
-void GDialog::EndModal(int Code)
+void LDialog::EndModal(int Code)
 {
 	if (d->IsModal)
 	{
@@ -137,18 +137,18 @@ void GDialog::EndModal(int Code)
 	}
 }
 
-int GDialog::DoModeless()
+int LDialog::DoModeless()
 {
 	d->IsModal = false;
 	return 0;
 }
 
-void GDialog::EndModeless(int Code)
+void LDialog::EndModeless(int Code)
 {
 	Quit(Code);
 }
 
-GMessage::Result GDialog::OnEvent(GMessage *Msg)
+GMessage::Result LDialog::OnEvent(GMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -159,16 +159,16 @@ GMessage::Result GDialog::OnEvent(GMessage *Msg)
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GControl::GControl(OsView view) : LView(view)
+LControl::LControl(OsView view) : LView(view)
 {
 	Pos.ZOff(10, 10);
 }
 
-GControl::~GControl()
+LControl::~LControl()
 {
 }
 
-GMessage::Result GControl::OnEvent(GMessage *Msg)
+GMessage::Result LControl::OnEvent(GMessage *Msg)
 {
 	switch (MsgCode(Msg))
 	{
@@ -176,7 +176,7 @@ GMessage::Result GControl::OnEvent(GMessage *Msg)
 	return 0;
 }
 
-LPoint GControl::SizeOfStr(const char *Str)
+LPoint LControl::SizeOfStr(const char *Str)
 {
 	int y = SysFont->GetHeight();
 	LPoint Pt(0, 0);
@@ -477,7 +477,7 @@ void LBitmap::OnMouseClick(LMouse &m)
 {
 	if (!m.Down() && GetParent())
 	{
-		GDialog *Dlg = dynamic_cast<GDialog*>(GetParent());
+		LDialog *Dlg = dynamic_cast<LDialog*>(GetParent());
 		if (Dlg) Dlg->OnNotify(this, 0);
 	}
 }

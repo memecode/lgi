@@ -105,7 +105,7 @@ bool LDialog::LoadFromResource(int Resource, char *Param)
 {
 	LAutoString n;
 	LRect p;
-	bool Status = GLgiRes::LoadFromResource(Resource, this, &p, &n);
+	bool Status = LResourceLoad::LoadFromResource(Resource, this, &p, &n);
 	if (Status)
 	{
 		Name(n);
@@ -274,23 +274,23 @@ void LDialog::EndModeless(int Code)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GControl::GControl(BView *view) : LView(view)
+LControl::LControl(BView *view) : LView(view)
 {
 	Pos.ZOff(10, 10);
 	SetId(0);
 	Sys_LastClick = 0;
 }
 
-GControl::~GControl()
+LControl::~LControl()
 {
 }
 
-GMessage::Result GControl::OnEvent(GMessage *Msg)
+GMessage::Result LControl::OnEvent(GMessage *Msg)
 {
 	return 0;
 }
 
-void GControl::MouseClickEvent(bool Down)
+void LControl::MouseClickEvent(bool Down)
 {
 	static int LastX = -1, LastY = -1;
 
@@ -332,7 +332,7 @@ void GControl::MouseClickEvent(bool Down)
 #include "LSlider.h"
 
 LSlider::LSlider(int id, int x, int y, int cx, int cy, const char *name, bool vert) :
-	GControl(new BViewRedir(this)),
+	LControl(new BViewRedir(this)),
 	ResObject(Res_Slider)
 {
 	SetId(id);

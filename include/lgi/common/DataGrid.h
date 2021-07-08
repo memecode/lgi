@@ -50,5 +50,3 @@ public:
 	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState);
 	ItemArray *GetDroppedItems();
 };
-
-#endif

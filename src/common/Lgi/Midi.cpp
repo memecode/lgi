@@ -1,5 +1,5 @@
-#include "Lgi.h"
-#include "GMidi.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Midi.h"
 
 #define MIDI_MIRROR_IN_TO_OUT		0
 

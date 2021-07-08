@@ -11,8 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include "Lgi.h"
-#include "LVariant.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Variant.h"
 
 class GdcTga : public GFilter
 {

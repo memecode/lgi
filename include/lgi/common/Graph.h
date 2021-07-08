@@ -1,7 +1,8 @@
 #ifndef _GGRAPH_H_
 #define _GGRAPH_H_
 
-#include "GDb.h"
+#include "lgi/common/Db.h"
+#include "lgi/common/Layout.h"
 
 class LGraph : public LLayout
 {

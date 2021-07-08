@@ -46,7 +46,7 @@ GSelectFont::GSelectFont(LView *parent, char *Face)
 	int DefSize = 0;
 	
 	Children.Insert(new GText(-1, 10, 10, -1, -1, "Font:"));
-	Children.Insert(CFont = new GCombo(100, 50, 10, 100, 20, "Font"));
+	Children.Insert(CFont = new LCombo(100, 50, 10, 100, 20, "Font"));
 	if (CFont)
 	{
 		int32 numFamilies = count_font_families();
@@ -80,7 +80,7 @@ GSelectFont::GSelectFont(LView *parent, char *Face)
 	}
 	
 	Children.Insert(new GText(-1, 10, 40, -1, -1, "Size:"));
-	Children.Insert(CSize = new GCombo(100, 50, 40, 100, 20, "Size"));
+	Children.Insert(CSize = new LCombo(100, 50, 40, 100, 20, "Size"));
 	if (CSize)
 	{
 		int n=0;
@@ -114,7 +114,7 @@ int GSelectFont::OnNotify(LViewI *Ctrl, int Flags)
 		{
 			if (CFont AND CSize)
 			{
-				strcpy(Font, CFont->GCombo::Name());
+				strcpy(Font, CFont->LCombo::Name());
 				Size = FontSizes[CSize->Value()];
 			}
 			

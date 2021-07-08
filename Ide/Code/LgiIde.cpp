@@ -1362,26 +1362,23 @@ public:
 			RecentFilesMenu->Empty();
 			int n=0;
 
-<<<<<<< working copy
 			if (RecentFiles.Length() == 0)
 				RecentFilesMenu->AppendItem(None, 0, false);
-=======
-			auto It = RecentFiles.begin();
-			char *f = *It;
-			if (f)
+			else
 			{
-				for (; f; f=*(++It))
+				auto It = RecentFiles.begin();
+				char *f = *It;
+				if (f)
 				{
-					if (LIsUtf8(f))
-						RecentFilesMenu->AppendItem(f, IDM_RECENT_FILE+n++, true);
-					else
-						RecentFiles.Delete(It);
+					for (; f; f=*(++It))
+					{
+						if (LIsUtf8(f))
+							RecentFilesMenu->AppendItem(f, IDM_RECENT_FILE+n++, true);
+						else
+							RecentFiles.Delete(It);
+					}
 				}
 			}
->>>>>>> destination
-			else
-				for (size_t i=0; i<RecentFiles.Length(); i++)
-					RecentFilesMenu->AppendItem(RecentFiles[i], IDM_RECENT_FILE+i);
 		}
 
 		if (RecentProjectsMenu)
@@ -1416,7 +1413,7 @@ public:
 		}
 	}
 
-	void Dump(GString::Array &a)
+	void Dump(LString::Array &a)
 	{
 		for (auto i: a)
 			printf("  %s\n", i.Get());
@@ -1427,51 +1424,17 @@ public:
 		if (!File)
 			return;
 
-<<<<<<< working copy
 		auto &Recent = IsProject ? RecentProjects : RecentFiles;
-		Recent.SetFixedLength(false);
-		for (size_t i=0; i<Recent.Length(); i++)
-=======
-		auto *Recent = IsProject ? &RecentProjects : &RecentFiles;
-		for (auto &f: *Recent)
->>>>>>> destination
+		for (auto it = Recent.begin(); it != Recent.end(); *++it)
 		{
-<<<<<<< working copy
-			if (!FileExists(Recent[i]))
-=======
-			if (f && LFileCompare(f, File) == 0)
->>>>>>> destination
-			{
-<<<<<<< working copy
-				Recent.DeleteAt(i--, true);
-=======
-				f = File;
-				UpdateMenus();
-				return;
->>>>>>> destination
-			}
-<<<<<<< working copy
-			else if (LFileCompare(Recent[i], File) == 0)
-			{
-				Recent.DeleteAt(i, true);
-				Recent.AddAt(0, File);
-
-				UpdateMenus();
-				return;
-			}
-=======
->>>>>>> destination
+			auto f = *it;
+			if (f && (!LIsUtf8(f) || LFileCompare(f, File) == 0))
+				Recent.Delete(it);
 		}
 
-<<<<<<< working copy
 		Recent.AddAt(0, File);
 		if (Recent.Length() > 10)
 			Recent.Length(10);
-=======
-		Recent->AddAt(0, File);
-		if (Recent->Length() > 10)
-			Recent->Length(10);
->>>>>>> destination
 
 		UpdateMenus();
 	}
@@ -1537,7 +1500,7 @@ public:
 	void SerializeStringList(const char *Opt, LString::Array *Lst, bool Write)
 	{
 		LVariant v;
-		GString Sep = ":";
+		LString Sep = ":";
 		if (Write)
 		{
 			if (Lst->Length() > 0)
@@ -1551,7 +1514,7 @@ public:
 		}
 		else if (Options.GetValue(Opt, v))
 		{
-			auto files = GString(v.Str()).Split(Sep);
+			auto files = LString(v.Str()).Split(Sep);
 			Lst->Length(0);
 			for (auto f: files)
 				if (f.Length() > 0)
@@ -2230,7 +2193,7 @@ int AppWnd::OnFixBuildErrors()
 
 				if (Fi)
 				{
-					GString Loc;
+					LString Loc;
 					Loc.Printf("%s:%i", Full.Get(), (int)LineNo);
 					if (FixHistory.Find(Loc))
 					{
@@ -2244,7 +2207,7 @@ int AppWnd::OnFixBuildErrors()
 						{
 							auto n = p.Last().SplitDelimit("\'");
 							auto wrongName = n[1];
-							GFile f(Full, O_READ);
+							LFile f(Full, O_READ);
 							auto Lines = f.Read().SplitDelimit("\n", -1, false);
 							f.Close();
 							if (LineNo <= Lines.Length())
@@ -2263,12 +2226,12 @@ int AppWnd::OnFixBuildErrors()
 								if (Pos > 0)
 								{
 									// Find where it went...
-									GString newPath;
+									LString newPath;
 									for (auto p: d->Projects)
 									{
 										const char *SubStr[] = { ".", "lgi/common" };
 
-										GArray<GString> IncPaths;
+										LArray<LString> IncPaths;
 										if (p->BuildIncludePaths(IncPaths, true, false, PlatformCurrent))
 										{
 											for (auto &inc: IncPaths)
@@ -2276,17 +2239,17 @@ int AppWnd::OnFixBuildErrors()
 												for (int sub=0; !newPath && sub<CountOf(SubStr); sub++)
 												{
 													char path[MAX_PATH];
-													LgiMakePath(path, sizeof(path), inc, SubStr[sub]);
-													LgiMakePath(path, sizeof(path), path, wrongName);
+													LMakePath(path, sizeof(path), inc, SubStr[sub]);
+													LMakePath(path, sizeof(path), path, wrongName);
 													if (LFileExists(path))
 													{
 														newPath = path + inc.Length() + 1;
 													}
 													else
 													{
-														GString minusFirst = wrongName(1,-1);
-														LgiMakePath(path, sizeof(path), inc, SubStr[sub]);
-														LgiMakePath(path, sizeof(path), path, minusFirst);
+														LString minusFirst = wrongName(1,-1);
+														LMakePath(path, sizeof(path), inc, SubStr[sub]);
+														LMakePath(path, sizeof(path), path, minusFirst);
 														if (LFileExists(path))
 														{
 															newPath = path + inc.Length() + 1;
@@ -2300,22 +2263,22 @@ int AppWnd::OnFixBuildErrors()
 									if (newPath)
 									{
 										newPath = newPath.Replace("\\", "/"); // Use unix dir chars
-										GString newLine = errLine(0, Pos) + newPath + errLine(Pos + wrongName.Length(), -1);
+										LString newLine = errLine(0, Pos) + newPath + errLine(Pos + wrongName.Length(), -1);
 										if (newLine == errLine)
 										{
 											Log->Print("Already changed '%s'.\n", wrongName.Get()); 
 										}
 										else
 										{
-											GString backup = GString(Full.Get()) + ".orig";
+											LString backup = LString(Full.Get()) + ".orig";
 											if (LFileExists(backup))
 												FileDev->Delete(backup);
 											LError Err;
 											if (FileDev->Move(Full, backup, &Err))
 											{
 												errLine = newLine;
-												GString newLines = GString("\n").Join(Lines);
-												GFile out(Full, O_WRITE);
+												LString newLines = LString("\n").Join(Lines);
+												LFile out(Full, O_WRITE);
 												out.Write(newLines);
 												Log->Print("Fixed '%s'->'%s' on ln %i in %s\n",
 													wrongName.Get(), newPath.Get(),
@@ -2344,7 +2307,7 @@ int AppWnd::OnFixBuildErrors()
 							{
 								for (int Offset = 0; (LineNo + Offset >= 1) && Offset >= -1; Offset--)
 								{
-									GString &s = Fi->Lines[LineNo+Offset-1];
+									LString &s = Fi->Lines[LineNo+Offset-1];
 									if (ReplaceWholeWord(s, i.key, i.value))
 									{
 										Log->Print("Renamed '%s' -> '%s' at %s:%i\n", i.key, i.value.Get(), Full.Get(), LineNo+Offset);
@@ -3384,7 +3347,7 @@ public:
 		Inst = NULL;
 	}
 
-	int OnNotify(GViewI *c, int f)
+	int OnNotify(LViewI *c, int f)
 	{
 		switch (c->GetId())
 		{

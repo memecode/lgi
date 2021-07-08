@@ -235,7 +235,7 @@ class VcFolder : public LTreeItem
 	bool ParseCountToTip(int Result, LString s, ParseParams *Params);
 	bool ParseUpdateSubs(int Result, LString s, ParseParams *Params);
 	bool ParseRemoteFind(int Result, LString s, ParseParams *Params);
-	bool ParseStartBranch(int Result, GString s, ParseParams *Params);
+	bool ParseStartBranch(int Result, LString s, ParseParams *Params);
 	void DoExpand();
 	
 public:

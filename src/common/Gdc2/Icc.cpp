@@ -24,8 +24,8 @@
 #endif
 
 #include <stdio.h>
-#include "Lgi.h"
-#include "GIcc.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Icc.h"
 
 #if USE_LCMS
 #include "lcms.h"

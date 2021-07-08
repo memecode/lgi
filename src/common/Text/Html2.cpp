@@ -14,7 +14,7 @@
 #include "LClipBoard.h"
 #include "LButton.h"
 #include "LEdit.h"
-#include "GCombo.h"
+#include "LCombo.h"
 
 #define DEBUG_TABLE_LAYOUT			0
 #define LUIS_DEBUG					0
@@ -3204,7 +3204,7 @@ void GTag::SetStyle()
 		case TAG_SELECT:
 		{
 			LgiAssert(!Ctrl);
-			Ctrl = new GCombo(Html->d->NextCtrlId++, 0, 0, 100, SysFont->GetHeight() + 8, NULL);
+			Ctrl = new LCombo(Html->d->NextCtrlId++, 0, 0, 100, SysFont->GetHeight() + 8, NULL);
 			CtrlType = CtrlSelect;
 			break;
 		}

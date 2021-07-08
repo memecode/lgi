@@ -185,10 +185,10 @@
     <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Font\EmojiFont.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Tools\GdcTools.cpp" />
-    <ClCompile Include="..\src\common\General\GProperties.cpp" />
+    <ClCompile Include="..\src\common\General\Properties.cpp" />
     <ClCompile Include="..\src\common\Images\Compare\ImageComparison.cpp" />
-    <ClCompile Include="..\src\common\INet\IHttp.cpp" />
-    <ClCompile Include="..\src\common\INet\OpenSSLSocket.cpp" />
+    <ClCompile Include="..\src\common\Net\Http.cpp" />
+    <ClCompile Include="..\src\common\Net\OpenSSLSocket.cpp" />
     <ClCompile Include="..\src\common\Lgi\LgiMain.cpp" />
     <ClCompile Include="..\src\common\Text\Emoji\EmojiMap.cpp" />
     <ClCompile Include="..\src\common\Text\Html.cpp" />

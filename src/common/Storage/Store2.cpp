@@ -14,7 +14,7 @@
 #ifndef WIN32
 #include "errno.h"
 #endif
-#include "GProgressDlg.h"
+#include "LProgressDlg.h"
 #include "LgiRes.h"
 
 #define STORE_DIR_ALLOC					8
@@ -1834,7 +1834,7 @@ bool StorageKitImpl::Compact(Progress *p, bool Interactive, StorageValidator *va
 		if (p)
 		{
 			GProgressPane *Pane = dynamic_cast<GProgressPane*>(p);
-			GProgressDlg *Dlg = Pane ? dynamic_cast<GProgressDlg*>(Pane->GetParent()) : 0;
+			LProgressDlg *Dlg = Pane ? dynamic_cast<LProgressDlg*>(Pane->GetParent()) : 0;
 			RemoveSpace = Dlg ? Dlg->Push() : p;
 
 			p->SetDescription("Building item list...");

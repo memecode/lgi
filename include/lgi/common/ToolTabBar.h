@@ -11,6 +11,8 @@
 #ifndef __TOOL_TAB_BAR_H
 #define __TOOL_TAB_BAR_H
 
+#include "lgi/common/ToolBar.h"
+
 class LToolTab : public LToolButton
 {
 	friend class LToolTabBar;

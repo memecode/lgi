@@ -1,7 +1,7 @@
 #ifndef _GHASHDOM_H_
 #define _GHASHDOM_H_
 
-#include "LVariant.h"
+#include "lgi/common/Variant.h"
 
 class GHashDom : public LHashTbl<ConstStrKey<char,false>, LVariant*>, public GDom
 {

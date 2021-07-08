@@ -178,7 +178,7 @@ LAutoPtr<LMemDC> CreateDiff(LViewI *Parent, LSurface *A, LSurface *B)
 
 				#define CompareCaseRgb(type, threshold) \
 					case Cs##type: \
-						CompareRgb<G##type>(A, B, c, LPoint(Cx, y), threshold); \
+						CompareRgb<L##type>(A, B, c, LPoint(Cx, y), threshold); \
 						break
 				
 				CompareCaseRgb(Rgb24, DIFF_LARGE_8BIT);
@@ -194,7 +194,7 @@ LAutoPtr<LMemDC> CreateDiff(LViewI *Parent, LSurface *A, LSurface *B)
 
 				#define CompareCaseRgba(type, threshold) \
 					case Cs##type: \
-						CompareRgba<G##type>(A, B, c, LPoint(Cx, y), threshold); \
+						CompareRgba<L##type>(A, B, c, LPoint(Cx, y), threshold); \
 						break
 				
 				CompareCaseRgba(Rgba32, DIFF_LARGE_8BIT);
@@ -295,14 +295,14 @@ class CmpZoomView : public LZoomView
 	CompareView *View;
 	
 public:
-	CmpZoomView(GZoomViewCallback *callback, CompareView *view);
+	CmpZoomView(LZoomViewCallback *callback, CompareView *view);
 	void OnMouseClick(LMouse &m);
 	void OnMouseMove(LMouse &m);
 };
 
 class CompareView : public LLayout
 {
-	GZoomViewCallback *Callback;
+	LZoomViewCallback *Callback;
 	LEdit *AName, *BName, *CName;
 	LAutoPtr<LSurface> A, B, C;
 	CmpZoomView *AView, *BView, *CView;
@@ -313,7 +313,7 @@ class CompareView : public LLayout
 	LPointF DocPos;
 	
 public:
-	CompareView(GZoomViewCallback *callback, const char *FileA = NULL, const char *FileB = NULL)
+	CompareView(LZoomViewCallback *callback, const char *FileA = NULL, const char *FileB = NULL)
 	{
 		Callback = callback;
 		AName = BName = CName = NULL;
@@ -592,7 +592,7 @@ public:
 			#define DescribeCase(type, method) \
 				case Cs##type: \
 				{ \
-					G##type *p = (G##type*)((*pDC)[Pos.y]); \
+					L##type *p = (L##type*)((*pDC)[Pos.y]); \
 					if (p) method(s, p + Pos.x, Diff); \
 					break; \
 				}
@@ -755,7 +755,7 @@ public:
 	}
 };
 
-CmpZoomView::CmpZoomView(GZoomViewCallback *callback, CompareView *view) : LZoomView(callback)
+CmpZoomView::CmpZoomView(LZoomViewCallback *callback, CompareView *view) : LZoomView(callback)
 {
 	View = view;
 }
@@ -850,7 +850,7 @@ struct CompareThread : public LThread
 	}
 };
 
-struct ImageCompareDlgPriv : public GZoomViewCallback
+struct ImageCompareDlgPriv : public LZoomViewCallback
 {
 	LCombo *l, *r;
 	LList *lst;
