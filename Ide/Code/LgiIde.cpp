@@ -1425,7 +1425,7 @@ public:
 			return;
 
 		auto &Recent = IsProject ? RecentProjects : RecentFiles;
-		for (auto it = Recent.begin(); it != Recent.end(); *++it)
+		for (auto it = Recent.begin(); it != Recent.end(); ++it)
 		{
 			auto f = *it;
 			if (f && (!LIsUtf8(f) || LFileCompare(f, File) == 0))
