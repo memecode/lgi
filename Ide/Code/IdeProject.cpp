@@ -624,7 +624,13 @@ public:
 				}
 			}
 
-			
+			#if 0
+			/*
+			Currently this code is adding extra paths that are covered by the official 'IncludePaths'
+			in addition to relative paths in the actual #include parameter. e.g.
+				#include "lgi/common/SomeHeader.h"
+			Hence disabling it for the time being.
+			*/
 			// Add paths of headers
 			for (int i=0; i<Files.Length(); i++)
 			{
@@ -664,6 +670,7 @@ public:
 					}
 				}
 			}
+			#endif
 
 			LString::Array Incs;
 			for (auto i: Inc)
