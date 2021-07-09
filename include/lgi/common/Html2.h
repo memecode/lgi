@@ -3,8 +3,8 @@
 #ifndef _GHTML2_H
 #define _GHTML2_H
 
-#include "GDocView.h"
-#include "GHtmlCommon.h"
+#include "lgi/common/DocView.h"
+#include "lgi/common/HtmlCommon.h"
 
 namespace Html2
 {

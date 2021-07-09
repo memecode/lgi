@@ -5,9 +5,9 @@
 	</Node>
 	<Node Name="Source" Type="1" Platforms="15" Id="1">
 		<Node Name="Lgi" Type="1" Platforms="15" Id="2">
-			<Node File="../src/common/Widgets/GControlTree.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Lgi/GSubProcess.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Text/GXmlTreeUi.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Widgets/ControlTree.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Lgi/SubProcess.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Text/XmlTreeUi.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
 		</Node>
@@ -23,7 +23,7 @@
 		<Node File="./Src/VcFolder.cpp" Type="2" Platforms="15" />
 		<Node File="./Src/VcFolder.h" Type="3" Platforms="15" />
 	</Node>
-	<Node File="..\Lgi.xml" Type="4" Platforms="15" />
+	<Node File="../Lgi.xml" Type="4" Platforms="15" />
 	<Node Name="Resources" Type="1" Platforms="15" Id="1">
 		<Node File="./Resources/icon32.png" Type="6" Platforms="15" />
 		<Node File="./installer-zip.py" Type="8" Platforms="15" />
@@ -50,10 +50,6 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Arguments />
-			<Defines />
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -64,11 +60,11 @@
 ../include</Release>
 				</All>
 				<Linux>
-					<Debug>../include/linux
-../include/linux/Gtk
+					<Debug>../include/lgi/linux
+../include/lgi/linux/Gtk
 </Debug>
-					<Release>../include/linux
-../include/linux/Gtk
+					<Release>../include/lgi/linux
+../include/lgi/linux/Gtk
 </Release>
 				</Linux>
 				<Windows>
@@ -85,7 +81,6 @@
 /usr/lib/x86_64-linux-gnu/gstreamer-1.0/include
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
-				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -102,23 +97,13 @@
 					<Debug>ssh</Debug>
 					<Release>ssh</Release>
 				</All>
-				<Windows />
 			</Libraries>
 			<TargetType>
 				<All>Executable</All>
 			</TargetType>
-			<LibraryPaths>
-				<All />
-				<Windows />
-			</LibraryPaths>
-			<TargetName>
-				<Windows />
-			</TargetName>
-			<ApplicationIcon />
-			<Defines>
-				<All />
-				<Windows />
-			</Defines>
+			<LibraryPaths />
+			<TargetName />
+			<Defines />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -130,27 +115,13 @@
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<ShowWhiteSpace />
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
 		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Windows />
-			</PostBuildCommands>
+			<PostBuildCommands />
 		</Advanced>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
+		<Remote />
 		<Debug>
-			<Environment />
-			<Arguments>
-				<All />
-			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
+			<Arguments />
 		</Debug>
 	</Settings>
 </Project>

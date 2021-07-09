@@ -6,7 +6,6 @@
 #include "lgi/common/Scripting.h"
 #include "lgi/common/Box.h"
 #include "lgi/common/TextView3.h"
-#include "resdefs.h"
 #include "lgi/common/ProgressDlg.h"
 #include "lgi/common/Combo.h"
 #include "lgi/common/Net.h"
@@ -19,6 +18,7 @@
 #include "lgi/common/EmojiFont.h"
 #include "lgi/common/Http.h"
 #include "lgi/common/Menu.h"
+#include "resdefs.h"
 
 #define HAS_LOG_VIEW			0
 #define HAS_IMAGE_LOADER		1

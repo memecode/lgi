@@ -1,8 +1,8 @@
 #ifndef _GHTML2_PRIV_H_
 #define _GHTML2_PRIV_H_
 
-#include "LCss.h"
-#include "GToken.h"
+#include "lgi/common/Css.h"
+#include "lgi/common/Token.h"
 
 namespace Html2
 {

@@ -2,27 +2,27 @@
 <Project TargetType="0" TabSize="4" IndentSize="4" UseTabs="1" ShowWhitespace="0" Makefile="./Makefile" TargetName="test-suite" IncludePaths="../../../../Lgi/include/common&#10;../../../../Lgi/include/linux/Xcb&#10;" Exe="./test-suite" Compiler="0">
 	<Node Name="Lgi" Type="1" Open="1" Platforms="7" Id="4">
 		<Node Name="Html" Type="1" Platforms="7" Open="1" Id="2">
-			<Node File="../src/common/Text/GHtml.cpp" Type="2" Platforms="7" />
-			<Node File="../include/common/GHtml.h" Type="3" Platforms="7" />
-			<Node File="../src/common/Text/GHtmlCommon.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Text/GHtmlParser.cpp" Type="2" Platforms="15" />
-			<Node File="../include/common/GHtmlPriv.h" Type="3" Platforms="7" />
+			<Node File="../src/common/Text/Html.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Text/HtmlCommon.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Text/HtmlParser.cpp" Type="2" Platforms="15" />
+			<Node File="../include/lgi/common/HtmlPriv.h" Type="3" Platforms="7" />
+			<Node File="../include/lgi/common/Http.h" Type="3" Platforms="7" />
 		</Node>
 		<Node Name="Scripting" Type="1" Platforms="15" Id="1">
-			<Node File="../src/common/Coding/GScriptLibrary.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Coding/GScriptVM.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Coding/GScriptCompiler.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Coding/GLexCpp.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Coding/ScriptLibrary.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Coding/ScriptVM.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Coding/ScriptCompiler.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Coding/LexCpp.cpp" Type="2" Platforms="15" />
 		</Node>
+		<Node File="../src/common/Gdc2/Font/EmojiFont.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Text/Emoji/EmojiMap.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Text/Emoji/EmojiTools.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Widgets/GZoomView.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/INet/IHttp.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Net/Http.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Images/Compare/ImageComparison.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Gdc2/Font/LEmojiFont.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="7" />
-		<Node File="../src/common/INet/OpenSSLSocket.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Net/OpenSSLSocket.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Widgets/ZoomView.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Resources" Type="1" Platforms="15" Id="1">
 		<Node File="./HtmlTestSuite.lr8" Type="5" Platforms="15" />
@@ -30,10 +30,8 @@
 	<Node Name="Source" Type="1" Open="1" Platforms="7" Id="1">
 		<Node File="./TestSuite.cpp" Type="2" Platforms="7" />
 	</Node>
-	<Node Name="Tests" Type="1" Platforms="15" Id="1">
-		<Node File="./Files/whistle.html" Type="7" Platforms="15" />
-	</Node>
-	<Node File="..\Lgi.xml" Type="4" Platforms="15" />
+	<Node Name="Tests" Type="1" Platforms="15" Id="1" />
+	<Node File="../Lgi.xml" Type="4" Platforms="15" />
 	<Settings>
 		<Build>
 			<IncludePaths>
@@ -42,10 +40,12 @@
 					<Release>../include</Release>
 				</All>
 				<Linux>
-					<Debug>../include/linux
-../include/linux/Gtk</Debug>
-					<Release>../include/linux
-../include/linux/Gtk</Release>
+					<Debug>../include/lgi/linux
+../include/lgi/linux/Gtk
+</Debug>
+					<Release>../include/lgi/linux
+../include/lgi/linux/Gtk
+</Release>
 				</Linux>
 				<Windows>
 					<Debug>../include/lgi/win</Debug>
@@ -59,7 +59,6 @@
 					<Release>/usr/include/gstreamer-1.0
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
-				<Windows />
 			</SystemIncludes>
 			<TargetType>
 				<All>Executable</All>
@@ -71,25 +70,13 @@
 					<Release>-static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
-				<All />
-				<Windows />
 			</Libraries>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-html-test-suite</Debug>
 					<Release>lgi-html-test-suite</Release>
 				</Linux>
-				<Windows />
 			</TargetName>
-			<Defines>
-				<All />
-				<Windows />
-			</Defines>
-			<LibraryPaths>
-				<All />
-				<Windows />
-			</LibraryPaths>
-			<ApplicationIcon />
 		</Build>
 		<General>
 			<Makefile>
@@ -101,37 +88,7 @@
 					<Debug>./HtmlTestSuite</Debug>
 					<Release>./HtmlTestSuite</Release>
 				</Linux>
-				<Windows />
 			</Executable>
-			<Compiler />
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
-		<Advanced>
-			<PostBuildCommands>
-				<Windows />
-			</PostBuildCommands>
-			<OtherMakefileRules />
-		</Advanced>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
-		<Debug>
-			<Arguments>
-				<All />
-			</Arguments>
-			<Environment />
-			<DebugAdmin />
-			<InitialDir />
-		</Debug>
-		<Editor>
-			<TabSize />
-			<IndentSize />
-			<ShowWhiteSpace />
-			<UseHardTabs />
-			<CommentFile />
-			<CommentFunction />
-		</Editor>
 	</Settings>
 </Project>

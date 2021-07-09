@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Project TabSize="4" IndentSize="4" UseTabs="1" ShowWhitespace="0" Makefile="./Makefile" Exe="./lgires" TargetType="0" TargetName="lgires" IncludePaths="../include/common&#10;../include/linux/X&#10;./Code&#10;" Compiler="0">
 	<Node Name="Resources" Type="1" Open="0" Platforms="7" Id="1">
-		<Node File="./Code/lgires.lr8" Type="5" Platforms="7" />
+		<Node File="./Resources/lgires.lr8" Type="5" Platforms="7" />
 	</Node>
 	<Node Name="Objects" Type="1" Open="1" Platforms="7" Id="2">
 		<Node Name="Dialog" Type="1" Open="0" Platforms="7" Id="3">
@@ -25,14 +25,14 @@
 		<Node File="./Code/ShowLanguages.cpp" Type="2" Platforms="7" />
 	</Node>
 	<Node Name="Lgi" Type="1" Open="1" Platforms="7" Id="6">
-		<Node File="../src/common/Lgi/GAbout.cpp" Type="2" Platforms="7" />
-		<Node File="../src/common/Lgi/GDocApp.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Lgi/About.cpp" Type="2" Platforms="7" />
+		<Node File="../src/common/Lgi/DocApp.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Gdc2/Filters/Gif.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Lgi/GOptionsFile.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Lgi/OptionsFile.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Gdc2/Filters/Lzw.cpp" Type="2" Platforms="15" />
 	</Node>
-	<Node File="..\Lgi.xml" Type="4" Platforms="15" />
+	<Node File="../Lgi.xml" Type="4" Platforms="15" />
 	<Settings>
 		<General>
 			<Makefile>
@@ -44,7 +44,6 @@
 					<Debug>./lgires</Debug>
 					<Release>./lgires</Release>
 				</Linux>
-				<Windows />
 			</Executable>
 			<Compiler>
 				<Linux>gcc</Linux>
@@ -67,11 +66,12 @@ Resources</Debug>
 Resources</Release>
 				</All>
 				<Linux>
-					<Debug>../include/linux
-../include/linux/Gtk
+					<Debug>../include/lgi/linux
+../include/lgi/linux/Gtk
+
 </Debug>
-					<Release>../include/linux
-../include/linux/Gtk
+					<Release>../include/lgi/linux
+../include/lgi/linux/Gtk
 </Release>
 				</Linux>
 				<Windows>
@@ -94,29 +94,26 @@ pthread
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
 				<All />
-				<Windows />
 			</Libraries>
 			<LibraryPaths>
 				<All />
-				<Windows />
+				<Linux />
 			</LibraryPaths>
 			<TargetName>
 				<Linux>
 					<Debug>lgires</Debug>
 					<Release>lgires</Release>
 				</Linux>
-				<Windows />
 			</TargetName>
 			<SystemIncludes>
 				<Linux>
 					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
-				<Windows />
 			</SystemIncludes>
 			<Defines>
 				<All />
-				<Windows />
+				<Linux />
 			</Defines>
 			<ApplicationIcon />
 		</Build>
@@ -138,7 +135,7 @@ pthread
 		</Editor>
 		<Advanced>
 			<PostBuildCommands>
-				<Windows />
+				<Linux />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>

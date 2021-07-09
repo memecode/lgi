@@ -3,18 +3,18 @@
 #include <ctype.h>
 #include <math.h>
 
-#include "Lgi.h"
-#include "GHtml2.h"
-#include "GHtmlPriv2.h"
-#include "GToken.h"
-#include "LScrollBar.h"
-#include "LVariant.h"
-#include "GFindReplaceDlg.h"
-#include "Emoji.h"
-#include "LClipBoard.h"
-#include "LButton.h"
-#include "LEdit.h"
-#include "LCombo.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Html2.h"
+#include "lgi/common/HtmlPriv2.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/FindReplaceDlg.h"
+#include "lgi/common/Emoji.h"
+#include "lgi/common/ClipBoard.h"
+#include "lgi/common/Button.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/Combo.h"
 
 #define DEBUG_TABLE_LAYOUT			0
 #define LUIS_DEBUG					0

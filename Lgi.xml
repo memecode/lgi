@@ -23,7 +23,7 @@
 			</Node>
 			<Node Name="File" Type="1" Platforms="15" Open="0" Id="8">
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="10">
-					<Node File="./src/linux/General/GFile.cpp" Type="2" Platforms="2" />
+					<Node File="./src/linux/General/File.cpp" Type="2" Platforms="2" />
 					<Node File="./src/linux/General/ShowFileProp_Linux.cpp" Type="2" Platforms="2" />
 				</Node>
 				<Node Name="Mac" Type="1" Platforms="15" Id="1">
@@ -75,7 +75,7 @@
 			</Node>
 			<Node Name="Memory Subsystem" Type="1" Platforms="15" Open="0" Id="18">
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="20">
-					<Node File="./src/linux/General/GMem.cpp" Type="2" Platforms="2" />
+					<Node File="./src/linux/General/Mem.cpp" Type="2" Platforms="2" />
 				</Node>
 				<Node Name="Property List" Type="1" Platforms="15" Open="0" Id="21">
 					<Node File=".\src\common\General\Properties.cpp" Type="2" Platforms="15" />
@@ -271,7 +271,7 @@
 		</Node>
 		<Node Name="Text" Type="1" Platforms="15" Open="0" Id="61">
 			<Node File=".\src\common\Text\String.cpp" Type="2" Platforms="15" />
-			<Node File=".\include\lgi\common\String.h" Type="3" Platforms="15" />
+			<Node File="./include/lgi/common/LgiString.h" Type="3" Platforms="15" />
 			<Node File=".\include\lgi\common\StringClass.h" Type="3" Platforms="15" />
 			<Node File=".\include\lgi\common\TextFile.h" Type="3" Platforms="15" />
 			<Node File=".\src\common\Text\Token.cpp" Type="2" Platforms="15" />
@@ -421,7 +421,7 @@
 				<All>0</All>
 			</DebugAdmin>
 			<Executable>
-				<Mac />
+				<Linux />
 			</Executable>
 			<CCrossCompiler />
 			<CppCrossCompiler />
@@ -433,16 +433,17 @@
 					<Release>./include</Release>
 				</All>
 				<Linux>
-					<Debug>include/lgi/linux
-include/lgi/linux/Gtk</Debug>
-					<Release>include/lgi/linux
-include/lgi/linux/Gtk</Release>
+					<Debug>./include/lgi/linux
+./include/lgi/linux/Gtk
+./private/linux</Debug>
+					<Release>./include/lgi/linux
+./include/lgi/linux/Gtk
+./private/linux</Release>
 				</Linux>
 				<Windows>
 					<Debug>include/lgi/win</Debug>
 					<Release>include/lgi/win</Release>
 				</Windows>
-				<Mac />
 			</IncludePaths>
 			<SystemIncludes>
 				<Linux>
@@ -453,7 +454,6 @@ include/lgi/linux/Gtk</Release>
 /usr/include/libappindicator3-0.1
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
-				<Mac />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -467,39 +467,37 @@ appindicator3
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
 				<All />
-				<Mac />
 			</Libraries>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-gtk3</Debug>
 					<Release>lgi-gtk3</Release>
 				</Linux>
-				<Mac />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
 			</TargetType>
-			<LibraryPaths>
-				<All />
-				<Mac />
-			</LibraryPaths>
 			<Defines>
 				<All />
-				<Mac />
+				<Linux />
 			</Defines>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
 			<ApplicationIcon />
 		</Build>
 		<Advanced>
-			<PostBuildCommands>
-				<Mac />
-			</PostBuildCommands>
 			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
 		</Advanced>
 		<Debug>
+			<Environment />
 			<Arguments>
 				<All />
 			</Arguments>
-			<Environment />
 			<DebugAdmin />
 			<InitialDir />
 		</Debug>

@@ -26,16 +26,12 @@ ifeq ($(Build),Debug)
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
-		-Iinclude/lgi/linux/Gtk \
-		-Iinclude/lgi/linux \
 		`pkg-config --cflags gtk+-3.0` \
 		-I/usr/include/libappindicator3-0.1 \
 		-I/usr/include/gstreamer-1.0 \
-		-I./src/common/Hash/sha1 \
-		-I./src/common/Hash/md5 \
 		-I./private/linux \
 		-I./include/lgi/linux/Gtk \
-		-I./include/lgi/common \
+		-I./include/lgi/linux \
 		-I./include
 else
 	Flags += -s -Os -std=c++14
@@ -46,16 +42,12 @@ else
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
-		-Iinclude/lgi/linux/Gtk \
-		-Iinclude/lgi/linux \
 		`pkg-config --cflags gtk+-3.0` \
 		-I/usr/include/libappindicator3-0.1 \
 		-I/usr/include/gstreamer-1.0 \
-		-I./src/common/Hash/sha1 \
-		-I./src/common/Hash/md5 \
 		-I./private/linux \
 		-I./include/lgi/linux/Gtk \
-		-I./include/lgi/common \
+		-I./include/lgi/linux \
 		-I./include
 endif
 
@@ -63,7 +55,7 @@ endif
 Depends =	DateTime.o \
 			DragAndDrop.o \
 			DragAndDropCommon.o \
-			GFile.o \
+			File.o \
 			ShowFileProp_Linux.o \
 			ExeCheck.o \
 			FileCommon.o \
@@ -76,7 +68,7 @@ Depends =	DateTime.o \
 			ViewCommon.o \
 			AppCommon.o \
 			Library.o \
-			GMem.o \
+			Mem.o \
 			Properties.o \
 			Containers.o \
 			Menu.o \
@@ -213,13 +205,13 @@ DragAndDropCommon.o : ./src/common/Lgi/DragAndDropCommon.cpp ./include/lgi/commo
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GFile.o : ./src/linux/General/GFile.cpp ./include/lgi/common/LgiDefs.h \
+File.o : ./src/linux/General/File.cpp ./include/lgi/common/LgiDefs.h \
 	./include/lgi/common/File.h \
 	./include/lgi/common/Containers.h \
 	./include/lgi/common/Token.h \
 	./include/lgi/common/Gdc2.h \
 	./include/lgi/common/LgiCommon.h \
-	./include/lgi/common/String.h \
+	./include/lgi/common/LgiString.h \
 	./include/lgi/common/DateTime.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
@@ -315,24 +307,24 @@ Library.o : ./src/common/Lgi/Library.cpp ./include/lgi/common/Lgi.h \
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GMem.o : ./src/linux/General/GMem.cpp ./include/lgi/common/LgiDefs.h \
-	./include/lgi/linux/Gtk/LgiOsDefs.h \
+Mem.o : ./src/linux/General/Mem.cpp ./include/lgi/common/LgiDefs.h \
+	./include/lgi/mac/cocoa/LgiOsDefs.h \
 	./include/lgi/common/Mem.h \
 	./include/lgi/common/Mutex.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-Properties.o : ./src/common/General/Properties.cpp ./include/lgi/linux/Gtk/LgiOsDefs.h \
+Properties.o : ./src/common/General/Properties.cpp ./include/lgi/mac/cocoa/LgiOsDefs.h \
 	./include/lgi/common/File.h \
 	./include/lgi/common/Properties.h \
-	./include/lgi/common/String.h \
+	./include/lgi/common/LgiString.h \
 	./include/lgi/common/Variant.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
 Containers.o : ./src/common/General/Containers.cpp ./include/lgi/common/Mem.h \
 	./include/lgi/common/Containers.h \
-	./include/lgi/common/String.h \
+	./include/lgi/common/LgiString.h \
 	./include/lgi/common/LgiCommon.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
@@ -451,7 +443,7 @@ GuiUtils.o : ./src/common/Lgi/GuiUtils.cpp ./include/lgi/common/Lgi.h \
 
 Object.o : ./src/common/Lgi/Object.cpp ./include/lgi/common/Gdc2.h \
 	./include/lgi/common/LgiCommon.h \
-	./include/lgi/common/String.h
+	./include/lgi/common/LgiString.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -662,7 +654,7 @@ Alpha.o : ./src/common/Gdc2/Alpha.cpp ./include/lgi/common/Gdc2.h \
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
 Filter.o : ./src/common/Gdc2/Filters/Filter.cpp ./include/lgi/common/Lgi.h \
-	./include/lgi/common/String.h \
+	./include/lgi/common/LgiString.h \
 	./include/lgi/common/Variant.h \
 	./include/lgi/common/ClipBoard.h \
 	./include/lgi/common/Token.h \
@@ -676,7 +668,7 @@ Rect.o : ./src/common/Gdc2/Rect.cpp ./include/lgi/common/Gdc2.h \
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
 GMemDC.o : ./src/linux/Gtk/GMemDC.cpp ./include/lgi/common/Gdc2.h \
-	./include/lgi/common/String.h
+	./include/lgi/common/LgiString.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -755,8 +747,7 @@ Rand.o : ./src/common/Lgi/Rand.cpp ./include/lgi/common/Mem.h \
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
 String.o : ./src/common/Text/String.cpp ./include/lgi/common/Mem.h \
-	./include/lgi/linux/Gtk/LgiOsDefs.h \
-	./include/lgi/common/String.h \
+	./include/lgi/common/LgiString.h \
 	./include/lgi/common/Containers.h \
 	./include/lgi/common/LgiCommon.h
 	@echo $(<F) [$(Build)]
@@ -765,7 +756,7 @@ String.o : ./src/common/Text/String.cpp ./include/lgi/common/Mem.h \
 Token.o : ./src/common/Text/Token.cpp ./include/lgi/common/Mem.h \
 	./include/lgi/common/Containers.h \
 	./include/lgi/common/Token.h \
-	./include/lgi/common/String.h
+	./include/lgi/common/LgiString.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -1055,18 +1046,18 @@ Uri.o : ./src/common/Net/Uri.cpp ./include/lgi/common/Lgi.h \
 Net.o : ./src/common/Net/Net.cpp ./include/lgi/common/File.h \
 	./include/lgi/common/Net.h \
 	./include/lgi/common/Token.h \
-	./include/lgi/common/String.h \
+	./include/lgi/common/LgiString.h \
 	./include/lgi/common/LgiCommon.h \
-	./include/lgi/linux/Gtk/LgiOsClasses.h \
+	./include/lgi/mac/cocoa/LgiOsClasses.h \
 	./include/lgi/common/RegKey.h \
 	./include/lgi/common/LgiNetInc.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
 NetTools.o : ./src/common/Net/NetTools.cpp ./include/lgi/common/Mem.h \
-	./include/lgi/linux/Gtk/LgiOsDefs.h \
+	./include/lgi/mac/cocoa/LgiOsDefs.h \
 	./include/lgi/common/NetTools.h \
-	./include/lgi/common/String.h
+	./include/lgi/common/LgiString.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -1084,26 +1075,37 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/DateTime.h \
 	./include/lgi/common/Containers.h \
 	./include/lgi/common/HashTable.h \
-	./include/lgi/common/String.h
+	./include/lgi/common/LgiString.h
 
 ./include/lgi/common/Bitmap.h : 
 
-./include/lgi/common/DisplayString.h : ./include/lgi/common/Font.h
-
 ./include/lgi/common/GdcTools.h : 
 
-./include/lgi/common/Lgi.h : ./include/lgi/linux/Gtk/LgiOsDefs.h \
+./include/lgi/common/Lgi.h : ./include/lgi/mac/cocoa/LgiOsDefs.h \
 	./include/lgi/common/LgiMsgs.h \
 	./include/lgi/common/LgiDefs.h \
 	./include/lgi/common/Mem.h \
-	./include/lgi/common/String.h \
+	./include/lgi/common/LgiString.h \
 	./include/lgi/common/File.h \
 	./include/lgi/common/Gdc2.h \
 	./include/lgi/common/Font.h \
 	./include/lgi/common/LgiClasses.h \
 	./include/lgi/common/LgiCommon.h
 
-./include/lgi/common/Gdc2.h : ./include/lgi/linux/Gtk/LgiOsDefs.h \
+./include/lgi/common/Combo.h : 
+
+./include/lgi/common/ThreadEvent.h : 
+
+./include/lgi/common/StringLayout.h : ./include/lgi/common/DisplayString.h \
+	./include/lgi/common/Css.h \
+	./include/lgi/common/FontCache.h
+
+./include/lgi/common/LgiDefs.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/common/AutoPtr.h
+
+./include/lgi/common/LgiMsgs.h : 
+
+./include/lgi/common/Gdc2.h : ./include/lgi/mac/cocoa/LgiOsDefs.h \
 	./include/lgi/common/LgiInc.h \
 	./include/lgi/common/LgiUiBase.h \
 	./include/lgi/common/File.h \
@@ -1121,32 +1123,36 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/CairoSurface.h \
 	./include/lgi/common/Filter.h
 
-./include/lgi/common/Point.h : 
+./include/lgi/mac/cocoa/LgiOsDefs.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/common/LgiDefs.h \
+	./include/lgi/common/AutoPtr.h \
+	./include/lgi/mac/cocoa/ObjCWrapper.h \
+	./include/lgi/common/Message.h
 
-./include/lgi/common/Combo.h : 
-
-./include/lgi/common/ThreadEvent.h : 
-
-./include/lgi/common/StringLayout.h : ./include/lgi/common/DisplayString.h \
-	./include/lgi/common/Css.h \
-	./include/lgi/common/FontCache.h
+./include/lgi/mac/cocoa/LgiOsClasses.h : 
 
 ./include/lgi/common/RegKey.h : ./include/lgi/common/Containers.h
 
-./include/lgi/linux/Gtk/LgiOsClasses.h : 
+./include/lgi/common/Core.h : 
 
-./include/lgi/common/Rect.h : ./include/lgi/common/Point.h
+./include/lgi/common/LgiCommon.h : ./include/lgi/common/Mem.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/common/LgiString.h \
+	./include/lgi/common/StringClass.h \
+	./include/lgi/common/CurrentTime.h \
+	./include/lgi/common/LgiUiBase.h
 
-./include/lgi/common/ColourSpace.h : 
+./include/lgi/common/HashTable.h : ./include/lgi/common/Mem.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/common/LgiString.h
 
 ./include/lgi/common/Slider.h : 
 
 ./include/lgi/common/DomFields.h : 
 
-./include/lgi/common/Button.h : 
+./include/lgi/common/Point.h : 
 
-./include/lgi/common/FontCache.h : ./include/lgi/common/App.h \
-	./include/lgi/common/Font.h
+./include/lgi/common/Button.h : 
 
 ./include/lgi/common/Input.h : ./include/lgi/common/Dialog.h \
 	./include/lgi/common/Edit.h
@@ -1155,18 +1161,8 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/Base64.h \
 	./include/lgi/common/Progress.h \
 	./include/lgi/common/Variant.h \
-	./include/lgi/common/OAuth2.h
-
-./include/lgi/common/Variant.h : ./include/lgi/common/Dom.h \
-	./include/lgi/common/DateTime.h \
-	./include/lgi/common/Containers.h \
-	./include/lgi/common/HashTable.h \
-	./include/lgi/common/String.h
-
-./include/lgi/common/LgiDefs.h : ./include/lgi/common/LgiInc.h \
-	./include/lgi/common/AutoPtr.h
-
-./include/lgi/common/AutoPtr.h : 
+	./include/lgi/common/OAuth2.h \
+	./include/lgi/common/Store3Defs.h
 
 ./include/lgi/common/DragAndDrop.h : ./include/lgi/common/Variant.h
 
@@ -1177,6 +1173,8 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/TableLayout.h \
 	./include/lgi/common/ProgressView.h \
 	./include/lgi/common/Button.h
+
+./include/lgi/common/ProgressView.h : ./include/lgi/common/Progress.h
 
 ./include/lgi/common/SkinEngine.h : ./include/lgi/common/List.h \
 	./include/lgi/common/Button.h \
@@ -1190,41 +1188,31 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/Tree.h \
 	./include/lgi/common/Combo.h
 
-./include/lgi/common/TabView.h : ./include/lgi/common/Layout.h
-
-./include/lgi/common/Containers.h : ./include/lgi/common/LgiInc.h \
-	./include/lgi/linux/Gtk/LgiOsDefs.h \
-	./include/lgi/common/Stream.h
-
-./include/lgi/common/Net.h : ./include/lgi/common/LgiNetInc.h \
-	./include/lgi/common/LgiInterfaces.h \
-	./include/lgi/common/Mem.h \
-	./include/lgi/common/Containers.h \
-	./include/lgi/common/Stream.h \
-	./include/lgi/common/String.h \
-	./include/lgi/common/Cancel.h \
-	./include/lgi/common/HashTable.h
-
 ./include/lgi/linux/SymLookup.h : ./include/lgi/common/SubProcess.h
+
+./include/lgi/common/LgiClasses.h : ./include/lgi/common/Mutex.h \
+	./include/lgi/mac/cocoa/LgiOsClasses.h \
+	./include/lgi/common/Mem.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/common/DragAndDrop.h \
+	./include/lgi/common/TrayIcon.h \
+	./include/lgi/common/Input.h
+
+./include/lgi/mac/cocoa/LgiOsClasses.h : 
 
 ./include/lgi/common/DocView.h : ./include/lgi/common/Variant.h \
 	./include/lgi/common/Notifications.h \
 	./include/lgi/common/Thread.h \
 	./include/lgi/common/Layout.h
 
-./include/lgi/common/Notifications.h : 
+./include/lgi/common/Tree.h : ./include/lgi/common/ItemContainer.h
 
-./include/lgi/common/List.h : ./include/lgi/common/Mem.h \
-	./include/lgi/common/Array.h \
-	./include/lgi/common/Popup.h \
-	./include/lgi/common/DisplayString.h \
+./include/lgi/common/ItemContainer.h : ./include/lgi/common/Popup.h \
+	./include/lgi/common/Notifications.h \
 	./include/lgi/common/Css.h \
-	./include/lgi/common/ItemContainer.h \
-	./include/lgi/common/UnrolledList.h
+	./include/lgi/common/ImageList.h
 
-./include/lgi/common/UnrolledList.h : 
-
-./include/lgi/common/Slider.h : 
+./include/lgi/common/Popup.h : ./include/lgi/common/Layout.h
 
 ./include/lgi/common/LgiInc.h : 
 
@@ -1232,17 +1220,15 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/Mem.h \
 	./include/lgi/common/Array.h
 
-./include/lgi/common/CairoSurface.h : 
+./include/lgi/common/Palette.h : ./include/lgi/common/ColourSpace.h \
+	./include/lgi/common/File.h
 
-./include/lgi/common/Layout.h : 
-
-./include/lgi/common/TableLayout.h : ./include/lgi/common/Css.h \
-	./include/lgi/common/Notifications.h \
-	./include/lgi/common/Layout.h
-
-./include/lgi/common/Button.h : 
+./include/lgi/common/Mutex.h : ./include/lgi/common/CurrentTime.h \
+	./include/lgi/common/LgiUiBase.h
 
 ./include/lgi/common/Tree.h : ./include/lgi/common/ItemContainer.h
+
+./include/lgi/common/Capabilities.h : ./include/lgi/common/HashTable.h
 
 ./include/lgi/common/RadioGroup.h : 
 
@@ -1254,13 +1240,11 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 
 ./include/lgi/common/SubProcess.h : 
 
+./include/lgi/common/FontCache.h : ./include/lgi/common/App.h \
+	./include/lgi/common/Font.h
+
 ./include/lgi/common/Properties.h : ./include/lgi/common/Containers.h \
-	./include/lgi/common/String.h
-
-./include/lgi/common/Mem.h : ./include/lgi/common/LgiInc.h \
-	./include/lgi/linux/Gtk/LgiOsDefs.h
-
-./include/lgi/common/Colour.h : ./include/lgi/common/ColourSpace.h
+	./include/lgi/common/LgiString.h
 
 ./include/lgi/common/CssTools.h : ./include/lgi/common/Css.h
 
@@ -1268,34 +1252,27 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 
 ./src/common/Gdc2/RopsCases.cpp : 
 
-./include/lgi/common/LgiInc.h : 
-
 ./include/lgi/common/DisplayString.h : ./include/lgi/common/Font.h
 
-./include/lgi/common/ClipBoard.h : 
+./include/lgi/common/App.h : ./include/lgi/mac/cocoa/LCocoaView.h
 
-./include/lgi/common/TextLabel.h : 
+./include/lgi/common/ClipBoard.h : 
 
 ./include/lgi/common/Net.h : ./include/lgi/common/LgiNetInc.h \
 	./include/lgi/common/LgiInterfaces.h \
 	./include/lgi/common/Mem.h \
 	./include/lgi/common/Containers.h \
 	./include/lgi/common/Stream.h \
-	./include/lgi/common/String.h \
+	./include/lgi/common/LgiString.h \
 	./include/lgi/common/Cancel.h \
 	./include/lgi/common/HashTable.h
 
-./include/lgi/common/LgiInterfaces.h : ./include/lgi/common/Mem.h \
-	./include/lgi/common/Array.h \
-	./include/lgi/linux/Gtk/LgiOsDefs.h \
-	./include/lgi/common/Colour.h \
-	./include/lgi/common/Cancel.h \
-	./include/lgi/common/StringClass.h
+./include/lgi/common/Cancel.h : 
 
-./include/lgi/common/StringClass.h : ./include/lgi/common/Unicode.h \
-	./include/lgi/common/Array.h
+./include/lgi/common/LgiString.h : ./include/lgi/common/LgiDefs.h \
+	./include/lgi/mac/cocoa/LgiOsDefs.h
 
-./include/lgi/common/Unicode.h : ./include/lgi/common/LgiInc.h
+./include/lgi/mac/cocoa/LCocoaView.h : 
 
 ./src/common/Hash/sha1/sha1.h : ./include/lgi/common/LgiInc.h
 
@@ -1307,7 +1284,7 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/AutoPtr.h \
 	./include/lgi/common/FontCache.h
 
-./include/lgi/common/Res.h : ./include/lgi/common/XmlTree.h
+./include/lgi/common/RadioGroup.h : 
 
 ./include/lgi/common/ViewPriv.h : ./include/lgi/common/ThreadEvent.h
 
@@ -1315,14 +1292,13 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 
 ./include/lgi/common/LibraryUtils.h : 
 
-./include/lgi/common/ImageList.h : 
+./include/lgi/common/Library.h : 
 
 ./include/lgi/common/Widgets.h : 
 
-./include/lgi/common/Palette.h : ./include/lgi/common/ColourSpace.h \
-	./include/lgi/common/File.h
-
 ./include/lgi/common/Password.h : 
+
+./include/lgi/common/SubProcess.h : 
 
 ./include/lgi/common/EventTargetThread.h : ./include/lgi/common/Thread.h \
 	./include/lgi/common/Mutex.h \
@@ -1334,33 +1310,11 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/RefCount.h \
 	./include/lgi/common/Dom.h
 
-./include/lgi/common/Dom.h : ./include/lgi/common/LgiInterfaces.h \
-	./include/lgi/common/Mem.h \
-	./include/lgi/common/Array.h \
-	./include/lgi/common/DomFields.h
-
-./include/lgi/common/DomFields.h : 
-
 ./include/lgi/common/Token.h : ./include/lgi/common/Array.h \
-	./include/lgi/common/String.h
+	./include/lgi/common/LgiString.h
 
 ./include/lgi/common/Mutex.h : ./include/lgi/common/CurrentTime.h \
 	./include/lgi/common/LgiUiBase.h
-
-./include/lgi/common/CurrentTime.h : 
-
-./include/lgi/common/ItemContainer.h : ./include/lgi/common/Popup.h \
-	./include/lgi/common/Notifications.h \
-	./include/lgi/common/Css.h \
-	./include/lgi/common/ImageList.h
-
-./include/lgi/common/ThreadEvent.h : 
-
-./include/lgi/common/Edit.h : ./include/lgi/common/TextView3.h
-
-./include/lgi/linux/Gtk/LgiOsDefs.h : ./include/lgi/common/LgiDefs.h \
-	./include/lgi/common/LgiInc.h \
-	./include/lgi/common/Message.h
 
 ./include/lgi/common/File.h : ./include/lgi/common/Mem.h \
 	./include/lgi/common/Stream.h \
@@ -1369,65 +1323,88 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/StringClass.h \
 	./include/lgi/common/Error.h
 
-./include/lgi/common/Mem.h : ./include/lgi/common/LgiInc.h \
-	./include/lgi/linux/Gtk/LgiOsDefs.h
+./include/lgi/common/Error.h : 
 
-./include/lgi/common/LgiClasses.h : ./include/lgi/common/Mutex.h \
-	./include/lgi/linux/Gtk/LgiOsClasses.h \
-	./include/lgi/common/Mem.h \
+./include/lgi/common/Combo.h : 
+
+./include/lgi/common/Array.h : ./include/lgi/common/Range.h
+
+./include/lgi/common/Range.h : 
+
+./include/lgi/common/File.h : ./include/lgi/common/Mem.h \
+	./include/lgi/common/Stream.h \
 	./include/lgi/common/Array.h \
-	./include/lgi/common/DragAndDrop.h \
-	./include/lgi/common/TrayIcon.h \
-	./include/lgi/common/Input.h
+	./include/lgi/common/RefCount.h \
+	./include/lgi/common/StringClass.h \
+	./include/lgi/common/Error.h
 
-./include/lgi/linux/Gtk/LgiOsClasses.h : 
-
-./include/lgi/common/Input.h : ./include/lgi/common/Dialog.h \
-	./include/lgi/common/Edit.h
-
-./include/lgi/common/Res.h : ./include/lgi/common/XmlTree.h
+./include/lgi/common/LgiString.h : ./include/lgi/common/LgiDefs.h \
+	./include/lgi/mac/cocoa/LgiOsDefs.h
 
 ./include/lgi/common/Font.h : ./include/lgi/common/Rect.h \
-	./include/lgi/linux/Gtk/LgiOsClasses.h \
+	./include/lgi/mac/cocoa/LgiOsClasses.h \
 	./include/lgi/common/Colour.h \
 	./include/lgi/common/Capabilities.h \
 	./include/lgi/common/Css.h
 
-./include/lgi/linux/Gtk/LgiOsDefs.h : ./include/lgi/common/LgiDefs.h \
-	./include/lgi/common/LgiInc.h \
-	./include/lgi/common/Message.h
+./include/lgi/common/Mem.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/mac/cocoa/LgiOsDefs.h
+
+./include/lgi/common/TextLabel.h : 
+
+./include/lgi/common/Res.h : ./include/lgi/common/XmlTree.h
+
+./include/lgi/mac/cocoa/ObjCWrapper.h : 
+
+./include/lgi/common/Slider.h : 
+
+./include/lgi/common/Font.h : ./include/lgi/common/Rect.h \
+	./include/lgi/mac/cocoa/LgiOsClasses.h \
+	./include/lgi/common/Colour.h \
+	./include/lgi/common/Capabilities.h \
+	./include/lgi/common/Css.h
 
 ./include/lgi/common/Notifications.h : 
 
-./include/lgi/common/LgiUiBase.h : ./include/lgi/common/LgiInc.h \
-	./include/lgi/common/LgiDefs.h \
-	./include/lgi/common/AutoPtr.h \
-	./include/lgi/common/StringClass.h \
-	./include/lgi/common/Point.h
+./include/lgi/common/ImageList.h : 
 
-./include/lgi/common/Library.h : 
+./include/lgi/common/Layout.h : 
+
+./include/lgi/common/ColourSpace.h : 
+
+./include/lgi/common/Button.h : 
 
 ./include/lgi/common/TextLog.h : ./include/lgi/common/TextView3.h \
 	./include/lgi/common/Net.h
 
+./include/lgi/common/CurrentTime.h : 
+
 ./include/lgi/common/TabView.h : ./include/lgi/common/Layout.h
 
-./include/lgi/common/DateTime.h : ./include/lgi/common/StringClass.h
+./include/lgi/common/Message.h : 
+
+./include/lgi/common/StringClass.h : ./include/lgi/mac/cocoa/LgiOsDefs.h \
+	./include/lgi/common/Unicode.h \
+	./include/lgi/common/Array.h
+
+./include/lgi/common/Unicode.h : ./include/lgi/common/LgiInc.h
 
 ./include/lgi/common/Range.h : 
 
-./include/lgi/common/DragAndDrop.h : ./include/lgi/common/Variant.h
+./include/lgi/common/DateTime.h : ./include/lgi/common/StringClass.h
 
-./include/lgi/common/Dialog.h : ./include/lgi/common/Window.h \
-	./include/lgi/common/LgiRes.h
+./include/lgi/common/Colour.h : ./include/lgi/common/ColourSpace.h
 
-./include/lgi/common/LgiRes.h : ./include/lgi/common/Res.h \
+./include/lgi/common/LgiInc.h : 
+
+./include/lgi/common/Net.h : ./include/lgi/common/LgiNetInc.h \
+	./include/lgi/common/LgiInterfaces.h \
+	./include/lgi/common/Mem.h \
 	./include/lgi/common/Containers.h \
-	./include/lgi/common/Css.h \
-	./include/lgi/common/AutoPtr.h \
-	./include/lgi/common/FontCache.h
-
-./include/lgi/common/ProgressView.h : ./include/lgi/common/Progress.h
+	./include/lgi/common/Stream.h \
+	./include/lgi/common/LgiString.h \
+	./include/lgi/common/Cancel.h \
+	./include/lgi/common/HashTable.h
 
 ./include/lgi/common/Stream.h : ./include/lgi/common/Dom.h \
 	./include/lgi/common/StringClass.h
@@ -1441,7 +1418,7 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 
 ./include/lgi/common/StatusBar.h : ./include/lgi/common/Layout.h
 
-./include/lgi/common/Gdc2.h : ./include/lgi/linux/Gtk/LgiOsDefs.h \
+./include/lgi/common/Gdc2.h : ./include/lgi/mac/cocoa/LgiOsDefs.h \
 	./include/lgi/common/LgiInc.h \
 	./include/lgi/common/LgiUiBase.h \
 	./include/lgi/common/File.h \
@@ -1459,91 +1436,69 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/CairoSurface.h \
 	./include/lgi/common/Filter.h
 
-./include/lgi/common/Core.h : 
-
-./include/lgi/common/Popup.h : ./include/lgi/common/Layout.h
-
 ./include/lgi/common/Base64.h : ./include/lgi/common/LgiDefs.h
 
 ./include/lgi/common/ScrollBar.h : 
 
-./include/lgi/common/RadioGroup.h : 
+./include/lgi/common/LgiUiBase.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/common/LgiDefs.h \
+	./include/lgi/common/AutoPtr.h \
+	./include/lgi/common/StringClass.h \
+	./include/lgi/common/Point.h \
+	./include/lgi/mac/cocoa/ObjCWrapper.h
 
 ./include/lgi/common/ProgressView.h : ./include/lgi/common/Progress.h
+
+./include/lgi/common/Rect.h : ./include/lgi/common/Point.h
+
+./include/lgi/common/TableLayout.h : ./include/lgi/common/Css.h \
+	./include/lgi/common/Notifications.h \
+	./include/lgi/common/Layout.h
+
+./include/lgi/mac/cocoa/LgiOsDefs.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/common/LgiDefs.h \
+	./include/lgi/common/AutoPtr.h \
+	./include/lgi/mac/cocoa/ObjCWrapper.h \
+	./include/lgi/common/Message.h
 
 ./include/lgi/common/Progress.h : ./include/lgi/common/Mutex.h \
 	./include/lgi/common/Cancel.h \
 	./include/lgi/common/StringClass.h \
 	./include/lgi/common/Dom.h
 
-./include/lgi/common/Bitmap.h : 
-
-./include/lgi/common/SubProcess.h : 
-
 ./include/lgi/common/TrayIcon.h : 
-
-./include/lgi/common/Mutex.h : ./include/lgi/common/CurrentTime.h \
-	./include/lgi/common/LgiUiBase.h
-
-./include/lgi/common/Css.h : ./include/lgi/common/LgiInc.h \
-	./include/lgi/linux/Gtk/LgiOsDefs.h \
-	./include/lgi/common/Mem.h \
-	./include/lgi/common/Gdc2.h \
-	./include/lgi/common/AutoPtr.h \
-	./include/lgi/common/String.h \
-	./include/lgi/common/HashTable.h
-
-./include/lgi/common/Filter.h : ./include/lgi/common/Containers.h \
-	./include/lgi/common/Progress.h
 
 ./include/lgi/common/Path.h : ./include/lgi/common/Matrix.h \
 	./include/lgi/common/Point.h \
 	./include/lgi/common/RectF.h
 
-./include/lgi/common/Message.h : 
+./include/lgi/common/RectF.h : 
 
 ./include/lgi/common/Json.h : ./include/lgi/common/Array.h \
 	./include/lgi/common/StringClass.h
 
-./include/lgi/common/Stream.h : ./include/lgi/common/Dom.h \
-	./include/lgi/common/StringClass.h
-
-./include/lgi/common/Matrix.h : 
+./include/lgi/common/DisplayString.h : ./include/lgi/common/Font.h
 
 ./include/lgi/common/CheckBox.h : 
 
-./include/lgi/common/Box.h : ./include/lgi/common/Css.h
+./include/lgi/common/Mem.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/mac/cocoa/LgiOsDefs.h
 
-./include/lgi/common/Thread.h : ./include/lgi/common/Mutex.h
+./include/lgi/common/Box.h : ./include/lgi/common/Css.h
 
 ./include/lgi/common/ItemContainer.h : ./include/lgi/common/Popup.h \
 	./include/lgi/common/Notifications.h \
 	./include/lgi/common/Css.h \
 	./include/lgi/common/ImageList.h
 
-./include/lgi/common/Base64.h : ./include/lgi/common/LgiDefs.h
-
-./include/lgi/common/LgiMsgs.h : 
+./include/lgi/common/Res.h : ./include/lgi/common/XmlTree.h
 
 ./include/lgi/common/Rops.h : ./include/lgi/common/PixelRops.h
-
-./include/lgi/common/TextView3.h : ./include/lgi/common/DocView.h \
-	./include/lgi/common/Undo.h \
-	./include/lgi/common/DragAndDrop.h \
-	./include/lgi/common/Css.h \
-	./include/lgi/common/UnrolledList.h \
-	./include/lgi/common/FindReplaceDlg.h
-
-./include/lgi/common/FindReplaceDlg.h : 
-
-./include/lgi/common/Undo.h : 
 
 ./include/lgi/common/Printer.h : 
 
 ./include/lgi/common/Unicode.h : ./include/lgi/common/LgiInc.h
 
-./include/lgi/common/Tree.h : ./include/lgi/common/ItemContainer.h
-
 ./include/lgi/common/TextView3.h : ./include/lgi/common/DocView.h \
 	./include/lgi/common/Undo.h \
 	./include/lgi/common/DragAndDrop.h \
@@ -1551,10 +1506,26 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/UnrolledList.h \
 	./include/lgi/common/FindReplaceDlg.h
 
+./include/lgi/common/Undo.h : 
+
+./include/lgi/common/DocView.h : ./include/lgi/common/Variant.h \
+	./include/lgi/common/Notifications.h \
+	./include/lgi/common/Thread.h \
+	./include/lgi/common/Layout.h
+
+./include/lgi/common/UnrolledList.h : 
+
 ./include/lgi/common/FontSelect.h : 
 
-./include/lgi/common/String.h : ./include/lgi/common/LgiDefs.h \
-	./include/lgi/linux/Gtk/LgiOsDefs.h
+./include/lgi/common/List.h : ./include/lgi/common/Mem.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/common/Popup.h \
+	./include/lgi/common/DisplayString.h \
+	./include/lgi/common/Css.h \
+	./include/lgi/common/ItemContainer.h \
+	./include/lgi/common/UnrolledList.h
+
+./include/lgi/common/FindReplaceDlg.h : 
 
 ./include/lgi/common/DropFiles.h : ./include/lgi/common/Variant.h \
 	./include/lgi/common/Array.h \
@@ -1563,9 +1534,9 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/Net.h
 
 ./include/lgi/common/Token.h : ./include/lgi/common/Array.h \
-	./include/lgi/common/String.h
+	./include/lgi/common/LgiString.h
 
-./include/lgi/common/Range.h : 
+./include/lgi/common/CairoSurface.h : 
 
 ./include/lgi/common/List.h : ./include/lgi/common/Mem.h \
 	./include/lgi/common/Array.h \
@@ -1579,68 +1550,81 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/ScrollBar.h \
 	./include/lgi/common/TextLabel.h
 
+./include/lgi/common/Properties.h : ./include/lgi/common/Containers.h \
+	./include/lgi/common/LgiString.h
+
 ./include/lgi/common/ScrollBar.h : 
 
-./include/lgi/common/Properties.h : ./include/lgi/common/Containers.h \
-	./include/lgi/common/String.h
+./include/lgi/common/Dom.h : ./include/lgi/common/LgiInterfaces.h \
+	./include/lgi/common/Mem.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/common/DomFields.h
 
-./include/lgi/common/Capabilities.h : ./include/lgi/common/HashTable.h
+./include/lgi/common/DomFields.h : 
 
 ./include/lgi/common/Palette.h : ./include/lgi/common/ColourSpace.h \
 	./include/lgi/common/File.h
 
-./include/lgi/common/OAuth2.h : ./include/lgi/common/Net.h
-
-./include/lgi/common/Error.h : 
-
-./include/lgi/common/PixelRops.h : 
-
 ./include/lgi/common/Css.h : ./include/lgi/common/LgiInc.h \
-	./include/lgi/linux/Gtk/LgiOsDefs.h \
+	./include/lgi/mac/cocoa/LgiOsDefs.h \
 	./include/lgi/common/Mem.h \
 	./include/lgi/common/Gdc2.h \
 	./include/lgi/common/AutoPtr.h \
-	./include/lgi/common/String.h \
+	./include/lgi/common/LgiString.h \
 	./include/lgi/common/HashTable.h
 
-./include/lgi/common/Combo.h : 
+./include/lgi/common/ThreadEvent.h : 
 
 ./include/lgi/common/PixelRops.h : 
+
+./include/lgi/common/Dialog.h : ./include/lgi/common/Window.h \
+	./include/lgi/common/LgiRes.h
+
+./include/lgi/common/Window.h : ./include/lgi/common/View.h
+
+./include/lgi/common/LgiRes.h : ./include/lgi/common/Res.h \
+	./include/lgi/common/Containers.h \
+	./include/lgi/common/Css.h \
+	./include/lgi/common/AutoPtr.h \
+	./include/lgi/common/FontCache.h
 
 ./private/linux/GAppPriv.h : ./include/lgi/common/Json.h \
 	./include/lgi/linux/SymLookup.h \
 	./include/lgi/linux/Gtk/LgiWinManGlue.h
 
-./include/lgi/common/Json.h : ./include/lgi/common/Array.h \
-	./include/lgi/common/StringClass.h
-
 ./include/lgi/linux/Gtk/LgiWinManGlue.h : ./include/lgi/common/LgiDefs.h \
 	./include/lgi/common/Mem.h \
 	./include/lgi/common/Array.h
+
+./include/lgi/common/Json.h : ./include/lgi/common/Array.h \
+	./include/lgi/common/StringClass.h
 
 ./include/lgi/common/Capabilities.h : ./include/lgi/common/HashTable.h
 
 ./include/lgi/common/FileSelect.h : 
 
-./include/lgi/common/Array.h : ./include/lgi/common/Range.h
-
 ./include/lgi/common/DateTime.h : ./include/lgi/common/StringClass.h
 
-./include/lgi/common/String.h : ./include/lgi/common/LgiDefs.h \
-	./include/lgi/linux/Gtk/LgiOsDefs.h
+./include/lgi/common/TextView3.h : ./include/lgi/common/DocView.h \
+	./include/lgi/common/Undo.h \
+	./include/lgi/common/DragAndDrop.h \
+	./include/lgi/common/Css.h \
+	./include/lgi/common/UnrolledList.h \
+	./include/lgi/common/FindReplaceDlg.h
 
-./include/lgi/common/DocView.h : ./include/lgi/common/Variant.h \
-	./include/lgi/common/Notifications.h \
-	./include/lgi/common/Thread.h \
-	./include/lgi/common/Layout.h
+./include/lgi/common/Notifications.h : 
 
 ./include/lgi/common/RefCount.h : ./include/lgi/common/LgiUiBase.h
 
-./include/lgi/common/LgiNetInc.h : 
-
 ./include/lgi/common/Containers.h : ./include/lgi/common/LgiInc.h \
-	./include/lgi/linux/Gtk/LgiOsDefs.h \
+	./include/lgi/mac/cocoa/LgiOsDefs.h \
 	./include/lgi/common/Stream.h
+
+./include/lgi/common/XmlTree.h : ./include/lgi/common/HashTable.h \
+	./include/lgi/common/RefCount.h \
+	./include/lgi/common/Dom.h
+
+./include/lgi/common/View.h : ./include/lgi/mac/cocoa/LCocoaView.h
 
 ./include/lgi/common/UnicodeString.h : ./include/lgi/common/Unicode.h
 
@@ -1648,11 +1632,7 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 
 ./include/lgi/common/Mru.h : ./include/lgi/common/FileSelect.h
 
-./include/lgi/common/FileSelect.h : 
-
-./include/lgi/common/Window.h : ./include/lgi/common/View.h
-
-./include/lgi/common/View.h : 
+./include/lgi/common/Bitmap.h : 
 
 ./include/lgi/common/NetTools.h : ./include/lgi/common/Containers.h \
 	./include/lgi/common/LgiNetInc.h
@@ -1663,26 +1643,37 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/Notifications.h \
 	./include/lgi/common/Layout.h
 
+./include/lgi/common/PixelRops.h : 
+
 ./include/lgi/common/Library.h : 
 
-./include/lgi/common/Cancel.h : 
+./include/lgi/common/Filter.h : ./include/lgi/common/Containers.h \
+	./include/lgi/common/Progress.h
 
-./include/lgi/common/File.h : ./include/lgi/common/Mem.h \
-	./include/lgi/common/Stream.h \
-	./include/lgi/common/Array.h \
-	./include/lgi/common/RefCount.h \
-	./include/lgi/common/StringClass.h \
-	./include/lgi/common/Error.h
+./include/lgi/common/FileSelect.h : 
+
+./include/lgi/common/Store3Defs.h : 
+
+./include/lgi/common/Stream.h : ./include/lgi/common/Dom.h \
+	./include/lgi/common/StringClass.h
+
+./include/lgi/common/DragAndDrop.h : ./include/lgi/common/Variant.h
+
+./include/lgi/common/Matrix.h : 
 
 ./include/lgi/linux/SymLookup.h : ./include/lgi/common/SubProcess.h
 
-./include/lgi/common/Font.h : ./include/lgi/common/Rect.h \
-	./include/lgi/linux/Gtk/LgiOsClasses.h \
-	./include/lgi/common/Colour.h \
-	./include/lgi/common/Capabilities.h \
-	./include/lgi/common/Css.h
+./include/lgi/common/Edit.h : ./include/lgi/common/TextView3.h
 
-./include/lgi/common/App.h : 
+./include/lgi/common/Thread.h : ./include/lgi/common/Mutex.h
+
+./include/lgi/common/AutoPtr.h : 
+
+./include/lgi/common/Base64.h : ./include/lgi/common/LgiDefs.h
+
+./include/lgi/common/Containers.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/mac/cocoa/LgiOsDefs.h \
+	./include/lgi/common/Stream.h
 
 ./include/lgi/common/CheckBox.h : 
 
@@ -1690,42 +1681,56 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/XmlTree.h \
 	./include/lgi/common/Mutex.h
 
+./include/lgi/common/LgiInterfaces.h : ./include/lgi/common/Mem.h \
+	./include/lgi/common/Array.h \
+	./include/lgi/common/Colour.h \
+	./include/lgi/common/Cancel.h \
+	./include/lgi/common/StringClass.h \
+	./include/lgi/common/LgiUiBase.h
+
 ./include/lgi/common/Splitter.h : ./include/lgi/common/Layout.h
 
 ./include/lgi/common/Edit.h : ./include/lgi/common/TextView3.h
 
-./include/lgi/common/XmlTree.h : ./include/lgi/common/HashTable.h \
-	./include/lgi/common/RefCount.h \
-	./include/lgi/common/Dom.h
+./include/lgi/common/LgiNetInc.h : 
 
-./include/lgi/common/LgiCommon.h : ./include/lgi/common/Mem.h \
-	./include/lgi/common/Array.h \
-	./include/lgi/common/String.h \
-	./include/lgi/common/StringClass.h \
-	./include/lgi/common/CurrentTime.h \
-	./include/lgi/common/LgiUiBase.h
+./include/lgi/common/TabView.h : ./include/lgi/common/Layout.h
 
 ./include/lgi/common/Menu.h : ./include/lgi/common/XmlTree.h \
 	./include/lgi/common/Res.h \
 	./include/lgi/common/ImageList.h
 
-./include/lgi/common/HashTable.h : ./include/lgi/common/Mem.h \
-	./include/lgi/common/Array.h \
-	./include/lgi/common/String.h
+./include/lgi/common/Css.h : ./include/lgi/common/LgiInc.h \
+	./include/lgi/mac/cocoa/LgiOsDefs.h \
+	./include/lgi/common/Mem.h \
+	./include/lgi/common/Gdc2.h \
+	./include/lgi/common/AutoPtr.h \
+	./include/lgi/common/LgiString.h \
+	./include/lgi/common/HashTable.h
 
-./include/lgi/common/RectF.h : 
+./include/lgi/common/Variant.h : ./include/lgi/common/Dom.h \
+	./include/lgi/common/DateTime.h \
+	./include/lgi/common/Containers.h \
+	./include/lgi/common/HashTable.h \
+	./include/lgi/common/LgiString.h
 
 ./include/lgi/common/LgiCommon.h : ./include/lgi/common/Mem.h \
 	./include/lgi/common/Array.h \
-	./include/lgi/common/String.h \
+	./include/lgi/common/LgiString.h \
 	./include/lgi/common/StringClass.h \
 	./include/lgi/common/CurrentTime.h \
 	./include/lgi/common/LgiUiBase.h
+
+./include/lgi/common/Input.h : ./include/lgi/common/Dialog.h \
+	./include/lgi/common/Edit.h
+
+./include/lgi/common/OAuth2.h : ./include/lgi/common/Net.h
 
 VPATH=%.cpp \
 	./src/common/Hash/sha1 \
 	./src/common/Hash/md5 \
 	./private/linux \
+	./include/lgi/mac/cocoa \
 	./include/lgi/linux/Gtk \
 	./include/lgi/linux \
 	./include/lgi/common \

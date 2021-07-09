@@ -34,7 +34,6 @@ ifeq ($(Build),Debug)
 		-I./Code \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
-		-I../include/lgi/common \
 		-I../include
 else
 	Flags += -s -Os -std=c++14
@@ -53,7 +52,6 @@ else
 		-I./Code \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
-		-I../include/lgi/common \
 		-I../include
 endif
 
@@ -89,16 +87,16 @@ Depends =	GDebugContext.o \
 			LgiUtils.o \
 			MemDumpViewer.o \
 			SpaceTabConv.o \
-			DocView.o \
-			Mdi.o \
-			LgiMain.o \
-			OpenSSLSocket.o \
-			Png.o \
-			TextConvert.o \
-			Http.o \
 			Html.o \
 			HtmlCommon.o \
-			HtmlParser.o
+			HtmlParser.o \
+			DocView.o \
+			Http.o \
+			LgiMain.o \
+			Mdi.o \
+			OpenSSLSocket.o \
+			Png.o \
+			TextConvert.o
 
 # Target
 # Executable target
@@ -166,6 +164,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
 	../include/lgi/common/LgiMsgs.h \
 	../include/lgi/common/LgiNetInc.h \
 	../include/lgi/common/LgiRes.h \
+	../include/lgi/common/LgiString.h \
 	../include/lgi/common/LgiUiBase.h \
 	../include/lgi/common/Library.h \
 	../include/lgi/common/LibraryUtils.h \
@@ -211,8 +210,8 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
 	../include/lgi/common/Slider.h \
 	../include/lgi/common/Splitter.h \
 	../include/lgi/common/StatusBar.h \
+	../include/lgi/common/Store3Defs.h \
 	../include/lgi/common/Stream.h \
-	../include/lgi/common/String.h \
 	../include/lgi/common/StringClass.h \
 	../include/lgi/common/StringLayout.h \
 	../include/lgi/common/SubProcess.h \
@@ -244,6 +243,13 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
 	../include/lgi/linux/Gtk/LgiWidget.h \
 	../include/lgi/linux/Gtk/LgiWinManGlue.h \
 	../include/lgi/linux/SymLookup.h \
+	../include/lgi/mac/cocoa/LCocoaView.h \
+	../include/lgi/mac/cocoa/LgiMac.h \
+	../include/lgi/mac/cocoa/LgiOs.h \
+	../include/lgi/mac/cocoa/LgiOsClasses.h \
+	../include/lgi/mac/cocoa/LgiOsDefs.h \
+	../include/lgi/mac/cocoa/ObjCWrapper.h \
+	../include/lgi/mac/cocoa/SymLookup.h \
 	../private/linux/GAppPriv.h \
 	../src/common/Gdc2/15Bit.cpp \
 	../src/common/Gdc2/16Bit.cpp \
@@ -344,8 +350,8 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
 	../src/common/Widgets/TextLabel.cpp \
 	../src/common/Widgets/ToolBar.cpp \
 	../src/common/Widgets/Tree.cpp \
-	../src/linux/General/GFile.cpp \
-	../src/linux/General/GMem.cpp \
+	../src/linux/General/File.cpp \
+	../src/linux/General/Mem.cpp \
 	../src/linux/General/ShowFileProp_Linux.cpp \
 	../src/linux/Gtk/Gdc2.cpp \
 	../src/linux/Gtk/GMemDC.cpp \
@@ -394,7 +400,7 @@ GDebugger.o : ./Code/GDebugger.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Token.h \
 	../include/lgi/common/DocView.h \
 	../include/lgi/common/StringClass.h \
-	../include/lgi/common/String.h \
+	../include/lgi/common/LgiString.h \
 	./Code/GDebugger.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
@@ -423,9 +429,9 @@ About.o : ../src/common/Lgi/About.cpp ../include/lgi/common/Lgi.h \
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
 WebFldDlg.o : ./Code/WebFldDlg.cpp ../include/lgi/common/Lgi.h \
+	../include/lgi/common/Net.h \
 	./Code/WebFldDlg.h \
-	./Resources/resdefs.h \
-	../include/lgi/common/Net.h
+	./Resources/resdefs.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -477,7 +483,7 @@ FtpThread.o : ./Code/FtpThread.cpp ../include/lgi/common/Lgi.h \
 Ftp.o : ../src/common/Net/Ftp.cpp ../include/lgi/common/Gdc2.h \
 	../include/lgi/common/Ftp.h \
 	../include/lgi/common/Token.h \
-	../include/lgi/common/String.h \
+	../include/lgi/common/LgiString.h \
 	../include/lgi/common/LgiCommon.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
@@ -616,9 +622,9 @@ ParseCpp.o : ../src/common/Coding/ParseCpp.cpp ../include/lgi/common/Lgi.h \
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
 SysCharSupport.o : ./Code/SysCharSupport.cpp ../include/lgi/common/Lgi.h \
-	./Code/LgiIde.h \
 	../include/lgi/common/List.h \
-	../include/lgi/common/DisplayString.h
+	../include/lgi/common/DisplayString.h \
+	./Code/LgiIde.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -680,59 +686,6 @@ SpaceTabConv.o : ./Code/SpaceTabConv.cpp ../include/lgi/common/Mem.h \
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-DocView.o : ../src/common/Text/DocView.cpp ../include/lgi/common/Lgi.h \
-	../include/lgi/common/DocView.h \
-	../include/lgi/common/Net.h
-	@echo $(<F) [$(Build)]
-	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
-
-Mdi.o : ../src/common/Lgi/Mdi.cpp ../include/lgi/common/Lgi.h \
-	../include/lgi/common/Mdi.h \
-	../include/lgi/common/DisplayString.h
-	@echo $(<F) [$(Build)]
-	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
-
-LgiMain.o : ../src/common/Lgi/LgiMain.cpp ../include/lgi/common/Lgi.h \
-	../include/lgi/common/Token.h
-	@echo $(<F) [$(Build)]
-	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
-
-OpenSSLSocket.o : ../src/common/Net/OpenSSLSocket.cpp ../include/lgi/common/Lgi.h \
-	../include/lgi/common/OpenSSLSocket.h \
-	../include/lgi/common/Token.h \
-	../include/lgi/common/Variant.h \
-	../include/lgi/common/Net.h
-	@echo $(<F) [$(Build)]
-	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
-
-Png.o : ../src/common/Gdc2/Filters/Png.cpp ../include/lgi/common/Lgi.h \
-	../include/lgi/common/Palette.h \
-	../include/lgi/common/LibraryUtils.h \
-	../include/lgi/common/Variant.h
-	@echo $(<F) [$(Build)]
-	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
-
-TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
-	../include/lgi/common/TextConvert.h \
-	../include/lgi/common/Mime.h \
-	../include/lgi/common/Base64.h
-	@echo $(<F) [$(Build)]
-	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
-
-Http.o : ../src/common/Net/Http.cpp ../include/lgi/common/Gdc2.h \
-	../include/lgi/common/Http.h \
-	../include/lgi/common/Token.h \
-	../include/lgi/common/LgiCommon.h \
-	../include/lgi/common/NetTools.h \
-	../include/lgi/common/String.h \
-	../include/lgi/common/Base64.h \
-	../include/lgi/common/Variant.h \
-	../include/lgi/common/OpenSSLSocket.h \
-	../include/lgi/common/Net.h \
-	../include/lgi/common/ZlibWrapper.h
-	@echo $(<F) [$(Build)]
-	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
-
 Html.o : ../src/common/Text/Html.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Html.h \
 	../include/lgi/common/HtmlPriv.h \
@@ -773,14 +726,65 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
+DocView.o : ../src/common/Text/DocView.cpp ../include/lgi/common/Lgi.h \
+	../include/lgi/common/DocView.h \
+	../include/lgi/common/Net.h
+	@echo $(<F) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
+
+Http.o : ../src/common/Net/Http.cpp ../include/lgi/common/Gdc2.h \
+	../include/lgi/common/Http.h \
+	../include/lgi/common/Token.h \
+	../include/lgi/common/LgiCommon.h \
+	../include/lgi/common/NetTools.h \
+	../include/lgi/common/LgiString.h \
+	../include/lgi/common/Base64.h \
+	../include/lgi/common/Variant.h \
+	../include/lgi/common/OpenSSLSocket.h \
+	../include/lgi/common/Net.h \
+	../include/lgi/common/ZlibWrapper.h
+	@echo $(<F) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
+
+LgiMain.o : ../src/common/Lgi/LgiMain.cpp ../include/lgi/common/Lgi.h \
+	../include/lgi/common/Token.h
+	@echo $(<F) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
+
+Mdi.o : ../src/common/Lgi/Mdi.cpp ../include/lgi/common/Lgi.h \
+	../include/lgi/common/Mdi.h \
+	../include/lgi/common/DisplayString.h
+	@echo $(<F) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
+
+OpenSSLSocket.o : ../src/common/Net/OpenSSLSocket.cpp ../include/lgi/common/Lgi.h \
+	../include/lgi/common/OpenSSLSocket.h \
+	../include/lgi/common/Token.h \
+	../include/lgi/common/Variant.h \
+	../include/lgi/common/Net.h
+	@echo $(<F) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
+
+Png.o : ../src/common/Gdc2/Filters/Png.cpp ../include/lgi/common/Lgi.h \
+	../include/lgi/common/Palette.h \
+	../include/lgi/common/LibraryUtils.h \
+	../include/lgi/common/Variant.h
+	@echo $(<F) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
+
+TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
+	../include/lgi/common/TextConvert.h \
+	../include/lgi/common/Mime.h \
+	../include/lgi/common/Base64.h
+	@echo $(<F) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
+
 ../src/common/Widgets/CheckBox.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/SkinEngine.h \
 	../include/lgi/common/CheckBox.h \
 	../include/lgi/common/DisplayString.h \
 	../include/lgi/common/StringLayout.h \
 	../include/lgi/common/LgiRes.h
-
-../include/lgi/common/DisplayString.h : ../include/lgi/common/Font.h
 
 ../include/lgi/common/RadioGroup.h : 
 
@@ -823,7 +827,7 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/LgiCommon.h : ../include/lgi/common/Mem.h \
 	../include/lgi/common/Array.h \
-	../include/lgi/common/String.h \
+	../include/lgi/common/LgiString.h \
 	../include/lgi/common/StringClass.h \
 	../include/lgi/common/CurrentTime.h \
 	../include/lgi/common/LgiUiBase.h
@@ -834,7 +838,7 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/HashTable.h : ../include/lgi/common/Mem.h \
 	../include/lgi/common/Array.h \
-	../include/lgi/common/String.h
+	../include/lgi/common/LgiString.h
 
 ../include/lgi/common/Com.h : ../include/lgi/common/Containers.h \
 	../include/lgi/common/Variant.h
@@ -844,30 +848,8 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Mem.h \
 	../include/lgi/common/Gdc2.h \
 	../include/lgi/common/AutoPtr.h \
-	../include/lgi/common/String.h \
+	../include/lgi/common/LgiString.h \
 	../include/lgi/common/HashTable.h
-
-../include/lgi/common/Gdc2.h : ../include/lgi/linux/Gtk/LgiOsDefs.h \
-	../include/lgi/common/LgiInc.h \
-	../include/lgi/common/LgiUiBase.h \
-	../include/lgi/common/File.h \
-	../include/lgi/common/Mem.h \
-	../include/lgi/common/Core.h \
-	../include/lgi/common/Containers.h \
-	../include/lgi/common/Capabilities.h \
-	../include/lgi/common/RefCount.h \
-	../include/lgi/common/Palette.h \
-	../include/lgi/common/Library.h \
-	../include/lgi/common/ColourSpace.h \
-	../include/lgi/common/Rect.h \
-	../include/lgi/common/Point.h \
-	../include/lgi/common/Colour.h \
-	../include/lgi/common/CairoSurface.h \
-	../include/lgi/common/Filter.h
-
-../include/lgi/common/AutoPtr.h : 
-
-../include/lgi/common/ColourSpace.h : 
 
 ../src/common/Gdc2/Font/FontCodePages.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Token.h \
@@ -891,8 +873,6 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/ProgressView.h : ../include/lgi/common/Progress.h
 
-../include/lgi/common/FileSelect.h : 
-
 ../include/lgi/common/Combo.h : 
 
 ../src/linux/Lgi/Window.cpp : ../include/lgi/common/Lgi.h \
@@ -905,24 +885,13 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Menu.h \
 	../include/lgi/linux/Gtk/LgiWidget.h
 
-../include/lgi/common/Variant.h : ../include/lgi/common/Dom.h \
-	../include/lgi/common/DateTime.h \
-	../include/lgi/common/Containers.h \
-	../include/lgi/common/HashTable.h \
-	../include/lgi/common/String.h
+../include/lgi/mac/cocoa/SymLookup.h : ../include/lgi/common/SubProcess.h
 
 ../src/linux/General/ShowFileProp_Linux.cpp : ../include/lgi/common/Lgi.h
 
 ../include/lgi/common/Rect.h : ../include/lgi/common/Point.h
 
-../include/lgi/common/Net.h : ../include/lgi/common/LgiNetInc.h \
-	../include/lgi/common/LgiInterfaces.h \
-	../include/lgi/common/Mem.h \
-	../include/lgi/common/Containers.h \
-	../include/lgi/common/Stream.h \
-	../include/lgi/common/String.h \
-	../include/lgi/common/Cancel.h \
-	../include/lgi/common/HashTable.h
+../include/lgi/common/Point.h : 
 
 ../include/lgi/common/Html.h : ../include/lgi/common/DocView.h \
 	../include/lgi/common/HtmlCommon.h \
@@ -931,18 +900,17 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/ToolTip.h \
 	../include/lgi/common/FindReplaceDlg.h
 
-../include/lgi/common/ToolTip.h : 
-
-../include/lgi/common/Containers.h : ../include/lgi/common/LgiInc.h \
-	../include/lgi/linux/Gtk/LgiOsDefs.h \
-	../include/lgi/common/Stream.h
+../include/lgi/common/HtmlCommon.h : ../include/lgi/common/Css.h \
+	../include/lgi/common/HashTable.h
 
 ../include/lgi/common/LgiInterfaces.h : ../include/lgi/common/Mem.h \
 	../include/lgi/common/Array.h \
-	../include/lgi/linux/Gtk/LgiOsDefs.h \
 	../include/lgi/common/Colour.h \
 	../include/lgi/common/Cancel.h \
-	../include/lgi/common/StringClass.h
+	../include/lgi/common/StringClass.h \
+	../include/lgi/common/LgiUiBase.h
+
+../include/lgi/common/Cancel.h : 
 
 ../include/lgi/common/ZlibWrapper.h : ../include/lgi/common/LibraryUtils.h
 
@@ -960,7 +928,7 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/LgiRes.h \
 	../include/lgi/common/CssTools.h
 
-../include/lgi/common/Notifications.h : 
+../include/lgi/common/Popup.h : ../include/lgi/common/Layout.h
 
 ../src/common/Lgi/MemStream.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Stream.h
@@ -987,8 +955,6 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/linux/SymLookup.h : ../include/lgi/common/SubProcess.h
 
-../include/lgi/common/Layout.h : 
-
 ../src/common/Gdc2/Font/Font.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Variant.h \
 	../include/lgi/common/DisplayString.h \
@@ -996,28 +962,32 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Css.h \
 	../include/lgi/common/FontSelect.h
 
-../include/lgi/common/FontSelect.h : 
+../include/lgi/common/Palette.h : ../include/lgi/common/ColourSpace.h \
+	../include/lgi/common/File.h
 
 ../src/common/Net/Net.cpp : ../include/lgi/common/File.h \
 	../include/lgi/common/Net.h \
 	../include/lgi/common/Token.h \
-	../include/lgi/common/String.h \
+	../include/lgi/common/LgiString.h \
 	../include/lgi/common/LgiCommon.h \
 	../include/lgi/linux/Gtk/LgiOsClasses.h \
 	../include/lgi/common/RegKey.h \
 	../include/lgi/common/LgiNetInc.h
 
+../include/lgi/linux/Gtk/LgiOsClasses.h : 
+
 ../include/lgi/linux/Gtk/LgiWinManGlue.h : ../include/lgi/common/LgiDefs.h \
 	../include/lgi/common/Mem.h \
 	../include/lgi/common/Array.h
 
-../include/lgi/common/Panel.h : ../include/lgi/common/DisplayString.h \
-	../include/lgi/common/Layout.h
+../include/lgi/common/Capabilities.h : ../include/lgi/common/HashTable.h
 
 ../src/common/Lgi/Mru.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Mru.h \
 	../include/lgi/common/Variant.h \
 	../include/lgi/common/Menu.h
+
+../include/lgi/common/Mru.h : ../include/lgi/common/FileSelect.h
 
 ../include/lgi/common/FontCache.h : ../include/lgi/common/App.h \
 	../include/lgi/common/Font.h
@@ -1037,17 +1007,12 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Token.h \
 	../include/lgi/common/DomFields.h
 
-../include/lgi/common/HtmlCommon.h : ../include/lgi/common/Css.h \
-	../include/lgi/common/HashTable.h
-
 ../include/lgi/common/Capabilities.h : ../include/lgi/common/HashTable.h
 
 ../include/lgi/common/CssTools.h : ../include/lgi/common/Css.h
 
 ../src/common/Widgets/Slider.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Slider.h
-
-../include/lgi/common/Slider.h : 
 
 ../src/common/Widgets/RadioGroup.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/SkinEngine.h \
@@ -1056,6 +1021,8 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/DisplayString.h \
 	../include/lgi/common/LgiRes.h \
 	../include/lgi/common/StringLayout.h
+
+../include/lgi/linux/Gtk/LgiWidget.h : 
 
 ../src/common/Lgi/Rand.cpp : ../include/lgi/common/Mem.h \
 	../include/lgi/common/File.h \
@@ -1076,58 +1043,41 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	./Code/IdeProjectSettings.h \
 	./Code/GDebugContext.h
 
-./Code/GDebugger.h : ../include/lgi/common/Variant.h \
-	../include/lgi/common/StringClass.h
+./Code/GDebugContext.h : 
 
 ../include/lgi/common/RectF.h : 
 
 ../include/lgi/common/ToolTip.h : 
 
-../include/lgi/common/Palette.h : ../include/lgi/common/ColourSpace.h \
-	../include/lgi/common/File.h
+../include/lgi/common/SubProcess.h : 
 
 ../include/lgi/common/Variant.h : ../include/lgi/common/Dom.h \
 	../include/lgi/common/DateTime.h \
 	../include/lgi/common/Containers.h \
 	../include/lgi/common/HashTable.h \
-	../include/lgi/common/String.h
+	../include/lgi/common/LgiString.h
 
 ../src/common/Gdc2/Colour.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Palette.h \
 	../include/lgi/common/SkinEngine.h \
 	../include/lgi/common/Json.h
 
-../include/lgi/common/Json.h : ../include/lgi/common/Array.h \
-	../include/lgi/common/StringClass.h
+../include/lgi/common/File.h : ../include/lgi/common/Mem.h \
+	../include/lgi/common/Stream.h \
+	../include/lgi/common/Array.h \
+	../include/lgi/common/RefCount.h \
+	../include/lgi/common/StringClass.h \
+	../include/lgi/common/Error.h
 
-../include/lgi/common/Input.h : ../include/lgi/common/Dialog.h \
-	../include/lgi/common/Edit.h
+../include/lgi/common/Combo.h : 
 
 ../include/lgi/common/Password.h : 
 
 ../include/lgi/common/ClipBoard.h : 
 
-../include/lgi/common/Lgi.h : ../include/lgi/linux/Gtk/LgiOsDefs.h \
-	../include/lgi/common/LgiMsgs.h \
-	../include/lgi/common/LgiDefs.h \
-	../include/lgi/common/Mem.h \
-	../include/lgi/common/String.h \
-	../include/lgi/common/File.h \
-	../include/lgi/common/Gdc2.h \
-	../include/lgi/common/Font.h \
-	../include/lgi/common/LgiClasses.h \
-	../include/lgi/common/LgiCommon.h
-
 ../src/common/Net/Uri.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Net.h \
 	../include/lgi/common/RegKey.h
-
-../include/lgi/common/ItemContainer.h : ../include/lgi/common/Popup.h \
-	../include/lgi/common/Notifications.h \
-	../include/lgi/common/Css.h \
-	../include/lgi/common/ImageList.h
-
-../include/lgi/common/ImageList.h : 
 
 ../src/linux/Gtk/Gdc2.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Palette.h
@@ -1143,45 +1093,28 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/linux/Gtk/LgiWinManGlue.h \
 	../include/lgi/common/Token.h
 
-../include/lgi/common/Edit.h : ../include/lgi/common/TextView3.h
+../include/lgi/common/LgiString.h : ../include/lgi/common/LgiDefs.h \
+	../include/lgi/linux/Gtk/LgiOsDefs.h
 
 ../include/lgi/common/View.h : 
 
 ../include/lgi/common/App.h : 
 
-../include/lgi/linux/Gtk/LgiOsDefs.h : ../include/lgi/common/LgiDefs.h \
-	../include/lgi/common/LgiInc.h \
-	../include/lgi/common/Message.h
-
 ../include/lgi/common/Layout.h : 
-
-../include/lgi/linux/Gtk/LgiWinManGlue.h : ../include/lgi/common/LgiDefs.h \
-	../include/lgi/common/Mem.h \
-	../include/lgi/common/Array.h
-
-./Code/IdeProjectSettings.h : 
 
 ../include/lgi/common/TextLabel.h : 
 
-../include/lgi/common/LgiClasses.h : ../include/lgi/common/Mutex.h \
-	../include/lgi/linux/Gtk/LgiOsClasses.h \
-	../include/lgi/common/Mem.h \
-	../include/lgi/common/Array.h \
-	../include/lgi/common/DragAndDrop.h \
-	../include/lgi/common/TrayIcon.h \
-	../include/lgi/common/Input.h
+./Code/IdeProjectSettings.h : 
 
 ../include/lgi/common/UnicodeString.h : ../include/lgi/common/Unicode.h
 
 ../include/lgi/common/Unicode.h : ../include/lgi/common/LgiInc.h
 
-../include/lgi/common/FindReplaceDlg.h : 
+../include/lgi/common/Slider.h : 
 
-../include/lgi/common/LgiUiBase.h : ../include/lgi/common/LgiInc.h \
-	../include/lgi/common/LgiDefs.h \
-	../include/lgi/common/AutoPtr.h \
-	../include/lgi/common/StringClass.h \
-	../include/lgi/common/Point.h
+../include/lgi/common/Layout.h : 
+
+../include/lgi/common/ColourSpace.h : 
 
 ../include/lgi/common/FontSelect.h : 
 
@@ -1190,7 +1123,7 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 ../src/common/Text/Token.cpp : ../include/lgi/common/Mem.h \
 	../include/lgi/common/Containers.h \
 	../include/lgi/common/Token.h \
-	../include/lgi/common/String.h
+	../include/lgi/common/LgiString.h
 
 ../src/common/Resource/LgiRes.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Token.h \
@@ -1214,6 +1147,8 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/ScrollBar.h \
 	../include/lgi/common/Tree.h
 
+../include/lgi/common/ProgressView.h : ../include/lgi/common/Progress.h
+
 ../include/lgi/common/DragAndDrop.h : ../include/lgi/common/Variant.h
 
 ../src/common/Lgi/DataDlg.cpp : ../include/lgi/common/Lgi.h \
@@ -1224,20 +1159,19 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/ScrollBar.h \
 	../include/lgi/common/TextLabel.h
 
-../include/lgi/common/Box.h : ../include/lgi/common/Css.h
-
-../include/lgi/common/Point.h : 
+../include/lgi/common/Properties.h : ../include/lgi/common/Containers.h \
+	../include/lgi/common/LgiString.h
 
 ../include/lgi/common/Menu.h : ../include/lgi/common/XmlTree.h \
 	../include/lgi/common/Res.h \
 	../include/lgi/common/ImageList.h
 
+../include/lgi/common/ImageList.h : 
+
 ../src/common/Widgets/Splitter.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/LgiRes.h \
 	../include/lgi/common/CssTools.h \
 	../include/lgi/common/Splitter.h
-
-../include/lgi/common/DragAndDrop.h : ../include/lgi/common/Variant.h
 
 ../include/lgi/common/Unicode.h : ../include/lgi/common/LgiInc.h
 
@@ -1246,19 +1180,31 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/DisplayString.h \
 	../include/lgi/common/Popup.h
 
-../include/lgi/common/ProgressView.h : ../include/lgi/common/Progress.h
+../include/lgi/common/Gdc2.h : ../include/lgi/linux/Gtk/LgiOsDefs.h \
+	../include/lgi/common/LgiInc.h \
+	../include/lgi/common/LgiUiBase.h \
+	../include/lgi/common/File.h \
+	../include/lgi/common/Mem.h \
+	../include/lgi/common/Core.h \
+	../include/lgi/common/Containers.h \
+	../include/lgi/common/Capabilities.h \
+	../include/lgi/common/RefCount.h \
+	../include/lgi/common/Palette.h \
+	../include/lgi/common/Library.h \
+	../include/lgi/common/ColourSpace.h \
+	../include/lgi/common/Rect.h \
+	../include/lgi/common/Point.h \
+	../include/lgi/common/Colour.h \
+	../include/lgi/common/CairoSurface.h \
+	../include/lgi/common/Filter.h
 
 ../include/lgi/common/FileSelect.h : 
 
 ../src/linux/Gtk/GPrintDC.cpp : ../include/lgi/common/Lgi.h
 
-../include/lgi/common/Core.h : 
-
 ../include/lgi/common/DataDlg.h : ../include/lgi/common/Properties.h \
 	../include/lgi/common/ScrollBar.h \
 	../include/lgi/common/TextLabel.h
-
-../include/lgi/common/Popup.h : ../include/lgi/common/Layout.h
 
 ../src/common/Widgets/TabView.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/TabView.h \
@@ -1269,38 +1215,35 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/CssTools.h \
 	../include/lgi/common/Path.h
 
+../include/lgi/common/LgiUiBase.h : ../include/lgi/common/LgiInc.h \
+	../include/lgi/common/LgiDefs.h \
+	../include/lgi/common/AutoPtr.h \
+	../include/lgi/common/StringClass.h \
+	../include/lgi/common/Point.h
+
+../include/lgi/common/Store3Defs.h : 
+
+../include/lgi/common/Palette.h : ../include/lgi/common/ColourSpace.h \
+	../include/lgi/common/File.h
+
 ../include/lgi/common/Path.h : ../include/lgi/common/Matrix.h \
 	../include/lgi/common/Point.h \
 	../include/lgi/common/RectF.h
 
-../include/lgi/common/Palette.h : ../include/lgi/common/ColourSpace.h \
-	../include/lgi/common/File.h
+../include/lgi/common/Json.h : ../include/lgi/common/Array.h \
+	../include/lgi/common/StringClass.h
 
 ../include/lgi/common/Progress.h : ../include/lgi/common/Mutex.h \
 	../include/lgi/common/Cancel.h \
 	../include/lgi/common/StringClass.h \
 	../include/lgi/common/Dom.h
 
-../include/lgi/common/SubProcess.h : 
-
-../include/lgi/common/Bitmap.h : 
-
-../src/common/Gdc2/Font/TypeFace.cpp : ../include/lgi/common/Lgi.h
-
 ../include/lgi/common/Mutex.h : ../include/lgi/common/CurrentTime.h \
 	../include/lgi/common/LgiUiBase.h
 
-../include/lgi/common/Properties.h : ../include/lgi/common/Containers.h \
-	../include/lgi/common/String.h
+../src/common/Gdc2/Font/TypeFace.cpp : ../include/lgi/common/Lgi.h
 
-../include/lgi/common/Mail.h : ../include/lgi/common/Net.h \
-	../include/lgi/common/Base64.h \
-	../include/lgi/common/Progress.h \
-	../include/lgi/common/Variant.h \
-	../include/lgi/common/OAuth2.h
-
-../include/lgi/common/Filter.h : ../include/lgi/common/Containers.h \
-	../include/lgi/common/Progress.h
+../include/lgi/common/RectF.h : 
 
 ../include/lgi/common/Containers.h : ../include/lgi/common/LgiInc.h \
 	../include/lgi/linux/Gtk/LgiOsDefs.h \
@@ -1315,39 +1258,44 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/ViewPriv.h \
 	../include/lgi/linux/Gtk/LgiWidget.h
 
-../include/lgi/common/CheckBox.h : 
-
 ../src/common/Gdc2/15Bit.cpp : ../include/lgi/common/Gdc2.h \
 	../include/lgi/common/Palette.h
+
+../include/lgi/common/CheckBox.h : 
+
+../include/lgi/common/DisplayString.h : ../include/lgi/common/Font.h
+
+../include/lgi/common/Mem.h : ../include/lgi/common/LgiInc.h \
+	../include/lgi/linux/Gtk/LgiOsDefs.h
 
 ../include/lgi/common/Net.h : ../include/lgi/common/LgiNetInc.h \
 	../include/lgi/common/LgiInterfaces.h \
 	../include/lgi/common/Mem.h \
 	../include/lgi/common/Containers.h \
 	../include/lgi/common/Stream.h \
-	../include/lgi/common/String.h \
+	../include/lgi/common/LgiString.h \
 	../include/lgi/common/Cancel.h \
 	../include/lgi/common/HashTable.h
 
-../include/lgi/common/Base64.h : ../include/lgi/common/LgiDefs.h
+../include/lgi/common/HtmlParser.h : ../include/lgi/common/DocView.h \
+	../include/lgi/common/HtmlCommon.h
+
+../include/lgi/common/DocView.h : ../include/lgi/common/Variant.h \
+	../include/lgi/common/Notifications.h \
+	../include/lgi/common/Thread.h \
+	../include/lgi/common/Layout.h
+
+../include/lgi/common/Res.h : ../include/lgi/common/XmlTree.h
 
 ../include/lgi/common/ScrollBar.h : 
 
-../include/lgi/common/LgiMsgs.h : 
-
 ../src/linux/Lgi/Thread.cpp : ../include/lgi/common/Lgi.h
 
-../include/lgi/common/DropFiles.h : ../include/lgi/common/Variant.h \
-	../include/lgi/common/Array.h \
-	../include/lgi/common/XmlTree.h \
-	../include/lgi/common/Token.h \
-	../include/lgi/common/Net.h
+../include/lgi/common/UnrolledList.h : 
+
+../include/lgi/mac/cocoa/LgiMac.h : 
 
 ./Resources/resdefs.h : 
-
-../include/lgi/common/Tree.h : ../include/lgi/common/ItemContainer.h
-
-../include/lgi/common/Mru.h : ../include/lgi/common/FileSelect.h
 
 ../src/common/Lgi/FindReplace.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/TextView3.h \
@@ -1358,11 +1306,28 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/TableLayout.h \
 	../include/lgi/common/LgiRes.h
 
+../include/lgi/common/CairoSurface.h : 
+
 ../src/common/Widgets/Progress.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/ProgressView.h \
 	../include/lgi/common/Css.h
 
-../include/lgi/common/Capabilities.h : ../include/lgi/common/HashTable.h
+../src/linux/General/File.cpp : ../include/lgi/common/LgiDefs.h \
+	../include/lgi/common/File.h \
+	../include/lgi/common/Containers.h \
+	../include/lgi/common/Token.h \
+	../include/lgi/common/Gdc2.h \
+	../include/lgi/common/LgiCommon.h \
+	../include/lgi/common/LgiString.h \
+	../include/lgi/common/DateTime.h
+
+../include/lgi/common/ToolBar.h : ../include/lgi/common/ImageList.h \
+	../include/lgi/common/Layout.h
+
+../include/lgi/common/Dom.h : ../include/lgi/common/LgiInterfaces.h \
+	../include/lgi/common/Mem.h \
+	../include/lgi/common/Array.h \
+	../include/lgi/common/DomFields.h
 
 ../include/lgi/common/PopupList.h : ../include/lgi/common/List.h \
 	../include/lgi/common/Css.h \
@@ -1370,14 +1335,10 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/UnrolledList.h : 
 
-../include/lgi/common/PixelRops.h : 
-
-../include/lgi/common/OAuth2.h : ../include/lgi/common/Net.h
-
 ../include/lgi/common/HtmlCommon.h : ../include/lgi/common/Css.h \
 	../include/lgi/common/HashTable.h
 
-../include/lgi/common/Combo.h : 
+../include/lgi/common/GdiLeak.h : 
 
 ../include/lgi/common/CairoSurface.h : 
 
@@ -1391,27 +1352,27 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/UnrolledList.h \
 	../include/lgi/common/FindReplaceDlg.h
 
-../include/lgi/common/Undo.h : 
-
-../include/lgi/common/DocView.h : ../include/lgi/common/Variant.h \
-	../include/lgi/common/Notifications.h \
-	../include/lgi/common/Thread.h \
-	../include/lgi/common/Layout.h
-
 ../include/lgi/common/Bitmap.h : 
 
 ../src/common/Gdc2/Font/StringLayout.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/StringLayout.h
+
+../include/lgi/common/LibraryUtils.h : 
+
+../include/lgi/common/Notifications.h : 
+
+../include/lgi/common/DropFiles.h : ../include/lgi/common/Variant.h \
+	../include/lgi/common/Array.h \
+	../include/lgi/common/XmlTree.h \
+	../include/lgi/common/Token.h \
+	../include/lgi/common/Net.h
 
 ../include/lgi/common/Filter.h : ../include/lgi/common/Containers.h \
 	../include/lgi/common/Progress.h
 
 ../include/lgi/common/DateTime.h : ../include/lgi/common/StringClass.h
 
-../include/lgi/linux/Gtk/LgiWidget.h : 
-
-../include/lgi/common/ToolBar.h : ../include/lgi/common/ImageList.h \
-	../include/lgi/common/Layout.h
+../include/lgi/common/Bitmap.h : 
 
 ../include/lgi/common/Base64.h : ../include/lgi/common/LgiDefs.h
 
@@ -1422,7 +1383,7 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Popup.h \
 	../include/lgi/common/Notifications.h
 
-./Code/GDebugContext.h : 
+../include/lgi/common/PixelRops.h : 
 
 ../src/common/Widgets/ItemContainer.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/ItemContainer.h \
@@ -1432,16 +1393,29 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Edit.h \
 	../include/lgi/common/CssTools.h
 
+../include/lgi/common/Filter.h : ../include/lgi/common/Containers.h \
+	../include/lgi/common/Progress.h
+
 ../include/lgi/common/Lgi.h : ../include/lgi/linux/Gtk/LgiOsDefs.h \
 	../include/lgi/common/LgiMsgs.h \
 	../include/lgi/common/LgiDefs.h \
 	../include/lgi/common/Mem.h \
-	../include/lgi/common/String.h \
+	../include/lgi/common/LgiString.h \
 	../include/lgi/common/File.h \
 	../include/lgi/common/Gdc2.h \
 	../include/lgi/common/Font.h \
 	../include/lgi/common/LgiClasses.h \
 	../include/lgi/common/LgiCommon.h
+
+../include/lgi/common/LgiClasses.h : ../include/lgi/common/Mutex.h \
+	../include/lgi/linux/Gtk/LgiOsClasses.h \
+	../include/lgi/common/Mem.h \
+	../include/lgi/common/Array.h \
+	../include/lgi/common/DragAndDrop.h \
+	../include/lgi/common/TrayIcon.h \
+	../include/lgi/common/Input.h
+
+../include/lgi/common/LgiMsgs.h : 
 
 ../include/lgi/common/LibraryUtils.h : 
 
@@ -1455,7 +1429,7 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/DisplayString.h : ../include/lgi/common/Font.h
 
-../include/lgi/common/GdiLeak.h : 
+../include/lgi/common/DragAndDrop.h : ../include/lgi/common/Variant.h
 
 ../src/common/Lgi/Library.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Token.h
@@ -1468,18 +1442,13 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 ../src/common/Lgi/MenuCommon.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Menu.h
 
-../src/common/Lgi/Mutex.cpp : ../include/lgi/common/Lgi.h
+../include/lgi/mac/cocoa/LgiOsClasses.h : 
 
-../include/lgi/common/HtmlParser.h : ../include/lgi/common/DocView.h \
-	../include/lgi/common/HtmlCommon.h
+../src/common/Lgi/Mutex.cpp : ../include/lgi/common/Lgi.h
 
 ../include/lgi/common/LgiMsgs.h : 
 
-../include/lgi/common/Font.h : ../include/lgi/common/Rect.h \
-	../include/lgi/linux/Gtk/LgiOsClasses.h \
-	../include/lgi/common/Colour.h \
-	../include/lgi/common/Capabilities.h \
-	../include/lgi/common/Css.h
+../include/lgi/common/Edit.h : ../include/lgi/common/TextView3.h
 
 ../include/lgi/linux/Gtk/LgiOsClasses.h : 
 
@@ -1500,7 +1469,12 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Error.h
 
 ../include/lgi/common/Token.h : ../include/lgi/common/Array.h \
-	../include/lgi/common/String.h
+	../include/lgi/common/LgiString.h
+
+../include/lgi/common/TextLog.h : ../include/lgi/common/TextView3.h \
+	../include/lgi/common/Net.h
+
+../include/lgi/common/TabView.h : ../include/lgi/common/Layout.h
 
 ../src/common/Gdc2/GdcCommon.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Palette.h \
@@ -1512,7 +1486,7 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 ../src/common/Net/NetTools.cpp : ../include/lgi/common/Mem.h \
 	../include/lgi/linux/Gtk/LgiOsDefs.h \
 	../include/lgi/common/NetTools.h \
-	../include/lgi/common/String.h
+	../include/lgi/common/LgiString.h
 
 ../include/lgi/common/NetTools.h : ../include/lgi/common/Containers.h \
 	../include/lgi/common/LgiNetInc.h
@@ -1533,38 +1507,27 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/Http.h : ../include/lgi/common/Net.h
 
-../include/lgi/common/LgiCommon.h : ../include/lgi/common/Mem.h \
-	../include/lgi/common/Array.h \
-	../include/lgi/common/String.h \
-	../include/lgi/common/StringClass.h \
-	../include/lgi/common/CurrentTime.h \
-	../include/lgi/common/LgiUiBase.h
-
-../include/lgi/common/HashTable.h : ../include/lgi/common/Mem.h \
-	../include/lgi/common/Array.h \
-	../include/lgi/common/String.h
-
 ../src/common/Lgi/ThreadCommon.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/EventTargetThread.h
 
-../include/lgi/common/EventTargetThread.h : ../include/lgi/common/Thread.h \
-	../include/lgi/common/Mutex.h \
-	../include/lgi/common/ThreadEvent.h \
-	../include/lgi/common/Cancel.h \
+../include/lgi/common/Css.h : ../include/lgi/common/LgiInc.h \
+	../include/lgi/linux/Gtk/LgiOsDefs.h \
+	../include/lgi/common/Mem.h \
+	../include/lgi/common/Gdc2.h \
+	../include/lgi/common/AutoPtr.h \
+	../include/lgi/common/LgiString.h \
 	../include/lgi/common/HashTable.h
-
-../include/lgi/common/RectF.h : 
 
 ../include/lgi/common/Box.h : ../include/lgi/common/Css.h
 
-../include/lgi/common/CssTools.h : ../include/lgi/common/Css.h
-
 ../src/common/Gdc2/Filters/Filter.cpp : ../include/lgi/common/Lgi.h \
-	../include/lgi/common/String.h \
+	../include/lgi/common/LgiString.h \
 	../include/lgi/common/Variant.h \
 	../include/lgi/common/ClipBoard.h \
 	../include/lgi/common/Token.h \
 	../include/lgi/common/Palette.h
+
+../include/lgi/common/CssTools.h : ../include/lgi/common/Css.h
 
 ../src/common/Widgets/ProgressDlg.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/ProgressDlg.h \
@@ -1573,13 +1536,25 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/TableLayout.h \
 	../include/lgi/common/LgiRes.h
 
+../include/lgi/common/StringLayout.h : ../include/lgi/common/DisplayString.h \
+	../include/lgi/common/Css.h \
+	../include/lgi/common/FontCache.h
+
+../include/lgi/common/ItemContainer.h : ../include/lgi/common/Popup.h \
+	../include/lgi/common/Notifications.h \
+	../include/lgi/common/Css.h \
+	../include/lgi/common/ImageList.h
+
 ../src/linux/Gtk/GMemDC.cpp : ../include/lgi/common/Gdc2.h \
-	../include/lgi/common/String.h
+	../include/lgi/common/LgiString.h
 
 ../include/lgi/common/DocView.h : ../include/lgi/common/Variant.h \
 	../include/lgi/common/Notifications.h \
 	../include/lgi/common/Thread.h \
 	../include/lgi/common/Layout.h
+
+../include/lgi/common/LgiDefs.h : ../include/lgi/common/LgiInc.h \
+	../include/lgi/common/AutoPtr.h
 
 ../include/lgi/common/Notifications.h : 
 
@@ -1591,12 +1566,19 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Ftp.h \
 	../include/lgi/common/Thread.h
 
-../include/lgi/common/Properties.h : ../include/lgi/common/Containers.h \
-	../include/lgi/common/String.h
+../include/lgi/common/Ftp.h : ../include/lgi/common/Net.h \
+	../include/lgi/common/DateTime.h \
+	../include/lgi/common/StringClass.h \
+	../include/lgi/common/Permissions.h
 
-../include/lgi/common/Password.h : 
+../include/lgi/common/Permissions.h : ../include/lgi/common/HashTable.h
+
+../include/lgi/common/Properties.h : ../include/lgi/common/Containers.h \
+	../include/lgi/common/LgiString.h
 
 ../include/lgi/common/GdcTools.h : 
+
+../include/lgi/common/Password.h : 
 
 ../src/common/General/DateTime.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/DateTime.h \
@@ -1607,10 +1589,12 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Css.h \
 	../include/lgi/common/FontCache.h
 
+../include/lgi/common/Core.h : 
+
 ../src/common/Gdc2/16Bit.cpp : ../include/lgi/common/Gdc2.h \
 	../include/lgi/common/Palette.h
 
-../include/lgi/common/Rect.h : ../include/lgi/common/Point.h
+../include/lgi/common/Undo.h : 
 
 ../include/lgi/common/ToolBar.h : ../include/lgi/common/ImageList.h \
 	../include/lgi/common/Layout.h
@@ -1620,12 +1604,16 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/GdiLeak.h \
 	../include/lgi/common/DisplayString.h
 
-../include/lgi/common/TextLog.h : ../include/lgi/common/TextView3.h \
-	../include/lgi/common/Net.h
+../include/lgi/common/LgiCommon.h : ../include/lgi/common/Mem.h \
+	../include/lgi/common/Array.h \
+	../include/lgi/common/LgiString.h \
+	../include/lgi/common/StringClass.h \
+	../include/lgi/common/CurrentTime.h \
+	../include/lgi/common/LgiUiBase.h
 
-../include/lgi/common/TabView.h : ../include/lgi/common/Layout.h
-
-../include/lgi/common/DomFields.h : 
+../include/lgi/common/HashTable.h : ../include/lgi/common/Mem.h \
+	../include/lgi/common/Array.h \
+	../include/lgi/common/LgiString.h
 
 ../include/lgi/common/CurrentTime.h : 
 
@@ -1649,7 +1637,8 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/Error.h : 
 
-../include/lgi/common/StringClass.h : ../include/lgi/common/Unicode.h \
+../include/lgi/common/StringClass.h : ../include/lgi/linux/Gtk/LgiOsDefs.h \
+	../include/lgi/common/Unicode.h \
 	../include/lgi/common/Array.h
 
 ../private/linux/GAppPriv.h : ../include/lgi/common/Json.h \
@@ -1658,23 +1647,29 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/linux/SymLookup.h : ../include/lgi/common/SubProcess.h
 
-../include/lgi/common/CurrentTime.h : 
+../include/lgi/common/Mail.h : ../include/lgi/common/Net.h \
+	../include/lgi/common/Base64.h \
+	../include/lgi/common/Progress.h \
+	../include/lgi/common/Variant.h \
+	../include/lgi/common/OAuth2.h \
+	../include/lgi/common/Store3Defs.h
 
-../include/lgi/common/StringClass.h : ../include/lgi/common/Unicode.h \
-	../include/lgi/common/Array.h
+../include/lgi/common/Base64.h : ../include/lgi/common/LgiDefs.h
+
+../include/lgi/common/OAuth2.h : ../include/lgi/common/Net.h
 
 ../include/lgi/common/GdiLeak.h : 
 
-../include/lgi/common/Rops.h : ../include/lgi/common/PixelRops.h
+../include/lgi/mac/cocoa/LgiOsDefs.h : ../include/lgi/common/LgiInc.h \
+	../include/lgi/common/LgiDefs.h \
+	../include/lgi/common/AutoPtr.h \
+	../include/lgi/common/Message.h
 
 ../include/lgi/common/RefCount.h : ../include/lgi/common/LgiUiBase.h
 
 ../include/lgi/common/Array.h : ../include/lgi/common/Range.h
 
 ../include/lgi/common/Range.h : 
-
-../include/lgi/common/FontCache.h : ../include/lgi/common/App.h \
-	../include/lgi/common/Font.h
 
 ../include/lgi/common/FindReplaceDlg.h : 
 
@@ -1683,75 +1678,64 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/RectF.h
 
 ../include/lgi/common/LexCpp.h : ../include/lgi/common/LgiInc.h \
-	../include/lgi/linux/Gtk/LgiOsDefs.h \
-	../include/lgi/common/String.h
-
-../include/lgi/common/RegKey.h : ../include/lgi/common/Containers.h
+	../include/lgi/common/LgiString.h \
+	../include/lgi/linux/Gtk/LgiOsDefs.h
 
 ../include/lgi/common/Json.h : ../include/lgi/common/Array.h \
 	../include/lgi/common/StringClass.h
-
-../include/lgi/common/LgiDefs.h : ../include/lgi/common/LgiInc.h \
-	../include/lgi/common/AutoPtr.h
 
 ../include/lgi/common/TextConvert.h : 
 
 ../src/common/Gdc2/Tools/ColourReduce.cpp : ../include/lgi/common/Gdc2.h \
 	../include/lgi/common/Palette.h
 
-../include/lgi/common/UnrolledList.h : 
-
-./Code/LgiIde.h : ./Resources/resource.h \
-	./Resources/resdefs.h \
-	../include/lgi/common/DocView.h \
+./Code/LgiIde.h : ../include/lgi/common/DocView.h \
 	../include/lgi/common/OptionsFile.h \
-	./Code/FindSymbol.h \
 	../include/lgi/common/StringClass.h \
-	./Code/GDebugger.h \
 	../include/lgi/common/TextView3.h \
 	../include/lgi/common/List.h \
 	../include/lgi/common/Tree.h \
+	./Resources/resdefs.h \
+	./Code/FindSymbol.h \
+	./Code/GDebugger.h \
+	./Resources/resource.h \
 	./Code/IdeDoc.h \
 	./Code/IdeProject.h \
-	./Code/FindInFiles.h
+	../include/lgi/common/FindInFiles.h
 
-./Code/IdeDoc.h : ../include/lgi/common/Mdi.h \
-	../include/lgi/common/TextView3.h \
-	./Code/ParserCommon.h
-
-./Code/ParserCommon.h : ../include/lgi/common/LexCpp.h
-
-./Code/FindInFiles.h : ./Code/GHistory.h
-
-../include/lgi/common/LexCpp.h : ../include/lgi/common/LgiInc.h \
-	../include/lgi/linux/Gtk/LgiOsDefs.h \
-	../include/lgi/common/String.h
+./Resources/resdefs.h : 
 
 ./Code/FindSymbol.h : ../include/lgi/common/EventTargetThread.h
 
-../include/lgi/linux/Gtk/LgiOsClasses.h : 
+./Code/IdeProject.h : ../include/lgi/common/XmlTree.h \
+	../include/lgi/common/DragAndDrop.h \
+	../include/lgi/common/Tree.h \
+	../include/lgi/common/OptionsFile.h \
+	./Code/GDebugger.h \
+	../include/lgi/common/ProgressDlg.h \
+	../include/lgi/common/List.h \
+	./Code/IdeProjectSettings.h \
+	./Code/GDebugContext.h
+
+./Resources/resource.h : 
+
+./Code/GDebugger.h : ../include/lgi/common/Variant.h \
+	../include/lgi/common/StringClass.h
 
 ../include/lgi/common/ListItemCheckBox.h : ../include/lgi/common/List.h
 
 ../include/lgi/common/Mru.h : ../include/lgi/common/FileSelect.h
 
-../include/lgi/common/List.h : ../include/lgi/common/Mem.h \
-	../include/lgi/common/Array.h \
-	../include/lgi/common/Popup.h \
-	../include/lgi/common/DisplayString.h \
-	../include/lgi/common/Css.h \
-	../include/lgi/common/ItemContainer.h \
-	../include/lgi/common/UnrolledList.h
+../include/lgi/common/Tree.h : ../include/lgi/common/ItemContainer.h
 
 ../include/lgi/common/TableLayout.h : ../include/lgi/common/Css.h \
 	../include/lgi/common/Notifications.h \
 	../include/lgi/common/Layout.h
 
-../include/lgi/common/CairoSurface.h : 
+../include/lgi/common/Token.h : ../include/lgi/common/Array.h \
+	../include/lgi/common/LgiString.h
 
-../include/lgi/common/TableLayout.h : ../include/lgi/common/Css.h \
-	../include/lgi/common/Notifications.h \
-	../include/lgi/common/Layout.h
+../include/lgi/common/DomFields.h : 
 
 ../src/common/Widgets/Button.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/SkinEngine.h \
@@ -1761,8 +1745,6 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/LgiRes.h \
 	../include/lgi/common/StringLayout.h \
 	../include/lgi/common/CssTools.h
-
-../include/lgi/common/Button.h : 
 
 ../src/linux/Lgi/Layout.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/ScrollBar.h \
@@ -1784,8 +1766,7 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/ImageList.h
 
 ../src/common/Text/String.cpp : ../include/lgi/common/Mem.h \
-	../include/lgi/linux/Gtk/LgiOsDefs.h \
-	../include/lgi/common/String.h \
+	../include/lgi/common/LgiString.h \
 	../include/lgi/common/Containers.h \
 	../include/lgi/common/LgiCommon.h
 
@@ -1797,6 +1778,18 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/FontCache.h
 
 ../src/linux/Gtk/GScreenDC.cpp : ../include/lgi/common/Lgi.h
+
+../include/lgi/common/SkinEngine.h : ../include/lgi/common/List.h \
+	../include/lgi/common/Button.h \
+	../include/lgi/common/TextLabel.h \
+	../include/lgi/common/CheckBox.h \
+	../include/lgi/common/RadioGroup.h \
+	../include/lgi/common/TabView.h \
+	../include/lgi/common/Slider.h \
+	../include/lgi/common/Bitmap.h \
+	../include/lgi/common/ProgressView.h \
+	../include/lgi/common/Tree.h \
+	../include/lgi/common/Combo.h
 
 ../src/common/Gdc2/8Bit.cpp : ../include/lgi/common/Gdc2.h \
 	../include/lgi/common/Palette.h
@@ -1811,24 +1804,16 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Library.h \
 	../include/lgi/linux/Gtk/LgiWidget.h
 
+../include/lgi/common/FontCache.h : ../include/lgi/common/App.h \
+	../include/lgi/common/Font.h
+
 ../include/lgi/common/OptionsFile.h : ../include/lgi/common/Variant.h \
 	../include/lgi/common/XmlTree.h \
 	../include/lgi/common/Mutex.h
 
 ./Code/GHistory.h : ../include/lgi/common/Popup.h
 
-../include/lgi/common/Mem.h : ../include/lgi/common/LgiInc.h \
-	../include/lgi/linux/Gtk/LgiOsDefs.h
-
-../include/lgi/common/ClipBoard.h : 
-
-../include/lgi/common/Colour.h : ../include/lgi/common/ColourSpace.h
-
-../include/lgi/common/OptionsFile.h : ../include/lgi/common/Variant.h \
-	../include/lgi/common/XmlTree.h \
-	../include/lgi/common/Mutex.h
-
-../include/lgi/common/LgiInc.h : 
+../include/lgi/common/App.h : 
 
 ../src/common/Lgi/Input.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/TextLabel.h \
@@ -1837,8 +1822,6 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/DisplayString.h \
 	../include/lgi/common/LgiRes.h \
 	../include/lgi/common/TableLayout.h
-
-../include/lgi/common/Res.h : ../include/lgi/common/XmlTree.h
 
 ../src/common/Lgi/AppCommon.cpp : ../include/lgi/common/Lgi.h
 
@@ -1851,8 +1834,6 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Menu.h \
 	../include/lgi/linux/Gtk/LgiWidget.h
 
-../include/lgi/common/LibraryUtils.h : 
-
 ../src/common/Gdc2/Font/FontSystem.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Token.h \
 	../include/lgi/common/Library.h \
@@ -1862,25 +1843,16 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Stream.h \
 	../include/lgi/common/NetTools.h
 
-../include/lgi/common/TextLabel.h : 
-
-../include/lgi/common/LgiInterfaces.h : ../include/lgi/common/Mem.h \
-	../include/lgi/common/Array.h \
-	../include/lgi/linux/Gtk/LgiOsDefs.h \
-	../include/lgi/common/Colour.h \
-	../include/lgi/common/Cancel.h \
-	../include/lgi/common/StringClass.h
-
 ../src/common/Gdc2/RopsCases.cpp : 
-
-./Resources/resdefs.h : 
 
 ../include/lgi/common/TextLog.h : ../include/lgi/common/TextView3.h \
 	../include/lgi/common/Net.h
 
-../include/lgi/common/View.h : 
+../include/lgi/common/RadioGroup.h : 
 
 ../include/lgi/common/TabView.h : ../include/lgi/common/Layout.h
+
+../include/lgi/common/Library.h : 
 
 ../src/common/Lgi/TrayIcon.cpp : ../include/lgi/common/Lgi.h
 
@@ -1891,14 +1863,11 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 
 ./Code/ProjectNode.h : ./Code/FtpThread.h
 
-../include/lgi/common/Dom.h : ../include/lgi/common/LgiInterfaces.h \
-	../include/lgi/common/Mem.h \
-	../include/lgi/common/Array.h \
-	../include/lgi/common/DomFields.h
-
 ./Code/FtpFile.h : ../include/lgi/common/ListItemCheckBox.h
 
 ../include/lgi/common/ListItemCheckBox.h : ../include/lgi/common/List.h
+
+../include/lgi/common/Error.h : 
 
 ../include/lgi/common/ViewPriv.h : ../include/lgi/common/ThreadEvent.h
 
@@ -1906,35 +1875,39 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 
 ./Code/SpaceTabConv.h : 
 
-../include/lgi/common/ThreadEvent.h : 
+../include/lgi/common/ClipBoard.h : 
 
 ../include/lgi/common/LgiDefs.h : ../include/lgi/common/LgiInc.h \
 	../include/lgi/common/AutoPtr.h
 
 ./Code/levenshtein.h : 
 
+../include/lgi/common/Array.h : ../include/lgi/common/Range.h
+
 ../src/common/General/FileCommon.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Variant.h
 
-./Code/GHistory.h : ../include/lgi/common/Popup.h
+../include/lgi/common/RegKey.h : ../include/lgi/common/Containers.h
 
 ../include/lgi/common/TextFile.h : 
 
-../include/lgi/common/LgiRes.h : ../include/lgi/common/Res.h \
-	../include/lgi/common/Containers.h \
-	../include/lgi/common/Css.h \
-	../include/lgi/common/AutoPtr.h \
-	../include/lgi/common/FontCache.h
+../include/lgi/common/LgiString.h : ../include/lgi/common/LgiDefs.h \
+	../include/lgi/linux/Gtk/LgiOsDefs.h
+
+../include/lgi/common/Font.h : ../include/lgi/common/Rect.h \
+	../include/lgi/linux/Gtk/LgiOsClasses.h \
+	../include/lgi/common/Colour.h \
+	../include/lgi/common/Capabilities.h \
+	../include/lgi/common/Css.h
+
+../include/lgi/linux/Gtk/LgiWinManGlue.h : ../include/lgi/common/LgiDefs.h \
+	../include/lgi/common/Mem.h \
+	../include/lgi/common/Array.h
 
 ../src/common/Lgi/GuiUtils.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/SkinEngine.h \
 	../include/lgi/common/Token.h \
 	../include/lgi/linux/Gtk/LgiWinManGlue.h
-
-../include/lgi/common/Ftp.h : ../include/lgi/common/Net.h \
-	../include/lgi/common/DateTime.h \
-	../include/lgi/common/StringClass.h \
-	../include/lgi/common/Permissions.h
 
 ../include/lgi/common/Button.h : 
 
@@ -1945,9 +1918,7 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/DocView.h \
 	../include/lgi/common/Net.h
 
-../include/lgi/common/Menu.h : ../include/lgi/common/XmlTree.h \
-	../include/lgi/common/Res.h \
-	../include/lgi/common/ImageList.h
+../include/lgi/common/TextLabel.h : 
 
 ../include/lgi/common/EventTargetThread.h : ../include/lgi/common/Thread.h \
 	../include/lgi/common/Mutex.h \
@@ -1957,17 +1928,17 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/ImageList.h : 
 
-../include/lgi/common/Library.h : 
-
 ../include/lgi/common/Edit.h : ../include/lgi/common/TextView3.h
 
 ../include/lgi/common/Colour.h : ../include/lgi/common/ColourSpace.h
+
+../include/lgi/common/Button.h : 
 
 ../include/lgi/common/LgiInc.h : 
 
 ../src/common/General/Containers.cpp : ../include/lgi/common/Mem.h \
 	../include/lgi/common/Containers.h \
-	../include/lgi/common/String.h \
+	../include/lgi/common/LgiString.h \
 	../include/lgi/common/LgiCommon.h
 
 ../src/linux/Lgi/Printer.cpp : ../include/lgi/common/Lgi.h \
@@ -1979,9 +1950,11 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/ParseCpp.h : 
 
-../include/lgi/common/StringLayout.h : ../include/lgi/common/DisplayString.h \
-	../include/lgi/common/Css.h \
-	../include/lgi/common/FontCache.h
+../include/lgi/common/StringClass.h : ../include/lgi/linux/Gtk/LgiOsDefs.h \
+	../include/lgi/common/Unicode.h \
+	../include/lgi/common/Array.h
+
+../include/lgi/common/CurrentTime.h : 
 
 ../include/lgi/common/DateTime.h : ../include/lgi/common/StringClass.h
 
@@ -1995,32 +1968,11 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/ProgressView.h \
 	../include/lgi/common/Button.h
 
-../src/linux/General/GMem.cpp : ../include/lgi/common/LgiDefs.h \
-	../include/lgi/linux/Gtk/LgiOsDefs.h \
-	../include/lgi/common/Mem.h \
-	../include/lgi/common/Mutex.h
-
-../include/lgi/common/SkinEngine.h : ../include/lgi/common/List.h \
-	../include/lgi/common/Button.h \
-	../include/lgi/common/TextLabel.h \
-	../include/lgi/common/CheckBox.h \
-	../include/lgi/common/RadioGroup.h \
-	../include/lgi/common/TabView.h \
-	../include/lgi/common/Slider.h \
-	../include/lgi/common/Bitmap.h \
-	../include/lgi/common/ProgressView.h \
-	../include/lgi/common/Tree.h \
-	../include/lgi/common/Combo.h
-
-../include/lgi/common/ProgressDlg.h : ../include/lgi/common/TextLabel.h \
-	../include/lgi/common/TableLayout.h \
-	../include/lgi/common/ProgressView.h \
-	../include/lgi/common/Button.h
+../include/lgi/common/Message.h : 
 
 ../include/lgi/common/Printer.h : 
 
-../include/lgi/common/Dialog.h : ../include/lgi/common/Window.h \
-	../include/lgi/common/LgiRes.h
+../include/lgi/common/FindInFiles.h : 
 
 ../src/linux/Lgi/Widgets.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Slider.h \
@@ -2030,10 +1982,23 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Button.h \
 	../include/lgi/linux/Gtk/LgiWidget.h
 
+../include/lgi/common/Net.h : ../include/lgi/common/LgiNetInc.h \
+	../include/lgi/common/LgiInterfaces.h \
+	../include/lgi/common/Mem.h \
+	../include/lgi/common/Containers.h \
+	../include/lgi/common/Stream.h \
+	../include/lgi/common/LgiString.h \
+	../include/lgi/common/Cancel.h \
+	../include/lgi/common/HashTable.h
+
+../include/lgi/common/Colour.h : ../include/lgi/common/ColourSpace.h
+
 ../src/common/Gdc2/Rect.cpp : ../include/lgi/common/Gdc2.h \
 	../include/lgi/common/Token.h
 
-../include/lgi/common/ScrollBar.h : 
+../include/lgi/common/LgiInc.h : 
+
+../include/lgi/mac/cocoa/LCocoaView.h : 
 
 ./Code/DocEdit.h : ../include/lgi/common/TextView3.h \
 	./Code/IdeDoc.h
@@ -2044,22 +2009,21 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/StringClass.h \
 	../include/lgi/common/Point.h
 
-../include/lgi/common/RadioGroup.h : 
-
 ../src/common/Lgi/Alert.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/TextLabel.h \
 	../include/lgi/common/Button.h \
 	../include/lgi/common/DisplayString.h \
 	../include/lgi/common/TableLayout.h
 
-../include/lgi/common/Mdi.h : ../include/lgi/common/Layout.h
+../include/lgi/common/Rect.h : ../include/lgi/common/Point.h
+
+../include/lgi/common/TableLayout.h : ../include/lgi/common/Css.h \
+	../include/lgi/common/Notifications.h \
+	../include/lgi/common/Layout.h
 
 ../src/common/Hash/sha1/sha1.c : 
 
-../include/lgi/common/Token.h : ../include/lgi/common/Array.h \
-	../include/lgi/common/String.h
-
-../include/lgi/common/TrayIcon.h : 
+../include/lgi/mac/cocoa/LgiOs.h : 
 
 ../include/lgi/common/Panel.h : ../include/lgi/common/DisplayString.h \
 	../include/lgi/common/Layout.h
@@ -2071,13 +2035,7 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Variant.h \
 	../include/lgi/common/Token.h
 
-../include/lgi/common/Css.h : ../include/lgi/common/LgiInc.h \
-	../include/lgi/linux/Gtk/LgiOsDefs.h \
-	../include/lgi/common/Mem.h \
-	../include/lgi/common/Gdc2.h \
-	../include/lgi/common/AutoPtr.h \
-	../include/lgi/common/String.h \
-	../include/lgi/common/HashTable.h
+../include/lgi/common/TrayIcon.h : 
 
 ../src/common/Lgi/CssTools.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/CssTools.h \
@@ -2090,24 +2048,21 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/AutoPtr.h \
 	../include/lgi/common/FontCache.h
 
-../include/lgi/common/Message.h : 
-
-../include/lgi/common/Stream.h : ../include/lgi/common/Dom.h \
-	../include/lgi/common/StringClass.h
-
 ../include/lgi/common/HtmlPriv.h : ../include/lgi/common/Css.h \
 	../include/lgi/common/Token.h \
 	../include/lgi/common/HtmlParser.h
 
-../include/lgi/common/Matrix.h : 
+../include/lgi/common/Rops.h : ../include/lgi/common/PixelRops.h
 
 ./Code/ParserCommon.h : ../include/lgi/common/LexCpp.h
+
+../include/lgi/common/LexCpp.h : ../include/lgi/common/LgiInc.h \
+	../include/lgi/common/LgiString.h \
+	../include/lgi/linux/Gtk/LgiOsDefs.h
 
 ../include/lgi/common/Core.h : 
 
 ../include/lgi/common/Splitter.h : ../include/lgi/common/Layout.h
-
-../include/lgi/common/Thread.h : ../include/lgi/common/Mutex.h
 
 ../include/lgi/common/Undo.h : 
 
@@ -2137,7 +2092,16 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/StatusBar.h : ../include/lgi/common/Layout.h
 
+../src/linux/General/Mem.cpp : ../include/lgi/common/LgiDefs.h \
+	../include/lgi/linux/Gtk/LgiOsDefs.h \
+	../include/lgi/common/Mem.h \
+	../include/lgi/common/Mutex.h
+
 ./Code/IdeDocPrivate.h : ../include/lgi/common/CheckBox.h
+
+../include/lgi/common/OptionsFile.h : ../include/lgi/common/Variant.h \
+	../include/lgi/common/XmlTree.h \
+	../include/lgi/common/Mutex.h
 
 ../src/common/Widgets/TextLabel.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/TextLabel.h \
@@ -2147,12 +2111,21 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/LgiRes.h \
 	../include/lgi/common/CssTools.h
 
-../include/lgi/common/TextView3.h : ../include/lgi/common/DocView.h \
-	../include/lgi/common/Undo.h \
-	../include/lgi/common/DragAndDrop.h \
+./Code/IdeDoc.h : ../include/lgi/common/Mdi.h \
+	../include/lgi/common/TextView3.h \
+	./Code/ParserCommon.h
+
+../include/lgi/common/Mdi.h : ../include/lgi/common/Layout.h
+
+./Code/ParserCommon.h : ../include/lgi/common/LexCpp.h
+
+../include/lgi/common/LgiRes.h : ../include/lgi/common/Res.h \
+	../include/lgi/common/Containers.h \
 	../include/lgi/common/Css.h \
-	../include/lgi/common/UnrolledList.h \
-	../include/lgi/common/FindReplaceDlg.h
+	../include/lgi/common/AutoPtr.h \
+	../include/lgi/common/FontCache.h
+
+../include/lgi/common/ScrollBar.h : 
 
 ../src/common/General/ExeCheck.cpp : ../include/lgi/common/Lgi.h
 
@@ -2168,27 +2141,38 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Base64.h \
 	../include/lgi/common/Progress.h \
 	../include/lgi/common/Variant.h \
-	../include/lgi/common/OAuth2.h
+	../include/lgi/common/OAuth2.h \
+	../include/lgi/common/Store3Defs.h
 
 ../src/common/Net/Base64.cpp : ../include/lgi/common/Mem.h \
 	../include/lgi/common/LgiInc.h \
 	../include/lgi/common/Base64.h \
 	../include/lgi/common/Range.h
 
+../include/lgi/common/List.h : ../include/lgi/common/Mem.h \
+	../include/lgi/common/Array.h \
+	../include/lgi/common/Popup.h \
+	../include/lgi/common/DisplayString.h \
+	../include/lgi/common/Css.h \
+	../include/lgi/common/ItemContainer.h \
+	../include/lgi/common/UnrolledList.h
+
 ../include/lgi/common/OpenSSLSocket.h : ../include/lgi/common/LibraryUtils.h \
 	../include/lgi/common/Cancel.h
+
+../include/lgi/common/FindReplaceDlg.h : 
 
 ../src/common/Gdc2/24Bit.cpp : ../include/lgi/common/Gdc2.h \
 	../include/lgi/common/Palette.h
 
 ../include/lgi/common/Library.h : 
 
-./Resources/resource.h : 
-
 ./Code/WebFldDlg.h : 
 
 ../include/lgi/common/Dialog.h : ../include/lgi/common/Window.h \
 	../include/lgi/common/LgiRes.h
+
+../include/lgi/common/Window.h : ../include/lgi/common/View.h
 
 ../src/common/Lgi/SubProcess.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/SubProcess.h \
@@ -2197,25 +2181,22 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 ../src/linux/Lgi/DragAndDrop.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/DragAndDrop.h
 
-./Code/IdeProject.h : ../include/lgi/common/XmlTree.h \
-	../include/lgi/common/DragAndDrop.h \
-	../include/lgi/common/Tree.h \
-	../include/lgi/common/OptionsFile.h \
-	./Code/GDebugger.h \
-	../include/lgi/common/ProgressDlg.h \
-	../include/lgi/common/List.h \
-	./Code/IdeProjectSettings.h \
-	./Code/GDebugContext.h
-
 ../include/lgi/common/Input.h : ../include/lgi/common/Dialog.h \
 	../include/lgi/common/Edit.h
 
 ../src/common/Net/MDStringToDigest.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Net.h
 
-../include/lgi/common/Permissions.h : ../include/lgi/common/HashTable.h
-
-../include/lgi/common/Error.h : 
+../include/lgi/common/Lgi.h : ../include/lgi/linux/Gtk/LgiOsDefs.h \
+	../include/lgi/common/LgiMsgs.h \
+	../include/lgi/common/LgiDefs.h \
+	../include/lgi/common/Mem.h \
+	../include/lgi/common/LgiString.h \
+	../include/lgi/common/File.h \
+	../include/lgi/common/Gdc2.h \
+	../include/lgi/common/Font.h \
+	../include/lgi/common/LgiClasses.h \
+	../include/lgi/common/LgiCommon.h
 
 ../src/common/Gdc2/Font/DisplayString.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Variant.h \
@@ -2230,11 +2211,16 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 ../include/lgi/common/Mem.h : ../include/lgi/common/LgiInc.h \
 	../include/lgi/linux/Gtk/LgiOsDefs.h
 
+../include/lgi/common/ThreadEvent.h : 
+
 ../include/lgi/common/Tree.h : ../include/lgi/common/ItemContainer.h
 
 ./Code/FtpThread.h : ../include/lgi/common/List.h \
 	../include/lgi/common/Ftp.h \
 	../include/lgi/common/Thread.h
+
+../include/lgi/common/Dialog.h : ../include/lgi/common/Window.h \
+	../include/lgi/common/LgiRes.h
 
 ../src/common/Hash/md5/md5.c : 
 
@@ -2242,7 +2228,7 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/Res.h : ../include/lgi/common/XmlTree.h
 
-../include/lgi/common/Array.h : ../include/lgi/common/Range.h
+../include/lgi/common/FontSelect.h : 
 
 ../src/common/Hash/md5/md5.h : ../include/lgi/common/LgiInc.h \
 	../include/lgi/common/LgiDefs.h
@@ -2259,8 +2245,12 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/CssTools.h \
 	../include/lgi/linux/Gtk/LgiWidget.h
 
-../include/lgi/common/String.h : ../include/lgi/common/LgiDefs.h \
-	../include/lgi/linux/Gtk/LgiOsDefs.h
+../include/lgi/common/TextView3.h : ../include/lgi/common/DocView.h \
+	../include/lgi/common/Undo.h \
+	../include/lgi/common/DragAndDrop.h \
+	../include/lgi/common/Css.h \
+	../include/lgi/common/UnrolledList.h \
+	../include/lgi/common/FindReplaceDlg.h
 
 ../include/lgi/common/DropFiles.h : ../include/lgi/common/Variant.h \
 	../include/lgi/common/Array.h \
@@ -2279,12 +2269,12 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 ../src/common/General/Properties.cpp : ../include/lgi/linux/Gtk/LgiOsDefs.h \
 	../include/lgi/common/File.h \
 	../include/lgi/common/Properties.h \
-	../include/lgi/common/String.h \
+	../include/lgi/common/LgiString.h \
 	../include/lgi/common/Variant.h
 
 ../include/lgi/common/RefCount.h : ../include/lgi/common/LgiUiBase.h
 
-../include/lgi/common/LgiNetInc.h : 
+../include/lgi/common/Widgets.h : 
 
 ../src/common/Gdc2/Font/FontType.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/FontSelect.h
@@ -2294,18 +2284,22 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/Matrix.h : 
 
+../include/lgi/common/View.h : 
+
 ../src/linux/Lgi/Menu.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Token.h \
 	../include/lgi/common/DisplayString.h \
 	../include/lgi/common/Menu.h \
 	../include/lgi/common/ToolBar.h
 
+../include/lgi/common/XmlTree.h : ../include/lgi/common/HashTable.h \
+	../include/lgi/common/RefCount.h \
+	../include/lgi/common/Dom.h
+
 ../include/lgi/common/Dom.h : ../include/lgi/common/LgiInterfaces.h \
 	../include/lgi/common/Mem.h \
 	../include/lgi/common/Array.h \
 	../include/lgi/common/DomFields.h
-
-../include/lgi/common/Window.h : ../include/lgi/common/View.h
 
 ../include/lgi/common/Thread.h : ../include/lgi/common/Mutex.h
 
@@ -2313,30 +2307,42 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/Message.h : 
 
+../include/lgi/common/Panel.h : ../include/lgi/common/DisplayString.h \
+	../include/lgi/common/Layout.h
+
 ../src/common/Gdc2/Alpha.cpp : ../include/lgi/common/Gdc2.h \
 	../include/lgi/common/Path.h \
 	../include/lgi/common/PixelRops.h \
 	../include/lgi/common/Palette.h
 
-../include/lgi/common/Cancel.h : 
-
-../include/lgi/common/File.h : ../include/lgi/common/Mem.h \
-	../include/lgi/common/Stream.h \
-	../include/lgi/common/Array.h \
-	../include/lgi/common/RefCount.h \
-	../include/lgi/common/StringClass.h \
-	../include/lgi/common/Error.h
+../include/lgi/common/FileSelect.h : 
 
 ../include/lgi/common/Point.h : 
+
+../include/lgi/common/Box.h : ../include/lgi/common/Css.h
 
 ../src/common/Lgi/Stream.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Stream.h
 
+../include/lgi/common/Stream.h : ../include/lgi/common/Dom.h \
+	../include/lgi/common/StringClass.h
+
+../include/lgi/common/Matrix.h : 
+
+../include/lgi/mac/cocoa/ObjCWrapper.h : 
+
 ../include/lgi/common/NetTools.h : ../include/lgi/common/Containers.h \
 	../include/lgi/common/LgiNetInc.h
 
+../include/lgi/common/ProgressDlg.h : ../include/lgi/common/TextLabel.h \
+	../include/lgi/common/TableLayout.h \
+	../include/lgi/common/ProgressView.h \
+	../include/lgi/common/Button.h
+
 ../src/common/Lgi/DragAndDropCommon.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/DragAndDrop.h
+
+../include/lgi/common/Store3Defs.h : 
 
 ../src/common/Widgets/Edit.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Edit.h \
@@ -2345,28 +2351,36 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/LgiRes.h \
 	../include/lgi/common/TextView3.h
 
+../include/lgi/common/Thread.h : ../include/lgi/common/Mutex.h
+
 ../include/lgi/common/Ftp.h : ../include/lgi/common/Net.h \
 	../include/lgi/common/DateTime.h \
 	../include/lgi/common/StringClass.h \
 	../include/lgi/common/Permissions.h
+
+../include/lgi/common/AutoPtr.h : 
+
+../include/lgi/linux/Gtk/LgiOsDefs.h : ../include/lgi/common/LgiDefs.h \
+	../include/lgi/common/LgiInc.h \
+	../include/lgi/common/Message.h
 
 ../include/lgi/common/Progress.h : ../include/lgi/common/Mutex.h \
 	../include/lgi/common/Cancel.h \
 	../include/lgi/common/StringClass.h \
 	../include/lgi/common/Dom.h
 
-../include/lgi/common/App.h : 
+../include/lgi/common/Containers.h : ../include/lgi/common/LgiInc.h \
+	../include/lgi/linux/Gtk/LgiOsDefs.h \
+	../include/lgi/common/Stream.h
 
 ../include/lgi/common/Popup.h : ../include/lgi/common/Layout.h
 
-../src/linux/General/GFile.cpp : ../include/lgi/common/LgiDefs.h \
-	../include/lgi/common/File.h \
-	../include/lgi/common/Containers.h \
-	../include/lgi/common/Token.h \
-	../include/lgi/common/Gdc2.h \
-	../include/lgi/common/LgiCommon.h \
-	../include/lgi/common/String.h \
-	../include/lgi/common/DateTime.h
+../include/lgi/common/LgiInterfaces.h : ../include/lgi/common/Mem.h \
+	../include/lgi/common/Array.h \
+	../include/lgi/common/Colour.h \
+	../include/lgi/common/Cancel.h \
+	../include/lgi/common/StringClass.h \
+	../include/lgi/common/LgiUiBase.h
 
 ../src/common/Text/Utf8.cpp : ../include/lgi/common/Lgi.h
 
@@ -2380,6 +2394,12 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/DisplayString.h \
 	../include/lgi/common/CssTools.h \
 	../include/lgi/common/StringLayout.h
+
+../include/lgi/common/Menu.h : ../include/lgi/common/XmlTree.h \
+	../include/lgi/common/Res.h \
+	../include/lgi/common/ImageList.h
+
+../include/lgi/common/LgiNetInc.h : 
 
 ../src/common/Widgets/TableLayout.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/TableLayout.h \
@@ -2401,8 +2421,6 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/ScrollBar.h \
 	../include/lgi/common/Css.h
 
-../include/lgi/common/Widgets.h : 
-
 ../include/lgi/common/SkinEngine.h : ../include/lgi/common/List.h \
 	../include/lgi/common/Button.h \
 	../include/lgi/common/TextLabel.h \
@@ -2415,9 +2433,11 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Tree.h \
 	../include/lgi/common/Combo.h
 
-../include/lgi/common/XmlTree.h : ../include/lgi/common/HashTable.h \
-	../include/lgi/common/RefCount.h \
-	../include/lgi/common/Dom.h
+../include/lgi/common/EventTargetThread.h : ../include/lgi/common/Thread.h \
+	../include/lgi/common/Mutex.h \
+	../include/lgi/common/ThreadEvent.h \
+	../include/lgi/common/Cancel.h \
+	../include/lgi/common/HashTable.h
 
 ../include/lgi/common/CheckBox.h : 
 
@@ -2444,14 +2464,22 @@ HtmlParser.o : ../src/common/Text/HtmlParser.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/LgiInc.h \
 	../include/lgi/common/Message.h
 
-../include/lgi/common/String.h : ../include/lgi/common/LgiDefs.h \
-	../include/lgi/linux/Gtk/LgiOsDefs.h
+../include/lgi/common/Variant.h : ../include/lgi/common/Dom.h \
+	../include/lgi/common/DateTime.h \
+	../include/lgi/common/Containers.h \
+	../include/lgi/common/HashTable.h \
+	../include/lgi/common/LgiString.h
+
+../include/lgi/common/ToolTip.h : 
 
 ../src/common/Gdc2/RopsCases.cpp : 
 
+../include/lgi/common/Input.h : ../include/lgi/common/Dialog.h \
+	../include/lgi/common/Edit.h
+
 ../src/common/Lgi/Object.cpp : ../include/lgi/common/Gdc2.h \
 	../include/lgi/common/LgiCommon.h \
-	../include/lgi/common/String.h
+	../include/lgi/common/LgiString.h
 
 VPATH=%.cpp \
 	../include/lgi/linux/Gtk \

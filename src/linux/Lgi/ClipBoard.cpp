@@ -188,8 +188,8 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LAutoPtr<LS
 			#define Rop24(out_cs, in_cs) \
 				case Cs##out_cs: \
 				{ \
-					G##in_cs *in = (G##in_cs*)(px + (yy*row)); \
-					G##out_cs *out = (G##out_cs*) ((*m)[yy]); \
+					auto in = (L##in_cs*)(px + (yy*row)); \
+					auto out = (L##out_cs*) ((*m)[yy]); \
 					auto end = out + x; \
 					while (out < end) \
 					{ \
@@ -201,8 +201,8 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LAutoPtr<LS
 			#define Rop32(out_cs, in_cs) \
 				case Cs##out_cs: \
 				{ \
-					G##in_cs *in = (G##in_cs*)(px + (yy*row)); \
-					G##out_cs *out = (G##out_cs*) (*m)[yy]; \
+					auto in = (L##in_cs*)(px + (yy*row)); \
+					auto out = (L##out_cs*) (*m)[yy]; \
 					auto end = out + x; \
 					while (out < end) \
 					{ \

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Project TabSize="4" IndentSize="4" UseTabs="1" Makefile="./Makefile.linux" Exe="./lgiide" ShowWhitespace="0" IncludePaths=".\Code&#10;..\include\common&#10;..\include\linux\X&#10;" BuildType="0" TargetType="0" TargetName="lgiide" Compiler="0">
+<Project TabSize="4" IndentSize="4" UseTabs="1" Makefile="./Makefile.linux" Exe="./lgiide" ShowWhitespace="0" BuildType="0" TargetType="0" TargetName="lgiide" Compiler="0">
 	<Node Name="Source Files" Type="1" Platforms="15" Open="1" Id="1">
 		<Node Name="Debugger" Type="1" Platforms="15" Open="0" Id="2">
 			<Node File="./Code/GDebugContext.cpp" Type="2" Platforms="15" />
@@ -59,23 +59,24 @@
 			<Node File="../src/common/Coding/ParseCpp.cpp" Type="2" Platforms="15" />
 			<Node File=".\Code\SysCharSupport.cpp" Type="2" Platforms="15" />
 		</Node>
-		<Node File=".\Code\IdeCommon.cpp" Type="2" Platforms="15" />
-		<Node File=".\Code\LgiIde.cpp" Type="2" Platforms="15" />
-		<Node File=".\Code\LgiIde.h" Type="3" Platforms="15" />
-		<Node File=".\Code\LgiUtils.cpp" Type="2" Platforms="15" />
-		<Node File=".\Code\MemDumpViewer.cpp" Type="2" Platforms="15" />
-		<Node File=".\Code\SpaceTabConv.h" Type="3" Platforms="15" />
-		<Node File=".\Code\SpaceTabConv.cpp" Type="2" Platforms="15" />
+		<Node File="./Code/IdeCommon.cpp" Type="2" Platforms="15" />
+		<Node File="./Code/LgiIde.cpp" Type="2" Platforms="15" />
+		<Node File="./Code/LgiIde.h" Type="3" Platforms="15" />
+		<Node File="./Code/LgiUtils.cpp" Type="2" Platforms="15" />
+		<Node File="./Code/MemDumpViewer.cpp" Type="2" Platforms="15" />
+		<Node File="./Code/SpaceTabConv.h" Type="3" Platforms="15" />
+		<Node File="./Code/SpaceTabConv.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Lgi" Type="1" Platforms="15" Open="1" Id="7">
-		<Node File="../src/common/Text/DocView.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Lgi/Mdi.cpp" Type="2" Platforms="15" />
 		<Node Name="Html" Type="1" Platforms="15" Id="1">
 			<Node File="../src/common/Text/Html.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Text/HtmlCommon.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Text/HtmlParser.cpp" Type="2" Platforms="15" />
 		</Node>
+		<Node File="../src/common/Text/DocView.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Net/Http.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Lgi/Mdi.cpp" Type="2" Platforms="15" />
 		<Node File="../include/lgi/common/Mdi.h" Type="3" Platforms="15" />
 		<Node File="../src/common/Net/OpenSSLSocket.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
@@ -83,7 +84,6 @@
 		<Node File="../src/common/Text/TextConvert.cpp" Type="2" Platforms="15" />
 		<Node File="../include/lgi/common/TextLog.h" Type="3" Platforms="15" />
 		<Node File="../include/lgi/common/TrayIcon.h" Type="3" Platforms="15" />
-		<Node File="../src/common/Net/Http.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Resources" Type="1" Platforms="15" Open="1" Id="8">
 		<Node Name="Test" Type="1" Platforms="15" Id="1" />
@@ -109,7 +109,6 @@
 					<Debug>LgiIde.exe</Debug>
 					<Release>LgiIde.exe</Release>
 				</Windows>
-				<Mac />
 			</Executable>
 			<Defines>
 				<Windows>
@@ -191,14 +190,13 @@ pthread
 					<Release>be</Release>
 				</Haiku>
 				<All />
-				<Mac />
 			</Libraries>
 			<LibraryPaths>
 				<All>
 					<Debug>..\Debug</Debug>
 					<Release>..\Release</Release>
 				</All>
-				<Mac />
+				<Linux />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -216,7 +214,6 @@ pthread
 					<Debug>lgiide</Debug>
 					<Release>lgiide</Release>
 				</Linux>
-				<Mac />
 			</TargetName>
 			<SystemIncludes>
 				<Windows>
@@ -229,14 +226,13 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
-				<Mac />
 			</SystemIncludes>
 			<ApplicationIcon>
 				<Haiku>./Code/icon-haiku</Haiku>
 			</ApplicationIcon>
 			<Defines>
 				<All />
-				<Mac />
+				<Linux />
 			</Defines>
 		</Build>
 		<Editor>
@@ -268,7 +264,7 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 		<Advanced>
 			<OtherMakefileRules />
 			<PostBuildCommands>
-				<Mac />
+				<Linux />
 			</PostBuildCommands>
 		</Advanced>
 		<Remote>

@@ -5,9 +5,7 @@
 //  Created by Matthew Allen on 19/10/2017.
 //
 //
-
-#ifndef LCancel_h
-#define LCancel_h
+#pragma once
 
 class LgiClass LCancel
 {
@@ -33,5 +31,3 @@ public:
 	}
 };
 
-
-#endif /* LCancel_h */

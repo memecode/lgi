@@ -12,7 +12,7 @@
 #include <math.h>
 
 #include "lgi/common/Gdc2.h"
-#include "lgi/common/String.h"
+#include "lgi/common/LgiString.h"
 using namespace Gtk;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
