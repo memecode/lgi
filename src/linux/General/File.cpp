@@ -1072,19 +1072,13 @@ struct LDirectoryPriv
 	DIR				*Dir;
 	struct dirent	*De;
 	struct stat		Stat;
-	char			*Pattern;
+	LString			Pattern;
 
 	LDirectoryPriv()
 	{	
 		Dir = 0;
 		De = 0;
 		BasePath[0] = 0;
-		Pattern = 0;
-	}
-	
-	~LDirectoryPriv()
-	{
-		DeleteArray(Pattern);
 	}
 	
 	bool Ignore()
@@ -1125,52 +1119,47 @@ int LDirectory::First(const char *Name, const char *Pattern)
 {
 	Close();
 
-	if (Name)
-	{
-		strcpy(d->BasePath, Name);
-		if (!Pattern || stricmp(Pattern, LGI_ALL_FILES) == 0)
-		{
-			struct stat S;
-			if (lstat(Name, &S) == 0)
-			{
-				if (S_ISREG(S.st_mode))
-				{
-					char *Dir = strrchr(d->BasePath, DIR_CHAR);
-					if (Dir)
-					{
-						*Dir++ = 0;
-						d->Pattern = NewStr(Dir);
-					}
-				}
-			}
-		}
-		else
-		{
-			d->Pattern = NewStr(Pattern);
-		}
-		
-		d->Dir = opendir(d->BasePath);
-		if (d->Dir)
-		{
-			d->De = readdir(d->Dir);
-			if (d->De)
-			{
-				char s[512];
-				LMakePath(s, sizeof(s), d->BasePath, GetName());
-				lstat(s, &d->Stat);
+	if (!Name)
+		return 0;
 
-				if (d->Ignore())
+	strcpy(d->BasePath, Name);
+	if (!Pattern || stricmp(Pattern, LGI_ALL_FILES) == 0)
+	{
+		struct stat S;
+		if (lstat(Name, &S) == 0)
+		{
+			if (S_ISREG(S.st_mode))
+			{
+				char *Dir = strrchr(d->BasePath, DIR_CHAR);
+				if (Dir)
 				{
-					if (!Next())
-					{
-						return false;
-					}
+					*Dir++ = 0;
+					d->Pattern = Dir;
 				}
 			}
 		}
 	}
+	else
+	{
+		d->Pattern = Pattern;
+	}
+	
+	d->Dir = opendir(d->BasePath);
+	if (d->Dir)
+	{
+		d->De = readdir(d->Dir);
+		if (d->De)
+		{
+			char s[MaxPathLen];
+			LMakePath(s, sizeof(s), d->BasePath, GetName());
+			lstat(s, &d->Stat);
 
-	return d->Dir != 0 && d->De != 0;
+			if (d->Ignore() && !Next())
+				return false;
+		}
+	}
+
+	return d->Dir != NULL && d->De != NULL;
 }
 
 int LDirectory::Next()
@@ -1181,9 +1170,10 @@ int LDirectory::Next()
 	{
 		if ((d->De = readdir(d->Dir)))
 		{
-			char s[512];
+			char s[MaxPathLen];
 			LMakePath(s, sizeof(s), d->BasePath, GetName());			
 			lstat(s, &d->Stat);
+
 			if (!d->Ignore())
 			{
 				Status = true;
@@ -1288,7 +1278,7 @@ long LDirectory::GetAttributes() const
 
 char *LDirectory::GetName() const
 {
-	return (d->De) ? d->De->d_name : 0;
+	return (d->De) ? d->De->d_name : NULL;
 }
 
 uint64 LDirectory::GetCreationTime() const

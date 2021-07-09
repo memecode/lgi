@@ -45,6 +45,8 @@ enum DlgType
 	TypeSaveFile
 };
 
+class LFileSelectDlg;
+
 char ModuleName[] = "File Select";
 
 uint32_t IconBits[] = {
@@ -139,18 +141,17 @@ char *LFileType::DefaultExtension()
 }
 
 //////////////////////////////////////////////////////////////////////////
-class GFolderItem : public LListItem
+class LFolderItem : public LListItem
 {
-	class GFileSelectDlg *Dlg;
-	char *Path;
+	LFileSelectDlg *Dlg;
+	LString Path;
 
 public:
 	char *File;
 	bool IsDir;
 
-	GFolderItem(GFileSelectDlg *dlg, char *FullPath, LDirectory *Dir);
-	~GFolderItem();
-
+	LFolderItem(LFileSelectDlg *dlg, char *FullPath, LDirectory *Dir);
+	~LFolderItem();
 
 	void OnActivate();
 	const char *GetText(int i);
@@ -168,7 +169,7 @@ public:
 class GFileSelectPrivate
 {
 	friend class LFileSelect;
-	friend class GFileSelectDlg;
+	friend class LFileSelectDlg;
 	friend class GFolderList;
 
 	LView *Parent;
@@ -255,15 +256,15 @@ LRect GFileSelectPrivate::InitSize(0, 0, 600, 500);
 
 //////////////////////////////////////////////////////////////////////////
 // This class implements the UI for the selector.
-class GFileSelectDlg;
+class LFileSelectDlg;
 
 class GFolderView
 {
 protected:
-	GFileSelectDlg *Dlg;
+	LFileSelectDlg *Dlg;
 
 public:
-	GFolderView(GFileSelectDlg *dlg)
+	GFolderView(LFileSelectDlg *dlg)
 	{
 		Dlg = dlg;
 	}
@@ -274,7 +275,7 @@ public:
 class GFolderDrop : public LDropDown, public GFolderView
 {
 public:
-	GFolderDrop(GFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy);
+	GFolderDrop(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy);
 
 	void OnFolder();
 
@@ -405,7 +406,7 @@ class GFolderList : public LList, public GFolderView
 	LString FilterKey;
 
 public:
-	GFolderList(GFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy);
+	GFolderList(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy);
 	~GFolderList()
 	{
 	}	
@@ -774,13 +775,13 @@ public:
 #endif
 
 
-class GFileSelectDlg :
+class LFileSelectDlg :
 	public LDialog
 {
 	LRect OldPos;
 	LRect MinSize;
 	LArray<LString> Links;
-	LArray<GFolderItem*> Hidden;
+	LArray<LFolderItem*> Hidden;
 	
 public:
 	GFileSelectPrivate *d;
@@ -811,8 +812,8 @@ public:
 	LCheckBox *ShowHidden;
 	LEdit *FilterEdit;
 
-	GFileSelectDlg(GFileSelectPrivate *Select);
-	~GFileSelectDlg();
+	LFileSelectDlg(GFileSelectPrivate *Select);
+	~LFileSelectDlg();
 
 	int OnNotify(LViewI *Ctrl, int Flags);
 	void OnUpFolder();
@@ -860,51 +861,29 @@ public:
 			if (ci)
 			{
 				i->Insert(ci);
-				i->Expanded(true);
-				
-				switch (cv->Type())
-				{
-					case VT_APPLICATIONS:
-					case VT_FLOPPY:
-					case VT_HARDDISK:
-					case VT_CDROM:
-					case VT_RAMDISK:
-					case VT_FOLDER:
-					case VT_DESKTOP:
-					case VT_MUSIC:
-					case VT_PICTURES:
-					case VT_DOWNLOADS:
-					case VT_TRASH:
-					case VT_NETWORK_NEIGHBOURHOOD:
-					case VT_NETWORK_MACHINE:
-					case VT_NETWORK_SHARE:
-					case VT_NETWORK_PRINTER:
-					case VT_NETWORK_GROUP:
-						break;
-				}
-				
+				i->Expanded(true);				
 				Add(ci, cv);
 			}
 		}
 	}
 };
 
-GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
+LFileSelectDlg::LFileSelectDlg(GFileSelectPrivate *select)
 {
-	SaveBtn = 0;
-	BackBtn = 0;
-	CancelBtn = 0;
-	ShowHidden = 0;
-	FileTypeCbo = 0;
-	FileNameEdit = 0;
-	Ctrl8 = 0;
-	Ctrl9 = 0;
-	FileLst = 0;
-	Ctrl3 = 0;
-	BackBtn = 0;
-	UpBtn = 0;
-	NewDirBtn = 0;
-	Ctrl2 = 0;
+	SaveBtn = NULL;
+	BackBtn = NULL;
+	CancelBtn = NULL;
+	ShowHidden = NULL;
+	FileTypeCbo = NULL;
+	FileNameEdit = NULL;
+	Ctrl8 = NULL;
+	Ctrl9 = NULL;
+	FileLst = NULL;
+	Ctrl3 = NULL;
+	BackBtn = NULL;
+	UpBtn = NULL;
+	NewDirBtn = NULL;
+	Ctrl2 = NULL;
 	Sub = NULL;
 	Bookmarks = NULL;
 	FilterEdit = NULL;
@@ -1065,7 +1044,7 @@ GFileSelectDlg::GFileSelectDlg(GFileSelectPrivate *select)
 	}
 }
 
-GFileSelectDlg::~GFileSelectDlg()
+LFileSelectDlg::~LFileSelectDlg()
 {
 	UnregisterHook(this);
 	d->InitShowHiddenFiles = ShowHidden ? ShowHidden->Value() : false;
@@ -1079,7 +1058,7 @@ GFileSelectDlg::~GFileSelectDlg()
 	}
 }
 
-void GFileSelectDlg::OnFile(char *f)
+void LFileSelectDlg::OnFile(char *f)
 {
 	if (d->Type != TypeOpenFolder)
 	{
@@ -1088,7 +1067,7 @@ void GFileSelectDlg::OnFile(char *f)
 	}
 }
 
-void GFileSelectDlg::SetFolder(char *f)
+void LFileSelectDlg::SetFolder(char *f)
 {
 	auto CurPath = GetCtrlName(IDC_PATH);
 	if (CurPath)
@@ -1100,7 +1079,7 @@ void GFileSelectDlg::SetFolder(char *f)
 	SetCtrlName(IDC_PATH, f);
 }
 
-void GFileSelectDlg::OnFolder()
+void LFileSelectDlg::OnFolder()
 {
 	if (Ctrl3)
 		Ctrl3->OnFolder();
@@ -1112,7 +1091,7 @@ void GFileSelectDlg::OnFolder()
 		UpBtn->Enabled(strlen(CurPath)>3);
 }
 
-void GFileSelectDlg::OnUpFolder()
+void LFileSelectDlg::OnUpFolder()
 {
 	auto Cur = GetCtrlName(IDC_PATH);
 	if (Cur)
@@ -1134,13 +1113,13 @@ void GFileSelectDlg::OnUpFolder()
 
 
 
-void GFileSelectDlg::OnFilter(const char *Key)
+void LFileSelectDlg::OnFilter(const char *Key)
 {
 	if (FileLst)
 		FileLst->SetFilterKey(Key);
 }
 
-int GFileSelectDlg::OnNotify(LViewI *Ctrl, int Flags)
+int LFileSelectDlg::OnNotify(LViewI *Ctrl, int Flags)
 {
 	switch (Ctrl->GetId())
 	{
@@ -1179,7 +1158,7 @@ int GFileSelectDlg::OnNotify(LViewI *Ctrl, int Flags)
 					List<LListItem> s;
 					if (FileLst->GetSelection(s))
 					{
-						GFolderItem *i = dynamic_cast<GFolderItem*>(s.First());
+						LFolderItem *i = dynamic_cast<LFolderItem*>(s.First());
 						if (i)
 						{
 							i->OnActivate();
@@ -1452,12 +1431,12 @@ class GFileSystemPopup : public LPopup
 {
 	friend class GFileSystemItem;
 
-	GFileSelectDlg *Dlg;
+	LFileSelectDlg *Dlg;
 	LTree *Tree;
 	GFileSystemItem *Root;
 
 public:
-	GFileSystemPopup(LView *owner, GFileSelectDlg *dlg, int x) : LPopup(owner)
+	GFileSystemPopup(LView *owner, LFileSelectDlg *dlg, int x) : LPopup(owner)
 	{
 		Dlg = dlg;
 		LRect r(0, 0, x, 150);
@@ -1664,7 +1643,7 @@ bool GFileSystemItem::OnKey(LKey &k)
 	return false;
 }
 
-GFolderDrop::GFolderDrop(GFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy) :
+GFolderDrop::GFolderDrop(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy) :
 	LDropDown(Id, x, y, cx, cy, 0),
 	GFolderView(dlg)
 {
@@ -1684,31 +1663,30 @@ void GFolderDrop::OnFolder()
 #define IDM_CREATE_SHORTCUT		1005
 #define IDM_DELETE				1006
 
-GFolderItem::GFolderItem(GFileSelectDlg *dlg, char *FullPath, LDirectory *Dir)
+LFolderItem::LFolderItem(LFileSelectDlg *dlg, char *FullPath, LDirectory *Dir)
 {
 	Dlg = dlg;
-	Path = NewStr(FullPath);
+	Path = FullPath;
 	File = strrchr(Path, DIR_CHAR);
 	if (File) File++;
 	IsDir = Dir->IsDir();
 }
 
-GFolderItem::~GFolderItem()
+LFolderItem::~LFolderItem()
 {
-	DeleteArray(Path);
 }
 
-const char *GFolderItem::GetText(int i)
+const char *LFolderItem::GetText(int i)
 {
 	return File;
 }
 
-int GFolderItem::GetImage(int Flags)
+int LFolderItem::GetImage(int Flags)
 {
 	return IsDir ? 1 : 0;
 }
 
-void GFolderItem::OnSelect()
+void LFolderItem::OnSelect()
 {
 	if (!IsDir && File)
 	{
@@ -1716,7 +1694,7 @@ void GFolderItem::OnSelect()
 	}
 }
 
-void GFolderItem::OnDelete(bool Ask)
+void LFolderItem::OnDelete(bool Ask)
 {
 	if (!Ask || LgiMsg(Parent, "Do you want to delete '%s'?", ModuleName, MB_YESNO, Path) == IDYES)
 	{
@@ -1739,7 +1717,7 @@ void GFolderItem::OnDelete(bool Ask)
 	}
 }
 
-void GFolderItem::OnRename()
+void LFolderItem::OnRename()
 {
 	GInput Inp(Dlg, File, "New name:", Dlg->Name());
 	if (Inp.DoModal())
@@ -1766,7 +1744,7 @@ void GFolderItem::OnRename()
 	}
 }
 
-void GFolderItem::OnActivate()
+void LFolderItem::OnActivate()
 {
 	if (File)
 	{
@@ -1786,7 +1764,7 @@ void GFolderItem::OnActivate()
 	}
 }
 
-void GFolderItem::OnMouseClick(LMouse &m)
+void LFolderItem::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -1842,8 +1820,8 @@ void GFolderItem::OnMouseClick(LMouse &m)
 
 int GFolderItemCompare(LListItem *A, LListItem *B, NativeInt Data)
 {
-	GFolderItem *a = dynamic_cast<GFolderItem*>(A);
-	GFolderItem *b = dynamic_cast<GFolderItem*>(B);
+	LFolderItem *a = dynamic_cast<LFolderItem*>(A);
+	LFolderItem *b = dynamic_cast<LFolderItem*>(B);
 	if (a && b)
 	{
 		if (a->IsDir ^ b->IsDir)
@@ -1860,7 +1838,7 @@ int GFolderItemCompare(LListItem *A, LListItem *B, NativeInt Data)
 	return 0;
 }
 
-GFolderList::GFolderList(GFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy) :
+GFolderList::GFolderList(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy) :
 	LList(Id, x, y, cx, cy),
 	GFolderView(dlg)
 {
@@ -1897,7 +1875,7 @@ bool GFolderList::OnKey(LKey &k)
 		{
 			if (k.Down() && GetWindow())
 			{
-				GFolderItem *Sel = dynamic_cast<GFolderItem*>(GetSelected());
+				LFolderItem *Sel = dynamic_cast<LFolderItem*>(GetSelected());
 				if (Sel)
 				{
 					if (Sel->IsDir)
@@ -1938,10 +1916,10 @@ bool GFolderList::OnKey(LKey &k)
 					LStringPipe Msg;
 					Msg.Push("Do you want to delete:\n\n");
 					
-					List<GFolderItem> Delete;
+					List<LFolderItem> Delete;
 					for (auto i: Sel)
 					{
-						GFolderItem *s = dynamic_cast<GFolderItem*>(i);
+						LFolderItem *s = dynamic_cast<LFolderItem*>(i);
 						if (s)
 						{
 							Delete.Insert(s);
@@ -1999,9 +1977,9 @@ void GFolderList::OnFolder()
 		return;
 		
 	bool ShowHiddenFiles = Dlg->ShowHidden ? Dlg->ShowHidden->Value() : false;
-	for (bool Found = Dir.First(Dlg->Ctrl2->Name()); Found; Found = Dir.Next())
+	for (auto Found = Dir.First(Dlg->Ctrl2->Name()); Found; Found = Dir.Next())
 	{
-		char Name[MAX_PATH];
+		char Name[LDirectory::MaxPathLen];
 		Dir.Path(Name, sizeof(Name));
 		
 		bool Match = true;
@@ -2028,7 +2006,7 @@ void GFolderList::OnFolder()
 			Match = stristr(Dir.GetName(), FilterKey) != NULL;
 
 		if (Match)
-			New.Insert(new GFolderItem(Dlg, Name, &Dir));
+			New.Insert(new LFolderItem(Dlg, Name, &Dir));
 	}
 
 	// Sort items...
@@ -2158,7 +2136,7 @@ CharPropImpl(DefaultExtension, d->DefExt);
 
 bool LFileSelect::Open()
 {
-	GFileSelectDlg Dlg(d);
+	LFileSelectDlg Dlg(d);
 
 	d->Type = TypeOpenFile;
 	Dlg.Name("Open");
@@ -2170,7 +2148,7 @@ bool LFileSelect::Open()
 
 bool LFileSelect::OpenFolder()
 {
-	GFileSelectDlg Dlg(d);
+	LFileSelectDlg Dlg(d);
 
 	d->Type = TypeOpenFolder;
 	Dlg.SaveBtn->Enabled(true);
@@ -2183,7 +2161,7 @@ bool LFileSelect::OpenFolder()
 
 bool LFileSelect::Save()
 {
-	GFileSelectDlg Dlg(d);
+	LFileSelectDlg Dlg(d);
 	
 	d->Type = TypeSaveFile;
 	Dlg.Name("Save As");

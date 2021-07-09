@@ -40,18 +40,20 @@ static OsChar GDisplayStringDots[] = {'.', '.', '.', 0};
 #if defined(__GTK_H__)
 struct Block : public LRect
 {
-	OsChar *Str;
-	int Bytes;
-	LFont *Fnt;
-	Gtk::PangoLayout *Hnd;
-
-	Block()
-	{
-		Str = NULL;
-		Hnd = NULL;
-		Fnt = NULL;
-		Bytes = 0;
-	}
+	/// This points to somewhere in Ds->Str
+	OsChar *Str = NULL;
+	
+	/// Bytes in this block
+	int Bytes = 0;
+	
+	/// Utf-8 characters in this block
+	int Chars = 0;
+	
+	/// Alternative font to get characters from (NULL if using the display string's font)
+	LFont *Fnt = NULL;
+	
+	/// Layout for this block. Shouldn't ever be NULL. But shouldn't crash otherwise.
+	Gtk::PangoLayout *Hnd = NULL;
 
 	~Block()
 	{
@@ -64,12 +66,16 @@ struct GDisplayStringPriv
 {
 	LDisplayString *Ds;
 	LArray<Block> Blocks;
-	bool Debug;	
+	bool Debug;
 	int LastTabOffset;
 
 	GDisplayStringPriv(LDisplayString *str) : Ds(str)
 	{
+		#if 0
+		Debug = Stristr(Ds->Str, "(Jumping).wma") != 0;
+		#else
 		Debug = false;
+		#endif
 		LastTabOffset = -1;
 	}
 
@@ -79,35 +85,37 @@ struct GDisplayStringPriv
 
 	void Create(Gtk::GtkPrintContext *PrintCtx)
 	{
-		Start:
 		auto *Fs = LFontSystem::Inst();
 		auto *Fnt = Ds->Font;
 		auto Tbl = Fnt->GetGlyphMap();
 
+		int Chars = 0;
 		GUtf8Ptr p(Ds->Str);
 		auto *Start = p.GetPtr();
 		if (Tbl)
 		{
 			int32 w;
 			Block *b = NULL;
+			auto DisplayCtx = LFontSystem::Inst()->GetContext();
 
 			while ((w = (int32)p))
 			{
 				LFont *f;
-
-				if (w == 0x1f551)
-					Debug = true;
-
+				
 				if (w >= 0x80 && !_HasUnicodeGlyph(Tbl, w))
 					f = Fs->GetGlyph(w, Ds->Font);
 				else
 					f = Ds->Font;
 
-				if (!b || f != Fnt)
+				if (!b || (f != NULL && f != Fnt))
 				{
 					// Finish old block
 					if (b)
+					{
 						b->Bytes = p.GetPtr() - Start;
+						b->Chars = Chars;
+						Chars = 0;
+					}
 
 					Start = p.GetPtr();
 
@@ -117,19 +125,15 @@ struct GDisplayStringPriv
 						b = &Blocks.New();
 						b->Str = (char*)Start;
 						b->Bytes = -1; // unknown at this point
-						if (f == Ds->Font)
-						{
-							// Create a pango layout
-							if (PrintCtx)
-								b->Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
-							else
-								b->Hnd = Gtk::pango_layout_new(LFontSystem::Inst()->GetContext());
-						}
-						else
-						{
+						if (f != Ds->Font)
 							// External font
 							b->Fnt = f;
-						}
+
+						// Create a pango layout
+						if (PrintCtx)
+							b->Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
+						else
+							b->Hnd = Gtk::pango_layout_new(DisplayCtx);
 					}
 					// else no font supports glyph
 
@@ -138,26 +142,45 @@ struct GDisplayStringPriv
 				// else no change in font
 				
 				p++;
+				Chars++;
 			}
 
 			if (b)
-				// Fix the size of the last block
+			{
+				// Finish the last block
 				b->Bytes = p.GetPtr() - Start;
+				b->Chars = Chars;
+			}
+				
+			if (Debug)
+			{
+				// Print the block array
+				for (size_t i=0; i<Blocks.Length(); i++)
+				{
+					auto &b = Blocks[i];
+					printf("%s%p, %i/%i, %p, %p\n", i?"    ":"Blk: ", b.Str, b.Bytes, b.Chars, b.Fnt, b.Hnd);
+				}
+			}
 		}
 		else
 		{
 			while (p.GetPtr() - Start < Ds->StrWords)
+			{
 				p++;
+				Chars++;
+			}
 
 			auto &b = Blocks.New();
 			b.Str = (char*)Start;
 			b.Bytes = p.GetPtr() - Start;
+			b.Chars = Chars;
 			if (PrintCtx)
 				b.Hnd = Gtk::gtk_print_context_create_pango_layout(PrintCtx);
 			else
 				b.Hnd = Gtk::pango_layout_new(LFontSystem::Inst()->GetContext());
 		}
 
+		/* This could get stuck in an infinite loop. Leaving out for the moment.
 		for (auto &b: Blocks)
 		{
 			if (b.Hnd == NULL && b.Fnt == NULL)
@@ -166,6 +189,7 @@ struct GDisplayStringPriv
 				goto Start;
 			}
 		}
+		*/
 	}
 	
 	void UpdateTabs(int Offset, int Size, bool Debug = false)
@@ -1025,8 +1049,6 @@ void LDisplayString::TruncateWithDots(int Width)
 
 ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 {
-	int Status = -1;
-
 	Layout();
 	if (Px < 0)
 	{
@@ -1035,12 +1057,12 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 	else if (Px >= (int)x)
 	{
 		#if defined __GTK_H__
-		if (Str)
-		{
-			GUtf8Str u(Str);
-			return u.GetChars();
-		}
-		return 0;
+			if (Str)
+			{
+				GUtf8Str u(Str);
+				return u.GetChars();
+			}
+			return 0;
 		#else
 			#if LGI_DSP_STR_CACHE
 				return WideWords;
@@ -1050,40 +1072,45 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 		#endif
 	}
 
+	int Status = -1;
+
 	#if defined __GTK_H__
 	
-	int Fx = 0;
-	int Fpos = Px << FShift;
-	for (auto &b: d->Blocks)
-	{
-		int Index = 0, Trailing = 0;
-		int Foffset = Fpos - Fx;
-		
-		if (b.Hnd &&
-			Gtk::pango_layout_xy_to_index(b.Hnd, Foffset, 0, &Index, &Trailing))
+		int Fx = 0;
+		int Fpos = Px << FShift;
+		Status = 0;
+		for (auto &b: d->Blocks)
 		{
-			// printf("Index = %i, Trailing = %i\n", Index, Trailing);
-			GUtf8Str u(Str);
-			Status = 0;
-			while ((OsChar*)u.GetPtr() < Str + Index)
+			int Index = 0, Trailing = 0;
+			int Foffset = Fpos - Fx;
+			
+			if (b.Hnd && Gtk::pango_layout_xy_to_index(b.Hnd, Foffset, 0, &Index, &Trailing))
 			{
-				u++;
-				Status++;
-			}
-		}
-		/*
-		else if (Trailing)
-		{
-			GUtf8Str u(Str + Index);
-			if (u)
-				u++;			
-			Status = (OsChar*)u.GetPtr() - Str;
-		}
-		*/
-		else Status = 0;
+				if (d->Debug)
+					printf("CharAt(%g) x=%g Status=%i Foffset=%g index=%i trailing=%i\n",
+						(double)Fpos/FScale, (double)b.X()/FScale, Status,
+						(double)Foffset/FScale, Index, Trailing);
 
-		Fx += b.X();
-	}
+				GUtf8Str u(Str);
+				while ((OsChar*)u.GetPtr() < Str + Index + Trailing)
+				{
+					u++;
+					Status++;
+				}
+				
+				return Status;
+			}
+			else
+			{
+				if (d->Debug)
+					printf("CharAt(%g) x=%g Status=%i Chars=%i\n",
+						(double)Fpos/FScale, (double)b.X()/FScale, Status, b.Chars);
+					
+				Status += b.Chars;
+			}
+
+			Fx += b.X();
+		}
 	
 	#elif defined MAC && !defined(LGI_SDL)
 
@@ -1127,101 +1154,103 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 	
 	#elif defined(LGI_SDL)
 	
+		LgiAssert(!"Impl me");
+	
 	#else // This case is for Win32 and Haiku.
 	
-	#if defined(WINNATIVE)
-	LFontSystem *Sys = LFontSystem::Inst();
-	if (Info.Length() && Font && Sys)
-	#endif
-	{
-		int TabSize = Font->TabSize() ? Font->TabSize() : 32;
-		int Cx = 0;
-		int Char = 0;
-
-		#if DEBUG_CHAR_AT
-		printf("CharAt(%i) Str='%s'\n", Px, Str);
+		#if defined(WINNATIVE)	
+		LFontSystem *Sys = LFontSystem::Inst();
+		if (Info.Length() && Font && Sys)		
 		#endif
-
-		for (int i=0; i<Info.Length() && Status < 0; i++)
 		{
-			if (Px < Cx)
-			{
-				Status = Char;
-				#if DEBUG_CHAR_AT
-				printf("\tPx<Cx %i<%i\n", Px, Cx);
-				#endif
-				break;
-			}
+			int TabSize = Font->TabSize() ? Font->TabSize() : 32;
+			int Cx = 0;
+			int Char = 0;
 
-			if (Px >= Cx && Px < Cx + Info[i].X)
+			#if DEBUG_CHAR_AT
+			printf("CharAt(%i) Str='%s'\n", Px, Str);
+			#endif
+
+			for (int i=0; i<Info.Length() && Status < 0; i++)
 			{
-				// The position is in this block of characters
-				if (IsTabChar(Info[i].Str[0]))
+				if (Px < Cx)
 				{
-					// Search through tab block
-					for (int t=0; t<Info[i].Len; t++)
+					Status = Char;
+					#if DEBUG_CHAR_AT
+					printf("\tPx<Cx %i<%i\n", Px, Cx);
+					#endif
+					break;
+				}
+
+				if (Px >= Cx && Px < Cx + Info[i].X)
+				{
+					// The position is in this block of characters
+					if (IsTabChar(Info[i].Str[0]))
 					{
-						int TabX = TabSize - (Cx % TabSize);
-						if (Px >= Cx && Px < Cx + TabX)
+						// Search through tab block
+						for (int t=0; t<Info[i].Len; t++)
 						{
-							Status = Char;
-							#if DEBUG_CHAR_AT
-							printf("\tIn tab block %i\n", i);
-							#endif
-							break;
+							int TabX = TabSize - (Cx % TabSize);
+							if (Px >= Cx && Px < Cx + TabX)
+							{
+								Status = Char;
+								#if DEBUG_CHAR_AT
+								printf("\tIn tab block %i\n", i);
+								#endif
+								break;
+							}
+							Cx += TabX;
+							Char++;
 						}
-						Cx += TabX;
-						Char++;
+					}
+					else
+					{
+						// Find the pos in this block
+						LFont *f = Font;
+
+						#if defined(WIN32)
+						if (Info[i].FontId)
+						{
+							f = Sys->Font[Info[i].FontId];
+							f->Colour(Font->Fore(), Font->Back());
+							f->Size(Font->Size());
+							if (!f->Handle())
+							{
+								f->Create();
+							}
+						}
+
+						int Fit = f->_CharAt(Px - Cx, Info[i].Str, Info[i].Len, Type);
+						#endif
+
+						#if DEBUG_CHAR_AT
+						printf("\tNon tab block %i, Fit=%i, Px-Cx=%i-%i=%i, Str='%.5s'\n",
+							i, Fit, Px, Cx, Px-Cx, Info[i].Str);
+						#endif
+						if (Fit >= 0)
+						{
+							Status = Char + Fit;
+						}
+						else
+						{
+							Status = -1;
+						}
+						break;
 					}
 				}
 				else
 				{
-					// Find the pos in this block
-					LFont *f = Font;
-
-					#if defined(WIN32)
-					if (Info[i].FontId)
-					{
-						f = Sys->Font[Info[i].FontId];
-						f->Colour(Font->Fore(), Font->Back());
-						f->Size(Font->Size());
-						if (!f->Handle())
-						{
-							f->Create();
-						}
-					}
-
-					int Fit = f->_CharAt(Px - Cx, Info[i].Str, Info[i].Len, Type);
-					#endif
-
-					#if DEBUG_CHAR_AT
-					printf("\tNon tab block %i, Fit=%i, Px-Cx=%i-%i=%i, Str='%.5s'\n",
-						i, Fit, Px, Cx, Px-Cx, Info[i].Str);
-					#endif
-					if (Fit >= 0)
-					{
-						Status = Char + Fit;
-					}
-					else
-					{
-						Status = -1;
-					}
-					break;
+					// Not in this block, skip the whole lot
+					Cx += Info[i].X;
+					Char += Info[i].Len;
 				}
 			}
-			else
+
+			if (Status < 0)
 			{
-				// Not in this block, skip the whole lot
-				Cx += Info[i].X;
-				Char += Info[i].Len;
+				Status = Char;
 			}
 		}
-
-		if (Status < 0)
-		{
-			Status = Char;
-		}
-	}
 	
 	#endif
 

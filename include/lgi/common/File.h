@@ -110,6 +110,8 @@ class LgiClass LDirectory
 	struct LDirectoryPriv *d;
 
 public:
+	constexpr static int MaxPathLen = 512;
+
 	LDirectory();
 	virtual ~LDirectory();
 
