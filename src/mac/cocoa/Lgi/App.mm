@@ -319,7 +319,7 @@ void OnCrash(int i)
 	return self;
 }
 
-- (void)setPriv:(nonnull GAppPrivate*)priv
+- (void)setPriv:(nonnull LAppPrivate*)priv
 {
 	self.d = priv;
 }
@@ -358,26 +358,26 @@ void OnCrash(int i)
 @end
 
 /////////////////////////////////////////////////////////////////////////////
-LSkinEngine *GApp::SkinEngine = 0;
-GApp *TheApp = 0;
-LMouseHook *GApp::MouseHook = 0;
+LSkinEngine *LApp::SkinEngine = 0;
+LApp *TheApp = 0;
+LMouseHook *LApp::MouseHook = 0;
 
-GApp::GApp(OsAppArguments &AppArgs, const char *AppName, GAppArguments *ObjArgs) :
+LApp::LApp(OsAppArguments &AppArgs, const char *AppName, GAppArguments *ObjArgs) :
 OsApplication(AppArgs.Args, AppArgs.Arg)
 {
 	TheApp = this;
-	d = new GAppPrivate(this);
+	d = new LAppPrivate(this);
 	d->Name.Reset(NewStr(AppName));
 	AppWnd = 0;
 	Name(AppName);
-	if (LgiIsRelativePath(AppArgs.Arg[0]))
+	if (LIsRelativePath(AppArgs.Arg[0]))
 	{
 		char wd[MAX_PATH];
 		char exe[MAX_PATH];
-		if (LgiMakePath(exe, sizeof(exe), getcwd(wd, sizeof(wd)), AppArgs.Arg[0]))
+		if (LMakePath(exe, sizeof(exe), getcwd(wd, sizeof(wd)), AppArgs.Arg[0]))
 			LgiArgsAppPath = exe;
 		else
-			printf("%s:%i - LgiMakePath for Exe failed.\n", _FL);
+			printf("%s:%i - LMakePath for Exe failed.\n", _FL);
 	}
 	else
 		LgiArgsAppPath = AppArgs.Arg[0];
@@ -405,11 +405,11 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	[em setEventHandler:d->NsApp andSelector:@selector(onUrl:withReplyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];
 	
 	// Setup the file and graphics sub-systems
-	d->FileSystem = new GFileSystem;
+	d->FileSystem = new LFileSystem;
 	d->GdcSystem = new GdcDevice;
 	
 	srand((unsigned)LgiCurrentTime());
-	GColour::OnChange();
+	LColour::OnChange();
 	
 	SetAppArgs(AppArgs);
 	MouseHook = new LMouseHook;
@@ -449,20 +449,20 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	
 	if (!SystemNormal)
 	{
-		LgiMsg(0, "Error: Couldn't create system font.", "Lgi Error: GApp::GApp", MB_OK);
+		LgiMsg(0, "Error: Couldn't create system font.", "Lgi Error: LApp::LApp", MB_OK);
 		LgiExitApp();
 	}
 	
 	if (!GetOption("noskin"))
 	{
-		extern LSkinEngine *CreateSkinEngine(GApp *App);
+		extern LSkinEngine *CreateSkinEngine(LApp *App);
 		SkinEngine = CreateSkinEngine(this);
 	}
 	
 	Default.Reset(new LMenu);
 }
 
-GApp::~GApp()
+LApp::~LApp()
 {
 	DeleteObj(AppWnd);
 	DeleteObj(SystemNormal);
@@ -476,12 +476,12 @@ GApp::~GApp()
 	TheApp = 0;
 }
 
-OsApp &GApp::Handle()
+OsApp &LApp::Handle()
 {
 	return d->NsApp;
 }
 
-bool GApp::PostEvent(LViewI *View, int Msg, GMessage::Param A, GMessage::Param B)
+bool LApp::PostEvent(LViewI *View, int Msg, GMessage::Param A, GMessage::Param B)
 {
 	if (!View)
 	{
@@ -515,12 +515,12 @@ bool GApp::PostEvent(LViewI *View, int Msg, GMessage::Param A, GMessage::Param B
 	return true;
 }
 
-GApp *GApp::ObjInstance()
+LApp *LApp::ObjInstance()
 {
 	return TheApp;
 }
 
-bool GApp::IsOk()
+bool LApp::IsOk()
 {
 	bool Status =
 					#if !defined(__clang__)
@@ -538,12 +538,12 @@ bool GApp::IsOk()
 	return Status;
 }
 
-LMouseHook *GApp::GetMouseHook()
+LMouseHook *LApp::GetMouseHook()
 {
 	return MouseHook;
 }
 
-int GApp::GetMetric(LgiSystemMetric Metric)
+int LApp::GetMetric(LgiSystemMetric Metric)
 {
 	switch (Metric)
 	{
@@ -577,7 +577,7 @@ int GApp::GetMetric(LgiSystemMetric Metric)
 	return 0;
 }
 
-LViewI *GApp::GetFocus()
+LViewI *LApp::GetFocus()
 {
 	auto kw = d->NsApp.p.keyWindow;
 	if (!kw)
@@ -591,32 +591,32 @@ LViewI *GApp::GetFocus()
 	return gw->GetFocus();
 }
 
-OsThread GApp::_GetGuiThread()
+OsThread LApp::_GetGuiThread()
 {
 	return d->GuiThread;
 }
 
-OsThreadId GApp::GetGuiThreadId()
+OsThreadId LApp::GetGuiThreadId()
 {
 	return d->GuiThreadId;
 }
 
-bool GApp::InThread()
+bool LApp::InThread()
 {
 	return GetCurrentThreadId() == d->GuiThreadId;
 }
 
-OsProcessId GApp::GetProcessId()
+OsProcessId LApp::GetProcessId()
 {
 	return getpid();
 }
 
-OsAppArguments *GApp::GetAppArgs()
+OsAppArguments *LApp::GetAppArgs()
 {
 	return IsOk() ? &d->Args : 0;
 }
 
-void GApp::SetAppArgs(OsAppArguments &AppArgs)
+void LApp::SetAppArgs(OsAppArguments &AppArgs)
 {
 	if (IsOk())
 	{
@@ -626,7 +626,7 @@ void GApp::SetAppArgs(OsAppArguments &AppArgs)
 
 struct IdleGluePtrs
 {
-	GApp::OnIdleProc Callback;
+	LApp::OnIdleProc Callback;
 	void *Param;
 };
 
@@ -640,7 +640,7 @@ void IdleGlue(EventLoopTimerRef inTimer, void *inUserData)
 }
 #endif
 
-bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
+bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 {
 	if (!d->NsApp)
 	{
@@ -689,7 +689,7 @@ bool GApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 	return 0;
 }
 
-void GApp::Exit(int Code)
+void LApp::Exit(int Code)
 {
 	#if CUSTOM_LOOP
 	if (!Code)
@@ -713,7 +713,7 @@ void GApp::Exit(int Code)
 	}
 }
 
-void GApp::OnUrl(const char *Url)
+void LApp::OnUrl(const char *Url)
 {
 	if (AppWnd)
 		AppWnd->OnUrl(Url);
@@ -721,18 +721,18 @@ void GApp::OnUrl(const char *Url)
 		d->UrlArg.Reset(NewStr(Url));
 }
 
-void GApp::OnReceiveFiles(LArray<const char*> &Files)
+void LApp::OnReceiveFiles(LArray<const char*> &Files)
 {
 	if (AppWnd)
 		AppWnd->OnReceiveFiles(Files);
 }
 
-const char *GApp::GetArgumentAt(int n)
+const char *LApp::GetArgumentAt(int n)
 {
 	return n >= 0 && n < d->Args.Args ? d->Args.Arg[n] : 0;
 }
 
-bool GApp::GetOption(const char *Option, char *Dest, int DestLen)
+bool LApp::GetOption(const char *Option, char *Dest, int DestLen)
 {
 	LString Buf;
 	if (GetOption(Option, Buf))
@@ -744,7 +744,7 @@ bool GApp::GetOption(const char *Option, char *Dest, int DestLen)
 	return false;
 }
 
-bool GApp::GetOption(const char *Option, LString &Buf)
+bool LApp::GetOption(const char *Option, LString &Buf)
 {
 	if (IsOk() && Option)
 	{
@@ -799,7 +799,7 @@ bool GApp::GetOption(const char *Option, LString &Buf)
 	return false;
 }
 
-void GApp::OnCommandLine()
+void LApp::OnCommandLine()
 {
 	LArray<const char*> Files;
 	
@@ -825,7 +825,7 @@ void GApp::OnCommandLine()
 LString MimeFromData(const char *File)
 {
 	LString Ret;
-	GFile f;
+	LFile f;
 	if (!f.Open(File, O_READ))
 		return Ret;
 	LArray<uint8_t> b;
@@ -843,7 +843,7 @@ LString MimeFromData(const char *File)
 	return Ret;
 }
 
-LString GApp::GetFileMimeType(const char *File)
+LString LApp::GetFileMimeType(const char *File)
 {
 	LString Ret;
 	
@@ -854,7 +854,7 @@ LString GApp::GetFileMimeType(const char *File)
 		for (int i=0; i<p.Length(); i++)
 		{
 			char Full[MAX_PATH];
-			LgiMakePath(Full, sizeof(Full), p[i], File);
+			LMakePath(Full, sizeof(Full), p[i], File);
 			if (LFileExists(Full))
 			{
 				break;
@@ -881,7 +881,7 @@ LString GApp::GetFileMimeType(const char *File)
 	return Ret;
 }
 
-bool GApp::GetAppsForMimeType(char *Mime, LArray<LAppInfo*> &Apps)
+bool LApp::GetAppsForMimeType(char *Mime, LArray<LAppInfo*> &Apps)
 {
 	// Use LSCopyApplicationForMIMEType?
 	
@@ -926,22 +926,22 @@ bool GApp::GetAppsForMimeType(char *Mime, LArray<LAppInfo*> &Apps)
 	return false;
 }
 
-LSymLookup *GApp::GetSymLookup()
+LSymLookup *LApp::GetSymLookup()
 {
 	return &d->SymLookup;
 }
 
-bool GApp::IsElevated()
+bool LApp::IsElevated()
 {
 	return geteuid() == 0;
 }
 
-int GApp::GetCpuCount()
+int LApp::GetCpuCount()
 {
 	return 1;
 }
 
-GFontCache *GApp::GetFontCache()
+GFontCache *LApp::GetFontCache()
 {
 	if (!d->FontCache)
 		d->FontCache.Reset(new GFontCache(SystemNormal));

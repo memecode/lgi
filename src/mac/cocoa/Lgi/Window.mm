@@ -243,7 +243,7 @@ public:
 		self.acceptsMouseMovedEvents = true;
 		self.ignoresMouseEvents = false;
 		
-		printf("LNsWindow.init\n");
+		// printf("LNsWindow.init\n");
 	}
 	return self;
 }

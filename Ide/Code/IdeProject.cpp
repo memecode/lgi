@@ -1886,18 +1886,37 @@ int BuildThread::Main()
 		}
 		else if (Compiler == Xcode)
 		{
+			LString::Array Configs;
+			Configs.SetFixedLength(false);
 			LString a;
 			a.Printf("-list -project \"%s\"", Makefile.Get());
 			LSubProcess Ls(Exe, a);
 			if (Ls.Start())
 			{
 				LStringPipe o;
-				auto ret = Ls.Communicate(&o);
-				LString Cfgs = o.NewGStr();
-
-				return 0;
+				Ls.Communicate(&o);
+				auto key = "Build Configurations:";
+				auto lines = o.NewGStr().SplitDelimit("\n");
+				int inKey = -1;
+				for (auto l: lines)
+				{
+					int ws = 0;
+					for (int i=0; i<l.Length(); i++)
+						if (IsWhiteSpace(l(i))) ws++;
+						else break;
+					if (l.Find(key)>=0)
+						inKey = ws;
+					else if (inKey>=0)
+					{
+						if (ws>inKey) { Configs.New() = l.Strip(); }
+						else { inKey = -1; }
+					}
+					// printf("%s\n", l.Get());
+				}
 			}
-			TmpArgs.Printf("-project \"%s\" -configuration Debug", Makefile.Get());
+			
+			auto Config = Configs.Length() > 0 ? Configs[0] : LString("Debug");
+			TmpArgs.Printf("-project \"%s\" -configuration %s", Makefile.Get(), Config.Get());
 		}
 		else
 		{

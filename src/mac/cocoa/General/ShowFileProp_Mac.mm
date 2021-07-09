@@ -4,7 +4,7 @@
 #import <Cocoa/Cocoa.h>
 #endif
 
-void LgiShowFileProperties(OsView Parent, const char *Filename)
+void LShowFileProperties(OsView Parent, const char *Filename)
 {
 	#if !defined(__GTK_H__)
 	NSPasteboard *pboard = [NSPasteboard pasteboardWithUniqueName];
@@ -21,7 +21,7 @@ void LgiShowFileProperties(OsView Parent, const char *Filename)
 	#endif
 }
 
-bool LgiBrowseToFile(const char *Filename)
+bool LBrowseToFile(const char *Filename)
 {
 	LString s;
 	s.Printf("/usr/bin/osascript "

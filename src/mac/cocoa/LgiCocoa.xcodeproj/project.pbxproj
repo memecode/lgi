@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		340833152698F8FF0028012F /* FontPriv.h in Headers */ = {isa = PBXBuildFile; fileRef = 340833122698F8FE0028012F /* FontPriv.h */; };
+		340833162698F8FF0028012F /* FontType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 340833132698F8FE0028012F /* FontType.cpp */; };
+		340833172698F8FF0028012F /* TypeFace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 340833142698F8FE0028012F /* TypeFace.cpp */; };
 		34109857217A9805007020CE /* CocoaView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 34109856217A9805007020CE /* CocoaView.mm */; };
 		34114C8B23091E6E00F342B1 /* LgiClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = 34114C8A23091E6E00F342B1 /* LgiClasses.h */; };
 		3413170E23068FFE008CE982 /* FileSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3413170D23068FFE008CE982 /* FileSelect.cpp */; };
@@ -141,13 +144,7 @@
 		3491A28523678DB800604C29 /* DropFiles.h in Headers */ = {isa = PBXBuildFile; fileRef = 3491A28423678DB700604C29 /* DropFiles.h */; };
 		34A3ACE820568D5800B1D62A /* StringLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A3ACE720568D5800B1D62A /* StringLayout.cpp */; };
 		34A3ACEA20568D9700B1D62A /* MenuCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A3ACE920568D9700B1D62A /* MenuCommon.cpp */; };
-		34B14E1826950F59004C22CC /* StringClass.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B14E1726950F59004C22CC /* StringClass.h */; };
-		34B14E1B26950F6C004C22CC /* LgiString.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B14E1A26950F6C004C22CC /* LgiString.h */; };
-		34B14E2026951653004C22CC /* HashTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B14E1F26951653004C22CC /* HashTable.h */; };
-		34B14E23269516FC004C22CC /* LgiCommon.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B14E22269516FC004C22CC /* LgiCommon.h */; };
-		34B14E382695466A004C22CC /* Slider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34B14E372695466A004C22CC /* Slider.cpp */; };
-		34B14E3C269546A3004C22CC /* TypeFace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34B14E3A269546A3004C22CC /* TypeFace.cpp */; };
-		34B14E3D269546A3004C22CC /* FontType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34B14E3B269546A3004C22CC /* FontType.cpp */; };
+		34B14E3426951C6E004C22CC /* Slider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34B14E3326951C6E004C22CC /* Slider.cpp */; };
 		34B531D822F65734002B50F7 /* Menu.h in Headers */ = {isa = PBXBuildFile; fileRef = 34B531D722F65734002B50F7 /* Menu.h */; };
 		34B6B19123CFD0F100C24906 /* DragAndDropCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34B6B19023CFD0F100C24906 /* DragAndDropCommon.cpp */; };
 		34C072C12369878100E1E222 /* DropFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C072C02369878100E1E222 /* DropFiles.cpp */; };
@@ -159,6 +156,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		340833122698F8FE0028012F /* FontPriv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FontPriv.h; path = ../../../common/Gdc2/Font/FontPriv.h; sourceTree = "<group>"; };
+		340833132698F8FE0028012F /* FontType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FontType.cpp; path = ../../../common/Gdc2/Font/FontType.cpp; sourceTree = "<group>"; };
+		340833142698F8FE0028012F /* TypeFace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TypeFace.cpp; path = ../../../common/Gdc2/Font/TypeFace.cpp; sourceTree = "<group>"; };
 		34109853217A975E007020CE /* LCocoaView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LCocoaView.h; path = ../../../../include/lgi/mac/cocoa/LCocoaView.h; sourceTree = "<group>"; };
 		34109856217A9805007020CE /* CocoaView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = CocoaView.mm; path = Lgi/CocoaView.mm; sourceTree = SOURCE_ROOT; };
 		34114C8A23091E6E00F342B1 /* LgiClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiClasses.h; path = ../../../include/lgi/common/LgiClasses.h; sourceTree = "<group>"; };
@@ -296,13 +296,7 @@
 		3491A28423678DB700604C29 /* DropFiles.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = DropFiles.h; path = ../../../../include/lgi/common/DropFiles.h; sourceTree = "<group>"; };
 		34A3ACE720568D5800B1D62A /* StringLayout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StringLayout.cpp; path = ../../../common/Gdc2/Font/StringLayout.cpp; sourceTree = "<group>"; };
 		34A3ACE920568D9700B1D62A /* MenuCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MenuCommon.cpp; path = ../../../common/Lgi/MenuCommon.cpp; sourceTree = "<group>"; };
-		34B14E1726950F59004C22CC /* StringClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StringClass.h; path = ../../../include/lgi/common/StringClass.h; sourceTree = "<group>"; };
-		34B14E1A26950F6C004C22CC /* LgiString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiString.h; path = ../../../include/lgi/common/LgiString.h; sourceTree = "<group>"; };
-		34B14E1F26951653004C22CC /* HashTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HashTable.h; path = ../../../include/lgi/common/HashTable.h; sourceTree = "<group>"; };
-		34B14E22269516FC004C22CC /* LgiCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiCommon.h; path = ../../../include/lgi/common/LgiCommon.h; sourceTree = "<group>"; };
-		34B14E372695466A004C22CC /* Slider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Slider.cpp; path = ../../../common/Widgets/Slider.cpp; sourceTree = "<group>"; };
-		34B14E3A269546A3004C22CC /* TypeFace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TypeFace.cpp; path = ../../../common/Gdc2/Font/TypeFace.cpp; sourceTree = "<group>"; };
-		34B14E3B269546A3004C22CC /* FontType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FontType.cpp; path = ../../../common/Gdc2/Font/FontType.cpp; sourceTree = "<group>"; };
+		34B14E3326951C6E004C22CC /* Slider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Slider.cpp; path = ../../../common/Widgets/Slider.cpp; sourceTree = "<group>"; };
 		34B531D722F65734002B50F7 /* Menu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Menu.h; path = ../../../../include/lgi/common/Menu.h; sourceTree = "<group>"; };
 		34B6B19023CFD0F100C24906 /* DragAndDropCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DragAndDropCommon.cpp; path = ../../../common/Lgi/DragAndDropCommon.cpp; sourceTree = "<group>"; };
 		34C072C02369878100E1E222 /* DropFiles.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = DropFiles.cpp; path = ../../../common/Lgi/DropFiles.cpp; sourceTree = "<group>"; };
@@ -436,10 +430,6 @@
 		3477C29A1CBF0A700028B84B /* Headers */ = {
 			isa = PBXGroup;
 			children = (
-				34B14E22269516FC004C22CC /* LgiCommon.h */,
-				34B14E1F26951653004C22CC /* HashTable.h */,
-				34B14E1A26950F6C004C22CC /* LgiString.h */,
-				34B14E1726950F59004C22CC /* StringClass.h */,
 				34114C8A23091E6E00F342B1 /* LgiClasses.h */,
 				3477C26B1CBF020F0028B84B /* LgiProject.h */,
 				3477C5161CC303B70028B84B /* LgiUiBase.h */,
@@ -514,8 +504,9 @@
 		3477C2BD1CBF97DA0028B84B /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
-				34B14E3B269546A3004C22CC /* FontType.cpp */,
-				34B14E3A269546A3004C22CC /* TypeFace.cpp */,
+				340833122698F8FE0028012F /* FontPriv.h */,
+				340833132698F8FE0028012F /* FontType.cpp */,
+				340833142698F8FE0028012F /* TypeFace.cpp */,
 				34A3ACE720568D5800B1D62A /* StringLayout.cpp */,
 				345920FC1F25649000098DFD /* Font.h */,
 				345920FD1F25649000098DFD /* FontCache.h */,
@@ -561,7 +552,7 @@
 		3477C2CC1CC046370028B84B /* Widgets */ = {
 			isa = PBXGroup;
 			children = (
-				34B14E372695466A004C22CC /* Slider.cpp */,
+				34B14E3326951C6E004C22CC /* Slider.cpp */,
 				3477C2F21CC04BF00028B84B /* Bitmap.cpp */,
 				3477C2F31CC04BF00028B84B /* Box.cpp */,
 				3477C2F41CC04BF00028B84B /* Button.cpp */,
@@ -569,7 +560,6 @@
 				3477C2F61CC04BF00028B84B /* Combo.cpp */,
 				3477C2F71CC04BF00028B84B /* Edit.cpp */,
 				3477C2EC1CC04BBB0028B84B /* ItemContainer.cpp */,
-				3477C2ED1CC04BBB0028B84B /* List.cpp */,
 				3477C2F81CC04BF00028B84B /* Panel.cpp */,
 				3477C2D61CC048390028B84B /* Popup.cpp */,
 				345EB84D235C6C01007D05DB /* Popup.h */,
@@ -587,6 +577,7 @@
 				3477C2C41CC046310028B84B /* TextView3.cpp */,
 				3477C2CF1CC047F50028B84B /* ToolBar.cpp */,
 				3477C2EE1CC04BBB0028B84B /* Tree.cpp */,
+				3477C2ED1CC04BBB0028B84B /* List.cpp */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -667,17 +658,14 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				34B14E1826950F59004C22CC /* StringClass.h in Headers */,
 				344CFBC8237365B800AE6B35 /* ClipBoard.h in Headers */,
 				343874B8230F46B200CF96B4 /* Layout.h in Headers */,
 				3477C2AC1CBF72170028B84B /* ViewPriv.h in Headers */,
 				3477C35D1CC2253E0028B84B /* LgiInterfaces.h in Headers */,
 				3477C2A51CBF0A920028B84B /* LgiOsClasses.h in Headers */,
-				34B14E23269516FC004C22CC /* LgiCommon.h in Headers */,
 				3491A28523678DB800604C29 /* DropFiles.h in Headers */,
 				34B531D822F65734002B50F7 /* Menu.h in Headers */,
 				34114C8B23091E6E00F342B1 /* LgiClasses.h in Headers */,
-				34B14E2026951653004C22CC /* HashTable.h in Headers */,
 				3477C35B1CC1AEEA0028B84B /* LgiInc.h in Headers */,
 				348362421F233A77003B2A6D /* Stream.h in Headers */,
 				3477C2A61CBF0A920028B84B /* LgiOsDefs.h in Headers */,
@@ -694,6 +682,7 @@
 				3477C2A21CBF0A920028B84B /* SymLookup.h in Headers */,
 				34D6AA1722D3749A005D739E /* Gdc2.h in Headers */,
 				3477C2A41CBF0A920028B84B /* LgiOs.h in Headers */,
+				340833152698F8FF0028012F /* FontPriv.h in Headers */,
 				343874B7230F46B200CF96B4 /* App.h in Headers */,
 				3418EBCF25D9FEA600EA168A /* Progress.h in Headers */,
 				346DDEC1240C882900751380 /* RadioGroup.h in Headers */,
@@ -702,7 +691,6 @@
 				346FACE71D3C720B00FFEBCE /* Message.h in Headers */,
 				3477C2A31CBF0A920028B84B /* LgiMac.h in Headers */,
 				3418EBD125D9FEF500EA168A /* ProgressDlg.h in Headers */,
-				34B14E1B26950F6C004C22CC /* LgiString.h in Headers */,
 				343874B6230F46B200CF96B4 /* View.h in Headers */,
 				345920FF1F25649000098DFD /* Font.h in Headers */,
 				3477C2A81CBF0AAF0028B84B /* Lgi.h in Headers */,
@@ -783,6 +771,7 @@
 				3477C3111CC04C790028B84B /* CssTools.cpp in Sources */,
 				34A3ACE820568D5800B1D62A /* StringLayout.cpp in Sources */,
 				3477C2DB1CC048F90028B84B /* DisplayString.cpp in Sources */,
+				34B14E3426951C6E004C22CC /* Slider.cpp in Sources */,
 				3477C33A1CC04ED90028B84B /* DragAndDrop.mm in Sources */,
 				3477C2DC1CC048F90028B84B /* Font.cpp in Sources */,
 				3477C2831CBF086A0028B84B /* Layout.mm in Sources */,
@@ -805,7 +794,6 @@
 				3477C3021CC04BF00028B84B /* CheckBox.cpp in Sources */,
 				3477C2BB1CBF97C80028B84B /* GdcCommon.cpp in Sources */,
 				3477C2E51CC04A7F0028B84B /* ViewCommon.cpp in Sources */,
-				34B14E382695466A004C22CC /* Slider.cpp in Sources */,
 				34131710230694D1008CE982 /* Gel.cpp in Sources */,
 				3477C2D71CC048390028B84B /* Popup.cpp in Sources */,
 				3477C3091CC04BF00028B84B /* TableLayout.cpp in Sources */,
@@ -838,6 +826,7 @@
 				3477C3491CC0AA7E0028B84B /* ProgressDlg.cpp in Sources */,
 				346FACEB1D3C75AE00FFEBCE /* Uri.cpp in Sources */,
 				3477C2B11CBF96C40028B84B /* Res.cpp in Sources */,
+				340833162698F8FF0028012F /* FontType.cpp in Sources */,
 				3477C4ED1CC27F1C0028B84B /* TrayIcon.cpp in Sources */,
 				3477C2991CBF09320028B84B /* ShowFileProp_Mac.mm in Sources */,
 				3477C2921CBF08C10028B84B /* GScreenDC.cpp in Sources */,
@@ -853,7 +842,6 @@
 				3477C3041CC04BF00028B84B /* Edit.cpp in Sources */,
 				3477C3361CC04E120028B84B /* 48Bit.cpp in Sources */,
 				3477C3261CC04DE20028B84B /* Mutex.cpp in Sources */,
-				34B14E3D269546A3004C22CC /* FontType.cpp in Sources */,
 				3477C2851CBF086A0028B84B /* Printer.mm in Sources */,
 				3477C33D1CC088590028B84B /* FileCommon.cpp in Sources */,
 				3477C3471CC0AA220028B84B /* WindowCommon.cpp in Sources */,
@@ -865,11 +853,11 @@
 				3477C3241CC04DD70028B84B /* Object.cpp in Sources */,
 				3477C2E31CC04A5C0028B84B /* Stream.cpp in Sources */,
 				34A3ACEA20568D9700B1D62A /* MenuCommon.cpp in Sources */,
-				34B14E3C269546A3004C22CC /* TypeFace.cpp in Sources */,
 				3477C3341CC04E120028B84B /* 24Bit.cpp in Sources */,
 				3477C3351CC04E120028B84B /* 32Bit.cpp in Sources */,
 				3477C31E1CC04D3F0028B84B /* NetTools.cpp in Sources */,
 				3477C2881CBF086A0028B84B /* Widgets.mm in Sources */,
+				340833172698F8FF0028012F /* TypeFace.cpp in Sources */,
 				3477C2891CBF086A0028B84B /* Window.mm in Sources */,
 				3477C3431CC0A6B90028B84B /* DocView.cpp in Sources */,
 				3477C2841CBF086A0028B84B /* Menu.mm in Sources */,

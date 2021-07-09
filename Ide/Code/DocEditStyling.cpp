@@ -1144,6 +1144,7 @@ void DocEdit::PourStyle(size_t Start, ssize_t EditSize)
 			FileType = SrcPlainText;
 		else if (!stricmp(Ext, "c") ||
 				!stricmp(Ext, "cpp") ||
+				!stricmp(Ext, "mm") ||
 				!stricmp(Ext, "cc") ||
 				!stricmp(Ext, "h") ||
 				!stricmp(Ext, "hpp") ||

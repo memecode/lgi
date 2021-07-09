@@ -3,16 +3,13 @@
 #include <ctype.h>
 
 #include "lgi/common/Lgi.h"
-#include "LgiIde.h"
 #include "lgi/common/Mdi.h"
 #include "lgi/common/Token.h"
 #include "lgi/common/XmlTree.h"
 #include "lgi/common/Panel.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/TabView.h"
-#include "FtpThread.h"
 #include "lgi/common/ClipBoard.h"
-#include "FindSymbol.h"
 #include "lgi/common/Box.h"
 #include "lgi/common/TextLog.h"
 #include "lgi/common/Edit.h"
@@ -20,15 +17,20 @@
 #include "lgi/common/TextLabel.h"
 #include "lgi/common/Combo.h"
 #include "lgi/common/CheckBox.h"
-#include "GDebugger.h"
 #include "lgi/common/LgiRes.h"
-#include "ProjectNode.h"
 #include "lgi/common/Box.h"
 #include "lgi/common/SubProcess.h"
 #include "lgi/common/About.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/ToolBar.h"
 #include "lgi/common/FileSelect.h"
+#include "lgi/common/SubProcess.h"
+
+#include "LgiIde.h"
+#include "FtpThread.h"
+#include "FindSymbol.h"
+#include "GDebugger.h"
+#include "ProjectNode.h"
 
 #define IDM_RECENT_FILE			1000
 #define IDM_RECENT_PROJECT		1100
@@ -1205,6 +1207,12 @@ public:
 		}
 	}
 	
+	#if 1
+		#define LOG_SEEK_MSG(...) printf(__VA_ARGS__)
+	#else
+		#define LOG_SEEK_MSG(...)
+	#endif
+		
 	void GetContext(const char16 *Txt, ssize_t &i, char16 *&Context)
 	{
 		static char16 NMsg[] = L"In file included ";
@@ -1250,6 +1258,33 @@ public:
 		}
 	}
 
+	template<typename T>
+	bool IsTimeStamp(T *s, ssize_t i)
+	{
+		while (i > 0 && s[i-1] != '\n')
+			i--;
+		auto start = i;
+		while (s[i] && (IsDigit(s[i]) || strchr(" :-", s[i])))
+			i++;
+		LString txt(s + start, i - start);
+		auto parts = txt.SplitDelimit(" :-");
+		return	parts.Length() == 6 &&
+				parts[0].Length() == 4;
+	}
+	
+	template<typename T>
+	bool IsContext(T *s, ssize_t i)
+	{
+		auto key = L"In file included";
+		auto end = i;
+		while (i > 0 && s[i-1] != '\n')
+			i--;
+		if (Strnistr(s + i, key, end - i))
+			return true;
+		
+		return false;
+	}
+
 	#define PossibleLineSep(ch) \
 		( (ch) == ':' || (ch) == '(' )
 		
@@ -1287,6 +1322,10 @@ public:
 				PossibleLineSep(Txt[i])
 				&&
 				isdigit(Txt[i+1])
+				&&
+				!IsTimeStamp(Txt, i)
+				&&
+				!IsContext(Txt, i)
 			)
 			{
 				break;
@@ -1305,6 +1344,10 @@ public:
 					PossibleLineSep(Txt[i])
 					&&
 					isdigit(Txt[i+1])
+					&&
+					!IsTimeStamp(Txt, i)
+					&&
+					!IsContext(Txt, i)
 				)
 				{
 					break;
@@ -1324,12 +1367,14 @@ public:
 		}
 						
 		// Store the filename
-		LAutoString File(WideToUtf8(Txt+Line, i-Line));
+		LString File(Txt+Line, i-Line);
 		if (!File)
 			return;
-		char *Sep;
-		while ((Sep = strchr(File, DIR_CHAR == '\\' ? '/' : '\\')))
-			*Sep = DIR_CHAR;
+		#if DIR_CHAR == '\\'
+		File = File.Replace("/", "\\");
+		#else
+		File = File.Replace("\\", "/");
+		#endif
 
 		// Scan over the line number..
 		auto NumIndex = ++i;
@@ -1337,12 +1382,12 @@ public:
 			NumIndex++;
 							
 		// Store the line number
-		LAutoString NumStr(WideToUtf8(Txt + i, NumIndex - i));
+		LString NumStr(Txt + i, NumIndex - i);
 		if (!NumStr)
 			return;
 
 		// Convert it to an integer
-		int LineNumber = atoi(NumStr);
+		auto LineNumber = (int)NumStr.Int();
 		o->SetCaret(Line, false);
 		o->SetCaret(NumIndex + 1, true);
 								
@@ -1360,15 +1405,14 @@ public:
 		if (RecentFilesMenu)
 		{
 			RecentFilesMenu->Empty();
-			int n=0;
 
 			if (RecentFiles.Length() == 0)
 				RecentFilesMenu->AppendItem(None, 0, false);
 			else
 			{
-				auto It = RecentFiles.begin();
-				char *f = *It;
-				if (f)
+				int n=0;
+				char *f;
+				for (auto It = RecentFiles.begin(); (f = *It); f=*(++It))
 				{
 					for (; f; f=*(++It))
 					{
@@ -1384,13 +1428,21 @@ public:
 		if (RecentProjectsMenu)
 		{
 			RecentProjectsMenu->Empty();
-			int n=0;
 
 			if (RecentProjects.Length() == 0)
 				RecentProjectsMenu->AppendItem(None, 0, false);
 			else
-				for (size_t i=0; i<RecentProjects.Length(); i++)
-					RecentProjectsMenu->AppendItem(RecentProjects[i], IDM_RECENT_PROJECT+i);
+			{
+				int n=0;
+				char *f;
+				for (auto It = RecentProjects.begin(); (f = *It); f=*(++It))
+				{
+					if (LIsUtf8(f))
+						RecentProjectsMenu->AppendItem(f, IDM_RECENT_PROJECT+n++, true);
+					else
+						RecentProjects.Delete(It);
+				}
+			}
 		}
 		
 		if (WindowsMenu)
@@ -1424,17 +1476,20 @@ public:
 		if (!File)
 			return;
 
-		auto &Recent = IsProject ? RecentProjects : RecentFiles;
-		for (auto it = Recent.begin(); it != Recent.end(); ++it)
+		auto *Recent = IsProject ? &RecentProjects : &RecentFiles;
+		for (auto &f: *Recent)
 		{
-			auto f = *it;
-			if (f && (!LIsUtf8(f) || LFileCompare(f, File) == 0))
-				Recent.Delete(it);
+			if (f && LFileCompare(f, File) == 0)
+			{
+				f = File;
+				UpdateMenus();
+				return;
+			}
 		}
 
-		Recent.AddAt(0, File);
-		if (Recent.Length() > 10)
-			Recent.Length(10);
+		Recent->AddAt(0, File);
+		if (Recent->Length() > 10)
+			Recent->Length(10);
 
 		UpdateMenus();
 	}
@@ -4230,7 +4285,6 @@ void AppWnd::FindSymbol(int ResultsSinkHnd, const char *Sym, bool AllPlatforms)
 	d->FindSym->Search(ResultsSinkHnd, Sym, AllPlatforms);
 }
 
-#include "lgi/common/SubProcess.h"
 bool AppWnd::GetSystemIncludePaths(::LArray<LString> &Paths)
 {
 	if (d->SystemIncludePaths.Length() == 0)

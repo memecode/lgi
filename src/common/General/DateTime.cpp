@@ -290,7 +290,8 @@ static int LDateCmp(LDateTime *a, LDateTime *b)
 
 #elif defined POSIX
 
-static bool ParseValue(char *s, LAutoString &var, LAutoString &val)
+/*
+static bool ParseValue(char *s, GAutoString &var, GAutoString &val)
 {
 	if (!s)
 		return false;
@@ -304,6 +305,7 @@ static bool ParseValue(char *s, LAutoString &var, LAutoString &val)
 	*e = '=';
 	return var != 0 && val != 0;
 }
+*/
 
 #endif
 
@@ -461,7 +463,7 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start,
 			auto &i = Info.New();
 			
 			i.UtcTimeStamp = [next timeIntervalSince1970] * 1000;
-			i.Offset = [tz secondsFromGMTForDate:[next dateByAddingTimeInterval:60]]/60;
+			i.Offset = (int)([tz secondsFromGMTForDate:[next dateByAddingTimeInterval:60]]/60);
 			
 			[startDate release];
 			startDate = next;

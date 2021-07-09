@@ -433,6 +433,7 @@ void ProjectNode::AutoDetectType()
 			}
 			else if (stricmp(Ext, "cpp") == 0 ||
 					stricmp(Ext, "cc") == 0 ||
+					stricmp(Ext, "mm") == 0 ||
 					stricmp(Ext, "c") == 0)
 			{
 				Type = NodeSrc;
@@ -1264,11 +1265,19 @@ void ProjectNode::OnMouseClick(LMouse &m)
 	}
 }
 
+#if 0
+#define LOG_FIND_FILE(...) printf(__VA_ARGS__)
+#else
+#define LOG_FIND_FILE(...)
+#endif
+
 ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 {
+	LOG_FIND_FILE("%s:%i Node='%s' '%s'\n", _FL, sFile.Get(), sName.Get());
 	if (sFile)
 	{
 		bool Match = false;
+		const char *AnyDir = "\\/";
 
 		if (IsWeb())
 		{
@@ -1281,7 +1290,7 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 			
 			if (LIsRelativePath(sFile))
 			{
-				LAutoString Base = Project->GetBasePath();
+				auto Base = Project->GetBasePath();
 				if (Base)
 					LMakePath(Full, sizeof(Full), Base, sFile);
 				else
@@ -1292,17 +1301,21 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 				strcpy_s(Full, sizeof(Full), sFile);
 			}
 			
+			LOG_FIND_FILE("%s:%i Full='%s'\n", _FL, Full);
+			
 			LString MyPath(Full);
-			LString::Array MyArr = MyPath.Split(DIR_STR);
+			LString::Array MyArr = MyPath.SplitDelimit(AnyDir);
 			LString InPath(In);
-			LString::Array InArr = InPath.Split(DIR_STR);
+			LString::Array InArr = InPath.SplitDelimit(AnyDir);
 			auto Common = MIN(MyArr.Length(), InArr.Length());
 			Match = true;
 			for (int i = 0; i < Common; i++)
 			{
 				char *a = MyArr[MyArr.Length()-(i+1)];
 				char *b = InArr[InArr.Length()-(i+1)];
-				if (_stricmp(a, b))
+				auto res = _stricmp(a, b);
+				LOG_FIND_FILE("%s:%i cmp '%s','%s'=%i\n", _FL, a, b, res);
+				if (res)
 				{
 					Match = false;
 					break;
@@ -1312,11 +1325,9 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 		else
 		{
 			// Match file name only
-			char *Dir = strrchr(sFile, DIR_CHAR);
-			if (Dir)
-			{
-				Match = stricmp(Dir + 1, In) == 0;
-			}
+			auto p = sFile.SplitDelimit(AnyDir);
+			Match = p.Last().Equals(In);
+			LOG_FIND_FILE("%s:%i cmp '%s','%s'=%i\n", _FL, p.Last().Get(), In, Match);
 		}
 		
 		if (Match)
@@ -1346,7 +1357,11 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 	for (auto i:*this)
 	{
 		ProjectNode *c = dynamic_cast<ProjectNode*>(i);
-		if (!c) break;
+		if (!c)
+		{
+			LgiAssert(!"Not a node?");
+			break;
+		}
 
 		ProjectNode *n = c->FindFile(In, Full);
 		if (n)

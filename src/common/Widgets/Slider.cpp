@@ -54,7 +54,6 @@ bool LSlider::SetRange(const LRange &r)
 {
 	Min = r.Start;
 	Max = r.End();
-	Invalidate();
 	return true;
 }
 

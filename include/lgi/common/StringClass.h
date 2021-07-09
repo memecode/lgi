@@ -450,7 +450,7 @@ public:
 	/// Cast to C string operator
 	operator char *() const
 	{
-		return Str ? Str->Str : NULL;
+		return Str && Str->Len > 0 ? Str->Str : NULL;
 	}
 	
 	int operator -(const LString &s) const

@@ -38,7 +38,7 @@ bool _lgi_check_file(char *Path)
 			{
 				// resolve shortcut
 				char Link[256];
-				if (ResolveShortcut(Path, Link, sizeof(Link)))
+				if (LResolveShortcut(Path, Link, sizeof(Link)))
 				{
 					// check destination of link
 					if (LFileExists(Link))

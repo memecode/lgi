@@ -97,7 +97,7 @@ public:
 	LRect ExternSubRgn;
 	int Effect;
 	LMemDC Icon;
-	GDragFormats Formats;
+	LDragFormats Formats;
 
 	GDndSourcePriv() : Formats(true)
 	{
@@ -165,7 +165,7 @@ public:
 	
 	int Main()
 	{
-		GFile out;
+		LFile out;
 		if (!out.Open(Dst, O_WRITE))
 		{
 			LgiTrace("%s:%i - can't open '%s' for writing.\n", _FL, Dst.Get());
@@ -253,7 +253,7 @@ public:
 
 	if (auto drop_url = ExtractPromiseDropLocation(sender))
 	{
-		GFile::Path path(drop_url.path.fileSystemRepresentation);
+		LFile::Path path(drop_url.path.fileSystemRepresentation);
 		auto di = objc_dynamic_cast(LDragItem, item);
 		if (!di)
 		{
@@ -294,18 +294,18 @@ public:
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
-GDragDropSource::GDragDropSource()
+LDragDropSource::LDragDropSource()
 {
 	d = new GDndSourcePriv;
 	OnRegister(true);
 }
 
-GDragDropSource::~GDragDropSource()
+LDragDropSource::~LDragDropSource()
 {
 	DeleteObj(d);
 }
 
-bool GDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
+bool LDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
 {
 	d->ExternImg = Img;
 	if (SubRgn)
@@ -316,7 +316,7 @@ bool GDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
 	return true;
 }
 
-bool GDragDropSource::CreateFileDrop(GDragData *OutputData, LMouse &m, LString::Array &Files)
+bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, LString::Array &Files)
 {
 	if (OutputData && Files.First())
 	{
@@ -369,7 +369,7 @@ static NSArray* BuildImageComponentsForItem(NSPasteboardItem *_item)
 	return @[ic];
 }
 
-int GDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
+int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
 {
 	LgiAssert(SourceWnd);
 	if (!SourceWnd || !Event)
@@ -425,11 +425,11 @@ int GDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 	auto pt = Event.p.locationInWindow;
 	pt.y -= Mem->Y();
 	
-	GDragFormats Formats(true);
+	LDragFormats Formats(true);
 	if (!GetFormats(Formats))
 		return DROPEFFECT_NONE;
 
-	LArray<GDragData> Data;
+	LArray<LDragData> Data;
 	for (auto f: Formats.Formats)
 		Data.New().Format = f;
 	Formats.Empty();
@@ -546,16 +546,16 @@ int GDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-GDragDropTarget::GDragDropTarget() : Formats(false)
+LDragDropTarget::LDragDropTarget() : Formats(false)
 {
 	To = 0;
 }
 
-GDragDropTarget::~GDragDropTarget()
+LDragDropTarget::~LDragDropTarget()
 {
 }
 
-void GDragDropTarget::SetWindow(LView *to)
+void LDragDropTarget::SetWindow(LView *to)
 {
 	bool Status = false;
 	To = to;

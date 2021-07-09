@@ -4,33 +4,33 @@
 
 #define kClipboardTextType				"public.utf16-plain-text"
 
-class GClipBoardPriv
+class LClipBoardPriv
 {
 public:
 	
-	GClipBoardPriv()
+	LClipBoardPriv()
 	{
 	}
 
-	~GClipBoardPriv()
+	~LClipBoardPriv()
 	{
 	}
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-GClipBoard::GClipBoard(LView *o)
+LClipBoard::LClipBoard(LView *o)
 {
-	d = new GClipBoardPriv;
+	d = new LClipBoardPriv;
 	Owner = o;
 	Open = true;
 }
 
-GClipBoard::~GClipBoard()
+LClipBoard::~LClipBoard()
 {
 	DeleteObj(d);
 }
 
-bool GClipBoard::Empty()
+bool LClipBoard::Empty()
 {
 	LAutoPool Ap;
 	bool Status = false;
@@ -44,7 +44,7 @@ bool GClipBoard::Empty()
 	return Status;
 }
 
-bool GClipBoard::Text(const char *Str, bool AutoEmpty)
+bool LClipBoard::Text(const char *Str, bool AutoEmpty)
 {
 	LAutoPool Ap;
 	
@@ -60,7 +60,7 @@ bool GClipBoard::Text(const char *Str, bool AutoEmpty)
 	return Txt;
 }
 
-char *GClipBoard::Text()
+char *LClipBoard::Text()
 {
 	LAutoPool Ap;
 	
@@ -81,7 +81,7 @@ char *GClipBoard::Text()
 	return Txt;
 }
 
-bool GClipBoard::TextW(const char16 *Str, bool AutoEmpty)
+bool LClipBoard::TextW(const char16 *Str, bool AutoEmpty)
 {
 	bool Status = false;
 
@@ -97,42 +97,42 @@ bool GClipBoard::TextW(const char16 *Str, bool AutoEmpty)
 	return Status;
 }
 
-char16 *GClipBoard::TextW()
+char16 *LClipBoard::TextW()
 {
 	Text();
 	wTxt.Reset(Utf8ToWide(Txt));
 	return wTxt;
 }
 
-bool GClipBoard::Html(const char *doc, bool AutoEmpty)
+bool LClipBoard::Html(const char *doc, bool AutoEmpty)
 {
 	return false;
 }
 
-LString GClipBoard::Html()
+LString LClipBoard::Html()
 {
 	return LString();
 }
 
-bool GClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
+bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 {
 	LgiAssert(!"Not impl.");
 	return false;
 }
 
-LSurface *GClipBoard::Bitmap()
+LSurface *LClipBoard::Bitmap()
 {
 	LgiAssert(!"Not impl.");
 	return NULL;
 }
 
-LString::Array GClipBoard::Files()
+LString::Array LClipBoard::Files()
 {
 	LgiAssert(!"Not impl.");
 	return LString::Array();
 }
 
-bool GClipBoard::Files(LString::Array &Paths, bool AutoEmpty)
+bool LClipBoard::Files(LString::Array &Paths, bool AutoEmpty)
 {
 	LgiAssert(!"Not impl.");
 	return false;
@@ -290,7 +290,7 @@ struct LBinaryData_Hdr
 
 #define LGI_ClipBoardType "clipboard-binary"
 
-bool GClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmpty)
+bool LClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmpty)
 {
 	if (!Ptr || Len <= 0)
 		return false;
@@ -304,7 +304,7 @@ bool GClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	return r;
 }
 
-bool GClipBoard::Binary(FormatType Format, LAutoPtr<uint8,true> &Ptr, ssize_t *Len)
+bool LClipBoard::Binary(FormatType Format, LAutoPtr<uint8,true> &Ptr, ssize_t *Len)
 {
 	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
 	auto d = [pasteboard dataForType:LBinaryDataPBoardType];

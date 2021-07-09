@@ -219,7 +219,6 @@
 		345B211C217969D30079E3C9 /* LgiIde.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = LgiIde.lr8; path = ../Resources/LgiIde.lr8; sourceTree = "<group>"; };
 		345B211D217969D30079E3C9 /* icons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icons.png; path = ../Resources/icons.png; sourceTree = "<group>"; };
 		346A86722325CBA000FBC545 /* libpng.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libpng.xcodeproj; path = ../../../../../CodeLib/libpng/build/libpng.xcodeproj; sourceTree = "<group>"; };
-		34B14E4E26954A8F004C22CC /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Cocoa.framework; sourceTree = "<group>"; };
 		34C4FD3222FDB50D00C4BECB /* cmds-16px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cmds-16px.png"; sourceTree = "<group>"; };
 		34C4FD3322FDB50D00C4BECB /* cmds-32px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cmds-32px.png"; sourceTree = "<group>"; };
 		34C75D9223A0D89A006DE6D1 /* NewProjectFromTemplate.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = NewProjectFromTemplate.cpp; path = ../Code/NewProjectFromTemplate.cpp; sourceTree = "<group>"; };
@@ -288,7 +287,6 @@
 		345B20CB217967B70079E3C9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				34B14E4E26954A8F004C22CC /* Cocoa.framework */,
 				346A86722325CBA000FBC545 /* libpng.xcodeproj */,
 				345B20C3217967760079E3C9 /* LgiCocoa.xcodeproj */,
 			);

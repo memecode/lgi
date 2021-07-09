@@ -714,8 +714,8 @@ void LMenuItem::_Paint(LSurface *pDC, int Flags)
 	else
 	{
 		// Paint a text menu item
-		GColour Fore(L_TEXT);
-		GColour Back(Selected ? L_HIGH : L_MED);
+		LColour Fore(L_TEXT);
+		LColour Back(Selected ? L_HIGH : L_MED);
 		int x = IconX;
 		int y = 1;
 		
@@ -770,7 +770,7 @@ void LMenuItem::_Paint(LSurface *pDC, int Flags)
 				 _Icon >= 0)
 		{
 			// it's an icon!
-			GColour Bk(L_MED);
+			LColour Bk(L_MED);
 			ImgLst->Draw(pDC, 0, 0, _Icon, Bk);
 		}
 		

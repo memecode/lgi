@@ -1696,7 +1696,7 @@ void LFolderItem::OnSelect()
 
 void LFolderItem::OnDelete(bool Ask)
 {
-	if (!Ask || LgiMsg(Parent, "Do you want to delete '%s'?", ModuleName, MB_YESNO, Path) == IDYES)
+	if (!Ask || LgiMsg(Parent, "Do you want to delete '%s'?", ModuleName, MB_YESNO, Path.Get()) == IDYES)
 	{
 		bool Status = false;
 

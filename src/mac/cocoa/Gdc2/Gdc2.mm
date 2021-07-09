@@ -283,7 +283,7 @@ void TrimWhite(char *s)
 	}
 }
 
-bool GPalette::Load(GFile &F)
+bool GPalette::Load(LFile &F)
 {
 	bool Status = false;
 	char Buf[256];
@@ -322,7 +322,7 @@ bool GPalette::Load(GFile &F)
 	return Status;
 }
 
-bool GPalette::Save(GFile &F, int Format)
+bool GPalette::Save(LFile &F, int Format)
 {
 	bool Status = false;
 	
@@ -558,7 +558,7 @@ bool GGlobalColour::AddBitmap(LImageList *il)
 			if (s)
 			{
 				s->Op(GDC_ALPHA);
-				GApplicator *pApp = s->Applicator();
+				LApplicator *pApp = s->Applicator();
 				if (pApp) pApp->SetVar(GAPP_ALPHA_A, 40);
 				s->Blt(0, 0, il);
 				d->Cache.Insert(s);
@@ -662,7 +662,7 @@ public:
 	int ScrX;
 	int ScrY;
 	int ScrBits;
-	GColourSpace Cs;
+	LColourSpace Cs;
 	
 	// Palette
 	double GammaCorrection;
@@ -829,7 +829,7 @@ int GdcDevice::GetBits()
 	return d->ScrBits;
 }
 
-GColourSpace GdcDevice::GetColourSpace()
+LColourSpace GdcDevice::GetColourSpace()
 {
 	return d->Cs;
 }
@@ -1014,7 +1014,7 @@ COLOUR GdcDevice::GetColour(COLOUR Rgb24, LSurface *pDC)
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 static int _Factories;
-static GApplicatorFactory *_Factory[16];
+static LApplicatorFactory *_Factory[16];
 
 GApp8 Factory8;
 GApp15 Factory15;
@@ -1023,7 +1023,7 @@ GApp24 Factory24;
 GApp32 Factory32;
 GAlphaFactory FactoryAlpha;
 
-GApplicatorFactory::GApplicatorFactory()
+LApplicatorFactory::LApplicatorFactory()
 {
 	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	if (_Factories < CountOf(_Factory) - 1)
@@ -1032,7 +1032,7 @@ GApplicatorFactory::GApplicatorFactory()
 	}
 }
 
-GApplicatorFactory::~GApplicatorFactory()
+LApplicatorFactory::~LApplicatorFactory()
 {
 	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)
@@ -1046,12 +1046,12 @@ GApplicatorFactory::~GApplicatorFactory()
 	}
 }
 
-GApplicator *GApplicatorFactory::NewApp(GColourSpace Cs, int Op)
+LApplicator *LApplicatorFactory::NewApp(LColourSpace Cs, int Op)
 {
 	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)
 	{
-		GApplicator *a = _Factory[i]->Create(Cs, Op);
+		LApplicator *a = _Factory[i]->Create(Cs, Op);
 		if (a) return a;
 	}
 	

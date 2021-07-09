@@ -113,8 +113,8 @@ struct DndEvent
 {
 	LCocoaView *cv;
 	LViewI *v;
-	GDragDropTarget *target;
-	GDragFormats InputFmts, AcceptedFmts;
+	LDragDropTarget *target;
+	LDragFormats InputFmts, AcceptedFmts;
 	LPoint Pt;
 	int Keys;
 
@@ -151,7 +151,7 @@ struct DndEvent
 		auto frame = cv.frame;
 		Pt.Set(loc.x, frame.size.height - loc.y);
 		
-		GDragDropTarget *t = NULL;
+		LDragDropTarget *t = NULL;
 		v = cv.w->WindowFromPoint(Pt.x, Pt.y);
 		if (!v)
 			return;
@@ -193,7 +193,7 @@ struct DndEvent
 
 	if ((self = [super initWithFrame:wnd->GetPos()]) != nil)
 	{
-		printf("LCocoaView.alloc... (%i, %s)\n", LCocoaView_Count, wnd->GetClass());
+		// printf("LCocoaView.alloc... (%i, %s)\n", LCocoaView_Count, wnd->GetClass());
 	
 		self.w = wnd;
 		self.WndClass = wnd->GetClass();
@@ -218,7 +218,7 @@ struct DndEvent
 {
 	LAutoPool Pool;
 
-	printf("LCocoaView.dealloc... (%i, %s)\n", LCocoaView_Count-1, self.WndClass.Get());
+	// printf("LCocoaView.dealloc... (%i, %s)\n", LCocoaView_Count-1, self.WndClass.Get());
 
 	DeleteObj(self->dnd);
 	if (self->tracking)
@@ -547,7 +547,7 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 	if (!e.target)
 		return NSDragOperationNone;
 
-	LArray<GDragData> Data;
+	LArray<LDragData> Data;
 	auto pb = sender.draggingPasteboard;
 	
 	auto Accepted = e.AcceptedFmts.GetSupported();
