@@ -15,33 +15,37 @@
 #include <string.h>
 
 #ifdef _POSIX_C_SOURCE
-#error "This shouldn't be defined."
+	#error "This shouldn't be defined."
 #endif
 #ifndef _DLFCN_H_
-#error "Include dlfcn.h"
+	#error "Include dlfcn.h"
 #endif
 
 #if __LP64__
-#define _BACKTRACE_FORMAT "%-4d%-35s 0x%16p %s + %u"
-#define _BACKTRACE_FORMAT_SIZE 82
+	#define _BACKTRACE_FORMAT "%-4d%-35s 0x%16p %s + %u"
+	#define _BACKTRACE_FORMAT_SIZE 82
 #else
-#define _BACKTRACE_FORMAT "%-4d%-35s 0x%08p %s + %u"
-#define _BACKTRACE_FORMAT_SIZE 65
+	#define _BACKTRACE_FORMAT "%-4d%-35s 0x%08p %s + %u"
+	#define _BACKTRACE_FORMAT_SIZE 65
 #endif
 
 #if defined(__i386__) || defined(__x86_64__)
-#define FP_LINK_OFFSET 1
+	#define FP_LINK_OFFSET 1
 #elif defined(__ppc__) || defined(__ppc64__)
-#define FP_LINK_OFFSET 2
+	#define FP_LINK_OFFSET 2
+#elif defined(__aarch64__)
+	#define FP_LINK_OFFSET 1 // This maybe incorrect... I have no way of knowing or testing.
 #else
-#error  ********** Unimplemented architecture
+	#error "Impl me""
 #endif
 
 #define	INSTACK(a)	((a) >= stackbot && (a) <= stacktop)
-#if defined(__ppc__) || defined(__ppc64__) || defined(__x86_64__)
-#define	ISALIGNED(a)	((((uintptr_t)(a)) & 0xf) == 0)
+#if defined(__ppc__) || defined(__ppc64__) || defined(__x86_64__) || defined(__aarch64__)
+	#define	ISALIGNED(a)	((((uintptr_t)(a)) & 0xf) == 0)
 #elif defined(__i386__)
-#define	ISALIGNED(a)	((((uintptr_t)(a)) & 0xf) == 8)
+	#define	ISALIGNED(a)	((((uintptr_t)(a)) & 0xf) == 8)
+#else
+	#error "Impl me"
 #endif
 
 /// Lookup the file/line information for an instruction pointer value
@@ -73,11 +77,13 @@ private:
 		 * optimization).  We now inline the code to get the stack frame pointer,
 		 * so we are consistent about the stack frame.
 		 */
-	#if defined(__i386__) || defined(__x86_64__)
+	#if defined(__i386__) || defined(__x86_64__) || defined(__aarch64__)
 		frame = __builtin_frame_address(0);
 	#elif defined(__ppc__) || defined(__ppc64__)
 		/* __builtin_frame_address IS BROKEN IN BEAKER: RADAR #2340421 */
 		__asm__ volatile("mr %0, r1" : "=r" (frame));
+	#else
+		#error "impl me"
 	#endif
 		if(!INSTACK(frame) || !ISALIGNED(frame))
 		return;

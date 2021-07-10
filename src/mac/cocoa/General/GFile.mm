@@ -434,13 +434,13 @@ ssize_t SizeofStr(const char *s)
 	return sizeof(uint32) + ((s) ? strlen(s) : 0);
 }
 
-bool LgiGetDriveInfo
+bool LGetDriveInfo
 (
 	char *Path,
 	uint64 *Free,
 	uint64 *Size,
 	uint64 *Available
- )
+)
 {
 	bool Status = false;
 	
@@ -449,7 +449,7 @@ bool LgiGetDriveInfo
 		struct stat s;
 		if (lstat(Path, &s) == 0)
 		{
-			// printf("LgiGetDriveInfo dev=%i\n", s.st_dev);
+			// printf("LGetDriveInfo dev=%i\n", s.st_dev);
 		}
 	}
 	

@@ -268,7 +268,7 @@ int LgiRand(int Limit)
 	return rand() % Limit;
 }
 
-bool LgiPlaySound(const char *FileName, int ASync)
+bool LPlaySound(const char *FileName, int ASync)
 {
 	return LExecute(FileName);
 }
@@ -553,7 +553,7 @@ char *CFStringToUtf8(CFStringRef r)
 	return Buffer;
 }
 
-bool LgiGetMimeTypeExtensions(const char *Mime, LArray<LString> &Ext)
+bool LGetMimeTypeExtensions(const char *Mime, LArray<LString> &Ext)
 {
 	size_t Start = Ext.Length();
 	

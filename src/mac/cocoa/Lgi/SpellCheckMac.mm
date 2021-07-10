@@ -1,6 +1,6 @@
 // http://src.chromium.org/svn/trunk/src/chrome/browser/spellchecker_mac.mm
-#include "Lgi.h"
-#include "LgiSpellCheck.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/SpellCheck.h"
 
 #include <Cocoa/Cocoa.h>
 
@@ -111,27 +111,27 @@ FallbackMethod:
 
 static const unsigned int kShortLanguageCodeSize = 2;
 
-int LangCmp(GSpellCheck::LanguageId *a, GSpellCheck::LanguageId *b)
+int LangCmp(LSpellCheck::LanguageId *a, LSpellCheck::LanguageId *b)
 {
 	return stricmp(a->LangCode, b->LangCode);
 }
 
 class AppleSpellChecker :
-	public GSpellCheck
+	public LSpellCheck
 {
-	GViewI *Wnd;
-	GString Dictionary;
-	GString CurLang;
-	GString::Array Dictionaries;
+	LViewI *Wnd;
+	LString Dictionary;
+	LString CurLang;
+	LString::Array Dictionaries;
 
-	GString ConvertLanguageCodeFromMac(NSString* lang_code)
+	LString ConvertLanguageCodeFromMac(NSString* lang_code)
 	{
 		// TODO(pwicks):figure out what to do about Multilingual
 		// Guards for strange cases.
 		// if ([lang_code isEqualToString:@"en"]) return NewStr("en-US");
 		// if ([lang_code isEqualToString:@"pt"]) return NewStr("pt-PT");
 		
-		GString s;
+		LString s;
 		if ([lang_code length] > kShortLanguageCodeSize && [lang_code characterAtIndex:kShortLanguageCodeSize] == '_')
 		{
 			NSString *tmp = [NSString stringWithFormat:@"%@-%@",
@@ -159,7 +159,7 @@ class AppleSpellChecker :
 		for (NSString *lang_code in availableLanguages)
 		#endif
 		{
-			GString lang = ConvertLanguageCodeFromMac(lang_code);
+			LString lang = ConvertLanguageCodeFromMac(lang_code);
 			/*if (lang)
 				d.Add(lang.Release());*/
 		}
@@ -168,7 +168,7 @@ class AppleSpellChecker :
 	}
 
 public:
-	AppleSpellChecker() : GSpellCheck("AppleSpellChecker")
+	AppleSpellChecker() : LSpellCheck("AppleSpellChecker")
 	{
 		InitializeCocoa();
 	}
@@ -180,7 +180,7 @@ public:
 			case M_ENUMERATE_LANGUAGES:
 			{
 				int ResponseHnd = (int)Msg->A();
-				GAutoPtr< GArray<LanguageId> > Langs(new GArray<LanguageId>);
+				LAutoPtr< LArray<LanguageId> > Langs(new LArray<LanguageId>);
 				
 				NSArray *availableLanguages = [[NSSpellChecker sharedSpellChecker] availableLanguages];
 				NSEnumerator *e = [availableLanguages objectEnumerator];
@@ -189,17 +189,17 @@ public:
 				LHashTbl<StrKey<char,false>,bool> Map;
 				while (lang_code = [e nextObject])
 				{
-					GString &lang = Dictionaries.New();
+					LString &lang = Dictionaries.New();
 					lang = ConvertLanguageCodeFromMac(lang_code);
 					if (lang)
 					{
 						ssize_t p = lang.Find("-");
-						GString l = p > 0 ? lang(0, p) : lang;
+						LString l = p > 0 ? lang(0, p) : lang;
 						Map.Add(l, true);
 					}
 				}
 				
-				GAutoPtr< GArray<LanguageId> > a(new GArray<LanguageId>);
+				LAutoPtr< LArray<LanguageId> > a(new LArray<LanguageId>);
 				if (!a)
 					break;
 				
@@ -219,15 +219,15 @@ public:
 			case M_ENUMERATE_DICTIONARIES:
 			{
 				int ResponseHnd = (int)Msg->A();
-				GAutoPtr<GString> Lang((GString*)Msg->B());
+				LAutoPtr<LString> Lang((LString*)Msg->B());
 				if (!Lang)
 					break;
 
-				GAutoPtr< GArray<DictionaryId> > Out(new GArray<DictionaryId>);
+				LAutoPtr< LArray<DictionaryId> > Out(new LArray<DictionaryId>);
 				for (unsigned i=0; i<Dictionaries.Length(); i++)
 				{
-					GString Dict = Dictionaries[i];
-					GString::Array a = Dict.Split("-", 1);
+					LString Dict = Dictionaries[i];
+					LString::Array a = Dict.Split("-", 1);
 					if (a.Length() >= 1 && a[0].Equals(*Lang))
 					{
 						DictionaryId &id = Out->New();
@@ -243,7 +243,7 @@ public:
 			case M_SET_DICTIONARY:
 			{
 				int ResponseHnd = (int)Msg->A();
-				GAutoPtr<DictionaryId> Dict((DictionaryId*)Msg->B());
+				LAutoPtr<DictionaryId> Dict((DictionaryId*)Msg->B());
 				bool Success = false;
 				if (Dict)
 				{
@@ -258,7 +258,7 @@ public:
 			case M_CHECK_TEXT:
 			{
 				int ResponseHnd = (int)Msg->A();
-				GAutoPtr<CheckText> Ct((CheckText*)Msg->B());
+				LAutoPtr<CheckText> Ct((CheckText*)Msg->B());
 				if (!Ct)
 				{
 					LgiTrace("%s:%i - No text specified.\n", _FL);
@@ -274,7 +274,7 @@ public:
 						e++;
 					if (e == s)
 						break;
-					GString Word(s, e - s);
+					LString Word(s, e - s);
 					
 					NSString *In = [NSString stringWithUTF8String:Word.Get()];
 					NSRange spell_range = [[NSSpellChecker sharedSpellChecker]
@@ -487,8 +487,8 @@ public:
 	}*/
 };
 
-GAutoPtr<GSpellCheck> CreateAppleSpellCheck()
+LAutoPtr<LSpellCheck> CreateAppleSpellCheck()
 {
-	GAutoPtr<GSpellCheck> a(new AppleSpellChecker());
+	LAutoPtr<LSpellCheck> a(new AppleSpellChecker());
 	return a;
 }
