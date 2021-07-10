@@ -1969,7 +1969,7 @@ GMessage::Result LTree::OnEvent(GMessage *Msg)
 		}
 	}
 
-	return LLayout::OnEvent(Msg);
+	return LItemContainer::OnEvent(Msg);
 }
 
 LTreeItem *LTree::Insert(LTreeItem *Obj, ssize_t Pos)

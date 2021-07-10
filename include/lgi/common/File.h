@@ -732,7 +732,7 @@ LgiFunc bool LBrowseToFile(const char *Filename);
 /// Returns the physical device a file resides on
 LgiExtern LString LGetPhysicalDevice(const char *Path);
 
-[[deprecated]] LgiFunc void WriteStr(LFile &f, const char *s);
-[[deprecated]] LgiFunc char *ReadStr(LFile &f DeclDebugArgs);
-[[deprecated]] LgiFunc ssize_t SizeofStr(const char *s);
+LgiFunc [[deprecated]] void WriteStr(LFile &f, const char *s);
+LgiFunc [[deprecated]] char *ReadStr(LFile &f DeclDebugArgs);
+LgiFunc [[deprecated]] ssize_t SizeofStr(const char *s);
 

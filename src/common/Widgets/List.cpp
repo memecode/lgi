@@ -751,7 +751,7 @@ GMessage::Result LList::OnEvent(GMessage *Msg)
 		#endif
 	}
 
-	return LLayout::OnEvent(Msg);
+	return LItemContainer::OnEvent(Msg);
 }
 
 int LList::OnNotify(LViewI *Ctrl, int Flags)
