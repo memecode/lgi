@@ -10,7 +10,7 @@
 #include "lgi/common/RadioGroup.h"
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/CssTools.h"
-#include "lgi/common/StringLayout.h"
+#include "lgi/common/TableLayout.h"
 
 #if defined WINNATIVE
 	#define BTN_TEXT_OFFSET_Y	-1
@@ -412,7 +412,7 @@ class GelSkin : public LSkinEngine
 		return Mem;
 	}
 
-	void DrawText(LSkinState *State, int x, int y, LRect &rcFill, bool Enabled, LView *Ctrl, LCssTools &Tools)
+	void DrawText(LSkinState *State, int x, int y, LRect &rcFill, bool Enabled, LView *Ctrl, LCssTools &Tools, bool Debug = false)
 	{
 		LCss::ColorDef CssFore, CssBack;
 		LColour Fore = Tools.GetFore(), Back = Tools.GetBack(), Light, Low;
@@ -440,17 +440,15 @@ class GelSkin : public LSkinEngine
 				c.Offset(x + (t->Fx >> LDisplayString::FShift), y + t->y);
 				Rgn.Subtract(&c);
 				
+				if (i)
+					Bounds.Union(&c);
+				else
+					Bounds = c;
+
 				LFont *f = t->GetFont();
 				if (Enabled)
 				{
 					f->Colour(Fore, Back);
-					if (Ctrl->Focus())
-					{
-						if (i)
-							Bounds.Union(&c);
-						else
-							Bounds = c;
-					}
 					f->Transparent(!Back.IsValid());
 					t->Draw(pDC, c.x1, c.y1, &c);
 				}
@@ -466,9 +464,9 @@ class GelSkin : public LSkinEngine
 				}
 			}
 
-			if (Ctrl->Focus() && Enabled)
+			if ((Ctrl->Focus() && Enabled) || Debug)
 			{
-				pDC->Colour(LColour(L_MIDGREY));
+				pDC->Colour(Debug ? LColour::Blue : LColour(L_MIDGREY));
 				pDC->Box(&Bounds);
 			}
 		}
@@ -834,6 +832,8 @@ public:
 		}
 	}
 
+	#define DEBUG_CHECKBOX 0
+
 	void OnPaint_LCheckBox(LCheckBox *Ctrl, LSkinState *State)
 	{
 		int Flags = (Ctrl->Value()   ? Btn_Value   : 0) |
@@ -851,50 +851,49 @@ public:
 		if (!Mem)
 			Mem = DrawCtrl(Ctrl, &State->Rect, Flags, false);
 
+		LRect TxtBounds = State->TextBounds();
+
 		// Output to screen
+		auto pDC = State->pScreen;
 		if (Mem)
 		{
-			// Draw icon
-			// int FontY = Ctrl->GetFont()->GetHeight();
-
 			LRect &Box = State->Rect;
-			State->pScreen->Blt(Box.x1, Box.y1, Mem);
+			pDC->Blt(Box.x1, Box.y1, Mem);
 
 			LRect Box1(Box.x1, 0, Box.x2, Box.y1 - 1);
 			LRect Box2(Box.x1, Box.y2 + 1, Box.x2, Ctrl->Y()-1);
-			if (Back.IsValid())
-			{
-				State->pScreen->Colour(Back);
+			pDC->Colour(Back.IsValid() ? Back : LColour(L_MED));
+			if (Box.y1 > 0)
+				pDC->Rectangle(&Box1);
+			if (Box.y2 < Ctrl->Y() - 1)
+				pDC->Rectangle(&Box2);
+			#if DEBUG_CHECKBOX
+				pDC->Colour(LColour::Red);
 				if (Box.y1 > 0)
-					State->pScreen->Rectangle(&Box1);
+					pDC->Box(&Box1);
+				pDC->Colour(LColour::Green);
 				if (Box.y2 < Ctrl->Y() - 1)
-					State->pScreen->Rectangle(&Box2);
-			}
-			else
-			{
-				State->pScreen->Colour(LColour(L_MED));
-				if (Box.y1 > 0)
-					State->pScreen->Rectangle(&Box1);
-				if (Box.y2 < Ctrl->Y() - 1)
-					State->pScreen->Rectangle(&Box2);
-			}	
+					pDC->Box(&Box2);
+			#endif
 
 			// Draw text
 			LRect t(Mem->X(), 0, Ctrl->X()-1, Ctrl->Y()-1);
 			if (t.Valid())
 			{
 				DrawText(State,
-						Mem->X() + 4, 0,
+						Mem->X() + LTableLayout::CellSpacing,
+						t.Y() > TxtBounds.Y() ? (t.Y()-TxtBounds.Y())>>1 : 0,
 						t,
 						(Flags & Btn_Enabled) != 0,
 						Ctrl,
-						Tools);
+						Tools,
+						DEBUG_CHECKBOX);
 			}
 		}
 		else
 		{
-			State->pScreen->Colour(Rgb24(255, 0, 255), 24);
-			State->pScreen->Rectangle();
+			pDC->Colour(LColour(255, 0, 255));
+			pDC->Rectangle();
 		}
 
 		DeleteObj(Temp);

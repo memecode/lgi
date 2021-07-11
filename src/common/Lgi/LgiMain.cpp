@@ -281,9 +281,6 @@ int main(int Args, char **Arg)
 		
 	#endif
 	
-	for (int i=0;i<Args;i++)
-		printf("[%i]='%s'\n", i, Arg[i]);
-	
 	if (_BuildCheck())
 	{
 		Status = LgiMain(AppArgs);

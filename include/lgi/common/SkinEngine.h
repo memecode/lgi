@@ -12,6 +12,7 @@
 #include "lgi/common/ProgressView.h"
 #include "lgi/common/Tree.h"
 #include "lgi/common/Combo.h"
+#include "lgi/common/StringLayout.h"
 
 // Feature support flags
 #define GSKIN_COLOUR		0x00000001
@@ -98,6 +99,25 @@ public:
 		}
 		
 		return NULL;
+	}
+
+	LRect TextBounds()
+	{
+		auto Txt = AllText();
+		LRect TxtBounds;
+		for (size_t i=0; i<Txt->Length(); i++)
+		{
+			auto t = dynamic_cast<LLayoutString*>((*Txt)[i]);
+			if (t)
+			{
+				LRect r(0, 0, t->X()-1, t->Y()-1);
+				r.Offset(t->Fx >> LDisplayString::FShift, t->y);
+				if (i) TxtBounds.Union(&r);
+				else TxtBounds = r;
+			}
+			else LgiAssert(!"Wrong obj.");
+		}
+		return TxtBounds;
 	}
 };
 
