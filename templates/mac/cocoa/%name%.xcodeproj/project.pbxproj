@@ -11,7 +11,7 @@
 		343FB8AB238662C500797ABC /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8AA238662C500797ABC /* LgiMain.cpp */; };
 		343FB8C62386638C00797ABC /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 343FB8A92386627A00797ABC /* LgiCocoa.framework */; };
 		343FB8C82386639C00797ABC /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 343FB8A92386627A00797ABC /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		343FB8DC2386642A00797ABC /* GOptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8DB2386642A00797ABC /* GOptionsFile.cpp */; };
+		343FB8DC2386642A00797ABC /* OptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8DB2386642A00797ABC /* OptionsFile.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,7 +51,7 @@
 		343FB89C2386621600797ABC /* %name%.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = %name%.entitlements; sourceTree = "<group>"; };
 		343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = %lgi.folder%/src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
 		343FB8AA238662C500797ABC /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = %lgi.folder%/src/common/Lgi/LgiMain.cpp; sourceTree = "<group>"; };
-		343FB8DB2386642A00797ABC /* GOptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GOptionsFile.cpp; path = %lgi.folder%/src/common/Lgi/GOptionsFile.cpp; sourceTree = "<group>"; };
+		343FB8DB2386642A00797ABC /* OptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsFile.cpp; path = %lgi.folder%/src/common/Lgi/OptionsFile.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,7 +98,7 @@
 		343FB8A32386626700797ABC /* Lgi */ = {
 			isa = PBXGroup;
 			children = (
-				343FB8DB2386642A00797ABC /* GOptionsFile.cpp */,
+				343FB8DB2386642A00797ABC /* OptionsFile.cpp */,
 				343FB8AA238662C500797ABC /* LgiMain.cpp */,
 				343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */,
 			);
@@ -213,7 +213,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				343FB8DC2386642A00797ABC /* GOptionsFile.cpp in Sources */,
+				343FB8DC2386642A00797ABC /* OptionsFile.cpp in Sources */,
 				343FB8AB238662C500797ABC /* LgiMain.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -347,8 +347,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				HEADER_SEARCH_PATHS = (
-					%lgi.folder%/include/common,
-					%lgi.folder%/include/mac/cocoa,
+					%lgi.folder%/include,
+					%lgi.folder%/include/lgi/mac/cocoa,
 					../Code,
 					../Resources,
 				);
@@ -374,8 +374,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				HEADER_SEARCH_PATHS = (
-					%lgi.folder%/include/common,
-					%lgi.folder%/include/mac/cocoa,
+					%lgi.folder%/include,
+					%lgi.folder%/include/lgi/mac/cocoa,
 					../Code,
 					../Resources,
 				);

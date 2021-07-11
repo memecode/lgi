@@ -67,7 +67,13 @@ LString GetPython3()
 	for (auto i: Path)
 	{
 		LFile::Path p(i);
-		p += "python" LGI_EXECUTABLE_EXT;
+		p +=
+			#ifdef MAC
+			"python3"
+			#else
+			"python"
+			#endif
+			LGI_EXECUTABLE_EXT;
 		if (p.Exists())
 		{
 			printf("Got python '%s'\n", p.GetFull().Get());

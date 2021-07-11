@@ -674,26 +674,24 @@ void LScrollBar::Limits(int64 &Low, int64 &High)
 
 bool LScrollBar::SetRange(const LRange &r)
 {
-	SetLimits(r.Start, r.End());
-	return true;
-}
-
-void LScrollBar::SetLimits(int64 Low, int64 High)
-{
-	if (d->Min != Low ||
-		d->Max != High)
+	if (d->Min != r.Start ||
+		d->Max != r.End() - 1)
 	{
-		d->Min = Low;
-		d->Max = High;
+		d->Min = r.Start;
+		d->Max = r.End() - 1;
 		d->Page = MIN(d->Page, d->GetRange());
 
 		d->CalcRegions();
 
 		Invalidate();
 		OnConfigure();
-		
-		// printf("LScrollBar::SetLimits " LPrintfInt64 ", " LPrintfInt64 "\n", d->Min, d->Max);
 	}
+	return true;
+}
+
+void LScrollBar::SetLimits(int64 Low, int64 High)
+{
+	SetRange(LRange(Low, High-Low+1));
 }
 
 int64 LScrollBar::Page()

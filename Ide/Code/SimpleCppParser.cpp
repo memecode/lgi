@@ -77,8 +77,6 @@ bool IsFuncNameChar(char c)
 			IsDigit(c);
 }
 
-#define IsWhiteSpace(c) (strchr(" \r\t\n", c) != NULL)
-
 bool ParseFunction(LRange &Return, LRange &Name, LRange &Args, const char *Defn)
 {
 	if (!Defn)

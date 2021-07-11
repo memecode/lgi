@@ -341,7 +341,7 @@ void LCheckBox::OnPaint(LSurface *pDC)
 	if (LApp::SkinEngine &&
 		TestFlag(LApp::SkinEngine->GetFeatures(), GSKIN_CHECKBOX))
 	{
-		auto Fnt = GetFont();
+		// auto Fnt = GetFont();
 		int Px = BoxSize();
 
 		LSkinState State;

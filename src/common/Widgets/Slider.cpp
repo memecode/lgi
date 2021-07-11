@@ -107,7 +107,7 @@ void LSlider::OnPaint(LSurface *pDC)
 	
 	if (Min < Max)
 	{
-		int x = Val * r.X() / (Max-Min);
+		int x = (int) (Val * r.X() / (Max - Min));
 		Thumb.ZOff(5, 9);
 		Thumb.Offset(r.x1 + x - 3, y - 5);
 		LRect b = Thumb;
@@ -134,7 +134,7 @@ void LSlider::OnMouseMove(LMouse &m)
 		if (Rx > 0 && Max >= Min)
 		{
 			int x = m.x - Tx;
-			int v = x * (Max-Min) / Rx;
+			auto v = x * (Max - Min) / Rx;
 			Value(v);
 		}
 	}

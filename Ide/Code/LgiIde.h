@@ -232,6 +232,8 @@ public:
 		FindTab,
 		FtpTab,
 		DebugTab,
+		
+		ChannelMax,
 	};
 
 	enum DebugTabs

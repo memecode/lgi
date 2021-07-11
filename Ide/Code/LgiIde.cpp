@@ -545,8 +545,8 @@ public:
 	LTabPage *Find;
 	LTabPage *Ftp;
 	LList *FtpLog;
-	GTextLog *Txt[3];
-	LArray<char> Buf[3];
+	GTextLog *Txt[AppWnd::Channels::ChannelMax];
+	LArray<char> Buf[AppWnd::Channels::ChannelMax];
 	LFont Small;
 	LFont Fixed;
 
@@ -967,7 +967,7 @@ public:
 					w.Reset(Utf8ToWide(Utf, (ssize_t)Size));
 				}
 				
-				auto OldText = Txt[Channel]->NameW();
+				// auto OldText = Txt[Channel]->NameW();
 				ssize_t OldLen = Txt[Channel]->Length();
 
 				auto Cur = Txt[Channel]->GetCaret();
