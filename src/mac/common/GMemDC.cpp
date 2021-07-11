@@ -19,6 +19,7 @@
 #define AlphaType		kCGImageAlphaPremultipliedLast
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
+static int CGImgCount = 0;
 class CGImgPriv
 {
 public:
@@ -60,10 +61,13 @@ public:
 
 void ReleaseCGImg(void *info, const void *data, size_t size)
 {
+	CGImg *img = (CGImg*)info;
+	delete img;
 }
 
 CGImg::CGImg(LSurface *pDC)
 {
+	CGImgCount++;
 	d = new CGImgPriv;
 	if (pDC)
 	{
@@ -76,6 +80,7 @@ CGImg::CGImg(LSurface *pDC)
 
 CGImg::CGImg(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, LRect *r, int Debug)
 {
+	CGImgCount++;
 	d = new CGImgPriv;
 	d->Debug = Debug;
 	Create(x, y, Bits, Line, data, palette, r);
@@ -134,9 +139,9 @@ void CGImg::Create(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *pal
 	if (d->Cs)
 	{
 		#if COPY_MODE
-		d->Prov = CGDataProviderCreateWithData(d, d->Data.Get(), RowSize * B.Y(), ReleaseCGImg);
+		d->Prov = CGDataProviderCreateWithData(this, d->Data.Get(), RowSize * B.Y(), ReleaseCGImg);
 		#else
-		d->Prov = CGDataProviderCreateWithData(d, Base, Line * B.Y(), ReleaseCGImg);
+		d->Prov = CGDataProviderCreateWithData(this, Base, Line * B.Y(), ReleaseCGImg);
 		#endif
 		if (d->Prov)
 		{
@@ -184,6 +189,7 @@ void CGImg::Create(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *pal
 CGImg::~CGImg()
 {
 	DeleteObj(d);
+	CGImgCount--;
 }
 
 CGImg::operator CGImageRef()

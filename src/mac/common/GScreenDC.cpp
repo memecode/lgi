@@ -668,7 +668,7 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 								CGContextSetAlpha(d->Ctx, 1.0);
 						#endif
 						
-						DeleteObj(i);
+						// CGImg manages it's own deletion via callback.
 					}
 					
 					#if !LGI_COCOA
@@ -696,7 +696,7 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 							if (HasConstAlpha)
 								CGContextSetAlpha(d->Ctx, 1.0);
 							
-							DeleteObj(i);
+							// CGImg manages it's own deletion via callback.
 						}
 					}
 					#endif
