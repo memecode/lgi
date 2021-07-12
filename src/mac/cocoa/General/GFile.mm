@@ -988,13 +988,17 @@ bool LFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, boo
 		#if LGI_COCOA
 		
 		NSMutableArray *urls = [[NSMutableArray alloc] initWithCapacity:Files.Length()];
-		for (auto f : Files)
+		if (urls)
 		{
-			id u = (NSURL *)CFURLCreateFromFileSystemRepresentation(NULL, (UInt8 *)f, strlen(f), 0);
-			[urls addObject:u];
-			CFRelease(u);
+			for (auto f : Files)
+			{
+				id u = (NSURL *)CFURLCreateFromFileSystemRepresentation(NULL, (UInt8 *)f, strlen(f), 0);
+				[urls addObject:u];
+				CFRelease(u);
+			}
+			[[NSWorkspace sharedWorkspace] recycleURLs:urls completionHandler:NULL];
+			[urls release];
 		}
-		[[NSWorkspace sharedWorkspace] recycleURLs:urls completionHandler:NULL];
 		
 		#else
 		

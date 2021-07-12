@@ -19,42 +19,39 @@
 #define AlphaType		kCGImageAlphaPremultipliedLast
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-static int CGImgCount = 0;
+static int CGImgCount = 0, CGImgDeletes = 0;
 class CGImgPriv
 {
 public:
-	LAutoPtr<uint8> Data;
-	CGImageRef Img;
-	CGColorSpaceRef Cs;
-	CGDataProviderRef Prov;
-	int Debug;
-	
-	CGImgPriv()
-	{
-		Img = 0;
-		Cs = 0;
-		Prov = 0;
-		Debug = -1;
-	}
+	LAutoPtr<uint8,true> Data;
+	CGImageRef Img = NULL;
+	CGColorSpaceRef Cs = NULL;
+	CGDataProviderRef Prov = NULL;
+	int Debug = -1;
 	
 	~CGImgPriv()
+	{
+		Release();
+	}
+
+	void Release()
 	{
 		if (Img)
 		{
 			CGImageRelease(Img);
-			Img = 0;
+			Img = NULL;
 		}
 		
 		if (Cs)
 		{
 			CGColorSpaceRelease(Cs);
-			Cs = 0;	
+			Cs = NULL;
 		}
 		
 		if (Prov)
 		{
 			CGDataProviderRelease(Prov);
-			Prov = 0;
+			Prov = NULL;
 		}
 	}
 };
@@ -78,12 +75,39 @@ CGImg::CGImg(LSurface *pDC)
 	}
 }
 
+uint64 Ts = 0;
+
 CGImg::CGImg(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, LRect *r, int Debug)
 {
 	CGImgCount++;
 	d = new CGImgPriv;
 	d->Debug = Debug;
 	Create(x, y, Bits, Line, data, palette, r);
+	
+	
+	auto now = LgiCurrentTime();
+	if (now - Ts >= 1000)
+	{
+		Ts = now;
+		printf("CGImg=%i %i\n", CGImgCount, CGImgDeletes);
+	}
+}
+
+CGImg::~CGImg()
+{
+	DeleteObj(d);
+	CGImgCount--;
+	CGImgDeletes++;
+}
+
+CGImg::operator CGImageRef()
+{
+	return d->Img;
+}
+
+void CGImg::Release()
+{
+	d->Release();
 }
 
 #define COPY_MODE		1
@@ -184,17 +208,6 @@ void CGImg::Create(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *pal
 	{
 		printf("%s:%i - ColourSpace creation failed.\n", _FL);
 	}
-}
-
-CGImg::~CGImg()
-{
-	DeleteObj(d);
-	CGImgCount--;
-}
-
-CGImg::operator CGImageRef()
-{
-	return d->Img;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////

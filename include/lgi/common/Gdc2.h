@@ -908,6 +908,7 @@ public:
 	~CGImg();
 	
 	operator CGImageRef();
+	void Release();
 };
 #endif
 

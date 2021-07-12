@@ -1440,12 +1440,15 @@ bool LView::DropTarget(bool t)
 				if (h)
 				{
 					NSMutableArray<NSString*> *a = [[NSMutableArray<NSString*> alloc] init];
-					
-					[a addObject:(NSString*)kUTTypeItem];
-					for (id item in NSFilePromiseReceiver.readableDraggedTypes)
-						[a addObject:item];
-					
-					[h.p.contentView registerForDraggedTypes:a];
+					if (a)
+					{
+						[a addObject:(NSString*)kUTTypeItem];
+						for (id item in NSFilePromiseReceiver.readableDraggedTypes)
+							[a addObject:item];
+						
+						[h.p.contentView registerForDraggedTypes:a];
+						[a release];
+					}
 				}
 			}
 

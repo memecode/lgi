@@ -948,22 +948,24 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 			auto Sz = Size();
 			LString sFamily(Face());
 			LString sBold("Bold");
-			int keys = 1;
-			CFStringRef key[5]  = {	kCTFontFamilyNameAttribute };
-			CFTypeRef values[5] = {	sFamily.CreateStringRef() };
+			LArray<CFStringRef> key;
+			LArray<CFTypeRef> values;
+			key.Add(kCTFontFamilyNameAttribute);
+			values.Add(sFamily.CreateStringRef());
+
 			if (!values[0])
 				return false;
 
 			if (Bold())
 			{
-				key[keys] = kCTFontStyleNameAttribute;
-				values[keys++] = sBold.CreateStringRef();
+				key.Add(kCTFontStyleNameAttribute);
+				values.Add(sBold.CreateStringRef());
 			}
 
 			CFDictionaryRef FontAttrD = CFDictionaryCreate(	kCFAllocatorDefault,
-															(const void**)&key,
-															(const void**)&values,
-															keys,
+															(const void**)key.AddressOf(),
+															(const void**)values.AddressOf(),
+															key.Length(),
 															&kCFTypeDictionaryKeyCallBacks,
 															&kCFTypeDictionaryValueCallBacks);
 			if (FontAttrD)
@@ -994,6 +996,11 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 				return false;
 			}
 			
+			for (size_t i=0; i<values.Length(); i++)
+				CFRelease(values[i]);
+			key.Length(0);
+			values.Length(0);
+			
 			if (d->hFont)
 			{
 				LTypeFace::d->_Ascent = CTFontGetAscent(d->hFont);
@@ -1018,33 +1025,30 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 				}
 				#endif
 				
-				int keys = 2;
-				CFStringRef key[5] = {	kCTFontAttributeName,
-										kCTForegroundColorFromContextAttributeName };
-				CFTypeRef values[5] = {	d->hFont,
-										kCFBooleanTrue };
+				key.Add(kCTFontAttributeName);
+				values.Add(d->hFont);
+				key.Add(kCTForegroundColorFromContextAttributeName);
+				values.Add(kCFBooleanTrue);
 
 				if (Underline())
 				{
-					key[keys] = kCTUnderlineStyleAttributeName;
+					key.Add(kCTUnderlineStyleAttributeName);
 					CTUnderlineStyle u = kCTUnderlineStyleSingle;
-					values[keys++] = CFNumberCreate(NULL, kCFNumberSInt32Type, &u);
+					values.Add(CFNumberCreate(NULL, kCFNumberSInt32Type, &u));
 				}
 				
 				d->Attributes = CFDictionaryCreate(	kCFAllocatorDefault,
-													(const void**)&key,
-													(const void**)&values,
-													keys,
+													(const void**)key.AddressOf(),
+													(const void**)values.AddressOf(),
+													key.Length(),
 													&kCFTypeDictionaryKeyCallBacks,
 													&kCFTypeDictionaryValueCallBacks);
 				
 				return true;
 			}
 			
-			for (int i=0; i<CountOf(values); i++)
-			{
+			for (int i=2; i<values.Length(); i++)
 				CFRelease(values[i]);
-			}
 		}
 
 	#endif
