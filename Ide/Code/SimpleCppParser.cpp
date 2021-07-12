@@ -34,6 +34,7 @@ Known bugs:
 
 */
 #include "lgi/common/Lgi.h"
+#include "lgi/common/DocView.h"
 #include "ParserCommon.h"
 
 #if 0
