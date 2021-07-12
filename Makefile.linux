@@ -388,7 +388,7 @@ Gel.o : ./src/common/Skins/Gel/Gel.cpp ./include/lgi/common/Lgi.h \
 	./include/lgi/common/RadioGroup.h \
 	./include/lgi/common/DisplayString.h \
 	./include/lgi/common/CssTools.h \
-	./include/lgi/common/StringLayout.h
+	./include/lgi/common/TableLayout.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -1186,7 +1186,8 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/Bitmap.h \
 	./include/lgi/common/ProgressView.h \
 	./include/lgi/common/Tree.h \
-	./include/lgi/common/Combo.h
+	./include/lgi/common/Combo.h \
+	./include/lgi/common/StringLayout.h
 
 ./include/lgi/linux/SymLookup.h : ./include/lgi/common/SubProcess.h
 
@@ -1725,6 +1726,10 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/Edit.h
 
 ./include/lgi/common/OAuth2.h : ./include/lgi/common/Net.h
+
+./include/lgi/common/StringLayout.h : ./include/lgi/common/DisplayString.h \
+	./include/lgi/common/Css.h \
+	./include/lgi/common/FontCache.h
 
 VPATH=%.cpp \
 	./src/common/Hash/sha1 \

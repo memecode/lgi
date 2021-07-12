@@ -290,8 +290,7 @@ static int LDateCmp(LDateTime *a, LDateTime *b)
 
 #elif defined POSIX
 
-/*
-static bool ParseValue(char *s, GAutoString &var, GAutoString &val)
+static bool ParseValue(char *s, LAutoString &var, LAutoString &val)
 {
 	if (!s)
 		return false;
@@ -305,7 +304,6 @@ static bool ParseValue(char *s, GAutoString &var, GAutoString &val)
 	*e = '=';
 	return var != 0 && val != 0;
 }
-*/
 
 #endif
 
