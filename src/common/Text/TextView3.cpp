@@ -4298,7 +4298,7 @@ bool LTextView3::OnKey(LKey &k)
 				{
 					#ifdef MAC
 					if (k.Ctrl())
-						goto GTextView3_PageUp;
+						goto LTextView3_PageUp;
 					#endif
 					
 					auto It = GetTextLineIt(Cursor);
@@ -4331,7 +4331,7 @@ bool LTextView3::OnKey(LKey &k)
 				{
 					#ifdef MAC
 					if (k.Ctrl())
-						goto GTextView3_PageDown;
+						goto LTextView3_PageDown;
 					#endif
 
 					auto It = GetTextLineIt(Cursor);
@@ -4417,7 +4417,7 @@ bool LTextView3::OnKey(LKey &k)
 			case LK_PAGEUP:
 			{
 				#ifdef MAC
-				GTextView3_PageUp:
+				LTextView3_PageUp:
 				#endif
 				if (k.Down())
 				{
@@ -4440,7 +4440,7 @@ bool LTextView3::OnKey(LKey &k)
 			case LK_PAGEDOWN:
 			{
 				#ifdef MAC
-				GTextView3_PageDown:
+				LTextView3_PageDown:
 				#endif
 				if (k.Down())
 				{
@@ -5399,7 +5399,7 @@ bool LTextView3::OnLayout(LViewLayoutInfo &Inf)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-class GTextView3_Factory : public LViewFactory
+class LTextView3_Factory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
