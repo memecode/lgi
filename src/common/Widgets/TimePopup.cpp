@@ -349,7 +349,7 @@ void LTimePopup::SetTime(LDateTime *t)
 	}
 }
 
-class GTimePopupFactory : public LViewFactory
+class LTimePopupFactory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
@@ -361,5 +361,4 @@ class GTimePopupFactory : public LViewFactory
 
 		return 0;
 	}
-}
-	TimePopupFactory;
+}	TimePopupFactory;

@@ -8937,11 +8937,11 @@ void GHtml::SetEmoji(bool i)
 }
 
 ////////////////////////////////////////////////////////////////////////
-class GHtml_Factory : public LViewFactory
+class LHtml_Factory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
-		if (_stricmp(Class, "GHtml") == 0)
+		if (_stricmp(Class, "LHtml") == 0)
 		{
 			return new GHtml(-1, 0, 0, 100, 100, new GDefaultDocumentEnv);
 		}
