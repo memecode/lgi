@@ -1340,7 +1340,7 @@ struct LScriptVmDebuggerPriv
 	LTabView *Tabs;
 	GDebugView *Text;
 	LList *Locals, *Globals, *Registers, *Stack;
-	GTextLog *Log;
+	LTextLog *Log;
 	LToolBar *Tools;
 	LTableLayout *VarsTbl;
 
@@ -1639,7 +1639,7 @@ LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmDebuggerCallback *Callback, LVi
 		d->Stack->AddColumn("Function", 300);
 		
 		p = d->Tabs->Append("Log");
-		p->Append(d->Log = new GTextLog(IDC_LOG));
+		p->Append(d->Log = new LTextLog(IDC_LOG));
 		
 		AttachChildren();
 		Visible(true);

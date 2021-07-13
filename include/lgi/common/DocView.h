@@ -23,18 +23,18 @@ enum LDocWrapType
 // Util macros
 
 /// Returns true if 'c' is whitespace
-#define IsWhiteSpace(c)				((c) < 126 && strchr(GDocView::WhiteSpace, c) != 0)
+#define IsWhiteSpace(c)				((c) < 126 && strchr(LDocView::WhiteSpace, c) != 0)
 /// Returns true if 'c' is a delimiter
-#define IsDelimiter(c)				((c) < 126 && strchr(GDocView::Delimiters, c) != 0)
+#define IsDelimiter(c)				((c) < 126 && strchr(LDocView::Delimiters, c) != 0)
 /// Returns true if 'c' is a letter or number
 #define IsText(c)					(IsDigit(c) || IsAlpha(c) || (c) == '_')
 /// Returns true if 'c' is word boundry
-#define IsWordBoundry(c)			(strchr(GDocView::WhiteSpace, c) || strchr(GDocView::Delimiters, c))
+#define IsWordBoundry(c)			(strchr(LDocView::WhiteSpace, c) || strchr(LDocView::Delimiters, c))
 /// Returns true if 'c' is alphanumeric or a digit
 #define AlphaOrDigit(c)				(IsDigit(c) || IsAlpha(c))
 /// Returns true if 'c' is a valid URL character
 #define UrlChar(c)					( \
-										strchr(GDocView::UrlDelim, (c)) || \
+										strchr(LDocView::UrlDelim, (c)) || \
 										AlphaOrDigit((c)) || \
 										((c) >= 256) \
 									)
@@ -60,16 +60,16 @@ struct GLinkInfo
 };
 
 // Call back class to handle viewer events
-class GDocView;
+class LDocView;
 
 /// An environment class to handle requests from the text view to the outside world.
 class LgiClass
 GDocumentEnv : public LThreadOwner
 {
-	LArray<GDocView*> Viewers;
+	LArray<LDocView*> Viewers;
 
 public:
-	GDocumentEnv(GDocView *v = 0);
+	GDocumentEnv(LDocView *v = 0);
 	virtual ~GDocumentEnv();
 
 	enum LoadType
@@ -154,7 +154,7 @@ public:
 		return new LoadJob(this);
 	}
 
-	bool AttachView(GDocView *v)
+	bool AttachView(LDocView *v)
 	{
 		if (!v)
 			return false;
@@ -166,7 +166,7 @@ public:
 		return true;
 	}
 
-	bool DetachView(GDocView *v)
+	bool DetachView(LDocView *v)
 	{
 		if (!v)
 			return false;
@@ -186,7 +186,7 @@ public:
 	
 	/// Do something when the menu items created by GDocumentEnv::AppendItems 
 	/// are clicked.
-	virtual bool OnMenu(GDocView *View, int Id, void *Context) { return false; }
+	virtual bool OnMenu(LDocView *View, int Id, void *Context) { return false; }
 	
 	/// Asks the env to get some data linked from the document, e.g. a css file or an iframe source etc.
 	/// If the GetContent implementation takes ownership of the job pointer then it should set 'j' to NULL.
@@ -195,20 +195,20 @@ public:
 	void OnDone(LAutoPtr<LThreadJob> j);
 	
 	/// Handle a click on URI
-	virtual bool OnNavigate(GDocView *Parent, const char *Uri) { return false; }
+	virtual bool OnNavigate(LDocView *Parent, const char *Uri) { return false; }
 	/// Handle a form post
-	virtual bool OnPostForm(GDocView *Parent, const char *Uri, const char *Data) { return false; }
+	virtual bool OnPostForm(LDocView *Parent, const char *Uri, const char *Data) { return false; }
 
 	/// Process dynamic content, returning a dynamically allocated string
 	/// for the result of the executed script. Dynamic content is enclosed
 	/// between &lt;? and ?&gt;.
-	virtual char *OnDynamicContent(GDocView *Parent, const char *Code) { return 0; }
+	virtual char *OnDynamicContent(LDocView *Parent, const char *Code) { return 0; }
 
 	/// Some script was received, the owner should compile it
-	virtual bool OnCompileScript(GDocView *Parent, char *Script, const char *Language, const char *MimeType) { return false; }
+	virtual bool OnCompileScript(LDocView *Parent, char *Script, const char *Language, const char *MimeType) { return false; }
 
 	/// Some script needs to be executed, the owner should compile it
-	virtual bool OnExecuteScript(GDocView *Parent, char *Script) { return false; }
+	virtual bool OnExecuteScript(LDocView *Parent, char *Script) { return false; }
 };
 
 /// Default text view environment
@@ -221,7 +221,7 @@ class LgiClass GDefaultDocumentEnv :
 {
 public:
 	LoadType GetContent(LoadJob *&j);
-	bool OnNavigate(GDocView *Parent, const char *Uri);
+	bool OnNavigate(LDocView *Parent, const char *Uri);
 };
 
 /// Find params
@@ -232,7 +232,7 @@ public:
 };
 
 /// TextView class is a base for all text controls
-class LgiClass GDocView :
+class LgiClass LDocView :
 	public LLayout,
 	virtual public GDom
 {
@@ -293,7 +293,7 @@ public:
 
 	///////////////////////////////////////////////////////////////////////
 	// Object
-	GDocView(GDocumentEnv *e = 0)
+	LDocView(GDocumentEnv *e = 0)
 	{
 		WrapAtCol = 0;
 		UrlDetect = true;
@@ -315,12 +315,12 @@ public:
 		SetEnv(e);
 	}
 
-	virtual ~GDocView()
+	virtual ~LDocView()
 	{
 		SetEnv(0);
 	}
 
-	const char *GetClass() { return "GDocView"; }
+	const char *GetClass() { return "LDocView"; }
 
 	/// Open a file handler
 	virtual bool Open(const char *Name, const char *Cs = 0) { return false; }

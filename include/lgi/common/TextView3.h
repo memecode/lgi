@@ -44,7 +44,7 @@ enum LTextViewStyleOwners
 /// Unicode text editor control.
 class LgiClass
 	LTextView3 :
-	public GDocView,
+	public LDocView,
 	public ResObject,
 	public LDragDropTarget
 {

@@ -5,11 +5,11 @@
 
 #define SubtractPtr(a, b)		((a)-(b))
 
-const char *GDocView::WhiteSpace		= " \t\r\n";
-const char *GDocView::Delimiters		= "!@#$%^&*()'\":;,.<>/?[]{}-=+\\|`~";
-const char *GDocView::UrlDelim			= "!~/:%+-?@&$#._=,;*()|";
+const char *LDocView::WhiteSpace		= " \t\r\n";
+const char *LDocView::Delimiters		= "!@#$%^&*()'\":;,.<>/?[]{}-=+\\|`~";
+const char *LDocView::UrlDelim			= "!~/:%+-?@&$#._=,;*()|";
 
-GDocumentEnv::GDocumentEnv(GDocView *v)
+GDocumentEnv::GDocumentEnv(LDocView *v)
 {
 	if (v)
 	{
@@ -43,7 +43,7 @@ void GDocumentEnv::OnDone(LAutoPtr<LThreadJob> j)
 	{
 		if (Lock(_FL))
 		{
-			GDocView *View = NULL;
+			LDocView *View = NULL;
 			for (unsigned i=0; i<Viewers.Length(); i++)
 			{
 				auto Uid = Viewers[i]->GetDocumentUid();
@@ -159,7 +159,7 @@ GDocumentEnv::LoadType GDefaultDocumentEnv::GetContent(LoadJob *&j)
 	return LoadError;
 }
 
-bool GDefaultDocumentEnv::OnNavigate(GDocView *Parent, const char *Uri)
+bool GDefaultDocumentEnv::OnNavigate(LDocView *Parent, const char *Uri)
 {
 	if (Uri)
 	{

@@ -56,7 +56,7 @@ enum GNotifyType
 										//		Most others -> take focus
 										// etc
 
-	// GDocView
+	// LDocView
 	GNotifyDocChanged,
 	GNotifyDocLoaded,
 	GNotifyCursorChanged,

@@ -588,13 +588,13 @@ public:
 		return 0;
 	}
 
-	bool OnCompileScript(GDocView *Parent, char *Script, const char *Language, const char *MimeType)
+	bool OnCompileScript(LDocView *Parent, char *Script, const char *Language, const char *MimeType)
 	{
 		// return Script->Compile(Code, true);
 		return false;
 	}
 
-	bool OnExecuteScript(GDocView *Parent, char *Script)
+	bool OnExecuteScript(LDocView *Parent, char *Script)
 	{
 		return false; // Script->RunTemporary(Code);
 	}

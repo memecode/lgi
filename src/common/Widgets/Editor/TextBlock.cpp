@@ -343,7 +343,7 @@ HtmlTag IsDefaultStyle(HtmlTag Id, LCss *Css)
 	return CONTENT;
 }
 
-bool LRichTextPriv::TextBlock::ToHtml(LStream &s, LArray<GDocView::ContentMedia> *Media, LRange *Rng)
+bool LRichTextPriv::TextBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng)
 {
 	s.Print("<p>");
 
@@ -373,7 +373,7 @@ bool LRichTextPriv::TextBlock::ToHtml(LStream &s, LArray<GDocView::ContentMedia>
 			const char *ElemName = NULL;
 			if (t->Element != CONTENT)
 			{
-				GHtmlElemInfo *e = d->Inst.Static->GetTagInfo(t->Element);
+				LHtmlElemInfo *e = d->Inst.Static->GetTagInfo(t->Element);
 				if (!e)
 					return false;
 				ElemName = e->Tag;
@@ -389,7 +389,7 @@ bool LRichTextPriv::TextBlock::ToHtml(LStream &s, LArray<GDocView::ContentMedia>
 				HtmlTag tag = IsDefaultStyle(t->Element, style);
 				if (tag != CONTENT)
 				{
-					GHtmlElemInfo *e = d->Inst.Static->GetTagInfo(tag);
+					LHtmlElemInfo *e = d->Inst.Static->GetTagInfo(tag);
 					if (e)
 					{
 						ElemName = e->Tag;

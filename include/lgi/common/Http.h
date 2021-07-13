@@ -6,7 +6,7 @@
 #define GET_TYPE_NORMAL				0x1 // Use basic URI, else file + host format
 #define GET_NO_CACHE				0x2
 
-class IHttp
+class LHttp
 {
 	char *Proxy;
 	int ProxyPort;
@@ -32,8 +32,8 @@ public:
 
 	Progress *Meter;
 
-	IHttp();
-	virtual ~IHttp();
+	LHttp();
+	virtual ~LHttp();
 
 	void SetResume(size_t i) { ResumeFrom = i; }
 	void SetProxy(char *p, int Port);

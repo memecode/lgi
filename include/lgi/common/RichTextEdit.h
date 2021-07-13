@@ -39,7 +39,7 @@ class
 	LgiClass
 #endif
 	LRichTextEdit :
-	public GDocView,
+	public LDocView,
 	public ResObject,
 	public LDragDropTarget,
 	public LCapabilityClient

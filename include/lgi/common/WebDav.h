@@ -29,14 +29,14 @@ protected:
 	{
 		bool Status;
 		int ProtocolStatus;
-		IHttp::ContentEncoding Encoding;
+		LHttp::ContentEncoding Encoding;
 		LString InHdrs, InBody;
 		LString OutHdrs, OutBody;
 
 		Req()
 		{
 			Status = false;
-			Encoding = IHttp::EncodeNone;
+			Encoding = LHttp::EncodeNone;
 			ProtocolStatus = 0;
 		}
 	};

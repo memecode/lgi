@@ -129,8 +129,8 @@ struct AppPriv
 	LList *Files;
 	LOptionsFile Opts;
 	LEdit *Msg;
-	GTextLog *Diff;
-	GTextLog *Log;
+	LTextLog *Diff;
+	LTextLog *Log;
 	LTabView *Tabs;
 	VersionCtrl PrevType;
 	int Resort;
@@ -191,7 +191,7 @@ public:
 	LHashTbl<StrKey<char,false>,VersionCtrl> Types;
 	LArray<VcFolder*> TypeNotify;
 	
-	SshConnection(GTextLog *log, const char *uri, const char *prompt);
+	SshConnection(LTextLog *log, const char *uri, const char *prompt);
 	bool DetectVcs(VcFolder *Fld);
 	bool Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Parser, ParseParams *Params);
 	

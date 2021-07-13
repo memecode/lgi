@@ -51,7 +51,7 @@ int VerToYear(double v)
 
 class App : public LWindow
 {
-	GTextLog *Log;
+	LTextLog *Log;
 
 public:
     App()
@@ -64,7 +64,7 @@ public:
 
         if (Attach(0))
         {
-			AddView(Log = new GTextLog(100));
+			AddView(Log = new LTextLog(100));
 			AttachChildren();
 			SetPulse(500);
         }

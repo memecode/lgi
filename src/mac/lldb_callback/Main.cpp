@@ -1,5 +1,5 @@
 #include "Lgi.h"
-#include "GTextLog.h"
+#include "LTextLog.h"
 #include "INet.h"
 #include "lldb_callback.h"
 #include "LWebSocket.h"
@@ -17,7 +17,7 @@ enum LLDBState
 
 class App : public LWindow, public LThread
 {
-	GTextLog *Log;
+	LTextLog *Log;
 	bool Loop;
 	LSubProcess LLDB;
 	LLDBState State;
@@ -36,7 +36,7 @@ public:
 
         if (Attach(0))
         {
-			AddView(Log = new GTextLog(100));
+			AddView(Log = new LTextLog(100));
 			AttachChildren();
             Visible(true);
         }

@@ -8,7 +8,7 @@
 #define FEATURE_REATTACH_ELEMENTS		1
 #define IsBlock(d)						((d) == LCss::DispBlock)
 
-char *GHtmlParser::NextTag(char *s)
+char *LHtmlParser::NextTag(char *s)
 {
 	while (s && *s)
 	{
@@ -31,7 +31,7 @@ char *GHtmlParser::NextTag(char *s)
 	return 0;
 }
 
-LHtmlElement *GHtmlParser::GetOpenTag(const char *Tag)
+LHtmlElement *LHtmlParser::GetOpenTag(const char *Tag)
 {
 	if (Tag)
 	{
@@ -58,7 +58,7 @@ LHtmlElement *GHtmlParser::GetOpenTag(const char *Tag)
 	return 0;
 }
 
-void GHtmlParser::SkipNonDisplay(char *&s)
+void LHtmlParser::SkipNonDisplay(char *&s)
 {
 	while (*s)
 	{
@@ -83,7 +83,7 @@ void GHtmlParser::SkipNonDisplay(char *&s)
 	}
 }
 
-char16 *GHtmlParser::DecodeEntities(const char *s, ssize_t len)
+char16 *LHtmlParser::DecodeEntities(const char *s, ssize_t len)
 {
 	char16 buf[256];
 	char16 *o = buf;
@@ -159,7 +159,7 @@ char16 *GHtmlParser::DecodeEntities(const char *s, ssize_t len)
 					}
 					
 					LAutoWString Var(Utf8ToWide(i, e-i));
-					uint32_t Char = GHtmlStatic::Inst->VarMap.Find(Var);
+					uint32_t Char = LHtmlStatic::Inst->VarMap.Find(Var);
 					if (Char)
 					{
 						*o++ = Char;
@@ -207,7 +207,7 @@ char16 *GHtmlParser::DecodeEntities(const char *s, ssize_t len)
 	return NewStrW(buf, o - buf);
 }
 
-char *GHtmlParser::ParsePropValue(char *s, char16 *&Value)
+char *LHtmlParser::ParsePropValue(char *s, char16 *&Value)
 {
 	Value = 0;
 	if (s)
@@ -234,7 +234,7 @@ char *GHtmlParser::ParsePropValue(char *s, char16 *&Value)
 	return s;
 }
 
-char *GHtmlParser::ParseName(char *s, char **Name)
+char *LHtmlParser::ParseName(char *s, char **Name)
 {
 	LAutoString a;
 	s = ParseName(s, a);
@@ -243,7 +243,7 @@ char *GHtmlParser::ParseName(char *s, char **Name)
 	return s;
 }
 
-char *GHtmlParser::ParseName(char *s, LAutoString &Name)
+char *LHtmlParser::ParseName(char *s, LAutoString &Name)
 {
 	SkipWhiteSpace(s);
 	char *Start = s;
@@ -261,7 +261,7 @@ char *GHtmlParser::ParseName(char *s, LAutoString &Name)
 	return s;
 }
 
-char *GHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
+char *LHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 {
 	while (s && *s)
 	{
@@ -333,10 +333,10 @@ char *GHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 	return s;
 }
 
-GHtmlElemInfo *GHtmlParser::GetTagInfo(const char *Tag)
+LHtmlElemInfo *LHtmlParser::GetTagInfo(const char *Tag)
 {
-	LgiAssert(GHtmlStatic::Inst != NULL);
-	return GHtmlStatic::Inst->GetTagInfo(Tag);
+	LgiAssert(LHtmlStatic::Inst != NULL);
+	return LHtmlStatic::Inst->GetTagInfo(Tag);
 }
 
 void DumpDomTree(LHtmlElement *e, int Depth = 0)
@@ -352,7 +352,7 @@ void DumpDomTree(LHtmlElement *e, int Depth = 0)
 	}
 }
 
-bool GHtmlParser::Parse(LHtmlElement *Root, const char *Doc)
+bool LHtmlParser::Parse(LHtmlElement *Root, const char *Doc)
 {
 	SourceData.Empty();
 	CurrentSrc = Doc;
@@ -367,7 +367,7 @@ bool GHtmlParser::Parse(LHtmlElement *Root, const char *Doc)
 	return true;
 }
 
-char *GHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPreTag, bool *BackOut)
+char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPreTag, bool *BackOut)
 {
 	#if CRASH_TRACE
 	LgiTrace("::ParseHtml Doc='%.10s'\n", Doc);
@@ -602,7 +602,7 @@ char *GHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 					Elem->Info = GetTagInfo(Elem->Tag);
 					if (Elem->Info)
 					{
-						if (Elem->Info->Flags & GHtmlElemInfo::TI_SINGLETON)
+						if (Elem->Info->Flags & LHtmlElemInfo::TI_SINGLETON)
 						{
 							// Do singleton check... we don't want nested BODY or HEAD tags...
 							for (int i = (int)OpenTags.Length() - 1; i >= 0; i--)
@@ -639,7 +639,7 @@ char *GHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 						auto Dsp = TestFlag
 							(
 								Elem->Info->Flags,
-								GHtmlElemInfo::TI_BLOCK
+								LHtmlElemInfo::TI_BLOCK
 							)
 							||
 							(
@@ -1243,7 +1243,7 @@ char *GHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 	return 0;
 }
 
-char16 *GHtmlParser::CleanText(const char *s, ssize_t Len, bool ConversionAllowed, bool KeepWhiteSpace)
+char16 *LHtmlParser::CleanText(const char *s, ssize_t Len, bool ConversionAllowed, bool KeepWhiteSpace)
 {
 	static const char *DefaultCs = "iso-8859-1";
 	char16 *t = 0;
@@ -1382,7 +1382,7 @@ char16 *GHtmlParser::CleanText(const char *s, ssize_t Len, bool ConversionAllowe
 							}
 							
 							LAutoWString Var(NewStrW(i, e-i));							
-							char16 Char = GHtmlStatic::Inst->VarMap.Find(Var);
+							char16 Char = LHtmlStatic::Inst->VarMap.Find(Var);
 							if (Char)
 							{
 								*o++ = Char;
@@ -1443,7 +1443,7 @@ char16 *GHtmlParser::CleanText(const char *s, ssize_t Len, bool ConversionAllowe
 	return t;
 }
 
-void GHtmlParser::_TraceOpenTags()
+void LHtmlParser::_TraceOpenTags()
 {
 	LStringPipe p;
 	for (unsigned i = 0; i < OpenTags.Length(); i++)
@@ -1465,7 +1465,7 @@ void GHtmlParser::_TraceOpenTags()
 	}
 }
 
-bool GHtmlParser::ParseColour(const char *s, LCss::ColorDef &c)
+bool LHtmlParser::ParseColour(const char *s, LCss::ColorDef &c)
 {
 	if (s)
 	{
@@ -1516,7 +1516,7 @@ bool GHtmlParser::ParseColour(const char *s, LCss::ColorDef &c)
 			
 			return true;
 		}
-		else if ((m = GHtmlStatic::Inst->ColourMap.Find(s)) >= 0)
+		else if ((m = LHtmlStatic::Inst->ColourMap.Find(s)) >= 0)
 		{
 			c.Type = LCss::ColorRgb;
 			c.Rgb32 = Rgb24To32(m);
@@ -1561,7 +1561,7 @@ bool GHtmlParser::ParseColour(const char *s, LCss::ColorDef &c)
 	return false;
 }
 
-bool GHtmlParser::Is8Bit(char *s)
+bool LHtmlParser::Is8Bit(char *s)
 {
 	while (*s)
 	{

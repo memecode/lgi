@@ -351,7 +351,7 @@ GMessage::Result DocEdit::OnEvent(GMessage *m)
 	}
 	return LTextView3::OnEvent(m);
 }
-bool DocEdit::OnMenu(GDocView *View, int Id, void *Context)
+bool DocEdit::OnMenu(LDocView *View, int Id, void *Context)
 {
 	if (View)
 	{

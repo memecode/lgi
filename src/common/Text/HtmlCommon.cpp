@@ -2,55 +2,55 @@
 #include "lgi/common/HtmlCommon.h"
 #include "lgi/common/DocView.h"
 
-static GHtmlElemInfo TagInfo[] =
+static LHtmlElemInfo TagInfo[] =
 {
-	{TAG_B,				"b",			0,			GHtmlElemInfo::TI_NONE},
-	{TAG_I,				"i",			0,			GHtmlElemInfo::TI_NONE},
-	{TAG_U,				"u",			0,			GHtmlElemInfo::TI_NONE},
-	{TAG_P,				"p",			0,			GHtmlElemInfo::TI_BLOCK},
-	{TAG_BR,			"br",			0,			GHtmlElemInfo::TI_NEVER_CLOSES},
-	{TAG_HR,			"hr",			0,			GHtmlElemInfo::TI_BLOCK | GHtmlElemInfo::TI_NEVER_CLOSES},
-	{TAG_OL,			"ol",			0,			GHtmlElemInfo::TI_BLOCK},
-	{TAG_UL,			"ul",			0,			GHtmlElemInfo::TI_BLOCK},
-	{TAG_LI,			"li",			1,			GHtmlElemInfo::TI_BLOCK},
-	{TAG_FONT,			"font",			0,			GHtmlElemInfo::TI_NONE},
-	{TAG_A,				"a",			0,			GHtmlElemInfo::TI_NONE},
-	{TAG_TABLE,			"table",		0,			GHtmlElemInfo::TI_BLOCK | GHtmlElemInfo::TI_NO_TEXT | GHtmlElemInfo::TI_TABLE},
-	{TAG_TR,			"tr",			1,			GHtmlElemInfo::TI_BLOCK | GHtmlElemInfo::TI_NO_TEXT | GHtmlElemInfo::TI_TABLE},
-	{TAG_TD,			"td",			1,			GHtmlElemInfo::TI_BLOCK | GHtmlElemInfo::TI_TABLE},
-	{TAG_TH,			"th",			1,			GHtmlElemInfo::TI_BLOCK | GHtmlElemInfo::TI_TABLE},
-	{TAG_HEAD,			"head",			1,			GHtmlElemInfo::TI_NONE | GHtmlElemInfo::TI_SINGLETON},
-	{TAG_BODY,			"body",			1,			GHtmlElemInfo::TI_BLOCK | GHtmlElemInfo::TI_NO_TEXT | GHtmlElemInfo::TI_SINGLETON},
-	{TAG_IMG,			"img",			0,			GHtmlElemInfo::TI_NEVER_CLOSES},
-	{TAG_HTML,			"html",			0,			GHtmlElemInfo::TI_BLOCK | GHtmlElemInfo::TI_NO_TEXT},
-	{TAG_DIV,			"div",			0,			GHtmlElemInfo::TI_BLOCK},
-	{TAG_SPAN,			"span",			0,			GHtmlElemInfo::TI_NONE},
-	{TAG_CENTER,		"center",		0,			GHtmlElemInfo::TI_NONE},
-	{TAG_META,			"meta",			0,			GHtmlElemInfo::TI_NEVER_CLOSES},
-	{TAG_TBODY,			"tbody",		1,			GHtmlElemInfo::TI_NONE},
-	{TAG_STYLE,			"style",		0,			GHtmlElemInfo::TI_NONE},
-	{TAG_SCRIPT,		"script",		0,			GHtmlElemInfo::TI_NONE},
-	{TAG_STRONG,		"strong",		0,			GHtmlElemInfo::TI_NONE},
-	{TAG_BLOCKQUOTE,	"blockquote",	0,			GHtmlElemInfo::TI_BLOCK},
-	{TAG_PRE,			"pre",			0,			GHtmlElemInfo::TI_BLOCK},
-	{TAG_H1,			"h1",			0,			GHtmlElemInfo::TI_BLOCK},
-	{TAG_H2,			"h2",			0,			GHtmlElemInfo::TI_BLOCK},
-	{TAG_H3,			"h3",			0,			GHtmlElemInfo::TI_BLOCK},
-	{TAG_H4,			"h4",			0,			GHtmlElemInfo::TI_BLOCK},
-	{TAG_H5,			"h5",			0,			GHtmlElemInfo::TI_BLOCK},
-	{TAG_H6,			"h6",			0,			GHtmlElemInfo::TI_BLOCK},
-	{TAG_IFRAME,		"iframe",		0,			GHtmlElemInfo::TI_BLOCK},
-	{TAG_LINK,			"link",			0,			GHtmlElemInfo::TI_NONE},
-	{TAG_BIG,			"big",			0,			GHtmlElemInfo::TI_NONE},
-	{TAG_SELECT,		"select",		0,			GHtmlElemInfo::TI_NONE},
-	{TAG_INPUT,			"input",		0,			GHtmlElemInfo::TI_NEVER_CLOSES},
-	{TAG_LABEL,			"label",		0,			GHtmlElemInfo::TI_NONE},
-	{TAG_FORM,			"form",			0,			GHtmlElemInfo::TI_NONE},
-	{TAG_SUP,			"sup",			0,			GHtmlElemInfo::TI_NONE},
-	{TAG_SUB,			"sub",			0,			GHtmlElemInfo::TI_NONE},
-	{TAG_EM,			"em",			0,			GHtmlElemInfo::TI_NONE},
-	{TAG_TITLE,			"title",		0,			GHtmlElemInfo::TI_NONE},
-	{TAG_LAST,			NULL,			0,			GHtmlElemInfo::TI_BLOCK}
+	{TAG_B,				"b",			0,			LHtmlElemInfo::TI_NONE},
+	{TAG_I,				"i",			0,			LHtmlElemInfo::TI_NONE},
+	{TAG_U,				"u",			0,			LHtmlElemInfo::TI_NONE},
+	{TAG_P,				"p",			0,			LHtmlElemInfo::TI_BLOCK},
+	{TAG_BR,			"br",			0,			LHtmlElemInfo::TI_NEVER_CLOSES},
+	{TAG_HR,			"hr",			0,			LHtmlElemInfo::TI_BLOCK | LHtmlElemInfo::TI_NEVER_CLOSES},
+	{TAG_OL,			"ol",			0,			LHtmlElemInfo::TI_BLOCK},
+	{TAG_UL,			"ul",			0,			LHtmlElemInfo::TI_BLOCK},
+	{TAG_LI,			"li",			1,			LHtmlElemInfo::TI_BLOCK},
+	{TAG_FONT,			"font",			0,			LHtmlElemInfo::TI_NONE},
+	{TAG_A,				"a",			0,			LHtmlElemInfo::TI_NONE},
+	{TAG_TABLE,			"table",		0,			LHtmlElemInfo::TI_BLOCK | LHtmlElemInfo::TI_NO_TEXT | LHtmlElemInfo::TI_TABLE},
+	{TAG_TR,			"tr",			1,			LHtmlElemInfo::TI_BLOCK | LHtmlElemInfo::TI_NO_TEXT | LHtmlElemInfo::TI_TABLE},
+	{TAG_TD,			"td",			1,			LHtmlElemInfo::TI_BLOCK | LHtmlElemInfo::TI_TABLE},
+	{TAG_TH,			"th",			1,			LHtmlElemInfo::TI_BLOCK | LHtmlElemInfo::TI_TABLE},
+	{TAG_HEAD,			"head",			1,			LHtmlElemInfo::TI_NONE | LHtmlElemInfo::TI_SINGLETON},
+	{TAG_BODY,			"body",			1,			LHtmlElemInfo::TI_BLOCK | LHtmlElemInfo::TI_NO_TEXT | LHtmlElemInfo::TI_SINGLETON},
+	{TAG_IMG,			"img",			0,			LHtmlElemInfo::TI_NEVER_CLOSES},
+	{TAG_HTML,			"html",			0,			LHtmlElemInfo::TI_BLOCK | LHtmlElemInfo::TI_NO_TEXT},
+	{TAG_DIV,			"div",			0,			LHtmlElemInfo::TI_BLOCK},
+	{TAG_SPAN,			"span",			0,			LHtmlElemInfo::TI_NONE},
+	{TAG_CENTER,		"center",		0,			LHtmlElemInfo::TI_NONE},
+	{TAG_META,			"meta",			0,			LHtmlElemInfo::TI_NEVER_CLOSES},
+	{TAG_TBODY,			"tbody",		1,			LHtmlElemInfo::TI_NONE},
+	{TAG_STYLE,			"style",		0,			LHtmlElemInfo::TI_NONE},
+	{TAG_SCRIPT,		"script",		0,			LHtmlElemInfo::TI_NONE},
+	{TAG_STRONG,		"strong",		0,			LHtmlElemInfo::TI_NONE},
+	{TAG_BLOCKQUOTE,	"blockquote",	0,			LHtmlElemInfo::TI_BLOCK},
+	{TAG_PRE,			"pre",			0,			LHtmlElemInfo::TI_BLOCK},
+	{TAG_H1,			"h1",			0,			LHtmlElemInfo::TI_BLOCK},
+	{TAG_H2,			"h2",			0,			LHtmlElemInfo::TI_BLOCK},
+	{TAG_H3,			"h3",			0,			LHtmlElemInfo::TI_BLOCK},
+	{TAG_H4,			"h4",			0,			LHtmlElemInfo::TI_BLOCK},
+	{TAG_H5,			"h5",			0,			LHtmlElemInfo::TI_BLOCK},
+	{TAG_H6,			"h6",			0,			LHtmlElemInfo::TI_BLOCK},
+	{TAG_IFRAME,		"iframe",		0,			LHtmlElemInfo::TI_BLOCK},
+	{TAG_LINK,			"link",			0,			LHtmlElemInfo::TI_NONE},
+	{TAG_BIG,			"big",			0,			LHtmlElemInfo::TI_NONE},
+	{TAG_SELECT,		"select",		0,			LHtmlElemInfo::TI_NONE},
+	{TAG_INPUT,			"input",		0,			LHtmlElemInfo::TI_NEVER_CLOSES},
+	{TAG_LABEL,			"label",		0,			LHtmlElemInfo::TI_NONE},
+	{TAG_FORM,			"form",			0,			LHtmlElemInfo::TI_NONE},
+	{TAG_SUP,			"sup",			0,			LHtmlElemInfo::TI_NONE},
+	{TAG_SUB,			"sub",			0,			LHtmlElemInfo::TI_NONE},
+	{TAG_EM,			"em",			0,			LHtmlElemInfo::TI_NONE},
+	{TAG_TITLE,			"title",		0,			LHtmlElemInfo::TI_NONE},
+	{TAG_LAST,			NULL,			0,			LHtmlElemInfo::TI_BLOCK}
 };
 
 char16 GHtmlListItem[] = { 0x2022, ' ', 0 };
@@ -67,15 +67,18 @@ char16 *WcharToChar16(const wchar_t *i)
 	return Buf;
 }
 
-GHtmlStatic *GHtmlStatic::Inst = NULL;
+LHtmlStatic *LHtmlStatic::Inst = NULL;
 
-GHtmlStatic::GHtmlStatic() :
+LHtmlStatic::LHtmlStatic() :
 	TagMap(CountOf(TagInfo) * 3),
 	TagIdMap(CountOf(TagInfo) * 3),
 	VarMap(8),
 	StyleMap(8),
 	ColourMap(8, -1)
 {
+	if (!Inst)
+		Inst = this;
+
 	Refs = 0;
 	UnknownElement = NULL;
 
@@ -527,7 +530,7 @@ GHtmlStatic::GHtmlStatic() :
 	#undef DefColour
 
 	// Tag info hash
-	for (GHtmlElemInfo *t = TagInfo; t->Tag; t++)
+	for (LHtmlElemInfo *t = TagInfo; t->Tag; t++)
 	{
 		TagMap.Add(t->Tag, t);
 		TagIdMap.Add(t->Id, t);
@@ -535,22 +538,22 @@ GHtmlStatic::GHtmlStatic() :
 	UnknownElement = TagInfo + CountOf(TagInfo) - 1;
 }
 
-GHtmlStatic::~GHtmlStatic()
+LHtmlStatic::~LHtmlStatic()
 {
 }
 
-GHtmlElemInfo *GHtmlStatic::GetTagInfo(const char *Tag)
+LHtmlElemInfo *LHtmlStatic::GetTagInfo(const char *Tag)
 {
-	GHtmlElemInfo *i = TagMap.Find(Tag);
+	LHtmlElemInfo *i = TagMap.Find(Tag);
 	return i ? i : UnknownElement;
 }
 
-GHtmlElemInfo *GHtmlStatic::GetTagInfo(HtmlTag TagId)
+LHtmlElemInfo *LHtmlStatic::GetTagInfo(HtmlTag TagId)
 {
 	return TagIdMap.Find(TagId);
 }
 
-void GHtmlStatic::OnSystemColourChange()
+void LHtmlStatic::OnSystemColourChange()
 {
 	#define SysColour(s) ColourMap.Add(#s, LColour(s).c24())
 	#define DefColour(s, v) ColourMap.Add(#s, LColour(v).c24())

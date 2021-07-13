@@ -94,7 +94,7 @@ class GHtmlPrivate2
 {
 public:
 	LHashTbl<ConstStrKey<char,false>, bool> Loading;
-	GHtmlStaticInst Inst;
+	LHtmlStaticInst Inst;
 	bool CursorVis;
 	LRect CursorPos;
 	bool WordSelectMode;
@@ -262,7 +262,7 @@ static bool ParseColour(const char *s, LCss::ColorDef &c)
 			
 			return true;
 		}
-		else if ((m = GHtmlStatic::Inst->ColourMap.Find(s)) >= 0)
+		else if ((m = LHtmlStatic::Inst->ColourMap.Find(s)) >= 0)
 		{
 			c.Type = LCss::ColorRgb;
 			c.Rgb32 = Rgb24To32(m);
@@ -1066,7 +1066,7 @@ void GLine::Set(char *s)
 		(
 			*c == '#'
 			||
-			GHtmlStatic::Inst->ColourMap.Find(c)
+			LHtmlStatic::Inst->ColourMap.Find(c)
 		)
 		{
 			ParseColour(c, Colour);
@@ -3413,7 +3413,7 @@ char16 *GTag::CleanText(const char *s, int Len, bool ConversionAllowed, bool Kee
 							}
 							
 							LAutoWString Var(NewStrW(i, e-i));							
-							char16 Char = GHtmlStatic::Inst->VarMap.Find(Var);
+							char16 Char = LHtmlStatic::Inst->VarMap.Find(Var);
 							if (Char)
 							{
 								*o++ = Char;
@@ -4261,7 +4261,7 @@ bool GTag::OnUnhandledColor(LCss::ColorDef *def, const char *&s)
 	int len = e - s;
 	memcpy(tmp, s, len);
 	tmp[len] = 0;
-	int m = GHtmlStatic::Inst->ColourMap.Find(tmp);
+	int m = LHtmlStatic::Inst->ColourMap.Find(tmp);
 	s = e;
 
 	if (m >= 0)
@@ -6501,7 +6501,7 @@ void GTag::OnPaint(LSurface *pDC)
 //////////////////////////////////////////////////////////////////////
 GHtml2::GHtml2(int id, int x, int y, int cx, int cy, GDocumentEnv *e)
 	:
-	GDocView(e),
+	LDocView(e),
 	ResObject(Res_Custom)
 {
 	d = new GHtmlPrivate2;
@@ -6808,7 +6808,7 @@ GMessage::Result GHtml2::OnEvent(GMessage *Msg)
 				for (int i=0; i<JobSem.Jobs.Length(); i++)
 				{
 					GDocumentEnv::LoadJob *j = JobSem.Jobs[i];
-					GDocView *Me = this;
+					LDocView *Me = this;
 					
 					if (j->View == Me &&
 						j->UserUid == d->DocumentUid &&
@@ -6856,7 +6856,7 @@ GMessage::Result GHtml2::OnEvent(GMessage *Msg)
 		}
 	}
 
-	return GDocView::OnEvent(Msg);
+	return LDocView::OnEvent(Msg);
 }
 
 int GHtml2::OnNotify(LViewI *c, int f)
@@ -7190,7 +7190,7 @@ void GHtml2::SetLoadImages(bool i)
 {
 	if (i ^ GetLoadImages())
 	{
-		GDocView::SetLoadImages(i);
+		LDocView::SetLoadImages(i);
 		SendNotify(GNotifyShowImagesChanged);
 
 		if (GetLoadImages() && Tag)
@@ -8072,7 +8072,7 @@ void GHtml2::SetLinkDoubleClick(bool b)
 	d->LinkDoubleClick = b;
 }
 
-bool GHtml2::GetFormattedContent(char *MimeType, LAutoString &Out, LArray<GDocView::ContentMedia> *Media)
+bool GHtml2::GetFormattedContent(char *MimeType, LAutoString &Out, LArray<LDocView::ContentMedia> *Media)
 {
 	if (!MimeType)
 	{
@@ -8111,7 +8111,7 @@ bool GHtml2::GetFormattedContent(char *MimeType, LAutoString &Out, LArray<GDocVi
 						if (f->Open(Src, O_READ))
 						{
 							// Add the exported image stream to the media array
-							GDocView::ContentMedia &m = Media->New();
+							LDocView::ContentMedia &m = Media->New();
 							m.Id.Reset(NewStr(Cid));
 							m.Stream.Reset(f);
 						}

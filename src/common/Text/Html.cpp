@@ -140,7 +140,7 @@ class GHtmlPrivate
 {
 public:
 	LHashTbl<ConstStrKey<char>, GTag*> Loading;
-	GHtmlStaticInst Inst;
+	LHtmlStaticInst Inst;
 	bool CursorVis;
 	LRect CursorPos;
 	LPoint Content;
@@ -1038,10 +1038,10 @@ void GLine::Set(char *s)
 		(
 			*c == '#'
 			||
-			GHtmlStatic::Inst->ColourMap.Find(c)
+			LHtmlStatic::Inst->ColourMap.Find(c)
 		)
 		{
-			GHtmlParser::ParseColour(c, Colour);
+			LHtmlParser::ParseColour(c, Colour);
 		}
 		else if (_strnicmp(c, "rgb(", 4) == 0)
 		{
@@ -1052,7 +1052,7 @@ void GLine::Set(char *s)
 			{
 				strcat(Buf, c);
 			}
-			GHtmlParser::ParseColour(Buf, Colour);
+			LHtmlParser::ParseColour(Buf, Colour);
 		}
 		else if (IsDigit(*c))
 		{
@@ -1546,7 +1546,7 @@ bool GTag::CreateSource(LStringPipe &p, int Depth, bool LastWasBlock)
 				Css->DeleteProp(p);
 			
 			// Clean out any default CSS properties where we can...
-			GHtmlElemInfo *i = GHtmlStatic::Inst->GetTagInfo(Tag);
+			LHtmlElemInfo *i = LHtmlStatic::Inst->GetTagInfo(Tag);
 			if (i)
 			{
 				if (Props.Find(PropDisplay)
@@ -1679,7 +1679,7 @@ void GTag::SetTag(const char *NewTag)
 		if (Info)
 		{
 			TagId = Info->Id;
-			Display(Info->Flags & GHtmlElemInfo::TI_BLOCK ? LCss::DispBlock : LCss::DispInline);
+			Display(Info->Flags & LHtmlElemInfo::TI_BLOCK ? LCss::DispBlock : LCss::DispInline);
 		}
 	}
 	else
@@ -2821,7 +2821,7 @@ void GTag::SetStyle()
 	if (Get("Color", s))
 	{
 		ColorDef Def;
-		if (GHtmlParser::ParseColour(s, Def))
+		if (LHtmlParser::ParseColour(s, Def))
 		{
 			Color(Def);
 		}
@@ -2831,7 +2831,7 @@ void GTag::SetStyle()
 		Get("bgcolor", s))
 	{
 		ColorDef Def;
-		if (GHtmlParser::ParseColour(s, Def))
+		if (LHtmlParser::ParseColour(s, Def))
 		{
 			BackgroundColor(Def);
 		}
@@ -3546,7 +3546,7 @@ char16 *GTag::CleanText(const char *s, ssize_t Len, const char *SourceCs,  bool 
 						}
 						
 						LAutoWString Var(NewStrW(i, e-i));							
-						char16 Char = GHtmlStatic::Inst->VarMap.Find(Var);
+						char16 Char = LHtmlStatic::Inst->VarMap.Find(Var);
 						if (Char)
 						{
 							*o++ = Char;
@@ -3843,7 +3843,7 @@ bool GTag::OnUnhandledColor(LCss::ColorDef *def, const char *&s)
 	ssize_t len = e - s;
 	memcpy(tmp, s, len);
 	tmp[len] = 0;
-	int m = GHtmlStatic::Inst->ColourMap.Find(tmp);
+	int m = LHtmlStatic::Inst->ColourMap.Find(tmp);
 	s = e;
 
 	if (m >= 0)
@@ -6909,9 +6909,9 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 
 //////////////////////////////////////////////////////////////////////
 GHtml::GHtml(int id, int x, int y, int cx, int cy, GDocumentEnv *e) :
-	GDocView(e),
+	LDocView(e),
 	ResObject(Res_Custom),
-	GHtmlParser(NULL)
+	LHtmlParser(NULL)
 {
 	View = this;
 	d = new GHtmlPrivate;
@@ -7363,7 +7363,7 @@ GMessage::Result GHtml::OnEvent(GMessage *Msg)
 		}
 	}
 
-	return GDocView::OnEvent(Msg);
+	return LDocView::OnEvent(Msg);
 }
 
 int GHtml::OnNotify(LViewI *c, int f)
@@ -7722,7 +7722,7 @@ void GHtml::SetLoadImages(bool i)
 {
 	if (i ^ GetLoadImages())
 	{
-		GDocView::SetLoadImages(i);
+		LDocView::SetLoadImages(i);
 		SendNotify(GNotifyShowImagesChanged);
 
 		if (GetLoadImages() && Tag)
@@ -8739,7 +8739,7 @@ void GHtml::SetLinkDoubleClick(bool b)
 	d->LinkDoubleClick = b;
 }
 
-bool GHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<GDocView::ContentMedia> *Media)
+bool GHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocView::ContentMedia> *Media)
 {
 	if (!MimeType)
 	{
@@ -8781,7 +8781,7 @@ bool GHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<GDocV
 						if (f->Open(Src, O_READ))
 						{
 							// Add the exported image stream to the media array
-							GDocView::ContentMedia &m = Media->New();
+							LDocView::ContentMedia &m = Media->New();
 							m.Id = Cid;
 							m.Stream.Reset(f);
 						}

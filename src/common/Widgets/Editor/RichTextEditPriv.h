@@ -297,8 +297,8 @@ public:
 
 class LRichTextPriv :
 	public LCss,
-	public GHtmlParser,
-	public GHtmlStaticInst,
+	public LHtmlParser,
+	public LHtmlStaticInst,
 	public GCssCache,
 	public GFontCache,
 	public GEmojiContext
@@ -348,7 +348,7 @@ public:
 	bool Dirty;
 	LPoint DocumentExtent; // Px
 	LString Charset;
-	GHtmlStaticInst Inst;
+	LHtmlStaticInst Inst;
 	int NextUid;
 	LStream *Log;
 	bool HtmlLinkAsCid;
@@ -720,7 +720,7 @@ public:
 			virtual bool GetPosFromIndex(BlockCursor *Cursor) = 0;
 			virtual bool OnLayout(Flow &f) = 0;
 			virtual void OnPaint(PaintContext &Ctx) = 0;
-			virtual bool ToHtml(LStream &s, LArray<GDocView::ContentMedia> *Media, LRange *Rgn) = 0;
+			virtual bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rgn) = 0;
 			virtual bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY) = 0;
 			virtual int LineToOffset(int Line) = 0;
 			virtual int GetLines() = 0;
@@ -1052,7 +1052,7 @@ public:
 		LNamedStyle *GetStyle(ssize_t At = -1);
 		void SetStyle(LNamedStyle *s);
 		ssize_t Length();
-		bool ToHtml(LStream &s, LArray<GDocView::ContentMedia> *Media, LRange *Rng);
+		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
 		bool HitTest(HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
@@ -1106,7 +1106,7 @@ public:
 		LNamedStyle *GetStyle(ssize_t At = -1);
 		void SetStyle(LNamedStyle *s);
 		ssize_t Length();
-		bool ToHtml(LStream &s, LArray<GDocView::ContentMedia> *Media, LRange *Rng);
+		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
 		bool HitTest(HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
@@ -1201,7 +1201,7 @@ public:
 		LNamedStyle *GetStyle(ssize_t At = -1);
 		void SetStyle(LNamedStyle *s);
 		ssize_t Length();
-		bool ToHtml(LStream &s, LArray<GDocView::ContentMedia> *Media, LRange *Rng);
+		bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng);
 		bool GetPosFromIndex(BlockCursor *Cursor);
 		bool HitTest(HitTestResult &htr);
 		void OnPaint(PaintContext &Ctx);
@@ -1338,7 +1338,7 @@ public:
 	
 	LAutoPtr<CreateContext> CreationCtx;
 
-	bool ToHtml(LArray<GDocView::ContentMedia> *Media = NULL, BlockCursor *From = NULL, BlockCursor *To = NULL);
+	bool ToHtml(LArray<LDocView::ContentMedia> *Media = NULL, BlockCursor *From = NULL, BlockCursor *To = NULL);
 	void DumpBlocks();
 	bool FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentStyle = NULL, int Depth = 0);
 

@@ -4,7 +4,7 @@
 #include "GHtml.h"
 #include "LTree.h"
 
-class GHtmlEdit : public GDocView
+class GHtmlEdit : public LDocView
 {
 	class GHtmlEditPriv *d;
 	friend class HtmlEdit;

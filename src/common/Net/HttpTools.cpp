@@ -700,7 +700,7 @@ char *HttpTools::Fetch(char *uri, LStream *Log, LViewI *Dump, CookieJar *Cookies
 
 	if (ValidStr(uri))
 	{
-		IHttp h;
+		LHttp h;
 
 		LProxyUri Proxy;
 		if (Proxy.sHost)
@@ -717,7 +717,7 @@ char *HttpTools::Fetch(char *uri, LStream *Log, LViewI *Dump, CookieJar *Cookies
 			LStringPipe p, hdr;
 
 			auto Enc = u.ToString();
-			IHttp::ContentEncoding type;
+			LHttp::ContentEncoding type;
 			if (h.Get(Enc, DefHeaders, &ProtocolStatus, &p, &type, &hdr))
 			{
 				if (Cookies)
@@ -795,7 +795,7 @@ char *HttpTools::Post(char *uri, char *headers, char *body, LStream *Log, LViewI
 {
 	if (uri && headers && body)
 	{
-		IHttp h;
+		LHttp h;
 
 		LUri u(uri);
 		LSocket s;
@@ -1094,7 +1094,7 @@ LSurface *GetHttpImage(char *Uri)
 
 	if (Uri)
 	{
-		IHttp Http;
+		LHttp Http;
 
 		LProxyUri p;
 		if (p.sHost)
@@ -1106,7 +1106,7 @@ LSurface *GetHttpImage(char *Uri)
 		{
 			LStringPipe Data;
 			int Code = 0;
-			IHttp::ContentEncoding enc;
+			LHttp::ContentEncoding enc;
 			if (Http.Get(Uri, 0, &Code, &Data, &enc))
 			{
 				if (Code == 200)

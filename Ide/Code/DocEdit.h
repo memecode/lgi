@@ -186,7 +186,7 @@ public:
 	void OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour) override;
 	void OnMouseClick(LMouse &m) override;
 	bool OnKey(LKey &k) override;	
-	bool OnMenu(GDocView *View, int Id, void *Context) override;
+	bool OnMenu(LDocView *View, int Id, void *Context) override;
 	GMessage::Result OnEvent(GMessage *m) override;
 	void SetCaret(size_t i, bool Select, bool ForceFullUpdate = false) override;
 	void PourStyle(size_t Start, ssize_t EditSize) override;

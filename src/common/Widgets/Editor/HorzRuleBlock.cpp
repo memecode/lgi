@@ -60,7 +60,7 @@ ssize_t LRichTextPriv::HorzRuleBlock::Length()
 	return IsDeleted ? 0 : 1;
 }
 
-bool LRichTextPriv::HorzRuleBlock::ToHtml(LStream &s, LArray<GDocView::ContentMedia> *Media, LRange *Rng)
+bool LRichTextPriv::HorzRuleBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng)
 {
 	s.Print("<hr>\n");
 	return true;

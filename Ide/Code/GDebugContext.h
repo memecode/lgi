@@ -10,10 +10,10 @@ public:
 	LList *Locals;
 	LList *CallStack;
 	LList *Threads;
-	class GTextLog *ObjectDump;
-	class GTextLog *MemoryDump;
-	class GTextLog *DebuggerLog;
-	class GTextLog *Registers;
+	class LTextLog *ObjectDump;
+	class LTextLog *MemoryDump;
+	class LTextLog *DebuggerLog;
+	class LTextLog *Registers;
 
 	// Object
 	GDebugContext(AppWnd *App, class IdeProject *Proj, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir);

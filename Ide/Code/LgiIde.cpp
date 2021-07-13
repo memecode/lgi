@@ -412,10 +412,10 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////
-class DebugTextLog : public GTextLog
+class DebugTextLog : public LTextLog
 {
 public:
-	DebugTextLog(int id) : GTextLog(id)
+	DebugTextLog(int id) : LTextLog(id)
 	{
 	}
 	
@@ -500,10 +500,10 @@ void WatchItem::OnExpand(bool b)
 	}
 }
 
-class BuildLog : public GTextLog
+class BuildLog : public LTextLog
 {
 public:
-	BuildLog(int id) : GTextLog(id)
+	BuildLog(int id) : LTextLog(id)
 	{
 	}
 
@@ -545,7 +545,7 @@ public:
 	LTabPage *Find;
 	LTabPage *Ftp;
 	LList *FtpLog;
-	GTextLog *Txt[AppWnd::Channels::ChannelMax];
+	LTextLog *Txt[AppWnd::Channels::ChannelMax];
 	LArray<char> Buf[AppWnd::Channels::ChannelMax];
 	LFont Small;
 	LFont Fixed;
@@ -555,10 +555,10 @@ public:
 	LBox *DebugLog;
 	LList *Locals, *CallStack, *Threads;
 	LTree *Watch;
-	GTextLog *ObjectDump, *MemoryDump, *Registers;
+	LTextLog *ObjectDump, *MemoryDump, *Registers;
 	LTableLayout *MemTable;
 	LEdit *DebugEdit;
-	GTextLog *DebuggerLog;
+	LTextLog *DebuggerLog;
 
 	IdeOutput(AppWnd *app)
 	{
@@ -615,9 +615,9 @@ public:
 		if (Build)
 			Build->Append(Txt[AppWnd::BuildTab] = new BuildLog(IDC_BUILD_LOG));
 		if (Output)
-			Output->Append(Txt[AppWnd::OutputTab] = new GTextLog(IDC_OUTPUT_LOG));
+			Output->Append(Txt[AppWnd::OutputTab] = new LTextLog(IDC_OUTPUT_LOG));
 		if (Find)
-			Find->Append(Txt[AppWnd::FindTab] = new GTextLog(IDC_FIND_LOG));
+			Find->Append(Txt[AppWnd::FindTab] = new LTextLog(IDC_FIND_LOG));
 		if (Ftp)
 			Ftp->Append(FtpLog = new LList(104, 0, 0, 100, 100));
 		if (Debug)
@@ -652,7 +652,7 @@ public:
 					if ((Page = DebugTab->Append("Object")))
 					{
 						Page->SetFont(&Small);
-						if ((ObjectDump = new GTextLog(IDC_OBJECT_DUMP)))
+						if ((ObjectDump = new LTextLog(IDC_OBJECT_DUMP)))
 						{
 							ObjectDump->SetFont(&Fixed);
 							ObjectDump->SetPourLargest(true);
@@ -757,7 +757,7 @@ public:
 							int cols = x;
 							x = 0;
 							c = MemTable->GetCell(x++, ++y, true, cols);
-							if ((MemoryDump = new GTextLog(IDC_MEMORY_DUMP)))
+							if ((MemoryDump = new LTextLog(IDC_MEMORY_DUMP)))
 							{
 								MemoryDump->SetFont(&Fixed);
 								MemoryDump->SetPourLargest(true);
@@ -799,7 +799,7 @@ public:
 					if ((Page = DebugTab->Append("Registers")))
 					{
 						Page->SetFont(&Small);
-						if ((Registers = new GTextLog(IDC_REGISTERS)))
+						if ((Registers = new LTextLog(IDC_REGISTERS)))
 						{
 							Registers->SetFont(&Small);
 							Registers->SetPourLargest(true);
@@ -3758,7 +3758,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		case IDM_FIND_REFERENCES:
 		{
 			LViewI *f = LgiApp->GetFocus();
-			GDocView *doc = dynamic_cast<GDocView*>(f);
+			LDocView *doc = dynamic_cast<LDocView*>(f);
 			if (!doc)
 				break;
 
@@ -4398,12 +4398,12 @@ bool AppWnd::GetSystemIncludePaths(::LArray<LString> &Paths)
 /*
 class SocketTest : public LWindow, public LThread
 {
-	GTextLog *Log;
+	LTextLog *Log;
 
 public:
 	SocketTest() : LThread("SocketTest")
 	{
-		Log = new GTextLog(100);
+		Log = new LTextLog(100);
 
 		SetPos(LRect(200, 200, 900, 800));
 		Attach(0);

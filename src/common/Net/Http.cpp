@@ -54,7 +54,7 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////
-IHttp::IHttp()
+LHttp::LHttp()
 {
 	Meter = 0;
 	ResumeFrom = 0;
@@ -66,7 +66,7 @@ IHttp::IHttp()
 	Buffer = new char[BufferLen];
 }
 
-IHttp::~IHttp()
+LHttp::~LHttp()
 {
 	Close();
 	DeleteArray(Proxy);
@@ -74,20 +74,20 @@ IHttp::~IHttp()
 	DeleteArray(Buffer);
 }
 
-void IHttp::SetProxy(char *p, int Port)
+void LHttp::SetProxy(char *p, int Port)
 {
 	DeleteArray(Proxy);
 	Proxy = NewStr(p);
 	ProxyPort = Port;
 }
 
-void IHttp::SetAuth(char *User, char *Pass)
+void LHttp::SetAuth(char *User, char *Pass)
 {
 	AuthUser = User;
 	AuthPassword = Pass;
 }
 
-bool IHttp::Open(LAutoPtr<LSocketI> S, const char *RemoteHost, int Port)
+bool LHttp::Open(LAutoPtr<LSocketI> S, const char *RemoteHost, int Port)
 {
 	Close();
 	Socket = S;
@@ -123,7 +123,7 @@ bool IHttp::Open(LAutoPtr<LSocketI> S, const char *RemoteHost, int Port)
 	return false;
 }
 
-bool IHttp::Close()
+bool LHttp::Close()
 {
 	if (Socket)
 	{
@@ -132,13 +132,13 @@ bool IHttp::Close()
 	return 0;
 }
 
-bool IHttp::IsOpen()
+bool LHttp::IsOpen()
 {
 	return Socket != 0;
 }
 
 #if 0
-bool IHttp::GetFile(char *File, LStream &Out, int Format, int *ProtocolStatus, int *DataLength)
+bool LHttp::GetFile(char *File, LStream &Out, int Format, int *ProtocolStatus, int *DataLength)
 {
 	bool Status = false;
 	LVariant v;
@@ -370,7 +370,7 @@ enum HttpRequestType
 	HttpOther,
 };
 
-bool IHttp::Request
+bool LHttp::Request
 (
 	const char *Type,
 	const char *Uri,
@@ -790,7 +790,7 @@ bool IHttp::Request
 #if 0
 #define HTTP_POST_LOG 1
 
-bool IHttp::Post
+bool LHttp::Post
 (
 	char *File,
 	const char *ContentType,
@@ -965,7 +965,7 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *In
 		return false;
 	}
 
-	IHttp Http;
+	LHttp Http;
 	int RedirectLimit = 10;
 	LAutoString Location;
 
@@ -1034,7 +1034,7 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *In
 		}
 
 		int Status = 0;
-		IHttp::ContentEncoding Enc;
+		LHttp::ContentEncoding Enc;
 		LStringPipe OutHeaders;
 		LStringPipe TmpFile(4 << 10);
 		Http.Get(InUri, InHeaders ? InputHeaders : DefaultHeaders, &Status, &TmpFile, &Enc, &OutHeaders);
@@ -1042,7 +1042,8 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *In
 		int StatusCatagory = Status / 100;
 		if (StatusCatagory == 3)
 		{
-			LAutoString Headers(OutHeaders.NewStr());			
+			LString Headers = OutHeaders.NewGStr();
+			LgiTrace("Header=%s\n", Headers.Get());
 			LAutoString Loc(InetGetHeaderField(Headers, "Location", -1));
 			if (!Loc)
 			{
@@ -1059,14 +1060,25 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *In
 			}
 
 			LgiTrace("HTTP redir(%i) from '%s' to '%s'\n", i, InUri, Loc.Get());
-			Location = Loc;
+
+			LUri u(Loc);
+			if (!u.sHost)
+			{
+				LUri in(InUri);
+				in.sPath = u.sPath;
+				Location.Reset(NewStr(in.ToString()));
+			}
+			else
+			{
+				Location = Loc;
+			}
 			InUri = Location;
 			continue;
 		}		
 		else if (StatusCatagory != 2)
 		{
 			// auto Hdr = OutHeaders.NewGStr();
-			Enc = IHttp::EncodeRaw;
+			Enc = LHttp::EncodeRaw;
 
 			if (OutError)
 				OutError->Printf("Got %i for '%.200s'\n", Status, InUri);
@@ -1075,7 +1087,7 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *In
 
 		Http.Close();
 		
-		if (Enc == IHttp::EncodeRaw)
+		if (Enc == LHttp::EncodeRaw)
 		{
 			// Copy TmpFile to Out
 			GCopyStreamer Cp;
@@ -1086,7 +1098,7 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *In
 				return false;
 			}
 		}
-		else if (Enc == IHttp::EncodeGZip)
+		else if (Enc == LHttp::EncodeGZip)
 		{
 			int64 Len = TmpFile.GetSize();
 			if (Len <= 0)

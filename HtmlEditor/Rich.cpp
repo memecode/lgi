@@ -257,11 +257,11 @@ public:
 
 class MediaItem : public LListItem
 {
-	GDocView::ContentMedia *Cm;
+	LDocView::ContentMedia *Cm;
 	LString sSize;
 
 public:
-	MediaItem(GDocView::ContentMedia *cm)
+	MediaItem(LDocView::ContentMedia *cm)
 	{
 		Cm = cm;
 	}
@@ -341,7 +341,7 @@ class App : public LWindow, public GCapabilityInstallTarget
 	LCapabilityTarget::CapsHash Caps;
 	LAutoPtr<LEventTargetThread> Installer;
 	LOptionsFile Options;
-	LArray<GDocView::ContentMedia> Media;
+	LArray<LDocView::ContentMedia> Media;
 
 public:
 	App() : Options(LOptionsFile::PortableMode, AppName)
@@ -593,7 +593,7 @@ public:
 				if (Edit)
 				{
 					LString Html;
-					LArray<GDocView::ContentMedia> Media;
+					LArray<LDocView::ContentMedia> Media;
 					if (Edit->GetFormattedContent("text/html", Html, &Media))
 					{
 						LFile::Path p(LSP_APP_INSTALL);
@@ -612,7 +612,7 @@ public:
 							
 							for (unsigned i=0; i<Media.Length(); i++)
 							{
-								GDocView::ContentMedia &Cm = Media[i];
+								LDocView::ContentMedia &Cm = Media[i];
 								
 								p--;
 								p += Cm.FileName;

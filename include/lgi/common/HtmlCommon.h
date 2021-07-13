@@ -65,7 +65,7 @@ enum HtmlTag
 };
 
 /// Common element info
-struct GHtmlElemInfo
+struct LHtmlElemInfo
 {
 public:
 	enum InfoFlags
@@ -89,56 +89,56 @@ public:
 };
 
 /// Common data for HTML related classes
-class GHtmlStatic
+class LHtmlStatic
 {
-	friend class GHtmlStaticInst;
-	GHtmlElemInfo *UnknownElement;
-	LHashTbl<ConstStrKey<char,false>,GHtmlElemInfo*> TagMap;
-	LHashTbl<IntKey<int>,GHtmlElemInfo*> TagIdMap;
+	friend class LHtmlStaticInst;
+	LHtmlElemInfo *UnknownElement;
+	LHashTbl<ConstStrKey<char,false>,LHtmlElemInfo*> TagMap;
+	LHashTbl<IntKey<int>,LHtmlElemInfo*> TagIdMap;
 
 public:
-	static GHtmlStatic *Inst;
+	static LHtmlStatic *Inst;
 
 	int Refs;
 	LHashTbl<StrKey<char16,true>,uint32_t>				VarMap;
 	LHashTbl<ConstStrKey<char,false>,LCss::PropType>	StyleMap;
 	LHashTbl<ConstStrKey<char,false>,int>				ColourMap;
 
-	GHtmlStatic();
-	~GHtmlStatic();
+	LHtmlStatic();
+	~LHtmlStatic();
 
-	GHtmlElemInfo *GetTagInfo(const char *Tag);
-	GHtmlElemInfo *GetTagInfo(HtmlTag TagId);
+	LHtmlElemInfo *GetTagInfo(const char *Tag);
+	LHtmlElemInfo *GetTagInfo(HtmlTag TagId);
 	void OnSystemColourChange();
 };
 
 /// Static data setup/pulldown
-class GHtmlStaticInst
+class LHtmlStaticInst
 {
 public:
-	GHtmlStatic *Static;
+	LHtmlStatic *Static;
 
-	GHtmlStaticInst()
+	LHtmlStaticInst()
 	{
-		if (!GHtmlStatic::Inst)
+		if (!LHtmlStatic::Inst)
 		{
-			GHtmlStatic::Inst = new GHtmlStatic;
+			LHtmlStatic::Inst = new LHtmlStatic;
 		}
-		if (GHtmlStatic::Inst)
+		if (LHtmlStatic::Inst)
 		{
-			GHtmlStatic::Inst->Refs++;
+			LHtmlStatic::Inst->Refs++;
 		}
-		Static = GHtmlStatic::Inst;
+		Static = LHtmlStatic::Inst;
 	}
 
-	~GHtmlStaticInst()
+	~LHtmlStaticInst()
 	{
-		if (GHtmlStatic::Inst)
+		if (LHtmlStatic::Inst)
 		{
-			GHtmlStatic::Inst->Refs--;
-			if (GHtmlStatic::Inst->Refs == 0)
+			LHtmlStatic::Inst->Refs--;
+			if (LHtmlStatic::Inst->Refs == 0)
 			{
-				DeleteObj(GHtmlStatic::Inst);
+				DeleteObj(LHtmlStatic::Inst);
 			}
 		}
 	}
@@ -161,7 +161,7 @@ public:
 /// Common base class for a HTML element
 class LHtmlElement : public GDom, public LCss
 {
-	friend class GHtmlParser;
+	friend class LHtmlParser;
 	friend class HtmlEdit;
 
 protected:
@@ -172,7 +172,7 @@ protected:
 public:
 	HtmlTag TagId;
 	LAutoString Tag;
-	GHtmlElemInfo *Info;
+	LHtmlElemInfo *Info;
 	LAutoString Condition;
 	
 	LHtmlElement *Parent;

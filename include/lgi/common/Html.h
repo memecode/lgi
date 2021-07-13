@@ -30,9 +30,9 @@ class GFontCache;
 ///
 /// Retreive any selected content through GHtml2::GetSelection.
 class GHtml :
-	public GDocView,
+	public LDocView,
 	public ResObject,
-	public GHtmlParser,
+	public LHtmlParser,
 	public LCapabilityClient
 {
 	friend class GTag;
@@ -88,7 +88,7 @@ public:
 
 	// Html
 	const char *GetClass() { return "GHtml"; }
-	bool GetFormattedContent(const char *MimeType, LString &Out, LArray<GDocView::ContentMedia> *Media = 0);
+	bool GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocView::ContentMedia> *Media = 0);
 
 	/// Get the tag at an x,y location
 	GTag *GetTagByPos(	int x, int y,
@@ -105,7 +105,7 @@ public:
 	bool GetEmoji();
 	void SetEmoji(bool i);
 
-	// GDocView
+	// LDocView
 	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
 	
 	/// Copy the selection to the clipboard

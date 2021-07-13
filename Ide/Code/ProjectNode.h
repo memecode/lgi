@@ -85,8 +85,8 @@ public:
 	void OnProperties();
 
 	// Serialization
-	bool Load(GDocView *Edit, NodeView *Callback) override;
-	bool Save(GDocView *Edit, NodeView *Callback) override;
+	bool Load(LDocView *Edit, NodeView *Callback) override;
+	bool Save(LDocView *Edit, NodeView *Callback) override;
 	bool Serialize(bool Write) override;
 };
 

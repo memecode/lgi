@@ -32,7 +32,7 @@ SshConnection *AppPriv::GetConnection(const char *Uri, bool Create)
 	return Conn;
 }
 
-SshConnection::SshConnection(GTextLog *log, const char *uri, const char *prompt) : LSsh(log), LEventTargetThread("SshConnection")
+SshConnection::SshConnection(LTextLog *log, const char *uri, const char *prompt) : LSsh(log), LEventTargetThread("SshConnection")
 {
 	auto Wnd = log->GetWindow();
 	GuiHnd = Wnd->AddDispatch();
@@ -348,10 +348,10 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 }
 
 
-class DiffView : public GTextLog
+class DiffView : public LTextLog
 {
 public:
-	DiffView(int id) : GTextLog(id)
+	DiffView(int id) : LTextLog(id)
 	{
 	}
 
@@ -1073,7 +1073,7 @@ public:
 			Diff->SetWrapType(TEXTED_WRAP_NONE);
 
 			p = Tabs->Append("Log");
-			p->Append(Log = new GTextLog(IDC_LOG));
+			p->Append(Log = new LTextLog(IDC_LOG));
 			// Log->Sunken(true);
 			Log->SetWrapType(TEXTED_WRAP_NONE);
 			

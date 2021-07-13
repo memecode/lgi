@@ -430,7 +430,7 @@ void LDialogTextMsg(LViewI *Parent, const char *Title, LString Txt)
 	LAutoPtr<LDialog> d(new LDialog);
 	if (d)
 	{
-		GTextLog *Log = NULL;
+		LTextLog *Log = NULL;
 		d->SetParent(Parent);
 		d->Name(Title);
 		LRect r(0, 0, 600, 500);
@@ -439,7 +439,7 @@ void LDialogTextMsg(LViewI *Parent, const char *Title, LString Txt)
 
 		LTableLayout *t = new LTableLayout(100);
 		auto c = t->GetCell(0, 0);
-		c->Add(Log = new GTextLog(101));
+		c->Add(Log = new LTextLog(101));
 		Log->Name(Txt);
 		c = t->GetCell(0, 1);
 		c->Add(new LButton(IDOK, 0, 0, -1, -1, "Ok"));

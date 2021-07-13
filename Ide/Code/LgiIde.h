@@ -188,8 +188,8 @@ public:
 	virtual const char *GetFileName() = 0;
 	virtual const char *GetLocalCache() = 0;
 	virtual const char *GetCharset() = 0;
-	virtual bool Load(GDocView *Edit, NodeView *Callback) = 0;
-	virtual bool Save(GDocView *Edit, NodeView *Callback) = 0;
+	virtual bool Load(LDocView *Edit, NodeView *Callback) = 0;
+	virtual bool Save(LDocView *Edit, NodeView *Callback) = 0;
 	virtual IdeProject *GetProject() = 0;
 };
 

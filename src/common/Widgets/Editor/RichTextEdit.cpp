@@ -123,7 +123,7 @@ void LRichTextEdit::SetFixedWidthFont(bool i)
 			LFontType Type;
 			if (Type.GetSystemFont("Fixed"))
 			{
-				GDocView::SetFixedWidthFont(i);
+				LDocView::SetFixedWidthFont(i);
 			}
 		}
 
@@ -134,7 +134,7 @@ void LRichTextEdit::SetFixedWidthFont(bool i)
 
 void LRichTextEdit::SetReadOnly(bool i)
 {
-	GDocView::SetReadOnly(i);
+	LDocView::SetReadOnly(i);
 
 	#if WINNATIVE
 	SetDlgCode(i ? DLGC_WANTARROWS : DLGC_WANTALLKEYS);
@@ -175,7 +175,7 @@ void LRichTextEdit::SetTabSize(uint8_t i)
 
 void LRichTextEdit::SetWrapType(LDocWrapType i)
 {
-	GDocView::SetWrapType(i);
+	LDocView::SetWrapType(i);
 
 	OnPosChange();
 	Invalidate();
@@ -367,7 +367,7 @@ bool LRichTextEdit::Name(const char *s)
 	if (!d->CreationCtx.Reset(new LRichTextPriv::CreateContext(d)))
 		return false;
 
-	if (!d->GHtmlParser::Parse(&Root, s))
+	if (!d->LHtmlParser::Parse(&Root, s))
 		return d->Error(_FL, "Failed to parse HTML.");
 	
 	LHtmlElement *Body = FindElement(&Root, TAG_BODY);
@@ -694,7 +694,7 @@ bool LRichTextEdit::Paste()
 		if (!d->CreationCtx.Reset(new LRichTextPriv::CreateContext(d)))
 			return false;
 
-		if (!d->GHtmlParser::Parse(&Root, Html))
+		if (!d->LHtmlParser::Parse(&Root, Html))
 			return d->Error(_FL, "Failed to parse HTML.");
 	
 		LHtmlElement *Body = FindElement(&Root, TAG_BODY);

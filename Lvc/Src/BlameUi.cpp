@@ -7,7 +7,7 @@ struct BlameUiPriv
 {
 	LString Output;
 	AppPriv *Priv;
-	GTextLog *Log;
+	LTextLog *Log;
 };
 
 BlameUi::BlameUi(AppPriv *priv, VersionCtrl Vc, LString Output)
@@ -27,7 +27,7 @@ BlameUi::BlameUi(AppPriv *priv, VersionCtrl Vc, LString Output)
 
 	if (Attach(0))
 	{
-		AddView(d->Log = new GTextLog(100));
+		AddView(d->Log = new LTextLog(100));
 		AttachChildren();
 		Visible(true);
 

@@ -218,7 +218,7 @@ const char *ProjectNode::GetLocalCache()
 	return sLocalCache;
 }
 
-bool ProjectNode::Load(GDocView *Edit, NodeView *Callback)
+bool ProjectNode::Load(LDocView *Edit, NodeView *Callback)
 {
 	bool Status = false;
 
@@ -238,7 +238,7 @@ bool ProjectNode::Load(GDocView *Edit, NodeView *Callback)
 	return Status;
 }
 
-bool ProjectNode::Save(GDocView *Edit, NodeView *Callback)
+bool ProjectNode::Save(LDocView *Edit, NodeView *Callback)
 {
 	bool Status = false;
 

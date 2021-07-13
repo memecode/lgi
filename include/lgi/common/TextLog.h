@@ -6,7 +6,7 @@
 #include "lgi/common/TextView3.h"
 #include "lgi/common/Net.h"
 
-class GTextLog : public LTextView3, public LStream
+class LTextLog : public LTextView3, public LStream
 {
 protected:
 	bool ProcessReturns;
@@ -22,7 +22,7 @@ protected:
 		if (Sem.Lock(_FL))
 		{
 			LString msg;
-			msg.Printf("GTextLog::ProcessTxt(%" PRIu64 ")", (uint64)Txt.Length());
+			msg.Printf("LTextLog::ProcessTxt(%" PRIu64 ")", (uint64)Txt.Length());
 			LProfile p(msg, 100);
 			Add(Txt.AddressOf(), Txt.Length());
 			Txt.Empty();
@@ -31,7 +31,7 @@ protected:
 	}
 
 public:
-	GTextLog(int id) : LTextView3(id, 0, 0, 2000, 1000)
+	LTextLog(int id) : LTextView3(id, 0, 0, 2000, 1000)
 	{
 		ProcessReturns = true;
 		Pos = 0;

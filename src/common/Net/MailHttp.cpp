@@ -261,7 +261,7 @@ bool MailPhp::Get(LSocketI *S, char *Uri, LStream &Out, bool MailTransfer)
 		{
 			char *Base = NewStr(Start, s-Start);
 
-			IHttp Http;
+			LHttp Http;
 			if (d->UserName && d->UserPass)
 			{
 				Http.SetAuth(d->UserName, d->UserPass);
@@ -276,7 +276,7 @@ bool MailPhp::Get(LSocketI *S, char *Uri, LStream &Out, bool MailTransfer)
 			{
 				LStringPipe Buf;
 				int Code = 0;
-				IHttp::ContentEncoding Enc;
+				LHttp::ContentEncoding Enc;
 				if (Http.Get(Uri, 0, &Code, &Buf, &Enc))
 				{
 					char Start[256];

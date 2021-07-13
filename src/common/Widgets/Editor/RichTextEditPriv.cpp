@@ -294,7 +294,7 @@ bool MultiBlockState::Cut(ssize_t Idx)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 LRichTextPriv::LRichTextPriv(LRichTextEdit *view, LRichTextPriv **Ptr) :
-	GHtmlParser(view),
+	LHtmlParser(view),
 	GFontCache(SysFont)
 {
 	if (Ptr) *Ptr = this;
@@ -1984,7 +1984,7 @@ LHtmlElement *LRichTextPriv::CreateElement(LHtmlElement *Parent)
 	return new LRichEditElem(Parent);
 }
 
-bool LRichTextPriv::ToHtml(LArray<GDocView::ContentMedia> *Media, BlockCursor *From, BlockCursor *To)
+bool LRichTextPriv::ToHtml(LArray<LDocView::ContentMedia> *Media, BlockCursor *From, BlockCursor *To)
 {
 	UtfNameCache.Reset();
 	if (!Blocks.Length())
@@ -2115,7 +2115,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			
 		// Check to see if the element is block level and end the previous
 		// paragraph if so.
-		c->Info = c->Tag ? GHtmlStatic::Inst->GetTagInfo(c->Tag) : NULL;
+		c->Info = c->Tag ? LHtmlStatic::Inst->GetTagInfo(c->Tag) : NULL;
 		bool IsBlock =	c->Info != NULL && c->Info->Block();
 		switch (c->TagId) 
 		{

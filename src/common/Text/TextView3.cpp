@@ -550,7 +550,7 @@ void LTextView3::SetFixedWidthFont(bool i)
 					}
 				}
 
-				GDocView::SetFixedWidthFont(i);
+				LDocView::SetFixedWidthFont(i);
 			}
 		}
 		else if (FixedFont)
@@ -558,7 +558,7 @@ void LTextView3::SetFixedWidthFont(bool i)
 			LFont *f = FixedFont;
 			FixedFont = Font;
 			Font = f;
-			GDocView::SetFixedWidthFont(i);
+			LDocView::SetFixedWidthFont(i);
 		}
 
 		OnFontChange();
@@ -568,7 +568,7 @@ void LTextView3::SetFixedWidthFont(bool i)
 
 void LTextView3::SetReadOnly(bool i)
 {
-	GDocView::SetReadOnly(i);
+	LDocView::SetReadOnly(i);
 
 	#if WINNATIVE
 	SetDlgCode(i ? DLGC_WANTARROWS : DLGC_WANTALLKEYS);
@@ -591,7 +591,7 @@ void LTextView3::SetTabSize(uint8_t i)
 
 void LTextView3::SetWrapType(LDocWrapType i)
 {
-	GDocView::SetWrapType(i);
+	LDocView::SetWrapType(i);
 	CanScrollX = i != TEXTED_WRAP_REFLOW;
 
 	OnPosChange();

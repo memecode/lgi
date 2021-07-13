@@ -1,16 +1,15 @@
-#ifndef _GHTMLPARSER_H_
-#define _GHTMLPARSER_H_
+#pragma once
 
 #include "lgi/common/DocView.h"
 #include "lgi/common/HtmlCommon.h"
 
-class GHtmlParser
+class LHtmlParser
 {
 	LStringPipe SourceData;
 	const char *CurrentSrc;
 
 protected:
-	GDocView *View;
+	LDocView *View;
 	LAutoString Source;
 	LArray<LHtmlElement*> OpenTags;
 	LAutoString DocCharSet;
@@ -30,20 +29,20 @@ protected:
 	char16 *DecodeEntities(const char *s, ssize_t len);
 
 public:
-	GHtmlParser(GDocView *view = NULL)
+	LHtmlParser(LDocView *view = NULL)
 	{
 		View = view;
 	}
 
 	// Props
-	GDocView *GetView() { return View; }
-	void SetView(GDocView *v) { View = v; }
+	LDocView *GetView() { return View; }
+	void SetView(LDocView *v) { View = v; }
 
 	// Main entry point
 	bool Parse(LHtmlElement *Root, const char *Doc);
 	
 	// Tool methods
-	GHtmlElemInfo *GetTagInfo(const char *Tag);
+	LHtmlElemInfo *GetTagInfo(const char *Tag);
 	static bool ParseColour(const char *s, LCss::ColorDef &c);
 	static bool Is8Bit(char *s);
 	char *ParsePropValue(char *s, char16 *&Value);
@@ -58,5 +57,3 @@ public:
 	virtual LHtmlElement *CreateElement(LHtmlElement *Parent) = 0;
 	virtual bool EvaluateCondition(const char *Cond) { return false; }
 };
-
-#endif // _GHTMLPARSER_H_

@@ -17,7 +17,7 @@ class LSsh : public LCancel
 	friend struct SshConsole;
 
 protected:
-	GTextLog *Log;
+	LTextLog *Log;
 	ssh_session Ssh;
 	LViewI *TxtLabel;
 	LProgressView *Prog;
@@ -142,7 +142,7 @@ protected:
 	};
 
 public:
-	LSsh(GTextLog *log)
+	LSsh(LTextLog *log)
 	{
 		Log = log;
 		Ssh = NULL;
@@ -157,7 +157,7 @@ public:
 		Ssh = NULL;
 	}
 
-	void SetLog(GTextLog *log)
+	void SetLog(LTextLog *log)
 	{
 		Log = log;
 	}

@@ -70,7 +70,7 @@ public:
 	ssize_t CurHistory;
 	bool Loading;
 	GBrowser::GBrowserEvents *Events;
-	IHttp Http;
+	LHttp Http;
 
 	GBrowserPriv(GBrowser *wnd)
 	{
@@ -173,7 +173,7 @@ public:
 		return true;
 	}
 
-	bool OnNavigate(GDocView *Parent, const char *Uri)
+	bool OnNavigate(LDocView *Parent, const char *Uri)
 	{
 		if (!Uri)
 			return false;
@@ -368,7 +368,7 @@ int GBrowserThread::Main()
 				LAutoPtr<LSocketI> Sock(new LSocket);
 				if (d->Http.Open(Sock, u.sHost, u.Port))
 				{
-					IHttp::ContentEncoding Enc;
+					LHttp::ContentEncoding Enc;
 					bool b = d->Http.Get(Uri, "Cache-Control:no-cache", &Status, p, &Enc);
 					GBrowserPriv::FilePtr f = d->Lock();
 					if (!b)

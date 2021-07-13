@@ -160,10 +160,10 @@ public:
 	}
 };
 
-class DnDtarget : public GTextLog
+class DnDtarget : public LTextLog
 {
 public:
-	DnDtarget() : GTextLog(10)
+	DnDtarget() : LTextLog(10)
 	{
 	}
 

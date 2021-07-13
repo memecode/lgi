@@ -33,7 +33,7 @@ struct LSoftwareUpdatePriv
 		LSoftwareUpdatePriv *d;
 		LSocket *s;
 		LSoftwareUpdate::UpdateInfo *Info;
-		IHttp Http;
+		LHttp Http;
 		bool IncBetas;
 
 	public:
@@ -99,7 +99,7 @@ struct LSoftwareUpdatePriv
 				LAutoPtr<LSocketI> s(new LSocket);
 				if (Http.Open(s, Uri.sHost, Uri.Port))
 				{
-					IHttp::ContentEncoding Enc;
+					LHttp::ContentEncoding Enc;
 					if (Http.Get(GetUri, NULL, &ProtocolStatus, &RawXml, &Enc))
 					{
 						LXmlTree Tree;
@@ -263,12 +263,12 @@ struct LSoftwareUpdatePriv
 
 		int Main() override
 		{
-			IHttp Http;
+			LHttp Http;
 			if (Proxy->sHost)
 				Http.SetProxy(Proxy->sHost, Proxy->Port?Proxy->Port:HTTP_PORT);
 
 			LAutoPtr<LSocketI> s(new LSocket);
-			IHttp::ContentEncoding Enc;
+			LHttp::ContentEncoding Enc;
 			if (!Http.Open(s, Uri->sHost, Uri->Port))
 			{
 				Err->Reset(NewStr(LgiLoadString(L_ERROR_CONNECT_FAILED, sSocketConnectFailed)));

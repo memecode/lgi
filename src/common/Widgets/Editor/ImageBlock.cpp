@@ -588,12 +588,12 @@ ssize_t LRichTextPriv::ImageBlock::Length()
 	return IsDeleted ? 0 : 1;
 }
 
-bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<GDocView::ContentMedia> *Media, LRange *Rng)
+bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng)
 {
 	if (Media)
 	{
 		bool ValidSourceFile = LFileExists(Source);
-		GDocView::ContentMedia &Cm = Media->New();
+		LDocView::ContentMedia &Cm = Media->New();
 		
 		int Idx = LRand() % 10000;
 		if (!ContentId)
