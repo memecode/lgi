@@ -550,6 +550,7 @@ struct SslSocketPriv : public LCancel
 
 	// This is for the connection logging.
 	LAutoString LogFile;
+	bool LogFileError = false;
 	LAutoPtr<LStream> LogStream;
 	int LogFormat;
 
@@ -665,13 +666,18 @@ void SslSocket::SetSslOnConnect(bool b)
 
 LStream *SslSocket::GetLogStream()
 {
-	if (!d->LogStream && d->LogFile)
+	if (!d->LogStream && d->LogFile && !d->LogFileError)
 	{
 		if (!d->LogStream.Reset(new LFile))
 			return NULL;
 		
 		if (!d->LogStream->Open(d->LogFile, O_WRITE))
+		{
+			d->LogStream.Reset();
+			d->LogFileError = true; // Stop retrying the open and spamming the trace log.
+			LgiTrace("%s:%i - Can't open '%s' for SSL logging.\n", _FL, d->LogFile.Get());
 			return NULL;
+		}
 		
 		// Seek to the end
 		d->LogStream->SetPos(d->LogStream->GetSize());
