@@ -148,7 +148,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread, public LCancel
 		va_end(Arg);
 		
 		if (s.Length())
-			GEventSinkMap::Dispatch.PostEvent(hApp, M_APPEND_TEXT, (GMessage::Param)NewStr(s), AppWnd::BuildTab);
+			PostThreadEvent(hApp, M_APPEND_TEXT, (GMessage::Param)NewStr(s), AppWnd::BuildTab);
 	}
 	
 	#if !USE_HASH

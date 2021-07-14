@@ -161,6 +161,7 @@ class BuildThread : public LThread, public LStream
 	LAutoPtr<LSubProcess> SubProc;
 	LString::Array BuildConfigs;
 	LString::Array PostBuild;
+	int AppHnd;
 
 	enum CompilerType
 	{
@@ -1279,7 +1280,8 @@ BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, bool rele
 	WordSize = wordsize;
 	Arch = DefaultArch;
 	Compiler = DefaultCompiler;
-
+	AppHnd = Proj->GetApp()->AddDispatch();
+	
 	LString Cmds = proj->d->Settings.GetStr(ProjPostBuildCommands, NULL);
 	if (ValidStr(Cmds))
 		PostBuild = Cmds.SplitDelimit("\r\n");
@@ -1369,7 +1371,7 @@ ssize_t BuildThread::Write(const void *Buffer, ssize_t Size, int Flags)
 {
 	if (Proj->GetApp())
 	{
-		Proj->GetApp()->PostEvent(M_APPEND_TEXT, (GMessage::Param)NewStr((char*)Buffer, Size), 0);
+		Proj->GetApp()->PostEvent(M_APPEND_TEXT, (GMessage::Param)NewStr((char*)Buffer, Size), AppWnd::BuildTab);
 	}
 	return Size;
 }
@@ -1971,9 +1973,11 @@ int BuildThread::Main()
 				TmpArgs += " Build=Release";
 		}
 
+		PostThreadEvent(AppHnd, M_SELECT_TAB, AppWnd::BuildTab);
+
 		LString Msg;
 		Msg.Printf("Making: %s\n", MakePath.Get());
-		Proj->GetApp()->PostEvent(M_APPEND_TEXT, (GMessage::Param)NewStr(Msg), 0);
+		Proj->GetApp()->PostEvent(M_APPEND_TEXT, (GMessage::Param)NewStr(Msg), AppWnd::BuildTab);
 
 		LgiTrace("%s %s\n", Exe.Get(), TmpArgs.Get());
 		if (SubProc.Reset(new LSubProcess(Exe, TmpArgs)))
@@ -2306,12 +2310,13 @@ char *QuoteStr(char *s)
 	return p.NewStr();
 }
 
-class ExecuteThread : public LThread, public LStream
+class ExecuteThread : public LThread, public LStream, public LCancel
 {
 	IdeProject *Proj;
 	LString Exe, Args, Path;
 	int Len;
 	ExeAction Act;
+	int AppHnd;
 
 public:
 	ExecuteThread(IdeProject *proj, const char *exe, const char *args, char *path, ExeAction act) : LThread("ExecuteThread")
@@ -2323,20 +2328,22 @@ public:
 		Args = args;
 		Path = path;
 		DeleteOnExit = true;
+		AppHnd = proj->GetApp()->AddDispatch();
 		
 		Run();
 	}
 	
 	~ExecuteThread()
 	{
+		Cancel();
+		while (!IsExited())
+			LgiSleep(1);
 	}
 	
 	int Main() override
 	{
-		if (Proj->GetApp())
-		{
-			Proj->GetApp()->PostEvent(M_APPEND_TEXT, 0, 1);
-		}
+		PostThreadEvent(AppHnd, M_SELECT_TAB, AppWnd::OutputTab);
+		PostThreadEvent(AppHnd, M_APPEND_TEXT, 0, AppWnd::OutputTab);
 		
 		if (Exe)
 		{
@@ -2346,7 +2353,7 @@ public:
 				if (Path)
 					sub.SetInitFolder(Path);
 				if (sub.Start())
-					sub.Communicate(this);
+					sub.Communicate(this, NULL, this);
 			}
 			else if (Act == ExeValgrind)
 			{
@@ -2402,7 +2409,7 @@ public:
 				if (Path)
 					sub.SetInitFolder(Path);
 				if (sub.Start())
-					sub.Communicate(this);
+					sub.Communicate(this, NULL, this);
 			}
 		}
 		
@@ -2411,18 +2418,12 @@ public:
 
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0) override
 	{
-		if (Len > 0)
-		{
-			if (Proj->GetApp())
-			{
-				Size = MIN(Size, Len);
-				Proj->GetApp()->PostEvent(M_APPEND_TEXT, (GMessage::Param)NewStr((char*)Buffer, Size), 1);
-				Len -= Size;
-			}
-			return Size;
-		}
-		
-		return 0;
+		if (Len <= 0)
+			return 0;
+
+		PostThreadEvent(AppHnd, M_APPEND_TEXT, (GMessage::Param)NewStr((char*)Buffer, Size), AppWnd::OutputTab);
+		Len -= Size;
+		return Size;
 	}
 };
 

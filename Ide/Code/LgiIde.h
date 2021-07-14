@@ -29,7 +29,7 @@
 
 enum IdeMessages
 {
-	M_APPEND_TEXT = M_USER+200,
+	M_APPEND_TEXT = M_USER+200, // A=(char*)heapStr, B=(int)tabIndex
 	M_APPEND_STR,
 	M_START_BUILD,
 	M_BUILD_ERR,
@@ -37,6 +37,7 @@ enum IdeMessages
 	M_DEBUG_ON_STATE,
 	M_MAKEFILES_CREATED,
 	M_LAST_MAKEFILE_CREATED,
+	M_SELECT_TAB, // A=(int)tabIndex
 	
 	/// Find symbol results message:
 	/// LAutoPtr<FindSymRequest> Req((FindSymRequest*)Msg->A());

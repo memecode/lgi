@@ -2966,10 +2966,16 @@ GMessage::Result AppWnd::OnEvent(GMessage *m)
 		}
 		case M_APPEND_TEXT:
 		{
-			char *Text = (char*) m->A();
+			LAutoString Text((char*) m->A());
 			Channels Ch = (Channels) m->B();
 			AppendOutput(Text, Ch);
-			DeleteArray(Text);
+			break;
+		}
+		case M_SELECT_TAB:
+		{
+			if (!d->Output)
+				break;
+			d->Output->Value(m->A());
 			break;
 		}
 		case M_DEBUG_ON_STATE:
