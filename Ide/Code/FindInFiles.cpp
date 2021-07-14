@@ -236,7 +236,7 @@ FindInFilesThread::~FindInFilesThread()
 
 void FindInFilesThread::Log(const char *Str)
 {
-	GEventSinkMap::Dispatch.PostEvent(d->AppHnd, M_APPEND_TEXT, (GMessage::Param)Str, 2);
+	PostThreadEvent(d->AppHnd, M_APPEND_TEXT, (GMessage::Param)Str, AppWnd::FindTab);
 }
 
 void FindInFilesThread::SearchFile(char *File)
@@ -365,6 +365,8 @@ GMessage::Result FindInFilesThread::OnEvent(GMessage *Msg)
 			{
 				char Msg[256];
 
+				PostThreadEvent(d->AppHnd, M_SELECT_TAB, AppWnd::FindTab);
+				
 				d->Loop = true;
 				d->Busy = true;
 				snprintf(Msg, sizeof(Msg), "Searching for '%s'...\n", d->Params->Text.Get());
