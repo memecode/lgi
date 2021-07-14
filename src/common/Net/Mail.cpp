@@ -344,54 +344,39 @@ int PartCmp(LAutoPtr<MailAddrPart> *a, LAutoPtr<MailAddrPart> *b)
     return (*b)->Score() - (*a)->Score();
 }
 
+bool IsAngleBrackets(LString &s)
+{
+	if (s(0) == '<' && s(-1) == '>')
+		return true;
+	return false;
+}
+
 void DecodeAddrName(const char *Str, LAutoString &Name, LAutoString &Addr, const char *DefaultDomain)
 {
-	/* Testing code
-	char *Input[] =
-	{
-		"\"Sound&Secure@speedytechnical.com\" <soundandsecure@speedytechnical.com>",
-		"\"@MM-Social Mailman List\" <social@cisra.canon.com.au>",
-		"'Matthew Allen (fret)' <fret@memecode.com>",
-		"Matthew Allen (fret) <fret@memecode.com>",
-		"\"'Matthew Allen'\" <fret@memecode.com>",
-		"Matthew Allen",
-		"fret@memecode.com",
-		"\"<Matthew Allen>\" <fret@memecode.com>",
-		"<Matthew Allen> (fret@memecode.com)",
-		"Matthew Allen <fret@memecode.com>",
-		"\"Matthew, Allen\" (fret@memecode.com)",
-		"Matt'hew Allen <fret@memecode.com>",
-		"john.omalley <john.O'Malley@testing.com>",
-		"Bankers' Association (ABA)<survey@aawp.org.au>",
-		"'Amy's Mum' <name@domain.com>",
-		"\"Philip Doggett (JIRA)\" <jira@audinate.atlassian.net>",
-		0
-	};
-
-	LAutoString Name, Addr;
-	for (char **i = Input; *i; i++)
-	{
-		Name.Reset();
-		Addr.Reset();
-		DecodeAddrName(*i, Name, Addr, "name.com");
-		LgiTrace("N=%-#32s A=%-32s\n", Name, Addr);
-	}
-	*/
-
 	if (!Str)
 		return;
-
-	LArray< LAutoPtr<MailAddrPart> > Parts;
 
 	LString s = Str;
 	LString non;
 	LString email;
-	LString::Array a = s.SplitDelimit("<>");
+	LString::Array a;
+
+	auto startBracket = s.Find("<");
+	auto endBracket = s.Find(">", startBracket);
+	if (startBracket >= 0 && endBracket >= 0)
+	{
+		// Keep the angle brackets for the time being...
+		a.New() = s(0, startBracket) + s(++endBracket, -1);
+		a.New() = s(startBracket, endBracket);
+	}
+	else a.New() = s;
+	
 	for (unsigned i=0; i<a.Length(); i++)
 	{
-		if (LIsValidEmail(a[i]))
+		if (LIsValidEmail(a[i]) ||
+			IsAngleBrackets(a[i]))
 		{
-			email = a[i];
+			email = a[i].Strip("<>");
 		}
 		else
 		{
@@ -446,6 +431,47 @@ void DecodeAddrName(const char *Str, LAutoString &Name, LAutoString &Addr, const
 	Name.Reset(NewStr(non));
 	Addr.Reset(NewStr(email.Strip()));
 }
+
+#if 0
+struct LDecodeAddrNameTest
+{
+	LDecodeAddrNameTest()
+	{
+		// Testing code
+		char *Input[] =
+		{
+			"\"Sound&Secure@speedytechnical.com\" <soundandsecure@speedytechnical.com>",
+			"\"@MM-Social Mailman List\" <social@cisra.canon.com.au>",
+			"'Matthew Allen (fret)' <fret@memecode.com>",
+			"Matthew Allen (fret) <fret@memecode.com>",
+			"\"'Matthew Allen'\" <fret@memecode.com>",
+			"Matthew Allen",
+			"fret@memecode.com",
+			"\"<Matthew Allen>\" <fret@memecode.com>",
+			"<Matthew Allen> (fret@memecode.com)",
+			"Matthew Allen <fret@memecode.com>",
+			"\"Matthew, Allen\" (fret@memecode.com)",
+			"Matt'hew Allen <fret@memecode.com>",
+			"john.omalley <john.O'Malley@testing.com>",
+			"Bankers' Association (ABA)<survey@aawp.org.au>",
+			"'Amy's Mum' <name@domain.com>",
+			"\"Philip Doggett (JIRA)\" <jira@audinate.atlassian.net>",
+			"\"group name\" <groupAddress>",
+			NULL
+		};
+
+		LAutoString Name, Addr;
+		for (char **i = Input; *i; i++)
+		{
+			Name.Reset();
+			Addr.Reset();
+			DecodeAddrName(*i, Name, Addr, "name.com");
+			LgiTrace("N=%-#32s A=%-32s\n", Name, Addr);
+		}
+		int asd=0;
+	}
+}	DecodeAddrNameTest;
+#endif
 
 void StrCopyToEOL(char *d, char *s)
 {
