@@ -156,7 +156,7 @@ struct LGraphPriv
 		return 0;
 	}
 
-	int Map(LVariant &v, int pixels, LVariant &min, LVariant &max)
+	int64 Map(LVariant &v, int pixels, LVariant &min, LVariant &max)
 	{
 		if (v.Type != min.Type ||
 			v.Type != max.Type)
@@ -329,9 +329,9 @@ struct LGraphPriv
 		for (int i=0; i<Values.Length(); i++)
 		{
 			v = Values[i];
-			int Offset = Map(v, pixels, min, max);
-			int dx = x + (xaxis ? Offset : 0);
-			int dy = y - (xaxis ? 0 : Offset);
+			auto Offset = Map(v, pixels, min, max);
+			int dx = (int)(x + (xaxis ? Offset : 0));
+			int dy = (int)(y - (xaxis ? 0 : Offset));
 
 			char s[256];
 			switch (v.Type)
@@ -347,12 +347,12 @@ struct LGraphPriv
 				}
 				case GV_INT64:
 				{
-					sprintf(s, LPrintfInt64, v.CastInt64());
+					sprintf_s(s, sizeof(s), LPrintfInt64, v.CastInt64());
 					break;
 				}
 				case GV_DOUBLE:
 				{
-					sprintf(s, "%g", v.CastDouble());
+					sprintf_s(s, sizeof(s), "%g", v.CastDouble());
 					break;
 				}
 				default:
@@ -429,7 +429,7 @@ bool LGraph::AddPair(char *x, char *y, void *UserData)
     return true;
 }
 
-bool LGraph::SetDataSource(GDbRecordset *Rs, int XAxis, int YAxis)
+bool LGraph::SetDataSource(LDbRecordset *Rs, int XAxis, int YAxis)
 {
 	if (!Rs)
 		return false;
@@ -554,7 +554,7 @@ void LGraph::OnMouseClick(LMouse &m)
                 {
                     case GV_INT64:
                     {
-                        int XRange = d->MaxX.CastInt64() - d->MinX.CastInt64() + 1;
+                        auto XRange = d->MaxX.CastInt64() - d->MinX.CastInt64() + 1;
                         for (int b=0; b<d->BucketSize; b++)
                         {
                             GraphAv &g = d->Ave[b];
@@ -629,7 +629,7 @@ void LGraph::OnPaint(LSurface *pDC)
         for (int i=0; i<d->Val.Length(); i++)
         {
 	        GGraphPair &p = d->Val[i];
-	        int Bucket = d->Map(p.x, d->BucketSize, d->MinX, d->MaxX);
+	        auto Bucket = d->Map(p.x, d->BucketSize, d->MinX, d->MaxX);
             d->Ave[Bucket].Sum += p.y.CastInt64();
             d->Ave[Bucket].Count++;
         }
@@ -642,8 +642,8 @@ void LGraph::OnPaint(LSurface *pDC)
 	        for (int i=0; i<d->Val.Length(); i++)
 	        {
 		        GGraphPair &p = d->Val[i];
-		        cx = x.x1 + d->Map(p.x, x.X(), d->MinX, d->MaxX);
-		        cy = y.y2 - d->Map(p.y, y.Y(), d->MinY, d->MaxY);
+		        cx = x.x1 + (int)d->Map(p.x, x.X(), d->MinX, d->MaxX);
+		        cy = y.y2 - (int)d->Map(p.y, y.Y(), d->MinY, d->MaxY);
 		        if (i)
 		        {
 			        pDC->Line(cx, cy, px, py);
@@ -658,8 +658,8 @@ void LGraph::OnPaint(LSurface *pDC)
 	        for (int i=0; i<d->Val.Length(); i++)
 	        {
 		        GGraphPair &p = d->Val[i];
-		        cx = x.x1 + d->Map(p.x, x.X(), d->MinX, d->MaxX);
-		        cy = y.y2 - d->Map(p.y, y.Y(), d->MinY, d->MaxY);
+		        cx = x.x1 + (int)d->Map(p.x, x.X(), d->MinX, d->MaxX);
+		        cy = y.y2 - (int)d->Map(p.y, y.Y(), d->MinY, d->MaxY);
 		        pDC->Set(cx, cy);
 		        
 		        if (d->Select &&
@@ -680,7 +680,7 @@ void LGraph::OnPaint(LSurface *pDC)
 	                {
 	                    int cx = x.x1 + (((b * x.X()) + (x.X() >> 1)) / d->BucketSize);
 	                    LVariant v = d->Ave[b].Sum / d->Ave[b].Count;
-	                    int cy = y.y2 - d->Map(v, y.Y(), d->MinY, d->MaxY);
+	                    int cy = y.y2 - (int)d->Map(v, y.Y(), d->MinY, d->MaxY);
 	                    
 	                    if (py >= 0)
 	                    {

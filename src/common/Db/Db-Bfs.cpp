@@ -40,12 +40,12 @@ public:
 		return false;
 	}
 
-	GDbRecordset *Open(char *Name)
+	LDbRecordset *Open(char *Name)
 	{
 		return false;
 	}
 
-	GDbRecordset *TableAt(int i)
+	LDbRecordset *TableAt(int i)
 	{
 		return false;
 	}

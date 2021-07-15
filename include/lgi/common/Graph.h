@@ -1,5 +1,4 @@
-#ifndef _GGRAPH_H_
-#define _GGRAPH_H_
+#pragma once 
 
 #include "lgi/common/Db.h"
 #include "lgi/common/Layout.h"
@@ -9,6 +8,8 @@ class LGraph : public LLayout
 	struct LGraphPriv *d;
 
 public:
+	constexpr static int AUTO_AXIS = -1;
+
     enum Style
     {
         LineGraph,
@@ -21,11 +22,21 @@ public:
 	    void *UserData;
     };
     
-	LGraph(int Id, int XAxix = -1, int YAxis = -1);
+	LGraph(	/// Control identifier
+			int Id,
+			/// Index into the data source of the X axis value
+			int XAxis = AUTO_AXIS,
+			/// Index into the data source of the Y axis value
+			int YAxis = AUTO_AXIS);
 	~LGraph();
 
 	// Api
-	bool SetDataSource(GDbRecordset *Rs, int XAxis = -1, int YAxis = -1);
+	bool SetDataSource(	/// Source of records
+						LDbRecordset *Rs,
+						/// Index into the data source of the X axis value
+						int XAxis = AUTO_AXIS,
+						/// Index into the data source of the Y axis value
+						int YAxis = AUTO_AXIS);
 	bool AddPair(char *x, char *y, void *UserData = 0);
 	void SetStyle(Style s);
 	Style GetStyle();
@@ -35,5 +46,3 @@ public:
 	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m);	
 };
-
-#endif

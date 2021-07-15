@@ -3,9 +3,9 @@
 #include "mysql.h"
 #include "INet.h"
 
-GDbField Null;
+LDbField Null;
 
-class MysqlField : public GDbField
+class MysqlField : public LDbField
 {
 	class MysqlRs *Rs;
 	MYSQL_FIELD *f;
@@ -28,7 +28,7 @@ public:
 	bool Get(LVariant &v);
 };
 
-class MysqlRs : public GDbRecordset
+class MysqlRs : public LDbRecordset
 {
 public:
 	char *Sql;
@@ -44,13 +44,13 @@ public:
 
 	char *Name();
 
-	GDbField &operator [](int Index);
-	GDbField &operator [](char *Name);	
-	GDbField *InsertField(	char *Name,
+	LDbField &operator [](int Index);
+	LDbField &operator [](char *Name);	
+	LDbField *InsertField(	char *Name,
 							int Type,
 							int Length = 0,
 							int Index = -1);
-	bool DeleteField(GDbField *Fld);
+	bool DeleteField(LDbField *Fld);
 	int Fields();
 
 	bool End();
@@ -171,7 +171,7 @@ char *MysqlRs::Name()
 	return Sql;
 }
 
-GDbField &MysqlRs::operator [](int Index)
+LDbField &MysqlRs::operator [](int Index)
 {
 	if (Index >= 0 AND Index < Field.Length())
 		return *Field[Index];
@@ -179,7 +179,7 @@ GDbField &MysqlRs::operator [](int Index)
 	return Null;
 }
 
-GDbField &MysqlRs::operator [](char *Name)
+LDbField &MysqlRs::operator [](char *Name)
 {
 	int n = (int)Idx.Find(Name);
 	if (n > 0 AND n <= Field.Length())
@@ -188,7 +188,7 @@ GDbField &MysqlRs::operator [](char *Name)
 	return Null;
 }
 
-GDbField *MysqlRs::InsertField(	char *Name,
+LDbField *MysqlRs::InsertField(	char *Name,
 						int Type,
 						int Length,
 						int Index)
@@ -196,7 +196,7 @@ GDbField *MysqlRs::InsertField(	char *Name,
 	return 0;
 }
 
-bool MysqlRs::DeleteField(GDbField *Fld)
+bool MysqlRs::DeleteField(LDbField *Fld)
 {
 	return 0;
 }
@@ -345,9 +345,9 @@ public:
 		return true;
 	}
 
-	GDbRecordset *Open(char *Name)
+	LDbRecordset *Open(char *Name)
 	{
-		GDbRecordset *Rs = 0;
+		LDbRecordset *Rs = 0;
 		
 		if (Connected)
 		{
@@ -381,7 +381,7 @@ public:
 		return mysql_error(&Db);
 	}
 
-	GDbRecordset *TableAt(int i)
+	LDbRecordset *TableAt(int i)
 	{
 		return 0;
 	}

@@ -16,14 +16,14 @@
 #define Dom_IsConnected		"IsConnected"
 
 // Classes
-class GDbField
+class LDbField
 {
 public:
-	virtual ~GDbField() {};
+	virtual ~LDbField() {};
 
 	// Cast
 	virtual operator char*() { LgiAssert(0); return 0; }
-	virtual GDbField &operator =(char*) { LgiAssert(0); return *this; }
+	virtual LDbField &operator =(char*) { LgiAssert(0); return *this; }
 
 	// Properties
 	virtual char *Name() { return 0; }
@@ -40,22 +40,22 @@ public:
 	virtual bool Get(LVariant &v) { return 0; }
 };
 
-class GDbRecordset
+class LDbRecordset
 {
 public:
-	virtual ~GDbRecordset() {};
+	virtual ~LDbRecordset() {};
 
 	// Props
 	virtual char *Name() = 0;
 
 	// Fields
-	virtual GDbField &operator [](unsigned Index) = 0;
-	virtual GDbField &operator [](const char *Name) = 0;
-	virtual GDbField *InsertField(	const char *Name,
+	virtual LDbField &operator [](unsigned Index) = 0;
+	virtual LDbField &operator [](const char *Name) = 0;
+	virtual LDbField *InsertField(	const char *Name,
 									int Type,
 									int Length = 0,
 									int Index = -1) = 0; // default: append to the end
-	virtual bool DeleteField(GDbField *Fld) = 0;
+	virtual bool DeleteField(LDbField *Fld) = 0;
 	virtual int Fields() = 0; // return number of fields
 
 	// Markers
@@ -92,9 +92,9 @@ public:
 	virtual bool Disconnect() = 0;
 
 	// Retrieving data
-	virtual GDbRecordset *Open(char *Name) = 0;
+	virtual LDbRecordset *Open(char *Name) = 0;
 	virtual bool Execute(char *Name) { return false; }
-	virtual GDbRecordset *TableAt(int i) { return NULL; }
+	virtual LDbRecordset *TableAt(int i) { return NULL; }
 	virtual const char *GetErrorMsg() { return 0; }
 };
 

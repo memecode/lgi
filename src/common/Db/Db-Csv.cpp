@@ -48,7 +48,7 @@ char *LgiTsvTok(char *&s)
 	return NewStr(start, end-start);
 }
 
-class SvRecordset : public GDbRecordset
+class SvRecordset : public LDbRecordset
 {
 	friend class SvField;
 	friend class SvDb;
@@ -74,10 +74,10 @@ public:
 	~SvRecordset();
 
 	char *Name();
-	GDbField &operator [](unsigned Index);
-	GDbField &operator [](const char *Name);
-	GDbField *InsertField(const char *Name, int Type, int Len, int Index);
-	bool DeleteField(GDbField *Fld);
+	LDbField &operator [](unsigned Index);
+	LDbField &operator [](const char *Name);
+	LDbField *InsertField(const char *Name, int Type, int Len, int Index);
+	bool DeleteField(LDbField *Fld);
 	int Fields();
 	bool End();
 	bool AddNew();
@@ -113,8 +113,8 @@ public:
 	~SvDb();
 	bool Connect(const char *Init);
 	bool Disconnect();
-	GDbRecordset *Open(char *Name);
-	GDbRecordset *TableAt(int i);
+	LDbRecordset *Open(char *Name);
+	LDbRecordset *TableAt(int i);
 	bool Tsv() { return Separator == '\t'; }
 	char GetSep() { return Separator; }
 };
@@ -290,7 +290,7 @@ public:
 	}
 };
 
-class SvField : public GDbField
+class SvField : public LDbField
 {
 	int Index;
 	LAutoString FldName;
@@ -361,7 +361,7 @@ public:
 		return false;
 	}
 
-	GDbField &operator =(char *ns)
+	LDbField &operator =(char *ns)
 	{
 		SvRecord *r = Rs->Record();
 		if (r)
@@ -557,9 +557,9 @@ SvRecord *SvRecordset::Record()
 	return NULL;
 }
 
-static GDbField Null;
+static LDbField Null;
 
-GDbField &SvRecordset::operator [](unsigned Index)
+LDbField &SvRecordset::operator [](unsigned Index)
 {
 	if (Index < F.Length())
 		return *F[Index];
@@ -567,13 +567,13 @@ GDbField &SvRecordset::operator [](unsigned Index)
 	return Null;
 }
 
-GDbField &SvRecordset::operator [](const char *Name)
+LDbField &SvRecordset::operator [](const char *Name)
 {
 	if (Name)
 	{
 		for (unsigned i=0; i<F.Length(); i++)
 		{
-			GDbField *f = F[i];
+			LDbField *f = F[i];
 			if (f->Name() && _stricmp(Name, f->Name()) == 0)
 			{
 				return *f;
@@ -583,7 +583,7 @@ GDbField &SvRecordset::operator [](const char *Name)
 	return Null;
 }
 
-GDbField *SvRecordset::InsertField(const char *Name, int Type, int Length, int Index)
+LDbField *SvRecordset::InsertField(const char *Name, int Type, int Length, int Index)
 {
 	if (Index < 0)
 	{
@@ -599,7 +599,7 @@ GDbField *SvRecordset::InsertField(const char *Name, int Type, int Length, int I
 	return f;
 }
 
-bool SvRecordset::DeleteField(GDbField *Fld)
+bool SvRecordset::DeleteField(LDbField *Fld)
 {
 	return 0;
 }
@@ -749,7 +749,7 @@ bool SvDb::Disconnect()
 	return true;
 }
 
-GDbRecordset *SvDb::Open(char *Name)
+LDbRecordset *SvDb::Open(char *Name)
 {
 	SvRecordset *rs = new SvRecordset(this, Name, HasHeaders);
 	if (rs)
@@ -759,7 +759,7 @@ GDbRecordset *SvDb::Open(char *Name)
 	return rs;
 }
 
-GDbRecordset *SvDb::TableAt(int i)
+LDbRecordset *SvDb::TableAt(int i)
 {
 	return Tables[i];
 }

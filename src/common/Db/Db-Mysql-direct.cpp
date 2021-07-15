@@ -100,7 +100,7 @@
 #define TIMESTAMP_FLAG				0x0400
 #define SET_FLAG					0x0800
 
-GDbField Null;
+LDbField Null;
 
 LArray<char> Hex(char *h)
 {
@@ -480,7 +480,7 @@ public:
 	}
 };
 
-class MysqlDirectField : public GDbField
+class MysqlDirectField : public LDbField
 {
 public:
 	class MysqlDirectRs *Rs;
@@ -511,7 +511,7 @@ public:
 	bool Get(LVariant &v);
 };
 
-class MysqlDirectRs : public GDbRecordset
+class MysqlDirectRs : public LDbRecordset
 {
 public:
 	typedef LArray<LAutoString> Row;
@@ -528,13 +528,13 @@ public:
 	char *Name();
 	bool Eof() { return Cursor < 0 || Cursor >= Rows.Length(); }
 
-	GDbField &operator [](int Index);
-	GDbField &operator [](const char *Name);	
-	GDbField *InsertField(	const char *Name,
+	LDbField &operator [](int Index);
+	LDbField &operator [](const char *Name);	
+	LDbField *InsertField(	const char *Name,
 							int Type,
 							int Length = 0,
 							int Index = -1);
-	bool DeleteField(GDbField *Fld);
+	bool DeleteField(LDbField *Fld);
 	int Fields();
 
 	bool End();
@@ -641,7 +641,7 @@ char *MysqlDirectRs::Name()
 	return Sql;
 }
 
-GDbField &MysqlDirectRs::operator [](int Index)
+LDbField &MysqlDirectRs::operator [](int Index)
 {
 	if (Index >= 0 && Index < Field.Length())
 		return *Field[Index];
@@ -649,13 +649,13 @@ GDbField &MysqlDirectRs::operator [](int Index)
 	return Null;
 }
 
-GDbField &MysqlDirectRs::operator [](const char *Name)
+LDbField &MysqlDirectRs::operator [](const char *Name)
 {
-	GDbField *f = Idx.Find((char*)Name);
+	LDbField *f = Idx.Find((char*)Name);
 	return f ? *f : Null;
 }
 
-GDbField *MysqlDirectRs::InsertField(	const char *Name,
+LDbField *MysqlDirectRs::InsertField(	const char *Name,
 										int Type,
 										int Length,
 										int Index)
@@ -663,7 +663,7 @@ GDbField *MysqlDirectRs::InsertField(	const char *Name,
 	return 0;
 }
 
-bool MysqlDirectRs::DeleteField(GDbField *Fld)
+bool MysqlDirectRs::DeleteField(LDbField *Fld)
 {
 	return 0;
 }
@@ -870,12 +870,12 @@ public:
 							else
 							{
 								// Read in a list of databases
-								LAutoPtr<GDbRecordset> r(Open("show databases;"));
+								LAutoPtr<LDbRecordset> r(Open("show databases;"));
 								if (r)
 								{
 									for (bool b = r->MoveFirst(); b; b = r->MoveNext())
 									{
-										GDbField &asd = (*r)[0];
+										LDbField &asd = (*r)[0];
 										char *db = asd;
 										Dbs.New().Reset(NewStr(db));
 									}
@@ -950,7 +950,7 @@ public:
 		return Response(p) == MyOk;
 	}
 
-	GDbRecordset *Open(char *Name)
+	LDbRecordset *Open(char *Name)
 	{
 		if (!IsOk())
 			return 0;
@@ -1025,7 +1025,7 @@ public:
 		return Err;
 	}
 
-	GDbRecordset *TableAt(int i)
+	LDbRecordset *TableAt(int i)
 	{
 		return 0;
 	}

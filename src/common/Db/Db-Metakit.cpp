@@ -11,7 +11,7 @@
 class MkDb;
 class MkTable;
 
-class MkField : public GDbField
+class MkField : public LDbField
 {
 public:
 	MkDb *Db;
@@ -37,7 +37,7 @@ public:
 	bool Get(LVariant &v);
 };
 
-class MkTable : public GDbRecordset
+class MkTable : public LDbRecordset
 {
 public:
 	MkDb *Db;
@@ -53,10 +53,10 @@ public:
 	char *Name() { return (char*) Tbl->Name(); }
 
 	// Fields
-	GDbField *operator [](int Index);
-	GDbField *operator [](char *Name);
-	bool InsertField(GDbField *Fld, int Index = -1);
-	bool DeleteField(GDbField *Fld);
+	LDbField *operator [](int Index);
+	LDbField *operator [](char *Name);
+	bool InsertField(LDbField *Fld, int Index = -1);
+	bool DeleteField(LDbField *Fld);
 	int Fields();
 
 	// Markers
@@ -96,8 +96,8 @@ public:
 	bool Connect(char *Init);
 	bool Disconnect();
 
-	GDbRecordset *Open(char *Name);
-	GDbRecordset *TableAt(int i);
+	LDbRecordset *Open(char *Name);
+	LDbRecordset *TableAt(int i);
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -238,12 +238,12 @@ MkTable::~MkTable()
 	F.DeleteObjects();
 }
 
-GDbField *MkTable::operator [](int Index)
+LDbField *MkTable::operator [](int Index)
 {
 	return F[Index];
 }
 
-GDbField *MkTable::operator [](char *Name)
+LDbField *MkTable::operator [](char *Name)
 {
 	if (Name)
 	{
@@ -259,12 +259,12 @@ GDbField *MkTable::operator [](char *Name)
 	return 0;
 }
 
-bool MkTable::InsertField(GDbField *Fld, int Index)
+bool MkTable::InsertField(LDbField *Fld, int Index)
 {
 	return 0;
 }
 
-bool MkTable::DeleteField(GDbField *Fld)
+bool MkTable::DeleteField(LDbField *Fld)
 {
 	return 0;
 }
@@ -386,7 +386,7 @@ bool MkDb::Disconnect()
 	return true;
 }
 
-GDbRecordset *MkDb::Open(char *Name)
+LDbRecordset *MkDb::Open(char *Name)
 {
 	if (Name)
 	{
@@ -402,7 +402,7 @@ GDbRecordset *MkDb::Open(char *Name)
 	return 0;
 }
 
-GDbRecordset *MkDb::TableAt(int i)
+LDbRecordset *MkDb::TableAt(int i)
 {
 	return T[i];
 }

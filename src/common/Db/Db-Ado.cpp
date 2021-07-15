@@ -14,7 +14,7 @@
 
 #import <msado15.dll> no_namespace rename("EOF", "adoEOF") implementation_only
 
-class GAdoField : public GDbField
+class GAdoField : public LDbField
 {
 	char *Value;
 	char *FldName;
@@ -311,7 +311,7 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////
-class GAdoRecordset : public GDbRecordset
+class GAdoRecordset : public LDbRecordset
 {
 	ADODB::_RecordsetPtr Rs1;
 	List<GAdoField> Fields;
@@ -354,13 +354,13 @@ public:
 		}
 	}
 
-	GDbField *Field(int Index)
+	LDbField *Field(int Index)
 	{
 		GAdoField *f = Fields.ItemAt(Index);
 		return (f) ? f : NullField;
 	}
 
-	GDbField *Field(char *Name)
+	LDbField *Field(char *Name)
 	{
 		if (Name)
 		{
@@ -376,12 +376,12 @@ public:
 		return NullField;
 	}
 
-	bool InsertField(GDbField *Fld, int Index)
+	bool InsertField(LDbField *Fld, int Index)
 	{
 		return false;
 	}
 
-	bool DeleteField(GDbField *Fld)
+	bool DeleteField(LDbField *Fld)
 	{
 		return false;
 	}
@@ -566,17 +566,17 @@ public:
 	}
 
 	// Retrieving data
-	GDbRecordset *OpenRecordset(char *Sql)
+	LDbRecordset *OpenRecordset(char *Sql)
 	{
 		return new GAdoRecordset(Con, Sql);
 	}
 
-	GDbRecordset *GetTables()
+	LDbRecordset *GetTables()
 	{
 		return 0;
 	}
 
-	GDbRecordset *GetFields(char *Table)
+	LDbRecordset *GetFields(char *Table)
 	{
 		return 0;
 	}

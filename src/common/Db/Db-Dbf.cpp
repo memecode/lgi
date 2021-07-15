@@ -34,8 +34,8 @@ public:
 	bool Disconnect() { return true; }
 
 	// Retrieving data
-	GDbRecordset *Open(char *Name);
-	GDbRecordset *TableAt(int i) { return 0; }
+	LDbRecordset *Open(char *Name);
+	LDbRecordset *TableAt(int i) { return 0; }
 };
 
 class GDbfRecord
@@ -50,7 +50,7 @@ public:
 	char *GetData();
 };
 
-class GDbfField : public GDbField
+class GDbfField : public LDbField
 {
 	friend class GDbfRecord;
 	friend class GDbfRecordset;
@@ -90,7 +90,7 @@ public:
 	bool Get(void *&Data, int &Length) { return false; }
 };
 
-class GDbfRecordset : public GDbRecordset
+class GDbfRecordset : public LDbRecordset
 {
 	friend class GDbfRecord;
 	friend class GDbfField;
@@ -119,10 +119,10 @@ public:
 	}
 
 	// Fields
-	GDbField *operator [](int Index);
-	GDbField *operator [](char *Name);
-	bool InsertField(GDbField *Fld, int Index = -1);
-	bool DeleteField(GDbField *Fld);
+	LDbField *operator [](int Index);
+	LDbField *operator [](char *Name);
+	bool InsertField(LDbField *Fld, int Index = -1);
+	bool DeleteField(LDbField *Fld);
 	int Fields();
 
 	bool AddNew() { return false; }
@@ -167,7 +167,7 @@ bool GDbfDb::Connect(char *Init)
 	return Dir != 0;
 }
 
-GDbRecordset *GDbfDb::Open(char *Name)
+LDbRecordset *GDbfDb::Open(char *Name)
 {
 	if (Dir AND Name)
 	{
@@ -554,13 +554,13 @@ GDbfRecordset::~GDbfRecordset()
 	Current = 0;
 }
 
-GDbField *GDbfRecordset::operator [](int Index)
+LDbField *GDbfRecordset::operator [](int Index)
 {
 	GDbfField *f = F.ItemAt(Index);
 	return (f) ? f : NullField;
 }
 
-GDbField *GDbfRecordset::operator [](char *Name)
+LDbField *GDbfRecordset::operator [](char *Name)
 {
 	if (Name)
 	{
@@ -577,13 +577,13 @@ GDbField *GDbfRecordset::operator [](char *Name)
 	return NullField;
 }
 
-bool GDbfRecordset::InsertField(GDbField *Fld, int Index)
+bool GDbfRecordset::InsertField(LDbField *Fld, int Index)
 {
 	// TODO
 	return false;
 }
 
-bool GDbfRecordset::DeleteField(GDbField *Fld)
+bool GDbfRecordset::DeleteField(LDbField *Fld)
 {
 	// TODO
 	return false;
