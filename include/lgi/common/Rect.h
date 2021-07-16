@@ -140,6 +140,9 @@ public:
 	/// Returns true if the point 'x,y' is in this rectangle
 	bool Overlap(int x, int y);
 
+	/// Returns true if the point 'pt' is in this rectangle
+	bool Overlap(LPoint &pt);
+
 	/// Returns true if the rectangle 'b' overlaps this rectangle
 	bool Overlap(LRect *b);
 	
@@ -421,6 +424,7 @@ public:
 	LRect Bound();
 	bool Overlap(LRect *b);
 	bool Overlap(int x, int y);
+	bool Overlap(LPoint &p);
 	
 	void Union(LRect *a);
 	void Intersect(LRect *a);

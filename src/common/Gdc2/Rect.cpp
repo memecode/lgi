@@ -202,6 +202,11 @@ void LRect::Bound(LRect *b)
 	y2 = MIN(y2,b->y2);
 }
 
+bool LRect::Overlap(LPoint &pt)
+{
+	return (pt.x >= x1) && (pt.x <= x2) && (pt.y >= y1) && (pt.y <= y2);
+}
+
 bool LRect::Overlap(int x, int y)
 {
 	return (x >= x1) && (x <= x2) && (y >= y1) && (y <= y2);
@@ -584,12 +589,20 @@ void LRegion::Bound(LRect *b)
 	}
 }
 
+bool LRegion::Overlap(LPoint &pt)
+{
+	for (int i=0; i<Size; i++)
+		if (a[i].Overlap(pt))
+			return true;
+
+	return false;
+}
+
 bool LRegion::Overlap(int x, int y)
 {
 	for (int i=0; i<Size; i++)
-	{
-		if (a[i].Overlap(x, y)) return true;
-	}
+		if (a[i].Overlap(x, y))
+			return true;
 
 	return false;
 }
