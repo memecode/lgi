@@ -16,12 +16,16 @@ struct GraphAv
 
 struct LGraphPriv
 {
+	constexpr static int AxisMarkPx = 8;
+
 	int XAxis, YAxis;
 	LVariantType XType, YType;
 	LVariant MaxX, MinX;
 	LVariant MaxY, MinY;
     LArray<LGraph::GGraphPair> Val;
 	LGraph::Style Style;
+	bool ShowCursor = false;
+	LPoint MouseLoc;
 	
 	// Averages
 	bool Average;
@@ -68,10 +72,10 @@ struct LGraphPriv
 
 		if (Num)
 		{
+			if (Delims)
+				return GV_DATETIME;
 			if (Dot)
 				return GV_DOUBLE;
-			else if (Delims)
-				return GV_DATETIME;
 			
 			return GV_INT64;
 		}
@@ -156,7 +160,55 @@ struct LGraphPriv
 		return 0;
 	}
 
-	int64 Map(LVariant &v, int pixels, LVariant &min, LVariant &max)
+	LVariant ViewToData(int coord, int pixels, LVariant &min, LVariant &max)
+	{
+		LVariant r;
+
+		if (pixels <= 0)
+			return r;
+
+		switch (min.Type)
+		{
+			case GV_DATETIME:
+			{
+				uint64 Min, Max;
+				min.Value.Date->Get(Min);
+				max.Value.Date->Get(Max);				
+				
+				uint64 ts = Min + ( ((uint64)coord * (Max - Min)) / pixels); 
+				LDateTime dt;
+				dt.Set(ts);
+
+				r = &dt;
+				break;
+			}
+			case GV_INT64:
+			{
+				int64 Min, Max;
+				Min = min.CastInt64();
+				Max = max.CastInt64();
+
+				r = Min + (((int64)coord * (Max - Min)) / pixels);
+				break;
+			}
+			case GV_DOUBLE:
+			{
+				double Min, Max;
+				Min = min.CastDouble();
+				Max = max.CastDouble();
+
+				r = Min + (((double)coord * (Max - Min)) / pixels);
+				break;
+			}
+			default:
+				LgiAssert(0);
+				break;
+		}
+
+		return r;
+	}
+
+	int DataToView(LVariant &v, int pixels, LVariant &min, LVariant &max)
 	{
 		if (v.Type != min.Type ||
 			v.Type != max.Type)
@@ -176,7 +228,7 @@ struct LGraphPriv
 				int64 Range = Max - Min;
 				LgiAssert(Range > 0);
 
-				return (Val - Min) * (pixels - 1) / Range;
+				return (int) ((Val - Min) * (pixels - 1) / Range);
 				break;
 			}
 			case GV_INT64:
@@ -189,7 +241,7 @@ struct LGraphPriv
 				int64 Range = Max - Min;
 				LgiAssert(Range > 0);
 
-				return (Val - Min) * (pixels - 1) / Range;
+				return (int) ((Val - Min) * (pixels - 1) / Range);
 				break;
 			}
 			case GV_DOUBLE:
@@ -211,6 +263,44 @@ struct LGraphPriv
 		}
 
 		return 0;
+	}
+
+	LString DataToString(LVariant &v)
+	{
+		LString s;
+		switch (v.Type)
+		{
+			case GV_DATETIME:
+			{
+				if (v.Value.Date->Hours() ||
+					v.Value.Date->Minutes())
+					s = v.Value.Date->Get();
+				else
+					s = v.Value.Date->GetDate();
+				break;
+			}
+			case GV_INT64:
+			{
+				s.Printf(LPrintfInt64, v.CastInt64());
+				break;
+			}
+			case GV_INT32:
+			{
+				s.Printf("%" PRIi32, v.CastInt32());
+				break;
+			}
+			case GV_DOUBLE:
+			{
+				s.Printf("%g", v.CastDouble());
+				break;
+			}
+			default:
+			{
+				LgiAssert(!"Impl me.");
+				break;
+			}
+		}
+		return s;
 	}
 
 	void DrawAxis(LSurface *pDC, LRect &r, int xaxis, LVariant &min, LVariant &max)
@@ -253,7 +343,7 @@ struct LGraphPriv
 					    min.Value.Date->Get(s);
 					    max.Value.Date->Get(e);
 					    int64 period = e - s;
-                        double days = (double)period / LDateTime::Second64Bit / 24 / 60 / 60;
+                        double days = (double)period / LDateTime::DayLength;
 					    if (days > 7)
 					        date_inc = (int) (days / 5);
 					    else
@@ -298,20 +388,24 @@ struct LGraphPriv
 					{
 						double dbl_range = max.CastDouble() - min.CastDouble();
 						double rng = dbl_range;
-						int p = 0;
-						while (rng > 10)
+						if (std::abs(rng - 0.0) > 0.0001)
 						{
-							p++;
-							rng /= 10;
+							int p = 0;
+							while (rng > 10)
+							{
+								p++;
+								rng /= 10;
+							}
+							while (rng < 1)
+							{
+								p--;
+								rng *= 10;
+							}
+							dbl_inc = pow(10.0, p);
+							int d = (int)((v.CastDouble() + dbl_inc) / dbl_inc);
+							v = (double)d * dbl_inc;
 						}
-						while (rng < 1)
-						{
-							p--;
-							rng *= 10;
-						}
-						dbl_inc = pow(10.0, p);
-						int d = (int)((v.CastDouble() + dbl_inc) / dbl_inc);
-						v = (double)d * dbl_inc;
+						else v = 0.0;
 					}
 					else
 					{
@@ -329,42 +423,17 @@ struct LGraphPriv
 		for (int i=0; i<Values.Length(); i++)
 		{
 			v = Values[i];
-			auto Offset = Map(v, pixels, min, max);
+			auto Offset = DataToView(v, pixels, min, max);
 			int dx = (int)(x + (xaxis ? Offset : 0));
 			int dy = (int)(y - (xaxis ? 0 : Offset));
 
-			char s[256];
-			switch (v.Type)
-			{
-				case GV_DATETIME:
-				{
-					if (v.Value.Date->Hours() ||
-						v.Value.Date->Minutes())
-						v.Value.Date->Get(s, sizeof(s));
-					else
-						v.Value.Date->GetDate(s, sizeof(s));
-					break;
-				}
-				case GV_INT64:
-				{
-					sprintf_s(s, sizeof(s), LPrintfInt64, v.CastInt64());
-					break;
-				}
-				case GV_DOUBLE:
-				{
-					sprintf_s(s, sizeof(s), "%g", v.CastDouble());
-					break;
-				}
-				default:
-					return;
+			LString s = DataToString(v);
 
-			}
-
-			LDisplayString d(SysFont, s);
+			LDisplayString ds(SysFont, s);
 			if (xaxis)
-				d.Draw(pDC, dx - (d.X()/2), dy + 10);
+				ds.Draw(pDC, dx - (ds.X()/2), dy + AxisMarkPx);
 			else
-				d.Draw(pDC, dx - d.X() - 10, dy - (d.Y() / 2));
+				ds.Draw(pDC, dx - ds.X() - AxisMarkPx, dy - (ds.Y() / 2));
 
 			if (xaxis)
 				pDC->Line(dx, dy, dx, dy + 5);
@@ -494,7 +563,8 @@ enum Msg
     IDM_LINE = 100,
     IDM_POINT,
     IDM_AVERAGE,
-    IDC_AVERAGE_SAVE,
+    IDM_AVERAGE_SAVE,
+	IDM_SHOW_CURSOR,
 };
 
 void LGraph::OnMouseClick(LMouse &m)
@@ -504,6 +574,9 @@ void LGraph::OnMouseClick(LMouse &m)
         LSubMenu s;
         m.ToScreen();
 
+		auto CursorItem = s.AppendItem("Show Cursor", IDM_SHOW_CURSOR);
+		if (CursorItem) CursorItem->Checked(d->ShowCursor);
+
         auto style = s.AppendSub("Style");
         style->AppendItem("Line", IDM_LINE);
         style->AppendItem("Point", IDM_POINT);
@@ -511,10 +584,13 @@ void LGraph::OnMouseClick(LMouse &m)
         auto a = s.AppendSub("Average");
         auto i = a->AppendItem("Show", IDM_AVERAGE);
         i->Checked(d->Average);
-        a->AppendItem("Save", IDC_AVERAGE_SAVE);
+        a->AppendItem("Save", IDM_AVERAGE_SAVE);
 
         switch (s.Float(this, m.x, m.y))
         {
+			case IDM_SHOW_CURSOR:
+				ShowCursor(!d->ShowCursor);
+				break;
             case IDM_LINE:
                 SetStyle(LineGraph);
                 break;
@@ -525,7 +601,7 @@ void LGraph::OnMouseClick(LMouse &m)
                 d->Average = !d->Average;
                 Invalidate();
                 break;
-            case IDC_AVERAGE_SAVE:
+            case IDM_AVERAGE_SAVE:
             {
                 if (!d->Ave.Length())
                 {
@@ -598,14 +674,41 @@ LArray<LGraph::GGraphPair*> *LGraph::GetSelection()
     return &d->Selection;
 }
 
+bool LGraph::ShowCursor()
+{
+	return d->ShowCursor;
+}
+
+void LGraph::ShowCursor(bool show)
+{
+	if (show ^ d->ShowCursor)
+	{
+		d->ShowCursor = show;
+		Invalidate();
+	}
+}
+
+void LGraph::OnMouseMove(LMouse &m)
+{
+	d->MouseLoc = m;
+	if (d->ShowCursor)
+		Invalidate();
+}
+
 void LGraph::OnPaint(LSurface *pDC)
 {
+	LAutoPtr<LDoubleBuffer> DoubleBuf;
+	if (d->ShowCursor)
+		DoubleBuf.Reset(new LDoubleBuffer(pDC));
+
 	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle();
 
+	LColour cBorder(222, 222, 222);
 	LRect c = GetClient();
 	LRect data = c;
 	data.Size(20, 20);
+	data.x2 -= 40;
 	LRect y = data;
 	y.x2 = y.x1 + 60;
 	data.x1 = y.x2 + 1;
@@ -613,13 +716,32 @@ void LGraph::OnPaint(LSurface *pDC)
 	x.y1 = x.y2 - 60;
 	y.y2 = data.y2 = x.y1 - 1;	
 	
-	pDC->Colour(LColour(222, 222, 222));
+	pDC->Colour(cBorder);
 	pDC->Box(&data);
 
 	// Draw axis
 	d->DrawAxis(pDC, x, true, d->MinX, d->MaxX);
 	d->DrawAxis(pDC, y, false, d->MinY, d->MaxY);
 	
+	if (d->ShowCursor)
+	{
+		// Draw in cursor...
+		if (data.Overlap(d->MouseLoc))
+		{
+			// X axis cursor info
+			auto xCur = d->ViewToData(d->MouseLoc.x - data.x1, data.X(), d->MinX, d->MaxX);
+			pDC->VLine(d->MouseLoc.x, data.y1, data.y2 + d->AxisMarkPx);
+			LDisplayString dsX(GetFont(), d->DataToString(xCur));
+			dsX.Draw(pDC, d->MouseLoc.x - (dsX.X() >> 1), data.y2 + d->AxisMarkPx + 4);
+
+			// Y axis
+			auto yCur = d->ViewToData(data.y2 - d->MouseLoc.y, data.Y(), d->MinY, d->MaxY);
+			pDC->HLine(data.x1 - d->AxisMarkPx, data.x2, d->MouseLoc.y);
+			LDisplayString dsY(GetFont(), d->DataToString(yCur));
+			dsY.Draw(pDC, data.x1 - d->AxisMarkPx - 4 - dsY.X(), d->MouseLoc.y - (dsY.Y() >> 1));
+		}
+	}
+
 	// Draw data
 	int cx, cy, px, py;
 	pDC->Colour(LColour(0, 0, 222));
@@ -629,7 +751,7 @@ void LGraph::OnPaint(LSurface *pDC)
         for (int i=0; i<d->Val.Length(); i++)
         {
 	        GGraphPair &p = d->Val[i];
-	        auto Bucket = d->Map(p.x, d->BucketSize, d->MinX, d->MaxX);
+	        auto Bucket = d->DataToView(p.x, d->BucketSize, d->MinX, d->MaxX);
             d->Ave[Bucket].Sum += p.y.CastInt64();
             d->Ave[Bucket].Count++;
         }
@@ -642,8 +764,8 @@ void LGraph::OnPaint(LSurface *pDC)
 	        for (int i=0; i<d->Val.Length(); i++)
 	        {
 		        GGraphPair &p = d->Val[i];
-		        cx = x.x1 + (int)d->Map(p.x, x.X(), d->MinX, d->MaxX);
-		        cy = y.y2 - (int)d->Map(p.y, y.Y(), d->MinY, d->MaxY);
+		        cx = x.x1 + (int)d->DataToView(p.x, x.X(), d->MinX, d->MaxX);
+		        cy = y.y2 - (int)d->DataToView(p.y, y.Y(), d->MinY, d->MaxY);
 		        if (i)
 		        {
 			        pDC->Line(cx, cy, px, py);
@@ -658,8 +780,12 @@ void LGraph::OnPaint(LSurface *pDC)
 	        for (int i=0; i<d->Val.Length(); i++)
 	        {
 		        GGraphPair &p = d->Val[i];
-		        cx = x.x1 + (int)d->Map(p.x, x.X(), d->MinX, d->MaxX);
-		        cy = y.y2 - (int)d->Map(p.y, y.Y(), d->MinY, d->MaxY);
+
+				int xmap = (int)d->DataToView(p.x, x.X(), d->MinX, d->MaxX);
+				int ymap = (int)d->DataToView(p.y, y.Y(), d->MinY, d->MaxY);
+				// LgiTrace("%s -> %i (%s, %s)\n", p.x.Value.Date->Get().Get(), xmap, d->MinX.Value.Date->Get().Get(), d->MaxX.Value.Date->Get().Get());
+		        cx = x.x1 + xmap;
+		        cy = y.y2 - ymap;
 		        pDC->Set(cx, cy);
 		        
 		        if (d->Select &&
@@ -680,7 +806,7 @@ void LGraph::OnPaint(LSurface *pDC)
 	                {
 	                    int cx = x.x1 + (((b * x.X()) + (x.X() >> 1)) / d->BucketSize);
 	                    LVariant v = d->Ave[b].Sum / d->Ave[b].Count;
-	                    int cy = y.y2 - (int)d->Map(v, y.Y(), d->MinY, d->MaxY);
+	                    int cy = y.y2 - (int)d->DataToView(v, y.Y(), d->MinY, d->MaxY);
 	                    
 	                    if (py >= 0)
 	                    {

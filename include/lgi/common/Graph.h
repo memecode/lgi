@@ -41,8 +41,11 @@ public:
 	void SetStyle(Style s);
 	Style GetStyle();
 	LArray<GGraphPair*> *GetSelection();
+	bool ShowCursor();
+	void ShowCursor(bool show);
 
     // Impl
 	void OnPaint(LSurface *pDC);
-	void OnMouseClick(LMouse &m);	
+	void OnMouseClick(LMouse &m);
+	void OnMouseMove(LMouse &m);
 };
