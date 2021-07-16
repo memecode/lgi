@@ -19,7 +19,6 @@
 #define AlphaType		kCGImageAlphaPremultipliedLast
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-static int CGImgCount = 0, CGImgDeletes = 0;
 class CGImgPriv
 {
 public:
@@ -64,7 +63,6 @@ void ReleaseCGImg(void *info, const void *data, size_t size)
 
 CGImg::CGImg(LSurface *pDC)
 {
-	CGImgCount++;
 	d = new CGImgPriv;
 	if (pDC)
 	{
@@ -75,29 +73,16 @@ CGImg::CGImg(LSurface *pDC)
 	}
 }
 
-uint64 Ts = 0;
-
 CGImg::CGImg(int x, int y, int Bits, ssize_t Line, uchar *data, uchar *palette, LRect *r, int Debug)
 {
-	CGImgCount++;
 	d = new CGImgPriv;
 	d->Debug = Debug;
 	Create(x, y, Bits, Line, data, palette, r);
-	
-	
-	auto now = LgiCurrentTime();
-	if (now - Ts >= 1000)
-	{
-		Ts = now;
-		printf("CGImg=%i %i\n", CGImgCount, CGImgDeletes);
-	}
 }
 
 CGImg::~CGImg()
 {
 	DeleteObj(d);
-	CGImgCount--;
-	CGImgDeletes++;
 }
 
 CGImg::operator CGImageRef()
