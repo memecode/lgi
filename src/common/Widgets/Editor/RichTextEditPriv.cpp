@@ -1835,7 +1835,7 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 		// Draw tools area...
 		LRect &t = Areas[LRichTextEdit::ToolsArea];
 		#ifdef WIN32
-		GDoubleBuffer Buf(pDC, &t);
+		LDoubleBuffer Buf(pDC, &t);
 		#endif
 		LColour ToolBar = LColour(L_FOCUS_SEL_BACK).Mix(LColour(L_LOW));
 		pDC->Colour(ToolBar);

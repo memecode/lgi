@@ -1124,7 +1124,7 @@ public:
 };
 
 /// This class is useful for double buffering in an OnPaint handler...
-class GDoubleBuffer
+class LDoubleBuffer
 {
 	LSurface **In;
 	LSurface *Screen;
@@ -1133,7 +1133,7 @@ class GDoubleBuffer
 	bool Valid;
 
 public:
-	GDoubleBuffer(LSurface *&pDC, LRect *Sub = NULL) : In(&pDC)
+	LDoubleBuffer(LSurface *&pDC, LRect *Sub = NULL) : In(&pDC)
 	{
 		Rgn = Sub ? *Sub : pDC->Bounds();
 		Screen = pDC;
@@ -1147,7 +1147,7 @@ public:
 		}
 	}
 	
-	~GDoubleBuffer()
+	~LDoubleBuffer()
 	{
 		if (Valid)
 		{

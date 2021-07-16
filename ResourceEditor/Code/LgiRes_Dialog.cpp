@@ -3523,7 +3523,7 @@ void ResDialog::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 	}
 
 	#if USE_MEM_DC
-	GDoubleBuffer DblBuf(pDC);
+	LDoubleBuffer DblBuf(pDC);
 	#endif
 	
 	LView::_Paint(pDC, Offset, Update);

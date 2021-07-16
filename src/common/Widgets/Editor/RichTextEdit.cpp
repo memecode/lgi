@@ -2924,9 +2924,9 @@ EmojiMenu::EmojiMenu(LRichTextPriv *priv, LPoint p) : LPopup(priv->View)
 
 void EmojiMenu::OnPaint(LSurface *pDC)
 {
-	LAutoPtr<GDoubleBuffer> DblBuf;
+	LAutoPtr<LDoubleBuffer> DblBuf;
 	if (!pDC->SupportsAlphaCompositing())
-		DblBuf.Reset(new GDoubleBuffer(pDC));
+		DblBuf.Reset(new LDoubleBuffer(pDC));
 
 	pDC->Colour(L_MED);
 	pDC->Rectangle();
