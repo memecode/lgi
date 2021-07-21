@@ -1112,7 +1112,7 @@ int LRichTextEdit::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 			LPoint TestPt(	Pt.x - d->Areas[ContentArea].x1,
 							Pt.y - d->Areas[ContentArea].y1);
 
-			GDropFiles Df(dd);
+			LDropFiles Df(dd);
 			for (unsigned n=0; n<Df.Length(); n++)
 			{
 				const char *f = Df[n];

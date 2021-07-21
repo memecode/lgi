@@ -4061,7 +4061,7 @@ int IdeTree::OnDrop(LArray<LDragData> &Data, LPoint p, int KeyState)
 			if (Dst)
 			{
 				AddFilesProgress Prog(this);
-				GDropFiles Df(dd);
+				LDropFiles Df(dd);
 				for (int i=0; i<Df.Length() && !Prog.Cancel; i++)
 				{
 					if (Dst->AddFiles(&Prog, Df[i]))

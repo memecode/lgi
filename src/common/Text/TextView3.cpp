@@ -17,6 +17,7 @@
 #include "lgi/common/Mail.h"
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/Menu.h"
+#include "lgi/common/DropFiles.h"
 
 #ifdef _DEBUG
 #define FEATURE_HILIGHT_ALL_MATCHES	1
@@ -3332,13 +3333,27 @@ int LTextView3::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 		else if (dd.IsFileDrop())
 		{
 			// We don't directly handle file drops... pass up to the parent
+			bool FoundTarget = false;
 			for (LViewI *p = GetParent(); p; p = p->GetParent())
 			{
 				LDragDropTarget *t = p->DropTarget();
 				if (t)
 				{
 					Status = t->OnDrop(Data, Pt, KeyState);
-					break;
+					if (Status != DROPEFFECT_NONE)
+					{
+						FoundTarget = true;
+						break;
+					}
+				}
+			}
+			if (!FoundTarget)
+			{
+				auto Wnd = GetWindow();
+				if (Wnd)
+				{
+					LDropFiles files(dd);
+					Wnd->OnReceiveFiles(files);
 				}
 			}
 		}

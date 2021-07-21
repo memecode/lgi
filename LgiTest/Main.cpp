@@ -192,7 +192,7 @@ public:
 				auto &v = d.Data[n];
 				if (d.IsFileDrop())
 				{
-					GDropFiles df(d);
+					LDropFiles df(d);
 					Print("\t\t%i files:\n", (int)df.Length());
 					for (unsigned f=0; f<df.Length(); f++)
 					{

@@ -16,7 +16,7 @@
 #include "Lgi.h"
 #include "Base64.h"
 #include "GDragAndDrop.h"
-#include "GDropFiles.h"
+#include "LDropFiles.h"
 #include "GViewPriv.h"
 #include "LCss.h"
 

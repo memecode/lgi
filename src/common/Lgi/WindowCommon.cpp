@@ -184,7 +184,7 @@ int LWindow::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 		#endif
 		if (dd.IsFileDrop())
 		{
-			GDropFiles Files(dd);
+			LDropFiles Files(dd);
 			if (Files.Length())
 			{
 				Status = DROPEFFECT_COPY;

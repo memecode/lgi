@@ -56,7 +56,7 @@ struct LgiClass LDragData
 				!_stricmp(Format, Fmt);
 	}
 	
-	// \sa GDropFiles
+	// \sa LDropFiles
 	bool IsFileDrop()
 	{
 		return IsFormat(LGI_FileDropFormat)

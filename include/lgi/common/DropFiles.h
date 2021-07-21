@@ -14,12 +14,12 @@
 LgiFunc bool LMacFileToPath(LString &a);
 #endif
 
-class GDropFiles : public LArray<const char*>
+class LDropFiles : public LArray<const char*>
 {
 	LString Fmt;
 
 public:
-	GDropFiles(LDragData &dd)
+	LDropFiles(LDragData &dd)
 	{
 		if (dd.IsFileDrop())
 		{
@@ -29,12 +29,12 @@ public:
 		}
 	}
 
-    GDropFiles(LVariant &v)
+    LDropFiles(LVariant &v)
 	{
 		Init(v);
 	}
 
-    ~GDropFiles()
+    ~LDropFiles()
 	{
 		DeleteArrays();
 	}
@@ -119,7 +119,7 @@ public:
 					}
 				}
 			}
-			else printf("GDropFiles: Type not binary.\n");
+			else printf("LDropFiles: Type not binary.\n");
 
 		#elif defined MAC
 
