@@ -66,13 +66,14 @@ public:
 	OsThread Handle() { return hThread; }
 	const char *GetName() { return Name; }
 	OsThreadId GetId() { return ThreadId; }
-	ThreadState GetState() { return State; } // Volitile at best... only use for 'debug'
+	ThreadState GetState() { return State; } // Volatile at best... only use for 'debug'
 	virtual int ExitCode();
 	virtual bool IsExited();
 
 	// Methods
 	virtual void Run();
 	virtual void Terminate();
+	virtual void WaitForExit(int WarnAfterMs = 2000);
 
 	// Override to do something
 	virtual int Main();

@@ -260,6 +260,71 @@ public:
 	{
 		DeleteArray(LogFile);
 	}
+
+	bool Select(int TimeoutMs, bool Read)
+	{
+		// Assign to local var to avoid a thread changing it
+		// on us between the validity check and the select.
+		// Which is important because a socket value of -1
+		// (ie invalid) will crash the FD_SET macro.
+		OsSocket s = Socket; 
+		if (ValidSocket(s) && !Cancel->IsCancelled())
+		{
+			struct timeval t = {TimeoutMs / 1000, (TimeoutMs % 1000) * 1000};
+
+			fd_set set;
+			FD_ZERO(&set);
+			FD_SET(s, &set);		
+			
+			int ret = select(	(int)s+1,
+								Read ? &set : NULL,
+								!Read ? &set : NULL,
+								NULL,
+								TimeoutMs >= 0 ? &t : NULL);
+			
+			if (ret > 0 && FD_ISSET(s, &set))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	// This is the timing granularity of the SelectWithCancel loop. Ie the 
+	// number of milliseconds between checking the Cancel object.
+	constexpr static int CancelCheckMs = 50;
+
+	bool SelectWithCancel(int TimeoutMs, bool Read)
+	{
+		if (!Cancel)
+			// Regular select where we just wait the whole timeout...
+			return Select(TimeoutMs, false);
+
+		// Because select can't check out 'Cancel' value during the waiting we run the select
+		// call in a much smaller timeout and a loop so that we can respond to Cancel being set
+		// in a timely manner.
+		auto Now = LgiCurrentTime();
+		auto End = Now + TimeoutMs;
+		do
+		{
+			// Do the cancel check...
+			if (Cancel->IsCancelled())
+				break;
+
+			// How many ms to wait?
+			Now = LgiCurrentTime();
+			auto Remain = MIN(CancelCheckMs, (int)(End - Now));
+			if (Remain <= 0)
+				break;
+			
+			if (Select(Remain, Read))
+				return true;
+		}
+		while (Now < End);
+
+		return false;
+	}
 };
 
 LSocket::LSocket(LStreamI *logger, void *unused_param)
@@ -394,27 +459,7 @@ bool LSocket::IsReadable(int TimeoutMs)
 
 bool LSocket::IsWritable(int TimeoutMs)
 {
-	// Assign to local var to avoid a thread changing it
-	// on us between the validity check and the select.
-	// Which is important because a socket value of -1
-	// (ie invalid) will crash the FD_SET macro.
-	OsSocket s = d->Socket; 
-	if (ValidSocket(s) && !d->Cancel->IsCancelled())
-	{
-		struct timeval t = {TimeoutMs / 1000, (TimeoutMs % 1000) * 1000};
-
-		fd_set set;
-		FD_ZERO(&set);
-		FD_SET(s, &set);		
-		int ret = select((int)s+1, 0, &set, 0, &t);
-		// printf("select ret=%i isset=%i\n", ret, FD_ISSET(s, &set));
-		if (ret > 0 && FD_ISSET(s, &set))
-		{
-			return true;
-		}
-	}
-
-	return false;
+	return d->SelectWithCancel(TimeoutMs, false);
 }
 
 bool LSocket::CanAccept(int TimeoutMs)

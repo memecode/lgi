@@ -163,6 +163,18 @@ bool LThread::IsExited()
 	return false;
 }
 
+void LThread::WaitForExit(int WarnAfterMs)
+{
+	auto Start = LgiCurrentTime();
+	while (!IsExited())
+	{
+		if ((LgiCurrentTime() - Start) >= WarnAfterMs)
+			LgiAssert(!"Thread hasn't exited.");
+
+		LgiSleep(10);
+	}
+}
+
 void LThread::Run()
 {
 	if (State == THREAD_EXITED)
