@@ -51,7 +51,7 @@ SshConnection::SshConnection(LTextLog *log, const char *uri, const char *prompt)
 
 bool SshConnection::DetectVcs(VcFolder *Fld)
 {
-	LAutoPtr<LString> p(new LString(Fld->GetUri().sPath(1, -1)));
+	LAutoPtr<LString> p(new LString(Fld->GetUri().sPath));
 	TypeNotify.Add(Fld);
 	return PostObject(GetHandle(), M_DETECT_VCS, p);
 }
@@ -67,7 +67,7 @@ bool SshConnection::Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Pa
 	p->Args = Args;
 	p->Parser = Parser;
 	p->Params = Params;
-	p->Path = Fld->GetUri().sPath(1, -1);
+	p->Path = Fld->GetUri().sPath;
 
 	return PostObject(GetHandle(), M_RUN_CMD, p);
 }
@@ -252,6 +252,10 @@ GMessage::Result SshConnection::OnEvent(GMessage *Msg)
 				r->Path = *p;
 				r->Vcs = Vcs;
 				PostObject(GuiHnd, M_RESPONSE, r);
+			}
+			else
+			{
+				Log->Print("Error: no VCS detected.\n%s\n", lines.Last().Get());
 			}
 			break;
 		}
@@ -1673,6 +1677,25 @@ int RemoteFolderDlg::OnNotify(LViewI *Ctrl, int Flags)
 		}
 		case IDC_DELETE:
 		{
+			auto sel = tree ? dynamic_cast<SshHost*>(tree->Selection()) : NULL;
+			if (!sel)
+				break;
+
+			LXmlTag *hosts = app->Opts.LockTag(OPT_Hosts, _FL);
+			if (!hosts)
+			{
+				LAssert(!"Couldn't lock tag.");
+				break;
+			}
+
+			if (hosts->Children.HasItem(sel->t))
+			{
+				sel->t->RemoveTag();
+				DeleteObj(sel->t);
+				delete sel;
+			}
+			
+			app->Opts.Unlock();
 			break;
 		}
 		case IDC_USER:

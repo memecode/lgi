@@ -31,26 +31,24 @@
     <ClCompile Include="Src\BlameUi.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\DropDownBtn.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp">
-      <Filter>Source Files\Lgi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\Text\GXmlTreeUi.cpp">
-      <Filter>Source Files\Lgi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\Widgets\GControlTree.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
     <ClCompile Include="..\src\common\Text\DeEscape.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\common\Widgets\ControlTree.cpp">
+      <Filter>Source Files\Lgi</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\DropDownBtn.cpp">
+      <Filter>Source Files\Lgi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Text\XmlTreeUi.cpp">
+      <Filter>Source Files\Lgi</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\src\win32\General\Lgi.manifest">
-      <Filter>Source Files\Lgi</Filter>
-    </Manifest>
+    <Manifest Include="..\src\win\General\Lgi.manifest" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\VcCommit.h">

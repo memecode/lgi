@@ -733,6 +733,10 @@ void VcFolder::Select(bool b)
 					IsLogging = StartCmd(s, &VcFolder::ParseLog);
 					break;
 				}
+				case VcPending:
+				{
+					break;
+				}
 				default:
 				{
 					IsLogging = StartCmd("log", &VcFolder::ParseLog);
@@ -834,17 +838,17 @@ void VcFolder::Select(bool b)
 			int i = 0;
 			if (GetType() == VcHg && d->Commits->GetColumns() >= 7)
 			{
-				d->Commits->ColumnAt(i++)->Width(60); // LGraph
-				d->Commits->ColumnAt(i++)->Width(40); // LIndex
+				d->Commits->ColumnAt(i++)->Width(60);  // LGraph
+				d->Commits->ColumnAt(i++)->Width(40);  // LIndex
 				d->Commits->ColumnAt(i++)->Width(100); // LRevision
-				d->Commits->ColumnAt(i++)->Width(60); // LBranch
+				d->Commits->ColumnAt(i++)->Width(60);  // LBranch
 				d->Commits->ColumnAt(i++)->Width(240); // LAuthor
 				d->Commits->ColumnAt(i++)->Width(130); // LTimeStamp
 				d->Commits->ColumnAt(i++)->Width(400); // LMessage
 			}
 			else if (d->Commits->GetColumns() >= 5)
 			{
-				d->Commits->ColumnAt(i++)->Width(40); // LGraph
+				d->Commits->ColumnAt(i++)->Width(40);  // LGraph
 				d->Commits->ColumnAt(i++)->Width(270); // LRevision
 				d->Commits->ColumnAt(i++)->Width(240); // LAuthor
 				d->Commits->ColumnAt(i++)->Width(130); // LTimeStamp
@@ -2341,7 +2345,7 @@ void VcFolder::OnVcsType()
 	auto c = d->GetConnection(Uri.ToString(), false);
 	if (c)
 	{
-		auto NewType = c->Types.Find(Uri.sPath(1, -1));
+		auto NewType = c->Types.Find(Uri.sPath);
 		if (NewType && NewType != Type)
 		{
 			Type = NewType;
