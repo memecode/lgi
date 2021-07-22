@@ -43,12 +43,12 @@ void LRect::Normal()
 {
 	if (x1 > x2)
 	{
-		LgiSwap(x1, x2);
+		LSwap(x1, x2);
 	}
 	
 	if (y1 > y2)
 	{
-		LgiSwap(y1, y2);
+		LSwap(y1, y2);
 	}
 }
 

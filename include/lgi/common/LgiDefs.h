@@ -183,7 +183,6 @@ typedef union
 #define makelong(a, b)					((a)<<16 | (b&0xFFFF))
 #define loword(a)						(a&0xFFFF)
 #define hiword(a)						(a>>16)
-#define LgiSwap(a, b)					{ auto n = a; a = b; b = n; }
 
 #undef ABS
 #ifdef __cplusplus

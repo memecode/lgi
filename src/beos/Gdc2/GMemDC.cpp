@@ -347,7 +347,7 @@ void LMemDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
 
 void LMemDC::HLine(int x1, int x2, int y, COLOUR a, COLOUR b)
 {
-	if (x1 > x2) LgiSwap(x1, x2);
+	if (x1 > x2) LSwap(x1, x2);
 
 	if (x1 < Clip.x1) x1 = Clip.x1;
 	if (x2 > Clip.x2) x2 = Clip.x2;
@@ -379,7 +379,7 @@ void LMemDC::HLine(int x1, int x2, int y, COLOUR a, COLOUR b)
 
 void LMemDC::VLine(int x, int y1, int y2, COLOUR a, COLOUR b)
 {
-	if (y1 > y2) LgiSwap(y1, y2);
+	if (y1 > y2) LSwap(y1, y2);
 	
 	if (y1 < Clip.y1) y1 = Clip.y1;
 	if (y2 > Clip.y2) y2 = Clip.y2;

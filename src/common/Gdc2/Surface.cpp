@@ -296,7 +296,7 @@ void LSurface::HLine(int x1, int x2, int y)
 	OrgXy(x1, y);
 	OrgX(x2);
 
-	if (x1 > x2) LgiSwap(x1, x2);
+	if (x1 > x2) LSwap(x1, x2);
 
 	if (x1 < Clip.x1) x1 = Clip.x1;
 	if (x2 > Clip.x2) x2 = Clip.x2;
@@ -333,7 +333,7 @@ void LSurface::VLine(int x, int y1, int y2)
 	OrgXy(x, y1);
 	OrgY(y2);
 
-	if (y1 > y2) LgiSwap(y1, y2);
+	if (y1 > y2) LSwap(y1, y2);
 	if (y1 < Clip.y1) y1 = Clip.y1;
 	if (y2 > Clip.y2) y2 = Clip.y2;
 	if (y1 <= y2 &&
@@ -382,8 +382,8 @@ void LSurface::Line(int x1, int y1, int x2, int y2)
 		// angled
 		if (y1 > y2)
 		{
-			LgiSwap(y1, y2);
-			LgiSwap(x1, x2);
+			LSwap(y1, y2);
+			LSwap(x1, x2);
 		}
 
 		LRect Bound(x1, y1, x2, y2);
@@ -455,8 +455,8 @@ void LSurface::Line(int x1, int y1, int x2, int y2)
 			// flat
 			if (x1 > x2)
 			{
-				LgiSwap(x1, x2);
-				LgiSwap(y1, y2);
+				LSwap(x1, x2);
+				LSwap(y1, y2);
 			}
 
 			if (y1 > y2)

@@ -4,8 +4,6 @@
 
 #include "lgi/common/Stream.h"
 
-extern bool LIsProcess(OsProcessId Pid);
-
 /// A process wrapper class
 class GProcess
 {
