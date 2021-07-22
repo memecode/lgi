@@ -52,7 +52,7 @@ void GPalette::Set(GPalette *pPal)
 	Size = 0;
 	if (pPal)
 	{
-		LgiAssert(pPal->GetSize() > 0);
+		LAssert(pPal->GetSize() > 0);
 
 		if (pPal->Data)
 		{
@@ -519,7 +519,7 @@ int GdcDevice::GetOption(int Opt)
 		return d->OptVal[Opt];
 	}
 
-	LgiAssert(0);
+	LAssert(0);
 	return 0;
 }
 
@@ -532,7 +532,7 @@ int GdcDevice::SetOption(int Opt, int Value)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return Prev;
 }
@@ -754,7 +754,7 @@ GAlphaFactory FactoryAlpha;
 
 LApplicatorFactory::LApplicatorFactory()
 {
-	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
+	LAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	if (_Factories < CountOf(_Factory) - 1)
 	{
 		_Factory[_Factories++] = this;
@@ -763,7 +763,7 @@ LApplicatorFactory::LApplicatorFactory()
 
 LApplicatorFactory::~LApplicatorFactory()
 {
-	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
+	LAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)
 	{
 		if (_Factory[i] == this)
@@ -777,7 +777,7 @@ LApplicatorFactory::~LApplicatorFactory()
 
 LApplicator *LApplicatorFactory::NewApp(LColourSpace Cs, int Op)
 {
-	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
+	LAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)
 	{
 		LApplicator *a = _Factory[i]->Create(Cs, Op);
@@ -918,14 +918,14 @@ LColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 		{
 			default:
 			{
-				LgiAssert(!"impl me");
+				LAssert(!"impl me");
 				c = GBitsToColourSpace(Depth);
 				break;
 			}
 			case Gtk::GDK_VISUAL_PSEUDO_COLOR:
 			case Gtk::GDK_VISUAL_STATIC_COLOR:
 			{
-				LgiAssert(Depth <= 16);
+				LAssert(Depth <= 16);
 				c = (CtIndex << 4) | (Depth != 16 ? Depth : 0);
 				break;
 			}
@@ -974,7 +974,7 @@ LColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 				if (bits != output_bits)
 				{
 					int remaining_bits = output_bits - bits;
-					LgiAssert(remaining_bits <= 16);
+					LAssert(remaining_bits <= 16);
 					if (remaining_bits <= 16)
 					{
 						c |=

@@ -15,7 +15,7 @@ class LColourSelectPopup : public LPopup
 public:
 	LColourSelectPopup(LColourSelect *Parent) : LPopup(Parent)
 	{
-	    Ly = SysFont->GetHeight();
+	    Ly = LSysFont->GetHeight();
 		SetParent(Colour = Parent);
 		LRect r(0, 0, 120, Ly + 4);
 		SetPos(r);
@@ -30,13 +30,13 @@ public:
 		pDC->Colour(L_MED);
 		pDC->Rectangle(&r);
 
-		SysFont->Transparent(true);
+		LSysFont->Transparent(true);
 		if (Colour->Presets.Length())
 		{
 			char s[64];
 			
-			SysFont->Colour(L_BLACK, L_MED);
-			LDisplayString ds(SysFont, (char*)LgiLoadString(L_COLOUR_NONE, "No Colour"));
+			LSysFont->Colour(L_BLACK, L_MED);
+			LDisplayString ds(LSysFont, (char*)LgiLoadString(L_COLOUR_NONE, "No Colour"));
 			ds.Draw(pDC, r.x1 + 2, r.y1 + 2);
 
 			for (unsigned i=0; i<Colour->Presets.Length(); i++)
@@ -48,7 +48,7 @@ public:
 				pDC->Rectangle(r.x1+1, y+1, r.x1+Ly-1, y+Ly-1);
 				
 				sprintf_s(s, sizeof(s), "%2.2X,%2.2X,%2.2X", p.r(), p.g(), p.b());
-				LDisplayString ds(SysFont, s);
+				LDisplayString ds(LSysFont, s);
 				ds.Draw(pDC, r.x1 + Ly + 10, y + 2);
 			}
 		}
@@ -97,7 +97,7 @@ void LColourSelect::SetColourList(LArray<LColour> *cols)
 
 	if (GetPopup())
 	{
-		LRect r(0, 0, 100, (MAX((int)Presets.Length()+1, 1) * SysFont->GetHeight()) + 4);
+		LRect r(0, 0, 100, (MAX((int)Presets.Length()+1, 1) * LSysFont->GetHeight()) + 4);
 		GetPopup()->SetPos(r);
 	}
 }
@@ -166,7 +166,7 @@ void LColourSelect::OnPaint(LSurface *pDC)
 bool LColourSelect::OnLayout(LViewLayoutInfo &Inf)
 {
     Inf.Width.Min = Inf.Width.Max = 80;
-    Inf.Height.Min = Inf.Height.Max = SysFont->GetHeight() + 6;
+    Inf.Height.Min = Inf.Height.Max = LSysFont->GetHeight() + 6;
     return true;
 }
 

@@ -39,7 +39,7 @@ LEmojiFont::~LEmojiFont()
 	else if (sizeof(*Str) == 4) \
 		u32 = *((uint32_t*&)s)++; \
 	else \
-		LgiAssert(!"Invalid OsChar type.");
+		LAssert(!"Invalid OsChar type.");
 
 void LEmojiFont::_Measure(int &x, int &y, OsChar *Str, int len)
 {
@@ -161,7 +161,7 @@ bool LEmojiFont::Create(const char *Face, LCss::Len Sz, LSurface *pSurface)
 		{
 			// This assert happens when the libpng library is not available and
 			// the fallback windows loader is used.
-			LgiAssert(priv->Img->GetBits() == 32);
+			LAssert(priv->Img->GetBits() == 32);
 		}
 		else return false;
 	}

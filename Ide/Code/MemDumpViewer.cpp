@@ -341,7 +341,7 @@ public:
 							}
 							else
 							{
-								LgiAssert(0);
+								LAssert(0);
 							}
 
 							Stack.Length(0);

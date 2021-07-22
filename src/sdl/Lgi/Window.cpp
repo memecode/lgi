@@ -89,9 +89,9 @@ LWindow::LWindow()
 
 LWindow::~LWindow()
 {
-	if (LgiApp->AppWnd == this)
+	if (LAppInst->AppWnd == this)
 	{
-		LgiApp->AppWnd = 0;
+		LAppInst->AppWnd = 0;
 	}
 
 	DeleteObj(Menu);
@@ -210,7 +210,7 @@ bool LWindow::OnRequestClose(bool OsShuttingDown)
 {
 	if (GetQuitOnClose())
 	{
-		LgiCloseApp();
+		LCloseApp();
 	}
 
 	return LView::OnRequestClose(OsShuttingDown);
@@ -307,9 +307,9 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	}
 
 	// Give key to popups
-	if (LgiApp &&
-		LgiApp->GetMouseHook() &&
-		LgiApp->GetMouseHook()->OnViewKey(v, k))
+	if (LAppInst &&
+		LAppInst->GetMouseHook() &&
+		LAppInst->GetMouseHook()->OnViewKey(v, k))
 	{
 		#if DEBUG_HANDLEVIEWKEY
 		if (Debug)
@@ -904,12 +904,12 @@ LViewI *LWindow::GetFocus()
 
 bool LWindow::PushWindow(LWindow *v)
 {
-	return LgiApp->PushWindow(v);
+	return LAppInst->PushWindow(v);
 }
 
 LWindow *LWindow::PopWindow()
 {
-	return LgiApp->PopWindow();
+	return LAppInst->PopWindow();
 }
 
 #if DEBUG_SETFOCUS

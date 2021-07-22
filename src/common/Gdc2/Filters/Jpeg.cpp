@@ -327,7 +327,7 @@ void j_skip_input_data(j_decompress_ptr cinfo, long num_bytes)
 boolean j_resync_to_restart(j_decompress_ptr cinfo, int desired)
 {
     // JpegStream *s = (JpegStream*)cinfo->client_data;
-    LgiAssert(0); // not impl
+    LAssert(0); // not impl
     return false;
 }
 
@@ -720,11 +720,11 @@ GFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 							{
 								if (cinfo.num_components != 4)
 								{
-									LgiAssert(!"Weird number of components for CMYK JPEG.");
+									LAssert(!"Weird number of components for CMYK JPEG.");
 									break;
 								}
 
-								LgiAssert(pDC->GetBits() == 32);
+								LAssert(pDC->GetBits() == 32);
 								
 								switch (pDC->GetColourSpace())
 								{
@@ -745,7 +745,7 @@ GFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 									#undef CmykCase
 
 									default:
-										LgiAssert(!"impl me.");
+										LAssert(!"impl me.");
 										Status = IoUnsupportedFormat;
 										break;
 								}
@@ -774,7 +774,7 @@ GFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 										YccCase(Bgra32, 32);
 										
 										default:
-											LgiAssert(!"Unsupported colour space.");
+											LAssert(!"Unsupported colour space.");
 											Status = IoUnsupportedFormat;
 											break;
 									}
@@ -808,7 +808,7 @@ GFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 										JpegCase(Bgra32, 32);
 
 										default:
-											LgiAssert(!"Unsupported colour space.");
+											LAssert(!"Unsupported colour space.");
 											Status = IoUnsupportedFormat;
 											break;
 									}
@@ -866,7 +866,7 @@ void j_term_destination(j_compress_ptr cinfo)
 	JpegStream *Stream = (JpegStream*)cinfo->client_data;
 	auto Bytes = Stream->Buf.Length() - cinfo->dest->free_in_buffer;
 	if (Stream->f->Write(&Stream->Buf[0], Bytes) != Bytes)
-		LgiAssert(!"Write failed.");
+		LAssert(!"Write failed.");
 }
 
 GFilter::IoStatus GdcJpeg::WriteImage(LStream *Out, LSurface *pDC)
@@ -1135,7 +1135,7 @@ GFilter::IoStatus GdcJpeg::_Write(LStream *Out, LSurface *pDC, int Quality, SubS
 					break;
 				}
 				default:
-					LgiAssert(0);
+					LAssert(0);
 					break;
 			}
 

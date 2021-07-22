@@ -621,13 +621,13 @@ bool LHtmlElement::Attach(LHtmlElement *Child, ssize_t Idx)
 {
 	if (TagId == CONTENT)
 	{
-		LgiAssert(!"Can't nest content tags.");
+		LAssert(!"Can't nest content tags.");
 		return false;
 	}
 
 	if (!Child)
 	{
-		LgiAssert(!"Can't insert NULL tag.");
+		LAssert(!"Can't insert NULL tag.");
 		return false;
 	}
 
@@ -672,7 +672,7 @@ bool GCssStyle::GetVariant(const char *Name, LVariant &Value, char *Array)
 		Value = Css->ToString(Css->Display());
 		return Value.Str() != NULL;
 	}
-	else LgiAssert(!"Impl me.");
+	else LAssert(!"Impl me.");
 	
 	return false;
 }
@@ -690,7 +690,7 @@ bool GCssStyle::SetVariant(const char *Name, LVariant &Value, char *Array)
 			return true;
 		}
 	}
-	else LgiAssert(!"Impl me.");
+	else LAssert(!"Impl me.");
 	
 	return false;
 }

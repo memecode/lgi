@@ -45,7 +45,7 @@
 			err = FT_Init_FreeType(&lib);
 			if (err)
 			{
-				LgiAssert(0);
+				LAssert(0);
 			}
 		}
 		
@@ -170,7 +170,7 @@ LFont::LFont(LFont &Fnt)
 
 LFont::~LFont()
 {
-	LgiAssert(d->WarnOnDelete == false);
+	LAssert(d->WarnOnDelete == false);
 	Destroy();
 	DeleteObj(d);
 }
@@ -194,19 +194,19 @@ bool LFont::CreateFromCss(LCss *Css)
 	if (Fam.Length())
 		Face(Fam[0]);
 	else
-		Face(SysFont->Face());
+		Face(LSysFont->Face());
 
 	LCss::Len Sz = Css->FontSize();
 	switch (Sz.Type)
 	{
 		case LCss::SizeSmaller:
-			Size(LCss::Len(LCss::LenPt, (float)SysFont->PointSize()-1));
+			Size(LCss::Len(LCss::LenPt, (float)LSysFont->PointSize()-1));
 			break;
 		case LCss::SizeLarger:
-			Size(LCss::Len(LCss::LenPt, (float)SysFont->PointSize()+1));
+			Size(LCss::Len(LCss::LenPt, (float)LSysFont->PointSize()+1));
 			break;
 		case LCss::LenInherit:
-			Size(SysFont->Size());
+			Size(LSysFont->Size());
 			break;
 		default:
 			Size(Sz);
@@ -270,7 +270,7 @@ bool LFont::Destroy()
 			ATSUDisposeStyle(d->hFont);
 			#endif
 		#else
-			LgiAssert(0);
+			LAssert(0);
 		#endif
 		
 		d->hFont = 0;
@@ -318,7 +318,7 @@ int LFont::GetHeight()
 	}
 	
 	// I've decided for the moment to allow zero pt fonts to make a HTML test case render correctly.
-	// LgiAssert(d->Height != 0);
+	// LAssert(d->Height != 0);
 	return d->Height;
 }
 
@@ -529,12 +529,12 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 		LTypeFace::d->_Size = size;
 	}
 	
-	if ((SizeChanging || FaceChanging) && this == SysFont && ValidInitFaceSize)
+	if ((SizeChanging || FaceChanging) && this == LSysFont && ValidInitFaceSize)
 	{
 		LgiTrace("Warning: Changing sysfont definition.\n");
 	}
 	
-	if (this == SysFont)
+	if (this == LSysFont)
 	{
 		printf("Setting sysfont up '%s' %i\n", Face(), PointSize());
 	}
@@ -607,7 +607,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 			
 			d->Height = (int) (ceil((double)d->hFont->height * PxSize / d->hFont->units_per_EM) + 0.0001);
 			LTypeFace::d->_Ascent = (double)d->hFont->ascender * PxSize / d->hFont->units_per_EM;
-			LgiAssert(d->Height > LTypeFace::d->_Ascent);
+			LAssert(d->Height > LTypeFace::d->_Ascent);
 			LTypeFace::d->_Descent = d->Height - LTypeFace::d->_Ascent;
 			
 			return true;
@@ -630,7 +630,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 		else if (Sz.Type == LCss::LenPx)
 			Win32Height = (int)(Sz.Value * 1.2);
 		else
-			LgiAssert(!"What now?");
+			LAssert(!"What now?");
 	
 		LTypeFace::d->IsSymbol = LTypeFace::d->_Face &&
 									(
@@ -703,7 +703,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 				{
 					bool HideUnihan = false;
 
-					LgiAssert(sizeof(type_4_cmap)==16);
+					LAssert(sizeof(type_4_cmap)==16);
 					uint16 Length = 0;
 					type_4_cmap *t = GetUnicodeTable(Handle(), Length);
 					if (t)
@@ -864,7 +864,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 				Gtk::pango_font_description_set_absolute_size(d->hFont, Sz.Value * PANGO_SCALE);
 			else
 			{
-				LgiAssert(0);
+				LAssert(0);
 				return false;
 			}
 			
@@ -937,7 +937,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 	
 		Destroy();
 		
-		if (this == SysFont)
+		if (this == LSysFont)
 			LgiTrace("%s:%i - WARNING: you are re-creating the system font... this is bad!!!!\n", _FL);
 
 		if (Face())
@@ -981,18 +981,18 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 //						PtSz = Sz.Value * 72.0f / LgiScreenDpi();
 						PtSz = Sz.Value;
 					else
-						LgiAssert(!"Impl me.");
+						LAssert(!"Impl me.");
 					
 					d->hFont = CTFontCreateWithFontDescriptor(descriptor, PtSz, NULL);
 					CFRelease(descriptor);
 				}
-				else LgiAssert(0);
+				else LAssert(0);
 				
 				CFRelease(FontAttrD);
 			}
 			else
 			{
-				LgiAssert(0);
+				LAssert(0);
 				return false;
 			}
 			
@@ -1267,7 +1267,7 @@ int LFont::_CharAt(int x, OsChar *Str, int Len, LPxToIndexType Type)
 	{
 		DWORD e = GetLastError();
 		Fit = -1;
-		LgiAssert(0);
+		LAssert(0);
 	}
 
 	DeleteDC(hDC);
@@ -1329,7 +1329,7 @@ void LFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, L
 	else
 	{
 		DWORD e = GetLastError();
-		LgiAssert(0);
+		LAssert(0);
 	}
 	pDC->EndDC();
 

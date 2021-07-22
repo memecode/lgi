@@ -216,7 +216,7 @@ void LScrollBar::SetParent(LViewI *p)
 
 int64 LScrollBar::Value()
 {
-	LgiAssert(d->Min < 1000000);
+	LAssert(d->Min < 1000000);
 
 	int64 Max = d->Max - d->Page + 1;
 	if (Max < d->Min)
@@ -226,7 +226,7 @@ int64 LScrollBar::Value()
 
 void LScrollBar::Value(int64 p)
 {
-	LgiAssert(d->Min < 1000000);
+	LAssert(d->Min < 1000000);
 
 	int64 Val = limit(p, d->Min, d->Max);
 	if (d->Value != Val)
@@ -257,7 +257,7 @@ void LScrollBar::SetLimits(int64 Low, int64 High)
 		d->Shift++;
 	}
  
-	LgiAssert(Low < 1000000);
+	LAssert(Low < 1000000);
  
 	d->Min = Low;
 	d->Max = High;
@@ -276,7 +276,7 @@ bool LScrollBar::SetRange(const LRange &r)
 		d->Shift++;
 	}
  
-	LgiAssert(r.Start < 1000000);
+	LAssert(r.Start < 1000000);
  
 	d->Min = r.Start;
 	d->Max = r.End();
@@ -398,7 +398,7 @@ GMessage::Result LScrollBar::OnEvent(GMessage *Msg)
 		case WM_MOUSEMOVE:
 		{
 			int CurX = (Msg->b&0xFFFF), CurY = (Msg->b>>16);
-			LgiCursor Cursor = LCUR_Normal;
+			LCursor Cursor = LCUR_Normal;
 			for (LViewI *c = this; Cursor == LCUR_Normal && c->GetParent(); c = c->GetParent())
 			{
 				LRect CPos = c->GetPos();

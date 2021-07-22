@@ -197,12 +197,12 @@ bool ResMenuItem::Read(LXmlTag *t, ResMenuItem *Parent)
 			{
 				int Ref = atoi(n);
 				_Str = Menu->GetStringByRef(Ref);
-				LgiAssert(_Str);
+				LAssert(_Str);
 				if (!_Str)
 				{
 					if (!(_Str = Menu->GetStringGroup()->CreateStr()))
 					{
-						LgiAssert(!"Create str failed.");
+						LAssert(!"Create str failed.");
 					}
 				}
 			}
@@ -230,7 +230,7 @@ bool ResMenuItem::Read(LXmlTag *t, ResMenuItem *Parent)
 					}
 					else
 					{
-						LgiAssert(0);
+						LAssert(0);
 						DeleteObj(i);
 					}
 				}
@@ -339,7 +339,7 @@ void ResMenu::Create(LXmlTag *load, SerialiseContext *Ctx)
 		if (Ctx)
 			Read(load, *Ctx);
 		else
-			LgiAssert(0);
+			LAssert(0);
 	}
 
 	if (Resource::Item) Resource::Item->Update();

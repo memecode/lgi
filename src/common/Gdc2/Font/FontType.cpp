@@ -171,7 +171,7 @@ bool LFontType::GetConfigFont(const char *Tag)
 {
 	bool Status = false;
 
-	auto Font = LgiApp->GetConfig(Tag);
+	auto Font = LAppInst->GetConfig(Tag);
 	if (Font)
 	{
 		// read from config file
@@ -273,7 +273,7 @@ bool LFontType::GetSystemFont(const char *Which)
 
 	if (!Which)
 	{
-		LgiAssert(!"No param supplied.");
+		LAssert(!"No param supplied.");
 		return false;
 	}
 	
@@ -471,7 +471,7 @@ bool LFontType::GetSystemFont(const char *Which)
 		{
 			#if LGI_SDL
 			
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			
 			#elif defined WINNATIVE
 
@@ -524,7 +524,7 @@ bool LFontType::GetSystemFont(const char *Which)
 		{
 			#if LGI_SDL
 			
-				LgiAssert(!"Impl me.");
+				LAssert(!"Impl me.");
 			
 			#elif defined WINNATIVE
 
@@ -579,7 +579,7 @@ bool LFontType::GetSystemFont(const char *Which)
 		{
 			#if LGI_SDL
 			
-				LgiAssert(!"Impl me.");
+				LAssert(!"Impl me.");
 			
 			#elif defined WINNATIVE
 			
@@ -632,7 +632,7 @@ bool LFontType::GetSystemFont(const char *Which)
 		{
 			#if LGI_SDL
 			
-				LgiAssert(!"Impl me.");
+				LAssert(!"Impl me.");
 			
 			#elif defined WINNATIVE
 
@@ -694,7 +694,7 @@ bool LFontType::GetSystemFont(const char *Which)
 		{
 			#if LGI_SDL
 			
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			
 			#elif defined WINNATIVE
 
@@ -722,7 +722,7 @@ bool LFontType::GetSystemFont(const char *Which)
 	}
 	else
 	{
-		LgiAssert(!"Invalid param supplied.");
+		LAssert(!"Invalid param supplied.");
 	}
 	
 	// printf("GetSystemFont(%s)=%i %s,%i\n", Which, Status, Info.Face(), Info.PointSize());
@@ -750,7 +750,7 @@ LFont *LFontType::Create(LSurface *pSurface)
 		}
 		
 		if (New)
-			LgiAssert(New->GetHeight() > 0);
+			LAssert(New->GetHeight() > 0);
 	}
 	return New;
 }

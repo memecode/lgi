@@ -476,7 +476,7 @@ void GBrowser::OnPosChange()
 {
 	LRect c = GetClient();
 	LRect e = c;
-	e.y2 = e.y1 + SysFont->GetHeight() + 8;
+	e.y2 = e.y1 + LSysFont->GetHeight() + 8;
 	LRect back = e;
 	LRect forward = e;
 	LRect stop = e;

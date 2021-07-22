@@ -320,7 +320,7 @@ public:
 		Used = 0;
 		Version = 0;
 		MaxSize = LHASHTBL_MAX_SIZE;
-		// LgiAssert(Size <= MaxSize);
+		// LAssert(Size <= MaxSize);
 		
 		if ((Table = new Pair[Size]))
 		{
@@ -373,7 +373,7 @@ public:
 				if (c.Table[i].key != c.NullKey)
 				{
 					Added += Add(c.Table[i].key, c.Table[i].value) ? 1 : 0;
-					LgiAssert(Added <= c.Used);
+					LAssert(Added <= c.Used);
 				}
 			}
 		}
@@ -409,7 +409,7 @@ public:
 			Used = 0;
 			if (MaxSize && NewSize > MaxSize)
 			{
-				LgiAssert(!"Max size reached.");
+				LAssert(!"Max size reached.");
 				return false;
 			}
 			Size = NewSize;
@@ -425,7 +425,7 @@ public:
 					{
 						if (!Add(OldTable[i].key, OldTable[i].value))
 						{
-							LgiAssert(0);
+							LAssert(0);
 						}
 						this->FreeKey(OldTable[i].key);
 					}
@@ -436,7 +436,7 @@ public:
 			}
 			else
 			{
-				LgiAssert(Table != 0);
+				LAssert(Table != 0);
 				Table = OldTable;
 				Size = OldSize;
 				return false;
@@ -461,7 +461,7 @@ public:
 			#ifndef LGI_STATIC
 			LgiTrace("%s:%i - this=%p Table=%p Used=%i Size=%i\n", _FL, this, Table, Used, Size);
 			#endif
-			LgiAssert(0);
+			LAssert(0);
 		}		
 		return Status;
 	}
@@ -488,7 +488,7 @@ public:
 			k == this->NullKey &&
 			v == NullValue)
 		{
-			LgiAssert(!"Adding NULL key or value.");
+			LAssert(!"Adding NULL key or value.");
 			return false;
 		}
 
@@ -527,7 +527,7 @@ public:
 			return true;
 		}
 
-		LgiAssert(!"Couldn't alloc space.");
+		LAssert(!"Couldn't alloc space.");
 		return false;
 	}
 	
@@ -563,7 +563,7 @@ public:
 						// Do bubble
 						if (Table[Hole].key != this->NullKey)
 						{
-							LgiAssert(0);
+							LAssert(0);
 						}
 						memmove(Table + Hole, Table + i, sizeof(Table[i]));
 						InitializeTable(Table + i, 1);
@@ -638,7 +638,7 @@ public:
 			if (Table[i].key != this->NullKey)
 			{
 				this->FreeKey(Table[i].key);
-				LgiAssert(Table[i].key == this->NullKey);
+				LAssert(Table[i].key == this->NullKey);
 			}
 			Table[i].value = NullValue;
 		}
@@ -748,7 +748,7 @@ public:
 				if (Version != t->Version)
 				{
 					#ifndef LGI_UNIT_TESTS
-					LgiAssert(!"Iterator invalidated");
+					LAssert(!"Iterator invalidated");
 					#endif
 					*this = t->end();
 				}
@@ -770,7 +770,7 @@ public:
 
 		Pair &operator *()
 		{
-			LgiAssert(	Idx >= 0 &&
+			LAssert(	Idx >= 0 &&
 						Idx < (ssize_t)t->Size &&
 						t->Table[Idx].key != t->NullKey);
 			return t->Table[Idx];

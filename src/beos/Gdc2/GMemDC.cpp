@@ -310,7 +310,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 			if (!pApp)
 			{
 				LgiTrace("Couldn't create applicator (%ix%i,%i)\n", x, y, Cs);
-				LgiAssert(0);
+				LAssert(0);
 			}
 
 			Clip.ZOff(x-1, y-1);
@@ -324,14 +324,14 @@ void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 {
 	if (!Src)
 	{
-		LgiAssert(!"Invalid parameter.");
+		LAssert(!"Invalid parameter.");
 		return;
 	}
 	
 	if (Src->IsScreen())
 	{
 		// screen to memory Blt
-		LgiAssert(!"Impl screen->memory blt");
+		LAssert(!"Impl screen->memory blt");
 	}
 	else
 	{
@@ -342,7 +342,7 @@ void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 
 void LMemDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 }
 
 void LMemDC::HLine(int x1, int x2, int y, COLOUR a, COLOUR b)

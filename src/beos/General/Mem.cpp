@@ -85,6 +85,6 @@ bool LgiDumpMemoryStats(char *filename)
 
 bool LgiCanReadMemory(void *p, int Len)
 {
-	LgiAssert(0);
+	LAssert(0);
 	return p != NULL;
 }

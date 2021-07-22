@@ -118,7 +118,7 @@ public:
 		switch (Cmd)
 		{
 			case IDM_EXIT:
-				LgiCloseApp();
+				LCloseApp();
 				break;
 		}
 		return 0;

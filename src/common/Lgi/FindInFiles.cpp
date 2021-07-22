@@ -73,12 +73,12 @@ public:
 	    if (!Inf.Width.Max)
 	    {
 	        Inf.Width.Min =
-	            Inf.Width.Max = (int) (SysFont->GetHeight() * 1.6);
+	            Inf.Width.Max = (int) (LSysFont->GetHeight() * 1.6);
 	    }
 	    else if (!Inf.Height.Max)
 	    {
 	        Inf.Height.Min =
-                Inf.Height.Max = LButton::Overhead.y + SysFont->GetHeight();
+                Inf.Height.Max = LButton::Overhead.y + LSysFont->GetHeight();
 	    }
 	    else return false;
 

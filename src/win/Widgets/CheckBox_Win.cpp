@@ -35,7 +35,7 @@ LCheckBox::LCheckBox(int id, int x, int y, int cx, int cy, const char *name, int
 	
 	if (cx < 0 || cy < 0)
 	{
-		LDisplayString ds(SysFont, name);
+		LDisplayString ds(LSysFont, name);
 		if (cx < 0)
 			cx = 18 + ds.X();
 		if (cy < 0)
@@ -55,7 +55,7 @@ LCheckBox::LCheckBox(int id, int x, int y, int cx, int cy, const char *name, int
 	if (SubClass)
 		SubClass->SubClass("BUTTON");
 	else
-		LgiAssert(!"No subclass?");
+		LAssert(!"No subclass?");
 	#else
 	SetClassW32("BUTTON");
 	#endif
@@ -73,7 +73,7 @@ void LCheckBox::OnAttach()
 	OnStyleChange();
 	LView::OnAttach();
 
-	SetFont(SysFont);
+	SetFont(LSysFont);
 	Value(d->InitState);
 }
 

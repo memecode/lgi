@@ -26,7 +26,7 @@ struct GMatrix
 	
 	T *operator[](int i)
 	{
-		LgiAssert(i >= 0 && i < Ys);
+		LAssert(i >= 0 && i < Ys);
 		return m[i];
 	}
 	

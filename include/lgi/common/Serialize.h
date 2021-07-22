@@ -256,10 +256,10 @@ public:
 				else if (f->Size == 2)
 					return AtoiW(f->s.w);
 				else
-					LgiAssert(!"Invalid string size");
+					LAssert(!"Invalid string size");
 				break;
 			default:
-				LgiAssert(!"Invalid type.");
+				LAssert(!"Invalid type.");
 		}
 
 		return Default;
@@ -291,7 +291,7 @@ public:
 				else if (f->Size == sizeof(double))
 					return (float)f->d;
 				else
-					LgiAssert(!"Invalid size.");
+					LAssert(!"Invalid size.");
 				break;
 			case LStr:
 				if (f->Size == 1)
@@ -302,10 +302,10 @@ public:
 					return (float)s.Float();
 				}
 				else
-					LgiAssert(!"Invalid string size");
+					LAssert(!"Invalid string size");
 				break;
 			default:
-				LgiAssert(!"Invalid type.");
+				LAssert(!"Invalid type.");
 				break;
 		}
 
@@ -322,7 +322,7 @@ public:
 		if (f->Size == 1)
 			return f->s.u;
 		else
-			LgiAssert(!"Request for wrong string width");
+			LAssert(!"Request for wrong string width");
 
 		return Default;
 	}
@@ -336,7 +336,7 @@ public:
 		if (f->Size == 2)
 			return f->s.w;
 		else
-			LgiAssert(!"Request for wrong string width");
+			LAssert(!"Request for wrong string width");
 
 		return Default;
 	}
@@ -368,7 +368,7 @@ public:
 		#ifdef _DEBUG
 		uint8_t *End = Ptr + Size;
 		uint8_t *Flds = (uint8_t*)FieldMem.AddressOf();
-		LgiAssert(Ptr >= Flds && End <= Flds + FieldMem.Length());
+		LAssert(Ptr >= Flds && End <= Flds + FieldMem.Length());
 		#endif
 		
 		return true;
@@ -503,7 +503,7 @@ public:
 				Field *fld = (Field*)s;
 				if (!fld->IsValid())
 				{
-					LgiAssert(!"Invalid field");
+					LAssert(!"Invalid field");
 					return false;
 				}
 

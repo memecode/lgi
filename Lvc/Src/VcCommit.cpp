@@ -178,7 +178,7 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 			{
 				LPath p;
 				p.Circle(Cx, Cy, r-1);
-				LgiAssert(NodeColour.IsValid());
+				LAssert(NodeColour.IsValid());
 				// LgiTrace("%s = %s\n", Branch.Get(), NodeColour.GetStr());
 				LSolidBrush sb(NodeColour);
 				p.Fill(&Mem, sb);
@@ -229,13 +229,13 @@ const char *VcCommit::GetText(int Col)
 {
 	if (!Folder)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return "#nofolder";
 	}
 
 	if (!Folder->Fields.IdxCheck(Col))
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return "#nofield";
 	}
 
@@ -442,7 +442,7 @@ void VcCommit::Select(bool b)
 				w->SetCtrlEnabled(IDC_COMMIT_AND_PUSH, false);
 			}
 		}
-		else LgiAssert(0);
+		else LAssert(0);
 	}
 }
 
@@ -473,7 +473,7 @@ void VcCommit::OnMouseClick(LMouse &m)
 				VcFolder *f = GetFolder();
 				if (!f)
 				{
-					LgiAssert(!"No folder?");
+					LAssert(!"No folder?");
 					break;
 				}
 
@@ -485,7 +485,7 @@ void VcCommit::OnMouseClick(LMouse &m)
 				VcFolder *f = GetFolder();
 				if (!f)
 				{
-					LgiAssert(!"No folder?");
+					LAssert(!"No folder?");
 					break;
 				}
 

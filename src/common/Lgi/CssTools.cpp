@@ -246,7 +246,7 @@ LRect LCssTools::PaintBorder(LSurface *pDC, LRect &in)
 			else if (Px == 2)
 				LWideBorder(pDC, Content, DefaultSunkenEdge);
 			else
-				LgiAssert(!"Unsupported sunken border width");
+				LAssert(!"Unsupported sunken border width");
 			break;
 		}
 		case LCss::BorderOutset: // Raised
@@ -258,7 +258,7 @@ LRect LCssTools::PaintBorder(LSurface *pDC, LRect &in)
 			else if (Px == 2)
 				LWideBorder(pDC, Content, DefaultRaisedEdge);
 			else
-				LgiAssert(!"Unsupported raised border width");
+				LAssert(!"Unsupported raised border width");
 			break;
 		}
 		case LCss::BorderSolid:
@@ -414,7 +414,7 @@ void LCssTools::PaintContent(LSurface *pDC, LRect &in, const char *utf8, LSurfac
 	if (utf8 || img)
 	{
 		LAutoPtr<LDisplayString> Ds;
-		auto Fnt = View ? View->GetFont() : SysFont;
+		auto Fnt = View ? View->GetFont() : LSysFont;
 		if (utf8)
 		{
 			Ds.Reset(new LDisplayString(Fnt, utf8));

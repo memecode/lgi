@@ -174,9 +174,9 @@ HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
 
 						Ret = S_OK;
 					}
-					else LgiAssert(!"Not a stream object?");
+					else LAssert(!"Not a stream object?");
 				}
-				else LgiAssert(!"What now?");
+				else LAssert(!"What now?");
 			}
 			else
 			{
@@ -209,7 +209,7 @@ HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
 					default:
 					{
 						// Unsupported format...
-						LgiAssert(0);
+						LAssert(0);
 						break;
 					}
 				}
@@ -353,7 +353,7 @@ bool LDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
 
 int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
 {
-	LgiAssert(SourceWnd != 0);
+	LAssert(SourceWnd != 0);
 	if (!SourceWnd)
 		return -1;
 
@@ -700,7 +700,7 @@ HRESULT STDMETHODCALLTYPE LDragDropTarget::Drop(IDataObject *pDataObject, DWORD 
 {
 	HRESULT Result = E_UNEXPECTED;
 
-	LgiAssert(To != NULL);
+	LAssert(To != NULL);
 
 	DataObject = pDataObject;
 

@@ -208,7 +208,7 @@ bool LHttp::GetFile(char *File, LStream &Out, int Format, int *ProtocolStatus, i
 		GLinePrefix EndHeaders("\r\n");
 		LStringPipe In;
 
-		int Start = LgiCurrentTime();
+		int Start = LCurrentTime();
 		do
 		{
 			CheckReadable:
@@ -226,7 +226,7 @@ bool LHttp::GetFile(char *File, LStream &Out, int Format, int *ProtocolStatus, i
 			}
 			else
 			{
-				if (LgiCurrentTime() - Start > 30000)
+				if (LCurrentTime() - Start > 30000)
 				{
 					HeaderSize = 0;
 					break;
@@ -475,7 +475,7 @@ bool LHttp::Request
 		{
 			// Digest authentication
 			// Not implemented yet...
-			LgiAssert(!"Not impl.");
+			LAssert(!"Not impl.");
 		}
 	}
 	Cmd.Push("\r\n");
@@ -605,7 +605,7 @@ bool LHttp::Request
 							End = strnstr(s, "\r\n", Used);
 							if (!End)
 							{
-								LgiAssert(!"No chunk header");
+								LAssert(!"No chunk header");
 								break;
 							}
 						}
@@ -643,7 +643,7 @@ bool LHttp::Request
 								#endif
 								if (w != Common)
 								{
-									LgiAssert(!"Write failed.");
+									LAssert(!"Write failed.");
 									break;
 								}
 								if (Used > Common)
@@ -691,7 +691,7 @@ bool LHttp::Request
 							#ifdef _DEBUG
 							LgiTrace("Log: %s\n", Log.NewGStr().Get());
 							#endif
-							LgiAssert(!"Post fix missing.");
+							LAssert(!"Post fix missing.");
 							break;
 						}
 						if (Used > 2)
@@ -722,7 +722,7 @@ bool LHttp::Request
 						}
 						else
 						{
-							LgiAssert(0);
+							LAssert(0);
 							Written = -1;
 						}
 					}

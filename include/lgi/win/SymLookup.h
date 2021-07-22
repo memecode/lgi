@@ -304,7 +304,7 @@ public:
 		if (!Ebp)
 		{
 			memset(addr, 0, sizeof(Addr) * len);
-			LgiAssert(!"Not impl");
+			LAssert(!"Not impl");
 			#if defined(_MSC_VER)
 			// Microsoft C++
 			_asm {

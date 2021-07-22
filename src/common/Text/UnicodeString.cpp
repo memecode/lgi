@@ -14,8 +14,8 @@ bool LUnicodeString_UnitTests()
 	auto b = Utf8.Bytes();
 	auto w = Utf8.Words();
 	auto c = Utf8.Chars();
-	LgiAssert(b == w);
-	LgiAssert(c == 48);
+	LAssert(b == w);
+	LAssert(c == 48);
 
 	LUnicodeString<wchar_t> Utf16;
 	uint32_t ch;

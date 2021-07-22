@@ -5,7 +5,7 @@ char *SkipEscape(char *c)
 {
 	if (*c != 0x1b)
 	{
-		LgiAssert(!"Not an escape seq.");
+		LAssert(!"Not an escape seq.");
 		return NULL;
 	}
 

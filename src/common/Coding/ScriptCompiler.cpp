@@ -314,7 +314,7 @@ public:
 		
 		if (r->File >= (ssize_t)FileNames.Length())
 		{
-			LgiAssert(!"Invalid file index.");
+			LAssert(!"Invalid file index.");
 			return "#err: invalid file index";
 		}
 		else
@@ -887,7 +887,7 @@ public:
 	/// Allocate a constant string
 	void AllocConst(GVarRef &r, char *s, ssize_t len = -1)
 	{
-		LgiAssert(s != 0);
+		LAssert(s != 0);
 		if (len < 0)
 			len = strlen(s);
 		
@@ -918,7 +918,7 @@ public:
 	/// Allocate a constant wide string
 	void AllocConst(GVarRef &r, char16 *s, ssize_t len)
 	{
-		LgiAssert(s != 0);
+		LAssert(s != 0);
 
 		char *utf = WideToUtf8(s, len);
 		if (!utf)
@@ -1050,13 +1050,13 @@ public:
 
 		if (!Value.Valid())
 		{
-			LgiAssert(!"Invalid value to assign.\n");
+			LAssert(!"Invalid value to assign.\n");
 			return false;
 		}
 
 		if (!n.IsVar())
 		{
-			LgiAssert(!"Target must be a variable.");
+			LAssert(!"Target must be a variable.");
 			return false;
 		}
 
@@ -1193,7 +1193,7 @@ public:
 				else
 				{
 					// Non array based assignment
-					LgiAssert(Cur != Value);
+					LAssert(Cur != Value);
 					Asm2(n.Tok, IAssign, Cur, Value);
 				}
 			}
@@ -1245,7 +1245,7 @@ public:
 			if (LValue && n.Reg != *LValue)
 			{
 				// Need to assign to LValue
-				LgiAssert(*LValue != n.Reg);
+				LAssert(*LValue != n.Reg);
 				Asm2(n.Tok, IAssign, *LValue, n.Reg);
 			}
 		}
@@ -1319,7 +1319,7 @@ public:
 							if (!AllocReg(reg, _FL))
 								return OnError(n.Tok, "Couldn't alloc register.");
 							
-							LgiAssert(reg != v);
+							LAssert(reg != v);
 							Asm2(n.Tok, IAssign, reg, v);
 							v = reg;
 						}
@@ -1334,7 +1334,7 @@ public:
 				n.Reg = v;
 				LValue = NULL;
 				
-				LgiAssert(v.Scope != SCOPE_OBJECT);
+				LAssert(v.Scope != SCOPE_OBJECT);
 
 				// Does it have an array deref?
 				if (n.Variable[p].Array.Length())
@@ -1536,7 +1536,7 @@ public:
 				{
 					*p.r++ = a[i];
 				}
-				LgiAssert(p.u8 == Start + Size);
+				LAssert(p.u8 == Start + Size);
 
 				// Deallocate argument registers
 				for (unsigned i=0; i<a.Length(); i++)
@@ -1631,7 +1631,7 @@ public:
 				{
 					*p.r++ = a[i];
 				}
-				LgiAssert(p.u8 == Start + Size);
+				LAssert(p.u8 == Start + Size);
 
 				// Deallocate argument registers
 				for (unsigned i=0; i<a.Length(); i++)
@@ -1643,7 +1643,7 @@ public:
 			}
 			else return false;
 			
-			LgiAssert(n.Reg.Valid());
+			LAssert(n.Reg.Valid());
 		}
 
 		return true;
@@ -1981,7 +1981,7 @@ public:
 		if (r.Scope == SCOPE_REGISTER && r.Index >= 0)
 		{
 			int Bit = 1 << r.Index;
-			LgiAssert((Bit & Regs) != 0);
+			LAssert((Bit & Regs) != 0);
 			Regs &= ~Bit;
 
 			#ifdef _DEBUG
@@ -2155,13 +2155,13 @@ public:
 					{
 						if (AllocReg(Reg, _FL))
 						{
-							LgiAssert(Reg != a.Reg);
+							LAssert(Reg != a.Reg);
 							Asm2(a.Tok, IAssign, Reg, a.Reg);
 							a.Reg = Reg;
 						}
 						else
 						{
-							LgiAssert(!"Can't alloc register");
+							LAssert(!"Can't alloc register");
 							return OnError(a.Tok, "No operator found in expression.");
 						}
 					}
@@ -2182,7 +2182,7 @@ public:
 							}
 							else if (n != a.Reg)
 							{
-								LgiAssert(n != a.Reg);
+								LAssert(n != a.Reg);
 								Asm2(a.Tok, IAssign, n, a.Reg);
 							}
 						}
@@ -2194,7 +2194,7 @@ public:
 				}
 				else
 				{
-					LgiAssert(!"Can't turn tokens to refs.");
+					LAssert(!"Can't turn tokens to refs.");
 					return OnError(a.Tok, "Can't turn tokens to refs.");
 				}
 			}
@@ -2263,7 +2263,7 @@ public:
 					{
 						if (AllocReg(Reg, _FL))
 						{
-							LgiAssert(Reg != a.Reg);
+							LAssert(Reg != a.Reg);
 							Asm2(a.Tok, IAssign, Reg, a.Reg);
 							a.Reg = Reg;
 						}
@@ -2288,7 +2288,7 @@ public:
 			}
 			else
 			{
-				LgiAssert(!"Not a valid type");
+				LAssert(!"Not a valid type");
 				return OnError(n[0].Tok, "Not a valid type.");
 			}
 
@@ -2296,7 +2296,7 @@ public:
 			if (StartLength == n.Length())
 			{
 				// No nodes removed... infinite loop!
-				LgiAssert(!"No nodes removed.");
+				LAssert(!"No nodes removed.");
 				return false;
 			}
 			#endif
@@ -2954,7 +2954,7 @@ public:
 					else if (ScriptMethod)
 						ScriptMethod->FrameSize.Reset(new uint16((uint16)LocalScope.Length()));
 					else
-						LgiAssert(!"What are you defining exactly?");
+						LAssert(!"What are you defining exactly?");
 					
 					Status = true;
 					Cur++;
@@ -3148,7 +3148,7 @@ public:
 				}
 				else
 				{
-					LgiAssert(0);
+					LAssert(0);
 					break;
 				}
 			}
@@ -3173,7 +3173,7 @@ public:
 			}
 			if (Idx < 0)
 			{
-				LgiAssert(0);
+				LAssert(0);
 				break;
 			}			
 			
@@ -3197,10 +3197,10 @@ public:
 							if (p[Idx+1].Value)
 								p[Idx-1].Value /= p[Idx+1].Value;
 							else
-								LgiAssert(!"Div 0");
+								LAssert(!"Div 0");
 							break;
 						default:
-							LgiAssert(!"Impl me.");
+							LAssert(!"Impl me.");
 							break;
 					}
 					p.DeleteAt(Idx, true);
@@ -3208,23 +3208,23 @@ public:
 				}
 				else
 				{
-					LgiAssert(0);
+					LAssert(0);
 					break;
 				}
 			}
 			else
 			{
-				LgiAssert(!"Impl me.");
+				LAssert(!"Impl me.");
 			}
 		}
 		
 		if (p.Length() == 1)
 		{
-			LgiAssert(p[0].Op == OpNull);
+			LAssert(p[0].Op == OpNull);
 			return p[0].Value;
 		}
 		
-		LgiAssert(0);
+		LAssert(0);
 		return 0;
 	}
 	
@@ -3477,7 +3477,7 @@ public:
 				{
 					GPtr p;
 					p.u8 = &Code->ByteCode[f.Offset];
-					LgiAssert(*p.u32 == 0);
+					LAssert(*p.u32 == 0);
 					*p.u32++ = f.Func->StartAddr;
 					*p.u16++ = *f.Func->FrameSize.Get();
 				}
@@ -3554,7 +3554,7 @@ bool GCompiler::Compile
 			else
 			{
 				LgiTrace("%s:%i - Conflicting name of method in application's context: '%s'\n", _FL, f[i].Method.Get());
-				LgiAssert(!"Conflicting name of method in application's context.");
+				LAssert(!"Conflicting name of method in application's context.");
 			}
 		}
 	}
@@ -3633,7 +3633,7 @@ bool LScriptEngine::Compile(LAutoPtr<LCompiledCode> &Obj, LScriptContext *UserCo
 {
 	if (!Script)
 	{
-		LgiAssert(!"Param error");
+		LAssert(!"Param error");
 		return NULL;
 	}
 
@@ -3690,7 +3690,7 @@ bool LScriptEngine::EvaluateExpression(LVariant *Result, GDom *VariableSource, c
 {
 	if (!Result || !VariableSource || !Expression)
 	{
-		LgiAssert(!"Param error");
+		LAssert(!"Param error");
 		return false;
 	}
 
@@ -3704,7 +3704,7 @@ bool LScriptEngine::EvaluateExpression(LVariant *Result, GDom *VariableSource, c
 	LAutoPtr<LCompiledCode> Obj;
 	if (!Comp.Compile(Obj, NULL, NULL, NULL, a, VariableSource))
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 	
@@ -3714,7 +3714,7 @@ bool LScriptEngine::EvaluateExpression(LVariant *Result, GDom *VariableSource, c
 	LExecutionStatus s = Vm.Execute(Code, 0, NULL, true, Result ? Result : &d->ReturnValue);
 	if (s == ScriptError)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 	

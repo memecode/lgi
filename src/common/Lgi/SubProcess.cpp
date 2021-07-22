@@ -193,12 +193,12 @@ LSubProcess::~LSubProcess()
 	#endif
 	if (Child)
 	{
-		LgiAssert(Child->Parent == this);
+		LAssert(Child->Parent == this);
 		Child->Parent = NULL;
 	}
 	if (Parent)
 	{
-		LgiAssert(Parent->Child == this);
+		LAssert(Parent->Child == this);
 		Parent->Child = NULL;
 	}
 	DeleteObj(d);
@@ -621,7 +621,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		::LArray<LSubProcess*> p;
 		for (LSubProcess *s=this; s; s=s->Child)
 		{
-			LgiAssert(!s->Child || s->Child->Parent == s);
+			LAssert(!s->Child || s->Child->Parent == s);
 			p.Add(s);
 		}
 		size_t Kids = p.Length() + 1;
@@ -976,7 +976,7 @@ int32 LSubProcess::Communicate(LStreamI *Out, LStreamI *In, LCancel *Cancel)
 	char Buf[1024];
 	ssize_t r;
 
-	LgiAssert(In == NULL); // Impl me.
+	LAssert(In == NULL); // Impl me.
 
 	while (IsRunning() && (!Cancel || !Cancel->IsCancelled()))
 	{
@@ -1104,7 +1104,7 @@ bool LSubProcess::Signal(int which)
 			return false;
 		}
 
-		LgiAssert(!"Impl me.");
+		LAssert(!"Impl me.");
 	#endif
 	
 	return true;

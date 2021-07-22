@@ -270,7 +270,7 @@ bool GdcSpiPlugin::ReadImage(LSurface *pDC, LStream *In)
 							int Bytes = BMPWIDTH(pDC->X() * pDC->GetBits());
 
 							int Size = BmpMem.GetSize();
-							LgiAssert(Size > (Bytes * pDC->Y()));
+							LAssert(Size > (Bytes * pDC->Y()));
 
 							Source = Bits;
 

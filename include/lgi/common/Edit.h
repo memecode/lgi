@@ -79,7 +79,7 @@ public:
 
 	bool OnKey(LKey &k);
 	void KeyProcessed();
-	LgiCursor GetCursor(int x, int y) { return LCUR_Ibeam; }
+	LCursor GetCursor(int x, int y) { return LCUR_Ibeam; }
 
 	#if WINNATIVE
 	GMessage::Result OnEvent(GMessage *Msg);

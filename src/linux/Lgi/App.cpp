@@ -235,7 +235,7 @@ LSkinEngine *LApp::SkinEngine = 0;
 LApp *TheApp = 0;
 LMouseHook *LApp::MouseHook = 0;
 
-LApp::LApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
+LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	OsApplication(AppArgs.Args, AppArgs.Arg)
 {
 	TheApp = this;
@@ -254,12 +254,12 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 
 	int WCharSz = sizeof(wchar_t);
 	#if defined(_MSC_VER)
-	LgiAssert(WCharSz == 2);
+	LAssert(WCharSz == 2);
 	::LFile::Path Dlls(LgiArgsAppPath);
 	Dlls--;
 	SetDllDirectoryA(Dlls);
 	#else
-	LgiAssert(WCharSz == 4);
+	LAssert(WCharSz == 4);
 	#endif
 
 	#ifdef _MSC_VER
@@ -277,14 +277,14 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 
 	SetAppArgs(AppArgs);
 
-	srand(LgiCurrentTime());
+	srand(LCurrentTime());
 	LColour::OnChange();
 	AppWnd = NULL;
 
 	Gtk::gchar id[256];
 	sprintf_s(id, sizeof(id), "com.memecode.%s", name);
 	d->App = gtk_application_new(id, G_APPLICATION_FLAGS_NONE); 
-	LgiAssert(d->App != NULL);
+	LAssert(d->App != NULL);
 
 	MouseHook = new LMouseHook;
 
@@ -350,7 +350,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	if (!SystemNormal)
 	{
 		LgiMsg(0, "Error: Couldn't create system font.", "Lgi Error: LApp::LApp", MB_OK);
-		LgiExitApp();
+		LExitApp();
 	}
 	
 	if (!GetOption("noskin"))
@@ -388,7 +388,7 @@ bool LApp::IsOk()
 		#endif
 		(d != 0);
 					
-	LgiAssert(Status);
+	LAssert(Status);
 	return Status;
 }
 
@@ -471,9 +471,9 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 {
 	#if 0
 	
-		static int64 ts = LgiCurrentTime();
+		static int64 ts = LCurrentTime();
 		static int count = 0;
-		int64 now = LgiCurrentTime();
+		int64 now = LCurrentTime();
 		if (now - ts > 300)
 		{
 			printf("IdleWrapper = %i\n", count);
@@ -595,7 +595,7 @@ bool LApp::PostEvent(LViewI *View, int Msg, GMessage::Param a, GMessage::Param b
 	if (q->Length() > 200 && (q->Length()%20)==0)
 	{
 		static uint64 prev = 0;
-		auto now = LgiCurrentTime();
+		auto now = LCurrentTime();
 		if (now - prev >= 500)
 		{
 			prev = now;
@@ -631,7 +631,7 @@ void LApp::OnReceiveFiles(::LArray<const char*> &Files)
 	if (AppWnd)
 		AppWnd->OnReceiveFiles(Files);
 	else
-		LgiAssert(!"You probably want to set 'AppWnd' before calling LApp::Run... maybe.");
+		LAssert(!"You probably want to set 'AppWnd' before calling LApp::Run... maybe.");
 }
 
 const char *LApp::KeyModFlags::FlagName(int Flag)
@@ -1075,7 +1075,7 @@ LSymLookup *LApp::GetSymLookup()
 bool LApp::IsElevated()
 {
 	#ifdef WIN32
-	LgiAssert(!"What API works here?");
+	LAssert(!"What API works here?");
 	return false;
 	#else
 	return geteuid() == 0;
@@ -1401,10 +1401,10 @@ bool GMessage::Send(LViewI *View)
 {
 	if (!View)
 	{
-		LgiAssert(!"No view");
+		LAssert(!"No view");
 		return false;
 	}
 	
-	return LgiApp->PostEvent(View, m, a, b);
+	return LAppInst->PostEvent(View, m, a, b);
 }
 

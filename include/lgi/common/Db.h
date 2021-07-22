@@ -22,8 +22,8 @@ public:
 	virtual ~LDbField() {};
 
 	// Cast
-	virtual operator char*() { LgiAssert(0); return 0; }
-	virtual LDbField &operator =(char*) { LgiAssert(0); return *this; }
+	virtual operator char*() { LAssert(0); return 0; }
+	virtual LDbField &operator =(char*) { LAssert(0); return *this; }
 
 	// Properties
 	virtual char *Name() { return 0; }

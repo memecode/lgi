@@ -229,7 +229,7 @@ public:
 			if (Col->GetId() == DeleteRecordId)
 			{
 				int Index = GetCurrentIndex();
-				LgiAssert(Index >= 0);
+				LAssert(Index >= 0);
 
 				Record *r = dynamic_cast<Record*>((*Records)[Index]);
 				if (r)

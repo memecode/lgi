@@ -1554,7 +1554,7 @@ void TextView::OnGotoLine()
 
 void TextView::OnEscape(LKey &K)
 {
-	LgiCloseApp();
+	LCloseApp();
 }
 
 void TextView::OnEnter(LKey &K)

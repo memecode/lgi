@@ -64,7 +64,7 @@ LSubMenu::~LSubMenu()
 	while (Items.Length())
 	{
 		LMenuItem *i = Items[0];
-		LgiAssert(i->Parent == this);
+		LAssert(i->Parent == this);
 		DeleteObj(i);
 	}
 	
@@ -110,7 +110,7 @@ gboolean LSubMenuClick(LMouse *m)
 
 	if (m->Down() && !OverMenu && HasVisible && ActiveTs > 0)
 	{
-		uint64 Now = LgiCurrentTime();
+		uint64 Now = LCurrentTime();
 		uint64 Since = Now - ActiveTs;
 		LgiTrace("%s:%i - LSubMenuClick, Since=" LPrintfInt64 "\n", _FL, Since);
 
@@ -163,7 +163,7 @@ LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where
 		Items.Insert(i, Where);
 
 		GtkWidget *item = GTK_WIDGET(i->Handle());
-		LgiAssert(item);
+		LAssert(item);
 		if (item)
 		{
 			gtk_menu_shell_append(Info, item);
@@ -188,7 +188,7 @@ LMenuItem *LSubMenu::AppendSeparator(int Where)
 		Items.Insert(i, Where);
 
 		GtkWidget *item = GTK_WIDGET(i->Handle());
-		LgiAssert(item);
+		LAssert(item);
 		if (item)
 		{
 			gtk_menu_shell_append(Info, item);
@@ -211,7 +211,7 @@ LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 		Items.Insert(i, Where);
 
 		GtkWidget *item = GTK_WIDGET(i->Handle());
-		LgiAssert(item);
+		LAssert(item);
 		if (item)
 		{
 			if (Where < 0)
@@ -229,7 +229,7 @@ LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 			i->Child->Window = Window;
 			
 			GtkWidget *sub = GTK_WIDGET(i->Child->Handle());
-			LgiAssert(sub);
+			LAssert(sub);
 			if (i->Handle() && sub)
 			{
 				gtk_menu_item_set_submenu(i->Handle(), sub);
@@ -341,7 +341,7 @@ int LSubMenu::Float(LView *From, int x, int y, int Button)
 		From->Capture(false);
 	#endif
 
-	ActiveTs = LgiCurrentTime();
+	ActiveTs = LCurrentTime();
 
 	// This signal handles the case where the user cancels the menu by clicking away from it.
 	Info.Connect("deactivate",  (GCallback)GtkDeactivate, this);
@@ -549,7 +549,7 @@ void LMenuItem::OnGtkEvent(::LString Event)
 					if (w)
 						w->PostEvent(M_COMMAND, Id());
 					else
-						LgiAssert(!"No window for menu to send to");
+						LAssert(!"No window for menu to send to");
 				}
 				else
 				{
@@ -609,7 +609,7 @@ LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int id, int Pos, co
 
 void LMenuItem::Handle(GtkMenuItem *mi)
 {
-	LgiAssert(Info == NULL);	
+	LAssert(Info == NULL);	
 	if (Info != mi)
 	{
 		Info = mi;
@@ -651,8 +651,8 @@ enum {
 Gtk::gint LgiKeyToGtkKey(int Key, const char *ShortCut)
 {
 	#ifdef GDK_a
-	LgiAssert(GDK_a == 'a');
-	LgiAssert(GDK_A == 'A');
+	LAssert(GDK_a == 'a');
+	LAssert(GDK_A == 'A');
 	#endif
 	
 	/*
@@ -907,7 +907,7 @@ bool LMenuItem::ScanForAccel()
 			}
 			
 			auto Ident = Id();
-			LgiAssert(Ident > 0);
+			LAssert(Ident > 0);
 			Menu->Accel.Insert( new GAccelerator(Flags, Key, Ident) );
 		}
 		else
@@ -1083,7 +1083,7 @@ bool LMenuItem::ScanForAccel()
 					case '\\': Key = 220; break;
 					case ']': Key = 221; break;
 					case '\'': Key = 222; break;
-					default: LgiAssert(!"Unknown key."); break;
+					default: LAssert(!"Unknown key."); break;
 				}
 			}
 			else
@@ -1093,7 +1093,7 @@ bool LMenuItem::ScanForAccel()
 		}
 		else
 		{
-			LgiAssert(!"Unknown Accel Part");
+			LAssert(!"Unknown Accel Part");
 		}
 	}
 
@@ -1128,7 +1128,7 @@ bool LMenuItem::ScanForAccel()
 		}
 		
 		auto Ident = Id();
-		LgiAssert(Ident > 0);
+		LAssert(Ident > 0);
 		Menu->Accel.Insert( new GAccelerator(Flags, Key, Ident) );
 		
 		return true;
@@ -1171,7 +1171,7 @@ bool LMenuItem::Remove()
 		}
 	}
 
-	LgiAssert(Parent->Items.HasItem(this));
+	LAssert(Parent->Items.HasItem(this));
 	Parent->Items.Delete(this);
 	Parent = NULL;
 	return true;
@@ -1247,7 +1247,7 @@ bool LMenuItem::Replace(Gtk::GtkWidget *newWid)
 		{			
 			// Find index
 			int PIdx = Parent->Items.IndexOf(this);
-			LgiAssert(PIdx >= 0);
+			LAssert(PIdx >= 0);
 		
 			// Remove old item
 			gtk_container_remove(c, w);
@@ -1358,7 +1358,7 @@ void LMenuItem::Checked(bool c)
 			if (w)
 				Replace(w);
 			else
-				LgiAssert(!"No new widget.");
+				LAssert(!"No new widget.");
 		}
 		
 		if (GTK_IS_CHECK_MENU_ITEM(Info.obj))
@@ -1380,7 +1380,7 @@ bool LMenuItem::Name(const char *n)
 	bool Status = LBase::Name(n);	
 	
 	#if GtkVer(2, 16)
-	LgiAssert(Info);
+	LAssert(Info);
 	LAutoString Txt = MenuItemParse(n);
 	ScanForAccel();
 	gtk_menu_item_set_label(Info, Txt);
@@ -1507,7 +1507,7 @@ LFont *LMenu::GetFont()
 			MenuFont.f = Type.Create();
 			if (MenuFont.f)
 			{
-				// MenuFont.f->CodePage(SysFont->CodePage());
+				// MenuFont.f->CodePage(LSysFont->CodePage());
 			}
 			else
 			{
@@ -1524,33 +1524,33 @@ LFont *LMenu::GetFont()
 			MenuFont.f = new LFont;
 			if (MenuFont.f)
 			{
-				*MenuFont.f = *SysFont;
+				*MenuFont.f = *LSysFont;
 			}
 		}
 	}
 
-	return MenuFont.f ? MenuFont.f : SysFont;
+	return MenuFont.f ? MenuFont.f : LSysFont;
 }
 
 bool LMenu::Attach(LViewI *p)
 {
 	if (!p)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 		
 	LWindow *Wnd = p->GetWindow();
 	if (!Wnd)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 		
 	Window = Wnd;
 	if (Wnd->_VBox)
 	{
-		LgiAssert(!"Already has a menu");
+		LAssert(!"Already has a menu");
 		return false;
 	}
 
@@ -1604,7 +1604,7 @@ bool LMenu::OnKey(LView *v, LKey &k)
 		{
 			if (a->Match(k))
 			{
-				LgiAssert(a->GetId() > 0);
+				LAssert(a->GetId() > 0);
 				Window->OnCommand(a->GetId(), 0, 0);
 				return true;
 			}

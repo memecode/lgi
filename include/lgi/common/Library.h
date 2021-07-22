@@ -49,7 +49,7 @@ public:
 };
 
 // Runtime linking macros
-#define GLibBreakPoint	LgiAssert(0);
+#define GLibBreakPoint	LAssert(0);
 #define GLibCallType	// __stdcall
 
 #define GLibFunc0(ret, func)							\

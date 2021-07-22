@@ -102,7 +102,7 @@ GtkPrintDrawPage(	GtkPrintOperation	*operation,
 {
 	cairo_t *ct = gtk_print_context_get_cairo_context(context);
 	if (ct && d->PrintDC)
-		LgiAssert(d->PrintDC->Handle() == ct); // Just checking it's the same handle
+		LAssert(d->PrintDC->Handle() == ct); // Just checking it's the same handle
 	
 	d->Events->OnPrintPage(d->PrintDC, page_number);
 }

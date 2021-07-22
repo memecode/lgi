@@ -189,7 +189,7 @@ char *DecodeXml(const char *Str, int Len)
 						}
 						else
 						{
-							LgiAssert(0);
+							LAssert(0);
 						}
 
 						while (*e && *e != ';') e++;
@@ -215,12 +215,12 @@ char *DecodeXml(const char *Str, int Len)
 						else
 						{
 							// Unsupported entity
-							LgiAssert(0);
+							LAssert(0);
 						}
 					}
 					else
 					{
-						LgiAssert(0);
+						LAssert(0);
 						while (*e && *e != ';') e++;
 					}
 					
@@ -258,7 +258,7 @@ Resource::Resource(AppWnd *w, int t, bool enabled)
 	Item = 0;
 	SysObject = false;
 
-	LgiAssert(AppWindow);
+	LAssert(AppWindow);
 }
 
 Resource::~Resource()
@@ -566,12 +566,12 @@ void FieldView::Serialize(bool Write)
 				case DATA_STR_SYSTEM:
 				default:
 				{
-					LgiAssert(0);
+					LAssert(0);
 					break;
 				}
 			}
 		}
-		else LgiAssert(0);
+		else LAssert(0);
 	}
 	*/
 
@@ -718,7 +718,7 @@ void FieldView::OnSelect(FieldSource *s)
 							if (Tv)
 							{
 								Tv->Multiline = c->Multiline;
-								Tv->GetCss(true)->Height(LCss::Len(LCss::LenPx, c->Multiline ? SysFont->GetHeight() * 8 : SysFont->GetHeight() + 8));
+								Tv->GetCss(true)->Height(LCss::Len(LCss::LenPx, c->Multiline ? LSysFont->GetHeight() * 8 : LSysFont->GetHeight() + 8));
 								Tv->SetWrapType(TEXTED_WRAP_NONE);
 								Tv->Sunken(true);
 							}
@@ -737,7 +737,7 @@ void FieldView::OnSelect(FieldSource *s)
 							break;
 						}
 						default:
-							LgiAssert(!"Impl me.");
+							LAssert(!"Impl me.");
 							break;
 					}
 				}
@@ -783,7 +783,7 @@ GMessage::Result FieldView::OnEvent(GMessage *m)
 				Fields.SetView(this);
 				Serialize(false);
 			}
-			else LgiAssert(0);
+			else LAssert(0);
 			break;
 		}
 	}
@@ -980,7 +980,7 @@ void AppWnd::OnCreate()
 		}
 
 		ViewMenu = Menu->FindSubMenu(IDM_VIEW);
-		LgiAssert(ViewMenu);
+		LAssert(ViewMenu);
 	}
 	else LgiTrace("%s:%i - _LoadMenu failed.\n", _FL);
 
@@ -1013,7 +1013,7 @@ void AppWnd::OnCreate()
 	DropTarget(true);
 
 	LString Open;
-	if (LgiApp->GetOption("o", Open))
+	if (LAppInst->GetOption("o", Open))
 		LoadLgi(Open);
 }
 
@@ -1337,7 +1337,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		}
 		case IDM_EXIT:
 		{
-			LgiCloseApp();
+			LCloseApp();
 			break;
 		}
 		case IDM_FIND:
@@ -1356,7 +1356,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		}
 		case IDM_CUT:
 		{
-			auto Focus = LgiApp->GetFocus();
+			auto Focus = LAppInst->GetFocus();
 			if (Focus)
 			{
 				Focus->PostEvent(M_CUT);
@@ -1371,7 +1371,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		}
 		case IDM_COPY:
 		{
-			auto Focus = LgiApp->GetFocus();
+			auto Focus = LAppInst->GetFocus();
 			if (Focus)
 			{
 				Focus->PostEvent(M_COPY);
@@ -1386,7 +1386,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		}
 		case IDM_PASTE:
 		{
-			auto Focus = LgiApp->GetFocus();
+			auto Focus = LAppInst->GetFocus();
 			if (Focus)
 			{
 				Focus->PostEvent(M_PASTE);
@@ -1617,7 +1617,7 @@ int AppWnd::GetUniqueStrRef(int	Start)
 				else
 				{
 				    // auto Idx = Grp->GetStrs()->IndexOf(s);
-				    LgiAssert(!"No string ref?");
+				    LAssert(!"No string ref?");
 				}
 			}			
 		}
@@ -2654,7 +2654,7 @@ bool AppWnd::LoadLgi(const char *FileName)
 						}
 						else
 						{
-							LgiAssert(!"Unexpected tag");
+							LAssert(!"Unexpected tag");
 						}
 
 						if (RType > 0)
@@ -2989,7 +2989,7 @@ bool AppWnd::WriteDefines(LFile &Defs)
 							else
 							{
 								// Add...
-								LgiAssert(s->GetId());
+								LAssert(s->GetId());
 								if (s->GetId())
 									Def.Add(s->GetDefine(), s->GetId());
 							}
@@ -3124,7 +3124,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 						}
 						else
 						{
-							LgiAssert(0);
+							LAssert(0);
 							DeleteObj(c);
 						}
 					}
@@ -3143,7 +3143,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 						else
 						{
 							r->Write(c, Ctx);
-							LgiAssert(0);
+							LAssert(0);
 							DeleteObj(c);
 						}
 					}

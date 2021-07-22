@@ -173,7 +173,7 @@ public:
 			
 			if (Mixed)
 			{
-				LgiAssert(Mixed->IsMixed());
+				LAssert(Mixed->IsMixed());
 				
 				// Add all our attachments now
 				for (unsigned i=0; i<Attachments.Length(); i++)

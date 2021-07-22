@@ -120,7 +120,7 @@ public:
 	bool Name(const char *n)
 	{
 		bool Status = LView::Name(n);
-		if (s.Reset(new LDisplayString(SysFont, LView::Name())))
+		if (s.Reset(new LDisplayString(LSysFont, LView::Name())))
 		{
 			LRect r = GetPos();
 			r.Dimension(s->X()+NativeTip::Padding.x, s->Y()+NativeTip::Padding.y);
@@ -144,8 +144,8 @@ public:
 		c.Size(1, 1);
 		
 		// Draw text interior
-		SysFont->Colour(L_TEXT, b);
-		SysFont->Transparent(false);
+		LSysFont->Colour(L_TEXT, b);
+		LSysFont->Transparent(false);
 
 		if (s)
 		{

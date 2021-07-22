@@ -60,7 +60,7 @@ public:
 			Status &= ToPtr.Delete(Hnd);
 		}
 		else
-			LgiAssert(!"Not a member of this sink.");
+			LAssert(!"Not a member of this sink.");
 
 		Unlock();
 		return Status;
@@ -79,7 +79,7 @@ public:
 			Status &= ToPtr.Delete(Hnd);
 		}
 		else
-			LgiAssert(!"Not a member of this sink.");
+			LAssert(!"Not a member of this sink.");
 
 		Unlock();
 		return Status;
@@ -232,7 +232,7 @@ public:
 	bool SetPulse(uint32_t Ms = 0)
 	{
 		TimerMs = Ms;
-		TimerTs = Ms ? LgiCurrentTime() + Ms : 0;
+		TimerTs = Ms ? LCurrentTime() + Ms : 0;
 		return Event.Signal();
 	}
 	
@@ -261,13 +261,13 @@ public:
 			{			
 				Event.Signal();
 				
-				uint64 Start = LgiCurrentTime();
+				uint64 Start = LCurrentTime();
 				
 				while (!IsExited())
 				{
 					LgiSleep(10);
 					
-					uint64 Now = LgiCurrentTime();
+					uint64 Now = LCurrentTime();
 					if (Now - Start > 2000)
 					{
 						#ifdef LINUX
@@ -322,7 +322,7 @@ public:
 			int WaitLength = -1;
 			if (TimerTs != 0)
 			{
-				uint64 Now = LgiCurrentTime();
+				uint64 Now = LCurrentTime();
 				if (TimerTs > Now)
 				{
 					WaitLength = (int) (TimerTs - Now);
@@ -380,12 +380,12 @@ public:
 	template<typename T>
 	bool PostObject(int Hnd, int Cmd, LAutoPtr<T> A)
 	{
-		uint64 Start = LgiCurrentTime();
+		uint64 Start = LCurrentTime();
 		bool Status;
 		while (!(Status = GEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, (GMessage::Param) A.Get())))
 		{
 			LgiSleep(2);
-			if (LgiCurrentTime() - Start >= PostTimeout) break;
+			if (LCurrentTime() - Start >= PostTimeout) break;
 		}
 		if (Status)
 			A.Release();
@@ -395,12 +395,12 @@ public:
 	template<typename T>
 	bool PostObject(int Hnd, int Cmd, GMessage::Param A, LAutoPtr<T> B)
 	{
-		uint64 Start = LgiCurrentTime();
+		uint64 Start = LCurrentTime();
 		bool Status;
 		while (!(Status = GEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, A, (GMessage::Param) B.Get())))
 		{
 			LgiSleep(2);
-			if (LgiCurrentTime() - Start >= PostTimeout) break;
+			if (LCurrentTime() - Start >= PostTimeout) break;
 		}
 		if (Status)
 			B.Release();
@@ -410,12 +410,12 @@ public:
 	template<typename T>
 	bool PostObject(int Hnd, int Cmd, LAutoPtr<T> A, LAutoPtr<T> B)
 	{
-		uint64 Start = LgiCurrentTime();
+		uint64 Start = LCurrentTime();
 		bool Status;
 		while (!(Status = GEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, (GMessage::Param) A.Get(), (GMessage::Param) B.Get())))
 		{
 			LgiSleep(2);
-			if (LgiCurrentTime() - Start >= PostTimeout) break;
+			if (LCurrentTime() - Start >= PostTimeout) break;
 		}
 		if (Status)
 		{

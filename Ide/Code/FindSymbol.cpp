@@ -202,7 +202,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread, public LCancel
 			return false;
 		}
 			
-		LgiAssert(!LIsRelativePath(Path));
+		LAssert(!LIsRelativePath(Path));
 
 		// Setup the file sym data...
 		f = new FileSyms;
@@ -421,12 +421,12 @@ struct FindSymbolSystemPriv : public LEventTargetThread, public LCancel
 			}
 			default:
 			{
-				LgiAssert(!"Implement handler for message.");
+				LAssert(!"Implement handler for message.");
 				break;
 			}
 		}
 		
-		auto Now = LgiCurrentTime();
+		auto Now = LCurrentTime();
 		// printf("Msg->Msg()=%i " LPrintfInt64 " %i\n", Msg->Msg(), MsgTs, (int)GetQueueSize());
 		if (Now - MsgTs > MSG_TIME_MS)
 		{
@@ -658,7 +658,7 @@ bool FindSymbolSystem::SetIncludePaths(LString::Array &Paths)
 bool FindSymbolSystem::OnFile(const char *Path, SymAction Action, int Platforms)
 {
 	if (d->Tasks == 0)
-		d->MsgTs = LgiCurrentTime();
+		d->MsgTs = LCurrentTime();
 	d->Tasks++;
 	
 	LAutoPtr<FindSymbolSystem::SymFileParams> Params(new FindSymbolSystem::SymFileParams);

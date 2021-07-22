@@ -50,9 +50,9 @@ LAlert::LAlert(	LViewI *parent,
 	Tbl->SetPos(r);
 	r = Tbl->GetUsedArea();
 	r.Size(-10, -10);
-	int x = LgiApp->GetMetric(LGI_MET_DECOR_X);
-	int y = LgiApp->GetMetric(LGI_MET_DECOR_Y) +
-			LgiApp->GetMetric(LGI_MET_DECOR_CAPTION);
+	int x = LAppInst->GetMetric(LGI_MET_DECOR_X);
+	int y = LAppInst->GetMetric(LGI_MET_DECOR_Y) +
+			LAppInst->GetMetric(LGI_MET_DECOR_CAPTION);
 	r.x2 += x + 20;
 	r.y2 += y;
 

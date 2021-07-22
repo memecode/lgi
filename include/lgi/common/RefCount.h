@@ -34,7 +34,7 @@ public:
 	{
 		if (_DebugTrace)
 			LgiTrace("%s:%i - ~GRefCount=%i\n", _FL, _Count);
-		LgiAssert(_Count == 0);
+		LAssert(_Count == 0);
 	}
 
 	virtual void AddRef()
@@ -55,7 +55,7 @@ public:
 	{
 		if (_DebugTrace)
 			LgiTrace("%s:%i - GRefCount.DecRef=%i\n", _FL, _Count);
-		LgiAssert(_Count > 0);
+		LAssert(_Count > 0);
 		#if defined(_WIN32)
 			if (InterlockedDecrement(&_Count) == 0)
 		#elif defined(__GNUC__)
@@ -104,7 +104,7 @@ public:
 	
 	T *operator->() const
 	{
-		LgiAssert(Ptr != NULL);
+		LAssert(Ptr != NULL);
 		return Ptr;
 	}
 

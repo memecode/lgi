@@ -350,7 +350,7 @@ union LColourSpaceBits
 			else if (t.All == (0x10<<24))
 				Reverse = 1;
 			else
-				LgiAssert(0);
+				LAssert(0);
 		}
 		if (Reverse == 1)
 			return Bits[3-i];

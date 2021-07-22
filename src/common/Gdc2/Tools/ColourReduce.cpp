@@ -56,7 +56,7 @@ struct Box
 	
 	Box(ImgColour *c, int len)
 	{
-		LgiAssert(c && len > 0);
+		LAssert(c && len > 0);
 		if (!c || len <= 0)
 			return;
 		
@@ -71,7 +71,7 @@ struct Box
 
 	Box(LArray<ImgColour*> &c, int Start, int End)
 	{
-		LgiAssert(End >= Start);
+		LAssert(End >= Start);
 		
 		Cols.Length(End - Start + 1);
 		for (unsigned i=0; i<Cols.Length(); i++)
@@ -108,7 +108,7 @@ struct Box
 	
 	void FindLimits()
 	{
-		LgiAssert(Cols.Length() > 0);
+		LAssert(Cols.Length() > 0);
 		
 		Pixels = 0;
 		for (int i=0; i<DIMENSIONS; i++)
@@ -120,7 +120,7 @@ struct Box
 		for (unsigned n=0; n<Cols.Length(); n++)
 		{
 			ImgColour *c = Cols[n];
-			LgiAssert(c != NULL);
+			LAssert(c != NULL);
 			for (int i=0; i<DIMENSIONS; i++)
 			{
 				r[i].Min = MIN(r[i].Min, c->c[i]);
@@ -263,7 +263,7 @@ public:
 				}
 			}
 			
-			LgiAssert(h < TABLE_SIZE);
+			LAssert(h < TABLE_SIZE);
 			
 			in++;
 		}
@@ -310,7 +310,7 @@ public:
 				}
 			}
 			
-			LgiAssert(h < TABLE_SIZE);
+			LAssert(h < TABLE_SIZE);
 			
 			in++;
 		}
@@ -346,7 +346,7 @@ public:
 				ScanCase24(Xbgr32);
 				
 				default:
-					LgiAssert(!"Not impl.");
+					LAssert(!"Not impl.");
 					break;
 			}
 		}
@@ -459,7 +459,7 @@ public:
 					}
 					
 					// Create new boxes out of the 2 parts
-					LgiAssert(Pos > 0);
+					LAssert(Pos > 0);
 					Boxes.Add(new Box(Index, 0, Pos - 1));
 					Boxes.Add(new Box(Index, Pos, (unsigned) Index.Length() - 1));
 					
@@ -494,7 +494,7 @@ public:
 					out->g = in.g();
 					out->b = in.b();
 				}
-				else LgiAssert(0);
+				else LAssert(0);
 			}
 		}
 
@@ -539,7 +539,7 @@ bool GReduceBitDepth(LSurface *pDC, int Bits, GPalette *Pal, GReduceOptions *Red
 				switch (Reduce->PalType)
 				{
 					default:
-						LgiAssert(0);
+						LAssert(0);
 						break;
 					case CR_PAL_CUBE:
 					{

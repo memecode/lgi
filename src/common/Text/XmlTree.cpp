@@ -255,7 +255,7 @@ char *LXmlTree::DecodeEntities(LXmlAlloc *Alloc, char *In, ssize_t Len)
 {
 	if (!In || !Alloc)
 	{
-		LgiAssert(!"Param error");
+		LAssert(!"Param error");
 		return NULL;
 	}
 	
@@ -307,7 +307,7 @@ char *LXmlTree::DecodeEntities(LXmlAlloc *Alloc, char *In, ssize_t Len)
 			}
 			else
 			{
-				LgiAssert(0);
+				LAssert(0);
 			}
 		}
 		else
@@ -367,7 +367,7 @@ LXmlTag::LXmlTag(const char *tag, LXmlAlloc *alloc)
 LXmlTag::LXmlTag(const LXmlTag &t)
 {
 	Allocator = t.Allocator;
-	LgiAssert(Allocator != NULL);
+	LAssert(Allocator != NULL);
 
 	Tag = NULL;
 	Write = false;
@@ -399,7 +399,7 @@ void LXmlTag::EmptyChildren()
 	while (Children.Length() &&
 		(c = Children[0]))
 	{
-		LgiAssert(c->Parent == this);
+		LAssert(c->Parent == this);
 		DeleteObj(c);
 	}
 }
@@ -670,7 +670,7 @@ bool LXmlTag::SetVariant(const char *Name, LVariant &Value, char *Array)
 			}
 			default:
 			{
-				LgiAssert(0);
+				LAssert(0);
 				return false;
 			}
 		}
@@ -766,7 +766,7 @@ LXmlAttr *LXmlTag::_Attr(const char *Name, bool Wr)
 			!IsDigit(*c) &&
 			!strchr(":-_()", *c))
 		{
-			LgiAssert(!"Invalid attribute name.");
+			LAssert(!"Invalid attribute name.");
 			return 0;
 		}
 	}
@@ -1132,7 +1132,7 @@ void LXmlTag::ParseAttribute(LXmlTree *Tree, LXmlAlloc *Alloc, char *&t, bool &N
 		else
 		{
 			LgiTrace("%s:%i - Error tagname='%s'\n", _FL, Tag);
-			LgiAssert(0);
+			LAssert(0);
 			break;
 		}
 
@@ -1315,7 +1315,7 @@ ParsingStart:
 				if (Tag)
 				{	
 					Tag->Empty(false);
-					LgiAssert(Tag->Tag == NULL);
+					LAssert(Tag->Tag == NULL);
 					Tag->SetTag(TagName, t - TagName);
 					NoChildren = Tag->Tag ? Tag->Tag[0] == '?' : false;
 					
@@ -1362,7 +1362,7 @@ ParsingStart:
 		else if (*t)
 		{
 			printf("Xml: stopped at '%-20s'\n", t);
-			LgiAssert(0);
+			LAssert(0);
 		}
 	}
 	

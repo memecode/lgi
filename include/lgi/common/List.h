@@ -147,7 +147,7 @@ public:
 	// Events;
 	void OnMouseClick(LMouse &m) override;
 	void OnMeasure(LPoint *Info) override;
-	void OnPaint(LSurface *pDC) override { LgiAssert(0); }
+	void OnPaint(LSurface *pDC) override { LAssert(0); }
 	void OnPaint(GItem::ItemPaintCtx &Ctx) override;
 	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c) override;
 
@@ -366,7 +366,7 @@ public:
 	void OnPaint(LSurface *pDC);
 	GMessage::Result OnEvent(GMessage *Msg);
 	// int OnHitTest(int x, int y);
-	LgiCursor GetCursor(int x, int y);
+	LCursor GetCursor(int x, int y);
 	void OnMouseClick(LMouse &m);
 	void OnMouseMove(LMouse &m);
 	int OnNotify(LViewI *Ctrl, int Flags);

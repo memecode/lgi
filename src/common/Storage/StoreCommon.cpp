@@ -81,7 +81,7 @@ void GSubFilePtr::ClearSub()
 
 int GSubFilePtr::Open(const char *Str, int Int)
 {
-	LgiAssert(0);
+	LAssert(0);
 	return 0;
 }
 
@@ -92,7 +92,7 @@ bool GSubFilePtr::IsOpen()
 
 int GSubFilePtr::Close()
 {
-	LgiAssert(0);
+	LAssert(0);
 	return 0;
 }
 
@@ -115,7 +115,7 @@ int64 GSubFilePtr::GetSize()
 
 int64 GSubFilePtr::SetSize(int64 Size)
 {
-	LgiAssert(0);
+	LAssert(0);
 	return -1;
 }
 
@@ -154,7 +154,7 @@ int64 GSubFilePtr::Seek(int64 To, int Whence)
 
 LStreamI *GSubFilePtr::Clone()
 {
-	LgiAssert(0);
+	LAssert(0);
 	return 0;
 }
 
@@ -202,7 +202,7 @@ ssize_t GSubFilePtr::Read(void *Buffer, ssize_t Size, int Flags)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	
 	return Status;
@@ -235,13 +235,13 @@ ssize_t GSubFilePtr::Write(const void *Buffer, ssize_t Size, int Flags)
 
 ssize_t GSubFilePtr::ReadStr(char *Buf, ssize_t Size)
 {
-	LgiAssert(0);
+	LAssert(0);
 	return 0;
 }
 
 ssize_t GSubFilePtr::WriteStr(char *Buf, ssize_t Size)
 {
-	LgiAssert(0);
+	LAssert(0);
 	return 0;
 }
 
@@ -296,7 +296,7 @@ GSubFilePtr *GSubFile::Create(const char *file, int line)
 void GSubFile::Detach(GSubFilePtr *Ptr)
 {
 	SubLock Lck = Lock(_FL);
-	LgiAssert(Ptrs.HasItem(Ptr));
+	LAssert(Ptrs.HasItem(Ptr));
 	Ptrs.Delete(Ptr);
 }
 

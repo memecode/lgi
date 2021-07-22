@@ -172,7 +172,7 @@ LAutoPtr<LMemDC> CreateDiff(LViewI *Parent, LSurface *A, LSurface *B)
 							b++;
 						}
 					}
-					else LgiAssert(!"No palette?");
+					else LAssert(!"No palette?");
 					break;
 				}
 
@@ -207,7 +207,7 @@ LAutoPtr<LMemDC> CreateDiff(LViewI *Parent, LSurface *A, LSurface *B)
 
 				default:
 				{
-					LgiAssert(!"Impl me.");
+					LAssert(!"Impl me.");
 					break;
 				}
 			}
@@ -271,13 +271,13 @@ public:
 		if (!Owner->Handle())
 		{
 			// Wait for the view to be created...
-			uint64 Start = LgiCurrentTime();
+			uint64 Start = LCurrentTime();
 			while (!Owner->Handle())
 			{
 				LgiSleep(100);
-				if (LgiCurrentTime() - Start > 5000)
+				if (LCurrentTime() - Start > 5000)
 				{
-					LgiAssert(0);
+					LAssert(0);
 					return -1;
 				}
 			}
@@ -336,9 +336,9 @@ public:
 			Threads.Add(new ThreadLoader(this, a, 1));
 		}
 		
-		AddView(AName = new LEdit(IDC_A_NAME, 0, 0, 100, SysFont->GetHeight() + 8, FileA));
-		AddView(BName = new LEdit(IDC_B_NAME, 0, 0, 100, SysFont->GetHeight() + 8, FileB));			
-		AddView(CName = new LEdit(IDC_C_NAME, 0, 0, 100, SysFont->GetHeight() + 8, NULL));
+		AddView(AName = new LEdit(IDC_A_NAME, 0, 0, 100, LSysFont->GetHeight() + 8, FileA));
+		AddView(BName = new LEdit(IDC_B_NAME, 0, 0, 100, LSysFont->GetHeight() + 8, FileB));			
+		AddView(CName = new LEdit(IDC_C_NAME, 0, 0, 100, LSysFont->GetHeight() + 8, NULL));
 		CName->Sunken(false);
 		CName->Enabled(false);
 
@@ -620,7 +620,7 @@ public:
 			DescribeCase(Bgra64, PixToStrRgba)
 			
 			default:
-				LgiAssert(0);
+				LAssert(0);
 				break;
 		}
 		
@@ -659,7 +659,7 @@ public:
 		LZoomView *zv = dynamic_cast<LZoomView*>(m.Target);
 		if (!zv)
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return;
 		}
 		
@@ -668,7 +668,7 @@ public:
 		{
 			LZoomView *zv = dynamic_cast<LZoomView*>(m.Target);
 			if (!zv->Convert(DocPos, m.x, m.y))
-				LgiAssert(0);
+				LAssert(0);
 
 			zv->Focus(true);
 		}
@@ -762,14 +762,14 @@ CmpZoomView::CmpZoomView(LZoomViewCallback *callback, CompareView *view) : LZoom
 
 void CmpZoomView::OnMouseClick(LMouse &m)
 {
-	LgiAssert(m.Target == this);
+	LAssert(m.Target == this);
 	LZoomView::OnMouseClick(m);
 	View->UserMouseClick(m);
 }
 
 void CmpZoomView::OnMouseMove(LMouse &m)
 {
-	LgiAssert(m.Target == this);
+	LAssert(m.Target == this);
 	LZoomView::OnMouseMove(m);
 	View->UserMouseMove(m);
 }
@@ -902,7 +902,7 @@ ImageCompareDlg::ImageCompareDlg(LView *p, const char *OutPath)
 		if (r)
 			ResFile = r.Get();
 	}
-	LgiAssert(ResFile.GetFull());
+	LAssert(ResFile.GetFull());
 	if (ResFile.GetFull())
 	{
 		AddView(d->tabs = new LTabView(IDC_TAB_VIEW));
@@ -910,7 +910,7 @@ ImageCompareDlg::ImageCompareDlg(LView *p, const char *OutPath)
 		LTabPage *First = d->tabs->Append("Select");
 		
 		LResources *Res = LgiGetResObj(false, ResFile.GetFull());
-		LgiAssert(Res);
+		LAssert(Res);
 		if (Res && Res->LoadDialog(IDD_COMPARE, First))
 		{
 			MoveToCenter();
@@ -1036,11 +1036,11 @@ int ImageCompareDlg::OnNotify(LViewI *Ctrl, int Flags)
 			if (Flags == GNotifyTabPage_ButtonClick)
 			{
 				LTabPage *p = dynamic_cast<LTabPage*>(Ctrl);
-				LgiAssert(p);
+				LAssert(p);
 				if (p)
 				{
 					LTabView *v = p->GetTabControl();
-					LgiAssert(v);
+					LAssert(v);
 					if (v)
 					{
 						v->Delete(p);

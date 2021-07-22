@@ -236,7 +236,7 @@ public:
 								else
 								{
 									LgiTrace("%s:%i - No env for '%s'\n", _FL, u.sPath.Get());
-									LgiAssert(0);
+									LAssert(0);
 								}
 							}
 							else LgiTrace("%s:%i - Failed to read '%s'\n", _FL, u.sPath.Get());
@@ -429,7 +429,7 @@ public:
 			Visible(true);
 			OnNotify(FindControl(IDC_LIST), GNotifyItem_Select);
 		}
-		else LgiExitApp();
+		else LExitApp();
 	}
 
 	~AppWnd()
@@ -477,14 +477,14 @@ public:
 						LAutoString Content(LReadTextFile(File));
 						if (!Content)
 						{
-							LgiAssert(0);
+							LAssert(0);
 							continue;
 						}
 
 						char *Leaf = strrchr(File, DIR_CHAR);
 						if (!Leaf)
 						{
-							LgiAssert(0);
+							LAssert(0);
 							continue;
 						}
 						Leaf++;
@@ -502,7 +502,7 @@ public:
 						Screen.Rectangle();
 						Html.OnPaint(&Screen);
 						if (!GdcD->Save(p, &Screen))
-							LgiAssert(0);
+							LAssert(0);
 						
 						Prog.Value(i);
 						LgiYield();

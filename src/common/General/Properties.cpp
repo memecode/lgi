@@ -29,7 +29,7 @@ bool Prop::Serialize(LFile &f, bool Write)
 		auto Len = strlen(Name) + 1;
 		if (Len > 0xffff)
 		{
-			LgiAssert(!"Name len overflow");
+			LAssert(!"Name len overflow");
 			return false;
 		}
 		Us = (uint16_t)Len;
@@ -54,7 +54,7 @@ bool Prop::Serialize(LFile &f, bool Write)
 				Len = Value.Cp ? strlen(Value.Cp) + 1 : 0;
 				if (Len > 0xffff)
 				{
-					LgiAssert(!"String len overflow");
+					LAssert(!"String len overflow");
 					return false;
 				}
 				Us = (uint16_t)Len;
@@ -328,7 +328,7 @@ bool Prop::SerializeText(LFile &f, bool Write)
 											p.Push("?", 1);
 											break;
 										default:
-											LgiAssert(0);
+											LAssert(0);
 											return false;
 									}
 								}
@@ -857,7 +857,7 @@ bool ObjProperties::Serialize(LFile &f, bool Write)
 
 		if (Properties.Length() > 0xffff)
 		{
-			LgiAssert(!"Prop len overflow");
+			LAssert(!"Prop len overflow");
 			return false;
 		}
 
@@ -868,7 +868,7 @@ bool ObjProperties::Serialize(LFile &f, bool Write)
 			auto Len = strlen(Name()) + 1;
 			if (Len > 0xffff)
 			{
-				LgiAssert(!"String len overflow");
+				LAssert(!"String len overflow");
 				return false;
 			}
 

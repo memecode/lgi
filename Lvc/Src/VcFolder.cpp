@@ -84,7 +84,7 @@ int Ver2Int(LString v)
 		}
 		else
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return 0;
 		}
 	}
@@ -257,7 +257,7 @@ void VcFolder::Init(AppPriv *priv)
 	Insert(Tmp = new LTreeItem);
 	Tmp->SetText("Loading...");
 
-	LgiAssert(d != NULL);
+	LAssert(d != NULL);
 }
 
 VcFolder::VcFolder(AppPriv *priv, const char *uri)
@@ -289,7 +289,7 @@ const char *VcFolder::LocalPath()
 {
 	if (!Uri.IsProtocol("file") || Uri.sPath.IsEmpty())
 	{
-		LgiAssert(!"Shouldn't call this if not a file path.");
+		LAssert(!"Shouldn't call this if not a file path.");
 		return NULL;
 	}
 	auto c = Uri.sPath.Get();
@@ -434,7 +434,7 @@ Result VcFolder::RunCmd(const char *Args, LoggingType Logging)
 	}
 	else
 	{
-		LgiAssert(!"Impl me.");
+		LAssert(!"Impl me.");
 	}
 
 	return Ret;
@@ -670,7 +670,7 @@ void VcFolder::UpdateColumns()
 			case LAuthor: d->Commits->AddColumn("Author", 240); break;
 			case LTimeStamp: d->Commits->AddColumn("Date", 130); break;
 			case LMessage: d->Commits->AddColumn("Message", 400); break;
-			default: LgiAssert(0); break;
+			default: LAssert(0); break;
 		}
 	}
 }
@@ -993,7 +993,7 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 			break;
 		}
 		default:
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 	}
 
@@ -1030,7 +1030,7 @@ void VcFolder::LogFile(const char *uri)
 			break;
 		*/
 		default:
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 	}
 }
@@ -1256,9 +1256,9 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 									}
 									Cc->Files.Add(File.Get());
 								}
-								else LgiAssert(!"NO ts for date.");
+								else LAssert(!"NO ts for date.");
 							}
-							else LgiAssert(!"Date parsing failed.");
+							else LAssert(!"Date parsing failed.");
 						}
 					}
 				}
@@ -1266,7 +1266,7 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 			break;
 		}
 		default:
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 	}
 
@@ -1354,7 +1354,7 @@ void VcFolder::LinkParents()
 
 				if (c == e->Child || c == e->Parent)
 				{
-					LgiAssert(c->NodeIdx >= 0);
+					LAssert(c->NodeIdx >= 0);
 					c->Pos.Add(e, c->NodeIdx);
 				}
 				else
@@ -1405,7 +1405,7 @@ void VcFolder::LinkParents()
 					}
 					else
 					{
-						LgiAssert(e->Idx == i);
+						LAssert(e->Idx == i);
 						c->Pos.Add(e, i);
 					}
 				}
@@ -1427,7 +1427,7 @@ void VcFolder::LinkParents()
 				if (c->NodeIdx < 0)
 					c->NodeIdx = i;
 
-				LgiAssert(Active[i].HasItem(e));
+				LAssert(Active[i].HasItem(e));
 				Active[i].Delete(e);
 			}
 		}
@@ -1443,7 +1443,7 @@ void VcFolder::LinkParents()
 				{
 					for (auto edge:Active[n])
 					{
-						LgiAssert(edge->Idx > 0);
+						LAssert(edge->Idx > 0);
 						edge->Idx--;
 						c->Pos.Add(edge, edge->Idx);
 					}
@@ -1572,7 +1572,7 @@ bool VcFolder::ParseInfo(int Result, LString s, ParseParams *Params)
 			break;
 		}			
 		default:
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 	}
 
@@ -1667,7 +1667,7 @@ void VcFolder::DiffRange(const char *FromRev, const char *ToRev)
 		case VcGit:
 		case VcHg:
 		default:
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 	}
 }
@@ -1697,7 +1697,7 @@ void VcFolder::Diff(VcFile *file)
 			LString a;
 
 			if (file->GetRevision())
-				LgiAssert(!"impl the revision cmd line arg.");
+				LAssert(!"impl the revision cmd line arg.");
 
 			a.Printf("diff \"%s\"", Fn);
 			StartCmd(a, &VcFolder::ParseDiff);
@@ -1716,14 +1716,14 @@ void VcFolder::Diff(VcFile *file)
 		case VcCvs:
 			break;
 		default:
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 	}
 }
 
 bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 {
-	LgiAssert(IsWorking || Rev.Get() != NULL);
+	LAssert(IsWorking || Rev.Get() != NULL);
 
 	switch (GetType())
 	{
@@ -1910,7 +1910,7 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 		}
 		default:
 		{
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 		}
 	}
@@ -1932,7 +1932,7 @@ void VcFolder::OnSshCmd(SshParams *p)
 {
 	if (!p || !p->f)
 	{
-		LgiAssert(!"Param error.");
+		LAssert(!"Param error.");
 		return;
 	}
 
@@ -2037,7 +2037,7 @@ void VcFolder::OnRemove()
 				}
 			}
 		}
-		LgiAssert(Found);
+		LAssert(Found);
 
 		d->Opts.Unlock();
 	}
@@ -2187,7 +2187,7 @@ void VcFolder::OnUpdate(const char *Rev)
 				break;
 			default:
 			{
-				LgiAssert(!"Impl me.");
+				LAssert(!"Impl me.");
 				break;
 			}
 		}
@@ -2335,7 +2335,7 @@ void VcFolder::OnVcsType()
 {
 	if (!d)
 	{
-		LgiAssert(!"No priv instance");
+		LAssert(!"No priv instance");
 		return;
 	}
 	auto c = d->GetConnection(Uri.ToString(), false);
@@ -2408,7 +2408,7 @@ void VcFolder::ListCommit(VcCommit *c)
 				break;
 			}
 			default:
-				LgiAssert(!"Impl me.");
+				LAssert(!"Impl me.");
 				break;
 		}
 
@@ -2638,7 +2638,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 						f->GetStatus();
 						Ins.Insert(f);
 					}
-					else LgiAssert(!"What happen?");
+					else LAssert(!"What happen?");
 				}
 				else if (ShowUntracked)
 				{
@@ -2652,7 +2652,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 		}
 		default:
 		{
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 		}
 	}
@@ -2727,7 +2727,7 @@ void VcFolder::FolderStatus(const char *uri, VcLeaf *Notify)
 		LFile::Path p(Uri.sPath(1,-1));
 		if (!p.IsFolder())
 		{
-			LgiAssert(!"Needs to be a folder.");
+			LAssert(!"Needs to be a folder.");
 			return;
 		}
 	}
@@ -2747,7 +2747,7 @@ void VcFolder::FolderStatus(const char *uri, VcLeaf *Notify)
 			break;
 		case VcGit:
 			if (!ToolVersion[VcGit])
-				LgiAssert(!"Where is the version?");
+				LAssert(!"Where is the version?");
 			
 			// What version did =2 become available? It's definitely not in v2.5.4
 			// Not in v2.7.4 either...
@@ -3000,7 +3000,7 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 		}
 		default:
 		{
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 		}
 	}
@@ -3443,7 +3443,7 @@ bool VcFolder::ParseMerge(int Result, LString s, ParseParams *Params)
 				OnCmdError(s, "Merge failed.");
 			break;
 		default:
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 	}
 
@@ -3481,7 +3481,7 @@ bool VcFolder::ParseClean(int Result, LString s, ParseParams *Params)
 				GetCss(true)->Color(LCss::ColorInherit);
 			break;
 		default:
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 	}
 
@@ -3665,7 +3665,7 @@ bool VcFolder::ParseVersion(int Result, LString s, ParseParams *Params)
 				printf("Git version: %s\n", p[2].Get());
 			}
 			else
-				LgiAssert(0);
+				LAssert(0);
 			break;
 		}
 		case VcSvn:
@@ -3676,7 +3676,7 @@ bool VcFolder::ParseVersion(int Result, LString s, ParseParams *Params)
 				printf("Svn version: %s\n", p[2].Get());
 			}
 			else
-				LgiAssert(0);
+				LAssert(0);
 			break;
 		}
 		case VcHg:
@@ -3757,7 +3757,7 @@ bool VcFolder::AddFile(const char *Path, bool AsBinary)
 		}
 		default:
 		{
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 		}
 	}
@@ -3823,7 +3823,7 @@ bool VcFolder::Revert(LString::Array &Uris, const char *Revision)
 		}
 		default:
 		{
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 		}
 	}
@@ -3844,7 +3844,7 @@ bool VcFolder::ParseResolve(int Result, LString s, ParseParams *Params)
 		case VcCvs:
 		default:
 		{
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 		}
 	}
@@ -3870,7 +3870,7 @@ bool VcFolder::Resolve(const char *Path)
 		case VcCvs:
 		default:
 		{
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 		}
 	}
@@ -3914,7 +3914,7 @@ bool VcFolder::Blame(const char *Path)
 		}
 		default:
 		{
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 		}
 	}
@@ -3970,7 +3970,7 @@ bool VcFolder::ParseCounts(int Result, LString s, ParseParams *Params)
 		}
 		default:
 		{
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 		}
 	}
@@ -4047,9 +4047,9 @@ VcLeaf::VcLeaf(VcFolder *parent, LTreeItem *Item, LString uri, LString leaf, boo
 {
 	Parent = parent;
 	d = Parent->GetPriv();
-	LgiAssert(uri.Find("://") >= 0); // Is URI
+	LAssert(uri.Find("://") >= 0); // Is URI
 	Uri.Set(uri);
-	LgiAssert(Uri);
+	LAssert(Uri);
 	Leaf = leaf;
 	Folder = folder;
 	Tmp = NULL;

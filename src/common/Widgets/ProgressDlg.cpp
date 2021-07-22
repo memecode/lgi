@@ -44,7 +44,7 @@ LString Progress::GetDescription()
 
 	LMutex::Auto lck(this, _FL);
 	if (!lck)
-		LgiAssert(0);
+		LAssert(0);
 	else
 		r = Description.Get();
 
@@ -56,7 +56,7 @@ void Progress::SetDescription(const char *d)
 	LMutex::Auto lck(this, _FL);
 	if (!lck)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return;
 	}
 	
@@ -187,7 +187,7 @@ void LProgressPane::UpdateUI()
 	bool Update = false;
 	UiDirty = false;
 
-	uint64 Now = LgiCurrentTime();
+	uint64 Now = LCurrentTime();
 	if (Start == 0)
 	{
 		// initialize the clock
@@ -325,7 +325,7 @@ void LProgressPane::OnPosChange()
 
 LFont *LProgressPane::GetFont()
 {
-	// GdcBeTtf *Fnt = SysFont;
+	// GdcBeTtf *Fnt = LSysFont;
 	// return (Fnt) ? Fnt->Handle() : 0;
 	return 0;
 }
@@ -345,13 +345,13 @@ void LProgressPane::SetDescription(const char *d)
 // #define DefX		((GetSystemMetrics(SM_CXDLGFRAME) * 2))
 // #define DefY		((GetSystemMetrics(SM_CYDLGFRAME) * 2) + GetSystemMetrics(SM_CYCAPTION))
 // #else
-#define DefX		LgiApp->GetMetric(LGI_MET_DECOR_X)
-#define DefY		LgiApp->GetMetric(LGI_MET_DECOR_Y)
+#define DefX		LAppInst->GetMetric(LGI_MET_DECOR_X)
+#define DefY		LAppInst->GetMetric(LGI_MET_DECOR_Y)
 // #endif
 
 LProgressDlg::LProgressDlg(LView *parent, uint64 timeout)
 {
-	Ts = LgiCurrentTime();
+	Ts = LCurrentTime();
 	YieldTs = 0;
 	Timeout = timeout;
 	CanCancel = true;
@@ -387,8 +387,8 @@ bool LProgressDlg::OnRequestClose(bool OsClose)
 void LProgressDlg::Resize()
 {
 	LRect r, c = GetPos();
-	int DecorX = LgiApp->GetMetric(LGI_MET_DECOR_X);
-	int DecorY = LgiApp->GetMetric(LGI_MET_DECOR_Y);
+	int DecorX = LAppInst->GetMetric(LGI_MET_DECOR_X);
+	int DecorY = LAppInst->GetMetric(LGI_MET_DECOR_Y);
 
 	size_t Items = MAX(1, Panes.Length());
 	int Width = DecorX + PANE_X;
@@ -461,8 +461,8 @@ int LProgressDlg::OnNotify(LViewI *Ctrl, int Flags)
 			int x = u.X();
 			int y = u.Y();
 			LRect p = GetPos();
-			p.Dimension(x + LgiApp->GetMetric(LGI_MET_DECOR_X),
-						y + LgiApp->GetMetric(LGI_MET_DECOR_Y));
+			p.Dimension(x + LAppInst->GetMetric(LGI_MET_DECOR_X),
+						y + LAppInst->GetMetric(LGI_MET_DECOR_Y));
 			SetPos(p);
 		}
 	}
@@ -578,7 +578,7 @@ void LProgressDlg::TimeCheck()
 {
 	if (!InThread())
 		return;
-	uint64 Now = LgiCurrentTime();
+	uint64 Now = LCurrentTime();
 	if (Timeout)
 	{
 		if (Now - Ts >= Timeout)

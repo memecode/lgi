@@ -317,7 +317,7 @@ bool MailPhp::Open(LSocketI *S, const char *RemoteHost, int Port, const char *Us
 		DeleteArray(d->UserPass);
 		d->UserPass = NewStr(Password);
 
-		uint64 Token = LgiCurrentTime();
+		uint64 Token = LCurrentTime();
 		strcpy_s(d->Uri, sizeof(d->Uri), RemoteHost);
 
 		char *e = d->Uri + strlen(d->Uri);
@@ -422,7 +422,7 @@ bool MailPhp::Close()
 		d->Messages)
 	{
 		LStringPipe p;
-		p.Print("%s?time=%i&delete=", d->Uri, LgiCurrentTime());
+		p.Print("%s?time=%i&delete=", d->Uri, LCurrentTime());
 		
 		bool First = true;
 		for (auto m: d->Msgs)
@@ -469,7 +469,7 @@ bool MailPhp::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks)
 	LStringPipe Cmd;
 
 	Cmd.Push(d->Uri);
-	Cmd.Print("?time=%i&msg=", LgiCurrentTime());
+	Cmd.Print("?time=%i&msg=", LCurrentTime());
 	for (unsigned i=0; i<Trans.Length(); i++)
 	{
 		if (i) Cmd.Push(",");

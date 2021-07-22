@@ -33,7 +33,7 @@ LRichTextPriv::BlockCursor &LRichTextPriv::BlockCursor::operator =(const BlockCu
 	Pos = c.Pos;
 	Line = c.Line;
 			
-	LgiAssert(Offset >= 0);
+	LAssert(Offset >= 0);
 			
 	return *this;
 }
@@ -53,7 +53,7 @@ void LRichTextPriv::BlockCursor::Set(LRichTextPriv::Block *b, ssize_t off, int l
 	{
 		if (Blk)
 		{
-			LgiAssert(Blk->Cursors > 0);
+			LAssert(Blk->Cursors > 0);
 			Blk->Cursors--;
 
 			#if DEBUG_LOG_CURSOR_COUNT
@@ -71,7 +71,7 @@ void LRichTextPriv::BlockCursor::Set(LRichTextPriv::Block *b, ssize_t off, int l
 		if (b)
 		{
 			Blk = b;
-			LgiAssert(Blk->Cursors < 0x7f);
+			LAssert(Blk->Cursors < 0x7f);
 			Blk->Cursors++;
 
 			#if DEBUG_LOG_CURSOR_COUNT
@@ -93,11 +93,11 @@ void LRichTextPriv::BlockCursor::Set(LRichTextPriv::Block *b, ssize_t off, int l
 		#ifdef _DEBUG
 		ssize_t BlkLen = Blk->Length();
 		#endif
-		LgiAssert(off >= 0 && off <= BlkLen);
+		LAssert(off >= 0 && off <= BlkLen);
 		Blk->GetPosFromIndex(this);
 	}
 
 	// LOG_FN("%s:%i - Cursor.Set: %i, Line: %i\n", _FL, Offset, LineHint);
 			
-	LgiAssert(Offset >= 0);
+	LAssert(Offset >= 0);
 }

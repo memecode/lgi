@@ -427,7 +427,7 @@ void LBox::OnPosChange()
 	for (int i=0; i<Sizes.Length(); i++)
 	{
 		BoxRange &box = Sizes[i];
-		LgiAssert(box.Size.Type == LCss::LenPx);
+		LAssert(box.Size.Type == LCss::LenPx);
 		int Px = (int) (box.Size.Value + 0.01);
 
 		// Allocate space for view
@@ -533,14 +533,14 @@ void LBox::OnMouseMove(LMouse &m)
 	int DragIndex = (int) (d->Dragging - &d->Spacers[0]);
 	if (DragIndex < 0 || DragIndex >= d->Spacers.Length())
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return;
 	}
 
 	LViewI *Prev = Children[DragIndex];
 	if (!Prev)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return;
 	}
 
@@ -556,7 +556,7 @@ void LBox::OnMouseMove(LMouse &m)
 	LCss::PropType Style = d->Vertical ? LCss::PropHeight : LCss::PropWidth;
 	bool EditPrev = !Next || IsValidLen(PrevStyle, Style);
 	LViewI *Edit = EditPrev ? Prev : Next;
-	LgiAssert(Edit != NULL);
+	LAssert(Edit != NULL);
 	LRect ViewPos = Edit->GetPos();
 	auto *EditCss = Edit->GetCss(true);
 
@@ -735,7 +735,7 @@ void LBox::Value(int64 i)
 	OnPosChange();
 }
 
-LgiCursor LBox::GetCursor(int x, int y)
+LCursor LBox::GetCursor(int x, int y)
 {
 	Spacer *Over = d->HitTest(x, y);
 	if (Over)
@@ -762,7 +762,7 @@ bool LBox::Serialize(GDom *Dom, const char *OptName, bool Write)
 	{
 	}
 
-	LgiAssert(0);
+	LAssert(0);
 	
 	return false;
 }

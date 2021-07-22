@@ -58,7 +58,7 @@ public:
 				return 18041;
 		}
 
-		LgiAssert(0);
+		LAssert(0);
 		return 0;
 	}
 

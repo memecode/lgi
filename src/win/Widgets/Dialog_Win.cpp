@@ -221,8 +221,8 @@ int LDialog::DoModal(OsView ParentHnd)
 			// title
 			A = DlgStrCopy(A, NameW());
 			// font
-			*A++ = SysFont->PointSize();
-			A = DlgStrCopy(A, SysFont->Face());
+			*A++ = LSysFont->PointSize();
+			A = DlgStrCopy(A, LSysFont->Face());
 			A = DlgPadToDWord(A);
 
 			LViewI *p = GetParent();
@@ -302,7 +302,7 @@ int LDialog::DoModal(OsView ParentHnd)
 	}
 	else
 	{
-	    LgiAssert(!"Attach failed.");
+	    LAssert(!"Attach failed.");
 	}
 	
 	#endif
@@ -316,7 +316,7 @@ int LDialog::DoModeless()
 {
 	int Status = -1;
 
-	LgiAssert(!_View);
+	LAssert(!_View);
 	if (_View)
 		return Status;
 
@@ -331,7 +331,7 @@ int LDialog::DoModeless()
 		LONG DlgUnits = GetDialogBaseUnits();
 		uint16 old_baseunitX = DlgUnits & 0xffff;
 		uint16 old_baseunitY = DlgUnits >> 16;
-		LDisplayString Bs(SysFont, BaseStr);
+		LDisplayString Bs(LSysFont, BaseStr);
 		int baseunitX = (Bs.X() / 26 + 1) / 2;
 		int baseunitY = Bs.Y();
 		
@@ -370,8 +370,8 @@ int LDialog::DoModeless()
 			// title
 			A = DlgStrCopy(A, NameW());
 			// font
-			*A++ = SysFont->PointSize(); // point size
-			A = DlgStrCopy(A, SysFont->Face());
+			*A++ = LSysFont->PointSize(); // point size
+			A = DlgStrCopy(A, LSysFont->Face());
 			A = DlgPadToDWord(A);
 
 			LViewI *p = GetParent();
@@ -422,7 +422,7 @@ int LDialog::DoModeless()
 	}
 	else
 	{
-	    LgiAssert(!"Attach failed.");
+	    LAssert(!"Attach failed.");
 	}
 
 	#endif
@@ -460,7 +460,7 @@ GMessage::Result LDialog::OnEvent(GMessage *Msg)
 			OnCreate();
 
     		#if USE_DIALOGBOXINDIRECTPARAM
-			LViewI *v = LgiApp->GetFocus();
+			LViewI *v = LAppInst->GetFocus();
 			LWindow *w = v ? v->GetWindow() : NULL;
 			if (v && (w != v) && (w == this))
 			{
@@ -637,7 +637,7 @@ LPoint LControl::SizeOfStr(const char *Str)
 			const char *e = strchr(s, '\n');
 			if (!e) e = s + strlen(s);
 
-			LDisplayString ds(SysFont, (char*)s, e - s);
+			LDisplayString ds(LSysFont, (char*)s, e - s);
 
 			Pt.y += ds.Y();
 			Pt.x = max(Pt.x, ds.X());

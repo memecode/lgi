@@ -799,7 +799,7 @@ LFont *GMenu::GetFont()
 		}
 	}
 
-	return _Font ? _Font : SysFont;
+	return _Font ? _Font : LSysFont;
 }
 
 bool GMenu::Attach(LViewI *p)

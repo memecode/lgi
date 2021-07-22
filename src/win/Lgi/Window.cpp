@@ -126,9 +126,9 @@ LWindow::LWindow() : LView(0)
 
 LWindow::~LWindow()
 {
-	if (LgiApp && LgiApp->AppWnd == this)
+	if (LAppInst && LAppInst->AppWnd == this)
 	{
-		LgiApp->AppWnd = 0;
+		LAppInst->AppWnd = 0;
 	}
 
 	if (Menu)
@@ -143,7 +143,7 @@ LWindow::~LWindow()
 
 bool LWindow::SetIcon(const char *Icon)
 {
-	return CreateClassW32(LgiApp->Name(), LoadIcon(LgiProcessInst(), (LPCWSTR)Icon)) != 0;
+	return CreateClassW32(LAppInst->Name(), LoadIcon(LgiProcessInst(), (LPCWSTR)Icon)) != 0;
 }
 
 LViewI *LWindow::GetFocus()
@@ -444,7 +444,7 @@ bool LWindow::OnRequestClose(bool OsShuttingDown)
 {
 	if (GetQuitOnClose())
 	{
-		LgiCloseApp();
+		LCloseApp();
 	}
 
 	return true;
@@ -867,8 +867,8 @@ GMessage::Result LWindow::OnEvent(GMessage *Msg)
 			LString *Str = (LString*)Msg->B();
 			if (Result)
 			{
-				extern int LgiAssertDlg(LString Msg);
-				*Result = LgiAssertDlg(Str ? *Str : "Error: no msg.");
+				extern int LAssertDlg(LString Msg);
+				*Result = LAssertDlg(Str ? *Str : "Error: no msg.");
 			}
 			else assert(!"Invalid param");
 			break;
@@ -1253,7 +1253,7 @@ bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 			#endif
 
 			// Apply any shortcut override
-			int Show = LgiApp->GetShow();
+			int Show = LAppInst->GetShow();
 			if (Show == SW_SHOWMINIMIZED ||
 				Show == SW_SHOWMINNOACTIVE ||
 				Show == SW_MINIMIZE)

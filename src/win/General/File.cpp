@@ -313,7 +313,7 @@ char *ReadStr(LFile &f DeclDebugArgs)
 		// is _probably_ an error
 		if (Len >= (16 << 20))
 		{
-			// LgiAssert(0);
+			// LAssert(0);
 			return 0;
 		}
 
@@ -1135,7 +1135,7 @@ bool LDirectory::Path(char *s, int BufLen) const
 		LMakePath(s, BufLen, d->BasePath, Name);
 		Status = true;
 	}
-	else LgiAssert(!"Not enough output buffer to write path.");
+	else LAssert(!"Not enough output buffer to write path.");
 
 	return Status;
 }
@@ -1207,7 +1207,7 @@ size_t UnicodeCpy(O *out, ssize_t outChar, I *in, ssize_t inChar = -1)
 	else if (sizeof(O) == 1 && sizeof(I) == 2)
 		return Utf16To8Cpy((uint8_t*)out, outChar, (uint16_t*)in, inChar);
 	else
-		LgiAssert(0);
+		LAssert(0);
 	return 0;
 }
 
@@ -1385,7 +1385,7 @@ struct ClusterSizeMap
 			if (b)
 				Sizes[letter] = Cs = SectorsPerCluster * BytesPerSector;
 			else
-				LgiAssert(0);
+				LAssert(0);
 		}
 
 		return Cs;
@@ -1632,7 +1632,7 @@ int LFile::Close()
 
 int64 LFile::GetSize()
 {
-	LgiAssert(IsOpen());
+	LAssert(IsOpen());
 	d->UseThreadCheck();
 
 	DWORD High = -1;
@@ -1642,7 +1642,7 @@ int64 LFile::GetSize()
 
 int64 LFile::SetSize(int64 Size)
 {
-	LgiAssert(IsOpen());
+	LAssert(IsOpen());
 	d->UseThreadCheck();
 
 	LONG OldPosHigh = 0;
@@ -1665,7 +1665,7 @@ int64 LFile::SetSize(int64 Size)
 
 int64 LFile::GetPos()
 {
-	LgiAssert(IsOpen());
+	LAssert(IsOpen());
 	d->UseThreadCheck();
 
 	LONG PosHigh = 0;
@@ -1675,7 +1675,7 @@ int64 LFile::GetPos()
 
 int64 LFile::SetPos(int64 Pos)
 {
-	LgiAssert(IsOpen());
+	LAssert(IsOpen());
 	d->UseThreadCheck();
 
 	LONG PosHigh = Pos >> 32;
@@ -1728,7 +1728,7 @@ ssize_t LFile::Write(const void *Buffer, ssize_t Size, int Flags)
 		{
 			if (Bytes != BlockSz)
 			{
-				LgiAssert(!"Is this ok?");
+				LAssert(!"Is this ok?");
 			}
 
 			Wr += Bytes;
@@ -1747,7 +1747,7 @@ ssize_t LFile::Write(const void *Buffer, ssize_t Size, int Flags)
 
 int64 LFile::Seek(int64 To, int Whence)
 {
-	LgiAssert(IsOpen());
+	LAssert(IsOpen());
 	d->UseThreadCheck();
 
 	int Mode;
@@ -1772,7 +1772,7 @@ int64 LFile::Seek(int64 To, int Whence)
 
 bool LFile::Eof()
 {
-	LgiAssert(IsOpen());
+	LAssert(IsOpen());
 	return GetPos() >= GetSize();
 }
 

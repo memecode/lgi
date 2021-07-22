@@ -60,7 +60,7 @@ public:
 
 	int Cmp(char *Key)
 	{
-		LgiAssert(D[0] != 0);
+		LAssert(D[0] != 0);
 
 		uint8 *Data = D + (D[0] + 1);
 		uint8 Temp = *Data;
@@ -340,7 +340,7 @@ BNode *BNode::FindData(char *Key, BData **Ptr)
 				}
 				else
 				{
-					LgiAssert(0);
+					LAssert(0);
 				}
 			}
 			else
@@ -361,7 +361,7 @@ BNode *BNode::FindData(char *Key, BData **Ptr)
 					}
 					else
 					{
-						LgiAssert(0);
+						LAssert(0);
 					}
 				}
 				else

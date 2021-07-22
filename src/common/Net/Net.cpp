@@ -304,7 +304,7 @@ public:
 		// Because select can't check out 'Cancel' value during the waiting we run the select
 		// call in a much smaller timeout and a loop so that we can respond to Cancel being set
 		// in a timely manner.
-		auto Now = LgiCurrentTime();
+		auto Now = LCurrentTime();
 		auto End = Now + TimeoutMs;
 		do
 		{
@@ -313,7 +313,7 @@ public:
 				break;
 
 			// How many ms to wait?
-			Now = LgiCurrentTime();
+			Now = LCurrentTime();
 			auto Remain = MIN(CancelCheckMs, (int)(End - Now));
 			if (Remain <= 0)
 				break;
@@ -794,12 +794,12 @@ int LSocket::Open(const char *HostAddr, int Port)
 						LgiTrace(LPrintSock " - IsWouldBlock()=%i d->LastError=%i\n", d->Socket, IsWouldBlock(), d->LastError);
 						#endif
 
-						int64 End = LgiCurrentTime() + (d->Timeout > 0 ? d->Timeout : 30000);
+						int64 End = LCurrentTime() + (d->Timeout > 0 ? d->Timeout : 30000);
 						while (	!d->Cancel->IsCancelled() &&
 								ValidSocket(d->Socket) &&
 								IsWouldBlock())
 						{
-							int64 Remaining = End - LgiCurrentTime();
+							int64 Remaining = End - LCurrentTime();
 
 							#if CONNECT_LOGGING
 							LgiTrace(LPrintSock " - Remaining " LPrintfInt64 "\n", d->Socket, Remaining);
@@ -956,7 +956,7 @@ bool LSocket::Accept(LSocketI *c)
 {
 	if (!c)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 	
@@ -970,7 +970,7 @@ bool LSocket::Accept(LSocketI *c)
 	
 	// int Loop = 0;
 	socklen_t Length = sizeof(Address);
-	uint64 Start = LgiCurrentTime();
+	uint64 Start = LCurrentTime();
 	while (	!d->Cancel->IsCancelled() &&
 			ValidSocket(d->Socket))
 	{
@@ -981,7 +981,7 @@ bool LSocket::Accept(LSocketI *c)
 		}
 		else if (d->Timeout > 0)
 		{
-			uint64 Now = LgiCurrentTime();
+			uint64 Now = LCurrentTime();
 			if (Now - Start >= d->Timeout)
 			{
 				LString s;
@@ -1575,7 +1575,7 @@ uint32_t LIpHostInt(LString str)
 		auto n = s.Int();
 		if (n > 255)
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return 0;
 		}
 		ip |= (uint8_t)s.Int();
@@ -1699,12 +1699,12 @@ int LSocks5Socket::Open(const char *HostAddr, int port)
 								*b++ = 1; // ver of sub-negotiation ??
 								
 								size_t NameLen = strlen(UserName);
-								LgiAssert(NameLen < 0x80);
+								LAssert(NameLen < 0x80);
 								*b++ = (char)NameLen;
 								b += sprintf_s(b, NameLen+1, "%s", UserName.Get());
 
 								size_t PassLen = strlen(Password);
-								LgiAssert(PassLen < 0x80);
+								LAssert(PassLen < 0x80);
 								*b++ = (char)PassLen;
 								b += sprintf_s(b, PassLen+1, "%s", Password.Get());
 
@@ -1748,7 +1748,7 @@ int LSocks5Socket::Open(const char *HostAddr, int port)
 							// Domain Name
 							*b++ = SOCKS5_ADDR_DOMAIN;
 							size_t Len = strlen(HostAddr);
-							LgiAssert(Len < 0x80);
+							LAssert(Len < 0x80);
 							*b++ = (char)Len;
 							strcpy_s(b, Buf+sizeof(Buf)-b, HostAddr);
 							b += Len;

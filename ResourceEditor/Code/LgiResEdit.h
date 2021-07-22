@@ -227,7 +227,7 @@ public:
 	ResFolder(AppWnd *w, int t, bool enabled = true);
 	LView *Wnd() { return dynamic_cast<LView*>(this); }
 
-	void Create(LXmlTag *load, SerialiseContext *ctx) { LgiAssert(0); }
+	void Create(LXmlTag *load, SerialiseContext *ctx) { LAssert(0); }
 	bool Test(ErrorCollection *e) { return false; }
 	bool Read(LXmlTag *t, SerialiseContext &Ctx) { return false; }
 	bool Write(LXmlTag *t, SerialiseContext &Ctx) { return false; }
@@ -338,7 +338,7 @@ protected:
 			if (Create)
 				f.Add(Token, a = new FieldArr);
 			else
-				LgiAssert(0);
+				LAssert(0);
 		}
 		return a;
 	}
@@ -449,7 +449,7 @@ public:
 				Store->SetValue(FieldName, v = i);
 				break;
 			default:
-				LgiAssert(0);
+				LAssert(0);
 		}
 	}
 
@@ -480,7 +480,7 @@ public:
 					Store->SetValue(FieldName, i = b);
 				break;
 			default:
-				LgiAssert(0);
+				LAssert(0);
 		}
 	}
 
@@ -514,7 +514,7 @@ public:
 				Store->SetValue(FieldName, v = s);
 				break;
 			default:
-				LgiAssert(0);
+				LAssert(0);
 		}
 	}
 
@@ -544,7 +544,7 @@ public:
 				Store->SetValue(FieldName, v = s);
 				break;
 			default:
-				LgiAssert(0);
+				LAssert(0);
 		}
 	}
 
@@ -572,7 +572,7 @@ public:
 				Store->SetValue(FieldName, v = s.Get());
 				break;
 			default:
-				LgiAssert(0);
+				LAssert(0);
 		}
 	}
 
@@ -606,7 +606,7 @@ public:
 				break;
 			}
 			default:
-				LgiAssert(0);
+				LAssert(0);
 		}
 	}
 

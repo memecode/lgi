@@ -61,7 +61,7 @@ bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, LString::
 
 int LDragDropSource::Drag(LView *SourceWnd, int Effect)
 {
-	LgiAssert(SourceWnd);
+	LAssert(SourceWnd);
 	if (!SourceWnd)
 		return -1;
 

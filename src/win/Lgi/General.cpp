@@ -504,7 +504,7 @@ bool LExecute(const char *File, const char *Arguments, const char *Dir, LString 
 	if (!File)
 		return false;
 
-	uint64 Now = LgiCurrentTime();
+	uint64 Now = LCurrentTime();
 	if (LGetOs() == LGI_OS_WIN9X)
 	{
 		auto f = LToNativeCp(File);
@@ -533,8 +533,8 @@ bool LExecute(const char *File, const char *Arguments, const char *Dir, LString 
 	#ifdef _DEBUG
 	if ((size_t)Status <= 32)
 		LgiTrace("ShellExecuteW failed with %p (LastErr=0x%x)\n", Status, Error);
-	if (LgiCurrentTime() - Now > 1000)
-		LgiTrace("ShellExecuteW took %I64i\n", LgiCurrentTime() - Now);
+	if (LCurrentTime() - Now > 1000)
+		LgiTrace("ShellExecuteW took %I64i\n", LCurrentTime() - Now);
 	#endif
 
 	if (ErrorMsg)
@@ -604,7 +604,7 @@ GRegKey::GRegKey(bool WriteAccess, char *Key, ...)
 		{			
 			DWORD err = GetLastError();
 			if (AssertOnError)
-				LgiAssert(!"RegOpenKeyEx failed");
+				LAssert(!"RegOpenKeyEx failed");
 		}
 	}
 }
@@ -637,7 +637,7 @@ bool GRegKey::Create()
 			{
 				DWORD err = GetLastError();
 				if (AssertOnError)
-					LgiAssert(!"RegCreateKey failed");
+					LAssert(!"RegCreateKey failed");
 			}
 		}
 	}
@@ -661,7 +661,7 @@ bool GRegKey::DeleteValue(char *Name)
 		else
 		{
 			DWORD Err = GetLastError();
-			LgiAssert(!"RegDeleteValue failed");
+			LAssert(!"RegDeleteValue failed");
 		}
 	}
 
@@ -686,7 +686,7 @@ bool GRegKey::DeleteKey()
 			if (!Status)
 			{
 				if (AssertOnError)
-					LgiAssert(!"RegDeleteKey failed.");
+					LAssert(!"RegDeleteKey failed.");
 			}
 			KeyName.Empty();
 		}
@@ -699,7 +699,7 @@ char *GRegKey::GetStr(const char *Name)
 {
 	if (!k)
 	{
-		LgiAssert(!"No key to read from.");
+		LAssert(!"No key to read from.");
 		return NULL;
 	}
 
@@ -708,7 +708,7 @@ char *GRegKey::GetStr(const char *Name)
 	if (Ret != ERROR_SUCCESS)
 	{
 		if (AssertOnError)
-			LgiAssert(!"RegQueryValueEx failed.");
+			LAssert(!"RegQueryValueEx failed.");
 		return NULL;
 	}
 
@@ -720,7 +720,7 @@ bool GRegKey::GetStr(const char *Name, LString &Str)
 	if (!k)
 	{
 		if (AssertOnError)
-			LgiAssert(!"No key to read from.");
+			LAssert(!"No key to read from.");
 		return false;
 	}
 
@@ -741,7 +741,7 @@ bool GRegKey::GetStr(const char *Name, LString &Str)
 
 OnError:
 	if (AssertOnError)
-		LgiAssert(!"RegQueryValueEx failed.");
+		LAssert(!"RegQueryValueEx failed.");
 	return false;
 }
 
@@ -749,7 +749,7 @@ bool GRegKey::SetStr(const char *Name, const char *Value)
 {
 	if (!k)
 	{
-		LgiAssert(!"No key open.");
+		LAssert(!"No key open.");
 		return false;
 	}
 
@@ -757,7 +757,7 @@ bool GRegKey::SetStr(const char *Name, const char *Value)
 	if (Ret != ERROR_SUCCESS)
 	{
 		if (AssertOnError)
-			LgiAssert(!"RegSetValueEx failed.");
+			LAssert(!"RegSetValueEx failed.");
 		return false;
 	}
 	
@@ -841,7 +841,7 @@ LString WinGetSpecialFolderPath(int Id)
 		else
 		{
 			DWORD e = GetLastError();
-			LgiAssert(!"Error getting system folder.");
+			LAssert(!"Error getting system folder.");
 		}
 	}
 
@@ -850,9 +850,9 @@ LString WinGetSpecialFolderPath(int Id)
 
 //////////////////////////////////////////////////////////////////////
 #ifndef LGI_STATIC
-int LgiAssertDlg(LString Msg)
+int LAssertDlg(LString Msg)
 {
-	LAlert a(LgiApp ? LgiApp->AppWnd : NULL, "Assert Failed", Msg, "Abort", "Debug", "Ignore");
+	LAlert a(LAppInst ? LAppInst->AppWnd : NULL, "Assert Failed", Msg, "Abort", "Debug", "Ignore");
 	a.SetAppModal();
 	return a.DoModal();
 }
@@ -867,7 +867,7 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 		#ifdef LGI_STATIC
 		assert(b);
 		#else
-		if (Asserting || !LgiApp || !SysFont)
+		if (Asserting || !LAppInst || !LSysFont)
 		{
 			// Woah boy...
 			assert(0);
@@ -884,10 +884,10 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 			Msg.Printf("Assert failed, file: %s, line: %i\n%s", file, line, test);
 
 			int Result = 0;
-			if (LgiApp->InThread())
+			if (LAppInst->InThread())
 			{
 				// We are in the GUI thread, show the dialog inline
-				Result = LgiAssertDlg(Msg);
+				Result = LAssertDlg(Msg);
 			}
 			else
 			{

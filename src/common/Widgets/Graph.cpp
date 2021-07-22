@@ -109,7 +109,7 @@ struct LGraphPriv
 				v = in;
 				break;
 			default:
-				LgiAssert(!"Not impl.");
+				LAssert(!"Not impl.");
 				break;
 		}
 		return true;
@@ -120,7 +120,7 @@ struct LGraphPriv
 		// a - b
 		if (a.Type != b.Type)
 		{
-			LgiAssert(!"Only defined for comparing values of the same type.");
+			LAssert(!"Only defined for comparing values of the same type.");
 			return 0;
 		}
 
@@ -152,7 +152,7 @@ struct LGraphPriv
 			}
 			default:
 			{
-				LgiAssert(!"Not impl.");
+				LAssert(!"Not impl.");
 				break;
 			}
 		}
@@ -201,7 +201,7 @@ struct LGraphPriv
 				break;
 			}
 			default:
-				LgiAssert(0);
+				LAssert(0);
 				break;
 		}
 
@@ -213,7 +213,7 @@ struct LGraphPriv
 		if (v.Type != min.Type ||
 			v.Type != max.Type)
 		{
-			LgiAssert(!"Incompatible types.");
+			LAssert(!"Incompatible types.");
 			return 0;
 		}
 
@@ -226,7 +226,7 @@ struct LGraphPriv
 				max.Value.Date->Get(Max);
 				v.Value.Date->Get(Val);
 				int64 Range = Max - Min;
-				LgiAssert(Range > 0);
+				LAssert(Range > 0);
 
 				return (int) ((Val - Min) * (pixels - 1) / Range);
 				break;
@@ -239,7 +239,7 @@ struct LGraphPriv
 				Val = v.CastInt64();
 
 				int64 Range = Max - Min;
-				LgiAssert(Range > 0);
+				LAssert(Range > 0);
 
 				return (int) ((Val - Min) * (pixels - 1) / Range);
 				break;
@@ -252,13 +252,13 @@ struct LGraphPriv
 				Val = v.CastDouble();
 
 				double Range = Max - Min;
-				LgiAssert(Range > 0);
+				LAssert(Range > 0);
 
 				return (int) ((Val - Min) * (pixels - 1) / Range);
 				break;
 			}
 			default:
-				LgiAssert(0);
+				LAssert(0);
 				break;
 		}
 
@@ -296,7 +296,7 @@ struct LGraphPriv
 			}
 			default:
 			{
-				LgiAssert(!"Impl me.");
+				LAssert(!"Impl me.");
 				break;
 			}
 		}
@@ -321,7 +321,7 @@ struct LGraphPriv
 		int64 int64_inc = 0;
 		int date_inc = 1;
 
-		SysFont->Colour(L_TEXT, L_WORKSPACE);
+		LSysFont->Colour(L_TEXT, L_WORKSPACE);
 
 		LArray<LVariant> Values;
 		while (Loop)
@@ -429,7 +429,7 @@ struct LGraphPriv
 
 			LString s = DataToString(v);
 
-			LDisplayString ds(SysFont, s);
+			LDisplayString ds(LSysFont, s);
 			if (xaxis)
 				ds.Draw(pDC, dx - (ds.X()/2), dy + AxisMarkPx);
 			else
@@ -653,7 +653,7 @@ void LGraph::OnMouseClick(LMouse &m)
                         break;
                     }
                     default:
-                        LgiAssert(0);
+                        LAssert(0);
                         break;
                 }
                 break;

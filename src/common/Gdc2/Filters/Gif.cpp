@@ -211,7 +211,7 @@ int GdcGif::out_line(uchar *pixels, int linewidth, int interlaced, int BitDepth)
 	    }
 	    default:
 	    {
-	        LgiAssert(!"Unsupported colour space");
+	        LAssert(!"Unsupported colour space");
 	        break;
 	    }
 	}
@@ -858,7 +858,7 @@ GFilter::IoStatus GdcGif::WriteImage(LStream *Out, LSurface *pDC)
 	            {
 	                uint8_t *p = (*pDC)[y];
 	                uint8_t *a = (*pDC->AlphaDC())[y];
-	                LgiAssert(p && a);
+	                LAssert(p && a);
 	                if (!p || !a) break;
 	                uint8_t *e = p + pDC->X();
 	                while (p < e)
@@ -900,7 +900,7 @@ GFilter::IoStatus GdcGif::WriteImage(LStream *Out, LSurface *pDC)
 			
 			if (Transparent.CastInt32() && Back < 0)
 			{
-			    LgiAssert(!"No background colour available??");
+			    LAssert(!"No background colour available??");
 	            if (Props)
 		            Props->SetValue(LGI_FILTER_ERROR, v = "Transparency requested, but no background colour set.");
                 return IoError;			    
@@ -1011,7 +1011,7 @@ GFilter::IoStatus GdcGif::WriteImage(LStream *Out, LSurface *pDC)
 		            *o++ = Back;
 		        p++;
 		    }
-		    LgiAssert(o == buf + Len);
+		    LAssert(o == buf + Len);
 		    p = buf;
 		}
 

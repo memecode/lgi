@@ -286,9 +286,9 @@ int LgiMain(OsAppArguments &AppArgs)
 		char In[256];
 		char Out[256];
 		char Langs[256];
-		if (LgiApp->GetOption("In", In) AND
-			LgiApp->GetOption("Out", Out) AND
-			LgiApp->GetOption("Langs", Langs))
+		if (LAppInst->GetOption("In", In) AND
+			LAppInst->GetOption("Out", Out) AND
+			LAppInst->GetOption("Langs", Langs))
 		{
 			if (w->Load(In))
 			{

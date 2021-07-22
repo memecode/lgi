@@ -198,7 +198,7 @@ class LJson
 	{
 		if (*c != '[')
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return false;
 		}
 
@@ -223,7 +223,7 @@ class LJson
 		}
 		if (*c != ']')
 		{
-			LgiAssert(!"Unexpected token.");
+			LAssert(!"Unexpected token.");
 			return false;
 		}
 
@@ -351,7 +351,7 @@ public:
 	{
 		LString s = Root.Print(0);
 		#ifdef _DEBUG
-		LgiAssert(LIsUtf8(s));
+		LAssert(LIsUtf8(s));
 		#endif
 		return s;
 	}

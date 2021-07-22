@@ -51,22 +51,22 @@ char *MimeFromName(char *Name)
 	return m;
 }
 
-LApp::LApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : BApplication(MimeFromName(Name))
+LApp::LApp(OsAppArguments &OsArgs, const char *Name, LAppArguments *AppArgs) : BApplication(MimeFromName(Name))
 {
 	// Sanity Checks
-	LgiAssert(sizeof(int8) == 1);
-	LgiAssert(sizeof(uint8) == 1);
+	LAssert(sizeof(int8) == 1);
+	LAssert(sizeof(uint8) == 1);
 
-	LgiAssert(sizeof(int16) == 2);
-	LgiAssert(sizeof(uint16) == 2);
+	LAssert(sizeof(int16) == 2);
+	LAssert(sizeof(uint16) == 2);
 
-	LgiAssert(sizeof(int32) == 4);
-	LgiAssert(sizeof(uint32) == 4);
+	LAssert(sizeof(int32) == 4);
+	LAssert(sizeof(uint32) == 4);
 
-	LgiAssert(sizeof(int64) == 8);
-	LgiAssert(sizeof(uint64) == 8);
+	LAssert(sizeof(int64) == 8);
+	LAssert(sizeof(uint64) == 8);
 	
-	LgiAssert(sizeof(char16) == 4);
+	LAssert(sizeof(char16) == 4);
 
 	// Private data
 	d = new LAppPrivate;
@@ -102,7 +102,7 @@ LApp::LApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : B
 				*SystemBold = *SystemNormal;
 				SystemBold->Bold(true);
 				SystemBold->Create();
-				LgiAssert(SystemBold->Handle());	
+				LAssert(SystemBold->Handle());	
 			}
 		}
 	}
@@ -110,7 +110,7 @@ LApp::LApp(OsAppArguments &OsArgs, const char *Name, GAppArguments *AppArgs) : B
 	if (!SystemNormal)
 	{
 		LgiMsg(0, "Error: Couldn't create system font.", "Lgi Error: LApp::LApp", MB_OK);
-		LgiExitApp();
+		LExitApp();
 	}
 
 	#if 1
@@ -483,7 +483,7 @@ void LApp::Exit(int Code)
 
 LAutoString LApp::GetFileMimeType(const char *File)
 {
-	LgiAssert(0);
+	LAssert(0);
 	return LAutoString();
 }
 

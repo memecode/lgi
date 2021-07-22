@@ -64,7 +64,7 @@ bool LgiFindBounds(LSurface *pDC, LRect *rc)
 	if (!pDC || ! rc)
 		return false;
 
-	LgiAssert(pDC->GetColourSpace() == System32BitColourSpace);
+	LAssert(pDC->GetColourSpace() == System32BitColourSpace);
 
 	// Move top border down to image
 	while (rc->y1 < rc->y2)
@@ -326,7 +326,7 @@ void LThinBorder(LSurface *pDC, LRect &r, LgiEdge Type)
 		}
 		default:
 		{
-			LgiAssert(0);
+			LAssert(0);
 			break;
 		}
 	}
@@ -577,7 +577,7 @@ COLOUR CBit(int DstBits, COLOUR c, int SrcBits, GPalette *Pal)
 						return Rgb24To32(c);
 					}
 					default:
-						LgiAssert(0);
+						LAssert(0);
 						break;
 				}
 				break;
@@ -879,7 +879,7 @@ LColourSpace GBitsToColourSpace(int Bits)
 		case 32:
 			return System32BitColourSpace;
 		default:
-			LgiAssert(!"Unknown colour space.");
+			LAssert(!"Unknown colour space.");
 			break;
 	}
 	
@@ -910,7 +910,7 @@ bool GColourSpaceTest()
 		xrgb32.pad != 1 ||
 		xrgb32.b != 4)
 	{
-		LgiAssert(!"32bit colour space byte ordering wrong. Flip the value of LEAST_SIG_BYTE_FIRST");
+		LAssert(!"32bit colour space byte ordering wrong. Flip the value of LEAST_SIG_BYTE_FIRST");
 		return false;
 	}
 	
@@ -931,7 +931,7 @@ bool GColourSpaceTest()
 	if (rgb16.r != 0x1f ||
 		rgb16.b != 0x0)
 	{
-		LgiAssert(!"16bit colour space bit ordering wrong. Flip the value of LEAST_SIG_BIT_FIRST");
+		LAssert(!"16bit colour space bit ordering wrong. Flip the value of LEAST_SIG_BIT_FIRST");
 		return false;
 	}
 	
@@ -1055,7 +1055,7 @@ bool LgiRopRgb(uint8_t *d, LColourSpace DstCs, uint8_t *s, LColourSpace SrcCs, i
 			Dst.All = DstCs;
 			
 			LgiTrace("%s:%i - Unsupported ROP: %s -> %s\n", _FL, GColourSpaceToString(SrcCs), GColourSpaceToString(DstCs));
-			LgiAssert(!"Unsupported pixel conversion.");
+			LAssert(!"Unsupported pixel conversion.");
 			return false;
 		}
 	}
@@ -1111,7 +1111,7 @@ bool LgiRopUniversal(GBmpMem *Dst, GBmpMem *Src, bool Composite)
 	{
 	}
 
-	// LgiAssert(!"Unsupported pixel conversion.");
+	// LAssert(!"Unsupported pixel conversion.");
 	return false;
 }
 

@@ -75,7 +75,7 @@ public:
 		/// line colour is used.
 		LColour Fore, Back;
 		/// Cursor
-		LgiCursor Cursor;		
+		LCursor Cursor;		
 		/// Optional extra decor not supported by the fonts
 		LCss::TextDecorType Decor;
 		/// Colour for the optional decor.
@@ -423,7 +423,7 @@ public:
 	bool OnLayout(LViewLayoutInfo &Inf) override;
 	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState) override;
 	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState) override;
-	LgiCursor GetCursor(int x, int y) override;
+	LCursor GetCursor(int x, int y) override;
 
 	// Virtuals
 	virtual bool Insert(size_t At, const char16 *Data, ssize_t Len);

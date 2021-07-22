@@ -96,7 +96,7 @@ typedef sem_id						OsSemaphore;
 #define LgiGetCurrentThread()		find_thread(0)
 
 #define LgiSleep(i)				snooze(i*1000)
-#define LgiYield()				LgiApp->Run(false)
+#define LgiYield()				LAppInst->Run(false)
 
 // Network
 // #include "NetworkKit.h"

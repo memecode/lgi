@@ -109,7 +109,7 @@ bool GHistory::OnLayout(LViewLayoutInfo &Inf)
 	if (!Inf.Width.Min)
 		Inf.Width.Min = Inf.Width.Max = 24;
 	else
-		Inf.Height.Min = Inf.Height.Max = SysFont->GetHeight() + 6;
+		Inf.Height.Min = Inf.Height.Max = LSysFont->GetHeight() + 6;
 	
 	return true;
 }

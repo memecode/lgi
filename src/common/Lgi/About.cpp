@@ -85,7 +85,7 @@ LAbout::LAbout(	LView *parent,
 		Ctrl->SetId(IDC_MESSAGE);
 		Ctrl->Name(p.NewGStr());
 		Ctrl->GetCss(true)->BackgroundColor(cBack);
-		Ctrl->SetFont(SysFont);
+		Ctrl->SetFont(LSysFont);
 	}
 
 	auto c = Tbl->GetCell(0, 1, true, x);

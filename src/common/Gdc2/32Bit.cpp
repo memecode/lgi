@@ -253,7 +253,7 @@ public:
 				#undef AlphaCase
 
 				default:
-					LgiAssert(!"Impl me.");
+					LAssert(!"Impl me.");
 					break;
 			}
 		}
@@ -593,7 +593,7 @@ public:
 				#undef AlphaCase
 
 				default:
-					LgiAssert(!"Impl me.");
+					LAssert(!"Impl me.");
 					break;
 			}
 		}

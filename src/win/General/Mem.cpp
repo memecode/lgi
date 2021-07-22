@@ -34,7 +34,7 @@
 #ifndef _WIN64
 #define mem_assert(c)				if (!(c)) _asm int 3
 #else
-#define mem_assert					LgiAssert
+#define mem_assert					LAssert
 #endif
 
 struct stack_addr
@@ -108,7 +108,7 @@ StackwalkExceptionHandler(PEXCEPTION_POINTERS ExceptionPointers)
 void *lgi_malloc(size_t size)
 {
 	#if MEM_TRACKING
-	LgiAssert(MemInit);
+	LAssert(MemInit);
 
 	if (size > 0)
 	{
@@ -221,13 +221,13 @@ void *lgi_realloc(void *ptr, size_t size)
 					prev->Next = n;
 				else
 					First = n;
-				LgiAssert(n->Prev == prev);
+				LAssert(n->Prev == prev);
 
 				if (next)
 					next->Prev = n;
 				else
 					Last = n;
-				LgiAssert(n->Next == next);
+				LAssert(n->Next == next);
 
 				ret = n + 1;
 			}
@@ -827,7 +827,7 @@ public:
 
 	~_VMemCleanup()
 	{
-		LgiAssert(LgiCheckHeap());
+		LAssert(LgiCheckHeap());
 
 		char s[256];
 		if (_First)

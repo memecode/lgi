@@ -32,7 +32,7 @@ inline const char *toString(Store3State s)
 		_(Store3Loaded)
 	}
 	#undef _
-	LgiAssert(0);
+	LAssert(0);
 	return "#invalidStore3State";
 }
 
@@ -64,7 +64,7 @@ inline const char *toString(Store3SystemFolder s)
 		_(Store3SystemSpam)
 	}
 	#undef _
-	LgiAssert(0);
+	LAssert(0);
 	return "#invalidStore3SystemFolder";
 }
 

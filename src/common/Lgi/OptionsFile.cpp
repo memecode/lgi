@@ -157,7 +157,7 @@ bool LOptionsFile::SerializeFile(bool Write)
 		else if (Write)
 		{
 			LgiTrace("%s:%i - Failed to open '%s'\n", _FL, File.Get());
-			LgiAssert(!"Failed to open file.");
+			LAssert(!"Failed to open file.");
 		}
 
 		Unlock();

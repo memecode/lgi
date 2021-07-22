@@ -593,8 +593,8 @@ public:
 		}
 
 		// Font
-		if (Ctrl->GetFont() == SysFont)
-			Ctrl->SetFont(SysBold);
+		if (Ctrl->GetFont() == LSysFont)
+			Ctrl->SetFont(LSysBold);
 
 		// Background
 		LCssTools Tools(Ctrl->GetCss(), Ctrl->GetFont());
@@ -743,8 +743,8 @@ public:
 		if (Mem.Create(Ctrl->X(), Ctrl->Y(), OsDefaultCs))
 		{
 			// Font
-			if (Ctrl->GetFont() == SysFont)
-				Ctrl->SetFont(SysBold);
+			if (Ctrl->GetFont() == LSysFont)
+				Ctrl->SetFont(LSysBold);
 
 			// Back
 			LColour TextDefault(L_TEXT), BackDefault(L_HIGH);
@@ -966,10 +966,10 @@ public:
 	{
 		if (Class && stricmp(Class, Res_Button) == 0)
 		{
-			return SysBold;
+			return LSysBold;
 		}
 
-		return SysFont;
+		return LSysFont;
 	}
 };
 

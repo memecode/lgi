@@ -275,7 +275,7 @@ bool LVariant::operator ==(LVariant &v)
 			return Value.Ptr == v.Value.Ptr;
 		case GV_HASHTABLE:
 		{
-			LgiAssert(0);
+			LAssert(0);
 			break;
 		}
 	}
@@ -616,7 +616,7 @@ LVariant &LVariant::operator =(LVariant const &i)
 		default:
 		{
 			printf("%s:%i - Unknown variant type '%i'\n", _FL, Type);
-			LgiAssert(0);
+			LAssert(0);
 			break;
 		}
 	}
@@ -1180,7 +1180,7 @@ bool LVariant::CastBool()
 	switch (Type)
 	{
 		default:
-			LgiAssert(0);
+			LAssert(0);
 			break;
 		case GV_NULL:
 			return false;
@@ -1664,9 +1664,9 @@ struct GDomPropMap
 
 		#if defined(_DEBUG) // Check for duplicates.
 		auto existing_prop = ToProp.Find(s);
-		LgiAssert(existing_prop == ObjNone);
+		LAssert(existing_prop == ObjNone);
 		auto existing_str = ToString.Find(p);
-		LgiAssert(existing_str == NULL);
+		LAssert(existing_str == NULL);
 		#endif
 
 		ToProp.Add(s, p);
@@ -1713,7 +1713,7 @@ bool GDom::GetValue(const char *Var, LVariant &Value)
 		else
 		{
 			LgiTrace("%s:%i - Locking error\n", _FL);
-			LgiAssert(0);
+			LAssert(0);
 		}
 	}
 
@@ -1747,7 +1747,7 @@ bool GDom::SetValue(const char *Var, LVariant &Value)
 		else
 		{
 			LgiTrace("%s:%i - Locking error\n", _FL);
-			LgiAssert(0);
+			LAssert(0);
 		}
 	}
 
@@ -1758,7 +1758,7 @@ bool LVariant::Add(LVariant *v, int Where)
 {
 	if (!v)
 	{
-		LgiAssert(!"No value to insert.");
+		LAssert(!"No value to insert.");
 		return false;
 	}
 
@@ -1767,7 +1767,7 @@ bool LVariant::Add(LVariant *v, int Where)
 		
 	if (Type != GV_LIST)
 	{
-		LgiAssert(!"Not a list variant");
+		LAssert(!"Not a list variant");
 		return false;
 	}
 	
@@ -1912,19 +1912,19 @@ bool LCustomType::DefineField(const char *Name, LCustomType *Type, int ArrayLen)
 {
 	if (ArrayLen < 1)
 	{
-		LgiAssert(!"Can't have zero size field.");
+		LAssert(!"Can't have zero size field.");
 		return false;
 	}
 
 	if (Name == NULL || Type == NULL)
 	{
-		LgiAssert(!"Invalid parameter.");
+		LAssert(!"Invalid parameter.");
 		return false;
 	}
 
 	if (FldMap.Find(Name) >= 0)
 	{
-		LgiAssert(!"Field already exists.");
+		LAssert(!"Field already exists.");
 		return false;
 	}
 	FldMap.Add(Name, (int)Flds.Length());
@@ -1948,19 +1948,19 @@ bool LCustomType::DefineField(const char *Name, LVariantType Type, int Bytes, in
 {
 	if (ArrayLen < 1)
 	{
-		LgiAssert(!"Can't have zero size field.");
+		LAssert(!"Can't have zero size field.");
 		return false;
 	}
 
 	if (Name == NULL)
 	{
-		LgiAssert(!"No field name.");
+		LAssert(!"No field name.");
 		return false;
 	}
 
 	if (FldMap.Find(Name) >= 0)
 	{
-		LgiAssert(!"Field already exists.");
+		LAssert(!"Field already exists.");
 		return false;
 	}
 	FldMap.Add(Name, (int)Flds.Length());
@@ -1990,7 +1990,7 @@ LCustomType::Method *LCustomType::DefineMethod(const char *Name, LArray<LString>
 	Method *m = MethodMap.Find(Name);
 	if (m)
 	{
-		LgiAssert(!"Method already defined.");
+		LAssert(!"Method already defined.");
 		return NULL;
 	}
 	
@@ -2049,7 +2049,7 @@ ssize_t LCustomType::CustomField::Sizeof()
 		case GV_CUSTOM:
 			return Nested->Sizeof();
 		default:
-			LgiAssert(!"Unknown type.");
+			LAssert(!"Unknown type.");
 			break;
 	}
 	
@@ -2062,14 +2062,14 @@ bool LCustomType::Get(int Index, LVariant &Out, uint8_t *This, int ArrayIndex)
 		Index >= Flds.Length() ||
 		!This)
 	{
-		LgiAssert(!"Invalid parameter error.");
+		LAssert(!"Invalid parameter error.");
 		return false;
 	}
 
 	CustomField *Def = Flds[Index];
 	if (ArrayIndex < 0 || ArrayIndex >= Def->ArrayLen)
 	{
-		LgiAssert(!"Array out of bounds.");
+		LAssert(!"Array out of bounds.");
 		return false;
 	}
 
@@ -2126,7 +2126,7 @@ bool LCustomType::Get(int Index, LVariant &Out, uint8_t *This, int ArrayIndex)
 				}
 				default:
 				{
-					LgiAssert(!"Unknown integer size.");
+					LAssert(!"Unknown integer size.");
 					return false;
 				}
 			}
@@ -2139,7 +2139,7 @@ bool LCustomType::Get(int Index, LVariant &Out, uint8_t *This, int ArrayIndex)
 		}
 		default:
 		{
-			LgiAssert(!"Impl this type.");
+			LAssert(!"Impl this type.");
 			return false;
 		}
 	}
@@ -2153,7 +2153,7 @@ bool LCustomType::Set(int Index, LVariant &In, uint8_t *This, int ArrayIndex)
 		Index >= Flds.Length() ||
 		!This)
 	{
-		LgiAssert(!"Invalid parameter error.");
+		LAssert(!"Invalid parameter error.");
 		return false;
 	}
 
@@ -2161,7 +2161,7 @@ bool LCustomType::Set(int Index, LVariant &In, uint8_t *This, int ArrayIndex)
 	uint8_t *Ptr = This + Def->Offset;
 	if (ArrayIndex < 0 || ArrayIndex >= Def->ArrayLen)
 	{
-		LgiAssert(!"Array out of bounds.");
+		LAssert(!"Array out of bounds.");
 		return false;
 	}
 	
@@ -2197,7 +2197,7 @@ bool LCustomType::Set(int Index, LVariant &In, uint8_t *This, int ArrayIndex)
 				}
 				else
 				{
-					LgiAssert(!"LBufConvertCp failed.");
+					LAssert(!"LBufConvertCp failed.");
 					return false;
 				}
 			}
@@ -2231,7 +2231,7 @@ bool LCustomType::Set(int Index, LVariant &In, uint8_t *This, int ArrayIndex)
 				}
 				else
 				{
-					LgiAssert(!"LBufConvertCp failed.");
+					LAssert(!"LBufConvertCp failed.");
 					return false;
 				}
 			}
@@ -2264,7 +2264,7 @@ bool LCustomType::Set(int Index, LVariant &In, uint8_t *This, int ArrayIndex)
 				}
 				default:
 				{
-					LgiAssert(!"Unknown integer size.");
+					LAssert(!"Unknown integer size.");
 					return false;
 				}
 			}
@@ -2276,7 +2276,7 @@ bool LCustomType::Set(int Index, LVariant &In, uint8_t *This, int ArrayIndex)
 			break;
 		}
 		default:
-			LgiAssert(!"Impl this type.");
+			LAssert(!"Impl this type.");
 			break;
 	}
 
@@ -2325,13 +2325,13 @@ bool LCustomType::GetVariant(const char *Field, LVariant &Value, char *Array)
 			break;
 	}
 
-	LgiAssert(0);
+	LAssert(0);
 	return false;
 }
 
 bool LCustomType::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	LgiAssert(0);
+	LAssert(0);
 	return false;
 }
 
@@ -2363,6 +2363,6 @@ bool LCustomType::CallMethod(const char *MethodName, LVariant *ReturnValue, LArr
 		return true;
 	}
 
-	LgiAssert(0);
+	LAssert(0);
 	return false;
 }

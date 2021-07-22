@@ -47,7 +47,7 @@ void UnitTest_CreateList(LArray<LString> &a, List<char> &l, int sz = 100)
 bool UnitTest_Err(const char *Fmt, ...)
 {
 	printf("Error: %s\n", Fmt);
-	LgiAssert(0);
+	LAssert(0);
 	return false;
 }
 
@@ -209,7 +209,7 @@ int GMemQueue::Find(char *Str)
 							}
 							else
 							{
-								LgiAssert(0);
+								LAssert(0);
 							}
 						}
 						else
@@ -622,7 +622,7 @@ GMemFile::Block *GMemFile::Get(int Index)
 	
 	if (Index - GMEMFILE_BLOCKS >= Extra.Length())
 	{
-		LgiAssert(!"Index beyond last block");
+		LAssert(!"Index beyond last block");
 		return NULL;
 	}
 
@@ -684,7 +684,7 @@ bool GMemFile::FreeBlock(Block *b)
 		if (Local[Idx] != b ||
 			Idx < Blocks-1)
 		{
-			LgiAssert(!"Block index error.");
+			LAssert(!"Block index error.");
 			return false;
 		}
 		
@@ -698,7 +698,7 @@ bool GMemFile::FreeBlock(Block *b)
 	ssize_t Off = Idx - GMEMFILE_BLOCKS;
 	if (Off != Extra.Length() - 1)
 	{
-		LgiAssert(!"Block index error.");
+		LAssert(!"Block index error.");
 		return false;
 	}
 	
@@ -802,7 +802,7 @@ ssize_t GMemFile::Read(void *Ptr, ssize_t Size, int Flags)
 		
 		// Where are we in the current block?
 		ssize_t BlkOffset = CurPos - b->Offset;
-		LgiAssert(b && BlkOffset >= 0 && BlkOffset <= (ssize_t)b->Used);
+		LAssert(b && BlkOffset >= 0 && BlkOffset <= (ssize_t)b->Used);
 		ssize_t Remaining = b->Used - BlkOffset;
 		if (Remaining > 0)
 		{
@@ -813,7 +813,7 @@ ssize_t GMemFile::Read(void *Ptr, ssize_t Size, int Flags)
 		}
 		else break;
 		
-		LgiAssert(p <= end);
+		LAssert(p <= end);
 		if (p >= end)	// End of read buffer reached?
 			break;		// Exit loop
 	}	

@@ -259,7 +259,7 @@ void sighandler(int signum)
 }
 #endif
 
-LApp::LApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
+LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	OsApplication(AppArgs.Args, AppArgs.Arg)
 {
 	TheApp = this;
@@ -287,7 +287,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, GAppArguments *Args) :
 	d->FileSystem = new LFileSystem;
 	d->GdcSystem = new GdcDevice;
 
-	srand(LgiCurrentTime());
+	srand(LCurrentTime());
 	LgiInitColours();
 	AppWnd = 0;
 
@@ -352,7 +352,7 @@ bool LApp::IsOk()
 					(d != NULL)/* &&
 					(SystemNormal != NULL)*/;
 					
-	LgiAssert(Status);
+	LAssert(Status);
 	return Status;
 }
 
@@ -379,7 +379,7 @@ int LApp::GetMetric(LgiSystemMetric Metric)
 		}
 		default:
 		{
-			LgiAssert(0);
+			LAssert(0);
 			break;
 		}
 	}
@@ -528,7 +528,7 @@ void LApp::OnSDLEvent(GMessage *m)
 					m->Event.key.keysym.mod == KMOD_RALT
 				)
 			)
-				LgiCloseApp();
+				LCloseApp();
 			
 			// fall through
 		}
@@ -1021,7 +1021,7 @@ LSymLookup *LApp::GetSymLookup()
 bool LApp::IsElevated()
 {
 	#ifdef WIN32
-	LgiAssert(!"What API works here?");
+	LAssert(!"What API works here?");
 	return false;
 	#else
 	return geteuid() == 0;
@@ -1093,7 +1093,7 @@ LWindow *LApp::PopWindow()
 	if (d->Stack.Length() == 0)
 	{
 		printf("%s:%i - No window to pop.\n", _FL);
-		LgiAssert(0);
+		LAssert(0);
 		return NULL;
 	}
 	
@@ -1174,7 +1174,7 @@ void GMessage::Set(int m, Param pa, Param pb)
 bool GMessage::Send(LViewI *Wnd)
 {
 	bool Status = false;
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 	return Status;
 }
 

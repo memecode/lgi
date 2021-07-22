@@ -52,7 +52,7 @@ const char *LCss::PropName(PropType p)
 			return i.key;
 	}
 
-	LgiAssert(!"Add this field to the LUT");
+	LAssert(!"Add this field to the LUT");
 	return 0;
 }
 
@@ -370,7 +370,7 @@ LCss::Len LCss::Len::operator *(const Len &b) const
 			}
 			default:
 			{
-				LgiAssert(!"Impl me.");
+				LAssert(!"Impl me.");
 				return b;
 			}
 		}
@@ -422,7 +422,7 @@ bool LCss::Len::ToString(LStream &p) const
 	}
 	if (!Unit)
 	{
-		LgiAssert(!"Impl missing length enum.");
+		LAssert(!"Impl missing length enum.");
 		return false;
 	}
 	
@@ -450,7 +450,7 @@ bool LCss::ColorDef::ToString(LStream &p)
 		}
 		default:
 		{
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			return false;
 		}
 	}
@@ -664,7 +664,7 @@ LAutoString LCss::ToString()
 					}
 					default:
 					{
-						LgiAssert(!"Impl me.");
+						LAssert(!"Impl me.");
 						break;
 					}
 				}
@@ -766,7 +766,7 @@ LAutoString LCss::ToString()
 			}
 			default:
 			{
-				LgiAssert(!"Invalid type.");
+				LAssert(!"Invalid type.");
 				break;
 			}
 		}
@@ -829,7 +829,7 @@ bool LCss::InheritCollect(LCss &c, PropMap &Contrib)
 					InheritEnum(PropTextDecoration, TextDecorType, TextDecorInherit);
 					default:
 					{
-						LgiAssert(!"Not impl.");
+						LAssert(!"Not impl.");
 						break;
 					}
 				}
@@ -886,7 +886,7 @@ bool LCss::InheritCollect(LCss &c, PropMap &Contrib)
 			InheritClass(TypeBorder, BorderDef, LenInherit);
 			default:
 			{
-				LgiAssert(!"Not impl.");
+				LAssert(!"Not impl.");
 				break;
 			}
 		}
@@ -981,7 +981,7 @@ bool LCss::InheritResolve(PropMap &Contrib)
 			                        }
 			                        default:
 			                        {
-			                            LgiAssert(!"Not impl");
+			                            LAssert(!"Not impl");
 			                            break;
 			                        }
 			                    }
@@ -1044,7 +1044,7 @@ bool LCss::InheritResolve(PropMap &Contrib)
 			                        }
 			                        default:
 			                        {
-			                            LgiAssert(!"Not impl");
+			                            LAssert(!"Not impl");
 			                            break;
 			                        }
 			                    }
@@ -1083,12 +1083,12 @@ bool LCss::InheritResolve(PropMap &Contrib)
 											Mine->Value = (float) NewSz;
 											Mine->Type = LenEm;
 										}
-										else LgiAssert(0);										
+										else LAssert(0);										
 										break;
 									}
 			                        default:
 			                        {
-			                            LgiAssert(!"Not impl");
+			                            LAssert(!"Not impl");
 			                            break;
 			                        }
 			                    }
@@ -1096,7 +1096,7 @@ bool LCss::InheritResolve(PropMap &Contrib)
 			                }
 	                        default:
 	                        {
-	                            LgiAssert(!"Not impl");
+	                            LAssert(!"Not impl");
 	                            break;
 	                        }
 			            }
@@ -1162,7 +1162,7 @@ bool LCss::CopyStyle(const LCss &c)
 			CopyProp(TypeStrings, StringsDef);
 			default:
 			{
-				LgiAssert(!"Invalidate property type.");
+				LAssert(!"Invalidate property type.");
 				return false;
 			}
 		}
@@ -1204,7 +1204,7 @@ bool LCss::operator ==(LCss &c)
 			CmpType(TypeBorder, BorderDef);
 			CmpType(TypeStrings, StringsDef);
 			default:
-				LgiAssert(!"Unknown type.");
+				LAssert(!"Unknown type.");
 				break;
 		}
 	}
@@ -1252,7 +1252,7 @@ void LCss::DeleteProp(PropType Prop, void *Data)
 			delete ((StringsDef*)Data);
 			break;
 		default:
-			LgiAssert(!"Unknown property type.");
+			LAssert(!"Unknown property type.");
 			break;
 	}
 }
@@ -1593,7 +1593,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 								if (!b->ParseStyle(s))
 								{
 									if (Type == ParseStrict)
-										LgiAssert(!"Colour parsing failed.");
+										LAssert(!"Colour parsing failed.");
 								}
 							}
 						}
@@ -1654,7 +1654,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 					}
 					default:
 					{
-						LgiAssert(!"Prop parsing support not implemented.");
+						LAssert(!"Prop parsing support not implemented.");
 					}						
 				}
 				break;
@@ -1674,7 +1674,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 					else
 					{
 						if (Type == ParseStrict)
-							LgiAssert(!"Parsing failed.");
+							LAssert(!"Parsing failed.");
 						break;
 					}
 				}
@@ -1702,7 +1702,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 							}
 							else if (Type == ParseStrict)
 							{
-								LgiAssert(0);
+								LAssert(0);
 							}
 						}
 						break;
@@ -1786,7 +1786,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 					}
 					default:
 					{
-						LgiAssert(ParentProp.Find(PropId) == PropNull);
+						LAssert(ParentProp.Find(PropId) == PropNull);
 						
 						if (Lengths.Length() > 0)
 						{
@@ -1841,7 +1841,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 						
 					if (Start == s)
 					{
-						LgiAssert(!"Parsing hang.");
+						LAssert(!"Parsing hang.");
 						break;
 					}
 				}
@@ -1868,12 +1868,12 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 								if (b)
 									b->Color = *t;
 							}
-							else LgiAssert(0);
+							else LAssert(0);
 							break;
 						}
 						default:
 						{					
-							LgiAssert(ParentProp.Find(PropId) == PropNull);
+							LAssert(ParentProp.Find(PropId) == PropNull);
 							
 							ColorDef *e = (ColorDef*)Props.Find(PropId);
 							if (e) *e = *t;
@@ -1883,7 +1883,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 					}
 				}
 				else if (Type == ParseStrict)
-					LgiAssert(!"Parsing failed.");
+					LAssert(!"Parsing failed.");
 				break;
 			}
 			case TypeStrings:
@@ -1895,7 +1895,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 					if (e) *e = *t;
 					else Props.Add(PropId, t.Release());
 				}
-				else LgiAssert(!"Parsing failed.");
+				else LAssert(!"Parsing failed.");
 				break;
 			}
 			case TypeBorder:
@@ -1971,7 +1971,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 				}
 				else if (Type == ParseStrict)
 				{
-					LgiAssert(!"Failed to parse Image definition");
+					LAssert(!"Failed to parse Image definition");
 					return false;
 				}
 				break;
@@ -1980,7 +1980,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 			{
 				if (Type == ParseStrict)
 				{
-					LgiAssert(!"Unsupported property type.");
+					LAssert(!"Unsupported property type.");
 					return false;
 				}
 				else
@@ -2326,7 +2326,7 @@ bool LCss::BorderDef::Parse(LCss *Css, const char *&s)
 		SkipWhite(s);
 		if (Start == s)
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return false;
 		}
 		Start = s;
@@ -2409,7 +2409,7 @@ bool LCss::Selector::TokString(LAutoString &a, const char *&s)
 		#if DEBUG_CSS_LOGGING
 		LgiTrace("Stuck at '%s'\n", e);
 		#endif
-		// LgiAssert(!"Failed to tokenise string.");
+		// LAssert(!"Failed to tokenise string.");
 		return false;
 	}
 	a.Reset(NewStr(s, e - s));
@@ -2533,7 +2533,7 @@ bool LCss::Selector::ToString(LStream &p)
 				p.Print("+");
 				break;
 			default:
-				LgiAssert(0);
+				LAssert(0);
 				break;
 		}
 	}
@@ -2742,7 +2742,7 @@ bool LCss::Selector::Parse(const char *&s)
 		if (*s == '+')
 		{
 			s++;
-			LgiAssert(Parts.Length() > 0);
+			LAssert(Parts.Length() > 0);
 			Combs.Add(Parts.Length());
 			Part &n = Parts.New();
 			n.Type = CombAdjacent;
@@ -2750,7 +2750,7 @@ bool LCss::Selector::Parse(const char *&s)
 		else if (*s == '>')
 		{
 			s++;
-			LgiAssert(Parts.Length() > 0);
+			LAssert(Parts.Length() > 0);
 			Combs.Add(Parts.Length());
 			Part &n = Parts.New();
 			n.Type = CombChild;
@@ -2758,7 +2758,7 @@ bool LCss::Selector::Parse(const char *&s)
 		else if (s > Last &&
 				(IsAlpha(*s) || strchr(".:#", *s)))
 		{
-			LgiAssert(Parts.Length() > 0);
+			LAssert(Parts.Length() > 0);
 			Combs.Add(Parts.Length());
 			Part &n = Parts.New();
 			n.Type = CombDesc;
@@ -2766,7 +2766,7 @@ bool LCss::Selector::Parse(const char *&s)
 		
 		if (*s && s == Prev)
 		{
-			LgiAssert(!"Parsing is stuck.");
+			LAssert(!"Parsing is stuck.");
 			return false;
 		}
 		Prev = s;
@@ -2974,7 +2974,7 @@ bool LCss::Store::Parse(const char *&c, int Depth)
 					if (n >= (ssize_t) s->Parts.Length())
 					{
 						Error.Printf("ErrSimpleIndex %i>=%zi @ '%.80s'", n, s->Parts.Length(), c);
-						LgiAssert(!"Part index too high.");
+						LAssert(!"Part index too high.");
 						return false;
 					}
 					LCss::Selector::Part &p = s->Parts[n];

@@ -43,14 +43,14 @@ public:
 			Alpha = 0;
 			return true;
 		}
-		else LgiAssert(0);
+		else LAssert(0);
 		
 		return false;
 	}
 
 	void SetPtr(int x, int y)
 	{
-		LgiAssert(Dest && Dest->Base);
+		LAssert(Dest && Dest->Base);
 		Ptr.u8 = Dest->Base + ((y * Dest->Line) + x + x);
 	}
 

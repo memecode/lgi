@@ -331,7 +331,7 @@ Search::Search(AppWnd *app)
 
 			Thread.Reset(new SearchThread(App, lst));
 		}
-		else LgiAssert(0);
+		else LAssert(0);
 		#endif
 
 		OnCheck();

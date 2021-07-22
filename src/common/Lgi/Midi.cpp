@@ -468,7 +468,7 @@ void GMidi::ParseMidi()
 			}
 			else
 			{
-				LgiAssert(0);
+				LAssert(0);
 				break;
 			}
 		}
@@ -675,7 +675,7 @@ void GMidi::OnMidiIn(uint8_t *midi, size_t midi_len)
 
 void GMidi::SendMidi(uint8_t *ptr, size_t len, bool quiet)
 {
-	LgiAssert(ptr != NULL);
+	LAssert(ptr != NULL);
 	if (!ptr)
 		return;
 

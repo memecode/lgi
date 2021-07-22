@@ -38,7 +38,7 @@ bool Utf16to32(LArray<uint32_t> &Out, const uint16_t *In, int WordLen)
 		*o++ = LgiUtf16To32(Ptr, Bytes);
 	}
 	
-	LgiAssert(o == e);
+	LAssert(o == e);
 	return true;
 }
 
@@ -252,7 +252,7 @@ bool MultiBlockState::Apply(LRichTextPriv *Ctx, bool Forward)
 {
 	if (Index < 0 || Length < 0)
 	{
-		LgiAssert(!"Missing parameters");
+		LAssert(!"Missing parameters");
 		return false;
 	}
 	
@@ -295,7 +295,7 @@ bool MultiBlockState::Cut(ssize_t Idx)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 LRichTextPriv::LRichTextPriv(LRichTextEdit *view, LRichTextPriv **Ptr) :
 	LHtmlParser(view),
-	GFontCache(SysFont)
+	GFontCache(LSysFont)
 {
 	if (Ptr) *Ptr = this;
 	BlinkTs = 0;
@@ -314,9 +314,9 @@ LRichTextPriv::LRichTextPriv(LRichTextEdit *view, LRichTextPriv **Ptr) :
 	SpellCheck = NULL;
 	SpellDictionaryLoaded = false;
 	HtmlLinkAsCid = false;
-	ScrollLinePx = SysFont->GetHeight();
+	ScrollLinePx = LSysFont->GetHeight();
 	if (Font.Reset(new LFont))
-		*Font = *SysFont;
+		*Font = *LSysFont;
 
 	for (unsigned i=0; i<CountOf(Areas); i++)
 	{
@@ -365,11 +365,11 @@ LRichTextPriv::~LRichTextPriv()
 {
 	if (IsBusy(true))
 	{
-		uint64 Start = LgiCurrentTime();
+		uint64 Start = LCurrentTime();
 		uint64 Msg = Start;
 		while (IsBusy())
 		{
-			uint64 Now = LgiCurrentTime();
+			uint64 Now = LCurrentTime();
 			LgiSleep(10);
 			LgiYield();
 
@@ -381,7 +381,7 @@ LRichTextPriv::~LRichTextPriv()
 
 			if (Now - Start > 10000)
 			{
-				LgiAssert(0);
+				LAssert(0);
 				Start = Now;
 			}
 		}
@@ -447,7 +447,7 @@ bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 		}
 		else
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return Error(_FL, "Cursor outside start block.");
 		}
 
@@ -465,7 +465,7 @@ bool LRichTextPriv::DeleteSelection(Transaction *Trans, char16 **Cut)
 		}
 		else
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return Error(_FL, "Start block has no index.");;
 		}
 
@@ -565,7 +565,7 @@ bool LRichTextPriv::SetUndoPos(ssize_t Pos)
 				goto ApplyError;
 			UndoPosLock = false;
 
-			LgiAssert(UndoPos == Prev);
+			LAssert(UndoPos == Prev);
 			UndoPos++;
 		}
 		else if (Pos < UndoPos)
@@ -578,7 +578,7 @@ bool LRichTextPriv::SetUndoPos(ssize_t Pos)
 				goto ApplyError;
 			UndoPosLock = false;
 
-			LgiAssert(UndoPos == Prev);
+			LAssert(UndoPos == Prev);
 			UndoPos--;
 		}
 		else break; // We are done
@@ -618,7 +618,7 @@ bool LRichTextPriv::Error(const char *file, int line, const char *fmt, ...)
 	Err = LogBuffer.NewGStr();
 	LgiTrace("%.*s", Err.Length(), Err.Get());
 		
-	LgiAssert(0);
+	LAssert(0);
 	return false;
 }
 
@@ -642,8 +642,8 @@ void LRichTextPriv::UpdateStyleUI()
 		f = GetFont(st->GetStyle());
 	else if (View)
 		f = View->GetFont();
-	else if (LgiApp)
-		f = SysFont;
+	else if (LAppInst)
+		f = LSysFont;
 		
 	if (f)
 	{
@@ -758,7 +758,7 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 						return Error(_FL, "No block at %i", NewIdx);
 						
 					c.Reset(new BlockCursor(b, b->Length(), b->GetLines() - 1));
-					LgiAssert(c->Offset >= 0);
+					LAssert(c->Offset >= 0);
 					Status = true;							
 				}
 			}
@@ -775,7 +775,7 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 						return Error(_FL, "No block at %i", NewIdx);
 						
 					c.Reset(new BlockCursor(b, 0, 0));
-					LgiAssert(c->Offset >= 0);
+					LAssert(c->Offset >= 0);
 					Status = true;							
 				}
 			}
@@ -830,7 +830,7 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 				ssize_t Idx = Blocks.IndexOf(c->Blk);
 				if (Idx < 0)
 				{
-					LgiAssert(0);
+					LAssert(0);
 					break;
 				}
 
@@ -840,7 +840,7 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 				Block *b = Blocks[--Idx];
 				if (!b)
 				{
-					LgiAssert(0);
+					LAssert(0);
 					break;
 				}
 
@@ -994,7 +994,7 @@ bool LRichTextPriv::Seek(BlockCursor *In, SeekType Dir, bool Select)
 					BlkIdx < CursorBlkIdx ||
 					(BlkIdx == CursorBlkIdx && Offset < Cursor->Offset))
 				{
-					LgiAssert(!"GetBlockByIndex failed.\n");
+					LAssert(!"GetBlockByIndex failed.\n");
 					LgiTrace("%s:%i - GetBlockByIndex failed.\n", _FL);
 				}
 
@@ -1139,7 +1139,7 @@ ssize_t LRichTextPriv::IndexOfCursor(BlockCursor *c)
 		CharPos += b->Length();
 	}
 		
-	LgiAssert(0);
+	LAssert(0);
 	return -1;
 }
 
@@ -1311,7 +1311,7 @@ bool LRichTextPriv::Layout(LScrollBar *&ScrollY)
 	Flow f(this);
 	
 	ScrollLinePx = View->GetFont()->GetHeight();
-	LgiAssert(ScrollLinePx > 0);
+	LAssert(ScrollLinePx > 0);
 	if (ScrollLinePx <= 0)
 		ScrollLinePx = 16;
 
@@ -1351,7 +1351,7 @@ bool LRichTextPriv::Layout(LScrollBar *&ScrollY)
 		
 	if (Cursor)
 	{
-		LgiAssert(Cursor->Blk != NULL);
+		LAssert(Cursor->Blk != NULL);
 		if (Cursor->Blk)
 			Cursor->Blk->GetPosFromIndex(Cursor);
 	}
@@ -1477,8 +1477,8 @@ void LRichTextPriv::PaintBtn(LSurface *pDC, LRichTextEdit::RectType t)
 	bool Down = (v.Type == GV_BOOL && v.Value.Bool) ||
 				(BtnState[t].IsPress && BtnState[t].Pressed && BtnState[t].MouseOver);
 
-	SysFont->Colour(L_TEXT, BtnState[t].MouseOver ? L_LIGHT : L_MED);
-	SysFont->Transparent(false);
+	LSysFont->Colour(L_TEXT, BtnState[t].MouseOver ? L_LIGHT : L_MED);
+	LSysFont->Transparent(false);
 
 	LColour Low(96, 96, 96);
 	pDC->Colour(Down ? LColour::White : Low);
@@ -1493,7 +1493,7 @@ void LRichTextPriv::PaintBtn(LSurface *pDC, LRichTextEdit::RectType t)
 	{
 		case GV_STRING:
 		{
-			LDisplayString Ds(SysFont, v.Str());
+			LDisplayString Ds(LSysFont, v.Str());
 			Ds.Draw(pDC,
 					r.x1 + ((r.X()-Ds.X())>>1) + Down,
 					r.y1 + ((r.Y()-Ds.Y())>>1) + Down,
@@ -1537,7 +1537,7 @@ void LRichTextPriv::PaintBtn(LSurface *pDC, LRichTextEdit::RectType t)
 					break;
 			}
 			if (!Label) break;
-			LDisplayString Ds(SysFont, Label);
+			LDisplayString Ds(LSysFont, Label);
 			Ds.Draw(pDC,
 					r.x1 + ((r.X()-Ds.X())>>1) + Down,
 					r.y1 + ((r.Y()-Ds.Y())>>1) + Down,
@@ -1592,7 +1592,7 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 			if (!LFontSystem::Inst()->EnumerateFonts(Fonts))
 				return Error(_FL, "EnumerateFonts failed.");
 
-			bool UseSub = (SysFont->GetHeight() * Fonts.Length()) > (GdcD->Y() * 0.8);
+			bool UseSub = (LSysFont->GetHeight() * Fonts.Length()) > (GdcD->Y() * 0.8);
 
 			LSubMenu s;
 			LSubMenu *Cur = NULL;
@@ -1857,20 +1857,20 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 		Areas[LRichTextEdit::BackgroundColourBtn] = AllocPx(r.Y()*1.5, 6);
 
 		{
-			LDisplayString Ds(SysFont, TEXT_LINK);
+			LDisplayString Ds(LSysFont, TEXT_LINK);
 			Areas[LRichTextEdit::MakeLinkBtn] = AllocPx(Ds.X() + 12, 0);
 		}
 		{
-			LDisplayString Ds(SysFont, TEXT_REMOVE_LINK);
+			LDisplayString Ds(LSysFont, TEXT_REMOVE_LINK);
 			Areas[LRichTextEdit::RemoveLinkBtn] = AllocPx(Ds.X() + 12, 6);
 		}
 		{
-			LDisplayString Ds(SysFont, TEXT_REMOVE_STYLE);
+			LDisplayString Ds(LSysFont, TEXT_REMOVE_STYLE);
 			Areas[LRichTextEdit::RemoveStyleBtn] = AllocPx(Ds.X() + 12, 6);
 		}
 		for (unsigned int i=LRichTextEdit::EmojiBtn; i<LRichTextEdit::MaxArea; i++)
 		{
-			LDisplayString Ds(SysFont, Values[i].Str());
+			LDisplayString Ds(LSysFont, Values[i].Str());
 			Areas[i] = AllocPx(Ds.X() + 12, 6);
 		}
 
@@ -1887,7 +1887,7 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 	LMemDC Mem;
 	if (!Mem.Create(r.X(), r.Y(), pDC->GetColourSpace()))
 	{
-		LgiAssert(!"MemDC creation failed.");
+		LAssert(!"MemDC creation failed.");
 		return;
 	}
 	LSurface *pScreen = pDC;
@@ -2123,7 +2123,7 @@ bool LRichTextPriv::FromHtml(LHtmlElement *e, CreateContext &ctx, LCss *ParentSt
 			{
 				char16 *Style = e->GetText();
 				if (ValidStrW(Style))
-					LgiAssert(!"Impl me.");
+					LAssert(!"Impl me.");
 				continue;
 				break;
 			}

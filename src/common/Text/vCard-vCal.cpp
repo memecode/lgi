@@ -1486,7 +1486,7 @@ bool VCal::Export(GDataPropI *c, LStreamI *o)
 						s += "END:VALARM\r\n";
 						o->Write(s.Get(), s.Length());
 					}
-					else LgiAssert(0);
+					else LAssert(0);
 				}
 			}
 		}

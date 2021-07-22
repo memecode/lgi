@@ -60,7 +60,7 @@ void LDatePopup::OnPaint(LSurface *pDC)
 
 	// Layout
 	Caption = r;
-	Caption.y2 = Caption.y1 + SysFont->GetHeight() + 2;
+	Caption.y2 = Caption.y1 + LSysFont->GetHeight() + 2;
 	Prev = Next = Caption;
 	Prev.x2 = Prev.x1 + Prev.Y();
 	Next.x1 = Next.x2 - Next.Y();
@@ -75,9 +75,9 @@ void LDatePopup::OnPaint(LSurface *pDC)
 	char *Title = Mv.Title();
 	if (Title)
 	{
-		SysFont->Transparent(true);
-		SysFont->Colour(L_TEXT, L_MED);
-		LDisplayString ds(SysFont, Title);
+		LSysFont->Transparent(true);
+		LSysFont->Colour(L_TEXT, L_MED);
+		LDisplayString ds(LSysFont, Title);
 		ds.Draw(pDC, r.x1 + (r.X()-ds.X())/2, r.y1);
 	}
 
@@ -114,21 +114,21 @@ void LDatePopup::OnPaint(LSurface *pDC)
 			{
 				pDC->Colour(L_FOCUS_SEL_BACK);
 				pDC->Rectangle(r.x1 + Px, r.y1 + Py, r.x1 + Px + Cx - 2, r.y1 + Py + Cy - 2);
-				SysFont->Colour(L_FOCUS_SEL_FORE, L_FOCUS_SEL_BACK);
+				LSysFont->Colour(L_FOCUS_SEL_FORE, L_FOCUS_SEL_BACK);
 			}
 			else
 			{
 				if (Mv.IsToday())
 				{
-					SysFont->Colour(LColour(192, 0, 0), LColour(L_WORKSPACE));
+					LSysFont->Colour(LColour(192, 0, 0), LColour(L_WORKSPACE));
 				}
 				else
 				{
-					SysFont->Colour(Mv.IsMonth() ? L_TEXT : L_MED, L_WORKSPACE);
+					LSysFont->Colour(Mv.IsMonth() ? L_TEXT : L_MED, L_WORKSPACE);
 				}
 			}
 
-			LDisplayString ds(SysFont, Mv.Day());
+			LDisplayString ds(LSysFont, Mv.Day());
 			ds.Draw(pDC, r.x1 + Px + 2, r.y1 + Py + 2);
 		}
 	}
@@ -286,7 +286,7 @@ bool GDateDropDown::OnLayout(LViewLayoutInfo &Inf)
     }
     else if (!Inf.Height.Max)
     {
-        Inf.Height.Min = Inf.Height.Max = SysFont->GetHeight() + 6;
+        Inf.Height.Min = Inf.Height.Max = LSysFont->GetHeight() + 6;
     }
     else return false;
     

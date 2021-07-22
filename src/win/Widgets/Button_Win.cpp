@@ -54,7 +54,7 @@ LButton::LButton(int id, int x, int y, int cx, int cy, const char *name) :
 	
 	if ((cx < 0 || cy < 0))
 	{
-		LDisplayString ds(SysFont, ValidStr(name)?name:"1");
+		LDisplayString ds(LSysFont, ValidStr(name)?name:"1");
 		if (cx < 0) cx = ds.X() + Overhead.x;
 		if (cy < 0) cy = ds.Y() + Overhead.y;
 	}
@@ -70,7 +70,7 @@ LButton::LButton(int id, int x, int y, int cx, int cy, const char *name) :
 	if (SubClass)
 		SubClass->SubClass("BUTTON");
 	else
-		LgiAssert(!"No subclass?");
+		LAssert(!"No subclass?");
 }
 
 LButton::~LButton()
@@ -113,7 +113,7 @@ void LButton::SetIsToggle(bool toggle)
 
 void LButton::OnCreate()
 {
-	SetFont(SysFont);
+	SetFont(LSysFont);
 	if (d->WantsDefault && GetWindow())
 	{
 		GetWindow()->SetDefault(this);
@@ -391,7 +391,7 @@ void LButton::OnClick()
 			}
 			else
 			{
-				LgiAssert(!"Out of thread and no handle?");
+				LAssert(!"Out of thread and no handle?");
 			}
 		}
 	}

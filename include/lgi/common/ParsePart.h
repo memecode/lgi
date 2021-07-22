@@ -44,7 +44,7 @@ struct LParsePart
 		while (c && *c)
 		{
 			#ifdef _DEBUG
-			if (c >= End) LgiAssert(!"Off the end");
+			if (c >= End) LAssert(!"Off the end");
 			#endif
 
 			char End = Lut[(uint8_t)*c];
@@ -83,7 +83,7 @@ struct LParsePart
 	}
 
 	#undef FAILTEST
-	#define FAILTEST(test, str) if (!(test)) { LgiAssert(!str); return false; }
+	#define FAILTEST(test, str) if (!(test)) { LAssert(!str); return false; }
 	bool Check(char start, const char *str) { return Start == start && Str.Equals(str); }
 
 	static bool UnitTests()

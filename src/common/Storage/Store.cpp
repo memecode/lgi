@@ -268,7 +268,7 @@ bool StorageItemImpl::Serialize(LFile &f, bool Write, int Flags)
 				{
 					// write failed!!
 					DWORD Error = GetLastError();
-					LgiAssert(0);
+					LAssert(0);
 				}
 				#endif
 			}

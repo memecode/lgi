@@ -90,7 +90,7 @@ struct LFunc
 
 	virtual ~LFunc()
 	{
-		// LgiAssert(!InUse);
+		// LAssert(!InUse);
 	}
 
 	virtual LExecutionStatus Call(LScriptContext *Ctx, LScriptArguments &Args) = 0;

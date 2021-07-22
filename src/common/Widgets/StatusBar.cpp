@@ -156,16 +156,16 @@ void LStatusPane::OnPaint(LSurface *pDC)
 	LRect r = GetClient();
 	if (ValidStr(t))
 	{
-		int TabSize = SysFont->TabSize();
+		int TabSize = LSysFont->TabSize();
 
-		SysFont->TabSize(0);
-		SysFont->Colour(L_TEXT, L_MED);
-		SysFont->Transparent(false);
+		LSysFont->TabSize(0);
+		LSysFont->Colour(L_TEXT, L_MED);
+		LSysFont->Transparent(false);
 
-		LDisplayString ds(SysFont, t);
+		LDisplayString ds(LSysFont, t);
 		ds.Draw(pDC, 1, (r.Y()-ds.Y())/2, &r);
 		
-		SysFont->TabSize(TabSize);
+		LSysFont->TabSize(TabSize);
 	}
 	else
 	{

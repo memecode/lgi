@@ -335,7 +335,7 @@ char *LHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 
 LHtmlElemInfo *LHtmlParser::GetTagInfo(const char *Tag)
 {
-	LgiAssert(LHtmlStatic::Inst != NULL);
+	LAssert(LHtmlStatic::Inst != NULL);
 	return LHtmlStatic::Inst->GetTagInfo(Tag);
 }
 
@@ -421,7 +421,7 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 					}
 
 					if (!e)
-						LgiAssert(0);
+						LAssert(0);
 				}
 				else
 				{
@@ -926,9 +926,9 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 														// LgiTrace("Inserted new TAG_TR: %p\n", NewRow);
 													}
 												}
-												else LgiAssert(!"Alloc error");
+												else LAssert(!"Alloc error");
 											}
-											// else LgiAssert(!"What now?");											
+											// else LAssert(!"What now?");											
 											break;
 										}
 										default:

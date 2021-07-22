@@ -44,7 +44,7 @@ public:
 
 	ZipLocalHeader()
 	{
-		LgiAssert(Sizeof() == 30);
+		LAssert(Sizeof() == 30);
 		ZeroObj(*this);
 	}
 
@@ -288,7 +288,7 @@ bool GZipFile::Decompress(char *File, LStream *To)
 			{
 				case 0: // Stored
 				{
-					LgiAssert(0);
+					LAssert(0);
 					break;
 				}
 				case 1: // Shrunk
@@ -301,27 +301,27 @@ bool GZipFile::Decompress(char *File, LStream *To)
 				case 4: // Reduced
 				case 5: // Reduced
 				{
-					LgiAssert(0);
+					LAssert(0);
 					break;
 				}
 				case 6: // Imploded
 				{
-					LgiAssert(0);
+					LAssert(0);
 					break;
 				}
 				case 8: // Deflated
 				{
-					LgiAssert(0);
+					LAssert(0);
 					break;
 				}
 				case 9: // Deflate64
 				{
-					LgiAssert(0);
+					LAssert(0);
 					break;
 				}
 				case 10: // PKWARE Date Compression
 				{
-					LgiAssert(0);
+					LAssert(0);
 					break;
 				}
 			}

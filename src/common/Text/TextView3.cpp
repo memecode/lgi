@@ -440,7 +440,7 @@ LTextView3::LTextView3(	int Id,
 	else
 	{
 		LgiTrace("%s:%i - Failed to create font, FontType=%p\n", _FL, FontType);
-		Font = SysFont;
+		Font = LSysFont;
 	}
 
 	CursorPos.ZOff(1, LineY-1);
@@ -464,7 +464,7 @@ LTextView3::~LTextView3()
 	DeleteArray(TextCache);
 	DeleteArray(Text);
 
-	if (Font != SysFont) DeleteObj(Font);
+	if (Font != LSysFont) DeleteObj(Font);
 	DeleteObj(FixedFont);
 	DeleteObj(Underline);
 	DeleteObj(Bold);
@@ -616,11 +616,11 @@ void LTextView3::SetFont(LFont *f, bool OwnIt)
 	
 	if (OwnIt)
 	{
-		if (Font != SysFont)
+		if (Font != LSysFont)
 			DeleteObj(Font);
 		Font = f;
 	}
-	else if (!Font || Font == SysFont)
+	else if (!Font || Font == LSysFont)
 	{
 		Font = new LFont(*f);
 	}
@@ -733,7 +733,7 @@ bool LTextView3::ValidateLines(bool CheckBox)
 		if (l->Start != Pos)
 		{
 			LogLines();
-			LgiAssert(!"Incorrect start.");
+			LAssert(!"Incorrect start.");
 			return false;
 		}
 
@@ -754,7 +754,7 @@ bool LTextView3::ValidateLines(bool CheckBox)
 		if (l->Len != Len)
 		{
 			LogLines();
-			LgiAssert(!"Incorrect length.");
+			LAssert(!"Incorrect length.");
 			return false;
 		}
 
@@ -764,7 +764,7 @@ bool LTextView3::ValidateLines(bool CheckBox)
 			Prev->r.y2 != l->r.y1 - 1)
 		{
 			LogLines();
-			LgiAssert(!"Lines not joined vertically");
+			LAssert(!"Lines not joined vertically");
 		}
 
 		if (*e)
@@ -784,7 +784,7 @@ bool LTextView3::ValidateLines(bool CheckBox)
 		Pos != Size)
 	{
 		LogLines();
-		LgiAssert(!"Last line != end of doc");
+		LAssert(!"Last line != end of doc");
 		return false;
 	}
 
@@ -838,7 +838,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 	LProfile Prof(_txt);
 	#endif
 
-	LgiAssert(InThread());
+	LAssert(InThread());
 
 	LRect Client = GetClient();
 	int Mx = Client.X() - d->rPadding.x1 - d->rPadding.x2;
@@ -896,7 +896,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 	}
 
 	// Alright... lets pour!
-	uint64 StartTs = LgiCurrentTime();
+	uint64 StartTs = LCurrentTime();
 	if (WrapType == TEXTED_WRAP_NONE)
 	{
 		// Find the dimensions of each line that is missing a rect
@@ -1136,7 +1136,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 					// Otherwise check if we are taking too long...
 					if (Line.Length() % 20 == 0)
 					{
-						uint64 Now = LgiCurrentTime();
+						uint64 Now = LCurrentTime();
 						if (Now - StartTs > WRAP_POUR_TIMEOUT)
 						{
 							PartialPour = true;
@@ -1230,8 +1230,8 @@ bool LTextView3::InsertStyle(LAutoPtr<LStyle> s)
 	if (!s)
 		return false;
 
-	LgiAssert(s->Start >= 0);
-	LgiAssert(s->Len > 0);
+	LAssert(s->Start >= 0);
+	LAssert(s->Len > 0);
 	ssize_t Last = 0;
 	// int n = 0;
 
@@ -1346,10 +1346,10 @@ LTextView3::LStyle *LTextView3::HitStyle(ssize_t i)
 void LTextView3::PourStyle(size_t Start, ssize_t EditSize)
 {
 	#ifdef _DEBUG
-	int64 StartTime = LgiCurrentTime();
+	int64 StartTime = LCurrentTime();
 	#endif
 
-	LgiAssert(InThread());
+	LAssert(InThread());
 
 	if (!Text || Size < 1)
 		return;
@@ -1400,7 +1400,7 @@ void LTextView3::PourStyle(size_t Start, ssize_t EditSize)
 	if (UrlDetect)
 	{		
 		LArray<GLinkInfo> Links;		
-		LgiAssert((ssize_t)Start + Length <= Size);		
+		LAssert((ssize_t)Start + Length <= Size);		
 		if (LgiDetectLinks(Links, Text + Start, Length))
 		{
 			for (uint32_t i=0; i<Links.Length(); i++)
@@ -1423,7 +1423,7 @@ void LTextView3::PourStyle(size_t Start, ssize_t EditSize)
 	}
 
 	#ifdef _DEBUG
-	_StyleTime = LgiCurrentTime() - StartTime;
+	_StyleTime = LCurrentTime() - StartTime;
 	#endif
 }
 
@@ -1432,7 +1432,7 @@ bool LTextView3::Insert(size_t At, const char16 *Data, ssize_t Len)
 	LProfile Prof("LTextView3::Insert");
 	Prof.HideResultsIfBelow(1000);
 
-	LgiAssert(InThread());
+	LAssert(InThread());
 	
 	if (!ReadOnly && Len > 0)
 	{
@@ -1589,9 +1589,9 @@ bool LTextView3::Insert(size_t At, const char16 *Data, ssize_t Len)
 				Prof.Add("PourText");
 				PourText(At, Len);
 				Prof.Add("PourStyle");
-				auto Start = LgiCurrentTime();
+				auto Start = LCurrentTime();
 				PourStyle(At, Len);
-				auto End = LgiCurrentTime();
+				auto End = LCurrentTime();
 				if (End - Start > 1000)
 				{
 					PourStyle(At, Len);
@@ -1610,7 +1610,7 @@ bool LTextView3::Delete(size_t At, ssize_t Len)
 {
 	bool Status = false;
 
-	LgiAssert(InThread());
+	LAssert(InThread());
 
 	if (!ReadOnly)
 	{
@@ -1812,7 +1812,7 @@ bool LTextView3::Name(const char *s)
 		Line.DeleteObjects();
 		Style.Empty();
 
-		LgiAssert(LIsUtf8(s));
+		LAssert(LIsUtf8(s));
 		Text = Utf8ToWide(s);
 		if (!Text)
 		{
@@ -1852,7 +1852,7 @@ bool LTextView3::Name(const char *s)
 			d->SetName = s;
 			PostEvent(M_TEXT_UPDATE_NAME);
 		}
-		else LgiAssert(!"Can't post event to detached/virtual window.");
+		else LAssert(!"Can't post event to detached/virtual window.");
 		d->Unlock();
 	}
 
@@ -2051,7 +2051,7 @@ bool LTextView3::ScrollToOffset(size_t Off)
 
 void LTextView3::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 {
-    // int _Start = LgiCurrentTime();
+    // int _Start = LCurrentTime();
 	Blink = true;
 
 	// Bound the new cursor position to the document
@@ -2195,7 +2195,7 @@ void LTextView3::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 		SendNotify(GNotifyCursorChanged);
 	}
 
-//int _Time = LgiCurrentTime() - _Start;
+//int _Time = LCurrentTime() - _Start;
 //printf("Setcursor=%ims\n", _Time);
 }
 
@@ -3130,7 +3130,7 @@ ssize_t LTextView3::SeekLine(ssize_t Offset, GTextViewSeek Where)
 		}
 		default:
 		{
-			LgiAssert(false);
+			LAssert(false);
 			break;
 		}
 	}
@@ -3297,7 +3297,7 @@ int LTextView3::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 		if (dd.IsFormat("text/html") || dd.IsFormat("UniformResourceLocatorW"))
 		{
 			LVariant *Data = &dd.Data[0];
-			LgiAssert(dd.Data.Length() == 1); // Impl multiple data entries if this asserts.
+			LAssert(dd.Data.Length() == 1); // Impl multiple data entries if this asserts.
 			if (Data->IsBinary())
 			{
 				OsChar *e = (OsChar*) ((char*)Data->Value.Binary.Data + Data->Value.Binary.Length);
@@ -3804,7 +3804,7 @@ void LTextView3::OnMouseMove(LMouse &m)
 	}
 }
 
-LgiCursor LTextView3::GetCursor(int x, int y)
+LCursor LTextView3::GetCursor(int x, int y)
 {
 	LRect c = GetClient();
 	c.Offset(-c.x1, -c.y1);
@@ -4996,7 +4996,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 						Block = NextSelection - Cur;
 					}
 
-					LgiAssert(Block != 0);	// sanity check
+					LAssert(Block != 0);	// sanity check
 					
 					if (NextStyle &&							// There is a style
 						(Cur < SelMin || Cur >= SelMax) &&		// && we're not drawing a selection block
@@ -5018,7 +5018,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 
 							Sf->Transparent(false);
 
-							LgiAssert(l->Start + Done >= 0);
+							LAssert(l->Start + Done >= 0);
 
 							LDisplayString Ds(	Sf,
 												MapText(Text + (l->Start + Done),
@@ -5047,12 +5047,12 @@ void LTextView3::OnPaint(LSurface *pDC)
 							LColour back = l->Back.IsValid() ? l->Back : Back;
 							Sf->Colour(fore, back);
 						}
-						else LgiAssert(0);
+						else LAssert(0);
 					}
 					else
 					{
 						// draw a block of normal text
-						LgiAssert(l->Start + Done >= 0);
+						LAssert(l->Start + Done >= 0);
 						
 						LDisplayString Ds(	Font,
 											MapText(Text + (l->Start + Done),
@@ -5180,8 +5180,8 @@ void LTextView3::OnPaint(LSurface *pDC)
 
 					LString s;
 					s.Printf("%i, %i", Line.IndexOf(l), l->Start);
-					LDisplayString ds(SysFont, s);
-					SysFont->Transparent(true);
+					LDisplayString ds(LSysFont, s);
+					LSysFont->Transparent(true);
 					ds.Draw(pDC, OldTr.x2 + 2, OldTr.y1);
 				}
 				#endif
@@ -5215,7 +5215,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 			pDC->Rectangle(&r);
 		}
 
-		// _PaintTime = LgiCurrentTime() - StartTime;
+		// _PaintTime = LCurrentTime() - StartTime;
 		#ifdef PAINT_DEBUG
 		if (GetNotify())
 		{
@@ -5357,7 +5357,7 @@ void LTextView3::InternalPulse()
 {
 	if (!ReadOnly)
 	{
-		uint64 Now = LgiCurrentTime();
+		uint64 Now = LCurrentTime();
 		if (!BlinkTs)
 			BlinkTs = Now;
 		else if (Now - BlinkTs > CURSOR_BLINK)

@@ -444,7 +444,7 @@ public:
 			#undef DownCase
 			
 			default:
-				LgiAssert(0);
+				LAssert(0);
 				break;
 		}
 	}
@@ -505,7 +505,7 @@ public:
 						uint32_t *dst = (uint32_t*) (*Dst)[y];
 						src += Sx;
 						
-						// LgiAssert(Dst->GetColourSpace() == System32BitColourSpace);
+						// LAssert(Dst->GetColourSpace() == System32BitColourSpace);
 						
 						while (src < end)
 						{
@@ -516,7 +516,7 @@ public:
 					else if (SampleMode == LZoomView::SampleMax)
 					{
 						uint8_t *s[32];
-						LgiAssert(Factor < 32);
+						LAssert(Factor < 32);
 						for (int f=0; f<Factor; f++)
 						{
 							s[f] = (*Src)[yy + f];
@@ -549,7 +549,7 @@ public:
 					}
 					else
 					{
-						LgiAssert(!"Impl me.");
+						LAssert(!"Impl me.");
 					}
 					break;
 				}
@@ -573,7 +573,7 @@ public:
 					}
 					else
 					{
-						LgiAssert(!"Impl me.");
+						LAssert(!"Impl me.");
 					}
 					break;
 				}
@@ -626,7 +626,7 @@ public:
 					}
 					else
 					{
-						LgiAssert(!"Impl me.");
+						LAssert(!"Impl me.");
 					}
 
 					#undef rop
@@ -639,7 +639,7 @@ public:
 					LBgr48 *end = src + Ex;
 					src += Sx;
 
-					LgiAssert(Dst->GetColourSpace() == CsBgr24);
+					LAssert(Dst->GetColourSpace() == CsBgr24);
 
 					if (SampleMode == LZoomView::SampleNearest)
 					{
@@ -654,7 +654,7 @@ public:
 					}
 					else
 					{
-						LgiAssert(!"Impl me.");
+						LAssert(!"Impl me.");
 					}
 
 					break;
@@ -666,7 +666,7 @@ public:
 					LBgra64 *end = s + Ex;
 					s += Sx;
 
-					LgiAssert(Dst->GetColourSpace() == CsBgra32);
+					LAssert(Dst->GetColourSpace() == CsBgra32);
 
 					if (SampleMode == LZoomView::SampleNearest)
 					{
@@ -697,14 +697,14 @@ public:
 					}
 					else
 					{
-						LgiAssert(!"Impl me.");
+						LAssert(!"Impl me.");
 					}
 
 					break;
 				}
 				default:
 				{
-					LgiAssert(!"Not impl");
+					LAssert(!"Not impl");
 					break;
 				}
 			}
@@ -734,14 +734,14 @@ public:
 
 		// Now copy the right pixels over...
 		int Pix = TileSize / Factor;
-		LgiAssert(Dst->X() % Factor == 0);
+		LAssert(Dst->X() % Factor == 0);
 		
 		Pal32 pal[256];
 		switch (Src->GetColourSpace())
 		{
 			default:
 			{
-				LgiAssert(0);
+				LAssert(0);
 				break;
 			}
 			case CsIndex8:
@@ -936,7 +936,7 @@ public:
 							uint32_t *dst0 = (uint32_t*) (*Dst)[DstY];
 							uint32_t *dst1 = (uint32_t*) (*Dst)[DstY+1];
 
-							LgiAssert(Src->GetColourSpace() == Dst->GetColourSpace());
+							LAssert(Src->GetColourSpace() == Dst->GetColourSpace());
 							
 							if (dst1)
 							{
@@ -963,7 +963,7 @@ public:
 							uint32_t *dst1 = (uint32_t*) (*Dst)[DstY+1];
 							uint32_t *dst2 = (uint32_t*) (*Dst)[DstY+2];
 
-							LgiAssert(Src->GetColourSpace() == Dst->GetColourSpace());
+							LAssert(Src->GetColourSpace() == Dst->GetColourSpace());
 							
 							if (dst2)
 							{
@@ -1034,7 +1034,7 @@ public:
 				}
 				default:
 				{
-					LgiAssert(!"Not impl");
+					LAssert(!"Not impl");
 					break;
 				}
 			}
@@ -1102,8 +1102,8 @@ public:
 
 	void UpdateTile(int x, int y)
 	{
-		LgiAssert(x >= 0 && x < Tiles.x);
-		LgiAssert(y >= 0 && y < Tiles.y);
+		LAssert(x >= 0 && x < Tiles.x);
+		LAssert(y >= 0 && y < Tiles.y);
 		ZoomTile *Dst = Tile[x][y];
 		LSurface *Src = pDC;
 		if (Dst && Src)
@@ -1745,10 +1745,10 @@ void LZoomView::OnPaint(LSurface *pDC)
 		tile.y2 = vis.y2 / d->TileSize;
 		
 		// Check the visible tiles are in range
-		LgiAssert(tile.x1 >= 0 && tile.x1 < d->Tiles.x);
-		LgiAssert(tile.y1 >= 0 && tile.y1 < d->Tiles.y);
-		LgiAssert(tile.x2 >= 0 && tile.x2 < d->Tiles.x);
-		LgiAssert(tile.y2 >= 0 && tile.y2 < d->Tiles.y);
+		LAssert(tile.x1 >= 0 && tile.x1 < d->Tiles.x);
+		LAssert(tile.y1 >= 0 && tile.y1 < d->Tiles.y);
+		LAssert(tile.x2 >= 0 && tile.x2 < d->Tiles.x);
+		LAssert(tile.y2 >= 0 && tile.y2 < d->Tiles.y);
 		
 		// Make sure we have tiles available and they are up to date
 		int Bits = Src->GetBits() <= 8 ? 32 : Src->GetBits();
@@ -1838,7 +1838,7 @@ void LZoomView::OnPaint(LSurface *pDC)
 						Rgn.Subtract(&r);
 					}
 				}
-				else LgiAssert(!"Missing tile?");
+				else LAssert(!"Missing tile?");
 			}
 		}
 	}

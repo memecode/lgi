@@ -104,7 +104,7 @@ ssize_t my_snwprintf(T *ptr, int ptr_size, const char16 *fmt, ...)
 				while (ptr < end && n > 0)
 					*ptr++ = tmp[--n];
 			}
-			else LgiAssert(!"Unknown format specifier");
+			else LAssert(!"Unknown format specifier");
 			fmt++;
 		}
 		else *ptr++ = *fmt++;
@@ -166,7 +166,7 @@ LAutoWString TextToEmoji(uint32_t *Txt, bool IsHtml)
 	LMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "resources/EmojiMap.png");
 	#endif
 
-	LgiAssert(sizeof(WChar) == sizeof(uint32_t));
+	LAssert(sizeof(WChar) == sizeof(uint32_t));
 	
 	if (!IsHtml)
 	{

@@ -472,7 +472,7 @@ bool LCombo::OnKey(LKey &k)
 				// Search for value
 				if (k.IsChar && k.c16 > ' ')
 				{
-					uint64 Now = LgiCurrentTime();
+					uint64 Now = LCurrentTime();
 					if (d->LastKey + 2000 < Now)
 					{
 						d->Find.Reset();
@@ -660,18 +660,18 @@ void LCombo::OnPaint(LSurface *pDC)
 				if (Enabled())
 				{
 					bool f = Focus();
-					SysFont->Colour(f ? L_FOCUS_SEL_FORE : L_TEXT, f ? L_FOCUS_SEL_BACK : L_MED);
-					SysFont->Transparent(false);
+					LSysFont->Colour(f ? L_FOCUS_SEL_FORE : L_TEXT, f ? L_FOCUS_SEL_BACK : L_MED);
+					LSysFont->Transparent(false);
 					ds->Draw(pDC, r.x1, r.y1, &r);
 				}
 				else
 				{
-					SysFont->Transparent(false);
-					SysFont->Colour(LColour(L_LIGHT), cBack);
+					LSysFont->Transparent(false);
+					LSysFont->Colour(LColour(L_LIGHT), cBack);
 					ds->Draw(pDC, r.x1+1, r.y1+1, &r);
 
-					SysFont->Transparent(true);
-					SysFont->Colour(L_LOW);
+					LSysFont->Transparent(true);
+					LSysFont->Colour(L_LOW);
 					ds->Draw(pDC, r.x1, r.y1, &r);
 				}
 			}

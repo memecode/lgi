@@ -206,7 +206,7 @@ bool LWindow::OnRequestClose(bool Os)
 {
 	if (GetQuitOnClose())
 	{
-		LgiCloseApp();
+		LCloseApp();
 	}
 
 	delete this;
@@ -631,9 +631,9 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	}
 
 	// Give key to popups
-	if (LgiApp &&
-		LgiApp->GetMouseHook() &&
-		LgiApp->GetMouseHook()->OnViewKey(v, k))
+	if (LAppInst &&
+		LAppInst->GetMouseHook() &&
+		LAppInst->GetMouseHook()->OnViewKey(v, k))
 	{
 		#if DEBUG_HANDLEVIEWKEY
 		if (Debug)

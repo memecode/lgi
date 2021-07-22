@@ -106,13 +106,13 @@ static void DeleteHandle(char *f, int l, uint32 hnd, HndType t)
 		else
 		{
 			// Wrong type of handle
-			LgiAssert(0);
+			LAssert(0);
 		}
 	}
 	else
 	{
 		// Handle wasn't allocated
-		LgiAssert(0);
+		LAssert(0);
 	}
 }
 
@@ -127,7 +127,7 @@ HDC Lgi_BeginPaint(char *File, int Line, HWND hWnd, LPPAINTSTRUCT lpPaint)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 
 	return hdc;
@@ -154,7 +154,7 @@ HDC Lgi_CreateCompatibleDC(char *File, int Line, HDC hInDC)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 
 	return hdc;
@@ -177,7 +177,7 @@ HDC Lgi_GetDC(char *File, int Line, HWND hWnd)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return hdc;
 }
@@ -192,7 +192,7 @@ HDC Lgi_GetWindowDC(char *File, int Line, HWND hWnd)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return hdc;
 }
@@ -214,7 +214,7 @@ HBRUSH Lgi_CreateBrushIndirect(char *File, int Line, CONST LOGBRUSH *LogBrush)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return h;
 }
@@ -229,7 +229,7 @@ HBRUSH Lgi_CreateDIBPatternBrush(char *File, int Line, HGLOBAL hglbDIBPacked, UI
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return h;
 }
@@ -244,7 +244,7 @@ HBRUSH Lgi_CreateDIBPatternBrushPt(char *File, int Line, CONST VOID *lpPackedDIB
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return h;
 }
@@ -259,7 +259,7 @@ HBRUSH Lgi_CreateHatchBrush(char *File, int Line, int fnStyle, COLORREF clrref)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return h;
 }
@@ -274,7 +274,7 @@ HBRUSH Lgi_CreatePatternBrush(char *File, int Line, HBITMAP hbmp)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return h;
 }
@@ -289,7 +289,7 @@ HBRUSH Lgi_CreateSolidBrush(char *File, int Line, COLORREF crColor)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return h;
 }
@@ -322,7 +322,7 @@ HFONT Lgi_CreateFont
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return h;
 }
@@ -337,7 +337,7 @@ HFONT Lgi_CreateFontIndirect(char *File, int Line, CONST LOGFONT *lplf)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return h;
 }
@@ -352,7 +352,7 @@ HPEN Lgi_CreatePen(char *File, int Line, int fnPenStyle, int nWidth, COLORREF cr
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return h;
 }
@@ -367,7 +367,7 @@ HPEN Lgi_CreatePenIndirect(char *File, int Line, CONST LOGPEN *lplgpn)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return h;
 }
@@ -382,7 +382,7 @@ HPEN Lgi_ExtCreatePen(char *File, int Line, DWORD dwPenStyle, DWORD dwWidth, CON
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return h;
 }
@@ -398,7 +398,7 @@ HGDIOBJ Lgi_SelectObject(char *File, int Line, HDC hdc, HGDIOBJ hgdiobj)
 {
 	#undef SelectObject
 	HGDIOBJ h = SelectObject(hdc, hgdiobj);
-	LgiAssert(h);
+	LAssert(h);
 	return h;
 }
 
@@ -412,7 +412,7 @@ HBITMAP Lgi_CreateDIBSection(char *File, int Line, HDC hdc, CONST BITMAPINFO *pb
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return h;
 }
@@ -427,7 +427,7 @@ HRGN Lgi_CreateRectRgn(char *File, int Line, int a, int b, int c, int d)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return h;
 }
@@ -442,7 +442,7 @@ HPALETTE Lgi_CreatePalette(char *File, int Line, CONST LOGPALETTE *lplgpl)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return h;
 }

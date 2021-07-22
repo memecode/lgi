@@ -76,7 +76,7 @@ uint32_t LgiGetViewPid(OsView View)
 	
 	// FIXME: Linux
 	
-	return LgiProcessId();
+	return LProcessId();
 }
 
 class LMouseHookPrivate : public ::LMutex, public ::LThread
@@ -199,7 +199,7 @@ public:
 				if (m.Down() && !Old.Down()) 
 				{
 					// Down click....
-					uint64 Now = LgiCurrentTime();
+					uint64 Now = LCurrentTime();
 					LPopup *Over = 0;
 
 					for (auto w: Popups)
@@ -350,7 +350,7 @@ public:
 				
 				OsView hWnd = (Inside) ? hOver : 0;
 
-				uint32_t hProcess = LgiProcessId();
+				uint32_t hProcess = LProcessId();
 				uint32_t hWndProcess = 0;
 				if (hWnd != hMouseOver)
 				{
@@ -601,7 +601,7 @@ LPopup::~LPopup()
 		#endif
 	}
 
-	LMouseHook *Hook = LgiApp->GetMouseHook();
+	LMouseHook *Hook = LAppInst->GetMouseHook();
 	if (Hook) Hook->UnregisterPopup(this);
 
 	while (Children.Length())
@@ -810,7 +810,7 @@ void LPopup::Visible(bool i)
 		#endif
 	
 		#ifdef LGI_SDL
-			auto *TopWnd = LgiApp->AppWnd;
+			auto *TopWnd = LAppInst->AppWnd;
 			if (i && TopWnd)
 			{
 				if (!TopWnd->HasView(this))
@@ -886,9 +886,9 @@ void LPopup::Visible(bool i)
 	
 		if (i)
 		{
-			Start = LgiCurrentTime();
+			Start = LCurrentTime();
 
-			LMouseHook *Hook = LgiApp->GetMouseHook();
+			LMouseHook *Hook = LAppInst->GetMouseHook();
 			if (Hook)
 				Hook->RegisterPopup(this);
 
@@ -906,7 +906,7 @@ void LPopup::Visible(bool i)
 		}
 		else
 		{
-			LMouseHook *Hook = LgiApp->GetMouseHook();
+			LMouseHook *Hook = LAppInst->GetMouseHook();
 			if (Hook)
 				Hook->UnregisterPopup(this);
 
@@ -1098,9 +1098,9 @@ void LDropDown::OnPaint(LSurface *pDC)
 	auto Nm = Name();
 	if (Nm && X() >= 32)
 	{
-		LDisplayString Ds(SysFont, Nm);
-		SysFont->Colour(L_TEXT, L_MED);
-		SysFont->Transparent(true);
+		LDisplayString Ds(LSysFont, Nm);
+		LSysFont->Colour(L_TEXT, L_MED);
+		LSysFont->Transparent(true);
 		int Offset = IsOpen() ? 1 : 0;
 		Ds.Draw(pDC, (Cx-Ds.X())/2+Offset+r.x1, (Y()-Ds.Y())/2+Offset);
 	}

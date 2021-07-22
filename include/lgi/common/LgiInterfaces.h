@@ -253,7 +253,7 @@ public:
 	/// Enters the message loop.
 	virtual bool Run
 	(
-		/// If true this function will return when the application exits (with LgiCloseApp()).
+		/// If true this function will return when the application exits (with LCloseApp()).
 		/// Otherwise if false only pending events will be processed and then the function returns.
 		bool Loop = true,
 		/// [Optional] Idle callback
@@ -482,7 +482,7 @@ public:
 	virtual void SetNotify(LViewI *n) = 0;
 
 	// Mouse
-	virtual LgiCursor GetCursor(int x, int y) = 0;
+	virtual LCursor GetCursor(int x, int y) = 0;
 	virtual bool Capture(bool c) = 0;
 	virtual bool IsCapturing() = 0;
 	virtual bool GetMouse(LMouse &m, bool ScreenCoords = false) = 0;

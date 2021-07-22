@@ -49,7 +49,7 @@ LXmlTag *GetFormField(LXmlTag *Form, char *Field)
 				LgiTrace("Match[%i]=%s\n", i, Matches[i]->GetAttr("Name"));
 			}
 
-			LgiAssert(0);
+			LAssert(0);
 		}
 		*/
 	}

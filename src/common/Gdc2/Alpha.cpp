@@ -135,7 +135,7 @@ public:
 
 	void SetPtr(int x, int y)
 	{
-		LgiAssert(Dest && Dest->Base);
+		LAssert(Dest && Dest->Base);
 		Ptr = Dest->Base + ((y * Dest->Line) + (x * Bytes));
 		if (APtr)
 			APtr = Alpha->Base + ((y * Alpha->Line) + x);
@@ -417,7 +417,7 @@ public:
 
 			return true;
 		}
-		else LgiAssert(0);
+		else LAssert(0);
 		
 		return false;
 	}
@@ -865,7 +865,7 @@ public:
 
 		if (SrcAlpha)
 		{
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 		}
 		else
 		{
@@ -1381,7 +1381,7 @@ LApplicator *GAlphaFactory::Create(LColourSpace Cs, int Op)
 					_FL,
 					Cs,
 					GColourSpaceToString(Cs));
-			// LgiAssert(0);
+			// LAssert(0);
 			break;
 	}
 
@@ -1525,7 +1525,7 @@ bool GdcApp8Alpha::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
 		{
 			default:
 			{
-				LgiAssert(!"Not impl.");
+				LAssert(!"Not impl.");
 				break;
 			}
 			case CsIndex8:

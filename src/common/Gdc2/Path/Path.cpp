@@ -53,7 +53,7 @@
 											}
 	#else
 		#ifdef _WIN64
-            #define PathAssert(b)			LgiAssert(b)
+            #define PathAssert(b)			LAssert(b)
         #else
             #define PathAssert(b)			if (!(b)) _asm int 3
         #endif
@@ -1972,7 +1972,7 @@ void LSolidBrush::Rop(LRopArgs &Args)
 	switch (Args.Cs)
 	{
 		default:
-			LgiAssert(!"Impl me");
+			LAssert(!"Impl me");
 			break;
 
 		#define SolidCase(cs, bits) \
@@ -2097,7 +2097,7 @@ void LLinearBlendBrush::Rop(LRopArgs &Args)
 	switch (Args.Cs)
 	{
 		default:
-			LgiAssert(!"Impl me");
+			LAssert(!"Impl me");
 			break;
 
 		#define LinearCase(cs, bits) \
@@ -2130,7 +2130,7 @@ void LRadialBlendBrush::Rop(LRopArgs &Args)
 	switch (Args.Cs)
 	{
 		default:
-			LgiAssert(!"Impl me");
+			LAssert(!"Impl me");
 			break;
 
 		#define RadialCase(cs, bits) \
@@ -2163,7 +2163,7 @@ void LEraseBrush::Rop(LRopArgs &Args)
 	switch (Args.Cs)
 	{
 		default:
-			LgiAssert(!"Impl me");
+			LAssert(!"Impl me");
 			break;
 		case System24BitColourSpace:
 		{

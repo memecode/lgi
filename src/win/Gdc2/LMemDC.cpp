@@ -432,7 +432,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 					{
 						DWORD err = GetLastError();
 						#if 1
-						LgiAssert(!"Create bmp failed.");
+						LAssert(!"Create bmp failed.");
 						#endif
 					}
 				}
@@ -528,7 +528,7 @@ void LMemDC::Empty()
 
 void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 {
-    LgiAssert(Src != 0);
+    LAssert(Src != 0);
     if (!Src)
         return;
 

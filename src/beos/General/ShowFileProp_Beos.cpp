@@ -2,7 +2,7 @@
 
 void LShowFileProperties(OsView Parent, const char *Filename)
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 }
 
 bool LBrowseToFile(const char *Filename)
@@ -12,6 +12,6 @@ bool LBrowseToFile(const char *Filename)
 	sprintf(Args, "/e,/select,\"%s\"", Filename);
 	return LExecute("explorer", Args);
 	*/
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 	return false;
 }

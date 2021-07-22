@@ -37,7 +37,7 @@
 		*Sz = (uint32_t) (p.c - Start); \
 	else \
 		p.c = Start + *Sz; \
-	LgiAssert(Sizeof() == *Sz); \
+	LAssert(Sizeof() == *Sz); \
 	return true;
 
 #define DB_DATE_SZ \
@@ -179,7 +179,7 @@ struct DbTablePriv
 	{
 		if (Rows > 0)
 		{
-			LgiAssert(!"Adding fields with records not supported yet.");
+			LAssert(!"Adding fields with records not supported yet.");
 			return false;
 		}
 
@@ -205,12 +205,12 @@ struct DbTablePriv
 			{
 				if (IsFixed(f.Type))
 				{
-					LgiAssert(i < Fixed && Fixed > 0);
+					LAssert(i < Fixed && Fixed > 0);
 					Fixed--;
 				}
 				else
 				{
-					LgiAssert(i >= Fixed && Variable > 0);
+					LAssert(i >= Fixed && Variable > 0);
 					Variable--;
 				}
 				Fields.DeleteAt(i, true);
@@ -228,7 +228,7 @@ struct DbTablePriv
 		}
 		else
 		{
-			LgiAssert(r == First);
+			LAssert(r == First);
 			First = r->Next;
 		}
 		if (r->Next)
@@ -237,7 +237,7 @@ struct DbTablePriv
 		}
 		else
 		{
-			LgiAssert(r == Last);
+			LAssert(r == Last);
 			Last = r->Prev;
 		}
 		r->Prev = NULL;
@@ -258,7 +258,7 @@ DbIndex::DbIndex(DbTablePriv *priv)
 
 DbIndex::~DbIndex()
 {
-	LgiAssert(d->Indexes.HasItem(this));
+	LAssert(d->Indexes.HasItem(this));
 	d->Indexes.Delete(this);
 }
 
@@ -316,7 +316,7 @@ DeclGArrayCompare(RowDateCompare, LDbRow*, CompareParams)
 	const LDateTime *B = (*b)->GetDate(param->Id);
 	if (!A || !B)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return 0;
 	}
 
@@ -324,7 +324,7 @@ DeclGArrayCompare(RowDateCompare, LDbRow*, CompareParams)
 	if (!A->Get(UtcA) ||
 		!B->Get(UtcB))
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return 0;
 	}
 
@@ -358,7 +358,7 @@ bool DbArrayIndex::Sort(LDbField *fld, bool ascend)
 			LArray<LDbRow*>::Sort(RowDateCompare, &p);
 			break;
 		default:
-			LgiAssert(0);
+			LAssert(0);
 			return false;
 	}
 
@@ -394,7 +394,7 @@ bool LDbDate::Serialize(GPointer &p, LDateTime &dt, bool Write)
 	SERIALIZE(u16, Tz);
 	if (!Write) dt.SetTimeZone(Tz, false);
 
-	LgiAssert(p.c - Start == DB_DATE_SZ);
+	LAssert(p.c - Start == DB_DATE_SZ);
 	return true;
 }
 
@@ -413,7 +413,7 @@ int LDbField::DataSize()
 		case GV_DATETIME:
 			return DB_DATE_SZ;
 		default:
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			break;
 	}
 
@@ -551,7 +551,7 @@ LString LDbRow::ToString()
 				break;
 			}
 			default:
-				LgiAssert(0);
+				LAssert(0);
 				break;
 		}
 	}
@@ -570,7 +570,7 @@ uint32_t LDbRow::Size(uint32_t Set)
 		return Base.u32[1];
 	}
 
-	LgiAssert(0);
+	LAssert(0);
 	return 0;
 }
 
@@ -590,7 +590,7 @@ bool LDbRow::CopyProps(GDataPropI &p)
 		else if (f.Type == GV_STRING)
 			Status = SetStr(f.Id, p.GetStr(f.Id));
 		else
-			LgiAssert(!"Impl type");
+			LAssert(!"Impl type");
 		if (Status <= Store3Error)
 			return false;
 	}
@@ -603,7 +603,7 @@ const char *LDbRow::GetStr(int id)
 	Info i = d->Map.Find(id);
 	if (i.Index < 0 || i.Type != GV_STRING || !Base.c)
 		return NULL;
-	LgiAssert((unsigned)i.Index < d->Variable);
+	LAssert((unsigned)i.Index < d->Variable);
 	return Base.c + Offsets[VariableOff][i.Index];
 }
 
@@ -746,37 +746,37 @@ Store3Status LDbRow::SetDate(int id, const LDateTime *dt)
 
 LVariant *LDbRow::GetVar(int id)
 {
-	LgiAssert(0);
+	LAssert(0);
 	return NULL;
 }
 
 Store3Status LDbRow::SetVar(int id, LVariant *i)
 {
-	LgiAssert(0);
+	LAssert(0);
 	return Store3Error;
 }
 
 GDataPropI *LDbRow::GetObj(int id)
 {
-	LgiAssert(0);
+	LAssert(0);
 	return NULL;
 }
 
 Store3Status LDbRow::SetObj(int id, GDataPropI *i)
 {
-	LgiAssert(0);
+	LAssert(0);
 	return Store3Error;
 }
 
 GDataIt LDbRow::GetList(int id)
 {
-	LgiAssert(0);
+	LAssert(0);
 	return NULL;
 }
 
 Store3Status LDbRow::SetRfc822(LStreamI *Rfc822Msg)
 {
-	LgiAssert(0);
+	LAssert(0);
 	return Store3Error;
 }
 
@@ -818,7 +818,7 @@ bool LDbTable::Iterate(LDbRow *&Ptr)
 {
 	if (Ptr && Ptr->d != d)
 	{
-		LgiAssert(!"Wrong table.");
+		LAssert(!"Wrong table.");
 		return false;
 	}
 
@@ -843,7 +843,7 @@ LDbRow *LDbTable::NewRow()
 
 	if (d->Last)
 	{
-		LgiAssert(d->Last->Next == NULL);
+		LAssert(d->Last->Next == NULL);
 		d->Last->Next = r;
 		r->Prev = d->Last;
 		d->Last = r;
@@ -851,7 +851,7 @@ LDbRow *LDbTable::NewRow()
 	}
 	else
 	{
-		LgiAssert(d->Rows == 0);
+		LAssert(d->Rows == 0);
 		d->First = d->Last = r;
 		d->Rows = 1;
 	}
@@ -916,7 +916,7 @@ DbArrayIndex *LDbTable::Sort(int Id, bool Ascending)
 	for (LDbRow *r = d->First; r; r = r->Next)
 		(*i)[Idx++] = r;
 
-	LgiAssert(Idx == d->Rows);
+	LAssert(Idx == d->Rows);
 
 	// Sort them
 	i->Sort(f, Ascending);
@@ -951,7 +951,7 @@ bool LDbTable::Serialize(const char *Path, bool Write)
 			f.SetSize(0);
 		
 			size_t Bytes = p.c - d->Data.AddressOf();
-			LgiAssert(Bytes == Sz);
+			LAssert(Bytes == Sz);
 			if (f.Write(d->Data.AddressOf(), Bytes) != Bytes)
 				return false;
 		}
@@ -959,7 +959,7 @@ bool LDbTable::Serialize(const char *Path, bool Write)
 		for (LDbRow *r = d->First; r; r = r->Next)
 		{
 			// Fix the size before we write
-			LgiAssert(r->Base.u32[0] == RowMagic);
+			LAssert(r->Base.u32[0] == RowMagic);
 			if (r->Edit.Length())
 				r->Compact();
 			if (f.Write(r->Base.c, r->Size()) != r->Size())

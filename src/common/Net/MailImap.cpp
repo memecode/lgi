@@ -127,7 +127,7 @@ ssize_t MailIMap::ParseImapResponse(char *Buffer, ssize_t BufferLen, LArray<StrR
 	ssize_t MsgSize = 0;
 	while (*s)
 	{
-		LgiAssert(s < End);
+		LAssert(s < End);
 		
 		// Field name
 		SkipWhite(s);
@@ -242,7 +242,7 @@ ssize_t MailIMap::ParseImapResponse(char *Buffer, ssize_t BufferLen, LArray<StrR
 		}
 	}
 
-	LgiAssert(s <= End);
+	LAssert(s <= End);
 	return MsgSize;
 }
 
@@ -800,7 +800,7 @@ bool MailIMap::WriteBuf(bool ObsurePass, const char *Buffer, bool Continuation)
 			Msg.Printf("%s:%i - WriteBuf failed(%s)\n", LGetLeaf(__FILE__), __LINE__, d->LastWrite.Strip().Get());
 			Socket->OnInformation(Msg);
 
-			LgiAssert(!"Can't be issuing new commands while others are still running.");
+			LAssert(!"Can't be issuing new commands while others are still running.");
 			return false;
 		}
 		/*
@@ -848,9 +848,9 @@ bool MailIMap::Read(LStreamI *Out, int Timeout)
 
 		if (Timeout > 0 && Socket->IsOpen() && r <= 0)
 		{
-			auto St = LgiCurrentTime();
+			auto St = LCurrentTime();
 			auto Rd = Socket->IsReadable(Timeout);
-			auto End = LgiCurrentTime();
+			auto End = LCurrentTime();
 
 			if (Rd)
 			{
@@ -1053,7 +1053,7 @@ public:
 	{
 		LString r;
 		
-		uint64 Start = LgiCurrentTime();
+		uint64 Start = LCurrentTime();
 		while (!r && (!Loop || !Loop->IsCancelled()))
 		{
 			if (Lock(_FL))
@@ -1065,7 +1065,7 @@ public:
 			
 			if (TimeoutMs)
 			{
-				uint64 Now = LgiCurrentTime();
+				uint64 Now = LCurrentTime();
 				if (Now - Start >= TimeoutMs)
 					break;
 			}
@@ -1333,7 +1333,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 							TlsError = true;
 						}
 					}
-					else LgiAssert(0);
+					else LAssert(0);
 					if (TlsError)
 					{
 						Log("STARTTLS failed", LSocketI::SocketMsgError);
@@ -1516,7 +1516,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 										#if 1
 											ZeroObj(challenge);
 											char *Line = Dialog[0];
-											LgiAssert(Line != NULL);
+											LAssert(Line != NULL);
 											ChopNewLine(Line);
 											int LineLen = strlen(Line);
 											int challengeLen = sizeof(challenge);
@@ -1706,7 +1706,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 									if ((s = p.NewStr()))
 									{
 										ssize_t Chars = ConvertBinaryToBase64(Buf, sizeof(Buf) - 4, (uchar*)s, strlen(s));
-										LgiAssert(Chars < sizeof(Buf));
+										LAssert(Chars < sizeof(Buf));
 										strcpy_s(Buf+Chars, sizeof(Buf)-Chars, "\r\n");
 										
 										if (WriteBuf(false, NULL, true) && Read())
@@ -2098,7 +2098,7 @@ static void RemoveBytes(LArray<char> &a, ssize_t &Used, ssize_t Bytes)
 			memmove(&a[0], &a[Bytes], Remain);
 		Used -= Bytes;
 	}
-	else LgiAssert(0);
+	else LAssert(0);
 }
 
 static bool PopLine(LArray<char> &a, ssize_t &Used, LAutoString &Line)
@@ -2123,7 +2123,7 @@ void NullCheck(char *Ptr, unsigned Len)
 	// Check for NULLs
 	for (unsigned i=0; i<Len; i++)
 	{
-		LgiAssert(Ptr[i] != 0);
+		LAssert(Ptr[i] != 0);
 	}
 }
 
@@ -2164,7 +2164,7 @@ int MailIMap::Fetch(bool ByUid,
 		Buf.Length(1024 + (SizeHint>0?(uint32)SizeHint:0));
 		ssize_t Used = 0;
 		ssize_t MsgSize;
-		// int64 Start = LgiCurrentTime();
+		// int64 Start = LCurrentTime();
 		int64 Bytes = 0;
 		bool Done = false;
 		
@@ -2177,7 +2177,7 @@ int MailIMap::Fetch(bool ByUid,
 		LgiTrace("%s:%i - Fetch: Starting loop\n", _FL);
 		#endif
 
-		uint64 LastActivity = LgiCurrentTime();
+		uint64 LastActivity = LCurrentTime();
 		bool Debug = false;
 		while (!Done && Socket->IsOpen())
 		{
@@ -2211,7 +2211,7 @@ int MailIMap::Fetch(bool ByUid,
 					Used += r;
 					Bytes += r;
 					
-					LastActivity = LgiCurrentTime();
+					LastActivity = LCurrentTime();
 				}
 				else
 				{
@@ -2225,7 +2225,7 @@ int MailIMap::Fetch(bool ByUid,
 			
 			// See if we can parse out a single response
 			LArray<StrRange> Ranges;
-			LgiAssert(Used < Buf.Length());
+			LAssert(Used < Buf.Length());
 			Buf[Used] = 0; // NULL terminate before we parse
 
 			while (true)
@@ -2242,7 +2242,7 @@ int MailIMap::Fetch(bool ByUid,
 					break;
 
 				if (!Debug)
-					LastActivity = LgiCurrentTime();
+					LastActivity = LCurrentTime();
 				
 				char *b = &Buf[0];
 				if (MsgSize > Used)
@@ -2253,7 +2253,7 @@ int MailIMap::Fetch(bool ByUid,
 					LgiTrace("%s:%i - Fetch: Wrong size %i, %i\n", _FL, MsgSize, Used);
 					#endif
 					Ranges.Length(0);
-					LgiAssert(0);
+					LAssert(0);
 					#if _DEBUG
 					ParseImapResponse(&Buf[0], Used, Ranges, 2);
 					#endif
@@ -2261,7 +2261,7 @@ int MailIMap::Fetch(bool ByUid,
 					break;
 				}
 				
-				LgiAssert(Ranges.Length() >= 2);
+				LAssert(Ranges.Length() >= 2);
 				
 				// Setup strings for callback
 				char *Param = b + Ranges[0].Start;
@@ -2556,7 +2556,7 @@ bool MailIMap::Append(const char *Folder, ImapMailFlags *Flags, const char *Msg,
 						else break;
 					}
 
-					LgiAssert(Wrote == Len);
+					LAssert(Wrote == Len);
 					Wrote += Socket->Write((char*)"\r\n", 2);
 
 					// Read response..

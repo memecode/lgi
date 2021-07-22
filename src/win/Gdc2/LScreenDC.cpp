@@ -141,7 +141,7 @@ LScreenDC::LScreenDC(HDC hdc, HWND hwnd, bool Release)
 	d = new LScreenPrivate;
 	ColourSpace = GdcD->GetColourSpace();
 
-	LgiAssert(hdc != 0);
+	LAssert(hdc != 0);
 	d->hWnd = hwnd;
 	CreateFromHandle(hdc);
 	d->Release = Release;
@@ -325,7 +325,7 @@ LRect LScreenDC::ClipRgn(LRect *Rgn)
 		Clip.x2 = min(Rgn->x2 - Origin.x, d->Sx-1);
 		Clip.y2 = min(Rgn->y2 - Origin.y, d->Sy-1);
 
-		LgiAssert(d->Sx > 0 && d->Sy > 0);
+		LAssert(d->Sx > 0 && d->Sy > 0);
 
 		HRGN hRgn = CreateRectRgn(Clip.x1, Clip.y1, Clip.x2+1, Clip.y2+1);
 		if (hRgn)
@@ -771,7 +771,7 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 			}
 			
 			Tmp.Blt(0, 0, Src, &b);
-			LgiAssert(Tmp.GetBitmap() != 0);
+			LAssert(Tmp.GetBitmap() != 0);
 			Src = &Tmp;
 			hSrcDC = Src->StartDC();
 		}

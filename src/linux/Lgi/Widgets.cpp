@@ -186,7 +186,7 @@ int LDialog::DoModal(OsView OverrideParent)
 	d->IsModal = true;
 	d->IsModeless = false;
 	SetupDialog(true);
-	LgiApp->Run();
+	LAppInst->Run();
 	
 	return d->ModalStatus;
 }
@@ -197,11 +197,11 @@ void LDialog::EndModal(int Code)
 	{
 		d->IsModal = false;
 		d->ModalStatus = Code;
-		LgiApp->Exit();
+		LAppInst->Exit();
 	}
 	else
 	{
-		// LgiAssert(0);
+		// LAssert(0);
 	}
 }
 
@@ -242,7 +242,7 @@ GMessage::Param LControl::OnEvent(GMessage *Msg)
 
 LPoint LControl::SizeOfStr(const char *Str)
 {
-	int y = SysFont->GetHeight();
+	int y = LSysFont->GetHeight();
 	LPoint Pt(0, 0);
 
 	if (Str)
@@ -253,7 +253,7 @@ LPoint LControl::SizeOfStr(const char *Str)
 			e = strchr(s, '\n');
 			auto Len = e ? e - s : strlen(s);
 
-			LDisplayString ds(SysFont, s, Len);
+			LDisplayString ds(LSysFont, s, Len);
 			Pt.x = MAX(Pt.x, ds.X());
 			Pt.y += y;
 		}

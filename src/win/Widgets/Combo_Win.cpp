@@ -62,7 +62,7 @@ LCombo::LCombo(int id, int x, int y, int cx, int cy, const char *name) :
 	if (SubClass)
 		SubClass->SubClass("COMBOBOX");
 	else
-		LgiAssert(!"No subclass?");
+		LAssert(!"No subclass?");
 	#endif
 }
 
@@ -83,7 +83,7 @@ void LCombo::OnAttach()
 			SendMessage(Handle(), CB_INSERTSTRING, n, (LPARAM) (s ? s.Get() : L"(NULL)"));
 		}
 
-		SetFont(SysFont);
+		SetFont(LSysFont);
 		
 		if (d->Name)
 			Name(d->Name);
@@ -205,18 +205,18 @@ const char *LCombo::Name()
 
 LSubMenu *LCombo::GetMenu()
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 	return 0;
 }
 
 void LCombo::SetMenu(LSubMenu *m)
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 }
 
 void LCombo::DoMenu()
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 }
 
 bool LCombo::Delete()
@@ -314,7 +314,7 @@ char *LCombo::operator [](ssize_t i)
 	if (i >= 0 && i < (ssize_t)d->Strs.Length())
 		return d->Strs[i];
 	
-	LgiAssert(!"Out of range combo string access.");
+	LAssert(!"Out of range combo string access.");
 	return NULL;
 }
 
@@ -389,7 +389,7 @@ GMessage::Result LCombo::OnEvent(GMessage *Msg)
 		}
 		case WM_CREATE:
 		{
-			SetFont(SysFont);
+			SetFont(LSysFont);
 			break;
 		}
 		case WM_DESTROY:

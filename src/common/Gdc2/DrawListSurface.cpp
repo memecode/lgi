@@ -85,7 +85,7 @@ struct LCmdBlt : public LCmd
 			Src.ZOff(-1, -1);
 		Stretch = stretch;
 		if (Stretch)
-			LgiAssert(Src.Valid() && Dst.Valid());
+			LAssert(Src.Valid() && Dst.Valid());
 	}
 	
 	bool OnPaint(GDrawListSurfacePriv *d, LSurface *pDC)
@@ -230,14 +230,14 @@ LDisplayString *GDrawListSurface::Text(int x, int y, const char *Str, int Len)
 {
 	if (!d->Font)
 	{
-		LgiAssert(!"No font.");
+		LAssert(!"No font.");
 		return NULL;
 	}
 	
 	LDisplayString *Ds = new LDisplayString(d->Font, Str, Len, d->CreationSurface);
 	if (!Ds)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return NULL;
 	}
 	
@@ -277,7 +277,7 @@ COLOUR GDrawListSurface::Colour()
 			return d->Fore.c32();
 	}
 	
-	LgiAssert(0);
+	LAssert(0);
 	return 0;
 }
 
@@ -290,7 +290,7 @@ COLOUR GDrawListSurface::Colour(COLOUR c, int Bits)
 	if (cmd)
 		d->Add(cmd);
 	else
-		LgiAssert(0);
+		LAssert(0);
 	
 	return Prev;
 }
@@ -304,7 +304,7 @@ LColour GDrawListSurface::Colour(LColour c)
 	if (cmd)
 		d->Add(cmd);
 	else
-		LgiAssert(0);
+		LAssert(0);
 
 	return Prev;
 }
@@ -351,7 +351,7 @@ void GDrawListSurface::Set(int x, int y)
 	if (c)
 		d->Add(c);
 	else
-		LgiAssert(0);
+		LAssert(0);
 }
 
 void GDrawListSurface::HLine(int x1, int x2, int y)
@@ -360,7 +360,7 @@ void GDrawListSurface::HLine(int x1, int x2, int y)
 	if (c)
 		d->Add(c);
 	else
-		LgiAssert(0);
+		LAssert(0);
 }
 
 void GDrawListSurface::VLine(int x, int y1, int y2)
@@ -369,7 +369,7 @@ void GDrawListSurface::VLine(int x, int y1, int y2)
 	if (c)
 		d->Add(c);
 	else
-		LgiAssert(0);
+		LAssert(0);
 }
 
 void GDrawListSurface::Line(int x1, int y1, int x2, int y2)
@@ -378,43 +378,43 @@ void GDrawListSurface::Line(int x1, int y1, int x2, int y2)
 	if (c)
 		d->Add(c);
 	else
-		LgiAssert(0);
+		LAssert(0);
 }
 
 uint GDrawListSurface::LineStyle(uint32_t Bits, uint32_t Reset)
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 	return 0;
 }
 
 void GDrawListSurface::Circle(double cx, double cy, double radius)
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 }
 
 void GDrawListSurface::FilledCircle(double cx, double cy, double radius)
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 }
 
 void GDrawListSurface::Arc(double cx, double cy, double radius, double start, double end)
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 }
 
 void GDrawListSurface::FilledArc(double cx, double cy, double radius, double start, double end)
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 }
 
 void GDrawListSurface::Ellipse(double cx, double cy, double x, double y)
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 }
 
 void GDrawListSurface::FilledEllipse(double cx, double cy, double x, double y)
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 }
 
 void GDrawListSurface::Box(int x1, int y1, int x2, int y2)
@@ -424,7 +424,7 @@ void GDrawListSurface::Box(int x1, int y1, int x2, int y2)
 	if (c)
 		d->Add(c);
 	else
-		LgiAssert(0);
+		LAssert(0);
 }
 
 void GDrawListSurface::Box(LRect *r)
@@ -434,7 +434,7 @@ void GDrawListSurface::Box(LRect *r)
 	if (c)
 		d->Add(c);
 	else
-		LgiAssert(0);
+		LAssert(0);
 }
 
 void GDrawListSurface::Rectangle(int x1, int y1, int x2, int y2)
@@ -444,7 +444,7 @@ void GDrawListSurface::Rectangle(int x1, int y1, int x2, int y2)
 	if (c)
 		d->Add(c);
 	else
-		LgiAssert(0);
+		LAssert(0);
 }
 
 void GDrawListSurface::Rectangle(LRect *r)
@@ -454,14 +454,14 @@ void GDrawListSurface::Rectangle(LRect *r)
 	if (c)
 		d->Add(c);
 	else
-		LgiAssert(0);
+		LAssert(0);
 }
 
 void GDrawListSurface::Blt(int x, int y, LSurface *Src, LRect *SrcRc)
 {
 	if (!Src)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return;
 	}
 	
@@ -469,14 +469,14 @@ void GDrawListSurface::Blt(int x, int y, LSurface *Src, LRect *SrcRc)
 	if (c)
 		d->Add(c);
 	else
-		LgiAssert(0);	
+		LAssert(0);	
 }
 
 void GDrawListSurface::StretchBlt(LRect *drc, LSurface *Src, LRect *s)
 {
 	if (!d || !Src || !s)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return;
 	}
 	
@@ -484,21 +484,21 @@ void GDrawListSurface::StretchBlt(LRect *drc, LSurface *Src, LRect *s)
 	if (c)
 		d->Add(c);
 	else
-		LgiAssert(0);	
+		LAssert(0);	
 }
 
 void GDrawListSurface::Polygon(int Points, LPoint *Data)
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 }
 
 void GDrawListSurface::Bezier(int Threshold, LPoint *Pt)
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 }
 
 void GDrawListSurface::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 }
 

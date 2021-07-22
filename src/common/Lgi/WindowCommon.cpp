@@ -147,7 +147,7 @@ bool LWindow::MoveSameScreen(LViewI *View)
 {
 	if (!View)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 

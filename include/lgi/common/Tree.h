@@ -167,7 +167,7 @@ public:
 
 	/// Paints the item
 	void OnPaint(ItemPaintCtx &Ctx) override;
-	void OnPaint(LSurface *pDC) override { LgiAssert(0); }
+	void OnPaint(LSurface *pDC) override { LAssert(0); }
 };
 
 /// A tree control.
@@ -231,7 +231,7 @@ public:
 	GMessage::Result OnEvent(GMessage *Msg) override;
 	void OnPulse() override;
 	int GetContentSize(int ColumnIdx) override;
-	LgiCursor GetCursor(int x, int y) override;
+	LCursor GetCursor(int x, int y) override;
 	bool Lock(const char *file, int line, int TimeOut = -1) override;
 	void Unlock() override;
 

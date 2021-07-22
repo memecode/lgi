@@ -204,7 +204,7 @@ bool LSurface::SetConstantAlpha(uint8_t Alpha)
 				SetAlphaCase(Abgr32);
 				#undef SetAlphaCase
 				default:
-					LgiAssert(!"Unknown CS.");
+					LAssert(!"Unknown CS.");
 					break;
 			}
 		}
@@ -220,7 +220,7 @@ bool LSurface::SetConstantAlpha(uint8_t Alpha)
 				SetAlphaCase(Abgr32);
 				#undef SetAlphaCase
 				default:
-					LgiAssert(!"Unknown CS.");
+					LAssert(!"Unknown CS.");
 					break;
 			}
 		}
@@ -1564,7 +1564,7 @@ LApplicator *LSurface::CreateApplicator(int Op, LColourSpace Cs)
 			}
 			else
 			{
-				LgiAssert(!"Memory context has no colour space...");
+				LAssert(!"Memory context has no colour space...");
 			}
 		}
 		else if (IsScreen())
@@ -1573,7 +1573,7 @@ LApplicator *LSurface::CreateApplicator(int Op, LColourSpace Cs)
 		}
 		else
 		{
-			LgiAssert(!"No memory context to read colour space from.");
+			LAssert(!"No memory context to read colour space from.");
 		}
 	}
 	
@@ -1595,7 +1595,7 @@ LApplicator *LSurface::CreateApplicator(int Op, LColourSpace Cs)
 		LApplicatorFactory::NewApp(Cs, Op);
 		const char *CsStr = GColourSpaceToString(Cs);
 		LgiTrace("Error: GDeviceContext::CreateApplicator(%i, %x, %s) failed.\n", Op, Cs, CsStr);
-		LgiAssert(!"No applicator");
+		LAssert(!"No applicator");
 	}
 
 	return pA;
@@ -1671,7 +1671,7 @@ LColour LSurface::Colour(LSystemColour SysCol)
 
 LColour LSurface::Colour(LColour c)
 {
-	LgiAssert(pApp != NULL);
+	LAssert(pApp != NULL);
 	LColour cPrev;
 
 	uint32_t c32 = c.c32();
@@ -1743,7 +1743,7 @@ LColour LSurface::Colour(LColour c)
 			break;
 		}
 		default:
-			LgiAssert(0);
+			LAssert(0);
 			break;
 	}
 
@@ -1817,7 +1817,7 @@ int LSurface::Op(int NewOp, NativeInt Param)
 		else
 		{
 			printf("Error: Couldn't create applicator, Op=%i\n", NewOp);
-			LgiAssert(0);
+			LAssert(0);
 		}
 	}
 

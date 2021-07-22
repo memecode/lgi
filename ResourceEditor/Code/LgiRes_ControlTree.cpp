@@ -355,7 +355,7 @@ bool CtrlControlTree::SetVariant(const char *Name, LVariant &Value, char *Array)
 
 		LXmlTag *x = dynamic_cast<LXmlTag*>(Value.Value.Dom);
 		if (!x)
-			LgiAssert(!"Not the right object.");
+			LAssert(!"Not the right object.");
 		else
 			ReadTree(x, this, d, this);
 	}

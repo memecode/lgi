@@ -8,7 +8,7 @@
 #define OverlapCheck()							\
 	if (IsOverlapping())						\
 	{											\
-		LgiAssert(!"regions can't overlap.");	\
+		LAssert(!"regions can't overlap.");	\
 		return;									\
 	}
 

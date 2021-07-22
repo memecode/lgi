@@ -863,7 +863,7 @@ lgi_widget_get_preferred_height(GtkWidget *widget, gint *minimum_height, gint *n
 		if (natural_height)
 			*natural_height = p->pour_largest ? MAX(10, p->target->Y()) : p->target->Y();
 	}
-	else LgiAssert(0);
+	else LAssert(0);
 }
 
 static void
@@ -877,7 +877,7 @@ lgi_widget_get_preferred_width(GtkWidget *widget, gint *minimum_width, gint *nat
 		if (natural_width)
 			*natural_width = p->pour_largest ? MAX(10, p->target->X()) : p->target->X();
 	}
-	else LgiAssert(0);
+	else LAssert(0);
 }
 
 static void

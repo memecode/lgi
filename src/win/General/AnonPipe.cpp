@@ -90,7 +90,7 @@ bool GAnonPipe::SetPulse(int i)
 	if (d->Timer != INVALID_HANDLE)
 	{
 		pDeleteTimerQueueTimer DeleteTimerQueueTimer = (pDeleteTimerQueueTimer) d->GetAddress("DeleteTimerQueueTimer");
-		LgiAssert(DeleteTimerQueueTimer);
+		LAssert(DeleteTimerQueueTimer);
 		if (DeleteTimerQueueTimer)
 		{
 			DeleteTimerQueueTimer(0, d->Timer, INVALID_HANDLE_VALUE);
@@ -100,7 +100,7 @@ bool GAnonPipe::SetPulse(int i)
 	if (i > 0)
 	{
 		pCreateTimerQueueTimer CreateTimerQueueTimer = (pCreateTimerQueueTimer) d->GetAddress("CreateTimerQueueTimer");
-		LgiAssert(CreateTimerQueueTimer);
+		LAssert(CreateTimerQueueTimer);
 		if (CreateTimerQueueTimer)
 		{
 			return CreateTimerQueueTimer(&d->Timer, 0, PipeTimer_Callback, this, i, i, WT_EXECUTEINPERSISTENTTHREAD);
@@ -128,7 +128,7 @@ void GAnonPipe::PostEvent(int cmd, int a, int b)
 {
 	if (!IsOk())
 	{
-		LgiAssert(!"Not a valid pipe");
+		LAssert(!"Not a valid pipe");
 		return;
 	}
 
@@ -145,7 +145,7 @@ GMessage *GAnonPipe::GetMessage()
 {
 	if (!IsOk())
 	{
-		LgiAssert(!"Not a valid pipe");
+		LAssert(!"Not a valid pipe");
 		return 0;
 	}
 

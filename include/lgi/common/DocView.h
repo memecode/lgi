@@ -160,7 +160,7 @@ public:
 			return false;
 		if (!Lock(_FL))
 			return false;
-		LgiAssert(!Viewers.HasItem(v));
+		LAssert(!Viewers.HasItem(v));
 		Viewers.Add(v);
 		Unlock();
 		return true;
@@ -172,7 +172,7 @@ public:
 			return false;
 		if (!Lock(_FL))
 			return false;
-		LgiAssert(Viewers.HasItem(v));
+		LAssert(Viewers.HasItem(v));
 		Viewers.Delete(v);
 		Unlock();
 		return true;

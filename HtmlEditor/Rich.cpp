@@ -99,7 +99,7 @@ public:
 			return false;
 
 		LRect p = *rc;
-		p.y2 = p.y1 + SysFont->GetHeight() + 11;
+		p.y2 = p.y1 + LSysFont->GetHeight() + 11;
 		SetPos(p);
 		return true;	
 	}
@@ -127,8 +127,8 @@ public:
 		pDC->Colour(LColour::Red);
 		pDC->Rectangle();
 
-		SysFont->Colour(LColour::White, LColour::Red);
-		SysFont->Transparent(true);
+		LSysFont->Colour(LColour::White, LColour::Red);
+		LSysFont->Transparent(true);
 
 		LString s = "Missing components: ";
 		// const char *k;
@@ -139,7 +139,7 @@ public:
 			s += " ";
 		}
 
-		LDisplayString d(SysFont, s);
+		LDisplayString d(LSysFont, s);
 		d.Draw(pDC, 6, 6);
 
 		if (Ok && Install)
@@ -541,7 +541,7 @@ public:
 		switch (Cmd)
 		{
 			case IDC_EXIT:
-				LgiCloseApp();
+				LCloseApp();
 				break;
 			case IDC_TO_HTML:
 			{
@@ -627,7 +627,7 @@ public:
 										Cp.Copy(Cm.Stream, &f);
 									}
 									else
-										LgiAssert(0);
+										LAssert(0);
 									f.Close();
 								}
 							}
@@ -652,7 +652,7 @@ public:
 				if ((f == GNotifyDocChanged || f == GNotifyCursorChanged) &&
 					Edit)
 				{
-					LastChange = LgiCurrentTime();
+					LastChange = LCurrentTime();
 					Tree->Empty();
 				}
 				break;

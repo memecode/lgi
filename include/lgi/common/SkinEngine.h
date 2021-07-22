@@ -115,7 +115,7 @@ public:
 				if (i) TxtBounds.Union(&r);
 				else TxtBounds = r;
 			}
-			else LgiAssert(!"Wrong obj.");
+			else LAssert(!"Wrong obj.");
 		}
 		return TxtBounds;
 	}
@@ -164,7 +164,7 @@ public:
 	virtual void OnPaint_ListColumn(ProcColumnPaint Callback, void *UserData, LSkinState *State) = 0;
 
 	// Get the default font for a control
-	virtual LFont *GetDefaultFont(char *Class) { return SysFont; }
+	virtual LFont *GetDefaultFont(char *Class) { return LSysFont; }
 
 	// Fills an abitary path with the skin's default fill...
 	virtual void FillPath(class LPath *Path, LSurface *pDC, LColour Back, bool Down, bool Enabled = true) {}

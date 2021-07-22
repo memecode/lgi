@@ -742,7 +742,7 @@ bool SvDb::Disconnect()
 	{
 		auto it = Tables.begin();
 		t = *it;
-		LgiAssert(t->Parent == this);
+		LAssert(t->Parent == this);
 		delete t;
 	}
 

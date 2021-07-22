@@ -413,7 +413,7 @@ LgiFunc int LIsReleaseBuild();
 
 #elif defined(__OBJC__)
 
-	LgiFunc NSCursor *LCocoaCursor(LgiCursor lc);
+	LgiFunc NSCursor *LCocoaCursor(LCursor lc);
 
 #endif
 

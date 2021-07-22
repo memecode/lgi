@@ -141,7 +141,7 @@ bool SeekPtr(char16 *&s, char16 *end, int &Line)
 {
 	if (s > end)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 
@@ -881,7 +881,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 								defnskipws(s);
 								if (*s == 0 || *s == ',' || *s == '}')
 									break;
-								LgiAssert(*s != '\n');
+								LAssert(*s != '\n');
 								s++;
 							}
 						}

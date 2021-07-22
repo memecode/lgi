@@ -68,7 +68,7 @@ protected:
 				return c - '0' + Numbers;
 			if (c == '_')
 				return Symbols;
-			// LgiAssert(0);
+			// LAssert(0);
 			return -1;
 		}
 

@@ -105,7 +105,7 @@ public:
 	{
 		z = zlib;
 		f = 0;
-		LgiAssert(z != NULL);
+		LAssert(z != NULL);
 	}
 
 	~GZlibFile()

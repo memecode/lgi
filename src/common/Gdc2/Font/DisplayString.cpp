@@ -261,7 +261,7 @@ bool StringConvert(Out *&out, ssize_t &OutWords, const In *in, ssize_t InLen)
 	{
 		// Convert the string to new word size
 		static const char *Cp[] = { NULL, "utf-8", "utf-16", NULL, "utf-32"};
-		LgiAssert(OutSz <= 4 && InSz <= 4 && Cp[OutSz] && Cp[InSz]);
+		LAssert(OutSz <= 4 && InSz <= 4 && Cp[OutSz] && Cp[InSz]);
 		out = (Out*) LNewConvertCp(Cp[OutSz], in, Cp[InSz], InWords*sizeof(In));
 		OutWords = Strlen(out);
 		return out != NULL;
@@ -297,7 +297,7 @@ bool StringConvert(Out *&out, ssize_t &OutWords, const In *in, ssize_t InLen)
 			if (attributes)
 				AttrStr = CFAttributedStringCreate(kCFAllocatorDefault, string, attributes);
 			
-			// else LgiAssert(0);
+			// else LAssert(0);
 			
 			CFRelease(string);
 		}
@@ -327,7 +327,7 @@ LDisplayString::LDisplayString(LFont *f, const char *s, ssize_t l, LSurface *pdc
 		d = new GDisplayStringPriv(this);
 		if (Font && Str)
 		{
-			LgiAssert(StrWords >= 0);
+			LAssert(StrWords >= 0);
 			if (StrWords > 0)
 				d->Create(pDC ? pDC->GetPrintContext() : NULL);
 		}
@@ -563,21 +563,21 @@ void LDisplayString::Layout(bool Debug)
 								Py = (AscentF >> FShift) - Fnt->glyph->bitmap_top;
 							}
 							
-							LgiAssert(Px + bmp.width <= Img->X());
+							LAssert(Px + bmp.width <= Img->X());
 							for (int y=0; y<bmp.rows; y++)
 							{
 								uint8_t *in = bmp.buffer + (y * bmp.pitch);
 								uint8_t *out = (*Img)[Py+y];
 								if (out)
 								{
-									LgiAssert(Px+Skip >= 0);
+									LAssert(Px+Skip >= 0);
 									out += Px+Skip;
 									memcpy(out, in+Skip, bmp.width-Skip);
 								}
 								/*
 								else
 								{
-									LgiAssert(!"No scanline?");
+									LAssert(!"No scanline?");
 									break;
 								}
 								*/
@@ -689,7 +689,7 @@ void LDisplayString::Layout(bool Debug)
 
 			if (AttrStr)
 			{
-				LgiAssert(!Hnd);
+				LAssert(!Hnd);
 				Hnd = CTLineCreateWithAttributedString(AttrStr);
 				if (Hnd)
 				{
@@ -905,7 +905,7 @@ int LDisplayString::GetDrawOffset()
 void LDisplayString::SetDrawOffset(int Px)
 {
 	if (LaidOut)
-		LgiAssert(!"No point setting TabOrigin after string is laid out.\n");
+		LAssert(!"No point setting TabOrigin after string is laid out.\n");
 	DrawOffsetF = Px << FShift;
 }
 
@@ -1124,7 +1124,7 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 			
 				// 'utf16' is in UTF-16, and the API needs to return a UTF-32 index...
 				// So convert between the 2 here...
-				LgiAssert(Str != NULL);
+				LAssert(Str != NULL);
 				int utf32 = 0;
 				for (int i=0; Str[i] && i<utf16;)
 				{
@@ -1154,7 +1154,7 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 	
 	#elif defined(LGI_SDL)
 	
-		LgiAssert(!"Impl me");
+		LAssert(!"Impl me");
 	
 	#else // This case is for Win32 and Haiku.
 	
@@ -1401,7 +1401,7 @@ bool CompositeText8Alpha(LSurface *Out, LSurface *In, LFont *Font, int px, int p
 		if (!i) return false;
 		uint8_t *e = i + Clip.DstClip.X();
 
-		LgiAssert((uint8_t*)d >= StartOfBuffer);
+		LAssert((uint8_t*)d >= StartOfBuffer);
 		
 		if (Font->Transparent())
 		{
@@ -1442,7 +1442,7 @@ bool CompositeText8Alpha(LSurface *Out, LSurface *In, LFont *Font, int px, int p
 			}
 		}
 
-		LgiAssert((uint8_t*)d <= EndOfBuffer);
+		LAssert((uint8_t*)d <= EndOfBuffer);
 	}
 	
 	return true;
@@ -1510,7 +1510,7 @@ bool CompositeText8NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int
 		uint8_t *e = i + Clip.DstClip.X();
 		LRgba32 *src;
 
-		LgiAssert((uint8_t*)dst >= StartOfBuffer);
+		LAssert((uint8_t*)dst >= StartOfBuffer);
 		
 		if (Font->Transparent())
 		{
@@ -1552,7 +1552,7 @@ bool CompositeText8NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int
 			}
 		}
 
-		LgiAssert((uint8_t*)dst <= EndOfBuffer);
+		LAssert((uint8_t*)dst <= EndOfBuffer);
 	}
 	
 	return true;
@@ -1616,7 +1616,7 @@ bool CompositeText5NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int
 		if (!i) return false;
 		uint8_t *e = i + Clip.DstClip.X();
 
-		LgiAssert((uint8_t*)dst >= StartOfBuffer);
+		LAssert((uint8_t*)dst >= StartOfBuffer);
 		
 		if (Font->Transparent())
 		{
@@ -1675,7 +1675,7 @@ bool CompositeText5NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int
 			}
 		}
 		
-		LgiAssert((uint8_t*)dst <= EndOfBuffer);
+		LAssert((uint8_t*)dst <= EndOfBuffer);
 	}
 	
 	return true;
@@ -1737,7 +1737,7 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 			DspStrCase(Abgr32, 8Alpha)
 			default:
 				LgiTrace("%s:%i - LDisplayString::Draw Unsupported colour space.\n", _FL);
-				// LgiAssert(!"Unsupported colour space.");
+				// LAssert(!"Unsupported colour space.");
 				break;
 			
 			#undef DspStrCase
@@ -1761,7 +1761,7 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 		if (VisibleTab)
 		{
 			cWhitespace = Font->WhitespaceColour();
-			LgiAssert(cWhitespace.IsValid());
+			LAssert(cWhitespace.IsValid());
 		}
 
 		for (int i=0; i<Info.Length(); i++)
@@ -1836,7 +1836,7 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 					{
 						// Draw the character(s)
 						LColour Fg = f->Fore();
-						LgiAssert(Fg.IsValid());
+						LAssert(Fg.IsValid());
 						f->_Draw(pDC, px, py, Info[i].Str, Info[i].Len, &b, Fg);
 						
 						if (VisibleTab)
@@ -1914,7 +1914,7 @@ int LDisplayString::GetDrawOffsetF()
 void LDisplayString::SetDrawOffsetF(int Fpx)
 {
 	if (LaidOut)
-		LgiAssert(!"No point setting TabOrigin after string is laid out.\n");
+		LAssert(!"No point setting TabOrigin after string is laid out.\n");
 	DrawOffsetF = Fpx;
 }
 
@@ -1960,7 +1960,7 @@ void LDisplayString::FDraw(LSurface *pDC, int fx, int fy, LRect *frc, bool Debug
 		Gtk::cairo_t *cr = pDC->Handle();
 		if (!cr)
 		{
-			LgiAssert(!"Can't get cairo.");
+			LAssert(!"Can't get cairo.");
 			return;
 		}
 
@@ -2049,7 +2049,7 @@ void LDisplayString::FDraw(LSurface *pDC, int fx, int fy, LRect *frc, bool Debug
 				b.Fnt->Back(Font->Back());
 				b.Fnt->_Draw(pDC, 0, 0, b.Str, b.Bytes, NULL, f);
 			}
-			else LgiAssert(0);
+			else LAssert(0);
 			
 			cairo_translate(cr, Bx, 0);
 		}

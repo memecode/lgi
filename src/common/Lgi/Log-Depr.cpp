@@ -79,7 +79,7 @@ RLogView::RLogView(GLog *log)
 int RLogView::GetScreenItems()
 {
 	LRect Client = GetClient();
-	int y = SysFont->GetHeight();
+	int y = LSysFont->GetHeight();
 	return Client.Y() / y;
 }
 
@@ -159,10 +159,10 @@ void RLogView::OnPaint(LSurface *pDC)
 
 	if (Log && r.Valid())
 	{
-		SysFont->Back(L_WORKSPACE);
-		SysFont->Transparent(false);
+		LSysFont->Back(L_WORKSPACE);
+		LSysFont->Transparent(false);
 
-		int y = SysFont->GetHeight();
+		int y = LSysFont->GetHeight();
 		int Screen = GetScreenItems();
 		int Index = MAX((VScroll) ? (int)VScroll->Value() : 0, 0);
 		int n = GetTotalItems() - 1;
@@ -178,7 +178,7 @@ void RLogView::OnPaint(LSurface *pDC)
 		{
 			LRect t;
 
-			SysFont->Fore(e->c);
+			LSysFont->Fore(e->c);
 
 			if (TopDown())
 			{
@@ -199,13 +199,13 @@ void RLogView::OnPaint(LSurface *pDC)
 				t.Set(r.x1, r.y2-y+1, r.x1 + SplitPos, r.y2);
 			}
 
-			LDisplayString ds(SysFont, e->Desc);
+			LDisplayString ds(LSysFont, e->Desc);
 			ds.Draw(pDC, t.x1, t.y1, &t);
 			t.x1 = t.x2+1;
 			t.x2 = r.x2;
 			if (ValidStr(e->Text))
 			{
-				LDisplayString ds(SysFont, e->Text);
+				LDisplayString ds(LSysFont, e->Text);
 				ds.Draw(pDC, t.x1, t.y1, &t);
 			}
 			else

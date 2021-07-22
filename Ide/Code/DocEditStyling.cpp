@@ -204,7 +204,7 @@ int DocEditStyling::Main()
 			auto r = View->PostEvent(M_STYLING_DONE);
 			if (ParentState != KExiting)
 			{
-				LgiAssert(r);
+				LAssert(r);
 			}
 		}
 		else
@@ -1126,7 +1126,7 @@ void DocEditStyling::AddKeywords(const char **keys, bool IsType)
 		for (const char *c = *k; *c && n; c++)
 		{
 			int idx = n->Map(*c);
-			LgiAssert(idx >= 0);
+			LAssert(idx >= 0);
 			if (!n->Next[idx])
 				n->Next[idx] = new Node;
 			n = n->Next[idx];

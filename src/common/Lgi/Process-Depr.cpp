@@ -315,13 +315,13 @@ public:
 
 	operator char *()
 	{
-		LgiAssert(!WinNT);
+		LAssert(!WinNT);
 		return n;
 	}
 
 	operator char16 *()
 	{
-		LgiAssert(WinNT);
+		LAssert(WinNT);
 		return w;
 	}
 
@@ -350,7 +350,7 @@ bool GProcess::Terminate()
 	#if defined(WIN32)
 	return TerminateProcess(d->Pid, -1) != 0;
 	#else
-	LgiAssert(0);
+	LAssert(0);
 	return false;
 	#endif
 }

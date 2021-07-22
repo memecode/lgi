@@ -49,7 +49,7 @@ public:
 			}
 			default:
 			{
-				LgiAssert(!"impl me.");
+				LAssert(!"impl me.");
 				break;
 			}
 		}
@@ -72,7 +72,7 @@ public:
 			}
 			default:
 			{
-				LgiAssert(!"impl me.");
+				LAssert(!"impl me.");
 				break;
 			}
 		}
@@ -289,7 +289,7 @@ public:
 				AlphaCase(Bgra32);
 
 				default:
-					LgiAssert(!"Impl me.");
+					LAssert(!"Impl me.");
 					break;
 			}
 		}

@@ -106,13 +106,13 @@ int LDialog::DoModal(OsView OverrideParent)
 {
 	d->ModalStatus = -1;
 	d->IsModal = true;
-	d->PrevWindow = LgiApp->AppWnd;	
+	d->PrevWindow = LAppInst->AppWnd;	
 	AttachChildren();
 	if (d->PrevWindow)
 		d->PrevWindow->PushWindow(this);
 	else
-		LgiApp->PushWindow(this);
-	LgiApp->Run();
+		LAppInst->PushWindow(this);
+	LAppInst->Run();
 	if (d->IsModal)
 	{
 		d->IsModal = false;
@@ -128,12 +128,12 @@ void LDialog::EndModal(int Code)
 	{
 		d->IsModal = false;
 		d->ModalStatus = Code;
-		LgiApp->Exit();
+		LAppInst->Exit();
 		d->PrevWindow->PopWindow();
 	}
 	else
 	{
-		LgiAssert(!"Not a modal dialog");
+		LAssert(!"Not a modal dialog");
 	}
 }
 
@@ -178,7 +178,7 @@ GMessage::Result LControl::OnEvent(GMessage *Msg)
 
 LPoint LControl::SizeOfStr(const char *Str)
 {
-	int y = SysFont->GetHeight();
+	int y = LSysFont->GetHeight();
 	LPoint Pt(0, 0);
 
 	if (Str)
@@ -189,7 +189,7 @@ LPoint LControl::SizeOfStr(const char *Str)
 			e = strchr(s, '\n');
 			int Len = e ? (int)e-(int)s : strlen(s);
 
-			LDisplayString ds(SysFont, s, Len);
+			LDisplayString ds(LSysFont, s, Len);
 			Pt.x = MAX(Pt.x, ds.X());
 			Pt.y += y;
 		}
@@ -357,11 +357,11 @@ public:
 				LViewI *n = Bmp->GetNotify() ? Bmp->GetNotify() : Bmp->GetParent();
 				if (n)
 				{
-					int Start = LgiCurrentTime();
+					int Start = LCurrentTime();
 					while (!n->Handle())
 					{
 						LgiSleep(100);
-						if (LgiCurrentTime() - Start > 2000)
+						if (LCurrentTime() - Start > 2000)
 						{
 							break;
 						}

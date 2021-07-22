@@ -139,7 +139,7 @@ uint32_t LStringLayout::PrevChar(char *s)
 
 LFont *LStringLayout::GetBaseFont()
 {
-	return FontCache && FontCache->GetDefaultFont() ? FontCache->GetDefaultFont() : SysFont;
+	return FontCache && FontCache->GetDefaultFont() ? FontCache->GetDefaultFont() : LSysFont;
 }
 
 void LStringLayout::SetBaseFont(LFont *f)
@@ -173,8 +173,8 @@ void LStringLayout::DoPreLayout(int32 &MinX, int32 &MaxX)
 	for (auto Run: Text)
 	{
 		char *s = Run->Text;
-		LFont *f = FontCache ? FontCache->GetFont(Run) : SysFont;
-		LgiAssert(f != NULL);
+		LFont *f = FontCache ? FontCache->GetFont(Run) : LSysFont;
+		LAssert(f != NULL);
 
 		char *Start = s;
 		while (*s)
@@ -210,7 +210,7 @@ void LStringLayout::DoPreLayout(int32 &MinX, int32 &MaxX)
 				e = LSeekUtf8(e, 1);
 				if (e == cur) // sanity check...
 				{
-					LgiAssert(!"LSeekUtf8 broke.");
+					LAssert(!"LSeekUtf8 broke.");
 					break;
 				}
 			}
@@ -280,7 +280,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 	LFont *f = GetBaseFont();
 	if (!f || !Text.Length() || Width <= 0)
 	{
-		Min.y = Max.y = MAX((f ? f : SysFont)->GetHeight(), MinYSize);
+		Min.y = Max.y = MAX((f ? f : LSysFont)->GetHeight(), MinYSize);
 		return false;
 	}
 
@@ -448,7 +448,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 								ssize_t Idx = Text.IndexOf(b.Run);
 								if (Idx < 0)
 								{
-									LgiAssert(0);
+									LAssert(0);
 									return false;
 								}
 

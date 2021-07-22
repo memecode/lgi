@@ -49,7 +49,7 @@ public:
 		// Get options file
 		LString Status;
 		char Opt[MAX_PATH];
-		if (LgiApp->GetOption("o", Opt, sizeof(Opt)))
+		if (LAppInst->GetOption("o", Opt, sizeof(Opt)))
 		{
 			if (LFileExists(Opt))
 				Status = Opt;
@@ -259,7 +259,7 @@ bool GDocApp<OptionsFmt>::SetLanguage(char *LangId)
 	LVariant v;
 	GetOptions()->SetValue(_LangOptsName, v = LangId);
 	GetOptions()->SerializeFile(true);
-	LgiCloseApp();
+	LCloseApp();
 	LExecute(LGetExeFile());
 	return true;
 }
@@ -318,7 +318,7 @@ bool GDocApp<OptionsFmt>::_DoSerialize(bool Write)
 		if (_LangOptsName &&
 			Options->GetValue(_LangOptsName, Lang))
 		{
-			LgiApp->SetConfig("language", Lang.Str());
+			LAppInst->SetConfig("language", Lang.Str());
 		}
 
 		// read misc options
@@ -364,7 +364,7 @@ bool GDocApp<OptionsFmt>::_Create(LIcon IconResource)
 	}
 	else
 	{
-		LgiAssert(!"Window create failed.");
+		LAssert(!"Window create failed.");
 		return false;
 	}
 
@@ -376,7 +376,7 @@ bool GDocApp<OptionsFmt>::_Destroy()
 {
 	// Save options
 	_DoSerialize(true);
-	LgiApp->AppWnd = 0;
+	LAppInst->AppWnd = 0;
 	return true;
 }
 
@@ -635,7 +635,7 @@ int GDocApp<OptionsFmt>::OnCommand(int Cmd, int Event, OsView Window)
 		}
 		case IDM_EXIT:
 		{
-			LgiCloseApp();
+			LCloseApp();
 			break;
 		}
 	}

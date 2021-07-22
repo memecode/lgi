@@ -47,7 +47,7 @@ public:
 			PostSink(M_IMAGE_SET_SURFACE, (GMessage::Param)Img, (GMessage::Param)In.Release());
 		}
 
-		int64 Now = LgiCurrentTime();
+		int64 Now = LCurrentTime();
 		if (Now - Ts > TIMEOUT_LOAD_PROGRESS)
 		{
 			Ts = Now;
@@ -64,7 +64,7 @@ public:
 			LgiSleep(1);
 		}
 
-		LgiAssert(!"PostSink failed.");
+		LAssert(!"PostSink failed.");
 		return false;
 	}
 
@@ -108,7 +108,7 @@ public:
 
 				Filter->SetProgress(this);
 
-				Ts = LgiCurrentTime();
+				Ts = LCurrentTime();
 				GFilter::IoStatus Status = Filter->ReadImage(Img, In);
 				if (Status != GFilter::IoSuccess)
 				{
@@ -150,7 +150,7 @@ public:
 				#endif
 				if (!Stream)
 				{
-					LgiAssert(!"No stream.");
+					LAssert(!"No stream.");
 					return PostSink(M_IMAGE_ERROR);
 				}
 				
@@ -174,7 +174,7 @@ public:
 
 				Filter->SetProgress(this);
 
-				Ts = LgiCurrentTime();
+				Ts = LCurrentTime();
 				GFilter::IoStatus Status = Filter->ReadImage(Img, Mem);
 				if (Status != GFilter::IoSuccess)
 				{
@@ -298,7 +298,7 @@ public:
 				LSurface *Img = (LSurface*)Msg->A();
 				if (!Img)
 				{
-					LgiAssert(!"No image.");
+					LAssert(!"No image.");
 					break;
 				}
 
@@ -317,7 +317,7 @@ public:
 				LSurface *Img = (LSurface*)Msg->A();
 				if (!Img)
 				{
-					LgiAssert(!"No image.");
+					LAssert(!"No image.");
 					break;
 				}
 
@@ -380,10 +380,10 @@ LRichTextPriv::ImageBlock::ImageBlock(const ImageBlock *Copy) : Block(Copy->d)
 
 LRichTextPriv::ImageBlock::~ImageBlock()
 {
-	LgiAssert(ThreadBusy == 0);
+	LAssert(ThreadBusy == 0);
 	if (ThreadHnd)
 		PostThreadEvent(ThreadHnd, M_CLOSE);
-	LgiAssert(Cursors == 0);
+	LAssert(Cursors == 0);
 }
 
 bool LRichTextPriv::ImageBlock::IsValid()
@@ -439,7 +439,7 @@ bool LRichTextPriv::ImageBlock::SetImage(LAutoPtr<LSurface> Img)
 		if (PostThreadEvent(GetThreadHandle(), M_IMAGE_COMPRESS, (GMessage::Param)SourceImg.Get(), (GMessage::Param)&si))
 			UpdateThreadBusy(_FL, 1);
 	}
-	else LgiAssert(!"ResizeIdx should be valid.");
+	else LAssert(!"ResizeIdx should be valid.");
 	
 	return true;
 }
@@ -487,7 +487,7 @@ bool LRichTextPriv::ImageBlock::Load(const char *Src)
 		}
 		else if (Result == GDocumentEnv::LoadDeferred)
 		{
-			LgiAssert(!"Impl me?");
+			LAssert(!"Impl me?");
 		}
 		
 		DeleteObj(j);
@@ -495,7 +495,7 @@ bool LRichTextPriv::ImageBlock::Load(const char *Src)
 	else if (LFileExists(Source))
 	{
 		FileName = Source;
-		FileMimeType = LgiApp->GetFileMimeType(Source);
+		FileMimeType = LAppInst->GetFileMimeType(Source);
 	}
 	else
 		return false;
@@ -564,7 +564,7 @@ void LRichTextPriv::ImageBlock::SetStyle(LNamedStyle *s)
 	{
 		LFont *Fnt = d->GetFont(s);
 		LayoutDirty = true;
-		LgiAssert(Fnt != NULL);
+		LAssert(Fnt != NULL);
 
 		Margin.x1 = Style->MarginLeft().ToPx(Pos.X(), Fnt);
 		Margin.y1 = Style->MarginTop().ToPx(Pos.Y(), Fnt);
@@ -623,14 +623,14 @@ bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia
 				Cm.FileName.Printf("img%u.bmp", Idx);
 			else
 			{
-				LgiAssert(!"Unknown image mime type?");
+				LAssert(!"Unknown image mime type?");
 				Cm.FileName.Printf("img%u", Idx);
 			}
 		}
 		else if (ValidSourceFile)
 		{
 			// Attach the original file...
-			Cm.MimeType = LgiApp->GetFileMimeType(Source);
+			Cm.MimeType = LAppInst->GetFileMimeType(Source);
 			Cm.FileName = LGetLeaf(Source);
 
 			LFile *f = new LFile;
@@ -650,11 +650,11 @@ bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia
 		else
 		{
 			LgiTrace("%s:%i - No source or JPEG for saving image to HTML.\n", _FL);
-			LgiAssert(!"No source file or compressed image.");
+			LAssert(!"No source file or compressed image.");
 			return false;
 		}
 
-		LgiAssert(Cm.MimeType != NULL);
+		LAssert(Cm.MimeType != NULL);
 
 		if (DisplayImg &&
 			SourceImg &&
@@ -673,7 +673,7 @@ bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia
 				s.Print("%s", Cm.FileName.Get());
 			s.Print("\">\n");
 
-			LgiAssert(Cm.Valid());
+			LAssert(Cm.Valid());
 			return true;
 		}
 	}
@@ -1104,7 +1104,7 @@ void LRichTextPriv::ImageBlock::UpdateThreadBusy(const char *File, int Line, int
 		#if LOADER_THREAD_LOGGING
 		LgiTrace("%s:%i - Error: ThreadBusy=%i\n", File, Line, ThreadBusy, ThreadBusy + Off);
 		#endif
-		LgiAssert(0);
+		LAssert(0);
 	}
 }
 
@@ -1131,7 +1131,7 @@ GMessage::Result LRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_COMPRESS, (GMessage::Param)SourceImg.Get(), (GMessage::Param)&si))
 						UpdateThreadBusy(_FL, 1);
 					else
-						LgiAssert(!"PostThreadEvent failed.");
+						LAssert(!"PostThreadEvent failed.");
 				}
 			}
 			else switch (Msg->A())
@@ -1173,7 +1173,7 @@ GMessage::Result LRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 			ScaleInf *Si = (ScaleInf*)Msg->B();
 			if (!Jpg || !Si)
 			{
-				LgiAssert(0);
+				LAssert(0);
 				#if LOADER_THREAD_LOGGING
 				LgiTrace("%s:%i - Error: M_IMAGE_COMPRESS bad arg\n", _FL);
 				#endif
@@ -1215,7 +1215,7 @@ GMessage::Result LRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 				for (int i=0; i<t.Length(); i++)
 					d->View->NeedsCapability(t[i]);
 			}
-			else LgiAssert(!"Missing component name.");
+			else LAssert(!"Missing component name.");
 			break;
 		}
 		case M_IMAGE_SET_SURFACE:

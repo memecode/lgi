@@ -127,7 +127,7 @@ public:
 	OsApplication(int Args, char **Arg);
 	~OsApplication();
 	
-	static OsApplication *GetInst() { LgiAssert(Inst != NULL); return Inst; }
+	static OsApplication *GetInst() { LAssert(Inst != NULL); return Inst; }
 };
 
 // Threads
@@ -185,7 +185,7 @@ LgiFunc void LgiSleep(uint32 i);
 #define _vsnprintf					vsnprintf
 
 /// Process any pending messages in the applications message que and then return.
-#define LgiYield()					LgiApp->Run(false)
+#define LgiYield()					LAppInst->Run(false)
 
 #define K_CHAR						0x0
 

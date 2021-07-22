@@ -115,7 +115,7 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 			if (Res == 0)
 			{
 				auto Err = GetLastError();
-				LgiAssert(!"MessageBoxA failed.");
+				LAssert(!"MessageBoxA failed.");
 			}
 		}
 		else
@@ -126,7 +126,7 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 			if (Res == 0)
 			{
 				auto Err = GetLastError();
-				LgiAssert(!"MessageBoxW failed.");
+				LAssert(!"MessageBoxW failed.");
 			}
 			DeleteArray(t);
 			DeleteArray(m);
@@ -185,7 +185,7 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 			else if (r == NSAlertSecondButtonReturn)
 				return IDOK;
 			else
-				LgiAssert(0);
+				LAssert(0);
 			break;
 		}
 		case MB_YESNO:
@@ -195,7 +195,7 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 			else if (r == NSAlertSecondButtonReturn)
 				return IDYES;
 			else
-				LgiAssert(0);
+				LAssert(0);
 			break;
 		}
 		case MB_YESNOCANCEL:
@@ -207,7 +207,7 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 			else if (r == NSAlertThirdButtonReturn)
 				return IDYES;
 			else
-				LgiAssert(0);
+				LAssert(0);
 			break;
 		}
 	}
@@ -274,7 +274,7 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 	
 	#else // Lgi only controls (used for Linux + Mac)
 
-	if (Str && LgiApp)
+	if (Str && LAppInst)
 	{
 		GMsgDlg Dlg;
 		Dlg.SetParent(Parent);
@@ -323,7 +323,7 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 
 		int BtnsX = (int) ((Btns.Length() * BtnX) + ((Btns.Length()-1) * 10));
 		int MaxX = MAX(BtnsX, Text->X());
-		LRect p(0, 0, MaxX + 30, Text->Y() + 30 + BtnY + LgiApp->GetMetric(LGI_MET_DECOR_Y) );
+		LRect p(0, 0, MaxX + 30, Text->Y() + 30 + BtnY + LAppInst->GetMetric(LGI_MET_DECOR_Y) );
 		Dlg.SetPos(p);
 		Dlg.MoveToCenter();
 

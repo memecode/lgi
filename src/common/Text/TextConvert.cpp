@@ -223,7 +223,7 @@ char *DecodeRfc2047(char *Str)
 		else
 		{
 			// Last segment of string...
-			LgiAssert(*e == 0);
+			LAssert(*e == 0);
 			if (e > s)
 				p.Write(s, e - s);
 			break;

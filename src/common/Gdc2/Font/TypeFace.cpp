@@ -37,7 +37,7 @@ void LTypeFace::Face(const char *s)
 	{
 		DeleteArray(d->_Face);
 		d->_Face = NewStr(s);
-		LgiAssert(d->_Face != NULL);
+		LAssert(d->_Face != NULL);
 		_OnPropChange(true);
 	}
 }
@@ -151,7 +151,7 @@ void LTypeFace::Colour(LSystemColour Fore, LSystemColour Back)
 
 void LTypeFace::Colour(LColour Fore, LColour Back)
 {
-	LgiAssert(Fore.IsValid());
+	LAssert(Fore.IsValid());
 	d->_Fore = Fore;
 	d->_Back = Back;
 	// Transparent(Back.Transparent());
@@ -187,7 +187,7 @@ int LTypeFace::PointSize()
 	if (d->_Size.Type == LCss::LenPx)
 		return (int) (d->_Size.Value * 72 / LgiScreenDpi());
 
-	LgiAssert(!"What now?");
+	LAssert(!"What now?");
 	return 0;
 }
 

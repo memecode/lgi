@@ -387,7 +387,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 								ProcessId = Pid;
 						#else
 
-							LgiAssert(!"Impl me.");
+							LAssert(!"Impl me.");
 
 						#endif
 					}
@@ -443,7 +443,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 			if (bytes == 6)
 			{
 				AtPrompt = !_strnicmp(Line, sPrompt, bytes);
-				// LgiTrace("%I64i: AtPrompt=%i\n", LgiCurrentTime(), AtPrompt);
+				// LgiTrace("%I64i: AtPrompt=%i\n", LCurrentTime(), AtPrompt);
 				if (AtPrompt)
 				{
 					if (Running ^ !AtPrompt)
@@ -554,10 +554,10 @@ class Gdb : public GDebugger, public LThread, public Callback
 	{
 		if (State == Init)
 		{
-			uint64 Start = LgiCurrentTime();
+			uint64 Start = LCurrentTime();
 			while (State == Init)
 			{
-				uint64 Now = LgiCurrentTime();
+				uint64 Now = LCurrentTime();
 				if (Now - Start < 5000)
 				{
 					LgiSleep(10);
@@ -570,15 +570,15 @@ class Gdb : public GDebugger, public LThread, public Callback
 			}
 		}
 
-		uint64 Start = LgiCurrentTime();
+		uint64 Start = LCurrentTime();
 		uint64 Now = Start;
 		while (!AtPrompt &&
 				Now - Start < 2000 &&
 				State == Looping)
 		{
-			Now = LgiCurrentTime();
+			Now = LCurrentTime();
 			LgiSleep(50);
-			uint64 After = LgiCurrentTime();
+			uint64 After = LCurrentTime();
 			if (After - Now > 65)
 			{
 				printf("Sleep took=%i\n", (int)(After - Now));
@@ -599,7 +599,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 		if (!ValidStr(c))
 		{
 			LgiTrace("%s:%i - Not a valid command.\n", _FL);
-			LgiAssert(!"Not a valid command.");
+			LAssert(!"Not a valid command.");
 			return false;
 		}
 		
@@ -620,7 +620,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 		OutLines = Arr;		
 		AtPrompt = false;
 
-		// uint64 Start = LgiCurrentTime();
+		// uint64 Start = LCurrentTime();
 		auto Wr = Sp->Write(str, ch);
 		if (Wr != ch)
 			return false;
@@ -628,14 +628,14 @@ class Gdb : public GDebugger, public LThread, public Callback
 		if (OutStream || OutLines)
 		{	
 			/*	
-			uint64 Wait0 = LgiCurrentTime();
+			uint64 Wait0 = LCurrentTime();
 			*/
 			WaitPrompt();
 			/*
-			uint64 Wait1 = LgiCurrentTime();
+			uint64 Wait1 = LCurrentTime();
 			LgiTrace("Cmd timing "LGI_PrintfInt64" "LGI_PrintfInt64"\n", Wait0-Start, Wait1-Wait0);
 			*/
-			LgiAssert(OutStream == NULL && OutLines == NULL);
+			LAssert(OutStream == NULL && OutLines == NULL);
 		}
 		
 		return true;
@@ -787,7 +787,7 @@ public:
 
 	bool GetFrame(int &Frame, LAutoString &File, int &Line)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 	
@@ -1002,11 +1002,11 @@ public:
 		}
 		
 		// Make sure the child 'gdb' is running...
-		uint64 Start = LgiCurrentTime();
+		uint64 Start = LCurrentTime();
 		while (State == Init)
 		{
 			LgiSleep(5);
-			if (LgiCurrentTime()-Start > 3000)
+			if (LCurrentTime()-Start > 3000)
 			{
 				LgiTrace("%s:%i - SetBreakPoint init wait failed...\n", _FL);
 				return false;
@@ -1037,11 +1037,11 @@ public:
 			return false;
 
 		// Make sure the child 'gdb' is running...
-		uint64 Start = LgiCurrentTime();
+		uint64 Start = LCurrentTime();
 		while (State == Init)
 		{
 			LgiSleep(5);
-			if (LgiCurrentTime()-Start > 3000)
+			if (LCurrentTime()-Start > 3000)
 			{
 				LgiTrace("%s:%i - SetBreakPoint init wait failed...\n", _FL);
 				return false;
@@ -1486,13 +1486,13 @@ public:
 	
 	bool GetLocation(LAutoString &File, int &Line)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 	
 	bool SetLocation(const char *File, int Line)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 
@@ -1547,7 +1547,7 @@ public:
 		LogMsg("%s:%i - SIGINT failed with %i(0x%x): %s (pid=%i)\n", _FL, ErrNo, ErrNo, LErrorCodeToString(ErrNo).Get(), ProcessId);
 		return false;
 		#else
-		LgiAssert(!"Impl me");
+		LAssert(!"Impl me");
 		return false;
 		#endif		
 	}

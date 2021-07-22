@@ -1182,14 +1182,14 @@ bool ResFactory::Res_Read(ResObject *Obj, LXmlTag *Tag, ResReadCtx &Ctx)
 {
 	if (!Obj)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 
 	ResObjectImpl *Impl = Obj->GetObjectImpl(this);
 	if (!Impl)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 
@@ -1205,9 +1205,9 @@ bool ResFactory::Res_Write(ResObject *Obj, LXmlTag *Tag)
 		{
 			return Impl->Res_Write(Tag) >= ResObjectImpl::SOk;
 		}
-		else LgiAssert(0);
+		else LAssert(0);
 	}
-	else LgiAssert(0);
+	else LAssert(0);
 	
 	return false;
 }
@@ -1218,7 +1218,7 @@ ResObjectImpl::ResObjectImpl(ResFactory *factory, ResObject *object)
 	Object = object;
 	Factory = factory;
 
-	LgiAssert(Object && (NativeInt)Object != 0xcdcdcdcd);
+	LAssert(Object && (NativeInt)Object != 0xcdcdcdcd);
 }
 
 ResObjectImpl *ResObjectImpl::CreateCtrl(LXmlTag *Tag, ResObject *Parent)
@@ -1231,7 +1231,7 @@ ResObjectImpl::SStatus ResObjectImpl::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 {
 	if (!Tag)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return SError;
 	}
 
@@ -1258,7 +1258,7 @@ ResObjectImpl::SStatus ResObjectImpl::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 	else
 	{
 		// Custom control needs to inherit from 'ResObject'
-		LgiAssert(0);
+		LAssert(0);
 	}
 
 	return SError;
@@ -1293,7 +1293,7 @@ bool ResObjectImpl::Res_SetStrRef(LXmlTag *t, ResReadCtx *Ctx)
 		return Factory->Res_SetStrRef(Object, atoi(s), Ctx);
 	}
 
-	LgiAssert(0);
+	LAssert(0);
 	return false;
 }
 
@@ -1407,7 +1407,7 @@ ResObjectImpl::SStatus ResDialogObj::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 {
 	if (!Tag)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return SError;
 	}
 
@@ -1424,7 +1424,7 @@ ResObjectImpl::SStatus ResDialogObj::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 
 	if (!Tag->IsTag(Res_Dialog))
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return SError;
 	}
 
@@ -1452,7 +1452,7 @@ ResObjectImpl::SStatus ResDialogObj::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 		else
 		{
 			LgiTrace("%s:%i - failed the parse the '%s' tag.\n", t->GetTag());
-			LgiAssert(0);
+			LAssert(0);
 			return SError;
 		}
 	}
@@ -1479,7 +1479,7 @@ ResObjectImpl::SStatus ResDialogObj::Res_Write(LXmlTag *t)
 				}
 				else
 				{
-					LgiAssert(0);
+					LAssert(0);
 					DeleteObj(a);
 					
 					LgiTrace("%s:%i - Res_Write returned %i\n", _FL, r);
@@ -1801,7 +1801,7 @@ ResObjectImpl::SStatus ResGroup::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 		}
 		else
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return SError;
 		}
 	}
@@ -1835,7 +1835,7 @@ ResObjectImpl::SStatus ResTab::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 {
 	if (!Tag || !Tag->IsTag(Res_Tab))
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return SError;
 	}
 
@@ -1847,7 +1847,7 @@ ResObjectImpl::SStatus ResTab::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 		ResObjectImpl *Ctrl = CreateCtrl(t, Object);
 		if (!Ctrl)
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return SError;
 		}
 		
@@ -1896,7 +1896,7 @@ ResObjectImpl::SStatus ResTabView::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 {
 	if (!Tag || !Tag->IsTag(Res_TabView))
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return SError;
 	}
 
@@ -1907,14 +1907,14 @@ ResObjectImpl::SStatus ResTabView::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 	{
 		if (!t->IsTag(Res_Tab))
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return SError;
 		}
 
 		ResObjectImpl *Tab = CreateCtrl(t, Object);
 		if (!Tab)
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return SError;
 		}
 
@@ -1953,7 +1953,7 @@ ResObjectImpl::SStatus ResColumn::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 {
 	if (!Tag || !Tag->IsTag(Res_Column))
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return SError;
 	}
 
@@ -1983,7 +1983,7 @@ ResObjectImpl::SStatus ResListView::Res_Read(LXmlTag *t, ResReadCtx &Ctx)
 {
 	if (!t)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return SError;
 	}
 
@@ -1991,7 +1991,7 @@ ResObjectImpl::SStatus ResListView::Res_Read(LXmlTag *t, ResReadCtx &Ctx)
 	{
 		// auto tag = t->GetTag();
 		// auto obj = Object->GetObjectName();
-		LgiAssert(0);
+		LAssert(0);
 		return SError;
 	}
 
@@ -2010,13 +2010,13 @@ ResObjectImpl::SStatus ResListView::Res_Read(LXmlTag *t, ResReadCtx &Ctx)
 			}
 			else
 			{
-				LgiAssert(0);
+				LAssert(0);
 				return SError;
 			}
 		}
 		else
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return SError;
 		}
 	}
@@ -2050,7 +2050,7 @@ ResObjectImpl::SStatus ResCustom::Res_Read(LXmlTag *t, ResReadCtx &Ctx)
 {
 	if (!t || !t->IsTag(Res_Custom))
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return SError;
 	}
 
@@ -2078,7 +2078,7 @@ ResObjectImpl::SStatus ResControlTree::Res_Read(LXmlTag *t, ResReadCtx &Ctx)
 {
 	if (!t || stricmp(t->GetTag(), Res_ControlTree))
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return SError;
 	}
 
@@ -2088,7 +2088,7 @@ ResObjectImpl::SStatus ResControlTree::Res_Read(LXmlTag *t, ResReadCtx &Ctx)
 	GDom *d = Factory->Res_GetDom(Object);
 	if (!d)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return SError;
 	}
 
@@ -2102,12 +2102,12 @@ ResObjectImpl::SStatus ResControlTree::Res_Write(LXmlTag *t)
 {
 	ResObjectImpl::SStatus s = ResObjectImpl::Res_Write(t);
 
-	LgiAssert(!t->GetAttr("id"));
+	LAssert(!t->GetAttr("id"));
 
 	GDom *d = Factory->Res_GetDom(Object);
 	if (!d)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return SError;
 	}
 

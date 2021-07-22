@@ -52,7 +52,7 @@ EditTray::EditTray(LTextView3 *ctrl, IdeDoc *doc)
 	FuncBtn.ZOff(-1, -1);
 	SymBtn.ZOff(-1, -1);
 		
-	int Ht = SysFont->GetHeight() + 6;
+	int Ht = LSysFont->GetHeight() + 6;
 	AddView(FileSearch = new LEdit(IDC_FILE_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
 	AddView(FuncSearch = new LEdit(IDC_METHOD_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
 	AddView(SymSearch = new LEdit(IDC_SYMBOL_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
@@ -97,7 +97,7 @@ void EditTray::OnCreate()
 
 int MeasureText(const char *s)
 {
-	LDisplayString Ds(SysFont, s);
+	LDisplayString Ds(LSysFont, s);
 	return Ds.X();
 }
 
@@ -139,34 +139,34 @@ void EditTray::OnPaint(LSurface *pDC)
 	LRect c = GetClient();
 	pDC->Colour(L_MED);
 	pDC->Rectangle();
-	SysFont->Colour(L_TEXT, L_MED);
-	SysFont->Transparent(true);
+	LSysFont->Colour(L_TEXT, L_MED);
+	LSysFont->Transparent(true);
 		
 	LString s;
 	s.Printf("Cursor: %i,%i", Col, Line + 1);
 	{
-		LDisplayString ds(SysFont, s);
+		LDisplayString ds(LSysFont, s);
 		ds.Draw(pDC, TextMsg.x1, TextMsg.y1 + ((c.Y()-TextMsg.Y())/2), &TextMsg);
 	}
 
 	LRect f = FileBtn;
 	LThinBorder(pDC, f, DefaultRaisedEdge);
 	{
-		LDisplayString ds(SysFont, HEADER_BTN_LABEL);
+		LDisplayString ds(LSysFont, HEADER_BTN_LABEL);
 		ds.Draw(pDC, f.x1 + 4, f.y1);
 	}
 
 	f = FuncBtn;
 	LThinBorder(pDC, f, DefaultRaisedEdge);
 	{
-		LDisplayString ds(SysFont, FUNCTION_BTN_LABEL);
+		LDisplayString ds(LSysFont, FUNCTION_BTN_LABEL);
 		ds.Draw(pDC, f.x1 + 4, f.y1);
 	}
 
 	f = SymBtn;
 	LThinBorder(pDC, f, DefaultRaisedEdge);
 	{
-		LDisplayString ds(SysFont, SYMBOL_BTN_LABEL);
+		LDisplayString ds(LSysFont, SYMBOL_BTN_LABEL);
 		ds.Draw(pDC, f.x1 + 4, f.y1);
 	}
 }
@@ -200,7 +200,7 @@ void EditTray::OnHeaderList(LMouse &m)
 			{
 				// Construct the menu
 				LHashTbl<StrKey<char>, int> Map;
-				int DisplayLines = GdcD->Y() / SysFont->GetHeight();
+				int DisplayLines = GdcD->Y() / LSysFont->GetHeight();
 				if (Headers.Length() > (0.9 * DisplayLines))
 				{
 					LArray<char*> Letters[26];
@@ -240,7 +240,7 @@ void EditTray::OnHeaderList(LMouse &m)
 								{
 									char *h = Letters[i][n];
 									int Id = Map.Find(h);
-									LgiAssert(Id > 0);
+									LAssert(Id > 0);
 									sub->AppendItem(LGetLeaf(h), Id, true);
 								}
 							}
@@ -249,7 +249,7 @@ void EditTray::OnHeaderList(LMouse &m)
 						{
 							char *h = Letters[i][0];
 							int Id = Map.Find(h);
-							LgiAssert(Id > 0);
+							LAssert(Id > 0);
 							s->AppendItem(LGetLeaf(h), Id, true);
 						}
 					}
@@ -260,7 +260,7 @@ void EditTray::OnHeaderList(LMouse &m)
 						{
 							char *h = Other[n];
 							int Id = Map.Find(h);
-							LgiAssert(Id > 0);
+							LAssert(Id > 0);
 							s->AppendItem(LGetLeaf(h), Id, true);
 						}
 					}
@@ -328,8 +328,8 @@ void EditTray::OnFunctionList(LMouse &m)
 		LArray<DefnInfo*> a;					
 		
 		int ScreenHt = GdcD->Y();
-		int ScreenLines = ScreenHt / SysFont->GetHeight();
-		float Ratio = ScreenHt ? (float)(SysFont->GetHeight() * Funcs.Length()) / ScreenHt : 0.0f;
+		int ScreenLines = ScreenHt / LSysFont->GetHeight();
+		float Ratio = ScreenHt ? (float)(LSysFont->GetHeight() * Funcs.Length()) / ScreenHt : 0.0f;
 		bool UseSubMenus = Ratio > 0.9f;
 		int Buckets = UseSubMenus ? (int)(ScreenLines * 0.9) : 1;
 		int BucketSize = MAX(2, (int)Funcs.Length() / Buckets);
@@ -675,10 +675,10 @@ void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LSt
 		InputLen = InputStr.Length();
 
 	LArray<ProjectNode*> Partial;
-	auto Start = LgiCurrentTime();
+	auto Start = LCurrentTime();
 	for (unsigned i=0; i<Nodes.Length(); i++)
 	{
-		if (i % 100 == 0 && LgiCurrentTime() - Start > 400)
+		if (i % 100 == 0 && LCurrentTime() - Start > 400)
 		{
 			break;
 		}
@@ -1091,8 +1091,8 @@ public:
 		if (SleepMs > 0)
 		{
 			// Sleep for a number of milliseconds to allow the file to upload/save to the website
-			uint64 Ts = LgiCurrentTime();
-			while (!Cancel.IsCancelled() && (LgiCurrentTime()-Ts) < SleepMs)
+			uint64 Ts = LCurrentTime();
+			while (!Cancel.IsCancelled() && (LCurrentTime()-Ts) < SleepMs)
 				LgiSleep(1);
 		}
 
@@ -1332,7 +1332,7 @@ void IdeDoc::SearchSymbol()
 {
 	if (!d->Edit || !d->Tray)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return;
 	}
 	

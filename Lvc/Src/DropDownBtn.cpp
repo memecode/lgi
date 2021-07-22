@@ -17,7 +17,7 @@ struct DropDownBtnPriv
 		LViewI *e = NULL;
 		if (View && View->GetParent())
 			View->GetParent()->GetViewById(EditId, e);
-		LgiAssert(e != 0);
+		LAssert(e != 0);
 		return e;
 	}
 };

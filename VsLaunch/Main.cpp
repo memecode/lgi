@@ -139,7 +139,7 @@ public:
 						if (p.IsFile())
 						{
 							LExecute(p, File);
-							LgiCloseApp();
+							LCloseApp();
 						}
 						else Log->Print("\t\tError: The file '%s' doesn't exist.", p.GetFull().Get());
 					}

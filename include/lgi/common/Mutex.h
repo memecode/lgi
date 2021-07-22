@@ -80,15 +80,15 @@ public:
 	public:
 	    Auto(LMutex *s, const char *file, int line)
 	    {
-	        LgiAssert(s != NULL);
+	        LAssert(s != NULL);
 	        Locked = (Sem = s) ? Sem->Lock(File = file, Line = line) : 0;
-			LgiAssert(Locked);
-			LockTs = Locked && s->MaxLockTime > 0 ? LgiCurrentTime() : 0;
+			LAssert(Locked);
+			LockTs = Locked && s->MaxLockTime > 0 ? LCurrentTime() : 0;
 	    }
 
 	    Auto(LMutex *s, int timeout, const char *file, int line)
 	    {
-	        LgiAssert(s != NULL);
+	        LAssert(s != NULL);
 			Sem = s;
 			if (!Sem)
 				Locked = false;
@@ -96,7 +96,7 @@ public:
 				Locked = Sem->LockWithTimeout(timeout, File = file, Line = line);
 			else
 				Locked = Sem->Lock(File = file, Line = line);
-			LockTs = Locked && s->MaxLockTime > 0 ? LgiCurrentTime() : 0;
+			LockTs = Locked && s->MaxLockTime > 0 ? LCurrentTime() : 0;
 	    }
 	    
 	    ~Auto()
@@ -104,7 +104,7 @@ public:
 	        if (Locked) Sem->Unlock();
 			if (LockTs)
 			{
-				uint64_t Now = LgiCurrentTime();
+				uint64_t Now = LCurrentTime();
 				if (Now - LockTs >= Sem->MaxLockTime)
 					LgiTrace(	"Warning: %s locked for %ims (%s:%i)\n",
 								Sem->GetName(),
@@ -148,13 +148,13 @@ public:
 
 		T *operator ->()
 		{
-			LgiAssert(GetLocked());
+			LAssert(GetLocked());
 			return tsi->object;
 		}
 		
 		T *Get()
 		{
-			LgiAssert(GetLocked());
+			LAssert(GetLocked());
 			return tsi->object;
 		}
 	};

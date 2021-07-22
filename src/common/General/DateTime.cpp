@@ -594,7 +594,7 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start,
 	
 	#else
 
-		LgiAssert(!"Not implemented.");
+		LAssert(!"Not implemented.");
 
 	#endif
 
@@ -605,7 +605,7 @@ bool LDateTime::DstToLocal(LArray<GDstInfo> &Dst, LDateTime &dt)
 {
 	if (dt.GetTimeZone())
 	{
-		LgiAssert(!"Should be a UTC date.");
+		LAssert(!"Should be a UTC date.");
 		return true;
 	}
 
@@ -623,7 +623,7 @@ bool LDateTime::DstToLocal(LArray<GDstInfo> &Dst, LDateTime &dt)
 		}
 	}
 
-	LgiAssert(!"No valid DST range for this date.");
+	LAssert(!"No valid DST range for this date.");
 	return false;
 }
 
@@ -918,7 +918,7 @@ bool LDateTime::Get(uint64 &s) const
 
     DWORD Err = GetLastError();
     s = 0;
-    LgiAssert(!"SystemTimeToFileTime failed."); 
+    LAssert(!"SystemTimeToFileTime failed."); 
 	return false;
 	
 	#else
@@ -1080,7 +1080,7 @@ bool LDateTime::SetDate(const char *Str)
 
 			if (_Year < 100)
 			{
-				LgiAssert(_Day < 1000 && _Month < 1000);
+				LAssert(_Day < 1000 && _Month < 1000);
 				if (_Year >= 80)
 					_Year += 1900;
 				else
@@ -1255,7 +1255,7 @@ bool LDateTime::Parse(LString s)
 					}
 					else
 					{
-						LgiAssert(!"Unknown date format?");
+						LAssert(!"Unknown date format?");
 						return false;
 					}
 				}
@@ -1343,7 +1343,7 @@ bool LDateTime::Serialize(ObjProperties *Props, char *Name, bool Write)
 			uint16_t ThouSec;
 		};
 
-		LgiAssert(sizeof(_Date) == 8);
+		LAssert(sizeof(_Date) == 8);
 
 		if (Write)
 		{
@@ -1395,8 +1395,8 @@ int LDateTime::Compare(const LDateTime *Date) const
 	auto DateTs = Date->IsValid() ? Date->Ts() : 0;
 
 	// If these ever fire, the cast to int64_t will overflow
-	LgiAssert((ThisTs & 0x800000000000000) == 0);
-	LgiAssert((DateTs & 0x800000000000000) == 0);
+	LAssert((ThisTs & 0x800000000000000) == 0);
+	LAssert((DateTs & 0x800000000000000) == 0);
 
 	int64_t Diff = (int64_t)ThisTs - DateTs;
 	if (Diff < 0)
@@ -1788,7 +1788,7 @@ bool LDateTime::Decode(const char *In)
 
 	if (!In)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 
@@ -2174,7 +2174,7 @@ bool LDateTime::CallMethod(const char *Name, LVariant *ReturnValue, LArray<LVari
 #define DATE_ASSERT(i) \
 	if (!(i)) \
 	{ \
-		LgiAssert(!"LDateTime unit test failed."); \
+		LAssert(!"LDateTime unit test failed."); \
 		return false; \
 	}
 

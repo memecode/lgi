@@ -80,18 +80,18 @@ public:
 			auto Sz = Size;
 			if (Sz.Type == LCss::SizeLarger)
 			{
-				Sz = SysFont->Size();
+				Sz = LSysFont->Size();
 				Sz.Value++;
 			}
 			else if (Sz.Type == LCss::SizeSmaller)
 			{
-				Sz = SysFont->Size();
+				Sz = LSysFont->Size();
 				Sz.Value--;
 			}
 
 			if (!f->Create(Face, Sz))
 			{
-				LgiAssert(0);
+				LAssert(0);
 				DeleteObj(f);
 				return NULL;
 			}

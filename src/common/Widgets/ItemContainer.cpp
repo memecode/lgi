@@ -163,7 +163,7 @@ void LItemContainer::PaintColumnHeadings(LSurface *pDC)
 			c->OnPaint(ColDC, cr);
 			cx += c->Width();
 		}
-		else LgiAssert(0);
+		else LAssert(0);
 	}
 
 	// Draw ending piece
@@ -670,7 +670,7 @@ void LItemColumn::Name(const char *n)
 				d->Parent->GetFont() &&
 				d->Parent->GetFont()->Handle() ?
 				d->Parent->GetFont() :
-				SysFont;
+				LSysFont;
 	
 	d->Txt = new LDisplayString(f, (char*)n);
 	if (d->Parent)
@@ -862,7 +862,7 @@ void LItemColumn::OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground)
 			LFont *f = d->Txt->GetFont();
 			if (!f)
 			{
-				LgiAssert(0);
+				LAssert(0);
 				return;
 			}
 
@@ -1140,7 +1140,7 @@ GItemEdit::GItemEdit(LView *parent, GItem *item, int index, int SelStart, int Se
 	GetParent()->PointToScreen(p);
 
 	LRect r = d->Item->GetPos(d->Index);
-	int MinY = 6 + SysFont->GetHeight();
+	int MinY = 6 + LSysFont->GetHeight();
 	if (r.Y() < MinY)
 		r.y2 = r.y1 + MinY - 1;
 	r.Offset(p.x, p.y);	

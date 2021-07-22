@@ -135,7 +135,7 @@ LArray<char> Sha1(LArray<char> &a, LArray<char> *b = 0)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 
 	return r;
@@ -192,14 +192,14 @@ struct MysqlDirectContext
 			}
 			else
 			{
-				LgiAssert(!"No buffer...");
+				LAssert(!"No buffer...");
 				return false;
 			}
 		}
 
 		if (!Socket)
 		{
-			LgiAssert(!"No socket...");
+			LAssert(!"No socket...");
 			return false;
 		}
 
@@ -229,7 +229,7 @@ public:
 
 	void Eof()
 	{
-		LgiAssert(!"End of packet");
+		LAssert(!"End of packet");
 	}
 
 	void Empty()
@@ -240,7 +240,7 @@ public:
 
 	uint32 *GetHdr()
 	{
-		LgiAssert(Data.Length() >= 4);
+		LAssert(Data.Length() >= 4);
 		return (uint32*) &Data[0];
 	}
 
@@ -296,7 +296,7 @@ public:
 						return false;
 
 					int Cpy = min(Total - Data.Length(), c.Length());
-					LgiAssert(Cpy > 0);
+					LAssert(Cpy > 0);
 					Data.Add(c.ReadBuf + c.ReadPos, Cpy);
 					c.ReadPos += Cpy;
 				}
@@ -841,7 +841,7 @@ public:
 					LArray<char> stage2_hash = Sha1(stage1_hash);
 					LArray<char> crypt = Sha1(ScrambleBuf, &stage2_hash);
 					LArray<char> token;
-					LgiAssert(stage1_hash.Length() == crypt.Length());
+					LAssert(stage1_hash.Length() == crypt.Length());
 					for (int i=0; i<stage1_hash.Length(); i++)
 					{
 						token[i] = stage1_hash[i] ^ crypt[i];

@@ -157,7 +157,7 @@ LStream *SystemFunctions::GetLog()
 
 bool SystemFunctions::SetLog(LStream *log)
 {
-	LgiAssert(Log == NULL);
+	LAssert(Log == NULL);
 	Log = log;
 	return true;
 }
@@ -294,7 +294,7 @@ bool SystemFunctions::Sprintf(LScriptArguments &Args)
 
 			if (i >= Args.Length())
 			{
-				LgiAssert(!"Not enough args.");
+				LAssert(!"Not enough args.");
 				break;
 			}
 
@@ -574,7 +574,7 @@ bool SystemFunctions::FormatSize(LScriptArguments &Args)
 
 bool SystemFunctions::ClockTick(LScriptArguments &Args)
 {
-	*Args.GetReturn() = (int64)LgiCurrentTime();
+	*Args.GetReturn() = (int64)LCurrentTime();
 	return true;
 }
 

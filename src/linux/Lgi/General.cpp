@@ -123,7 +123,7 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 		Gtk::gint Result = Gtk::GTK_RESPONSE_NO;
 		
 		#if 1
-		if (LgiApp->InThread())
+		if (LAppInst->InThread())
 			Result = GtkAssertDlg(file, line, test);
 		else
 			Result = 1;
@@ -179,7 +179,7 @@ bool LGetMimeTypeExtensions(const char *Mime, LArray<LString> &Ext)
 
 LString LGetFileMimeType(const char *File)
 {
-	return LgiApp->GetFileMimeType(File);
+	return LAppInst->GetFileMimeType(File);
 }
 
 bool _GetSystemFont(char *FontType, char *Font, int FontBufSize, int &PointSize)
@@ -187,7 +187,7 @@ bool _GetSystemFont(char *FontType, char *Font, int FontBufSize, int &PointSize)
 	bool Status = false;
 
 	#ifndef LGI_SDL
-	GLibrary *WmLib = LgiApp->GetWindowManagerLib();
+	GLibrary *WmLib = LAppInst->GetWindowManagerLib();
 	if (WmLib)
 	{
 		Proc_LgiWmGetSysFont GetSysFont = (Proc_LgiWmGetSysFont) WmLib->GetAddress("LgiWmGetSysFont");

@@ -42,7 +42,7 @@ LScreenDC::LScreenDC(LView *view, void *Param)
 	ColourSpace = CsNone;
 	
 	d->Screen = (SDL_Surface*)Param;
-	LgiAssert(d->Screen);
+	LAssert(d->Screen);
 	if (d->Screen)
 	{
 		ColourSpace = PixelFormat2ColourSpace(d->Screen->format);
@@ -50,7 +50,7 @@ LScreenDC::LScreenDC(LView *view, void *Param)
 		SDL_LockSurface(d->Screen);
 
 		pMem = new GBmpMem;
-		LgiAssert(pMem != NULL);
+		LAssert(pMem != NULL);
 		if (pMem)
 		{
 			pMem->Base = (uchar*)d->Screen->pixels;
@@ -61,7 +61,7 @@ LScreenDC::LScreenDC(LView *view, void *Param)
 		}
 
 		pApp = CreateApplicator(d->Op, ColourSpace);
-		LgiAssert(pApp != NULL);
+		LAssert(pApp != NULL);
 		
 		Clip.ZOff(d->Screen->w-1, d->Screen->h-1);
 	}

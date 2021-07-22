@@ -16,7 +16,7 @@ public:
 	// Read
 	ushort ReadUChar()
 	{
-		LgiAssert(Conn);
+		LAssert(Conn);
 
 		uchar i;
 		Conn->Read((char*) &i, sizeof(i), 0);
@@ -25,7 +25,7 @@ public:
 
 	ushort ReadUShort()
 	{
-		LgiAssert(Conn);
+		LAssert(Conn);
 
 		ushort i;
 		Conn->Read((char*) &i, sizeof(i), 0);
@@ -34,7 +34,7 @@ public:
 
 	ushort ReadULong()
 	{
-		LgiAssert(Conn);
+		LAssert(Conn);
 
 		ulong i;
 		Conn->Read((char*) &i, sizeof(i), 0);
@@ -44,21 +44,21 @@ public:
 	// Write
 	void WriteUChar(uchar i)
 	{
-		LgiAssert(Conn);
+		LAssert(Conn);
 
 		Conn->Read((char*) &i, sizeof(i), 0);
 	}
 
 	void WriteUShort(ushort i)
 	{
-		LgiAssert(Conn);
+		LAssert(Conn);
 
 		Conn->Read((char*) &i, sizeof(i), 0);
 	}
 
 	void WriteULong(ulong i)
 	{
-		LgiAssert(Conn);
+		LAssert(Conn);
 
 		Conn->Read((char*) &i, sizeof(i), 0);
 	}

@@ -199,7 +199,7 @@ public:
 		memcpy(Cur, szText, Cp);
 		Cur += Cp;
 		*Cur = 0;
-		LgiAssert(Cur < Buf+sizeof(Buf));
+		LAssert(Cur < Buf+sizeof(Buf));
 	}
 };
 

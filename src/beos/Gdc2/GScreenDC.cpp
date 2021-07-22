@@ -35,7 +35,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 LScreenDC::LScreenDC(LView *view, void *Param)
 {
-	LgiAssert(view);
+	LAssert(view);
 
 	d = new LScreenPrivate;
 	d->View = view->Handle();
@@ -43,7 +43,7 @@ LScreenDC::LScreenDC(LView *view, void *Param)
 
 LScreenDC::LScreenDC(BView *view)
 {
-	LgiAssert(view);
+	LAssert(view);
 
 	d = new LScreenPrivate;
 	d->View = view;

@@ -254,18 +254,18 @@ bool LGetAppsForMimeType(const char *Mime,
 							LArray<LAppInfo*> &Apps,
 							int Limit = -1)
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 	return false;
 }
 
 bool LGetMimeTypeExtensions(const char *Mime, LArray<LString> &Ext)
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 	return false;
 }
 
 bool LPlaySound(const char *File, int Flags)
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 	return false;
 }

@@ -102,12 +102,12 @@ GInlineBmp Cursors =
 ////////////////////////////////////////////////////////////////////////////
 void _lgi_yield()
 {
-	LgiApp->Run(false);
+	LAppInst->Run(false);
 }
 
 bool LgiIsKeyDown(int Key)
 {
-	LgiAssert(0);
+	LAssert(0);
 	return false;
 }
 
@@ -139,7 +139,7 @@ GViewPrivate::GViewPrivate()
 
 GViewPrivate::~GViewPrivate()
 {
-	LgiAssert(Pulse == 0);
+	LAssert(Pulse == 0);
 
 	if (Font && FontOwnType == GV_FontOwned)
 		DeleteObj(Font);
@@ -206,9 +206,9 @@ void LView::_Delete()
 	if (Wnd && Wnd->GetFocus() == static_cast<LViewI*>(this))
 		Wnd->SetFocus(this, LWindow::ViewDelete);
 
-	if (LgiApp && LgiApp->AppWnd == this)
+	if (LAppInst && LAppInst->AppWnd == this)
 	{
-		LgiApp->AppWnd = 0;
+		LAppInst->AppWnd = 0;
 	}
 
 	// Hierarchy
@@ -236,9 +236,9 @@ LView *&LView::PopupChild()
 	return d->Popup;
 }
 
-void LgiToGtkCursor(LViewI *v, LgiCursor c)
+void LgiToGtkCursor(LViewI *v, LCursor c)
 {
-	static LgiCursor CurrentCursor = LCUR_Normal;
+	static LCursor CurrentCursor = LCUR_Normal;
 
 	if (!v || c == CurrentCursor)
 		return;
@@ -323,7 +323,7 @@ void LgiToGtkCursor(LViewI *v, LgiCursor c)
 		case LCUR_SplitH:
 		case LCUR_DropCopy:
 		case LCUR_DropMove:
-			LgiAssert(0);
+			LAssert(0);
 			break;
 		*/
 	}
@@ -333,9 +333,9 @@ void LgiToGtkCursor(LViewI *v, LgiCursor c)
 	if (w)
 		h = GTK_WIDGET(w->WindowHandle());
 	
-	LgiAssert(v->InThread());
+	LAssert(v->InThread());
 	auto wnd = gtk_widget_get_window(h);
-	// LgiAssert(wnd);
+	// LAssert(wnd);
 	if (wnd)
 	{
 		if (type == GDK_ARROW)
@@ -885,7 +885,7 @@ bool LView::Attach(LViewI *parent)
 	bool Status = false;
 
 	LView *Parent = d->GetParent();
-	LgiAssert(Parent == NULL || Parent == parent);
+	LAssert(Parent == NULL || Parent == parent);
 
 	SetParent(parent);
 	Parent = d->GetParent();
@@ -951,7 +951,7 @@ bool LView::Detach()
 
 			while ((c = Children[0]))
 			{
-				LgiAssert(!prev || c != prev);
+				LAssert(!prev || c != prev);
 				if (c->GetParent())
 					c->Detach();
 				else
@@ -959,7 +959,7 @@ bool LView::Detach()
 				Detached++;
 				prev = c;
 			}
-			LgiAssert(Count == Detached);
+			LAssert(Count == Detached);
 		}
 	}
 	#endif
@@ -967,7 +967,7 @@ bool LView::Detach()
 	return true;
 }
 
-LgiCursor LView::GetCursor(int x, int y)
+LCursor LView::GetCursor(int x, int y)
 {
 	return LCUR_Normal;
 }

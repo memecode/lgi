@@ -188,7 +188,7 @@ void LControlTree::Item::Save()
 							Tree->SendNotify(Ctrl->GetId());
 						}
 					}
-					else LgiAssert(0);
+					else LAssert(0);
 				}
 				else if (Idx != Value.CastInt32())
 				{
@@ -209,8 +209,8 @@ void LControlTree::Item::Select(bool b)
 	{
 		if (b)
 		{
-			LgiAssert(Ctrl == 0);
-			int FontY = SysFont->GetHeight();
+			LAssert(Ctrl == 0);
+			int FontY = LSysFont->GetHeight();
 			int CtrlY = FontY + (FontY >> 1);
 
 			switch (Type)
@@ -308,8 +308,8 @@ void LControlTree::Item::OnPaint(ItemPaintCtx &Ctx)
 	{
 		LCssTools Tools(GetTree());
 		auto Ws = LColour(L_WORKSPACE);
-		SysBold->Colour(Tools.GetFore(), Tools.GetBack(&Ws, 0));
-		SysBold->Transparent(true);
+		LSysBold->Colour(Tools.GetFore(), Tools.GetBack(&Ws, 0));
+		LSysBold->Transparent(true);
 
 		LRect p = GetRect();
 		switch (Type)
@@ -340,33 +340,33 @@ void LControlTree::Item::OnPaint(ItemPaintCtx &Ctx)
 
 					if (Disp)
 					{
-						LDisplayString ds(SysBold, Disp);
+						LDisplayString ds(LSysBold, Disp);
 						ds.Draw(Ctx.pDC, p.x1 + 8, p.y1 + 1);
 					}
 					else
 					{
-						LDisplayString ds(SysFont, LgiLoadString(L_CONTROLTREE_NO_VALUE, "(no value)"));
-						SysFont->Colour(LColour(L_LOW), LColour(L_WORKSPACE));
+						LDisplayString ds(LSysFont, LgiLoadString(L_CONTROLTREE_NO_VALUE, "(no value)"));
+						LSysFont->Colour(LColour(L_LOW), LColour(L_WORKSPACE));
 						ds.Draw(Ctx.pDC, p.x1 + 8, p.y1 + 1);
 					}
 				}
 				else
 				{
 					sprintf_s(Disp = s, sizeof(s), "%i", Value.CastInt32());
-					LDisplayString ds(SysBold, Disp);
+					LDisplayString ds(LSysBold, Disp);
 					ds.Draw(Ctx.pDC, p.x1 + 6, p.y1 + 2);
 				}
 				break;
 			}
 			case GV_STRING:
 			{
-				LDisplayString ds(SysBold, Value.Str());
+				LDisplayString ds(LSysBold, Value.Str());
 				ds.Draw(Ctx.pDC, p.x1 + 6, p.y1 + 2);
 				break;
 			}
 			case GV_BOOL:
 			{
-				LDisplayString ds(SysBold, (char*) (Value.CastInt32() ? "true" : "false"));
+				LDisplayString ds(LSysBold, (char*) (Value.CastInt32() ? "true" : "false"));
 				ds.Draw(Ctx.pDC, p.x1 + 1, p.y1 + 1);
 				break;
 			}
@@ -493,7 +493,7 @@ void LControlTree::ReadTree(LXmlTag *t, LTreeNode *n)
 		int CtrlId = -1;
 		int StrRef = c->GetAsInt("ref");
 		LgiStringRes *Str = d->Factory->StrFromRef(StrRef);
-		LgiAssert(Str != NULL);
+		LAssert(Str != NULL);
 		if (!Str)
 			continue;
 		
@@ -548,11 +548,11 @@ bool LControlTree::SetVariant(const char *Name, LVariant &Value, char *Array)
 
 		LXmlTag *x = dynamic_cast<LXmlTag*>(Value.Value.Dom);
 		if (!x)
-			LgiAssert(!"Not the right object.");
+			LAssert(!"Not the right object.");
 		else if (d->Factory)
 			ReadTree(x, this);
 	    else
-	        LgiAssert(!"No factory.");
+	        LAssert(!"No factory.");
 			
 		d->Factory = 0;
 	}

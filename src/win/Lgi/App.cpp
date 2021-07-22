@@ -94,8 +94,8 @@ LApp *LApp::ObjInstance()
 /////////////////////////////////////////////////////////////////////////////
 LONG __stdcall _ExceptionFilter_Redir(LPEXCEPTION_POINTERS e)
 {
-	if (LgiApp)
-		return LgiApp->_ExceptionFilter(e, LgiApp->d->ProductId);
+	if (LAppInst)
+		return LAppInst->_ExceptionFilter(e, LAppInst->d->ProductId);
 	else
 		LgiTrace("_ExceptionFilter_Redir error: No application ptr.\n");
 
@@ -221,38 +221,38 @@ void LgiInvalidParam(const wchar_t * expression,
 extern int MouseRollMsg;
 typedef HRESULT (CALLBACK *fDllGetVersion)(DLLVERSIONINFO *);
 
-LApp::LApp(OsAppArguments &AppArgs, const char *AppName, GAppArguments *Opts)
+LApp::LApp(OsAppArguments &AppArgs, const char *AppName, LAppArguments *Opts)
 {
 	// LApp instance
 	SystemNormal = 0;
 	SystemBold = 0;
-	LgiAssert(TheApp == 0);
+	LAssert(TheApp == 0);
 	TheApp = this;
-	LgiAssert(AppName != NULL);
+	LAssert(AppName != NULL);
 	Name(AppName);
 
-int64 Time = LgiCurrentTime();
+int64 Time = LCurrentTime();
 #define DumpTime(str) /* \
-	{ int64 n = LgiCurrentTime(); \
+	{ int64 n = LCurrentTime(); \
 	LgiTrace("%s=%ims\n", str, (int)(n-Time)); \
 	Time = n; } */
 
 	// Sanity Checks
-	LgiAssert(sizeof(int8) == 1);
-	LgiAssert(sizeof(uint8_t) == 1);
+	LAssert(sizeof(int8) == 1);
+	LAssert(sizeof(uint8_t) == 1);
 
-	LgiAssert(sizeof(int16) == 2);
-	LgiAssert(sizeof(uint16) == 2);
+	LAssert(sizeof(int16) == 2);
+	LAssert(sizeof(uint16) == 2);
 
-	LgiAssert(sizeof(int32) == 4);
-	LgiAssert(sizeof(uint32_t) == 4);
+	LAssert(sizeof(int32) == 4);
+	LAssert(sizeof(uint32_t) == 4);
 
-	LgiAssert(sizeof(int64) == 8);
-	LgiAssert(sizeof(uint64) == 8);
+	LAssert(sizeof(int64) == 8);
+	LAssert(sizeof(uint64) == 8);
 
-	LgiAssert(sizeof(char16) == 2);
+	LAssert(sizeof(char16) == 2);
 	
-	LgiAssert(LDisplayString::FScale == (1 << LDisplayString::FShift));
+	LAssert(LDisplayString::FScale == (1 << LDisplayString::FShift));
 
 DumpTime("start");
 
@@ -368,7 +368,7 @@ DumpTime("vars");
 		else
 		{
 			LgiMsg(0, "Error: SysFontType.Create() failed.", "Lgi Error");
-			LgiExitApp();
+			LExitApp();
 		}
 
 		SystemBold = SysFontType.Create();
@@ -381,14 +381,14 @@ DumpTime("vars");
 	else
 	{
 		LgiMsg(0, "Error: GetSystemFont failed.", "Lgi Error");
-		LgiExitApp();
+		LExitApp();
 	}
 
 DumpTime("fonts");
 
 	// Other vars and init
 	hNormalCursor = LoadCursor(NULL, IDC_ARROW);
-	LRandomize((uint) (LgiCurrentTime()*GetCurrentThreadId()));
+	LRandomize((uint) (LCurrentTime()*GetCurrentThreadId()));
 	MouseRollMsg = RegisterWindowMessage(L"MSWHEEL_ROLLMSG");
 
 DumpTime("cursor/rand/msg");
@@ -446,7 +446,7 @@ bool LApp::IsOk()
 					(d->FileSystem != 0) &&
 					(d->GdcSystem != 0);
 	if (!Status)
-		LgiAssert(!"Hash table error");
+		LAssert(!"Hash table error");
 	return Status;
 }
 
@@ -775,14 +775,14 @@ bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 						break;
 
 					#ifdef _DEBUG
-					int64 Last = LgiCurrentTime();
+					int64 Last = LCurrentTime();
 					#endif
 					
 					TranslateMessage(&Msg);
 					DispatchMessage(&Msg);
 
 					#ifdef _DEBUG
-					int64 Now = LgiCurrentTime();
+					int64 Now = LCurrentTime();
 					if (Now - Last > 10000)
 					{
 						LgiTrace("%s:%i - Msg Loop Blocked: %i ms (Msg: 0x%.4x)\n",
@@ -806,14 +806,14 @@ bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 			while (!d->QuitReceived && GetMessage(&Msg, NULL, 0, 0) > 0)
 			{
 				#ifdef _DEBUG
-				int64 Last = LgiCurrentTime();
+				int64 Last = LCurrentTime();
 				#endif
 				
 				TranslateMessage(&Msg);
 				DispatchMessage(&Msg);
 
 				#ifdef _DEBUG
-				int64 Now = LgiCurrentTime();
+				int64 Now = LCurrentTime();
 				if (Now - Last > 1000)
 				{
 					LgiTrace("%s:%i - Msg Loop Blocked: %i ms (Msg: 0x%.4x)\n",
@@ -861,7 +861,7 @@ LString LApp::GetFileMimeType(const char *File)
 
 bool LApp::GetAppsForMimeType(char *Mime, LArray<LAppInfo*> &Apps)
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 	return false;
 }
 

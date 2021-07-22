@@ -357,7 +357,7 @@ LProxyUri::LProxyUri()
 //		if (enable)
 //		{
 //			#ifdef LGI_COCOA
-//			LgiAssert(!"Fixme");
+//			LAssert(!"Fixme");
 //			#else
 //			Host = CFStringToUtf8((CFStringRef) CFDictionaryGetValue(Proxies, kSCPropNetProxiesHTTPProxy));
 //			#endif

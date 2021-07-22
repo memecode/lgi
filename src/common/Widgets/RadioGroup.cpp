@@ -29,7 +29,7 @@ public:
 
 	LRadioGroupPrivate(LRadioGroup *g) :
 		LMutex("LRadioGroupPrivate"),
-		LStringLayout(LgiApp->GetFontCache())
+		LStringLayout(LAppInst->GetFontCache())
 	{
 		Ctrl = g;
 		Val = 0;
@@ -167,7 +167,7 @@ bool LRadioGroup::OnLayout(LViewLayoutInfo &Inf)
 
 					LastY = MAX(LastY, r.y2);
 				}
-				else LgiAssert(!"This shouldn't fail.");
+				else LAssert(!"This shouldn't fail.");
 			}
 			else
 			{
@@ -243,7 +243,7 @@ bool LRadioGroup::NameW(const char16 *n)
 
 void LRadioGroup::SetFont(LFont *Fnt, bool OwnIt)
 {
-	LgiAssert(Fnt && Fnt->Handle());
+	LAssert(Fnt && Fnt->Handle());
 
 	if (d->Lock(_FL))
 	{
@@ -373,7 +373,7 @@ public:
 
 	LRadioButtonPrivate(LRadioButton *c) :
 		LMutex("LRadioButtonPrivate"),
-		LStringLayout(LgiApp->GetFontCache())
+		LStringLayout(LAppInst->GetFontCache())
 	{
 		Btn.ZOff(-1,-1);
 		Ctrl = c;
@@ -518,7 +518,7 @@ bool LRadioButton::NameW(const char16 *n)
 
 void LRadioButton::SetFont(LFont *Fnt, bool OwnIt)
 {
-	LgiAssert(Fnt && Fnt->Handle());
+	LAssert(Fnt && Fnt->Handle());
 
 	if (d->Lock(_FL))
 	{

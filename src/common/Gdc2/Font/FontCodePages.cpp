@@ -92,7 +92,7 @@ public:
 		o += 47;
 		iso2022jp_map[o++] = &iso2022jp_blocks[i++];;
 
-		LgiAssert(o == 128);
+		LAssert(o == 128);
 	}
 
 	bool CanEncode(char16 *s, ssize_t l)
@@ -826,7 +826,7 @@ ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *
 						InLen = StringLen((uint32_t*)In) << 2;
 						break;
 					default:
-						LgiAssert(0);
+						LAssert(0);
 						return 0;
 				}
 			}
@@ -894,7 +894,7 @@ ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *
 				if (Fs)
 					return Fs->IconvConvert(OutInfo->GetIconvName(), (char*)Out, OutLen, InInfo->GetIconvName(), (const char*&)In, InLen);
 				#else
-				LgiAssert(!"No iconv in static build");
+				LAssert(!"No iconv in static build");
 				#endif
 			}
 			else
@@ -952,7 +952,7 @@ ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *
 							break;
 						}
 						default:
-							LgiAssert(0);
+							LAssert(0);
 							break;
 					}
 
@@ -1105,7 +1105,7 @@ LString LStrConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 		case CpWindowsDb:
 		case CpUtf32:
 		default:
-			LgiAssert(!"LString doesn't >8bit char (yet).");
+			LAssert(!"LString doesn't >8bit char (yet).");
 			return LString();
 	}
 
@@ -1128,7 +1128,7 @@ LString LStrConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 			InCp = "iso-8859-1";
 		}
 		#else
-		LgiAssert(!"No inconv in static build");
+		LAssert(!"No inconv in static build");
 		#endif
 	}
 
@@ -1173,7 +1173,7 @@ void *LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t
 				InLen = StringLen((uint32_t*)In) << 2;
 				break;
 			default:
-				LgiAssert(0);
+				LAssert(0);
 				return NULL;
 		}
 	}
@@ -1194,7 +1194,7 @@ void *LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t
 			NullSize = 4;
 			break;
 		default:
-			LgiAssert(0);
+			LAssert(0);
 			return NULL;
 	}
 
@@ -1224,7 +1224,7 @@ void *LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t
 			}
 		}
 		#else
-		LgiAssert(!"No inconv in static build");
+		LAssert(!"No inconv in static build");
 		#endif
 	}
 	else
@@ -1399,7 +1399,7 @@ char *LSeekUtf8(const char *Ptr, ssize_t D, char *Start)
 			// You must pass a start point to move backwards in
 			// the utf-8 string, otherwise you can run off the
 			// beginning of the array.
-			LgiAssert(0);
+			LAssert(0);
 		}
 	}
 
@@ -1621,7 +1621,7 @@ LCharsetSystem::LCharsetSystem()
 	// Charset setup, store all the charset pointers
 	// in a hash table for O(1) lookup.
 	d = new LCharsetSystemPriv;
-	LgiAssert(LgiCharsets->Charset != NULL);
+	LAssert(LgiCharsets->Charset != NULL);
 
 	for (LCharset *Cs = LgiCharsets; Cs->Charset; Cs++)
 	{

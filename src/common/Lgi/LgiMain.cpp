@@ -214,9 +214,9 @@ pascal OSErr AppEventHandler(const AppleEvent *ae, AppleEvent *reply, SRefCon ha
 			else if (Used < sizeof(urlbuf))
 			{
 				urlbuf[Used] = 0;
-				if (LgiApp && LgiApp->AppWnd)
+				if (LAppInst && LAppInst->AppWnd)
 				{
-					LgiApp->AppWnd->PostEvent(M_URL, (GMessage::Param) new LString(urlbuf));
+					LAppInst->AppWnd->PostEvent(M_URL, (GMessage::Param) new LString(urlbuf));
 				}
 				else
 				{

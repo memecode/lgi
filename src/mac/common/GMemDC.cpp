@@ -295,7 +295,7 @@ LMemDC::LMemDC(NSImage *img)
 		NSRect r = {{0.0, 0.0}, {img.size.width, img.size.height}};
 		
 		[img lockFocus];
-		LgiAssert([NSGraphicsContext currentContext] != NULL);
+		LAssert([NSGraphicsContext currentContext] != NULL);
 		[img drawAtPoint:p fromRect:r operation:NSCompositingOperationCopy fraction:0.0];
 		[img unlockFocus];
 	}
@@ -331,8 +331,8 @@ NSImage *LMemDC::NsImage(LRect *rc)
 	for (int y=0; y<p->y; y++)
 	{
 		auto src = p->Base + (y * p->Line);
-		LgiAssert(dst + bytesPerRow <= Mem.AddressOf() + Mem.Length());
-		LgiAssert(src + bytesPerRow <= pMem->Base + (pMem->y * pMem->Line));
+		LAssert(dst + bytesPerRow <= Mem.AddressOf() + Mem.Length());
+		LAssert(src + bytesPerRow <= pMem->Base + (pMem->y * pMem->Line));
 		
 		memcpy(dst, src, bytesPerRow);
 		dst += bytesPerRow;
@@ -503,14 +503,14 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 								pMem->Flags |= GBmpMem::BmpPreMulAlpha;
 								break;
 							default:
-								LgiAssert(0);
+								LAssert(0);
 								break;
 						}
 						break;
 					}
 					default:
 					{
-						LgiAssert(0);
+						LAssert(0);
 						break;
 					}
 				}

@@ -125,13 +125,13 @@ void LXmlTreeUi::Map(const char *Attr, int UiIdent, int Type)
 			m->Id = UiIdent;
 			m->Hint = Type;
 			
-			LgiAssert(!d->Maps.Find(Attr));
+			LAssert(!d->Maps.Find(Attr));
 			d->Maps.Add(Attr, m);
 		}
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 }
 
@@ -148,13 +148,13 @@ void LXmlTreeUi::Map(const char *Attr, int UiIdent, CreateListItem Factory, cons
 			m->ChildElements = ChildElements;
 			m->User = User;
 			
-			LgiAssert(!d->Maps.Find(Attr));
+			LAssert(!d->Maps.Find(Attr));
 			d->Maps.Add(Attr, m);
 		}
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 }
 
@@ -171,13 +171,13 @@ void LXmlTreeUi::Map(const char *Attr, int UiIdent, CreateTreeItem Factory, cons
 			m->ChildElements = ChildElements;
 			m->User = User;
 
-			LgiAssert(!d->Maps.Find(Attr));
+			LAssert(!d->Maps.Find(Attr));
 			d->Maps.Add(Attr, m);
 		}
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 }
 

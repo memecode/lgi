@@ -456,7 +456,7 @@ void PNGAPI LibPngRead(png_structp Png, png_bytep Ptr, png_size_t Size)
 	else
 	{
 		LgiTrace("%s:%i - No this ptr? (%p)\n", __FILE__, __LINE__, Ptr);
-		LgiAssert(0);
+		LAssert(0);
 	}
 }
 
@@ -484,7 +484,7 @@ void PNGAPI LibPngWrite(png_structp Png, png_bytep Ptr, png_size_t Size)
 	else
 	{
 		LgiTrace("%s:%i - No this ptr?\n", __FILE__, __LINE__);
-		LgiAssert(0);
+		LAssert(0);
 	}
 }
 
@@ -731,7 +731,7 @@ GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 			if (!png_ptr->io_ptr)
 			{
 				printf("io_ptr offset = %i\n", off);
-				LgiAssert(0);
+				LAssert(0);
 
 				CurrentLibPng = 0;
 				return false;
@@ -787,7 +787,7 @@ GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 					for (int y=0; y<pDC->Y() && !Error; y++)
 					{
 						uchar *Scan = (*pDC)[y];
-						LgiAssert(Scan != NULL);
+						LAssert(Scan != NULL);
 
 						switch (RequestBits)
 						{
@@ -834,7 +834,7 @@ GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 								{
 									uint8_t *grey = Scan;
 									uint8_t *alpha = (*(pDC->AlphaDC()))[y];
-									LgiAssert(grey && alpha);
+									LAssert(grey && alpha);
 									uint8_t *end = grey + pDC->X();
 									uint8_t *in = Scan0[y];
 									
@@ -883,7 +883,7 @@ GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 												_FL,	
 												pDC->GetColourSpace(),
 												GColourSpaceToString(pDC->GetColourSpace()));
-										LgiAssert(!"Not impl.");
+										LAssert(!"Not impl.");
 										break;
 								}
 								break;
@@ -921,7 +921,7 @@ GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 												_FL,	
 												pDC->GetColourSpace(),
 												GColourSpaceToString(pDC->GetColourSpace()));
-										LgiAssert(!"Not impl.");
+										LAssert(!"Not impl.");
 										if (Props)
 											Props->SetValue(LGI_FILTER_ERROR, v = "Missing scan convertor");
 										Error = true;
@@ -937,7 +937,7 @@ GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 								}
 								else
 								{
-									LgiAssert(!"Yeah you need to impl a convertor here.");
+									LAssert(!"Yeah you need to impl a convertor here.");
 									if (Props)
 										Props->SetValue(LGI_FILTER_ERROR, v = "Missing scan convertor");
 									Error = true;

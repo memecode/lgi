@@ -186,10 +186,10 @@ struct LOAuth2Priv
 
 		Server(LOAuth2Priv *cd) : d(cd)
 		{
-			auto Start = LgiCurrentTime();
+			auto Start = LCurrentTime();
 			while (	!d->Cancel->IsCancelled() &&
 					!Listen.Listen(LOCALHOST_PORT) &&
-					(LgiCurrentTime() - Start) < 60000)
+					(LCurrentTime() - Start) < 60000)
 			{
 				d->Log->Print("Error: Can't listen on %i... (%s)\n", LOCALHOST_PORT, Listen.GetErrorString());
 				LgiSleep(1000);

@@ -72,7 +72,7 @@ public:
 	void OnMouseExit(LMouse &m) override;
 	int OnHitTest(int x, int y) override;
 	void OnChildrenChanged(LViewI *Wnd, bool Attaching) override;
-	LgiCursor GetCursor(int x, int y) override;
+	LCursor GetCursor(int x, int y) override;
 };
 
 #endif

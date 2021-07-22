@@ -135,7 +135,7 @@ public:
 			if (note->CallbackTarget)
 				p.Print("Notification-Callback-Target: %s\r\n", note->CallbackTarget.Get());
 		}
-		else LgiAssert(0);
+		else LAssert(0);
 		
 		p.Print("\r\n");
 		

@@ -67,7 +67,7 @@ static const char **GetEnumValues(ProjSetting s)
 		case ProjTargetType:
 			return sBuildTypes;
 		default:
-			LgiAssert(!"Unknown enum type.");
+			LAssert(!"Unknown enum type.");
 			break;
 	}
 	
@@ -239,7 +239,7 @@ public:
 	char *BuildPath(ProjSetting s, int Flags, IdePlatform Platform, int Config = -1)
 	{
 		SettingInfo *i = Map.Find(s);
-		LgiAssert(i);
+		LAssert(i);
 
 		const char *PlatformStr = PlatformToString(Flags, Platform);
 		int Ch = sprintf_s(	PathBuf, sizeof(PathBuf),
@@ -383,7 +383,7 @@ public:
 			if (t && t->GetContent())
 				Ctrls[i].Chk->Value(atoi(t->GetContent()));
 		}
-		else LgiAssert(!"Unknown type?");
+		else LAssert(!"Unknown type?");
 	}
 	
 	void SetSetting(SettingInfo *setting, int flags)
@@ -399,14 +399,14 @@ public:
 				auto Path = Ctrls[i].Text->Name();
 				if (!Path)
 				{
-					LgiAssert(0);
+					LAssert(0);
 					continue;
 				}
 
 				LXmlTag *t = d->Editing.GetChildTag(Path, true);
 				if (!t)
 				{
-					LgiAssert(0);
+					LAssert(0);
 					continue;
 				}
 
@@ -428,7 +428,7 @@ public:
 					// LgiTrace("Saving enum setting '%s': '%s'\n", Path, Val);
 					t->SetContent(Val);
 				}
-				else LgiAssert(0);
+				else LAssert(0);
 			}
 		}	
 	
@@ -614,7 +614,7 @@ public:
 			{
 				if (Flags == LK_RETURN)
 				{
-					DefLockOut = LgiCurrentTime();
+					DefLockOut = LCurrentTime();
 					OnSearch(GetCtrlName(IDC_SEARCH));
 				}
 				else
@@ -631,7 +631,7 @@ public:
 			}
 			case IDOK:
 			{
-				if (LgiCurrentTime() - DefLockOut < 500)
+				if (LCurrentTime() - DefLockOut < 500)
 					break;
 				Detail->SetSetting(NULL, 0);
 				EndModal(1);
@@ -639,7 +639,7 @@ public:
 			}
 			case IDCANCEL:
 			{
-				if (LgiCurrentTime() - DefLockOut < 500)
+				if (LCurrentTime() - DefLockOut < 500)
 					break;
 				EndModal(0);
 				break;
@@ -892,14 +892,14 @@ bool IdeProjectSettings::Serialize(LXmlTag *Parent, bool Write)
 {
 	if (!Parent)
 	{
-		LgiAssert(!"No parent tag?");
+		LAssert(!"No parent tag?");
 		return false;
 	}
 
 	LXmlTag *t = Parent->GetChildTag(TagSettings, Write);
 	if (!t)
 	{
-		LgiAssert(!"Can't find settings tags?");
+		LAssert(!"Can't find settings tags?");
 		return false;
 	}
 
@@ -923,7 +923,7 @@ bool IdeProjectSettings::Serialize(LXmlTag *Parent, bool Write)
 const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default, IdePlatform Platform)
 {
 	SettingInfo *s = d->Map.Find(Setting);
-	LgiAssert(s);
+	LAssert(s);
 	LArray<char*> Strs;
 	int Bytes = 0;
 	if (!s->Flag.PlatformSpecific)
@@ -969,7 +969,7 @@ int IdeProjectSettings::GetInt(ProjSetting Setting, int Default, IdePlatform Pla
 	int Status = Default;
 
 	SettingInfo *s = d->Map.Find(Setting);
-	LgiAssert(s);
+	LAssert(s);
 	
 	if (!s->Flag.PlatformSpecific)
 	{
@@ -987,7 +987,7 @@ int IdeProjectSettings::GetInt(ProjSetting Setting, int Default, IdePlatform Pla
 			Status = t->GetContent() ? atoi(t->GetContent()) : 0;
 		}
 	}
-	else LgiAssert(0);
+	else LAssert(0);
 
 	return Status;
 }

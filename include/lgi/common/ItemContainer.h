@@ -125,7 +125,7 @@ public:
 	void OnChildrenChanged(LViewI *Wnd, bool Attaching) {}
 	int OnNotify(LViewI *Ctrl, int Flags) { return 0; }
 	int OnCommand(int Cmd, int Event, OsView Wnd) { return 0; }
-	void OnPaint(LSurface *pDC) { LgiAssert(0); }
+	void OnPaint(LSurface *pDC) { LAssert(0); }
 
 	// Style access
 	LCss *GetCss(bool Create = false)
@@ -389,7 +389,7 @@ public:
 
 	LItemContainer &operator =(const LItemContainer &i)
 	{
-		LgiAssert(!"Not impl..");
+		LAssert(!"Not impl..");
 		return *this;
 	}
 };

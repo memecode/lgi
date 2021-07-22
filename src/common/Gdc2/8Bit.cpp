@@ -113,7 +113,7 @@ bool GdcApp8::SetSurface(GBmpMem *d, GPalette *p, GBmpMem *a)
 
 void GdcApp8::SetPtr(int x, int y)
 {
-	LgiAssert(Dest && Dest->Base);
+	LAssert(Dest && Dest->Base);
 	Ptr = Dest->Base + ((y * Dest->Line) + x);
 	if (Alpha)
 		APtr = Alpha->Base + ((y * Alpha->Line) + x);
@@ -329,7 +329,7 @@ void GConvertIndexed(OutPx *out, InPx *in, int len, LColourSpace inCs, GPalette 
 		}
 		default:
 		{
-			LgiAssert(0);
+			LAssert(0);
 			break;
 		}
 	}
@@ -411,7 +411,7 @@ void Convert(System24BitPixel *Dst, GBmpMem *Src, int Line, GPalette *SPal)
 		ConvertCase(Argb32);
 		ConvertCase(Abgr32);
 		default:
-			LgiAssert(0);
+			LAssert(0);
 			break;
 	}
 }
@@ -504,7 +504,7 @@ bool GdcApp8Set::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
 									{
 										default:
 										{
-											LgiAssert(!"Not impl.");
+											LAssert(!"Not impl.");
 											break;
 										}
 										case CsRgb15:
@@ -568,7 +568,7 @@ bool GdcApp8Set::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
 							{
 								default:
 								{
-									LgiAssert(!"Not impl.");
+									LAssert(!"Not impl.");
 									break;
 								}
 								case CsRgb15:
@@ -788,7 +788,7 @@ bool GdcApp8Or::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
 		{
 			default:
 			{
-				LgiAssert(!"Not impl.");
+				LAssert(!"Not impl.");
 				break;
 			}
 			case CsIndex8:

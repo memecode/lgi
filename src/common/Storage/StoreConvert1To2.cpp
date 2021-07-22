@@ -6,9 +6,9 @@
 
 class ReaderItem : public StorageObj
 {
-	int Type() { LgiAssert(0); return 0; }
-	int Sizeof() { LgiAssert(0); return 0; }
-	bool Serialize(LFile &f, bool Write) { LgiAssert(0); return 0; }
+	int Type() { LAssert(0); return 0; }
+	int Sizeof() { LAssert(0); return 0; }
+	bool Serialize(LFile &f, bool Write) { LAssert(0); return 0; }
 
 public:
 	int Len;
@@ -30,7 +30,7 @@ public:
 				Len = ((Storage1::StorageItemImpl*)Store)->StoreAllocatedSize;
 			}
 
-			LgiAssert(Len > 0);
+			LAssert(Len > 0);
 
 			Data = new uchar[Len];
 			if (Data)

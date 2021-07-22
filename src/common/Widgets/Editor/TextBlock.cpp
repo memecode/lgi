@@ -38,7 +38,7 @@ uint32_t *LRichTextPriv::StyleText::At(ssize_t i)
 {
 	if (i >= 0 && i < (int)Length())
 		return &(*this)[i];
-	LgiAssert(0);
+	LAssert(0);
 	return NULL;
 }
 		
@@ -75,7 +75,7 @@ LRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, LSurface *img, L
 	Utf32.Add(s, l);
 	uint32_t *u = &Utf32[0];
 	#else
-	LgiAssert(sizeof(char16) == 4);
+	LAssert(sizeof(char16) == 4);
 	uint32_t *u = (uint32_t*)Wide;
 	Chars = Strlen(u);
 	#endif
@@ -83,7 +83,7 @@ LRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, LSurface *img, L
 	for (int i=0; i<Chars; i++)
 	{
 		int Idx = EmojiToIconIndex(u + i, Chars - i);
-		LgiAssert(Idx >= 0);
+		LAssert(Idx >= 0);
 		if (Idx >= 0)
 		{
 			int x = Idx % EMOJI_GROUP_X;
@@ -105,7 +105,7 @@ LAutoPtr<LRichTextPriv::DisplayStr> LRichTextPriv::EmojiDisplayStr::Clone(ssize_
 	if (Len < 0)
 		Len = Chars - Start;
 	#if defined(_MSC_VER)
-	LgiAssert(	Start >= 0 &&
+	LAssert(	Start >= 0 &&
 				Start < (int)Utf32.Length() &&
 				Start + Len <= (int)Utf32.Length());
 	#endif
@@ -185,7 +185,7 @@ void LRichTextPriv::TextLine::LayoutOffsets(int DefaultFontHt)
 	if (Strs.Length() == 0)
 		HtPx = DefaultFontHt;
 	else
-		LgiAssert(HtPx > 0);
+		LAssert(HtPx > 0);
 			
 	for (unsigned i=0; i<Strs.Length(); i++)
 	{
@@ -193,7 +193,7 @@ void LRichTextPriv::TextLine::LayoutOffsets(int DefaultFontHt)
 		double Ascent = ds->GetAscent();
 		if (Ascent > 0.0)
 			ds->OffsetY = (int)(BaseLine - Ascent);
-		LgiAssert(ds->OffsetY >= 0);
+		LAssert(ds->OffsetY >= 0);
 		HtPx = MAX(HtPx, ds->OffsetY+ds->Y());
 	}
 			
@@ -235,7 +235,7 @@ LRichTextPriv::TextBlock::TextBlock(const TextBlock *Copy) : Block(Copy)
 		
 LRichTextPriv::TextBlock::~TextBlock()
 {
-	LgiAssert(Cursors == 0);
+	LAssert(Cursors == 0);
 	Txt.DeleteObjects();
 }
 
@@ -282,7 +282,7 @@ void LRichTextPriv::TextBlock::SetStyle(LNamedStyle *s)
 	{
 		Fnt = d->GetFont(s);
 		LayoutDirty = true;
-		LgiAssert(Fnt != NULL);
+		LAssert(Fnt != NULL);
 
 		Margin.x1 = Style->MarginLeft().ToPx(Pos.X(), Fnt);
 		Margin.y1 = Style->MarginTop().ToPx(Pos.Y(), Fnt);
@@ -592,7 +592,7 @@ bool LRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
 			htr.Idx = CharPos;
 			htr.LineHint = i;
 			
-			LgiAssert(htr.Idx <= Length());
+			LAssert(htr.Idx <= Length());
 			
 			return true;
 		}
@@ -619,7 +619,7 @@ bool LRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
 				htr.Idx = CharPos + OffChar;
 				htr.LineHint = i;
 
-				LgiAssert(htr.Idx <= Length());
+				LAssert(htr.Idx <= Length());
 
 				return true;
 			}
@@ -635,7 +635,7 @@ bool LRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
 			htr.Idx = CharPos;
 			htr.LineHint = i;
 			
-			LgiAssert(htr.Idx <= Length());
+			LAssert(htr.Idx <= Length());
 
 			return true;
 		}
@@ -957,9 +957,9 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 		
 
 		#if DEBUG_NUMBERED_LAYOUTS
-		LDisplayString Ds(SysFont, s);
-		SysFont->Colour(LColour::Green, LColour::White);
-		SysFont->Transparent(false);
+		LDisplayString Ds(LSysFont, s);
+		LSysFont->Colour(LColour::Green, LColour::White);
+		LSysFont->Transparent(false);
 		Ds.Draw(Ctx.pDC, LinePos.x1, LinePos.y1);
 		/*
 		Ctx.pDC->Colour(LColour::Blue);
@@ -1039,7 +1039,7 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 	{
 		StyleText *t = Txt[i];
 		LNamedStyle *tstyle = t->GetStyle();
-		LgiAssert(t->Length() >= 0);			
+		LAssert(t->Length() >= 0);			
 		TextSize += t->Length();
 		
 		if (t->Length() == 0)
@@ -1133,7 +1133,7 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 					LgiTrace("\tFitChars error: %i\n", FitChars);
 					#endif
 					flow.d->Error(_FL, "PosToIndex(%i) failed.", AvailablePx);
-					LgiAssert(0);
+					LAssert(0);
 				}
 				else
 				{
@@ -1222,7 +1222,7 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 			
 	if (CurLine && CurLine->Strs.Length() > 0)
 	{
-		LFont *f = d->View ? d->View->GetFont() : SysFont;
+		LFont *f = d->View ? d->View->GetFont() : LSysFont;
 		CurLine->LayoutOffsets(f->GetHeight());
 		Pos.y2 = MAX(Pos.y2, Pos.y1 + CurLine->PosOff.y2);
 		LayoutSize += CurLine->Length();
@@ -1234,7 +1234,7 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 		Layout.Add(CurLine.Release());
 	}
 	
-	LgiAssert(LayoutSize == Len);
+	LAssert(LayoutSize == Len);
 			
 	flow.CurY = Pos.y2 + 1 + Margin.y2 + Border.y2 + Padding.y2;
 	flow.Left -= Margin.x1 + Border.x1 + Padding.x1;
@@ -1263,7 +1263,7 @@ ssize_t LRichTextPriv::TextBlock::GetTextAt(ssize_t Offset, LArray<StyleText*> &
 		Pos += Len;
 	}
 
-	LgiAssert(Pos == Len);
+	LAssert(Pos == Len);
 	return Out.Length();
 }
 
@@ -1278,7 +1278,7 @@ bool LRichTextPriv::TextBlock::IsValid()
 		{
 			if ((*t)[n] == 0)
 			{
-				LgiAssert(0);
+				LAssert(0);
 				return false;
 			}
 		}
@@ -2206,11 +2206,11 @@ bool LRichTextPriv::TextBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, s
 		else
 		{
 			ssize_t Before = Offset >= CharPos ? Offset - CharPos : 0;
-			LgiAssert(Before >= 0);
+			LAssert(Before >= 0);
 			ssize_t After = RestyleEnd < End ? End - RestyleEnd : 0;
-			LgiAssert(After >= 0);
+			LAssert(After >= 0);
 			ssize_t Inside = Len - Before - After;
-			LgiAssert(Inside >= 0);
+			LAssert(Inside >= 0);
 
 
 			LAutoPtr<LCss> TmpStyle(new LCss);

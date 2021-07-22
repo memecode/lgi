@@ -163,8 +163,8 @@ void GPaneThrottle::OnPaint(LSurface *pDC)
 			strcpy_s(Str, sizeof(Str), "No limit");
 		}
 		
-		SysFont->Colour(LColour(L_TEXT), LColour(L_MED));
-		LDisplayString ds(SysFont, Str);
+		LSysFont->Colour(LColour(L_TEXT), LColour(L_MED));
+		LDisplayString ds(LSysFont, Str);
 		ds.Draw(pDC, r.x1+2, r.y1);
 	}
 }
@@ -278,8 +278,8 @@ void GPaneHistory::OnPaint(LSurface *pDC)
 
 	char Str[256];
 	sprintf_s(Str, sizeof(Str), "%.1f K/s", Max / 1024.0);
-	SysFont->Colour(LColour(L_TEXT), LColour(L_MED));
-	LDisplayString ds(SysFont, Str);
+	LSysFont->Colour(LColour(L_TEXT), LColour(L_MED));
+	LDisplayString ds(LSysFont, Str);
 	ds.Draw(pDC, r.x1+2, r.y1);
 
 	r.x1 += HISTORY_TEXT_WIDTH+1;
@@ -315,13 +315,13 @@ void GPaneHistory::Value(int64 i)
 	if (i <= 0)
 	{
 		Max = 0;
-		Last = LgiCurrentTime();
+		Last = LCurrentTime();
 		Cur = -i;
 		Clear();
 	}
 	else
 	{
-		uint64 Now = LgiCurrentTime();
+		uint64 Now = LCurrentTime();
 		int64 NewData = i - Cur;
 		int64 Diff = Now - Last;
 
@@ -466,7 +466,7 @@ bool FileTransferProgress::SetRange(const LRange &r)
     if (!InThread())
     {
         bool Status = PostEvent(IDM_SET_LIMITS, (GMessage::Param)r.Start, (GMessage::Param)r.Len);
-        LgiAssert(Status);
+        LAssert(Status);
     }
     else
     {
@@ -484,7 +484,7 @@ void FileTransferProgress::Value(int64 v)
 		return;
 
 	if (Val == 0)
-		StartTime = LgiCurrentTime();
+		StartTime = LCurrentTime();
 
 	Progress::Value(v);
 }
@@ -494,7 +494,7 @@ void FileTransferProgress::UpdateUi()
 	if (DspVal == Val)
 		return;
 
-	uint64 Now = LgiCurrentTime();
+	uint64 Now = LCurrentTime();
 	// LgiTrace("Update UI %i, %i  InThread()=%i\n", (int)Val, (int)DspVal, InThread());
 	bool Start = Val == 0;
 	
@@ -561,7 +561,7 @@ bool FileTransferProgress::SetVariant(const char *Name, LVariant &Value, char *A
 	if (!InThread())
 	{
 		bool Status = PostEvent(IDM_SET_START_VAL, (GMessage::Param)Value.CastInt32());
-		LgiAssert(Status);
+		LAssert(Status);
 	}
 	else
 	{

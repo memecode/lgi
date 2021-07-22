@@ -137,13 +137,13 @@ public:
 					}
 					else
 					{
-						LgiAssert(!"ToString failed.");
+						LAssert(!"ToString failed.");
 						return false;
 					}
 				}
-				else LgiAssert(!"Alloc failed.");
+				else LAssert(!"Alloc failed.");
 			}
-			else LgiAssert(!"Null array entry.");
+			else LAssert(!"Null array entry.");
 		}
 		
 		return true;

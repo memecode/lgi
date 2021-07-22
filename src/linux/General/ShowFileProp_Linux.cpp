@@ -2,7 +2,7 @@
 
 void LShowFileProperties(OsView Parent, const char *Filename)
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 }
 
 bool LBrowseToFile(const char *Filename)

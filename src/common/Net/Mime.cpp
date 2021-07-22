@@ -29,7 +29,7 @@ template<typename T>
 int CastInt(T in)
 {
 	int out = (int)in;
-	LgiAssert(out == in);
+	LAssert(out == in);
 	return out;
 }
 
@@ -95,7 +95,7 @@ void CreateMimeBoundary(char *Buf, int BufLen)
 	if (Buf)
 	{
 		static int Count = 1;
-		sprintf_s(Buf, BufLen, "--%x-%x-%x--", (int)LgiCurrentTime(), (int)(uint64)LgiGetCurrentThread(), Count++);
+		sprintf_s(Buf, BufLen, "--%x-%x-%x--", (int)LCurrentTime(), (int)(uint64)LgiGetCurrentThread(), Count++);
 	}
 }
 
@@ -132,7 +132,7 @@ public:
 			ssize_t w =
 			#endif
 			Out->Write(MimeEol, 2);
-			LgiAssert(w == 2);
+			LAssert(w == 2);
 		}
 	}
 
@@ -220,7 +220,7 @@ public:
 				ptrdiff_t Len = d - Buf;
 				if (Out->Write(Buf, CastInt(Len)) < Len)
 				{
-					LgiAssert(!"write error");
+					LAssert(!"write error");
 					break;
 				}
 				if (!*s)
@@ -238,7 +238,7 @@ public:
 				int Ch = sprintf_s(d, sizeof(Buf)-(d-Buf), "=%2.2X", (uchar)*s);
 				if (Ch < 0)
 				{
-					LgiAssert(!"printf error");
+					LAssert(!"printf error");
 					break;
 				}
 				d += Ch;
@@ -264,7 +264,7 @@ public:
 				ptrdiff_t Len = d-Buf;
 				if (Out->Write(Buf, CastInt(Len)) < Len)
 				{
-					LgiAssert(!"write error");
+					LAssert(!"write error");
 					break;
 				}
 
@@ -369,7 +369,7 @@ public:
 		uchar b[100];
 
 		int64 Len = Buf.GetSize();
-		LgiAssert(Len < sizeof(b));
+		LAssert(Len < sizeof(b));
 		ssize_t r = Buf.Read(b, CastInt(Len));
 		if (r > 0)
 		{
@@ -398,7 +398,7 @@ public:
 					Out->Write(t, w);
 					Out->Write(MimeEol, 2);
 				}
-				else LgiAssert(0);
+				else LAssert(0);
 			}
 			else return 0;
 		}
@@ -647,18 +647,18 @@ LMime *LMime::NewChild()
 
 bool LMime::Insert(LMime *m, int Pos)
 {
-	LgiAssert(m != NULL);
+	LAssert(m != NULL);
 	if (!m)
 		return false;
 	
 	if (m->Parent)
 	{
-		LgiAssert(m->Parent->Children.HasItem(m));
+		LAssert(m->Parent->Children.HasItem(m));
 		m->Parent->Children.Delete(m, true);
 	}
 
 	m->Parent = this;
-	LgiAssert(!Children.HasItem(m));
+	LAssert(!Children.HasItem(m));
 	if (Pos >= 0)
 		Children.AddAt(Pos, m);
 	else
@@ -671,7 +671,7 @@ void LMime::Remove()
 {
 	if (Parent)
 	{
-		LgiAssert(Parent->Children.HasItem(this));
+		LAssert(Parent->Children.HasItem(this));
 		Parent->Children.Delete(this, true);
 		Parent = 0;
 	}
@@ -1169,11 +1169,11 @@ int LMime::GMimeText::GMimeDecode::Parse(LStringPipe *Source, ParentState *State
 	if (!Mime->CreateTempData())
 	{
 		LOG("CreateTempData failed.\n");
-		LgiAssert(!"CreateTempData failed.");
+		LAssert(!"CreateTempData failed.");
 		return Status;
 	}
 	
-	LgiAssert(Mime->DataStore != NULL);
+	LAssert(Mime->DataStore != NULL);
 
 	// Read the headers..
 	LStringPipe HeaderBuf;
@@ -1646,7 +1646,7 @@ ssize_t LMime::GMimeBinary::GMimeWrite::Push(LStreamI *Dest, LStreamEnd *End)
 				}
 
 				// Check we've written out all the data
-				LgiAssert(Written < Header[2]);
+				LAssert(Written < Header[2]);
 				if (Written < Header[2])
 				{
 					return 0;

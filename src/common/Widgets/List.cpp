@@ -393,7 +393,7 @@ void LListItem::OnMeasure(LPoint *Info)
 			Info->x = 22 + (s ? s->X() : 0);
 		}
 		
-		LFont *f = Parent ? Parent->GetFont() : SysFont;
+		LFont *f = Parent ? Parent->GetFont() : LSysFont;
 		Info->y = MAX(16, f->GetHeight() + 2); // the default height
 	}
 }
@@ -421,10 +421,10 @@ LDisplayString *LListItem::GetDs(int Col, int FitTo)
 	{
 		LFont *f = GetFont();
 		if (!f && Parent) f = Parent->GetFont();
-		if (!f) f = SysFont;
+		if (!f) f = LSysFont;
 
 		const char *Text = d->Str[Col] ? d->Str[Col] : GetText(Col);
-		LgiAssert((NativeInt)Text != 0xcdcdcdcd &&
+		LAssert((NativeInt)Text != 0xcdcdcdcd &&
 				  (NativeInt)Text != 0xfdfdfdfd);
 		d->Display[Col] = new LDisplayString(f, Text?Text:(char*)"");
 		if (d->Display[Col] && FitTo > 0)
@@ -516,7 +516,7 @@ void LListItem::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 					if (Img >= 0)
 					{
 					    int CenterY = Ctx.y1 + ((Ctx.Y() - Parent->GetImageList()->TileY()) >> 1);
-					    LgiAssert(CenterY >= 0);
+					    LAssert(CenterY >= 0);
 					    
 						Parent->GetImageList()->Draw(pDC, Ctx.x1+1, CenterY, Img, Background);
 					}
@@ -680,7 +680,7 @@ void LList::OnItemSelect(LArray<LListItem*> &It)
 	if (It.Length())
 	{
 		Keyboard = (int)Items.IndexOf(It[0]);
-		LgiAssert(Keyboard >= 0);
+		LAssert(Keyboard >= 0);
 		
 		LHashTbl<PtrKey<LListItem*>, bool> Sel;
 		for (int n=0; n<It.Length(); n++)
@@ -1202,7 +1202,7 @@ bool LList::OnKey(LKey &k)
 				{
 					if (k.Down())
 					{
-						uint64 Now = LgiCurrentTime();
+						uint64 Now = LCurrentTime();
 						LStringPipe p;
 						if (d->KeyBuf && Now < d->KeyLast + 1500)
 						{
@@ -1271,7 +1271,7 @@ bool LList::OnKey(LKey &k)
 	return Status;
 }
 
-LgiCursor LList::GetCursor(int x, int y)
+LCursor LList::GetCursor(int x, int y)
 {
 	LItemColumn *Resize, *Over;
 	HitColumn(x, y, Resize, Over);
@@ -1374,7 +1374,7 @@ void LList::OnMouseClick(LMouse &m)
 					{
 						// Could be drag'n'drop operation
 						// Or just a select
-						int64 StartHandler = LgiCurrentTime();
+						int64 StartHandler = LCurrentTime();
 
 						// this will get set if 'this' is deleted.
 						bool DeleteFlag = false;
@@ -1395,7 +1395,7 @@ void LList::OnMouseClick(LMouse &m)
 						d->DeleteFlag = 0;
 
 						// Check if the handler hung for a long time...
-						uint64 Now = LgiCurrentTime();
+						uint64 Now = LCurrentTime();
 						HandlerHung = Now - StartHandler > 200;
 						if (!HandlerHung && !m.Double() && !m.IsContextMenu())
 						{
@@ -2227,7 +2227,7 @@ void LList::Empty()
 	{
 		ForAllItems(i)
 		{
-			LgiAssert(i->Parent == this);
+			LAssert(i->Parent == this);
 			i->Parent = 0;
 			DeleteObj(i);
 		}
@@ -2496,7 +2496,7 @@ void LList::PourAll()
 			d->VisibleColumns++;
 		}
 
-		// printf("%u - ScrollX=%i VisCol=%i Cols=%i\n", (uint32)LgiCurrentTime(), ScrollX, d->VisibleColumns, d->Columns);
+		// printf("%u - ScrollX=%i VisCol=%i Cols=%i\n", (uint32)LCurrentTime(), ScrollX, d->VisibleColumns, d->Columns);
 		SetScrollBars(d->VisibleColumns < d->Columns, false);
 		UpdateScrollBars();
 	}
@@ -2512,7 +2512,7 @@ static LColour Tint(LColour back, double amt)
 void LList::OnPaint(LSurface *pDC)
 {
 	#if LList_ONPAINT_PROFILE
-	int Start = LgiCurrentTime(), t1, t2, t3, t4, t5;
+	int Start = LCurrentTime(), t1, t2, t3, t4, t5;
 	#endif
 	
 	if (!Lock(_FL))
@@ -2535,7 +2535,7 @@ void LList::OnPaint(LSurface *pDC)
 	// printf("ListPaint SelFore=%s SelBack=%s Back=%s %f NonFocusBack=%s\n", SelFore.GetStr(), SelBack.GetStr(), Back.GetStr(), NonFocusBackAmt, NonFocusBack.GetStr());
 	
 	#if LList_ONPAINT_PROFILE
-	t1 = LgiCurrentTime();
+	t1 = LCurrentTime();
 	#endif
 
 	// Check icon column status then draw
@@ -2554,7 +2554,7 @@ void LList::OnPaint(LSurface *pDC)
 	PaintColumnHeadings(pDC);
 
 	#if LList_ONPAINT_PROFILE
-	t2 = LgiCurrentTime();
+	t2 = LCurrentTime();
 	#endif
 
 	// Draw items
@@ -2629,7 +2629,7 @@ void LList::OnPaint(LSurface *pDC)
 	Unlock();
 
 	#if LList_ONPAINT_PROFILE
-	int64 End = LgiCurrentTime();
+	int64 End = LCurrentTime();
 	printf("LList::OnPaint() pour=%i headers=%i items=%i\n", (int) (t1-Start), (int) (t2-t1), (int) (End-t2));
 	#endif
 }
@@ -2694,7 +2694,7 @@ int LList::GetContentSize(int Index)
 		{
 			LFont *f = i->GetFont();
 			if (!f) f = GetFont();
-			if (!f) f = SysFont;
+			if (!f) f = LSysFont;
 
 			const char *Text = i->d->Str[Index] ? i->d->Str[Index] : i->GetText(Index);
 			if (s && s->IsTruncated())
@@ -2719,7 +2719,7 @@ int LList::GetContentSize(int Index)
 	// Measure the heading too
 	LItemColumn *Col = Columns[Index];
 	LFont *f = GetFont();
-	LgiAssert(f != 0);
+	LAssert(f != 0);
 	if (f)
 	{
 		LDisplayString h(f, Col->Name());

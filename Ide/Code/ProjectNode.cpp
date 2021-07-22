@@ -227,7 +227,7 @@ bool ProjectNode::Load(LDocView *Edit, NodeView *Callback)
 		if (sLocalCache)
 			Status = Edit->Open(sLocalCache);
 		else
-			LgiAssert(!"No LocalCache");
+			LAssert(!"No LocalCache");
 	}
 	else
 	{
@@ -262,9 +262,9 @@ bool ProjectNode::Save(LDocView *Edit, NodeView *Callback)
 					}
 				}
 			}
-			else LgiAssert(!"Editbox save failed.");
+			else LAssert(!"Editbox save failed.");
 		}
-		else LgiAssert(!"No LocalCache");
+		else LAssert(!"No LocalCache");
 	}
 	else
 	{
@@ -793,7 +793,7 @@ IdeDoc *ProjectNode::Open()
 
 	if (Processing)
 	{
-		LgiAssert(!"Not recursive");
+		LAssert(!"Not recursive");
 	}
 
 	if (!Processing)
@@ -1114,7 +1114,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 									// Create the node
 									IdeCommon *Com = Insert->GetSubFolder(Project, p[i], true);												
 									Insert = dynamic_cast<ProjectNode*>(Com);
-									LgiAssert(Insert);
+									LAssert(Insert);
 								}
 							}
 							
@@ -1259,7 +1259,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 			}
 			else
 			{
-				LgiAssert(!"Unknown file type");
+				LAssert(!"Unknown file type");
 			}
 		}
 	}
@@ -1359,7 +1359,7 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 		ProjectNode *c = dynamic_cast<ProjectNode*>(i);
 		if (!c)
 		{
-			LgiAssert(!"Not a node?");
+			LAssert(!"Not a node?");
 			break;
 		}
 

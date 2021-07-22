@@ -166,7 +166,7 @@ struct GVarRef
 	{
 		if (Index < 0)
 		{
-			LgiAssert(!"Invalid reference");
+			LAssert(!"Invalid reference");
 			return "NoRef";
 		}
 
@@ -177,7 +177,7 @@ struct GVarRef
 		char *b = Buf[Cur++];
 		if (Cur >= 8) Cur = 0;
 
-		LgiAssert(Scope <= SCOPE_GLOBAL);
+		LAssert(Scope <= SCOPE_GLOBAL);
 		sprintf_s(b, GETSTR_BUF_SIZE, "%c%i", Names[Scope], Index);
 		return b;		
 	}
@@ -275,7 +275,7 @@ protected:
 				return 0;
 			
 			default:
-				LgiAssert(!"Really?");
+				LAssert(!"Really?");
 				break;
 		}
 

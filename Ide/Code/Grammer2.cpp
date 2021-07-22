@@ -277,7 +277,7 @@ ParseRule::ParseRule(GToken &t, int &i)
 				else
 				{
 					printf("Invalid rule line %i: '%s'\n", i-1, s);
-					LgiAssert(0);
+					LAssert(0);
 					break;
 				}
 			}
@@ -343,12 +343,12 @@ bool ParseRule::Eval(ParseContext &c, int d)
 		if (!Rule)
 		{
 			printf("The rule '%s' is not in the grammar.\n", LinkToRule);
-			LgiAssert(0);
+			LAssert(0);
 		}
 		if (this == Rule)
 		{
 			printf("The rule '%s' is self referencing.\n", LinkToRule);
-			LgiAssert(0);
+			LAssert(0);
 		}
 		
 		// printf("Mapping '%s' in '%s'\n", Rule->Me(), Me());

@@ -532,7 +532,7 @@ void NonPrintable(uint64 ch, uint8_t *&out, ssize_t &len)
 			*out++ = 'r';
 			len -= 2;
 		}
-		else LgiAssert(0);
+		else LAssert(0);
 	}
 	else if (ch == '\n')
 	{
@@ -542,7 +542,7 @@ void NonPrintable(uint64 ch, uint8_t *&out, ssize_t &len)
 			*out++ = 'n';
 			len -= 2;
 		}
-		else LgiAssert(0);
+		else LAssert(0);
 	}
 	else if (len > 0)
 	{
@@ -712,7 +712,7 @@ void GDebugContext::OnFileLine(const char *File, int Line, bool CurrentIp)
 	if (!File || Line < 1)
 	{
 		LgiTrace("%s:%i - Error: No File or Line... one or both must be valid.\n", _FL);
-		LgiAssert(!"Invalid Param");
+		LAssert(!"Invalid Param");
 		return;
 	}
 

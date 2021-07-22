@@ -288,13 +288,13 @@ ResDialogCtrl::ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, LXmlTag *load) 
 		if (Dlg)
 		{
 			SetStr(Dlg->Symbols->FindRef(r));
-			LgiAssert(GetStr());
+			LAssert(GetStr());
 
 			if (!GetStr()) // oh well we should have one anyway... fix things up so to speak.
 				SetStr(Dlg->Symbols->CreateStr());
 		}
 
-		LgiAssert(GetStr());
+		LAssert(GetStr());
 	}
 	else if (Dlg->CreateSymbols)
 	{
@@ -349,7 +349,7 @@ void ResDialogCtrl::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 	for (LViewI *w: View()->IterateViews())
 	{
 		ResDialogCtrl *c = dynamic_cast<ResDialogCtrl*>(w);
-		LgiAssert(c);
+		LAssert(c);
 		if (c)
 		{
 			l.Insert(c);
@@ -432,7 +432,7 @@ bool ResDialogCtrl::SetStr(ResString *s)
 	if (_Str == s)
 	{
 		if (_Str)
-			LgiAssert(_Str->Refs.HasItem(this));
+			LAssert(_Str->Refs.HasItem(this));
 		return true;
 	}
 
@@ -440,7 +440,7 @@ bool ResDialogCtrl::SetStr(ResString *s)
 	{
 		if (!_Str->Refs.HasItem(this))
 		{
-			LgiAssert(!"Refs incorrect.");
+			LAssert(!"Refs incorrect.");
 			return false;
 		}
 
@@ -453,7 +453,7 @@ bool ResDialogCtrl::SetStr(ResString *s)
 	{
 		if (_Str->Refs.HasItem(this))
 		{
-			LgiAssert(!"Refs already has us.");
+			LAssert(!"Refs already has us.");
 			return false;
 		}
 
@@ -508,7 +508,7 @@ void ResDialogCtrl::StrFromRef(int Ref)
 	if (!GetStr())
 	{
 		LgiTrace("%s:%i - String with ref '%i' missing.\n", _FL, Ref);
-		LgiAssert(0);
+		LAssert(0);
 		if (SetStr(Dlg->App()->GetDialogSymbols()->CreateStr()))
 		{
 			GetStr()->SetRef(Ref);
@@ -523,7 +523,7 @@ void ResDialogCtrl::StrFromRef(int Ref)
 	// associated with a control, and thus we would
 	// duplicate the pointer to the string if we let
 	// it go by
-	// LgiAssert(Str->UpdateWnd == 0);
+	// LAssert(Str->UpdateWnd == 0);
 
 	// set the string's control to us
 	GetStr()->UpdateWnd = View();
@@ -1002,7 +1002,7 @@ LRect &CtrlDlg::GetClient(bool InClientSpace)
 	
 	Client.Set(0, 0, View()->X()-1, View()->Y()-1);
 	Client.Size(2, 2);
-	Client.y1 += LgiApp->GetMetric(LGI_MET_DECOR_CAPTION);
+	Client.y1 += LAppInst->GetMetric(LGI_MET_DECOR_CAPTION);
 	if (Client.y1 > Client.y2) Client.y1 = Client.y2;
 
 	if (InClientSpace)
@@ -1019,16 +1019,16 @@ void CtrlDlg::OnNcPaint(LSurface *pDC, LRect &r)
 	LWideBorder(pDC, r, DefaultRaisedEdge);
 
 	// Draw the title bar
-	int TitleY = LgiApp->GetMetric(LGI_MET_DECOR_CAPTION);
+	int TitleY = LAppInst->GetMetric(LGI_MET_DECOR_CAPTION);
 	LRect t = r;
 	t.y2 = t.y1 + TitleY - 1;
 	pDC->Colour(L_ACTIVE_TITLE);
 	pDC->Rectangle(&t);
 	if (GetStr())
 	{
-		LDisplayString ds(SysFont, GetStr()->Get());
-		SysFont->Fore(L_ACTIVE_TITLE_TEXT);
-		SysFont->Transparent(true);
+		LDisplayString ds(LSysFont, GetStr()->Get());
+		LSysFont->Fore(L_ACTIVE_TITLE_TEXT);
+		LSysFont->Transparent(true);
 		ds.Draw(pDC, t.x1 + 10, t.y1 + ((t.Y()-ds.Y())/2));
 	}
 
@@ -1069,8 +1069,8 @@ void CtrlText::OnPaint(LSurface *pDC)
 {
 	Client.ZOff(X()-1, Y()-1);
 	char *Text = GetStr()->Get();
-	SysFont->Fore(L_TEXT);
-	SysFont->Transparent(true);
+	LSysFont->Fore(L_TEXT);
+	LSysFont->Transparent(true);
 
 	if (Text)
 	{
@@ -1082,7 +1082,7 @@ void CtrlText::OnPaint(LSurface *pDC)
 		{
 			if ((*s == '\\' && *(s+1) == 'n') || (*s == 0))
 			{
-				LDisplayString ds(SysFont, Start, s - Start);
+				LDisplayString ds(LSysFont, Start, s - Start);
 				ds.Draw(pDC, 0, y, &Client);
 				y += 15;
 				Start = s + 2;
@@ -1116,8 +1116,8 @@ void CtrlEditbox::OnPaint(LSurface *pDC)
 	pDC->Rectangle(&r);
 
 	char *Text = GetStr()->Get();
-	SysFont->Fore(Enabled() ? L_TEXT : L_LOW);
-	SysFont->Transparent(true);
+	LSysFont->Fore(Enabled() ? L_TEXT : L_LOW);
+	LSysFont->Transparent(true);
 	if (Text)
 	{
 		if (Password)
@@ -1126,14 +1126,14 @@ void CtrlEditbox::OnPaint(LSurface *pDC)
 			if (t)
 			{
 				for (char *p = t; *p; p++) *p = '*';
-				LDisplayString ds(SysFont, t);
+				LDisplayString ds(LSysFont, t);
 				ds.Draw(pDC, 4, 4);
 				DeleteArray(t);
 			}
 		}
 		else
 		{
-			LDisplayString ds(SysFont, Text);
+			LDisplayString ds(LSysFont, Text);
 			ds.Draw(pDC, 4, 4);
 		}
 	}
@@ -1199,9 +1199,9 @@ void CtrlCheckbox::OnPaint(LSurface *pDC)
 	char *Text = GetStr()->Get();
 	if (Text)
 	{
-		SysFont->Fore(L_TEXT);
-		SysFont->Transparent(true);
-		LDisplayString ds(SysFont, Text);
+		LSysFont->Fore(L_TEXT);
+		LSysFont->Transparent(true);
+		LDisplayString ds(LSysFont, Text);
 		ds.Draw(pDC, r.x2 + 10, r.y1-2);
 	}
 
@@ -1249,14 +1249,14 @@ void CtrlButton::OnPaint(LSurface *pDC)
 	
 	// Draw the ctrl
 	LWideBorder(pDC, r, DefaultRaisedEdge);
-	SysFont->Fore(L_TEXT);
+	LSysFont->Fore(L_TEXT);
 
 	if (ValidStr(Text))
 	{
-		SysFont->Back(L_MED);
-		SysFont->Transparent(false);
+		LSysFont->Back(L_MED);
+		LSysFont->Transparent(false);
 
-		LDisplayString ds(SysFont, Text);
+		LDisplayString ds(LSysFont, Text);
 		ds.Draw(pDC, r.x1 + ((r.X()-ds.X())/2), r.y1 + ((r.Y()-ds.Y())/2), &r);
 	}
 	else
@@ -1293,11 +1293,11 @@ void CtrlGroup::OnPaint(LSurface *pDC)
 	r.y1 += 5;
 	LWideBorder(pDC, r, EdgeXpChisel);
 	r.y1 -= 5;
-	SysFont->Fore(L_TEXT);
-	SysFont->Back(L_MED);
-	SysFont->Transparent(false);
+	LSysFont->Fore(L_TEXT);
+	LSysFont->Back(L_MED);
+	LSysFont->Transparent(false);
 	char *Text = GetStr()->Get();
-	LDisplayString ds(SysFont, Text);
+	LDisplayString ds(LSysFont, Text);
 	ds.Draw(pDC, r.x1 + 8, r.y1 - 2);
 
 	// Draw children
@@ -1363,9 +1363,9 @@ void CtrlRadio::OnPaint(LSurface *pDC)
 	char *Text = GetStr()->Get();
 	if (Text)
 	{
-		SysFont->Fore(L_TEXT);
-		SysFont->Transparent(true);
-		LDisplayString ds(SysFont, Text);
+		LSysFont->Fore(L_TEXT);
+		LSysFont->Transparent(true);
+		LDisplayString ds(LSysFont, Text);
 		ds.Draw(pDC, r.x2 + 10, r.y1-2);
 	}
 
@@ -1391,10 +1391,10 @@ void CtrlTab::ListChildren(List<ResDialogCtrl> &l, bool Deep)
 {
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(GetParent());
 	CtrlTabs *Par = dynamic_cast<CtrlTabs*>(Ctrl);
-	LgiAssert(Par);
+	LAssert(Par);
 
 	auto MyIndex = Par->Tabs.IndexOf(this);
-	LgiAssert(MyIndex >= 0);
+	LAssert(MyIndex >= 0);
 
 	List<LViewI> *CList = (Par->Current == MyIndex) ? &Par->Children : &Children;
 	for (auto w: *CList)
@@ -1550,7 +1550,7 @@ void CtrlTabs::OnPaint(LSurface *pDC)
 	for (auto Tab: Tabs)
 	{
 		char *Str = Tab->GetStr() ? Tab->GetStr()->Get() : 0;
-		LDisplayString ds(SysFont, Str);
+		LDisplayString ds(LSysFont, Str);
 
 		int Width = 12 + ds.X();
 		LRect t(x, Title.y1 + 2, x + Width - 1, Title.y2 - 1);
@@ -1583,9 +1583,9 @@ void CtrlTabs::OnPaint(LSurface *pDC)
 		t.Size(2, 2);
 		t.y2 += 2;
 
-		SysFont->Fore(L_TEXT);
-		SysFont->Back(L_MED);
-		SysFont->Transparent(false);
+		LSysFont->Fore(L_TEXT);
+		LSysFont->Back(L_MED);
+		LSysFont->Transparent(false);
 		ds.Draw(pDC, t.x1 + ((t.X()-ds.X())/2), t.y1 + ((t.Y()-ds.Y())/2), &t);
 
 		x += Width + ((Current == i) ? 2 : 1);
@@ -2035,13 +2035,13 @@ void CtrlList::OnPaint(LSurface *pDC)
 		{
 			LWideBorder(pDC, r, DefaultRaisedEdge);
 
-			SysFont->Fore(L_TEXT);
-			SysFont->Back(L_MED);
-			SysFont->Transparent(false);
+			LSysFont->Fore(L_TEXT);
+			LSysFont->Back(L_MED);
+			LSysFont->Transparent(false);
 
 			const char *Str = c->GetStr()->Get();
 			if (!Str) Str = "";
-			LDisplayString ds(SysFont, Str);
+			LDisplayString ds(LSysFont, Str);
 			ds.Draw(pDC, r.x1 + 2, r.y1 + ((r.Y()-ds.Y())/2) - 1, &r);
 		}
 	}
@@ -2100,11 +2100,11 @@ void CtrlComboBox::OnPaint(LSurface *pDC)
 
 	// Text
 	char *Text = GetStr()->Get();
-	SysFont->Fore(L_TEXT);
-	SysFont->Transparent(true);
+	LSysFont->Fore(L_TEXT);
+	LSysFont->Transparent(true);
 	if (Text)
 	{
-		LDisplayString ds(SysFont, Text);
+		LDisplayString ds(LSysFont, Text);
 		ds.Draw(pDC, 4, 4);
 	}
 
@@ -2189,9 +2189,9 @@ void CtrlTree::OnPaint(LSurface *pDC)
 	LWideBorder(pDC, r, DefaultSunkenEdge);
 	pDC->Colour(Rgb24(255, 255, 255), 24);
 	pDC->Rectangle(&r);
-	SysFont->Colour(L_TEXT, L_WORKSPACE);
-	SysFont->Transparent(true);
-	LDisplayString ds(SysFont, "Tree");
+	LSysFont->Colour(L_TEXT, L_WORKSPACE);
+	LSysFont->Transparent(true);
+	LDisplayString ds(LSysFont, "Tree");
 	ds.Draw(pDC, r.x1 + 3, r.y1 + 3, &r);
 
 	// Draw any rubber band
@@ -2284,8 +2284,8 @@ void CtrlCustom::OnPaint(LSurface *pDC)
 		strcat(s, Control);
 	}
 
-	SysFont->Colour(L_TEXT, L_WORKSPACE);
-	LDisplayString ds(SysFont, s);
+	LSysFont->Colour(L_TEXT, L_WORKSPACE);
+	LDisplayString ds(LSysFont, s);
 	ds.Draw(pDC, r.x1+2, r.y1+1, &r);
 
 	// Draw any rubber band
@@ -2335,7 +2335,7 @@ void ResDialogCtrl::EnumCtrls(List<ResDialogCtrl> &Ctrls)
 	for (LViewI *c: View()->IterateViews())
 	{
 		ResDialogCtrl *dc = dynamic_cast<ResDialogCtrl*>(c);
-		LgiAssert(dc);
+		LAssert(dc);
 		dc->EnumCtrls(Ctrls);
 	}
 }
@@ -2543,7 +2543,7 @@ LRect ResDialog::Res_GetPos(ResObject *Obj)
 	if (Obj)
 	{
 		ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>((ResDialogCtrl*)Obj);
-		LgiAssert(Ctrl);
+		LAssert(Ctrl);
 		if (Ctrl)
 		{
 			return Ctrl->View()->GetPos();
@@ -2576,7 +2576,7 @@ bool ResDialog::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
 		return false;
 
 	Ctrl->StrFromRef(Ref);
-	LgiAssert(Ctrl && Ctrl->GetStr());
+	LAssert(Ctrl && Ctrl->GetStr());
 	return Ctrl->GetStr() != 0;
 }
 
@@ -2688,7 +2688,7 @@ void ResDialog::Create(LXmlTag *load, SerialiseContext *Ctx)
 			if (Ctx)
 				Read(load, *Ctx);
 			else
-				LgiAssert(0);
+				LAssert(0);
 		}
 		else
 		{
@@ -2901,7 +2901,7 @@ void RemapAllRefs(LXmlTag *t, List<StringId> &Strs)
 			// if this assert failes then no map for this
 			// string was found. every incomming string needs
 			// to be remapped
-			LgiAssert(0);
+			LAssert(0);
 		}
 	}
 
@@ -2967,7 +2967,7 @@ void ResDialog::Paste()
 					if (t->IsTag("string"))
 					{
 						// string tag
-						LgiAssert(Symbols);
+						LAssert(Symbols);
 
 						ResString *Str = Symbols->CreateStr();
 						SerialiseContext Ctx;
@@ -2976,7 +2976,7 @@ void ResDialog::Paste()
 							// setup remap object, so that we can make all the strings
 							// unique
 							StringId *Id = new StringId;
-							LgiAssert(Id);
+							LAssert(Id);
 							Id->Str = Str;
 							Id->OldRef = Str->GetRef();
 							NextRef = Str->SetRef(Id->NewRef = AppWindow->GetUniqueStrRef(NextRef + 1));
@@ -3473,7 +3473,7 @@ ResDialogCtrl *ResDialog::CreateCtrl(int Tool, LXmlTag *load)
 		}
 		default:
 		{
-			LgiAssert(!"No control factory handler.");
+			LAssert(!"No control factory handler.");
 			break;
 		}
 	}
@@ -3823,7 +3823,7 @@ void ResDialog::CleanSymbols()
 		// remove duplicate string entries
 		for (auto c: l)
 		{
-			LgiAssert(c->GetStr());
+			LAssert(c->GetStr());
 			c->GetStr()->UnDuplicate();
 		}
 	}
@@ -3909,7 +3909,7 @@ const char *TextOfCtrl(ResDialogCtrl *Ctrl)
 		case UI_COLUMN:
 		case UI_TAB:
 		{
-			LgiAssert(0);
+			LAssert(0);
 			break;
 		}
 

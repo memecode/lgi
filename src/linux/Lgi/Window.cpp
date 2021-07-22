@@ -133,8 +133,8 @@ LWindow::~LWindow()
 		g_signal_handler_disconnect(Wnd, d->DestroySig);
 	}
 
-	if (LgiApp->AppWnd == this)
-		LgiApp->AppWnd = NULL;
+	if (LAppInst->AppWnd == this)
+		LAppInst->AppWnd = NULL;
 
     if (_Root)
 	{
@@ -180,7 +180,7 @@ bool LWindow::SetIcon(const char *FileName)
 		else
 		{
 			#if defined(LINUX)
-			LgiApp->SetApplicationIcon(FileName);
+			LAppInst->SetApplicationIcon(FileName);
 			#endif
 			
 			#if _MSC_VER
@@ -374,7 +374,7 @@ gboolean LWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 		case GDK_KEY_PRESS:
 		case GDK_KEY_RELEASE:
 		{
-			auto ModFlags = LgiApp->GetKeyModFlags();
+			auto ModFlags = LAppInst->GetKeyModFlags();
 			auto e = &event->key;
 			#define KEY(name) GDK_KEY_##name
 
@@ -524,7 +524,7 @@ gboolean LWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 				{
 					if (ToLower(k.c16) == 'q')
 					{
-						auto AppWnd = LgiApp->AppWnd;
+						auto AppWnd = LAppInst->AppWnd;
 						auto Wnd = AppWnd ? AppWnd : this;
 						if (Wnd->OnRequestClose(false))
 						{
@@ -792,8 +792,8 @@ LWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, 
 	}
 
 	// Wait for the data to arrive...
-	uint64_t Start = LgiCurrentTime();
-	while (LgiCurrentTime()-Start < 2000)
+	uint64_t Start = LCurrentTime();
+	while (LCurrentTime()-Start < 2000)
 	{
 		int HasData = 0;
 		for (auto d: t->Data)
@@ -925,7 +925,7 @@ bool LWindow::Attach(LViewI *p)
 				auto content = gtk_dialog_get_content_area(GTK_DIALOG(Wnd));
 				if (!content)
 				{
-					LgiAssert(!"No content area");
+					LAssert(!"No content area");
 					return false;
 				}
 				AttachPoint = GTK_CONTAINER(content);
@@ -935,14 +935,14 @@ bool LWindow::Attach(LViewI *p)
 				AttachPoint = GTK_CONTAINER(Wnd);
 			}
 
-			LgiAssert(AttachPoint != NULL);
+			LAssert(AttachPoint != NULL);
 			gtk_container_add(AttachPoint, _Root);
 
 			// Check it actually worked... (would a return value kill you GTK? no it would not)
 			auto p = gtk_widget_get_parent(_Root);
 			if (!p)
 			{
-				LgiAssert(!"Add failed");
+				LAssert(!"Add failed");
 				return false;
 			}
 
@@ -972,7 +972,7 @@ bool LWindow::OnRequestClose(bool OsShuttingDown)
 {
 	if (GetQuitOnClose())
 	{
-		LgiCloseApp();
+		LCloseApp();
 	}
 
 	return LView::OnRequestClose(OsShuttingDown);
@@ -1055,9 +1055,9 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	}
 
 	// Give key to popups
-	if (LgiApp &&
-		LgiApp->GetMouseHook() &&
-		LgiApp->GetMouseHook()->OnViewKey(v, k))
+	if (LAppInst &&
+		LAppInst->GetMouseHook() &&
+		LAppInst->GetMouseHook()->OnViewKey(v, k))
 	{
 		#if DEBUG_HANDLEVIEWKEY
 		if (Debug)

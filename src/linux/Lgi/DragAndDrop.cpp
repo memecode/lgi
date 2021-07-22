@@ -200,7 +200,7 @@ LgiDragDataGet(GtkWidget        *widget,
 													(Gtk::guchar*) string,
 													strlen(string) + 1);
 						}
-						else LgiAssert(0);
+						else LAssert(0);
 						break;
 					}
 					case GV_BINARY:
@@ -213,12 +213,12 @@ LgiDragDataGet(GtkWidget        *widget,
 													(Gtk::guchar*) v.Value.Binary.Data,
 													v.Value.Binary.Length);
 						}
-						else LgiAssert(0);
+						else LAssert(0);
 						break;
 					}
 					default:
 					{
-						LgiAssert(!"Impl this data type?");
+						LAssert(!"Impl this data type?");
 						break;
 					}
 				}
@@ -258,7 +258,7 @@ GInlineBmp DefIcon = { 32, 32, 32, DefaultIcon };
 
 int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
 {
-	LgiAssert(SourceWnd);
+	LAssert(SourceWnd);
 	if (!SourceWnd)
 		return -1;
 

@@ -196,7 +196,7 @@ bool LLayout::Pour(LRegion &r)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 

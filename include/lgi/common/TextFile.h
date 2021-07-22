@@ -133,7 +133,7 @@ public:
 		{
 			if (Rd < 4)
 			{
-				// LgiAssert(!"Initial read is too small");
+				// LAssert(!"Initial read is too small");
 				return 0;
 			}
 			else
@@ -222,7 +222,7 @@ public:
 			
 			// Now read some more data into the free space
 			Remaining = Buf.Length() - Used;
-			LgiAssert(Remaining > 0);
+			LAssert(Remaining > 0);
 			ssize_t Rd = Read(&Buf[Used], Remaining);
 			if (Rd <= 0)
 				return 0;
@@ -258,21 +258,21 @@ public:
 			switch (Type)
 			{
 				case Utf16BE:
-					LgiAssert(sizeof(ch) == 2);
+					LAssert(sizeof(ch) == 2);
 					ch = LgiSwap16(*Pos.u16);
 					Pos.u16++;
 					break;
 				case Utf16LE:
-					LgiAssert(sizeof(ch) == 2);
+					LAssert(sizeof(ch) == 2);
 					ch = *Pos.u16++;
 					break;
 				case Utf32BE:
-					LgiAssert(sizeof(ch) == 4);
+					LAssert(sizeof(ch) == 4);
 					ch = LgiSwap32(*Pos.u32);
 					Pos.u32++;
 					break;
 				case Utf32LE:
-					LgiAssert(sizeof(ch) == 4);
+					LAssert(sizeof(ch) == 4);
 					ch = *Pos.u32++;
 					break;
 				default: // Utf8

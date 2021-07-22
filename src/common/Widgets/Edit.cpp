@@ -15,7 +15,7 @@ class _OsFontType : public LFontType
 public:
 	LFont *Create(LSurface *pDC = NULL)
 	{
-		return SysFont;
+		return LSysFont;
 	}
 };
 
@@ -57,7 +57,7 @@ LEdit::LEdit(int id, int x, int y, int cx, int cy, const char *name) :
 	_OsFontType Type;
 	d = new LEditPrivate;
 
-	LDisplayString Ds(SysFont, (char*)(name?name:"A"));
+	LDisplayString Ds(LSysFont, (char*)(name?name:"A"));
 	if (cx < 0) cx = Ds.X() + 6;
 	if (cy < 0) cy = Ds.Y() + 4;
 

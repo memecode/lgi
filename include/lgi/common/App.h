@@ -9,51 +9,51 @@ typedef int							OsProcessId;
 #endif
 
 /// Returns the current process ID
-#define LgiProcessId()				(LgiApp->GetProcessId())
+#define LProcessId()				(LAppInst->GetProcessId())
 
 /// Returns a pointer to the LApp object.
 ///
 /// \warning Don't use this before you have created your LApp object. i.e. in a constructor
 /// of a global static class which is initialized before the main begins executing.
-#define LgiApp						(LApp::ObjInstance())
+#define LAppInst						(LApp::ObjInstance())
 
 /// Returns a system font pointer.
 ///
 /// \warning Don't use this before you have created your LApp object. i.e. in a constructor
 /// of a global static class which is initialized before the main begins executing.
-#define SysFont						(LgiApp->SystemNormal)
+#define LSysFont						(LAppInst->SystemNormal)
 
 /// Returns a bold system font pointer.
 ///
 /// \warning Don't use this before you have created your LApp object. i.e. in a constructor
 /// of a global static class which is initialized before the main begins executing.
-#define SysBold						(LgiApp->SystemBold)
+#define LSysBold						(LAppInst->SystemBold)
 
 /// Exits the application right now!
 ///
 /// \warning This will cause data loss if you have any unsaved data. Equivilant to exit(0).
-LgiFunc void LgiExitApp();
+LgiFunc void LExitApp();
 
 /// Closes the application gracefully.
 ///
 /// This actually causes LApp::Run() to stop processing message and return.
-#define LgiCloseApp()				LgiApp->Exit(false)
+#define LCloseApp()				LAppInst->Exit(false)
 
 #if defined(LINUX) && !defined(LGI_SDL)
-#define ThreadCheck()				LgiAssert(InThread())
+#define ThreadCheck()				LAssert(InThread())
 #else
 #define ThreadCheck()
 #endif
 
 /// Optional arguments to the LApp object
-struct GAppArguments
+struct LAppArguments
 {
 	/// Don't initialize the skinning engine.
 	bool NoSkin;
 	/// Don't do crash handling
 	bool NoCrashHandler;
 
-	GAppArguments(const char *init = NULL)
+	LAppArguments(const char *init = NULL)
 	{
 		NoSkin = false;
 		NoCrashHandler = false;
@@ -144,7 +144,7 @@ protected:
 public:
 	// Static publics
 	
-	/// Use 'LgiApp' to return a pointer to the LApp object
+	/// Use 'LAppInst' to return a pointer to the LApp object
 	static LApp *ObjInstance();
 	static class LSkinEngine *SkinEngine;
 
@@ -181,7 +181,7 @@ public:
 		/// The application's name.
 		const char *AppName,
 		/// Optional args
-		GAppArguments *ObjArgs = 0
+		LAppArguments *ObjArgs = 0
 	);
 
 	/// Destroys the object
@@ -199,7 +199,7 @@ public:
 	/// Enters the message loop.
 	bool Run
 	(
-		/// If true this function will return when the application exits (with LgiCloseApp()).
+		/// If true this function will return when the application exits (with LCloseApp()).
 		/// Otherwise if false only pending events will be processed and then the function returns.
 		bool Loop = true,
 		/// Idle callback

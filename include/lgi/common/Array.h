@@ -246,7 +246,7 @@ public:
 	{
 		if (len <= 0)
 		{
-			LgiAssert(!"Must have one element.");
+			LAssert(!"Must have one element.");
 			static Type t;
 			return t;
 		}
@@ -258,7 +258,7 @@ public:
 	{
 		if (len <= 0)
 		{
-			LgiAssert(!"Must have one element.");
+			LAssert(!"Must have one element.");
 			static Type t;
 			return t;
 		}
@@ -317,7 +317,7 @@ public:
 			if (nalloc > 1<<30)
 			{
 				#if defined(_DEBUG) && defined(_MSC_VER)
-				LgiAssert(0);
+				LAssert(0);
 				#endif
 				
 				ZeroObj(t);

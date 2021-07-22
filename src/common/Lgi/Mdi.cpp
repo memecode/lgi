@@ -38,7 +38,7 @@ public:
 		CloseOnUp = false;
 		Child = c;
 		CloseDown = false;
-		Fy = SysFont->GetHeight() + 1;
+		Fy = LSysFont->GetHeight() + 1;
 		Title.ZOff(-1, -1);
 		
 		#if MDI_TAB_STYLE
@@ -164,7 +164,7 @@ bool GMdiChild::Detach()
 	GMdiParent *par = dynamic_cast<GMdiParent*>(GetParent());
 	if (par)
 	{
-		LgiAssert(par->d->Children.HasItem(this));
+		LAssert(par->d->Children.HasItem(this));
 		par->d->Children.Delete(this);
 	}
 	#endif
@@ -301,9 +301,9 @@ void GMdiChild::OnPaint(LSurface *pDC)
 		DeleteObj(it);
 	}
 	
-	SysFont->Colour(Top ? LC_ACTIVE_TITLE_TEXT : LC_INACTIVE_TITLE_TEXT, Top ? LC_ACTIVE_TITLE : LC_INACTIVE_TITLE);
-	SysFont->Transparent(false);
-	LDisplayString ds(SysFont, n);
+	LSysFont->Colour(Top ? LC_ACTIVE_TITLE_TEXT : LC_INACTIVE_TITLE_TEXT, Top ? LC_ACTIVE_TITLE : LC_INACTIVE_TITLE);
+	LSysFont->Transparent(false);
+	LDisplayString ds(LSysFont, n);
 	ds.Draw(pDC, d->System.x2 + 1, d->Title.y1 + 1, &d->Title);
 	
 	// System button
@@ -458,7 +458,7 @@ void GMdiChild::OnMouseClick(LMouse &m)
 		}
 	}
 }
-LgiCursor GMdiChild::GetCursor(int x, int y)
+LCursor GMdiChild::GetCursor(int x, int y)
 {
 	GMdiDrag Hit = d->HitTest(x, y);
 	if (Hit & DragLeft)
@@ -570,7 +570,7 @@ void GMdiChild::Raise()
 				if (wnd)
 					gdk_window_raise(wnd);
 				else
-					LgiAssert(0);
+					LAssert(0);
 			#elif WINNATIVE
 				SetWindowPos(Handle(), HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 			#else
@@ -611,7 +611,7 @@ void GMdiChild::Lower()
 				if (wnd)
 					gdk_window_lower(wnd);
 				else
-					LgiAssert(0);
+					LAssert(0);
 			#elif WINNATIVE
 				SetWindowPos(Handle(), HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 			#else
@@ -778,7 +778,7 @@ GMdiChild *GMdiParent::IsChild(LViewI *View)
 			{
 				return c;
 			}
-			LgiAssert(0);
+			LAssert(0);
 			break;
 		}
 	}

@@ -1180,7 +1180,7 @@ GFilter::IoStatus GdcIco::WriteImage(LStream *Out, LSurface *pDC)
 
 	// Write icon itself
 	BMP_WININFO	Header;
-	LgiAssert(sizeof(Header) == 40);
+	LAssert(sizeof(Header) == 40);
 	Header.Size = sizeof(Header);
 	Header.Sx = Width;
 	Header.Sy = Height * 2;
@@ -1318,7 +1318,7 @@ GFilterFactory::~GFilterFactory()
 		{
 			// we aren't in the list
 			// thats bad
-			LgiAssert(0);
+			LAssert(0);
 		}
 	}
 }
@@ -1547,8 +1547,8 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
 				{
 					SIZE  Size = { -1, -1 };
 					ULONG State = 0;
-					int64 Start = LgiCurrentTime();
-					while (LgiCurrentTime() - Start < 3000) // just in case it gets stuck....
+					int64 Start = LCurrentTime();
+					while (LCurrentTime() - Start < 3000) // just in case it gets stuck....
 					{
 						hr = Ctx->GetStateInfo(&State, &Size, false);
 						if (SUCCEEDED(hr))
@@ -1605,7 +1605,7 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
 	if (FilterStatus == GFilter::IoComponentMissing)
 	{
 		const char *c = Filter->GetComponentName();
-		LgiAssert(c != NULL);
+		LAssert(c != NULL);
 		if (c)
 		{
 			GToken t(c, ",");

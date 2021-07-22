@@ -352,7 +352,7 @@ bool StorageItemImpl::SerializeHeader(LFile &f, bool Write)
 					{
 						// write failed!!
 						DWORD Error = GetLastError();
-						LgiAssert(0);
+						LAssert(0);
 					}
 					#endif
 				}
@@ -482,7 +482,7 @@ bool StorageItemImpl::SerializeObject(GSubFilePtr &f, bool Write)
 							IgnoreStorageErrors = true;
 						}
 
-						LgiAssert(0);
+						LAssert(0);
 						Status = false;
 					}
 				}
@@ -558,14 +558,14 @@ StorageItem *StorageItemImpl::GetChild()
 
 			// Allocate directory
 			uint32 Pos = Header->DirLoc;
-			LgiAssert(Header->DirAlloc <= 40000); // this it arbitary, increase if needed
+			LAssert(Header->DirAlloc <= 40000); // this it arbitary, increase if needed
 
 			Dir = new StorageItemHeader[Header->DirAlloc];
 			if (Dir)
 			{
 				// Seek to directory
 				bool GotLoc = Tree->File->SetPos(Header->DirLoc) == Header->DirLoc;
-				LgiAssert(GotLoc);
+				LAssert(GotLoc);
 				if (GotLoc)
 				{
 					// Read directory in one big hit... the speed oh the SPEEEED!
@@ -599,7 +599,7 @@ StorageItem *StorageItemImpl::GetChild()
 
 					int DirLength = Header->DirCount * sizeof(StorageItemHeader);
 					bool GotLength = Tree->File->Read(Dir, DirLength) == DirLength;
-					LgiAssert(GotLength);
+					LAssert(GotLength);
 					if (GotLength)
 					{
 						// Now allocate a list of children items
@@ -651,7 +651,7 @@ StorageItem *StorageItemImpl::GetChild()
 									}
 									else
 									{
-										LgiAssert(Last != NULL);
+										LAssert(Last != NULL);
 										Last->Next = Item;
 										Item->Prev = Last;
 									}
@@ -755,7 +755,7 @@ bool StorageItemImpl::DirChange()
 
 			// push header out to disk
 			bool GotPos = Tree->File->SetPos(Header->DirLoc) == Header->DirLoc;
-			LgiAssert(GotPos);
+			LAssert(GotPos);
 			if (GotPos)
 			{
 				int DirLength = Header->DirAlloc * sizeof(StorageItemHeader);
@@ -769,7 +769,7 @@ bool StorageItemImpl::DirChange()
 				for (i=0; i<Header->DirAlloc; i++)
 					Dir[i].SwapBytes();
 				#endif
-				LgiAssert(w == DirLength);
+				LAssert(w == DirLength);
 				if (w == DirLength)
 				{
 					// success
@@ -816,7 +816,7 @@ StorageItem *StorageItemImpl::CreateChild(StorageObj *Obj)
 
 			// add new child at the start
 			Child = new StorageItemImpl(Dir);
-			LgiAssert(Child != NULL);
+			LAssert(Child != NULL);
 			if (!Child)
 			{
 				// The unlock would normal by performed by DirChange
@@ -852,7 +852,7 @@ StorageItem *StorageItemImpl::CreateSub(StorageObj *Obj)
 		{
 			// add new child
 			New = new StorageItemImpl(Dir + Header->DirCount);
-			LgiAssert(New != NULL);
+			LAssert(New != NULL);
 			if (!New)
 			{
 				Tree->Unlock();
@@ -978,7 +978,7 @@ bool StorageItemImpl::InsertSub(StorageItem *ObjVirtual, uint32 At)
 				else
 				{
 					// Broken object list
-					LgiAssert(0);
+					LAssert(0);
 					Tree->Unlock();
 					return false;
 				}
@@ -1047,7 +1047,7 @@ bool StorageItemImpl::DeleteAllChildren()
 
 				// write it
 				int64 NewLoc = Tree->File->SetPos(Header->DirLoc);
-				LgiAssert(NewLoc == Header->DirLoc);
+				LAssert(NewLoc == Header->DirLoc);
 				if (NewLoc == Header->DirLoc)
 				{
 					#ifdef __BIG_ENDIAN__
@@ -1060,7 +1060,7 @@ bool StorageItemImpl::DeleteAllChildren()
 					for (i=0; i<Header->DirAlloc; i++)
 						Dir[i].SwapBytes();
 					#endif
-					LgiAssert(WroteDir);
+					LAssert(WroteDir);
 				}
 				else
 				{
@@ -1109,7 +1109,7 @@ bool StorageItemImpl::DeleteChild(StorageItem *ObjVirtual)
 		Tree->Lock(_FL))
 	{
 		bool HeaderPtrOk = Obj->Header && (Obj->Header >= Dir && Obj->Header < Dir + Header->DirCount);
-		LgiAssert(HeaderPtrOk);
+		LAssert(HeaderPtrOk);
 		if (HeaderPtrOk)
 		{
 			uint32 Index = Obj->Header - Dir;
@@ -1603,7 +1603,7 @@ StorageKitImpl::StorageKitImpl(char *filename) : LMutex("StorageKitImpl2")
 	Root = 0;
 	Version = 0;
 
-	LgiAssert(sizeof(StorageItemHeader) == 32);
+	LAssert(sizeof(StorageItemHeader) == 32);
 
 	FileName = filename;
 	if (IsOk())
@@ -1639,7 +1639,7 @@ StorageKitImpl::~StorageKitImpl()
 bool StorageKitImpl::IsOk()
 {
 	bool Status = (this != 0) && (File != 0);
-	LgiAssert(Status);
+	LAssert(Status);
 	return Status;
 }
 
@@ -1880,7 +1880,7 @@ bool StorageKitImpl::Compact(Progress *p, bool Interactive, StorageValidator *va
 		}
 		else
 		{
-			LgiAssert(0);
+			LAssert(0);
 		}
 		#endif
 
@@ -1984,7 +1984,7 @@ bool StorageKitImpl::Compact(Progress *p, bool Interactive, StorageValidator *va
 								{
 									// the root object's directory never moves
 									// from loc: 64 so this should never occur
-									LgiAssert(0);
+									LAssert(0);
 								}
 
 								// update the block to reflect the changes we just made
@@ -2131,7 +2131,7 @@ bool StorageKitImpl::AttachItem(StorageItem *ItemVirtual, StorageItem *ToVirtual
 		if (Item == To)
 		{
 			// You can't attach to yourself...!?!
-			LgiAssert(0);
+			LAssert(0);
 		}
 		else if (Lock(_FL))
 		{

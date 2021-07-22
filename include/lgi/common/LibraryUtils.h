@@ -5,7 +5,7 @@
 #if defined(_DEBUG) && defined(WIN32)
 #define BreakPoint	_asm { int 3 }
 #else
-#define BreakPoint	LgiAssert(0);
+#define BreakPoint	LAssert(0);
 #endif
 */
 

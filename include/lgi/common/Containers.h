@@ -69,7 +69,7 @@ public:
 			#else
 			auto Cur = GetCurrentThreadId();
 			bool Ok = Thread == Cur;
-			LgiAssert(Ok);
+			LAssert(Ok);
 			return Ok;
 			#endif
 		}
@@ -226,7 +226,7 @@ public:
 			CHECK_THREAD
 			if (i)
 			{
-				LgiAssert(Lst);
+				LAssert(Lst);
 				i->Delete(Cur, i);
 				return true;
 			}
@@ -259,7 +259,7 @@ protected:
 	LstBlk *NewBlock(LstBlk *Where)
 	{
 		LstBlk *i = new LstBlk;
-		LgiAssert(i != NULL);
+		LAssert(i != NULL);
 		if (!i)
 			return NULL;
 
@@ -276,15 +276,15 @@ protected:
 			{
 				// Append
 				i->Prev->Next = i;
-				LgiAssert(LastObj == Where);
+				LAssert(LastObj == Where);
 				LastObj = i;
 			}
 		}
 		else
 		{
 			// First object
-			LgiAssert(FirstObj == 0);
-			LgiAssert(LastObj == 0);
+			LAssert(FirstObj == 0);
+			LAssert(LastObj == 0);
 			FirstObj = LastObj = i;
 		}
 
@@ -295,14 +295,14 @@ protected:
 	{
 		if (!i)
 		{
-			LgiAssert(!"No ptr.");
+			LAssert(!"No ptr.");
 			return false;
 		}
 
 		if (i->Prev != 0 && i->Next != 0)
 		{
-			LgiAssert(FirstObj != i);
-			LgiAssert(LastObj != i);
+			LAssert(FirstObj != i);
+			LAssert(LastObj != i);
 		}
 
 		if (i->Prev)
@@ -311,7 +311,7 @@ protected:
 		}
 		else
 		{
-			LgiAssert(FirstObj == i);
+			LAssert(FirstObj == i);
 			FirstObj = i->Next;
 		}
 
@@ -321,7 +321,7 @@ protected:
 		}
 		else
 		{
-			LgiAssert(LastObj == i);
+			LAssert(LastObj == i);
 			LastObj = i->Prev;
 		}
 
@@ -359,7 +359,7 @@ protected:
 			// Fall through to the local "non-full" insert...
 		}
 
-		LgiAssert(!i->Full());
+		LAssert(!i->Full());
 		if (Index < 0)
 			Index = i->Count;
 		else if (Index < i->Count)
@@ -368,7 +368,7 @@ protected:
 		i->Count++;
 		Items++;
 
-		LgiAssert(i->Count <= ITEM_PTRS);
+		LAssert(i->Count <= ITEM_PTRS);
 		return true;
 	}
 
@@ -511,7 +511,7 @@ protected:
 				}
 				else
 				{
-					LgiAssert(0);
+					LAssert(0);
 				}
 
 				return false;
@@ -575,22 +575,22 @@ public:
 				size_t Offset = Len - Base;
 				if (!(Offset <= i.i->Count))
 				{
-					LgiAssert(!"Offset error");
+					LAssert(!"Offset error");
 				}
 				i.i->Count = (uint8_t) (Len - Base);
-				LgiAssert(i.i->Count >= 0 && i.i->Count < ITEM_PTRS);
+				LAssert(i.i->Count >= 0 && i.i->Count < ITEM_PTRS);
 				while (i.i->Next)
 				{
 					DeleteBlock(i.i->Next);
 				}
 				Items = Len;
 			}
-			else LgiAssert(!"Iterator invalid.");
+			else LAssert(!"Iterator invalid.");
 		}
 		else
 		{
 			// Increase list size...
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 		}
 				
 		VALIDATE();
@@ -702,7 +702,7 @@ public:
 				Status = Insert(LastObj, p, -1);				
 		}
 		VALIDATE();
-		LgiAssert(Status);
+		LAssert(Status);
 		return Status;
 	}
 
@@ -725,7 +725,7 @@ public:
 		VALIDATE();
 		size_t Base = -1;
 		auto It = GetPtr(p, &Base);
-		LgiAssert(Base != -1);
+		LAssert(Base != -1);
 		ssize_t Idx = It.In() ? Base + It.Cur : -1;
 		VALIDATE();
 		return Idx;
@@ -835,7 +835,7 @@ public:
 					delete i->Ptr[n];
 					#ifdef _DEBUG
 					if (Objs != Items)
-						LgiAssert(!"Do you have self deleting objects?");
+						LAssert(!"Do you have self deleting objects?");
 					#endif
 					i->Ptr[n] = NULL;
 				}
@@ -911,7 +911,7 @@ public:
 				i += ITEM_PTRS;
 			else
 			{
-				LgiAssert(!"Can't allocate enough blocks?");
+				LAssert(!"Can't allocate enough blocks?");
 				return *this;
 			}
 		}
@@ -935,13 +935,13 @@ public:
 					out = out->Next;
 					if (!out)
 					{
-						LgiAssert(!"We should have pre-allocated everything...");
+						LAssert(!"We should have pre-allocated everything...");
 						return *this;
 					}
 				}
 
 				int Cp = MIN(out->Remaining(), in->Count - pos);
-				LgiAssert(Cp > 0);
+				LAssert(Cp > 0);
 				memcpy(out->Ptr + out->Count, in->Ptr + pos, Cp * sizeof(T*));
 				out->Count += Cp;
 				pos += Cp;
@@ -975,7 +975,7 @@ public:
 			{
 				if (!i->Ptr[k])
 				{
-					LgiAssert(!"NULL pointer in LstBlk.");
+					LAssert(!"NULL pointer in LstBlk.");
 					return false;
 				}
 				else
@@ -988,7 +988,7 @@ public:
 			{
 				if (i->Prev)
 				{
-					LgiAssert(!"First object's 'Prev' should be NULL.");
+					LAssert(!"First object's 'Prev' should be NULL.");
 					return false;
 				}
 			}
@@ -996,7 +996,7 @@ public:
 			{
 				if (i->Next)
 				{
-					LgiAssert(!"Last object's 'Next' should be NULL.");
+					LAssert(!"Last object's 'Next' should be NULL.");
 					return false;
 				}
 			}
@@ -1004,7 +1004,7 @@ public:
 			{
 				if (i->Prev != Prev)
 				{
-					LgiAssert(!"Middle LstBlk 'Prev' incorrect.");
+					LAssert(!"Middle LstBlk 'Prev' incorrect.");
 					return false;
 				}
 			}
@@ -1014,7 +1014,7 @@ public:
 
 		if (Items != n)
 		{
-			LgiAssert(!"Item count cache incorrect.");
+			LAssert(!"Item count cache incorrect.");
 			return false;
 		}
 		#endif

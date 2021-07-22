@@ -290,7 +290,7 @@ public:
 		bool IsExecutableTarget = TargetType && !stricmp(TargetType, "Executable");
 		bool IsDynamicLibrary	= TargetType && !stricmp(TargetType, "DynamicLibrary");
 		
-		LgiAssert(Log);
+		LAssert(Log);
 		if (!Log)
 			return false;
 		
@@ -333,7 +333,7 @@ public:
 				PlatformStaticLibExt = "a";
 				break;
 			default:
-				LgiAssert(0);
+				LAssert(0);
 				break;
 		}
 
@@ -757,7 +757,7 @@ public:
 						LStringPipe Rules;
 						IdeProject *Dep;
 						
-						uint64 Last = LgiCurrentTime();
+						uint64 Last = LCurrentTime();
 						int Count = 0;
 						auto It = Deps.begin();
 						for (Dep=*It; Dep && !IsCancelled(); Dep=*(++It), Count++)
@@ -787,7 +787,7 @@ public:
 								
 								LArray<char*> AllDeps;
 								Dep->GetAllDependencies(AllDeps, Platform);
-								LgiAssert(AllDeps.Length() > 0);
+								LAssert(AllDeps.Length() > 0);
 								AllDeps.Sort(StrSort);
 
 								Rules.Print("%s : ", Buf);
@@ -829,7 +829,7 @@ public:
 								Rules.Print("\n\n");
 							}
 							
-							uint64 Now = LgiCurrentTime();
+							uint64 Now = LCurrentTime();
 							if (Now - Last > 1000)
 							{
 								Last = Now;
@@ -1312,7 +1312,7 @@ BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, bool rele
 			else if (!stricmp(Comp, "Cygwin"))
 				Compiler = Cygwin;
 			else
-				LgiAssert(!"Unknown compiler.");
+				LAssert(!"Unknown compiler.");
 		}
 	}
 
@@ -1338,13 +1338,13 @@ BuildThread::~BuildThread()
 	}
 	else LgiTrace("%s:%i - No sub process to interrupt.\n", _FL);
 
-	uint64 Start = LgiCurrentTime();
+	uint64 Start = LCurrentTime();
 	bool Killed = false;
 	while (!IsExited())
 	{
 		LgiSleep(10);
 
-		if (LgiCurrentTime() - Start > STOP_BUILD_TIMEOUT &&
+		if (LCurrentTime() - Start > STOP_BUILD_TIMEOUT &&
 			SubProc)
 		{
 			if (Killed)
@@ -1361,7 +1361,7 @@ BuildThread::~BuildThread()
 				bool b = SubProc->Kill();
 				Killed = true;
 				LgiTrace("%s:%i - Sub process killed.\n", _FL, b);
-				Start = LgiCurrentTime();
+				Start = LCurrentTime();
 			}
 		}
 	}
@@ -1491,7 +1491,7 @@ LString BuildThread::FindExe()
 									i->File = f;
 								/*
 								else
-									LgiAssert(0);
+									LAssert(0);
 								*/
 							}
 
@@ -1578,7 +1578,7 @@ LString BuildThread::FindExe()
 				#endif
 				default:
 				{
-					LgiAssert(!"Impl me.");
+					LAssert(!"Impl me.");
 					break;
 				}
 			}
@@ -1855,7 +1855,7 @@ int BuildThread::Main()
 				ADD_PATHS(LibPath, DefLibPath);
 				ADD_PATHS(Path, DefPath);
 			}
-			else LgiAssert(!"Invalid Arch");
+			else LAssert(!"Invalid Arch");
 
 			TmpArgs.Printf(" -f \"%s\"", Makefile.Get());
 
@@ -2026,7 +2026,7 @@ int BuildThread::Main()
 							if (p.Length() > 1)
 								FileDev->SetCurrentFolder(p[1]);
 							else
-								LgiAssert(!"No folder for cd?");
+								LAssert(!"No folder for cd?");
 						}
 						else
 						{
@@ -2075,7 +2075,7 @@ int BuildThread::Main()
 		if (Err)
 			Proj->GetApp()->PostEvent(M_BUILD_ERR, 0, (GMessage::Param)NewStr(Err));
 	}
-	else LgiAssert(0);
+	else LAssert(0);
 	
 	return 0;
 }
@@ -2099,7 +2099,7 @@ bool IdeProject::OnNode(const char *Path, ProjectNode *Node, bool Add)
 {
 	if (!Path || !Node)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 
@@ -2710,7 +2710,7 @@ LString IdeProject::GetExecutable(IdePlatform Platform)
 			}
 			default:
 			{
-				LgiAssert(0);
+				LAssert(0);
 				printf("%s:%i - Unknown platform.\n", _FL);
 				return LString();
 			}
@@ -2753,7 +2753,7 @@ LAutoString IdeProject::GetFullPath()
 	LAutoString Status;
 	if (!d->FileName)
 	{
-		// LgiAssert(!"No path.");
+		// LAssert(!"No path.");
 		return Status;
 	}
 
@@ -2769,7 +2769,7 @@ LAutoString IdeProject::GetFullPath()
 
 	if (!proj)
 	{
-		// LgiAssert(!"All projects have a relative path?");
+		// LAssert(!"All projects have a relative path?");
 		return Status; // No absolute path in the parent projects?
 	}
 
@@ -2975,7 +2975,7 @@ bool IdeProject::SaveFile()
 	if (d->UserFileDirty)
 	{
 		LFile f;
-		LgiAssert(d->UserFile.Get());
+		LAssert(d->UserFile.Get());
 		if (f.Open(d->UserFile, O_WRITE))
 		{
 			f.SetSize(0);
@@ -4032,7 +4032,7 @@ int IdeTree::OnDrop(LArray<LDragData> &Data, LPoint p, int KeyState)
 						i->Detach();
 						if (Src->LXmlTag::Parent)
 						{
-							LgiAssert(Src->LXmlTag::Parent->Children.HasItem(Src));
+							LAssert(Src->LXmlTag::Parent->Children.HasItem(Src));
 							Src->LXmlTag::Parent->Children.Delete(Src);
 						}
 						
@@ -4082,7 +4082,7 @@ AddFilesProgress::AddFilesProgress(LViewI *par)
 	Cancel = false;
 	Msg = NULL;
 	SetParent(par);
-	Ts = LgiCurrentTime();
+	Ts = LCurrentTime();
 	LRect r(0, 0, 140, 100);
 	SetPos(r);
 	MoveSameScreen(par);
@@ -4117,7 +4117,7 @@ void AddFilesProgress::Value(int64 val)
 {
 	v = val;
 
-	uint64 Now = LgiCurrentTime();
+	uint64 Now = LCurrentTime();
 	if (Visible())
 	{
 		if (Now - Ts > 200)

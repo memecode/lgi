@@ -70,7 +70,7 @@ bool DataDlgTools::ProcessField(DataDlgField *f, bool Write, char *OptionOverrid
 						{
 							g.Set(Pass);
 							// g.Serialize(Options, f->GetOption(), Write);
-							LgiAssert(!"Not impl");
+							LAssert(!"Not impl");
 						}
 					}
 					else
@@ -81,7 +81,7 @@ bool DataDlgTools::ProcessField(DataDlgField *f, bool Write, char *OptionOverrid
 				else // Opts -> Ctrl
 				{
 					// bool HasPass = g.Serialize(Options, f->GetOption(), Write);
-					LgiAssert(!"Not impl");
+					LAssert(!"Not impl");
 					// Dlg->SetCtrlEnabled(f->GetCtrl(), HasPass);
 				}
 				break;
@@ -132,7 +132,7 @@ bool DataDlgTools::ProcessField(DataDlgField *f, bool Write, char *OptionOverrid
 			}
 			default:
 			{
-				LgiAssert(0);
+				LAssert(0);
 				return false;
 				break;
 			}

@@ -356,7 +356,7 @@ public:
 	LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int Id, int Pos, const char *Shortcut = 0);
 	virtual ~LMenuItem();
 
-	LMenuItem &operator =(const LMenuItem &m) { LgiAssert(!"This shouldn't be used anywhere"); return *this; }
+	LMenuItem &operator =(const LMenuItem &m) { LAssert(!"This shouldn't be used anywhere"); return *this; }
 
 	/// Creates a sub menu off the item
 	LSubMenu *Create();

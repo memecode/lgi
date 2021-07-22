@@ -32,7 +32,7 @@ protected:
 		IoProgress(LSsh *ssh)
 		{
 			s = ssh;
-			Start = LgiCurrentTime();
+			Start = LCurrentTime();
 			Pos = Length = 0;
 		}
 
@@ -59,7 +59,7 @@ protected:
 			Pos = i;
 			if (s->TxtLabel)
 			{
-				double Sec = (double)(LgiCurrentTime()-Start)/1000.0;
+				double Sec = (double)(LCurrentTime()-Start)/1000.0;
 				double Rate = (double)i / Sec;
 				double TotalTime = Length / MAX(Rate, 1);
 				double RemainingTime = TotalTime - Sec;
@@ -356,7 +356,7 @@ public:
 				if (bytes > 0)
 				{
 					auto has_esc = Buf.Find("\x1B", 0, logged+bytes);
-					LgiAssert(has_esc < 0);
+					LAssert(has_esc < 0);
 
 					Log->Write(Buf.Get() + logged, bytes);
 					logged += bytes;

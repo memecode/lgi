@@ -98,7 +98,7 @@ GLanguageId StrLang::GetLang()
 
 void StrLang::SetLang(GLanguageId i)
 {
-	LgiAssert(i);
+	LAssert(i);
 	Lang = i;
 }
 
@@ -142,14 +142,14 @@ ResString::ResString(ResStringGroup *grp, int init_ref)
 
 	if (Group)
 	{
-		LgiAssert(!Group->Strs.HasItem(this));
+		LAssert(!Group->Strs.HasItem(this));
 
 		Group->Strs.Insert(this);
 		Group->LList::Insert(this);
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 
 	// LgiStackTrace("%p::ResString\n", this);
@@ -168,7 +168,7 @@ ResString::~ResString()
 		Group->App()->OnObjDelete(this);
 
 		if (!Group->Strs.Delete(this))
-			LgiAssert(0);
+			LAssert(0);
 
 		Group->LList::Remove(this);
 	}
@@ -183,7 +183,7 @@ ResString::~ResString()
 
 int ResString::SetRef(int r)
 {
-	LgiAssert(r != 0 && r != -1);
+	LAssert(r != 0 && r != -1);
 
 	if (r != Ref)
 	{
@@ -201,7 +201,7 @@ int ResString::SetRef(int r)
 
 int ResString::SetId(int id)
 {
-	LgiAssert(id != 0);
+	LAssert(id != 0);
 	if (Id != id)
 	{
 		Id = id;
@@ -251,7 +251,7 @@ char *ResString::Get(GLanguageId Lang)
 		}
 		else
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return 0;
 		}
 	}
@@ -276,7 +276,7 @@ void ResString::Set(const char *p, GLanguageId Lang)
 		}
 		else
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return;
 		}
 	}
@@ -302,7 +302,7 @@ void ResString::Set(const char *p, GLanguageId Lang)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 }
 
@@ -432,7 +432,7 @@ bool ResString::Read(LXmlTag *t, SerialiseContext &Ctx)
 			{
 				if (Ctx.Format == Lr8File)
 				{
-					LgiAssert(LIsUtf8(v->GetName()));
+					LAssert(LIsUtf8(v->GetName()));
 					Set(v->GetValue(), Lang->Id);
 				}
 				else if (Ctx.Format == CodepageFile)
@@ -454,7 +454,7 @@ bool ResString::Read(LXmlTag *t, SerialiseContext &Ctx)
 					}
 				}
 				else
-					LgiAssert(0);
+					LAssert(0);
 			}
 		}
 	}
@@ -526,7 +526,7 @@ bool ResString::Write(LXmlTag *t, SerialiseContext &Ctx)
 				String = Mem = EncodeXml(s->GetStr());
 			}
 			else
-				LgiAssert(0);
+				LAssert(0);
 
 			if (ValidStr(String))
 			{
@@ -625,7 +625,7 @@ int ResString::NewId()
 			s->Update();
 		}
 	}
-	else LgiAssert(!"Invalid ptrs.");
+	else LAssert(!"Invalid ptrs.");
 
 	return Id;
 }
@@ -1325,7 +1325,7 @@ void ResStringGroup::SetLanguages()
 	}
 
 	// CurrentLang = 0;
-	// LgiAssert(CurrentLang < Lang.Length());
+	// LAssert(CurrentLang < Lang.Length());
 
 	Lang.Length(l.Length() + ((EnglishFound) ? 0 : 1));
 
@@ -1336,7 +1336,7 @@ void ResStringGroup::SetLanguages()
 		if (stricmp(li->Id, "en") != 0) // !English
 		{
 			Lang[n] = GFindLang(li->Id);
-			LgiAssert(Lang[n]);
+			LAssert(Lang[n]);
 			n++;
 		}
 	}
@@ -1541,7 +1541,7 @@ void ResStringGroup::Create(LXmlTag *load, SerialiseContext *ctx)
 		if (ctx)
 			Read(load, *ctx);
 		else
-			LgiAssert(0);
+			LAssert(0);
 	}
 }
 

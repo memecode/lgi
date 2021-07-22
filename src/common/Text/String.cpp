@@ -48,7 +48,7 @@ char *strcpy_s(char *dest, size_t dest_size, const char *src)
 	
 	// Assert if we ran out of buffer.
 	if (*src != 0)
-		LgiAssert(!"Buffer too small");
+		LAssert(!"Buffer too small");
 	
 	return Start;
 }
@@ -83,7 +83,7 @@ char *strcat_s(char *dest, size_t dest_size, const char *src)
 	
 	// Assert if we ran out of buffer.
 	if (*src != 0)
-		LgiAssert(!"Buffer too small");
+		LAssert(!"Buffer too small");
 	
 	return Start;
 }
@@ -101,7 +101,7 @@ char *strnchr(const char *s, char c, NativeInt Len)
 				return (char*)s + i;
 		}
 	}
-	else LgiAssert(!"Bad params");
+	else LAssert(!"Bad params");
 
 	return 0;
 }
@@ -813,7 +813,7 @@ char16 *TrimStrW(const char16 *s, const char16 *Delim)
 
 bool MatchStrW(const char16 *a, const char16 *b)
 {
-	LgiAssert(0);
+	LAssert(0);
 	return 0;
 }
 

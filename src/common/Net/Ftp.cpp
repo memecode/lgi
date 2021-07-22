@@ -588,7 +588,7 @@ LString IFtp::GetDir()
 		LgiTrace("%s:%i - error: " LPrintfSSizeT "\n", _FL, Error);
 		if (IsOpen())
 		{
-			LgiAssert(0);
+			LAssert(0);
 		}
 	}
 
@@ -648,7 +648,7 @@ bool IFtp::CreateDir(const char *Dir)
 		printf("%s:%i - error: " LPrintfSSizeT "\n", _FL, Error);
 		if (IsOpen())
 		{
-			LgiAssert(0);
+			LAssert(0);
 		}
 	}
 
@@ -696,7 +696,7 @@ bool IFtp::UpDir()
 		printf("%s:%i - error: " LPrintfSSizeT "\n", _FL, Error);
 		if (IsOpen())
 		{
-			LgiAssert(0);
+			LAssert(0);
 		}
 	}
 
@@ -865,7 +865,7 @@ bool IFtp::RenameFile(const char *From, const char *To)
 		printf("%s:%i - error: " LPrintfSSizeT "\n", _FL, Error);
 		if (IsOpen())
 		{
-			LgiAssert(0);
+			LAssert(0);
 		}
 	}
 
@@ -1145,7 +1145,7 @@ bool IFtp::SetupData(bool Binary)
 			{
 				LStreamI *nstream = Socket->Clone();
 				LSocket *nsock = dynamic_cast<LSocket*>(nstream);
-				LgiAssert(nsock != NULL);
+				LAssert(nsock != NULL);
 				d->Data.Reset(nsock);
 			}
 			else
@@ -1157,7 +1157,7 @@ bool IFtp::SetupData(bool Binary)
 
 		if (!d->Data)
 		{
-			LgiAssert(!"No data socket");
+			LAssert(!"No data socket");
 			LgiTrace("%s:%i - No data socket, Socket=%p.\n", _FL, Socket.Get());
 		}
 		else
@@ -1286,7 +1286,7 @@ bool IFtp::SetPerms(const char *File, LPermissions Perms)
 
 	if (Perms.IsWindows)
 	{
-		LgiAssert(!"Wrong perms type.");
+		LAssert(!"Wrong perms type.");
 		return false;
 	}
 
@@ -1311,7 +1311,7 @@ bool IFtp::SetPerms(const char *File, LPermissions Perms)
 		printf("%s:%i - error: " LPrintfSSizeT "\n", _FL, Error);
 		if (IsOpen())
 		{
-			LgiAssert(0);
+			LAssert(0);
 		}
 	}
 

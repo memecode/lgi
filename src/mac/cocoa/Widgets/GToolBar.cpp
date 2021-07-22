@@ -326,7 +326,7 @@ LImageList::LImageList(int x, int y, LSurface *pDC)
 			for (int y=0; y<Y(); y++)
 			{
 				uchar *a = (*Alpha)[y];
-				LgiAssert(a);
+				LAssert(a);
 				for (int x=0; x<X(); x++)
 				{
 					COLOUR c = Get(x, y);
@@ -341,7 +341,7 @@ LImageList::LImageList(int x, int y, LSurface *pDC)
 		for (int y=0; y<Y(); y++)
 		{
 			COLOUR *p = (COLOUR*) (*this)[y];
-			LgiAssert(p);
+			LAssert(p);
 			COLOUR *e = p + X();
 			while (p < e)
 			{
@@ -435,7 +435,7 @@ void LImageList::Draw(LSurface *pDest, int Dx, int Dy, int Image, int Flags)
 
 				BOOL Status = false;
 				if (GdcD->AlphaBlend &&
-					!LgiApp->IsWine())
+					!LAppInst->IsWine())
 				{
 					HDC hDest = pDest->StartDC();
 					HDC hSrc = StartDC();
@@ -1207,7 +1207,7 @@ LToolBar::LToolBar()
 		d->Font = SysFontType.Create();
 		if (d->Font)
 		{
-			d->Font->PointSize(min(d->Font->PointSize(), SysFont->PointSize()));
+			d->Font->PointSize(min(d->Font->PointSize(), LSysFont->PointSize()));
 			d->Font->Colour(0);
 			d->Font->Bold(false);
 			d->Font->Transparent(true);

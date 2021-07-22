@@ -106,12 +106,12 @@ ssize_t ConvertBase64ToBinary(uchar *Binary, ssize_t OutBuf, const char *Base64,
 			OutBuf--;
 			if (Base64[2] != '=')
 			{
-				LgiAssert(OutBuf > 0);
+				LAssert(OutBuf > 0);
 				*Binary++ = (Temp[1] << 4) | (Temp[2] >> 2);
 				OutBuf--;
 				if (Base64[3] != '=')
 				{
-					LgiAssert(OutBuf > 0);
+					LAssert(OutBuf > 0);
 					*Binary++ = (Temp[2] << 6) | (Temp[3]);
 					OutBuf--;
 				}

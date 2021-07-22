@@ -94,7 +94,7 @@ public:
 	ULONG STDMETHODCALLTYPE Release()
 	{
 		int i = --Count;
-		LgiAssert(i >= 0);
+		LAssert(i >= 0);
 		if (TraceRefs)
 			LgiTrace("%s:%i - %p::Release %i\n", _FL, this, Count);
 		if (i <= 0)
@@ -182,7 +182,7 @@ public:
 				Value = ((int64) Desc->nFileSizeHigh << 32) | Desc->nFileSizeLow;
 				return true;
 			default:
-				LgiAssert(!"Unknown field.");
+				LAssert(!"Unknown field.");
 				break;
 		}
 		
@@ -191,7 +191,7 @@ public:
 	
 	bool SetVariant(const char *Name, LVariant &Value, char *Array = NULL) override
 	{
-		LgiAssert(!"Impl me.");
+		LAssert(!"Impl me.");
 		return false;
 	}
 
@@ -374,7 +374,7 @@ public:
 		return S_OK;
 	}
 	
-	#define NotImplemented { LgiAssert(!"Function not implemented."); return E_NOTIMPL; }
+	#define NotImplemented { LAssert(!"Function not implemented."); return E_NOTIMPL; }
 	
 	HRESULT STDMETHODCALLTYPE CopyTo(IStream *pstm, ULARGE_INTEGER cb, ULARGE_INTEGER *pcbRead, ULARGE_INTEGER *pcbWritten) NotImplemented
 	HRESULT STDMETHODCALLTYPE Commit(DWORD grfCommitFlags) NotImplemented
@@ -418,7 +418,7 @@ public:
 
 	T* operator->() const
 	{
-		LgiAssert(ptr != 0); 
+		LAssert(ptr != 0); 
 		return ptr;
 	}
 

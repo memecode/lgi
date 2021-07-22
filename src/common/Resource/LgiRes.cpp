@@ -227,7 +227,7 @@ bool LgiStringRes::Read(LXmlTag *t, ResFileFormat Format)
 						GLanguage *OldLang = GFindOldLang(Old);
 						if (OldLang)
 						{
-							LgiAssert(OldLang->OldId == Old);
+							LAssert(OldLang->OldId == Old);
 							Res->AddLang(OldLang->Id);
 						}
 					}
@@ -349,7 +349,7 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 									"Fatal error: Couldn't get the path of the running\nexecutable. Can't find resource file."),
 									"LResources::LResources");
 			LgiTrace("%s:%i - Fatal error: Couldn't get the path of the running\nexecutable. Can't find resource file.", _FL);
-			LgiExitApp();
+			LExitApp();
 		}
 	}
 
@@ -400,7 +400,7 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 			LgiMsg(0, Msg, "LResources::LResources");
 
 			// Exit
-			LgiExitApp();
+			LExitApp();
 		}
 	}
 }
@@ -505,7 +505,7 @@ bool LResources::Load(const char *FileName)
 	if (!FileName)
 	{
 		LgiTrace("%s:%i - No filename.\n", _FL);
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 
@@ -513,7 +513,7 @@ bool LResources::Load(const char *FileName)
 	if (!F.Open(FileName, O_READ))
 	{
 		LgiTrace("%s:%i - Couldn't open '%s'.\n", _FL, FileName);
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 
@@ -544,7 +544,7 @@ bool LResources::Load(const char *FileName)
 	if (!x.Read(Root, &F, 0))
 	{
 		LgiTrace("%s:%i - ParseXmlFile failed: %s\n", _FL, x.GetErrorMsg());
-		// LgiAssert(0);
+		// LAssert(0);
 		return false;
 	}
 	
@@ -701,9 +701,9 @@ public:
         pDC->Colour(LColour(0xff, 0, 0));
         pDC->Line(c.x1, c.y1, c.x2, c.y2);
         pDC->Line(c.x2, c.y1, c.x1, c.y2);
-        LDisplayString ds(SysFont, n);
-        SysFont->Transparent(true);
-        SysFont->Fore(LColour(L_TEXT));
+        LDisplayString ds(LSysFont, n);
+        LSysFont->Transparent(true);
+        LSysFont->Fore(LColour(L_TEXT));
         ds.Draw(pDC, 3, 0);
     }
 };
@@ -768,7 +768,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 			{
 				LList *Lst = dynamic_cast<LList*>(Parent);
 
-				LgiAssert(Lst != NULL);
+				LAssert(Lst != NULL);
 
 				if (Lst)
 				{
@@ -826,7 +826,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 				if (!Wnd)
 				{
 					// Not a "ResObject"
-					LgiAssert(!"Not a ResObject");
+					LAssert(!"Not a ResObject");
 					DeleteObj(v);
 				}
 			}
@@ -845,7 +845,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 		}
 	}
 	
-	LgiAssert(Wnd != NULL);
+	LAssert(Wnd != NULL);
 	return Wnd;
 }
 
@@ -916,7 +916,7 @@ struct ResObjectCallback : public LCss::ElementCallback<ResObject>
 	
 	ResObject *GetParent(ResObject *obj)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return NULL;
 	}
 	
@@ -1059,7 +1059,7 @@ void LResources::Res_Attach(ResObject *Obj, ResObject *Parent)
 		}
 		else
 		{
-			LgiAssert(p != NULL);
+			LAssert(p != NULL);
 		}
 	}
 }
@@ -1204,7 +1204,7 @@ bool LgiMenuRes::Read(LXmlTag *t, ResFileFormat Format)
 					LgiStringRes *s = new LgiStringRes(Res);
 					if (s && s->Read(i, Format))
 					{
-					    LgiAssert(!Strings.Find(s->Ref)); // If this fires the string has a dupe ref
+					    LAssert(!Strings.Find(s->Ref)); // If this fires the string has a dupe ref
 						Strings.Add(s->Ref, s);
 					}
 					else
@@ -1244,7 +1244,7 @@ GLanguage *LGetLanguageId()
 {
 	// Check for command line override
 	char Buf[64];
-	if (LgiApp->GetOption("i", Buf))
+	if (LAppInst->GetOption("i", Buf))
 	{
 		GLanguage *i = GFindLang(Buf);
 		if (i)
@@ -1252,7 +1252,7 @@ GLanguage *LGetLanguageId()
 	}
 
 	// Check for config setting
-	auto LangId = LgiApp->GetConfig("Language");
+	auto LangId = LAppInst->GetConfig("Language");
 	if (LangId)
 	{
 		GLanguage *l = GFindLang(LangId);
@@ -1291,7 +1291,7 @@ GLanguage *LGetLanguageId()
 
 	#elif defined(LINUX) && !defined(LGI_SDL)
 
-	GLibrary *WmLib = LgiApp->GetWindowManagerLib();
+	GLibrary *WmLib = LAppInst->GetWindowManagerLib();
 	if (WmLib)
 	{
 		Proc_LgiWmGetLanguage GetLanguage = (Proc_LgiWmGetLanguage) WmLib->GetAddress("LgiWmGetLanguage");
@@ -1393,8 +1393,8 @@ bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, LAutoStrin
 				// p.Add("1");
 				int x = Dlg->X();
 				int y = Dlg->Y();
-				x += LgiApp->GetMetric(LGI_MET_DECOR_X) - 4;
-				y += LgiApp->GetMetric(LGI_MET_DECOR_Y) - 18;
+				x += LAppInst->GetMetric(LGI_MET_DECOR_X) - 4;
+				y += LAppInst->GetMetric(LGI_MET_DECOR_Y) - 18;
 				if (Pos)
 				{
 					Pos->ZOff(x, y);
@@ -1461,7 +1461,7 @@ bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, LAutoStrin
 					}
 					else
 					{
-						LgiAssert(0);
+						LAssert(0);
 					}
 				}
 
@@ -1550,7 +1550,7 @@ bool LMenuLoader::Load(LgiMenuRes *MenuRes, LXmlTag *Tag, ResFileFormat Format, 
 				}
 				else
 				{
-					LgiAssert(0);
+					LAssert(0);
 				}
 			}
 			else if (t->IsTag("menuitem"))
@@ -1574,7 +1574,7 @@ bool LMenuLoader::Load(LgiMenuRes *MenuRes, LXmlTag *Tag, ResFileFormat Format, 
 					}
 					else
 					{
-						LgiAssert(0);
+						LAssert(0);
 					}
 				}
 			}

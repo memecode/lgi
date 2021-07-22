@@ -47,7 +47,7 @@
 #else
 #define SSL_LIBRARY					"libssl"
 #endif
-#define HasntTimedOut()				((To < 0) || (LgiCurrentTime() - Start < To))
+#define HasntTimedOut()				((To < 0) || (LCurrentTime() - Start < To))
 
 static const char*
 	MinimumVersion					= "1.0.1g";
@@ -419,7 +419,7 @@ public:
 					SSL_CTX_use_PrivateKey_file(Server, KeyFile, SSL_FILETYPE_PEM);
 				if (!SSL_CTX_check_private_key(Server))
 				{
-					LgiAssert(0);
+					LAssert(0);
 				}
  			}
 			else
@@ -468,7 +468,7 @@ static OpenSSL *Library = 0;
 void
 SSL_locking_function(int mode, int n, const char *file, int line)
 {
-	LgiAssert(Library != NULL);
+	LAssert(Library != NULL);
 	if (Library)
 	{
 		if (!Library->Locks[n])
@@ -834,7 +834,7 @@ DebugTrace("%s:%i - BIO_get_ssl=%p\n", _FL, Ssl);
 							#endif
 
 							// Do non-block connect
-							uint64 Start = LgiCurrentTime();
+							uint64 Start = LCurrentTime();
 							int To = GetTimeout();
 							
 							IsBlocking(false);
@@ -861,7 +861,7 @@ DebugTrace("%s:%i - SSL_get_error=%i\n", _FL, err);
 									LgiTrace("%s:%i - SSL_connect crashed.\n", _FL);
 								}
 
-DebugTrace("%s:%i - SSL_connect=%i (%i of %i ms)\n", _FL, r, (int)(LgiCurrentTime() - Start), (int)To);
+DebugTrace("%s:%i - SSL_connect=%i (%i of %i ms)\n", _FL, r, (int)(LCurrentTime() - Start), (int)To);
 
 								bool TimeOut = !HasntTimedOut();
 								if (TimeOut)
@@ -910,7 +910,7 @@ DebugTrace("%s:%i - BIO_new_connect=%p\n", _FL, Bio);
 				// can quit out of the connect loop.
 				IsBlocking(false);
 
-				uint64 Start = LgiCurrentTime();
+				uint64 Start = LCurrentTime();
 				int To = GetTimeout();
 
 				long r = Library->BIO_do_connect(Bio);
@@ -1006,7 +1006,7 @@ DebugTrace("%s:%i - SSL_new=%p\n", _FL, Ssl);
 						int r = Library->SSL_set_bio(Ssl, Bio, Bio);
 DebugTrace("%s:%i - SSL_set_bio=%i\n", _FL, r);
 		
-						uint64 Start = LgiCurrentTime();
+						uint64 Start = LCurrentTime();
 						int To = GetTimeout();
 						while (HasntTimedOut())
 						{
@@ -1186,7 +1186,7 @@ void SslSocket::OnWrite(const char *Data, ssize_t Len)
 		const char *End = Data + Len;
 		while (Data < End)
 		{
-			LgiAssert(*Data != '\n' || d->LastWasCR);
+			LAssert(*Data != '\n' || d->LastWasCR);
 			d->LastWasCR = *Data == '\r';
 			Data++;
 		}
@@ -1204,7 +1204,7 @@ void SslSocket::OnRead(char *Data, ssize_t Len)
 		const char *End = Data + Len;
 		while (Data < End)
 		{
-			LgiAssert(*Data != '\n' || d->LastWasCR);
+			LAssert(*Data != '\n' || d->LastWasCR);
 			d->LastWasCR = *Data == '\r';
 			Data++;
 		}
@@ -1232,7 +1232,7 @@ ssize_t SslSocket::Write(const void *Data, ssize_t Len, int Flags)
 	{
 		if (Ssl)
 		{
-			uint64 Start = LgiCurrentTime();
+			uint64 Start = LCurrentTime();
 			int To = GetTimeout();
 
 			while (HasntTimedOut())
@@ -1263,7 +1263,7 @@ ssize_t SslSocket::Write(const void *Data, ssize_t Len, int Flags)
 	}
 	else
 	{
-		uint64 Start = LgiCurrentTime();
+		uint64 Start = LCurrentTime();
 		int To = GetTimeout();
 		while (HasntTimedOut())
 		{
@@ -1329,7 +1329,7 @@ ssize_t SslSocket::Read(void *Data, ssize_t Len, int Flags)
 		{
 			if (Ssl)
 			{
-				uint64 Start = LgiCurrentTime();
+				uint64 Start = LCurrentTime();
 				int To = GetTimeout();
 				while (HasntTimedOut())
 				{
@@ -1362,7 +1362,7 @@ DebugTrace("%s:%i - Ssl is NULL\n", _FL);
 		}
 		else
 		{
-			uint64 Start = LgiCurrentTime();
+			uint64 Start = LCurrentTime();
 			int To = GetTimeout();
 			while (HasntTimedOut())
 			{
@@ -1468,7 +1468,7 @@ void SslSocket::OnInformation(const char *Str)
 		}
 		*o++ = '\n';
 		*o++ = 0;
-		LgiAssert((o-a) <= Len);
+		LAssert((o-a) <= Len);
 				
 		Log(a, -1, SocketMsgInfo);
 		

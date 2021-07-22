@@ -142,7 +142,7 @@ public:
 			char s[256];
 			Test *t = a[i];
 			sprintf_s(s, sizeof(s), "%s->%s", GColourSpaceToString(t->Src), GColourSpaceToString(t->Dst));
-			LDisplayString ds(SysFont, s);
+			LDisplayString ds(LSysFont, s);
 			ds.Draw(pDC, x, y);
 			y += ds.Y();
 			if (t->Result.Y())
@@ -388,15 +388,15 @@ bool DbTesting()
 			{
 				if (!m->SetDate(M_DATE, &Dt))
 				{
-					LgiAssert(0);
+					LAssert(0);
 				}
 			}
 			else
 			{
-				LgiAssert(0);
+				LAssert(0);
 			}
 		}
-		else LgiAssert(0);
+		else LAssert(0);
 		
 		m->SetStr(M_LABEL, c->GetAttr("Label"));
 		m->SetInt(M_COLOUR, c->GetAsInt("Colour"));

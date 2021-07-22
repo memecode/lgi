@@ -126,7 +126,7 @@ bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a, GMessage::Param b)
 
 	#elif defined(__GTK_H__)
 
-		LgiAssert(Wnd);
+		LAssert(Wnd);
 		LViewI *View = (LViewI*) g_object_get_data(GtkCast(Wnd, g_object, GObject), "LViewI");
 		if (View)
 		{
@@ -139,7 +139,7 @@ bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a, GMessage::Param b)
 	#elif defined(MAC) && !LGI_COCOA
 	
 		#if 0
-		int64 Now = LgiCurrentTime();
+		int64 Now = LCurrentTime();
 		static int64 Last = 0;
 		static int Count = 0;
 	
@@ -192,14 +192,14 @@ bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a, GMessage::Param b)
 	
 	#else
 	
-		LgiAssert(!"Not impl.");
+		LAssert(!"Not impl.");
 	
 	#endif
 
 	return false;
 }
 
-void LgiExitApp()
+void LExitApp()
 {
 	exit(0);
 }
@@ -220,7 +220,7 @@ bool RegisterActiveXControl(char *Dll)
 			return DllRegisterServer() == S_OK;
 		}
 		#else
-		LgiAssert(!"Not impl.");
+		LAssert(!"Not impl.");
 		#endif
 	}
 
@@ -277,7 +277,7 @@ int LGetOs
 		}
 		else
 		{
-			LgiAssert(0);
+			LAssert(0);
 		}
 		#else
 		OSVERSIONINFO v;
@@ -618,7 +618,7 @@ void LgiStackTrace(const char *Msg, ...)
 {
 	LSymLookup::Addr Stack[STACK_SIZE];
 	ZeroObj(Stack);
-	LSymLookup *Lu = LgiApp ? LgiApp->GetSymLookup() : NULL;
+	LSymLookup *Lu = LAppInst ? LAppInst->GetSymLookup() : NULL;
 	if (!Lu)
 	{
 		printf("%s:%i - Failed to get sym lookup object.\n", _FL);
@@ -754,7 +754,7 @@ bool LIsRelativePath(const char *Path)
 
 bool LMakePath(char *Str, int StrSize, const char *Path, const char *File)
 {
-	LgiAssert(Str != 0 &&
+	LAssert(Str != 0 &&
 			  StrSize > 0 &&
 			  Path != 0 &&
 			  File != 0);
@@ -1003,7 +1003,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 	/*
 	#if defined(LINUX) && !defined(LGI_SDL)
 	// Ask our window manager add-on if it knows the path
-	GLibrary *WmLib = LgiApp ? LgiApp->GetWindowManagerLib() : NULL;
+	GLibrary *WmLib = LAppInst ? LAppInst->GetWindowManagerLib() : NULL;
 	if (WmLib)
 	{
 		Proc_LgiWmGetPath WmGetPath = (Proc_LgiWmGetPath) WmLib->GetAddress("LgiWmGetPath");
@@ -1097,7 +1097,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 
 			#else
 
-				LgiAssert(!"Not implemented");
+				LAssert(!"Not implemented");
 
 			#endif
 			break;
@@ -1309,7 +1309,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 
 			#else
 
-				LgiAssert(!"Impl me.");
+				LAssert(!"Impl me.");
 
 			#endif
 			break;
@@ -1344,8 +1344,8 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 			const char *Name = NULL;
 			
 			// Try and get the configured app name:
-			if (LgiApp)
-				Name = LgiApp->LBase::Name();
+			if (LAppInst)
+				Name = LAppInst->LBase::Name();
 			
 			if (!Name)
 			{
@@ -1365,7 +1365,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 			
 			if (!Name)
 			{
-				LgiAssert(0);
+				LAssert(0);
 				break;
 			}
 
@@ -1384,7 +1384,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 					if (e)
 					{
 						printf("%s:%i - FSFindFolder failed e=%i\n", _FL, e);
-						LgiAssert(0);
+						LAssert(0);
 					}
 					else
 					{
@@ -1414,11 +1414,11 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				if (pw)
 					Path = pw->pw_dir;
 				else
-					LgiAssert(0);
+					LAssert(0);
 
 			#else
 
-				LgiAssert(0);
+				LAssert(0);
 
 			#endif
 
@@ -1518,7 +1518,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				if (tempDir)
 					Path = tempDir;
 				else
-					LgiAssert(!"No tmp folder?");
+					LAssert(!"No tmp folder?");
 			
 			#elif defined LINUX
 
@@ -1526,7 +1526,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 			
 			#else
 			
-				LgiAssert(!"Impl me.");
+				LAssert(!"Impl me.");
 
 			#endif
 			break;
@@ -1563,7 +1563,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 			
 			#else
 			
-				LgiAssert(!"Impl me.");
+				LAssert(!"Impl me.");
 
 			#endif
 			break;
@@ -1600,7 +1600,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 
 			#else
 			
-				LgiAssert(!"Impl me.");
+				LAssert(!"Impl me.");
 
 			#endif
 			break;
@@ -1621,7 +1621,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 			
 			#else
 			
-				LgiAssert(!"Impl me.");
+				LAssert(!"Impl me.");
 			
 			#endif
 			break;
@@ -1695,7 +1695,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 				if (home)
 					Path = home;
 				else
-					LgiAssert(!"No home path?");
+					LAssert(!"No home path?");
 
 			#elif defined POSIX
 
@@ -1811,7 +1811,7 @@ LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
 
 			#elif defined(WIN32)
 
-				LgiAssert(0);
+				LAssert(0);
 
 			#endif
 			break;
@@ -1843,7 +1843,7 @@ LString LGetExeFile()
 		LString m;
 		m.Printf("GetModuleFileName failed err: %08.8X", GetLastError());
 		MessageBoxA(0, m, "LgiGetExeFile Error", MB_OK);
-		LgiExitApp();
+		LExitApp();
 
 	#elif defined LINUX
 
@@ -2068,7 +2068,7 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 			LMakePath(Path, sizeof(Path), *Pref, Name);
 		}
 		size_t PathLen = strlen(Path);
-		LgiAssert(PathLen < sizeof(Path));
+		LAssert(PathLen < sizeof(Path));
 
 		// printf("\t%s\n", Path);
 		if (LFileExists(Path))
@@ -2126,7 +2126,7 @@ static LARGE_INTEGER Freq = {0};
 static bool CurTimeInit = false;
 #endif
 
-uint64_t LgiCurrentTime()
+uint64_t LCurrentTime()
 {
 	#if defined WIN32
 
@@ -2412,7 +2412,7 @@ DoEvery::DoEvery(int p) // p = timeout in ms
 
 void DoEvery::Init(int p) // p = timeout in ms
 {
-	LastTime = LgiCurrentTime();
+	LastTime = LCurrentTime();
 	if (p > 0)
 	{
 		Period = p;
@@ -2421,7 +2421,7 @@ void DoEvery::Init(int p) // p = timeout in ms
 
 bool DoEvery::DoNow()
 {
-	int64 Now = LgiCurrentTime();
+	int64 Now = LCurrentTime();
 	if (LastTime + Period < Now)
 	{
 		LastTime = Now;
@@ -2527,7 +2527,7 @@ void LProfile::Add(const char *Name)
 		#if PROFILE_MICRO
 		LgiMicroTime(),
 		#else
-		LgiCurrentTime(),
+		LCurrentTime(),
 		#endif
 		Name));
 }
@@ -2539,7 +2539,7 @@ void LProfile::Add(const char *File, int Line)
 			return;
 	if (Used > BUF_SIZE - 64)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return;
 	}
 	char *Name = Buf + Used;
@@ -2548,7 +2548,7 @@ void LProfile::Add(const char *File, int Line)
 		#if PROFILE_MICRO
 		LgiMicroTime(),
 		#else
-		LgiCurrentTime(),
+		LCurrentTime(),
 		#endif
 		Name));
 }
@@ -2676,7 +2676,7 @@ bool LIsValidEmail(LString Email)
 
 	// Output
 	*o = 0;
-	LgiAssert(o - buf <= sizeof(buf));
+	LAssert(o - buf <= sizeof(buf));
 	if (strcmp(Email, buf))
 		Email.Set(buf, o - buf);
 	return true;
@@ -2720,7 +2720,7 @@ LString LGetAppForProtocol(const char *Protocol)
 			}
 		}
 	#elif defined(__GTK_H__)
-		LgiAssert(!"What to do?");
+		LAssert(!"What to do?");
 	#elif defined(MAC)
 		// Get the handler type
 		CFStringRef Type = LString(Protocol).CreateStringRef();

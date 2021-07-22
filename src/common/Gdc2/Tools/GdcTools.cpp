@@ -577,7 +577,7 @@ bool ResampleDC(LSurface *dst, LSurface *src, LRect *FromRgn, Progress *Prog)
 			break;
 		}
 		default:
-			LgiAssert(0);
+			LAssert(0);
 	}
 
 	return true;
@@ -686,7 +686,7 @@ bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *FromRgn, Progress *Prog)
 							Src = (System32BitPixel*) (*pSrc)[y >> 8];
 							if (!Src)
 							{
-								LgiAssert(0);
+								LAssert(0);
 								break;
 							}
 							Src += x >> 8;

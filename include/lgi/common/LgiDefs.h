@@ -242,9 +242,9 @@ inline T ABS(T v)
 // Asserts
 LgiFunc void							_lgi_assert(bool b, const char *test, const char *file, int line);
 #ifdef _DEBUG
-#define LgiAssert(b)					_lgi_assert(b, #b, __FILE__, __LINE__)
+#define LAssert(b)					_lgi_assert(b, #b, __FILE__, __LINE__)
 #else
-#define LgiAssert(b)					while (0)
+#define LAssert(b)					while (0)
 #endif
 
 
@@ -338,7 +338,7 @@ enum LgiEdge
 #define DefaultRaisedEdge			EdgeXpRaised
 
 // Cursors
-enum LgiCursor
+enum LCursor
 {
 	/// Blank/invisible cursor
 	LCUR_Blank,

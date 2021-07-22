@@ -192,7 +192,7 @@ public:
 			else
 			{
 				delete dc;
-				LgiAssert(!"Create memdc failed.");
+				LAssert(!"Create memdc failed.");
 			}
 		}
 		
@@ -344,7 +344,7 @@ void LImageList::Draw(LSurface *pDC, int Dx, int Dy, int Image, LColour Backgrou
 	{
 		pDC->Blt(Dx, Dy, Cache, &rSrc);
 	}
-	else LgiAssert(!"Impl me.");
+	else LAssert(!"Impl me.");
 }
 
 int LImageList::TileX()
@@ -1013,7 +1013,7 @@ LToolBar::LToolBar()
 		d->Font = SysFontType.Create();
 		if (d->Font)
 		{
-			d->Font->PointSize(MIN(d->Font->PointSize(), SysFont->PointSize()));
+			d->Font->PointSize(MIN(d->Font->PointSize(), LSysFont->PointSize()));
 			d->Font->Colour(L_TEXT);
 			d->Font->Bold(false);
 			d->Font->Transparent(true);

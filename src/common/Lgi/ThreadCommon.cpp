@@ -63,7 +63,7 @@ void LThreadWorker::Attach(LThreadTarget *o)
 	LMutex::Auto a(this, _FL);
 	if (!Owners.HasItem(o))
 	{
-		LgiAssert(o->Worker == this);
+		LAssert(o->Worker == this);
 		Owners.Add(o);
 		if (Owners.Length() == 1)
 		{
@@ -76,7 +76,7 @@ void LThreadWorker::Attach(LThreadTarget *o)
 void LThreadWorker::Detach(LThreadTarget *o)
 {
 	LMutex::Auto a(this, _FL);
-	LgiAssert(Owners.HasItem(o));
+	LAssert(Owners.HasItem(o));
 	Owners.Delete(o);
 }
 
@@ -171,7 +171,7 @@ GEventSinkPtr::~GEventSinkPtr()
 			if (tt->Lock(_FL))
 			{
 				if (!tt->Ptrs.Delete(this))
-					LgiAssert(0);
+					LAssert(0);
 				tt->Unlock();
 			}
 		}

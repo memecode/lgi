@@ -166,7 +166,7 @@ LSegment **LSegmentTree::CreateIndex()
 		{
 			LSegment **i = Index;
 			d->Root->Index(i);
-			LgiAssert(i == Index + d->Items);
+			LAssert(i == Index + d->Items);
 		}
 	}
 

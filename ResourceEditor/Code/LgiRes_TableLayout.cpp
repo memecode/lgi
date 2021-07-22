@@ -212,7 +212,7 @@ public:
 		{
 			for (auto v: *Value.Value.Lst)
 			{
-				LgiAssert(v->Type == GV_VOID_PTR);
+				LAssert(v->Type == GV_VOID_PTR);
 				ResDialogCtrl *Obj = dynamic_cast<ResDialogCtrl*>((ResObject*) v->Value.Ptr);
 				if (Obj)
 				{
@@ -404,7 +404,7 @@ struct OpHandle : public LRect
 				break;
 			}
 			default:
-				LgiAssert(!"Impl me.");
+				LAssert(!"Impl me.");
 		}
 	}
 };
@@ -590,7 +590,7 @@ public:
 							}
 						}
 
-						LgiAssert(Cell->Cell.X());
+						LAssert(Cell->Cell.X());
 						x += Cell->Cell.X();
 
 						Px += Cell->Pos.X() + CELL_SPACING;
@@ -823,7 +823,7 @@ bool CtrlTable::GetVariant(const char *Name, LVariant &Value, char *Array)
 		}
 		default:
 		{
-			LgiAssert(!"Invalid property.");
+			LAssert(!"Invalid property.");
 			return false;
 		}
 	}
@@ -898,7 +898,7 @@ bool CtrlTable::SetVariant(const char *Name, LVariant &Value, char *Array)
 		}
 		default:
 		{
-			LgiAssert(!"Invalid property.");
+			LAssert(!"Invalid property.");
 			return false;
 		}
 	}
@@ -1045,11 +1045,11 @@ void CtrlTable::OnPaint(LSurface *pDC)
 			}
 
 			#if DRAW_CELL_INDEX
-			SysFont->Colour(Blue, 24);
-			SysFont->Transparent(true);
+			LSysFont->Colour(Blue, 24);
+			LSysFont->Transparent(true);
 			char s[256];
 			sprintf(s, "%i,%i-%i,%i", c->Cell.x1, c->Cell.y1, c->Cell.X(), c->Cell.Y());
-			SysFont->Text(pDC, c->Pos.x1 + 3, c->Pos.y1 + 1, s);
+			LSysFont->Text(pDC, c->Pos.x1 + 3, c->Pos.y1 + 1, s);
 			#endif
 
 			// LgiTrace("Drawing %i,%i = %p @ %s\n", c->Cell.x1, c->Cell.y1, c, c->Pos.GetStr());
@@ -1060,11 +1060,11 @@ void CtrlTable::OnPaint(LSurface *pDC)
 		h.OnPaint(pDC);
 
 	#if DRAW_TABLE_SIZE
-	SysFont->Colour(Blue, 24);
-	SysFont->Transparent(true);
+	LSysFont->Colour(Blue, 24);
+	LSysFont->Transparent(true);
 	char s[256];
 	sprintf(s, "Cells: %i,%i", d->CellX, d->CellY);
-	SysFont->Text(pDC, 3, 24, s);
+	LSysFont->Text(pDC, 3, 24, s);
 	#endif
 
 	ResDialogCtrl::OnPaint(pDC);

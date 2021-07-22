@@ -110,7 +110,7 @@ class LUnicodeString
 				return;
 			}
 			
-			LgiAssert(!"Invalid char.");
+			LAssert(!"Invalid char.");
 			return;
 		}
 
@@ -217,7 +217,7 @@ public:
 
 		Iter &operator =(uint32_t ch)
 		{
-			LgiAssert(u->start != NULL);
+			LAssert(u->start != NULL);
 			u->Write(p, ch);
 			return *this;
 		}

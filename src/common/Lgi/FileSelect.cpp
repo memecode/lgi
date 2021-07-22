@@ -891,7 +891,7 @@ LFileSelectDlg::LFileSelectDlg(GFileSelectPrivate *select)
 	d = select;
 	SetParent(d->Parent);
 	MinSize.ZOff(450, 300);
-	OldPos.Set(0, 0, 475, 350 + LgiApp->GetMetric(LGI_MET_DECOR_Y) );
+	OldPos.Set(0, 0, 475, 350 + LAppInst->GetMetric(LGI_MET_DECOR_Y) );
 	SetPos(OldPos);
 
 	int x = 0, y = 0;
@@ -2222,7 +2222,7 @@ bool LgiGetUsersLinks(LArray<LString> &Links)
 				Links.New() = u.sPath;
 		}
 	#else
-		LgiAssert(!"Not impl yet.");
+		LAssert(!"Not impl yet.");
 		return false;
 	#endif
 	

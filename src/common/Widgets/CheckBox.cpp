@@ -31,7 +31,7 @@ public:
 
 	LCheckBoxPrivate(LCheckBox *ctrl) :
 		LMutex("LCheckBoxPrivate"),
-		LStringLayout(LgiApp->GetFontCache())
+		LStringLayout(LAppInst->GetFontCache())
 	{
 		Ctrl = ctrl;
 		Val = 0;
@@ -197,7 +197,7 @@ bool LCheckBox::NameW(const char16 *n)
 
 void LCheckBox::SetFont(LFont *Fnt, bool OwnIt)
 {
-	LgiAssert(Fnt && Fnt->Handle());
+	LAssert(Fnt && Fnt->Handle());
 
 	if (d->Lock(_FL))
 	{

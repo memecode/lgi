@@ -100,7 +100,7 @@ public:
 
 	int GetVar(int Var)
 	{
-		LgiAssert(0)
+		LAssert(0)
 			;
 		return 0;
 	}
@@ -334,7 +334,7 @@ public:
 				AlphaCase(Bgra32);
 
 				default:
-					LgiAssert(!"Impl me.");
+					LAssert(!"Impl me.");
 					break;
 			}
 		}
@@ -399,7 +399,7 @@ bool GdcApp24::SetSurface(GBmpMem *d, GPalette *p, GBmpMem *a)
 
 void GdcApp24::SetPtr(int x, int y)
 {
-	LgiAssert(Dest && Dest->Base);
+	LAssert(Dest && Dest->Base);
 	Ptr = (System24BitPixel*) ((uint8_t*)Dest->Base + (y * Dest->Line) + (x * 3));
 }
 

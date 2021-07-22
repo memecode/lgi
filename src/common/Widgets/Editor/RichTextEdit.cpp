@@ -71,7 +71,7 @@ LRichTextEdit::LRichTextEdit(	int Id,
 	d->BackgroundColor(LColour(L_WORKSPACE));
 	#endif
 	
-	SetFont(SysFont);
+	SetFont(LSysFont);
 
 	#if 0 // def _DEBUG
 	Name("<html>\n"
@@ -484,7 +484,7 @@ int LRichTextEdit::GetLine()
 	ssize_t Idx = d->Blocks.IndexOf(d->Cursor->Blk);
 	if (Idx < 0)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return -1;
 	}
 
@@ -510,7 +510,7 @@ int LRichTextEdit::GetLine()
 		else
 		{
 			// Hmmm...
-			LgiAssert(!"Can't find block line.");
+			LAssert(!"Can't find block line.");
 			return -1;
 		}
 	}
@@ -581,7 +581,7 @@ ssize_t LRichTextEdit::GetCaret(bool Cur)
 		CharPos += b->Length();
 	}
 	
-	LgiAssert(!"Cursor block not found.");
+	LAssert(!"Cursor block not found.");
 	return -1;
 }
 
@@ -675,7 +675,7 @@ bool LRichTextEdit::Paste()
 	if (!d->Cursor ||
 		!d->Cursor->Blk)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 
@@ -733,7 +733,7 @@ bool LRichTextEdit::Paste()
 		ptrdiff_t Len = Strlen(Utf32.Get());
 		if (!d->Cursor->Blk->AddText(Trans, d->Cursor->Offset, Utf32.Get(), (int)Len))
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return false;
 		}
 
@@ -747,7 +747,7 @@ bool LRichTextEdit::Paste()
 		LRichTextPriv::Block *After = NULL;
 		ssize_t AddIndex;
 		
-		LgiAssert(BlkIdx >= 0);
+		LAssert(BlkIdx >= 0);
 
 		// Split 'b' to make room for the image
 		if (d->Cursor->Offset > 0)
@@ -916,7 +916,7 @@ bool LRichTextEdit::DoCase(bool Upper)
 		}
 		else
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return false;
 		}
 
@@ -985,7 +985,7 @@ bool LRichTextEdit::OnFind(GFindReplaceCommon *Params)
 {
 	if (!Params || !d->Cursor)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 	
@@ -993,7 +993,7 @@ bool LRichTextEdit::OnFind(GFindReplaceCommon *Params)
 	ssize_t Idx = d->Blocks.IndexOf(d->Cursor->Blk);
 	if (Idx < 0)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 
@@ -1847,7 +1847,7 @@ bool LRichTextEdit::OnKey(LKey &k)
 						if (k.Down())
 						{
 							// Implement delete by word
-							LgiAssert(!"Impl backspace by word");
+							LAssert(!"Impl backspace by word");
 						}
 					}
 
@@ -2575,7 +2575,7 @@ GMessage::Result LRichTextEdit::OnEvent(GMessage *Msg)
 			LAutoPtr<LSpellCheck::CheckText> Ct((LSpellCheck::CheckText*)Msg->A());
 			if (!Ct || Ct->User.Length() > 1)
 			{
-				LgiAssert(0);
+				LAssert(0);
 				break;
 			}
 			
@@ -2668,7 +2668,7 @@ void LRichTextEdit::OnPulse()
 {
 	if (!ReadOnly && d->Cursor)
 	{
-		uint64 n = LgiCurrentTime();
+		uint64 n = LCurrentTime();
 		if (d->BlinkTs - n >= RTE_CURSOR_BLINK_RATE)
 		{
 			d->BlinkTs = n;
@@ -2871,7 +2871,7 @@ EmojiMenu::EmojiMenu(LRichTextPriv *priv, LPoint p) : LPopup(priv->View)
 	int PaneSz = (int)(Map.Length() / PaneCount);
 	int ImgIdx = 0;
 
-	int PaneSelectSz = SysFont->GetHeight() * 2;
+	int PaneSelectSz = LSysFont->GetHeight() * 2;
 	int Rows = (PaneSz + EMOJI_GROUP_X - 1) / EMOJI_GROUP_X;
 	LRect r(0, 0,
 			(EMOJI_CELL_SIZE + EMOJI_PAD) * EMOJI_GROUP_X + EMOJI_PAD,
@@ -2942,14 +2942,14 @@ void EmojiMenu::OnPaint(LSurface *pDC)
 			
 			LString s;
 			s.Printf("%i", i);
-			LDisplayString Ds(SysFont, s);
+			LDisplayString Ds(LSysFont, s);
 			if (Cur == i)
 			{
 				pDC->Colour(L_LIGHT);
 				pDC->Rectangle(&p.Btn);
 			}
-			SysFont->Fore(L_TEXT);
-			SysFont->Transparent(true);
+			LSysFont->Fore(L_TEXT);
+			LSysFont->Transparent(true);
 			Ds.Draw(pDC, p.Btn.x1 + ((p.Btn.X()-Ds.X())>>1), p.Btn.y1 + ((p.Btn.Y()-Ds.Y())>>1));
 		}
 		
@@ -2963,9 +2963,9 @@ void EmojiMenu::OnPaint(LSurface *pDC)
 	else
 	{
 		LRect c = GetClient();
-		LDisplayString Ds(SysFont, "Loading...");
-		SysFont->Colour(L_TEXT, L_MED);
-		SysFont->Transparent(true);
+		LDisplayString Ds(LSysFont, "Loading...");
+		LSysFont->Colour(L_TEXT, L_MED);
+		LSysFont->Transparent(true);
 		Ds.Draw(pDC, (c.X()-Ds.X())>>1, (c.Y()-Ds.Y())>>1);
 	}
 }

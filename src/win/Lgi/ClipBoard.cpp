@@ -415,7 +415,7 @@ LString LClipBoard::FmtToStr(FormatType Fmt)
 			case CF_UNICODETEXT:
 				return "CF_UNICODETEXT";
 			default:
-				LgiAssert(!"Not impl.");
+				LAssert(!"Not impl.");
 				break;
 		}
 	}
@@ -450,7 +450,7 @@ LClipBoard::~LClipBoard()
 
 LClipBoard &LClipBoard::operator =(LClipBoard &c)
 {
-    LgiAssert(0);
+    LAssert(0);
     return *this;
 }
 

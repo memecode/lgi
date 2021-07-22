@@ -87,7 +87,7 @@ public:
 	
 	void StartTransfer(ssize_t Size)
 	{
-		Start = LgiCurrentTime();
+		Start = LCurrentTime();
 		Value = 0;
 		Range = Size;
 	}
@@ -332,7 +332,7 @@ struct ImapMailFlags
 		if (ch == 0)
 			return NULL;
 
-		LgiAssert(ch < sizeof(s));
+		LAssert(ch < sizeof(s));
 		s[--ch] = 0;
 		return NewStr(s);
 	}

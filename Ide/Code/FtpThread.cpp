@@ -392,7 +392,7 @@ int FtpThread::Main()
 				}
 				default:
 				{
-					LgiAssert(!"Not implemented.");
+					LAssert(!"Not implemented.");
 					break;
 				}
 			}

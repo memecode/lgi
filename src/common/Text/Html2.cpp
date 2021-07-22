@@ -173,7 +173,7 @@ static GInfo *GetTagInfo(const char *Tag)
 	    }
 	    
 	    UnknownTag = i;
-	    LgiAssert(UnknownTag->Id == TAG_UNKNOWN);
+	    LAssert(UnknownTag->Id == TAG_UNKNOWN);
 	}
 
 	i = TagMap.Find(Tag);
@@ -505,7 +505,7 @@ public:
 				if (abs(Diff) <= 1)
 				{
 					Fonts.Insert(f = Tmp.Release());
-					LgiAssert(f->Face());
+					LAssert(f->Face());
 					return f;
 				}
 
@@ -584,7 +584,7 @@ public:
 			};
 
 			int Idx = Size.Type-LCss::SizeXXSmall;
-			LgiAssert(Idx >= 0 && Idx < CountOf(Table));
+			LAssert(Idx >= 0 && Idx < CountOf(Table));
 			PtSize = Default->PointSize() * Table[Idx];
 			if (PtSize < MinimumPointSize)
 				PtSize = MinimumPointSize;
@@ -597,7 +597,7 @@ public:
 		{
 			PtSize = Default->PointSize() + 1;
 		}
-		else LgiAssert(!"Not impl.");
+		else LAssert(!"Not impl.");
 
 		if (f = new LFont)
 		{
@@ -632,7 +632,7 @@ public:
 
 			// Not already cached
 			Fonts.Insert(f);
-			LgiAssert(f->Face());
+			LAssert(f->Face());
 			return f;
 		}
 
@@ -793,7 +793,7 @@ public:
 
 			Stack.Length(len-1);
 		}
-		else LgiAssert(!"Nothing to pop.");
+		else LAssert(!"Nothing to pop.");
 		#endif
 	}
 
@@ -817,8 +817,8 @@ public:
 			{
 				if (!f)
 				{
-					LgiAssert(!"No font?");
-					f = SysFont;
+					LAssert(!"No font?");
+					f = LSysFont;
 				}
 				return (int)(l.Value * f->GetHeight());
 			}
@@ -826,8 +826,8 @@ public:
 			{
 				if (!f)
 				{
-					LgiAssert(!"No font?");
-					f = SysFont;
+					LAssert(!"No font?");
+					f = LSysFont;
 				}
 				return (int) (l.Value * f->GetHeight() / 2); // More haha, who uses 'ex' anyway?
 			}
@@ -874,8 +874,8 @@ public:
 			{
 				if (!f)
 				{
-					f = SysFont;
-					LgiAssert(!"No font");
+					f = LSysFont;
+					LAssert(!"No font");
 				}
 				return (int) (l.Value * f->GetHeight());
 			}
@@ -883,15 +883,15 @@ public:
 			{
 				if (!f)
 				{
-					f = SysFont;
-					LgiAssert(!"No font");
+					f = LSysFont;
+					LAssert(!"No font");
 				}
 				return (int) (l.Value * f->GetHeight() / 2); // More haha, who uses 'ex' anyway?
 			}
 			case LCss::LenPercent:
 				return (int)l.Value;
 			default:
-				LgiAssert(!"Not supported.");
+				LAssert(!"Not supported.");
 		}
 
 		return 0;
@@ -1225,13 +1225,13 @@ bool GTag::Attach(GTag *Child, int Idx)
 {
 	if (TagId == CONTENT)
 	{
-		LgiAssert(!"Can't nest content tags.");
+		LAssert(!"Can't nest content tags.");
 		return false;
 	}
 
 	if (!Child)
 	{
-		LgiAssert(!"Can't insert NULL tag.");
+		LAssert(!"Can't insert NULL tag.");
 		return false;
 	}
 
@@ -1493,7 +1493,7 @@ int GTag::GetTextStart()
 		GFlowRect *t = TextPos[0];
 		if (t)
 		{
-			LgiAssert(t->Text >= Text() && t->Text <= Text()+2);
+			LAssert(t->Text >= Text() && t->Text <= Text()+2);
 			return t->Text - Text();
 		}
 	}
@@ -2261,7 +2261,7 @@ void GTag::GetTagByPos(GTagHit &hit, int x, int y)
 				Tmp.Hit = this;
 				Tmp.Block = Tr;
 				Tmp.Near = IsNearRect(Tr, x, y);
-				LgiAssert(Tmp.Near >= 0);
+				LAssert(Tmp.Near >= 0);
 				if (Tmp < hit)
 				{
 					hit = Tmp;
@@ -2412,7 +2412,7 @@ void GTag::LoadImage(const char *Uri)
 	GDocumentEnv::LoadJob *j = Html->Environment->NewJob();
 	if (j)
 	{
-		LgiAssert(Html);
+		LAssert(Html);
 		j->Uri.Reset(NewStr(Uri));
 		j->View = Html;
 		j->UserData = this;
@@ -2491,7 +2491,7 @@ bool GTag::MatchFullSelector(LCss::Selector *Sel)
 				break;
 
 			StartIdx = Sel->Combs[CombIdx];
-			LgiAssert(StartIdx > 0);
+			LAssert(StartIdx > 0);
 
 			if (StartIdx >= Sel->Parts.Length())
 				break;
@@ -2501,13 +2501,13 @@ bool GTag::MatchFullSelector(LCss::Selector *Sel)
 			{
 				case LCss::Selector::CombChild:
 				{
-					// LgiAssert(!"Not impl.");
+					// LAssert(!"Not impl.");
 					return false;
 					break;
 				}
 				case LCss::Selector::CombAdjacent:
 				{
-					// LgiAssert(!"Not impl.");
+					// LAssert(!"Not impl.");
 					return false;
 					break;
 				}
@@ -2530,7 +2530,7 @@ bool GTag::MatchFullSelector(LCss::Selector *Sel)
 				}
 				default:
 				{
-					LgiAssert(!"This must be a comb.");
+					LAssert(!"This must be a comb.");
 					return false;
 					break;
 				}
@@ -2758,7 +2758,7 @@ void GTag::SetStyle()
 					GDocumentEnv::LoadJob *j = Html->Environment->NewJob();
 					if (j)
 					{
-						LgiAssert(Html);
+						LAssert(Html);
 						GTag *t = this;
 						
 						j->Uri.Reset(NewStr(Href));
@@ -2782,7 +2782,7 @@ void GTag::SetStyle()
 									Html->AddCss(a.Release());
 								}
 							}
-							else LgiAssert(!"Not impl.");
+							else LAssert(!"Not impl.");
 						}
 
 						DeleteObj(j);
@@ -3051,7 +3051,7 @@ void GTag::SetStyle()
 			LFontType Type;
 			if (Type.GetSystemFont("Fixed"))
 			{
-				LgiAssert(ValidStr(Type.GetFace()));
+				LAssert(ValidStr(Type.GetFace()));
 				FontFamily(StringsDef(Type.GetFace()));
 			}
 			break;
@@ -3203,14 +3203,14 @@ void GTag::SetStyle()
 		}
 		case TAG_SELECT:
 		{
-			LgiAssert(!Ctrl);
-			Ctrl = new LCombo(Html->d->NextCtrlId++, 0, 0, 100, SysFont->GetHeight() + 8, NULL);
+			LAssert(!Ctrl);
+			Ctrl = new LCombo(Html->d->NextCtrlId++, 0, 0, 100, LSysFont->GetHeight() + 8, NULL);
 			CtrlType = CtrlSelect;
 			break;
 		}
 		case TAG_INPUT:
 		{
-			LgiAssert(!Ctrl);
+			LAssert(!Ctrl);
 
 			const char *Type, *Value = NULL;
 			Get("value", Value);
@@ -3236,7 +3236,7 @@ void GTag::SetStyle()
 				{
 					LEdit *Ed;
 					LAutoString UtfCleanValue(LgiNewUtf16To8(CleanValue));
-					if (Ctrl = Ed = new LEdit(Html->d->NextCtrlId++, 0, 0, 60, SysFont->GetHeight() + 8, UtfCleanValue))
+					if (Ctrl = Ed = new LEdit(Html->d->NextCtrlId++, 0, 0, 60, LSysFont->GetHeight() + 8, UtfCleanValue))
 					{
 						Ed->Sunken(false);
 						Ed->Password(CtrlType == CtrlPassword);
@@ -3675,7 +3675,7 @@ char *GTag::ParseHtml(char *Doc, int Depth, bool InPreTag, bool *BackOut)
 					}
 
 					if (!e)
-						LgiAssert(0);
+						LAssert(0);
 				}
 				else
 				{
@@ -3881,7 +3881,7 @@ char *GTag::ParseHtml(char *Doc, int Depth, bool InPreTag, bool *BackOut)
 								GDocumentEnv::LoadJob *j = Html->Environment->NewJob();
 								if (j)
 								{
-									LgiAssert(Html);
+									LAssert(Html);
 									j->Uri.Reset(NewStr(Src));
 									j->View = Html;
 									j->UserData = this;
@@ -4123,7 +4123,7 @@ char *GTag::ParseHtml(char *Doc, int Depth, bool InPreTag, bool *BackOut)
 					}
 				}
 				else
-					LgiAssert(!"This should not happen?");
+					LAssert(!"This should not happen?");
 
 				if (Parent)
 				{
@@ -5284,7 +5284,7 @@ void GArea::FlowText(GTag *Tag, GFlowRegion *Flow, LFont *Font, char16 *Text, LC
 			else
 			{
 				Tr->Len = n;
-				LgiAssert(Tr->Len > 0);
+				LAssert(Tr->Len > 0);
 			}
 
 			Wrap = true;
@@ -5293,7 +5293,7 @@ void GArea::FlowText(GTag *Tag, GFlowRegion *Flow, LFont *Font, char16 *Text, LC
 		{
 			// Fits..
 			Tr->Len = Chars;
-			LgiAssert(Tr->Len > 0);
+			LAssert(Tr->Len > 0);
 		}
 
 		LDisplayString ds2(Font, Tr->Text, Tr->Len);
@@ -6556,7 +6556,7 @@ void GHtml2::_Delete()
 	LgiTrace("%s:%i html(%p).src(%p)='%30.30s'\n", _FL, this, Source, Source);
 	#endif
 
-	LgiAssert(!d->IsParsing);
+	LAssert(!d->IsParsing);
 
 	SetBackColour(Rgb24To32(LC_WORKSPACE));
 
@@ -6728,7 +6728,7 @@ bool GHtml2::Name(const char *s)
 	}
 	#endif
 
-	LgiAssert(LgiApp->GetGuiThread() == LgiGetCurrentThread());
+	LAssert(LAppInst->GetGuiThread() == LgiGetCurrentThread());
 
 	_Delete();
 	_New();
@@ -6989,7 +6989,7 @@ void GHtml2::OnPaint(LSurface *ScreenDC)
 	{
 		LAutoString a = d->OnLoadAnchor;
 		GotoAnchor(a);
-		LgiAssert(d->OnLoadAnchor == 0);
+		LAssert(d->OnLoadAnchor == 0);
 	}
 }
 
@@ -7299,7 +7299,7 @@ bool GHtml2::OnSubmitForm(GTag *Form)
 {
 	if (!Form || !Environment)
 	{
-		LgiAssert(!"Bad param");
+		LAssert(!"Bad param");
 		return false;
 	}
 
@@ -7308,7 +7308,7 @@ bool GHtml2::OnSubmitForm(GTag *Form)
 	if (!Form->Get("method", Method) ||
 		!Form->Get("action", Action))
 	{
-		LgiAssert(!"Missing form action/method");
+		LAssert(!"Missing form action/method");
 		return false;
 	}
 		
@@ -7347,7 +7347,7 @@ bool GHtml2::OnSubmitForm(GTag *Form)
 	}
 	else
 	{
-		LgiAssert(!"Bad form method.");
+		LAssert(!"Bad form method.");
 	}
 	
 	f.DeleteArrays();
@@ -7855,7 +7855,7 @@ bool GHtml2::OnMouseWheel(double Lines)
 	return true;
 }
 
-LgiCursor GHtml2::GetCursor(int x, int y)
+LCursor GHtml2::GetCursor(int x, int y)
 {
 	int Offset = ScrollY();
 	int Index = -1;
@@ -8076,7 +8076,7 @@ bool GHtml2::GetFormattedContent(char *MimeType, LAutoString &Out, LArray<LDocVi
 {
 	if (!MimeType)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 
@@ -8098,7 +8098,7 @@ bool GHtml2::GetFormattedContent(char *MimeType, LAutoString &Out, LArray<LDocVi
 					!Img->Get("cid", Cid))
 				{
 					char id[256];
-					sprintf(id, "%x.%x", (unsigned)LgiCurrentTime(), (unsigned)LRand());
+					sprintf(id, "%x.%x", (unsigned)LCurrentTime(), (unsigned)LRand());
 					Img->Set("cid", id);
 					Img->Get("cid", Cid);
 				}
@@ -8256,7 +8256,7 @@ GCellStore::GCellStore(GTag *Table)
 				}
 				else
 				{
-					LgiAssert(FakeCell);
+					LAssert(FakeCell);
 					FakeCell->Attach(r);
 				}
 				Table->Tags[Idx-1];
@@ -8378,7 +8378,7 @@ bool GCellStore::Set(GTag *t)
 	{
 		for (int x=0; x<t->Span.x; x++)
 		{
-			// LgiAssert(!c[y][x]);
+			// LAssert(!c[y][x]);
 			c[t->Cell.y + y][t->Cell.x + x] = t;
 		}
 	}

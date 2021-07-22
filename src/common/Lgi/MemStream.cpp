@@ -34,7 +34,7 @@ GMemStream::GMemStream(LStreamI *Src, int64 Start, int64 len)
 		}
 		if (Error)
 		{
-			LgiAssert(!"Failed to set stream position");
+			LAssert(!"Failed to set stream position");
 		}
 		else
 		{
@@ -85,7 +85,7 @@ GMemStream::GMemStream(const void *mem, int64 len, bool copy)
 		if ((Mem = new char[(Alloc = Len)]))
 			memcpy(Mem, mem, Len);
 		else
-			LgiAssert(!"Alloc error");
+			LAssert(!"Alloc error");
 	}
 	else
 	{
@@ -119,7 +119,7 @@ int GMemStream::Open(const char *Str, int Int)
 
 		return Len > 0;
 	}
-	else LgiAssert(!"Open error");
+	else LAssert(!"Open error");
 
 	return 0;
 }
@@ -150,7 +150,7 @@ int64 GMemStream::SetSize(int64 Size)
 		}
 		else
 		{
-			LgiAssert(!"Alloc error");
+			LAssert(!"Alloc error");
 			return -1;
 		}
 	}
@@ -321,7 +321,7 @@ ssize_t GTempStream::Write(const void *Buffer, ssize_t Size, int Flags)
 		}
 		while (LFileExists(c));
 
-		LgiAssert(Tmp == 0);
+		LAssert(Tmp == 0);
 		if ((Tmp = new LFile))
 		{
 			int64 Len = Mem->GetSize();

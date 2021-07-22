@@ -379,7 +379,7 @@ public:
 				Dpi.x = Dpi.y = 96;
 		}
 
-		LgiAssert(Dpi.x > 0);
+		LAssert(Dpi.x > 0);
 
 		return Dpi.x / 96.0;
 	}
@@ -573,7 +573,7 @@ bool TableCell::SetVariant(const char *Name, LVariant &Value, char *Array)
 		{
 			if (Value.Type != GV_LIST)
 			{
-				LgiAssert(!"Should be a list.");
+				LAssert(!"Should be a list.");
 				return false;
 			}
 			
@@ -970,7 +970,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 	
 	LCss::Len CssWidth = LCss::Width();
 	Width -= Padding.x1 + Padding.x2;
-	LgiAssert(Width >= 0);
+	LAssert(Width >= 0);
 	
 	Child *c = Children.AddressOf();
 	for (int i=0; i<Children.Length(); i++, c++)
@@ -1083,7 +1083,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		else if (Izza(LEdit) || Izza(LCombo))
 		{
 			LFont *f = v->GetFont();
-			int y = (f ? f : SysFont)->GetHeight() + 8;
+			int y = (f ? f : LSysFont)->GetHeight() + 8;
 			
 			c->r = v->GetPos();
 			c->r.y2 = c->r.y1 + y - 1;
@@ -1961,7 +1961,7 @@ void GTableLayoutPrivate::Layout(LRect &Client)
 {
     if (InLayout)
     {    
-        LgiAssert(!"In layout, no recursion should happen.");
+        LAssert(!"In layout, no recursion should happen.");
         return;
     }
 
@@ -1978,7 +1978,7 @@ void GTableLayoutPrivate::Layout(LRect &Client)
     #endif
 
 	#if DEBUG_PROFILE
-	int64 Start = LgiCurrentTime();
+	int64 Start = LCurrentTime();
 	#endif
 
 	LString s;
@@ -2000,7 +2000,7 @@ void GTableLayoutPrivate::Layout(LRect &Client)
 	if (Prof) Prof->Add("Notify");
 
 	#if DEBUG_PROFILE
-	LgiTrace("LTableLayout::Layout(%i) = %i ms\n", Ctrl->GetId(), (int)(LgiCurrentTime()-Start));
+	LgiTrace("LTableLayout::Layout(%i) = %i ms\n", Ctrl->GetId(), (int)(LCurrentTime()-Start));
 	#endif
 
 	#if DEBUG_LAYOUT
@@ -2152,7 +2152,7 @@ void LTableLayout::OnPaint(LSurface *pDC)
 		#if LGI_VIEW_HANDLE
 		else
 			if (!PostEvent(M_TABLE_LAYOUT))
-				LgiAssert(!"Post event failed.");
+				LAssert(!"Post event failed.");
 		return;
 		#endif
 	}
@@ -2248,7 +2248,7 @@ bool LTableLayout::SetVariant(const char *Name, LVariant &Value, char *Array)
 		}
 		default:
 		{
-			LgiAssert(!"Unsupported property.");
+			LAssert(!"Unsupported property.");
 			return false;
 		}
 	}

@@ -44,7 +44,7 @@ public:
 
 	GPulseThread(LView *view, int len) : LThread("GPulseThread"), Event("GPulseThread")
 	{
-		LgiAssert(view);
+		LAssert(view);
 		
 		Loop = true;
 		View = view;
@@ -65,9 +65,9 @@ public:
 	
 	int Main()
 	{
-		// auto ts = LgiCurrentTime();
+		// auto ts = LCurrentTime();
 		
-		while (Loop && LgiApp)
+		while (Loop && LAppInst)
 		{
 			auto s = Event.Wait(Length);
 			if (!Loop || s == LThreadEvent::WaitError)
@@ -75,7 +75,7 @@ public:
 			
 			if (View)
 			{
-				// auto now = LgiCurrentTime();
+				// auto now = LCurrentTime();
 				// printf("pulse %i of %i\n", (int)(now - ts), (int)Length);
 				if (!View->PostEvent(M_PULSE))
 					Loop = false;

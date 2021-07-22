@@ -125,7 +125,7 @@ uchar *DnsMethods::WriteLabel(uchar *s, char *Label)
 // Functions
 bool IDnsResolve(LArray<char*> &Results, char *Name, int Type, int Class)
 {
-	LgiAssert(sizeof(DnsHeader) == 12);
+	LAssert(sizeof(DnsHeader) == 12);
 
 	if (!Name)
 		return false;

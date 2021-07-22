@@ -13,7 +13,7 @@
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/Widgets.h"
 
-LAutoWString LgiAddReturns(const char16 *n)
+LAutoWString LAddReturns(const char16 *n)
 {
 	LAutoWString w;
 	
@@ -44,7 +44,7 @@ LAutoWString LgiAddReturns(const char16 *n)
 				}
 			}
 			*o = 0;
-			LgiAssert(o - w == Len);
+			LAssert(o - w == Len);
 		}
 	}
 	
@@ -89,7 +89,7 @@ LEdit::LEdit(int id, int x, int y, int cx, int cy, const char *name) :
 	LRect r(x, y, x+max(cx, 10), y+max(cy, 10));
 	SetPos(r);
 	SetStyle(WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | WS_TABSTOP);
-	SetFont(SysFont);
+	SetFont(LSysFont);
 
 	if (SubClass)
 		SubClass->SubClass("EDIT");
@@ -507,7 +507,7 @@ bool LEdit::SysName(const char16 *n)
 	if (!_View)
 		return false;
 
-	LAutoWString w = LgiAddReturns(n);
+	LAutoWString w = LAddReturns(n);
 	if (w)
 		n = w;
 
@@ -531,7 +531,7 @@ bool LEdit::Name(const char *n)
 	d->IgnoreNotify = true;
 
 	LBase::Name(n);
-	LAutoWString w = LgiAddReturns(LBase::NameW());
+	LAutoWString w = LAddReturns(LBase::NameW());
 	if (w)
 		LBase::NameW(w);
 	bool Status = SysEmptyText();
@@ -556,7 +556,7 @@ bool LEdit::NameW(const char16 *s)
 	bool Old = d->IgnoreNotify;
 	d->IgnoreNotify = true;
 
-	LAutoWString w = LgiAddReturns(s);
+	LAutoWString w = LAddReturns(s);
 	LBase::NameW(w ? w : s);
 	bool Status = SysEmptyText();
 

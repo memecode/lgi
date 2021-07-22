@@ -122,7 +122,7 @@ bool LToolTabBar::IsOk()
 			Count[Dn != 0]++;
 		}
 	}
-	LgiAssert(Count[1] == 0 || Count[1] == 1);
+	LAssert(Count[1] == 0 || Count[1] == 1);
 	return Count[1] == 0 || Count[1] == 1;
 }
 

@@ -23,7 +23,7 @@ public:
 	void OnPaint(LSurface *pDC);	
 	void OnMouseClick(LMouse &m);
 	void OnMouseMove(LMouse &m);
-	LgiCursor GetCursor(int x, int y);
+	LCursor GetCursor(int x, int y);
 	LRect &GetClient(bool InClientSpace = true);
 	#endif
 

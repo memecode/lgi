@@ -528,7 +528,7 @@ GDbfRecordset::GDbfRecordset(char *file)
 				else
 				{
 					// memory allocation error
-					LgiAssert(0);
+					LAssert(0);
 					break;
 				}
 			}

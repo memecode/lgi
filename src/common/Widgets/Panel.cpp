@@ -21,7 +21,7 @@ LPanel::LPanel(const char *name, int size, bool open)
 	if (name) Name(name);
 	IsOpen = open;
 	_IsToolBar = !IsOpen;
-	ClosedSize = SysFont->GetHeight() + 3;
+	ClosedSize = LSysFont->GetHeight() + 3;
 	OpenSize = size;
 	Align = GV_EDGE_TOP;
 	

@@ -157,32 +157,32 @@ void LPrintDC::Line(int x1, int y1, int x2, int y2)
 
 void LPrintDC::Circle(double cx, double cy, double radius)
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 }
 
 void LPrintDC::FilledCircle(double cx, double cy, double radius)
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 }
 
 void LPrintDC::Arc(double cx, double cy, double radius, double start, double end)
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 }
 
 void LPrintDC::FilledArc(double cx, double cy, double radius, double start, double end)
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 }
 
 void LPrintDC::Ellipse(double cx, double cy, double x, double y)
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 }
 
 void LPrintDC::FilledEllipse(double cx, double cy, double x, double y)
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 }
 
 void LPrintDC::Box(int x1, int y1, int x2, int y2)
@@ -245,14 +245,14 @@ void LPrintDC::StretchBlt(LRect *rc, LSurface *Src, LRect *s)
 {
 	if (!d->cr)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return;
 	}
 	
 	uint8_t *Scan0 = (*Src)[0];
 	if (!Scan0)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return;
 	}
 	
@@ -271,7 +271,7 @@ void LPrintDC::StretchBlt(LRect *rc, LSurface *Src, LRect *s)
 	}
 	if (Fmt == Gtk::CAIRO_FORMAT_INVALID)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return;
 	}
 	
@@ -282,7 +282,7 @@ void LPrintDC::StretchBlt(LRect *rc, LSurface *Src, LRect *s)
 																	Src->GetRowStep());
 	if (!Img)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return;
 	}
 
@@ -312,11 +312,11 @@ void LPrintDC::StretchBlt(LRect *rc, LSurface *Src, LRect *s)
 
 void LPrintDC::Polygon(int Points, LPoint *Data)
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 }
 
 void LPrintDC::Bezier(int Threshold, LPoint *Pt)
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 }
 

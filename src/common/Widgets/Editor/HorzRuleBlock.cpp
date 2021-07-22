@@ -15,7 +15,7 @@ LRichTextPriv::HorzRuleBlock::HorzRuleBlock(const HorzRuleBlock *Copy) : Block(C
 
 LRichTextPriv::HorzRuleBlock::~HorzRuleBlock()
 {
-	LgiAssert(Cursors == 0);
+	LAssert(Cursors == 0);
 }
 
 bool LRichTextPriv::HorzRuleBlock::IsValid()

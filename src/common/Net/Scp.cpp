@@ -196,13 +196,13 @@ bool IScp::ReadData(LSocketI *&s, IScpData *&d, int *HttpErr)
 		do
 		{
 			bool Readable = true;
-			int64 Start = LgiCurrentTime();
+			int64 Start = LCurrentTime();
 			while (	s->IsOpen() AND
 					!s->IsReadable())
 			{
-				// LgiTrace("SCP: Socket not readable: %.1fs\n", ((double)(int64)(LgiCurrentTime()-Start)/1000));
+				// LgiTrace("SCP: Socket not readable: %.1fs\n", ((double)(int64)(LCurrentTime()-Start)/1000));
 
-				if ( ((LgiCurrentTime()-Start)/1000) > SCP_SOCKET_TIMEOUT)
+				if ( ((LCurrentTime()-Start)/1000) > SCP_SOCKET_TIMEOUT)
 				{
 					// LgiTrace("SCP: Timeout waiting for data.\n");
 					
@@ -854,7 +854,7 @@ bool IScpServer::OnIdle(LSocketI *s)
 					char *Pass = d->GetStr("Pass");
 					if (User AND Pass)
 					{
-						SeshId = (int)((int64)LgiGetCurrentThread() ^ LgiCurrentTime());
+						SeshId = (int)((int64)LgiGetCurrentThread() ^ LCurrentTime());
 						bool Ok = OnLogin(User, Pass, SeshId);
 						IScpData r(SCP_RESPONSE);
 

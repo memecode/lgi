@@ -69,7 +69,7 @@ bool GWordStore::Serialize(const char *FileName, bool Load)
 
 			bool GotVer = false;
 			double FileFormat = 0.0;
-			int64 Start = LgiCurrentTime();
+			int64 Start = LCurrentTime();
 			
 			LStringPipe p;
 			char Buf[4<<10];
@@ -93,7 +93,7 @@ bool GWordStore::Serialize(const char *FileName, bool Load)
 							}
 							else
 							{
-								LgiAssert(0);
+								LAssert(0);
 							}
 						}
 						else
@@ -128,7 +128,7 @@ bool GWordStore::Serialize(const char *FileName, bool Load)
 			}
 
 			#if DBG_MSGS
-			LgiTrace("Load '%s' time: %ims\n", Name, LgiCurrentTime() - Start);
+			LgiTrace("Load '%s' time: %ims\n", Name, LCurrentTime() - Start);
 			#endif
 			
 			Status = GotVer;

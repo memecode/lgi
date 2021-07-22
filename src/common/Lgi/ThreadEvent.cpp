@@ -106,7 +106,7 @@ LThreadEvent::LThreadEvent(const char *name)
 		if (Event)
 			LastError = GetLastError();
 		else
-			LgiAssert(!"Failed to create event.");
+			LAssert(!"Failed to create event.");
 	
 	#else
 	
@@ -255,7 +255,7 @@ bool LThreadEvent::Signal()
 		}
 		else
 		{
-			LgiAssert(!"No event handle");
+			LAssert(!"No event handle");
 			return false;
 		}
 	
@@ -370,7 +370,7 @@ LThreadEvent::WaitStatus LThreadEvent::Wait(int32 Timeout)
 		if (e) printf("%s:%i - pthread_mutex_lock failed %i\n", _FL, e);
 
 		int result = 0;
-		uint64_t start = Timeout >= 0 ? LgiCurrentTime() : 0;
+		uint64_t start = Timeout >= 0 ? LCurrentTime() : 0;
 		while (!signalled)
 		{
 			if (Timeout < 0)
@@ -386,7 +386,7 @@ LThreadEvent::WaitStatus LThreadEvent::Wait(int32 Timeout)
 			else
 			{
 				timespec to;
-				uint64_t now = LgiCurrentTime();
+				uint64_t now = LCurrentTime();
 				if (now >= start + Timeout)
 				{
 					result = ETIMEDOUT;

@@ -110,7 +110,7 @@ LMouse &lgi_adjust_click(LMouse &Info, LViewI *Wnd, bool Capturing, bool Debug)
 		}
 	}
 	
-	LgiAssert(Temp.Target != NULL);
+	LAssert(Temp.Target != NULL);
 	
 	return Temp;
 }
@@ -156,7 +156,7 @@ bool LView::LockHandler(LViewI *v, LView::LockOp Op)
 			if (Ref == 0)
 				Status = m->Add(v, 1);
 			else
-				LgiAssert(!"Already exists?");
+				LAssert(!"Already exists?");
 			break;
 		}
 		case OpDelete:
@@ -164,7 +164,7 @@ bool LView::LockHandler(LViewI *v, LView::LockOp Op)
 			if (Ref == 1)
 				Status = m->Delete(v);
 			else
-				LgiAssert(!"Either locked or missing.");
+				LAssert(!"Either locked or missing.");
 			break;
 		}
 		case OpExists:
@@ -265,14 +265,14 @@ LArray<LViewI*> LView::IterateViews()
 
 bool LView::AddView(LViewI *v, int Where)
 {
-	LgiAssert(!Children.HasItem(v));
+	LAssert(!Children.HasItem(v));
 	bool Add = Children.Insert(v, Where);
 	if (Add)
 	{
 		LView *gv = v->GetGView();
 		if (gv && gv->_Window != _Window)
 		{
-			LgiAssert(!_InLock);
+			LAssert(!_InLock);
 			gv->_Window = _Window;
 		}
 		v->SetParent(this);
@@ -289,7 +289,7 @@ bool LView::DelView(LViewI *v)
 	if (Has)
 		OnChildrenChanged(v, false);
 	Has = Children.HasItem(v);
-	LgiAssert(!Has);
+	LAssert(!Has);
 	return b;
 }
 
@@ -314,7 +314,7 @@ LWindow *LView::GetWindow()
 		{
 			if (w->_Window)
 			{
-				LgiAssert(!_InLock);
+				LAssert(!_InLock);
 				_Window = w->_Window;
 				break;
 			}
@@ -522,7 +522,7 @@ uint64 PaintTime = 0;
 void LView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 {
 	/*
-	uint64 StartTs = Update ? LgiCurrentTime() : 0;
+	uint64 StartTs = Update ? LCurrentTime() : 0;
 	d->InPaint = true;
 	*/
 
@@ -776,7 +776,7 @@ void LView::SendNotify(int Data)
 				}
 			}
 			
-            LgiAssert(GetId() > 0); // We must have a valid ctrl ID at this point, otherwise
+            LAssert(GetId() > 0); // We must have a valid ctrl ID at this point, otherwise
 									// the receiver will never be able to find our object.
             
             // printf("Post M_CHANGE %i %i\n", GetId(), Data);
@@ -1079,13 +1079,13 @@ bool LView::HandleCapture(LView *Wnd, bool c)
 				if (h)
 					SetCapture(h);
 				else
-					LgiAssert(0);
+					LAssert(0);
 
 			#elif defined(LGI_SDL)
 				#if SDL_VERSION_ATLEAST(2, 0, 4)
 				SDL_CaptureMouse(SDL_TRUE);
 				#else
-				LgiApp->CaptureMouse(true);
+				LAppInst->CaptureMouse(true);
 				#endif
 			#endif
 		}
@@ -1101,7 +1101,7 @@ bool LView::HandleCapture(LView *Wnd, bool c)
 			#if SDL_VERSION_ATLEAST(2, 0, 4)
 			SDL_CaptureMouse(SDL_FALSE);
 			#else
-			LgiApp->CaptureMouse(false);
+			LAppInst->CaptureMouse(false);
 			#endif
 		#endif
 	}
@@ -1742,7 +1742,7 @@ LFont *LView::GetFont()
 		d->Css &&
 		LResources::GetLoadStyles())
 	{
-		GFontCache *fc = LgiApp->GetFontCache();
+		GFontCache *fc = LAppInst->GetFontCache();
 		if (fc)
 		{
 			LFont *f = fc->GetFont(d->Css);
@@ -1756,7 +1756,7 @@ LFont *LView::GetFont()
 		}
 	}
 	
-	return d->Font ? d->Font : SysFont;
+	return d->Font ? d->Font : LSysFont;
 }
 
 void LView::SetFont(LFont *Font, bool OwnIt)
@@ -1766,7 +1766,7 @@ void LView::SetFont(LFont *Font, bool OwnIt)
 	{
 		if (d->FontOwnType == GV_FontOwned)
 		{
-			LgiAssert(d->Font != SysFont);
+			LAssert(d->Font != LSysFont);
 			DeleteObj(d->Font);
 		}
 
@@ -1951,14 +1951,14 @@ bool LView::InThread()
 		}
 		
 		auto CurThreadId = GetCurrentThreadId();
-		auto GuiThreadId = LgiApp->GetGuiThreadId();
+		auto GuiThreadId = LAppInst->GetGuiThreadId();
 		DWORD ViewThread = Hnd ? GetWindowThreadProcessId(Hnd, NULL) : GuiThreadId;
 		return CurThreadId == ViewThread;
 	
 	#else
 
 		OsThreadId Me = GetCurrentThreadId();
-		OsThreadId Gui = LgiApp ? LgiApp->GetGuiThreadId() : 0;
+		OsThreadId Gui = LAppInst ? LAppInst->GetGuiThreadId() : 0;
 		
 		#if 0
 		if (Gui != Me)
@@ -1991,11 +1991,11 @@ bool LView::PostEvent(int Cmd, GMessage::Param a, GMessage::Param b)
 		}
 		return Res != 0;
 	#elif !LGI_VIEW_HANDLE
-		return LgiApp->PostEvent(this, Cmd, a, b);
+		return LAppInst->PostEvent(this, Cmd, a, b);
 	#else
 		if (_View)
 			return LgiPostEvent(_View, Cmd, a, b);
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	#endif
 }
@@ -2117,7 +2117,7 @@ const char16 *LView::NameW()
 
 LViewI *LView::FindControl(int Id)
 {
-	LgiAssert(Id != -1);
+	LAssert(Id != -1);
 
 	if (GetId() == Id)
 	{
@@ -2370,7 +2370,7 @@ LViewFactory::LViewFactory()
 	}
 	else
 	{
-		LgiAssert(AllFactories != NULL);
+		LAssert(AllFactories != NULL);
 	}
 	#else
 	pthread_once(&FactoryOnce, GFactoryInitFactories);

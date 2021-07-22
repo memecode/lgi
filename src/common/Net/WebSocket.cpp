@@ -66,7 +66,7 @@ int LSelect::Select(LArray<LSocket*> &Results, bool Rd, bool Wr, int TimeoutMs)
 					// printf("Poll[%i] = %x (flags=%x)\n", i, f.revents, Flags);
 					Results.Add(s[i]);
 				}
-				else LgiAssert(0);
+				else LAssert(0);
 			}
 		}
 	}
@@ -274,7 +274,7 @@ struct LWebSocketPriv
 				Used = Remaining;				
 			}
 			else
-				LgiAssert(!"Impl me");
+				LAssert(!"Impl me");
 		}
 		else
 		{

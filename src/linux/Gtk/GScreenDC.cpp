@@ -91,7 +91,7 @@ LScreenDC::LScreenDC(LView *view, void *param)
 		if (v)
 		{
 			d->v = v;
-			LgiAssert(!"Gtk3 FIXME");
+			LAssert(!"Gtk3 FIXME");
 		}
 		else
 		{
@@ -584,16 +584,16 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 
 void LScreenDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
 {
-	LgiAssert(0);
+	LAssert(0);
 }
 
 void LScreenDC::Bezier(int Threshold, LPoint *Pt)
 {
-	LgiAssert(0);
+	LAssert(0);
 }
 
 void LScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
 {
-	LgiAssert(0);
+	LAssert(0);
 }
 

@@ -69,8 +69,8 @@ GLocker::~GLocker()
 
 bool GLocker::Lock()
 {
-	LgiAssert(!Locked);
-	LgiAssert(hnd != NULL);
+	LAssert(!Locked);
+	LAssert(hnd != NULL);
 
 	while (!Locked)
 	{
@@ -113,8 +113,8 @@ bool GLocker::Lock()
 
 status_t GLocker::LockWithTimeout(int64 time)
 {
-	LgiAssert(!Locked);
-	LgiAssert(hnd != NULL);
+	LAssert(!Locked);
+	LAssert(hnd != NULL);
 	
 	status_t result = hnd->LockLooperWithTimeout(time);
 	if (result == B_OK)
@@ -344,7 +344,7 @@ void LView::Quit(bool DontDelete)
 	}
 }
 
-LgiCursor LView::GetCursor(int x, int y)
+LCursor LView::GetCursor(int x, int y)
 {
 	return LCUR_Normal;
 }
@@ -550,7 +550,7 @@ bool LView::Invalidate(LRect *r, bool Repaint, bool NonClient)
 	return false;
 }
 
-static void SetBeosCursor(LgiCursor c)
+static void SetBeosCursor(LCursor c)
 {
 }
 
@@ -987,9 +987,9 @@ void LView::_Delete()
 	if (_Over == this) _Over = 0;
 	if (_Capturing == this) _Capturing = 0;
 
-	if (LgiApp && LgiApp->AppWnd == this)
+	if (LAppInst && LAppInst->AppWnd == this)
 	{
-		LgiApp->AppWnd = 0;
+		LAppInst->AppWnd = 0;
 	}
 
 	SetPulse();

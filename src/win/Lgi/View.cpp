@@ -305,10 +305,10 @@ LWindowsClass::~LWindowsClass()
 
 LWindowsClass *LWindowsClass::Create(const char *ClassName)
 {
-	if (!LgiApp)
+	if (!LAppInst)
 		return NULL;
 
-	LApp::ClassContainer *Classes = LgiApp->GetClasses();
+	LApp::ClassContainer *Classes = LAppInst->GetClasses();
 	if (!Classes)
 		return NULL;
 
@@ -352,7 +352,7 @@ bool LWindowsClass::Register()
 		ZeroObj(Class);
 		Class.cbSize = sizeof(Class);
 		Status = GetClassInfoExW(LgiProcessInst(), NameW(), &Class) != 0;
-		LgiAssert(Status);
+		LAssert(Status);
 	}
 	else // if (!Class.lpszClassName)
 	{
@@ -366,7 +366,7 @@ bool LWindowsClass::Register()
 			if (err == 1410)
 				Status = true;
 			else
-				LgiAssert(Status);
+				LAssert(Status);
 		}
 	}
 
@@ -397,7 +397,7 @@ bool LWindowsClass::SubClass(char *Parent)
 
 				Class.lpszClassName = NameW();
 				Status = RegisterClassExW(&Class) != 0;
-				LgiAssert(Status);
+				LAssert(Status);
 			}
 		}
 	}
@@ -438,11 +438,11 @@ LViewI *LWindowFromHandle(HWND hWnd)
 				WNDCLASSEX cls;
 				ZeroObj(cls);
 				cls.cbSize = sizeof(WNDCLASSEX);
-				if (GetClassInfoEx(LgiApp->GetInstance(), name, &cls))
+				if (GetClassInfoEx(LAppInst->GetInstance(), name, &cls))
 				{
 					if (cls.cbWndExtra >= 8)
 					{
-						LgiAssert(!"Really?");
+						LAssert(!"Really?");
 					}
 				}
 			}
@@ -480,9 +480,9 @@ void LView::_Delete()
 	// LArray<LViewI*> HasView;
 	for (auto c: Children)
 	{
-		// LgiAssert(!HasView.HasItem(c));
+		// LAssert(!HasView.HasItem(c));
 		// HasView.Add(c);
-		LgiAssert(((LViewI*)c->GetParent()) == this || c->GetParent() == 0);
+		LAssert(((LViewI*)c->GetParent()) == this || c->GetParent() == 0);
 	}
 	#endif
 
@@ -513,7 +513,7 @@ void LView::_Delete()
 	{
 		WndFlags |= GWF_DESTRUCTOR;
 		BOOL Status = DestroyWindow(_View);
-		LgiAssert(Status != 0);
+		LAssert(Status != 0);
 	}
 	
 	// NULL my handles and flags
@@ -654,13 +654,13 @@ bool LView::Attach(LViewI *p)
             auto r = Cls->Register();
 			if (!r)
 			{
-				LgiAssert(0);
+				LAssert(0);
 			}
 		}
         else if (!IsSystemClass)
             return false;
 
-		LgiAssert(!Parent || Parent->Handle() != 0);
+		LAssert(!Parent || Parent->Handle() != 0);
 
 		DWORD Style	  = GetStyle();
 		DWORD ExStyle = GetExStyle() & ~WS_EX_CONTROLPARENT;
@@ -686,7 +686,7 @@ bool LView::Attach(LViewI *p)
 		{
 			DWORD e = GetLastError();
 			LgiTrace("%s:%i - CreateWindowExW failed with 0x%x\n", _FL, e);
-			LgiAssert(!"CreateWindowEx failed");
+			LAssert(!"CreateWindowEx failed");
 		}
 		#endif
 
@@ -766,7 +766,7 @@ bool LView::Detach()
 			WndFlags &= ~GWF_QUIT_WND;
 			BOOL Status = DestroyWindow(_View);
 			DWORD Err = GetLastError();
-			LgiAssert(Status != 0);
+			LAssert(Status != 0);
 		}
 	}
 	return Status;
@@ -807,7 +807,7 @@ LRect &LView::GetClient(bool InClientSpace)
 	return Client;
 }
 
-LgiCursor LView::GetCursor(int x, int y)
+LCursor LView::GetCursor(int x, int y)
 {
 	return LCUR_Normal;
 }
@@ -816,7 +816,7 @@ LgiCursor LView::GetCursor(int x, int y)
 #define GCL_HCURSOR -12
 #endif
 
-bool LgiToWindowsCursor(OsView Hnd, LgiCursor Cursor)
+bool LgiToWindowsCursor(OsView Hnd, LCursor Cursor)
 {
 	char16 *Set = 0;
 	switch (Cursor)
@@ -1321,8 +1321,8 @@ GMessage::Result LView::OnEvent(GMessage *Msg)
 			case WM_GETFONT:
 			{
 				LFont *f = GetFont();
-				if (!f || f == SysFont)
-					return (GMessage::Result) SysFont->Handle();
+				if (!f || f == LSysFont)
+					return (GMessage::Result) LSysFont->Handle();
 
 				return (GMessage::Result) f->Handle();
 				break;
@@ -1780,7 +1780,7 @@ GMessage::Result LView::OnEvent(GMessage *Msg)
 				}
 
 				// int CurX = Ms.x, CurY = Ms.y;
-				LgiCursor Cursor = (_Over ? _Over : this)->GetCursor(Ms.x, Ms.y);
+				LCursor Cursor = (_Over ? _Over : this)->GetCursor(Ms.x, Ms.y);
 				LgiToWindowsCursor(_View, Cursor);
 
 				#if 0
@@ -1812,7 +1812,7 @@ GMessage::Result LView::OnEvent(GMessage *Msg)
 				int Hit = OnHitTest(Pt.x, Pt.y);
 				if (Hit >= 0)
 				{
-					// LgiTrace("%I64i Hit=%i\n", LgiCurrentTime(), Hit);
+					// LgiTrace("%I64i Hit=%i\n", LCurrentTime(), Hit);
 					return Hit;
 				}
 				if (!(WndFlags & GWF_DIALOG))
@@ -2096,11 +2096,11 @@ GMessage::Result LView::OnEvent(GMessage *Msg)
 
 ReturnDefaultProc:
 	#ifdef _DEBUG
-	uint64 start = LgiCurrentTime();
+	uint64 start = LCurrentTime();
 	#endif
 	LRESULT r = DefWindowProcW(_View, Msg->m, Msg->a, Msg->b);
 	#ifdef _DEBUG
-	uint64 now = LgiCurrentTime();
+	uint64 now = LCurrentTime();
 	if (now - start > 1000)
 	{
 		LgiTrace("DefWindowProc(0x%.4x, %i, %i) took %ims\n",

@@ -23,7 +23,7 @@ enum SpellCheckParams
 #define SPELL_CHK_VALID_HND(hnd) \
 	if (hnd < 0)				\
 	{							\
-		LgiAssert(0);			\
+		LAssert(0);			\
 		return false;			\
 	}
 

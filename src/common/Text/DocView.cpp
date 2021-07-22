@@ -62,7 +62,7 @@ void GDocumentEnv::OnDone(LAutoPtr<LThreadJob> j)
 			Unlock();
 		}
 	}
-	else LgiAssert(!"RTTI failed.");
+	else LAssert(!"RTTI failed.");
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -201,11 +201,11 @@ bool GDefaultDocumentEnv::OnNavigate(LDocView *Parent, const char *Uri)
 				if (LExecute(Exe, Args, ".", &ErrorMsg))
 					return true;
 
-				LgiMsg(Parent, "Failed to open '%s':\n%s", LgiApp->LBase::Name(), MB_OK, Exe.Get(), ErrorMsg.Get());
+				LgiMsg(Parent, "Failed to open '%s':\n%s", LAppInst->LBase::Name(), MB_OK, Exe.Get(), ErrorMsg.Get());
 			}
 			else
 			{
-				LgiMsg(Parent, "Couldn't get app to handle email.", LgiApp->LBase::Name(), MB_OK);
+				LgiMsg(Parent, "Couldn't get app to handle email.", LAppInst->LBase::Name(), MB_OK);
 			}
 		}
 		else
@@ -215,7 +215,7 @@ bool GDefaultDocumentEnv::OnNavigate(LDocView *Parent, const char *Uri)
 			if (LExecute(Uri, NULL, NULL, &ErrorMsg))
 				return true;
 
-			LgiMsg(Parent, "Failed to open '%s':\n%s", LgiApp->LBase::Name(), MB_OK, Uri, ErrorMsg.Get());
+			LgiMsg(Parent, "Failed to open '%s':\n%s", LAppInst->LBase::Name(), MB_OK, Uri, ErrorMsg.Get());
 		}
 	}
 

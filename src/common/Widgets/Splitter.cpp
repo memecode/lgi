@@ -495,7 +495,7 @@ void LSplitter::OnMouseMove(LMouse &m)
 	}
 }
 
-LgiCursor LSplitter::GetCursor(int x, int y)
+LCursor LSplitter::GetCursor(int x, int y)
 {
 	if (OverSplit(x, y))
 		return (d->Vertical) ? LCUR_SizeHor : LCUR_SizeVer;

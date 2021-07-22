@@ -367,7 +367,7 @@ public:
 		Pool = false;
 		SizeBackup = Size = size ? MAX(size, 16) : 512;
 		MaxSize = GHASHTBL_MAX_SIZE;
-		// LgiAssert(Size <= MaxSize);
+		// LAssert(Size <= MaxSize);
 		
 		if ((Table = new Entry[Size]))
 		{
@@ -405,7 +405,7 @@ public:
 				if (c.Table[i].k != c.NullKey)
 				{
 					Added += Add(c.Table[i].k, c.Table[i].v) ? 1 : 0;
-					LgiAssert(Added <= c.Used);
+					LAssert(Added <= c.Used);
 				}
 			}
 		}
@@ -438,7 +438,7 @@ public:
 			Entry *OldTable = Table;
 
 			Used = 0;
-			LgiAssert(NewSize <= MaxSize);
+			LAssert(NewSize <= MaxSize);
 			SizeBackup = Size = NewSize;
 
 			Table = new Entry[Size];
@@ -456,7 +456,7 @@ public:
 					{
 						if (!Add(OldTable[i].k, OldTable[i].v))
 						{
-							LgiAssert(0);
+							LAssert(0);
 						}
 						FreeKey(OldTable[i].k);
 					}
@@ -467,7 +467,7 @@ public:
 			}
 			else
 			{
-				LgiAssert(Table != 0);
+				LAssert(Table != 0);
 				Table = OldTable;
 				SizeBackup = Size = OldSize;
 				return false;
@@ -522,7 +522,7 @@ public:
 			#ifndef LGI_STATIC
 			LgiStackTrace("%s:%i - this=%p Table=%p Used=%i Size=%i\n", _FL, this, Table, Used, Size);
 			#endif
-			LgiAssert(0);
+			LAssert(0);
 		}		
 		return Status;
 	}
@@ -601,7 +601,7 @@ public:
 				return true;
 			}
 		}
-		else LgiAssert(!"Adding NULL key or value.");
+		else LAssert(!"Adding NULL key or value.");
 
 		return false;
 	}
@@ -643,7 +643,7 @@ public:
 						// Do bubble
 						if (Table[Hole].k != NullKey)
 						{
-							LgiAssert(0);
+							LAssert(0);
 						}
 						memmove(Table + Hole, Table + i, sizeof(Table[i]));
 						InitializeTable(Table + i, 1);
@@ -792,7 +792,7 @@ public:
 				if (Table[i].k != NullKey)
 				{
 					FreeKey(Table[i].k);
-					LgiAssert(Table[i].k == NullKey);
+					LAssert(Table[i].k == NullKey);
 				}
 				Table[i].v = NullValue;
 			}
@@ -916,7 +916,7 @@ public:
 
 		Pair operator *()
 		{
-			LgiAssert(	Idx >= 0 &&
+			LAssert(	Idx >= 0 &&
 						Idx < t->Size &&
 						t->Table[Idx].k != t->NullKey);
 			Pair p = { t->Table[Idx].k, t->Table[Idx].v };

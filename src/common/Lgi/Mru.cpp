@@ -268,7 +268,7 @@ const char *GMru::AddFile(const char *FileName, bool Update)
 		}
 		else
 		{
-			LgiAssert(0);
+			LAssert(0);
 		}
 	}
 
@@ -405,7 +405,7 @@ bool GMru::Serialize(GDom *Store, const char *Prefix, bool Write)
 			for (int i=0; i<d->Items.Length(); i++)
 			{
 				GMruEntry *e = d->Items[i];
-				LgiAssert(e->Raw.Get() != NULL);
+				LAssert(e->Raw.Get() != NULL);
 				if (!Saved.Find(e->Raw))
 				{
 					Saved.Add(e->Raw, true);
@@ -416,7 +416,7 @@ bool GMru::Serialize(GDom *Store, const char *Prefix, bool Write)
 						sprintf_s(Key, sizeof(Key), "%s.Item%i", Prefix, Idx++);
 						Store->SetValue(Key, v = Stored.Get());
 					}
-					else LgiAssert(0);
+					else LAssert(0);
 				}
 			}
 
@@ -442,7 +442,7 @@ bool GMru::Serialize(GDom *Store, const char *Prefix, bool Write)
 					if (Store->GetValue(Key, File))
 					{
 						LString Stored = File.Str();
-						LgiAssert(Stored.Get() != NULL);
+						LAssert(Stored.Get() != NULL);
 						
 						LAutoPtr<GMruEntry> e(new GMruEntry);
 						if (SerializeEntry(&e->Display, &e->Raw, &Stored)) // Convert Stored -> Raw

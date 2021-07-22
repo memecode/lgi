@@ -55,11 +55,11 @@ public:
 	{
 		Map = Gtk::pango_cairo_font_map_get_default();
 		if (!Map)
-			LgiAssert(!"pango_cairo_font_map_get_default failed.\n");
+			LAssert(!"pango_cairo_font_map_get_default failed.\n");
 		
 		Ctx = Gtk::pango_cairo_font_map_create_context((Gtk::PangoCairoFontMap*)Map);
 		if (!Ctx)
-			LgiAssert(!"pango_cairo_font_map_create_context failed.\n");
+			LAssert(!"pango_cairo_font_map_create_context failed.\n");
 	}
 	#endif
 
@@ -167,9 +167,9 @@ bool LFontSystem::GetGlyphSubSupport()
 
 bool LFontSystem::GetDefaultGlyphSub()
 {
-	if (!d->CheckedConfig && LgiApp)
+	if (!d->CheckedConfig && LAppInst)
 	{
-		auto GlyphSub = LgiApp->GetConfig("Fonts.GlyphSub");
+		auto GlyphSub = LAppInst->GetConfig("Fonts.GlyphSub");
 		if (GlyphSub)
 		{
 			d->DefaultGlyphSub = atoi(GlyphSub) != 0;
@@ -301,7 +301,7 @@ bool LFontSystem::HasIconv(bool Quiet)
 				if (Warn)
 				{
 					Warn = false;
-					LgiAssert(!"Iconv is not available");
+					LAssert(!"Iconv is not available");
 				}
 			}
 		}
@@ -334,7 +334,7 @@ bool LFontSystem::HasIconv(bool Quiet)
 
 ssize_t LFontSystem::IconvConvert(const char *OutCs, LStreamI *Out, const char *InCs, const char *&In, ssize_t InLen)
 {
-	LgiAssert(InLen > 0);
+	LAssert(InLen > 0);
 
 	if (!Out || !In)
 		return 0;
@@ -379,7 +379,7 @@ ssize_t LFontSystem::IconvConvert(const char *OutCs, LStreamI *Out, const char *
 	if ((NativeInt)(Conv = d->libiconv_open(OutCs, InCs)) >= 0)
 	{
 		char *i = (char*)In;
-		LgiAssert((NativeInt)Conv != 0xffffffff);
+		LAssert((NativeInt)Conv != 0xffffffff);
 
 		while (InLen)
 		{
@@ -502,7 +502,7 @@ LFont *LFontSystem::GetBestFont(char *Str)
 			char16 *i;
 			for (i = s; *i; i++)
 			{
-				LFont *Font = GetGlyph(*i, SysFont);
+				LFont *Font = GetGlyph(*i, LSysFont);
 				if (Font)
 				{
 					bool Has = false;
@@ -601,7 +601,7 @@ LFont *LFontSystem::GetGlyph(uint32_t u, LFont *UserFont)
 {
 	if (u > MAX_UNICODE || !UserFont)
 	{
-		LgiAssert(!"Invalid character");
+		LAssert(!"Invalid character");
 		return 0;
 	}
 
@@ -618,7 +618,7 @@ LFont *LFontSystem::GetGlyph(uint32_t u, LFont *UserFont)
 	if (Lut[u])
 	{
 		Has = Font[Lut[u]];
-		LgiAssert(Has != NULL);
+		LAssert(Has != NULL);
 		if (!Has)
 		{
 			LgiTrace("%s:%i - Font table missing pointer. u=%i Lut[u]=%i\n", _FL, u, Lut[u]);
@@ -702,9 +702,9 @@ LFont *LFontSystem::GetGlyph(uint32_t u, LFont *UserFont)
 			// Start loading in fonts from the remaining 'SubFonts' container until we find the char we're looking for, 
 			// but only for a max of 10ms. This may result in a few missing glyphs but reduces the max time a display
 			// string takes to layout
-			auto Start = LgiCurrentTime();
+			auto Start = LCurrentTime();
 			int Used = d->Used;
-			while (SubFonts.Length() > 0 && (LgiCurrentTime() - Start) < 10)
+			while (SubFonts.Length() > 0 && (LCurrentTime() - Start) < 10)
 			{
 				LString f = SubFonts[0];
 				SubFonts.DeleteAt(0, true);
@@ -728,7 +728,7 @@ LFont *LFontSystem::GetGlyph(uint32_t u, LFont *UserFont)
 						if (PrevMap && _HasUnicodeGlyph(Prev->GetGlyphMap(), u))
 						{
 							Has = Prev;
-							LgiAssert(Has != NULL);
+							LAssert(Has != NULL);
 							break;
 						}
 					}

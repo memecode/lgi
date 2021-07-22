@@ -107,7 +107,7 @@ public:
 			if (In())
 				return i->Obj[Cur];
 
-			LgiAssert(!"Invalid iterator.");			
+			LAssert(!"Invalid iterator.");			
 			static T empty;
 			return empty;
 		}
@@ -191,7 +191,7 @@ public:
 		{
 			if (i)
 			{
-				LgiAssert(Lst);
+				LAssert(Lst);
 				i->Delete(Cur, i);
 				return true;
 			}
@@ -223,7 +223,7 @@ protected:
 	LstBlk *NewBlock(LstBlk *Where)
 	{
 		LstBlk *i = new LstBlk;
-		LgiAssert(i != NULL);
+		LAssert(i != NULL);
 		if (!i)
 			return NULL;
 
@@ -240,15 +240,15 @@ protected:
 			{
 				// Append
 				i->Prev->Next = i;
-				LgiAssert(LastObj == Where);
+				LAssert(LastObj == Where);
 				LastObj = i;
 			}
 		}
 		else
 		{
 			// First object
-			LgiAssert(FirstObj == 0);
-			LgiAssert(LastObj == 0);
+			LAssert(FirstObj == 0);
+			LAssert(LastObj == 0);
 			FirstObj = LastObj = i;
 		}
 
@@ -259,14 +259,14 @@ protected:
 	{
 		if (!i)
 		{
-			LgiAssert(!"No Obj.");
+			LAssert(!"No Obj.");
 			return false;
 		}
 
 		if (i->Prev != 0 && i->Next != 0)
 		{
-			LgiAssert(FirstObj != i);
-			LgiAssert(LastObj != i);
+			LAssert(FirstObj != i);
+			LAssert(LastObj != i);
 		}
 
 		if (i->Prev)
@@ -275,7 +275,7 @@ protected:
 		}
 		else
 		{
-			LgiAssert(FirstObj == i);
+			LAssert(FirstObj == i);
 			FirstObj = i->Next;
 		}
 
@@ -285,7 +285,7 @@ protected:
 		}
 		else
 		{
-			LgiAssert(LastObj == i);
+			LAssert(LastObj == i);
 			LastObj = i->Prev;
 		}
 
@@ -323,7 +323,7 @@ protected:
 			// Fall through to the local "non-full" insert...
 		}
 
-		LgiAssert(!i->Full());
+		LAssert(!i->Full());
 		if (Index < 0)
 			Index = i->Count;
 		else if (Index < i->Count)
@@ -332,7 +332,7 @@ protected:
 		i->Count++;
 		Items++;
 
-		LgiAssert(i->Count <= BlockSize);
+		LAssert(i->Count <= BlockSize);
 		return true;
 	}
 
@@ -440,21 +440,21 @@ public:
 			Iter i = GetIndex(Len, &Base);
 			if (i.i)
 			{
-				LgiAssert((Len - Base) <= i.i->Count);
+				LAssert((Len - Base) <= i.i->Count);
 				i.i->Count = Len - Base;
-				LgiAssert(i.i->Count >= 0 && i.i->Count < BlockSize);
+				LAssert(i.i->Count >= 0 && i.i->Count < BlockSize);
 				while (i.i->Next)
 				{
 					DeleteBlock(i.i->Next);
 				}
 				Items = Len;
 			}
-			else LgiAssert(!"Iterator invalid.");
+			else LAssert(!"Iterator invalid.");
 		}
 		else
 		{
 			// Increase list size...
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 		}
 				
 		VALIDATE_UL();
@@ -542,7 +542,7 @@ public:
 
 		if (LastObj->Count >= BlockSize)
 		{
-			LgiAssert(!"No block for new object.");
+			LAssert(!"No block for new object.");
 			static T empty;
 			return empty;
 		}
@@ -559,7 +559,7 @@ public:
 	{
 		if (it.Lst != this)
 		{
-			LgiAssert(!"Wrong list.");
+			LAssert(!"Wrong list.");
 			return false;
 		}
 
@@ -602,7 +602,7 @@ public:
 				Status = Insert(LastObj, p, -1);				
 		}
 		VALIDATE_UL();
-		LgiAssert(Status);
+		LAssert(Status);
 		return Status;
 	}
 
@@ -624,7 +624,7 @@ public:
 		VALIDATE_UL();
 		size_t Base = -1;
 		auto Local = GetPtr(p, &Base);
-		LgiAssert(Base != -1);
+		LAssert(Base != -1);
 		ssize_t Idx = Local.In() ? Base + Local.Cur : -1;
 		VALIDATE_UL();
 		return Idx;
@@ -670,7 +670,7 @@ public:
 				out.Cur = 0;
 				if (!out.i)
 				{
-					LgiAssert(!"Out should always trail in, and therefor be valid.");
+					LAssert(!"Out should always trail in, and therefor be valid.");
 					break;
 				}
 			}
@@ -699,7 +699,7 @@ public:
 				i->Count = (int)c;
 			c -= i->Count;
 		}
-		LgiAssert(c == 0);
+		LAssert(c == 0);
 
 		// Free any empty blocks...
 		while (LastObj->Count <= 0)
@@ -764,7 +764,7 @@ public:
 			for (Shift=0; Shift<32 && (1<<Shift) != BlockSize; Shift++);
 			if (Shift >= 32)
 			{
-				LgiAssert(!"Not a power of 2 size");
+				LAssert(!"Not a power of 2 size");
 				return false;
 			}
 			Mask = (1 << Shift) - 1;
@@ -776,7 +776,7 @@ public:
 				u->Compact();
 
 				// Get a count of blocks and alloc index
-				LgiAssert(Map == NULL);
+				LAssert(Map == NULL);
 				Map = new BlkMap(u);
 			}
 
@@ -844,18 +844,18 @@ public:
 
 		inline T& operator*() const
 		{
-			LgiAssert(IsValid());
+			LAssert(IsValid());
 			T &Obj = Map->Blocks[Idx>>Shift]->Obj[Idx&Mask];
 			return Obj;
 		}
 		inline T* operator->() const
 		{
-			LgiAssert(IsValid());
+			LAssert(IsValid());
 			return &Map->Blocks[Idx>>Shift]->Obj[Idx&Mask];
 		}
 		inline T& operator[](difference_type rhs) const
 		{
-			LgiAssert(IsValid() && rhs >= 0 && rhs < u->Items);
+			LAssert(IsValid() && rhs >= 0 && rhs < u->Items);
 			return Map->Blocks[rhs>>Shift]->Obj[rhs&Mask];
 		}
 
@@ -933,7 +933,7 @@ public:
 				i += BlockSize;
 			else
 			{
-				LgiAssert(!"Can't allocate enough blocks?");
+				LAssert(!"Can't allocate enough blocks?");
 				return *this;
 			}
 		}
@@ -957,13 +957,13 @@ public:
 					out = out->Next;
 					if (!out)
 					{
-						LgiAssert(!"We should have pre-allocated everything...");
+						LAssert(!"We should have pre-allocated everything...");
 						return *this;
 					}
 				}
 
 				int Cp = MIN(out->Remaining(), in->Count - pos);
-				LgiAssert(Cp > 0);
+				LAssert(Cp > 0);
 				memcpy(out->Obj + out->Count, in->Obj + pos, Cp * sizeof(T*));
 				out->Count += Cp;
 				pos += Cp;
@@ -1000,7 +1000,7 @@ public:
 			{
 				if (i->Prev)
 				{
-					LgiAssert(!"First object's 'Prev' should be NULL.");
+					LAssert(!"First object's 'Prev' should be NULL.");
 					return false;
 				}
 			}
@@ -1008,7 +1008,7 @@ public:
 			{
 				if (i->Next)
 				{
-					LgiAssert(!"Last object's 'Next' should be NULL.");
+					LAssert(!"Last object's 'Next' should be NULL.");
 					return false;
 				}
 			}
@@ -1016,7 +1016,7 @@ public:
 			{
 				if (i->Prev != Prev)
 				{
-					LgiAssert(!"Middle LstBlk 'Prev' incorrect.");
+					LAssert(!"Middle LstBlk 'Prev' incorrect.");
 					return false;
 				}
 			}
@@ -1026,7 +1026,7 @@ public:
 
 		if (Items != n)
 		{
-			LgiAssert(!"Item count cache incorrect.");
+			LAssert(!"Item count cache incorrect.");
 			return false;
 		}
 		

@@ -77,7 +77,7 @@ bool LMutex::_Lock()
 {
 	#if defined WIN32
 
-	// LgiAssert(_Sem != 0);
+	// LAssert(_Sem != 0);
 	// return WaitForSingleObject(_Sem, INFINITE) == WAIT_OBJECT_0;
 	EnterCriticalSection(&_Sem);
 	return true;
@@ -114,12 +114,12 @@ void LMutex::_Unlock()
 
 bool LMutex::Lock(const char *file, int line, bool NoTrace)
 {
-	auto Start = LgiCurrentTime();
+	auto Start = LCurrentTime();
 	bool Status = false;
 	OsThreadId CurrentThread = GetCurrentThreadId();
 	bool Warn = true;
 
-	LgiAssert(file != NULL && line != 0);
+	LAssert(file != NULL && line != 0);
 
 	while (!Status)
 	{
@@ -153,7 +153,7 @@ bool LMutex::Lock(const char *file, int line, bool NoTrace)
 		}
 
 		#if 1 // _DEBUG
-		auto Now = LgiCurrentTime();
+		auto Now = LCurrentTime();
 		if (Warn && Now > Start + 5000 && !NoTrace)
 		{
 			LgiTrace("LMutex=%p(%s): Can't lock after %ims... LockingThread=%i ThisThread=%x Count=%x Locker=%s:%i.\n",
@@ -170,7 +170,7 @@ bool LMutex::Lock(const char *file, int line, bool NoTrace)
 			// Warn = false;
 		}
 		
-		if (LgiCurrentTime() > Start + (2 * 60 * 1000) && !NoTrace)
+		if (LCurrentTime() > Start + (2 * 60 * 1000) && !NoTrace)
 		{
 			// Obviously we've locked up and to un-deadlock things we'll fail the lock
 			LgiTrace("::Lock timeout ask_thread=%i hold_thread=%i sem=%i count=%i\n", _Thread, CurrentThread, _Sem, _Count);
@@ -190,13 +190,13 @@ bool LMutex::Lock(const char *file, int line, bool NoTrace)
 
 bool LMutex::LockWithTimeout(int Timeout, const char *file, int line)
 {
-	auto Start = LgiCurrentTime();
+	auto Start = LCurrentTime();
 	bool Status = false;
 
-	LgiAssert(file != NULL && line != 0);
+	LAssert(file != NULL && line != 0);
 
 	while (!Status &&
-			LgiCurrentTime() < Start + Timeout)
+			LCurrentTime() < Start + Timeout)
 	{
 		if (_Lock())
 		{
@@ -253,7 +253,7 @@ void LMutex::Unlock()
 		
 		// if this assert fails then you tryed to unlock an object that
 		// wasn't locked in the first place
-		LgiAssert(0);
+		LAssert(0);
 	}
 
 	// decrement the lock counter

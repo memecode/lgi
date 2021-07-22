@@ -106,7 +106,7 @@ ssize_t LStreamOp::GetElapsedTime()
 		return EndTime - StartTime;
 	}
 	
-	return LgiCurrentTime() - StartTime;
+	return LCurrentTime() - StartTime;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -193,7 +193,7 @@ ssize_t GCopyStreamer::Copy(LStreamI *Source, LStreamI *Dest, LStreamEnd *End)
 
 	int64 Bytes = 0;
 	ssize_t r, w, e = -1;
-	StartTime = LgiCurrentTime();
+	StartTime = LCurrentTime();
 
 	if (Buffer.Length() == 0)
 		Buffer.Length(4 << 10);
@@ -217,7 +217,7 @@ ssize_t GCopyStreamer::Copy(LStreamI *Source, LStreamI *Dest, LStreamEnd *End)
 		else break;
 	}
 	
-	EndTime = LgiCurrentTime();
+	EndTime = LCurrentTime();
 
 	return Bytes;
 }

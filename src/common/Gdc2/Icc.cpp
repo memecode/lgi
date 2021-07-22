@@ -871,7 +871,7 @@ public:
 		#if USE_LCMS
 		Profile = 0;
 		#endif
-		LgiAssert(sizeof(IccProfileHeader) == 128);
+		LAssert(sizeof(IccProfileHeader) == 128);
 	}
 
 	~GIccProfilePrivate()

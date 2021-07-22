@@ -888,7 +888,7 @@ int GdcDevice::GetOption(int Opt)
 		return d->OptVal[Opt];
 	}
 
-	LgiAssert(0);
+	LAssert(0);
 	return 0;
 }
 
@@ -901,7 +901,7 @@ int GdcDevice::SetOption(int Opt, int Value)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return Prev;
 }
@@ -1137,7 +1137,7 @@ GAlphaFactory FactoryAlpha;
 
 LApplicatorFactory::LApplicatorFactory()
 {
-	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
+	LAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	if (_Factories < CountOf(_Factory) - 1)
 	{
 		_Factory[_Factories++] = this;
@@ -1146,7 +1146,7 @@ LApplicatorFactory::LApplicatorFactory()
 
 LApplicatorFactory::~LApplicatorFactory()
 {
-	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
+	LAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)
 	{
 		if (_Factory[i] == this)
@@ -1160,7 +1160,7 @@ LApplicatorFactory::~LApplicatorFactory()
 
 LApplicator *LApplicatorFactory::NewApp(LColourSpace Cs, int Op)
 {
-	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
+	LAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)
 	{
 		LApplicator *a = _Factory[i]->Create(Cs, Op);

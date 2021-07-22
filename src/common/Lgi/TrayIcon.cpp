@@ -82,12 +82,12 @@ public:
 			if (!appind)
 				return;
 				
-			LgiAssert(!"Impl me.");
+			LAssert(!"Impl me.");
 			#else
 			if (!tray_icon)
 				return;
 
-			uint64 Now = LgiCurrentTime();
+			uint64 Now = LCurrentTime();
 			GdkScreen *s = gtk_status_icon_get_screen(tray_icon);
 			GdkDisplay *dsp = gdk_screen_get_display(s);
 			gint x, y;
@@ -161,8 +161,8 @@ public:
 
 			LastClickTime = 0;
 			#if USE_APPINDICATOR
-				auto name = LgiApp->Name();
-				LgiAssert(name != NULL);
+				auto name = LAppInst->Name();
+				LAssert(name != NULL);
 				appind = app_indicator_new(name, name, APP_INDICATOR_CATEGORY_COMMUNICATIONS);
 			#else
 				tray_icon = Gtk::gtk_status_icon_new();
@@ -264,7 +264,7 @@ bool GTrayIcon::Load(const TCHAR *Str)
 			d->Icon.Add(i);
 			return true;
 		}
-		else LgiAssert(0);
+		else LAssert(0);
 	
 	#elif LGI_COCOA
 	
@@ -385,7 +385,7 @@ void GTrayIcon::Visible(bool v)
 				
 				if (d->appind)
 				{
-					LgiAssert(!"Impl me.");
+					LAssert(!"Impl me.");
 				}
 				
 			#elif defined(__GTK_H__)
@@ -450,7 +450,7 @@ void GTrayIcon::Visible(bool v)
 				
 				if (d->appind)
 				{
-					LgiAssert(!"Impl me.");
+					LAssert(!"Impl me.");
 				}
 				
 			#elif defined(__GTK_H__)
@@ -503,7 +503,7 @@ void GTrayIcon::Value(int64 v)
 			
 			if (d->appind)
 			{
-				LgiAssert(!"Impl me.");
+				LAssert(!"Impl me.");
 			}
 			
 		#elif defined __GTK_H__
@@ -568,7 +568,7 @@ void GTrayIcon::Value(int64 v)
 				}
 				else
 				{
-					LgiAssert(!"Failed to create memory bitmap");
+					LAssert(!"Failed to create memory bitmap");
 				}
 
 				CGContextFlush(c);

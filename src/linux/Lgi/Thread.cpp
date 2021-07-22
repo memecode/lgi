@@ -8,7 +8,7 @@ OsThreadId GetCurrentThreadId()
 	#ifdef SYS_gettid
 	return syscall(SYS_gettid);
 	#else
-	LgiAssert(0);
+	LAssert(0);
 	return 0;
 	#endif
 }

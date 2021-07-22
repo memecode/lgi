@@ -120,7 +120,7 @@ LSubMenu::~LSubMenu()
 	LMenuItem *i;
 	while (i = Items[0])
 	{
-		LgiAssert(i->Parent == this);
+		LAssert(i->Parent == this);
 		DeleteObj(i);
 	}
 }
@@ -479,7 +479,7 @@ void LMenuItem::_Measure(LPoint &Size)
 	}
 	else
 	{
-		LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+		LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : LSysFont;
 		bool BaseMenu = Parent == Menu; // true if attached to a windows menu
 										// else is a submenu
 		int Ht = Font->GetHeight();
@@ -510,7 +510,7 @@ void LMenuItem::_Measure(LPoint &Size)
 void LMenuItem::_PaintText(LSurface *pDC, int x, int y, int Width)
 {
 	bool Underline = d->StartUnderline;
-	LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+	LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : LSysFont;
 	for (int i=0; i < (d->Strs.Length() - (d->HasAccel ? 1 : 0)); i++)
 	{
 		LDisplayString *s = d->Strs[i];
@@ -568,7 +568,7 @@ void LMenuItem::_Paint(LSurface *pDC, int Flags)
 		LColour Fore(Selected ? L_FOCUS_SEL_FORE : L_MENU_TEXT);
 		LColour Back(BaseMenu ? Menu->d->RootMenuBack : (Selected ? LColour(L_FOCUS_SEL_BACK) : LColour(L_MENU_BACKGROUND)));
 		int x = IconX;
-		LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+		LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : LSysFont;
 		int y = (pDC->Y() - Font->GetHeight()) >> 1;
 
 		// paint the background
@@ -801,7 +801,7 @@ bool LMenuItem::ScanForAccel()
 							case '\\': Key = 220; break;
 							case ']': Key = 221; break;
 							case '\'': Key = 222; break;
-							default: LgiAssert(!"Unknown key."); break;
+							default: LAssert(!"Unknown key."); break;
 						}
 					}
 					else
@@ -819,7 +819,7 @@ bool LMenuItem::ScanForAccel()
 			{
 				d->Shortcut = LString("+").Join(Keys);
 				LString n = Name();
-				LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+				LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : LSysFont;
 				d->UpdateStrings(Font, n);
 			}
 			
@@ -864,7 +864,7 @@ bool LMenuItem::Update()
 	if (Parent && Parent->Handle())
 	{
 		Status = SetMenuItemInfo(Parent->Handle(), Position, true, &Info) != 0;
-		LgiAssert(Status);
+		LAssert(Status);
 	}
 
 	return Status;
@@ -931,7 +931,7 @@ bool LMenuItem::Name(const char *Txt)
 			Info.fType |= MFT_STRING;
 			Info.fMask |= MIIM_TYPE | MIIM_DATA;
 
-			LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+			LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : LSysFont;
 			d->UpdateStrings(Font, n);
 
 			// Tell the OS
@@ -994,13 +994,13 @@ bool LMenuItem::Insert(int Pos)
 
 	if (Parent && Parent->Handle())
 	{
-		LgiAssert(Position >= 0);
+		LAssert(Position >= 0);
 		Position = Pos;
 		Status = InsertMenuItem(Parent->Handle(),
 								Position,
 								true,
 								&Info) != 0;
-		LgiAssert(Status);
+		LAssert(Status);
 	}
 
 	return Status;
@@ -1074,7 +1074,7 @@ LFont *LMenu::GetFont()
 		}
 	}
 
-	return MenuFont.f ? MenuFont.f : SysFont;
+	return MenuFont.f ? MenuFont.f : LSysFont;
 }
 
 bool LMenu::Attach(LViewI *p)

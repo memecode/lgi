@@ -42,7 +42,7 @@ VcFile::FileStatus VcFile::GetStatus()
 		else STATE("Locally Modified", 1, SModified);
 		else
 		{
-			//LgiAssert(!"Impl state");
+			//LAssert(!"Impl state");
 			d->Log->Print("%s:%i - Unknown status '%s'\n", _FL, s);
 		}
 	}
@@ -54,7 +54,7 @@ LString VcFile::GetUri()
 {
 	const char *File = GetText(COL_FILENAME);
 	LUri u = Uri || !Owner ? Uri : Owner->GetUri();
-	LgiAssert(u && File);
+	LAssert(u && File);
 	u += File;
 	return u.ToString();
 }

@@ -562,7 +562,7 @@ public:
 			if (ValidStr(init))
 				*this = init;
 			else
-				LgiAssert(init == 0);
+				LAssert(init == 0);
 		}
 		StringsDef(const StringsDef &c)
 		{
@@ -595,7 +595,7 @@ public:
 				if (ValidStr(str))
 					Add(NewStr(str));
 				else
-					LgiAssert(!"Not a valid string.");
+					LAssert(!"Not a valid string.");
 			}
 
 			return *this;			
@@ -640,7 +640,7 @@ public:
 							if (_stricmp(n, "inherit"))
 								Add(n.Release());
 						}
-						else LgiAssert(!"Not a valid string.");
+						else LAssert(!"Not a valid string.");
 					}
 
 					if (s) s++;
@@ -658,7 +658,7 @@ public:
 							if (_stricmp(n, "inherit"))
 								Add(n.Release());
 						}
-						else LgiAssert(!"Not a valid string.");
+						else LAssert(!"Not a valid string.");
 					}
 				}
 			}
@@ -964,7 +964,7 @@ public:
 						break;
 
 					StartIdx = Sel->Combs[CombIdx];
-					LgiAssert(StartIdx > 0);
+					LAssert(StartIdx > 0);
 
 					if (StartIdx >= (ssize_t)Sel->Parts.Length())
 						break;
@@ -974,13 +974,13 @@ public:
 					{
 						case LCss::Selector::CombChild:
 						{
-							// LgiAssert(!"Not impl.");
+							// LAssert(!"Not impl.");
 							return false;
 							break;
 						}
 						case LCss::Selector::CombAdjacent:
 						{
-							// LgiAssert(!"Not impl.");
+							// LAssert(!"Not impl.");
 							return false;
 							break;
 						}
@@ -1003,7 +1003,7 @@ public:
 						}
 						default:
 						{
-							LgiAssert(!"This must be a comb.");
+							LAssert(!"This must be a comb.");
 							return false;
 							break;
 						}
@@ -1123,7 +1123,7 @@ public:
 							if (Member) return *Member; \
 							else if ((Member = (Type*)Props.Find(BaseProp))) return *Member; \
 							return Default; } \
-		void PropName(Type t) {	LgiAssert(!ReadOnly); \
+		void PropName(Type t) {	LAssert(!ReadOnly); \
 								Type *Member = (Type*)Props.Find(Prop##PropName); \
 								if (Member) *Member = t; \
 								else { Props.Add(Prop##PropName, Member = new Type); \

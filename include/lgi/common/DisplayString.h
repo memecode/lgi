@@ -153,7 +153,7 @@ public:
 	
 	LDisplayString &operator=(const LDisplayString &s)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return *this;
 	}
 	

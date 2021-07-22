@@ -314,7 +314,7 @@ void FindInFilesThread::SearchFile(char *File)
 					int Chars = snprintf(Buf, sizeof(Buf), "%s:%i:%.*s\n", File, Line + 1, (int)LineLen, LineStart);
 					d->Pipe.Push(Buf, Chars);
 					
-					int64 Now = LgiCurrentTime();
+					int64 Now = LCurrentTime();
 					if (Now > d->Last  + 500)
 						Log(d->Pipe.NewStr());
 				}

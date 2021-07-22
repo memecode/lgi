@@ -198,7 +198,7 @@ bool GLibrary::Unload()
 		#elif defined(LINUX) || defined(MAC)
 		dlclose(hLib);
 		#else
-		LgiAssert(0);
+		LAssert(0);
 		#endif
 		hLib = 0;
 	}
@@ -219,7 +219,7 @@ void *GLibrary::GetAddress(const char *Resource)
 		#elif defined(LINUX) || defined(MAC)
 		p = dlsym(hLib, Resource);
 		#else
-		LgiAssert(0);
+		LAssert(0);
 		#endif
 
 		#if DEBUG_LIB_MSGS
@@ -337,7 +337,7 @@ LString GLibrary::GetFullPath()
 				return realpath(map->l_name, NULL);
 		}
 	#else
-		LgiAssert(!"Impl me.");
+		LAssert(!"Impl me.");
 	#endif
 	return NULL;
 }

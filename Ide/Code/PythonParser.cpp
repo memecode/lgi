@@ -41,7 +41,7 @@ bool BuildPyDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Def
 			if (ClsName)
 			{
 				LString::Array a = Ln.Strip().SplitDelimit(" \t", 1);
-				LgiAssert(a.Length() == 2);
+				LAssert(a.Length() == 2);
 				LString Fn = a[0] + " " + ClsName + "::" + a[1];
 				Defns.New().Set(DefnFunc, FileName, Fn, Line);
 			}
@@ -53,7 +53,7 @@ bool BuildPyDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Def
 		else if (Ln.Find("class ") == Depth)
 		{
 			LString::Array a = Ln.SplitDelimit(" \t(");
-			LgiAssert(a.Length() >= 2);
+			LAssert(a.Length() >= 2);
 			ClsName = a[1];
 			auto ClsDesc = a[0] + " " + a[1];
 			Defns.New().Set(DefnClass, FileName, ClsDesc, Line);

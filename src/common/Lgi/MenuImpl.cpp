@@ -262,7 +262,7 @@ void SubMenuImpl::OnPaint(LSurface *pDC)
 
 void SubMenuImpl::Layout(int Bx, int By)
 {
-	int Ly = SysFont->GetHeight() + 4;
+	int Ly = LSysFont->GetHeight() + 4;
 	int Col = (GdcD->Y() - 32) / Ly;
 	int Cols = (int)ceil((double)d->Sub->Items.Length()/Col);
 	int ColX = 0;
@@ -403,7 +403,7 @@ MenuImpl::MenuImpl(GMenu *Menu)
 	d->Menu = Menu;
 	Name("MenuImpl");
 
-	LRect r(0, 0, 1000, SysFont->GetHeight() + 4);
+	LRect r(0, 0, 1000, LSysFont->GetHeight() + 4);
 	SetPos(r);
 }
 
@@ -450,7 +450,7 @@ bool MenuImpl::Pour(LRegion &r)
 
 	int x = 1;
 	int y = 1;
-	int Ly = SysFont->GetHeight() + 4;
+	int Ly = LSysFont->GetHeight() + 4;
 	
 	for (::GMenuItem *i=d->Menu->Items.First(); i; i=d->Menu->Items.Next())
 	{

@@ -221,7 +221,7 @@ template<typename A, typename B>
 A &AssertCast(A &a, B b)
 {
 	a = (A) b;	 // If this breaks it'll assert.
-	LgiAssert((B)a == b);
+	LAssert((B)a == b);
 	return a;
 }
 

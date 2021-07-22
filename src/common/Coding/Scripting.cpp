@@ -146,7 +146,7 @@ public:
 			}
 		}
 
-		LgiAssert(0);
+		LAssert(0);
 		return 0;
 	}
 
@@ -223,7 +223,7 @@ struct GDomAddr
 			return Parts[i].Name;
 		}
 
-		LgiAssert(0);
+		LAssert(0);
 		return 0;
 	}
 
@@ -526,7 +526,7 @@ public:
 				}
 				default:
 				{
-					LgiAssert(0);
+					LAssert(0);
 					break;
 				}
 			}
@@ -914,7 +914,7 @@ bool GDomRef::Set(LScriptEnginePrivate *Priv, LVariant &v)
 					else
 					{
 						Priv->Term.Print("%s:%i - Can't index into type '%i'.\n", __FILE__, __LINE__, Var->Type);
-						LgiAssert(0);
+						LAssert(0);
 					}
 
 					DeleteObj(a);
@@ -1596,7 +1596,7 @@ LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 				LVariant *r = Execute_Expression(Cur, Src, Depth + 1);
 				if (r)
 				{
-					LgiAssert(r->Type != GV_NULL);
+					LAssert(r->Type != GV_NULL);
 					Args.Add(r);
 					PrevIsOp = 0;
 				}
@@ -1699,7 +1699,7 @@ LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 							ProcessArguments(Arg, Mem, &Idx);
 							if (Method->Call(Context, Ret, Arg))
 							{
-								LgiAssert(Ret->Type != GV_NULL);
+								LAssert(Ret->Type != GV_NULL);
 								Args.Add(Ret);
 								PrevIsOp = 0;
 							}
@@ -1756,7 +1756,7 @@ LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 								if (!ResolveDomAddr(*Ref, Addr, false))
 								{
 									// Variable name...
-									LgiAssert(Ref->Array == 0);
+									LAssert(Ref->Array == 0);
 									DeleteObj(Ref);
 									if ((v = new LVariant))
 										ToVar(*v, t);
@@ -1786,7 +1786,7 @@ LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 								if (dom)
 									Args.Add(new LVariant(dom, Ref->Member));
 								else
-									LgiAssert(!"No DOM ptr.");
+									LAssert(!"No DOM ptr.");
 							}
 							else
 							{
@@ -1900,7 +1900,7 @@ LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 				int LowestPre = -1;
 				for (int i=0; i<Args.Length(); i++)
 				{
-					LgiAssert(Args[i]->Type);
+					LAssert(Args[i]->Type);
 
 					if (Args[i]->Type == GV_OPERATOR)
 					{
@@ -1913,7 +1913,7 @@ LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 					}
 				}
 
-				LgiAssert(LowestOp >= 0 && LowestOp < Args.Length());
+				LAssert(LowestOp >= 0 && LowestOp < Args.Length());
 
 				OperatorType Type = OpType(Args[LowestOp]->Value.Op);
 				if (Type == OpPrefix)
@@ -2006,7 +2006,7 @@ LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 							}
 							default:
 							{
-								LgiAssert(!"Not a valid prefix operator");
+								LAssert(!"Not a valid prefix operator");
 								break;
 							}
 						}
@@ -2079,7 +2079,7 @@ LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 							}
 							default:
 							{
-								LgiAssert(!"Not a valid postfix operator");
+								LAssert(!"Not a valid postfix operator");
 								Term.Print("%s:%i - Not a valid postfix operator.\n", ErrorTitle(), Lines[StartToken]);
 								break;
 							}
@@ -2117,7 +2117,7 @@ LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 					LVariant *b = Args[LowestOp + 1];
 					LVariant r;
 
-					LgiAssert(op->Value.Op);
+					LAssert(op->Value.Op);
 
 					switch (op->Value.Op)
 					{
@@ -2309,7 +2309,7 @@ LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 					Args.DeleteAt(LowestOp+1, true);
 					Args.DeleteAt(LowestOp, true);
 				}
-				else LgiAssert(!"Unknown operator type");
+				else LAssert(!"Unknown operator type");
 			}
 		}
 
@@ -2443,7 +2443,7 @@ LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LVariant *Ret, ArgumentA
 				}
 				default:
 				{
-					LgiAssert(0);
+					LAssert(0);
 					break;
 				}
 			}
@@ -2483,7 +2483,7 @@ LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LVariant *Ret, ArgumentA
 				}
 				#else
 				// Not implemented
-				LgiAssert(0);
+				LAssert(0);
 				#endif
 
 				if (Ret) (*Ret) = (int) r;
@@ -2546,9 +2546,9 @@ LExecutionStatus LScriptFunc::Call(LScriptContext *Ctx, LVariant *Ret, ArgumentA
 		}
 
 		// Call the method
-		LgiAssert(BodyIdx < BodyArr->Length());
+		LAssert(BodyIdx < BodyArr->Length());
 		GCode *Body = &(*BodyArr)[BodyIdx];
-		LgiAssert(Body->Type == GS_FUNCTION_DEFN);
+		LAssert(Body->Type == GS_FUNCTION_DEFN);
 		Status = Priv->Execute_Statement(Body->Code);
 
 		// Remove the local stack frame
@@ -2615,7 +2615,7 @@ LExecutionStatus LScriptEnginePrivate::Execute_Statement(LArray<GCode> &To)
 			{
 				if (!Code.If.Blocks)
 				{
-					LgiAssert(!"No blocks in if statement.");
+					LAssert(!"No blocks in if statement.");
 					break;
 				}
 
@@ -2850,7 +2850,7 @@ LExecutionStatus LScriptEnginePrivate::Execute_Statement(LArray<GCode> &To)
 										else if (Ref.Var->Type == GV_STRING ||
 												Ref.Var->Type == GV_NULL)
 										{
-											LgiAssert(0);
+											LAssert(0);
 
 											/*
 											if (stricmp(Ref.Member, "length") == 0)
@@ -2887,7 +2887,7 @@ LExecutionStatus LScriptEnginePrivate::Execute_Statement(LArray<GCode> &To)
 						}
 						default:
 						{
-							LgiAssert(0);
+							LAssert(0);
 							break;
 						}
 					}
@@ -2896,7 +2896,7 @@ LExecutionStatus LScriptEnginePrivate::Execute_Statement(LArray<GCode> &To)
 			}
 			default:
 			{
-				LgiAssert(0);
+				LAssert(0);
 				return ScriptError;
 				break;
 			}

@@ -29,7 +29,7 @@ public:
 	
 	LCssTools(LView *view)
 	{
-		LgiAssert(view != NULL);
+		LAssert(view != NULL);
 		View = view;
 		Css = view ? view->GetCss(true) : 0;
 		Font = view ? view->GetFont() : 0;

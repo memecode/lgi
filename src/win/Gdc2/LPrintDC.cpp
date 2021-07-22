@@ -15,7 +15,7 @@ public:
 	}
 };
 
-BOOL CALLBACK LgiAbortProc(HDC hdc, int iError)
+BOOL CALLBACK LAbortProc(HDC hdc, int iError)
 {
 	LgiYield();
 	return true;
@@ -26,7 +26,7 @@ LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterNa
 	d = new GPrintDCPrivate;
 	hDC = (HDC) Handle;
 
-	SetAbortProc(hDC, LgiAbortProc);
+	SetAbortProc(hDC, LAbortProc);
 	
 	// Start document
 	if (hDC)

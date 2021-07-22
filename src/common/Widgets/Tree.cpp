@@ -110,7 +110,7 @@ public:
 	{
 		if (!Ds[Col])
 		{
-			LFont *f = Item->GetTree() ? Item->GetTree()->GetFont() : SysFont;		
+			LFont *f = Item->GetTree() ? Item->GetTree()->GetFont() : LSysFont;		
 			Ds[Col] = new LDisplayString(f, Item->GetText(Col));
 			if (Ds[Col])
 			{
@@ -172,7 +172,7 @@ void LTreeNode::_Visible(bool v)
 {
 	for (LTreeItem *i=GetChild(); i; i=i->GetNext())
 	{
-		LgiAssert(i != this);
+		LAssert(i != this);
 		i->OnVisible(v);
 		i->_Visible(v);
 	}
@@ -194,7 +194,7 @@ LItemContainer *LTreeItem::GetContainer()
 
 LTreeItem *LTreeNode::Insert(LTreeItem *Obj, ssize_t Idx)
 {
-	LgiAssert(Obj != this);
+	LAssert(Obj != this);
 
 	if (Obj)
 	{
@@ -237,7 +237,7 @@ void LTreeNode::Detach()
 		LTreeItem *It = Item();
 		if (It)
 		{
-			LgiAssert(Parent->Items.HasItem(It));
+			LAssert(Parent->Items.HasItem(It));
 			Parent->Items.Delete(It);
 		}
 		Parent = 0;
@@ -605,18 +605,18 @@ void LTreeItem::_Remove()
 	{
 		if (Parent)
 		{
-			LgiAssert(Parent->Items.HasItem(this));
+			LAssert(Parent->Items.HasItem(this));
 			Parent->Items.Delete(this);
 		}
 		else if (Tree)
 		{
-			LgiAssert(Tree->Items.HasItem(this));
+			LAssert(Tree->Items.HasItem(this));
 			Tree->Items.Delete(this);
 		}
 
 		if (Tree)
 		{
-			LgiAssert(Tree->d != NULL);
+			LAssert(Tree->d != NULL);
 			Tree->d->LayoutDirty = true;
 			
 			if (Tree->IsCapturing())
@@ -630,14 +630,14 @@ void LTreeItem::_Remove()
 
 void LTreeItem::_PourText(LPoint &Size)
 {
-	LFont *f = Tree ? Tree->GetFont() : SysFont;
+	LFont *f = Tree ? Tree->GetFont() : LSysFont;
 	auto *Txt = GetText();
 	
 	#if defined(_WIN64) && defined(_DEBUG)
 	if ((void*)Txt == (void*)0xfeeefeeefeeefeee ||
 		(void*)Txt == (void*)0xcdcdcdcdcdcdcdcd)
 	{
-		LgiAssert(!"Yeah nah...");
+		LAssert(!"Yeah nah...");
 	}
 	#endif
 	
@@ -652,7 +652,7 @@ void LTreeItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 	if (Text)
 	{
 		LDisplayString *Ds = d->GetDs(0, d->Text.X());
-		LFont *f = Tree ? Tree->GetFont() : SysFont;
+		LFont *f = Tree ? Tree->GetFont() : LSysFont;
 
 		int Tab = f->TabSize();
 		f->TabSize(0);
@@ -875,7 +875,7 @@ void LTreeItem::_MouseClick(LMouse &m)
 
 void LTreeItem::OnPaint(ItemPaintCtx &Ctx)
 {
-	LgiAssert(Tree != NULL);
+	LAssert(Tree != NULL);
 
 	// background up to text
 	LSurface *&pDC = Ctx.pDC;
@@ -1850,7 +1850,7 @@ void LTree::OnPaint(LSurface *pDC)
 	if (GetImageList() &&
 		!d->IconCache)
 	{
-		int CacheHeight = MAX(SysFont->GetHeight(), GetImageList()->Y());
+		int CacheHeight = MAX(LSysFont->GetHeight(), GetImageList()->Y());
 		
 		d->IconCache = new LMemDC;
 		if (d->IconCache &&
@@ -1867,7 +1867,7 @@ void LTree::OnPaint(LSurface *pDC)
 
 			GetImageList()->Lock();
 			int DrawY = (CacheHeight - GetImageList()->TileY()) >> 1;
-			LgiAssert(DrawY >= 0);
+			LAssert(DrawY >= 0);
 			for (int i=0; i<GetImageList()->GetItems(); i++)
 			{
 				GetImageList()->Draw(d->IconCache, i * GetImageList()->TileX(), DrawY, i, Background);
@@ -2053,7 +2053,7 @@ void LTree::OnPulse()
 		
 	if (d->DropTarget)
 	{
-		int64 p = LgiCurrentTime() - d->DropSelectTime;
+		int64 p = LCurrentTime() - d->DropSelectTime;
 		if (p >= 1000)
 		{
 			SetPulse();
@@ -2127,7 +2127,7 @@ int LTree::GetContentSize(int ColumnIdx)
 	return MaxPx;
 }
 
-LgiCursor LTree::GetCursor(int x, int y)
+LCursor LTree::GetCursor(int x, int y)
 {
 	TREELOCK
 		
@@ -2172,7 +2172,7 @@ void LTree::SelectDropTarget(LTreeItem *Item)
 		if (d->DropTarget)
 		{
 			d->DropTarget->Update();
-			d->DropSelectTime = LgiCurrentTime();
+			d->DropSelectTime = LCurrentTime();
 		}
 
 		if (Update)

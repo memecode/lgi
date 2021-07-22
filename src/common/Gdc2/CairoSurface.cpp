@@ -328,13 +328,13 @@ bool LCairoSurface::Create(int x, int y, LColourSpace Cs, int Flags)
 		// supported. Just create an in memory bitmap.
 		pMem->OwnMem(true);
 		pMem->Line = ((pMem->x * Bits + 31) / 32) * 4;
-		LgiAssert(pMem->Line > 0);
+		LAssert(pMem->Line > 0);
 		pMem->Base = new uchar[pMem->Line * pMem->y];
 		pMem->Cs = ColourSpace = Cs;
 	}
 	else
 	{
-		LgiAssert(d->Img == NULL);
+		LAssert(d->Img == NULL);
 		d->Img = cairo_image_surface_create(fmt, x, y);
 		if (!d->Img)
 			return false;
@@ -355,7 +355,7 @@ bool LCairoSurface::Create(int x, int y, LColourSpace Cs, int Flags)
 				pMem->Cs = CsRgb16;
 				break;
 			default:
-				// LgiAssert(0);
+				// LAssert(0);
 				printf("%s:%i - Invalid surface format: %i (0x%x), in: %i (0x%x), sz: %ix%i\n", _FL, OutFmt, OutFmt, fmt, fmt, x, y);
 				return false;
 		}			
@@ -392,7 +392,7 @@ bool LCairoSurface::Create(int x, int y, LColourSpace Cs, int Flags)
 	if (!pApp)
 	{
 		printf("LCairoSurface::Create(%i,%i,%i) No Applicator.\n", x, y, Bits);
-		LgiAssert(0);
+		LAssert(0);
 	}
 
 	Clip.ZOff(X()-1, Y()-1);
@@ -421,7 +421,7 @@ void LCairoSurface::Blt(int x, int y, LSurface *Src, LRect *a)
 			if (root_window)
 			{
 				#if GTK_MAJOR_VERSION == 3
-				LgiAssert(!"Gtk3 FIXME");
+				LAssert(!"Gtk3 FIXME");
 				#else
 				gint x_orig, y_orig;
 				gint width, height;
@@ -449,7 +449,7 @@ void LCairoSurface::Blt(int x, int y, LSurface *Src, LRect *a)
 				Status = true;
 			}
 			#else
-			LgiAssert(!"Not impl.");
+			LAssert(!"Not impl.");
 			#endif
 		}
 		
@@ -468,7 +468,7 @@ void LCairoSurface::Blt(int x, int y, LSurface *Src, LRect *a)
 
 void LCairoSurface::StretchBlt(LRect *d, LSurface *Src, LRect *s)
 {
-    LgiAssert(!"Not implemented");
+    LAssert(!"Not implemented");
 }
 
 void LCairoSurface::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)

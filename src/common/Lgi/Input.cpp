@@ -34,7 +34,7 @@ GInput::GInput(LViewI *parent, const char *InitStr, const char *Msg, const char 
 	LTableLayout *Tbl = new LTableLayout(IDC_TABLE);
 	if (!Tbl)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return;
 	}
 	AddView(Tbl);
@@ -44,9 +44,9 @@ GInput::GInput(LViewI *parent, const char *InitStr, const char *Msg, const char 
 	LView *Txt;
 	c->Add(Txt = new LTextLabel(-1, 5, 5, -1, -1, Msg));
 
-	LDisplayString MsgDs(SysFont, ValidStr(InitStr)?InitStr:"A");
-	int Dx = LgiApp->GetMetric(LGI_MET_DECOR_X) + 10;
-	int Dy = LgiApp->GetMetric(LGI_MET_DECOR_Y);
+	LDisplayString MsgDs(LSysFont, ValidStr(InitStr)?InitStr:"A");
+	int Dx = LAppInst->GetMetric(LGI_MET_DECOR_X) + 10;
+	int Dy = LAppInst->GetMetric(LGI_MET_DECOR_Y);
 	
 	int ContextX = 400;
 	ContextX = MAX(ContextX, MsgDs.X() + 40);
@@ -55,7 +55,7 @@ GInput::GInput(LViewI *parent, const char *InitStr, const char *Msg, const char 
 	int CallbackX = callback ? GBUTTON_MIN_X + 20 : 0;
 	ContextX = MAX(ContextX, Txt->X() + CallbackX);
 
-	LRect r(0, 0, ContextX + CallbackX + Dx, 80 + MAX(SysFont->GetHeight(), Txt->Y()) + Dy);
+	LRect r(0, 0, ContextX + CallbackX + Dx, 80 + MAX(LSysFont->GetHeight(), Txt->Y()) + Dy);
 
 	SetParent(parent);
 	Name(Title);

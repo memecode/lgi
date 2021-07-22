@@ -134,7 +134,7 @@ public:
 
 typedef GDataIterator<GDataPropI*> *GDataIt;
 
-#define EmptyVirtual(t)		LgiAssert(0); return t
+#define EmptyVirtual(t)		LAssert(0); return t
 #define Store3CopyDecl		bool CopyProps(GDataPropI &p)
 #define Store3CopyImpl(Cls)	bool Cls::CopyProps(GDataPropI &p)
 
@@ -178,7 +178,7 @@ public:
 	/// Gets an iterator interface to a list of sub-objects.
 	virtual GDataIt GetList(int id) { EmptyVirtual(NULL); }
 	/// Set the mime segments
-	virtual Store3Status SetRfc822(LStreamI *Rfc822Msg) { LgiAssert(!"Pretty sure you should be implementing this"); return Store3Error; }
+	virtual Store3Status SetRfc822(LStreamI *Rfc822Msg) { LAssert(!"Pretty sure you should be implementing this"); return Store3Error; }
 };
 
 #pragma warning(default:4263)
@@ -359,7 +359,7 @@ public:
 
 	GDataStoreI()
 	{
-		LgiAssert(LgiApp->InThread());
+		LAssert(LAppInst->InThread());
 		while (Map.Find(Id = LRand(1000)))
 			;
 		Map.Add(Id, this);
@@ -367,9 +367,9 @@ public:
 
 	virtual ~GDataStoreI()
 	{
-		LgiAssert(LgiApp->InThread());
+		LAssert(LAppInst->InThread());
 		if (!Map.Delete(Id))
-			LgiAssert(!"Delete failed.");
+			LAssert(!"Delete failed.");
 	}
 
 	/// \returns size of object on disk
@@ -597,20 +597,20 @@ public:
 
 	TPub *Create(GDataStoreI *Store)
 	{
-		LgiAssert(State == Store3Loaded);
+		LAssert(State == Store3Loaded);
 		return new TPriv(dynamic_cast<TStore*>(Store));
 	}
 
 	TPub *First()
 	{
-		LgiAssert(State == Store3Loaded);
+		LAssert(State == Store3Loaded);
 		Cur = 0;
 		return (int)a.Length() > Cur ? a[Cur] : 0;
 	}
 	
 	TPub *Next()
 	{
-		LgiAssert(State == Store3Loaded);
+		LAssert(State == Store3Loaded);
 		Cur++;
 		return (int)a.Length() > Cur ? a[Cur] : 0;
 	}
@@ -622,17 +622,17 @@ public:
 	
 	TPub *operator [](size_t idx)
 	{
-		LgiAssert(State == Store3Loaded);
+		LAssert(State == Store3Loaded);
 		return a[idx];
 	}
 	
 	bool Delete(TPub *pub_ptr)
 	{
-		LgiAssert(State == Store3Loaded);
+		LAssert(State == Store3Loaded);
 		TPriv *priv_ptr = dynamic_cast<TPriv*>(pub_ptr);
 		if (!priv_ptr)
 		{
-			LgiAssert(!"Not the right type of object.");
+			LAssert(!"Not the right type of object.");
 			return false;
 		}
 
@@ -647,11 +647,11 @@ public:
 	bool Insert(TPub *pub_ptr, ssize_t idx = -1, bool NoAssert = false)
 	{
 		if (!NoAssert)
-			LgiAssert(State == Store3Loaded);
+			LAssert(State == Store3Loaded);
 		TPriv *priv_ptr = dynamic_cast<TPriv*>(pub_ptr);
 		if (!priv_ptr)
 		{
-			LgiAssert(!"Not the right type of object.");
+			LAssert(!"Not the right type of object.");
 			return false;
 		}
 
@@ -660,7 +660,7 @@ public:
 	
 	bool Empty()
 	{
-		LgiAssert(State == Store3Loaded);
+		LAssert(State == Store3Loaded);
 		a.Length(0);
 		return true;
 	}
@@ -674,11 +674,11 @@ public:
 	ssize_t IndexOf(TPub *pub_ptr, bool NoAssert = false)
 	{
 		if (!NoAssert)
-			LgiAssert(State == Store3Loaded);
+			LAssert(State == Store3Loaded);
 		TPriv *priv_ptr = dynamic_cast<TPriv*>(pub_ptr);
 		if (!priv_ptr)
 		{
-			LgiAssert(!"Not the right type of object.");
+			LAssert(!"Not the right type of object.");
 			return -1;
 		}
 

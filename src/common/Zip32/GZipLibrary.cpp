@@ -117,7 +117,7 @@ public:
 						ZpSetOptions AND
 						ZpGetOptions AND
 						ZpArchive;
-		LgiAssert(Status);
+		LAssert(Status);
 		return Status;
 	}
 

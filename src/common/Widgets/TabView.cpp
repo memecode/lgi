@@ -205,7 +205,7 @@ struct LTabPagePriv
 			{
 				if ((f = new LFont))
 				{
-					*f = *SysFont;
+					*f = *LSysFont;
 
 					if (f->CreateFromCss(s))
 						Tab->SetFont(f, true);
@@ -221,7 +221,7 @@ struct LTabPagePriv
 			if (f)
 				Ds.Reset(new LDisplayString(f, Text));
 			else
-				LgiAssert(!"no font.");
+				LAssert(!"no font.");
 		}
 
 		return Ds;
@@ -511,12 +511,12 @@ bool LTabView::Delete(LTabPage *Page)
 		if (Index == d->Current)
 		{
 			Status = Page->Detach();
-			LgiAssert(Status);
+			LAssert(Status);
 		}
 		else
 		{
 			Status = DelView(Page);
-			LgiAssert(Status);
+			LAssert(Status);
 		}
 		
 		delete Page;
@@ -1116,7 +1116,7 @@ void LTabView::OnPaint(LSurface *pDC)
 			}
 		}
 	}
-	else LgiAssert(!"Not impl.");
+	else LAssert(!"Not impl.");
 }
 
 void LTabView::OnPosChange()
@@ -1434,7 +1434,7 @@ void LTabPage::Append(LViewI *Wnd)
 		{
 			AddView(Wnd);
 		}
-		else LgiAssert(0);
+		else LAssert(0);
 	}
 }
 
@@ -1442,7 +1442,7 @@ bool LTabPage::Remove(LViewI *Wnd)
 {
 	if (Wnd)
 	{
-		LgiAssert(HasView(Wnd));
+		LAssert(HasView(Wnd));
 		Wnd->Detach();
 		return true;
 	}
@@ -1459,7 +1459,7 @@ LColour LTabPage::GetBackground()
 
 void LTabPage::OnStyleChange()
 {
-	SetFont(SysFont, false);
+	SetFont(LSysFont, false);
 	GetParent()->Invalidate();
 }
 

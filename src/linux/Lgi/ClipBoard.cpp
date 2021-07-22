@@ -174,7 +174,7 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LAutoPtr<LS
 	}
 	else
 	{
-		LgiAssert(!"Unexpected colourspace.");
+		LAssert(!"Unexpected colourspace.");
 	}
 
 	auto x = gdk_pixbuf_get_width(Img), y = gdk_pixbuf_get_height(Img);
@@ -223,7 +223,7 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LAutoPtr<LS
 				Rop24(Xbgr32, Rgb24);
 
 				default:
-					LgiAssert(!"Unsupported colour space.");
+					LAssert(!"Unsupported colour space.");
 					yy = y;
 					break;
 			}
@@ -238,8 +238,8 @@ LSurface *LClipBoard::Bitmap()
 	pDC.Reset();
 	gtk_clipboard_request_image(d->c, (GtkClipboardImageReceivedFunc) ClipboardImageReceived, &pDC);
 
-	uint64 Ts = LgiCurrentTime();
-	while (!pDC && (LgiCurrentTime() - Ts) < LGI_RECEIVE_CLIPBOARD_TIMEOUT)
+	uint64 Ts = LCurrentTime();
+	while (!pDC && (LCurrentTime() - Ts) < LGI_RECEIVE_CLIPBOARD_TIMEOUT)
 		LgiYield();
 
 	return pDC.Release();
@@ -404,7 +404,7 @@ bool LClipBoard::Binary(FormatType Format, LAutoPtr<uint8_t,true> &Ptr, ssize_t 
 	                                &r);
                                 
 
-	uint64 Start = LgiCurrentTime();
+	uint64 Start = LCurrentTime();
 	do
 	{
 		if (r.Ptr->Get())
@@ -412,7 +412,7 @@ bool LClipBoard::Binary(FormatType Format, LAutoPtr<uint8_t,true> &Ptr, ssize_t 
 		LgiYield();
 		LgiSleep(1);
 	}
-	while (LgiCurrentTime() - Start > LGI_RECEIVE_CLIPBOARD_TIMEOUT);
+	while (LCurrentTime() - Start > LGI_RECEIVE_CLIPBOARD_TIMEOUT);
 
 	#if DEBUG_CLIPBOARD
 	printf("%s:%i - LClipBoard::Binary %p, %i\n", _FL, r.Ptr->Get(), Len ? *Len : -1);

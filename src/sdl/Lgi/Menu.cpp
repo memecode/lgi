@@ -64,7 +64,7 @@ GMenuItem *GSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where
 		else
 		{
 			LgiTrace("%s:%i Error: gtk_menu_shell_append(%p,%p) failed\n", _FL, Info, i->Info);
-			LgiAssert(0);
+			LAssert(0);
 		}
 		Items.Insert(i, Where);
 
@@ -318,7 +318,7 @@ GMenuItem::~GMenuItem()
 // the default painting behaviour if desired.
 void GMenuItem::_Measure(LPoint &Size)
 {
-	LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+	LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : LSysFont;
 	bool BaseMenu = Parent == Menu; // true if attached to a windows menu
 									// else is a submenu
 	int Ht = Font->GetHeight();
@@ -389,7 +389,7 @@ void GMenuItem::_PaintText(LSurface *pDC, int x, int y, int Width)
 	char *n = Name();
 	if (n)
 	{
-		LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+		LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : LSysFont;
 		bool Underline = false;
 		int CharY = Font->GetHeight();
 
@@ -505,7 +505,7 @@ void GMenuItem::_Paint(LSurface *pDC, int Flags)
 		pDC->Rectangle(&r);
 
 		// Draw the text on top
-		LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+		LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : LSysFont;
 		Font->Transparent(true);
 		if (Disabled)
 		{
@@ -806,7 +806,7 @@ LFont *GMenu::GetFont()
 			_Font = Type.Create();
 			if (_Font)
 			{
-				// _Font->CodePage(SysFont->CodePage());
+				// _Font->CodePage(LSysFont->CodePage());
 			}
 			else
 			{
@@ -823,12 +823,12 @@ LFont *GMenu::GetFont()
 			_Font = new LFont;
 			if (_Font)
 			{
-				*_Font = *SysFont;
+				*_Font = *LSysFont;
 			}
 		}
 	}
 
-	return _Font ? _Font : SysFont;
+	return _Font ? _Font : LSysFont;
 }
 
 bool GMenu::Attach(LViewI *p)

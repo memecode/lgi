@@ -129,7 +129,7 @@ public:
 	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m);
 	void OnMouseMove(LMouse &m);
-	LgiCursor GetCursor(int x, int y);
+	LCursor GetCursor(int x, int y);
 	bool OnMouseWheel(double Lines);
 	bool OnKey(LKey &k);
 	int OnNotify(LViewI *c, int f);

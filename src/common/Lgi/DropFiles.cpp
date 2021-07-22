@@ -33,7 +33,7 @@ LgiFunc bool LMacFileToPath(LString &a)
 
 	#else
 
-		LgiAssert(!"Impl me.");
+		LAssert(!"Impl me.");
 
 	#endif
 

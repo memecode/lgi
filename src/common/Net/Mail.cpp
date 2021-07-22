@@ -76,7 +76,7 @@ bool Base64Str(LString &s)
 	ssize_t Ch =
 	#endif
 	ConvertBinaryToBase64(b64.Get(), b64.Length(), (uchar*)s.Get(), s.Length());
-	LgiAssert(Ch == b64.Length());
+	LAssert(Ch == b64.Length());
 	s = b64;
 	return true;
 }
@@ -89,7 +89,7 @@ bool UnBase64Str(LString &s)
 		return false;
 	
 	ssize_t Ch = ConvertBase64ToBinary((uchar*)Bin.Get(), Bin.Length(), s.Get(), s.Length());
-	LgiAssert(Ch <= (int)Bin.Length());
+	LAssert(Ch <= (int)Bin.Length());
 	s = Bin;
 	s.Get()[Ch] = 0;
 	return true;
@@ -1393,7 +1393,7 @@ public:
 	{
 		if (p)
 		{
-			p->Start = LgiCurrentTime();
+			p->Start = LCurrentTime();
 			p->Range = (int)Size;
 			return Size;
 		}
@@ -1990,7 +1990,7 @@ int MailPop3::GetMessages()
 
 			Messages = GetInt();
 		}
-		else LgiAssert(!"No socket to get message count.");
+		else LAssert(!"No socket to get message count.");
 	}
 
 CleanUp:
@@ -2360,7 +2360,7 @@ bool MailPop3::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks
 					{
 						Transfer->Value = 0;
 						Transfer->Range = Size;
-						Transfer->Start = LgiCurrentTime();
+						Transfer->Start = LCurrentTime();
 					}
 
 					// Read status line
@@ -2447,7 +2447,7 @@ bool MailPop3::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks
 											ssize_t w =
 											#endif
 											Msg->Write(Buffer, Actual);
-											LgiAssert(w == Actual);
+											LAssert(w == Actual);
 										}
 										// else the end point was in the last buffer
 
@@ -2460,7 +2460,7 @@ bool MailPop3::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks
 										ssize_t w =
 										#endif
 										Msg->Write(Buffer, r);
-										LgiAssert(w == r);
+										LAssert(w == r);
 										DataPos += r;
 									}
 								}

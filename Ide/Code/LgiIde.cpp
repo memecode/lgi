@@ -421,9 +421,9 @@ public:
 	
 	void PourText(size_t Start, ssize_t Len) override
 	{
-		auto Ts = LgiCurrentTime();
+		auto Ts = LCurrentTime();
 		LTextView3::PourText(Start, Len);
-		auto Dur = LgiCurrentTime() - Ts;
+		auto Dur = LCurrentTime() - Ts;
 		if (Dur > 1500)
 		{
 			// Yo homes, too much text bro...
@@ -579,20 +579,20 @@ public:
 		Threads = NULL;
 		Registers = NULL;
 
-		Small = *SysFont;
+		Small = *LSysFont;
 		Small.PointSize(Small.PointSize()-1);
 		Small.Create();
-		LgiAssert(Small.Handle());
+		LAssert(Small.Handle());
 		
 		LFontType Type;
 		if (Type.GetSystemFont("Fixed"))
 		{
-			Type.SetPointSize(SysFont->PointSize()-1);
+			Type.SetPointSize(LSysFont->PointSize()-1);
 			Fixed.Create(&Type);
 		}
 		else
 		{
-			Fixed.PointSize(SysFont->PointSize()-1);
+			Fixed.PointSize(LSysFont->PointSize()-1);
 			Fixed.Face("Courier");
 			Fixed.Create();			
 		}		
@@ -815,7 +815,7 @@ public:
 					DebugLog->AddView(DebuggerLog = new DebugTextLog(IDC_DEBUGGER_LOG));
 					DebuggerLog->SetFont(&Small);
 					DebugLog->AddView(DebugEdit = new LEdit(IDC_DEBUG_EDIT, 0, 0, 60, 20));
-					DebugEdit->GetCss(true)->Height(LCss::Len(LCss::LenPx, (float)(SysFont->GetHeight() + 8)));
+					DebugEdit->GetCss(true)->Height(LCss::Len(LCss::LenPx, (float)(LSysFont->GetHeight() + 8)));
 				}
 			}
 		}
@@ -1626,7 +1626,7 @@ Chk;
 		{
 			Menu->Attach(this);
 			bool Loaded = Menu->Load(this, "IDM_MENU");
-			LgiAssert(Loaded);
+			LAssert(Loaded);
 			if (Loaded)
 			{
 				Menu->SetPrefAndAboutItems(IDM_OPTIONS, IDM_ABOUT);
@@ -1786,7 +1786,7 @@ AppWnd::~AppWnd()
 
 	CloseAll();
 	
-	LgiApp->AppWnd = 0;
+	LAppInst->AppWnd = 0;
 	DeleteObj(d);
 }
 
@@ -2073,7 +2073,7 @@ void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 	
 	Raise();
 	
-	if (LgiApp->GetOption("createMakeFiles"))
+	if (LAppInst->GetOption("createMakeFiles"))
 	{
 		IdeProject *p = RootProject();
 		if (p)
@@ -2648,7 +2648,7 @@ void AppWnd::OnLocationChange(const char *File, int Line)
 			FileLoc &loc = d->CursorHistory[d->HistoryLoc];
 			#ifdef WIN64
 			if ((NativeInt)loc.File.Get() == 0xcdcdcdcdcdcdcdcd)
-				LgiAssert(0); // wtf?
+				LAssert(0); // wtf?
 			else
 			#endif
 				loc.Set(File, Line);
@@ -2847,7 +2847,7 @@ IdeProject *AppWnd::RootProject()
 	{
 		if (!p->GetParentProject())
 		{
-			LgiAssert(Root == 0);
+			LAssert(Root == 0);
 			Root = p;
 		}
 	}
@@ -2932,8 +2932,8 @@ GMessage::Result AppWnd::OnEvent(GMessage *m)
 		}
 		case M_LAST_MAKEFILE_CREATED:
 		{
-			if (LgiApp->GetOption("exit"))
-				LgiCloseApp();
+			if (LAppInst->GetOption("exit"))
+				LCloseApp();
 			break;
 		}
 		case M_START_BUILD:
@@ -3173,10 +3173,10 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 					}
 					else
 					{
-						LgiAssert(!"No MemoryDump.");
+						LAssert(!"No MemoryDump.");
 					}
 				}
-				else LgiAssert(!"No debug context.");
+				else LAssert(!"No debug context.");
 			}
 			break;
 		}
@@ -3461,7 +3461,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 	{
 		case IDM_EXIT:
 		{
-			LgiCloseApp();
+			LCloseApp();
 			break;
 		}
 		case IDM_OPTIONS:
@@ -3763,7 +3763,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_FIND_REFERENCES:
 		{
-			LViewI *f = LgiApp->GetFocus();
+			LViewI *f = LAppInst->GetFocus();
 			LDocView *doc = dynamic_cast<LDocView*>(f);
 			if (!doc)
 				break;

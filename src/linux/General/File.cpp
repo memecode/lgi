@@ -469,7 +469,7 @@ char *ReadStr(LFile &f DeclDebugArgs)
 		// is _probably_ an error
 		if (Len >= (16 << 20))
 		{
-			// LgiAssert(0);
+			// LAssert(0);
 			return 0;
 		}
 

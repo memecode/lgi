@@ -53,7 +53,7 @@ bool LTimeDropDown::OnLayout(LViewLayoutInfo &Inf)
     }
     else if (!Inf.Height.Max)
     {
-        Inf.Height.Min = Inf.Height.Max = SysFont->GetHeight() + 6;
+        Inf.Height.Min = Inf.Height.Max = LSysFont->GetHeight() + 6;
     }
     else return false;
     

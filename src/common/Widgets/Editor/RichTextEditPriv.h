@@ -102,7 +102,7 @@ enum RteCommands
 };
 
 //////////////////////////////////////////////////////////////////////
-#define PtrCheckBreak(ptr)				if (!ptr) { LgiAssert(!"Invalid ptr"); break; }
+#define PtrCheckBreak(ptr)				if (!ptr) { LAssert(!"Invalid ptr"); break; }
 #undef FixedToInt
 #define FixedToInt(fixed)				((fixed)>>LDisplayString::FShift)
 #undef IntToFixed
@@ -688,7 +688,7 @@ public:
 			// We must have removed cursors by the time we are deleted
 			// otherwise there will be a hanging pointer in the cursor
 			// object.
-			LgiAssert(Cursors == 0);
+			LAssert(Cursors == 0);
 		}
 		
 		// Events
@@ -882,7 +882,7 @@ public:
 			Chars = WideWords;
 			#endif
 
-			// LgiAssert(l == 0 || FX() > 0);
+			// LAssert(l == 0 || FX() > 0);
 		}
 		
 		template<typename T>
@@ -901,7 +901,7 @@ public:
 					n = *s & 0xfc00;
 					if (n != 0xdc00)
 					{
-						LgiAssert(!"Unexpected surrogate");
+						LAssert(!"Unexpected surrogate");
 						continue;
 					}
 					// else skip over the 2nd surrogate
@@ -937,7 +937,7 @@ public:
 					Start + Len <= (int)WideW)
 				{
 					#if defined(_MSC_VER)
-					LgiAssert(Str != NULL);
+					LAssert(Str != NULL);
 					const char16 *s = Utf16Seek(Str, Start);
 					const char16 *e = Utf16Seek(s, Len);
 					LArray<uint32_t> Tmp;

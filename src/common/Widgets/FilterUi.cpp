@@ -204,11 +204,11 @@ public:
 	{
 		View = v;
 
-		dsNot.Reset(new LDisplayString(SysFont, (char*)LgiLoadString(L_FUI_NOT, "Not")));
-		dsNew.Reset(new LDisplayString(SysBold, (char*)LgiLoadString(L_FUI_NEW, "New")));
-		dsAnd.Reset(new LDisplayString(SysBold, (char*)LgiLoadString(L_FUI_AND, "And")));
-		dsOr.Reset(new LDisplayString(SysBold, (char*)LgiLoadString(L_FUI_OR, "Or")));
-		dsLegend.Reset(new LDisplayString(SysBold, (char*)LgiLoadString(L_FUI_LEGEND, "Legend:")));
+		dsNot.Reset(new LDisplayString(LSysFont, (char*)LgiLoadString(L_FUI_NOT, "Not")));
+		dsNew.Reset(new LDisplayString(LSysBold, (char*)LgiLoadString(L_FUI_NEW, "New")));
+		dsAnd.Reset(new LDisplayString(LSysBold, (char*)LgiLoadString(L_FUI_AND, "And")));
+		dsOr.Reset(new LDisplayString(LSysBold, (char*)LgiLoadString(L_FUI_OR, "Or")));
+		dsLegend.Reset(new LDisplayString(LSysBold, (char*)LgiLoadString(L_FUI_LEGEND, "Legend:")));
 		
 		ShowLegend = true;
 		Callback = 0;
@@ -440,7 +440,7 @@ public:
 							HalveAlphaCase(Argb32);
 							HalveAlphaCase(Abgr32);
 							default:
-								LgiAssert(pDC->GetBits() < 32);
+								LAssert(pDC->GetBits() < 32);
 								break;
 						}
 					}
@@ -608,7 +608,7 @@ void LFilterItem::SetValue(char *s)
 
 void LFilterItem::_PourText(LPoint &Size)
 {
-	Size.y = SysFont->GetHeight() +
+	Size.y = LSysFont->GetHeight() +
 	#ifdef MAC
 	14; // Not sure what the deal is here... it just looks better.
 	#else
@@ -787,8 +787,8 @@ void LFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 			Buf.Blt(d->FieldDropBtn.x1, d->FieldDropBtn.y1, d->Data->Icons[IconDropDown]);
 			Buf.Op(GDC_SET);
 
-			SysFont->Transparent(true);
-			SysFont->Colour(LColour(L_TEXT), Ctx.Back);
+			LSysFont->Transparent(true);
+			LSysFont->Colour(LColour(L_TEXT), Ctx.Back);
 			d->Data->dsNot->Draw(&Buf, d->NotBtn.x2 + 3, d->NotBtn.y1);
 
 			ShowControls(Select());
@@ -805,17 +805,17 @@ void LFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 
 				if (d->Field)
 				{
-					LDisplayString ds(SysFont, d->Field);
+					LDisplayString ds(LSysFont, d->Field);
 					ds.Draw(&Buf, d->FieldBtn.x1+Tx, d->FieldBtn.y1+Ty, &d->FieldBtn);
 				}
 				if (d->Op >= 0)
 				{
-					LDisplayString ds(SysFont, d->Data->OpNames[d->Op]);
+					LDisplayString ds(LSysFont, d->Data->OpNames[d->Op]);
 					ds.Draw(&Buf, d->OpBtn.x1+Tx, d->OpBtn.y1+Ty, &d->OpBtn);
 				}
 				if (d->Value)
 				{
-					LDisplayString ds(SysFont, d->Value);
+					LDisplayString ds(LSysFont, d->Value);
 					ds.Draw(&Buf, d->ValueBtn.x1+Tx, d->ValueBtn.y1+Ty, &d->ValueBtn);
 				}
 			}
@@ -823,23 +823,23 @@ void LFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
 		}
 		case LNODE_NEW:
 		{
-			SysBold->Transparent(true);
-			SysBold->Colour(BackCol, Workspace);
-			d->Data->dsNew->Draw(&Buf, (int)r - 3, (int)(oy + r) - (SysBold->GetHeight() / 2));
+			LSysBold->Transparent(true);
+			LSysBold->Colour(BackCol, Workspace);
+			d->Data->dsNew->Draw(&Buf, (int)r - 3, (int)(oy + r) - (LSysBold->GetHeight() / 2));
 			break;
 		}
 		case LNODE_AND:
 		{
-			SysBold->Transparent(true);
-			SysBold->Colour(IconColour[d->Node], BackCol);
-			d->Data->dsAnd->Draw(&Buf, (int)r - 3, (int)(oy + r) - (SysBold->GetHeight() / 2));
+			LSysBold->Transparent(true);
+			LSysBold->Colour(IconColour[d->Node], BackCol);
+			d->Data->dsAnd->Draw(&Buf, (int)r - 3, (int)(oy + r) - (LSysBold->GetHeight() / 2));
 			break;
 		}
 		case LNODE_OR:
 		{
-			SysBold->Transparent(true);
-			SysBold->Colour(IconColour[d->Node], BackCol);
-			d->Data->dsOr->Draw(&Buf, (int)r - 3, (int)(oy + r) - (SysBold->GetHeight() / 2));
+			LSysBold->Transparent(true);
+			LSysBold->Colour(IconColour[d->Node], BackCol);
+			d->Data->dsOr->Draw(&Buf, (int)r - 3, (int)(oy + r) - (LSysBold->GetHeight() / 2));
 			break;
 		}
 	}
@@ -1207,7 +1207,7 @@ void LFilterView::OnPosChange()
 	if (d->ShowLegend)
 	{
 		d->Info = c;
-		d->Info.y2 = d->Info.y1 + SysFont->GetHeight() + 8;
+		d->Info.y2 = d->Info.y1 + LSysFont->GetHeight() + 8;
 		c.y1 += d->Info.y2 + 1;
 	}
 
@@ -1223,7 +1223,7 @@ LRect &LFilterView::GetClient(bool ClientCoods)
 	if (d->ShowLegend)
 	{
 		d->Info = c;
-		d->Info.y2 = d->Info.y1 + SysFont->GetHeight() + 8;
+		d->Info.y2 = d->Info.y1 + LSysFont->GetHeight() + 8;
 		c.y1 += d->Info.y2 + 1;
 	}
 	else
@@ -1248,10 +1248,10 @@ void LFilterView::OnPaint(LSurface *pDC)
 		Buf.Colour(L_LOW);
 		Buf.Line(0, Buf.Y()-1, Buf.X()-1, Buf.Y()-1);
 
-		SysFont->Transparent(true);
-		SysFont->Colour(L_TEXT, L_MED);
-		SysBold->Transparent(true);
-		SysBold->Colour(L_TEXT, L_MED);
+		LSysFont->Transparent(true);
+		LSysFont->Colour(L_TEXT, L_MED);
+		LSysBold->Transparent(true);
+		LSysBold->Colour(L_TEXT, L_MED);
 		int x = 4, y = 4;
 
 		d->dsLegend->Draw(&Buf, x, y);
@@ -1266,7 +1266,7 @@ void LFilterView::OnPaint(LSurface *pDC)
 				Buf.Blt(x, y, d->Icons[i]);
 				x += 3 + d->Icons[i]->X();
 				Buf.Op(GDC_SET);
-				LDisplayString ds(SysFont, (char*)IconName[i]);
+				LDisplayString ds(LSysFont, (char*)IconName[i]);
 				ds.Draw(&Buf, x, y);
 				x += 12 + ds.X();
 			}

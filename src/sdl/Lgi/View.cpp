@@ -89,9 +89,9 @@ void LView::_Delete()
 	// LArray<LViewI*> HasView;
 	for (c = Children.First(); c; c = Children.Next())
 	{
-		// LgiAssert(!HasView.HasItem(c));
+		// LAssert(!HasView.HasItem(c));
 		// HasView.Add(c);
-		LgiAssert(((LViewI*)c->GetParent()) == this || c->GetParent() == 0);
+		LAssert(((LViewI*)c->GetParent()) == this || c->GetParent() == 0);
 	}
 	#endif
 
@@ -125,9 +125,9 @@ void LView::_Delete()
 	if (_Over == this) _Over = 0;
 	if (_Capturing == this) _Capturing = 0;
 
-	if (LgiApp && LgiApp->AppWnd == this)
+	if (LAppInst && LAppInst->AppWnd == this)
 	{
-		LgiApp->AppWnd = 0;
+		LAppInst->AppWnd = 0;
 	}
 
 	LWindow *Wnd = GetWindow();
@@ -211,14 +211,14 @@ bool LView::Detach()
 
 		if (_Capturing == this)
 		{
-			LgiAssert(!"Release capture");
+			LAssert(!"Release capture");
 			_Capturing = 0;
 		}
 		if (_View)
 		{
 			WndFlags &= ~GWF_QUIT_WND;
 			// Status = DestroyWindow(_View);
-			LgiAssert(Status);
+			LAssert(Status);
 		}
 	}
 
@@ -235,12 +235,12 @@ LRect &LView::GetClient(bool InClientSpace)
 	return Client;
 }
 
-LgiCursor LView::GetCursor(int x, int y)
+LCursor LView::GetCursor(int x, int y)
 {
 	return LCUR_Normal;
 }
 
-bool LgiToWindowsCursor(LgiCursor Cursor)
+bool LgiToWindowsCursor(LCursor Cursor)
 {
 	return false;
 }
@@ -321,7 +321,7 @@ bool LView::Invalidate(LRect *r, bool Repaint, bool Frame)
 		LViewI *Par = p->GetParent();
 		if (Par == p)
 		{
-			LgiAssert(!"Window can't be parent of itself.");
+			LAssert(!"Window can't be parent of itself.");
 			break;
 		}
 		
@@ -337,7 +337,7 @@ bool LView::Invalidate(LRect *r, bool Repaint, bool Frame)
 		p = Par;
 	}
 
-	return LgiApp->InvalidateRect(Up);
+	return LAppInst->InvalidateRect(Up);
 }
 
 Uint32 SDL_PulseCallback(Uint32 interval, LView *v)

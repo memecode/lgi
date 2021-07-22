@@ -97,7 +97,7 @@ GBlockArray::Block *GBlockArray::New()
 		n->File.Reset(NewStr(p));
 		n->Data.Reset(new char[BlockSize]);
 		
-		LgiAssert(!m.Find(n->Id));
+		LAssert(!m.Find(n->Id));
 		m.Add(n->Id, n);
 	}
 	
@@ -126,9 +126,9 @@ bool GBlockArray::Add(const char *File, uint32 id)
 		return false;
 	}
 	
-	LgiAssert(f.GetSize() <= BlockSize);
+	LAssert(f.GetSize() <= BlockSize);
 	n->Used = f.Read(n->Data, BlockSize);
-	LgiAssert(!m.Find(n->Id));
+	LAssert(!m.Find(n->Id));
 	m.Add(n->Id, n);
 	
 	return true;
@@ -170,7 +170,7 @@ bool GTableDb::Field::Serialize(GPointer &p, bool Write)
 
 bool GTableDb::Field::operator !=(const Field &b)
 {
-	LgiAssert(Name && b.Name);
+	LAssert(Name && b.Name);
 
 	return	Id != b.Id ||
 			!Name ||
@@ -324,7 +324,7 @@ bool GIndexFile::Serialize(bool Write)
 	{
 		if (Write)
 		{
-			LgiAssert(Blocks[i]);
+			LAssert(Blocks[i]);
 		}
 		else // Read
 		{
@@ -374,7 +374,7 @@ bool GIndexFile::Parse()
 					Table->IndexFileSize = *p.u32++;					
 					End = Blocks[i] + Table->IndexBlockSize;				
 					
-					LgiAssert(p.u8 <= Next);
+					LAssert(p.u8 <= Next);
 					p.u8 = Next;
 					break;
 				}
@@ -388,7 +388,7 @@ bool GIndexFile::Parse()
 					f.Type = (LVariantType)*p.u8++;
 					f.Name = ReadStr(p);
 					
-					LgiAssert(p.u8 <= Next);
+					LAssert(p.u8 <= Next);
 					p.u8 = Next;
 					break;
 				}
@@ -605,13 +605,13 @@ bool RunTableDbTest(LStream *Log)
 		if (!sc.New().Serialize(p, false)) return false;
 		if (!sc.New().Serialize(p, false)) return false;
 		if (!sc.New().Serialize(p, false)) return false;
-		LgiAssert(p.s8 - Flds == sizeof(Flds) - 1);
+		LAssert(p.s8 - Flds == sizeof(Flds) - 1);
 		
 		p.s8 = &Mem[0];
 		for (unsigned i=0; i<sc.Length(); i++)
 			if (!sc[i].Serialize(p, true))
 				return false;
-		LgiAssert(p.s8 - &Mem[0] == sizeof(Flds) - 1);
+		LAssert(p.s8 - &Mem[0] == sizeof(Flds) - 1);
 		if (memcmp(&Mem[0], Flds, sizeof(Flds) - 1))
 			return false;
 			

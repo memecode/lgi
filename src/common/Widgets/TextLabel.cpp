@@ -20,7 +20,7 @@ public:
 	LString ThreadName;
 	int PrevX;
 
-	LTextPrivate(LTextLabel *ctrl) : LStringLayout(LgiApp->GetFontCache()), LMutex("LTextPrivate")
+	LTextPrivate(LTextLabel *ctrl) : LStringLayout(LAppInst->GetFontCache()), LMutex("LTextPrivate")
 	{
 		Ctrl = ctrl;
 		PrevX = -1;

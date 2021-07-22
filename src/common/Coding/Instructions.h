@@ -706,7 +706,7 @@ case IRet:
 		LVariant *RetVar = &Scope[Ret.Scope][Ret.Index];
 		// LgiTrace("IRet to %i:%i\n", Ret.Scope, Ret.Index);
 		if (Ret.Scope == SCOPE_LOCAL)
-			LgiAssert(Locals.PtrCheck(RetVar));
+			LAssert(Locals.PtrCheck(RetVar));
 		*RetVar = *ReturnValue;
 		CheckParam(RetVar->Type == ReturnValue->Type);
 

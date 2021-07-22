@@ -350,7 +350,7 @@ void GPalette::CreateCube()
 	}
 	
 	bool b = Update();
-	LgiAssert(b);
+	LAssert(b);
 }
 
 
@@ -378,26 +378,26 @@ bool GPalette::Load(LFile &F)
 	LString::Array Lines = F.Read().SplitDelimit("\r\n");
 	if (Lines.Length() < 2)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 
 	if (!Lines[0].Equals("JASC-PAL"))
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 
 	auto Sz = Lines[1].Int();
 	if (Sz < 0 || Sz > 256)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 
 	if (!SetSize((int)Sz))
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 
@@ -413,7 +413,7 @@ bool GPalette::Load(LFile &F)
 		}
 		else
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return false;
 		}
 	}
@@ -865,7 +865,7 @@ public:
 				ColourSpace = System32BitColourSpace;
 				break;
 			default:
-				LgiAssert(!"Unknown colour space.");
+				LAssert(!"Unknown colour space.");
 				ColourSpace = CsNone;
 				break;
 		}
@@ -934,7 +934,7 @@ GdcDevice *GdcDevice::pInstance = 0;
 GdcDevice::GdcDevice()
 {
 	GColourSpaceTest();
-	LgiAssert(pInstance == 0);
+	LAssert(pInstance == 0);
 
 	pInstance = this;
 	AlphaBlend = 0;
@@ -1187,7 +1187,7 @@ GAlphaFactory FactoryAlpha;
 
 LApplicatorFactory::LApplicatorFactory()
 {
-	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
+	LAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	if (_Factories < CountOf(_Factory) - 1)
 	{
 		_Factory[_Factories++] = this;
@@ -1196,7 +1196,7 @@ LApplicatorFactory::LApplicatorFactory()
 
 LApplicatorFactory::~LApplicatorFactory()
 {
-	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
+	LAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)
 	{
 		if (_Factory[i] == this)
@@ -1227,7 +1227,7 @@ public:
 
 LApplicator *LApplicatorFactory::NewApp(LColourSpace Cs, int Op)
 {
-	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
+	LAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)
 	{
 		LApplicator *a = _Factory[i]->Create(Cs, Op);

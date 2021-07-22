@@ -41,7 +41,7 @@ public:
 	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
 	GMessage::Result OnEvent(GMessage *Msg);
 	bool Pour(LRegion &r);
-	LgiCursor GetCursor(int x, int y);
+	LCursor GetCursor(int x, int y);
 	bool OnLayout(LViewLayoutInfo &Inf);
 	int OnNotify(LViewI *Ctrl, int Flags);
 

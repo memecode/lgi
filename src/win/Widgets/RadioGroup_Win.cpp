@@ -63,7 +63,7 @@ LRadioGroup::LRadioGroup(int id, int x, int y, int cx, int cy, const char *name,
 	if (SubClass)
 		SubClass->SubClass("BUTTON");
 	else
-		LgiAssert(!"No subclass?");
+		LAssert(!"No subclass?");
 }
 
 LRadioGroup::~LRadioGroup()
@@ -115,7 +115,7 @@ void LRadioGroup::SetFont(LFont *Fnt, bool OwnIt)
 
 void LRadioGroup::OnCreate()
 {
-	SetFont(SysFont);
+	SetFont(LSysFont);
 	AttachChildren();
 	Value(d->InitVal);
 }
@@ -258,7 +258,7 @@ bool LRadioGroup::OnLayout(LViewLayoutInfo &Inf)
                         Cy += r.Y() + RADIO_GRID;
                     LastY = max(LastY, r.y2);
                 }
-                else LgiAssert(!"This shouldn't fail.");
+                else LAssert(!"This shouldn't fail.");
             }
             else
             {
@@ -308,7 +308,7 @@ LRadioButton::LRadioButton(int id, int x, int y, int cx, int cy, const char *nam
 
 	Name(name);
 
-	LDisplayString t(SysFont, name);
+	LDisplayString t(LSysFont, name);
 	if (cx < 0) cx = t.X() + 26;
 	if (cy < 0) cy = t.Y() + 4;
 
@@ -324,7 +324,7 @@ LRadioButton::LRadioButton(int id, int x, int y, int cx, int cy, const char *nam
 	if (SubClass)
 		SubClass->SubClass("BUTTON");
 	else
-		LgiAssert(!"No subclass?");
+		LAssert(!"No subclass?");
 }
 
 LRadioButton::~LRadioButton()
@@ -334,7 +334,7 @@ LRadioButton::~LRadioButton()
 
 void LRadioButton::OnAttach()
 {
-	SetFont(SysFont);
+	SetFont(LSysFont);
 
 	LResources::StyleElement(this);
 	OnStyleChange();

@@ -123,7 +123,7 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data)
 {
 	char buf[1024];
 	LString out;
-	auto Ts = LgiCurrentTime();
+	auto Ts = LCurrentTime();
 	int64 Count = 0, Total = 0;
 	ProgressListItem *Prog = NULL;
 
@@ -156,7 +156,7 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data)
 			break;
 		}
 
-		auto Now = LgiCurrentTime();
+		auto Now = LCurrentTime();
 		if (Now - Ts >= TIMEOUT_PROMPT)
 		{
 			if (!Prog && d->Commits)
@@ -288,7 +288,7 @@ GMessage::Result SshConnection::OnEvent(GMessage *Msg)
 		}
 		default:
 		{
-			LgiAssert(!"Unhandled msg.");
+			LAssert(!"Unhandled msg.");
 			break;
 		}
 	}
@@ -396,7 +396,7 @@ public:
 		{
 			OnPosChange();
 		}
-		else LgiAssert(!"Missing toolbar resource");
+		else LAssert(!"Missing toolbar resource");
 	}
 
 	void OnCreate()
@@ -427,7 +427,7 @@ public:
 				SendNotify(GNotifyTableLayout_Refresh);
 			}
 		}
-		else LgiAssert(!"Missing table ctrl");
+		else LAssert(!"Missing table ctrl");
 	}
 
 	void OnPaint(LSurface *pDC)
@@ -461,9 +461,9 @@ public:
 					r.Set(0, 0, 30, 30);
 				GetCss(true)->Height(LCss::Len(LCss::LenPx, (float)r.Y()));
 			}
-			else LgiAssert(!"Missing table ctrl");
+			else LAssert(!"Missing table ctrl");
 		}
-		else LgiAssert(!"Missing toolbar resource");
+		else LAssert(!"Missing toolbar resource");
 	}
 
 	void OnPosChange()
@@ -632,7 +632,7 @@ LString::Array AppPriv::GetCommitRange()
 			r.Add(Sel[0]->GetRev());
 		}
 	}
-	else LgiAssert(!"No commit list ptr");
+	else LAssert(!"No commit list ptr");
 
 	return r;
 }
@@ -1060,7 +1060,7 @@ public:
 					Tv->SetWrapType(TEXTED_WRAP_NONE);
 				}
 			}
-			else LgiAssert(!"No ctrl?");
+			else LAssert(!"No ctrl?");
 
 			Tabs = new LTabView(IDC_TAB_VIEW);
 			Tabs->Attach(MsgBox);
@@ -1269,7 +1269,7 @@ public:
 			}
 			case IDM_EXIT:
 			{
-				LgiCloseApp();
+				LCloseApp();
 				break;
 			}
 		}
@@ -1671,6 +1671,10 @@ int RemoteFolderDlg::OnNotify(LViewI *Ctrl, int Flags)
 			}
 			break;
 		}
+		case IDC_DELETE:
+		{
+			break;
+		}
 		case IDC_USER:
 		{
 			CHECK_SPECIAL()
@@ -1693,7 +1697,7 @@ int RemoteFolderDlg::OnNotify(LViewI *Ctrl, int Flags)
 				if (!(app->Opts.CreateTag(OPT_Hosts) && (hosts = app->Opts.LockTag(OPT_Hosts, _FL))))
 					break;
 			}
-			LgiAssert(hosts != NULL);
+			LAssert(hosts != NULL);
 			
 			for (auto i = root->GetChild(); i; i = i->GetNext())
 			{
@@ -1743,7 +1747,7 @@ int LgiMain(OsAppArguments &AppArgs)
 		a.Run();
 	}
 
-	LgiAssert(VcCommit::Instances == 0);
+	LAssert(VcCommit::Instances == 0);
 	return 0;
 }
 

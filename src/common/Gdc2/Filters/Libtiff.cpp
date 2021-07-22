@@ -297,7 +297,7 @@ void SwapRBandY(LSurface *pDC)
 			}
 			default:
 			{
-				LgiAssert(!"Not impl.");
+				LAssert(!"Not impl.");
 				break;
 			}
 		}
@@ -346,7 +346,7 @@ void SwapRB(LSurface *pDC)
 			}
 			default:
 			{
-				LgiAssert(!"Not impl.");
+				LAssert(!"Not impl.");
 				break;
 			}
 		}
@@ -531,7 +531,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 					{
 						default:
 						{
-							LgiAssert(!"impl me.");
+							LAssert(!"impl me.");
 							break;
 						}
 						case 1:
@@ -603,9 +603,9 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 							LArray<LRgb24> Buf;
 							Buf.Length(img.width);
 							LRgb24 *b = &Buf[0];
-							LgiAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
+							LAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
 
-							LgiAssert(Photometric == PHOTOMETRIC_RGB); // we don't support anything else yet.
+							LAssert(Photometric == PHOTOMETRIC_RGB); // we don't support anything else yet.
 
 							for (unsigned y=0; y<img.height; y++)
 							{
@@ -632,7 +632,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 									#undef TiffCase
 
 									default:
-										LgiAssert(!"impl me.");
+										LAssert(!"impl me.");
 										break;
 								}
 
@@ -646,7 +646,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 							LArray<uint32_t> Buf;
 							Buf.Length(img.width);
 							uint32_t *b = &Buf[0];
-							LgiAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
+							LAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
 							LColourSpace DestCs = pDC->GetColourSpace();
 
 							for (unsigned y=0; y<img.height; y++)
@@ -675,7 +675,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 										#undef TiffCase
 
 										default:
-											LgiAssert(!"impl me.");
+											LAssert(!"impl me.");
 											break;
 									}
 								}
@@ -701,11 +701,11 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 										#undef TiffCase
 
 										default:
-											LgiAssert(!"impl me.");
+											LAssert(!"impl me.");
 											break;
 									}
 								}
-								else LgiAssert(0);
+								else LAssert(0);
 
 								if (Meter && (y % 32) == 0)
 									Meter->Value(y);
@@ -717,7 +717,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 							LArray<LRgb48> Buf;
 							Buf.Length(img.width);
 							LRgb48 *b = &Buf[0];
-							LgiAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
+							LAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
 
 							for (unsigned y=0; y<img.height; y++)
 							{
@@ -735,7 +735,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 									#undef TiffCase
 									
 									default:
-										LgiAssert(!"impl me.");
+										LAssert(!"impl me.");
 										break;
 								}
 
@@ -749,7 +749,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 							LArray<LRgba64> Buf;
 							Buf.Length(img.width);
 							LRgba64 *b = &Buf[0];
-							LgiAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
+							LAssert(Lib->TIFFScanlineSize(tif) == Buf.Length() * sizeof(Buf[0]));
 
 							for (unsigned y=0; y<img.height; y++)
 							{
@@ -767,7 +767,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 									#undef TiffCase64
 
 									default:
-										LgiAssert(!"impl me.");
+										LAssert(!"impl me.");
 										break;
 								}
 

@@ -322,7 +322,7 @@ LVolume *LFileSystem::GetRootVolume()
 
 bool LFileSystem::Copy(char *From, char *To, int *Status, CopyFileCallback Callback, void *Token)
 {
-	LgiAssert(0);
+	LAssert(0);
 	return false;
 }
 	
@@ -960,18 +960,18 @@ LFile &LFile::operator << (uint64 i) WrIO
 
 int LFile::GetError()
 {
-	LgiAssert(!"Impl me.");
+	LAssert(!"Impl me.");
 	return 0;
 }
 
 const char *GetErrorName(int e)
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 	return 0;
 }
 
 bool LGetDriveInfo(char *Path, uint64 *Free, uint64 *Size, uint64 *Available)
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 	return false;
 }

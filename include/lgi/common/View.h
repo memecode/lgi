@@ -443,7 +443,7 @@ public:
 
 	/// Returns the cursor that should be displayed for the given location
 	/// \returns a cursor type. i.e. LCUR_Normal from LgiDefs.h
-	LgiCursor GetCursor(int x, int y) override;
+	LCursor GetCursor(int x, int y) override;
 	
 	/// \brief Get the position of the view relitive to it's parent.
 	virtual LRect &GetPos() override { return Pos; }

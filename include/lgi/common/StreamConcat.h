@@ -48,14 +48,14 @@ public:
 	{
 		if (!s)
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return false;
 		}
 		
 		int64 Size = s->GetSize();
 		if (Size < 0)
 		{
-			LgiAssert(0);
+			LAssert(0);
 			return false;
 		}
 		
@@ -143,11 +143,11 @@ public:
 							Cur++;
 					}
 				}
-				else LgiAssert(0);
+				else LAssert(0);
 			}
-			else LgiAssert(0);
+			else LAssert(0);
 		}
-		else LgiAssert(0);
+		else LAssert(0);
 		
 		return Rd;
 	}
@@ -155,7 +155,7 @@ public:
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0)
 	{
 		int Wr = 0;
-		LgiAssert(0);
+		LAssert(0);
 		return Wr;
 	}
 	

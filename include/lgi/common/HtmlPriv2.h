@@ -54,7 +54,7 @@ struct GTagHit
 		if (!h.Hit || (Near >= 0 && h.Near < 0))
 			return true;
 
-		LgiAssert(Near >= 0);
+		LAssert(Near >= 0);
 
 		if (Near < h.Near)
 			return true;

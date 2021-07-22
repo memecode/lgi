@@ -83,7 +83,7 @@ public:
 	OsApplication(char Args, char **Arg);
 	~OsApplication();
 	
-	static OsApplication *GetInst() { LgiAssert(Inst); return Inst; }
+	static OsApplication *GetInst() { LAssert(Inst); return Inst; }
 	xcb_connection_t *GetConn() { return c; };
 	xcb_screen_t *GetScreen() { return s; }
 	bool Check(xcb_void_cookie_t c, char *file, int line);
@@ -123,7 +123,7 @@ public:
 		{ \
 			if (ResponseType() == Id) \
 				return (Obj*)e; \
-			LgiAssert(!"Not a valid cast."); \
+			LAssert(!"Not a valid cast."); \
 			return 0; \
 		}
 		
@@ -249,7 +249,7 @@ LgiFunc void LgiSleep(uint32 i);
 #define _vsnprintf					vsnprintf
 
 /// Process any pending messages in the applications message que and then return.
-#define LgiYield()					LgiApp->Run(false)
+#define LgiYield()					LAppInst->Run(false)
 
 #define K_CHAR						0x0
 

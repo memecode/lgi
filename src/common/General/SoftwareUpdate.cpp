@@ -53,7 +53,7 @@ struct LSoftwareUpdatePriv
 
 		~UpdateThread()
 		{
-			LgiAssert(IsExited());
+			LAssert(IsExited());
 		}
 
 		void Cancel()

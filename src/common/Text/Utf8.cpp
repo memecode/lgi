@@ -39,7 +39,7 @@ GUtf8Ptr &GUtf8Ptr::operator++()
 			if (Warn)
 			{
 				Warn = false;
-				LgiAssert(!"Invalid UTF");
+				LAssert(!"Invalid UTF");
 			}
 		}
 
@@ -61,11 +61,11 @@ GUtf8Ptr &GUtf8Ptr::operator--()
 			Ptr--;
 		}
 
-		LgiAssert(IsUtf8_Lead(*Ptr));
+		LAssert(IsUtf8_Lead(*Ptr));
 	}
 	else
 	{
-		LgiAssert((*Ptr & 0x80) == 0);
+		LAssert((*Ptr & 0x80) == 0);
 	}
 
 	return *this;
@@ -89,7 +89,7 @@ GUtf8Ptr &GUtf8Ptr::operator++(const int i)
 			if (Warn)
 			{
 				Warn = false;
-				LgiAssert(!"Invalid UTF");
+				LAssert(!"Invalid UTF");
 			}
 		}
 
@@ -111,11 +111,11 @@ GUtf8Ptr &GUtf8Ptr::operator--(const int i)
 			Ptr--;
 		}
 
-		LgiAssert(IsUtf8_Lead(*Ptr));
+		LAssert(IsUtf8_Lead(*Ptr));
 	}
 	else
 	{
-		LgiAssert((*Ptr & 0x80) == 0);
+		LAssert((*Ptr & 0x80) == 0);
 	}
 
 	return *this;

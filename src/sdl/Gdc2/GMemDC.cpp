@@ -248,7 +248,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 
 void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 {
-    LgiAssert(Src);
+    LAssert(Src);
     if (!Src)
         return;
 

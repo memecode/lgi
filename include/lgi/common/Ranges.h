@@ -150,7 +150,7 @@ public:
 		return true;
 
 	Error:
-		LgiAssert(!"Failed.");
+		LAssert(!"Failed.");
 		return false;
 	}
 };

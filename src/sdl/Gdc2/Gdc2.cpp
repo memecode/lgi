@@ -423,7 +423,7 @@ LColourSpace PixelFormat2ColourSpace(SDL_PixelFormat *pf)
 	
 	cs.All = 0;
 	cs[0].Type(CtIndex);
-	LgiAssert(cs.All == 0x10);
+	LAssert(cs.All == 0x10);
 	cs.All = 0;
 	
 	if (pf->BytesPerPixel <= 1)
@@ -448,17 +448,17 @@ LColourSpace PixelFormat2ColourSpace(SDL_PixelFormat *pf)
 				idx = i;
 			if (pf->Rmask & b)
 			{
-				LgiAssert(Bits[idx] == 'x');
+				LAssert(Bits[idx] == 'x');
 				Bits[idx] = 'r';
 			}
 			if (pf->Gmask & b)
 			{
-				LgiAssert(Bits[idx] == 'x');
+				LAssert(Bits[idx] == 'x');
 				Bits[idx] = 'g';
 			}
 			if (pf->Bmask & b)
 			{
-				LgiAssert(Bits[idx] == 'x');
+				LAssert(Bits[idx] == 'x');
 				Bits[idx] = 'b';
 			}
 		}
@@ -546,7 +546,7 @@ public:
 		const SDL_VideoInfo *vi = SDL_GetVideoInfo();
 		LPoint ScreenSz(320, 240);
 		LString ScrOpt;
-		if (LgiApp->GetOption("screen", ScrOpt))
+		if (LAppInst->GetOption("screen", ScrOpt))
 		{
 			LString s = ScrOpt.Get();
 			LString::Array a = s.Split("x");
@@ -558,7 +558,7 @@ public:
 		}
 		
 		Screen = NULL;
-		if (!LgiApp->GetOption("novid"))
+		if (!LAppInst->GetOption("novid"))
 		{
 			#ifdef LINUX
 			SetTextMode();
@@ -650,7 +650,7 @@ int GdcDevice::GetOption(int Opt)
 		return d->OptVal[Opt];
 	}
 
-	LgiAssert(0);
+	LAssert(0);
 	return 0;
 }
 
@@ -663,7 +663,7 @@ int GdcDevice::SetOption(int Opt, int Value)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	return Prev;
 }
@@ -885,7 +885,7 @@ GAlphaFactory FactoryAlpha;
 
 LApplicatorFactory::LApplicatorFactory()
 {
-	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
+	LAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	if (_Factories < CountOf(_Factory) - 1)
 	{
 		_Factory[_Factories++] = this;
@@ -894,7 +894,7 @@ LApplicatorFactory::LApplicatorFactory()
 
 LApplicatorFactory::~LApplicatorFactory()
 {
-	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
+	LAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)
 	{
 		if (_Factory[i] == this)
@@ -908,7 +908,7 @@ LApplicatorFactory::~LApplicatorFactory()
 
 LApplicator *LApplicatorFactory::NewApp(LColourSpace Cs, int Op)
 {
-	LgiAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
+	LAssert(_Factories >= 0 && _Factories < CountOf(_Factory));
 	for (int i=0; i<_Factories; i++)
 	{
 		LApplicator *a = _Factory[i]->Create(Cs, Op);

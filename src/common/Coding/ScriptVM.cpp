@@ -91,7 +91,7 @@ int LVariantCmp(LVariant *a, LVariant *b, NativeInt Data)
 	}
 	else
 	{
-		LgiAssert(!"Impl a handler for this type.");
+		LAssert(!"Impl a handler for this type.");
 	}
 	
 	return 0;
@@ -179,7 +179,7 @@ inline int CompareVariants(LVariant *a, LVariant *b)
 			LVariant *Val = a->IsNull() ? b : a;
 			if (Val->IsNull())
 			{
-				LgiAssert(0);
+				LAssert(0);
 				return 0;
 			}
 			switch (Val->Type)
@@ -362,7 +362,7 @@ LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LScriptArguments &Args)
 		#endif
 	#else
 		// Not implemented, gcc???
-		LgiAssert(0);
+		LAssert(0);
 	#endif
 
 	*Args.GetReturn() = (int) r;
@@ -640,7 +640,7 @@ public:
 	LExecutionStatus Decompile(LScriptContext *Context, LCompiledCode *Code, LStream *log)
 	{
 		LExecutionStatus Status = ScriptSuccess;
-		LgiAssert(sizeof(GVarRef) == 4);
+		LAssert(sizeof(GVarRef) == 4);
 
 		GPtr c;
 		uint8_t *Base = &Code->ByteCode[0];
@@ -665,7 +665,7 @@ public:
 			if (Info->StartAddr >= 0)
 				Fn.Add(Info->StartAddr, Info->Name.Get());
 			else
-				LgiAssert(!"Method not defined.");
+				LAssert(!"Method not defined.");
 		}
 
 		int OldLineNum = 0;
@@ -713,7 +713,7 @@ public:
 			Log = Code->UserContext->GetLog();
 		// else LgiTrace("%s:%i - Execution without a log?\n", _FL);
 			
-		LgiAssert(sizeof(GVarRef) == 4);
+		LAssert(sizeof(GVarRef) == 4);
 
 		uint8_t *Base = c.u8 = &Code->ByteCode[0];
 		uint8_t *e = c.u8 + Code->ByteCode.Length();
@@ -791,7 +791,7 @@ public:
 					f.Close();
 					if (Decomp != ScriptSuccess)
 					{
-						LgiAssert(!"Decompilation failed.");
+						LAssert(!"Decompilation failed.");
 						return ScriptError;
 					}
 
@@ -823,7 +823,7 @@ public:
 		if (Func)
 		{
 			// Set up stack for function call
-			LgiAssert(Func->FrameSize.Get() != NULL);
+			LAssert(Func->FrameSize.Get() != NULL);
 			Sf.CurrentFrameSize = *Func->FrameSize.Get();
 			AddLocalSize(Sf.CurrentFrameSize);
 
@@ -884,7 +884,7 @@ public:
 	
 	LExecutionStatus Run(RunType Type)
 	{
-		LgiAssert(Code != NULL);
+		LAssert(Code != NULL);
 		
 		uint8_t *Base = &Code->ByteCode[0];
 		uint8_t *e = Base + Code->ByteCode.Length();
@@ -1145,7 +1145,7 @@ bool GTypeDef::GetVariant(const char *Name, LVariant &Value, char *Arr)
 	GMember *m = Members.Find(Name);
 	if (!m || !Object)
 	{
-		LgiAssert(!"No member?");
+		LAssert(!"No member?");
 		return false;
 	}
 
@@ -1191,7 +1191,7 @@ bool GTypeDef::SetVariant(const char *Name, LVariant &Value, char *Arr)
 	GMember *m = Members.Find(Name);
 	if (!m || !Object)
 	{
-		LgiAssert(!"No member?");
+		LAssert(!"No member?");
 		return false;
 	}
 
@@ -1694,7 +1694,7 @@ LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmDebuggerCallback *Callback, LVi
 
 LVmDebuggerWnd::~LVmDebuggerWnd()
 {
-	LgiAssert(d->RunLoop == false);
+	LAssert(d->RunLoop == false);
 }
 
 bool LVmDebuggerWnd::OnRequestClose(bool OsShuttingDown)
@@ -1713,7 +1713,7 @@ void LVmDebuggerWnd::Run()
 	d->RunLoop = true;
 	while (d->RunLoop && Visible())
 	{
-		LgiApp->Run(false);
+		LAppInst->Run(false);
 		LgiSleep(1);
 	}
 	Quit();
@@ -1929,7 +1929,7 @@ void LVmDebuggerWnd::LoadFile(const char *File)
 {
 	if (!d->Vm || !d->Callback)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return;
 	}
 
@@ -2030,14 +2030,14 @@ int LVmDebuggerWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		{
 			if (!d->Vm)
 			{
-				LgiAssert(0);
+				LAssert(0);
 				break;
 			}
 
 			LMenuItem *i = Menu->FindItem(IDC_BREAK_CPP);
 			if (!i)
 			{
-				LgiAssert(0);
+				LAssert(0);
 				break;
 			}
 			

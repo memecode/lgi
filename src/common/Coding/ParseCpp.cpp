@@ -108,7 +108,7 @@ public:
 	char16 *NextToken()
 	{
 		if (Start != NULL)
-			LgiAssert(0); // Call GSourceFile::Lex first
+			LAssert(0); // Call GSourceFile::Lex first
 			
 		if (CurToken >= Tokens.Length())
 			return NULL;
@@ -271,7 +271,7 @@ struct GCppStringPool
 		}
 		else
 		{
-			LgiAssert(Mem.Length() > 0);
+			LAssert(Mem.Length() > 0);
 			n = Mem.Last() + Used;
 		}
 		
@@ -459,7 +459,7 @@ struct GSourceFile
 			t.Write(&r, &f);
 			f.Close();
 		}
-		else LgiAssert(0);
+		else LAssert(0);
 		#endif		
 	}
 
@@ -760,7 +760,7 @@ struct RoundBracket
 			else if (CmpToken(t, ")"))
 			{
 				Depth--;
-				LgiAssert(Depth >= 0);
+				LAssert(Depth >= 0);
 			}
 			else if (CmpToken(t, "*") && Sections == 1)
 			{
@@ -768,7 +768,7 @@ struct RoundBracket
 			}
 		}
 		
-		LgiAssert(Depth == 0);
+		LAssert(Depth == 0);
 	}
 };
 
@@ -906,7 +906,7 @@ LAutoWString GCppParserWorker::GetSymbolName(LArray<char16*> &in, bool IsEnum)
 		else if (CmpToken(t, ")"))
 		{
 			Rb.Depth--;
-			LgiAssert(Rb.Depth >= 0);
+			LAssert(Rb.Depth >= 0);
 		}
 		else if (IsAlpha(*t) || *t == '_')
 		{
@@ -943,13 +943,13 @@ LAutoWString GCppParserWorker::GetSymbolName(LArray<char16*> &in, bool IsEnum)
 		if (IsEnum && LastName < 0)
 			return LAutoWString();
 		
-		LgiAssert(LastName >= 0);
+		LAssert(LastName >= 0);
 		t = a[LastName];
 		p.Write(t, StrlenW(t) * sizeof(char16) );
 	}
 	
 	ret.Reset(p.NewStrW());
-	LgiAssert(ret);
+	LAssert(ret);
 	
 	return ret;
 }
@@ -1207,7 +1207,7 @@ int GCppParserWorker::Evaluate(LArray<char16*> &Exp)
 		}
 		
 		
-		LgiAssert(StartLength > Values.Length());
+		LAssert(StartLength > Values.Length());
 		if (Values.Length() >= StartLength)
 		{
 			Msg(MsgError, "Nothing happened.\n");
@@ -1299,7 +1299,7 @@ bool GCppParserWorker::Preprocess(GSourceFile *sf)
 				Blk = &sf->Blocks.New();
 			Blk->BlockLine = Line;
 			Blk->Type = PreprocessSyms.Find(Cmd);
-			LgiAssert(Blk->Type != SourceBlock);
+			LAssert(Blk->Type != SourceBlock);
 			Blk->Start = Cur;
 
 			// Scan till the end of line...		
@@ -1439,7 +1439,7 @@ GSourceFile *GCppParserWorker::ParseCpp(const char *Path)
 				{
 					case KwPreprocessor:
 					{
-						LgiAssert(!"We shouldn't see these here at all.");
+						LAssert(!"We shouldn't see these here at all.");
 						Error = true;
 						break;
 					}
@@ -1835,7 +1835,7 @@ GSymbol *GCppParserWorker::ParseUserType(GSourceFile *sf, char16 *t)
 					}
 					else
 					{
-						LgiAssert(!"End scope mis-match.");
+						LAssert(!"End scope mis-match.");
 						Finished = true;
 						break;
 					}
@@ -1863,7 +1863,7 @@ GSymbol *GCppParserWorker::ParseUserType(GSourceFile *sf, char16 *t)
 					}
 					else if (kt == KwPreprocessor)
 					{
-						LgiAssert(0);
+						LAssert(0);
 					}
 					else if (kt == KwUserType)
 					{
@@ -2031,7 +2031,7 @@ bool GCppParserWorker::ParsePreprocessor(GSourceFile *sf)
 	PreprocessBlock *blk = sf->Current();
 	if (blk->Type == SourceBlock)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 		
@@ -2134,7 +2134,7 @@ bool GCppParserWorker::ParsePreprocessor(GSourceFile *sf)
 		}
 		case HashEndif:
 		{
-			LgiAssert(sf->Stack.Length() > 0);
+			LAssert(sf->Stack.Length() > 0);
 			PreprocessState &ps = sf->Stack.Last();
 			sf->Active = ps.ParentIsActive;
 			sf->Stack.Length(sf->Stack.Length() - 1);
@@ -2237,7 +2237,7 @@ bool GCppParserWorker::ParsePreprocessor(GSourceFile *sf)
 		}
 		default:
 		{
-			LgiAssert(!"Impl me");
+			LAssert(!"Impl me");
 			Status = false;
 			break;
 		}
@@ -2269,7 +2269,7 @@ void GCppParserWorker::DoWork(WorkUnit *wk)
 			{
 				InitScopes();
 				
-				uint64 Start = LgiCurrentTime();
+				uint64 Start = LCurrentTime();
 
 				if (!stricmp(ext, "cpp"))
 				{
@@ -2277,7 +2277,7 @@ void GCppParserWorker::DoWork(WorkUnit *wk)
 				}	
 
 				ParseCpp(w->Source[i]);
-				uint64 Time = LgiCurrentTime() - Start;
+				uint64 Time = LCurrentTime() - Start;
 				
 				#if 0
 				char16 *k;
@@ -2297,7 +2297,7 @@ void GCppParserWorker::DoWork(WorkUnit *wk)
 			Srcs.DeleteObjects();
 		}
 	}
-	else LgiAssert(!"Unknown work unit type.");
+	else LAssert(!"Unknown work unit type.");
 }
 
 GCppParser::GCppParser()

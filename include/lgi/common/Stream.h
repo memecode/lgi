@@ -245,7 +245,7 @@ public:
 	
 	GTempStream &operator =(const GTempStream &ts)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return *this;
 	}
 };

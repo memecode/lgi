@@ -83,7 +83,7 @@ bool LColour::SetColourSpace(LColourSpace cs)
 	if (space == cs)
 		return true;
 
-	LgiAssert(!"Impl conversion.");
+	LAssert(!"Impl conversion.");
 	return false;
 }
 
@@ -171,7 +171,7 @@ void LColour::Set(uint32_t c, int bits, GPalette *palette)
 			space = System32BitColourSpace;
 			flat = 0;
 			LgiTrace("Error: Unable to set colour %x, %i\n", c, bits);
-			LgiAssert(!"Not a known colour depth.");
+			LAssert(!"Not a known colour depth.");
 		}
 	}
 }
@@ -183,7 +183,7 @@ uint32_t LColour::Get(int bits)
 		case 8:
 			if (space == CsIndex8)
 				return index;
-			LgiAssert(!"Not supported.");
+			LAssert(!"Not supported.");
 			break;
 		case 24:
 			return c24();
@@ -204,7 +204,7 @@ void LColour::r(uint8_t i)
 	if (SetColourSpace(System32BitColourSpace))
 		rgb.r = i;
 	else
-		LgiAssert(0);
+		LAssert(0);
 }
 
 uint8_t LColour::g() const
@@ -217,7 +217,7 @@ void LColour::g(uint8_t i)
 	if (SetColourSpace(System32BitColourSpace))
 		rgb.g = i;
 	else
-		LgiAssert(0);
+		LAssert(0);
 }
 
 uint8_t LColour::b() const
@@ -230,7 +230,7 @@ void LColour::b(uint8_t i)
 	if (SetColourSpace(System32BitColourSpace))
 		rgb.b = i;
 	else
-		LgiAssert(0);
+		LAssert(0);
 }
 
 uint8_t LColour::a() const
@@ -243,7 +243,7 @@ void LColour::a(uint8_t i)
 	if (SetColourSpace(System32BitColourSpace))
 		rgb.a = i;
 	else
-		LgiAssert(0);
+		LAssert(0);
 }
 
 uint8_t LColour::c8() const
@@ -518,10 +518,10 @@ uint32_t LColour::GetNative()
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 	#else
-	LgiAssert(0);
+	LAssert(0);
 	#endif		
 	return c32();
 }
@@ -659,7 +659,7 @@ bool LColour::GetConfigColour(const char *Tag, LColour &c)
 	if (!Tag)
 		return false;
 
-	auto Col = LgiApp->GetConfig(Tag);
+	auto Col = LAppInst->GetConfig(Tag);
 	if (!Col)
 		return false;
 
@@ -714,7 +714,7 @@ void LColour::OnChange()
 	_LgiColours[L_MENU_TEXT] = Rgb24(0x35, 0x1f, 0x4f); // LC_MENU_TEXT
 	_LgiColours[L_NON_FOCUS_SEL_BACK] = Rgb24(0xbc, 0xa9, 0xd4); // LC_NON_FOCUS_SEL_BACK
 	_LgiColours[L_NON_FOCUS_SEL_FORE] = Rgb24(0x35, 0x1f, 0x4f); // LC_NON_FOCUS_SEL_FORE
-	LgiAssert(i == LC_MAXIMUM);
+	LAssert(i == LC_MAXIMUM);
 	
 	#elif defined __GTK_H__
 
@@ -824,7 +824,7 @@ void LColour::OnChange()
 	#if defined(LINUX) && !defined(LGI_SDL)
 	WmColour c;
 	Proc_LgiWmGetColour WmGetColour = 0;
-	GLibrary *WmLib = LgiApp->GetWindowManagerLib();
+	GLibrary *WmLib = LAppInst->GetWindowManagerLib();
 	if (WmLib)
 	{
 		WmGetColour = (Proc_LgiWmGetColour) WmLib->GetAddress("LgiWmGetColour");
@@ -919,7 +919,7 @@ bool LColourLoad(const char *Json)
 				if (cd.Type == LCss::ColorRgb)
 					_LgiColours[c].Set(cd.Rgb32, 32);
 				else
-					LgiAssert(!"Invalid colour type.");
+					LAssert(!"Invalid colour type.");
 			}
 		}
 

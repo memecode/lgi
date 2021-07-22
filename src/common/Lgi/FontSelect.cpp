@@ -64,7 +64,7 @@ LFontSelect::LFontSelect(LView *Parent, void *Init, int InitLen)
 
 	SetParent(Parent);
 	Name(LgiLoadString(L_FONTUI_TITLE, "Select Font"));
-	LRect r(0, 0, 290 + LgiApp->GetMetric(LGI_MET_DECOR_X), 290 + LgiApp->GetMetric(LGI_MET_DECOR_Y));
+	LRect r(0, 0, 290 + LAppInst->GetMetric(LGI_MET_DECOR_X), 290 + LAppInst->GetMetric(LGI_MET_DECOR_Y));
 	SetPos(r);
 	MoveToCenter();
 
@@ -277,7 +277,7 @@ bool LFontSelect::Serialize(void *Data, int DataLen, bool Write)
 			Fnt->lfUnderline = Underline;
 			Fnt->lfItalic = Italic;
 		}
-		else LgiAssert(!"Unknown object size.");
+		else LAssert(!"Unknown object size.");
 
 		#else
 		

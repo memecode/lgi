@@ -277,7 +277,7 @@ public:
 					}
 					else
 					{
-						LgiAssert(0);
+						LAssert(0);
 						break;
 					}
 				}

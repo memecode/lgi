@@ -71,7 +71,7 @@ public:
 	
 	bool RunScript(const char *File)
 	{
-		bool Disassemble = LgiApp->GetOption("disassemble");
+		bool Disassemble = LAppInst->GetOption("disassemble");
 		if (!LFileExists(File))
 		{
 			printf("Error: '%s' not found.\n", File);

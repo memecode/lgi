@@ -45,7 +45,7 @@ public:
 		}
 		else
 		{
-			LgiAssert(0);
+			LAssert(0);
 		}
 		
 		return false;
@@ -53,7 +53,7 @@ public:
 
 	void SetPtr(int x, int y)
 	{
-		LgiAssert(Dest && Dest->Base);
+		LAssert(Dest && Dest->Base);
 		u8 = Dest->Base + ((y * Dest->Line) + x + x);
 	}
 

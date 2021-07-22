@@ -33,12 +33,12 @@ uint WINAPI ThreadEntryPoint(void *i)
 	{
 		// Wait for it...
 		int Status = 0;
-		auto Start = LgiCurrentTime();
+		auto Start = LCurrentTime();
 
         while (Thread->State == LThread::THREAD_INIT)
 		{
 			LgiSleep(5);
-			if (LgiCurrentTime() - Start > 2000)
+			if (LCurrentTime() - Start > 2000)
 			{
 				// If the thread object doesn't set the running state we're
 				// stuffed. So timeout in that case after 2 seconds. The only
@@ -103,7 +103,7 @@ LThread::LThread(const char *name)
 
 LThread::~LThread()
 {
-	LgiAssert(State == THREAD_INIT || State == THREAD_EXITED);
+	LAssert(State == THREAD_INIT || State == THREAD_EXITED);
 	if (hThread)
 	{
 		CloseHandle(hThread);
@@ -165,11 +165,11 @@ bool LThread::IsExited()
 
 void LThread::WaitForExit(int WarnAfterMs)
 {
-	auto Start = LgiCurrentTime();
+	auto Start = LCurrentTime();
 	while (!IsExited())
 	{
-		if ((LgiCurrentTime() - Start) >= WarnAfterMs)
-			LgiAssert(!"Thread hasn't exited.");
+		if ((LCurrentTime() - Start) >= WarnAfterMs)
+			LAssert(!"Thread hasn't exited.");
 
 		LgiSleep(10);
 	}
@@ -219,14 +219,14 @@ void LThread::Terminate()
 	{
 		TerminateThread(hThread, 1);
 
-		auto Start = LgiCurrentTime();
+		auto Start = LCurrentTime();
 		while (!IsExited())
 		{
-			auto Now = LgiCurrentTime();
+			auto Now = LCurrentTime();
 			if (Now - Start > 2000)
 			{
 				LgiTrace("%s:%i - TerminateThread didn't work for '%s'\n", _FL, Name.Get());
-				LgiAssert(!"TerminateThread failure?");
+				LAssert(!"TerminateThread failure?");
 				break;
 			}
 

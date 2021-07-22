@@ -58,7 +58,7 @@ public:
 		LString r;
 		int p;
 		char buf[256];
-		uint64 Start = LgiCurrentTime();
+		uint64 Start = LCurrentTime();
 		do
 		{
 			if ((p = LLDB.Peek()) > 0)
@@ -77,7 +77,7 @@ public:
 				}
 			}
 		}
-		while (LgiCurrentTime() - Start < LLDB_CMD_TIMEOUT);
+		while (LCurrentTime() - Start < LLDB_CMD_TIMEOUT);
 
 		return r;
 	}
