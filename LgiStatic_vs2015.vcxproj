@@ -219,6 +219,7 @@
     <ClCompile Include="src\common\Lgi\LgiCommon.cpp" />
     <ClCompile Include="src\common\Lgi\Mutex.cpp" />
     <ClCompile Include="src\common\Lgi\Stream.cpp" />
+    <ClCompile Include="src\common\Lgi\ThreadCommon.cpp" />
     <ClCompile Include="src\common\Lgi\Variant.cpp" />
     <ClCompile Include="src\common\Lgi\LMsg.cpp" />
     <ClCompile Include="src\common\Lgi\Rand.cpp" />
