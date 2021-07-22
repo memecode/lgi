@@ -192,7 +192,7 @@ struct LOAuth2Priv
 					(LCurrentTime() - Start) < 60000)
 			{
 				d->Log->Print("Error: Can't listen on %i... (%s)\n", LOCALHOST_PORT, Listen.GetErrorString());
-				LgiSleep(1000);
+				LSleep(1000);
 			}
 		}
 

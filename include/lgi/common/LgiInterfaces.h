@@ -320,7 +320,7 @@ public:
 	virtual int32 GetMetric
 	(
 		/// One of #LGI_MET_DECOR_X, #LGI_MET_DECOR_Y
-		LgiSystemMetric Metric
+		LSystemMetric Metric
 	) = 0;
 
 	/// Get the mouse hook instance

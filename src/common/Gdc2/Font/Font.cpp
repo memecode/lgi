@@ -591,7 +591,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 		}
 		else
 		{
-			int Dpi = LgiScreenDpi();
+			int Dpi = LScreenDpi();
 			int PtSize = PointSize();
 			int PxSize = (int) (PtSize * Dpi / 72.0);
 			
@@ -978,7 +978,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 						PtSz = Sz.Value;
 					else if (Sz.Type == LCss::LenPx)
 // This seems to give fonts that are too small:
-//						PtSz = Sz.Value * 72.0f / LgiScreenDpi();
+//						PtSz = Sz.Value * 72.0f / LScreenDpi();
 						PtSz = Sz.Value;
 					else
 						LAssert(!"Impl me.");

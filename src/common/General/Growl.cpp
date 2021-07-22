@@ -27,7 +27,7 @@ public:
 		
 		while (Async && !IsExited())
 		{
-			LgiSleep(10);
+			LSleep(10);
 		}
 		
 		Notes.DeleteObjects();
@@ -185,7 +185,7 @@ public:
 			}
 			else
 			{
-				LgiSleep(20);
+				LSleep(20);
 			}
 		}
 		

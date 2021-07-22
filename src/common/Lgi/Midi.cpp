@@ -266,7 +266,7 @@ struct GMidiPriv
 		{
 			loop = false;
 			while (!IsExited())
-				LgiSleep(1);
+				LSleep(1);
 		}
 		
 		int Main()
@@ -617,7 +617,7 @@ bool GMidi::Connect(int InIdx, int OutIdx, LAutoString *ErrorMsg)
 			else if (ErrorMsg)
 			{
 				int e = errno;
-				LAutoString msg = LgiErrorCodeToString(e);
+				LAutoString msg = LErrorCodeToString(e);
 				LString s;
 				s.Printf("Error opening the device: %i (%s)\n", e, msg.Get());
 				ErrorMsg->Reset(NewStr(s));

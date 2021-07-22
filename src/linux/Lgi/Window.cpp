@@ -801,7 +801,7 @@ LWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, 
 				HasData++;
 		if (HasData >= Formats.Length())
 			break;
-		LgiYield();
+		LYield();
 	}
 
 	auto Result = t->OnDrop(t->Data, p, KeyState);

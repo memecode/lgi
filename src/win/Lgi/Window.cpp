@@ -40,7 +40,7 @@ UINT LGetDpiForWindow(HWND hwnd)
 	if (pGetDpiForWindow && pGetDpiForSystem)
 		return hwnd ? pGetDpiForWindow(hwnd) : pGetDpiForSystem();
 
-	return LgiScreenDpi();
+	return LScreenDpi();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -143,7 +143,7 @@ LWindow::~LWindow()
 
 bool LWindow::SetIcon(const char *Icon)
 {
-	return CreateClassW32(LAppInst->Name(), LoadIcon(LgiProcessInst(), (LPCWSTR)Icon)) != 0;
+	return CreateClassW32(LAppInst->Name(), LoadIcon(LProcessInst(), (LPCWSTR)Icon)) != 0;
 }
 
 LViewI *LWindow::GetFocus()
@@ -422,7 +422,7 @@ void LWindow::SetZoom(LWindowZoom i)
 					ShowWindow(Handle(), SW_NORMAL);
 				}
 
-				LgiYield();
+				LYield();
 
 				RECT r;
 				GetWindowRect(Handle(), &r);

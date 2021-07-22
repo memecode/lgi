@@ -1311,7 +1311,7 @@ void LToolBar::ContextMenu(LMouse &m)
 				}
 			}
 			Sub->AppendSeparator();
-			GMenuItem *Txt = Sub->AppendItem(LgiLoadString(L_TOOLBAR_SHOW_TEXT, "Show Text Labels"), 1000, true);
+			GMenuItem *Txt = Sub->AppendItem(LLoadString(L_TOOLBAR_SHOW_TEXT, "Show Text Labels"), 1000, true);
 			Txt->Checked(d->Text);
 
 			bool Save = false;

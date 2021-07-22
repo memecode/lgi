@@ -487,7 +487,7 @@ SSL_locking_function(int mode, int n, const char *file, int line)
 			TestFlag(mode, CRYPTO_WRITE),
 			mode,
 			Library->Locks[n]->GetCount(),
-			LgiGetCurrentThread(),
+			LGetCurrentThread(),
 			file, line);
 		#endif
 		
@@ -849,7 +849,7 @@ DebugTrace("%s:%i - initial SSL_connect=%i\n", _FL, r);
 DebugTrace("%s:%i - SSL_get_error=%i\n", _FL, err);
 								}
 
-								LgiSleep(50);
+								LSleep(50);
 
 								try
 								{
@@ -922,7 +922,7 @@ DebugTrace("%s:%i - BIO_do_connect=%i\n", _FL, r);
 						break;
 					}
 
-					LgiSleep(50);
+					LSleep(50);
 					r = Library->BIO_do_connect(Bio);
 DebugTrace("%s:%i - BIO_do_connect=%i\n", _FL, r);
 
@@ -1013,7 +1013,7 @@ DebugTrace("%s:%i - SSL_set_bio=%i\n", _FL, r);
 							r = Library->SSL_connect(Ssl);
 DebugTrace("%s:%i - SSL_connect=%i\n", _FL, r);
 							if (r < 0)
-								LgiSleep(100);
+								LSleep(100);
 							else
 								break;
 						}
@@ -1243,7 +1243,7 @@ ssize_t SslSocket::Write(const void *Data, ssize_t Len, int Flags)
 					if (!Library->BIO_should_retry(Bio))
 						break;
 					if (d->IsBlocking)
-						LgiSleep(1);
+						LSleep(1);
 					else
 						break;
 				}
@@ -1276,7 +1276,7 @@ ssize_t SslSocket::Write(const void *Data, ssize_t Len, int Flags)
 				if (!Library->BIO_should_retry(Bio))
 					break;
 				if (d->IsBlocking)
-					LgiSleep(1);
+					LSleep(1);
 				else
 					break;
 			}
@@ -1343,7 +1343,7 @@ DebugTrace("%s:%i - BIO_should_retry is false\n", _FL);
 							break;
 						}
 						if (d->IsBlocking)
-							LgiSleep(1);
+							LSleep(1);
 						else
 							break;
 					}
@@ -1378,7 +1378,7 @@ DebugTrace("%s:%i - BIO_should_retry=%i IsBlocking=%i\n", _FL, Retry, d->IsBlock
 						break;
 					}
 					if (d->IsBlocking)
-						LgiSleep(1);
+						LSleep(1);
 					else
 						break;
 				}

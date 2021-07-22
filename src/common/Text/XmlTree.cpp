@@ -64,7 +64,7 @@ public:
 	{
 		_Pools--;
 		#ifndef LGI_STATIC
-		// LgiStackTrace("%p::~XmlPoolAlloc _Pools=%i, Refs=%i\n", (LXmlAlloc*)this, _Pools, _GetCount());
+		// LStackTrace("%p::~XmlPoolAlloc _Pools=%i, Refs=%i\n", (LXmlAlloc*)this, _Pools, _GetCount());
 		#endif
 	}
 
@@ -109,7 +109,7 @@ public:
 	{
 		_Normals--;
 		#ifndef LGI_STATIC
-		// LgiStackTrace("%p::~XmlNormalAlloc _Normals=%i\n", (LXmlAlloc*)this, _Normals);
+		// LStackTrace("%p::~XmlNormalAlloc _Normals=%i\n", (LXmlAlloc*)this, _Normals);
 		#endif
 	}
 

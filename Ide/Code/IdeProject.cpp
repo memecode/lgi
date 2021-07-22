@@ -262,7 +262,7 @@ public:
 	{
 		Cancel();
 		while (!IsExited())
-			LgiSleep(1);
+			LSleep(1);
 		Instances--;
 	}
 	
@@ -1342,7 +1342,7 @@ BuildThread::~BuildThread()
 	bool Killed = false;
 	while (!IsExited())
 	{
-		LgiSleep(10);
+		LSleep(10);
 
 		if (LCurrentTime() - Start > STOP_BUILD_TIMEOUT &&
 			SubProc)
@@ -2337,7 +2337,7 @@ public:
 	{
 		Cancel();
 		while (!IsExited())
-			LgiSleep(1);
+			LSleep(1);
 	}
 	
 	int Main() override
@@ -2963,7 +2963,7 @@ bool IdeProject::SaveFile()
 			{
 				GCopyStreamer Cp;
 				Prog.SetDescription("Writing XML...");
-				LgiYield();
+				LYield();
 				if (Cp.Copy(&Buf, &f))
 					d->Dirty = false;
 			}
@@ -4127,7 +4127,7 @@ void AddFilesProgress::Value(int64 val)
 				Msg->Value(v);
 				Msg->SendNotify(GNotifyTableLayout_Refresh);
 			}
-			LgiYield();
+			LYield();
 			Ts = Now;
 		}
 	}

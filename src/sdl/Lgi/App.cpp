@@ -212,7 +212,7 @@ public:
 	{
 		CaptureId = 0;
 		CurEvent = 0;
-		GuiThread = LgiGetCurrentThread();
+		GuiThread = LGetCurrentThread();
 		GuiThreadId = GetCurrentThreadId();
 		FileSystem = 0;
 		GdcSystem = 0;
@@ -361,7 +361,7 @@ LMouseHook *LApp::GetMouseHook()
 	return MouseHook;
 }
 
-int LApp::GetMetric(LgiSystemMetric Metric)
+int LApp::GetMetric(LSystemMetric Metric)
 {
 	switch (Metric)
 	{

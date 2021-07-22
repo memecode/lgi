@@ -74,8 +74,8 @@ GInput::GInput(LViewI *parent, const char *InitStr, const char *Msg, const char 
 	c->TextAlign(LCss::AlignRight);
 
 	LButton *Ok;
-	c->Add(Ok = new LButton(IDOK, 0, 0, -1, -1, LgiLoadString(L_BTN_OK, "Ok")));
-	c->Add(new LButton(IDCANCEL, 0, 0, -1, -1, LgiLoadString(L_BTN_CANCEL, "Cancel")));
+	c->Add(Ok = new LButton(IDOK, 0, 0, -1, -1, LLoadString(L_BTN_OK, "Ok")));
+	c->Add(new LButton(IDCANCEL, 0, 0, -1, -1, LLoadString(L_BTN_CANCEL, "Cancel")));
 	Ok->Default(true);
 
 	SetPos(r);

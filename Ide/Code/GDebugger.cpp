@@ -560,7 +560,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 				uint64 Now = LCurrentTime();
 				if (Now - Start < 5000)
 				{
-					LgiSleep(10);
+					LSleep(10);
 				}
 				else
 				{
@@ -577,7 +577,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 				State == Looping)
 		{
 			Now = LCurrentTime();
-			LgiSleep(50);
+			LSleep(50);
 			uint64 After = LCurrentTime();
 			if (After - Now > 65)
 			{
@@ -673,7 +673,7 @@ public:
 			State = Exiting;
 			while (!IsExited())
 			{
-				LgiSleep(1);
+				LSleep(1);
 			}
 			#if DEBUG_SESSION_LOGGING
 			LgiTrace("Gdb::~Gdb - thread has exited.\n");
@@ -1005,7 +1005,7 @@ public:
 		uint64 Start = LCurrentTime();
 		while (State == Init)
 		{
-			LgiSleep(5);
+			LSleep(5);
 			if (LCurrentTime()-Start > 3000)
 			{
 				LgiTrace("%s:%i - SetBreakPoint init wait failed...\n", _FL);
@@ -1040,7 +1040,7 @@ public:
 		uint64 Start = LCurrentTime();
 		while (State == Init)
 		{
-			LgiSleep(5);
+			LSleep(5);
 			if (LCurrentTime()-Start > 3000)
 			{
 				LgiTrace("%s:%i - SetBreakPoint init wait failed...\n", _FL);
@@ -1178,8 +1178,8 @@ public:
 								continue;
 							}						
 							
-							s = LgiSkipDelim(s, WhiteSpace, true);
-							s = LgiSkipDelim(s, WhiteSpace);						
+							s = LSkipDelim(s, WhiteSpace, true);
+							s = LSkipDelim(s, WhiteSpace);						
 						}
 					}
 				}

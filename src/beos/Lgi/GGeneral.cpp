@@ -191,7 +191,7 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LAutoString *
 	return false;
 }
 
-LAutoString LgiErrorCodeToString(uint32 Code)
+LAutoString LErrorCodeToString(uint32 Code)
 {
 	char e[32];
 	sprintf_s(e, sizeof(e), "Err(%i)", Code);

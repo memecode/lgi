@@ -136,9 +136,9 @@ public:
 typedef HANDLE  					OsThread;
 typedef DWORD						OsThreadId;
 typedef CRITICAL_SECTION			OsSemaphore;
-#define LgiGetCurrentThread()		GetCurrentThread()
+#define LGetCurrentThread()		GetCurrentThread()
 #define GetCurrentThreadId()		GetCurrentThreadId()
-#define LgiGetCurrentProcess()		GetCurrentProcessId()
+#define LGetCurrentProcess()		GetCurrentProcessId()
 
 #elif defined POSIX
 
@@ -149,9 +149,9 @@ typedef pthread_t           OsThread;
 	typedef pthread_t					OsThreadId;
 #endif
 typedef pthread_mutex_t				OsSemaphore;
-#define LgiGetCurrentThread()		pthread_self()
+#define LGetCurrentThread()		pthread_self()
 LgiFunc OsThreadId					GetCurrentThreadId();
-#define LgiGetCurrentProcess()		getpid()
+#define LGetCurrentProcess()		getpid()
 
 #else
 
@@ -173,7 +173,7 @@ LgiFunc OsThreadId					GetCurrentThreadId();
 typedef int OsSocket;
 
 /// Sleep the current thread for i milliseconds.
-LgiFunc void LgiSleep(uint32 i);
+LgiFunc void LSleep(uint32 i);
 
 #ifndef WIN32
 #define atoi64						atoll
@@ -185,7 +185,7 @@ LgiFunc void LgiSleep(uint32 i);
 #define _vsnprintf					vsnprintf
 
 /// Process any pending messages in the applications message que and then return.
-#define LgiYield()					LAppInst->Run(false)
+#define LYield()					LAppInst->Run(false)
 
 #define K_CHAR						0x0
 

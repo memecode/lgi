@@ -225,7 +225,7 @@ public:
 				Dst.y = Src->y;
 				Dst.Cs = this->Dest->Cs;
 				Dst.Line = this->Dest->Line;				
-				if (!LgiRopUniversal(&Dst, Src, false))
+				if (!LRopUniversal(&Dst, Src, false))
 				{
 					return false;
 				}
@@ -561,7 +561,7 @@ public:
 				Dst.Cs = this->Dest->Cs;
 				Dst.Line = this->Dest->Line;
 				Dst.PreMul(this->Dest->PreMul());
-				if (!LgiRopUniversal(&Dst, Src, false))
+				if (!LRopUniversal(&Dst, Src, false))
 				{
 					return false;
 				}

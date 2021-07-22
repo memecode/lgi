@@ -559,7 +559,7 @@ public:
 			Dst.y = Src->y;
 			Dst.Cs = this->Dest->Cs;
 			Dst.Line = this->Dest->Line;
-			return LgiRopUniversal(&Dst, Src, true);
+			return LRopUniversal(&Dst, Src, true);
 		}
 	}
 
@@ -675,7 +675,7 @@ public:
 			Dst.y = Src->y;
 			Dst.Cs = this->Dest->Cs;
 			Dst.Line = this->Dest->Line;
-			return LgiRopUniversal(&Dst, Src, true);
+			return LRopUniversal(&Dst, Src, true);
 		}
 	}
 };
@@ -931,7 +931,7 @@ public:
 					Dst.y = Src->y;
 					Dst.Cs = this->Dest->Cs;
 					Dst.Line = this->Dest->Line;				
-					return LgiRopUniversal(&Dst, Src, true);
+					return LRopUniversal(&Dst, Src, true);
 					break;
 				}
 			}
@@ -1284,7 +1284,7 @@ public:
 				Dst.y = Src->y;
 				Dst.Cs = this->Dest->Cs;
 				Dst.Line = this->Dest->Line;
-				if (!LgiRopUniversal(&Dst, Src, true))
+				if (!LRopUniversal(&Dst, Src, true))
 				{
 					return false;
 				}

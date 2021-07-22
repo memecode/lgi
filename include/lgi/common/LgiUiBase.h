@@ -58,7 +58,7 @@ LgiFunc void LgiTrace(const char *Format, ...);
 
 #ifndef LGI_STATIC
 /// Same as LgiTrace but writes a stack trace as well.
-LgiFunc void LgiStackTrace(const char *Format, ...);
+LgiFunc void LStackTrace(const char *Format, ...);
 #endif
 
 // Template hash function:

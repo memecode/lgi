@@ -51,7 +51,7 @@ const char *Store2_LgiLoadString(int ref)
 
 #else
 
-#define Store2_LgiLoadString			LgiLoadString
+#define Store2_LgiLoadString			LLoadString
 
 #endif
 
@@ -438,7 +438,7 @@ bool StorageItemImpl::SerializeObject(GSubFilePtr &f, bool Write)
 						char Msg[512];
 						uint Error = 0;
 
-						strcpy_s(Msg, sizeof(Msg), LgiLoadString(L_STORE_WRITE_ERR, "Storage failed to write the object to disk:\n\n"));
+						strcpy_s(Msg, sizeof(Msg), LLoadString(L_STORE_WRITE_ERR, "Storage failed to write the object to disk:\n\n"));
 
 						if (!Status)
 						{
@@ -449,7 +449,7 @@ bool StorageItemImpl::SerializeObject(GSubFilePtr &f, bool Write)
 							#endif
 
 							int Len = strlen(Msg);
-							sprintf_s(Msg+Len, sizeof(Msg)-Len, LgiLoadString(L_STORE_OS_ERR, "OS error code: %u (0x%x)\n"), Error, Error);
+							sprintf_s(Msg+Len, sizeof(Msg)-Len, LLoadString(L_STORE_OS_ERR, "OS error code: %u (0x%x)\n"), Error, Error);
 						}
 
 						if (CurrentPos != Header->DataLoc + Header->DataSize)
@@ -459,7 +459,7 @@ bool StorageItemImpl::SerializeObject(GSubFilePtr &f, bool Write)
 
 							int Len = strlen(Msg);
 							sprintf_s(Msg+Len, sizeof(Msg)-Len,
-									LgiLoadString(	L_STORE_MISMATCH,
+									LLoadString(	L_STORE_MISMATCH,
 													"Object write size mismatch:\n"
 													"\tHeader: %u\n"
 													"\tBytes written: %u\n"
@@ -475,7 +475,7 @@ bool StorageItemImpl::SerializeObject(GSubFilePtr &f, bool Write)
 
 						int Len = strlen(Msg);
 						strcpy_s(Msg + Len, sizeof(Msg) - Len,
-								LgiLoadString(L_STORE_RESTART, "\nYou should restart the application and then report this problem.\n"
+								LLoadString(L_STORE_RESTART, "\nYou should restart the application and then report this problem.\n"
 								"Ignore all furthur such errors for this session?"));
 						if (LgiMsg(0, Msg, "Storage2 Error", MB_YESNO) == IDYES)
 						{
@@ -1394,7 +1394,7 @@ namespace Storage2
 					if (_Timer.DoNow())
 					{
 						_Ui->Value(_CompactPos);
-						LgiYield();
+						LYield();
 						if (_Ui && _Ui->Cancel())
 						{
 							break;
@@ -1455,7 +1455,7 @@ namespace Storage2
 					AddItem((StorageItemImpl*)Item->GetChild());
 					if (_Timer.DoNow())
 					{
-						LgiYield();
+						LYield();
 						if (_Ui && _Ui->Cancel())
 						{
 							break;
@@ -1581,7 +1581,7 @@ namespace Storage2
 					if (_Timer.DoNow())
 					{
 						_Ui->Value(_CompactPos);
-						LgiYield();
+						LYield();
 					}
 				}
 			}
@@ -1851,7 +1851,7 @@ bool StorageKitImpl::Compact(Progress *p, bool Interactive, StorageValidator *va
 
 			d->_Timer.Init(300);
 
-			LgiYield();
+			LYield();
 		}
 
 		#if 1
@@ -2014,7 +2014,7 @@ bool StorageKitImpl::Compact(Progress *p, bool Interactive, StorageValidator *va
 						d->_Timer.DoNow())
 					{
 						RemoveSpace->Value(b->Start);
-						LgiYield();
+						LYield();
 
 						if (p && p->Cancel())
 						{

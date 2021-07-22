@@ -498,7 +498,7 @@ bool TableCell::IsSpanned()
 
 bool TableCell::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty Fld = LgiStringToDomProp(Name);
+	GDomProperty Fld = LStringToDomProp(Name);
 	switch (Fld)
 	{
 		case ContainerChildren: // Type: LView[]
@@ -566,7 +566,7 @@ bool TableCell::GetVariant(const char *Name, LVariant &Value, char *Array)
 
 bool TableCell::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty Fld = LgiStringToDomProp(Name);
+	GDomProperty Fld = LStringToDomProp(Name);
 	switch (Fld)
 	{
 		case ContainerChildren: // Type: LView[]
@@ -2210,7 +2210,7 @@ bool ConvertNumbers(LArray<double> &a, char *s)
 
 bool LTableLayout::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty p = LgiStringToDomProp(Name);
+	GDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		case TableLayoutCols:

@@ -172,7 +172,7 @@ public:
 	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL) override
 	{
 		if (!Desc) return false;
-		GDomProperty p = LgiStringToDomProp(Name);
+		GDomProperty p = LStringToDomProp(Name);
 		switch (p)
 		{
 			case ObjName:

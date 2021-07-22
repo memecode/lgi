@@ -33,7 +33,7 @@
 /// \ingroup Base
 LgiExtern LString LGetSystemPath(
 	/// Which path to retreive
-	LgiSystemPath Which,
+	LSystemPath Which,
 	int WordSize = 0
 );
 
@@ -221,7 +221,7 @@ LgiFunc char *LEncodeUri
 LgiFunc bool LGetSystemPath
 (
 	/// Which path to retreive
-	LgiSystemPath Which,
+	LSystemPath Which,
 	/// The buffer to receive the path into 
 	char *Dst,
 	/// The size of the receive buffer in bytes

@@ -170,7 +170,7 @@ GDrawListSurface::GDrawListSurface(int Width, int Height, LColourSpace Cs)
 	d = new GDrawListSurfacePriv;
 	d->x = Width;
 	d->y = Height;
-	d->DpiX = d->DpiY = LgiScreenDpi();
+	d->DpiX = d->DpiY = LScreenDpi();
 	d->Bits = GColourSpaceToBits(Cs);
 	d->Fore = LColour::Black;
 	ColourSpace = Cs;

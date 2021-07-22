@@ -220,8 +220,8 @@ int GSubMenu::Float(LView *From, int x, int y, int Btns)
 				// Wait for the menu to hide itself
 				while (m->Visible())
 				{
-					LgiYield();
-					LgiSleep(1);
+					LYield();
+					LSleep(1);
 				}
 			}
 			LgiTrace("Finished float loop...\n");

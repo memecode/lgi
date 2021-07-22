@@ -59,7 +59,7 @@ public:
 
 /// A string resource
 /// \ingroup Resources
-class LgiClass LgiStringRes
+class LgiClass LStringRes
 {
 	LResources *Res;
 
@@ -73,8 +73,8 @@ public:
 	char *Tag;
 	// bool IsString;
 
-	LgiStringRes(LResources *res);
-	~LgiStringRes();
+	LStringRes(LResources *res);
+	~LStringRes();
 
 	LResources *GetRes() { return Res; }
 	bool Read(LXmlTag *Tag, ResFileFormat Format);
@@ -82,17 +82,17 @@ public:
 
 /// A dialog resource
 /// \ingroup Resources
-class LgiClass LgiDialogRes
+class LgiClass LDialogRes
 {
 	LResources *Res;
 
 public:
 	LXmlTag *Dialog;
-	LgiStringRes *Str;
+	LStringRes *Str;
 	LRect Pos;
 
-	LgiDialogRes(LResources *res);
-	~LgiDialogRes();
+	LDialogRes(LResources *res);
+	~LDialogRes();
 
 	LResources *GetRes() { return Res; }
 	bool Read(LXmlTag *Tag, ResFileFormat Format);
@@ -104,20 +104,20 @@ public:
 
 /// A menu resource
 /// \ingroup Resources
-class LgiClass LgiMenuRes : public LBase
+class LgiClass LMenuRes : public LBase
 {
 	LResources *Res;
-	LHashTbl<IntKey<int>, LgiStringRes*> Strings;
+	LHashTbl<IntKey<int>, LStringRes*> Strings;
 
 public:
 	LXmlTag *Tag;
 
-	LgiMenuRes(LResources *res);
-	~LgiMenuRes();
+	LMenuRes(LResources *res);
+	~LMenuRes();
 
 	bool Read(LXmlTag *Tag, ResFileFormat Format);
 	LResources *GetRes() { return Res; }
-	LgiStringRes *GetString(LXmlTag *Tag);
+	LStringRes *GetString(LXmlTag *Tag);
 };
 
 /// A resource collection.
@@ -126,11 +126,11 @@ class LgiClass LResources : public ResFactory
 {
 	friend class LResourceLoad;
 	friend class LMenu;
-	friend class LgiStringRes;
+	friend class LStringRes;
 
-	class LgiResourcesPrivate *d;
-	List<LgiDialogRes> Dialogs;
-	List<LgiMenuRes> Menus;
+	class LResourcesPrivate *d;
+	List<LDialogRes> Dialogs;
+	List<LMenuRes> Menus;
 	LEventsI *ScriptEngine;
 
 	/// Array of languages available in the loaded file.
@@ -195,7 +195,7 @@ public:
 	);
 	
 	/// Get a string resource object using it's reference.
-	LgiStringRes *StrFromRef(int Ref);
+	LStringRes *StrFromRef(int Ref);
 	
 	/// Gets the value of a string resource from it's Ref.
 	char *StringFromRef(int Ref);
@@ -219,7 +219,7 @@ public:
 	LArray<GLanguageId> *GetLanguages() { return &Languages; }
 	
 	/// \returns an iterator for all the dialogs in the resource collection.
-	List<LgiDialogRes>::I GetDialogs() { return Dialogs.begin(); }
+	List<LDialogRes>::I GetDialogs() { return Dialogs.begin(); }
 
 	/// Create a resource object
 	/// \private
@@ -279,7 +279,7 @@ public:
 LgiExtern LResources *LgiGetResObj(bool Warn = false, const char *filename = 0, bool LoadOnDemand = true);
 
 /// This class is used to style LView controls with CSS
-class LgiClass GViewCssCb : public LCss::ElementCallback<LViewI>
+class LgiClass LViewCssCb : public LCss::ElementCallback<LViewI>
 {
 public:
 	const char *GetElement(LViewI *obj)
@@ -314,7 +314,7 @@ public:
 
 /// Loads a string from the resource file
 /// \ingroup Resources
-LgiFunc const char *LgiLoadString(int Res, const char *Default = 0);
+LgiFunc const char *LLoadString(int Res, const char *Default = 0);
 
 
 #endif

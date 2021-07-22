@@ -185,7 +185,7 @@ int LTypeFace::PointSize()
 		return (int)d->_Size.Value;
 	
 	if (d->_Size.Type == LCss::LenPx)
-		return (int) (d->_Size.Value * 72 / LgiScreenDpi());
+		return (int) (d->_Size.Value * 72 / LScreenDpi());
 
 	LAssert(!"What now?");
 	return 0;

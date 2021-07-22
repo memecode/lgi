@@ -3615,7 +3615,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				Doc->DoGoto();
 			else
 			{
-				GInput Inp(this, NULL, LgiLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
+				GInput Inp(this, NULL, LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
 				if (Inp.DoModal())
 				{
 					LString s = Inp.GetStr();

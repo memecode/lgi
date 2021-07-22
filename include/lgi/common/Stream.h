@@ -16,7 +16,7 @@
 #include "lgi/common/StringClass.h"
 
 /// Stream printf
-LgiExtern ssize_t LgiPrintf(LAutoString &Str, const char *Format, va_list &Arg);
+LgiExtern ssize_t LPrintf(LAutoString &Str, const char *Format, va_list &Arg);
 LgiFunc ssize_t LStreamPrintf(LStreamI *s, int flags, const char *Format, va_list &Arg);
 LgiFunc ssize_t LStreamPrint(LStreamI *s, const char *fmt, ...);
 

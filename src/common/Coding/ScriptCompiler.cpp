@@ -1887,7 +1887,7 @@ public:
 					}
 					else if (*t == '\'' ||
 							*t == '\"' ||
-							LgiIsNumber(t))
+							LIsNumber(t))
 					{
 						// Constant string or number
 						n.New().SetConst(Cur, TLiteral);
@@ -1911,7 +1911,7 @@ public:
 							}
 							else if (*t == '\'' ||
 									*t == '\"' ||
-									LgiIsNumber(t))
+									LIsNumber(t))
 							{
 								Values[Index] = Cur;
 							}

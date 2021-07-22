@@ -1181,7 +1181,7 @@ void DocEdit::PourStyle(size_t Start, ssize_t EditSize)
 		#endif
 		ParentState = KCancel;
 		while (WorkerState != KWaiting)
-			LgiSleep(1);
+			LSleep(1);
 		#ifdef _DEBUG
 		uint64 Tm = LgiMicroTime() - Start;
 		if (Tm >= 10000)

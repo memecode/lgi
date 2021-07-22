@@ -1035,7 +1035,7 @@ case IDomGet:
 				CheckParam(Dom->Value.Lst);
 				char *sName = Name->Str();
 				CheckParam(sName);
-				GDomProperty p = LgiStringToDomProp(sName);
+				GDomProperty p = LStringToDomProp(sName);
 				if (p == ObjLength)
 					(*Dst) = (int)Dom->Value.Lst->Length();
 				break;
@@ -1045,7 +1045,7 @@ case IDomGet:
 				CheckParam(Dom->Value.Hash);
 				char *sName = Name->Str();
 				CheckParam(sName);
-				GDomProperty p = LgiStringToDomProp(sName);
+				GDomProperty p = LStringToDomProp(sName);
 				if (p == ObjLength)
 					(*Dst) = (int)Dom->Value.Hash->Length();
 				break;
@@ -1054,7 +1054,7 @@ case IDomGet:
 			{
 				char *sName = Name->Str();
 				CheckParam(sName);
-				GDomProperty p = LgiStringToDomProp(sName);
+				GDomProperty p = LStringToDomProp(sName);
 				if (p == ObjLength)
 					(*Dst) = Dom->Value.Binary.Length;
 				break;
@@ -1063,7 +1063,7 @@ case IDomGet:
 			{
 				char *sName = Name->Str();
 				CheckParam(sName);
-				GDomProperty p = LgiStringToDomProp(sName);
+				GDomProperty p = LStringToDomProp(sName);
 				switch (p)
 				{
 					case ObjLength:
@@ -1219,7 +1219,7 @@ case IDomSet:
 		}
 		case GV_STRING:
 		{
-			GDomProperty p = LgiStringToDomProp(sName);
+			GDomProperty p = LStringToDomProp(sName);
 			switch (p)
 			{
 				case ObjLength:
@@ -1362,7 +1362,7 @@ case IDomCall:
 		Arg[i] = Resolve();
 	}
 	
-	GDomProperty p = LgiStringToDomProp(sName);
+	GDomProperty p = LStringToDomProp(sName);
 	if (p == ObjType)
 	{
 		*Dst = LVariant::TypeToString(Dom->Type);

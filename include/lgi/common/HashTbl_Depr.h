@@ -520,7 +520,7 @@ public:
 		if (!Status)
 		{
 			#ifndef LGI_STATIC
-			LgiStackTrace("%s:%i - this=%p Table=%p Used=%i Size=%i\n", _FL, this, Table, Used, Size);
+			LStackTrace("%s:%i - this=%p Table=%p Used=%i Size=%i\n", _FL, this, Table, Used, Size);
 			#endif
 			LAssert(0);
 		}		

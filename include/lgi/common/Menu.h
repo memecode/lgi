@@ -64,7 +64,7 @@ public:
 		#endif
 	}
 
-	bool Load(	class LgiMenuRes *MenuRes,
+	bool Load(	class LMenuRes *MenuRes,
 				LXmlTag *Tag,
 				ResFileFormat Format,
 				class TagHash *TagList);

@@ -210,7 +210,7 @@ bool IScp::ReadData(LSocketI *&s, IScpData *&d, int *HttpErr)
 					break;
 				}
 
-				LgiSleep(10);
+				LSleep(10);
 			}
 
 			int r = Readable ? s->Read(RawBuf, sizeof(RawBuf), 0) : 0;
@@ -854,7 +854,7 @@ bool IScpServer::OnIdle(LSocketI *s)
 					char *Pass = d->GetStr("Pass");
 					if (User AND Pass)
 					{
-						SeshId = (int)((int64)LgiGetCurrentThread() ^ LCurrentTime());
+						SeshId = (int)((int64)LGetCurrentThread() ^ LCurrentTime());
 						bool Ok = OnLogin(User, Pass, SeshId);
 						IScpData r(SCP_RESPONSE);
 

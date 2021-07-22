@@ -12,7 +12,7 @@ void LThread::WaitForExit(int WarnAfterMs)
 		if ((LCurrentTime() - Start) >= WarnAfterMs)
 			LAssert(!"Thread hasn't exited.");
 
-		LgiSleep(10);
+		LSleep(10);
 	}
 }
 
@@ -61,7 +61,7 @@ void LThreadWorker::Stop()
 	{
 		Loop = false;
 		while (!IsExited())
-			LgiSleep(1);
+			LSleep(1);
 		if (Lock(_FL))
 		{
 			for (uint32_t i=0; i<Owners.Length(); i++)
@@ -145,7 +145,7 @@ int LThreadWorker::Main()
 				Unlock();
 			}
 		}
-		else LgiSleep(50);
+		else LSleep(50);
 	}
 	return 0;
 }

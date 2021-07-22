@@ -61,7 +61,7 @@ public:
 		{
 			if (Sink->PostEvent(Cmd, a, b))
 				return true;
-			LgiSleep(1);
+			LSleep(1);
 		}
 
 		LAssert(!"PostSink failed.");

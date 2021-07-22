@@ -532,7 +532,7 @@ struct LVolumePriv
 {
 	int64 _Size, _Free;
 	int _Type, _Flags;
-	LgiSystemPath SysPath;
+	LSystemPath SysPath;
 	LString _Name, _Path;
 	List<LVolume> _Sub;
 	List<LVolume>::I _It;
@@ -555,7 +555,7 @@ struct LVolumePriv
 		_Type = VT_FOLDER;
 	}
 
-	LVolumePriv(LgiSystemPath sys, const char *name) : _It(_Sub.end())
+	LVolumePriv(LSystemPath sys, const char *name) : _It(_Sub.end())
 	{
 		Init();
 		SysPath = sys;
@@ -650,7 +650,7 @@ struct LVolumePriv
 				}
 			}
 			
-			LgiSystemPath p[] = {LSP_USER_DOCUMENTS,
+			LSystemPath p[] = {LSP_USER_DOCUMENTS,
 								LSP_USER_MUSIC,
 								LSP_USER_VIDEO,
 								LSP_USER_DOWNLOADS,
@@ -685,7 +685,7 @@ LVolume::LVolume(const char *Path = NULL)
 	d = new LVolumePriv(Path);
 }
 
-LVolume::LVolume(LgiSystemPath SysPath, const char *Name)
+LVolume::LVolume(LSystemPath SysPath, const char *Name)
 {
 	d = new LVolumePriv(SysPath, Name);
 }

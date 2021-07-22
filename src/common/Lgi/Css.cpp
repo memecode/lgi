@@ -327,12 +327,12 @@ int LCss::Len::ToPx(int Box, LFont *Font, int Dpi)
 		}
 		case LenPt:
 		{
-			int EffectiveDpi = Dpi > 0 ? Dpi : LgiScreenDpi();
+			int EffectiveDpi = Dpi > 0 ? Dpi : LScreenDpi();
 			return (int) (Value * EffectiveDpi / 72.0);
 		}
 		case LenCm:
 		{
-			int EffectiveDpi = Dpi > 0 ? Dpi : LgiScreenDpi();
+			int EffectiveDpi = Dpi > 0 ? Dpi : LScreenDpi();
 			return (int) (Value * EffectiveDpi / 2.54);
 		}
 		case LenEm:

@@ -676,7 +676,7 @@ Results::Results(AppWnd *app, Search *params)
 							d->Lst->Insert(Res);
 						}
 						
-						LgiYield();
+						LYield();
 					}
 				}
 				else if (r->IsDialog())
@@ -696,7 +696,7 @@ Results::Results(AppWnd *app, Search *params)
 							d->Lst->Insert(Res);
 						}
 						
-						LgiYield();
+						LYield();
 					}
 				}
 				else if (r->IsMenu())
@@ -715,7 +715,7 @@ Results::Results(AppWnd *app, Search *params)
 							d->Lst->Insert(Res);
 						}
 						
-						LgiYield();
+						LYield();
 					}
 				}
 			}

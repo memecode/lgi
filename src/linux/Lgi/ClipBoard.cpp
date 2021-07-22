@@ -240,7 +240,7 @@ LSurface *LClipBoard::Bitmap()
 
 	uint64 Ts = LCurrentTime();
 	while (!pDC && (LCurrentTime() - Ts) < LGI_RECEIVE_CLIPBOARD_TIMEOUT)
-		LgiYield();
+		LYield();
 
 	return pDC.Release();
 }
@@ -409,8 +409,8 @@ bool LClipBoard::Binary(FormatType Format, LAutoPtr<uint8_t,true> &Ptr, ssize_t 
 	{
 		if (r.Ptr->Get())
 			break;
-		LgiYield();
-		LgiSleep(1);
+		LYield();
+		LSleep(1);
 	}
 	while (LCurrentTime() - Start > LGI_RECEIVE_CLIPBOARD_TIMEOUT);
 

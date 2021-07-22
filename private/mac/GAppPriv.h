@@ -37,7 +37,7 @@ public:
 		FileSystem = 0;
 		GdcSystem = 0;
 		SkinLib = 0;
-		GuiThread = LgiGetCurrentThread();
+		GuiThread = LGetCurrentThread();
 		GuiThreadId = GetCurrentThreadId();
 	}
 	

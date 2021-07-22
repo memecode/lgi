@@ -37,7 +37,7 @@ uint WINAPI ThreadEntryPoint(void *i)
 
         while (Thread->State == LThread::THREAD_INIT)
 		{
-			LgiSleep(5);
+			LSleep(5);
 			if (LCurrentTime() - Start > 2000)
 			{
 				// If the thread object doesn't set the running state we're
@@ -218,7 +218,7 @@ void LThread::Terminate()
 				break;
 			}
 
-			LgiSleep(10);
+			LSleep(10);
 		}
 	}
 }

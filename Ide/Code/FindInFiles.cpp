@@ -349,7 +349,7 @@ void FindInFilesThread::Stop()
 {
 	d->Loop = false;
 	while (d->Busy)
-		LgiSleep(1);
+		LSleep(1);
 }
 
 GMessage::Result FindInFilesThread::OnEvent(GMessage *Msg)

@@ -232,7 +232,7 @@ bool LHttp::GetFile(char *File, LStream &Out, int Format, int *ProtocolStatus, i
 					break;
 				}
 				
-				LgiSleep(500);
+				LSleep(500);
 				goto CheckReadable;
 			}
 		}

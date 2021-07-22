@@ -48,7 +48,7 @@ public:
 	{
 		Loop = false;
 		while (!IsExited())
-			LgiSleep(10);
+			LSleep(10);
 	}
 	
 	LHashTbl<PtrKey<void*>,int> Watchpoints;
@@ -191,7 +191,7 @@ public:
 				ListenWarn = true;
 				Log->Print("Can't listen on socket..\n");
 			}
-			LgiSleep(1000);
+			LSleep(1000);
 		}
 		if (ListenWarn)
 			Log->Print("Listening now...\n");

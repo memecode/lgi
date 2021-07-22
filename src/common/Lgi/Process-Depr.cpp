@@ -64,7 +64,7 @@ int hndstate(int h)
 
 #endif
 
-bool LgiIsProcess(OsProcessId Pid)
+bool LIsProcess(OsProcessId Pid)
 {
 	bool Status = false;
 
@@ -608,7 +608,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 							}
 
 							// Don't use the cpu
-							LgiSleep(100);
+							LSleep(100);
 						}
 						while (true);
 					}
@@ -777,7 +777,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 				/*
 				while (!TestFlag(hndstate(Read.Read), POLLOUT))
 				{
-					LgiSleep(IO_WAIT);
+					LSleep(IO_WAIT);
 				}
 				*/
 
@@ -823,7 +823,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 					break;
 				}				
 
-				LgiSleep(IO_WAIT);
+				LSleep(IO_WAIT);
 			}
 
 			if (In)

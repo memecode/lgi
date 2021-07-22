@@ -85,7 +85,7 @@ bool GLocker::Lock()
 			// Warn about failure to lock...
 			thread_id Thread = hnd->Looper()->LockingThread();
 			const char *Lck = GetLocker(Thread);
-			printf("%s:%i - Warning: can't lock. Myself=%i Locker=%i,%s\n", _FL, LgiGetCurrentThread(), Thread, Lck);
+			printf("%s:%i - Warning: can't lock. Myself=%i Locker=%i,%s\n", _FL, LGetCurrentThread(), Thread, Lck);
 		}
 		else if (result == B_BAD_VALUE)
 		{
@@ -100,8 +100,8 @@ bool GLocker::Lock()
 
 	if (Locked)
 	{
-		LockerInfo *i = GetLockerInfo(LgiGetCurrentThread(), true);
-		i->Thread = LgiGetCurrentThread();
+		LockerInfo *i = GetLockerInfo(LGetCurrentThread(), true);
+		i->Thread = LGetCurrentThread();
 		i->File = File;
 		i->Line = Line;
 
@@ -119,8 +119,8 @@ status_t GLocker::LockWithTimeout(int64 time)
 	status_t result = hnd->LockLooperWithTimeout(time);
 	if (result == B_OK)
 	{
-		LockerInfo *i = GetLockerInfo(LgiGetCurrentThread(), true);
-		i->Thread = LgiGetCurrentThread();
+		LockerInfo *i = GetLockerInfo(LGetCurrentThread(), true);
+		i->Thread = LGetCurrentThread();
 		i->File = File;
 		i->Line = Line;
 		Locked = true;
@@ -138,7 +138,7 @@ void GLocker::Unlock()
 		hnd->UnlockLooper();
 		Locked = false;
 
-		LockerInfo *i = GetLockerInfo(LgiGetCurrentThread(), false);
+		LockerInfo *i = GetLockerInfo(LGetCurrentThread(), false);
 		if (i)
 		{
 			// printf("Unlock %i = %s:%i count=%i\n", i->Thread, i->File, i->Line, hnd->Looper()->CountLocks());
@@ -151,7 +151,7 @@ void GLocker::Unlock()
 
 const char *GLocker::GetLocker(int Thread)
 {
-	LockerInfo *i = GetLockerInfo(Thread ? Thread : LgiGetCurrentThread(), false);
+	LockerInfo *i = GetLockerInfo(Thread ? Thread : LGetCurrentThread(), false);
 	if (!i)
 		return NULL;
 	
@@ -669,7 +669,7 @@ long _lgi_pulse_thread(void *ptr)
 	{
 		while (Wnd->_PulseRate > 0)
 		{
-			LgiSleep(Wnd->_PulseRate);
+			LSleep(Wnd->_PulseRate);
 			
 			BMessenger m(Wnd->Handle());
 			BMessage msg(M_PULSE);

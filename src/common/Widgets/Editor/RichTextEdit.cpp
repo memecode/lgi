@@ -282,7 +282,7 @@ void LRichTextEdit::SetCharset(const char *s)
 
 bool LRichTextEdit::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty p = LgiStringToDomProp(Name);
+	GDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		case HtmlImagesLinkCid:
@@ -309,7 +309,7 @@ bool LRichTextEdit::GetVariant(const char *Name, LVariant &Value, char *Array)
 
 bool LRichTextEdit::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty p = LgiStringToDomProp(Name);
+	GDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		case HtmlImagesLinkCid:
@@ -787,8 +787,8 @@ bool LRichTextEdit::ClearDirty(bool Ask, const char *FileName)
 	if (1 /*dirty*/)
 	{
 		int Answer = (Ask) ? LgiMsg(this,
-									LgiLoadString(L_TEXTCTRL_ASK_SAVE, "Do you want to save your changes to this document?"),
-									LgiLoadString(L_TEXTCTRL_SAVE, "Save"),
+									LLoadString(L_TEXTCTRL_ASK_SAVE, "Do you want to save your changes to this document?"),
+									LLoadString(L_TEXTCTRL_SAVE, "Save"),
 									MB_YESNOCANCEL) : IDYES;
 		if (Answer == IDYES)
 		{
@@ -933,7 +933,7 @@ bool LRichTextEdit::DoCase(bool Upper)
 
 bool LRichTextEdit::DoGoto()
 {
-	GInput Dlg(this, "", LgiLoadString(L_TEXTCTRL_GOTO_LINE, "Goto line:"), "Text");
+	GInput Dlg(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto line:"), "Text");
 	if (Dlg.DoModal() == IDOK)
 	{
 		LString s = Dlg.GetStr();
@@ -1269,31 +1269,31 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 	if (Over)
 		Over->DoContext(RClick, Doc, Offset, true);
 
-	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_CUT, "Cut"), IDM_RTE_CUT, HasSelection());
-	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_RTE_COPY, HasSelection());
-	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_PASTE, "Paste"), IDM_RTE_PASTE, ClipText != 0);
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_CUT, "Cut"), IDM_RTE_CUT, HasSelection());
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_RTE_COPY, HasSelection());
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_PASTE, "Paste"), IDM_RTE_PASTE, ClipText != 0);
 	RClick.AppendSeparator();
 
-	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_UNDO, "Undo"), IDM_RTE_UNDO, false /* UndoQue.CanUndo() */);
-	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_REDO, "Redo"), IDM_RTE_REDO, false /* UndoQue.CanRedo() */);
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_UNDO, "Undo"), IDM_RTE_UNDO, false /* UndoQue.CanUndo() */);
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_REDO, "Redo"), IDM_RTE_REDO, false /* UndoQue.CanRedo() */);
 	RClick.AppendSeparator();
 
 	#if 0
-	i = RClick.AppendItem(LgiLoadString(L_TEXTCTRL_FIXED, "Fixed Width Font"), IDM_FIXED, true);
+	i = RClick.AppendItem(LLoadString(L_TEXTCTRL_FIXED, "Fixed Width Font"), IDM_FIXED, true);
 	if (i) i->Checked(GetFixedWidthFont());
 	#endif
 
-	i = RClick.AppendItem(LgiLoadString(L_TEXTCTRL_AUTO_INDENT, "Auto Indent"), IDM_AUTO_INDENT, true);
+	i = RClick.AppendItem(LLoadString(L_TEXTCTRL_AUTO_INDENT, "Auto Indent"), IDM_AUTO_INDENT, true);
 	if (i) i->Checked(AutoIndent);
 	
-	i = RClick.AppendItem(LgiLoadString(L_TEXTCTRL_SHOW_WHITESPACE, "Show Whitespace"), IDM_SHOW_WHITE, true);
+	i = RClick.AppendItem(LLoadString(L_TEXTCTRL_SHOW_WHITESPACE, "Show Whitespace"), IDM_SHOW_WHITE, true);
 	if (i) i->Checked(ShowWhiteSpace);
 	
-	i = RClick.AppendItem(LgiLoadString(L_TEXTCTRL_HARD_TABS, "Hard Tabs"), IDM_HARD_TABS, true);
+	i = RClick.AppendItem(LLoadString(L_TEXTCTRL_HARD_TABS, "Hard Tabs"), IDM_HARD_TABS, true);
 	if (i) i->Checked(HardTabs);
 	
-	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_INDENT_SIZE, "Indent Size"), IDM_INDENT_SIZE, true);
-	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_TAB_SIZE, "Tab Size"), IDM_TAB_SIZE, true);
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_INDENT_SIZE, "Indent Size"), IDM_INDENT_SIZE, true);
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_TAB_SIZE, "Tab Size"), IDM_TAB_SIZE, true);
 	
 	LSubMenu *Src = RClick.AppendSub("Source");
 	if (Src)

@@ -172,19 +172,19 @@ enum LgiKeys {
 };
 
 // Sleep the current thread
-LgiFunc void LgiSleep(DWORD i);
+LgiFunc void LSleep(DWORD i);
 
 // Process
 typedef DWORD							OsProcessId;
 LgiExtern HINSTANCE						_lgi_app_instance;
-#define LgiProcessInst()				_lgi_app_instance
+#define LProcessInst()				_lgi_app_instance
 extern p_vscprintf						lgi_vscprintf;
-#define LgiGetCurrentProcess()			GetCurrentProcessId()
+#define LGetCurrentProcess()			GetCurrentProcessId()
 
 // Threads
 typedef DWORD							OsThreadId;
 typedef CRITICAL_SECTION				OsSemaphore;
-#define LgiGetCurrentThread()			GetCurrentThread()
+#define LGetCurrentThread()			GetCurrentThread()
 // #define GetCurrentThreadId()			GetCurrentThreadId()
 
 // Socket/Network
@@ -192,7 +192,7 @@ typedef CRITICAL_SECTION				OsSemaphore;
 typedef SOCKET							OsSocket;
 
 // Run the message loop to process any pending messages
-#define LgiYield()						LApp::ObjInstance()->Run(false)
+#define LYield()						LApp::ObjInstance()->Run(false)
 
 #define LGI_GViewMagic					0x14412662
 #define LGI_FileDropFormat				"CF_HDROP"

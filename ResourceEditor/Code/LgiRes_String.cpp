@@ -152,7 +152,7 @@ ResString::ResString(ResStringGroup *grp, int init_ref)
 		LAssert(0);
 	}
 
-	// LgiStackTrace("%p::ResString\n", this);
+	// LStackTrace("%p::ResString\n", this);
 }
 
 ResString::~ResString()

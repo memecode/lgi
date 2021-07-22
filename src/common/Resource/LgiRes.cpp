@@ -80,10 +80,10 @@ public:
 	}
 };
 
-const char *LgiStringRes::CodePage = 0;
-GLanguage *LgiStringRes::CurLang = 0;
+const char *LStringRes::CodePage = 0;
+GLanguage *LStringRes::CurLang = 0;
 
-LgiStringRes::LgiStringRes(LResources *res)
+LStringRes::LStringRes(LResources *res)
 {
 	Res = res;
 	Ref = 0;
@@ -93,15 +93,15 @@ LgiStringRes::LgiStringRes(LResources *res)
 	// IsString = false;
 }
 
-LgiStringRes::~LgiStringRes()
+LStringRes::~LStringRes()
 {
 	DeleteArray(Str);
 	DeleteArray(Tag);
 }
 
-bool LgiStringRes::Read(LXmlTag *t, ResFileFormat Format)
+bool LStringRes::Read(LXmlTag *t, ResFileFormat Format)
 {
-	if (LgiStringRes::CurLang &&
+	if (LStringRes::CurLang &&
 		t &&
 		stricmp(t->GetTag(), "string") == 0)
 	{
@@ -135,9 +135,9 @@ bool LgiStringRes::Read(LXmlTag *t, ResFileFormat Format)
 			Tag = NewStr(n);
 		}
 
-		const char *Cp = LgiStringRes::CodePage;
+		const char *Cp = LStringRes::CodePage;
 		char Name[256];
-		strcpy_s(Name, sizeof(Name), LgiStringRes::CurLang->Id);
+		strcpy_s(Name, sizeof(Name), LStringRes::CurLang->Id);
 		n = 0;
 		
 		if ((n = t->GetAttr(Name)) &&
@@ -146,14 +146,14 @@ bool LgiStringRes::Read(LXmlTag *t, ResFileFormat Format)
 			// Language string ok
 			// Lang = LangFind(0, CurLang, 0);
 		}
-		else if (LgiStringRes::CurLang->OldId &&
-				sprintf_s(Name, sizeof(Name), "Text(%i)", LgiStringRes::CurLang->OldId) &&
+		else if (LStringRes::CurLang->OldId &&
+				sprintf_s(Name, sizeof(Name), "Text(%i)", LStringRes::CurLang->OldId) &&
 				(n = t->GetAttr(Name)) &&
 				strlen(n) > 0)
 		{
 			// Old style language string ok
 		}
-		else if (!LgiStringRes::CurLang->IsEnglish())
+		else if (!LStringRes::CurLang->IsEnglish())
 		{
 			// no string, try english
 			n = t->GetAttr("en");
@@ -243,25 +243,24 @@ bool LgiStringRes::Read(LXmlTag *t, ResFileFormat Format)
 
 ///////////////////////////////////////////////////////////////////
 // Lgi resources
-class LgiResourcesPrivate
+class LResourcesPrivate
 {
 public:
 	bool Ok;
 	ResFileFormat Format;
 	LString File;
 	LString ThemeFolder;
-	LHashTbl<IntKey<int>, LgiStringRes*> StrRef;
-	LHashTbl<IntKey<int>, LgiStringRes*> Strings;
-	LHashTbl<IntKey<int>, LgiStringRes*> DlgStrings;
+	LHashTbl<IntKey<int>, LStringRes*> StrRef;
+	LHashTbl<IntKey<int>, LStringRes*> Strings;
+	LHashTbl<IntKey<int>, LStringRes*> DlgStrings;
 
-
-	LgiResourcesPrivate()
+	LResourcesPrivate()
 	{
 		Ok = false;
 		Format = Lr8File;
 	}
 
-	~LgiResourcesPrivate()
+	~LResourcesPrivate()
 	{
 		StrRef.DeleteObjects();
 	}
@@ -269,21 +268,21 @@ public:
 
 /// A collection of resources
 /// \ingroup Resources
-class GResourceContainer : public LArray<LResources*>
+class LResourceContainer : public LArray<LResources*>
 {
 public:
-	~GResourceContainer()
+	~LResourceContainer()
 	{
 		DeleteObjects();
 	}
 };
 
-static GResourceContainer ResourceOwner;
+static LResourceContainer ResourceOwner;
 bool LResources::LoadStyles = false;
 
 LResources::LResources(const char *FileName, bool Warn, const char *ThemeFolder)
 {
-	d = new LgiResourcesPrivate;
+	d = new LResourcesPrivate;
 	ScriptEngine = 0;
 
 	// global pointer list
@@ -345,7 +344,7 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 		}
 		else
 		{
-			LgiMsg(0, LgiLoadString(L_ERROR_RES_NO_EXE_PATH,
+			LgiMsg(0, LLoadString(L_ERROR_RES_NO_EXE_PATH,
 									"Fatal error: Couldn't get the path of the running\nexecutable. Can't find resource file."),
 									"LResources::LResources");
 			LgiTrace("%s:%i - Fatal error: Couldn't get the path of the running\nexecutable. Can't find resource file.", _FL);
@@ -388,7 +387,7 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 
 		// Prepare data
 		sprintf_s(Msg, sizeof(Msg),
-				LgiLoadString(L_ERROR_RES_NO_LR8_FILE,
+				LLoadString(L_ERROR_RES_NO_LR8_FILE,
 								"Couldn't find the file '%s' required to run this application\n(Exe='%s')"),
 				BaseFile.Get(),
 				Exe.Get());
@@ -450,7 +449,7 @@ bool LResources::StyleElement(LViewI *v)
 	LCss::SelArray Selectors;
 	for (auto r: ResourceOwner)
 	{
-		GViewCssCb Ctx;
+		LViewCssCb Ctx;
 		r->CssStore.Match(Selectors, &Ctx, v);
 	}
 	
@@ -529,14 +528,14 @@ bool LResources::Load(const char *FileName)
 		d->Format = XmlFile;
 	}
 
-	LgiStringRes::CurLang = LGetLanguageId();
+	LStringRes::CurLang = LGetLanguageId();
 	if (d->Format != CodepageFile)
 	{
-		LgiStringRes::CodePage = 0;
+		LStringRes::CodePage = 0;
 	}
-	else if (LgiStringRes::CurLang)
+	else if (LStringRes::CurLang)
 	{
-		LgiStringRes::CodePage = LgiStringRes::CurLang->Charset;
+		LStringRes::CodePage = LStringRes::CurLang->Charset;
 	}
 
 	LXmlTree x(0);
@@ -565,7 +564,7 @@ bool LResources::Load(const char *FileName)
 
 			for (auto c: t->Children)
 			{
-				LgiStringRes *s = new LgiStringRes(this);
+				LStringRes *s = new LStringRes(this);
 				if (s && s->Read(c, d->Format))
 				{
 					// This code saves the names of the languages if specified in the LR8 files.
@@ -599,7 +598,7 @@ bool LResources::Load(const char *FileName)
 		}
 		else if (t->IsTag("dialog"))
 		{
-			LgiDialogRes *n = new LgiDialogRes(this);
+			LDialogRes *n = new LDialogRes(this);
 			if (n && n->Read(t, d->Format))
 			{
 				Dialogs.Insert(n);
@@ -617,7 +616,7 @@ bool LResources::Load(const char *FileName)
 		}
 		else if (t->IsTag("menu"))
 		{
-			LgiMenuRes *m = new LgiMenuRes(this);
+			LMenuRes *m = new LMenuRes(this);
 			if (m && m->Read(t, d->Format))
 			{
 				Menus.Insert(m);
@@ -646,15 +645,15 @@ bool LResources::Load(const char *FileName)
 	return true;
 }
 
-LgiStringRes *LResources::StrFromRef(int Ref)
+LStringRes *LResources::StrFromRef(int Ref)
 {
 	return d->StrRef.Find(Ref);
 }
 
 char *LResources::StringFromId(int Id)
 {
-	LgiStringRes *NotStr = 0;
-	LgiStringRes *sr;
+	LStringRes *NotStr = 0;
+	LStringRes *sr;
 
 	if ((sr = d->Strings.Find(Id)))
 		return sr->Str;
@@ -667,7 +666,7 @@ char *LResources::StringFromId(int Id)
 
 char *LResources::StringFromRef(int Ref)
 {
-	LgiStringRes *s = d->StrRef.Find(Ref);
+	LStringRes *s = d->StrRef.Find(Ref);
 	return s ? s->Str : 0;
 }
 
@@ -838,7 +837,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 	
 		if (!Wnd)
 		{
-			printf(LgiLoadString(L_ERROR_RES_CREATE_OBJECT_FAILED,
+			printf(LLoadString(L_ERROR_RES_CREATE_OBJECT_FAILED,
 								"LResources::CreateObject(%s) failed. (Ctrl=%s)\n"),
 					t->GetTag(),
 					Control);
@@ -994,7 +993,7 @@ int LResources::Res_GetStrRef(ResObject *Obj)
 
 bool LResources::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
 {
-	LgiStringRes *s = d->StrRef.Find(Ref);
+	LStringRes *s = d->StrRef.Find(Ref);
 	if (!s)
 		return false;
 
@@ -1133,19 +1132,19 @@ GDom *LResources::Res_GetDom(ResObject *Obj)
 }
 
 ///////////////////////////////////////////////////////
-LgiDialogRes::LgiDialogRes(LResources *res)
+LDialogRes::LDialogRes(LResources *res)
 {
 	Res = res;
 	Dialog = 0;
 	Str = 0;
 }
 
-LgiDialogRes::~LgiDialogRes()
+LDialogRes::~LDialogRes()
 {
 	DeleteObj(Dialog);
 }
 
-bool LgiDialogRes::Read(LXmlTag *t, ResFileFormat Format)
+bool LDialogRes::Read(LXmlTag *t, ResFileFormat Format)
 {
 	if ((Dialog = t))
 	{
@@ -1172,19 +1171,19 @@ bool LgiDialogRes::Read(LXmlTag *t, ResFileFormat Format)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
-LgiMenuRes::LgiMenuRes(LResources *res)
+LMenuRes::LMenuRes(LResources *res)
 {
 	Res = res;
 	Tag = 0;
 }
 
-LgiMenuRes::~LgiMenuRes()
+LMenuRes::~LMenuRes()
 {
 	Strings.DeleteObjects();
 	DeleteObj(Tag);
 }
 
-bool LgiMenuRes::Read(LXmlTag *t, ResFileFormat Format)
+bool LMenuRes::Read(LXmlTag *t, ResFileFormat Format)
 {
 	Tag = t;
 	if (t && stricmp(t->GetTag(), "menu") == 0)
@@ -1201,7 +1200,7 @@ bool LgiMenuRes::Read(LXmlTag *t, ResFileFormat Format)
 			{
 				for (auto i: c->Children)
 				{
-					LgiStringRes *s = new LgiStringRes(Res);
+					LStringRes *s = new LStringRes(Res);
 					if (s && s->Read(i, Format))
 					{
 					    LAssert(!Strings.Find(s->Ref)); // If this fires the string has a dupe ref
@@ -1349,7 +1348,7 @@ GLanguage *LGetLanguageId()
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // Load string
-const char *LgiLoadString(int Res, const char *Default)
+const char *LLoadString(int Res, const char *Default)
 {
 	char *s = 0;
 	LResources *r = LgiGetResObj();
@@ -1450,7 +1449,7 @@ bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, LAutoStrin
 							else
 							{
 								LgiMsg(	NULL,
-										LgiLoadString(	L_ERROR_RES_RESOURCE_READ_FAILED,
+										LLoadString(	L_ERROR_RES_RESOURCE_READ_FAILED,
 														"Resource read error, tag: %s"),
 										"LResources::LoadDialog",
 										MB_OK,
@@ -1476,7 +1475,7 @@ bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, LAutoStrin
 
 //////////////////////////////////////////////////////////////////////
 // Menus
-LgiStringRes *LgiMenuRes::GetString(LXmlTag *Tag)
+LStringRes *LMenuRes::GetString(LXmlTag *Tag)
 {
 	if (Tag)
 	{
@@ -1484,7 +1483,7 @@ LgiStringRes *LgiMenuRes::GetString(LXmlTag *Tag)
 		if (n)
 		{
 			int Ref = atoi(n);
-			LgiStringRes *s = Strings.Find(Ref);
+			LStringRes *s = Strings.Find(Ref);
 			if (s)
 				return s;
 		}
@@ -1493,7 +1492,7 @@ LgiStringRes *LgiMenuRes::GetString(LXmlTag *Tag)
 	return 0;
 }
 
-bool LMenuLoader::Load(LgiMenuRes *MenuRes, LXmlTag *Tag, ResFileFormat Format, TagHash *TagList)
+bool LMenuLoader::Load(LMenuRes *MenuRes, LXmlTag *Tag, ResFileFormat Format, TagHash *TagList)
 {
 	bool Status = false;
 
@@ -1525,7 +1524,7 @@ bool LMenuLoader::Load(LgiMenuRes *MenuRes, LXmlTag *Tag, ResFileFormat Format, 
 				break;
 			if (t->IsTag("submenu"))
 			{
-				LgiStringRes *Str = MenuRes->GetString(t);
+				LStringRes *Str = MenuRes->GetString(t);
 				if (Str && Str->Str)
 				{
 					bool Add = !TagList || TagList->Check(Str->Tag);
@@ -1561,7 +1560,7 @@ bool LMenuLoader::Load(LgiMenuRes *MenuRes, LXmlTag *Tag, ResFileFormat Format, 
 				}
 				else
 				{
-					LgiStringRes *Str = MenuRes->GetString(t);
+					LStringRes *Str = MenuRes->GetString(t);
 					if (Str && Str->Str)
 					{
 						if (!TagList || TagList->Check(Str->Tag))

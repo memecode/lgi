@@ -152,7 +152,7 @@ public:
 	{
 		Cancel(true);
 		while (!IsExited())
-			LgiSleep(1);
+			LSleep(1);
 	}
 	
 	void Add(GDocumentEnv::LoadJob *j)
@@ -246,7 +246,7 @@ public:
 					else LgiTrace("%s:%i - Failed to get '%s'\n", _FL, Job->Uri.Get());
 				}
 			}
-			else LgiSleep(10);
+			else LSleep(10);
 		}
 	
 		return 0;
@@ -505,7 +505,7 @@ public:
 							LAssert(0);
 						
 						Prog.Value(i);
-						LgiYield();
+						LYield();
 					}
 					Files.DeleteArrays();
 				}

@@ -221,9 +221,9 @@ GDocApp<OptionsFmt>::GDocApp(const char *appname, LIcon icon, char *optsname)
 			if (c)
 			{
 				if (icon < 0x10000)
-					c->Class.hIcon = LoadIcon(LgiProcessInst(), MAKEINTRESOURCE(icon));
+					c->Class.hIcon = LoadIcon(LProcessInst(), MAKEINTRESOURCE(icon));
 				else
-					c->Class.hIcon = LoadIcon(LgiProcessInst(), (TCHAR*)(size_t)icon);
+					c->Class.hIcon = LoadIcon(LProcessInst(), (TCHAR*)(size_t)icon);
 			}
 		#else
 			SetIcon(icon);
@@ -251,7 +251,7 @@ bool GDocApp<OptionsFmt>::SetLanguage(char *LangId)
 		return false;
 	
 	if (LgiMsg(	this,
-				LgiLoadString(L_DOCAPP_RESTART_APP, "Changing the language requires restarting the application.\nDo you want to restart?"),
+				LLoadString(L_DOCAPP_RESTART_APP, "Changing the language requires restarting the application.\nDo you want to restart?"),
 				d->AppName,
 				MB_YESNO) != IDYES)
 		return false;
@@ -348,7 +348,7 @@ bool GDocApp<OptionsFmt>::_Create(LIcon IconResource)
 	#ifdef WIN32
 	HICON hIcon = NULL;
 	if (IconResource)
-		hIcon = LoadIcon(LgiProcessInst(), MAKEINTRESOURCE(IconResource));
+		hIcon = LoadIcon(LProcessInst(), MAKEINTRESOURCE(IconResource));
 	CreateClassW32(d->AppName, hIcon);
 	#endif
 
@@ -545,7 +545,7 @@ bool GDocApp<OptionsFmt>::SetDirty(bool Dirty)
 		{
 			// Clearing dirty
 			int Result = LgiMsg(this,
-								LgiLoadString(L_DOCAPP_SAVE_CHANGE, "Do you want to save your changes?"),
+								LLoadString(L_DOCAPP_SAVE_CHANGE, "Do you want to save your changes?"),
 								d->AppName,
 								MB_YESNOCANCEL);
 			if (Result == IDYES)

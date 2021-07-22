@@ -149,7 +149,7 @@ bool LMutex::Lock(const char *file, int line, bool NoTrace)
 
 		if (!Status)
 		{
-			LgiSleep(1);
+			LSleep(1);
 		}
 
 		#if 1 // _DEBUG
@@ -182,7 +182,7 @@ bool LMutex::Lock(const char *file, int line, bool NoTrace)
 	#ifdef _DEBUG
     /*
 	if (_DebugSem)
-		LgiStackTrace("%p::Lock %i\n", this, _Count);
+		LStackTrace("%p::Lock %i\n", this, _Count);
     */
 	#endif
 	return Status;
@@ -215,14 +215,14 @@ bool LMutex::LockWithTimeout(int Timeout, const char *file, int line)
 
 		if (!Status)
 		{
-			LgiSleep(5);
+			LSleep(5);
 		}
 	}
 
 	#ifdef _DEBUG
     /*
 	if (_DebugSem)
-		LgiStackTrace("%p::LockWi %i\n", this, _Count);
+		LStackTrace("%p::LockWi %i\n", this, _Count);
     */
 	#endif
 	return Status;
@@ -233,12 +233,12 @@ void LMutex::Unlock()
 	#ifdef _DEBUG
     /*
 	if (_DebugSem)
-		LgiStackTrace("%p::Unlock %i\n", this, _Count);
+		LStackTrace("%p::Unlock %i\n", this, _Count);
     */
 	#endif
 	while (!_Lock())
 	{
-		LgiSleep(1);
+		LSleep(1);
 	}
 	
 	if (_Count < 1)

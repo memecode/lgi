@@ -420,7 +420,7 @@ bool LSubProcess::SetEnvironment(const char *Var, const char *Value)
 
 bool LSubProcess::GetValue(const char *Var, ::LVariant &Value)
 {
-	switch (LgiStringToDomProp(Var))
+	switch (LStringToDomProp(Var))
 	{
 		case StreamReadable:
 		{
@@ -706,7 +706,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 				#endif
 				close(out.Read);
 				fsync(STDOUT_FILENO);
-				LgiSleep(100);
+				LSleep(100);
 				
 				// Execute the child
 				sp->Args.Add(NULL);
@@ -1054,7 +1054,7 @@ bool LSubProcess::Interrupt()
  
 			// Must wait here. If we don't and re-enable Ctrl-C
 			// handling below too fast, we might terminate ourselves.
-			LgiSleep(1000);
+			LSleep(1000);
  
 			FreeConsole();
  

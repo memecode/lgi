@@ -29,7 +29,7 @@ char *WideToUtf8(const wchar_t *In, ptrdiff_t InLen)
 		auto r = WideCharToMultiByte(CP_UTF8, 0, In, (int)InLen, NULL, 0, 0, NULL);
 		if (r <= 0) return NULL;
 		auto s = new char[r + 1];
-		// LgiStackTrace("WideToUtf8 %p\n", s);
+		// LStackTrace("WideToUtf8 %p\n", s);
 		if (!s) return NULL;
 		r = WideCharToMultiByte(CP_UTF8, 0, In, (int)InLen, s, r, 0, NULL);
 		if (r <= 0) return NULL;

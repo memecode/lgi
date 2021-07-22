@@ -95,7 +95,7 @@ void CreateMimeBoundary(char *Buf, int BufLen)
 	if (Buf)
 	{
 		static int Count = 1;
-		sprintf_s(Buf, BufLen, "--%x-%x-%x--", (int)LCurrentTime(), (int)(uint64)LgiGetCurrentThread(), Count++);
+		sprintf_s(Buf, BufLen, "--%x-%x-%x--", (int)LCurrentTime(), (int)(uint64)LGetCurrentThread(), Count++);
 	}
 }
 

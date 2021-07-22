@@ -93,10 +93,10 @@ public:
 // Threads
 typedef thread_id					OsThreadId;
 typedef sem_id						OsSemaphore;
-#define LgiGetCurrentThread()		find_thread(0)
+#define LGetCurrentThread()		find_thread(0)
 
-#define LgiSleep(i)				snooze(i*1000)
-#define LgiYield()				LAppInst->Run(false)
+#define LSleep(i)				snooze(i*1000)
+#define LYield()				LAppInst->Run(false)
 
 // Network
 // #include "NetworkKit.h"

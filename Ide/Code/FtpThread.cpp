@@ -253,7 +253,7 @@ FtpThread::~FtpThread()
 
 	while (!IsExited())
 	{
-		LgiSleep(1);
+		LSleep(1);
 	}
 	
 	DeleteObj(d);
@@ -403,7 +403,7 @@ int FtpThread::Main()
 			}
 			else DeleteObj(c);
 		}
-		else LgiSleep(1);
+		else LSleep(1);
 	}
 
 	return 0;

@@ -775,7 +775,7 @@ LCharset()
 
 static LCharsetSystem CharsetSystem;
 
-LCharset *LgiGetCpInfo(const char *Cs)
+LCharset *LGetCpInfo(const char *Cs)
 {
 	return CharsetSystem.GetCsInfo(Cs);
 }
@@ -801,8 +801,8 @@ ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *
 
 	if (Out && OutCp && In && InCp)
 	{
-		LCharset *InInfo = LgiGetCpInfo(InCp);
-		LCharset *OutInfo = LgiGetCpInfo(OutCp);
+		LCharset *InInfo = LGetCpInfo(InCp);
+		LCharset *OutInfo = LGetCpInfo(OutCp);
 
 		if (InInfo && OutInfo)
 		{
@@ -1069,8 +1069,8 @@ LString LStrConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 	if (!OutCp || !In || !InCp)
 		return LString();
 
-	LCharset *InInfo = LgiGetCpInfo(InCp);
-	LCharset *OutInfo = LgiGetCpInfo(OutCp);
+	LCharset *InInfo = LGetCpInfo(InCp);
+	LCharset *OutInfo = LGetCpInfo(OutCp);
 	if (!InInfo || !OutInfo)
 		return LString();
 
@@ -1150,8 +1150,8 @@ void *LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t
 	if (!OutCp || !In || !InCp)
 		return NULL;
 
-	LCharset *InInfo = LgiGetCpInfo(InCp);
-	LCharset *OutInfo = LgiGetCpInfo(OutCp);
+	LCharset *InInfo = LGetCpInfo(InCp);
+	LCharset *OutInfo = LGetCpInfo(OutCp);
 	if (!InInfo || !OutInfo)
 		return NULL;
 
@@ -1252,7 +1252,7 @@ int LCharLen(const void *Str, const char *Cp, int Bytes)
 {
 	if (Str && Cp)
 	{
-		LCharset *InInfo = LgiGetCpInfo(Cp);
+		LCharset *InInfo = LGetCpInfo(Cp);
 		if (InInfo)
 		{
 			switch (InInfo->Type)
@@ -1302,7 +1302,7 @@ int LCharLen(const void *Str, const char *Cp, int Bytes)
 
 bool LIsCpImplemented(char *Cp)
 {
-	return LgiGetCpInfo(Cp) != 0;
+	return LGetCpInfo(Cp) != 0;
 }
 
 const char *LAnsiToLgiCp(int AnsiCodePage)
@@ -1406,7 +1406,7 @@ char *LSeekUtf8(const char *Ptr, ssize_t D, char *Start)
 	return (char*)p;
 }
 
-bool LgiMatchCharset(short *Map, char16 *Utf, bool &Has8Bit)
+bool LMatchCharset(short *Map, char16 *Utf, bool &Has8Bit)
 {
 	if (Map && Utf)
 	{
@@ -1461,7 +1461,7 @@ const char *LDetectCharset(const char *Utf8, ssize_t Len, List<char> *Prefs)
 					Cp->UnicodeMap)
 				{
 					bool Has8Bit = false;
-					if (LgiMatchCharset(Cp->UnicodeMap, Utf, Has8Bit))
+					if (LMatchCharset(Cp->UnicodeMap, Utf, Has8Bit))
 					{
 						return Cp->Charset;
 					}
@@ -1478,7 +1478,7 @@ const char *LDetectCharset(const char *Utf8, ssize_t Len, List<char> *Prefs)
 			if (Cp->UnicodeMap)
 			{
 				bool Has8Bit = false;
-				if (LgiMatchCharset(Cp->UnicodeMap, Utf, Has8Bit))
+				if (LMatchCharset(Cp->UnicodeMap, Utf, Has8Bit))
 				{
 					return Cp->Charset;
 				}
@@ -1500,7 +1500,7 @@ LString LToNativeCp(const char *In, ssize_t InLen)
 	LString s;
 
 	#ifdef WIN32
-	LCharset *CpInfo = LgiGetCpInfo(Cp);
+	LCharset *CpInfo = LGetCpInfo(Cp);
 	if (!CpInfo || CpInfo->Type == CpWindowsDb)
 	{
 		if (In)
@@ -1539,7 +1539,7 @@ LString LFromNativeCp(const char *In, ssize_t InLen)
 	LString s;
 
 	#ifdef WIN32
-	LCharset *CpInfo = LgiGetCpInfo(Cp);
+	LCharset *CpInfo = LGetCpInfo(Cp);
 	if (!CpInfo || CpInfo->Type == CpWindowsDb)
 	{
 		if (In)

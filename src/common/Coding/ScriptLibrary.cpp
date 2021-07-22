@@ -204,7 +204,7 @@ bool SystemFunctions::LoadString(LScriptArguments &Args)
 	if (Args.Length() != 1)
 		return false;
 
-	*Args.GetReturn() = LgiLoadString(Args[0]->CastInt32());
+	*Args.GetReturn() = LLoadString(Args[0]->CastInt32());
 	return true;	
 }
 
@@ -483,7 +483,7 @@ bool SystemFunctions::Sleep(LScriptArguments &Args)
 	if (Args.Length() != 1)
 		return false;
 
-	LgiSleep(Args[0]->CastInt32());
+	LSleep(Args[0]->CastInt32());
 	return true;
 }
 
@@ -608,7 +608,7 @@ bool SystemFunctions::New(LScriptArguments &Args)
 	}
 
 	LVariant *Ret = Args.GetReturn();
-	GDomProperty Type = LgiStringToDomProp(sType);
+	GDomProperty Type = LStringToDomProp(sType);
 	switch (Type)
 	{	
 		case TypeList:
@@ -723,7 +723,7 @@ public:
 
 	bool GetVariant(const char *Var, LVariant &Value, char *Arr = 0)
 	{
-		GDomProperty p = LgiStringToDomProp(Var);
+		GDomProperty p = LStringToDomProp(Var);
 		switch (p)
 		{
 			case ObjName:

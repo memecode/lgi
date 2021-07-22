@@ -133,9 +133,9 @@ typedef Gtk::PangoFontDescription       *OsFont;
 typedef void							*OsBitmap;
 
 #ifdef WIN32
-#define LgiGetCurrentProcess			GetCurrentProcessId
+#define LGetCurrentProcess			GetCurrentProcessId
 #else
-#define LgiGetCurrentProcess			getpid
+#define LGetCurrentProcess			getpid
 #endif
 
 // Because of namespace issues you can't use the built in GTK casting macros.
@@ -165,14 +165,14 @@ public:
 typedef HANDLE  					OsThread;
 typedef DWORD						OsThreadId;
 typedef CRITICAL_SECTION			OsSemaphore;
-#define LgiGetCurrentThread()		GetCurrentThread()
+#define LGetCurrentThread()		GetCurrentThread()
 
 #else
 
 typedef pthread_t					OsThread;
 typedef pid_t						OsThreadId;
 typedef pthread_mutex_t				OsSemaphore;
-#define LgiGetCurrentThread()		pthread_self()
+#define LGetCurrentThread()		pthread_self()
 LgiFunc OsThreadId					GetCurrentThreadId();
 
 #endif
@@ -188,9 +188,9 @@ typedef int OsSocket;
 
 /// Sleep the current thread for i milliseconds.
 #ifdef WIN32
-LgiFunc void LgiSleep(DWORD i);
+LgiFunc void LSleep(DWORD i);
 #else
-LgiFunc void LgiSleep(uint32_t i);
+LgiFunc void LSleep(uint32_t i);
 #endif
 
 #ifndef WIN32
@@ -204,7 +204,7 @@ LgiFunc void LgiSleep(uint32_t i);
 #define wcscpy_s(dst, len, src)		wcsncpy(dst, src, len)
 
 /// Process any pending messages in the applications message que and then return.
-#define LgiYield()					LAppInst->Run(false)
+#define LYield()					LAppInst->Run(false)
 
 #define K_CHAR						0x0
 

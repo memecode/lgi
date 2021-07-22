@@ -300,7 +300,7 @@ typedef XWidget						*OsView;
 // Threads
 typedef pthread_t					OsThreadId;
 typedef pthread_mutex_t				OsSemaphore;
-#define LgiGetCurrentThread()		pthread_self()
+#define LGetCurrentThread()		pthread_self()
 
 // Sockets
 #define ValidSocket(s)				((s)>=0)
@@ -308,14 +308,14 @@ typedef pthread_mutex_t				OsSemaphore;
 typedef int OsSocket;
 
 /// Sleep the current thread for i milliseconds.
-LgiFunc void LgiSleep(uint32 i);
+LgiFunc void LSleep(uint32 i);
 
 #define atoi64						atoll
 #define _snprintf					snprintf
 #define _vsnprintf					vsnprintf
 
 /// Process any pending messages in the applications message que and then return.
-#define LgiYield()					LAppInst->Run(false)
+#define LYield()					LAppInst->Run(false)
 
 #define K_CHAR						0x0
 

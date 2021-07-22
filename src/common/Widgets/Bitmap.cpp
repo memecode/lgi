@@ -46,7 +46,7 @@ public:
 
 				#ifndef __GTK_H__
 				while (!Bmp->Handle())
-					LgiSleep(10);
+					LSleep(10);
 				#endif
 
 				LRect r = Bmp->GetPos();

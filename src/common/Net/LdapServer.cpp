@@ -23,7 +23,7 @@ ILdapServer::~ILdapServer()
 	Listen.Close();
 	while (!IsExited())
 	{
-		LgiSleep(100);
+		LSleep(100);
 	}
 }
 
@@ -404,7 +404,7 @@ void ILdapServer::Server()
 					OnMessage(Msg);
 				}
 
-				LgiSleep(100);
+				LSleep(100);
 			}
 		}
 	}

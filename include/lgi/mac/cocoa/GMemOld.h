@@ -16,7 +16,7 @@
 #include "LgiDefs.h"
 #include "LgiOsDefs.h"
 
-LgiFunc bool LgiCheckHeap();
+LgiFunc bool LCheckHeap();
 LgiFunc bool LgiCanReadMemory(void *p, int Len = 1);
 
 #if 0 // def MEMORY_DEBUG

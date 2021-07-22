@@ -1,7 +1,7 @@
 #ifndef _LGI_MSGS_H_
 #define _LGI_MSGS_H_
 
-enum LgiStringID
+enum LStringID
 {
 	// Base
 	L_SUCCESS = 0,

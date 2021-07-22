@@ -213,7 +213,7 @@ protected:
 
 public:
 	LVolume(const char *Path = NULL);
-	LVolume(LgiSystemPath SysPath, const char *Name);
+	LVolume(LSystemPath SysPath, const char *Name);
 	virtual ~LVolume();
 
 	const char *Name();
@@ -503,7 +503,7 @@ public:
 				*this = Init;
 		}
 		
-		Path(LgiSystemPath Which, int WordSize = 0)
+		Path(LSystemPath Which, int WordSize = 0)
 		{
 			SetFixedLength(false);
 			*this = GetSystem(Which, WordSize);
@@ -638,7 +638,7 @@ public:
 		State Exists();
 		bool IsFile() { return Exists() == TypeFile; }
 		bool IsFolder() { return Exists() == TypeFolder; }
-		static LString GetSystem(LgiSystemPath Which, int WordSize = 0);
+		static LString GetSystem(LSystemPath Which, int WordSize = 0);
 		static LString PrintAll();
 	};
 
@@ -718,7 +718,7 @@ LgiFunc char *LGetExtension(const char *File);
 LgiFunc bool LIsFileNameExecutable(const char *FileName);
 
 /// \returns true if 'FileName' is an executable of some kind (looks at content).
-LgiFunc bool LgiIsFileExecutable(const char *FileName, LStreamI *f, int64 Start, int64 Len);
+LgiFunc bool LIsFileExecutable(const char *FileName, LStreamI *f, int64 Start, int64 Len);
 
 /// Get information about the disk that a file resides on.
 LgiFunc bool LGetDriveInfo(char *Path, uint64 *Free, uint64 *Size = 0, uint64 *Available = 0);

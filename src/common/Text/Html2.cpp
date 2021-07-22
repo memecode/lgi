@@ -1973,7 +1973,7 @@ bool GTag::OnMouseClick(LMouse &m)
 			{
 				int Id = 0;
 
-				RClick.AppendItem(LgiLoadString(L_COPY_LINK_LOCATION, "&Copy Link Location"), IDM_COPY_LINK, Uri != 0);
+				RClick.AppendItem(LLoadString(L_COPY_LINK_LOCATION, "&Copy Link Location"), IDM_COPY_LINK, Uri != 0);
 				if (Html->GetEnv())
 					Html->GetEnv()->AppendItems(&RClick);
 
@@ -6728,7 +6728,7 @@ bool GHtml2::Name(const char *s)
 	}
 	#endif
 
-	LAssert(LAppInst->GetGuiThread() == LgiGetCurrentThread());
+	LAssert(LAppInst->GetGuiThread() == LGetCurrentThread());
 
 	_Delete();
 	_New();
@@ -7590,13 +7590,13 @@ void GHtml2::OnMouseClick(LMouse &m)
 				#define IDM_VIEW_IMAGES		105
 				#define IDM_CHARSET_BASE	1000
 
-				RClick->AppendItem					(LgiLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_COPY, HasSelection());
-				GMenuItem *Vs = RClick->AppendItem	(LgiLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
-				RClick->AppendItem					(LgiLoadString(L_COPY_SOURCE, "Copy Source"), IDM_COPY_SRC, Source != 0);
-				GMenuItem *Load = RClick->AppendItem(LgiLoadString(L_VIEW_IMAGES, "View External Images"), IDM_VIEW_IMAGES, true);
+				RClick->AppendItem					(LLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_COPY, HasSelection());
+				GMenuItem *Vs = RClick->AppendItem	(LLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
+				RClick->AppendItem					(LLoadString(L_COPY_SOURCE, "Copy Source"), IDM_COPY_SRC, Source != 0);
+				GMenuItem *Load = RClick->AppendItem(LLoadString(L_VIEW_IMAGES, "View External Images"), IDM_VIEW_IMAGES, true);
 				if (Load) Load->Checked(GetLoadImages());
-				RClick->AppendItem					(LgiLoadString(L_VIEW_IN_DEFAULT_BROWSER, "View in Default Browser"), IDM_EXTERNAL, Source != 0);
-				GSubMenu *Cs = RClick->AppendSub	(LgiLoadString(L_CHANGE_CHARSET, "Change Charset"));
+				RClick->AppendItem					(LLoadString(L_VIEW_IN_DEFAULT_BROWSER, "View in Default Browser"), IDM_EXTERNAL, Source != 0);
+				GSubMenu *Cs = RClick->AppendSub	(LLoadString(L_CHANGE_CHARSET, "Change Charset"));
 				if (Cs)
 				{
 					int n=0;
@@ -7628,14 +7628,14 @@ void GHtml2::OnMouseClick(LMouse &m)
 						}
 						case IDM_VIEW_SRC:
 						{
-							LgiCheckHeap();
+							LCheckHeap();
 							if (Vs)
 							{
 								DeleteObj(Tag);
 								IsHtml = !IsHtml;
 								Parse();
 							}
-							LgiCheckHeap();
+							LCheckHeap();
 							break;
 						}
 						case IDM_COPY_SRC:
@@ -7684,7 +7684,7 @@ void GHtml2::OnMouseClick(LMouse &m)
 								sprintf(f, "_%i.html", LRand(1000000));
 								LMakePath(Path, sizeof(Path), Path, f);
 								
-								LgiCheckHeap();
+								LCheckHeap();
 
 								LFile F;
 								if (F.Open(Path, O_WRITE))
@@ -7767,7 +7767,7 @@ void GHtml2::OnMouseClick(LMouse &m)
 										}
 									}
 
-									LgiCheckHeap();
+									LCheckHeap();
 
 									if (!Error)
 									{

@@ -401,7 +401,7 @@ LRect *LImageList::GetBounds()
 				d->Bounds[i].ZOff(d->Sx - 1, d->Sy - 1);
 				d->Bounds[i].Offset(i * d->Sx, 0);
 
-				LgiFindBounds(this, &d->Bounds[i]);
+				LFindBounds(this, &d->Bounds[i]);
 
 				d->Bounds[i].Offset(-i * d->Sx, 0);
 			}
@@ -1083,7 +1083,7 @@ void LToolBar::ContextMenu(LMouse &m)
 				}
 			}
 			Sub->AppendSeparator();
-			auto Txt = Sub->AppendItem(LgiLoadString(L_TOOLBAR_SHOW_TEXT, "Show Text Labels"), 1000, true);
+			auto Txt = Sub->AppendItem(LLoadString(L_TOOLBAR_SHOW_TEXT, "Show Text Labels"), 1000, true);
 			Txt->Checked(d->Text);
 
 			bool Save = false;

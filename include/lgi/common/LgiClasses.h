@@ -19,7 +19,7 @@
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-LgiFunc bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a = 0, GMessage::Param b = 0);
+LgiFunc bool LPostEvent(OsView Wnd, int Event, GMessage::Param a = 0, GMessage::Param b = 0);
 LgiFunc LViewI *GetNextTabStop(LViewI *v, bool Back);
 
 class LgiClass LCommand : public LBase //, public GFlags
@@ -111,8 +111,8 @@ public:
 
 // Graphics
 LgiFunc void LDrawBox(LSurface *pDC, LRect &r, bool Sunken, bool Fill);
-LgiFunc void LWideBorder(LSurface *pDC, LRect &r, LgiEdge Type);
-LgiFunc void LThinBorder(LSurface *pDC, LRect &r, LgiEdge Type);
+LgiFunc void LWideBorder(LSurface *pDC, LRect &r, LEdge Type);
+LgiFunc void LThinBorder(LSurface *pDC, LRect &r, LEdge Type);
 LgiFunc void LFlatBorder(LSurface *pDC, LRect &r, int Width = -1);
 
 // Helpers

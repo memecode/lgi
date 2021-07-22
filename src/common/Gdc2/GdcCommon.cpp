@@ -59,7 +59,7 @@ void MemOr(void *d, void *s, uint l)
 }
 
 //////////////////////////////////////////////////////////////////////
-bool LgiFindBounds(LSurface *pDC, LRect *rc)
+bool LFindBounds(LSurface *pDC, LRect *rc)
 {
 	if (!pDC || ! rc)
 		return false;
@@ -162,7 +162,7 @@ void LDrawBox(LSurface *pDC, LRect &r, bool Sunken, bool Fill)
 	pDC->Line(r.x1, r.y1, r.x2, r.y1);
 }
 
-void LWideBorder(LSurface *pDC, LRect &r, LgiEdge Type)
+void LWideBorder(LSurface *pDC, LRect &r, LEdge Type)
 {
 	if (!pDC) return;
 	COLOUR Old = pDC->Colour();
@@ -289,7 +289,7 @@ void LWideBorder(LSurface *pDC, LRect &r, LgiEdge Type)
 	pDC->Colour(Old);
 }
 
-void LThinBorder(LSurface *pDC, LRect &r, LgiEdge Type)
+void LThinBorder(LSurface *pDC, LRect &r, LEdge Type)
 {
 	if (!pDC) return;
 	COLOUR Old = pDC->Colour();
@@ -352,7 +352,7 @@ void LFlatBorder(LSurface *pDC, LRect &r, int Width)
 	}
 }
 
-void LgiFillGradient(LSurface *pDC, LRect &r, bool Vert, LArray<GColourStop> &Stops)
+void LFillGradient(LSurface *pDC, LRect &r, bool Vert, LArray<GColourStop> &Stops)
 {
 	int CurStop = 0;
 	GColourStop *This = Stops.Length() > CurStop ? &Stops[CurStop] : 0;
@@ -966,7 +966,7 @@ LSurface *GInlineBmp::Create(uint32_t TransparentPx)
 		Dst.y = pDC->Y();
 		Dst.Cs = pDC->GetColourSpace();
 		
-		LgiRopUniversal(&Dst, &Src, false);
+		LRopUniversal(&Dst, &Src, false);
 		
 		if (TransparentPx != 0xffffffff)
 		{
@@ -1039,7 +1039,7 @@ LSurface *GInlineBmp::Create(uint32_t TransparentPx)
 /////////////////////////////////////////////////////////////////////////////////////////////
 #include "lgi/common/Rops.h"
 
-bool LgiRopRgb(uint8_t *d, LColourSpace DstCs, uint8_t *s, LColourSpace SrcCs, int x, bool Composite)
+bool LRopRgb(uint8_t *d, LColourSpace DstCs, uint8_t *s, LColourSpace SrcCs, int x, bool Composite)
 {
 	// This is just a huge switch statement that takes care of all possible combinations
 	// of src and dst RGB colour space formats. The 'GRopsCases.cpp' code is generated
@@ -1063,7 +1063,7 @@ bool LgiRopRgb(uint8_t *d, LColourSpace DstCs, uint8_t *s, LColourSpace SrcCs, i
 }
 
 /// Universal bit blt method
-bool LgiRopUniversal(GBmpMem *Dst, GBmpMem *Src, bool Composite)
+bool LRopUniversal(GBmpMem *Dst, GBmpMem *Src, bool Composite)
 {
 	if (!Dst || !Src)
 		return false;
@@ -1099,7 +1099,7 @@ bool LgiRopUniversal(GBmpMem *Dst, GBmpMem *Src, bool Composite)
 
 		for (int y=0; y<Cy; y++)
 		{
-			if (!LgiRopRgb(d, Dst->Cs, s, Src->Cs, Cx, Composite))
+			if (!LRopRgb(d, Dst->Cs, s, Src->Cs, Cx, Composite))
 				return false;
 			d += Dst->Line;
 			s += Src->Line;
@@ -1115,7 +1115,7 @@ bool LgiRopUniversal(GBmpMem *Dst, GBmpMem *Src, bool Composite)
 	return false;
 }
 
-int LgiScreenDpi()
+int LScreenDpi()
 {
 	#if LGI_COCOA
 	

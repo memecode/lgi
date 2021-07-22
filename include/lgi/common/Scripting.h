@@ -85,7 +85,7 @@ struct LFunc
 		Method = m;
 		InUse = false;
 
-		// LgiStackTrace("%p alloc\n", this);
+		// LStackTrace("%p alloc\n", this);
 	}
 
 	virtual ~LFunc()

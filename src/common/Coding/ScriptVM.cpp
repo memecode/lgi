@@ -1714,7 +1714,7 @@ void LVmDebuggerWnd::Run()
 	while (d->RunLoop && Visible())
 	{
 		LAppInst->Run(false);
-		LgiSleep(1);
+		LSleep(1);
 	}
 	Quit();
 }

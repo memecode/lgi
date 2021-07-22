@@ -78,7 +78,7 @@ void MemorySizeToStr(char *Str, uint Size)
 	#undef G
 }
 
-bool LgiDumpMemoryStats(char *filename)
+bool LDumpMemoryStats(char *filename)
 {
 	return false;
 }

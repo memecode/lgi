@@ -380,7 +380,7 @@ public:
 				}
 			}
 			else if (Rd == 0)
-				LgiSleep(10); // Wait for more data...
+				LSleep(10); // Wait for more data...
 			else
 				break;
 		}

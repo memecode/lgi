@@ -26,7 +26,7 @@
 #define LGI_RAD					(360/(2*LGI_PI))
 
 /****************************** Helper Functions ****************************************************************************/
-void LgiDrawIcon(LSurface *pDC, int Dx, int Dy, HICON ico)
+void LDrawIcon(LSurface *pDC, int Dx, int Dy, HICON ico)
 {
 	ICONINFO iconinfo;
 	GetIconInfo(ico, &iconinfo);

@@ -345,7 +345,7 @@ void LControlTree::Item::OnPaint(ItemPaintCtx &Ctx)
 					}
 					else
 					{
-						LDisplayString ds(LSysFont, LgiLoadString(L_CONTROLTREE_NO_VALUE, "(no value)"));
+						LDisplayString ds(LSysFont, LLoadString(L_CONTROLTREE_NO_VALUE, "(no value)"));
 						LSysFont->Colour(LColour(L_LOW), LColour(L_WORKSPACE));
 						ds.Draw(Ctx.pDC, p.x1 + 8, p.y1 + 1);
 					}
@@ -492,7 +492,7 @@ void LControlTree::ReadTree(LXmlTag *t, LTreeNode *n)
 	{
 		int CtrlId = -1;
 		int StrRef = c->GetAsInt("ref");
-		LgiStringRes *Str = d->Factory->StrFromRef(StrRef);
+		LStringRes *Str = d->Factory->StrFromRef(StrRef);
 		LAssert(Str != NULL);
 		if (!Str)
 			continue;

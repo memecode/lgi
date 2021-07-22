@@ -394,7 +394,7 @@ struct LVolumePriv
 	int Flags;			// VA_??
 	int64 Size;
 	int64 Free;
-	LgiSystemPath SysPath;
+	LSystemPath SysPath;
 	LAutoPtr<LSurface> Icon;
 	List<LVolume> Sub;
 	List<LVolume>::I It;
@@ -408,7 +408,7 @@ struct LVolumePriv
 		SysPath = LSP_ROOT;
 	}
 
-	LVolumePriv(LgiSystemPath sysPath, const char *name) : It(Sub.end())
+	LVolumePriv(LSystemPath sysPath, const char *name) : It(Sub.end())
 	{
 		Init();
 		SysPath = sysPath;
@@ -505,7 +505,7 @@ LVolume::LVolume(const char *Path)
 	d = new LVolumePriv(Path);
 }
 
-LVolume::LVolume(LgiSystemPath SysPath, const char *Name)
+LVolume::LVolume(LSystemPath SysPath, const char *Name)
 {
 	d = new LVolumePriv(SysPath, Name);
 }
@@ -543,7 +543,7 @@ LVolume *LVolume::First()
 	if (d->SysPath == LSP_DESKTOP && !d->Sub.Length())
 	{
 		// Add some basic shortcuts
-		LgiSystemPath Paths[] = {LSP_HOME, LSP_USER_DOCUMENTS, LSP_USER_MUSIC, LSP_USER_VIDEO, LSP_USER_DOWNLOADS, LSP_USER_PICTURES};
+		LSystemPath Paths[] = {LSP_HOME, LSP_USER_DOCUMENTS, LSP_USER_MUSIC, LSP_USER_VIDEO, LSP_USER_DOWNLOADS, LSP_USER_PICTURES};
 		const char   *Names[] = {"Home",   "Documents",        "Music",        "Video",        "Downloads",        "Pictures"};
 		for (unsigned i=0; i<CountOf(Paths); i++)
 		{

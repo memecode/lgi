@@ -178,7 +178,7 @@ void LItemContainer::PaintColumnHeadings(LSurface *pDC)
 			LRect j(cr.x1, cr.y1, cr.x2-1, cr.y2-1);
 		
 			FillStops(Stops, j, false);
-			LgiFillGradient(ColDC, j, true, Stops);
+			LFillGradient(ColDC, j, true, Stops);
 		
 			ColDC->Colour(L_LOW);
 			ColDC->Line(cr.x1, cr.y2, cr.x2, cr.y2);
@@ -946,7 +946,7 @@ void LItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
 			LArray<GColourStop> Stops;
 			LRect j(r.x1, r.y1, r.x2-1, r.y2-1);
 			FillStops(Stops, j, d->cMark != 0);
-			LgiFillGradient(pDC, j, true, Stops);
+			LFillGradient(pDC, j, true, Stops);
 			if (d->cMark)
 				pDC->Colour(Rgb24(0x66, 0x93, 0xc0), 24);
 			else

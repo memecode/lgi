@@ -100,7 +100,7 @@ LONG __stdcall LApp::_ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId)
 {
 	char *Title = "Application Crash";
 
-	LgiSetLeakDetect(false);
+	LSetLeakDetect(false);
 	SetUnhandledExceptionFilter(0); // We can't handle crashes within
 									// ourself, so let the default handler
 									// do it.

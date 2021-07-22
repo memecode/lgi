@@ -370,8 +370,8 @@ LRichTextPriv::~LRichTextPriv()
 		while (IsBusy())
 		{
 			uint64 Now = LCurrentTime();
-			LgiSleep(10);
-			LgiYield();
+			LSleep(10);
+			LYield();
 
 			if (Now - Msg > 1000)
 			{
@@ -608,7 +608,7 @@ bool LRichTextPriv::Error(const char *file, int line, const char *fmt, ...)
 	va_list Arg;
 	va_start(Arg, fmt);
 	LString s;
-	LgiPrintf(s, fmt, Arg);
+	LPrintf(s, fmt, Arg);
 	va_end(Arg);
 
 	LString Err;

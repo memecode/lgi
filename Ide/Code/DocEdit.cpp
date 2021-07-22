@@ -55,7 +55,7 @@ DocEdit::~DocEdit()
 	ParentState = KExiting;
 	Event.Signal();
 	while (!IsExited())
-		LgiSleep(1);
+		LSleep(1);
 	SetEnv(0);
 }
 void DocEdit::OnCreate()
@@ -76,7 +76,7 @@ bool DocEdit::AppendItems(LSubMenu *Menu, const char *Param, int Base)
 	
 bool DocEdit::DoGoto()
 {
-	GInput Dlg(this, "", LgiLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
+	GInput Dlg(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
 	if (Dlg.DoModal() != IDOK || !ValidStr(Dlg.GetStr()))
 		return false;
 	LString s = Dlg.GetStr();

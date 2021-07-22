@@ -65,16 +65,16 @@ static const char **GetIconNames()
 	if (!IconName[0])
 	{
 		int i = 0;
-		IconName[i++] = LgiLoadString(L_FUI_NEW_CONDITION, "New Condition");
-		IconName[i++] = LgiLoadString(L_FUI_NEW_AND, "New And");
-		IconName[i++] = LgiLoadString(L_FUI_NEW_OR, "New Or");
-		IconName[i++] = LgiLoadString(L_FUI_DELETE, "Delete");
-		IconName[i++] = LgiLoadString(L_FUI_MOVE_UP, "Move Up");
-		IconName[i++] = LgiLoadString(L_FUI_MOVE_DOWN, "Move Down");
+		IconName[i++] = LLoadString(L_FUI_NEW_CONDITION, "New Condition");
+		IconName[i++] = LLoadString(L_FUI_NEW_AND, "New And");
+		IconName[i++] = LLoadString(L_FUI_NEW_OR, "New Or");
+		IconName[i++] = LLoadString(L_FUI_DELETE, "Delete");
+		IconName[i++] = LLoadString(L_FUI_MOVE_UP, "Move Up");
+		IconName[i++] = LLoadString(L_FUI_MOVE_DOWN, "Move Down");
 		i++;
-		IconName[i++] = LgiLoadString(L_FUI_OPTIONS, "Options");
+		IconName[i++] = LLoadString(L_FUI_OPTIONS, "Options");
 		i++;
-		IconName[i++] = LgiLoadString(L_FUI_NOT, "Not");
+		IconName[i++] = LLoadString(L_FUI_NOT, "Not");
 	}
 
 	return IconName;
@@ -204,11 +204,11 @@ public:
 	{
 		View = v;
 
-		dsNot.Reset(new LDisplayString(LSysFont, (char*)LgiLoadString(L_FUI_NOT, "Not")));
-		dsNew.Reset(new LDisplayString(LSysBold, (char*)LgiLoadString(L_FUI_NEW, "New")));
-		dsAnd.Reset(new LDisplayString(LSysBold, (char*)LgiLoadString(L_FUI_AND, "And")));
-		dsOr.Reset(new LDisplayString(LSysBold, (char*)LgiLoadString(L_FUI_OR, "Or")));
-		dsLegend.Reset(new LDisplayString(LSysBold, (char*)LgiLoadString(L_FUI_LEGEND, "Legend:")));
+		dsNot.Reset(new LDisplayString(LSysFont, (char*)LLoadString(L_FUI_NOT, "Not")));
+		dsNew.Reset(new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_NEW, "New")));
+		dsAnd.Reset(new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_AND, "And")));
+		dsOr.Reset(new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_OR, "Or")));
+		dsLegend.Reset(new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_LEGEND, "Legend:")));
 		
 		ShowLegend = true;
 		Callback = 0;
@@ -1099,9 +1099,9 @@ void LFilterItem::OptionsMenu()
 
 	LSubMenu s;
 	if (d->Node == LNODE_NEW)
-		s.AppendItem(LgiLoadString(L_FUI_CONDITION, "Condition"), 3, true);
-	s.AppendItem(LgiLoadString(L_FUI_AND, "And"), 1, true);
-	s.AppendItem(LgiLoadString(L_FUI_OR, "Or"), 2, true);
+		s.AppendItem(LLoadString(L_FUI_CONDITION, "Condition"), 3, true);
+	s.AppendItem(LLoadString(L_FUI_AND, "And"), 1, true);
+	s.AppendItem(LLoadString(L_FUI_OR, "Or"), 2, true);
 
 	LRect r = d->Btns[d->Node == LNODE_NEW ? IconNewCond : IconOptions];
 	r.Offset(Pos->x1 + Client.x1, Pos->y1 + Client.y1);

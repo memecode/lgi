@@ -187,7 +187,7 @@ bool LEmojiFont::Create(const char *Face, LCss::Len Sz, LSurface *pSurface)
 		}
 	}
 
-	auto Dpi = LgiScreenDpi();
+	auto Dpi = LScreenDpi();
 	Sz = Size();
 	if (Sz.IsValid() && priv->Img)
 	{

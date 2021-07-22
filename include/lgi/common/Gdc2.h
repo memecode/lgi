@@ -1391,15 +1391,15 @@ struct GColourStop
 };
 
 /// Draws a horizontal or vertical gradient
-LgiFunc void LgiFillGradient(LSurface *pDC, LRect &r, bool Vert, LArray<GColourStop> &Stops);
+LgiFunc void LFillGradient(LSurface *pDC, LRect &r, bool Vert, LArray<GColourStop> &Stops);
 
 #ifdef WIN32
 /// Draws a windows HICON onto a surface at Dx, Dy
-LgiFunc void LgiDrawIcon(LSurface *pDC, int Dx, int Dy, HICON ico);
+LgiFunc void LDrawIcon(LSurface *pDC, int Dx, int Dy, HICON ico);
 #endif
 
 /// Row copy operator for full RGB (8 bit components)
-LgiFunc bool LgiRopRgb
+LgiFunc bool LRopRgb
 (
 	// Pointer to destination pixel buffer
 	uint8_t *Dst,
@@ -1416,14 +1416,14 @@ LgiFunc bool LgiRopRgb
 );
 
 /// Universal bit blt method
-LgiFunc bool LgiRopUniversal(GBmpMem *Dst, GBmpMem *Src, bool Composite);
+LgiFunc bool LRopUniversal(GBmpMem *Dst, GBmpMem *Src, bool Composite);
 
 /// Gets the screens DPI
-LgiFunc int LgiScreenDpi();
+LgiFunc int LScreenDpi();
 
 /// Find the bounds of an image.
 /// \return true if there is some non-transparent image	 in 'rc'
-LgiFunc bool LgiFindBounds
+LgiFunc bool LFindBounds
 (
 	/// [in] The image
 	LSurface *pDC,

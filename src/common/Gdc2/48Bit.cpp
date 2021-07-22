@@ -263,7 +263,7 @@ public:
 				Dst.y = Src->y;
 				Dst.Cs = Dest->Cs;
 				Dst.Line = Dest->Line;				
-				if (!LgiRopUniversal(&Dst, Src, Op==GDC_ALPHA))
+				if (!LRopUniversal(&Dst, Src, Op==GDC_ALPHA))
 				{
 					return false;
 				}

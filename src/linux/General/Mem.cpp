@@ -242,7 +242,7 @@ void lgi_free(void *ptr)
 
 #endif
 
-bool LgiCheckHeap()
+bool LCheckHeap()
 {
 	return 1;
 }
@@ -295,7 +295,7 @@ bool LgiCanReadMemory(void *p, int Len)
 	return true;
 }
 
-bool LgiDumpMemoryStats(char *filename)
+bool LDumpMemoryStats(char *filename)
 {
 	return false;
 }

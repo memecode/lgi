@@ -25,7 +25,7 @@ struct LSoftwareUpdatePriv
 
 	void SetError(int Id, const char *Def = 0)
 	{
-		Error.Reset(NewStr(LgiLoadString(Id, Def)));
+		Error.Reset(NewStr(LLoadString(Id, Def)));
 	}
 
 	class UpdateThread : public LThread
@@ -132,7 +132,7 @@ struct LSoftwareUpdatePriv
 								{
 									LXmlTag *Msg = Root.GetChildTag("msg");
 									LStringPipe p;
-									p.Print(LgiLoadString(L_ERROR_UPDATE, sUpdateError), Msg?Msg->GetContent():(char*)"Unknown");
+									p.Print(LLoadString(L_ERROR_UPDATE, sUpdateError), Msg?Msg->GetContent():(char*)"Unknown");
 									d->Error.Reset(p.NewStr());
 									LgiTrace("UpdateURI=%s\n", GetUri.Get());
 								}
@@ -169,7 +169,7 @@ struct LSoftwareUpdatePriv
 											10, 10,
 											c.X()-20,
 											-1,
-											LgiLoadString(L_SOFTUP_CHECKING, "Checking for software update..."));
+											LLoadString(L_SOFTUP_CHECKING, "Checking for software update..."));
 			if (t)
 			{
 				AddView(t);
@@ -178,7 +178,7 @@ struct LSoftwareUpdatePriv
 											t->GetPos().y2 + 10,
 											70,
 											-1,
-											LgiLoadString(L_BTN_CANCEL, "Cancel"));
+											LLoadString(L_BTN_CANCEL, "Cancel"));
 				if (btn)
 				{
 					AddView(btn);
@@ -271,11 +271,11 @@ struct LSoftwareUpdatePriv
 			LHttp::ContentEncoding Enc;
 			if (!Http.Open(s, Uri->sHost, Uri->Port))
 			{
-				Err->Reset(NewStr(LgiLoadString(L_ERROR_CONNECT_FAILED, sSocketConnectFailed)));
+				Err->Reset(NewStr(LLoadString(L_ERROR_CONNECT_FAILED, sSocketConnectFailed)));
 			}
 			else if (!Http.Get(Info->Uri, 0, Status, this, &Enc))
 			{
-				Err->Reset(NewStr(LgiLoadString(L_ERROR_HTTP_FAILED, sHttpDownloadFailed)));
+				Err->Reset(NewStr(LLoadString(L_ERROR_HTTP_FAILED, sHttpDownloadFailed)));
 			}
 
 			return 0;
@@ -312,8 +312,8 @@ bool LSoftwareUpdate::CheckForUpdate(UpdateInfo &Info, LViewI *WithUi, bool IncB
 	{
 		while (!Update.IsExited())
 		{
-			LgiYield();
-			LgiSleep(10);
+			LYield();
+			LSleep(10);
 		}
 	}
 
@@ -354,7 +354,7 @@ bool LSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *W
 	Local.SetSize(0);
 
 	LProgressDlg *Dlg = new LProgressDlg;
-	Dlg->SetDescription(LgiLoadString(L_SOFTUP_DOWNLOADING, "Downloading..."));
+	Dlg->SetDescription(LLoadString(L_SOFTUP_DOWNLOADING, "Downloading..."));
 	Dlg->SetType("KiB");
 	Dlg->SetScale(1.0 / 1024.0);
 
@@ -364,8 +364,8 @@ bool LSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *W
 	LSoftwareUpdatePriv::UpdateDownload Thread(&Info, &Uri, &Proxy, &Local, &d->Error, &HttpStatus);
 	while (!Thread.IsExited())
 	{
-		LgiYield();
-		LgiSleep(50);
+		LYield();
+		LSleep(50);
 
 		if (!Size)
 		{

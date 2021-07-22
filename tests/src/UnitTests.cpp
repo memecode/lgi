@@ -40,6 +40,6 @@ int main(int args, char **arg)
 	{
 		UnitTests();
 	}
-	LgiSleep(2000);
+	LSleep(2000);
 	return 0;
 }

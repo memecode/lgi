@@ -118,14 +118,14 @@ public:
 			
 			while (!IsExited())
 			{
-				LgiSleep(10);
+				LSleep(10);
 			}
 		}
 	}
 	
 	void PostEvent(OsView h, int c, GMessage::Param a, GMessage::Param b)
 	{
-		LgiPostEvent(h, c, a, b);
+		LPostEvent(h, c, a, b);
 	}
 
 	int Main()
@@ -171,7 +171,7 @@ public:
 				{
 					// Up click...
 					if (ViewHandle)
-						LgiPostEvent(ViewHandle, M_MOUSE_TRACK_UP, 0, 0);
+						LPostEvent(ViewHandle, M_MOUSE_TRACK_UP, 0, 0);
 					else
 						printf("%s:%i - No mouse hook view for up click.\n", _FL);
 				}
@@ -179,7 +179,7 @@ public:
 				#endif
 				
 				Prev = Cur;
-				LgiSleep(30);
+				LSleep(30);
 			}
 			while (Loop && Cur.Down());
 
@@ -413,7 +413,7 @@ public:
 
 			Old = m;
 
-			LgiSleep(MOUSE_POLL_MS);
+			LSleep(MOUSE_POLL_MS);
 			#endif
 		}
 

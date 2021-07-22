@@ -206,7 +206,7 @@ static LAutoString ParseVer(void *Resource, char *Part)
 	return LAutoString();
 }
 
-void LgiInvalidParam(const wchar_t * expression,
+void LInvalidParam(const wchar_t * expression,
 					const wchar_t * function, 
 					const wchar_t * file, 
 					unsigned int line,
@@ -289,7 +289,7 @@ DumpTime("priv");
 		#if !defined(_DEBUG)
 		_PrevExceptionHandler = SetUnhandledExceptionFilter(_ExceptionFilter_Redir);
 		#endif
-		_set_invalid_parameter_handler(LgiInvalidParam);
+		_set_invalid_parameter_handler(LInvalidParam);
 	}
 	
 DumpTime("exception handler");
@@ -663,7 +663,7 @@ void LApp::OnReceiveFiles(LArray<const char*> &Files)
 		AppWnd->OnReceiveFiles(Files);
 }
 
-int32 LApp::GetMetric(LgiSystemMetric Metric)
+int32 LApp::GetMetric(LSystemMetric Metric)
 {
 	int32 Status = 0;
 

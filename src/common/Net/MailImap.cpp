@@ -827,7 +827,7 @@ bool MailIMap::WriteBuf(bool ObsurePass, const char *Buffer, bool Continuation)
 			}
 			else Log(Buffer, LSocketI::SocketMsgSend);
 			
-			d->InCommand = LgiGetCurrentThread();
+			d->InCommand = LGetCurrentThread();
 
 			return true;
 		}
@@ -1040,7 +1040,7 @@ public:
 		{
 			Loop = false;
 			while (!IsExited())
-				LgiSleep(10);
+				LSleep(10);
 		}
 	}
 	
@@ -1071,7 +1071,7 @@ public:
 			}
 
 			if (!r)
-				LgiSleep(50);
+				LSleep(50);
 		}
 		
 		return r;
@@ -1139,7 +1139,7 @@ public:
 							Unlock();
 						}
 						if (!Response)
-							LgiSleep(10);
+							LSleep(10);
 					}
 					while (Loop && !Response);
 					
@@ -1148,7 +1148,7 @@ public:
 					Loop = false;
 				}
 			}
-			else LgiSleep(10);
+			else LSleep(10);
 		}
 
 		Finished = true;
@@ -2215,7 +2215,7 @@ int MailIMap::Fetch(bool ByUid,
 				}
 				else
 				{
-					LgiSleep(1); // Don't eat the whole CPU...
+					LSleep(1); // Don't eat the whole CPU...
 					break;
 				}
 				

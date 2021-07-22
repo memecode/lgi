@@ -360,7 +360,7 @@ public:
 					int Start = LCurrentTime();
 					while (!n->Handle())
 					{
-						LgiSleep(100);
+						LSleep(100);
 						if (LCurrentTime() - Start > 2000)
 						{
 							break;

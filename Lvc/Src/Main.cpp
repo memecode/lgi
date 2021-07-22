@@ -135,7 +135,7 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data)
 
 		if (rd == 0)
 		{
-			LgiSleep(10);
+			LSleep(10);
 			continue;
 		}
 				

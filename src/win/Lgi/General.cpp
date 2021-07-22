@@ -10,7 +10,7 @@
 
 ////////////////////////////////////////////////////////////////
 // Implementations
-void LgiSleep(DWORD i)
+void LSleep(DWORD i)
 {
 	::Sleep(i);
 }
@@ -433,28 +433,6 @@ bool LPlaySound(const char *FileName, int Flags)
 	}
 
 	return Status;
-}
-
-static char *LgiFindArgsStart(char *File)
-{
-	for (char *a = File; *a; a++)
-	{
-		if (*a == '\'' || *a == '\"')
-		{
-			char delim = *a++;
-			char *e = strchr(a, delim);
-			if (e)
-				a = e;
-			else
-				return 0;
-		}
-		else if (strchr(" \t\r\n", *a))
-		{
-			return a;
-		}
-	}
-
-	return 0;
 }
 
 #include <lmerr.h>

@@ -36,7 +36,7 @@ public:
 			char s[64];
 			
 			LSysFont->Colour(L_BLACK, L_MED);
-			LDisplayString ds(LSysFont, (char*)LgiLoadString(L_COLOUR_NONE, "No Colour"));
+			LDisplayString ds(LSysFont, (char*)LLoadString(L_COLOUR_NONE, "No Colour"));
 			ds.Draw(pDC, r.x1 + 2, r.y1 + 2);
 
 			for (unsigned i=0; i<Colour->Presets.Length(); i++)

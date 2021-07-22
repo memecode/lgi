@@ -243,7 +243,7 @@ int LDialog::DoModal(OsView ParentHnd)
 				hWindow = p->Handle();
 			}
 
-			Status = DialogBoxIndirectParam(LgiProcessInst(),
+			Status = DialogBoxIndirectParam(LProcessInst(),
 											Template,
 											hWindow,
 											(DLGPROC) DlgRedir, 
@@ -290,8 +290,8 @@ int LDialog::DoModal(OsView ParentHnd)
 	    if (pwnd) EnableWindow(pwnd, false);
 	    while (d->ModalResult < 0)
 	    {
-	        LgiYield();
-	        LgiSleep(20);
+	        LYield();
+	        LSleep(20);
 	    }
 	    if (pwnd) EnableWindow(pwnd, true);
 	    if (ParentWnd)
@@ -384,7 +384,7 @@ int LDialog::DoModeless()
 
 			HWND hWindow = (p)?p->Handle():0;
 
-			CreateDialogIndirectParam(	LgiProcessInst(),
+			CreateDialogIndirectParam(	LProcessInst(),
 										Template,
 										hWindow,
 										(DLGPROC) DlgRedir, 

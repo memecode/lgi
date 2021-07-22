@@ -76,10 +76,10 @@ public:
 // Process
 typedef int							OsProcess;
 typedef int							OsProcessId;
-#define LgiGetCurrentProcess()		getpid()
+#define LGetCurrentProcess()		getpid()
 
 // Threads
-#define LgiGetCurrentThread()		pthread_self()
+#define LGetCurrentThread()		pthread_self()
 LgiFunc OsThreadId					GetCurrentThreadId();
 
 // Sockets
@@ -88,10 +88,10 @@ LgiFunc OsThreadId					GetCurrentThreadId();
 typedef int OsSocket;
 
 // Sleep the current thread
-LgiFunc void LgiSleep(uint32_t i);
+LgiFunc void LSleep(uint32_t i);
 
 // Run the message loop to process any pending messages
-#define LgiYield()					LApp::ObjInstance()->Run(false)
+#define LYield()					LApp::ObjInstance()->Run(false)
 
 #define LGI_GViewMagic				0x14412662
 #define LGI_FileDropFormat			"public.file-url"

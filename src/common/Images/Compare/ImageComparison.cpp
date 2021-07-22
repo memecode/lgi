@@ -259,7 +259,7 @@ public:
 	~ThreadLoader()
 	{
 		while (!IsExited())
-			LgiSleep(10);
+			LSleep(10);
 	}
 	
 	int Main()
@@ -274,7 +274,7 @@ public:
 			uint64 Start = LCurrentTime();
 			while (!Owner->Handle())
 			{
-				LgiSleep(100);
+				LSleep(100);
 				if (LCurrentTime() - Start > 5000)
 				{
 					LAssert(0);
@@ -790,7 +790,7 @@ struct CompareThread : public LThread
 	{
 		loop = false;
 		while (!IsExited())
-			LgiSleep(1);
+			LSleep(1);
 	}
 	
 	int Main()

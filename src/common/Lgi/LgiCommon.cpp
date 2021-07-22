@@ -102,7 +102,7 @@ namespace Gtk {
 	#endif
 #endif
 
-bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a, GMessage::Param b)
+bool LPostEvent(OsView Wnd, int Event, GMessage::Param a, GMessage::Param b)
 {
 	#if LGI_SDL
 
@@ -114,7 +114,7 @@ bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a, GMessage::Param b)
 		e.user.data2 = a || b ? new GMessage::EventParams(a, b) : NULL;
 
 		/*
-		printf("LgiPostEvent Wnd=%p, Event=%i, a/b: %i/%i\n",
+		printf("LPostEvent Wnd=%p, Event=%i, a/b: %i/%i\n",
 			Wnd, Event, (int)a, (int)b);
 		*/
 
@@ -134,7 +134,7 @@ bool LgiPostEvent(OsView Wnd, int Event, GMessage::Param a, GMessage::Param b)
 			m.Set(Event, a, b);
 			return m.Send(View);
 		}
-		else printf("%s:%i - Error: LgiPostEvent can't cast OsView to LViewI\n", _FL);
+		else printf("%s:%i - Error: LPostEvent can't cast OsView to LViewI\n", _FL);
 
 	#elif defined(MAC) && !LGI_COCOA
 	
@@ -614,7 +614,7 @@ void LgiTrace(const char *Msg, ...)
 #ifndef LGI_STATIC
 #define STACK_SIZE 12
 
-void LgiStackTrace(const char *Msg, ...)
+void LStackTrace(const char *Msg, ...)
 {
 	LSymLookup::Addr Stack[STACK_SIZE];
 	ZeroObj(Stack);
@@ -835,7 +835,7 @@ bool LgiGetTempPath(char *Dst, int DstSize)
 	return LGetSystemPath(LSP_TEMP, Dst, DstSize);
 }
 
-bool LGetSystemPath(LgiSystemPath Which, char *Dst, ssize_t DstSize)
+bool LGetSystemPath(LSystemPath Which, char *Dst, ssize_t DstSize)
 {
 	if (!Dst || DstSize <= 0)
 		return false;
@@ -849,7 +849,7 @@ bool LGetSystemPath(LgiSystemPath Which, char *Dst, ssize_t DstSize)
 	return true;
 }
 
-LString LGetSystemPath(LgiSystemPath Which, int WordSize)
+LString LGetSystemPath(LSystemPath Which, int WordSize)
 {
 	LFile::Path p;
 	return p.GetSystem(Which, WordSize);
@@ -972,7 +972,7 @@ LString LFile::Path::PrintAll()
 	return p.NewGStr();
 }
 
-LString LFile::Path::GetSystem(LgiSystemPath Which, int WordSize)
+LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 {
 	LString Path;
 

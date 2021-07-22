@@ -44,7 +44,7 @@ enum LDocWrapType
 extern char16 *ConvertToCrLf(char16 *Text);
 
 /// This class contains infomation about a link.
-/// \sa LgiDetectLinks
+/// \sa LDetectLinks
 struct GLinkInfo
 {
 	NativeInt Start;
@@ -444,7 +444,7 @@ public:
 
 /// Detects links in text, returning their location and type
 template<typename T>
-bool LgiDetectLinks(LArray<GLinkInfo> &Links, T *Text, ssize_t TextCharLen = -1)
+bool LDetectLinks(LArray<GLinkInfo> &Links, T *Text, ssize_t TextCharLen = -1)
 {
 	if (!Text)
 		return false;

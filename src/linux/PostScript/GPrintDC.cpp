@@ -435,7 +435,7 @@ public:
 	int Main()
 	{
 		/*
-		LgiSleep(2 * 60 * 1000);
+		LSleep(2 * 60 * 1000);
 		FileDev->DeleteFile(File, false);
 		DeleteArray(File);
 		*/

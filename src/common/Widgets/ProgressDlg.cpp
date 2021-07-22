@@ -110,7 +110,7 @@ LProgressPane::LProgressPane(LProgressDlg *dlg) : Dlg(dlg)
 	UiDirty = false;
 	LRect r(0, 0, PANE_X-1, PANE_Y-1);
 	SetPos(r);
-	Name(LgiLoadString(L_PROGRESSDLG_PROGRESS, "Progress"));
+	Name(LLoadString(L_PROGRESSDLG_PROGRESS, "Progress"));
 	SetId(IDC_PANE);
 	Ref = 0;
 
@@ -151,7 +151,7 @@ LProgressPane::LProgressPane(LProgressDlg *dlg) : Dlg(dlg)
 		c->Padding(LCss::Len(LCss::LenPx, PAD));
 		#endif
 		c->TextAlign(LCss::Len(LCss::AlignCenter));
-		c->Add(But = new LButton(IDC_BUTTON, 0, 0, -1, -1, LgiLoadString(L_PROGRESSDLG_REQ_ABORT, "Request Abort")));
+		c->Add(But = new LButton(IDC_BUTTON, 0, 0, -1, -1, LLoadString(L_PROGRESSDLG_REQ_ABORT, "Request Abort")));
 	}
 }
 
@@ -204,13 +204,13 @@ void LProgressPane::UpdateUI()
 		else
 			PerSec = 0;
 		
-		sprintf_s(Str, sizeof(Str), LgiLoadString(L_PROGRESSDLG_RATE_FMT, "@ %.2f %s / sec"), PerSec * Scale, (Type) ? Type.Get() : "");
+		sprintf_s(Str, sizeof(Str), LLoadString(L_PROGRESSDLG_RATE_FMT, "@ %.2f %s / sec"), PerSec * Scale, (Type) ? Type.Get() : "");
 		Update |= Rate->Name(Str);
 	}
 
 	if (ValText)
 	{
-		auto ValFmt = LgiLoadString(L_PROGRESSDLG_VALUE_FMT, "%.1f of %.1f %s");
+		auto ValFmt = LLoadString(L_PROGRESSDLG_VALUE_FMT, "%.1f of %.1f %s");
 		sprintf_s(Str, sizeof(Str), ValFmt,
 			(double)Val * Scale,
 			(double)(High - Low) * Scale,
@@ -363,7 +363,7 @@ LProgressDlg::LProgressDlg(LView *parent, uint64 timeout)
 	else
 		MoveToCenter();	
 	
-	Name(LgiLoadString(L_PROGRESSDLG_PROGRESS, "Progress"));
+	Name(LLoadString(L_PROGRESSDLG_PROGRESS, "Progress"));
 	if (Timeout == 0)
 		DoModeless();
 	else
@@ -592,7 +592,7 @@ void LProgressDlg::TimeCheck()
 		if (Now - Ts >= YieldTs)
 		{
 			Ts = Now;
-			LgiYield();
+			LYield();
 		}
 	}
 }

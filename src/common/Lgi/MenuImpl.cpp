@@ -558,7 +558,7 @@ void MenuItemImpl::Activate()
 		LWindow *w = Menu->Info->View()->GetWindow();
 		if (w)
 		{
-			LgiPostEvent(w->Handle(), M_COMMAND, (GMessage::Param) d->Item->Id(), 0);
+			LPostEvent(w->Handle(), M_COMMAND, (GMessage::Param) d->Item->Id(), 0);
 		}
 		else printf("%s:%i - No Window.\n", _FL);
 	}

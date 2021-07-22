@@ -309,7 +309,7 @@ GBrowserThread::~GBrowserThread()
 {
 	Loop = false;
 	while (!IsExited())
-		LgiSleep(10);
+		LSleep(10);
 }
 
 void GBrowserThread::Stop()
@@ -380,7 +380,7 @@ int GBrowserThread::Main()
 				}
 			}
 		}
-		else LgiSleep(50);
+		else LSleep(50);
 	}
 
 	return false;

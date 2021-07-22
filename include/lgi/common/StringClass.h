@@ -35,7 +35,7 @@
 	#define IsDigit(ch) ((ch) >= '0' && (ch) <= '9')
 #endif
 
-LgiExtern int LgiPrintf(class LString &Str, const char *Format, va_list &Arg);
+LgiExtern int LPrintf(class LString &Str, const char *Format, va_list &Arg);
 
 /// A pythonic string class.
 class LString
@@ -1022,7 +1022,7 @@ public:
 	int Printf(va_list &Arg, const char *Fmt)
 	{
 		Empty();
-		return LgiPrintf(*this, Fmt, Arg);
+		return LPrintf(*this, Fmt, Arg);
 	}
 	
 	static LString Escape(const char *In, ssize_t Len = -1, const char *Chars = "\r\n\b\\\'\"")

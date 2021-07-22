@@ -1082,7 +1082,7 @@ public:
 		Cancel.Cancel();
 		while (!IsExited())
 		{
-			LgiSleep(1);
+			LSleep(1);
 		}
 	}
 
@@ -1093,7 +1093,7 @@ public:
 			// Sleep for a number of milliseconds to allow the file to upload/save to the website
 			uint64 Ts = LCurrentTime();
 			while (!Cancel.IsCancelled() && (LCurrentTime()-Ts) < SleepMs)
-				LgiSleep(1);
+				LSleep(1);
 		}
 
 		// Download the file...

@@ -254,7 +254,7 @@ LgiFunc bool LIsFileNameExecutable(const char *Str)
 	return c.IsExecutable();
 }
 
-LgiFunc bool LgiIsFileExecutable(const char *name, LStreamI *f, int64 Start, int64 Len)
+LgiFunc bool LIsFileExecutable(const char *name, LStreamI *f, int64 Start, int64 Len)
 {
 	GExecuteCheck c(name, f, Start, Len);
 	return c.IsExecutable();

@@ -78,7 +78,7 @@ public:
 	{
 		IdleId = 0;
 		CurEvent = 0;
-		GuiThread = LgiGetCurrentThread();
+		GuiThread = LGetCurrentThread();
 		GuiThreadId = GetCurrentThreadId();
 		WmLib = 0;
 		FileSystem = 0;

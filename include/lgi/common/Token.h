@@ -6,7 +6,7 @@
 
 /// \returns true if the string represents a int or float number
 template<typename T>
-bool LgiIsNumber(T *p)
+bool LIsNumber(T *p)
 {
 	if (!p)
 		return false;
@@ -59,7 +59,7 @@ bool LgiIsNumber(T *p)
 }
 
 /// Skips over a set of delimiters, returning the next non-delimiter
-LgiFunc char *LgiSkipDelim(char *p, const char *Delimiter = " \r\n\t", bool NotDelim = false);
+LgiFunc char *LSkipDelim(char *p, const char *Delimiter = " \r\n\t", bool NotDelim = false);
 
 /// A simple token parser
 class GToken : public LArray<char*>

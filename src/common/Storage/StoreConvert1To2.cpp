@@ -120,7 +120,7 @@ public:
 			if (Prog)
 			{
 				Prog->Value(Prog->Value() + Reader->Len);
-				LgiYield();
+				LYield();
 			}
 
 			Converted++;

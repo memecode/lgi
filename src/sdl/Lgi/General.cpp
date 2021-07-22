@@ -6,7 +6,7 @@
 
 ////////////////////////////////////////////////////////////////
 // Implementations
-void LgiSleep(uint32 i)
+void LSleep(uint32 i)
 {
 	SDL_Delay(i);
 }
@@ -44,7 +44,7 @@ bool LGetMimeTypeExtensions(const char *Mime, LArray<char*> &Ext)
 	return Ext.Length() > Start;
 }
 
-bool LgiGetFileMimeType(const char *File, char *Mime, int BufLen)
+bool LGetFileMimeType(const char *File, char *Mime, int BufLen)
 {
 	bool Status = false;
 
@@ -388,7 +388,7 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 	return Status;
 }
 
-bool LgiGetAppForMimeType(const char *Mime, char *AppPath, int BufSize)
+bool LGetAppForMimeType(const char *Mime, char *AppPath, int BufSize)
 {
 	bool Status = false;
 	if (AppPath)
@@ -436,31 +436,9 @@ bool LPlaySound(const char *FileName, int Flags)
 	return Status;
 }
 
-static char *LgiFindArgsStart(char *File)
-{
-	for (char *a = File; *a; a++)
-	{
-		if (*a == '\'' || *a == '\"')
-		{
-			char delim = *a++;
-			char *e = strchr(a, delim);
-			if (e)
-				a = e;
-			else
-				return 0;
-		}
-		else if (strchr(" \t\r\n", *a))
-		{
-			return a;
-		}
-	}
-
-	return 0;
-}
-
 #include <lmerr.h>
 
-LAutoString LgiErrorCodeToString(uint32 ErrorCode)
+LAutoString LErrorCodeToString(uint32 ErrorCode)
 {
 	LAutoString Str;
     HMODULE hModule = NULL;
@@ -539,7 +517,7 @@ bool LExecute(const char *File, const char *Arguments, const char *Dir, LAutoStr
 	#endif
 
 	if (ErrorMsg)
-		*ErrorMsg = LgiErrorCodeToString(Error);
+		*ErrorMsg = LErrorCodeToString(Error);
 	
 	return Status > 32;
 }

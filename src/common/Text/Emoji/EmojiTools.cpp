@@ -170,7 +170,7 @@ LAutoWString TextToEmoji(uint32_t *Txt, bool IsHtml)
 	
 	if (!IsHtml)
 	{
-		LgiDetectLinks(Links, Txt);
+		LDetectLinks(Links, Txt);
 		Ch = my_snwprintf(Buf, BUF_SIZE, h1);
 		if (Ch > 0)
 			p.Write(Buf, (int) (Ch * sizeof(*Buf)));

@@ -355,7 +355,7 @@ public:
 				{
 					// Update status
 					Prog.Value(f.GetPos());
-					LgiYield();
+					LYield();
 
 					// Read more data in?
 					memmove(&Buf[0], &Buf[Pos], Used - Pos);

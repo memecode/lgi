@@ -193,7 +193,7 @@ class LgiClass LEventTargetThread :
 	// prevent multiple instances clashing.
 	LString ProcessName(LString obj, const char *desc)
 	{
-		OsProcessId process = LgiGetCurrentProcess();
+		OsProcessId process = LGetCurrentProcess();
 		OsThreadId thread = GetCurrentThreadId();
 		LString s;
 		s.Printf("%s.%s.%i.%i", obj.Get(), desc, process, thread);
@@ -265,7 +265,7 @@ public:
 				
 				while (!IsExited())
 				{
-					LgiSleep(10);
+					LSleep(10);
 					
 					uint64 Now = LCurrentTime();
 					if (Now - Start > 2000)
@@ -384,7 +384,7 @@ public:
 		bool Status;
 		while (!(Status = LEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, (GMessage::Param) A.Get())))
 		{
-			LgiSleep(2);
+			LSleep(2);
 			if (LCurrentTime() - Start >= PostTimeout) break;
 		}
 		if (Status)
@@ -399,7 +399,7 @@ public:
 		bool Status;
 		while (!(Status = LEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, A, (GMessage::Param) B.Get())))
 		{
-			LgiSleep(2);
+			LSleep(2);
 			if (LCurrentTime() - Start >= PostTimeout) break;
 		}
 		if (Status)
@@ -414,7 +414,7 @@ public:
 		bool Status;
 		while (!(Status = LEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, (GMessage::Param) A.Get(), (GMessage::Param) B.Get())))
 		{
-			LgiSleep(2);
+			LSleep(2);
 			if (LCurrentTime() - Start >= PostTimeout) break;
 		}
 		if (Status)

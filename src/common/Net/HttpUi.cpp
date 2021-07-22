@@ -49,7 +49,7 @@ struct GHttpServerPriv : public LThread
 		Listen.Close();
 		while (!IsExited())
 		{
-			LgiSleep(50);
+			LSleep(50);
 		}
 	}
 

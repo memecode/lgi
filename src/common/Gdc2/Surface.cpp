@@ -1875,7 +1875,7 @@ void LSurface::Palette(GPalette *pPal, bool bOwnIt)
 
 bool LSurface::GetVariant(const char *Name, LVariant &Dst, char *Array)
 {
-	switch (LgiStringToDomProp(Name))
+	switch (LStringToDomProp(Name))
 	{
 		case SurfaceX: // Type: Int32
 		{
@@ -1913,7 +1913,7 @@ bool LSurface::GetVariant(const char *Name, LVariant &Dst, char *Array)
 
 bool LSurface::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	switch (LgiStringToDomProp(Name))
+	switch (LStringToDomProp(Name))
 	{
 		case SurfaceIncludeCursor:
 		{

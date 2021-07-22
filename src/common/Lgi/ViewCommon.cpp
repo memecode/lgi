@@ -493,7 +493,7 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 	int Border = Sunken() || Raised() ? _BorderSize : 0;
 	if (Border == 2)
 	{
-		LgiEdge e;
+		LEdge e;
 		if (Sunken())
 			e = Focus() ? EdgeWin7FocusSunken : DefaultSunkenEdge;
 		else
@@ -1979,7 +1979,7 @@ bool LView::InThread()
 bool LView::PostEvent(int Cmd, GMessage::Param a, GMessage::Param b)
 {
 	#ifdef LGI_SDL
-		return LgiPostEvent(this, Cmd, a, b);
+		return LPostEvent(this, Cmd, a, b);
 	#elif WINNATIVE
 		if (!_View)
 			return false;
@@ -1994,7 +1994,7 @@ bool LView::PostEvent(int Cmd, GMessage::Param a, GMessage::Param b)
 		return LAppInst->PostEvent(this, Cmd, a, b);
 	#else
 		if (_View)
-			return LgiPostEvent(_View, Cmd, a, b);
+			return LPostEvent(_View, Cmd, a, b);
 		LAssert(0);
 		return false;
 	#endif

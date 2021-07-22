@@ -1401,7 +1401,7 @@ void LTextView3::PourStyle(size_t Start, ssize_t EditSize)
 	{		
 		LArray<GLinkInfo> Links;		
 		LAssert((ssize_t)Start + Length <= Size);		
-		if (LgiDetectLinks(Links, Text + Start, Length))
+		if (LDetectLinks(Links, Text + Start, Length))
 		{
 			for (uint32_t i=0; i<Links.Length(); i++)
 			{
@@ -2308,8 +2308,8 @@ bool LTextView3::ClearDirty(bool Ask, const char *FileName)
 	if (Dirty)
 	{
 		int Answer = (Ask) ? LgiMsg(this,
-									LgiLoadString(L_TEXTCTRL_ASK_SAVE, "Do you want to save your changes to this document?"),
-									LgiLoadString(L_TEXTCTRL_SAVE, "Save"),
+									LLoadString(L_TEXTCTRL_ASK_SAVE, "Do you want to save your changes to this document?"),
+									LLoadString(L_TEXTCTRL_SAVE, "Save"),
 									MB_YESNOCANCEL) : IDYES;
 		if (Answer == IDYES)
 		{
@@ -2694,7 +2694,7 @@ void LTextView3::SetLine(int i)
 
 bool LTextView3::DoGoto()
 {
-	GInput Dlg(this, "", LgiLoadString(L_TEXTCTRL_GOTO_LINE, "Goto line:"), "Text");
+	GInput Dlg(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto line:"), "Text");
 	if (Dlg.DoModal() == IDOK &&
 		Dlg.GetStr())
 	{
@@ -3495,33 +3495,33 @@ void LTextView3::DoContextMenu(LMouse &m)
 		}
 	}
 
-	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_CUT, "Cut"), IDM_CUT, HasSelection());
-	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_COPY, HasSelection());
-	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_PASTE, "Paste"), IDM_PASTE, ClipText != 0);
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_CUT, "Cut"), IDM_CUT, HasSelection());
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_COPY, HasSelection());
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_PASTE, "Paste"), IDM_PASTE, ClipText != 0);
 	RClick.AppendSeparator();
 
 	RClick.AppendItem("Copy All", IDM_COPY_ALL, true);
 	RClick.AppendItem("Select All", IDM_SELECT_ALL, true);
 	RClick.AppendSeparator();
 
-	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_UNDO, "Undo"), IDM_UNDO, UndoQue.CanUndo());
-	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_REDO, "Redo"), IDM_REDO, UndoQue.CanRedo());
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_UNDO, "Undo"), IDM_UNDO, UndoQue.CanUndo());
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_REDO, "Redo"), IDM_REDO, UndoQue.CanRedo());
 	RClick.AppendSeparator();
 
-	auto i = RClick.AppendItem(LgiLoadString(L_TEXTCTRL_FIXED, "Fixed Width Font"), IDM_FIXED, true);
+	auto i = RClick.AppendItem(LLoadString(L_TEXTCTRL_FIXED, "Fixed Width Font"), IDM_FIXED, true);
 	if (i) i->Checked(GetFixedWidthFont());
 
-	i = RClick.AppendItem(LgiLoadString(L_TEXTCTRL_AUTO_INDENT, "Auto Indent"), IDM_AUTO_INDENT, true);
+	i = RClick.AppendItem(LLoadString(L_TEXTCTRL_AUTO_INDENT, "Auto Indent"), IDM_AUTO_INDENT, true);
 	if (i) i->Checked(AutoIndent);
 	
-	i = RClick.AppendItem(LgiLoadString(L_TEXTCTRL_SHOW_WHITESPACE, "Show Whitespace"), IDM_SHOW_WHITE, true);
+	i = RClick.AppendItem(LLoadString(L_TEXTCTRL_SHOW_WHITESPACE, "Show Whitespace"), IDM_SHOW_WHITE, true);
 	if (i) i->Checked(ShowWhiteSpace);
 	
-	i = RClick.AppendItem(LgiLoadString(L_TEXTCTRL_HARD_TABS, "Hard Tabs"), IDM_HARD_TABS, true);
+	i = RClick.AppendItem(LLoadString(L_TEXTCTRL_HARD_TABS, "Hard Tabs"), IDM_HARD_TABS, true);
 	if (i) i->Checked(HardTabs);
 	
-	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_INDENT_SIZE, "Indent Size"), IDM_INDENT_SIZE, true);
-	RClick.AppendItem(LgiLoadString(L_TEXTCTRL_TAB_SIZE, "Tab Size"), IDM_TAB_SIZE, true);
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_INDENT_SIZE, "Indent Size"), IDM_INDENT_SIZE, true);
+	RClick.AppendItem(LLoadString(L_TEXTCTRL_TAB_SIZE, "Tab Size"), IDM_TAB_SIZE, true);
 
 	if (Environment)
 		Environment->AppendItems(&RClick, NULL);
@@ -3661,11 +3661,11 @@ bool LTextView3::OnStyleMenu(LStyle *style, LSubMenu *m)
 		{
 			LString s(Text + style->Start, style->Len);
 			if (LIsValidEmail(s))
-				m->AppendItem(LgiLoadString(L_TEXTCTRL_EMAIL_TO, "New Email to..."), IDM_NEW, true);
+				m->AppendItem(LLoadString(L_TEXTCTRL_EMAIL_TO, "New Email to..."), IDM_NEW, true);
 			else
-				m->AppendItem(LgiLoadString(L_TEXTCTRL_OPENURL, "Open URL"), IDM_OPEN, true);
+				m->AppendItem(LLoadString(L_TEXTCTRL_OPENURL, "Open URL"), IDM_OPEN, true);
 
-			m->AppendItem(LgiLoadString(L_TEXTCTRL_COPYLINK, "Copy link location"), IDM_COPY_URL, true);
+			m->AppendItem(LLoadString(L_TEXTCTRL_COPYLINK, "Copy link location"), IDM_COPY_URL, true);
 			return true;
 		}
 		default:

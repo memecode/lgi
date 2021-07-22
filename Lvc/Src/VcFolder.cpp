@@ -108,7 +108,7 @@ ReaderThread::~ReaderThread()
 {
 	Out = NULL;
 	while (!IsExited())
-		LgiSleep(1);
+		LSleep(1);
 }
 
 const char *HgFilter = "We\'re removing Mercurial support";
@@ -419,7 +419,7 @@ Result VcFolder::RunCmd(const char *Args, LoggingType Logging)
 					d->Log->Write(Rd.Get(), Rd.Length());
 			}
 
-			LgiYield();
+			LYield();
 		}
 
 		auto Rd = Process.Read();

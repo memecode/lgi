@@ -258,7 +258,7 @@ bool GTrayIcon::Load(const TCHAR *Str)
 {
 	#if WINNATIVE
 	
-		HICON i = ::LoadIcon(LgiProcessInst(), Str);
+		HICON i = ::LoadIcon(LProcessInst(), Str);
 		if (i)
 		{
 			d->Icon.Add(i);

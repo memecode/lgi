@@ -57,7 +57,7 @@ enum GDomProperty
 	#undef _
 };
 
-LgiFunc GDomProperty LgiStringToDomProp(const char *Str);
-LgiFunc const char *LgiDomPropToString(GDomProperty Prop);
+LgiFunc GDomProperty LStringToDomProp(const char *Str);
+LgiFunc const char *LDomPropToString(GDomProperty Prop);
 
 #endif

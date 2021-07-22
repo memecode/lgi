@@ -641,9 +641,9 @@ public:
 				// return MIN((int)l.Value, X());
 				return (int)l.Value;
 			case LCss::LenPt:
-				return (int) (l.Value * LgiScreenDpi() / 72.0);
+				return (int) (l.Value * LScreenDpi() / 72.0);
 			case LCss::LenCm:
-				return (int) (l.Value * LgiScreenDpi() / 2.54);
+				return (int) (l.Value * LScreenDpi() / 2.54);
 			case LCss::LenEm:
 			{
 				if (!f)
@@ -728,9 +728,9 @@ public:
 			case LCss::LenPx:
 				return (int)l.Value;
 			case LCss::LenPt:
-				return (int) (l.Value * LgiScreenDpi() / 72.0);
+				return (int) (l.Value * LScreenDpi() / 72.0);
 			case LCss::LenCm:
-				return (int) (l.Value * LgiScreenDpi() / 2.54);
+				return (int) (l.Value * LScreenDpi() / 2.54);
 
 			case LCss::LenEm:
 			{
@@ -1354,7 +1354,7 @@ void GTag::Set(const char *attr, const char *val)
 
 bool GTag::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty Fld = LgiStringToDomProp(Name);
+	GDomProperty Fld = LStringToDomProp(Name);
 	switch (Fld)
 	{
 		case ObjStyle: // Type: GCssStyle
@@ -1384,7 +1384,7 @@ bool GTag::GetVariant(const char *Name, LVariant &Value, char *Array)
 
 bool GTag::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty Fld = LgiStringToDomProp(Name);
+	GDomProperty Fld = LStringToDomProp(Name);
 	switch (Fld)
 	{
 		case ObjStyle:
@@ -2038,7 +2038,7 @@ bool GTag::OnMouseClick(LMouse &m)
 				int Id = 0;
 
 				if (IsAnchor)
-					RClick.AppendItem(LgiLoadString(L_COPY_LINK_LOCATION, "&Copy Link Location"), IDM_COPY_LINK, Uri != NULL);
+					RClick.AppendItem(LLoadString(L_COPY_LINK_LOCATION, "&Copy Link Location"), IDM_COPY_LINK, Uri != NULL);
 				if (IsImg)
 					RClick.AppendItem("Copy Image Location", IDM_COPY_IMG, ImgSrc != NULL);
 				if (Html->GetEnv())
@@ -8186,13 +8186,13 @@ void GHtml::OnMouseClick(LMouse &m)
 			};
 			#define IDM_CHARSET_BASE	10000
 
-			RClick.AppendItem					(LgiLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_COPY, HasSelection());
-			LMenuItem *Vs = RClick.AppendItem	(LgiLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
-			RClick.AppendItem					(LgiLoadString(L_COPY_SOURCE, "Copy Source"), IDM_COPY_SRC, Source != 0);
-			LMenuItem *Load = RClick.AppendItem	(LgiLoadString(L_VIEW_IMAGES, "View External Images"), IDM_VIEW_IMAGES, true);
+			RClick.AppendItem					(LLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_COPY, HasSelection());
+			LMenuItem *Vs = RClick.AppendItem	(LLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
+			RClick.AppendItem					(LLoadString(L_COPY_SOURCE, "Copy Source"), IDM_COPY_SRC, Source != 0);
+			LMenuItem *Load = RClick.AppendItem	(LLoadString(L_VIEW_IMAGES, "View External Images"), IDM_VIEW_IMAGES, true);
 			if (Load) Load->Checked(GetLoadImages());
-			RClick.AppendItem					(LgiLoadString(L_VIEW_IN_DEFAULT_BROWSER, "View in Default Browser"), IDM_EXTERNAL, Source != 0);
-			LSubMenu *Cs = RClick.AppendSub		(LgiLoadString(L_CHANGE_CHARSET, "Change Charset"));
+			RClick.AppendItem					(LLoadString(L_VIEW_IN_DEFAULT_BROWSER, "View in Default Browser"), IDM_EXTERNAL, Source != 0);
+			LSubMenu *Cs = RClick.AppendSub		(LLoadString(L_CHANGE_CHARSET, "Change Charset"));
 
 			if (Cs)
 			{

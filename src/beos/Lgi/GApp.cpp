@@ -22,7 +22,7 @@ public:
 		GdcSystem = 0;
 		Config = 0;
 		SkinLib = 0;
-		GuiThread = LgiGetCurrentThread();
+		GuiThread = LGetCurrentThread();
 		FirstRun = true;
 	}
 
@@ -174,7 +174,7 @@ LViewI *LApp::GetFocus()
 	return 0;
 }
 
-int32 LApp::GetMetric(LgiSystemMetric Which)
+int32 LApp::GetMetric(LSystemMetric Which)
 {
 	return 0;
 }

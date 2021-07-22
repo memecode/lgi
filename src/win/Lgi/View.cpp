@@ -299,7 +299,7 @@ LWindowsClass::LWindowsClass(const char *name)
 
 LWindowsClass::~LWindowsClass()
 {
-	UnregisterClassW(NameW(), LgiProcessInst());
+	UnregisterClassW(NameW(), LProcessInst());
 	Class.lpszClassName = NULL;
 }
 
@@ -351,12 +351,12 @@ bool LWindowsClass::Register()
 	{
 		ZeroObj(Class);
 		Class.cbSize = sizeof(Class);
-		Status = GetClassInfoExW(LgiProcessInst(), NameW(), &Class) != 0;
+		Status = GetClassInfoExW(LProcessInst(), NameW(), &Class) != 0;
 		LAssert(Status);
 	}
 	else // if (!Class.lpszClassName)
 	{
-		Class.hInstance = LgiProcessInst();
+		Class.hInstance = LProcessInst();
 		if (!Class.lpszClassName)
 			Class.lpszClassName = NameW();
 		Status = RegisterClassExW(&Class) != 0;
@@ -383,7 +383,7 @@ bool LWindowsClass::SubClass(char *Parent)
 		LAutoWString p(Utf8ToWide(Parent));
 		if (p)
 		{
-			if (GetClassInfoExW(LgiProcessInst(), p, &Class))
+			if (GetClassInfoExW(LProcessInst(), p, &Class))
 			{
 				ParentProc = Class.lpfnWndProc;
 				if (hBr)
@@ -392,7 +392,7 @@ bool LWindowsClass::SubClass(char *Parent)
 				}
 
 				Class.cbWndExtra = max(Class.cbWndExtra, GWL_EXTRA_BYTES);
-				Class.hInstance = LgiProcessInst();
+				Class.hInstance = LProcessInst();
 				Class.lpfnWndProc = (WNDPROC) SubClassRedir;
 
 				Class.lpszClassName = NameW();
@@ -678,7 +678,7 @@ bool LView::Attach(LViewI *p)
 								Pos.X(), Pos.Y(),
 								Parent ? Parent->Handle() : 0,
 								NULL,
-								LgiProcessInst(),
+								LProcessInst(),
 								(LViewI*) this);
 
 		#ifdef _DEBUG

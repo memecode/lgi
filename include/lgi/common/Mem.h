@@ -27,10 +27,10 @@ typedef unsigned char bool;
 #endif
 
 /// \returns true if heap is ok.
-LgiFunc bool LgiCheckHeap();
+LgiFunc bool LCheckHeap();
 
 /// Turns on/off leak detection.
-LgiFunc void LgiSetLeakDetect(bool On);
+LgiFunc void LSetLeakDetect(bool On);
 
 /// \return true if the block of memory referenced by 'p' is readable for Len bytes.
 LgiFunc bool LgiCanReadMemory
@@ -45,7 +45,7 @@ LgiFunc bool LgiCanReadMemory
 /// Dumps info about the currently allocated blocks of memory
 /// to 'filename'. Only work when LGI_MEM_DEBUG defined.
 /// \returns true on success.
-LgiFunc bool LgiDumpMemoryStats(char *filename);
+LgiFunc bool LDumpMemoryStats(char *filename);
 
 #if (!defined(_MSC_VER) || _MSC_VER != _MSC_VER_VS2003) && (defined(WIN32) || defined(WIN64))
 

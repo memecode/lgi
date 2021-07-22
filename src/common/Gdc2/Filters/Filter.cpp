@@ -574,7 +574,7 @@ GFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, LStream *In)
 					
 					if (DstCs != SrcCs)
 					{
-						if (!LgiRopRgb(Ptr, DstCs, Ptr, SrcCs, pMem->x, false))
+						if (!LRopRgb(Ptr, DstCs, Ptr, SrcCs, pMem->x, false))
 						{
 							Status = IoUnsupportedFormat;
 							LgiTrace("%s:%i - Bmp had unsupported bit depth.\n", _FL);
@@ -1559,7 +1559,7 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
 							}
 							else
 							{
-								LgiSleep(10);
+								LSleep(10);
 							}
 						}
 						else break;

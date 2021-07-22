@@ -1900,12 +1900,12 @@ void AppWnd::GotoObject(ResString *s,
 				{
 					s->GetList()->Select(0);
 					s->ScrollTo();
-					LgiYield();
+					LYield();
 					s->Select(true);
 				}
 				else if (d)
 				{
-					LgiYield();
+					LYield();
 					d->SelectCtrl(c);
 				}
 				else if (m)
@@ -2219,7 +2219,7 @@ public:
 			}
 		}
 
-		LgiYield();
+		LYield();
 	}
 
 	void OnPosChange()
@@ -2632,7 +2632,7 @@ bool AppWnd::LoadLgi(const char *FileName)
 						if (Timer.DoNow())
 						{
 							Progress.Value(Root->Children.IndexOf(t));
-							LgiYield();
+							LYield();
 						}
 
 						int RType = 0;
@@ -3211,7 +3211,7 @@ public:
 			if (strnicmp(Line, "define", 6) == 0)
 			{
 				Line += 6;
-				Line = LgiSkipDelim(Line);
+				Line = LSkipDelim(Line);
 				char *Start = Line;
 				const char *WhiteSpace = " \r\n\t";
 				while (*Line && !strchr(WhiteSpace, *Line))
@@ -3220,7 +3220,7 @@ public:
 				}
 
 				Name = NewStr(Start, Line-Start);
-				Line = LgiSkipDelim(Line);
+				Line = LSkipDelim(Line);
 				Start = Line;
 				while (*Line && !strchr(WhiteSpace, *Line))
 				{
@@ -3347,7 +3347,7 @@ public:
 								while (!F.Eof())
 								{
 									F.ReadStr(Line, sizeof(Line));
-									char *p = LgiSkipDelim(Line);
+									char *p = LSkipDelim(Line);
 									if (*p == '#')
 									{
 										ProcessLine(p);
@@ -3517,12 +3517,12 @@ bool AppWnd::LoadWin32(const char *FileName)
 				if (Ticker.DoNow())
 				{
 					Progress.Value(CurLine);
-					LgiYield();
+					LYield();
 				}
 				
 				// Skip white space
 				char *Line = Lines[CurLine];
-				char *p = LgiSkipDelim(Line);
+				char *p = LSkipDelim(Line);
 				Defines.ProcessLine(Line);
 
 				// Tokenize
@@ -3557,11 +3557,11 @@ bool AppWnd::LoadWin32(const char *FileName)
 										{
 											int Pos[4] = {0, 0, 0, 0};
 											int i = 0;
-											for (; i<T.Length() && !LgiIsNumber(T[i]); i++)
+											for (; i<T.Length() && !LIsNumber(T[i]); i++)
 												;
 											for (int n=0; n<4; n++)
 											{
-												if (i+n<T.Length() && LgiIsNumber(T[i+n]))
+												if (i+n<T.Length() && LIsNumber(T[i+n]))
 												{
 													Pos[n] = atoi(T[i+n]);
 												}
@@ -3679,7 +3679,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 								char *Next = Lines[CurLine+1];
 								if (Next)
 								{
-									Next = LgiSkipDelim(Next);
+									Next = LSkipDelim(Next);
 									char *NextTok = LTokStr((const char*&)Next);
 									if (NextTok)
 									{

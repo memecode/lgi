@@ -787,7 +787,7 @@ void CtrlTable::EnumCtrls(List<ResDialogCtrl> &Ctrls)
 
 bool CtrlTable::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty p = LgiStringToDomProp(Name);
+	GDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		case TableLayoutCols:
@@ -833,7 +833,7 @@ bool CtrlTable::GetVariant(const char *Name, LVariant &Value, char *Array)
 
 bool CtrlTable::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty p = LgiStringToDomProp(Name);
+	GDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		case TableLayoutCols:
@@ -1489,7 +1489,7 @@ public:
 	TableLayoutTest(LViewI *par);
 	~TableLayoutTest();
 	
-	void OnDialog(LgiDialogRes *Dlg);
+	void OnDialog(LDialogRes *Dlg);
 	int OnNotify(LViewI *Ctrl, int Flags);
     GMessage::Param OnEvent(GMessage *m);
 };
@@ -1497,10 +1497,10 @@ public:
 class DlgItem : public LTreeItem
 {
     TableLayoutTest *Wnd;
-	LgiDialogRes *Dlg;
+	LDialogRes *Dlg;
 	
 public:
-	DlgItem(TableLayoutTest *w, LgiDialogRes *dlg)
+	DlgItem(TableLayoutTest *w, LDialogRes *dlg)
 	{
 	    Wnd = w;
 		Dlg = dlg;
@@ -1542,8 +1542,8 @@ public:
 		Res = res;
 		File = file;
 
-		List<LgiDialogRes>::I d = Res->GetDialogs();
-		for (LgiDialogRes *dlg = *d; dlg; dlg = *++d)
+		List<LDialogRes>::I d = Res->GetDialogs();
+		for (LDialogRes *dlg = *d; dlg; dlg = *++d)
 		{
 			if (dlg->Str && HasTableLayout(dlg->Dialog))
 			{
@@ -1582,7 +1582,7 @@ public:
 	{
 		while (!IsExited())
 		{
-			LgiSleep(1);
+			LSleep(1);
 		}
 	}
 	
@@ -1598,9 +1598,9 @@ public:
             	LAutoPtr<LResources> Res;
     			if (Res.Reset(new LResources(Files[i])))
     			{
-				    List<LgiDialogRes>::I d = Res->GetDialogs();
+				    List<LDialogRes>::I d = Res->GetDialogs();
 				    bool HasTl = false;
-				    for (LgiDialogRes *dlg = *d; dlg; dlg = *++d)
+				    for (LDialogRes *dlg = *d; dlg; dlg = *++d)
 				    {
 					    if (dlg->Str && HasTableLayout(dlg->Dialog))
 					    {
@@ -1625,7 +1625,7 @@ public:
 
 class DlgContainer : public LLayout
 {
-    LgiDialogRes *Dlg;
+    LDialogRes *Dlg;
     LRect Size;
 
 public:
@@ -1645,7 +1645,7 @@ public:
         pDC->Rectangle();
     }
     
-    void OnDialog(LgiDialogRes *d)
+    void OnDialog(LDialogRes *d)
     {
         while (Children.Length())
             delete Children[0];
@@ -1699,7 +1699,7 @@ TableLayoutTest::~TableLayoutTest()
 	Worker.Reset();
 }
 
-void TableLayoutTest::OnDialog(LgiDialogRes *Dlg)
+void TableLayoutTest::OnDialog(LDialogRes *Dlg)
 {
     if (View)
         View->OnDialog(Dlg);

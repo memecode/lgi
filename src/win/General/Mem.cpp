@@ -57,27 +57,27 @@ static block *First = 0;
 static block *Last = 0;
 static CRITICAL_SECTION Lock;
 
-void LgiSetLeakDetect(bool On)
+void LSetLeakDetect(bool On)
 {
 	DoLeakCheck = On;
 }
 
 #pragma warning(disable:4074) // warning C4074: initializers put in compiler reserved initialization area
 #pragma init_seg(compiler)
-struct GLeakCheck
+struct LLeakCheck
 {
-	GLeakCheck()
+	LLeakCheck()
 	{
 		InitializeCriticalSection(&Lock);
 		MemInit = true;
 	}
 
-	~GLeakCheck()
+	~LLeakCheck()
 	{
 		char DefName[] = "leaks.mem";
 		if (First && DoLeakCheck)
 		{
-			LgiDumpMemoryStats(DefName);
+			LDumpMemoryStats(DefName);
 		}
 		else
 		{
@@ -327,7 +327,7 @@ typedef BOOL (__stdcall *proc_SymGetLineFromAddr)(	HANDLE hProcess,
 typedef DWORD (__stdcall *proc_SymGetOptions)(VOID);
 typedef DWORD (__stdcall *proc_SymSetOptions)(DWORD SymOptions);
 
-bool LgiDumpMemoryStats(char *filename)
+bool LDumpMemoryStats(char *filename)
 {
 	bool Status = true;
 
@@ -599,7 +599,7 @@ typedef struct _CrtMemBlockHeader
          */
 } _CrtMemBlockHeader;
 
-bool LgiDumpMemoryStats(char *filename)
+bool LDumpMemoryStats(char *filename)
 {
 	#ifdef _DEBUG
 	_CrtMemState state = {0};
@@ -641,7 +641,7 @@ bool LgiDumpMemoryStats(char *filename)
 	#endif
 }
 
-void LgiSetLeakDetect(bool On)
+void LSetLeakDetect(bool On)
 {
 }
 
@@ -827,7 +827,7 @@ public:
 
 	~_VMemCleanup()
 	{
-		LAssert(LgiCheckHeap());
+		LAssert(LCheckHeap());
 
 		char s[256];
 		if (_First)
@@ -959,7 +959,7 @@ void _vmem_free(void *ptr)
 #endif
 */
 
-bool LgiCheckHeap()
+bool LCheckHeap()
 {
 	#ifdef MEMORY_DEBUG
 

@@ -60,7 +60,7 @@ public:
 		Event.Signal();
 
 		while (!IsExited())
-			LgiSleep(0);
+			LSleep(0);
 	}
 	
 	int Main()

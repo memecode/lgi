@@ -17,7 +17,7 @@ public:
 
 BOOL CALLBACK LAbortProc(HDC hdc, int iError)
 {
-	LgiYield();
+	LYield();
 	return true;
 }
 

@@ -86,7 +86,7 @@ void LTextLabel::OnAttach()
 
 bool LTextLabel::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty p = LgiStringToDomProp(Name);
+	GDomProperty p = LStringToDomProp(Name);
 	if (p == ObjStyle)
 	{
 		const char *Style = Value.Str();

@@ -1675,12 +1675,12 @@ struct GDomPropMap
 	
 } DomPropMap;
 
-GDomProperty LgiStringToDomProp(const char *Str)
+GDomProperty LStringToDomProp(const char *Str)
 {
 	return DomPropMap.ToProp.Find(Str);
 }
 
-const char *LgiDomPropToString(GDomProperty Prop)
+const char *LDomPropToString(GDomProperty Prop)
 {
 	return DomPropMap.ToString.Find(Prop);
 }
@@ -2006,7 +2006,7 @@ LCustomType::Method *LCustomType::DefineMethod(const char *Name, LArray<LString>
 
 bool LCustomType::CustomField::GetVariant(const char *Field, LVariant &Value, char *Array)
 {
-	GDomProperty p = LgiStringToDomProp(Field);
+	GDomProperty p = LStringToDomProp(Field);
 	switch (p)
 	{
 		case ObjName: // Type: String
@@ -2285,7 +2285,7 @@ bool LCustomType::Set(int Index, LVariant &In, uint8_t *This, int ArrayIndex)
 
 bool LCustomType::GetVariant(const char *Field, LVariant &Value, char *Array)
 {
-	GDomProperty p = LgiStringToDomProp(Field);
+	GDomProperty p = LStringToDomProp(Field);
 	switch (p)
 	{
 		case ObjName: // Type: String
