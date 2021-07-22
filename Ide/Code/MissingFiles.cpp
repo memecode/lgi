@@ -236,9 +236,9 @@ public:
 	~MissingFiles()
 	{
 		if (SearchHnd >= 0)
-			GEventSinkMap::Dispatch.CancelThread(SearchHnd);
+			LEventSinkMap::Dispatch.CancelThread(SearchHnd);
 		if (ExistsHnd >= 0)
-			GEventSinkMap::Dispatch.CancelThread(ExistsHnd);
+			LEventSinkMap::Dispatch.CancelThread(ExistsHnd);
 	}
 
 	void OnReplace(const char *NewPath)

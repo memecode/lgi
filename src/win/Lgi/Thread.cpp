@@ -163,18 +163,6 @@ bool LThread::IsExited()
 	return false;
 }
 
-void LThread::WaitForExit(int WarnAfterMs)
-{
-	auto Start = LCurrentTime();
-	while (!IsExited())
-	{
-		if ((LCurrentTime() - Start) >= WarnAfterMs)
-			LAssert(!"Thread hasn't exited.");
-
-		LgiSleep(10);
-	}
-}
-
 void LThread::Run()
 {
 	if (State == THREAD_EXITED)

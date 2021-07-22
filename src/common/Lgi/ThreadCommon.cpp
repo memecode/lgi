@@ -1,7 +1,20 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/EventTargetThread.h"
 
-GEventSinkMap GEventSinkMap::Dispatch(128);
+LEventSinkMap LEventSinkMap::Dispatch(128);
+
+//////////////////////////////////////////////////////////////////////////////////
+void LThread::WaitForExit(int WarnAfterMs)
+{
+	auto Start = LCurrentTime();
+	while (!IsExited())
+	{
+		if ((LCurrentTime() - Start) >= WarnAfterMs)
+			LAssert(!"Thread hasn't exited.");
+
+		LgiSleep(10);
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////////
 LThreadTarget::LThreadTarget()
@@ -147,38 +160,3 @@ LThreadOwner::~LThreadOwner()
 		Unlock();
 	}
 }
-
-////////////////////////////////////////////////////////////////////////////////////////
-/*
-GEventSinkPtr::GEventSinkPtr(LEventTargetThread *p, bool own)
-{
-	Ptr = p;
-	OwnPtr = own;
-	if (p && p->Lock(_FL))
-	{
-		p->Ptrs.Add(this);
-		p->Unlock();
-	}
-}
-
-GEventSinkPtr::~GEventSinkPtr()
-{
-	if (Lock(_FL))
-	{
-		LEventTargetThread *tt = dynamic_cast<LEventTargetThread*>(Ptr);
-		if (tt)
-		{
-			if (tt->Lock(_FL))
-			{
-				if (!tt->Ptrs.Delete(this))
-					LAssert(0);
-				tt->Unlock();
-			}
-		}
-
-		if (OwnPtr)
-			delete Ptr;
-		Ptr = NULL;
-	}
-}
-*/

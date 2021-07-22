@@ -211,7 +211,7 @@ LView::~LView()
 {
 	if (d->SinkHnd >= 0)
 	{
-		GEventSinkMap::Dispatch.RemoveSink(this);
+		LEventSinkMap::Dispatch.RemoveSink(this);
 		d->SinkHnd = -1;
 	}
 	
@@ -236,7 +236,7 @@ LView::~LView()
 int LView::AddDispatch()
 {
 	if (d->SinkHnd < 0)
-		d->SinkHnd = GEventSinkMap::Dispatch.AddSink(this);
+		d->SinkHnd = LEventSinkMap::Dispatch.AddSink(this);
 	return d->SinkHnd;
 }
 

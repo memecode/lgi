@@ -1076,7 +1076,7 @@ public:
 	// Object
 	AppWndPrivate(AppWnd *a) :
 		Options(LOptionsFile::DesktopMode, AppName),
-		AppHnd(GEventSinkMap::Dispatch.AddSink(a))
+		AppHnd(LEventSinkMap::Dispatch.AddSink(a))
 	{
 		FindSym.Reset(new FindSymbolSystem(AppHnd));
 		HistoryLoc = 0;

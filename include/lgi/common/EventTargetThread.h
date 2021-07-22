@@ -7,24 +7,24 @@
 #include "lgi/common/Cancel.h"
 #include "lgi/common/HashTable.h"
 
-#define PostThreadEvent GEventSinkMap::Dispatch.PostEvent
+#define PostThreadEvent LEventSinkMap::Dispatch.PostEvent
 
-class LgiClass GEventSinkMap : public LMutex
+class LgiClass LEventSinkMap : public LMutex
 {
 protected:
 	LHashTbl<IntKey<int>,LEventSinkI*> ToPtr;
 	LHashTbl<PtrKey<void*>,int> ToHnd;
 
 public:
-	static GEventSinkMap Dispatch;
+	static LEventSinkMap Dispatch;
 
-	GEventSinkMap(int SizeHint = 0) :
+	LEventSinkMap(int SizeHint = 0) :
 		ToPtr(SizeHint),
 		ToHnd(SizeHint)
 	{
 	}
 
-	virtual ~GEventSinkMap()
+	virtual ~LEventSinkMap()
 	{
 	}
 
@@ -138,14 +138,14 @@ class LgiClass GMappedEventSink : public LEventSinkI
 {
 protected:
 	int Handle;
-	GEventSinkMap *Map;
+	LEventSinkMap *Map;
 
 public:
 	GMappedEventSink()
 	{
 		Map = NULL;
 		Handle = 0;
-		SetMap(&GEventSinkMap::Dispatch);
+		SetMap(&LEventSinkMap::Dispatch);
 	}
 
 	virtual ~GMappedEventSink()
@@ -153,7 +153,7 @@ public:
 		SetMap(NULL);
 	}
 
-	bool SetMap(GEventSinkMap *m)
+	bool SetMap(LEventSinkMap *m)
 	{
 		if (Map)
 		{
@@ -382,7 +382,7 @@ public:
 	{
 		uint64 Start = LCurrentTime();
 		bool Status;
-		while (!(Status = GEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, (GMessage::Param) A.Get())))
+		while (!(Status = LEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, (GMessage::Param) A.Get())))
 		{
 			LgiSleep(2);
 			if (LCurrentTime() - Start >= PostTimeout) break;
@@ -397,7 +397,7 @@ public:
 	{
 		uint64 Start = LCurrentTime();
 		bool Status;
-		while (!(Status = GEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, A, (GMessage::Param) B.Get())))
+		while (!(Status = LEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, A, (GMessage::Param) B.Get())))
 		{
 			LgiSleep(2);
 			if (LCurrentTime() - Start >= PostTimeout) break;
@@ -412,7 +412,7 @@ public:
 	{
 		uint64 Start = LCurrentTime();
 		bool Status;
-		while (!(Status = GEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, (GMessage::Param) A.Get(), (GMessage::Param) B.Get())))
+		while (!(Status = LEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, (GMessage::Param) A.Get(), (GMessage::Param) B.Get())))
 		{
 			LgiSleep(2);
 			if (LCurrentTime() - Start >= PostTimeout) break;
