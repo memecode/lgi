@@ -1703,9 +1703,8 @@ ssize_t LFile::Read(void *Buffer, ssize_t Size, int Flags)
 		}
 		else
 		{
-			Rd += Bytes;
-			d->Status &= Bytes > 0;
-			d->OnError(_FL, GetLastError(), "Read");
+			if (!Eof())
+				d->OnError(_FL, GetLastError(), "Read");
 			break;
 		}
 	}
