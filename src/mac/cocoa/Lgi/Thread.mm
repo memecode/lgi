@@ -27,7 +27,7 @@ void *ThreadEntryPoint(void *i)
 		// Make sure we have finished executing the setup
 		while (Thread->State == LThread::THREAD_INIT)
 		{
-			LgiSleep(5);
+			LSleep(5);
 		}
 		
 		pthread_detach(Thread->hThread);

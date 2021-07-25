@@ -422,8 +422,8 @@ LWindow::LWindow(OsWindow wnd) : LView(NULL)
 LWindow::~LWindow()
 {
 	LOG("LWindow::~LWindow %p\n", this);
-	if (LgiApp->AppWnd == this)
-		LgiApp->AppWnd = 0;
+	if (LAppInst->AppWnd == this)
+		LAppInst->AppWnd = 0;
 	
 	_Delete();
 	d->DeleteOnClose = false; // We're already in the destructor, don't redelete.
@@ -586,7 +586,7 @@ void LWindow::Quit(bool DontDelete)
 	if (_QuitOnClose)
 	{
 		_QuitOnClose = false;
-		LgiCloseApp();
+		LCloseApp();
 	}
 	
 	if (Wnd)
@@ -633,7 +633,7 @@ void LWindow::OnFrontSwitch(bool b)
 	}
 	else
 	{
-		auto m = LgiApp->Default.Get();
+		auto m = LAppInst->Default.Get();
 		[NSApplication sharedApplication].mainMenu = m ? m->Handle() : nil;
 	}
 	// printf("%s:%i - menu for %s is %p\n", _FL, Name(), [NSApplication sharedApplication].mainMenu);
@@ -693,7 +693,7 @@ void LWindow::SetAlwaysOnTop(bool b)
 
 bool LWindow::PostEvent(int Event, GMessage::Param a, GMessage::Param b)
 {
-	return LgiApp->PostEvent(this, Event, a, b);
+	return LAppInst->PostEvent(this, Event, a, b);
 }
 
 bool LWindow::Attach(LViewI *p)
@@ -730,7 +730,7 @@ bool LWindow::OnRequestClose(bool OsShuttingDown)
 {
 	if (GetQuitOnClose())
 	{
-		LgiCloseApp();
+		LCloseApp();
 	}
 	
 	return LView::OnRequestClose(OsShuttingDown);
@@ -765,9 +765,9 @@ bool LWindow::HandleViewMouse(LView *v, LMouse &m)
 			}
 		}
 		
-		if (!m.IsMove() && LgiApp)
+		if (!m.IsMove() && LAppInst)
 		{
-			auto mh = LgiApp->GetMouseHook();
+			auto mh = LAppInst->GetMouseHook();
 			if (mh)
 				mh->TrackClick(v);
 		}
@@ -803,9 +803,9 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	}
 	
 	// Give key to popups
-	if (LgiApp &&
-		LgiApp->GetMouseHook() &&
-		LgiApp->GetMouseHook()->OnViewKey(v, k))
+	if (LAppInst &&
+		LAppInst->GetMouseHook() &&
+		LAppInst->GetMouseHook()->OnViewKey(v, k))
 	{
 		goto AllDone;
 	}
@@ -924,7 +924,7 @@ AllDone:
 	if (d)
 		d->LastKey = k;
 	else
-		LgiAssert(!"Window was deleted and we are accessing unallocated mem.");
+		LAssert(!"Window was deleted and we are accessing unallocated mem.");
 	
 	return Status;
 }
@@ -1104,7 +1104,7 @@ bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 
 LPoint LWindow::GetDpi()
 {
-	auto Dpi = LgiScreenDpi();
+	auto Dpi = LScreenDpi();
 	return LPoint(Dpi, Dpi);
 }
 
@@ -1297,7 +1297,7 @@ GMessage::Result LWindow::OnEvent(GMessage *m)
 			if (Wnd)
 				[Wnd.p performSelectorOnMainThread:@selector(onQuit) withObject:nil waitUntilDone:false];
 			else
-				LgiAssert(!"No window?");
+				LAssert(!"No window?");
 			break;
 		}
 		case M_DESTROY:

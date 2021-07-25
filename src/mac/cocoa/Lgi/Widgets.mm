@@ -145,7 +145,7 @@ int LDialog::DoModal(OsView OverideParent)
 		AttachChildren();
 		Visible(true);
 		
-		auto app = LgiApp->Handle();
+		auto app = LAppInst->Handle();
 		auto wnd = WindowHandle();
 		[app runModalForWindow:wnd];
 		
@@ -165,12 +165,12 @@ void LDialog::EndModal(int Code)
 		d->IsModal = false;
 		d->ModalStatus = Code;
 		
-		NSApplication *app = LgiApp->Handle();
+		NSApplication *app = LAppInst->Handle();
 		[app stopModal];
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 }
 
@@ -226,7 +226,8 @@ GMessage::Result LControl::OnEvent(GMessage *Msg)
 
 LPoint LControl::SizeOfStr(const char *Str)
 {
-	int y = SysFont->GetHeight();
+	auto Fnt = GetFont();
+	int y = Fnt->GetHeight();
 	LPoint Pt(0, 0);
 	
 	if (Str)
@@ -237,7 +238,7 @@ LPoint LControl::SizeOfStr(const char *Str)
 			e = strchr(s, '\n');
 			size_t Len = e ? e-s : strlen(s);
 			
-			LDisplayString ds(SysFont, s, Len);
+			LDisplayString ds(Fnt, s, Len);
 			Pt.x = MAX(Pt.x, ds.X());
 			Pt.y += y;
 		}

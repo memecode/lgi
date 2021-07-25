@@ -116,25 +116,25 @@ LString LClipBoard::Html()
 
 bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 	return false;
 }
 
 LSurface *LClipBoard::Bitmap()
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 	return NULL;
 }
 
 LString::Array LClipBoard::Files()
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 	return LString::Array();
 }
 
 bool LClipBoard::Files(LString::Array &Paths, bool AutoEmpty)
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 	return false;
 }
 

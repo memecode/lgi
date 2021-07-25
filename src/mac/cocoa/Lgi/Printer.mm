@@ -68,7 +68,7 @@ bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int MaxPage
 {
 	if (!Events)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 	

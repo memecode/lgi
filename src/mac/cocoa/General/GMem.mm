@@ -15,12 +15,12 @@
 #include "lgi/common/Mem.h"
 #include "lgi/common/Mutex.h"
 
-bool LgiCheckHeap()
+bool LCheckHeap()
 {
 	return true;
 }
 
-bool LgiDumpMemoryStats(char *filename)
+bool LDumpMemoryStats(char *filename)
 {
 	return false;
 }

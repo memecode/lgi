@@ -471,7 +471,7 @@ struct LVolumePriv
 	int64 Free;
 	LAutoPtr<LSurface> Icon;
 
-	LgiSystemPath SysPath;
+	LSystemPath SysPath;
 	List<LVolume> Sub;
 	List<LVolume>::I It;
 
@@ -496,7 +496,7 @@ struct LVolumePriv
 		}
 	}
 
-	LVolumePriv(LgiSystemPath type, const char *name) : It(Sub.end())
+	LVolumePriv(LSystemPath type, const char *name) : It(Sub.end())
 	{
 		Init();
 		
@@ -527,7 +527,7 @@ LVolume::LVolume(const char *init)
 	d = new LVolumePriv(init);
 }
 
-LVolume::LVolume(LgiSystemPath syspath, const char *name)
+LVolume::LVolume(LSystemPath syspath, const char *name)
 {
 	d = new LVolumePriv(syspath, name);
 }
@@ -1488,7 +1488,7 @@ char *LDirectory::GetName() const
 	if (d->De)
 		return d->De->d_name;
 
-	LgiAssert(!"Invalid state.");
+	LAssert(!"Invalid state.");
 	return NULL;
 }
 

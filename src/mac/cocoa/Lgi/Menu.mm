@@ -314,7 +314,7 @@ LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 				i->Child->Window = Window;
 				
 				i->Info.p = [[NSMenuItem alloc] init];
-				LgiAssert(i->Info);
+				LAssert(i->Info);
 
 				i->Name(Str);
 				LString s(i->LBase::Name());
@@ -382,7 +382,7 @@ void LSubMenu::OnActivate(LMenuItem *item)
 	else if (Parent)
 		Parent->OnActivate(item);
 	else
-		LgiAssert(!"Should have a float result OR a parent..");
+		LAssert(!"Should have a float result OR a parent..");
 }
 
 int LSubMenu::Float(LView *From, int x, int y, int Btns)
@@ -510,7 +510,7 @@ void LMenuItem::OnActivate(LMenuItem *item)
 	if (Parent)
 		Parent->OnActivate(item);
 	else
-		LgiAssert(!"Should have a parent.");
+		LAssert(!"Should have a parent.");
 }
 
 void LMenuItem::OnAttach(bool Attach)
@@ -538,7 +538,7 @@ void LMenuItem::OnAttach(bool Attach)
 // the default painting behaviour if desired.
 void LMenuItem::_Measure(LPoint &Size)
 {
-	auto Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+	auto Font = Menu && Menu->GetFont() ? Menu->GetFont() : LSysFont;
 	bool BaseMenu = Parent == Menu; // true if attached to a windows menu
 	// else is a submenu
 	int Ht = Font->GetHeight();
@@ -611,7 +611,7 @@ void LMenuItem::_PaintText(LSurface *pDC, int x, int y, int Width)
 	auto n = Name();
 	if (n)
 	{
-		auto Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+		auto Font = Menu && Menu->GetFont() ? Menu->GetFont() : LSysFont;
 		bool Underline = false;
 		const char *e = 0;
 		for (auto s=n; s && *s; s = *e ? e : 0)
@@ -724,7 +724,7 @@ void LMenuItem::_Paint(LSurface *pDC, int Flags)
 		pDC->Rectangle();
 		
 		// Draw the text on top
-		LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : SysFont;
+		LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : LSysFont;
 		Font->Transparent(true);
 		if (Disabled)
 		{
@@ -863,7 +863,7 @@ bool LMenuItem::ScanForAccel()
 				(Flags & LGI_EF_SYSTEM) == 0)
 			{
 				auto Ident = Id();
-				LgiAssert(Ident > 0);
+				LAssert(Ident > 0);
 				Menu->Accel.Insert( new GAccelerator(Flags, Key, Ident) );
 			}
 		}
@@ -1100,7 +1100,7 @@ void LMenu::OnActivate(LMenuItem *item)
 {
 	if (!item)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return;
 	}
 	switch (item->Id())
@@ -1117,7 +1117,7 @@ void LMenu::OnActivate(LMenuItem *item)
 			[[NSApplication sharedApplication] hide:Info];
 			break;
 		case M_QUIT:
-			LgiCloseApp();
+			LCloseApp();
 			break;
 		default:
 			if (Window)
@@ -1176,11 +1176,11 @@ LFont *LMenu::GetFont()
 		{
 			MenuFont.f = new LFont;
 			if (MenuFont.f)
-				*MenuFont.f = *SysFont;
+				*MenuFont.f = *LSysFont;
 		}
 	}
 	
-	return MenuFont.f ? MenuFont.f : SysFont;
+	return MenuFont.f ? MenuFont.f : LSysFont;
 }
 
 bool LMenu::Attach(LViewI *p)

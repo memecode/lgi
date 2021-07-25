@@ -15,7 +15,7 @@
 #define Check() if (!self.w) return
 static int LCocoaView_Count = 0;
 
-NSCursor *LCocoaCursor(LgiCursor lc)
+NSCursor *LCocoaCursor(LCursor lc)
 {
 	switch (lc)
 	{

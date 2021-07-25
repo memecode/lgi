@@ -32,7 +32,7 @@ const char *LMimeToUti(const char *Mime)
 	_("text/html", "public.html")
 	_("text/xml", "public.xml")
 	
-	LgiAssert(!"Impl me");
+	LAssert(!"Impl me");
 	return "public.item";
 }
 
@@ -136,7 +136,7 @@ public:
 		SetParent(parent);
 		Dst = dst;
 		Src = src;
-		StartTs = LgiCurrentTime();
+		StartTs = LCurrentTime();
 		
 		SetDescription("Saving file...");
 		SetPulse(400);
@@ -154,7 +154,7 @@ public:
 		}
 		else if (StartTs)
 		{
-			uint64_t Diff = LgiCurrentTime() - StartTs;
+			uint64_t Diff = LCurrentTime() - StartTs;
 			if (Diff > 1000)
 			{
 				StartTs = 0;
@@ -371,17 +371,17 @@ static NSArray* BuildImageComponentsForItem(NSPasteboardItem *_item)
 
 int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface *Icon)
 {
-	LgiAssert(SourceWnd);
+	LAssert(SourceWnd);
 	if (!SourceWnd || !Event)
 	{
-		LgiAssert(!"Missing param");
+		LAssert(!"Missing param");
 		return DROPEFFECT_NONE;
 	}
 
 	d->Formats.SetSource(true);
 	if (!GetFormats(d->Formats))
 	{
-		LgiAssert(!"No formats");
+		LAssert(!"No formats");
 		return DROPEFFECT_NONE;
 	}
 

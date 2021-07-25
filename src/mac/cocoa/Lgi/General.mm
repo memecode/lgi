@@ -13,6 +13,7 @@
 #include "lgi/common/TextLabel.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/Net.h"
+#include "lgi/common/Token.h"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -55,7 +56,7 @@ bool _lgi_check_file(char *Path)
 	return false;
 }
 
-void LgiSleep(uint32 i)
+void LSleep(uint32 i)
 {
 	struct timespec request, remain;
 	
@@ -109,10 +110,10 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 		int Result = -1;
 		
 #if LGI_COCOA
-        if (LgiApp)
+        if (LAppInst)
         {
             LCocoaAssert *ca = [[LCocoaAssert alloc] init:p.NewGStr()];
-            auto hnd = LgiApp->Handle();
+            auto hnd = LAppInst->Handle();
             [hnd.p performSelectorOnMainThread:@selector(assert:) withObject:ca waitUntilDone:true];
             switch (ca.result)
             {
@@ -175,10 +176,9 @@ OsView DefaultOsView(LView *v)
 
 LString LGetFileMimeType(const char *File)
 {
-	return LgiApp->GetFileMimeType(File);
+	return LAppInst ? LAppInst->GetFileMimeType(File) : NULL;
 }
 
-#include "lgi/common/Token.h"
 bool _GetIniField(char *Grp, char *Field, char *In, char *Out, int OutSize)
 {
 	if (ValidStr(In))

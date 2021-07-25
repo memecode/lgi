@@ -96,21 +96,21 @@ LView *GWindowFromHandle(OsView h)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-bool LgiIsKeyDown(int Key)
+bool LIsKeyDown(int Key)
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 	return false;
 }
 
-bool LgiIsMounted(char *Name)
+bool LIsMounted(char *Name)
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 	return false;
 }
 
-bool LgiMountVolume(char *Name)
+bool LMountVolume(char *Name)
 {
-	LgiAssert(!"Not impl.");
+	LAssert(!"Not impl.");
 	return false;
 }
 
@@ -157,7 +157,7 @@ GViewPrivate::GViewPrivate()
 GViewPrivate::~GViewPrivate()
 {
 	DeleteObj(Popup);
-	LgiAssert(Pulse == NULL);
+	LAssert(Pulse == NULL);
 }
 
 const char *LView::GetClass()
@@ -307,7 +307,7 @@ bool LView::_Mouse(LMouse &m, bool Move)
 			if (Move)
 			{
 				// Do cursor stuff
-				LgiCursor cursor = Target->GetCursor(m.x, m.y);
+				auto cursor = Target->GetCursor(m.x, m.y);
 				auto cc = NSCursor.arrowCursor;
 				if (cursor != LCUR_Normal)
 					cc = LCocoaCursor(cursor);
@@ -462,7 +462,7 @@ void LView::SetPulse(int Length)
 		d->Pulse = new GPulseThread(this, Length);
 }
 
-LgiCursor LView::GetCursor(int x, int y)
+LCursor LView::GetCursor(int x, int y)
 {
 	return LCUR_Normal;
 }
@@ -855,7 +855,7 @@ bool LView::_Attach(LViewI *parent)
 	LAutoPool Pool;
 	if (!parent)
 	{
-		LgiAssert(0);
+		LAssert(0);
 		return false;
 	}
 
@@ -864,7 +864,7 @@ bool LView::_Attach(LViewI *parent)
 	d->ParentI = parent;
 	d->Parent = d->ParentI ? parent->GetGView() : NULL;
 
-	LgiAssert(!_InLock);
+	LAssert(!_InLock);
 	_Window = d->GetParent() ? d->GetParent()->GetWindow() : 0;
 	if (_Window)
 		_Lock = _Window->_Lock;
@@ -885,7 +885,7 @@ bool LView::_Attach(LViewI *parent)
 	}
 	else
 	{
-		LgiAssert(0);
+		LAssert(0);
 	}
 
 	if (!p->Children.HasItem(this))
@@ -918,9 +918,9 @@ void LView::_Delete()
 	if (_Over == this) _Over = 0;
 	if (_Capturing == this) _Capturing = 0;
 
-	if (LgiApp && LgiApp->AppWnd == this)
+	if (LAppInst && LAppInst->AppWnd == this)
 	{
-		LgiApp->AppWnd = 0;
+		LAppInst->AppWnd = NULL;
 	}
 
 	SetPulse();

@@ -177,7 +177,7 @@ void LMouse::SetFromEvent(NSEvent *ev, NSView *view)
 			Down(true); IsMove(true); Right(true);
 			break;
 		default:
-			LgiAssert(!"Unknown event.");
+			LAssert(!"Unknown event.");
 			break;
 	}
 
@@ -362,7 +362,7 @@ LSkinEngine *LApp::SkinEngine = 0;
 LApp *TheApp = 0;
 LMouseHook *LApp::MouseHook = 0;
 
-LApp::LApp(OsAppArguments &AppArgs, const char *AppName, GAppArguments *ObjArgs) :
+LApp::LApp(OsAppArguments &AppArgs, const char *AppName, LAppArguments *ObjArgs) :
 OsApplication(AppArgs.Args, AppArgs.Arg)
 {
 	TheApp = this;
@@ -408,7 +408,7 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	d->FileSystem = new LFileSystem;
 	d->GdcSystem = new GdcDevice;
 	
-	srand((unsigned)LgiCurrentTime());
+	srand((unsigned)LCurrentTime());
 	LColour::OnChange();
 	
 	SetAppArgs(AppArgs);
@@ -450,7 +450,7 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	if (!SystemNormal)
 	{
 		LgiMsg(0, "Error: Couldn't create system font.", "Lgi Error: LApp::LApp", MB_OK);
-		LgiExitApp();
+		LExitApp();
 	}
 	
 	if (!GetOption("noskin"))
@@ -534,7 +534,7 @@ bool LApp::IsOk()
 	 */
 	;
 	
-	LgiAssert(Status);
+	LAssert(Status);
 	return Status;
 }
 
@@ -543,7 +543,7 @@ LMouseHook *LApp::GetMouseHook()
 	return MouseHook;
 }
 
-int LApp::GetMetric(LgiSystemMetric Metric)
+int LApp::GetMetric(LSystemMetric Metric)
 {
 	switch (Metric)
 	{
@@ -644,7 +644,7 @@ bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 {
 	if (!d->NsApp)
 	{
-		LgiAssert(!"No d->NsApp");
+		LAssert(!"No d->NsApp");
 		return false;
 	}
 
