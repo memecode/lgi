@@ -946,6 +946,8 @@ bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 				((GetAsyncKeyState(VK_RBUTTON)&0x8000) ? LGI_EF_RIGHT  : 0) |
 				((GetAsyncKeyState(VK_CONTROL)&0x8000) ? LGI_EF_CTRL   : 0) |
 				((GetAsyncKeyState(VK_MENU)   &0x8000) ? LGI_EF_ALT    : 0) |
+				((GetAsyncKeyState(VK_LWIN)   &0x8000) ? LGI_EF_SYSTEM : 0) |
+				((GetAsyncKeyState(VK_RWIN)   &0x8000) ? LGI_EF_SYSTEM : 0) |
 				((GetAsyncKeyState(VK_SHIFT)  &0x8000) ? LGI_EF_SHIFT  : 0);
 
 	if (m.Flags & (LGI_EF_LEFT | LGI_EF_MIDDLE | LGI_EF_RIGHT))

@@ -4,7 +4,7 @@
 #include "GTableDbPriv.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-static LAutoString ReadStr(GPointer &p)
+static LAutoString ReadStr(LPointer &p)
 {
 	char *e = p.s8;
 	while (*e)
@@ -16,7 +16,7 @@ static LAutoString ReadStr(GPointer &p)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 #define BaseIntegerSerialize(bits) \
-	bool GTableDb::Base::Io(uint##bits &i, GPointer &p, bool write) \
+	bool GTableDb::Base::Io(uint##bits &i, LPointer &p, bool write) \
 	{ \
 		if (write)	*p.u##bits++ = i; \
 		else		i = *p.u##bits++; \
@@ -27,7 +27,7 @@ BaseIntegerSerialize(16)
 BaseIntegerSerialize(32)
 BaseIntegerSerialize(64)
 
-bool GTableDb::Base::Io(LAutoString &str, GPointer &p, bool write)
+bool GTableDb::Base::Io(LAutoString &str, LPointer &p, bool write)
 {
 	if (write)
 	{
@@ -160,7 +160,7 @@ void GTableDb::Field::Set(int id, int type, const char *name, int flags)
 	Name.Reset(NewStr(name));
 }
 
-bool GTableDb::Field::Serialize(GPointer &p, bool Write)
+bool GTableDb::Field::Serialize(LPointer &p, bool Write)
 {
 	return	Io(Id,    p, Write) &&
 			Io(Type,  p, Write) &&
@@ -357,7 +357,7 @@ bool GIndexFile::Parse()
 	/*
 	for (int i=0; i<Blocks.Length(); i++)
 	{
-		GPointer p;
+		LPointer p;
 		p.u8 = Blocks[i];
 		uint8 *End = p.u8 + Table->IndexBlockSize;		
 
@@ -600,7 +600,7 @@ bool RunTableDbTest(LStream *Log)
 		Mem.Length(4 << 10);
 		char Flds[] = {"key \1\0Key\0name\5\0Name\0data\5\0Data\0" };
 		GTableDb::Schema sc;
-		GPointer p;
+		LPointer p;
 		p.s8 = Flds;
 		if (!sc.New().Serialize(p, false)) return false;
 		if (!sc.New().Serialize(p, false)) return false;

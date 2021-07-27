@@ -110,7 +110,7 @@ LMouseHook *LApp::GetMouseHook()
 	return MouseHook;
 }
 
-static LAutoString ParseStr(GPointer &p, bool Pad = true)
+static LAutoString ParseStr(LPointer &p, bool Pad = true)
 {
 	char16 *Key = p.w;
 	// Skip 'key' string
@@ -133,7 +133,7 @@ static LAutoString ParseVer(void *Resource, char *Part)
 	GToken Parts(Part, ".");
 	if (Parts.Length() == 3)
 	{
-		GPointer p;
+		LPointer p;
 		p.u8 = (uint8_t*)Resource;
 		uint16 Len = *p.u16++;
 		uint16 ValueLen = *p.u16++;

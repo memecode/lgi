@@ -376,7 +376,7 @@ size_t LDbDate::Sizeof()
 	return DB_DATE_SZ;
 }
 
-bool LDbDate::Serialize(GPointer &p, LDateTime &dt, bool Write)
+bool LDbDate::Serialize(LPointer &p, LDateTime &dt, bool Write)
 {
 	#ifdef _DEBUG
 	char *Start = p.c;
@@ -428,7 +428,7 @@ size_t LDbField::Sizeof()
 			sizeof(Offset);
 }
 
-bool LDbField::Serialize(GPointer &p, bool Write)
+bool LDbField::Serialize(LPointer &p, bool Write)
 {
 	OBJ_HEAD(FieldMagic);
 		
@@ -680,7 +680,7 @@ int64 LDbRow::GetInt(int id)
 	Info i = d->Map.Find(id);
 	if (i.Index < 0 || !Base.c)
 		return -1;
-	GPointer p = { Base.s8 + Offsets[FixedOff][i.Index] };
+	LPointer p = { Base.s8 + Offsets[FixedOff][i.Index] };
 	if (i.Type == GV_INT32)
 		return *p.s32;
 	if (i.Type == GV_INT64)
@@ -695,7 +695,7 @@ Store3Status LDbRow::SetInt(int id, int64 val)
 		return Store3Error;
 	if (!Base.c)
 		StartEdit();
-	GPointer p = { Base.s8 + Offsets[FixedOff][i.Index] };
+	LPointer p = { Base.s8 + Offsets[FixedOff][i.Index] };
 	if (i.Type == GV_INT32)
 	{
 		*p.s32 = (int32)val;
@@ -716,7 +716,7 @@ const LDateTime *LDbRow::GetDate(int id)
 	Info i = d->Map.Find(id);
 	if (i.Index < 0 || !Base.c)
 		return NULL;
-	GPointer p = { Base.s8 + Offsets[FixedOff][i.Index] };
+	LPointer p = { Base.s8 + Offsets[FixedOff][i.Index] };
 	if (i.Type != GV_DATETIME)
 		return NULL;
 
@@ -732,7 +732,7 @@ Store3Status LDbRow::SetDate(int id, const LDateTime *dt)
 		return Store3Error;
 	if (!Base.c)
 		StartEdit();
-	GPointer p = { Base.s8 + Offsets[FixedOff][i.Index] };
+	LPointer p = { Base.s8 + Offsets[FixedOff][i.Index] };
 	if (i.Type != GV_DATETIME)
 		return Store3Error;
 
@@ -941,7 +941,7 @@ bool LDbTable::Serialize(const char *Path, bool Write)
 				d->Fields.Length() * d->Fields[0].Sizeof();
 			if (d->Data.Length() < Sz)
 				d->Data.Length(Sz);
-			GPointer p = {(int8*)d->Data.AddressOf()};
+			LPointer p = {(int8*)d->Data.AddressOf()};
 			*p.u32++ = TableMagic;
 			for (unsigned i=0; i<d->Fields.Length(); i++)
 			{
@@ -976,7 +976,7 @@ bool LDbTable::Serialize(const char *Path, bool Write)
 		auto Rd = f.Read(d->Data.AddressOf(0), (ssize_t)f.GetSize());
 		if (Rd != f.GetSize())
 			return false;
-		GPointer p = {(int8*)d->Data.AddressOf()};
+		LPointer p = {(int8*)d->Data.AddressOf()};
 		if (*p.u32++ != TableMagic)
 			return false;
 

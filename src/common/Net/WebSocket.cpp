@@ -366,7 +366,7 @@ bool LWebSocket::SendMessage(char *Data, uint64 Len)
 
 	uint8_t Masked = d->Server ? 0 : 0x80;
 	int8 Hdr[2 + 8 + 4];
-	GPointer p = {Hdr};
+	LPointer p = {Hdr};
 	*p.u8++ =	0x80 | // Fin
 				WsText;
 	if (Len < 126) // 1 byte

@@ -176,7 +176,7 @@ typedef union
 	void **vp;
 	int i;
 
-}	GPointer;
+}	LPointer;
 
 // Basic macros
 #define limit(i,l,u)					(((i)<(l)) ? (l) : (((i)>(u)) ? (u) : (i)))

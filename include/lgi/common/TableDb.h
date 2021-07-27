@@ -41,11 +41,11 @@ public:
 	
 	struct Base
 	{
-		bool Io(uint8_t &i8, GPointer &p, bool write);
-		bool Io(uint16 &i16, GPointer &p, bool write);
-		bool Io(uint32_t &i32, GPointer &p, bool write);
-		bool Io(uint64 &i64, GPointer &p, bool write);
-		bool Io(LAutoString &str, GPointer &p, bool write);
+		bool Io(uint8_t &i8, LPointer &p, bool write);
+		bool Io(uint16 &i16, LPointer &p, bool write);
+		bool Io(uint32_t &i32, LPointer &p, bool write);
+		bool Io(uint64 &i64, LPointer &p, bool write);
+		bool Io(LAutoString &str, LPointer &p, bool write);
 	};
 
 	class Field : public Base
@@ -64,7 +64,7 @@ public:
 		Field(int id, int type, const char *name, int flags = 0);
 		
 		void Set(int id, int type, const char *name, int flags = 0);
-		bool Serialize(GPointer &p, bool Write);
+		bool Serialize(LPointer &p, bool Write);
 		bool operator !=(const Field &b);
 		Field &operator=(const Field &b);
 	};

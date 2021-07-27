@@ -221,7 +221,7 @@ LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LScriptArguments &Args)
 	bool UnsupportedArg = false;
 
 	Val.Length(Args.Length() << 1);
-	GPointer Ptr;
+	LPointer Ptr;
 	Ptr.ni = &Val[0];
 	for (unsigned i=0; !UnsupportedArg && i<Args.Length(); i++)
 	{

@@ -972,7 +972,7 @@ LSurface *GInlineBmp::Create(uint32_t TransparentPx)
 		{
 			for (int y=0; y<Y; y++)
 			{
-				GPointer s;
+				LPointer s;
 				s.u8 = (uint8_t*)Data + (y * Src.Line);
 				uint32_t *d = (uint32_t*)(*pDC)[y];
 				

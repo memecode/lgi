@@ -18,7 +18,7 @@ protected:
 	bool First;
 	size_t Used;
 	bool InEndOfLine;
-	GPointer Pos;
+	LPointer Pos;
 	EncodingType Type;
 	LArray<uint8_t> Buf;
 	LAutoString Charset;

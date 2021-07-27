@@ -173,7 +173,7 @@ public:
 			LPITEMIDLIST *Parent = (LPITEMIDLIST) (Data + 1);
 			Data->aoffset[0] = (char*)Parent - (char*)Data;
 
-			GPointer p;
+			LPointer p;
 			p.vp = Parent + 1;
 			for (unsigned i=0; i<Files.Length(); i++)
 			{
@@ -301,7 +301,7 @@ LString::Array LClipBoard::Files()
 								DROPFILES *p = (DROPFILES*)GlobalLock(Med.hGlobal);
 								if (p)
 								{
-									GPointer End;
+									LPointer End;
 									End.c = (char*)p + Sz;
 									if (p->fWide)
 									{

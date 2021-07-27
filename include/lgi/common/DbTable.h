@@ -10,7 +10,7 @@ class LDbTable;
 struct LDbDate
 {
 	size_t Sizeof();
-	bool Serialize(GPointer &p, LDateTime &dt, bool Write);
+	bool Serialize(LPointer &p, LDateTime &dt, bool Write);
 };
 
 struct LDbField
@@ -21,7 +21,7 @@ struct LDbField
 
 	int DataSize();
 	size_t Sizeof();
-	bool Serialize(GPointer &p, bool Write);
+	bool Serialize(LPointer &p, bool Write);
 };
 
 class LDbRow : public GDataPropI
@@ -50,7 +50,7 @@ class LDbRow : public GDataPropI
 	//		char FixedSizeData[d->FixedSz]
 	//		uint32 VariableOffsets[d->Variable]
 	//		char VariableData[??]
-	GPointer Base;
+	LPointer Base;
 
 	// This points to the offset data:
 	// [0] -> Variable offset table (part of this record)
