@@ -3,33 +3,41 @@
 
 #include "lgi/common/Layout.h"
 #include "lgi/common/DisplayString.h"
+#include "lgi/common/Menu.h"
+#include "lgi/common/ClipBoard.h"
 
 #define CC(code) LgiSwap32(code)
 
 class LAudioView : public LLayout
 {
 public:
-	enum FileType
+	enum LFileType
 	{
 		AudioUnknown,
 		AudioRaw,
 		AudioWav,
 	};
-	enum SampleType
+	enum LSampleType
 	{
 		AudioS16LE,
 		AudioS32LE,
 	};
+	enum LCmds
+	{
+		IDC_COPY_CURSOR,
+	};
 
 protected:
 	LArray<uint8_t> Audio;
-	FileType Type = AudioUnknown;
-	SampleType SampleType = AudioS16LE;
+	LFileType Type = AudioUnknown;
+	LSampleType SampleType = AudioS16LE;
 	int SampleBits = 0;
 	int SampleRate = 0;
+	int Channels = 0;
 	size_t DataStart = 0;
 	size_t CursorSample = 0;
-	LRect DataRc;
+	LRect Data;
+	LArray<LRect> ChData;
 	double XZoom = 1.0;
 	LString Msg;
 
@@ -37,7 +45,7 @@ protected:
 	{
 		int32_t Min = 0, Max = 0;
 	};
-	LArray<Grp> Graph;
+	LArray<LArray<Grp>> Graphs;
 
 	void MouseToCursor(LMouse &m)
 	{
@@ -45,7 +53,23 @@ protected:
 		if (idx != CursorSample)
 		{
 			CursorSample = idx;
+			UpdateMsg();
 			Invalidate();
+		}
+	}
+
+	void SetData(LRect &r)
+	{
+		Data = r;
+		ChData.Length(Channels);
+
+		int Dy = Data.Y() - 1;
+		for (int i=0; i<Channels; i++)
+		{
+			auto &r = ChData[i];
+			r = Data;
+			r.y1 = Data.y1 + (i * Dy / Channels);
+			r.y2 = Data.y1 + ((i + 1) * Dy / Channels) - 1;
 		}
 	}
 
@@ -77,13 +101,14 @@ public:
 		SampleRate = 0;
 		SampleBits = 0;
 		DataStart = 0;
+		Channels = 0;
 		CursorSample = 0;
-		DataRc.ZOff(-1, -1);
+		Data.ZOff(-1, -1);
 
 		return false;
 	}
 
-	bool Load(const char *FileName, int rate = 0, int bits = 0)
+	bool Load(const char *FileName, int rate = 0, int bitDepth = 0, int channels = 0)
 	{
 		LFile f(FileName, O_READ);
 		if (!f.IsOpen())
@@ -108,12 +133,13 @@ public:
 			SampleRate = rate;
 
 		DataStart = 0;
-		SampleBits = bits;
-		if (bits == 16)
+		SampleBits = bitDepth;
+		Channels = channels;
+		if (bitDepth == 16)
 		{
 			SampleType = AudioS16LE;
 		}
-		else if (bits == 32)
+		else if (bitDepth == 32)
 		{
 			SampleType = AudioS32LE;
 		}
@@ -137,7 +163,7 @@ public:
 				if (SubChunkId == CC('fmt '))
 				{
 					auto AudioFmt = *p.u16++;
-					auto Channels = *p.u16++;
+					Channels = *p.u16++;
 					SampleRate = *p.u32++;
 					auto ByteRate = *p.u32++;
 					auto BlockAlign = *p.u16++;
@@ -161,10 +187,13 @@ public:
 			// Assume 32bit
 			SampleType = AudioS32LE;
 			SampleBits = 32;
+			// DataStart = 2;
 		}
 
 		if (!SampleRate)
 			SampleRate = 44100;
+		if (!Channels)
+			Channels = 2;
 
 		Invalidate();
 		return true;
@@ -179,19 +208,19 @@ public:
 
 	size_t GetSamples()
 	{
-		return (Audio.Length() - DataStart) / (SampleBits >> 3);
+		return (Audio.Length() - DataStart) / (SampleBits >> 3) / Channels;
 	}
 
 	int SampleToView(size_t idx)
 	{
-		return DataRc.x1 + (int)((idx * DataRc.X()) / GetSamples());
+		return Data.x1 + (int)((idx * Data.X()) / GetSamples());
 	}
 
 	size_t ViewToSample(int x /*px*/)
 	{
-		int offset = x - DataRc.x1;
+		int offset = x - Data.x1;
 		ssize_t samples = GetSamples();
-		ssize_t idx = offset * samples / DataRc.X();
+		ssize_t idx = offset * samples / Data.X();
 		if (idx < 0)
 			idx = 0;
 		else if (idx >= samples)
@@ -203,9 +232,28 @@ public:
 	{
 		if (m.IsContextMenu())
 		{
+			LSubMenu s;
+			s.AppendItem("Copy Cursor Address", IDC_COPY_CURSOR);
+			switch (s.Float(this, m))
+			{
+				case IDC_COPY_CURSOR:
+				{
+					LClipBoard clip(this);
+					size_t addrVal = DataStart + (CursorSample * Channels * SampleBits / 8);
+					LString addr;
+					addr.Printf(LPrintfSizeT, addrVal);
+					clip.Text(addr);
+					break;
+				}
+				default:
+					break;
+			}
 		}
 		else if (m.Left())
+		{
+			Focus(true);
 			MouseToCursor(m);
+		}
 	}
 
 	void OnMouseMove(LMouse &m)
@@ -214,43 +262,88 @@ public:
 			MouseToCursor(m);
 	}
 
+	LPointer AddressOf(size_t Sample)
+	{
+		LPointer p;
+		int SampleBytes = SampleBits >> 3;
+		p.u8 = Audio.AddressOf(DataStart + (Sample * Channels * SampleBytes));
+		return p;
+	}
+
+	void UpdateMsg()
+	{
+		ssize_t Samples = GetSamples();
+		auto Addr = AddressOf(CursorSample);
+		size_t AddrOffset = Addr.u8 - Audio.AddressOf();
+		LString::Array Val;
+		for (int ch=0; ch<Channels; ch++)
+		{
+			switch (SampleType)
+			{
+				case AudioS16LE:
+					Val.New().Printf("%i", Addr.s16[ch]);
+					break;
+				case AudioS32LE:
+					Val.New().Printf("%i", Addr.s32[ch]);
+					break;
+			}
+		}
+		Msg.Printf("XZoom=%g Samples=" LPrintfSSizeT " Cursor=" LPrintfSizeT " @ " LPrintfSizeT " (%s) Graph=" LPrintfSizeT "\n",
+			XZoom, Samples, CursorSample, AddrOffset, LString(",").Join(Val).Get(), Graphs.Length() ? Graphs[0].Length() : 0);
+	}
+
 	bool OnMouseWheel(double Lines)
 	{
 		LMouse m;
 		GetMouse(m);
 
-		ssize_t samples = GetSamples();
+		ssize_t Samples = GetSamples();
 		if (m.System() && m.Alt())
 		{
 			auto DefPos = DefaultPos();
 			auto change = (double)Lines / 3;
 			XZoom *= 1.0 + (-change / 10);
 
-			int OldX = DataRc.X();
+			int OldX = Data.X();
 			int x = (int)(DefPos.X() * XZoom);
 			int CursorX = SampleToView(CursorSample);
-			DataRc.x1 = (int) (CursorX - (CursorSample * x / samples));
-			DataRc.x2 = DataRc.x1 + x - 1;
+			LRect d = Data;
+			d.x1 = (int) (CursorX - (CursorSample * x / Samples));
+			d.x2 = d.x1 + x - 1;
+			SetData(d);
 
 			Invalidate();
 		}
 		else
 		{
 			int change = (int)(Lines * -6);
-			DataRc.x1 += change;
-			DataRc.x2 += change;
+			LRect d = Data;
+			d.x1 += change;
+			d.x2 += change;
+			SetData(d);
 
 			Invalidate();
 		}
 
-		Msg.Printf("DataRc=%s XZoom=%g samples=" LPrintfSSizeT "\n", DataRc.GetStr(), XZoom, samples);
+		UpdateMsg();
 
 		return true;
 	}
 
+	#define PROFILE_PAINT_SAMPLES 0
+	#if PROFILE_PAINT_SAMPLES
+		#define PROF(name) Prof.Add(name)
+	#else
+		#define PROF(name)
+	#endif
+
 	template<typename T>
-	void PaintSamples(LSurface *pDC)
+	void PaintSamples(LSurface *pDC, int ChannelIdx)
 	{
+		#if PROFILE_PAINT_SAMPLES
+		LProfile Prof("PaintSamples", 10);
+		#endif
+
 		T MaxT = 0;
 		if (sizeof(T) == 1)
 			MaxT = 0x7f;
@@ -260,73 +353,103 @@ public:
 			MaxT = (T)(20 * 1000000);
 
 		auto Client = GetClient();
-		auto &c = DataRc;
-		T *start = (T*)Audio.AddressOf(DataStart);
+		auto &c = ChData[ChannelIdx];
+		auto start = (T*)Audio.AddressOf(DataStart);
 		size_t samples = GetSamples();
-		auto *end = start + samples;
+		auto end = start + (samples * Channels);
 		int cy = c.y1 + (c.Y() / 2);
 
+		T (*ToNative)(T s) = [](T s) { return s; };
+		#if 0
+		if (SampleType == AudioS32LE)
+			ToNative = [](T s) { return (T)LgiSwap32(s); };
+		#endif
+
 		int blk = 64;
-		if (Graph.Length() == 0)
+		if (Graphs.Length() == 0)
 		{
 			// Initialize the graph
-			Graph.SetFixedLength(false);
-			auto GenStart = LCurrentTime();
-			for (auto p = start; p < end; p += blk)
+			PROF("GraphGen");
+			Graphs.Length(Channels);
+			for (int ch = 0; ch < Channels; ch++)
 			{
-				int remain = MIN((int)(end - p), blk);
-				auto &b = Graph.New();
-				b.Min = b.Max = *p;
-				for (int i=1; i<remain; i++)
+				auto &GraphArr = Graphs[ch];
+				GraphArr.SetFixedLength(false);
+				GraphArr.Length(0);
+
+				int BlkChannels = blk * Channels;
+				size_t BlkIndex = 0;
+				for (auto p = start; p < end; p += BlkChannels)
 				{
-					if (p[i] < b.Min)
-						b.Min = p[i];
-					if (p[i] > b.Max)
-						b.Max = p[i];
+					int remain = MIN( (int)(end - p), BlkChannels );
+					auto &b = GraphArr[BlkIndex++];
+					b.Min = b.Max = ToNative(p[ch]);
+					for (int i = Channels + ch; i < remain; i += Channels)
+					{
+						auto n = ToNative(p[i]);
+						if (n < b.Min)
+							b.Min = n;
+						if (n > b.Max)
+							b.Max = n;
+					}
 				}
+
+				GraphArr.SetFixedLength(true);
 			}
-			auto GenTime = LCurrentTime() - GenStart;
-			LgiTrace("GenTime=" LPrintfInt64 "\n", GenTime);
-			Graph.SetFixedLength(true);
 		}
+
+		PROF("PrePaint");
 
 		int YScale = c.Y() / 2;
 		int CursorX = SampleToView(CursorSample);
-		double blkScale = (double) Graph.Length() / c.X();
+		double blkScale = Graphs.Length() > 0 ? (double) Graphs[0].Length() / c.X() : 1.0;
 		bool DrawSamples = blkScale < 1.0;
 				
-		for (int x=0; x<c.X(); x++)
+		// For all x coordinates in the view space..
+		for (int Vx=Client.x1; Vx<=Client.x2; Vx++)
 		{
-			int ViewX = c.x1 + x;
-			if (ViewX < Client.x1 || ViewX > Client.x2)
+			if (Vx % 100 == 0)
+			{
+				PROF("Pixels");
+			}
+
+			if (Vx < c.x1 || Vx > c.x2)
 				continue;
 
-			auto isCursor = CursorX == c.x1 + x;
+			auto isCursor = CursorX == Vx;
 			if (isCursor)
 			{
 				pDC->Colour(L_BLACK);
-				pDC->VLine(c.x1 + x, c.y1, c.y2);
+				pDC->VLine(Vx, c.y1, c.y2);
 			}
 
 			Grp Min, Max;
+			auto StartSample = ViewToSample(Vx);
+			auto EndSample = ViewToSample(Vx+1);
 			if (DrawSamples)
 			{
 				// Scan individual samples
-				auto Start = ViewToSample(ViewX);
-				auto End = ViewToSample(ViewX+1);
-
-				for (auto i = Start; i < End; i++)
+				auto pStart = start + (StartSample * Channels) + ChannelIdx;
+				auto pEnd = start + (EndSample * Channels) + ChannelIdx;
+				for (auto i = pStart; i < pEnd; i += Channels)
 				{
-					Min.Min = MIN(Min.Min, start[i]);
-					Max.Max = MAX(Max.Max, start[i]);														
-				}						
+					auto n = ToNative(*i);
+					Min.Min = MIN(Min.Min, n);
+					Max.Max = MAX(Max.Max, n);
+				}
+
+				int asd=0;
 			}
 			else
 			{
 				// Scan the buckets
-				double blkStart = (double)x * Graph.Length() / c.X();
-				double blkEnd = (double)(x + 1) * Graph.Length() / c.X();
-					
+				auto &Graph = Graphs[ChannelIdx];
+				double blkStart = (double)StartSample * Graph.Length() / samples;
+				double blkEnd = (double)EndSample * Graph.Length() / samples;
+				
+				if (isCursor)
+					LgiTrace("Blk %g-%g of " LPrintfSizeT "\n", blkStart, blkEnd, Graph.Length());
+
 				for (int i=(int)floor(blkStart); i<(int)ceil(blkEnd); i++)
 				{
 					auto &b = Graph[i];
@@ -336,18 +459,18 @@ public:
 					Max.Max = MAX(Max.Max, b.Max);
 				}
 			}
-					
+			
 			int y1 = cy + (Min.Min * YScale / MaxT);
 			int y2 = cy + (Max.Max * YScale / MaxT);
 			pDC->Colour(isCursor ? cCursorMax : cMax);
-			pDC->VLine(c.x1 + x, y1, y2);
+			pDC->VLine(Vx, y1, y2);
 
 			if (!DrawSamples)
 			{
 				y1 = cy + (Min.Max * YScale / MaxT);
 				y2 = cy + (Max.Min * YScale / MaxT);
 				pDC->Colour(isCursor ? cCursorMin : cMin);
-				pDC->VLine(c.x1 + x, y1, y2);
+				pDC->VLine(Vx, y1, y2);
 			}
 		}				
 	}
@@ -364,28 +487,29 @@ public:
 		LColour cMax = LColour::Blue;
 		LColour cMin = cMax.Mix(cGrid);
 
-		if (!DataRc.Valid())
-			DataRc = DefaultPos();
-		auto &c = DataRc;
+		if (!Data.Valid())
+			SetData(DefaultPos());
 		pDC->Colour(cGrid);
-		pDC->Box(&c);
+		pDC->Box(&Data);
 
 		auto Fnt = GetFont();
 		LDisplayString ds(Fnt, Msg);
 		Fnt->Transparent(true);
-		Fnt->Fore(cGrid);
+		Fnt->Fore(L_LOW);
 		ds.Draw(pDC, 4, 4);
 
 		switch (SampleType)
 		{
 			case AudioS16LE:
 			{
-				PaintSamples<int16_t>(pDC);
+				for (int ch = 0; ch < Channels; ch++)
+					PaintSamples<int16_t>(pDC, ch);
 				break;
 			}
 			case AudioS32LE:
 			{
-				PaintSamples<int32_t>(pDC);
+				for (int ch = 0; ch < Channels; ch++)
+					PaintSamples<int32_t>(pDC, ch);
 				break;
 			}
 		}
