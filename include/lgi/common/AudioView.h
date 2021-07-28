@@ -20,7 +20,10 @@ public:
 	enum LSampleType
 	{
 		AudioS16LE,
+		AudioS16BE,
 		AudioS32LE,
+		AudioS32BE,
+		AudioFloat32,
 	};
 	enum LCmds
 	{
@@ -41,11 +44,15 @@ protected:
 	double XZoom = 1.0;
 	LString Msg;
 
+	template<typename T>
 	struct Grp
 	{
-		int32_t Min = 0, Max = 0;
+		T Min = 0, Max = 0;
 	};
-	LArray<LArray<Grp>> Graphs;
+
+	LArray<LArray<Grp<int16_t>>> Int16Grps;
+	LArray<LArray<Grp<int32_t>>> Int32Grps;
+	LArray<LArray<Grp<float>>> FloatGrps;
 
 	void MouseToCursor(LMouse &m)
 	{
@@ -228,6 +235,15 @@ public:
 		return idx;
 	}
 
+	void OnPosChange()
+	{
+		auto def = DefaultPos();
+		LRect d = Data;
+		d.y1 = def.y1;
+		d.y2 = def.y2;
+		SetData(d);
+	}
+
 	void OnMouseClick(LMouse &m)
 	{
 		if (m.IsContextMenu())
@@ -270,26 +286,50 @@ public:
 		return p;
 	}
 
+	int16_t Native(int16_t &i)
+	{
+		if (SampleType == AudioS16BE)
+			return LgiSwap16(i);
+		return i;
+	}
+
+	int32_t Native(int32_t &i)
+	{
+		if (SampleType == AudioS32BE)
+			return LgiSwap32(i);
+		return i;
+	}
+
+	float Native(float &i)
+	{
+		return i;
+	}
+
 	void UpdateMsg()
 	{
 		ssize_t Samples = GetSamples();
 		auto Addr = AddressOf(CursorSample);
 		size_t AddrOffset = Addr.u8 - Audio.AddressOf();
 		LString::Array Val;
+		size_t GraphLen = 0;
 		for (int ch=0; ch<Channels; ch++)
 		{
 			switch (SampleType)
 			{
 				case AudioS16LE:
-					Val.New().Printf("%i", Addr.s16[ch]);
+				case AudioS16BE:
+					Val.New().Printf("%i", Native(Addr.s16[ch]));
+					GraphLen = Int16Grps.Length() ? Int16Grps[0].Length() : 0;
 					break;
 				case AudioS32LE:
-					Val.New().Printf("%i", Addr.s32[ch]);
+				case AudioS32BE:
+					Val.New().Printf("%i", Native(Addr.s32[ch]));
+					GraphLen = Int32Grps.Length() ? Int32Grps[0].Length() : 0;
 					break;
 			}
 		}
 		Msg.Printf("XZoom=%g Samples=" LPrintfSSizeT " Cursor=" LPrintfSizeT " @ " LPrintfSizeT " (%s) Graph=" LPrintfSizeT "\n",
-			XZoom, Samples, CursorSample, AddrOffset, LString(",").Join(Val).Get(), Graphs.Length() ? Graphs[0].Length() : 0);
+			XZoom, Samples, CursorSample, AddrOffset, LString(",").Join(Val).Get(), GraphLen);
 	}
 
 	bool OnMouseWheel(double Lines)
@@ -338,7 +378,7 @@ public:
 	#endif
 
 	template<typename T>
-	void PaintSamples(LSurface *pDC, int ChannelIdx)
+	void PaintSamples(LSurface *pDC, int ChannelIdx, LArray<LArray<Grp<T>>> *Grps)
 	{
 		#if PROFILE_PAINT_SAMPLES
 		LProfile Prof("PaintSamples", 10);
@@ -359,21 +399,18 @@ public:
 		auto end = start + (samples * Channels);
 		int cy = c.y1 + (c.Y() / 2);
 
-		T (*ToNative)(T s) = [](T s) { return s; };
-		#if 0
-		if (SampleType == AudioS32LE)
-			ToNative = [](T s) { return (T)LgiSwap32(s); };
-		#endif
+		pDC->Colour(cGrid);
+		pDC->Box(&c);
 
 		int blk = 64;
-		if (Graphs.Length() == 0)
+		if (Grps->Length() == 0)
 		{
 			// Initialize the graph
 			PROF("GraphGen");
-			Graphs.Length(Channels);
+			Grps->Length(Channels);
 			for (int ch = 0; ch < Channels; ch++)
 			{
-				auto &GraphArr = Graphs[ch];
+				auto &GraphArr = (*Grps)[ch];
 				GraphArr.SetFixedLength(false);
 				GraphArr.Length(0);
 
@@ -383,10 +420,10 @@ public:
 				{
 					int remain = MIN( (int)(end - p), BlkChannels );
 					auto &b = GraphArr[BlkIndex++];
-					b.Min = b.Max = ToNative(p[ch]);
+					b.Min = b.Max = Native(p[ch]);
 					for (int i = Channels + ch; i < remain; i += Channels)
 					{
-						auto n = ToNative(p[i]);
+						auto n = Native(p[i]);
 						if (n < b.Min)
 							b.Min = n;
 						if (n > b.Max)
@@ -402,7 +439,7 @@ public:
 
 		int YScale = c.Y() / 2;
 		int CursorX = SampleToView(CursorSample);
-		double blkScale = Graphs.Length() > 0 ? (double) Graphs[0].Length() / c.X() : 1.0;
+		double blkScale = Grps->Length() > 0 ? (double) (*Grps)[0].Length() / c.X() : 1.0;
 		bool DrawSamples = blkScale < 1.0;
 				
 		// For all x coordinates in the view space..
@@ -423,7 +460,7 @@ public:
 				pDC->VLine(Vx, c.y1, c.y2);
 			}
 
-			Grp Min, Max;
+			Grp<T> Min, Max;
 			auto StartSample = ViewToSample(Vx);
 			auto EndSample = ViewToSample(Vx+1);
 			if (DrawSamples)
@@ -433,7 +470,7 @@ public:
 				auto pEnd = start + (EndSample * Channels) + ChannelIdx;
 				for (auto i = pStart; i < pEnd; i += Channels)
 				{
-					auto n = ToNative(*i);
+					auto n = Native(*i);
 					Min.Min = MIN(Min.Min, n);
 					Max.Max = MAX(Max.Max, n);
 				}
@@ -443,7 +480,7 @@ public:
 			else
 			{
 				// Scan the buckets
-				auto &Graph = Graphs[ChannelIdx];
+				auto &Graph = (*Grps)[ChannelIdx];
 				double blkStart = (double)StartSample * Graph.Length() / samples;
 				double blkEnd = (double)EndSample * Graph.Length() / samples;
 				
@@ -460,17 +497,17 @@ public:
 				}
 			}
 			
-			int y1 = cy + (Min.Min * YScale / MaxT);
-			int y2 = cy + (Max.Max * YScale / MaxT);
+			auto y1 = cy + (Min.Min * YScale / MaxT);
+			auto y2 = cy + (Max.Max * YScale / MaxT);
 			pDC->Colour(isCursor ? cCursorMax : cMax);
-			pDC->VLine(Vx, y1, y2);
+			pDC->VLine(Vx, (int)y1, (int)y2);
 
 			if (!DrawSamples)
 			{
 				y1 = cy + (Min.Max * YScale / MaxT);
 				y2 = cy + (Max.Min * YScale / MaxT);
 				pDC->Colour(isCursor ? cCursorMin : cMin);
-				pDC->VLine(Vx, y1, y2);
+				pDC->VLine(Vx, (int)y1, (int)y2);
 			}
 		}				
 	}
@@ -483,14 +520,8 @@ public:
 		pDC->Colour(L_WORKSPACE);
 		pDC->Rectangle();
 
-		LColour cGrid(200, 200, 200);
-		LColour cMax = LColour::Blue;
-		LColour cMin = cMax.Mix(cGrid);
-
 		if (!Data.Valid())
 			SetData(DefaultPos());
-		pDC->Colour(cGrid);
-		pDC->Box(&Data);
 
 		auto Fnt = GetFont();
 		LDisplayString ds(Fnt, Msg);
@@ -501,15 +532,23 @@ public:
 		switch (SampleType)
 		{
 			case AudioS16LE:
+			case AudioS16BE:
 			{
 				for (int ch = 0; ch < Channels; ch++)
-					PaintSamples<int16_t>(pDC, ch);
+					PaintSamples<int16_t>(pDC, ch, &Int16Grps);
 				break;
 			}
 			case AudioS32LE:
+			case AudioS32BE:
 			{
 				for (int ch = 0; ch < Channels; ch++)
-					PaintSamples<int32_t>(pDC, ch);
+					PaintSamples<int32_t>(pDC, ch, &Int32Grps);
+				break;
+			}
+			case AudioFloat32:
+			{
+				for (int ch = 0; ch < Channels; ch++)
+					PaintSamples<float>(pDC, ch, &FloatGrps);
 				break;
 			}
 		}
