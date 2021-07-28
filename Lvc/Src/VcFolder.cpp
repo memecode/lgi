@@ -93,15 +93,16 @@ int Ver2Int(LString v)
 
 int ToolVersion[VcMax] = {0};
 
-ReaderThread::ReaderThread(VersionCtrl vcs, LSubProcess *p, LStream *out) : LThread("ReaderThread")
+ReaderThread::ReaderThread(VersionCtrl vcs, LAutoPtr<LSubProcess> p, LStream *out) : LThread("ReaderThread")
 {
 	Vcs = vcs;
 	Process = p;
 	Out = out;
 	Result = -1;
 	FilterCount = 0;
-	
-	Run();
+
+	// We don't start this thread immediately... because the number of threads is scaled to the system
+	// resources, particularly CPU cores.
 }
 
 ReaderThread::~ReaderThread()
@@ -234,8 +235,14 @@ int ReaderThread::Main()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
+int VcFolder::CmdMaxThreads = 0;
+int VcFolder::CmdActiveThreads = 0;
+
 void VcFolder::Init(AppPriv *priv)
 {
+	if (!CmdMaxThreads)
+		CmdMaxThreads = LAppInst->GetCpuCount();
+
 	d = priv;
 
 	IsCommit = false;
@@ -479,7 +486,7 @@ bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, L
 
 		c->PostOp = Parser;
 		c->Params.Reset(Params);
-		c->Rd.Reset(new ReaderThread(GetType(), Process.Release(), c));
+		c->Rd.Reset(new ReaderThread(GetType(), Process, c));
 		Cmds.Add(c.Release());
 	}
 	else
@@ -1962,39 +1969,53 @@ void VcFolder::OnPulse()
 	bool Reselect = false, CmdsChanged = false;
 	static bool Processing = false;
 	
-	// printf("%s:%i - OnPulse\n", _FL);
 	if (!Processing)
 	{	
-		Processing = true; // Lock out processing, if it puts up a dialog or something...
-		// bad things happen if we try and re-process something.	
+		Processing = true;	// Lock out processing, if it puts up a dialog or something...
+							// bad things happen if we try and re-process something.	
+
 		for (unsigned i=0; i<Cmds.Length(); i++)
 		{
 			Cmd *c = Cmds[i];
-			if (c)
+			if (!c)
 			{
-				bool Ex = c->Rd->IsExited();
-				// printf("%s:%i - Ex=%i, Cmds=%i\n", _FL, (int)Cmds.Length());
-				if (Ex)
+				Cmds.DeleteAt(i--, true);
+				continue;
+			}
+
+			if (c->Rd->GetState() == LThread::THREAD_INIT)
+			{
+				if (CmdActiveThreads < CmdMaxThreads)
 				{
-					LString s = c->GetBuf();
-					int Result = c->Rd->ExitCode();
-					if (Result == ErrSubProcessFailed)
-					{
-						if (!CmdErrors)
-							d->Log->Print("Error: Can't run '%s'\n", GetVcName());
-						CmdErrors++;
-					}
-					else if (c->PostOp)
-					{
-						Reselect |= CALL_MEMBER_FN(*this, c->PostOp)(Result, s, c->Params);
-					}
-					
-					Cmds.DeleteAt(i--, true);
-					delete c;
-					CmdsChanged = true;
+					c->Rd->Run();
+					CmdActiveThreads++;
+					// LgiTrace("CmdActiveThreads++ = %i\n", CmdActiveThreads);
 				}
 			}
+			else if (c->Rd->IsExited())
+			{
+				CmdActiveThreads--;
+				// LgiTrace("CmdActiveThreads-- = %i\n", CmdActiveThreads);
+
+				LString s = c->GetBuf();
+				int Result = c->Rd->ExitCode();
+				if (Result == ErrSubProcessFailed)
+				{
+					if (!CmdErrors)
+						d->Log->Print("Error: Can't run '%s'\n", GetVcName());
+					CmdErrors++;
+				}
+				else if (c->PostOp)
+				{
+					Reselect |= CALL_MEMBER_FN(*this, c->PostOp)(Result, s, c->Params);
+				}
+					
+				Cmds.DeleteAt(i--, true);
+				delete c;
+				CmdsChanged = true;
+			}
 		}
+
 		Processing = false;
 	}
 
@@ -2003,8 +2024,12 @@ void VcFolder::OnPulse()
 		if (LTreeItem::Select())
 			Select(true);
 	}
+	
 	if (CmdsChanged)
+	{
 		Update();
+	}
+
 	if (CmdErrors)
 	{
 		d->Tabs->Value(1);

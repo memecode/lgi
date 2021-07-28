@@ -29,7 +29,7 @@ class ReaderThread : public LThread
 {
 	VersionCtrl Vcs;
 	LStream *Out;
-	LSubProcess *Process;
+	LAutoPtr<LSubProcess> Process;
 	int FilterCount;
 
 	int OnLine(char *s, ssize_t len);
@@ -38,7 +38,7 @@ class ReaderThread : public LThread
 public:
 	int Result;
 
-	ReaderThread(VersionCtrl vcs, LSubProcess *p, LStream *out);
+	ReaderThread(VersionCtrl vcs, LAutoPtr<LSubProcess> p, LStream *out);
 	~ReaderThread();
 
 	int Main();
@@ -170,12 +170,15 @@ class VcFolder : public LTreeItem
 	LHashTbl<ConstStrKey<char>,VcBranch*> Branches;
 	LAutoPtr<UncommitedItem> Uncommit;
 	LString Cache, NewRev;
-	bool CommitListDirty;
-	int Unpushed, Unpulled;
+	bool CommitListDirty = 0;
+	int Unpushed = 0, Unpulled = 0;
 	LString CountCache;
-	LTreeItem *Tmp;
-	int CmdErrors;
+	LTreeItem *Tmp = NULL;
+	int CmdErrors = 0;
 	LArray<CommitField> Fields;
+
+	static int CmdMaxThreads;
+	static int CmdActiveThreads;
 	
 	struct GitCommit
 	{
