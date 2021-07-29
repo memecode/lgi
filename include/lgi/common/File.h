@@ -368,6 +368,7 @@ public:
 
 	OsFile Handle();
 	void ChangeThread() override;
+	operator bool() { return IsOpen(); }
 
 	/// \brief Opens a file
 	/// \return Non zero on success

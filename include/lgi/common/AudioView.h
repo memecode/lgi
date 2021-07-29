@@ -5,6 +5,7 @@
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/ClipBoard.h"
+#include "lgi/common/FileSelect.h"
 
 #define CC(code) LgiSwap32(code)
 
@@ -25,12 +26,25 @@ public:
 		AudioS32BE,
 		AudioFloat32,
 	};
+
+protected:
 	enum LCmds
 	{
 		IDC_COPY_CURSOR,
+		IDC_SAVE_RAW,
+		IDC_DRAW_AUTO,
+		IDC_DRAW_LINE,
+		IDC_SCAN_SAMPLES,
+		IDC_SCAN_GROUPS,
+	};
+	enum LDrawMode
+	{
+		DrawAutoSelect,
+		DrawSamples,
+		ScanSamples,
+		ScanGroups,
 	};
 
-protected:
 	LArray<uint8_t> Audio;
 	LFileType Type = AudioUnknown;
 	LSampleType SampleType = AudioS16LE;
@@ -42,7 +56,8 @@ protected:
 	LRect Data;
 	LArray<LRect> ChData;
 	double XZoom = 1.0;
-	LString Msg;
+	LString Msg, ErrorMsg;
+	LDrawMode DrawMode = DrawAutoSelect;
 
 	template<typename T>
 	struct Grp
@@ -53,6 +68,8 @@ protected:
 	LArray<LArray<Grp<int16_t>>> Int16Grps;
 	LArray<LArray<Grp<int32_t>>> Int32Grps;
 	LArray<LArray<Grp<float>>> FloatGrps;
+
+	LArray<LArray<void*>> PixelAddr;
 
 	void MouseToCursor(LMouse &m)
 	{
@@ -119,10 +136,16 @@ public:
 	{
 		LFile f(FileName, O_READ);
 		if (!f.IsOpen())
+		{
+			ErrorMsg.Printf("Can't open '%s' for reading.", FileName);
 			return false;
+		}
 		
 		if (!Audio.Length(f.GetSize()))
+		{
+			ErrorMsg.Printf("Can't allocate %s.", LFormatSize(f.GetSize()).Get());
 			return Empty();
+		}
 
 		auto rd = f.Read(Audio.AddressOf(), f.GetSize());
 		if (rd > 0 && rd != f.GetSize())
@@ -134,7 +157,10 @@ public:
 		else if (!Stricmp(Ext, "raw"))
 			Type = AudioRaw;
 		else
+		{
+			ErrorMsg.Printf("Unknown format: %s", Ext);
 			return Empty();
+		}
 			
 		if (rate)
 			SampleRate = rate;
@@ -166,6 +192,7 @@ public:
 			{
 				auto SubChunkId = *p.u32++;
 				auto SubChunkSz = *p.u32++;
+				auto NextChunk = p.u8 + SubChunkSz;
 
 				if (SubChunkId == CC('fmt '))
 				{
@@ -186,7 +213,14 @@ public:
 					DataStart = p.u8 - Audio.AddressOf();
 					break;
 				}
-				else p.u8 += SubChunkSz;
+				
+				p.u8 = NextChunk;
+			}
+
+			if (!DataStart)
+			{
+				ErrorMsg = "No 'data' element found.";
+				return Empty();
 			}
 		}
 		else if (Type == AudioRaw)
@@ -194,7 +228,6 @@ public:
 			// Assume 32bit
 			SampleType = AudioS32LE;
 			SampleBits = 32;
-			// DataStart = 2;
 		}
 
 		if (!SampleRate)
@@ -250,6 +283,13 @@ public:
 		{
 			LSubMenu s;
 			s.AppendItem("Copy Cursor Address", IDC_COPY_CURSOR);
+			s.AppendItem("Save Raw Audio", IDC_SAVE_RAW);
+			s.AppendSeparator();
+			s.AppendItem("Auto", IDC_DRAW_AUTO);
+			s.AppendItem("Line", IDC_DRAW_LINE);
+			s.AppendItem("Scan Samples", IDC_SCAN_SAMPLES);
+			s.AppendItem("Scan Groups", IDC_SCAN_GROUPS);
+
 			switch (s.Float(this, m))
 			{
 				case IDC_COPY_CURSOR:
@@ -261,6 +301,41 @@ public:
 					clip.Text(addr);
 					break;
 				}
+				case IDC_SAVE_RAW:
+				{
+					LFileSelect s;
+					s.Parent(this);
+					if (!s.Save())
+						break;
+
+					LFile out(s.Name(), O_WRITE);
+					if (out)
+					{
+						out.SetSize(0);
+
+						auto ptr = Audio.AddressOf(DataStart);
+						out.Write(ptr, Audio.Length() - DataStart);
+					}
+					else
+						LgiMsg(this, "Can't open '%s' for writing.", "Error", MB_OK, s.Name());
+					break;
+				}
+				case IDC_DRAW_AUTO:
+					DrawMode = DrawAutoSelect;
+					Invalidate();
+					break;
+				case IDC_DRAW_LINE:
+					DrawMode = DrawSamples;
+					Invalidate();
+					break;
+				case IDC_SCAN_SAMPLES:
+					DrawMode = ScanSamples;
+					Invalidate();
+					break;
+				case IDC_SCAN_GROUPS:
+					DrawMode = ScanGroups;
+					Invalidate();
+					break;
 				default:
 					break;
 			}
@@ -328,7 +403,9 @@ public:
 					break;
 			}
 		}
-		Msg.Printf("XZoom=%g Samples=" LPrintfSSizeT " Cursor=" LPrintfSizeT " @ " LPrintfSizeT " (%s) Graph=" LPrintfSizeT "\n",
+
+		Msg.Printf("Channels=%i SampleRate=%i BitDepth=%i XZoom=%g Samples=" LPrintfSSizeT " Cursor=" LPrintfSizeT " @ " LPrintfSizeT " (%s) Graph=" LPrintfSizeT "\n",
+			Channels, SampleRate, SampleBits,
 			XZoom, Samples, CursorSample, AddrOffset, LString(",").Join(Val).Get(), GraphLen);
 	}
 
@@ -377,7 +454,7 @@ public:
 		#define PROF(name)
 	#endif
 
-	template<typename T>
+	template<typename T, typename M /* Intermediate type for doing sample math, needs to be larger than 'T' */>
 	void PaintSamples(LSurface *pDC, int ChannelIdx, LArray<LArray<Grp<T>>> *Grps)
 	{
 		#if PROFILE_PAINT_SAMPLES
@@ -390,7 +467,7 @@ public:
 		else if (sizeof(T) == 2)
 			MaxT = 0x7fff;
 		else
-			MaxT = (T)(20 * 1000000);
+			MaxT = (T)0x7fffffff;
 
 		auto Client = GetClient();
 		auto &c = ChData[ChannelIdx];
@@ -440,76 +517,129 @@ public:
 		int YScale = c.Y() / 2;
 		int CursorX = SampleToView(CursorSample);
 		double blkScale = Grps->Length() > 0 ? (double) (*Grps)[0].Length() / c.X() : 1.0;
-		bool DrawSamples = blkScale < 1.0;
-				
-		// For all x coordinates in the view space..
-		for (int Vx=Client.x1; Vx<=Client.x2; Vx++)
+		LDrawMode EffectiveMode = DrawMode;
+		auto StartSample = ViewToSample(Client.x1);
+		auto EndSample = ViewToSample(Client.x2);
+		auto SampleRange = EndSample - StartSample;
+
+		if (EffectiveMode == DrawAutoSelect)
 		{
-			if (Vx % 100 == 0)
-			{
-				PROF("Pixels");
-			}
+			if (SampleRange < (Client.X() << 2))
+				EffectiveMode = DrawSamples;
+			else if (blkScale < 1.0)
+				EffectiveMode = ScanSamples;
+			else
+				EffectiveMode = ScanGroups;
+		}
+	
+		// LgiTrace("DrawRange: " LPrintfSizeT "->" LPrintfSizeT " (" LPrintfSizeT ") mode=%i\n", StartSample, EndSample, SampleRange, (int)EffectiveMode);
+		if (EffectiveMode == DrawSamples)
+		{
+			auto pSample = start + (StartSample * Channels) + ChannelIdx;
 
-			if (Vx < c.x1 || Vx > c.x2)
-				continue;
-
-			auto isCursor = CursorX == Vx;
-			if (isCursor)
+			if (CursorX >= Client.x1 && CursorX <= Client.x2)
 			{
 				pDC->Colour(L_BLACK);
-				pDC->VLine(Vx, c.y1, c.y2);
+				pDC->VLine(CursorX, c.y1, c.y2);
 			}
+			pDC->Colour(cGrid);
+			pDC->HLine(c.x1, c.x2, cy);
 
-			Grp<T> Min, Max;
-			auto StartSample = ViewToSample(Vx);
-			auto EndSample = ViewToSample(Vx+1);
-			if (DrawSamples)
+			// LgiTrace("	ptr=%i\n", (int)((char*)pSample-(char*)start));
+
+			// For all samples in the view space...
+			pDC->Colour(cMax);
+			LPoint Prev(-1, -1);
+			for (auto idx = StartSample; idx <= EndSample + 1; idx++, pSample += Channels)
 			{
-				// Scan individual samples
-				auto pStart = start + (StartSample * Channels) + ChannelIdx;
-				auto pEnd = start + (EndSample * Channels) + ChannelIdx;
-				for (auto i = pStart; i < pEnd; i += Channels)
+				auto n = Native(*pSample);
+				auto x = SampleToView(idx);
+				auto y = (T) (cy - ((M)n * YScale / MaxT));
+				if (idx != StartSample)
+					pDC->Line(Prev.x, Prev.y, (int)x, (int)y);
+				Prev.Set((int)x, (int)y);
+			}
+		}
+		else
+		{
+			// For all x coordinates in the view space..
+			for (int Vx=Client.x1; Vx<=Client.x2; Vx++)
+			{
+				if (Vx % 100 == 0)
 				{
-					auto n = Native(*i);
-					Min.Min = MIN(Min.Min, n);
-					Max.Max = MAX(Max.Max, n);
+					PROF("Pixels");
 				}
 
-				int asd=0;
-			}
-			else
-			{
-				// Scan the buckets
-				auto &Graph = (*Grps)[ChannelIdx];
-				double blkStart = (double)StartSample * Graph.Length() / samples;
-				double blkEnd = (double)EndSample * Graph.Length() / samples;
-				
+				if (Vx < c.x1 || Vx > c.x2)
+					continue;
+
+				auto isCursor = CursorX == Vx;
 				if (isCursor)
-					LgiTrace("Blk %g-%g of " LPrintfSizeT "\n", blkStart, blkEnd, Graph.Length());
-
-				for (int i=(int)floor(blkStart); i<(int)ceil(blkEnd); i++)
 				{
-					auto &b = Graph[i];
-					Min.Min = MIN(Min.Min, b.Min);
-					Min.Max = MAX(Min.Max, b.Min);
-					Max.Min = MIN(Max.Min, b.Max);
-					Max.Max = MAX(Max.Max, b.Max);
+					pDC->Colour(L_BLACK);
+					pDC->VLine(Vx, c.y1, c.y2);
+				}
+
+				Grp<T> Min, Max;
+				StartSample = ViewToSample(Vx);
+				EndSample = ViewToSample(Vx+1);
+				if (EffectiveMode == ScanSamples)
+				{
+					// Scan individual samples
+					auto pStart = start + (StartSample * Channels) + ChannelIdx;
+					auto pEnd = start + (EndSample * Channels) + ChannelIdx;
+
+					#if 0
+					if (Vx==Client.x1)
+					{
+						auto PosX = SampleToView((pStart - ChannelIdx - start) / Channels);
+						LgiTrace("	ptr=%i " LPrintfSizeT "-" LPrintfSizeT " x=%i pos=%i\n", (int)((char*)pStart-(char*)start), StartSample, EndSample, Vx, PosX);
+					}
+					#endif
+					
+					for (auto i = pStart; i < pEnd; i += Channels)
+					{
+						auto n = Native(*i);
+						Min.Min = MIN(Min.Min, n);
+						Max.Max = MAX(Max.Max, n);
+					}
+				}
+				else
+				{
+					// Scan the buckets
+					auto &Graph = (*Grps)[ChannelIdx];
+					double blkStart = (double)StartSample * Graph.Length() / samples;
+					double blkEnd = (double)EndSample * Graph.Length() / samples;
+				
+					#if 0
+					if (isCursor)
+						LgiTrace("Blk %g-%g of " LPrintfSizeT "\n", blkStart, blkEnd, Graph.Length());
+					#endif
+
+					for (int i=(int)floor(blkStart); i<(int)ceil(blkEnd); i++)
+					{
+						auto &b = Graph[i];
+						Min.Min = MIN(Min.Min, b.Min);
+						Min.Max = MAX(Min.Max, b.Min);
+						Max.Min = MIN(Max.Min, b.Max);
+						Max.Max = MAX(Max.Max, b.Max);
+					}
+				}
+			
+				auto y1 = (T) (cy - ((M)Min.Min * YScale / MaxT));
+				auto y2 = (T) (cy - ((M)Max.Max * YScale / MaxT));
+				pDC->Colour(isCursor ? cCursorMax : cMax);
+				pDC->VLine(Vx, (int)y1, (int)y2);
+
+				if (EffectiveMode == ScanGroups)
+				{
+					y1 = (T) (cy - ((M)Min.Max * YScale / MaxT));
+					y2 = (T) (cy - ((M)Max.Min * YScale / MaxT));
+					pDC->Colour(isCursor ? cCursorMin : cMin);
+					pDC->VLine(Vx, (int)y1, (int)y2);
 				}
 			}
-			
-			auto y1 = cy + (Min.Min * YScale / MaxT);
-			auto y2 = cy + (Max.Max * YScale / MaxT);
-			pDC->Colour(isCursor ? cCursorMax : cMax);
-			pDC->VLine(Vx, (int)y1, (int)y2);
-
-			if (!DrawSamples)
-			{
-				y1 = cy + (Min.Max * YScale / MaxT);
-				y2 = cy + (Max.Min * YScale / MaxT);
-				pDC->Colour(isCursor ? cCursorMin : cMin);
-				pDC->VLine(Vx, (int)y1, (int)y2);
-			}
-		}				
+		}
 	}
 
 	void OnPaint(LSurface *pDC)
@@ -524,10 +654,12 @@ public:
 			SetData(DefaultPos());
 
 		auto Fnt = GetFont();
-		LDisplayString ds(Fnt, Msg);
+		LDisplayString ds(Fnt, ErrorMsg ? ErrorMsg : Msg);
 		Fnt->Transparent(true);
-		Fnt->Fore(L_LOW);
+		Fnt->Fore(ErrorMsg ? LColour::Red : LColour(L_LOW));
 		ds.Draw(pDC, 4, 4);
+		if (ErrorMsg)
+			return;
 
 		switch (SampleType)
 		{
@@ -535,20 +667,20 @@ public:
 			case AudioS16BE:
 			{
 				for (int ch = 0; ch < Channels; ch++)
-					PaintSamples<int16_t>(pDC, ch, &Int16Grps);
+					PaintSamples<int16_t,int32_t>(pDC, ch, &Int16Grps);
 				break;
 			}
 			case AudioS32LE:
 			case AudioS32BE:
 			{
 				for (int ch = 0; ch < Channels; ch++)
-					PaintSamples<int32_t>(pDC, ch, &Int32Grps);
+					PaintSamples<int32_t,int64_t>(pDC, ch, &Int32Grps);
 				break;
 			}
 			case AudioFloat32:
 			{
 				for (int ch = 0; ch < Channels; ch++)
-					PaintSamples<float>(pDC, ch, &FloatGrps);
+					PaintSamples<float,float>(pDC, ch, &FloatGrps);
 				break;
 			}
 		}
