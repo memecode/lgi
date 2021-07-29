@@ -31,11 +31,26 @@ protected:
 	enum LCmds
 	{
 		IDC_COPY_CURSOR,
+		
+		IDC_LOAD_WAV,
+		IDC_LOAD_RAW,
+		IDC_SAVE_WAV,
 		IDC_SAVE_RAW,
+		
 		IDC_DRAW_AUTO,
 		IDC_DRAW_LINE,
 		IDC_SCAN_SAMPLES,
 		IDC_SCAN_GROUPS,
+		
+		IDC_44K,
+		IDC_48K,
+		IDC_88K,
+		IDC_96K,
+		
+		IDC_MONO,
+		IDC_STEREO,
+		IDC_2pt1_CHANNELS,
+		IDC_5pt1_CHANNELS,
 	};
 	enum LDrawMode
 	{
@@ -277,19 +292,45 @@ public:
 		SetData(d);
 	}
 
+	#define CheckItem(Sub, Name, Id, Chk) \
+	{ \
+		auto item = Sub->AppendItem(Name, Id); \
+		if (item && Chk) item->Checked(true); \
+	}
+
 	void OnMouseClick(LMouse &m)
 	{
 		if (m.IsContextMenu())
 		{
 			LSubMenu s;
 			s.AppendItem("Copy Cursor Address", IDC_COPY_CURSOR);
-			s.AppendItem("Save Raw Audio", IDC_SAVE_RAW);
 			s.AppendSeparator();
-			s.AppendItem("Auto", IDC_DRAW_AUTO);
-			s.AppendItem("Line", IDC_DRAW_LINE);
-			s.AppendItem("Scan Samples", IDC_SCAN_SAMPLES);
-			s.AppendItem("Scan Groups", IDC_SCAN_GROUPS);
 
+			auto File = s.AppendSub("File");
+			File->AppendItem("Load Wav", IDC_LOAD_WAV);
+			File->AppendItem("Load Raw", IDC_LOAD_RAW);
+			File->AppendItem("Save Wav", IDC_SAVE_WAV);
+			File->AppendItem("Save Raw", IDC_SAVE_RAW);
+
+			auto Draw = s.AppendSub("Draw Mode");
+			CheckItem(Draw, "Auto", IDC_DRAW_AUTO, DrawMode == DrawAutoSelect);
+			CheckItem(Draw, "Line", IDC_DRAW_LINE, DrawMode == DrawSamples);
+			CheckItem(Draw, "Scan Samples", IDC_SCAN_SAMPLES, DrawMode == ScanSamples);
+			CheckItem(Draw, "Scan Groups", IDC_SCAN_GROUPS, DrawMode == ScanGroups);
+
+			auto Rate = s.AppendSub("Sample Rate");
+			CheckItem(Rate, "44.1k", IDC_44K, SampleRate == 44100);
+			CheckItem(Rate, "48k", IDC_48K, SampleRate == 4800);
+			CheckItem(Rate, "88.2k", IDC_88K, SampleRate == 44100*2);
+			CheckItem(Rate, "96k", IDC_96K, SampleRate == 48000*2);
+
+			auto Ch = s.AppendSub("Channels");
+			CheckItem(Ch, "Mono", IDC_MONO, Channels == 1);
+			CheckItem(Ch, "Stereo", IDC_STEREO, Channels == 2);
+			CheckItem(Ch, "2.1", IDC_2pt1_CHANNELS, Channels == 3);
+			CheckItem(Ch, "5.1", IDC_5pt1_CHANNELS, Channels == 6);
+
+			bool Update = false;
 			switch (s.Float(this, m))
 			{
 				case IDC_COPY_CURSOR:
@@ -322,22 +363,63 @@ public:
 				}
 				case IDC_DRAW_AUTO:
 					DrawMode = DrawAutoSelect;
-					Invalidate();
+					Update = true;
 					break;
 				case IDC_DRAW_LINE:
 					DrawMode = DrawSamples;
-					Invalidate();
+					Update = true;
 					break;
 				case IDC_SCAN_SAMPLES:
 					DrawMode = ScanSamples;
-					Invalidate();
+					Update = true;
 					break;
 				case IDC_SCAN_GROUPS:
 					DrawMode = ScanGroups;
-					Invalidate();
+					Update = true;
+					break;
+				case IDC_44K:
+					SampleRate = 44100;
+					Update = true;
+					break;
+				case IDC_48K:
+					SampleRate = 48000;
+					Update = true;
+					break;
+				case IDC_88K:
+					SampleRate = 44100*2;
+					Update = true;
+					break;
+				case IDC_96K:
+					SampleRate = 48000*2;
+					Update = true;
+					break;
+				case IDC_MONO:
+					Channels = 1;
+					Update = true;
+					break;
+				case IDC_STEREO:
+					Channels = 2;
+					Update = true;
+					break;
+				case IDC_2pt1_CHANNELS:
+					Channels = 3;
+					Update = true;
+					break;
+				case IDC_5pt1_CHANNELS:
+					Channels = 6;
+					Update = true;
 					break;
 				default:
 					break;
+			}
+
+			if (Update)
+			{
+				Int16Grps.Length(0);
+				Int32Grps.Length(0);
+				FloatGrps.Length(0);
+				SetData(Data);
+				Invalidate();
 			}
 		}
 		else if (m.Left())
@@ -680,7 +762,7 @@ public:
 			case AudioFloat32:
 			{
 				for (int ch = 0; ch < Channels; ch++)
-					PaintSamples<float,float>(pDC, ch, &FloatGrps);
+					PaintSamples<float,double>(pDC, ch, &FloatGrps);
 				break;
 			}
 		}
