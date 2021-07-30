@@ -772,5 +772,8 @@
     <ClInclude Include="include\lgi\common\ProgressDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\lgi\common\StringClass.h">
+      <Filter>Source Files\Core\Memory Subsystem</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -171,7 +171,7 @@ public:
 	int Close();
 
 	/// Binds on a given port.
-	bool Bind(int Port);
+	bool Bind(int Port, bool reuseAddr = true);
 
 	/// Binds and listens on a given port for an incomming connection.
 	bool Listen(int Port = 0);
@@ -252,9 +252,9 @@ public:
 	/// Get UPD mode
 	bool GetUdp();
 	/// Set UPD mode
-	void SetUdp(bool b);
+	void SetUdp(bool isUdp = true);
 	/// Makes the socket able to broadcast
-	void SetBroadcast();
+	void SetBroadcast(bool isBroadcast = true);
 	/// Read UPD packet
 	int ReadUdp(void *Buffer, int Size, int Flags, uint32_t *Ip = 0, uint16_t *Port = 0);
 	/// Write UPD packet

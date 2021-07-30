@@ -229,36 +229,30 @@ class LSocketImplPrivate : public LCancel
 {
 public:
 	// Data
-	int Blocking : 1;
-	int NoDelay : 1;
-	int Udp : 1;
-	int Broadcast : 1;
+	int Blocking	: 1;
+	int NoDelay		: 1;
+	int Udp			: 1;
+	int Broadcast	: 1;
 
-	int			LogType;
-	char		*LogFile;
-	int			Timeout;
-	OsSocket	Socket;
-	int			LastError;
+	int			LogType		= NET_LOG_NONE;
+	LString		LogFile;
+	int			Timeout		= -1;
+	OsSocket	Socket		= INVALID_SOCKET;
+	int			LastError	= 0;
+	LCancel		*Cancel		= NULL;
 	LString		ErrStr;
-	LCancel		*Cancel;
 
 	LSocketImplPrivate()
 	{	
+		Cancel = this;
 		Blocking = true;
 		NoDelay = false;
 		Udp = false;
-		Cancel = this;
-
-		LogType = NET_LOG_NONE;
-		LogFile = 0;
-		Timeout = -1;
-		Socket = INVALID_SOCKET;
-		LastError = 0;
+		Broadcast = false;
 	}
 
 	~LSocketImplPrivate()
 	{
-		DeleteArray(LogFile);
 	}
 
 	bool Select(int TimeoutMs, bool Read)
@@ -901,13 +895,32 @@ int LSocket::Open(const char *HostAddr, int Port)
 	return Status == 0;
 }
 
-bool LSocket::Bind(int Port)
+bool LSocket::Bind(int Port, bool reuseAddr)
 {
+	if (!ValidSocket(d->Socket))
+	{
+		OnError(0, "Attempt to use invalid socket to bind.");
+		return false;
+	}
+
+	if (reuseAddr)
+	{
+		int so_reuseaddr = 1;
+		if (setsockopt(Handle(), SOL_SOCKET, SO_REUSEADDR, (const char *)&so_reuseaddr, sizeof so_reuseaddr))
+			OnError(0, "Attempt to set SO_REUSEADDR failed.");
+			// This might not be fatal... so continue on.
+	}
+
 	sockaddr_in add;
 	add.sin_family = AF_INET;
 	add.sin_addr.s_addr = htonl(INADDR_ANY);
 	add.sin_port = htons(Port);
 	int ret = bind(Handle(), (sockaddr*)&add, sizeof(add));
+	if (ret)
+	{
+		Error();
+	}
+
 	return ret == 0;
 }
 
@@ -1167,7 +1180,7 @@ int LSocket::Error(void *Param)
 		d->LastError == EISCONN)
 		return 0;
 
-	class ErrorMsg {
+	static class ErrorMsg {
 	public:
 		int Code;
 		const char *Msg;
@@ -1307,37 +1320,16 @@ int LSocket::Error(void *Param)
 	return d->LastError;
 }
 
-/*
-void LSocket::SetLogFile(char *FileName, int Type)
-{
-	DeleteArray(d->LogFile);
-
-	if (FileName)
-	{
-		switch (Type)
-		{
-			case NET_LOG_HEX_DUMP:
-			case NET_LOG_ALL_BYTES:
-			{
-				d->LogFile = NewStr(FileName);
-				d->LogType = Type;
-				break;
-			}
-		}
-	}
-}
-*/
-
 bool LSocket::GetUdp()
 {
 	return d->Udp != 0;
 }
 
-void LSocket::SetUdp(bool b)
+void LSocket::SetUdp(bool isUdp)
 {
-	if (d->Udp ^ b)
+	if (d->Udp ^ isUdp)
 	{
-		d->Udp = b;
+		d->Udp = isUdp;
 		if (!ValidSocket(d->Socket))
 		{
 			if (d->Udp)
@@ -1354,9 +1346,9 @@ void LSocket::SetUdp(bool b)
 	}
 }
 
-void LSocket::SetBroadcast()
+void LSocket::SetBroadcast(bool isBroadcast)
 {
-	d->Broadcast = true;
+	d->Broadcast = isBroadcast;
 }
 
 bool LSocket::AddMulticastMember(uint32_t MulticastIp, uint32_t LocalInterface)

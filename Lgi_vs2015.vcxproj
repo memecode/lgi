@@ -626,6 +626,7 @@
     <ClInclude Include="include\lgi\common\ProgressDlg.h" />
     <ClInclude Include="include\lgi\common\ProgressView.h" />
     <ClInclude Include="include\lgi\common\Slider.h" />
+    <ClInclude Include="include\lgi\common\StringClass.h" />
     <ClInclude Include="include\lgi\common\View.h" />
     <ClInclude Include="include\lgi\common\Menu.h" />
     <ClInclude Include="include\lgi\common\Message.h" />
