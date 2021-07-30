@@ -48,4 +48,5 @@ public:
 	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m);
 	void OnMouseMove(LMouse &m);
+	bool OnMouseWheel(double Lines);
 };

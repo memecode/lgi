@@ -18,14 +18,15 @@ struct LGraphPriv
 {
 	constexpr static int AxisMarkPx = 8;
 
-	int XAxis, YAxis;
+	int XAxis = 0, YAxis = 0;
 	LVariantType XType, YType;
 	LVariant MaxX, MinX;
 	LVariant MaxY, MinY;
     LArray<LGraph::GGraphPair> Val;
 	LGraph::Style Style;
-	bool ShowCursor = false;
 	LPoint MouseLoc;
+	bool ShowCursor = false;
+	double Zoom = 1.0, Px = 0.0, Py = 0.0;
 	
 	// Averages
 	bool Average;
@@ -695,6 +696,22 @@ void LGraph::OnMouseMove(LMouse &m)
 		Invalidate();
 }
 
+bool LGraph::OnMouseWheel(double Lines)
+{
+	LMouse m;
+	GetMouse(m);
+
+	if (m.Ctrl())
+		d->Zoom -= Lines / 30;
+	else if (m.Shift())
+		d->Px -= Lines / (50 * d->Zoom);
+	else
+		d->Py -= Lines / (50 * d->Zoom);
+	Invalidate();
+
+	return true;
+}
+
 void LGraph::OnPaint(LSurface *pDC)
 {
 	LAutoPtr<LDoubleBuffer> DoubleBuf;
@@ -709,6 +726,9 @@ void LGraph::OnPaint(LSurface *pDC)
 	LRect data = c;
 	data.Size(20, 20);
 	data.x2 -= 40;
+	data.Dimension((int)(d->Zoom * data.X()), (int)(d->Zoom * data.Y()));
+	data.Offset(d->Px * data.X(), d->Py * data.Y());
+	
 	LRect y = data;
 	y.x2 = y.x1 + 60;
 	data.x1 = y.x2 + 1;
@@ -732,13 +752,13 @@ void LGraph::OnPaint(LSurface *pDC)
 			auto xCur = d->ViewToData(d->MouseLoc.x - data.x1, data.X(), d->MinX, d->MaxX);
 			pDC->VLine(d->MouseLoc.x, data.y1, data.y2 + d->AxisMarkPx);
 			LDisplayString dsX(GetFont(), d->DataToString(xCur));
-			dsX.Draw(pDC, d->MouseLoc.x - (dsX.X() >> 1), data.y2 + d->AxisMarkPx + 4);
+			dsX.Draw(pDC, d->MouseLoc.x - (dsX.X() >> 1), data.y2 + d->AxisMarkPx + dsX.Y());
 
 			// Y axis
 			auto yCur = d->ViewToData(data.y2 - d->MouseLoc.y, data.Y(), d->MinY, d->MaxY);
 			pDC->HLine(data.x1 - d->AxisMarkPx, data.x2, d->MouseLoc.y);
 			LDisplayString dsY(GetFont(), d->DataToString(yCur));
-			dsY.Draw(pDC, data.x1 - d->AxisMarkPx - 4 - dsY.X(), d->MouseLoc.y - (dsY.Y() >> 1));
+			dsY.Draw(pDC, data.x1 - d->AxisMarkPx - dsY.X(), d->MouseLoc.y - (dsY.Y() >> 1));
 		}
 	}
 
