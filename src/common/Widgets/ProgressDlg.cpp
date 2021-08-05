@@ -268,13 +268,13 @@ LProgressPane &LProgressPane::operator--(int)
 	return *this;
 }
 
-int LProgressPane::OnNotify(LViewI *Ctrl, int Flags)
+int LProgressPane::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{
 		case IDC_TABLE:
 		{
-			if (Flags == LNotifyTableLayoutChanged)
+			if (n.Type == LNotifyTableLayoutChanged)
 			{
 				LRect p = GetPos();
 				LRect tbl_pos = t->GetPos();
@@ -441,10 +441,10 @@ void LProgressDlg::OnPosChange()
 	}
 }
 
-int LProgressDlg::OnNotify(LViewI *Ctrl, int Flags)
+int LProgressDlg::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	if (Ctrl->GetId() == IDC_PANE &&
-		Flags == LNotifyTableLayoutChanged)
+		n.Type == LNotifyTableLayoutChanged)
 	{
 		// This code recalculates the size needed by all the progress panes
 		// and then resizes the window to contain them all.

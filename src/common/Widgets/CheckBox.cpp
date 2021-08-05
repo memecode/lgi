@@ -114,9 +114,9 @@ void LCheckBox::OnStyleChange()
 	}
 }
 
-int LCheckBox::OnNotify(LViewI *Ctrl, int Flags)
+int LCheckBox::OnNotify(LViewI *Ctrl, LNotification &n)
 {
-	if (Ctrl == (LViewI*)this && Flags == LNotifyActivate)
+	if (Ctrl == (LViewI*)this && n.Type == LNotifyActivate)
 	{
 		Value(!Value());
 	}
@@ -151,7 +151,7 @@ void LCheckBox::Value(int64 i)
 		d->Val = i;
 		Invalidate(&d->ValuePos);
 
-		SendNotify((int)d->Val);
+		SendNotify(LNotifyValueChanged);
 	}
 }
 

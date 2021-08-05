@@ -346,7 +346,8 @@ public:
 			if (Trigger)
 			{
 				LViewI *n=GetNotify()?GetNotify():GetParent();
-				if (n) n->OnNotify(this, 0);
+				LNotification note(LNotifyItemClick);
+				if (n) n->OnNotify(this, note);
 			}
 		}
 	}
@@ -381,7 +382,8 @@ public:
 				if (!Down)
 				{
 					LViewI *n=GetNotify()?GetNotify():GetParent();
-					if (n) n->OnNotify(this, 0);
+					LNotification note(LNotifyActivate);
+					if (n) n->OnNotify(this, note);
 				}
 			}
 			
@@ -696,12 +698,12 @@ public:
 		}
 	}
 
-	int OnNotify(LViewI *c, int f)
+	int OnNotify(LViewI *c, LNotification &n)
 	{
 		if (e != NULL &&
 			c->GetId() == e->GetId())
 		{
-			if (f == LK_RETURN)
+			if (n.Type == LK_RETURN)
 			{
 				ExitEditMode();
 			}
@@ -815,7 +817,7 @@ public:
 	LFileSelectDlg(LFileSelectPrivate *Select);
 	~LFileSelectDlg();
 
-	int OnNotify(LViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, LNotification &n);
 	void OnUpFolder();
 	void SetFolder(char *f);
 	void OnFolder();
@@ -1119,13 +1121,13 @@ void LFileSelectDlg::OnFilter(const char *Key)
 		FileLst->SetFilterKey(Key);
 }
 
-int LFileSelectDlg::OnNotify(LViewI *Ctrl, int Flags)
+int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{
 		case IDC_BOOKMARKS:
 		{
-			if (Flags == LNotifyItemSelect && Bookmarks)
+			if (n.Type == LNotifyItemSelect && Bookmarks)
 			{
 				LTreeItem *s = Bookmarks->Selection();
 				if (s)
@@ -1142,7 +1144,7 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, int Flags)
 		}
 		case IDC_PATH:
 		{
-			if (Flags == LNotifyValueChanged)
+			if (n.Type == LNotifyValueChanged)
 				OnFolder();
 			break;
 		}
@@ -1179,7 +1181,7 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, int Flags)
 			if (!f)
 				break;
 
-			if (Flags == LK_RETURN)
+			if (n.Type == LK_RETURN)
 			{
 				// allow user to insert new type by typing the pattern into the file name edit box and
 				// hitting enter
@@ -1759,7 +1761,8 @@ void LFolderItem::OnActivate()
 		}
 		else // Is file
 		{
-			Dlg->OnNotify(Dlg->SaveBtn, 0);
+			LNotification note(LNotifyActivate);
+			Dlg->OnNotify(Dlg->SaveBtn, note);
 		}
 	}
 }
@@ -1862,7 +1865,8 @@ bool GFolderList::OnKey(LKey &k)
 				LViewI *v = GetWindow()->FindControl(IDC_UP);
 				if (v)
 				{
-					GetWindow()->OnNotify(v, 0);
+					LNotification note(LNotifyBackspaceKey);
+					GetWindow()->OnNotify(v, note);
 				}
 			}
 			Status = true;
@@ -1898,7 +1902,8 @@ bool GFolderList::OnKey(LKey &k)
 						if (Ok)
 						{
 							GetWindow()->SetCtrlName(IDC_FILE, Sel->GetText(0));
-							GetWindow()->OnNotify(Ok, 0);
+							LNotification note(LNotifyReturnKey);
+							GetWindow()->OnNotify(Ok, note);
 						}
 					}
 				}

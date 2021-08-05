@@ -192,7 +192,7 @@ void LUiEvent::SetModifer(uint32_t modifierKeys)
 	Ctrl  (modifierKeys & SDK_10_12(NSEventModifierFlagControl, NSControlKeyMask));
 }
 
-void GMessage::Set(int msg, Param A, Param B)
+void LMessage::Set(int msg, Param A, Param B)
 {
 	m = msg;
 	a = A;
@@ -481,7 +481,7 @@ OsApp &LApp::Handle()
 	return d->NsApp;
 }
 
-bool LApp::PostEvent(LViewI *View, int Msg, GMessage::Param A, GMessage::Param B)
+bool LApp::PostEvent(LViewI *View, int Msg, LMessage::Param A, LMessage::Param B)
 {
 	if (!View)
 	{
@@ -941,10 +941,10 @@ int LApp::GetCpuCount()
 	return 1;
 }
 
-GFontCache *LApp::GetFontCache()
+LFontCache *LApp::GetFontCache()
 {
 	if (!d->FontCache)
-		d->FontCache.Reset(new GFontCache(SystemNormal));
+		d->FontCache.Reset(new LFontCache(SystemNormal));
 	return d->FontCache;
 }
 

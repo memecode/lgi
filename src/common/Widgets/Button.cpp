@@ -109,9 +109,9 @@ LButton::~LButton()
 	DeleteObj(d);
 }
 
-int LButton::OnNotify(LViewI *Ctrl, int Flags)
+int LButton::OnNotify(LViewI *Ctrl, LNotification &n)
 {
-	if (Ctrl == (LViewI*)this && Flags == LNotifyActivate)
+	if (Ctrl == (LViewI*)this && n.Type == LNotifyActivate)
 	{
 		OnClick();
 	}
@@ -366,7 +366,8 @@ void LButton::OnClick()
 			}
 			else if (InThread())
 			{
-				target->OnNotify(this, 0);
+				LNotification note(LNotifyItemClick);
+				target->OnNotify(this, note);
 			}
 			else
 			{

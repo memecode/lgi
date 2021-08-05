@@ -77,7 +77,7 @@ void LAlert::SetAppModal()
     #endif
 }
 
-int LAlert::OnNotify(LViewI *Ctrl, int Flags)
+int LAlert::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{
@@ -85,7 +85,7 @@ int LAlert::OnNotify(LViewI *Ctrl, int Flags)
 		case CMD_BASE+1:
 		case CMD_BASE+2:
 		{
-			if (Flags != LNotifyTableLayoutChanged)
+			if (n.Type != LNotifyTableLayoutChanged)
 			{
 				EndModal(Ctrl->GetId() - CMD_BASE + 1);
 			}

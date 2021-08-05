@@ -79,6 +79,11 @@ enum LNotifyType
 	LNotifyScrollBarCreate,
 	LNotifyScrollBarDestroy,
 
+	// Popup
+	LNotifyPopupDelete,
+	LNotifyPopupVisible,
+	LNotifyPopupHide,
+
 	/// Return/Enter pressed
 	/// \sa LList, LView::OnNotify
 	LNotifyReturnKey = LK_RETURN,

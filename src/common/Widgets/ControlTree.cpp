@@ -151,7 +151,7 @@ void LControlTree::Item::Save()
 				if (Stricmp(v, Value.Str()))
 				{
 					Value = v;
-					Tree->SendNotify(Ctrl->GetId());
+					Tree->SendNotify(LNotifyValueChanged);
 				}
 				break;
 			}
@@ -161,7 +161,7 @@ void LControlTree::Item::Save()
 				if (b != (Value.CastInt32() != 0))
 				{
 					Value = b;
-					Tree->SendNotify(Ctrl->GetId());
+					Tree->SendNotify(LNotifyValueChanged);
 				}
 				break;
 			}
@@ -179,13 +179,13 @@ void LControlTree::Item::Save()
 							if (Stricmp(Value.Str(), e.Value.Str()))
 							{
 								Value = e.Value;
-								Tree->SendNotify(Ctrl->GetId());
+								Tree->SendNotify(LNotifyValueChanged);
 							}
 						}
 						else if (Idx != Value.CastInt32())
 						{
 							Value = Idx;
-							Tree->SendNotify(Ctrl->GetId());
+							Tree->SendNotify(LNotifyValueChanged);
 						}
 					}
 					else LAssert(0);
@@ -193,7 +193,7 @@ void LControlTree::Item::Save()
 				else if (Idx != Value.CastInt32())
 				{
 					Value = Idx;
-					Tree->SendNotify(Ctrl->GetId());
+					Tree->SendNotify(LNotifyValueChanged);
 				}
 				break;
 			}
@@ -565,7 +565,7 @@ bool LControlTree::SetVariant(const char *Name, LVariant &Value, char *Array)
 	return true;
 }
 
-int LControlTree::OnNotify(LViewI *c, int f)
+int LControlTree::OnNotify(LViewI *c, LNotification &n)
 {
 	switch (c->GetId())
 	{
@@ -586,7 +586,7 @@ int LControlTree::OnNotify(LViewI *c, int f)
 		}
 	}
 
-	return LTree::OnNotify(c, f);
+	return LTree::OnNotify(c, n);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

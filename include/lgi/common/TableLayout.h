@@ -45,7 +45,7 @@ public:
 	LTableLayout(int id = -1);
 	~LTableLayout();
 
-	const char *GetClass() { return "LTableLayout"; }
+	const char *GetClass() override { return "LTableLayout"; }
 
 	/// Return the number of cells across (columns).
 	int CellX();
@@ -64,16 +64,16 @@ public:
     void Empty(LRect *Range = NULL);
 
 	// Impl
-	void OnFocus(bool b);
-	void OnCreate();
-	void OnPosChange();
-	void OnPaint(LSurface *pDC);
-	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
-	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
-	int64 Value();
-	void Value(int64 v);
-	int OnNotify(LViewI *c, int f);
+	void OnFocus(bool b) override;
+	void OnCreate() override;
+	void OnPosChange() override;
+	void OnPaint(LSurface *pDC) override;
+	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0) override;
+	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0) override;
+	void OnChildrenChanged(LViewI *Wnd, bool Attaching) override;
+	int64 Value() override;
+	void Value(int64 v) override;
+	int OnNotify(LViewI *c, LNotification &n) override;
 	LMessage::Result OnEvent(LMessage *m) override;
 };
 

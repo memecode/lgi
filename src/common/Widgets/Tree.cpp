@@ -1926,7 +1926,7 @@ void LTree::OnPaint(LSurface *pDC)
 	}
 }
 
-int LTree::OnNotify(LViewI *Ctrl, int Flags)
+int LTree::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{
@@ -1950,7 +1950,7 @@ int LTree::OnNotify(LViewI *Ctrl, int Flags)
 		}
 	}
 
-	return LLayout::OnNotify(Ctrl, Flags);
+	return LLayout::OnNotify(Ctrl, n);
 }
 
 LMessage::Result LTree::OnEvent(LMessage *Msg)

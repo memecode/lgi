@@ -251,17 +251,17 @@ LMessage::Result LTextLabel::OnEvent(LMessage *Msg)
 	return LView::OnEvent(Msg);
 }
 
-int LTextLabel::OnNotify(LViewI *Ctrl, int Flags)
+int LTextLabel::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	if (Ctrl == (LViewI*)this &&
-		Flags == LNotifyActivate &&
+		n.Type == LNotifyActivate &&
 		GetParent())
 	{
 		auto c = GetParent()->IterateViews();
 		ssize_t Idx = c.IndexOf(this);
-		LViewI *n = c[++Idx];
-		if (n)
-			n->OnNotify(n, Flags);
+		LViewI *v = c[++Idx];
+		if (v)
+			v->OnNotify(Ctrl, n);
 	}
 
 	return 0;

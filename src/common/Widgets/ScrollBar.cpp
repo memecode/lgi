@@ -466,7 +466,11 @@ public:
 			Widget->Invalidate();
 			
 			LViewI *n = Widget->GetNotify() ? Widget->GetNotify() : Widget->GetParent();
-			if (n) n->OnNotify(Widget, (int)Value);
+			if (n)
+			{
+				LNotification note(LNotifyItemChange);
+				n->OnNotify(Widget, note);
+			}
 		}
 	}
 };

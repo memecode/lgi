@@ -124,14 +124,14 @@ void LLayout::AttachScrollBars()
 	{
 		HScroll->Attach(this);
 		HScroll->SetNotify(this);
-		HScroll->SendNotify(GNotifyScrollBar_Create);
+		HScroll->SendNotify(LNotifyScrollBarCreate);
 	}
 
 	if (VScroll && !VScroll->IsAttached())
 	{
 		VScroll->Attach(this);
 		VScroll->SetNotify(this);
-		VScroll->SendNotify(GNotifyScrollBar_Create);
+		VScroll->SendNotify(LNotifyScrollBarCreate);
 	}
 }
 
@@ -221,9 +221,9 @@ bool LLayout::_SetScrollBars(bool x, bool y)
 	return true;
 }
 
-int LLayout::OnNotify(LViewI *c, int f)
+int LLayout::OnNotify(LViewI *c, LNotification &n)
 {
-	return LView::OnNotify(c, f);
+	return LView::OnNotify(c, n);
 }
 
 void LLayout::OnPosChange()
@@ -292,7 +292,7 @@ LRect &LLayout::GetClient(bool ClientSpace)
 	return r;
 }
 
-GMessage::Param LLayout::OnEvent(GMessage *Msg)
+LMessage::Param LLayout::OnEvent(LMessage *Msg)
 {
 	#ifdef M_SET_SCROLL
 	if (Msg->Msg() == M_SET_SCROLL)

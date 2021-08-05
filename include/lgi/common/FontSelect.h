@@ -55,7 +55,7 @@ public:
 	);
 	~LFontSelect();
 
-	int OnNotify(LViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, LNotification &n);
 
 	/// Read/Write the font information to a OS specific structure
 	///

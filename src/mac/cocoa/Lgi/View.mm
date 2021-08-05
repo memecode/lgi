@@ -411,7 +411,7 @@ bool LView::SetPos(LRect &p, bool Repaint)
 bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 {
 	if (!InThread())
-		return PostEvent(M_INVALIDATE, (GMessage::Param) (rc ? new LRect(*rc) : NULL), (GMessage::Param) this);
+		return PostEvent(M_INVALIDATE, (LMessage::Param) (rc ? new LRect(*rc) : NULL), (LMessage::Param) this);
 
 	LRect r;
 	if (rc)
@@ -467,7 +467,7 @@ LCursor LView::GetCursor(int x, int y)
 	return LCUR_Normal;
 }
 
-GMessage::Result LView::OnEvent(GMessage *Msg)
+LMessage::Result LView::OnEvent(LMessage *Msg)
 {
 	switch (Msg->m)
 	{
@@ -480,7 +480,10 @@ GMessage::Result LView::OnEvent(GMessage *Msg)
 		{
 			LViewI *Ctrl;
 			if (GetViewById((int)Msg->A(), Ctrl))
-				return OnNotify(Ctrl, (int)Msg->B());
+			{
+				LNotification note((LNotifyType)Msg->B());
+				return OnNotify(Ctrl, note);
+			}
 			break;
 		}
 		case M_COMMAND:

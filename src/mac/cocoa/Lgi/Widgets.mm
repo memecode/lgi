@@ -54,7 +54,7 @@ int LDialog::GetButtonId()
 	return d->BtnId;
 }
 
-int LDialog::OnNotify(LViewI *Ctrl, int Flags)
+int LDialog::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	auto b = dynamic_cast<LButton*>(Ctrl);
 	if (b)
@@ -192,7 +192,7 @@ void LDialog::EndModeless(int Code)
 
 extern LButton *FindDefault(LView *w);
 
-GMessage::Result LDialog::OnEvent(GMessage *Msg)
+LMessage::Result LDialog::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -216,7 +216,7 @@ LControl::~LControl()
 {
 }
 
-GMessage::Result LControl::OnEvent(GMessage *Msg)
+LMessage::Result LControl::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{

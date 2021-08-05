@@ -128,7 +128,6 @@ public:
 	
 	void OnPosChange() override;
 	int OnNotify(LViewI *c, LNotification &n) override;
-	int OnNotify(LViewI *c, int f) override;
 	void OnNcPaint(LSurface *pDC, LRect &r) override;
 
 	#endif

@@ -441,11 +441,11 @@ LMessage::Result LTabView::OnEvent(LMessage *Msg)
 	return LView::OnEvent(Msg);
 }
 
-int LTabView::OnNotify(LViewI *Ctrl, int Flags)
+int LTabView::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	if (GetParent())
 	{
-		return GetParent()->OnNotify(Ctrl, Flags);
+		return GetParent()->OnNotify(Ctrl, n);
 	}
 
 	return 0;

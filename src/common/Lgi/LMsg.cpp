@@ -76,7 +76,7 @@ public:
 		return LDialog::OnViewKey(v, k);
 	}
 	
-	int OnNotify(LViewI *Ctrl, int f)
+	int OnNotify(LViewI *Ctrl, LNotification &n)
 	{
 		switch (Ctrl->GetId())
 		{

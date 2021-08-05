@@ -691,7 +691,7 @@ void LWindow::SetAlwaysOnTop(bool b)
 {
 }
 
-bool LWindow::PostEvent(int Event, GMessage::Param a, GMessage::Param b)
+bool LWindow::PostEvent(int Event, LMessage::Param a, LMessage::Param b)
 {
 	return LAppInst->PostEvent(this, Event, a, b);
 }
@@ -1288,7 +1288,7 @@ void LWindow::PourAll()
 	
 }
 
-GMessage::Result LWindow::OnEvent(GMessage *m)
+LMessage::Result LWindow::OnEvent(LMessage *m)
 {
 	switch (m->Msg())
 	{

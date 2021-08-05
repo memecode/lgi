@@ -300,18 +300,18 @@ void LRadioGroup::Value(int64 Which)
 	}
 }
 
-int LRadioGroup::OnNotify(LViewI *Ctrl, int Flags)
+int LRadioGroup::OnNotify(LViewI *Ctrl, LNotification &n)
 {
-	LViewI *n = GetNotify() ? GetNotify() : GetParent();
-	if (n)
+	LViewI *v = GetNotify() ? GetNotify() : GetParent();
+	if (v)
 	{
 		if (dynamic_cast<LRadioButton*>(Ctrl))
 		{
-			return n->OnNotify(this, Flags);
+			return v->OnNotify(this, n);
 		}
 		else
 		{
-			return n->OnNotify(Ctrl, Flags);
+			return v->OnNotify(Ctrl, n);
 		}
 	}
 	return 0;
@@ -553,9 +553,9 @@ bool LRadioButton::OnLayout(LViewLayoutInfo &Inf)
 	return true;	
 }
 
-int LRadioButton::OnNotify(LViewI *Ctrl, int Flags)
+int LRadioButton::OnNotify(LViewI *Ctrl, LNotification &n)
 {
-	if (Ctrl == (LViewI*)this && Flags == LNotifyActivate)
+	if (Ctrl == (LViewI*)this && n.Type == LNotifyActivate)
 	{
 		Value(true);
 	}
@@ -598,7 +598,7 @@ void LRadioButton::Value(int64 i)
 
 		if (i)
 		{
-			SendNotify(0);
+			SendNotify();
 		}
 	}
 }

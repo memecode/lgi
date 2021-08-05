@@ -83,10 +83,10 @@ void LEdit::SetEmptyText(const char *EmptyText)
 	Invalidate();
 }
 
-void LEdit::SendNotify(int Data)
+void LEdit::SendNotify(LNotifyType Data)
 {
 	if (Data == LNotifyDocChanged)
-		return LTextView3::SendNotify(0);
+		return LTextView3::SendNotify(Data);
 	else if (Data == LK_RETURN ||
 			Data == LNotifyEscapeKey)
 		return LTextView3::SendNotify(Data);

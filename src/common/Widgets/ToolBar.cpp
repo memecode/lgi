@@ -896,7 +896,8 @@ void LToolButton::OnMouseClick(LMouse &m)
 						{
 							SendCommand();
 						}
-						SendNotify(m.Flags);
+						
+						SendNotify(LNotifyActivate);
 					}
 
 					Down = m.Down();
@@ -916,7 +917,7 @@ void LToolButton::OnMouseClick(LMouse &m)
 							Value(!Down);
 							SendCommand();
 						}
-						SendNotify(m.Flags);
+						SendNotify(LNotifyActivate);
 					}
 					break;
 				}
@@ -930,7 +931,7 @@ void LToolButton::OnMouseClick(LMouse &m)
 							Value(true);
 							SendCommand();
 						}
-						SendNotify(m.Flags);
+						SendNotify(LNotifyActivate);
 					}
 					break;
 				}

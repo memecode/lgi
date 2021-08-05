@@ -1216,13 +1216,13 @@ void GItemEdit::OnPaint(LSurface *pDC)
 	pDC->Rectangle();
 }
 
-int GItemEdit::OnNotify(LViewI *v, int f)
+int GItemEdit::OnNotify(LViewI *v, LNotification &n)
 {
 	switch (v->GetId())
 	{
 		case 100:
 		{
-			if (f == LNotifyEscapeKey)
+			if (n.Type == LNotifyEscapeKey)
 			{
 				d->Esc = true;
 				#if DEBUG_EDIT_LABEL
@@ -1230,7 +1230,7 @@ int GItemEdit::OnNotify(LViewI *v, int f)
 				#endif
 			}
 
-			if (f == LNotifyEscapeKey || f == LNotifyReturnKey)
+			if (n.Type == LNotifyEscapeKey || n.Type == LNotifyReturnKey)
 			{
 				#if DEBUG_EDIT_LABEL
 				LgiTrace("%s:%i - GItemEdit hiding on esc/enter\n", _FL);

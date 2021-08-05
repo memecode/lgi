@@ -118,7 +118,8 @@ LFontSelect::LFontSelect(LView *Parent, void *Init, int InitLen)
 	SetCtrlValue(IDC_UNDERLINE, Underline);
 
 	d->Running = true;
-	OnNotify(d->PtSizes, 0);
+	LNotification note(LNotifyNull);
+	OnNotify(d->PtSizes, note);
 }
 
 LFontSelect::~LFontSelect()
@@ -342,7 +343,7 @@ bool LFontSelect::Serialize(void *Data, int DataLen, bool Write)
 	return true;
 }
 
-int LFontSelect::OnNotify(LViewI *Ctrl, int Flags)
+int LFontSelect::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	switch (Ctrl->GetId())
 	{
@@ -364,8 +365,7 @@ int LFontSelect::OnNotify(LViewI *Ctrl, int Flags)
 		}
 		case IDC_FONT:
 		{
-			LNotifyType n = (LNotifyType)Flags;
-			if (n == LNotifyItemSelect)
+			if (n.Type == LNotifyItemSelect)
 			{
 				UpdatePreview();
 			}

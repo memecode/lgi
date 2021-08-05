@@ -675,9 +675,9 @@ void LBox::OnMouseMove(LMouse &m)
 	Invalidate((LRect*)NULL, true);
 }
 
-int LBox::OnNotify(LViewI *Ctrl, int Flags)
+int LBox::OnNotify(LViewI *Ctrl, LNotification &n)
 {
-	if (Flags == LNotifyTableLayoutRefresh)
+	if (n.Type == LNotifyTableLayoutRefresh)
 	{
 		d->Dirty = true;
 		
@@ -687,7 +687,7 @@ int LBox::OnNotify(LViewI *Ctrl, int Flags)
 			PostEvent(M_CHILDREN_CHANGED);
 	}
 		
-	return LView::OnNotify(Ctrl, Flags);
+	return LView::OnNotify(Ctrl, n);
 }
 
 void LBox::OnChildrenChanged(LViewI *Wnd, bool Attaching)

@@ -775,7 +775,7 @@ int LList::OnNotify(LViewI *Ctrl, LNotification &n)
 		Invalidate(&ItemsPos);
 	}
 
-	return LLayout::OnNotify(Ctrl, n.Type);
+	return LLayout::OnNotify(Ctrl, n);
 }
 
 LRect &LList::GetClientRect()
@@ -2144,7 +2144,7 @@ bool LList::Remove(LListItem *i)
 			}
 
 			// Notify
-			LViewI *Note = (GetNotify())?GetNotify():GetParent();
+			LViewI *Note = GetNotify() ? GetNotify() : GetParent();
 			if (Note)
 			{
 				if (Selected)
@@ -2153,7 +2153,8 @@ bool LList::Remove(LListItem *i)
 					OnItemSelect(s);
 				}
 
-				Note->OnNotify(this, LNotifyItemDelete);
+				LNotification n(LNotifyItemDelete);
+				Note->OnNotify(this, n);
 			}
 
 			Status = true;

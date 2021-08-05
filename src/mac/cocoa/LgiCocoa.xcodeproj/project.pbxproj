@@ -21,6 +21,7 @@
 		343874B7230F46B200CF96B4 /* App.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B3230F46B200CF96B4 /* App.h */; };
 		343874B8230F46B200CF96B4 /* Layout.h in Headers */ = {isa = PBXBuildFile; fileRef = 343874B4230F46B200CF96B4 /* Layout.h */; };
 		343BE8C72355D0CE00742E21 /* PopupList.h in Headers */ = {isa = PBXBuildFile; fileRef = 343BE8C62355D0CE00742E21 /* PopupList.h */; };
+		3449B8CE26BBF6B10022A9B8 /* Notifications.h in Headers */ = {isa = PBXBuildFile; fileRef = 3449B8CD26BBF6B10022A9B8 /* Notifications.h */; };
 		344CFBC8237365B800AE6B35 /* ClipBoard.h in Headers */ = {isa = PBXBuildFile; fileRef = 344CFBC7237365B800AE6B35 /* ClipBoard.h */; };
 		345920FF1F25649000098DFD /* Font.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FC1F25649000098DFD /* Font.h */; };
 		345921001F25649000098DFD /* FontCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FD1F25649000098DFD /* FontCache.h */; };
@@ -171,6 +172,7 @@
 		343874B3230F46B200CF96B4 /* App.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = App.h; path = ../../../../include/lgi/common/App.h; sourceTree = "<group>"; };
 		343874B4230F46B200CF96B4 /* Layout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Layout.h; path = ../../../../include/lgi/common/Layout.h; sourceTree = "<group>"; };
 		343BE8C62355D0CE00742E21 /* PopupList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PopupList.h; path = ../../../../include/lgi/common/PopupList.h; sourceTree = "<group>"; };
+		3449B8CD26BBF6B10022A9B8 /* Notifications.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Notifications.h; path = ../../../include/lgi/common/Notifications.h; sourceTree = "<group>"; };
 		344CFBC7237365B800AE6B35 /* ClipBoard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ClipBoard.h; path = ../../../../include/lgi/common/ClipBoard.h; sourceTree = "<group>"; };
 		345920FC1F25649000098DFD /* Font.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Font.h; path = ../../../../include/lgi/common/Font.h; sourceTree = "<group>"; };
 		345920FD1F25649000098DFD /* FontCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FontCache.h; path = ../../../../include/lgi/common/FontCache.h; sourceTree = "<group>"; };
@@ -430,6 +432,7 @@
 		3477C29A1CBF0A700028B84B /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				3449B8CD26BBF6B10022A9B8 /* Notifications.h */,
 				34114C8A23091E6E00F342B1 /* LgiClasses.h */,
 				3477C26B1CBF020F0028B84B /* LgiProject.h */,
 				3477C5161CC303B70028B84B /* LgiUiBase.h */,
@@ -659,6 +662,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				344CFBC8237365B800AE6B35 /* ClipBoard.h in Headers */,
+				3449B8CE26BBF6B10022A9B8 /* Notifications.h in Headers */,
 				343874B8230F46B200CF96B4 /* Layout.h in Headers */,
 				3477C2AC1CBF72170028B84B /* ViewPriv.h in Headers */,
 				3477C35D1CC2253E0028B84B /* LgiInterfaces.h in Headers */,

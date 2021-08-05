@@ -5338,11 +5338,11 @@ LMessage::Result LTextView3::OnEvent(LMessage *Msg)
 	return LLayout::OnEvent(Msg);
 }
 
-int LTextView3::OnNotify(LViewI *Ctrl, int Flags)
+int LTextView3::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	if (Ctrl->GetId() == IDC_VSCROLL && VScroll)
 	{
-		if (Flags == LNotifyScrollBarCreate)
+		if (n.Type == LNotifyScrollBarCreate)
 		{
 			UpdateScrollBars();
 		}

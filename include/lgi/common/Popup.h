@@ -85,7 +85,7 @@ public:
 	void OnPaint(LSurface *pDC);
 	bool OnKey(LKey &k);
 	void OnMouseClick(LMouse &m);
-	int OnNotify(LViewI *c, int f);
+	int OnNotify(LViewI *c, LNotification &n);
 
 	// Override
 	virtual void Activate();

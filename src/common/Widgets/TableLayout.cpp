@@ -2276,9 +2276,9 @@ void LTableLayout::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 	}
 }
 
-int LTableLayout::OnNotify(LViewI *c, int f)
+int LTableLayout::OnNotify(LViewI *c, LNotification &n)
 {
-    if (f == LNotifyTableLayoutRefresh)
+    if (n.Type == LNotifyTableLayoutRefresh)
     {
 		if (!d->LayoutDirty)
 		{
@@ -2295,7 +2295,7 @@ int LTableLayout::OnNotify(LViewI *c, int f)
         return 0;
     }
 
-    return LLayout::OnNotify(c, f);
+    return LLayout::OnNotify(c, n);
 }
 
 int64 LTableLayout::Value()

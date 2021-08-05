@@ -36,7 +36,7 @@ public:
 	LRadioButton *Append(int x, int y, const char *name);
 
 	// Impl
-	int OnNotify(LViewI *Ctrl, int Flags) override;
+	int OnNotify(LViewI *Ctrl, LNotification &n) override;
 	void OnPaint(LSurface *pDC) override;
 	void OnAttach() override;
 	LMessage::Result OnEvent(LMessage *m) override;
@@ -77,7 +77,7 @@ public:
 	int64 Value() override;
 	void Value(int64 i) override;
 	bool OnLayout(LViewLayoutInfo &Inf) override;
-	int OnNotify(LViewI *Ctrl, int Flags) override;
+	int OnNotify(LViewI *Ctrl, LNotification &n) override;
 
 	// Events
 	void OnAttach() override;

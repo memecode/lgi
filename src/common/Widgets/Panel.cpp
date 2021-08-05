@@ -194,11 +194,11 @@ bool LPanel::Pour(LRegion &r)
 	return false;
 }
 
-int LPanel::OnNotify(LViewI *Ctrl, int Flags)
+int LPanel::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	if (GetParent())
 	{
-		return GetParent()->OnNotify(Ctrl, Flags);
+		return GetParent()->OnNotify(Ctrl, n);
 	}
 
 	return 0;
@@ -262,7 +262,8 @@ void LPanel::OnMouseClick(LMouse &m)
 		Open(!IsOpen);
 		if (GetParent())
 		{
-			OnNotify(this, 0);
+			LNotification note(LNotifyItemClick);
+			OnNotify(this, note);
 		}
 	}
 }

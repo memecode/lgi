@@ -479,7 +479,7 @@ int LView::OnNotify(LViewI *Ctrl, LNotification &Data)
 		// notification up to the parent
 
 		// FIXME: eventually we need to call the 'LNotification' parent fn...
-		return d->Parent->OnNotify(Ctrl, Data.Type);
+		return d->Parent->OnNotify(Ctrl, Data);
 	}
 
 	return 0;
@@ -722,7 +722,7 @@ void LView::SetParent(LViewI *p)
 	d->ParentI = p;
 }
 
-void LView::SendNotify(int Data)
+void LView::SendNotify(LNotifyType Data)
 {
 	LViewI *n = d->Notify ? d->Notify : d->Parent;
 	if (n)
@@ -733,7 +733,8 @@ void LView::SendNotify(int Data)
 			#endif
 			InThread())
 		{
-			n->OnNotify(this, Data);
+			LNotification note(Data);
+			n->OnNotify(this, note);
 		}
 		else
 		{

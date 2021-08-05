@@ -68,7 +68,7 @@ NSCursor *LCocoaCursor(LCursor lc)
 
 @implementation LCocoaMsg
 
-- (id)init:(LViewI*)View msg:(int)Msg a:(GMessage::Param)A b:(GMessage::Param)B
+- (id)init:(LViewI*)View msg:(int)Msg a:(LMessage::Param)A b:(LMessage::Param)B
 {
 	if ((self = [super init]) != nil)
 	{
@@ -442,7 +442,7 @@ LKey KeyEvent(NSEvent *ev)
 
 	if (LView::LockHandler(msg.v, LView::OpExists))
 	{
-		GMessage Msg(msg.m, msg.a, msg.b);
+		LMessage Msg(msg.m, msg.a, msg.b);
 		// LgiTrace("%s::OnEvent %i,%i,%i\n", msg.v->GetClass(), msg.m, msg.a, msg.b);
 		msg.v->OnEvent(&Msg);
 	}

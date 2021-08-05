@@ -45,7 +45,7 @@ public:
 
 	bool Attach(LViewI *Wnd);
 	bool Pour(LRegion &r);
-	int OnNotify(LViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, LNotification &n);
 	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m);
 };

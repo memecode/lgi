@@ -78,7 +78,7 @@ public:
 	);
 
     void SetAppModal();
-	int OnNotify(LViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, LNotification &n);
 };
 #endif
 

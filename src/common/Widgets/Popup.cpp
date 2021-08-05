@@ -10,13 +10,6 @@
 	#include <Cocoa/Cocoa.h>
 #endif
 
-enum LPopupNotifications
-{
-    POPUP_DELETE = 1,
-    POPUP_VISIBLE,
-    POPUP_HIDE,
-};
-
 /////////////////////////////////////////////////////////////////////////////////////
 #ifndef WH_MOUSE_LL
 #define WH_MOUSE_LL        14
@@ -586,7 +579,7 @@ LPopup::LPopup(LView *owner)
 LPopup::~LPopup()
 {
 	CurrentPopups.Delete(this);
-	SendNotify(POPUP_DELETE);
+	SendNotify(LNotifyPopupDelete);
 
 	if (Owner)
 	{
@@ -910,7 +903,7 @@ void LPopup::Visible(bool i)
 			if (Hook)
 				Hook->UnregisterPopup(this);
 
-			SendNotify(POPUP_HIDE);
+			SendNotify(LNotifyPopupHide);
 
 			/*
 			#if WINNATIVE
@@ -1167,22 +1160,22 @@ void LDropDown::OnMouseClick(LMouse &m)
 	}
 }
 
-int LDropDown::OnNotify(LViewI *c, int f)
+int LDropDown::OnNotify(LViewI *c, LNotification &n)
 {
 	if (c == (LViewI*)Popup)
 	{
-		switch (f)
+		switch (n.Type)
 		{
-			case POPUP_DELETE:
+			case LNotifyPopupDelete:
 			{
 				Popup = 0;
 				break;
 			}
-			case POPUP_VISIBLE:
+			case LNotifyPopupVisible:
 			{
 				break;
 			}
-			case POPUP_HIDE:
+			case LNotifyPopupHide:
 			{
 				Invalidate();
 				OnPopupClose();

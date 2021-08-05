@@ -282,7 +282,7 @@ public:
 	virtual void SetParent(LViewI *p) override;
 
 	/// Sends a notification to the notify target or the parent chain
-	void SendNotify(int Data = 0) override;
+	void SendNotify(LNotifyType Data = LNotifyNull) override;
 	
 	/// Gets the window that receives event notifications
 	LViewI *GetNotify() override;
@@ -671,7 +671,6 @@ public:
 	/// each LView on the way. If it reaches a LView that processes it then the event stops propagating
 	/// up the hierarchy.
 	int OnNotify(LViewI *Ctrl, LNotification &Data) override;
-	int OnNotify(LViewI *Ctrl, int Flags) { return LViewI::OnNotify(Ctrl, Flags); }
 
 	/// Called when a menu command is activated by the user.
 	int OnCommand(int Cmd, int Event, OsView Wnd) override;

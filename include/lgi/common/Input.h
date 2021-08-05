@@ -38,7 +38,7 @@ public:
 		void *CallbackParam = 0
 	);
 	
-	int OnNotify(LViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, LNotification &n);
 	LString GetStr() { return Str; }
 };
 

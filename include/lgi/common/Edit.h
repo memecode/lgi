@@ -91,7 +91,7 @@ public:
 	#else
 	bool Paste();
 	void OnEnter(LKey &k);
-	void SendNotify(int Data = 0);
+	void SendNotify(LNotifyType Data = LNotifyNull);
 	bool OnLayout(LViewLayoutInfo &Inf) { return false; }
     void OnPaint(LSurface *pDC);
 	bool SetScrollBars(bool x, bool y);

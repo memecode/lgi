@@ -146,7 +146,7 @@ public:
 	
 	LItem *GetItem();
 	void OnPaint(LSurface *pDC);
-	int OnNotify(LViewI *v, int f);
+	int OnNotify(LViewI *v, LNotification &n);
 	void Visible(bool i);
 	LMessage::Result OnEvent(LMessage *Msg);
 

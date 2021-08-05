@@ -372,12 +372,6 @@ public:
 	virtual void OnPaint(LSurface *pDC) = 0;
 	virtual int OnCommand(int Cmd, int Event, OsView Wnd) = 0;
 	virtual int OnNotify(LViewI *Ctrl, LNotification &Data) = 0;
-
-	virtual int OnNotify(LViewI *Ctrl, int Flags)
-	{
-		LNotification n((LNotifyType)Flags);
-		return OnNotify(Ctrl, n);
-	}
 };
 
 class LViewLayoutInfo
@@ -484,7 +478,7 @@ public:
 	virtual void SetId(int i) = 0;
 
 	// Events and notification
-	virtual void SendNotify(int Data = 0) = 0;
+	virtual void SendNotify(LNotifyType Data = LNotifyNull) = 0;
 	virtual LViewI *GetNotify() = 0;
 	virtual void SetNotify(LViewI *n) = 0;
 
