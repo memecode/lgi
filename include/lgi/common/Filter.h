@@ -12,7 +12,7 @@
 #include "lgi/common/Containers.h"
 #include "lgi/common/Progress.h"
 
-// These are properties defined for use in the GFilter property list
+// These are properties defined for use in the LFilter property list
 #define LGI_FILTER_ERROR		"ErrorMsg"
 #define LGI_FILTER_COLOUR_PROF	"ColourProfile"
 #define LGI_FILTER_PARENT_WND	"Parent"
@@ -25,10 +25,10 @@
 #define LGI_FILTER_DPI_X		"DpiX"
 #define LGI_FILTER_DPI_Y		"DpiY"
 
-// These must be returned by a GFilter's GetVariant method
-/// A descriptive name for a GFilter
+// These must be returned by a LFilter's GetVariant method
+/// A descriptive name for a LFilter
 #define LGI_FILTER_TYPE			"Type"
-/// A comma separated list of extensions the GFilter can handle
+/// A comma separated list of extensions the LFilter can handle
 #define LGI_FILTER_EXTENSIONS	"Extension"
 
 LgiFunc int FindHeader(int Offset, const char *Str, LStream *f);
@@ -43,7 +43,7 @@ LgiFunc int FindHeader(int Offset, const char *Str, LStream *f);
 /// General base class for image filters. If you are creating a new filter you will
 /// need to also create a factory for it by inheriting another singleton class from
 /// GFilterFactory.
-class LgiClass GFilter : public GDom
+class LgiClass LFilter : public GDom
 {
 	LArray<uint8_t> Buf;
 
@@ -117,13 +117,13 @@ public:
 	    IoCancel
 	};
 
-	GFilter()
+	LFilter()
 	{
 		Meter = 0;
 		Props = 0;
 	}
 	
-	virtual ~GFilter() { }
+	virtual ~LFilter() { }
 	virtual Format GetFormat() = 0;
 
 	/// Get the progress meter
@@ -170,14 +170,14 @@ class LgiClass GFilterFactory
 		const uchar *Hint
 	) = 0;
 	/// Override to return an new (heap alloced) instance of your filter.
-	virtual GFilter *NewObject() = 0;
+	virtual LFilter *NewObject() = 0;
 	
 public:
 	GFilterFactory();
 	virtual ~GFilterFactory();
 
-	static GFilter *New(const char *File, int Access, const uchar *Hint);
-	static GFilter *NewAt(int i);
+	static LFilter *New(const char *File, int Access, const uchar *Hint);
+	static LFilter *NewAt(int i);
 	static int GetItems();
 };
 

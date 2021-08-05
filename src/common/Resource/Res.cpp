@@ -34,7 +34,7 @@
 /// and insert the output into GFindLang and GFindLangOldId
 ///
 /// \ingroup Resources
-GLanguage LgiLanguageTable[] =
+LLanguage LgiLanguageTable[] =
 {
 	{"Abkhazian",				"ab"},
 	{"Afar",					"aa"},
@@ -212,7 +212,7 @@ GLanguage LgiLanguageTable[] =
 	{0}
 };
 
-GLanguage *GFindLang(GLanguageId Id, const char *Name)
+LLanguage *GFindLang(LLanguageId Id, const char *Name)
 {
 	if (!Id)
 		return LgiLanguageTable;
@@ -700,7 +700,7 @@ GLanguage *GFindLang(GLanguageId Id, const char *Name)
 	}
 	else if (Name)
 	{
-		for (GLanguage *l=LgiLanguageTable; l->Id; l++)
+		for (LLanguage *l=LgiLanguageTable; l->Id; l++)
 		{
 			if (stricmp(Name, l->Name) == 0)
 			{
@@ -712,7 +712,7 @@ GLanguage *GFindLang(GLanguageId Id, const char *Name)
 	return 0;
 }
 
-GLanguage *GFindOldLang(int OldId)
+LLanguage *GFindOldLang(int OldId)
 {
 	switch (OldId)
 	{
@@ -822,10 +822,10 @@ LgiFunc char *_LgiGenLangLookup()
 	for (char i='a'; i<='z'; i++)
 	{
 		List<int> Index;
-		List<GLanguage> d;
+		List<LLanguage> d;
 
 		int n=0;
-		for (GLanguage *Lang = LgiLanguageTable; Lang->Id; Lang++, n++)
+		for (LLanguage *Lang = LgiLanguageTable; Lang->Id; Lang++, n++)
 		{
 			if (tolower(Lang->Id[0]) == i)
 			{

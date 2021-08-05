@@ -10,17 +10,17 @@ namespace Html2
 {
 
 class GTag;
-class GFontCache;
+class LFontCache;
 
 /// A lightwight scripting safe HTML control. It has limited CSS support, renders
 /// most tables, even when nested. You can provide support for loading external
-/// images by implementing the GDocumentEnv::GetImageUri method of the 
-/// GDocumentEnv interface and passing it into GHtml2::SetEnv.
-/// All attempts to open URL's are passed into GDocumentEnv::OnNavigate method of the
+/// images by implementing the LDocumentEnv::GetImageUri method of the 
+/// LDocumentEnv interface and passing it into GHtml2::SetEnv.
+/// All attempts to open URL's are passed into LDocumentEnv::OnNavigate method of the
 /// environment if set. Likewise any content inside active scripting tags, e.g. &lt;? ?&gt;
-/// will be striped out of the document and passed to GDocumentEnv::OnDynamicContent, which
+/// will be striped out of the document and passed to LDocumentEnv::OnDynamicContent, which
 /// should return the relevant HTML that the script resolves to. A reasonable default
-/// implementation of the GDocumentEnv interface is the GDefaultDocumentEnv object.
+/// implementation of the LDocumentEnv interface is the GDefaultDocumentEnv object.
 ///
 /// You can set the content of the control through the GHtml2::Name method.
 ///
@@ -36,7 +36,7 @@ class GHtml2 :
 
 protected:	
 	// Data
-	GFontCache			*FontCache;
+	LFontCache			*FontCache;
 	GTag				*Tag;				// Tree root
 	GTag				*Cursor;			// Cursor location..
 	GTag				*Selection;			// Edge of selection or NULL
@@ -56,7 +56,7 @@ protected:
 	struct GJobSem : public LMutex
 	{
     	// Data that has to be accessed under Lock
-	    LArray<GDocumentEnv::LoadJob*> Jobs;	    
+	    LArray<LDocumentEnv::LoadJob*> Jobs;	    
 	    GJobSem() : LMutex("GJobSem") {}
 	} JobSem;
 
@@ -79,7 +79,7 @@ protected:
 	GTag *GetLastChild(GTag *t);
 
 public:
-	GHtml2(int Id, int x, int y, int cx, int cy, GDocumentEnv *system = 0);
+	GHtml2(int Id, int x, int y, int cx, int cy, LDocumentEnv *system = 0);
 	~GHtml2();
 
 	// Html
@@ -135,9 +135,9 @@ public:
 	int OnNotify(LViewI *c, int f);
 	void OnPosChange();
 	void OnPulse();
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 	const char *GetMimeType() { return "text/html"; }
-	void OnContent(GDocumentEnv::LoadJob *Res);
+	void OnContent(LDocumentEnv::LoadJob *Res);
 	bool GotoAnchor(char *Name);
 
 	// Javascript handlers

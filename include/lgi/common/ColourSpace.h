@@ -2,7 +2,7 @@
 #define _G_COLOUR_SPACE_H_
 
 /// Colour component type
-enum GComponentType
+enum LComponentType
 {
 	CtNone,			// 0
 	CtIndex,		// 1
@@ -326,8 +326,8 @@ struct LColourComponent
 	// ((type << 4) | (size))
 	uint8_t Bits;
 	
-	GComponentType Type() { return (GComponentType) ((Bits >> 4) & 0xf); }
-	void Type(GComponentType t) { Bits = (Bits & 0xf) | ((uint8_t)t << 4); }
+	LComponentType Type() { return (LComponentType) ((Bits >> 4) & 0xf); }
+	void Type(LComponentType t) { Bits = (Bits & 0xf) | ((uint8_t)t << 4); }
 	uint8_t Size() { return Bits & 0xf; }
 	void Size(uint8_t t) { Bits = (Bits & 0xf0) | (t & 0xf); }
 };

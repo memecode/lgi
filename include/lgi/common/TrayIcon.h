@@ -36,7 +36,7 @@ public:
 	void Value(int64 v);
 
 	/// Call this in your window's OnEvent handler
-	virtual GMessage::Result OnEvent(GMessage *Msg);
+	virtual LMessage::Result OnEvent(LMessage *Msg);
 };
 
 #endif

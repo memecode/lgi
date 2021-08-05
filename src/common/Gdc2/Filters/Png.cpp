@@ -316,7 +316,7 @@ public:
 #define LIBPNG
 #endif
 
-class GdcPng : public GFilter
+class GdcPng : public LFilter
 {
 	static char PngSig[];
 	friend void PNGAPI LibPngError(png_structp Png, png_const_charp Msg);
@@ -382,7 +382,7 @@ class GdcPngFactory : public GFilterFactory
 		}
 	}
 
-	GFilter *NewObject()
+	LFilter *NewObject()
 	{
 		return new GdcPng
 		(
@@ -667,9 +667,9 @@ void ReadAlpha64_32(Out *o, In *i, int Len)
 	}
 }
 
-GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
+LFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 {
-	GFilter::IoStatus Status = IoError;
+	LFilter::IoStatus Status = IoError;
 
 	Pos = 0;
 	pDC = pDeviceContext;
@@ -700,7 +700,7 @@ GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 		    Warn = false;
 		}
 		
-        return GFilter::IoComponentMissing;
+        return LFilter::IoComponentMissing;
 	}
 	#endif
 
@@ -1057,9 +1057,9 @@ GFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 	return Status;
 }
 
-GFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
+LFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 {
-	GFilter::IoStatus Status = IoError;
+	LFilter::IoStatus Status = IoError;
 	
 	LVariant Transparent;
 	bool HasTransparency = false;
@@ -1067,7 +1067,7 @@ GFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 	LVariant v;
 
 	if (!pDC)
-		return GFilter::IoError;
+		return LFilter::IoError;
 	
 	#if LIBPNG_SHARED
     if (!Lib->IsLoaded() && !Lib->Load(sLibrary))
@@ -1079,7 +1079,7 @@ GFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 		    Warn = false;
 		}
 		
-        return GFilter::IoComponentMissing;	
+        return LFilter::IoComponentMissing;	
     }
 	#endif
 	

@@ -23,7 +23,7 @@
 // TIFF
 #define TIFF_USE_LZW
 
-class TiffIo : public GFilter
+class TiffIo : public LFilter
 {
 public:
 	LStream *s;
@@ -45,12 +45,12 @@ public:
 
 	bool Read(void *p, int len)
 	{
-		return GFilter::Read(s, p, len);
+		return LFilter::Read(s, p, len);
 	}
 
 	bool Write(const void *p, int len)
 	{
-		return GFilter::Write(s, p, len);
+		return LFilter::Write(s, p, len);
 	}
 };
 
@@ -129,7 +129,7 @@ class GdcTiffFactory : public GFilterFactory
 		return false;
 	}
 
-	GFilter *NewObject()
+	LFilter *NewObject()
 	{
 		return new GdcTiff;
 	}
@@ -491,9 +491,9 @@ public:
 	}
 };
 
-GFilter::IoStatus GdcTiff::ProcessRead(LSurface *pDC)
+LFilter::IoStatus GdcTiff::ProcessRead(LSurface *pDC)
 {
-	GFilter::IoStatus Status = IoError;
+	LFilter::IoStatus Status = IoError;
 	bool Error = false;
 	IFD *x = FindTag(TAG_ImageX);
 	IFD *y = FindTag(TAG_ImageY);
@@ -992,9 +992,9 @@ GFilter::IoStatus GdcTiff::ProcessRead(LSurface *pDC)
 	return Status;
 }
 
-GFilter::IoStatus GdcTiff::ReadImage(LSurface *pDC, LStream *In)
+LFilter::IoStatus GdcTiff::ReadImage(LSurface *pDC, LStream *In)
 {
-	GFilter::IoStatus Status = IoError;
+	LFilter::IoStatus Status = IoError;
 	ushort n16;
 
 	if (!pDC || !In)
@@ -1073,12 +1073,12 @@ GFilter::IoStatus GdcTiff::ReadImage(LSurface *pDC, LStream *In)
 	return Status;
 }
 
-GFilter::IoStatus GdcTiff::ProcessWrite(LSurface *pDC)
+LFilter::IoStatus GdcTiff::ProcessWrite(LSurface *pDC)
 {
 	return IoUnsupportedFormat;
 }
 
-GFilter::IoStatus GdcTiff::WriteImage(LStream *Out, LSurface *pDC)
+LFilter::IoStatus GdcTiff::WriteImage(LStream *Out, LSurface *pDC)
 {
 	return ProcessWrite(pDC);
 }

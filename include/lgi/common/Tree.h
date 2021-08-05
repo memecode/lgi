@@ -228,7 +228,7 @@ public:
 	void OnPosChange() override;
 	bool OnKey(LKey &k) override;
 	int OnNotify(LViewI *Ctrl, int Flags) override;
-	GMessage::Result OnEvent(GMessage *Msg) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
 	void OnPulse() override;
 	int GetContentSize(int ColumnIdx) override;
 	LCursor GetCursor(int x, int y) override;

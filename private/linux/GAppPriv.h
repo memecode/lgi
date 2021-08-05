@@ -58,7 +58,7 @@ public:
 	#endif
 
 	/// Any fonts needed for styling the elements
-	LAutoPtr<GFontCache> FontCache;
+	LAutoPtr<LFontCache> FontCache;
 	
 	// Clipboard handling
 	int Clipboard, Utf8, Utf8String;

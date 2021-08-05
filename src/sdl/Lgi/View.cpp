@@ -409,7 +409,7 @@ bool IsKeyChar(LKey &k, int vk)
 
 #define KEY_FLAGS		(~(MK_LBUTTON | MK_MBUTTON | MK_RBUTTON))
 
-GMessage::Result LView::OnEvent(GMessage *Msg)
+LMessage::Result LView::OnEvent(LMessage *Msg)
 {
 	return 0;
 }

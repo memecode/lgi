@@ -159,7 +159,7 @@ LgiFunc OsThreadId					GetCurrentThreadId();
 
 #endif
 
-#include "GMessage.h"
+#include "LMessage.h"
 
 #ifndef _MSC_VER
 #pragma clang diagnostic ignored "-Wtautological-undefined-compare"

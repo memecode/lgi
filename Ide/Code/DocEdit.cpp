@@ -341,7 +341,7 @@ bool DocEdit::OnKey(LKey &k)
 	}
 	return LTextView3::OnKey(k); 
 }
-GMessage::Result DocEdit::OnEvent(GMessage *m)
+LMessage::Result DocEdit::OnEvent(LMessage *m)
 {
 	switch (m->Msg())
 	{

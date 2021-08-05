@@ -39,7 +39,7 @@ public:
 	int OnNotify(LViewI *Ctrl, int Flags) override;
 	void OnPaint(LSurface *pDC) override;
 	void OnAttach() override;
-	GMessage::Result OnEvent(GMessage *m) override;
+	LMessage::Result OnEvent(LMessage *m) override;
 	bool OnLayout(LViewLayoutInfo &Inf) override;
 	void OnStyleChange();
 

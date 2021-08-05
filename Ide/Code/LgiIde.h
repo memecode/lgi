@@ -289,7 +289,7 @@ public:
 	void OnFile(char *File, bool IsProject = false);
 	bool OnRequestClose(bool IsClose) override;
 	int OnNotify(LViewI *Ctrl, int Flags) override;
-	GMessage::Result OnEvent(GMessage *m) override;
+	LMessage::Result OnEvent(LMessage *m) override;
 	bool OnNode(const char *Path, class ProjectNode *Node, FindSymbolSystem::SymAction Action);
 	void OnPulse() override;
 

@@ -22,7 +22,7 @@ public:
 	/// Gets the surface being displayed
 	virtual LSurface *GetSurface();
 
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m);
 };

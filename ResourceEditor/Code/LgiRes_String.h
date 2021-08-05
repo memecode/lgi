@@ -23,21 +23,21 @@ class ResStringUi;
 ////////////////////////////////////////////////////////////////
 class StrLang
 {
-	GLanguageId Lang;
+	LLanguageId Lang;
 	char *Str;
 
 public:
 	StrLang();
 	~StrLang();
 
-	GLanguageId GetLang();
-	void SetLang(GLanguageId i);
+	LLanguageId GetLang();
+	void SetLang(LLanguageId i);
 	char *&GetStr();
 	void SetStr(const char *s);
 	bool IsEnglish();
 
-	bool operator ==(GLanguageId LangId);
-	bool operator !=(GLanguageId LangId);
+	bool operator ==(LLanguageId LangId);
+	bool operator !=(LLanguageId LangId);
 };
 
 class ResString : public LListItem, public FieldSource
@@ -51,7 +51,7 @@ protected:
 	char RefStr[16];
 	char IdStr[16];
 	char **GetIndex(int i);
-	StrLang *GetLang(GLanguageId i);
+	StrLang *GetLang(LLanguageId i);
 	LAutoString Define;		// #define used in code to reference
 	int Ref;			// globally unique
 	int Id;				// numerical value used in code to reference
@@ -73,8 +73,8 @@ public:
 	int GetId() { return Id; }
 	int SetId(int id);
 	int NewId(); // Creates a new Id based on #define
-	char *Get(GLanguageId Lang = 0);
-	void Set(const char *s, GLanguageId Lang = 0);
+	char *Get(LLanguageId Lang = 0);
+	void Set(const char *s, LLanguageId Lang = 0);
 	void UnDuplicate();
 	int Compare(LListItem *To, ssize_t Field);
 	void CopyText();
@@ -111,8 +111,8 @@ class ResStringGroup : public Resource, public LList
 protected:
 	ResStringUi *Ui;
 	List<ResString> Strs;
-	LArray<GLanguage*> Lang;
-	LArray<GLanguage*> Visible;
+	LArray<LLanguage*> Lang;
+	LArray<LLanguage*> Visible;
 	int SortCol;
 	int SortAscend;
 
@@ -139,11 +139,11 @@ public:
 	int OnCommand(int Cmd, int Event, OsView hWnd);
 	void SetLanguages();
 	int GetLanguages() { return (int)Lang.Length(); }
-	GLanguage *GetLanguage(int i) { return i < Lang.Length() ? Lang[i] : 0; }
-	GLanguage *GetLanguage(GLanguageId Id);
-	int GetLangIdx(GLanguageId Id);
-	void AppendLanguage(GLanguageId Id);
-	void DeleteLanguage(GLanguageId Id);
+	LLanguage *GetLanguage(int i) { return i < Lang.Length() ? Lang[i] : 0; }
+	LLanguage *GetLanguage(LLanguageId Id);
+	int GetLangIdx(LLanguageId Id);
+	void AppendLanguage(LLanguageId Id);
+	void DeleteLanguage(LLanguageId Id);
 	void Sort();
 	void RemoveUnReferenced();
 	List<ResString> *GetStrs() { return &Strs; }
@@ -183,18 +183,18 @@ public:
 	void PourAll();
 	void OnPosChange();
 	void OnCreate();
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 };
 
 class LangDlg : public LDialog
 {
 	LCombo *Sel;
-	List<GLanguage> Langs;
+	List<LLanguage> Langs;
 
 public:
-	GLanguage *Lang;
+	LLanguage *Lang;
 
-	LangDlg(LView *parent, List<GLanguage> &l, int Init = -1);
+	LangDlg(LView *parent, List<LLanguage> &l, int Init = -1);
 	int OnNotify(LViewI *Ctrl, int Flags);
 };
 

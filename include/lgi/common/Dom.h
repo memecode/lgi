@@ -49,7 +49,7 @@ public:
 
 /// This is a global map between strings and enum values for fast lookup of
 /// object properties inside the SetVariant, GetVariant and CallMethod handlers.
-enum GDomProperty
+enum LDomProperty
 {
 	#undef _
 	#define _(symbol, txt) symbol,
@@ -57,7 +57,7 @@ enum GDomProperty
 	#undef _
 };
 
-LgiFunc GDomProperty LStringToDomProp(const char *Str);
-LgiFunc const char *LDomPropToString(GDomProperty Prop);
+LgiFunc LDomProperty LStringToDomProp(const char *Str);
+LgiFunc const char *LDomPropToString(LDomProperty Prop);
 
 #endif

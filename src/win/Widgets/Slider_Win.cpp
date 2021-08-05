@@ -81,7 +81,7 @@ void LSlider::SetLimits(int64 min, int64 max)
 	SetRange(LRange(Min, max-min+1));
 }
 
-GMessage::Result LSlider::OnEvent(GMessage *Msg)
+LMessage::Result LSlider::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -141,7 +141,7 @@ GMessage::Result LSlider::OnEvent(GMessage *Msg)
 		}
 	}
 
-	GMessage::Result Status = LControl::OnEvent(Msg);
+	LMessage::Result Status = LControl::OnEvent(Msg);
 
 	switch (Msg->Msg())
 	{

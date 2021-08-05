@@ -7,18 +7,18 @@
 
 char AppName[] = "LrStrip";
 
-int Cmp(GLanguage *a, GLanguage *b, int d)
+int Cmp(LLanguage *a, LLanguage *b, int d)
 {
 	return stricmp(a->Name, b->Name);
 }
 
 class LangInc : public LListItem
 {
-	GLanguage *Lang;
+	LLanguage *Lang;
 	GListItemCheckBox *Inc;
 
 public:
-	LangInc(GLanguage *l)
+	LangInc(LLanguage *l)
 	{
 		Lang = l;
 		SetText(l->Name, 0);
@@ -60,7 +60,7 @@ public:
 			for (int i=0; i<t->Attr.Length(); i++)
 			{
 				LXmlAttr &a = t->Attr[i];
-				GLanguage *l = GFindLang(a.GetName());
+				LLanguage *l = GFindLang(a.GetName());
 				if (l)
 				{
 					if (!Langs.Find(l->Id))
@@ -96,15 +96,15 @@ public:
 					{
 						CollectLangs(Tree);
 
-						List<GLanguage> Lst;
+						List<LLanguage> Lst;
 						const char *Key = 0;
 						for (bool p = Langs.First(&Key); p; p = Langs.Next(&Key))
 						{
-							Lst.Insert((GLanguage*)p);
+							Lst.Insert((LLanguage*)p);
 						}
 						Lst.Sort(Cmp, 0);
 
-						for (GLanguage *l = Lst.First(); l; l = Lst.Next())
+						for (LLanguage *l = Lst.First(); l; l = Lst.Next())
 						{
 							Inc->Insert(new LangInc(l));
 						}
@@ -136,7 +136,7 @@ public:
 		{
 			for (int i=0; i<t->Attr.Length(); i++)
 			{
-				GLanguage *l = GFindLang(t->Attr[i].GetName());
+				LLanguage *l = GFindLang(t->Attr[i].GetName());
 				if (l)
 				{
 					if (!Langs.Find(l->Id))

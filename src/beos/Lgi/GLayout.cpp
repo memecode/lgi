@@ -236,7 +236,7 @@ int LLayout::OnNotify(LViewI *v, int f)
 	return LView::OnNotify(v, f);
 }
 
-GMessage::Result LLayout::OnEvent(GMessage *Msg)
+LMessage::Result LLayout::OnEvent(LMessage *Msg)
 {
 	switch (MsgCode(Msg))
 	{

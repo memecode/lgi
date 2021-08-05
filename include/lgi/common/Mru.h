@@ -51,7 +51,7 @@ public:
 	bool Set(LSubMenu *parent, int size = -1);
 	const char *AddFile(const char *FileName, bool Update = true);
 	void RemoveFile(const char *FileName, bool Update = true);
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 	bool OnCommand(int Cmd);
 
 	// Serialization

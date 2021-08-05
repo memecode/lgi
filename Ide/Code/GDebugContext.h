@@ -34,7 +34,7 @@ public:
 	// Ui events...
 	bool OnCommand(int Cmd);
 	void OnUserCommand(const char *Cmd);
-	GMessage::Param OnEvent(GMessage *m);
+	LMessage::Param OnEvent(LMessage *m);
 	void OnMemoryDump(const char *Addr, int WordSize, int Width, bool IsHex);
 	void FormatMemoryDump(int WordSize, int Width, bool InHex);
 	

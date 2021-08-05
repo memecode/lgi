@@ -1,7 +1,7 @@
 #include <Path.h>
 #include "Lgi.h"
 #include "SkinEngine.h"
-#include "GFontCache.h"
+#include "LFontCache.h"
 
 class LAppPrivate
 {
@@ -12,7 +12,7 @@ public:
 	LFileSystem *FileSystem;
 	GLibrary *SkinLib;
 	GdcDevice *GdcSystem;
-	LAutoPtr<GFontCache> FontCache;
+	LAutoPtr<LFontCache> FontCache;
 	OsThreadId GuiThread;
 	bool FirstRun;
 
@@ -498,10 +498,10 @@ int LApp::GetCpuCount()
 	return 4;	
 }
 
-GFontCache *LApp::GetFontCache()
+LFontCache *LApp::GetFontCache()
 {
 	if (!d->FontCache)
-		d->FontCache.Reset(new GFontCache(SystemNormal));
+		d->FontCache.Reset(new LFontCache(SystemNormal));
 	return d->FontCache;
 }
 

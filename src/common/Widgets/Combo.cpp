@@ -205,7 +205,7 @@ void LCombo::Value(int64 i)
 		d->SetText(NULL, _FL);
 		Invalidate();
 
-		SendNotify(GNotifyValueChanged);
+		SendNotify(LNotifyValueChanged);
 	}
 }
 
@@ -214,7 +214,7 @@ int64 LCombo::Value()
 	return d->Current;
 }
 
-GMessage::Result LCombo::OnEvent(GMessage *Msg)
+LMessage::Result LCombo::OnEvent(LMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }
@@ -411,7 +411,7 @@ void LCombo::DoMenu()
 			d->SetText(NULL, _FL);
 			Invalidate();
 
-			SendNotify(GNotifyValueChanged);
+			SendNotify(LNotifyValueChanged);
 		}
 	}
 }
@@ -536,7 +536,7 @@ void LCombo::OnPaint(LSurface *pDC)
 	if (d->LayoutDirty)
 	{
 		d->LayoutDirty = false;
-		SendNotify(GNotifyTableLayout_Refresh);
+		SendNotify(LNotifyTableLayoutRefresh);
 	}
 	
 	if (!d->GetText(_FL))

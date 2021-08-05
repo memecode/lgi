@@ -211,7 +211,7 @@ public:
 	void OnMouseMove(LMouse &m);
 	bool OnKey(LKey &k);
 	void OnPaint(LSurface *pDC);
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 	int OnNotify(LViewI *Ctrl, int Flags);
 	void OnPulse();
 	int OnHitTest(int x, int y);

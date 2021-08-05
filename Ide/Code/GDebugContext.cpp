@@ -190,7 +190,7 @@ GDebugContext::~GDebugContext()
 	DeleteObj(d);
 }
 
-GMessage::Param GDebugContext::OnEvent(GMessage *m)
+LMessage::Param GDebugContext::OnEvent(LMessage *m)
 {
 	switch (m->Msg())
 	{

@@ -216,7 +216,7 @@ pascal OSErr AppEventHandler(const AppleEvent *ae, AppleEvent *reply, SRefCon ha
 				urlbuf[Used] = 0;
 				if (LAppInst && LAppInst->AppWnd)
 				{
-					LAppInst->AppWnd->PostEvent(M_URL, (GMessage::Param) new LString(urlbuf));
+					LAppInst->AppWnd->PostEvent(M_URL, (LMessage::Param) new LString(urlbuf));
 				}
 				else
 				{

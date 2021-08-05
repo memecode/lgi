@@ -227,7 +227,7 @@ public:
 
 	///////////////// Implementation ////////////////////////////
 	void OnPosChange() override;
-	GMessage::Result OnEvent(GMessage *Msg) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
 	void OnPaint(LSurface *pDC) override;
 	bool HandleViewMouse(LView *v, LMouse &m);
 	bool HandleViewKey(LView *v, LKey &k);
@@ -282,7 +282,7 @@ public:
 	
 	#elif defined(MAC)
 	
-		bool PostEvent(int Cmd, GMessage::Param a = 0, GMessage::Param b = 0) override;
+		bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0) override;
 		void Quit(bool DontDelete = false) override;
 		int OnCommand(int Cmd, int Event, OsView Wnd) override;
 		LViewI *WindowFromPoint(int x, int y, int DebugDebug = 0) override;

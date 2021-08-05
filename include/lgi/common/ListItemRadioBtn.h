@@ -108,7 +108,7 @@ public:
 			}
 
 			if (GetList())
-				GetList()->SendNotify(GNotifyItem_Change);
+				GetList()->SendNotify(LNotifyItemChange);
 		}
 	}
 };

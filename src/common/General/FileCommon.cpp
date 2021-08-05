@@ -42,7 +42,7 @@ LString LFileSystem::GetCurrentFolder()
 /////////////////////////////////////////////////////////////////////////////////
 bool LFile::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty p = LStringToDomProp(Name);
+	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		case ObjType: // Type: String
@@ -66,7 +66,7 @@ bool LFile::GetVariant(const char *Name, LVariant &Value, char *Array)
 
 bool LFile::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty p = LStringToDomProp(Name);
+	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		case ObjLength:
@@ -84,7 +84,7 @@ bool LFile::SetVariant(const char *Name, LVariant &Value, char *Array)
 
 bool LFile::CallMethod(const char *Name, LVariant *Dst, LArray<LVariant*> &Arg)
 {
-	GDomProperty p = LStringToDomProp(Name);
+	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		case ObjLength: // Type: ([NewLength])

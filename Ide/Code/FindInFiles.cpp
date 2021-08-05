@@ -236,7 +236,7 @@ FindInFilesThread::~FindInFilesThread()
 
 void FindInFilesThread::Log(const char *Str)
 {
-	PostThreadEvent(d->AppHnd, M_APPEND_TEXT, (GMessage::Param)Str, AppWnd::FindTab);
+	PostThreadEvent(d->AppHnd, M_APPEND_TEXT, (LMessage::Param)Str, AppWnd::FindTab);
 }
 
 void FindInFilesThread::SearchFile(char *File)
@@ -352,7 +352,7 @@ void FindInFilesThread::Stop()
 		LSleep(1);
 }
 
-GMessage::Result FindInFilesThread::OnEvent(GMessage *Msg)
+LMessage::Result FindInFilesThread::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{

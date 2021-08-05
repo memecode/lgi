@@ -17,7 +17,7 @@
 #include "LVariant.h"
 #include "GPalette.h"
 
-class GdcPcx : public GFilter {
+class GdcPcx : public LFilter {
 public:
 	Format GetFormat() { return FmtPcx; }
 	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
@@ -48,7 +48,7 @@ class GdcPcxFactory : public GFilterFactory
 		return (File) ? stristr(File, ".pcx") != 0 : false;
 	}
 
-	GFilter *NewObject()
+	LFilter *NewObject()
 	{
 		return new GdcPcx;
 	}
@@ -81,7 +81,7 @@ typedef struct {
 
 } PCX_HEADER;
 
-GFilter::IoStatus GdcPcx::ReadImage(LSurface *pDC, LStream *In)
+LFilter::IoStatus GdcPcx::ReadImage(LSurface *pDC, LStream *In)
 {
 	IoStatus Status = IoError;
 
@@ -265,7 +265,7 @@ GFilter::IoStatus GdcPcx::ReadImage(LSurface *pDC, LStream *In)
 	return Status;
 }
 
-GFilter::IoStatus GdcPcx::WriteImage(LStream *Out, LSurface *pDC)
+LFilter::IoStatus GdcPcx::WriteImage(LStream *Out, LSurface *pDC)
 {
 	IoStatus Status = IoError;
 

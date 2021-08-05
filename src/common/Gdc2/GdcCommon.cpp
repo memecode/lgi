@@ -657,7 +657,7 @@ const char *GColourSpaceToString(LColourSpace cs)
 // printf("    c[%i] = 0x%x\n", i, c);
 		if (c)
 		{
-			GComponentType type = (GComponentType)(c >> 4);
+			LComponentType type = (LComponentType)(c >> 4);
 			int size = c & 0xf;
 			if (first)
 			{
@@ -699,7 +699,7 @@ bool GColourSpaceHasAlpha(LColourSpace Cs)
 	while (Cs)
 	{
 		uint8_t c = Cs & 0xff;
-		GComponentType type = (GComponentType)(c >> 4);
+		LComponentType type = (LComponentType)(c >> 4);
 		if (type == CtAlpha)
 			return true;
 		
@@ -747,7 +747,7 @@ LColourSpace GStringToColourSpace(const char *c)
 		}
 		else
 		{
-			LArray<GComponentType> Comp;
+			LArray<LComponentType> Comp;
 			while (*c)
 			{
 				switch (tolower(*c))

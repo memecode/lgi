@@ -1585,7 +1585,7 @@ bool LZoomView::OnMouseWheel(double Lines)
 		// Update the screen        
 		// FIXME... mark stuff dirty
 		Invalidate();
-		SendNotify(GNotifyViewport_Changed);
+		SendNotify(LNotifyViewportChanged);
 	}
 	else
 	{
@@ -1596,7 +1596,7 @@ bool LZoomView::OnMouseWheel(double Lines)
 			if (HScroll)
 			{
 				HScroll->Value((int64) (HScroll->Value() + (Lines * 5)));
-				SendNotify(GNotifyViewport_Changed);
+				SendNotify(LNotifyViewportChanged);
 			}
 		}
 		else
@@ -1605,7 +1605,7 @@ bool LZoomView::OnMouseWheel(double Lines)
 			if (VScroll)
 			{
 				VScroll->Value((int64) (VScroll->Value() + (Lines * 5)));
-				SendNotify(GNotifyViewport_Changed);
+				SendNotify(LNotifyViewportChanged);
 			}
 		}
 	}
@@ -1642,7 +1642,7 @@ void LZoomView::OnPulse()
 			if (Amount)
 			{
 				VScroll->Value(VScroll->Value() + Amount);
-				SendNotify(GNotifyViewport_Changed);
+				SendNotify(LNotifyViewportChanged);
 				Update = true;
 			}
 		}
@@ -1657,7 +1657,7 @@ void LZoomView::OnPulse()
 			if (Amount)
 			{
 				HScroll->Value(HScroll->Value() + Amount);
-				SendNotify(GNotifyViewport_Changed);
+				SendNotify(LNotifyViewportChanged);
 				Update = true;
 			}
 		}
@@ -1669,7 +1669,7 @@ void LZoomView::OnPulse()
 	}
 }
 
-GMessage::Param LZoomView::OnEvent(GMessage *m)
+LMessage::Param LZoomView::OnEvent(LMessage *m)
 {
 	switch (m->Msg())
 	{
@@ -1693,7 +1693,7 @@ int LZoomView::OnNotify(LViewI *v, int f)
 			#if WINNATIVE
 			UpdateWindow(Handle());
 			#endif
-			SendNotify(GNotifyViewport_Changed);
+			SendNotify(LNotifyViewportChanged);
 			break;
 		}
 	}

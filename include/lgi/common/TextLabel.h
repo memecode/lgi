@@ -55,7 +55,7 @@ public:
 	void SetWrap(bool b);
 	
 	// Events
-	GMessage::Result OnEvent(GMessage *Msg) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
 	int OnNotify(LViewI *Ctrl, int Flags) override;
 	void OnPaint(LSurface *pDC) override;
 	void OnPosChange() override;

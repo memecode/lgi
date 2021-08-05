@@ -364,8 +364,8 @@ int LFontSelect::OnNotify(LViewI *Ctrl, int Flags)
 		}
 		case IDC_FONT:
 		{
-			GNotifyType n = (GNotifyType)Flags;
-			if (n == GNotifyItem_Select)
+			LNotifyType n = (LNotifyType)Flags;
+			if (n == LNotifyItemSelect)
 			{
 				UpdatePreview();
 			}

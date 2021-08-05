@@ -20,7 +20,7 @@ typedef struct PictureInfo {
 } PictureInfo;
 
 // Filter
-class GdcSpiPlugin : public GFilter
+class GdcSpiPlugin : public LFilter
 {
 	GdcSpiPluginFactory *Factory;
 	char Ext[512];
@@ -141,7 +141,7 @@ public:
 		return false;
 	}
 
-	GFilter *NewObject()
+	LFilter *NewObject()
 	{
 		return new GdcSpiPlugin(this);
 	}

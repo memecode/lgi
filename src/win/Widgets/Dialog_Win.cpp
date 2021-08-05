@@ -159,7 +159,7 @@ LRESULT CALLBACK DlgRedir(HWND hWnd, UINT m, WPARAM a, LPARAM b)
 		#endif
 	if (Wnd)
 	{
-		GMessage Msg(m, a, b);
+		LMessage Msg(m, a, b);
 		return Wnd->OnEvent(&Msg);
 	}
 
@@ -430,7 +430,7 @@ int LDialog::DoModeless()
 	return Status;
 }
 
-GMessage::Result LDialog::OnEvent(GMessage *Msg)
+LMessage::Result LDialog::OnEvent(LMessage *Msg)
 {
 	switch (Msg->m)
 	{
@@ -568,9 +568,9 @@ LControl::~LControl()
 		*SetOnDelete = true;
 }
 
-GMessage::Result LControl::OnEvent(GMessage *Msg)
+LMessage::Result LControl::OnEvent(LMessage *Msg)
 {
-	GMessage::Result Status = 0;
+	LMessage::Result Status = 0;
 	
 	// Pre-OS event handler
 	switch (Msg->m)

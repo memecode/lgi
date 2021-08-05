@@ -1,54 +1,54 @@
 #ifndef _GNOTIFICATIONS_H_
 #define _GNOTIFICATIONS_H_
 
-enum GNotifyType
+enum LNotifyType
 {
-	GNotifyNull,
+	LNotifyNull,
 
 	// LItemContainer notification flags
 	/// Item inserted
 	/// \sa LList, LView::OnNotify
-	GNotifyItem_Insert = 0x100,
+	LNotifyItemInsert = 0x100,
 	/// Item deleted
 	/// \sa LList, LView::OnNotify
-	GNotifyItem_Delete,
+	LNotifyItemDelete,
 	/// Item selected
 	/// \sa LList, LView::OnNotify
-	GNotifyItem_Select,
+	LNotifyItemSelect,
 	/// Item clicked
 	/// \sa LList, LView::OnNotify
-	GNotifyItem_Click,
+	LNotifyItemClick,
 	/// Item double clicked
 	/// \sa LList, LView::OnNotify
-	GNotifyItem_DoubleClick,
+	LNotifyItemDoubleClick,
 	/// Item changed
 	/// \sa LList, LView::OnNotify
-	GNotifyItem_Change,
+	LNotifyItemChange,
 	/// Column changed
 	/// \sa LList, LView::OnNotify
-	GNotifyItem_ColumnsChanged,
+	LNotifyItemColumnsChanged,
 	/// Column sized
 	/// \sa LList, LView::OnNotify
-	GNotifyItem_ColumnsResized,
+	LNotifyItemColumnsResized,
 	/// Column clicks
 	/// \sa LList, LView::OnNotify
-	GNotifyItem_ColumnClicked,
+	LNotifyItemColumnClicked,
 	/// Items dropped on the control
-	GNotifyItem_ItemsDropped,
+	LNotifyItemItemsDropped,
 	/// Sent when the control requests a context menu 
 	/// outside of the existing items, i.e. in the blank
 	/// space below the items.
-	GNotifyItem_ContextMenu,
+	LNotifyItemContextMenu,
 	/// Blank space clicked
-	GNotifyContainer_Click,
+	LNotifyContainerClick,
 	/// Ctrl+F - find
-	GNotifyContainer_Find,
+	LNotifyContainerFind,
 
 	// Generic value changed
-	GNotifyValueChanged,
+	LNotifyValueChanged,
 
 	// Control notifications
-	GNotify_Activate,					// User has used say the keyboard to activate control:
+	LNotifyActivate,					// User has used say the keyboard to activate control:
 										//		Check box -> toggle value
 										//		Radio button -> select
 										//		Button -> push or toggle
@@ -57,41 +57,41 @@ enum GNotifyType
 										// etc
 
 	// LDocView
-	GNotifyDocChanged,
-	GNotifyDocLoaded,
-	GNotifyCursorChanged,
-	GNotifySelectionChanged,
-	GNotifyCharsetChanged,
-	GNotifyFixedWidthChanged,
-	GNotifyShowImagesChanged,
+	LNotifyDocChanged,
+	LNotifyDocLoaded,
+	LNotifyCursorChanged,
+	LNotifySelectionChanged,
+	LNotifyCharsetChanged,
+	LNotifyFixedWidthChanged,
+	LNotifyShowImagesChanged,
 
 	// LTableLayout
-	GNotifyTableLayout_LayoutChanged,	// Sent by LTableLayout to notify it's layout changed
-	GNotifyTableLayout_Refresh,			// Sent by child views of LTableLayout to cause it to
+	LNotifyTableLayoutChanged,	// Sent by LTableLayout to notify it's layout changed
+	LNotifyTableLayoutRefresh,			// Sent by child views of LTableLayout to cause it to
 										// update the layout
 
 	// LZoomView
-	GNotifyViewport_Changed,
+	LNotifyViewportChanged,
 
 	// LTabPage
-	GNotifyTabPage_ButtonClick,
+	LNotifyTabPageButtonClick,
 	
 	// LScrollBar
-	GNotifyScrollBar_Create,
-	GNotifyScrollBar_Destroy,
+	LNotifyScrollBarCreate,
+	LNotifyScrollBarDestroy,
 
 	/// Return/Enter pressed
 	/// \sa LList, LView::OnNotify
-	GNotify_ReturnKey = LK_RETURN,
+	LNotifyReturnKey = LK_RETURN,
 	/// Backspace pressed
 	/// \sa LList, LView::OnNotify
-	GNotify_BackspaceKey = LK_BACKSPACE,
+	LNotifyBackspaceKey = LK_BACKSPACE,
 	/// Delete pressed
 	/// \sa LList, LView::OnNotify
-	GNotify_DeleteKey = LK_DELETE,
+	LNotifyDeleteKey = LK_DELETE,
 	/// Escape pressed
 	/// \sa LList, LView::OnNotify
-	GNotify_EscapeKey = LK_ESCAPE,
+	LNotifyEscapeKey = LK_ESCAPE,
 	
 	
 	/// User app notification IDs should start with this value:

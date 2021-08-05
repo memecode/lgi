@@ -171,7 +171,7 @@ public:
 
 	const char *GetClass() override { return "ResDialog"; }
 	LView *Wnd() override { return dynamic_cast<LView*>(this); }
-	static void AddLanguage(GLanguageId Id);
+	static void AddLanguage(LLanguageId Id);
 	ResDialog *IsDialog() override { return this; }
 	void EnumCtrls(List<ResDialogCtrl> &Ctrls);
 	void OnChildrenChanged(LViewI *Wnd, bool Attaching) override;
@@ -256,7 +256,7 @@ public:
 	void PourAll();
 	void OnPosChange();
 	void OnCreate();
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 
 	int CurrentTool();
 	void SelectTool(int i);

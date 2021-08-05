@@ -50,14 +50,14 @@ public:
 	OsAppArguments &operator =(OsAppArguments &a);
 };
 
-class LgiClass GMessage : public BMessage
+class LgiClass LMessage : public BMessage
 {
 public:
 	typedef int32 Param;
 	typedef int32 Result;
 	
-	GMessage() {}
-	GMessage(int m, Param a = 0, Param b = 0)
+	LMessage() {}
+	LMessage(int m, Param a = 0, Param b = 0)
 	{
 		what = m;
 		AddInt32("Lgi.a", a);
@@ -268,9 +268,9 @@ typedef int OsSocket;
 
 /////////////////////////////////////////////////////////////////////////////////////
 #define MsgCode(m) m->what
-extern GMessage::Param MsgA(GMessage *m);
-extern GMessage::Param MsgB(GMessage *m);
-extern GMessage CreateMsg(int m, int a, int b);
+extern LMessage::Param MsgA(LMessage *m);
+extern LMessage::Param MsgB(LMessage *m);
+extern LMessage CreateMsg(int m, int a, int b);
 
 /////////////////////////////////////////////////////////////////////////////////////
 // BeOS specific

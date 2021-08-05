@@ -128,7 +128,7 @@ public:
 		return Size;
 	}
 
-	GMessage::Result OnEvent(GMessage *m)
+	LMessage::Result OnEvent(LMessage *m)
 	{
 		if (m->Msg() == M_LOG_TEXT)
 		{

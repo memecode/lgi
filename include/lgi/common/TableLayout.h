@@ -8,7 +8,7 @@
 #include "lgi/common/Notifications.h"
 #include "lgi/common/Layout.h"
 
-/// A layout cell, not currently implemened.
+/// A layout cell, not currently implemented.
 class GLayoutCell : public GDom, public LCss
 {
 public:
@@ -74,7 +74,7 @@ public:
 	int64 Value();
 	void Value(int64 v);
 	int OnNotify(LViewI *c, int f);
-	GMessage::Result OnEvent(GMessage *m);
+	LMessage::Result OnEvent(LMessage *m) override;
 };
 
 

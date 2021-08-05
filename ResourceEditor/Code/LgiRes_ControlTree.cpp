@@ -16,7 +16,7 @@ class CtrlControlTreePriv
 public:
 	ResDialog *Dlg;
 	bool DiscardClick;
-	GLanguageId CurLang;
+	LLanguageId CurLang;
 
 	CtrlControlTreePriv(ResDialog *dlg)
 	{

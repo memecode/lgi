@@ -65,7 +65,7 @@ public:
 	
 	// Impl
 	bool Attach(LViewI *parent);
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 	LViewI *FindControl(int Id);
 	int OnNotify(LViewI *Ctrl, int Flags);
 	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
@@ -137,7 +137,7 @@ public:
 	void HasButton(bool b);
 	LTabView *GetTabControl() { return TabCtrl; }
 
-	GMessage::Result OnEvent(GMessage *Msg) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
 	void OnPaint(LSurface *pDC) override;
 	bool OnKey(LKey &k) override;
 	void OnFocus(bool b) override;

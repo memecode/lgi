@@ -793,7 +793,7 @@ void ResMenuUi::OnCreate()
 	}
 }
 
-GMessage::Result ResMenuUi::OnEvent(GMessage *Msg)
+LMessage::Result ResMenuUi::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{

@@ -29,7 +29,7 @@ public:
 
 	void OnPosChange();
 	int OnNotify(LViewI *c, int f);
-	GMessage::Result OnEvent(GMessage *m);
+	LMessage::Result OnEvent(LMessage *m);
 };
 
 #endif

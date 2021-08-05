@@ -138,8 +138,8 @@ void LSort(T *v, int left, int right, std::function<ssize_t(T, T)> comp)
 #elif defined _SDL_H
 	typedef SDL_Event *OsEvent;
 #elif defined _WIN32
-	// No native type here, but GMessage can encapsulate the message code, WPARAM and LPARAM.
-	typedef class GMessage *OsEvent;
+	// No native type here, but LMessage can encapsulate the message code, WPARAM and LPARAM.
+	typedef class LMessage *OsEvent;
 #elif LGI_COCOA
 	#include "ObjCWrapper.h"
 	ObjCWrapper(NSEvent,  OsEvent);

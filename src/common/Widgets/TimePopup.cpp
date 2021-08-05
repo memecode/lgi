@@ -273,8 +273,8 @@ int LTimePopup::OnNotify(LViewI *c, int f)
 {
 	if (c->GetId() == 100 && !Ignore)
 	{
-		GNotifyType Type = (GNotifyType)f;
-		if 	(Type == GNotifyItem_Select || Type == GNotify_ReturnKey)
+		LNotifyType Type = (LNotifyType)f;
+		if 	(Type == LNotifyItemSelect || Type == LNotifyReturnKey)
 		{
 			LListItem *Sel = Times->GetSelected();
 			if (Sel)
@@ -286,9 +286,9 @@ int LTimePopup::OnNotify(LViewI *c, int f)
 					if (n)
 					{
 						n->Name(t);
-						n->OnNotify(this, GNotifyValueChanged);
+						n->OnNotify(this, LNotifyValueChanged);
 						
-						if (Times->Mouse || Type == GNotify_ReturnKey)
+						if (Times->Mouse || Type == LNotifyReturnKey)
 						{
 							n->Focus(true);
 							Visible(false);
@@ -297,7 +297,7 @@ int LTimePopup::OnNotify(LViewI *c, int f)
 				}
 			}
 		}
-		else if (Type == GNotify_EscapeKey)
+		else if (Type == LNotifyEscapeKey)
 		{
 			LViewI *n = GetNotify();
 			if (n)

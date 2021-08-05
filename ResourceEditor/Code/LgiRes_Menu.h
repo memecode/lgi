@@ -110,7 +110,7 @@ public:
 	void PourAll();
 	void OnPosChange();
 	void OnCreate();
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 
 	int CurrentTool();
 	void SelectTool(int i);

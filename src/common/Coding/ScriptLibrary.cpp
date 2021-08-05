@@ -608,7 +608,7 @@ bool SystemFunctions::New(LScriptArguments &Args)
 	}
 
 	LVariant *Ret = Args.GetReturn();
-	GDomProperty Type = LStringToDomProp(sType);
+	LDomProperty Type = LStringToDomProp(sType);
 	switch (Type)
 	{	
 		case TypeList:
@@ -723,7 +723,7 @@ public:
 
 	bool GetVariant(const char *Var, LVariant &Value, char *Arr = 0)
 	{
-		GDomProperty p = LStringToDomProp(Var);
+		LDomProperty p = LStringToDomProp(Var);
 		switch (p)
 		{
 			case ObjName:

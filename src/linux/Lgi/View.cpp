@@ -610,7 +610,7 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 	if (!InThread())
 	{
 		DEBUG_INVALIDATE("%s::Invalidate out of thread\n", GetClass());
-		return PostEvent(M_INVALIDATE, NULL, (GMessage::Param)this);
+		return PostEvent(M_INVALIDATE, NULL, (LMessage::Param)this);
 	}
 
 	LRect r;
@@ -688,7 +688,7 @@ void LView::SetPulse(int Length)
 	}
 }
 
-GMessage::Param LView::OnEvent(GMessage *Msg)
+LMessage::Param LView::OnEvent(LMessage *Msg)
 {
 	ThreadCheck();
 	

@@ -216,18 +216,18 @@ public:
 	}
 };
 
-class GFontCache
+class LFontCache
 {
 	GHtml *Owner;
 	List<LFont> Fonts;
 
 public:
-	GFontCache(GHtml *owner)
+	LFontCache(GHtml *owner)
 	{
 		Owner = owner;
 	}
 
-	~GFontCache()
+	~LFontCache()
 	{
 		Fonts.DeleteObjects();
 	}
@@ -1354,7 +1354,7 @@ void GTag::Set(const char *attr, const char *val)
 
 bool GTag::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty Fld = LStringToDomProp(Name);
+	LDomProperty Fld = LStringToDomProp(Name);
 	switch (Fld)
 	{
 		case ObjStyle: // Type: GCssStyle
@@ -1384,7 +1384,7 @@ bool GTag::GetVariant(const char *Name, LVariant &Value, char *Array)
 
 bool GTag::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty Fld = LStringToDomProp(Name);
+	LDomProperty Fld = LStringToDomProp(Name);
 	switch (Fld)
 	{
 		case ObjStyle:
@@ -2625,7 +2625,7 @@ void GTag::LoadImage(const char *Uri)
 		if (p.Length() != 2 || !p.Last().Equals("base64"))
 			return;
 		LString Name = LString("name.") + p[0];
-		LAutoPtr<GFilter> Filter(GFilterFactory::New(Name, FILTER_CAP_READ, NULL));
+		LAutoPtr<LFilter> Filter(GFilterFactory::New(Name, FILTER_CAP_READ, NULL));
 		if (!Filter)
 			return;
 
@@ -2639,12 +2639,12 @@ void GTag::LoadImage(const char *Uri)
 		if (!Image.Reset(new LMemDC))
 			return;
 		auto result = Filter->ReadImage(Image, &bin);
-		if (result != GFilter::IoSuccess)
+		if (result != LFilter::IoSuccess)
 			Image.Reset();
 		return;
 	}
 
-	GDocumentEnv::LoadJob *j = Html->Environment->NewJob();
+	LDocumentEnv::LoadJob *j = Html->Environment->NewJob();
 	if (j)
 	{
 		LAssert(Html != NULL);
@@ -2655,12 +2655,12 @@ void GTag::LoadImage(const char *Uri)
 
 		// LgiTrace("%s:%i - new job %p, %p\n", _FL, j, j->UserData);
 
-		GDocumentEnv::LoadType Result = Html->Environment->GetContent(j);
-		if (Result == GDocumentEnv::LoadImmediate)
+		LDocumentEnv::LoadType Result = Html->Environment->GetContent(j);
+		if (Result == LDocumentEnv::LoadImmediate)
 		{
 			SetImage(Uri, j->pDC.Release());
 		}
-		else if (Result == GDocumentEnv::LoadDeferred)
+		else if (Result == LDocumentEnv::LoadDeferred)
 		{
 			Html->d->DeferredLoads++;
 		}
@@ -2715,7 +2715,7 @@ void GTag::ImageLoaded(char *uri, LSurface *Img, int &Used)
 	}
 }
 
-struct GTagElementCallback : public LCss::ElementCallback<GTag>
+struct LTagElementCallback : public LCss::ElementCallback<GTag>
 {
 	const char *Val;
 
@@ -2769,7 +2769,7 @@ void GTag::Restyle()
 {
 	// Use the matching built into the LCss Store.
 	LCss::SelArray Styles;
-	GTagElementCallback Context;
+	LTagElementCallback Context;
 	if (Html->CssStore.Match(Styles, &Context, this))
 	{
 		for (unsigned i=0; i<Styles.Length(); i++)
@@ -2864,7 +2864,7 @@ void GTag::SetStyle()
 				!Stricmp(Type, "text/css") &&
 				!Html->CssHref.Find(Href))
 			{
-				GDocumentEnv::LoadJob *j = Html->Environment->NewJob();
+				LDocumentEnv::LoadJob *j = Html->Environment->NewJob();
 				if (j)
 				{
 					LAssert(Html != NULL);
@@ -2875,8 +2875,8 @@ void GTag::SetStyle()
 					j->UserData = t;
 					j->UserUid = Html->GetDocumentUid();
 
-					GDocumentEnv::LoadType Result = Html->Environment->GetContent(j);
-					if (Result == GDocumentEnv::LoadImmediate)
+					LDocumentEnv::LoadType Result = Html->Environment->GetContent(j);
+					if (Result == LDocumentEnv::LoadImmediate)
 					{
 						LStreamI *s = j->GetStream();							
 						if (s)
@@ -2893,7 +2893,7 @@ void GTag::SetStyle()
 							}
 						}
 					}
-					else if (Result == GDocumentEnv::LoadDeferred)
+					else if (Result == LDocumentEnv::LoadDeferred)
 					{
 						Html->d->DeferredLoads++;
 					}
@@ -6908,7 +6908,7 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 }
 
 //////////////////////////////////////////////////////////////////////
-GHtml::GHtml(int id, int x, int y, int cx, int cy, GDocumentEnv *e) :
+GHtml::GHtml(int id, int x, int y, int cx, int cy, LDocumentEnv *e) :
 	LDocView(e),
 	ResObject(Res_Custom),
 	LHtmlParser(NULL)
@@ -6961,7 +6961,7 @@ void GHtml::_New()
 	}
 	#endif
 	
-	FontCache = new GFontCache(this);	
+	FontCache = new LFontCache(this);	
 	SetScrollBars(false, false);
 }
 
@@ -7243,7 +7243,7 @@ const char *GHtml::Name()
 	return Source;
 }
 
-GMessage::Result GHtml::OnEvent(GMessage *Msg)
+LMessage::Result GHtml::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -7261,7 +7261,7 @@ GMessage::Result GHtml::OnEvent(GMessage *Msg)
 			{
 				for (unsigned i=0; i<JobSem.Jobs.Length(); i++)
 				{
-					GDocumentEnv::LoadJob *j = JobSem.Jobs[i];
+					LDocumentEnv::LoadJob *j = JobSem.Jobs[i];
 					int MyUid = GetDocumentUid();
 
 					// LgiTrace("%s:%i - Receive job %p, %p\n", _FL, j, j->UserData);
@@ -7297,7 +7297,7 @@ GMessage::Result GHtml::OnEvent(GMessage *Msg)
 									}
 									else LgiTrace("%s:%i - Image decode failed for '%s'\n", _FL, j->Uri.Get());
 								}
-								else if (j->Status == GDocumentEnv::LoadJob::JobOk)
+								else if (j->Status == LDocumentEnv::LoadJob::JobOk)
 									LgiTrace("%s:%i - Unexpected job type for '%s'\n", _FL, j->Uri.Get());
 							}
 							else if (r->TagId == TAG_LINK)
@@ -7377,7 +7377,7 @@ int GHtml::OnNotify(LViewI *c, int f)
 			if (Tag)
 				Tag->ClearToolTips();
 
-			if (f == GNotifyScrollBar_Create && VScroll && LineY > 0)
+			if (f == LNotifyScrollBarCreate && VScroll && LineY > 0)
 			{
 				int y = Y();
 				int p = MAX(y / LineY, 1);
@@ -7723,7 +7723,7 @@ void GHtml::SetLoadImages(bool i)
 	if (i ^ GetLoadImages())
 	{
 		LDocView::SetLoadImages(i);
-		SendNotify(GNotifyShowImagesChanged);
+		SendNotify(LNotifyShowImagesChanged);
 
 		if (GetLoadImages() && Tag)
 		{
@@ -8129,7 +8129,7 @@ void GHtml::OnMouseClick(LMouse &m)
 					}
 
 					Invalidate();
-					SendNotify(GNotifySelectionChanged);
+					SendNotify(LNotifySelectionChanged);
 				}
 			}
 			else if (Hit.NearestText)
@@ -8145,7 +8145,7 @@ void GHtml::OnMouseClick(LMouse &m)
 				#endif
 
 				OnCursorChanged();
-				SendNotify(GNotifySelectionChanged);
+				SendNotify(LNotifySelectionChanged);
 			}
 			else
 			{
@@ -8339,21 +8339,21 @@ void GHtml::OnMouseClick(LMouse &m)
 										char File[MAX_PATH] = "";
 										if (Environment)
 										{
-											GDocumentEnv::LoadJob *j = Environment->NewJob();
+											LDocumentEnv::LoadJob *j = Environment->NewJob();
 											if (j)
 											{
 												j->Uri.Reset(WideToUtf8(cid));
 												j->Env = Environment;
-												j->Pref = GDocumentEnv::LoadJob::FmtFilename;
+												j->Pref = LDocumentEnv::LoadJob::FmtFilename;
 												j->UserUid = GetDocumentUid();
 
-												GDocumentEnv::LoadType Result = Environment->GetContent(j);
-												if (Result == GDocumentEnv::LoadImmediate)
+												LDocumentEnv::LoadType Result = Environment->GetContent(j);
+												if (Result == LDocumentEnv::LoadImmediate)
 												{
 													if (j->Filename)
 														strcpy_s(File, sizeof(File), j->Filename);
 												}
-												else if (Result == GDocumentEnv::LoadDeferred)
+												else if (Result == LDocumentEnv::LoadDeferred)
 												{
 													d->DeferredLoads++;
 												}
@@ -8434,7 +8434,7 @@ void GHtml::OnMouseClick(LMouse &m)
 
 								Invalidate();
 
-								SendNotify(GNotifyCharsetChanged);
+								SendNotify(LNotifyCharsetChanged);
 							}								
 						}
 						else
@@ -8456,7 +8456,7 @@ void GHtml::OnMouseClick(LMouse &m)
 		{
 			Selection->Selection = -1;
 			Selection = 0;
-			SendNotify(GNotifySelectionChanged);
+			SendNotify(LNotifySelectionChanged);
 
 			#if DEBUG_SELECTION
 			LgiTrace("NoSelect on release\n");
@@ -8468,7 +8468,7 @@ void GHtml::OnMouseClick(LMouse &m)
 void GHtml::OnLoad()
 {
 	d->IsLoaded = true;
-	SendNotify(GNotifyDocLoaded);
+	SendNotify(LNotifyDocLoaded);
 }
 
 GTag *GHtml::GetTagByPos(int x, int y, ssize_t *Index, LPoint *LocalCoords, bool DebugLog)
@@ -8599,7 +8599,7 @@ void GHtml::OnMouseMove(LMouse &m)
 			OnCursorChanged();
 			Invalidate();
 			
-			SendNotify(GNotifySelectionChanged);
+			SendNotify(LNotifySelectionChanged);
 
 			#if DEBUG_SELECTION
 			LgiTrace("CreateSelection '%20S' %i\n", Hit.NearestText->Text(), Hit.Index);
@@ -8653,7 +8653,7 @@ void GHtml::OnMouseMove(LMouse &m)
 
 			OnCursorChanged();
 			Invalidate();
-			SendNotify(GNotifySelectionChanged);
+			SendNotify(LNotifySelectionChanged);
 		}
 	}
 }
@@ -8808,7 +8808,7 @@ bool GHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocV
 	return false;
 }
 
-void GHtml::OnContent(GDocumentEnv::LoadJob *Res)
+void GHtml::OnContent(LDocumentEnv::LoadJob *Res)
 {
 	if (JobSem.Lock(_FL))
 	{

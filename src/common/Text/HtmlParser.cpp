@@ -950,7 +950,7 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 						LVariant Src;
 						if (Elem->GetValue("src", Src) && View && View->GetEnv())
 						{
-							GDocumentEnv::LoadJob *j = View->GetEnv()->NewJob();
+							LDocumentEnv::LoadJob *j = View->GetEnv()->NewJob();
 							if (j)
 							{
 								j->Uri.Reset(Src.ReleaseStr());
@@ -960,8 +960,8 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 
 								// LgiTrace("%s:%i - new job %p, %p\n", _FL, j, j->UserData);
 
-								GDocumentEnv::LoadType Result = View->GetEnv()->GetContent(j);
-								if (Result == GDocumentEnv::LoadImmediate)
+								LDocumentEnv::LoadType Result = View->GetEnv()->GetContent(j);
+								if (Result == LDocumentEnv::LoadImmediate)
 								{
 									LStreamI *s = j->GetStream();
 									if (s)

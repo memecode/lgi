@@ -416,7 +416,7 @@ public:
 	void OnMouseMove(LMouse &m) override;
 	bool OnKey(LKey &k) override;
 	void OnPaint(LSurface *pDC) override;
-	GMessage::Result OnEvent(GMessage *Msg) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
 	int OnNotify(LViewI *Ctrl, int Flags) override;
 	void OnPulse() override;
 	int OnHitTest(int x, int y) override;

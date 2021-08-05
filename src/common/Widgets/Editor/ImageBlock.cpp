@@ -15,7 +15,7 @@ class ImageLoader : public LEventTargetThread, public Progress
 	LString File;
 	LEventSinkI *Sink;
 	LSurface *Img;
-	LAutoPtr<GFilter> Filter;
+	LAutoPtr<LFilter> Filter;
 	bool SurfaceSent;
 	int64 Ts;
 	LAutoPtr<LStream> In;
@@ -44,18 +44,18 @@ public:
 		if (!SurfaceSent)
 		{
 			SurfaceSent = true;
-			PostSink(M_IMAGE_SET_SURFACE, (GMessage::Param)Img, (GMessage::Param)In.Release());
+			PostSink(M_IMAGE_SET_SURFACE, (LMessage::Param)Img, (LMessage::Param)In.Release());
 		}
 
 		int64 Now = LCurrentTime();
 		if (Now - Ts > TIMEOUT_LOAD_PROGRESS)
 		{
 			Ts = Now;
-			PostSink(M_IMAGE_PROGRESS, (GMessage::Param)v);
+			PostSink(M_IMAGE_PROGRESS, (LMessage::Param)v);
 		}
 	}
 
-	bool PostSink(int Cmd, GMessage::Param a = 0, GMessage::Param b = 0)
+	bool PostSink(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0)
 	{
 		for (int i=0; i<50; i++)
 		{
@@ -68,7 +68,7 @@ public:
 		return false;
 	}
 
-	GMessage::Result OnEvent(GMessage *Msg)
+	LMessage::Result OnEvent(LMessage *Msg)
 	{
 		switch (Msg->Msg())
 		{
@@ -109,16 +109,16 @@ public:
 				Filter->SetProgress(this);
 
 				Ts = LCurrentTime();
-				GFilter::IoStatus Status = Filter->ReadImage(Img, In);
-				if (Status != GFilter::IoSuccess)
+				LFilter::IoStatus Status = Filter->ReadImage(Img, In);
+				if (Status != LFilter::IoSuccess)
 				{
-					if (Status == GFilter::IoComponentMissing)
+					if (Status == LFilter::IoComponentMissing)
 					{
 						LString *s = new LString(Filter->GetComponentName());
 						#if LOADER_THREAD_LOGGING
 						LgiTrace("%s:%i - Thread.Send(M_IMAGE_COMPONENT_MISSING)\n", _FL);
 						#endif
-						return PostSink(M_IMAGE_COMPONENT_MISSING, (GMessage::Param)s);
+						return PostSink(M_IMAGE_COMPONENT_MISSING, (LMessage::Param)s);
 					}
 
 					#if LOADER_THREAD_LOGGING
@@ -132,7 +132,7 @@ public:
 					#if LOADER_THREAD_LOGGING
 					LgiTrace("%s:%i - Thread.Send(M_IMAGE_SET_SURFACE)\n", _FL);
 					#endif
-					PostSink(M_IMAGE_SET_SURFACE, (GMessage::Param)Img, (GMessage::Param)In.Release());
+					PostSink(M_IMAGE_SET_SURFACE, (LMessage::Param)Img, (LMessage::Param)In.Release());
 				}
 
 				#if LOADER_THREAD_LOGGING
@@ -175,16 +175,16 @@ public:
 				Filter->SetProgress(this);
 
 				Ts = LCurrentTime();
-				GFilter::IoStatus Status = Filter->ReadImage(Img, Mem);
-				if (Status != GFilter::IoSuccess)
+				LFilter::IoStatus Status = Filter->ReadImage(Img, Mem);
+				if (Status != LFilter::IoSuccess)
 				{
-					if (Status == GFilter::IoComponentMissing)
+					if (Status == LFilter::IoComponentMissing)
 					{
 						LString *s = new LString(Filter->GetComponentName());
 						#if LOADER_THREAD_LOGGING
 						LgiTrace("%s:%i - Thread.Send(M_IMAGE_COMPONENT_MISSING)\n", _FL);
 						#endif
-						return PostSink(M_IMAGE_COMPONENT_MISSING, (GMessage::Param)s);
+						return PostSink(M_IMAGE_COMPONENT_MISSING, (LMessage::Param)s);
 					}
 
 					#if LOADER_THREAD_LOGGING
@@ -198,7 +198,7 @@ public:
 					#if LOADER_THREAD_LOGGING
 					LgiTrace("%s:%i - Thread.Send(M_IMAGE_SET_SURFACE)\n", _FL);
 					#endif
-					PostSink(M_IMAGE_SET_SURFACE, (GMessage::Param)Img, (GMessage::Param)In.Release());
+					PostSink(M_IMAGE_SET_SURFACE, (LMessage::Param)Img, (LMessage::Param)In.Release());
 				}
 
 				#if LOADER_THREAD_LOGGING
@@ -246,17 +246,17 @@ public:
 					#if LOADER_THREAD_LOGGING
 					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): invalid ptr\n", _FL);
 					#endif
-					PostSink(M_IMAGE_ERROR, (GMessage::Param) new LString("Invalid pointer."));
+					PostSink(M_IMAGE_ERROR, (LMessage::Param) new LString("Invalid pointer."));
 					break;
 				}
 				
-				LAutoPtr<GFilter> f(GFilterFactory::New("a.jpg", O_READ, NULL));
+				LAutoPtr<LFilter> f(GFilterFactory::New("a.jpg", O_READ, NULL));
 				if (!f)
 				{
 					#if LOADER_THREAD_LOGGING
 					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): No JPEG filter available\n", _FL);
 					#endif
-					PostSink(M_IMAGE_ERROR, (GMessage::Param) new LString("No JPEG filter available."));
+					PostSink(M_IMAGE_ERROR, (LMessage::Param) new LString("No JPEG filter available."));
 					break;
 				}
 
@@ -280,14 +280,14 @@ public:
 					#if LOADER_THREAD_LOGGING
 					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): Image compression failed\n", _FL);
 					#endif
-					PostSink(M_IMAGE_ERROR, (GMessage::Param) new LString("Image compression failed."));
+					PostSink(M_IMAGE_ERROR, (LMessage::Param) new LString("Image compression failed."));
 					break;
 				}
 
 				#if LOADER_THREAD_LOGGING
 				LgiTrace("%s:%i - Thread.Send(M_IMAGE_COMPRESS)\n", _FL);
 				#endif
-				PostSink(M_IMAGE_COMPRESS, (GMessage::Param)jpg.Release(), (GMessage::Param)si);
+				PostSink(M_IMAGE_COMPRESS, (LMessage::Param)jpg.Release(), (LMessage::Param)si);
 				break;
 			}
 			case M_IMAGE_ROTATE:
@@ -424,8 +424,8 @@ bool LRichTextPriv::ImageBlock::SetImage(LAutoPtr<LSurface> Img)
 		// Update the display image by scaling it from the source...
 		if (PostThreadEvent(GetThreadHandle(),
 							M_IMAGE_RESAMPLE,
-							(GMessage::Param) DisplayImg.Get(),
-							(GMessage::Param) SourceImg.Get()))
+							(LMessage::Param) DisplayImg.Get(),
+							(LMessage::Param) SourceImg.Get()))
 			UpdateThreadBusy(_FL, 1);
 
 	}
@@ -436,7 +436,7 @@ bool LRichTextPriv::ImageBlock::SetImage(LAutoPtr<LSurface> Img)
 	if (ResizeIdx >= 0 && ResizeIdx < (int)Scales.Length())
 	{
 		ScaleInf &si = Scales[ResizeIdx];
-		if (PostThreadEvent(GetThreadHandle(), M_IMAGE_COMPRESS, (GMessage::Param)SourceImg.Get(), (GMessage::Param)&si))
+		if (PostThreadEvent(GetThreadHandle(), M_IMAGE_COMPRESS, (LMessage::Param)SourceImg.Get(), (LMessage::Param)&si))
 			UpdateThreadBusy(_FL, 1);
 	}
 	else LAssert(!"ResizeIdx should be valid.");
@@ -455,21 +455,21 @@ bool LRichTextPriv::ImageBlock::Load(const char *Src)
 	if (a.Length() > 1 &&
 		a[0].Equals("cid"))
 	{
-		GDocumentEnv *Env = d->View->GetEnv();
+		LDocumentEnv *Env = d->View->GetEnv();
 		if (!Env)
 			return false;
 		
-		GDocumentEnv::LoadJob *j = Env->NewJob();
+		LDocumentEnv::LoadJob *j = Env->NewJob();
 		if (!j)
 			return false;
 		
 		j->Uri.Reset(NewStr(Source));
 		j->Env = Env;
-		j->Pref = GDocumentEnv::LoadJob::FmtStream;
+		j->Pref = LDocumentEnv::LoadJob::FmtStream;
 		j->UserUid = d->View->GetDocumentUid();
 
-		GDocumentEnv::LoadType Result = Env->GetContent(j);
-		if (Result == GDocumentEnv::LoadImmediate)
+		LDocumentEnv::LoadType Result = Env->GetContent(j);
+		if (Result == LDocumentEnv::LoadImmediate)
 		{
 			StreamMimeType = j->MimeType;
 			ContentId = j->ContentId.Strip("<>");
@@ -485,7 +485,7 @@ bool LRichTextPriv::ImageBlock::Load(const char *Src)
 				return true;
 			}
 		}
-		else if (Result == GDocumentEnv::LoadDeferred)
+		else if (Result == LDocumentEnv::LoadDeferred)
 		{
 			LAssert(!"Impl me?");
 		}
@@ -508,7 +508,7 @@ bool LRichTextPriv::ImageBlock::Load(const char *Src)
 		#if LOADER_THREAD_LOGGING
 		LgiTrace("%s:%i - Posting M_IMAGE_LOAD_STREAM\n", _FL);
 		#endif
-		if (PostThreadEvent(GetThreadHandle(), M_IMAGE_LOAD_STREAM, (GMessage::Param)Stream.Release(), (GMessage::Param) (FileName ? new LString(FileName) : NULL)))
+		if (PostThreadEvent(GetThreadHandle(), M_IMAGE_LOAD_STREAM, (LMessage::Param)Stream.Release(), (LMessage::Param) (FileName ? new LString(FileName) : NULL)))
 		{
 			UpdateThreadBusy(_FL, 1);
 			return true;
@@ -520,7 +520,7 @@ bool LRichTextPriv::ImageBlock::Load(const char *Src)
 		#if LOADER_THREAD_LOGGING
 		LgiTrace("%s:%i - Posting M_IMAGE_LOAD_FILE\n", _FL);
 		#endif
-		if (PostThreadEvent(GetThreadHandle(), M_IMAGE_LOAD_FILE, (GMessage::Param)new LString(FileName)))
+		if (PostThreadEvent(GetThreadHandle(), M_IMAGE_LOAD_FILE, (LMessage::Param)new LString(FileName)))
 		{
 			UpdateThreadBusy(_FL, 1);
 			return true;
@@ -1108,7 +1108,7 @@ void LRichTextPriv::ImageBlock::UpdateThreadBusy(const char *File, int Line, int
 	}
 }
 
-GMessage::Result LRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
+LMessage::Result LRichTextPriv::ImageBlock::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -1128,7 +1128,7 @@ GMessage::Result LRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 					#if LOADER_THREAD_LOGGING
 					LgiTrace("%s:%i - Posting M_IMAGE_COMPRESS\n", _FL);
 					#endif
-					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_COMPRESS, (GMessage::Param)SourceImg.Get(), (GMessage::Param)&si))
+					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_COMPRESS, (LMessage::Param)SourceImg.Get(), (LMessage::Param)&si))
 						UpdateThreadBusy(_FL, 1);
 					else
 						LAssert(!"PostThreadEvent failed.");
@@ -1140,28 +1140,28 @@ GMessage::Result LRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 					#if LOADER_THREAD_LOGGING
 					LgiTrace("%s:%i - Posting M_IMAGE_ROTATE\n", _FL);
 					#endif
-					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_ROTATE, (GMessage::Param) SourceImg.Get(), 1))
+					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_ROTATE, (LMessage::Param) SourceImg.Get(), 1))
 						UpdateThreadBusy(_FL, 1);
 					break;
 				case IDM_ANTI_CLOCKWISE:
 					#if LOADER_THREAD_LOGGING
 					LgiTrace("%s:%i - Posting M_IMAGE_ROTATE\n", _FL);
 					#endif
-					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_ROTATE, (GMessage::Param) SourceImg.Get(), -1))
+					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_ROTATE, (LMessage::Param) SourceImg.Get(), -1))
 						UpdateThreadBusy(_FL, 1);
 					break;
 				case IDM_X_FLIP:
 					#if LOADER_THREAD_LOGGING
 					LgiTrace("%s:%i - Posting M_IMAGE_FLIP\n", _FL);
 					#endif
-					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_FLIP, (GMessage::Param) SourceImg.Get(), 1))
+					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_FLIP, (LMessage::Param) SourceImg.Get(), 1))
 						UpdateThreadBusy(_FL, 1);
 					break;
 				case IDM_Y_FLIP:
 					#if LOADER_THREAD_LOGGING
 					LgiTrace("%s:%i - Posting M_IMAGE_FLIP\n", _FL);
 					#endif
-					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_FLIP, (GMessage::Param) SourceImg.Get(), 0))
+					if (PostThreadEvent(GetThreadHandle(), M_IMAGE_FLIP, (LMessage::Param) SourceImg.Get(), 0))
 						UpdateThreadBusy(_FL, 1);
 					break;
 			}
@@ -1189,7 +1189,7 @@ GMessage::Result LRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 
 			// Change the doc to dirty
 			d->Dirty = true;
-			d->View->SendNotify(GNotifyDocChanged);
+			d->View->SendNotify(LNotifyDocChanged);
 			break;
 		}
 		case M_IMAGE_ERROR:
@@ -1280,8 +1280,8 @@ GMessage::Result LRichTextPriv::ImageBlock::OnEvent(GMessage *Msg)
 				if (DisplayImg != NULL &&
 					PostThreadEvent(GetThreadHandle(),
 									M_IMAGE_RESAMPLE,
-									(GMessage::Param)DisplayImg.Get(),
-									(GMessage::Param)SourceImg.Get()))
+									(LMessage::Param)DisplayImg.Get(),
+									(LMessage::Param)SourceImg.Get()))
 					UpdateThreadBusy(_FL, 1);
 			}
 			break;

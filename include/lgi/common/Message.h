@@ -176,7 +176,7 @@ enum LgiMessages
 	#endif
 };
 
-class LgiClass GMessage
+class LgiClass LMessage
 {
 public:
 	#if defined(WINNATIVE)
@@ -221,7 +221,7 @@ public:
 		#endif
 	#endif
 
-	GMessage()
+	LMessage()
 	{
 		#if defined(LGI_SDL)
 			Set(0, 0, 0);
@@ -240,7 +240,7 @@ public:
 		#endif
 	}
 
-	GMessage
+	LMessage
 	(
 		int M,
 		#if defined(WINNATIVE)
@@ -278,9 +278,9 @@ public:
 };
 
 #ifdef LINUX
-extern GMessage CreateMsg(int m, int a = 0, int b = 0);
+extern LMessage CreateMsg(int m, int a = 0, int b = 0);
 #else
-#define CreateMsg(m, a, b)				GMessage(m, a, b)
+#define CreateMsg(m, a, b)				LMessage(m, a, b)
 #endif
 
 

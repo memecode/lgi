@@ -847,7 +847,7 @@ int LWindow::OnDrop(char *Format, ::LVariant *Data, LPoint Pt, int KeyState)
 }
 */
 
-GMessage::Result LWindow::OnEvent(GMessage *m)
+LMessage::Result LWindow::OnEvent(LMessage *m)
 {
 	switch (MsgCode(m))
 	{

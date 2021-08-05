@@ -166,7 +166,7 @@ public:
 //////////////////////////////////////////////////////////////////////////
 // This is just a private data container to make it easier to change the
 // implementation of this class without effecting headers and applications.
-class GFileSelectPrivate
+class LFileSelectPrivate
 {
 	friend class LFileSelect;
 	friend class LFileSelectDlg;
@@ -194,7 +194,7 @@ public:
 	static bool InitShowHiddenFiles;
 	static LRect InitSize;
 
-	GFileSelectPrivate(LFileSelect *select)
+	LFileSelectPrivate(LFileSelect *select)
 	{
 		ShowReadOnly = false;
 		ReadOnly = false;
@@ -237,7 +237,7 @@ public:
 		}
 	}
 
-	virtual ~GFileSelectPrivate()
+	virtual ~LFileSelectPrivate()
 	{
 		DeleteArray(Title);
 		DeleteArray(DefExt);
@@ -248,11 +248,11 @@ public:
 	}
 };
 
-LImageList *GFileSelectPrivate::BtnIcons = NULL;
-LImageList *GFileSelectPrivate::TreeIcons = NULL;
-char *GFileSelectPrivate::InitPath = 0;
-bool GFileSelectPrivate::InitShowHiddenFiles = false;
-LRect GFileSelectPrivate::InitSize(0, 0, 600, 500);
+LImageList *LFileSelectPrivate::BtnIcons = NULL;
+LImageList *LFileSelectPrivate::TreeIcons = NULL;
+char *LFileSelectPrivate::InitPath = 0;
+bool LFileSelectPrivate::InitShowHiddenFiles = false;
+LRect LFileSelectPrivate::InitSize(0, 0, 600, 500);
 
 //////////////////////////////////////////////////////////////////////////
 // This class implements the UI for the selector.
@@ -652,7 +652,7 @@ public:
 					Cursor = Over - p.AddressOf(0);
 					Part &o = p[Cursor];
 					Invalidate();
-					SendNotify(GNotifyValueChanged);
+					SendNotify(LNotifyValueChanged);
 
 					if (o.Arrow.Overlap(m.x, m.y))
 					{
@@ -710,7 +710,7 @@ public:
 		return 0;
 	}
 
-	GMessage::Result OnEvent(GMessage *m)
+	LMessage::Result OnEvent(LMessage *m)
 	{
 		switch (m->Msg())
 		{
@@ -726,7 +726,7 @@ public:
 			}
 			case M_NOTIFY_VALUE_CHANGED:
 			{
-				SendNotify(GNotifyValueChanged);
+				SendNotify(LNotifyValueChanged);
 				break;			
 			}
 		}
@@ -784,7 +784,7 @@ class LFileSelectDlg :
 	LArray<LFolderItem*> Hidden;
 	
 public:
-	GFileSelectPrivate *d;
+	LFileSelectPrivate *d;
 
 	LTableLayout *Tbl;
 	LBox *Sub;
@@ -812,7 +812,7 @@ public:
 	LCheckBox *ShowHidden;
 	LEdit *FilterEdit;
 
-	LFileSelectDlg(GFileSelectPrivate *Select);
+	LFileSelectDlg(LFileSelectPrivate *Select);
 	~LFileSelectDlg();
 
 	int OnNotify(LViewI *Ctrl, int Flags);
@@ -868,7 +868,7 @@ public:
 	}
 };
 
-LFileSelectDlg::LFileSelectDlg(GFileSelectPrivate *select)
+LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 {
 	SaveBtn = NULL;
 	BackBtn = NULL;
@@ -1125,7 +1125,7 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, int Flags)
 	{
 		case IDC_BOOKMARKS:
 		{
-			if (Flags == GNotifyItem_Select && Bookmarks)
+			if (Flags == LNotifyItemSelect && Bookmarks)
 			{
 				LTreeItem *s = Bookmarks->Selection();
 				if (s)
@@ -1142,7 +1142,7 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, int Flags)
 		}
 		case IDC_PATH:
 		{
-			if (Flags == GNotifyValueChanged)
+			if (Flags == LNotifyValueChanged)
 				OnFolder();
 			break;
 		}
@@ -2019,7 +2019,7 @@ void GFolderList::OnFolder()
 //////////////////////////////////////////////////////////////////////////
 LFileSelect::LFileSelect()
 {
-	d = new GFileSelectPrivate(this);
+	d = new LFileSelectPrivate(this);
 }
 
 LFileSelect::~LFileSelect()

@@ -62,7 +62,7 @@ struct LLayoutString : public LDisplayString
 class LStringLayout
 {
 protected:
-	GFontCache *FontCache;
+	LFontCache *FontCache;
 
 	// Min and max bounds (in pixels)
 	LPoint Min, Max;
@@ -80,7 +80,7 @@ protected:
 public:
 	bool Debug;
 
-	LStringLayout(GFontCache *fc);	
+	LStringLayout(LFontCache *fc);	
 	~LStringLayout();
 
 	void Empty();

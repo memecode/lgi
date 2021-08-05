@@ -85,10 +85,10 @@ void LEdit::SetEmptyText(const char *EmptyText)
 
 void LEdit::SendNotify(int Data)
 {
-	if (Data == GNotifyDocChanged)
+	if (Data == LNotifyDocChanged)
 		return LTextView3::SendNotify(0);
 	else if (Data == LK_RETURN ||
-			Data == GNotify_EscapeKey)
+			Data == LNotifyEscapeKey)
 		return LTextView3::SendNotify(Data);
 }
 
@@ -196,25 +196,25 @@ bool LEdit::OnKey(LKey &k)
 		#endif
 		{
 			if (k.Down())
-				SendNotify(GNotify_ReturnKey);
+				SendNotify(LNotifyReturnKey);
 			break;
 		}
 		case LK_ESCAPE:
 		{
 			if (k.Down())
-				SendNotify(GNotify_EscapeKey);
+				SendNotify(LNotifyEscapeKey);
 			break;
 		}
 		case LK_BACKSPACE:
 		{
 			if (k.Down())
-				SendNotify(GNotify_BackspaceKey);
+				SendNotify(LNotifyBackspaceKey);
 			break;
 		}
 		case LK_DELETE:
 		{
 			if (k.Down())
-				SendNotify(GNotify_DeleteKey);
+				SendNotify(LNotifyDeleteKey);
 			break;
 		}
 	}
@@ -243,7 +243,7 @@ void LEdit::OnEnter(LKey &k)
 	if (d->Multiline)
 		LTextView3::OnEnter(k);
 	else
-		SendNotify(GNotify_ReturnKey);
+		SendNotify(LNotifyReturnKey);
 }
 
 bool LEdit::Paste()

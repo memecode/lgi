@@ -183,7 +183,7 @@ class SshConnection : public LSsh, public LEventTargetThread
 	LString Uri, Prompt;
 	AppPriv *d;
 
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 	LStream *GetConsole();
 	bool WaitPrompt(LStream *c, LString *Data = NULL);
 
@@ -196,7 +196,7 @@ public:
 	bool Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Parser, ParseParams *Params);
 	
 	// This is the GUI thread message handler
-	static bool HandleMsg(GMessage *m);
+	static bool HandleMsg(LMessage *m);
 };
 
 class BlameUi : public LWindow

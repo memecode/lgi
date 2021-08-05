@@ -142,7 +142,7 @@ public:
 	LString LastError;
 	
 	// If the scroll position is set before we get a scroll bar, store the index
-	// here and set it when the GNotifyScrollBar_Create arrives.
+	// here and set it when the LNotifyScrollBarCreate arrives.
 	ssize_t VScrollCache;
 
 	// Find/Replace Params
@@ -1156,7 +1156,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 
 		if (i >= Size)
 			PartialPour = false;
-		SendNotify(GNotifyCursorChanged);
+		SendNotify(LNotifyCursorChanged);
 	}
 
 	#ifdef _DEBUG
@@ -1211,7 +1211,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 	{
 		static char s[256];
 		sprintf_s(s, sizeof(s), "Pour: %.2f sec", (double)_PourTime / 1000);
-		GetWindow()->PostEvent(M_TEXTVIEW_DEBUG_TEXT, (GMessage::Param)s);
+		GetWindow()->PostEvent(M_TEXTVIEW_DEBUG_TEXT, (LMessage::Param)s);
 	}
 	#endif
 
@@ -1597,7 +1597,7 @@ bool LTextView3::Insert(size_t At, const char16 *Data, ssize_t Len)
 					PourStyle(At, Len);
 				}
 			}
-			SendNotify(GNotifyDocChanged);
+			SendNotify(LNotifyDocChanged);
 
 			return true;
 		}
@@ -1716,7 +1716,7 @@ bool LTextView3::Delete(size_t At, ssize_t Len)
 				}
 			}
 
-			SendNotify(GNotifyDocChanged);
+			SendNotify(LNotifyDocChanged);
 			Status = true;
 		}
 	}
@@ -2192,7 +2192,7 @@ void LTextView3::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 	if (c != Cursor)
 	{
 		// Send off notify
-		SendNotify(GNotifyCursorChanged);
+		SendNotify(LNotifyCursorChanged);
 	}
 
 //int _Time = LCurrentTime() - _Start;
@@ -2667,7 +2667,7 @@ bool LTextView3::DoCase(bool Upper)
 			d->SetDirty(Min, 0);
 			Invalidate();
 
-			SendNotify(GNotifyDocChanged);
+			SendNotify(LNotifyDocChanged);
 		}
 	}
 	
@@ -3468,7 +3468,7 @@ void LTextView3::Undo()
 	if (Old && !UndoQue.GetPos())
 	{
 		Dirty = false;
-		SendNotify(GNotifyDocChanged);
+		SendNotify(LNotifyDocChanged);
 	}
 }
 
@@ -3533,7 +3533,7 @@ void LTextView3::DoContextMenu(LMouse &m)
 		case IDM_FIXED:
 		{
 			SetFixedWidthFont(!GetFixedWidthFont());							
-			SendNotify(GNotifyFixedWidthChanged);
+			SendNotify(LNotifyFixedWidthChanged);
 			break;
 		}
 		case IDM_CUT:
@@ -5221,7 +5221,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 		{
 			char s[256];
 			sprintf_s(s, sizeof(s), "Pour:%i Style:%i Paint:%i ms", _PourTime, _StyleTime, _PaintTime);
-			GMessage m = CreateMsg(DEBUG_TIMES_MSG, 0, (int)s);
+			LMessage m = CreateMsg(DEBUG_TIMES_MSG, 0, (int)s);
 			GetNotify()->OnEvent(&m);
 		}
 		#endif
@@ -5236,7 +5236,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 	#endif
 }
 
-GMessage::Result LTextView3::OnEvent(GMessage *Msg)
+LMessage::Result LTextView3::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -5342,7 +5342,7 @@ int LTextView3::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (Ctrl->GetId() == IDC_VSCROLL && VScroll)
 	{
-		if (Flags == GNotifyScrollBar_Create)
+		if (Flags == LNotifyScrollBarCreate)
 		{
 			UpdateScrollBars();
 		}

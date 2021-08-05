@@ -2116,7 +2116,7 @@ int LVmDebuggerWnd::OnNotify(LViewI *Ctrl, int Flags)
 		}
 		case IDC_SOURCE_LST:
 		{
-			if (Flags == GNotifyItem_Select)
+			if (Flags == LNotifyItemSelect)
 			{
 				LListItem *it = d->SourceLst->GetSelected();
 				if (!it)
@@ -2135,7 +2135,7 @@ int LVmDebuggerWnd::OnNotify(LViewI *Ctrl, int Flags)
 	return LWindow::OnNotify(Ctrl, Flags);
 }
 
-GMessage::Param LVmDebuggerWnd::OnEvent(GMessage *Msg)
+LMessage::Param LVmDebuggerWnd::OnEvent(LMessage *Msg)
 {
 	return LWindow::OnEvent(Msg);
 }

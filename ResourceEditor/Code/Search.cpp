@@ -22,9 +22,9 @@ public:
 	ResDialog *Dialog;
 	ResDialogCtrl *Ctrl;
 	ResString *Str;
-	GLanguageId Lang;
+	LLanguageId Lang;
 	
-	Result(AppWnd *app, ResString *s, GLanguageId l = 0)
+	Result(AppWnd *app, ResString *s, LLanguageId l = 0)
 	{
 		App = app;
 		Grp = 0;
@@ -184,10 +184,10 @@ SearchThread::SearchThread(AppWnd *app, LList *results) :
 void SearchThread::Search(SearchParams &p)
 {
 	Cancel(true);
-	PostEvent(M_SEARCH, (GMessage::Param)new SearchParams(p));
+	PostEvent(M_SEARCH, (LMessage::Param)new SearchParams(p));
 }
 
-GMessage::Result SearchThread::OnEvent(GMessage *Msg)
+LMessage::Result SearchThread::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -268,7 +268,7 @@ GMessage::Result SearchThread::OnEvent(GMessage *Msg)
 ////////////////////////////////////////////////////////////////////////////////////
 // Search window
 
-void FillLangs(LViewI *v, int id, List<GLanguage> &l)
+void FillLangs(LViewI *v, int id, List<LLanguage> &l)
 {
 	LCombo *c;
 	if (!v->GetViewById(id, c))
@@ -281,7 +281,7 @@ Search::Search(AppWnd *app)
 {
 	SetParent(App = app);
 
-	List<GLanguage> l;
+	List<LLanguage> l;
 	List<Resource> Res;
 	if (App->ListObjects(Res))
 	{
@@ -292,7 +292,7 @@ Search::Search(AppWnd *app)
 
 			for (int i=0; i<g->GetLanguages(); i++)
 			{
-				GLanguage *Lang = g->GetLanguage(i);
+				LLanguage *Lang = g->GetLanguage(i);
 				if (!Lang) continue;
 
 				bool Has = false;
@@ -391,7 +391,7 @@ int Search::OnNotify(LViewI *c, int f)
 			if (GetCtrlValue(IDC_IN_LANG))
 			{
 				auto FullName = GetCtrlName(IDC_LANG);
-				GLanguage *l = GFindLang("", FullName);
+				LLanguage *l = GFindLang("", FullName);
 				InLang = l ? l->Id : NULL;
 			}
 			Thread->Search(*this);
@@ -409,7 +409,7 @@ int Search::OnNotify(LViewI *c, int f)
 			if (!Thread) break;
 			if (GetCtrlValue(IDC_NOT_IN_LANG))
 			{
-				GLanguage *l = GFindLang("", GetCtrlName(IDC_NOT_LANG));
+				LLanguage *l = GFindLang("", GetCtrlName(IDC_NOT_LANG));
 				NotInLang = l ? l->Id : NULL;
 			}
 			Thread->Search(*this);
@@ -478,13 +478,13 @@ int Search::OnNotify(LViewI *c, int f)
 			
 			if (GetCtrlValue(IDC_IN_LANG))
 			{
-				GLanguage *l = GFindLang(0, GetCtrlName(IDC_LANG));
+				LLanguage *l = GFindLang(0, GetCtrlName(IDC_LANG));
 				if (l) InLang = l->Id;
 			}
 			
 			if (GetCtrlValue(IDC_NOT_IN_LANG))
 			{
-				GLanguage *l = GFindLang(0, GetCtrlName(IDC_NOT_LANG));
+				LLanguage *l = GFindLang(0, GetCtrlName(IDC_NOT_LANG));
 				if (l) NotInLang = l->Id;
 			}
 			
@@ -518,8 +518,8 @@ public:
 	AppWnd *App;
 	char *Text;
 	char *Define;
-	GLanguageId InLang;
-	GLanguageId NotInLang;
+	LLanguageId InLang;
+	LLanguageId NotInLang;
 	int RefId;
 	int CtrlId;
 	bool Searching;

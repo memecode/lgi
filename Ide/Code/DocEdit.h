@@ -155,7 +155,7 @@ public:
 
 class DocEdit :
 	public LTextView3,
-	public GDocumentEnv,
+	public LDocumentEnv,
 	public DocEditStyling
 {
 	IdeDoc *Doc;
@@ -187,7 +187,7 @@ public:
 	void OnMouseClick(LMouse &m) override;
 	bool OnKey(LKey &k) override;	
 	bool OnMenu(LDocView *View, int Id, void *Context) override;
-	GMessage::Result OnEvent(GMessage *m) override;
+	LMessage::Result OnEvent(LMessage *m) override;
 	void SetCaret(size_t i, bool Select, bool ForceFullUpdate = false) override;
 	void PourStyle(size_t Start, ssize_t EditSize) override;
 	bool Pour(LRegion &r) override;

@@ -1,9 +1,9 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/RichTextEdit.h"
-#include "RichTextEditPriv.h"
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/CssTools.h"
 #include "lgi/common/Menu.h"
+#include "RichTextEditPriv.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool Utf16to32(LArray<uint32_t> &Out, const uint16_t *In, int WordLen)
@@ -80,17 +80,17 @@ LArray<LRichEditElem*> LRichEditElemContext::GetChildren(LRichEditElem *obj)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-GCssCache::GCssCache()
+LCssCache::LCssCache()
 {
 	Idx = 1;
 }
 	
-GCssCache::~GCssCache()
+LCssCache::~LCssCache()
 {
 	Styles.DeleteObjects();
 }
 
-uint32_t GCssCache::GetStyles()
+uint32_t LCssCache::GetStyles()
 {
 	uint32_t c = 0;
 	for (unsigned i=0; i<Styles.Length(); i++)
@@ -100,7 +100,7 @@ uint32_t GCssCache::GetStyles()
 	return c;
 }
 
-void GCssCache::ZeroRefCounts()
+void LCssCache::ZeroRefCounts()
 {
 	for (unsigned i=0; i<Styles.Length(); i++)
 	{
@@ -108,7 +108,7 @@ void GCssCache::ZeroRefCounts()
 	}
 }
 
-bool GCssCache::OutputStyles(LStream &s, int TabDepth)
+bool LCssCache::OutputStyles(LStream &s, int TabDepth)
 {
 	char Tabs[64];
 	memset(Tabs, '\t', TabDepth);
@@ -136,7 +136,7 @@ bool GCssCache::OutputStyles(LStream &s, int TabDepth)
 	return true;
 }
 
-LNamedStyle *GCssCache::AddStyleToCache(LAutoPtr<LCss> &s)
+LNamedStyle *LCssCache::AddStyleToCache(LAutoPtr<LCss> &s)
 {
 	if (!s)
 		return NULL;
@@ -295,7 +295,7 @@ bool MultiBlockState::Cut(ssize_t Idx)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 LRichTextPriv::LRichTextPriv(LRichTextEdit *view, LRichTextPriv **Ptr) :
 	LHtmlParser(view),
-	GFontCache(LSysFont)
+	LFontCache(LSysFont)
 {
 	if (Ptr) *Ptr = this;
 	BlinkTs = 0;
@@ -1173,7 +1173,7 @@ bool LRichTextPriv::Merge(Transaction *Trans, Block *a, Block *b)
 	return true;
 }
 
-LSurface *GEmojiContext::GetEmojiImage()
+LSurface *LEmojiImage::GetEmojiImage()
 {
 	if (!EmojiImg)
 	{

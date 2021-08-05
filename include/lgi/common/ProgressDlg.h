@@ -112,7 +112,7 @@ public:
 	LProgressDlg &operator--(int);
 
 	int OnNotify(LViewI *Ctrl, int Flags) override;
-	GMessage::Result OnEvent(GMessage *Msg) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
 	void OnPaint(LSurface *pDC) override;
 	void OnCreate() override;
 	void OnPosChange() override;

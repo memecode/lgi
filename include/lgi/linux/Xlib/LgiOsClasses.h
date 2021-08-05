@@ -19,7 +19,7 @@ typedef char16						OsChar;
 
 #undef Bool
 
-class GMessage : public XlibEvent
+class LMessage : public XlibEvent
 {
 	friend class XApplication;
 	XEvent Local;
@@ -33,12 +33,12 @@ class GMessage : public XlibEvent
 		return &Local;
 	}
 
-	GMessage(XEvent *e) : XlibEvent(e)
+	LMessage(XEvent *e) : XlibEvent(e)
 	{
 	}
 
 public:
-	GMessage(int M = 0, int A = 0, int B = 0) : XlibEvent(GetLocal())
+	LMessage(int M = 0, int A = 0, int B = 0) : XlibEvent(GetLocal())
 	{
 		Msg() = M;
 		a() = A;
@@ -56,11 +56,11 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////////////
-#define MsgCode(Msg)				((Msg->type() == ClientMessage) ? ((GMessage*)Msg)->m() : 0)
-#define MsgA(Msg)					((Msg->type() == ClientMessage) ? ((GMessage*)Msg)->a() : 0)
-#define MsgB(Msg)					((Msg->type() == ClientMessage) ? ((GMessage*)Msg)->b() : 0)
+#define MsgCode(Msg)				((Msg->type() == ClientMessage) ? ((LMessage*)Msg)->m() : 0)
+#define MsgA(Msg)					((Msg->type() == ClientMessage) ? ((LMessage*)Msg)->a() : 0)
+#define MsgB(Msg)					((Msg->type() == ClientMessage) ? ((LMessage*)Msg)->b() : 0)
 
-extern GMessage CreateMsg(int m, int a, int b);
+extern LMessage CreateMsg(int m, int a, int b);
 
 /////////////////////////////////////////////////////////////////////////////////////
 template <class q>

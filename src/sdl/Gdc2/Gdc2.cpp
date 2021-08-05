@@ -391,11 +391,11 @@ GBmpMem::~GBmpMem()
 
 struct PfComponent
 {
-	GComponentType Type;
+	LEmojiImage Type;
 	int Bits;
 	int Pos;
 	
-	void Set(GComponentType type, uint32 Mask)
+	void Set(LComponentType type, uint32 Mask)
 	{
 		Type = type;
 		Bits = 0;

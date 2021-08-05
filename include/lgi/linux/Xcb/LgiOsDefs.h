@@ -98,16 +98,16 @@ public:
 #define XcbDebug(cookie)			cookie
 #endif
 
-class LgiClass GMessage
+class LgiClass LMessage
 {
 	xcb_generic_event_t *e;
 
 public:
     typedef int Param;
 
-	GMessage(xcb_generic_event_t *ev = 0);
-	GMessage(int m, Param a = 0, Param b = 0);
-	~GMessage();
+	LMessage(xcb_generic_event_t *ev = 0);
+	LMessage(int m, Param a = 0, Param b = 0);
+	~LMessage();
 
 	int ResponseType() { return e ? e->response_type & ~0x80 : 0; }
 	int Type();

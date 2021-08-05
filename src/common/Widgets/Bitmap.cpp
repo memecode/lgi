@@ -151,7 +151,7 @@ void LBitmap::SetDC(LSurface *pNewDC)
 				}
 			}
 			
-			SendNotify(GNotifyTableLayout_Refresh);
+			SendNotify(LNotifyTableLayoutRefresh);
 		}
 	}
 }
@@ -161,7 +161,7 @@ LSurface *LBitmap::GetSurface()
 	return pDC;
 }
 
-GMessage::Result LBitmap::OnEvent(GMessage *Msg)
+LMessage::Result LBitmap::OnEvent(LMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }

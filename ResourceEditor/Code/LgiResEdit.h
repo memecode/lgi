@@ -646,7 +646,7 @@ public:
 	void OnFieldChange()
 	{
 		if (_FieldView >= 0)
-			PostThreadEvent(_FieldView, M_OBJECT_CHANGED, (GMessage::Param)this);
+			PostThreadEvent(_FieldView, M_OBJECT_CHANGED, (LMessage::Param)this);
 	}
 };
 
@@ -670,7 +670,7 @@ public:
 	void OnPosChange();
 	void OnSelect(FieldSource *s);
 	void OnDelete(FieldSource *s);
-	GMessage::Result OnEvent(GMessage *m);
+	LMessage::Result OnEvent(LMessage *m);
 	void OnPaint(LSurface *pDC);
 	int OnNotify(LViewI *Ctrl, int Flags);
 };
@@ -690,7 +690,7 @@ public:
 
 #include "LgiRes_String.h"
 
-class AppWnd : public GDocApp<LOptionsFile>
+class AppWnd : public LDocApp<LOptionsFile>
 {
 protected:
 	// UI
@@ -714,7 +714,7 @@ protected:
 	
 	// Languages
 	int				CurLang;
-	LArray<GLanguage*> Languages;
+	LArray<LLanguage*> Languages;
 	LHashTbl<ConstStrKey<char,false>, bool> ShowLanguages;
 
 	void SortDialogs();
@@ -725,12 +725,12 @@ public:
 	~AppWnd();
 
 	// Languages
-	bool ShowLang(GLanguageId Lang);
-	void ShowLang(GLanguageId Lang, bool Show);
-	GLanguage *GetCurLang();
-	void SetCurLang(GLanguage *L);
-	LArray<GLanguage*> *GetLanguages();
-	void OnLanguagesChange(GLanguageId Lang, bool Add, bool Update = false);
+	bool ShowLang(LLanguageId Lang);
+	void ShowLang(LLanguageId Lang, bool Show);
+	LLanguage *GetCurLang();
+	void SetCurLang(LLanguage *L);
+	LArray<LLanguage*> *GetLanguages();
+	void OnLanguagesChange(LLanguageId Lang, bool Add, bool Update = false);
 
 	// ---------------------------------------------------------------------
 	// Application
@@ -777,7 +777,7 @@ public:
 	// ---------------------------------------------------------------------
 	// Window
 	int OnNotify(LViewI *Ctrl, int Flags);
-	GMessage::Result OnEvent(GMessage *m);
+	LMessage::Result OnEvent(LMessage *m);
 	int OnCommand(int Cmd, int Event, OsView Handle);
 	void OnReceiveFiles(LArray<const char*> &Files);
 	void OnCreate();
@@ -795,8 +795,8 @@ struct SearchParams
 	#else
 	LString Define;
 	#endif
-	GLanguageId InLang;
-	GLanguageId NotInLang;
+	LLanguageId InLang;
+	LLanguageId NotInLang;
 	int Ref;
 	int CtrlId;
 
@@ -829,7 +829,7 @@ public:
 	SearchThread(AppWnd *app, LList *results);
 
 	void Search(SearchParams &p);
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 };
 
 class Search : public LDialog, public SearchParams

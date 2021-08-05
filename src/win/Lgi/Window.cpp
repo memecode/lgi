@@ -575,7 +575,7 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 		LViewI *c = Map.Find(ToUpper(k.c16));
 		if (c)
 		{
-			c->OnNotify(c, GNotify_Activate);
+			c->OnNotify(c, LNotifyActivate);
 			return true;
 		}
 	}
@@ -848,7 +848,7 @@ public:
 	}
 };
 
-GMessage::Result LWindow::OnEvent(GMessage *Msg)
+LMessage::Result LWindow::OnEvent(LMessage *Msg)
 {
 	int Status = 0;
 

@@ -64,7 +64,7 @@ public:
 	
 	// Impl
 	void OnTitleClick(LMouse &m) override;
-	GMessage::Result OnEvent(GMessage *Msg) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
 	int OnNotify(LViewI *v, int f) override;
 	void OnPulse() override;
 	LString Read();

@@ -83,7 +83,7 @@ int64 LProgressView::Value()
 	return Val;
 }
 
-GMessage::Result LProgressView::OnEvent(GMessage *Msg)
+LMessage::Result LProgressView::OnEvent(LMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }

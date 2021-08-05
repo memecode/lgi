@@ -111,7 +111,7 @@ LButton::~LButton()
 
 int LButton::OnNotify(LViewI *Ctrl, int Flags)
 {
-	if (Ctrl == (LViewI*)this && Flags == GNotify_Activate)
+	if (Ctrl == (LViewI*)this && Flags == LNotifyActivate)
 	{
 		OnClick();
 	}
@@ -204,7 +204,7 @@ void LButton::SetFont(LFont *Fnt, bool OwnIt)
 	Invalidate();
 }
 
-GMessage::Result LButton::OnEvent(GMessage *Msg)
+LMessage::Result LButton::OnEvent(LMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }
@@ -362,7 +362,7 @@ void LButton::OnClick()
 			if (IsAttached())
 			#endif
 			{
-				target->PostEvent(M_CHANGE, (GMessage::Param)Id);
+				target->PostEvent(M_CHANGE, (LMessage::Param)Id);
 			}
 			else if (InThread())
 			{

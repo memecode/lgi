@@ -29,7 +29,7 @@ enum GDocAppInstallMode
 };
 
 template<typename OptionsFmt>
-class GDocApp :
+class LDocApp :
 	public LWindow,
 	public GMru
 {
@@ -69,7 +69,7 @@ protected:
 
 public:
 	/// Creates the class.
-	GDocApp
+	LDocApp
 	(
 		/// The name of the application
 		const char *appname = 0,
@@ -78,7 +78,7 @@ public:
 		/// [Optional] Options file base name..
 		char *optsname = 0
 	);
-	~GDocApp();
+	~LDocApp();
 
 	/// Gets the install mode
 	GDocAppInstallMode GetInstallMode();
@@ -116,7 +116,7 @@ public:
 	void OnReceiveFiles(LArray<const char*> &Files);
 	bool OnRequestClose(bool OsShuttingDown);
 	int OnCommand(int Cmd, int Event, OsView Window);
-	GMessage::Result OnEvent(GMessage *m);
+	LMessage::Result OnEvent(LMessage *m);
 };
 
 #endif

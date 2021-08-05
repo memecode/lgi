@@ -256,7 +256,7 @@ LRect &LLayout::GetClient(bool ClientSpace)
 	return r;
 }
 
-GMessage::Result LLayout::OnEvent(GMessage *Msg)
+LMessage::Result LLayout::OnEvent(LMessage *Msg)
 {
     if (Msg->Msg() != M_INVALIDATE)
     {

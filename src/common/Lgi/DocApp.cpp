@@ -1,5 +1,5 @@
 /*hdr
-**      FILE:           GDocApp.cpp
+**      FILE:           LDocApp.cpp
 **      AUTHOR:         Matthew Allen
 **      DATE:           20/4/01
 **      DESCRIPTION:    Generic Document Application Impl
@@ -183,7 +183,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////
 template <typename OptionsFmt>
-GDocApp<OptionsFmt>::GDocApp(const char *appname, LIcon icon, char *optsname)
+LDocApp<OptionsFmt>::LDocApp(const char *appname, LIcon icon, char *optsname)
 {
 	Options = 0;
 	_LangOptsName = 0;
@@ -193,7 +193,7 @@ GDocApp<OptionsFmt>::GDocApp(const char *appname, LIcon icon, char *optsname)
 	SetPos(r);
 	MoveToCenter();
 	_FileMenu = 0;
-	d->AppName = NewStr(appname?appname:(char*)"Lgi.GDocApp");
+	d->AppName = NewStr(appname?appname:(char*)"Lgi.LDocApp");
 
 	char p[MAX_PATH];
 	if (LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p)))
@@ -232,20 +232,20 @@ GDocApp<OptionsFmt>::GDocApp(const char *appname, LIcon icon, char *optsname)
 }
 
 template <typename OptionsFmt>
-GDocApp<OptionsFmt>::~GDocApp()
+LDocApp<OptionsFmt>::~LDocApp()
 {
 	DeleteObj(d);
 	DeleteObj(Options);
 }
 
 template <typename OptionsFmt>
-GDocAppInstallMode GDocApp<OptionsFmt>::GetInstallMode()
+GDocAppInstallMode LDocApp<OptionsFmt>::GetInstallMode()
 {
 	return d->Mode;
 }
 
 template <typename OptionsFmt>
-bool GDocApp<OptionsFmt>::SetLanguage(char *LangId)
+bool LDocApp<OptionsFmt>::SetLanguage(char *LangId)
 {	
 	if (!_LangOptsName)
 		return false;
@@ -265,20 +265,20 @@ bool GDocApp<OptionsFmt>::SetLanguage(char *LangId)
 }
 
 template <typename OptionsFmt>
-char *GDocApp<OptionsFmt>::GetOptionsFileName()
+char *LDocApp<OptionsFmt>::GetOptionsFileName()
 {
 	return d->OptionsFile;
 }
 
 template <typename OptionsFmt>
-void GDocApp<OptionsFmt>::_Close()
+void LDocApp<OptionsFmt>::_Close()
 {
 	Empty();
 	SetCurFile(0);
 }
 
 template <typename OptionsFmt>
-bool GDocApp<OptionsFmt>::_DoSerialize(bool Write)
+bool LDocApp<OptionsFmt>::_DoSerialize(bool Write)
 {
 	bool Status = false;
 
@@ -333,13 +333,13 @@ bool GDocApp<OptionsFmt>::_DoSerialize(bool Write)
  }
 
 template <typename OptionsFmt>
-bool GDocApp<OptionsFmt>::_SerializeFile(bool Write)
+bool LDocApp<OptionsFmt>::_SerializeFile(bool Write)
 {
 	return d->SerializeOpts(Options, Write);
 }
 
 template <typename OptionsFmt>
-bool GDocApp<OptionsFmt>::_Create(LIcon IconResource)
+bool LDocApp<OptionsFmt>::_Create(LIcon IconResource)
 {
 	// Load options
 	_DoSerialize(false);
@@ -372,7 +372,7 @@ bool GDocApp<OptionsFmt>::_Create(LIcon IconResource)
 }
 
 template <typename OptionsFmt>
-bool GDocApp<OptionsFmt>::_Destroy()
+bool LDocApp<OptionsFmt>::_Destroy()
 {
 	// Save options
 	_DoSerialize(true);
@@ -381,7 +381,7 @@ bool GDocApp<OptionsFmt>::_Destroy()
 }
 
 template <typename OptionsFmt>
-bool GDocApp<OptionsFmt>::_LoadMenu(const char *Resource, const char *Tags, int FileMenuId, int RecentMenuId)
+bool LDocApp<OptionsFmt>::_LoadMenu(const char *Resource, const char *Tags, int FileMenuId, int RecentMenuId)
 {
 	if ((Menu = new LMenu))
 	{
@@ -439,7 +439,7 @@ bool GDocApp<OptionsFmt>::_LoadMenu(const char *Resource, const char *Tags, int 
 }
 
 template <typename OptionsFmt>
-bool GDocApp<OptionsFmt>::_OpenFile(const char *File, bool ReadOnly)
+bool LDocApp<OptionsFmt>::_OpenFile(const char *File, bool ReadOnly)
 {
 	bool Status = false;
 	if (SetDirty(false))
@@ -462,7 +462,7 @@ bool GDocApp<OptionsFmt>::_OpenFile(const char *File, bool ReadOnly)
 }
 
 template <typename OptionsFmt>
-bool GDocApp<OptionsFmt>::_SaveFile(const char *File)
+bool LDocApp<OptionsFmt>::_SaveFile(const char *File)
 {
 	char RealPath[256];
 	if (LResolveShortcut(File, RealPath, sizeof(RealPath)))
@@ -486,13 +486,13 @@ bool GDocApp<OptionsFmt>::_SaveFile(const char *File)
 }
 
 template <typename OptionsFmt>
-char *GDocApp<OptionsFmt>::GetAppName()
+char *LDocApp<OptionsFmt>::GetAppName()
 {
 	return d->AppName;
 }
 
 template <typename OptionsFmt>
-void GDocApp<OptionsFmt>::SetCurFile(const char *f)
+void LDocApp<OptionsFmt>::SetCurFile(const char *f)
 {
 	if (!d->CurFile.Equals(f))
 	{
@@ -524,13 +524,13 @@ void GDocApp<OptionsFmt>::SetCurFile(const char *f)
 }
 
 template <typename OptionsFmt>
-const char *GDocApp<OptionsFmt>::GetCurFile()
+const char *LDocApp<OptionsFmt>::GetCurFile()
 {
 	return d->CurFile;
 }
 
 template <typename OptionsFmt>
-bool GDocApp<OptionsFmt>::SetDirty(bool Dirty)
+bool LDocApp<OptionsFmt>::SetDirty(bool Dirty)
 {
 	if (IsAttached() && (d->Dirty ^ Dirty))
 	{
@@ -576,19 +576,19 @@ bool GDocApp<OptionsFmt>::SetDirty(bool Dirty)
 }
 
 template <typename OptionsFmt>
-bool GDocApp<OptionsFmt>::GetDirty()
+bool LDocApp<OptionsFmt>::GetDirty()
 {
 	return d->Dirty;
 }
 
 template <typename OptionsFmt>
-OptionsFmt *GDocApp<OptionsFmt>::GetOptions()
+OptionsFmt *LDocApp<OptionsFmt>::GetOptions()
 {
 	return Options;
 }
 
 template <typename OptionsFmt>
-void GDocApp<OptionsFmt>::OnReceiveFiles(LArray<const char*> &Files)
+void LDocApp<OptionsFmt>::OnReceiveFiles(LArray<const char*> &Files)
 {
 	const char *f = Files.Length() ? Files[0] : 0;
 	if (f && _OpenFile(f, false))
@@ -598,7 +598,7 @@ void GDocApp<OptionsFmt>::OnReceiveFiles(LArray<const char*> &Files)
 }
 
 template <typename OptionsFmt>
-bool GDocApp<OptionsFmt>::OnRequestClose(bool OsShuttingDown)
+bool LDocApp<OptionsFmt>::OnRequestClose(bool OsShuttingDown)
 {
 	if (SetDirty(false))
 	{
@@ -609,7 +609,7 @@ bool GDocApp<OptionsFmt>::OnRequestClose(bool OsShuttingDown)
 }
 
 template <typename OptionsFmt>
-int GDocApp<OptionsFmt>::OnCommand(int Cmd, int Event, OsView Window)
+int LDocApp<OptionsFmt>::OnCommand(int Cmd, int Event, OsView Window)
 {
 	switch (Cmd)
 	{
@@ -645,7 +645,7 @@ int GDocApp<OptionsFmt>::OnCommand(int Cmd, int Event, OsView Window)
 }
 
 template <typename OptionsFmt>
-GMessage::Result GDocApp<OptionsFmt>::OnEvent(GMessage *m)
+LMessage::Result LDocApp<OptionsFmt>::OnEvent(LMessage *m)
 {
 	GMru::OnEvent(m);
 
@@ -668,7 +668,7 @@ GMessage::Result GDocApp<OptionsFmt>::OnEvent(GMessage *m)
 	return LWindow::OnEvent(m);
 }
 
-template class GDocApp<LOptionsFile>;
+template class LDocApp<LOptionsFile>;
 #ifdef __PROP_H
-template class GDocApp<ObjProperties>;
+template class LDocApp<ObjProperties>;
 #endif

@@ -14,7 +14,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/FileSelect.h"
 
-class GFileSelectPrivate
+class LFileSelectPrivate
 {
 	friend class LFileSelect;
 
@@ -175,7 +175,7 @@ class GFileSelectPrivate
 		SelectedType = Info.nFilterIndex - 1;
 	}
 
-	GFileSelectPrivate()
+	LFileSelectPrivate()
 	{
 		CanMultiSelect = false;
 		MultiSelected = false;
@@ -189,7 +189,7 @@ class GFileSelectPrivate
 		ShowReadOnly = false;
 	}
 
-	~GFileSelectPrivate()
+	~LFileSelectPrivate()
 	{
 		DeleteArray(FileStr);
 		DeleteArray(InitDir);
@@ -200,7 +200,7 @@ class GFileSelectPrivate
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 LFileSelect::LFileSelect()
 {
-	d = new GFileSelectPrivate;
+	d = new LFileSelectPrivate;
 }
 
 LFileSelect::~LFileSelect()
@@ -355,7 +355,7 @@ int CALLBACK GFileSelectBrowseCallback(HWND hwnd, UINT uMsg, LPARAM lParam, LPAR
 	char *Name = (char*)lpData;
 	if (uMsg == BFFM_INITIALIZED && Name)
 	{
-        PostMessage(hwnd, BFFM_SETSELECTION, true, (GMessage::Param)Name);
+        PostMessage(hwnd, BFFM_SETSELECTION, true, (LMessage::Param)Name);
 	}
 
 	return 0;

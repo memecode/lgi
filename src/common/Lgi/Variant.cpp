@@ -1646,8 +1646,8 @@ ResolveDone:
 
 struct GDomPropMap
 {
-	LHashTbl<ConstStrKey<char,false>, GDomProperty> ToProp;
-	LHashTbl<IntKey<GDomProperty,ObjNone>, const char *> ToString;
+	LHashTbl<ConstStrKey<char,false>, LDomProperty> ToProp;
+	LHashTbl<IntKey<LDomProperty,ObjNone>, const char *> ToString;
 
 	GDomPropMap()
 	{
@@ -1657,7 +1657,7 @@ struct GDomPropMap
 		#undef _
 	}
 	
-	void Define(const char *s, GDomProperty p)
+	void Define(const char *s, LDomProperty p)
 	{
 		if (!s)
 			return;
@@ -1675,12 +1675,12 @@ struct GDomPropMap
 	
 } DomPropMap;
 
-GDomProperty LStringToDomProp(const char *Str)
+LDomProperty LStringToDomProp(const char *Str)
 {
 	return DomPropMap.ToProp.Find(Str);
 }
 
-const char *LDomPropToString(GDomProperty Prop)
+const char *LDomPropToString(LDomProperty Prop)
 {
 	return DomPropMap.ToString.Find(Prop);
 }
@@ -2006,7 +2006,7 @@ LCustomType::Method *LCustomType::DefineMethod(const char *Name, LArray<LString>
 
 bool LCustomType::CustomField::GetVariant(const char *Field, LVariant &Value, char *Array)
 {
-	GDomProperty p = LStringToDomProp(Field);
+	LDomProperty p = LStringToDomProp(Field);
 	switch (p)
 	{
 		case ObjName: // Type: String
@@ -2285,7 +2285,7 @@ bool LCustomType::Set(int Index, LVariant &In, uint8_t *This, int ArrayIndex)
 
 bool LCustomType::GetVariant(const char *Field, LVariant &Value, char *Array)
 {
-	GDomProperty p = LStringToDomProp(Field);
+	LDomProperty p = LStringToDomProp(Field);
 	switch (p)
 	{
 		case ObjName: // Type: String

@@ -82,7 +82,7 @@ public:
 	LCursor GetCursor(int x, int y) { return LCUR_Ibeam; }
 
 	#if WINNATIVE
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 	void OnFocus(bool f);
 	const char *Name() override;
 	bool Name(const char *s) override;

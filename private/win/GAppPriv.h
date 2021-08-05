@@ -20,7 +20,7 @@ public:
 	bool ThemeAware;
 
 	/// Any fonts needed for styling the elements
-	LAutoPtr<GFontCache> FontCache;
+	LAutoPtr<LFontCache> FontCache;
 
 	// Win32
 	bool QuitReceived;

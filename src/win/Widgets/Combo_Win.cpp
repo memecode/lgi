@@ -358,7 +358,7 @@ int LCombo::SysOnNotify(int Msg, int Code)
 			{
 				uint64 Old = d->Value;
 				if (Value() != Old)
-					SendNotify(GNotifyValueChanged);
+					SendNotify(LNotifyValueChanged);
 				break;
 			}
 			case CBN_DROPDOWN:
@@ -372,7 +372,7 @@ int LCombo::SysOnNotify(int Msg, int Code)
 	return 0;
 }
 
-GMessage::Result LCombo::OnEvent(GMessage *Msg)
+LMessage::Result LCombo::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -415,7 +415,7 @@ GMessage::Result LCombo::OnEvent(GMessage *Msg)
 		#endif
 	}
 
-	GMessage::Result Status = LControl::OnEvent(Msg);
+	LMessage::Result Status = LControl::OnEvent(Msg);
 	
 	switch (Msg->Msg())
 	{
@@ -435,7 +435,7 @@ GMessage::Result LCombo::OnEvent(GMessage *Msg)
 				else
 					Value(d->Value);
 
-				SendNotify(GNotifyTableLayout_Refresh);
+				SendNotify(LNotifyTableLayoutRefresh);
 			}
 			break;
 		}

@@ -30,7 +30,7 @@ public:
 	DynFunc4(int, deflateInit_, z_streamp, strm, int, level, const char *, version, int, stream_size);
 };
 
-class GdcPng : public GFilter, public ZLib
+class GdcPng : public LFilter, public ZLib
 {
 	static bool CrcTableComputed;
 	static ulong CrcTable[256];
@@ -84,7 +84,7 @@ class GdcPngFactory : public GFilterFactory
 		return (File) ? stristr(File, ".png") != 0 : false;
 	}
 
-	GFilter *NewObject()
+	LFilter *NewObject()
 	{
 		return new GdcPng;
 	}

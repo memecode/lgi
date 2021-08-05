@@ -1458,7 +1458,7 @@ ssize_t LRichTextPriv::TextBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset
 	return Deleted;
 }
 		
-GMessage::Result LRichTextPriv::TextBlock::OnEvent(GMessage *Msg)
+LMessage::Result LRichTextPriv::TextBlock::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{

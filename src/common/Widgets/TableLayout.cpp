@@ -498,7 +498,7 @@ bool TableCell::IsSpanned()
 
 bool TableCell::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty Fld = LStringToDomProp(Name);
+	LDomProperty Fld = LStringToDomProp(Name);
 	switch (Fld)
 	{
 		case ContainerChildren: // Type: LView[]
@@ -566,7 +566,7 @@ bool TableCell::GetVariant(const char *Name, LVariant &Value, char *Array)
 
 bool TableCell::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty Fld = LStringToDomProp(Name);
+	LDomProperty Fld = LStringToDomProp(Name);
 	switch (Fld)
 	{
 		case ContainerChildren: // Type: LView[]
@@ -2014,7 +2014,7 @@ void GTableLayoutPrivate::Layout(LRect &Client)
 	
 	InLayout = false;
 
-	Ctrl->SendNotify(GNotifyTableLayout_LayoutChanged);
+	Ctrl->SendNotify(LNotifyTableLayoutChanged);
 }
 
 LTableLayout::LTableLayout(int id) : ResObject(Res_Table)
@@ -2126,7 +2126,7 @@ void LTableLayout::InvalidateLayout()
 		Invalidate();
 }
 
-GMessage::Result LTableLayout::OnEvent(GMessage *m)
+LMessage::Result LTableLayout::OnEvent(LMessage *m)
 {
 	switch (m->Msg())
 	{
@@ -2210,7 +2210,7 @@ bool ConvertNumbers(LArray<double> &a, char *s)
 
 bool LTableLayout::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty p = LStringToDomProp(Name);
+	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		case TableLayoutCols:
@@ -2278,7 +2278,7 @@ void LTableLayout::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 
 int LTableLayout::OnNotify(LViewI *c, int f)
 {
-    if (f == GNotifyTableLayout_Refresh)
+    if (f == LNotifyTableLayoutRefresh)
     {
 		if (!d->LayoutDirty)
 		{
@@ -2290,7 +2290,7 @@ int LTableLayout::OnNotify(LViewI *c, int f)
 			}
 		}
 
-		SendNotify(GNotifyTableLayout_Refresh);
+		SendNotify(LNotifyTableLayoutRefresh);
 
         return 0;
     }

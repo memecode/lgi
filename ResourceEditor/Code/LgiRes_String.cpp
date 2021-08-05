@@ -25,7 +25,7 @@
 #include "resdefs.h"
 
 ////////////////////////////////////////////////////////////////////////////
-LangDlg::LangDlg(LView *parent, List<GLanguage> &l, int Init)
+LangDlg::LangDlg(LView *parent, List<LLanguage> &l, int Init)
 {
 	Lang = 0;
 	SetParent((parent) ? parent : MainWnd);
@@ -91,12 +91,12 @@ StrLang::~StrLang()
 	DeleteArray(Str);
 }
 
-GLanguageId StrLang::GetLang()
+LLanguageId StrLang::GetLang()
 {
 	return Lang;
 }
 
-void StrLang::SetLang(GLanguageId i)
+void StrLang::SetLang(LLanguageId i)
 {
 	LAssert(i);
 	Lang = i;
@@ -119,12 +119,12 @@ bool StrLang::IsEnglish()
 	return stricmp(Lang, "en") == 0;
 }
 
-bool StrLang::operator ==(GLanguageId LangId)
+bool StrLang::operator ==(LLanguageId LangId)
 {
 	return stricmp(Lang, LangId) == 0;
 }
 
-bool StrLang::operator !=(GLanguageId LangId)
+bool StrLang::operator !=(LLanguageId LangId)
 {
 	return !(*this == LangId);
 }
@@ -240,11 +240,11 @@ ResString &ResString::operator =(ResString &s)
 	return *this;
 }
 
-char *ResString::Get(GLanguageId Lang)
+char *ResString::Get(LLanguageId Lang)
 {
 	if (!Lang)
 	{
-		GLanguage *L = Group->App()->GetCurLang();
+		LLanguage *L = Group->App()->GetCurLang();
 		if (L)
 		{
 			Lang = L->Id;
@@ -265,11 +265,11 @@ char *ResString::Get(GLanguageId Lang)
 	return 0;
 }
 
-void ResString::Set(const char *p, GLanguageId Lang)
+void ResString::Set(const char *p, LLanguageId Lang)
 {
 	if (!Lang)
 	{
-		GLanguage *L = Group->App()->GetCurLang();
+		LLanguage *L = Group->App()->GetCurLang();
 		if (L)
 		{
 			Lang = L->Id;
@@ -427,7 +427,7 @@ bool ResString::Read(LXmlTag *t, SerialiseContext &Ctx)
 		LXmlAttr *v = &t->Attr[i];
 		if (v->GetName())
 		{
-			GLanguage *Lang = GFindLang(v->GetName());
+			LLanguage *Lang = GFindLang(v->GetName());
 			if (Lang)
 			{
 				if (Ctx.Format == Lr8File)
@@ -503,7 +503,7 @@ bool ResString::Write(LXmlTag *t, SerialiseContext &Ctx)
 			}
 			else if (Ctx.Format == CodepageFile)
 			{
-				GLanguage *Li = GFindLang(s->GetLang());
+				LLanguage *Li = GFindLang(s->GetLang());
 				if (Li)
 				{
 					Mem = String = (char*)LNewConvertCp(Li->Charset, s->GetStr(), "utf-8");
@@ -540,7 +540,7 @@ bool ResString::Write(LXmlTag *t, SerialiseContext &Ctx)
 	return true;
 }
 
-StrLang *ResString::GetLang(GLanguageId i)
+StrLang *ResString::GetLang(LLanguageId i)
 {
 	for (auto s: Items)
 	{
@@ -588,7 +588,7 @@ bool ResString::Serialize(FieldTree &Fields)
 	{
 		for (int i=0; i<Group->GetLanguages(); i++)
 		{
-			GLanguageId Id = Group->Lang[i]->Id;
+			LLanguageId Id = Group->Lang[i]->Id;
 			StrLang *s = GetLang(Id);
 			if (Fields.GetMode() == FieldTree::UiToObj && !s)
 			{
@@ -658,7 +658,7 @@ const char *ResString::GetText(int i)
 			int LangIdx = i - 3;
 			if (LangIdx < Group->Visible.Length())
 			{
-				GLanguage *Info = Group->Visible[LangIdx];
+				LLanguage *Info = Group->Visible[LangIdx];
 				if (Info)
 				{
 					for (auto s: Items)
@@ -865,7 +865,7 @@ void ResString::PasteText()
 				{
 					*Translation++ = 0;
 
-					GLanguage *l = GFindLang(Lines[i]);
+					LLanguage *l = GFindLang(Lines[i]);
 					if (l)
 					{
 						Set(Translation, l->Id);
@@ -911,7 +911,7 @@ ResStringGroup::~ResStringGroup()
 	DeleteObj(Ui);
 }
 
-GLanguage *ResStringGroup::GetLanguage(GLanguageId Id)
+LLanguage *ResStringGroup::GetLanguage(LLanguageId Id)
 {
 	for (int i=0; i<Lang.Length(); i++)
 	{
@@ -921,7 +921,7 @@ GLanguage *ResStringGroup::GetLanguage(GLanguageId Id)
 	return 0;
 }
 
-int ResStringGroup::GetLangIdx(GLanguageId Id)
+int ResStringGroup::GetLangIdx(LLanguageId Id)
 {
 	for (int i=0; i<Lang.Length(); i++)
 	{
@@ -962,7 +962,7 @@ int ResString::Compare(LListItem *li, ssize_t Column)
 				auto Col = Column - 3;
 				if (Group && Col >= 0 && Col < Group->GetLanguages())
 				{
-					GLanguageId Lang = Group->Visible[Column - 3]->Id;
+					LLanguageId Lang = Group->Visible[Column - 3]->Id;
 					char *a = Get(Lang);
 					char *b = r->Get(Lang);
 					const char *Empty = "";
@@ -1048,7 +1048,7 @@ void ResStringGroup::UpdateColumns()
 	}
 }
 
-void ResStringGroup::DeleteLanguage(GLanguageId Id)
+void ResStringGroup::DeleteLanguage(LLanguageId Id)
 {
 	// Check for presence
 	int Index = -1;
@@ -1069,7 +1069,7 @@ void ResStringGroup::DeleteLanguage(GLanguageId Id)
 	}
 }
 
-void ResStringGroup::AppendLanguage(GLanguageId Id)
+void ResStringGroup::AppendLanguage(LLanguageId Id)
 {
 	// Check for presence
 	int Index = -1;
@@ -1084,7 +1084,7 @@ void ResStringGroup::AppendLanguage(GLanguageId Id)
 
 	if (Index < 0)
 	{
-		GLanguage *n = GFindLang(Id);
+		LLanguage *n = GFindLang(Id);
 		if (n)
 		{
 			Lang[Lang.Length()] = n;
@@ -1143,8 +1143,8 @@ int ResStringGroup::OnCommand(int Cmd, int Event, OsView hWnd)
 		{
 			// List all the languages minus the ones already
 			// being edited
-			List<GLanguage> l;
-			for (GLanguage *li = GFindLang(NULL); li->Id; li++)
+			List<LLanguage> l;
+			for (LLanguage *li = GFindLang(NULL); li->Id; li++)
 			{
 				bool Present = false;
 				for (int i=0; i<Lang.Length(); i++)
@@ -1179,7 +1179,7 @@ int ResStringGroup::OnCommand(int Cmd, int Event, OsView hWnd)
 		case IDM_DELETE_LANG:
 		{
 			// List all the languages being edited
-			List<GLanguage> l;
+			List<LLanguage> l;
 			for (int i=0; i<Lang.Length(); i++)
 			{
 				l.Insert(Lang[i]);
@@ -1298,14 +1298,14 @@ int ResStringGroup::FindId(int Id, List<ResString*> &Strs)
 
 void ResStringGroup::SetLanguages()
 {
-	List<GLanguage> l;
+	List<LLanguage> l;
 	bool EnglishFound = false;
 
 	for (auto s: Strs)
 	{
 		for (auto sl: s->Items)
 		{
-			GLanguage *li = 0;
+			LLanguage *li = 0;
 			for (auto i: l)
 				if (*sl == i->Id)
 				{
@@ -1315,10 +1315,10 @@ void ResStringGroup::SetLanguages()
 			
 			if (!li)
 			{
-				GLanguage *NewLang = GFindLang(sl->GetLang());
+				LLanguage *NewLang = GFindLang(sl->GetLang());
 				if (NewLang) l.Insert(NewLang);
 				
-				if (*sl == (GLanguageId)"en")
+				if (*sl == (LLanguageId)"en")
 					EnglishFound = true;
 			}
 		}
@@ -1659,7 +1659,7 @@ void ResStringUi::OnCreate()
 	}
 }
 
-GMessage::Result ResStringUi::OnEvent(GMessage *Msg)
+LMessage::Result ResStringUi::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{

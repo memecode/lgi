@@ -14,7 +14,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Variant.h"
 
-class GdcTga : public GFilter
+class GdcTga : public LFilter
 {
 public:
 	int GetCapabilites() { return FILTER_CAP_READ; }
@@ -133,7 +133,7 @@ class GdcTgaFactory : public GFilterFactory
 		return (Access == FILTER_CAP_READ && File) ? stristr(File, ".tga") != 0 : false;
 	}
 
-	GFilter *NewObject()
+	LFilter *NewObject()
 	{
 		return new GdcTga;
 	}

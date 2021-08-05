@@ -142,7 +142,7 @@ void LDatePopup::OnChange()
 		char s[64];
 		Mv.Get().GetDate(s, sizeof(s));
 		n->Name(s);
-		n->SendNotify(GNotifyValueChanged);
+		n->SendNotify(LNotifyValueChanged);
 		n->Focus(true);
 	}
 

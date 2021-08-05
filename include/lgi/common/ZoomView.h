@@ -97,7 +97,7 @@ public:
 	void OnPulse();
 	void OnPaint(LSurface *pDC);
 	int OnNotify(LViewI *v, int f);
-	GMessage::Param OnEvent(GMessage *m);
+	LMessage::Param OnEvent(LMessage *m);
 	bool OnLayout(LViewLayoutInfo &Inf);
 	void UpdateScrollBars(LPoint *MaxScroll = NULL, bool ResetPos = false);
 	void OnPosChange();

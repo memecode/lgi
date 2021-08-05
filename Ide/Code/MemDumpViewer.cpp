@@ -174,7 +174,7 @@ public:
 			{
 				switch (f)
 				{
-					case GNotifyItem_Select:
+					case LNotifyItemSelect:
 					{
 						LListItem *s = Lst->GetSelected();
 						if (s)
@@ -187,7 +187,7 @@ public:
 						}
 						break;
 					}
-					case GNotifyItem_ColumnClicked:
+					case LNotifyItemColumnClicked:
 					{
 						int Col;
 						LMouse m;

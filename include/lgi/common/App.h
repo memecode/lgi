@@ -113,7 +113,7 @@ protected:
 	
 	#if defined LGI_SDL
 	
-	void OnSDLEvent(GMessage *m);
+	void OnSDLEvent(LMessage *m);
 	
 	#elif defined LGI_COCOA
 	
@@ -286,7 +286,7 @@ public:
 	bool IsElevated();
 
 	/// Gets the font cache
-	class GFontCache *GetFontCache();
+	class LFontCache *GetFontCache();
 
 	// OS Specific
 	#if defined(LGI_SDL)
@@ -405,7 +405,7 @@ public:
 	#endif
 	
 	#if !LGI_VIEW_HANDLE
-		bool PostEvent(LViewI *View, int Msg, GMessage::Param a = 0, GMessage::Param b = 0);
+		bool PostEvent(LViewI *View, int Msg, LMessage::Param a = 0, LMessage::Param b = 0);
 	#endif
 };
 

@@ -212,7 +212,7 @@ LRichTextPriv::Block *LRichTextPriv::HorzRuleBlock::Clone()
 	return new HorzRuleBlock(this);
 }
 
-GMessage::Result LRichTextPriv::HorzRuleBlock::OnEvent(GMessage *Msg)
+LMessage::Result LRichTextPriv::HorzRuleBlock::OnEvent(LMessage *Msg)
 {
 	return false;
 }

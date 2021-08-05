@@ -1126,7 +1126,7 @@ bool LMenu::OnKey(LView *v, LKey &k)
 	return false;
 }
 
-int LMenu::_OnEvent(GMessage *Msg)
+int LMenu::_OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{

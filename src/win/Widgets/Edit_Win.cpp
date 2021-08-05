@@ -186,7 +186,7 @@ int64 LEdit::Value()
 
 #define EDIT_PROCESSING 1
 
-GMessage::Result LEdit::OnEvent(GMessage *Msg)
+LMessage::Result LEdit::OnEvent(LMessage *Msg)
 {
 	#if EDIT_PROCESSING
 	switch (Msg->m)
@@ -249,7 +249,7 @@ GMessage::Result LEdit::OnEvent(GMessage *Msg)
 				return 1;				
 			}
 
-			// if (Msg->a == VK_ESCAPE) SendNotify(GNotify_EscapeKey);
+			// if (Msg->a == VK_ESCAPE) SendNotify(LNotifyEscapeKey);
 
 
 			if (Msg->a == VK_TAB && MultiLine())
@@ -376,7 +376,7 @@ bool LEdit::OnKey(LKey &k)
 	 	case LK_RETURN:
 		{
 			if (k.Down())
-				SendNotify(GNotify_ReturnKey);
+				SendNotify(LNotifyReturnKey);
 			else if (d->NotificationProcessed)
 			{
 				d->NotificationProcessed = false;
@@ -389,7 +389,7 @@ bool LEdit::OnKey(LKey &k)
 		case LK_ESCAPE:
 		{
 			if (k.Down())
-				SendNotify(GNotify_EscapeKey);
+				SendNotify(LNotifyEscapeKey);
 			else if (d->NotificationProcessed)
 			{
 				d->NotificationProcessed = false;
@@ -400,7 +400,7 @@ bool LEdit::OnKey(LKey &k)
 		case LK_BACKSPACE:
 		{
 			if (k.Down())
-				SendNotify(GNotify_BackspaceKey);
+				SendNotify(LNotifyBackspaceKey);
 			else if (d->NotificationProcessed)
 			{
 				d->NotificationProcessed = false;
@@ -411,7 +411,7 @@ bool LEdit::OnKey(LKey &k)
 		case LK_DELETE:
 		{
 			if (k.Down())
-				SendNotify(GNotify_DeleteKey);
+				SendNotify(LNotifyDeleteKey);
 			else if (d->NotificationProcessed)
 			{
 				d->NotificationProcessed = false;
@@ -458,7 +458,7 @@ ssize_t LEdit::GetCaret(bool Cursor)
 {
 	DWORD Start, End = 0;
 	if (_View)
-        SendMessage(_View, EM_GETSEL, (GMessage::Param)&Start, (GMessage::Param)&End);
+        SendMessage(_View, EM_GETSEL, (LMessage::Param)&Start, (LMessage::Param)&End);
 	return End;
 }
 

@@ -75,7 +75,7 @@ void OsAppArguments::Set(char *Utf)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void GMessage::Set(int Msg, Param A, Param B)
+void LMessage::Set(int Msg, Param A, Param B)
 {
 	m = Msg;
 	a = A;
@@ -910,9 +910,9 @@ bool LApp::IsElevated()
     return fRet;
 }
 
-GFontCache *LApp::GetFontCache()
+LFontCache *LApp::GetFontCache()
 {
 	if (!d->FontCache)
-		d->FontCache.Reset(new GFontCache(SystemNormal));
+		d->FontCache.Reset(new LFontCache(SystemNormal));
 	return d->FontCache;
 }

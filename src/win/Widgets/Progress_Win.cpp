@@ -118,7 +118,7 @@ bool LProgressView::OnLayout(LViewLayoutInfo &Inf)
 	return true;
 }
 
-GMessage::Result LProgressView::OnEvent(GMessage *Msg)
+LMessage::Result LProgressView::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{

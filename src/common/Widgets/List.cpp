@@ -234,7 +234,7 @@ bool LListItem::SetText(const char *s, int i)
 	d->Str[i] = NewStr(s);
 
 	if (Parent)
-		Parent->SendNotify(GNotifyItem_Change);
+		Parent->SendNotify(LNotifyItemChange);
 
 	return true;
 }
@@ -711,7 +711,7 @@ void LList::OnItemSelect(LArray<LListItem*> &It)
 	}
 
 	// Notify selection change
-	SendNotify(GNotifyItem_Select);
+	SendNotify(LNotifyItemSelect);
 }
 
 bool LItemContainer::DeleteColumn(LItemColumn *Col)
@@ -727,7 +727,7 @@ bool LItemContainer::DeleteColumn(LItemColumn *Col)
 			DeleteObj(Col);
 			UpdateAllItems();
 
-			SendNotify(GNotifyItem_ColumnsChanged);
+			SendNotify(LNotifyItemColumnsChanged);
 			Status = true;
 		}
 
@@ -737,7 +737,7 @@ bool LItemContainer::DeleteColumn(LItemColumn *Col)
 	return Status;
 }
 
-GMessage::Result LList::OnEvent(GMessage *Msg)
+LMessage::Result LList::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -763,7 +763,7 @@ int LList::OnNotify(LViewI *Ctrl, int Flags)
 		(Ctrl->GetId() == IDC_HSCROLL && HScroll)
 	)
 	{
-		if (Flags == GNotifyScrollBar_Create)
+		if (Flags == LNotifyScrollBarCreate)
 			UpdateScrollBars();
 
 		Invalidate(&ItemsPos);
@@ -948,26 +948,26 @@ bool LList::OnKey(LKey &k)
 				#endif
 				{
 					if (k.Down())
-						SendNotify(GNotify_ReturnKey);
+						SendNotify(LNotifyReturnKey);
 				}
 				break;
 			}
 			case LK_BACKSPACE:
 			{
 				if (k.Down())
-					SendNotify(GNotify_BackspaceKey);
+					SendNotify(LNotifyBackspaceKey);
 				break;
 			}
 			case LK_ESCAPE:
 			{
 				if (k.Down())
-					SendNotify(GNotify_EscapeKey);
+					SendNotify(LNotifyEscapeKey);
 				break;
 			}
 			case LK_DELETE:
 			{
 				if (k.Down())
-					SendNotify(GNotify_DeleteKey);
+					SendNotify(LNotifyDeleteKey);
 				break;
 			}
 			case LK_UP:
@@ -1493,7 +1493,7 @@ void LList::OnMouseClick(LMouse &m)
 
 						if (SelectionChanged)
 						{
-							SendNotify(GNotifyItem_Select);
+							SendNotify(LNotifyItemSelect);
 						}
 
 						// d->NoSelectEvent = false;
@@ -1505,13 +1505,13 @@ void LList::OnMouseClick(LMouse &m)
 				if (!HandlerHung)
 				{
 					if (m.IsContextMenu())
-						SendNotify(GNotifyItem_ContextMenu);
+						SendNotify(LNotifyItemContextMenu);
 					else if (m.Double())
-						SendNotify(GNotifyItem_DoubleClick);
+						SendNotify(LNotifyItemDoubleClick);
 					else if (Item)
-						SendNotify(GNotifyItem_Click);
+						SendNotify(LNotifyItemClick);
 					else
-						SendNotify(GNotifyContainer_Click);
+						SendNotify(LNotifyContainerClick);
 				}
 			}
 		}
@@ -2076,7 +2076,7 @@ bool LList::Insert(List<LListItem> &l, int Index, bool Update)
 			Invalidate();
 
 			// Notify
-			SendNotify(GNotifyItem_Insert);
+			SendNotify(LNotifyItemInsert);
 		}
 	}
 
@@ -2147,7 +2147,7 @@ bool LList::Remove(LListItem *i)
 					OnItemSelect(s);
 				}
 
-				Note->OnNotify(this, GNotifyItem_Delete);
+				Note->OnNotify(this, LNotifyItemDelete);
 			}
 
 			Status = true;

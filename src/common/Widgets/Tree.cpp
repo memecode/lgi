@@ -1346,7 +1346,7 @@ void LTree::OnItemSelect(LTreeItem *Item)
 	TREELOCK
 
 	Item->OnSelect();
-	SendNotify(GNotifyItem_Select);
+	SendNotify(LNotifyItemSelect);
 }
 
 void LTree::OnItemExpand(LTreeItem *Item, bool Expand)
@@ -1568,7 +1568,7 @@ bool LTree::OnKey(LKey &k)
 				if (k.Down())
 				{
 					Unlock(); // before potentially being deleted...?
-					SendNotify(GNotify_DeleteKey);
+					SendNotify(LNotifyDeleteKey);
 					// This might delete the item... so just return here.
 					return true;
 				}
@@ -1605,7 +1605,7 @@ bool LTree::OnKey(LKey &k)
 					case 'f':
 					{
 						if (k.Ctrl())
-							SendNotify(GNotifyContainer_Find);
+							SendNotify(LNotifyContainerFind);
 						break;
 					}
 				}
@@ -1718,7 +1718,7 @@ void LTree::OnMouseClick(LMouse &m)
 			}
 			else
 			{
-				SendNotify(GNotifyContainer_Click);
+				SendNotify(LNotifyContainerClick);
 			}
 		}
 	}
@@ -1934,7 +1934,7 @@ int LTree::OnNotify(LViewI *Ctrl, int Flags)
 		case IDC_VSCROLL:
 		{
 			TREELOCK
-			if (Flags == GNotifyScrollBar_Create)
+			if (Flags == LNotifyScrollBarCreate)
 			{
 				_UpdateScrollBars();
 				if (VScroll)
@@ -1953,7 +1953,7 @@ int LTree::OnNotify(LViewI *Ctrl, int Flags)
 	return LLayout::OnNotify(Ctrl, Flags);
 }
 
-GMessage::Result LTree::OnEvent(GMessage *Msg)
+LMessage::Result LTree::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -2223,7 +2223,7 @@ void LTree::OnItemClick(LTreeItem *Item, LMouse &m)
 
 	Item->OnMouseClick(m);
 	if (!m.Ctrl() && !m.Shift())
-		SendNotify(GNotifyItem_Click);
+		SendNotify(LNotifyItemClick);
 }
 
 void LTree::OnItemBeginDrag(LTreeItem *Item, LMouse &m)

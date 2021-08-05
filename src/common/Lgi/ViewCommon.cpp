@@ -468,7 +468,7 @@ int LView::OnNotify(LViewI *Ctrl, int Flags)
 	if (!Ctrl)
 		return 0;
 
-	if (Ctrl == (LViewI*)this && Flags == GNotify_Activate)
+	if (Ctrl == (LViewI*)this && Flags == LNotifyActivate)
 	{
 		// Default activation is to focus the current control.
 		Focus(true);
@@ -780,7 +780,7 @@ void LView::SendNotify(int Data)
 									// the receiver will never be able to find our object.
             
             // printf("Post M_CHANGE %i %i\n", GetId(), Data);
-            n->PostEvent(M_CHANGE, (GMessage::Param) GetId(), (GMessage::Param) Data);
+            n->PostEvent(M_CHANGE, (LMessage::Param) GetId(), (LMessage::Param) Data);
 		}
 	}
 }
@@ -1742,7 +1742,7 @@ LFont *LView::GetFont()
 		d->Css &&
 		LResources::GetLoadStyles())
 	{
-		GFontCache *fc = LAppInst->GetFontCache();
+		LFontCache *fc = LAppInst->GetFontCache();
 		if (fc)
 		{
 			LFont *f = fc->GetFont(d->Css);
@@ -1976,7 +1976,7 @@ bool LView::InThread()
 	#endif
 }
 
-bool LView::PostEvent(int Cmd, GMessage::Param a, GMessage::Param b)
+bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b)
 {
 	#ifdef LGI_SDL
 		return LPostEvent(this, Cmd, a, b);

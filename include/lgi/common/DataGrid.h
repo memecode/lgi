@@ -33,7 +33,7 @@ public:
 	void OnItemSelect(LArray<LListItem*> &Items);
 	void OnItemClick(LListItem *Item, LMouse &m);
 	void OnCreate();
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 	int OnNotify(LViewI *c, int f);
 	bool OnMouseWheel(double Lines);
 	void OnPaint(LSurface *pDC);

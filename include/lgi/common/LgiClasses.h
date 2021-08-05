@@ -19,7 +19,7 @@
 
 /////////////////////////////////////////////////////////////////////////////////////
 
-LgiFunc bool LPostEvent(OsView Wnd, int Event, GMessage::Param a = 0, GMessage::Param b = 0);
+LgiFunc bool LPostEvent(OsView Wnd, int Event, LMessage::Param a = 0, LMessage::Param b = 0);
 LgiFunc LViewI *GetNextTabStop(LViewI *v, bool Back);
 
 class LgiClass LCommand : public LBase //, public GFlags

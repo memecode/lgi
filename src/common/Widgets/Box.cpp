@@ -677,7 +677,7 @@ void LBox::OnMouseMove(LMouse &m)
 
 int LBox::OnNotify(LViewI *Ctrl, int Flags)
 {
-	if (Flags == GNotifyTableLayout_Refresh)
+	if (Flags == LNotifyTableLayoutRefresh)
 	{
 		d->Dirty = true;
 		
@@ -781,7 +781,7 @@ bool LBox::SetSize(int ViewIndex, LCss::Len Size)
 	return true;
 }
 
-GMessage::Result LBox::OnEvent(GMessage *Msg)
+LMessage::Result LBox::OnEvent(LMessage *Msg)
 {
 	if (Msg->Msg() == M_CHILDREN_CHANGED)
 	{

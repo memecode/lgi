@@ -175,7 +175,7 @@ public:
 		Attach(0);
 	}
 
-	GMessage::Result OnEvent(GMessage *m)
+	LMessage::Result OnEvent(LMessage *m)
 	{
 		if (m->Msg() == M_FTP_CMD)
 		{
@@ -399,7 +399,7 @@ int FtpThread::Main()
 
 			if (c->Callback)
 			{
-				d->Redir->PostEvent(M_FTP_CMD, (GMessage::Param)c);
+				d->Redir->PostEvent(M_FTP_CMD, (LMessage::Param)c);
 			}
 			else DeleteObj(c);
 		}

@@ -259,23 +259,23 @@ GViewPrivate::~GViewPrivate()
 {
 }
 
-GMessage CreateMsg(int m, int a, int b)
+LMessage CreateMsg(int m, int a, int b)
 {
-	GMessage Msg(m, a, b);
+	LMessage Msg(m, a, b);
 	return Msg;
 }
 
-GMessage::Param MsgA(GMessage *m)
+LMessage::Param MsgA(LMessage *m)
 {
-	GMessage::Param i = 0;
+	LMessage::Param i = 0;
 	if (m)
 		m->FindInt32("a", (int32*)&i);
 	return i;
 }
 
-GMessage::Param MsgB(GMessage *m)
+LMessage::Param MsgB(LMessage *m)
 {
-	GMessage::Param i = 0;
+	LMessage::Param i = 0;
 	if (m)
 		m->FindInt32("b", (int32*)&i);
 	return i;
@@ -718,7 +718,7 @@ void LView::SetPulse(int Length)
 	}
 }
 
-GMessage::Result LView::OnEvent(GMessage *Msg)
+LMessage::Result LView::OnEvent(LMessage *Msg)
 {
 	switch (MsgCode(Msg))
 	{
@@ -807,7 +807,7 @@ GMessage::Result LView::OnEvent(GMessage *Msg)
 			{
 				int32 Cid = -1;
 				Msg->FindInt32("cid", &Cid);
-				GMessage::Param Data = MsgB(Msg);
+				LMessage::Param Data = MsgB(Msg);
 
 				OnNotify(Ctrl, Data);
 			}
@@ -1195,7 +1195,7 @@ void BViewRedir::Pulse()
 
 void BViewRedir::MessageReceived(BMessage *message)
 {
-	Wnd->OnEvent((GMessage*) message); // Haha, this is so bad... oh well.
+	Wnd->OnEvent((LMessage*) message); // Haha, this is so bad... oh well.
 }
 
 void BViewRedir::KeyDown(const char *bytes, int32 numBytes)

@@ -64,13 +64,13 @@ class LDocView;
 
 /// An environment class to handle requests from the text view to the outside world.
 class LgiClass
-GDocumentEnv : public LThreadOwner
+LDocumentEnv : public LThreadOwner
 {
 	LArray<LDocView*> Viewers;
 
 public:
-	GDocumentEnv(LDocView *v = 0);
-	virtual ~GDocumentEnv();
+	LDocumentEnv(LDocView *v = 0);
+	virtual ~LDocumentEnv();
 
 	enum LoadType
 	{
@@ -108,7 +108,7 @@ public:
 		};
 		
 		// View data
-		GDocumentEnv *Env;
+		LDocumentEnv *Env;
 		void *UserData;
 		uint32_t UserUid;
 		PrefFormat Pref;
@@ -184,7 +184,7 @@ public:
 	/// document.
 	virtual bool AppendItems(LSubMenu *Menu, const char *Param, int Base = 1000) { return false; }
 	
-	/// Do something when the menu items created by GDocumentEnv::AppendItems 
+	/// Do something when the menu items created by LDocumentEnv::AppendItems 
 	/// are clicked.
 	virtual bool OnMenu(LDocView *View, int Id, void *Context) { return false; }
 	
@@ -217,7 +217,7 @@ public:
 /// However you will need to instantiate this yourself and call
 /// SetEnv with your instance. i.e. it's not automatic.
 class LgiClass GDefaultDocumentEnv :
-	public GDocumentEnv
+	public LDocumentEnv
 {
 public:
 	LoadType GetContent(LoadJob *&j);
@@ -236,10 +236,10 @@ class LgiClass LDocView :
 	public LLayout,
 	virtual public GDom
 {
-	friend class GDocumentEnv;
+	friend class LDocumentEnv;
 
 protected:
-	GDocumentEnv *Environment;
+	LDocumentEnv *Environment;
 	LString Charset;
 
 public:
@@ -293,7 +293,7 @@ public:
 
 	///////////////////////////////////////////////////////////////////////
 	// Object
-	LDocView(GDocumentEnv *e = 0)
+	LDocView(LDocumentEnv *e = 0)
 	{
 		WrapAtCol = 0;
 		UrlDetect = true;
@@ -339,9 +339,9 @@ public:
 	///////////////////////////////////////////////////////////////////////
 
 	/// Get the current environment
-	virtual GDocumentEnv *GetEnv() { return Environment; }
+	virtual LDocumentEnv *GetEnv() { return Environment; }
 	/// Set the current environment
-	virtual void SetEnv(GDocumentEnv *e)
+	virtual void SetEnv(LDocumentEnv *e)
 	{
 		if (Environment) Environment->DetachView(this);
 		Environment = e;
@@ -350,7 +350,7 @@ public:
 	/// When the env has loaded a resource it can pass it to the doc control via this method.
 	/// It MUST be thread safe. Often an environment will call this function directly from
 	/// it's worker thread.
-	virtual void OnContent(GDocumentEnv::LoadJob *Res) {}
+	virtual void OnContent(LDocumentEnv::LoadJob *Res) {}
 	
 	///////////////////////////////////////////////////////////////////////
 	// State / Selection

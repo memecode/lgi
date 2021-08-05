@@ -441,7 +441,7 @@ void FileTransferProgress::OnPulse()
 		UpdateUi();
 }
 
-GMessage::Result FileTransferProgress::OnEvent(GMessage *m)
+LMessage::Result FileTransferProgress::OnEvent(LMessage *m)
 {
     switch (m->Msg())
     {
@@ -465,7 +465,7 @@ bool FileTransferProgress::SetRange(const LRange &r)
 {
     if (!InThread())
     {
-        bool Status = PostEvent(IDM_SET_LIMITS, (GMessage::Param)r.Start, (GMessage::Param)r.Len);
+        bool Status = PostEvent(IDM_SET_LIMITS, (LMessage::Param)r.Start, (LMessage::Param)r.Len);
         LAssert(Status);
     }
     else
@@ -560,7 +560,7 @@ bool FileTransferProgress::SetVariant(const char *Name, LVariant &Value, char *A
 
 	if (!InThread())
 	{
-		bool Status = PostEvent(IDM_SET_START_VAL, (GMessage::Param)Value.CastInt32());
+		bool Status = PostEvent(IDM_SET_START_VAL, (LMessage::Param)Value.CastInt32());
 		LAssert(Status);
 	}
 	else

@@ -172,7 +172,7 @@ public:
 		AppHnd = appHnd;
 	}
 
-	GMessage::Result OnEvent(GMessage *m)
+	LMessage::Result OnEvent(LMessage *m)
 	{
 		switch (m->Msg())
 		{
@@ -649,7 +649,7 @@ public:
 		{
 			case IDC_EDITOR:
 			{
-				if ((f == GNotifyDocChanged || f == GNotifyCursorChanged) &&
+				if ((f == LNotifyDocChanged || f == LNotifyCursorChanged) &&
 					Edit)
 				{
 					LastChange = LCurrentTime();
@@ -659,7 +659,7 @@ public:
 			}
 			case IDC_TREE:
 			{
-				GNotifyType ft = (GNotifyType)f;
+				LNotifyType ft = (LNotifyType)f;
 				LTreeItem *i = Tree->Selection();
 				
 				LHashTbl<ConstStrKey<char>,LString> vars;
@@ -676,7 +676,7 @@ public:
 
 				switch (ft)
 				{
-					case GNotifyItem_Select:
+					case LNotifyItemSelect:
 					{
 						#ifdef _DEBUG
 						LString Ptr = vars.Find("ptr");
@@ -705,7 +705,7 @@ public:
 		}
 	}
 
-	GMessage::Result OnEvent(GMessage *m)
+	LMessage::Result OnEvent(LMessage *m)
 	{
 		if (m->Msg() == M_INSTALL)
 		{

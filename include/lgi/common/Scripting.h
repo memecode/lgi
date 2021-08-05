@@ -427,7 +427,7 @@ public:
 	int OnNotify(LViewI *Ctrl, int Flags);
 	int OnCommand(int Cmd, int Event, OsView Wnd);
 	bool OnRequestClose(bool OsShuttingDown);
-	GMessage::Param OnEvent(GMessage *Msg);
+	LMessage::Param OnEvent(LMessage *Msg);
 	void LoadFile(const char *File);
 	LStream *GetLog();
 	void OwnCompiledCode(LAutoPtr<LCompiledCode> Cc);

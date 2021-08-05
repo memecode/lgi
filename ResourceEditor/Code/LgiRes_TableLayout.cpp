@@ -787,7 +787,7 @@ void CtrlTable::EnumCtrls(List<ResDialogCtrl> &Ctrls)
 
 bool CtrlTable::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty p = LStringToDomProp(Name);
+	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		case TableLayoutCols:
@@ -833,7 +833,7 @@ bool CtrlTable::GetVariant(const char *Name, LVariant &Value, char *Array)
 
 bool CtrlTable::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty p = LStringToDomProp(Name);
+	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		case TableLayoutCols:
@@ -1491,7 +1491,7 @@ public:
 	
 	void OnDialog(LDialogRes *Dlg);
 	int OnNotify(LViewI *Ctrl, int Flags);
-    GMessage::Param OnEvent(GMessage *m);
+    LMessage::Param OnEvent(LMessage *m);
 };
 
 class DlgItem : public LTreeItem
@@ -1659,7 +1659,7 @@ public:
                 SetPos(r);
                 AttachChildren();
                 
-                SendNotify(GNotifyTableLayout_Refresh);
+                SendNotify(LNotifyTableLayoutRefresh);
             }
         }        
     }
@@ -1717,7 +1717,7 @@ int TableLayoutTest::OnNotify(LViewI *Ctrl, int Flags)
 	return LDialog::OnNotify(Ctrl, Flags);
 }
 
-GMessage::Param TableLayoutTest::OnEvent(GMessage *m)
+LMessage::Param TableLayoutTest::OnEvent(LMessage *m)
 {
     if (m->Msg() == M_FINISHED)
     {

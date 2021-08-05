@@ -102,7 +102,7 @@ namespace Gtk {
 	#endif
 #endif
 
-bool LPostEvent(OsView Wnd, int Event, GMessage::Param a, GMessage::Param b)
+bool LPostEvent(OsView Wnd, int Event, LMessage::Param a, LMessage::Param b)
 {
 	#if LGI_SDL
 
@@ -111,7 +111,7 @@ bool LPostEvent(OsView Wnd, int Event, GMessage::Param a, GMessage::Param b)
 		e.type = SDL_USEREVENT;
 		e.user.code = Event;
 		e.user.data1 = Wnd;
-		e.user.data2 = a || b ? new GMessage::EventParams(a, b) : NULL;
+		e.user.data2 = a || b ? new LMessage::EventParams(a, b) : NULL;
 
 		/*
 		printf("LPostEvent Wnd=%p, Event=%i, a/b: %i/%i\n",
@@ -130,7 +130,7 @@ bool LPostEvent(OsView Wnd, int Event, GMessage::Param a, GMessage::Param b)
 		LViewI *View = (LViewI*) g_object_get_data(GtkCast(Wnd, g_object, GObject), "LViewI");
 		if (View)
 		{
-			GMessage m(0);
+			LMessage m(0);
 			m.Set(Event, a, b);
 			return m.Send(View);
 		}

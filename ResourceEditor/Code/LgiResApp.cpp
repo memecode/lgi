@@ -770,7 +770,7 @@ void FieldView::OnPosChange()
 		v->SetPos(c);
 }
 
-GMessage::Result FieldView::OnEvent(GMessage *m)
+LMessage::Result FieldView::OnEvent(LMessage *m)
 {
 	switch (m->Msg())
 	{
@@ -796,7 +796,7 @@ int FieldView::OnNotify(LViewI *Ctrl, int Flags)
 	if (!Ignore)
 	{
 		LTextView3 *Tv = dynamic_cast<LTextView3*>(Ctrl);
-		if (Tv && Flags == GNotifyCursorChanged)
+		if (Tv && Flags == LNotifyCursorChanged)
 		{
 			return 0;
 		}
@@ -929,7 +929,7 @@ const char *Icon = "icon64.png";
 #endif
 
 AppWnd::AppWnd() :
-	GDocApp<LOptionsFile>(AppName, Icon)
+	LDocApp<LOptionsFile>(AppName, Icon)
 {
 	LastRes = 0;
 	Fields = 0;
@@ -1017,7 +1017,7 @@ void AppWnd::OnCreate()
 		LoadLgi(Open);
 }
 
-void AppWnd::OnLanguagesChange(GLanguageId Lang, bool Add, bool Update)
+void AppWnd::OnLanguagesChange(LLanguageId Lang, bool Add, bool Update)
 {
 	bool Change = false;
 
@@ -1057,7 +1057,7 @@ void AppWnd::OnLanguagesChange(GLanguageId Lang, bool Add, bool Update)
 		int n = 0;
 		for (int i=0; i<Languages.Length(); i++, n++)
 		{
-			GLanguage *Lang = Languages[i];
+			LLanguage *Lang = Languages[i];
 			if (Lang)
 			{
 				auto Item = ViewMenu->AppendItem(Lang->Name, IDM_LANG_BASE + n, true);
@@ -1073,12 +1073,12 @@ void AppWnd::OnLanguagesChange(GLanguageId Lang, bool Add, bool Update)
 	}
 }
 
-bool AppWnd::ShowLang(GLanguageId Lang)
+bool AppWnd::ShowLang(LLanguageId Lang)
 {
 	return ShowLanguages.Find(Lang) != 0;
 }
 
-void AppWnd::ShowLang(GLanguageId Lang, bool Show)
+void AppWnd::ShowLang(LLanguageId Lang, bool Show)
 {
 	// Apply change
 	if (Show)
@@ -1119,7 +1119,7 @@ void AppWnd::ShowLang(GLanguageId Lang, bool Show)
 	}
 }
 
-GLanguage *AppWnd::GetCurLang()
+LLanguage *AppWnd::GetCurLang()
 {
 	if (CurLang >= 0 && CurLang < Languages.Length())
 		return Languages[CurLang];
@@ -1127,7 +1127,7 @@ GLanguage *AppWnd::GetCurLang()
 	return GFindLang("en");
 }
 
-void AppWnd::SetCurLang(GLanguage *L)
+void AppWnd::SetCurLang(LLanguage *L)
 {
 	for (int i=0; i<Languages.Length(); i++)
 	{
@@ -1151,7 +1151,7 @@ void AppWnd::SetCurLang(GLanguage *L)
 	}
 }
 
-LArray<GLanguage*> *AppWnd::GetLanguages()
+LArray<LLanguage*> *AppWnd::GetLanguages()
 {
 	return &Languages;
 }
@@ -1177,7 +1177,7 @@ public:
 	}
 };
 
-GMessage::Result AppWnd::OnEvent(GMessage *m)
+LMessage::Result AppWnd::OnEvent(LMessage *m)
 {
 	GMru::OnEvent(m);
 
@@ -1481,7 +1481,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		}
 	}
 
-	return GDocApp<LOptionsFile>::OnCommand(Cmd, Event, Handle);
+	return LDocApp<LOptionsFile>::OnCommand(Cmd, Event, Handle);
 }
 
 int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
@@ -2307,12 +2307,12 @@ void AppWnd::ImportLang()
 
 					if (HasData)
 					{
-						List<GLanguage> Langs;
+						List<LLanguage> Langs;
 						for (auto g: Groups)
 						{
 							for (int i=0; i<g->GetLanguages(); i++)
 							{
-								GLanguage *Lang = g->GetLanguage(i);
+								LLanguage *Lang = g->GetLanguage(i);
 								if (Lang)
 								{
 									bool Has = false;
@@ -2672,7 +2672,7 @@ bool AppWnd::LoadLgi(const char *FileName)
 
 					// Scan for languages and update the view lang menu
 					Languages.Length(0);
-					LHashTbl<ConstStrKey<char,false>, GLanguage*> Langs;
+					LHashTbl<ConstStrKey<char,false>, LLanguage*> Langs;
 					if (ViewMenu)
 					{
 						// Remove existing language menu items
@@ -2690,7 +2690,7 @@ bool AppWnd::LoadLgi(const char *FileName)
 								{
 									for (int i=0; i<Sg->GetLanguages(); i++)
 									{
-										GLanguage *Lang = Sg->GetLanguage(i);
+										LLanguage *Lang = Sg->GetLanguage(i);
 										if (Lang)
 										{
 											Langs.Add(Lang->Id, Lang);
@@ -3479,7 +3479,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 
 			// Language
 			char *Language = 0;
-			GLanguageId LanguageId = 0;
+			LLanguageId LanguageId = 0;
 
 			// Dialogs
 			List<ResDialog> DlLList;
@@ -3637,7 +3637,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 									char *Language = NewStr(T[1]);
 									if (Language)
 									{
-										GLanguage *Info = GFindLang(0, Language);
+										LLanguage *Info = GFindLang(0, Language);
 										if (Info)
 										{
 											LanguageId = Info->Id;
@@ -4110,8 +4110,8 @@ bool AppWnd::LoadWin32(const char *FileName)
 									if (Str)
 									{
 										// get the language
-										GLanguage *Lang = GFindLang(Language);
-										GLanguageId SLang = (Lang) ? Lang->Id : (char*)"en";
+										LLanguage *Lang = GFindLang(Language);
+										LLanguageId SLang = (Lang) ? Lang->Id : (char*)"en";
 										StrLang *s = 0;
 
 										// look for language present in string object
@@ -4221,7 +4221,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 
 											if (i)
 											{
-												GLanguage *Lang = GFindLang(Language);
+												LLanguage *Lang = GFindLang(Language);
 												i->GetStr()->Set(Text, (Lang) ? Lang->Id : (char*)"en");
 											}
 
@@ -4283,7 +4283,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 													}
 
 													// Set Text
-													GLanguage *Lang = GFindLang(Language);
+													LLanguage *Lang = GFindLang(Language);
 													i->GetStr()->Set(Text, (Lang) ? Lang->Id : (char*)"en");
 												}
 											}
@@ -4541,7 +4541,7 @@ int ShortCutView::OnNotify(LViewI *Ctrl, int Flags)
 	{
 		switch (Flags)
 		{
-			case GNotifyItem_Click:
+			case LNotifyItemClick:
 			{
 				LListItem *li = Lst->GetSelected();
 				if (li)

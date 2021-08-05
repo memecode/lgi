@@ -204,7 +204,7 @@ public:
 	size_t Length() { return Children.Length(); }
 
 	// Events
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 	void OnPaint(LSurface *pDC);
 	void OnMouseClick(LMouse &m);
 	void OnMouseEnter(LMouse &m);

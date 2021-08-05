@@ -79,7 +79,7 @@ class LMenu;
 class LgiClass LSubMenu :
 	public LBase,
 	public LMenuLoader,
-	public GImageListOwner,
+	public LImageListOwner,
 	public GDom
 {
 	friend class LMenuItem;
@@ -541,7 +541,7 @@ public:
 	bool SetPrefAndAboutItems(int PrefId, int AboutId);
 
 	#if defined(WIN32)
-	static int _OnEvent(GMessage *Msg);
+	static int _OnEvent(LMessage *Msg);
 	#elif defined(MAC)
 	int GetIdForCommand(uint32_t Cmd);
 	#endif

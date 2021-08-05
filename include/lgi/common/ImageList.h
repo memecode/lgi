@@ -59,19 +59,19 @@ public:
 	);
 };
 
-class LgiClass GImageListOwner
+class LgiClass LImageListOwner
 {
 	bool OwnList;
 	LImageList *ImageList;
 
 public:
-	GImageListOwner()
+	LImageListOwner()
 	{
 		OwnList = true;
 		ImageList = NULL;
 	}
 	
-	~GImageListOwner()
+	~LImageListOwner()
 	{
 		if (OwnList)
 			DeleteObj(ImageList);

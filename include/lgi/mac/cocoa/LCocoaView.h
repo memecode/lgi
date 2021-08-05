@@ -36,9 +36,9 @@ LgiExtern LRect LScreenFlip(LRect r);
 }
 @property LViewI *v;
 @property int m;
-@property GMessage::Param a;
-@property GMessage::Param b;
-- (id)init:(LViewI*)view msg:(int)Msg a:(GMessage::Param)A b:(GMessage::Param)B;
+@property LMessage::Param a;
+@property LMessage::Param b;
+- (id)init:(LViewI*)view msg:(int)Msg a:(LMessage::Param)A b:(LMessage::Param)B;
 @end
 
 @interface LCocoaAssert : NSObject

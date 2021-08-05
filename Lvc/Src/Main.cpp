@@ -1,15 +1,16 @@
 #include "lgi/common/Lgi.h"
-#include "../Resources/resdefs.h"
-#include "Lvc.h"
 #include "lgi/common/TableLayout.h"
-#ifdef WINDOWS
-#include "../Resources/resource.h"
-#endif
 #include "lgi/common/TextLog.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/XmlTreeUi.h"
 #include "lgi/common/Tree.h"
 #include "lgi/common/FileSelect.h"
+
+#include "Lvc.h"
+#include "../Resources/resdefs.h"
+#ifdef WINDOWS
+#include "../Resources/resource.h"
+#endif
 
 #define TIMEOUT_PROMPT			1000
 
@@ -177,7 +178,7 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data)
 	return true;
 }
 
-bool SshConnection::HandleMsg(GMessage *m)
+bool SshConnection::HandleMsg(LMessage *m)
 {
 	if (m->Msg() != M_RESPONSE)
 		return false;
@@ -214,7 +215,7 @@ bool SshConnection::HandleMsg(GMessage *m)
 	return true;
 }
 
-GMessage::Result SshConnection::OnEvent(GMessage *Msg)
+LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -428,7 +429,7 @@ public:
 			if (OldSz != NewSz)
 			{
 				GetCss(true)->Height(NewSz);
-				SendNotify(GNotifyTableLayout_Refresh);
+				SendNotify(LNotifyTableLayoutRefresh);
 			}
 		}
 		else LAssert(!"Missing table ctrl");
@@ -824,7 +825,7 @@ int LstCmp(LListItem *a, LListItem *b, int Col)
 
 		case LBranch:
 		case LAuthor:
-		case LMessage:
+		case LMessageTxt:
 			return Stricmp(A->GetFieldText(fld), B->GetFieldText(fld));
 
 		case LTimeStamp:
@@ -1154,7 +1155,7 @@ public:
 		Opts.SerializeFile(true);
 	}
 
-	GMessage::Result OnEvent(GMessage *Msg)
+	LMessage::Result OnEvent(LMessage *Msg)
 	{
 		if (Msg->Msg() == M_RESPONSE)
 			SshConnection::HandleMsg(Msg);
@@ -1349,7 +1350,7 @@ public:
 			{
 				switch (flag)
 				{
-					case GNotifyItem_ColumnClicked:
+					case LNotifyItemColumnClicked:
 					{
 						int Col = -1;
 						LMouse m;
@@ -1383,7 +1384,7 @@ public:
 			{
 				switch (flag)
 				{
-					case GNotifyContainer_Click:
+					case LNotifyContainerClick:
 					{
 						LMouse m;
 						c->GetMouse(m);
@@ -1507,7 +1508,7 @@ public:
 			}
 			case IDC_HEADS:
 			{
-				if (flag == GNotifyValueChanged)
+				if (flag == LNotifyValueChanged)
 				{
 					auto Revs = LString(c->Name()).SplitDelimit();
 
@@ -1521,7 +1522,7 @@ public:
 			{
 				switch (flag)
 				{
-					case GNotifyItem_ColumnClicked:
+					case LNotifyItemColumnClicked:
 					{
 						int Col = -1;
 						LMouse Ms;
@@ -1529,7 +1530,7 @@ public:
 						Commits->Sort(LstCmp, Col);
 						break;
 					}
-					case GNotifyItem_DoubleClick:
+					case LNotifyItemClick:
 					{
 						VcFolder *f = dynamic_cast<VcFolder*>(Tree->Selection());
 						if (!f)
@@ -1649,7 +1650,7 @@ int RemoteFolderDlg::OnNotify(LViewI *Ctrl, int Flags)
 		{
 			switch (Flags)
 			{
-				case GNotifyItem_Select:
+				case LNotifyItemSelect:
 				{
 					bool isRoot = cur == root;
 					SetCtrlEnabled(IDC_HOSTNAME, !isRoot);

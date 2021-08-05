@@ -75,7 +75,7 @@ void LRadioGroup::OnAttach()
 {
 }
 
-GMessage::Result LRadioGroup::OnEvent(GMessage *Msg)
+LMessage::Result LRadioGroup::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -435,7 +435,7 @@ bool LRadioButton::OnLayout(LViewLayoutInfo &Inf)
 }
 int LRadioButton::OnNotify(LViewI *Ctrl, int Flags)
 {
-	if (Ctrl == (LViewI*)this && Flags == GNotify_Activate)
+	if (Ctrl == (LViewI*)this && Flags == LNotifyActivate)
 	{
 		Value(true);
 	}

@@ -710,7 +710,7 @@ void LScrollBar::SetPage(int64 i)
 	}
 }
 
-GMessage::Result LScrollBar::OnEvent(GMessage *Msg)
+LMessage::Result LScrollBar::OnEvent(LMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }

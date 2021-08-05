@@ -81,7 +81,7 @@ public:
 };
 
 const char *LStringRes::CodePage = 0;
-GLanguage *LStringRes::CurLang = 0;
+LLanguage *LStringRes::CurLang = 0;
 
 LStringRes::LStringRes(LResources *res)
 {
@@ -157,7 +157,7 @@ bool LStringRes::Read(LXmlTag *t, ResFileFormat Format)
 		{
 			// no string, try english
 			n = t->GetAttr("en");
-			GLanguage *Lang = GFindLang("en");
+			LLanguage *Lang = GFindLang("en");
 			if (Lang)
 			{
 				Cp = Lang->Charset;
@@ -224,7 +224,7 @@ bool LStringRes::Read(LXmlTag *t, ResFileFormat Format)
 					int Old = atoi(Name + 5);
 					if (Old)
 					{
-						GLanguage *OldLang = GFindOldLang(Old);
+						LLanguage *OldLang = GFindOldLang(Old);
 						if (OldLang)
 						{
 							LAssert(OldLang->OldId == Old);
@@ -481,7 +481,7 @@ bool LResources::IsOk()
 	return d->Ok;
 }
 
-void LResources::AddLang(GLanguageId id)
+void LResources::AddLang(LLanguageId id)
 {
 	// search through id's...
 	for (int i=0; i<Languages.Length(); i++)
@@ -1239,13 +1239,13 @@ bool LResourceLoad::LoadFromResource(int Resource, LViewI *Parent, LRect *Pos, L
 
 ////////////////////////////////////////////////////////////////////////
 // Get language
-GLanguage *LGetLanguageId()
+LLanguage *LGetLanguageId()
 {
 	// Check for command line override
 	char Buf[64];
 	if (LAppInst->GetOption("i", Buf))
 	{
-		GLanguage *i = GFindLang(Buf);
+		LLanguage *i = GFindLang(Buf);
 		if (i)
 			return i;
 	}
@@ -1254,7 +1254,7 @@ GLanguage *LGetLanguageId()
 	auto LangId = LAppInst->GetConfig("Language");
 	if (LangId)
 	{
-		GLanguage *l = GFindLang(LangId);
+		LLanguage *l = GFindLang(LangId);
 		if (l)
 			return l;
 	}
@@ -1272,7 +1272,7 @@ GLanguage *LGetLanguageId()
 
 	int Primary = PRIMARYLANGID(Lang);
 	int Sub = SUBLANGID(Lang);
-	GLanguage *i, *English = 0;
+	LLanguage *i, *English = 0;
 
 	// Search for exact match
 	for (i = GFindLang(NULL); i->Id; i++)
@@ -1299,7 +1299,7 @@ GLanguage *LGetLanguageId()
 		if (GetLanguage &&
 			GetLanguage(Lang))
 		{
-			GLanguage *l = GFindLang(Lang);
+			LLanguage *l = GFindLang(Lang);
 			if (l)
 				return l;
 		}
@@ -1319,7 +1319,7 @@ GLanguage *LGetLanguageId()
 		{
 			extern bool _GetIniField(char *Grp, char *Field, char *In, char *Out, int OutSize);
 			char Lang[256] = "";
-			GLanguage *Ret = 0;
+			LLanguage *Ret = 0;
 			if (_GetIniField("Locale", "Language", Txt, Lang, sizeof(Lang)))
 			{
 				GToken Langs(Lang, ":,; \t");

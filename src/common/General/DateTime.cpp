@@ -2030,7 +2030,7 @@ bool LDateTime::Decode(const char *In)
 
 bool LDateTime::GetVariant(const char *Name, LVariant &Dst, char *Array)
 {
-	GDomProperty p = LStringToDomProp(Name);
+	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		case DateYear: // Type: Int32
@@ -2094,7 +2094,7 @@ bool LDateTime::GetVariant(const char *Name, LVariant &Dst, char *Array)
 
 bool LDateTime::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty p = LStringToDomProp(Name);
+	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		case DateYear:

@@ -285,7 +285,7 @@ LRect &LLayout::GetClient(bool ClientSpace)
 	return r;
 }
 
-GMessage::Param LLayout::OnEvent(GMessage *Msg)
+LMessage::Param LLayout::OnEvent(LMessage *Msg)
 {
 	#ifdef M_SET_SCROLL
 	if (Msg->Msg() == M_SET_SCROLL)
@@ -294,9 +294,9 @@ GMessage::Param LLayout::OnEvent(GMessage *Msg)
 		_SetScrollBars(Msg->A(), Msg->B());
 		
 		if (HScroll)
-			HScroll->SendNotify(GNotifyScrollBar_Create);
+			HScroll->SendNotify(LNotifyScrollBarCreate);
 		if (VScroll)
-			VScroll->SendNotify(GNotifyScrollBar_Create);
+			VScroll->SendNotify(LNotifyScrollBarCreate);
 		return 0;
 	}
 	#endif

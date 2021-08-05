@@ -235,7 +235,7 @@ LRESULT CALLBACK LWindowsClass::Redir(HWND hWnd, UINT m, WPARAM a, LPARAM b)
 		#endif
 	if (Wnd)
 	{
-		GMessage Msg(m, a, b);
+		LMessage Msg(m, a, b);
 		Msg.hWnd = hWnd;
 		return Wnd->OnEvent(&Msg);
 	}
@@ -274,9 +274,9 @@ LRESULT CALLBACK LWindowsClass::SubClassRedir(HWND hWnd, UINT m, WPARAM a, LPARA
 		#endif
 	if (Wnd)
 	{
-		GMessage Msg(m, a, b);
+		LMessage Msg(m, a, b);
 		Msg.hWnd = hWnd;
-		GMessage::Result Status = Wnd->OnEvent(&Msg);
+		LMessage::Result Status = Wnd->OnEvent(&Msg);
 		return Status;
 	}
 
@@ -1104,7 +1104,7 @@ void LView::SetPulse(int Length)
 
 static int ConsumeTabKey = 0;
 
-bool SysOnKey(LView *w, GMessage *m)
+bool SysOnKey(LView *w, LMessage *m)
 {
 	if (m->a == VK_TAB &&
 		(m->m == WM_KEYDOWN ||
@@ -1249,7 +1249,7 @@ bool IsKeyChar(LKey &k, int vk)
 
 #define KEY_FLAGS		(~(MK_LBUTTON | MK_MBUTTON | MK_RBUTTON))
 
-GMessage::Result LView::OnEvent(GMessage *Msg)
+LMessage::Result LView::OnEvent(LMessage *Msg)
 {
 	int Status = 0;
 
@@ -1324,9 +1324,9 @@ GMessage::Result LView::OnEvent(GMessage *Msg)
 			{
 				LFont *f = GetFont();
 				if (!f || f == LSysFont)
-					return (GMessage::Result) LSysFont->Handle();
+					return (LMessage::Result) LSysFont->Handle();
 
-				return (GMessage::Result) f->Handle();
+				return (LMessage::Result) f->Handle();
 				break;
 			}
 			case WM_MENUCHAR:
@@ -2045,7 +2045,7 @@ GMessage::Result LView::OnEvent(GMessage *Msg)
 			}
 			case WM_NCCALCSIZE:
 			{
-				GMessage::Param Status = 0;
+				LMessage::Param Status = 0;
 				int Edge = (Sunken() || Raised()) ? _BorderSize : 0;
 				RECT *rc = NULL;
 				if (Msg->a)

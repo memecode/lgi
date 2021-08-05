@@ -94,7 +94,7 @@ class HtmlScriptContext :
 public:
 	static GHostFunc Methods[];
 
-	HtmlScriptContext(int Id, GDocumentEnv *Env) :
+	HtmlScriptContext(int Id, LDocumentEnv *Env) :
 		#ifdef _GHTML2_H
 		Html2::GHtml2
 		#else
@@ -140,7 +140,7 @@ GHostFunc HtmlScriptContext::Methods[] =
 
 class HtmlImageLoader : public LThread, public LMutex, public LCancel
 {
-	LArray<GDocumentEnv::LoadJob*> In;
+	LArray<LDocumentEnv::LoadJob*> In;
 
 public:
 	HtmlImageLoader() : LThread("HtmlImageLoader")
@@ -155,7 +155,7 @@ public:
 			LSleep(1);
 	}
 	
-	void Add(GDocumentEnv::LoadJob *j)
+	void Add(LDocumentEnv::LoadJob *j)
 	{
 		if (Lock(_FL))
 		{
@@ -194,7 +194,7 @@ public:
 				Unlock();
 			}
 			
-			GDocumentEnv::LoadJob *Job = dynamic_cast<GDocumentEnv::LoadJob*>(j.Get());
+			LDocumentEnv::LoadJob *Job = dynamic_cast<LDocumentEnv::LoadJob*>(j.Get());
 			if (Job)
 			{
 				LUri u(Job->Uri);
@@ -203,7 +203,7 @@ public:
 					// Local document?
 					if (Job->pDC.Reset(GdcD->Load(Job->Uri)))
 					{
-						GDocumentEnv *e = Job->Env;
+						LDocumentEnv *e = Job->Env;
 						if (e)
 						{
 							// LgiTrace("Loaded '%s' as image %ix%i\n", u.Path, j->pDC->X(), j->pDC->Y());
@@ -220,12 +220,12 @@ public:
 					{
 						uchar Hint[16];
 						p.Peek(Hint, sizeof(Hint));
-						LAutoPtr<GFilter> Filter(GFilterFactory::New(u.sPath, FILTER_CAP_READ, Hint));
+						LAutoPtr<LFilter> Filter(GFilterFactory::New(u.sPath, FILTER_CAP_READ, Hint));
 						if (Filter)
 						{
 							LAutoPtr<LSurface> Img(new LMemDC);
-							GFilter::IoStatus Rd = Filter->ReadImage(Img, &p);
-							if (Rd == GFilter::IoSuccess)
+							LFilter::IoStatus Rd = Filter->ReadImage(Img, &p);
+							if (Rd == LFilter::IoSuccess)
 							{
 								Job->pDC = Img;
 								if (Job->Env)
@@ -427,7 +427,7 @@ public:
 			AttachChildren();
 			
 			Visible(true);
-			OnNotify(FindControl(IDC_LIST), GNotifyItem_Select);
+			OnNotify(FindControl(IDC_LIST), LNotifyItemSelect);
 		}
 		else LExitApp();
 	}
@@ -542,7 +542,7 @@ public:
 		{
 			case IDC_LIST:
 			{
-				if (f == GNotifyItem_Select)
+				if (f == LNotifyItemSelect)
 				{
 					LListItem *s = Lst->GetSelected();
 					if (s)
@@ -568,7 +568,7 @@ public:
 			{
 				switch (f)
 				{
-					case GNotifySelectionChanged:
+					case LNotifySelectionChanged:
 					{
 						if (Text)
 						{

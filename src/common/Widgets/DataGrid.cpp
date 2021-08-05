@@ -457,7 +457,7 @@ void LDataGrid::OnItemClick(LListItem *Item, LMouse &m)
 				{
 					d->Deleted.Add(IndexOf(i));
 				}
-				SendNotify(GNotifyItem_Delete);
+				SendNotify(LNotifyItemDelete);
 				d->Deleted.Length(0);
 
 				Sel.Delete(d->NewRecord);
@@ -482,7 +482,7 @@ void LDataGrid::OnCreate()
 	SetWindow(this);
 }
 
-GMessage::Result LDataGrid::OnEvent(GMessage *Msg)
+LMessage::Result LDataGrid::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -629,7 +629,7 @@ int LDataGrid::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 				{
 					d->Dropped.Add(Item[i]);
 				}
-				SendNotify(GNotifyItem_ItemsDropped);
+				SendNotify(LNotifyItemItemsDropped);
 				return DROPEFFECT_COPY;
 			}
 		}

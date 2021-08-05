@@ -200,15 +200,15 @@ struct LNamedStyle : public LCss
 	}
 };
 
-class GCssCache
+class LCssCache
 {
 	int Idx;
 	LArray<LNamedStyle*> Styles;
 	LString Prefix;
 
 public:
-	GCssCache();
-	~GCssCache();
+	LCssCache();
+	~LCssCache();
 
 	void SetPrefix(LString s) { Prefix = s; }
 	uint32_t GetStyles();
@@ -287,7 +287,7 @@ struct ButtonState
 
 extern bool Utf16to32(LArray<uint32_t> &Out, const uint16_t *In, int Len);
 
-class GEmojiContext
+class LEmojiImage
 {
 	LAutoPtr<LSurface> EmojiImg;
 
@@ -299,9 +299,9 @@ class LRichTextPriv :
 	public LCss,
 	public LHtmlParser,
 	public LHtmlStaticInst,
-	public GCssCache,
-	public GFontCache,
-	public GEmojiContext
+	public LCssCache,
+	public LFontCache,
+	public LEmojiImage
 {
 	LStringPipe LogBuffer;
 
@@ -692,11 +692,11 @@ public:
 		}
 		
 		// Events
-		bool PostEvent(int Cmd, GMessage::Param a = 0, GMessage::Param b = 0)
+		bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0)
 		{
 			bool r = d->View->PostEvent(M_BLOCK_MSG,
-										(GMessage::Param)(Block*)this,
-										(GMessage::Param)new GMessage(Cmd, a, b));
+										(LMessage::Param)(Block*)this,
+										(LMessage::Param)new LMessage(Cmd, a, b));
 			#if defined(_DEBUG)
 			if (!r)
 				LgiTrace("%s:%i - Warning: PostEvent failed..\n", _FL);
@@ -705,7 +705,7 @@ public:
 		}
 
 		// If this returns non-zero further command processing is aborted.
-		GMessage::Result OnEvent(GMessage *Msg)
+		LMessage::Result OnEvent(LMessage *Msg)
 		{
 			return false;
 		}
@@ -1072,7 +1072,7 @@ public:
 		void UpdateSpellingAndLinks(Transaction *Trans, LRange r);
 
 		// Events
-		GMessage::Result OnEvent(GMessage *Msg);
+		LMessage::Result OnEvent(LMessage *Msg);
 
 		// Transactional changes
 		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, LNamedStyle *Style = NULL);
@@ -1123,7 +1123,7 @@ public:
 		Block *Clone();
 
 		// Events
-		GMessage::Result OnEvent(GMessage *Msg);
+		LMessage::Result OnEvent(LMessage *Msg);
 
 		// Transactional changes
 		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, LNamedStyle *Style = NULL);
@@ -1219,7 +1219,7 @@ public:
 		void OnComponentInstall(LString Name);
 
 		// Events
-		GMessage::Result OnEvent(GMessage *Msg);
+		LMessage::Result OnEvent(LMessage *Msg);
 
 		// Transactional changes
 		bool AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *Str, ssize_t Chars = -1, LNamedStyle *Style = NULL);
@@ -1270,11 +1270,11 @@ public:
 		HorzRuleBlock *Hrb;
 		LArray<uint32_t> Buf;
 		uint32_t LastChar;
-		GFontCache *FontCache;
+		LFontCache *FontCache;
 		LCss::Store StyleStore;
 		bool StartOfLine;
 		
-		CreateContext(GFontCache *fc)
+		CreateContext(LFontCache *fc)
 		{
 			Tb = NULL;
 			Ib = NULL;

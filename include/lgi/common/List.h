@@ -364,7 +364,7 @@ public:
 	// Events
 	
 	void OnPaint(LSurface *pDC);
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 	// int OnHitTest(int x, int y);
 	LCursor GetCursor(int x, int y);
 	void OnMouseClick(LMouse &m);

@@ -32,7 +32,7 @@ class LgiClass LView : virtual public LViewI, virtual public LBase
 	friend		class LPopup;
 	friend		class LWindowPrivate;
 
-	friend		bool SysOnKey(LView *w, GMessage *m);
+	friend		bool SysOnKey(LView *w, LMessage *m);
 
 	#if defined(__GTK_H__)
 
@@ -322,7 +322,7 @@ public:
 	int AddDispatch() override;
 
 	/// Called to process every message received by this window.
-	GMessage::Result OnEvent(GMessage *Msg) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
 
 	/// true if the view is enabled
 	bool Enabled() override;
@@ -399,15 +399,15 @@ public:
 		/// \sa Should be M_USER or higher for custom events.
 		int Cmd,
 		/// The first 32-bits of data. Equivalent to wParam on Win32.
-		GMessage::Param a = 0,
+		LMessage::Param a = 0,
 		/// The second 32-bits of data. Equivalent to lParam on Win32.
-		GMessage::Param b = 0
+		LMessage::Param b = 0
 	) override;
 
 	template<typename T>
 	bool PostEvent(int Cmd, T *Ptr)
 	{
-		return PostEvent(Cmd, (GMessage::Param)Ptr, 0);
+		return PostEvent(Cmd, (LMessage::Param)Ptr, 0);
 	}	
 
 	/// \brief Sets the utf-8 text associated with this view
@@ -781,6 +781,6 @@ public:
 
 	~LControl();
 
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 };
 

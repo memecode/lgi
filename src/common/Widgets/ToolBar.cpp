@@ -806,7 +806,7 @@ void LToolButton::Value(int64 b)
 			{
 				Down = b != 0;
 				Invalidate();
-				SendNotify(GNotifyValueChanged);
+				SendNotify(LNotifyValueChanged);
 			}
 			break;
 		}
@@ -842,7 +842,7 @@ void LToolButton::Value(int64 b)
 
 			Down = b != 0;
 			GetParent()->Invalidate();
-			SendNotify(GNotifyValueChanged);
+			SendNotify(LNotifyValueChanged);
 			break;
 		}
 	}
@@ -1094,7 +1094,7 @@ void LToolBar::ContextMenu(LMouse &m)
 				{
 					d->Text = !d->Text;
 					Save = true;
-					SendNotify(GNotifyTableLayout_Refresh);
+					SendNotify(LNotifyTableLayoutRefresh);
 					break;
 				}
 				default:
@@ -1377,11 +1377,11 @@ void LToolBar::OnButtonClick(LToolButton *Btn)
 	if (w && Btn)
 	{
 		int Id = Btn->GetId();
-        w->PostEvent(M_COMMAND, (GMessage::Param) Id,
+        w->PostEvent(M_COMMAND, (LMessage::Param) Id,
 			#ifdef __GTK_H__
 			0
 			#else
-        	(GMessage::Param) Handle()
+        	(LMessage::Param) Handle()
         	#endif
         	);
 	}
@@ -1391,12 +1391,12 @@ int LToolBar::PostDescription(LView *Ctrl, const char *Text)
 {
 	if (GetParent())
 	{
-        return GetParent()->PostEvent(M_DESCRIBE, (GMessage::Param) Ctrl, (GMessage::Param) Text);
+        return GetParent()->PostEvent(M_DESCRIBE, (LMessage::Param) Ctrl, (LMessage::Param) Text);
 	}
 	return 0;
 }
 
-GMessage::Result LToolBar::OnEvent(GMessage *Msg)
+LMessage::Result LToolBar::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{

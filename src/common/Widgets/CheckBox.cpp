@@ -116,7 +116,7 @@ void LCheckBox::OnStyleChange()
 
 int LCheckBox::OnNotify(LViewI *Ctrl, int Flags)
 {
-	if (Ctrl == (LViewI*)this && Flags == GNotify_Activate)
+	if (Ctrl == (LViewI*)this && Flags == LNotifyActivate)
 	{
 		Value(!Value());
 	}
@@ -124,7 +124,7 @@ int LCheckBox::OnNotify(LViewI *Ctrl, int Flags)
 	return 0;
 }
 
-GMessage::Result LCheckBox::OnEvent(GMessage *m)
+LMessage::Result LCheckBox::OnEvent(LMessage *m)
 {
 	return LView::OnEvent(m);
 }

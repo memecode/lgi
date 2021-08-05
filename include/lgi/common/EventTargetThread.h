@@ -85,7 +85,7 @@ public:
 		return Status;
 	}
 
-	bool PostEvent(int Hnd, int Cmd, GMessage::Param a = 0, GMessage::Param b = 0)
+	bool PostEvent(int Hnd, int Cmd, LMessage::Param a = 0, LMessage::Param b = 0)
 	{
 		if (!Hnd)
 			return false;
@@ -134,21 +134,21 @@ public:
 	}
 };
 
-class LgiClass GMappedEventSink : public LEventSinkI
+class LgiClass LMappedEventSink : public LEventSinkI
 {
 protected:
 	int Handle;
 	LEventSinkMap *Map;
 
 public:
-	GMappedEventSink()
+	LMappedEventSink()
 	{
 		Map = NULL;
 		Handle = 0;
 		SetMap(&LEventSinkMap::Dispatch);
 	}
 
-	virtual ~GMappedEventSink()
+	virtual ~LMappedEventSink()
 	{
 		SetMap(NULL);
 	}
@@ -182,10 +182,10 @@ public:
 class LgiClass LEventTargetThread :
 	public LThread,
 	public LMutex,
-	public GMappedEventSink,
+	public LMappedEventSink,
 	public LEventTargetI // Sub-class has to implement OnEvent
 {
-	LArray<GMessage*> Msgs;
+	LArray<LMessage*> Msgs;
 	LThreadEvent Event;
 	bool Loop;
 
@@ -301,14 +301,14 @@ public:
 		return Msgs.Length() + Processing;
 	}
 
-	bool PostEvent(int Cmd, GMessage::Param a = 0, GMessage::Param b = 0)
+	bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0)
 	{
 		if (!Loop)
 			return false;
 		if (!Lock(_FL))
 			return false;
 		
-		Msgs.Add(new GMessage(Cmd, a, b));
+		Msgs.Add(new LMessage(Cmd, a, b));
 		Unlock();
 		
 		// printf("%x: PostEvent and sig %i\n", GetCurrentThreadId(), (int)Msgs.Length());
@@ -342,7 +342,7 @@ public:
 			LThreadEvent::WaitStatus s = Event.Wait(WaitLength);
 			if (s == LThreadEvent::WaitSignaled)
 			{
-				LArray<GMessage*> m;
+				LArray<LMessage*> m;
 				if (Lock(_FL))
 				{
 					if (Msgs.Length())
@@ -382,7 +382,7 @@ public:
 	{
 		uint64 Start = LCurrentTime();
 		bool Status;
-		while (!(Status = LEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, (GMessage::Param) A.Get())))
+		while (!(Status = LEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, (LMessage::Param) A.Get())))
 		{
 			LSleep(2);
 			if (LCurrentTime() - Start >= PostTimeout) break;
@@ -393,11 +393,11 @@ public:
 	}
 
 	template<typename T>
-	bool PostObject(int Hnd, int Cmd, GMessage::Param A, LAutoPtr<T> B)
+	bool PostObject(int Hnd, int Cmd, LMessage::Param A, LAutoPtr<T> B)
 	{
 		uint64 Start = LCurrentTime();
 		bool Status;
-		while (!(Status = LEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, A, (GMessage::Param) B.Get())))
+		while (!(Status = LEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, A, (LMessage::Param) B.Get())))
 		{
 			LSleep(2);
 			if (LCurrentTime() - Start >= PostTimeout) break;
@@ -412,7 +412,7 @@ public:
 	{
 		uint64 Start = LCurrentTime();
 		bool Status;
-		while (!(Status = LEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, (GMessage::Param) A.Get(), (GMessage::Param) B.Get())))
+		while (!(Status = LEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, (LMessage::Param) A.Get(), (LMessage::Param) B.Get())))
 		{
 			LSleep(2);
 			if (LCurrentTime() - Start >= PostTimeout) break;
@@ -426,13 +426,13 @@ public:
 	}
 
 	template<typename T>
-	bool ReceiveA(LAutoPtr<T> &Obj, GMessage *m)
+	bool ReceiveA(LAutoPtr<T> &Obj, LMessage *m)
 	{
 		return Obj.Reset((T*)m->A());
 	}
 
 	template<typename T>
-	bool ReceiveB(LAutoPtr<T> &Obj, GMessage *m)
+	bool ReceiveB(LAutoPtr<T> &Obj, LMessage *m)
 	{
 		return Obj.Reset((T*)m->B());
 	}

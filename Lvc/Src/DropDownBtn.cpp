@@ -58,7 +58,7 @@ public:
 	int OnNotify(LViewI *c, int flag)
 	{
 		if (c->GetId() == 10 &&
-			flag == GNotifyItem_Click)
+			flag == LNotifyItemClick)
 		{
 			LListItem *i = Lst->GetSelected();
 			LViewI *e = d->GetEdit();

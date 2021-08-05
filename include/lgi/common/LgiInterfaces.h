@@ -330,21 +330,21 @@ public:
 	virtual int GetCpuCount() { return -1; }
 
 	/// Gets the font cache
-	virtual class GFontCache *GetFontCache() = 0;
+	virtual class LFontCache *GetFontCache() = 0;
 };
 
 class LEventSinkI
 {
 public:
 	virtual ~LEventSinkI() {}
-	virtual bool PostEvent(int Cmd, GMessage::Param a = 0, GMessage::Param b = 0) = 0;
+	virtual bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0) = 0;
 };
 
 class LEventTargetI
 {
 public:
 	virtual ~LEventTargetI() {}
-	virtual GMessage::Result OnEvent(GMessage *Msg) = 0;
+	virtual LMessage::Result OnEvent(LMessage *Msg) = 0;
 };
 
 class LEventsI : public LEventTargetI

@@ -40,7 +40,7 @@ public:
 	int OnNotify(LViewI *v, int f);
 	void OnCreate();
 	bool OnViewKey(LView *v, LKey &k);
-	GMessage::Result OnEvent(GMessage *m);
+	LMessage::Result OnEvent(LMessage *m);
 };
 
 int ScoreCmp(FindSymResult **a, FindSymResult **b)
@@ -148,7 +148,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread, public LCancel
 		va_end(Arg);
 		
 		if (s.Length())
-			PostThreadEvent(hApp, M_APPEND_TEXT, (GMessage::Param)NewStr(s), AppWnd::BuildTab);
+			PostThreadEvent(hApp, M_APPEND_TEXT, (LMessage::Param)NewStr(s), AppWnd::BuildTab);
 	}
 	
 	#if !USE_HASH
@@ -279,7 +279,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread, public LCancel
 		return true;
 	}
 
-	GMessage::Result OnEvent(GMessage *Msg)
+	LMessage::Result OnEvent(LMessage *Msg)
 	{
 		if (IsCancelled())
 			return -1;
@@ -503,7 +503,7 @@ bool FindSymbolDlg::OnViewKey(LView *v, LKey &k)
 	return false;
 }
 
-GMessage::Result FindSymbolDlg::OnEvent(GMessage *m)
+LMessage::Result FindSymbolDlg::OnEvent(LMessage *m)
 {
 	switch (m->Msg())
 	{
@@ -597,7 +597,7 @@ int FindSymbolDlg::OnNotify(LViewI *v, int f)
 		}
 		case IDC_RESULTS:
 		{
-			if (f == GNotifyItem_DoubleClick)
+			if (f == LNotifyItemDoubleClick)
 			{
 				// Fall throu
 			}
@@ -652,7 +652,7 @@ bool FindSymbolSystem::SetIncludePaths(LString::Array &Paths)
 	if (!a)
 		return false;
 	*a = Paths;
-	return d->PostEvent(M_FIND_SYM_INC_PATHS, (GMessage::Param)a);
+	return d->PostEvent(M_FIND_SYM_INC_PATHS, (LMessage::Param)a);
 }
 
 bool FindSymbolSystem::OnFile(const char *Path, SymAction Action, int Platforms)
@@ -679,6 +679,6 @@ void FindSymbolSystem::Search(int ResultsSinkHnd, const char *SearchStr, bool Al
 	if (Req)
 	{
 		Req->Str = SearchStr;
-		d->PostEvent(M_FIND_SYM_REQUEST, (GMessage::Param)Req, (GMessage::Param)AllPlat);
+		d->PostEvent(M_FIND_SYM_REQUEST, (LMessage::Param)Req, (LMessage::Param)AllPlat);
 	}
 }

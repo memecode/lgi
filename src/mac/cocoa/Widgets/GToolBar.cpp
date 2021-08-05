@@ -1812,7 +1812,7 @@ void LToolBar::OnButtonClick(LToolButton *Btn)
 	if (w && Btn)
 	{
 		int Id = Btn->GetId();
-		w->PostEvent(M_COMMAND, Id, (GMessage::Param) Handle());
+		w->PostEvent(M_COMMAND, Id, (LMessage::Param) Handle());
 	}
 }
 
@@ -1820,12 +1820,12 @@ int LToolBar::PostDescription(LView *Ctrl, char *Text)
 {
 	if (GetParent())
 	{
-		return GetParent()->PostEvent(M_DESCRIBE, (GMessage::Param) Ctrl, (GMessage::Param) Text);
+		return GetParent()->PostEvent(M_DESCRIBE, (LMessage::Param) Ctrl, (LMessage::Param) Text);
 	}
 	return 0;
 }
 
-int LToolBar::OnEvent(GMessage *Msg)
+int LToolBar::OnEvent(LMessage *Msg)
 {
 	switch (MsgCode(Msg))
 	{

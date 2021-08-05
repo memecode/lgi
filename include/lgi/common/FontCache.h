@@ -3,7 +3,7 @@
 #include "lgi/common/App.h"
 #include "lgi/common/Font.h"
 
-class GFontCache
+class LFontCache
 {
 	LFont *DefaultFont;
 	LArray<LFont*> Fonts;
@@ -11,7 +11,7 @@ class GFontCache
 	
 public:
 	/// Constructor for font cache
-	GFontCache
+	LFontCache
 	(
 		/// This is an externally owned default font... or optionally 
 		/// NULL if there is no default.
@@ -21,7 +21,7 @@ public:
 		DefaultFont = DefFnt;
 	}
 	
-	~GFontCache()
+	~LFontCache()
 	{
 		Fonts.DeleteObjects();
 	}

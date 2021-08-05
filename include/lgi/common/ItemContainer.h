@@ -108,7 +108,7 @@ public:
 	virtual bool XmlIo(class LXmlTag *Tag, bool Write) { return false; }
 
 	bool OnScriptEvent(LViewI *Ctrl) { return false; }
-	GMessage::Result OnEvent(GMessage *Msg) { return 0; }
+	LMessage::Result OnEvent(LMessage *Msg) { return 0; }
 	void OnMouseEnter(LMouse &m) {}
 	void OnMouseExit(LMouse &m) {}
 	void OnMouseMove(LMouse &m) {}
@@ -148,7 +148,7 @@ public:
 	void OnPaint(LSurface *pDC);
 	int OnNotify(LViewI *v, int f);
 	void Visible(bool i);
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 
 	bool OnKey(LKey &k);
 	void OnFocus(bool f);
@@ -258,7 +258,7 @@ public:
 
 class LgiClass LItemContainer :
 	public LLayout,
-	public GImageListOwner
+	public LImageListOwner
 {
 	friend class LItemColumn;
 	friend class GItem;
@@ -385,7 +385,7 @@ public:
 	/// Resizes all the columns to their content, allowing a little extra space for visual effect
 	virtual void ResizeColumnsToContent(int Border = DEFAULT_COLUMN_SPACING);
 
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 
 	LItemContainer &operator =(const LItemContainer &i)
 	{

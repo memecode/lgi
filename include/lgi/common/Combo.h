@@ -111,7 +111,7 @@ public:
 	virtual void DoMenu();
 
 	// Events/Window/Implementation
-	GMessage::Result OnEvent(GMessage *Msg) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
 	void OnAttach() override;
 	bool OnKey(LKey &k) override;
 	

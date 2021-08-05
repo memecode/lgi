@@ -223,7 +223,7 @@ LItemColumn *LItemContainer::AddColumn(const char *Name, int Width, int Where)
 			Columns.SetFixedLength(true);
 
 			UpdateAllItems();
-			SendNotify(GNotifyItem_ColumnsChanged);
+			SendNotify(LNotifyItemColumnsChanged);
 		}
 		Unlock();
 	}
@@ -244,7 +244,7 @@ bool LItemContainer::AddColumn(LItemColumn *Col, int Where)
 		if (Status)
 		{
 			UpdateAllItems();
-			SendNotify(GNotifyItem_ColumnsChanged);
+			SendNotify(LNotifyItemColumnsChanged);
 		}
 
 		Unlock();
@@ -294,7 +294,7 @@ void LItemContainer::EmptyColumns()
 {
 	Columns.DeleteObjects();
 	Invalidate(&ColumnHeader);
-	SendNotify(GNotifyItem_ColumnsChanged);
+	SendNotify(LNotifyItemColumnsChanged);
 }
 
 int LItemContainer::HitColumn(int x, int y, LItemColumn *&Resize, LItemColumn *&Over)
@@ -346,7 +346,7 @@ void LItemContainer::OnColumnClick(int Col, LMouse &m)
 {
 	ColClick = Col;
 	ColMouse = m;
-	SendNotify(GNotifyItem_ColumnClicked);
+	SendNotify(LNotifyItemColumnClicked);
 }
 
 bool LItemContainer::GetColumnClickInfo(int &Col, LMouse &m)
@@ -386,7 +386,7 @@ void LItemContainer::GetColumnSizes(ColSizes &cs)
 	}
 }
 
-GMessage::Result LItemContainer::OnEvent(GMessage *Msg)
+LMessage::Result LItemContainer::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -729,7 +729,7 @@ void LItemColumn::Width(int i)
 		// Notify listener
 		auto p = d->Parent;
 		if (p)
-			p->SendNotify(GNotifyItem_ColumnsResized);
+			p->SendNotify(LNotifyItemColumnsResized);
 	}
 }
 
@@ -1075,7 +1075,7 @@ public:
 	bool OnKey(LKey &k)
 	{
 		/*	This should be handled by LEdit::OnKey now.
-			Which will send a GNotify_EscapeKey or GNotify_ReturnKey
+			Which will send a LNotifyEscapeKey or LNotifyReturnKey
 			up to the ItemEdit OnNotify handler.
 
 		switch (k.vkey)
@@ -1222,7 +1222,7 @@ int GItemEdit::OnNotify(LViewI *v, int f)
 	{
 		case 100:
 		{
-			if (f == GNotify_EscapeKey)
+			if (f == LNotifyEscapeKey)
 			{
 				d->Esc = true;
 				#if DEBUG_EDIT_LABEL
@@ -1230,7 +1230,7 @@ int GItemEdit::OnNotify(LViewI *v, int f)
 				#endif
 			}
 
-			if (f == GNotify_EscapeKey || f == GNotify_ReturnKey)
+			if (f == LNotifyEscapeKey || f == LNotifyReturnKey)
 			{
 				#if DEBUG_EDIT_LABEL
 				LgiTrace("%s:%i - GItemEdit hiding on esc/enter\n", _FL);
@@ -1271,7 +1271,7 @@ void GItemEdit::OnFocus(bool f)
 		d->Edit->Focus(true);
 }
 
-GMessage::Result GItemEdit::OnEvent(GMessage *Msg)
+LMessage::Result GItemEdit::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{

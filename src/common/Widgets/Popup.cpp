@@ -123,7 +123,7 @@ public:
 		}
 	}
 	
-	void PostEvent(OsView h, int c, GMessage::Param a, GMessage::Param b)
+	void PostEvent(OsView h, int c, LMessage::Param a, LMessage::Param b)
 	{
 		LPostEvent(h, c, a, b);
 	}
@@ -288,7 +288,7 @@ public:
 							#endif
 
 							if (Close)
-								w->PostEvent(M_SET_VISIBLE, (GMessage::Param)false);
+								w->PostEvent(M_SET_VISIBLE, (LMessage::Param)false);
 						}
 					}
 				}
@@ -362,7 +362,7 @@ public:
 						hWndProcess = LgiGetViewPid(hMouseOver);
 						if (hWndProcess == hProcess)
 						{
-							PostEvent(hMouseOver, M_MOUSEEXIT, 0, (GMessage::Param)MAKELONG((short) p.x, (short) p.y));
+							PostEvent(hMouseOver, M_MOUSEEXIT, 0, (LMessage::Param)MAKELONG((short) p.x, (short) p.y));
 						}
 					}
 
@@ -376,7 +376,7 @@ public:
 						hWndProcess = LgiGetViewPid(hMouseOver);
 						if (hWndProcess == hProcess)
 						{
-							PostEvent(hMouseOver, M_MOUSEENTER, (GMessage::Param)Inside, (GMessage::Param)MAKELONG((short) p.x, (short) p.y));
+							PostEvent(hMouseOver, M_MOUSEENTER, (LMessage::Param)Inside, (LMessage::Param)MAKELONG((short) p.x, (short) p.y));
 						}
 					}
 				}
@@ -660,7 +660,7 @@ bool LPopup::SetPos(LRect &r, bool repaint)
 
 #endif
 
-GMessage::Result LPopup::OnEvent(GMessage *Msg)
+LMessage::Result LPopup::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{

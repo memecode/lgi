@@ -220,7 +220,7 @@ void LDialog::EndModeless(int Code)
 
 extern LButton *FindDefault(LView *w);
 
-GMessage::Param LDialog::OnEvent(GMessage *Msg)
+LMessage::Param LDialog::OnEvent(LMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }
@@ -235,7 +235,7 @@ LControl::~LControl()
 {
 }
 
-GMessage::Param LControl::OnEvent(GMessage *Msg)
+LMessage::Param LControl::OnEvent(LMessage *Msg)
 {
 	return 0;
 }

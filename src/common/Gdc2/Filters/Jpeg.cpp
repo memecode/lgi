@@ -132,7 +132,7 @@ class GdcJpegFactory : public GFilterFactory
 						stristr(File, ".jpg") != 0 : false;
 	}
 
-	GFilter *NewObject()
+	LFilter *NewObject()
 	{
 		#if LIBJPEG_SHARED
 		if (JpegLibraryLock.Lock(_FL))
@@ -519,9 +519,9 @@ void CmykToRgb32(D *d, S *s, int width)
 	}
 }
 
-GFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
+LFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 {
-	GFilter::IoStatus Status = IoError;
+	LFilter::IoStatus Status = IoError;
 	LVariant v;
 	
 	#if LIBJPEG_SHARED
@@ -546,7 +546,7 @@ GFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 		    Warn = false;
 		}
 		
-		return GFilter::IoComponentMissing;
+		return LFilter::IoComponentMissing;
 	}
 	#endif
 
@@ -869,7 +869,7 @@ void j_term_destination(j_compress_ptr cinfo)
 		LAssert(!"Write failed.");
 }
 
-GFilter::IoStatus GdcJpeg::WriteImage(LStream *Out, LSurface *pDC)
+LFilter::IoStatus GdcJpeg::WriteImage(LStream *Out, LSurface *pDC)
 {
 	LVariant v;
 	#if LIBJPEG_SHARED
@@ -885,7 +885,7 @@ GFilter::IoStatus GdcJpeg::WriteImage(LStream *Out, LSurface *pDC)
 		    Warn = false;
 		}
 		
-		return GFilter::IoComponentMissing;
+		return LFilter::IoComponentMissing;
 	}
 	#endif
 
@@ -927,7 +927,7 @@ void Rop24(LRgb24 *dst, I *p, int x)
 	}
 }
 
-GFilter::IoStatus GdcJpeg::_Write(LStream *Out, LSurface *pDC, int Quality, SubSampleMode SubSample, LPoint Dpi)
+LFilter::IoStatus GdcJpeg::_Write(LStream *Out, LSurface *pDC, int Quality, SubSampleMode SubSample, LPoint Dpi)
 {
 	struct jpeg_compress_struct cinfo;
 	struct my_error_mgr jerr;
@@ -940,7 +940,7 @@ GFilter::IoStatus GdcJpeg::_Write(LStream *Out, LSurface *pDC, int Quality, SubS
 	if (setjmp(jerr.setjmp_buffer))
 	{
 		JPEGLIB jpeg_destroy_compress(&cinfo);
-		return GFilter::IoError;
+		return LFilter::IoError;
 	}
 
 	JpegStream Stream;

@@ -171,7 +171,7 @@
 #define Div255Lut					(GdcDevice::GetInst()->GetDiv255())
 
 //				Classes
-class GFilter;
+class LFilter;
 class LSurface;
 
 #include "lgi/common/Rect.h"
@@ -388,7 +388,7 @@ public:
 /// Base class API for graphics operations
 class LgiClass LSurface : public GRefCount, public GDom
 {
-	friend class GFilter;
+	friend class LFilter;
 	friend class LView;
 	friend class LWindow;
 	friend class LVariant;
@@ -1231,7 +1231,7 @@ public:
     ///
     /// Lgi comes with the following image codecs:
     /// <ul>
-    ///  <li> Windows or OS/2 Bitmap: GdcBmp (GFilter.cpp)
+    ///  <li> Windows or OS/2 Bitmap: GdcBmp (LFilter.cpp)
     ///  <li> PCX: GdcPcx (Pcx.cpp)
     ///  <li> GIF: GdcGif (Gif.cpp and Lzw.cpp)
     ///  <li> JPEG: GdcJpeg (Jpeg.cpp + <a href='http://www.memecode.com/scribe/extras.php'>libjpeg</a> library)

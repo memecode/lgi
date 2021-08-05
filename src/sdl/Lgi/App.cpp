@@ -23,7 +23,7 @@
 #include "GToken.h"
 #include "GViewPriv.h"
 #include "GRegionClipDC.h"
-#include "GFontCache.h"
+#include "LFontCache.h"
 
 #define DEBUG_MSG_TYPES				0
 #define DEBUG_HND_WARNINGS			0
@@ -186,7 +186,7 @@ public:
 	LArray<LViewI*> DeleteLater;
 	LMouse LastMove;
 	LAutoString Name;
-	LAutoPtr<GFontCache> FontCache;
+	LAutoPtr<LFontCache> FontCache;
 
 	// Update handling (lock before using)
 	LRegion Dirty;
@@ -455,7 +455,7 @@ void SDL_to_Mouse(LMouse &ms, T &ev)
 	*/
 }
 
-void LApp::OnSDLEvent(GMessage *m)
+void LApp::OnSDLEvent(LMessage *m)
 {
 	SDL_EventType t = (SDL_EventType) m->Event.type;
 	switch (m->Event.type)
@@ -611,7 +611,7 @@ void LApp::OnSDLEvent(GMessage *m)
 				case M_CHANGE:
 				{
 					LView *v = (LView*)m->Event.user.data1;
-					LAutoPtr<GMessage::EventParams> p((GMessage::EventParams*)m->Event.user.data2);
+					LAutoPtr<LMessage::EventParams> p((LMessage::EventParams*)m->Event.user.data2);
 					
 					if (!ViewMap.Find(v))
 						break;
@@ -630,7 +630,7 @@ void LApp::OnSDLEvent(GMessage *m)
 				default:
 				{
 					LView *v = (LView*)m->Event.user.data1;
-					LAutoPtr<GMessage::EventParams> p((GMessage::EventParams*)m->Event.user.data2);
+					LAutoPtr<LMessage::EventParams> p((LMessage::EventParams*)m->Event.user.data2);
 
 					if (!ViewMap.Find(v))
 						break;
@@ -663,7 +663,7 @@ bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 {
 	ThreadCheck();
 
-	GMessage Msg;
+	LMessage Msg;
 	int r;
 	
 	if (AppWnd)
@@ -1028,10 +1028,10 @@ bool LApp::IsElevated()
 	#endif
 }
 
-GFontCache *LApp::GetFontCache()
+LFontCache *LApp::GetFontCache()
 {
 	if (!d->FontCache)
-		d->FontCache.Reset(new GFontCache(SystemNormal));
+		d->FontCache.Reset(new LFontCache(SystemNormal));
 	return d->FontCache;
 }
 
@@ -1160,7 +1160,7 @@ OsApplication::~OsApplication()
 }
 
 ////////////////////////////////////////////////////////////////
-void GMessage::Set(int m, Param pa, Param pb)
+void LMessage::Set(int m, Param pa, Param pb)
 {
 	Event.type = SDL_USEREVENT;
 	Event.user.code = m;
@@ -1171,14 +1171,14 @@ void GMessage::Set(int m, Param pa, Param pb)
 		Event.user.data2 = NULL;
 }
 
-bool GMessage::Send(LViewI *Wnd)
+bool LMessage::Send(LViewI *Wnd)
 {
 	bool Status = false;
 	LAssert(!"Not impl.");
 	return Status;
 }
 
-int GMessage::Msg()
+int LMessage::Msg()
 {
 	if (Event.type >= SDL_USEREVENT && Event.type <= SDL_NUMEVENTS)
 		return Event.user.code;
@@ -1187,7 +1187,7 @@ int GMessage::Msg()
 	return 0;
 }
 
-GMessage::Param GMessage::A()
+LMessage::Param LMessage::A()
 {
 	if (Event.type >= SDL_USEREVENT &&
 		Event.type <= SDL_NUMEVENTS &&
@@ -1196,7 +1196,7 @@ GMessage::Param GMessage::A()
 	return 0;
 }
 
-GMessage::Param GMessage::B()
+LMessage::Param LMessage::B()
 {
 	if (Event.type >= SDL_USEREVENT &&
 		Event.type <= SDL_NUMEVENTS &&

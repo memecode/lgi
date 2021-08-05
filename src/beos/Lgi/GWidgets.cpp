@@ -233,7 +233,7 @@ int LDialog::DoModeless()
 	return false;
 }
 
-GMessage::Result LDialog::OnEvent(GMessage *Msg)
+LMessage::Result LDialog::OnEvent(LMessage *Msg)
 {
 	return LWindow::OnEvent(Msg);
 }
@@ -285,7 +285,7 @@ LControl::~LControl()
 {
 }
 
-GMessage::Result LControl::OnEvent(GMessage *Msg)
+LMessage::Result LControl::OnEvent(LMessage *Msg)
 {
 	return 0;
 }
@@ -386,7 +386,7 @@ void LSlider::SetLimits(int64 min, int64 max)
 	if (Val > Max) Val = Max;
 }
 
-GMessage::Result LSlider::OnEvent(GMessage *Msg)
+LMessage::Result LSlider::OnEvent(LMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }

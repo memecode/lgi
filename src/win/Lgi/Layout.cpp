@@ -203,11 +203,11 @@ bool LLayout::Pour(LRegion &r)
 	return true;
 }
 
-GMessage::Result LLayout::OnEvent(GMessage *Msg)
+LMessage::Result LLayout::OnEvent(LMessage *Msg)
 {
 	if (VScroll) VScroll->OnEvent(Msg);
 	if (HScroll) HScroll->OnEvent(Msg);
-	GMessage::Result Status = LView::OnEvent(Msg);
+	LMessage::Result Status = LView::OnEvent(Msg);
 	if (Msg->Msg() == M_CHANGE &&
 		Status == -1 &&
 		GetParent())

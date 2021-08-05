@@ -70,7 +70,7 @@ void EditTray::GotoSearch(int CtrlId, char *InitialText)
 		FileSearch->Name(InitialText);
 		FileSearch->Focus(true);
 		if (InitialText)
-			FileSearch->SendNotify(GNotifyDocChanged);
+			FileSearch->SendNotify(LNotifyDocChanged);
 	}
 		
 	if (FuncSearch && FuncSearch->GetId() == CtrlId)
@@ -78,7 +78,7 @@ void EditTray::GotoSearch(int CtrlId, char *InitialText)
 		FuncSearch->Name(InitialText);
 		FuncSearch->Focus(true);
 		if (InitialText)
-			FuncSearch->SendNotify(GNotifyDocChanged);
+			FuncSearch->SendNotify(LNotifyDocChanged);
 	}
 
 	if (SymSearch && SymSearch->GetId() == CtrlId)
@@ -86,7 +86,7 @@ void EditTray::GotoSearch(int CtrlId, char *InitialText)
 		SymSearch->Name(InitialText);
 		SymSearch->Focus(true);
 		if (InitialText)
-			SymSearch->SendNotify(GNotifyDocChanged);
+			SymSearch->SendNotify(LNotifyDocChanged);
 	}
 }
 	
@@ -570,7 +570,7 @@ public:
 	{
 		if (Lst &&
 			Ctrl == Edit &&
-			(!Flags || Flags == GNotifyDocChanged))
+			(!Flags || Flags == LNotifyDocChanged))
 		{
 			Name(Edit->Name());
 		}
@@ -652,7 +652,7 @@ public:
 	{
 		if (Lst &&
 			Ctrl == Edit &&
-			(!Flags || Flags == GNotifyDocChanged))
+			(!Flags || Flags == LNotifyDocChanged))
 		{
 			// Kick off search...
 			LString s = Ctrl->Name();
@@ -774,7 +774,7 @@ public:
 	{
 		if (Lst &&
 			Ctrl == Edit &&
-			(!Flags || Flags == GNotifyDocChanged))
+			(!Flags || Flags == LNotifyDocChanged))
 		{
 			auto s = Ctrl->Name();
 			if (ValidStr(s))
@@ -792,7 +792,7 @@ public:
 	{
 	}
 	
-	GMessage::Result OnEvent(GMessage *Msg)
+	LMessage::Result OnEvent(LMessage *Msg)
 	{
 		switch (Msg->Msg())
 		{
@@ -1569,7 +1569,7 @@ void IdeDoc::Focus(bool f)
 	d->Edit->Focus(f);
 }
 
-GMessage::Result IdeDoc::OnEvent(GMessage *Msg)
+LMessage::Result IdeDoc::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -1670,12 +1670,12 @@ int IdeDoc::OnNotify(LViewI *v, int f)
 		{
 			switch (f)
 			{
-				case GNotifyDocChanged:
+				case LNotifyDocChanged:
 				{
 					d->UpdateName();
 					break;
 				}
-				case GNotifyCursorChanged:
+				case LNotifyCursorChanged:
 				{
 					if (d->Tray)
 					{
@@ -1694,7 +1694,7 @@ int IdeDoc::OnNotify(LViewI *v, int f)
 		}
 		case IDC_FILE_SEARCH:
 		{
-			if (f == GNotify_EscapeKey)
+			if (f == LNotifyEscapeKey)
 			{
 				d->Edit->Focus(true);
 				break;
@@ -1741,9 +1741,9 @@ int IdeDoc::OnNotify(LViewI *v, int f)
 		}
 		case IDC_METHOD_SEARCH:
 		{
-			if (f == GNotify_EscapeKey)
+			if (f == LNotifyEscapeKey)
 			{
-				printf("%s:%i Got GNotify_EscapeKey\n", _FL);
+				printf("%s:%i Got LNotifyEscapeKey\n", _FL);
 				d->Edit->Focus(true);
 				break;
 			}
@@ -1771,9 +1771,9 @@ int IdeDoc::OnNotify(LViewI *v, int f)
 		}
 		case IDC_SYMBOL_SEARCH:
 		{
-			if (f == GNotify_EscapeKey)
+			if (f == LNotifyEscapeKey)
 			{
-				printf("%s:%i Got GNotify_EscapeKey\n", _FL);
+				printf("%s:%i Got LNotifyEscapeKey\n", _FL);
 				d->Edit->Focus(true);
 				break;
 			}

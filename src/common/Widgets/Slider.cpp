@@ -87,7 +87,7 @@ bool LSlider::OnLayout(LViewLayoutInfo &Inf)
 	return true;
 }
 
-GMessage::Param LSlider::OnEvent(GMessage *Msg)
+LMessage::Param LSlider::OnEvent(LMessage *Msg)
 {
 	return LControl::OnEvent(Msg);
 }

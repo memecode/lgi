@@ -151,9 +151,9 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 
 ////////////////////////////////////////////////////////////////////////
 // Implementations
-GMessage CreateMsg(int m, int a, int b)
+LMessage CreateMsg(int m, int a, int b)
 {
-	static GMessage Msg(0);
+	static LMessage Msg(0);
 	Msg.Set(m, a, b);
 	return Msg;
 }
@@ -226,7 +226,7 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 	sprintf(Args, "query default %s", Mime);
 	LStringPipe Output;
 
-	GLanguage *CurLang = LGetLanguageId();	
+	LLanguage *CurLang = LGetLanguageId();	
 	char LangName[64];
 	sprintf_s(LangName, sizeof(LangName), "Name[%s]", CurLang ? CurLang->Id : "en");
 

@@ -110,7 +110,7 @@ bool GAnonPipe::SetPulse(int i)
 	return true;
 }
 
-int GAnonPipe::OnEvent(GMessage *Msg)
+int GAnonPipe::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg)
 	{
@@ -141,7 +141,7 @@ void GAnonPipe::PostEvent(int cmd, int a, int b)
 	}
 }
 
-GMessage *GAnonPipe::GetMessage()
+LMessage *GAnonPipe::GetMessage()
 {
 	if (!IsOk())
 	{
@@ -155,7 +155,7 @@ GMessage *GAnonPipe::GetMessage()
 	{
 		if (read == sizeof(m))
 		{
-			GMessage *n = new GMessage;
+			LMessage *n = new LMessage;
 			if (n)
 			{
 				n->Msg = m.Cmd;

@@ -441,7 +441,7 @@ void LWindow::Pour()
 	if (Lock) Wnd->Unlock();
 }
 
-GMessage::Result LWindow::OnEvent(GMessage *Msg)
+LMessage::Result LWindow::OnEvent(LMessage *Msg)
 {
 	switch (MsgCode(Msg))
 	{

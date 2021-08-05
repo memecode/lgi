@@ -3563,7 +3563,7 @@ void ResDialog::OnLanguageChange()
 {
 	if (Ui && Ui->StatusInfo)
 	{
-		GLanguage *l = Symbols->GetLanguage(App()->GetCurLang()->Id);
+		LLanguage *l = Symbols->GetLanguage(App()->GetCurLang()->Id);
 		if (l)
 		{
 			char Str[256];
@@ -3586,7 +3586,7 @@ bool ResDialog::OnKey(LKey &k)
 					int Idx = Symbols->GetLangIdx(App()->GetCurLang()->Id);
 					if (Idx > 0)
 					{
-						GLanguage *l = Symbols->GetLanguage(Idx - 1);
+						LLanguage *l = Symbols->GetLanguage(Idx - 1);
 						if (l)
 						{
 							App()->SetCurLang(l);
@@ -3605,7 +3605,7 @@ bool ResDialog::OnKey(LKey &k)
 					int Idx = Symbols->GetLangIdx(App()->GetCurLang()->Id);
 					if (Idx < Symbols->GetLanguages() - 1)
 					{
-						GLanguage *l = Symbols->GetLanguage(Idx + 1);
+						LLanguage *l = Symbols->GetLanguage(Idx + 1);
 						if (l)
 						{
 							App()->SetCurLang(l);
@@ -4346,7 +4346,7 @@ void ResDialogUi::SelectTool(int i)
 	}
 }
 
-GMessage::Result ResDialogUi::OnEvent(GMessage *Msg)
+LMessage::Result ResDialogUi::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{

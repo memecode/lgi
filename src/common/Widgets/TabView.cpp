@@ -432,11 +432,11 @@ void LTabView::Value(int64 i)
 		}
 
 		Invalidate();
-		SendNotify(GNotifyValueChanged);
+		SendNotify(LNotifyValueChanged);
 	}
 }
 
-GMessage::Result LTabView::OnEvent(GMessage *Msg)
+LMessage::Result LTabView::OnEvent(LMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }
@@ -1239,13 +1239,13 @@ void LTabPage::HasButton(bool b)
 void LTabPage::OnButtonClick(LMouse &m)
 {
 	if (GetId() > 0)
-		SendNotify(GNotifyTabPage_ButtonClick);
+		SendNotify(LNotifyTabPageButtonClick);
 }
 
 void LTabPage::OnTabClick(LMouse &m)
 {
 	LViewI *v = GetId() > 0 ? this : GetParent();
-	v->SendNotify(GNotifyItem_Click);
+	v->SendNotify(LNotifyItemClick);
 }
 
 void LTabPage::OnButtonPaint(LSurface *pDC)
@@ -1409,7 +1409,7 @@ bool LTabPage::Attach(LViewI *parent)
 	return Status;
 }
 
-GMessage::Result LTabPage::OnEvent(GMessage *Msg)
+LMessage::Result LTabPage::OnEvent(LMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }

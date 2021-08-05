@@ -213,7 +213,7 @@ const char *VcCommit::GetFieldText(CommitField Fld)
 		case LTimeStamp:
 			Cache = Ts.Get();
 			return Cache;
-		case LMessage:
+		case LMessageTxt:
 			if (!Msg)
 				return NULL;
 			Cache = Msg.Split("\n", 1)[0];

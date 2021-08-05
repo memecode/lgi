@@ -9,7 +9,7 @@ const char *LDocView::WhiteSpace		= " \t\r\n";
 const char *LDocView::Delimiters		= "!@#$%^&*()'\":;,.<>/?[]{}-=+\\|`~";
 const char *LDocView::UrlDelim			= "!~/:%+-?@&$#._=,;*()|";
 
-GDocumentEnv::GDocumentEnv(LDocView *v)
+LDocumentEnv::LDocumentEnv(LDocView *v)
 {
 	if (v)
 	{
@@ -17,7 +17,7 @@ GDocumentEnv::GDocumentEnv(LDocView *v)
 	}
 }
 
-GDocumentEnv::~GDocumentEnv()
+LDocumentEnv::~LDocumentEnv()
 {
 	for (uint32_t i=0; i<Viewers.Length(); i++)
 	{
@@ -25,7 +25,7 @@ GDocumentEnv::~GDocumentEnv()
 	}
 }
 
-int GDocumentEnv::NextUid()
+int LDocumentEnv::NextUid()
 {
 	if (!Lock(_FL))
 		return -1;
@@ -36,7 +36,7 @@ int GDocumentEnv::NextUid()
 	return Uid;
 }
 
-void GDocumentEnv::OnDone(LAutoPtr<LThreadJob> j)
+void LDocumentEnv::OnDone(LAutoPtr<LThreadJob> j)
 {
 	LoadJob *ld = dynamic_cast<LoadJob*>(j.Get());
 	if (ld)
@@ -113,7 +113,7 @@ char16 *ConvertToCrLf(char16 *Text)
 
 //////////////////////////////////////////////////////////////////////////////////
 #include "lgi/common/Net.h"
-GDocumentEnv::LoadType GDefaultDocumentEnv::GetContent(LoadJob *&j)
+LDocumentEnv::LoadType GDefaultDocumentEnv::GetContent(LoadJob *&j)
 {
 	if (!j || !ValidStr(j->Uri))
 		return LoadError;

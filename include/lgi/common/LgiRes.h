@@ -65,7 +65,7 @@ class LgiClass LStringRes
 
 public:
 	static const char *CodePage;
-	static GLanguage *CurLang;
+	static LLanguage *CurLang;
 
 	int Ref;
 	int Id;
@@ -134,10 +134,10 @@ class LgiClass LResources : public ResFactory
 	LEventsI *ScriptEngine;
 
 	/// Array of languages available in the loaded file.
-	LArray<GLanguageId> Languages; 
+	LArray<LLanguageId> Languages; 
 	
 	/// Add a language to the Languages array
-	void AddLang(GLanguageId id);
+	void AddLang(LLanguageId id);
 
 	/// If this is true then all UI elements should attempt to load styles from the CSS store
 	/// by calling 'StyleElement'. It will default to false for old applications. Newer apps
@@ -216,7 +216,7 @@ public:
 	char *GetFileName();
 	
 	/// \returns the languages in the file.
-	LArray<GLanguageId> *GetLanguages() { return &Languages; }
+	LArray<LLanguageId> *GetLanguages() { return &Languages; }
 	
 	/// \returns an iterator for all the dialogs in the resource collection.
 	List<LDialogRes>::I GetDialogs() { return Dialogs.begin(); }

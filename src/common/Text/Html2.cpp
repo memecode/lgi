@@ -376,18 +376,18 @@ public:
 	}
 };
 
-class GFontCache
+class LFontCache
 {
 	GHtml2 *Owner;
 	List<LFont> Fonts;
 
 public:
-	GFontCache(GHtml2 *owner)
+	LFontCache(GHtml2 *owner)
 	{
 		Owner = owner;
 	}
 
-	~GFontCache()
+	~LFontCache()
 	{
 		Fonts.DeleteObjects();
 	}
@@ -2409,7 +2409,7 @@ void GTag::SetImage(const char *Uri, LSurface *Img)
 void GTag::LoadImage(const char *Uri)
 {
 	#if 1
-	GDocumentEnv::LoadJob *j = Html->Environment->NewJob();
+	LDocumentEnv::LoadJob *j = Html->Environment->NewJob();
 	if (j)
 	{
 		LAssert(Html);
@@ -2418,8 +2418,8 @@ void GTag::LoadImage(const char *Uri)
 		j->UserData = this;
 		j->UserUid = Html->d->DocumentUid;
 
-		GDocumentEnv::LoadType Result = Html->Environment->GetContent(j);
-		if (Result == GDocumentEnv::LoadImmediate)
+		LDocumentEnv::LoadType Result = Html->Environment->GetContent(j);
+		if (Result == LDocumentEnv::LoadImmediate)
 		{
 			SetImage(Uri, j->pDC.Release());
 		}
@@ -2755,7 +2755,7 @@ void GTag::SetStyle()
 			{
 				if (!stricmp(Type, "text/css"))
 				{
-					GDocumentEnv::LoadJob *j = Html->Environment->NewJob();
+					LDocumentEnv::LoadJob *j = Html->Environment->NewJob();
 					if (j)
 					{
 						LAssert(Html);
@@ -2765,10 +2765,10 @@ void GTag::SetStyle()
 						j->View = Html;
 						j->UserData = t;
 						j->UserUid = Html->d->DocumentUid;
-						// j->Pref = GDocumentEnv::LoadJob::FmtFilename;
+						// j->Pref = LDocumentEnv::LoadJob::FmtFilename;
 
-						GDocumentEnv::LoadType Result = Html->Environment->GetContent(j);
-						if (Result == GDocumentEnv::LoadImmediate)
+						LDocumentEnv::LoadType Result = Html->Environment->GetContent(j);
+						if (Result == LDocumentEnv::LoadImmediate)
 						{
 							if (j->Stream)
 							{
@@ -3878,7 +3878,7 @@ char *GTag::ParseHtml(char *Doc, int Depth, bool InPreTag, bool *BackOut)
 							const char *Src;
 							if (Get("src", Src))
 							{
-								GDocumentEnv::LoadJob *j = Html->Environment->NewJob();
+								LDocumentEnv::LoadJob *j = Html->Environment->NewJob();
 								if (j)
 								{
 									LAssert(Html);
@@ -3887,8 +3887,8 @@ char *GTag::ParseHtml(char *Doc, int Depth, bool InPreTag, bool *BackOut)
 									j->UserData = this;
 									j->UserUid = Html->d->DocumentUid;
 
-									GDocumentEnv::LoadType Result = Html->Environment->GetContent(j);
-									if (Result == GDocumentEnv::LoadImmediate)
+									LDocumentEnv::LoadType Result = Html->Environment->GetContent(j);
+									if (Result == LDocumentEnv::LoadImmediate)
 									{
 										if (j->Stream)
 										{
@@ -6499,7 +6499,7 @@ void GTag::OnPaint(LSurface *pDC)
 }
 
 //////////////////////////////////////////////////////////////////////
-GHtml2::GHtml2(int id, int x, int y, int cx, int cy, GDocumentEnv *e)
+GHtml2::GHtml2(int id, int x, int y, int cx, int cy, LDocumentEnv *e)
 	:
 	LDocView(e),
 	ResObject(Res_Custom)
@@ -6546,7 +6546,7 @@ void GHtml2::_New()
 	// if (!Charset) Charset = NewStr("utf-8");
 
 	IsHtml = true;
-	FontCache = new GFontCache(this);
+	FontCache = new LFontCache(this);
 	SetScrollBars(false, false);
 }
 
@@ -6790,7 +6790,7 @@ char *GHtml2::Name()
 	return Source;
 }
 
-GMessage::Result GHtml2::OnEvent(GMessage *Msg)
+LMessage::Result GHtml2::OnEvent(LMessage *Msg)
 {
 	switch (MsgCode(Msg))
 	{
@@ -6807,7 +6807,7 @@ GMessage::Result GHtml2::OnEvent(GMessage *Msg)
 			{
 				for (int i=0; i<JobSem.Jobs.Length(); i++)
 				{
-					GDocumentEnv::LoadJob *j = JobSem.Jobs[i];
+					LDocumentEnv::LoadJob *j = JobSem.Jobs[i];
 					LDocView *Me = this;
 					
 					if (j->View == Me &&
@@ -7191,7 +7191,7 @@ void GHtml2::SetLoadImages(bool i)
 	if (i ^ GetLoadImages())
 	{
 		LDocView::SetLoadImages(i);
-		SendNotify(GNotifyShowImagesChanged);
+		SendNotify(LNotifyShowImagesChanged);
 
 		if (GetLoadImages() && Tag)
 		{
@@ -7720,16 +7720,16 @@ void GHtml2::OnMouseClick(LMouse &m)
 													char File[MAX_PATH] = "";
 													if (Environment)
 													{
-														GDocumentEnv::LoadJob *j = Environment->NewJob();
+														LDocumentEnv::LoadJob *j = Environment->NewJob();
 														if (j)
 														{
 															j->Uri.Reset(NewStr(cid));
 															j->View = this;
-															j->Pref = GDocumentEnv::LoadJob::FmtFilename;
+															j->Pref = LDocumentEnv::LoadJob::FmtFilename;
 															j->UserUid = d->DocumentUid;
 
-															GDocumentEnv::LoadType Result = Environment->GetContent(j);
-															if (Result == GDocumentEnv::LoadImmediate)
+															LDocumentEnv::LoadType Result = Environment->GetContent(j);
+															if (Result == LDocumentEnv::LoadImmediate)
 															{
 																if (j->Filename)
 																	strsafecpy(File, j->Filename, sizeof(File));
@@ -7803,7 +7803,7 @@ void GHtml2::OnMouseClick(LMouse &m)
 
 									Invalidate();
 
-									SendNotify(GNotifyCharsetChanged);
+									SendNotify(LNotifyCharsetChanged);
 								}								
 							}
 							break;
@@ -8135,7 +8135,7 @@ bool GHtml2::GetFormattedContent(char *MimeType, LAutoString &Out, LArray<LDocVi
 	return false;
 }
 
-void GHtml2::OnContent(GDocumentEnv::LoadJob *Res)
+void GHtml2::OnContent(LDocumentEnv::LoadJob *Res)
 {
 	if (JobSem.Lock(_FL))
 	{

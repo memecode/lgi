@@ -65,7 +65,7 @@ int FindHeader(int Offset, const char *Str, LStream *f)
 }
 
 /// Windows and OS/2 BMP file filter
-class GdcBmp : public GFilter
+class GdcBmp : public LFilter
 {
 	int ActualBits;
 	int ScanSize;
@@ -117,7 +117,7 @@ class GdcBmpFactory : public GFilterFactory
 		return false;
 	}
 
-	GFilter *NewObject()
+	LFilter *NewObject()
 	{
 		return new GdcBmp;
 	}
@@ -256,11 +256,11 @@ static int CountSetBits(uint32_t b)
 
 struct MaskComp
 {
-	GComponentType Type;
+	LComponentType Type;
 	uint32_t Mask;
 	int Bits;
 	
-	void Set(GComponentType t, int mask)
+	void Set(LComponentType t, int mask)
 	{
 		Type = t;
 		Mask = mask;
@@ -278,10 +278,10 @@ int DownSort(MaskComp *a, MaskComp *b)
 	return b->Mask > a->Mask ? 1 : -1;
 }
 
-GFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, LStream *In)
+LFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, LStream *In)
 {
 	if (!pDC || !In)
-		return GFilter::IoError;
+		return LFilter::IoError;
 
 	ActualBits = 0;
 	ScanSize = 0;
@@ -299,13 +299,13 @@ GFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, LStream *In)
 	if (!Info.Read(*In))
 	{
 		LgiTrace("%s:%i - BmpHdr read failed.\n", _FL);
-		return GFilter::IoError;
+		return LFilter::IoError;
 	}
 
 	if (File.Type[0] != 'B' || File.Type[1] != 'M')
 	{
 		LgiTrace("%s:%i - Bmp file id failed: '%.2s'.\n", _FL, File.Type);
-		return GFilter::IoUnsupportedFormat;
+		return LFilter::IoUnsupportedFormat;
 	}
 
 	ActualBits = Info.Bits;
@@ -314,7 +314,7 @@ GFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, LStream *In)
 	if (!pDC->Create(Info.Sx, Info.Sy, GBitsToColourSpace(MemBits), ScanSize))
 	{
 		LgiTrace("%s:%i - MemDC(%i,%i,%i) failed.\n", _FL, Info.Sx, Info.Sy, MAX(Info.Bits, 8));
-		return GFilter::IoError;
+		return LFilter::IoError;
 	}
 
 	if (pDC->GetBits() <= 8)
@@ -339,7 +339,7 @@ GFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, LStream *In)
 	GBmpMem *pMem = GetSurface(pDC);
 	In->SetPos(File.OffsetToData);
 
-	GFilter::IoStatus Status = IoSuccess;
+	LFilter::IoStatus Status = IoSuccess;
 	if (Info.Compression == BI_RLE8)
 	{
 		// 8 bit RLE compressed image
@@ -613,12 +613,12 @@ ssize_t SwapWrite(LStream *Out, T v)
 	return Out->Write(&v, sizeof(v));
 }
 
-GFilter::IoStatus GdcBmp::WriteImage(LStream *Out, LSurface *pDC)
+LFilter::IoStatus GdcBmp::WriteImage(LStream *Out, LSurface *pDC)
 {
-    GFilter::IoStatus Status = IoError;
+    LFilter::IoStatus Status = IoError;
 	
 	if (!pDC || !Out)
-		return GFilter::IoError;
+		return LFilter::IoError;
 
 	BMP_FILE File;
 	BMP_WININFO Info;
@@ -646,7 +646,7 @@ GFilter::IoStatus GdcBmp::WriteImage(LStream *Out, LSurface *pDC)
 		!pMem->x ||
 		!pMem->y)
 	{
-		return GFilter::IoError;
+		return LFilter::IoError;
 	}
 
 	Out->SetSize(0);
@@ -734,7 +734,7 @@ GFilter::IoStatus GdcBmp::WriteImage(LStream *Out, LSurface *pDC)
 		}
 
 		int Bytes = BMPWIDTH(pMem->x * UsedBits);
-		Status = GFilter::IoSuccess;
+		Status = LFilter::IoSuccess;
 		switch (UsedBits)
 		{
 			case 1:
@@ -844,7 +844,7 @@ GFilter::IoStatus GdcBmp::WriteImage(LStream *Out, LSurface *pDC)
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 // ICO file format
-class GdcIco : public GFilter
+class GdcIco : public LFilter
 {
 	int TruncSize(int i)
 	{
@@ -871,7 +871,7 @@ class GdcIcoFactory : public GFilterFactory
 		return (File) ? stristr(File, ".ico") != 0 : false;
 	}
 
-	GFilter *NewObject()
+	LFilter *NewObject()
 	{
 		return new GdcIco;
 	}
@@ -897,9 +897,9 @@ bool GdcIco::GetVariant(const char *n, LVariant &v, char *a)
 	return true;
 }
 
-GFilter::IoStatus GdcIco::ReadImage(LSurface *pDC, LStream *In)
+LFilter::IoStatus GdcIco::ReadImage(LSurface *pDC, LStream *In)
 {
-	GFilter::IoStatus Status = IoError;
+	LFilter::IoStatus Status = IoError;
 	int MyBits = 0;
 
 	int16 Reserved_1;
@@ -942,7 +942,7 @@ GFilter::IoStatus GdcIco::ReadImage(LSurface *pDC, LStream *In)
 
 		int64 StartHdrPos = In->GetPos();
 		if (!Header.Read(*In))
-			return GFilter::IoError;
+			return LFilter::IoError;
 		BytesLeft -= In->GetPos() - StartHdrPos;
 
 		if (!Header.Sx) Header.Sx = Width;
@@ -1119,12 +1119,12 @@ GFilter::IoStatus GdcIco::ReadImage(LSurface *pDC, LStream *In)
 	return Status;
 }
 
-GFilter::IoStatus GdcIco::WriteImage(LStream *Out, LSurface *pDC)
+LFilter::IoStatus GdcIco::WriteImage(LStream *Out, LSurface *pDC)
 {
-	GFilter::IoStatus Status = IoError;
+	LFilter::IoStatus Status = IoError;
 
 	if (!pDC || pDC->GetBits() > 8 || !Out)
-		return GFilter::IoError;
+		return LFilter::IoError;
 
 	Out->SetSize(0);
 
@@ -1323,7 +1323,7 @@ GFilterFactory::~GFilterFactory()
 	}
 }
 
-GFilter *GFilterFactory::New(const char *File, int Access, const uchar *Hint)
+LFilter *GFilterFactory::New(const char *File, int Access, const uchar *Hint)
 {
 	GFilterFactory *i = First;
 	while (i)
@@ -1337,7 +1337,7 @@ GFilter *GFilterFactory::New(const char *File, int Access, const uchar *Hint)
 	return 0;
 }
 
-GFilter *GFilterFactory::NewAt(int n)
+LFilter *GFilterFactory::NewAt(int n)
 {
 	int Status = 0;
 	GFilterFactory *i = First;
@@ -1418,7 +1418,7 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
 	if (!In)
 		return NULL;
 
-	GFilter::IoStatus FilterStatus = GFilter::IoError;
+	LFilter::IoStatus FilterStatus = LFilter::IoError;
 
 	int64 Size = In->GetSize();
 	if (Size <= 0)
@@ -1441,14 +1441,14 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
 	}
 
 	LXmlTag Props;
-	LAutoPtr<GFilter> Filter(GFilterFactory::New(Name, FILTER_CAP_READ, Hint));
+	LAutoPtr<LFilter> Filter(GFilterFactory::New(Name, FILTER_CAP_READ, Hint));
 	LAutoPtr<LSurface> pDC;
 	if (Filter &&
 		pDC.Reset(new LMemDC))
 	{
 		Filter->Props = &Props;
 		FilterStatus = Filter->ReadImage(pDC, In);
-		if (FilterStatus != GFilter::IoSuccess)
+		if (FilterStatus != LFilter::IoSuccess)
 		{
 			pDC.Reset();
 			
@@ -1602,7 +1602,7 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
 			return pDC.Release();
 	}
 
-	if (FilterStatus == GFilter::IoComponentMissing)
+	if (FilterStatus == LFilter::IoComponentMissing)
 	{
 		const char *c = Filter->GetComponentName();
 		LAssert(c != NULL);
@@ -1627,14 +1627,14 @@ bool GdcDevice::Save(LStream *Out, LSurface *In, const char *FileType)
 	if (!Out || !In || !FileType)
 		return false;
 
-	LAutoPtr<GFilter> F(GFilterFactory::New(FileType, FILTER_CAP_WRITE, 0));
+	LAutoPtr<LFilter> F(GFilterFactory::New(FileType, FILTER_CAP_WRITE, 0));
 	if (!F)
 	{
 		LgiTrace("%s:%i - No filter for '%s'\n", _FL, FileType);
 		return false;
 	}
 
-	return F->WriteImage(Out, In) == GFilter::IoSuccess;
+	return F->WriteImage(Out, In) == LFilter::IoSuccess;
 }
 
 bool GdcDevice::Save(const char *Name, LSurface *pDC)

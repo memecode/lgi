@@ -257,7 +257,7 @@ LgiFunc bool LRecursiveFileSearch
 
 /// Gets the currently selected language
 /// \ingroup Resources
-LgiFunc struct GLanguage *LGetLanguageId();
+LgiFunc struct LLanguage *LGetLanguageId();
 
 // Os version functions
 

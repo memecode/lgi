@@ -17,7 +17,7 @@ public:
 		Attach(0);
 	}
 	
-	GMessage::Result OnEvent(GMessage *Msg)
+	LMessage::Result OnEvent(LMessage *Msg)
 	{
 		if (Msg->Msg() == M_MIDI_IN)
 		{

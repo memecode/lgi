@@ -154,7 +154,7 @@ public:
 		switch (c->GetId())
 		{
 			case IDC_FILES:
-				if (f == GNotifyItem_DoubleClick)
+				if (f == LNotifyItemDoubleClick)
 				{
 					LListItem *i = Lst->GetSelected();
 					if (i)
@@ -165,7 +165,7 @@ public:
 				}
 				break;
 			case IDC_TEXT:
-				if (f != GNotify_ReturnKey)
+				if (f != LNotifyReturnKey)
 					Search(c->Name());
 				break;
 			case IDCANCEL:
@@ -481,7 +481,7 @@ bool WatchItem::SetText(const char *s, int i)
 		{
 			LViewI *Tabs = Tree->GetWindow()->FindControl(IDC_DEBUG_TAB);
 			if (Tabs)
-				Tabs->SendNotify(GNotifyValueChanged);
+				Tabs->SendNotify(LNotifyValueChanged);
 		}
 		return true;
 	}
@@ -2919,7 +2919,7 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 	return p;
 }
 
-GMessage::Result AppWnd::OnEvent(GMessage *m)
+LMessage::Result AppWnd::OnEvent(LMessage *m)
 {
 	switch (m->Msg())
 	{
@@ -2993,7 +2993,7 @@ GMessage::Result AppWnd::OnEvent(GMessage *m)
 					d->Output &&
 					d->Output->DebugTab)
 				{
-					d->Output->DebugTab->SendNotify(GNotifyValueChanged);
+					d->Output->DebugTab->SendNotify(LNotifyValueChanged);
 				}
 			}
 			if (d->Debugging != Debugging)
@@ -3133,7 +3133,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 	{
 		case IDC_PROJECT_TREE:
 		{
-			if (Flags == GNotify_DeleteKey)
+			if (Flags == LNotifyDeleteKey)
 			{
 				ProjectNode *n = dynamic_cast<ProjectNode*>(d->Tree->Selection());
 				if (n)
@@ -3194,7 +3194,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 		}
 		case IDC_DEBUG_TAB:
 		{
-			if (d->DbgContext && Flags == GNotifyValueChanged)
+			if (d->DbgContext && Flags == LNotifyValueChanged)
 			{
 				switch (Ctrl->Value())
 				{
@@ -3232,7 +3232,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 		case IDC_LOCALS_LIST:
 		{
 			if (d->Output->Locals &&
-				Flags == GNotifyItem_DoubleClick &&
+				Flags == LNotifyItemDoubleClick &&
 				d->DbgContext)
 			{
 				LListItem *it = d->Output->Locals->GetSelected();
@@ -3258,7 +3258,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 				if (d->Output->DebugTab)
 					d->Output->DebugTab->Value(AppWnd::CallStackTab);
 			}
-			else if (Flags == GNotifyItem_Select)
+			else if (Flags == LNotifyItemSelect)
 			{
 				// This takes the user to a given call stack reference
 				if (d->Output->CallStack && d->DbgContext)
@@ -3290,7 +3290,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 			WatchItem *Edit = NULL;
 			switch (Flags)
 			{
-				case GNotify_DeleteKey:
+				case LNotifyDeleteKey:
 				{
 					LArray<LTreeItem *> Sel;
 					for (LTreeItem *c = d->Output->Watch->GetChild(); c; c = c->GetNext())
@@ -3301,12 +3301,12 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 					Sel.DeleteObjects();
 					break;
 				}
-				case GNotifyItem_Click:
+				case LNotifyItemClick:
 				{
 					Edit = dynamic_cast<WatchItem*>(d->Output->Watch->Selection());
 					break;
 				}
-				case GNotifyContainer_Click:
+				case LNotifyContainerClick:
 				{
 					// Create new watch.
 					Edit = new WatchItem(d->Output);
@@ -3322,7 +3322,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 		}
 		case IDC_THREADS:
 		{
-			if (Flags == GNotifyItem_Select)
+			if (Flags == LNotifyItemSelect)
 			{
 				// This takes the user to a given thread
 				if (d->Output->Threads && d->DbgContext)
@@ -3716,7 +3716,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 					GetOptions()->SetValue(OPT_ENTIRE_SOLUTION, var);
 
 					d->Finder->Stop();
-					d->Finder->PostEvent(FindInFilesThread::M_START_SEARCH, (GMessage::Param) new FindParams(d->FindParameters));
+					d->Finder->PostEvent(FindInFilesThread::M_START_SEARCH, (LMessage::Param) new FindParams(d->FindParameters));
 				}
 			}
 			break;
@@ -3812,7 +3812,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			}
 
 			d->Finder->Stop();
-			d->Finder->PostEvent(FindInFilesThread::M_START_SEARCH, (GMessage::Param) Params.Release());
+			d->Finder->PostEvent(FindInFilesThread::M_START_SEARCH, (LMessage::Param) Params.Release());
 			break;
 		}
 		case IDM_PREV_LOCATION:

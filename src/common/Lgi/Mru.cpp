@@ -366,7 +366,7 @@ bool GMru::OnCommand(int Cmd)
 	return Status;
 }
 
-GMessage::Result GMru::OnEvent(GMessage *Msg)
+LMessage::Result GMru::OnEvent(LMessage *Msg)
 {
 	/*
 	if (d->Parent &&

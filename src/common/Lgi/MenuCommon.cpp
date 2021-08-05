@@ -11,7 +11,7 @@
 
 bool LSubMenu::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty p = LStringToDomProp(Name);
+	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		case ObjLength:
@@ -26,7 +26,7 @@ bool LSubMenu::GetVariant(const char *Name, LVariant &Value, char *Array)
 bool LSubMenu::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
 	/*
-	GDomProperty p = LStringToDomProp(Name);
+	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		default:
@@ -38,7 +38,7 @@ bool LSubMenu::SetVariant(const char *Name, LVariant &Value, char *Array)
 
 bool LSubMenu::CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args)
 {
-	GDomProperty Method = LStringToDomProp(MethodName);	
+	LDomProperty Method = LStringToDomProp(MethodName);	
 	switch (Method)
 	{
 		case ::AppendSeparator:

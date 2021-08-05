@@ -190,7 +190,7 @@ void LScrollBar::Update()
 		}
 		else
 		{
-            PostEvent(M_SCROLL_BAR_CHANGED, 0, (GMessage::Param)this);
+            PostEvent(M_SCROLL_BAR_CHANGED, 0, (LMessage::Param)this);
 		}
 	}
 	else if (GetParent() &&
@@ -203,7 +203,7 @@ void LScrollBar::Update()
 		}
 		else
 		{
-            GetParent()->PostEvent(M_SCROLL_BAR_CHANGED, 0, (GMessage::Param)this);
+            GetParent()->PostEvent(M_SCROLL_BAR_CHANGED, 0, (LMessage::Param)this);
 		}
 	}
 }
@@ -309,7 +309,7 @@ bool LScrollBar::Invalidate(LRect *r, bool Repaint, bool NonClient)
 	return false;
 }
 
-GMessage::Result LScrollBar::OnEvent(GMessage *Msg)
+LMessage::Result LScrollBar::OnEvent(LMessage *Msg)
 {
 	auto Status = SubClass ? SubClass->CallParent(Handle(), Msg->m, Msg->a, Msg->b) : 0;
 
@@ -388,7 +388,7 @@ GMessage::Result LScrollBar::OnEvent(GMessage *Msg)
 		}
 		case M_SCROLL_BAR_CHANGED:
 		{
-            if (Msg->B() == (GMessage::Param)this)
+            if (Msg->B() == (LMessage::Param)this)
 			{
 				Update();
 			}

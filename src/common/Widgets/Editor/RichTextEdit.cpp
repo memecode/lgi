@@ -282,7 +282,7 @@ void LRichTextEdit::SetCharset(const char *s)
 
 bool LRichTextEdit::GetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty p = LStringToDomProp(Name);
+	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		case HtmlImagesLinkCid:
@@ -309,7 +309,7 @@ bool LRichTextEdit::GetVariant(const char *Name, LVariant &Value, char *Array)
 
 bool LRichTextEdit::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty p = LStringToDomProp(Name);
+	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		case HtmlImagesLinkCid:
@@ -630,7 +630,7 @@ bool LRichTextEdit::Cut()
 		DeleteArray(Txt);
 	}
 
-	SendNotify(GNotifyDocChanged);
+	SendNotify(LNotifyDocChanged);
 
 	return Status;
 }
@@ -777,7 +777,7 @@ bool LRichTextEdit::Paste()
 	}
 
 	Invalidate();
-	SendNotify(GNotifyDocChanged);
+	SendNotify(LNotifyDocChanged);
 
 	return d->AddTrans(Trans);
 }
@@ -1167,7 +1167,7 @@ int LRichTextEdit::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 	if (Effect != DROPEFFECT_NONE)
 	{
 		Invalidate();
-		SendNotify(GNotifyDocChanged);
+		SendNotify(LNotifyDocChanged);
 	}
 
 	return Effect;
@@ -1323,7 +1323,7 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 		case IDM_FIXED:
 		{
 			SetFixedWidthFont(!GetFixedWidthFont());							
-			SendNotify(GNotifyFixedWidthChanged);
+			SendNotify(LNotifyFixedWidthChanged);
 			break;
 		}
 		case IDM_RTE_CUT:
@@ -1414,7 +1414,7 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 		{
 			if (Over)
 			{
-				GMessage Cmd(M_COMMAND, Id);
+				LMessage Cmd(M_COMMAND, Id);
 				if (Over->OnEvent(&Cmd))
 					break;
 			}
@@ -1715,7 +1715,7 @@ bool LRichTextEdit::OnKey(LKey &k)
 						{
 							d->Cursor->Set(d->Cursor->Offset + 1);
 							Invalidate();
-							SendNotify(GNotifyDocChanged);
+							SendNotify(LNotifyDocChanged);
 
 							d->AddTrans(Trans);
 						}
@@ -1732,7 +1732,7 @@ bool LRichTextEdit::OnKey(LKey &k)
 				if (k.Down() && k.IsChar)
 				{
 					OnEnter(k);
-					SendNotify(GNotifyDocChanged);
+					SendNotify(LNotifyDocChanged);
 				}
 
 				return true;
@@ -1814,7 +1814,7 @@ bool LRichTextEdit::OnKey(LKey &k)
 				{
 					Invalidate();
 					d->AddTrans(Trans);
-					SendNotify(GNotifyDocChanged);
+					SendNotify(LNotifyDocChanged);
 				}
 				return true;
 			}
@@ -2120,7 +2120,7 @@ bool LRichTextEdit::OnKey(LKey &k)
 				{
 					Invalidate();
 					d->AddTrans(Trans);
-					SendNotify(GNotifyDocChanged);
+					SendNotify(LNotifyDocChanged);
 				}
 				return true;
 			}
@@ -2144,7 +2144,7 @@ bool LRichTextEdit::OnKey(LKey &k)
 						{
 							d->Cursor->Set(d->Cursor->Offset + 1);
 							Invalidate();
-							SendNotify(GNotifyDocChanged);
+							SendNotify(LNotifyDocChanged);
 						}
 					}
 					break;
@@ -2428,7 +2428,7 @@ void LRichTextEdit::OnEnter(LKey &k)
 	{
 		Invalidate();
 		d->AddTrans(Trans);
-		SendNotify(GNotifyDocChanged);
+		SendNotify(LNotifyDocChanged);
 	}
 }
 
@@ -2473,7 +2473,7 @@ void LRichTextEdit::OnPaint(LSurface *pDC)
 	// else the scroll bars changed, wait for re-paint
 }
 
-GMessage::Result LRichTextEdit::OnEvent(GMessage *Msg)
+LMessage::Result LRichTextEdit::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -2495,7 +2495,7 @@ GMessage::Result LRichTextEdit::OnEvent(GMessage *Msg)
 		case M_BLOCK_MSG:
 		{
 			LRichTextPriv::Block *b = (LRichTextPriv::Block*)Msg->A();
-			LAutoPtr<GMessage> msg((GMessage*)Msg->B());
+			LAutoPtr<LMessage> msg((LMessage*)Msg->B());
 			if (d->Blocks.HasItem(b) && msg)
 			{
 				b->OnEvent(msg);
@@ -2988,7 +2988,7 @@ bool EmojiMenu::InsertEmoji(uint32_t Ch)
 						
 	d->Dirty = true;
 	d->InvalidateDoc(NULL);
-	d->View->SendNotify(GNotifyDocChanged);
+	d->View->SendNotify(LNotifyDocChanged);
 
 	return true;
 }

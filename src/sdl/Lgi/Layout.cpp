@@ -135,7 +135,7 @@ void LLayout::AttachScrollBars()
 bool LLayout::SetScrollBars(bool x, bool y)
 {
 	#ifdef M_SET_SCROLL
-	PostEvent(M_SET_SCROLL, (GMessage::Param) x, (GMessage::Param) y);
+	PostEvent(M_SET_SCROLL, (LMessage::Param) x, (LMessage::Param) y);
 	#else
 	_SetScrollBars(x, y);
 	#endif
@@ -264,7 +264,7 @@ LRect &LLayout::GetClient(bool ClientSpace)
 	return r;
 }
 
-GMessage::Result LLayout::OnEvent(GMessage *Msg)
+LMessage::Result LLayout::OnEvent(LMessage *Msg)
 {
 	#ifdef M_SET_SCROLL
 	if (MsgCode(Msg) == M_SET_SCROLL)

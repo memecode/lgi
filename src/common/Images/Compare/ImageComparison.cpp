@@ -245,9 +245,9 @@ class ThreadLoader : public LThread
 	
 public:
 	LAutoPtr<LSurface> Img;
-	GMessage::Param Param;
+	LMessage::Param Param;
 
-	ThreadLoader(LView *owner, LAutoString file, GMessage::Param param) : LThread("ThreadLoader")
+	ThreadLoader(LView *owner, LAutoString file, LMessage::Param param) : LThread("ThreadLoader")
 	{
 		Owner = owner;
 		File = file;
@@ -284,7 +284,7 @@ public:
 		}
 		#endif
 		
-		Owner->PostEvent(M_LOAD, 0, (GMessage::Param) this);
+		Owner->PostEvent(M_LOAD, 0, (LMessage::Param) this);
 		return 0;
 	}
 };
@@ -375,7 +375,7 @@ public:
 		pDC->Rectangle();
 	}
 	
-	GMessage::Param OnEvent(GMessage *Msg)
+	LMessage::Param OnEvent(LMessage *Msg)
 	{
 		switch (Msg->Msg())
 		{
@@ -960,7 +960,7 @@ int ImageCompareDlg::OnNotify(LViewI *Ctrl, int Flags)
 	{
 		case IDC_LIST:
 		{
-			if (Flags == GNotifyItem_DoubleClick)
+			if (Flags == LNotifyItemDoubleClick)
 			{
 				LListItem *s = d->lst->GetSelected();
 				if (s)
@@ -1033,7 +1033,7 @@ int ImageCompareDlg::OnNotify(LViewI *Ctrl, int Flags)
 		}
 		case IDC_TAB_PAGE:
 		{
-			if (Flags == GNotifyTabPage_ButtonClick)
+			if (Flags == LNotifyTabPageButtonClick)
 			{
 				LTabPage *p = dynamic_cast<LTabPage*>(Ctrl);
 				LAssert(p);

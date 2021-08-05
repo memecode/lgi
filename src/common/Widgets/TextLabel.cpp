@@ -86,7 +86,7 @@ void LTextLabel::OnAttach()
 
 bool LTextLabel::SetVariant(const char *Name, LVariant &Value, char *Array)
 {
-	GDomProperty p = LStringToDomProp(Name);
+	LDomProperty p = LStringToDomProp(Name);
 	if (p == ObjStyle)
 	{
 		const char *Style = Value.Str();
@@ -120,7 +120,7 @@ bool LTextLabel::Name(const char *n)
 	{
 		LView::Name(n);
 		OnStyleChange();
-		SendNotify(GNotifyTableLayout_Refresh);
+		SendNotify(LNotifyTableLayoutRefresh);
 	}
 	else
 	{
@@ -141,7 +141,7 @@ bool LTextLabel::NameW(const char16 *n)
 	{
 		LView::NameW(n);
 		OnStyleChange();
-		SendNotify(GNotifyTableLayout_Refresh);
+		SendNotify(LNotifyTableLayoutRefresh);
 	}
 	else
 	{
@@ -230,7 +230,7 @@ void LTextLabel::OnCreate()
 	}
 }
 
-GMessage::Result LTextLabel::OnEvent(GMessage *Msg)
+LMessage::Result LTextLabel::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -254,7 +254,7 @@ GMessage::Result LTextLabel::OnEvent(GMessage *Msg)
 int LTextLabel::OnNotify(LViewI *Ctrl, int Flags)
 {
 	if (Ctrl == (LViewI*)this &&
-		Flags == GNotify_Activate &&
+		Flags == LNotifyActivate &&
 		GetParent())
 	{
 		auto c = GetParent()->IterateViews();

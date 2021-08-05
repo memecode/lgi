@@ -41,7 +41,7 @@ public:
 	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0) override;
 
 	// Impl
-	GMessage::Result OnEvent(GMessage *m) override;
+	LMessage::Result OnEvent(LMessage *m) override;
 	void OnCreate() override;
 	void OnPulse() override;
 };

@@ -30,7 +30,7 @@ public:
 	bool SetRange(const LRange &r) override;
 	void Value(int64 v) override;
 	int64 Value() override;
-	GMessage::Result OnEvent(GMessage *Msg) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
 	bool OnLayout(LViewLayoutInfo &Inf) override;
 	bool Pour(LRegion &r) override;
 	bool Colour(LColour Col);

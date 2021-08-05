@@ -646,7 +646,7 @@ void VcFolder::DefaultFields()
 				Fields.Add(LBranch);
 				Fields.Add(LAuthor);
 				Fields.Add(LTimeStamp);
-				Fields.Add(LMessage);
+				Fields.Add(LMessageTxt);
 				break;
 			}
 			default:
@@ -655,7 +655,7 @@ void VcFolder::DefaultFields()
 				Fields.Add(LRevision);
 				Fields.Add(LAuthor);
 				Fields.Add(LTimeStamp);
-				Fields.Add(LMessage);
+				Fields.Add(LMessageTxt);
 				break;
 			}
 		}
@@ -676,7 +676,7 @@ void VcFolder::UpdateColumns()
 			case LRevision: d->Commits->AddColumn("Revision", 60); break;
 			case LAuthor: d->Commits->AddColumn("Author", 240); break;
 			case LTimeStamp: d->Commits->AddColumn("Date", 130); break;
-			case LMessage: d->Commits->AddColumn("Message", 400); break;
+			case LMessageTxt: d->Commits->AddColumn("Message", 400); break;
 			default: LAssert(0); break;
 		}
 	}
@@ -1484,7 +1484,7 @@ void VcFolder::LinkParents()
 			if (!Has)
 				Heads->Insert(c->GetRev());
 		}
-		Heads->SendNotify(GNotifyTableLayout_Refresh);
+		Heads->SendNotify(LNotifyTableLayoutRefresh);
 	}
 }
 

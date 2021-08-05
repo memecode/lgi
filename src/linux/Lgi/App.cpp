@@ -190,9 +190,9 @@ struct Msg
 {
 	LViewI *v;
 	int m;
-	GMessage::Param a, b;
+	LMessage::Param a, b;
 	
-	void Set(LViewI *V, int M, GMessage::Param A, GMessage::Param B)
+	void Set(LViewI *V, int M, LMessage::Param A, LMessage::Param B)
 	{
 		v = V;
 		m = M;
@@ -509,7 +509,7 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 			}
 			else
 			{
-				GMessage Msg(m.m, m.a, m.b);
+				LMessage Msg(m.m, m.a, m.b);
 				// LgiTrace("%s::OnEvent %i,%i,%i\n", m.v->GetClass(), m.m, m.a, m.b);
 				m.v->OnEvent(&Msg);
 			}
@@ -580,7 +580,7 @@ void LApp::Exit(int Code)
 	}
 }
 
-bool LApp::PostEvent(LViewI *View, int Msg, GMessage::Param a, GMessage::Param b)
+bool LApp::PostEvent(LViewI *View, int Msg, LMessage::Param a, LMessage::Param b)
 {
 	LMessageQue::MsgArray *q = MsgQue.Lock(_FL);
 	if (!q)
@@ -1087,10 +1087,10 @@ int LApp::GetCpuCount()
 	return 1;
 }
 
-GFontCache *LApp::GetFontCache()
+LFontCache *LApp::GetFontCache()
 {
 	if (!d->FontCache)
-		d->FontCache.Reset(new GFontCache(SystemNormal));
+		d->FontCache.Reset(new LFontCache(SystemNormal));
 	return d->FontCache;
 }
 
@@ -1316,14 +1316,14 @@ OsApplication::~OsApplication()
 }
 
 ////////////////////////////////////////////////////////////////
-void GMessage::Set(int Msg, Param ParamA, Param ParamB)
+void LMessage::Set(int Msg, Param ParamA, Param ParamB)
 {
 	m = Msg;
 	a = ParamA;
 	b = ParamB;
 }
 
-struct GlibEventParams : public GMessage
+struct GlibEventParams : public LMessage
 {
     GtkWidget *w;
 };
@@ -1397,7 +1397,7 @@ void LApp::OnDetach(LViewI *View)
 	MsgQue.Unlock();
 }
 
-bool GMessage::Send(LViewI *View)
+bool LMessage::Send(LViewI *View)
 {
 	if (!View)
 	{

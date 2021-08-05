@@ -79,7 +79,7 @@ public:
     void SetPreferredSize(int x = -1, int y = -1);
 
 	// Events
-	GMessage::Result OnEvent(GMessage *Msg) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
 	void OnMouseClick(LMouse &m) override;
 	void OnMouseEnter(LMouse &m) override;
 	void OnMouseExit(LMouse &m) override;

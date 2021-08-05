@@ -89,7 +89,7 @@ public:
 
 };
 
-class GdcLibTiff : public GFilter
+class GdcLibTiff : public LFilter
 {
 	LAutoPtr<LibTiff> Lib;
 
@@ -135,7 +135,7 @@ class GdcTiffFactory : public GFilterFactory
 		return false;
 	}
 
-	GFilter *NewObject()
+	LFilter *NewObject()
 	{
 		return new GdcLibTiff;
 	}
@@ -443,7 +443,7 @@ void CmykToRgb32(D *d, S *s, int width)
 	}
 }
 
-GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
+LFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 {
 	LVariant v;
 	if (!pDC || !In)
@@ -799,7 +799,7 @@ GFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 	return Status;
 }
 
-GFilter::IoStatus GdcLibTiff::WriteImage(LStream *Out, LSurface *pDC)
+LFilter::IoStatus GdcLibTiff::WriteImage(LStream *Out, LSurface *pDC)
 {
 	LVariant v;
 	if (!pDC || !Out)

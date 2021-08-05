@@ -17,7 +17,7 @@
 #include "Clipboard.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-class GFileSelectPrivate : public BHandler
+class LFileSelectPrivate : public BHandler
 {
 public:
 	int Size;
@@ -32,7 +32,7 @@ public:
 	bool WaitForMessage;
 	BMessenger *Messenger;
 	
-	GFileSelectPrivate() : BHandler("LFileSelect")
+	LFileSelectPrivate() : BHandler("LFileSelect")
 	{
 		ParentWnd = 0;
 		WaitForMessage = false;
@@ -54,7 +54,7 @@ public:
 		Panel = 0;
 	}
 
-	~GFileSelectPrivate()
+	~LFileSelectPrivate()
 	{
 		DeleteObj(Panel);
 		DeleteArray(FileStr);
@@ -169,7 +169,7 @@ public:
 
 LFileSelect::LFileSelect()
 {
-	d = new GFileSelectPrivate;
+	d = new LFileSelectPrivate;
 }
 
 LFileSelect::~LFileSelect()

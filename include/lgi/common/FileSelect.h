@@ -50,7 +50,7 @@ public:
 class LgiClass LFileSelect :
 	public LBase
 {
-	class GFileSelectPrivate *d;
+	class LFileSelectPrivate *d;
 
 public:
 	LFileSelect();

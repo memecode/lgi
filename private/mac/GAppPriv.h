@@ -28,7 +28,7 @@ public:
 	LAutoString UrlArg;
 	
 	/// Any fonts needed for styling the elements
-	LAutoPtr<GFontCache> FontCache;
+	LAutoPtr<LFontCache> FontCache;
 	
 	LAppPrivate(LApp *owner) : Owner(owner)
 	{

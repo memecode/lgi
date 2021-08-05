@@ -36,7 +36,7 @@ public:
 		Hnd = hnd;
 	}
 
-	GMessage::Result OnEvent(GMessage *Msg)
+	LMessage::Result OnEvent(LMessage *Msg)
 	{
 		switch (Msg->Msg())
 		{
@@ -90,7 +90,7 @@ public:
 		Files.DeleteArrays();
 	}
 
-	GMessage::Result OnEvent(GMessage *Msg)
+	LMessage::Result OnEvent(LMessage *Msg)
 	{
 		switch (Msg->Msg())
 		{
@@ -212,7 +212,7 @@ public:
 							SearchResults *Sr = new SearchResults;
 							Sr->Node = Node;
 							Sr->Path = s;
-							PostThreadEvent(ExistsHnd, M_CHECK_FILE, (GMessage::Param) Sr);
+							PostThreadEvent(ExistsHnd, M_CHECK_FILE, (LMessage::Param) Sr);
 							
 							LString Parent = s.Get();
 							LTrimDir(Parent);
@@ -227,7 +227,7 @@ public:
 			}
 
 			for (auto i : Flds)
-				PostThreadEvent(SearchHnd, M_ADD_SEARCH_PATH, (GMessage::Param) new LString(i.key));
+				PostThreadEvent(SearchHnd, M_ADD_SEARCH_PATH, (LMessage::Param) new LString(i.key));
 
 			PostThreadEvent(SearchHnd, M_RECURSE);
 		}
@@ -325,7 +325,7 @@ public:
 			{
 				switch (Flags)
 				{
-					case GNotifyItem_DoubleClick:
+					case LNotifyItemDoubleClick:
 					{
 						LListItem *li = Lst->GetSelected();
 						if (li)
@@ -347,7 +347,7 @@ public:
 		return 0;
 	}
 
-	GMessage::Result OnEvent(GMessage *Msg)
+	LMessage::Result OnEvent(LMessage *Msg)
 	{
 		switch (Msg->Msg())
 		{
@@ -357,7 +357,7 @@ public:
 				if (Sr)
 				{
 					printf("Missing file '%s'\n", Sr->Path.Get());
-					PostThreadEvent(SearchHnd, M_SEARCH, (GMessage::Param) Sr.Release());
+					PostThreadEvent(SearchHnd, M_SEARCH, (LMessage::Param) Sr.Release());
 				}
 				break;
 			}

@@ -75,7 +75,7 @@ public:
 	void OnPaint(LSurface *pDC) override;
 	void OnAttach() override;
 	void OnStyleChange();
-	GMessage::Result OnEvent(GMessage *Msg) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
 	int OnNotify(LViewI *Ctrl, int Flags) override;
 
 	#ifdef WINNATIVE

@@ -19,8 +19,8 @@ public:
 
 	// Messages
 	void PostEvent(int cmd, int a = 0, int b = 0);
-    GMessage::Result OnEvent(GMessage *Msg);
-	GMessage *GetMessage();
+    LMessage::Result OnEvent(LMessage *Msg);
+	LMessage *GetMessage();
 };
 
 

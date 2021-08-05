@@ -100,7 +100,7 @@ void LToolTabBar::OnButtonClick(LToolButton *Btn)
 
 int LToolTabBar::OnNotify(LViewI *c, int f)
 {
-	if (f == GNotifyValueChanged)
+	if (f == LNotifyValueChanged)
 	{
 		LToolTab *b = dynamic_cast<LToolTab*>(c);
 		if (b && b != Current)

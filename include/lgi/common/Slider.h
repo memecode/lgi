@@ -43,7 +43,7 @@ public:
 	bool SetRange(const LRange &r);
 
 	bool OnLayout(LViewLayoutInfo &Inf);
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 	
 	#if !WINNATIVE
 	void OnPaint(LSurface *pDC);

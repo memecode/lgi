@@ -39,7 +39,7 @@ public:
 	bool OnViewMouse(LView *v, LMouse &m);
 	void OnMouseMove(LMouse &m);
 	void OnChildrenChanged(LViewI *Wnd, bool Attaching);
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 	bool Pour(LRegion &r);
 	LCursor GetCursor(int x, int y);
 	bool OnLayout(LViewLayoutInfo &Inf);

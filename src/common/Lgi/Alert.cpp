@@ -85,7 +85,7 @@ int LAlert::OnNotify(LViewI *Ctrl, int Flags)
 		case CMD_BASE+1:
 		case CMD_BASE+2:
 		{
-			if (Flags != GNotifyTableLayout_LayoutChanged)
+			if (Flags != LNotifyTableLayoutChanged)
 			{
 				EndModal(Ctrl->GetId() - CMD_BASE + 1);
 			}

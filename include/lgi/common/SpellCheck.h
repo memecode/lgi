@@ -82,7 +82,7 @@ public:
 	virtual ~LSpellCheck() {}
 
 	// Impl OnEvent in your subclass:
-	// GMessage::Result OnEvent(GMessage *Msg);
+	// LMessage::Result OnEvent(LMessage *Msg);
 
 	/// Sends a M_ENUMERATE_LANGUAGES event to 'ResponseHnd' with a heap
 	/// allocated LArray<LanguageId>.
@@ -90,7 +90,7 @@ public:
 	{
 		SPELL_CHK_VALID_HND(ResponseHnd);
 		return PostEvent(M_ENUMERATE_LANGUAGES,
-						(GMessage::Param)ResponseHnd);
+						(LMessage::Param)ResponseHnd);
 	}
 
 	/// Sends a M_ENUMERATE_DICTIONARIES event to 'ResponseHnd' with a heap
@@ -99,8 +99,8 @@ public:
 	{
 		SPELL_CHK_VALID_HND(ResponseHnd);
 		return PostEvent(M_ENUMERATE_DICTIONARIES,
-						(GMessage::Param)ResponseHnd,
-						(GMessage::Param)new LString(Lang));
+						(LMessage::Param)ResponseHnd,
+						(LMessage::Param)new LString(Lang));
 	}
 
 	bool SetParams(LAutoPtr<Params> p)
@@ -120,7 +120,7 @@ public:
 		
 		return PostObject(	GetHandle(),
 							M_SET_DICTIONARY,
-							(GMessage::Param)ResponseHnd,
+							(LMessage::Param)ResponseHnd,
 							i);
 	}
 
@@ -141,7 +141,7 @@ public:
 		if (User)
 			c->User = *User;
 		
-		return PostObject(GetHandle(), M_CHECK_TEXT, (GMessage::Param)ResponseHnd, c);
+		return PostObject(GetHandle(), M_CHECK_TEXT, (LMessage::Param)ResponseHnd, c);
 	}
 	
 	bool InstallDictionary()

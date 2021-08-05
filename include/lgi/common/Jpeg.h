@@ -1,7 +1,7 @@
 #if !defined(_GJPEG_H_) && HAS_LIBJPEG
 #define _GJPEG_H_
 
-class GdcJpeg : public GFilter
+class GdcJpeg : public LFilter
 {
 public:
     enum SubSampleMode
@@ -18,7 +18,7 @@ private:
 	class LibJpeg *d;
 	#endif
 
-	GFilter::IoStatus _Write(LStream *Out, LSurface *pDC, int Quality, SubSampleMode SubSample, LPoint Dpi);
+	LFilter::IoStatus _Write(LStream *Out, LSurface *pDC, int Quality, SubSampleMode SubSample, LPoint Dpi);
 
 public:
 	GdcJpeg();

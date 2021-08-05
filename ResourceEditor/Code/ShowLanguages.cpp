@@ -13,12 +13,12 @@ public:
 
 class Lang : public LListItem
 {
-	GLanguage *L;
+	LLanguage *L;
 	int Index;
 	LListItemCheckBox *Val;
 
 public:
-	Lang(AppWnd *App, GLanguage *l, int i)
+	Lang(AppWnd *App, LLanguage *l, int i)
 	{
 		L = l;
 		Index = i;
@@ -27,7 +27,7 @@ public:
 		Val = new LListItemCheckBox(this, 0, App->ShowLang(L->Id));
 	}
 
-	GLanguage *GetLang()
+	LLanguage *GetLang()
 	{
 		return L;
 	}
@@ -65,7 +65,7 @@ ShowLanguagesDlg::ShowLanguagesDlg(AppWnd *app)
 
 		for (int i=0; i<d->App->GetLanguages()->Length(); i++)
 		{
-			GLanguage *L = (*d->App->GetLanguages())[i];
+			LLanguage *L = (*d->App->GetLanguages())[i];
 			if (L)
 			{
 				d->Lst->Insert(new Lang(d->App, L, i));

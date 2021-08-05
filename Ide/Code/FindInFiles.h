@@ -94,7 +94,7 @@ public:
 	~FindInFilesThread();
 	
 	void Stop();
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 };
 
 #endif

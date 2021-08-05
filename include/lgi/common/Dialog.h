@@ -202,7 +202,7 @@ public:
 	/// End a modeless window. Typically calling in the OnNotify event of the LDialog.
 	virtual void EndModeless(int Code = 0);
 
-	GMessage::Result OnEvent(GMessage *Msg);
+	LMessage::Result OnEvent(LMessage *Msg);
 	bool OnRequestClose(bool OsClose);
 	void OnPosChange();
     void PourAll() {}

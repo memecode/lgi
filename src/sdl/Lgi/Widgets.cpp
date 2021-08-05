@@ -148,7 +148,7 @@ void LDialog::EndModeless(int Code)
 	Quit(Code);
 }
 
-GMessage::Result LDialog::OnEvent(GMessage *Msg)
+LMessage::Result LDialog::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -168,7 +168,7 @@ LControl::~LControl()
 {
 }
 
-GMessage::Result LControl::OnEvent(GMessage *Msg)
+LMessage::Result LControl::OnEvent(LMessage *Msg)
 {
 	switch (MsgCode(Msg))
 	{
@@ -253,7 +253,7 @@ void LSlider::SetLimits(int64 min, int64 max)
 	Max = max;
 }
 
-GMessage::Result LSlider::OnEvent(GMessage *Msg)
+LMessage::Result LSlider::OnEvent(LMessage *Msg)
 {
 	return 0;
 }
@@ -444,7 +444,7 @@ LSurface *LBitmap::GetSurface()
 	return pDC;
 }
 
-GMessage::Param LBitmap::OnEvent(GMessage *Msg)
+LMessage::Param LBitmap::OnEvent(LMessage *Msg)
 {
 	return LView::OnEvent(Msg);
 }

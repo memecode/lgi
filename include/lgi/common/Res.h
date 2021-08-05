@@ -23,20 +23,20 @@ enum ResFileFormat
 /// A list of all language supported is provide in ::LgiLanguageTable.
 /// 
 /// \ingroup Resources
-typedef const char *GLanguageId;
+typedef const char *LLanguageId;
 
 /// Infomation pertaining to one language.
 ///
 /// A table of these is in ::LgiLanguageTable.
 /// 
 /// \ingroup Resources
-struct GLanguage
+struct LLanguage
 {
 	/// The full english name of the language
 	const char *Name;
 	
 	/// The short language code, e.g. 'en'
-	GLanguageId Id;
+	LLanguageId Id;
 	
 	/// Any windows language ID mapping
 	int Win32Id;
@@ -56,28 +56,28 @@ struct GLanguage
 	}
 
 	/// \returns true if the language is the same as 'i'
-	bool operator ==(GLanguageId i)
+	bool operator ==(LLanguageId i)
 	{
 		return i && _stricmp(Id, i) == 0;
 	}
 
 	/// \returns true if the language is NOT the same as 'i'
-	bool operator !=(GLanguageId i)
+	bool operator !=(LLanguageId i)
 	{
 		return !(*this == i);
 	}
 };
 
-/// Find a GLanguage object by it's language code.
+/// Find a LLanguage object by it's language code.
 ///
 /// This function is very fast, it's not a linear search through the
 /// list of all languages. So you can call it often without worrying
 /// about speed.
-LgiExtern GLanguage *GFindLang
+LgiExtern LLanguage *GFindLang
 (
 	/// [Optional] The language code to search for.
 	/// If not provided the start of the table is returned.
-	GLanguageId Id,
+	LLanguageId Id,
 	/// [Optional] The textual name of the language to search for.
 	const char *Name = NULL
 );

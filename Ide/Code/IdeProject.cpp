@@ -1179,7 +1179,7 @@ public:
 
 	void OnAfterMain()
 	{
-		Proj->GetApp()->PostEvent(M_MAKEFILES_CREATED, (GMessage::Param)Proj);
+		Proj->GetApp()->PostEvent(M_MAKEFILES_CREATED, (LMessage::Param)Proj);
 	}
 };
 
@@ -1371,7 +1371,7 @@ ssize_t BuildThread::Write(const void *Buffer, ssize_t Size, int Flags)
 {
 	if (Proj->GetApp())
 	{
-		Proj->GetApp()->PostEvent(M_APPEND_TEXT, (GMessage::Param)NewStr((char*)Buffer, Size), AppWnd::BuildTab);
+		Proj->GetApp()->PostEvent(M_APPEND_TEXT, (LMessage::Param)NewStr((char*)Buffer, Size), AppWnd::BuildTab);
 	}
 	return Size;
 }
@@ -1977,7 +1977,7 @@ int BuildThread::Main()
 
 		LString Msg;
 		Msg.Printf("Making: %s\n", MakePath.Get());
-		Proj->GetApp()->PostEvent(M_APPEND_TEXT, (GMessage::Param)NewStr(Msg), AppWnd::BuildTab);
+		Proj->GetApp()->PostEvent(M_APPEND_TEXT, (LMessage::Param)NewStr(Msg), AppWnd::BuildTab);
 
 		LgiTrace("%s %s\n", Exe.Get(), TmpArgs.Get());
 		if (SubProc.Reset(new LSubProcess(Exe, TmpArgs)))
@@ -2073,7 +2073,7 @@ int BuildThread::Main()
 	{
 		w->PostEvent(M_BUILD_DONE);
 		if (Err)
-			Proj->GetApp()->PostEvent(M_BUILD_ERR, 0, (GMessage::Param)NewStr(Err));
+			Proj->GetApp()->PostEvent(M_BUILD_ERR, 0, (LMessage::Param)NewStr(Err));
 	}
 	else LAssert(0);
 	
@@ -2421,7 +2421,7 @@ public:
 		if (Len <= 0)
 			return 0;
 
-		PostThreadEvent(AppHnd, M_APPEND_TEXT, (GMessage::Param)NewStr((char*)Buffer, Size), AppWnd::OutputTab);
+		PostThreadEvent(AppHnd, M_APPEND_TEXT, (LMessage::Param)NewStr((char*)Buffer, Size), AppWnd::OutputTab);
 		Len -= Size;
 		return Size;
 	}
@@ -4125,7 +4125,7 @@ void AddFilesProgress::Value(int64 val)
 			if (Msg)
 			{
 				Msg->Value(v);
-				Msg->SendNotify(GNotifyTableLayout_Refresh);
+				Msg->SendNotify(LNotifyTableLayoutRefresh);
 			}
 			LYield();
 			Ts = Now;

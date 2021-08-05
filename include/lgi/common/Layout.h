@@ -103,7 +103,7 @@ public:
 	void SetPourLargest(bool i);
 
 	/// Handles the incoming events.
-	GMessage::Result OnEvent(GMessage *Msg) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
 
 	/// Lay out all the children views into the client area according to their
 	/// own internal rules. Space is given in a first come first served basis.

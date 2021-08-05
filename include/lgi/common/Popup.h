@@ -61,7 +61,7 @@ public:
 	bool Attach(LViewI *p) override;
 	void Visible(bool i) override;
 	bool Visible() override;
-	GMessage::Result OnEvent(GMessage *Msg) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
 };
 
 /// Drop down menu, UI widget for opening a popup.

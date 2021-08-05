@@ -588,7 +588,7 @@ void GTrayIcon::Value(int64 v)
 	}
 }
 
-GMessage::Result GTrayIcon::OnEvent(GMessage *Message)
+LMessage::Result GTrayIcon::OnEvent(LMessage *Message)
 {
 	#if WINNATIVE
 	

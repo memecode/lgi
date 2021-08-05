@@ -23,7 +23,7 @@
 
 #define MAX_CODES   				4095
 
-class GdcGif : public GFilter
+class GdcGif : public LFilter
 {
 	LSurface *pDC;
 	LStream *s;
@@ -101,7 +101,7 @@ class GdcGifFactory : public GFilterFactory
 		return (File) ? stristr(File, ".gif") != 0 : false;
 	}
 
-	GFilter *NewObject()
+	LFilter *NewObject()
 	{
 		return new GdcGif;
 	}
@@ -632,9 +632,9 @@ bool GifLoadPalette(LStream *s, LSurface *pDC, int TableBits)
 	return true;
 }
 
-GFilter::IoStatus GdcGif::ReadImage(LSurface *pdc, LStream *in)
+LFilter::IoStatus GdcGif::ReadImage(LSurface *pdc, LStream *in)
 {
-	GFilter::IoStatus Status = IoError;
+	LFilter::IoStatus Status = IoError;
 	pDC = pdc;
 	s = in;
 	ProcessedScanlines = 0;
@@ -814,20 +814,20 @@ GFilter::IoStatus GdcGif::ReadImage(LSurface *pdc, LStream *in)
 	return Status;
 }
 
-GFilter::IoStatus GdcGif::WriteImage(LStream *Out, LSurface *pDC)
+LFilter::IoStatus GdcGif::WriteImage(LStream *Out, LSurface *pDC)
 {
 	LVariant Transparent;
 	int Back = -1;
 	LVariant v;
 
 	if (!Out || !pDC)
-		return GFilter::IoError;
+		return LFilter::IoError;
 
 	if (pDC->GetBits() > 8)
 	{			
 		if (Props)
 			Props->SetValue(LGI_FILTER_ERROR, v = "The GIF format only supports 1 to 8 bit graphics.");
-		return GFilter::IoUnsupportedFormat;
+		return LFilter::IoUnsupportedFormat;
 	}
 
 	#ifdef FILTER_UI
@@ -1045,7 +1045,7 @@ GFilter::IoStatus GdcGif::WriteImage(LStream *Out, LSurface *pDC)
 	c = 0x3b;
 	Out->Write(&c, 1);
 
-	return GFilter::IoSuccess;
+	return LFilter::IoSuccess;
 }
 
 GdcGif::GdcGif()

@@ -36,7 +36,7 @@ public:
 	int Main();
 };
 
-class GBrowserPriv : public GDocumentEnv
+class GBrowserPriv : public LDocumentEnv
 {
 public:
 	typedef LHashTbl<StrKey<char,false>,LStream*> Collection;
@@ -594,7 +594,7 @@ int GBrowser::OnNotify(LViewI *c, int f)
 	return 0;
 }
 
-GMessage::Result GBrowser::OnEvent(GMessage *m)
+LMessage::Result GBrowser::OnEvent(LMessage *m)
 {
 	switch (m->Msg())
 	{
