@@ -41,7 +41,7 @@ class LgiClass LToolButton :
 	friend class LToolBar;
 
 protected:
-	struct GToolButtonPriv *d;
+	struct LToolButtonPriv *d;
 
 	int			Type;		// Button Type
 	bool		Clicked;

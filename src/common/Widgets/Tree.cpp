@@ -646,7 +646,7 @@ void LTreeItem::_PourText(LPoint &Size)
 	Size.y = 0;
 }
 
-void LTreeItem::_PaintText(GItem::ItemPaintCtx &Ctx)
+void LTreeItem::_PaintText(LItem::ItemPaintCtx &Ctx)
 {
 	const char *Text = GetText();
 	if (Text)
@@ -1097,7 +1097,7 @@ void LTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	}
 }
 
-void LTreeItem::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
+void LTreeItem::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 {
 	LDisplayString *ds = d->GetDs(i, Ctx.ColPx[i]);
 	if (ds)
@@ -1885,7 +1885,7 @@ void LTree::OnPaint(LSurface *pDC)
 
 	// selection colour
 	LArray<int> ColPx;
-	GItem::ItemPaintCtx Ctx;
+	LItem::ItemPaintCtx Ctx;
 	Ctx.pDC = pDC;
 	if (Columns.Length() > 0)
 	{

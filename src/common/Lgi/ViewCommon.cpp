@@ -463,12 +463,12 @@ void LView::OnPaint(LSurface *pDC)
 	Tools.PaintContent(pDC, c);
 }
 
-int LView::OnNotify(LViewI *Ctrl, int Flags)
+int LView::OnNotify(LViewI *Ctrl, LNotification &Data)
 {
 	if (!Ctrl)
 		return 0;
 
-	if (Ctrl == (LViewI*)this && Flags == LNotifyActivate)
+	if (Ctrl == (LViewI*)this && Data.Type == LNotifyActivate)
 	{
 		// Default activation is to focus the current control.
 		Focus(true);
@@ -477,7 +477,9 @@ int LView::OnNotify(LViewI *Ctrl, int Flags)
 	{
 		// default behaviour is just to pass the 
 		// notification up to the parent
-		return d->Parent->OnNotify(Ctrl, Flags);
+
+		// FIXME: eventually we need to call the 'LNotification' parent fn...
+		return d->Parent->OnNotify(Ctrl, Data.Type);
 	}
 
 	return 0;

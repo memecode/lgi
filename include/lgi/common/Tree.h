@@ -91,7 +91,7 @@ public:
 };
 
 /// The item class for a tree. This defines a node in the heirarchy.
-class LgiClass LTreeItem : public GItem, public LTreeNode
+class LgiClass LTreeItem : public LItem, public LTreeNode
 {
 	friend class LTree;
 	friend class LTreeNode;
@@ -112,9 +112,9 @@ protected:
 	LRect *Pos() override;
 
 	virtual void _PourText(LPoint &Size);
-	virtual void _PaintText(GItem::ItemPaintCtx &Ctx);
+	virtual void _PaintText(LItem::ItemPaintCtx &Ctx);
 	void _ClearDs(int Col) override;
-	virtual void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c);
+	virtual void OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c);
 	int GetColumnSize(int Col);
 
 protected:

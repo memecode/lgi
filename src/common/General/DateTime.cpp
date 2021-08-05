@@ -98,22 +98,16 @@ static int CurTzOff			= NO_ZONE;
 
 LDateTime::LDateTime(const char *Init)
 {
-	_Day = 0;
-	_Month = 0;
-	_Year = 0;
-	_Thousands = 0;
-	_Seconds = 0;
-	_Minutes = 0;
-	_Hours = 0;
-	
-	if (CurTz == NO_ZONE)
-		_Tz = SystemTimeZone();
-	else
-		_Tz = CurTz + CurTzOff;
-
-	_Format = GetDefaultFormat();
+	Empty();
 	if (Init)
 		Set(Init);
+}
+
+LDateTime::LDateTime(uint64 Ts)
+{
+	Empty();
+	if (Ts)
+		Set(Ts);
 }
 
 LDateTime::~LDateTime()
@@ -129,6 +123,13 @@ void LDateTime::Empty()
 	_Hours = 0;
 	_Seconds = 0;
 	_Thousands = 0;
+
+	if (CurTz == NO_ZONE)
+		_Tz = SystemTimeZone();
+	else
+		_Tz = CurTz + CurTzOff;
+
+	_Format = GetDefaultFormat();
 }
 
 #define InRange(v, low, high) ((v) >= low && (v) <= high)
@@ -700,6 +701,13 @@ int LDateTime::DayOfWeek() const
 	while (Diff < 0) Diff += 7;
 
 	return Diff % 7;
+}
+
+LDateTime LDateTime::Now()
+{
+	LDateTime dt;
+	dt.SetNow();
+	return dt;
 }
 
 void LDateTime::SetNow()

@@ -93,6 +93,7 @@ class LgiClass LDateTime // This class can't have a virtual table, because it's 
 
 public:
 	LDateTime(const char *Init = NULL);
+	LDateTime(uint64 Ts);
 	LDateTime(const LDateTime &dt) { *this = dt; }
 	~LDateTime();
 
@@ -240,6 +241,8 @@ public:
 	/// Returns the 64bit timestamp.
 	uint64 Ts() const;
 
+	/// Get the current time...
+	static LDateTime Now();
 	/// Sets the date and time to the system clock
 	void SetNow();
 	/// Parses a date time from a string

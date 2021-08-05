@@ -214,6 +214,11 @@ bool LLayout::_SetScrollBars(bool x, bool y)
 	return true;
 }
 
+int LLayout::OnNotify(LViewI *c, LNotification &n)
+{
+	return LView::OnNotify(c, n.Type);
+}
+
 int LLayout::OnNotify(LViewI *c, int f)
 {
 	return LView::OnNotify(c, f);

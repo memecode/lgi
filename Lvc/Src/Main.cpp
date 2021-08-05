@@ -100,7 +100,7 @@ public:
 
 	int64_t Value() { return v; }
 	void Value(int64_t val) { v = val; Update(); }
-	void OnPaint(GItem::ItemPaintCtx &Ctx)
+	void OnPaint(LItem::ItemPaintCtx &Ctx)
 	{
 		auto pDC = Ctx.pDC;
 		pDC->Colour(Ctx.Back);

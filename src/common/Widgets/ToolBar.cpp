@@ -520,14 +520,14 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-struct GToolButtonPriv
+struct LToolButtonPriv
 {
 	LArray<LDisplayString*> Text;
 };
 
 LToolButton::LToolButton(int Bx, int By)
 {
-	d = new GToolButtonPriv;
+	d = new LToolButtonPriv;
 	Type = TBT_PUSH;
 	SetId(IDM_NONE);
 	Down = false;

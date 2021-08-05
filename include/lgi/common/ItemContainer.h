@@ -10,7 +10,7 @@ class LItemContainer;
 #define DragColumnColour				LColour(L_LOW)
 
 /// Base class for items in widget containers
-class LgiClass GItem : virtual public LEventsI
+class LgiClass LItem : virtual public LEventsI
 {
 protected:
     LAutoPtr<LCss> Css;
@@ -37,10 +37,10 @@ public:
 		int *ColPx;
 	};
 	
-	GItem();
-	~GItem();
+	LItem();
+	~LItem();
 
-    GItem &operator =(GItem &i)
+    LItem &operator =(LItem &i)
     {
 		if (i.GetCss())
 		{
@@ -123,7 +123,7 @@ public:
 	bool OnRequestClose(bool OsShuttingDown) { return false; }
 	int OnHitTest(int x, int y) { return 0; }
 	void OnChildrenChanged(LViewI *Wnd, bool Attaching) {}
-	int OnNotify(LViewI *Ctrl, int Flags) { return 0; }
+	int OnNotify(LViewI *Ctrl, LNotification &n) { return 0; }
 	int OnCommand(int Cmd, int Event, OsView Wnd) { return 0; }
 	void OnPaint(LSurface *pDC) { LAssert(0); }
 
@@ -135,16 +135,16 @@ public:
 	}
 };
 
-/// The popup label for GItem's
+/// The popup label for LItem's
 class GItemEdit : public LPopup
 {
 	class GItemEditPrivate *d;
 
 public:
-	GItemEdit(LView *parent, GItem *item, int index, int selstart, int selend);
+	GItemEdit(LView *parent, LItem *item, int index, int selstart, int selend);
 	~GItemEdit();
 	
-	GItem *GetItem();
+	LItem *GetItem();
 	void OnPaint(LSurface *pDC);
 	int OnNotify(LViewI *v, int f);
 	void Visible(bool i);
@@ -261,7 +261,7 @@ class LgiClass LItemContainer :
 	public LImageListOwner
 {
 	friend class LItemColumn;
-	friend class GItem;
+	friend class LItem;
 	friend class GItemEdit;
 
 public:

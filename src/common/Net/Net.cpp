@@ -1416,17 +1416,14 @@ int LSocket::ReadUdp(void *Buffer, int Size, int Flags, uint32_t *Ip, uint16_t *
 	if (Port)
 		a.sin_port = htons(*Port);
 	#if defined(WINDOWS)
-	a.sin_addr.S_un.S_addr = INADDR_ANY;
+		a.sin_addr.S_un.S_addr = INADDR_ANY;
 	#else
-	a.sin_addr.s_addr = INADDR_ANY;
+		a.sin_addr.s_addr = INADDR_ANY;
 	#endif
 
-	//printf("recvfrom(%i,%p,%i,%i,%i:%i,%i)\n",
-	// 	d->Socket, Buffer, Size, Flags, a.sin_addr.s_addr, a.sin_port, AddrSize);
-	ssize_t b = recvfrom(d->Socket, (char*)Buffer, Size, Flags, (sockaddr*)&a, &AddrSize);
+	auto b = recvfrom(d->Socket, (char*)Buffer, Size, Flags, (sockaddr*)&a, &AddrSize);
 	if (b > 0)
 	{
-		printf("recvfrom=%i\n", (int)b);
 		OnRead((char*)Buffer, (int)b);
 
 		if (Ip)
@@ -1434,6 +1431,7 @@ int LSocket::ReadUdp(void *Buffer, int Size, int Flags, uint32_t *Ip, uint16_t *
 		if (Port)
 			*Port = ntohs(a.sin_port);
 	}
+
 	return (int)b;
 }
 

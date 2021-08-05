@@ -39,7 +39,7 @@ class LFilterItem : public LTreeItem, public LDragDropSource
 
 protected:
 	void _PourText(LPoint &Size);
-	void _PaintText(GItem::ItemPaintCtx &Ctx);
+	void _PaintText(LItem::ItemPaintCtx &Ctx);
 	void ShowControls(bool s);
 
 public:

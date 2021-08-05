@@ -10,6 +10,7 @@
 #include "lgi/common/Cancel.h"
 #include "lgi/common/StringClass.h"
 #include "lgi/common/LgiUiBase.h"
+#include "lgi/common/Notifications.h"
 
 // Fwd defs
 class LXmlTag;
@@ -369,8 +370,14 @@ public:
 	virtual int OnHitTest(int x, int y) = 0;
 	virtual void OnChildrenChanged(LViewI *Wnd, bool Attaching) = 0;
 	virtual void OnPaint(LSurface *pDC) = 0;
-	virtual int OnNotify(LViewI *Ctrl, int Flags) = 0;
 	virtual int OnCommand(int Cmd, int Event, OsView Wnd) = 0;
+	virtual int OnNotify(LViewI *Ctrl, LNotification &Data) = 0;
+
+	virtual int OnNotify(LViewI *Ctrl, int Flags)
+	{
+		LNotification n((LNotifyType)Flags);
+		return OnNotify(Ctrl, n);
+	}
 };
 
 class LViewLayoutInfo

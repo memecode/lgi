@@ -16,7 +16,7 @@ public:
 		c.Set(col, 24);
 	}
 
-	void OnPaint(GItem::ItemPaintCtx &Ctx)
+	void OnPaint(LItem::ItemPaintCtx &Ctx)
 	{
 		if (!Select())
 			Ctx.Fore = c;

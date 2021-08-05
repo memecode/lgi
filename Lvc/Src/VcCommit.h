@@ -76,7 +76,7 @@ public:
 	LDateTime &GetTs() { return Ts; }
 
 	void SetCurrent(bool b);
-	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c);
+	void OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c);
 	const char *GetText(int Col);
 	const char *GetFieldText(CommitField Fld);
 	bool GitParse(LString s, bool RevList);

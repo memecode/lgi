@@ -40,10 +40,10 @@ class LgiClass LListItemPainter
 {
 public:
 	// Overridable
-	virtual void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c) = 0;
+	virtual void OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c) = 0;
 };
 
-class LgiClass LListItemColumn : public LBase, public GItem, public LListItemPainter
+class LgiClass LListItemColumn : public LBase, public LItem, public LListItemPainter
 {
 	LListItem *_Item;
 	int _Column;
@@ -70,8 +70,8 @@ public:
 	virtual void Value(int64 i);
 };
 
-/// GItem for populating a LList
-class LgiClass LListItem : public GItem, public LListItemPainter
+/// LItem for populating a LList
+class LgiClass LListItem : public LItem, public LListItemPainter
 {
 	friend class LList;
 	friend class LListItemColumn;
@@ -148,8 +148,8 @@ public:
 	void OnMouseClick(LMouse &m) override;
 	void OnMeasure(LPoint *Info) override;
 	void OnPaint(LSurface *pDC) override { LAssert(0); }
-	void OnPaint(GItem::ItemPaintCtx &Ctx) override;
-	void OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c) override;
+	void OnPaint(LItem::ItemPaintCtx &Ctx) override;
+	void OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c) override;
 
 	// Over-ridable
 	virtual int Compare(LListItem *To, ssize_t Field = 0) { return 0; }
@@ -369,7 +369,8 @@ public:
 	LCursor GetCursor(int x, int y);
 	void OnMouseClick(LMouse &m);
 	void OnMouseMove(LMouse &m);
-	int OnNotify(LViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, int f);
+	int OnNotify(LViewI *Ctrl, LNotification &n);
 	void OnPosChange();
 	bool OnKey(LKey &k);
 	bool OnMouseWheel(double Lines);

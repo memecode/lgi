@@ -447,7 +447,7 @@ void LListItem::ClearDs(int Col)
 	}
 }
 
-void LListItem::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
+void LListItem::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 {
 	LSurface *&pDC = Ctx.pDC;
 	if (pDC && c)
@@ -533,7 +533,7 @@ void LListItem::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 	}
 }
 
-void LListItem::OnPaint(GItem::ItemPaintCtx &Ctx)
+void LListItem::OnPaint(LItem::ItemPaintCtx &Ctx)
 {
 	if (!Parent)
 	    return;
@@ -558,7 +558,7 @@ void LListItem::OnPaint(GItem::ItemPaintCtx &Ctx)
 	// Icon?
 	if (Parent->IconCol)
 	{
-		GItem::ItemPaintCtx IcoCtx = Ctx;
+		LItem::ItemPaintCtx IcoCtx = Ctx;
 		IcoCtx.Set(x, Ctx.y1, x + Parent->IconCol->Width()-1, Ctx.y2);
 
 		// draw icon
@@ -569,7 +569,7 @@ void LListItem::OnPaint(GItem::ItemPaintCtx &Ctx)
 	// draw columns
 	auto It = d->Cols.begin();
 	LListItemColumn *h = *It;
-	GItem::ItemPaintCtx ColCtx = Ctx;
+	LItem::ItemPaintCtx ColCtx = Ctx;
 	
 	for (int i=0; i<Parent->Columns.Length(); i++)
 	{
@@ -754,7 +754,13 @@ LMessage::Result LList::OnEvent(LMessage *Msg)
 	return LItemContainer::OnEvent(Msg);
 }
 
-int LList::OnNotify(LViewI *Ctrl, int Flags)
+int LList::OnNotify(LViewI *Ctrl, int f)
+{
+	LNotification n((LNotifyType)f);
+	return OnNotify(Ctrl, n);
+}
+
+int LList::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	if
 	(
@@ -763,13 +769,13 @@ int LList::OnNotify(LViewI *Ctrl, int Flags)
 		(Ctrl->GetId() == IDC_HSCROLL && HScroll)
 	)
 	{
-		if (Flags == LNotifyScrollBarCreate)
+		if (n.Type == LNotifyScrollBarCreate)
 			UpdateScrollBars();
 
 		Invalidate(&ItemsPos);
 	}
 
-	return LLayout::OnNotify(Ctrl, Flags);
+	return LLayout::OnNotify(Ctrl, n.Type);
 }
 
 LRect &LList::GetClientRect()
@@ -2567,7 +2573,7 @@ void LList::OnPaint(LSurface *pDC)
 	LCss::ColorDef Fill;
 	int LastSelected = -1;
 
-	GItem::ItemPaintCtx Ctx;
+	LItem::ItemPaintCtx Ctx;
 	Ctx.pDC = pDC;
 
 	LRegion Rgn(ItemsPos);

@@ -628,7 +628,7 @@ void LFilterItem::_PourText(LPoint &Size)
 	}
 }
 
-void LFilterItem::_PaintText(GItem::ItemPaintCtx &Ctx)
+void LFilterItem::_PaintText(LItem::ItemPaintCtx &Ctx)
 {
 	LRect *Pos = _GetRect(TreeItemText);
 

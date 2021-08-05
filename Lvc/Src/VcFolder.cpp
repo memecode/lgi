@@ -4061,7 +4061,7 @@ void VcFolder::UncommitedItem::Select(bool b)
 	}
 }
 
-void VcFolder::UncommitedItem::OnPaint(GItem::ItemPaintCtx &Ctx)
+void VcFolder::UncommitedItem::OnPaint(LItem::ItemPaintCtx &Ctx)
 {
 	LFont *f = GetList()->GetFont();
 	f->Transparent(false);

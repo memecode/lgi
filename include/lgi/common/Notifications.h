@@ -1,5 +1,4 @@
-#ifndef _GNOTIFICATIONS_H_
-#define _GNOTIFICATIONS_H_
+#pragma once
 
 enum LNotifyType
 {
@@ -107,4 +106,13 @@ enum LNotifyType
 	*/
 };
 
-#endif
+struct LNotification
+{
+	constexpr static int MaxInts = 4;
+
+	LNotifyType Type;
+	int64_t Int[MaxInts] = {0};
+	LString::Array Str;
+
+	LNotification(LNotifyType type) : Type(type) {}
+};

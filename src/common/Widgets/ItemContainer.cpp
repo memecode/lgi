@@ -993,16 +993,16 @@ void LItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-GItem::GItem()
+LItem::LItem()
 {
 	SelectionStart = SelectionEnd = -1;
 }
 	
-GItem::~GItem()
+LItem::~LItem()
 {
 }
 
-LView *GItem::EditLabel(int Col)
+LView *LItem::EditLabel(int Col)
 {
 	LItemContainer *c = GetContainer();
 	if (!c)
@@ -1018,14 +1018,14 @@ LView *GItem::EditLabel(int Col)
 	return c->ItemEdit;
 }
 
-void GItem::OnEditLabelEnd()
+void LItem::OnEditLabelEnd()
 {
 	LItemContainer *c = GetContainer();
 	if (c)
 		c->ItemEdit = NULL;
 }
 
-void GItem::SetEditLabelSelection(int SelStart, int SelEnd)
+void LItem::SetEditLabelSelection(int SelStart, int SelEnd)
 {
 	SelectionStart = SelStart;
 	SelectionEnd = SelEnd;
@@ -1103,7 +1103,7 @@ public:
 class GItemEditPrivate
 {
 public:
-	GItem *Item;
+	LItem *Item;
 	LEdit *Edit;
 	int Index;
 	bool Esc;
@@ -1116,7 +1116,7 @@ public:
 	}
 };
 
-GItemEdit::GItemEdit(LView *parent, GItem *item, int index, int SelStart, int SelEnd)
+GItemEdit::GItemEdit(LView *parent, LItem *item, int index, int SelStart, int SelEnd)
 	: LPopup(parent)
 {
 	d = new GItemEditPrivate;
@@ -1205,7 +1205,7 @@ GItemEdit::~GItemEdit()
 	DeleteObj(d);
 }
 
-GItem *GItemEdit::GetItem()
+LItem *GItemEdit::GetItem()
 {
 	return d->Item;
 }

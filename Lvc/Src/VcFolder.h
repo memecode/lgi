@@ -156,7 +156,7 @@ class VcFolder : public LTreeItem
 			d = priv;
 		}
 
-		void OnPaint(GItem::ItemPaintCtx &Ctx);
+		void OnPaint(LItem::ItemPaintCtx &Ctx);
 		void Select(bool b);
 	};
 

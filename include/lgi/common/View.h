@@ -662,14 +662,17 @@ public:
 	) override;
 	/// Called when the contents of the Children list have changed.
 	void OnChildrenChanged(LViewI *Wnd, bool Attaching) override;
-	/// Called to paint the onscreen representation of the view
+	/// Called to paint the on screen representation of the view
 	void OnPaint(LSurface *pDC) override;
+
 	/// \brief Called when a child view or view with it's SetNotify() set to this window changes.
 	///
-	/// The event by default will bubble up to the LWindow at the top of the window heirarchy visiting
-	/// each LView on the way. If it reaches a LView that processes it then the event stops propergating
-	/// up the heirarchy.
-	int OnNotify(LViewI *Ctrl, int Flags) override;
+	/// The event by default will bubble up to the LWindow at the top of the window hierarchy visiting
+	/// each LView on the way. If it reaches a LView that processes it then the event stops propagating
+	/// up the hierarchy.
+	int OnNotify(LViewI *Ctrl, LNotification &Data) override;
+	int OnNotify(LViewI *Ctrl, int Flags) { return LViewI::OnNotify(Ctrl, Flags); }
+
 	/// Called when a menu command is activated by the user.
 	int OnCommand(int Cmd, int Event, OsView Wnd) override;
 	/// Called after the view is attached to a new parent

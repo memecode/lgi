@@ -88,7 +88,7 @@ void VcCommit::SetCurrent(bool b)
 	Current = b;
 }
 
-void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
+void VcCommit::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 {
 	if (i == 0)
 	{
@@ -101,7 +101,7 @@ void VcCommit::OnPaintColumn(GItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 
 		#ifdef LINUX
 		{
-			GItem::ItemPaintCtx TmpCtx = Ctx;
+			LItem::ItemPaintCtx TmpCtx = Ctx;
 			TmpCtx.Offset(-TmpCtx.x1, -TmpCtx.y1);
 			TmpCtx.pDC = &Mem;
 			LListItem::OnPaintColumn(TmpCtx, i, c);
