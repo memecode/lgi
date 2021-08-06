@@ -119,5 +119,5 @@ struct LNotification
 	int64_t Int[MaxInts] = {0};
 	LString::Array Str;
 
-	LNotification(LNotifyType type) : Type(type) {}
+	LNotification(LNotifyType type = LNotifyValueChanged) : Type(type) {}
 };

@@ -196,7 +196,7 @@ public:
 	{
 		if (Lst &&
 			Ctrl == Edit &&
-			(!Flags || Flags == LNotifyDocChanged))
+			(n.Type == LNotifyValueChanged || n.Type == LNotifyDocChanged))
 		{
 			auto Str = Edit->Name();
 			Name(Str);
@@ -211,8 +211,8 @@ public:
 		}
 		else if (Ctrl == Lst)
 		{
-			if (Flags == LNotifyReturnKey ||
-				Flags == LNotifyItemClick)
+			if (n.Type == LNotifyReturnKey ||
+				n.Type == LNotifyItemClick)
 			{
 				Item *Sel = dynamic_cast<Item*>(Lst->GetSelected());
 				if (Sel)

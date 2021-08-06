@@ -2988,7 +2988,8 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 		{
 			CurrentCommit.Empty();
 			CommitListDirty = true;
-			GetTree()->SendNotify(LvcCommandEnd);
+
+			GetTree()->SendNotify((LNotifyType)LvcCommandEnd);
 			if (!Result)
 			{
 				Unpushed = 0;
@@ -3001,7 +3002,7 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 		{
 			CurrentCommit.Empty();
 			CommitListDirty = true;
-			GetTree()->SendNotify(LvcCommandEnd);
+			GetTree()->SendNotify((LNotifyType)LvcCommandEnd);
 			if (!Result)
 			{
 				Unpushed = 0;
@@ -3018,7 +3019,7 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 		{
 			CurrentCommit.Empty();
 			CommitListDirty = true;
-			GetTree()->SendNotify(LvcCommandEnd);
+			GetTree()->SendNotify((LNotifyType)LvcCommandEnd);
 			if (!Result)
 			{
 				Unpushed = 0;
@@ -3123,7 +3124,7 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 				if (d->Tabs && IsCommit)
 				{
 					d->Tabs->Value(1);
-					GetTree()->SendNotify(LvcCommandStart);
+					GetTree()->SendNotify((LNotifyType)LvcCommandStart);
 				}
 				break;
 			}
@@ -3159,7 +3160,7 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 				if (d->Tabs && IsCommit)
 				{
 					d->Tabs->Value(1);
-					GetTree()->SendNotify(LvcCommandStart);
+					GetTree()->SendNotify((LNotifyType)LvcCommandStart);
 				}
 				break;
 			}
@@ -3266,7 +3267,7 @@ void VcFolder::Push(bool NewBranchOk)
 	if (d->Tabs && Working)
 	{
 		d->Tabs->Value(1);
-		GetTree()->SendNotify(LvcCommandStart);
+		GetTree()->SendNotify((LNotifyType)LvcCommandStart);
 	}
 }
 
@@ -3309,7 +3310,7 @@ bool VcFolder::ParsePush(int Result, LString s, ParseParams *Params)
 		Status = true;
 	}
 
-	GetTree()->SendNotify(LvcCommandEnd);
+	GetTree()->SendNotify((LNotifyType)LvcCommandEnd);
 	return Status; // no reselect
 }
 
@@ -3341,13 +3342,13 @@ void VcFolder::Pull(int AndUpdate, LoggingType Logging)
 	if (d->Tabs && Status)
 	{
 		d->Tabs->Value(1);
-		GetTree()->SendNotify(LvcCommandStart);
+		GetTree()->SendNotify((LNotifyType)LvcCommandStart);
 	}
 }
 
 bool VcFolder::ParsePull(int Result, LString s, ParseParams *Params)
 {
-	GetTree()->SendNotify(LvcCommandEnd);
+	GetTree()->SendNotify((LNotifyType)LvcCommandEnd);
 	if (Result)
 	{
 		OnCmdError(s, "Pull failed.");

@@ -139,7 +139,7 @@ public:
 	LCursor GetCursor(int x, int y);
 	bool OnMouseWheel(double Lines);
 	bool OnKey(LKey &k);
-	int OnNotify(LViewI *c, int f);
+	int OnNotify(LViewI *c, LNotification &n);
 	void OnPosChange();
 	void OnPulse();
 	LMessage::Result OnEvent(LMessage *Msg);

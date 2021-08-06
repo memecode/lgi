@@ -55,10 +55,10 @@ public:
 		pDC->Box();
 	}
 
-	int OnNotify(LViewI *c, int flag)
+	int OnNotify(LViewI *c, LNotification &n)
 	{
 		if (c->GetId() == 10 &&
-			flag == LNotifyItemClick)
+			n.Type == LNotifyItemClick)
 		{
 			LListItem *i = Lst->GetSelected();
 			LViewI *e = d->GetEdit();

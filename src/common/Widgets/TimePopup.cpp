@@ -18,7 +18,7 @@ LTimeDropDown::LTimeDropDown() :
 	SetPopup(Drop = new LTimePopup(this));
 }
 
-int LTimeDropDown::OnNotify(LViewI *Ctrl, int Flags)
+int LTimeDropDown::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	LViewI *DateSrc = GetNotify();
 	if (Ctrl == (LViewI*)Drop && DateSrc)
@@ -34,7 +34,7 @@ int LTimeDropDown::OnNotify(LViewI *Ctrl, int Flags)
 		return true;
 	}
 	
-	return LDropDown::OnNotify(Ctrl, Flags);
+	return LDropDown::OnNotify(Ctrl, n);
 }
 
 void LTimeDropDown::OnChildrenChanged(LViewI *Wnd, bool Attaching)
@@ -90,7 +90,8 @@ void LTimeDropDown::SetDate(char *d)
 		LViewI *Nn = n->GetNotify() ? n->GetNotify() : n->GetParent();
 		if (Nn)
 		{
-			Nn->OnNotify(n, 0);
+			LNotification note;
+			Nn->OnNotify(n, note);
 		}
 	}
 }
@@ -269,12 +270,11 @@ void LTimePopup::OnPaint(LSurface *pDC)
 	}
 }
 
-int LTimePopup::OnNotify(LViewI *c, int f)
+int LTimePopup::OnNotify(LViewI *c, LNotification &n)
 {
 	if (c->GetId() == 100 && !Ignore)
 	{
-		LNotifyType Type = (LNotifyType)f;
-		if 	(Type == LNotifyItemSelect || Type == LNotifyReturnKey)
+		if 	(n.Type == LNotifyItemSelect || n.Type == LNotifyReturnKey)
 		{
 			LListItem *Sel = Times->GetSelected();
 			if (Sel)
@@ -282,26 +282,28 @@ int LTimePopup::OnNotify(LViewI *c, int f)
 				const char *t = Sel->GetText(0);
 				if (t)
 				{
-					LViewI *n = GetNotify();
-					if (n)
+					LViewI *v = GetNotify();
+					if (v)
 					{
-						n->Name(t);
-						n->OnNotify(this, LNotifyValueChanged);
+						v->Name(t);
+
+						LNotification note;
+						v->OnNotify(this, note);
 						
-						if (Times->Mouse || Type == LNotifyReturnKey)
+						if (Times->Mouse || n.Type == LNotifyReturnKey)
 						{
-							n->Focus(true);
+							v->Focus(true);
 							Visible(false);
 						}
 					}
 				}
 			}
 		}
-		else if (Type == LNotifyEscapeKey)
+		else if (n.Type == LNotifyEscapeKey)
 		{
-			LViewI *n = GetNotify();
-			if (n)
-				n->Focus(true);			
+			LViewI *v = GetNotify();
+			if (v)
+				v->Focus(true);			
 			Visible(false);
 		}
 	}

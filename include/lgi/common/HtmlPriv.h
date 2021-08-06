@@ -432,7 +432,7 @@ public:
 
 	// Control handling
 	GTag *FindCtrlId(int Id);
-	int OnNotify(int f);
+	int OnNotify(LNotification &n);
 	void CollectFormValues(LHashTbl<ConstStrKey<char,false>,char*> &f);
 
 	// GDom impl

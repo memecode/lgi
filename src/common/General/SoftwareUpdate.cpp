@@ -203,7 +203,7 @@ struct LSoftwareUpdatePriv
 			}
 		}
 
-		int OnNotify(LViewI *c, int f)
+		int OnNotify(LViewI *c, LNotification &n)
 		{
 			switch (c->GetId())
 			{
@@ -214,7 +214,7 @@ struct LSoftwareUpdatePriv
 				}
 			}
 
-			return LDialog::OnNotify(c, f);
+			return LDialog::OnNotify(c, n);
 		}
 	};
 

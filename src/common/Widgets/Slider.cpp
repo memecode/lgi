@@ -32,7 +32,7 @@ void LSlider::Value(int64 i)
 		LViewI *n = GetNotify() ? GetNotify() : GetParent();
 		if (n)
 		{
-			LNotification note(LNotifyValueChanged);
+			LNotification note;
 			n->OnNotify(this, note);
 		}
 		

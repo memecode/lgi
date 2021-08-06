@@ -581,7 +581,7 @@ public:
 		}
 	}
 
-	int OnNotify(LViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, LNotification &n)
 	{
 		switch (Ctrl->GetId())
 		{
@@ -607,7 +607,7 @@ public:
 			}
 		}
 
-		return LDialog::OnNotify(Ctrl, Flags);
+		return LDialog::OnNotify(Ctrl, n);
 	}
 };
 
@@ -875,7 +875,7 @@ public:
 	RemoteFolderDlg(App *application);
 	~RemoteFolderDlg();
 
-	int OnNotify(LViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, LNotification &n);
 };
 
 class VcDiffFile : public LTreeItem
@@ -1342,13 +1342,13 @@ public:
 		Tree->Insert(new VcDiffFile(this, File));
 	}
 
-	int OnNotify(LViewI *c, int flag)
+	int OnNotify(LViewI *c, LNotification &n)
 	{
 		switch (c->GetId())
 		{
 			case IDC_FILES:
 			{
-				switch (flag)
+				switch (n.Type)
 				{
 					case LNotifyItemColumnClicked:
 					{
@@ -1382,7 +1382,7 @@ public:
 			}
 			case IDC_TREE:
 			{
-				switch (flag)
+				switch (n.Type)
 				{
 					case LNotifyContainerClick:
 					{
@@ -1508,7 +1508,7 @@ public:
 			}
 			case IDC_HEADS:
 			{
-				if (flag == LNotifyValueChanged)
+				if (n.Type == LNotifyValueChanged)
 				{
 					auto Revs = LString(c->Name()).SplitDelimit();
 
@@ -1520,7 +1520,7 @@ public:
 			}
 			case IDC_LIST:
 			{
-				switch (flag)
+				switch (n.Type)
 				{
 					case LNotifyItemColumnClicked:
 					{
@@ -1631,7 +1631,7 @@ RemoteFolderDlg::~RemoteFolderDlg()
 {
 }
 
-int RemoteFolderDlg::OnNotify(LViewI *Ctrl, int Flags)
+int RemoteFolderDlg::OnNotify(LViewI *Ctrl, LNotification &n)
 {
 	SshHost *cur = tree ? dynamic_cast<SshHost*>(tree->Selection()) : NULL;
 
@@ -1648,7 +1648,7 @@ int RemoteFolderDlg::OnNotify(LViewI *Ctrl, int Flags)
 	{
 		case IDC_HOSTS:
 		{
-			switch (Flags)
+			switch (n.Type)
 			{
 				case LNotifyItemSelect:
 				{

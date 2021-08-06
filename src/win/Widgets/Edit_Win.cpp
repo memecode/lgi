@@ -164,8 +164,7 @@ int LEdit::SysOnNotify(int Msg, int Code)
 			LBase::NameW(w);
 		}
 		
-		// LgiTrace("LEdit::SysOnNotify EN_CHANGE inempty=%i, n16=%S\n", d->InEmptyMode, LBase::NameW());
-		SendNotify(0);
+		SendNotify(LNotifyValueChanged);
 	}
 
 	return 0;

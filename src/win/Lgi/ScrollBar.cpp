@@ -373,7 +373,7 @@ LMessage::Result LScrollBar::OnEvent(LMessage *Msg)
 
 				if (GetParent())
 				{
-					SendNotify(Si.nPos);
+					SendNotify(LNotifyValueChanged);
 				}
 			}
 		}

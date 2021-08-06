@@ -1448,7 +1448,8 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 				LViewI *Ctrl = w ? w->FindControl((int)Msg->a) : 0;
 				if (Ctrl)
 				{
-					return OnNotify(Ctrl, (int)Msg->b);
+					LNotification note;
+					return OnNotify(Ctrl, note);
 				}
 				else
 				{
@@ -1475,7 +1476,9 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 						case CBN_EDITCHANGE: // COMBO
 						{
 							Ctrl->SysOnNotify(Msg->Msg(), Code);
-							OnNotify(Ctrl, 0);
+
+							LNotification note;
+							OnNotify(Ctrl, note);
 							break;
 						}
 						/*

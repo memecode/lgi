@@ -529,13 +529,13 @@ bool GBrowser::SetHtml(char *Html)
 	return true;
 }
 
-int GBrowser::OnNotify(LViewI *c, int f)
+int GBrowser::OnNotify(LViewI *c, LNotification &n)
 {
 	switch (c->GetId())
 	{
 		case IDC_SEARCH_TXT:
 		{
-			if (f != LK_RETURN)
+			if (n.Type != LK_RETURN)
 				break;
 			// else fall through
 		}
@@ -551,7 +551,7 @@ int GBrowser::OnNotify(LViewI *c, int f)
 		}
 		case IDC_URI:
 		{
-			if (f == LK_RETURN)
+			if (n.Type == LK_RETURN)
 			{
 				const char *u = c->Name();
 				SetUri(u);

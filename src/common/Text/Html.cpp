@@ -1337,7 +1337,8 @@ bool GTag::OnClick()
 	}
 	else
 	{
-		OnNotify(0);
+		LNotification note;
+		OnNotify(note);
 	}
 
 	return true;
@@ -2440,7 +2441,7 @@ void GTag::GetTagByPos(GTagHit &TagHit, int x, int y, int Depth, bool InBody, bo
 	}
 }
 
-int GTag::OnNotify(int f)
+int GTag::OnNotify(LNotification &n)
 {
 	if (!Ctrl || !Html->InThread())
 		return 0;
@@ -7366,7 +7367,7 @@ LMessage::Result GHtml::OnEvent(LMessage *Msg)
 	return LDocView::OnEvent(Msg);
 }
 
-int GHtml::OnNotify(LViewI *c, int f)
+int GHtml::OnNotify(LViewI *c, LNotification &n)
 {
 	switch (c->GetId())
 	{
@@ -7377,7 +7378,7 @@ int GHtml::OnNotify(LViewI *c, int f)
 			if (Tag)
 				Tag->ClearToolTips();
 
-			if (f == LNotifyScrollBarCreate && VScroll && LineY > 0)
+			if (n.Type == LNotifyScrollBarCreate && VScroll && LineY > 0)
 			{
 				int y = Y();
 				int p = MAX(y / LineY, 1);
@@ -7393,12 +7394,12 @@ int GHtml::OnNotify(LViewI *c, int f)
 		{
 			GTag *Ctrl = Tag ? Tag->FindCtrlId(c->GetId()) : NULL;
 			if (Ctrl)
-				return Ctrl->OnNotify(f);
+				return Ctrl->OnNotify(n);
 			break;
 		}
 	}
 
-	return LLayout::OnNotify(c, f);
+	return LLayout::OnNotify(c, n);
 }
 
 void GHtml::OnPosChange()
