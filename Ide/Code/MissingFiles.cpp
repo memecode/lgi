@@ -300,7 +300,7 @@ public:
 		}
 	}
 
-	int OnNotify(LViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, LNotification n)
 	{
 		switch (Ctrl->GetId())
 		{
@@ -323,7 +323,7 @@ public:
 			}
 			case IDC_RESULTS:
 			{
-				switch (Flags)
+				switch (n.Type)
 				{
 					case LNotifyItemDoubleClick:
 					{

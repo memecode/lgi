@@ -40,7 +40,7 @@ public:
 		}
 	}
 	
-	int OnNotify(LViewI *c, int flags)
+	int OnNotify(LViewI *c, LNotification n)
 	{
 		switch (c->GetId())
 		{

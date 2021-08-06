@@ -195,7 +195,7 @@ public:
 	LLanguage *Lang;
 
 	LangDlg(LView *parent, List<LLanguage> &l, int Init = -1);
-	int OnNotify(LViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, LNotification n);
 };
 
 ////////////////////////////////////////////////////////////////

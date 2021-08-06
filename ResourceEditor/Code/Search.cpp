@@ -352,7 +352,7 @@ void Search::OnCheck()
 	#endif
 }
 
-int Search::OnNotify(LViewI *c, int f)
+int Search::OnNotify(LViewI *c, LNotification n)
 {
 	switch (c->GetId())
 	{
@@ -755,7 +755,7 @@ void Results::OnPosChange()
 	}
 }
 
-int Results::OnNotify(LViewI *v, int f)
+int Results::OnNotify(LViewI *v, LNotification n)
 {
 	switch (v->GetId())
 	{

@@ -570,7 +570,7 @@ public:
 	{
 		if (Lst &&
 			Ctrl == Edit &&
-			(!Flags || Flags == LNotifyDocChanged))
+			(n.Type == LNotifyValueChanged || n.Type == LNotifyDocChanged))
 		{
 			Name(Edit->Name());
 		}
@@ -652,7 +652,7 @@ public:
 	{
 		if (Lst &&
 			Ctrl == Edit &&
-			(!Flags || Flags == LNotifyDocChanged))
+			(n.Type == LNotifyValueChanged || n.Type == LNotifyDocChanged))
 		{
 			// Kick off search...
 			LString s = Ctrl->Name();
@@ -770,18 +770,18 @@ public:
 		SetItems(Matches);
 	}
 	
-	int OnNotify(LViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, LNotification n)
 	{
 		if (Lst &&
 			Ctrl == Edit &&
-			(!Flags || Flags == LNotifyDocChanged))
+			(n.Type == LNotifyValueChanged || n.Type == LNotifyDocChanged))
 		{
 			auto s = Ctrl->Name();
 			if (ValidStr(s))
 				Update(s);
 		}
 		
-		return GPopupList<ProjectNode>::OnNotify(Ctrl, Flags);
+		return GPopupList<ProjectNode>::OnNotify(Ctrl, n);
 	}
 };
 
@@ -1660,7 +1660,7 @@ void IdeDoc::OnProjectChange()
 	DeleteObj(d->SymPopup);
 }
 
-int IdeDoc::OnNotify(LViewI *v, int f)
+int IdeDoc::OnNotify(LViewI *v, LNotification n)
 {
 	// printf("IdeDoc::OnNotify(%i, %i)\n", v->GetId(), f);
 	
@@ -1668,7 +1668,7 @@ int IdeDoc::OnNotify(LViewI *v, int f)
 	{
 		case IDC_EDIT:
 		{
-			switch (f)
+			switch (n.Type)
 			{
 				case LNotifyDocChanged:
 				{
@@ -1694,7 +1694,7 @@ int IdeDoc::OnNotify(LViewI *v, int f)
 		}
 		case IDC_FILE_SEARCH:
 		{
-			if (f == LNotifyEscapeKey)
+			if (n.Type == LNotifyEscapeKey)
 			{
 				d->Edit->Focus(true);
 				break;
@@ -1730,7 +1730,7 @@ int IdeDoc::OnNotify(LViewI *v, int f)
 				if (d->FilePopup)
 				{
 					// Update list elements...
-					d->FilePopup->OnNotify(v, f);
+					d->FilePopup->OnNotify(v, n);
 				}
 			}
 			else if (d->FilePopup)
@@ -1741,7 +1741,7 @@ int IdeDoc::OnNotify(LViewI *v, int f)
 		}
 		case IDC_METHOD_SEARCH:
 		{
-			if (f == LNotifyEscapeKey)
+			if (n.Type == LNotifyEscapeKey)
 			{
 				printf("%s:%i Got LNotifyEscapeKey\n", _FL);
 				d->Edit->Focus(true);
@@ -1760,7 +1760,7 @@ int IdeDoc::OnNotify(LViewI *v, int f)
 					BuildDefnList(GetFileName(), (char16*)d->Edit->NameW(), d->MethodPopup->All, DefnFunc);
 
 					// Update list elements...
-					d->MethodPopup->OnNotify(v, f);
+					d->MethodPopup->OnNotify(v, n);
 				}
 			}
 			else if (d->MethodPopup)
@@ -1771,7 +1771,7 @@ int IdeDoc::OnNotify(LViewI *v, int f)
 		}
 		case IDC_SYMBOL_SEARCH:
 		{
-			if (f == LNotifyEscapeKey)
+			if (n.Type == LNotifyEscapeKey)
 			{
 				printf("%s:%i Got LNotifyEscapeKey\n", _FL);
 				d->Edit->Focus(true);
@@ -1784,7 +1784,7 @@ int IdeDoc::OnNotify(LViewI *v, int f)
 				if (!d->SymPopup)
 					d->SymPopup = new ProjSymPopup(d->App, this, v);
 				if (d->SymPopup)
-					d->SymPopup->OnNotify(v, f);
+					d->SymPopup->OnNotify(v, n);
 			}
 			else if (d->SymPopup)
 			{

@@ -1490,7 +1490,7 @@ public:
 	~TableLayoutTest();
 	
 	void OnDialog(LDialogRes *Dlg);
-	int OnNotify(LViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, LNotification n);
     LMessage::Param OnEvent(LMessage *m);
 };
 
@@ -1705,7 +1705,7 @@ void TableLayoutTest::OnDialog(LDialogRes *Dlg)
         View->OnDialog(Dlg);
 }
 
-int TableLayoutTest::OnNotify(LViewI *Ctrl, int Flags)
+int TableLayoutTest::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{
@@ -1714,7 +1714,7 @@ int TableLayoutTest::OnNotify(LViewI *Ctrl, int Flags)
 			break;
 	}
 	
-	return LDialog::OnNotify(Ctrl, Flags);
+	return LDialog::OnNotify(Ctrl, n);
 }
 
 LMessage::Param TableLayoutTest::OnEvent(LMessage *m)

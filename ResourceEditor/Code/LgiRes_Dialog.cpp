@@ -149,7 +149,7 @@ public:
 		}
 	}
 
-	int OnNotify(LViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, LNotification n)
 	{
 		int MoveDir = 1;
 		switch (Ctrl->GetId())

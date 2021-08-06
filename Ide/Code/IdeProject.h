@@ -69,7 +69,7 @@ public:
 
 	int64 Value();
 	void Value(int64 val);
-	int OnNotify(LViewI *c, int f);
+	int OnNotify(LViewI *c, LNotification n);
 };
 
 extern IdePlatform GetCurrentPlatform();

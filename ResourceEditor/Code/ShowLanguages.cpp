@@ -84,9 +84,9 @@ ShowLanguagesDlg::~ShowLanguagesDlg()
 	DeleteObj(d);
 }
 
-int ShowLanguagesDlg::OnNotify(LViewI *n, int f)
+int ShowLanguagesDlg::OnNotify(LViewI *v, LNotification n)
 {
-	switch (n->GetId())
+	switch (v->GetId())
 	{
 		case IDOK:
 		{
@@ -104,7 +104,7 @@ int ShowLanguagesDlg::OnNotify(LViewI *n, int f)
 		}
 		case IDCANCEL:
 		{
-			EndModal(n->GetId() == IDOK);
+			EndModal(v->GetId() == IDOK);
 			break;
 		}
 	}

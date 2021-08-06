@@ -34,7 +34,7 @@ public:
 	void OnItemClick(LListItem *Item, LMouse &m);
 	void OnCreate();
 	LMessage::Result OnEvent(LMessage *Msg);
-	int OnNotify(LViewI *c, int f);
+	int OnNotify(LViewI *c, LNotification n);
 	bool OnMouseWheel(double Lines);
 	void OnPaint(LSurface *pDC);
 	bool OnLayout(LViewLayoutInfo &Inf);

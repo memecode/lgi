@@ -166,13 +166,13 @@ public:
 		}
 	}
 
-	int OnNotify(LViewI *c, int f)
+	int OnNotify(LViewI *c, LNotification n)
 	{
 		switch (c->GetId())
 		{
 			case IDC_LIST:
 			{
-				switch (f)
+				switch (n.Type)
 				{
 					case LNotifyItemSelect:
 					{

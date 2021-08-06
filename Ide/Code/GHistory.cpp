@@ -56,7 +56,7 @@ public:
 	{
 		if (Lst && Ctrl->GetId() == 1)
 		{
-			if (Flags == LNotifyItemSelect)
+			if (n.Type == LNotifyItemSelect)
 			{
 				LListItem *li = Lst->GetSelected();
 				if (li)

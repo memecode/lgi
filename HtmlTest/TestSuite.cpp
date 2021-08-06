@@ -542,7 +542,7 @@ public:
 		{
 			case IDC_LIST:
 			{
-				if (f == LNotifyItemSelect)
+				if (n.Type == LNotifyItemSelect)
 				{
 					LListItem *s = Lst->GetSelected();
 					if (s)
@@ -566,7 +566,7 @@ public:
 			}
 			case IDC_HTML:
 			{
-				switch (f)
+				switch (n.Type)
 				{
 					case LNotifySelectionChanged:
 					{

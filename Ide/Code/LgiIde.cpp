@@ -149,12 +149,12 @@ public:
 		Lst->ResizeColumnsToContent();
 	}
 
-	int OnNotify(LViewI *c, int f)
+	int OnNotify(LViewI *c, LNotification n)
 	{
 		switch (c->GetId())
 		{
 			case IDC_FILES:
-				if (f == LNotifyItemDoubleClick)
+				if (n.Type == LNotifyItemDoubleClick)
 				{
 					LListItem *i = Lst->GetSelected();
 					if (i)
@@ -165,7 +165,7 @@ public:
 				}
 				break;
 			case IDC_TEXT:
-				if (f != LNotifyReturnKey)
+				if (n.Type != LNotifyReturnKey)
 					Search(c->Name());
 				break;
 			case IDCANCEL:
@@ -379,7 +379,7 @@ public:
 		DoModal();
 	}
 	
-	int OnNotify(LViewI *c, int f)
+	int OnNotify(LViewI *c, LNotification n)
 	{
 		switch (c->GetId())
 		{
@@ -3082,7 +3082,7 @@ public:
 		}
 	}
 	
-	int OnNotify(LViewI *c, int f)
+	int OnNotify(LViewI *c, LNotification n)
 	{
 		switch (c->GetId())
 		{
@@ -3127,13 +3127,13 @@ void AppWnd::UpdateMemoryDump()
 	}
 }
 
-int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
+int AppWnd::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{
 		case IDC_PROJECT_TREE:
 		{
-			if (Flags == LNotifyDeleteKey)
+			if (n.Type == LNotifyDeleteKey)
 			{
 				ProjectNode *n = dynamic_cast<ProjectNode*>(d->Tree->Selection());
 				if (n)
@@ -3143,7 +3143,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 		}
 		case IDC_DEBUG_EDIT:
 		{
-			if (Flags == LK_RETURN && d->DbgContext)
+			if (n.Type == LNotifyReturnKey && d->DbgContext)
 			{
 				const char *Cmd = Ctrl->Name();
 				if (Cmd)
@@ -3156,7 +3156,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 		}
 		case IDC_MEM_ADDR:
 		{
-			if (Flags == LK_RETURN)
+			if (n.Type == LNotifyReturnKey)
 			{
 				if (d->DbgContext)
 				{
@@ -3182,7 +3182,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 		}
 		case IDC_MEM_ROW_LEN:
 		{
-			if (Flags == LK_RETURN)
+			if (n.Type == LNotifyReturnKey)
 				UpdateMemoryDump();
 			break;
 		}
@@ -3194,7 +3194,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 		}
 		case IDC_DEBUG_TAB:
 		{
-			if (d->DbgContext && Flags == LNotifyValueChanged)
+			if (d->DbgContext && n.Type == LNotifyValueChanged)
 			{
 				switch (Ctrl->Value())
 				{
@@ -3232,7 +3232,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 		case IDC_LOCALS_LIST:
 		{
 			if (d->Output->Locals &&
-				Flags == LNotifyItemDoubleClick &&
+				n.Type == LNotifyItemDoubleClick &&
 				d->DbgContext)
 			{
 				LListItem *it = d->Output->Locals->GetSelected();
@@ -3253,12 +3253,12 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 		}
 		case IDC_CALL_STACK:
 		{
-			if (Flags == M_CHANGE)
+			if (n.Type == LNotifyValueChanged)
 			{
 				if (d->Output->DebugTab)
 					d->Output->DebugTab->Value(AppWnd::CallStackTab);
 			}
-			else if (Flags == LNotifyItemSelect)
+			else if (n.Type == LNotifyItemSelect)
 			{
 				// This takes the user to a given call stack reference
 				if (d->Output->CallStack && d->DbgContext)
@@ -3288,7 +3288,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 		case IDC_WATCH_LIST:
 		{
 			WatchItem *Edit = NULL;
-			switch (Flags)
+			switch (n.Type)
 			{
 				case LNotifyDeleteKey:
 				{
@@ -3322,7 +3322,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
 		}
 		case IDC_THREADS:
 		{
-			if (Flags == LNotifyItemSelect)
+			if (n.Type == LNotifyItemSelect)
 			{
 				// This takes the user to a given thread
 				if (d->Output->Threads && d->DbgContext)
@@ -3408,7 +3408,7 @@ public:
 		Inst = NULL;
 	}
 
-	int OnNotify(LViewI *c, int f)
+	int OnNotify(LViewI *c, LNotification n)
 	{
 		switch (c->GetId())
 		{

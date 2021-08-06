@@ -672,7 +672,7 @@ public:
 	void OnDelete(FieldSource *s);
 	LMessage::Result OnEvent(LMessage *m);
 	void OnPaint(LSurface *pDC);
-	int OnNotify(LViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, LNotification n);
 };
 
 class ShortCutView : public LWindow
@@ -685,7 +685,7 @@ public:
 	~ShortCutView();
 
 	void OnDialogChange(ResDialog *Dlg);
-	int OnNotify(LViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, LNotification n);
 };
 
 #include "LgiRes_String.h"
@@ -776,7 +776,7 @@ public:
 
 	// ---------------------------------------------------------------------
 	// Window
-	int OnNotify(LViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, LNotification n);
 	LMessage::Result OnEvent(LMessage *m);
 	int OnCommand(int Cmd, int Event, OsView Handle);
 	void OnReceiveFiles(LArray<const char*> &Files);
@@ -840,7 +840,7 @@ class Search : public LDialog, public SearchParams
 
 public:
 	Search(AppWnd *app);
-	int OnNotify(LViewI *c, int f);
+	int OnNotify(LViewI *c, LNotification n);
 };
 
 class Results : public LWindow
@@ -852,7 +852,7 @@ public:
 	~Results();
 
 	void OnPosChange();
-	int OnNotify(LViewI *v, int f);
+	int OnNotify(LViewI *v, LNotification n);
 
 };
 
@@ -864,7 +864,7 @@ public:
 	ShowLanguagesDlg(AppWnd *app);
 	~ShowLanguagesDlg();
 
-	int OnNotify(LViewI *n, int f);
+	int OnNotify(LViewI *v, LNotification n);
 };
 
 class ResCss : public Resource, public LLayout

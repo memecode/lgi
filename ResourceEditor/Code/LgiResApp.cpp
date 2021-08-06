@@ -791,12 +791,12 @@ LMessage::Result FieldView::OnEvent(LMessage *m)
 	return LLayout::OnEvent(m);
 }
 
-int FieldView::OnNotify(LViewI *Ctrl, int Flags)
+int FieldView::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	if (!Ignore)
 	{
 		LTextView3 *Tv = dynamic_cast<LTextView3*>(Ctrl);
-		if (Tv && Flags == LNotifyCursorChanged)
+		if (Tv && n.Type == LNotifyCursorChanged)
 		{
 			return 0;
 		}
@@ -1485,7 +1485,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 	return LDocApp<LOptionsFile>::OnCommand(Cmd, Event, Handle);
 }
 
-int AppWnd::OnNotify(LViewI *Ctrl, int Flags)
+int AppWnd::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{
@@ -4536,11 +4536,11 @@ void FindShortCuts(LList *Out, LViewI *In)
 	}
 }
 
-int ShortCutView::OnNotify(LViewI *Ctrl, int Flags)
+int ShortCutView::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	if (Ctrl->GetId() == Lst->GetId())
 	{
-		switch (Flags)
+		switch (n.Type)
 		{
 			case LNotifyItemClick:
 			{
@@ -4557,7 +4557,7 @@ int ShortCutView::OnNotify(LViewI *Ctrl, int Flags)
 		}
 	}
 
-	return LWindow::OnNotify(Ctrl, Flags);
+	return LWindow::OnNotify(Ctrl, n);
 }
 
 void ShortCutView::OnDialogChange(ResDialog *Dlg)

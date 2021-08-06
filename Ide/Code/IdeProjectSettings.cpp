@@ -599,7 +599,7 @@ public:
 		}
 	}
 	
-	int OnNotify(LViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, LNotification n)
 	{
 		switch (Ctrl->GetId())
 		{
@@ -612,7 +612,7 @@ public:
 			}
 			case IDC_SEARCH:
 			{
-				if (Flags == LK_RETURN)
+				if (n.Type == LK_RETURN)
 				{
 					DefLockOut = LCurrentTime();
 					OnSearch(GetCtrlName(IDC_SEARCH));
@@ -694,7 +694,7 @@ public:
 			}
 		}
 		
-		return LDialog::OnNotify(Ctrl, Flags);
+		return LDialog::OnNotify(Ctrl, n);
 	}
 	
 	void OnSelect(SettingItem *si)

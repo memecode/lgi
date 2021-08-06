@@ -496,7 +496,7 @@ LMessage::Result LDataGrid::OnEvent(LMessage *Msg)
 	return LList::OnEvent(Msg);
 }
 
-int LDataGrid::OnNotify(LViewI *c, int f)
+int LDataGrid::OnNotify(LViewI *c, LNotification n)
 {
 	switch (c->GetId())
 	{
@@ -512,7 +512,7 @@ int LDataGrid::OnNotify(LViewI *c, int f)
 		}
 	}
 
-	return LList::OnNotify(c, f);
+	return LList::OnNotify(c, n);
 }
 
 void LDataGrid::SetColFlag(int Col, LDataGridFlags Flags, LVariant *Arg)

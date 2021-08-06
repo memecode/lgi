@@ -93,7 +93,7 @@ public:
 		}
 	}
 	
-	int OnNotify(LViewI *c, int f)
+	int OnNotify(LViewI *c, LNotification n)
 	{
 		switch (c->GetId())
 		{

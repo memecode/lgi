@@ -584,7 +584,7 @@ int FindSymbolDlg::OnNotify(LViewI *v, LNotification n)
 	{
 		case IDC_STR:
 		{
-			if (f != LK_RETURN)
+			if (n.Type != LK_RETURN)
 			{
 				auto Str = v->Name();
 				if (Str && strlen(Str) > 2)
@@ -597,7 +597,7 @@ int FindSymbolDlg::OnNotify(LViewI *v, LNotification n)
 		}
 		case IDC_RESULTS:
 		{
-			if (f == LNotifyItemDoubleClick)
+			if (n.Type == LNotifyItemDoubleClick)
 			{
 				// Fall throu
 			}

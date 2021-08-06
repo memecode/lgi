@@ -74,7 +74,7 @@ class GPaneThrottle : public LStatusPane
 public:
 	GPaneThrottle(GDom *app);
 
-	int OnNotify(LViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, LNotification n);
 	void OnPaint(LSurface *pDC);
 	int64 Value();
 	void OnMouseClick(LMouse &m);
@@ -88,7 +88,7 @@ GPaneThrottle::GPaneThrottle(GDom *app)
 	Slider = new LSlider(SLIDER_ID, 0, 0, 100, 20, "Throttle", false);
 }
 
-int GPaneThrottle::OnNotify(LViewI *Ctrl, int Flags)
+int GPaneThrottle::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	if (Ctrl && Ctrl->GetId() == SLIDER_ID)
 	{
@@ -126,7 +126,7 @@ void GPaneThrottle::OnPaint(LSurface *pDC)
 			Slider->Attach(this);
 			#endif
 			Slider->SetNotify(this);
-			Slider->SetLimits(0, 100);
+			Slider->SetRange(LRange(0, 100));
 			Slider->Value(100);
 
 			if (Pipe < 0)

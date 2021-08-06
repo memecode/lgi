@@ -649,7 +649,7 @@ public:
 		{
 			case IDC_EDITOR:
 			{
-				if ((f == LNotifyDocChanged || f == LNotifyCursorChanged) &&
+				if ((n.Type == LNotifyDocChanged || n.Type == LNotifyCursorChanged) &&
 					Edit)
 				{
 					LastChange = LCurrentTime();
@@ -659,7 +659,6 @@ public:
 			}
 			case IDC_TREE:
 			{
-				LNotifyType ft = (LNotifyType)f;
 				LTreeItem *i = Tree->Selection();
 				
 				LHashTbl<ConstStrKey<char>,LString> vars;
@@ -674,7 +673,7 @@ public:
 					}
 				}
 
-				switch (ft)
+				switch (n.Type)
 				{
 					case LNotifyItemSelect:
 					{
