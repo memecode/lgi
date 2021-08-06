@@ -257,7 +257,7 @@ GDateDropDown::GDateDropDown() :
 	SetPopup(Drop = new LDatePopup(this));
 }
 
-int GDateDropDown::OnNotify(LViewI *Wnd, LNotification &n)
+int GDateDropDown::OnNotify(LViewI *Wnd, LNotification n)
 {
 	if (Wnd == (LViewI*)Drop)
 	{
@@ -319,8 +319,7 @@ void GDateDropDown::SetDate(char *d)
 		LViewI *Nn = n->GetNotify() ? n->GetNotify() : n->GetParent();
 		if (Nn)
 		{
-			LNotification note;
-			Nn->OnNotify(n, note);
+			Nn->OnNotify(n, LNotifyValueChanged);
 		}
 	}
 }

@@ -566,7 +566,7 @@ public:
 		return SetItems(Matching);
 	}
 	
-	int OnNotify(LViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, LNotification n)
 	{
 		if (Lst &&
 			Ctrl == Edit &&
@@ -575,7 +575,7 @@ public:
 			Name(Edit->Name());
 		}
 		
-		return GPopupList<DefnInfo>::OnNotify(Ctrl, Flags);
+		return GPopupList<DefnInfo>::OnNotify(Ctrl, n);
 	}
 };
 
@@ -648,7 +648,7 @@ public:
 		App->GotoReference(Obj->File, Obj->Line, false);
 	}
 	
-	int OnNotify(LViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, LNotification n)
 	{
 		if (Lst &&
 			Ctrl == Edit &&
@@ -662,7 +662,7 @@ public:
 				App->FindSymbol(Doc->AddDispatch(), s, AllPlatforms != 0);
 		}
 		
-		return GPopupList<FindSymResult>::OnNotify(Ctrl, Flags);
+		return GPopupList<FindSymResult>::OnNotify(Ctrl, n);
 	}
 };
 

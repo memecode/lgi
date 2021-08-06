@@ -2276,7 +2276,7 @@ void LTableLayout::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 	}
 }
 
-int LTableLayout::OnNotify(LViewI *c, LNotification &n)
+int LTableLayout::OnNotify(LViewI *c, LNotification n)
 {
     if (n.Type == LNotifyTableLayoutRefresh)
     {

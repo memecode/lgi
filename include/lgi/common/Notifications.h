@@ -120,4 +120,11 @@ struct LNotification
 	LString::Array Str;
 
 	LNotification(LNotifyType type = LNotifyValueChanged) : Type(type) {}
+	LNotification(const LNotification &n)
+	{
+		Type = n.Type;
+		for (int i=0; i<MaxInts; i++)
+			Int[i] = n.Int[i];
+		Str = n.Str;
+	}
 };

@@ -754,13 +754,7 @@ LMessage::Result LList::OnEvent(LMessage *Msg)
 	return LItemContainer::OnEvent(Msg);
 }
 
-int LList::OnNotify(LViewI *Ctrl, int f)
-{
-	LNotification n((LNotifyType)f);
-	return OnNotify(Ctrl, n);
-}
-
-int LList::OnNotify(LViewI *Ctrl, LNotification &n)
+int LList::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	if
 	(

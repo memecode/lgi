@@ -346,8 +346,7 @@ public:
 			if (Trigger)
 			{
 				LViewI *n=GetNotify()?GetNotify():GetParent();
-				LNotification note(LNotifyItemClick);
-				if (n) n->OnNotify(this, note);
+				if (n) n->OnNotify(this, LNotifyItemClick);
 			}
 		}
 	}
@@ -382,8 +381,7 @@ public:
 				if (!Down)
 				{
 					LViewI *n=GetNotify()?GetNotify():GetParent();
-					LNotification note(LNotifyActivate);
-					if (n) n->OnNotify(this, note);
+					if (n) n->OnNotify(this, LNotifyActivate);
 				}
 			}
 			
@@ -698,7 +696,7 @@ public:
 		}
 	}
 
-	int OnNotify(LViewI *c, LNotification &n)
+	int OnNotify(LViewI *c, LNotification n)
 	{
 		if (e != NULL &&
 			c->GetId() == e->GetId())
@@ -817,7 +815,7 @@ public:
 	LFileSelectDlg(LFileSelectPrivate *Select);
 	~LFileSelectDlg();
 
-	int OnNotify(LViewI *Ctrl, LNotification &n);
+	int OnNotify(LViewI *Ctrl, LNotification n);
 	void OnUpFolder();
 	void SetFolder(char *f);
 	void OnFolder();
@@ -1121,7 +1119,7 @@ void LFileSelectDlg::OnFilter(const char *Key)
 		FileLst->SetFilterKey(Key);
 }
 
-int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification &n)
+int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{
@@ -1761,8 +1759,7 @@ void LFolderItem::OnActivate()
 		}
 		else // Is file
 		{
-			LNotification note(LNotifyActivate);
-			Dlg->OnNotify(Dlg->SaveBtn, note);
+			Dlg->OnNotify(Dlg->SaveBtn, LNotifyActivate);
 		}
 	}
 }
@@ -1865,8 +1862,7 @@ bool GFolderList::OnKey(LKey &k)
 				LViewI *v = GetWindow()->FindControl(IDC_UP);
 				if (v)
 				{
-					LNotification note(LNotifyBackspaceKey);
-					GetWindow()->OnNotify(v, note);
+					GetWindow()->OnNotify(v, LNotifyBackspaceKey);
 				}
 			}
 			Status = true;
@@ -1902,8 +1898,7 @@ bool GFolderList::OnKey(LKey &k)
 						if (Ok)
 						{
 							GetWindow()->SetCtrlName(IDC_FILE, Sel->GetText(0));
-							LNotification note(LNotifyReturnKey);
-							GetWindow()->OnNotify(Ok, note);
+							GetWindow()->OnNotify(Ok, LNotifyReturnKey);
 						}
 					}
 				}

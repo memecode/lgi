@@ -77,7 +77,7 @@ void LAlert::SetAppModal()
     #endif
 }
 
-int LAlert::OnNotify(LViewI *Ctrl, LNotification &n)
+int LAlert::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{

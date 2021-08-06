@@ -166,7 +166,7 @@ void LButton::SetFont(LFont *Fnt, bool OwnIt)
 	LView::SetFont(Fnt, OwnIt);
 }
 
-int LButton::OnNotify(LViewI *Ctrl, LNotification &n)
+int LButton::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	if (Ctrl == (LViewI*)this && n.Type == LNotifyActivate)
 	{
@@ -373,31 +373,7 @@ void LButton::Value(int64 i)
 
 void LButton::OnClick()
 {
-	int Id = GetId();
-	if (Id)
-	{
-		LViewI *n = GetNotify();
-		LViewI *p = GetParent();
-		LViewI *target = n ? n : p;
-		if (target)
-		{
-			if (Handle())
-			{
-				target->PostEvent(M_CHANGE, (LMessage::Param)Id);
-			}
-			else if (InThread())
-			{
-				LNotification note;
-				target->OnNotify(this, note);
-			}
-			else
-			{
-				LAssert(!"Out of thread and no handle?");
-			}
-		}
-	}
-	else
-		SendNotify();
+	SendNotify(LNotifyValueChanged);
 }
 
 bool LButton::SetImage(const char *FileName)

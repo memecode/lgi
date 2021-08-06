@@ -59,7 +59,7 @@ void AddFtpFile::OnCmdComplete(FtpCmd *Cmd)
 	}
 }
 
-int AddFtpFile::OnNotify(LViewI *c, int f)
+int AddFtpFile::OnNotify(LViewI *c, LNotification n)
 {
 	switch (c->GetId())
 	{

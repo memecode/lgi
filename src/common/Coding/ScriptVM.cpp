@@ -1912,8 +1912,7 @@ void LVmDebuggerWnd::OnAddress(size_t Addr)
 		d->Text->Invalidate();
 	}
 
-	LNotification note;
-	OnNotify(d->Tabs, note);
+	OnNotify(d->Tabs, LNotifyValueChanged);
 }
 
 void LVmDebuggerWnd::OnError(const char *Msg)
@@ -2052,7 +2051,7 @@ int LVmDebuggerWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 	return LWindow::OnCommand(Cmd, Event, Wnd);
 }
 
-int LVmDebuggerWnd::OnNotify(LViewI *Ctrl, LNotification &n)
+int LVmDebuggerWnd::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	if (!d->AcceptNotify)
 		return 0;

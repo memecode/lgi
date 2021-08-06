@@ -17,7 +17,7 @@ public:
 	~AddFtpFile();
 
 	void OnCmdComplete(FtpCmd *Cmd);
-	int OnNotify(LViewI *c, int f);
+	int OnNotify(LViewI *c, LNotification n);
 };
 
 #endif

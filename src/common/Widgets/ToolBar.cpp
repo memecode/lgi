@@ -1405,6 +1405,7 @@ LMessage::Result LToolBar::OnEvent(LMessage *Msg)
 		{
 			if (GetParent())
 				return GetParent()->OnEvent(Msg);
+			LAutoPtr<LNotification> note((LNotification*)Msg->B());
 			break;
 		}
 	}

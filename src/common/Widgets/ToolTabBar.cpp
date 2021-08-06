@@ -98,16 +98,16 @@ void LToolTabBar::OnButtonClick(LToolButton *Btn)
 		OnChange(Btn);
 }
 
-int LToolTabBar::OnNotify(LViewI *c, int f)
+int LToolTabBar::OnNotify(LViewI *c, LNotification n)
 {
-	if (f == LNotifyValueChanged)
+	if (n.Type == LNotifyValueChanged)
 	{
 		LToolTab *b = dynamic_cast<LToolTab*>(c);
 		if (b && b != Current)
 			OnChange(b);
 	}
 	
-	return LLayout::OnNotify(c, f);
+	return LLayout::OnNotify(c, n);
 }
 
 bool LToolTabBar::IsOk()

@@ -192,7 +192,7 @@ public:
 		}
 	}
 	
-	int OnNotify(LViewI *Ctrl, LNotification &n)
+	int OnNotify(LViewI *Ctrl, LNotification n)
 	{
 		if (Lst &&
 			Ctrl == Edit &&

@@ -611,7 +611,10 @@ void LApp::OnSDLEvent(LMessage *m)
 				case M_CHANGE:
 				{
 					LView *v = (LView*)m->Event.user.data1;
-					LAutoPtr<LMessage::EventParams> p((LMessage::EventParams*)m->Event.user.data2);
+					// LAutoPtr<LMessage::EventParams> p((LMessage::EventParams*)m->Event.user.data2);
+					// FIXME: 'B' data type is changing...
+					LAssert(!"Fixme");
+					LAutoPtr<LNotification> note((LNotification*)m->B());
 					
 					if (!ViewMap.Find(v))
 						break;

@@ -136,7 +136,7 @@ void GFindDlg::OnCreate()
 	}
 }
 
-int GFindDlg::OnNotify(LViewI *Ctrl, LNotification &n)
+int GFindDlg::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{
@@ -274,7 +274,7 @@ void GReplaceDlg::OnCreate()
 	SetCtrlValue(IDC_SEARCH_UP, SearchUpwards);
 }
 
-int GReplaceDlg::OnNotify(LViewI *Ctrl, LNotification &n)
+int GReplaceDlg::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{

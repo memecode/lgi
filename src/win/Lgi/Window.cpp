@@ -575,8 +575,7 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 		LViewI *c = Map.Find(ToUpper(k.c16));
 		if (c)
 		{
-			LNotification note(LNotifyActivate);
-			c->OnNotify(c, note);
+			c->OnNotify(c, LNotifyActivate);
 			return true;
 		}
 	}

@@ -1445,11 +1445,12 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 			case M_CHANGE:
 			{
 				LWindow *w = GetWindow();
+				LAutoPtr<LNotification> note((LNotification*)Msg->B());
 				LViewI *Ctrl = w ? w->FindControl((int)Msg->a) : 0;
 				if (Ctrl)
 				{
-					LNotification note;
-					return OnNotify(Ctrl, note);
+					LAssert(note.Get() != NULL);
+					return OnNotify(Ctrl, note ? *note : LNotifyNull);
 				}
 				else
 				{
@@ -1476,9 +1477,7 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 						case CBN_EDITCHANGE: // COMBO
 						{
 							Ctrl->SysOnNotify(Msg->Msg(), Code);
-
-							LNotification note;
-							OnNotify(Ctrl, note);
+							OnNotify(Ctrl, LNotifyValueChanged);
 							break;
 						}
 						/*

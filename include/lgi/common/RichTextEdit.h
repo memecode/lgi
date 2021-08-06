@@ -212,7 +212,7 @@ public:
 	bool OnKey(LKey &k);
 	void OnPaint(LSurface *pDC);
 	LMessage::Result OnEvent(LMessage *Msg);
-	int OnNotify(LViewI *Ctrl, LNotification &n);
+	int OnNotify(LViewI *Ctrl, LNotification n);
 	void OnPulse();
 	int OnHitTest(int x, int y);
 	bool OnLayout(LViewLayoutInfo &Inf);

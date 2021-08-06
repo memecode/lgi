@@ -165,7 +165,7 @@ void LRadioGroup::Value(int64 Which)
 	}
 }
 
-int LRadioGroup::OnNotify(LViewI *Ctrl, LNotification &n)
+int LRadioGroup::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	LViewI *v = GetNotify() ? GetNotify() : GetParent();
 	if (v)
@@ -433,7 +433,7 @@ bool LRadioButton::OnLayout(LViewLayoutInfo &Inf)
 	
     return true;    
 }
-int LRadioButton::OnNotify(LViewI *Ctrl, LNotification &n)
+int LRadioButton::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	if (Ctrl == (LViewI*)this && n.Type == LNotifyActivate)
 	{

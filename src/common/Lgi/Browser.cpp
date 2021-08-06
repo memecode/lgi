@@ -529,7 +529,7 @@ bool GBrowser::SetHtml(char *Html)
 	return true;
 }
 
-int GBrowser::OnNotify(LViewI *c, LNotification &n)
+int GBrowser::OnNotify(LViewI *c, LNotification n)
 {
 	switch (c->GetId())
 	{

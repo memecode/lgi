@@ -1185,7 +1185,8 @@ LMessage::Result AppWnd::OnEvent(LMessage *m)
 	{
 		case M_CHANGE:
 		{
-			return OnNotify((LViewI*) m->A(), (int)m->B());
+			LAutoPtr<LNotification> note((LNotification*)m->B());
+			return OnNotify((LViewI*) m->A(), *note);
 		}
 		case M_DESCRIBE:
 		{

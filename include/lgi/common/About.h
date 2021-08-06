@@ -29,7 +29,7 @@ public:
 		const char *Email
 	);
 
-	int OnNotify(LViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, LNotification n);
 };
 
 #endif

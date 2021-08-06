@@ -82,7 +82,7 @@ GInput::GInput(LViewI *parent, const char *InitStr, const char *Msg, const char 
 	MoveToCenter();
 }
 
-int GInput::OnNotify(LViewI *Ctrl, LNotification &n)
+int GInput::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{

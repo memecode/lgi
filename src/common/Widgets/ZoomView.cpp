@@ -1682,7 +1682,7 @@ LMessage::Param LZoomView::OnEvent(LMessage *m)
 	return LLayout::OnEvent(m);
 }
 
-int LZoomView::OnNotify(LViewI *v, LNotification &n)
+int LZoomView::OnNotify(LViewI *v, LNotification n)
 {
 	switch (v->GetId())
 	{

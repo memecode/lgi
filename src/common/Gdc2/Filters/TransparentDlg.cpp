@@ -33,7 +33,7 @@ GTransparentDlg::GTransparentDlg(LView *parent, LVariant *trans)
 	Children.Insert(new LButton(IDOK, 65, 82, 60, 20, "Ok"));
 }
 
-int GTransparentDlg::OnNotify(LViewI *Ctrl, int Flags)
+int GTransparentDlg::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{

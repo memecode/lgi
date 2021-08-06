@@ -1160,7 +1160,7 @@ void LDropDown::OnMouseClick(LMouse &m)
 	}
 }
 
-int LDropDown::OnNotify(LViewI *c, LNotification &n)
+int LDropDown::OnNotify(LViewI *c, LNotification n)
 {
 	if (c == (LViewI*)Popup)
 	{

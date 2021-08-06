@@ -489,7 +489,7 @@ public:
 		}
 	}
 	
-	int OnNotify(LViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, LNotification n)
 	{
 		switch (Ctrl->GetId())
 		{
@@ -519,7 +519,7 @@ public:
 			}
 		}
 		
-		return LLayout::OnNotify(Ctrl, Flags);
+		return LLayout::OnNotify(Ctrl, n);
 	}
 
     int ZoomToFactor(int Zoom)
@@ -954,13 +954,13 @@ ImageCompareDlg::~ImageCompareDlg()
 	DeleteObj(d);
 }
 
-int ImageCompareDlg::OnNotify(LViewI *Ctrl, int Flags)
+int ImageCompareDlg::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{
 		case IDC_LIST:
 		{
-			if (Flags == LNotifyItemDoubleClick)
+			if (n.Type == LNotifyItemDoubleClick)
 			{
 				LListItem *s = d->lst->GetSelected();
 				if (s)
@@ -1033,7 +1033,7 @@ int ImageCompareDlg::OnNotify(LViewI *Ctrl, int Flags)
 		}
 		case IDC_TAB_PAGE:
 		{
-			if (Flags == LNotifyTabPageButtonClick)
+			if (n.Type == LNotifyTabPageButtonClick)
 			{
 				LTabPage *p = dynamic_cast<LTabPage*>(Ctrl);
 				LAssert(p);

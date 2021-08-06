@@ -56,7 +56,7 @@ public:
 	
 	// Events
 	LMessage::Result OnEvent(LMessage *Msg) override;
-	int OnNotify(LViewI *Ctrl, LNotification &n) override;
+	int OnNotify(LViewI *Ctrl, LNotification n) override;
 	void OnPaint(LSurface *pDC) override;
 	void OnPosChange() override;
 	void OnAttach() override;

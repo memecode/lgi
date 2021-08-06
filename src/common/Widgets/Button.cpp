@@ -109,7 +109,7 @@ LButton::~LButton()
 	DeleteObj(d);
 }
 
-int LButton::OnNotify(LViewI *Ctrl, LNotification &n)
+int LButton::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	if (Ctrl == (LViewI*)this && n.Type == LNotifyActivate)
 	{
@@ -348,35 +348,7 @@ bool LButton::OnKey(LKey &k)
 
 void LButton::OnClick()
 {
-	int Id = GetId();
-	if (Id)
-	{
-		LViewI *n = GetNotify();
-		LViewI *p = GetParent();
-		LViewI *target = n ? n : p;
-		if (target)
-		{
-			#if LGI_VIEW_HANDLE
-			if (Handle())
-			#else
-			if (IsAttached())
-			#endif
-			{
-				target->PostEvent(M_CHANGE, (LMessage::Param)Id);
-			}
-			else if (InThread())
-			{
-				LNotification note(LNotifyItemClick);
-				target->OnNotify(this, note);
-			}
-			else
-			{
-				LAssert(!"Out of thread and no handle?");
-			}
-		}
-	}
-	else
-		SendNotify();
+	SendNotify(LNotifyItemClick);
 }
 
 void LButton::OnFocus(bool f)

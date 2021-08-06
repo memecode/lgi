@@ -1337,8 +1337,7 @@ bool GTag::OnClick()
 	}
 	else
 	{
-		LNotification note;
-		OnNotify(note);
+		OnNotify(LNotification());
 	}
 
 	return true;
@@ -2441,7 +2440,7 @@ void GTag::GetTagByPos(GTagHit &TagHit, int x, int y, int Depth, bool InBody, bo
 	}
 }
 
-int GTag::OnNotify(LNotification &n)
+int GTag::OnNotify(LNotification n)
 {
 	if (!Ctrl || !Html->InThread())
 		return 0;
@@ -7367,7 +7366,7 @@ LMessage::Result GHtml::OnEvent(LMessage *Msg)
 	return LDocView::OnEvent(Msg);
 }
 
-int GHtml::OnNotify(LViewI *c, LNotification &n)
+int GHtml::OnNotify(LViewI *c, LNotification n)
 {
 	switch (c->GetId())
 	{

@@ -463,7 +463,7 @@ void LView::OnPaint(LSurface *pDC)
 	Tools.PaintContent(pDC, c);
 }
 
-int LView::OnNotify(LViewI *Ctrl, LNotification &Data)
+int LView::OnNotify(LViewI *Ctrl, LNotification Data)
 {
 	if (!Ctrl)
 		return 0;
@@ -722,7 +722,7 @@ void LView::SetParent(LViewI *p)
 	d->ParentI = p;
 }
 
-void LView::SendNotify(LNotifyType Data)
+void LView::SendNotify(LNotification note)
 {
 	LViewI *n = d->Notify ? d->Notify : d->Parent;
 	if (n)
@@ -733,7 +733,6 @@ void LView::SendNotify(LNotifyType Data)
 			#endif
 			InThread())
 		{
-			LNotification note(Data);
 			n->OnNotify(this, note);
 		}
 		else
@@ -783,7 +782,7 @@ void LView::SendNotify(LNotifyType Data)
 									// the receiver will never be able to find our object.
             
             // printf("Post M_CHANGE %i %i\n", GetId(), Data);
-            n->PostEvent(M_CHANGE, (LMessage::Param) GetId(), (LMessage::Param) Data);
+            n->PostEvent(M_CHANGE, (LMessage::Param) GetId(), (LMessage::Param) new LNotification(note));
 		}
 	}
 }

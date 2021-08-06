@@ -72,6 +72,6 @@ public:
 	LTreeItem *Insert(const char *DomPath, int CtrlId, LVariantType Type, LVariant *Value = 0, LArray<EnumValue> *Enum = 0);
 	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
 	bool Serialize(GDom *Store, bool Write);
-	int OnNotify(LViewI *c, LNotification &n);
+	int OnNotify(LViewI *c, LNotification n);
 };
 

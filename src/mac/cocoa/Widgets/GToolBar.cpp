@@ -1832,9 +1832,8 @@ int LToolBar::OnEvent(LMessage *Msg)
 		case M_CHANGE:
 		{
 			if (GetParent())
-			{
 				return GetParent()->OnEvent(Msg);
-			}
+			LAutoPtr<LNotification> note((LNotification*)m->B());
 			break;
 		}
 	}

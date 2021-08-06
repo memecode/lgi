@@ -801,15 +801,16 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 		}
 		case M_CHANGE:
 		{
-			int CtrlId = MsgA(Msg);
+			int CtrlId = Msg->A();
+			LAutoPtr<LNotification> note((LNotification*)m->B());
+
 			LViewI *Ctrl = FindControl(CtrlId);
 			if (Ctrl)
 			{
 				int32 Cid = -1;
 				Msg->FindInt32("cid", &Cid);
-				LMessage::Param Data = MsgB(Msg);
 
-				OnNotify(Ctrl, Data);
+				OnNotify(Ctrl, *note);
 			}
 			else LgiTrace("%s:%i - Couldn't find ctrl '%i'\n", _FL, CtrlId);
 			break;

@@ -99,7 +99,7 @@ LAbout::LAbout(	LView *parent,
 	DoModal();
 }
 
-int LAbout::OnNotify(LViewI *Ctrl, int Flags)
+int LAbout::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	if (!Ctrl) return 0;
 	

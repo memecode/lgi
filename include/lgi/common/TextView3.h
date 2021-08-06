@@ -417,7 +417,7 @@ public:
 	bool OnKey(LKey &k) override;
 	void OnPaint(LSurface *pDC) override;
 	LMessage::Result OnEvent(LMessage *Msg) override;
-	int OnNotify(LViewI *Ctrl, LNotification &n) override;
+	int OnNotify(LViewI *Ctrl, LNotification n) override;
 	void OnPulse() override;
 	int OnHitTest(int x, int y) override;
 	bool OnLayout(LViewLayoutInfo &Inf) override;

@@ -467,10 +467,7 @@ public:
 			
 			LViewI *n = Widget->GetNotify() ? Widget->GetNotify() : Widget->GetParent();
 			if (n)
-			{
-				LNotification note(LNotifyItemChange);
-				n->OnNotify(Widget, note);
-			}
+				n->OnNotify(Widget, LNotifyItemChange);
 		}
 	}
 };

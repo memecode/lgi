@@ -268,7 +268,7 @@ LProgressPane &LProgressPane::operator--(int)
 	return *this;
 }
 
-int LProgressPane::OnNotify(LViewI *Ctrl, LNotification &n)
+int LProgressPane::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{
@@ -441,7 +441,7 @@ void LProgressDlg::OnPosChange()
 	}
 }
 
-int LProgressDlg::OnNotify(LViewI *Ctrl, LNotification &n)
+int LProgressDlg::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	if (Ctrl->GetId() == IDC_PANE &&
 		n.Type == LNotifyTableLayoutChanged)

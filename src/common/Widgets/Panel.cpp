@@ -194,7 +194,7 @@ bool LPanel::Pour(LRegion &r)
 	return false;
 }
 
-int LPanel::OnNotify(LViewI *Ctrl, LNotification &n)
+int LPanel::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	if (GetParent())
 	{
@@ -261,10 +261,7 @@ void LPanel::OnMouseClick(LMouse &m)
 	{
 		Open(!IsOpen);
 		if (GetParent())
-		{
-			LNotification note(LNotifyItemClick);
-			OnNotify(this, note);
-		}
+			OnNotify(this, LNotifyItemClick);
 	}
 }
 

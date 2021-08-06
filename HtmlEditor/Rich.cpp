@@ -104,7 +104,7 @@ public:
 		return true;	
 	}
 
-	int OnNotify(LViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, LNotification n)
 	{
 		switch (Ctrl->GetId())
 		{
@@ -643,7 +643,7 @@ public:
 		return LWindow::OnCommand(Cmd, Event, Wnd);
 	}
 
-	int OnNotify(LViewI *c, int f)
+	int OnNotify(LViewI *c, LNotification n)
 	{
 		switch (c->GetId())
 		{

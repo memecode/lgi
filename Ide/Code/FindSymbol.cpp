@@ -37,7 +37,7 @@ public:
 	FindSymbolDlg(LViewI *parent, FindSymbolSystem *sys);
 	~FindSymbolDlg();
 	
-	int OnNotify(LViewI *v, int f);
+	int OnNotify(LViewI *v, LNotification n);
 	void OnCreate();
 	bool OnViewKey(LView *v, LKey &k);
 	LMessage::Result OnEvent(LMessage *m);
@@ -578,7 +578,7 @@ LMessage::Result FindSymbolDlg::OnEvent(LMessage *m)
 	return LDialog::OnEvent(m);
 }
 
-int FindSymbolDlg::OnNotify(LViewI *v, int f)
+int FindSymbolDlg::OnNotify(LViewI *v, LNotification n)
 {
 	switch (v->GetId())
 	{
@@ -625,7 +625,7 @@ int FindSymbolDlg::OnNotify(LViewI *v, int f)
 		}
 	}
 	
-	return LDialog::OnNotify(v, f);
+	return LDialog::OnNotify(v, n);
 }
 
 ///////////////////////////////////////////////////////////////////////////

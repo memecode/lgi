@@ -28,7 +28,7 @@ public:
 	bool SetHtml(char *Html);
 
 	void OnPosChange();
-	int OnNotify(LViewI *c, LNotification &n);
+	int OnNotify(LViewI *c, LNotification n);
 	LMessage::Result OnEvent(LMessage *m);
 };
 

@@ -369,8 +369,7 @@ public:
 	LCursor GetCursor(int x, int y);
 	void OnMouseClick(LMouse &m);
 	void OnMouseMove(LMouse &m);
-	int OnNotify(LViewI *Ctrl, int f);
-	int OnNotify(LViewI *Ctrl, LNotification &n);
+	int OnNotify(LViewI *Ctrl, LNotification n);
 	void OnPosChange();
 	bool OnKey(LKey &k);
 	bool OnMouseWheel(double Lines);
