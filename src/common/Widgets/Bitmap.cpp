@@ -188,7 +188,8 @@ void LBitmap::OnMouseClick(LMouse &m)
 		LDialog *Dlg = dynamic_cast<LDialog*>(GetParent());
 		if (Dlg)
 		{
-			Dlg->OnNotify(this, LNotifyItemClick);
+			LNotification note(m);
+			Dlg->OnNotify(this, note);
 		}
 	}
 }

@@ -346,9 +346,9 @@ bool LButton::OnKey(LKey &k)
 	return false;
 }
 
-void LButton::OnClick()
+void LButton::OnClick(const LMouse &m)
 {
-	SendNotify(LNotifyItemClick);
+	SendNotify(LNotification(m));
 }
 
 void LButton::OnFocus(bool f)

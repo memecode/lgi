@@ -170,7 +170,9 @@ int LButton::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	if (Ctrl == (LViewI*)this && n.Type == LNotifyActivate)
 	{
-		OnClick();
+		LMouse m;
+		GetMouse(m);
+		OnClick(m);
 	}
 
 	return 0;
@@ -181,7 +183,9 @@ int LButton::SysOnNotify(int Msg, int Code)
 	if (Msg == WM_COMMAND &&
 		Code == BN_CLICKED)
 	{
-		OnClick();
+		LMouse m;
+		GetMouse(m);
+		OnClick(m);
 	}
 	
 	return 0;
@@ -321,7 +325,11 @@ bool LButton::OnKey(LKey &k)
 		case VK_RETURN:
 		{
 			if (!k.IsChar && k.Down())
-				OnClick();
+			{
+				LMouse m;
+				GetMouse(m);
+				OnClick(m);
+			}
 			return true;
 		}
 	}
@@ -371,9 +379,9 @@ void LButton::Value(int64 i)
 	}
 }
 
-void LButton::OnClick()
+void LButton::OnClick(const LMouse &m)
 {
-	SendNotify(LNotifyValueChanged);
+	SendNotify(LNotification(m));
 }
 
 bool LButton::SetImage(const char *FileName)

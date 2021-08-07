@@ -162,20 +162,20 @@ public:
 	}
 
 	virtual ~LUiEvent() {}
-	virtual void Trace(const char *Msg) {}
+	virtual void Trace(const char *Msg) const {}
 
 	/// The key or mouse button was being pressed. false on the up-click.
-	bool Down()		{ return TestFlag(Flags, LGI_EF_DOWN); }
+	bool Down() const	{ return TestFlag(Flags, LGI_EF_DOWN); }
 	/// The mouse button was double clicked.
-	bool Double()	{ return TestFlag(Flags, LGI_EF_DOUBLE); }
+	bool Double() const	{ return TestFlag(Flags, LGI_EF_DOUBLE); }
 	/// A ctrl button was held down during the event
-	bool Ctrl()		{ return TestFlag(Flags, LGI_EF_CTRL); }
+	bool Ctrl() const	{ return TestFlag(Flags, LGI_EF_CTRL); }
 	/// A alt button was held down during the event
-	bool Alt()		{ return TestFlag(Flags, LGI_EF_ALT); }
+	bool Alt() const	{ return TestFlag(Flags, LGI_EF_ALT); }
 	/// A shift button was held down during the event
-	bool Shift()	{ return TestFlag(Flags, LGI_EF_SHIFT); }
+	bool Shift() const	{ return TestFlag(Flags, LGI_EF_SHIFT); }
 	/// The system key was held down (windows key / apple key etc)
-	bool System()	{ return TestFlag(Flags, LGI_EF_SYSTEM); }
+	bool System() const	{ return TestFlag(Flags, LGI_EF_SYSTEM); }
 
 	// Set
 	void Down(bool i)	{ AssignFlag(Flags, LGI_EF_DOWN, i); }
@@ -186,14 +186,14 @@ public:
 	void System(bool i)	{ AssignFlag(Flags, LGI_EF_SYSTEM, i); }
 
 	#if defined(MAC)
-		bool CtrlCmd() { return System(); }
+		bool CtrlCmd() const { return System(); }
 		static const char *CtrlCmdName() { return "\xE2\x8C\x98"; }	
-		bool AltCmd() { return System(); }
+		bool AltCmd() const { return System(); }
 		static const char *AltCmdName()	{ return "\xE2\x8C\x98"; }
 	#else // win32 and linux
-		bool CtrlCmd() { return Ctrl(); }
+		bool CtrlCmd() const { return Ctrl(); }
 		static const char *CtrlCmdName() { return "Ctrl"; }	
-		bool AltCmd() { return Alt(); }
+		bool AltCmd() const { return Alt(); }
 		static const char *AltCmdName() { return "Alt"; }
 	#endif
 	
@@ -262,7 +262,7 @@ public:
 
 	LKey(int vkey, uint32_t flags);
 
-	void Trace(const char *Msg)
+	void Trace(const char *Msg) const
 	{
 		LgiTrace("%s LKey vkey=%i(0x%x) c16=%i(%c) IsChar=%i down=%i ctrl=%i alt=%i sh=%i sys=%i\n",
 			Msg ? Msg : (char*)"",
@@ -271,13 +271,13 @@ public:
 			IsChar, Down(), Ctrl(), Alt(), Shift(), System());
 	}
 	
-	bool CapsLock()
+	bool CapsLock() const
 	{
 		return TestFlag(Flags, LGI_EF_CAPS_LOCK);
 	}
 
 	/// Returns the character in the right case...
-	char16 GetChar()
+	char16 GetChar() const
 	{
 		if (Shift() ^ CapsLock())
 		{
@@ -290,7 +290,7 @@ public:
 	}
 	
 	/// \returns true if this event should show a context menu
-	bool IsContextMenu();
+	bool IsContextMenu() const;
 };
 
 /// \brief All the parameters of a mouse click event
@@ -333,7 +333,7 @@ public:
 		return m;
 	}
 
-	void Trace(const char *Msg)
+	void Trace(const char *Msg) const
 	{
 		LgiTrace("%s LMouse pos=%i,%i view=%i btns=%i/%i/%i dwn=%i dbl=%i "
 				"ctrl=%i alt=%i sh=%i sys=%i\n",
@@ -344,13 +344,13 @@ public:
 	}
 
 	/// True if the left mouse button was clicked
-	bool Left()		{ return TestFlag(Flags, LGI_EF_LEFT); }
+	bool Left() const	{ return TestFlag(Flags, LGI_EF_LEFT); }
 	/// True if the middle mouse button was clicked
-	bool Middle()	{ return TestFlag(Flags, LGI_EF_MIDDLE); }
+	bool Middle() const	{ return TestFlag(Flags, LGI_EF_MIDDLE); }
 	/// True if the right mouse button was clicked
-	bool Right()	{ return TestFlag(Flags, LGI_EF_RIGHT); }
+	bool Right() const	{ return TestFlag(Flags, LGI_EF_RIGHT); }
 	/// True if the mouse event is a move, false for a click event.
-	bool IsMove()	{ return TestFlag(Flags, LGI_EF_MOVE); }
+	bool IsMove() const	{ return TestFlag(Flags, LGI_EF_MOVE); }
 
 	/// Sets the left button flag
 	void Left(bool i)	{ AssignFlag(Flags, LGI_EF_LEFT, i); }
@@ -367,7 +367,7 @@ public:
 	bool ToView();
 
 	/// \returns true if this event should show a context menu
-	bool IsContextMenu();
+	bool IsContextMenu() const;
 	
 	#if defined(__OBJC__) && !defined(__GTK_H__)
 	void SetFromEvent(NSEvent *ev, NSView *view);

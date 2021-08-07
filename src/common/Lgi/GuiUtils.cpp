@@ -18,7 +18,7 @@
 	#endif
 #endif
 
-bool LKey::IsContextMenu()
+bool LKey::IsContextMenu() const
 {
 	#if WINNATIVE || defined(LINUX)
 	return !IsChar && vkey == LK_CONTEXTKEY;
@@ -28,7 +28,7 @@ bool LKey::IsContextMenu()
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-bool LMouse::IsContextMenu()
+bool LMouse::IsContextMenu() const
 {
 	if (Right())
 		return true;

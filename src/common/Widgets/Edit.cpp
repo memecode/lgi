@@ -194,27 +194,12 @@ bool LEdit::OnKey(LKey &k)
 	 	#ifndef LINUX
 		case LK_KEYPADENTER:
 		#endif
-		{
-			if (k.Down())
-				SendNotify(LNotifyReturnKey);
-			break;
-		}
 		case LK_ESCAPE:
-		{
-			if (k.Down())
-				SendNotify(LNotifyEscapeKey);
-			break;
-		}
 		case LK_BACKSPACE:
-		{
-			if (k.Down())
-				SendNotify(LNotifyBackspaceKey);
-			break;
-		}
 		case LK_DELETE:
 		{
 			if (k.Down())
-				SendNotify(LNotifyDeleteKey);
+				SendNotify(LNotification(k));
 			break;
 		}
 	}
@@ -243,7 +228,7 @@ void LEdit::OnEnter(LKey &k)
 	if (d->Multiline)
 		LTextView3::OnEnter(k);
 	else
-		SendNotify(LNotifyReturnKey);
+		SendNotify(LNotification(k));
 }
 
 bool LEdit::Paste()

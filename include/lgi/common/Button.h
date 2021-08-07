@@ -89,7 +89,7 @@ public:
 	void OnCreate() override;
 	void OnAttach() override;
 	void OnStyleChange();
-	virtual void OnClick();
+	virtual void OnClick(const LMouse &m);
 
 	// Impl
 	const char *Name() override { return LView::Name(); }

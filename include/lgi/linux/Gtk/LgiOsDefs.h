@@ -8,13 +8,15 @@
 #define __LGI_OS_DEFS_H
 
 #include <string.h>
-#include "assert.h"
-#include "lgi/common/LgiDefs.h"
+#include <assert.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <wchar.h>
+
+#include "lgi/common/LgiDefs.h"
+
 #ifdef WIN32
 	#include "winsock2.h"
 	#define WIN32GTK                    1
@@ -67,6 +69,7 @@
 #endif
 #define LGI_VIEW_HANDLE					0
 #define LGI_VIEW_HASH                   1
+#define LGI_GTK							1
 
 #undef stricmp
 
@@ -133,9 +136,9 @@ typedef Gtk::PangoFontDescription       *OsFont;
 typedef void							*OsBitmap;
 
 #ifdef WIN32
-#define LGetCurrentProcess			GetCurrentProcessId
+#define LGetCurrentProcess				GetCurrentProcessId
 #else
-#define LGetCurrentProcess			getpid
+#define LGetCurrentProcess				getpid
 #endif
 
 // Because of namespace issues you can't use the built in GTK casting macros.
@@ -162,18 +165,18 @@ public:
 // Threads
 #ifdef WIN32
 
-typedef HANDLE  					OsThread;
-typedef DWORD						OsThreadId;
-typedef CRITICAL_SECTION			OsSemaphore;
-#define LGetCurrentThread()		GetCurrentThread()
+	typedef HANDLE  					OsThread;
+	typedef DWORD						OsThreadId;
+	typedef CRITICAL_SECTION			OsSemaphore;
+	#define LGetCurrentThread()			GetCurrentThread()
 
 #else
 
-typedef pthread_t					OsThread;
-typedef pid_t						OsThreadId;
-typedef pthread_mutex_t				OsSemaphore;
-#define LGetCurrentThread()		pthread_self()
-LgiFunc OsThreadId					GetCurrentThreadId();
+	typedef pthread_t					OsThread;
+	typedef pid_t						OsThreadId;
+	typedef pthread_mutex_t				OsSemaphore;
+	#define LGetCurrentThread()			pthread_self()
+	LgiFunc OsThreadId					GetCurrentThreadId();
 
 #endif
 

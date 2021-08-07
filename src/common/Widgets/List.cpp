@@ -948,26 +948,16 @@ bool LList::OnKey(LKey &k)
 				#endif
 				{
 					if (k.Down())
-						SendNotify(LNotifyReturnKey);
+						SendNotify(LNotification(k));
 				}
 				break;
 			}
 			case LK_BACKSPACE:
-			{
-				if (k.Down())
-					SendNotify(LNotifyBackspaceKey);
-				break;
-			}
+			case LK_DELETE:
 			case LK_ESCAPE:
 			{
 				if (k.Down())
-					SendNotify(LNotifyEscapeKey);
-				break;
-			}
-			case LK_DELETE:
-			{
-				if (k.Down())
-					SendNotify(LNotifyDeleteKey);
+					SendNotify(LNotification(k));
 				break;
 			}
 			case LK_UP:
@@ -1505,13 +1495,11 @@ void LList::OnMouseClick(LMouse &m)
 				if (!HandlerHung)
 				{
 					if (m.IsContextMenu())
-						SendNotify(LNotifyItemContextMenu);
-					else if (m.Double())
-						SendNotify(LNotifyItemDoubleClick);
-					else if (Item)
-						SendNotify(LNotifyItemClick);
+						SendNotify(LNotification(m, LNotifyItemContextMenu));
+					else if (Item || m.Double())
+						SendNotify(LNotification(m));
 					else
-						SendNotify(LNotifyContainerClick);
+						SendNotify(LNotification(m, LNotifyContainerClick));
 				}
 			}
 		}

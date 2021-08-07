@@ -346,7 +346,8 @@ public:
 			if (Trigger)
 			{
 				LViewI *n=GetNotify()?GetNotify():GetParent();
-				if (n) n->OnNotify(this, LNotifyItemClick);
+				if (n)
+					n->OnNotify(this, LNotification(m));
 			}
 		}
 	}
@@ -701,7 +702,7 @@ public:
 		if (e != NULL &&
 			c->GetId() == e->GetId())
 		{
-			if (n.Type == LK_RETURN)
+			if (n.Type == LNotifyReturnKey)
 			{
 				ExitEditMode();
 			}
@@ -1898,7 +1899,7 @@ bool GFolderList::OnKey(LKey &k)
 						if (Ok)
 						{
 							GetWindow()->SetCtrlName(IDC_FILE, Sel->GetText(0));
-							GetWindow()->OnNotify(Ok, LNotifyReturnKey);
+							GetWindow()->OnNotify(Ok, LNotification(k));
 						}
 					}
 				}

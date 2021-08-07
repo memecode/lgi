@@ -1568,7 +1568,7 @@ bool LTree::OnKey(LKey &k)
 				if (k.Down())
 				{
 					Unlock(); // before potentially being deleted...?
-					SendNotify(LNotifyDeleteKey);
+					SendNotify(LNotification(k));
 					// This might delete the item... so just return here.
 					return true;
 				}
@@ -1718,7 +1718,7 @@ void LTree::OnMouseClick(LMouse &m)
 			}
 			else
 			{
-				SendNotify(LNotifyContainerClick);
+				SendNotify(LNotification(m, LNotifyContainerClick));
 			}
 		}
 	}
@@ -2223,7 +2223,7 @@ void LTree::OnItemClick(LTreeItem *Item, LMouse &m)
 
 	Item->OnMouseClick(m);
 	if (!m.Ctrl() && !m.Shift())
-		SendNotify(LNotifyItemClick);
+		SendNotify(LNotification(m));
 }
 
 void LTree::OnItemBeginDrag(LTreeItem *Item, LMouse &m)
