@@ -307,7 +307,7 @@ public:
 		#endif
 	}
 	
-	int OnNotify(LViewI *Ctrl, int Flags)
+	int OnNotify(LViewI *Ctrl, LNotification n)
 	{
 		switch (Ctrl->GetId())
 		{

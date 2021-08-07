@@ -217,7 +217,7 @@ GFindInFiles::~GFindInFiles()
 	DeleteObj(d);
 }
 
-int GFindInFiles::OnNotify(LViewI *Ctrl, int Flags)
+int GFindInFiles::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{
@@ -248,5 +248,5 @@ int GFindInFiles::OnNotify(LViewI *Ctrl, int Flags)
 		}
 	}
 
-	return LDialog::OnNotify(Ctrl, Flags);
+	return LDialog::OnNotify(Ctrl, n);
 }

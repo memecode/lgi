@@ -13,7 +13,7 @@ public:
 	GFindInFiles(LViewI *Parent, LAutoString Search, GDom *Store);
 	~GFindInFiles();
 	
-	int OnNotify(LViewI *Ctrl, int Flags);
+	int OnNotify(LViewI *Ctrl, LNotification n);
 };
 
 #endif
