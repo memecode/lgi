@@ -219,11 +219,6 @@ int LLayout::OnNotify(LViewI *c, LNotification n)
 	return LView::OnNotify(c, n.Type);
 }
 
-int LLayout::OnNotify(LViewI *c, int f)
-{
-	return LView::OnNotify(c, f);
-}
-
 void LLayout::OnPosChange()
 {
 	LRect r = LView::GetClient();

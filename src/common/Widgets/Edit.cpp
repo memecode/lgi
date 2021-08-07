@@ -83,13 +83,13 @@ void LEdit::SetEmptyText(const char *EmptyText)
 	Invalidate();
 }
 
-void LEdit::SendNotify(LNotifyType Data)
+void LEdit::SendNotify(LNotification n)
 {
-	if (Data == LNotifyDocChanged)
-		return LTextView3::SendNotify(Data);
-	else if (Data == LK_RETURN ||
-			Data == LNotifyEscapeKey)
-		return LTextView3::SendNotify(Data);
+	if (n.Type == LNotifyDocChanged)
+		return LTextView3::SendNotify(n);
+	else if (n.Type == LNotifyReturnKey ||
+			 n.Type == LNotifyEscapeKey)
+		return LTextView3::SendNotify(n);
 }
 
 LRange LEdit::GetSelectionRange()
