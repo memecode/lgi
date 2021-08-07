@@ -933,7 +933,8 @@ TextView3.o : ./src/common/Text/TextView3.cpp ./include/lgi/common/Lgi.h \
 	./include/lgi/common/LgiRes.h \
 	./include/lgi/common/Mail.h \
 	./include/lgi/common/FileSelect.h \
-	./include/lgi/common/Menu.h
+	./include/lgi/common/Menu.h \
+	./include/lgi/common/DropFiles.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -1687,7 +1688,8 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/Colour.h \
 	./include/lgi/common/Cancel.h \
 	./include/lgi/common/StringClass.h \
-	./include/lgi/common/LgiUiBase.h
+	./include/lgi/common/LgiUiBase.h \
+	./include/lgi/common/Notifications.h
 
 ./include/lgi/common/Splitter.h : ./include/lgi/common/Layout.h
 

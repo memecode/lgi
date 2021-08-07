@@ -371,7 +371,8 @@ public:
 		#if defined(WINNATIVE)
 		Speller = CreateWindowsSpellCheck();
 		#elif defined(LINUX)
-		Speller = CreateAspellObject();
+		// This is currently in the Scribe code base... should be moved into Lgi?
+		// Speller = CreateAspellObject();
 		#elif defined(MAC) && !defined(__GTK_H__)
 		Speller = CreateAppleSpellCheck();
 		#endif
