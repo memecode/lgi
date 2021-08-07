@@ -195,6 +195,7 @@ int ReaderThread::Main()
 
 	char Buf[1024];
 	ssize_t r;
+	
 	// printf("%s:%i - starting reader loop.\n", _FL);
 	while (Process->IsRunning())
 	{
@@ -1974,6 +1975,7 @@ void VcFolder::OnPulse()
 		Processing = true;	// Lock out processing, if it puts up a dialog or something...
 							// bad things happen if we try and re-process something.	
 
+		// printf("Cmds.Len=%i\n", (int)Cmds.Length());
 		for (unsigned i=0; i<Cmds.Length(); i++)
 		{
 			Cmd *c = Cmds[i];
@@ -1983,6 +1985,7 @@ void VcFolder::OnPulse()
 				continue;
 			}
 
+			// printf("c->Rd->GetState()=%i\n", c->Rd->GetState());
 			if (c->Rd->GetState() == LThread::THREAD_INIT)
 			{
 				if (CmdActiveThreads < CmdMaxThreads)
@@ -1991,6 +1994,7 @@ void VcFolder::OnPulse()
 					CmdActiveThreads++;
 					// LgiTrace("CmdActiveThreads++ = %i\n", CmdActiveThreads);
 				}
+				// else printf("Too many active threads.");
 			}
 			else if (c->Rd->IsExited())
 			{
@@ -2014,6 +2018,7 @@ void VcFolder::OnPulse()
 				delete c;
 				CmdsChanged = true;
 			}
+			// else printf("Not exited.\n");
 		}
 
 		Processing = false;

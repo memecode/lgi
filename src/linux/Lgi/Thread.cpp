@@ -55,7 +55,7 @@ LThread::LThread(const char *ThreadName)
 {
 	Name = ThreadName;
 	ThreadId = 0;
-	State = LThread::THREAD_ASLEEP;
+	State = LThread::THREAD_INIT;
 	ReturnValue = -1;
 	hThread = 0;
 	DeleteOnExit = false;
