@@ -228,8 +228,8 @@ public:
 
 - (id)init:(LWindowPrivate*)priv Frame:(NSRect)rc
 {
-	NSUInteger windowStyleMask = NSTitledWindowMask | NSResizableWindowMask |
-								 NSClosableWindowMask | NSMiniaturizableWindowMask;
+	NSUInteger windowStyleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskResizable |
+								 NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable;
 	if ((self = [super initWithContentRect:rc
 					styleMask:windowStyleMask
 					backing:NSBackingStoreBuffered

@@ -591,8 +591,9 @@ LVolume *LVolume::First()
 	{
 		LVolume *v = NULL;
 
-		#if 1
-
+		{
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // IDGF Apple.. provide an alternative you dumbass
 			LString DesktopPath = LGetSystemPath(LSP_DESKTOP);
 
 			// List any favorites
@@ -640,35 +641,14 @@ LVolume *LVolume::First()
 			}
 			CFRelease(items);
 			CFRelease(sflRef);
-
-		#else
-
-			// List some user folders
-			const char *n[]   = {"Home",   "Downloads",        "Documents",        "Music",        "Video",        "Pictures"};
-			LgiSystemPath a[] = {LSP_HOME, LSP_USER_DOWNLOADS, LSP_USER_DOCUMENTS, LSP_USER_MUSIC, LSP_USER_VIDEO, LSP_USER_PICTURES};
-			for (int i=0; i<CountOf(a); i++)
-			{
-				LFile::Path p(a[i]);
-				if (p.Exists())
-				{
-					auto f = p.GetFull();
-					v = new GMacVolume(0);
-					if (v)
-					{
-						v->_Path = f;
-						v->_Name = n[i];
-						v->_Type = VT_FOLDER;
-						_Sub.Insert(v);
-					}
-				}
-			}
-		
-		#endif
+#pragma GCC diagnostic pop
+		}
 		
 		// List the local hard disks
 		NSWorkspace   *ws = [NSWorkspace sharedWorkspace];
 		NSArray     *vols = [ws mountedLocalVolumePaths];
 		NSFileManager *fm = [NSFileManager defaultManager];
+		[fm mountedVolumeURLsIncludingResourceValuesForKeys];
 
 		for (NSString *path in vols)
 		{

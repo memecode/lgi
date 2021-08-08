@@ -555,7 +555,7 @@ LPopup::LPopup(LView *owner)
 	{
 		Panel.p.floatingPanel = TRUE;
 		Panel.p.worksWhenModal = TRUE;
-		Panel.p.styleMask = NSBorderlessWindowMask;
+		Panel.p.styleMask = NSWindowStyleMaskBorderless;
 		
 		Panel.p.contentView = [[LCocoaView alloc] init:this];
 	}

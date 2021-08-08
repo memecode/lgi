@@ -529,7 +529,7 @@ void GTrayIcon::Value(int64 v)
 			{
 				auto img = d->Icon[d->Val];
 				[d->StatusItem setImage:img];
-				printf("setImage %i/%p\n", (int)d->Val, img);
+				// printf("setImage %i/%p\n", (int)d->Val, img);
 			}
 			else LgiTrace("%s:%i - No status item?\n", _FL);
 

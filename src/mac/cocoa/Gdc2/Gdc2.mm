@@ -701,7 +701,10 @@ public:
 		
 		CGDisplayModeRef mode = CGDisplayCopyDisplayMode(CGMainDisplayID());
 		
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 		CFStringRef pixEnc = CGDisplayModeCopyPixelEncoding(mode);
+#pragma GCC diagnostic pop
 		if (CFStringCompare(pixEnc,
 							CFSTR(IO32BitDirectPixels),
 							kCFCompareCaseInsensitive) == kCFCompareEqualTo)

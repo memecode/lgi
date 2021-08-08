@@ -173,7 +173,7 @@ public:
 		InitializeCocoa();
 	}
 	
-	GMessage::Result OnEvent(GMessage *Msg)
+	LMessage::Result OnEvent(LMessage *Msg)
 	{
 		switch (Msg->Msg())
 		{
@@ -252,7 +252,7 @@ public:
 					Success = [[NSSpellChecker sharedSpellChecker] setLanguage:ln];
 				}
 
-				PostThreadEvent(ResponseHnd, M_SET_DICTIONARY, (GMessage::Param)Success);
+				PostThreadEvent(ResponseHnd, M_SET_DICTIONARY, (LMessage::Param)Success);
 				break;
 			}
 			case M_CHECK_TEXT:
