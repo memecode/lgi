@@ -1747,7 +1747,7 @@ void LDateTime::AddMonths(int64 Months)
 		_Day = DaysInMonth();
 }
 
-LString LDateTime::DescribePeriod(LDateTime &to)
+LString LDateTime::DescribePeriod(LDateTime to)
 {
 	auto ThisTs = Ts();
 	auto ToTs = to.Ts();

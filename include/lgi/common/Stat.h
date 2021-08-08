@@ -31,7 +31,7 @@ struct LStat :
 		LAutoWString w(Utf8ToWide(path));
 		Result = _wstat64(w, this);
 		#else
-		Result = stat(Path, this);
+		Result = ::stat(path, this);
 		#endif
 	}
 
@@ -40,9 +40,28 @@ struct LStat :
 		return Result == 0;
 	}
 
-	bool IsFile() const { return (st_mode & _S_IFREG) != 0; }
-	bool IsDir() const { return (st_mode & _S_IFDIR) != 0; }
-	bool IsPipe() const { return (st_mode & _S_IFIFO) != 0; }
+	bool IsFile() const
+	{
+		#if defined(WINDOWS)
+		return (st_mode & _S_IFREG) != 0;
+		#else
+		return S_ISREG(st_mode);
+		#endif
+	}
+	bool IsDir()  const {
+		#if defined(WINDOWS)
+		return (st_mode & _S_IFDIR) != 0;
+		#else
+		return S_ISDIR(st_mode);
+		#endif
+	}
+	bool IsPipe() const {
+		#if defined(WINDOWS)
+		return (st_mode & _S_IFIFO) != 0;
+		#else
+		return S_ISFIFO(st_mode);
+		#endif
+	}
 
 	int64_t Size() const { return st_size; }	
 

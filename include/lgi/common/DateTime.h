@@ -264,7 +264,7 @@ public:
 	/// Describes the perios between this and 'to' in the form:
 	/// ##d ##h ##m ##s
 	/// Order of the dates isn't important.
-	LString DescribePeriod(LDateTime &to);
+	LString DescribePeriod(LDateTime to);
 
 	/// \returns true if 'd' is on the same day as this object
 	bool IsSameDay(LDateTime &d) const;
