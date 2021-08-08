@@ -874,6 +874,10 @@ void LToolButton::OnMouseClick(LMouse &m)
 			m.ToScreen();
 			ToolBar->ContextMenu(m);
 		}
+		else
+		{
+			SendNotify(LNotification(m));
+		}
 	}
 	else if (m.Left())
 	{
@@ -1374,15 +1378,13 @@ bool LToolBar::Pour(LRegion &r)
 
 void LToolBar::OnButtonClick(LToolButton *Btn)
 {
-	LViewI *w = (GetNotify()) ? GetNotify() : GetParent();
-	if (w && Btn)
+	LViewI *v = GetNotify() ? GetNotify() : GetParent();
+	if (v && Btn)
 	{
 		int Id = Btn->GetId();
-        w->PostEvent(M_COMMAND, (LMessage::Param) Id,
-			#ifdef __GTK_H__
-			0
-			#else
-        	(LMessage::Param) Handle()
+        v->PostEvent(M_COMMAND, (LMessage::Param) Id
+			#ifndef __GTK_H__
+        	, (LMessage::Param) Handle()
         	#endif
         	);
 	}

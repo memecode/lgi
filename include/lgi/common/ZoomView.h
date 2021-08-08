@@ -75,6 +75,8 @@ public:
 	~LZoomView();
 
 	// Methods
+	int GetZoom();
+	void SetZoom(int z);
 	void SetCallback(LZoomViewCallback *cb);
 	bool Convert(LPointF &p, int x, int y);
 	ViewportInfo GetViewport();

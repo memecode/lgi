@@ -210,9 +210,9 @@ public:
 		Tag = tag;
 	}
 	
-	void OnClick()
+	void OnClick(const LMouse &m)
 	{
-		Tag->OnClick();
+		Tag->OnClick(m);
 	}
 };
 
@@ -1325,7 +1325,7 @@ void GTag::OnChange(PropType Prop)
 {
 }
 
-bool GTag::OnClick()
+bool GTag::OnClick(const LMouse &m)
 {
 	if (!Html->Environment)
 		return false;
@@ -1337,7 +1337,7 @@ bool GTag::OnClick()
 	}
 	else
 	{
-		OnNotify(LNotification());
+		OnNotify(LNotification(m));
 	}
 
 	return true;
@@ -2161,7 +2161,7 @@ bool GTag::OnMouseClick(LMouse &m)
 				}
 				else
 				{
-					Processed = OnClick();
+					Processed = OnClick(m);
 				}
 			}
 		}

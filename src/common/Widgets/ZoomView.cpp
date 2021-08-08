@@ -61,7 +61,7 @@ struct ZoomTile : public LMemDC
 
 typedef ZoomTile *SuperTilePtr;
 
-class LZoomViewPriv // : public LThread, public LMutex
+class LZoomViewPriv
 {
 	int Zoom;
 	LAutoPtr<LMemDC> TileCache;
@@ -116,7 +116,7 @@ public:
 		Active,
 		Stopping,
 		Stopped,
-	} Mode;
+	}	Mode;
 
 	LZoomViewPriv(LZoomView *view, LZoomViewCallback *callback)
 	{
@@ -236,6 +236,7 @@ public:
 		{
 			Zoom = z;
 			EmptyTiles();
+			View->Invalidate();
 		}
 	}
 	
@@ -1335,6 +1336,16 @@ LZoomView::ViewportInfo LZoomView::GetViewport()
 	v.TilePx = d->TileSize;
 	
 	return v;
+}
+
+int LZoomView::GetZoom()
+{
+	return d->GetZoom();
+}
+
+void LZoomView::SetZoom(int z)
+{
+	return d->SetZoom(z);
 }
 
 void LZoomView::SetDefaultZoomMode(DefaultZoomMode m)
