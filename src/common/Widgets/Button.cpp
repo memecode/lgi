@@ -113,7 +113,12 @@ int LButton::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	if (Ctrl == (LViewI*)this && n.Type == LNotifyActivate)
 	{
-		OnClick();
+		LMouse m;
+		if (n.IsMouseEvent())
+			m = n.GetMouseEvent();
+		else
+			GetMouse(m);
+		OnClick(m);
 	}
 
 	return 0;
@@ -223,7 +228,7 @@ void LButton::OnMouseClick(LMouse &m)
 		if (m.Down())
 		{
 			Value(!Value());
-			OnClick();
+			OnClick(m);
 		}
 	}
 	else
@@ -254,7 +259,7 @@ void LButton::OnMouseClick(LMouse &m)
 					d->Pressed == 0)
 				{
 					// This may delete ourself, so do it last.
-					OnClick();
+					OnClick(m);
 				}
 			}
 		}
@@ -334,7 +339,9 @@ bool LButton::OnKey(LKey &k)
 
 				if (!k.Down() && d->Pressed == 0)
 				{
-					OnClick();
+					LMouse m;
+					GetMouse(m);
+					OnClick(m);
 				}
 			}
 

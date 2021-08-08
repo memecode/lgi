@@ -184,7 +184,7 @@ public:
 		}
 		// Log->Print("%s:%i - ssh_connect ok.\n", _FL);
 
-		auto State = ssh_is_server_known /*ssh_session_is_known_server*/(Ssh);
+		/*auto State =*/ ssh_is_server_known /*ssh_session_is_known_server*/(Ssh);
 		// Log->Print("%s:%i - ssh_session_is_known_server=%i.\n", _FL, State);
 
 		if (PublicKey)

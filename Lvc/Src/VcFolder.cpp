@@ -3282,7 +3282,6 @@ bool VcFolder::ParsePush(int Result, LString s, ParseParams *Params)
 	
 	if (Result)
 	{
-		bool hasErr = true;
 		if (GetType() == VcHg)
 		{
 			if (s.Find("push creates new remote branches") > 0)

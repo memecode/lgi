@@ -1181,6 +1181,8 @@ int LDropDown::OnNotify(LViewI *c, LNotification n)
 				OnPopupClose();
 				break;
 			}
+			default:
+				break;
 		}
 	}
 

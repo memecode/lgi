@@ -231,7 +231,7 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 
 			LString ls, out;
 			ls.Printf("find \"%s\" -maxdepth 1 -printf \"%%f\n\"\n", p->Get());
-			auto wr = con->Write(ls, ls.Length());
+			con->Write(ls, ls.Length());
 			auto pr = WaitPrompt(con, &out);
 			auto lines = out.SplitDelimit("\r\n");
 
@@ -1372,6 +1372,8 @@ public:
 						}
 						break;
 					}
+					default:
+						break;
 				}
 				break;
 			}
@@ -1424,6 +1426,8 @@ public:
 						SetCtrlEnabled(IDC_PULL_ALL, true);
 						break;
 					}
+					default:
+						break;
 				}
 				break;
 			}
@@ -1541,6 +1545,8 @@ public:
 							f->OnUpdate(s[0]->GetRev());
 						break;
 					}
+					default:
+						break;
 				}
 				break;
 			}
@@ -1663,6 +1669,8 @@ int RemoteFolderDlg::OnNotify(LViewI *Ctrl, LNotification n)
 					SetCtrlName(IDC_PASS, cur ? cur->Pass : NULL);
 					break;
 				}
+				default:
+					break;
 			}			
 			break;
 		}

@@ -1180,7 +1180,7 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification n)
 			if (!f)
 				break;
 
-			if (n.Type == LK_RETURN)
+			if (n.Type == LNotifyReturnKey)
 			{
 				// allow user to insert new type by typing the pattern into the file name edit box and
 				// hitting enter
