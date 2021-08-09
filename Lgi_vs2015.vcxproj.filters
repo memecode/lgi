@@ -120,6 +120,9 @@
       <UniqueIdentifier>{5fe450b8-5fa9-440e-9fb0-03860b3548d0}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
+    <Filter Include="Source Files\Widgets\TextViews">
+      <UniqueIdentifier>{4472f483-982a-4fb1-8995-6dc204cd81ae}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\common\Resource\LgiRes.cpp">
@@ -455,9 +458,6 @@
     <ClCompile Include="src\common\Widgets\TextLabel.cpp">
       <Filter>Source Files\Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Text\TextView3.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Lgi\ThreadEvent.cpp">
       <Filter>Source Files\Core\Threads</Filter>
     </ClCompile>
@@ -496,6 +496,12 @@
     </ClCompile>
     <ClCompile Include="src\common\Text\Utf8.cpp">
       <Filter>Source Files\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Text\TextView3.cpp">
+      <Filter>Source Files\Widgets\TextViews</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Text\TextView4.cpp">
+      <Filter>Source Files\Widgets\TextViews</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -667,9 +673,6 @@
     <ClInclude Include="include\lgi\common\TextLabel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\lgi\common\TextView3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\lgi\common\ToolBar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -774,6 +777,12 @@
     </ClInclude>
     <ClInclude Include="include\lgi\common\StringClass.h">
       <Filter>Source Files\Core\Memory Subsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\TextView3.h">
+      <Filter>Source Files\Widgets\TextViews</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\TextView4.h">
+      <Filter>Source Files\Widgets\TextViews</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
