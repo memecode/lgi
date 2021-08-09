@@ -1033,7 +1033,8 @@ LMessage::Result LWindow::OnEvent(LMessage *Msg)
 	 	case WM_CLOSE:
 		{
 			bool QuitApp;
-			if (QuitApp = OnRequestClose(Msg->Msg() == WM_QUERYENDSESSION))
+			bool OsShuttingDown = Msg->Msg() == WM_QUERYENDSESSION;
+			if (QuitApp = OnRequestClose(OsShuttingDown))
 			{
 				Quit();
 			}

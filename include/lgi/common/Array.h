@@ -834,7 +834,7 @@ public:
 	};
 
 	typedef Iter<Type> I;
-	I begin() { return I(this, 0); }
+	I begin(size_t start = 0) { return I(this, start); }
 	I rbegin() { return I(this, len-1); }
 	I end() { return I(this); }
 	bool Delete(I &It)

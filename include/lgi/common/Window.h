@@ -231,6 +231,7 @@ public:
 	void OnPaint(LSurface *pDC) override;
 	bool HandleViewMouse(LView *v, LMouse &m);
 	bool HandleViewKey(LView *v, LKey &k);
+	/// Return true to accept application quit
 	bool OnRequestClose(bool OsShuttingDown) override;
 	bool Obscured();
 	bool Visible() override;
