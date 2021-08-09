@@ -604,6 +604,13 @@ enum MessageBoxType
 	#define _stricmp strcasecmp // LgiFunc int _stricmp(const char *a, const char *b);
 	#endif
 	#define sprintf_s snprintf
+	#if __BIG_ENDIAN__
+		#define htonll(x) (x)
+		#define ntohll(x) (x)
+	#else
+		#define htonll(x) ( ((uint64)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32) )
+		#define ntohll(x) ( ((uint64)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32) )
+	#endif
 
 #else
 
