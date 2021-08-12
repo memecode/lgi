@@ -447,7 +447,7 @@ bool LResolveShortcut(const char *LinkFile, char *Path, ssize_t Len)
 
 void WriteStr(LFile &f, const char *s)
 {
-	ulong Len = (s) ? strlen(s) : 0;
+	uint32_t Len = (s) ? strlen(s) : 0;
 	f << Len;
 	if (Len > 0)
 	{
