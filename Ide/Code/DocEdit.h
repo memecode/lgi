@@ -97,7 +97,7 @@ protected:
 		LTextView3::LStyle Dirty;
 
 		StylingParams(LTextView3 *view) :
-			Dirty(STYLE_NONE)
+			Dirty(LTextView3::STYLE_NONE)
 		{
 			View = view;
 		}
@@ -106,7 +106,7 @@ protected:
 		{
 			if (!Out)
 				Out = &Styles;
-			auto &st = Out->New().Construct(View, STYLE_IDE);
+			auto &st = Out->New().Construct(View, LTextView3::STYLE_IDE);
 			auto pText = Text.AddressOf();
 			st.Start = s - pText;
 			st.Font = View->GetFont();

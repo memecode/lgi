@@ -51,7 +51,7 @@ public:
 	virtual void Add(char16 *w, ssize_t chars = -1)
 	{
 		ssize_t Len = chars >= 0 ? chars : StrlenW(w);
-		bool AtEnd = GetCaret() == Size;
+		bool AtEnd = GetCaret() == TView::Size;
 		
 		if (ProcessReturns)
 		{
@@ -61,10 +61,10 @@ public:
 			{
 				if (len > 0)
 				{
-					auto del = MIN(Size - (ssize_t)Pos, len);
+					auto del = MIN(TView::Size - (ssize_t)Pos, len);
 					if (del > 0)
-						Delete(Pos, del);
-					Insert(Pos, s, len);
+						TView::Delete(Pos, del);
+					TView::Insert(Pos, s, len);
 					Pos += len;
 				}
 			};			
@@ -77,24 +77,24 @@ public:
 				{
 					Ins(prev, s - prev);
 					prev = s + 1;
-					while (Pos > 0 && Text[Pos-1] != '\n')
+					while (Pos > 0 && TView::Text[Pos-1] != '\n')
 						Pos--;
 				}
 				else if (*s == '\n')
 				{
-					Pos = Size;
+					Pos = TView::Size;
 				}
 			}
 			Ins(prev, s - prev);
 		}
 		else
 		{
-			Insert(Size, w, Len);
+			TView::Insert(TView::Size, w, Len);
 		}
 		
 		Invalidate();
 		if (AtEnd)
-			SetCaret(Size, false);
+			SetCaret(TView::Size, false);
 	}
 
 	int64 SetSize(int64 s)

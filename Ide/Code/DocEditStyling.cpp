@@ -223,6 +223,7 @@ int DocEditStyling::Main()
 	}
 	return 0;
 }
+
 void DocEditStyling::StyleCpp(StylingParams &p)
 {
 	#if PROFILE_STYLE
@@ -258,7 +259,7 @@ void DocEditStyling::StyleCpp(StylingParams &p)
 				}
 				if (IsWhite)
 				{
-					auto &st = Out.New().Construct(View, STYLE_IDE);
+					auto &st = Out.New().Construct(View, LTextView3::STYLE_IDE);
 					st.Start = s - Text;
 					st.Font = View->GetFont();
 							
@@ -300,7 +301,7 @@ void DocEditStyling::StyleCpp(StylingParams &p)
 			{
 				if (s == Text || !IsSymbolChar(s[-1]))
 				{
-					auto &st = Out.New().Construct(View, STYLE_IDE);
+					auto &st = Out.New().Construct(View, LTextView3::STYLE_IDE);
 					st.Start = s - Text;
 					st.Font = View->GetFont();
 					bool IsHex = false;
@@ -346,7 +347,7 @@ void DocEditStyling::StyleCpp(StylingParams &p)
 			{
 				if (s[1] == '/')
 				{
-					auto &st = Out.New().Construct(View, STYLE_IDE);
+					auto &st = Out.New().Construct(View, LTextView3::STYLE_IDE);
 					st.Start = s - Text;
 					st.Font = View->GetFont();
 					while (s < e && *s != '\n')
@@ -357,7 +358,7 @@ void DocEditStyling::StyleCpp(StylingParams &p)
 				}
 				else if (s[1] == '*')
 				{
-					auto &st = Out.New().Construct(View, STYLE_IDE);
+					auto &st = Out.New().Construct(View, LTextView3::STYLE_IDE);
 					st.Start = s - Text;
 					st.Font = View->GetFont();
 					s += 2;
@@ -377,7 +378,7 @@ void DocEditStyling::StyleCpp(StylingParams &p)
 					DetectKeyword();
 					if (n && n->Type)
 					{
-						auto &st = Out.New().Construct(View, STYLE_IDE);
+						auto &st = Out.New().Construct(View, LTextView3::STYLE_IDE);
 						st.Start = s - Text;
 						#ifdef MAC
 						#warning "Weird mac bold issues fixme.")
@@ -465,7 +466,7 @@ void DocEditStyling::StylePython(StylingParams &p)
 			case '#':
 			{
 				// Single line comment
-				auto &st = Style.New().Construct(View, STYLE_IDE);
+				auto &st = Style.New().Construct(View, LTextView3::STYLE_IDE);
 				st.Start = s - Text;
 				st.Font = View->GetFont();
 				while (s < e && *s != '\n')
@@ -488,7 +489,7 @@ void DocEditStyling::StylePython(StylingParams &p)
 			{
 				if (s == Text || !IsSymbolChar(s[-1]))
 				{
-					auto &st = Style.New().Construct(View, STYLE_IDE);
+					auto &st = Style.New().Construct(View, LTextView3::STYLE_IDE);
 					st.Start = s - Text;
 					st.Font = View->GetFont();
 					bool IsHex = false;
@@ -538,7 +539,7 @@ void DocEditStyling::StylePython(StylingParams &p)
 					DetectKeyword();
 					if (n && n->Type)
 					{
-						auto &st = Style.New().Construct(View, STYLE_IDE);
+						auto &st = Style.New().Construct(View, LTextView3::STYLE_IDE);
 						st.Start = s - Text;
 						st.Font = n->Type == KType ? View->GetFont() : View->GetBold();
 						st.Len = e - s;
@@ -565,7 +566,7 @@ void DocEditStyling::StyleDefault(StylingParams &p)
 			case '\'':
 			case '`':
 			{
-				auto &st = Style.New().Construct(View, STYLE_IDE);
+				auto &st = Style.New().Construct(View, LTextView3::STYLE_IDE);
 				bool Quoted = s > Text && s[-1] == '\\';
 				st.Start = s - Text - Quoted;
 				st.Font = View->GetFont();
@@ -595,7 +596,7 @@ void DocEditStyling::StyleDefault(StylingParams &p)
 			case '#':
 			{
 				// Single line comment
-				auto &st = Style.New().Construct(View, STYLE_IDE);
+				auto &st = Style.New().Construct(View, LTextView3::STYLE_IDE);
 				st.Start = s - Text;
 				st.Font = View->GetFont();
 				while (s < e && *s != '\n')
@@ -618,7 +619,7 @@ void DocEditStyling::StyleDefault(StylingParams &p)
 			{
 				if (s == Text || !IsSymbolChar(s[-1]))
 				{
-					auto &st = Style.New().Construct(View, STYLE_IDE);
+					auto &st = Style.New().Construct(View, LTextView3::STYLE_IDE);
 					st.Start = s - Text - ((s > Text && strchr("-+", s[-1])) ? 1 : 0);
 					st.Font = View->GetFont();
 					bool IsHex = false;
@@ -725,7 +726,7 @@ void DocEditStyling::StyleXml(StylingParams &p)
 			{
 				if (s == Text || !IsSymbolChar(s[-1]))
 				{
-					auto &st = Style.New().Construct(View, STYLE_IDE);
+					auto &st = Style.New().Construct(View, LTextView3::STYLE_IDE);
 					st.Start = s - Text;
 					st.Font = View->GetFont();
 					bool IsHex = false;
@@ -773,7 +774,7 @@ void DocEditStyling::StyleXml(StylingParams &p)
 					s[2] == '-' &&
 					s[3] == '-')
 				{
-					auto &st = Style.New().Construct(View, STYLE_IDE);
+					auto &st = Style.New().Construct(View, LTextView3::STYLE_IDE);
 					st.Start = s - Text;
 					st.Font = View->GetFont();
 					s += 4;
@@ -861,7 +862,7 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 	#define START_CODE() \
 		if (Type != CodeHtml) \
 		{ \
-			Cur = &Style.New().Construct(View, STYLE_IDE); \
+			Cur = &Style.New().Construct(View, LTextView3::STYLE_IDE); \
 			Cur->Start = s - Text; \
 			Cur->Font = View->GetFont(); \
 			Cur->Fore = ColourFromType(Type); \
@@ -940,7 +941,7 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 						char16 *nl = Strchr(s, '\n');
 						if (!nl) nl = s + Strlen(s);
 						
-						auto &st = Style.New().Construct(View, STYLE_IDE);
+						auto &st = Style.New().Construct(View, LTextView3::STYLE_IDE);
 						st.Start = s - Text;
 						st.Font = View->GetFont();
 						st.Fore = ColourComment;
@@ -955,7 +956,7 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 						if (!end_comment) end_comment = s + Strlen(s);
 						else end_comment += 2;
 						
-						auto &st = Style.New().Construct(View, STYLE_IDE);
+						auto &st = Style.New().Construct(View, LTextView3::STYLE_IDE);
 						st.Start = s - Text;
 						st.Font = View->GetFont();
 						st.Fore = ColourComment;
@@ -1025,7 +1026,7 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 							if (c < e) c++;
 							start = true;
 						}
-						auto &st = Style.New().Construct(View, STYLE_IDE);
+						auto &st = Style.New().Construct(View, LTextView3::STYLE_IDE);
 						st.Start = s - Text;
 						st.Font = View->GetFont();
 						st.Fore = ColourHtml;
@@ -1065,7 +1066,7 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 			{
 				if (Type == CodeHtml)
 				{
-					auto &st = Style.New().Construct(View, STYLE_IDE);
+					auto &st = Style.New().Construct(View, LTextView3::STYLE_IDE);
 					st.Start = s - Text;
 					st.Font = View->GetFont();
 					st.Fore = ColourHtml;
@@ -1089,7 +1090,7 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 					{
 						s -= 8;
 						END_CODE();
-						auto &st = Style.New().Construct(View, STYLE_IDE);
+						auto &st = Style.New().Construct(View, LTextView3::STYLE_IDE);
 						st.Start = s - Text;
 						st.Font = View->GetFont();
 						st.Fore = ColourHtml;

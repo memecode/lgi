@@ -1,6 +1,8 @@
 #ifndef _GDEBUG_CONTEXT_H_
 #define _GDEBUG_CONTEXT_H_
 
+#include "lgi/common/TextLog.h"
+
 class GDebugContext : public GDebugEvents
 {
 	class GDebugContextPriv *d;
@@ -10,10 +12,10 @@ public:
 	LList *Locals;
 	LList *CallStack;
 	LList *Threads;
-	class LTextLog *ObjectDump;
-	class LTextLog *MemoryDump;
-	class LTextLog *DebuggerLog;
-	class LTextLog *Registers;
+	LTextLog *ObjectDump;
+	LTextLog *MemoryDump;
+	LTextLog *DebuggerLog;
+	LTextLog *Registers;
 
 	// Object
 	GDebugContext(AppWnd *App, class IdeProject *Proj, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir);
