@@ -1,12 +1,13 @@
 /// \file
 /// \author Matthew Allen
-#ifndef _GTEXTLOG_H_
-#define _GTEXTLOG_H_
+#ifndef _LTEXTLOG_H_
+#define _LTEXTLOG_H_
 
 #include "lgi/common/TextView3.h"
 #include "lgi/common/Net.h"
 
-class LTextLog : public LTextView3, public LStream
+template<typename TView>
+class LThreadSafeTextView : public TView, public LStream
 {
 protected:
 	bool ProcessReturns;
@@ -31,7 +32,7 @@ protected:
 	}
 
 public:
-	LTextLog(int id) : LTextView3(id, 0, 0, 2000, 1000)
+	LThreadSafeTextView(int id) : TView(id, 0, 0, 2000, 1000)
 	{
 		ProcessReturns = true;
 		Pos = 0;
@@ -43,7 +44,7 @@ public:
 	
 	void OnCreate()
 	{
-		LTextView3::OnCreate();
+		TView::OnCreate();
 		ProcessTxt();
 	}
 
@@ -135,8 +136,10 @@ public:
 			ProcessTxt();
 		}
 
-		return LTextView3::OnEvent(m);
+		return TView::OnEvent(m);
 	}
 };
+
+typedef LThreadSafeTextView<LTextView3> LTextLog;
 
 #endif

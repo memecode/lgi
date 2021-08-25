@@ -784,5 +784,8 @@
     <ClInclude Include="include\lgi\common\TextView4.h">
       <Filter>Source Files\Widgets\TextViews</Filter>
     </ClInclude>
+    <ClInclude Include="include\lgi\common\TextLog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -319,14 +319,11 @@ class LJson
 	}
 
 public:
-	LJson()
+	LJson(const char *c = NULL)
 	{
 		Start = NULL;
-	}
-
-	LJson(const char *c)
-	{
-		SetJson(c);
+		if (c)
+			SetJson(c);
 	}
 
 	void Empty()

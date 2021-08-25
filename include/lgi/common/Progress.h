@@ -49,7 +49,7 @@ public:
 	}
 	[[deprecated]] virtual void SetLimits(int64 l, int64 h)
 	{
-		SetRange(LRange(l, h - l + 1));
+		SetRange(LRange((ssize_t)l, (ssize_t)(h - l + 1)));
 	}
 };
 

@@ -1436,6 +1436,9 @@ void LTextView4::PourStyle(size_t Start, ssize_t EditSize)
 
 bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 {
+	static int count = 0;
+	LgiTrace("count=%i\n", count++);
+
 	LProfile Prof("LTextView4::Insert");
 	Prof.HideResultsIfBelow(1000);
 

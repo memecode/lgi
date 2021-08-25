@@ -14,7 +14,7 @@
 #include "lgi/common/OpenSSLSocket.h"
 #include "lgi/common/Json.h"
 
-#define DEBUG_OAUTH2				0
+#define DEBUG_OAUTH2				1
 #ifdef _DEBUG
 	#define DEBUG_FETCH				0
 #else
@@ -294,7 +294,7 @@ bool MailIMap::Http(LSocketI *S,
 
 		if (ContentLen)
 		{
-			if (Res.Length() >= HdrLen + ContentLen)
+			if ((ssize_t)Res.Length() >= HdrLen + ContentLen)
 				break;
 		}
 		else
@@ -1794,12 +1794,11 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 											l++;
 										s = l;
 										UnBase64Str(s);
-										Log(s, LSocketI::SocketMsgError);
+										Log(s.Strip(), LSocketI::SocketMsgError);
 				
-										LJson t;
-										t.SetJson(s);
-										int StatusCode = (int)t.Get("status").Int();
-										LgiTrace("%s:%i - HTTP status: %i\n%s\n", _FL, StatusCode, s.Get());
+										LJson t(s);
+										auto StatusCode = t.Get("status").Int();
+										LgiTrace("%s:%i - HTTP status: %" PRIi64 "\n%s\n", _FL, StatusCode, s.Get());
 
 										sprintf_s(Buf, sizeof(Buf), "\r\n");
 										WriteBuf(false, NULL, true);

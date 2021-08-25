@@ -215,6 +215,22 @@ bool SshConnection::HandleMsg(LMessage *m)
 	return true;
 }
 
+LString PathFilter(LString s)
+{
+	auto parts = s.SplitDelimit("/");
+	if
+	(
+		(parts[0].Equals("~") || parts[0].Equals("."))
+		&&
+		s(0) == '/'
+	)
+	{
+		return s(1, -1).Replace(" ", "\\ ");
+	}
+
+	return s.Replace(" ", "\\ ");
+}
+
 LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
@@ -225,12 +241,13 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 			if (!ReceiveA(p, Msg))
 				break;
 
+			LString path = PathFilter(*p);
 			LStream *con = GetConsole();
 			if (!con)
 				break;
 
 			LString ls, out;
-			ls.Printf("find \"%s\" -maxdepth 1 -printf \"%%f\n\"\n", p->Get());
+			ls.Printf("find %s -maxdepth 1 -printf \"%%f\n\"\n", path.Get());
 			con->Write(ls, ls.Length());
 			auto pr = WaitPrompt(con, &out);
 			auto lines = out.SplitDelimit("\r\n");
@@ -256,7 +273,7 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 			}
 			else
 			{
-				Log->Print("Error: no VCS detected.\n%s\n", lines.Last().Get());
+				Log->Print("Error: no VCS detected.\n%s\n%s\n", ls.Get(), lines.Last().Get());
 			}
 			break;
 		}
@@ -266,12 +283,13 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 			if (!ReceiveA(p, Msg))
 				break;
 
+			LString path = PathFilter(p->Path);
 			LStream *con = GetConsole();
 			if (!con)
 				break;
 
 			LString cmd;
-			cmd.Printf("cd \"%s\"\n", p->Path.Get());
+			cmd.Printf("cd %s\n", path.Get());
 			auto wr = con->Write(cmd, cmd.Length());
 			auto pr = WaitPrompt(con);
 

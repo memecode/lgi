@@ -19,27 +19,9 @@
 #define TAB_SIZE					4
 #define DEBUG_TIMES_MSG				8000 // a=0 b=(char*)Str
 
-enum LTextView3Messages
-{
-	M_TEXTVIEW_DEBUG_TEXT = M_USER + 0x3421,
-	M_TEXTVIEW_FIND,
-	M_TEXTVIEW_REPLACE,
-	M_TEXT_POUR_CONTINUE,
-};
-
 extern char Delimiters[];
 
 class LTextView3;
-
-enum LTextViewStyleOwners
-{
-	STYLE_NONE,
-	STYLE_IDE,
-	STYLE_SPELLING,
-	STYLE_FIND_MATCHES,
-	STYLE_ADDRESS,
-	STYLE_URL,
-};
 
 /// Unicode text editor control.
 class LgiClass
@@ -52,6 +34,24 @@ class LgiClass
 	friend bool Text3_FindCallback(GFindReplaceCommon *Dlg, bool Replace, void *User);
 
 public:
+	enum Messages
+	{
+		M_TEXTVIEW_DEBUG_TEXT = M_USER + 0x3421,
+		M_TEXTVIEW_FIND,
+		M_TEXTVIEW_REPLACE,
+		M_TEXT_POUR_CONTINUE,
+	};
+
+	enum StyleOwners
+	{
+		STYLE_NONE,
+		STYLE_IDE,
+		STYLE_SPELLING,
+		STYLE_FIND_MATCHES,
+		STYLE_ADDRESS,
+		STYLE_URL,
+	};
+
 	class LStyle
 	{
 	protected:
@@ -64,7 +64,7 @@ public:
 		/// different owner id's so that they can manage the lifespan of their
 		/// own styles. LTextView3::PourStyle is owner '0', anything else it
 		/// will leave alone.
-		LTextViewStyleOwners Owner;
+		StyleOwners Owner;
 		/// The start index into the text buffer of the region to style.
 		ssize_t Start;
 		/// The length of the styled region
@@ -84,7 +84,7 @@ public:
 		/// Application base data
 		LVariant Data;
 
-		LStyle(LTextViewStyleOwners owner = STYLE_NONE)
+		LStyle(StyleOwners owner = STYLE_NONE)
 		{
 			Owner = owner;
 			View = NULL;
@@ -109,7 +109,7 @@ public:
 			Cursor = s.Cursor;
 		}
 		
-		LStyle &Construct(LTextView3 *view, LTextViewStyleOwners owner)
+		LStyle &Construct(LTextView3 *view, StyleOwners owner)
 		{
 			View = view;
 			Owner = owner;

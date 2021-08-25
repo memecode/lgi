@@ -1160,7 +1160,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 	}
 
 	#ifdef _DEBUG
-	ValidateLines(true);
+	// ValidateLines(true);
 	#endif
 	#if PROFILE_POUR
 	Prof.Add("LastLine");
@@ -1685,7 +1685,7 @@ bool LTextView3::Delete(size_t At, ssize_t Len)
 			Status = true;
 
 			#ifdef _DEBUG
-			ValidateLines();
+			// ValidateLines();
 			#endif
 
 			if (AdjustStylePos)
