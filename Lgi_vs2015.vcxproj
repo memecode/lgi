@@ -591,6 +591,7 @@
     <ClCompile Include="src\win\Widgets\Dialog_Win.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\lgi\common\App.h" />
     <ClInclude Include="include\lgi\common\Array.h" />
     <ClInclude Include="include\lgi\common\AutoPtr.h" />
     <ClInclude Include="include\lgi\common\Box.h" />

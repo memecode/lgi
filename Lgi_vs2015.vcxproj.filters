@@ -787,5 +787,8 @@
     <ClInclude Include="include\lgi\common\TextLog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\lgi\common\App.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
