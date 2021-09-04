@@ -20,14 +20,26 @@ protected:
 	{
 		if (Txt.Length() == 0)
 			return;
-		if (Sem.Lock(_FL))
+
+		LArray<char16> Local;
+		if (Sem.LockWithTimeout(250, _FL))
+		{
+			// Minimize time locked by moving the text to a local var
+			Local.Swap(Txt);
+			Sem.Unlock();
+		}
+		else
+		{
+			PostEvent(M_LOG_TEXT); // Try again later...
+			return;
+		}
+
+		if (Local.Length())
 		{
 			LString msg;
 			msg.Printf("LTextLog::ProcessTxt(%" PRIu64 ")", (uint64)Txt.Length());
-			LProfile p(msg, 100);
-			Add(Txt.AddressOf(), Txt.Length());
-			Txt.Empty();
-			Sem.Unlock();
+			LProfile p(msg, 200);
+			Add(Local.AddressOf(), Local.Length());
 		}
 	}
 
@@ -45,6 +57,12 @@ public:
 	void OnCreate()
 	{
 		TView::OnCreate();
+		// ProcessTxt();
+		SetPulse(250);
+	}
+
+	void OnPulse()
+	{
 		ProcessTxt();
 	}
 
@@ -114,14 +132,19 @@ public:
 		if (!w)
 			return 0;
 
-		if (Sem.LockWithTimeout(200, _FL))
+		size_t OldLen = 0;
+		if (Sem.Lock(_FL))
 		{
+			OldLen = Txt.Length();
 			Txt.Add(w.Get(), Strlen(w.Get()));
 			Sem.Unlock();
 		}
-		#if LGI_VIEW_HANDLE
-		if (Handle())
-		#endif
+
+		if (!OldLen
+			#if LGI_VIEW_HANDLE
+			&& Handle()
+			#endif
+		)
 		{
 			PostEvent(M_LOG_TEXT);
 		}
@@ -133,7 +156,7 @@ public:
 	{
 		if (m->Msg() == M_LOG_TEXT)
 		{
-			ProcessTxt();
+			// ProcessTxt();
 		}
 
 		return TView::OnEvent(m);

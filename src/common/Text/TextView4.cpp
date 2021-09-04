@@ -1,14 +1,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#ifdef WIN32
+#include <imm.h>
+#endif
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/TextView4.h"
 #include "lgi/common/Input.h"
 #include "lgi/common/ScrollBar.h"
-#ifdef WIN32
-#include <imm.h>
-#endif
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/ViewPriv.h"
@@ -707,12 +707,14 @@ void LTextView4::OnFontChange()
 void LTextView4::LogLines()
 {
 	int Idx = 0;
-	LgiTrace("DocSize: %i\n", (int)Size);
+	LStringPipe p;
+	p.Print("DocSize: %i\n", (int)Size);
 	for (auto i : Line)
 	{
-		LgiTrace("  [%i]=%p, %i+%i, %s\n", Idx, i, (int)i->Start, (int)i->Len, i->r.GetStr());
+		p.Print("  [%i]=%p, %i+%i, %s\n", Idx, i, (int)i->Start, (int)i->Len, i->r.GetStr());
 		Idx++;
 	}
+	LgiTrace(p.NewGStr());
 
 	#ifdef _DEBUG
 	if (d->PourLog)
@@ -1413,13 +1415,12 @@ void LTextView4::PourStyle(size_t Start, ssize_t EditSize)
 			for (uint32_t i=0; i<Links.Length(); i++)
 			{
 				GLinkInfo &Inf = Links[i];
-                LAutoPtr<LTextView4::LStyle> Url(new LStyle(STYLE_URL));
+                LAutoPtr<LStyle> Url(new LStyle(STYLE_URL));
 				if (Url)
 				{
 					Url->View = this;
 					Url->Start = Inf.Start + Start;
 					Url->Len = Inf.Len;
-					// Url->Email = Inf.Email;
 					Url->Font = Underline;
 					Url->Fore = d->UrlColour;
 
@@ -1436,8 +1437,8 @@ void LTextView4::PourStyle(size_t Start, ssize_t EditSize)
 
 bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 {
-	static int count = 0;
-	LgiTrace("count=%i\n", count++);
+	static int count = -1;
+	count++;
 
 	LProfile Prof("LTextView4::Insert");
 	Prof.HideResultsIfBelow(1000);
@@ -1498,10 +1499,14 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 			// Add the undo object...
 			if (UndoOn)
 			{
-				LAutoPtr<LTextView4Undo> Obj(new LTextView4Undo(this));
-				LTextView4Undo *u = UndoCur ? UndoCur : Obj;
+				LAutoPtr<LTextView4Undo> Obj;
+				if (!UndoCur)
+					Obj.Reset(new LTextView4Undo(this));
+				auto u = UndoCur ? UndoCur : Obj;
 				if (u)
 					u->AddChange(At, Len, UndoInsert);
+				else
+					LAssert(!"No undo obj?");
 				if (Obj)
 					UndoQue += Obj.Release();
 			}
@@ -1516,10 +1521,12 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 				Line.Add(Cur = new LTextLine);
 				Idx = 0;
 				Cur->Start = 0;
+				LgiTrace("FirstLine\n");
 			}
 			else
 			{
 				Cur = GetTextLine(At, &Idx);
+				LgiTrace("NotFirstLine %p %i %i\n", Cur, (int)At, (int)Idx);
 			}
 
 			if (Cur)
@@ -1565,6 +1572,7 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 				else
 				{
 					// Clear all lines to the end of the doc...
+					LgiTrace("ClearLines %i\n", (int)Idx+1);
 					for (size_t i = ++Idx; i < Line.Length(); i++)
 						delete Line[i];
 					Line.Length(Idx);
@@ -1776,7 +1784,8 @@ LArray<LTextView4::LTextLine*>::I LTextView4::GetTextLineIt(ssize_t Offset, ssiz
 		}
 	}
 
-	for (size_t mid, s = 0, e = Line.Length() - 1; s < e; )
+	size_t mid, s = 0, e = Line.Length() - 1;
+	while (s < e)
 	{
 		if (e - s <= 1)
 		{
@@ -1796,15 +1805,17 @@ LArray<LTextView4::LTextLine*>::I LTextView4::GetTextLineIt(ssize_t Offset, ssiz
 			s = mid + 1;
 		else
 		{
+			LAssert(Line[mid]->Overlap(Offset));
 			if (Index)
 				*Index = mid;
 			return Line.begin(mid);
 		}
 	}
 
+	LAssert(Line[s]->Overlap(Offset));
 	if (Index)
-		*Index = 0;
-	return Line.begin();
+		*Index = s;
+	return Line.begin(s);
 }
 
 int64 LTextView4::Value()
