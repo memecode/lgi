@@ -1,9 +1,10 @@
+#ifdef WIN32
+#include <winsock2.h>
+#include <imm.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
-#ifdef WIN32
-#include <imm.h>
-#endif
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/TextView4.h"

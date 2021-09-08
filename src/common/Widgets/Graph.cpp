@@ -727,7 +727,7 @@ void LGraph::OnPaint(LSurface *pDC)
 	data.Size(20, 20);
 	data.x2 -= 40;
 	data.Dimension((int)(d->Zoom * data.X()), (int)(d->Zoom * data.Y()));
-	data.Offset(d->Px * data.X(), d->Py * data.Y());
+	data.Offset((int)(d->Px * data.X()), (int)(d->Py * data.Y()));
 	
 	LRect y = data;
 	y.x2 = y.x1 + 60;

@@ -30,7 +30,7 @@ protected:
 		}
 		else
 		{
-			PostEvent(M_LOG_TEXT); // Try again later...
+			TView::PostEvent(M_LOG_TEXT); // Try again later...
 			return;
 		}
 
@@ -48,17 +48,17 @@ public:
 	{
 		ProcessReturns = true;
 		Pos = 0;
-		Sunken(true);
-		SetPourLargest(true);
-		SetUndoOn(false);
-		SetWrapType(TEXTED_WRAP_NONE);
+		TView::Sunken(true);
+		TView::SetPourLargest(true);
+		TView::SetUndoOn(false);
+		TView::SetWrapType(TEXTED_WRAP_NONE);
 	}
 	
 	void OnCreate()
 	{
 		TView::OnCreate();
 		// ProcessTxt();
-		SetPulse(250);
+		TView::SetPulse(250);
 	}
 
 	void OnPulse()
@@ -69,7 +69,7 @@ public:
 	virtual void Add(char16 *w, ssize_t chars = -1)
 	{
 		ssize_t Len = chars >= 0 ? chars : StrlenW(w);
-		bool AtEnd = GetCaret() == TView::Size;
+		bool AtEnd = TView::GetCaret() == TView::Size;
 		
 		if (ProcessReturns)
 		{
@@ -110,14 +110,14 @@ public:
 			TView::Insert(TView::Size, w, Len);
 		}
 		
-		Invalidate();
+		TView::Invalidate();
 		if (AtEnd)
-			SetCaret(TView::Size, false);
+			TView::SetCaret(TView::Size, false);
 	}
 
 	int64 SetSize(int64 s)
 	{
-		Name(0);
+		TView::Name(0);
 		return 0;
 	}
 
@@ -142,11 +142,11 @@ public:
 
 		if (!OldLen
 			#if LGI_VIEW_HANDLE
-			&& Handle()
+			&& TView::Handle()
 			#endif
 		)
 		{
-			PostEvent(M_LOG_TEXT);
+			TView::PostEvent(M_LOG_TEXT);
 		}
 
 		return Size;
