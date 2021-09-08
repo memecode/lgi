@@ -72,7 +72,7 @@ public:
 
 	/// Sorts the child items
 	template<typename T>
-	bool Sort(int (*Compare)(LTreeItem*, LTreeItem*, T user_param), T user_param)
+	bool Sort(int (*Compare)(LTreeItem*, LTreeItem*, T user_param), T user_param = 0)
 	{
 		if (!Compare)
 			return false;
@@ -157,8 +157,6 @@ public:
 	void ScrollTo() override;
 	/// Gets the bounding box of the item.
 	LRect *GetPos(int Col = -1) override;
-	/// Sort the child folder
-	bool SortChildren(int (*compare)(LTreeItem *a, LTreeItem *b, NativeInt UserData), NativeInt UserData = 0);
 	/// True if the node is the drop target
 	bool IsDropTarget();
 
@@ -168,6 +166,11 @@ public:
 	/// Paints the item
 	void OnPaint(ItemPaintCtx &Ctx) override;
 	void OnPaint(LSurface *pDC) override { LAssert(0); }
+
+	/*
+	/// Sort the child folder
+	bool SortChildren(int (*compare)(LTreeItem *a, LTreeItem *b, NativeInt UserData), NativeInt UserData = 0);
+	*/
 };
 
 /// A tree control.

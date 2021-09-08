@@ -2362,7 +2362,7 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 		return;
 	}
 
-	Parent->SortChildren(FolderCompare);
+	Parent->Sort(FolderCompare);
 }
 
 void VcFolder::OnVcsType()

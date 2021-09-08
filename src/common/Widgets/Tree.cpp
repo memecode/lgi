@@ -477,6 +477,7 @@ LRect *LTreeItem::_GetRect(LTreeItemRect Which)
 	return 0;
 }
 
+/*
 bool LTreeItem::SortChildren(int (*compare)(LTreeItem *a, LTreeItem *b, NativeInt data), NativeInt data)
 {
 	Items.Sort(compare, data);
@@ -487,6 +488,7 @@ bool LTreeItem::SortChildren(int (*compare)(LTreeItem *a, LTreeItem *b, NativeIn
 	}
 	return true;
 }
+*/
 
 bool LTreeItem::IsDropTarget()
 {
