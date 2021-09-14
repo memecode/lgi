@@ -2,8 +2,8 @@
 /// \author Matthew Allen
 /// \brief A unicode text editor
 
-#ifndef __GTEXTVIEW4_H
-#define __GTEXTVIEW4_H
+#ifndef _GTEXTVIEW4_H
+#define _GTEXTVIEW4_H
 
 #include "lgi/common/DocView.h"
 #include "lgi/common/Undo.h"
@@ -432,4 +432,4 @@ public:
 	virtual void OnStyleMenuClick(LStyle *style, int i);
 };
 
-#endif
+#endif // _GTEXTVIEW4_H

@@ -164,5 +164,8 @@ public:
 };
 
 typedef LThreadSafeTextView<LTextView3> LTextLog;
+#ifdef _GTEXTVIEW4_H
+typedef LThreadSafeTextView<LTextView4> LTextLog4;
+#endif
 
 #endif
