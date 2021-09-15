@@ -1432,6 +1432,8 @@ bool MailSmtp::SendToFrom(List<AddressDescriptor> &To, AddressDescriptor *From, 
 		ErrMsgId = L_ERROR_ESMTP_NO_RECIPIENT;
 		ErrMsgFmt = "No recipients to send to.";
 		ErrMsgParam.Empty();
+
+		LgiTrace("%s:%i - No recipients.\n", _FL);
 		return false;
 	}
 
@@ -1445,6 +1447,8 @@ bool MailSmtp::SendToFrom(List<AddressDescriptor> &To, AddressDescriptor *From, 
 		ErrMsgId = L_ERROR_ESMTP_NO_FROM;
 		ErrMsgFmt = "No 'from' address in email.";
 		ErrMsgParam.Empty();
+
+		LgiTrace("%s:%i - Invalid from '%s'.\n", _FL, From->sAddr.Get());
 		return false;
 	}
 
