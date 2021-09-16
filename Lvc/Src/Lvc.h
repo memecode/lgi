@@ -185,7 +185,7 @@ class SshConnection : public LSsh, public LEventTargetThread
 
 	LMessage::Result OnEvent(LMessage *Msg);
 	LStream *GetConsole();
-	bool WaitPrompt(LStream *c, LString *Data = NULL);
+	bool WaitPrompt(LStream *c, LString *Data = NULL, bool Debug = false);
 
 public:
 	LHashTbl<StrKey<char,false>,VersionCtrl> Types;

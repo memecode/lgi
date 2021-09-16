@@ -14,6 +14,7 @@ void UnitTests()
 	Tests.Add(new LDateTimeTest);
 	Tests.Add(new GStringPipeTest);
 	Tests.Add(new LBitsTest);
+	Tests.Add(new JsonTest);
 
 	for (int i=0; i<Tests.Length(); i++)
 	{

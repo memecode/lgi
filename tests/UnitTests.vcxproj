@@ -247,14 +247,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\src\common\General\New.cpp" />
-    <ClCompile Include="src\GAutoPtrTest.cpp" />
-    <ClCompile Include="src\GContainerTests.cpp" />
-    <ClCompile Include="src\GCssTest.cpp" />
-    <ClCompile Include="src\GMatrixTest.cpp" />
-    <ClCompile Include="src\GStringClassTests.cpp" />
-    <ClCompile Include="src\GStringPipeTests.cpp" />
-    <ClCompile Include="src\LBitsTest.cpp" />
-    <ClCompile Include="src\LRangeTest.cpp" />
+    <ClCompile Include="src\AutoPtrTest.cpp" />
+    <ClCompile Include="src\ContainerTests.cpp" />
+    <ClCompile Include="src\CssTest.cpp" />
+    <ClCompile Include="src\JsonTest.cpp" />
+    <ClCompile Include="src\MatrixTest.cpp" />
+    <ClCompile Include="src\StringClassTests.cpp" />
+    <ClCompile Include="src\StringPipeTests.cpp" />
+    <ClCompile Include="src\BitsTest.cpp" />
+    <ClCompile Include="src\RangeTest.cpp" />
     <ClCompile Include="src\UnitTests.cpp" />
   </ItemGroup>
   <ItemGroup>

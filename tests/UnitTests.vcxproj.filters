@@ -17,34 +17,37 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\GAutoPtrTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GCssTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GMatrixTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\UnitTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\GStringClassTests.cpp">
-      <Filter>Source Files\Strings</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\General\GNew.cpp">
-      <Filter>Lgi</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GStringPipeTests.cpp">
+    <ClCompile Include="..\src\common\General\New.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\GContainerTests.cpp">
+    <ClCompile Include="src\AutoPtrTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\LRangeTest.cpp">
+    <ClCompile Include="src\ContainerTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\LBitsTest.cpp">
+    <ClCompile Include="src\CssTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MatrixTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StringClassTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StringPipeTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BitsTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RangeTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\JsonTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -56,10 +59,10 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\common\LUnrolledList.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\common\LHashTable.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

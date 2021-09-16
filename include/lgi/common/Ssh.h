@@ -188,11 +188,18 @@ public:
 		// Log->Print("%s:%i - ssh_session_is_known_server=%i.\n", _FL, State);
 
 		if (PublicKey)
+		{
 			r = ssh_userauth_publickey_auto(Ssh, Username, Password);
+			if (r == SSH_AUTH_DENIED)
+			{
+				r = ssh_userauth_password(Ssh, Username, Password);
+			}
+		}
 		else if (Username && Password)
+		{
 			r = ssh_userauth_password(Ssh, Username, Password);
-		else
-			Log->Print("%s:%i - No username and password.\n", _FL);
+		}
+		else Log->Print("%s:%i - No username and password.\n", _FL);
 
 		if (r != S_OK)
 			return false;

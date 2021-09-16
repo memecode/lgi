@@ -111,6 +111,15 @@ public:
 	bool Run();
 };
 
+class JsonTest : public UnitTest
+{
+public:
+	JsonTest();
+	~JsonTest();
+
+	bool Run();
+};
+
 class LBitsTest : public UnitTest
 {
 public:

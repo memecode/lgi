@@ -449,7 +449,6 @@ public:
 			}
 		};
 
-
 		Iter(LJson *J = NULL) : j(J)
 		{
 			a = NULL;
@@ -463,6 +462,11 @@ public:
 		void Set(LArray<Key> *arr)
 		{
 			a = arr;
+		}
+
+		size_t Length()
+		{
+			return a ? a->Length() : 0;
 		}
 
 		IterPos begin()

@@ -29,7 +29,7 @@ SshConnection *AppPriv::GetConnection(const char *Uri, bool Create)
 	auto s = u.ToString();
 	auto Conn = Connections.Find(s);
 	if (!Conn && Create)
-		Connections.Add(s, Conn = new SshConnection(Log, s, "matthew@matthew-linux:"));
+		Connections.Add(s, Conn = new SshConnection(Log, s, "matthew@"));
 	return Conn;
 }
 
@@ -120,7 +120,7 @@ public:
 	}
 };
 
-bool SshConnection::WaitPrompt(LStream *con, LString *Data)
+bool SshConnection::WaitPrompt(LStream *con, LString *Data, bool Debug)
 {
 	char buf[1024];
 	LString out;
@@ -139,8 +139,13 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data)
 			LSleep(10);
 			continue;
 		}
-				
+
 		out += LString(buf, rd);
+		if (Debug)
+		{
+			LgiTrace("WaitPrompt.out='%s'\n", out.Get());
+		}
+
 		Count += rd;
 		Total += rd;
 		DeEscape(out);
@@ -264,6 +269,7 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 				else if (ln.Equals(".git"))
 					Vcs = VcGit;
 			}
+
 			if (Vcs)
 			{
 				LAutoPtr<SshParams> r(new SshParams(this));
@@ -288,6 +294,12 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 			if (!con)
 				break;
 
+			bool Debug = path.Equals("/var/www/html/node");
+			if (Debug)
+			{
+				int asd=0;
+			}
+
 			LString cmd;
 			cmd.Printf("cd %s\n", path.Get());
 			auto wr = con->Write(cmd, cmd.Length());
@@ -295,14 +307,14 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 
 			cmd.Printf("%s %s\n", p->Exe.Get(), p->Args.Get());
 			wr = con->Write(cmd, cmd.Length());
-			pr = WaitPrompt(con, &p->Output);
+			pr = WaitPrompt(con, &p->Output, Debug);
 			
 			// Log->Print("Ssh: %s\n%s\n", cmd.Get(), p->Output.Get());
 
 			LString result;
 			cmd = "echo $?\n";
 			wr = con->Write(cmd, cmd.Length());
-			pr = WaitPrompt(con, &result);
+			pr = WaitPrompt(con, &result, Debug);
 			if (pr)
 				p->ExitCode = (int)result.Int();
 
