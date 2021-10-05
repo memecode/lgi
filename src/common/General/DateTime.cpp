@@ -372,7 +372,7 @@ struct MonthHash : public LHashTbl<ConstStrKey<char,false>,int>
 
 LString::Array Zdump;
 
-#define DEBUG_DST_INFO		0
+#define DEBUG_DST_INFO		1
 
 bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start, LDateTime *End)
 {
@@ -610,6 +610,7 @@ bool LDateTime::DstToLocal(LArray<GDstInfo> &Dst, LDateTime &dt)
 		return true;
 	}
 
+	// LgiTrace("DstToLocal: %s\n", dt.Get().Get());
 	for (size_t i=0; i<Dst.Length()-1; i++)
 	{
 		auto &a = Dst[i];
@@ -617,11 +618,24 @@ bool LDateTime::DstToLocal(LArray<GDstInfo> &Dst, LDateTime &dt)
 		LDateTime start, end;
 		start.Set(a.UtcTimeStamp);
 		end.Set(b.UtcTimeStamp);
+
+		// LgiTrace("Rng[%i]: %s -> %s\n", (int)i, start.Get().Get(), end.Get().Get());
 		if (dt >= start && dt < end)
 		{
 			dt.SetTimeZone(a.Offset, true);
 			return true;
 		}
+	}
+
+	auto Last = Dst.Last();
+	LDateTime d;
+	d.Set(Last.UtcTimeStamp);
+	if (dt >= d && dt.Year() == d.Year())
+	{
+		// If it's after the last DST change but in the same year... it's ok...
+		// Just use the last offset.
+		dt.SetTimeZone(Last.Offset, true);
+		return true;
 	}
 
 	LAssert(!"No valid DST range for this date.");
