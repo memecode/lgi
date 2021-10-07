@@ -575,19 +575,15 @@ void LRadioButton::Value(int64 i)
 		if (i)
 		{
 			// remove the value from the currenly selected radio value
-			LViewI *p = GetParent();
-			if (p)
+			if (auto p = GetParent())
 			{
-				for (LViewI *c: p->IterateViews())
+				for (auto c: p->IterateViews())
 				{
-					if (c != this)
+					LRadioButton *b = dynamic_cast<LRadioButton*>(c);
+					if (b && b != this && b->d->Val)
 					{
-						LRadioButton *b = dynamic_cast<LRadioButton*>(c);
-						if (b && b->d->Val)
-						{
-							b->d->Val = false;
-							b->Invalidate();
-						}
+						b->d->Val = false;
+						b->Invalidate();
 					}
 				}
 			}
@@ -597,9 +593,7 @@ void LRadioButton::Value(int64 i)
 		Invalidate();
 
 		if (i)
-		{
 			SendNotify();
-		}
 	}
 }
 
