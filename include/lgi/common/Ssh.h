@@ -265,7 +265,7 @@ public:
 			}
 			else Log->Print("%s:%i - Can't open '%s'.\n", _FL, To);
 		}
-		else Log->Print("%s:%i - ssh_scp_init failed.\n", _FL);
+		else Log->Print("%s:%i - ssh_scp_init failed with %i\n", _FL, r);
 
 		ssh_scp_close(Scp);
 		ssh_scp_free(Scp);
@@ -326,7 +326,7 @@ public:
 			}
 			else Log->Print("%s:%i - ssh_scp_push_file(%s,%" PRIi64 ") failed.\n", _FL, Parts[1].Get(), length);
 		}
-		else Log->Print("%s:%i - ssh_scp_init failed.\n", _FL);
+		else Log->Print("%s:%i - ssh_scp_init failed with %i\n", _FL, r);
 
 		ssh_scp_close(Scp);
 		ssh_scp_free(Scp);

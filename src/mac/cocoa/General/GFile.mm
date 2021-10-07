@@ -648,7 +648,7 @@ LVolume *LVolume::First()
 		NSWorkspace   *ws = [NSWorkspace sharedWorkspace];
 		NSArray     *vols = [ws mountedLocalVolumePaths];
 		NSFileManager *fm = [NSFileManager defaultManager];
-		[fm mountedVolumeURLsIncludingResourceValuesForKeys];
+		// [fm mountedVolumeURLsIncludingResourceValuesForKeys];
 
 		for (NSString *path in vols)
 		{
