@@ -321,10 +321,10 @@ int LDialog::DoModeless()
 		return Status;
 
 	d->IsModeless = true;
+	d->IsModal = false;
 
 	#if USE_DIALOGBOXINDIRECTPARAM
 	d->Mem = new GMem(16<<10);
-	d->IsModal = false;
 	LRect OldPos = GetPos();
 	if (d->Mem)
 	{
@@ -359,8 +359,6 @@ int LDialog::DoModeless()
 			Template->y = r.y1;
 			Template->cx = r.X();
 			Template->cy = r.Y();
-
-			d->IsModal = false;
 
 			short *A = (short*) (Template+1);
 			// menu
@@ -398,7 +396,6 @@ int LDialog::DoModeless()
     if (p && p->GetWindow() != p)
         p = p->GetWindow();
     
-    d->IsModal = false;
 	if (Attach(0))
 	{
 	    AttachChildren();
@@ -531,7 +528,6 @@ void LDialog::EndModal(int Code)
 {
 	if (d->IsModal)
 	{
-		d->IsModal = false;
 		#if USE_DIALOGBOXINDIRECTPARAM
 		EndDialog(Handle(), Code);
 		#else
@@ -543,10 +539,7 @@ void LDialog::EndModal(int Code)
 void LDialog::EndModeless(int Code)
 {
 	if (d->IsModeless)
-	{
-		d->IsModeless = false;
 		Quit(Code != 0);
-	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
