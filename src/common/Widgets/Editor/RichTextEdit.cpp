@@ -1111,6 +1111,8 @@ int LRichTextEdit::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 			int AddIndex = -1;
 			LPoint TestPt(	Pt.x - d->Areas[ContentArea].x1,
 							Pt.y - d->Areas[ContentArea].y1);
+			if (VScroll)
+				TestPt.y += VScroll->Value() * d->ScrollLinePx;
 
 			LDropFiles Df(dd);
 			for (unsigned n=0; n<Df.Length(); n++)
