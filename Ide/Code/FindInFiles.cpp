@@ -88,7 +88,7 @@ void SerializeHistory(GHistory *h, const char *opt, LOptionsFile *p, bool Write)
 				i++;
 			}
 
-			LString strs = LString("|").Join(a);
+			LString strs = LString(OptFileSeparator).Join(a);
 			p->SetValue(opt, v = strs.Get());
 			#if DEBUG_HIST
 			LgiTrace("\tstrs='%s'\n", strs.Get());

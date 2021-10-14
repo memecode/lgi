@@ -27,6 +27,8 @@
 
 #define DEBUG_FIND_DEFN			0
 
+#define OptFileSeparator		"\n"
+
 enum IdeMessages
 {
 	M_APPEND_TEXT = M_USER+200, // A=(char*)heapStr, B=(int)tabIndex

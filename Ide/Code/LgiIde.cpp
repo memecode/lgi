@@ -1555,7 +1555,7 @@ public:
 	void SerializeStringList(const char *Opt, LString::Array *Lst, bool Write)
 	{
 		LVariant v;
-		LString Sep = ":";
+		LString Sep = OptFileSeparator;
 		if (Write)
 		{
 			if (Lst->Length() > 0)
