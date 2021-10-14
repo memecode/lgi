@@ -119,7 +119,12 @@ void VcFile::OnMouseClick(LMouse &m)
 			p += File;
 			LocalPath = p.GetFull();
 		}
-		
+		else if (File && Parent)
+		{
+			LFile::Path p(Owner->LocalPath(), File);
+			LocalPath = p.GetFull();
+		}
+
 		LArray<VcFile*> Files;
 		GetList()->GetSelection(Files);
 		LString::Array Uris;
@@ -210,7 +215,8 @@ void VcFile::OnMouseClick(LMouse &m)
 			}
 			case IDM_BROWSE:
 			{
-				if (LocalPath && LDirExists(LocalPath))
+				LFile::Path p(LocalPath);
+				if (p.Exists())
 					LBrowseToFile(LocalPath);
 				else
 					LgiMsg(GetList(), "Can't find path '%s'.", AppName, MB_OK, LocalPath.Get());

@@ -977,15 +977,16 @@ int32 LSubProcess::Communicate(LStreamI *Out, LStreamI *In, LCancel *Cancel)
 	ssize_t r;
 
 	LAssert(In == NULL); // Impl me.
+	#define NOT_CANCELLED (!Cancel || !Cancel->IsCancelled())
 
-	while (IsRunning() && (!Cancel || !Cancel->IsCancelled()))
+	while (IsRunning() && NOT_CANCELLED)
 	{
 		r = Read(Buf, sizeof(Buf));
 		if (r > 0 && Out)
 			Out->Write(Buf, r);
 	}
 
-	while (1)
+	while (NOT_CANCELLED)
 	{
 		r = Read(Buf, sizeof(Buf));
 		if (r > 0 && Out)
