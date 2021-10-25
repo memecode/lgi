@@ -47,9 +47,9 @@ public:
 
 	// Bitmap
 	bool Bitmap(LSurface *pDC, bool AutoEmpty = true);
-	LSurface *Bitmap();
+	LAutoPtr<LSurface> Bitmap();
 	#if WINNATIVE
-	LSurface *ConvertFromPtr(void *Ptr);
+	LAutoPtr<LSurface> ConvertFromPtr(void *Ptr);
 	#endif
 
 	// Files

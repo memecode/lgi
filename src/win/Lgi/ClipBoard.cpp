@@ -712,87 +712,82 @@ bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 	return Status;
 }
 
-LSurface *LClipBoard::ConvertFromPtr(void *Ptr)
+LAutoPtr<LSurface> LClipBoard::ConvertFromPtr(void *Ptr)
 {
-	LSurface *pDC = NULL;
-	if (Ptr)
+	LAutoPtr<LSurface> pDC;
+	BITMAPINFO *Info = (BITMAPINFO*) Ptr;
+	if
+	(
+		Info &&
+		pDC.Reset(new LMemDC) &&
+		(Info->bmiHeader.biCompression == BI_RGB ||
+		Info->bmiHeader.biCompression == BI_BITFIELDS)
+	)
 	{
-		BITMAPINFO *Info = (BITMAPINFO*) Ptr;
-		if (Info)
+		if
+		(
+			pDC->Create
+			(
+				Info->bmiHeader.biWidth,
+				Info->bmiHeader.biHeight,
+				GBitsToColourSpace(max(Info->bmiHeader.biPlanes * Info->bmiHeader.biBitCount, 8))
+			)
+		)
 		{
-			pDC = new LMemDC;
-			if (pDC &&
-				(Info->bmiHeader.biCompression == BI_RGB ||
-				Info->bmiHeader.biCompression == BI_BITFIELDS))
+			int Colours = 0;
+			char *Source = (char*) Info->bmiColors;
+
+			// do palette
+			if (pDC->GetBits() <= 8)
 			{
-				if (pDC->Create(Info->bmiHeader.biWidth,
-						Info->bmiHeader.biHeight,
-						GBitsToColourSpace(max(Info->bmiHeader.biPlanes * Info->bmiHeader.biBitCount, 8))))
+				if (Info->bmiHeader.biClrUsed > 0)
+					Colours = Info->bmiHeader.biClrUsed;
+				else
+					Colours = 1 << pDC->GetBits();
+
+				GPalette *Pal = new GPalette(NULL, Colours);
+				if (Pal)
 				{
-					int Colours = 0;
-					char *Source = (char*) Info->bmiColors;
-
-					// do palette
-					if (pDC->GetBits() <= 8)
+					GdcRGB *d = (*Pal)[0];
+					RGBQUAD *s = (RGBQUAD*) Source;
+					if (d)
 					{
-						if (Info->bmiHeader.biClrUsed > 0)
+						for (int i=0; i<Colours; i++, d++, s++)
 						{
-							Colours = Info->bmiHeader.biClrUsed;
-						}
-						else
-						{
-							Colours = 1 << pDC->GetBits();
-						}
-
-						GPalette *Pal = new GPalette(NULL, Colours);
-						if (Pal)
-						{
-							GdcRGB *d = (*Pal)[0];
-							RGBQUAD *s = (RGBQUAD*) Source;
-							if (d)
-							{
-								for (int i=0; i<Colours; i++, d++, s++)
-								{
-									d->r = s->rgbRed;
-									d->g = s->rgbGreen;
-									d->b = s->rgbBlue;
-									d->a = s->rgbReserved;
-								}
-							}
-							Source = (char*) s;
-							pDC->Palette(Pal);
+							d->r = s->rgbRed;
+							d->g = s->rgbGreen;
+							d->b = s->rgbBlue;
+							d->a = s->rgbReserved;
 						}
 					}
-
-					if (Info->bmiHeader.biCompression == BI_BITFIELDS)
-					{
-						Source += sizeof(DWORD) * 3;
-					}
-
-					// do pixels
-					int Bytes = BMPWIDTH(pDC->X() * pDC->GetBits());
-					for (int y=pDC->Y()-1; y>=0; y--)
-					{
-						uchar *d = (*pDC)[y];
-						if (d)
-						{
-							memcpy(d, Source, Bytes);
-						}
-						Source += Bytes;
-					}
+					Source = (char*) s;
+					pDC->Palette(Pal);
 				}
+			}
+
+			if (Info->bmiHeader.biCompression == BI_BITFIELDS)
+				Source += sizeof(DWORD) * 3;
+
+			// do pixels
+			int Bytes = BMPWIDTH(pDC->X() * pDC->GetBits());
+			for (int y=pDC->Y()-1; y>=0; y--)
+			{
+				uchar *d = (*pDC)[y];
+				if (d)
+					memcpy(d, Source, Bytes);
+				Source += Bytes;
 			}
 		}
 	}
+
 	return pDC;
 }
 
-LSurface *LClipBoard::Bitmap()
+LAutoPtr<LSurface> LClipBoard::Bitmap()
 {
 	HGLOBAL hMem = GetClipboardData(CF_DIB);
-	void *Ptr = GlobalLock(hMem);
-	LSurface *pDC = 0;
-	if (Ptr)
+	LAutoPtr<LSurface> pDC;
+	if (void *Ptr = GlobalLock(hMem))
 	{
 		#if 0
 		SIZE_T TotalSize = GlobalSize(hMem);
@@ -808,6 +803,7 @@ LSurface *LClipBoard::Bitmap()
 		pDC = ConvertFromPtr(Ptr);
 		GlobalUnlock(hMem);
 	}
+
 	return pDC;
 }
 

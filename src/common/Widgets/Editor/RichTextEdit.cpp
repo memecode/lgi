@@ -659,13 +659,18 @@ bool LRichTextEdit::Paste()
 	LAutoPtr<LSurface> Img;
 
 	{
-		LClipBoard Cb(this);	
-		Html = Cb.Html();
-		if (!Html)
-		{
-			Text.Reset(NewStrW(Cb.TextW()));
-			if (!Text)
-				Img.Reset(Cb.Bitmap());
+		LClipBoard Cb(this);
+		
+		Img = Cb.Bitmap();
+		if (!Img)
+		{	
+			Html = Cb.Html();
+			if (!Html)
+			{
+				Text.Reset(NewStrW(Cb.TextW()));
+				if (!Text)
+					Img.Reset(Cb.Bitmap());
+			}
 		}
 	}
 
