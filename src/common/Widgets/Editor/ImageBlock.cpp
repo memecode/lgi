@@ -1085,6 +1085,14 @@ void LRichTextPriv::ImageBlock::UpdateDisplayImg()
 			{
 				DisplayImg->Colour(L_MED);
 				DisplayImg->Rectangle();
+
+				if (PostThreadEvent(GetThreadHandle(),
+									M_IMAGE_RESAMPLE,
+									(LMessage::Param)DisplayImg.Get(),
+									(LMessage::Param)SourceImg.Get()))
+				{
+					UpdateThreadBusy(_FL, 1);
+				}
 			}
 		}
 	}
@@ -1277,12 +1285,17 @@ LMessage::Result LRichTextPriv::ImageBlock::OnEvent(LMessage *Msg)
 			if (SourceImg)
 			{
 				UpdateDisplay(SourceImg->Y()-1);
-				if (DisplayImg != NULL &&
+				if
+				(
+					DisplayImg != NULL &&
 					PostThreadEvent(GetThreadHandle(),
 									M_IMAGE_RESAMPLE,
 									(LMessage::Param)DisplayImg.Get(),
-									(LMessage::Param)SourceImg.Get()))
+									(LMessage::Param)SourceImg.Get())
+				)
+				{
 					UpdateThreadBusy(_FL, 1);
+				}
 			}
 			break;
 		}
