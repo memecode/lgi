@@ -666,11 +666,7 @@ bool LRichTextEdit::Paste()
 		{	
 			Html = Cb.Html();
 			if (!Html)
-			{
 				Text.Reset(NewStrW(Cb.TextW()));
-				if (!Text)
-					Img.Reset(Cb.Bitmap());
-			}
 		}
 	}
 
