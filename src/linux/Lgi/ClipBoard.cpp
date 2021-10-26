@@ -233,16 +233,16 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LAutoPtr<LS
 	}
 }
 
-LSurface *LClipBoard::Bitmap()
+LAutoPtr<LSurface> LClipBoard::Bitmap()
 {
-	pDC.Reset();
-	gtk_clipboard_request_image(d->c, (GtkClipboardImageReceivedFunc) ClipboardImageReceived, &pDC);
+	LAutoPtr<LSurface> img;
+	gtk_clipboard_request_image(d->c, (GtkClipboardImageReceivedFunc) ClipboardImageReceived, &img);
 
 	uint64 Ts = LCurrentTime();
-	while (!pDC && (LCurrentTime() - Ts) < LGI_RECEIVE_CLIPBOARD_TIMEOUT)
+	while (!img && (LCurrentTime() - Ts) < LGI_RECEIVE_CLIPBOARD_TIMEOUT)
 		LYield();
 
-	return pDC.Release();
+	return img;
 }
 
 void LgiClipboardGetFunc(GtkClipboard *clipboard,
