@@ -120,10 +120,10 @@ bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 	return false;
 }
 
-LSurface *LClipBoard::Bitmap()
+LAutoPtr<LSurface> LClipBoard::Bitmap()
 {
 	LAssert(!"Not impl.");
-	return NULL;
+	return LAutoPtr<LSurface>(NULL);
 }
 
 LString::Array LClipBoard::Files()
