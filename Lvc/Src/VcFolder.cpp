@@ -3,6 +3,7 @@
 #include "lgi/common/Combo.h"
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/Json.h"
+#include "lgi/common/ProgressDlg.h"
 
 #ifndef CALL_MEMBER_FN
 #define CALL_MEMBER_FN(object,ptrToMember)  ((object).*(ptrToMember))
@@ -1803,10 +1804,16 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 		}
 		case VcHg:
 		{
-			LString::Array a = s.Split("\n");
-			LString Diff;
+			LString Sep("\n");
+			LString::Array a = s.Split(Sep);
+			LString::Array Diffs;
 			VcFile *f = NULL;
 			List<LListItem> Files;
+			LProgressDlg Prog(GetTree(), 1000);
+
+			Prog.SetDescription("Reading diff lines...");
+			Prog.SetRange(LRange(0, a.Length()));
+			Prog.SetYieldTime(300);
 
 			for (unsigned i=0; i<a.Length(); i++)
 			{
@@ -1814,19 +1821,16 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 				if (!_strnicmp(Ln, "diff", 4))
 				{
 					if (f)
-						f->SetDiff(Diff);
-					Diff.Empty();
+						f->SetDiff(Sep.Join(Diffs));
+					Diffs.Empty();
 
 					auto MainParts = a[i].Split(" -r ");
 					auto FileParts = MainParts.Last().Split(" ",1);
 					LString Fn = FileParts.Last();
-					// LString Status = "M";
 
 					f = FindFile(Fn);
 					if (!f)
 						f = new VcFile(d, this, Rev, IsWorking);
-
-					// printf("a='%s'\n", a[i].Get());
 
 					f->SetText(Fn.Replace("\\","/"), COL_FILENAME);
 					// f->SetText(Status, COL_STATE);
@@ -1843,14 +1847,17 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 				}
 				else
 				{
-					if (Diff) Diff += "\n";
-					Diff += a[i];
+					Diffs.Add(a[i]);
 				}
+
+				Prog.Value(i);
+				if (Prog.IsCancelled())
+					break;
 			}
-			if (f && Diff)
+			if (f && Diffs.Length())
 			{
-				f->SetDiff(Diff);
-				Diff.Empty();
+				f->SetDiff(Sep.Join(Diffs));
+				Diffs.Empty();
 			}
 			d->Files->Insert(Files);
 			break;
