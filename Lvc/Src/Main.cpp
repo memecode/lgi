@@ -1564,7 +1564,7 @@ public:
 						Commits->Sort(LstCmp, Col);
 						break;
 					}
-					case LNotifyItemClick:
+					case LNotifyItemDoubleClick:
 					{
 						VcFolder *f = dynamic_cast<VcFolder*>(Tree->Selection());
 						if (!f)
