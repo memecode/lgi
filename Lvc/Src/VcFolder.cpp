@@ -1017,7 +1017,9 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 LString VcFolder::GetFilePart(const char *uri)
 {
 	LUri u(uri);
-	LString File = u.IsFile() ? LString(u.LocalPath()) : u.sPath(Uri.sPath.Length(), -1).LStrip("/");
+	LString File =	u.IsFile() ?
+					u.DecodeStr(u.LocalPath()) :
+					u.sPath(Uri.sPath.Length(), -1).LStrip("/");
 	return File;
 }
 
