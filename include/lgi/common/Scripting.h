@@ -139,12 +139,9 @@ struct LExternFunc : public LFunc
 
 class LFunctionInfo : public GRefCount
 {
-	friend class LVirtualMachinePriv;
-	friend class LCompilerPriv;
-	
 	static int _Infos;
 
-	int32 StartAddr;
+	int32 StartAddr = INVALID_ADDR;
 	LString Name;
 
 	// The reason why this is a pointer is because during the function compilation the frame
@@ -157,9 +154,10 @@ class LFunctionInfo : public GRefCount
 	LArray<LString> Params;
 
 public:
+	static constexpr int32 INVALID_ADDR = -1;
+
 	LFunctionInfo(const char *name)
 	{
-		StartAddr = 0;
 		if (name)
 			Name = name;
 	}
@@ -173,16 +171,61 @@ public:
 		return Name;
 	}
 
-	int32 GetStartAddr()
+	LArray<LString> &GetParams()
 	{
-		return StartAddr;
-	}
-	
-	size_t GetParams()
-	{
-		return Params.Length();
+		return Params;
 	}
 
+	bool ValidFrameSize()
+	{
+		return FrameSize.Get() != NULL;
+	}
+	
+	uint16 GetFrameSize()
+	{
+		if (!FrameSize)
+		{
+			LAssert(!"Invalid frame size");
+			return 0;
+		}
+		return *FrameSize;
+	}
+
+	template<typename T>
+	bool SetFrameSize(T size)
+	{
+		if (size >= 0xffff)
+		{
+			LAssert(!"Invalid frame size.");
+			return false;
+		}
+
+		return FrameSize.Reset(new uint16(size));
+	}
+
+	bool ValidStartAddr()
+	{
+		return StartAddr != INVALID_ADDR;
+	}
+
+	int32 GetStartAddr()
+	{
+		LAssert(ValidStartAddr());
+		return StartAddr;
+	}
+
+	bool SetStartAddr(int32_t addr)
+	{
+		if (addr < 0)
+		{
+			LAssert(!"Invalid start address");
+			return false;
+		}
+
+		StartAddr = addr;
+		return true;
+	}
+	
 	LFunctionInfo &operator =(LFunctionInfo &f)
 	{
 		StartAddr = f.StartAddr;

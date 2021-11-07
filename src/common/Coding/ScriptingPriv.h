@@ -489,7 +489,7 @@ public:
 
 	// File
 		/// Reads a text file into a variable
-		bool LReadTextFile(LScriptArguments &Args);
+		bool ReadTextFile(LScriptArguments &Args);
 		/// Writes a text file from a variable
 		bool WriteTextFile(LScriptArguments &Args);
 		/// \brief Opens a file open dialog to select files.

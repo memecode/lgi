@@ -662,8 +662,8 @@ public:
 		for (unsigned m=0; m<Code->Methods.Length(); m++)
 		{
 			LFunctionInfo *Info = Code->Methods[m];
-			if (Info->StartAddr >= 0)
-				Fn.Add(Info->StartAddr, Info->Name.Get());
+			if (Info->ValidStartAddr())
+				Fn.Add(Info->GetStartAddr(), Info->GetName());
 			else
 				LAssert(!"Method not defined.");
 		}
@@ -823,8 +823,13 @@ public:
 		if (Func)
 		{
 			// Set up stack for function call
-			LAssert(Func->FrameSize.Get() != NULL);
-			Sf.CurrentFrameSize = *Func->FrameSize.Get();
+			if (!Func->ValidFrameSize())
+			{
+				Log->Print("%s:%i - Function '%s' has an invalid frame size. (Script: %s).\n",
+					_FL, Func->GetName(), Code->AddrToSourceRef(Func->GetStartAddr()));
+				return ScriptError;
+			}
+			Sf.CurrentFrameSize = Func->GetFrameSize();
 			AddLocalSize(Sf.CurrentFrameSize);
 
 			if (Args)
@@ -834,7 +839,7 @@ public:
 				{
 					Log->Print("%s:%i - Arg count mismatch, Supplied: %i, FrameSize: %i (Script: %s).\n",
 						_FL, (int)Args->Length(), (int)Sf.CurrentFrameSize,
-						Code->AddrToSourceRef(Func->StartAddr));
+						Code->AddrToSourceRef(Func->GetStartAddr()));
 					return ScriptError;
 				}
 
@@ -844,9 +849,15 @@ public:
 					Locals[LocalsBase+i] = *(*Args)[i];
 				}
 			}
+			if (!Func->ValidStartAddr())
+			{
+				Log->Print("%s:%i - Function '%s' is not defined. (Script: %s).\n",
+					_FL, Func->GetName(), Code->AddrToSourceRef(Func->GetStartAddr()));
+				return ScriptError;
+			}
 
 			// Set IP to start of function
-			c.u8 = Base + Func->StartAddr;
+			c.u8 = Base + Func->GetStartAddr();
 		}
 		else
 		{

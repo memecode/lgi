@@ -355,7 +355,7 @@ bool SystemFunctions::Sprintf(LScriptArguments &Args)
 	return true;
 }
 
-bool SystemFunctions::LReadTextFile(LScriptArguments &Args)
+bool SystemFunctions::ReadTextFile(LScriptArguments &Args)
 {
 	if (Args.Length() == 1 &&
 		LFileExists(Args[0]->CastString()))
@@ -1011,7 +1011,7 @@ GHostFunc SystemLibrary[] =
 	DefFn(Delete),
 
 	// Files
-	DefFn(LReadTextFile),
+	DefFn(ReadTextFile),
 	DefFn(WriteTextFile),
 	DefFn(SelectFiles),
 	DefFn(SelectFolder),

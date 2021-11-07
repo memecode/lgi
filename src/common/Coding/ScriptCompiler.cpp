@@ -54,17 +54,17 @@ struct Node
 	NodeExp Child;
 
 	// One of the following are valid:
-	GOperator Op;
+	GOperator Op = OpNull;
 	// -or-
-	bool Constant;
-	int Tok;
+	bool Constant = false;
+	int Tok = -1;
 	LArray<int> Lst;
-	GTokenType ConstTok;
+	GTokenType ConstTok = TNone;
 	// -or-
-	LFunc *ContextFunc;
+	LFunc *ContextFunc = NULL;
 	LArray<NodeExp> Args;
 	// -or-
-	LFunctionInfo *ScriptFunc;
+	LFunctionInfo *ScriptFunc = NULL;
 	// -or-
 	LArray<VariablePart> Variable;
 	
@@ -74,12 +74,6 @@ struct Node
 
 	void Init()
 	{
-		Op = OpNull;
-		ContextFunc = 0;
-		ScriptFunc = 0;
-		Constant = false;
-		Tok = -1;
-		ConstTok = TNone;
 		Reg.Empty();
 		ArrayIdx.Empty();
 	}
@@ -117,6 +111,13 @@ struct Node
 	void SetScriptFunction(LFunctionInfo *m, int tok)
 	{
 		Init();
+
+		LgiTrace("SetScriptFunction %s\n", m->GetName());
+		if (!stricmp(m->GetName(), "Substr"))
+		{
+			int asd=0;
+		}
+
 		ScriptFunc = m;
 		Tok = tok;
 	}
@@ -167,11 +168,13 @@ LCompiledCode &LCompiledCode::operator =(const LCompiledCode &c)
 
 LFunctionInfo *LCompiledCode::GetMethod(const char *Name, bool Create)
 {
-	for (unsigned i=0; i<Methods.Length(); i++)
+	for (auto &m: Methods)
 	{
-		const char *Fn = Methods[i]->GetName();
+		const char *Fn = m->GetName();
 		if (!strcmp(Fn, Name))
-			return Methods[i];
+		{
+			return m;
+		}
 	}
 
 	if (Create)
@@ -1557,13 +1560,26 @@ public:
 					return true;
 				}
 				
-				if (n.ScriptFunc->GetParams() != n.Args.Length())
+				if (n.ScriptFunc->GetParams().Length() != n.Args.Length())
 				{
-					return OnError(	n.Tok,
-									"Wrong number of parameters: %i (%s expects %i)",
-									n.Args.Length(),
-									FnName,
-									n.ScriptFunc->GetParams());
+					if (n.ScriptFunc->ValidStartAddr())
+					{
+						// Function is already defined and doesn't have the right arg count...
+						return OnError(	n.Tok,
+										"Wrong number of parameters: %i (%s expects %i)",
+										n.Args.Length(),
+										FnName,
+										n.ScriptFunc->GetParams().Length());
+					}
+					else
+					{
+						// Maybe it's defined later or in a separate file?
+						// Or maybe it's just not defined at all?
+						// Can't know until later... flag it as a unresolved external...
+						//
+						// Allow the assembly for the call to occur.
+						int asd=0;
+					}
 				}
 				
 				// Call to a script function, create byte code to call function
@@ -1606,12 +1622,12 @@ public:
 				p.u8 = Start;
 				*p.u8++ = ICallScript;
 				
-				if (n.ScriptFunc->StartAddr &&
-					n.ScriptFunc->FrameSize.Get())
+				if (n.ScriptFunc->ValidStartAddr() &&
+					n.ScriptFunc->ValidFrameSize())
 				{
 					// Compile func address straight into code...
-					*p.u32++ = n.ScriptFunc->StartAddr;
-					*p.u16++ = *n.ScriptFunc->FrameSize.Get();
+					*p.u32++ = n.ScriptFunc->GetStartAddr();
+					*p.u16++ = n.ScriptFunc->GetFrameSize();
 				}
 				else
 				{
@@ -2049,7 +2065,7 @@ public:
 			}
 			else if (n[i].ScriptFunc)
 			{
-				e.Print("%s(...)", n[i].ScriptFunc->Name.Get());
+				e.Print("%s(...)", n[i].ScriptFunc->GetName());
 			}
 			else
 			{
@@ -2913,8 +2929,8 @@ public:
 				if (!ScriptMethod)
 					return OnError(Cur, "Can't define method '%s'.", FunctionName.Get());
 
-				ScriptMethod->Params = Params;
-				ScriptMethod->StartAddr = (uint32_t)Code->ByteCode.Length();
+				ScriptMethod->GetParams() = Params;
+				ScriptMethod->SetStartAddr((int32_t)Code->ByteCode.Length());
 			}
 
 			// Parse start of body
@@ -2952,7 +2968,7 @@ public:
 					if (StructMethod)
 						StructMethod->FrameSize = (uint16)LocalScope.Length();
 					else if (ScriptMethod)
-						ScriptMethod->FrameSize.Reset(new uint16((uint16)LocalScope.Length()));
+						ScriptMethod->SetFrameSize(LocalScope.Length());
 					else
 						LAssert(!"What are you defining exactly?");
 					
@@ -3455,36 +3471,36 @@ public:
 			JumpLoc = 0;
 		}
 
-		// Do link time fixups...
+		// Do link time fix ups...
 		for (unsigned i=0; i<Fixups.Length(); i++)
 		{
 			LinkFixup &f = Fixups[i];
-			if (f.Func->StartAddr)
+			if (f.Func->ValidStartAddr())
 			{
-				if (f.Args != f.Func->Params.Length())
+				if (f.Args != f.Func->GetParams().Length())
 				{
 					return OnError(f.Tok, "Function call '%s' has wrong arg count (caller=%i, method=%i).",
-											f.Func->Name.Get(),
+											f.Func->GetName(),
 											f.Args,
-											f.Func->Params.Length());
+											f.Func->GetParams().Length());
 				}
-				else if (!f.Func->FrameSize.Get())
+				else if (!f.Func->ValidFrameSize())
 				{
 					return OnError(f.Tok, "Function call '%s' has no frame size.",
-											f.Func->Name.Get());
+											f.Func->GetName());
 				}
 				else
 				{
 					GPtr p;
 					p.u8 = &Code->ByteCode[f.Offset];
 					LAssert(*p.u32 == 0);
-					*p.u32++ = f.Func->StartAddr;
-					*p.u16++ = *f.Func->FrameSize.Get();
+					*p.u32++ = f.Func->GetStartAddr();
+					*p.u16++ = f.Func->GetFrameSize();
 				}
 			}
 			else
 			{
-				return OnError(f.Tok, "Function '%s' not defined.", f.Func->Name.Get());
+				return OnError(f.Tok, "Function '%s' not defined.", f.Func->GetName());
 			}
 		}
 		Fixups.Length(0);
