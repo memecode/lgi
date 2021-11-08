@@ -120,7 +120,7 @@ extern const char *InstToString(GInstruction i);
 		The scope is one byte, the index is 3 bytes following, totally 4 bytes per ref.
 */
 
-#define MAX_REGISTER		8
+#define MAX_REGISTER		16
 
 /// 32bit variable reference, used to track where a variable is during compilation.
 struct GVarRef
@@ -450,7 +450,7 @@ class SystemFunctions : public LScriptContext
 	HANDLE Brk;
 	#endif
 
-	LView *CastGView(LVariant &v);
+	LView *CastLView(LVariant &v);
 
 public:
 	SystemFunctions();
@@ -486,6 +486,7 @@ public:
 	// Object creation/deletion
 		bool New(LScriptArguments &Args);
 		bool Delete(LScriptArguments &Args);
+		bool Len(LScriptArguments &Args);
 
 	// File
 		/// Reads a text file into a variable

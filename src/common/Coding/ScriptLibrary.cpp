@@ -403,7 +403,7 @@ bool SystemFunctions::WriteTextFile(LScriptArguments &Args)
 	return false;
 }
 
-LView *SystemFunctions::CastGView(LVariant &v)
+LView *SystemFunctions::CastLView(LVariant &v)
 {
 	switch (v.Type)
 	{
@@ -421,7 +421,7 @@ bool SystemFunctions::SelectFiles(LScriptArguments &Args)
 	LFileSelect s;
 	
 	if (Args.Length() > 0)
-		s.Parent(CastGView(*Args[0]));
+		s.Parent(CastLView(*Args[0]));
 	
 	GToken t(Args.Length() > 1 ? Args[1]->CastString() : 0, ",;:");
 	for (unsigned i=0; i<t.Length(); i++)
@@ -467,7 +467,7 @@ bool SystemFunctions::SelectFolder(LScriptArguments &Args)
 	LFileSelect s;
 	
 	if (Args.Length() > 0)
-		s.Parent(CastGView(*Args[0]));
+		s.Parent(CastLView(*Args[0]));
 	s.InitialDir(Args.Length() > 1 ? Args[1]->CastString() : 0);
 
 	if (s.OpenFolder())
@@ -685,6 +685,38 @@ bool SystemFunctions::New(LScriptArguments &Args)
 	return true;
 }
 
+bool SystemFunctions::Len(LScriptArguments &Args)
+{
+	int i = 0;
+	for (LVariant *v: Args)
+	{
+		switch (v->Type)
+		{
+			case GV_LIST:
+				i += v->Value.Lst->Length();
+				break;
+			case GV_HASHTABLE:
+				i += v->Value.Hash->Length();
+				break;
+			case GV_BINARY:
+				i += v->Value.Binary.Length;
+				break;
+			case GV_STRING:
+				i += Strlen(v->Value.String);
+				break;
+			case GV_WSTRING:
+				i += Strlen(v->Value.WString);
+				break;
+			default:
+				i += 1;
+				break;
+		}
+	}
+
+	*Args.GetReturn() = i;
+	return true;
+}
+
 bool SystemFunctions::Delete(LScriptArguments &Args)
 {
 	if (Args.Length() != 1)
@@ -882,7 +914,7 @@ bool SystemFunctions::MessageDlg(LScriptArguments &Args)
 	if (Args.Length() < 4)
 		return false;
 
-	LViewI *Parent = CastGView(*Args[0]);
+	LViewI *Parent = CastLView(*Args[0]);
 	char *Msg = Args[1]->Str();
 	char *Title = Args[2]->Str();
 	uint32_t Btns = Args[3]->CastInt32();
@@ -898,7 +930,7 @@ bool SystemFunctions::GetInputDlg(LScriptArguments &Args)
 	if (Args.Length() < 4)
 		return false;
 
-	LViewI *Parent = CastGView(*Args[0]);
+	LViewI *Parent = CastLView(*Args[0]);
 	char *InitVal = Args[1]->Str();
 	char *Msg = Args[2]->Str();
 	char *Title = Args[3]->Str();
@@ -919,7 +951,7 @@ bool SystemFunctions::GetViewById(LScriptArguments &Args)
 	if (Args.Length() < 2)
 		return false;
 
-	LViewI *Parent = CastGView(*Args[0]);
+	LViewI *Parent = CastLView(*Args[0]);
 	int Id = Args[1]->CastInt32();
 	if (!Parent || Id <= 0)
 		return false;
@@ -1009,6 +1041,7 @@ GHostFunc SystemLibrary[] =
 	// Containers/objects
 	DefFn(New),
 	DefFn(Delete),
+	DefFn(Len),
 
 	// Files
 	DefFn(ReadTextFile),

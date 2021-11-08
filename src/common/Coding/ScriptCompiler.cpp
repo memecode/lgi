@@ -395,8 +395,8 @@ public:
 	LArray<char16*> Tokens;	
 	TokenRanges Lines;
 	char16 *Script;
-	LHashTbl<StrKey<char>, LFunc*> Methods;
-	int Regs;
+	LHashTbl<StrKey<char, false>, LFunc*> Methods;
+	uint64_t Regs;
 	LArray<LVariables*> Scopes;
 	LArray<LinkFixup> Fixups;
 	LHashTbl<StrKey<char16>, char16*> Defines;
@@ -1082,7 +1082,7 @@ public:
 				GVarRef Dst = Cur;
 				if (!Dst.IsReg())
 				{
-					AllocReg(Dst, _FL);
+					AllocReg(Dst, n.Tok, _FL);
 				}
 				
 				// Assemble array load instruction
@@ -1118,7 +1118,7 @@ public:
 				if (Cur.Scope != SCOPE_REGISTER)
 				{
 					GVarRef Dest;
-					AllocReg(Dest, _FL);
+					AllocReg(Dest, n.Tok, _FL);
 					Asm4(n.Tok, IDomGet, Dest, Cur, DomName, Idx);
 					Cur = Dest;
 				}
@@ -1264,7 +1264,7 @@ public:
 				{
 					if (HasScriptArgs)
 					{
-						if (AllocReg(v, _FL))
+						if (AllocReg(v, n.Tok, _FL))
 						{
 							char16 *VarName = GetTok((unsigned)n.Tok);
 
@@ -1299,7 +1299,7 @@ public:
 					{
 						// We have to load the variable into a register
 						GVarRef Reg, ThisPtr, MemberIndex, Null;
-						if (!AllocReg(Reg, _FL))
+						if (!AllocReg(Reg, n.Tok, _FL))
 							return OnError(n.Tok, "Couldn't alloc register.");
 						
 						ThisPtr.Scope = SCOPE_LOCAL;
@@ -1319,7 +1319,7 @@ public:
 							// make sure it's a register first so we don't lose the
 							// actual variable.
 							GVarRef reg;
-							if (!AllocReg(reg, _FL))
+							if (!AllocReg(reg, n.Tok, _FL))
 								return OnError(n.Tok, "Couldn't alloc register.");
 							
 							LAssert(reg != v);
@@ -1350,7 +1350,7 @@ public:
 
 					// Do we need to create code to load the value from the array?
 					GVarRef Val;
-					if (AllocReg(Val, _FL))
+					if (AllocReg(Val, n.Tok, _FL))
 					{
 						Asm3(n.Tok, IArrayGet, Val, n.Reg, n.ArrayIdx);
 						n.Reg = Val;
@@ -1365,6 +1365,9 @@ public:
 					LArray<GVarRef> Args;
 					Node::VariablePart &Part = n.Variable[p];
 					
+					Name.Empty();
+					Arr.Empty();
+
 					char *nm = Part.Name.Str();
 					AllocConst(Name, nm, strlen(nm));
 					
@@ -1380,6 +1383,7 @@ public:
 						for (unsigned i=0; i<Part.Args.Length(); i++)
 						{
 							GVarRef &a = Args.New();
+							a.Empty();
 							if (!AsmExpression(&a, *Part.Args[i]))
 							{
 								return OnError(n.Tok, "Can't assemble argument expression.");
@@ -1398,7 +1402,7 @@ public:
 					}
 					else
 					{
-						AllocReg(Dst, _FL);
+						AllocReg(Dst, n.Tok, _FL);
 					}
 					
 					if (Part.Call)
@@ -1508,7 +1512,7 @@ public:
 				}
 				else
 				{
-					if (!AllocReg(n.Reg, _FL))
+					if (!AllocReg(n.Reg, n.Tok, _FL))
 					{
 						return OnError(n.Tok, "Can't allocate register for method return value.");
 					}
@@ -1520,7 +1524,9 @@ public:
 				LArray<GVarRef> a;
 				for (unsigned i=0; i<n.Args.Length(); i++)
 				{
-					if (!AsmExpression(&a[i], n.Args[i]))
+					auto &AsmResult = a.New();
+					AsmResult.Empty();
+					if (!AsmExpression(&AsmResult, n.Args[i]))
 						return OnError(n.Tok, "Error creating bytecode for context function argument.");
 				}
 
@@ -1590,7 +1596,7 @@ public:
 				}
 				else
 				{
-					if (!AllocReg(n.Reg, _FL))
+					if (!AllocReg(n.Reg, n.Tok, _FL))
 					{
 						return OnError(n.Tok, "Can't allocate register for method return value.");
 					}
@@ -1602,7 +1608,9 @@ public:
 				LArray<GVarRef> a;
 				for (unsigned i=0; i<n.Args.Length(); i++)
 				{
-					if (!AsmExpression(&a[i], n.Args[i]))
+					auto &r = a.New();
+					r.Empty();
+					if (!AsmExpression(&r, n.Args[i]))
 					{
 						return OnError(n.Tok, "Error creating byte code for script function argument.");
 					}
@@ -1769,9 +1777,12 @@ public:
 			{
 				Cur++;
 
-				if (!Expression(Cur, n[n.Length()].Child, Depth + 1))
+				auto &Next = n.New();
+				if (!Expression(Cur, Next.Child, Depth + 1))
 					return false;
 				PrevIsOp = false;
+				if (Next.Child.Length() > 0)
+					Next.Tok = Next.Child[0].Tok;
 			}
 			else if (Tok == TEndRdBracket)
 			{
@@ -1938,7 +1949,7 @@ public:
 							Cur++;
 						}
 						n.New().SetConst(Values, TLiteral);
-					} 
+					}
 					else
 					{
 						// Unknown
@@ -1954,7 +1965,7 @@ public:
 	}
 
 	/// Allocate a register (must be mirrored with DeallocReg)
-	bool AllocReg(GVarRef &r, const char *file, int line)
+	bool AllocReg(GVarRef &r, int LineOrTok, const char *file, int line)
 	{
 		for (int i=0; i<MAX_REGISTER; i++)
 		{
@@ -1966,8 +1977,11 @@ public:
 				r.Scope = SCOPE_REGISTER;
 				
 				#ifdef _DEBUG
+				auto Src = LineOrTok < 0 ? Lines.GetLine(-LineOrTok) : Lines[LineOrTok];
+				auto Leaf = Strrchr(Src, DIR_CHAR);
+
 				char s[256];
-				sprintf_s(s, sizeof(s), "%s:%i", file, line);
+				sprintf_s(s, sizeof(s), "%s:%i (%s)", file, line, Leaf?Leaf+1:Src);
 				RegAllocators[i] = s;
 				#endif
 				return true;
@@ -2090,11 +2104,12 @@ public:
 		// Resolve any sub-expressions and store their values
 		for (unsigned i = 0; i < n.Length(); i++)
 		{
-			if (!n[i].IsVar() &&
-				n[i].Child.Length())
+			auto &k = n[i];
+			if (!k.IsVar() &&
+				k.Child.Length())
 			{
-				AllocReg(n[i].Reg, _FL);
-				AsmExpression(&n[i].Reg, n[i].Child, Depth + 1);
+				AllocReg(k.Reg, k.Tok, _FL);
+				AsmExpression(&k.Reg, k.Child, Depth + 1);
 			}
 		}
 
@@ -2169,7 +2184,7 @@ public:
 					GVarRef Reg;
 					if (a.Reg.Scope != SCOPE_REGISTER)
 					{
-						if (AllocReg(Reg, _FL))
+						if (AllocReg(Reg, a.Tok, _FL))
 						{
 							LAssert(Reg != a.Reg);
 							Asm2(a.Tok, IAssign, Reg, a.Reg);
@@ -2275,9 +2290,10 @@ public:
 						return OnError(b.Tok, "Can't convert right token to var ref.");
 					
 					GVarRef Reg;
+					Reg.Empty();
 					if (a.Reg.Scope != SCOPE_REGISTER)
 					{
-						if (AllocReg(Reg, _FL))
+						if (AllocReg(Reg, a.Tok, _FL))
 						{
 							LAssert(Reg != a.Reg);
 							Asm2(a.Tok, IAssign, Reg, a.Reg);
@@ -2288,10 +2304,10 @@ public:
 
 					Asm2(a.Tok, Op, a.Reg, b.Reg);
 
-					if ((int)Op == (int)IPlusEquals ||
-						(int)Op == (int)IMinusEquals ||
-						(int)Op == (int)IMulEquals ||
-						(int)Op == (int)IDivEquals)
+					if (Op == IPlusEquals ||
+						Op == IMinusEquals ||
+						Op == IMulEquals ||
+						Op == IDivEquals)
 					{
 						AssignVarRef(a, a.Reg);
 					}
@@ -2301,6 +2317,7 @@ public:
 					DeallocReg(b.Reg);
 				n.DeleteAt(OpIdx+1, true);
 				n.DeleteAt(OpIdx, true);
+				// Result is in n[OpIdx-1] (ie the 'a' node)
 			}
 			else
 			{
@@ -2320,10 +2337,11 @@ public:
 
 		if (n.Length() == 1)
 		{
-			if (!n[0].Reg.Valid())
+			auto &k = n[0];
+			if (!k.Reg.Valid())
 			{
 				GVarRef *NullRef = NULL;
-				if (!TokenToVarRef(n[0], NullRef))
+				if (!TokenToVarRef(k, NullRef))
 				{
 					return false;
 				}
@@ -2331,11 +2349,13 @@ public:
 
 			if (Result)
 			{
-				*Result = n[0].Reg;
+				if (Result->Valid() && *Result != k.Reg)
+					DeallocReg(*Result);
+				*Result = k.Reg;
 			}
 			else
 			{
-				DeallocReg(n[0].Reg);
+				DeallocReg(k.Reg);
 			}
 
 			return true;
@@ -2829,6 +2849,7 @@ public:
 		GVarRef ReturnValue;
 		char16 *t;
 		int StartTok = Cur;
+		ReturnValue.Empty();
 
 		LArray<Node> Exp;
 		if (!Expression(Cur, Exp))
