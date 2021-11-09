@@ -1804,6 +1804,12 @@ public:
 			}
 			else
 			{
+				if (!Stricmp(t, L"Len") &&
+					!Stricmp(GetTok(Cur+1), L"="))
+				{
+					int asd=0;
+				}
+
 				GOperator o = IsOp(t, PrevIsOp);
 				if (o != OpNull)
 				{
@@ -1819,8 +1825,9 @@ public:
 					m = t;
 					LFunc *f = Methods.Find(m.Str());
 					LFunctionInfo *sf = 0;
-					char16 *Next;
-					if (f)
+					char16 *Next = GetTok(Cur+1);
+					bool IsFunctionCall = !StricmpW(Next, sStartRdBracket);
+					if (f && IsFunctionCall)
 					{
 						Node &Call = n.New();
 						Call.SetContextFunction(f, Cur++);
@@ -1832,7 +1839,8 @@ public:
 						{
 							if (StricmpW(t, sStartRdBracket) == 0)
 								Cur++;
-							else return OnError(Cur, "Function missing '('");
+							else
+								return OnError(Cur, "Function missing '('");
 						}
 						else return OnError(Cur, "No token.");
 						
@@ -1861,15 +1869,7 @@ public:
 					}
 					else if
 					(
-						(
-							sf = Code->GetMethod
-							(
-								m.Str(),
-								(Next = GetTok(Cur+1)) != 0
-								&&
-								StricmpW(Next, sStartRdBracket) == 0
-							)
-						)
+						(sf = Code->GetMethod(m.Str(),  IsFunctionCall))
 					)
 					{
 						Node &Call = n.New();
@@ -1883,7 +1883,8 @@ public:
 						{
 							if (StricmpW(t, sStartRdBracket) == 0)
 								Cur++;
-							else return OnError(Cur, "Function missing '('");
+							else
+								return OnError(Cur, "Function missing '('");
 						}
 						else return OnError(Cur, "No token.");
 						
