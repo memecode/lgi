@@ -1084,68 +1084,61 @@ public:
 	template<typename T>
 	static LString UnEscape(const T *In, ssize_t Len = -1)
 	{
+		if (!In)
+			return NULL;
+
 		LString s;
-		if (In)
+		if (Len < 0)
+			// As memory allocation/copying around data is far slower then
+			// just scanning the string for size... don't try and chunk the
+			// processing.
+			Len = Strlen(In);
+
+		if (!s.Length(Len))
+			return NULL;
+
+		auto *Out = s.Get();
+		auto *End = In + Len;
+		while (In < End)
 		{
-			T Buf[256];
-			int Ch = 0;
-			const T *End = Len >= 0 ? In + Len : NULL;
-		
-			while
-			(
-				(!End || In < End)
-				&&
-				*In
-			)
+			if (*In == '\\')
 			{
-				if (Ch > sizeof(Buf)-4)
+				In++;
+				switch (*In)
 				{
-					// Buffer full, add substring to 's'
-					Buf[Ch] = 0;
-					s += Buf;
-					Ch = 0;
-				}
-				if (*In == '\\')
-				{
-					In++;
-					switch (*In)
-					{
-						case 'n':
-						case 'N':
-							Buf[Ch++] = '\n';
-							break;
-						case 'r':
-						case 'R':
-							Buf[Ch++] = '\r';
-							break;
-						case 'b':
-						case 'B':
-							Buf[Ch++] = '\b';
-							break;
-						case 't':
-						case 'T':
-							Buf[Ch++] = '\t';
-							break;
-						default:
-							Buf[Ch++] = *In;
-							break;
-						case 0:
-							break;
-					}
-					if (*In)
-						In++;
-					else
+					case 'n':
+					case 'N':
+						*Out++ = '\n';
+						break;
+					case 'r':
+					case 'R':
+						*Out++ = '\r';
+						break;
+					case 'b':
+					case 'B':
+						*Out++ = '\b';
+						break;
+					case 't':
+					case 'T':
+						*Out++ = '\t';
+						break;
+					default:
+						*Out++ = *In;
+						break;
+					case 0:
 						break;
 				}
-				else Buf[Ch++] = *In++;
+				if (*In)
+					In++;
+				else
+					break;
 			}
-			if (Ch > 0)
-			{
-				Buf[Ch] = 0;
-				s += Buf;
-			}
+			else
+				*Out++ = *In++;
 		}
 	
+		// Trim excess size off string
+		s.Length(Out - s.Get());
 		return s;
 	}
 

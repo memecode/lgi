@@ -850,6 +850,7 @@ void LApp::Exit(int Code)
 	}
 	else
 	{
+		LAssert(InThread()); // Doesn't work for worker threads.
 		PostQuitMessage(Code);
 	}
 }
