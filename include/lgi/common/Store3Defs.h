@@ -213,6 +213,7 @@ enum CalendarPrivacyType
 	CalPrivate
 };
 
+// To convert to string use 'Store3ItemTypeName'
 enum Store3ItemTypes
 {
 	MAGIC_NONE						= 0x00000000,

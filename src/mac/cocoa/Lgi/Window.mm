@@ -300,6 +300,7 @@ public:
 	
 	LOG("	::onQuit %p/%s self.close\n", wnd, cls);
 	self->ReqClose = CSClosed;
+	self.d->Wnd->SetPulse();
 	[self close];
 }
 
