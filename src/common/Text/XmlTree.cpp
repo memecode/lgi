@@ -1610,7 +1610,6 @@ bool LXmlTree::Write(LXmlTag *Root, LStreamI *File, Progress *Prog)
 	
 	if (Root && File)
 	{
-		File->SetSize(0);
 		d->File = File;
 		if ((d->Prog = Prog))
 			d->Prog->SetRange(LRange(0, Root->CountTags()));
