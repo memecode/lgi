@@ -554,7 +554,7 @@ bool VIo::ReadField(LStreamI &s, LString &Name, ParamArray *Params, LString &Dat
 	if (Params) Params->Empty();
 	else Params = &LocalParams;
 
-	char Temp[256];
+	char Temp[1024];
 	LArray<char> p;
 	bool Done = false;
 
@@ -570,12 +570,17 @@ bool VIo::ReadField(LStreamI &s, LString &Name, ParamArray *Params, LString &Dat
 			// Try reading more data...
 			r = s.Read(Temp, sizeof(Temp));
 			if (r > 0)
-				d->Buf.Write(Temp, (int)r);
+				d->Buf.Write(Temp, r);
 			else
 				break;
 
 			r = d->Buf.Pop(Temp, sizeof(Temp));
 		}
+		else if (Temp[0] == '\r' || Temp[1] == '\n')
+		{
+			// Skip empty lines...
+			goto ReadNextLine;
+ 		}
 
 		if (r <= 0)
 			break;
@@ -886,7 +891,6 @@ bool VCard::Export(GDataPropI *c, LStreamI *o)
 
 					i += Wr;
 				}
-				o->Write("\r\n", 2);
 			}
 		}
 	}
