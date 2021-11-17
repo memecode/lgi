@@ -36,6 +36,10 @@ typedef unsigned int uint32_t;
 	typedef unsigned long long uint64;
 #endif
 
+// Various unicode code points of interest
+#define UNICODE_ZERO_WIDTH_SPACE		0x200B
+#define UNICODE_ZERO_WIDTH_JOINER		0x200d
+
 // Defines for decoding UTF8
 #define IsUtf8_1Byte(c)		( ((uint8_t)(c) & 0x80) == 0x00 )
 #define IsUtf8_2Byte(c)		( ((uint8_t)(c) & 0xe0) == 0xc0 )
@@ -298,8 +302,12 @@ public:
 	GUtf8Ptr &operator =(char *s) { Ptr = (uint8_t*)s; return *this; }
 	/// Assign a new pointer to the string
 	GUtf8Ptr &operator =(uint8_t *s) { Ptr = s; return *this; }
+
 	/// \returns the current character in the string or -1 on error.
 	operator int32();
+	/// Change the character at the point, the pointer will advance to the end
+	/// of the character written.
+	GUtf8Ptr &operator =(uint32_t ch);
 
 	/// Seeks forward
 	GUtf8Ptr &operator ++();

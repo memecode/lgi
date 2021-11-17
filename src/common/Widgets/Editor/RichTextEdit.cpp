@@ -22,6 +22,7 @@
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/Menu.h"
+#include "lgi/common/Homoglyphs.h"
 
 #define DefaultCharset              "utf-8"
 
@@ -644,6 +645,17 @@ bool LRichTextEdit::Copy()
 	LAutoString Html;
 	if (!d->GetSelection(&PlainText, &Html))
 		return false;
+
+	LString PlainUtf8 = PlainText.AddressOf();
+	if (HasHomoglyphs(PlainUtf8, PlainUtf8.Length()))
+	{
+		if (LgiMsg(	this,
+					"Text contains homoglyph characters that maybe a phishing attack.\n"
+					"Do you really want to copy it?",
+					"Warning",
+					MB_YESNO) == IDNO)
+			return false;
+	}
 
 	// Put on the clipboard
 	LClipBoard Cb(this);

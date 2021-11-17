@@ -27,6 +27,7 @@
 #include "lgi/common/Base64.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/FindReplaceDlg.h"
+#include "lgi/common/Homoglyphs.h"
 
 #define DEBUG_TABLE_LAYOUT			0
 #define DEBUG_DRAW_TD				0
@@ -7780,6 +7781,18 @@ bool GHtml::Copy()
 	LAutoString s(GetSelection());
 	if (s)
 	{
+		RemoveZeroWidthCharacters(s);
+
+		if (HasHomoglyphs(s, -1))
+		{
+			if (LgiMsg(	this,
+						"Text contains homoglyph characters that maybe a phishing attack.\n"
+						"Do you really want to copy it?",
+						"Warning",
+						MB_YESNO) == IDNO)
+				return false;
+		}
+	
 		LClipBoard c(this);
 		
 		LAutoWString w;
@@ -7787,6 +7800,7 @@ bool GHtml::Copy()
 		w.Reset(Utf8ToWide(s));
 		if (w) c.TextW(w);
 		#endif
+
 		c.Text(s, w == 0);
 
 		return true;

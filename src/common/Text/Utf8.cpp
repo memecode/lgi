@@ -15,6 +15,15 @@ GUtf8Ptr::operator int32()
 	return LgiUtf8To32(p, l);
 }
 
+GUtf8Ptr &GUtf8Ptr::operator =(uint32_t ch)
+{
+	uint8_t *p = Ptr;
+	ssize_t l = 6;
+	LgiUtf32To8(ch, p, l);
+	Ptr = p;
+	return *this;
+}
+
 void GUtf8Ptr::Add(wchar_t c)
 {
 	ssize_t l = 6;
