@@ -400,6 +400,15 @@ int LDialog::DoModeless()
 	{
 	    AttachChildren();
 	    
+		if (p && Handle() && p->Handle())
+		{
+			#ifdef _WIN64
+			SetWindowLongPtr(Handle(), GWLP_HWNDPARENT, (LONG_PTR)p->Handle());
+			#else
+			SetWindowLong(Handle(), GWL_HWNDPARENT, p->Handle());
+			#endif
+		}
+
 	    if (p)
 	    {
 	        LRect pp = p->GetPos();
