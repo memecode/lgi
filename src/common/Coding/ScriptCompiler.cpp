@@ -111,13 +111,6 @@ struct Node
 	void SetScriptFunction(LFunctionInfo *m, int tok)
 	{
 		Init();
-
-		LgiTrace("SetScriptFunction %s\n", m->GetName());
-		if (!stricmp(m->GetName(), "Substr"))
-		{
-			int asd=0;
-		}
-
 		ScriptFunc = m;
 		Tok = tok;
 	}

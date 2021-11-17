@@ -113,15 +113,11 @@ void VcFile::OnMouseClick(LMouse &m)
 		const char *File = GetText(COL_FILENAME);
 		LString LocalPath;
 
-		if (Uri.IsProtocol("file"))
+		LUri u(GetUri());
+		if (u.IsProtocol("file"))
 		{
-			LFile::Path p = Uri.sPath ? Uri.sPath(1,-1).Get() : Owner->LocalPath();
+			LFile::Path p = u.sPath ? Uri.sPath(1,-1).Get() : Owner->LocalPath();
 			p += File;
-			LocalPath = p.GetFull();
-		}
-		else if (File && Parent)
-		{
-			LFile::Path p(Owner->LocalPath(), File);
 			LocalPath = p.GetFull();
 		}
 
@@ -167,7 +163,7 @@ void VcFile::OnMouseClick(LMouse &m)
 				default:
 					break;
 			}					
-			s.AppendItem("Browse To", IDM_BROWSE);
+			s.AppendItem("Browse To", IDM_BROWSE, !LocalPath.IsEmpty());
 			s.AppendItem("Log", IDM_LOG_FILE);
 
 			int CurEol = LocalPath ? GetEol(LocalPath) : 0;
