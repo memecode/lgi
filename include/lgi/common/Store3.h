@@ -139,7 +139,7 @@ typedef GDataIterator<GDataPropI*> *GDataIt;
 #define Store3CopyImpl(Cls)	bool Cls::CopyProps(GDataPropI &p)
 
 /// A generic interface for getting / setting properties.
-class GDataPropI : virtual public GDom
+class GDataPropI : virtual public LDom
 {
 	virtual GDataPropI &operator =(GDataPropI &p) { return *this; }
 
@@ -308,7 +308,7 @@ public:
 	/// Get the logging stream
 	virtual LStreamI *GetLogger(GDataStoreI *store) { return 0; }
 	/// Search for a object by type and name
-	virtual bool Match(GDataStoreI *store, GDataPropI *Addr, int ObjectType, LArray<GDom*> &Matches) { return 0; }
+	virtual bool Match(GDataStoreI *store, GDataPropI *Addr, int ObjectType, LArray<LDom*> &Matches) { return 0; }
 };
 
 /// The virtual mail storage interface from which all mail stores inherit from.

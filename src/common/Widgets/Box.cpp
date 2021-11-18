@@ -753,7 +753,7 @@ bool LBox::OnLayout(LViewLayoutInfo &Inf)
 	return true;
 }
 
-bool LBox::Serialize(GDom *Dom, const char *OptName, bool Write)
+bool LBox::Serialize(LDom *Dom, const char *OptName, bool Write)
 {
 	if (Write)
 	{

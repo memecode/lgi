@@ -409,17 +409,17 @@ public:
 					LScriptContext *UserContext,
 					const char *Script,
 					const char *FileName = NULL,
-					GDom *Args = NULL);
+					LDom *Args = NULL);
 	LExecutionStatus Run(LCompiledCode *Obj, LVariant *Ret = NULL, const char *TempPath = NULL);
 	LExecutionStatus RunTemporary(LCompiledCode *Obj, char *Script, LVariant *Ret = NULL);
-	bool EvaluateExpression(LVariant *Result, GDom *VariableSource, char *Expression);
+	bool EvaluateExpression(LVariant *Result, LDom *VariableSource, char *Expression);
 	bool CallMethod(LCompiledCode *Obj, const char *Method, LScriptArguments &Args);
 	LScriptContext *GetSystemContext();
 };
 
 class LVirtualMachine;
 
-class LVmDebugger : public GDom
+class LVmDebugger : public LDom
 {
 public:
 	/// Set the VM ownership flag.
@@ -442,7 +442,7 @@ public:
 		virtual void OnRun(bool Running) = 0;
 };
 
-class LVmDebuggerCallback : public GDom
+class LVmDebuggerCallback : public LDom
 {
 public:
 	/// Start a debugger instance to handle the execution in 'Vm'

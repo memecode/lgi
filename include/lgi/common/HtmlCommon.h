@@ -144,7 +144,7 @@ public:
 	}
 };
 
-class GCssStyle : public GDom
+class GCssStyle : public LDom
 {
 public:
 	LCss *Css;
@@ -154,12 +154,12 @@ public:
 		Css = NULL;
 	}
 
-	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 };
 
 /// Common base class for a HTML element
-class LHtmlElement : public GDom, public LCss
+class LHtmlElement : public LDom, public LCss
 {
 	friend class LHtmlParser;
 	friend class HtmlEdit;

@@ -9,7 +9,7 @@
 #include "lgi/common/Tree.h"
 
 /// This class allows you to serialize data between the user interface and a
-/// GDom instance. Useful for storing user visible application settings in
+/// LDom instance. Useful for storing user visible application settings in
 /// XML or an optons file.
 class LXmlTreeUi
 {
@@ -31,7 +31,7 @@ public:
 	/// Clear all mappings
 	void EmptyMaps();
 	/// Convert data to/from an XML tag
-	virtual bool Convert(GDom *Tag, LViewI *ui, bool ToUI);
+	virtual bool Convert(LDom *Tag, LViewI *ui, bool ToUI);
 	/// Disable/enable all control
 	void EnableAll(LViewI *ui, bool Enable);
 	/// Empty all controls of text / value

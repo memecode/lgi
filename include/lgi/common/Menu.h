@@ -80,7 +80,7 @@ class LgiClass LSubMenu :
 	public LBase,
 	public LMenuLoader,
 	public LImageListOwner,
-	public GDom
+	public LDom
 {
 	friend class LMenuItem;
 	friend class LMenu;
@@ -289,15 +289,15 @@ public:
 	LMenu *GetMenu() { return Menu; }
 
 	// Dom impl
-	bool GetVariant(const char *Name, LVariant &Value, char *Arr = NULL);
-	bool SetVariant(const char *Name, LVariant &Value, char *Arr = NULL);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Arr = NULL);
+	bool SetVariant(const char *Name, LVariant &Value, const char *Arr = NULL);
 	bool CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args);
 };
 
 /// An item an a menu
 class LgiClass LMenuItem :
 	public LBase,
-	public GDom
+	public LDom
 {
 	friend class LSubMenu;
 	friend class LMenu;

@@ -307,7 +307,7 @@ public:
 	/// Read/Write the font def to storage
 	// bool Serialize(ObjProperties *Options, char *OptName, bool Write);
 	/// Read/Write the font def to storage
-	bool Serialize(GDom *Options, const char *OptName, bool Write);
+	bool Serialize(LDom *Options, const char *OptName, bool Write);
 
 	/// Read the font from the LGI config
 	bool GetConfigFont(const char *Tag);

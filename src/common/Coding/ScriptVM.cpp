@@ -499,7 +499,7 @@ public:
 				Log->Print("(bool) %s", v.Value.Bool ? "true" : "false");
 				break;
 			case GV_DOM:
-				Log->Print("(GDom*) %p", v.Value.Dom);
+				Log->Print("(LDom*) %p", v.Value.Dom);
 				break;
 			case GV_HASHTABLE:
 			{

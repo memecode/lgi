@@ -55,7 +55,7 @@ public:
 	bool OnCommand(int Cmd);
 
 	// Serialization
-	bool Serialize(GDom *Store, const char *Prefix, bool Write);
+	bool Serialize(LDom *Store, const char *Prefix, bool Write);
 	#ifdef HAS_PROPERTIES
 	bool Serialize(ObjProperties *Store, char *Prefix, bool Write);
 	#endif

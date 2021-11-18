@@ -970,7 +970,7 @@ case IDomGet:
 			case GV_STREAM:
 			case GV_LSURFACE:
 			{
-				GDom *dom = Dom->CastDom();
+				auto *dom = Dom->CastDom();
 				CheckParam(dom != NULL);
 				char *sName = Name->Str();
 				CheckParam(sName);
@@ -1166,7 +1166,7 @@ case IDomSet:
 		case GV_STREAM:
 		case GV_LSURFACE:
 		{
-			GDom *dom = Dom->CastDom();
+			auto *dom = Dom->CastDom();
 			CheckParam(dom != NULL);
 			bool Ret = dom->SetVariant(sName, *Value, CastArrayIndex(Arr));
 			if (!Ret)
@@ -1373,7 +1373,7 @@ case IDomCall:
 		case GV_STREAM:
 		case GV_LSURFACE:
 		{
-			GDom *dom = Dom->CastDom();
+			auto *dom = Dom->CastDom();
 			CheckParam(dom);
 			bool Ret = dom->CallMethod(sName, Dst, Arg);
 			if (!Ret)

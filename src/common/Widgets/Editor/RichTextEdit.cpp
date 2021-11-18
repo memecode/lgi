@@ -281,7 +281,7 @@ void LRichTextEdit::SetCharset(const char *s)
 	d->Charset = s;
 }
 
-bool LRichTextEdit::GetVariant(const char *Name, LVariant &Value, char *Array)
+bool LRichTextEdit::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
@@ -308,7 +308,7 @@ bool LRichTextEdit::GetVariant(const char *Name, LVariant &Value, char *Array)
 	return true;
 }
 
-bool LRichTextEdit::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool LRichTextEdit::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	LDomProperty p = LStringToDomProp(Name);
 	switch (p)

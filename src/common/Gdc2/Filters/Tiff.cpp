@@ -99,7 +99,7 @@ public:
 	IoStatus ReadImage(LSurface *pDC, LStream *In);
 	IoStatus WriteImage(LStream *Out, LSurface *pDC);
 
-	bool GetVariant(const char *n, LVariant &v, char *a)
+	bool GetVariant(const char *n, LVariant &v, const char *a)
 	{
 		if (!stricmp(n, LGI_FILTER_TYPE))
 		{

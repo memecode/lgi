@@ -1182,7 +1182,7 @@ void MailIMap::CommandFinished()
 	d->LastWrite.Empty();
 }
 
-bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *settingStore, int Flags)
+bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *settingStore, int Flags)
 {
 	bool Status = false;
 	

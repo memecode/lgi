@@ -737,7 +737,7 @@ bool SystemFunctions::Delete(LScriptArguments &Args)
 	return true;
 }
 
-class GFileListEntry : public GDom
+class GFileListEntry : public LDom
 {
 	bool Folder;
 	LVariant Name;
@@ -753,7 +753,7 @@ public:
 		Modified.Set(d->GetLastWriteTime());
 	}
 
-	bool GetVariant(const char *Var, LVariant &Value, char *Arr = 0)
+	bool GetVariant(const char *Var, LVariant &Value, const char *Arr = NULL) override
 	{
 		LDomProperty p = LStringToDomProp(Var);
 		switch (p)

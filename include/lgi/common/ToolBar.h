@@ -157,7 +157,7 @@ public:
 	void Customizable
 	(
 		/// Set this to the properties store to switch on the right click menu, or NULL to switch it off.
-		GDom *Store = 0,
+		LDom *Store = 0,
 		/// This is the property that the toolbar stores state under. It should be unique for every toolbar.
 		const char *Option = 0
 	);

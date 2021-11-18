@@ -80,7 +80,7 @@ public:
 	/// Writes a Windows BMP file
 	IoStatus WriteImage(LStream *Out, LSurface *In);
 
-	bool GetVariant(const char *n, LVariant &v, char *a)
+	bool GetVariant(const char *n, LVariant &v, const char *a) override
 	{
 		if (!stricmp(n, LGI_FILTER_TYPE))
 		{
@@ -861,7 +861,7 @@ public:
 	int GetImages() { return 1; }
 	IoStatus ReadImage(LSurface *pDC, LStream *In);
 	IoStatus WriteImage(LStream *Out, LSurface *pDC);
-	bool GetVariant(const char *n, LVariant &v, char *a);
+	bool GetVariant(const char *n, LVariant &v, const char *a) override;
 };
 
 class GdcIcoFactory : public GFilterFactory
@@ -882,7 +882,7 @@ GdcIco::GdcIco()
 {
 }
 
-bool GdcIco::GetVariant(const char *n, LVariant &v, char *a)
+bool GdcIco::GetVariant(const char *n, LVariant &v, const char *a)
 {
 	if (!stricmp(n, LGI_FILTER_TYPE))
 	{

@@ -9,7 +9,7 @@
 #include "lgi/common/Layout.h"
 
 /// A layout cell, not currently implemented.
-class GLayoutCell : public GDom, public LCss
+class GLayoutCell : public LDom, public LCss
 {
 public:
 	bool Debug;
@@ -30,7 +30,7 @@ public:
 class LgiClass LTableLayout :
 	public LLayout,
 	public ResObject,
-	public GDom
+	public LDom
 {
 	friend class TableCell;
 	class GTableLayoutPrivate *d;
@@ -68,8 +68,8 @@ public:
 	void OnCreate() override;
 	void OnPosChange() override;
 	void OnPaint(LSurface *pDC) override;
-	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0) override;
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0) override;
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = 0) override;
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = 0) override;
 	void OnChildrenChanged(LViewI *Wnd, bool Attaching) override;
 	int64 Value() override;
 	void Value(int64 v) override;

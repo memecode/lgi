@@ -4,7 +4,7 @@
 #include "lgi/common/Variant.h"
 #include "lgi/common/Button.h"
 
-class LControlTree : public LTree, public GDom
+class LControlTree : public LTree, public LDom
 {
 public:
 	struct EnumValue
@@ -46,7 +46,7 @@ public:
 		~Item();
 
 		Item *Find(const char *opt);
-		bool Serialize(GDom *Store, bool Write);
+		bool Serialize(LDom *Store, bool Write);
 		void SetValue(LVariant &v);
 		LRect &GetRect();
 		void Select(bool b);
@@ -70,8 +70,8 @@ public:
 
 	Item *Find(const char *opt);
 	LTreeItem *Insert(const char *DomPath, int CtrlId, LVariantType Type, LVariant *Value = 0, LArray<EnumValue> *Enum = 0);
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
-	bool Serialize(GDom *Store, bool Write);
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
+	bool Serialize(LDom *Store, bool Write);
 	int OnNotify(LViewI *c, LNotification n);
 };
 

@@ -394,7 +394,7 @@ public:
 	LArray<LinkFixup> Fixups;
 	LHashTbl<StrKey<char16>, char16*> Defines;
 	LHashTbl<ConstStrKey<char16,false>, GTokenType> ExpTok;
-	GDom *ScriptArgs;
+	LDom *ScriptArgs;
 	GVarRef ScriptArgsRef;
 	bool ErrShowFirstOnly;
 	LArray<LString> ErrLog;
@@ -439,7 +439,7 @@ public:
 		Types.Add("double", GV_DOUBLE);
 		Types.Add("float", GV_DOUBLE);
 		Types.Add("char", GV_STRING);
-		Types.Add("GDom", GV_DOM);
+		Types.Add("LDom", GV_DOM);
 		Types.Add("void", GV_VOID_PTR);
 		Types.Add("LDateTime", GV_DATETIME);
 		Types.Add("GHashTable", GV_HASHTABLE);
@@ -450,7 +450,7 @@ public:
 		Types.Add("LVariant", GV_VARIANT);
 		// Types.Add("binary", GV_BINARY);
 		// Types.Add("List", GV_LIST);
-		// Types.Add("GDom&", GV_DOMREF);
+		// Types.Add("LDom&", GV_DOMREF);
 	}
 
 	~LCompilerPriv()
@@ -3541,7 +3541,7 @@ bool GCompiler::Compile
 	LScriptContext *UserContext,
 	const char *FileName,
 	const char *Script,
-	GDom *Args
+	LDom *Args
 )
 {
 	if (!Script)
@@ -3660,7 +3660,7 @@ LCompiledCode *LScriptEngine::GetCurrentCode()
 	return d->Code;
 }
 
-bool LScriptEngine::Compile(LAutoPtr<LCompiledCode> &Obj, LScriptContext *UserContext, const char *Script, const char *FileName, GDom *Args)
+bool LScriptEngine::Compile(LAutoPtr<LCompiledCode> &Obj, LScriptContext *UserContext, const char *Script, const char *FileName, LDom *Args)
 {
 	if (!Script)
 	{
@@ -3717,7 +3717,7 @@ LExecutionStatus LScriptEngine::RunTemporary(LCompiledCode *Obj, char *Script, L
 	return Status;
 }
 
-bool LScriptEngine::EvaluateExpression(LVariant *Result, GDom *VariableSource, char *Expression)
+bool LScriptEngine::EvaluateExpression(LVariant *Result, LDom *VariableSource, char *Expression)
 {
 	if (!Result || !VariableSource || !Expression)
 	{

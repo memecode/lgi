@@ -98,8 +98,8 @@ public:
 	bool GetFormattedContent(const char *MimeType, LString &Out, LArray<ContentMedia> *Media = NULL);
 
 	// Dom	
-	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL);
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = NULL);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
 
 	// Font
 	LFont *GetFont();

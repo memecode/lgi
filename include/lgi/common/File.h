@@ -461,9 +461,9 @@ public:
 	GFileOps();
 	#undef GFileOp
 
-	// GDom impl
-	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL) override;
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = NULL) override;
+	// LDom impl
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 	bool CallMethod(const char *Name, LVariant *ReturnValue, LArray<LVariant*> &Args) override;
 
 	// Path handling

@@ -54,7 +54,7 @@ public:
 		return NULL;
 	}
 
-	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL)
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override
 	{
 		if (LStringToDomProp(Name) == FileEncoding)
 		{

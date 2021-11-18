@@ -44,7 +44,7 @@ enum LVariantType
 	GV_BINARY,
 	/// List of LVariant
 	GV_LIST,
-	/// Pointer to GDom object
+	/// Pointer to LDom object
 	GV_DOM,
 	/// DOM reference, ie. a variable in a DOM object
 	GV_DOMREF,
@@ -106,10 +106,10 @@ enum GOperator
 	OpNot,
 };
 
-class LgiClass LCustomType : public GDom
+class LgiClass LCustomType : public LDom
 {
 protected:
-	struct CustomField : public GDom
+	struct CustomField : public LDom
 	{
 		ssize_t Offset;
 		ssize_t Bytes;
@@ -119,11 +119,11 @@ protected:
 		LCustomType *Nested;
 
 		ssize_t Sizeof();
-		bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL);
+		bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
 	};
 
 public:
-	struct Method : public GDom
+	struct Method : public LDom
 	{
 		LString Name;
 		LArray<LString> Params;
@@ -169,15 +169,15 @@ public:
 	Method *DefineMethod(const char *Name, LArray<LString> &Params, size_t Address);
 	Method *GetMethod(const char *Name);
 
-	// Field access. You can't use the GDom interface to get/set member variables because
+	// Field access. You can't use the LDom interface to get/set member variables because
 	// there is no provision for the 'This' pointer.
 	bool Get(int Index, LVariant &Out, uint8_t *This, int ArrayIndex = 0);
 	bool Set(int Index, LVariant &In, uint8_t *This, int ArrayIndex = 0);
 	
 	// Dom access. However the DOM can be used to access information about the type itself.
 	// Which doesn't need a 'This' pointer.
-	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL);
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = NULL);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
 	bool CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args);
 };
 
@@ -206,7 +206,7 @@ public:
 	    /// Valid when Type == #GV_WSTRING
 		char16 *WString;
 		/// Valid when Type == #GV_DOM
-		GDom *Dom;
+		LDom *Dom;
 		/// Valid when Type is #GV_VOID_PTR, #GV_GVIEW, #GV_LMOUSE or #GV_LKEY
 		void *Ptr;
 		/// Valid when Type == #GV_BINARY
@@ -237,7 +237,7 @@ public:
 		struct _DomRef
 		{
 			/// The pointer to the dom object
-			GDom *Dom;
+			LDom *Dom;
 			/// The name of the variable to set/get in the dom object
 			char *Name;
 		} DomRef;
@@ -299,9 +299,9 @@ public:
 	/// Constructor for ptr
 	LVariant(void *p);
 	/// Constructor for DOM ptr
-	LVariant(GDom *p);
+	LVariant(LDom *p);
 	/// Constructor for DOM variable reference
-	LVariant(GDom *p, char *name);
+	LVariant(LDom *p, char *name);
 	/// Constructor for date
 	LVariant(const LDateTime *d);
 	/// Constructor for variant
@@ -335,7 +335,7 @@ public:
 	/// Assign value to a void ptr
 	LVariant &operator =(void *p);
 	/// Assign value to DOM ptr
-	LVariant &operator =(GDom *p);
+	LVariant &operator =(LDom *p);
 	/// Assign value to be a date/time
 	LVariant &operator =(const LDateTime *d);
 
@@ -348,7 +348,7 @@ public:
 	bool operator !=(LVariant &v) { return !(*this == v); }
 
 	/// Sets the value to a DOM variable reference
-	bool SetDomRef(GDom *obj, char *name);
+	bool SetDomRef(LDom *obj, char *name);
 	/// Sets the value to a copy of	block of binary data
 	bool SetBinary(ssize_t Len, void *Data, bool Own = false);
 	/// Sets the value to a copy of the list
@@ -409,7 +409,7 @@ public:
 	/// returning a static string is not thread safe.
 	char *CastString();
 	/// Casts to a DOM ptr
-	GDom *CastDom();
+	LDom *CastDom();
 	/// Casts to a boolean. You probably DON'T want to use this function. The
 	/// behaviour for strings -> bool is such that if the string is value it
 	/// always evaluates to true, and false if it's not a valid string. Commonly

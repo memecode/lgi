@@ -21,7 +21,7 @@ LgiFunc ssize_t LStreamPrintf(LStreamI *s, int flags, const char *Format, va_lis
 LgiFunc ssize_t LStreamPrint(LStreamI *s, const char *fmt, ...);
 
 /// \brief Virtual base class for a data source or sink.
-class LgiClass LStream : virtual public LStreamI, virtual public GDom
+class LgiClass LStream : virtual public LStreamI, virtual public LDom
 {
 public:
 	virtual ~LStream() {}

@@ -539,18 +539,15 @@ LXmlTag *LXmlTag::GetChildTag(const char *Name, bool Create, const char *TagSepa
 	return t;
 }
 
-bool LXmlTag::GetVariant(const char *Name, LVariant &Value, char *Array)
+bool LXmlTag::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {
-	/* !_stricmp(Name, "'attribute_name'") // Type: String
-	*/
-
 	if (Name)
 	{
 		for (auto c: Children)
 		{
 			if (c->Tag && stricmp(c->Tag, Name) == 0)
 			{
-				Value = (GDom*) c;
+				Value = (LDom*) c;
 				return true;
 			}
 		}
@@ -610,7 +607,7 @@ bool LXmlTag::GetVariant(const char *Name, LVariant &Value, char *Array)
 	return false;	
 }
 
-bool LXmlTag::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool LXmlTag::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	if (Name)
 	{

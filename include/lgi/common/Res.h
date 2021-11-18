@@ -160,11 +160,11 @@ public:
 	virtual bool		Res_GetChildren	(ResObject *Obj, List<ResObject> *l, bool Deep) = 0;
 	virtual void		Res_Append		(ResObject *Obj, ResObject *Parent) = 0;
 	virtual bool		Res_GetItems	(ResObject *Obj, List<ResObject> *l) = 0;
-	virtual GDom*		Res_GetDom		(ResObject *Obj) = 0;
+	virtual LDom*		Res_GetDom		(ResObject *Obj) = 0;
 	
 	// Property access
-	virtual bool		Res_GetProperties(ResObject *Obj, GDom *Props) = 0;
-	virtual bool		Res_SetProperties(ResObject *Obj, GDom *Props) = 0;
+	virtual bool		Res_GetProperties(ResObject *Obj, LDom *Props) = 0;
+	virtual bool		Res_SetProperties(ResObject *Obj, LDom *Props) = 0;
 };
 
 #endif

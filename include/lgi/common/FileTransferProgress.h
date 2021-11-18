@@ -30,7 +30,7 @@ class FileTransferProgress : public LStatusPane, public Progress
 	void UpdateUi();
 
 public:
-	FileTransferProgress(GDom *App, LStatusBar *Status, bool Limit = false);
+	FileTransferProgress(LDom *App, LStatusBar *Status, bool Limit = false);
 
 	// Progress Api (must be thread-safe)
 	bool SetRange(const LRange &r) override;
@@ -38,7 +38,7 @@ public:
 
 	// Parameters
 	constexpr static const char *sStartValue = "StartValue";
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0) override;
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 
 	// Impl
 	LMessage::Result OnEvent(LMessage *m) override;

@@ -49,7 +49,7 @@ public:
 		}
 	};
 
-	LOAuth2(Params &params, const char *account, GDom *store, LCancel *cancel, LStream *log = NULL);
+	LOAuth2(Params &params, const char *account, LDom *store, LCancel *cancel, LStream *log = NULL);
 	virtual ~LOAuth2();
 
 	LString GetAccessToken();

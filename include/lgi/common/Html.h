@@ -106,7 +106,7 @@ public:
 	void SetEmoji(bool i);
 
 	// LDocView
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 	
 	/// Copy the selection to the clipboard
 	bool Copy();
@@ -148,13 +148,13 @@ public:
 	bool GotoAnchor(char *Name);
 	LHtmlElement *CreateElement(LHtmlElement *Parent);
 	bool EvaluateCondition(const char *Cond);
-	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 	bool DoFind();
 	LPointF GetDpiScale();
 	void SetVScroll(int64 v);
 
 	// Javascript handlers
-	GDom *getElementById(char *Id);
+	LDom *getElementById(char *Id);
 
 	// Events
 	bool OnFind(GFindReplaceCommon *Params);

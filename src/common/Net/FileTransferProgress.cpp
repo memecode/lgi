@@ -393,7 +393,7 @@ void GPaneHistory::Value(int64 i)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
-FileTransferProgress::FileTransferProgress(	GDom *App,
+FileTransferProgress::FileTransferProgress(	LDom *App,
 											LStatusBar *Status,
 											bool Limit)
 {

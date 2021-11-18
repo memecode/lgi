@@ -5,8 +5,7 @@
 	Copyright (C), <a href="mailto:fret@memecode.com">Matthew Allen</a>
  */
 
-#ifndef _GDOM_H_
-#define _GDOM_H_
+#pragma once
 
 class LVariant;
 #include "lgi/common/LgiInterfaces.h"
@@ -14,18 +13,18 @@ class LVariant;
 #include "lgi/common/Array.h"
 
 /// API for reading and writing properties in objects.
-class LgiClass GDom : virtual public LDomI
+class LgiClass LDom : virtual public LDomI
 {
 	friend class LScriptEnginePrivate;
-	friend struct GDomRef;
+	friend struct LDomRef;
 	friend class LVirtualMachinePriv;
 
 protected:
-	GDom *ResolveObject(const char *Var, char *Name, char *Array);
+	LDom *ResolveObject(const char *Var, LString &Name, LString &Array);
 
 	virtual bool _OnAccess(bool Start) { return true; }
-	virtual bool GetVariant(const char *Name, LVariant &Value, char *Array = 0) { return false; }
-	virtual bool SetVariant(const char *Name, LVariant &Value, char *Array = 0) { return false; }
+	virtual bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) { return false; }
+	virtual bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) { return false; }
 
 public:
 	/// Gets an object's property
@@ -60,4 +59,3 @@ enum LDomProperty
 LgiFunc LDomProperty LStringToDomProp(const char *Str);
 LgiFunc const char *LDomPropToString(LDomProperty Prop);
 
-#endif

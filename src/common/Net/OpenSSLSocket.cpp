@@ -686,7 +686,7 @@ LStream *SslSocket::GetLogStream()
 	return d->LogStream;
 }
 
-bool SslSocket::GetVariant(const char *Name, LVariant &Val, char *Arr)
+bool SslSocket::GetVariant(const char *Name, LVariant &Val, const char *Arr)
 {
 	if (!Name)
 		return false;
@@ -962,7 +962,7 @@ DebugTrace("%s:%i - SslSocket::Open status=%i\n", _FL, Status);
 	return Status;
 }
 
-bool SslSocket::SetVariant(const char *Name, LVariant &Value, char *Arr)
+bool SslSocket::SetVariant(const char *Name, LVariant &Value, const char *Arr)
 {
 	bool Status = false;
 

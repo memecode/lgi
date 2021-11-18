@@ -327,8 +327,8 @@ public:
 	Child *HasView(LView *v);
 
 	bool IsSpanned();
-	bool GetVariant(const char *Name, LVariant &Value, char *Array);
-	bool SetVariant(const char *Name, LVariant &Value, char *Array);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array) override;
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array) override;
 	int MaxCellWidth();
 
 	/// Calculates the minimum and maximum widths this cell can occupy.
@@ -496,7 +496,7 @@ bool TableCell::IsSpanned()
 	return Cell.X() > 1 || Cell.Y() > 1;
 }
 
-bool TableCell::GetVariant(const char *Name, LVariant &Value, char *Array)
+bool TableCell::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	LDomProperty Fld = LStringToDomProp(Name);
 	switch (Fld)
@@ -564,7 +564,7 @@ bool TableCell::GetVariant(const char *Name, LVariant &Value, char *Array)
 	return true;
 }
 
-bool TableCell::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool TableCell::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	LDomProperty Fld = LStringToDomProp(Name);
 	switch (Fld)
@@ -2193,7 +2193,7 @@ void LTableLayout::OnPaint(LSurface *pDC)
 	#endif
 }
 
-bool LTableLayout::GetVariant(const char *Name, LVariant &Value, char *Array)
+bool LTableLayout::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	return false;
 }
@@ -2208,7 +2208,7 @@ bool ConvertNumbers(LArray<double> &a, char *s)
 	return a.Length() > 0;
 }
 
-bool LTableLayout::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool LTableLayout::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
@@ -2240,7 +2240,7 @@ bool LTableLayout::SetVariant(const char *Name, LVariant &Value, char *Array)
 			
 			if (Value.Type == GV_VOID_PTR)
 			{
-				GDom **d = (GDom**)Value.Value.Ptr;
+				LDom **d = (LDom**)Value.Value.Ptr;
 				if (d)
 					*d = c;
 			}

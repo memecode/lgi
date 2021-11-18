@@ -388,7 +388,7 @@ LMessage::Result GMru::OnEvent(LMessage *Msg)
 	return false;
 }
 
-bool GMru::Serialize(GDom *Store, const char *Prefix, bool Write)
+bool GMru::Serialize(LDom *Store, const char *Prefix, bool Write)
 {
 	bool Status = false;
 	LVariant v;

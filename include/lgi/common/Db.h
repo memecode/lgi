@@ -82,7 +82,7 @@ public:
 	virtual bool DeleteRecord() = 0; // delete's the current record
 };
 
-class GDb : public GDom
+class GDb : public LDom
 {
 public:
 	virtual ~GDb() {}

@@ -195,7 +195,7 @@ public:
 	bool SerializeState
 	(
 		/// The data store for reading/writing
-		GDom *Store,
+		LDom *Store,
 		/// The field name to use for storing settings under
 		const char *FieldName,
 		/// TRUE if loading the settings into the window, FALSE if saving to the store.

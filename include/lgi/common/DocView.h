@@ -234,7 +234,7 @@ public:
 /// TextView class is a base for all text controls
 class LgiClass LDocView :
 	public LLayout,
-	virtual public GDom
+	virtual public LDom
 {
 	friend class LDocumentEnv;
 

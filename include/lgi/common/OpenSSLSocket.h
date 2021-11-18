@@ -18,7 +18,7 @@
 
 class SslSocket :
 	public LSocketI,
-	virtual public GDom
+	virtual public LDom
 {
 	friend class OpenSSL;
 	struct SslSocketPriv *d;
@@ -68,8 +68,8 @@ public:
 	bool IsBlocking();
 	void IsBlocking(bool block);
 
-	bool SetVariant(const char *Name, LVariant &Val, char *Arr = NULL);
-	bool GetVariant(const char *Name, LVariant &Val, char *Arr = NULL);
+	bool SetVariant(const char *Name, LVariant &Val, const char *Arr = NULL) override;
+	bool GetVariant(const char *Name, LVariant &Val, const char *Arr = NULL) override;
 
 	LStreamI *Clone();
 	const char *GetErrorString();

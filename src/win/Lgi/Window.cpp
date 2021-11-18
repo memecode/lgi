@@ -1207,7 +1207,7 @@ bool LWindow::UnregisterHook(LView *Target)
 	return false;
 }
 
-bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
+bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 {
 	if (!Store || !FieldName)
 		return false;

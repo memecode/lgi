@@ -45,7 +45,7 @@ public:
 	bool OnLayout(LViewLayoutInfo &Inf);
 	int OnNotify(LViewI *Ctrl, LNotification n);
 
-	bool Serialize(GDom *Dom, const char *OptName, bool Write);	
+	bool Serialize(LDom *Dom, const char *OptName, bool Write);	
 	bool SetSize(int ViewIndex, LCss::Len Size);
 };
 

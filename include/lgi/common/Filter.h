@@ -43,7 +43,7 @@ LgiFunc int FindHeader(int Offset, const char *Str, LStream *f);
 /// General base class for image filters. If you are creating a new filter you will
 /// need to also create a factory for it by inheriting another singleton class from
 /// GFilterFactory.
-class LgiClass LFilter : public GDom
+class LgiClass LFilter : public LDom
 {
 	LArray<uint8_t> Buf;
 
@@ -93,7 +93,7 @@ protected:
 	}
 
 public:
-	GDom *Props;
+	LDom *Props;
 
 	enum Format
 	{

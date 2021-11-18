@@ -110,7 +110,7 @@ bool LFontType::GetDescription(char *Str, int SLen)
 	return false;
 }
 
-bool LFontType::Serialize(GDom *Options, const char *OptName, bool Write)
+bool LFontType::Serialize(LDom *Options, const char *OptName, bool Write)
 {
 	bool Status = false;
 

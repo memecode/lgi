@@ -12,7 +12,7 @@
 class LgiClass Progress :
 	public LMutex,
 	public LCancel,
-	virtual public GDom
+	virtual public LDom
 {
 protected:
 	LString Description, Type;

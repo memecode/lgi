@@ -14,7 +14,7 @@
 #include "lgi/common/DragAndDrop.h"
 #include "lgi/common/Com.h"
 
-// #define DND_DEBUG_TRACE
+#define DND_DEBUG_TRACE 1
 
 class LDataObject : public GUnknownImpl<IDataObject>
 {
@@ -109,9 +109,9 @@ HRESULT LDataObject::EnumFormatEtc(DWORD dwDirection, IEnumFORMATETC **ppFormatE
 	return (*ppFormatEtc) ? S_OK : E_OUTOFMEMORY;
 }
 
-HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
+HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *pMedium)
 {
-	HRESULT Ret = E_INVALIDARG;
+	HRESULT Ret = DV_E_FORMATETC;
 
 	int CurFormat = 0;
 	LDragFormats Formats(true);
@@ -130,25 +130,25 @@ HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
 	}
 	Formats.Empty();
 
-	#ifdef DND_DEBUG_TRACE
-	LgiTrace(	"GetData 0, pFormatEtc{'%s',%p,%i,%i,%i} PMedium{%i} CurrentFormat=%s",
+	#if DND_DEBUG_TRACE
+	LgiTrace(	"GetData 0 pFormatEtc{'%s',%p,%i,%i,%i} pMedium{%i} CurrentFormat=%s\n",
 				FormatToStr(pFormatEtc->cfFormat),
 				pFormatEtc->ptd,
 				pFormatEtc->dwAspect,
 				pFormatEtc->lindex,
 				pFormatEtc->tymed,
-				PMedium->tymed,
-				Source->CurrentFormat);
+				pMedium->tymed,
+				FormatToStr(CurFormat));
 	#endif
 
 	if (pFormatEtc &&
-		PMedium &&
+		pMedium &&
 		Source->d->CurData.Length())
 	{
 		// the users don't HAVE to use this...
 		Source->GetData(Source->d->CurData);
 
-		ZeroObj(*PMedium);
+		ZeroObj(*pMedium);
 
 		uchar *Ptr = 0;
 		ssize_t Size = 0;
@@ -164,13 +164,15 @@ HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
 					auto &v = CurData.Data[2];
 					if (v.Type == GV_STREAM)
 					{
-						PMedium->tymed = TYMED_ISTREAM;
+						pMedium->tymed = TYMED_ISTREAM;
 					
-						PMedium->pstm = new LStreamWrap(FileName, v.Value.Stream.Release());
-						PMedium->pstm->AddRef();
+						pMedium->pstm = new LStreamWrap(FileName, v.Value.Stream.Release());
+						pMedium->pstm->AddRef();
 					
-						PMedium->pUnkForRelease = PMedium->pstm;
-						PMedium->pUnkForRelease->AddRef();
+						#if 0
+						pMedium->pUnkForRelease = PMedium->pstm;
+						pMedium->pUnkForRelease->AddRef();
+						#endif
 
 						Ret = S_OK;
 					}
@@ -187,21 +189,21 @@ HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
 						break;
 					case GV_BINARY:
 					{
-						PMedium->tymed = TYMED_HGLOBAL;
+						pMedium->tymed = TYMED_HGLOBAL;
 						Ptr = (uchar*)Data.Value.Binary.Data;
 						Size = Data.Value.Binary.Length;
 						break;
 					}
 					case GV_STRING:
 					{
-						PMedium->tymed = TYMED_HGLOBAL;
+						pMedium->tymed = TYMED_HGLOBAL;
 						Ptr = (uchar*)Data.Value.String;
 						Size = Ptr ? strlen((char*)Ptr) + 1 : 0;
 						break;
 					}
 					case GV_VOID_PTR:
 					{
-						PMedium->tymed = TYMED_HGLOBAL;
+						pMedium->tymed = TYMED_HGLOBAL;
 						Ptr = (uchar*)&Data.Value.Ptr;
 						Size = sizeof(Data.Value.Ptr);
 						break;
@@ -213,27 +215,29 @@ HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *PMedium)
 						break;
 					}
 				}
-			}
 
-			if (PMedium->tymed == TYMED_HGLOBAL &&
-				Ptr &&
-				Size > 0)
-			{
-				PMedium->hGlobal = GlobalAlloc(GHND, Size);
-				if (PMedium->hGlobal)
+				if (pMedium->tymed == TYMED_HGLOBAL &&
+					Ptr &&
+					Size > 0)
 				{
-					void *g = GlobalLock(PMedium->hGlobal);
-					if (g)
+					pMedium->hGlobal = GlobalAlloc(GHND, Size);
+					if (pMedium->hGlobal)
 					{
-						memcpy(g, Ptr, Size);
-						GlobalUnlock(PMedium->hGlobal);
-						Ret = S_OK;
+						void *g = GlobalLock(pMedium->hGlobal);
+						if (g)
+						{
+							memcpy(g, Ptr, Size);
+							GlobalUnlock(pMedium->hGlobal);
+							Ret = S_OK;
+						}
+						else Ret = E_OUTOFMEMORY;
 					}
+					else Ret = E_OUTOFMEMORY;
 				}
 			}
 
-			#ifdef DND_DEBUG_TRACE
-			LgiTrace("GetData 2, Ret=%i", Ret);
+			#if DND_DEBUG_TRACE
+			LgiTrace("GetData 2, Ret=%i\n", Ret);
 			#endif
 		}
 	}
@@ -263,7 +267,7 @@ HRESULT LDataObject::QueryGetData(FORMATETC *pFormatEtc)
 
 		if (!HaveFormat)
 		{
-			#ifdef DND_DEBUG_TRACE
+			#if DND_DEBUG_TRACE
 			char *TheirFormat = FormatToStr(pFormatEtc->cfFormat);
 			LgiTrace("QueryGetData didn't have '%s' format.", TheirFormat);
 			#endif
@@ -271,7 +275,7 @@ HRESULT LDataObject::QueryGetData(FORMATETC *pFormatEtc)
 		}
 		else if (pFormatEtc->tymed != TYMED_HGLOBAL)
 		{
-			#ifdef DND_DEBUG_TRACE
+			#if DND_DEBUG_TRACE
 			LgiTrace("QueryGetData no TYMED!");
 			#endif
 			Ret = DV_E_TYMED;
@@ -436,7 +440,7 @@ LDragDropSource::Next(ULONG celt, FORMATETC *rgelt, ULONG *pceltFetched)
 {
 	HRESULT Ret = S_FALSE;
 
-	#ifdef DND_DEBUG_TRACE
+	#if DND_DEBUG_TRACE
 	LgiTrace("Next[%i]=", Index);
 	#endif
 
@@ -453,7 +457,7 @@ LDragDropSource::Next(ULONG celt, FORMATETC *rgelt, ULONG *pceltFetched)
 
 		if (i)
 		{
-			#ifdef DND_DEBUG_TRACE
+			#if DND_DEBUG_TRACE
 			LgiTrace("\t%s", i);
 			#endif
 
@@ -475,7 +479,7 @@ HRESULT STDMETHODCALLTYPE
 LDragDropSource::Skip(ULONG celt)
 {
 	Index += celt;
-	#ifdef DND_DEBUG_TRACE
+	#if DND_DEBUG_TRACE
 	LgiTrace("Skip Index=%i", Index);
 	#endif
 	return S_FALSE;
@@ -485,7 +489,7 @@ HRESULT STDMETHODCALLTYPE
 LDragDropSource::Reset()
 {
 	Index = 0;
-	#ifdef DND_DEBUG_TRACE
+	#if DND_DEBUG_TRACE
 	LgiTrace("Reset Index=%i", Index);
 	#endif
 	return S_OK;
@@ -680,21 +684,6 @@ HRESULT STDMETHODCALLTYPE LDragDropTarget::DragLeave()
 	OnDragExit();
 	return S_OK;
 }
-
-/*
-int LDragDropTarget::OnDrop(LArray<LDragData> &DropData,
-							LPoint Pt,
-							int KeyState)
-{
-	if (DropData.Length() == 0 ||
-		DropData[0].Data.Length() == 0)
-		return DROPEFFECT_NONE;
-	
-	char *Fmt = DropData[0].Format;
-	LVariant *Var = &DropData[0].Data[0];
-	return OnDrop(Fmt, Var, Pt, KeyState);
-}
-*/
 
 HRESULT STDMETHODCALLTYPE LDragDropTarget::Drop(IDataObject *pDataObject, DWORD grfKeyState, POINTL pt, DWORD *pdwEffect)
 {

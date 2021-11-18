@@ -84,7 +84,7 @@ void LTextLabel::OnAttach()
 	LView::OnAttach();
 }
 
-bool LTextLabel::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool LTextLabel::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	LDomProperty p = LStringToDomProp(Name);
 	if (p == ObjStyle)

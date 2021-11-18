@@ -1353,7 +1353,7 @@ void GTag::Set(const char *attr, const char *val)
 		Attr.Add(attr, NewStr(val));
 }
 
-bool GTag::GetVariant(const char *Name, LVariant &Value, char *Array)
+bool GTag::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	LDomProperty Fld = LStringToDomProp(Name);
 	switch (Fld)
@@ -1383,7 +1383,7 @@ bool GTag::GetVariant(const char *Name, LVariant &Value, char *Array)
 	return false;
 }
 
-bool GTag::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool GTag::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	LDomProperty Fld = LStringToDomProp(Name);
 	switch (Fld)
@@ -7763,7 +7763,7 @@ char *GHtml::GetSelection()
 	return s;
 }
 
-bool GHtml::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool GHtml::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	if (!Name)
 		return false;
@@ -8719,7 +8719,7 @@ bool GHtml::GetCursorVis()
 	return d->CursorVis;
 }
 
-GDom *ElementById(GTag *t, char *id)
+LDom *ElementById(GTag *t, char *id)
 {
 	if (t && id)
 	{
@@ -8730,7 +8730,7 @@ GDom *ElementById(GTag *t, char *id)
 		for (unsigned i=0; i<t->Children.Length(); i++)
 		{
 			GTag *c = ToTag(t->Children[i]);
-			GDom *n = ElementById(c, id);
+			LDom *n = ElementById(c, id);
 			if (n) return n;
 		}
 	}
@@ -8738,7 +8738,7 @@ GDom *ElementById(GTag *t, char *id)
 	return 0;
 }
 
-GDom *GHtml::getElementById(char *Id)
+LDom *GHtml::getElementById(char *Id)
 {
 	return ElementById(Tag, Id);
 }
@@ -8837,7 +8837,7 @@ LHtmlElement *GHtml::CreateElement(LHtmlElement *Parent)
 	return new GTag(this, Parent);
 }
 
-bool GHtml::GetVariant(const char *Name, LVariant &Value, char *Array)
+bool GHtml::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	if (!_stricmp(Name, "supportLists")) // Type: Bool
 		Value = false;

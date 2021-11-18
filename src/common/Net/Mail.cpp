@@ -1805,7 +1805,7 @@ MailReceiveFolder::~MailReceiveFolder()
 	DeleteObj(d);
 }
 
-bool MailReceiveFolder::Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags)
+bool MailReceiveFolder::Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *SettingStore, int Flags)
 {
 	// We don't use the socket so just free it here...
 	DeleteObj(S);
@@ -2087,7 +2087,7 @@ bool MailPop3::ListCmd(const char *Cmd, LHashTbl<ConstStrKey<char,false>, bool> 
 
 #define OPT_Pop3NoApop		"NoAPOP"
 
-bool MailPop3::Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags)
+bool MailPop3::Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *SettingStore, int Flags)
 {
 	bool Status = false;
 	// bool RemoveMail = false;

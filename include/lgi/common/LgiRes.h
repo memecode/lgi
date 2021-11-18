@@ -263,15 +263,15 @@ public:
 
 	/// Gets a dom object of properties
 	/// \private
-	bool Res_GetProperties(ResObject *Obj, GDom *Props);
+	bool Res_GetProperties(ResObject *Obj, LDom *Props);
 
 	/// Sets a dom object of properties
 	/// \private
-	bool Res_SetProperties(ResObject *Obj, GDom *Props);
+	bool Res_SetProperties(ResObject *Obj, LDom *Props);
 
 	/// Gets the current dom object of properties
 	/// \private
-	GDom* Res_GetDom(ResObject *Obj);
+	LDom* Res_GetDom(ResObject *Obj);
 };
 
 /// Loads a resource and returns a pointer to it.

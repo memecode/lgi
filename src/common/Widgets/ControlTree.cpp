@@ -82,7 +82,7 @@ LControlTree::Item *LControlTree::Item::Find(const char *opt)
 	return 0;
 }
 
-bool LControlTree::Item::Serialize(GDom *Store, bool Write)
+bool LControlTree::Item::Serialize(LDom *Store, bool Write)
 {
 	if (Opt)
 	{
@@ -406,7 +406,7 @@ LControlTree::Item *LControlTree::Find(const char *opt)
 	return 0;
 }
 
-bool LControlTree::Serialize(GDom *Store, bool Write)
+bool LControlTree::Serialize(LDom *Store, bool Write)
 {
 	bool Error = false;
 
@@ -534,7 +534,7 @@ void LControlTree::ReadTree(LXmlTag *t, LTreeNode *n)
 	}
 }
 
-bool LControlTree::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool LControlTree::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	if (!Name)
 		return false;

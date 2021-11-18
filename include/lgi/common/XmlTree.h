@@ -63,7 +63,7 @@ public:
 /// virtual member function Serialize and call SerializeAttr on each of your native
 /// member variables. When loading and saving the attributes will be mapped to and
 /// from your native types.
-class LgiClass LXmlTag : virtual public GDom
+class LgiClass LXmlTag : virtual public LDom
 {
 	friend class LXmlTree;
 
@@ -75,8 +75,8 @@ protected:
 
 	bool Write;
 	LXmlAttr *_Attr(const char *Name, bool Write);
-	bool GetVariant(const char *Name, LVariant &Value, char *Array);
-	bool SetVariant(const char *Name, LVariant &Value, char *Array);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array);
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array);
 
 	/// The name of the tag/element. This can be NULL in the case
 	/// that the element is purely content. The memory is managed by 

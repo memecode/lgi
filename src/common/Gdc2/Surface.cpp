@@ -1873,7 +1873,7 @@ void LSurface::Palette(GPalette *pPal, bool bOwnIt)
 	}
 }
 
-bool LSurface::GetVariant(const char *Name, LVariant &Dst, char *Array)
+bool LSurface::GetVariant(const char *Name, LVariant &Dst, const char *Array)
 {
 	switch (LStringToDomProp(Name))
 	{
@@ -1911,7 +1911,7 @@ bool LSurface::GetVariant(const char *Name, LVariant &Dst, char *Array)
 	return true;
 }
 
-bool LSurface::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool LSurface::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	switch (LStringToDomProp(Name))
 	{

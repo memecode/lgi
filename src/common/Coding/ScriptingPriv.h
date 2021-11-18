@@ -376,7 +376,7 @@ public:
 		LScriptContext *UserContext,
 		const char *FileName,
 		const char *Script,
-		GDom *Args
+		LDom *Args
 	);
 };
 

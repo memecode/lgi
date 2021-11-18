@@ -426,7 +426,7 @@ public:
 	GToolTip *Tip;
 	
 	// Customization menu
-	GDom *CustomDom;
+	LDom *CustomDom;
 	const char *CustomProp;
 
 	// bitmap cache
@@ -1161,7 +1161,7 @@ bool LToolBar::IsCustomizable()
 	return d->CustomDom != 0 && d->CustomProp;
 }
 
-void LToolBar::Customizable(GDom *Store, const char *Option)
+void LToolBar::Customizable(LDom *Store, const char *Option)
 {
 	d->CustomDom = Store;
 	d->CustomProp = Option;

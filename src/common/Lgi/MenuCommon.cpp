@@ -9,7 +9,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Menu.h"
 
-bool LSubMenu::GetVariant(const char *Name, LVariant &Value, char *Array)
+bool LSubMenu::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
@@ -23,7 +23,7 @@ bool LSubMenu::GetVariant(const char *Name, LVariant &Value, char *Array)
 	return true;
 }
 
-bool LSubMenu::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool LSubMenu::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	/*
 	LDomProperty p = LStringToDomProp(Name);

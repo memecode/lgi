@@ -147,13 +147,13 @@ LVariant::LVariant(void *p)
 	*this = p;
 }
 
-LVariant::LVariant(GDom *p)
+LVariant::LVariant(LDom *p)
 {
 	Type = GV_NULL;
 	*this = p;
 }
 
-LVariant::LVariant(GDom *p, char *name)
+LVariant::LVariant(LDom *p, char *name)
 {
 	Type = GV_NULL;
 	SetDomRef(p, name);
@@ -425,7 +425,7 @@ LVariant &LVariant::operator =(void *p)
 	return *this;
 }
 
-LVariant &LVariant::operator =(GDom *p)
+LVariant &LVariant::operator =(LDom *p)
 {
 	Empty();
 	if (p)
@@ -626,7 +626,7 @@ LVariant &LVariant::operator =(LVariant const &i)
 	return *this;
 }
 
-bool LVariant::SetDomRef(GDom *obj, char *name)
+bool LVariant::SetDomRef(LDom *obj, char *name)
 {
 	Empty();
 
@@ -1154,7 +1154,7 @@ void *LVariant::CastVoidPtr()
 	return 0;
 }
 
-GDom *LVariant::CastDom()
+LDom *LVariant::CastDom()
 {
 	switch (Type)
 	{
@@ -1165,7 +1165,7 @@ GDom *LVariant::CastDom()
 		case GV_DOMREF:
 			return Value.DomRef.Dom;
 		case GV_STREAM:
-			return dynamic_cast<GDom*>(Value.Stream.Ptr);
+			return dynamic_cast<LDom*>(Value.Stream.Ptr);
 		case GV_LSURFACE:
 			return Value.Surface.Ptr;
 		case GV_CUSTOM:
@@ -1487,13 +1487,13 @@ char *LVariant::CastString()
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-GDom *GDom::ResolveObject(const char *Var, char *Name, char *Array)
+LDom *LDom::ResolveObject(const char *Var, LString &Name, LString &Array)
 {
-	GDom *Object = this;
+	LDom *Object = this;
 
-	// Tokenise the string
-	LArray<char*> t;
-	for (const char *s = Var; s && *s; )
+	// Tokenize the string
+	LString::Array t;
+	for (auto *s = Var; s && *s; )
 	{
 		const char *e = s;
 		while (*e && *e != '.')
@@ -1507,48 +1507,31 @@ GDom *GDom::ResolveObject(const char *Var, char *Name, char *Array)
 					{
 						char d = *e++;
 						while (*e && *e != d)
-						{
 							e++;
-						}
 						if (*e == d) e++;
 					}
 					else e++;
 				}
-				if (*e == ']') e++;
+
+				if (*e == ']')
+					e++;
 			}
 			else e++;
 		}
 		
-		size_t Len = e - s;
-		if (Len < 1 || Len > 255)
-		{
-			Object = 0;
-			break;
-		}
-		
-		char Part[256];
-		memcpy(Part, s, Len);
-		Part[Len] = 0;
-		while (strchr(" \t", Part[Len-1]))
-		{
-			Len--;
-		}
-
-		t[t.Length()] = NewStr(Part, Len);
+		t.New() = LString(s, e - s).Strip();
 		s = *e ? e + 1 : e;
 	}
 
 	// Process elements
 	for (int i=0; i<t.Length(); i++)
 	{
-		char Base[256];
-		char Index[256] = "";
-
-		// Parse out object name parts
+		// Parse out object name and array parts
+		LString Index;
 		char *Obj = t[i];
 		if (*Obj == '[')
 		{
-			Object = 0;
+			Object = NULL;
 			break;
 		}
 		
@@ -1569,29 +1552,23 @@ GDom *GDom::ResolveObject(const char *Var, char *Name, char *Array)
 			if (ArrEnd)
 			{
 				*ArrEnd = 0;
-				strcpy_s(Index, sizeof(Index), ArrStart);
+				Index = ArrStart;
 			}
 		}
-		strcpy_s(Base, sizeof(Base), Obj);
 
 		// Process parts
 		if (i == t.Length()-1)
 		{
-			strcpy_s(Name, 256, Base);
-			strcpy_s(Array, 256, Index);
-			
-			char *e = Name + strlen(Name) - 1;
-			while (e > Name && strchr(" \t\r\n", *e))
-			{
-				*e-- = 0;
-			}
+			// Output the variable and array index
+			Name = LString(Obj).Strip();
+			Array = Index;
 		}
 		else
 		{
 			LVariant v;
-			if (Index[0])
+			if (!Index.IsEmpty())
 			{
-				if (Object->GetVariant(Base, v, Index))
+				if (Object->GetVariant(Obj, v, Index))
 				{
 					if (v.Type == GV_LIST)
 					{
@@ -1603,8 +1580,7 @@ GDom *GDom::ResolveObject(const char *Var, char *Name, char *Array)
 						}
 						else
 						{
-							Object = 0;
-							goto ResolveDone;
+							return NULL;
 						}
 					}
 					else if (v.Type == GV_DOM)
@@ -1613,14 +1589,12 @@ GDom *GDom::ResolveObject(const char *Var, char *Name, char *Array)
 					}
 					else
 					{
-						Object = 0;
-						goto ResolveDone;
+						return NULL;
 					}
 				}
 				else
 				{
-					Object = 0;
-					goto ResolveDone;
+					return NULL;
 				}
 			}
 			else
@@ -1632,24 +1606,21 @@ GDom *GDom::ResolveObject(const char *Var, char *Name, char *Array)
 				}
 				else
 				{
-					Object = 0;
-					goto ResolveDone;
+					return NULL;
 				}
 			}
 		}
 	}
 
-ResolveDone:
-	t.DeleteArrays();
 	return Object;
 }
 
-struct GDomPropMap
+struct LDomPropMap
 {
 	LHashTbl<ConstStrKey<char,false>, LDomProperty> ToProp;
 	LHashTbl<IntKey<LDomProperty,ObjNone>, const char *> ToString;
 
-	GDomPropMap()
+	LDomPropMap()
 	{
 		#undef _
 		#define _(symbol, txt) Define(txt, symbol);
@@ -1685,7 +1656,7 @@ const char *LDomPropToString(LDomProperty Prop)
 	return DomPropMap.ToString.Find(Prop);
 }
 
-bool GDom::GetValue(const char *Var, LVariant &Value)
+bool LDom::GetValue(const char *Var, LVariant &Value)
 {
 	bool Status = false;
 
@@ -1693,8 +1664,8 @@ bool GDom::GetValue(const char *Var, LVariant &Value)
 	{
 		if (_OnAccess(true))
 		{
-			char Name[256] = "", Arr[256] = "";
-			GDom *Object = ResolveObject(Var, Name, Arr);
+			LString Name, Arr;
+			LDom *Object = ResolveObject(Var, Name, Arr);
 			if (Object)
 			{
 				if (Name[0] == 0)
@@ -1703,8 +1674,7 @@ bool GDom::GetValue(const char *Var, LVariant &Value)
 				}
 				else
 				{
-					bool ValidArray = ValidStr(Arr);
-					Status = Object->GetVariant(Name, Value, ValidArray ? Arr : 0);
+					Status = Object->GetVariant(Name, Value, Arr.IsEmpty() ? NULL : Arr);
 				}
 			}
 
@@ -1720,7 +1690,7 @@ bool GDom::GetValue(const char *Var, LVariant &Value)
 	return Status;
 }
 
-bool GDom::SetValue(const char *Var, LVariant &Value)
+bool LDom::SetValue(const char *Var, LVariant &Value)
 {
 	bool Status = false;
 
@@ -1729,17 +1699,14 @@ bool GDom::SetValue(const char *Var, LVariant &Value)
 		// LMutex *Sem = dynamic_cast<LMutex*>(this);
 		if (_OnAccess(true))
 		{
-			char Name[256], Arr[256] = "";
-			GDom *Object = ResolveObject(Var, Name, Arr);
+			LString Name, Arr;
+			LDom *Object = ResolveObject(Var, Name, Arr);
 			if (Object)
 			{
-				if (Name[0] == 0)
+				if (Name.IsEmpty())
 					LgiTrace("%s:%i - Warning name parse failed for '%s'\n", _FL, Var);
 				else
-				{
-					bool Valid = ValidStr(Arr);
-					Status = Object->SetVariant(Name, Value, Valid ? Arr : 0);
-				}
+					Status = Object->SetVariant(Name, Value, Arr.IsEmpty() ? NULL : Arr);
 			}
 
 			_OnAccess(false);
@@ -2004,7 +1971,7 @@ LCustomType::Method *LCustomType::DefineMethod(const char *Name, LArray<LString>
 	return m;
 }
 
-bool LCustomType::CustomField::GetVariant(const char *Field, LVariant &Value, char *Array)
+bool LCustomType::CustomField::GetVariant(const char *Field, LVariant &Value, const char *Array)
 {
 	LDomProperty p = LStringToDomProp(Field);
 	switch (p)
@@ -2283,7 +2250,7 @@ bool LCustomType::Set(int Index, LVariant &In, uint8_t *This, int ArrayIndex)
 	return true;
 }
 
-bool LCustomType::GetVariant(const char *Field, LVariant &Value, char *Array)
+bool LCustomType::GetVariant(const char *Field, LVariant &Value, const char *Array)
 {
 	LDomProperty p = LStringToDomProp(Field);
 	switch (p)
@@ -2310,7 +2277,7 @@ bool LCustomType::GetVariant(const char *Field, LVariant &Value, char *Array)
 				int Index = atoi(Array);
 				if (Index >= 0 && Index < Flds.Length())
 				{
-					Value = (GDom*)&Flds[Index];
+					Value = (LDom*)&Flds[Index];
 					return true;
 				}			
 			}
@@ -2329,7 +2296,7 @@ bool LCustomType::GetVariant(const char *Field, LVariant &Value, char *Array)
 	return false;
 }
 
-bool LCustomType::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool LCustomType::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	LAssert(0);
 	return false;

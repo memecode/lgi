@@ -386,7 +386,7 @@ public:
 #define OrgRgn(r)		r.Offset(-OriginX, -OriginY)
 
 /// Base class API for graphics operations
-class LgiClass LSurface : public GRefCount, public GDom
+class LgiClass LSurface : public GRefCount, public LDom
 {
 	friend class LFilter;
 	friend class LView;
@@ -670,9 +670,9 @@ public:
 	/// Describes the image
 	virtual LString GetStr();
 
-	// GDom interface
-	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL);
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = NULL);
+	// LDom interface
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
 	bool CallMethod(const char *Name, LVariant *ReturnValue, LArray<LVariant*> &Args);
 };
 

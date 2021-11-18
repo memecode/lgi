@@ -436,8 +436,8 @@ public:
 	void CollectFormValues(LHashTbl<ConstStrKey<char,false>,char*> &f);
 
 	// GDom impl
-	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = 0);
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = 0);
 
 	// Window
 	bool OnMouseClick(LMouse &m);

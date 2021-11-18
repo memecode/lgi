@@ -40,7 +40,7 @@ LString LFileSystem::GetCurrentFolder()
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-bool LFile::GetVariant(const char *Name, LVariant &Value, char *Array)
+bool LFile::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
@@ -64,7 +64,7 @@ bool LFile::GetVariant(const char *Name, LVariant &Value, char *Array)
 	return true;
 }
 
-bool LFile::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool LFile::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	LDomProperty p = LStringToDomProp(Name);
 	switch (p)

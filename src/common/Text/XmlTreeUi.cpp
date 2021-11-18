@@ -248,7 +248,7 @@ int GetDataType(char *str)
 	return GV_NULL;
 }
 
-bool LXmlTreeUi::Convert(GDom *Tag, LViewI *Ui, bool ToUI)
+bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 {
 	bool Status = false;
 

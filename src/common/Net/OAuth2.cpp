@@ -168,7 +168,7 @@ struct LOAuth2Priv
 	LString Token;
 	LString CodeVerifier;
 	LStringPipe LocalLog;
-	GDom *Store;
+	LDom *Store;
 	LCancel *Cancel;
 
 	LString AccessToken, RefreshToken;
@@ -428,7 +428,7 @@ struct LOAuth2Priv
 		return AccessToken.Get() != NULL;
 	}
 
-	LOAuth2Priv(LOAuth2::Params &params, const char *account, GDom *store, LStream *log, LCancel *cancel)
+	LOAuth2Priv(LOAuth2::Params &params, const char *account, LDom *store, LStream *log, LCancel *cancel)
 	{
 		Params = params;
 		Id = account;
@@ -468,7 +468,7 @@ struct LOAuth2Priv
 	}
 };
 
-LOAuth2::LOAuth2(LOAuth2::Params &params, const char *account, GDom *store, LCancel *cancel, LStream *log)
+LOAuth2::LOAuth2(LOAuth2::Params &params, const char *account, LDom *store, LCancel *cancel, LStream *log)
 {
 	d = new LOAuth2Priv(params, account, store, log, cancel);
 	d->Serialize(false);

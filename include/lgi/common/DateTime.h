@@ -340,7 +340,7 @@ public:
 	// File
 	int Sizeof();
 	bool Serialize(class LFile &f, bool Write);
-	bool Serialize(class GDom *Props, char *Name, bool Write);
+	bool Serialize(class LDom *Props, char *Name, bool Write);
 
 	// operators
 	bool operator <(const LDateTime &dt) const;
@@ -377,9 +377,9 @@ public:
 		return *this;
 	}
 
-	/// GDom interface.
+	/// LDom interface.
 	///
-	/// Even though we don't inherit from a GDom class this class supports the same
+	/// Even though we don't inherit from a LDom class this class supports the same
 	/// interface for ease of use. Currently there are cases where LDateTime is used
 	/// in LArray's which don't implement calling a constructor (they init with all
 	/// zeros).

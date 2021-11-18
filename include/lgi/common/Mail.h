@@ -176,7 +176,7 @@ protected:
 	LMutex SocketLock;
 	LAutoPtr<LSocketI> Socket;
 	LOAuth2::Params OAuth2;
-	GDom *SettingStore;
+	LDom *SettingStore;
 
 	bool Error(const char *file, int line, const char *msg, ...);
 	bool Read();
@@ -208,7 +208,7 @@ public:
 
 	// Methods
 	void SetOAuthParams(LOAuth2::Params &p) { OAuth2 = p; }
-	void SetSettingStore(GDom *store) { SettingStore = store; }
+	void SetSettingStore(LDom *store) { SettingStore = store; }
 	
 	/// Thread safe hard close (quit now)
 	bool CloseSocket()
@@ -499,7 +499,7 @@ public:
 		/// The password for authentication
 		const char *Password,
 		/// [Optional] Persistant storage of settings
-		GDom *SettingStore,
+		LDom *SettingStore,
 		/// [Optional] Flags: #MAIL_SOURCE_STARTTLS, #MAIL_SOURCE_AUTH, #MAIL_SOURCE_USE_PLAIN, #MAIL_SOURCE_USE_LOGIN
 		int Flags = 0) = 0;
 	/// Closes the connection
@@ -591,7 +591,7 @@ public:
 	~MailPop3();
 
 	// Connection
-	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags = 0);
+	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *SettingStore, int Flags = 0);
 	bool Close();
 
 	// Commands available while connected
@@ -615,7 +615,7 @@ public:
 	~MailReceiveFolder();
 
 	// Connection
-	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags = 0);
+	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *SettingStore, int Flags = 0);
 	bool Close();
 
 	// Commands available while connected
@@ -640,7 +640,7 @@ public:
 	~MailPhp();
 
 	// Connection
-	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags = 0);
+	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *SettingStore, int Flags = 0);
 	bool Close();
 
 	// Commands available while connected
@@ -764,7 +764,7 @@ public:
 	ssize_t ParseImapResponse(char *Buffer, ssize_t BufferLen, LArray<StrRange> &Ranges, int Names);
 
 	// Connection
-	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, GDom *SettingStore, int Flags = 0);
+	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *SettingStore, int Flags = 0);
 	bool Close(); // Non-threadsafe soft close (normal operation)
 	bool GetCapabilities(LArray<char*> &s);
 

@@ -1248,7 +1248,7 @@ ResObjectImpl::SStatus ResObjectImpl::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 		if (Style)
 		{
 			LVariant v = Style;
-			GDom *d = Factory->Res_GetDom(Object);
+			LDom *d = Factory->Res_GetDom(Object);
 			if (d)
 				d->SetValue("style", v);
 		}
@@ -1513,12 +1513,12 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 	if (Style)
 	{
 		LVariant v = Style;
-		GDom *d = Factory->Res_GetDom(Object);
+		LDom *d = Factory->Res_GetDom(Object);
 		if (d)
 			d->SetValue("style", v);
 	}
 
-	GDom *d = Factory->Res_GetDom(Object);
+	LDom *d = Factory->Res_GetDom(Object);
 	if (d)
 	{
 		LVariant v;
@@ -1570,7 +1570,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 					RowSpan = atoi(s);
 
 				char CellName[32];
-				GDom *Cell = 0;
+				LDom *Cell = 0;
 				v = (void*) &Cell;
 				sprintf_s(CellName, sizeof(CellName), "cell[%i,%i]", x, y);
 				if (d->SetValue(CellName, v))
@@ -1634,7 +1634,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 				{
 					// Create empty cell for unused slot
 					char CellName[32];
-					GDom *Cell = 0;
+					LDom *Cell = 0;
 					v = (void*) &Cell;
 					sprintf_s(CellName, sizeof(CellName), "cell[%i,%i]", x, y);
 					d->SetValue(CellName, v);
@@ -1650,7 +1650,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Write(LXmlTag *t)
 {
 	ResObjectImpl::SStatus s = ResObjectImpl::Res_Write(t);
 
-	GDom *d = Factory->Res_GetDom(Object);
+	LDom *d = Factory->Res_GetDom(Object);
 	if (d)
 	{
 		LVariant v;
@@ -1679,7 +1679,7 @@ ResObjectImpl::SStatus ResTableLayout::Res_Write(LXmlTag *t)
 					if (d->GetValue(a, v) &&
 						v.Type == GV_DOM)
 					{
-						GDom *c = v.Value.Dom;
+						LDom *c = v.Value.Dom;
 						if (c)
 						{
 							LRect Span;
@@ -2085,7 +2085,7 @@ ResObjectImpl::SStatus ResControlTree::Res_Read(LXmlTag *t, ResReadCtx &Ctx)
 	Res_SetPos(t);
 	Res_SetStrRef(t, &Ctx);
 
-	GDom *d = Factory->Res_GetDom(Object);
+	LDom *d = Factory->Res_GetDom(Object);
 	if (!d)
 	{
 		LAssert(0);
@@ -2104,7 +2104,7 @@ ResObjectImpl::SStatus ResControlTree::Res_Write(LXmlTag *t)
 
 	LAssert(!t->GetAttr("id"));
 
-	GDom *d = Factory->Res_GetDom(Object);
+	LDom *d = Factory->Res_GetDom(Object);
 	if (!d)
 	{
 		LAssert(0);

@@ -133,7 +133,7 @@ void GPassword::Serialize(char *Password, int Write)
 	}
 }
 
-bool GPassword::Serialize(GDom *Options, const char *Prop, int Write)
+bool GPassword::Serialize(LDom *Options, const char *Prop, int Write)
 {
 	bool Status = false;
 	if (Options && Prop)
@@ -163,7 +163,7 @@ bool GPassword::Serialize(GDom *Options, const char *Prop, int Write)
 	return Status;
 }
 
-void GPassword::Delete(GDom *Options, char *Option)
+void GPassword::Delete(LDom *Options, char *Option)
 {
 	if (Options && Option)
 	{

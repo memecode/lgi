@@ -169,7 +169,7 @@ public:
 	int Open(const char *Str = 0, int Int = 0) { return IsOpen(); }
 	bool IsOpen() { return s != NULL; }
 
-	bool GetVariant(const char *Name, LVariant &Value, char *Array = NULL) override
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override
 	{
 		if (!Desc) return false;
 		LDomProperty p = LStringToDomProp(Name);
@@ -189,7 +189,7 @@ public:
 		return false;
 	}
 	
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = NULL) override
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override
 	{
 		LAssert(!"Impl me.");
 		return false;
@@ -289,7 +289,8 @@ public:
 	
 	HRESULT STDMETHODCALLTYPE Read(void *pv, ULONG cb, ULONG *pcbRead)
 	{
-		if (!s || !pv) return E_INVALIDARG;
+		if (!s || !pv)
+			return E_INVALIDARG;
 
 		ULONG TotalRd = 0;
 		uint8_t *Ptr = (uint8_t*)pv;
@@ -314,15 +315,20 @@ public:
 	
 	HRESULT STDMETHODCALLTYPE Write(const void *pv, ULONG cb, ULONG *pcbWritten)
 	{
-		if (!s || !pv) return E_INVALIDARG;
+		if (!s || !pv)
+			return E_INVALIDARG;
+		
 		auto Wr = s->Write(pv, cb);
-		if (pcbWritten) *pcbWritten = (ULONG)Wr;
+		if (pcbWritten)
+			*pcbWritten = (ULONG)Wr;
+		
 		return S_OK;
 	}    
 
 	HRESULT STDMETHODCALLTYPE Seek(LARGE_INTEGER dlibMove, DWORD dwOrigin, ULARGE_INTEGER *plibNewPosition)
 	{
-		if (!s) return E_INVALIDARG;
+		if (!s)
+			return E_INVALIDARG;
 		
 		int64 NewPos = -1;
 		switch (dwOrigin)
@@ -344,14 +350,18 @@ public:
 		
 		if (plibNewPosition)
 			plibNewPosition->QuadPart = NewPos;
+		
 		return S_OK;
 	}
 			
 	HRESULT STDMETHODCALLTYPE SetSize(ULARGE_INTEGER libNewSize)
 	{
-		if (!s) return E_INVALIDARG;
+		if (!s)
+			return E_INVALIDARG;
+		
 		if (s->SetSize(libNewSize.QuadPart) != libNewSize.QuadPart)
 			return E_FAIL;
+		
 		return S_OK;
 	}
 

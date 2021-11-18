@@ -9,7 +9,7 @@
 class LgiClass LTextLabel :
 	public LView,
 	public ResObject,
-	public GDom
+	public LDom
 {
 	class LTextPrivate *d;
 
@@ -62,7 +62,7 @@ public:
 	void OnAttach() override;
 	bool OnLayout(LViewLayoutInfo &Inf) override;
 	void OnStyleChange();
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = NULL) override;
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 	void OnCreate() override;
 };
 

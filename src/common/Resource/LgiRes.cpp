@@ -878,7 +878,7 @@ void LResources::Res_SetPos(ResObject *Obj, char *s)
 	}
 }
 
-bool LResources::Res_GetProperties(ResObject *Obj, GDom *Props)
+bool LResources::Res_GetProperties(ResObject *Obj, LDom *Props)
 {
 	// this is a read-only system...
 	return false;
@@ -886,10 +886,10 @@ bool LResources::Res_GetProperties(ResObject *Obj, GDom *Props)
 
 struct ResObjectCallback : public LCss::ElementCallback<ResObject>
 {
-	GDom *Props;
+	LDom *Props;
 	LVariant v;
 	
-	ResObjectCallback(GDom *props)
+	ResObjectCallback(LDom *props)
 	{
 		Props = props;
 	}
@@ -926,7 +926,7 @@ struct ResObjectCallback : public LCss::ElementCallback<ResObject>
 	}
 };
 
-bool LResources::Res_SetProperties(ResObject *Obj, GDom *Props)
+bool LResources::Res_SetProperties(ResObject *Obj, LDom *Props)
 {
 	LView *v = dynamic_cast<LView*>(Obj);
 	if (!v || !Props)
@@ -1126,9 +1126,9 @@ bool LResources::Res_GetItems(ResObject *Obj, List<ResObject> *l)
 	return false;
 }
 
-GDom *LResources::Res_GetDom(ResObject *Obj)
+LDom *LResources::Res_GetDom(ResObject *Obj)
 {
-	return dynamic_cast<GDom*>(Obj);
+	return dynamic_cast<LDom*>(Obj);
 }
 
 ///////////////////////////////////////////////////////

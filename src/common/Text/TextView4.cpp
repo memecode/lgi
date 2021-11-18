@@ -1522,12 +1522,10 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 				Line.Add(Cur = new LTextLine);
 				Idx = 0;
 				Cur->Start = 0;
-				LgiTrace("FirstLine\n");
 			}
 			else
 			{
 				Cur = GetTextLine(At, &Idx);
-				LgiTrace("NotFirstLine %p %i %i\n", Cur, (int)At, (int)Idx);
 			}
 
 			if (Cur)
