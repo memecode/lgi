@@ -14,11 +14,11 @@
 #include "lgi/common/DragAndDrop.h"
 #include "lgi/common/Com.h"
 
-#define DND_DEBUG_TRACE 1
+#define DND_DEBUG_TRACE 0
 
 class LDataObject : public GUnknownImpl<IDataObject>
 {
-	friend class GDndSourcePriv;
+	friend class LDndSourcePriv;
 	LDragDropSource *Source;
 
 public:
@@ -39,18 +39,19 @@ public:
 	HRESULT STDMETHODCALLTYPE GetCanonicalFormatEtc(FORMATETC * pFormatetcIn, FORMATETC * pFormatetcOut) { return E_NOTIMPL; }
 };
 
-class GDndSourcePriv
+class LDndSourcePriv
 {
 public:
+	LDragData FileStream;
 	LArray<LDragData> CurData;
 	LDataObject *InDrag;
 
-	GDndSourcePriv()
+	LDndSourcePriv()
 	{
 		InDrag = NULL;
 	}
 
-	~GDndSourcePriv()
+	~LDndSourcePriv()
 	{
 		if (InDrag)
 			InDrag->Source = NULL;
@@ -111,8 +112,13 @@ HRESULT LDataObject::EnumFormatEtc(DWORD dwDirection, IEnumFORMATETC **ppFormatE
 
 HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *pMedium)
 {
-	HRESULT Ret = DV_E_FORMATETC;
+	if (!pFormatEtc || !pMedium)
+		return E_INVALIDARG;
 
+	LString InFormat = FormatToStr(pFormatEtc->cfFormat);
+	bool IsFileContents = InFormat.Find("FileContents") >= 0;
+
+	HRESULT Ret = DV_E_FORMATETC;
 	int CurFormat = 0;
 	LDragFormats Formats(true);
 	Source->d->CurData.Length(0);
@@ -120,7 +126,6 @@ HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *pMedium)
 	for (auto f: Formats.Formats)
 	{
 		int n = FormatToInt(f);
-		char *efmt = FormatToStr(pFormatEtc->cfFormat);
 		if (n == pFormatEtc->cfFormat)
 		{
 			CurFormat = n;
@@ -132,7 +137,7 @@ HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *pMedium)
 
 	#if DND_DEBUG_TRACE
 	LgiTrace(	"GetData 0 pFormatEtc{'%s',%p,%i,%i,%i} pMedium{%i} CurrentFormat=%s\n",
-				FormatToStr(pFormatEtc->cfFormat),
+				InFormat.Get(),
 				pFormatEtc->ptd,
 				pFormatEtc->dwAspect,
 				pFormatEtc->lindex,
@@ -141,44 +146,86 @@ HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *pMedium)
 				FormatToStr(CurFormat));
 	#endif
 
-	if (pFormatEtc &&
-		pMedium &&
-		Source->d->CurData.Length())
+	if (IsFileContents)
+	{
+		int asd=0;
+	}
+
+	if (Source->d->CurData.Length())
 	{
 		// the users don't HAVE to use this...
 		Source->GetData(Source->d->CurData);
 
 		ZeroObj(*pMedium);
 
-		uchar *Ptr = 0;
+		uchar *Ptr = NULL;
 		ssize_t Size = 0;
+		FILEGROUPDESCRIPTORW grp;
 		LDragData &CurData = Source->d->CurData[0];
-		if (CurData.Data.Length() > 0)
+
+		if (IsFileContents && Source->d->FileStream.IsFileStream())
+		{
+			auto &Contents = Source->d->FileStream;
+			if (Contents.Data.Length() == 3)
+			{
+				auto &v = Contents.Data[2];
+				if (v.Type == GV_STREAM)
+				{
+					pMedium->tymed = TYMED_ISTREAM;
+					pMedium->pstm = new LStreamWrap(Contents.GetFileStreamName(), v.Value.Stream.Release());
+					pMedium->pstm->AddRef();
+					
+					#if 0
+					pMedium->pUnkForRelease = PMedium->pstm;
+					pMedium->pUnkForRelease->AddRef();
+					#endif
+
+					Ret = S_OK;
+				}
+				else LAssert(!"Not a stream object?");
+			}
+			else LAssert(!"Incorrect file stream object count.");
+		}
+		else if (CurData.Data.Length() > 0)
 		{
 			if (CurData.IsFileStream())
 			{
 				if (CurData.Data.Length() == 3)
 				{
-					auto FileName = CurData.Data[0].Str();
-					auto MimeType = CurData.Data[1].Str();
-					auto &v = CurData.Data[2];
+					// Save the file stream objects, we'll need them for the CFSTR_FILECONTENTS handler below.
+					auto &Contents = Source->d->FileStream;
+					Contents.Swap(CurData);
+
+					ZeroObj(grp);
+					FILEDESCRIPTORW &f = grp.fgd[grp.cItems++];
+					f.dwFlags = FD_UNICODE | FD_PROGRESSUI;
+
+					auto &v = Contents.Data[2];
 					if (v.Type == GV_STREAM)
 					{
-						pMedium->tymed = TYMED_ISTREAM;
-					
-						pMedium->pstm = new LStreamWrap(FileName, v.Value.Stream.Release());
-						pMedium->pstm->AddRef();
-					
-						#if 0
-						pMedium->pUnkForRelease = PMedium->pstm;
-						pMedium->pUnkForRelease->AddRef();
-						#endif
+						auto Stream = v.Value.Stream.Ptr;
+						if (Stream)
+						{
+							ssize_t Sz = Stream->GetSize();
+							if (Sz > 0)
+							{
+								f.dwFlags |= FD_FILESIZE;
+								f.nFileSizeHigh = Sz >> 32;
+								f.nFileSizeLow = Sz & 0xffffffff;
+							}
 
-						Ret = S_OK;
+							LAutoWString w(Utf8ToWide(Contents.GetFileStreamName()));
+							wcsncpy_s(f.cFileName, w, MAX_PATH);
+
+							pMedium->tymed = TYMED_HGLOBAL;
+							Ptr = (uchar*)&grp;
+							Size = sizeof(grp);
+						}
+						else LAssert(!"Stream is NULL.");
 					}
-					else LAssert(!"Not a stream object?");
+					else LAssert(!"Not a stream variant.");
 				}
-				else LAssert(!"What now?");
+				else LAssert(!"Incorrect file stream object count.");
 			}
 			else
 			{
@@ -215,25 +262,25 @@ HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *pMedium)
 						break;
 					}
 				}
+			}
 
-				if (pMedium->tymed == TYMED_HGLOBAL &&
-					Ptr &&
-					Size > 0)
+			if (pMedium->tymed == TYMED_HGLOBAL &&
+				Ptr &&
+				Size > 0)
+			{
+				pMedium->hGlobal = GlobalAlloc(GHND, Size);
+				if (pMedium->hGlobal)
 				{
-					pMedium->hGlobal = GlobalAlloc(GHND, Size);
-					if (pMedium->hGlobal)
+					void *g = GlobalLock(pMedium->hGlobal);
+					if (g)
 					{
-						void *g = GlobalLock(pMedium->hGlobal);
-						if (g)
-						{
-							memcpy(g, Ptr, Size);
-							GlobalUnlock(pMedium->hGlobal);
-							Ret = S_OK;
-						}
-						else Ret = E_OUTOFMEMORY;
+						memcpy(g, Ptr, Size);
+						GlobalUnlock(pMedium->hGlobal);
+						Ret = S_OK;
 					}
 					else Ret = E_OUTOFMEMORY;
 				}
+				else Ret = E_OUTOFMEMORY;
 			}
 
 			#if DND_DEBUG_TRACE
@@ -269,14 +316,14 @@ HRESULT LDataObject::QueryGetData(FORMATETC *pFormatEtc)
 		{
 			#if DND_DEBUG_TRACE
 			char *TheirFormat = FormatToStr(pFormatEtc->cfFormat);
-			LgiTrace("QueryGetData didn't have '%s' format.", TheirFormat);
+			LgiTrace("QueryGetData didn't have '%s' format.\n", TheirFormat);
 			#endif
 			Ret = DV_E_FORMATETC;
 		}
 		else if (pFormatEtc->tymed != TYMED_HGLOBAL)
 		{
 			#if DND_DEBUG_TRACE
-			LgiTrace("QueryGetData no TYMED!");
+			LgiTrace("QueryGetData no TYMED!\n");
 			#endif
 			Ret = DV_E_TYMED;
 		}
@@ -288,7 +335,7 @@ HRESULT LDataObject::QueryGetData(FORMATETC *pFormatEtc)
 /////////////////////////////////////////////////////////////////////////////////////////
 LDragDropSource::LDragDropSource()
 {
-	d = new GDndSourcePriv;
+	d = new LDndSourcePriv;
 	Index = 0;
 
 	OnRegister(true);

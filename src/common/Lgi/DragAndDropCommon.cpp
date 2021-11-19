@@ -28,6 +28,9 @@ void LDragFormats::SupportsFileDrops()
 void LDragFormats::SupportsFileStreams()
 {
 	Supports(LGI_StreamDropFormat);
+	#ifdef WINDOWS
+	Supports(CFSTR_FILECONTENTS);
+	#endif
 }
 
 bool LDragFormats::HasFormat(const char *Fmt)

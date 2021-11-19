@@ -277,7 +277,7 @@ public:
 		FileName = fileName;
 		s = src;
 		Own = own;
-		TraceRefs = true;
+		// TraceRefs = true;
 		AddInterface(IID_IStream, (IStream*)this);
 	}
 	
@@ -299,8 +299,6 @@ public:
 		{
 			size_t Remaining = cb - i;
 			auto Rd = s->Read(Ptr + i, Remaining);
-			
-			// LgiTrace("Read(%i)=%i\n", cb, Rd);
 			
 			if (Rd > 0)
 				i += Rd;				

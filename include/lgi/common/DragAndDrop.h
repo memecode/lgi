@@ -55,6 +55,12 @@ struct LgiClass LDragData
 				Fmt != NULL &&
 				!_stricmp(Format, Fmt);
 	}
+
+	void Swap(LDragData &o)
+	{
+		Format.Swap(o.Format);
+		Data.Swap(o.Data);
+	}
 	
 	// \sa LDropFiles
 	bool IsFileDrop()
@@ -87,6 +93,22 @@ struct LgiClass LDragData
 		
 		return true;
 	}
+
+	const char *GetFileStreamName()
+	{
+		if (!IsFileStream() || Data.Length() != 3)
+			return NULL;
+		return Data[0].Str();
+	}
+
+	const char *GetFileStreamMimeType()
+	{
+		if (!IsFileStream() || Data.Length() != 3)
+			return NULL;
+		return Data[1].Str();
+	}
+
+
 };
 
 class LgiClass LDragFormats
@@ -135,7 +157,7 @@ class LgiClass LDragDropSource
 	friend class LDataObject;
 
 protected:
-	class GDndSourcePriv *d;
+	class LDndSourcePriv *d;
 	
 	#if WINNATIVE
 	int Index;
