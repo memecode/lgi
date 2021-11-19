@@ -56,7 +56,7 @@ class GDataI;
 class GDataFolderI;
 class GDataStoreI;
 class GDataPropI;
-typedef LAutoPtr<LStreamI> GAutoStreamI;
+typedef LAutoPtr<LStreamI> LAutoStreamI;
 void ParseIdList(char *In, List<char> &Out);
 extern const char *Store3ItemTypeToMime(Store3ItemTypes type);
 
@@ -239,11 +239,11 @@ public:
 	/// For Type == MAGIC_ATTACHMENT: the decoded body of the MIME segment.
 	/// For Type == MAGIC_MAIL: is an RFC822 encoded version of the email.
 	/// For other objects the stream is not defined.
-	virtual GAutoStreamI GetStream(const char *file, int line) = 0;
+	virtual LAutoStreamI GetStream(const char *file, int line) = 0;
 	/// Sets the stream, which is used during the next call to GDataI::Save, which
 	/// also deletes the object when it's used. The caller loses ownership of the
 	/// object passed into this function.
-	virtual bool SetStream(GAutoStreamI stream) { return false; }
+	virtual bool SetStream(LAutoStreamI stream) { return false; }
 	/// Parses the headers of the object and updates all the metadata fields
 	virtual bool ParseHeaders() { return false; }
 };
