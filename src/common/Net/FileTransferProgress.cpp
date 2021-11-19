@@ -50,7 +50,7 @@ int PipeSize[] =
 class GPaneThrottle : public LStatusPane
 {
 	LSlider *Slider;
-	GDom *App;
+	LDom *App;
 	int Pipe;
 
 	void Set()
@@ -72,7 +72,7 @@ class GPaneThrottle : public LStatusPane
 	}
 
 public:
-	GPaneThrottle(GDom *app);
+	GPaneThrottle(LDom *app);
 
 	int OnNotify(LViewI *Ctrl, LNotification n);
 	void OnPaint(LSurface *pDC);
@@ -80,7 +80,7 @@ public:
 	void OnMouseClick(LMouse &m);
 };
 
-GPaneThrottle::GPaneThrottle(GDom *app)
+GPaneThrottle::GPaneThrottle(LDom *app)
 {
 	Pipe = -1;
 	App = app;
@@ -219,7 +219,7 @@ void GPaneThrottle::OnMouseClick(LMouse &m)
 
 class GPaneHistory : public LStatusPane
 {
-	GDom *App;
+	LDom *App;
 	int64 Cur; // Current value
 	int64 Max; // Max value
 	uint64 Last; // Last time value changed
@@ -245,14 +245,14 @@ class GPaneHistory : public LStatusPane
 	}
 
 public:
-	GPaneHistory(GDom *app);
+	GPaneHistory(LDom *app);
 	~GPaneHistory();
 
 	void OnPaint(LSurface *pDC);
 	void Value(int64 i);
 };
 
-GPaneHistory::GPaneHistory(GDom *app)
+GPaneHistory::GPaneHistory(LDom *app)
 {
 	Width = HISTORY_TEXT_WIDTH + MAX_SAMPLE + 2;
 	App = app;
@@ -553,7 +553,7 @@ void FileTransferProgress::UpdateUi()
 	DspVal = Val;
 }
 
-bool FileTransferProgress::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool FileTransferProgress::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	if (Stricmp(Name, sStartValue))
 		return false;

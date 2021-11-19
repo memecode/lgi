@@ -405,7 +405,7 @@ int LDialog::DoModeless()
 			#ifdef _WIN64
 			SetWindowLongPtr(Handle(), GWLP_HWNDPARENT, (LONG_PTR)p->Handle());
 			#else
-			SetWindowLong(Handle(), GWL_HWNDPARENT, p->Handle());
+			SetWindowLong(Handle(), GWL_HWNDPARENT, (LONG)p->Handle());
 			#endif
 		}
 

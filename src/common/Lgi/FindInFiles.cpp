@@ -123,7 +123,7 @@ struct GFindInFilesPriv : public LXmlTreeUi
 {
 	LTableLayout *Tbl;
 	LAutoString Search;
-	GDom *Store;
+	LDom *Store;
 	GHistory *SearchHistory, *WhereHistory, *TypesHistory;
 
 	GFindInFilesPriv()
@@ -147,7 +147,7 @@ struct GFindInFilesPriv : public LXmlTreeUi
 	}
 };
 	
-GFindInFiles::GFindInFiles(LViewI *Parent, LAutoString Search, GDom *Store)
+GFindInFiles::GFindInFiles(LViewI *Parent, LAutoString Search, LDom *Store)
 {
 	d = new GFindInFilesPriv;
 	d->Search = Search;

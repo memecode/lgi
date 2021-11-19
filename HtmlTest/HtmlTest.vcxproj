@@ -191,6 +191,8 @@
     <ClCompile Include="..\src\common\Net\OpenSSLSocket.cpp" />
     <ClCompile Include="..\src\common\Lgi\LgiMain.cpp" />
     <ClCompile Include="..\src\common\Text\Emoji\EmojiMap.cpp" />
+    <ClCompile Include="..\src\common\Text\Homoglyphs\Homoglyphs.cpp" />
+    <ClCompile Include="..\src\common\Text\Homoglyphs\HomoglyphsTable.cpp" />
     <ClCompile Include="..\src\common\Text\Html.cpp" />
     <ClCompile Include="..\src\common\Text\HtmlCommon.cpp" />
     <ClCompile Include="..\src\common\Text\HtmlParser.cpp" />

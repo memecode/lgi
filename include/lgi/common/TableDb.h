@@ -5,7 +5,7 @@
 
 #define ID(c)		c
 
-class GTableDb : public GDom
+class GTableDb : public LDom
 {
 	struct GTableDbPriv *d;
 
@@ -87,7 +87,7 @@ public:
 		}
 	};
 
-	class Table : public LBase, public GDom
+	class Table : public LBase, public LDom
 	{
 		struct GTablePriv *d;
 		

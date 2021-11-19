@@ -325,7 +325,7 @@ protected:
 	int &NextId;
 	FieldMode Mode;
 	LViewI *View;
-	GDom *Store;
+	LDom *Store;
 	bool Deep;
 
 	LHashTbl<PtrKey<void*>, FieldArr*> f;
@@ -393,7 +393,7 @@ public:
 		View = v;
 	}
 
-	void SetStore(GDom *p)
+	void SetStore(LDom *p)
 	{
 		Store = p;
 	}

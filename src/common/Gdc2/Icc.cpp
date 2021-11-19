@@ -279,7 +279,7 @@ struct IccXYZTag
 	bool IsOk() { return Swap32(Sig) == 'XYZ '; }
 };
 
-class ValueDom : public GDom
+class ValueDom : public LDom
 {
 	char *Txt;
 
@@ -345,7 +345,7 @@ public:
 		DeleteArray(Txt);
 	}
 
-	bool GetVariant(const char *Name, LVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
 	{
 		if (!Name)
 			return false;
@@ -363,7 +363,7 @@ public:
 #define DomAdd(fld) \
 	Dom.Add(new ValueDom(h->fld, #fld));
 
-class LocalStringDom : public GDom
+class LocalStringDom : public LDom
 {
 	char *Base;
 	IccLocalString *Str;
@@ -375,7 +375,7 @@ public:
 		Str = s;
 	}
 
-	bool GetVariant(const char *Name, LVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
 	{
 		if (!Name)
 			return false;
@@ -404,10 +404,10 @@ public:
 	}
 };
 
-class LocalUnicodeDom : public GDom
+class LocalUnicodeDom : public LDom
 {
 	IccMultiLocalUnicode *h;
-	LArray<GDom*> Dom;
+	LArray<LDom*> Dom;
 
 public:
 	LocalUnicodeDom(IccMultiLocalUnicode *header)
@@ -431,7 +431,7 @@ public:
 		Dom.DeleteObjects();
 	}
 
-	bool GetVariant(const char *Name, LVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
 	{
 		if (!Name)
 			return false;
@@ -454,22 +454,22 @@ public:
 	}
 };
 
-class TagDom : public GDom
+class TagDom : public LDom
 {
 	IccTag *h;
-	LArray<GDom*> Dom;
+	LArray<LDom*> Dom;
 	char *Txt;
 
 public:
 	TagDom(IccTag *tag, char *header);
 	~TagDom();
-	bool GetVariant(const char *Name, LVariant &Value, char *Array);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array);
 };
 
-class HeaderDom : public GDom
+class HeaderDom : public LDom
 {
 	IccProfileHeader *h;
-	LArray<GDom*> Dom;
+	LArray<LDom*> Dom;
 
 public:
 	HeaderDom(IccProfileHeader *header)
@@ -497,7 +497,7 @@ public:
 		Dom.DeleteObjects();
 	}
 
-	bool GetVariant(const char *Name, LVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
 	{
 		if (!Name)
 			return false;
@@ -520,7 +520,7 @@ public:
 	}
 };
 
-class CurveDom : public GDom
+class CurveDom : public LDom
 {
 	IccCurve *c;
 
@@ -530,7 +530,7 @@ public:
 		c = curve;
 	}
 
-	bool GetVariant(const char *Name, LVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
 	{
 		if (!Name)
 			return false;
@@ -561,7 +561,7 @@ public:
 	}
 };
 
-class XyzDom : public GDom
+class XyzDom : public LDom
 {
 	IccXYZTag *x;
 	int Len;
@@ -573,7 +573,7 @@ public:
 		Len = Swap32(len);
 	}
 
-	bool GetVariant(const char *Name, LVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
 	{
 		if (!Name)
 			return false;
@@ -600,10 +600,10 @@ public:
 	}
 };
 
-class ChildDom : public GDom
+class ChildDom : public LDom
 {
 public:
-	LArray<GDom*> Dom;
+	LArray<LDom*> Dom;
 	char *Txt;
 
 	ChildDom()
@@ -616,7 +616,7 @@ public:
 		DeleteArray(Txt);
 	}
 
-	bool GetVariant(const char *Name, LVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
 	{
 		if (!Name)
 			return false;
@@ -762,7 +762,7 @@ TagDom::~TagDom()
 	Dom.DeleteObjects();
 }
 
-bool TagDom::GetVariant(const char *Name, LVariant &Value, char *Array)
+bool TagDom::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	if (!Name)
 		return false;
@@ -794,10 +794,10 @@ bool TagDom::GetVariant(const char *Name, LVariant &Value, char *Array)
 	return true;
 }
 
-class TagTableDom : public GDom
+class TagTableDom : public LDom
 {
 	IccTagTable *t;
-	LArray<GDom*> Dom;
+	LArray<LDom*> Dom;
 
 public:
 	TagTableDom(IccTagTable *table, char *header)
@@ -814,7 +814,7 @@ public:
 		Dom.DeleteObjects();
 	}
 
-	bool GetVariant(const char *Name, LVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
 	{
 		if (!Name)
 			return false;
@@ -860,7 +860,7 @@ public:
 	#if USE_LCMS
 	cmsHPROFILE Profile;
 	#endif
-	LArray<GDom*> Dom;
+	LArray<LDom*> Dom;
 
 	GIccProfilePrivate()
 	{
@@ -1157,7 +1157,7 @@ bool GIccProfile::Convert(LSurface *Dest, LSurface *Src, GIccProfile *Profile)
 	return false;
 }
 
-bool GIccProfile::GetVariant(const char *Name, LVariant &Value, char *Array)
+bool GIccProfile::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	if (!Name)
 		return false;

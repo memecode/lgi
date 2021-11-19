@@ -20,7 +20,7 @@ public:
 	int GetCapabilites() { return FILTER_CAP_READ; }
 	Format GetFormat() { return FmtTga; }
 
-	bool GetVariant(const char *n, LVariant &v, char *a)
+	bool GetVariant(const char *n, LVariant &v, const char *a)
 	{
 		if (!stricmp(n, LGI_FILTER_TYPE))
 		{

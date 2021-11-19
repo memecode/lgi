@@ -2469,7 +2469,7 @@ char *ResDialog::StringFromRef(int Ref)
 	return 0;
 }
 
-bool ResDialog::Res_GetProperties(ResObject *Obj, GDom *Props)
+bool ResDialog::Res_GetProperties(ResObject *Obj, LDom *Props)
 {
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Obj);
 	if (Ctrl && Props)
@@ -2486,12 +2486,12 @@ bool ResDialog::Res_GetProperties(ResObject *Obj, GDom *Props)
 	return false;
 }
 
-GDom *ResDialog::Res_GetDom(ResObject *Obj)
+LDom *ResDialog::Res_GetDom(ResObject *Obj)
 {
-	return dynamic_cast<GDom*>(Obj);
+	return dynamic_cast<LDom*>(Obj);
 }
 
-bool ResDialog::Res_SetProperties(ResObject *Obj, GDom *Props)
+bool ResDialog::Res_SetProperties(ResObject *Obj, LDom *Props)
 {
 	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Obj);
 	if (Ctrl && Props)

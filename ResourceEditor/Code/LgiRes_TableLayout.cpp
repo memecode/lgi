@@ -83,7 +83,7 @@ const char *TableAlignNames[] =
 	"Max"
 };
 
-class ResTableCell : public GDom
+class ResTableCell : public LDom
 {
 public:
 	CtrlTable *Table;
@@ -160,7 +160,7 @@ public:
 		MoveCtrls();
 	}
 
-	bool GetVariant(const char *Name, LVariant &Value, char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
 	{
 		if (stricmp(Name, VAL_Span) == 0)
 		{
@@ -197,7 +197,7 @@ public:
 		return true;
 	}
 
-	bool SetVariant(const char *Name, LVariant &Value, char *Array)
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array)
 	{
 		if (stricmp(Name, VAL_Span) == 0)
 		{
@@ -785,7 +785,7 @@ void CtrlTable::EnumCtrls(List<ResDialogCtrl> &Ctrls)
 	}
 }
 
-bool CtrlTable::GetVariant(const char *Name, LVariant &Value, char *Array)
+bool CtrlTable::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
@@ -831,7 +831,7 @@ bool CtrlTable::GetVariant(const char *Name, LVariant &Value, char *Array)
 	return true;
 }
 
-bool CtrlTable::SetVariant(const char *Name, LVariant &Value, char *Array)
+bool CtrlTable::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
@@ -881,7 +881,7 @@ bool CtrlTable::SetVariant(const char *Name, LVariant &Value, char *Array)
 				return false;
 
 			d->Cells.Add(c);
-			GDom **Ptr = (GDom**)Value.Value.Ptr;
+			LDom **Ptr = (LDom**)Value.Value.Ptr;
 			if (!Ptr)
 				return false;
 		

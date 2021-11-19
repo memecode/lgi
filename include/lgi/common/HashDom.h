@@ -3,7 +3,7 @@
 
 #include "lgi/common/Variant.h"
 
-class GHashDom : public LHashTbl<ConstStrKey<char,false>, LVariant*>, public GDom
+class GHashDom : public LHashTbl<ConstStrKey<char,false>, LVariant*>, public LDom
 {
 public:
 	GHashDom(int Size = 0) : LHashTbl<ConstStrKey<char,false>, LVariant*>(Size)
@@ -15,7 +15,7 @@ public:
 	    DeleteObjects();
 	}
 
-	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0)
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = 0)
 	{
 		LVariant *v = Find(Name);
 		if (v)
@@ -27,7 +27,7 @@ public:
 		return false;
 	}
 
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0)
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = 0)
 	{
 		LVariant *v = Find(Name);
 		if (v)

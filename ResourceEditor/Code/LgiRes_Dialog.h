@@ -193,9 +193,9 @@ public:
 	bool Res_GetChildren(ResObject *Obj, List<ResObject> *l, bool Deep) override;
 	void Res_Append(ResObject *Obj, ResObject *Parent) override;
 	bool Res_GetItems(ResObject *Obj, List<ResObject> *l) override;
-	bool Res_GetProperties(ResObject *Obj, GDom *Props) override;
-	bool Res_SetProperties(ResObject *Obj, GDom *Props) override;
-	GDom *Res_GetDom(ResObject *Obj) override;
+	bool Res_GetProperties(ResObject *Obj, LDom *Props) override;
+	bool Res_SetProperties(ResObject *Obj, LDom *Props) override;
+	LDom *Res_GetDom(ResObject *Obj) override;
 
 	// Implementation
 	int CurrentTool();
@@ -277,7 +277,7 @@ public:
 	void OnNcPaint(LSurface *pDC, LRect &r);
 };
 
-class CtrlTable : public ResDialogCtrl, public GDom, public LView
+class CtrlTable : public ResDialogCtrl, public LDom, public LView
 {
 	class CtrlTablePrivate *d;
 
@@ -304,8 +304,8 @@ public:
 	void EnumCtrls(List<ResDialogCtrl> &Ctrls);
 	void OnPosChange();
 
-	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = 0);
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = 0);
 };
 
 class CtrlText : public ResDialogCtrl, public LView
@@ -500,7 +500,7 @@ public:
 	bool Serialize(FieldTree &Fields);
 };
 
-class CtrlControlTree : public ResDialogCtrl, public LTree, public GDom
+class CtrlControlTree : public ResDialogCtrl, public LTree, public LDom
 {
 	class CtrlControlTreePriv *d;
 
@@ -514,8 +514,8 @@ public:
 	bool GetFields(FieldTree &Fields);
 	bool Serialize(FieldTree &Fields);
 
-	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
-	bool SetVariant(const char *Name, LVariant &Value, char *Array = 0);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = 0);
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = 0);
 };
 
 ////////////////////////////////////////////////////////////////

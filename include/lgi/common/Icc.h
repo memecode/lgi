@@ -4,7 +4,7 @@
 #include "lgi/common/Dom.h"
 #include "lgi/common/Variant.h"
 
-class GIccProfile : public GDom
+class GIccProfile : public LDom
 {
 	class GIccProfilePrivate *d;
 
@@ -28,7 +28,7 @@ public:
 	bool Convert(LSurface *Dest, LSurface *Src, GIccProfile *Profile = 0);
 
 	// Dom
-	bool GetVariant(const char *Name, LVariant &Value, char *Array = 0);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = 0);
 };
 
 #endif
