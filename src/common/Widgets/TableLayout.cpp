@@ -319,10 +319,10 @@ public:
 	LString ClassName;
 
 	TableCell(LTableLayout *t, int Cx, int Cy);
-	LTableLayout *GetTable() { return Table; }
-	bool Add(LView *v);	
-	bool Remove(LView *v);
-	LArray<LView*> GetChildren();
+	LTableLayout *GetTable() override { return Table; }
+	bool Add(LView *v) override;
+	bool Remove(LView *v) override;
+	LArray<LView*> GetChildren() override;
 	bool RemoveAll();
 	Child *HasView(LView *v);
 
@@ -338,7 +338,7 @@ public:
 	/// Called after the layout has been done to move the controls into place
 	void PostLayout();
 	void OnPaint(LSurface *pDC);
-	void OnChange(PropType Prop);
+	void OnChange(PropType Prop) override;
 };
 
 class GTableLayoutPrivate

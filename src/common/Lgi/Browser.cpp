@@ -535,7 +535,7 @@ int GBrowser::OnNotify(LViewI *c, LNotification n)
 	{
 		case IDC_SEARCH_TXT:
 		{
-			if (n.Type != LK_RETURN)
+			if (n.Type != LNotifyReturnKey)
 				break;
 			// else fall through
 		}
@@ -551,7 +551,7 @@ int GBrowser::OnNotify(LViewI *c, LNotification n)
 		}
 		case IDC_URI:
 		{
-			if (n.Type == LK_RETURN)
+			if (n.Type == LNotifyReturnKey)
 			{
 				const char *u = c->Name();
 				SetUri(u);

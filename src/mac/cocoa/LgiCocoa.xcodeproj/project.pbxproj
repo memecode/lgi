@@ -157,6 +157,7 @@
 		34D1B3C121748A2800BC6B58 /* Path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D1B3C021748A2800BC6B58 /* Path.cpp */; };
 		34D21CEC217981AE003D1EA6 /* EventTargetThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D21CEB217981AE003D1EA6 /* EventTargetThread.h */; };
 		34D6AA1722D3749A005D739E /* Gdc2.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D6AA1622D3749A005D739E /* Gdc2.h */; };
+		34EE8BB12748A55600F12915 /* TextFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 34EE8BB02748A55600F12915 /* TextFile.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -313,6 +314,7 @@
 		34D1B3C021748A2800BC6B58 /* Path.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Path.cpp; path = ../../../common/Gdc2/Path/Path.cpp; sourceTree = "<group>"; };
 		34D21CEB217981AE003D1EA6 /* EventTargetThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EventTargetThread.h; path = ../../../../include/lgi/common/EventTargetThread.h; sourceTree = "<group>"; };
 		34D6AA1622D3749A005D739E /* Gdc2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Gdc2.h; path = ../../../../include/lgi/common/Gdc2.h; sourceTree = "<group>"; };
+		34EE8BB02748A55600F12915 /* TextFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TextFile.h; path = ../../../include/lgi/common/TextFile.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -449,6 +451,7 @@
 		3477C29A1CBF0A700028B84B /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				34EE8BB02748A55600F12915 /* TextFile.h */,
 				3449B8CD26BBF6B10022A9B8 /* Notifications.h */,
 				34114C8A23091E6E00F342B1 /* LgiClasses.h */,
 				3477C26B1CBF020F0028B84B /* LgiProject.h */,
@@ -694,6 +697,7 @@
 				345EB84E235C6C01007D05DB /* Popup.h in Headers */,
 				34D21CEC217981AE003D1EA6 /* EventTargetThread.h in Headers */,
 				343BE8C72355D0CE00742E21 /* PopupList.h in Headers */,
+				34EE8BB12748A55600F12915 /* TextFile.h in Headers */,
 				34CD9F7223D5768B0039F259 /* Unicode.h in Headers */,
 				34837C4925C677ED00D103B4 /* GAppPriv.h in Headers */,
 				3477C2A11CBF0A920028B84B /* Mem.h in Headers */,

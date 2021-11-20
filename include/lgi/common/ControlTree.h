@@ -66,12 +66,12 @@ public:
 	LControlTree();
 	~LControlTree();
 
-	const char *GetClass() { return "LControlTree"; }
+	const char *GetClass() override { return "LControlTree"; }
 
 	Item *Find(const char *opt);
 	LTreeItem *Insert(const char *DomPath, int CtrlId, LVariantType Type, LVariant *Value = 0, LArray<EnumValue> *Enum = 0);
 	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 	bool Serialize(LDom *Store, bool Write);
-	int OnNotify(LViewI *c, LNotification n);
+	int OnNotify(LViewI *c, LNotification n) override;
 };
 

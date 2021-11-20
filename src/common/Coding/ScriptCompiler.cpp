@@ -2298,10 +2298,10 @@ public:
 
 					Asm2(a.Tok, Op, a.Reg, b.Reg);
 
-					if (Op == IPlusEquals ||
-						Op == IMinusEquals ||
-						Op == IMulEquals ||
-						Op == IDivEquals)
+					if (Op == OpPlusEquals ||
+						Op == OpMinusEquals ||
+						Op == OpMulEquals ||
+						Op == OpDivEquals)
 					{
 						AssignVarRef(a, a.Reg);
 					}

@@ -1783,7 +1783,7 @@ LArray<LTextView4::LTextLine*>::I LTextView4::GetTextLineIt(ssize_t Offset, ssiz
 		}
 	}
 
-	size_t mid, s = 0, e = Line.Length() - 1;
+	size_t mid = 0, s = 0, e = Line.Length() - 1;
 	while (s < e)
 	{
 		if (e - s <= 1)

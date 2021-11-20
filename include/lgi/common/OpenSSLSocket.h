@@ -42,37 +42,37 @@ public:
 	~SslSocket();
 
 	void SetLogger(LStreamI *logger);
-	LStreamI *GetLog();
+	LStreamI *GetLog() override;
 	void SetSslOnConnect(bool b);
-	LCancel *GetCancel();
-	void SetCancel(LCancel *c);
+	LCancel *GetCancel() override;
+	void SetCancel(LCancel *c) override;
 	
 	// Socket
-	OsSocket Handle(OsSocket Set = INVALID_SOCKET);
-	bool IsOpen();
-	int Open(const char *HostAddr, int Port);
-	int Close();
-	bool Listen(int Port = 0);
-	void OnError(int ErrorCode, const char *ErrorDescription);
-	void OnInformation(const char *Str);
-	int GetTimeout();
-	void SetTimeout(int ms);
+	OsSocket Handle(OsSocket Set = INVALID_SOCKET) override;
+	bool IsOpen() override;
+	int Open(const char *HostAddr, int Port) override;
+	int Close() override;
+	bool Listen(int Port = 0) override;
+	void OnError(int ErrorCode, const char *ErrorDescription) override;
+	void OnInformation(const char *Str) override;
+	int GetTimeout() override;
+	void SetTimeout(int ms) override;
 
-	ssize_t Write(const void *Data, ssize_t Len, int Flags = 0);
-	ssize_t Read(void *Data, ssize_t Len, int Flags = 0);
-	void OnWrite(const char *Data, ssize_t Len);
-	void OnRead(char *Data, ssize_t Len);
+	ssize_t Write(const void *Data, ssize_t Len, int Flags = 0) override;
+	ssize_t Read(void *Data, ssize_t Len, int Flags = 0) override;
+	void OnWrite(const char *Data, ssize_t Len) override;
+	void OnRead(char *Data, ssize_t Len) override;
 
-	bool IsReadable(int TimeoutMs = 0);
-	bool IsWritable(int TimeoutMs = 0);
-	bool IsBlocking();
-	void IsBlocking(bool block);
+	bool IsReadable(int TimeoutMs = 0) override;
+	bool IsWritable(int TimeoutMs = 0) override;
+	bool IsBlocking() override;
+	void IsBlocking(bool block) override;
 
 	bool SetVariant(const char *Name, LVariant &Val, const char *Arr = NULL) override;
 	bool GetVariant(const char *Name, LVariant &Val, const char *Arr = NULL) override;
 
-	LStreamI *Clone();
-	const char *GetErrorString();
+	LStreamI *Clone() override;
+	const char *GetErrorString() override;
 };
 
 extern bool StartSSL(LAutoString &ErrorMsg, SslSocket *Sock);

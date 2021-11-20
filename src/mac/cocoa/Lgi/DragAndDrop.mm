@@ -19,7 +19,7 @@ Useful info:
 #include "lgi/common/ProgressDlg.h"
 
 // #define DND_DEBUG_TRACE
-class GDndSourcePriv;
+class LDndSourcePriv;
 
 const char *LMimeToUti(const char *Mime)
 {
@@ -78,9 +78,9 @@ const char *LMimeToUti(const char *Mime)
 	LView *SourceWnd;
 }
 
-@property GDndSourcePriv *d;
+@property LDndSourcePriv *d;
 
-- (id)init:(GDndSourcePriv*)view wnd:(LView*)Wnd;
+- (id)init:(LDndSourcePriv*)view wnd:(LView*)Wnd;
 - (void)addItem:(LDragItem*)i;
 
 - (NSDragOperation)draggingSession:(nonnull NSDraggingSession *)session sourceOperationMaskForDraggingContext:(NSDraggingContext)context;
@@ -89,7 +89,7 @@ const char *LMimeToUti(const char *Mime)
 
 @end
 
-class GDndSourcePriv
+class LDndSourcePriv
 {
 public:
 	LAutoString CurrentFormat;
@@ -99,7 +99,7 @@ public:
 	LMemDC Icon;
 	LDragFormats Formats;
 
-	GDndSourcePriv() : Formats(true)
+	LDndSourcePriv() : Formats(true)
 	{
 		Effect = 0;
 		ExternImg = NULL;
@@ -200,7 +200,7 @@ public:
 
 @implementation LDragSource
 
-- (id)init:(GDndSourcePriv*)d wnd:(LView*)Wnd
+- (id)init:(LDndSourcePriv*)d wnd:(LView*)Wnd
 {
 	if ((self = [super init]) != nil)
 	{
@@ -296,7 +296,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////////
 LDragDropSource::LDragDropSource()
 {
-	d = new GDndSourcePriv;
+	d = new LDndSourcePriv;
 	OnRegister(true);
 }
 

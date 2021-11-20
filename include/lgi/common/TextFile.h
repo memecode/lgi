@@ -126,7 +126,7 @@ public:
 		return true;
 	}
 		
-	ssize_t Read(void *Buffer, ssize_t Size, int Flags = 0)
+	ssize_t Read(void *Buffer, ssize_t Size, int Flags = 0) override
 	{
 		ssize_t Rd = LFile::Read(Buffer, Size, Flags);
 		if (First)

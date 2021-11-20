@@ -342,12 +342,12 @@ public:
 	);
 	~GdcPng();
 
-    const char *GetComponentName() { return "libpng"; }
-	Format GetFormat() { return FmtPng; }
+    const char *GetComponentName() override { return "libpng"; }
+	Format GetFormat() override { return FmtPng; }
 	void SetMeter(int i) { if (Meter) Meter->Value(i); }
-	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
-	IoStatus ReadImage(LSurface *pDC, LStream *In);
-	IoStatus WriteImage(LStream *Out, LSurface *pDC);
+	int GetCapabilites() override { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
+	IoStatus ReadImage(LSurface *pDC, LStream *In) override;
+	IoStatus WriteImage(LStream *Out, LSurface *pDC) override;
 
 	bool GetVariant(const char *n, LVariant &v, const char *a = NULL) override
 	{

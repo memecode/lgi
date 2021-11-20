@@ -1046,7 +1046,7 @@ LRect &LWindow::GetClient(bool ClientSpace)
 	return r;
 }
 
-bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
+bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 {
 	if (!Store || !FieldName)
 		return false;

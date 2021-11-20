@@ -66,11 +66,11 @@ protected:
 
 	// Methods
 	void _New();
-	void _Delete();
+	void _Delete() override;
 	LFont *DefFont();
 	void CloseTag(GTag *t);
 	void ParseDocument(const char *Doc);
-	void OnAddStyle(const char *MimeType, const char *Styles);
+	void OnAddStyle(const char *MimeType, const char *Styles) override;
 	int ScrollY();
 	void SetCursorVis(bool b);
 	bool GetCursorVis();
@@ -87,8 +87,8 @@ public:
 	~GHtml();
 
 	// Html
-	const char *GetClass() { return "GHtml"; }
-	bool GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocView::ContentMedia> *Media = 0);
+	const char *GetClass() override { return "GHtml"; }
+	bool GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocView::ContentMedia> *Media = 0) override;
 
 	/// Get the tag at an x,y location
 	GTag *GetTagByPos(	int x, int y,
@@ -101,7 +101,7 @@ public:
 	// Options
 	bool GetLinkDoubleClick();
 	void SetLinkDoubleClick(bool b);
-	void SetLoadImages(bool i);
+	void SetLoadImages(bool i) override;
 	bool GetEmoji();
 	void SetEmoji(bool i);
 
@@ -109,47 +109,47 @@ public:
 	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 	
 	/// Copy the selection to the clipboard
-	bool Copy();
+	bool Copy() override;
 	/// Returns true if there is a selection
-	bool HasSelection();
+	bool HasSelection() override;
 	/// Unselect all the text in the control
-	void UnSelectAll();
+	void UnSelectAll() override;
 	/// Select all the text in the control (not impl)
-	void SelectAll();
+	void SelectAll() override;
 	/// Return the selection in a dynamically allocated string
-	char *GetSelection();
+	char *GetSelection() override;
 	
 	// Prop
 
 	// Window
 
 	/// Sets the HTML content of the control
-	bool Name(const char *s);
+	bool Name(const char *s) override;
 	/// Returns the HTML content
-	const char *Name();
+	const char *Name() override;
 	/// Sets the HTML content of the control
-	bool NameW(const char16 *s);
+	bool NameW(const char16 *s) override;
 	/// Returns the HTML content
-	const char16 *NameW();
+	const char16 *NameW() override;
 
 	// Impl
-	void OnPaint(LSurface *pDC);
-	void OnMouseClick(LMouse &m);
-	void OnMouseMove(LMouse &m);
-	LCursor GetCursor(int x, int y);
-	bool OnMouseWheel(double Lines);
-	bool OnKey(LKey &k);
-	int OnNotify(LViewI *c, LNotification n);
-	void OnPosChange();
-	void OnPulse();
-	LMessage::Result OnEvent(LMessage *Msg);
-	const char *GetMimeType() { return "text/html"; }
-	void OnContent(LDocumentEnv::LoadJob *Res);
+	void OnPaint(LSurface *pDC) override;
+	void OnMouseClick(LMouse &m) override;
+	void OnMouseMove(LMouse &m) override;
+	LCursor GetCursor(int x, int y) override;
+	bool OnMouseWheel(double Lines) override;
+	bool OnKey(LKey &k) override;
+	int OnNotify(LViewI *c, LNotification n) override;
+	void OnPosChange() override;
+	void OnPulse() override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
+	const char *GetMimeType() override { return "text/html"; }
+	void OnContent(LDocumentEnv::LoadJob *Res) override;
 	bool GotoAnchor(char *Name);
-	LHtmlElement *CreateElement(LHtmlElement *Parent);
-	bool EvaluateCondition(const char *Cond);
+	LHtmlElement *CreateElement(LHtmlElement *Parent) override;
+	bool EvaluateCondition(const char *Cond) override;
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
-	bool DoFind();
+	bool DoFind() override;
 	LPointF GetDpiScale();
 	void SetVScroll(int64 v);
 

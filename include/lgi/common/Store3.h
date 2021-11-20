@@ -135,7 +135,7 @@ public:
 typedef GDataIterator<GDataPropI*> *GDataIt;
 
 #define EmptyVirtual(t)		LAssert(0); return t
-#define Store3CopyDecl		bool CopyProps(GDataPropI &p)
+#define Store3CopyDecl		bool CopyProps(GDataPropI &p) override
 #define Store3CopyImpl(Cls)	bool Cls::CopyProps(GDataPropI &p)
 
 /// A generic interface for getting / setting properties.

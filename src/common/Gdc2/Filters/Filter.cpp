@@ -71,14 +71,14 @@ class GdcBmp : public LFilter
 	int ScanSize;
 
 public:
-	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
-	Format GetFormat() { return FmtBmp; }
+	int GetCapabilites() override { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
+	Format GetFormat() override { return FmtBmp; }
 
 	/// Reads a BMP file
-	IoStatus ReadImage(LSurface *Out, LStream *In);
+	IoStatus ReadImage(LSurface *Out, LStream *In) override;
 	
 	/// Writes a Windows BMP file
-	IoStatus WriteImage(LStream *Out, LSurface *In);
+	IoStatus WriteImage(LStream *Out, LSurface *In) override;
 
 	bool GetVariant(const char *n, LVariant &v, const char *a) override
 	{
@@ -856,11 +856,11 @@ class GdcIco : public LFilter
 public:
 	GdcIco();
 
-	Format GetFormat() { return FmtIco; }
-	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
-	int GetImages() { return 1; }
-	IoStatus ReadImage(LSurface *pDC, LStream *In);
-	IoStatus WriteImage(LStream *Out, LSurface *pDC);
+	Format GetFormat() override { return FmtIco; }
+	int GetCapabilites() override { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
+	int GetImages() override { return 1; }
+	IoStatus ReadImage(LSurface *pDC, LStream *In) override;
+	IoStatus WriteImage(LStream *Out, LSurface *pDC) override;
 	bool GetVariant(const char *n, LVariant &v, const char *a) override;
 };
 
