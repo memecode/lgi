@@ -231,8 +231,7 @@ enum Store3ItemTypes
 	MAGIC_CALENDAR					= (MAGIC_BASE+11),	// Calendar event
 	MAGIC_ATTENDEE					= (MAGIC_BASE+12),	// Event attendee
 	MAGIC_GROUP						= (MAGIC_BASE+13),	// Group of contacts
-	MAGIC_ADDRESS					= (MAGIC_BASE+14),	// Group of contacts
-	MAGIC_MAX						= (MAGIC_BASE+15)	// One past the end
+	MAGIC_MAX						= (MAGIC_BASE+14)	// One past the end
 };
 
 // When setting this via GDataI::SetInt the return value is:

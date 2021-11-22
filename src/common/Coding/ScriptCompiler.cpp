@@ -637,6 +637,72 @@ public:
 		return true;
 	}
 
+	bool ResolveDefine(char16 *&t, ssize_t &FileIndex, int &Line)
+	{
+		char16 *DefineValue;
+		if (!IsAlpha(*t) || !(DefineValue = Defines.Find(t)))
+			return false;
+
+		char16 *Def = DefineValue, *f;
+		while ((f = LexCpp(Def, LexStrdup)))
+		{
+			if (!ResolveDefine(f, FileIndex, Line))
+			{
+				Lines.Add((int)Tokens.Length(), FileIndex, Line);
+				Tokens.Add(f);
+			}
+		}
+
+		DeleteArray(t);
+		return true;
+	}
+
+	struct CompilerDefineSource : public LDom
+	{
+		LCompilerPriv *d;
+		CompilerDefineSource(LCompilerPriv *priv) : d(priv) {}
+		bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override
+		{
+			LAutoWString wName(Utf8ToWide(Name));
+			auto v = d->Defines.Find(wName);
+			if (v)
+			{
+				// Is it a number? Cause we should really convert to an int if possible...
+				#define INVALID_CONVERSION -11111
+				int64 i = INVALID_CONVERSION;
+				if (!Strnicmp(v, L"0x", 2))
+					i = Atoi(v, 16, INVALID_CONVERSION);
+				else if (IsDigit(*v) || strchr("-.", *v))
+					i = Atoi(v);
+
+				if (i != INVALID_CONVERSION)
+					Value = i;
+				else
+					Value = v;
+				return true;
+			}
+			return false;
+		}
+	};
+
+
+	/// This will look at resolving the expression to something simpler before storing it...
+	void SimplifyDefine(LScriptEngine &Eng, char16 *Name, LAutoWString &Value)
+	{
+		LString Exp = Value;
+		if (Exp.Find("(") >= 0) // Filter out simple expressions...
+		{
+			LVariant Result;
+			CompilerDefineSource Src(this);
+			if (Eng.EvaluateExpression(&Result, &Src, Exp))
+			{
+				auto Val = Result.CastString();
+				if (Val)
+					Value.Reset(Utf8ToWide(Val));
+			}
+		}
+	}
+
 	/// Convert the source from one big string into an array of tokens
 	bool Lex(char *Source, const char *FileName)
 	{
@@ -644,6 +710,7 @@ public:
 		if (!w)
 			return OnError(0, "Couldn't convert source to wide chars.");
 		
+		LScriptEngine Eng(NULL, NULL, NULL);
 		ssize_t FileIndex = Lines.GetFileIndex(FileName);
 		int Line = 1;
 		char16 *s = w, *t;
@@ -722,7 +789,9 @@ public:
 						while (Eol > Start && strchr(WhiteSpace, Eol[-1]))
 							Eol--;
 						
-						Defines.Add(Name, NewStrW(Start, Eol - Start));
+						LAutoWString Value(NewStrW(Start, Eol - Start));
+						SimplifyDefine(Eng, Name, Value);
+						Defines.Add(Name, Value.Release());
 						
 						s = Eol;
 					}
@@ -732,18 +801,7 @@ public:
 				continue;
 			}
 
-			char16 *DefineValue;
-			if (IsAlpha(*t) && (DefineValue = Defines.Find(t)))
-			{
-				char16 *Def = DefineValue, *f;
-				while ((f = LexCpp(Def, LexStrdup)))
-				{
-					Lines.Add((int)Tokens.Length(), FileIndex, Line);
-					Tokens.Add(f);
-				}
-				DeleteArray(t);
-			}
-			else
+			if (!ResolveDefine(t, FileIndex, Line))
 			{
 				Lines.Add((int)Tokens.Length(), FileIndex, Line);
 				Tokens.Add(t);
@@ -3743,9 +3801,8 @@ bool LScriptEngine::EvaluateExpression(LVariant *Result, LDom *VariableSource, c
 	LVirtualMachine Vm(d->Callback);
 	LCompiledCode *Code = dynamic_cast<LCompiledCode*>(Obj.Get());
 	LExecutionStatus s = Vm.Execute(Code, 0, NULL, true, Result ? Result : &d->ReturnValue);
-	if (s == ScriptError)
+	if (s != ScriptSuccess)
 	{
-		LAssert(0);
 		return false;
 	}
 	
