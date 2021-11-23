@@ -346,6 +346,22 @@ void LRadioButton::OnAttach()
 void LRadioButton::OnStyleChange()
 {
 }
+
+LMessage::Result LRadioButton::OnEvent(LMessage *m)
+{
+	switch (m->Msg())
+	{
+		case WM_DESTROY:
+		{
+			// Save the value for anyone needing it.
+			d->InitVal = Value();
+			break;
+		}
+	}
+
+	return LControl::OnEvent(m);
+}
+
 int LRadioButton::SysOnNotify(int Msg, int Code)
 {
 	if (Msg == WM_COMMAND &&

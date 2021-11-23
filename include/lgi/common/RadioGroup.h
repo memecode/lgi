@@ -86,6 +86,7 @@ public:
 	
 	#if WINNATIVE && !XP_BUTTON
 	int SysOnNotify(int Msg, int Code);
+	LMessage::Result OnEvent(LMessage *m) override;
 	#else
 	void OnMouseClick(LMouse &m) override;
 	void OnMouseEnter(LMouse &m) override;

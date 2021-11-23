@@ -64,7 +64,7 @@ GFindDlg::GFindDlg(LView *Parent, char *Init, GFrCallback Callback, void *UserDa
     if (AddView(t = new LTableLayout(IDC_FIND_TABLE)))
     {        
         int Row = 0;
-        GLayoutCell *c = t->GetCell(0, Row);
+        LLayoutCell *c = t->GetCell(0, Row);
         c->Add(new LTextLabel(IDS_16, 14, 14, -1, -1, LLoadString(L_FR_FIND_WHAT, "Find what:")));
         
         c = t->GetCell(1, Row);
@@ -209,7 +209,7 @@ GReplaceDlg::GReplaceDlg(LView *Parent, char *InitFind, char *InitReplace, GFrCa
 	if (AddView(t = new LTableLayout(IDC_FIND_TABLE)))
 	{
 	    int Row = 0;
-        GLayoutCell *c = t->GetCell(0, Row);
+        LLayoutCell *c = t->GetCell(0, Row);
     	c->Add(new LTextLabel(-1, 14, 14, -1, -1, LLoadString(L_FR_FIND_WHAT, "Find what:")));
 
         c = t->GetCell(1, Row);

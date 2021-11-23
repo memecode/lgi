@@ -121,7 +121,7 @@ LProgressPane::LProgressPane(LProgressDlg *dlg) : Dlg(dlg)
 		#define PAD 1
 		
 		int Row = 0;
-		GLayoutCell *c = t->GetCell(0, Row++, true, 2, 1);
+		LLayoutCell *c = t->GetCell(0, Row++, true, 2, 1);
 		#ifdef PAD
 		c->Padding(LCss::Len(LCss::LenPx, PAD));
 		#endif

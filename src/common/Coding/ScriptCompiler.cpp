@@ -698,7 +698,10 @@ public:
 			{
 				auto Val = Result.CastString();
 				if (Val)
+				{
+					// LgiTrace("Simplify: %S -> %s\n", Value.Get(), Val);
 					Value.Reset(Utf8ToWide(Val));
+				}
 			}
 		}
 	}
