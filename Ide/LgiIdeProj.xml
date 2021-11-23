@@ -74,6 +74,8 @@
 			<Node File="../src/common/Text/HtmlParser.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node File="../src/common/Text/DocView.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Text/Homoglyphs/Homoglyphs.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Text/Homoglyphs/HomoglyphsTable.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Net/Http.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Lgi/Mdi.cpp" Type="2" Platforms="15" />
@@ -91,7 +93,7 @@
 		<Node File="./Makefile.linux" Type="9" Platforms="15" />
 		<Node File="./Resources/resource.h" Type="3" Platforms="15" />
 	</Node>
-	<Node File="..\Lgi.xml" Type="4" Platforms="15" />
+	<Node File="../Lgi.xml" Type="4" Platforms="15" />
 	<Settings>
 		<General>
 			<Makefile>
@@ -196,7 +198,7 @@ pthread
 					<Debug>..\Debug</Debug>
 					<Release>..\Release</Release>
 				</All>
-				<Windows />
+				<Linux />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -232,7 +234,7 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			</ApplicationIcon>
 			<Defines>
 				<All />
-				<Windows />
+				<Linux />
 			</Defines>
 		</Build>
 		<Editor>
@@ -264,7 +266,7 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 		<Advanced>
 			<OtherMakefileRules />
 			<PostBuildCommands>
-				<Windows />
+				<Linux />
 			</PostBuildCommands>
 		</Advanced>
 		<Remote>

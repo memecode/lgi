@@ -52,25 +52,14 @@ const char *GtkGetDndFormat(int Type)
 	return DndTypes.FindKey(Type);
 }
 
-class GDndSourcePriv
+class LDndSourcePriv
 {
 public:
 	LAutoString CurrentFormat;
-	Gtk::GdkDragContext *Ctx;
+	Gtk::GdkDragContext *Ctx = NULL;
 	LAutoPtr<LSurface> Ico;
 
-	OsView SignalWnd;
-	
-	GDndSourcePriv()
-	{
-		Ctx = NULL;
-		SignalWnd = NULL;
-	}
-	
-	~GDndSourcePriv()
-	{
-		
-	}
+	OsView SignalWnd = NULL;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -103,7 +92,7 @@ void RemoveExistingSignals(OsView w)
 
 LDragDropSource::LDragDropSource()
 {
-	d = new GDndSourcePriv;
+	d = new LDndSourcePriv;
 	OnRegister(true);
 }
 
