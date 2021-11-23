@@ -9,13 +9,13 @@
 #include "lgi/common/Layout.h"
 
 /// A layout cell, not currently implemented.
-class GLayoutCell : public LDom, public LCss
+class LLayoutCell : public LDom, public LCss
 {
 public:
 	bool Debug;
 
-	GLayoutCell() { Debug = false; }
-	virtual ~GLayoutCell() {}
+	LLayoutCell() { Debug = false; }
+	virtual ~LLayoutCell() {}
 
 	virtual class LTableLayout *GetTable() = 0;
 	virtual bool Add(LView *v) = 0;
@@ -33,7 +33,7 @@ class LgiClass LTableLayout :
 	public LDom
 {
 	friend class TableCell;
-	class GTableLayoutPrivate *d;
+	class LTableLayoutPrivate *d;
 
 	bool SizeChanged();
 
@@ -52,14 +52,14 @@ public:
 	/// Returns the number of cell high (rows).
 	int CellY();
 	/// Returns the cell at a given location.
-	GLayoutCell *CellAt(int x, int y);
+	LLayoutCell *CellAt(int x, int y);
 	/// Returns area being used by cells
 	LRect GetUsedArea();
 	/// Invalidates the layout, causing the control to relay all the children
 	void InvalidateLayout();
 
     /// Create a cell
-    GLayoutCell *GetCell(int x, int y, bool create = true, int colspan = 1, int rowspan = 1);
+    LLayoutCell *GetCell(int x, int y, bool create = true, int colspan = 1, int rowspan = 1);
     /// Clear all cells;
     void Empty(LRect *Range = NULL);
 

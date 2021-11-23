@@ -33,7 +33,7 @@ LAlert::LAlert(	LViewI *parent,
 	Tbl->GetCss(true)->Padding("10px");
 	AddView(Tbl);
 
-	GLayoutCell *c = Tbl->GetCell(0, 0, true);
+	LLayoutCell *c = Tbl->GetCell(0, 0, true);
 	c->Add(new LTextLabel(-1, 8, 8, -1, -1, Text));
 	c->PaddingBottom(LCss::Len("10px"));
 

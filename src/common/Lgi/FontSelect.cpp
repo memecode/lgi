@@ -72,7 +72,7 @@ LFontSelect::LFontSelect(LView *Parent, void *Init, int InitLen)
 	AddView(d->Tbl = new LTableLayout(50));
 
 	LRadioGroup *rg;
-	GLayoutCell *c = d->Tbl->GetCell(0, 0, true, 1, 2);
+	LLayoutCell *c = d->Tbl->GetCell(0, 0, true, 1, 2);
 		c->Add(d->Lst = new LList(IDC_FONT, 14, 14, 161, 147));
 		d->Lst->AddColumn(LLoadString(L_FONTUI_FACE, "Face"), 140);
 		d->Lst->MultiSelect(false);

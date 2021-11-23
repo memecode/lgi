@@ -40,7 +40,7 @@ GInput::GInput(LViewI *parent, const char *InitStr, const char *Msg, const char 
 	AddView(Tbl);
 
 	int Cy = 0;
-	GLayoutCell *c = Tbl->GetCell(0, Cy++);
+	LLayoutCell *c = Tbl->GetCell(0, Cy++);
 	LView *Txt;
 	c->Add(Txt = new LTextLabel(-1, 5, 5, -1, -1, Msg));
 

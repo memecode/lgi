@@ -6,7 +6,7 @@
 
 enum CellFlag
 {
-    // A null value when the call flag is not known yet
+	// A null value when the call flag is not known yet
 	SizeUnknown,
 	// The cell contains fixed size objects
 	SizeFixed,
@@ -64,15 +64,15 @@ T CountRange(LArray<T> &a, ssize_t Start, ssize_t End)
 
 struct UnderInfo
 {
-    int Priority;
+	int Priority;
 	int Col;		// index of column
 	int Grow;		// in px
 };
 
 int Cmp(UnderInfo *a, UnderInfo *b)
 {
-    if (a->Priority != b->Priority)
-        return a->Priority - b->Priority;
+	if (a->Priority != b->Priority)
+		return a->Priority - b->Priority;
 	return b->Grow - a->Grow;
 }
 
@@ -118,13 +118,13 @@ DistributeUnusedSpace(	LArray<int> &Min,
 			u.Grow = Max[i] - Min[i];
 			if (u.Grow > Avail)
 			{
-			    u.Grow = 0;
-			    u.Priority = 2;
-			    UnknownGrow++;
+				u.Grow = 0;
+				u.Priority = 2;
+				UnknownGrow++;
 			}
 			else
 			{
-			    u.Priority = u.Grow < Avail >> 1 ? 0 : 1;
+				u.Priority = u.Grow < Avail >> 1 ? 0 : 1;
 			}
 
 			/*
@@ -136,10 +136,10 @@ DistributeUnusedSpace(	LArray<int> &Min,
 	
 	Unders.Sort(Cmp);
 
-    int UnknownSplit = 0;
+	int UnknownSplit = 0;
 	for (i=0; Avail>0 && i<Unders.Length(); i++)
 	{
-	    UnderInfo &u = Unders[i];
+		UnderInfo &u = Unders[i];
 		if (u.Grow)
 		{
 			/*
@@ -147,23 +147,23 @@ DistributeUnusedSpace(	LArray<int> &Min,
 				Debug->Print("\t\tGrow[%i] %i += %i\n", i, Min[u.Col], u.Grow);
 			*/
 
-		    Min[u.Col] += u.Grow;
-		    Avail -= u.Grow;
+			Min[u.Col] += u.Grow;
+			Avail -= u.Grow;
 		}
 		else
 		{
-		    if (!UnknownSplit)
-		        UnknownSplit = Avail / UnknownGrow;
-		    if (!UnknownSplit)
-		        UnknownSplit = Avail;
-		    
-		    /*    
+			if (!UnknownSplit)
+				UnknownSplit = Avail / UnknownGrow;
+			if (!UnknownSplit)
+				UnknownSplit = Avail;
+			
+			/*    
 			if (Debug)
 				Debug->Print("\t\tFill[%i] %i += %i\n", i, Min[u.Col], UnknownSplit);
 			*/
 
-		    Min[u.Col] += UnknownSplit;
-		    Avail -= UnknownSplit;
+			Min[u.Col] += UnknownSplit;
+			Avail -= UnknownSplit;
 		}
 	}
 }
@@ -195,8 +195,8 @@ DistributeSize(	LArray<int> &a,
 
 	for (int i=Start; i<Start+Span; i++)
 	{
-	    switch (Flags[i])
-	    {
+		switch (Flags[i])
+		{
 			default:
 				break;
 			case SizeUnknown:
@@ -210,18 +210,18 @@ DistributeSize(	LArray<int> &a,
 				Fixed.Add(i);
 				break;
 			}
-	        case SizeGrow:
-		    {
-			    Grow.Add(i);
-			    ExistingGrowPx += a[i];
-			    break;
-		    }
-		    case SizeFill:
-		    {
-			    Fill.Add(i);
-			    ExistingFillPx += a[i];
-		        break;
-		    }
+			case SizeGrow:
+			{
+				Grow.Add(i);
+				ExistingGrowPx += a[i];
+				break;
+			}
+			case SizeFill:
+			{
+				Fill.Add(i);
+				ExistingFillPx += a[i];
+				break;
+			}
 		}
 	}
 
@@ -231,8 +231,8 @@ DistributeSize(	LArray<int> &a,
 		// Distribute size amongst the growable cells
 		int PerFillSize = AdditionalSize / (int)Fill.Length();
 		if (PerFillSize <= 0)
-		    PerFillSize = 1;
-		    
+			PerFillSize = 1;
+			
 		for (int i=0; i<Fill.Length(); i++)
 		{
 			int Cell = Fill[i];
@@ -250,9 +250,9 @@ DistributeSize(	LArray<int> &a,
 			int Cell = Grow[i];
 			int Add;
 			if (a[Cell] && ExistingGrowPx)
-			    Add = a[Cell] * AdditionalSize / ExistingGrowPx;
+				Add = a[Cell] * AdditionalSize / ExistingGrowPx;
 			else
-			    Add = (int)MAX(1, AdditionalSize / Grow.Length());
+				Add = (int)MAX(1, AdditionalSize / Grow.Length());
 			a[Cell] = a[Cell] + Add;
 		}
 	}
@@ -265,9 +265,9 @@ DistributeSize(	LArray<int> &a,
 			int Cell = Unknown[i];
 			int Add;
 			if (a[Cell] && UnknownPx)
-			    Add = a[Cell] * AdditionalSize / UnknownPx;
+				Add = a[Cell] * AdditionalSize / UnknownPx;
 			else
-			    Add = (int)MAX(1, AdditionalSize / Unknown.Length());
+				Add = (int)MAX(1, AdditionalSize / Unknown.Length());
 			a[Cell] = a[Cell] + Add;
 		}
 	}
@@ -298,7 +298,7 @@ LCss::LengthType ConvertAlign(char *s, bool x_axis)
 	return x_axis ? LCss::AlignLeft : LCss::VerticalTop;
 }
 
-class TableCell : public GLayoutCell
+class TableCell : public LLayoutCell
 {
 public:
 	struct Child
@@ -341,7 +341,7 @@ public:
 	void OnChange(PropType Prop) override;
 };
 
-class GTableLayoutPrivate
+class LTableLayoutPrivate
 {
 	friend class TableCell;
 
@@ -359,15 +359,15 @@ public:
 	LTableLayout *Ctrl;
 
 	// Object
-	GTableLayoutPrivate(LTableLayout *ctrl);
-	~GTableLayoutPrivate();
+	LTableLayoutPrivate(LTableLayout *ctrl);
+	~LTableLayoutPrivate();
 	
 	// Utils
 	bool IsInLayout() { return InLayout; }
 	TableCell *GetCellAt(int cx, int cy);
 	void Empty(LRect *Range = NULL);
-    bool CollectRadioButtons(LArray<LRadioButton*> &Btns);
-    void InitBorderSpacing();
+	bool CollectRadioButtons(LArray<LRadioButton*> &Btns);
+	void InitBorderSpacing();
 	double Scale()
 	{
 		if (!Dpi.x)
@@ -804,7 +804,7 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 				else if (Max)
 					Max += c->Inf.Width.Max + LTableLayout::CellSpacing;
 				else
- 					Max = c->Inf.Width.Max;
+					Max = c->Inf.Width.Max;
 
 				if (c->Inf.Width.Min)
 				{
@@ -1365,7 +1365,7 @@ void TableCell::OnPaint(LSurface *pDC)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-GTableLayoutPrivate::GTableLayoutPrivate(LTableLayout *ctrl)
+LTableLayoutPrivate::LTableLayoutPrivate(LTableLayout *ctrl)
 {
 	PrevSize.Set(-1, -1);
 	LayoutDirty = true;
@@ -1377,22 +1377,22 @@ GTableLayoutPrivate::GTableLayoutPrivate(LTableLayout *ctrl)
 	LayoutMinX = LayoutMaxX = 0;
 }
 
-GTableLayoutPrivate::~GTableLayoutPrivate()
+LTableLayoutPrivate::~LTableLayoutPrivate()
 {
 	Empty();
 }
 
-bool GTableLayoutPrivate::CollectRadioButtons(LArray<LRadioButton*> &Btns)
+bool LTableLayoutPrivate::CollectRadioButtons(LArray<LRadioButton*> &Btns)
 {
-    for (LViewI *i: Ctrl->IterateViews())
-    {
-        LRadioButton *b = dynamic_cast<LRadioButton*>(i);
-        if (b) Btns.Add(b);
-    }
-    return Btns.Length() > 0;
+	for (LViewI *i: Ctrl->IterateViews())
+	{
+		LRadioButton *b = dynamic_cast<LRadioButton*>(i);
+		if (b) Btns.Add(b);
+	}
+	return Btns.Length() > 0;
 }
 
-void GTableLayoutPrivate::Empty(LRect *Range)
+void LTableLayoutPrivate::Empty(LRect *Range)
 {
 	if (Range)
 	{
@@ -1422,7 +1422,7 @@ void GTableLayoutPrivate::Empty(LRect *Range)
 	LayoutMinX = LayoutMaxX = 0;
 }
 
-TableCell *GTableLayoutPrivate::GetCellAt(int cx, int cy)
+TableCell *LTableLayoutPrivate::GetCellAt(int cx, int cy)
 {
 	for (int i=0; i<Cells.Length(); i++)
 	{
@@ -1435,7 +1435,7 @@ TableCell *GTableLayoutPrivate::GetCellAt(int cx, int cy)
 	return 0;
 }
 
-void GTableLayoutPrivate::LayoutHorizontal(LRect &Client, int *MinX, int *MaxX, CellFlag *Flag)
+void LTableLayoutPrivate::LayoutHorizontal(LRect &Client, int *MinX, int *MaxX, CellFlag *Flag)
 {
 	// This only gets called when you nest LTableLayout controls. It's 
 	// responsible for doing pre layout stuff for an entire control of cells.
@@ -1686,7 +1686,7 @@ void GTableLayoutPrivate::LayoutHorizontal(LRect &Client, int *MinX, int *MaxX, 
 	Prof.Reset();
 }
 
-void GTableLayoutPrivate::LayoutVertical(LRect &Client, int *MinY, int *MaxY, CellFlag *Flag, int Depth)
+void LTableLayoutPrivate::LayoutVertical(LRect &Client, int *MinY, int *MaxY, CellFlag *Flag, int Depth)
 {
 	int Cx, Cy, i;
 
@@ -1873,7 +1873,7 @@ void GTableLayoutPrivate::LayoutVertical(LRect &Client, int *MinY, int *MaxY, Ce
 	}
 }
 
-void GTableLayoutPrivate::LayoutPost(LRect &Client)
+void LTableLayoutPrivate::LayoutPost(LRect &Client)
 {
 	int Px = 0, Py = 0, Cx, Cy;
 	LFont *Fnt = Ctrl->GetFont();
@@ -1946,7 +1946,7 @@ void GTableLayoutPrivate::LayoutPost(LRect &Client)
 	LayoutBounds.ZOff(Px-1, Py-1);
 }
 
-void GTableLayoutPrivate::InitBorderSpacing()
+void LTableLayoutPrivate::InitBorderSpacing()
 {
 	BorderSpacing = LTableLayout::CellSpacing;
 	if (Ctrl->GetCss())
@@ -1957,25 +1957,25 @@ void GTableLayoutPrivate::InitBorderSpacing()
 	}
 }
 
-void GTableLayoutPrivate::Layout(LRect &Client)
+void LTableLayoutPrivate::Layout(LRect &Client)
 {
-    if (InLayout)
-    {    
-        LAssert(!"In layout, no recursion should happen.");
-        return;
-    }
+	if (InLayout)
+	{    
+		LAssert(!"In layout, no recursion should happen.");
+		return;
+	}
 
-    InLayout = true;
+	InLayout = true;
 	InitBorderSpacing();
-    
-    #if DEBUG_LAYOUT
-    int CtrlId = Ctrl->GetId();
-    DebugLayout = CtrlId == DEBUG_LAYOUT;
-    if (DebugLayout)
-    {
+	
+	#if DEBUG_LAYOUT
+	int CtrlId = Ctrl->GetId();
+	DebugLayout = CtrlId == DEBUG_LAYOUT;
+	if (DebugLayout)
+	{
 		// int asd=0;
-    }
-    #endif
+	}
+	#endif
 
 	#if DEBUG_PROFILE
 	int64 Start = LCurrentTime();
@@ -2019,7 +2019,7 @@ void GTableLayoutPrivate::Layout(LRect &Client)
 
 LTableLayout::LTableLayout(int id) : ResObject(Res_Table)
 {
-	d = new GTableLayoutPrivate(this);
+	d = new LTableLayoutPrivate(this);
 	SetPourLargest(true);
 	Name("LTableLayout");
 	SetId(id);
@@ -2056,7 +2056,7 @@ int LTableLayout::CellY()
 	return (int)d->Rows.Length();
 }
 
-GLayoutCell *LTableLayout::CellAt(int x, int y)
+LLayoutCell *LTableLayout::CellAt(int x, int y)
 {
 	return d->GetCellAt(x, y);
 }
@@ -2101,15 +2101,15 @@ LRect LTableLayout::GetUsedArea()
 	}
 
 	LRect r(0, 0, -1, -1);
-    for (int i=0; i<d->Cells.Length(); i++)
-    {
-        TableCell *c = d->Cells[i];
-        if (i)
-            r.Union(&c->Pos);
-        else
-            r = c->Pos;
-    }
-    
+	for (int i=0; i<d->Cells.Length(); i++)
+	{
+		TableCell *c = d->Cells[i];
+		if (i)
+			r.Union(&c->Pos);
+		else
+			r = c->Pos;
+	}
+	
 	return r;
 }
 
@@ -2278,8 +2278,8 @@ void LTableLayout::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 
 int LTableLayout::OnNotify(LViewI *c, LNotification n)
 {
-    if (n.Type == LNotifyTableLayoutRefresh)
-    {
+	if (n.Type == LNotifyTableLayoutRefresh)
+	{
 		if (!d->LayoutDirty)
 		{
 			d->LayoutDirty = true;
@@ -2292,34 +2292,34 @@ int LTableLayout::OnNotify(LViewI *c, LNotification n)
 
 		SendNotify(LNotifyTableLayoutRefresh);
 
-        return 0;
-    }
+		return 0;
+	}
 
-    return LLayout::OnNotify(c, n);
+	return LLayout::OnNotify(c, n);
 }
 
 int64 LTableLayout::Value()
 {
-    LArray<LRadioButton*> Btns;
-    if (d->CollectRadioButtons(Btns))
-    {
-        for (int i=0; i<Btns.Length(); i++)
-        {
-            if (Btns[i]->Value())
-                return i;
-        }
-    }
-    return -1;
+	LArray<LRadioButton*> Btns;
+	if (d->CollectRadioButtons(Btns))
+	{
+		for (int i=0; i<Btns.Length(); i++)
+		{
+			if (Btns[i]->Value())
+				return i;
+		}
+	}
+	return -1;
 }
 
 void LTableLayout::Value(int64 v)
 {
-    LArray<LRadioButton*> Btns;
-    if (d->CollectRadioButtons(Btns))
-    {
-        if (v >= 0 && v < (ssize_t)Btns.Length())
-            Btns[(int)v]->Value(true);
-    }
+	LArray<LRadioButton*> Btns;
+	if (d->CollectRadioButtons(Btns))
+	{
+		for (int i=0; i<Btns.Length(); i++)
+			Btns[i]->Value(i == v);
+	}
 }
 
 void LTableLayout::Empty(LRect *Range)
@@ -2327,27 +2327,27 @@ void LTableLayout::Empty(LRect *Range)
 	d->Empty(Range);
 }
 
-GLayoutCell *LTableLayout::GetCell(int cx, int cy, bool create, int colspan, int rowspan)
+LLayoutCell *LTableLayout::GetCell(int cx, int cy, bool create, int colspan, int rowspan)
 {
 	TableCell *c = d->GetCellAt(cx, cy);
 	if (!c && create)
-    {
-        c = new TableCell(this, cx, cy);
-        if (c)
-        {
+	{
+		c = new TableCell(this, cx, cy);
+		if (c)
+		{
 			d->LayoutDirty = true;
-            if (colspan > 1)
-                c->Cell.x2 += colspan - 1;
-            if (rowspan > 1)
-                c->Cell.y2 += rowspan - 1;
-            d->Cells.Add(c);
-            
-            while (d->Cols.Length() <= c->Cell.x2)
-                d->Cols.Add(1);
-            while (d->Rows.Length() <= c->Cell.y2)
-                d->Rows.Add(1);
-        }
-    }
-    
-    return c;
+			if (colspan > 1)
+				c->Cell.x2 += colspan - 1;
+			if (rowspan > 1)
+				c->Cell.y2 += rowspan - 1;
+			d->Cells.Add(c);
+			
+			while (d->Cols.Length() <= c->Cell.x2)
+				d->Cols.Add(1);
+			while (d->Rows.Length() <= c->Cell.y2)
+				d->Rows.Add(1);
+		}
+	}
+	
+	return c;
 }
