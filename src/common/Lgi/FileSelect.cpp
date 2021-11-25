@@ -899,7 +899,7 @@ LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 	AddView(Tbl = new LTableLayout);
 
 	// Top Row
-	GLayoutCell *c = Tbl->GetCell(x++, y);
+	auto *c = Tbl->GetCell(x++, y);
 	c->Add(Ctrl1 = new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Look in:"));
 	c->VerticalAlign(LCss::Len(LCss::VerticalMiddle));
 	c = Tbl->GetCell(x++, y);

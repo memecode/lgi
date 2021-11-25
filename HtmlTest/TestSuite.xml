@@ -17,6 +17,8 @@
 		<Node File="../src/common/Gdc2/Font/EmojiFont.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Text/Emoji/EmojiMap.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Text/Emoji/EmojiTools.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Text/Homoglyphs/Homoglyphs.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Text/Homoglyphs/HomoglyphsTable.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Net/Http.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Images/Compare/ImageComparison.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="7" />
@@ -70,6 +72,7 @@
 					<Release>-static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
+				<All />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -77,6 +80,15 @@
 					<Release>lgi-html-test-suite</Release>
 				</Linux>
 			</TargetName>
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<ApplicationIcon />
 		</Build>
 		<General>
 			<Makefile>
@@ -89,6 +101,35 @@
 					<Release>./HtmlTestSuite</Release>
 				</Linux>
 			</Executable>
+			<Compiler />
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
+		<Editor>
+			<TabSize />
+			<IndentSize />
+			<ShowWhiteSpace />
+			<UseHardTabs />
+			<CommentFile />
+			<CommentFunction />
+		</Editor>
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
 	</Settings>
 </Project>

@@ -689,7 +689,7 @@ public:
 	/// This will look at resolving the expression to something simpler before storing it...
 	void SimplifyDefine(LScriptEngine &Eng, char16 *Name, LAutoWString &Value)
 	{
-		LString Exp = Value;
+		LString Exp = Value.Get();
 		if (Exp.Find("(") >= 0) // Filter out simple expressions...
 		{
 			LVariant Result;
