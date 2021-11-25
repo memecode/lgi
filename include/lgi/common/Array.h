@@ -859,6 +859,17 @@ public:
 
 		return a;
 	}
+
+	LArray<Type> Reverse()
+	{
+		LArray<Type> r;
+
+		r.Length(len);
+		for (size_t i=0, k=len-1; i<len; i++, k--)
+			r.p[i] = p[k];
+
+		return r;
+	}
 };
 
 #endif
