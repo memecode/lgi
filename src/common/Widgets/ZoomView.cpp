@@ -1230,13 +1230,13 @@ void LZoomView::UpdateScrollBars(LPoint *MaxScroll, bool ResetPos)
 
 		if (HScroll)
 		{
-			HScroll->SetLimits(0, DocSize.x);
+			HScroll->SetRange(LRange(0, DocSize.x));
 			HScroll->SetPage(DocClientSize.x);
 			if (ResetPos) HScroll->Value(0);
 		}
 		if (VScroll)
 		{
-			VScroll->SetLimits(0, DocSize.y);
+			VScroll->SetRange(LRange(0, DocSize.y));
 			VScroll->SetPage(DocClientSize.y);
 			if (ResetPos) VScroll->Value(0);
 		}
@@ -1557,13 +1557,13 @@ bool LZoomView::OnMouseWheel(double Lines)
 
 				if (HScroll)
 				{
-					HScroll->SetLimits(0, Src->X());
+					HScroll->SetRange(LRange(0, Src->X()));
 					HScroll->SetPage(ScaledClient.x);
 					HScroll->Value(NewSx);
 				}
 				if (VScroll)
 				{
-					VScroll->SetLimits(0, Src->Y());
+					VScroll->SetRange(LRange(0, Src->Y()));
 					VScroll->SetPage(ScaledClient.y);
 					VScroll->Value(NewSy);
 				}

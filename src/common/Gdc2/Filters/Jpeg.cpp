@@ -635,7 +635,7 @@ LFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 		if (Meter)
 		{
 			Meter->SetDescription("scanlines");
-			Meter->SetLimits(0, cinfo.image_height-1);
+			Meter->SetRange(LRange(0, cinfo.image_height));
 		}
 
 		// Read
@@ -1045,7 +1045,7 @@ LFilter::IoStatus GdcJpeg::_Write(LStream *Out, LSurface *pDC, int Quality, SubS
 		if (Meter)
 		{
 			Meter->SetDescription("scanlines");
-			Meter->SetLimits(0, cinfo.image_height-1);
+			Meter->SetRange(LRange(0, cinfo.image_height));
 		}
 
 		// Write

@@ -370,7 +370,7 @@ bool LSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *W
 		if (!Size)
 		{
 			if (Thread.Total)
-				Dlg->SetLimits(0, Size = Thread.Total);
+				Dlg->SetRange(LRange(0, Size = Thread.Total));
 		}
 		else
 		{

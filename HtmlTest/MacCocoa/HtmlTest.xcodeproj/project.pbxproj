@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3416FADB2748AA070062D3B8 /* HomoglyphsTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3416FAD92748AA070062D3B8 /* HomoglyphsTable.cpp */; };
+		3416FADC2748AA070062D3B8 /* Homoglyphs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3416FADA2748AA070062D3B8 /* Homoglyphs.cpp */; };
 		34319029238DF4A700DDE1F5 /* TestSuite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319027238DF4A700DDE1F5 /* TestSuite.cpp */; };
 		3431902A238DF4A700DDE1F5 /* HtmlTestSuite.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 34319028238DF4A700DDE1F5 /* HtmlTestSuite.lr8 */; };
 		3431902C238DF51B00DDE1F5 /* OpenSSLSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3431902B238DF51B00DDE1F5 /* OpenSSLSocket.cpp */; };
@@ -63,6 +65,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3416FAD92748AA070062D3B8 /* HomoglyphsTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HomoglyphsTable.cpp; path = ../../src/common/Text/Homoglyphs/HomoglyphsTable.cpp; sourceTree = "<group>"; };
+		3416FADA2748AA070062D3B8 /* Homoglyphs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Homoglyphs.cpp; path = ../../src/common/Text/Homoglyphs/Homoglyphs.cpp; sourceTree = "<group>"; };
 		34319027238DF4A700DDE1F5 /* TestSuite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TestSuite.cpp; path = ../TestSuite.cpp; sourceTree = "<group>"; };
 		34319028238DF4A700DDE1F5 /* HtmlTestSuite.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = HtmlTestSuite.lr8; path = ../HtmlTestSuite.lr8; sourceTree = "<group>"; };
 		3431902B238DF51B00DDE1F5 /* OpenSSLSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenSSLSocket.cpp; path = ../../src/common/Net/OpenSSLSocket.cpp; sourceTree = "<group>"; };
@@ -134,6 +138,8 @@
 		343FB8A32386626700797ABC /* Lgi */ = {
 			isa = PBXGroup;
 			children = (
+				3416FADA2748AA070062D3B8 /* Homoglyphs.cpp */,
+				3416FAD92748AA070062D3B8 /* HomoglyphsTable.cpp */,
 				34C81A5725DA09770053F93A /* Http.cpp */,
 				3431903F238DFA4B00DDE1F5 /* ZoomView.cpp */,
 				34319047238DFA9100DDE1F5 /* GdcTools.cpp */,
@@ -270,10 +276,12 @@
 			files = (
 				3431904A238DFAB000DDE1F5 /* EmojiMap.cpp in Sources */,
 				34319039238DF9C600DDE1F5 /* ParseCpp.cpp in Sources */,
+				3416FADB2748AA070062D3B8 /* HomoglyphsTable.cpp in Sources */,
 				3431903C238DF9C600DDE1F5 /* ScriptVM.cpp in Sources */,
 				34C81A5825DA09770053F93A /* Http.cpp in Sources */,
 				34319029238DF4A700DDE1F5 /* TestSuite.cpp in Sources */,
 				34319030238DF57C00DDE1F5 /* HtmlCommon.cpp in Sources */,
+				3416FADC2748AA070062D3B8 /* Homoglyphs.cpp in Sources */,
 				3431903B238DF9C600DDE1F5 /* ScriptLibrary.cpp in Sources */,
 				34319032238DF57C00DDE1F5 /* Html.cpp in Sources */,
 				34319046238DFA8400DDE1F5 /* LexCpp.cpp in Sources */,

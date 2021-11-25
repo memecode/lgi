@@ -7384,7 +7384,7 @@ int GHtml::OnNotify(LViewI *c, LNotification n)
 				int p = MAX(y / LineY, 1);
 				int fy = d->Content.y / LineY;
 				VScroll->SetPage(p);
-				VScroll->SetLimits(0, fy);
+				VScroll->SetRange(LRange(0, fy));
 			}
 			
 			Invalidate();
@@ -7440,7 +7440,7 @@ LPoint GHtml::Layout(bool ForceLayout)
 				int p = MAX(y / LineY, 1);
 				int fy = f.y2 / LineY;
 				VScroll->SetPage(p);
-				VScroll->SetLimits(0, fy);
+				VScroll->SetRange(LRange(0, fy));
 			}
 		}
 		else
