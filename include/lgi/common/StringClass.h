@@ -530,7 +530,7 @@ public:
 	{
 		if (Str)
 		{
-			if (NewLen < Str->Len)
+			if (NewLen <= Str->Len)
 			{
 				Str->Len = NewLen;
 				Str->Str[NewLen] = 0;

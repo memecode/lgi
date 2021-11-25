@@ -959,36 +959,29 @@ LString LUrlEncode(const char *s, const char *delim)
 	return out;
 }
 
-LString LUrlDecode(const char *s)
+LString LUrlDecode(const char *in)
 {
-	if (!s || !*s)
-		return LString();
+	if (!in || !*in)
+		return NULL;
 
-	char buf[256];
-	int ch = 0;
-	LString out;
-	while (*s)
+	LString s;
+	if (!s.Length(strlen(in)))
+		return NULL;
+
+	char *out = s.Get();
+	while (*in)
 	{
-		if (*s == '%')
+		if (*in == '%')
 		{
-			s++;
-			if (!s[0] || !s[1])
+			if (!in[1] || !in[2])
 				break;
-			char h[3] = {s[0], s[1], 0};
-			buf[ch++] = htoi(h);
-			s++;
+			char h[3] = {in[1], in[2], 0};
+			*out++ = htoi(h);
+			in += 3;
 		}
-		else buf[ch++] = *s;
-		s++;
-		if (ch > sizeof(buf) - 6)
-		{
-			buf[ch] = 0;
-			out += buf;
-			ch = 0;
-		}	
+		else *out++ = *in++;
 	}
-	buf[ch] = 0;
-	if (ch > 0)
-		out += buf;
-	return out;
+
+	s.Length(out - s.Get());
+	return s;
 }
