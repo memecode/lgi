@@ -690,7 +690,7 @@ void FieldView::OnSelect(FieldSource *s)
 			LTableLayout *t = new LTableLayout(IDC_TABLE);
 
 			int Row = 0;
-			GLayoutCell *Cell;
+			LLayoutCell *Cell;
 
 			LArray<FieldTree::FieldArr*> a;
 			Fields.GetAll(a);
@@ -4468,7 +4468,7 @@ LgiFunc char *_LgiGenLangLookup();
 #include "lgi/common/Css.h"
 #include "lgi/common/TableLayout.h"
 
-class Foo : public GLayoutCell
+class Foo : public LLayoutCell
 {
 public:
 	Foo()

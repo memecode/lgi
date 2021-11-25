@@ -1622,7 +1622,7 @@ LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmDebuggerCallback *Callback, LVi
 		p->Append(d->VarsTbl = new LTableLayout(IDC_VARS_TBL));		
 		
 		int x = 0, y = 0;
-		GLayoutCell *c = d->VarsTbl->GetCell(x++, y);
+		auto *c = d->VarsTbl->GetCell(x++, y);
 		c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Globals:"));
 		c = d->VarsTbl->GetCell(x++, y);
 		c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Locals:"));

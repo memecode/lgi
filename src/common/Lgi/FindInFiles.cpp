@@ -164,7 +164,7 @@ GFindInFiles::GFindInFiles(LViewI *Parent, LAutoString Search, LDom *Store)
 
 	Name("Find In Files");
 	
-	GLayoutCell *c = d->Tbl->GetCell(0, y, true, cols);
+	auto *c = d->Tbl->GetCell(0, y, true, cols);
 	c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Find what:"));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols-1);

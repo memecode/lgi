@@ -324,7 +324,7 @@ public:
 		int CellY = i * 2;
 		
 		// Do label cell
-		GLayoutCell *c = Tbl->GetCell(0, CellY);
+		auto *c = Tbl->GetCell(0, CellY);
 		c->Add(Ctrls[i].Text = new LTextLabel(IDC_TEXT_BASE + i, 0, 0, -1, -1, Path = d->BuildPath(Setting->Setting, Flags, PlatformCurrent, Config)));
 		
 		// Do value cell

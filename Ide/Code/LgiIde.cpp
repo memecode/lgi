@@ -706,7 +706,7 @@ public:
 							MemTable->SetFont(&Small);
 							
 							int x = 0, y = 0;
-							GLayoutCell *c = MemTable->GetCell(x++, y);
+							auto *c = MemTable->GetCell(x++, y);
 							if (c)
 							{
 								c->VerticalAlign(LCss::VerticalMiddle);

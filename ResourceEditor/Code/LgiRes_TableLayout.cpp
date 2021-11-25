@@ -1672,9 +1672,8 @@ TableLayoutTest::TableLayoutTest(LViewI *par)
 	SetParent(par);
 	
 	AddView(Tbl = new LTableLayout);
-	GLayoutCell *c;
 
-	c = Tbl->GetCell(0, 0, true, 2);
+	auto *c = Tbl->GetCell(0, 0, true, 2);
 	c->Add(Msg = new LTextLabel(100, 0, 0, -1, -1, "Searching for files..."));
 
 	c = Tbl->GetCell(0, 1);

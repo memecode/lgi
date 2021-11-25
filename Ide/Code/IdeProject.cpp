@@ -4097,7 +4097,7 @@ AddFilesProgress::AddFilesProgress(LViewI *par)
 	LTableLayout *t = new LTableLayout(100);
 	AddView(t);
 		
-	GLayoutCell *c = t->GetCell(0, 0);
+	auto *c = t->GetCell(0, 0);
 	c->Add(new LTextLabel(-1, 0, 0, -1, -1, "Loaded:"));
 		
 	c = t->GetCell(1, 0);

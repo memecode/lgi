@@ -22,7 +22,7 @@ public:
     {
         Css = css;
         int y = 0;
-        GLayoutCell *c;
+        LLayoutCell *c;
         
         if ((c = GetCell(0, y++)))
             c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Name:"));
