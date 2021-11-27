@@ -580,6 +580,8 @@ public:
 						}
 						break;
 					}
+					default:
+						break;
 				}
 				break;
 			}
