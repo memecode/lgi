@@ -73,5 +73,6 @@ public:
 	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 	bool Serialize(LDom *Store, bool Write);
 	int OnNotify(LViewI *c, LNotification n) override;
+	bool CallMethod(const char *Method, LVariant *Ret, ArgumentArray &Args);
 };
 

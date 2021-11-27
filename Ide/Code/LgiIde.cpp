@@ -3314,6 +3314,8 @@ int AppWnd::OnNotify(LViewI *Ctrl, LNotification n)
 						d->Output->Watch->Insert(Edit);
 					break;
 				}
+				default:
+					break;
 			}
 			
 			if (Edit)

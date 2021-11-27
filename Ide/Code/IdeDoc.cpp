@@ -1689,6 +1689,8 @@ int IdeDoc::OnNotify(LViewI *v, LNotification n)
 					}
 					break;
 				}
+				default:
+					break;
 			}
 			break;
 		}

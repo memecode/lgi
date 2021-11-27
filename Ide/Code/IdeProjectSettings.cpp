@@ -612,7 +612,7 @@ public:
 			}
 			case IDC_SEARCH:
 			{
-				if (n.Type == LK_RETURN)
+				if (n.Type == LNotifyReturnKey)
 				{
 					DefLockOut = LCurrentTime();
 					OnSearch(GetCtrlName(IDC_SEARCH));

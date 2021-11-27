@@ -584,7 +584,7 @@ int FindSymbolDlg::OnNotify(LViewI *v, LNotification n)
 	{
 		case IDC_STR:
 		{
-			if (n.Type != LK_RETURN)
+			if (n.Type != LNotifyReturnKey)
 			{
 				auto Str = v->Name();
 				if (Str && strlen(Str) > 2)

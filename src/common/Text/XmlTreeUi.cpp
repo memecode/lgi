@@ -10,7 +10,6 @@
 #include "lgi/common/Combo.h"
 #include "lgi/common/Edit.h"
 #include "lgi/common/Tree.h"
-#include "lgi/common/ControlTree.h"
 
 #include <ctype.h>
 
@@ -190,11 +189,7 @@ int GetCtrlType(LViewI *v)
 {
 	if (v)
 	{
-		if (dynamic_cast<LControlTree*>(v))
-		{
-			return GV_DOM;
-		}
-		else if (dynamic_cast<LCheckBox*>(v) ||
+		if (dynamic_cast<LCheckBox*>(v) ||
 				dynamic_cast<LButton*>(v) ||
 				dynamic_cast<LRadioButton*>(v))
 		{
@@ -206,6 +201,11 @@ int GetCtrlType(LViewI *v)
 		{
 			return GV_INT32;
 		}
+		else if (!Stricmp(v->GetClass(), "LControlTree"))
+		{
+			return GV_DOM;
+		}
+		
 	}
 
 	return GV_STRING;
@@ -299,10 +299,15 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 				}
 				else if (Map.value->Hint == GV_DOM)
 				{
-					LControlTree *ct;
+					LView *ct;
 					if (Ui->GetViewById(Map.value->Id, ct))
 					{
-						ct->Serialize(Xml, false);
+						LVariant Ret;
+						LArray<LVariant*> Args;
+						Args[0] = new LVariant(&Xml);
+						Args[1] = new LVariant(false);
+						ct->CallMethod(LDomPropToString(ControlSerialize), &Ret, Args);
+						Args.DeleteObjects();
 					}
 				}
 				else if (Tag->GetValue(Map.key, v))
@@ -390,10 +395,15 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 						}
 						case GV_DOM:
 						{
-							LControlTree *ct;
+							LView *ct;
 							if (Ui->GetViewById(Map.value->Id, ct))
 							{
-								ct->Serialize(Xml, true);
+								LVariant Ret;
+								LArray<LVariant*> Args;
+								Args[0] = new LVariant(&Xml);
+								Args[1] = new LVariant(true);
+								ct->CallMethod(LDomPropToString(ControlSerialize), &Ret, Args);
+								Args.DeleteObjects();
 							}
 							break;
 						}

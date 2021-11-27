@@ -94,3 +94,6 @@ _(AppendSubmenu, "AppendSubmenu")
 _(TableLayoutCols, "Cols")
 _(TableLayoutRows, "Rows")
 _(TableLayoutCell, "Cell")
+
+// ControlTree
+_(ControlSerialize, "Serialize")

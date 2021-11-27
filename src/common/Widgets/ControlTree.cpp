@@ -406,6 +406,27 @@ LControlTree::Item *LControlTree::Find(const char *opt)
 	return 0;
 }
 
+bool LControlTree::CallMethod(const char *Method, LVariant *Ret, ArgumentArray &Args)
+{
+	switch (LStringToDomProp(Name))
+	{
+		case ControlSerialize:
+		{
+			if (Args.Length() != 2)
+			{
+				LAssert(!"Wrong argument count.");
+				return false;
+			}
+			
+			auto *Store = Args[0].CastDom();
+			auto *Write = Args[1].CastInt32() != 0;
+			return Serialize(Store, Write);
+		}
+	}
+
+	return false;
+}
+
 bool LControlTree::Serialize(LDom *Store, bool Write)
 {
 	bool Error = false;
