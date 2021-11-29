@@ -703,7 +703,7 @@ HRESULT STDMETHODCALLTYPE LDragDropTarget::DragEnter(IDataObject *pDataObject, D
 		// It deletes those it doesn't and leaves the formats it can handle
 		Formats.SetSource(false);
 		*pdwEffect = WillAccept(Formats, Pt, MapW32FlagsToLgi(grfKeyState));
-		LgiTrace("WillAccept=%i\n", *pdwEffect);
+		// LgiTrace("WillAccept=%i\n", *pdwEffect);
 		Result = S_OK;
 	}
 
