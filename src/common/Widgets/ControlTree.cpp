@@ -406,9 +406,9 @@ LControlTree::Item *LControlTree::Find(const char *opt)
 	return 0;
 }
 
-bool LControlTree::CallMethod(const char *Method, LVariant *Ret, LArray<LVariant> &Args)
+bool LControlTree::CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args)
 {
-	switch (LStringToDomProp(Method))
+	switch (LStringToDomProp(MethodName))
 	{
 		case ControlSerialize:
 		{
@@ -418,9 +418,10 @@ bool LControlTree::CallMethod(const char *Method, LVariant *Ret, LArray<LVariant
 				return false;
 			}
 			
-			auto *Store = Args[0].CastDom();
-			auto Write = Args[1].CastInt32() != 0;
-			return Serialize(Store, Write);
+			auto *Store = Args[0]->CastDom();
+			auto Write = Args[1]->CastInt32() != 0;
+			*ReturnValue = Serialize(Store, Write);
+			return true;
 		}
 	}
 
