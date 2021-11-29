@@ -1491,101 +1491,108 @@ LDom *LDom::ResolveObject(const char *Var, LString &Name, LString &Array)
 {
 	LDom *Object = this;
 
-	// Tokenize the string
-	LString::Array t;
-	for (auto *s = Var; s && *s; )
+	try
 	{
-		const char *e = s;
-		while (*e && *e != '.')
+		// Tokenize the string
+		LString::Array t;
+		for (auto *s = Var; s && *s; )
 		{
-			if (*e == '[')
+			const char *e = s;
+			while (*e && *e != '.')
 			{
-				e++;
-				while (*e && *e != ']')
+				if (*e == '[')
 				{
-					if (*e == '\"' || *e == '\'')
-					{
-						char d = *e++;
-						while (*e && *e != d)
-							e++;
-						if (*e == d) e++;
-					}
-					else e++;
-				}
-
-				if (*e == ']')
 					e++;
-			}
-			else e++;
-		}
-		
-		t.New() = LString(s, e - s).Strip();
-		s = *e ? e + 1 : e;
-	}
+					while (*e && *e != ']')
+					{
+						if (*e == '\"' || *e == '\'')
+						{
+							char d = *e++;
+							while (*e && *e != d)
+								e++;
+							if (*e == d) e++;
+						}
+						else e++;
+					}
 
-	// Process elements
-	for (int i=0; i<t.Length(); i++)
-	{
-		// Parse out object name and array parts
-		LString Index;
-		char *Obj = t[i];
-		if (*Obj == '[')
-		{
-			Object = NULL;
-			break;
-		}
+					if (*e == ']')
+						e++;
+				}
+				else e++;
+			}
 		
-		char *ArrStart = strchr(Obj, '[');
-		if (ArrStart)
+			t.New() = LString(s, e - s).Strip();
+			s = *e ? e + 1 : e;
+		}
+
+		// Process elements
+		for (int i=0; i<t.Length(); i++)
 		{
-			*ArrStart++ = 0;
-			char *ArrEnd = 0;
-			if (strchr("\'\"", *ArrStart))
+			// Parse out object name and array parts
+			LString Index;
+			char *Obj = t[i];
+			if (*Obj == '[')
 			{
-				ArrEnd = strchr(ArrStart + 1, ArrStart[0]);
-				ArrStart++;
+				Object = NULL;
+				break;
+			}
+		
+			char *ArrStart = strchr(Obj, '[');
+			if (ArrStart)
+			{
+				*ArrStart++ = 0;
+				char *ArrEnd = 0;
+				if (strchr("\'\"", *ArrStart))
+				{
+					ArrEnd = strchr(ArrStart + 1, ArrStart[0]);
+					ArrStart++;
+				}
+				else
+				{
+					ArrEnd = strchr(ArrStart, ']');
+				}
+				if (ArrEnd)
+				{
+					*ArrEnd = 0;
+					Index = ArrStart;
+				}
+			}
+
+			// Process parts
+			if (i == t.Length()-1)
+			{
+				// Output the variable and array index
+				Name = LString(Obj).Strip();
+				Array = Index;
 			}
 			else
 			{
-				ArrEnd = strchr(ArrStart, ']');
-			}
-			if (ArrEnd)
-			{
-				*ArrEnd = 0;
-				Index = ArrStart;
-			}
-		}
-
-		// Process parts
-		if (i == t.Length()-1)
-		{
-			// Output the variable and array index
-			Name = LString(Obj).Strip();
-			Array = Index;
-		}
-		else
-		{
-			LVariant v;
-			if (!Index.IsEmpty())
-			{
-				if (Object->GetVariant(Obj, v, Index))
+				LVariant v;
+				if (!Index.IsEmpty())
 				{
-					if (v.Type == GV_LIST)
+					if (Object->GetVariant(Obj, v, Index))
 					{
-						int N = atoi(Index);
-						LVariant *Element = v.Value.Lst->ItemAt(N);
-						if (Element && Element->Type == GV_DOM)
+						if (v.Type == GV_LIST)
 						{
-							Object = Element->Value.Dom;
+							int N = atoi(Index);
+							LVariant *Element = v.Value.Lst->ItemAt(N);
+							if (Element && Element->Type == GV_DOM)
+							{
+								Object = Element->Value.Dom;
+							}
+							else
+							{
+								return NULL;
+							}
+						}
+						else if (v.Type == GV_DOM)
+						{
+							Object = v.Value.Dom;
 						}
 						else
 						{
 							return NULL;
 						}
-					}
-					else if (v.Type == GV_DOM)
-					{
-						Object = v.Value.Dom;
 					}
 					else
 					{
@@ -1594,22 +1601,23 @@ LDom *LDom::ResolveObject(const char *Var, LString &Name, LString &Array)
 				}
 				else
 				{
-					return NULL;
-				}
-			}
-			else
-			{
-				if (Object->GetVariant(Obj, v) &&
-					v.Type == GV_DOM)
-				{
-					Object = v.Value.Dom;
-				}
-				else
-				{
-					return NULL;
+					if (Object->GetVariant(Obj, v) &&
+						v.Type == GV_DOM)
+					{
+						Object = v.Value.Dom;
+					}
+					else
+					{
+						return NULL;
+					}
 				}
 			}
 		}
+	}
+	catch (...)
+	{
+		LgiTrace("LDom::ResolveObject crashed: '%s'\n", Var);
+		return NULL;
 	}
 
 	return Object;
