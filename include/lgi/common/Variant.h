@@ -17,7 +17,7 @@
 
 class LCompiledCode;
 
-#if !defined(_MSC_VER) && !defined(LINUX) && (defined(LGI_64BIT) || defined(MAC))
+#if !defined(_MSC_VER) && !defined(LINUX) && (defined(LGI_64BIT) || defined(MAC)) && !defined(HAIKU)
 	#define LVARIANT_SIZET	1
 	#define LVARIANT_SSIZET	1
 #endif

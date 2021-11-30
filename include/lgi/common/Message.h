@@ -94,7 +94,7 @@ enum LgiMessages
 		// because something else has requested it.
 		M_LOSING_CAPTURE,
 	
-	#elif defined(LGI_SDL)
+	#elif defined(LGI_SDL) || defined(HAIKU)
 
 		/// Minimum value for application defined message ID's
 		M_MOUSEENTER	= 900,

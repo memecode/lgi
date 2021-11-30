@@ -145,6 +145,8 @@ void LSort(T *v, int left, int right, std::function<ssize_t(T, T)> comp)
 	ObjCWrapper(NSEvent,  OsEvent);
 #elif LGI_CARBON
 	typedef EventRef OsEvent;
+#elif LGI_HAIKU
+	typedef BMessage OsEvent;
 #else
 	#error "Impl me."
 #endif

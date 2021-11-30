@@ -9,6 +9,10 @@
 #ifndef _LGIDEFS_H_
 #define _LGIDEFS_H_
 
+#ifdef HAIKU
+#include <View.h>
+#endif
+
 #include "LgiInc.h"
 
 #if defined(WIN32) && defined(__GNUC__)
@@ -47,7 +51,7 @@ typedef		unsigned long				ulong;
 	typedef		int64_t						int64;
 	/// 64-bit unsigned int type (size safe, guaranteed to be 64 bits)
 	typedef		uint64_t					uint64;
-#else
+#elif !defined(HAIKU)
 	/// 64-bit signed int type (size safe, guaranteed to be 64 bits)
 	typedef		signed long long			int64;
 	/// 64-bit unsigned int type (size safe, guaranteed to be 64 bits)

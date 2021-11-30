@@ -212,7 +212,7 @@ LgiFunc char *LEncodeUri
 );
 
 // Path
-#if LGI_COCOA || defined(__GTK_H__)
+#if LGI_COCOA || defined(__GTK_H__) || defined(HAIKU)
 	LgiExtern LString LgiArgsAppPath;
 #endif
 

@@ -1,7 +1,7 @@
 /*
-**	FILE:		LDateTime.cpp
-**	AUTHOR:		Matthew Allen
-**	DATE:		11/11/98
+**	FILE:			LDateTime.cpp
+**	AUTHOR:			Matthew Allen
+**	DATE:			11/11/98
 **	DESCRIPTION:	Scribe Date Time Object
 **
 **	Copyright (C) 1998, Matthew Allen
@@ -9,13 +9,14 @@
 */
 
 #define _INTEGRAL_MAX_BITS 64
+#define _DEFAULT_SOURCE
 #include <time.h>
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <sys/timeb.h>
-#ifdef MAC
+#if defined(MAC)
 #include <sys/time.h>
 #endif
 #ifdef WINDOWS
@@ -206,7 +207,7 @@ int LDateTime::SystemTimeZone(bool ForceUpdate)
 			if (GetTimeZoneInformation(&Tzi) == TIME_ZONE_ID_DAYLIGHT)
 				CurTzOff = -Tzi.DaylightBias;
 		
-		#elif defined(LINUX)
+		#elif defined(LINUX) || defined(HAIKU)
 
 			int six_months = (365 * 24 * 60 * 60) / 2;
 			time_t now = 0, then = 0;

@@ -31,7 +31,7 @@ typedef unsigned int uint32_t;
 #elif defined(LINUX)
 	typedef int64_t int64;
 	typedef uint64_t uint64;
-#else
+#elif !defined(HAIKU)
 	typedef signed long long int64;
 	typedef unsigned long long uint64;
 #endif

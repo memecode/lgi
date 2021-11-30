@@ -319,7 +319,7 @@ public:
 		GFileOp(ulong)			\
 		GFileOp(float)			\
 		GFileOp(double)
-#elif defined(LINUX)
+#elif defined(LINUX) || defined(HAIKU)
 	#define GFileOps()			\
 		GFileOp(char)			\
 		GFileOp(int8_t)			\
