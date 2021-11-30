@@ -1060,39 +1060,39 @@ public:
 
 	#if defined __GTK_H__
 	
-	Gtk::GtkPrintContext *GetPrintContext();
-
-	int Op() { return GDC_SET; }
-	int Op(int Op, NativeInt Param = -1) { return GDC_SET; }
-
-	LRect ClipRgn(LRect *Rgn);
-	LRect ClipRgn();
-	COLOUR Colour();
-	COLOUR Colour(COLOUR c, int Bits = 0);
-	LColour Colour(LColour c);
-
-	void Set(int x, int y);
-
-	void HLine(int x1, int x2, int y);
-	void VLine(int x, int y1, int y2);
-	void Line(int x1, int y1, int x2, int y2);
-
-	void Circle(double cx, double cy, double radius);
-	void FilledCircle(double cx, double cy, double radius);
-	void Arc(double cx, double cy, double radius, double start, double end);
-	void FilledArc(double cx, double cy, double radius, double start, double end);
-	void Ellipse(double cx, double cy, double x, double y);
-	void FilledEllipse(double cx, double cy, double x, double y);
-
-	void Box(int x1, int y1, int x2, int y2);
-	void Box(LRect *a = NULL);
-	void Rectangle(int x1, int y1, int x2, int y2);
-	void Rectangle(LRect *a = NULL);
-	void Blt(int x, int y, LSurface *Src, LRect *a = NULL);
-	void StretchBlt(LRect *d, LSurface *Src, LRect *s);
-
-	void Polygon(int Points, LPoint *Data);
-	void Bezier(int Threshold, LPoint *Pt);
+		Gtk::GtkPrintContext *GetPrintContext();
+	
+		int Op() { return GDC_SET; }
+		int Op(int Op, NativeInt Param = -1) { return GDC_SET; }
+	
+		LRect ClipRgn(LRect *Rgn);
+		LRect ClipRgn();
+		COLOUR Colour();
+		COLOUR Colour(COLOUR c, int Bits = 0);
+		LColour Colour(LColour c);
+	
+		void Set(int x, int y);
+	
+		void HLine(int x1, int x2, int y);
+		void VLine(int x, int y1, int y2);
+		void Line(int x1, int y1, int x2, int y2);
+	
+		void Circle(double cx, double cy, double radius);
+		void FilledCircle(double cx, double cy, double radius);
+		void Arc(double cx, double cy, double radius, double start, double end);
+		void FilledArc(double cx, double cy, double radius, double start, double end);
+		void Ellipse(double cx, double cy, double x, double y);
+		void FilledEllipse(double cx, double cy, double x, double y);
+	
+		void Box(int x1, int y1, int x2, int y2);
+		void Box(LRect *a = NULL);
+		void Rectangle(int x1, int y1, int x2, int y2);
+		void Rectangle(LRect *a = NULL);
+		void Blt(int x, int y, LSurface *Src, LRect *a = NULL);
+		void StretchBlt(LRect *d, LSurface *Src, LRect *s);
+	
+		void Polygon(int Points, LPoint *Data);
+		void Bezier(int Threshold, LPoint *Pt);
 
 	#endif
 };

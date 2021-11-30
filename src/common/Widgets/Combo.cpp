@@ -279,7 +279,7 @@ void LCombo::DoMenu()
 		if (Result)
 		{
 			GetWindow()->OnCommand(Result, 0,
-				#ifdef __GTK_H__
+				#if !LGI_VIEW_HANDLE
 				NULL
 				#else
 				Handle()

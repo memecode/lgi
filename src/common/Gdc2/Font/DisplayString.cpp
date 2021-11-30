@@ -1221,8 +1221,6 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 						}
 
 						int Fit = f->_CharAt(Px - Cx, Info[i].Str, Info[i].Len, Type);
-						#endif
-
 						#if DEBUG_CHAR_AT
 						printf("\tNon tab block %i, Fit=%i, Px-Cx=%i-%i=%i, Str='%.5s'\n",
 							i, Fit, Px, Cx, Px-Cx, Info[i].Str);
@@ -1236,6 +1234,7 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 							Status = -1;
 						}
 						break;
+						#endif
 					}
 				}
 				else

@@ -46,6 +46,10 @@
 	#define INVALID_PID -1
 #endif
 
+#ifdef HAIKU
+#include <Roster.h>
+#endif
+
 LSubProcess::Pipe::Pipe()
 {
 	Read = Write = NULL_PIPE;
@@ -1272,7 +1276,7 @@ bool LIsProcess(OsProcessId Pid)
 		sprintf_s(ProcPath, sizeof(ProcPath), "/proc/%i", Pid);
 		Status = LDirExists(ProcPath);
 	
-	#elif defined BEOS
+	#elif defined HAIKU
 	
 		BRoster r;
 		app_info a;

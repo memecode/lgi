@@ -14,7 +14,7 @@ void MsgCb(Gtk::GtkDialog *dialog, Gtk::gint response_id, Gtk::gpointer user_dat
 
 #endif
 
-#if defined(__GTK_H__) || defined(MAC) || defined(LGI_SDL)
+#if defined(__GTK_H__) || defined(MAC) || defined(LGI_SDL) || defined(HAIKU)
 #include "lgi/common/TextLabel.h"
 #include "lgi/common/Button.h"
 
@@ -22,10 +22,10 @@ void MsgCb(Gtk::GtkDialog *dialog, Gtk::gint response_id, Gtk::gpointer user_dat
 #import <Cocoa/Cocoa.h>
 #endif
 
-class GMsgDlg : public LDialog
+class LMsgDlg : public LDialog
 {
 public:
-	GMsgDlg()
+	LMsgDlg()
 	{
 		RegisterHook(this, LKeyEvents);
 	}
@@ -105,178 +105,178 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 
 	#if WINNATIVE
 
-	if (Str)
-	{
-		if (LGetOs() == LGI_OS_WIN9X)
+		if (Str)
 		{
-			auto t = LToNativeCp(Title ? Title : (char*)"Message");
-			auto m = LToNativeCp(Msg);
-			Res = MessageBoxA(Parent ? Parent->Handle() : 0, m?m:"", t?t:"", Type);
-			if (Res == 0)
+			if (LGetOs() == LGI_OS_WIN9X)
 			{
-				auto Err = GetLastError();
-				LAssert(!"MessageBoxA failed.");
+				auto t = LToNativeCp(Title ? Title : (char*)"Message");
+				auto m = LToNativeCp(Msg);
+				Res = MessageBoxA(Parent ? Parent->Handle() : 0, m?m:"", t?t:"", Type);
+				if (Res == 0)
+				{
+					auto Err = GetLastError();
+					LAssert(!"MessageBoxA failed.");
+				}
+			}
+			else
+			{
+				char16 *t = Utf8ToWide(Title ? Title : (char*)"Message");
+				char16 *m = Utf8ToWide(Msg);
+				Res = MessageBoxW(Parent ? Parent->Handle() : 0, m?m:L"", t?t:L"", Type);
+				if (Res == 0)
+				{
+					auto Err = GetLastError();
+					LAssert(!"MessageBoxW failed.");
+				}
+				DeleteArray(t);
+				DeleteArray(m);
 			}
 		}
-		else
-		{
-			char16 *t = Utf8ToWide(Title ? Title : (char*)"Message");
-			char16 *m = Utf8ToWide(Msg);
-			Res = MessageBoxW(Parent ? Parent->Handle() : 0, m?m:L"", t?t:L"", Type);
-			if (Res == 0)
-			{
-				auto Err = GetLastError();
-				LAssert(!"MessageBoxW failed.");
-			}
-			DeleteArray(t);
-			DeleteArray(m);
-		}
-	}
 	
 	#elif LGI_COCOA
 	
-	NSAlert *alert = [[NSAlert alloc] init];
-	auto msg = Msg.NsStr();
-	auto title = LString(Title).NsStr();
-	[alert setMessageText:msg];
-	[alert setInformativeText:title];
-	switch (Type & ~MB_SYSTEMMODAL)
-	{
-		default:
-		case MB_OK:
+		NSAlert *alert = [[NSAlert alloc] init];
+		auto msg = Msg.NsStr();
+		auto title = LString(Title).NsStr();
+		[alert setMessageText:msg];
+		[alert setInformativeText:title];
+		switch (Type & ~MB_SYSTEMMODAL)
 		{
-			[alert addButtonWithTitle:@"Ok"];
-			break;
+			default:
+			case MB_OK:
+			{
+				[alert addButtonWithTitle:@"Ok"];
+				break;
+			}
+			case MB_OKCANCEL:
+			{
+				[alert addButtonWithTitle:@"Cancel"];
+				[alert addButtonWithTitle:@"Ok"];
+				break;
+			}
+			case MB_YESNO:
+			{
+				[alert addButtonWithTitle:@"No"];
+				[alert addButtonWithTitle:@"Yes"];
+				break;
+			}
+			case MB_YESNOCANCEL:
+			{
+				[alert addButtonWithTitle:@"Cancel"];
+				[alert addButtonWithTitle:@"No"];
+				[alert addButtonWithTitle:@"Yes"];
+				break;
+			}
 		}
-		case MB_OKCANCEL:
+		auto r = [alert runModal];
+		[msg release];
+		[title release];
+		
+		Res = IDOK;
+		switch (Type & ~MB_SYSTEMMODAL)
 		{
-			[alert addButtonWithTitle:@"Cancel"];
-			[alert addButtonWithTitle:@"Ok"];
-			break;
+			default:
+			case MB_OK:
+				break;
+			case MB_OKCANCEL:
+			{
+				if (r == NSAlertFirstButtonReturn)
+					return IDCANCEL;
+				else if (r == NSAlertSecondButtonReturn)
+					return IDOK;
+				else
+					LAssert(0);
+				break;
+			}
+			case MB_YESNO:
+			{
+				if (r == NSAlertFirstButtonReturn)
+					return IDNO;
+				else if (r == NSAlertSecondButtonReturn)
+					return IDYES;
+				else
+					LAssert(0);
+				break;
+			}
+			case MB_YESNOCANCEL:
+			{
+				if (r == NSAlertFirstButtonReturn)
+					return IDCANCEL;
+				else if (r == NSAlertSecondButtonReturn)
+					return IDNO;
+				else if (r == NSAlertThirdButtonReturn)
+					return IDYES;
+				else
+					LAssert(0);
+				break;
+			}
 		}
-		case MB_YESNO:
-		{
-			[alert addButtonWithTitle:@"No"];
-			[alert addButtonWithTitle:@"Yes"];
-			break;
-		}
-		case MB_YESNOCANCEL:
-		{
-			[alert addButtonWithTitle:@"Cancel"];
-			[alert addButtonWithTitle:@"No"];
-			[alert addButtonWithTitle:@"Yes"];
-			break;
-		}
-	}
-	auto r = [alert runModal];
-	[msg release];
-	[title release];
-	
-	Res = IDOK;
-	switch (Type & ~MB_SYSTEMMODAL)
-	{
-		default:
-		case MB_OK:
-			break;
-		case MB_OKCANCEL:
-		{
-			if (r == NSAlertFirstButtonReturn)
-				return IDCANCEL;
-			else if (r == NSAlertSecondButtonReturn)
-				return IDOK;
-			else
-				LAssert(0);
-			break;
-		}
-		case MB_YESNO:
-		{
-			if (r == NSAlertFirstButtonReturn)
-				return IDNO;
-			else if (r == NSAlertSecondButtonReturn)
-				return IDYES;
-			else
-				LAssert(0);
-			break;
-		}
-		case MB_YESNOCANCEL:
-		{
-			if (r == NSAlertFirstButtonReturn)
-				return IDCANCEL;
-			else if (r == NSAlertSecondButtonReturn)
-				return IDNO;
-			else if (r == NSAlertThirdButtonReturn)
-				return IDYES;
-			else
-				LAssert(0);
-			break;
-		}
-	}
 
 	#elif defined(__GTK_H__)
 
-	using namespace Gtk;
-
-	GtkButtonsType GtkType;
-	switch (Type & ~MB_SYSTEMMODAL)
-	{
-		default:
-		case MB_OK:
-			GtkType = GTK_BUTTONS_OK;
-			break;
-		case MB_OKCANCEL:
-			GtkType = GTK_BUTTONS_OK_CANCEL;
-			break;
-		case MB_YESNO:
-		case MB_YESNOCANCEL: // ugh, soz
-			GtkType = GTK_BUTTONS_YES_NO;
-			break;
-	}
-	GtkWidget *dlg = gtk_message_dialog_new(
-		Parent ? Parent->WindowHandle() : NULL,
-		GTK_DIALOG_MODAL,
-		GTK_MESSAGE_INFO,
-		GtkType,
-		"%s",
-		Msg.Get());
-	if (dlg)
-	{
-		if (Type == MB_YESNOCANCEL)
-			gtk_dialog_add_button(GTK_DIALOG(dlg), "Cancel", GTK_RESPONSE_CANCEL);
-		int Response = 0;
-		g_signal_connect(GTK_DIALOG(dlg), "response", G_CALLBACK(MsgCb), &Response);
-		gtk_dialog_run(GTK_DIALOG(dlg));
-		gtk_widget_destroy(dlg);
+		using namespace Gtk;
 	
-		switch (Response)
+		GtkButtonsType GtkType;
+		switch (Type & ~MB_SYSTEMMODAL)
 		{
-			case GTK_RESPONSE_NONE:
-			case GTK_RESPONSE_REJECT:
-			case GTK_RESPONSE_ACCEPT:
-			case GTK_RESPONSE_DELETE_EVENT:
-			case GTK_RESPONSE_CLOSE:
-			case GTK_RESPONSE_APPLY:
-			case GTK_RESPONSE_HELP:
+			default:
+			case MB_OK:
+				GtkType = GTK_BUTTONS_OK;
 				break;
-			case GTK_RESPONSE_OK:
-				Res = IDOK;
+			case MB_OKCANCEL:
+				GtkType = GTK_BUTTONS_OK_CANCEL;
 				break;
-			case GTK_RESPONSE_CANCEL:
-				Res = IDCANCEL;
-				break;
-			case GTK_RESPONSE_YES:
-				Res = IDYES;
-				break;
-			case GTK_RESPONSE_NO:
-				Res = IDNO;
+			case MB_YESNO:
+			case MB_YESNOCANCEL: // ugh, soz
+				GtkType = GTK_BUTTONS_YES_NO;
 				break;
 		}
-	}
+		GtkWidget *dlg = gtk_message_dialog_new(
+			Parent ? Parent->WindowHandle() : NULL,
+			GTK_DIALOG_MODAL,
+			GTK_MESSAGE_INFO,
+			GtkType,
+			"%s",
+			Msg.Get());
+		if (dlg)
+		{
+			if (Type == MB_YESNOCANCEL)
+				gtk_dialog_add_button(GTK_DIALOG(dlg), "Cancel", GTK_RESPONSE_CANCEL);
+			int Response = 0;
+			g_signal_connect(GTK_DIALOG(dlg), "response", G_CALLBACK(MsgCb), &Response);
+			gtk_dialog_run(GTK_DIALOG(dlg));
+			gtk_widget_destroy(dlg);
+		
+			switch (Response)
+			{
+				case GTK_RESPONSE_NONE:
+				case GTK_RESPONSE_REJECT:
+				case GTK_RESPONSE_ACCEPT:
+				case GTK_RESPONSE_DELETE_EVENT:
+				case GTK_RESPONSE_CLOSE:
+				case GTK_RESPONSE_APPLY:
+				case GTK_RESPONSE_HELP:
+					break;
+				case GTK_RESPONSE_OK:
+					Res = IDOK;
+					break;
+				case GTK_RESPONSE_CANCEL:
+					Res = IDCANCEL;
+					break;
+				case GTK_RESPONSE_YES:
+					Res = IDYES;
+					break;
+				case GTK_RESPONSE_NO:
+					Res = IDNO;
+					break;
+			}
+		}
 	
 	#else // Lgi only controls (used for Linux + Mac)
 
 	if (Str && LAppInst)
 	{
-		GMsgDlg Dlg;
+		LMsgDlg Dlg;
 		Dlg.SetParent(Parent);
 		Dlg.Name((char*)(Title ? Title : "Message"));
 

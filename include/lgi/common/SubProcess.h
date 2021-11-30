@@ -34,7 +34,7 @@
 #if defined(MAC)
 	#include <errno.h>
 	#define GSUBPROCESS_ERROR	EBADEXEC
-#elif defined(LINUX)
+#elif defined(LINUX) || defined(HAIKU)
 	#include <errno.h>
 	#define GSUBPROCESS_ERROR	ECHILD
 #elif defined(WINDOWS)

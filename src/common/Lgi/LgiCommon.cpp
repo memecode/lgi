@@ -40,7 +40,9 @@
 	#include "lgi/common/SubProcess.h"
 #endif
 
+#ifndef HAIKU
 #include "SymLookup.h"
+#endif
 #include "lgi/common/Library.h"
 
 #if defined(__GTK_H__)
@@ -616,6 +618,7 @@ void LgiTrace(const char *Msg, ...)
 
 void LStackTrace(const char *Msg, ...)
 {
+	#ifndef HAIKU
 	LSymLookup::Addr Stack[STACK_SIZE];
 	ZeroObj(Stack);
 	LSymLookup *Lu = LAppInst ? LAppInst->GetSymLookup() : NULL;
@@ -663,6 +666,7 @@ void LStackTrace(const char *Msg, ...)
 		printf("Trace: %s", Buffer);
 		#endif
 	}
+	#endif
 }
 #endif
 
@@ -2745,7 +2749,7 @@ LString LGetAppForProtocol(const char *Protocol)
 		}
 		CFRelease(Handler);
 	#else
-		#error "Impl me."
+		#warning "Impl me."
 	#endif
 
 	return App;

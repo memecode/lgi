@@ -310,7 +310,7 @@ bool GTrayIcon::Load(const TCHAR *Str)
 	
 	#else
 	
-		LAutoString File(LgiFindFile(Str));
+		auto File = LFindFile(Str);
 		if (File)
 		{
 			LSurface *i = GdcD->Load(File);

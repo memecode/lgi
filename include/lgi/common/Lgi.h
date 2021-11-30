@@ -204,7 +204,11 @@
 #define __LGI_H
 
 /// \brief Define as '1' if Iconv is available else as '0'
+#ifdef HAIKU
+#define HAS_ICONV							0
+#else
 #define HAS_ICONV							1
+#endif
 
 /// \brief Define as '1' if libjpeg is available else as '0'
 #define HAS_LIBJPEG							1

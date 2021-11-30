@@ -1,9 +1,7 @@
 /// \file
 /// \author Matthew Allen
 /// \brief Growable, type-safe array.
-
-#ifndef _GARRAY_H_
-#define _GARRAY_H_
+#pragma once 
 
 #include <stdlib.h>
 #include <assert.h>
@@ -872,4 +870,3 @@ public:
 	}
 };
 
-#endif

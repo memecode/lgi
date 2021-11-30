@@ -1,0 +1,226 @@
+/*hdr
+**      FILE:           GuiDlg.cpp
+**      AUTHOR:         Matthew Allen
+**      DATE:           8/9/1998
+**      DESCRIPTION:    Dialog components
+**
+**      Copyright (C) 1998 Matthew Allen
+**              fret@memecode.com
+*/
+
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Slider.h"
+#include "lgi/common/Bitmap.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/DisplayString.h"
+#include "lgi/common/Button.h"
+
+///////////////////////////////////////////////////////////////////////////////////////////
+#define GreyBackground()
+
+struct LDialogPriv
+{
+	int ModalStatus;
+	int BtnId;
+	bool IsModal, IsModeless;
+	bool Resizable;
+	
+	LDialogPriv()
+	{
+		IsModal = false;
+		IsModeless = false;
+		Resizable = true;
+		ModalStatus = 0;
+		BtnId = -1;
+	}
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////
+LDialog::LDialog()
+	:
+	#ifdef __GTK_H__
+	// , LWindow(gtk_dialog_new())
+	LWindow(gtk_window_new(GTK_WINDOW_TOPLEVEL)),
+	#endif
+	ResObject(Res_Dialog)
+{
+	d = new LDialogPriv();
+	Name("Dialog");
+}
+
+LDialog::~LDialog()
+{
+	DeleteObj(d);
+}
+
+bool LDialog::IsModal()
+{
+	return d->IsModal;
+}
+
+int LDialog::GetButtonId()
+{
+	return d->BtnId;
+}
+
+int LDialog::OnNotify(LViewI *Ctrl, LNotification n)
+{
+	LButton *b = dynamic_cast<LButton*>(Ctrl);
+	if (b)
+	{
+		d->BtnId = b->GetId();
+		
+		if (d->IsModal)
+			EndModal();
+		else if (d->IsModeless)
+			EndModeless();
+	}
+
+	return 0;
+}
+
+
+void LDialog::Quit(bool DontDelete)
+{
+	if (d->IsModal)
+		EndModal(0);
+	else
+		LView::Quit(DontDelete);
+}
+
+void LDialog::OnPosChange()
+{
+	LWindow::OnPosChange();
+    if (Children.Length() == 1)
+    {
+        List<LViewI>::I it = Children.begin();
+        LTableLayout *t = dynamic_cast<LTableLayout*>((LViewI*)it);
+        if (t)
+        {
+            LRect r = GetClient();
+            r.Size(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
+            t->SetPos(r);
+
+			// _Dump();
+        }
+    }
+}
+
+bool LDialog::LoadFromResource(int Resource, char *TagList)
+{
+	LAutoString n;
+	LRect p;
+	LProfile Prof("LDialog::LoadFromResource");
+
+	bool Status = LResourceLoad::LoadFromResource(Resource, this, &p, &n, TagList);
+	if (Status)
+	{
+		Prof.Add("Name.");
+		Name(n);
+		SetPos(p);
+	}
+	
+	return Status;
+}
+
+bool LDialog::OnRequestClose(bool OsClose)
+{
+	if (d->IsModal)
+	{
+		EndModal(0);
+		return false;
+	}
+
+	return true;
+}
+
+int LDialog::DoModal(OsView OverrideParent)
+{
+	d->ModalStatus = -1;
+	
+	auto Parent = GetParent();
+	if (Parent)
+	{
+		MoveSameScreen(Parent);
+	}
+
+	d->IsModal = true;
+	d->IsModeless = false;
+	LAppInst->Run();
+	
+	return d->ModalStatus;
+}
+
+void LDialog::EndModal(int Code)
+{
+	if (d->IsModal)
+	{
+		d->IsModal = false;
+		d->ModalStatus = Code;
+		LAppInst->Exit();
+	}
+	else
+	{
+		// LAssert(0);
+	}
+}
+
+int LDialog::DoModeless()
+{
+	d->IsModal = false;
+	d->IsModeless = true;
+	return 0;
+}
+
+void LDialog::EndModeless(int Code)
+{
+	Quit(Code);
+}
+
+extern LButton *FindDefault(LView *w);
+
+LMessage::Param LDialog::OnEvent(LMessage *Msg)
+{
+	return LView::OnEvent(Msg);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+LControl::LControl(OsView view) : LView(view)
+{
+	Pos.ZOff(10, 10);
+}
+
+LControl::~LControl()
+{
+}
+
+LMessage::Param LControl::OnEvent(LMessage *Msg)
+{
+	return 0;
+}
+
+LPoint LControl::SizeOfStr(const char *Str)
+{
+	int y = LSysFont->GetHeight();
+	LPoint Pt(0, 0);
+
+	if (Str)
+	{
+		const char *e = 0;
+		for (const char *s = Str; s && *s; s = e?e+1:0)
+		{
+			e = strchr(s, '\n');
+			auto Len = e ? e - s : strlen(s);
+
+			LDisplayString ds(LSysFont, s, Len);
+			Pt.x = MAX(Pt.x, ds.X());
+			Pt.y += y;
+		}
+	}
+
+	return Pt;
+}
+

@@ -1383,7 +1383,7 @@ void LToolBar::OnButtonClick(LToolButton *Btn)
 	{
 		int Id = Btn->GetId();
         v->PostEvent(M_COMMAND, (LMessage::Param) Id
-			#ifndef __GTK_H__
+			#if LGI_VIEW_HANDLE
         	, (LMessage::Param) Handle()
         	#endif
         	);

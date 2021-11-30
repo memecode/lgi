@@ -79,7 +79,7 @@ protected:
 		ATSUTextMeasurement fDescent;
 	#endif
 	
-	#elif defined(WINNATIVE) || defined(BEOS)
+	#elif defined(WINNATIVE) || defined(HAIKU)
 	
 	class CharInfo
 	{

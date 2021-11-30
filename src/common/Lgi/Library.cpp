@@ -9,6 +9,11 @@
 #include <dlfcn.h>
 #endif
 #include "lgi/common/Token.h"
+#ifdef HAIKU
+#include <dlfcn.h>
+// #define RTLD_NOW 0
+#endif
+
 
 GLibrary::GLibrary(const char *File, bool Quiet)
 {

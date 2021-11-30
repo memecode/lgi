@@ -715,7 +715,7 @@ bool LFontType::GetSystemFont(const char *Which)
 
 			#else
 
-			#error "Impl me"
+			#warning "Impl me"
 
 			#endif
 		}

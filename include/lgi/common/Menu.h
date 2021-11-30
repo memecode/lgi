@@ -30,6 +30,9 @@
 		typedef MenuRef OsSubMenu;
 		typedef MenuItemIndex OsMenuItem;
 	#endif
+#elif defined(HAIKU)
+	typedef class BMenu *OsSubMenu;
+	typedef class BMenuItem *OsMenuItem;
 #else
 	#include "LMenuImpl.h"
 	typedef class MenuClickImpl *OsSubMenu;

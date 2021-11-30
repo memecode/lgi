@@ -1270,7 +1270,9 @@ int LSocket::Error(void *Param)
 		{ETIMEOUT,			"Operation timed out."},
 		{EDESTADDRREQ,		"Destination address required."},
 		{EHOSTDOWN,			"Host is down."},
+		#ifndef HAIKU
 		{ESOCKTNOSUPPORT,	"Socket type not supported."},
+		#endif
 		
 		#endif
 		{-1, 0}

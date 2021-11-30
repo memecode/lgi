@@ -715,7 +715,7 @@ bool LPopup::Attach(LViewI *p)
 
 	GetWindow();
 
-	#ifdef __GTK_H__
+	#if !LGI_VIEW_HANDLE
 	return true;
 	#else
 	return Handle() != 0;
@@ -811,7 +811,11 @@ void LPopup::Visible(bool i)
 			}
 		#else
 
-			if (!Handle() && i)
+			if (
+				#if LGI_VIEW_HANDLE
+				!Handle() &&
+				#endif
+				i)
 			{
 				#if WINNATIVE
 				SetStyle(WS_POPUP);
