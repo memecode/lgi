@@ -267,12 +267,14 @@ Window.o : ./src/linux/Lgi/Window.cpp ./include/lgi/common/Lgi.h \
 	./include/lgi/common/Panel.h \
 	./include/lgi/common/Notifications.h \
 	./include/lgi/common/Menu.h \
+	./private/common/ViewPriv.h \
 	./include/lgi/linux/Gtk/LgiWidget.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
 LgiWidget.o : ./src/linux/Gtk/LgiWidget.cpp ./include/lgi/common/Lgi.h \
 	./include/lgi/common/DragAndDrop.h \
+	./private/common/ViewPriv.h \
 	./include/lgi/linux/Gtk/LgiWidget.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
