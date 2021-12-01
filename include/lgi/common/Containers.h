@@ -10,6 +10,7 @@
 #ifndef _CONTAIN_H_
 #define _CONTAIN_H_
 
+#include <stdlib.h>
 #include "lgi/common/LgiInc.h"
 #include "LgiOsDefs.h"
 #include "lgi/common/Stream.h"
@@ -659,10 +660,36 @@ public:
 			User Data;
 		} ud = {Compare, Data};
 		
-		// int (* _Nonnull __compar)(void *, const void *, const void *)
-		qsort_r(a.AddressOf(), a.Length(), sizeof(T*), &ud, [](void *ud, const void *a, const void *b){
-			return ((UserData*)ud)->Compare(*(T**)a, *(T**)b, ((UserData*)ud)->Data);
-		});
+		
+		#if defined(WINDOWS)
+		/*
+		_ACRTIMP void __cdecl qsort_s(
+			_Inout_updates_bytes_(_NumOfElements * _SizeOfElements) void*   _Base,
+			_In_                                                    rsize_t _NumOfElements,
+			_In_                                                    rsize_t _SizeOfElements,
+			_In_ int (__cdecl* _PtFuncCompare)(void*, void const*, void const*),
+			_In_                                                    void*   _Context
+			);
+		*/
+		qsort_s
+		#else
+		qsort_r
+		#endif
+			(
+				a.AddressOf(),
+				a.Length(),
+				sizeof(T*),
+				#if !defined(WINDOWS)
+				&ud,
+				#endif
+				[](void *ud, const void *a, const void *b)
+				{
+					return ((UserData*)ud)->Compare(*(T**)a, *(T**)b, ((UserData*)ud)->Data);
+				}
+				#if defined(WINDOWS)
+				,&ud
+				#endif
+			);
 
 		// prof.Add("Copy");
 
