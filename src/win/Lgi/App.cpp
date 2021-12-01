@@ -2,17 +2,19 @@
 #ifndef _MSC_VER
 #include <basetyps.h>
 #endif
-#include "lgi/common/Lgi.h"
+#include <winsock2.h>
 #include <ole2.h>
 #include <commctrl.h>
 #include <time.h>
+#include <stdio.h>
+#include "lgi/common/Lgi.h"
 #include "lgi/common/SkinEngine.h"
 #include "lgi/common/DocView.h"
 #include "lgi/common/Token.h"
 #include "lgi/common/Css.h"
-#include <stdio.h>
 #include "lgi/common/SpellCheck.h"
 #include "lgi/common/Json.h"
+#include "AppPriv.h"
 
 // Don't have a better place to put this...
 const char LSpellCheck::Delimiters[] =
@@ -89,8 +91,6 @@ LApp *LApp::ObjInstance()
 	return TheApp;
 }
 
-#include "GAppPriv.h"
-
 /////////////////////////////////////////////////////////////////////////////
 LONG __stdcall _ExceptionFilter_Redir(LPEXCEPTION_POINTERS e)
 {
@@ -103,8 +103,8 @@ LONG __stdcall _ExceptionFilter_Redir(LPEXCEPTION_POINTERS e)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-LSkinEngine *LApp::SkinEngine = 0;
-LMouseHook *LApp::MouseHook = 0;
+LSkinEngine *LApp::SkinEngine = NULL;
+LMouseHook *LApp::MouseHook = NULL;
 LMouseHook *LApp::GetMouseHook()
 {
 	return MouseHook;

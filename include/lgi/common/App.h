@@ -139,14 +139,14 @@ protected:
 	#endif
 
 	friend class LMouseHook;
-	static LMouseHook *MouseHook = NULL;
+	static LMouseHook *MouseHook;
 
 public:
 	// Static publics
 	
 	/// Use 'LAppInst' to return a pointer to the LApp object
 	static LApp *ObjInstance();
-	static class LSkinEngine *SkinEngine = NULL;
+	static class LSkinEngine *SkinEngine;
 
 	// public member vars
 	

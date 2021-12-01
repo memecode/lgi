@@ -62,7 +62,9 @@
 #include <stdbool.h>
 #endif
 #include "lgi/common/LgiInc.h"
-// #include "lgi/common/LgiDefs.h"
+#ifndef HAIKU
+#include "lgi/common/LgiDefs.h"
+#endif
 
 #ifdef LINUX
 #include <unistd.h>

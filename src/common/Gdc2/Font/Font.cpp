@@ -25,6 +25,8 @@
 #include "lgi/common/GdiLeak.h"
 #include "lgi/common/Css.h"
 
+#include "FontPriv.h"
+
 #ifdef FontChange
 #undef FontChange
 #endif
@@ -131,8 +133,6 @@
 #endif
 
 ////////////////////////////////////////////////////////////////////
-#include "FontPriv.h"
-
 #ifdef WINDOWS
 LAutoPtr<GLibrary> LFontPrivate::Gdi32;
 #endif
