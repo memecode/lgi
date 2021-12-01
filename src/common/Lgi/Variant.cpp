@@ -1521,7 +1521,9 @@ LDom *LDom::ResolveObject(const char *Var, LString &Name, LString &Array)
 				else e++;
 			}
 		
-			t.New() = LString(s, e - s).Strip();
+			LString part = LString(s, e - s).Strip();
+			if (part.Length() > 0)
+				t.New() = part;
 			s = *e ? e + 1 : e;
 		}
 

@@ -662,15 +662,11 @@ public:
 		
 		
 		#if defined(WINDOWS)
-		/*
-		_ACRTIMP void __cdecl qsort_s(
-			_Inout_updates_bytes_(_NumOfElements * _SizeOfElements) void*   _Base,
-			_In_                                                    rsize_t _NumOfElements,
-			_In_                                                    rsize_t _SizeOfElements,
-			_In_ int (__cdecl* _PtFuncCompare)(void*, void const*, void const*),
-			_In_                                                    void*   _Context
-			);
-		*/
+		/* _ACRTIMP void __cdecl qsort_s(void*   _Base,
+										rsize_t _NumOfElements,
+										rsize_t _SizeOfElements,
+										int (__cdecl* _PtFuncCompare)(void*, void const*, void const*),
+										void*   _Context); */
 		qsort_s
 		#else
 		qsort_r
