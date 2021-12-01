@@ -914,63 +914,64 @@ bool LDateTime::Set(time_t tt)
 
 bool LDateTime::Get(uint64 &s) const
 {
-	#ifdef WIN32
-	FILETIME Utc;
-	SYSTEMTIME System;
+	#ifdef WINDOWS
+	
+		FILETIME Utc;
+		SYSTEMTIME System;
 
-	System.wYear = _Year;
-	System.wMonth = limit(_Month, 1, 12);
-	System.wDay = limit(_Day, 1, 31);
-	System.wHour = limit(_Hours, 0, 23);
-	System.wMinute = limit(_Minutes, 0, 59);
-	System.wSecond = limit(_Seconds, 0, 59);
-	System.wMilliseconds = limit(_Thousands, 0, 999);
-	System.wDayOfWeek = DayOfWeek();
+		System.wYear			= _Year;
+		System.wMonth			= limit(_Month, 1, 12);
+		System.wDay				= limit(_Day, 1, 31);
+		System.wHour			= limit(_Hours, 0, 23);
+		System.wMinute			= limit(_Minutes, 0, 59);
+		System.wSecond			= limit(_Seconds, 0, 59);
+		System.wMilliseconds	= limit(_Thousands, 0, 999);
+		System.wDayOfWeek		= DayOfWeek();
 
-	BOOL b1;
-	if (b1 = SystemTimeToFileTime(&System, &Utc))
-	{
-		// Convert to 64bit
-		s = ((uint64)Utc.dwHighDateTime << 32) | Utc.dwLowDateTime;
+		BOOL b1;
+		if (b1 = SystemTimeToFileTime(&System, &Utc))
+		{
+			// Convert to 64bit
+			s = ((uint64)Utc.dwHighDateTime << 32) | Utc.dwLowDateTime;
 
-		// Adjust for timezone
-		s -= (int64)_Tz * 60 * Second64Bit;
+			// Adjust for timezone
+			s -= (int64)_Tz * 60 * Second64Bit;
 
-		return true;
-	}
+			return true;
+		}
 
-    DWORD Err = GetLastError();
-    s = 0;
-    LAssert(!"SystemTimeToFileTime failed."); 
-	return false;
+		DWORD Err = GetLastError();
+		s = 0;
+		LAssert(!"SystemTimeToFileTime failed.");
+		return false;
 	
 	#else
 	
-	struct tm t;
-	ZeroObj(t);
-	t.tm_year = _Year - 1900;
-	t.tm_mon = _Month - 1;
-	t.tm_mday = _Day;
+		struct tm t;
+		ZeroObj(t);
+		t.tm_year	= _Year - 1900;
+		t.tm_mon	= _Month - 1;
+		t.tm_mday	= _Day;
 
-	t.tm_hour = _Hours;
-	t.tm_min = _Minutes;
-	t.tm_sec = _Seconds;
-	t.tm_isdst = -1;
-	
-	time_t sec = timegm(&t);
-	if (sec == -1)
-		return false;
-	
-	if (_Tz)
-	{
-		// Adjust the output to UTC from the current timezone.
-		sec -= _Tz * 60;
-		// printf("Adjusting -= %i (%i)\n", _Tz * 60, _Tz);
-	}
-	
-	s = (uint64)sec * Second64Bit + _Thousands;
-	
-	return true;
+		t.tm_hour	= _Hours;
+		t.tm_min	= _Minutes;
+		t.tm_sec	= _Seconds;
+		t.tm_isdst	= -1;
+		
+		time_t sec = timegm(&t);
+		if (sec == -1)
+			return false;
+		
+		if (_Tz)
+		{
+			// Adjust the output to UTC from the current timezone.
+			sec -= _Tz * 60;
+			// printf("Adjusting -= %i (%i)\n", _Tz * 60, _Tz);
+		}
+		
+		s = (uint64)sec * Second64Bit + _Thousands;
+		
+		return true;
 	
 	#endif
 }
@@ -1411,8 +1412,6 @@ bool LDateTime::Serialize(ObjProperties *Props, char *Name, bool Write)
 
 int LDateTime::Compare(const LDateTime *Date) const
 {
-	#if 1
-
 	// this - *Date
 	auto ThisTs = IsValid() ? Ts() : 0;
 	auto DateTs = Date->IsValid() ? Date->Ts() : 0;
@@ -1424,41 +1423,8 @@ int LDateTime::Compare(const LDateTime *Date) const
 	int64_t Diff = (int64_t)ThisTs - DateTs;
 	if (Diff < 0)
 		return -1;
+
 	return Diff > 0 ? 1 : 0;
-
-	#else
-	int c = 0;
-	if (d)
-	{
-		c = _Year - d->_Year;
-		if (!c)
-		{
-			c = _Month - d->_Month;
-			if (!c)
-			{
-				c = _Day - d->_Day;
-				if (!c)
-				{
-					c = _Hours - d->_Hours;
-					if (!c)
-					{
-						c = _Minutes - d->_Minutes;
-						if (!c)
-						{
-							c = _Seconds - d->_Seconds;
-							if (!c)
-							{
-								c = _Thousands - d->_Thousands;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	return c;
-	#endif
 }
 
 bool LDateTime::operator <(const LDateTime &dt) const

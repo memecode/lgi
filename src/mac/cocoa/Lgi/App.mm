@@ -23,7 +23,7 @@
 #include <sys/wait.h>
 
 #import "LCocoaView.h"
-#include "GAppPriv.h"
+#include "AppPriv.h"
 
 extern int hndstate(int hnd);
 

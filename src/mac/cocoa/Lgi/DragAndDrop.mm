@@ -14,9 +14,9 @@ Useful info:
 #include "lgi/common/DragAndDrop.h"
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/Net.h"
-#include "lgi/common/ViewPriv.h"
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/ProgressDlg.h"
+#include "ViewPriv.h"
 
 // #define DND_DEBUG_TRACE
 class LDndSourcePriv;

@@ -109,9 +109,9 @@ RESULT LHash(const CHAR *v, ssize_t l, bool Case)
 
 // Template sort function:
 template<typename T>
-void LSort(T *v, int left, int right, std::function<ssize_t(T, T)> comp)
+void LSort(T *v, ssize_t left, ssize_t right, std::function<ssize_t(T, T)> comp)
 {
-    int i, last;
+    ssize_t i, last;
 
     if (left >= right)
         return;

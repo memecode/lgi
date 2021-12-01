@@ -423,6 +423,8 @@ bool LControlTree::CallMethod(const char *MethodName, LVariant *ReturnValue, LAr
 			*ReturnValue = Serialize(Store, Write);
 			return true;
 		}
+		default:
+			break;
 	}
 
 	return false;

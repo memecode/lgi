@@ -13,6 +13,7 @@
 #include "lgi/common/LgiInc.h"
 #include "LgiOsDefs.h"
 #include "lgi/common/Stream.h"
+#include "lgi/common/Profile.h"
 #include <cstdlib>
 
 ///	Template for using DLinkList with a type safe API.
@@ -413,128 +414,6 @@ protected:
 		return Iter(this);
 	}
 
-	#if 1
-	class BTreeNode
-	{
-	public:
-		T *Node;
-		BTreeNode *Left;
-		BTreeNode *Right;
-
-		T ***Index(T ***Items)
-		{
-			if (Left)
-			{
-				Items = Left->Index(Items);
-			}
-
-			**Items = Node;
-			Items++;
-
-			if (Right)
-			{
-				Items = Right->Index(Items);
-			}
-
-			return Items;
-		}	
-	};
-
-	class BTree
-	{
-		size_t Items;
-		size_t Used;
-		BTreeNode *Node;
-		BTreeNode *Min;
-		BTreeNode *Max;
-
-	public:
-		BTree(size_t i)
-		{
-			Used = 0;
-			Min = Max = 0;
-			Node = new BTreeNode[Items = i];
-			if (Node)
-			{
-				memset(Node, 0, Items * sizeof(BTreeNode));
-			}
-		}
-
-		~BTree()
-		{
-			DeleteArray(Node);
-		}
-
-		int GetItems() { return Used; }
-
-		template<typename User>
-		bool Add(T *Obj, int (*Cmp)(T *a, T *b, User data), User Data)
-		{
-			if (Used)
-			{
-				BTreeNode *Cur = Node;
-			
-				if (Used < Items)
-				{
-					if (Cmp(Obj, Max->Node, Data) >= 0)
-					{
-						Max->Right = Node + Used++;
-						Max = Max->Right;
-						Max->Node = Obj;
-						return true;
-					}
-
-					if (Cmp(Obj, Min->Node, Data) < 0)
-					{
-						Min->Left = Node + Used++;
-						Min = Min->Left;
-						Min->Node = Obj;
-						return true;
-					}
-
-					while (true)
-					{
-						int c = Cmp(Obj, Cur->Node, Data);
-						BTreeNode **Ptr = (c < 0) ? &Cur->Left : &Cur->Right;
-						if (*Ptr)
-						{
-							Cur = *Ptr;
-						}
-						else if (Used < Items)
-						{
-							*Ptr = &Node[Used++];
-							(*Ptr)->Node = Obj;
-							return true;
-						}
-						else return false;
-					}
-				}
-				else
-				{
-					LAssert(0);
-				}
-
-				return false;
-			}
-			else
-			{
-				Min = Max = Node;
-				Node[Used++].Node = Obj;
-				return true;
-			}
-		}
-
-		void Index(T ***Items)
-		{
-			if (Node)
-			{
-				Node->Index(Items);
-			}
-		}
-	};
-	#endif
-
-
 public:
 	List<T>()
 	{
@@ -763,7 +642,7 @@ public:
 
 		VALIDATE();
 
-		#if 0
+		// LProfile prof("List<T>Sort");
 
 		// Save the List to an Array
 		LArray<T*> a;
@@ -773,46 +652,25 @@ public:
 			for (int n=0; n<i->Count; n++)
 				*p++ = i->Ptr[n];
 		
-		// Sort
-		LSort<T*>
-		(
-			a.AddressOf(),
-			0, a.Length()-1,
-			[Compare, Data](T *a, T *b) -> ssize_t
-			{
-				return Compare(a, b, Data);
-			}
-		);
+		// prof.Add("Compare");
+
+		struct UserData {
+			int (*Compare)(T *a, T *b, User data);
+			User Data;
+		} ud = {Compare, Data};
+		
+		// int (* _Nonnull __compar)(void *, const void *, const void *)
+		qsort_r(a.AddressOf(), a.Length(), sizeof(T*), &ud, [](void *ud, const void *a, const void *b){
+			return ((UserData*)ud)->Compare(*(T**)a, *(T**)b, ((UserData*)ud)->Data);
+		});
+
+		// prof.Add("Copy");
 
 		// Copy back to the List
 		p = a.AddressOf();
 		for (LstBlk *i = FirstObj; i; i = i->Next)
 			for (int n=0; n<i->Count; n++)
 				i->Ptr[n] = *p++;
-
-		#else
-
-		BTree Tree(Items);
-		T ***iLst = new T**[Items];
-		if (iLst)
-		{
-			int n=0;
-			LstBlk *i = FirstObj;
-			while (i)
-			{
-				for (int k=0; k<i->Count; k++)
-				{
-					iLst[n++] = i->Ptr + k;
-					Tree.Add(i->Ptr[k], Compare, Data);
-				}
-				i = i->Next;
-			}
-
-			Tree.Index(iLst);
-			delete [] iLst;
-		}
-		
-		#endif
 
 		VALIDATE();
 	}

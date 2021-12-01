@@ -10,6 +10,10 @@
 		340833152698F8FF0028012F /* FontPriv.h in Headers */ = {isa = PBXBuildFile; fileRef = 340833122698F8FE0028012F /* FontPriv.h */; };
 		340833162698F8FF0028012F /* FontType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 340833132698F8FE0028012F /* FontType.cpp */; };
 		340833172698F8FF0028012F /* TypeFace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 340833142698F8FE0028012F /* TypeFace.cpp */; };
+		3409C0CA27580ED60050302A /* ListItemRadioBtn.h in Headers */ = {isa = PBXBuildFile; fileRef = 3409C0C727580ED60050302A /* ListItemRadioBtn.h */; };
+		3409C0CB27580ED60050302A /* List.h in Headers */ = {isa = PBXBuildFile; fileRef = 3409C0C827580ED60050302A /* List.h */; };
+		3409C0CC27580ED60050302A /* ListItemCheckBox.h in Headers */ = {isa = PBXBuildFile; fileRef = 3409C0C927580ED60050302A /* ListItemCheckBox.h */; };
+		3409C0D0275812CB0050302A /* Profile.h in Headers */ = {isa = PBXBuildFile; fileRef = 3409C0CF275812CB0050302A /* Profile.h */; };
 		34109857217A9805007020CE /* CocoaView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 34109856217A9805007020CE /* CocoaView.mm */; };
 		34114C8B23091E6E00F342B1 /* LgiClasses.h in Headers */ = {isa = PBXBuildFile; fileRef = 34114C8A23091E6E00F342B1 /* LgiClasses.h */; };
 		3413170E23068FFE008CE982 /* FileSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3413170D23068FFE008CE982 /* FileSelect.cpp */; };
@@ -164,6 +168,10 @@
 		340833122698F8FE0028012F /* FontPriv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FontPriv.h; path = ../../../common/Gdc2/Font/FontPriv.h; sourceTree = "<group>"; };
 		340833132698F8FE0028012F /* FontType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FontType.cpp; path = ../../../common/Gdc2/Font/FontType.cpp; sourceTree = "<group>"; };
 		340833142698F8FE0028012F /* TypeFace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TypeFace.cpp; path = ../../../common/Gdc2/Font/TypeFace.cpp; sourceTree = "<group>"; };
+		3409C0C727580ED60050302A /* ListItemRadioBtn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ListItemRadioBtn.h; path = ../../../../include/lgi/common/ListItemRadioBtn.h; sourceTree = "<group>"; };
+		3409C0C827580ED60050302A /* List.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = List.h; path = ../../../../include/lgi/common/List.h; sourceTree = "<group>"; };
+		3409C0C927580ED60050302A /* ListItemCheckBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ListItemCheckBox.h; path = ../../../../include/lgi/common/ListItemCheckBox.h; sourceTree = "<group>"; };
+		3409C0CF275812CB0050302A /* Profile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Profile.h; path = ../../../include/lgi/common/Profile.h; sourceTree = "<group>"; };
 		34109853217A975E007020CE /* LCocoaView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LCocoaView.h; path = ../../../../include/lgi/mac/cocoa/LCocoaView.h; sourceTree = "<group>"; };
 		34109856217A9805007020CE /* CocoaView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = CocoaView.mm; path = Lgi/CocoaView.mm; sourceTree = SOURCE_ROOT; };
 		34114C8A23091E6E00F342B1 /* LgiClasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiClasses.h; path = ../../../include/lgi/common/LgiClasses.h; sourceTree = "<group>"; };
@@ -351,6 +359,7 @@
 		3477C25E1CBF020F0028B84B = {
 			isa = PBXGroup;
 			children = (
+				3409C0CF275812CB0050302A /* Profile.h */,
 				346FACE81D3C723700FFEBCE /* Resources */,
 				3477C26A1CBF020F0028B84B /* Classes */,
 				3477C29A1CBF0A700028B84B /* Headers */,
@@ -575,8 +584,6 @@
 		3477C2CC1CC046370028B84B /* Widgets */ = {
 			isa = PBXGroup;
 			children = (
-				3415168D26EC32C8007EE35F /* TextCtrls */,
-				34B14E3326951C6E004C22CC /* Slider.cpp */,
 				3477C2F21CC04BF00028B84B /* Bitmap.cpp */,
 				3477C2F31CC04BF00028B84B /* Box.cpp */,
 				3477C2F41CC04BF00028B84B /* Button.cpp */,
@@ -584,6 +591,10 @@
 				3477C2F61CC04BF00028B84B /* Combo.cpp */,
 				3477C2F71CC04BF00028B84B /* Edit.cpp */,
 				3477C2EC1CC04BBB0028B84B /* ItemContainer.cpp */,
+				3477C2ED1CC04BBB0028B84B /* List.cpp */,
+				3409C0C827580ED60050302A /* List.h */,
+				3409C0C927580ED60050302A /* ListItemCheckBox.h */,
+				3409C0C727580ED60050302A /* ListItemRadioBtn.h */,
 				3477C2F81CC04BF00028B84B /* Panel.cpp */,
 				3477C2D61CC048390028B84B /* Popup.cpp */,
 				345EB84D235C6C01007D05DB /* Popup.h */,
@@ -594,13 +605,14 @@
 				3477C2FA1CC04BF00028B84B /* RadioGroup.cpp */,
 				346DDEC0240C882900751380 /* RadioGroup.h */,
 				3477C2DE1CC04A030028B84B /* ScrollBar.cpp */,
+				34B14E3326951C6E004C22CC /* Slider.cpp */,
 				3477C2FB1CC04BF00028B84B /* Splitter.cpp */,
 				3477C2FC1CC04BF00028B84B /* TableLayout.cpp */,
 				3477C2FD1CC04BF00028B84B /* TabView.cpp */,
+				3415168D26EC32C8007EE35F /* TextCtrls */,
 				3477C2FE1CC04BF00028B84B /* TextLabel.cpp */,
 				3477C2CF1CC047F50028B84B /* ToolBar.cpp */,
 				3477C2EE1CC04BBB0028B84B /* Tree.cpp */,
-				3477C2ED1CC04BBB0028B84B /* List.cpp */,
 			);
 			name = Widgets;
 			sourceTree = "<group>";
@@ -685,6 +697,7 @@
 				3449B8CE26BBF6B10022A9B8 /* Notifications.h in Headers */,
 				343874B8230F46B200CF96B4 /* Layout.h in Headers */,
 				3477C2AC1CBF72170028B84B /* ViewPriv.h in Headers */,
+				3409C0CA27580ED60050302A /* ListItemRadioBtn.h in Headers */,
 				3477C35D1CC2253E0028B84B /* LgiInterfaces.h in Headers */,
 				3477C2A51CBF0A920028B84B /* LgiOsClasses.h in Headers */,
 				3491A28523678DB800604C29 /* DropFiles.h in Headers */,
@@ -694,12 +707,14 @@
 				3477C35B1CC1AEEA0028B84B /* LgiInc.h in Headers */,
 				348362421F233A77003B2A6D /* Stream.h in Headers */,
 				3477C2A61CBF0A920028B84B /* LgiOsDefs.h in Headers */,
+				3409C0CC27580ED60050302A /* ListItemCheckBox.h in Headers */,
 				345EB84E235C6C01007D05DB /* Popup.h in Headers */,
 				34D21CEC217981AE003D1EA6 /* EventTargetThread.h in Headers */,
 				343BE8C72355D0CE00742E21 /* PopupList.h in Headers */,
 				34EE8BB12748A55600F12915 /* TextFile.h in Headers */,
 				34CD9F7223D5768B0039F259 /* Unicode.h in Headers */,
 				34837C4925C677ED00D103B4 /* GAppPriv.h in Headers */,
+				3409C0D0275812CB0050302A /* Profile.h in Headers */,
 				3477C2A11CBF0A920028B84B /* Mem.h in Headers */,
 				3477C2D51CC0481B0028B84B /* Array.h in Headers */,
 				3477C5171CC303B70028B84B /* LgiUiBase.h in Headers */,
@@ -722,6 +737,7 @@
 				3415169426EC32FF007EE35F /* TextView4.h in Headers */,
 				3477C2A81CBF0AAF0028B84B /* Lgi.h in Headers */,
 				345921001F25649000098DFD /* FontCache.h in Headers */,
+				3409C0CB27580ED60050302A /* List.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1036,6 +1052,7 @@
 					../../../include,
 					../../../include/lgi/mac/cocoa,
 					../../../private/mac,
+					../../../private/common,
 				);
 				INFOPLIST_FILE = Lgi/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
@@ -1080,6 +1097,7 @@
 					../../../include,
 					../../../include/lgi/mac/cocoa,
 					../../../private/mac,
+					../../../private/common,
 				);
 				INFOPLIST_FILE = Lgi/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";

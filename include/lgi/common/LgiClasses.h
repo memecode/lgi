@@ -187,43 +187,7 @@ LgiFunc bool LGetDisplays
 	LRect *AllDisplays = 0
 );
 
-/// This class makes it easy to profile a function and write out timings at the end
-class LgiClass LProfile
-{
-	struct Sample
-	{
-		uint64 Time;
-		const char *Name;
-		
-		Sample(uint64 t = 0, const char *n = 0)
-		{
-			Time = t;
-			Name = n;
-		}
-	};
-	
-	LArray<Sample> s;
-	char *Buf;
-	int Used;
-	int MinMs;
-	
-public:
-	LProfile(const char *Name, int HideMs = -1);
-	virtual ~LProfile();
-	
-	void HideResultsIfBelow(int Ms);
-	virtual void Add(const char *Name);
-	virtual void Add(const char *File, int Line);
-};
-
-// This code will assert if the cast fails.
-template<typename A, typename B>
-A &AssertCast(A &a, B b)
-{
-	a = (A) b;	 // If this breaks it'll assert.
-	LAssert((B)a == b);
-	return a;
-}
+#include "lgi/common/Profile.h"
 
 #endif
 

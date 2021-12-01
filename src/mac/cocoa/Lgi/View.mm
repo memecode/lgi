@@ -15,10 +15,10 @@
 #include "lgi/common/DragAndDrop.h"
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Edit.h"
-#include "lgi/common/ViewPriv.h"
 #include "lgi/common/Css.h"
 #include "lgi/common/Popup.h"
 #include "lgi/common/DisplayString.h"
+#include "ViewPriv.h"
 #include "LCocoaView.h"
 
 #define ADJ_LEFT					1
