@@ -1982,6 +1982,21 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b)
 {
 	#ifdef LGI_SDL
 		return LPostEvent(this, Cmd, a, b);
+	#elif defined(HAIKU)
+		BMessage *m = new BMessage(Cmd);
+		if (!m)
+			return false;
+		m->AddUInt64(LMessage::PropNames[0], a);
+		m->AddUInt64(LMessage::PropNames[1], b);
+
+		auto w = d->Window();
+		if (!d->LockLooper())
+			return false;
+
+		status_t r = w->PostMessage(m);
+		d->UnlockLooper();
+
+		return r == B_OK;
 	#elif WINNATIVE
 		if (!_View)
 			return false;

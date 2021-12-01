@@ -14,6 +14,8 @@
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/LgiString.h"
 
+#include <Bitmap.h>
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 #define ROUND_UP(bits) (((bits) + 7) / 8)
 
@@ -21,11 +23,11 @@ class LMemDCPrivate
 {
 public:
 	::LArray<LRect> Client;
-	LColourSpace CreateCs;
+	LColourSpace CreateCs = CsNone;
+	BBitmap *Bmp = NULL;
 
     LMemDCPrivate()
     {
-		CreateCs = CsNone;
     }
 
     ~LMemDCPrivate()
@@ -128,8 +130,54 @@ bool LMemDC::Unlock()
 
 bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 {
-	LAssert(!"Impl me.");
-	return false;
+	BRect b(0, 0, x, y);
+	d->Bmp = new BBitmap(b, B_RGB32, false, true);
+	if (!d->Bmp || d->Bmp->InitCheck() != B_OK)
+	{
+		DeleteObj(d->Bmp);
+		LgiTrace("%s:%i - Failed to create memDC(%i,%i)\n", _FL, x, y);
+		return false;
+	}
+
+	pMem = new GBmpMem;
+	if (!pMem)
+		return false;
+
+	pMem->x = x;
+	pMem->y = y;
+	ColourSpace = pMem->Cs = CsRgba32;
+	pMem->Line = d->Bmp->BytesPerRow();
+	pMem->Base = d->Bmp->Bits();
+
+	int NewOp = (pApp) ? Op() : GDC_SET;
+	if ((Flags & GDC_OWN_APPLICATOR) && !(Flags & GDC_CACHED_APPLICATOR))
+	{
+		DeleteObj(pApp);
+	}
+
+	for (int i=0; i<GDC_CACHE_SIZE; i++)
+	{
+		DeleteObj(pAppCache[i]);
+	}
+
+	if (NewOp < GDC_CACHE_SIZE && !DrawOnAlpha())
+	{
+		pApp = (pAppCache[NewOp]) ? pAppCache[NewOp] : pAppCache[NewOp] = CreateApplicator(NewOp);
+		Flags &= ~GDC_OWN_APPLICATOR;
+		Flags |= GDC_CACHED_APPLICATOR;
+	}
+	else
+	{
+		pApp = CreateApplicator(NewOp);
+		Flags &= ~GDC_CACHED_APPLICATOR;
+		Flags |= GDC_OWN_APPLICATOR;
+	}
+
+	Clip.ZOff(X()-1, Y()-1);
+
+	printf("CreatedBmp: %i,%i %s,%i,%p\n", pMem->x, pMem->y, GColourSpaceToString(pMem->Cs), pMem->Line, pMem->Base);
+
+	return true;
 }
 
 void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)

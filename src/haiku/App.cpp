@@ -449,11 +449,32 @@ void LApp::Exit(int Code)
 	}
 }
 
+/*
 bool LApp::PostEvent(LViewI *View, int Msg, LMessage::Param a, LMessage::Param b)
 {
-	LAssert(!"Impl me.");
-	return false;
+	if (!View)
+		return false;
+
+	BMessage *m = new BMessage(Msg);
+	if (!m)
+		return false;
+	m->AddUInt64(LMessage::PropNames[0], a);
+	m->AddUInt64(LMessage::PropNames[1], b);
+
+	auto v = View->Handle();
+	if (!v)
+		return false;
+
+	auto w = v->Window();
+	if (!w->LockLooper())
+		return false;
+
+	status_t r = Window()->PostMessage(m);
+	w->UnlockLooper()
+
+	return r == B_OK;
 }
+*/
 
 void LApp::OnUrl(const char *Url)
 {
@@ -987,6 +1008,6 @@ bool LMessage::Send(LViewI *View)
 		return false;
 	}
 	
-	return LAppInst->PostEvent(View, m, a, b);
+	return View->PostEvent(m, a, b);
 }
 

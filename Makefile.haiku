@@ -28,7 +28,9 @@ ifeq ($(Build),Debug)
 	Inc =  \
 		-I./private/haiku \
 		-I./include/lgi/haiku \
-		-I./include
+		-I./include \
+		-I./private/common \
+		-I./private/haiku
 else
 	Flags += -s -Os -std=c++14
 	Defs = -DHAIKU -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -D_GNU_SOURCE -DLGI_LIBRARY
@@ -40,7 +42,9 @@ else
 	Inc =  \
 		-I./private/haiku \
 		-I./include/lgi/haiku \
-		-I./include
+		-I./include \
+		-I./private/common \
+		-I./private/haiku
 endif
 
 # Dependencies

@@ -1093,6 +1093,7 @@ public:
 		Building = false;
 		RecentFilesMenu = 0;
 		RecentProjectsMenu = 0;
+
 		Icons = LLoadImageList("icons.png", 16, 16);
 
 		Options.SerializeFile(false);
@@ -1607,6 +1608,7 @@ Chk;
 Chk;
 
 	d = new AppWndPrivate(this);
+
 	Name(AppName);
 	SetQuitOnClose(true);
 
@@ -1618,6 +1620,7 @@ Chk;
 	SetIcon("icon64.png");
 	#endif
 Chk;
+
 	if (!Attach(0))
 	{
 		LgiTrace("%s:%i - Attach failed.\n", _FL);
@@ -4437,21 +4440,29 @@ public:
 };
 */
 
-#include "lgi/common/TextConvert.h"
+class Test : public LWindow
+{
+public:
+	Test()
+	{
+		LRect r(100, 100, 300, 300);
+		SetPos(r);
+		Name("Test");
+		if (Attach(0))
+		{
+			Visible(true);
+		}
+	}
+};
+
 int LgiMain(OsAppArguments &AppArgs)
 {
 	printf("LgiIde v%s\n", APP_VER);
 	LApp a(AppArgs, "LgiIde");
 	if (a.IsOk())
 	{
-		// new SocketTest();
-		#if 0
-		auto s = "=?gb18030?B?0Nyz9sO7?=";
-		LAutoString out(DecodeRfc2047(NewStr(s)));
-		printf("out=%s\n", out.Get());
-		#endif
-
-		a.AppWnd = new AppWnd;
+		// a.AppWnd = new AppWnd;
+		a.AppWnd = new Test;
 		a.Run();
 	}
 

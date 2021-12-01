@@ -1447,6 +1447,7 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
 		pDC.Reset(new LMemDC))
 	{
 		Filter->Props = &Props;
+
 		FilterStatus = Filter->ReadImage(pDC, In);
 		if (FilterStatus != LFilter::IoSuccess)
 		{

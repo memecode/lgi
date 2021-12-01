@@ -14,9 +14,9 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DragAndDrop.h"
 #include "lgi/common/Edit.h"
-#include "lgi/common/ViewPriv.h"
 #include "lgi/common/Popup.h"
 #include "lgi/common/Css.h"
+#include "ViewPriv.h"
 
 #define DEBUG_MOUSE_EVENTS			0
 
@@ -307,6 +307,24 @@ LRect &LView::GetClient(bool ClientSpace)
 	return c;
 }
 
+LViewI *LView::FindControl(OsView hCtrl)
+{
+	if (_View == hCtrl)
+	{
+		return this;
+	}
+
+	for (auto i : Children)
+	{
+		LViewI *Ctrl = i->FindControl(hCtrl);
+		if (Ctrl)
+		{
+			return Ctrl;
+		}
+	}
+	return 0;
+}
+
 void LView::Quit(bool DontDelete)
 {
 	ThreadCheck();
@@ -521,12 +539,7 @@ bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 bool LView::IsAttached()
 {
 	auto w = GetWindow();
-	if (!w)
-		return false;
-
-	w = dynamic_cast<LWindow*>(this);
-
-	return w->IsAttached();
+	return w != NULL;
 }
 
 const char *LView::GetClass()

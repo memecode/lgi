@@ -26,7 +26,7 @@
 #define XP_CTRLS					1
 #define POSIX						1
 #define LGI_64BIT					1
-#define LGI_VIEW_HANDLE				0
+#define LGI_VIEW_HANDLE				1
 #define LGI_VIEW_HASH               1
 #define LGI_HAIKU					1
 

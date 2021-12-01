@@ -1,7 +1,7 @@
 #define __USE_GNU
 #include <stdio.h>
 
-#define DEBUG_LIB_MSGS		1
+#define DEBUG_LIB_MSGS		0
 #define ALLOW_FALLBACK_PATH	0
 
 #include "lgi/common/Lgi.h"
@@ -9,7 +9,6 @@
 #include <dlfcn.h>
 #endif
 #include "lgi/common/Token.h"
-
 
 GLibrary::GLibrary(const char *File, bool Quiet)
 {
@@ -78,6 +77,9 @@ bool GLibrary::Load(const char *File, bool Quiet)
 							stricmp(f, "lgilgid." LGI_LIBRARY_EXT) == 0;			
 				if (!IsLgi) // Bad things happen when we load LGI again.
 				{
+					#if DEBUG_LIB_MSGS
+					LgiTrace("%s:%i - calling dlopen('%s')\n", _FL, FileName);
+					#endif
 					hLib = dlopen(FileName, RTLD_NOW);
 					#if DEBUG_LIB_MSGS
 					LgiTrace("%s:%i - dlopen('%s') = %p\n", _FL, FileName, hLib);
@@ -107,14 +109,14 @@ bool GLibrary::Load(const char *File, bool Quiet)
 					if (hLib)
 					{
 						#if 0 // defined(LINUX) && defined(__USE_GNU)
-						char Path[MAX_PATH];
-						int r = dlinfo(hLib, RTLD_DI_ORIGIN, Path);
-						if (r == 0)
-						{
-							LMakePath(Path, sizeof(Path), Path, File);
-							printf("GLibrary loaded: '%s'\n", Path);
-						}
-						else printf("%s:%i - dlinfo failed.\n", _FL);
+							char Path[MAX_PATH];
+							int r = dlinfo(hLib, RTLD_DI_ORIGIN, Path);
+							if (r == 0)
+							{
+								LMakePath(Path, sizeof(Path), Path, File);
+								printf("GLibrary loaded: '%s'\n", Path);
+							}
+							else printf("%s:%i - dlinfo failed.\n", _FL);
 						#endif
 					}
 					else

@@ -2,23 +2,12 @@
 #define __GLIBRARY_H
 
 // Os specific wrapper typedefs/defines
-#ifdef WIN32
-
-	// Win32
+#if defined(WINDOWS)
 	typedef HMODULE _SysLibHandle;
-
-#else
-
-	// Unix-like systems
-
-	#if defined BEOS
-	typedef image_id _SysLibHandle;
-	#elif defined(LINUX)||defined(MAC)
+#elif defined(POSIX)
 	typedef void *_SysLibHandle;
-	#else // atheos/linux
+#else // atheos/linux
 	typedef int _SysLibHandle;
-	#endif
-
 #endif
 
 // Generic shared library loader

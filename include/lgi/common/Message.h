@@ -222,6 +222,10 @@ public:
 		#endif
 	#endif
 
+	#if defined(HAIKU)
+	static constexpr char *PropNames[2] = {"lgi_a", "lgi_b"};
+	#endif
+
 	LMessage()
 	{
 		#if defined(LGI_SDL)

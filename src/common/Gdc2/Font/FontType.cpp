@@ -433,7 +433,6 @@ bool LFontType::GetSystemFont(const char *Which)
 				font_style style = {0};
 				be_plain_font->GetFamilyAndStyle(&family, &style);
 				Info.PointSize(be_plain_font->Size());
-				printf("SystemFont: '%s' '%s' %f\n", family, style, be_plain_font->Size());
 				Info.Face(family);
 				Status = true;
 
@@ -719,7 +718,6 @@ bool LFontType::GetSystemFont(const char *Which)
 				font_style style = {0};
 				be_fixed_font->GetFamilyAndStyle(&family, &style);
 				Info.PointSize(be_fixed_font->Size());
-				printf("SystemFont: '%s' '%s' %f\n", family, style, be_plain_font->Size());
 				Info.Face(family);
 				Status = true;
 

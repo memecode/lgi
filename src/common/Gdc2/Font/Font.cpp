@@ -269,6 +269,8 @@ bool LFont::Destroy()
 			#else
 			ATSUDisposeStyle(d->hFont);
 			#endif
+		#elif defined(HAIKU)
+			DeleteObj(d->hFont);
 		#else
 			LAssert(0);
 		#endif
@@ -1053,13 +1055,14 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 
 	#elif defined(HAIKU)
 
-		d->SetSize(PointSize());
-		status_t r = d->SetFamilyAndStyle(Face(), "Regular");
+		d->hFont = new BFont();
+		d->hFont->SetSize(PointSize());
+		status_t r = d->hFont->SetFamilyAndStyle(Face(), "Regular");
 		// printf("SetFamilyAndFace(%s)=%i\n", Face(), r);
 		if (r == B_OK)
 		{
 			font_height height;
-			d->GetHeight(&height);
+			d->hFont->GetHeight(&height);
 			d->Height = height.ascent + height.descent + height.leading;
 			return true;
 		}

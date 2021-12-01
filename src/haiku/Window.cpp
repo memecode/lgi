@@ -6,8 +6,8 @@
 #include "lgi/common/Popup.h"
 #include "lgi/common/Panel.h"
 #include "lgi/common/Notifications.h"
-#include "lgi/common/ViewPriv.h"
 #include "lgi/common/Menu.h"
+#include "ViewPriv.h"
 
 #define DEBUG_SETFOCUS			0
 #define DEBUG_HANDLEVIEWKEY		0
@@ -50,7 +50,7 @@ public:
 	bool Active;
 
 	LWindowPrivate() :
-		BWindow(BRect(100,100,200,200),
+		BWindow(BRect(100,100,400,400),
 				"tmp_title",
 				B_DOCUMENT_WINDOW_LOOK,
 				B_NORMAL_WINDOW_FEEL,
@@ -535,6 +535,7 @@ void LWindow::SetDefault(LViewI *v)
 
 bool LWindow::Name(const char *n)
 {
+	d->SetTitle(n);
 	return LBase::Name(n);
 }
 
@@ -545,7 +546,7 @@ const char *LWindow::Name()
 
 LPoint LWindow::GetDpi()
 {
-	return LPoint(96,96);
+	return LPoint(96, 96);
 }
 
 LPointF LWindow::GetDpiScale()
