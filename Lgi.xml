@@ -59,15 +59,15 @@
 					<Node File=".\src\win\Lgi\Window.cpp" Type="2" Platforms="1" />
 					<Node File=".\src\win\Lgi\LgiException.cpp" Type="2" Platforms="1" />
 				</Node>
-				<Node File=".\include\lgi\common\App.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Lgi\WindowCommon.cpp" Type="2" Platforms="15" />
-				<Node File="./private/linux/GAppPriv.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\common\Message.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\common\View.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Lgi\ViewCommon.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\ViewPriv.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\common\Window.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Lgi\AppCommon.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/App.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Lgi/WindowCommon.cpp" Type="2" Platforms="15" />
+				<Node File="./private/linux/AppPriv.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Message.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/View.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Lgi/ViewCommon.cpp" Type="2" Platforms="15" />
+				<Node File="./private/common/ViewPriv.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Window.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Lgi/AppCommon.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Libraries" Type="1" Platforms="15" Open="1" Id="17">
 				<Node File=".\src\common\Lgi\Library.cpp" Type="2" Platforms="15" />
@@ -142,13 +142,13 @@
 				<Node File=".\src\common\Lgi\Variant.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\Variant.h" Type="3" Platforms="15" />
 			</Node>
-			<Node File=".\src\common\Lgi\GuiUtils.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Lgi\Object.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Lgi\ToolTip.cpp" Type="2" Platforms="15" />
-			<Node File=".\include\lgi\common\ToolTip.h" Type="3" Platforms="15" />
-			<Node File=".\src\common\Lgi\TrayIcon.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/GuiUtils.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/Object.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/ToolTip.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/ToolTip.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Lgi/TrayIcon.cpp" Type="2" Platforms="15" />
 			<Node File="./src/common/Lgi/LgiCommon.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Lgi\LMsg.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/LMsg.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="36">
 			<Node Name="File Select Win" Type="1" Platforms="15" Open="0" Id="38">
@@ -239,7 +239,7 @@
 		<Node Name="General" Type="1" Platforms="15" Open="0" Id="54">
 			<Node Name="Clipboard" Type="1" Platforms="15" Open="0" Id="55">
 				<Node Name="Haiku" Type="1" Platforms="15" Open="0" Id="58">
-					<Node File="./src/beos/Lgi/GClipBoard.cpp" Type="2" Platforms="8" />
+					<Node File="./src/haiku/ClipBoard.cpp" Type="2" Platforms="8" />
 				</Node>
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="57">
 					<Node File=".\src\linux\Lgi\ClipBoard.cpp" Type="2" Platforms="2" />
@@ -420,17 +420,15 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Executable>
-				<Linux />
-			</Executable>
-			<CCrossCompiler />
-			<CppCrossCompiler />
+			<Executable />
 		</General>
 		<Build>
 			<IncludePaths>
 				<All>
-					<Debug>./include</Debug>
-					<Release>./include</Release>
+					<Debug>./include
+./private/common</Debug>
+					<Release>./include
+./private/common</Release>
 				</All>
 				<Linux>
 					<Debug>./include/lgi/linux
@@ -438,7 +436,8 @@
 ./private/linux</Debug>
 					<Release>./include/lgi/linux
 ./include/lgi/linux/Gtk
-./private/linux</Release>
+./private/linux
+</Release>
 				</Linux>
 				<Windows>
 					<Debug>include/lgi/win</Debug>
@@ -466,7 +465,6 @@ appindicator3
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
-				<All />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -477,41 +475,16 @@ appindicator3
 			<TargetType>
 				<All>DynamicLibrary</All>
 			</TargetType>
-			<Defines>
-				<All />
-				<Linux />
-			</Defines>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<ApplicationIcon />
+			<Defines />
+			<LibraryPaths />
 		</Build>
 		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
+			<PostBuildCommands />
 		</Advanced>
 		<Debug>
-			<Environment />
-			<Arguments>
-				<All />
-			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
+			<Arguments />
 		</Debug>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
-		<Editor>
-			<TabSize />
-			<IndentSize />
-			<ShowWhiteSpace />
-			<UseHardTabs />
-			<CommentFile />
-			<CommentFunction />
-		</Editor>
+		<Remote />
+		<Editor />
 	</Settings>
 </Project>

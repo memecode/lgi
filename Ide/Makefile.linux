@@ -32,6 +32,7 @@ ifeq ($(Build),Debug)
 		`pkg-config --cflags gtk+-3.0` \
 		-I./Resources \
 		-I./Code \
+		-I../private/common \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
 		-I../include
@@ -50,6 +51,7 @@ else
 		`pkg-config --cflags gtk+-3.0` \
 		-I./Resources \
 		-I./Code \
+		-I../private/common \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
 		-I../include
@@ -236,7 +238,6 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
 	../include/lgi/common/UnrolledList.h \
 	../include/lgi/common/Variant.h \
 	../include/lgi/common/View.h \
-	../include/lgi/common/ViewPriv.h \
 	../include/lgi/common/Widgets.h \
 	../include/lgi/common/Window.h \
 	../include/lgi/common/XmlTree.h \
@@ -252,7 +253,9 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
 	../include/lgi/mac/cocoa/LgiOsDefs.h \
 	../include/lgi/mac/cocoa/ObjCWrapper.h \
 	../include/lgi/mac/cocoa/SymLookup.h \
-	../private/linux/GAppPriv.h \
+	../private/common/FontPriv.h \
+	../private/common/ViewPriv.h \
+	../private/linux/AppPriv.h \
 	../src/common/Gdc2/15Bit.cpp \
 	../src/common/Gdc2/16Bit.cpp \
 	../src/common/Gdc2/24Bit.cpp \
@@ -691,7 +694,6 @@ SpaceTabConv.o : ./Code/SpaceTabConv.cpp ../include/lgi/common/Mem.h \
 
 Html.o : ../src/common/Text/Html.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Html.h \
-	../include/lgi/common/HtmlPriv.h \
 	../include/lgi/common/Token.h \
 	../include/lgi/common/ScrollBar.h \
 	../include/lgi/common/Variant.h \
@@ -711,7 +713,8 @@ Html.o : ../src/common/Text/Html.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Net.h \
 	../include/lgi/common/Base64.h \
 	../include/lgi/common/Menu.h \
-	../include/lgi/common/Homoglyphs.h
+	../include/lgi/common/Homoglyphs.h \
+	../private/common/HtmlPriv.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -818,15 +821,13 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/ScrollBar.h \
 	../include/lgi/common/ClipBoard.h \
 	../include/lgi/common/DisplayString.h \
-	../include/lgi/common/ViewPriv.h \
 	../include/lgi/common/CssTools.h \
 	../include/lgi/common/LgiRes.h \
 	../include/lgi/common/Mail.h \
 	../include/lgi/common/FileSelect.h \
 	../include/lgi/common/Menu.h \
-	../include/lgi/common/DropFiles.h
-
-../include/lgi/common/ViewPriv.h : ../include/lgi/common/ThreadEvent.h
+	../include/lgi/common/DropFiles.h \
+	../private/common/ViewPriv.h
 
 ../include/lgi/common/Mdi.h : ../include/lgi/common/Layout.h
 
@@ -864,6 +865,9 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/LgiString.h \
 	../include/lgi/common/HashTable.h
 
+../private/common/ViewPriv.h : ../include/lgi/common/View.h \
+	../include/lgi/common/ThreadEvent.h
+
 ../src/common/Gdc2/Font/FontCodePages.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Token.h \
 	../include/lgi/common/Font.h
@@ -894,7 +898,6 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Popup.h \
 	../include/lgi/common/Panel.h \
 	../include/lgi/common/Notifications.h \
-	../include/lgi/common/ViewPriv.h \
 	../include/lgi/common/Menu.h \
 	../include/lgi/linux/Gtk/LgiWidget.h
 
@@ -974,6 +977,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/DisplayString.h \
 	../include/lgi/common/GdiLeak.h \
 	../include/lgi/common/Css.h \
+	../private/common/FontPriv.h \
 	../include/lgi/common/FontSelect.h
 
 ../include/lgi/common/Palette.h : ../include/lgi/common/ColourSpace.h \
@@ -1257,7 +1261,8 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 ../include/lgi/common/Mutex.h : ../include/lgi/common/CurrentTime.h \
 	../include/lgi/common/LgiUiBase.h
 
-../src/common/Gdc2/Font/TypeFace.cpp : ../include/lgi/common/Lgi.h
+../src/common/Gdc2/Font/TypeFace.cpp : ../include/lgi/common/Lgi.h \
+	../private/common/FontPriv.h
 
 ../include/lgi/common/RectF.h : 
 
@@ -1271,7 +1276,6 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 
 ../src/linux/Gtk/LgiWidget.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/DragAndDrop.h \
-	../include/lgi/common/ViewPriv.h \
 	../include/lgi/linux/Gtk/LgiWidget.h
 
 ../src/common/Gdc2/15Bit.cpp : ../include/lgi/common/Gdc2.h \
@@ -1308,6 +1312,9 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 ../src/linux/Lgi/Thread.cpp : ../include/lgi/common/Lgi.h
 
 ../include/lgi/common/UnrolledList.h : 
+
+../private/common/ViewPriv.h : ../include/lgi/common/View.h \
+	../include/lgi/common/ThreadEvent.h
 
 ../include/lgi/mac/cocoa/LgiMac.h : 
 
@@ -1475,6 +1482,10 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/LgiNetInc.h : 
 
+../private/common/HtmlPriv.h : ../include/lgi/common/Css.h \
+	../include/lgi/common/Token.h \
+	../include/lgi/common/HtmlParser.h
+
 ../include/lgi/common/OAuth2.h : ../include/lgi/common/Net.h
 
 ../include/lgi/common/File.h : ../include/lgi/common/Mem.h \
@@ -1516,9 +1527,9 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 ../src/linux/Lgi/View.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/DragAndDrop.h \
 	../include/lgi/common/Edit.h \
-	../include/lgi/common/ViewPriv.h \
 	../include/lgi/common/Popup.h \
 	../include/lgi/common/Css.h \
+	../private/common/ViewPriv.h \
 	../include/lgi/linux/Gtk/LgiWidget.h
 
 ../include/lgi/common/Http.h : ../include/lgi/common/Net.h
@@ -1569,7 +1580,8 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Thread.h \
 	../include/lgi/common/Layout.h
 
-../include/lgi/common/LgiDefs.h : ../include/lgi/common/LgiInc.h \
+../include/lgi/common/LgiDefs.h : ../include/lgi/common/View.h \
+	../include/lgi/common/LgiInc.h \
 	../include/lgi/common/AutoPtr.h
 
 ../include/lgi/common/Notifications.h : 
@@ -1657,12 +1669,6 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Unicode.h \
 	../include/lgi/common/Array.h
 
-../private/linux/GAppPriv.h : ../include/lgi/common/Json.h \
-	../include/lgi/linux/SymLookup.h \
-	../include/lgi/linux/Gtk/LgiWinManGlue.h
-
-../include/lgi/linux/SymLookup.h : ../include/lgi/common/SubProcess.h
-
 ../include/lgi/common/Mail.h : ../include/lgi/common/Net.h \
 	../include/lgi/common/Base64.h \
 	../include/lgi/common/Progress.h \
@@ -1739,6 +1745,8 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/StringClass.h
 
 ../include/lgi/common/ListItemCheckBox.h : ../include/lgi/common/List.h
+
+../private/common/FontPriv.h : 
 
 ../include/lgi/common/Mru.h : ../include/lgi/common/FileSelect.h
 
@@ -1821,6 +1829,8 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Library.h \
 	../include/lgi/linux/Gtk/LgiWidget.h
 
+../include/lgi/linux/SymLookup.h : ../include/lgi/common/SubProcess.h
+
 ../include/lgi/common/FontCache.h : ../include/lgi/common/App.h \
 	../include/lgi/common/Font.h
 
@@ -1886,15 +1896,14 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/Error.h : 
 
-../include/lgi/common/ViewPriv.h : ../include/lgi/common/ThreadEvent.h
-
 ../include/lgi/common/ThreadEvent.h : 
 
 ./Code/SpaceTabConv.h : 
 
 ../include/lgi/common/ClipBoard.h : 
 
-../include/lgi/common/LgiDefs.h : ../include/lgi/common/LgiInc.h \
+../include/lgi/common/LgiDefs.h : ../include/lgi/common/View.h \
+	../include/lgi/common/LgiInc.h \
 	../include/lgi/common/AutoPtr.h
 
 ./Code/levenshtein.h : 
@@ -2015,6 +2024,10 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/LgiInc.h : 
 
+../private/linux/AppPriv.h : ../include/lgi/common/Json.h \
+	../include/lgi/linux/SymLookup.h \
+	../include/lgi/linux/Gtk/LgiWinManGlue.h
+
 ../include/lgi/mac/cocoa/LCocoaView.h : 
 
 ./Code/DocEdit.h : ../include/lgi/common/TextView3.h \
@@ -2064,10 +2077,6 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Css.h \
 	../include/lgi/common/AutoPtr.h \
 	../include/lgi/common/FontCache.h
-
-../include/lgi/common/HtmlPriv.h : ../include/lgi/common/Css.h \
-	../include/lgi/common/Token.h \
-	../include/lgi/common/HtmlParser.h
 
 ../include/lgi/common/Rops.h : ../include/lgi/common/PixelRops.h
 
@@ -2215,6 +2224,11 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/LgiClasses.h \
 	../include/lgi/common/LgiCommon.h
 
+../private/common/FontPriv.h : 
+
+../include/lgi/common/Mem.h : ../include/lgi/common/LgiInc.h \
+	../include/lgi/linux/Gtk/LgiOsDefs.h
+
 ../src/common/Gdc2/Font/DisplayString.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Variant.h \
 	../include/lgi/common/FontSelect.h \
@@ -2224,9 +2238,6 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/UnicodeString.h
 
 ../include/lgi/common/UnicodeString.h : ../include/lgi/common/Unicode.h
-
-../include/lgi/common/Mem.h : ../include/lgi/common/LgiInc.h \
-	../include/lgi/linux/Gtk/LgiOsDefs.h
 
 ../include/lgi/common/ThreadEvent.h : 
 
@@ -2251,7 +2262,6 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/LgiDefs.h
 
 ../src/common/Lgi/ViewCommon.cpp : ../include/lgi/common/Lgi.h \
-	../include/lgi/common/ViewPriv.h \
 	../include/lgi/common/DragAndDrop.h \
 	../include/lgi/common/TableLayout.h \
 	../include/lgi/common/Button.h \
@@ -2260,6 +2270,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/EventTargetThread.h \
 	../include/lgi/common/Popup.h \
 	../include/lgi/common/CssTools.h \
+	../private/common/ViewPriv.h \
 	../include/lgi/linux/Gtk/LgiWidget.h
 
 ../include/lgi/common/TextView3.h : ../include/lgi/common/DocView.h \
@@ -2501,6 +2512,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/LgiString.h
 
 VPATH=%.cpp \
+	../private/common \
 	../include/lgi/linux/Gtk \
 	../include/lgi/linux \
 	../include/lgi/common \

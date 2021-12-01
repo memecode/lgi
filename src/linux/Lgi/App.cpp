@@ -14,7 +14,7 @@
 #include "lgi/common/Variant.h"
 #include "lgi/common/Token.h"
 #include "lgi/common/FontCache.h"
-#include "GAppPriv.h"
+#include "AppPriv.h"
 
 #define DEBUG_MSG_TYPES				0
 #define DEBUG_HND_WARNINGS			0
@@ -227,8 +227,6 @@ private:
 	MsgArray q;
 
 }	MsgQue;
-
-#include "GAppPriv.h"
 
 /////////////////////////////////////////////////////////////////////////////
 LSkinEngine *LApp::SkinEngine = 0;

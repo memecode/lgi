@@ -6,8 +6,8 @@
 #include "lgi/common/Popup.h"
 #include "lgi/common/Panel.h"
 #include "lgi/common/Notifications.h"
-#include "lgi/common/ViewPriv.h"
 #include "lgi/common/Menu.h"
+#include "ViewPriv.h"
 
 using namespace Gtk;
 #undef Status

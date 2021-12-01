@@ -14,9 +14,9 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DragAndDrop.h"
 #include "lgi/common/Edit.h"
-#include "lgi/common/ViewPriv.h"
 #include "lgi/common/Popup.h"
 #include "lgi/common/Css.h"
+#include "ViewPriv.h"
 
 using namespace Gtk;
 #include "LgiWidget.h"

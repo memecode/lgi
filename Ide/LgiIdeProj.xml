@@ -144,10 +144,12 @@ WINNATIVE</Release>
 				<All>
 					<Debug>./Code
 ./Resources
-../include</Debug>
+../include
+../private/common</Debug>
 					<Release>./Code
 ./Resources
-../include</Release>
+../include
+../private/common</Release>
 				</All>
 				<Windows>
 					<Debug>..\include\lgi\win
