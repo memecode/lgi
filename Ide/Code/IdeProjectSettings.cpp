@@ -27,7 +27,7 @@ const char sCurrentPlatform[] =
 	"Linux"
 	#elif defined MAC
 	"Mac"
-	#elif defined BEOS
+	#elif defined HAIKU
 	"Haiku"
 	#else
 	#error "Not impl"

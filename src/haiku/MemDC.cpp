@@ -168,6 +168,40 @@ void LMemDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
     LAssert(!"Not implemented");
 }
 
+void LMemDC::SetOrigin(int x, int y)
+{
+}
+
+bool LMemDC::SupportsAlphaCompositing()
+{
+	return true;
+}
+
+void LMemDC::GetOrigin(int &x, int &y)
+{
+	LSurface::GetOrigin(x, y);
+}
+
+LRect LMemDC::ClipRgn(LRect *Rgn)
+{
+	LRect Old = Clip;
+	
+	if (Rgn)
+	{
+		LRect Dc(0, 0, X()-1, Y()-1);
+		
+		Clip = *Rgn;
+		Clip.Offset(-OriginX, -OriginY);
+		Clip.Bound(&Dc);
+	}
+	else
+	{
+		Clip.ZOff(X()-1, Y()-1);
+	}
+	
+	return Old;
+}
+
 void LMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)
 {
 	if (x1 > x2) LSwap(x1, x2);

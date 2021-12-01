@@ -69,7 +69,7 @@ IdePlatform GetCurrentPlatform()
 	return PlatformLinux;
 	#elif defined(MAC)
 	return PlatformMac;
-	#elif defined(BEOS)
+	#elif defined(HAIKU)
 	return PlatformHaiku;
 	#else
 	#error "Not impl."

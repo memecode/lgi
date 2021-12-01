@@ -154,7 +154,7 @@ enum IdePlatform
 #define PLATFORM_CURRENT		PLATFORM_MAC
 #elif defined(LINUX)
 #define PLATFORM_CURRENT		PLATFORM_LINUX
-#elif defined(BEOS)
+#elif defined(HAIKU)
 #define PLATFORM_CURRENT		PLATFORM_HAIKU
 #endif
 

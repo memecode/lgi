@@ -308,8 +308,6 @@ enum MessageBoxType
 #define LGI_VMOUSE_DOUBLE			0x400
 
 
-#define abs(a)						( (a) < 0 ? -(a) : (a) )
-
 #if !defined(WINNATIVE)
 
 	typedef enum {

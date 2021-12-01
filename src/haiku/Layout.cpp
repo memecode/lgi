@@ -1,0 +1,316 @@
+/*
+**	FILE:			Layout.cpp
+**	AUTHOR:			Matthew Allen
+**	DATE:			1/12/2021
+**	DESCRIPTION:	Standard Views
+**
+**	Copyright (C) 2021, Matthew Allen
+**		fret@memecode.com
+*/
+
+#include <stdio.h>
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ScrollBar.h"
+#include "lgi/common/Notifications.h"
+
+#define M_SET_SCROLL		(M_USER + 0x2000)
+
+//////////////////////////////////////////////////////////////////////////////
+LLayout::LLayout()
+{
+	_PourLargest = false;
+	VScroll = 0;
+	HScroll = 0;
+}
+
+LLayout::~LLayout()
+{
+	DeleteObj(HScroll);
+	DeleteObj(VScroll);
+}
+
+LViewI *LLayout::FindControl(int Id)
+{
+	if (VScroll && VScroll->GetId() == Id)
+		return VScroll;
+	if (HScroll && HScroll->GetId() == Id)
+		return HScroll;
+
+	return LView::FindControl(Id);
+}
+
+bool LLayout::GetPourLargest()
+{
+	return _PourLargest;
+}
+
+void LLayout::SetPourLargest(bool i)
+{
+	_PourLargest = i;
+}
+
+bool LLayout::Pour(LRegion &r)
+{
+	if (_PourLargest)
+	{
+		LRect *Best = FindLargest(r);
+		if (Best)
+		{
+			SetPos(*Best);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void LLayout::GetScrollPos(int64 &x, int64 &y)
+{
+	if (HScroll)
+	{
+		x = HScroll->Value();
+	}
+	else
+	{
+		x = 0;
+	}
+
+	if (VScroll)
+	{
+		y = VScroll->Value();
+	}
+	else
+	{
+		y = 0;
+	}
+}
+
+void LLayout::SetScrollPos(int64 x, int64 y)
+{
+	if (HScroll)
+	{
+		HScroll->Value(x);
+	}
+
+	if (VScroll)
+	{
+		VScroll->Value(y);
+	}
+}
+
+bool LLayout::Attach(LViewI *p)
+{
+	bool Status = LView::Attach(p);
+	AttachScrollBars();
+	return Status;
+}
+
+bool LLayout::Detach()
+{
+	return LView::Detach();
+}
+
+void LLayout::OnCreate()
+{
+	AttachScrollBars();
+	OnPosChange();
+}
+
+void LLayout::AttachScrollBars()
+{
+	if (HScroll && !HScroll->IsAttached())
+	{
+		// LRect r = HScroll->GetPos();
+		HScroll->Attach(this);
+		HScroll->SetNotify(this);
+	}
+
+	if (VScroll && !VScroll->IsAttached())
+	{
+		// LRect r = VScroll->GetPos();
+		VScroll->Attach(this);
+		VScroll->SetNotify(this);
+	}
+}
+
+bool LLayout::SetScrollBars(bool x, bool y)
+{
+	#ifdef M_SET_SCROLL
+	if (x ^ (HScroll != NULL)
+		||
+		y ^ (VScroll != NULL))
+	{
+		if (_SetScroll.x != x ||
+			_SetScroll.y != y ||
+			!_SetScroll.SentMsg)
+		{
+			// This is to filter out masses of duplicate messages
+			// before they have a chance to be processed. Esp important on
+			// GTK systems where the message handling isn't very fast.
+			_SetScroll.x = x;
+			_SetScroll.y = y;
+			_SetScroll.SentMsg = true;
+			return PostEvent(M_SET_SCROLL, x, y);
+		}
+		
+		// Duplicate... ignore...
+		return true;
+	}
+	#else
+	_SetScrollBars(x, y);
+	#endif
+
+	return true;
+}
+
+bool LLayout::_SetScrollBars(bool x, bool y)
+{
+	static bool Processing = false;
+
+	if (!Processing &&
+		(((HScroll!=0) ^ x ) || ((VScroll!=0) ^ y )) )
+	{
+		Processing = true;
+
+		if (x)
+		{
+			if (!HScroll)
+			{
+				HScroll = new LScrollBar(IDC_HSCROLL, 0, 0, 100, 10, "LLayout->HScroll");
+				if (HScroll)
+				{
+					HScroll->SetVertical(false);
+					HScroll->Visible(false);
+				}
+			}
+		}
+		else
+		{
+			DeleteObj(HScroll);
+		}
+		if (y)
+		{
+			if (!VScroll)
+			{
+				VScroll = new LScrollBar(IDC_VSCROLL, 0, 0, 10, 100, "LLayout->VScroll");
+				if (VScroll)
+				{
+					VScroll->Visible(false);
+				}
+			}
+		}
+		else if (VScroll)
+		{
+			DeleteObj(VScroll);
+		}
+
+		AttachScrollBars();
+		OnPosChange();
+		Invalidate();
+
+		Processing = false;
+	}
+	
+	return true;
+}
+
+int LLayout::OnNotify(LViewI *c, LNotification n)
+{
+	return LView::OnNotify(c, n.Type);
+}
+
+void LLayout::OnPosChange()
+{
+	LRect r = LView::GetClient();
+	LRect v(r.x2-SCROLL_BAR_SIZE+1, r.y1, r.x2, r.y2);
+	LRect h(r.x1, r.y2-SCROLL_BAR_SIZE+1, r.x2, r.y2);
+	if (VScroll && HScroll)
+	{
+		h.x2 = v.x1 - 1;
+		v.y2 = h.y1 - 1;
+	}
+	
+	if (VScroll)
+	{
+		VScroll->Visible(true);
+		VScroll->SetPos(v, true);
+	}
+	if (HScroll)
+	{
+		HScroll->Visible(true);
+		HScroll->SetPos(h, true);
+	}
+}
+
+void LLayout::OnNcPaint(LSurface *pDC, LRect &r)
+{
+	LView::OnNcPaint(pDC, r);
+	
+	if (VScroll && VScroll->Visible())
+	{
+		r.x2 -= VScroll->X();
+	}
+
+	if (HScroll && HScroll->Visible())
+	{
+		r.y2 -= HScroll->Y();
+	}
+	
+	if (VScroll && VScroll->Visible() &&
+		HScroll && HScroll->Visible())
+	{
+		// Draw square at the end of each scroll bar
+		LRect s(	VScroll->GetPos().x1, HScroll->GetPos().y1,
+					VScroll->GetPos().x2, HScroll->GetPos().y2);
+		pDC->Colour(L_MED);
+		pDC->Rectangle(&s);
+	}
+}
+
+LRect &LLayout::GetClient(bool ClientSpace)
+{
+	static LRect r;
+	r = LView::GetClient(ClientSpace);
+
+	if (VScroll && VScroll->Visible())
+	{
+		r.x2 = VScroll->GetPos().x1 - 1;
+	}
+
+	if (HScroll && HScroll->Visible())
+	{
+		r.y2 = HScroll->GetPos().y1 - 1;
+	}
+	
+	return r;
+}
+
+LMessage::Param LLayout::OnEvent(LMessage *Msg)
+{
+	#ifdef M_SET_SCROLL
+	if (Msg->Msg() == M_SET_SCROLL)
+	{
+		_SetScroll.SentMsg = false;
+		_SetScrollBars(Msg->A(), Msg->B());
+		
+		if (HScroll)
+			HScroll->SendNotify(LNotifyScrollBarCreate);
+		if (VScroll)
+			VScroll->SendNotify(LNotifyScrollBarCreate);
+		return 0;
+	}
+	#endif
+
+	// if (VScroll) VScroll->OnEvent(Msg);
+	// if (HScroll) HScroll->OnEvent(Msg);
+	int Status = LView::OnEvent(Msg);
+	if (Msg->Msg() == M_CHANGE &&
+		Status == -1 &&
+		GetParent())
+	{
+		Status = GetParent()->OnEvent(Msg);
+	}
+
+	return Status;
+}
+
