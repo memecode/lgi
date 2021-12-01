@@ -17,11 +17,11 @@
 #include "lgi/common/DragAndDrop.h"
 #include "lgi/common/DropFiles.h"
 #include "lgi/common/GdiLeak.h"
-#include "lgi/common/ViewPriv.h"
 #include "lgi/common/Css.h"
 #include "lgi/common/Edit.h"
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/Menu.h"
+#include "ViewPriv.h"
 
 #define DEBUG_MOUSE_CLICKS		0
 #define DEBUG_OVER				0

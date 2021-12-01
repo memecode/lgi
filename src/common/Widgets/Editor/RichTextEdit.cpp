@@ -11,18 +11,19 @@
 #endif
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/DisplayString.h"
-#include "lgi/common/ViewPriv.h"
 #include "lgi/common/CssTools.h"
 #include "lgi/common/FontCache.h"
 #include "lgi/common/Unicode.h"
 #include "lgi/common/DropFiles.h"
-
 #include "lgi/common/HtmlCommon.h"
 #include "lgi/common/HtmlParser.h"
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/Homoglyphs.h"
+
+// If this is not found add $lgi/private/common to your include paths
+#include "ViewPriv.h"
 
 #define DefaultCharset              "utf-8"
 

@@ -5,7 +5,6 @@
 #endif
 
 #include "lgi/common/Lgi.h"
-#include "lgi/common/ViewPriv.h"
 #include "lgi/common/DragAndDrop.h"
 #include "lgi/common/TableLayout.h"
 #include "lgi/common/Button.h"
@@ -14,6 +13,7 @@
 #include "lgi/common/EventTargetThread.h"
 #include "lgi/common/Popup.h"
 #include "lgi/common/CssTools.h"
+#include "ViewPriv.h"
 
 #if 0
 #define DEBUG_CAPTURE(...) printf(__VA_ARGS__)

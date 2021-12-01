@@ -1,5 +1,5 @@
-#ifndef _GVIEW_PRIV_
-#define _GVIEW_PRIV_
+// Private LView definations
+#pragma once
 
 #if WINNATIVE
 	#if !defined(_WIN32_WINNT) || _WIN32_WINNT < 0x501
@@ -198,4 +198,3 @@ public:
 	}
 };
 
-#endif

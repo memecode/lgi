@@ -11,13 +11,13 @@
 #endif
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/DisplayString.h"
-#include "lgi/common/ViewPriv.h"
 #include "lgi/common/CssTools.h"
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/Mail.h"
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/DropFiles.h"
+#include "ViewPriv.h"
 
 #ifdef _DEBUG
 #define FEATURE_HILIGHT_ALL_MATCHES	1

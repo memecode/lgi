@@ -6,7 +6,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Html.h"
-#include "lgi/common/HtmlPriv.h"
 #include "lgi/common/Token.h"
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Variant.h"
@@ -28,6 +27,8 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/FindReplaceDlg.h"
 #include "lgi/common/Homoglyphs.h"
+
+#include "HtmlPriv.h"
 
 #define DEBUG_TABLE_LAYOUT			0
 #define DEBUG_DRAW_TD				0
