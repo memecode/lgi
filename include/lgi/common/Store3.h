@@ -3,6 +3,7 @@
 #ifndef _MAIL_STORE_H_
 #define _MAIL_STORE_H_
 
+#include <functional>
 #include "Mail.h"
 #include "Store3Defs.h"
 #undef GetObject
@@ -97,11 +98,13 @@ extern const char *Store3ItemTypeToMime(Store3ItemTypes type);
 
 
 /// This class is an interface to a collection of objects (NOT thread-safe).
+typedef std::function<void(ssize_t,ssize_t)> LIteratorProgressFn;
+
 template <class T>
-class GDataIterator
+class LDataIterator
 {
 public:
-	virtual ~GDataIterator() {}
+	virtual ~LDataIterator() {}
 
 	/// \returns an empty object of the right type.
 	virtual T Create(GDataStoreI *Store) = 0;
@@ -129,10 +132,12 @@ public:
 	virtual bool DeleteObjects() = 0;
 	/// Gets the current loading/loaded state.
 	virtual Store3State GetState() = 0;
+	/// Sets the progress function
+	virtual void SetProgressFn(LIteratorProgressFn cb) = 0;
 };
 
 
-typedef GDataIterator<GDataPropI*> *GDataIt;
+typedef LDataIterator<GDataPropI*> *GDataIt;
 
 #define EmptyVirtual(t)		LAssert(0); return t
 #define Store3CopyDecl		bool CopyProps(GDataPropI &p) override
@@ -257,11 +262,11 @@ public:
 	virtual ~GDataFolderI() {}
 
 	/// \returns an iterator for the sub-folders.
-	virtual GDataIterator<GDataFolderI*> &SubFolders() = 0;
+	virtual LDataIterator<GDataFolderI*> &SubFolders() = 0;
 	/// \returns an iterator for the child objects
-	virtual GDataIterator<GDataI*> &Children() = 0;
+	virtual LDataIterator<GDataI*> &Children() = 0;
 	/// \returns an iterator for the fields this folder defines
-	virtual GDataIterator<GDataPropI*> &Fields() = 0;
+	virtual LDataIterator<GDataPropI*> &Fields() = 0;
 	/// Deletes all child objects from disk and memory.
 	/// \return true on success;
 	virtual Store3Status DeleteAllChildren() { return Store3Error; }
@@ -557,7 +562,7 @@ extern GDataStoreI *OpenMapiStore
 //////////////////////////////////////////////////////////////////////////////
 // Common implementation of interfaces
 template <class T>
-class DNullIterator : public GDataIterator<T>
+class DNullIterator : public LDataIterator<T>
 {
 public:
 	T First() { return 0; }
@@ -572,13 +577,14 @@ public:
 };
 
 template <typename TPub, typename TPriv, typename TStore>
-class DIterator : public GDataIterator<TPub*>
+class DIterator : public LDataIterator<TPub*>
 {
 	int Cur;
 
 public:
 	LArray<TPriv*> a;
 	Store3State State;
+	LIteratorProgressFn Prog;
 	
 	DIterator()
 	{
@@ -588,6 +594,11 @@ public:
 
 	Store3State GetState() { return State; }
 
+	void SetProgressFn(LIteratorProgressFn cb)
+	{
+		Prog = cb;
+	}
+	
 	void Swap(DIterator<TPub, TPriv, TStore> &di)
 	{
 		LSwap(Cur, di.Cur);
