@@ -281,115 +281,115 @@ bool LFontType::GetSystemFont(const char *Which)
 
 	#elif defined WINNATIVE
 
-	// Get the system settings
-	NONCLIENTMETRICS info;
-	info.cbSize = sizeof(info);
-	#if (WINVER >= 0x0600)
-	LArray<int> Ver;
-	if (LGetOs(&Ver) == LGI_OS_WIN32 &&
-		Ver[0] <= 5)
-		info.cbSize -= 4;
-	#endif
-	BOOL InfoOk = SystemParametersInfo(	SPI_GETNONCLIENTMETRICS,
-										info.cbSize,
-										&info,
-										0);
-	if (!InfoOk)
-	{
-		LgiTrace("%s:%i - SystemParametersInfo failed with 0x%x (info.cbSize=%i, os=%i, %i)\n",
-			_FL, GetLastError(),
-			info.cbSize,
-			LGetOs(), LGI_OS_WIN9X);
-	}
+		// Get the system settings
+		NONCLIENTMETRICS info;
+		info.cbSize = sizeof(info);
+		#if (WINVER >= 0x0600)
+		LArray<int> Ver;
+		if (LGetOs(&Ver) == LGI_OS_WIN32 &&
+			Ver[0] <= 5)
+			info.cbSize -= 4;
+		#endif
+		BOOL InfoOk = SystemParametersInfo(	SPI_GETNONCLIENTMETRICS,
+											info.cbSize,
+											&info,
+											0);
+		if (!InfoOk)
+		{
+			LgiTrace("%s:%i - SystemParametersInfo failed with 0x%x (info.cbSize=%i, os=%i, %i)\n",
+				_FL, GetLastError(),
+				info.cbSize,
+				LGetOs(), LGI_OS_WIN9X);
+		}
 
-	// Convert windows font height into points
-	int Height = WinHeightToPoint(info.lfMessageFont.lfHeight);
+		// Convert windows font height into points
+		int Height = WinHeightToPoint(info.lfMessageFont.lfHeight);
 
 	#elif defined __GTK_H__
 
-	// Define some defaults.. in case the system settings aren't there
-	static char DefFont[64] =
-	#ifdef __CYGWIN__
-		"Luxi Sans";
-	#else
-		"Sans";
-	#endif
-	int DefSize = 10;
-	// int Offset = 0;
+		// Define some defaults.. in case the system settings aren't there
+		static char DefFont[64] =
+		#ifdef __CYGWIN__
+			"Luxi Sans";
+		#else
+			"Sans";
+		#endif
+		int DefSize = 10;
+		// int Offset = 0;
 
-	static bool First = true;
-	if (First)
-	{
-		bool ConfigFontUsed = false;
-		char p[MAX_PATH];
-		LGetSystemPath(LSP_HOME, p, sizeof(p));
-		LMakePath(p, sizeof(p), p, ".lgi.conf");
-		if (LFileExists(p))
+		static bool First = true;
+		if (First)
 		{
-			LAutoString a(LReadTextFile(p));
-			if (a)
+			bool ConfigFontUsed = false;
+			char p[MAX_PATH];
+			LGetSystemPath(LSP_HOME, p, sizeof(p));
+			LMakePath(p, sizeof(p), p, ".lgi.conf");
+			if (LFileExists(p))
 			{
-				LString s;
-				s = a.Get();
-				LString::Array Lines = s.Split("\n");
-				for (int i=0; i<Lines.Length(); i++)
+				LAutoString a(LReadTextFile(p));
+				if (a)
 				{
-					if (Lines[i].Find("=")>=0)
+					LString s;
+					s = a.Get();
+					LString::Array Lines = s.Split("\n");
+					for (int i=0; i<Lines.Length(); i++)
 					{
-						LString::Array p = Lines[i].Split("=", 1);
-						if (!_stricmp(p[0].Lower(), "font"))
+						if (Lines[i].Find("=")>=0)
 						{
-							LString::Array d = p[1].Split(":");
-							if (d.Length() > 1)
+							LString::Array p = Lines[i].Split("=", 1);
+							if (!_stricmp(p[0].Lower(), "font"))
 							{
-								strcpy_s(DefFont, sizeof(DefFont), d[0]);
-								int PtSize = d[1].Int();
-								if (PtSize > 0)
+								LString::Array d = p[1].Split(":");
+								if (d.Length() > 1)
 								{
-									DefSize = PtSize;
-									ConfigFontUsed = true;
-									
-									printf("Config font %s : %i\n", DefFont, DefSize);
+									strcpy_s(DefFont, sizeof(DefFont), d[0]);
+									int PtSize = d[1].Int();
+									if (PtSize > 0)
+									{
+										DefSize = PtSize;
+										ConfigFontUsed = true;
+										
+										printf("Config font %s : %i\n", DefFont, DefSize);
+									}
 								}
 							}
 						}
 					}
 				}
+				else printf("Can't read '%s'\n", p);
 			}
-			else printf("Can't read '%s'\n", p);
-		}
-		
-		if (!ConfigFontUsed)
-		{	
-			Gtk::GtkStyle *s = Gtk::gtk_style_new();
-			if (s)
-			{
-				const char *fam = Gtk::pango_font_description_get_family(s->font_desc);
-				if (fam)
+			
+			if (!ConfigFontUsed)
+			{	
+				Gtk::GtkStyle *s = Gtk::gtk_style_new();
+				if (s)
 				{
-					strcpy_s(DefFont, sizeof(DefFont), fam);
-				}
-				else printf("%s:%i - pango_font_description_get_family failed.\n", _FL);
+					const char *fam = Gtk::pango_font_description_get_family(s->font_desc);
+					if (fam)
+					{
+						strcpy_s(DefFont, sizeof(DefFont), fam);
+					}
+					else printf("%s:%i - pango_font_description_get_family failed.\n", _FL);
 
-				if (Gtk::pango_font_description_get_size_is_absolute(s->font_desc))
-				{
-					float Px = Gtk::pango_font_description_get_size(s->font_desc) / PANGO_SCALE;
-					float Dpi = (float)LScreenDpi();
-					DefSize = (Px * 72.0) / Dpi;
-					printf("pango px=%f, Dpi=%f\n", Px, Dpi);
+					if (Gtk::pango_font_description_get_size_is_absolute(s->font_desc))
+					{
+						float Px = Gtk::pango_font_description_get_size(s->font_desc) / PANGO_SCALE;
+						float Dpi = (float)LScreenDpi();
+						DefSize = (Px * 72.0) / Dpi;
+						printf("pango px=%f, Dpi=%f\n", Px, Dpi);
+					}
+					else
+					{
+						DefSize = Gtk::pango_font_description_get_size(s->font_desc) / PANGO_SCALE;
+					}
+					
+					g_object_unref(s);
 				}
-				else
-				{
-					DefSize = Gtk::pango_font_description_get_size(s->font_desc) / PANGO_SCALE;
-				}
-				
-				g_object_unref(s);
+				else printf("%s:%i - gtk_style_new failed.\n", _FL);
 			}
-			else printf("%s:%i - gtk_style_new failed.\n", _FL);
+			
+			First = false;
 		}
-		
-		First = false;
-	}
 	
 	#endif
 
@@ -402,19 +402,19 @@ bool LFontType::GetSystemFont(const char *Which)
 			#if LGI_SDL
 
 				#if defined(WIN32)
-				Info.Face("Tahoma");
-				Info.PointSize(11);
-				Status = true;
+					Info.Face("Tahoma");
+					Info.PointSize(11);
+					Status = true;
 				#elif defined(MAC)
-				Info.Face("LucidaGrande");
-				Info.PointSize(11);
-				Status = true;
+					Info.Face("LucidaGrande");
+					Info.PointSize(11);
+					Status = true;
 				#elif defined(LINUX)
-				Info.Face("Sans");
-				Info.PointSize(11);
-				Status = true;
+					Info.Face("Sans");
+					Info.PointSize(11);
+					Status = true;
 				#else
-				#error fix me
+					#error fix me
 				#endif
 			
 			#elif defined WINNATIVE
@@ -426,6 +426,16 @@ bool LFontType::GetSystemFont(const char *Which)
 					Status = true;
 				}
 				else LgiTrace("%s:%i - Info not ok.\n", _FL);
+
+			#elif defined(HAIKU)
+
+				font_family family = {0};
+				font_style style = {0};
+				be_plain_font->GetFamilyAndStyle(&family, &style);
+				Info.PointSize(be_plain_font->Size());
+				printf("SystemFont: '%s' '%s' %f\n", family, style, be_plain_font->Size());
+				Info.Face(family);
+				Status = true;
 
 			#elif defined __GTK_H__
 
@@ -694,24 +704,34 @@ bool LFontType::GetSystemFont(const char *Which)
 		{
 			#if LGI_SDL
 			
-			LAssert(!"Impl me.");
+				LAssert(!"Impl me.");
 			
 			#elif defined WINNATIVE
 
-			// SetFace("Courier New");
-			SetFace("Consolas");
-			Info.lfHeight = WinPointToHeight(10);
-			Status = true;
+				// SetFace("Courier New");
+				SetFace("Consolas");
+				Info.lfHeight = WinPointToHeight(10);
+				Status = true;
+
+			#elif defined(HAIKU)
+
+				font_family family = {0};
+				font_style style = {0};
+				be_fixed_font->GetFamilyAndStyle(&family, &style);
+				Info.PointSize(be_fixed_font->Size());
+				printf("SystemFont: '%s' '%s' %f\n", family, style, be_plain_font->Size());
+				Info.Face(family);
+				Status = true;
 
 			#elif defined __GTK_H__
 
-			Info.Face("Courier New");
-			Info.PointSize(DefSize);
-			Status = true;
+				Info.Face("Courier New");
+				Info.PointSize(DefSize);
+				Status = true;
 			
 			#elif defined MAC
 			
-			Status = MacGetSystemFont(Info, kCTFontUIFontUserFixedPitch);
+				Status = MacGetSystemFont(Info, kCTFontUIFontUserFixedPitch);
 
 			#else
 

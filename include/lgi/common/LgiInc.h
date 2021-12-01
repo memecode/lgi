@@ -20,7 +20,7 @@
 
 	// dynamically linked
 
-	#if defined(WIN32) || defined(_WIN64)
+	#if defined(WIN32) || defined(_WIN64) || defined(HAIKU)
 
 		#ifdef LGI_LIBRARY
 			

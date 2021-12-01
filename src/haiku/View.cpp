@@ -108,7 +108,16 @@ LKey::LKey(int vkey, uint32_t flags)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-GViewPrivate::GViewPrivate()
+LViewPrivate::LViewPrivate() : 
+	BView
+	(
+		"name",
+		B_FULL_UPDATE_ON_RESIZE | 
+		B_WILL_DRAW |
+		B_PULSE_NEEDED |
+		B_NAVIGABLE |
+		B_FRAME_EVENTS
+	)
 {
 	Parent = 0;
 	ParentI = 0;
@@ -127,7 +136,7 @@ GViewPrivate::GViewPrivate()
 	DropSource = NULL;
 }
 
-GViewPrivate::~GViewPrivate()
+LViewPrivate::~LViewPrivate()
 {
 	LAssert(Pulse == 0);
 
@@ -366,7 +375,11 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 	{
 		Repainting = true;
 
-		LAssert(!"Fixme.");
+		LLocker lck(d, _FL);
+		if (lck.Lock())
+		{
+			d->Invalidate();
+		}
 
 		Repainting = false;
 	}
@@ -472,12 +485,37 @@ bool LView::PointToView(LPoint &p)
 
 bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 {
-	bool Status = true;
-	ThreadCheck();
+	LLocker Locker(d, _FL);
+	if (!Locker.Lock())
+		return false;
 
-	LAssert(!"Fixme.");
+	// get mouse state
+	BPoint Cursor;
+	uint32 Buttons;
 	
-	return Status;
+	d->GetMouse(&Cursor, &Buttons);
+	if (ScreenCoords)
+		d->ConvertToScreen(&Cursor);
+	
+	// position
+	m.x = Cursor.x;
+	m.y = Cursor.y;
+
+	// buttons
+	m.Left(TestFlag(Buttons, B_PRIMARY_MOUSE_BUTTON));
+	m.Middle(TestFlag(Buttons, B_TERTIARY_MOUSE_BUTTON));
+	m.Right(TestFlag(Buttons, B_SECONDARY_MOUSE_BUTTON));
+
+	// key states
+	key_info KeyInfo;
+	if (get_key_info(&KeyInfo) == B_OK)
+	{
+		m.Ctrl(TestFlag(KeyInfo.modifiers, B_CONTROL_KEY));
+		m.Alt(TestFlag(KeyInfo.modifiers, B_MENU_KEY));
+		m.Shift(TestFlag(KeyInfo.modifiers, B_SHIFT_KEY));
+	}
+	
+	return true;
 }
 
 bool LView::IsAttached()

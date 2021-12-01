@@ -29,9 +29,9 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 bool In_SetWindowPos = false;
-HWND GViewPrivate::hPrevCapture = 0;
+HWND LViewPrivate::hPrevCapture = 0;
 
-GViewPrivate::GViewPrivate()
+LViewPrivate::LViewPrivate()
 {
 	SinkHnd = -1;
 	Font = 0;
@@ -52,7 +52,7 @@ GViewPrivate::GViewPrivate()
 	CssDirty = false;
 }
 
-GViewPrivate::~GViewPrivate()
+LViewPrivate::~LViewPrivate()
 {
 	if (hTheme)
 	{

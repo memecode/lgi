@@ -19,10 +19,11 @@ Flags = -fPIC -w -fno-inline -fpermissive
 ifeq ($(Build),Debug)
 	Flags += -g -std=c++14
 	Tag = d
-	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -D_GNU_SOURCE
+	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -D_GNU_SOURCE -DLGI_LIBRARY
 	Libs =  \
 		-static-libgcc \
 		-lgnu \
+		-lnetwork \
 		-lbe
 	Inc =  \
 		-I./private/haiku \
@@ -30,10 +31,11 @@ ifeq ($(Build),Debug)
 		-I./include
 else
 	Flags += -s -Os -std=c++14
-	Defs = -DHAIKU -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -D_GNU_SOURCE
+	Defs = -DHAIKU -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -D_GNU_SOURCE -DLGI_LIBRARY
 	Libs =  \
 		-static-libgcc \
 		-lgnu \
+		-lnetwork \
 		-lbe
 	Inc =  \
 		-I./private/haiku \
@@ -224,7 +226,7 @@ App.o : ./src/haiku/App.cpp ./include/lgi/common/Lgi.h \
 	./include/lgi/common/Variant.h \
 	./include/lgi/common/Token.h \
 	./include/lgi/common/FontCache.h \
-	./private/linux/GAppPriv.h
+	./private/linux/AppPriv.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -276,7 +278,7 @@ ViewCommon.o : ./src/common/Lgi/ViewCommon.cpp ./include/lgi/common/Lgi.h \
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
 AppCommon.o : ./src/common/Lgi/AppCommon.cpp ./include/lgi/common/Lgi.h \
-	./private/linux/GAppPriv.h
+	./private/linux/AppPriv.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -1565,7 +1567,7 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/AutoPtr.h \
 	./include/lgi/common/FontCache.h
 
-./private/linux/GAppPriv.h : ./include/lgi/common/Json.h \
+./private/linux/AppPriv.h : ./include/lgi/common/Json.h \
 	./include/lgi/linux/SymLookup.h \
 	./include/lgi/linux/Gtk/LgiWinManGlue.h
 

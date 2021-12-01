@@ -1,10 +1,17 @@
 #pragma once
 
+#ifdef HAIKU
+#include <Application.h>
+#endif
+
 #include "lgi/common/Json.h"
 
 typedef LArray<LAppInfo*> AppArray;
 
 class LAppPrivate
+	#ifdef HAIKU
+	: public BApplication
+	#endif
 {
 public:
 	// Common
@@ -42,6 +49,9 @@ public:
 	int LastClickY;
 
 	LAppPrivate(LApp *a) : Args(0, 0), Owner(a)
+	#ifdef HAIKU
+		, BApplication(LString("application/") + a->Name())
+	#endif
 	{
 		CurEvent = 0;
 		GuiThread = LGetCurrentThread();

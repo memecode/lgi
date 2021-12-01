@@ -481,6 +481,7 @@ enum LSystemPath
 	///		[Win32] = ~\Application Data
 	///		[Mac] = ~/Library
 	///		[Linux] = /usr
+	///		[Haiku] = ~/config (???)
 	LSP_USER_APP_DATA,
 
 	/// Machine + user specific application data (probably should not use)

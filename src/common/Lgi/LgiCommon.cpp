@@ -40,7 +40,10 @@
 	#include "lgi/common/SubProcess.h"
 #endif
 
-#ifndef HAIKU
+#ifdef HAIKU
+#include <FindDirectory.h>
+#include <fs_info.h>
+#else
 #include "SymLookup.h"
 #endif
 #include "lgi/common/Library.h"
@@ -1294,6 +1297,13 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 
 				Path = WinGetSpecialFolderPath(Id);
 
+			#elif defined(HAIKU)
+
+				dev_t volume = dev_for_path("/boot");
+				char path[MAX_PATH] = "";
+				if (find_directory(B_SYSTEM_APPS_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+					Path = path;
+			
 			#elif LGI_COCOA
 
 				NSArray *paths = NSSearchPathForDirectoriesInDomains( NSApplicationDirectory, NSSystemDomainMask, YES);
@@ -1442,6 +1452,13 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 				if (GetWindowsDirectoryW(p, CountOf(p)) > 0)
 					Path = p;
 
+			#elif defined(HAIKU)
+
+				dev_t volume = dev_for_path("/boot");
+				char path[MAX_PATH] = "";
+				if (find_directory(B_SYSTEM_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+					Path = path;
+			
 			#elif defined LGI_CARBON
 			
 				FSRef Ref;
@@ -1477,6 +1494,13 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 				char16 p[MAX_PATH];
 				if (GetSystemDirectoryW(p, CountOf(p)) > 0)
 					Path = p;
+			
+			#elif defined(HAIKU)
+
+				dev_t volume = dev_for_path("/boot");
+				char path[MAX_PATH] = "";
+				if (find_directory(B_SYSTEM_LIB_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+					Path = path;
 			
 			#elif defined MAC
 			
@@ -1602,6 +1626,13 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 
 				Path = "/usr";
 
+			#elif defined HAIKU
+
+				dev_t volume = dev_for_path("/boot");
+				char path[MAX_PATH] = "";
+				if (find_directory(B_USER_SETTINGS_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+					Path = path;
+
 			#else
 			
 				LAssert(!"Impl me.");
@@ -1635,6 +1666,13 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#if defined(WINDOWS) && defined(_MSC_VER)
 
 				Path = WinGetSpecialFolderPath(CSIDL_DESKTOPDIRECTORY);
+			
+			#elif defined(HAIKU)
+
+				dev_t volume = dev_for_path("/boot");
+				char path[MAX_PATH] = "";
+				if (find_directory(B_DESKTOP_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+					Path = path;
 			
 			#elif defined(__GTK_H__)
 			
@@ -1692,6 +1730,13 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#if defined WIN32
 
 				Path = WinGetSpecialFolderPath(CSIDL_PROFILE);
+			
+			#elif defined(HAIKU)
+
+				dev_t volume = dev_for_path("/boot");
+				char path[MAX_PATH] = "";
+				if (find_directory(B_USER_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+					Path = path;
 			
 			#elif defined LGI_COCOA
 			
@@ -1792,6 +1837,13 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 						break;
 					}
 				}
+			
+			#elif defined(HAIKU)
+
+				dev_t volume = dev_for_path("/boot");
+				char path[MAX_PATH] = "";
+				if (find_directory(B_TRASH_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+					Path = path;
 			
 			#elif defined LGI_CARBON
 			

@@ -93,7 +93,7 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 		Asserting = true;
 
 		printf("%s:%i - Assert failed:\n%s\n", file, line, test);
-		exit(-1);
+		exit(0);
 
 		Asserting = false;
 	}

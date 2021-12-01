@@ -280,7 +280,8 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 	LFont *f = GetBaseFont();
 	if (!f || !Text.Length() || Width <= 0)
 	{
-		Min.y = Max.y = MAX((f ? f : LSysFont)->GetHeight(), MinYSize);
+		auto fnt = f ? f : LSysFont;
+		Min.y = Max.y = MAX(fnt ? fnt->GetHeight() : 0, MinYSize);
 		return false;
 	}
 

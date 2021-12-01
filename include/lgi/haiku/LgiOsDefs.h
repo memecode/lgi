@@ -18,6 +18,7 @@
 #include <View.h>
 #include <Window.h>
 #include <Message.h>
+#include <Font.h>
 
 #include "lgi/common/LgiDefs.h"
 

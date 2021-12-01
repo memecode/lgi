@@ -116,7 +116,7 @@ LKey::LKey(int vkey, uint32_t flags)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-GViewPrivate::GViewPrivate()
+LViewPrivate::LViewPrivate()
 {
 	Parent = 0;
 	ParentI = 0;
@@ -137,7 +137,7 @@ GViewPrivate::GViewPrivate()
 	DropSource = NULL;
 }
 
-GViewPrivate::~GViewPrivate()
+LViewPrivate::~LViewPrivate()
 {
 	LAssert(Pulse == 0);
 

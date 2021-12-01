@@ -1,5 +1,5 @@
 #include "lgi/common/Lgi.h"
-#include "GAppPriv.h"
+#include "AppPriv.h"
 
 ::LString LApp::GetConfigPath()
 {

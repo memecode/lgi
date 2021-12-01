@@ -12,12 +12,13 @@
 #include "lgi/common/Variant.h"
 #include "lgi/common/Token.h"
 #include "lgi/common/FontCache.h"
-#include "GAppPriv.h"
+#include "AppPriv.h"
 
 #define DEBUG_MSG_TYPES				0
 #define DEBUG_HND_WARNINGS			0
 #define IDLE_ALWAYS					0
 
+LString LgiArgsAppPath;
 
 ////////////////////////////////////////////////////////////////
 struct OsAppArgumentsPriv
@@ -224,8 +225,6 @@ private:
 
 }	MsgQue;
 
-#include "GAppPriv.h"
-
 /////////////////////////////////////////////////////////////////////////////
 LSkinEngine *LApp::SkinEngine = 0;
 LApp *TheApp = 0;
@@ -235,10 +234,12 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	OsApplication(AppArgs.Args, AppArgs.Arg)
 {
 	TheApp = this;
-	SystemNormal = 0;
-	SystemBold = 0;
-	d = new LAppPrivate(this);
+	SystemNormal = NULL;
+	SystemBold = NULL;
+	AppWnd = NULL;
+
 	Name(name);
+	d = new LAppPrivate(this);
 	LgiArgsAppPath = AppArgs.Arg[0];
 	if (LIsRelativePath(LgiArgsAppPath))
 	{
@@ -275,16 +276,13 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 
 	srand(LCurrentTime());
 	LColour::OnChange();
-	AppWnd = NULL;
 
 	MouseHook = new LMouseHook;
 
 	d->GetConfig();
 
 	// System font setup
-	SystemNormal = 0;
 	LFontType SysFontType;
-
 	if (SysFontType.GetSystemFont("System"))
 	{
 		SystemNormal = SysFontType.Create();

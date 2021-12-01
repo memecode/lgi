@@ -5,6 +5,8 @@
 #include <string.h>
 #include <math.h>
 
+#include <Screen.h>
+
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Palette.h"
 
@@ -404,6 +406,20 @@ GBmpMem::~GBmpMem()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
+LColourSpace HaikuColourSpace(color_space cs)
+{
+	switch (cs)
+	{
+		case B_CMAP8:
+			return CsIndex8;
+		case B_RGB15:
+			return CsRgb15;
+		case B_RGB32:
+			return CsRgba32;
+	}
+	return CsNone;
+}
+
 class GdcDevicePrivate
 {
 public:
@@ -439,7 +455,12 @@ public:
 		GammaCorrection = 1.0;
 
 		// Get mode stuff
-		
+		BScreen screen;
+		ScrX = screen.Frame().IntegerWidth() + 1;
+		ScrY = screen.Frame().IntegerHeight() + 1;
+		ScrColourSpace = HaikuColourSpace(screen.ColorSpace());
+		ScrBits = GColourSpaceToBits(ScrColourSpace);
+
 		printf("Screen: %i x %i @ %i bpp (%s)\n", ScrX, ScrY, ScrBits, GColourSpaceToString(ScrColourSpace));
 		
 		#if !LGI_RPI

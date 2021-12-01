@@ -348,6 +348,18 @@ LMenuItem::~LMenuItem()
 	DeleteObj(d);
 }
 
+void LMenuItem::_Measure(LPoint &Size)
+{
+}
+
+void LMenuItem::_Paint(LSurface *pDC, int Flags)
+{
+}
+
+void LMenuItem::_PaintText(LSurface *pDC, int x, int y, int Width)
+{
+}
+
 #if 1
 
 bool LMenuItem::ScanForAccel()

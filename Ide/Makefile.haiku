@@ -23,6 +23,7 @@ ifeq ($(Build),Debug)
 	Libs =  \
 		-L../Debug \
 		-lbe \
+		-lnetwork \
 		-lgnu \
 		-lpthread \
 		-static-libgcc \
@@ -39,6 +40,7 @@ else
 	Libs =  \
 		-L../Release \
 		-lbe \
+		-lnetwork \
 		-lgnu \
 		-lpthread \
 		-static-libgcc \
@@ -236,7 +238,6 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so outputfolder $(Depends)
 	../include/lgi/common/Widgets.h \
 	../include/lgi/common/Window.h \
 	../include/lgi/common/XmlTree.h \
-	../include/lgi/linux/SymLookup.h \
 	../include/lgi/mac/cocoa/LCocoaView.h \
 	../include/lgi/mac/cocoa/LgiMac.h \
 	../include/lgi/mac/cocoa/LgiOs.h \
@@ -244,7 +245,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so outputfolder $(Depends)
 	../include/lgi/mac/cocoa/LgiOsDefs.h \
 	../include/lgi/mac/cocoa/ObjCWrapper.h \
 	../include/lgi/mac/cocoa/SymLookup.h \
-	../private/linux/GAppPriv.h \
+	../private/haiku/AppPriv.h \
 	../src/common/Gdc2/15Bit.cpp \
 	../src/common/Gdc2/16Bit.cpp \
 	../src/common/Gdc2/24Bit.cpp \
@@ -377,7 +378,7 @@ clean :
 cleanall :
 	rm -f $(BuildDir)/*.o $(Target)
 	@echo Cleaned $(BuildDir)
-	+make -C "../" -f "Makefile.linux" clean
+	+make -C "../" -f "Makefile.haiku" clean
 
 GDebugContext.o : ./Code/GDebugContext.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/TextLog.h \
@@ -878,7 +879,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/Combo.h : 
 
-../src/linux/Lgi/Window.cpp : ../include/lgi/common/Lgi.h \
+../src/haiku/Window.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/DragAndDrop.h \
 	../include/lgi/common/Token.h \
 	../include/lgi/common/Popup.h \
@@ -888,8 +889,6 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Menu.h
 
 ../include/lgi/mac/cocoa/SymLookup.h : ../include/lgi/common/SubProcess.h
-
-../src/linux/General/ShowFileProp_Linux.cpp : ../include/lgi/common/Lgi.h
 
 ../include/lgi/common/Rect.h : ../include/lgi/common/Point.h
 
@@ -955,8 +954,6 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 ../include/lgi/common/Rops.h : ../include/lgi/common/PixelRops.h
 
 ../include/lgi/common/DomFields.h : 
-
-../include/lgi/linux/SymLookup.h : ../include/lgi/common/SubProcess.h
 
 ../src/common/Gdc2/Font/Font.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Variant.h \
@@ -1083,7 +1080,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/Slider.h : 
 
-../src/linux/Lgi/General.cpp : ../include/lgi/common/Lgi.h \
+../src/haiku/General.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/SubProcess.h \
 	../include/lgi/common/TextLabel.h \
 	../include/lgi/common/Button.h \
@@ -1279,7 +1276,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/ScrollBar.h : 
 
-../src/linux/Lgi/Thread.cpp : ../include/lgi/common/Lgi.h
+../src/haiku/Thread.cpp : ../include/lgi/common/Lgi.h
 
 ../include/lgi/common/UnrolledList.h : 
 
@@ -1302,7 +1299,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/ProgressView.h \
 	../include/lgi/common/Css.h
 
-../src/linux/General/File.cpp : ../include/lgi/common/LgiDefs.h \
+../src/haiku/File.cpp : ../include/lgi/common/LgiDefs.h \
 	../include/lgi/common/File.h \
 	../include/lgi/common/Containers.h \
 	../include/lgi/common/Token.h \
@@ -1487,7 +1484,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/LgiRes.h \
 	../include/lgi/common/Thread.h
 
-../src/linux/Lgi/View.cpp : ../include/lgi/common/Lgi.h \
+../src/haiku/View.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/DragAndDrop.h \
 	../include/lgi/common/Edit.h \
 	../include/lgi/common/ViewPriv.h \
@@ -1630,10 +1627,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Unicode.h \
 	../include/lgi/common/Array.h
 
-../private/linux/GAppPriv.h : ../include/lgi/common/Json.h \
-	../include/lgi/linux/SymLookup.h
-
-../include/lgi/linux/SymLookup.h : ../include/lgi/common/SubProcess.h
+../private/haiku/AppPriv.h : ../include/lgi/common/Json.h
 
 ../include/lgi/common/Mail.h : ../include/lgi/common/Net.h \
 	../include/lgi/common/Base64.h \
@@ -1734,7 +1728,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/StringLayout.h \
 	../include/lgi/common/CssTools.h
 
-../src/linux/Lgi/Layout.cpp : ../include/lgi/common/Lgi.h \
+../src/haiku/Layout.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/ScrollBar.h \
 	../include/lgi/common/Notifications.h
 
@@ -1758,7 +1752,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Containers.h \
 	../include/lgi/common/LgiCommon.h
 
-../src/linux/Lgi/App.cpp : ../include/lgi/common/Lgi.h \
+../src/haiku/App.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/SkinEngine.h \
 	../include/lgi/common/Array.h \
 	../include/lgi/common/Variant.h \
@@ -1788,7 +1782,6 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Token.h \
 	../include/lgi/common/Capabilities.h \
 	../include/lgi/common/SubProcess.h \
-	../include/lgi/linux/SymLookup.h \
 	../include/lgi/common/Library.h
 
 ../include/lgi/common/FontCache.h : ../include/lgi/common/App.h \
@@ -1922,7 +1915,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/LgiString.h \
 	../include/lgi/common/LgiCommon.h
 
-../src/linux/Lgi/Printer.cpp : ../include/lgi/common/Lgi.h \
+../src/haiku/Printer.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/List.h \
 	../include/lgi/common/Button.h \
 	../include/lgi/common/Printer.h
@@ -1955,7 +1948,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/FindInFiles.h : 
 
-../src/linux/Lgi/Widgets.cpp : ../include/lgi/common/Lgi.h \
+../src/haiku/Widgets.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Slider.h \
 	../include/lgi/common/Bitmap.h \
 	../include/lgi/common/TableLayout.h \
@@ -2072,7 +2065,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/StatusBar.h : ../include/lgi/common/Layout.h
 
-../src/linux/General/Mem.cpp : ../include/lgi/common/LgiDefs.h \
+../src/haiku/Mem.cpp : ../include/lgi/common/LgiDefs.h \
 	../include/lgi/haiku/LgiOsDefs.h \
 	../include/lgi/common/Mem.h \
 	../include/lgi/common/Mutex.h
@@ -2158,7 +2151,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/SubProcess.h \
 	../include/lgi/common/Token.h
 
-../src/linux/Lgi/DragAndDrop.cpp : ../include/lgi/common/Lgi.h \
+../src/haiku/DragAndDrop.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/DragAndDrop.h
 
 ../include/lgi/common/Input.h : ../include/lgi/common/Dialog.h \
@@ -2265,7 +2258,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 
 ../include/lgi/common/View.h : 
 
-../src/linux/Lgi/Menu.cpp : ../include/lgi/common/Lgi.h \
+../src/haiku/Menu.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Token.h \
 	../include/lgi/common/DisplayString.h \
 	../include/lgi/common/Menu.h \
@@ -2431,7 +2424,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/LgiRes.h \
 	../include/lgi/common/CssTools.h
 
-../src/linux/Lgi/ClipBoard.cpp : ../include/lgi/common/Lgi.h \
+../src/haiku/ClipBoard.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Variant.h \
 	../include/lgi/common/ClipBoard.h
 

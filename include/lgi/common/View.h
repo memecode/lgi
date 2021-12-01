@@ -86,7 +86,7 @@ private:
 	int					_InLock;
 
 protected:
-	class GViewPrivate	*d;
+	class LViewPrivate	*d;
 
 	#if LGI_VIEW_HANDLE
 	OsView				_View; // OS specific handle to view object

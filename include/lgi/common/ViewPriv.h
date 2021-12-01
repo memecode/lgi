@@ -14,8 +14,10 @@
 	#define GViewFlags WndFlags
 #endif
 
-#ifdef MAC
+#if defined(MAC)
 extern OsThread LgiThreadInPaint;
+#elif defined(HAIKU)
+#include <View.h>
 #endif
 
 #define PAINT_VIRTUAL_CHILDREN	1
@@ -101,7 +103,10 @@ enum GViewFontType
 	GV_FontCached,
 };
 
-class GViewPrivate
+class LViewPrivate
+	#ifdef HAIKU
+	: public BView
+	#endif
 {
 public:
 	// General
@@ -178,8 +183,8 @@ public:
 	int PulseLength;
 	#endif
 	
-	GViewPrivate();
-	~GViewPrivate();
+	LViewPrivate();
+	~LViewPrivate();
 	
 	LView *GetParent()
 	{

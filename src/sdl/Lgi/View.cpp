@@ -27,7 +27,7 @@
 LHashTbl<PtrKey<LView*>,bool> ViewMap(256);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-GViewPrivate::GViewPrivate()
+LViewPrivate::LViewPrivate()
 {
 	Font = 0;
 	FontOwnType = GV_FontPtr;
@@ -42,7 +42,7 @@ GViewPrivate::GViewPrivate()
 	SinkHnd = -1;
 }
 
-GViewPrivate::~GViewPrivate()
+LViewPrivate::~LViewPrivate()
 {
 	if (FontOwnType == GV_FontOwned)
 	{

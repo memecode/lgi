@@ -185,7 +185,7 @@ LView::LView(OsView view)
     _Debug = false;
 	#endif
 
-	d = new GViewPrivate;
+	d = new LViewPrivate;
 	#ifdef LGI_SDL
 	_View = this;
 	#elif LGI_VIEW_HANDLE

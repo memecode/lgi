@@ -125,11 +125,11 @@ LKey::LKey(int Vkey, uint32_t flags)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #if 0
-bool GViewPrivate::CursorSet = false;
-LView *GViewPrivate::LastCursor = 0;
+bool LViewPrivate::CursorSet = false;
+LView *LViewPrivate::LastCursor = 0;
 #endif
 
-GViewPrivate::GViewPrivate()
+LViewPrivate::LViewPrivate()
 {
 	TabStop = false;
 	#if 0
@@ -154,7 +154,7 @@ GViewPrivate::GViewPrivate()
 	}
 }
 	
-GViewPrivate::~GViewPrivate()
+LViewPrivate::~LViewPrivate()
 {
 	DeleteObj(Popup);
 	LAssert(Pulse == NULL);

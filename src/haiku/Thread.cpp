@@ -1,15 +1,11 @@
 #include "lgi/common/Lgi.h"
 #include <errno.h>
 #include <unistd.h>
+#include <OS.h>
 
 OsThreadId GetCurrentThreadId()
 {
-	#ifdef SYS_gettid
-	return syscall(SYS_gettid);
-	#else
-	LAssert(0);
-	return 0;
-	#endif
+	return find_thread(NULL);
 }
 
 ////////////////////////////////////////////////////////////////////////////
