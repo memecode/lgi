@@ -60,6 +60,9 @@ public:
 };
 
 class LFontPrivate
+	#ifdef HAIKU
+	: public BFont
+	#endif
 {
 public:
 	#ifdef WINDOWS

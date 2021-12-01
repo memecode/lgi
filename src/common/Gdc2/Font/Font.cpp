@@ -1051,6 +1051,19 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 				CFRelease(values[i]);
 		}
 
+	#elif defined(HAIKU)
+
+		d->SetSize(PointSize());
+		status_t r = d->SetFamilyAndStyle(Face(), "Regular");
+		// printf("SetFamilyAndFace(%s)=%i\n", Face(), r);
+		if (r == B_OK)
+		{
+			font_height height;
+			d->GetHeight(&height);
+			d->Height = height.ascent + height.descent + height.leading;
+			return true;
+		}
+
 	#endif
 
 	return false;

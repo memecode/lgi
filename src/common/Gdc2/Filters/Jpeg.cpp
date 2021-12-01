@@ -30,6 +30,8 @@
 	const char sLibrary[] =
 		#if defined(LINUX)
 			"libjpeg"
+		#elif defined(HAIKU)
+			"libjpeg.so.62"
 		#else
 			"libjpeg9a"
 			#if defined(WINDOWS)

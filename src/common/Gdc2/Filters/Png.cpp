@@ -73,6 +73,8 @@ const char *sLibrary =
 		#else
 		"libpng15.15.4.0"
 		#endif
+	#elif defined(HAIKU)
+		"libpng16.so.16"
 	#elif defined(LINUX)
 		LinuxLibName()
 	#else
@@ -111,7 +113,7 @@ public:
 			if (Loaded)
 				LgiTrace("%s:%i - PNG: %s\n", _FL, GetFullPath().Get());
 			else
-				LgiTrace("%s:%i - Failed to load libpng.\n", _FL);
+				LgiTrace("%s:%i - Failed to load '%s'.\n", _FL, sLibrary);
 		}
 	}
 

@@ -761,10 +761,11 @@ bool LIsRelativePath(const char *Path)
 
 bool LMakePath(char *Str, int StrSize, const char *Path, const char *File)
 {
-	LAssert(Str != 0 &&
-			  StrSize > 0 &&
-			  Path != 0 &&
-			  File != 0);
+	if (!Str || StrSize <= 0 || !Path || !File)
+	{
+		printf("%s:%i - Invalid LMakePath(%p,%i,%s,%s) param\n", _FL, Str, StrSize, Path, File);
+		return false;
+	}
 
 	if (StrSize <= 4)
 	{
@@ -1430,6 +1431,13 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 				else
 					LAssert(0);
 
+			#elif defined(HAIKU)
+
+				dev_t volume = dev_for_path("/boot");
+				char path[MAX_PATH] = "";
+				if (find_directory(B_USER_DIRECTORY , volume, true, path, sizeof(path)) == B_OK)
+					Path = path;
+
 			#else
 
 				LAssert(0);
@@ -1900,6 +1908,11 @@ LString LGetExeFile()
 		m.Printf("GetModuleFileName failed err: %08.8X", GetLastError());
 		MessageBoxA(0, m, "LgiGetExeFile Error", MB_OK);
 		LExitApp();
+
+	#elif defined HAIKU
+
+		// Copy the string so as to not allow callers to change it
+		return LgiArgsAppPath.Get();
 
 	#elif defined LINUX
 

@@ -347,7 +347,7 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 			LgiMsg(0, LLoadString(L_ERROR_RES_NO_EXE_PATH,
 									"Fatal error: Couldn't get the path of the running\nexecutable. Can't find resource file."),
 									"LResources::LResources");
-			LgiTrace("%s:%i - Fatal error: Couldn't get the path of the running\nexecutable. Can't find resource file.", _FL);
+			LgiTrace("%s:%i - Fatal error: Couldn't get the path of the running\nexecutable. Can't find resource file.\n", _FL);
 			LExitApp();
 		}
 	}

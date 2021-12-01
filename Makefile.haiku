@@ -568,6 +568,7 @@ Font.o : ./src/common/Gdc2/Font/Font.cpp ./include/lgi/common/Lgi.h \
 	./include/lgi/common/DisplayString.h \
 	./include/lgi/common/GdiLeak.h \
 	./include/lgi/common/Css.h \
+	./src/common/Gdc2/Font/FontPriv.h \
 	./include/lgi/common/FontSelect.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
@@ -1493,6 +1494,8 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/Layout.h
 
 ./include/lgi/common/UnrolledList.h : 
+
+./src/common/Gdc2/Font/FontPriv.h : 
 
 ./include/lgi/common/FontSelect.h : 
 

@@ -1588,7 +1588,6 @@ public:
 
 AppWnd::AppWnd()
 {
-	printf("Here...\n");
 	#ifdef __GTK_H__
 	LgiGetResObj(true, AppName);
 	#endif

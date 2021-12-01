@@ -159,7 +159,7 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 		}
 		if (a)
 		{
-			printf("DoModal(%s,%s)\n", Title, Str);
+			printf("DoModal(%s,%s)\n", Title, Msg.Get());
 			result = a->Go();
 			printf("result=%i\n", result);
 		}
