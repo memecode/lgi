@@ -109,7 +109,7 @@ public:
 
 protected:
 	// private member vars
-	class LAppPrivate *d;
+	class LAppPrivate *d = NULL;
 	
 	#if defined LGI_SDL
 	
@@ -139,25 +139,25 @@ protected:
 	#endif
 
 	friend class LMouseHook;
-	static LMouseHook *MouseHook;
+	static LMouseHook *MouseHook = NULL;
 
 public:
 	// Static publics
 	
 	/// Use 'LAppInst' to return a pointer to the LApp object
 	static LApp *ObjInstance();
-	static class LSkinEngine *SkinEngine;
+	static class LSkinEngine *SkinEngine = NULL;
 
 	// public member vars
 	
 	/// The system font
-	LFont *SystemNormal;
+	LFont *SystemNormal = NULL;
 	
 	/// The system font in bold
-	LFont *SystemBold;
+	LFont *SystemBold = NULL;
 	
 	/// Pointer to the applications main window
-	LWindow *AppWnd;
+	LWindow *AppWnd = NULL;
 
 	/// Returns true if the LApp object initialized correctly
 	bool IsOk();

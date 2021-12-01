@@ -1588,6 +1588,7 @@ public:
 
 AppWnd::AppWnd()
 {
+	printf("Here...\n");
 	#ifdef __GTK_H__
 	LgiGetResObj(true, AppName);
 	#endif
@@ -1618,7 +1619,11 @@ Chk;
 	SetIcon("icon64.png");
 	#endif
 Chk;
-	if (Attach(0))
+	if (!Attach(0))
+	{
+		LgiTrace("%s:%i - Attach failed.\n", _FL);
+	}
+	else
 	{
 Chk;
 		Menu = new LMenu;

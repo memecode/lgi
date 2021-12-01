@@ -149,7 +149,8 @@ int LDialog::DoModal(OsView OverrideParent)
 
 	d->IsModal = true;
 	d->IsModeless = false;
-	LAppInst->Run();
+	// LAppInst->Run();
+	printf("%s:%i - DoModal not supported.\n", _FL);
 	
 	return d->ModalStatus;
 }

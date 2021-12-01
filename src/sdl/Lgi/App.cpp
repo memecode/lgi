@@ -263,8 +263,6 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	OsApplication(AppArgs.Args, AppArgs.Arg)
 {
 	TheApp = this;
-	SystemNormal = NULL;
-	SystemBold = NULL;
 	d = new LAppPrivate;
 	Name(name);
 
@@ -294,7 +292,6 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	MouseHook = new LMouseHook;
 
 	// System font setup
-	SystemNormal = 0;
 	LFontType SysFontType;
 
 	if (SysFontType.GetSystemFont("System"))

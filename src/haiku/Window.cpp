@@ -28,15 +28,15 @@ enum LAttachState
 	LDetaching,
 };
 
-class LWindowPrivate
+class LWindowPrivate : public BWindow
 {
 public:
 	int Sx, Sy;
 	bool Dynamic;
 	LKey LastKey;
-	::LArray<HookInfo> Hooks;
+	LArray<HookInfo> Hooks;
 	bool SnapToEdge;
-	::LString Icon;
+	LString Icon;
 	LRect Decor;
 	LAutoPtr<LSurface> IconImg;
 	LAttachState AttachState;
@@ -46,15 +46,19 @@ public:
 	
 	// Focus stuff
 	OsView FirstFocus;
-	LViewI *Focus;
+	LViewI *Focus = NULL;
 	bool Active;
 
-	LWindowPrivate()
+	LWindowPrivate() :
+		BWindow(BRect(100,100,200,200),
+				"tmp_title",
+				B_DOCUMENT_WINDOW_LOOK,
+				B_NORMAL_WINDOW_FEEL,
+				0)
 	{
 		AttachState = LUnattached;
 		Decor.ZOff(-1, -1);
 		FirstFocus = NULL;
-		Focus = NULL;
 		Active = false;
 		HadCreateEvent = false;
 		
@@ -170,12 +174,27 @@ bool LWindow::SetActive()
 
 bool LWindow::Visible()
 {
-	return LView::Visible();
+	LLocker lck(d, _FL);
+	if (!lck.Lock())
+		return false;
+	
+	return !d->IsHidden();
 }
 
 void LWindow::Visible(bool i)
 {
-	ThreadCheck();
+	LLocker lck(d, _FL);
+	if (!lck.Lock())
+	{
+		printf("%s:%i - Can't lock.\n", _FL);
+		return;
+	}
+	
+	printf("LWindow:Vis %i\n", i);
+	if (i)
+		d->Show();
+	else
+		d->Hide();
 }
 
 bool LWindow::Obscured()
@@ -839,7 +858,7 @@ static LAutoString DescribeView(LViewI *v)
 
 	char s[512];
 	int ch = 0;
-	::LArray<LViewI*> p;
+	LArray<LViewI*> p;
 	for (LViewI *i = v; i; i = i->GetParent())
 	{
 		p.Add(i);

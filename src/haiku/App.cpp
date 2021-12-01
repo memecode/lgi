@@ -226,18 +226,14 @@ private:
 }	MsgQue;
 
 /////////////////////////////////////////////////////////////////////////////
-LSkinEngine *LApp::SkinEngine = 0;
-LApp *TheApp = 0;
-LMouseHook *LApp::MouseHook = 0;
+LApp *TheApp = NULL;
+LSkinEngine *LApp::SkinEngine;
+LMouseHook *LApp::MouseHook;
 
 LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	OsApplication(AppArgs.Args, AppArgs.Arg)
 {
 	TheApp = this;
-	SystemNormal = NULL;
-	SystemBold = NULL;
-	AppWnd = NULL;
-
 	Name(name);
 	d = new LAppPrivate(this);
 	LgiArgsAppPath = AppArgs.Arg[0];
@@ -425,6 +421,11 @@ bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 
 	if (Loop)
 	{
+		int *i = 0;
+		*i = 0;
+		printf("Running main loop...\n");
+		d->Run();
+		printf("Main loop finished...\n");
 	}
 	else
 	{
@@ -443,7 +444,8 @@ void LApp::Exit(int Code)
 	else
 	{
 		// soft exit
-
+		printf("Quitting main loop...\n");
+		d->Quit();
 	}
 }
 

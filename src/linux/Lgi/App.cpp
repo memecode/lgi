@@ -239,8 +239,6 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	OsApplication(AppArgs.Args, AppArgs.Arg)
 {
 	TheApp = this;
-	SystemNormal = 0;
-	SystemBold = 0;
 	d = new LAppPrivate(this);
 	Name(name);
 	LgiArgsAppPath = AppArgs.Arg[0];
@@ -300,7 +298,6 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	d->GetConfig();
 
 	// System font setup
-	SystemNormal = 0;
 	LFontType SysFontType;
 
 	Gtk::PangoFontMap *fm = Gtk::pango_cairo_font_map_get_default();

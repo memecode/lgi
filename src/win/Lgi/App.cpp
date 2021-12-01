@@ -224,8 +224,6 @@ typedef HRESULT (CALLBACK *fDllGetVersion)(DLLVERSIONINFO *);
 LApp::LApp(OsAppArguments &AppArgs, const char *AppName, LAppArguments *Opts)
 {
 	// LApp instance
-	SystemNormal = 0;
-	SystemBold = 0;
 	LAssert(TheApp == 0);
 	TheApp = this;
 	LAssert(AppName != NULL);
