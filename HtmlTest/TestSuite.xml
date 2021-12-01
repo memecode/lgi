@@ -38,8 +38,10 @@
 		<Build>
 			<IncludePaths>
 				<All>
-					<Debug>../include</Debug>
-					<Release>../include</Release>
+					<Debug>../include
+../private/common</Debug>
+					<Release>../include
+../private/common</Release>
 				</All>
 				<Linux>
 					<Debug>../include/lgi/linux
