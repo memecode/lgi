@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <algorithm>
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/TextView3.h"
@@ -19,6 +20,7 @@
 #include "lgi/common/DropFiles.h"
 #include "ViewPriv.h"
 
+#undef max
 #ifdef _DEBUG
 #define FEATURE_HILIGHT_ALL_MATCHES	1
 #else
@@ -349,6 +351,7 @@ LTextView3::LTextView3(	int Id,
 	
 	PourEnabled = true;
 	PartialPour = false;
+	PartialPourLines = 0;
 	AdjustStylePos = true;
 	BlinkTs = 0;
 	LineY = 1;
@@ -982,6 +985,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 		d->PourLog = Log.NewGStr();
 		#endif
 		PartialPour = false;
+		PartialPourLines = 0;
 	}
 	else // Wrap text
 	{
@@ -1128,6 +1132,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 						// We have reached the end of the displayed area... so
 						// exit out temporarily to display the layout to the user
 						PartialPour = true;
+						PartialPourLines = std::max(PartialPourLines, Line.Length());
 						break;
 					}
 				}
@@ -1140,7 +1145,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 						if (Now - StartTs > WRAP_POUR_TIMEOUT)
 						{
 							PartialPour = true;
-							// LgiTrace("Pour timeout...\n");
+							PartialPourLines = std::max(PartialPourLines, Line.Length());
 							break;
 						}
 					}
@@ -1155,7 +1160,10 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 		}
 
 		if (i >= Size)
+		{
 			PartialPour = false;
+			PartialPourLines = 0;
+		}
 		SendNotify(LNotifyCursorChanged);
 	}
 
@@ -1190,7 +1198,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 		}
 	}
 
-	bool ScrollYNeeded = Client.Y() < (Line.Length() * LineY);
+	bool ScrollYNeeded = Client.Y() < (std::max(PartialPourLines, Line.Length()) * LineY);
 	bool ScrollChange = ScrollYNeeded ^ (VScroll != NULL);
 	d->LayoutDirty = WrapType != TEXTED_WRAP_NONE && ScrollChange;
 	#if PROFILE_POUR
@@ -1201,7 +1209,8 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 
 	if (ScrollChange)
 	{
-		// printf("%s:%i - SetScrollBars(%i) %i %i\n", _FL, ScrollYNeeded, Client.Y(), (Line.Length() * LineY));
+		LgiTrace("%s:%i - %p::SetScrollBars(%i) cliy=%i content=%i partial=%i\n",
+			_FL, this, ScrollYNeeded, Client.Y(), (Line.Length() * LineY), PartialPour);
 		SetScrollBars(false, ScrollYNeeded);
 	}
 	UpdateScrollBars();
@@ -2583,49 +2592,49 @@ const char *LTextView3::GetLastError()
 
 void LTextView3::UpdateScrollBars(bool Reset)
 {
+	if (!VScroll)
+		return;
+
+	LRect Before = GetClient();
+
+	int DisplayLines = Y() / LineY;
+	ssize_t Lines = std::max(PartialPourLines, Line.Length());
+	VScroll->SetRange(LRange(0, Lines));
 	if (VScroll)
 	{
-		LRect Before = GetClient();
-
-		int DisplayLines = Y() / LineY;
-		ssize_t Lines = GetLines();
-		VScroll->SetRange(LRange(0, Lines));
-		if (VScroll)
+		VScroll->SetPage(DisplayLines);
+			
+		ssize_t Max = Lines - DisplayLines + 1;
+		bool Inval = false;
+		if (VScroll->Value() > Max)
 		{
-			VScroll->SetPage(DisplayLines);
+			VScroll->Value(Max);
+			Inval = true;
+		}
+
+		if (Reset)
+		{
+			VScroll->Value(0);
+			SelStart = SelEnd = -1;
+		}
+		else if (d->VScrollCache >= 0)
+		{
+			VScroll->Value(d->VScrollCache);
+			d->VScrollCache = -1;
+			SelStart = SelEnd = -1;
+		}
+
+		LRect After = GetClient();
+
+		if (Before != After && GetWrapType())
+		{
+			d->SetDirty(0, Size);
+			Inval = true;
+		}
 			
-			ssize_t Max = Lines - DisplayLines + 1;
-			bool Inval = false;
-			if (VScroll->Value() > Max)
-			{
-				VScroll->Value(Max);
-				Inval = true;
-			}
-
-			if (Reset)
-			{
-				VScroll->Value(0);
-				SelStart = SelEnd = -1;
-			}
-			else if (d->VScrollCache >= 0)
-			{
-				VScroll->Value(d->VScrollCache);
-				d->VScrollCache = -1;
-				SelStart = SelEnd = -1;
-			}
-
-			LRect After = GetClient();
-
-			if (Before != After && GetWrapType())
-			{
-				d->SetDirty(0, Size);
-				Inval = true;
-			}
-			
-			if (Inval)
-			{
-				Invalidate();
-			}
+		if (Inval)
+		{
+			Invalidate();
 		}
 	}
 }
@@ -3258,11 +3267,13 @@ void LTextView3::OnPosChange()
 		LLayout::OnPosChange();
 
 		LRect c = GetClient();
-		bool ScrollYNeeded = c.Y() < (Line.Length() * LineY);
+		bool ScrollYNeeded = c.Y() < (std::max(PartialPourLines, Line.Length()) * LineY);
 		bool ScrollChange = ScrollYNeeded ^ (VScroll != NULL);
 		if (ScrollChange)
 		{
-			// printf("%s:%i - SetScrollBars(%i)\n", _FL, ScrollYNeeded);
+			auto Client = GetClient();
+			LgiTrace("%s:%i - %p::SetScrollBars(%i) cliy=%i content=%i partial=%i\n",
+				_FL, this, ScrollYNeeded, Client.Y(), (Line.Length() * LineY), PartialPour);
 			SetScrollBars(false, ScrollYNeeded);
 		}
 		UpdateScrollBars();

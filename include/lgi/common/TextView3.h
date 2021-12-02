@@ -242,12 +242,13 @@ protected:
 	LRect CursorPos;
 
 	/// true if the text pour process is still ongoing
-	bool PourEnabled;		// True if pouring the text happens on edit. Turn off if doing lots
-							// of related edits at the same time. And then manually pour once 
-							// finished.
-	bool PartialPour;		// True if the pour is happening in the background. It's not threaded
-							// but taking place in the GUI thread via timer.
-	bool AdjustStylePos;	// Insert/Delete moved styles automatically to match (default: true)
+	bool PourEnabled;			// True if pouring the text happens on edit. Turn off if doing lots
+								// of related edits at the same time. And then manually pour once 
+								// finished.
+	bool PartialPour;			// True if the pour is happening in the background. It's not threaded
+								// but taking place in the GUI thread via timer.
+	size_t PartialPourLines;	// Partial pour max lines, if we restart this tracks the max we saw...
+	bool AdjustStylePos;		// Insert/Delete moved styles automatically to match (default: true)
 
 	List<LTextLine> Line;
 	LUnrolledList<LStyle> Style;		// sorted in 'Start' order

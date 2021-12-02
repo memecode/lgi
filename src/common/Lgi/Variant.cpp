@@ -1523,7 +1523,8 @@ LDom *LDom::ResolveObject(const char *Var, LString &Name, LString &Array)
 		
 			LString part = LString(s, e - s).Strip();
 			if (part.Length() > 0)
-				t.New() = part;
+				t.New() = part; // Store non-empty part
+
 			s = *e ? e + 1 : e;
 		}
 
@@ -1668,34 +1669,29 @@ const char *LDomPropToString(LDomProperty Prop)
 
 bool LDom::GetValue(const char *Var, LVariant &Value)
 {
+	if (!Var)
+		return false;
+
+	if (!_OnAccess(true))
+	{
+		LgiTrace("%s:%i - Locking error\n", _FL);
+		LAssert(0);
+		return false;
+	}
+
 	bool Status = false;
 
-	if (Var)
+	LString Name, Arr;
+	LDom *Object = ResolveObject(Var, Name, Arr);
+	if (Object)
 	{
-		if (_OnAccess(true))
-		{
-			LString Name, Arr;
-			LDom *Object = ResolveObject(Var, Name, Arr);
-			if (Object)
-			{
-				if (Name[0] == 0)
-				{
-					LgiTrace("%s:%i - Warning name parse failed for '%s'\n", _FL, Var);
-				}
-				else
-				{
-					Status = Object->GetVariant(Name, Value, Arr.IsEmpty() ? NULL : Arr);
-				}
-			}
-
-			_OnAccess(false);
-		}
+		if (Name.IsEmpty())
+			LgiTrace("%s:%i - Warning name parse failed for '%s'\n", _FL, Var);
 		else
-		{
-			LgiTrace("%s:%i - Locking error\n", _FL);
-			LAssert(0);
-		}
+			Status = Object->GetVariant(Name, Value, Arr.IsEmpty() ? NULL : Arr);
 	}
+
+	_OnAccess(false);
 
 	return Status;
 }
