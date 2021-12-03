@@ -25,6 +25,8 @@ protected:
 	int MonthX, MonthY;
 
 public:
+	int FirstDayOfWeek = 0; // 0-sun, 1-mon etc..
+
 	MonthView(LDateTime *dt = 0);
 
 	// Set

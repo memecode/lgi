@@ -3,10 +3,10 @@
 #include "lgi/common/MonthView.h"
 
 // These are the localized strings for days and months.
-const char *ShortDayNames[7] = {"Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat"};
-const char *FullDayNames[7] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-const char *ShortMonthNames[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-const char *FullMonthNames[12] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+const char *ShortDayNames[7]	= {"Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat"};
+const char *FullDayNames[7]		= {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+const char *ShortMonthNames[12]	= {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+const char *FullMonthNames[12]	= {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 char MonthView::Buf[256];
 
 MonthView::MonthView(LDateTime *dt)
@@ -24,7 +24,11 @@ void MonthView::Set(LDateTime *dt)
 		First = Cursor;
 		First.Day(1);
 		Start = First;
-		Start.AddDays(-Start.DayOfWeek());
+
+		auto Offset = FirstDayOfWeek - Start.DayOfWeek();
+		if (Offset > 0)
+			Offset -= 7;
+		Start.AddDays(Offset);
 
 		int DayOfWeek = First.DayOfWeek();
 		MonthX = 7;
@@ -92,13 +96,10 @@ char *MonthView::Day(bool FromCursor)
 char *MonthView::Date(bool FromCursor)
 {
 	if (FromCursor)
-	{
 		Cursor.GetDate(Buf, sizeof(Buf));
-	}
 	else
-	{
 		Cell.GetDate(Buf, sizeof(Buf));
-	}
+
 	return Buf;
 }
 

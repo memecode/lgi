@@ -1670,8 +1670,7 @@ bool LDateTime::AddDays(int64 Days)
 	if (!Get(Ts))
 		return false;
 
-	uint64 DayTicks = (uint64)LDateTime::Second64Bit * 60 * 60 * 24;
-	Ts += Days * DayTicks;
+	Ts += Days * LDateTime::DayLength * Second64Bit;
 	bool b = Set(Ts);
 	return b;
 }

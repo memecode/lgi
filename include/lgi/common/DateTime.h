@@ -97,19 +97,16 @@ public:
 	LDateTime(const LDateTime &dt) { *this = dt; }
 	~LDateTime();
 
-    enum 
-    {
-        /// Resolution of a second when using 64 bit int's
-        /// \sa LDateTime::Get(int64), LDateTime::Set(int64)
-        #ifdef WIN32
-        Second64Bit = 10000000,
-        #else
-        Second64Bit = 1000,
-        #endif
-    };
-    static constexpr int64 MinuteLength		= Second64Bit  * 60;
-    static constexpr int64 HourLength		= MinuteLength * 60;
-    static constexpr int64 DayLength		= HourLength   * 24;
+    /// Resolution of a second when using 64 bit int's
+    /// \sa LDateTime::Get(int64), LDateTime::Set(int64)
+    #ifdef WIN32
+    static constexpr int64_t Second64Bit	= 10000000;
+    #else
+    static constexpr int64_t Second64Bit	= 1000;
+    #endif
+	static constexpr int64_t MinuteLength	= 60; // seconds
+    static constexpr int64_t HourLength		= MinuteLength * 60; // seconds
+    static constexpr int64_t DayLength		= HourLength   * 24; // seconds
 	static constexpr char *WeekdaysShort[]	= {"Sun",    "Mon",    "Tue",     "Wed",       "Thu",      "Fri",     "Sat"};
 	static constexpr char *WeekdaysLong[]	= {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 	static constexpr char *MonthsShort[]	= {"Jan",     "Feb",      "Mar",   "Apr",   "May", "Jun",  "Jul",  "Aug",    "Sep",       "Oct",     "Nov",      "Dec"};
