@@ -50,7 +50,7 @@ int ScoreCmp(FindSymResult **a, FindSymResult **b)
 
 #define USE_HASH	1
 
-struct FindSymbolSystemPriv : public LEventTargetThread, public LCancel
+struct FindSymbolSystemPriv : public LEventTargetThread
 {
 	struct FileSyms
 	{
