@@ -92,10 +92,8 @@ public:
 		if (!Lock(_FL))
 			return false;
 
-		LEventSinkI *s = (LEventSinkI*)ToPtr.Find(Hnd);
-		bool Status = false;
-		if (s)
-			Status = s->PostEvent(Cmd, a, b);
+		auto *s = ToPtr.Find(Hnd);
+		bool Status = s ? s->PostEvent(Cmd, a, b) : false;
 		#if 0 // _DEBUG
 		else
 			// This is not fatal, but we might want to know about it in DEBUG builds:
@@ -183,11 +181,11 @@ class LgiClass LEventTargetThread :
 	public LThread,
 	public LMutex,
 	public LMappedEventSink,
+	public LCancel,
 	public LEventTargetI // Sub-class has to implement OnEvent
 {
 	LArray<LMessage*> Msgs;
 	LThreadEvent Event;
-	bool Loop;
 
 	// This makes the event name unique on windows to 
 	// prevent multiple instances clashing.
@@ -212,7 +210,6 @@ public:
 		LMutex(Name + ".Mutex"),
 		Event(ProcessName(Name, "Event"))
 	{
-		Loop = true;
 		PostTimeout = 1000;
 		Processing = 0;
 		TimerMs = 0;
@@ -243,11 +240,11 @@ public:
 
 	void EndThread()
 	{
-		if (Loop)
+		if (!IsCancelled())
 		{
 			// We can't be locked here, because LEventTargetThread::Main needs
 			// to lock to check for messages...
-			Loop = false;
+			Cancel();
 			
 			if (GetCurrentThreadId() == LThread::GetId())
 			{
@@ -303,7 +300,7 @@ public:
 
 	bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0)
 	{
-		if (!Loop)
+		if (IsCancelled())
 			return false;
 		if (!Lock(_FL))
 			return false;
@@ -317,7 +314,7 @@ public:
 	
 	int Main()
 	{
-		while (Loop)
+		while (!IsCancelled())
 		{
 			int WaitLength = -1;
 			if (TimerTs != 0)
@@ -354,7 +351,7 @@ public:
 				}
 
 				Processing = m.Length();
-				for (unsigned i=0; Loop && i < m.Length(); i++)
+				for (unsigned i=0; !IsCancelled() && i < m.Length(); i++)
 				{
 					Processing--;
 					/*

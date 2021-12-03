@@ -814,7 +814,7 @@ struct SearchParams
 	}
 };
 
-class SearchThread : public LEventTargetThread, public LCancel
+class SearchThread : public LEventTargetThread
 {
 	List<Resource> Res;
 	AppWnd *App;

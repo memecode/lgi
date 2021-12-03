@@ -128,7 +128,7 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, bool Debug)
 	int64 Count = 0, Total = 0;
 	ProgressListItem *Prog = NULL;
 
-	while (!IsCancelled())
+	while (!LSsh::IsCancelled())
 	{
 		auto rd = con->Read(buf, sizeof(buf));
 		if (rd < 0)
@@ -1233,7 +1233,7 @@ public:
 			}
 			case IDM_FIND:
 			{
-				GInput i(this, "", "Search string:");
+				LInput i(this, "", "Search string:");
 				if (i.DoModal())
 				{
 					LString::Array Revs;

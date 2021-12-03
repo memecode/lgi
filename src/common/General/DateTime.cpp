@@ -343,31 +343,11 @@ struct MonthHash : public LHashTbl<ConstStrKey<char,false>,int>
 {
 	MonthHash()
 	{
-		Add("Jan", 1);
-		Add("Feb", 2);
-		Add("Mar", 3);
-		Add("Apr", 4);
-		Add("May", 5);
-		Add("Jun", 6);
-		Add("Jul", 7);
-		Add("Aug", 8);
-		Add("Sep", 9);
-		Add("Oct", 10);
-		Add("Nov", 11);
-		Add("Dec", 12);
+		for (int i=0; i<CountOf(LDateTime::MonthsShort); i++)
+			Add(LDateTime::MonthsShort[i], i + 1);
 
-		Add("January", 1);
-		Add("February", 2);
-		Add("March", 3);
-		Add("April", 4);
-		Add("May", 5);
-		Add("June", 6);
-		Add("July", 7);
-		Add("August", 8);
-		Add("September", 9);
-		Add("October", 10);
-		Add("November", 11);
-		Add("December", 12);
+		for (int i=0; i<CountOf(LDateTime::MonthsLong); i++)
+			Add(LDateTime::MonthsLong[i], i + 1);
 	}
 };
 
@@ -1214,12 +1194,10 @@ bool LDateTime::SetTime(const char *Str)
 
 int LDateTime::IsWeekDay(const char *s)
 {
-	static const char *Short[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-	static const char *Long[] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-	for (unsigned n=0; n<CountOf(Short); n++)
+	for (unsigned n=0; n<CountOf(WeekdaysShort); n++)
 	{
-		if (!_stricmp(Short[n], s) ||
-			!_stricmp(Long[n], s))
+		if (!_stricmp(WeekdaysShort[n], s) ||
+			!_stricmp(WeekdaysLong[n], s))
 			return n;
 	}
 	return -1;
@@ -1227,12 +1205,10 @@ int LDateTime::IsWeekDay(const char *s)
 
 int LDateTime::IsMonth(const char *s)
 {
-	static const char *Short[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-	static const char *Long[] = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
-	for (unsigned n=0; n<CountOf(Short); n++)
+	for (unsigned n=0; n<CountOf(MonthsShort); n++)
 	{
-		if (!_stricmp(Short[n], s) ||
-			!_stricmp(Long[n], s))
+		if (!_stricmp(MonthsShort[n], s) ||
+			!_stricmp(MonthsLong[n], s))
 			return n;
 	}
 	return -1;
@@ -1680,7 +1656,7 @@ void LDateTime::AddHours(int64 Hours)
 	uint64 i;
 	if (Get(i))
 	{
-		i += Hours * 3600 * Second64Bit;
+		i += Hours * LDateTime::HourLength * Second64Bit;
 		Set(i);
 	}
 }
@@ -1751,13 +1727,9 @@ int LDateTime::MonthFromName(const char *Name)
 {
 	if (Name)
 	{
-		const char *MonthName[] = {
-			"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-			"Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-
 		for (int m=0; m<12; m++)
 		{
-			if (strnicmp(Name, MonthName[m], strlen(MonthName[m])) == 0)
+			if (strnicmp(Name, MonthsShort[m], strlen(MonthsShort[m])) == 0)
 			{
 				return m + 1;
 				break;

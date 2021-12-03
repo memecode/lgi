@@ -947,7 +947,7 @@ bool LRichTextEdit::DoCase(bool Upper)
 
 bool LRichTextEdit::DoGoto()
 {
-	GInput Dlg(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto line:"), "Text");
+	LInput Dlg(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto line:"), "Text");
 	if (Dlg.DoModal() == IDOK)
 	{
 		LString s = Dlg.GetStr();
@@ -1387,7 +1387,7 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 		{
 			char s[32];
 			sprintf_s(s, sizeof(s), "%i", IndentSize);
-			GInput i(this, s, "Indent Size:", "Text");
+			LInput i(this, s, "Indent Size:", "Text");
 			if (i.DoModal())
 			{
 				IndentSize = i.GetStr().Int();
@@ -1398,7 +1398,7 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 		{
 			char s[32];
 			sprintf_s(s, sizeof(s), "%i", TabSize);
-			GInput i(this, s, "Tab Size:", "Text");
+			LInput i(this, s, "Tab Size:", "Text");
 			if (i.DoModal())
 			{
 				SetTabSize(i.GetStr().Int());

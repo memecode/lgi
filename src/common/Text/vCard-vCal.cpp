@@ -584,6 +584,8 @@ bool VIo::ReadField(LStreamI &s, LString &Name, ParamArray *Params, LString &Dat
 
 		if (r <= 0)
 			break;
+		if ((r == 1 && Temp[0] == '\n') || (r == 2 && Temp[0] == '\r' && Temp[1] == '\n')) // Blank line case...
+			continue;
 
 		// Unfold
 		for (char *c = Temp; *c; c++)

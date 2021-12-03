@@ -164,7 +164,7 @@
 	<ul>
 		<li> ::LgiMsg
 		<li> LAlert
-		<li> GInput
+		<li> LInput
 		<li> LFileSelect
 		<li> LFontSelect
 		<li> GPrinter::Browse

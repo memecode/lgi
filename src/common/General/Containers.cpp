@@ -452,6 +452,7 @@ LString LStringPipe::NewGStr()
 ssize_t LStringPipe::LineChars()
 {
 	ssize_t Len = 0;
+
 	for (auto m: Mem)
 	{
 		uint8_t *p = m->Ptr();
@@ -539,7 +540,7 @@ ssize_t LStringPipe::Pop(char *Str, ssize_t BufSize)
 		return 0;
 
 	ssize_t Chars = LineChars();
-	if (Chars <= 0)
+	if (Chars < 0)
 		return 0;
 
 	return SaveToBuffer(Str, BufSize-1 /* for the NULL */, Chars);

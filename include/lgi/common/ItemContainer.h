@@ -53,6 +53,7 @@ public:
         return *this;
     }
 
+	virtual const char *GetClass() { return "LItem"; }
 	virtual LItemContainer *GetContainer() = 0;
 
 	// Events

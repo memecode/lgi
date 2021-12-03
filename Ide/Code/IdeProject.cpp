@@ -3213,7 +3213,7 @@ void IdeProject::OnMouseClick(LMouse &m)
 		{
 			case IDM_NEW_FOLDER:
 			{
-				GInput Name(Tree, "", "Name:", AppName);
+				LInput Name(Tree, "", "Name:", AppName);
 				if (Name.DoModal())
 				{
 					GetSubFolder(this, Name.GetStr(), true);

@@ -1718,7 +1718,7 @@ void CtrlTabs::OnMouseClick(LMouse &m)
 								if (!t->GetStr())
 									t->SetStr(Dlg->CreateSymbol());
 
-								GInput Input(this, t->GetStr()->Get(), "Enter tab name:", "Rename");
+								LInput Input(this, t->GetStr()->Get(), "Enter tab name:", "Rename");
 								Input.SetParent(Dlg);
 								if (Input.DoModal() && Input.GetStr())
 								{
@@ -1928,7 +1928,7 @@ void CtrlList::OnMouseClick(LMouse &m)
 							{
 								if (c)
 								{
-									GInput Input(this, c->GetStr()->Get(), "Enter column name:", "Rename");
+									LInput Input(this, c->GetStr()->Get(), "Enter column name:", "Rename");
 									Input.SetParent(Dlg);
 									if (Input.DoModal())
 									{

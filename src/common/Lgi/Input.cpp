@@ -26,7 +26,7 @@ enum InputCtrls
 };
 
 //////////////////////////////////////////////////////////////////////////////
-GInput::GInput(LViewI *parent, const char *InitStr, const char *Msg, const char *Title, bool Password, GInputCallback callback, void *callbackparam)
+LInput::LInput(LViewI *parent, const char *InitStr, const char *Msg, const char *Title, bool Password, GInputCallback callback, void *callbackparam)
 {
 	Callback = callback;
 	CallbackParam = callbackparam;
@@ -82,7 +82,7 @@ GInput::GInput(LViewI *parent, const char *InitStr, const char *Msg, const char 
 	MoveToCenter();
 }
 
-int GInput::OnNotify(LViewI *Ctrl, LNotification n)
+int LInput::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{

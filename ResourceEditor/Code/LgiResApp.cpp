@@ -407,7 +407,7 @@ void ObjTreeItem::OnMouseClick(LMouse &m)
 				}
 				case IDM_RENAME:
 				{
-					GInput Dlg(Tree, GetText(), "Enter the name for the object", "Object Name");
+					LInput Dlg(Tree, GetText(), "Enter the name for the object", "Object Name");
 					if (Dlg.DoModal())
 					{
 						Obj->Wnd()->Name(Dlg.GetStr());

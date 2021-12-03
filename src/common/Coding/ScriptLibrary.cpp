@@ -935,7 +935,7 @@ bool SystemFunctions::GetInputDlg(LScriptArguments &Args)
 	char *Msg = Args[2]->Str();
 	char *Title = Args[3]->Str();
 	bool Pass = Args.Length() > 4 ? Args[4]->CastInt32() != 0 : false;
-	GInput Dlg(Parent, InitVal, Msg, Title, Pass);
+	LInput Dlg(Parent, InitVal, Msg, Title, Pass);
 	if (Dlg.DoModal())
 	{
 		*Args.GetReturn() = Dlg.GetStr();

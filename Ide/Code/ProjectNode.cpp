@@ -1145,7 +1145,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 			}
 			case IDM_NEW_FOLDER:
 			{
-				GInput Name(Tree, "", "Name:", AppName);
+				LInput Name(Tree, "", "Name:", AppName);
 				if (Name.DoModal())
 				{
 					GetSubFolder(Project, Name.GetStr(), true);
@@ -1154,7 +1154,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 			}
 			case IDM_RENAME:
 			{
-				GInput Name(Tree, "", "Name:", AppName);
+				LInput Name(Tree, "", "Name:", AppName);
 				if (Name.DoModal())
 				{
 					SetName(Name.GetStr());

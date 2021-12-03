@@ -580,7 +580,7 @@ bool LApp::GetOption(const char *Option, char *Dest, int DestLen)
 	return false;
 }
 
-// #include "GInput.h"
+// #include "LInput.h"
 
 void LApp::SetAppArgs(OsAppArguments &AppArgs)
 {

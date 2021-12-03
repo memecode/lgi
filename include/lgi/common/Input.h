@@ -3,14 +3,14 @@
 #include "lgi/common/Dialog.h"
 #include "lgi/common/Edit.h"
 
-/// This callback if supplied to the GInput will create a "..." button, which if clicked
+/// This callback if supplied to the LInput will create a "..." button, which if clicked
 /// will call the callback.
-typedef void (*GInputCallback)(class GInput *Dlg, LViewI *EditCtrl, void *Param);
+typedef void (*GInputCallback)(class LInput *Dlg, LViewI *EditCtrl, void *Param);
 
 /// This class displays a window with a message and an edit box to enter a string.
 /// Once constructed, use the LDialog::DoModal() call to run the input window, it
 /// returns TRUE if 'Ok' is clicked.
-class LgiClass GInput : public LDialog
+class LgiClass LInput : public LDialog
 {
 	LEdit *Edit;
 	GInputCallback Callback;
@@ -19,7 +19,7 @@ class LgiClass GInput : public LDialog
 
 public:
 	/// Constructs the dialog.
-	GInput
+	LInput
 	(
 		/// The parent view
 		LViewI *parent,

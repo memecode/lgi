@@ -76,7 +76,7 @@ bool DocEdit::AppendItems(LSubMenu *Menu, const char *Param, int Base)
 	
 bool DocEdit::DoGoto()
 {
-	GInput Dlg(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
+	LInput Dlg(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
 	if (Dlg.DoModal() != IDOK || !ValidStr(Dlg.GetStr()))
 		return false;
 	LString s = Dlg.GetStr();

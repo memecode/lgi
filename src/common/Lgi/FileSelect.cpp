@@ -1338,7 +1338,7 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification n)
 		}
 		case IDC_NEW:
 		{
-			GInput Dlg(this, "", "Create new folder:", "New Folder");
+			LInput Dlg(this, "", "Create new folder:", "New Folder");
 			if (Dlg.DoModal())
 			{
 				char New[256];
@@ -1720,7 +1720,7 @@ void LFolderItem::OnDelete(bool Ask)
 
 void LFolderItem::OnRename()
 {
-	GInput Inp(Dlg, File, "New name:", Dlg->Name());
+	LInput Inp(Dlg, File, "New name:", Dlg->Name());
 	if (Inp.DoModal())
 	{
 		char Old[256];

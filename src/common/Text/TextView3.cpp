@@ -2703,7 +2703,7 @@ void LTextView3::SetLine(int i)
 
 bool LTextView3::DoGoto()
 {
-	GInput Dlg(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto line:"), "Text");
+	LInput Dlg(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto line:"), "Text");
 	if (Dlg.DoModal() == IDOK &&
 		Dlg.GetStr())
 	{
@@ -3603,7 +3603,7 @@ void LTextView3::DoContextMenu(LMouse &m)
 		{
 			char s[32];
 			sprintf_s(s, sizeof(s), "%i", IndentSize);
-			GInput i(this, s, "Indent Size:", "Text");
+			LInput i(this, s, "Indent Size:", "Text");
 			if (i.DoModal())
 			{
 				IndentSize = atoi(i.GetStr());
@@ -3614,7 +3614,7 @@ void LTextView3::DoContextMenu(LMouse &m)
 		{
 			char s[32];
 			sprintf_s(s, sizeof(s), "%i", TabSize);
-			GInput i(this, s, "Tab Size:", "Text");
+			LInput i(this, s, "Tab Size:", "Text");
 			if (i.DoModal())
 			{
 				SetTabSize(atoi(i.GetStr()));

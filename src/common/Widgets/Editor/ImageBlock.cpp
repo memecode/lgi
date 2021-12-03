@@ -31,7 +31,7 @@ public:
 
 	~ImageLoader()
 	{
-		Cancel(true);
+		Progress::Cancel(true);
 		#if LOADER_THREAD_LOGGING
 		LgiTrace("%s:%i - ~ImageLoader\n", _FL);
 		#endif

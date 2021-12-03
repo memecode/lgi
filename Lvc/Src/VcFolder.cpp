@@ -2189,7 +2189,7 @@ void VcFolder::OnMouseClick(LMouse &m)
 			}
 			case IDM_EDIT:
 			{
-				GInput Dlg(GetTree(), Uri.ToString(), "URI:", "Remote Folder Location");
+				LInput Dlg(GetTree(), Uri.ToString(), "URI:", "Remote Folder Location");
 				if (Dlg.DoModal())
 				{
 					Uri.Set(Dlg.GetStr());
@@ -2950,7 +2950,7 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 				if (s.Find("Please tell me who you are") >= 0)
 				{
 					{
-						GInput i(GetTree(), "", "Git user name:", AppName);
+						LInput i(GetTree(), "", "Git user name:", AppName);
 						if (i.DoModal())
 						{
 							LString Args;
@@ -2959,7 +2959,7 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 						}
 					}
 					{
-						GInput i(GetTree(), "", "Git user email:", AppName);
+						LInput i(GetTree(), "", "Git user email:", AppName);
 						if (i.DoModal())
 						{
 							LString Args;

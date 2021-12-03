@@ -107,9 +107,13 @@ public:
         Second64Bit = 1000,
         #endif
     };
-    constexpr static int64 MinuteLength = Second64Bit * 60;
-    constexpr static int64 HourLength = MinuteLength * 60;
-    constexpr static int64 DayLength = HourLength * 24;
+    static constexpr int64 MinuteLength		= Second64Bit  * 60;
+    static constexpr int64 HourLength		= MinuteLength * 60;
+    static constexpr int64 DayLength		= HourLength   * 24;
+	static constexpr char *WeekdaysShort[]	= {"Sun",    "Mon",    "Tue",     "Wed",       "Thu",      "Fri",     "Sat"};
+	static constexpr char *WeekdaysLong[]	= {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+	static constexpr char *MonthsShort[]	= {"Jan",     "Feb",      "Mar",   "Apr",   "May", "Jun",  "Jul",  "Aug",    "Sep",       "Oct",     "Nov",      "Dec"};
+	static constexpr char *MonthsLong[]		= {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
 	/// Returns true if all the components are in a valid range
 	bool IsValid() const;

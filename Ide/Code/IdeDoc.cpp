@@ -1465,7 +1465,7 @@ void IdeDoc::EscapeSelection(bool ToEscaped)
 		LString Delim = "\r\n\\";
 		if (m.Ctrl())
 		{
-			GInput Inp(this, LString::Escape(Delim, -1, "\\"), "Delimiter chars:", "Escape");
+			LInput Inp(this, LString::Escape(Delim, -1, "\\"), "Delimiter chars:", "Escape");
 			if (Inp.DoModal())
 				Delim = LString::UnEscape(Inp.GetStr().Get(), -1);
 		}

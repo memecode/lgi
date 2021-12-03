@@ -55,13 +55,10 @@ public:
 ///////////////////////////////////////////////////////////////////
 int LookupMonth(char *m)
 {
-	const char *Months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 	for (int i=0; i<12; i++)
 	{
-		if (m && _stricmp(m, Months[i]) == 0)
-		{
+		if (m && _stricmp(m, LDateTime::MonthsShort[i]) == 0)
 			return i + 1;
-		}
 	}
 	return 1;
 }

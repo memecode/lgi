@@ -3624,7 +3624,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				Doc->DoGoto();
 			else
 			{
-				GInput Inp(this, NULL, LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
+				LInput Inp(this, NULL, LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
 				if (Inp.DoModal())
 				{
 					LString s = Inp.GetStr();
@@ -4105,7 +4105,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			if (!Doc)
 				break;
 
-			GInput i(this, "", "Separator:", AppName);
+			LInput i(this, "", "Separator:", AppName);
 			if (!i.DoModal())
 				break;
 				
@@ -4118,7 +4118,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			if (!Doc)
 				break;
 
-			GInput i(this, "", "Separator:", AppName);
+			LInput i(this, "", "Separator:", AppName);
 			if (!i.DoModal())
 				break;
 				

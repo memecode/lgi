@@ -2,6 +2,7 @@
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/MonthView.h"
 
+// These are the localized strings for days and months.
 const char *ShortDayNames[7] = {"Sun", "Mon", "Tues", "Wed", "Thur", "Fri", "Sat"};
 const char *FullDayNames[7] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 const char *ShortMonthNames[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};

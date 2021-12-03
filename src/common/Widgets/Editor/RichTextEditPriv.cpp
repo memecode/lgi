@@ -1688,7 +1688,7 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 			if (a)
 			{
 				// Edit the existing link...
-				GInput i(View, a->Param, "Edit link:", "Link");
+				LInput i(View, a->Param, "Edit link:", "Link");
 				if (i.DoModal())
 				{
 					a->Param = i.GetStr();
@@ -1697,7 +1697,7 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 			else if (Selection)
 			{
 				// Turn current selection into link
-				GInput i(View, NULL, "Edit link:", "Link");
+				LInput i(View, NULL, "Edit link:", "Link");
 				if (i.DoModal())
 				{
 					BlockCursor *Start = CursorFirst() ? Cursor : Selection;

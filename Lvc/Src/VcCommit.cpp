@@ -517,7 +517,7 @@ void VcCommit::OnMouseClick(LMouse &m)
 				LArray<VcCommit*> Revs;
 				if (GetList()->GetSelection(Revs))
 				{
-					GInput Inp(GetList(), "", "New branch name:", AppName);
+					LInput Inp(GetList(), "", "New branch name:", AppName);
 					if (Inp.DoModal())
 					{
 						Folder->RenameBranch(Inp.GetStr(), Revs);
