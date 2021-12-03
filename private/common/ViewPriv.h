@@ -105,11 +105,11 @@ class LViewPrivate
 public:
 	// General
 	LView			*View = NULL;
-	int				CtrlId = 0;
 	LDragDropSource	*DropSource = NULL;
 	LDragDropTarget	*DropTarget = NULL;
 	bool			IsThemed = false;
-	int				WantsPulse = 0;
+	int				CtrlId = -1;
+	int				WantsPulse = -1;
 
 	// Hierarchy
 	LViewI			*ParentI = NULL;

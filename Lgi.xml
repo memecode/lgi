@@ -220,14 +220,14 @@
 					<Node File=".\src\linux\Lgi\Printer.cpp" Type="2" Platforms="2" />
 				</Node>
 				<Node Name="Mac" Type="1" Platforms="15" Open="0" Id="51">
-					<Node File="./src/mac/common/GMemDC.cpp" Type="2" Platforms="4" />
-					<Node File="./src/mac/common/GPrintDC.cpp" Type="2" Platforms="4" />
-					<Node File="./src/mac/common/GScreenDC.cpp" Type="2" Platforms="4" />
+					<Node File="./src/linux/Gtk/MemDC.cpp" Type="2" Platforms="4" />
+					<Node File="./src/linux/Gtk/PrintDC.cpp" Type="2" Platforms="4" />
+					<Node File="./src/linux/Gtk/ScreenDC.cpp" Type="2" Platforms="4" />
 				</Node>
 				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="52">
-					<Node File=".\src\win\Gdc2\LScreenDC.cpp" Type="2" Platforms="1" />
-					<Node File=".\src\win\Gdc2\LPrintDC.cpp" Type="2" Platforms="1" />
-					<Node File=".\src\win\Gdc2\LMemDC.cpp" Type="2" Platforms="1" />
+					<Node File="./src/win/Gdc2/ScreenDC.cpp" Type="2" Platforms="1" />
+					<Node File="./src/win/Gdc2/PrintDC.cpp" Type="2" Platforms="1" />
+					<Node File="./src/win/Gdc2/MemDC.cpp" Type="2" Platforms="1" />
 				</Node>
 				<Node File=".\src\common\Gdc2\Surface.cpp" Type="2" Platforms="15" />
 			</Node>
@@ -420,7 +420,11 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Executable />
+			<Executable>
+				<Linux />
+			</Executable>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -465,6 +469,7 @@ appindicator3
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
+				<All />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -475,16 +480,41 @@ appindicator3
 			<TargetType>
 				<All>DynamicLibrary</All>
 			</TargetType>
-			<Defines />
-			<LibraryPaths />
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<ApplicationIcon />
 		</Build>
 		<Advanced>
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+			<OtherMakefileRules />
 		</Advanced>
 		<Debug>
-			<Arguments />
+			<Arguments>
+				<All />
+			</Arguments>
+			<Environment />
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
-		<Remote />
-		<Editor />
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Editor>
+			<TabSize />
+			<IndentSize />
+			<ShowWhiteSpace />
+			<UseHardTabs />
+			<CommentFile />
+			<CommentFunction />
+		</Editor>
 	</Settings>
 </Project>

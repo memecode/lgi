@@ -116,30 +116,13 @@ LKey::LKey(int vkey, uint32_t flags)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-LViewPrivate::LViewPrivate()
+LViewPrivate::LViewPrivate(LView *view) : View(view)
 {
-	Parent = 0;
-	ParentI = 0;
-	Notify = 0;
-	CtrlId = -1;
-	Font = 0;
-	FontOwnType = GV_FontPtr;
-	Popup = 0;
-	TabStop = 0;
-	Pulse = 0;
-	InPaint = false;
-	GotOnCreate = false;
-	WantsFocus = false;
-	SinkHnd = -1;
-	CssDirty = false;
-
-	DropTarget = NULL;
-	DropSource = NULL;
 }
 
 LViewPrivate::~LViewPrivate()
 {
-	LAssert(Pulse == 0);
+	LAssert(PulseThread == 0);
 
 	if (Font && FontOwnType == GV_FontOwned)
 		DeleteObj(Font);
@@ -677,15 +660,9 @@ void LView::SetPulse(int Length)
 {
 	ThreadCheck();
 
-	if (d->Pulse)
-	{
-		DeleteObj(d->Pulse);
-	}
-
+	DeleteObj(d->PulseThread);
 	if (Length > 0)
-	{
-		d->Pulse = new LPulseThread(this, Length);
-	}
+		d->PulseThread = new LPulseThread(this, Length);
 }
 
 LMessage::Param LView::OnEvent(LMessage *Msg)

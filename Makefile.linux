@@ -118,9 +118,9 @@ Depends =	DateTime.o \
 			Alpha.o \
 			Filter.o \
 			Rect.o \
-			GMemDC.o \
-			GPrintDC.o \
-			GScreenDC.o \
+			MemDC.o \
+			PrintDC.o \
+			ScreenDC.o \
 			Printer.o \
 			Surface.o \
 			ClipBoard.o \
@@ -671,16 +671,16 @@ Rect.o : ./src/common/Gdc2/Rect.cpp ./include/lgi/common/Gdc2.h \
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GMemDC.o : ./src/linux/Gtk/GMemDC.cpp ./include/lgi/common/Gdc2.h \
+MemDC.o : ./src/linux/Gtk/MemDC.cpp ./include/lgi/common/Gdc2.h \
 	./include/lgi/common/LgiString.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GPrintDC.o : ./src/linux/Gtk/GPrintDC.cpp ./include/lgi/common/Lgi.h
+PrintDC.o : ./src/linux/Gtk/PrintDC.cpp ./include/lgi/common/Lgi.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-GScreenDC.o : ./src/linux/Gtk/GScreenDC.cpp ./include/lgi/common/Lgi.h
+ScreenDC.o : ./src/linux/Gtk/ScreenDC.cpp ./include/lgi/common/Lgi.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -1206,9 +1206,12 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 	./include/lgi/common/Array.h \
 	./include/lgi/common/DragAndDrop.h \
 	./include/lgi/common/TrayIcon.h \
-	./include/lgi/common/Input.h
+	./include/lgi/common/Input.h \
+	./include/lgi/common/Profile.h
 
 ./include/lgi/mac/cocoa/LgiOsClasses.h : 
+
+./include/lgi/common/Profile.h : 
 
 ./include/lgi/common/DocView.h : ./include/lgi/common/Variant.h \
 	./include/lgi/common/Notifications.h \
@@ -1629,7 +1632,8 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 
 ./include/lgi/common/Containers.h : ./include/lgi/common/LgiInc.h \
 	./include/lgi/mac/cocoa/LgiOsDefs.h \
-	./include/lgi/common/Stream.h
+	./include/lgi/common/Stream.h \
+	./include/lgi/common/Profile.h
 
 ./include/lgi/common/View.h : ./include/lgi/mac/cocoa/LCocoaView.h
 
@@ -1684,7 +1688,8 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 
 ./include/lgi/common/Containers.h : ./include/lgi/common/LgiInc.h \
 	./include/lgi/mac/cocoa/LgiOsDefs.h \
-	./include/lgi/common/Stream.h
+	./include/lgi/common/Stream.h \
+	./include/lgi/common/Profile.h
 
 ./include/lgi/common/CheckBox.h : 
 

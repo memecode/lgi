@@ -660,7 +660,7 @@ public:
 			User Data;
 		} ud = {Compare, Data};		
 		
-		#if !defined(WINDOWS) && !defined(HAIKU)
+		#if !defined(WINDOWS) && !defined(HAIKU) && !defined(LINUX)
 		#define USER_DATA_FIRST 1
 		#else
 		#define USER_DATA_FIRST 0
@@ -681,7 +681,6 @@ public:
 				a.Length(),
 				sizeof(T*),
 				#if USER_DATA_FIRST
-					#error asd
 					&ud,
 				#endif
 				#if defined(HAIKU)
