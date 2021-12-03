@@ -5,6 +5,8 @@
 #ifndef __MAIL_H
 #define __MAIL_H
 
+#include <functional>
+
 #include "lgi/common/Net.h"
 #include "lgi/common/Base64.h"
 #include "lgi/common/Progress.h"
@@ -34,7 +36,9 @@
 extern void TokeniseStrList(char *Str, List<char> &Output, const char *Delim);
 extern char ConvHexToBin(char c);
 #define ConvBinToHex(i) (((i)<10)?'0'+(i):'A'+(i)-10)
+extern void DecodeAddrName(const char *Start, std::function<void(LString,LString)> cb, const char *DefaultDomain);
 extern void DecodeAddrName(const char *Start, LAutoString &Name, LAutoString &Addr, const char *DefaultDomain);
+extern void DecodeAddrName(const char *Start, LString &Name, LString &Addr, const char *DefaultDomain);
 extern int MaxLineLen(char *Text);
 extern char *EncodeImapString(const char *s);
 extern char *DecodeImapString(const char *s);

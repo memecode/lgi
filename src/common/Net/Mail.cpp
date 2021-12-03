@@ -351,7 +351,7 @@ bool IsAngleBrackets(LString &s)
 	return false;
 }
 
-void DecodeAddrName(const char *Str, LAutoString &Name, LAutoString &Addr, const char *DefaultDomain)
+void DecodeAddrName(const char *Str, std::function<void(LString,LString)> Cb, const char *DefaultDomain)
 {
 	if (!Str)
 		return;
@@ -428,8 +428,23 @@ void DecodeAddrName(const char *Str, LAutoString &Name, LAutoString &Addr, const
 		while (non.Length() > 0 && strchr(ChSet, non(0)));
 	}
 	
-	Name.Reset(NewStr(non));
-	Addr.Reset(NewStr(email.Strip()));
+	Cb(non, email.Strip());
+}
+
+void DecodeAddrName(const char *Start, LAutoString &Name, LAutoString &Addr, const char *DefaultDomain)
+{
+	DecodeAddrName(Start, [&](LString n, LString a){
+		Name.Reset(NewStr(n));
+		Addr.Reset(NewStr(a));
+	}, DefaultDomain);
+}
+
+void DecodeAddrName(const char *Start, LString &Name, LString &Addr, const char *DefaultDomain)
+{
+	DecodeAddrName(Start, [&](LString n, LString a){
+		Name = n;
+		Addr = a;
+	}, DefaultDomain);
 }
 
 #if 0
