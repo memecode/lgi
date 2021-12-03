@@ -554,9 +554,9 @@
     <ClCompile Include="src\common\Widgets\List.cpp" />
     <ClCompile Include="src\win\Gdc2\Gdc2.cpp" />
     <ClCompile Include="src\win\Gdc2\GdiLeak.cpp" />
-    <ClCompile Include="src\win\Gdc2\LMemDC.cpp" />
-    <ClCompile Include="src\win\Gdc2\LPrintDC.cpp" />
-    <ClCompile Include="src\win\Gdc2\LScreenDC.cpp" />
+    <ClCompile Include="src\win\Gdc2\MemDC.cpp" />
+    <ClCompile Include="src\win\Gdc2\PrintDC.cpp" />
+    <ClCompile Include="src\win\Gdc2\ScreenDC.cpp" />
     <ClCompile Include="src\win\General\File.cpp" />
     <ClCompile Include="src\win\General\Mem.cpp" />
     <ClCompile Include="src\win\General\ShowFileProp_Win.cpp" />

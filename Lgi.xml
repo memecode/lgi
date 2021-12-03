@@ -214,9 +214,9 @@
 			</Node>
 			<Node Name="Surfaces" Type="1" Platforms="15" Open="0" Id="48">
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="50">
-					<Node File="./src/linux/Gtk/GMemDC.cpp" Type="2" Platforms="2" />
-					<Node File="./src/linux/Gtk/GPrintDC.cpp" Type="2" Platforms="2" />
-					<Node File="./src/linux/Gtk/GScreenDC.cpp" Type="2" Platforms="2" />
+					<Node File="./src/linux/Gtk/MemDC.cpp" Type="2" Platforms="2" />
+					<Node File="./src/linux/Gtk/PrintDC.cpp" Type="2" Platforms="2" />
+					<Node File="./src/linux/Gtk/ScreenDC.cpp" Type="2" Platforms="2" />
 					<Node File=".\src\linux\Lgi\Printer.cpp" Type="2" Platforms="2" />
 				</Node>
 				<Node Name="Mac" Type="1" Platforms="15" Open="0" Id="51">

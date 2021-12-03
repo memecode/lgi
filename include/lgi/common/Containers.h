@@ -660,7 +660,11 @@ public:
 			User Data;
 		} ud = {Compare, Data};		
 		
-		#define USER_DATA_FIRST (!defined(WINDOWS) && !defined(HAIKU))
+		#if !defined(WINDOWS) && !defined(HAIKU)
+		#define USER_DATA_FIRST 1
+		#else
+		#define USER_DATA_FIRST 0
+		#endif
 
 		#if defined(WINDOWS)
 		/* _ACRTIMP void __cdecl qsort_s(void*   _Base,
@@ -677,6 +681,7 @@ public:
 				a.Length(),
 				sizeof(T*),
 				#if USER_DATA_FIRST
+					#error asd
 					&ud,
 				#endif
 				#if defined(HAIKU)

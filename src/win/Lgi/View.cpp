@@ -31,25 +31,12 @@
 bool In_SetWindowPos = false;
 HWND LViewPrivate::hPrevCapture = 0;
 
-LViewPrivate::LViewPrivate()
+LViewPrivate::LViewPrivate(LView *view) : View(view)
 {
-	SinkHnd = -1;
-	Font = 0;
-	FontOwnType = GV_FontPtr;
-	CtrlId = -1;
 	WndStyle = WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN;
 	WndExStyle = 0;
 	WndDlgCode = 0;
-	TimerId = 0;
-	DropTarget = NULL;
-	DropSource = NULL;
-	Parent = 0;
-	ParentI = 0;
-	Notify = 0;
-	WantsPulse = -1;
-	hTheme = NULL;
 	IsThemed = LResources::DefaultColours;
-	CssDirty = false;
 }
 
 LViewPrivate::~LViewPrivate()

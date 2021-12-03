@@ -109,8 +109,9 @@ public:
 	LDragDropSource	*DropSource = NULL;
 	LDragDropTarget	*DropTarget = NULL;
 	bool			IsThemed = false;
+	int				WantsPulse = 0;
 
-	// Heirarchy
+	// Hierarchy
 	LViewI			*ParentI = NULL;
 	LView			*Parent = NULL;
 	LViewI			*Notify = NULL;
@@ -137,13 +138,12 @@ public:
 	#if WINNATIVE
 
 		static OsView	hPrevCapture;
-		int				WndStyle;				// Win32 hWnd Style
-		int				WndExStyle;				// Win32 hWnd ExStyle
-		int				WndDlgCode;				// Win32 Dialog Code (WM_GETDLGCODE)
+		int				WndStyle = 0;			// Windows hWnd Style
+		int				WndExStyle = 0;			// Windows hWnd ExStyle
+		int				WndDlgCode = 0;			// Windows Dialog Code (WM_GETDLGCODE)
 		LString			WndClass;
-		UINT_PTR		TimerId;
-		HTHEME			hTheme;
-		int				WantsPulse;
+		UINT_PTR		TimerId = 0;
+		HTHEME			hTheme = NULL;
 
 	#else
 
@@ -152,7 +152,6 @@ public:
 		LView			*Popup = NULL;
 		bool			TabStop = false;
 		bool			WantsFocus = false;
-		int				WantsPulse = 0;
 
 		#if defined __GTK_H__
 		bool			InPaint = false;
