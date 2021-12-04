@@ -231,10 +231,10 @@ LView::~LView()
 
 	_Delete();
 	
+	#ifdef HAIKU
 	if (d->LockLooper())
-	{
+	#endif
 		DeleteObj(d);
-	}
 }
 
 int LView::AddDispatch()
@@ -305,7 +305,7 @@ bool LView::HasView(LViewI *v)
 OsWindow LView::WindowHandle()
 {
 	auto *w = GetWindow();
-	return (w) ? w->WindowHandle() : NULL;
+	return (w) ? w->WindowHandle() : (OsWindow)NULL;
 }
 
 LWindow *LView::GetWindow()

@@ -129,35 +129,16 @@ bool LViewPrivate::CursorSet = false;
 LView *LViewPrivate::LastCursor = 0;
 #endif
 
-LViewPrivate::LViewPrivate()
+LViewPrivate::LViewPrivate(LView *view) : View(view)
 {
 	TabStop = false;
-	#if 0
-	CursorId = 0;
-	FontOwn = false;
-	#endif
-	Parent = 0;
-	ParentI = 0;
-	Notify = 0;
-	CtrlId = -1;
-	DropTarget = 0;
-	Font = 0;
-	Popup = 0;
-	Pulse = 0;
-	SinkHnd = -1;
 	AttachEvent = false;
-		
-	static bool First = true;
-	if (First)
-	{
-		First = false;
-	}
 }
 	
 LViewPrivate::~LViewPrivate()
 {
 	DeleteObj(Popup);
-	LAssert(Pulse == NULL);
+	LAssert(PulseThread == NULL);
 }
 
 const char *LView::GetClass()
@@ -457,9 +438,9 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 
 void LView::SetPulse(int Length)
 {
-	DeleteObj(d->Pulse);
+	DeleteObj(d->PulseThread);
 	if (Length > 0)
-		d->Pulse = new GPulseThread(this, Length);
+		d->PulseThread = new LPulseThread(this, Length);
 }
 
 LCursor LView::GetCursor(int x, int y)

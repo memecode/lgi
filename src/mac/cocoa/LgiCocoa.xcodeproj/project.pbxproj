@@ -51,9 +51,9 @@
 		3477C2881CBF086A0028B84B /* Widgets.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2801CBF086A0028B84B /* Widgets.mm */; };
 		3477C2891CBF086A0028B84B /* Window.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2811CBF086A0028B84B /* Window.mm */; };
 		3477C28F1CBF08C10028B84B /* Gdc2.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C28B1CBF08C10028B84B /* Gdc2.mm */; };
-		3477C2901CBF08C10028B84B /* GMemDC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C28C1CBF08C10028B84B /* GMemDC.cpp */; };
-		3477C2911CBF08C10028B84B /* GPrintDC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C28D1CBF08C10028B84B /* GPrintDC.cpp */; };
-		3477C2921CBF08C10028B84B /* GScreenDC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C28E1CBF08C10028B84B /* GScreenDC.cpp */; };
+		3477C2901CBF08C10028B84B /* MemDC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C28C1CBF08C10028B84B /* MemDC.cpp */; };
+		3477C2911CBF08C10028B84B /* PrintDC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C28D1CBF08C10028B84B /* PrintDC.cpp */; };
+		3477C2921CBF08C10028B84B /* ScreenDC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C28E1CBF08C10028B84B /* ScreenDC.cpp */; };
 		3477C2971CBF09320028B84B /* GFile.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2941CBF09320028B84B /* GFile.mm */; };
 		3477C2981CBF09320028B84B /* GMem.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2951CBF09320028B84B /* GMem.mm */; };
 		3477C2991CBF09320028B84B /* ShowFileProp_Mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3477C2961CBF09320028B84B /* ShowFileProp_Mac.mm */; };
@@ -160,6 +160,8 @@
 		34CD9F7223D5768B0039F259 /* Unicode.h in Headers */ = {isa = PBXBuildFile; fileRef = 34CD9F7123D5768B0039F259 /* Unicode.h */; };
 		34D1B3C121748A2800BC6B58 /* Path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D1B3C021748A2800BC6B58 /* Path.cpp */; };
 		34D21CEC217981AE003D1EA6 /* EventTargetThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D21CEB217981AE003D1EA6 /* EventTargetThread.h */; };
+		34D28926275B3D9F005961A8 /* DateTime.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D28925275B3D9F005961A8 /* DateTime.h */; };
+		34D28929275B3DB0005961A8 /* Variant.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D28928275B3DB0005961A8 /* Variant.h */; };
 		34D6AA1722D3749A005D739E /* Gdc2.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D6AA1622D3749A005D739E /* Gdc2.h */; };
 		34EE8BB12748A55600F12915 /* TextFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 34EE8BB02748A55600F12915 /* TextFile.h */; };
 /* End PBXBuildFile section */
@@ -212,9 +214,9 @@
 		3477C2801CBF086A0028B84B /* Widgets.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Widgets.mm; sourceTree = "<group>"; };
 		3477C2811CBF086A0028B84B /* Window.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Window.mm; sourceTree = "<group>"; };
 		3477C28B1CBF08C10028B84B /* Gdc2.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = Gdc2.mm; path = Gdc2/Gdc2.mm; sourceTree = SOURCE_ROOT; };
-		3477C28C1CBF08C10028B84B /* GMemDC.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GMemDC.cpp; path = ../common/GMemDC.cpp; sourceTree = SOURCE_ROOT; };
-		3477C28D1CBF08C10028B84B /* GPrintDC.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GPrintDC.cpp; path = ../common/GPrintDC.cpp; sourceTree = SOURCE_ROOT; };
-		3477C28E1CBF08C10028B84B /* GScreenDC.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = GScreenDC.cpp; path = ../common/GScreenDC.cpp; sourceTree = SOURCE_ROOT; };
+		3477C28C1CBF08C10028B84B /* MemDC.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = MemDC.cpp; path = ../common/MemDC.cpp; sourceTree = SOURCE_ROOT; };
+		3477C28D1CBF08C10028B84B /* PrintDC.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = PrintDC.cpp; path = ../common/PrintDC.cpp; sourceTree = SOURCE_ROOT; };
+		3477C28E1CBF08C10028B84B /* ScreenDC.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = ScreenDC.cpp; path = ../common/ScreenDC.cpp; sourceTree = SOURCE_ROOT; };
 		3477C2941CBF09320028B84B /* GFile.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = GFile.mm; path = General/GFile.mm; sourceTree = SOURCE_ROOT; };
 		3477C2951CBF09320028B84B /* GMem.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = GMem.mm; path = General/GMem.mm; sourceTree = SOURCE_ROOT; };
 		3477C2961CBF09320028B84B /* ShowFileProp_Mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ShowFileProp_Mac.mm; path = General/ShowFileProp_Mac.mm; sourceTree = SOURCE_ROOT; };
@@ -321,6 +323,8 @@
 		34CD9F7123D5768B0039F259 /* Unicode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Unicode.h; path = ../../../../include/lgi/common/Unicode.h; sourceTree = "<group>"; };
 		34D1B3C021748A2800BC6B58 /* Path.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Path.cpp; path = ../../../common/Gdc2/Path/Path.cpp; sourceTree = "<group>"; };
 		34D21CEB217981AE003D1EA6 /* EventTargetThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EventTargetThread.h; path = ../../../../include/lgi/common/EventTargetThread.h; sourceTree = "<group>"; };
+		34D28925275B3D9F005961A8 /* DateTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DateTime.h; path = ../../../../include/lgi/common/DateTime.h; sourceTree = "<group>"; };
+		34D28928275B3DB0005961A8 /* Variant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Variant.h; path = ../../../../include/lgi/common/Variant.h; sourceTree = "<group>"; };
 		34D6AA1622D3749A005D739E /* Gdc2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Gdc2.h; path = ../../../../include/lgi/common/Gdc2.h; sourceTree = "<group>"; };
 		34EE8BB02748A55600F12915 /* TextFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TextFile.h; path = ../../../include/lgi/common/TextFile.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -445,14 +449,16 @@
 			isa = PBXGroup;
 			children = (
 				34C81A5925DA0AA10053F93A /* Base64.cpp */,
-				3477C34C1CC0ACED0028B84B /* md5.c */,
-				3477C3421CC0A6B90028B84B /* DocView.cpp */,
 				3477C3401CC0A68E0028B84B /* DateTime.cpp */,
-				3477C3271CC04E020028B84B /* Variant.cpp */,
+				34D28925275B3D9F005961A8 /* DateTime.h */,
+				3477C3421CC0A6B90028B84B /* DocView.cpp */,
+				3477C2951CBF09320028B84B /* GMem.mm */,
+				3477C34C1CC0ACED0028B84B /* md5.c */,
 				3477C3231CC04DD70028B84B /* Object.cpp */,
 				3477C2E81CC04B5D0028B84B /* Rand.cpp */,
-				3477C2951CBF09320028B84B /* GMem.mm */,
 				3477C2961CBF09320028B84B /* ShowFileProp_Mac.mm */,
+				3477C3271CC04E020028B84B /* Variant.cpp */,
+				34D28928275B3DB0005961A8 /* Variant.h */,
 			);
 			name = General;
 			sourceTree = "<group>";
@@ -526,9 +532,9 @@
 			isa = PBXGroup;
 			children = (
 				3477C2E61CC04B1E0028B84B /* Surface.cpp */,
-				3477C28E1CBF08C10028B84B /* GScreenDC.cpp */,
-				3477C28C1CBF08C10028B84B /* GMemDC.cpp */,
-				3477C28D1CBF08C10028B84B /* GPrintDC.cpp */,
+				3477C28E1CBF08C10028B84B /* ScreenDC.cpp */,
+				3477C28C1CBF08C10028B84B /* MemDC.cpp */,
+				3477C28D1CBF08C10028B84B /* PrintDC.cpp */,
 			);
 			name = Surfaces;
 			sourceTree = "<group>";
@@ -704,6 +710,7 @@
 				3415169326EC32FF007EE35F /* TextView3.h in Headers */,
 				34B531D822F65734002B50F7 /* Menu.h in Headers */,
 				34114C8B23091E6E00F342B1 /* LgiClasses.h in Headers */,
+				34D28926275B3D9F005961A8 /* DateTime.h in Headers */,
 				3477C35B1CC1AEEA0028B84B /* LgiInc.h in Headers */,
 				348362421F233A77003B2A6D /* Stream.h in Headers */,
 				3477C2A61CBF0A920028B84B /* LgiOsDefs.h in Headers */,
@@ -720,6 +727,7 @@
 				3477C5171CC303B70028B84B /* LgiUiBase.h in Headers */,
 				3477C2AA1CBF22A00028B84B /* File.h in Headers */,
 				343874B5230F46B200CF96B4 /* Window.h in Headers */,
+				34D28929275B3DB0005961A8 /* Variant.h in Headers */,
 				3477C2A21CBF0A920028B84B /* SymLookup.h in Headers */,
 				34D6AA1722D3749A005D739E /* Gdc2.h in Headers */,
 				3477C2A41CBF0A920028B84B /* LgiOs.h in Headers */,
@@ -849,7 +857,7 @@
 				3471868823A9AF8900F8C952 /* SubProcess.cpp in Sources */,
 				3477C3161CC04CCB0028B84B /* Library.cpp in Sources */,
 				3477C3051CC04BF00028B84B /* Panel.cpp in Sources */,
-				3477C2901CBF08C10028B84B /* GMemDC.cpp in Sources */,
+				3477C2901CBF08C10028B84B /* MemDC.cpp in Sources */,
 				34C072C12369878100E1E222 /* DropFiles.cpp in Sources */,
 				3477C30D1CC04C560028B84B /* FindReplace.cpp in Sources */,
 				3477C34B1CC0AB0B0028B84B /* ToolTip.cpp in Sources */,
@@ -858,7 +866,7 @@
 				3477C3031CC04BF00028B84B /* Combo.cpp in Sources */,
 				3477C30B1CC04BF00028B84B /* TextLabel.cpp in Sources */,
 				3477C2B71CBF973F0028B84B /* GuiUtils.cpp in Sources */,
-				3477C2911CBF08C10028B84B /* GPrintDC.cpp in Sources */,
+				3477C2911CBF08C10028B84B /* PrintDC.cpp in Sources */,
 				3477C2B91CBF977F0028B84B /* LgiCommon.cpp in Sources */,
 				34D1B3C121748A2800BC6B58 /* Path.cpp in Sources */,
 				3477C2CA1CC046310028B84B /* Utf8.cpp in Sources */,
@@ -873,7 +881,7 @@
 				340833162698F8FF0028012F /* FontType.cpp in Sources */,
 				3477C4ED1CC27F1C0028B84B /* TrayIcon.cpp in Sources */,
 				3477C2991CBF09320028B84B /* ShowFileProp_Mac.mm in Sources */,
-				3477C2921CBF08C10028B84B /* GScreenDC.cpp in Sources */,
+				3477C2921CBF08C10028B84B /* ScreenDC.cpp in Sources */,
 				3477C2981CBF09320028B84B /* GMem.mm in Sources */,
 				3477C2CB1CC046310028B84B /* XmlTree.cpp in Sources */,
 				3477C2EF1CC04BBB0028B84B /* ItemContainer.cpp in Sources */,
@@ -1040,6 +1048,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES_NONAGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
@@ -1084,6 +1093,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES_NONAGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				COMBINE_HIDPI_IMAGES = YES;

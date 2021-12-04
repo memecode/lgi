@@ -107,10 +107,10 @@ public:
 	static constexpr int64_t MinuteLength	= 60; // seconds
     static constexpr int64_t HourLength		= MinuteLength * 60; // seconds
     static constexpr int64_t DayLength		= HourLength   * 24; // seconds
-	static constexpr char *WeekdaysShort[]	= {"Sun",    "Mon",    "Tue",     "Wed",       "Thu",      "Fri",     "Sat"};
-	static constexpr char *WeekdaysLong[]	= {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-	static constexpr char *MonthsShort[]	= {"Jan",     "Feb",      "Mar",   "Apr",   "May", "Jun",  "Jul",  "Aug",    "Sep",       "Oct",     "Nov",      "Dec"};
-	static constexpr char *MonthsLong[]		= {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+	static constexpr const char *WeekdaysShort[]	= {"Sun",    "Mon",    "Tue",     "Wed",       "Thu",      "Fri",     "Sat"};
+	static constexpr const char *WeekdaysLong[]	= {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+	static constexpr const char *MonthsShort[]	= {"Jan",     "Feb",      "Mar",   "Apr",   "May", "Jun",  "Jul",  "Aug",    "Sep",       "Oct",     "Nov",      "Dec"};
+	static constexpr const char *MonthsLong[]		= {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
 	/// Returns true if all the components are in a valid range
 	bool IsValid() const;

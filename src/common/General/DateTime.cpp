@@ -29,10 +29,10 @@
 #include "lgi/common/DocView.h"
 
 #if !defined(WINDOWS)
-constexpr char *LDateTime::WeekdaysShort[];
-constexpr char *LDateTime::WeekdaysLong[];
-constexpr char *LDateTime::MonthsShort[];
-constexpr char *LDateTime::MonthsLong[];
+constexpr const char *LDateTime::WeekdaysShort[];
+constexpr const char *LDateTime::WeekdaysLong[];
+constexpr const char *LDateTime::MonthsShort[];
+constexpr const char *LDateTime::MonthsLong[];
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
