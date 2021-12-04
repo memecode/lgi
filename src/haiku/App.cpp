@@ -423,7 +423,7 @@ bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 	{
 		printf("Running main loop...\n");
 		d->Run();
-		printf("Main loop finished...\n");
+		printf("Main loop finished.\n");
 	}
 	else
 	{
@@ -443,7 +443,11 @@ void LApp::Exit(int Code)
 	{
 		// soft exit
 		printf("Quitting main loop...\n");
-		d->Quit();
+		if (d->Lock())
+		{
+			d->Quit();
+			d->Unlock();
+		}
 	}
 }
 
@@ -964,11 +968,30 @@ OsApplication::~OsApplication()
 }
 
 ////////////////////////////////////////////////////////////////
-void LMessage::Set(int Msg, Param ParamA, Param ParamB)
+int LMessage::Msg()
 {
-	m = Msg;
-	a = ParamA;
-	b = ParamB;
+	return what;
+}
+
+LMessage::Param LMessage::A()
+{
+	LMessage::Param a = 0;
+	FindInt64(PropNames[0], &a);
+	return a;
+}
+
+LMessage::Param LMessage::B()
+{
+	LMessage::Param b = 0;
+	FindInt64(PropNames[1], &b);
+	return b;
+}
+
+void LMessage::Set(int Msg, Param a, Param b)
+{
+	what = Msg;
+	AddInt64(PropNames[0], a);
+	AddInt64(PropNames[1], b);
 }
 
 bool LMessage::Send(LViewI *View)
@@ -979,6 +1002,6 @@ bool LMessage::Send(LViewI *View)
 		return false;
 	}
 	
-	return View->PostEvent(m, a, b);
+	return View->PostEvent(what, A(), B());
 }
 

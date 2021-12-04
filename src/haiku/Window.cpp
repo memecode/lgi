@@ -31,45 +31,24 @@ enum LAttachState
 class LWindowPrivate : public BWindow
 {
 public:
-	int Sx, Sy;
-	bool Dynamic;
-	LKey LastKey;
+	LWindow *Wnd;
+	bool SnapToEdge = false;
+	bool Active = false;
 	LArray<HookInfo> Hooks;
-	bool SnapToEdge;
-	LString Icon;
-	LRect Decor;
-	LAutoPtr<LSurface> IconImg;
-	LAttachState AttachState;
 	
-	// State
-	bool HadCreateEvent;
-	
-	// Focus stuff
-	OsView FirstFocus;
-	LViewI *Focus = NULL;
-	bool Active;
-
-	LWindowPrivate() :
+	LWindowPrivate(LWindow *wnd) :
+		Wnd(wnd),
 		BWindow(BRect(100,100,400,400),
-				"tmp_title",
+				"...loading...",
 				B_DOCUMENT_WINDOW_LOOK,
 				B_NORMAL_WINDOW_FEEL,
 				0)
 	{
-		AttachState = LUnattached;
-		Decor.ZOff(-1, -1);
-		FirstFocus = NULL;
-		Active = false;
-		HadCreateEvent = false;
-		
-		Sx = Sy = 0;
-		Dynamic = true;
-		SnapToEdge = false;
+	}
 
-		LastKey.vkey = 0;
-		LastKey.c16 = 0;
-		LastKey.Data = 0;
-		LastKey.IsChar = 0;
+	~LWindowPrivate()
+	{
+		Wnd->d = NULL;		
 	}
 	
 	int GetHookIndex(LView *Target, bool Create = false)
@@ -92,6 +71,27 @@ public:
 		
 		return -1;
 	}
+
+	void FrameMoved(BPoint newPosition)
+	{
+		Wnd->OnPosChange();
+	}
+
+	void FrameResized(float newWidth, float newHeight)
+	{
+		Wnd->OnPosChange();
+	}
+
+	bool QuitRequested()
+	{
+		return Wnd->OnRequestClose(false);
+	}
+
+	void MessageReceived(BMessage *message)
+	{
+		Wnd->OnEvent(message);
+		BWindow::MessageReceived(message);
+	}
 };
 
 ///////////////////////////////////////////////////////////////////////
@@ -99,7 +99,7 @@ public:
 
 LWindow::LWindow() : LView(0)
 {
-	d = new LWindowPrivate;
+	d = new LWindowPrivate(this);
 	_QuitOnClose = false;
 	Menu = NULL;
 	
@@ -113,41 +113,29 @@ LWindow::LWindow() : LView(0)
 
 LWindow::~LWindow()
 {
-	d->AttachState = LDetaching;
-
 	if (LAppInst->AppWnd == this)
 		LAppInst->AppWnd = NULL;
 
-	d->AttachState = LUnattached;
-
 	DeleteObj(Menu);
-	DeleteObj(d);
 	DeleteObj(_Lock);
-}
 
-/*
-static void PixbufDestroyNotify(guchar *pixels, LSurface *data)
-{
-	delete data;
+	if (d)
+	{
+		d->Quit();
+		d = NULL;
+	}
 }
-*/
 
 bool LWindow::SetIcon(const char *FileName)
 {
 	LString a;
-	if (Wnd)
+	if (!LFileExists(FileName))
 	{
-		if (!LFileExists(FileName))
-		{
-			if (a = LFindFile(FileName))
-				FileName = a;
-		}
+		if (a = LFindFile(FileName))
+			FileName = a;
 	}
 	
-	if (FileName != d->Icon.Get())
-		d->Icon = FileName;
-
-	return d->Icon != NULL;
+	return false;
 }
 
 bool LWindow::GetSnapToEdge()
@@ -228,37 +216,24 @@ bool DndPointMap(LViewI *&v, LPoint &p, LDragDropTarget *&t, LWindow *Wnd, int x
 
 bool LWindow::Attach(LViewI *p)
 {
-	bool Status = false;
-
-	ThreadCheck();
+	LLocker lck(d, _FL);
+	if (!lck.Lock())
+		return false;
 	
 	// Setup default button...
 	if (!_Default)
 		_Default = FindControl(IDOK);
 
-	// Create a window if needed..
-		
 	// Do a rough layout of child windows
 	PourAll();
 
-	// Add icon
-	if (d->Icon)
-	{
-		SetIcon(d->Icon);
-		d->Icon.Empty();
-	}
-	
-	Status = true;
-	
-	return Status;
+	return true;
 }
 
 bool LWindow::OnRequestClose(bool OsShuttingDown)
 {
 	if (GetQuitOnClose())
-	{
 		LCloseApp();
-	}
 
 	return LView::OnRequestClose(OsShuttingDown);
 }
@@ -478,9 +453,6 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	}
 
 AllDone:
-	if (d)
-		d->LastKey = k;
-
 	return Status;
 }
 
@@ -629,14 +601,19 @@ bool LWindow::SetPos(LRect &p, bool Repaint)
 {
 	Pos = p;
 
-	OnPosChange();
+	LLocker lck(d, _FL);
+	if (lck.Lock())
+	{
+		d->MoveTo(Pos.x1, Pos.y1);
+		d->ResizeTo(Pos.X(), Pos.Y());
+	}
+
 	return true;
 }
 
 void LWindow::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	// Force repour
-	d->Sx = d->Sy = -1;
 }
 
 void LWindow::OnCreate()
@@ -653,13 +630,7 @@ void LWindow::OnPaint(LSurface *pDC)
 void LWindow::OnPosChange()
 {
 	LView::OnPosChange();
-
-	if (d->Sx != X() ||	d->Sy != Y())
-	{
-		PourAll();
-		d->Sx = X();
-		d->Sy = Y();
-	}
+	PourAll();
 }
 
 #define IsTool(v) \
@@ -848,7 +819,7 @@ void LWindow::OnFrontSwitch(bool b)
 
 LViewI *LWindow::GetFocus()
 {
-	return d->Focus;
+	return NULL;
 }
 
 #if DEBUG_SETFOCUS
@@ -879,6 +850,7 @@ static LAutoString DescribeView(LViewI *v)
 
 void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 {
+	/*
 	#if DEBUG_SETFOCUS
 	const char *TypeName = NULL;
 	switch (type)
@@ -993,6 +965,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 			break;
 		}
 	}
+	*/
 }
 
 void LWindow::SetDragHandlers(bool On)

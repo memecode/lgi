@@ -178,6 +178,9 @@ enum LgiMessages
 };
 
 class LgiClass LMessage
+	#ifdef HAIKU
+	: public BMessage
+	#endif
 {
 public:
 	#if defined(WINNATIVE)
@@ -191,7 +194,7 @@ public:
 		typedef NativeInt Result;
 	#endif
 
-	#if !defined(LGI_SDL)
+	#if !defined(LGI_SDL) && !defined(HAIKU)
 		int m;
 	#endif
 	#if defined(LGI_SDL)
@@ -209,7 +212,7 @@ public:
 		HWND hWnd;
 		WPARAM a;
 		LPARAM b;
-	#else
+	#elif !defined(HAIKU)
 		Param a;
 		Param b;
 	#endif
@@ -234,7 +237,7 @@ public:
 			#if defined(WINNATIVE)
 				hWnd = 0;
 			#endif
-			#if !defined(LGI_SDL)
+			#if !defined(LGI_SDL) && !defined(HAIKU)
 				m = 0;
 				a = 0;
 				b = 0;
@@ -264,7 +267,7 @@ public:
 		Set(M, A, B);
 	}
 	
-	#if defined(LGI_SDL)
+	#if defined(LGI_SDL) || defined(HAIKU)
 		int Msg();
 		Param A();
 		Param B();
