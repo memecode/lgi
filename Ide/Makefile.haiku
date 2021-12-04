@@ -682,7 +682,7 @@ SpaceTabConv.o : ./Code/SpaceTabConv.cpp ../include/lgi/common/Mem.h \
 
 Html.o : ../src/common/Text/Html.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Html.h \
-	../include/lgi/common/HtmlPriv.h \
+	../src/common/Text/HtmlPriv.h \
 	../include/lgi/common/Token.h \
 	../include/lgi/common/ScrollBar.h \
 	../include/lgi/common/Variant.h \
@@ -809,7 +809,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/ScrollBar.h \
 	../include/lgi/common/ClipBoard.h \
 	../include/lgi/common/DisplayString.h \
-	../include/lgi/common/ViewPriv.h \
+	../private/common/ViewPriv.h \
 	../include/lgi/common/CssTools.h \
 	../include/lgi/common/LgiRes.h \
 	../include/lgi/common/Mail.h \
@@ -817,7 +817,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Menu.h \
 	../include/lgi/common/DropFiles.h
 
-../include/lgi/common/ViewPriv.h : ../include/lgi/common/ThreadEvent.h
+../private/common/ViewPriv.h : ../include/lgi/common/ThreadEvent.h
 
 ../include/lgi/common/Mdi.h : ../include/lgi/common/Layout.h
 
@@ -885,7 +885,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 	../include/lgi/common/Popup.h \
 	../include/lgi/common/Panel.h \
 	../include/lgi/common/Notifications.h \
-	../include/lgi/common/ViewPriv.h \
+	../private/common/ViewPriv.h \
 	../include/lgi/common/Menu.h
 
 ../include/lgi/mac/cocoa/SymLookup.h : ../include/lgi/common/SubProcess.h
@@ -1487,7 +1487,7 @@ TextConvert.o : ../src/common/Text/TextConvert.cpp ../include/lgi/common/Lgi.h \
 ../src/haiku/View.cpp : ../include/lgi/common/Lgi.h \
 	../include/lgi/common/DragAndDrop.h \
 	../include/lgi/common/Edit.h \
-	../include/lgi/common/ViewPriv.h \
+	../private/common/ViewPriv.h \
 	../include/lgi/common/Popup.h \
 	../include/lgi/common/Css.h
 

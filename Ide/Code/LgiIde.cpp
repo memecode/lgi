@@ -4440,29 +4440,13 @@ public:
 };
 */
 
-class Test : public LWindow
-{
-public:
-	Test()
-	{
-		LRect r(100, 100, 300, 300);
-		SetPos(r);
-		Name("Test");
-		if (Attach(0))
-		{
-			Visible(true);
-		}
-	}
-};
-
 int LgiMain(OsAppArguments &AppArgs)
 {
 	printf("LgiIde v%s\n", APP_VER);
 	LApp a(AppArgs, "LgiIde");
 	if (a.IsOk())
 	{
-		// a.AppWnd = new AppWnd;
-		a.AppWnd = new Test;
+		a.AppWnd = new AppWnd;
 		a.Run();
 	}
 

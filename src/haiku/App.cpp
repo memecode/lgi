@@ -421,8 +421,6 @@ bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 
 	if (Loop)
 	{
-		int *i = 0;
-		*i = 0;
 		printf("Running main loop...\n");
 		d->Run();
 		printf("Main loop finished...\n");
@@ -448,33 +446,6 @@ void LApp::Exit(int Code)
 		d->Quit();
 	}
 }
-
-/*
-bool LApp::PostEvent(LViewI *View, int Msg, LMessage::Param a, LMessage::Param b)
-{
-	if (!View)
-		return false;
-
-	BMessage *m = new BMessage(Msg);
-	if (!m)
-		return false;
-	m->AddUInt64(LMessage::PropNames[0], a);
-	m->AddUInt64(LMessage::PropNames[1], b);
-
-	auto v = View->Handle();
-	if (!v)
-		return false;
-
-	auto w = v->Window();
-	if (!w->LockLooper())
-		return false;
-
-	status_t r = Window()->PostMessage(m);
-	w->UnlockLooper()
-
-	return r == B_OK;
-}
-*/
 
 void LApp::OnUrl(const char *Url)
 {

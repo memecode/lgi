@@ -245,7 +245,7 @@ General.o : ./src/haiku/General.cpp ./include/lgi/common/Lgi.h \
 View.o : ./src/haiku/View.cpp ./include/lgi/common/Lgi.h \
 	./include/lgi/common/DragAndDrop.h \
 	./include/lgi/common/Edit.h \
-	./include/lgi/common/ViewPriv.h \
+	./private/common/ViewPriv.h \
 	./include/lgi/common/Popup.h \
 	./include/lgi/common/Css.h
 	@echo $(<F) [$(Build)]
@@ -257,7 +257,7 @@ Window.o : ./src/haiku/Window.cpp ./include/lgi/common/Lgi.h \
 	./include/lgi/common/Popup.h \
 	./include/lgi/common/Panel.h \
 	./include/lgi/common/Notifications.h \
-	./include/lgi/common/ViewPriv.h \
+	./private/common/ViewPriv.h \
 	./include/lgi/common/Menu.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
@@ -269,7 +269,7 @@ WindowCommon.o : ./src/common/Lgi/WindowCommon.cpp ./include/lgi/common/Lgi.h \
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
 ViewCommon.o : ./src/common/Lgi/ViewCommon.cpp ./include/lgi/common/Lgi.h \
-	./include/lgi/common/ViewPriv.h \
+	./private/common/ViewPriv.h \
 	./include/lgi/common/DragAndDrop.h \
 	./include/lgi/common/TableLayout.h \
 	./include/lgi/common/Button.h \
@@ -572,7 +572,7 @@ Font.o : ./src/common/Gdc2/Font/Font.cpp ./include/lgi/common/Lgi.h \
 	./include/lgi/common/DisplayString.h \
 	./include/lgi/common/GdiLeak.h \
 	./include/lgi/common/Css.h \
-	./src/common/Gdc2/Font/FontPriv.h \
+	./private/common/FontPriv.h \
 	./include/lgi/common/FontSelect.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
@@ -800,7 +800,8 @@ Combo.o : ./src/common/Widgets/Combo.cpp ./include/lgi/common/Lgi.h \
 
 DocView.o : ./src/common/Text/DocView.cpp ./include/lgi/common/Lgi.h \
 	./include/lgi/common/DocView.h \
-	./include/lgi/common/Net.h
+	./include/lgi/common/Net.h \
+	./private/common/ViewPriv.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -911,7 +912,7 @@ TextView3.o : ./src/common/Text/TextView3.cpp ./include/lgi/common/Lgi.h \
 	./include/lgi/common/ScrollBar.h \
 	./include/lgi/common/ClipBoard.h \
 	./include/lgi/common/DisplayString.h \
-	./include/lgi/common/ViewPriv.h \
+	./private/common/ViewPriv.h \
 	./include/lgi/common/CssTools.h \
 	./include/lgi/common/LgiRes.h \
 	./include/lgi/common/Mail.h \
@@ -1270,7 +1271,7 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 
 ./include/lgi/common/RadioGroup.h : 
 
-./include/lgi/common/ViewPriv.h : ./include/lgi/common/ThreadEvent.h
+./private/common/ViewPriv.h : ./include/lgi/common/ThreadEvent.h
 
 ./include/lgi/common/Popup.h : ./include/lgi/common/Layout.h
 
@@ -1499,7 +1500,7 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 
 ./include/lgi/common/UnrolledList.h : 
 
-./src/common/Gdc2/Font/FontPriv.h : 
+./private/common/FontPriv.h : 
 
 ./include/lgi/common/FontSelect.h : 
 
