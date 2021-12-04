@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		341EF791255A991B0045CB3B /* libssh.4.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 347D147E252D44EE00422DA9 /* libssh.4.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		341EF791255A991B0045CB3B /* libssh.4.7.2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 347D147E252D44EE00422DA9 /* libssh.4.7.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		342D52A50F0CBA2F002A1C7C /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */; };
 		3448F8C62081D2500038AE76 /* mac-icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 3448F8C52081D2500038AE76 /* mac-icon.icns */; };
 		3457FE492081CB3D00014BE4 /* BlameUi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE3E2081CB3D00014BE4 /* BlameUi.cpp */; };
@@ -18,8 +18,8 @@
 		3457FE4E2081CB3D00014BE4 /* VcFolder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE472081CB3D00014BE4 /* VcFolder.cpp */; };
 		3457FE502081CBE500014BE4 /* SubProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE4F2081CBE500014BE4 /* SubProcess.cpp */; };
 		3457FE522081CC4800014BE4 /* Lvc.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 3457FE512081CC4800014BE4 /* Lvc.lr8 */; };
-		347D1484252D450500422DA9 /* libssh.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 347D147E252D44EE00422DA9 /* libssh.4.dylib */; };
-		347D1487252D451C00422DA9 /* libpng15.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34CE07222327B3F900807DCB /* libpng15.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		347D1484252D450500422DA9 /* libssh.4.7.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 347D147E252D44EE00422DA9 /* libssh.4.7.2.dylib */; };
+		347D1487252D451C00422DA9 /* libpng15.15.4.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34CE07222327B3F900807DCB /* libpng15.15.4.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		347D1489252D453300422DA9 /* DeEscape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 347D1488252D453300422DA9 /* DeEscape.cpp */; };
 		34BD35B120C5484A0001838A /* ControlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B020C5484A0001838A /* ControlTree.cpp */; };
 		34BD35B320C548710001838A /* XmlTreeUi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B220C548710001838A /* XmlTreeUi.cpp */; };
@@ -108,7 +108,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 347D145B252D44EE00422DA9 /* libssh.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = B134DE5613C14C5FBE63969B;
+			remoteGlobalIDString = 148FADB5FEFC4DCFAFCC5A8C;
 			remoteInfo = ssh_shared;
 		};
 		34C032B82319CDFE00470DF2 /* PBXContainerItemProxy */ = {
@@ -178,7 +178,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = FEA4458D289145EDB6E2BE90;
+			remoteGlobalIDString = A5BD8566EC9F44589879D4FC;
 			remoteInfo = libpng15;
 		};
 /* End PBXContainerItemProxy section */
@@ -190,8 +190,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				341EF791255A991B0045CB3B /* libssh.4.dylib in CopyFiles */,
-				347D1487252D451C00422DA9 /* libpng15.dylib in CopyFiles */,
+				341EF791255A991B0045CB3B /* libssh.4.7.2.dylib in CopyFiles */,
+				347D1487252D451C00422DA9 /* libpng15.15.4.0.dylib in CopyFiles */,
 				34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -236,7 +236,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				34C6E29E26BF6731002CBB07 /* libssl.a in Frameworks */,
-				347D1484252D450500422DA9 /* libssh.4.dylib in Frameworks */,
+				347D1484252D450500422DA9 /* libssh.4.7.2.dylib in Frameworks */,
 				34C032BB2319CE8C00470DF2 /* LgiCocoa.framework in Frameworks */,
 				34C032B32319CDE900470DF2 /* Cocoa.framework in Frameworks */,
 			);
@@ -333,7 +333,7 @@
 				347D1478252D44EE00422DA9 /* scp_download */,
 				347D147A252D44EE00422DA9 /* senddata */,
 				347D147C252D44EE00422DA9 /* ssh-client */,
-				347D147E252D44EE00422DA9 /* libssh.4.dylib */,
+				347D147E252D44EE00422DA9 /* libssh.4.7.2.dylib */,
 				347D1480252D44EE00422DA9 /* sshnetcat */,
 			);
 			name = Products;
@@ -358,7 +358,7 @@
 			isa = PBXGroup;
 			children = (
 				34CE07202327B3F900807DCB /* example */,
-				34CE07222327B3F900807DCB /* libpng15.dylib */,
+				34CE07222327B3F900807DCB /* libpng15.15.4.0.dylib */,
 				34CE07242327B3F900807DCB /* libpng15_static.a */,
 				34CE07262327B3F900807DCB /* minigzip */,
 				34CE07282327B3F900807DCB /* pngtest */,
@@ -490,10 +490,10 @@
 			remoteRef = 347D147B252D44EE00422DA9 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		347D147E252D44EE00422DA9 /* libssh.4.dylib */ = {
+		347D147E252D44EE00422DA9 /* libssh.4.7.2.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
-			path = libssh.4.dylib;
+			path = libssh.4.7.2.dylib;
 			remoteRef = 347D147D252D44EE00422DA9 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -518,10 +518,9 @@
 			remoteRef = 34CE071F2327B3F900807DCB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		34CE07222327B3F900807DCB /* libpng15.dylib */ = {
+		34CE07222327B3F900807DCB /* libpng15.15.4.0.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
-			name = libpng15.dylib;
 			path = libpng15.15.4.0.dylib;
 			remoteRef = 34CE07212327B3F900807DCB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -550,7 +549,6 @@
 		34CE072A2327B3F900807DCB /* libz_local.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
-			name = libz_local.dylib;
 			path = libz_local.1.2.5.dylib;
 			remoteRef = 34CE07292327B3F900807DCB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -655,7 +653,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = x86_64;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -687,7 +685,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = x86_64;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;

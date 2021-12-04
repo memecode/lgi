@@ -34,7 +34,7 @@
 		345B2117217969700079E3C9 /* GDebugContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FD2179696F0079E3C9 /* GDebugContext.cpp */; };
 		345B2118217969700079E3C9 /* IdeProjectSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FE217969700079E3C9 /* IdeProjectSettings.cpp */; };
 		345B2119217969700079E3C9 /* MissingFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FF217969700079E3C9 /* MissingFiles.cpp */; };
-		346A86902325CBC000FBC545 /* libpng15.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 346A86832325CBA000FBC545 /* libpng15.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		346A86902325CBC000FBC545 /* libpng15.15.4.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 346A86832325CBA000FBC545 /* libpng15.15.4.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34C4FD2A22FD7EB800C4BECB /* icons.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211D217969D30079E3C9 /* icons.png */; };
 		34C4FD2B22FD7EC100C4BECB /* LgiIde.lr8 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211C217969D30079E3C9 /* LgiIde.lr8 */; };
 		34C4FD2C22FD7EC700C4BECB /* mac-icon.icns in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211B217969D30079E3C9 /* mac-icon.icns */; };
@@ -52,7 +52,7 @@
 		34D21CEA217978DA003D1EA6 /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CE9217978DA003D1EA6 /* Base64.cpp */; };
 		34D21CEE21798240003D1EA6 /* Png.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CED21798240003D1EA6 /* Png.cpp */; };
 		34F566AB237BD55F0027133A /* JavascriptParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34F566A0237BD55F0027133A /* JavascriptParser.cpp */; };
-		34FC784E23D920A900B72108 /* libpng15.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 346A86832325CBA000FBC545 /* libpng15.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		34FC784E23D920A900B72108 /* libpng15.15.4.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 346A86832325CBA000FBC545 /* libpng15.15.4.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -135,7 +135,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				34FC784E23D920A900B72108 /* libpng15.dylib in CopyFiles */,
+				34FC784E23D920A900B72108 /* libpng15.15.4.0.dylib in CopyFiles */,
 				34148AFC2349ECA200D5E495 /* LgiCocoa.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -146,7 +146,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				346A86902325CBC000FBC545 /* libpng15.dylib in CopyFiles */,
+				346A86902325CBC000FBC545 /* libpng15.15.4.0.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -395,7 +395,7 @@
 			isa = PBXGroup;
 			children = (
 				346A86812325CBA000FBC545 /* example */,
-				346A86832325CBA000FBC545 /* libpng15.dylib */,
+				346A86832325CBA000FBC545 /* libpng15.15.4.0.dylib */,
 				346A86852325CBA000FBC545 /* libpng15_static.a */,
 				346A86872325CBA000FBC545 /* minigzip */,
 				346A86892325CBA000FBC545 /* pngtest */,
@@ -509,10 +509,9 @@
 			remoteRef = 346A86802325CBA000FBC545 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		346A86832325CBA000FBC545 /* libpng15.dylib */ = {
+		346A86832325CBA000FBC545 /* libpng15.15.4.0.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
-			name = libpng15.dylib;
 			path = libpng15.15.4.0.dylib;
 			remoteRef = 346A86822325CBA000FBC545 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -541,7 +540,6 @@
 		346A868B2325CBA000FBC545 /* libz_local.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
-			name = libz_local.dylib;
 			path = libz_local.1.2.5.dylib;
 			remoteRef = 346A868A2325CBA000FBC545 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -731,7 +729,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES_NONAGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -769,7 +766,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES_NONAGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_ENABLE_OBJC_ARC = NO;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;

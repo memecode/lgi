@@ -431,6 +431,7 @@
 				HEADER_SEARCH_PATHS = (
 					../../include,
 					../../include/lgi/mac/cocoa,
+					../../private/common,
 					../Code,
 					../Resources,
 					/opt/local/include,
@@ -463,6 +464,7 @@
 				HEADER_SEARCH_PATHS = (
 					../../include,
 					../../include/lgi/mac/cocoa,
+					../../private/common,
 					../Code,
 					../Resources,
 					/opt/local/include,
