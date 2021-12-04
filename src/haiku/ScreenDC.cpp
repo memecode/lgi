@@ -203,7 +203,7 @@ LColour LScreenDC::Colour(LColour c)
 	d->Col = c;
 	if (d->v)
 	{
-		LgiTrace("SetViewColor %s\n", c.GetStr());
+		// LgiTrace("SetViewColor %s\n", c.GetStr());
 		d->v->SetLowColor(c);
 		d->v->SetHighColor(c);
 	}
@@ -390,8 +390,6 @@ void LScreenDC::Rectangle(int x1, int y1, int x2, int y2)
 void LScreenDC::Rectangle(LRect *a)
 {
 	VIEW_CHECK
-
-	printf("Draw Rect %i,%i\n", X(), Y());
 	d->v->FillRect(a ? *a : Bounds());
 }
 

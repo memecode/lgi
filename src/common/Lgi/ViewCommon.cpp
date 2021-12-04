@@ -1723,11 +1723,9 @@ void LView::SetCtrlVisible(int Id, bool v)
 
 bool LView::AttachChildren()
 {
-	printf("AttachChildren:\n");
 	for (auto c: Children)
 	{
 		bool a = c->IsAttached();
-		LgiTrace("AttachChildren: %s::IsAttached = %i\n", c->GetClass(), a);
 		if (!a)
 		{
 			if (!c->Attach(this))
@@ -1962,6 +1960,10 @@ bool LView::InThread()
 		DWORD ViewThread = Hnd ? GetWindowThreadProcessId(Hnd, NULL) : GuiThreadId;
 		return CurThreadId == ViewThread;
 	
+	#elif defined(HAIKU)
+
+		return true;
+
 	#else
 
 		OsThreadId Me = GetCurrentThreadId();

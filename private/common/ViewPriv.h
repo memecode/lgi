@@ -199,11 +199,13 @@ public:
 
 	void FrameMoved(BPoint newPosition)
 	{
+		View->Pos = Frame();
 		View->OnPosChange();
 	}
 
 	void FrameResized(float newWidth, float newHeight)
 	{
+		View->Pos = Frame();
 		View->OnPosChange();
 	}
 
@@ -215,7 +217,6 @@ public:
 
 	void Draw(BRect updateRect)
 	{
-		printf("Draw called View->d=%p\n", View->d);
 		LScreenDC dc(View);
 		View->OnPaint(&dc);
 	}

@@ -95,31 +95,31 @@ LImageList *LLoadImageList(const char *File, int x, int y)
 LToolBar *LgiLoadToolbar(LViewI *Parent, const char *File, int x, int y)
 {
 	LToolBar *Toolbar = new LToolBar;
-	if (Toolbar)
+	if (!Toolbar)
+		return NULL;
+
+	LString FileName = LFindFile(File);
+	if (FileName)
 	{
-		LString FileName = LFindFile(File);
-		if (FileName)
-		{
-			bool Success = FileName && Toolbar->SetBitmap(FileName, x, y);
-			if (!Success)
-			{
-				LgiMsg(Parent,
-						"Can't load '%s' for the toolbar.\n"
-						"This is probably because libpng/libjpeg is missing.",
-						"LgiLoadToolbar",
-						MB_OK,
-						File);
-			}
-		}
-		else
+		bool Success = FileName && Toolbar->SetBitmap(FileName, x, y);
+		if (!Success)
 		{
 			LgiMsg(Parent,
-					"Can't find the graphic '%s' for the toolbar.\n"
-					"You can find it in this program's archive.",
+					"Can't load '%s' for the toolbar.\n"
+					"This is probably because libpng/libjpeg is missing.",
 					"LgiLoadToolbar",
 					MB_OK,
 					File);
 		}
+	}
+	else
+	{
+		LgiMsg(Parent,
+				"Can't find the graphic '%s' for the toolbar.\n"
+				"You can find it in this program's archive.",
+				"LgiLoadToolbar",
+				MB_OK,
+				File);
 	}
 
 	return Toolbar;
@@ -1367,11 +1367,13 @@ bool LToolBar::Pour(LRegion &r)
 	{
 		n.Offset(Best->x1, Best->y1);
 		n.Bound(Best);
+		LgiTrace("%s:%i - Toolbar=%s.\n", _FL, n.GetStr());
 		SetPos(n, true);
 		
 		// _Dump();
 		return true;
 	}
+	else LgiTrace("%s:%i - No best pos.\n", _FL);
 
 	return false;
 }

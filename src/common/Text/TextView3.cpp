@@ -841,7 +841,9 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 	LProfile Prof(_txt);
 	#endif
 
+	#if !defined(HAIKU)
 	LAssert(InThread());
+	#endif
 
 	LRect Client = GetClient();
 	int Mx = Client.X() - d->rPadding.x1 - d->rPadding.x2;

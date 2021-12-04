@@ -1662,9 +1662,8 @@ Chk;
 			}
 		}
 
-		#if 1
 Chk;
-		LToolBar *Tools;
+		LToolBar *Tools = NULL;
 		if (GdcD->Y() > 1200)
 			Tools = LgiLoadToolbar(this, "cmds-32px.png", 32, 32);
 		else
@@ -1672,7 +1671,6 @@ Chk;
 		
 		if (Tools)
 		{
-Chk;
 			Tools->AppendButton("New", IDM_NEW, TBT_PUSH, true, CMD_NEW);
 			Tools->AppendButton("Open", IDM_OPEN, TBT_PUSH, true, CMD_OPEN);
 			Tools->AppendButton("Save", IDM_SAVE_ALL, TBT_PUSH, true, CMD_SAVE_ALL);
@@ -1681,7 +1679,7 @@ Chk;
 			Tools->AppendButton("Copy", IDM_COPY, TBT_PUSH, true, CMD_COPY);
 			Tools->AppendButton("Paste", IDM_PASTE, TBT_PUSH, true, CMD_PASTE);
 			Tools->AppendSeparator();
-Chk;
+
 			Tools->AppendButton("Compile", IDM_COMPILE, TBT_PUSH, true, CMD_COMPILE);
 			Tools->AppendButton("Build", IDM_BUILD, TBT_PUSH, true, CMD_BUILD);
 			Tools->AppendButton("Stop", IDM_STOP_BUILD, TBT_PUSH, true, CMD_STOP_BUILD);
@@ -1704,9 +1702,7 @@ Chk;
 			Tools->Attach(this);
 		}
 		else LgiTrace("%s:%i - No tools obj?", _FL);
-		#endif
 
-		#if 1
 Chk;
 		LVariant v = 270, OutPx = 250;
 		d->Options.GetValue(OPT_SPLIT_PX, v);
@@ -1741,7 +1737,6 @@ Chk;
 			LCss::Len y(LCss::LenPx, (float)MAX(Px, 120));
 			d->Output->GetCss(true)->Height(y);
 		}
-		#endif
 
 		AttachChildren();
 		OnPosChange();
@@ -4484,7 +4479,7 @@ int LgiMain(OsAppArguments &AppArgs)
 	LApp a(AppArgs, "LgiIde");
 	if (a.IsOk())
 	{
-		#if 1
+		#if 0
 		a.AppWnd = new Test;
 		#else
 		a.AppWnd = new AppWnd;
