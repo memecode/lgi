@@ -35,7 +35,7 @@ extern LRect GtkGetPos(Gtk::GtkWidget *w);
 #if !WINNATIVE
 #include "lgi/common/ThreadEvent.h"
 
-class GPulseThread : public LThread
+class LPulseThread : public LThread
 {
 	LView *View;
 	int Length;
@@ -44,7 +44,7 @@ class GPulseThread : public LThread
 public:
 	bool Loop;
 
-	GPulseThread(LView *view, int len) : LThread("GPulseThread"), Event("GPulseThread")
+	LPulseThread(LView *view, int len) : LThread("LPulseThread"), Event("LPulseThread")
 	{
 		LAssert(view);
 		
@@ -55,7 +55,7 @@ public:
 		Run();
 	}
 	
-	~GPulseThread()
+	~LPulseThread()
 	{
 		Loop = false;
 		View = NULL;
@@ -67,8 +67,6 @@ public:
 	
 	int Main()
 	{
-		// auto ts = LCurrentTime();
-		
 		while (Loop && LAppInst)
 		{
 			auto s = Event.Wait(Length);
@@ -77,12 +75,8 @@ public:
 			
 			if (View)
 			{
-				// auto now = LCurrentTime();
-				// printf("pulse %i of %i\n", (int)(now - ts), (int)Length);
 				if (!View->PostEvent(M_PULSE))
 					Loop = false;
-					
-				// ts = now;
 			}
 		}
 		
@@ -91,7 +85,7 @@ public:
 };
 #endif
 
-enum GViewFontType
+enum LViewFontType
 {
 	/// The LView has a pointer to an externally owned font.
 	GV_FontPtr,
@@ -110,33 +104,34 @@ class LViewPrivate
 {
 public:
 	// General
-	int				CtrlId;
-	LDragDropSource	*DropSource;
-	LDragDropTarget	*DropTarget;
-	bool			IsThemed;
+	LView			*View = NULL;
+	int				CtrlId = 0;
+	LDragDropSource	*DropSource = NULL;
+	LDragDropTarget	*DropTarget = NULL;
+	bool			IsThemed = false;
 
 	// Heirarchy
-	LViewI			*ParentI;
-	LView			*Parent;
-	LViewI			*Notify;
+	LViewI			*ParentI = NULL;
+	LView			*Parent = NULL;
+	LViewI			*Notify = NULL;
 
 	// Size
 	LPoint			MinimumSize;
 	
 	// Font
-	LFont			*Font;
-	GViewFontType	FontOwnType;
+	LFont			*Font = NULL;
+	LViewFontType	FontOwnType = GV_FontPtr;
 	
 	// Style
 	LAutoPtr<LCss>  Css;
-	bool CssDirty;			// This is set when 'Styles' changes, the next call to GetCss(...) parses
+	bool CssDirty = false;	// This is set when 'Styles' changes, the next call to GetCss(...) parses
 							// the styles into the 'Css' object.
 	LString			Styles; // Somewhat temporary object to store unparsed styles particular to
 							// this view until runtime, where the view heirarchy is known.
 	LString::Array	Classes;
 
 	// Event dispatch handle
-	int				SinkHnd;
+	int				SinkHnd = -1;
 
 	// OS Specific
 	#if WINNATIVE
@@ -153,15 +148,15 @@ public:
 	#else
 
 		// Cursor
-		GPulseThread	*Pulse;
-		LView			*Popup;
-		bool			TabStop;
-		bool			WantsFocus;
-		int				WantsPulse;
+		LPulseThread	*PulseThread = NULL;
+		LView			*Popup = NULL;
+		bool			TabStop = false;
+		bool			WantsFocus = false;
+		int				WantsPulse = 0;
 
 		#if defined __GTK_H__
-		bool			InPaint;
-		bool			GotOnCreate;
+		bool			InPaint = false;
+		bool			GotOnCreate = false;
 		#elif defined(MAC) && !defined(LGI_COCOA)
 		static HIObjectClassRef BaseClass;
 		#endif
@@ -183,7 +178,7 @@ public:
 	int PulseLength;
 	#endif
 	
-	LViewPrivate();
+	LViewPrivate(LView *view);
 	~LViewPrivate();
 	
 	LView *GetParent()

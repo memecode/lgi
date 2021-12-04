@@ -272,14 +272,9 @@ public:
 		Param A();
 		Param B();
 	#else
-		int Msg() { return m; }
-		#if defined(WINNATIVE)
-		WPARAM A() { return a; }
-		LPARAM B() { return b; }
-		#else
-		Param A() { return a; }
-		Param B() { return b; }
-		#endif
+		auto Msg() { return m; }
+		auto A() { return a; }
+		auto B() { return b; }
 	#endif
 	void Set(int m, Param a, Param b);
 	bool Send(class LViewI *View);

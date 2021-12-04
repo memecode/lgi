@@ -103,43 +103,29 @@ bool LgiIsKeyDown(int Key)
 	return false;
 }
 
-LKey::LKey(int vkey, uint32_t flags)
+LKey::LKey(int Vkey, uint32_t flags)
 {
+	vkey = Vkey;
+	Flags = flags;
+	IsChar = false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-LViewPrivate::LViewPrivate() : 
+LViewPrivate::LViewPrivate(LView *view) :
+	View(view),
 	BView
 	(
 		"name",
 		B_FULL_UPDATE_ON_RESIZE | 
 		B_WILL_DRAW |
-		B_PULSE_NEEDED |
 		B_NAVIGABLE |
 		B_FRAME_EVENTS
 	)
 {
-	Parent = 0;
-	ParentI = 0;
-	Notify = 0;
-	CtrlId = -1;
-	Font = 0;
-	FontOwnType = GV_FontPtr;
-	Popup = 0;
-	TabStop = 0;
-	Pulse = 0;
-	WantsFocus = false;
-	SinkHnd = -1;
-	CssDirty = false;
-
-	DropTarget = NULL;
-	DropSource = NULL;
 }
 
 LViewPrivate::~LViewPrivate()
 {
-	LAssert(Pulse == 0);
-
 	if (Font && FontOwnType == GV_FontOwned)
 		DeleteObj(Font);
 }
@@ -155,10 +141,6 @@ void LView::_Focus(bool f)
 
 	OnFocus(f);	
 	Invalidate();
-
-	if (f)
-	{
-	}
 }
 
 void LView::_Delete()
@@ -411,17 +393,9 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 
 void LView::SetPulse(int Length)
 {
-	ThreadCheck();
-
-	if (d->Pulse)
-	{
-		DeleteObj(d->Pulse);
-	}
-
+	DeleteObj(d->PulseThread);
 	if (Length > 0)
-	{
-		d->Pulse = new GPulseThread(this, Length);
-	}
+		d->PulseThread = new LPulseThread(this, Length);
 }
 
 LMessage::Param LView::OnEvent(LMessage *Msg)

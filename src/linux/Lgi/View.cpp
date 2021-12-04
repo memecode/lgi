@@ -684,7 +684,7 @@ void LView::SetPulse(int Length)
 
 	if (Length > 0)
 	{
-		d->Pulse = new GPulseThread(this, Length);
+		d->Pulse = new LPulseThread(this, Length);
 	}
 }
 
