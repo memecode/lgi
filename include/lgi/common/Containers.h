@@ -658,9 +658,10 @@ public:
 		struct UserData {
 			int (*Compare)(T *a, T *b, User data);
 			User Data;
-		} ud = {Compare, Data};
+		} ud = {Compare, Data};		
 		
-		
+		#define USER_DATA_FIRST (!defined(WINDOWS) && !defined(HAIKU))
+
 		#if defined(WINDOWS)
 		/* _ACRTIMP void __cdecl qsort_s(void*   _Base,
 										rsize_t _NumOfElements,
@@ -675,15 +676,22 @@ public:
 				a.AddressOf(),
 				a.Length(),
 				sizeof(T*),
-				#if !defined(WINDOWS)
-				&ud,
+				#if USER_DATA_FIRST
+					&ud,
 				#endif
-				[](void *ud, const void *a, const void *b)
+				#if defined(HAIKU)
+					// typedef int (*_compare_function_qsort_r)(const void*, const void*, void*);
+					// extern void qsort_r(void* base, size_t numElements, size_t sizeOfElement, _compare_function_qsort_r, void* cookie);
+					[](const void *a, const void *b, void *ud) -> int
+				#else
+					[](void *ud, const void *a, const void *b) -> int
+				#endif
 				{
-					return ((UserData*)ud)->Compare(*(T**)a, *(T**)b, ((UserData*)ud)->Data);
+					auto *user = (UserData*)ud;
+					return user->Compare(*(T**)a, *(T**)b, user->Data);
 				}
-				#if defined(WINDOWS)
-				,&ud
+				#if !USER_DATA_FIRST
+					, &ud
 				#endif
 			);
 

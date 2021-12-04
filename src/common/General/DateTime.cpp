@@ -28,6 +28,11 @@
 #include "lgi/common/Token.h"
 #include "lgi/common/DocView.h"
 
+constexpr char *LDateTime::WeekdaysShort[];
+constexpr char *LDateTime::WeekdaysLong[];
+constexpr char *LDateTime::MonthsShort[];
+constexpr char *LDateTime::MonthsLong[];
+
 //////////////////////////////////////////////////////////////////////////////
 uint16 LDateTime::DefaultFormat = GDTF_DEFAULT;
 char LDateTime::DefaultSeparator = '/';
