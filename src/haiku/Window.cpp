@@ -33,7 +33,6 @@ class LWindowPrivate : public BWindow
 public:
 	LWindow *Wnd;
 	bool SnapToEdge = false;
-	bool Active = false;
 	LArray<HookInfo> Hooks;
 	
 	LWindowPrivate(LWindow *wnd) :
@@ -126,6 +125,11 @@ LWindow::~LWindow()
 	}
 }
 
+OsWindow LWindow::WindowHandle()
+{
+	return d;
+}
+
 bool LWindow::SetIcon(const char *FileName)
 {
 	LString a;
@@ -150,13 +154,18 @@ void LWindow::SetSnapToEdge(bool s)
 
 bool LWindow::IsActive()
 {
-	return d->Active;
+	LLocker lck(d, _FL);
+	if (!lck.Lock())
+		return false;
+	return d->IsActive();
 }
 
 bool LWindow::SetActive()
 {
-	if (!Wnd)
+	LLocker lck(d, _FL);
+	if (!lck.Lock())
 		return false;
+	d->Activate();
 	return true;
 }
 
@@ -164,8 +173,7 @@ bool LWindow::Visible()
 {
 	LLocker lck(d, _FL);
 	if (!lck.Lock())
-		return false;
-	
+		return false;	
 	return !d->IsHidden();
 }
 
@@ -178,7 +186,6 @@ void LWindow::Visible(bool i)
 		return;
 	}
 	
-	printf("LWindow:Vis %i\n", i);
 	if (i)
 		d->Show();
 	else
@@ -461,23 +468,25 @@ void LWindow::Raise()
 {
 }
 
-
 LWindowZoom LWindow::GetZoom()
 {
-	return GZoomNormal;
+	LLocker lck(d, _FL);
+	if (lck.Lock())
+	{
+		if (d->IsMinimized())
+			return LZoomMin;
+	}
+
+	return LZoomNormal;
 }
 
 void LWindow::SetZoom(LWindowZoom i)
 {
-	if (!Wnd)
+	LLocker lck(d, _FL);
+	if (lck.Lock())
 	{
-		// LgiTrace("%s:%i - No window.\n", _FL);
-		return;
+		d->Minimize(i == LZoomMin);
 	}
-	
-
-	ThreadCheck();
-
 }
 
 LViewI *LWindow::GetDefault()
@@ -507,7 +516,9 @@ void LWindow::SetDefault(LViewI *v)
 
 bool LWindow::Name(const char *n)
 {
-	d->SetTitle(n);
+	LLocker lck(d, _FL);
+	if (lck.Lock())
+		d->SetTitle(n);
 	return LBase::Name(n);
 }
 
@@ -531,7 +542,6 @@ LRect &LWindow::GetClient(bool ClientSpace)
 {
 	static LRect r;
 	r = LView::GetClient(ClientSpace);
-
 	return r;
 }
 
@@ -546,7 +556,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 		if (Store->GetValue(FieldName, v) && v.Str())
 		{
 			LRect Position(0, 0, -1, -1);
-			LWindowZoom State = GZoomNormal;
+			LWindowZoom State = LZoomNormal;
 
 // printf("SerializeState load %s\n", v.Str());
 

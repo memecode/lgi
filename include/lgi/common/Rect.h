@@ -17,11 +17,10 @@
 	#define CornerOffset 1
 	typedef RECT OsRect;
 
-#elif defined ATHEOS
+#elif defined HAIKU
 
-	#include <gui/rect.h>
 	#define CornerOffset 0
-	typedef os::Rect OsRect;
+	typedef BRect OsRect;
 
 #elif defined MAC
 
@@ -178,6 +177,60 @@ public:
 		return LRect(0, 0, X()-1, Y()-1);
 	}
 
+	bool operator ==(const LRect &r)
+	{
+		return	x1 == r.x1 &&
+				y1 == r.y1 &&
+				x2 == r.x2 &&
+				y2 == r.y2;
+	}
+	
+	LRect &operator =(const LRect &r);	
+	
+	LRect operator +(const LPoint &p)
+	{
+		LRect r = *this;
+		r.Offset(p.x, p.y);
+		return r;
+	}
+	
+	LRect &operator +=(const LPoint &p)
+	{
+		Offset(p.x, p.y);
+		return *this;
+	}
+	
+	LRect operator -(const LPoint &p)
+	{
+		LRect r = *this;
+		r.Offset(-p.x, -p.y);
+		return r;
+	}
+	
+	LRect &operator -=(const LPoint &p)
+	{
+		Offset(-p.x, -p.y);
+		return *this;
+	}
+
+	LRect &operator *=(int factor)
+	{
+		x1 *= factor;
+		y1 *= factor;
+		x2 *= factor;
+		y2 *= factor;
+		return *this;
+	}
+	
+	LRect &operator /=(int factor)
+	{
+		x1 /= factor;
+		y1 /= factor;
+		x2 /= factor;
+		y2 /= factor;
+		return *this;
+	}
+
 	#if LGI_COCOA
 
 		operator OsRect()
@@ -284,98 +337,51 @@ public:
 		}
 		#endif
 	
+	#elif defined(__GTK_H__)
+
+		operator Gtk::GdkRectangle()
+		{
+			Gtk::GdkRectangle r;
+			r.x = x1;
+			r.y = y1;
+			r.width = X();
+			r.height = Y();
+			return r;
+		}
+
+		LRect &operator =(const Gtk::GdkRectangle r)
+		{
+			x1 = r.x;
+			y1 = r.y;
+			x2 = x1 + r.width - 1;
+			y2 = y1 + r.height - 1;
+			return *this;
+		}
+
+		LRect(const Gtk::GtkAllocation &a)
+		{
+			x1 = a.x;
+			y1 = a.y;
+			x2 = a.x + a.width - 1;
+			y2 = a.y + a.height - 1;
+		}
+
+	#elif defined(LGI_SDL)
+
+		operator SDL_Rect()
+		{
+			SDL_Rect s = {(Sint16)x1, (Sint16)y1, (Uint16)X(), (Uint16)Y()};
+			return s;
+		}
+
+	#elif defined(HAIKU)
+
+		operator BRect()
+		{
+			return BRect(x1, y1, x2, y2);
+		}
+
 	#endif
-	
-	bool operator ==(const LRect &r)
-	{
-		return	x1 == r.x1 &&
-				y1 == r.y1 &&
-				x2 == r.x2 &&
-				y2 == r.y2;
-	}
-	
-	LRect &operator =(const LRect &r);	
-	
-	#ifdef __GTK_H__
-	operator Gtk::GdkRectangle()
-	{
-	    Gtk::GdkRectangle r;
-	    r.x = x1;
-	    r.y = y1;
-	    r.width = X();
-	    r.height = Y();
-	    return r;
-	}
-
-	LRect &operator =(const Gtk::GdkRectangle r)
-	{
-		x1 = r.x;
-		y1 = r.y;
-		x2 = x1 + r.width - 1;
-		y2 = y1 + r.height - 1;
-		return *this;
-	}
-
-	LRect(const Gtk::GtkAllocation &a)
-	{
-		x1 = a.x;
-		y1 = a.y;
-		x2 = a.x + a.width - 1;
-		y2 = a.y + a.height - 1;
-	}
-	#endif
-	
-	#ifdef LGI_SDL
-	operator SDL_Rect()
-	{
-		SDL_Rect s = {(Sint16)x1, (Sint16)y1, (Uint16)X(), (Uint16)Y()};
-		return s;
-	}
-	#endif
-
-	LRect operator +(const LPoint &p)
-	{
-		LRect r = *this;
-		r.Offset(p.x, p.y);
-		return r;
-	}
-	
-	LRect &operator +=(const LPoint &p)
-	{
-		Offset(p.x, p.y);
-		return *this;
-	}
-	
-	LRect operator -(const LPoint &p)
-	{
-		LRect r = *this;
-		r.Offset(-p.x, -p.y);
-		return r;
-	}
-	
-	LRect &operator -=(const LPoint &p)
-	{
-		Offset(-p.x, -p.y);
-		return *this;
-	}
-
-	LRect &operator *=(int factor)
-	{
-		x1 *= factor;
-		y1 *= factor;
-		x2 *= factor;
-		y2 *= factor;
-		return *this;
-	}
-	
-	LRect &operator /=(int factor)
-	{
-		x1 /= factor;
-		y1 /= factor;
-		x2 /= factor;
-		y2 /= factor;
-		return *this;
-	}
 };
 
 LgiClass bool operator ==(LRect &a, LRect &b);

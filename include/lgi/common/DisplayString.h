@@ -25,7 +25,7 @@
 ///
 /// The first stage is converting text into the native format for the 
 /// OS's API. This usually involved converting the text to wide characters for
-/// Linux or Windows, or Utf-8 for BeOS. Then the text is converted into runs of
+/// Linux or Windows, or Utf-8 for Haiku. Then the text is converted into runs of
 /// characters that can be rendered in the same font. If glyph substitution is
 /// required to render the characters a separate run is used with a different
 /// font ID. Finally you can measure or paint these runs of text. Also tab characters

@@ -188,7 +188,7 @@ LView::LView(OsView view)
 	d = new LViewPrivate(this);
 	#ifdef LGI_SDL
 	_View = this;
-	#elif LGI_VIEW_HANDLE
+	#elif LGI_VIEW_HANDLE && !defined(HAIKU)
 	_View = view;
 	#endif
 	_Window = 0;
@@ -230,7 +230,11 @@ LView::~LView()
 	}
 
 	_Delete();
-	DeleteObj(d);
+	
+	if (d->LockLooper())
+	{
+		DeleteObj(d);
+	}
 }
 
 int LView::AddDispatch()
@@ -301,7 +305,7 @@ bool LView::HasView(LViewI *v)
 OsWindow LView::WindowHandle()
 {
 	auto *w = GetWindow();
-	return (w) ? w->WindowHandle() : OsWindow();
+	return (w) ? w->WindowHandle() : NULL;
 }
 
 LWindow *LView::GetWindow()
@@ -728,7 +732,7 @@ void LView::SendNotify(LNotification note)
 	if (n)
 	{
 		if (
-			#if LGI_VIEW_HANDLE
+			#if LGI_VIEW_HANDLE && !defined(HAIKU)
 			!_View ||
 			#endif
 			InThread())
@@ -1146,7 +1150,7 @@ void LView::Enabled(bool i)
 	if (!i) SetFlag(GViewFlags, GWF_DISABLED);
 	else ClearFlag(GViewFlags, GWF_DISABLED);
 
-	#if LGI_VIEW_HANDLE
+	#if LGI_VIEW_HANDLE && !defined(HAIKU)
 	if (_View)
 	{
 		#if WINNATIVE
@@ -1198,7 +1202,7 @@ void LView::Visible(bool v)
 	if (v) SetFlag(GViewFlags, GWF_VISIBLE);
 	else ClearFlag(GViewFlags, GWF_VISIBLE);
 
-	#if LGI_VIEW_HANDLE
+	#if LGI_VIEW_HANDLE && !defined(HAIKU)
 	if (_View)
 	{
 		#if WINNATIVE
@@ -1287,7 +1291,7 @@ void LView::Focus(bool i)
 	if (Wnd)
 		Wnd->SetFocus(this, i ? LWindow::GainFocus : LWindow::LoseFocus);
 
-	#if LGI_VIEW_HANDLE
+	#if LGI_VIEW_HANDLE && !defined(HAIKU)
 	if (_View)
 	#endif
 	{
@@ -1719,10 +1723,11 @@ void LView::SetCtrlVisible(int Id, bool v)
 
 bool LView::AttachChildren()
 {
-	for (auto c : Children)
+	printf("AttachChildren:\n");
+	for (auto c: Children)
 	{
 		bool a = c->IsAttached();
-		// LgiTrace("%s::IsAttached = %i\n", c->GetClass(), a);
+		LgiTrace("AttachChildren: %s::IsAttached = %i\n", c->GetClass(), a);
 		if (!a)
 		{
 			if (!c->Attach(this))
@@ -2059,7 +2064,7 @@ bool LView::Name(const char *n)
 {
 	LBase::Name(n);
 
-	#if LGI_VIEW_HANDLE
+	#if LGI_VIEW_HANDLE && !defined(HAIKU)
 	if (_View)
 	{
 		#if WINNATIVE

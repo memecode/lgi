@@ -24,7 +24,7 @@ public:
 	char *GetFileName() { return FileName; }
 	virtual bool IsLoaded()
 	{
-		#ifdef BEOS
+		#ifdef HAIKU
 		return hLib >= 0;
 		#else
 		return hLib != 0;

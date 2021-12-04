@@ -7,11 +7,11 @@
 enum LWindowZoom
 {
 	/// Minimized
-	GZoomMin,
+	LZoomMin,
 	/// Restored/Normal
-	GZoomNormal,
+	LZoomNormal,
 	/// Maximized
-	GZoomMax
+	LZoomMax
 };
 
 enum LWindowHookType
@@ -52,7 +52,7 @@ protected:
 		LRect OldPos;
 		LWindow *_Dialog;
 
-	#else
+	#elif !defined(HAIKU)
 
 		OsWindow Wnd;
 		void SetDeleteOnClose(bool i);
@@ -252,7 +252,11 @@ public:
 		bool Attach(LViewI *p) override;
 
 		// Props
-		OsWindow WindowHandle() override { return Wnd; }
+		#if defined(HAIKU)
+			OsWindow WindowHandle() override;
+		#else
+			OsWindow WindowHandle() override { return Wnd; }
+		#endif
 		bool Name(const char *n) override;
 		const char *Name() override;
 		bool SetPos(LRect &p, bool Repaint = false) override;

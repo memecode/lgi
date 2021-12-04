@@ -2426,7 +2426,7 @@ void AppWnd::OnBuildStateChanged(bool NewState)
 
 void AppWnd::UpdateState(int Debugging, int Building)
 {
-	printf("UpdateState %i %i\n", Debugging, Building);
+	// printf("UpdateState %i %i\n", Debugging, Building);
 	
 	if (Debugging >= 0) d->Debugging = Debugging;
 	if (Building >= 0)
@@ -4440,13 +4440,55 @@ public:
 };
 */
 
+class TestView : public LView
+{
+public:
+	TestView()
+	{
+		LRect r(10, 10, 110, 110);
+		SetPos(r);
+	}
+
+	void OnPaint(LSurface *pdc)
+	{
+		pdc->Colour(LColour::Red);
+
+		// pdc->Rectangle();
+		pdc->Line(0, 0, X()-1, Y()-1);
+		pdc->Circle(50, 50, 50);
+	}
+};
+
+class Test : public LWindow
+{
+public:
+	Test()
+	{
+		LRect r(100, 100, 800, 700);
+		SetPos(r);
+		Name("Test");
+		SetQuitOnClose(true);
+
+		if (Attach(0))
+		{
+			AddView(new TestView);
+			AttachChildren();
+			Visible(true);
+		}
+	}
+};
+
 int LgiMain(OsAppArguments &AppArgs)
 {
 	printf("LgiIde v%s\n", APP_VER);
 	LApp a(AppArgs, "LgiIde");
 	if (a.IsOk())
 	{
+		#if 1
+		a.AppWnd = new Test;
+		#else
 		a.AppWnd = new AppWnd;
+		#endif
 		a.Run();
 	}
 

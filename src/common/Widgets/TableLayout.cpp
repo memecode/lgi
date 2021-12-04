@@ -2146,7 +2146,7 @@ void LTableLayout::OnPaint(LSurface *pDC)
 	if (SizeChanged() || d->LayoutDirty)
 	{
 		#if LGI_VIEW_HANDLE
-		if (!_View)
+		if (!Handle())
 		#endif
 			OnPosChange();
 		#if LGI_VIEW_HANDLE

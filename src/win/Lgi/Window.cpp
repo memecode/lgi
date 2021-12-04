@@ -69,7 +69,7 @@ public:
 	{
 		Focus = NULL;
 		InCreate = true;
-		Show = GZoomNormal;
+		Show = LZoomNormal;
 		SnapToEdge = false;
 		AlwaysOnTop = false;
 	}
@@ -384,14 +384,14 @@ LWindowZoom LWindow::GetZoom()
 {
 	if (IsZoomed(Handle()))
 	{
-		return GZoomMax;
+		return LZoomMax;
 	}
 	else if (IsIconic(Handle()))
 	{
-		return GZoomMin;
+		return LZoomMin;
 	}
 
-	return GZoomNormal;
+	return LZoomNormal;
 }
 
 void LWindow::SetZoom(LWindowZoom i)
@@ -400,17 +400,17 @@ void LWindow::SetZoom(LWindowZoom i)
 	{
 		switch (i)
 		{
-			case GZoomMax:
+			case LZoomMax:
 			{
 				ShowWindow(Handle(), SW_MAXIMIZE);
 				break;
 			}
-			case GZoomMin:
+			case LZoomMin:
 			{
 				ShowWindow(Handle(), SW_MINIMIZE);
 				break;
 			}
-			case GZoomNormal:
+			case LZoomNormal:
 			{
 				if (!Visible())
 				{
@@ -651,12 +651,12 @@ void LWindow::Visible(bool v)
 				Wp->ptMaxPosition.x = -1;
 				Wp->ptMaxPosition.y = -1;
 
-				if (d->Show == GZoomMax)
+				if (d->Show == LZoomMax)
 				{
 					Wp->showCmd = SW_MAXIMIZE;
 					Cmd = "SW_MAXIMIZE";
 				}
-				else if (d->Show == GZoomMin)
+				else if (d->Show == LZoomMin)
 				{
 					Wp->showCmd = SW_MINIMIZE;
 					Cmd = "SW_MINIMIZE";
@@ -979,17 +979,17 @@ LMessage::Result LWindow::OnEvent(LMessage *Msg)
 				{
 					case SIZE_MINIMIZED:
 					{
-						z = GZoomMin;
+						z = LZoomMin;
 						break;
 					}
 					case SIZE_MAXIMIZED:
 					{
-						z = GZoomMax;
+						z = LZoomMax;
 						break;
 					}
 					case SIZE_RESTORED:
 					{
-						z = GZoomNormal;
+						z = LZoomNormal;
 						break;
 					}
 				}
@@ -1221,7 +1221,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 		if (Store->GetValue(FieldName, v) && v.Str())
 		{
 			LRect Position(0, 0, -1, -1);
-			LWindowZoom State = GZoomNormal;
+			LWindowZoom State = LZoomNormal;
 
 			#if DEBUG_SERIALIZE_STATE
 			LgiTrace("\t::SerializeState:%i v=%s\n", __LINE__, v.Str());
@@ -1259,12 +1259,12 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 				Show == SW_SHOWMINNOACTIVE ||
 				Show == SW_MINIMIZE)
 			{
-				State = GZoomMin;
+				State = LZoomMin;
 			}
 			else if (Show == SW_SHOWMAXIMIZED ||
 					 Show == SW_MAXIMIZE)
 			{
-				State = GZoomMax;
+				State = LZoomMax;
 			}
 
 			LAutoPtr<WINDOWPLACEMENT> Wp(new WINDOWPLACEMENT);
@@ -1274,11 +1274,11 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 				Wp->length = sizeof(WINDOWPLACEMENT);
 				if (Visible())
 				{
-					if (State == GZoomMax)
+					if (State == LZoomMax)
 					{
 						Wp->showCmd = SW_SHOWMAXIMIZED;
 					}
-					else if (State == GZoomMin)
+					else if (State == LZoomMin)
 					{
 						Wp->showCmd = SW_MINIMIZE;
 					}

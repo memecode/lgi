@@ -13,23 +13,21 @@
 
 #include "lgi/common/Lgi.h"
 
+#define VIEW_CHECK		if (!d->v) return;
+
 class LScreenPrivate
 {
 public:
-	int x, y, Bits;
-	bool Own;
+	int x = 0, y = 0, Bits = 0;
+	bool Own = false;
 	LColour Col;
 	LRect Client;
 
-	LView *View;
-	OsView v;
+	LView *View = NULL;
+	OsView v = NULL;
 
 	LScreenPrivate()
 	{
-		View = NULL;
-		x = y = Bits = 0;
-		Own = false;
-		v = 0;
 		Client.ZOff(-1, -1);
 	}
 	
@@ -50,15 +48,14 @@ LScreenDC::LScreenDC()
 LScreenDC::LScreenDC(LView *view, void *param)
 {
 	d = new LScreenPrivate;
-	d->View = view;
-	if (view)
+	if (d->View = view)
+		d->v = view->Handle();
+
+	if (d->v)
 	{
-		LWindow *w = view->GetWindow();
-    }
-    else
-    {
-    	printf("%s:%i - No view?\n", _FL);
-    }
+		d->Client = d->v->Frame();
+	}
+	else LgiTrace("%s:%i - LScreenDC::LScreenDC - No view?\n", _FL);
 }
 
 LScreenDC::~LScreenDC()
@@ -194,7 +191,7 @@ COLOUR LScreenDC::Colour()
 
 COLOUR LScreenDC::Colour(COLOUR c, int Bits)
 {
-	auto b = Bits?Bits:GetBits();
+	auto b = Bits ? Bits : GetBits();
 	d->Col.Set(c, b);
 	return Colour(d->Col).Get(b);
 }
@@ -202,8 +199,16 @@ COLOUR LScreenDC::Colour(COLOUR c, int Bits)
 LColour LScreenDC::Colour(LColour c)
 {
 	LColour Prev = d->Col;
+	
 	d->Col = c;
-
+	if (d->v)
+	{
+		LgiTrace("SetViewColor %s\n", c.GetStr());
+		d->v->SetLowColor(c);
+		d->v->SetHighColor(c);
+	}
+	else
+		LgiTrace("%s:%i - No view.\n", _FL);
 
 	return Prev;
 }
@@ -292,10 +297,13 @@ GPalette *LScreenDC::Palette()
 
 void LScreenDC::Palette(GPalette *pPal, bool bOwnIt)
 {
+	VIEW_CHECK
 }
 
 void LScreenDC::Set(int x, int y)
 {
+	VIEW_CHECK
+	d->v->StrokeLine(BPoint(x, y), BPoint(x, y));
 }
 
 COLOUR LScreenDC::Get(int x, int y)
@@ -305,83 +313,98 @@ COLOUR LScreenDC::Get(int x, int y)
 
 void LScreenDC::HLine(int x1, int x2, int y)
 {
+	VIEW_CHECK
+	d->v->StrokeLine(BPoint(x1, y), BPoint(x2, y));
 }
 
 void LScreenDC::VLine(int x, int y1, int y2)
 {
+	VIEW_CHECK
+	d->v->StrokeLine(BPoint(x, y1), BPoint(x, y2));
 }
 
 void LScreenDC::Line(int x1, int y1, int x2, int y2)
 {
+	VIEW_CHECK
+	d->v->StrokeLine(BPoint(x1, y1), BPoint(x2, y2));
 }
 
 void LScreenDC::Circle(double cx, double cy, double radius)
 {
+	VIEW_CHECK
+	d->v->StrokeArc(BPoint(cx, cy), radius, radius, 0, 360);
 }
 
 void LScreenDC::FilledCircle(double cx, double cy, double radius)
 {
+	VIEW_CHECK
+	d->v->FillArc(BPoint(cx, cy), radius, radius, 0, 360);
 }
 
 void LScreenDC::Arc(double cx, double cy, double radius, double start, double end)
 {
+	VIEW_CHECK
+	d->v->StrokeArc(BPoint(cx, cy), radius, radius, start, end);
 }
 
 void LScreenDC::FilledArc(double cx, double cy, double radius, double start, double end)
 {
+	VIEW_CHECK
+	d->v->FillArc(BPoint(cx, cy), radius, radius, start, end);
 }
 
 void LScreenDC::Ellipse(double cx, double cy, double x, double y)
 {
+	VIEW_CHECK
+	d->v->StrokeArc(BPoint(cx, cy), x, y, 0, 360);
 }
 
 void LScreenDC::FilledEllipse(double cx, double cy, double x, double y)
 {
+	VIEW_CHECK
+	d->v->FillArc(BPoint(cx, cy), x, y, 0, 360);
 }
 
 void LScreenDC::Box(int x1, int y1, int x2, int y2)
 {
+	VIEW_CHECK
+	d->v->StrokeRect(BRect(x1, y1, x2, y2));
 }
 
 void LScreenDC::Box(LRect *a)
 {
+	VIEW_CHECK
 	if (a)
-		Box(a->x1, a->y1, a->x2, a->y2);
+		d->v->StrokeRect(*a);
 	else
 		Box(0, 0, X()-1, Y()-1);
 }
 
 void LScreenDC::Rectangle(int x1, int y1, int x2, int y2)
 {
-	if (x2 >= x1 &&
-		y2 >= y1)
-	{
-	}
+	VIEW_CHECK
+	if (x2 >= x1 && y2 >= y1)
+		d->v->FillRect(BRect(x1, y1, x2, y2));
 }
 
 void LScreenDC::Rectangle(LRect *a)
 {
-	if (a)
-	{
-		if (a->X() > 0 &&
-			a->Y() > 0)
-		{
-		}
-	}
-	else
-	{
-	}
+	VIEW_CHECK
+
+	printf("Draw Rect %i,%i\n", X(), Y());
+	d->v->FillRect(a ? *a : Bounds());
 }
 
 void LScreenDC::Polygon(int Points, LPoint *Data)
 {
+	VIEW_CHECK
 	if (!Data || Points <= 0)
 		return;
-
 }
 
 void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 {
+	VIEW_CHECK
 	if (!Src)
 	{
 		LgiTrace("%s:%i - No source.\n", _FL);
@@ -405,22 +428,23 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 		// LgiTrace("Blt inval pos=%i,%i a=%s bounds=%s\n", x, y, a?a->GetStr():"null", Bounds().GetStr());
 		return;
 	}
-
-	
 }
 
-void LScreenDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
+void LScreenDC::StretchBlt(LRect *Dest, LSurface *Src, LRect *s)
 {
+	VIEW_CHECK
 	LAssert(0);
 }
 
 void LScreenDC::Bezier(int Threshold, LPoint *Pt)
 {
+	VIEW_CHECK
 	LAssert(0);
 }
 
 void LScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
 {
+	VIEW_CHECK
 	LAssert(0);
 }
 

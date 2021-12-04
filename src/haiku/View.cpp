@@ -291,7 +291,7 @@ LRect &LView::GetClient(bool ClientSpace)
 
 LViewI *LView::FindControl(OsView hCtrl)
 {
-	if (_View == hCtrl)
+	if (d == hCtrl)
 	{
 		return this;
 	}
@@ -326,6 +326,15 @@ bool LView::SetPos(LRect &p, bool Repaint)
 	if (Pos != p)
 	{
 		Pos = p;
+
+		LLocker lck(d, _FL);
+		if (lck.Lock())
+		{
+			d->ResizeTo(Pos.X(), Pos.Y());
+			d->MoveTo(Pos.x1, Pos.y1);
+			lck.Unlock();
+		}
+
 		OnPosChange();
 	}
 
@@ -435,6 +444,11 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 	return 0;
 }
 
+OsView LView::Handle() const
+{
+	return d;
+}
+
 bool LView::PointToScreen(LPoint &p)
 {
 	ThreadCheck();
@@ -512,8 +526,13 @@ bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 
 bool LView::IsAttached()
 {
-	auto w = GetWindow();
-	return w != NULL;
+	bool attached = false;
+	LLocker lck(d, _FL);
+	if (lck.Lock())
+		attached = d->BView::Parent() != NULL;
+	
+	printf("%s::IsAttached = %i\n", GetClass(), attached);
+	return attached;
 }
 
 const char *LView::GetClass()
@@ -523,8 +542,6 @@ const char *LView::GetClass()
 
 bool LView::Attach(LViewI *parent)
 {
-	ThreadCheck();
-	
 	bool Status = false;
 
 	LView *Parent = d->GetParent();
@@ -542,7 +559,68 @@ bool LView::Attach(LViewI *parent)
 		if (w && TestFlag(WndFlags, GWF_FOCUS))
 			w->SetFocus(this, LWindow::GainFocus);
 
-		Status = true;
+		auto *Wnd = dynamic_cast<LWindow*>(parent);
+		printf("Wnd=%p\n", Wnd);
+		if (Wnd)
+		{
+			auto bwnd = parent->WindowHandle();
+			if (bwnd)
+			{
+				if (bwnd->LockLooper())
+				{
+					LgiTrace("%s:%i - Attaching %s to window %s\n",
+						_FL, GetClass(), parent->GetClass());
+
+					bwnd->AddChild(d);
+					
+					d->ResizeTo(Pos.X(), Pos.Y());
+					d->MoveTo(Pos.x1, Pos.y1);
+					d->Show();
+
+					bwnd->Unlock();
+
+					Status = true;
+
+					LgiTrace("%s:%i - Attached %s to window %s, success\n",
+						_FL, GetClass(), parent->GetClass());
+				}
+				else
+				{
+					LgiTrace("%s:%i - Error attaching %s to window %s, can't lock.\n",
+						_FL, GetClass(), parent->GetClass());
+				}
+			}
+			else LgiTrace("%s:%i - Error no window handle for %s\n", _FL, parent->GetClass());
+		}
+		else
+		{
+			auto bview = parent->Handle();
+			if (bview)
+			{
+				LLocker lck(bview, _FL);
+				if (lck.Lock())
+				{
+					LgiTrace("%s:%i - Attaching %s to view %s\n",
+						_FL, GetClass(), parent->GetClass());
+
+					bview->AddChild(d);
+
+					d->ResizeTo(Pos.X(), Pos.Y());
+					d->MoveTo(Pos.x1, Pos.y1);
+					d->Show();
+
+					Status = true;
+
+					LgiTrace("%s:%i - Attached %s to view %s, success\n",
+						_FL, GetClass(), parent->GetClass());
+				}
+				else
+				{
+					LgiTrace("%s:%i - Error attaching %s to view %s, can't lock.\n",
+						_FL, GetClass(), parent->GetClass());
+				}
+			}
+		}
 
 		if (!Parent->HasView(this))
 		{

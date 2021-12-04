@@ -947,16 +947,16 @@ LWindowZoom LWindow::GetZoom()
 		bool c = IsWindowCollapsed(Wnd);
 		// printf("IsWindowCollapsed=%i\n", c);
 		if (c)
-			return GZoomMin;
+			return LZoomMin;
 		
 		c = IsWindowInStandardState(Wnd, NULL, NULL);
 		// printf("IsWindowInStandardState=%i\n", c);
 		if (!c)
-			return GZoomMax;
+			return LZoomMax;
 		#endif
 	}
 	
-	return GZoomNormal;
+	return LZoomNormal;
 }
 
 void LWindow::SetZoom(LWindowZoom i)
@@ -965,19 +965,19 @@ void LWindow::SetZoom(LWindowZoom i)
 	OSStatus e = 0;
 	switch (i)
 	{
-		case GZoomMin:
+		case LZoomMin:
 		{
 			e = CollapseWindow(Wnd, true);
 			if (e) printf("%s:%i - CollapseWindow failed with %i\n", _FL, (int)e);
-			// else printf("GZoomMin ok.\n");
+			// else printf("LZoomMin ok.\n");
 			break;
 		}
 		default:
-		case GZoomNormal:
+		case LZoomNormal:
 		{
 			e = CollapseWindow(Wnd, false);
 			if (e) printf("%s:%i - [Un]CollapseWindow failed with %i\n", _FL, (int)e);
-			// else printf("GZoomNormal ok.\n");
+			// else printf("LZoomNormal ok.\n");
 			break;
 		}
 	}
@@ -1057,7 +1057,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 		if (Store->GetValue(FieldName, v) && v.Str())
 		{
 			LRect Position(0, 0, -1, -1);
-			LWindowZoom State = GZoomNormal;
+			LWindowZoom State = LZoomNormal;
 			
 			GToken t(v.Str(), ";");
 			for (int i=0; i<t.Length(); i++)

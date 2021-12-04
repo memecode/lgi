@@ -190,5 +190,35 @@ public:
 
 		return 0;
 	}
+
+	#ifdef HAIKU
+	void AttachedToWindow()
+	{
+		View->OnCreate();
+	}
+
+	void FrameMoved(BPoint newPosition)
+	{
+		View->OnPosChange();
+	}
+
+	void FrameResized(float newWidth, float newHeight)
+	{
+		View->OnPosChange();
+	}
+
+	void MessageReceived(BMessage *message)
+	{
+		View->OnEvent(message);
+		BView::MessageReceived(message);
+	}
+
+	void Draw(BRect updateRect)
+	{
+		printf("Draw called View->d=%p\n", View->d);
+		LScreenDC dc(View);
+		View->OnPaint(&dc);
+	}
+	#endif
 };
 

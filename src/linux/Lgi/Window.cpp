@@ -1212,14 +1212,14 @@ LWindowZoom LWindow::GetZoom()
 	switch (d->State)
 	{
 		case GDK_WINDOW_STATE_ICONIFIED:
-			return GZoomMin;
+			return LZoomMin;
 		case GDK_WINDOW_STATE_MAXIMIZED:
-			return GZoomMax;
+			return LZoomMax;
 		default:
 			break;
 	}
 
-	return GZoomNormal;
+	return LZoomNormal;
 }
 
 void LWindow::SetZoom(LWindowZoom i)
@@ -1235,18 +1235,18 @@ void LWindow::SetZoom(LWindowZoom i)
 
 	switch (i)
 	{
-		case GZoomMin:
+		case LZoomMin:
 		{
 			gtk_window_iconify(Wnd);
 			break;
 		}
-		case GZoomNormal:
+		case LZoomNormal:
 		{
 			gtk_window_deiconify(Wnd);
 			gtk_window_unmaximize(Wnd);
 			break;
 		}
-		case GZoomMax:
+		case LZoomMax:
 		{
 			gtk_window_maximize(Wnd);
 			break;
@@ -1375,7 +1375,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 		if (Store->GetValue(FieldName, v) && v.Str())
 		{
 			LRect Position(0, 0, -1, -1);
-			LWindowZoom State = GZoomNormal;
+			LWindowZoom State = LZoomNormal;
 
 // printf("SerializeState load %s\n", v.Str());
 

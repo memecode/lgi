@@ -450,7 +450,7 @@ void LWindow::Raise()
 
 GWindowZoom LWindow::GetZoom()
 {
-	return GZoomNormal;
+	return LZoomNormal;
 }
 
 void LWindow::SetZoom(GWindowZoom i)
@@ -535,7 +535,7 @@ bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 		if (Store->GetValue(FieldName, v) && v.Str())
 		{
 			LRect Position(0, 0, -1, -1);
-			GWindowZoom State = GZoomNormal;
+			GWindowZoom State = LZoomNormal;
 
 // printf("SerializeState load %s\n", v.Str());
 

@@ -31,6 +31,7 @@ class LgiClass LView : virtual public LViewI, virtual public LBase
 	friend		class LDragDropTarget;
 	friend		class LPopup;
 	friend		class LWindowPrivate;
+	friend		class LViewPrivate;
 
 	friend		bool SysOnKey(LView *w, LMessage *m);
 
@@ -86,9 +87,9 @@ private:
 	int					_InLock;
 
 protected:
-	class LViewPrivate	*d;
+	class LViewPrivate	*d = NULL;
 
-	#if LGI_VIEW_HANDLE
+	#if LGI_VIEW_HANDLE && !defined(HAIKU)
 	OsView				_View; // OS specific handle to view object
 	#endif
 
@@ -223,7 +224,9 @@ public:
 	virtual ~LView();
 
 	/// Returns the OS handle of the view
-	#if LGI_VIEW_HANDLE
+	#if defined(HAIKU)
+	OsView Handle() const;
+	#elif LGI_VIEW_HANDLE
 	OsView Handle() const { return _View; }
 	#endif
 

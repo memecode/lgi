@@ -38,10 +38,6 @@ protected:
 	friend uint WINAPI ThreadEntryPoint(void *i);
     void Create(class LThread *Thread, OsThread &hThread, OsThreadId &ThreadId);
 
-	#elif defined BEOS
-
-	friend int32 ThreadEntryPoint(void *i);
-
 	#elif defined POSIX
 
 	friend void *ThreadEntryPoint(void *i);

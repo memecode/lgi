@@ -178,7 +178,7 @@ public:
 	char *GetStr();
 	bool SetStr(const char *Str);
 	
-	#ifdef BEOS
+	#ifdef HAIKU
 	operator rgb_color()
 	{
 		rgb_color c;
