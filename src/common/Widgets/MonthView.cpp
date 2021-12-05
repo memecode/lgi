@@ -60,14 +60,12 @@ void MonthView::SetCursor(int x, int y)
 	Set(&n);
 }
 
-void MonthView::GetCursor(int &x, int &y)
+LPoint MonthView::GetCursor()
 {
-	x = Cursor.DayOfWeek();
-	
-	LDateTime t = Cursor;
-	t.Day(1);
-	int BaseOffset = t.DayOfWeek();
-	y = (Cursor.Day() - 1 + BaseOffset) / 7;
+	auto diff = Cursor.Ts() - Start.Ts();
+	double days = (double)diff / (LDateTime::Second64Bit * LDateTime::DayLength);
+	int d = (int)(days + 0.5);
+	return LPoint(d % 7, d / 7);
 }
 
 void MonthView::SelectCell(int x, int y)

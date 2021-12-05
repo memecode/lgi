@@ -191,8 +191,8 @@ void LDatePopup::OnMouseClick(LMouse &m)
 void LDatePopup::Move(int Dx, int Dy)
 {
 	int x = 0, y = 0;
-	Mv.GetCursor(x, y);
-	Mv.SetCursor(x + Dx, y + Dy);
+	auto Cur = Mv.GetCursor();
+	Mv.SetCursor(Cur.x + Dx, Cur.y + Dy);
 	Invalidate();
 }
 

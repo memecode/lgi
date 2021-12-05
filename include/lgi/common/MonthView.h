@@ -33,7 +33,7 @@ public:
 	void Set(LDateTime *dt);
 	LDateTime &Get();
 	void SetCursor(int x, int y);
-	void GetCursor(int &x, int &y);
+	LPoint GetCursor();
 	void SelectCell(int x, int y);
 	
 	// Get
