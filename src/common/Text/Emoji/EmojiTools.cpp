@@ -17,7 +17,7 @@ bool HasEmoji(char *Txt)
 	if (!Txt)
 		return false;
 		
-	GUtf8Ptr p(Txt);
+	LUtf8Ptr p(Txt);
 	WChar u;
 	while ((u = p++))
 	{

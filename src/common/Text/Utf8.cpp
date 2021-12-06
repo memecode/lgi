@@ -3,19 +3,19 @@
 /////////////////////////////////////////////////////////////////////////////
 static bool Warn = true;
 
-GUtf8Ptr::GUtf8Ptr(const void *p)
+LUtf8Ptr::LUtf8Ptr(const void *p)
 {
 	Ptr = (uint8_t*)p;
 }
 
-GUtf8Ptr::operator int32()
+LUtf8Ptr::operator int32()
 {
 	uint8_t *p = Ptr;
 	ssize_t l = 6;
 	return LgiUtf8To32(p, l);
 }
 
-GUtf8Ptr &GUtf8Ptr::operator =(uint32_t ch)
+LUtf8Ptr &LUtf8Ptr::operator =(uint32_t ch)
 {
 	uint8_t *p = Ptr;
 	ssize_t l = 6;
@@ -24,13 +24,13 @@ GUtf8Ptr &GUtf8Ptr::operator =(uint32_t ch)
 	return *this;
 }
 
-void GUtf8Ptr::Add(wchar_t c)
+void LUtf8Ptr::Add(wchar_t c)
 {
 	ssize_t l = 6;
 	LgiUtf32To8(c, Ptr, l);
 }
 
-GUtf8Ptr &GUtf8Ptr::operator++()
+LUtf8Ptr &LUtf8Ptr::operator++()
 {
 	if (IsUtf8_Lead(*Ptr))
 	{
@@ -58,7 +58,7 @@ GUtf8Ptr &GUtf8Ptr::operator++()
 	return *this;
 }
 
-GUtf8Ptr &GUtf8Ptr::operator--()
+LUtf8Ptr &LUtf8Ptr::operator--()
 {
 	Ptr--;
 	if (IsUtf8_Trail(*Ptr))
@@ -80,7 +80,7 @@ GUtf8Ptr &GUtf8Ptr::operator--()
 	return *this;
 }
 
-GUtf8Ptr &GUtf8Ptr::operator++(const int i)
+LUtf8Ptr &LUtf8Ptr::operator++(const int i)
 {
 	if (IsUtf8_Lead(*Ptr))
 	{
@@ -108,7 +108,7 @@ GUtf8Ptr &GUtf8Ptr::operator++(const int i)
 	return *this;
 }
 
-GUtf8Ptr &GUtf8Ptr::operator--(const int i)
+LUtf8Ptr &LUtf8Ptr::operator--(const int i)
 {
 	Ptr--;
 	if (IsUtf8_Trail(*Ptr))
@@ -130,7 +130,7 @@ GUtf8Ptr &GUtf8Ptr::operator--(const int i)
 	return *this;
 }
 
-GUtf8Ptr &GUtf8Ptr::operator += (ssize_t n)
+LUtf8Ptr &LUtf8Ptr::operator += (ssize_t n)
 {
 	while (*Ptr && n-- > 0)
 	{
@@ -140,7 +140,7 @@ GUtf8Ptr &GUtf8Ptr::operator += (ssize_t n)
 	return *this;
 }
 
-GUtf8Ptr &GUtf8Ptr::operator-=(ssize_t n)
+LUtf8Ptr &LUtf8Ptr::operator-=(ssize_t n)
 {
 	while (*Ptr && n-- > 0)
 	{
@@ -150,12 +150,12 @@ GUtf8Ptr &GUtf8Ptr::operator-=(ssize_t n)
 	return *this;
 }
 
-int GUtf8Ptr::GetBytes()
+int LUtf8Ptr::GetBytes()
 {
 	return (int)strlen((char*)Ptr);
 }
 
-int GUtf8Ptr::GetChars()
+int LUtf8Ptr::GetChars()
 {
 	int Count = 0;
 	uint8_t *p = Ptr;

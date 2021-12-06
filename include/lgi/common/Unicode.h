@@ -290,43 +290,43 @@ inline void LgiPrevUtf8(T *&p)
 }
 
 /// Pointer to utf-8 string
-class LgiClass GUtf8Ptr
+class LgiClass LUtf8Ptr
 {
 protected:
 	uint8_t *Ptr;
 
 public:
-	GUtf8Ptr(const void *p = 0);
+	LUtf8Ptr(const void *p = 0);
 
 	/// Assign a new pointer to the string
-	GUtf8Ptr &operator =(char *s) { Ptr = (uint8_t*)s; return *this; }
+	LUtf8Ptr &operator =(char *s) { Ptr = (uint8_t*)s; return *this; }
 	/// Assign a new pointer to the string
-	GUtf8Ptr &operator =(uint8_t *s) { Ptr = s; return *this; }
+	LUtf8Ptr &operator =(uint8_t *s) { Ptr = s; return *this; }
 
 	/// \returns the current character in the string or -1 on error.
 	operator int32();
 	/// Change the character at the point, the pointer will advance to the end
 	/// of the character written.
-	GUtf8Ptr &operator =(uint32_t ch);
+	LUtf8Ptr &operator =(uint32_t ch);
 
 	/// Seeks forward
-	GUtf8Ptr &operator ++();
-	GUtf8Ptr &operator ++(const int i);
-	GUtf8Ptr &operator +=(const ssize_t n);
+	LUtf8Ptr &operator ++();
+	LUtf8Ptr &operator ++(const int i);
+	LUtf8Ptr &operator +=(const ssize_t n);
 
 	/// Seeks 1 character backward
-	GUtf8Ptr &operator --();
-	GUtf8Ptr &operator --(const int i);
-	GUtf8Ptr &operator -=(const ssize_t n);
+	LUtf8Ptr &operator --();
+	LUtf8Ptr &operator --(const int i);
+	LUtf8Ptr &operator -=(const ssize_t n);
 
 	// Comparison
-	bool operator <(const GUtf8Ptr &p) { return Ptr < p.Ptr; }
-	bool operator <=(const GUtf8Ptr &p) { return Ptr <= p.Ptr; }
-	bool operator >(const GUtf8Ptr &p) { return Ptr > p.Ptr; }
-	bool operator >=(const GUtf8Ptr &p) { return Ptr >= p.Ptr; }
-	bool operator ==(const GUtf8Ptr &p) { return Ptr == p.Ptr; }
-	bool operator !=(const GUtf8Ptr &p) { return Ptr != p.Ptr; }
-	ptrdiff_t operator -(const GUtf8Ptr &p) { return Ptr - p.Ptr; }
+	bool operator <(const LUtf8Ptr &p) { return Ptr < p.Ptr; }
+	bool operator <=(const LUtf8Ptr &p) { return Ptr <= p.Ptr; }
+	bool operator >(const LUtf8Ptr &p) { return Ptr > p.Ptr; }
+	bool operator >=(const LUtf8Ptr &p) { return Ptr >= p.Ptr; }
+	bool operator ==(const LUtf8Ptr &p) { return Ptr == p.Ptr; }
+	bool operator !=(const LUtf8Ptr &p) { return Ptr != p.Ptr; }
+	ptrdiff_t operator -(const LUtf8Ptr &p) { return Ptr - p.Ptr; }
 
 	/// Gets the bytes between the cur pointer and the end of the buffer or string.
 	int GetBytes();
@@ -340,12 +340,12 @@ public:
 };
 
 /// Unicode string class. Allows traversing a utf-8 strings.
-class LgiClass GUtf8Str : public GUtf8Ptr
+class LgiClass GUtf8Str : public LUtf8Ptr
 {
 	// Complete buffer
 	uint8_t *Start;
 	uint8_t *End;
-	GUtf8Ptr Cur;
+	LUtf8Ptr Cur;
 	bool Own;
 
 	void Empty();

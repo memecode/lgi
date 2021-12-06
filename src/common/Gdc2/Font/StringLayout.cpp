@@ -96,7 +96,7 @@ bool LStringLayout::Add(const char *Str, LCss *Style)
 				r = new LLayoutRun(Style);
 				r->TextDecoration(LCss::TextDecorUnderline);
 				s = e + 1; // Skip the '&' itself
-				GUtf8Ptr p(s); // Find the end of the next unicode char
+				LUtf8Ptr p(s); // Find the end of the next unicode char
 				p++;
 				if ((const char*)p.GetPtr() == s)
 					break; // No more text: exit
@@ -307,7 +307,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 	for (auto Run: Text)
 	{
 		char *Start = Run->Text;
-		GUtf8Ptr s(Start);
+		LUtf8Ptr s(Start);
 
 		#if DEBUG_LAYOUT
 		if (Debug) LgiTrace("    Run='%s' %p\n", s.GetPtr(), Run);
@@ -319,7 +319,7 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 
 		while (s)
 		{
-			GUtf8Ptr e(s);
+			LUtf8Ptr e(s);
 			ssize_t StartOffset = (char*)s.GetPtr() - Start;
 			#if DEBUG_LAYOUT
 			if (Debug) LgiTrace("    Breaks: ");

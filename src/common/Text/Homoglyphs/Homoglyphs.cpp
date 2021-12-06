@@ -10,7 +10,7 @@ bool HasHomoglyphs(const char *utf8, ssize_t len)
 		len = Strlen(utf8);
 	uint8_t *end = (uint8_t*)utf8 + len;
 
-	for (GUtf8Ptr p(utf8); p.GetPtr() < end; p++)
+	for (LUtf8Ptr p(utf8); p.GetPtr() < end; p++)
 	{
 		int32 ch = p;
 		// LgiTrace("ch=%i %x\n", ch, ch);
@@ -35,7 +35,7 @@ bool RemoveZeroWidthCharacters(char *utf8, ssize_t len)
 	if (len < 0)
 		len = Strlen(utf8);
 	uint8_t *end = (uint8_t*)utf8 + len;
-	GUtf8Ptr in(utf8), out(utf8);
+	LUtf8Ptr in(utf8), out(utf8);
 
 	bool changed = false;
 	while (in.GetPtr() < end)

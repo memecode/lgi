@@ -410,9 +410,9 @@ bool LRichTextPriv::TextBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia>
 				s.Print(">");
 		
 			// Encode entities...
-			GUtf8Ptr last(str);
-			GUtf8Ptr cur(str);
-			GUtf8Ptr end(str + utf.Length());
+			LUtf8Ptr last(str);
+			LUtf8Ptr cur(str);
+			LUtf8Ptr end(str + utf.Length());
 			while (cur < end)
 			{
 				int32 ch = cur;

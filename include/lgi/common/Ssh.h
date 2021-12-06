@@ -11,10 +11,15 @@
 
 #define DEFAULT_PROMPT		"# "
 
-class LSsh : public LCancel
+class LSsh
 {
 	friend struct IoProgress;
 	friend struct SshConsole;
+
+	LCancel LocalCancel;
+
+protected:
+	LCancel *Cancel = NULL;
 
 protected:
 	LTextLog *Log;
@@ -142,8 +147,9 @@ protected:
 	};
 
 public:
-	LSsh(LTextLog *log)
+	LSsh(LTextLog *log, LCancel *cancel = NULL)
 	{
+		Cancel = cancel ? cancel : &LocalCancel;
 		Log = log;
 		Ssh = NULL;
 		Prog = NULL;
@@ -243,7 +249,7 @@ public:
 					Log->Print("%s:%i - Downloading %s to %s.\n", _FL, From, To);
 					Meter.SetLength(Len);
 
-					while (!IsCancelled() && i < Len)
+					while (!Cancel->IsCancelled() && i < Len)
 					{
 						auto rd = ssh_scp_read(Scp, Buf.AddressOf(), Buf.Length());
 						if (rd <= 0)
@@ -303,7 +309,7 @@ public:
 					Meter.SetLength(length);
 
 					Log->Print("%s:%i - Writing %s.\n", _FL, LFormatSize(length).Get());
-					for (i=0; !IsCancelled() && i<length; )
+					for (i=0; !Cancel->IsCancelled() && i<length; )
 					{
 						auto rd = in.Read(Buf.AddressOf(), Buf.Length());
 						if (rd <= 0)
@@ -346,7 +352,7 @@ public:
 		int CmdIdx = 0;
 		size_t logged = 0;
 
-		while (Console && !IsCancelled())
+		while (Console && !Cancel->IsCancelled())
 		{
 			char Bytes[512];
 			auto Rd = Console->Read(Bytes, sizeof(Bytes)-1);

@@ -811,7 +811,7 @@ case IArrayGet:
 			if (!c || i < 0)
 				break;
 
-			GUtf8Ptr p(c);
+			LUtf8Ptr p(c);
 			uint32_t ch;
 			do
 			{

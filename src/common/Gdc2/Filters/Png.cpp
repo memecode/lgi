@@ -812,6 +812,30 @@ LFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 								}
 								break;
 							}
+							case 2:
+							{
+								uchar *i = Scan0[y];
+								uchar *o = Scan;
+								for (int x=0; x<pDC->X(); x++)
+								{
+									switch (x & 3)
+									{
+										case 0:
+											*o++ = (*i >> 6) & 0x3;
+											break;
+										case 1:
+											*o++ = (*i >> 4) & 0x3;
+											break;
+										case 2:
+											*o++ = (*i >> 2) & 0x3;
+											break;
+										case 3:
+											*o++ = (*i++ >> 0) & 0x3;
+											break;
+									}
+								}
+								break;
+							}
 							case 4:
 							{
 								uchar *i = Scan0[y];

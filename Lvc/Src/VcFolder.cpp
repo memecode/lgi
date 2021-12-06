@@ -2463,7 +2463,7 @@ void VcFolder::ListCommit(VcCommit *c)
 LString ConvertUPlus(LString s)
 {
 	LArray<uint32_t> c;
-	GUtf8Ptr p(s);
+	LUtf8Ptr p(s);
 	int32 ch;
 	while ((ch = p))
 	{

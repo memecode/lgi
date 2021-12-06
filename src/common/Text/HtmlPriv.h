@@ -243,7 +243,7 @@ public:
 			bool Valid = false;
 			const uint8_t Ws[] = {' ', '\t', 0xa0, 0};
 			
-			GUtf8Ptr p(&Buf[0]);
+			LUtf8Ptr p(&Buf[0]);
 			uint8_t *End = (uint8_t*) &Buf[CharsOnLine];
 			while (p.GetPtr() < End)
 			{

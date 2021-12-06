@@ -128,7 +128,7 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, bool Debug)
 	int64 Count = 0, Total = 0;
 	ProgressListItem *Prog = NULL;
 
-	while (!LSsh::IsCancelled())
+	while (!LSsh::Cancel->IsCancelled())
 	{
 		auto rd = con->Read(buf, sizeof(buf));
 		if (rd < 0)

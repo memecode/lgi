@@ -325,7 +325,7 @@ void LCombo::DoMenu()
 				LSubMenu *m = 0;
 				for (; c; c = *(++It), i++)
 				{
-					GUtf8Ptr u(c);
+					LUtf8Ptr u(c);
 					if (d->Sub == GV_INT32)
 					{
 						int ci = atoi(c);

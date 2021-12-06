@@ -90,7 +90,7 @@ struct GDisplayStringPriv
 		auto Tbl = Fnt->GetGlyphMap();
 
 		int Chars = 0;
-		GUtf8Ptr p(Ds->Str);
+		LUtf8Ptr p(Ds->Str);
 		auto *Start = p.GetPtr();
 		if (Tbl)
 		{
@@ -607,7 +607,7 @@ void LDisplayString::Layout(bool Debug)
 		if (!d->Blocks.Length() || !Font->Handle())
 			return;
 
-		GUtf8Ptr Utf(Str);
+		LUtf8Ptr Utf(Str);
 		int32 Wide;
 		while (*Utf.GetPtr())
 		{
