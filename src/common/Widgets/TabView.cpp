@@ -1199,6 +1199,8 @@ LTabPage::LTabPage(const char *name) : ResObject(Res_Tab)
 	#if WINNATIVE
 	SetStyle(GetStyle() | WS_CLIPCHILDREN);
 	CreateClassW32(GetClass(), 0, CS_HREDRAW | CS_VREDRAW);
+	#elif defined(HAIKU)
+	Visible(false);
 	#endif
 
 	LResources::StyleElement(this);

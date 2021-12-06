@@ -26,11 +26,6 @@
 #define DEBUG_INVALIDATE(...)
 #endif
 
-#define ADJ_LEFT					1
-#define ADJ_RIGHT					2
-#define ADJ_UP						3
-#define ADJ_DOWN					4
-
 struct CursorInfo
 {
 public:
@@ -118,23 +113,80 @@ LKey::LKey(int Vkey, uint32_t flags)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+class LBView : public BView
+{
+	LViewPrivate *d = NULL;
+
+public:
+	LBView(LViewPrivate *priv) :
+		d(priv),
+		BView
+		(
+			"",
+			B_FULL_UPDATE_ON_RESIZE | 
+			B_WILL_DRAW |
+			B_NAVIGABLE |
+			B_FRAME_EVENTS
+		)
+	{
+		SetName(d->View->GetClass());
+	}
+	
+	~LBView()
+	{
+		d->Hnd = NULL;
+	}		
+
+	void AttachedToWindow()
+	{
+		d->View->OnCreate();
+	}
+
+	void FrameMoved(BPoint newPosition)
+	{
+		d->View->Pos = Frame();
+		d->View->OnPosChange();
+	}
+
+	void FrameResized(float newWidth, float newHeight)
+	{
+		d->View->Pos = Frame();
+		d->View->OnPosChange();
+	}
+
+	void MessageReceived(BMessage *message)
+	{
+		d->View->OnEvent(message);
+		BView::MessageReceived(message);
+	}
+
+	void Draw(BRect updateRect)
+	{
+		LScreenDC dc(d->View);
+		d->View->OnPaint(&dc);
+	}
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 LViewPrivate::LViewPrivate(LView *view) :
 	View(view),
-	BView
-	(
-		"name",
-		B_FULL_UPDATE_ON_RESIZE | 
-		B_WILL_DRAW |
-		B_NAVIGABLE |
-		B_FRAME_EVENTS
-	)
+	Hnd(new LBView(this))
 {
 }
 
 LViewPrivate::~LViewPrivate()
 {
+	View->d = NULL;
+
 	if (Font && FontOwnType == GV_FontOwned)
 		DeleteObj(Font);
+
+	if (Hnd)
+	{
+		if (Hnd->LockLooper())
+			delete Hnd;
+		Hnd = NULL;
+	}
 }
 
 void LView::_Focus(bool f)
@@ -152,7 +204,6 @@ void LView::_Focus(bool f)
 
 void LView::_Delete()
 {
-	ThreadCheck();
 	SetPulse();
 
 	// Remove static references to myself
@@ -298,7 +349,7 @@ LRect &LView::GetClient(bool ClientSpace)
 
 LViewI *LView::FindControl(OsView hCtrl)
 {
-	if (d == hCtrl)
+	if (d->Hnd == hCtrl)
 	{
 		return this;
 	}
@@ -334,11 +385,11 @@ bool LView::SetPos(LRect &p, bool Repaint)
 	{
 		Pos = p;
 
-		LLocker lck(d, _FL);
+		LLocker lck(d->Hnd, _FL);
 		if (lck.Lock())
 		{
-			d->ResizeTo(Pos.X(), Pos.Y());
-			d->MoveTo(Pos.x1, Pos.y1);
+			d->Hnd->ResizeTo(Pos.X(), Pos.Y());
+			d->Hnd->MoveTo(Pos.x1, Pos.y1);
 			lck.Unlock();
 		}
 
@@ -391,10 +442,10 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 	{
 		Repainting = true;
 
-		LLocker lck(d, _FL);
+		LLocker lck(d->Hnd, _FL);
 		if (lck.Lock())
 		{
-			d->Invalidate();
+			d->Hnd->Invalidate();
 		}
 
 		Repainting = false;
@@ -453,7 +504,7 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 
 OsView LView::Handle() const
 {
-	return d;
+	return d->Hnd;
 }
 
 bool LView::PointToScreen(LPoint &p)
@@ -498,7 +549,7 @@ bool LView::PointToView(LPoint &p)
 
 bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 {
-	LLocker Locker(d, _FL);
+	LLocker Locker(d->Hnd, _FL);
 	if (!Locker.Lock())
 		return false;
 
@@ -506,9 +557,9 @@ bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 	BPoint Cursor;
 	uint32 Buttons;
 	
-	d->GetMouse(&Cursor, &Buttons);
+	d->Hnd->GetMouse(&Cursor, &Buttons);
 	if (ScreenCoords)
-		d->ConvertToScreen(&Cursor);
+		d->Hnd->ConvertToScreen(&Cursor);
 	
 	// position
 	m.x = Cursor.x;
@@ -534,11 +585,11 @@ bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 bool LView::IsAttached()
 {
 	bool attached = false;
-	LLocker lck(d, _FL);
+	LLocker lck(d->Hnd, _FL);
 	if (lck.Lock())
 	{
-		auto pview = d->BView::Parent();
-		auto pwnd = d->BView::Window();
+		auto pview = d->Hnd->Parent();
+		auto pwnd = d->Hnd->Window();
 		attached = pview != NULL || pwnd != NULL;
 	}
 	
@@ -586,21 +637,25 @@ bool LView::Attach(LViewI *parent)
 						_FL, GetClass(), parent->GetClass(), ::IsAttached(d));
 					#endif
 
-					if (::IsAttached(d))
-						d->RemoveSelf();
-					bwnd->AddChild(d);
+					if (::IsAttached(d->Hnd))
+						d->Hnd->RemoveSelf();
+					bwnd->AddChild(d->Hnd);
 					
-					d->ResizeTo(Pos.X(), Pos.Y());
-					d->MoveTo(Pos.x1, Pos.y1);
-					d->Show();
+					d->Hnd->ResizeTo(Pos.X(), Pos.Y());
+					d->Hnd->MoveTo(Pos.x1, Pos.y1);
+					if (Visible())
+						d->Hnd->Show();
 
 					bwnd->Unlock();
 
 					Status = true;
 
 					#if 0
-					LgiTrace("%s:%i - Attached %s to window %s, success (parent=%p)\n",
-						_FL, GetClass(), parent->GetClass(), ::IsAttached(d));
+					LgiTrace("%s:%i - Attached %s/%p to window %s/%p, success (parent=%p)\n",
+						_FL,
+						GetClass(), d->Hnd,
+						parent->GetClass(), bwnd,
+						::IsAttached(d->Hnd));
 					#endif
 				}
 				else
@@ -624,19 +679,22 @@ bool LView::Attach(LViewI *parent)
 						_FL, GetClass(), parent->GetClass());
 					#endif
 
-					if (::IsAttached(d))
-						d->RemoveSelf();
-					bview->AddChild(d);
+					if (::IsAttached(d->Hnd))
+						d->Hnd->RemoveSelf();
+					bview->AddChild(d->Hnd);
 
-					d->ResizeTo(Pos.X(), Pos.Y());
-					d->MoveTo(Pos.x1, Pos.y1);
-					d->Show();
+					d->Hnd->ResizeTo(Pos.X(), Pos.Y());
+					d->Hnd->MoveTo(Pos.x1, Pos.y1);
+					if (Visible())
+						d->Hnd->Show();
 
 					Status = true;
 
 					#if 0
-					LgiTrace("%s:%i - Attached %s to view %s, success\n",
-						_FL, GetClass(), parent->GetClass());
+					LgiTrace("%s:%i - Attached %s/%p to view %s/%p, success\n",
+						_FL,
+						GetClass(), d->Hnd,
+						parent->GetClass(), bview);
 					#endif
 				}
 				else

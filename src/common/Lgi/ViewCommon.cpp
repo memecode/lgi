@@ -230,11 +230,7 @@ LView::~LView()
 	}
 
 	_Delete();
-	
-	#ifdef HAIKU
-	if (d->LockLooper())
-	#endif
-		DeleteObj(d);
+	DeleteObj(d);
 }
 
 int LView::AddDispatch()
@@ -1202,7 +1198,17 @@ void LView::Visible(bool v)
 	if (v) SetFlag(GViewFlags, GWF_VISIBLE);
 	else ClearFlag(GViewFlags, GWF_VISIBLE);
 
-	#if LGI_VIEW_HANDLE && !defined(HAIKU)
+ 	#if defined(HAIKU)
+	LLocker lck(d->Hnd, _FL);
+	if (!IsAttached() || lck.Lock())
+	{
+		if (v)
+			d->Hnd->Show();
+		else
+			d->Hnd->Hide();
+	}
+	else LgiTrace("%s:%i - Can't lock.\n", _FL);
+ 	#elif LGI_VIEW_HANDLE	
 	if (_View)
 	{
 		#if WINNATIVE
@@ -1990,18 +1996,18 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b)
 	#ifdef LGI_SDL
 		return LPostEvent(this, Cmd, a, b);
 	#elif defined(HAIKU)
+		if (!d || !d->Hnd || !d->Hnd->LockLooper())
+			return false;
+
 		BMessage *m = new BMessage(Cmd);
 		if (!m)
 			return false;
 		m->AddUInt64(LMessage::PropNames[0], a);
 		m->AddUInt64(LMessage::PropNames[1], b);
 
-		auto w = d->Window();
-		if (!d->LockLooper())
-			return false;
-
+		auto w = d && d->Hnd ? d->Hnd->Window() : NULL;
 		status_t r = w->PostMessage(m);
-		d->UnlockLooper();
+		d->Hnd->UnlockLooper();
 
 		return r == B_OK;
 	#elif WINNATIVE
@@ -2275,67 +2281,91 @@ LPoint &LView::GetWindowBorderSize()
 
 #ifdef _DEBUG
 
-#ifdef LGI_CARBON
-void DumpHiview(HIViewRef v, int Depth = 0)
-{
-	char Sp[256];
-	memset(Sp, ' ', Depth << 2);
-	Sp[Depth<<2] = 0;
+#if defined(LGI_CARBON)
 
-	printf("%sHIView=%p", Sp, v);
-	if (v)
+	void DumpHiview(HIViewRef v, int Depth = 0)
 	{
-		Boolean vis = HIViewIsVisible(v);
-		Boolean en = HIViewIsEnabled(v, NULL);
-		HIRect pos;
-		HIViewGetFrame(v, &pos);
+		char Sp[256];
+		memset(Sp, ' ', Depth << 2);
+		Sp[Depth<<2] = 0;
 
-		char cls[128];
-		ZeroObj(cls);
-		GetControlProperty(v, 'meme', 'clas', sizeof(cls), NULL, cls);
-
-		printf(" vis=%i en=%i pos=%g,%g-%g,%g cls=%s",
-			vis, en,
-			pos.origin.x, pos.origin.y, pos.size.width, pos.size.height,
-			cls);
-	}
-	printf("\n");
-
-	for (HIViewRef c = HIViewGetFirstSubview(v); c; c = HIViewGetNextView(c))
-	{
-		DumpHiview(c, Depth + 1);
-	}
-}
-#endif
-
-#if defined(__GTK_H__)
-void DumpGtk(Gtk::GtkWidget *w, Gtk::gpointer Depth = NULL)
-{
-	using namespace Gtk;
-	if (!w)
-		return;
-
-	char Sp[65] = {0};
-	if (Depth)
-		memset(Sp, ' ', *((int*)Depth)*2);
-
-	auto *Obj = G_OBJECT(w);
-	LViewI *View = (LViewI*) g_object_get_data(Obj, "LViewI");
-
-	GtkAllocation a;
-	gtk_widget_get_allocation(w, &a);
-	LgiTrace("%s%p(%s) = %i,%i-%i,%i\n", Sp, w, View?View->GetClass():G_OBJECT_TYPE_NAME(Obj), a.x, a.y, a.width, a.height);
-
-	if (GTK_IS_CONTAINER(w))
-	{
-		auto *c = GTK_CONTAINER(w);
-		if (c)
+		printf("%sHIView=%p", Sp, v);
+		if (v)
 		{
-			int Next = Depth ? *((int*)Depth)+1 : 1;
-			gtk_container_foreach(c, DumpGtk, &Next);
+			Boolean vis = HIViewIsVisible(v);
+			Boolean en = HIViewIsEnabled(v, NULL);
+			HIRect pos;
+			HIViewGetFrame(v, &pos);
+
+			char cls[128];
+			ZeroObj(cls);
+			GetControlProperty(v, 'meme', 'clas', sizeof(cls), NULL, cls);
+
+			printf(" vis=%i en=%i pos=%g,%g-%g,%g cls=%s",
+				vis, en,
+				pos.origin.x, pos.origin.y, pos.size.width, pos.size.height,
+				cls);
+		}
+		printf("\n");
+
+		for (HIViewRef c = HIViewGetFirstSubview(v); c; c = HIViewGetNextView(c))
+		{
+			DumpHiview(c, Depth + 1);
 		}
 	}
-}
+
+#elif defined(__GTK_H__)
+
+	void DumpGtk(Gtk::GtkWidget *w, Gtk::gpointer Depth = NULL)
+	{
+		using namespace Gtk;
+		if (!w)
+			return;
+
+		char Sp[65] = {0};
+		if (Depth)
+			memset(Sp, ' ', *((int*)Depth)*2);
+
+		auto *Obj = G_OBJECT(w);
+		LViewI *View = (LViewI*) g_object_get_data(Obj, "LViewI");
+
+		GtkAllocation a;
+		gtk_widget_get_allocation(w, &a);
+		LgiTrace("%s%p(%s) = %i,%i-%i,%i\n", Sp, w, View?View->GetClass():G_OBJECT_TYPE_NAME(Obj), a.x, a.y, a.width, a.height);
+
+		if (GTK_IS_CONTAINER(w))
+		{
+			auto *c = GTK_CONTAINER(w);
+			if (c)
+			{
+				int Next = Depth ? *((int*)Depth)+1 : 1;
+				gtk_container_foreach(c, DumpGtk, &Next);
+			}
+		}
+	}
+
+#elif defined(HAIKU)
+
+	template<typename T>
+	void _Dump(int Depth, T *v)
+	{
+		LString Sp, Name;
+		Sp.Length(Depth<<1);
+		memset(Sp.Get(), ' ', Depth<<1);
+		
+		LRect Frame = v->Frame();
+		LViewPrivate *Priv = dynamic_cast<LViewPrivate*>(v);
+		if (Priv)
+			Name = Priv->View->GetClass();
+		
+		printf("%s### %p::%s frame=%s vis=%i\n",
+			Sp.Get(), v, Name.Get(), Frame.GetStr(), !v->IsHidden());
+		for (int32 i=0; i<v->CountChildren(); i++)
+		{
+			_Dump(Depth + 1, v->ChildAt(i));
+		}
+	}
+
 #endif
 
 void LView::_Dump(int Depth)
@@ -2358,11 +2388,17 @@ void LView::_Dump(int Depth)
 	
 	#elif defined(LGI_CARBON)
 	
-	DumpHiview(_View);
+		DumpHiview(_View);
 
 	#elif defined(__GTK_H__)
 
-	// DumpGtk(_View);
+		DumpGtk(_View);
+	
+	#elif defined(HAIKU)
+	
+		LLocker lck(WindowHandle(), _FL);
+		if (lck.Lock())
+			::_Dump(0, WindowHandle());
 	
 	#endif
 }

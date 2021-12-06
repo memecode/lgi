@@ -1581,184 +1581,148 @@ public:
 	}
 };
 
-#if 0// def LGI_COCOA
-#define Chk printf("%s:%i - Cnt=%i\n", LGetLeaf(__FILE__), __LINE__, (int)WindowHandle().p.retainCount)
-#else
-#define Chk
-#endif
-
 AppWnd::AppWnd()
 {
 	#ifdef __GTK_H__
 	LgiGetResObj(true, AppName);
 	#endif
 	
-Chk;
-
 	LRect r(0, 0, 1300, 900);
-	#ifdef BEOS
-	r.Offset(GdcD->X() - r.X() - 10, GdcD->Y() - r.Y() - 10);
 	SetPos(r);
-	#else
-	SetPos(r);
-Chk;
 	MoveToCenter();
-	#endif
-
-Chk;
 
 	d = new AppWndPrivate(this);
 
 	Name(AppName);
 	SetQuitOnClose(true);
 
-Chk;
-
 	#if WINNATIVE
-	SetIcon((char*)MAKEINTRESOURCE(IDI_APP));
+		SetIcon((char*)MAKEINTRESOURCE(IDI_APP));
 	#else
-	SetIcon("icon64.png");
+		SetIcon("icon64.png");
 	#endif
-Chk;
 
 	if (!Attach(0))
 	{
 		LgiTrace("%s:%i - Attach failed.\n", _FL);
+		return;
 	}
-	else
+
+	if (Menu = new LMenu)
 	{
-Chk;
-		Menu = new LMenu;
-		if (Menu)
+		Menu->Attach(this);
+		bool Loaded = Menu->Load(this, "IDM_MENU");
+		LAssert(Loaded);
+		if (Loaded)
 		{
-			Menu->Attach(this);
-			bool Loaded = Menu->Load(this, "IDM_MENU");
-			LAssert(Loaded);
-			if (Loaded)
+			Menu->SetPrefAndAboutItems(IDM_OPTIONS, IDM_ABOUT);
+			d->RecentFilesMenu = Menu->FindSubMenu(IDM_RECENT_FILES);
+			d->RecentProjectsMenu = Menu->FindSubMenu(IDM_RECENT_PROJECTS);
+			d->WindowsMenu = Menu->FindSubMenu(IDM_WINDOW_LST);
+			d->CreateMakefileMenu = Menu->FindSubMenu(IDM_CREATE_MAKEFILE);
+			if (d->CreateMakefileMenu)
 			{
-				Menu->SetPrefAndAboutItems(IDM_OPTIONS, IDM_ABOUT);
-				d->RecentFilesMenu = Menu->FindSubMenu(IDM_RECENT_FILES);
-				d->RecentProjectsMenu = Menu->FindSubMenu(IDM_RECENT_PROJECTS);
-				d->WindowsMenu = Menu->FindSubMenu(IDM_WINDOW_LST);
-				d->CreateMakefileMenu = Menu->FindSubMenu(IDM_CREATE_MAKEFILE);
-				if (d->CreateMakefileMenu)
+				d->CreateMakefileMenu->Empty();
+				for (int i=0; PlatformNames[i]; i++)
 				{
-					d->CreateMakefileMenu->Empty();
-					for (int i=0; PlatformNames[i]; i++)
-					{
-						d->CreateMakefileMenu->AppendItem(PlatformNames[i], IDM_MAKEFILE_BASE + i);
-					}
+					d->CreateMakefileMenu->AppendItem(PlatformNames[i], IDM_MAKEFILE_BASE + i);
 				}
-				else LgiTrace("%s:%i - FindSubMenu failed.\n", _FL);
-
-				LMenuItem *Debug = GetMenu()->FindItem(IDM_DEBUG_MODE);
-				if (Debug)
-				{
-					Debug->Checked(true);
-				}
-				else LgiTrace("%s:%i - FindSubMenu failed.\n", _FL);
-				
-				d->UpdateMenus();
 			}
-		}
+			else LgiTrace("%s:%i - FindSubMenu failed.\n", _FL);
 
-Chk;
-		LToolBar *Tools = NULL;
-		if (GdcD->Y() > 1200)
-			Tools = LgiLoadToolbar(this, "cmds-32px.png", 32, 32);
-		else
-			Tools = LgiLoadToolbar(this, "cmds-16px.png", 16, 16);
-		
-		if (Tools)
-		{
-			Tools->AppendButton("New", IDM_NEW, TBT_PUSH, true, CMD_NEW);
-			Tools->AppendButton("Open", IDM_OPEN, TBT_PUSH, true, CMD_OPEN);
-			Tools->AppendButton("Save", IDM_SAVE_ALL, TBT_PUSH, true, CMD_SAVE_ALL);
-			Tools->AppendSeparator();
-			Tools->AppendButton("Cut", IDM_CUT, TBT_PUSH, true, CMD_CUT);
-			Tools->AppendButton("Copy", IDM_COPY, TBT_PUSH, true, CMD_COPY);
-			Tools->AppendButton("Paste", IDM_PASTE, TBT_PUSH, true, CMD_PASTE);
-			Tools->AppendSeparator();
-
-			Tools->AppendButton("Compile", IDM_COMPILE, TBT_PUSH, true, CMD_COMPILE);
-			Tools->AppendButton("Build", IDM_BUILD, TBT_PUSH, true, CMD_BUILD);
-			Tools->AppendButton("Stop", IDM_STOP_BUILD, TBT_PUSH, true, CMD_STOP_BUILD);
-			// Tools->AppendButton("Execute", IDM_EXECUTE, TBT_PUSH, true, CMD_EXECUTE);
+			LMenuItem *Debug = GetMenu()->FindItem(IDM_DEBUG_MODE);
+			if (Debug)
+			{
+				Debug->Checked(true);
+			}
+			else LgiTrace("%s:%i - FindSubMenu failed.\n", _FL);
 			
-			Tools->AppendSeparator();
-			Tools->AppendButton("Debug", IDM_START_DEBUG, TBT_PUSH, true, CMD_DEBUG);
-			Tools->AppendButton("Pause", IDM_PAUSE_DEBUG, TBT_PUSH, true, CMD_PAUSE);
-			Tools->AppendButton("Restart", IDM_RESTART_DEBUGGING, TBT_PUSH, true, CMD_RESTART);
-			Tools->AppendButton("Kill", IDM_STOP_DEBUG, TBT_PUSH, true, CMD_KILL);
-			Tools->AppendButton("Step Into", IDM_STEP_INTO, TBT_PUSH, true, CMD_STEP_INTO);
-			Tools->AppendButton("Step Over", IDM_STEP_OVER, TBT_PUSH, true, CMD_STEP_OVER);
-			Tools->AppendButton("Step Out", IDM_STEP_OUT, TBT_PUSH, true, CMD_STEP_OUT);
-			Tools->AppendButton("Run To", IDM_RUN_TO, TBT_PUSH, true, CMD_RUN_TO);
-
-			Tools->AppendSeparator();
-			Tools->AppendButton("Find In Files", IDM_FIND_IN_FILES, TBT_PUSH, true, CMD_FIND_IN_FILES);
-			
-			Tools->GetCss(true)->Padding("4px");
-			Tools->Attach(this);
+			d->UpdateMenus();
 		}
-		else LgiTrace("%s:%i - No tools obj?", _FL);
-
-Chk;
-		LVariant v = 270, OutPx = 250;
-		d->Options.GetValue(OPT_SPLIT_PX, v);
-		d->Options.GetValue(OPT_OUTPUT_PX, OutPx);
-
-		AddView(d->VBox = new LBox);
-		d->VBox->SetVertical(true);
-
-		d->HBox = new LBox;
-		d->VBox->AddView(d->HBox);
-		d->VBox->AddView(d->Output = new IdeOutput(this));
-
-		d->HBox->AddView(d->Tree = new IdeTree);
-		if (d->Tree)
-		{
-			d->Tree->SetImageList(d->Icons, false);
-			d->Tree->Sunken(false);
-		}
-		d->HBox->AddView(d->Mdi = new GMdiParent);
-		if (d->Mdi)
-		{
-			d->Mdi->HasButton(true);
-		}
-
-Chk;
-		d->HBox->Value(MAX(v.CastInt32(), 20));
-
-		LRect c = GetClient();
-		if (c.Y() > OutPx.CastInt32())
-		{
-			auto Px = OutPx.CastInt32();
-			LCss::Len y(LCss::LenPx, (float)MAX(Px, 120));
-			d->Output->GetCss(true)->Height(y);
-		}
-
-		AttachChildren();
-		OnPosChange();
-	
-Chk;
-		#ifdef LINUX
-		auto f = LFindFile("lgiide.png");
-		if (f)
-		{
-			// Handle()->setIcon(f);
-		}
-		#endif
-		
-		UpdateState();
-		
-Chk;
-		Visible(true);
-		DropTarget(true);
-
-Chk;
-		SetPulse(1000);
 	}
+
+	LToolBar *Tools = NULL;
+	if (GdcD->Y() > 1200)
+		Tools = LgiLoadToolbar(this, "cmds-32px.png", 32, 32);
+	else
+		Tools = LgiLoadToolbar(this, "cmds-16px.png", 16, 16);
+	
+	if (Tools)
+	{
+		Tools->AppendButton("New", IDM_NEW, TBT_PUSH, true, CMD_NEW);
+		Tools->AppendButton("Open", IDM_OPEN, TBT_PUSH, true, CMD_OPEN);
+		Tools->AppendButton("Save", IDM_SAVE_ALL, TBT_PUSH, true, CMD_SAVE_ALL);
+		Tools->AppendSeparator();
+		Tools->AppendButton("Cut", IDM_CUT, TBT_PUSH, true, CMD_CUT);
+		Tools->AppendButton("Copy", IDM_COPY, TBT_PUSH, true, CMD_COPY);
+		Tools->AppendButton("Paste", IDM_PASTE, TBT_PUSH, true, CMD_PASTE);
+		Tools->AppendSeparator();
+
+		Tools->AppendButton("Compile", IDM_COMPILE, TBT_PUSH, true, CMD_COMPILE);
+		Tools->AppendButton("Build", IDM_BUILD, TBT_PUSH, true, CMD_BUILD);
+		Tools->AppendButton("Stop", IDM_STOP_BUILD, TBT_PUSH, true, CMD_STOP_BUILD);
+		// Tools->AppendButton("Execute", IDM_EXECUTE, TBT_PUSH, true, CMD_EXECUTE);
+		
+		Tools->AppendSeparator();
+		Tools->AppendButton("Debug", IDM_START_DEBUG, TBT_PUSH, true, CMD_DEBUG);
+		Tools->AppendButton("Pause", IDM_PAUSE_DEBUG, TBT_PUSH, true, CMD_PAUSE);
+		Tools->AppendButton("Restart", IDM_RESTART_DEBUGGING, TBT_PUSH, true, CMD_RESTART);
+		Tools->AppendButton("Kill", IDM_STOP_DEBUG, TBT_PUSH, true, CMD_KILL);
+		Tools->AppendButton("Step Into", IDM_STEP_INTO, TBT_PUSH, true, CMD_STEP_INTO);
+		Tools->AppendButton("Step Over", IDM_STEP_OVER, TBT_PUSH, true, CMD_STEP_OVER);
+		Tools->AppendButton("Step Out", IDM_STEP_OUT, TBT_PUSH, true, CMD_STEP_OUT);
+		Tools->AppendButton("Run To", IDM_RUN_TO, TBT_PUSH, true, CMD_RUN_TO);
+
+		Tools->AppendSeparator();
+		Tools->AppendButton("Find In Files", IDM_FIND_IN_FILES, TBT_PUSH, true, CMD_FIND_IN_FILES);
+		
+		Tools->GetCss(true)->Padding("4px");
+		Tools->Attach(this);
+	}
+	else LgiTrace("%s:%i - No tools obj?", _FL);
+
+	LVariant v = 270, OutPx = 250;
+	d->Options.GetValue(OPT_SPLIT_PX, v);
+	d->Options.GetValue(OPT_OUTPUT_PX, OutPx);
+
+	AddView(d->VBox = new LBox);
+	d->VBox->SetVertical(true);
+
+	d->HBox = new LBox;
+	d->VBox->AddView(d->HBox);
+	d->VBox->AddView(d->Output = new IdeOutput(this));
+
+	d->HBox->AddView(d->Tree = new IdeTree);
+	if (d->Tree)
+	{
+		d->Tree->SetImageList(d->Icons, false);
+		d->Tree->Sunken(false);
+	}
+	d->HBox->AddView(d->Mdi = new GMdiParent);
+	if (d->Mdi)
+	{
+		d->Mdi->HasButton(true);
+	}
+
+	d->HBox->Value(MAX(v.CastInt32(), 20));
+
+	LRect c = GetClient();
+	if (c.Y() > OutPx.CastInt32())
+	{
+		auto Px = OutPx.CastInt32();
+		LCss::Len y(LCss::LenPx, (float)MAX(Px, 120));
+		d->Output->GetCss(true)->Height(y);
+	}
+
+	AttachChildren();
+	OnPosChange();
+
+	UpdateState();
+	
+	Visible(true);
+	DropTarget(true);
+
+	SetPulse(1000);
 	
 	#ifdef LINUX
 	LFinishXWindowsStartup(this);
@@ -1768,7 +1732,6 @@ Chk;
 	if (d->Output)
 		d->Output->SetPulse(1000);
 	#endif
-Chk;
 }
 
 AppWnd::~AppWnd()

@@ -1367,7 +1367,6 @@ bool LToolBar::Pour(LRegion &r)
 	{
 		n.Offset(Best->x1, Best->y1);
 		n.Bound(Best);
-		LgiTrace("%s:%i - Toolbar=%s.\n", _FL, n.GetStr());
 		SetPos(n, true);
 		
 		// _Dump();

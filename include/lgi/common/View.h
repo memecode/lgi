@@ -72,6 +72,10 @@ private:
 			friend OSStatus LgiViewDndHandler(EventHandlerCallRef inHandlerCallRef, EventRef inEvent, void *inUserData);
 
 		#endif
+	
+	#elif defined HAIKU
+	
+		friend class LBView;
 
 	#endif
 

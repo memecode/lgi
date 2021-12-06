@@ -77,10 +77,8 @@ public:
 		if (Pos != Wnd->Pos)
 		{
 			Wnd->Pos = Pos;
-			printf("%s:%i - LWindow::OnPosChange %s\n", _FL, Wnd->Pos.GetStr());
 			Wnd->OnPosChange();
 		}
-		else printf("%s:%i FrameMoved no change.\n", _FL);
 	}
 
 	void FrameResized(float newWidth, float newHeight)
@@ -89,10 +87,8 @@ public:
 		if (Pos != Wnd->Pos)
 		{
 			Wnd->Pos = Pos;
-			printf("%s:%i - LWindow::OnPosChange %s\n", _FL, Wnd->Pos.GetStr());
 			Wnd->OnPosChange();
 		}
-		else printf("%s:%i FrameResized no change.\n", _FL);
 	}
 
 	bool QuitRequested()
@@ -484,8 +480,14 @@ void LWindow::Raise()
 
 LWindowZoom LWindow::GetZoom()
 {
+	if (!d)
+	{
+		LgiTrace("%s:%i - No priv ptr?\n", _FL);
+		return LZoomNormal;
+	}
+
 	LLocker lck(d, _FL);
-	if (lck.Lock())
+	if (!IsAttached() || lck.Lock())
 	{
 		if (d->IsMinimized())
 			return LZoomMin;
@@ -670,8 +672,6 @@ void LWindow::PourAll()
 	LRegion Client(c);
 	LViewI *MenuView = 0;
 
-	printf("PourAll %s\n", c.GetStr());
-
 	LRegion Update(Client);
 	bool HasTools = false;
 	LViewI *v;
@@ -686,7 +686,6 @@ void LWindow::PourAll()
 			if (!IsMenu && IsTool(v))
 			{
 				LRect OldPos = v->GetPos();
-				printf("tools pour pos = %s\n", OldPos.GetStr());
 				if (OldPos.Valid())
 					Update.Union(&OldPos);
 				

@@ -98,13 +98,10 @@ enum LViewFontType
 };
 
 class LViewPrivate
-	#ifdef HAIKU
-	: public BView
-	#endif
 {
 public:
 	// General
-	LView			*View = NULL;
+	LView			*View = NULL; // Owning view
 	LDragDropSource	*DropSource = NULL;
 	LDragDropTarget	*DropTarget = NULL;
 	bool			IsThemed = false;
@@ -163,6 +160,7 @@ public:
 	#endif
 
 	#if defined(MAC)
+
 		#ifdef LGI_COCOA
 		LString ClassName;
 		bool AttachEvent;
@@ -170,11 +168,16 @@ public:
 		EventHandlerRef DndHandler;
 		LAutoString AcceptedDropFormat;
 		#endif
-	#endif
+
+	#elif defined(LGI_SDL)
+		
+		SDL_TimerID PulseId;
+		int PulseLength = -1;
 	
-	#if defined(LGI_SDL)
-	SDL_TimerID PulseId;
-	int PulseLength;
+	#elif defined(HAIKU)
+	
+		BView *Hnd = NULL;
+	
 	#endif
 	
 	LViewPrivate(LView *view);
@@ -190,36 +193,5 @@ public:
 
 		return 0;
 	}
-
-	#ifdef HAIKU
-	void AttachedToWindow()
-	{
-		View->OnCreate();
-	}
-
-	void FrameMoved(BPoint newPosition)
-	{
-		View->Pos = Frame();
-		View->OnPosChange();
-	}
-
-	void FrameResized(float newWidth, float newHeight)
-	{
-		View->Pos = Frame();
-		View->OnPosChange();
-	}
-
-	void MessageReceived(BMessage *message)
-	{
-		View->OnEvent(message);
-		BView::MessageReceived(message);
-	}
-
-	void Draw(BRect updateRect)
-	{
-		LScreenDC dc(View);
-		View->OnPaint(&dc);
-	}
-	#endif
 };
 

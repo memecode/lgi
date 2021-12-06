@@ -1148,73 +1148,73 @@ public:
 
 	#elif defined(MAC) // && __COREFOUNDATION_CFBASE__
 
-	LString(const CFStringRef r)
-	{
-		Str = NULL;
-		*this = r;
-	}
-	
-	LString &operator =(CFStringRef r)
-	{
-		if (r)
+		LString(const CFStringRef r)
 		{
-			CFIndex length = CFStringGetLength(r);
-			CFRange range = CFRangeMake(0, length);
-			CFIndex usedBufLen = 0;
-			CFIndex slen = CFStringGetBytes(r,
-											range,
-											kCFStringEncodingUTF8,
-											'?',
-											false,
-											NULL,
-											0,
-											&usedBufLen);
-			if (Set(NULL, usedBufLen))
-			{
-				slen = CFStringGetBytes(	r,
-											range,
-											kCFStringEncodingUTF8,
-											'?',
-											false,
-											(UInt8*)Str->Str,
-											Str->Len,
-											&usedBufLen);
-				Str->Str[usedBufLen] = 0; // NULL terminate
-			}
+			Str = NULL;
+			*this = r;
 		}
 		
-		return *this;
-	}
-	
-	CFStringRef CreateStringRef()
-	{
-		char *s = Get();
-		if (!s)
-			return NULL;
-		return CFStringCreateWithCString(kCFAllocatorDefault, s, kCFStringEncodingUTF8);
-	}
-	
-	#ifdef __OBJC__
-	NSString *NsStr()
-	{
-		if (Str)
-			return [[NSString alloc] initWithBytes:Str->Str length:Str->Len encoding:NSUTF8StringEncoding];
-		return nil;
-	}
-	
-	bool operator=(NSString *const s)
-	{
-		*this = [s UTF8String];
-		return !IsEmpty();
-	}
+		LString &operator =(CFStringRef r)
+		{
+			if (r)
+			{
+				CFIndex length = CFStringGetLength(r);
+				CFRange range = CFRangeMake(0, length);
+				CFIndex usedBufLen = 0;
+				CFIndex slen = CFStringGetBytes(r,
+												range,
+												kCFStringEncodingUTF8,
+												'?',
+												false,
+												NULL,
+												0,
+												&usedBufLen);
+				if (Set(NULL, usedBufLen))
+				{
+					slen = CFStringGetBytes(	r,
+												range,
+												kCFStringEncodingUTF8,
+												'?',
+												false,
+												(UInt8*)Str->Str,
+												Str->Len,
+												&usedBufLen);
+					Str->Str[usedBufLen] = 0; // NULL terminate
+				}
+			}
+			
+			return *this;
+		}
+		
+		CFStringRef CreateStringRef()
+		{
+			char *s = Get();
+			if (!s)
+				return NULL;
+			return CFStringCreateWithCString(kCFAllocatorDefault, s, kCFStringEncodingUTF8);
+		}
+		
+		#ifdef __OBJC__
+			NSString *NsStr()
+			{
+				if (Str)
+					return [[NSString alloc] initWithBytes:Str->Str length:Str->Len encoding:NSUTF8StringEncoding];
+				return nil;
+			}
+			
+			bool operator=(NSString *const s)
+			{
+				*this = [s UTF8String];
+				return !IsEmpty();
+			}
 
-	LString(NSString *const s)
-	{
-		Str = NULL;
-		*this = [s UTF8String];
-	}
-	#endif
-	
+			LString(NSString *const s)
+			{
+				Str = NULL;
+				*this = [s UTF8String];
+			}
+		#endif
+		
 	#endif
 
 };
