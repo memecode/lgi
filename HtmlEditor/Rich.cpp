@@ -162,7 +162,7 @@ public:
 	}
 };
 
-class InstallThread : public LEventTargetThread, public LCancel
+class InstallThread : public LEventTargetThread
 {
 	int AppHnd;
 

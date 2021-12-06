@@ -272,9 +272,9 @@ public:
 		Param A();
 		Param B();
 	#else
-		auto Msg() { return m; }
-		auto A() { return a; }
-		auto B() { return b; }
+		int Msg() { return m; }
+		Param A() { return a; }
+		Param B() { return b; }
 	#endif
 	void Set(int m, Param a, Param b);
 	bool Send(class LViewI *View);
