@@ -148,8 +148,8 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 	if (!pMem)
 		return false;
 
-	pMem->x = x;
-	pMem->y = y;
+	pMem->x = d->Bmp->Bounds().Width();
+	pMem->y = d->Bmp->Bounds().Height();
 	ColourSpace = pMem->Cs = System32BitColourSpace;
 	pMem->Line = d->Bmp->BytesPerRow();
 	pMem->Base = d->Bmp->Bits();
@@ -180,7 +180,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 
 	Clip.ZOff(X()-1, Y()-1);
 
-	// printf("CreatedBmp: %i,%i %s,%i,%p\n", pMem->x, pMem->y, GColourSpaceToString(pMem->Cs), pMem->Line, pMem->Base);
+	printf("CreatedBmp: %i,%i %s,%i,%p\n", pMem->x, pMem->y, GColourSpaceToString(pMem->Cs), pMem->Line, pMem->Base);
 
 	return true;
 }

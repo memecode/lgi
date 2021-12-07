@@ -882,15 +882,17 @@ void LTabView::OnPaint(LSurface *pDC)
 				LMemDC Mem;
 				if (First || Last)
 				{
+					printf("Create mem %i,%i\n", r.X(), r.Y());
 					if (Mem.Create(r.X(), r.Y(), System32BitColourSpace))
 					{
 						pDC = &Mem;
 						b.Offset(-b.x1, -b.y1);
 					}
+					
+					Mem.Colour(LColour::Red);
+					Mem.Rectangle();
 				}
 				#endif
-
-				// d->CreateCorners();
 
 				pDC->Colour(d->cTopEdge);
 				pDC->Line(b.x1, b.y1, b.x2, b.y1); // top edge
@@ -968,6 +970,8 @@ void LTabView::OnPaint(LSurface *pDC)
 
 					pScreen->Blt(r.x1, r.y1, &Mem);
 				}
+				else
+					printf("NonMemDC %s\n", r.GetStr());
 				#endif
 				pDC = pScreen;
 

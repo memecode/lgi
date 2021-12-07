@@ -19,7 +19,7 @@
 
 #elif defined HAIKU
 
-	#define CornerOffset 0
+	#define CornerOffset 1
 	typedef BRect OsRect;
 
 #elif defined MAC
@@ -52,9 +52,6 @@
 /// Rectangle class
 class LgiClass LRect
 {
-	friend LgiClass bool operator ==(LRect &a, LRect &b);
-	friend LgiClass bool operator !=(LRect &a, LRect &b);
-
 public:
 	int x1, y1, x2, y2;
 
@@ -276,67 +273,6 @@ public:
 			}
 		}
 	
-	#elif !defined(__GTK_H__)
-	
-	/// Returns an operating system specific rectangle
-		operator OsRect()
-		{
-			OsRect r;
-
-			r.left = x1;
-			r.top = y1;
-			r.right = x2+CornerOffset;
-			r.bottom = y2+CornerOffset;
-
-			return r;
-		}
-
-		LRect &operator =(OsRect &r)
-		{
-			x1 = (int) r.left;
-			y1 = (int) r.top;
-			x2 = (int) r.right - CornerOffset;
-			y2 = (int) r.bottom - CornerOffset;
-			return *this;
-		}
-
-		LRect(OsRect r)
-		{
-			x1 = (int) r.left;
-			y1 = (int) r.top;
-			x2 = (int) r.right - CornerOffset;
-			y2 = (int) r.bottom - CornerOffset;
-		}
-
-		#if defined(MAC)
-		LRect(const CGRect &r)
-		{
-			x1 = (int)r.origin.x;
-			y1 = (int)r.origin.y;
-			x2 = x1 + (int)r.size.width - 1;
-			y2 = y1 + (int)r.size.height - 1;
-		}
-
-		LRect &operator =(const CGRect &r)
-		{
-			x1 = (int)r.origin.x;
-			y1 = (int)r.origin.y;
-			x2 = x1 + (int)r.size.width - 1;
-			y2 = y1 + (int)r.size.height - 1;
-			return *this;
-		}
-
-		operator CGRect()
-		{
-			CGRect r;
-			r.origin.x = x1;
-			r.origin.y = y1;
-			r.size.width = x2 - x1 + 1;
-			r.size.height = y2 - y1 + 1;
-			return r;
-		}
-		#endif
-	
 	#elif defined(__GTK_H__)
 
 		operator Gtk::GdkRectangle()
@@ -374,13 +310,67 @@ public:
 			return s;
 		}
 
-	#elif defined(HAIKU)
-
-		operator BRect()
+	#else
+	
+		/// Returns an operating system specific rectangle
+		operator OsRect()
 		{
-			return BRect(x1, y1, x2, y2);
+			OsRect r;
+
+			r.left = x1;
+			r.top = y1;
+			r.right = x2+CornerOffset;
+			r.bottom = y2+CornerOffset;
+
+			return r;
 		}
 
+		LRect &operator =(OsRect &r)
+		{
+			x1 = (int) r.left;
+			y1 = (int) r.top;
+			x2 = (int) r.right - CornerOffset;
+			y2 = (int) r.bottom - CornerOffset;
+			return *this;
+		}
+
+		LRect(OsRect r)
+		{
+			x1 = (int) r.left;
+			y1 = (int) r.top;
+			x2 = (int) r.right - CornerOffset;
+			y2 = (int) r.bottom - CornerOffset;
+		}
+
+		#if defined(MAC)
+		LRect(const CGRect &r)
+		{
+			x1 = (int)r.origin.x;
+			y1 = (int)r.origin.y;
+			x2 = x1 + (int)r.size.width - CornerOffset;
+			y2 = y1 + (int)r.size.height - CornerOffset;
+		}
+
+		LRect &operator =(const CGRect &r)
+		{
+			x1 = (int)r.origin.x;
+			y1 = (int)r.origin.y;
+			x2 = x1 + (int)r.size.width - CornerOffset;
+			y2 = y1 + (int)r.size.height - CornerOffset;
+			return *this;
+		}
+
+		operator CGRect()
+		{
+			CGRect r;
+			r.origin.x = x1;
+			r.origin.y = y1;
+			r.size.width = x2 - x1 + CornerOffset;
+			r.size.height = y2 - y1 + CornerOffset;
+			return r;
+		}
+		#endif
+	
 	#endif
 };
 

@@ -12,6 +12,7 @@
 #include <math.h>
 
 #include "lgi/common/Lgi.h"
+#include <Bitmap.h>
 
 #define VIEW_CHECK		if (!d->v) return;
 
@@ -368,7 +369,7 @@ void LScreenDC::FilledEllipse(double cx, double cy, double x, double y)
 void LScreenDC::Box(int x1, int y1, int x2, int y2)
 {
 	VIEW_CHECK
-	d->v->StrokeRect(BRect(x1, y1, x2, y2));
+	d->v->StrokeRect(LRect(x1, y1, x2, y2));
 }
 
 void LScreenDC::Box(LRect *a)
@@ -384,13 +385,14 @@ void LScreenDC::Rectangle(int x1, int y1, int x2, int y2)
 {
 	VIEW_CHECK
 	if (x2 >= x1 && y2 >= y1)
-		d->v->FillRect(BRect(x1, y1, x2, y2));
+		d->v->FillRect(LRect(x1, y1, x2, y2));
 }
 
 void LScreenDC::Rectangle(LRect *a)
 {
 	VIEW_CHECK
-	d->v->FillRect(a ? *a : Bounds());
+	LRect r = a ? *a : Bounds();
+	d->v->FillRect(BRect(r.x1, r.y1, r.x2, r.y2));
 }
 
 void LScreenDC::Polygon(int Points, LPoint *Data)
@@ -423,29 +425,31 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 		return;
 	}
 		
-	/*
-	// memory -> screen blt
-	LRect RealClient = d->Client;
-	d->Client.ZOff(-1, -1); // Clear this so the blit rgn calculation uses the
-							// full context size rather than just the client.
-	GBlitRegions br(this, x, y, Src, a);
-	d->Client = RealClient;
-	if (!br.Valid())
-	{
-		LgiTrace("Blt inval pos=%i,%i a=%s bounds=%s\n", x, y, a?a->GetStr():"null", Bounds().GetStr());
-		return;
-	}
-	*/
-	
 	if (a)
 	{
 		BRect bitmapRect = *a;
 		BRect viewRect(x, y, x + a->X(), y + a->Y());
 		d->v->DrawBitmap(bmp, bitmapRect, viewRect);
+		
+		#if 0
+		printf("ScreenDC::Blt %g,%g/%gx%g -> %g,%g/%gx%g %i,%i\n",
+			bitmapRect.left, bitmapRect.top, bitmapRect.Width(), bitmapRect.Height(),
+			viewRect.left, viewRect.top, viewRect.Width(), viewRect.Height(),
+			a->X(), a->Y());
+		#endif
 	}
 	else
 	{
-		d->v->DrawBitmap(bmp, BPoint(x, y));
+		BRect bitmapRect = bmp->Bounds();
+		BRect viewRect(x, y, x + Src->X() - 1, y + Src->Y() - 1); // This seems like a Haiku bug... shouldn't need the -1 offset here.
+		d->v->DrawBitmap(bmp, bitmapRect, viewRect);
+
+		#if 0
+		printf("ScreenDC::Blt %g,%g/%gx%g -> %g,%g/%gx%g %i,%i\n",
+			bitmapRect.left, bitmapRect.top, bitmapRect.Width(), bitmapRect.Height(),
+			viewRect.left, viewRect.top, viewRect.Width(), viewRect.Height(),
+			x, y);
+		#endif
 	}
 }
 

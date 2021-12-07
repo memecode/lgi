@@ -252,10 +252,10 @@
 					<Node File="./src/linux/Gtk/PrintDC.cpp" Type="2" Platforms="4" />
 					<Node File="./src/linux/Gtk/ScreenDC.cpp" Type="2" Platforms="4" />
 				</Node>
-				<Node Name="Win32" Type="1" Platforms="15" Open="0" Id="52">
-					<Node File="./src/win/Gdc2/ScreenDC.cpp" Type="2" Platforms="1" />
-					<Node File="./src/win/Gdc2/PrintDC.cpp" Type="2" Platforms="1" />
-					<Node File="./src/win/Gdc2/MemDC.cpp" Type="2" Platforms="1" />
+				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="52">
+					<Node File=".\src\win\Gdc2\ScreenDC.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\Gdc2\PrintDC.cpp" Type="2" Platforms="1" />
+					<Node File=".\src\win\Gdc2\MemDC.cpp" Type="2" Platforms="1" />
 				</Node>
 				<Node File=".\src\common\Gdc2\Surface.cpp" Type="2" Platforms="15" />
 			</Node>
@@ -452,6 +452,11 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
+			<Executable>
+				<Windows />
+			</Executable>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -484,6 +489,7 @@
 /usr/include/libappindicator3-0.1
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -496,18 +502,54 @@ appindicator3
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
+				<All />
+				<Windows />
 			</Libraries>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-gtk3</Debug>
 					<Release>lgi-gtk3</Release>
 				</Linux>
+				<Windows />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
 			</TargetType>
+			<Defines>
+				<All />
+				<Windows />
+			</Defines>
+			<LibraryPaths>
+				<All />
+				<Windows />
+			</LibraryPaths>
+			<ApplicationIcon />
 		</Build>
-		<Advanced />
-		<Debug />
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Windows />
+			</PostBuildCommands>
+		</Advanced>
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Editor>
+			<TabSize />
+			<IndentSize />
+			<ShowWhiteSpace />
+			<UseHardTabs />
+			<CommentFile />
+			<CommentFunction />
+		</Editor>
 	</Settings>
 </Project>
