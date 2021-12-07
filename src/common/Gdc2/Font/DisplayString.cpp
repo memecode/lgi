@@ -503,7 +503,7 @@ void LDisplayString::Layout(bool Debug)
 		
 		auto &l = Info[0];
 		l.Str = Str;
-		l.Len = strlen(Str);
+		l.Len = Str ? strlen(Str) : 0;
 
 		const char *strArr[] = { Str };
 		const int32 strLen[] = { l.Len };

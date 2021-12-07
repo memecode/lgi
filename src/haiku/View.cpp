@@ -18,7 +18,7 @@
 #include "lgi/common/Css.h"
 #include "ViewPriv.h"
 
-#define DEBUG_MOUSE_EVENTS			0
+#define DEBUG_MOUSE_EVENTS			1
 
 #if 0
 #define DEBUG_INVALIDATE(...)		printf(__VA_ARGS__)
@@ -165,6 +165,50 @@ public:
 		LScreenDC dc(d->View);
 		d->View->OnPaint(&dc);
 	}
+
+	LMouse ConvertMouse(BPoint where)
+	{
+		LMouse m;
+		BPoint loc;
+		uint32 buttons = 0;
+		
+		m.Target = d->View;
+		
+		m.x = where.x;
+		m.y = where.y;
+
+		GetMouse(&loc, &buttons, false);
+		if (buttons & B_PRIMARY_MOUSE_BUTTON) m.Left(true);
+		if (buttons & B_TERTIARY_MOUSE_BUTTON) m.Middle(true);
+		if (buttons & B_SECONDARY_MOUSE_BUTTON) m.Right(true);
+		
+		uint32 mod = modifiers();
+		if (mod & B_SHIFT_KEY) m.Shift(true);
+		if (mod & B_OPTION_KEY) m.Alt(true);
+		if (mod & B_CONTROL_KEY) m.Ctrl(true);
+		
+		return m;
+	}
+	
+	void MouseDown(BPoint where)
+	{
+		LMouse m = ConvertMouse(where);
+		m.Down(true);
+		d->View->_Mouse(m, false);
+	}
+	
+	void MouseUp(BPoint where) 
+	{
+		LMouse m = ConvertMouse(where);
+		m.Down(false);
+		d->View->_Mouse(m, false);
+	}
+	
+	void MouseMoved(BPoint where, uint32 code, const BMessage *dragMessage)
+	{
+		LMouse m = ConvertMouse(where);
+		d->View->_Mouse(m, true);
+	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -252,20 +296,14 @@ bool LView::_Mouse(LMouse &m, bool Move)
 	
 	#if DEBUG_MOUSE_EVENTS
 	if (!Move)
-		LgiTrace("%s:%i - _Mouse([%i,%i], %i) View=%p/%s\n", _FL, m.x, m.y, Move, _Over, _Over ? _Over->GetClass() : NULL);
+		LgiTrace("%s:%i - %s\n", _FL, m.ToString().Get());
 	#endif
 
 	if
 	(
-		/*
-		!_View
-		||
-		*/
-		(
-			GetWindow()
-			&&
-			!GetWindow()->HandleViewMouse(this, m)
-		)
+		GetWindow()
+		&&
+		!GetWindow()->HandleViewMouse(this, m)
 	)
 	{
 		#if DEBUG_MOUSE_EVENTS
@@ -274,8 +312,8 @@ bool LView::_Mouse(LMouse &m, bool Move)
 		return false;
 	}
 
-	#if DEBUG_MOUSE_EVENTS
-	// if (!Move)
+	#if 0 //DEBUG_MOUSE_EVENTS
+	if (!Move)
 		LgiTrace("%s:%i - _Capturing=%p/%s\n", _FL, _Capturing, _Capturing ? _Capturing->GetClass() : NULL);
 	#endif
 	if (Move)
@@ -311,13 +349,9 @@ bool LView::_Mouse(LMouse &m, bool Move)
 	if (!Client.Valid() || Client.Overlap(m.x, m.y) || _Capturing)
 	{
 		if (Move)
-		{
 			Target->OnMouseMove(m);
-		}
 		else
-		{
 			Target->OnMouseClick(m);
-		}
 	}
 	else if (!Move)
 	{
@@ -509,40 +543,52 @@ OsView LView::Handle() const
 
 bool LView::PointToScreen(LPoint &p)
 {
-	ThreadCheck();
+	if (!Handle())
+	{
+		LgiTrace("%s:%i - No handle.\n", _FL);
+		return false;
+	}
 
 	LPoint Offset;
 	WindowVirtualOffset(&Offset);
 	p += Offset;
 
-	auto w = GetWindow();
-	if (!w)
+	LLocker lck(Handle(), _FL);
+	if (!lck.Lock())
+	{
+		LgiTrace("%s:%i - Can't lock.\n", _FL);
 		return false;
-	auto wnd = w->WindowHandle();
-	if (!wnd)
-		return false;
-
-	LAssert(!"Fixme.");
+	}
+	
+	BPoint pt = Handle()->ConvertToScreen(BPoint(Offset.x, Offset.y));
+	Offset.x = pt.x;
+	Offset.y = pt.y;
 
 	return true;
 }
 
 bool LView::PointToView(LPoint &p)
 {
-	ThreadCheck();
+	if (!Handle())
+	{
+		LgiTrace("%s:%i - No handle.\n", _FL);
+		return false;
+	}
 
 	LPoint Offset;
 	WindowVirtualOffset(&Offset);
 	p -= Offset;
 
-	auto w = GetWindow();
-	if (!w)
+	LLocker lck(Handle(), _FL);
+	if (!lck.Lock())
+	{
+		LgiTrace("%s:%i - Can't lock.\n", _FL);
 		return false;
-	auto wnd = w->WindowHandle();
-	if (!wnd)
-		return false;
-
-	LAssert(!"Fixme.");
+	}
+	
+	BPoint pt = Handle()->ConvertFromScreen(BPoint(Offset.x, Offset.y));
+	Offset.x = pt.x;
+	Offset.y = pt.y;
 
 	return true;
 }

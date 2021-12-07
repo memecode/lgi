@@ -19,7 +19,7 @@
 class LScreenPrivate
 {
 public:
-	int x = 0, y = 0, Bits = 0;
+	int x = 0, y = 0, Bits = 32;
 	bool Own = false;
 	LColour Col;
 	LRect Client;
@@ -44,6 +44,7 @@ LScreenDC::LScreenDC()
 	d = new LScreenPrivate;
 	d->x = GdcD->X();
 	d->y = GdcD->Y();
+	d->Bits = GdcD->GetBits();
 }
 
 LScreenDC::LScreenDC(LView *view, void *param)
@@ -52,11 +53,12 @@ LScreenDC::LScreenDC(LView *view, void *param)
 	if (d->View = view)
 		d->v = view->Handle();
 
+	d->Bits = GdcD->GetBits();
+
 	if (d->v)
-	{
 		d->Client = d->v->Frame();
-	}
-	else LgiTrace("%s:%i - LScreenDC::LScreenDC - No view?\n", _FL);
+	else
+		LgiTrace("%s:%i - LScreenDC::LScreenDC - No view?\n", _FL);
 }
 
 LScreenDC::~LScreenDC()

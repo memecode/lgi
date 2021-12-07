@@ -882,7 +882,6 @@ void LTabView::OnPaint(LSurface *pDC)
 				LMemDC Mem;
 				if (First || Last)
 				{
-					printf("Create mem %i,%i\n", r.X(), r.Y());
 					if (Mem.Create(r.X(), r.Y(), System32BitColourSpace))
 					{
 						pDC = &Mem;
@@ -970,8 +969,6 @@ void LTabView::OnPaint(LSurface *pDC)
 
 					pScreen->Blt(r.x1, r.y1, &Mem);
 				}
-				else
-					printf("NonMemDC %s\n", r.GetStr());
 				#endif
 				pDC = pScreen;
 

@@ -335,14 +335,10 @@ public:
 		return m;
 	}
 
+	LString ToString() const;
 	void Trace(const char *Msg) const
 	{
-		LgiTrace("%s LMouse pos=%i,%i view=%i btns=%i/%i/%i dwn=%i dbl=%i "
-				"ctrl=%i alt=%i sh=%i sys=%i\n",
-			Msg ? Msg : (char*)"", x, y, ViewCoords,
-			Left(), Middle(), Right(),
-			Down(), Double(),
-			Ctrl(), Alt(), Shift(), System());
+		LgiTrace("%s %s\n", Msg ? Msg : (char*)"", ToString().Get());
 	}
 
 	/// True if the left mouse button was clicked
