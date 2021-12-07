@@ -2,8 +2,9 @@
 /// \author Matthew Allen (fret@memecode.com)
 /// \brief This is the base data and code for all the text controls (inc. HTML)
 
-#ifndef __GDOCVIEW_H
-#define __GDOCVIEW_H
+#pragma once
+
+#include <functional>
 
 #include "lgi/common/Variant.h"
 #include "lgi/common/Notifications.h"
@@ -330,9 +331,9 @@ public:
 	///////////////////////////////////////////////////////////////////////
 
 	/// Find window handler
-	virtual bool DoFind() { return false; }
+	virtual void DoFind(std::function<void(bool)> Callback) { if (Callback) Callback(false); }
 	/// Replace window handler
-	virtual bool DoReplace() { return false; }
+	virtual void DoReplace(std::function<void(bool)> Callback) { if (Callback) Callback(false); }
 	virtual GDocFindReplaceParams *CreateFindReplaceParams() { return 0; }
 	virtual void SetFindReplaceParams(GDocFindReplaceParams *Params) { }
 
@@ -538,6 +539,3 @@ bool LDetectLinks(LArray<GLinkInfo> &Links, T *Text, ssize_t TextCharLen = -1)
 	return true;
 }
 
-
-
-#endif

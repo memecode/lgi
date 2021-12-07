@@ -334,7 +334,7 @@ void LFileSelect::DefaultExtension(const char *DefExt)
 	d->DefExt = NewStr(DefExt);
 }
 
-bool LFileSelect::Open()
+void LFileSelect::Open(SelectCb Cb)
 {
 	bool Status = FALSE;
 
@@ -345,7 +345,8 @@ bool LFileSelect::Open()
 		Status = GetOpenFileNameW(&Info) != 0;
 	d->AfterDlg(Info, Status);
 
-	return Status && Length() > 0;
+	if (Cb)
+		Cb(this, Status && Length() > 0);
 }
 
 #include "shlobj.h"
@@ -361,10 +362,8 @@ int CALLBACK GFileSelectBrowseCallback(HWND hwnd, UINT uMsg, LPARAM lParam, LPAR
 	return 0;
 }
 
-bool LFileSelect::OpenFolder()
+void LFileSelect::OpenFolder(SelectCb Cb)
 {
-	#if 1
-
 	bool Status = FALSE;
 
 	Name("(folder selection)");
@@ -393,53 +392,11 @@ bool LFileSelect::OpenFolder()
 		}
 	}
 
-	return Status && Length() > 0;
-	
-	#else
-	// This is the ACTUAL folder selection dialog, but it sucks.
-	
-	LPMALLOC pMalloc; // Gets the Shell's default allocator
-	bool Status = false;
-
-	if  (::SHGetMalloc(&pMalloc) == NOERROR)
-	{
-		BROWSEINFO      bi;
-		char16          pszBuffer[MAX_PATH];
-		LPITEMIDLIST    pidl;
-
-		ZeroObj(bi);
-
-		// Get help on BROWSEINFO struct - it's got all the bit settings.
-		bi.hwndOwner        = (d->ParentWnd) ? d->ParentWnd->Handle() : 0;
-		bi.pszDisplayName   = pszBuffer;
-		bi.lpszTitle        = L"Select a Directory";
-		bi.ulFlags          = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS | BIF_EDITBOX;
-		bi.lpfn				= GFileSelectBrowseCallback;
-		bi.lParam			= (LPARAM)InitialDir();
-
-		// This next call issues the dialog box.
-		if  (pidl = ::SHBrowseForFolder(&bi))
-		{
-			if  (::SHGetPathFromIDList(pidl, pszBuffer))
-			{
-				// At this point pszBuffer contains the selected path
-				d->Files.Insert(WideToUtf8(pszBuffer));
-				Status = true;
-			}
-
-			// Free the PIDL allocated by SHBrowseForFolder.
-			pMalloc->Free(pidl);
-		}
-
-		// Release the shell's allocator
-		pMalloc->Release();
-	}
-	#endif
-
-	return Status;
+	if (Cb)
+		Cb(this, Status && Length() > 0);
 }
 
-bool LFileSelect::Save()
+void LFileSelect::Save(SelectCb Cb)
 {
 	bool Status = FALSE;
 
@@ -450,5 +407,6 @@ bool LFileSelect::Save()
 		Status = GetSaveFileNameW(&Info) != 0;		
 	d->AfterDlg(Info, Status);
 
-	return Status && Length() > 0;
+	if (Cb)
+		Cb(this, Status && Length() > 0);
 }

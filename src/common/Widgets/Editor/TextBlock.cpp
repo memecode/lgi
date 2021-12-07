@@ -1996,7 +1996,7 @@ ssize_t LRichTextPriv::TextBlock::CopyAt(ssize_t Offset, ssize_t Chars, LArray<u
 	return Text->Length();
 }
 
-ssize_t LRichTextPriv::TextBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params)
+ssize_t LRichTextPriv::TextBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params)
 {
 	if (!Str || !Params)
 		return -1;

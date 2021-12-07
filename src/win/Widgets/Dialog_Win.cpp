@@ -176,7 +176,7 @@ bool LDialog::IsModal()
 	return d->IsModal;
 }
 
-int LDialog::DoModal(OsView ParentHnd)
+void LDialog::DoModal(OnClose Callback, OsView ParentHnd)
 {
 	int Status = -1;
 
@@ -307,7 +307,8 @@ int LDialog::DoModal(OsView ParentHnd)
 	
 	#endif
 
-	return Status;
+	if (Callback)
+		Callback(*this, Status);
 }
 
 static char *BaseStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";

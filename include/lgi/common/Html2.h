@@ -144,7 +144,7 @@ public:
 	GDom *getElementById(char *Id);
 
 	// Events
-	bool OnFind(class GFindReplaceCommon *Params);
+	bool OnFind(class LFindReplaceCommon *Params);
 	virtual bool OnSubmitForm(GTag *Form);
 	virtual void OnCursorChanged() {}
 };

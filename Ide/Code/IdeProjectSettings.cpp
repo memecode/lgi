@@ -665,17 +665,17 @@ public:
 					LEdit *e;
 					if (GetViewById(IDC_EDIT_BASE + BrowseIdx, e))
 					{
-						LFileSelect s;
-						s.Parent(this);
+						LFileSelect *s = new LFileSelect;
+						s->Parent(this);
 
 						LFile::Path Path(d->Project->GetBasePath());
 						LFile::Path Cur(e->Name());
 						Path.Join(Cur.GetFull());
 						Path--;
 						if (Path.Exists())
-							s.InitialDir(Path);
+							s->InitialDir(Path);
 
-						auto Process = [&](LFileSelect &s, bool ok)
+						auto Process = [&](LFileSelect *s, bool ok)
 						{
 							if (!ok)
 								return;
@@ -684,15 +684,17 @@ public:
 							if (Base)
 							{
 								LFile::Path p = Base;
-								Rel = LMakeRelativePath(--p, s.Name());
+								Rel = LMakeRelativePath(--p, s->Name());
 							}
-							e->Name(Rel ? Rel : s.Name());
+							e->Name(Rel ? Rel : s->Name());
+
+							delete s;
 						};
 						
 						if (BrowseFolder)
-							s.OpenFolder(Process);
+							s->OpenFolder(Process);
 						else
-							s.Open(Process);
+							s->Open(Process);
 
 						return 0; // no default btn handling.
 					}
@@ -876,14 +878,14 @@ void IdeProjectSettings::InitAllSettings(bool ClearCurrent)
 	}
 }
 
-bool IdeProjectSettings::Edit(LViewI *parent, std::function<void()> OnChanged)
+void IdeProjectSettings::Edit(LViewI *parent, std::function<void()> OnChanged)
 {
 	// Copy all the settings to the edit tag...
 	d->Editing.Copy(d->Active, true);
 	
 	// Show the dialog...
 	ProjectSettingsDlg Dlg(parent, d);
-	Dlg.DoModal([&](auto d, auto code)
+	Dlg.DoModal([&](auto dlg, auto code)
 	{
 		if (code)
 		{

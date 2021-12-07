@@ -31,7 +31,7 @@ class LgiClass
 	public LDragDropTarget
 {
 	friend struct LTextView4Undo;
-	friend bool Text4_FindCallback(GFindReplaceCommon *Dlg, bool Replace, void *User);
+	friend bool Text4_FindCallback(LFindReplaceCommon *Dlg, bool Replace, void *User);
 
 public:
 	enum Messages
@@ -372,17 +372,17 @@ public:
 	void SetUndoOn(bool b) { UndoOn = b; }
 
 	// Action UI
-	virtual bool DoGoto();
-	virtual bool DoCase(bool Upper);
-	virtual bool DoFind() override;
-	virtual bool DoFindNext();
-	virtual bool DoReplace() override;
+	virtual void DoGoto(std::function<void(bool)> Callback);
+	virtual void DoCase(std::function<void(bool)> Callback, bool Upper);
+	virtual void DoFind(std::function<void(bool)> Callback) override;
+	virtual void DoFindNext(std::function<void(bool)> Callback);
+	virtual void DoReplace(std::function<void(bool)> Callback) override;
 
 	// Action Processing	
-	bool ClearDirty(bool Ask, const char *FileName = 0);
+	void ClearDirty(std::function<void(bool)> OnStatus, bool Ask, const char *FileName = 0);
 	void UpdateScrollBars(bool Reset = false);
 	ssize_t GetLine();
-	void SetLine(int Line);
+	void SetLine(int64_t Line);
 	GDocFindReplaceParams *CreateFindReplaceParams() override;
 	void SetFindReplaceParams(GDocFindReplaceParams *Params) override;
 

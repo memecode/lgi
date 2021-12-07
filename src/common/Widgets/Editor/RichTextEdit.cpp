@@ -977,7 +977,7 @@ bool LRichTextEdit::DoFindNext()
 }
 
 bool
-RichText_FindCallback(GFindReplaceCommon *Dlg, bool Replace, void *User)
+RichText_FindCallback(LFindReplaceCommon *Dlg, bool Replace, void *User)
 {
 	return ((LRichTextEdit*)User)->OnFind(Dlg);
 }
@@ -989,13 +989,13 @@ bool LRichTextEdit::DoFind()
 	if (HasSelection())
 		d->GetSelection(&Sel, NULL);
 	LAutoString u(Sel.Length() ? WideToUtf8(&Sel.First()) : NULL);
-	GFindDlg Dlg(this, u, RichText_FindCallback, this);
+	LFindDlg Dlg(this, u, RichText_FindCallback, this);
 	Dlg.DoModal();	
 	Focus(true);
 	return false;
 }
 
-bool LRichTextEdit::OnFind(GFindReplaceCommon *Params)
+bool LRichTextEdit::OnFind(LFindReplaceCommon *Params)
 {
 	if (!Params || !d->Cursor)
 	{
@@ -1037,7 +1037,7 @@ bool LRichTextEdit::DoReplace()
 	return false;
 }
 
-bool LRichTextEdit::OnReplace(GFindReplaceCommon *Params)
+bool LRichTextEdit::OnReplace(LFindReplaceCommon *Params)
 {
 	return false;
 }

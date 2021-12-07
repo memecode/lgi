@@ -2615,24 +2615,28 @@ void IdeProject::Build(bool All, bool Release)
 	if (GetApp())
 		GetApp()->PostEvent(M_APPEND_TEXT, 0, 0);
 
-	SetClean();
+	SetClean([&](bool ok)
+	{
+		if (!ok)
+			return;
 
-	if (!IsMakefileUpToDate())
-		CreateMakefile(GetCurrentPlatform(), true);
-	else
-		// Start the build thread...
-		d->Thread.Reset
-		(
-			new BuildThread
+		if (!IsMakefileUpToDate())
+			CreateMakefile(GetCurrentPlatform(), true);
+		else
+			// Start the build thread...
+			d->Thread.Reset
 			(
-				this,
-				m,
-				false,
-				Release,
-				All,
-				sizeof(size_t)*8
-			)
-		);
+				new BuildThread
+				(
+					this,
+					m,
+					false,
+					Release,
+					All,
+					sizeof(size_t)*8
+				)
+			);
+	});
 }
 
 void IdeProject::StopBuild()
@@ -3215,27 +3219,28 @@ void IdeProject::OnMouseClick(LMouse &m)
 			case IDM_NEW_FOLDER:
 			{
 				LInput Name(Tree, "", "Name:", AppName);
-				if (Name.DoModal())
+				Name.DoModal([&](auto d, auto code)
 				{
 					GetSubFolder(this, Name.GetStr(), true);
-				}
+				});
 				break;
 			}
 			case IDM_WEB_FOLDER:
 			{
-				WebFldDlg Dlg(Tree, 0, 0, 0);
-				if (Dlg.DoModal())
+				WebFldDlg *Dlg = new WebFldDlg(Tree, 0, 0, 0);
+				Dlg->DoModal([&](auto d, auto code)
 				{
-					if (Dlg.Ftp && Dlg.Www)
+					if (Dlg->Ftp && Dlg->Www)
 					{
-						IdeCommon *f = GetSubFolder(this, Dlg.Name, true);
+						IdeCommon *f = GetSubFolder(this, Dlg->Name, true);
 						if (f)
 						{
-							f->SetAttr(OPT_Ftp, Dlg.Ftp);
-							f->SetAttr(OPT_Www, Dlg.Www);
+							f->SetAttr(OPT_Ftp, Dlg->Ftp);
+							f->SetAttr(OPT_Www, Dlg->Www);
 						}
 					}
-				}
+					delete Dlg;
+				});
 				break;
 			}
 			case IDM_BUILD:
@@ -3276,28 +3281,31 @@ void IdeProject::OnMouseClick(LMouse &m)
 			}
 			case IDM_SETTINGS:
 			{
-				if (d->Settings.Edit(Tree))
+				d->Settings.Edit(Tree, [&]()
 				{
 					SetDirty();
-				}
+				});
 				break;
 			}
 			case IDM_INSERT_DEP:
 			{
-				LFileSelect s;
-				s.Parent(Tree);
-				s.Type("Project", "*.xml");
-				if (s.Open())
+				LFileSelect *s = new LFileSelect;
+				s->Parent(Tree);
+				s->Type("Project", "*.xml");
+				s->Open([&](auto s, bool ok)
 				{
+					if (!ok)
+						return;
 					ProjectNode *New = new ProjectNode(this);
 					if (New)
 					{
-						New->SetFileName(s.Name());
+						New->SetFileName(s->Name());
 						New->SetType(NodeDependancy);
 						InsertTag(New);
 						SetDirty();
 					}
-				}
+					delete s;
+				});
 				break;
 			}
 		}

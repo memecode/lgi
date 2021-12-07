@@ -157,7 +157,7 @@ public:
 	LDom *getElementById(char *Id);
 
 	// Events
-	bool OnFind(GFindReplaceCommon *Params);
+	bool OnFind(LFindReplaceCommon *Params);
 	virtual bool OnSubmitForm(GTag *Form);
 	virtual void OnCursorChanged() {}
 	virtual void OnLoad();

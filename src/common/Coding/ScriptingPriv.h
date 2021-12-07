@@ -451,6 +451,7 @@ class SystemFunctions : public LScriptContext
 	#endif
 
 	LView *CastLView(LVariant &v);
+	bool WaitForReturn(LScriptArguments &Args);
 
 public:
 	SystemFunctions();

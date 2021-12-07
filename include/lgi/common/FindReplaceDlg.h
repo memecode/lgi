@@ -3,12 +3,16 @@
 #ifndef __GFINDREPLACEDLG_H
 #define __GFINDREPLACEDLG_H
 
+#include <functional>
+
 /// Common find/replace window parameters
-class LgiClass GFindReplaceCommon : public LDialog
+class LgiClass LFindReplaceCommon : public LDialog
 {
 	// bool OnViewKey(LView *v, LKey &k);
 
 public:
+	typedef std::function<void(LFindReplaceCommon *Dlg, int CtrlCode)> Callback;
+
 	/// The string to find
 	LString Find;
 	/// Whether to match a whole word
@@ -20,30 +24,26 @@ public:
 	/// Whether to search only in the selection
 	bool SearchUpwards;
 	
-	GFindReplaceCommon();
+	LFindReplaceCommon();
 };
 
-typedef bool (*GFrCallback)(GFindReplaceCommon *Dlg, bool Replace, void *User);
-
 /// Find dialog
-class LgiClass GFindDlg : public GFindReplaceCommon
+class LgiClass LFindDlg : public LFindReplaceCommon
 {
 	class GFindDlgPrivate *d;
 
 public:
 	/// Constructor
-	GFindDlg
+	LFindDlg
 	(
 		/// The parent window
 		LView *Parent,
-		/// The initial string for the find argument
-		char *Init = 0,
 		/// Callback
-		GFrCallback Callback = 0,
-		/// User defined data for callback
-		void *UserData = 0
+		Callback Cb,
+		/// The initial string for the find argument
+		char *Init = NULL
 	);
-	~GFindDlg();
+	~LFindDlg();
 
 	void OnCreate();
 	void OnPosChange();
@@ -56,28 +56,26 @@ public:
 #define IDC_FR_REPLACE				21007
 
 /// Replace dialog
-class LgiClass GReplaceDlg : public GFindReplaceCommon
+class LgiClass LReplaceDlg : public LFindReplaceCommon
 {
-	class GReplaceDlgPrivate *d;
+	class LReplaceDlgPrivate *d;
 
 public:
 	LString Replace;
 
 	/// Constructor
-	GReplaceDlg
+	LReplaceDlg
 	(
 		/// The parent window
 		LView *Parent,
-		/// The initial value to find
-		char *InitFind = 0,
-		/// The initial value to replace with
-		char *InitReplace = 0,
 		/// Callback
-		GFrCallback Callback = 0,
-		/// User defined data for callback
-		void *UserData = 0
+		Callback Cb,
+		/// The initial value to find
+		char *InitFind = NULL,
+		/// The initial value to replace with
+		char *InitReplace = NULL
 	);
-	~GReplaceDlg();
+	~LReplaceDlg();
 
 	void OnCreate();
 	void OnPosChange();

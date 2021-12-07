@@ -375,8 +375,7 @@ public:
 			Children.Insert(new LButton(IDOK, 80, t->LView::GetPos().y2 + 10, 60, 20, "Ok"));
 		}
 		
-		
-		DoModal();
+		DoModal(NULL);
 	}
 	
 	int OnNotify(LViewI *c, LNotification n)
@@ -2445,18 +2444,22 @@ void AppWnd::AppendOutput(char *Txt, AppWnd::Channels Channel)
 
 void AppWnd::SaveAll()
 {
-	List<IdeDoc>::I Docs = d->Docs.begin();
-	for (IdeDoc *Doc = *Docs; Doc; Doc = *++Docs)
+	for (auto Doc: d->Docs)
 	{
-		Doc->SetClean();
-		d->OnFile(Doc->GetFileName());
+		Doc->SetClean([&](bool ok)
+		{
+			if (ok)
+				d->OnFile(Doc->GetFileName());
+		});
 	}
 	
-	List<IdeProject>::I Projs = d->Projects.begin();
-	for (IdeProject *Proj = *Projs; Proj; Proj = *++Projs)
+	for (auto Proj: d->Projects)
 	{
-		Proj->SetClean();
-		d->OnFile(Proj->GetFileName(), true);
+		Proj->SetClean([&](bool ok)
+		{
+			if (ok)
+				d->OnFile(Proj->GetFileName(), true);
+		});
 	}
 }
 
@@ -3043,7 +3046,7 @@ public:
 			else
 				SetCtrlValue(IDC_JOBS, 2);
 			
-			DoModal();
+			DoModal(NULL);
 		}
 	}
 	
@@ -3064,14 +3067,14 @@ public:
 			}
 			case IDC_SET_FONT:
 			{
-				if (Font.DoUI(this))
+				Font.DoUI(this, [&](auto ui)
 				{
 					char s[256];
 					if (Font.GetDescription(s, sizeof(s)))
 					{
 						SetCtrlName(IDC_FONT, s);
 					}
-				}
+				});
 				break;
 			}
 		}
@@ -3466,12 +3469,13 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_OPEN:
 		{
-			LFileSelect s;
-			s.Parent(this);
-			if (s.Open())
+			LFileSelect *s = new LFileSelect;
+			s->Parent(this);
+			s->Open([&](auto s, auto ok)
 			{
-				OpenFile(s.Name());
-			}
+				OpenFile(s->Name());
+				delete s;
+			});
 			break;
 		}
 		case IDM_SAVE_ALL:
@@ -3483,7 +3487,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		{
 			IdeDoc *Top = TopDoc();
 			if (Top)
-				Top->SetClean();
+				Top->SetClean(NULL);
 			break;
 		}
 		case IDM_SAVEAS:
@@ -3491,13 +3495,14 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			IdeDoc *Top = TopDoc();
 			if (Top)
 			{
-				LFileSelect s;
-				s.Parent(this);
-				if (s.Save())
+				LFileSelect *s = new LFileSelect;
+				s->Parent(this);
+				s->Save([&](auto s, auto ok)
 				{
-					Top->SetFileName(s.Name(), true);
-					d->OnFile(s.Name());
-				}
+					Top->SetFileName(s->Name(), true);
+					d->OnFile(s->Name());
+					delete s;
+				});
 			}
 			break;
 		}
@@ -3550,7 +3555,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 			{
-				Doc->DoFind();
+				Doc->DoFind(NULL);
 			}
 			else LgiTrace("%s:%i - No focus doc.\n", _FL);
 			break;
@@ -3560,7 +3565,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 			{
-				Doc->DoFindNext();
+				Doc->DoFindNext(NULL);
 			}
 			else LgiTrace("%s:%i - No focus doc.\n", _FL);
 			break;
@@ -3570,7 +3575,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 			{
-				Doc->DoReplace();
+				Doc->DoReplace(NULL);
 			}
 			else LgiTrace("%s:%i - No focus doc.\n", _FL);
 			break;
@@ -3579,13 +3584,13 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		{
 			LTextView3 *Doc = FocusEdit();
 			if (Doc)
-				Doc->DoGoto();
+				Doc->DoGoto(NULL);
 			else
 			{
-				LInput Inp(this, NULL, LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
-				if (Inp.DoModal())
+				LInput *Inp = new LInput(this, NULL, LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
+				Inp->DoModal([&](auto dlg, auto code)
 				{
-					LString s = Inp.GetStr();
+					LString s = Inp->GetStr();
 					LString::Array p = s.SplitDelimit(":,");
 					if (p.Length() == 2)
 					{
@@ -3594,7 +3599,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 						GotoReference(file, line, false, true);
 					}
 					else LgiMsg(this, "Error: Needs a file name as well.", AppName);
-				}
+					delete Inp;
+				});
 			}
 			break;
 		}
@@ -3656,7 +3662,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 						Dlg.Params->Dir = Base;
 				}
 
-				if (Dlg.DoModal())
+				Dlg.DoModal([&](auto dlg, auto code)
 				{
 					if (p && Dlg.Params->Type == FifSearchSolution)
 					{
@@ -3684,7 +3690,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 
 					d->Finder->Stop();
 					d->Finder->PostEvent(FindInFilesThread::M_START_SEARCH, (LMessage::Param) new FindParams(d->FindParameters));
-				}
+				});
 			}
 			break;
 		}
@@ -3697,11 +3703,11 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			}
 			else
 			{
-				FindSymResult r = d->FindSym->OpenSearchDlg(this);
-				if (r.File)
+				d->FindSym->OpenSearchDlg(this, [&](auto r)
 				{
-					GotoReference(r.File, r.Line, false);
-				}
+					if (r.File)
+						GotoReference(r.File, r.Line, false);
+				});
 			}
 			break;
 		}
@@ -3724,7 +3730,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			else
 			{
 				FindInProject Dlg(this);
-				Dlg.DoModal();
+				Dlg.DoModal(NULL);
 			}
 			break;
 		}
@@ -3815,18 +3821,22 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_OPEN_PROJECT:
 		{
-			LFileSelect s;
-			s.Parent(this);
-			s.Type("Projects", "*.xml");
-			if (s.Open())
+			LFileSelect *s = new LFileSelect;
+			s->Parent(this);
+			s->Type("Projects", "*.xml");
+			s->Open([&](auto s, auto ok)
 			{
-				CloseAll();
-				OpenProject(s.Name(), NULL, Cmd == IDM_NEW_PROJECT);
-				if (d->Tree)
+				if (ok)
 				{
-					d->Tree->Focus(true);
+					CloseAll();
+					OpenProject(s->Name(), NULL, Cmd == IDM_NEW_PROJECT);
+					if (d->Tree)
+					{
+						d->Tree->Focus(true);
+					}
 				}
-			}
+				delete s;
+			});
 			break;
 		}
 		case IDM_IMPORT_DSP:
@@ -3834,13 +3844,15 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			IdeProject *p = RootProject();
 			if (p)
 			{
-				LFileSelect s;
-				s.Parent(this);
-				s.Type("Developer Studio Project", "*.dsp");
-				if (s.Open())
+				LFileSelect *s = new LFileSelect;
+				s->Parent(this);
+				s->Type("Developer Studio Project", "*.dsp");
+				s->Open([&](auto s, auto ok)
 				{
-					p->ImportDsp(s.Name());
-				}
+					if (ok)
+						p->ImportDsp(s->Name());
+					delete s;
+				});
 			}
 			break;
 		}
@@ -4063,11 +4075,13 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			if (!Doc)
 				break;
 
-			LInput i(this, "", "Separator:", AppName);
-			if (!i.DoModal())
-				break;
-				
-			Doc->SplitSelection(i.GetStr());
+			LInput *i = new LInput(this, "", "Separator:", AppName);
+			i->DoModal([&](auto dlg, auto ok)
+			{
+				if (ok)
+					Doc->SplitSelection(i->GetStr());
+				delete i;
+			});
 			break;
 		}
 		case IDM_JOIN:
@@ -4076,11 +4090,13 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			if (!Doc)
 				break;
 
-			LInput i(this, "", "Separator:", AppName);
-			if (!i.DoModal())
-				break;
-				
-			Doc->JoinSelection(i.GetStr());
+			LInput *i = new LInput(this, "", "Separator:", AppName);
+			i->DoModal([&](auto dlg, auto ok)
+			{
+				if (ok)
+					Doc->JoinSelection(i->GetStr());
+				delete i;
+			});
 			break;
 		}
 		case IDM_EOL_LF:

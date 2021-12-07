@@ -154,14 +154,16 @@ public:
 				Load(file);
 			else
 			{
-				LFileSelect s;
-				s.Parent(this);
-				s.Type("Dump", "*.mem");
-				s.Type("All Files", LGI_ALL_FILES);
-				if (s.Open())
+				LFileSelect *s = new LFileSelect;
+				s->Parent(this);
+				s->Type("Dump", "*.mem");
+				s->Type("All Files", LGI_ALL_FILES);
+				s->Open([&](auto s, auto ok)
 				{
-					Load(s.Name());
-				}
+					if (ok)
+						Load(s->Name());
+					delete s;
+				});
 			}
 		}
 	}

@@ -44,7 +44,7 @@ class
 	public LDragDropTarget,
 	public LCapabilityClient
 {
-	friend bool RichText_FindCallback(GFindReplaceCommon *Dlg, bool Replace, void *User);
+	friend bool RichText_FindCallback(LFindReplaceCommon *Dlg, bool Replace, void *User);
 
 public:
 	enum GTextViewSeek
@@ -191,8 +191,8 @@ public:
 	void OnAddStyle(const char *MimeType, const char *Styles);
 
 	// Object Events
-	bool OnFind(GFindReplaceCommon *Params);
-	bool OnReplace(GFindReplaceCommon *Params);
+	bool OnFind(LFindReplaceCommon *Params);
+	bool OnReplace(LFindReplaceCommon *Params);
 	bool OnMultiLineTab(bool In);
 	void OnSetHidden(int Hidden);
 	void OnPosChange();

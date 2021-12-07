@@ -341,18 +341,25 @@ void ProjectNode::AddNodes(LArray<ProjectNode*> &Nodes)
 
 void ProjectNode::SetClean()
 {
-	if (Dep)
+	auto CleanProj = [&]()
 	{
-		Dep->SetClean();
-	}
-	
-	for (auto i:*this)
-	{
-		ProjectNode *p = dynamic_cast<ProjectNode*>(i);
-		if (!p) break;
+		for (auto i: *this)
+		{
+			ProjectNode *p = dynamic_cast<ProjectNode*>(i);
+			if (p)
+				p->SetClean();
+		}
+	};
 
-		p->SetClean();
-	}
+	if (Dep)
+		Dep->SetClean([&](bool ok)
+		{
+			if (ok)
+				CleanProj();
+		});
+	else
+		CleanProj();
+
 }
 
 IdeProject *ProjectNode::GetDep()
@@ -1002,139 +1009,151 @@ void ProjectNode::OnMouseClick(LMouse &m)
 		{
 			case IDM_INSERT_FTP:
 			{
-				AddFtpFile Add(Tree, GetAttr(OPT_Ftp));
-				if (Add.DoModal())
+				AddFtpFile *Add = new AddFtpFile(Tree, GetAttr(OPT_Ftp));
+				Add->DoModal([&](auto dlg, auto code)
 				{
-					for (int i=0; i<Add.Uris.Length(); i++)
+					if (code)
 					{
-						ProjectNode *New = new ProjectNode(Project);
-						if (New)
-						{
-							New->SetFileName(Add.Uris[i]);
-							InsertTag(New);
-							SortChildren();
-							Project->SetDirty();
-						}
-					}
-				}
-				break;
-			}
-			case IDM_INSERT:
-			{
-				LFileSelect s;
-				s.Parent(Tree);
-				s.Type("Source", SourcePatterns);
-				s.Type("Makefiles", "*makefile");
-				s.Type("All Files", LGI_ALL_FILES);
-				s.MultiSelect(true);
-
-				LAutoString Dir = Project->GetBasePath();
-				if (Dir)
-				{
-					s.InitialDir(Dir);
-				}
-
-				if (s.Open())
-				{
-					for (int i=0; i<s.Length(); i++)
-					{
-						if (!Project->InProject(false, s[i], false))
+						for (int i=0; i<Add->Uris.Length(); i++)
 						{
 							ProjectNode *New = new ProjectNode(Project);
 							if (New)
 							{
-								New->SetFileName(s[i]);
+								New->SetFileName(Add->Uris[i]);
 								InsertTag(New);
 								SortChildren();
 								Project->SetDirty();
 							}
 						}
-						else
-						{
-							LgiMsg(Tree, "'%s' is already in the project.\n", AppName, MB_OK, s[i]);
-						}
 					}
-				}
+					delete Add;
+				});
 				break;
 			}
-			case IDM_IMPORT_FOLDER:
+			case IDM_INSERT:
 			{
-				LFileSelect s;
-				s.Parent(Tree);
+				LFileSelect *s = new LFileSelect;
+				s->Parent(Tree);
+				s->Type("Source", SourcePatterns);
+				s->Type("Makefiles", "*makefile");
+				s->Type("All Files", LGI_ALL_FILES);
+				s->MultiSelect(true);
 
 				LAutoString Dir = Project->GetBasePath();
 				if (Dir)
 				{
-					s.InitialDir(Dir);
+					s->InitialDir(Dir);
 				}
 
-				if (s.OpenFolder())
+				s->Open([&](auto s, auto ok)
 				{
-					LArray<char*> Files;
-					LArray<const char*> Ext;
-					GToken e(SourcePatterns, ";");
-					for (int i=0; i<e.Length(); i++)
+					if (ok)
 					{
-						Ext.Add(e[i]);
-					}
-					
-					if (LRecursiveFileSearch(s.Name(), &Ext, &Files))
-					{
-						auto Start = strlen(s.Name()) + 1;
-						for (int i=0; i<Files.Length(); i++)
+						for (int i=0; i<s->Length(); i++)
 						{
-							char *f = Files[i];
-							GToken p(f + Start, DIR_STR);
-							ProjectNode *Insert = this;
-							
-							// Find sub nodes, and drill into directory heirarchy,
-							// creating the nodes if needed.
-							for (int i=0; Insert && i<p.Length()-1; i++)
-							{
-								// Find existing node...
-								bool Found = false;
-
-								for (auto it:*Insert)
-								{
-									ProjectNode *c = dynamic_cast<ProjectNode *>(it);
-									if (!c) break;
-
-									if (c->GetType() == NodeDir &&
-										c->GetName() &&
-										stricmp(c->GetName(), p[i]) == 0)
-									{
-										Insert = c;
-										Found = true;
-										break;
-									}
-								}
-								
-								if (!Found)
-								{
-									// Create the node
-									IdeCommon *Com = Insert->GetSubFolder(Project, p[i], true);												
-									Insert = dynamic_cast<ProjectNode*>(Com);
-									LAssert(Insert);
-								}
-							}
-							
-							// Insert the file into the tree...
-							if (Insert)
+							if (!Project->InProject(false, (*s)[i], false))
 							{
 								ProjectNode *New = new ProjectNode(Project);
 								if (New)
 								{
-									New->SetFileName(f);
-									Insert->InsertTag(New);
-									Insert->SortChildren();
+									New->SetFileName((*s)[i]);
+									InsertTag(New);
+									SortChildren();
 									Project->SetDirty();
 								}
 							}
+							else
+							{
+								LgiMsg(Tree, "'%s' is already in the project.\n", AppName, MB_OK, s[i]);
+							}
 						}
-						
-						Files.DeleteArrays();
-					}														
+					}
+					delete s;
+				});
+				break;
+			}
+			case IDM_IMPORT_FOLDER:
+			{
+				LFileSelect *s = new LFileSelect;
+				s->Parent(Tree);
+
+				LAutoString Dir = Project->GetBasePath();
+				if (Dir)
+				{
+					s->InitialDir(Dir);
 				}
+
+				s->OpenFolder([&](auto s, auto ok)
+				{
+					if (ok)
+					{
+						LArray<char*> Files;
+						LArray<const char*> Ext;
+						GToken e(SourcePatterns, ";");
+						for (int i=0; i<e.Length(); i++)
+						{
+							Ext.Add(e[i]);
+						}
+					
+						if (LRecursiveFileSearch(s->Name(), &Ext, &Files))
+						{
+							auto Start = strlen(s->Name()) + 1;
+							for (int i=0; i<Files.Length(); i++)
+							{
+								char *f = Files[i];
+								GToken p(f + Start, DIR_STR);
+								ProjectNode *Insert = this;
+							
+								// Find sub nodes, and drill into directory heirarchy,
+								// creating the nodes if needed.
+								for (int i=0; Insert && i<p.Length()-1; i++)
+								{
+									// Find existing node...
+									bool Found = false;
+
+									for (auto it:*Insert)
+									{
+										ProjectNode *c = dynamic_cast<ProjectNode *>(it);
+										if (!c) break;
+
+										if (c->GetType() == NodeDir &&
+											c->GetName() &&
+											stricmp(c->GetName(), p[i]) == 0)
+										{
+											Insert = c;
+											Found = true;
+											break;
+										}
+									}
+								
+									if (!Found)
+									{
+										// Create the node
+										IdeCommon *Com = Insert->GetSubFolder(Project, p[i], true);												
+										Insert = dynamic_cast<ProjectNode*>(Com);
+										LAssert(Insert);
+									}
+								}
+							
+								// Insert the file into the tree...
+								if (Insert)
+								{
+									ProjectNode *New = new ProjectNode(Project);
+									if (New)
+									{
+										New->SetFileName(f);
+										Insert->InsertTag(New);
+										Insert->SortChildren();
+										Project->SetDirty();
+									}
+								}
+							}
+						
+							Files.DeleteArrays();
+						}
+					}
+					delete s;
+				});
 				break;
 			}
 			case IDM_SORT_CHILDREN:
@@ -1145,22 +1164,28 @@ void ProjectNode::OnMouseClick(LMouse &m)
 			}
 			case IDM_NEW_FOLDER:
 			{
-				LInput Name(Tree, "", "Name:", AppName);
-				if (Name.DoModal())
+				LInput *Name = new LInput(Tree, "", "Name:", AppName);
+				Name->DoModal([&](auto dlg, auto ok)
 				{
-					GetSubFolder(Project, Name.GetStr(), true);
-				}
+					if (ok)
+						GetSubFolder(Project, Name->GetStr(), true);
+					delete Name;
+				});
 				break;
 			}
 			case IDM_RENAME:
 			{
-				LInput Name(Tree, "", "Name:", AppName);
-				if (Name.DoModal())
+				LInput *Name = new LInput(Tree, GetName(), "Name:", AppName);
+				Name->DoModal([&](auto dlg, auto ok)
 				{
-					SetName(Name.GetStr());
-					Project->SetDirty();
-					Update();
-				}
+					if (ok)
+					{
+						SetName(Name->GetStr());
+						Project->SetDirty();
+						Update();
+					}
+					delete Name;
+				});
 				break;
 			}
 			case IDM_DELETE:
@@ -1379,23 +1404,27 @@ void ProjectNode::OnProperties()
 	{
 		bool IsFolder = sFile.IsEmpty();
 
-		WebFldDlg Dlg(Tree, sName, IsFolder ? GetAttr(OPT_Ftp) : sFile.Get(), GetAttr(OPT_Www));
-		if (Dlg.DoModal())
+		WebFldDlg *Dlg = new WebFldDlg(Tree, sName, IsFolder ? GetAttr(OPT_Ftp) : sFile.Get(), GetAttr(OPT_Www));
+		Dlg->DoModal([&](auto dlg, auto ok)
 		{
-			if (IsFolder)
+			if (ok)
 			{
-				SetName(Dlg.Name);
-				SetAttr(OPT_Ftp, Dlg.Ftp);
-				SetAttr(OPT_Www, Dlg.Www);
-			}
-			else
-			{
-				sFile = Dlg.Ftp;
-			}
+				if (IsFolder)
+				{
+					SetName(Dlg->Name);
+					SetAttr(OPT_Ftp, Dlg->Ftp);
+					SetAttr(OPT_Www, Dlg->Www);
+				}
+				else
+				{
+					sFile = Dlg->Ftp;
+				}
 
-			Project->SetDirty();
-			Update();
-		}
+				Project->SetDirty();
+				Update();
+			}
+			delete Dlg;
+		});
 	}
 	else if (Type == NodeDir)
 	{
@@ -1416,37 +1445,41 @@ void ProjectNode::OnProperties()
 			char Msg[512];
 			sprintf(Msg, "Source Code:\n\n\t%s\n\nSize: %s (%i bytes)", Path.Get(), Size, (int32)FSize);
 		
-			FileProps Dlg(Tree, Msg, Type, Platforms, Charset);
-			switch (Dlg.DoModal())
+			FileProps *Dlg = new FileProps(Tree, Msg, Type, Platforms, Charset);
+			Dlg->DoModal([&](auto dlg, auto code)
 			{
-				case IDOK:
+				switch (code)
 				{
-					if (Type != Dlg.Type)
+					case IDOK:
 					{
-						Type = Dlg.Type;
-						Project->SetDirty();
-					}
-					if (Platforms != Dlg.Platforms)
-					{
-						Platforms = Dlg.Platforms;
-						Project->SetDirty();
-					}
-					if (Charset != Dlg.Charset)
-					{
-						Charset = Dlg.Charset;
-						Project->SetDirty();
-					}
+						if (Type != Dlg->Type)
+						{
+							Type = Dlg->Type;
+							Project->SetDirty();
+						}
+						if (Platforms != Dlg->Platforms)
+						{
+							Platforms = Dlg->Platforms;
+							Project->SetDirty();
+						}
+						if (Charset != Dlg->Charset)
+						{
+							Charset = Dlg->Charset;
+							Project->SetDirty();
+						}
 					
-					Update();
-					break;
+						Update();
+						break;
+					}
+					case IDC_COPY_PATH:
+					{
+						LClipBoard Clip(Tree);
+						Clip.Text(Path);
+						break;
+					}
 				}
-				case IDC_COPY_PATH:
-				{
-					LClipBoard Clip(Tree);
-					Clip.Text(Path);
-					break;
-				}
-			}
+				delete Dlg;
+			});
 		}
 	}
 }

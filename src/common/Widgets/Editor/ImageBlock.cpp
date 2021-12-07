@@ -932,7 +932,7 @@ bool LRichTextPriv::ImageBlock::Seek(SeekType To, BlockCursor &Cursor)
 	return true;
 }
 
-ssize_t LRichTextPriv::ImageBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params)
+ssize_t LRichTextPriv::ImageBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params)
 {
 	// No text to find in
 	return -1;

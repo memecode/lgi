@@ -7811,7 +7811,7 @@ bool GHtml::Copy()
 	return false;
 }
 
-static bool FindCallback(GFindReplaceCommon *Dlg, bool Replace, void *User)
+static bool FindCallback(LFindReplaceCommon *Dlg, bool Replace, void *User)
 {
 	GHtml *h = (GHtml*)User;
 	return h->OnFind(Dlg);
@@ -7904,7 +7904,7 @@ bool GHtml::OnSubmitForm(GTag *Form)
 	return Status;
 }
 
-bool GHtml::OnFind(GFindReplaceCommon *Params)
+bool GHtml::OnFind(LFindReplaceCommon *Params)
 {
 	bool Status = false;
 
@@ -7971,7 +7971,7 @@ bool GHtml::OnFind(GFindReplaceCommon *Params)
 
 bool GHtml::DoFind()
 {
-	GFindDlg Dlg(this, 0, FindCallback, this);
+	LFindDlg Dlg(this, 0, FindCallback, this);
 	return Dlg.DoModal();
 }
 

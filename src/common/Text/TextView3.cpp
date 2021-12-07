@@ -2331,15 +2331,16 @@ void LTextView3::ClearDirty(std::function<void(bool)> OnStatus, bool Ask, const 
 					OnStatus(ok);
 			};
 			
-			LFileSelect Select;
-			Select.Parent(this);
 			if (!FileName)
 			{
-				Select.Save([&FileName, &DoSave](auto Select, auto ok)
+				LFileSelect *Select = new LFileSelect;
+				Select->Parent(this);
+				Select->Save([&FileName, &DoSave](auto Select, auto ok)
 				{
 					if (ok)
-						FileName = Select.Name();					
+						FileName = Select->Name();					
 					DoSave(ok);
+					delete Select;
 				});
 			}
 			else DoSave(true);
@@ -2654,7 +2655,7 @@ void LTextView3::UpdateScrollBars(bool Reset)
 	}
 }
 
-bool LTextView3::DoCase(bool Upper)
+void LTextView3::DoCase(std::function<void(bool)> Callback, bool Upper)
 {
 	if (Text)
 	{
@@ -2695,7 +2696,8 @@ bool LTextView3::DoCase(bool Upper)
 		}
 	}
 	
-	return true;
+	if (Callback)
+		Callback(Text != NULL);
 }
 
 ssize_t LTextView3::GetLine()
@@ -2705,7 +2707,7 @@ ssize_t LTextView3::GetLine()
 	return Idx + 1;
 }
 
-void LTextView3::SetLine(int i)
+void LTextView3::SetLine(int64_t i)
 {
 	LTextLine *l = Line.ItemAt(i - 1);
 	if (l)
@@ -2749,10 +2751,9 @@ void LTextView3::SetFindReplaceParams(GDocFindReplaceParams *Params)
 	}
 }
 
-bool LTextView3::DoFindNext()
+void LTextView3::DoFindNext(std::function<void(bool)> OnStatus)
 {
 	bool Status = false;
-
 	if (InThread())
 	{
 		if (d->FindReplaceParams->Lock(_FL))
@@ -2771,31 +2772,11 @@ bool LTextView3::DoFindNext()
 	{
 		Status = PostEvent(M_TEXTVIEW_FIND);
 	}
-	
-	return Status;
+	if (OnStatus)
+		OnStatus(Status);
 }
 
-bool
-Text3_FindCallback(GFindReplaceCommon *Dlg, bool Replace, void *User)
-{
-	LTextView3 *v = (LTextView3*) User;
-
-	if (v->d->FindReplaceParams &&
-		v->d->FindReplaceParams->Lock(_FL))
-	{
-		v->d->FindReplaceParams->MatchWord = Dlg->MatchWord;
-		v->d->FindReplaceParams->MatchCase = Dlg->MatchCase;
-		v->d->FindReplaceParams->SelectionOnly = Dlg->SelectionOnly;
-		v->d->FindReplaceParams->SearchUpwards = Dlg->SearchUpwards;
-		v->d->FindReplaceParams->LastFind.Reset(Utf8ToWide(Dlg->Find));
-		
-		v->d->FindReplaceParams->Unlock();
-	}
-
-	return v->DoFindNext();
-}
-
-bool LTextView3::DoFind()
+void LTextView3::DoFind(std::function<void(bool)> Callback)
 {
 	LString u;
 
@@ -2811,14 +2792,32 @@ bool LTextView3::DoFind()
 		u = d->FindReplaceParams->LastFind.Get();
 	}
 
-	GFindDlg Dlg(this, u, Text3_FindCallback, this);
-	Dlg.DoModal();
-	Focus(true);
+	LFindDlg Dlg(this, [View=this, Params=d->FindReplaceParams, Callback](LFindReplaceCommon *Dlg, int Action)
+	{
+		if (Params &&
+			Params->Lock(_FL))
+		{
+			Params->MatchWord = Dlg->MatchWord;
+			Params->MatchCase = Dlg->MatchCase;
+			Params->SelectionOnly = Dlg->SelectionOnly;
+			Params->SearchUpwards = Dlg->SearchUpwards;
+			Params->LastFind.Reset(Utf8ToWide(Dlg->Find));
+		
+			Params->Unlock();
+		}
 
-	return false;
+		View->DoFindNext([View, Callback](bool ok)
+		{
+			View->Focus(true);
+			if (Callback)
+				Callback(ok);
+		});
+	}, u);
+
+	Dlg.DoModal(NULL);
 }
 
-bool LTextView3::DoReplace()
+void LTextView3::DoReplace(std::function<void(bool)> Callback)
 {
 	bool SingleLineSelection = false;
 	SingleLineSelection = HasSelection();
@@ -2838,52 +2837,62 @@ bool LTextView3::DoReplace()
 	char *LastFind8 = SingleLineSelection ? GetSelection() : WideToUtf8(d->FindReplaceParams->LastFind);
 	char *LastReplace8 = WideToUtf8(d->FindReplaceParams->LastReplace);
 	
-	GReplaceDlg Dlg(this, LastFind8, LastReplace8);
+	LReplaceDlg Dlg(this,
+		[&](LFindReplaceCommon *Dlg, int Action)
+		{
+			LReplaceDlg *Replace = dynamic_cast<LReplaceDlg*>(Dlg);
+			LAssert(Replace != NULL);
+
+			DeleteArray(LastFind8);
+			DeleteArray(LastReplace8);
+
+			if (Action == IDCANCEL)
+				return;
+
+			if (d->FindReplaceParams->Lock(_FL))
+			{
+				d->FindReplaceParams->LastFind.Reset(Utf8ToWide(Replace->Find));
+				d->FindReplaceParams->LastReplace.Reset(Utf8ToWide(Replace->Replace));
+				d->FindReplaceParams->MatchWord = Replace->MatchWord;
+				d->FindReplaceParams->MatchCase = Replace->MatchCase;
+				d->FindReplaceParams->SelectionOnly = Replace->SelectionOnly;
+					
+				switch (Action)
+				{
+					case IDC_FR_FIND:
+					{
+						OnFind(	d->FindReplaceParams->LastFind,
+								d->FindReplaceParams->MatchWord,
+								d->FindReplaceParams->MatchCase,
+								d->FindReplaceParams->SelectionOnly,
+								d->FindReplaceParams->SearchUpwards);
+						break;
+					}
+					case IDOK:
+					case IDC_FR_REPLACE:
+					{
+						OnReplace(	d->FindReplaceParams->LastFind,
+									d->FindReplaceParams->LastReplace,
+									Action == IDOK,
+									d->FindReplaceParams->MatchWord,
+									d->FindReplaceParams->MatchCase,
+									d->FindReplaceParams->SelectionOnly,
+									d->FindReplaceParams->SearchUpwards);
+						break;
+					}
+				}
+
+				d->FindReplaceParams->Unlock();
+			}
+		},
+		LastFind8,
+		LastReplace8);
 
 	Dlg.MatchWord = d->FindReplaceParams->MatchWord;
 	Dlg.MatchCase = d->FindReplaceParams->MatchCase;
 	Dlg.SelectionOnly = HasSelection();
 
-	int Action = Dlg.DoModal();
-
-	DeleteArray(LastFind8);
-	DeleteArray(LastReplace8);
-
-	if (Action != IDCANCEL)
-	{
-		d->FindReplaceParams->LastFind.Reset(Utf8ToWide(Dlg.Find));
-		d->FindReplaceParams->LastReplace.Reset(Utf8ToWide(Dlg.Replace));
-		d->FindReplaceParams->MatchWord = Dlg.MatchWord;
-		d->FindReplaceParams->MatchCase = Dlg.MatchCase;
-		d->FindReplaceParams->SelectionOnly = Dlg.SelectionOnly;
-	}
-
-	switch (Action)
-	{
-		case IDC_FR_FIND:
-		{
-			OnFind(	d->FindReplaceParams->LastFind,
-					d->FindReplaceParams->MatchWord,
-					d->FindReplaceParams->MatchCase,
-					d->FindReplaceParams->SelectionOnly,
-					d->FindReplaceParams->SearchUpwards);
-			break;
-		}
-		case IDOK:
-		case IDC_FR_REPLACE:
-		{
-			OnReplace(	d->FindReplaceParams->LastFind,
-						d->FindReplaceParams->LastReplace,
-						Action == IDOK,
-						d->FindReplaceParams->MatchWord,
-						d->FindReplaceParams->MatchCase,
-						d->FindReplaceParams->SelectionOnly,
-						d->FindReplaceParams->SearchUpwards);
-			break;
-		}
-	}
-
-	return false;
+	Dlg.DoModal(NULL);
 }
 
 void LTextView3::SelectWord(size_t From)
@@ -3620,22 +3629,27 @@ void LTextView3::DoContextMenu(LMouse &m)
 		{
 			char s[32];
 			sprintf_s(s, sizeof(s), "%i", IndentSize);
-			LInput i(this, s, "Indent Size:", "Text");
-			if (i.DoModal())
+			
+			LInput *i = new LInput(this, s, "Indent Size:", "Text");
+			i->DoModal([&](auto dlg, auto code)
 			{
-				IndentSize = atoi(i.GetStr());
-			}
+				if (code)
+					IndentSize = atoi(i->GetStr());
+				delete i;
+			});
 			break;
 		}
 		case IDM_TAB_SIZE:
 		{
 			char s[32];
 			sprintf_s(s, sizeof(s), "%i", TabSize);
-			LInput i(this, s, "Tab Size:", "Text");
-			if (i.DoModal())
+			
+			LInput *i = new LInput(this, s, "Tab Size:", "Text");
+			i->DoModal([&](auto dlg, auto code)
 			{
-				SetTabSize(atoi(i.GetStr()));
-			}
+				SetTabSize(atoi(i->GetStr()));
+				delete i;
+			});
 			break;
 		}
 		default:
@@ -4181,7 +4195,7 @@ bool LTextView3::OnKey(LKey &k)
 			{
 				if (k.Down())
 				{
-					DoFindNext();
+					DoFindNext(NULL);
 				}
 				return true;
 				break;
@@ -4668,7 +4682,7 @@ bool LTextView3::OnKey(LKey &k)
 						{
 							if (k.Down())
 							{
-								DoFind();
+								DoFind(NULL);
 							}
 							return true;
 							break;
@@ -4688,7 +4702,7 @@ bool LTextView3::OnKey(LKey &k)
 						{
 							if (k.Down())
 							{
-								DoReplace();
+								DoReplace(NULL);
 							}
 							return true;
 							break;
@@ -4700,7 +4714,7 @@ bool LTextView3::OnKey(LKey &k)
 							{
 								if (k.Down())
 								{
-									DoCase(k.Shift());
+									DoCase(NULL, k.Shift());
 								}
 								return true;
 							}
@@ -5281,7 +5295,7 @@ LMessage::Result LTextView3::OnEvent(LMessage *Msg)
 		case M_TEXTVIEW_FIND:
 		{
 			if (InThread())
-				DoFindNext();
+				DoFindNext(NULL);
 			else
 				LgiTrace("%s:%i - Not in thread.\n", _FL);
 			break;

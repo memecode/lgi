@@ -84,7 +84,7 @@ void LFontType::DoUI(LView *Parent, std::function<void(LFontType*)> Callback)
 	#endif
 
 	LFontSelect *Dlg = new LFontSelect(Parent, i, bytes);
-	Dlg->DoModal([Dlg,FontType=this,Callback](auto d, auto code)
+	Dlg->DoModal([&,FontType=this](auto d, auto code)
 	{
 		if (code == IDOK)
 		{

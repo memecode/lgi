@@ -863,14 +863,10 @@ LMessage::Result LWindow::OnEvent(LMessage *Msg)
 		}
 		case M_ASSERT_UI:
 		{
-			int *Result = (int*)Msg->A();
-			LString *Str = (LString*)Msg->B();
-			if (Result)
-			{
-				extern int LAssertDlg(LString Msg);
-				*Result = LAssertDlg(Str ? *Str : "Error: no msg.");
-			}
-			else assert(!"Invalid param");
+			LAutoPtr<LString> Str((LString*)Msg->A());
+			extern void LAssertDlg(LString Msg, std::function<void(int)> Callback);
+			if (Str)
+				LAssertDlg(Str ? *Str : "Error: no msg.", NULL);
 			break;
 		}
 		case M_SET_WINDOW_PLACEMENT:

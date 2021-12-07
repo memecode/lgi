@@ -639,11 +639,15 @@ FindSymbolSystem::~FindSymbolSystem()
 	delete d;
 }
 
-FindSymResult FindSymbolSystem::OpenSearchDlg(LViewI *Parent)
+void FindSymbolSystem::OpenSearchDlg(LViewI *Parent, std::function<void(FindSymResult&)> Callback)
 {
-	FindSymbolDlg Dlg(Parent, this);
-	Dlg.DoModal();
-	return Dlg.Result;	
+	FindSymbolDlg *Dlg = new FindSymbolDlg(Parent, this);
+	Dlg->DoModal([Dlg, Callback](auto d, auto code)
+	{
+		if (Callback)
+			Callback(Dlg->Result);
+		delete Dlg;
+	});
 }
 
 bool FindSymbolSystem::SetIncludePaths(LString::Array &Paths)

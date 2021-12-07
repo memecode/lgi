@@ -306,14 +306,16 @@ public:
 		{
 			case IDC_BROWSE:
 			{
-				LFileSelect s;
+				LFileSelect *s = new LFileSelect;
 				LAutoString Dir = Proj->GetBasePath();
-				s.Parent(this);
-				s.InitialDir(Dir);
-				if (s.Open())
+				s->Parent(this);
+				s->InitialDir(Dir);
+				s->Open([&](auto s, auto ok)
 				{
-					OnReplace(s.Name());
-				}
+					if (ok)
+						OnReplace(s->Name());
+					delete s;
+				});
 				break;
 			}
 			case IDC_DELETE:
@@ -393,5 +395,5 @@ public:
 void FixMissingFilesDlg(IdeProject *Proj)
 {
 	MissingFiles Dlg(Proj);
-	Dlg.DoModal();
+	Dlg.DoModal(NULL);
 }

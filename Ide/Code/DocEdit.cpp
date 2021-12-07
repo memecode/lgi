@@ -74,36 +74,40 @@ bool DocEdit::AppendItems(LSubMenu *Menu, const char *Param, int Base)
 	return true;
 }
 	
-bool DocEdit::DoGoto()
+void DocEdit::DoGoto(std::function<void(bool)> Callback)
 {
-	LInput Dlg(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
-	
-	Dlg.DoModal( [&,&Dlg](auto &d, auto code) {
-	
-		if (!ValidStr(Dlg.GetStr()))
-			return;
-	
-		LString s = Dlg.GetStr();
-		LString::Array p = s.SplitDelimit(":,");
-		if (p.Length() == 2)
-		{
-			LString file = p[0];
-			int line = (int)p[1].Int();
-			Doc->GetApp()->GotoReference(file, line, false, true);
+	LInput *Dlg = new LInput(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");	
+	Dlg->DoModal([&](auto d, auto code)
+	{
+		bool status = code && ValidStr(Dlg->GetStr());
+		if (status)
+		{	
+			auto s = Dlg->GetStr();
+			LString::Array p = s.SplitDelimit(":,");
+			if (p.Length() == 2)
+			{
+				LString file = p[0];
+				int line = (int)p[1].Int();
+				Doc->GetApp()->GotoReference(file, line, false, true);
+			}
+			else if (p.Length() == 1)
+			{
+				int line = (int)p[0].Int();
+				if (line > 0)
+					SetLine(line);
+				else
+					// Probably a filename with no line number..
+					Doc->GetApp()->GotoReference(p[0], 1, false, true);				
+			}
 		}
-		else if (p.Length() == 1)
-		{
-			int line = (int)p[0].Int();
-			if (line > 0)
-				SetLine(line);
-			else
-				// Probably a filename with no line number..
-				Doc->GetApp()->GotoReference(p[0], 1, false, true);				
-		}
+
+		if (Callback)
+			Callback(status);
+
+		delete Dlg;
 	});
-		
-	return true;
 }
+
 bool DocEdit::SetPourEnabled(bool b)
 {
 	bool e = PourEnabled;

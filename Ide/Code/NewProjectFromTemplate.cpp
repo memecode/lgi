@@ -46,10 +46,14 @@ public:
 		{
 			case IDC_BROWSE_OUTPUT:
 			{
-				LFileSelect s;
-				s.Parent(this);
-				if (s.OpenFolder())
-					SetCtrlName(IDC_FOLDER, s.Name());
+				LFileSelect *s = new LFileSelect;
+				s->Parent(this);
+				s->OpenFolder([&](auto s, auto ok)
+				{
+					if (ok)
+						SetCtrlName(IDC_FOLDER, s->Name());
+					delete s;
+				});
 				break;
 			}
 			case IDOK:
@@ -140,6 +144,7 @@ bool CreateProject(const char *Name, const char *Template, const char *Folder)
 	FileDev->Delete(ScriptOut);
 	return true;
 }
+
 void NewProjectFromTemplate(LViewI *parent)
 {
 	LFile::Path p(LSP_APP_INSTALL);
@@ -149,25 +154,24 @@ void NewProjectFromTemplate(LViewI *parent)
 		#endif
 		"../templates";
 	TemplatesPath = p;
-	NewProjFromTemplate Dlg(parent);
-	if (!Dlg.DoModal())
+	NewProjFromTemplate *Dlg = new NewProjFromTemplate(parent);
+	Dlg->DoModal([&](auto dlg, auto code)
 	{
-		LgiTrace("%s:%i - Dialog cancelled.\n", _FL);
-		return;
-	}
-	LTree *t;
-	if (!Dlg.GetViewById(IDC_TEMPLATES, t))
-	{
-		LgiTrace("%s:%i - No tree.\n", _FL);
-		return;
-	}
+		LTree *t;
+		if (!Dlg->GetViewById(IDC_TEMPLATES, t))
+		{
+			LgiTrace("%s:%i - No tree.\n", _FL);
+			return;
+		}
 	
-	auto sel = t->Selection();
-	if (!sel)
-	{
-		LgiTrace("%s:%i - No selection.\n", _FL);
-		return;
-	}
+		auto sel = t->Selection();
+		if (!sel)
+		{
+			LgiTrace("%s:%i - No selection.\n", _FL);
+			return;
+		}
 	
-	CreateProject(Dlg.GetCtrlName(IDC_PROJ_NAME), sel->GetText(1), Dlg.GetCtrlName(IDC_FOLDER));
+		CreateProject(Dlg->GetCtrlName(IDC_PROJ_NAME), sel->GetText(1), Dlg->GetCtrlName(IDC_FOLDER));
+		delete Dlg;
+	});
 }

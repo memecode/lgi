@@ -416,12 +416,25 @@ LView *SystemFunctions::CastLView(LVariant &v)
 	return 0;
 }
 
+bool SystemFunctions::WaitForReturn(LScriptArguments &Args)
+{
+	while (Args.GetReturn()->Type != GV_NULL)
+	{
+		// This should only ever loop on Haiku...
+		LYield();
+		LSleep(10);
+	}
+
+	return true;
+}
+
 bool SystemFunctions::SelectFiles(LScriptArguments &Args)
 {
-	LFileSelect s;
+	LFileSelect *s = new LFileSelect;
 	
+	Args.GetReturn()->Empty();
 	if (Args.Length() > 0)
-		s.Parent(CastLView(*Args[0]));
+		s->Parent(CastLView(*Args[0]));
 	
 	GToken t(Args.Length() > 1 ? Args[1]->CastString() : 0, ",;:");
 	for (unsigned i=0; i<t.Length(); i++)
@@ -431,7 +444,7 @@ bool SystemFunctions::SelectFiles(LScriptArguments &Args)
 		if (sp)
 		{
 			*sp++ = 0;
-			s.Type(sp, c);
+			s->Type(sp, c);
 		}
 		else
 		{
@@ -440,42 +453,57 @@ bool SystemFunctions::SelectFiles(LScriptArguments &Args)
 			{
 				char Type[256];
 				sprintf_s(Type, sizeof(Type), "%s files", dot + 1);
-				s.Type(Type, c);
+				s->Type(Type, c);
 			}
 		}
 	}
-	s.Type("All Files", LGI_ALL_FILES);
+	s->Type("All Files", LGI_ALL_FILES);
 
-	s.InitialDir(Args.Length() > 2 ? Args[2]->CastString() : 0);
-	s.MultiSelect(Args.Length() > 3 ? Args[3]->CastInt32() != 0 : true);
+	s->InitialDir(Args.Length() > 2 ? Args[2]->CastString() : 0);
+	s->MultiSelect(Args.Length() > 3 ? Args[3]->CastInt32() != 0 : true);
 	bool SaveAs = Args.Length() > 4 ? Args[4]->CastInt32() != 0 : false;
 
-	if (SaveAs ? s.Save() : s.Open())
+	auto Process = [&Args](LFileSelect *s, bool ok)
 	{
-		Args.GetReturn()->SetList();
-		for (unsigned i=0; i<s.Length(); i++)
+		if (ok)
 		{
-			Args.GetReturn()->Value.Lst->Insert(new LVariant(s[i]));
+			Args.GetReturn()->SetList();
+			auto Lst = Args.GetReturn()->Value.Lst;
+			for (unsigned i=0; i<s->Length(); i++)
+				Lst->Insert(new LVariant((*s)[i]));
 		}
-	}
+		else *Args.GetReturn() = false;
+		delete s;
+	};
 
-	return true;
+	if (SaveAs)
+		s->Save(Process);
+	else
+		s->Open(Process);
+
+	return WaitForReturn(Args);
 }
 
 bool SystemFunctions::SelectFolder(LScriptArguments &Args)
 {
-	LFileSelect s;
+	LFileSelect *s = new LFileSelect;
 	
 	if (Args.Length() > 0)
-		s.Parent(CastLView(*Args[0]));
-	s.InitialDir(Args.Length() > 1 ? Args[1]->CastString() : 0);
+		s->Parent(CastLView(*Args[0]));
+	s->InitialDir(Args.Length() > 1 ? Args[1]->CastString() : 0);
 
-	if (s.OpenFolder())
-		*Args.GetReturn() = s.Name();
-	else
-		Args.GetReturn()->Empty();
+	Args.GetReturn()->Empty();
 
-	return true;
+	s->OpenFolder([&Args](LFileSelect *s, bool ok)
+	{
+		if (ok)
+			*Args.GetReturn() = s->Name();
+		else
+			*Args.GetReturn() = false;
+		delete s;
+	});
+
+	return WaitForReturn(Args);
 }
 
 bool SystemFunctions::Sleep(LScriptArguments &Args)
@@ -935,13 +963,15 @@ bool SystemFunctions::GetInputDlg(LScriptArguments &Args)
 	char *Msg = Args[2]->Str();
 	char *Title = Args[3]->Str();
 	bool Pass = Args.Length() > 4 ? Args[4]->CastInt32() != 0 : false;
-	LInput Dlg(Parent, InitVal, Msg, Title, Pass);
-	if (Dlg.DoModal())
-	{
-		*Args.GetReturn() = Dlg.GetStr();
-	}
 
-	return true;
+	LInput *Dlg = new LInput(Parent, InitVal, Msg, Title, Pass);
+	Dlg->DoModal([Dlg, &Args](auto d, auto code)
+	{
+		*Args.GetReturn() = code ? Dlg->GetStr() : -1;
+		delete Dlg;
+	});
+
+	return WaitForReturn(Args);
 }
 
 bool SystemFunctions::GetViewById(LScriptArguments &Args)

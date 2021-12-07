@@ -1836,7 +1836,7 @@ void IdeDoc::SetClean(std::function<void(bool)> Callback)
 		if (d->Project)
 			d->Project->CheckExists(LocalPath);
 
-		auto OnSave = [Doc=this, &Status, &Callback](boo ok)
+		auto OnSave = [Doc=this, &Status, &Callback](bool ok)
 		{
 			if (Callback)
 				Callback(ok);
@@ -1890,11 +1890,16 @@ bool IdeDoc::OnRequestClose(bool OsShuttingDown)
 		{
 			case IDYES:
 			{
-				if (!SetClean())
-				{				
-					return false;
-				}
-				break;
+				SetClean([](bool ok)
+				{
+					if (ok)
+					{
+						LAssert(!"Impl close doc.");
+					}
+				});
+
+				// This is returned immediately... before the user has decided to save or not
+				return false;
 			}
 			case IDNO:
 			{

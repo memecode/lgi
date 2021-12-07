@@ -724,7 +724,7 @@ public:
 			virtual bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY) = 0;
 			virtual int LineToOffset(int Line) = 0;
 			virtual int GetLines() = 0;
-			virtual ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params) = 0;
+			virtual ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params) = 0;
 			virtual void SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r) {}
 			virtual void IncAllStyleRefs() {}
 			virtual void Dump() {}
@@ -1060,7 +1060,7 @@ public:
 		ssize_t GetTextAt(ssize_t Offset, LArray<StyleText*> &t);
 		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text);
 		bool Seek(SeekType To, BlockCursor &Cursor);
-		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params);
+		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params);
 		void IncAllStyleRefs();
 		void SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r);
 		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling);
@@ -1114,7 +1114,7 @@ public:
 		ssize_t GetTextAt(ssize_t Offset, LArray<StyleText*> &t);
 		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text);
 		bool Seek(SeekType To, BlockCursor &Cursor);
-		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params);
+		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params);
 		void IncAllStyleRefs();
 		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG
@@ -1209,7 +1209,7 @@ public:
 		ssize_t GetTextAt(ssize_t Offset, LArray<StyleText*> &t);
 		ssize_t CopyAt(ssize_t Offset, ssize_t Chars, LArray<uint32_t> *Text);
 		bool Seek(SeekType To, BlockCursor &Cursor);
-		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params);
+		ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params);
 		void IncAllStyleRefs();
 		bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling);
 		#ifdef _DEBUG

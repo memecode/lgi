@@ -306,15 +306,15 @@ void GMru::DoFileDlg(LFileSelect &Select, bool Open, std::function<void(bool)> O
 	GetFileTypes(&Select, false);
 	Select.ShowReadOnly(Open);
 
-	auto Cb = [&](auto Select, bool ok)
+	auto Cb = [&](auto s, bool ok)
 	{
 		if (ok)
 		{
-			d->SelectedType = Select.TypeAt(Select.SelectedType());
+			d->SelectedType = s->TypeAt(s->SelectedType());
 			if (Open)
-				_OpenFile(Select.Name(), Select.ReadOnly());
+				_OpenFile(s->Name(), s->ReadOnly());
 			else
-				_SaveFile(Select.Name());
+				_SaveFile(s->Name());
 		}
 			
 		if (OnSelect)
