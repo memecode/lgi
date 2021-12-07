@@ -390,7 +390,7 @@ bool VcCommit::SvnParse(LString s)
 	Msg = Msg.Strip();
 	OnParse();
 	
-	LgiTrace("SvnParse %s %i %s %s %s\n", Rev.Get(), (int)Index, Author.Get(), Ts.GetDate().Get(), Msg.Get());
+	// LgiTrace("SvnParse %s %i %s %s %s\n", Rev.Get(), (int)Index, Author.Get(), Ts.GetDate().Get(), Msg.Get());
 
 	return Author && Rev && Ts.IsValid();
 }

@@ -29,7 +29,7 @@ SshConnection *AppPriv::GetConnection(const char *Uri, bool Create)
 	auto s = u.ToString();
 	auto Conn = Connections.Find(s);
 	if (!Conn && Create)
-		Connections.Add(s, Conn = new SshConnection(Log, s, "matthew@"));
+		Connections.Add(s, Conn = new SshConnection(Log, s, "matthew@*$ "));
 	return Conn;
 }
 
@@ -120,7 +120,7 @@ public:
 	}
 };
 
-bool SshConnection::WaitPrompt(LStream *con, LString *Data, bool Debug)
+bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 {
 	char buf[1024];
 	LString out;
@@ -132,7 +132,11 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, bool Debug)
 	{
 		auto rd = con->Read(buf, sizeof(buf));
 		if (rd < 0)
+		{
+			if (Debug)
+				LgiTrace("WaitPrompt.%s rd=%i\n", Debug, rd);
 			return false;
+		}
 
 		if (rd == 0)
 		{
@@ -143,7 +147,7 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, bool Debug)
 		out += LString(buf, rd);
 		if (Debug)
 		{
-			LgiTrace("WaitPrompt.out='%s'\n", out.Get());
+			LgiTrace("WaitPrompt.%s out='%s'\n", Debug, out.Get());
 		}
 
 		Count += rd;
@@ -151,7 +155,7 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, bool Debug)
 		DeEscape(out);
 		auto lines = out.SplitDelimit("\n");
 		auto last = lines.Last();
-		if (last.Find(Prompt) >= 0)
+		if (MatchStr(Prompt, last))
 		{
 			if (Data)
 			{
@@ -159,6 +163,9 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, bool Debug)
 				lines.PopLast();
 				*Data = LString("\n").Join(lines);
 			}
+
+			if (Debug)
+				LgiTrace("WaitPrompt.%s Prompt line=%i data=%i\n", Debug, (int)lines.Length(), Data?(int)Data->Length():0);
 			break;
 		}
 
@@ -294,27 +301,27 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 			if (!con)
 				break;
 
-			bool Debug = path.Equals("/var/www/html/node");
+			LAssert(p->Args.Find("\n") < 0);
+			bool Debug = false; // p->Args.Find("lib_system_control_v2/include/CTrack.h") >= 0;
 			if (Debug)
 			{
-				int asd=0;
 			}
 
 			LString cmd;
 			cmd.Printf("cd %s\n", path.Get());
 			auto wr = con->Write(cmd, cmd.Length());
-			auto pr = WaitPrompt(con);
+			auto pr = WaitPrompt(con, NULL, Debug?"Cd":NULL);
 
 			cmd.Printf("%s %s\n", p->Exe.Get(), p->Args.Get());
 			wr = con->Write(cmd, cmd.Length());
-			pr = WaitPrompt(con, &p->Output, Debug);
+			pr = WaitPrompt(con, &p->Output, Debug?"Cmd":NULL);
 			
-			// Log->Print("Ssh: %s\n%s\n", cmd.Get(), p->Output.Get());
+			// LgiTrace("Ssh: %s\n%s\n", cmd.Get(), p->Output.Get());
 
 			LString result;
 			cmd = "echo $?\n";
 			wr = con->Write(cmd, cmd.Length());
-			pr = WaitPrompt(con, &result, Debug);
+			pr = WaitPrompt(con, &result, Debug?"Echo":NULL);
 			if (pr)
 				p->ExitCode = (int)result.Int();
 
