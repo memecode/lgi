@@ -675,8 +675,10 @@ public:
 						if (Path.Exists())
 							s.InitialDir(Path);
 
-						if (BrowseFolder ? s.OpenFolder() : s.Open())
+						auto Process = [&](LFileSelect &s, bool ok)
 						{
+							if (!ok)
+								return;
 							const char *Base = GetCtrlName(IDC_PATH);
 							LAutoString Rel;
 							if (Base)
@@ -685,7 +687,12 @@ public:
 								Rel = LMakeRelativePath(--p, s.Name());
 							}
 							e->Name(Rel ? Rel : s.Name());
-						}
+						};
+						
+						if (BrowseFolder)
+							s.OpenFolder(Process);
+						else
+							s.Open(Process);
 
 						return 0; // no default btn handling.
 					}
@@ -869,23 +876,26 @@ void IdeProjectSettings::InitAllSettings(bool ClearCurrent)
 	}
 }
 
-bool IdeProjectSettings::Edit(LViewI *parent)
+bool IdeProjectSettings::Edit(LViewI *parent, std::function<void()> OnChanged)
 {
 	// Copy all the settings to the edit tag...
 	d->Editing.Copy(d->Active, true);
 	
 	// Show the dialog...
 	ProjectSettingsDlg Dlg(parent, d);
-	bool Changed = Dlg.DoModal();
-	if (Changed)
+	Dlg.DoModal([&](auto d, auto code)
 	{
-		// User elected to save settings... so copy all the values
-		// back over to the active settings...
-		d->Active.Copy(d->Editing, true);
-		d->Editing.Empty(true);
-	}
-	
-	return Changed;
+		if (code)
+		{
+			// User elected to save settings... so copy all the values
+			// back over to the active settings...
+			d->Active.Copy(d->Editing, true);
+			d->Editing.Empty(true);
+			
+			if (OnChanged)
+				OnChanged();
+		}
+	});
 }
 
 bool IdeProjectSettings::Serialize(LXmlTag *Parent, bool Write)

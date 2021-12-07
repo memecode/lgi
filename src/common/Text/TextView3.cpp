@@ -2314,7 +2314,7 @@ bool LTextView3::Paste()
 	return true;
 }
 
-bool LTextView3::ClearDirty(bool Ask, const char *FileName)
+void LTextView3::ClearDirty(std::function<void(bool)> OnStatus, bool Ask, const char *FileName)
 {
 	if (Dirty)
 	{
@@ -2324,23 +2324,36 @@ bool LTextView3::ClearDirty(bool Ask, const char *FileName)
 									MB_YESNOCANCEL) : IDYES;
 		if (Answer == IDYES)
 		{
+			auto DoSave = [&](bool ok)
+			{
+				Save(FileName);				
+				if (OnStatus)
+					OnStatus(ok);
+			};
+			
 			LFileSelect Select;
 			Select.Parent(this);
-			if (!FileName &&
-				Select.Save())
+			if (!FileName)
 			{
-				FileName = Select.Name();
+				Select.Save([&FileName, &DoSave](auto Select, auto ok)
+				{
+					if (ok)
+						FileName = Select.Name();					
+					DoSave(ok);
+				});
 			}
-
-			Save(FileName);
+			else DoSave(true);
 		}
 		else if (Answer == IDCANCEL)
 		{
-			return false;
+			if (OnStatus)
+				OnStatus(false);
+			return;
 		}
 	}
 
-	return true;
+	if (OnStatus)
+		OnStatus(true);
 }
 
 bool LTextView3::Open(const char *Name, const char *CharSet)
@@ -2703,16 +2716,18 @@ void LTextView3::SetLine(int i)
 	}
 }
 
-bool LTextView3::DoGoto()
+void LTextView3::DoGoto(std::function<void(bool)> Callback)
 {
-	LInput Dlg(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto line:"), "Text");
-	if (Dlg.DoModal() == IDOK &&
-		Dlg.GetStr())
+	LInput *Dlg = new LInput(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto line:"), "Text");	
+	Dlg->DoModal([&](auto d, auto code)
 	{
-		SetLine(atoi(Dlg.GetStr()));
-	}
-
-	return true;
+		auto ok = code == IDOK && Dlg->GetStr();
+		if (ok)
+			SetLine(Dlg->GetStr().Int());
+		if (Callback)
+			Callback(ok);
+		delete Dlg;
+	});
 }
 
 GDocFindReplaceParams *LTextView3::CreateFindReplaceParams()
@@ -4663,7 +4678,7 @@ bool LTextView3::OnKey(LKey &k)
 						{
 							if (k.Down())
 							{
-								DoGoto();
+								DoGoto(NULL);
 							}
 							return true;
 							break;

@@ -1222,7 +1222,7 @@ void IdeDoc::OnTitleClick(LMouse &m)
 		{
 			case IDM_SAVE:
 			{
-				SetClean();
+				SetClean(NULL);
 				break;
 			}
 			case IDM_CLOSE:
@@ -1466,8 +1466,9 @@ void IdeDoc::EscapeSelection(bool ToEscaped)
 		if (m.Ctrl())
 		{
 			LInput Inp(this, LString::Escape(Delim, -1, "\\"), "Delimiter chars:", "Escape");
-			if (Inp.DoModal())
+			Inp.DoModal([&](auto d, auto code) {
 				Delim = LString::UnEscape(Inp.GetStr().Get(), -1);
+			});
 		}
 		s = LString::Escape(s, -1, Delim);
 	}
@@ -1805,14 +1806,14 @@ void IdeDoc::SetDirty()
 	d->UpdateName();
 }
 
-bool IdeDoc::SetClean()
+void IdeDoc::SetClean(std::function<void(bool)> Callback)
 {
 	static bool Processing = false;
 	bool Status = false;
 
 	if (!Processing)
 	{
-		Status = Processing = true;
+		Processing = true;
 
 		LAutoString Base;
 		if (GetProject())
@@ -1835,6 +1836,13 @@ bool IdeDoc::SetClean()
 		if (d->Project)
 			d->Project->CheckExists(LocalPath);
 
+		auto OnSave = [Doc=this, &Status, &Callback](boo ok)
+		{
+			if (Callback)
+				Callback(ok);
+		};
+		
+		
 		if (d->Edit->IsDirty() &&
 			!LFileExists(LocalPath))
 		{
@@ -1844,17 +1852,17 @@ bool IdeDoc::SetClean()
 			if (Base)
 				s.InitialDir(Base);
 			
-			if (s.Save())
-				d->SetFileName(s.Name());
+			s.Save([&](auto fileSel, auto ok)
+			{
+				if (ok)
+					d->SetFileName(s.Name());				
+				OnSave(ok);
+			});
 		}
-		
-		if (d->Edit->IsDirty())
-			d->Save();
+		else OnSave(true);
 		
 		Processing = false;
 	}
-	
-	return Status;
 }
 
 void IdeDoc::OnPaint(LSurface *pDC)

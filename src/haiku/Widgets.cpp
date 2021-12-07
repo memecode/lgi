@@ -27,6 +27,7 @@ struct LDialogPriv
 	int BtnId;
 	bool IsModal, IsModeless;
 	bool Resizable;
+	LDialog::OnClose ModalCb;
 	
 	LDialogPriv()
 	{
@@ -137,22 +138,20 @@ bool LDialog::OnRequestClose(bool OsClose)
 	return true;
 }
 
-int LDialog::DoModal(OsView OverrideParent)
+void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 {
 	d->ModalStatus = -1;
 	
 	auto Parent = GetParent();
 	if (Parent)
-	{
 		MoveSameScreen(Parent);
-	}
 
 	d->IsModal = true;
 	d->IsModeless = false;
-	// LAppInst->Run();
-	printf("%s:%i - DoModal not supported.\n", _FL);
+	d->ModalCb = Cb;
 	
-	return d->ModalStatus;
+	if (Attach(0))
+		Visible(true);
 }
 
 void LDialog::EndModal(int Code)
@@ -161,11 +160,7 @@ void LDialog::EndModal(int Code)
 	{
 		d->IsModal = false;
 		d->ModalStatus = Code;
-		LAppInst->Exit();
-	}
-	else
-	{
-		// LAssert(0);
+		d->ModalCb(*this, Code);
 	}
 }
 

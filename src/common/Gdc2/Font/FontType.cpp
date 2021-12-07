@@ -71,7 +71,7 @@ void LFontType::SetPointSize(int PointSize)
 	#endif
 }
 
-bool LFontType::DoUI(LView *Parent)
+void LFontType::DoUI(LView *Parent, std::function<void(LFontType*)> Callback)
 {
 	bool Status = false;
 
@@ -83,20 +83,24 @@ bool LFontType::DoUI(LView *Parent)
 	int bytes = sprintf_s(i, sizeof(i), "%s,%i", Info.Face(), Info.PointSize());
 	#endif
 
-	LFontSelect Dlg(Parent, i, bytes);
-	if (Dlg.DoModal() == IDOK)
+	LFontSelect *Dlg = new LFontSelect(Parent, i, bytes);
+	Dlg->DoModal([Dlg,FontType=this,Callback](auto d, auto code)
 	{
-		#if WINNATIVE
-		Dlg.Serialize(i, sizeof(Info), true);
-		#else
-		if (Dlg.Face) Info.Face(Dlg.Face);
-		Info.PointSize(Dlg.Size);
-		#endif
-
-		Status = true;
-	}
-
-	return Status;
+		if (code == IDOK)
+		{
+			#if WINNATIVE
+			Dlg->Serialize(i, sizeof(Info), true);
+			#else
+			if (Dlg->Face) FontType->Info.Face(Dlg->Face);
+			FontType->Info.PointSize(Dlg->Size);
+			#endif
+			
+			if (Callback)
+				Callback(FontType);
+		}
+		
+		delete Dlg;
+	});
 }
 
 bool LFontType::GetDescription(char *Str, int SLen)

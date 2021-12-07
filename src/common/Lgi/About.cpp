@@ -96,7 +96,7 @@ LAbout::LAbout(	LView *parent,
 	SetPos(r);
 	MoveSameScreen(parent);
 
-	DoModal();
+	DoModal([](auto &d, auto code){});
 }
 
 int LAbout::OnNotify(LViewI *Ctrl, LNotification n)

@@ -1,5 +1,6 @@
-#ifndef __GFILE_SELECT_H
-#define __GFILE_SELECT_H
+#pragma once
+
+#include <functional>
 
 LgiFunc bool LgiGetUsersLinks(LArray<LString> &Links);
 
@@ -53,6 +54,8 @@ class LgiClass LFileSelect :
 	class LFileSelectPrivate *d;
 
 public:
+	typedef std::function<void(LFileSelect&, bool)> SelectCb;
+
 	LFileSelect();
 	~LFileSelect();
 
@@ -116,13 +119,12 @@ public:
 	
 	/// Shows the open file dialog
 	/// \returns true if the user selected a file, otherwise false
-	bool Open();
+	void Open(SelectCb Cb);
 	/// Shows the save file dialog
 	/// \returns true if the user selected a file, otherwise false
-	bool Save();
+	void Save(SelectCb Cb);
 	/// Shows the open folder dialog
 	/// \returns true if the user selected a folder, otherwise false
-	bool OpenFolder();
+	void OpenFolder(SelectCb Cb);
 };
 
-#endif

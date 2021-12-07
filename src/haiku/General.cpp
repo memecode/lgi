@@ -16,6 +16,7 @@
 
 #include <errno.h>
 #include <pwd.h>
+#include <Alert.h>
 
 #define DEBUG_GET_APPS_FOR_MIMETYPE			0
 
@@ -93,9 +94,26 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 		Asserting = true;
 
 		printf("%s:%i - Assert failed:\n%s\n", file, line, test);
-		int *i = 0;
-		*i = 0;
-		exit(0);
+
+		LString msg;
+		msg.Printf("Assert failed: %s\n%s:%s", test, file, line);
+		BAlert alert("Assert", msg, "Abort", "Debug", "Ignore");
+		auto result = alert.Go();
+		printf("alert result=%i\n", result);
+		switch (result)
+		{
+			case 1:
+			{
+				exit(-1);
+				break;
+			}
+			case 2:
+			{
+				int *i = 0;
+				*i = 0;
+				break;
+			}
+		}
 
 		Asserting = false;
 	}

@@ -1339,16 +1339,16 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification n)
 		case IDC_NEW:
 		{
 			LInput Dlg(this, "", "Create new folder:", "New Folder");
-			if (Dlg.DoModal())
+			Dlg.DoModal([&](auto &d, auto code)
 			{
-				char New[256];
+				char New[MAX_PATH];
 				strcpy(New, GetCtrlName(IDC_PATH));
 				if (New[strlen(New)-1] != DIR_CHAR) strcat(New, DIR_STR);
 				strcat(New, Dlg.GetStr());
 
 				FileDev->CreateFolder(New);
 				OnFolder();
-			}
+			});
 			break;
 		}
 		case IDOK:
@@ -1721,12 +1721,15 @@ void LFolderItem::OnDelete(bool Ask)
 void LFolderItem::OnRename()
 {
 	LInput Inp(Dlg, File, "New name:", Dlg->Name());
-	if (Inp.DoModal())
+	Inp.DoModal([&](auto &d, auto code)
 	{
-		char Old[256];
-		strcpy(Old, Path);
+		if (!code)
+			return;
+			
+		char Old[MAX_PATH];
+		strcpy_s(Old, sizeof(Old), Path);
 
-		char New[256];
+		char New[MAX_PATH];
 		File[0] = 0;
 		LMakePath(New, sizeof(New), Path, Inp.GetStr());
 		
@@ -1742,7 +1745,7 @@ void LFolderItem::OnRename()
 		{
 			LgiMsg(Dlg, "Renaming '%s' failed.", Dlg->Name(), MB_OK);
 		}
-	}
+	});
 }
 
 void LFolderItem::OnActivate()
@@ -2135,7 +2138,7 @@ CharPropImpl(InitialDir, d->InitPath);
 CharPropImpl(Title, d->Title);
 CharPropImpl(DefaultExtension, d->DefExt);
 
-bool LFileSelect::Open()
+void LFileSelect::Open(SelectCb Cb)
 {
 	LFileSelectDlg Dlg(d);
 
@@ -2144,10 +2147,14 @@ bool LFileSelect::Open()
 	if (Dlg.SaveBtn)
 		Dlg.SaveBtn->Name("Open");
 
-	return Dlg.DoModal() == IDOK;
+	Dlg.DoModal([&,Select=this](auto &d, auto code)
+	{
+		if (Cb)
+			Cb(*Select, code == IDOK);
+	});
 }
 
-bool LFileSelect::OpenFolder()
+void LFileSelect::OpenFolder(SelectCb Cb)
 {
 	LFileSelectDlg Dlg(d);
 
@@ -2157,10 +2164,14 @@ bool LFileSelect::OpenFolder()
 	Dlg.Name("Open Folder");
 	Dlg.SaveBtn->Name("Open");
 
-	return Dlg.DoModal() == IDOK;
+	Dlg.DoModal([FileSelect=this,Cb](auto d, auto code)
+	{
+		if (Cb)
+			Cb(*FileSelect, code != IDOK);
+	});
 }
 
-bool LFileSelect::Save()
+void LFileSelect::Save(SelectCb Cb)
 {
 	LFileSelectDlg Dlg(d);
 	
@@ -2168,7 +2179,11 @@ bool LFileSelect::Save()
 	Dlg.Name("Save As");
 	Dlg.SaveBtn->Name("Save As");
 
-	return Dlg.DoModal() == IDOK;
+	Dlg.DoModal([FileSelect=this,Cb](auto d, auto code)
+	{
+		if (Cb)
+			Cb(*FileSelect, code != IDOK);
+	});
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

@@ -5,6 +5,8 @@
 #ifndef __GTEXTVIEW3_H
 #define __GTEXTVIEW3_H
 
+#include <functional>
+
 #include "lgi/common/DocView.h"
 #include "lgi/common/Undo.h"
 #include "lgi/common/DragAndDrop.h"
@@ -377,14 +379,14 @@ public:
 	void SetUndoOn(bool b) { UndoOn = b; }
 
 	// Action UI
-	virtual bool DoGoto();
+	virtual void DoGoto(std::function<void(bool)> Callback);
 	virtual bool DoCase(bool Upper);
 	virtual bool DoFind() override;
 	virtual bool DoFindNext();
 	virtual bool DoReplace() override;
 
 	// Action Processing	
-	bool ClearDirty(bool Ask, const char *FileName = 0);
+	void ClearDirty(std::function<void(bool)> OnStatus, bool Ask, const char *FileName = 0);
 	void UpdateScrollBars(bool Reset = false);
 	ssize_t GetLine();
 	void SetLine(int Line);

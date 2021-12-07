@@ -11,6 +11,8 @@
 #include "lgi/common/Capabilities.h"
 #include "lgi/common/Css.h"
 
+#include <functional>
+
 //////////////////////////////////////////////////////////////
 // Defines
 
@@ -299,7 +301,7 @@ public:
 	void SetPointSize(int PointSize);
 
 	/// Put a user interface for the user to edit the font def
-	bool DoUI(LView *Parent);
+	void DoUI(LView *Parent, std::function<void(LFontType*)> Callback);
 	
 	/// Describe the font to the user as a string
 	bool GetDescription(char *Str, int SLen);

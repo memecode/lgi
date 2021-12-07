@@ -182,7 +182,7 @@ public:
 
 	// Overrides
 	bool AppendItems(LSubMenu *Menu, const char *Param, int Base) override;
-	bool DoGoto() override;
+	void DoGoto(std::function<void(bool)> Callback) override;
 	void OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour) override;
 	void OnMouseClick(LMouse &m) override;
 	bool OnKey(LKey &k) override;	

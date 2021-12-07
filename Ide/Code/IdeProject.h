@@ -183,7 +183,7 @@ public:
 	void CreateProject();
 	ProjectStatus OpenFile(const char *FileName);
 	bool SaveFile();
-	bool SetClean();
+	void SetClean(std::function<void(bool)> OnDone);
 	void SetDirty();
 	void SetUserFileDirty();
 	bool Serialize(bool Write);

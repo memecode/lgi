@@ -3113,9 +3113,10 @@ bool IdeProject::CheckExists(LAutoString &p, bool Debug)
 		}, Debug);
 }
 
-bool IdeProject::SetClean()
+void IdeProject::SetClean(std::function<void(bool)> OnDone)
 {
-	// printf("IdeProject::SetClean %i %i\n", d->Dirty, d->UserFileDirty);
+	LAssert(!"Fixme");
+	/*
 	if (d->Dirty || d->UserFileDirty)
 	{
 		if (!ValidStr(d->FileName))
@@ -3143,9 +3144,9 @@ bool IdeProject::SetClean()
 
 		p->SetClean();
 	}
-
-	return true;
+	*/
 }
+
 
 const char *IdeProject::GetText(int Col)
 {

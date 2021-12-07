@@ -1,6 +1,8 @@
 #ifndef _IDE_PROJECT_SETTINGS_H_
 #define _IDE_PROJECT_SETTINGS_H_
 
+#include <functional>
+
 enum ProjSetting
 {
 	ProjNone,
@@ -50,7 +52,7 @@ public:
 	bool DeleteConfig(const char *Config);
 	
 	// UI
-	bool Edit(LViewI *parent);
+	void Edit(LViewI *parent, std::function<void()> OnChanged);
 
 	// Serialization
 	bool Serialize(LXmlTag *Parent, bool Write);

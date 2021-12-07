@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include "lgi/common/Window.h"
 #include "lgi/common/LgiRes.h"
 
@@ -161,6 +163,8 @@ private:
     struct LDialogPriv *d;
 
 public:
+    typedef std::function<void(LDialog &dlg,int ctrlId)> OnClose;
+
 	/// Constructor
 	LDialog();
 	
@@ -181,8 +185,10 @@ public:
 	/// \brief Run the dialog in modal mode.
 	///
 	/// The user has to dismiss the dialog to continue.
-	virtual int DoModal
+	virtual void DoModal
 	(
+	    /// Call back to handle post-dialog activity
+	    OnClose Callback,
 		/// Optional override parent window handle
 		OsView ParentHnd = NULL
 	);
