@@ -65,7 +65,7 @@ LScreenDC::~LScreenDC()
 
 OsPainter LScreenDC::Handle()
 {
-	return NULL;
+	return d->v;
 }
 
 ::LString LScreenDC::Dump()

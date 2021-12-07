@@ -486,7 +486,39 @@ void LDisplayString::Layout(bool Debug)
 
 	LaidOut = 1;
 
-	#if defined(LGI_SDL)
+	#if defined(HAIKU)
+
+		if (!Font)
+		{
+			LgiTrace("%s:%i - Missing pointer: %p\n", _FL, Font);
+			return;
+		}
+
+		BFont *fnt = Font->Handle();
+		if (!fnt)
+		{
+			LgiTrace("%s:%i - Missing handle. %p/%p\n", _FL, fnt);
+			return;
+		}
+		
+		auto &l = Info[0];
+		l.Str = Str;
+		l.Len = strlen(Str);
+
+		const char *strArr[] = { Str };
+		const int32 strLen[] = { l.Len };
+		float width[1] = { 0 };
+		fnt->GetStringWidths(strArr, strLen, 1, width);
+		
+		x = l.X = (int)(width[0] + 0.5);
+		
+		font_height height = {0};
+		fnt->GetHeight(&height);
+		y = height.ascent + height.descent + height.leading;
+
+		// printf("Layout str=%s sz=%i,%i\n", Str, x, y);
+	
+	#elif defined(LGI_SDL)
 	
 		FT_Face Fnt = Font->Handle();
 		FT_Error error;
@@ -893,7 +925,7 @@ void LDisplayString::Layout(bool Debug)
 		
 		xf = x;
 		yf = y;
-	
+
 	#endif
 }
 
@@ -1706,7 +1738,38 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 	
 	FDraw(pDC, px << FShift, py << FShift, r ? &rc : NULL, Debug);
 	
-	#elif defined LGI_SDL
+	#elif defined(HAIKU)
+	
+	if (!Font || !pDC)
+	{
+		LgiTrace("%s:%i - No ptr: %p/%p.\n", _FL, Font, pDC);
+		return;
+	}
+	
+	BFont *fnt = Font->Handle();
+	BView *view = pDC->Handle();
+	if (!fnt || !view)
+	{
+		LgiTrace("%s:%i - No handle: %p/%p(%s).\n", _FL, fnt, view, pDC->GetClass());
+		return;
+	}
+	
+	if (!Info.Length())
+	{
+		LgiTrace("%s:%i - No layout.\n", _FL);
+		return;
+	}
+	
+	view->SetHighColor(Font->Fore());
+	
+	font_height height = {0};
+	fnt->GetHeight(&height);
+
+	auto &i = Info[0];
+	view->SetFont(fnt);
+	view->DrawString(i.Str, i.Len, BPoint(px, py + height.ascent));	
+	
+	#elif defined(LGI_SDL)
 	
 	if (Img && pDC && pDC->Y() > 0 && (*pDC)[0])
 	{

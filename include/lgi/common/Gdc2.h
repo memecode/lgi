@@ -447,6 +447,7 @@ public:
 	
 	#endif
 
+	virtual const char *GetClass() { return "LSurface"; }
 	virtual OsBitmap GetBitmap();
 	virtual OsPainter Handle();
 	virtual void SetClient(LRect *c) {}
@@ -706,6 +707,8 @@ public:
 	LScreenDC();
 	virtual ~LScreenDC();
 
+	const char *GetClass() { return "LScreenDC"; }
+
 	// OS Sepcific
 	#if WINNATIVE
 
@@ -951,6 +954,8 @@ public:
 	LMemDC(LSurface *pDC);
 	virtual ~LMemDC();
 
+	const char *GetClass() { return "LMemDC"; }
+
 	#if WINNATIVE
 	
 		HDC StartDC();
@@ -1046,6 +1051,8 @@ class LgiClass LPrintDC
 public:
 	LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName = NULL);
 	~LPrintDC();
+
+	const char *GetClass() { return "LPrintDC"; }
 
 	bool IsPrint() { return true; }
 	const char *GetOutputFileName();
