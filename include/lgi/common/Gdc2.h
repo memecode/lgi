@@ -995,7 +995,7 @@ public:
 				CGImg *GetImg(LRect *Sub = 0, int Debug = 0);
 			#endif
 		
-		#elif defined(LGI_SDL)
+		#elif defined(LGI_SDL) || defined(HAIKU)
 
 			OsBitmap GetBitmap();
 

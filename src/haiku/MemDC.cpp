@@ -64,6 +64,11 @@ LMemDC::~LMemDC()
 	DeleteObj(d);
 }
 
+OsBitmap LMemDC::GetBitmap()
+{
+	return d->Bmp;
+}
+
 OsPainter LMemDC::Handle()
 {
 	return NULL;
@@ -145,7 +150,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 
 	pMem->x = x;
 	pMem->y = y;
-	ColourSpace = pMem->Cs = CsRgba32;
+	ColourSpace = pMem->Cs = System32BitColourSpace;
 	pMem->Line = d->Bmp->BytesPerRow();
 	pMem->Base = d->Bmp->Bits();
 

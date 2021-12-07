@@ -414,7 +414,16 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 		LgiTrace("%s:%i - Can't do screen->screen blt.\n", _FL);
 		return;
 	}
+
+	BBitmap *bmp = Src->GetBitmap();
+	if (!bmp)
+	{
+		LAssert(!"no bmp.");
+		LgiTrace("%s:%i - No bitmap.\n", _FL);
+		return;
+	}
 		
+	/*
 	// memory -> screen blt
 	LRect RealClient = d->Client;
 	d->Client.ZOff(-1, -1); // Clear this so the blit rgn calculation uses the
@@ -423,8 +432,20 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 	d->Client = RealClient;
 	if (!br.Valid())
 	{
-		// LgiTrace("Blt inval pos=%i,%i a=%s bounds=%s\n", x, y, a?a->GetStr():"null", Bounds().GetStr());
+		LgiTrace("Blt inval pos=%i,%i a=%s bounds=%s\n", x, y, a?a->GetStr():"null", Bounds().GetStr());
 		return;
+	}
+	*/
+	
+	if (a)
+	{
+		BRect bitmapRect = *a;
+		BRect viewRect(x, y, x + a->X(), y + a->Y());
+		d->v->DrawBitmap(bmp, bitmapRect, viewRect);
+	}
+	else
+	{
+		d->v->DrawBitmap(bmp, BPoint(x, y));
 	}
 }
 
