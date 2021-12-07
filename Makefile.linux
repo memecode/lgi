@@ -66,9 +66,9 @@ Depends =	DateTime.o \
 			View.o \
 			Window.o \
 			LgiWidget.o \
-			WindowCommon.o \
-			ViewCommon.o \
 			AppCommon.o \
+			ViewCommon.o \
+			WindowCommon.o \
 			Library.o \
 			Mem.o \
 			Properties.o \
@@ -279,9 +279,8 @@ LgiWidget.o : ./src/linux/Gtk/LgiWidget.cpp ./include/lgi/common/Lgi.h \
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-WindowCommon.o : ./src/common/Lgi/WindowCommon.cpp ./include/lgi/common/Lgi.h \
-	./include/lgi/common/Net.h \
-	./include/lgi/common/DropFiles.h
+AppCommon.o : ./src/common/Lgi/AppCommon.cpp ./include/lgi/common/Lgi.h \
+	./private/linux/AppPriv.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -299,8 +298,9 @@ ViewCommon.o : ./src/common/Lgi/ViewCommon.cpp ./include/lgi/common/Lgi.h \
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-AppCommon.o : ./src/common/Lgi/AppCommon.cpp ./include/lgi/common/Lgi.h \
-	./private/linux/AppPriv.h
+WindowCommon.o : ./src/common/Lgi/WindowCommon.cpp ./include/lgi/common/Lgi.h \
+	./include/lgi/common/Net.h \
+	./include/lgi/common/DropFiles.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 

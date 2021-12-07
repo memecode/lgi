@@ -683,7 +683,7 @@ public:
 				#if USER_DATA_FIRST
 					&ud,
 				#endif
-				#if defined(HAIKU)
+				#if defined(HAIKU) || defined(LINUX)
 					// typedef int (*_compare_function_qsort_r)(const void*, const void*, void*);
 					// extern void qsort_r(void* base, size_t numElements, size_t sizeOfElement, _compare_function_qsort_r, void* cookie);
 					[](const void *a, const void *b, void *ud) -> int

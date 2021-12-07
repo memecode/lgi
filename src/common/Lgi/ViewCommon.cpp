@@ -2392,7 +2392,7 @@ void LView::_Dump(int Depth)
 
 	#elif defined(__GTK_H__)
 
-		DumpGtk(_View);
+		// DumpGtk(_View);
 	
 	#elif defined(HAIKU)
 	
