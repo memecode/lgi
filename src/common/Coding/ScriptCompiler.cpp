@@ -2066,7 +2066,7 @@ public:
 		if (r.Scope == SCOPE_REGISTER && r.Index >= 0)
 		{
 			int Bit = 1 << r.Index;
-			LAssert((Bit & Regs) != 0);
+			// LAssert((Bit & Regs) != 0);
 			Regs &= ~Bit;
 
 			#ifdef _DEBUG

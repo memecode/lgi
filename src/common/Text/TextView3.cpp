@@ -1211,8 +1211,10 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 
 	if (ScrollChange)
 	{
+		#if 0
 		LgiTrace("%s:%i - %p::SetScrollBars(%i) cliy=%i content=%i partial=%i\n",
 			_FL, this, ScrollYNeeded, Client.Y(), (Line.Length() * LineY), PartialPour);
+		#endif
 		SetScrollBars(false, ScrollYNeeded);
 	}
 	UpdateScrollBars();
