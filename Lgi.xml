@@ -508,8 +508,8 @@ appindicator3
 			</Libraries>
 			<TargetName>
 				<Linux>
-					<Debug>lgi-gtk3</Debug>
-					<Release>lgi-gtk3</Release>
+					<Debug>lgi-dev</Debug>
+					<Release>lgi-dev</Release>
 				</Linux>
 			</TargetName>
 			<TargetType>

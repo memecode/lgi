@@ -8,7 +8,7 @@
 
 CC = gcc
 CPP = g++
-Target = lgi-gtk3
+Target = lgi-dev
 ifndef Build
 	Build = Debug
 endif

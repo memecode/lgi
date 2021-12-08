@@ -26,7 +26,7 @@ ifeq ($(Build),Debug)
 		-lpthread \
 		`pkg-config --libs gtk+-3.0` \
 		-static-libgcc \
-		-llgi-gtk3$(Tag) \
+		-llgi-dev$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
@@ -44,7 +44,7 @@ else
 		-lpthread \
 		`pkg-config --libs gtk+-3.0` \
 		-static-libgcc \
-		-llgi-gtk3$(Tag) \
+		-llgi-dev$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
@@ -102,13 +102,13 @@ Depends =	GDebugContext.o \
 
 # Target
 # Executable target
-$(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so outputfolder $(Depends)
+$(Target) : ../$(BuildDir)/liblgi-dev$(Tag).so outputfolder $(Depends)
 	@echo Linking $(Target) [$(Build)]...
 	$(CPP) -Wl,-export-dynamic,-R. -o \
 		$(Target) $(addprefix $(BuildDir)/,$(Depends)) $(Libs)
 	@echo Done.
 
-../$(BuildDir)/liblgi-gtk3$(Tag).so : ../include/lgi/common/App.h \
+../$(BuildDir)/liblgi-dev$(Tag).so : ../include/lgi/common/App.h \
 	../include/lgi/common/Array.h \
 	../include/lgi/common/AutoPtr.h \
 	../include/lgi/common/Base64.h \
