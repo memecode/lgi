@@ -126,12 +126,6 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 
 	~FindSymbolSystemPriv()
 	{
-		Cancel(true);
-		
-		// Wait for the queue of messages to complete...
-		while (GetQueueSize())
-			LSleep(1);
-
 		// End the thread...
 		EndThread();
 

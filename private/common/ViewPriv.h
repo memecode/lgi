@@ -41,15 +41,24 @@ class LPulseThread : public LThread
 	int Length;
 	LThreadEvent Event;
 
+	LString MakeName(LView *v, const char *Type)
+	{
+		LString s;
+		s.Printf("LPulseThread.%s.%s", v->GetClass(), Type);
+		return s;
+	}
+
 public:
 	bool Loop;
 
-	LPulseThread(LView *view, int len) : LThread("LPulseThread"), Event("LPulseThread")
+	LPulseThread(LView *view, int len) :
+		View(view),
+		LThread(MakeName(view, "Thread")),
+		Event(MakeName(view, "Event"))
 	{
-		LAssert(view);
+		LAssert(View);
 		
 		Loop = true;
-		View = view;
 		Length = len;
 		
 		Run();
