@@ -308,7 +308,7 @@ void LDialog::DoModal(OnClose Callback, OsView ParentHnd)
 	#endif
 
 	if (Callback)
-		Callback(*this, Status);
+		Callback(this, Status);
 }
 
 static char *BaseStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";

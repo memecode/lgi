@@ -77,7 +77,7 @@ bool DocEdit::AppendItems(LSubMenu *Menu, const char *Param, int Base)
 void DocEdit::DoGoto(std::function<void(bool)> Callback)
 {
 	LInput *Dlg = new LInput(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");	
-	Dlg->DoModal([&](auto d, auto code)
+	Dlg->DoModal([&, App=Doc->GetApp()](auto d, auto code)
 	{
 		bool status = code && ValidStr(Dlg->GetStr());
 		if (status)
@@ -88,7 +88,7 @@ void DocEdit::DoGoto(std::function<void(bool)> Callback)
 			{
 				LString file = p[0];
 				int line = (int)p[1].Int();
-				Doc->GetApp()->GotoReference(file, line, false, true);
+				App->GotoReference(file, line, false, true);
 			}
 			else if (p.Length() == 1)
 			{
@@ -97,7 +97,7 @@ void DocEdit::DoGoto(std::function<void(bool)> Callback)
 					SetLine(line);
 				else
 					// Probably a filename with no line number..
-					Doc->GetApp()->GotoReference(p[0], 1, false, true);				
+					App->GotoReference(p[0], 1, false, true);				
 			}
 		}
 

@@ -3119,36 +3119,49 @@ bool IdeProject::CheckExists(LAutoString &p, bool Debug)
 
 void IdeProject::SetClean(std::function<void(bool)> OnDone)
 {
-	LAssert(!"Fixme");
-	/*
+	auto CleanNodes = [&]()
+	{
+		for (auto i: *this)
+		{
+			ProjectNode *p = dynamic_cast<ProjectNode*>(i);
+			if (!p) break;
+			p->SetClean();
+		}
+
+		if (OnDone)
+			OnDone(true);
+	};
+
 	if (d->Dirty || d->UserFileDirty)
 	{
-		if (!ValidStr(d->FileName))
+		if (ValidStr(d->FileName))
+			SaveFile();
+		else
 		{
 			LFileSelect s;
 			s.Parent(Tree);
 			s.Name("Project.xml");
-			if (s.Save())
+			s.Save([&](auto s, auto ok)
 			{
-				d->FileName = s.Name();
+				if (!ok)
+				{
+					if (OnDone)
+						OnDone(false);
+					return;
+				}
+
+				d->FileName = s->Name();
 				d->UserFile = d->FileName + "." + LCurrentUserName();
 				d->App->OnFile(d->FileName, true);
 				Update();
-			}
-			else return false;
+
+				CleanNodes();
+			});
+			return;
 		}
-
-		SaveFile();
 	}
-
-	for (auto i:*this)
-	{
-		ProjectNode *p = dynamic_cast<ProjectNode*>(i);
-		if (!p) break;
-
-		p->SetClean();
-	}
-	*/
+	
+	CleanNodes();
 }
 
 

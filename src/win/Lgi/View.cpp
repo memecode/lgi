@@ -467,9 +467,10 @@ void LView::_Delete()
 	// LArray<LViewI*> HasView;
 	for (auto c: Children)
 	{
-		// LAssert(!HasView.HasItem(c));
-		// HasView.Add(c);
-		LAssert(((LViewI*)c->GetParent()) == this || c->GetParent() == 0);
+		auto par = c->GetParent();
+		bool ok = ((LViewI*)par) == this || par == NULL;
+		if (!ok)
+			LAssert(!"heirachy error");
 	}
 	#endif
 

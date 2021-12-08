@@ -163,7 +163,7 @@ private:
     struct LDialogPriv *d;
 
 public:
-    typedef std::function<void(LDialog &dlg,int ctrlId)> OnClose;
+    typedef std::function<void(LDialog *dlg, int ctrlId)> OnClose;
 
 	/// Constructor
 	LDialog();

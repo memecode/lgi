@@ -1836,8 +1836,10 @@ void IdeDoc::SetClean(std::function<void(bool)> Callback)
 		if (d->Project)
 			d->Project->CheckExists(LocalPath);
 
-		auto OnSave = [Doc=this, &Status, &Callback](bool ok)
+		auto OnSave = [&](bool ok)
 		{
+			if (ok)
+				d->Save();
 			if (Callback)
 				Callback(ok);
 		};
