@@ -149,7 +149,7 @@ public:
 	LHtmlElement *CreateElement(LHtmlElement *Parent) override;
 	bool EvaluateCondition(const char *Cond) override;
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
-	bool DoFind() override;
+	void DoFind(std::function<void(bool)> Callback) override;
 	LPointF GetDpiScale();
 	void SetVScroll(int64 v);
 

@@ -172,7 +172,7 @@ bool LDialog::SetupDialog(bool Modal)
 	return true;
 }
 
-int LDialog::DoModal(OsView OverrideParent)
+void LDialog::DoModal(OnClose Callback, OsView OverrideParent)
 {
 	d->ModalStatus = -1;
 	
@@ -188,7 +188,8 @@ int LDialog::DoModal(OsView OverrideParent)
 	SetupDialog(true);
 	LAppInst->Run();
 	
-	return d->ModalStatus;
+	if (Callback)
+		Callback(*this, d->ModalStatus);
 }
 
 void LDialog::EndModal(int Code)

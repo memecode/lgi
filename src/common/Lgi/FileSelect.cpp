@@ -2150,7 +2150,7 @@ void LFileSelect::Open(SelectCb Cb)
 	Dlg.DoModal([&,Select=this](auto &d, auto code)
 	{
 		if (Cb)
-			Cb(*Select, code == IDOK);
+			Cb(Select, code == IDOK);
 	});
 }
 
@@ -2167,7 +2167,7 @@ void LFileSelect::OpenFolder(SelectCb Cb)
 	Dlg.DoModal([FileSelect=this,Cb](auto d, auto code)
 	{
 		if (Cb)
-			Cb(*FileSelect, code != IDOK);
+			Cb(FileSelect, code != IDOK);
 	});
 }
 
@@ -2182,7 +2182,7 @@ void LFileSelect::Save(SelectCb Cb)
 	Dlg.DoModal([FileSelect=this,Cb](auto d, auto code)
 	{
 		if (Cb)
-			Cb(*FileSelect, code != IDOK);
+			Cb(FileSelect, code != IDOK);
 	});
 }
 

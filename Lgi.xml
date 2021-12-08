@@ -311,50 +311,51 @@
 		</Node>
 		<Node Name="Widgets" Type="1" Platforms="15" Open="1" Id="62">
 			<Node Name="Common" Type="1" Platforms="15" Open="0" Id="63">
-				<Node File=".\src\common\Widgets\Bitmap.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Widgets\Button.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\Button.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Widgets\CheckBox.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\CheckBox.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Widgets\Combo.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\Combo.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Text\DocView.cpp" Type="2" Platforms="14" />
-				<Node File=".\include\lgi\common\DocView.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Widgets\Edit.cpp" Type="2" Platforms="14" />
-				<Node File=".\include\lgi\common\Edit.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Widgets\ItemContainer.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\ItemContainer.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\common\Layout.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Widgets\List.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\List.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\common\ListItemCheckBox.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\common\ListItemRadioBtn.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Widgets\Panel.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Widgets\Popup.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\Popup.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\common\PopupList.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Widgets\Progress.cpp" Type="2" Platforms="14" />
-				<Node File=".\include\lgi\common\Progress.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\common\Progress.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Widgets\ProgressDlg.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\ProgressDlg.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Widgets\RadioGroup.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\RadioGroup.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Widgets\ScrollBar.cpp" Type="2" Platforms="14" />
-				<Node File=".\include\lgi\common\ScrollBar.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Widgets\Slider.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\Slider.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Widgets\StatusBar.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Widgets\TabView.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\TabView.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Widgets\TextLabel.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\TextLabel.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Text\TextView3.cpp" Type="2" Platforms="14" />
-				<Node File=".\include\lgi\common\TextView3.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Widgets\ToolBar.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\ToolBar.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Widgets\Tree.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\Tree.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Widgets/Bitmap.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Widgets/Button.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/Button.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Widgets/CheckBox.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/CheckBox.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Widgets/Combo.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/Combo.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Text/DocView.cpp" Type="2" Platforms="14" />
+				<Node File="./include/lgi/common/DocView.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Widgets/Edit.cpp" Type="2" Platforms="14" />
+				<Node File="./include/lgi/common/Edit.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/FindReplaceDlg.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Widgets/ItemContainer.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/ItemContainer.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Layout.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Widgets/List.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/List.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/ListItemCheckBox.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/ListItemRadioBtn.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Widgets/Panel.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Widgets/Popup.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/Popup.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/PopupList.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Widgets/Progress.cpp" Type="2" Platforms="14" />
+				<Node File="./include/lgi/common/Progress.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Progress.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Widgets/ProgressDlg.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/ProgressDlg.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Widgets/RadioGroup.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/RadioGroup.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Widgets/ScrollBar.cpp" Type="2" Platforms="14" />
+				<Node File="./include/lgi/common/ScrollBar.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Widgets/Slider.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/Slider.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Widgets/StatusBar.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Widgets/TabView.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/TabView.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Widgets/TextLabel.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/TextLabel.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Text/TextView3.cpp" Type="2" Platforms="14" />
+				<Node File="./include/lgi/common/TextView3.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Widgets/ToolBar.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/ToolBar.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Widgets/Tree.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/Tree.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Css" Type="1" Platforms="15" Open="0" Id="64">
 				<Node File=".\src\common\Lgi\Css.cpp" Type="2" Platforms="15" />
@@ -385,7 +386,7 @@
 				<Node File=".\src\win\Lgi\Layout.cpp" Type="2" Platforms="1" />
 				<Node File=".\src\common\Widgets\Progress.cpp" Type="2" Platforms="1" />
 			</Node>
-			<Node File=".\include\lgi\common\Dialog.h" Type="3" Platforms="15" />
+			<Node File="./include/lgi/common/Dialog.h" Type="3" Platforms="15" />
 		</Node>
 	</Node>
 	<Node Name="LgiNet" Type="1" Platforms="15" Open="0" Id="69">
@@ -454,7 +455,11 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Executable />
+			<Executable>
+				<Linux />
+			</Executable>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -499,6 +504,7 @@ appindicator3
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
+				<All />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -509,16 +515,41 @@ appindicator3
 			<TargetType>
 				<All>DynamicLibrary</All>
 			</TargetType>
-			<Defines />
-			<LibraryPaths />
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<ApplicationIcon />
 		</Build>
 		<Advanced>
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+			<OtherMakefileRules />
 		</Advanced>
 		<Debug>
-			<Arguments />
+			<Arguments>
+				<All />
+			</Arguments>
+			<Environment />
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
-		<Remote />
-		<Editor />
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Editor>
+			<TabSize />
+			<IndentSize />
+			<ShowWhiteSpace />
+			<UseHardTabs />
+			<CommentFile />
+			<CommentFunction />
+		</Editor>
 	</Settings>
 </Project>

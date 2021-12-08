@@ -7811,11 +7811,13 @@ bool GHtml::Copy()
 	return false;
 }
 
+/*
 static bool FindCallback(LFindReplaceCommon *Dlg, bool Replace, void *User)
 {
 	GHtml *h = (GHtml*)User;
 	return h->OnFind(Dlg);
 }
+*/
 
 void BuildTagList(LArray<GTag*> &t, GTag *Tag)
 {
@@ -7969,10 +7971,16 @@ bool GHtml::OnFind(LFindReplaceCommon *Params)
 	return Status;
 }
 
-bool GHtml::DoFind()
+void GHtml::DoFind(std::function<void(bool)> Callback)
 {
-	LFindDlg Dlg(this, 0, FindCallback, this);
-	return Dlg.DoModal();
+	LFindDlg *Dlg = new LFindDlg(this,
+		[&](auto dlg, auto action)
+		{
+			OnFind(dlg);
+			delete dlg;
+		});
+	
+	Dlg->DoModal(NULL);
 }
 
 bool GHtml::OnKey(LKey &k)
@@ -8046,7 +8054,7 @@ bool GHtml::OnKey(LKey &k)
 					{
 						if (k.CtrlCmd())
 						{
-							DoFind();
+							DoFind(NULL);
 							Status = true;
 						}
 						break;
