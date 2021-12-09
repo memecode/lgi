@@ -1339,7 +1339,7 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification n)
 		case IDC_NEW:
 		{
 			LInput Dlg(this, "", "Create new folder:", "New Folder");
-			Dlg.DoModal([&](auto &d, auto code)
+			Dlg.DoModal([&](auto d, auto code)
 			{
 				char New[MAX_PATH];
 				strcpy(New, GetCtrlName(IDC_PATH));
@@ -1720,8 +1720,8 @@ void LFolderItem::OnDelete(bool Ask)
 
 void LFolderItem::OnRename()
 {
-	LInput Inp(Dlg, File, "New name:", Dlg->Name());
-	Inp.DoModal([&](auto &d, auto code)
+	LInput *Inp = new LInput(Dlg, File, "New name:", Dlg->Name());
+	Inp->DoModal([&](auto d, auto code)
 	{
 		if (!code)
 			return;
@@ -1731,7 +1731,7 @@ void LFolderItem::OnRename()
 
 		char New[MAX_PATH];
 		File[0] = 0;
-		LMakePath(New, sizeof(New), Path, Inp.GetStr());
+		LMakePath(New, sizeof(New), Path, Inp->GetStr());
 		
 		if (FileDev->Move(Old, New))
 		{
@@ -1745,6 +1745,8 @@ void LFolderItem::OnRename()
 		{
 			LgiMsg(Dlg, "Renaming '%s' failed.", Dlg->Name(), MB_OK);
 		}
+		
+		delete Inp;
 	});
 }
 
@@ -2140,17 +2142,18 @@ CharPropImpl(DefaultExtension, d->DefExt);
 
 void LFileSelect::Open(SelectCb Cb)
 {
-	LFileSelectDlg Dlg(d);
+	LFileSelectDlg *Dlg = new LFileSelectDlg(d);
 
 	d->Type = TypeOpenFile;
-	Dlg.Name("Open");
-	if (Dlg.SaveBtn)
-		Dlg.SaveBtn->Name("Open");
+	Dlg->Name("Open");
+	if (Dlg->SaveBtn)
+		Dlg->SaveBtn->Name("Open");
 
-	Dlg.DoModal([&,Select=this](auto &d, auto code)
+	Dlg->DoModal([&,Select=this](auto d, auto code)
 	{
 		if (Cb)
 			Cb(Select, code == IDOK);
+		delete Dlg;
 	});
 }
 

@@ -116,6 +116,7 @@ LKey::LKey(int Vkey, uint32_t flags)
 class LBView : public BView
 {
 	LViewPrivate *d = NULL;
+	static uint32 MouseButtons;
 
 public:
 	LBView(LViewPrivate *priv) :
@@ -166,7 +167,7 @@ public:
 		d->View->OnPaint(&dc);
 	}
 
-	LMouse ConvertMouse(BPoint where)
+	LMouse ConvertMouse(BPoint where, bool down = false)
 	{
 		LMouse m;
 		BPoint loc;
@@ -176,8 +177,18 @@ public:
 		
 		m.x = where.x;
 		m.y = where.y;
-
-		GetMouse(&loc, &buttons, false);
+		
+		if (down)
+		{
+			m.Down(true);
+			GetMouse(&loc, &buttons, false);
+			MouseButtons = buttons; // save for up click
+		}
+		else
+		{
+			buttons = MouseButtons;
+		}
+		
 		if (buttons & B_PRIMARY_MOUSE_BUTTON) m.Left(true);
 		if (buttons & B_TERTIARY_MOUSE_BUTTON) m.Middle(true);
 		if (buttons & B_SECONDARY_MOUSE_BUTTON) m.Right(true);
@@ -186,14 +197,14 @@ public:
 		if (mod & B_SHIFT_KEY) m.Shift(true);
 		if (mod & B_OPTION_KEY) m.Alt(true);
 		if (mod & B_CONTROL_KEY) m.Ctrl(true);
+
 		
 		return m;
 	}
 	
 	void MouseDown(BPoint where)
 	{
-		LMouse m = ConvertMouse(where);
-		m.Down(true);
+		LMouse m = ConvertMouse(where, true);
 		d->View->_Mouse(m, false);
 	}
 	
@@ -210,6 +221,8 @@ public:
 		d->View->_Mouse(m, true);
 	}
 };
+
+uint32 LBView::MouseButtons = 0;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 LViewPrivate::LViewPrivate(LView *view) :

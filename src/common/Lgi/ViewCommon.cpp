@@ -15,7 +15,7 @@
 #include "lgi/common/CssTools.h"
 #include "ViewPriv.h"
 
-#if 0
+#if 1
 #define DEBUG_CAPTURE(...) printf(__VA_ARGS__)
 #else
 #define DEBUG_CAPTURE(...)
@@ -1075,6 +1075,7 @@ bool LView::HandleCapture(LView *Wnd, bool c)
 			_Capturing = Wnd;
 			
 			#if WINNATIVE
+
 				LPoint Offset;
 				LViewI *v = _Capturing->Handle() ? _Capturing : FindReal(&Offset);
 				HWND h = v ? v->Handle() : NULL;
@@ -1084,11 +1085,13 @@ bool LView::HandleCapture(LView *Wnd, bool c)
 					LAssert(0);
 
 			#elif defined(LGI_SDL)
+
 				#if SDL_VERSION_ATLEAST(2, 0, 4)
 				SDL_CaptureMouse(SDL_TRUE);
 				#else
 				LAppInst->CaptureMouse(true);
 				#endif
+
 			#endif
 		}
 	}
@@ -1098,13 +1101,17 @@ bool LView::HandleCapture(LView *Wnd, bool c)
 		_Capturing = NULL;
 		
 		#if WINNATIVE
+
 			ReleaseCapture();
+
 		#elif defined(LGI_SDL)
+
 			#if SDL_VERSION_ATLEAST(2, 0, 4)
 			SDL_CaptureMouse(SDL_FALSE);
 			#else
 			LAppInst->CaptureMouse(false);
 			#endif
+
 		#endif
 	}
 
@@ -1114,7 +1121,6 @@ bool LView::HandleCapture(LView *Wnd, bool c)
 bool LView::IsCapturing()
 {
 	ThreadCheck();
-	
 	DEBUG_CAPTURE("%s::IsCapturing()=%i\n", GetClass(), (int)(_Capturing == this));
 	return _Capturing == this;
 }
@@ -1123,7 +1129,7 @@ bool LView::Capture(bool c)
 {
 	ThreadCheck();
 
-	DEBUG_CAPTURE("%s::Capture(%i)\n", GetClass());
+	DEBUG_CAPTURE("%s::Capture(%i)\n", GetClass(), c);
 	return HandleCapture(this, c);
 }
 

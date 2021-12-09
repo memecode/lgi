@@ -150,8 +150,11 @@ void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 	d->IsModeless = false;
 	d->ModalCb = Cb;
 	
+	printf("attach..\n");
 	if (Attach(0))
 		Visible(true);
+	else
+		printf("attach failed..\n");
 }
 
 void LDialog::EndModal(int Code)
@@ -159,8 +162,7 @@ void LDialog::EndModal(int Code)
 	if (d->IsModal)
 	{
 		d->IsModal = false;
-		d->ModalStatus = Code;
-		d->ModalCb(*this, Code);
+		d->ModalCb(this, d->ModalStatus = Code);
 	}
 }
 
