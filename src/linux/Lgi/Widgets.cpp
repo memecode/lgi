@@ -189,7 +189,7 @@ void LDialog::DoModal(OnClose Callback, OsView OverrideParent)
 	LAppInst->Run();
 	
 	if (Callback)
-		Callback(*this, d->ModalStatus);
+		Callback(this, d->ModalStatus);
 }
 
 void LDialog::EndModal(int Code)
