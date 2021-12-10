@@ -530,69 +530,96 @@ bool LGetDriveInfo
 
 struct LVolumePriv
 {
-	int64 _Size, _Free;
-	int _Type, _Flags;
-	LSystemPath SysPath;
-	LString _Name, _Path;
-	List<LVolume> _Sub;
-	List<LVolume>::I _It;
+	LVolume *Owner = NULL;
+	int64 Size = 0, Free = 0;
+	int Type = VT_NONE, Flags = 0;
+	LSystemPath SysPath = LSP_ROOT;
+	LString Name, Path;
+	LVolume *NextVol = NULL, *ChildVol = NULL;
 
-	void Init()
+	LVolumePriv(LVolume *owner, const char *path) : Owner(owner)
 	{
-		SysPath = LSP_ROOT;
-		_Type = VT_NONE;
-		_Flags = 0;
-		_Size = 0;
-		_Free = 0;
+		Path = path;
+		Name = LGetLeaf(path);
+		Type = VT_FOLDER;
 	}
 
-	LVolumePriv(const char *path) : _It(_Sub.end())
+	LVolumePriv(LVolume *owner, LSystemPath sys, const char *name) : Owner(owner)
 	{
-		Init();
-		
-		_Path = path;
-		_Name = LGetLeaf(path);
-		_Type = VT_FOLDER;
-	}
-
-	LVolumePriv(LSystemPath sys, const char *name) : _It(_Sub.end())
-	{
-		Init();
 		SysPath = sys;
 
+		Name = name;
 		if (SysPath == LSP_ROOT)
-			_Path = "/";
+			Path = "/";
 		else
-			_Path = LGetSystemPath(SysPath);
-		if (_Path)
-		{
-			_Name = name;
-			_Type = sys == LSP_DESKTOP ? VT_DESKTOP : VT_FOLDER;
-		}
+			Path = LGetSystemPath(SysPath);
+		
+		if (Path)
+			Type = sys == LSP_DESKTOP ? VT_DESKTOP : VT_FOLDER;
 	}
 	
 	~LVolumePriv()
 	{
-		_Sub.DeleteObjects();
+		DeleteObj(NextVol);
+		DeleteObj(ChildVol);
 	}
+
+	void Insert(LVolume *vol, LVolume *newVol)
+	{
+		if (vol->d->ChildVol)
+		{
+			for (auto v = vol->d->ChildVol; v; v = v->d->NextVol)
+			{
+				if (!v->d->NextVol)
+				{
+					v->d->NextVol = newVol;
+					break;
+				}
+			}
+		}
+		else vol->d->ChildVol = newVol;
+	}	
 
 	LVolume *First()
 	{
-		if (SysPath == LSP_DESKTOP && !_Sub.Length())
+		if (SysPath == LSP_DESKTOP && !ChildVol)
 		{
 			// Get various shortcuts to points of interest
-			LVolume *v = new LVolume(LSP_ROOT, "Root");
-			if (v)
-				_Sub.Insert(v);
-
+			Insert(Owner, new LVolume(LSP_ROOT, "Root"));
+			
 			struct passwd *pw = getpwuid(getuid());
 			if (pw)
-			{
-				v = new LVolume(LSP_HOME, "Home");
-				if (v)
-					_Sub.Insert(v);
-			}
+				Insert(Owner, new LVolume(LSP_HOME, "Home"));
 
+			LSystemPath p[] = {LSP_USER_DOCUMENTS,
+								LSP_USER_MUSIC,
+								LSP_USER_VIDEO,
+								LSP_USER_DOWNLOADS,
+								LSP_USER_PICTURES};
+			for (int i=0; i<CountOf(p); i++)
+			{
+				LString Path = LGetSystemPath(p[i]);
+				auto v = new LVolume(0);
+				if (Path && v)
+				{
+					auto Parts = Path.Split("/");
+					v->d->Path = Path;
+					v->d->Name = *Parts.rbegin();
+					v->d->Type = VT_FOLDER;
+					Insert(Owner, v);
+				}
+			}
+		}
+
+		return ChildVol;
+	}
+
+	LVolume *Next()
+	{
+		if (SysPath == LSP_DESKTOP && !NextVol)
+		{
+			NextVol = new LVolume(LSP_MOUNT_POINT, "Mounts");
+			
 			// Get mount list
 			// this is just a hack at this stage to establish some base
 			// functionality. I would appreciate someone telling me how
@@ -613,6 +640,8 @@ struct LVolumePriv
 						auto &Mount = M[1];
 						auto &FileSys = M[2];
 						
+						printf("fstab %s %s %s\n", Device.Get(), Mount.Get(), FileSys.Get());
+						
 						if
 						(
 							(Device.Find("/dev/") == 0 || Mount.Find("/mnt/") == 0)
@@ -624,70 +653,45 @@ struct LVolumePriv
 							!FileSys.Equals("swap")
 						)
 						{
-							v = new LVolume(0);
+							auto v = new LVolume(0);
 							if (v)
 							{
 								char *MountName = strrchr(Mount, '/');
-								v->d->_Name = (MountName ? MountName + 1 : Mount.Get());
-								v->d->_Path = Mount;
-								v->d->_Type = VT_HARDDISK;
+								v->d->Name = (MountName ? MountName + 1 : Mount.Get());
+								v->d->Path = Mount;
+								v->d->Type = VT_HARDDISK;
 
 								char *Device = M[0];
 								// char *FileSys = M[2];
 								if (stristr(Device, "fd"))
 								{
-									v->d->_Type = VT_FLOPPY;
+									v->d->Type = VT_FLOPPY;
 								}
 								else if (stristr(Device, "cdrom"))
 								{
-									v->d->_Type = VT_CDROM;
+									v->d->Type = VT_CDROM;
 								}
 
-								_Sub.Insert(v);
+								Insert(NextVol, v);
 							}
 						}
 					}
 				}
 			}
-			
-			LSystemPath p[] = {LSP_USER_DOCUMENTS,
-								LSP_USER_MUSIC,
-								LSP_USER_VIDEO,
-								LSP_USER_DOWNLOADS,
-								LSP_USER_PICTURES};
-			for (int i=0; i<CountOf(p); i++)
-			{
-				LString Path = LGetSystemPath(p[i]);
-				if (Path &&
-					(v = new LVolume(0)))
-				{
-					auto Parts = Path.Split("/");
-					v->d->_Path = Path;
-					v->d->_Name = *Parts.rbegin();
-					v->d->_Type = VT_FOLDER;
-					_Sub.Insert(v);
-				}
-			}
 		}
-
-		_It = _Sub.begin();
-		return *_It;
-	}
-
-	LVolume *Next()
-	{
-		return *(++_It);
+		
+		return NextVol;
 	}
 };
 
 LVolume::LVolume(const char *Path = NULL)
 {
-	d = new LVolumePriv(Path);
+	d = new LVolumePriv(this, Path);
 }
 
 LVolume::LVolume(LSystemPath SysPath, const char *Name)
 {
-	d = new LVolumePriv(SysPath, Name);
+	d = new LVolumePriv(this, SysPath, Name);
 }
 
 LVolume::~LVolume()
@@ -695,42 +699,42 @@ LVolume::~LVolume()
 	DeleteObj(d);
 }
 
-const char *LVolume::Name()
+const char *LVolume::Name() const
 {
-    return d->_Name;
+    return d->Name;
 }
 
-const char *LVolume::Path()
+const char *LVolume::Path() const
 {
-    return d->_Path;
+    return d->Path;
 }
 
-int LVolume::Type()
+int LVolume::Type() const
 {
-    return d->_Type;
+    return d->Type;
 }
 
-int LVolume::Flags()
+int LVolume::Flags() const
 {
-    return d->_Flags;
+    return d->Flags;
 }
 
-uint64 LVolume::Size()
+uint64 LVolume::Size() const
 {
-    return d->_Size;
+    return d->Size;
 }
 
-uint64 LVolume::Free()
+uint64 LVolume::Free() const
 {
-    return d->_Free;
+    return d->Free;
 }
 
-LSurface *LVolume::Icon()
+LSurface *LVolume::Icon() const
 {
     return NULL;
 }
 
-bool LVolume::IsMounted()
+bool LVolume::IsMounted() const
 {
     return true;
 }
@@ -752,16 +756,16 @@ LVolume *LVolume::Next()
 
 void LVolume::Insert(LAutoPtr<LVolume> v)
 {
-    d->_Sub.Insert(v.Release());
+    d->Insert(this, v.Release());
 }
 
 LDirectory *LVolume::GetContents()
 {
 	LDirectory *Dir = 0;
-	if (d->_Path)
+	if (d->Path)
 	{
 		Dir = new LDirectory;
-		if (Dir && !Dir->First(d->_Path))
+		if (Dir && !Dir->First(d->Path))
 			DeleteObj(Dir);
 	}
 	return Dir;

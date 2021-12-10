@@ -556,6 +556,8 @@ enum LSystemPath
 	///		[Win32] = C:\Users\%HOME%\Pictures
 	///		[Mac]   = ???
 	///		[Linux] = ~\Pictures
+	
+	LSP_MOUNT_POINT,
 };
 
 // Deprecated method defines

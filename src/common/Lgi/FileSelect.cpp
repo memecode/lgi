@@ -844,28 +844,29 @@ public:
 			return;
 		
 		auto Path = v->Path();
-		i->SetText(v->Name(), 0);
+		i->SetText(v->Name());
 		i->SetText(Path, 1);
 		
 		for (unsigned n=0; n<Links.Length(); n++)
 		{
-			if (v->Path() && !_stricmp(v->Path(), Links[n]))
+			if (Path && !Stricmp(Path, Links[n].Get()))
 			{
 				Links.DeleteAt(n--);
 				break;
 			}
 		}
 		
-		for (LVolume *cv = v->First(); cv; cv = v->Next())
+		for (LVolume *cv = v->First(); cv; cv = cv->Next())
 		{
 			LTreeItem *ci = new LTreeItem;
 			if (ci)
 			{
 				i->Insert(ci);
-				i->Expanded(true);				
 				Add(ci, cv);
 			}
 		}
+
+		i->Expanded(true);
 	}
 };
 
@@ -1025,22 +1026,42 @@ LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 	FileLst->Focus(true);
 	
 	LgiGetUsersLinks(Links);
-	LTreeItem *RootItem = new LTreeItem;
-	if (RootItem)
+
+	auto v = FileDev->GetRootVolume();
+	if (v)
 	{
-		Bookmarks->Insert(RootItem);
-		Add(RootItem, FileDev->GetRootVolume());
-	}
-	for (unsigned n=0; n<Links.Length(); n++)
-	{
-		LTreeItem *ci = new LTreeItem;
-		if (ci)
+		for (auto vol = v; vol; vol = vol->Next())
 		{
-			char *p = Links[n];
-			char *leaf = strrchr(p, DIR_CHAR);
-			ci->SetText(leaf?leaf+1:p, 0);
-			ci->SetText(p, 1);
-			RootItem->Insert(ci);
+			if (auto *ti = new LTreeItem)
+			{
+				Bookmarks->Insert(ti);
+				Add(ti, vol);
+				ti->Expanded(true);
+			}
+		}
+	}
+	
+	if (Links.Length())
+	{
+		if (auto *ti = new LTreeItem)
+		{
+			ti->SetText("Bookmarks");
+			Bookmarks->Insert(ti);
+			
+			for (unsigned n=0; n<Links.Length(); n++)
+			{
+				LTreeItem *ci = new LTreeItem;
+				if (ci)
+				{
+					char *p = Links[n];
+					char *leaf = strrchr(p, DIR_CHAR);
+					ci->SetText(leaf?leaf+1:p, 0);
+					ci->SetText(p, 1);
+					ti->Insert(ci);
+				}
+			}
+
+			ti->Expanded(true);
 		}
 	}
 }
@@ -1452,6 +1473,12 @@ public:
 			{
 				Tree->SetImageList(Dlg->d->BtnIcons, false);
 				Tree->Insert(Root = new GFileSystemItem(this, v));
+				
+				for (auto next = v->Next(); next; next = next->Next())
+				{
+					Tree->SetImageList(Dlg->d->BtnIcons, false);
+					Tree->Insert(Root = new GFileSystemItem(this, next));
+				}
 			}
 		}
 	}
@@ -1524,7 +1551,7 @@ GFileSystemItem::GFileSystemItem(GFileSystemPopup *popup, LVolume *Vol, char *pa
 				break;
 		}
 
-		for (LVolume *v=Vol->First(); v; v=Vol->Next())
+		for (LVolume *v=Vol->First(); v; v=v->Next())
 		{
 			Insert(new GFileSystemItem(Popup, v));
 		}

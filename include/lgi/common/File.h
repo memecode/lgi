@@ -216,15 +216,15 @@ public:
 	LVolume(LSystemPath SysPath, const char *Name);
 	virtual ~LVolume();
 
-	const char *Name();
-	const char *Path();
-	int Type();
-	int Flags();
-	uint64 Size();
-	uint64 Free();
-	LSurface *Icon();
+	const char *Name() const;
+	const char *Path() const;
+	int Type() const;
+	int Flags() const;
+	uint64 Size() const;
+	uint64 Free() const;
+	LSurface *Icon() const;
 
-	virtual bool IsMounted();
+	virtual bool IsMounted() const;
 	virtual bool SetMounted(bool Mount);
 	virtual LVolume *First();
 	virtual LVolume *Next();
@@ -241,7 +241,7 @@ class LgiClass LFileSystem
 	static LFileSystem *Instance;
 	class GFileSystemPrivate *d;
 
-	LVolume *Root;
+	LVolume *Root = NULL;
 
 public:
 	LFileSystem();
