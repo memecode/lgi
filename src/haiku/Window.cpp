@@ -237,6 +237,19 @@ bool LWindow::Attach(LViewI *p)
 	LLocker lck(d, _FL);
 	if (!lck.Lock())
 		return false;
+
+	auto rootView = Handle();
+	auto wnd = WindowHandle();
+	// printf("%s:%i attach %p to %p\n", _FL, Handle(), WindowHandle());
+	if (rootView && wnd)
+	{
+		wnd->AddChild(rootView);
+		rootView->Show();
+		
+		auto f = wnd->Frame();
+		rootView->ResizeTo(f.Width(), f.Height());
+		rootView->SetResizingMode(B_FOLLOW_ALL_SIDES);
+	}
 	
 	// Setup default button...
 	if (!_Default)

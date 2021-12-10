@@ -93,7 +93,7 @@
 		<Node File="./Makefile.linux" Type="9" Platforms="15" />
 		<Node File="./Resources/resource.h" Type="3" Platforms="15" />
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" />
+	<Node File="..\Lgi.xml" Type="4" Platforms="15" />
 	<Settings>
 		<General>
 			<Makefile>
@@ -136,6 +136,8 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -189,12 +191,14 @@ pthread
 					<Debug>be</Debug>
 					<Release>be</Release>
 				</Haiku>
+				<All />
 			</Libraries>
 			<LibraryPaths>
 				<All>
 					<Debug>..\Debug</Debug>
 					<Release>..\Release</Release>
 				</All>
+				<Windows />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -228,7 +232,10 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<ApplicationIcon>
 				<Haiku>./Code/icon-haiku</Haiku>
 			</ApplicationIcon>
-			<Defines />
+			<Defines>
+				<All />
+				<Windows />
+			</Defines>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -243,16 +250,28 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Environment>
 				<All>SOME_TEST=testing</All>
 			</Environment>
-			<Arguments />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
 		<Advanced>
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Windows />
+			</PostBuildCommands>
+			<OtherMakefileRules />
 		</Advanced>
-		<Remote />
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>

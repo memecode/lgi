@@ -172,6 +172,7 @@ public:
 	void Draw(BRect updateRect)
 	{
 		LScreenDC dc(d->View);
+		printf("Draw %s\n", d->View->GetClass());
 		d->View->OnPaint(&dc);
 	}
 
@@ -702,6 +703,7 @@ bool LView::Attach(LViewI *parent)
 		if (w && TestFlag(WndFlags, GWF_FOCUS))
 			w->SetFocus(this, LWindow::GainFocus);
 
+		/*
 		auto *Wnd = dynamic_cast<LWindow*>(parent);
 		if (Wnd)
 		{
@@ -745,6 +747,7 @@ bool LView::Attach(LViewI *parent)
 			else LgiTrace("%s:%i - Error no window handle for %s\n", _FL, parent->GetClass());
 		}
 		else
+		*/
 		{
 			auto bview = parent->Handle();
 			if (bview)
@@ -768,7 +771,7 @@ bool LView::Attach(LViewI *parent)
 
 					Status = true;
 
-					#if 0
+					#if 1
 					LgiTrace("%s:%i - Attached %s/%p to view %s/%p, success\n",
 						_FL,
 						GetClass(), d->Hnd,
@@ -777,7 +780,7 @@ bool LView::Attach(LViewI *parent)
 				}
 				else
 				{
-					#if 0
+					#if 1
 					LgiTrace("%s:%i - Error attaching %s to view %s, can't lock.\n",
 						_FL, GetClass(), parent->GetClass());
 					#endif

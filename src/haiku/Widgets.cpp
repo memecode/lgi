@@ -157,9 +157,11 @@ void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 		printf("%s:%i - no looper for domodal thread.\n",_FL);
 
 	if (Attach(0))
+	{
+		AttachChildren();
 		Visible(true);
-	else
-		printf("%s:%i - attach failed..\n", _FL);
+	}
+	else printf("%s:%i - attach failed..\n", _FL);
 }
 
 void LDialog::EndModal(int Code)
