@@ -851,14 +851,17 @@ void LToolButton::Value(int64 b)
 void LToolButton::SendCommand()
 {
 	LToolBar *t = dynamic_cast<LToolBar*>(GetParent());
-	if (t) t->OnButtonClick(this);
+	if (t)
+		t->OnButtonClick(this);
+	else
+		printf("%s:%i - Error: parent not toolbar.\n", _FL);
 }
 
 void LToolButton::OnMouseClick(LMouse &m)
 {
 	LToolBar *ToolBar = dynamic_cast<LToolBar*>(GetParent());
 
-	#if 0
+	#if 1
 	printf("tool button click %i,%i down=%i, left=%i right=%i middle=%i, ctrl=%i alt=%i shift=%i Double=%i\n",
 		m.x, m.y,
 		m.Down(), m.Left(), m.Right(), m.Middle(),
@@ -895,12 +898,7 @@ void LToolButton::OnMouseClick(LMouse &m)
 					
 					if (Old && IsOver(m))
 					{
-						// char *n = Name();
-						if (m.Left())
-						{
-							SendCommand();
-						}
-						
+						SendCommand();
 						SendNotify(LNotifyActivate);
 					}
 
@@ -1383,12 +1381,16 @@ void LToolBar::OnButtonClick(LToolButton *Btn)
 	if (v && Btn)
 	{
 		int Id = Btn->GetId();
-        v->PostEvent(M_COMMAND, (LMessage::Param) Id
+		if (v->PostEvent(M_COMMAND, (LMessage::Param) Id
 			#if LGI_VIEW_HANDLE
         	, (LMessage::Param) Handle()
         	#endif
-        	);
+        	))
+        	; //printf("Send M_COMMAND(%i)\n", Id);
+        else
+        	printf("%s:%i - Failed to send M_COMMAND.\n", _FL);
 	}
+	else printf("%s:%i - Ptr error: %p %p\n", _FL, v, Btn);
 }
 
 int LToolBar::PostDescription(LView *Ctrl, const char *Text)

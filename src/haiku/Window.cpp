@@ -130,7 +130,8 @@ LWindow::~LWindow()
 
 	if (d)
 	{
-		d->Quit();
+		if (d->Lock())
+			d->Quit();
 		d = NULL;
 	}
 }

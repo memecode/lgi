@@ -18,6 +18,7 @@
 extern OsThread LgiThreadInPaint;
 #elif defined(HAIKU)
 #include <View.h>
+extern void *IsAttached(BView *v);
 #endif
 
 #define PAINT_VIRTUAL_CHILDREN	1

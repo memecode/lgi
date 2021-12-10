@@ -1102,6 +1102,10 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 					if ([paths count])
 						Path = [paths objectAtIndex:0];
 				}
+				
+			#elif defined(HAIKU)
+			
+				
 
 			#else
 

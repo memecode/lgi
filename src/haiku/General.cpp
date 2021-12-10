@@ -96,7 +96,7 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 		printf("%s:%i - Assert failed:\n%s\n", file, line, test);
 
 		LString msg;
-		msg.Printf("Assert failed: %s\n%s:%s", test, file, line);
+		msg.Printf("Assert failed: %s\n%s:%i", test, file, line);
 		BAlert alert("Assert", msg, "Abort", "Debug", "Ignore");
 		auto result = alert.Go();
 		printf("alert result=%i\n", result);

@@ -597,7 +597,8 @@ struct LVolumePriv
 			// functionality. I would appreciate someone telling me how
 			// to do this properly. Till then...
 			LFile f;
-			if (f.Open("/etc/fstab", O_READ))
+			auto fstab = "/etc/fstab";
+			if (LFileExists(fstab) && f.Open(fstab, O_READ))
 			{
 				auto Buf= f.Read();
 				f.Close();

@@ -157,7 +157,15 @@ public:
 
 	void MessageReceived(BMessage *message)
 	{
-		d->View->OnEvent(message);
+		LView *v = NULL;
+		if (message->FindPointer(LMessage::PropView, &v) == B_OK)
+		{
+			// Proxy'd event for child view...
+			v->OnEvent(message);
+			return;
+		}
+		else d->View->OnEvent(message);		
+		
 		BView::MessageReceived(message);
 	}
 
@@ -519,6 +527,17 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 	int Id;
 	switch (Id = Msg->Msg())
 	{
+		case M_HANDLE_IN_THREAD:
+		{
+			LMessage::InThreadCb *Cb = NULL;
+			if (Msg->FindPointer(LMessage::PropCallback, &Cb) == B_OK)
+			{
+				(*Cb)();
+				delete Cb;
+			}
+			else printf("%s:%i - No Callback.\n", _FL);
+			break;
+		}
 		case M_INVALIDATE:
 		{
 			if ((LView*)this == (LView*)Msg->B())
@@ -542,7 +561,7 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 		}
 		case M_COMMAND:
 		{
-			return OnCommand(Msg->A(), 0, (OsView) Msg->B());
+			return OnCommand(Msg->A(), 0, 0);
 		}
 	}
 

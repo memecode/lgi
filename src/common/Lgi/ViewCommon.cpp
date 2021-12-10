@@ -2002,18 +2002,84 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b)
 	#ifdef LGI_SDL
 		return LPostEvent(this, Cmd, a, b);
 	#elif defined(HAIKU)
-		if (!d || !d->Hnd || !d->Hnd->LockLooper())
+		if (!d || !d->Hnd)
+		{
+			printf("%s:%i - Bad pointers %p %p\n", _FL, d, d ? d->Hnd : NULL);
 			return false;
+		}
+		
+		bool locked = false;
+		BView *lockView = NULL;
+		BWindow *lockWindow = NULL;
+		LWindow *wnd = dynamic_cast<LWindow*>(this);
+		if (wnd)
+		{
+			lockWindow = wnd->WindowHandle();
+			if (!lockWindow || !(locked = lockWindow->LockLooper()))
+			{
+				printf("%s:%i - Failed to window: cls=%s\n",
+					_FL, GetClass());
+			}
+		}
+		else
+		{
+			LViewI *view = GetParent();
+			while (view && ::IsAttached(view->Handle()))
+			{
+				// printf("view=%s not attached\n", view->GetClass());
+				view = view->GetParent();
+			}
+			
+			lockView = view ? view->Handle() : NULL;
+			if (!lockView || !(locked = lockView->LockLooper()))
+			{
+				auto wnd = lockView ? lockView->Window() : NULL;
+				auto par = lockView ? lockView->Parent() : NULL;
+				#if 0
+				printf("%s:%i - Failed to locklooper: %p %i %p %p cls=%s\n",
+					_FL, lockView, locked, wnd, par, GetClass());
+				#endif
+				return false;
+			}
+		}
 
 		BMessage *m = new BMessage(Cmd);
 		if (!m)
+		{
+			printf("%s:%i - alloc failed.\n", _FL);
 			return false;
-		m->AddUInt64(LMessage::PropNames[0], a);
-		m->AddUInt64(LMessage::PropNames[1], b);
+		}
+		
+		auto r = m->AddInt64(LMessage::PropA, a);
+		if (r != B_OK) printf("%s:%i - AddUInt64 failed.\n", _FL);
+		r = m->AddInt64(LMessage::PropB, b);
+		if (r != B_OK) printf("%s:%i - AddUInt64 failed.\n", _FL);
+		if (lockView != d->Hnd)
+		{
+			r = m->AddPointer(LMessage::PropView, this);
+			if (r != B_OK) printf("%s:%i - AddPointer failed.\n", _FL);
+		}
 
-		auto w = d && d->Hnd ? d->Hnd->Window() : NULL;
-		status_t r = w->PostMessage(m);
-		d->Hnd->UnlockLooper();
+		if (lockView)
+		{		
+			r = d->Hnd->Window()->PostMessage(m, lockView);
+			if (r != B_OK) printf("%s:%i - PostMessage failed.\n", _FL);
+		}
+		else if (lockWindow)
+		{
+			r = lockWindow->PostMessage(m);
+			if (r != B_OK) printf("%s:%i - PostMessage failed.\n", _FL);
+		}
+		else
+		{
+			r = B_ERROR;
+			printf("%s:%i - No window?\n", _FL);
+		}
+
+		if (lockView)
+			lockView->UnlockLooper();
+		else if (lockWindow)
+			lockWindow->UnlockLooper();
 
 		return r == B_OK;
 	#elif WINNATIVE

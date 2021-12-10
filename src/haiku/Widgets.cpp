@@ -28,6 +28,7 @@ struct LDialogPriv
 	bool IsModal, IsModeless;
 	bool Resizable;
 	LDialog::OnClose ModalCb;
+	thread_id CallingThread = NULL;
 	
 	LDialogPriv()
 	{
@@ -149,12 +150,16 @@ void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 	d->IsModal = true;
 	d->IsModeless = false;
 	d->ModalCb = Cb;
-	
-	printf("attach..\n");
+	d->CallingThread = find_thread(NULL);
+
+	BLooper *looper = BLooper::LooperForThread(d->CallingThread);
+	if (!looper)
+		printf("%s:%i - no looper for domodal thread.\n",_FL);
+
 	if (Attach(0))
 		Visible(true);
 	else
-		printf("attach failed..\n");
+		printf("%s:%i - attach failed..\n", _FL);
 }
 
 void LDialog::EndModal(int Code)
@@ -162,7 +167,31 @@ void LDialog::EndModal(int Code)
 	if (d->IsModal)
 	{
 		d->IsModal = false;
-		d->ModalCb(this, d->ModalStatus = Code);
+		if (d->ModalCb)
+		{
+			BLooper *looper = BLooper::LooperForThread(d->CallingThread);
+			if (looper)
+			{
+				BMessage *m = new BMessage(M_HANDLE_IN_THREAD);
+				m->AddPointer
+				(
+					LMessage::PropCallback,
+					new LMessage::InThreadCb
+					(
+						[dlg=this,cb=d->ModalCb,code=Code]()
+						{
+							// printf("%s:%i - Calling LDialog callback.. in original thread?\n", _FL);
+							cb(dlg, code);
+							// printf("%s:%i - Calling LDialog callback.. done\n", _FL);
+						}
+					)
+				);
+					
+				// printf("%s:%i - Posting M_HANDLE_IN_THREAD.\n", _FL);
+				looper->PostMessage(m);
+			}
+			else printf("%s:%i - Failed to get looper for %p\n", _FL, d->CallingThread);
+		}
 	}
 }
 

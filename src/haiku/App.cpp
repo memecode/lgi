@@ -975,23 +975,37 @@ int LMessage::Msg()
 
 LMessage::Param LMessage::A()
 {
-	LMessage::Param a = 0;
-	FindInt64(PropNames[0], &a);
+	int64 a = 0;
+	if (FindInt64(PropA, &a) != B_OK)
+	{
+		int32 c = CountNames(B_ANY_TYPE);
+		printf("%s:%i - Failed to find PropA (%i names)\n", _FL, c);
+		for (int32 i=0; i<c; i++)
+		{
+			char *name = NULL;
+			type_code type;
+			int32 count = 0;
+			status_t r = GetInfo(B_ANY_TYPE, i, &name, &type, &count);
+			if (r == B_OK)
+				printf("\t%x %s[%i]\n", type, name, count);
+		}
+	}
 	return a;
 }
 
 LMessage::Param LMessage::B()
 {
-	LMessage::Param b = 0;
-	FindInt64(PropNames[1], &b);
+	int64 b = 0;
+	if (FindInt64(PropB, &b) != B_OK)
+		printf("%s:%i - Failed to find PropB.\n", _FL);
 	return b;
 }
 
 void LMessage::Set(int Msg, Param a, Param b)
 {
 	what = Msg;
-	AddInt64(PropNames[0], a);
-	AddInt64(PropNames[1], b);
+	AddInt64(PropA, a);
+	AddInt64(PropA, b);
 }
 
 bool LMessage::Send(LViewI *View)

@@ -1586,7 +1586,7 @@ AppWnd::AppWnd()
 	LgiGetResObj(true, AppName);
 	#endif
 	
-	LRect r(0, 0, 1300, 900);
+	LRect r(0, 0, 1000, 760);
 	SetPos(r);
 	MoveToCenter();
 
@@ -3473,7 +3473,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			s->Parent(this);
 			s->Open([&](auto s, auto ok)
 			{
-				OpenFile(s->Name());
+				if (ok)
+					OpenFile(s->Name());
 				delete s;
 			});
 			break;
@@ -4127,7 +4128,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		default:
 		{
-			char *r = d->RecentFiles[Cmd - IDM_RECENT_FILE];
+			int index = Cmd - IDM_RECENT_FILE;
+			auto r = d->RecentFiles.IdxCheck(index)? d->RecentFiles[index] : NULL;
 			if (r)
 			{
 				IdeDoc *f = d->IsFileOpen(r);
@@ -4141,7 +4143,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				}
 			}
 
-			auto p = d->RecentProjects[Cmd - IDM_RECENT_PROJECT];
+			index = Cmd - IDM_RECENT_PROJECT;
+			auto p = d->RecentProjects.IdxCheck(index) ? d->RecentProjects[index] : NULL;
 			if (p)
 			{
 				CloseAll();

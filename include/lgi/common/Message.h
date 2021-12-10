@@ -1,5 +1,10 @@
+
 #ifndef _GMESSAGE_H_
 #define _GMESSAGE_H_
+
+#ifdef HAIKU
+#include <functional>
+#endif
 
 enum LgiMessages
 {
@@ -109,6 +114,7 @@ enum LgiMessages
 		M_TEXT_UPDATE_NAME,
 		M_ASSERT_DLG,
 		M_CLOSE,
+		M_HANDLE_IN_THREAD, // A = (LMessage::InThreadCb*)Cb;
 	
 	#elif defined(MAC)
 
@@ -226,7 +232,11 @@ public:
 	#endif
 
 	#if defined(HAIKU)
-	static constexpr char *PropNames[2] = {"lgi_a", "lgi_b"};
+	static constexpr char *PropA = "lgiA";
+	static constexpr char *PropB = "lgiB";
+	static constexpr char *PropView = "lgiView";
+	static constexpr char *PropCallback = "lgiCallback";
+	typedef std::function<void()> InThreadCb;
 	#endif
 
 	LMessage()
