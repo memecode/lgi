@@ -79,6 +79,8 @@ public:
 		y1 = r->y1;
 		y2 = r->y2;
 	}
+	
+	LPoint Center() { return LPoint(x1 + (X()/2), y1 + (Y()/2)); }
 
 	/// Returns the width
 	int X() const { return x2 - x1 + 1; }
