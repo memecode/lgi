@@ -1203,7 +1203,7 @@ NodeView::~NodeView()
 
 
 //////////////////////////////////////////////////////////////////////////////////
-int NodeSort(LTreeItem *a, LTreeItem *b, NativeInt d)
+int NodeSort(LTreeItem *a, LTreeItem *b, NativeInt d = 0)
 {
 	ProjectNode *A = dynamic_cast<ProjectNode*>(a);
 	ProjectNode *B = dynamic_cast<ProjectNode*>(b);
@@ -1225,13 +1225,6 @@ int NodeSort(LTreeItem *a, LTreeItem *b, NativeInt d)
 	}
 
 	return 0;
-}
-
-DeclGArrayCompare(XmlSort, LXmlTag*, NativeInt)
-{
-	LTreeItem *A = dynamic_cast<LTreeItem*>(*a);
-	LTreeItem *B = dynamic_cast<LTreeItem*>(*b);
-	return NodeSort(A, B, param ? *param : 0);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

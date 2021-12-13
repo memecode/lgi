@@ -69,13 +69,6 @@ struct UnderInfo
 	int Grow;		// in px
 };
 
-int Cmp(UnderInfo *a, UnderInfo *b)
-{
-	if (a->Priority != b->Priority)
-		return a->Priority - b->Priority;
-	return b->Grow - a->Grow;
-}
-
 static void
 DistributeUnusedSpace(	LArray<int> &Min,
 						LArray<int> &Max,
@@ -134,7 +127,12 @@ DistributeUnusedSpace(	LArray<int> &Min,
 		}
 	}
 	
-	Unders.Sort(Cmp);
+	Unders.Sort([](auto a, auto b)
+	{
+		if (a->Priority != b->Priority)
+			return a->Priority - b->Priority;
+		return b->Grow - a->Grow;
+	});
 
 	int UnknownSplit = 0;
 	for (i=0; Avail>0 && i<Unders.Length(); i++)

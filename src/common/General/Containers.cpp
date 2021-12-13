@@ -92,7 +92,10 @@ bool UnitTest_ListClass()
 	CHECK(UnitTest_Check(a, l));
 
 	// Sort test..
-	a.Sort(ACmp);
+	a.Sort([](auto a, auto b)
+	{
+		return stricmp(*a, *b);
+	});
 	l.Sort(LCmp);
 	CHECK(UnitTest_Check(a, l));
 

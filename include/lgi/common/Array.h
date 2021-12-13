@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <cstdlib>
 #include <initializer_list>
+#include <functional>
 
 #define GARRAY_MIN_SIZE			16
 
@@ -616,13 +617,6 @@ public:
 		return true;
 	}
 
-	/// Sorts the array via a comparison function
-	void Sort(int (*Compare)(Type*, Type*))
-	{
-		typedef int (*qsort_compare)(const void *, const void *);
-		qsort(p, len, sizeof(Type), (qsort_compare)Compare);
-	}
-
 	/// Sorts the array via objects '-' operator
 	void Sort()
 	{
@@ -639,44 +633,47 @@ public:
 		});
 	}
 
-	// Sorts the array with a comparison function (can I get a standard here?)
-	#if defined(_MSC_VER) || defined(PLATFORM_MINGW)
-	
-		#define DeclGArrayCompare(func_name, type, user_type) \
-			int func_name(user_type *param, type *a, type *b)
-		
-		template<typename U>
-		void Sort(int (*Compare)(U *user_param, Type*, Type*), U *user_param)
-		{
-			typedef int (*qsort_s_compare)(void *, const void *, const void *);
-			qsort_s(p, len, sizeof(Type), (qsort_s_compare)Compare, user_param);
-		}
-	
-	#elif defined(MAC)
+	/// Sorts the array via a callback.
+	void Sort(std::function<int(Type*,Type*)> Compare)
+	{
+		#if !defined(WINDOWS) && !defined(HAIKU) && !defined(LINUX)
+		#define USER_DATA_FIRST 1
+		#else
+		#define USER_DATA_FIRST 0
+		#endif
 
-		#define DeclGArrayCompare(func_name, type, user_type) \
-			int func_name(user_type *param, type *a, type *b)
-		
-		template<typename U>
-		void Sort(int (*Compare)(U *user_param, Type*, Type*), U *user_param)
-		{
-			typedef int (*qsort_r_compare)(void *, const void *, const void *);
-			qsort_r(p, len, sizeof(Type), user_param, (qsort_r_compare)Compare);
-		}
-	
-	#else
-	
-		#define DeclGArrayCompare(func_name, type, user_type) \
-			int func_name(type *a, type *b, user_type *param)
-		
-		template<typename T>
-		void Sort(int (*Compare)(Type*, Type*, T *user_param), T *user_param)
-		{
-			typedef int (*qsort_r_compare)(const void *, const void *, void *);
-			qsort_r(p, len, sizeof(Type), (qsort_r_compare)Compare, user_param);
-		}
-	
-	#endif
+		#if defined(WINDOWS)
+		/* _ACRTIMP void __cdecl qsort_s(void*   _Base,
+										rsize_t _NumOfElements,
+										rsize_t _SizeOfElements,
+										int (__cdecl* _PtFuncCompare)(void*, void const*, void const*),
+										void*   _Context); */
+		qsort_s
+		#else
+		qsort_r
+		#endif
+			(
+				p,
+				len,
+				sizeof(Type),
+				#if USER_DATA_FIRST
+					&Compare,
+				#endif
+				#if defined(HAIKU) || defined(LINUX)
+					// typedef int (*_compare_function_qsort_r)(const void*, const void*, void*);
+					// extern void qsort_r(void* base, size_t numElements, size_t sizeOfElement, _compare_function_qsort_r, void* cookie);
+					[](const void *a, const void *b, void *ud) -> int
+				#else
+					[](void *ud, const void *a, const void *b) -> int
+				#endif
+				{
+					return (*( (std::function<int(Type*,Type*)>*)ud ))((Type*)a, (Type*)b);
+				}
+				#if !USER_DATA_FIRST
+					, &Compare
+				#endif
+			);
+	}
 
 	/// \returns a reference to a new object on the end of the array
 	///

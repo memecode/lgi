@@ -335,13 +335,6 @@ int LItemContainer::HitColumn(int x, int y, LItemColumn *&Resize, LItemColumn *&
 	return Index;
 }
 
-DeclGArrayCompare(ColInfoCmp, LItemContainer::ColInfo, void)
-{
-	int AGrowPx = a->GrowPx();
-	int BGrowPx = b->GrowPx();
-	return AGrowPx - BGrowPx;
-}
-
 void LItemContainer::OnColumnClick(int Col, LMouse &m)
 {
 	ColClick = Col;
@@ -422,7 +415,12 @@ void LItemContainer::ResizeColumnsToContent(int Border)
 			AvailablePx -= VScroll->X();
 
 		int ExpandPx = AvailablePx - Sizes.FixedPx;
-		Sizes.Info.Sort(ColInfoCmp, (void*)NULL);
+		Sizes.Info.Sort([](auto a, auto b)
+		{
+			int AGrowPx = a->GrowPx();
+			int BGrowPx = b->GrowPx();
+			return AGrowPx - BGrowPx;
+		});
 		
 		for (int i=0; i<Sizes.Info.Length(); i++)
 		{
