@@ -1074,7 +1074,12 @@ bool LView::HandleCapture(LView *Wnd, bool c)
 			DEBUG_CAPTURE("    _Capturing=%s -> %s\n", _Capturing?_Capturing->GetClass():0, Wnd?Wnd->GetClass():0);
 			_Capturing = Wnd;
 			
-			#if WINNATIVE
+			#if defined(__GTK_H__)
+			
+				d->CaptureThread.Reset(new LCaptureThread(this));
+			
+			#elif WINNATIVE
+				
 				LPoint Offset;
 				LViewI *v = _Capturing->Handle() ? _Capturing : FindReal(&Offset);
 				HWND h = v ? v->Handle() : NULL;
@@ -1082,13 +1087,15 @@ bool LView::HandleCapture(LView *Wnd, bool c)
 					SetCapture(h);
 				else
 					LAssert(0);
-
+					
 			#elif defined(LGI_SDL)
+				
 				#if SDL_VERSION_ATLEAST(2, 0, 4)
-				SDL_CaptureMouse(SDL_TRUE);
+					SDL_CaptureMouse(SDL_TRUE);
 				#else
-				LAppInst->CaptureMouse(true);
+					LAppInst->CaptureMouse(true);
 				#endif
+
 			#endif
 		}
 	}
@@ -1097,14 +1104,22 @@ bool LView::HandleCapture(LView *Wnd, bool c)
 		DEBUG_CAPTURE("    _Capturing=%s -> NULL\n", _Capturing?_Capturing->GetClass():0);
 		_Capturing = NULL;
 		
-		#if WINNATIVE
+		#if defined(__GTK_H__)
+		
+			d->CaptureThread.Reset();
+		
+		#elif WINNATIVE
+
 			ReleaseCapture();
+
 		#elif defined(LGI_SDL)
+
 			#if SDL_VERSION_ATLEAST(2, 0, 4)
-			SDL_CaptureMouse(SDL_FALSE);
+				SDL_CaptureMouse(SDL_FALSE);
 			#else
-			LAppInst->CaptureMouse(false);
+				LAppInst->CaptureMouse(false);
 			#endif
+
 		#endif
 	}
 
@@ -1747,8 +1762,6 @@ bool LView::AttachChildren()
 
 LFont *LView::GetFont()
 {
-	// const char *Cls = GetClass();
-	
 	if (!d->Font &&
 		d->Css &&
 		LResources::GetLoadStyles())

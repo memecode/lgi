@@ -2,6 +2,7 @@
 #pragma once
 
 #if WINNATIVE
+
 	#if !defined(_WIN32_WINNT) || _WIN32_WINNT < 0x501
 		#undef _WIN32_WINNT
 		#define _WIN32_WINNT 0x501
@@ -10,14 +11,36 @@
 	#include "commctrl.h"
 	#include "Uxtheme.h"
 	#define GViewFlags d->WndStyle
+
 #else
+
 	#define GViewFlags WndFlags
+
 #endif
 
-#if defined(MAC)
-extern OsThread LgiThreadInPaint;
+#if defined(__GTK_H__)
+
+	struct LCaptureThread : public LThread, public LCancel
+	{
+		int view = -1;
+		
+	public:
+		constexpr static int EventMs = 150;
+	
+		LCaptureThread(LView *v);
+		~LCaptureThread();
+		
+		int Main();
+	};
+
+#elif defined(MAC)
+
+	extern OsThread LgiThreadInPaint;
+
 #elif defined(HAIKU)
-#include <View.h>
+
+	#include <View.h>
+
 #endif
 
 #define PAINT_VIRTUAL_CHILDREN	1
@@ -168,14 +191,19 @@ public:
 
 	#endif
 
-	#if defined(MAC)
+	#if defined(__GTK_H__)
+
+		LAutoPtr<LCaptureThread> CaptureThread;
+		LMouse PrevMouse;
+	
+	#elif defined(MAC)
 
 		#ifdef LGI_COCOA
-		LString ClassName;
-		bool AttachEvent;
+			LString ClassName;
+			bool AttachEvent;
 		#elif defined LGI_CARBON
-		EventHandlerRef DndHandler;
-		LAutoString AcceptedDropFormat;
+			EventHandlerRef DndHandler;
+			LAutoString AcceptedDropFormat;
 		#endif
 
 	#elif defined(LGI_SDL)

@@ -16,6 +16,7 @@
 #include "lgi/common/Edit.h"
 #include "lgi/common/Popup.h"
 #include "lgi/common/Css.h"
+#include "lgi/common/EventTargetThread.h"
 #include "ViewPriv.h"
 
 using namespace Gtk;
@@ -115,9 +116,36 @@ LKey::LKey(int vkey, uint32_t flags)
 {
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+LCaptureThread::LCaptureThread(LView *v) : LThread("CaptureThread")
+{
+	view = v->AddDispatch();
+	DeleteOnExit = true;	
+	Run();
+}
+
+LCaptureThread::~LCaptureThread()
+{
+	Cancel();
+	// Don't wait.. the thread will exit and delete itself asnyronously.
+}
+
+int LCaptureThread::Main()
+{
+	while (!IsCancelled())
+	{
+		LSleep(EventMs);
+		if (!IsCancelled())
+			PostThreadEvent(view, M_CAPTURE_PULSE);
+	}
+	
+	return 0;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 LViewPrivate::LViewPrivate(LView *view) : View(view)
 {
+	PrevMouse.x = PrevMouse.y = -1;
 }
 
 LViewPrivate::~LViewPrivate()
@@ -181,18 +209,16 @@ void LView::_Delete()
 
 	// Remove static references to myself
 	if (_Over == this)
-		_Over = 0;
+		_Over = NULL;
 	if (_Capturing == this)
-		_Capturing = 0;
+		_Capturing = NULL;
 	
 	auto *Wnd = GetWindow();
 	if (Wnd && Wnd->GetFocus() == static_cast<LViewI*>(this))
 		Wnd->SetFocus(this, LWindow::ViewDelete);
 
 	if (LAppInst && LAppInst->AppWnd == this)
-	{
-		LAppInst->AppWnd = 0;
-	}
+		LAppInst->AppWnd = NULL;
 
 	// Hierarchy
 	LViewI *c;
@@ -686,6 +712,70 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 			OnPulse();
 			break;
 		}
+		case M_CAPTURE_PULSE:
+		{
+			auto wnd = GetWindow();
+			if (!wnd)
+			{
+				printf("%s:%i - No window.\n", _FL);
+				break;
+			}
+			
+			LMouse m;
+			if (!wnd->GetMouse(m, true))
+			{
+				printf("%s:%i - GetMouse failed.\n", _FL);
+				break;
+			}
+			
+			auto c = wnd->GetPos();
+			if (c.Overlap(m))
+				break; // Over the window, so we'll get normal events...
+			if (!_Capturing)
+				break; // Don't care now, there is no window capturing...
+
+			if (d->PrevMouse.x < 0)
+			{
+				d->PrevMouse = m; // Initialize the previous mouse var.
+				break;
+			}
+
+			int mask = LGI_EF_LEFT | LGI_EF_MIDDLE | LGI_EF_RIGHT;
+			bool coordsChanged = m.x != d->PrevMouse.x || m.y != d->PrevMouse.y;
+			bool buttonsChanged = (m.Flags & mask) != (d->PrevMouse.Flags & mask);
+			if (!coordsChanged && !buttonsChanged)
+				break; // Nothing changed since last poll..
+
+			int prevFlags = d->PrevMouse.Flags;
+			d->PrevMouse = m;
+			
+			// Convert coords to local view...
+			m.Target = _Capturing;
+			#if 0
+			printf("%s:%i - Mouse(%i,%i) outside window(%s, %s).. %s\n",
+				_FL, m.x, m.y, c.GetStr(), wnd->Name(),
+				m.ToString().Get());
+			#endif
+			m.ToView();
+
+			// Process events...
+			if (coordsChanged)
+			{
+				// printf("Move event: %s\n", m.ToString().Get());
+				_Capturing->OnMouseMove(m);
+			}
+			/* This seems to happen anyway? Ok then... whatevs
+			if (buttonsChanged)
+			{
+				m.Flags &= ~mask; // clear any existing
+				m.Flags |= prevFlags & mask;
+				m.Down(false);
+				printf("Click event: %s, mask=%x flags=%x\n", m.ToString().Get(), mask, m.Flags);
+				_Capturing->OnMouseClick(m);
+			}
+			*/
+			break;
+		}
 		case M_CHANGE:
 		{
 			LViewI *Ctrl;
@@ -830,6 +920,7 @@ bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 	m.Middle((mask & GDK_BUTTON2_MASK) != 0);
 	m.Right((mask & GDK_BUTTON3_MASK) != 0);
 	m.Down(m.Left() || m.Middle() || m.Right());
+	m.ViewCoords = !ScreenCoords;
 	
 	return Status;
 }

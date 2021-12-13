@@ -35,16 +35,16 @@ protected:
 
 	#if defined WIN32
 
-	friend uint WINAPI ThreadEntryPoint(void *i);
-    void Create(class LThread *Thread, OsThread &hThread, OsThreadId &ThreadId);
+		friend uint WINAPI ThreadEntryPoint(void *i);
+	    void Create(class LThread *Thread, OsThread &hThread, OsThreadId &ThreadId);
 
 	#elif defined POSIX
 
-	friend void *ThreadEntryPoint(void *i);
+		friend void *ThreadEntryPoint(void *i);
 
 	#else
 
-	friend int32 ThreadEntryPoint(void *i);
+		friend int32 ThreadEntryPoint(void *i);
 
 	#endif
 

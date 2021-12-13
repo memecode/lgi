@@ -334,6 +334,13 @@ public:
 		m.y += p.y;
 		return m;
 	}
+	
+	bool operator !=(const LMouse &m)
+	{
+		return	x != m.x ||
+				y != m.y ||
+				Flags != m.Flags;
+	}
 
 	LString ToString() const;
 	void Trace(const char *Msg) const
@@ -368,20 +375,20 @@ public:
 	bool IsContextMenu() const;
 	
 	#if defined(__OBJC__) && !defined(__GTK_H__)
-	void SetFromEvent(NSEvent *ev, NSView *view);
+		void SetFromEvent(NSEvent *ev, NSView *view);
 	#else
-	void SetButton(uint32_t Btn)
-	{
-		#if defined(MAC) && defined(__CARBONEVENTS__)
-		Left(Btn == kEventMouseButtonPrimary);
-		Right(Btn == kEventMouseButtonSecondary);
-		Middle(Btn == kEventMouseButtonTertiary);
-		#elif defined(__GTK_H__)
-		if (Btn == 1) Left(true);
-		else if (Btn == 2) Middle(true);
-		else if (Btn == 3) Right(true);
-		#endif
-	}
+		void SetButton(uint32_t Btn)
+		{
+			#if defined(MAC) && defined(__CARBONEVENTS__)
+			Left(Btn == kEventMouseButtonPrimary);
+			Right(Btn == kEventMouseButtonSecondary);
+			Middle(Btn == kEventMouseButtonTertiary);
+			#elif defined(__GTK_H__)
+			if (Btn == 1) Left(true);
+			else if (Btn == 2) Middle(true);
+			else if (Btn == 3) Right(true);
+			#endif
+		}
 	#endif
 };
 
