@@ -815,7 +815,7 @@ int LDateTime::GetTime(char *Str, size_t SLen) const
 
 uint64 LDateTime::Ts() const
 {
-	uint64 ts;
+	uint64 ts = 0;
 	Get(ts);
 	return ts;
 }
@@ -946,6 +946,13 @@ bool LDateTime::Get(uint64 &s) const
 		t.tm_isdst	= -1;
 		
 		time_t sec = timegm(&t);
+		
+		#if 0
+		printf("timegm(y=%i m=%i d=%i h=%i m=%i s=%i)=%lli\n",
+			t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec,
+			sec);
+		#endif
+		
 		if (sec == -1)
 			return false;
 		
