@@ -1203,7 +1203,7 @@ NodeView::~NodeView()
 
 
 //////////////////////////////////////////////////////////////////////////////////
-int NodeSort(LTreeItem *a, LTreeItem *b, NativeInt d = 0)
+int NodeSort(LTreeItem *a, LTreeItem *b, NativeInt d)
 {
 	ProjectNode *A = dynamic_cast<ProjectNode*>(a);
 	ProjectNode *B = dynamic_cast<ProjectNode*>(b);
