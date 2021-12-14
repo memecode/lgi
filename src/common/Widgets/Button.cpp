@@ -92,7 +92,7 @@ LButton::LButton(int id, int x, int y, int cx, int cy, const char *name) :
 			y,
 			x + (cx <= 0 ? d->TxtSz.X() + Overhead.x : cx) - 1,
 			y + (cy <= 0 ? d->TxtSz.Y() + Overhead.y : cy) - 1);
-	LAssert(r.Valid());
+	LAssert(r.Valid());	
 	SetPos(r);
 	SetId(id);
 	SetTabStop(true);

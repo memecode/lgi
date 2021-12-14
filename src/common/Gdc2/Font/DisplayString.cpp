@@ -510,11 +510,11 @@ void LDisplayString::Layout(bool Debug)
 		float width[1] = { 0 };
 		fnt->GetStringWidths(strArr, strLen, 1, width);
 		
-		x = l.X = (int)(width[0] + 0.5);
+		xf = x = l.X = (int)(width[0] + 0.5);
 		
 		font_height height = {0};
 		fnt->GetHeight(&height);
-		y = height.ascent + height.descent + height.leading;
+		yf = y = height.ascent + height.descent + height.leading;
 
 		// printf("Layout str=%s sz=%i,%i\n", Str, x, y);
 	
@@ -1997,7 +1997,7 @@ int LDisplayString::FX()
 int LDisplayString::FY()
 {
 	Layout();
-	return y;
+	return yf;
 }
 
 LPoint LDisplayString::FSize()
