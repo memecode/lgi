@@ -109,6 +109,8 @@ void LScreenDC::GetOrigin(int &x, int &y)
 
 void LScreenDC::SetOrigin(int x, int y)
 {
+	VIEW_CHECK
+
 	if (d->Client.Valid())
 	{
 		OriginX = x - d->Client.x1;
@@ -120,27 +122,32 @@ void LScreenDC::SetOrigin(int x, int y)
 		OriginY = y;
 	}
 
+	// printf("setori %i,%i\n", OriginX, OriginY);
+	d->v->SetOrigin(OriginX, OriginX);
 }
 
 void LScreenDC::SetClient(LRect *c)
 {
+	VIEW_CHECK
+
 	if (c)
 	{
 		d->Client = *c;
 
+		OriginX = c->x1;
+		OriginY = c->y1;
 
-		OriginX = -c->x1;
-		OriginY = -c->y1;
+		LRect clp(0, 0, c->X()-2, c->Y()-2);
+		// printf("clp=%s ori=%i,%i\n", clp.GetStr(), OriginX, OriginY);
+		d->v->SetOrigin(OriginX, OriginY);
+		d->v->ClipToRect(clp);
 	}
 	else
 	{
 		if (Clip.Valid())
 			ClipRgn(NULL);
 		
-		OriginX = 0;
-		OriginY = 0;	
-
-
+		d->v->SetOrigin(OriginX = 0, OriginX = 0);
 		d->Client.ZOff(-1, -1);
 	}
 }
@@ -177,11 +184,12 @@ LRect LScreenDC::ClipRgn(LRect *c)
 	if (c)
 	{
 		Clip = *c;
-
+		d->v->ClipToRect(Clip);
 	}
 	else
 	{
 	    Clip.ZOff(-1, -1);
+	    d->v->ConstrainClippingRegion(NULL);
 	}
 
 	return Prev;
@@ -206,76 +214,22 @@ LColour LScreenDC::Colour(LColour c)
 	d->Col = c;
 	if (d->v)
 	{
-		// LgiTrace("SetViewColor %s\n", c.GetStr());
 		d->v->SetLowColor(c);
 		d->v->SetHighColor(c);
 	}
-	else
-		LgiTrace("%s:%i - No view.\n", _FL);
+	else LgiTrace("%s:%i - No view.\n", _FL);
 
 	return Prev;
 }
 
 int LScreenDC::Op(int ROP, NativeInt Param)
 {
-	int Prev = Op();
-
-	switch (ROP)
-	{
-		case GDC_SET:
-		{
-			//d->p.setRasterOp(XPainter::CopyROP);
-			break;
-		}
-		case GDC_OR:
-		{
-			//d->p.setRasterOp(XPainter::OrROP);
-			break;
-		}
-		case GDC_AND:
-		{
-			//d->p.setRasterOp(XPainter::AndROP);
-			break;
-		}
-		case GDC_XOR:
-		{
-			//d->p.setRasterOp(XPainter::XorROP);
-			break;
-		}
-	}
-
-	return Prev;
+	return GDC_SET; // not supported..
 }
 
 int LScreenDC::Op()
 {
-	/*
-	switch (d->p.rasterOp())
-	{
-		case XPainter::CopyROP:
-		{
-			return GDC_SET;
-			break;
-		}
-		case XPainter::OrROP:
-		{
-			return GDC_OR;
-			break;
-		}
-		case XPainter::AndROP:
-		{
-			return GDC_AND;
-			break;
-		}
-		case XPainter::XorROP:
-		{
-			return GDC_XOR;
-			break;
-		}
-	}
-	*/
-
-	return GDC_SET;
+	return GDC_SET; // not supported..
 }
 
 int LScreenDC::X()
@@ -295,12 +249,11 @@ int LScreenDC::GetBits()
 
 GPalette *LScreenDC::Palette()
 {
-	return 0;
+	return NULL; // not supported.
 }
 
 void LScreenDC::Palette(GPalette *pPal, bool bOwnIt)
 {
-	VIEW_CHECK
 }
 
 void LScreenDC::Set(int x, int y)
@@ -387,13 +340,21 @@ void LScreenDC::Rectangle(int x1, int y1, int x2, int y2)
 {
 	VIEW_CHECK
 	if (x2 >= x1 && y2 >= y1)
+	{
+		// auto o = d->v->Origin();
+		// printf("Rect %i,%i,%i,%i %g,%g\n", x1, y1, x2, y2, o.x, o.y);
 		d->v->FillRect(LRect(x1, y1, x2, y2));
+	}
 }
 
 void LScreenDC::Rectangle(LRect *a)
 {
 	VIEW_CHECK
 	LRect r = a ? *a : Bounds();
+
+	// auto o = d->v->Origin();
+	// printf("Rect %s %g,%g\n", r.GetStr(), o.x, o.y);
+
 	d->v->FillRect(BRect(r.x1, r.y1, r.x2, r.y2));
 }
 

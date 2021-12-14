@@ -18,7 +18,7 @@
 #include "lgi/common/Css.h"
 #include "ViewPriv.h"
 
-#define DEBUG_MOUSE_EVENTS			1
+#define DEBUG_MOUSE_EVENTS			0
 
 #if 0
 #define DEBUG_INVALIDATE(...)		printf(__VA_ARGS__)
@@ -172,8 +172,8 @@ public:
 	void Draw(BRect updateRect)
 	{
 		LScreenDC dc(d->View);
-		printf("Draw %s\n", d->View->GetClass());
-		d->View->OnPaint(&dc);
+		LPoint off(0,0);
+		d->View->_Paint(&dc, &off, NULL);
 	}
 
 	LMouse ConvertMouse(BPoint where, bool down = false)
@@ -703,88 +703,41 @@ bool LView::Attach(LViewI *parent)
 		if (w && TestFlag(WndFlags, GWF_FOCUS))
 			w->SetFocus(this, LWindow::GainFocus);
 
-		/*
-		auto *Wnd = dynamic_cast<LWindow*>(parent);
-		if (Wnd)
+		auto bview = parent->Handle();
+		if (bview)
 		{
-			auto bwnd = parent->WindowHandle();
-			if (bwnd)
+			LLocker lck(bview, _FL);
+			if (lck.Lock())
 			{
-				if (bwnd->LockLooper())
-				{
-					#if 0
-					LgiTrace("%s:%i - Attaching %s to window %s (parent=%p)\n",
-						_FL, GetClass(), parent->GetClass(), ::IsAttached(d));
-					#endif
+				#if 0
+				LgiTrace("%s:%i - Attaching %s to view %s\n",
+					_FL, GetClass(), parent->GetClass());
+				#endif
 
-					if (::IsAttached(d->Hnd))
-						d->Hnd->RemoveSelf();
-					bwnd->AddChild(d->Hnd);
-					
-					d->Hnd->ResizeTo(Pos.X(), Pos.Y());
-					d->Hnd->MoveTo(Pos.x1, Pos.y1);
-					if (Visible())
-						d->Hnd->Show();
+				if (::IsAttached(d->Hnd))
+					d->Hnd->RemoveSelf();
+				bview->AddChild(d->Hnd);
 
-					bwnd->Unlock();
+				d->Hnd->ResizeTo(Pos.X(), Pos.Y());
+				d->Hnd->MoveTo(Pos.x1, Pos.y1);
+				if (Visible())
+					d->Hnd->Show();
 
-					Status = true;
+				Status = true;
 
-					#if 0
-					LgiTrace("%s:%i - Attached %s/%p to window %s/%p, success (parent=%p)\n",
-						_FL,
-						GetClass(), d->Hnd,
-						parent->GetClass(), bwnd,
-						::IsAttached(d->Hnd));
-					#endif
-				}
-				else
-				{
-					LgiTrace("%s:%i - Error attaching %s to window %s, can't lock.\n",
-						_FL, GetClass(), parent->GetClass());
-				}
+				#if 0
+				LgiTrace("%s:%i - Attached %s/%p to view %s/%p, success\n",
+					_FL,
+					GetClass(), d->Hnd,
+					parent->GetClass(), bview);
+				#endif
 			}
-			else LgiTrace("%s:%i - Error no window handle for %s\n", _FL, parent->GetClass());
-		}
-		else
-		*/
-		{
-			auto bview = parent->Handle();
-			if (bview)
+			else
 			{
-				LLocker lck(bview, _FL);
-				if (lck.Lock())
-				{
-					#if 0
-					LgiTrace("%s:%i - Attaching %s to view %s\n",
-						_FL, GetClass(), parent->GetClass());
-					#endif
-
-					if (::IsAttached(d->Hnd))
-						d->Hnd->RemoveSelf();
-					bview->AddChild(d->Hnd);
-
-					d->Hnd->ResizeTo(Pos.X(), Pos.Y());
-					d->Hnd->MoveTo(Pos.x1, Pos.y1);
-					if (Visible())
-						d->Hnd->Show();
-
-					Status = true;
-
-					#if 1
-					LgiTrace("%s:%i - Attached %s/%p to view %s/%p, success\n",
-						_FL,
-						GetClass(), d->Hnd,
-						parent->GetClass(), bview);
-					#endif
-				}
-				else
-				{
-					#if 1
-					LgiTrace("%s:%i - Error attaching %s to view %s, can't lock.\n",
-						_FL, GetClass(), parent->GetClass());
-					#endif
-				}
+				#if 1
+				LgiTrace("%s:%i - Error attaching %s to view %s, can't lock.\n",
+					_FL, GetClass(), parent->GetClass());
+				#endif
 			}
 		}
 

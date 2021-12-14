@@ -4422,19 +4422,24 @@ class TestView : public LView
 public:
 	TestView()
 	{
-		LRect r(10, 10, 110, 110);
+		LRect r(10, 10, 110, 210);
 		SetPos(r);
+		Sunken(true);
+		printf("_BorderSize=%i\n", _BorderSize);
 	}
 
 	void OnPaint(LSurface *pdc)
 	{
+		auto c = GetClient();
+		
 		pdc->Colour(LColour::Red);
-
-		// pdc->Rectangle();
-		pdc->Line(0, 0, X()-1, Y()-1);
-		pdc->Circle(50, 50, 50);
+		pdc->Line(c.x1, c.y1, c.x2, c.y2);		
+		pdc->Ellipse(c.x1+(c.X()/2)+10, c.y1+(c.Y()/2), c.X()/2, c.Y()/2);
 	}
 };
+
+#include "lgi/common/Tree.h"
+#include "lgi/common/List.h"
 
 class Test : public LWindow
 {
@@ -4448,7 +4453,11 @@ public:
 
 		if (Attach(0))
 		{
-			AddView(new TestView);
+			// AddView(new TestView);
+			
+			auto t = new LTree(10, 10, 10, 100, 200);
+			AddView(t);			
+			
 			AttachChildren();
 			Visible(true);
 		}
