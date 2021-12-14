@@ -1,5 +1,5 @@
 #include <math.h>
-#include "Gdc2.h"
+#include "lgi/common/Gdc2.h"
 
 class GGradient : public LApplicator
 {

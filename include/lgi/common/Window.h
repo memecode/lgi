@@ -281,7 +281,7 @@ public:
 		void Quit(bool DontDelete = false);
 		LRect *GetDecorSize();
 		bool TranslateMouse(LMouse &m);
-		LViewI *WindowFromPoint(int x, int y, bool Debug);
+		LViewI *WindowFromPoint(int x, int y, bool Debug = false);
 		void _SetDynamic(bool b);
 		void _OnViewDelete();
 	
