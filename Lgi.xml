@@ -178,17 +178,17 @@
 				<Node File=".\src\common\Lgi\FileSelect.cpp" Type="2" Platforms="14" />
 				<Node File=".\include\lgi\common\FileSelect.h" Type="3" Platforms="15" />
 			</Node>
-			<Node File=".\src\common\Lgi\Alert.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Lgi\FindReplace.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Lgi\FontSelect.cpp" Type="2" Platforms="15" />
-			<Node File=".\include\lgi\common\FontSelect.h" Type="3" Platforms="15" />
-			<Node File=".\src\common\Lgi\Input.cpp" Type="2" Platforms="15" />
-			<Node File=".\include\lgi\common\Input.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Lgi/Alert.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/FindReplace.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/FontSelect.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/FontSelect.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Lgi/Input.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/Input.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Graphics" Type="1" Platforms="15" Open="0" Id="39">
 			<Node Name="_Core" Type="1" Platforms="15" Open="0" Id="40">
 				<Node Name="Haiku" Type="1" Platforms="15" Id="2">
-					<Node File=".\src\haiku\Gdc2.cpp" Type="2" Platforms="8" />
+					<Node File="./src/haiku/Gdc2.cpp" Type="2" Platforms="8" />
 				</Node>
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="42">
 					<Node File=".\src\linux\Gtk\Gdc2.cpp" Type="2" Platforms="2" />
@@ -196,44 +196,46 @@
 				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="43">
 					<Node File=".\src\win\Gdc2\Gdc2.cpp" Type="2" Platforms="1" />
 				</Node>
-				<Node File=".\src\common\Gdc2\Colour.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\Colour.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Gdc2\Tools\ColourReduce.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\ColourSpace.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\common\Filter.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\common\Gdc2.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Gdc2\GdcCommon.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Gdc2\Tools\GdcTools.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\GdcTools.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\common\PixelRops.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Gdc2/Colour.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/Colour.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Gdc2/Tools/ColourReduce.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/ColourSpace.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Filter.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Gdc2.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Gdc2/GdcCommon.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Tools/GdcTools.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/GdcTools.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/PixelRops.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Font" Type="1" Platforms="15" Open="0" Id="44">
 				<Node File="./src/common/Gdc2/Font/DisplayString.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/DisplayString.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/Font.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/Font.h" Type="3" Platforms="15" />
-				<Node File="./include/lgi/common/StringLayout.h" Type="3" Platforms="15" />
 				<Node File="./include/lgi/common/FontCache.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/FontCodePages.cpp" Type="2" Platforms="15" />
+				<Node File="./private/common/FontPriv.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/FontSystem.cpp" Type="2" Platforms="15" />
-				<Node File="./src/common/Gdc2/Font/StringLayout.cpp" Type="2" Platforms="15" />
-				<Node File="./src/common/Gdc2/Font/TypeFace.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/FontType.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Font/StringLayout.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/StringLayout.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Gdc2/Font/TypeFace.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Applicators" Type="1" Platforms="15" Open="0" Id="45">
-				<Node File=".\src\common\Gdc2\15Bit.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Gdc2\16Bit.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Gdc2\24Bit.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Gdc2\32Bit.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Gdc2\8Bit.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Gdc2\Alpha.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/15Bit.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/16Bit.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/24Bit.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/32Bit.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/8Bit.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Alpha.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Filters" Type="1" Platforms="15" Open="0" Id="46">
-				<Node File=".\src\common\Gdc2\Filters\Filter.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Filters/Filter.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Rect/Region" Type="1" Platforms="15" Open="0" Id="47">
-				<Node File=".\src\common\Gdc2\Rect.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\Rect.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Gdc2/Rect.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/Rect.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/RectF.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Surfaces" Type="1" Platforms="15" Open="0" Id="48">
 				<Node Name="Haiku" Type="1" Platforms="15" Id="3">

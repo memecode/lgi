@@ -275,7 +275,6 @@ void LTextLabel::OnPaint(LSurface *pDC)
 	if (Tools.GetBackImage())
 		Back.Empty();
 
-	printf("Paint %i,%i\n", pDC->X(), pDC->Y());
 	if (d->Lock(_FL))
 	{
 		if (d->ThreadName)

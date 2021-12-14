@@ -384,6 +384,9 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 		LgiTrace("%s:%i - No bitmap.\n", _FL);
 		return;
 	}
+	
+	d->v->SetDrawingMode(B_OP_ALPHA);
+	d->v->SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_COMPOSITE);
 		
 	if (a)
 	{
@@ -411,6 +414,8 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 			x, y);
 		#endif
 	}
+
+	d->v->SetDrawingMode(B_OP_COPY);
 }
 
 void LScreenDC::StretchBlt(LRect *Dest, LSurface *Src, LRect *s)

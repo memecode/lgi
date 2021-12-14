@@ -1064,6 +1064,9 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 			font_height height;
 			d->hFont->GetHeight(&height);
 			d->Height = height.ascent + height.descent + height.leading;
+			LTypeFace::d->_Ascent = height.ascent;
+			LTypeFace::d->_Descent = height.descent;
+			LTypeFace::d->_Leading = height.leading;
 			return true;
 		}
 

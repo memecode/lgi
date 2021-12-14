@@ -327,7 +327,8 @@ int LCheckBox::BoxSize()
 {
 	auto Fnt = GetFont();
 	int Px = (int) Fnt->Ascent() + 2;
-	if (Px > Y()) Px = Y();
+	if (Px > Y())
+		Px = Y();
 	return Px;
 }
 
