@@ -734,7 +734,7 @@ bool LView::Attach(LViewI *parent)
 			}
 			else
 			{
-				#if 1
+				#if 0
 				LgiTrace("%s:%i - Error attaching %s to view %s, can't lock.\n",
 					_FL, GetClass(), parent->GetClass());
 				#endif

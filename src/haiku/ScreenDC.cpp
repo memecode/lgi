@@ -14,7 +14,7 @@
 #include "lgi/common/Lgi.h"
 #include <Bitmap.h>
 
-#define VIEW_CHECK		if (!d->v) return;
+#define VIEW_CHECK(...)		if (!d->v) return __VA_ARGS__;
 
 class LScreenPrivate
 {
@@ -109,7 +109,7 @@ void LScreenDC::GetOrigin(int &x, int &y)
 
 void LScreenDC::SetOrigin(int x, int y)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 
 	if (d->Client.Valid())
 	{
@@ -128,7 +128,7 @@ void LScreenDC::SetOrigin(int x, int y)
 
 void LScreenDC::SetClient(LRect *c)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 
 	if (c)
 	{
@@ -258,7 +258,7 @@ void LScreenDC::Palette(GPalette *pPal, bool bOwnIt)
 
 void LScreenDC::Set(int x, int y)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->StrokeLine(BPoint(x, y), BPoint(x, y));
 }
 
@@ -269,67 +269,67 @@ COLOUR LScreenDC::Get(int x, int y)
 
 void LScreenDC::HLine(int x1, int x2, int y)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->StrokeLine(BPoint(x1, y), BPoint(x2, y));
 }
 
 void LScreenDC::VLine(int x, int y1, int y2)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->StrokeLine(BPoint(x, y1), BPoint(x, y2));
 }
 
 void LScreenDC::Line(int x1, int y1, int x2, int y2)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->StrokeLine(BPoint(x1, y1), BPoint(x2, y2));
 }
 
 void LScreenDC::Circle(double cx, double cy, double radius)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->StrokeArc(BPoint(cx, cy), radius, radius, 0, 360);
 }
 
 void LScreenDC::FilledCircle(double cx, double cy, double radius)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->FillArc(BPoint(cx, cy), radius, radius, 0, 360);
 }
 
 void LScreenDC::Arc(double cx, double cy, double radius, double start, double end)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->StrokeArc(BPoint(cx, cy), radius, radius, start, end);
 }
 
 void LScreenDC::FilledArc(double cx, double cy, double radius, double start, double end)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->FillArc(BPoint(cx, cy), radius, radius, start, end);
 }
 
 void LScreenDC::Ellipse(double cx, double cy, double x, double y)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->StrokeArc(BPoint(cx, cy), x, y, 0, 360);
 }
 
 void LScreenDC::FilledEllipse(double cx, double cy, double x, double y)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->FillArc(BPoint(cx, cy), x, y, 0, 360);
 }
 
 void LScreenDC::Box(int x1, int y1, int x2, int y2)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->StrokeRect(LRect(x1, y1, x2, y2));
 }
 
 void LScreenDC::Box(LRect *a)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	if (a)
 		d->v->StrokeRect(*a);
 	else
@@ -338,7 +338,7 @@ void LScreenDC::Box(LRect *a)
 
 void LScreenDC::Rectangle(int x1, int y1, int x2, int y2)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	if (x2 >= x1 && y2 >= y1)
 	{
 		// auto o = d->v->Origin();
@@ -349,25 +349,22 @@ void LScreenDC::Rectangle(int x1, int y1, int x2, int y2)
 
 void LScreenDC::Rectangle(LRect *a)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	LRect r = a ? *a : Bounds();
-
-	// auto o = d->v->Origin();
-	// printf("Rect %s %g,%g\n", r.GetStr(), o.x, o.y);
-
-	d->v->FillRect(BRect(r.x1, r.y1, r.x2, r.y2));
+	BRect br(r.x1, r.y1, r.x2, r.y2);
+	d->v->FillRect(br);
 }
 
 void LScreenDC::Polygon(int Points, LPoint *Data)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	if (!Data || Points <= 0)
 		return;
 }
 
 void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	if (!Src)
 	{
 		LgiTrace("%s:%i - No source.\n", _FL);
@@ -391,7 +388,7 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 	if (a)
 	{
 		BRect bitmapRect = *a;
-		BRect viewRect(x, y, x + a->X(), y + a->Y());
+		BRect viewRect(x, y, x + a->X() - 1, y + a->Y() - 1);
 		d->v->DrawBitmap(bmp, bitmapRect, viewRect);
 		
 		#if 0
@@ -404,7 +401,7 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 	else
 	{
 		BRect bitmapRect = bmp->Bounds();
-		BRect viewRect(x, y, x + Src->X() - 1, y + Src->Y() - 1); // This seems like a Haiku bug... shouldn't need the -1 offset here.
+		BRect viewRect(x, y, x + Src->X() - 1, y + Src->Y() - 1);
 		d->v->DrawBitmap(bmp, bitmapRect, viewRect);
 
 		#if 0
@@ -418,19 +415,19 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 
 void LScreenDC::StretchBlt(LRect *Dest, LSurface *Src, LRect *s)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	LAssert(0);
 }
 
 void LScreenDC::Bezier(int Threshold, LPoint *Pt)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	LAssert(0);
 }
 
 void LScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	LAssert(0);
 }
 

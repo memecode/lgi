@@ -4455,7 +4455,8 @@ public:
 		{
 			// AddView(new TestView);
 			
-			auto t = new LTree(10, 10, 10, 100, 200);
+			// auto t = new LTree(10, 10, 10, 100, 200);
+			auto t = new LTextLabel(10, 10, 10, 100, 35, "Text");
 			AddView(t);			
 			
 			AttachChildren();

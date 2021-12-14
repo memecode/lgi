@@ -204,6 +204,9 @@ int DocEditStyling::Main()
 			auto r = View->PostEvent(M_STYLING_DONE);
 			if (ParentState != KExiting)
 			{
+				#if LOG_STYLE
+				LgiTrace("PostEvent(M_STYLING_DONE)=%i\n", (int)r);
+				#endif
 				LAssert(r);
 			}
 		}
