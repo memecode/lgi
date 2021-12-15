@@ -4475,6 +4475,7 @@ int LgiMain(OsAppArguments &AppArgs)
 		a.AppWnd = new Test;
 		#else
 		a.AppWnd = new AppWnd;
+		// a.AppWnd->_Dump();
 		#endif
 		a.Run();
 	}

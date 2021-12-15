@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import sys
 import paramiko
@@ -14,6 +15,6 @@ def cmd(c):
 		line = stdout.readline()
 		if not line:
 			break
-		print(line, end="")
+		print(line.strip())
 
 cmd("cd code/lgi/trunk/Ide && make -j4 2>&1")

@@ -17,6 +17,7 @@
 
 #include <Menu.h>
 #include <MenuBar.h>
+#include <MenuItem.h>
 
 #define DEBUG_MENUS		0
 
@@ -118,9 +119,7 @@ void LSubMenu::ClearHandle()
 {
 	Info = NULL;
 	for (auto i: Items)
-	{
 		i->ClearHandle();
-	}
 }
 
 void LSubMenu::Empty()
@@ -764,11 +763,56 @@ class LMenuPrivate
 public:
 };
 
+struct LMenuBar : public BMenuBar
+{
+	LMenuBar(const char *name) : BMenuBar(BRect(), name)
+	{
+		printf("LMenuBar\n");
+	}
+	
+	~LMenuBar()
+	{
+		printf("~LMenuBar\n");
+	}
+	
+	/*
+	void AllAttached()
+	{
+		printf("AllAttached\n");
+		BMenuBar::AllAttached();
+	}
+	
+	void AllDetached()
+	{
+		printf("AllDetached\n");
+		BMenuBar::AllDetached();
+	}
+	
+	void FrameMoved(BPoint pos)
+	{
+		printf("FrameMoved %g,%g\n", pos.x, pos.y);
+		BMenuBar::FrameMoved(pos);
+	}
+	
+	void GetPreferredSize(float *x, float *y)
+	{
+		BMenuBar::GetPreferredSize(x, y);
+		printf("GetPreferredSize %g,%g\n", x, y);
+	}
+	
+	void MessageReceived(BMessage *message)
+	{
+		BMenuBar::MessageReceived(message);
+		printf("MessageReceived %i\n", message->what);
+	}
+	*/
+};
+
 LMenu::LMenu(const char *AppName) : LSubMenu("", false)
 {
 	Menu = this;
 	d = new LMenuPrivate;
-	Info = new BMenuBar(AppName);
+	Info = new LMenuBar(AppName);
 }
 
 LMenu::~LMenu()
@@ -802,9 +846,7 @@ LFont *LMenu::GetFont()
 		{
 			MenuFont.f = new LFont;
 			if (MenuFont.f)
-			{
 				*MenuFont.f = *LSysFont;
-			}
 		}
 	}
 
@@ -813,28 +855,48 @@ LFont *LMenu::GetFont()
 
 bool LMenu::Attach(LViewI *p)
 {
-	if (!p)
+	if (!p || !p->GetWindow())
 	{
 		LAssert(0);
 		return false;
 	}
 		
-	LWindow *Wnd = p->GetWindow();
-	if (!Wnd)
+	Window = p->GetWindow();	
+	auto bwnd = Window->WindowHandle();
+	LLocker lck(bwnd, _FL);
+	if (!lck.Lock())
 	{
-		LAssert(0);
+		LAssert(!"Can't lock.");
 		return false;
 	}
-		
-	Window = Wnd;
 	
+	auto menubar = dynamic_cast<BMenuBar*>(Info);
+	bwnd->AddChild(menubar);
+	menubar->AddItem(new BMenuItem("File", new BMessage(M_COMMAND)));
+	
+	lck.Unlock();
+	
+	Window->OnPosChange(); // Force update of root view position	
 	return true;
 }
 
 bool LMenu::Detach()
 {
-	bool Status = false;
-	return Status;
+	if (!Window)
+		return false;
+	
+	auto bwnd = Window->WindowHandle();
+	LLocker lck(bwnd, _FL);
+	if (!lck.Lock())
+	{
+		LAssert(!"Can't lock.");
+		return false;
+	}
+	
+	bwnd->SetKeyMenuBar(NULL);
+		
+	lck.Unlock();	
+	return true;
 }
 
 bool LMenu::SetPrefAndAboutItems(int a, int b)

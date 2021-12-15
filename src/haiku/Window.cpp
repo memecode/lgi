@@ -7,7 +7,9 @@
 #include "lgi/common/Panel.h"
 #include "lgi/common/Notifications.h"
 #include "lgi/common/Menu.h"
+
 #include "ViewPriv.h"
+#include "MenuBar.h"
 
 #define DEBUG_SETFOCUS			0
 #define DEBUG_HANDLEVIEWKEY		0
@@ -54,7 +56,8 @@ public:
 	{
 		for (int i=0; i<Hooks.Length(); i++)
 		{
-			if (Hooks[i].Target == Target) return i;
+			if (Hooks[i].Target == Target)
+				return i;
 		}
 		
 		if (Create)
@@ -79,6 +82,7 @@ public:
 			Wnd->Pos = Pos;
 			Wnd->OnPosChange();
 		}
+		BWindow::FrameMoved(newPosition);
 	}
 
 	void FrameResized(float newWidth, float newHeight)
@@ -89,6 +93,7 @@ public:
 			Wnd->Pos = Pos;
 			Wnd->OnPosChange();
 		}
+		BWindow::FrameResized(newWidth, newHeight);
 	}
 
 	bool QuitRequested()
@@ -246,8 +251,13 @@ bool LWindow::Attach(LViewI *p)
 		wnd->AddChild(rootView);
 		rootView->Show();
 		
+		auto menu = wnd->KeyMenuBar();
+		BRect menuPos = menu ? menu->Frame() : BRect(0, 0, 0, 0);
+		
 		auto f = wnd->Frame();
-		rootView->ResizeTo(f.Width(), f.Height());
+		rootView->ResizeTo(f.Width(), f.Height() - menuPos.Height());
+		if (menu)
+			rootView->MoveTo(0, menuPos.Height());
 		rootView->SetResizingMode(B_FOLLOW_ALL_SIDES);
 	}
 	
@@ -571,7 +581,13 @@ LPointF LWindow::GetDpiScale()
 LRect &LWindow::GetClient(bool ClientSpace)
 {
 	static LRect r;
-	r = LView::GetClient(ClientSpace);
+	LLocker lck(WindowHandle(), _FL);
+	if (lck.Lock())
+	{
+		r = Handle()->Bounds();
+		lck.Unlock();
+	}
+	else r.ZOff(-1,-1);
 	return r;
 }
 
@@ -667,8 +683,36 @@ void LWindow::OnPaint(LSurface *pDC)
 	pDC->Rectangle();
 }
 
+LString ToString(BRect &r)
+{
+	LString s;
+	s.Printf("%g,%g,%g,%g", r.left, r.top, r.right, r.bottom);
+	return s;
+}
+
 void LWindow::OnPosChange()
 {
+	LLocker lck(WindowHandle(), _FL);
+	if (lck.Lock())
+	{
+		auto frame = WindowHandle()->Bounds();
+		auto menu = WindowHandle()->KeyMenuBar();
+		auto menuPos = menu ? menu->Frame() : BRect(0, 0, 0, 0);
+		auto rootPos = Handle()->Frame();
+		#if 0
+		printf("frame=%s menu=%s rootpos=%s\n",
+			ToString(frame).Get(), ToString(menuPos).Get(), ToString(rootPos).Get());
+		#endif
+		int rootTop = menu ? menuPos.bottom + 1 : 0;
+		if (rootPos.top != rootTop)
+		{
+			Handle()->MoveTo(0, rootTop);
+			Handle()->ResizeTo(rootPos.Width(), frame.Height() - menuPos.Height());
+		}
+	
+		lck.Unlock();		
+	}
+
 	LView::OnPosChange();
 	PourAll();
 }

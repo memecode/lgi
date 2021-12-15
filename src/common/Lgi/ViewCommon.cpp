@@ -2424,14 +2424,11 @@ LPoint &LView::GetWindowBorderSize()
 		LString Sp, Name;
 		Sp.Length(Depth<<1);
 		memset(Sp.Get(), ' ', Depth<<1);
+		Sp.Get()[Depth<<1] = 0;
 		
 		LRect Frame = v->Frame();
-		LViewPrivate *Priv = dynamic_cast<LViewPrivate*>(v);
-		if (Priv)
-			Name = Priv->View->GetClass();
-		
-		printf("%s### %p::%s frame=%s vis=%i\n",
-			Sp.Get(), v, Name.Get(), Frame.GetStr(), !v->IsHidden());
+		printf("%s%p::%s frame=%s vis=%i\n",
+			Sp.Get(), v, v->Name(), Frame.GetStr(), !v->IsHidden());
 		for (int32 i=0; i<v->CountChildren(); i++)
 		{
 			_Dump(Depth + 1, v->ChildAt(i));
