@@ -2467,7 +2467,9 @@ LString::Array LGetPath()
 			}
 		}
 	#else
-		Paths = LGetEnv("PATH").SplitDelimit(LGI_PATH_SEPARATOR);
+		auto Path = LGetEnv("PATH");
+		// printf("Path='%s'\n", Path.Get());
+		Paths = Path.SplitDelimit(LGI_PATH_SEPARATOR);
 	#endif
 
 	return Paths;

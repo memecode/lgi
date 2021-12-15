@@ -1392,51 +1392,55 @@ LString BuildThread::FindExe()
 
 		if (!Best)
 		{
+			const char *binName[] = {"python3", "python"};
 			for (int i=0; i<p.Length(); i++)
 			{
 				char Path[MAX_PATH];
-				LMakePath(Path, sizeof(Path), p[i], "python" LGI_EXECUTABLE_EXT);
-				if (LFileExists(Path))
+				for (unsigned n=0; n<CountOf(binName); n++)
 				{
-					// Check version
-					#if defined(WINDOWS)
-						DWORD Sz = GetFileVersionInfoSizeA(Path, NULL);
-						void *Buf = malloc(Sz);
-						if (GetFileVersionInfoA(Path, NULL, Sz, Buf))
-						{
-							LPVOID Ptr = NULL;
-							UINT Bytes;
-							if (VerQueryValueA(Buf, "\\", &Ptr, &Bytes))
+					LMakePath(Path, sizeof(Path), p[i], LString(binName[n]) + LGI_EXECUTABLE_EXT);
+					if (LFileExists(Path))
+					{			
+						// Check version
+						#if defined(WINDOWS)
+							DWORD Sz = GetFileVersionInfoSizeA(Path, NULL);
+							void *Buf = malloc(Sz);
+							if (GetFileVersionInfoA(Path, NULL, Sz, Buf))
 							{
-								VS_FIXEDFILEINFO *v = (VS_FIXEDFILEINFO *)Ptr;
-								if (v->dwProductVersionMS > BestVer)
+								LPVOID Ptr = NULL;
+								UINT Bytes;
+								if (VerQueryValueA(Buf, "\\", &Ptr, &Bytes))
 								{
-									BestVer = v->dwProductVersionMS;
-									Best = Path;
+									VS_FIXEDFILEINFO *v = (VS_FIXEDFILEINFO *)Ptr;
+									if (v->dwProductVersionMS > BestVer)
+									{
+										BestVer = v->dwProductVersionMS;
+										Best = Path;
+									}
 								}
 							}
-						}
-						else if (!Best)
-						{
-							Best = Path;
-						}
-						free(Buf);
-					#else
-						LSubProcess p(Path, "--version");
-						LStringPipe o;
-						if (p.Start())
-							p.Communicate(&o);
-						auto Out = o.NewGStr();
-						auto Ver = Out.SplitDelimit().Last();
-						printf("Ver=%s\n", Ver.Get());
+							else if (!Best)
+							{
+								Best = Path;
+							}
+							free(Buf);
+						#else
+							LSubProcess p(Path, "--version");
+							LStringPipe o;
+							if (p.Start())
+								p.Communicate(&o);
+							auto Out = o.NewGStr();
+							auto Ver = Out.SplitDelimit().Last();
+							printf("Ver=%s\n", Ver.Get());
 
-						if (!BestVer || Stricmp(Ver.Get(), BestVer.Get()) > 0)
-						{
-							Best = Path;
-							BestVer = Ver;
-						}
-						break;
-					#endif
+							if (!BestVer || Stricmp(Ver.Get(), BestVer.Get()) > 0)
+							{
+								Best = Path;
+								BestVer = Ver;
+							}
+							break;
+						#endif
+					}
 				}
 			}
 		}
@@ -2484,6 +2488,13 @@ bool IdeProject::IsMakefileUpToDate()
 		{		
 			d->App->GetBuildLog()->Print("Error: no makefile? (%s:%i)\n", _FL);
 			break;
+		}
+		
+		auto Ext = LGetExtension(m);
+		if (!Stricmp(Ext, "py"))
+		{
+			// Not a makefile but a build script... can't update.
+			return true;
 		}
 
 		if (dir.First(m))
