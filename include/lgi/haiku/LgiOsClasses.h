@@ -4,9 +4,11 @@
 class LLocker
 {
     BHandler *hnd;
-    bool locked = false;
     const char *file = NULL;
     int line = 0;
+
+protected:
+    bool locked = false;
 
 public:
     LLocker(BHandler *h, const char *File, int Line)

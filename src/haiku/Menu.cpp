@@ -27,6 +27,35 @@
 	#define LOG(...)
 #endif
 
+struct MenuLock : public LLocker
+{
+	LMenu *menu = NULL;
+	LViewI *lwnd = NULL;
+	BWindow *bwnd = NULL;
+	bool unattached = false;
+
+	template<typename T>
+	MenuLock(T *s, const char *file, int line) :
+		menu(s ? s->GetMenu() : NULL),
+		lwnd(menu ? menu->WindowHandle() : NULL),
+		bwnd(lwnd ? lwnd->WindowHandle() : NULL),
+		LLocker(bwnd, file, line)
+	{
+		if (!Lock())
+		{
+			if (bwnd)
+				unattached = bwnd->Thread() < 0;
+			if (!unattached)
+				printf("%s:%i - Failed to lock (%p,%p,%p,%i).\n", file, line, menu, lwnd, bwnd, bwnd ? bwnd->Thread() : 0);
+		}
+	}
+	
+	operator bool() const
+	{
+		return locked || unattached;
+	}
+};
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 static ::LArray<LSubMenu*> Active;
 
@@ -79,22 +108,16 @@ LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where
 
 	i->Enabled(Enabled);
 
-	auto bwnd = Menu && Menu->Window ? Menu->Window->WindowHandle() : NULL;
-	if (bwnd)
+	MenuLock lck(this, _FL);
+	if (lck)
 	{
-		LLocker lck(bwnd, _FL);
-		if (!lck.Lock())
-		{
-			printf("%s:%i - Failed to lock.\n", _FL);
-			DeleteObj(i);
-			return NULL;
-		}
-		
 		Info->AddItem(i->Info);
-		
-		lck.Unlock();
 	}
-	else printf("%s:%i - No window to lock.\n", _FL);
+	else
+	{
+		DeleteObj(i);
+		return NULL;
+	}
 
 	Items.Insert(i, Where);
 	return i;
@@ -108,22 +131,16 @@ LMenuItem *LSubMenu::AppendSeparator(int Where)
 
 	i->Parent = this;
 
-	auto bwnd = Menu && Menu->Window ? Menu->Window->WindowHandle() : NULL;
-	if (bwnd)
+	MenuLock lck(this, _FL);
+	if (lck)
 	{
-		LLocker lck(bwnd, _FL);
-		if (!lck.Lock())
-		{
-			printf("%s:%i - Failed to lock.\n", _FL);
-			DeleteObj(i);
-			return NULL;
-		}
-		
 		Info->AddItem(i->Info);
-		
-		lck.Unlock();
 	}
-	else printf("%s:%i - No window to lock.\n", _FL);
+	else
+	{
+		DeleteObj(i);
+		return NULL;
+	}
 
 	Items.Insert(i, Where);
 
@@ -138,24 +155,18 @@ LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 	if (!i)
 		return NULL;
 
-	auto bwnd = Menu && Menu->Window ? Menu->Window->WindowHandle() : NULL;
-	if (bwnd)
-	{
-		LLocker lck(bwnd, _FL);
-		if (!lck.Lock())
-		{
-			printf("%s:%i - Failed to lock.\n", _FL);
-			DeleteObj(i);
-			return NULL;
-		}
-		
-		Info->AddItem(i->Info);
-		
-		lck.Unlock();
-	}
-	else printf("%s:%i - No window to lock.\n", _FL);
-
 	Items.Insert(i, Where);
+
+	MenuLock lck(this, _FL);
+	if (lck)
+	{
+		Info->AddItem(i->Info);
+	}
+	else
+	{
+		DeleteObj(i);
+		return NULL;
+	}
 	
 	return i->Child;
 }
@@ -370,6 +381,8 @@ LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int id, int Pos, co
 		if (Child)
 		{
 			Child->Menu = Menu;
+			Child->Parent = this;
+			
 			Info = new BMenuItem(Child->Info);
 			if (Info && trigger)
 				Info->SetTrigger(ToLower(trigger));
@@ -713,7 +726,12 @@ void LMenuItem::Enabled(bool e)
 		ClearFlag(_Flags, ODS_DISABLED);
 	else
 		SetFlag(_Flags, ODS_DISABLED);
-	
+
+	MenuLock lck(this, _FL);
+	if (lck)
+	{
+		Info->SetEnabled(e);
+	}	
 }
 
 void LMenuItem::Focus(bool f)

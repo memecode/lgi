@@ -45,12 +45,12 @@
 			</Node>
 			<Node Name="Interface" Type="1" Platforms="15" Open="1" Id="12">
 				<Node Name="Haiku" Type="1" Platforms="15" Id="1">
-					<Node File="./src/haiku/App.cpp" Type="2" Platforms="8" />
-					<Node File="./src/haiku/Printer.cpp" Type="2" Platforms="8" />
-					<Node File="./src/haiku/View.cpp" Type="2" Platforms="8" />
-					<Node File="./src/haiku/Window.cpp" Type="2" Platforms="8" />
-					<Node File="./src/haiku/General.cpp" Type="2" Platforms="8" />
-					<Node File="./src/haiku/Menu.cpp" Type="2" Platforms="8" />
+					<Node File=".\src\haiku\App.cpp" Type="2" Platforms="8" />
+					<Node File=".\src\haiku\Printer.cpp" Type="2" Platforms="8" />
+					<Node File=".\src\haiku\View.cpp" Type="2" Platforms="8" />
+					<Node File=".\src\haiku\Window.cpp" Type="2" Platforms="8" />
+					<Node File=".\src\haiku\General.cpp" Type="2" Platforms="8" />
+					<Node File=".\src\haiku\Menu.cpp" Type="2" Platforms="8" />
 				</Node>
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="14">
 					<Node Name="Headers" Type="1" Platforms="15" Open="0" Id="15">
@@ -73,15 +73,15 @@
 					<Node File=".\src\win\Lgi\Window.cpp" Type="2" Platforms="1" />
 					<Node File=".\src\win\Lgi\LgiException.cpp" Type="2" Platforms="1" />
 				</Node>
-				<Node File="./include/lgi/common/App.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Lgi/AppCommon.cpp" Type="2" Platforms="15" />
-				<Node File="./private/linux/AppPriv.h" Type="3" Platforms="15" />
-				<Node File="./include/lgi/common/Message.h" Type="3" Platforms="15" />
-				<Node File="./include/lgi/common/View.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Lgi/ViewCommon.cpp" Type="2" Platforms="15" />
-				<Node File="./private/common/ViewPriv.h" Type="3" Platforms="15" />
-				<Node File="./include/lgi/common/Window.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Lgi/WindowCommon.cpp" Type="2" Platforms="15" />
+				<Node File=".\include\lgi\common\App.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Lgi\AppCommon.cpp" Type="2" Platforms="15" />
+				<Node File=".\private\linux\AppPriv.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Message.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\View.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Lgi\ViewCommon.cpp" Type="2" Platforms="15" />
+				<Node File=".\private\common\ViewPriv.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Window.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Lgi\WindowCommon.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Libraries" Type="1" Platforms="15" Open="1" Id="17">
 				<Node File=".\src\common\Lgi\Library.cpp" Type="2" Platforms="15" />
@@ -162,13 +162,13 @@
 				<Node File=".\src\common\Lgi\Variant.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\Variant.h" Type="3" Platforms="15" />
 			</Node>
-			<Node File="./src/common/Lgi/GuiUtils.cpp" Type="2" Platforms="15" />
-			<Node File="./src/common/Lgi/Object.cpp" Type="2" Platforms="15" />
-			<Node File="./src/common/Lgi/ToolTip.cpp" Type="2" Platforms="15" />
-			<Node File="./include/lgi/common/ToolTip.h" Type="3" Platforms="15" />
-			<Node File="./src/common/Lgi/TrayIcon.cpp" Type="2" Platforms="15" />
-			<Node File="./src/common/Lgi/LgiCommon.cpp" Type="2" Platforms="15" />
-			<Node File="./src/common/Lgi/LMsg.cpp" Type="2" Platforms="15" />
+			<Node File=".\src\common\Lgi\GuiUtils.cpp" Type="2" Platforms="15" />
+			<Node File=".\src\common\Lgi\Object.cpp" Type="2" Platforms="15" />
+			<Node File=".\src\common\Lgi\ToolTip.cpp" Type="2" Platforms="15" />
+			<Node File=".\include\lgi\common\ToolTip.h" Type="3" Platforms="15" />
+			<Node File=".\src\common\Lgi\TrayIcon.cpp" Type="2" Platforms="15" />
+			<Node File=".\src\common\Lgi\LgiCommon.cpp" Type="2" Platforms="15" />
+			<Node File=".\src\common\Lgi\LMsg.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="36">
 			<Node Name="File Select Win" Type="1" Platforms="15" Open="0" Id="38">
@@ -313,51 +313,51 @@
 		</Node>
 		<Node Name="Widgets" Type="1" Platforms="15" Open="1" Id="62">
 			<Node Name="Common" Type="1" Platforms="15" Open="0" Id="63">
-				<Node File="./src/common/Widgets/Bitmap.cpp" Type="2" Platforms="15" />
-				<Node File="./src/common/Widgets/Button.cpp" Type="2" Platforms="15" />
-				<Node File="./include/lgi/common/Button.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Widgets/CheckBox.cpp" Type="2" Platforms="15" />
-				<Node File="./include/lgi/common/CheckBox.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Widgets/Combo.cpp" Type="2" Platforms="15" />
-				<Node File="./include/lgi/common/Combo.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Text/DocView.cpp" Type="2" Platforms="14" />
-				<Node File="./include/lgi/common/DocView.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Widgets/Edit.cpp" Type="2" Platforms="14" />
-				<Node File="./include/lgi/common/Edit.h" Type="3" Platforms="15" />
-				<Node File="./include/lgi/common/FindReplaceDlg.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Widgets/ItemContainer.cpp" Type="2" Platforms="15" />
-				<Node File="./include/lgi/common/ItemContainer.h" Type="3" Platforms="15" />
-				<Node File="./include/lgi/common/Layout.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Widgets/List.cpp" Type="2" Platforms="15" />
-				<Node File="./include/lgi/common/List.h" Type="3" Platforms="15" />
-				<Node File="./include/lgi/common/ListItemCheckBox.h" Type="3" Platforms="15" />
-				<Node File="./include/lgi/common/ListItemRadioBtn.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Widgets/Panel.cpp" Type="2" Platforms="15" />
-				<Node File="./src/common/Widgets/Popup.cpp" Type="2" Platforms="15" />
-				<Node File="./include/lgi/common/Popup.h" Type="3" Platforms="15" />
-				<Node File="./include/lgi/common/PopupList.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Widgets/Progress.cpp" Type="2" Platforms="14" />
-				<Node File="./include/lgi/common/Progress.h" Type="3" Platforms="15" />
-				<Node File="./include/lgi/common/Progress.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Widgets/ProgressDlg.cpp" Type="2" Platforms="15" />
-				<Node File="./include/lgi/common/ProgressDlg.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Widgets/RadioGroup.cpp" Type="2" Platforms="15" />
-				<Node File="./include/lgi/common/RadioGroup.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Widgets/ScrollBar.cpp" Type="2" Platforms="14" />
-				<Node File="./include/lgi/common/ScrollBar.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Widgets/Slider.cpp" Type="2" Platforms="15" />
-				<Node File="./include/lgi/common/Slider.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Widgets/StatusBar.cpp" Type="2" Platforms="15" />
-				<Node File="./src/common/Widgets/TabView.cpp" Type="2" Platforms="15" />
-				<Node File="./include/lgi/common/TabView.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Widgets/TextLabel.cpp" Type="2" Platforms="15" />
-				<Node File="./include/lgi/common/TextLabel.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Text/TextView3.cpp" Type="2" Platforms="14" />
-				<Node File="./include/lgi/common/TextView3.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Widgets/ToolBar.cpp" Type="2" Platforms="15" />
-				<Node File="./include/lgi/common/ToolBar.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Widgets/Tree.cpp" Type="2" Platforms="15" />
-				<Node File="./include/lgi/common/Tree.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Widgets\Bitmap.cpp" Type="2" Platforms="15" />
+				<Node File=".\src\common\Widgets\Button.cpp" Type="2" Platforms="15" />
+				<Node File=".\include\lgi\common\Button.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Widgets\CheckBox.cpp" Type="2" Platforms="15" />
+				<Node File=".\include\lgi\common\CheckBox.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Widgets\Combo.cpp" Type="2" Platforms="15" />
+				<Node File=".\include\lgi\common\Combo.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Text\DocView.cpp" Type="2" Platforms="14" />
+				<Node File=".\include\lgi\common\DocView.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Widgets\Edit.cpp" Type="2" Platforms="14" />
+				<Node File=".\include\lgi\common\Edit.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\FindReplaceDlg.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Widgets\ItemContainer.cpp" Type="2" Platforms="15" />
+				<Node File=".\include\lgi\common\ItemContainer.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Layout.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Widgets\List.cpp" Type="2" Platforms="15" />
+				<Node File=".\include\lgi\common\List.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\ListItemCheckBox.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\ListItemRadioBtn.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Widgets\Panel.cpp" Type="2" Platforms="15" />
+				<Node File=".\src\common\Widgets\Popup.cpp" Type="2" Platforms="15" />
+				<Node File=".\include\lgi\common\Popup.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\PopupList.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Widgets\Progress.cpp" Type="2" Platforms="14" />
+				<Node File=".\include\lgi\common\Progress.h" Type="3" Platforms="15" />
+				<Node File=".\include\lgi\common\Progress.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Widgets\ProgressDlg.cpp" Type="2" Platforms="15" />
+				<Node File=".\include\lgi\common\ProgressDlg.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Widgets\RadioGroup.cpp" Type="2" Platforms="15" />
+				<Node File=".\include\lgi\common\RadioGroup.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Widgets\ScrollBar.cpp" Type="2" Platforms="14" />
+				<Node File=".\include\lgi\common\ScrollBar.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Widgets\Slider.cpp" Type="2" Platforms="15" />
+				<Node File=".\include\lgi\common\Slider.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Widgets\StatusBar.cpp" Type="2" Platforms="15" />
+				<Node File=".\src\common\Widgets\TabView.cpp" Type="2" Platforms="15" />
+				<Node File=".\include\lgi\common\TabView.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Widgets\TextLabel.cpp" Type="2" Platforms="15" />
+				<Node File=".\include\lgi\common\TextLabel.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Text\TextView3.cpp" Type="2" Platforms="14" />
+				<Node File=".\include\lgi\common\TextView3.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Widgets\ToolBar.cpp" Type="2" Platforms="15" />
+				<Node File=".\include\lgi\common\ToolBar.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Widgets\Tree.cpp" Type="2" Platforms="15" />
+				<Node File=".\include\lgi\common\Tree.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Css" Type="1" Platforms="15" Open="0" Id="64">
 				<Node File=".\src\common\Lgi\Css.cpp" Type="2" Platforms="15" />
@@ -388,7 +388,7 @@
 				<Node File=".\src\win\Lgi\Layout.cpp" Type="2" Platforms="1" />
 				<Node File=".\src\common\Widgets\Progress.cpp" Type="2" Platforms="1" />
 			</Node>
-			<Node File="./include/lgi/common/Dialog.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\common\Dialog.h" Type="3" Platforms="15" />
 		</Node>
 	</Node>
 	<Node Name="LgiNet" Type="1" Platforms="15" Open="0" Id="69">
@@ -408,6 +408,10 @@
 		</Node>
 	</Node>
 	<Node Name="Headers" Type="1" Platforms="15" Open="0" Id="73">
+		<Node Name="Haiku" Type="1" Platforms="15" Id="1">
+			<Node File=".\include\lgi\haiku\LgiOsClasses.h" Type="3" Platforms="8" />
+			<Node File=".\include\lgi\haiku\LgiOsDefs.h" Type="3" Platforms="8" />
+		</Node>
 		<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="75">
 			<Node File=".\include\lgi\linux\Gtk\LgiOsDefs.h" Type="3" Platforms="2" />
 		</Node>
@@ -423,22 +427,22 @@
 		<Node Name="Win" Type="1" Platforms="15" Open="0" Id="76">
 			<Node File=".\include\lgi\win\LgiOsDefs.h" Type="3" Platforms="1" />
 		</Node>
-		<Node File="./include/lgi/common/AutoPtr.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Cancel.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Error.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Json.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Lgi.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiClasses.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiCommon.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiDefs.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiInc.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiInterfaces.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiMsgs.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiUiBase.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Notifications.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/RefCount.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/TextLog.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Token.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\AutoPtr.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Cancel.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Error.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Json.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Lgi.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiClasses.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiCommon.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiDefs.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiInc.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiInterfaces.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiMsgs.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiUiBase.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Notifications.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\RefCount.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\TextLog.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Token.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
 		<Node File="./Ide/Gtk3/CMakeLists.txt" Type="8" Platforms="15" />
@@ -458,7 +462,7 @@
 				<All>0</All>
 			</DebugAdmin>
 			<Executable>
-				<Linux />
+				<Windows />
 			</Executable>
 			<CCrossCompiler />
 			<CppCrossCompiler />
@@ -494,6 +498,7 @@
 /usr/include/libappindicator3-0.1
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -507,29 +512,31 @@ appindicator3
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
 				<All />
+				<Windows />
 			</Libraries>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-dev</Debug>
 					<Release>lgi-dev</Release>
 				</Linux>
+				<Windows />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
 			</TargetType>
 			<Defines>
 				<All />
-				<Linux />
+				<Windows />
 			</Defines>
 			<LibraryPaths>
 				<All />
-				<Linux />
+				<Windows />
 			</LibraryPaths>
 			<ApplicationIcon />
 		</Build>
 		<Advanced>
 			<PostBuildCommands>
-				<Linux />
+				<Windows />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>
