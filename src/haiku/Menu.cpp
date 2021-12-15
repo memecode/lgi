@@ -15,6 +15,9 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/ToolBar.h"
 
+#include <Menu.h>
+#include <MenuBar.h>
+
 #define DEBUG_MENUS		0
 
 #if DEBUG_MENUS
@@ -764,7 +767,8 @@ public:
 LMenu::LMenu(const char *AppName) : LSubMenu("", false)
 {
 	Menu = this;
-	d = NULL;
+	d = new LMenuPrivate;
+	Info = new BMenuBar(AppName);
 }
 
 LMenu::~LMenu()
@@ -964,19 +968,10 @@ bool GAccelerator::Match(LKey &k)
 ////////////////////////////////////////////////////////////////////////////
 LCommand::LCommand()
 {
-	Flags = GWF_VISIBLE;
-	Id = 0;
-	ToolButton = 0;
-	MenuItem = 0;
-	Accelerator = 0;
-	TipHelp = 0;
-	PrevValue = false;
 }
 
 LCommand::~LCommand()
 {
-	DeleteArray(Accelerator);
-	DeleteArray(TipHelp);
 }
 
 bool LCommand::Enabled()
@@ -991,13 +986,9 @@ bool LCommand::Enabled()
 void LCommand::Enabled(bool e)
 {
 	if (ToolButton)
-	{
 		ToolButton->Enabled(e);
-	}
 	if (MenuItem)
-	{
 		MenuItem->Enabled(e);
-	}
 }
 
 bool LCommand::Value()
@@ -1005,18 +996,12 @@ bool LCommand::Value()
 	bool HasChanged = false;
 
 	if (ToolButton)
-	{
 		HasChanged |= (ToolButton->Value() != 0) ^ PrevValue;
-	}
 	if (MenuItem)
-	{
 		HasChanged |= (MenuItem->Checked() != 0) ^ PrevValue;
-	}
 
 	if (HasChanged)
-	{
 		Value(!PrevValue);
-	}
 
 	return PrevValue;
 }
@@ -1024,12 +1009,8 @@ bool LCommand::Value()
 void LCommand::Value(bool v)
 {
 	if (ToolButton)
-	{
 		ToolButton->Value(v);
-	}
 	if (MenuItem)
-	{
 		MenuItem->Checked(v);
-	}
 	PrevValue = v;
 }

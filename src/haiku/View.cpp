@@ -213,7 +213,16 @@ public:
 	
 	void MouseDown(BPoint where)
 	{
+		static uint64_t lastClick = 0;
+		bigtime_t interval = 0;
+		status_t r = get_click_speed(&interval);
+		auto now = LCurrentTime();
+		bool doubleClick = now-lastClick < (interval/1000);
+		// LgiTrace("Click double=%i %llu %llu\n", doubleClick, now-lastClick, interval);
+		lastClick = now;
+		
 		LMouse m = ConvertMouse(where, true);
+		m.Double(doubleClick);
 		d->View->_Mouse(m, false);
 	}
 	

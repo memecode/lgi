@@ -22,17 +22,17 @@
 LgiFunc bool LPostEvent(OsView Wnd, int Event, LMessage::Param a = 0, LMessage::Param b = 0);
 LgiFunc LViewI *GetNextTabStop(LViewI *v, bool Back);
 
-class LgiClass LCommand : public LBase //, public GFlags
+class LgiClass LCommand : public LBase
 {
-	int			Flags;
-	bool		PrevValue;
+	int			Flags = GWF_VISIBLE;
+	bool		PrevValue = false;
 
 public:
-	int			Id;
-	LToolButton	*ToolButton;
-	LMenuItem	*MenuItem;
-	LKey		*Accelerator;
-	char		*TipHelp;
+	int			Id = 0;
+	LToolButton	*ToolButton = NULL;
+	LMenuItem	*MenuItem = NULL;
+	LAutoPtr<LKey> Accelerator;
+	LString		TipHelp;
 	
 	LCommand();
 	~LCommand();

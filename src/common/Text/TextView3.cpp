@@ -3300,8 +3300,10 @@ void LTextView3::OnPosChange()
 		if (ScrollChange)
 		{
 			auto Client = GetClient();
+			#if 0
 			LgiTrace("%s:%i - %p::SetScrollBars(%i) cliy=%i content=%i partial=%i\n",
 				_FL, this, ScrollYNeeded, Client.Y(), (Line.Length() * LineY), PartialPour);
+			#endif
 			SetScrollBars(false, ScrollYNeeded);
 		}
 		UpdateScrollBars();

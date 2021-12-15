@@ -1,7 +1,7 @@
 /** \file
 	\author Matthew Allen
  */
- 
+
 #ifndef _LMENU_H_
 #define _LMENU_H_
 
@@ -484,19 +484,19 @@ class LgiClass LMenu :
 	class LMenuPrivate *d;
 
 	#if defined WIN32
-	void OnChange();
+		void OnChange();
 	#else
-	void OnChange() {}
+		void OnChange() {}
 	#endif
 
 protected:
 	/// List of keyboard shortcuts in the menu items attached
 	List<GAccelerator> Accel;
 	#ifdef __GTK_H__
-	Gtk::GtkAccelGroup *AccelGrp;
+		Gtk::GtkAccelGroup *AccelGrp;
 	#endif
 	#if LGI_COCOA
-	void OnActivate(LMenuItem *item);
+		void OnActivate(LMenuItem *item);
 	#endif
 
 public:
@@ -544,9 +544,9 @@ public:
 	bool SetPrefAndAboutItems(int PrefId, int AboutId);
 
 	#if defined(WIN32)
-	static int _OnEvent(LMessage *Msg);
+		static int _OnEvent(LMessage *Msg);
 	#elif defined(MAC)
-	int GetIdForCommand(uint32_t Cmd);
+		int GetIdForCommand(uint32_t Cmd);
 	#endif
 };
 
