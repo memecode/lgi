@@ -30,13 +30,18 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////
 static ::LArray<LSubMenu*> Active;
 
+LSubMenu::LSubMenu(OsSubMenu Hnd)
+{
+	Active.Add(this);
+	Info = Hnd;
+}
+
 LSubMenu::LSubMenu(const char *name, bool Popup)
 {
-	Menu = NULL;
-	Parent = NULL;
-	Info = NULL;
-
 	Active.Add(this);
+	Info = new BMenu(name);
+	if (name)
+		Name(name);
 }
 
 LSubMenu::~LSubMenu()
@@ -54,8 +59,6 @@ LSubMenu::~LSubMenu()
 // This is not called in the GUI thread..
 void LSubMenu::SysMouseClick(LMouse &m)
 {
-	LMouse *ms = new LMouse;
-	*ms = m;
 }
 
 size_t LSubMenu::Length()
@@ -71,48 +74,90 @@ LMenuItem *LSubMenu::ItemAt(int Id)
 LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where, const char *Shortcut)
 {
 	LMenuItem *i = new LMenuItem(Menu, this, Str, Id, Where < 0 ? Items.Length() : Where, Shortcut);
-	if (i)
+	if (!i)
+		return NULL;
+
+	i->Enabled(Enabled);
+
+	auto bwnd = Menu && Menu->Window ? Menu->Window->WindowHandle() : NULL;
+	if (bwnd)
 	{
-		i->Enabled(Enabled);
-
-		Items.Insert(i, Where);
-
-		return i;
+		LLocker lck(bwnd, _FL);
+		if (!lck.Lock())
+		{
+			printf("%s:%i - Failed to lock.\n", _FL);
+			DeleteObj(i);
+			return NULL;
+		}
+		
+		Info->AddItem(i->Info);
+		
+		lck.Unlock();
 	}
+	else printf("%s:%i - No window to lock.\n", _FL);
 
-	return 0;
+	Items.Insert(i, Where);
+	return i;
 }
 
 LMenuItem *LSubMenu::AppendSeparator(int Where)
 {
-	LMenuItem *i = new LMenuItem;
-	if (i)
+	LMenuItem *i = new LMenuItem(Menu, NULL, NULL, ItemId_Separator, -1);
+	if (!i)
+		return NULL;
+
+	i->Parent = this;
+
+	auto bwnd = Menu && Menu->Window ? Menu->Window->WindowHandle() : NULL;
+	if (bwnd)
 	{
-		i->Parent = this;
-		i->Menu = Menu;
-		i->Id(-2);
-
-		Items.Insert(i, Where);
-
-		return i;
+		LLocker lck(bwnd, _FL);
+		if (!lck.Lock())
+		{
+			printf("%s:%i - Failed to lock.\n", _FL);
+			DeleteObj(i);
+			return NULL;
+		}
+		
+		Info->AddItem(i->Info);
+		
+		lck.Unlock();
 	}
+	else printf("%s:%i - No window to lock.\n", _FL);
 
-	return 0;
+	Items.Insert(i, Where);
+
+	return i;
 }
 
 LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 {
 	LBase::Name(Str);
-	LMenuItem *i = new LMenuItem(Menu, this, Str, Where < 0 ? Items.Length() : Where, NULL);
-	if (i)
+	
+	LMenuItem *i = new LMenuItem(Menu, this, Str, ItemId_Submenu, Where < 0 ? Items.Length() : Where, NULL);
+	if (!i)
+		return NULL;
+
+	auto bwnd = Menu && Menu->Window ? Menu->Window->WindowHandle() : NULL;
+	if (bwnd)
 	{
-		i->Id(-1);
-		Items.Insert(i, Where);
-
-		return i->Child;
+		LLocker lck(bwnd, _FL);
+		if (!lck.Lock())
+		{
+			printf("%s:%i - Failed to lock.\n", _FL);
+			DeleteObj(i);
+			return NULL;
+		}
+		
+		Info->AddItem(i->Info);
+		
+		lck.Unlock();
 	}
+	else printf("%s:%i - No window to lock.\n", _FL);
 
-	return 0;
+	Items.Insert(i, Where);
+	
+	return i->Child;
 }
 
 void LSubMenu::ClearHandle()
@@ -276,69 +321,70 @@ public:
 	}
 };
 
-static LAutoString MenuItemParse(const char *s)
+static LString MenuItemParse(const char *s, char &trigger)
 {
 	char buf[256], *out = buf;
 	const char *in = s;
+	
+	trigger = 0;
+	
 	while (in && *in && out < buf + sizeof(buf) - 1)
 	{
-		if (*in == '_')
-		{
-			*out++ = '_';
-			*out++ = '_';
-		}
-		else if (*in != '&' || in[1] == '&')
-		{
-			*out++ = *in;
-		}
+		if (*in == '\t')
+			break;
+		else if (*in == '&' && in[1] == '&')
+			*out++ = *in++;			
+		else if (*in == '&' && in[1] != '&')
+			trigger = in[1];
 		else
-		{
-			*out++ = '_';
-		}
+			*out++ = *in;
 		
 		in++;
 	}
 	*out++ = 0;
 	
-	char *tab = strrchr(buf, '\t');
-	if (tab)
-	{
-		*tab++ = 0;
-	}
-	
-	return LAutoString(NewStr(buf));
+	return buf;
 }
 
 LMenuItem::LMenuItem()
 {
 	d = new LMenuItemPrivate();
 	Info = NULL;
-	Child = NULL;
-	Menu = NULL;
-	Parent = NULL;
-
-	Position = -1;
-	
-	_Flags = 0;	
-	_Icon = -1;
-	_Id = 0;
 }
 
 LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int id, int Pos, const char *shortcut)
 {
-	d = NULL;
-	LAutoString Txt = MenuItemParse(txt);
+	d = new LMenuItemPrivate();
+	char trigger;
+	auto Txt = MenuItemParse(txt, trigger);
 	LBase::Name(txt);
-	Info = NULL;
 
-	Child = NULL;
 	Menu = m;
 	Parent = p;
 	Position = Pos;
-
-	_Flags = 0;	
-	_Icon = -1;
 	_Id = id;
+
+	if (id == LSubMenu::ItemId_Submenu)
+	{
+		Child = new LSubMenu(new BMenu(Txt));
+		if (Child)
+		{
+			Child->Menu = Menu;
+			Info = new BMenuItem(Child->Info);
+			if (Info && trigger)
+				Info->SetTrigger(ToLower(trigger));
+		}
+	}
+	else if (id == LSubMenu::ItemId_Separator)
+	{
+		Info = new BSeparatorItem();
+	}
+	else // Normal item...
+	{
+		Info = new BMenuItem(Txt, new LMessage(M_COMMAND, id));
+		if (Info && trigger)
+			Info->SetTrigger(ToLower(trigger));
+	}
 
 	ScanForAccel();
 }
@@ -361,18 +407,6 @@ void LMenuItem::_Paint(LSurface *pDC, int Flags)
 void LMenuItem::_PaintText(LSurface *pDC, int x, int y, int Width)
 {
 }
-
-#if 1
-
-bool LMenuItem::ScanForAccel()
-{
-	if (!Menu)
-		return false;
-
-	return true;
-}
-
-#else
 
 bool LMenuItem::ScanForAccel()
 {
@@ -551,6 +585,7 @@ bool LMenuItem::ScanForAccel()
 
 	if (Key)
 	{
+		/*
 		Gtk::gint GtkKey = LgiKeyToGtkKey(Key, Accel);
 		if (GtkKey)
 		{
@@ -584,15 +619,15 @@ bool LMenuItem::ScanForAccel()
 		Menu->Accel.Insert( new GAccelerator(Flags, Key, Ident) );
 		
 		return true;
+		*/
 	}
 	else
 	{
 		LOG("%s:%i - Accel scan failed, str='%s'\n", _FL, Accel.Get());
-		return false;
 	}
-}
 
-#endif
+	return false;
+}
 
 LSubMenu *LMenuItem::GetParent()
 {
@@ -609,13 +644,12 @@ void LMenuItem::ClearHandle()
 bool LMenuItem::Remove()
 {
 	if (!Parent)
-	{
 		return false;
-	}
 
 	LAssert(Parent->Items.HasItem(this));
 	Parent->Items.Delete(this);
 	Parent = NULL;
+	
 	return true;
 }
 
@@ -627,9 +661,7 @@ void LMenuItem::Id(int i)
 void LMenuItem::Separator(bool s)
 {
 	if (s)
-	{
-		_Id = -2;
-	}
+		_Id = LSubMenu::ItemId_Separator;
 }
 
 LImageList *LMenuItem::GetImageList()
@@ -709,7 +741,7 @@ const char *LMenuItem::Name()
 
 bool LMenuItem::Separator()
 {
-	return _Id == -2;
+	return _Id == LSubMenu::ItemId_Separator;
 }
 
 bool LMenuItem::Checked()
@@ -808,11 +840,10 @@ struct LMenuBar : public BMenuBar
 	*/
 };
 
-LMenu::LMenu(const char *AppName) : LSubMenu("", false)
+LMenu::LMenu(const char *AppName) : LSubMenu(new LMenuBar(AppName))
 {
 	Menu = this;
 	d = new LMenuPrivate;
-	Info = new LMenuBar(AppName);
 }
 
 LMenu::~LMenu()
@@ -872,7 +903,6 @@ bool LMenu::Attach(LViewI *p)
 	
 	auto menubar = dynamic_cast<BMenuBar*>(Info);
 	bwnd->AddChild(menubar);
-	menubar->AddItem(new BMenuItem("File", new BMessage(M_COMMAND)));
 	
 	lck.Unlock();
 	

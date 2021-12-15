@@ -169,7 +169,6 @@ class GelSkin : public LSkinEngine
 				// Edge
 				LPath e;
 				LRectF r(Client);
-				printf("roundrect %s\n", r.Describe());
 				e.RoundRect(r, 6);
 			
 				COLOUR EdgeColour = Default ? Rgba32(40, 40, 40, 255) : Rgba32(114, 114, 114, 255);
@@ -631,7 +630,6 @@ public:
 				Ctrl->Value() != 0,
 				Ctrl->Enabled(),
 				Ctrl->Default());
-		printf("MemSize=%i,%i, GetClient()=%i,%i\n", Mem.X(), Mem.Y(), Ctrl->GetClient().X(), Ctrl->GetClient().Y());
 		
 		LSurface *Out = &Mem;
 		
