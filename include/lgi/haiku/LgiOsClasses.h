@@ -25,8 +25,17 @@ public:
 
     bool Lock()
     {
-        LAssert(!locked);
-        LAssert(hnd != NULL);
+    	if (locked)
+    	{
+    		printf("%s:%i - Locker already locked.\n", file, line);
+        	LAssert(!"Locker already locked.");
+        	return false;
+        }
+        if (!hnd)
+        {
+        	// printf("%s:%i - Locker hnd is NULL.\n", file, line);
+        	return false;
+        }        
 
         while (!locked)
         {

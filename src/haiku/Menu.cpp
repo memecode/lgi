@@ -41,7 +41,9 @@ struct MenuLock : public LLocker
 		bwnd(lwnd ? lwnd->WindowHandle() : NULL),
 		LLocker(bwnd, file, line)
 	{
-		if (!Lock())
+		if (!bwnd)
+			unattached = true;
+		else if (!Lock())
 		{
 			if (bwnd)
 				unattached = bwnd->Thread() < 0;
@@ -107,6 +109,7 @@ LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where
 		return NULL;
 
 	i->Enabled(Enabled);
+	Items.Insert(i, Where);
 
 	MenuLock lck(this, _FL);
 	if (lck)
@@ -119,7 +122,6 @@ LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where
 		return NULL;
 	}
 
-	Items.Insert(i, Where);
 	return i;
 }
 
@@ -130,6 +132,7 @@ LMenuItem *LSubMenu::AppendSeparator(int Where)
 		return NULL;
 
 	i->Parent = this;
+	Items.Insert(i, Where);
 
 	MenuLock lck(this, _FL);
 	if (lck)
@@ -141,8 +144,6 @@ LMenuItem *LSubMenu::AppendSeparator(int Where)
 		DeleteObj(i);
 		return NULL;
 	}
-
-	Items.Insert(i, Where);
 
 	return i;
 }
@@ -813,52 +814,7 @@ class LMenuPrivate
 public:
 };
 
-struct LMenuBar : public BMenuBar
-{
-	LMenuBar(const char *name) : BMenuBar(BRect(), name)
-	{
-		printf("LMenuBar\n");
-	}
-	
-	~LMenuBar()
-	{
-		printf("~LMenuBar\n");
-	}
-	
-	/*
-	void AllAttached()
-	{
-		printf("AllAttached\n");
-		BMenuBar::AllAttached();
-	}
-	
-	void AllDetached()
-	{
-		printf("AllDetached\n");
-		BMenuBar::AllDetached();
-	}
-	
-	void FrameMoved(BPoint pos)
-	{
-		printf("FrameMoved %g,%g\n", pos.x, pos.y);
-		BMenuBar::FrameMoved(pos);
-	}
-	
-	void GetPreferredSize(float *x, float *y)
-	{
-		BMenuBar::GetPreferredSize(x, y);
-		printf("GetPreferredSize %g,%g\n", x, y);
-	}
-	
-	void MessageReceived(BMessage *message)
-	{
-		BMenuBar::MessageReceived(message);
-		printf("MessageReceived %i\n", message->what);
-	}
-	*/
-};
-
-LMenu::LMenu(const char *AppName) : LSubMenu(new LMenuBar(AppName))
+LMenu::LMenu(const char *AppName) : LSubMenu(new BMenuBar(AppName))
 {
 	Menu = this;
 	d = new LMenuPrivate;

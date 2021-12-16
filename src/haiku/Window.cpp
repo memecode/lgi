@@ -581,13 +581,16 @@ LPointF LWindow::GetDpiScale()
 LRect &LWindow::GetClient(bool ClientSpace)
 {
 	static LRect r;
+	
+	r = Pos.ZeroTranslate();
+
 	LLocker lck(WindowHandle(), _FL);
 	if (lck.Lock())
 	{
 		r = Handle()->Bounds();
 		lck.Unlock();
 	}
-	else r.ZOff(-1,-1);
+	
 	return r;
 }
 

@@ -409,8 +409,8 @@
 	</Node>
 	<Node Name="Headers" Type="1" Platforms="15" Open="0" Id="73">
 		<Node Name="Haiku" Type="1" Platforms="15" Id="1">
-			<Node File=".\include\lgi\haiku\LgiOsClasses.h" Type="3" Platforms="8" />
-			<Node File=".\include\lgi\haiku\LgiOsDefs.h" Type="3" Platforms="8" />
+			<Node File="./include/lgi/haiku/LgiOsClasses.h" Type="3" Platforms="8" />
+			<Node File="./include/lgi/haiku/LgiOsDefs.h" Type="3" Platforms="8" />
 		</Node>
 		<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="75">
 			<Node File=".\include\lgi\linux\Gtk\LgiOsDefs.h" Type="3" Platforms="2" />
@@ -427,25 +427,26 @@
 		<Node Name="Win" Type="1" Platforms="15" Open="0" Id="76">
 			<Node File=".\include\lgi\win\LgiOsDefs.h" Type="3" Platforms="1" />
 		</Node>
-		<Node File=".\include\lgi\common\AutoPtr.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\Cancel.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\Error.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\Json.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\Lgi.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\LgiClasses.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\LgiCommon.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\LgiDefs.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\LgiInc.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\LgiInterfaces.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\LgiMsgs.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\LgiUiBase.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\Notifications.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\RefCount.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\TextLog.h" Type="3" Platforms="15" />
-		<Node File=".\include\lgi\common\Token.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/AutoPtr.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/Cancel.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/Error.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/Json.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/Lgi.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/LgiClasses.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/LgiCommon.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/LgiDefs.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/LgiInc.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/LgiInterfaces.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/LgiMsgs.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/LgiUiBase.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/Notifications.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/RefCount.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/TextLog.h" Type="3" Platforms="15" />
+		<Node File="./include/lgi/common/Token.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
 		<Node File="./Ide/Gtk3/CMakeLists.txt" Type="8" Platforms="15" />
+		<Node File="./Makefile.haiku" Type="9" Platforms="15" />
 		<Node File="./Makefile.linux" Type="9" Platforms="15" />
 	</Node>
 	<Settings>
@@ -462,7 +463,7 @@
 				<All>0</All>
 			</DebugAdmin>
 			<Executable>
-				<Windows />
+				<Linux />
 			</Executable>
 			<CCrossCompiler />
 			<CppCrossCompiler />
@@ -498,7 +499,6 @@
 /usr/include/libappindicator3-0.1
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
-				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -512,31 +512,29 @@ appindicator3
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
 				<All />
-				<Windows />
 			</Libraries>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-dev</Debug>
 					<Release>lgi-dev</Release>
 				</Linux>
-				<Windows />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
 			</TargetType>
 			<Defines>
 				<All />
-				<Windows />
+				<Linux />
 			</Defines>
 			<LibraryPaths>
 				<All />
-				<Windows />
+				<Linux />
 			</LibraryPaths>
 			<ApplicationIcon />
 		</Build>
 		<Advanced>
 			<PostBuildCommands>
-				<Windows />
+				<Linux />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>

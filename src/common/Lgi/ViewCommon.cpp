@@ -2023,14 +2023,18 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b)
 		}
 		else
 		{
-			LViewI *view = GetParent();
-			while (view && ::IsAttached(view->Handle()))
+			// Look for an attached view to lock...
+			for (LViewI *v = this; v; v = v->GetParent())
 			{
-				// printf("view=%s not attached\n", view->GetClass());
-				view = view->GetParent();
+				auto vhnd = v->Handle();
+				if (vhnd && ::IsAttached(vhnd))
+				{
+					lockView = vhnd;
+					break;
+				}
 			}
 			
-			lockView = view ? view->Handle() : NULL;
+			// Try and lock the looper...
 			if (!lockView || !(locked = lockView->LockLooper()))
 			{
 				auto wnd = lockView ? lockView->Window() : NULL;
@@ -2057,18 +2061,21 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b)
 		if (lockView != d->Hnd)
 		{
 			r = m->AddPointer(LMessage::PropView, this);
-			if (r != B_OK) printf("%s:%i - AddPointer failed.\n", _FL);
+			if (r != B_OK)
+				printf("%s:%i - AddPointer failed.\n", _FL);
 		}
 
 		if (lockView)
 		{		
 			r = d->Hnd->Window()->PostMessage(m, lockView);
-			if (r != B_OK) printf("%s:%i - PostMessage failed.\n", _FL);
+			if (r != B_OK)
+				printf("%s:%i - PostMessage failed.\n", _FL);
 		}
 		else if (lockWindow)
 		{
 			r = lockWindow->PostMessage(m);
-			if (r != B_OK) printf("%s:%i - PostMessage failed.\n", _FL);
+			if (r != B_OK)
+				printf("%s:%i - PostMessage failed.\n", _FL);
 		}
 		else
 		{

@@ -507,10 +507,11 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 	{
 		Repainting = true;
 
-		LLocker lck(d->Hnd, _FL);
-		if (lck.Lock())
+		if (d->Hnd)
 		{
-			d->Hnd->Invalidate();
+			LLocker lck(d->Hnd, _FL);
+			if (lck.Lock())
+				d->Hnd->Invalidate();
 		}
 
 		Repainting = false;
@@ -673,6 +674,7 @@ bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 bool LView::IsAttached()
 {
 	bool attached = false;
+	
 	LLocker lck(d->Hnd, _FL);
 	if (lck.Lock())
 	{
