@@ -47,13 +47,13 @@ LgiFunc bool LgiCanReadMemory
 /// \returns true on success.
 LgiFunc bool LDumpMemoryStats(char *filename);
 
-#if (!defined(_MSC_VER) || _MSC_VER != _MSC_VER_VS2003) && (defined(WIN32) || defined(WIN64))
+#if (!defined(_MSC_VER) || _MSC_VER != _MSC_VER_VS2003) && (defined(WIN32) || defined(WIN64) || defined(LINUX))
 
 // Set this to '1' to switch on memory tracking, else '0'.
-#if 0 // defined(_DEBUG)
+#if 0
 
     #if defined(_MSC_VER) && _MSC_VER == _MSC_VER_VS2003
-    #error "Visual C++ 2003 does not support redefining new and delete."
+	    #error "Visual C++ 2003 does not support redefining new and delete."
     #endif
     
 	#include <stdlib.h>
@@ -63,14 +63,38 @@ LgiFunc bool LDumpMemoryStats(char *filename);
 	/// source file 'GNew.cpp' and each EXE should include
 	/// 'LgiMain.cpp' OR 'GNew.cpp' for this to work.
 	#define LGI_MEM_DEBUG		1
+	
+	struct LNewContext
+	{
+	    LNewContext(const char *File, const int Line) :
+	    	file(File),
+	    	line(Line)
+	    {
+	    	curScope = this;
+	    }
+	    
+	    ~LNewContext()
+	    {
+	    	curScope = NULL;
+	    }
 
-	#ifdef __cplusplus
-	void *operator				new(size_t size);
-	void *operator				new[](size_t size);
-	void operator				delete[](void *p);
-	void operator				delete(void *p);
-	#endif
+	    static LNewContext const &scope()
+	    {
+	    	assert(curScope);
+	    	return *curScope;
+	    }
 
+	    operator bool() const { return false; }
+
+	    const char *file;
+	    const int line;
+		
+	private:
+	    static LNewContext *curScope;
+	};
+	
+	#define new LNewContext(__FILE__, __LINE__) ? 0 : new
+	
 	LgiFunc void *lgi_malloc(size_t size);
 	LgiFunc void *lgi_realloc(void *ptr, size_t size);
 	LgiFunc void lgi_free(void *ptr);
