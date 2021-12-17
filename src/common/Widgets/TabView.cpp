@@ -384,6 +384,7 @@ int64 LTabView::Value()
 
 void LTabView::OnCreate()
 {
+	printf("LTabView::OnCreate\n");
 	LResources::StyleElement(this);			
 
 	d->Depth = 0;
@@ -418,22 +419,30 @@ void LTabView::Value(int64 i)
 		LTabPage *Old = it[d->Current];
 		if (Old)
 		{
+			printf("%s:%i - old[%i] hide.\n", _FL, d->Current);
 			Old->Visible(false);
 		}
+		else printf("%s:%i - no old.\n", _FL);
 
 		d->Current = (int)MIN(i, (ssize_t)it.Length()-1);
 		OnPosChange();
 
 		LTabPage *p = it[d->Current];
-		if (p && IsAttached())
+		if (p)
 		{
-			p->Attach(this);
+			if (!IsAttached())
+			{
+				printf("%s:%i - new[%i] attach.\n", _FL, d->Current);
+				p->Attach(this);
+			}
+			printf("%s:%i - new[%i] visible.\n", _FL, d->Current);
 			p->Visible(true);
 		}
 
 		Invalidate();
 		SendNotify(LNotifyValueChanged);
 	}
+	else printf("%s:%i - no change\n", _FL);
 }
 
 LMessage::Result LTabView::OnEvent(LMessage *Msg)
@@ -613,7 +622,7 @@ void LTabView::OnMouseClick(LMouse &m)
 		if (p)
 		{
 			if (p->HasButton() &&
-				p->BtnPos.Overlap(m.x, m.y))
+				p->BtnPos.Overlap(m))
 			{
 				if (DownLeft)
 				{

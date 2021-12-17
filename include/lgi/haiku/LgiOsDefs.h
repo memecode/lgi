@@ -309,178 +309,166 @@ enum MessageBoxType
 #define LGI_VMOUSE_DOUBLE			0x400
 
 
-#if !defined(WINNATIVE)
+enum LgiKey
+{
+	/* The keyboard syms have been cleverly chosen to map to ASCII */
+	LK_UNKNOWN		= 0,
+	LK_FIRST		= 0,
+	LK_BACKSPACE	= B_BACKSPACE,
+	LK_TAB			= B_TAB,
+	LK_RETURN		= B_RETURN,
+	LK_ESCAPE		= B_ESCAPE,
+	LK_SPACE		= B_SPACE,
+	LK_EXCLAIM		= '!',
+	LK_QUOTEDBL		= '\"',
+	LK_HASH			= '#',
+	LK_DOLLAR		= '$',
+	LK_AMPERSAND	= '&',
+	LK_QUOTE		= '\'',
+	LK_LEFTPAREN	= '(',
+	LK_RIGHTPAREN	= ')',
+	LK_ASTERISK		= '*',
+	LK_PLUS			= '+',
+	LK_COMMA		= ',',
+	LK_MINUS		= '-',
+	LK_PERIOD		= '.',
+	LK_SLASH		= '/',
+	LK_0			= '0',
+	LK_1			= '1',
+	LK_2			= '2',
+	LK_3			= '3',
+	LK_4			= '4',
+	LK_5			= '5',
+	LK_6			= '6',
+	LK_7			= '7',
+	LK_8			= '8',
+	LK_9			= '9',
+	LK_COLON		= ':',
+	LK_SEMICOLON	= ';',
+	LK_LESS			= '<',
+	LK_EQUALS		= '=',
+	LK_GREATER		= '>',
+	LK_QUESTION		= '?',
+	LK_AT			= '@',
+	/* 
+	   Skip uppercase letters
+	 */
+	LK_LEFTBRACKET	= '[',
+	LK_BACKSLASH	= '\\',
+	LK_RIGHTBRACKET	= ']',
+	LK_CARET		= '^',
+	LK_UNDERSCORE	= '_',
+	LK_BACKQUOTE	= 96,
+	LK_a			= 'a',
+	LK_b			= 'b',
+	LK_c			= 'c',
+	LK_d			= 'd',
+	LK_e			= 'e',
+	LK_f			= 'f',
+	LK_g			= 'g',
+	LK_h			= 'h',
+	LK_i			= 'i',
+	LK_j			= 'j',
+	LK_k			= 'k',
+	LK_l			= 'l',
+	LK_m			= 'm',
+	LK_n			= 'n',
+	LK_o			= 'o',
+	LK_p			= 'p',
+	LK_q			= 'q',
+	LK_r			= 'r',
+	LK_s			= 's',
+	LK_t			= 't',
+	LK_u			= 'u',
+	LK_v			= 'v',
+	LK_w			= 'w',
+	LK_x			= 'x',
+	LK_y			= 'y',
+	LK_z			= 'z',
+	/* End of ASCII mapped keysyms */
 
-	typedef enum {
-		/* The keyboard syms have been cleverly chosen to map to ASCII */
-		LK_UNKNOWN		= 0,
-		LK_FIRST		= 0,
-		LK_BACKSPACE	= 8,
-		LK_TAB			= 9,
-		LK_RETURN		= 13,
-		LK_ESCAPE		= 27,
-		LK_SPACE		= 32,
-		LK_EXCLAIM		= 33,
-		LK_QUOTEDBL		= 34,
-		LK_HASH			= 35,
-		LK_DOLLAR		= 36,
-		LK_AMPERSAND	= 38,
-		LK_QUOTE		= 39,
-		LK_LEFTPAREN	= 40,
-		LK_RIGHTPAREN	= 41,
-		LK_ASTERISK		= 42,
-		LK_PLUS			= 43,
-		LK_COMMA		= 44,
-		LK_MINUS		= 45,
-		LK_PERIOD		= 46,
-		LK_SLASH		= 47,
-		LK_0			= 48,
-		LK_1			= 49,
-		LK_2			= 50,
-		LK_3			= 51,
-		LK_4			= 52,
-		LK_5			= 53,
-		LK_6			= 54,
-		LK_7			= 55,
-		LK_8			= 56,
-		LK_9			= 57,
-		LK_COLON		= 58,
-		LK_SEMICOLON	= 59,
-		LK_LESS			= 60,
-		LK_EQUALS		= 61,
-		LK_GREATER		= 62,
-		LK_QUESTION		= 63,
-		LK_AT			= 64,
-		/* 
-		   Skip uppercase letters
-		 */
-		LK_LEFTBRACKET	= '[',
-		LK_BACKSLASH	= '\\',
-		LK_RIGHTBRACKET	= ']',
-		LK_CARET		= '^',
-		LK_UNDERSCORE	= '_',
-		LK_BACKQUOTE	= 96,
-		LK_a			= 'a',
-		LK_b			= 'b',
-		LK_c			= 'c',
-		LK_d			= 'd',
-		LK_e			= 'e',
-		LK_f			= 'f',
-		LK_g			= 'g',
-		LK_h			= 'h',
-		LK_i			= 'i',
-		LK_j			= 'j',
-		LK_k			= 'k',
-		LK_l			= 'l',
-		LK_m			= 'm',
-		LK_n			= 'n',
-		LK_o			= 'o',
-		LK_p			= 'p',
-		LK_q			= 'q',
-		LK_r			= 'r',
-		LK_s			= 's',
-		LK_t			= 't',
-		LK_u			= 'u',
-		LK_v			= 'v',
-		LK_w			= 'w',
-		LK_x			= 'x',
-		LK_y			= 'y',
-		LK_z			= 'z',
-		/* End of ASCII mapped keysyms */
+	/* Arrows + Home/End pad */
+	LK_HOME			= B_HOME,
+	LK_LEFT			= B_LEFT_ARROW,
+	LK_UP			= B_UP_ARROW,
+	LK_RIGHT		= B_RIGHT_ARROW,
+	LK_DOWN			= B_DOWN_ARROW,
+	LK_PAGEUP		= B_PAGE_UP,
+	LK_PAGEDOWN		= B_PAGE_DOWN,
+	LK_END			= B_END,
+	LK_INSERT		= B_INSERT,
+	LK_DELETE		= B_DELETE,
 
-		/* Numeric keypad */
-		LK_KEYPADENTER	,
-		LK_KP0			,
-		LK_KP1			,
-		LK_KP2			,
-		LK_KP3			,
-		LK_KP4			,
-		LK_KP5			,
-		LK_KP6			,
-		LK_KP7			,
-		LK_KP8			,
-		LK_KP9			,
-		LK_KP_PERIOD	,
-		LK_KP_DELETE	,
-		LK_KP_MULTIPLY	,
-		LK_KP_PLUS		,
-		LK_KP_MINUS		,
-		LK_KP_DIVIDE	,
-		LK_KP_EQUALS	,
+	/* Numeric keypad */
+	LK_KEYPADENTER	,
+	LK_KP0			,
+	LK_KP1			,
+	LK_KP2			,
+	LK_KP3			,
+	LK_KP4			,
+	LK_KP5			,
+	LK_KP6			,
+	LK_KP7			,
+	LK_KP8			,
+	LK_KP9			,
+	LK_KP_PERIOD	,
+	LK_KP_DELETE	,
+	LK_KP_MULTIPLY	,
+	LK_KP_PLUS		,
+	LK_KP_MINUS		,
+	LK_KP_DIVIDE	,
+	LK_KP_EQUALS	,
 
-		/* Arrows + Home/End pad */
-		LK_HOME			,
-		LK_LEFT			,
-		LK_UP			,
-		LK_RIGHT		,
-		LK_DOWN			,
-		LK_PAGEUP		,
-		LK_PAGEDOWN		,
-		LK_END			,
-		LK_INSERT		,
+	/* Function keys */
+	LK_F1,
+	LK_F2			,
+	LK_F3			,
+	LK_F4			,
+	LK_F5			,
+	LK_F6			,
+	LK_F7			,
+	LK_F8			,
+	LK_F9			,
+	LK_F10			,
+	LK_F11			,
+	LK_F12			,
+	LK_F13			,
+	LK_F14			,
+	LK_F15			,
 
-		/* Function keys */
-		LK_F1			,
-		LK_F2			,
-		LK_F3			,
-		LK_F4			,
-		LK_F5			,
-		LK_F6			,
-		LK_F7			,
-		LK_F8			,
-		LK_F9			,
-		LK_F10			,
-		LK_F11			,
-		LK_F12			,
-		LK_F13			,
-		LK_F14			,
-		LK_F15			,
+	/* Key state modifier keys */
+	LK_NUMLOCK		,
+	LK_CAPSLOCK		,
+	LK_SCROLLOCK	,
+	LK_LSHIFT		,
+	LK_RSHIFT		,
+	LK_LCTRL		,
+	LK_RCTRL		,
+	LK_LALT			,
+	LK_RALT			,
+	LK_LMETA		,
+	LK_RMETA		,
+	LK_LSUPER		, /* "Windows" key */
+	LK_RSUPER		,
 
-		/* Key state modifier keys */
-		LK_NUMLOCK		,
-		LK_CAPSLOCK		,
-		LK_SCROLLOCK	,
-		LK_LSHIFT		,
-		LK_RSHIFT		,
-		LK_LCTRL		,
-		LK_RCTRL		,
-		LK_LALT			,
-		LK_RALT			,
-		LK_LMETA		,
-		LK_RMETA		,
-		LK_LSUPER		, /* "Windows" key */
-		LK_RSUPER		,
+	/* Miscellaneous function keys */
+	LK_HELP			,
+	LK_PRINT		,
+	LK_SYSREQ		,
+	LK_BREAK		,
+	LK_MENU			,
+	LK_UNDO			,
+	LK_REDO			,
+	LK_EURO			, /* Some european keyboards */
+	LK_COMPOSE		, /* Multi-key compose key */
+	LK_MODE			, /* "Alt Gr" key (could be wrong) */
+	LK_POWER		,	/* Power Macintosh power key */
+	LK_CONTEXTKEY	,
 
-		/* Miscellaneous function keys */
-		LK_HELP			,
-		LK_PRINT		,
-		LK_SYSREQ		,
-		LK_BREAK		,
-		LK_MENU			,
-		LK_UNDO			,
-		LK_REDO			,
-		LK_EURO			, /* Some european keyboards */
-		LK_COMPOSE		, /* Multi-key compose key */
-		LK_MODE			, /* "Alt Gr" key (could be wrong) */
-		LK_DELETE		,
-		LK_POWER		,	/* Power Macintosh power key */
-		LK_CONTEXTKEY	,
+	/* Add any other keys here */
+	LK_LAST
 
-		/* Add any other keys here */
-		LK_LAST
-	} LgiKey;
-
-#else
-
-	#define VK_BACKSPACE    VK_BACK
-	#define VK_PAGEUP       VK_PRIOR
-	#define VK_PAGEDOWN     VK_NEXT
-	#define VK_RALT         VK_MENU
-	#define VK_LALT         VK_MENU
-	#define VK_RCTRL        VK_CONTROL
-	#define VK_LCTRL        VK_CONTROL
-
-#endif
+};
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Externs

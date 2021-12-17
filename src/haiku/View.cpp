@@ -113,7 +113,8 @@ LKey::LKey(int Vkey, uint32_t flags)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-class LBView : public BView
+template<typename Parent = BView>
+class LBView : public Parent
 {
 	LViewPrivate *d = NULL;
 	static uint32 MouseButtons;
@@ -121,7 +122,7 @@ class LBView : public BView
 public:
 	LBView(LViewPrivate *priv) :
 		d(priv),
-		BView
+		Parent
 		(
 			"",
 			B_FULL_UPDATE_ON_RESIZE | 
@@ -142,6 +143,91 @@ public:
 	{
 		d->View->OnCreate();
 	}
+	
+	LKey ConvertKey(const char *bytes, int32 numBytes)
+	{
+		LKey k;
+		
+		uint8_t *utf = (uint8_t*)bytes;
+		ssize_t len = numBytes;
+		auto w = LgiUtf8To32(utf, len);
+
+		#if 0
+		LString::Array a;
+		for (int i=0; i<numBytes; i++)
+			a.New().Printf("%i(%x)", (uint8_t)bytes[i], (uint8_t)bytes[i]);		
+		printf("ConvertKey(%s)=%i\n", LString(",").Join(a).Get(), w);
+		#endif
+		
+		if (w)
+		{
+			if (w == B_FUNCTION_KEY)
+			{
+				auto bmsg = Window()->CurrentMessage();
+				if (bmsg)
+				{
+					int32 key = 0;
+					if (bmsg->FindInt32("key", &key) == B_OK)
+					{
+						// Translate the function keys into the LGI address space...
+						switch (key)
+						{
+							case B_F1_KEY: w = LK_F1; break;
+							case B_F2_KEY: w = LK_F2; break;
+							case B_F3_KEY: w = LK_F3; break;
+							case B_F4_KEY: w = LK_F4; break;
+							case B_F5_KEY: w = LK_F5; break;
+							case B_F6_KEY: w = LK_F6; break;
+							case B_F7_KEY: w = LK_F7; break;
+							case B_F8_KEY: w = LK_F8; break;
+							case B_F9_KEY: w = LK_F9; break;
+							case B_F10_KEY: w = LK_F10; break;
+							case B_F11_KEY: w = LK_F11; break;
+							case B_F12_KEY: w = LK_F12; break;
+							default:
+								printf("%s:%i - Upsupported key %i.\n", _FL, key);
+								break;
+						}
+					}
+					else printf("%s:%i - No 'key' in BMessage.\n", _FL);
+				}
+				else printf("%s:%i - No BMessage.\n", _FL);
+			}
+
+			k.c16 = k.vkey = w;
+			
+			key_info KeyInfo;
+			int flags = 0;
+			if (get_key_info(&KeyInfo) == B_OK)
+			{
+				k.Ctrl(TestFlag(KeyInfo.modifiers, B_CONTROL_KEY));
+				k.Alt(TestFlag(KeyInfo.modifiers, B_MENU_KEY));
+				k.Shift(TestFlag(KeyInfo.modifiers, B_SHIFT_KEY));
+			}
+		}
+
+		k.IsChar = (k.c16 >= ' ' && k.c16 < LK_DELETE) ||
+			k.c16 == LK_BACKSPACE ||
+			k.c16 == LK_TAB ||
+			k.c16 == LK_RETURN;
+
+		return k;
+	}
+	
+	void KeyDown(const char *bytes, int32 numBytes)
+	{
+		auto k = ConvertKey(bytes, numBytes);
+		k.Down(true);
+		// k.Trace("KeyDown");
+		d->View->OnKey(k);
+	}
+	
+	void KeyUp(const char *bytes, int32 numBytes)
+	{
+		auto k = ConvertKey(bytes, numBytes);
+		// k.Trace("KeyUp");
+		d->View->OnKey(k);
+	}
 
 	void FrameMoved(BPoint newPosition)
 	{
@@ -157,16 +243,16 @@ public:
 
 	void MessageReceived(BMessage *message)
 	{
-		LView *v = NULL;
+		void *v = NULL;
 		if (message->FindPointer(LMessage::PropView, &v) == B_OK)
 		{
 			// Proxy'd event for child view...
-			v->OnEvent(message);
+			((LView*)v)->OnEvent((LMessage*)message);
 			return;
 		}
-		else d->View->OnEvent(message);		
+		else d->View->OnEvent((LMessage*)message);
 		
-		BView::MessageReceived(message);
+		Parent::MessageReceived(message);
 	}
 
 	void Draw(BRect updateRect)
@@ -238,14 +324,21 @@ public:
 		LMouse m = ConvertMouse(where);
 		d->View->_Mouse(m, true);
 	}
+
+	void MakeFocus(bool focus=true)
+	{
+		Parent::MakeFocus(focus);
+		d->View->OnFocus(focus);
+	}
 };
 
-uint32 LBView::MouseButtons = 0;
+template<typename Parent>
+uint32 LBView<Parent>::MouseButtons = 0;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 LViewPrivate::LViewPrivate(LView *view) :
 	View(view),
-	Hnd(new LBView(this))
+	Hnd(new LBView<BView>(this))
 {
 }
 
@@ -273,7 +366,14 @@ void LView::_Focus(bool f)
 	else
 		ClearFlag(WndFlags, GWF_FOCUS);
 
-	OnFocus(f);	
+	LLocker lck(d->Hnd, _FL);
+	if (lck.Lock())
+	{
+		d->Hnd->MakeFocus(f);
+		lck.Unlock();
+	}
+
+	// OnFocus will be called by the LBview handler...
 	Invalidate();
 }
 

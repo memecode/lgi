@@ -27,6 +27,7 @@
 			<Node Name="File" Type="1" Platforms="15" Open="0" Id="8">
 				<Node Name="Haiku" Type="1" Platforms="15" Id="8">
 					<Node File=".\src\haiku\File.cpp" Type="2" Platforms="8" />
+					<Node File=".\src\haiku\ShowFileProp_Haiku.cpp" Type="2" Platforms="15" />
 				</Node>
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="10">
 					<Node File="./src/linux/General/File.cpp" Type="2" Platforms="2" />
@@ -427,22 +428,22 @@
 		<Node Name="Win" Type="1" Platforms="15" Open="0" Id="76">
 			<Node File=".\include\lgi\win\LgiOsDefs.h" Type="3" Platforms="1" />
 		</Node>
-		<Node File="./include/lgi/common/AutoPtr.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Cancel.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Error.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Json.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Lgi.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiClasses.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiCommon.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiDefs.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiInc.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiInterfaces.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiMsgs.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiUiBase.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Notifications.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/RefCount.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/TextLog.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Token.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\AutoPtr.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Cancel.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Error.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Json.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Lgi.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiClasses.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiCommon.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiDefs.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiInc.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiInterfaces.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiMsgs.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiUiBase.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Notifications.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\RefCount.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\TextLog.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Token.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
 		<Node File="./Ide/Gtk3/CMakeLists.txt" Type="8" Platforms="15" />
@@ -463,7 +464,7 @@
 				<All>0</All>
 			</DebugAdmin>
 			<Executable>
-				<Linux />
+				<Windows />
 			</Executable>
 			<CCrossCompiler />
 			<CppCrossCompiler />
@@ -499,6 +500,7 @@
 /usr/include/libappindicator3-0.1
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -512,29 +514,31 @@ appindicator3
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
 				<All />
+				<Windows />
 			</Libraries>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-dev</Debug>
 					<Release>lgi-dev</Release>
 				</Linux>
+				<Windows />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
 			</TargetType>
 			<Defines>
 				<All />
-				<Linux />
+				<Windows />
 			</Defines>
 			<LibraryPaths>
 				<All />
-				<Linux />
+				<Windows />
 			</LibraryPaths>
 			<ApplicationIcon />
 		</Build>
 		<Advanced>
 			<PostBuildCommands>
-				<Linux />
+				<Windows />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>

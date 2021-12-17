@@ -75,7 +75,7 @@ private:
 	
 	#elif defined HAIKU
 	
-		friend class LBView;
+		template<typename Parent> friend class LBView;
 
 	#endif
 

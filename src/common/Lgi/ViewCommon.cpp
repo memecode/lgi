@@ -432,6 +432,7 @@ void LView::OnDestroy()
 
 void LView::OnFocus(bool f)
 {
+	printf("%s::OnFocus(%i)\n", GetClass(), f);
 }
 
 void LView::OnPulse()
@@ -1215,27 +1216,25 @@ void LView::Visible(bool v)
 	}
 	else LgiTrace("%s:%i - Can't lock.\n", _FL);
  	#elif LGI_VIEW_HANDLE	
-	if (_View)
-	{
-		#if WINNATIVE
+	if (_View)		
+		#if WINNATIV
 
-			ShowWindow(_View, (v) ? SW_SHOWNORMAL : SW_HIDE);
+			ShowWindow(_View, (v) ? SW_SHOWNORMAL : SW_HIDE;
 
-		#elif LGI_COCOA
+		#elif LGI_COOA
 
-			LAutoPool Pool;
-			[_View.p setHidden:!v];
+			LAutoPool ool;
+			[_View.p setHidden!v];
 
-		#elif LGI_CARBON
+		#elif LGICABON
 		
-			Boolean is = HIViewIsVisible(_View);
-			if (v != is)
+			Boolean is = HIViewIsVisibl(_View);
+			if(v ! is)
 			{
-				OSErr e = HIViewSetVisible(_View, v);
-				if (e) printf("%s:%i - HIViewSetVisible(%p,%i) failed with %i (class=%s)\n",
-								_FL, _View, v, e, GetClass());
-			}
-		
+				OSErr e = HIViewSetVisibl(_View, v);
+				if (e) printf("%s:%i - HIViewSetVisible(%p,%i) failed with %i (lass=%s)\n",
+								_FL, _View, v, e Getlas());
+		}			
 		#endif
 	}
 	else
@@ -1259,6 +1258,13 @@ bool LView::Focus()
 		if (Active)
 			Has = w->GetFocus() == static_cast<LViewI*>(this);
 	}
+	#elif defined(HAIKU)
+	LLocker lck(d->Hnd, _FL);
+	if (lck.Lock())
+	{
+		Has = d->Hnd->IsFocus();
+		lck.Unlock();
+	}	
 	#elif defined(WINNATIVE)
 	if (_View)
 	{
@@ -1307,7 +1313,11 @@ void LView::Focus(bool i)
 	if (_View)
 	#endif
 	{
-		#if defined(LGI_SDL) || defined(__GTK_H__)
+		#if defined(HAIKU)
+		
+			_Focus(i);
+		
+		#elif defined(LGI_SDL) || defined(__GTK_H__)
 		
 			// Nop: Focus is all handled by Lgi's LWindow class.
 		
@@ -2004,7 +2014,7 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b)
 	#elif defined(HAIKU)
 		if (!d || !d->Hnd)
 		{
-			printf("%s:%i - Bad pointers %p %p\n", _FL, d, d ? d->Hnd : NULL);
+			// printf("%s:%i - Bad pointers %p %p\n", _FL, d, d ? d->Hnd : NULL);
 			return false;
 		}
 		
