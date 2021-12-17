@@ -831,8 +831,11 @@ bool LView::Attach(LViewI *parent)
 
 				d->Hnd->ResizeTo(Pos.X(), Pos.Y());
 				d->Hnd->MoveTo(Pos.x1, Pos.y1);
-				if (Visible())
+				if (TestFlag(GViewFlags, GWF_VISIBLE) && d->Hnd->IsHidden())
+				{
+					// printf("%s/%p: show hidden=%i\n", GetClass(), this, d->Hnd->IsHidden());
 					d->Hnd->Show();
+				}
 
 				Status = true;
 

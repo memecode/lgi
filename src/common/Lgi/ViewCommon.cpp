@@ -1209,10 +1209,29 @@ void LView::Visible(bool v)
 	LLocker lck(d->Hnd, _FL);
 	if (!IsAttached() || lck.Lock())
 	{
+		const int attempts = 5;
+		printf("%s/%p:Visible(%i) hidden=%i\n", GetClass(), this, v, d->Hnd->IsHidden());
 		if (v)
-			d->Hnd->Show();
+		{
+			for (int i=0; i<attempts && d->Hnd->IsHidden(); i++)
+			{
+				printf("\t%p Show\n", this);
+				d->Hnd->Show();
+			}
+			if (d->Hnd->IsHidden())
+				printf("%s:%i - Failed to show %s.\n", _FL, GetClass());
+		}
 		else
-			d->Hnd->Hide();
+		{
+			for (int i=0; i<attempts && !d->Hnd->IsHidden(); i++)
+			{
+				printf("\t%p Hide\n", this);
+				d->Hnd->Hide();
+			}
+			if (!d->Hnd->IsHidden())
+				printf("%s:%i - Failed to hide %s.\n", _FL, GetClass());
+		}
+		printf("\t%s/%p:Visible(%i) hidden=%i\n", GetClass(), this, v, d->Hnd->IsHidden());
 	}
 	else LgiTrace("%s:%i - Can't lock.\n", _FL);
  	#elif LGI_VIEW_HANDLE	

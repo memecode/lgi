@@ -203,9 +203,15 @@ void LWindow::Visible(bool i)
 	}
 	
 	if (i)
-		d->Show();
+	{
+		if (d->IsHidden())
+			d->Show();
+	}
 	else
-		d->Hide();
+	{
+		if (!d->IsHidden())
+			d->Hide();
+	}
 }
 
 bool LWindow::Obscured()
@@ -249,7 +255,8 @@ bool LWindow::Attach(LViewI *p)
 	if (rootView && wnd)
 	{
 		wnd->AddChild(rootView);
-		rootView->Show();
+		if (rootView->IsHidden())
+			rootView->Show();
 		
 		auto menu = wnd->KeyMenuBar();
 		BRect menuPos = menu ? menu->Frame() : BRect(0, 0, 0, 0);

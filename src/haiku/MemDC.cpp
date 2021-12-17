@@ -25,6 +25,7 @@ public:
 	::LArray<LRect> Client;
 	LColourSpace CreateCs = CsNone;
 	BBitmap *Bmp = NULL;
+	BView *View = NULL;
 
     LMemDCPrivate()
     {
@@ -71,7 +72,14 @@ OsBitmap LMemDC::GetBitmap()
 
 OsPainter LMemDC::Handle()
 {
-	return NULL;
+	if (!d->View && d->Bmp)
+	{
+		d->View = new BView(d->Bmp->Bounds(), "BBitmapView", B_FOLLOW_NONE, B_WILL_DRAW);
+		if (d->View)
+			d->Bmp->AddChild(d->View);
+	}
+	
+	return d->View;
 }
 
 void LMemDC::SetClient(LRect *c)

@@ -419,7 +419,7 @@ void LTabView::Value(int64 i)
 		LTabPage *Old = it[d->Current];
 		if (Old)
 		{
-			printf("%s:%i - old[%i] hide.\n", _FL, d->Current);
+			// printf("%s:%i - old[%i] hide.\n", _FL, d->Current);
 			Old->Visible(false);
 		}
 		else printf("%s:%i - no old.\n", _FL);
@@ -432,17 +432,18 @@ void LTabView::Value(int64 i)
 		{
 			if (!IsAttached())
 			{
-				printf("%s:%i - new[%i] attach.\n", _FL, d->Current);
+				// printf("%s:%i - new[%i] attach %p.\n", _FL, d->Current, p->Handle());
 				p->Attach(this);
 			}
-			printf("%s:%i - new[%i] visible.\n", _FL, d->Current);
+			// printf("%s:%i - new[%i] visible %p.\n", _FL, d->Current, p->Handle());
 			p->Visible(true);
 		}
 
 		Invalidate();
 		SendNotify(LNotifyValueChanged);
+		
+		// GetWindow()->_Dump();
 	}
-	else printf("%s:%i - no change\n", _FL);
 }
 
 LMessage::Result LTabView::OnEvent(LMessage *Msg)
