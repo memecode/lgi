@@ -6,19 +6,14 @@
 #include <stdio.h>
 
 #include "lgi/common/Lgi.h"
-#include "LgiIde.h"
 #include "lgi/common/DragAndDrop.h"
 #include "lgi/common/Token.h"
-#include "resdefs.h"
 #include "lgi/common/Combo.h"
 #include "lgi/common/Net.h"
 #include "lgi/common/ListItemCheckBox.h"
-#include "FtpThread.h"
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/DropFiles.h"
 #include "lgi/common/SubProcess.h"
-#include "ProjectNode.h"
-#include "WebFldDlg.h"
 #include "lgi/common/Css.h"
 #include "lgi/common/TableLayout.h"
 #include "lgi/common/TextLabel.h"
@@ -26,6 +21,12 @@
 #include "lgi/common/RegKey.h"
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/Menu.h"
+
+#include "LgiIde.h"
+#include "resdefs.h"
+#include "FtpThread.h"
+#include "ProjectNode.h"
+#include "WebFldDlg.h"
 
 extern const char *Untitled;
 const char SourcePatterns[] = "*.c;*.h;*.cpp;*.cc;*.java;*.d;*.php;*.html;*.css;*.js";
@@ -232,6 +233,15 @@ public:
 	void CollectAllFiles(LTreeNode *Base, LArray<ProjectNode*> &Files, bool SubProjects, int Platform);
 };
 
+LString ToPlatformPath(const char *s, IdePlatform platform)
+{
+	LString p = s;
+	if (platform == PlatformWin)
+		return p.Replace("/", "\\");
+	else
+		return p.Replace("\\", "/");
+}
+
 class MakefileThread : public LThread, public LCancel
 {
 	IdeProjectPrivate *d;
@@ -398,13 +408,13 @@ public:
 			if (Exe)
 			{
 				if (LIsRelativePath(Exe))
-					m.Print("Target = %s\n", Exe.Get());
+					m.Print("Target = %s\n", ToPlatformPath(Exe, Platform).Get());
 				else
 				{
 					LAutoString RelExe = LMakeRelativePath(Base, Exe);
 					if (Base && RelExe)
 					{
-						m.Print("Target = %s\n", RelExe.Get());
+						m.Print("Target = %s\n", ToPlatformPath(RelExe, Platform).Get());
 					}
 					else
 					{
@@ -423,7 +433,7 @@ public:
 		{
 			LString Target = Proj->GetTargetName(Platform);
 			if (Target)
-				m.Print("Target = %s\n", Target.Get());
+				m.Print("Target = %s\n", ToPlatformPath(Target, Platform).Get());
 			else
 			{
 				Log->Print("%s:%i - Error: No target name specified.\n", _FL);
@@ -458,19 +468,15 @@ public:
 		}
 		else
 		{
-			char PlatformCap[32];
-			strcpy_s(	PlatformCap,
-						sizeof(PlatformCap),
-						Platform == PlatformHaiku ? "BEOS" : PlatformName);
-			strupr(PlatformCap);
-			
+			LString PlatformCap = PlatformName;
+		
 			ExtraLinkFlags = "";
 			ExeFlags = "";
 			m.Print("BuildDir = $(Build)\n"
 					"\n"
 					"Flags = -fPIC -w -fno-inline -fpermissive\n" // -fexceptions
 					);
-			sDefines[0].Printf("-D%s -D_REENTRANT", PlatformCap);
+			sDefines[0].Printf("-D%s -D_REENTRANT", PlatformCap.Upper().Get());
 			#ifdef LINUX
 			sDefines[0] += " -D_FILE_OFFSET_BITS=64"; // >:-(
 			sDefines[0] += " -DPOSIX";
@@ -720,27 +726,35 @@ public:
 			LArray<LString> IncPaths;
 			if (Proj->BuildIncludePaths(IncPaths, false, false, Platform))
 			{
-				// Do dependencies
+				// Do source code list...
 				m.Print("# Dependencies\n"
-						"Depends =\t");
+						"Source =\t");
 					
-				for (int c = 0; c < Files.Length() && !IsCancelled(); c++)
+				LString::Array SourceFiles;
+				for (auto &n: Files)
 				{
-					ProjectNode *n = Files[c];
 					if (n->GetType() == NodeSrc)
 					{
-						LAutoString f = ToNativePath(n->GetFileName());
-						char *d = f ? strrchr(f, DIR_CHAR) : 0;
-						char *file = d ? d + 1 : f;
-						d = file ? strrchr(file, '.') : 0;
-						if (d)
-						{
-							if (c) m.Print(" \\\n\t\t\t");
-							m.Print("%.*s.o", d - file, file);
-						}
+						auto f = n->GetFileName();
+						auto path = ToPlatformPath(f, Platform);
+						if (path.Find("./") == 0)
+							path = path(2,-1);
+						SourceFiles.Add(path);
 					}
 				}
-				m.Print("\n\n");
+				SourceFiles.Sort();
+				int c = 0;
+				for (auto &src: SourceFiles)
+				{
+					if (c++) m.Print(" \\\n\t\t\t");
+					m.Print("%s", src.Get());
+				}
+				m.Print("\n"
+						"\n"
+						"SourceLst := $(patsubst %%.c,%%.o,$(patsubst %%.cpp,%%.o,$(Sources)))\n"
+						"\n"
+						"Objects := $(addprefix $(BuildDir)/,$(SourceLst))\n"
+						"\n");
 
 				// Write out the target stuff
 				m.Print("# Target\n");
@@ -837,7 +851,7 @@ public:
 							}
 						}
 
-						m.Print(" outputfolder $(Depends)\n"
+						m.Print(" $(Depends)\n"
 								"	@echo Linking $(Target) [$(Build)]...\n"
 								"	$(CPP)%s%s %s%s -o \\\n"
 								"		$(Target) $(addprefix $(BuildDir)/,$(Depends)) $(Libs)\n",
@@ -868,26 +882,31 @@ public:
 
 						LAutoString r(Rules.NewStr());
 						if (r)
-						{
 							m.Write(r, strlen(r));
-						}
 
 						// Various fairly global rules
-						m.Print("# Create the output folder\n"
-								"outputfolder :\n"
-								"	-mkdir -p $(BuildDir) 2> /dev/null\n"
-								"\n");
-							
-						m.Print("# Clean just this target\n"
+						m.Print(".SECONDEXPANSION:\n"
+								"$(Objects): $(BuildDir)/%%.o: $$(wildcard %%.c*)\n"
+								"	mkdir -p $(@D)\n"
+								"	@echo $(<F) [$(Build)]\n"
+								"ifeq \"$(suffix $<)\" \".cpp\"\n"
+								"	$(CPP) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@\n"
+								"else\n"
+								"	$(CC) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@\n"
+								"endif\n"
+								"\n"
+								"-include $(Objects:.o=.d)\n"
+								"\n"						
+								"# Clean just this target\n"
 								"clean :\n"
-								"	rm -f $(BuildDir)/*.o $(Target)%s\n"
+								"	rm -rf $(BuildDir)/* $(Target)%s\n"
 								"	@echo Cleaned $(BuildDir)\n"
 								"\n",
 								PlatformExecutableExt(Platform));
 						
 						m.Print("# Clean all targets\n"
 								"cleanall :\n"
-								"	rm -f $(BuildDir)/*.o $(Target)%s\n"
+								"	rm -rf $(BuildDir)/* $(Target)%s\n"
 								"	@echo Cleaned $(BuildDir)\n",
 								PlatformExecutableExt(Platform));
 						
@@ -915,12 +934,12 @@ public:
 					else if (!stricmp(TargetType, "DynamicLibrary"))
 					{
 						m.Print("TargetFile = lib$(Target)$(Tag).%s\n"
-								"$(TargetFile) : outputfolder $(Depends)\n"
+								"$(TargetFile) : $(Objects)\n"
 								"	@echo Linking $(TargetFile) [$(Build)]...\n"
 								"	$(CPP)$s -shared \\\n"
 								"		%s%s \\\n"
 								"		-o $(BuildDir)/$(TargetFile) \\\n"
-								"		$(addprefix $(BuildDir)/,$(Depends)) \\\n"
+								"		$(Objects) \\\n"
 								"		$(Libs)\n",
 								PlatformLibraryExt,
 								ValidStr(ExtraLinkFlags) ? "-Wl" : "", ExtraLinkFlags,
@@ -937,14 +956,22 @@ public:
 						m.Print("	@echo Done.\n"
 								"\n");
 
-						// Cleaning target
-						m.Print("# Create the output folder\n"
-								"outputfolder :\n"
-								"	-mkdir -p $(BuildDir) 2> /dev/null\n"
+						// Other rules
+						m.Print(".SECONDEXPANSION:\n"
+								"$(Objects): $(BuildDir)/%%.o: $$(wildcard %%.c*)\n"
+								"	mkdir -p $(@D)\n"
+								"	@echo $(<F) [$(Build)]\n"
+								"ifeq \"$(suffix $<)\" \".cpp\"\n"
+								"	$(CPP) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@\n"
+								"else\n"
+								"	$(CC) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@\n"
+								"endif\n"
+								"\n"
+								"-include $(Objects:.o=.d)\n"
 								"\n"
 								"# Clean out targets\n"
 								"clean :\n"
-								"	rm -f $(BuildDir)/*.o $(BuildDir)/$(TargetFile)\n"
+								"	rm -rf $(BuildDir)/* $(BuildDir)/$(TargetFile)\n"
 								"	@echo Cleaned $(BuildDir)\n"
 								"\n",
 								PlatformLibraryExt);
@@ -969,166 +996,25 @@ public:
 						m.Print("	@echo Done.\n"
 								"\n");
 
-						// Cleaning target
-						m.Print("# Create the output folder\n"
-								"outputfolder :\n"
-								"	-mkdir -p $(BuildDir) 2> /dev/null\n"
+						// Other rules
+						m.Print(".SECONDEXPANSION:\n"
+								"$(Objects): $(BuildDir)/%%.o: $$(wildcard %%.c*)\n"
+								"	mkdir -p $(@D)\n"
+								"	@echo $(<F) [$(Build)]\n"
+								"ifeq \"$(suffix $<)\" \".cpp\"\n"
+								"	$(CPP) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@\n"
+								"else\n"
+								"	$(CC) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@\n"
+								"endif\n"
+								"\n"
+								"-include $(Objects:.o=.d)\n"
 								"\n"
 								"# Clean out targets\n"
 								"clean :\n"
-								"	rm -f $(BuildDir)/*.o $(BuildDir)/$(TargetFile)\n"
+								"	rm -rf $(BuildDir)/* $(BuildDir)/$(TargetFile)\n"
 								"	@echo Cleaned $(BuildDir)\n"
 								"\n",
 								PlatformStaticLibExt);
-					}
-				}
-
-				// Create dependency tree, starting with all the source files.
-				for (int idx=0; idx<Files.Length() && !IsCancelled(); idx++)
-				{
-					ProjectNode *n = Files[idx];
-					if (n->GetType() == NodeSrc)
-					{
-						auto Src = n->GetFullPath();
-						if (Src)
-						{
-							char Part[256];						
-							
-							char *d = strrchr(Src, DIR_CHAR);
-							d = d ? d + 1 : Src.Get();
-							strcpy(Part, d);
-							char *Dot = strrchr(Part, '.');
-							if (Dot) *Dot = 0;
-
-							LString Rel;							
-							if (Platform != PlatformHaiku)
-							{
-								if (!Proj->RelativePath(Rel, Src))
-						 			Rel = Src;
-							}
-							else
-							{
-								// Use full path for Haiku because the Debugger needs it to
-								// find the source correctly. As there are duplicate filenames
-								// for different platforms it's better to rely on full paths
-								// rather than filename index to find the right file.
-					 			Rel = Src;
-							}
-							
-							m.Print("%s.o : %s ", Part, ToUnixPath(Rel));
-
-							LArray<char*> SrcDeps;
-							if (Proj->GetDependencies(Src, IncPaths, SrcDeps, Platform))
-							{
-								for (int i=0; i<SrcDeps.Length() && !IsCancelled(); i++)
-								{
-									char *SDep = SrcDeps[i];
-									
-									if (stricmp(Src.Get(), SDep) != 0)
-									{
-										if (i) m.Print(" \\\n\t");
-										m.Print("%s", SDep);
-										if (!DepFiles.Find(SDep))
-										{
-											DepFiles.Add(SDep, true);
-										}
-									}
-									else printf("%s:%i - not add dep: '%s' '%s'\n", _FL, Src.Get(), SDep);
-								}
-								SrcDeps.DeleteArrays();
-							}
-
-							char *Ext = LGetExtension(Src);
-							const char *Compiler = Src && !stricmp(Ext, "c") ? "CC" : "CPP";
-
-							m.Print("\n"
-									"	@echo $(<F) [$(Build)]\n"
-									"	$(%s) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)\n"
-									"\n",
-									Compiler);
-						}
-					}
-				}
-				
-				// Do remaining include file dependencies
-				bool Done = false;
-				LHashTbl<StrKey<char,false>,bool> Processed;
-				LAutoString Base = Proj->GetBasePath();
-				while (!Done)
-				{
-					Done = true;
-
-					for (auto it : DepFiles)
-					{
-						if (IsCancelled())
-							break;
-						if (Processed.Find(it.key))
-							continue;
-
-						Done = false;
-						LString Path = it.key;
-						Proj->CheckExists(Path);
-						Processed.Add(Path, true);
-						
-						char Full[MAX_PATH], Rel[MAX_PATH];
-						if (LIsRelativePath(Path))
-						{
-							LMakePath(Full, sizeof(Full), Base, Path);
-							strcpy_s(Rel, sizeof(Rel), Path);
-						}
-						else
-						{
-							strcpy_s(Full, sizeof(Full), Path);
-							LAutoString a = LMakeRelativePath(Base, Path);
-							if (a)
-							{
-								strcpy_s(Rel, sizeof(Rel), a);
-							}
-							else
-							{
-								strcpy_s(Rel, sizeof(Rel), a);
-								LgiTrace("%s:%i - Failed to make relative path '%s' '%s'\n",
-									_FL,
-									Base.Get(), it.key);
-							}
-						}
-						
-						LAutoString c8(LReadTextFile(Full));
-						if (c8)
-						{
-							LArray<char*> Headers;
-							if (BuildHeaderList(c8, Headers, IncPaths, false))
-							{
-								m.Print("%s : ", ToUnixPath(Rel));
-
-								for (int n=0; n<Headers.Length() && !IsCancelled(); n++)
-								{
-									char *i = Headers[n];
-									
-									if (n) m.Print(" \\\n\t");
-									
-									LString Rel;
-									if (!Proj->RelativePath(Rel, i))
-										Rel = i;
-									Proj->CheckExists(Rel);
-
-									if (stricmp(i, Full) != 0)
-										m.Print("%s", ToUnixPath(Rel));
-									
-									if (!DepFiles.Find(i))
-									{
-										DepFiles.Add(i, true);
-									}
-								}
-								Headers.DeleteArrays();
-
-								m.Print("\n\n");
-							}
-							else LgiTrace("%s:%i - Error: BuildHeaderList failed for '%s'\n", _FL, Full);
-						}
-						else LgiTrace("%s:%i - Error: Failed to read '%s'\n", _FL, Full);
-						
-						break;
 					}
 				}
 
@@ -1144,11 +1030,11 @@ public:
 						if (!LIsRelativePath(p))
 						{
 							LAutoString a = LMakeRelativePath(Base, p);
-							m.Print("\t%s \\\n", a?a.Get():p.Get());
+							m.Print("\t%s \\\n", ToPlatformPath(a ? a.Get() : p, Platform).Get());
 						}
 						else
 						{
-							m.Print("\t%s \\\n", p.Get());
+							m.Print("\t%s \\\n", ToPlatformPath(p, Platform).Get());
 						}
 					}
 				}
@@ -2672,7 +2558,8 @@ const char *IdeProject::GetExeArgs()
 LString IdeProject::GetExecutable(IdePlatform Platform)
 {
 	LString Bin = d->Settings.GetStr(ProjExe, NULL, Platform);
-	LAutoString Base = GetBasePath();
+	auto TargetType = d->Settings.GetStr(ProjTargetType, NULL, Platform);
+	auto Base = GetBasePath();
 
 	if (Bin)
 	{
@@ -2687,9 +2574,10 @@ LString IdeProject::GetExecutable(IdePlatform Platform)
 	}
 
 	// Create binary name from target:	
-	LString Target = GetTargetName(Platform);
+	auto Target = GetTargetName(Platform);
 	if (Target)
 	{
+		bool IsLibrary = Stristr(TargetType, "library");
 		int BuildMode = d->App->GetBuildMode();
 		const char *Name = BuildMode ? "Release" : "Debug";
 		const char *Postfix = BuildMode ? "" : "d";
@@ -2698,18 +2586,27 @@ LString IdeProject::GetExecutable(IdePlatform Platform)
 		{			
 			case PlatformWin:
 			{
-				Bin.Printf("%s%s.dll", Target.Get(), Postfix);
+				if (IsLibrary)
+					Bin.Printf("%s%s.dll", Target.Get(), Postfix);
+				else
+					Bin = Target;
 				break;
 			}
 			case PlatformMac:
 			{
-				Bin.Printf("lib%s%s.dylib", Target.Get(), Postfix);
+				if (IsLibrary)
+					Bin.Printf("lib%s%s.dylib", Target.Get(), Postfix);
+				else
+					Bin = Target;
 				break;
 			}
 			case PlatformLinux:
 			case PlatformHaiku:
 			{
-				Bin.Printf("lib%s%s.so", Target.Get(), Postfix);
+				if (IsLibrary)
+					Bin.Printf("lib%s%s.so", Target.Get(), Postfix);
+				else
+					Bin = Target;
 				break;
 			}
 			default:
@@ -3518,9 +3415,7 @@ bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool In
 {
 	List<IdeProject> Projects;
 	if (Recurse)
-	{
 		GetChildProjects(Projects);
-	}
 	Projects.Insert(this, 0);
 
 	LHashTbl<StrKey<char>, bool> Map;
@@ -3545,12 +3440,7 @@ bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool In
 		
 		for (unsigned i=0; i<In.Length(); i++)
 		{
-			LString p;
-			#if DIR_CHAR == '\\'
-			p = In[i].Replace("/", "\\").Strip();
-			#else
-			p = In[i].Replace("\\", "/").Strip();
-			#endif
+			auto p = ToPlatformPath(In[i], Platform);
 
 			char *Path = p;
 			if (*Path == '`')
@@ -3608,25 +3498,8 @@ bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool In
 				Full = Out[i];
 			}
 			
-			#if 0
-			bool Has = false;
-			for (int n=0; n<Paths.Length(); n++)
-			{
-				if (stricmp(Paths[n], Full) == 0)
-				{
-					Has = true;
-					break;
-				}
-			}
-			
-			if (!Has)
-			{
-				Paths.Add(NewStr(Full));
-			}
-			#else
 			if (!Map.Find(Full))
 				Map.Add(Full, true);
-			#endif
 		}
 
 		// Add paths for the headers in the project... bit of a hack but it'll
@@ -3639,13 +3512,17 @@ bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool In
 			{
 				LTrimDir(Base);
 
-				for (unsigned i=0; i<Nodes.Length(); i++)
+				for (auto &n: Nodes)
 				{
-					ProjectNode *n = Nodes[i];
 					if (n->GetType() == NodeHeader &&				// Only look at headers.
 						(n->GetPlatforms() & (1 << Platform)) != 0)	// Exclude files not on this platform.
 					{
 						auto f = n->GetFileName();
+						if (Stristr(f, "linux"))
+						{
+							int as=0;
+						}
+
 						char p[MAX_PATH];
 						if (f &&
 							LMakePath(p, sizeof(p), Base, f))
