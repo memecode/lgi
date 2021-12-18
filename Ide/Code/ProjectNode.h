@@ -20,8 +20,7 @@ enum NodeType
 	NodeMax, // Always last
 };
 
-extern int NodeSort(LTreeItem *a, LTreeItem *b, NativeInt d);
-extern DeclGArrayCompare(XmlSort, LXmlTag*, NativeInt);
+extern int NodeSort(LTreeItem *a, LTreeItem *b, NativeInt d = 0);
 
 class ProjectNode : public IdeCommon, public LDragDropSource, public FtpCallback, public NodeSource
 {

@@ -12,10 +12,10 @@
 #include <string.h>
 #include <math.h>
 
-#include "Gdc2.h"
-#include "LString.h"
-#include "LVariant.h"
-#include "GPalette.h"
+#include "lgi/common/Gdc2.h"
+#include "lgi/common/StringClass.h"
+#include "lgi/common/Variant.h"
+#include "lgi/common/Palette.h"
 
 class GdcPcx : public LFilter {
 public:

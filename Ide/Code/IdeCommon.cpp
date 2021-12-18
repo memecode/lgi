@@ -115,7 +115,12 @@ void IdeCommon::CollectAllSource(LArray<LString> &c, IdePlatform Platform)
 void IdeCommon::SortChildren()
 {
 	Items.Sort(NodeSort);
-	Children.Sort<NativeInt>(XmlSort, 0);
+	Children.Sort([](auto a, auto b)
+	{
+		LTreeItem *A = dynamic_cast<LTreeItem*>(*a);
+		LTreeItem *B = dynamic_cast<LTreeItem*>(*b);
+		return NodeSort(A, B);
+	});
 	
 	if (Tree)
 	{

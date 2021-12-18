@@ -515,15 +515,15 @@ LVolume::~LVolume()
 	DeleteObj(d);
 }
 
-const char *LVolume::Name() { return d->Name; }
-const char *LVolume::Path() { return d->Path; }
-int LVolume::Type() { return d->Type; } // VT_??
-int LVolume::Flags() { return d->Flags; }
-uint64 LVolume::Size() { return d->Size; }
-uint64 LVolume::Free() { return d->Free; }
-LSurface *LVolume::Icon() { return d->Icon; }
+const char *LVolume::Name() const { return d->Name; }
+const char *LVolume::Path() const { return d->Path; }
+int LVolume::Type() const { return d->Type; } // VT_??
+int LVolume::Flags() const { return d->Flags; }
+uint64 LVolume::Size() const { return d->Size; }
+uint64 LVolume::Free() const { return d->Free; }
+LSurface *LVolume::Icon() const { return d->Icon; }
 
-bool LVolume::IsMounted()
+bool LVolume::IsMounted() const
 {
 	return false;
 }

@@ -442,7 +442,7 @@ void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 
 void LMemDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
 {
-    LAssert(!"Not implemented");
+	// LAssert(!"Not implemented");
 }
 
 void LMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)

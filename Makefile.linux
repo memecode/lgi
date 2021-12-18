@@ -255,6 +255,7 @@ View.o : ./src/linux/Lgi/View.cpp ./include/lgi/common/Lgi.h \
 	./include/lgi/common/Edit.h \
 	./include/lgi/common/Popup.h \
 	./include/lgi/common/Css.h \
+	./include/lgi/common/EventTargetThread.h \
 	./private/common/ViewPriv.h \
 	./include/lgi/linux/Gtk/LgiWidget.h
 	@echo $(<F) [$(Build)]

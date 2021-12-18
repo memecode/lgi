@@ -45,6 +45,7 @@ enum LgiMessages
 		/// Implemented to handle timer events in the GUI thread.
 		M_PULSE,
 		M_SET_VISIBLE,
+		M_CAPTURE_PULSE,
 		
 		/// Sent from a worker thread when calling LTextLabel::Name
 		M_TEXT_UPDATE_NAME,

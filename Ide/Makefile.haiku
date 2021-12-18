@@ -5,7 +5,7 @@
 
 CC = gcc
 CPP = g++
-Target = ./lgiide
+Target = lgiide
 ifndef Build
 	Build = Debug
 endif
@@ -16,14 +16,10 @@ Flags = -fPIC -w -fno-inline -fpermissive
 ifeq ($(Build),Debug)
 	Flags += -g -std=c++14
 	Tag = d
-	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -D_GNU_SOURCE
+	Defs = -D_DEBUG -DHAIKU -D_REENTRANT
 	Libs =  \
 		-L../Debug \
 		-lbe \
-		-lnetwork \
-		-lgnu \
-		-lpthread \
-		-static-libgcc \
 		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
@@ -33,14 +29,10 @@ ifeq ($(Build),Debug)
 		-I../include
 else
 	Flags += -s -Os -std=c++14
-	Defs = -DHAIKU -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -D_GNU_SOURCE
+	Defs = -DHAIKU -D_REENTRANT
 	Libs =  \
 		-L../Release \
 		-lbe \
-		-lnetwork \
-		-lgnu \
-		-lpthread \
-		-static-libgcc \
 		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
@@ -108,11 +100,19 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	@echo Linking $(Target) [$(Build)]...
 	$(CPP) -Wl,-export-dynamic,-R. -o \
 		$(Target) $(Objects) $(Libs)
+	addattr -f ./Code/icon-haiku -t "'VICN'" "BEOS:ICON" $(Target)
 	@echo Done.
 
 .PHONY: ../$(BuildDir)/liblgi$(Tag).so
 
 ../$(BuildDir)/liblgi$(Tag).so :
+	../include/lgi/common/Profile.h \
+	../src/haiku/File.cpp \
+	../src/haiku/Gdc2.cpp \
+	../src/haiku/Mem.cpp \
+	../src/haiku/MemDC.cpp \
+	../src/haiku/PrintDC.cpp \
+	../src/haiku/ScreenDC.cpp \
 	export Build=$(Build); \
 	$(MAKE) -C .. -f Makefile.haiku
 
@@ -135,7 +135,7 @@ clean :
 
 # Clean all targets
 cleanall :
-	rm -f $(BuildDir)/*.o $(Target)
+	rm -rf $(BuildDir)/* $(Target)
 	@echo Cleaned $(BuildDir)
 	+make -C "../" -f "Makefile.haiku" clean
 

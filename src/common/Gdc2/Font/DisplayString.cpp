@@ -2068,6 +2068,16 @@ void LDisplayString::FDraw(LSurface *pDC, int fx, int fy, LRect *frc, bool Debug
 				cairo_clip(cr);
 			}
 		}
+		else if (frc)
+		{
+			rx = ((double)frc->x1 / FScale);
+			ry = ((double)frc->y1 / FScale);
+			rw = (double)frc->X() / FScale;
+			rh = (double)frc->Y() / FScale;
+
+			cairo_rectangle(cr, rx, ry, rw, rh);
+			cairo_clip(cr);
+		}
 
 		cairo_translate(cr, Dx, Dy);
 

@@ -157,6 +157,7 @@ public:
 	const char *GetFileComment();
 	const char *GetFunctionComment();
 	bool IsMakefileUpToDate();
+	bool IsMakefileAScript();
 	bool CreateMakefile(IdePlatform Platform, bool BuildAfterwards);
 	LString GetTargetName(IdePlatform Platform);
 	LString GetTargetFile(IdePlatform Platform);

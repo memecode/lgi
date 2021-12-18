@@ -19,7 +19,7 @@ Flags = -fPIC -w -fno-inline -fpermissive
 ifeq ($(Build),Debug)
 	Flags += -g -std=c++14
 	Tag = d
-	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -D_GNU_SOURCE -DLGI_LIBRARY
+	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -DLGI_LIBRARY -DPOSIX -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64
 	Libs =  \
 		-static-libgcc \
 		-lgnu \
@@ -27,148 +27,142 @@ ifeq ($(Build),Debug)
 		-lbe
 	Inc =  \
 		-I./private/haiku \
-		-I./include/lgi/haiku \
-		-I./include \
 		-I./private/common \
-		-I./private/haiku
+		-I./include/lgi/haiku \
+		-I./include
 else
 	Flags += -s -Os -std=c++14
-	Defs = -DHAIKU -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -D_GNU_SOURCE -DLGI_LIBRARY
+	Defs = -DHAIKU -D_REENTRANT -DLGI_LIBRARY -DPOSIX -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64
 	Libs =  \
 		-static-libgcc \
 		-lgnu \
 		-lnetwork \
 		-lbe
 	Inc =  \
-		-Iprivate/haiku \
-		-Iinclude/lgi/haiku \
-		-Iinclude \
-		-Iprivate/common \
-		-Iprivate/haiku
+		-I./private/haiku \
+		-I./private/common \
+		-I./include/lgi/haiku \
+		-I./include
 endif
 
 # Dependencies
-Sources =	src/common/General/DateTime.cpp \
-			src/haiku/DragAndDrop.cpp \
-			src/common/Lgi/DragAndDropCommon.cpp \
-			src/haiku/File.cpp \
-			src/common/General/ExeCheck.cpp \
-			src/common/General/FileCommon.cpp \
-			src/haiku/App.cpp \
-			src/haiku/General.cpp \
+Source =	src/haiku/Window.cpp \
+			src/haiku/Widgets.cpp \
 			src/haiku/View.cpp \
-			src/haiku/Window.cpp \
-			src/common/Lgi/WindowCommon.cpp \
-			src/common/Lgi/ViewCommon.cpp \
-			src/common/Lgi/AppCommon.cpp \
-			src/common/Lgi/Library.cpp \
-			src/haiku/Mem.cpp \
-			src/common/General/Properties.cpp \
-			src/common/General/Containers.cpp \
-			src/haiku/Menu.cpp \
-			src/common/Lgi/MenuCommon.cpp \
-			src/common/Lgi/SubProcess.cpp \
-			src/common/Resource/LgiRes.cpp \
-			src/common/Resource/Res.cpp \
-			src/common/Skins/Gel/Gel.cpp \
-			src/common/Gdc2/Path/Path.cpp \
-			src/common/Lgi/MemStream.cpp \
-			src/common/Lgi/Stream.cpp \
 			src/haiku/Thread.cpp \
-			src/common/Lgi/Mutex.cpp \
-			src/common/Lgi/ThreadCommon.cpp \
-			src/common/Lgi/ThreadEvent.cpp \
-			src/common/Lgi/Variant.cpp \
-			src/common/Lgi/GuiUtils.cpp \
-			src/common/Lgi/Object.cpp \
-			src/common/Lgi/ToolTip.cpp \
-			src/common/Lgi/TrayIcon.cpp \
-			src/common/Lgi/LgiCommon.cpp \
-			src/common/Lgi/LMsg.cpp \
-			src/common/Lgi/FileSelect.cpp \
-			src/common/Lgi/Alert.cpp \
-			src/common/Lgi/FindReplace.cpp \
-			src/common/Lgi/FontSelect.cpp \
-			src/common/Lgi/Input.cpp \
-			src/haiku/Gdc2.cpp \
-			src/common/Gdc2/Colour.cpp \
-			src/common/Gdc2/Tools/ColourReduce.cpp \
-			src/common/Gdc2/GdcCommon.cpp \
-			src/common/Gdc2/Tools/GdcTools.cpp \
-			src/common/Gdc2/Font/DisplayString.cpp \
-			src/common/Gdc2/Font/Font.cpp \
-			src/common/Gdc2/Font/FontCodePages.cpp \
-			src/common/Gdc2/Font/FontSystem.cpp \
-			src/common/Gdc2/Font/StringLayout.cpp \
-			src/common/Gdc2/Font/TypeFace.cpp \
-			src/common/Gdc2/Font/FontType.cpp \
-			src/common/Gdc2/15Bit.cpp \
-			src/common/Gdc2/16Bit.cpp \
-			src/common/Gdc2/24Bit.cpp \
-			src/common/Gdc2/32Bit.cpp \
-			src/common/Gdc2/8Bit.cpp \
-			src/common/Gdc2/Alpha.cpp \
-			src/common/Gdc2/Filters/Filter.cpp \
-			src/common/Gdc2/Rect.cpp \
-			src/haiku/MemDC.cpp \
-			src/haiku/PrintDC.cpp \
 			src/haiku/ScreenDC.cpp \
 			src/haiku/Printer.cpp \
-			src/common/Gdc2/Surface.cpp \
-			src/haiku/ClipBoard.cpp \
-			src/common/Lgi/DataDlg.cpp \
-			src/common/General/Password.cpp \
-			src/common/Hash/md5/md5.c \
-			src/common/Hash/sha1/sha1.c \
-			src/common/Lgi/Mru.cpp \
-			src/common/Net/Base64.cpp \
-			src/common/Lgi/OptionsFile.cpp \
-			src/common/Lgi/Rand.cpp \
-			src/common/Text/String.cpp \
-			src/common/Text/Token.cpp \
-			src/common/Text/Unicode.cpp \
-			src/common/Text/Utf8.cpp \
-			src/common/Text/XmlTree.cpp \
-			src/common/Widgets/Bitmap.cpp \
-			src/common/Widgets/Button.cpp \
-			src/common/Widgets/CheckBox.cpp \
-			src/common/Widgets/Combo.cpp \
-			src/common/Text/DocView.cpp \
-			src/common/Widgets/Edit.cpp \
-			src/common/Widgets/ItemContainer.cpp \
-			src/common/Widgets/Panel.cpp \
-			src/common/Widgets/Popup.cpp \
-			src/common/Widgets/Progress.cpp \
-			src/common/Widgets/ProgressDlg.cpp \
-			src/common/Widgets/RadioGroup.cpp \
-			src/common/Widgets/ScrollBar.cpp \
-			src/common/Widgets/Slider.cpp \
-			src/common/Widgets/StatusBar.cpp \
-			src/common/Widgets/TabView.cpp \
-			src/common/Widgets/TextLabel.cpp \
-			src/common/Text/TextView3.cpp \
-			src/common/Widgets/ToolBar.cpp \
-			src/common/Widgets/Tree.cpp \
-			src/common/Widgets/List.cpp \
-			src/common/Lgi/Css.cpp \
-			src/common/Lgi/CssTools.cpp \
-			src/common/Widgets/Box.cpp \
-			src/common/Widgets/Splitter.cpp \
-			src/common/Widgets/TableLayout.cpp \
+			src/haiku/PrintDC.cpp \
+			src/haiku/Menu.cpp \
+			src/haiku/MemDC.cpp \
+			src/haiku/Mem.cpp \
 			src/haiku/Layout.cpp \
-			src/haiku/Widgets.cpp \
+			src/haiku/General.cpp \
+			src/haiku/Gdc2.cpp \
+			src/haiku/File.cpp \
+			src/haiku/DragAndDrop.cpp \
+			src/haiku/ClipBoard.cpp \
+			src/haiku/App.cpp \
+			src/common/Widgets/Tree.cpp \
+			src/common/Widgets/ToolBar.cpp \
+			src/common/Widgets/TextLabel.cpp \
+			src/common/Widgets/TabView.cpp \
+			src/common/Widgets/TableLayout.cpp \
+			src/common/Widgets/StatusBar.cpp \
+			src/common/Widgets/Splitter.cpp \
+			src/common/Widgets/Slider.cpp \
+			src/common/Widgets/ScrollBar.cpp \
+			src/common/Widgets/RadioGroup.cpp \
+			src/common/Widgets/ProgressDlg.cpp \
+			src/common/Widgets/Progress.cpp \
+			src/common/Widgets/Popup.cpp \
+			src/common/Widgets/Panel.cpp \
+			src/common/Widgets/List.cpp \
+			src/common/Widgets/ItemContainer.cpp \
+			src/common/Widgets/Edit.cpp \
+			src/common/Widgets/Combo.cpp \
+			src/common/Widgets/CheckBox.cpp \
+			src/common/Widgets/Button.cpp \
+			src/common/Widgets/Box.cpp \
+			src/common/Widgets/Bitmap.cpp \
+			src/common/Text/XmlTree.cpp \
+			src/common/Text/Utf8.cpp \
+			src/common/Text/Unicode.cpp \
+			src/common/Text/Token.cpp \
+			src/common/Text/TextView3.cpp \
+			src/common/Text/String.cpp \
+			src/common/Text/DocView.cpp \
+			src/common/Skins/Gel/Gel.cpp \
+			src/common/Resource/Res.cpp \
+			src/common/Resource/LgiRes.cpp \
 			src/common/Net/Uri.cpp \
-			src/common/Net/Net.cpp \
 			src/common/Net/NetTools.cpp \
+			src/common/Net/Net.cpp \
 			src/common/Net/MDStringToDigest.cpp \
-			src/haiku/ShowFileProp_Haiku.cpp
+			src/common/Net/Base64.cpp \
+			src/common/Lgi/WindowCommon.cpp \
+			src/common/Lgi/ViewCommon.cpp \
+			src/common/Lgi/Variant.cpp \
+			src/common/Lgi/TrayIcon.cpp \
+			src/common/Lgi/ToolTip.cpp \
+			src/common/Lgi/ThreadEvent.cpp \
+			src/common/Lgi/ThreadCommon.cpp \
+			src/common/Lgi/SubProcess.cpp \
+			src/common/Lgi/Stream.cpp \
+			src/common/Lgi/Rand.cpp \
+			src/common/Lgi/OptionsFile.cpp \
+			src/common/Lgi/Object.cpp \
+			src/common/Lgi/Mutex.cpp \
+			src/common/Lgi/Mru.cpp \
+			src/common/Lgi/MenuCommon.cpp \
+			src/common/Lgi/MemStream.cpp \
+			src/common/Lgi/LMsg.cpp \
+			src/common/Lgi/Library.cpp \
+			src/common/Lgi/LgiCommon.cpp \
+			src/common/Lgi/Input.cpp \
+			src/common/Lgi/GuiUtils.cpp \
+			src/common/Lgi/FontSelect.cpp \
+			src/common/Lgi/FindReplace.cpp \
+			src/common/Lgi/FileSelect.cpp \
+			src/common/Lgi/DragAndDropCommon.cpp \
+			src/common/Lgi/DataDlg.cpp \
+			src/common/Lgi/CssTools.cpp \
+			src/common/Lgi/Css.cpp \
+			src/common/Lgi/AppCommon.cpp \
+			src/common/Lgi/Alert.cpp \
+			src/common/Hash/sha1/sha1.c \
+			src/common/Hash/md5/md5.c \
+			src/common/General/Properties.cpp \
+			src/common/General/Password.cpp \
+			src/common/General/FileCommon.cpp \
+			src/common/General/ExeCheck.cpp \
+			src/common/General/DateTime.cpp \
+			src/common/General/Containers.cpp \
+			src/common/Gdc2/Tools/GdcTools.cpp \
+			src/common/Gdc2/Tools/ColourReduce.cpp \
+			src/common/Gdc2/Surface.cpp \
+			src/common/Gdc2/Rect.cpp \
+			src/common/Gdc2/Path/Path.cpp \
+			src/common/Gdc2/GdcCommon.cpp \
+			src/common/Gdc2/Font/TypeFace.cpp \
+			src/common/Gdc2/Font/StringLayout.cpp \
+			src/common/Gdc2/Font/FontType.cpp \
+			src/common/Gdc2/Font/FontSystem.cpp \
+			src/common/Gdc2/Font/FontCodePages.cpp \
+			src/common/Gdc2/Font/Font.cpp \
+			src/common/Gdc2/Font/DisplayString.cpp \
+			src/common/Gdc2/Filters/Filter.cpp \
+			src/common/Gdc2/Colour.cpp \
+			src/common/Gdc2/Alpha.cpp \
+			src/common/Gdc2/8Bit.cpp \
+			src/common/Gdc2/32Bit.cpp \
+			src/common/Gdc2/24Bit.cpp \
+			src/common/Gdc2/16Bit.cpp \
+			src/common/Gdc2/15Bit.cpp
 
 SourceLst := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(Sources)))
 
 Objects := $(addprefix $(BuildDir)/,$(SourceLst))
-
-#all:
-#	echo "$(SourceLst)"
 
 # Target
 TargetFile = lib$(Target)$(Tag).so
@@ -203,7 +197,6 @@ VPATH=%.cpp \
 	./src/common/Hash/md5 \
 	./private/haiku \
 	./private/common \
-	./include/lgi/ \
 	./include/lgi/haiku \
 	./include/lgi/common \
 	./include \

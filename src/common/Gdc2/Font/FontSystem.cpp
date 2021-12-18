@@ -550,12 +550,6 @@ LFont *LFontSystem::GetBestFont(char *Str)
 }
 
 typedef LHashTbl<ConstStrKey<char,false>,int> FontMap;
-DeclGArrayCompare(FontNameCmp, LString, FontMap)
-{
-	int ap = param->Find(*a);
-	int bp = param->Find(*b);
-	return bp - ap;
-}
 
 bool LFontSystem::AddFont(LAutoPtr<LFont> Fnt)
 {
@@ -675,7 +669,12 @@ LFont *LFontSystem::GetGlyph(uint32_t u, LFont *UserFont)
 					}
 
 					// Prefer these fonts...
-					SubFonts.Sort<FontMap>(FontNameCmp, &Pref);
+					SubFonts.Sort([&Pref](auto a, auto b)
+					{
+						int ap = Pref.Find(*a);
+						int bp = Pref.Find(*b);
+						return bp - ap;
+					});
 
 					// Delete fonts prefixed with '@' to the end, as they are for
 					// vertical rendering... and aren't suitable for what LGI uses

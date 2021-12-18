@@ -292,50 +292,6 @@ struct CompareParams
 	}
 };
 
-DeclGArrayCompare(RowIntCompare, LDbRow*, CompareParams)
-{
-	int64 A = (*a)->GetInt(param->Id);
-	int64 B = (*b)->GetInt(param->Id);
-	return (int) (param->Ascend ? A - B : B - A);
-}
-
-DeclGArrayCompare(RowStrCompare, LDbRow*, CompareParams)
-{
-	const char *A = (*a)->GetStr(param->Id);
-	if (!A) A = "";
-
-	const char *B = (*b)->GetStr(param->Id);
-	if (!B) B = "";
-
-	return param->Ascend ? stricmp(A, B) : stricmp(B, A);
-}
-
-DeclGArrayCompare(RowDateCompare, LDbRow*, CompareParams)
-{
-	const LDateTime *A = (*a)->GetDate(param->Id);
-	const LDateTime *B = (*b)->GetDate(param->Id);
-	if (!A || !B)
-	{
-		LAssert(0);
-		return 0;
-	}
-
-	uint64 UtcA, UtcB;
-	if (!A->Get(UtcA) ||
-		!B->Get(UtcB))
-	{
-		LAssert(0);
-		return 0;
-	}
-
-	int64 r = param->Ascend ? UtcA - UtcB : UtcB - UtcA;
-	if (r < 0)
-		return -1;
-	if (r > 0)
-		return 1;
-	return 0;
-}
-
 bool DbArrayIndex::Sort(LDbField *fld, bool ascend)
 {
 	if (!fld)
@@ -349,13 +305,51 @@ bool DbArrayIndex::Sort(LDbField *fld, bool ascend)
 	{
 		case GV_INT32:
 		case GV_INT64:
-			LArray<LDbRow*>::Sort(RowIntCompare, &p);
+			LArray<LDbRow*>::Sort([&p](auto a, auto b)
+			{
+				int64 A = (*a)->GetInt(p.Id);
+				int64 B = (*b)->GetInt(p.Id);
+				return (int) (p.Ascend ? A - B : B - A);
+			});
 			break;
 		case GV_STRING:
-			LArray<LDbRow*>::Sort(RowStrCompare, &p);
+			LArray<LDbRow*>::Sort([&p](auto a, auto b)
+			{
+				const char *A = (*a)->GetStr(p.Id);
+				if (!A) A = "";
+
+				const char *B = (*b)->GetStr(p.Id);
+				if (!B) B = "";
+
+				return p.Ascend ? stricmp(A, B) : stricmp(B, A);
+			});
 			break;
 		case GV_DATETIME:
-			LArray<LDbRow*>::Sort(RowDateCompare, &p);
+			LArray<LDbRow*>::Sort([&p](auto a, auto b)
+			{
+				const LDateTime *A = (*a)->GetDate(p.Id);
+				const LDateTime *B = (*b)->GetDate(p.Id);
+				if (!A || !B)
+				{
+					LAssert(0);
+					return 0;
+				}
+
+				uint64 UtcA, UtcB;
+				if (!A->Get(UtcA) ||
+					!B->Get(UtcB))
+				{
+					LAssert(0);
+					return 0;
+				}
+
+				int64 r = p.Ascend ? UtcA - UtcB : UtcB - UtcA;
+				if (r < 0)
+					return -1;
+				if (r > 0)
+					return 1;
+				return 0;
+			});
 			break;
 		default:
 			LAssert(0);
@@ -472,11 +466,6 @@ struct VarBlock : public LRange
 	int Index;
 };
 
-int VarCmp(VarBlock *a, VarBlock *b)
-{
-	return (int) (a->Start - b->Start);
-}
-
 uint32_t LDbRow::GetInitialSize()
 {
 	return HeaderSz + d->FixedSz + (d->Variable * sizeof(uint32_t));
@@ -498,7 +487,10 @@ bool LDbRow::Compact()
 				b.Len = strlen(Base.c + b.Start) + 1;
 			}
 		}
-		v.Sort(VarCmp);
+		v.Sort([](auto a, auto b)
+		{
+			return (int) (a->Start - b->Start);
+		});
 		uint32_t Pos = GetInitialSize();
 		for (unsigned i=0; i<v.Length(); i++)
 		{

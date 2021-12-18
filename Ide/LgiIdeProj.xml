@@ -166,8 +166,8 @@ WINNATIVE</Release>
 </Release>
 				</Linux>
 				<Haiku>
-					<Debug>../include/beos</Debug>
-					<Release>../include/beos</Release>
+					<Debug>../include/lgi/haiku</Debug>
+					<Release>../include/lgi/haiku</Release>
 				</Haiku>
 				<Mac>
 					<Debug>../include/lgi/mac/cocoa</Debug>
