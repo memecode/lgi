@@ -185,7 +185,11 @@ $(TargetFile) : $(Objects)
 $(Objects): $(BuildDir)/%.o: $$(wildcard %.c*)
 	mkdir -p $(@D)
 	@echo $(<F) [$(Build)]
+ifeq "$(suffix $<)" ".cpp"
 	$(CPP) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
+else
+	$(CC) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
+endif
 
 -include $(Objects:.o=.d)
 

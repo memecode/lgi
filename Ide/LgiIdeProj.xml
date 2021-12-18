@@ -91,6 +91,7 @@
 		<Node Name="Test" Type="1" Platforms="15" Id="1" />
 		<Node File=".\buildHaiku.py" Type="8" Platforms="15" />
 		<Node File=".\CMakeLists.txt" Type="8" Platforms="15" />
+		<Node File=".\Makefile.haiku" Type="9" Platforms="15" />
 		<Node File=".\Makefile.linux" Type="9" Platforms="15" />
 		<Node File=".\Resources\resource.h" Type="3" Platforms="15" />
 	</Node>
