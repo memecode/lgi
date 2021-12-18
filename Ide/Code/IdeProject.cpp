@@ -2351,8 +2351,27 @@ GDebugContext *IdeProject::Execute(ExeAction Act)
 	return NULL;
 }
 
+bool IdeProject::IsMakefileAScript()
+{
+	auto m = GetMakefile(PlatformCurrent);
+	if (m)
+	{
+		auto Ext = LGetExtension(m);
+		if (!Stricmp(Ext, "py"))
+		{
+			// Not a makefile but a build script... can't update.
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool IdeProject::IsMakefileUpToDate()
 {
+	if (IsMakefileAScript())
+		return true; // We can't know if it's up to date...
+
 	List<IdeProject> Proj;
 	GetChildProjects(Proj);
 
