@@ -1209,29 +1209,49 @@ void LView::Visible(bool v)
 	LLocker lck(d->Hnd, _FL);
 	if (!IsAttached() || lck.Lock())
 	{
-		const int attempts = 5;
-		printf("%s/%p:Visible(%i) hidden=%i\n", GetClass(), this, v, d->Hnd->IsHidden());
+		const int attempts = 3;
+		// printf("%s/%p:Visible(%i) hidden=%i\n", GetClass(), this, v, d->Hnd->IsHidden());
 		if (v)
 		{
-			for (int i=0; i<attempts && d->Hnd->IsHidden(); i++)
+			bool parentHidden = false;
+			for (auto p = d->Hnd->Parent(); p; p = p->Parent())
 			{
-				printf("\t%p Show\n", this);
-				d->Hnd->Show();
+				if (p->IsHidden())
+				{
+					parentHidden = true;
+					break;
+				}
 			}
-			if (d->Hnd->IsHidden())
-				printf("%s:%i - Failed to show %s.\n", _FL, GetClass());
+			if (!parentHidden) // Don't try and show if one of the parent's is hidden.
+			{
+				for (int i=0; i<attempts && d->Hnd->IsHidden(); i++)
+				{
+					// printf("\t%p Show\n", this);
+					d->Hnd->Show();
+				}
+				if (d->Hnd->IsHidden())
+				{
+					printf("%s:%i - Failed to show %s.\n", _FL, GetClass());
+					for (auto p = d->Hnd->Parent(); p; p = p->Parent())
+						printf("\tparent: %s/%p ishidden=%i\n", p->Name(), p, p->IsHidden());
+				}
+			}
 		}
 		else
 		{
 			for (int i=0; i<attempts && !d->Hnd->IsHidden(); i++)
 			{
-				printf("\t%p Hide\n", this);
+				// printf("\t%p Hide\n", this);
 				d->Hnd->Hide();
 			}
 			if (!d->Hnd->IsHidden())
+			{
 				printf("%s:%i - Failed to hide %s.\n", _FL, GetClass());
+				for (auto p = d->Hnd->Parent(); p; p = p->Parent())
+					printf("\tparent: %s/%p ishidden=%i\n", p->Name(), p, p->IsHidden());
+			}
 		}
-		printf("\t%s/%p:Visible(%i) hidden=%i\n", GetClass(), this, v, d->Hnd->IsHidden());
+		// printf("\t%s/%p:Visible(%i) hidden=%i\n", GetClass(), this, v, d->Hnd->IsHidden());
 	}
 	else LgiTrace("%s:%i - Can't lock.\n", _FL);
  	#elif LGI_VIEW_HANDLE	

@@ -100,7 +100,7 @@ SourceLst := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(Sources)))
 Objects := $(addprefix $(BuildDir)/,$(SourceLst))
 
 #all:
-#	echo "$(Objects)"
+#	echo "../Debug/$(Objects:.o=.d)"
 
 # Target
 # Executable target
@@ -109,6 +109,8 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	$(CPP) -Wl,-export-dynamic,-R. -o \
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
+
+.PHONY: ../$(BuildDir)/liblgi$(Tag).so
 
 ../$(BuildDir)/liblgi$(Tag).so :
 	export Build=$(Build); \
@@ -123,7 +125,6 @@ ifeq "$(suffix $<)" ".cpp"
 else
 	$(CC) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
 endif
-	
 
 -include $(Objects:.o=.d)
 
