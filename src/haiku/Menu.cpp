@@ -19,12 +19,12 @@
 #include <MenuBar.h>
 #include <MenuItem.h>
 
-#define DEBUG_MENUS		0
+#define DEBUG_MENUS		1
 
 #if DEBUG_MENUS
 	#define LOG(...)	printf(__VA_ARGS__)
 #else
-	#define LOG(...)
+	#define LOG(...)	;
 #endif
 
 struct MenuLock : public LLocker
@@ -260,77 +260,7 @@ LMenuItem *LSubMenu::FindItem(int Id)
 class LMenuItemPrivate
 {
 public:
-	bool StartUnderline;		// Underline the first display string
-	bool HasAccel;				// The last display string should be right aligned
-	List<LDisplayString> Strs;	// Draw each alternate display string with underline
-								// except the last in the case of HasAccel==true.
 	::LString Shortcut;
-
-	LMenuItemPrivate()
-	{
-		HasAccel = false;
-		StartUnderline = false;
-	}
-
-	~LMenuItemPrivate()
-	{
-		Strs.DeleteObjects();
-	}
-
-	void UpdateStrings(LFont *Font, char *n)
-	{
-		// Build up our display strings, 
-		Strs.DeleteObjects();
-		StartUnderline = false;
-
-		char *Tab = strrchr(n, '\t');
-		if (Tab)
-		{
-			*Tab = 0;
-		}
-
-		char *Amp = 0, *a = n;
-		while (a = strchr(a, '&'))
-		{
-			if (a[1] != '&')
-			{
-				Amp = a;
-				break;
-			}
-
-			a++;
-		}
-
-		if (Amp)
-		{
-			// Before amp
-			Strs.Insert(new LDisplayString(Font, n, Amp - n ));
-
-			// Amp'd letter
-			char *e = LSeekUtf8(++Amp, 1);
-			Strs.Insert(new LDisplayString(Font, Amp, e - Amp ));
-
-			// After Amp
-			if (*e)
-			{
-				Strs.Insert(new LDisplayString(Font, e));
-			}
-		}
-		else
-		{
-			Strs.Insert(new LDisplayString(Font, n));
-		}
-
-		if (HasAccel = (Tab != 0))
-		{
-			Strs.Insert(new LDisplayString(Font, Tab + 1));
-			*Tab = '\t';
-		}
-		else if (HasAccel = (Shortcut.Get() != 0))
-		{
-			Strs.Insert(new LDisplayString(Font, Shortcut));
-		}
-	}
 };
 
 static LString MenuItemParse(const char *s, char &trigger)
@@ -375,6 +305,7 @@ LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int id, int Pos, co
 	Parent = p;
 	Position = Pos;
 	_Id = id;
+	d->Shortcut = shortcut;
 
 	if (id == LSubMenu::ItemId_Submenu)
 	{
@@ -424,8 +355,7 @@ void LMenuItem::_PaintText(LSurface *pDC, int x, int y, int Width)
 
 bool LMenuItem::ScanForAccel()
 {
-	::LString Accel;
-
+	LString Accel;
 	if (d->Shortcut)
 	{
 		Accel = d->Shortcut;
@@ -599,46 +529,63 @@ bool LMenuItem::ScanForAccel()
 
 	if (Key)
 	{
-		/*
-		Gtk::gint GtkKey = LgiKeyToGtkKey(Key, Accel);
-		if (GtkKey)
+		if (Info)
 		{
-			GtkWidget *w = GtkCast(Info.obj, gtk_widget, GtkWidget);
-			Gtk::GdkModifierType mod = (Gtk::GdkModifierType)
-				(
-					(TestFlag(Flags, LGI_EF_CTRL)   ? Gtk::GDK_CONTROL_MASK : 0) |
-					(TestFlag(Flags, LGI_EF_SHIFT)  ? Gtk::GDK_SHIFT_MASK : 0)   |
-					(TestFlag(Flags, LGI_EF_ALT)    ? Gtk::GDK_MOD1_MASK : 0)    |
-					(TestFlag(Flags, LGI_EF_SYSTEM) ? Gtk::GDK_META_MASK : 0)
-				);
-
-			const char *Signal = "activate";
-
-			gtk_widget_add_accelerator(	w,
-										Signal,
-										Menu->AccelGrp,
-										GtkKey,
-										mod,
-										Gtk::GTK_ACCEL_VISIBLE
-									);
-			gtk_widget_show_all(w);
+			uint32 modifiers = 
+				((Flags & LGI_EF_CTRL) ? B_CONTROL_KEY : 0) |
+				((Flags & LGI_EF_ALT) ? B_MENU_KEY : 0) |
+				((Flags & LGI_EF_SHIFT) ? B_SHIFT_KEY : 0) |
+				((Flags & LGI_EF_SYSTEM) ? B_COMMAND_KEY : 0);
+			
+			if (Key >= LK_F1 && Key <= LK_F12)
+			{
+				#if 1
+				
+					if (Menu)
+					{
+						LAssert(Id() > 0);
+						Menu->Accel.Insert(new LAccelerator(Flags, Key, Id()));
+					}
+				
+				#else
+				
+					auto bwnd = Menu && Menu->WindowHandle() ? Menu->WindowHandle()->WindowHandle() : NULL;
+					if (bwnd)
+					{
+						BMessage *msg = new BMessage(M_COMMAND);
+						if (msg)
+						{
+							msg->AddInt32("key", Key-LK_F1+B_F1_KEY);
+							bwnd->AddShortcut(B_FUNCTION_KEY, modifiers, msg);
+						}
+						else printf("%s:%i - Alloc err.\n", _FL);
+					}
+					else printf("%s:%i - No bwnd to add function key shortcut to.\n", _FL);
+				
+				#endif				
+			}
+			else
+			{
+				#if 0
+				printf("Scan '%s' / Key=%i(%i) / Flags: %x ctrl=%i alt=%i shift=%i sys=%i / Mods: ctrl=%i alt=%i sh=%i sys=%i\n",
+					Accel.Get(),
+					Key, LK_F1,
+					Flags,
+					(Flags & LGI_EF_CTRL) != 0,
+					(Flags & LGI_EF_ALT) != 0,
+					(Flags & LGI_EF_SHIFT) != 0,
+					(Flags & LGI_EF_SYSTEM) != 0,
+					(modifiers & B_CONTROL_KEY) != 0,
+					(modifiers & B_MENU_KEY) != 0,
+					(modifiers & B_SHIFT_KEY) != 0,
+					(modifiers & B_COMMAND_KEY) != 0);
+				#endif
+				Info->SetShortcut(Key, modifiers);
+			}
 		}
-		else
-		{
-			LOG("%s:%i - No gtk key for '%s'\n", _FL, Accel.Get());
-		}
-		
-		auto Ident = Id();
-		LAssert(Ident > 0);
-		Menu->Accel.Insert( new GAccelerator(Flags, Key, Ident) );
-		
-		return true;
-		*/
+		else LOG("%s:%i - No item handle.\n", _FL);
 	}
-	else
-	{
-		LOG("%s:%i - Accel scan failed, str='%s'\n", _FL, Accel.Get());
-	}
+	else LOG("%s:%i - Accel scan failed, str='%s'\n", _FL, Accel.Get());
 
 	return false;
 }
@@ -796,17 +743,8 @@ int LMenuItem::Icon()
 ///////////////////////////////////////////////////////////////////////////////////////////////
 struct LMenuFont
 {
-	LFont *f;
+	LAutoPtr<LFont> f;
 
-	LMenuFont()
-	{
-		f = NULL;
-	}
-
-	~LMenuFont()
-	{
-		DeleteObj(f);
-	}
 }	MenuFont;
 
 class LMenuPrivate
@@ -823,6 +761,7 @@ LMenu::LMenu(const char *AppName) : LSubMenu(new BMenuBar(AppName))
 LMenu::~LMenu()
 {
 	Accel.DeleteObjects();
+	DeleteObj(d);
 }
 
 LFont *LMenu::GetFont()
@@ -832,26 +771,18 @@ LFont *LMenu::GetFont()
 		LFontType Type;
 		if (Type.GetSystemFont("Menu"))
 		{
-			MenuFont.f = Type.Create();
-			if (MenuFont.f)
+			if (MenuFont.f.Reset(Type.Create()))
 			{
 				// MenuFont.f->CodePage(LSysFont->CodePage());
 			}
-			else
-			{
-				LOG("LMenu::GetFont Couldn't create menu font.\n");
-			}
+			else LOG("LMenu::GetFont Couldn't create menu font.\n");
 		}
-		else
-		{
-			LOG("LMenu::GetFont Couldn't get menu typeface.\n");
-		}
+		else LOG("LMenu::GetFont Couldn't get menu typeface.\n");
 
-		if (!MenuFont.f)
+		if (!MenuFont.f &&
+			MenuFont.f.Reset(new LFont))
 		{
-			MenuFont.f = new LFont;
-			if (MenuFont.f)
-				*MenuFont.f = *LSysFont;
+			*MenuFont.f = *LSysFont;
 		}
 	}
 
@@ -874,7 +805,8 @@ bool LMenu::Attach(LViewI *p)
 		LAssert(!"Can't lock.");
 		return false;
 	}
-	
+
+	printf("Attaching menubar...\n");	
 	auto menubar = dynamic_cast<BMenuBar*>(Info);
 	bwnd->AddChild(menubar);
 	
@@ -977,14 +909,14 @@ bool LMenu::OnKey(LView *v, LKey &k)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-GAccelerator::GAccelerator(int flags, int key, int id)
+LAccelerator::LAccelerator(int flags, int key, int id)
 {
 	Flags = flags;
 	Key = key;
 	Id = id;
 }
 
-bool GAccelerator::Match(LKey &k)
+bool LAccelerator::Match(LKey &k)
 {
 	int Press = (uint) k.vkey;
 	
@@ -998,8 +930,8 @@ bool GAccelerator::Match(LKey &k)
 		return false;
 	}
 	
-	#if 1
-	LOG("GAccelerator::Match %i(%c)%s%s%s = %i(%c)%s%s%s%s\n",
+	#if 0
+	LOG("LAccelerator::Match %i(%c)%s%s%s = %i(%c)%s%s%s%s\n",
 		Press,
 		Press>=' '?Press:'.',
 		k.Ctrl()?" ctrl":"",
@@ -1018,9 +950,9 @@ bool GAccelerator::Match(LKey &k)
 	{
 		if
 		(
-			((TestFlag(Flags, LGI_EF_CTRL) ^ k.Ctrl()) == 0) &&
-			((TestFlag(Flags, LGI_EF_ALT) ^ k.Alt()) == 0) &&
-			((TestFlag(Flags, LGI_EF_SHIFT) ^ k.Shift()) == 0) &&
+			((TestFlag(Flags, LGI_EF_CTRL)   ^ k.Ctrl())   == 0) &&
+			((TestFlag(Flags, LGI_EF_ALT)    ^ k.Alt())    == 0) &&
+			((TestFlag(Flags, LGI_EF_SHIFT)  ^ k.Shift())  == 0) &&
 			((TestFlag(Flags, LGI_EF_SYSTEM) ^ k.System()) == 0)
 		)
 		{

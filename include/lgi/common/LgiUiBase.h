@@ -192,6 +192,11 @@ public:
 		static const char *CtrlCmdName() { return "\xE2\x8C\x98"; }	
 		bool AltCmd() const { return System(); }
 		static const char *AltCmdName()	{ return "\xE2\x8C\x98"; }
+	#elif defined(HAIKU)
+		bool CtrlCmd() const { return Alt(); }
+		static const char *CtrlCmdName() { return "Alt"; }	
+		bool AltCmd() const { return Ctrl(); }
+		static const char *AltCmdName() { return "Ctrl"; }
 	#else // win32 and linux
 		bool CtrlCmd() const { return Ctrl(); }
 		static const char *CtrlCmdName() { return "Ctrl"; }	

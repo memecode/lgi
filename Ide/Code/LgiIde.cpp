@@ -1018,7 +1018,7 @@ class AppWndPrivate
 {
 public:
 	AppWnd *App;
-	GMdiParent *Mdi;
+	LMdiParent *Mdi;
 	LOptionsFile Options;
 	LBox *HBox, *VBox;
 	List<IdeDoc> Docs;
@@ -1697,7 +1697,7 @@ AppWnd::AppWnd()
 		d->Tree->SetImageList(d->Icons, false);
 		d->Tree->Sunken(false);
 	}
-	d->HBox->AddView(d->Mdi = new GMdiParent);
+	d->HBox->AddView(d->Mdi = new LMdiParent);
 	if (d->Mdi)
 	{
 		d->Mdi->HasButton(true);
@@ -4225,7 +4225,7 @@ void AppWnd::OnProjectDestroy(IdeProject *Proj)
 
 void AppWnd::OnProjectChange()
 {
-	LArray<GMdiChild*> Views;
+	LArray<LMdiChild*> Views;
 	if (d->Mdi->GetChildren(Views))
 	{
 		for (unsigned i=0; i<Views.Length(); i++)

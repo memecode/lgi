@@ -5,17 +5,17 @@
 
 #define MDI_TAB_STYLE	1
 
-class GMdiChild : public LLayout
+class LMdiChild : public LLayout
 {
-	friend class GMdiParent;
+	friend class LMdiParent;
 	
-	class GMdiChildPrivate *d;
+	class LMdiChildPrivate *d;
 
 public:
-	GMdiChild();
-	~GMdiChild();
+	LMdiChild();
+	~LMdiChild();
 
-	const char *GetClass() { return "GMdiChild"; }
+	const char *GetClass() { return "LMdiChild"; }
 
 	#if MDI_TAB_STYLE
 	int GetOrder();
@@ -41,22 +41,22 @@ public:
 	virtual void OnPaintButton(LSurface *pDC, LRect &rc);
 };
 
-class GMdiParent : public LLayout
+class LMdiParent : public LLayout
 {
-	friend class GMdiChild;
-	class GMdiParentPrivate *d;
+	friend class LMdiChild;
+	class LMdiParentPrivate *d;
 
 	#if MDI_TAB_STYLE
 	int GetNextOrder();
 	#endif
-	GMdiChild *IsChild(LViewI *v);
-	::LArray<GMdiChild*> &PrivChildren();
+	LMdiChild *IsChild(LViewI *v);
+	::LArray<LMdiChild*> &PrivChildren();
 
 public:
-	GMdiParent();
-	~GMdiParent();
+	LMdiParent();
+	~LMdiParent();
 	
-	const char *GetClass() { return "GMdiParent"; }
+	const char *GetClass() { return "LMdiParent"; }
 
 	bool HasButton();
 	void HasButton(bool b);

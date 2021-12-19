@@ -662,7 +662,7 @@ bool GMenuItem::ScanForAccel()
 			if (Key)
 			{
 				// printf("\tFlags=%x Key=%c(%i)\n", Flags, Key, Key);
-				Menu->Accel.Insert( new GAccelerator(Flags, Key, Id()) );
+				Menu->Accel.Insert( new LAccelerator(Flags, Key, Id()) );
 			}
 		}
 	}
@@ -860,7 +860,7 @@ bool GMenu::OnKey(LView *v, LKey &k)
 {
 	if (k.Down())
 	{
-		for (GAccelerator *a = Accel.First(); a; a = Accel.Next())
+		for (LAccelerator *a = Accel.First(); a; a = Accel.Next())
 		{
 			if (a->Match(k))
 			{
@@ -926,14 +926,14 @@ bool GMenu::OnKey(LView *v, LKey &k)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-GAccelerator::GAccelerator(int flags, int key, int id)
+LAccelerator::LAccelerator(int flags, int key, int id)
 {
 	Flags = flags;
 	Key = key;
 	Id = id;
 }
 
-bool GAccelerator::Match(LKey &k)
+bool LAccelerator::Match(LKey &k)
 {
 	int Press = (uint) k.vkey;
 	
@@ -948,7 +948,7 @@ bool GAccelerator::Match(LKey &k)
 	}
 	
 	#if 0
-	printf("GAccelerator::Match %i(%c)%s%s%s = %i(%c)%s%s%s\n",
+	printf("LAccelerator::Match %i(%c)%s%s%s = %i(%c)%s%s%s\n",
 		Press,
 		Press>=' '?Press:'.',
 		k.Ctrl()?" ctrl":"",

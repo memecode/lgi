@@ -16,7 +16,9 @@
 #include "lgi/common/Edit.h"
 #include "lgi/common/Popup.h"
 #include "lgi/common/Css.h"
+
 #include "ViewPriv.h"
+#include <Cursor.h>
 
 #define DEBUG_MOUSE_EVENTS			0
 
@@ -203,6 +205,7 @@ public:
 				k.Ctrl(TestFlag(KeyInfo.modifiers, B_CONTROL_KEY));
 				k.Alt(TestFlag(KeyInfo.modifiers, B_MENU_KEY));
 				k.Shift(TestFlag(KeyInfo.modifiers, B_SHIFT_KEY));
+				k.System(TestFlag(KeyInfo.modifiers, B_COMMAND_KEY));
 			}
 		}
 
@@ -219,14 +222,24 @@ public:
 		auto k = ConvertKey(bytes, numBytes);
 		k.Down(true);
 		// k.Trace("KeyDown");
-		d->View->OnKey(k);
+
+		auto wnd = d->View->GetWindow();
+		if (wnd)
+			wnd->HandleViewKey(d->View, k);
+		else
+			d->View->OnKey(k);
 	}
 	
 	void KeyUp(const char *bytes, int32 numBytes)
 	{
 		auto k = ConvertKey(bytes, numBytes);
 		// k.Trace("KeyUp");
-		d->View->OnKey(k);
+
+		auto wnd = d->View->GetWindow();
+		if (wnd)
+			wnd->HandleViewKey(d->View, k);
+		else
+			d->View->OnKey(k);
 	}
 
 	void FrameMoved(BPoint newPosition)
@@ -292,7 +305,7 @@ public:
 		if (mod & B_SHIFT_KEY) m.Shift(true);
 		if (mod & B_OPTION_KEY) m.Alt(true);
 		if (mod & B_CONTROL_KEY) m.Ctrl(true);
-
+		if (mod & B_COMMAND_KEY) m.System(true);
 		
 		return m;
 	}
@@ -304,7 +317,6 @@ public:
 		status_t r = get_click_speed(&interval);
 		auto now = LCurrentTime();
 		bool doubleClick = now-lastClick < (interval/1000);
-		// LgiTrace("Click double=%i %llu %llu\n", doubleClick, now-lastClick, interval);
 		lastClick = now;
 		
 		LMouse m = ConvertMouse(where, true);
@@ -322,6 +334,10 @@ public:
 	void MouseMoved(BPoint where, uint32 code, const BMessage *dragMessage)
 	{
 		LMouse m = ConvertMouse(where);
+		m.Down(	m.Left() ||
+				m.Middle() ||
+				m.Right());
+		m.IsMove(true);
 		d->View->_Mouse(m, true);
 	}
 
@@ -421,6 +437,37 @@ LView *&LView::PopupChild()
 	return d->Popup;
 }
 
+BCursorID LgiToHaiku(LCursor c)
+{
+	switch (c)
+	{
+		#define _(l,h) case l: return h;
+		_(LCUR_Blank, B_CURSOR_ID_NO_CURSOR)
+		_(LCUR_Normal, B_CURSOR_ID_SYSTEM_DEFAULT)
+		_(LCUR_UpArrow, B_CURSOR_ID_RESIZE_NORTH)
+		_(LCUR_DownArrow, B_CURSOR_ID_RESIZE_SOUTH)
+		_(LCUR_LeftArrow, B_CURSOR_ID_RESIZE_WEST)
+		_(LCUR_RightArrow, B_CURSOR_ID_RESIZE_EAST)
+		_(LCUR_Cross, B_CURSOR_ID_CROSS_HAIR)
+		_(LCUR_Wait, B_CURSOR_ID_PROGRESS)
+		_(LCUR_Ibeam, B_CURSOR_ID_I_BEAM)
+		_(LCUR_SizeVer, B_CURSOR_ID_RESIZE_NORTH_SOUTH)
+		_(LCUR_SizeHor, B_CURSOR_ID_RESIZE_EAST_WEST)
+		_(LCUR_SizeBDiag, B_CURSOR_ID_RESIZE_NORTH_WEST_SOUTH_EAST)
+		_(LCUR_SizeFDiag, B_CURSOR_ID_RESIZE_NORTH_EAST_SOUTH_WEST)
+		_(LCUR_PointingHand, B_CURSOR_ID_GRAB)
+		_(LCUR_Forbidden, B_CURSOR_ID_NOT_ALLOWED)
+		_(LCUR_DropCopy, B_CURSOR_ID_COPY)
+		_(LCUR_DropMove, B_CURSOR_ID_MOVE)
+		// _(LCUR_SizeAll,
+		// _(LCUR_SplitV,
+		// _(LCUR_SplitH,
+		#undef _
+	}
+	
+	return B_CURSOR_ID_SYSTEM_DEFAULT;
+}
+
 bool LView::_Mouse(LMouse &m, bool Move)
 {
 	ThreadCheck();
@@ -463,6 +510,24 @@ bool LView::_Mouse(LMouse &m, bool Move)
 			_Over = o;
 			if (_Over)
 				_Over->OnMouseEnter(lgi_adjust_click(m, _Over));
+		}
+		
+		int cursor = GetCursor(m.x, m.y);
+		if (cursor >= 0)
+		{
+			BCursorID haikuId = LgiToHaiku((LCursor)cursor);
+			static BCursorID curId = B_CURSOR_ID_SYSTEM_DEFAULT;
+			if (curId != haikuId)
+			{
+				curId = haikuId;
+				
+				LLocker lck(Handle(), _FL);
+				if (lck.Lock())
+				{
+					Handle()->SetViewCursor(new BCursor(curId));
+					lck.Unlock();
+				}
+			}
 		}
 	}
 		
@@ -672,6 +737,7 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 		}
 		case M_COMMAND:
 		{
+			printf("M_COMMAND %i\n", (int)Msg->A());
 			return OnCommand(Msg->A(), 0, 0);
 		}
 	}

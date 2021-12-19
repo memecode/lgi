@@ -420,13 +420,13 @@ public:
 };
 
 /// Encapsulates a keyboard shortcut
-class LgiClass GAccelerator : public LUiEvent
+class LgiClass LAccelerator : public LUiEvent
 {
 	int Key;
 	int Id;
 
 public:
-	GAccelerator(int flags, int key, int id);
+	LAccelerator(int flags, int key, int id);
 	
 	int GetId() { return Id; }
 
@@ -494,7 +494,7 @@ class LgiClass LMenu :
 
 protected:
 	/// List of keyboard shortcuts in the menu items attached
-	List<GAccelerator> Accel;
+	List<LAccelerator> Accel;
 	#ifdef __GTK_H__
 		Gtk::GtkAccelGroup *AccelGrp;
 	#endif

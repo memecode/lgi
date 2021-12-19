@@ -12,7 +12,7 @@
 #include "MenuBar.h"
 
 #define DEBUG_SETFOCUS			0
-#define DEBUG_HANDLEVIEWKEY		0
+#define DEBUG_HANDLEVIEWKEY		1
 
 ///////////////////////////////////////////////////////////////////////
 class HookInfo
@@ -335,15 +335,14 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	
 	// if (Debug)
 	{
-		LgiTrace("%s/%p::HandleViewKey=%i ischar=%i %s%s%s%s (d->Focus=%s/%p)\n",
+		LgiTrace("%s/%p::HandleViewKey=%i ischar=%i %s%s%s%s\n",
 			v->GetClass(), v,
 			k.c16,
 			k.IsChar,
 			(char*)(k.Down()?" Down":" Up"),
 			(char*)(k.Shift()?" Shift":""),
 			(char*)(k.Alt()?" Alt":""),
-			(char*)(k.Ctrl()?" Ctrl":""),
-			d->Focus?d->Focus->GetClass():0, d->Focus);
+			(char*)(k.Ctrl()?" Ctrl":""));
 	}
 	#endif
 
@@ -709,9 +708,30 @@ void LWindow::OnPosChange()
 		auto menu = WindowHandle()->KeyMenuBar();
 		auto menuPos = menu ? menu->Frame() : BRect(0, 0, 0, 0);
 		auto rootPos = Handle()->Frame();
+		if (menu)
+		{
+			if (menu->IsHidden()) // Why?
+			{
+				menu->Show();
+				if (menu->IsHidden())
+				{
+					// printf("Can't show menu?\n");
+					for (auto p = menu->Parent(); p; p = p->Parent())
+						printf("   par=%s %i\n", p->Name(), p->IsHidden());
+				}
+			}			
+			if (menuPos.Width() < 1) // Again... WHHHHY? FFS
+			{
+				float x = 0.0f, y = 0.0f;
+				menu->GetPreferredSize(&x, &y);
+				// printf("Pref=%g,%g\n", x, y);
+				if (y > 0.0f)
+					menu->ResizeTo(frame.Width(), y);
+			}
+		}	
 		#if 0
-		printf("frame=%s menu=%s rootpos=%s\n",
-			ToString(frame).Get(), ToString(menuPos).Get(), ToString(rootPos).Get());
+		printf("frame=%s menu=%p,%i,%s rootpos=%s\n",
+			ToString(frame).Get(), menu, menu?menu->IsHidden():0, ToString(menuPos).Get(), ToString(rootPos).Get());
 		#endif
 		int rootTop = menu ? menuPos.bottom + 1 : 0;
 		if (rootPos.top != rootTop)
@@ -928,7 +948,7 @@ static LAutoString DescribeView(LViewI *v)
 	for (int n=MIN(3, p.Length()-1); n>=0; n--)
 	{
 		char Buf[256] = "";
-		if (!stricmp(v->GetClass(), "GMdiChild"))
+		if (!stricmp(v->GetClass(), "LMdiChild"))
 			sprintf(Buf, "'%s'", v->Name());
 		v = p[n];
 		

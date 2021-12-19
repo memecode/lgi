@@ -1174,7 +1174,7 @@ void IdeDoc::OnMarginClick(int Line)
 
 void IdeDoc::OnTitleClick(LMouse &m)
 {
-	GMdiChild::OnTitleClick(m);
+	LMdiChild::OnTitleClick(m);
 	
 	if (m.IsContextMenu())
 	{
@@ -1613,7 +1613,7 @@ LMessage::Result IdeDoc::OnEvent(LMessage *Msg)
 		}
 	}
 	
-	return GMdiChild::OnEvent(Msg);
+	return LMdiChild::OnEvent(Msg);
 }
 
 void IdeDoc::OnPulse()
@@ -1869,7 +1869,7 @@ void IdeDoc::SetClean(std::function<void(bool)> Callback)
 
 void IdeDoc::OnPaint(LSurface *pDC)
 {
-	GMdiChild::OnPaint(pDC);
+	LMdiChild::OnPaint(pDC);
 	
 	#if !MDI_TAB_STYLE
 	LRect c = GetClient();
@@ -1879,7 +1879,7 @@ void IdeDoc::OnPaint(LSurface *pDC)
 
 void IdeDoc::OnPosChange()
 {
-	GMdiChild::OnPosChange();
+	LMdiChild::OnPosChange();
 }
 
 bool IdeDoc::OnRequestClose(bool OsShuttingDown)

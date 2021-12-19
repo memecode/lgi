@@ -9,7 +9,7 @@
 
 extern void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LString InputStr);
 
-class IdeDoc : public GMdiChild, public LStream
+class IdeDoc : public LMdiChild, public LStream
 {
 	friend class DocEdit;
 	class IdeDocPrivate *d;

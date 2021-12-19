@@ -1130,7 +1130,7 @@ bool LView::HandleCapture(LView *Wnd, bool c)
 bool LView::IsCapturing()
 {
 	ThreadCheck();
-	// DEBUG_CAPTURE("%s::IsCapturing()=%i\n", GetClass(), (int)(_Capturing == this));
+	// DEBUG_CAPTURE("%s::IsCapturing()=%p==%p==%i\n", GetClass(), _Capturing, this, (int)(_Capturing == this));
 	return _Capturing == this;
 }
 

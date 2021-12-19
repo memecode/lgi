@@ -464,7 +464,7 @@ bool LWindow::HandleViewMouse(LView *v, LMouse &m)
 			if (!t->OnViewMouse(v, m))
 			{
 				#if DEBUG_HANDLE_VIEW_MOUSE
-				if (!m.IsMove())
+				if (m.IsMove())
 					LgiTrace("   Hook %i of %i ate mouse event: '%s'\n", i, d->Hooks.Length(), d->Hooks[i].Target->GetClass());
 				#endif
 				return false;

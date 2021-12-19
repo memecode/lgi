@@ -928,7 +928,7 @@ static LAutoString DescribeView(LViewI *v)
 	for (int n=min(3, p.Length()-1); n>=0; n--)
 	{
 		char Buf[256] = "";
-		if (!stricmp(v->GetClass(), "GMdiChild"))
+		if (!stricmp(v->GetClass(), "LMdiChild"))
 			sprintf(Buf, "'%s'", v->Name());
 		v = p[n];
 		

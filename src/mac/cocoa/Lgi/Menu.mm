@@ -864,7 +864,7 @@ bool LMenuItem::ScanForAccel()
 			{
 				auto Ident = Id();
 				LAssert(Ident > 0);
-				Menu->Accel.Insert( new GAccelerator(Flags, Key, Ident) );
+				Menu->Accel.Insert( new LAccelerator(Flags, Key, Ident) );
 			}
 		}
 		else
@@ -1286,21 +1286,21 @@ bool LMenu::OnKey(LView *v, LKey &k)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-GAccelerator::GAccelerator(int flags, int key, int id)
+LAccelerator::LAccelerator(int flags, int key, int id)
 {
 	Flags = flags;
 	Key = key;
 	Id = id;
 }
 
-bool GAccelerator::Match(LKey &k)
+bool LAccelerator::Match(LKey &k)
 {
 	int Press = (uint) k.c16;
 	auto Up = toupper(Press);
 	bool Match = false;
 	
 #if 1
-	printf("GAccelerator::Match %i(%c)%s%s%s = %i(%c)%s%s%s\n",
+	printf("LAccelerator::Match %i(%c)%s%s%s = %i(%c)%s%s%s\n",
 		   Up,
 		   Up>=' '?Up:'.',
 		   k.Ctrl()?" ctrl":"",
