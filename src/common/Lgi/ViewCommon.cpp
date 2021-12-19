@@ -1263,25 +1263,27 @@ void LView::Visible(bool v)
 	}
 	else LgiTrace("%s:%i - Can't lock.\n", _FL);
  	#elif LGI_VIEW_HANDLE	
-	if (_View)		
-		#if WINNATIV
+	if (_View)
+	{
+		#if WINNATIVE
 
-			ShowWindow(_View, (v) ? SW_SHOWNORMAL : SW_HIDE;
+			ShowWindow(_View, (v) ? SW_SHOWNORMAL : SW_HIDE);
 
-		#elif LGI_COOA
+		#elif LGI_COCOA
 
-			LAutoPool ool;
-			[_View.p setHidden!v];
+			LAutoPool Pool;
+			[_View.p setHidden:!v];
 
-		#elif LGICABON
+		#elif LGI_CARBON
 		
-			Boolean is = HIViewIsVisibl(_View);
-			if(v ! is)
+			Boolean is = HIViewIsVisible(_View);
+			if (v != is)
 			{
-				OSErr e = HIViewSetVisibl(_View, v);
-				if (e) printf("%s:%i - HIViewSetVisible(%p,%i) failed with %i (lass=%s)\n",
-								_FL, _View, v, e Getlas());
-		}			
+				OSErr e = HIViewSetVisible(_View, v);
+				if (e) printf("%s:%i - HIViewSetVisible(%p,%i) failed with %i (class=%s)\n",
+								_FL, _View, v, e, GetClass());
+			}
+		
 		#endif
 	}
 	else
