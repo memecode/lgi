@@ -16,10 +16,11 @@ Flags = -fPIC -w -fno-inline -fpermissive
 ifeq ($(Build),Debug)
 	Flags += -g -std=c++14
 	Tag = d
-	Defs = -D_DEBUG -DHAIKU -D_REENTRANT
+	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -D_GNU_SOURCE -DPOSIX
 	Libs =  \
 		-L../Debug \
 		-lbe \
+		-lgnu \
 		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
@@ -29,10 +30,11 @@ ifeq ($(Build),Debug)
 		-I../include
 else
 	Flags += -s -Os -std=c++14
-	Defs = -DHAIKU -D_REENTRANT
+	Defs = -DHAIKU -D_REENTRANT -D_GNU_SOURCE -DPOSIX
 	Libs =  \
 		-L../Release \
 		-lbe \
+		-lgnu \
 		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
@@ -95,24 +97,17 @@ Objects := $(addprefix $(BuildDir)/,$(SourceLst))
 #	echo "../Debug/$(Objects:.o=.d)"
 
 # Target
+#	addattr -f ./Code/icon-haiku -t "'VICN'" "BEOS:ICON" $(Target)
 # Executable target
 $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	@echo Linking $(Target) [$(Build)]...
 	$(CPP) -Wl,-export-dynamic,-R. -o \
 		$(Target) $(Objects) $(Libs)
-	addattr -f ./Code/icon-haiku -t "'VICN'" "BEOS:ICON" $(Target)
 	@echo Done.
 
 .PHONY: ../$(BuildDir)/liblgi$(Tag).so
 
 ../$(BuildDir)/liblgi$(Tag).so :
-	../include/lgi/common/Profile.h \
-	../src/haiku/File.cpp \
-	../src/haiku/Gdc2.cpp \
-	../src/haiku/Mem.cpp \
-	../src/haiku/MemDC.cpp \
-	../src/haiku/PrintDC.cpp \
-	../src/haiku/ScreenDC.cpp \
 	export Build=$(Build); \
 	$(MAKE) -C .. -f Makefile.haiku
 

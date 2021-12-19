@@ -1030,7 +1030,7 @@ public:
 						if (!LIsRelativePath(p))
 						{
 							LAutoString a = LMakeRelativePath(Base, p);
-							m.Print("\t%s \\\n", ToPlatformPath(a ? a.Get() : p, Platform).Get());
+							m.Print("\t%s \\\n", ToPlatformPath(a ? a.Get() : p.Get(), Platform).Get());
 						}
 						else
 						{

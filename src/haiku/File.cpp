@@ -695,42 +695,42 @@ LVolume::~LVolume()
 	DeleteObj(d);
 }
 
-const char *LVolume::Name()
+const char *LVolume::Name() const
 {
     return d->_Name;
 }
 
-const char *LVolume::Path()
+const char *LVolume::Path() const
 {
     return d->_Path;
 }
 
-int LVolume::Type()
+int LVolume::Type() const
 {
     return d->_Type;
 }
 
-int LVolume::Flags()
+int LVolume::Flags() const
 {
     return d->_Flags;
 }
 
-uint64 LVolume::Size()
+uint64 LVolume::Size() const
 {
     return d->_Size;
 }
 
-uint64 LVolume::Free()
+uint64 LVolume::Free() const
 {
     return d->_Free;
 }
 
-LSurface *LVolume::Icon()
+LSurface *LVolume::Icon() const
 {
     return NULL;
 }
 
-bool LVolume::IsMounted()
+bool LVolume::IsMounted() const
 {
     return true;
 }
