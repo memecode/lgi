@@ -430,7 +430,7 @@ void LTabView::Value(int64 i)
 		LTabPage *p = it[d->Current];
 		if (p)
 		{
-			if (!IsAttached())
+			if (!p->IsAttached())
 			{
 				// printf("%s:%i - new[%i] attach %p.\n", _FL, d->Current, p->Handle());
 				p->Attach(this);

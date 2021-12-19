@@ -825,7 +825,7 @@ bool LView::Attach(LViewI *parent)
 					_FL, GetClass(), parent->GetClass());
 				#endif
 
-				bview->SetName(GetClass());
+				d->Hnd->SetName(GetClass());
 				if (::IsAttached(d->Hnd))
 					d->Hnd->RemoveSelf();
 				bview->AddChild(d->Hnd);
