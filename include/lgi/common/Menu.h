@@ -312,6 +312,7 @@ class LgiClass LMenuItem :
 	friend class MenuItemImpl;
 	friend class MenuImpl;
 	friend class SubMenuImplPrivate;
+	friend class LMenuPrivate;
 
 private:
 	#ifdef WIN32
@@ -483,6 +484,7 @@ class LgiClass LMenu :
 	friend class LSubMenu;
 	friend class LMenuItem;
 	friend class LWindow;
+	friend class LMenuPrivate;
 
 	class LMenuPrivate *d;
 

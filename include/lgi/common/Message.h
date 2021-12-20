@@ -115,7 +115,12 @@ enum LgiMessages
 		M_TEXT_UPDATE_NAME,
 		M_ASSERT_DLG,
 		M_CLOSE,
+
+		#if defined(HAIKU)
 		M_HANDLE_IN_THREAD, // A = (LMessage::InThreadCb*)Cb;
+		M_LWINDOW_DELETE,
+		M_LMENUITEM_ENABLE,
+		#endif
 	
 	#elif defined(MAC)
 

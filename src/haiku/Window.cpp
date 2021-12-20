@@ -103,8 +103,17 @@ public:
 
 	void MessageReceived(BMessage *message)
 	{
-		Wnd->OnEvent(message);
-		BWindow::MessageReceived(message);
+		if (message->what == M_LWINDOW_DELETE)
+		{
+			// printf("Processing M_LWINDOW_DELETE\n");
+			Wnd->Handle()->RemoveSelf();			
+			Quit();
+		}
+		else
+		{
+			BWindow::MessageReceived(message);
+			Wnd->OnEvent(message);
+		}
 	}
 };
 
@@ -134,9 +143,25 @@ LWindow::~LWindow()
 	DeleteObj(_Lock);
 
 	if (d)
-	{
-		if (d->Lock())
-			d->Quit();
+	{	
+		// printf("~LWindow thread=%u lock=%u\n", GetCurrentThreadId(), d->LockingThread());
+		if (d->Thread() == GetCurrentThreadId())
+		{
+			// We are in thread... can delete easily.
+			if (d->Lock())
+			{
+				// printf("~LWindow Quiting\n");
+				Handle()->RemoveSelf();
+				d->Quit();
+			}
+		}
+		else
+		{
+			// Post event to the window's thread to delete itself...
+			// printf("~LWindow posting M_LWINDOW_DELETE\n");
+			d->PostMessage(new BMessage(M_LWINDOW_DELETE));
+		}
+		
 		d = NULL;
 	}
 }

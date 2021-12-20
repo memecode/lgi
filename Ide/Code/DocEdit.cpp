@@ -8,7 +8,9 @@
 
 #define EDIT_TRAY_HEIGHT	(LSysFont->GetHeight() + 10)
 #define EDIT_LEFT_MARGIN	16 // gutter for debug break points
+
 int DocEdit::LeftMarginPx = EDIT_LEFT_MARGIN;
+
 LAutoPtr<GDocFindReplaceParams> GlobalFindReplace;
 DocEdit::DocEdit(IdeDoc *d, LFontType *f) :
 	LTextView3(IDC_EDIT, 0, 0, 100, 100, f),
@@ -58,11 +60,13 @@ DocEdit::~DocEdit()
 		LSleep(1);
 	SetEnv(0);
 }
+
 void DocEdit::OnCreate()
 {
 	LTextView3::OnCreate();
 	Run();
 }
+
 bool DocEdit::AppendItems(LSubMenu *Menu, const char *Param, int Base)
 {
 	LSubMenu *Insert = Menu->AppendSub("Insert...");
@@ -119,10 +123,12 @@ bool DocEdit::SetPourEnabled(bool b)
 	}
 	return e;
 }
+
 int DocEdit::GetTopPaddingPx()
 {
 	return GetCss(true)->PaddingTop().ToPx(GetClient().Y(), GetFont());
 }
+
 void DocEdit::InvalidateLine(int Idx)
 {
 	LTextLine *Ln = LTextView3::Line[Idx];
@@ -172,6 +178,7 @@ void DocEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
 		}
 	}
 }
+
 void DocEdit::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
@@ -208,6 +215,7 @@ void DocEdit::OnMouseClick(LMouse &m)
 	}
 	LTextView3::OnMouseClick(m);
 }
+
 void DocEdit::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 {
 	LTextView3::SetCaret(i, Select, ForceFullUpdate);
@@ -282,6 +290,7 @@ char *DocEdit::TemplateMerge(const char *Template, const char *Name, List<char> 
 	T.Push("\n");
 	return T.NewStr();
 }
+
 bool DocEdit::GetVisible(LStyle &s)
 {
 	LRect c = GetClient();
@@ -291,6 +300,7 @@ bool DocEdit::GetVisible(LStyle &s)
 	s.Len = b - a + 1;
 	return true;
 }
+
 bool DocEdit::Pour(LRegion &r)
 {
 	LRect c = r.Bound();
@@ -299,6 +309,7 @@ bool DocEdit::Pour(LRegion &r)
 		
 	return true;
 }
+
 bool DocEdit::Insert(size_t At, const char16 *Data, ssize_t Len)
 {
 	int Old = PourEnabled ? CountRefreshEdges(At, 0) : 0;
@@ -308,6 +319,7 @@ bool DocEdit::Insert(size_t At, const char16 *Data, ssize_t Len)
 		Invalidate();
 	return Status;
 }
+
 bool DocEdit::Delete(size_t At, ssize_t Len)
 {
 	int Old = CountRefreshEdges(At, Len);
@@ -317,6 +329,7 @@ bool DocEdit::Delete(size_t At, ssize_t Len)
 		Invalidate();
 	return Status;
 }
+
 bool DocEdit::OnKey(LKey &k)
 {
 	#ifdef MAC
@@ -350,6 +363,7 @@ bool DocEdit::OnKey(LKey &k)
 	}
 	return LTextView3::OnKey(k); 
 }
+
 LMessage::Result DocEdit::OnEvent(LMessage *m)
 {
 	switch (m->Msg())
@@ -360,6 +374,7 @@ LMessage::Result DocEdit::OnEvent(LMessage *m)
 	}
 	return LTextView3::OnEvent(m);
 }
+
 bool DocEdit::OnMenu(LDocView *View, int Id, void *Context)
 {
 	if (View)
@@ -458,27 +473,15 @@ bool DocEdit::OnMenu(LDocView *View, int Id, void *Context)
 								DeleteArray(FuncName);
 								Params.DeleteArrays();
 							}
-							else
-							{
-								LgiTrace("%s:%i - No function name.\n", _FL);
-							}
+							else LgiTrace("%s:%i - No function name.\n", _FL);
 						}
-						else
-						{
-							LgiTrace("%s:%i - OpenBracketIndex not found.\n", _FL);
-						}
+						else LgiTrace("%s:%i - OpenBracketIndex not found.\n", _FL);
 						
 						Tokens.DeleteArrays();
 					}
-					else
-					{
-						LgiTrace("%s:%i - No input text.\n", _FL);
-					}
+					else LgiTrace("%s:%i - No input text.\n", _FL);
 				}
-				else
-				{
-					LgiTrace("%s:%i - No template.\n", _FL);
-				}
+				else LgiTrace("%s:%i - No template.\n", _FL);
 				break;
 			}
 		}

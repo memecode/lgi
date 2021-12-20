@@ -260,7 +260,26 @@ LMenuItem *LSubMenu::FindItem(int Id)
 class LMenuItemPrivate
 {
 public:
-	::LString Shortcut;
+	LMenuItem *Item;
+	LString Shortcut;
+	
+	LMenuItemPrivate(LMenuItem *it) : Item(it)
+	{
+	}
+	
+	bool PostMessage(BMessage *m)
+	{
+		auto menu = Item->GetMenu();
+		auto view = menu ? menu->WindowHandle() : NULL;
+		auto hnd = view ? view->WindowHandle() : NULL;
+		
+		if (hnd && hnd->PostMessage(m) == B_OK)
+			return true;
+
+		printf("%s:%i - PostMessage failed. %p,%p,%p\n", _FL, menu, view, hnd);
+		delete m;
+		return false;
+	}
 };
 
 static LString MenuItemParse(const char *s, char &trigger)
@@ -290,13 +309,13 @@ static LString MenuItemParse(const char *s, char &trigger)
 
 LMenuItem::LMenuItem()
 {
-	d = new LMenuItemPrivate();
+	d = new LMenuItemPrivate(this);
 	Info = NULL;
 }
 
 LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int id, int Pos, const char *shortcut)
 {
-	d = new LMenuItemPrivate();
+	d = new LMenuItemPrivate(this);
 	char trigger;
 	auto Txt = MenuItemParse(txt, trigger);
 	LBase::Name(txt);
@@ -675,11 +694,13 @@ void LMenuItem::Enabled(bool e)
 	else
 		SetFlag(_Flags, ODS_DISABLED);
 
-	MenuLock lck(this, _FL);
-	if (lck)
+	if (!d->PostMessage(new LMessage(M_LMENUITEM_ENABLE, Id(), e)))
 	{
-		Info->SetEnabled(e);
-	}	
+		MenuLock lck(this, _FL);
+		printf("%s:%i locking..\n");
+		if (lck)
+			Info->SetEnabled(e);
+	}
 }
 
 void LMenuItem::Focus(bool f)
@@ -747,15 +768,55 @@ struct LMenuFont
 
 }	MenuFont;
 
-class LMenuPrivate
+class LMenuPrivate : public BMenuBar
 {
+	LMenu *Menu;
+
 public:
+	LMenuPrivate(LMenu *menu, const char *name) :
+		Menu(menu),
+		BMenuBar(name)
+	{
+	}
+	
+	~LMenuPrivate()
+	{
+		Menu->d = NULL;
+	}
+
+	void MessageReceived(BMessage *message)
+	{
+		LMessage *m = (LMessage*)message;
+		switch (message->what)
+		{
+			case M_LMENUITEM_ENABLE:
+			{
+				auto id = m->A();
+				auto en = m->B();
+				auto item = Menu->FindItem(id);
+				if (item)
+				{
+					if (item->Info)
+						item->Info->SetEnabled(en);
+					else
+						printf("%s:%i - M_LMENUITEM_ENABLE: no hnd to set.\n", _FL);
+				}
+				else printf("%s:%i - M_LMENUITEM_ENABLE: Couldn't find %i\n", _FL, (int)id);
+				break;
+			}
+			default:
+				BMenuBar::MessageReceived(message);
+				break;
+		}
+	}
 };
 
-LMenu::LMenu(const char *AppName) : LSubMenu(new BMenuBar(AppName))
+LMenu::LMenu(const char *AppName) : 
+	d(new LMenuPrivate(this, AppName)),
+	LSubMenu(d)
 {
 	Menu = this;
-	d = new LMenuPrivate;
+	Info = d;
 }
 
 LMenu::~LMenu()

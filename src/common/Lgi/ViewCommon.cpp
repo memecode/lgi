@@ -15,7 +15,7 @@
 #include "lgi/common/CssTools.h"
 #include "ViewPriv.h"
 
-#if 1
+#if 0
 #define DEBUG_CAPTURE(...) printf(__VA_ARGS__)
 #else
 #define DEBUG_CAPTURE(...)

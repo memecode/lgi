@@ -1,6 +1,7 @@
 #include "lgi/common/Lgi.h"
 #include "LgiIde.h"
 #include "DocEdit.h"
+
 #define COMP_STYLE				1
 #define LOG_STYLE				0
 #define PROFILE_STYLE			0
@@ -38,6 +39,7 @@ struct LanguageParams
 	const char **Types;
 	const char **Edges;
 };
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPP
 const char *DefaultKeywords[] = {"if", "elseif", "endif", "else", "ifeq", "ifdef", "ifndef", "ifneq", "include", NULL};
@@ -54,14 +56,18 @@ const char *CppTypes[] = {	"int", "char", "short", "long", "signed", "unsigned",
 							"LAutoPtr", "LHashTbl",
 							NULL};
 const char *CppEdges[] = {	"/*", "*/", "\"", NULL };
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Python
 const char *PythonKeywords[] = {"def", "try", "except", "import", "if", "for", "elif", "else", "class", NULL};
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // XML
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // HTML
 const char *HtmlEdges[] = {	"<?php", "?>", "/*", "*/", "<style", "</style>", "<pre", "</pre>", "\"", "\'", NULL };
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 LanguageParams LangParam[] =
 {
@@ -78,6 +84,7 @@ LanguageParams LangParam[] =
 	// Html/Php
 	{NULL, NULL, HtmlEdges}
 };
+
 DocEditStyling::DocEditStyling(DocEdit *view) : 
 	LThread("DocEditStyling.Thread"),
 	LMutex("DocEditStyling.Lock"),
@@ -88,6 +95,7 @@ DocEditStyling::DocEditStyling(DocEdit *view) :
 	Params(view)
 {
 }
+
 void DocEdit::OnApplyStyles()
 {
 	#if PROFILE_STYLE
@@ -161,6 +169,7 @@ void DocEdit::OnApplyStyles()
 		DocEditStyling::Unlock();
 	}
 }
+
 int DocEditStyling::Main()
 {
 	LThreadEvent::WaitStatus s;
@@ -452,6 +461,7 @@ void DocEditStyling::StyleCpp(StylingParams &p)
 	#endif
 	p.Styles.Swap(Out);
 }
+
 void DocEditStyling::StylePython(StylingParams &p)
 {
 	char16 *Text = p.Text.AddressOf();
@@ -555,6 +565,7 @@ void DocEditStyling::StylePython(StylingParams &p)
 		}
 	}
 }
+
 void DocEditStyling::StyleDefault(StylingParams &p)
 {
 	char16 *Text = p.Text.AddressOf();
@@ -702,6 +713,7 @@ void DocEditStyling::StyleDefault(StylingParams &p)
 		}
 	}
 }
+
 void DocEditStyling::StyleXml(StylingParams &p)
 {
 	char16 *Text = p.Text.AddressOf();
@@ -837,6 +849,7 @@ void DocEditStyling::StyleXml(StylingParams &p)
 		}
 	}
 }
+
 LColour DocEditStyling::ColourFromType(DocType t)
 {
 	switch (t)
@@ -854,6 +867,7 @@ LColour DocEditStyling::ColourFromType(DocType t)
 			return ColourComment;
 	}
 }
+
 void DocEditStyling::StyleHtml(StylingParams &p)
 {
 	char16 *Text = p.Text.AddressOf();
@@ -1139,6 +1153,7 @@ void DocEditStyling::AddKeywords(const char **keys, bool IsType)
 			n->Type = IsType ? KType : KLang;
 	}
 }
+
 void DocEdit::PourStyle(size_t Start, ssize_t EditSize)
 {
 	if (FileType == SrcUnknown)
@@ -1211,6 +1226,7 @@ void DocEdit::PourStyle(size_t Start, ssize_t EditSize)
 		Event.Signal();
 	}
 }
+
 int DocEdit::CountRefreshEdges(size_t At, ssize_t Len)
 {
 	if (!RefreshEdges)

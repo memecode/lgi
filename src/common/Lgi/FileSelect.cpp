@@ -2179,12 +2179,12 @@ void LFileSelect::Open(SelectCb Cb)
 	// printf("LFileSelect domodal.. thread=%p\n", LGetCurrentThread());
 	Dlg->DoModal([select=this, cb=Cb](auto dlg, auto code)
 	{
-		// printf("LFileSelect cb.. thread=%p\n", LGetCurrentThread());
+		printf("LFileSelect cb.. thread=%u lock=%u\n", GetCurrentThreadId(), dlg->WindowHandle()->LockingThread());
 		if (cb)
 			cb(select, code == IDOK);
-		// printf("LFileSelect deleting..\n");
+		printf("LFileSelect deleting.. lock=%u\n", dlg->WindowHandle()->LockingThread());
 		delete dlg;
-		// printf("LFileSelect deleted..\n");
+		printf("LFileSelect deleted..\n");
 	});
 }
 

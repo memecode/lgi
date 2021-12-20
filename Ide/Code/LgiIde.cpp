@@ -3471,11 +3471,16 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		{
 			LFileSelect *s = new LFileSelect;
 			s->Parent(this);
+			
+			printf("File open dlg from thread=%u\n", GetCurrentThreadId());
 			s->Open([&](auto s, auto ok)
 			{
+				printf("open handler start... ok=%i thread=%u\n", ok, GetCurrentThreadId());
 				if (ok)
 					OpenFile(s->Name());
+				printf("open handler deleting...\n");
 				delete s;
+				printf("open handler deleted...\n");
 			});
 			break;
 		}
