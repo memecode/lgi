@@ -240,55 +240,52 @@ public:
 
 	void EndThread()
 	{
-		if (!IsCancelled())
-		{
-			// We can't be locked here, because LEventTargetThread::Main needs
-			// to lock to check for messages...
-			Cancel();
+		// We can't be locked here, because LEventTargetThread::Main needs
+		// to lock to check for messages...
+		Cancel();
 			
-			if (GetCurrentThreadId() == LThread::GetId())
-			{
-				// Being called from within the thread, in which case we can't signal 
-				// the event because we'll be stuck in this loop and not waitin on it.
-				#ifdef _DEBUG
-				LgiTrace("%s:%i - EndThread called from inside thread.\n", _FL);
-				#endif
-			}
-			else
-			{			
-				Event.Signal();
-				
-				uint64 Start = LCurrentTime();
-				
-				while (!IsExited())
-				{
-					LSleep(10);
-					
-					uint64 Now = LCurrentTime();
-					if (Now - Start > 2000)
-					{
-						#ifdef LINUX
-						int val = 1111;
-						int r = sem_getvalue(Event.Handle(), &val);
+		if (GetCurrentThreadId() == LThread::GetId())
+		{
+			// Being called from within the thread, in which case we can't signal 
+			// the event because we'll be stuck in this loop and not waitin on it.
+			#ifdef _DEBUG
+			LgiTrace("%s:%i - EndThread called from inside thread.\n", _FL);
+			#endif
+		}
+		else
+		{			
+			Event.Signal();
+		}
 
-						printf("%s:%i - EndThread() hung waiting for %s to exit (caller.thread=%i, worker.thread=%i, event=%i, r=%i, val=%i).\n",
-							_FL, LThread::GetName(),
-							GetCurrentThreadId(),
-							GetId(),
-							Event.Handle(),
-							r,
-							val);
-						#else
-						printf("%s:%i - EndThread() hung waiting for %s to exit (caller.thread=0x%x, worker.thread=0x%x, event=%p).\n",
-							_FL, LThread::GetName(),
-							(int)GetCurrentThreadId(),
-							(int)GetId(),
-							(void*)(ssize_t)Event.Handle());
-						#endif
+		uint64 Start = LCurrentTime();
+				
+		while (!IsExited())
+		{
+			LSleep(10);
+					
+			uint64 Now = LCurrentTime();
+			if (Now - Start > 2000)
+			{
+				#ifdef LINUX
+				int val = 1111;
+				int r = sem_getvalue(Event.Handle(), &val);
+
+				printf("%s:%i - EndThread() hung waiting for %s to exit (caller.thread=%i, worker.thread=%i, event=%i, r=%i, val=%i).\n",
+					_FL, LThread::GetName(),
+					GetCurrentThreadId(),
+					GetId(),
+					Event.Handle(),
+					r,
+					val);
+				#else
+				printf("%s:%i - EndThread() hung waiting for %s to exit (caller.thread=0x%x, worker.thread=0x%x, event=%p).\n",
+					_FL, LThread::GetName(),
+					(int)GetCurrentThreadId(),
+					(int)GetId(),
+					(void*)(ssize_t)Event.Handle());
+				#endif
 						
-						Start = Now;
-					}
-				}
+				Start = Now;
 			}
 		}
 	}
