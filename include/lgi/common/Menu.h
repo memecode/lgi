@@ -504,6 +504,10 @@ protected:
 		void OnActivate(LMenuItem *item);
 	#endif
 
+	#ifdef HAIKU
+	bool PostMessage(BMessage *m);
+	#endif
+
 public:
 	/// Constructor
 	LMenu(const char *AppName = NULL);

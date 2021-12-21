@@ -405,7 +405,7 @@ public:
 	virtual OsView Handle() const = 0;
 	#endif
 	virtual int AddDispatch() = 0;
-	virtual OsWindow WindowHandle() = 0;
+	virtual OsWindow WindowHandle() { printf("LViewI::WindowHandle()\n"); return NULL; }
 	virtual LView *GetGView() { return NULL; }
 
 	// Heirarchy

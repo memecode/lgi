@@ -300,8 +300,10 @@ bool LView::HasView(LViewI *v)
 
 OsWindow LView::WindowHandle()
 {
-	auto *w = GetWindow();
-	return (w) ? w->WindowHandle() : (OsWindow)NULL;
+	auto w = GetWindow();
+	auto h = w ? w->WindowHandle() : NULL;
+	printf("LView::WindowHandle() %p\n", w, h);
+	return h;
 }
 
 LWindow *LView::GetWindow()

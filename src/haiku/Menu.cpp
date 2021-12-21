@@ -33,16 +33,29 @@ struct MenuLock : public LLocker
 	LViewI *lwnd = NULL;
 	BWindow *bwnd = NULL;
 	bool unattached = false;
+	
+	template<typename T>
+	T Print(T ptr)
+	{
+		printf("lwnd=%p/%s ptr=%p\n", lwnd, lwnd?lwnd->GetClass():0, ptr);
+		return ptr;
+	}
 
 	template<typename T>
 	MenuLock(T *s, const char *file, int line) :
 		menu(s ? s->GetMenu() : NULL),
 		lwnd(menu ? menu->WindowHandle() : NULL),
 		bwnd(lwnd ? lwnd->WindowHandle() : NULL),
-		LLocker(bwnd, file, line)
+		LLocker(Print(bwnd), file, line)
 	{
+		printf("%s:%i - MenuLock %p %p, %p %p %p\n", file, line,
+			bwnd, hnd,
+			dynamic_cast<BHandler*>(bwnd), static_cast<BHandler*>(bwnd), (BHandler*)bwnd);
+	
 		if (!bwnd)
+		{
 			unattached = true;
+		}
 		else if (!Lock())
 		{
 			if (bwnd)
@@ -116,11 +129,15 @@ LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where
 	{
 		Info->AddItem(i->Info);
 	}
-	else
+	else if (Menu)
 	{
-		DeleteObj(i);
-		return NULL;
+		BMessage *m = new BMessage(M_LSUBMENU_APPENDITEM);
+		m->AddPointer("sub", this);
+		m->AddPointer("item", i);
+		if (!Menu->PostMessage(m))
+			DeleteObj(i);
 	}
+	else printf("%s:%i - error.\n", _FL);
 
 	return i;
 }
@@ -265,20 +282,6 @@ public:
 	
 	LMenuItemPrivate(LMenuItem *it) : Item(it)
 	{
-	}
-	
-	bool PostMessage(BMessage *m)
-	{
-		auto menu = Item->GetMenu();
-		auto view = menu ? menu->WindowHandle() : NULL;
-		auto hnd = view ? view->WindowHandle() : NULL;
-		
-		if (hnd && hnd->PostMessage(m) == B_OK)
-			return true;
-
-		printf("%s:%i - PostMessage failed. %p,%p,%p\n", _FL, menu, view, hnd);
-		delete m;
-		return false;
 	}
 };
 
@@ -694,13 +697,10 @@ void LMenuItem::Enabled(bool e)
 	else
 		SetFlag(_Flags, ODS_DISABLED);
 
-	if (!d->PostMessage(new LMessage(M_LMENUITEM_ENABLE, Id(), e)))
-	{
-		MenuLock lck(this, _FL);
-		printf("%s:%i locking..\n");
-		if (lck)
-			Info->SetEnabled(e);
-	}
+	if (Menu)
+		Menu->PostMessage(new LMessage(M_LMENUITEM_ENABLE, Id(), e));
+	else
+		printf("%s:%i - No menu.\n", _FL);
 }
 
 void LMenuItem::Focus(bool f)
@@ -786,6 +786,8 @@ public:
 
 	void MessageReceived(BMessage *message)
 	{
+		printf("MessageReceived start.\n");
+		
 		LMessage *m = (LMessage*)message;
 		switch (message->what)
 		{
@@ -804,10 +806,29 @@ public:
 				else printf("%s:%i - M_LMENUITEM_ENABLE: Couldn't find %i\n", _FL, (int)id);
 				break;
 			}
+			case M_LSUBMENU_APPENDITEM:
+			{
+				LSubMenu *sub = NULL;
+				LMenuItem *item = NULL;
+				if (message->FindPointer("sub", &sub) == B_OK &&
+					message->FindPointer("item", &item) == B_OK)
+				{
+					if (sub->Handle())
+					{
+						printf("M_LSUBMENU_APPENDITEM done.\n");
+						sub->Handle()->AddItem(item->Handle());
+					}
+					else printf("%s:%i - Error: No handle.\n", _FL);
+				}
+				else printf("%s:%i - Error: missing pointers.\n", _FL);
+				break;
+			}
 			default:
 				BMenuBar::MessageReceived(message);
 				break;
 		}
+
+		printf("MessageReceived end.\n");
 	}
 };
 
@@ -823,6 +844,19 @@ LMenu::~LMenu()
 {
 	Accel.DeleteObjects();
 	DeleteObj(d);
+}
+
+bool LMenu::PostMessage(BMessage *m)
+{
+	auto view = WindowHandle();
+	auto hnd = view ? view->WindowHandle() : NULL;
+	
+	if (hnd && hnd->PostMessage(m) == B_OK)
+		return true;
+
+	// printf("%s:%i - PostMessage failed. %p,%p,%p\n", _FL, menu, view, hnd);
+	delete m;
+	return false;
 }
 
 LFont *LMenu::GetFont()

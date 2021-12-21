@@ -1106,7 +1106,7 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 
 	int Status = -1;
 
-	#if defined __GTK_H__
+	#if defined(__GTK_H__)
 	
 		int Fx = 0;
 		int Fpos = Px << FShift;
@@ -1251,6 +1251,7 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 								f->Create();
 							}
 						}
+						#endif
 
 						int Fit = f->_CharAt(Px - Cx, Info[i].Str, Info[i].Len, Type);
 						#if DEBUG_CHAR_AT
@@ -1258,15 +1259,10 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 							i, Fit, Px, Cx, Px-Cx, Info[i].Str);
 						#endif
 						if (Fit >= 0)
-						{
 							Status = Char + Fit;
-						}
 						else
-						{
 							Status = -1;
-						}
 						break;
-						#endif
 					}
 				}
 				else
@@ -1292,70 +1288,6 @@ ssize_t LDisplayString::Length()
 {
 	return StrWords;
 }
-
-/* If this is only impl for windows either, impl for everything or don't use.
-void LDisplayString::Length(int New)
-{
-	Layout();
-
-	#if WINNATIVE
-	
-	if (New < len)
-	{
-		LFontSystem *Sys = LFontSystem::Inst();
-		
-		int CurX = 0;
-		int CurLen = 0;
-		for (int i=0; i<Info.Length(); i++)
-		{
-			// Is the cut point in this block?
-			if (New >= CurLen && New < CurLen + Info[i].Len )
-			{
-				// In this block
-				int Offset = New - CurLen;
-				Info[i].Len = Offset;
-				Info[i].Str[Info[i].Len] = 0;
-
-				// Get the font for this block of characters
-				LFont *f = 0;
-				if (Info[i].FontId)
-				{
-					f = Sys->Font[Info[i].FontId];
-					f->PointSize(Font->PointSize());
-					f->Transparent(Font->Transparent());
-					if (!f->Handle())
-					{
-						f->Create();
-					}
-				}
-				else
-				{
-					f = Font;
-				}
-
-				// Chop the current block and re-measure
-				int ChoppedX, Unused;
-				f->_Measure(ChoppedX, Unused, Info[i].Str, Info[i].Len);
-				Info[i].X = ChoppedX;
-				x = CurX + Info[i].X;
-				Info.Length(i + 1);
-				
-				// Leave the loop
-				break;
-			}
-			
-			CurX += Info[i].X;
-			CurLen += Info[i].Len;
-		}
-	}
-	else
-	{
-		printf("%s:%i - New>=Len (%i>=" LPrintfSSizeT" )\n", _FL, New, len);
-	}
-
-	#endif
-}
-*/
 
 int LDisplayString::X()
 {

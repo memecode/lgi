@@ -12,9 +12,10 @@ def cmd(c):
 	global ssh
 	stdin, stdout, stderr = ssh.exec_command(c, get_pty=True)
 	while True:
-		line = stdout.readline()
-		if not line:
+		ln = stdout.readline()
+		if len(ln) > 0:
+			print(ln[0:-1], flush=True)
+		else:
 			break
-		print(line.strip())
 
 cmd("cd code/lgi/trunk/Ide && make -j4 2>&1")

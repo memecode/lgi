@@ -1019,3 +1019,78 @@ bool LMessage::Send(LViewI *View)
 	return View->PostEvent(what, A(), B());
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+LLocker::LLocker(BHandler *h, const char *File, int Line)
+{
+    hnd = h;
+    file = File;
+    line = Line;
+}
+
+LLocker::~LLocker()
+{
+    Unlock();
+}
+
+bool LLocker::Lock()
+{
+	if (locked)
+	{
+		printf("%s:%i - Locker already locked.\n", file, line);
+    	LAssert(!"Locker already locked.");
+    	return false;
+    }
+    if (!hnd)
+    {
+    	// printf("%s:%i - Locker hnd is NULL.\n", file, line);
+    	return false;
+    }        
+
+    while (!locked)
+    {
+        status_t result = hnd->LockLooperWithTimeout(1000 * 1000);
+        if (result == B_OK)
+        {
+            locked = true;
+            break;
+        }
+        else if (result == B_TIMED_OUT)
+        {
+            // Warn about failure to lock...
+            thread_id Thread = hnd->Looper()->LockingThread();
+            printf("%s:%i - Warning: can't lock. Myself=%i\n", _FL, LGetCurrentThread(), Thread);
+        }
+        else if (result == B_BAD_VALUE)
+        {
+            break;
+        }
+        else
+        {
+            // Warn about error
+            printf("%s:%i - Error from LockLooperWithTimeout = 0x%x\n", _FL, result);
+        }
+    }
+
+    return locked;
+}
+
+status_t LLocker::LockWithTimeout(int64 time)
+{
+    LAssert(!locked);
+    LAssert(hnd != NULL);
+    
+    status_t result = hnd->LockLooperWithTimeout(time);
+    if (result == B_OK)
+        locked = true;
+    
+    return result;
+}
+
+void LLocker::Unlock()
+{
+    if (locked)
+    {
+        hnd->UnlockLooper();
+        locked = false;
+    }
+}
