@@ -35,22 +35,27 @@ struct MenuLock : public LLocker
 	bool unattached = false;
 	
 	template<typename T>
-	T Print(T ptr)
+	BHandler *Init(T *s)
 	{
-		printf("lwnd=%p/%s ptr=%p\n", lwnd, lwnd?lwnd->GetClass():0, ptr);
-		return ptr;
+		if (s)
+			menu = s->GetMenu();
+		if (menu)
+			lwnd = menu->WindowHandle();
+		if (lwnd)
+			bwnd = lwnd->WindowHandle();
+		// printf("\tInit %p,%p,%p\n", menu, lwnd, bwnd);
+		return bwnd;
 	}
-
+	
 	template<typename T>
 	MenuLock(T *s, const char *file, int line) :
-		menu(s ? s->GetMenu() : NULL),
-		lwnd(menu ? menu->WindowHandle() : NULL),
-		bwnd(lwnd ? lwnd->WindowHandle() : NULL),
-		LLocker(Print(bwnd), file, line)
+		LLocker(Init(s), file, line)
 	{
+		/*
 		printf("%s:%i - MenuLock %p %p, %p %p %p\n", file, line,
 			bwnd, hnd,
 			dynamic_cast<BHandler*>(bwnd), static_cast<BHandler*>(bwnd), (BHandler*)bwnd);
+		*/
 	
 		if (!bwnd)
 		{
@@ -786,8 +791,6 @@ public:
 
 	void MessageReceived(BMessage *message)
 	{
-		printf("MessageReceived start.\n");
-		
 		LMessage *m = (LMessage*)message;
 		switch (message->what)
 		{
@@ -827,8 +830,6 @@ public:
 				BMenuBar::MessageReceived(message);
 				break;
 		}
-
-		printf("MessageReceived end.\n");
 	}
 };
 

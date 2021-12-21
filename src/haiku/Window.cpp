@@ -168,9 +168,7 @@ LWindow::~LWindow()
 
 OsWindow LWindow::WindowHandle()
 {
-	OsWindow r = d;
-	printf("LWindow::WindowHandle() %p %p\n", d, r);
-	return r;
+	return d;
 }
 
 bool LWindow::SetIcon(const char *FileName)
