@@ -1893,6 +1893,32 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 					Ms.Target->OnMouseClick(Ms);
 				break;
 			}
+			case WM_XBUTTONDBLCLK:
+			case WM_XBUTTONDOWN:
+			case WM_XBUTTONUP:
+			{
+				LMouse Ms;
+				int Clicked = (Msg->a >> 16) & 0xffff;
+				Ms.x = (short) (Msg->b&0xFFFF);
+				Ms.y = (short) (Msg->b>>16);
+				Ms.Flags = _lgi_get_key_flags() | LGI_EF_MIDDLE;
+				Ms.Button1(TestFlag(Clicked, XBUTTON1));
+				Ms.Button2(TestFlag(Clicked, XBUTTON2));
+ 				Ms.Down(Msg->m != WM_XBUTTONUP);
+				Ms.Double(Msg->m == WM_XBUTTONDBLCLK);
+
+				if (_Capturing)
+					Ms = lgi_adjust_click(Ms, _Capturing, true);
+				else if (_Over)
+					Ms = lgi_adjust_click(Ms, _Over);
+				else
+					Ms.Target = this;
+
+				LWindow *Wnd = GetWindow();
+				if (!Wnd || Wnd->HandleViewMouse(dynamic_cast<LView*>(Ms.Target), Ms))
+					Ms.Target->OnMouseClick(Ms);
+				break;
+			}
 			case WM_SYSKEYUP:
 			case WM_SYSKEYDOWN:
 			case WM_KEYDOWN:

@@ -3732,7 +3732,12 @@ void LTextView3::OnMouseClick(LMouse &m)
 
 	if (m.Down())
 	{
-		if (!m.IsContextMenu())
+		if (m.IsContextMenu())
+		{
+			DoContextMenu(m);
+			return;
+		}
+		else if (m.Left())
 		{
 			Focus(true);
 
@@ -3755,11 +3760,6 @@ void LTextView3::OnMouseClick(LMouse &m)
 			{
 				d->WordSelectMode = -1;
 			}
-		}
-		else
-		{
-			DoContextMenu(m);
-			return;
 		}
 	}
 

@@ -31,11 +31,11 @@ bool LKey::IsContextMenu() const
 LString LMouse::ToString() const
 {
 	LString s;
-	s.Printf("LMouse(pos=%i,%i view=%p/%s btns=%i/%i/%i dwn=%i dbl=%i "
+	s.Printf("LMouse(pos=%i,%i view=%p/%s btns=%i/%i/%i/%i/%i dwn=%i dbl=%i "
 			"ctrl=%i alt=%i sh=%i sys=%i)",
 		x, y, // pos
 		Target, Target?Target->GetClass():NULL, // view
-		Left(), Middle(), Right(), // btns
+		Left(), Middle(), Right(), Button1(), Button2(), // btns
 		Down(), Double(), // dwn
 		Ctrl(), Alt(), Shift(), System()); // mod keys
 	return s;
