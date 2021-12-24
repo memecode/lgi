@@ -135,14 +135,12 @@ public:
 class LgiClass LMappedEventSink : public LEventSinkI
 {
 protected:
-	int Handle;
-	LEventSinkMap *Map;
+	int Handle = 0;
+	LEventSinkMap *Map = NULL;
 
 public:
 	LMappedEventSink()
 	{
-		Map = NULL;
-		Handle = 0;
 		SetMap(&LEventSinkMap::Dispatch);
 	}
 
@@ -171,6 +169,7 @@ public:
 
 	int GetHandle()
 	{
+		LAssert(Handle != 0);
 		return Handle;
 	}
 };
@@ -379,7 +378,8 @@ public:
 		while (!(Status = LEventSinkMap::Dispatch.PostEvent(Hnd, Cmd, (LMessage::Param) A.Get())))
 		{
 			LSleep(2);
-			if (LCurrentTime() - Start >= PostTimeout) break;
+			if (LCurrentTime() - Start >= PostTimeout)
+				break;
 		}
 		if (Status)
 			A.Release();

@@ -81,6 +81,7 @@ public:
 
 	~WindowsSpellCheck()
 	{
+		EndThread();
 		if (Sc)
 		{
 			Sc->Release();
@@ -150,7 +151,7 @@ public:
 		return Factory;
 	}
 
-	ISpellChecker *GetSpellCheck(char *Lang)
+	ISpellChecker *GetSpellCheck(const char *Lang)
 	{
 		if (!GetFactory())
 		{
@@ -173,6 +174,17 @@ public:
 	{
 		switch (Msg->Msg())
 		{
+			case M_SET_PARAMS:
+			{
+				LAutoPtr<LSpellCheck::Params> Params((LSpellCheck::Params*)Msg->A());
+				if (Params)
+				{
+					auto l = GFindLang("", Params->Lang);
+					if (l)
+						GetSpellCheck(l->Id);
+				}
+				break;
+			}
 			case M_ENUMERATE_LANGUAGES:
 			{
 				if (!GetFactory())
@@ -291,6 +303,8 @@ public:
 					r = Err->get_Replacement(&Replace);
 
 					Err->Release();
+
+					auto ww = WTxt.Get() + Start;
 
 					SpellingError &Se = Ct->Errors.New();
 					Se.Start = Start;
