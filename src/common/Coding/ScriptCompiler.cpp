@@ -3803,12 +3803,19 @@ bool LScriptEngine::EvaluateExpression(LVariant *Result, LDom *VariableSource, c
 	// Execute the script
 	LVirtualMachine Vm(d->Callback);
 	LCompiledCode *Code = dynamic_cast<LCompiledCode*>(Obj.Get());
-	LExecutionStatus s = Vm.Execute(Code, 0, NULL, true, Result ? Result : &d->ReturnValue);
+	auto ReturnVal = Result ? Result : &d->ReturnValue;
+	LExecutionStatus s = Vm.Execute(Code, 0, NULL, true, ReturnVal);
 	if (s != ScriptSuccess)
 	{
 		return false;
 	}
 	
+	if (ReturnVal->Type == GV_INT64 &&
+		!(ReturnVal->Value.Int64 >> 32))
+	{
+		*ReturnVal = ReturnVal->CastInt32();
+	}
+
 	return true;
 }
 
