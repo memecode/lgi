@@ -27,7 +27,7 @@ public:
 	}
 };
 
-GWordStore::GWordStore(const char *file)
+LWordStore::LWordStore(const char *file)
 {
 	d = new GWordStorePriv;
 	d->File = NewStr(file);
@@ -37,7 +37,7 @@ GWordStore::GWordStore(const char *file)
 	}
 }
 
-GWordStore::~GWordStore()
+LWordStore::~LWordStore()
 {
 	if (d->Dirty)
 	{
@@ -46,12 +46,12 @@ GWordStore::~GWordStore()
 	DeleteObj(d);
 }
 
-char *GWordStore::GetFile()
+char *LWordStore::GetFile()
 {
 	return d->File;
 }
 
-bool GWordStore::Serialize(const char *FileName, bool Load)
+bool LWordStore::Serialize(const char *FileName, bool Load)
 {
 	static const char *ObjName = "GWordStore";
 	bool Status = false;
@@ -166,12 +166,12 @@ bool GWordStore::Serialize(const char *FileName, bool Load)
 	return Status;
 }
 
-int GWordStore::GetItems()
+int LWordStore::GetItems()
 {
 	return d->Items;
 }
 
-bool GWordStore::SetItems(int i)
+bool LWordStore::SetItems(int i)
 {
 	if (i != d->Items)
 	{
@@ -181,7 +181,7 @@ bool GWordStore::SetItems(int i)
 	return true;
 }
 
-bool GWordStore::Insert(const char *Word)
+bool LWordStore::Insert(const char *Word)
 {
 	bool Status = false;
 	
@@ -196,36 +196,36 @@ bool GWordStore::Insert(const char *Word)
 
 }
 
-uint32 GWordStore::GetWordCount(const char *Word)
+uint32 LWordStore::GetWordCount(const char *Word)
 {
 	return Word ? d->Table.Find(Word) : 0;
 }
 
-void GWordStore::Empty()
+void LWordStore::Empty()
 {
 	d->Table.Empty();
 	d->Dirty = true;
 }
 
-const char *GWordStore::First()
+const char *LWordStore::First()
 {
 	const char *key;
 	return d->Table.First(&key) ? key : 0;
 }
 
-const char *GWordStore::Next()
+const char *LWordStore::Next()
 {
 	const char *key;
 	return d->Table.Next(&key) ? key : 0;
 }
 
-int GWordStore::Length()
+int LWordStore::Length()
 {
 	return d->Table.Length();
 }
 
 #ifdef _DEBUG
-int64 GWordStore::Sizeof()
+int64 LWordStore::Sizeof()
 {
 	return sizeof(*this) + d->Table.Sizeof();
 }

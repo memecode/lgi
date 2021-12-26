@@ -2,13 +2,13 @@
 #ifndef _GWORDSTORE_H_
 #define _GWORDSTORE_H_
 
-class GWordStore
+class LWordStore
 {
 	class GWordStorePriv *d;
 
 public:
-	GWordStore(const char *file = 0);
-	~GWordStore();
+	LWordStore(const char *file = 0);
+	~LWordStore();
 	
 	// Serialization
 	bool Serialize(const char *file, bool Load);

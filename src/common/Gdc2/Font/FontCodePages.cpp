@@ -193,15 +193,18 @@ bool LIsUtf8(const char *s, ssize_t len)
 		}
 		else goto Utf8Error;
 	}
+
 	return true;
 
 Utf8Error:
+	#if 0
 	LgiTrace("%s:%i - Invalid utf, len=%i, bytes=", _FL, len);
 	for (int i=0; len < 0 ? s[i] : i<MIN(16, len); i++)
 	{
 		LgiTrace("%02.2x,", (uint8_t)s[i]);
 	}
 	LgiTrace("\n");
+	#endif
 	return false;
 }
 				

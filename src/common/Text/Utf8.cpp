@@ -1,7 +1,7 @@
 #include "lgi/common/Lgi.h"
 
 /////////////////////////////////////////////////////////////////////////////
-static bool Warn = true;
+bool LUtf8Ptr::Warn = true;
 
 LUtf8Ptr::LUtf8Ptr(const void *p)
 {
@@ -50,9 +50,12 @@ LUtf8Ptr &LUtf8Ptr::operator++()
 				Warn = false;
 				LAssert(!"Invalid UTF");
 			}
+			Ptr++;
+			while (IsUtf8_Trail(*Ptr))
+				Ptr++;
 		}
-
-		Ptr++;
+		else
+			Ptr++;
 	}
 
 	return *this;
@@ -100,9 +103,12 @@ LUtf8Ptr &LUtf8Ptr::operator++(const int i)
 				Warn = false;
 				LAssert(!"Invalid UTF");
 			}
+			Ptr++;
+			while (IsUtf8_Trail(*Ptr))
+				Ptr++;
 		}
-
-		Ptr++;
+		else
+			Ptr++;
 	}
 
 	return *this;

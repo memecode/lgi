@@ -296,6 +296,8 @@ protected:
 	uint8_t *Ptr;
 
 public:
+	static bool Warn;
+
 	LUtf8Ptr(const void *p = NULL);
 
 	/// Assign a new pointer to the string
