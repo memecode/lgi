@@ -296,9 +296,6 @@
     <ClCompile Include="src\common\Lgi\FindReplace.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="src\common\Gdc2\Font\FontCodePages.cpp">
-      <Filter>Source Files\Graphics\Font</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Lgi\FontSelect.cpp">
       <Filter>Source Files\Graphics\Font</Filter>
     </ClCompile>
@@ -344,17 +341,8 @@
     <ClCompile Include="src\common\Widgets\List.cpp">
       <Filter>Source Files\Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="src\win\Gdc2\LMemDC.cpp">
-      <Filter>Source Files\Graphics\Surfaces</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\Gdc2\LPrintDC.cpp">
-      <Filter>Source Files\Graphics\Surfaces</Filter>
-    </ClCompile>
     <ClCompile Include="src\common\Lgi\LMsg.cpp">
       <Filter>Source Files\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="src\win\Gdc2\LScreenDC.cpp">
-      <Filter>Source Files\Graphics\Surfaces</Filter>
     </ClCompile>
     <ClCompile Include="src\common\Net\MDStringToDigest.cpp">
       <Filter>Source Files\Network</Filter>
@@ -502,6 +490,18 @@
     </ClCompile>
     <ClCompile Include="src\common\Text\TextView4.cpp">
       <Filter>Source Files\Widgets\TextViews</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\Gdc2\Font\Charset.cpp">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Gdc2\MemDC.cpp">
+      <Filter>Source Files\Graphics\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Gdc2\PrintDC.cpp">
+      <Filter>Source Files\Graphics\Surfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Gdc2\ScreenDC.cpp">
+      <Filter>Source Files\Graphics\Surfaces</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -789,6 +789,9 @@
     </ClInclude>
     <ClInclude Include="include\lgi\common\App.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Charset.h">
+      <Filter>Source Files\Graphics\Font</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

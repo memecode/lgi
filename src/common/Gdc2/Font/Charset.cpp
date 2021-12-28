@@ -5,6 +5,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Token.h"
 #include "lgi/common/Font.h"
+#include "lgi/common/Charset.h"
 
 struct UnicodeMappings
 {
@@ -777,6 +778,10 @@ LCharset()
 };
 
 static LCharsetSystem CharsetSystem;
+LCharsetSystem *LCharsetSystem::Inst()
+{
+	return &CharsetSystem;
+}
 
 LCharset *LGetCpInfo(const char *Cs)
 {
@@ -1447,7 +1452,7 @@ bool LMatchCharset(short *Map, char16 *Utf, bool &Has8Bit)
 	return false;
 }
 
-const char *LDetectCharset(const char *Utf8, ssize_t Len, List<char> *Prefs)
+const char *LUnicodeToCharset(const char *Utf8, ssize_t Len, List<char> *Prefs)
 {
 	const char *Status = "utf-8"; // The default..
 

@@ -18,14 +18,16 @@ struct LGraphPriv
 {
 	constexpr static int AxisMarkPx = 8;
 
+	LGraph *View = NULL;
 	int XAxis = 0, YAxis = 0;
 	LVariantType XType, YType;
 	LVariant MaxX, MinX;
 	LVariant MaxY, MinY;
-    LArray<LGraph::GGraphPair> Val;
+    LArray<LGraph::Pair> Val;
 	LGraph::Style Style;
 	LPoint MouseLoc;
 	bool ShowCursor = false;
+	LString LabelX, LabelY;
 	double Zoom = 1.0, Px = 0.0, Py = 0.0;
 	
 	// Averages
@@ -35,9 +37,9 @@ struct LGraphPriv
     
     // Selection
     LAutoPtr<LPoint> Select;
-    LArray<LGraph::GGraphPair*> Selection;
+    LArray<LGraph::Pair*> Selection;
 	
-	LGraphPriv()
+	LGraphPriv(LGraph *view) : View(view)
 	{
 	    #if 1
         Style = LGraph::PointGraph;
@@ -304,7 +306,7 @@ struct LGraphPriv
 		return s;
 	}
 
-	void DrawAxis(LSurface *pDC, LRect &r, int xaxis, LVariant &min, LVariant &max)
+	void DrawAxis(LSurface *pDC, LRect &r, int xaxis, LVariant &min, LVariant &max, LString &label)
 	{
 		LVariant v = min;
 		bool First = true;
@@ -322,7 +324,8 @@ struct LGraphPriv
 		int64 int64_inc = 0;
 		int date_inc = 1;
 
-		LSysFont->Colour(L_TEXT, L_WORKSPACE);
+		auto Fnt = View->GetFont();
+		Fnt->Colour(L_TEXT, L_WORKSPACE);
 
 		LArray<LVariant> Values;
 		while (Loop)
@@ -441,12 +444,18 @@ struct LGraphPriv
 			else
 				pDC->Line(dx, dy, dx - 5, dy);
 		}
+
+		if (label)
+		{
+			LDisplayString ds(Fnt, label);
+			ds.Draw(pDC, r.Center().x, r.y2-ds.Y());
+		}
 	}
 };
 
 LGraph::LGraph(int Id, int XAxis, int YAxis)
 {
-	d = new LGraphPriv;
+	d = new LGraphPriv(this);
     d->XAxis = XAxis;
     d->YAxis = YAxis;
 	SetPourLargest(true);
@@ -467,7 +476,7 @@ bool LGraph::AddPair(char *x, char *y, void *UserData)
     if (d->YType == GV_NULL)
         d->YType = d->GuessType(y);
 
-    GGraphPair &p = d->Val.New();
+    Pair &p = d->Val.New();
     p.UserData = UserData;
     
     if (d->Convert(p.x, d->XType, x))
@@ -670,7 +679,7 @@ void LGraph::OnMouseClick(LMouse &m)
     }
 }
 
-LArray<LGraph::GGraphPair*> *LGraph::GetSelection()
+LArray<LGraph::Pair*> *LGraph::GetSelection()
 {
     return &d->Selection;
 }
@@ -687,6 +696,54 @@ void LGraph::ShowCursor(bool show)
 		d->ShowCursor = show;
 		Invalidate();
 	}
+}
+
+const char *LGraph::GetLabel(bool XAxis)
+{
+	if (XAxis)
+		return d->LabelX;
+	else
+		return d->LabelY;
+}
+
+void LGraph::SetLabel(bool XAxis, const char *Label)
+{
+	if (XAxis)
+		d->LabelX = Label;
+	else
+		d->LabelY = Label;
+	Invalidate();
+}
+
+LGraph::Range LGraph::GetRange(bool XAxis)
+{
+	Range r;
+	if (XAxis)
+	{
+		r.Min = d->MinX;
+		r.Max = d->MaxX;
+	}
+	else
+	{
+		r.Min = d->MinY;
+		r.Max = d->MaxY;
+	}
+	return r;
+}
+
+void LGraph::SetRange(bool XAxis, Range r)
+{
+	if (XAxis)
+	{
+		d->MinX = r.Min;
+		d->MaxX = r.Max;
+	}
+	else
+	{
+		d->MinY = r.Min;
+		d->MaxY = r.Max;
+	}
+	Invalidate();
 }
 
 void LGraph::OnMouseMove(LMouse &m)
@@ -740,8 +797,8 @@ void LGraph::OnPaint(LSurface *pDC)
 	pDC->Box(&data);
 
 	// Draw axis
-	d->DrawAxis(pDC, x, true, d->MinX, d->MaxX);
-	d->DrawAxis(pDC, y, false, d->MinY, d->MaxY);
+	d->DrawAxis(pDC, x, true, d->MinX, d->MaxX, d->LabelX);
+	d->DrawAxis(pDC, y, false, d->MinY, d->MaxY, d->LabelY);
 	
 	if (d->ShowCursor)
 	{
@@ -770,7 +827,7 @@ void LGraph::OnPaint(LSurface *pDC)
     {
         for (int i=0; i<d->Val.Length(); i++)
         {
-	        GGraphPair &p = d->Val[i];
+	        Pair &p = d->Val[i];
 	        auto Bucket = d->DataToView(p.x, d->BucketSize, d->MinX, d->MaxX);
             d->Ave[Bucket].Sum += p.y.CastInt64();
             d->Ave[Bucket].Count++;
@@ -783,7 +840,7 @@ void LGraph::OnPaint(LSurface *pDC)
 	    {
 	        for (int i=0; i<d->Val.Length(); i++)
 	        {
-		        GGraphPair &p = d->Val[i];
+		        Pair &p = d->Val[i];
 		        cx = x.x1 + (int)d->DataToView(p.x, x.X(), d->MinX, d->MaxX);
 		        cy = y.y2 - (int)d->DataToView(p.y, y.Y(), d->MinY, d->MaxY);
 		        if (i)
@@ -799,7 +856,7 @@ void LGraph::OnPaint(LSurface *pDC)
 	    {
 	        for (int i=0; i<d->Val.Length(); i++)
 	        {
-		        GGraphPair &p = d->Val[i];
+		        Pair &p = d->Val[i];
 
 				int xmap = (int)d->DataToView(p.x, x.X(), d->MinX, d->MaxX);
 				int ymap = (int)d->DataToView(p.y, y.Y(), d->MinY, d->MaxY);

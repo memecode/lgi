@@ -20,18 +20,11 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 Progress::Progress() : LMutex("ProgressObj")
 {
-	Start = 0;
-	Val = Low = 0;
-	High = 0;
-	Type = 0;
-	Scale = 1.0;
-	UserData = 0;
 }
 
 Progress::Progress(char *desc, int64 l, int64 h, char *type, double scale)
 {
 	Description = desc;
-	Start = 0;
 	Val = Low = l;
 	High = h;
 	Type = type;
@@ -100,14 +93,13 @@ Progress &Progress::operator =(Progress &p)
 #define IDC_BUTTON				104
 #define IDC_TABLE				105
 #define IDC_PANE				106
+#define IDC_REMAINING			107
 
 #define PANE_X					300
 #define PANE_Y					100
 
 LProgressPane::LProgressPane(LProgressDlg *dlg) : Dlg(dlg)
 {
-	t = NULL;
-	UiDirty = false;
 	LRect r(0, 0, PANE_X-1, PANE_Y-1);
 	SetPos(r);
 	Name(LLoadString(L_PROGRESSDLG_PROGRESS, "Progress"));
@@ -118,40 +110,35 @@ LProgressPane::LProgressPane(LProgressDlg *dlg) : Dlg(dlg)
 	{
 		OnPosChange();
 
-		#define PAD 1
+		#define PAD		c->Padding(LCss::Len(LCss::LenPx, 1));
+		#define COLUMNS	3
 		
-		int Row = 0;
-		LLayoutCell *c = t->GetCell(0, Row++, true, 2, 1);
-		#ifdef PAD
-		c->Padding(LCss::Len(LCss::LenPx, PAD));
-		#endif
-		c->Height("1.1em"); // This stops the layout flickering
-		c->Add(Desc = new LTextLabel(IDC_DESCRIPTION, 0, 0, -1, -1, "##"));
+		int Row = 0, Col = 0;
+		LLayoutCell *c = t->GetCell(0, Row++, true, COLUMNS, 1);
+			PAD
+			c->Height("1.2em"); // This stops the layout flickering
+			c->Add(Desc = new LTextLabel(IDC_DESCRIPTION, 0, 0, -1, -1, "##"));
 
-		c = t->GetCell(0, Row);
-		#ifdef PAD
-		c->Padding(LCss::Len(LCss::LenPx, PAD));
-		#endif
-		c->Add(ValText = new LTextLabel(IDC_VALUE, 0, 0, -1, -1, "##"));
+		c = t->GetCell(Col++, Row);
+			PAD
+			c->Add(ValText = new LTextLabel(IDC_VALUE, 0, 0, -1, -1, "##"));
 
-		c = t->GetCell(1, Row++);
-		#ifdef PAD
-		c->Padding(LCss::Len(LCss::LenPx, PAD));
-		#endif
-		c->Add(Rate = new LTextLabel(IDC_RATE, 0, 0, -1, -1, "##"));
+		c = t->GetCell(Col++, Row);
+			PAD
+			c->Add(Rate = new LTextLabel(IDC_RATE, 0, 0, -1, -1, "##"));
 
-		c = t->GetCell(0, Row++, true, 2, 1);
-		#ifdef PAD
-		c->Padding(LCss::Len(LCss::LenPx, PAD));
-		#endif
-		c->Add(Bar = new LProgressView(IDC_PROGRESS, 0, 0, PANE_X - 14, 10, "Progress"));
+		c = t->GetCell(Col++, Row++);
+			PAD
+			c->Add(Remaining = new LTextLabel(IDC_REMAINING, 0, 0, -1, -1, "##"));
 
-		c = t->GetCell(0, Row++, true, 2, 1);
-		#ifdef PAD
-		c->Padding(LCss::Len(LCss::LenPx, PAD));
-		#endif
-		c->TextAlign(LCss::Len(LCss::AlignCenter));
-		c->Add(But = new LButton(IDC_BUTTON, 0, 0, -1, -1, LLoadString(L_PROGRESSDLG_REQ_ABORT, "Request Abort")));
+		c = t->GetCell(0, Row++, true, COLUMNS, 1);
+			PAD
+			c->Add(Bar = new LProgressView(IDC_PROGRESS, 0, 0, PANE_X - 14, 10, "Progress"));
+
+		c = t->GetCell(0, Row++, true, COLUMNS, 1);
+			PAD
+			c->TextAlign(LCss::Len(LCss::AlignCenter));
+			c->Add(But = new LButton(IDC_BUTTON, 0, 0, -1, -1, LLoadString(L_PROGRESSDLG_REQ_ABORT, "Request Abort")));
 	}
 }
 
@@ -192,25 +179,34 @@ void LProgressPane::UpdateUI()
 	{
 		// initialize the clock
 		Start = Now;
+		StartDt.SetNow();
 	}
 	else if (Rate)
 	{
 		// calc rate
-		double Secs = ((double)(int64)(Now - Start)) / 1000.0;
-		double PerSec;
+		double ElapsedSeconds = ((double)(Now - Start)) / 1000.0;
+		double PerSec = 0.0;
 		
-		if (Secs != 0.0)
-			PerSec = ((double) Val - Low) / Secs;
-		else
-			PerSec = 0;
+		if (ElapsedSeconds != 0.0)
+			PerSec = ((double) Val - Low) / ElapsedSeconds;
 		
 		sprintf_s(Str, sizeof(Str), LLoadString(L_PROGRESSDLG_RATE_FMT, "@ %.2f %s / sec"), PerSec * Scale, (Type) ? Type.Get() : "");
 		Update |= Rate->Name(Str);
+
+		if (Remaining && PerSec > 0.0)
+		{
+			auto TotalSeconds = (High - Low + 1) / PerSec;
+			auto RemainingSeconds = TotalSeconds - ElapsedSeconds;
+			LDateTime End;
+			End.Set(StartDt.Ts() + (uint64_t)(TotalSeconds * LDateTime::Second64Bit));
+			if (auto Dur = LDateTime::Now().DescribePeriod(End))
+				Update |= Remaining->Name(Dur);
+		}
 	}
 
 	if (ValText)
 	{
-		auto ValFmt = LLoadString(L_PROGRESSDLG_VALUE_FMT, "%.1f of %.1f %s");
+		auto ValFmt = LLoadString(L_PROGRESSDLG_VALUE_FMT, "%g of %g %s");
 		sprintf_s(Str, sizeof(Str), ValFmt,
 			(double)Val * Scale,
 			(double)(High - Low) * Scale,

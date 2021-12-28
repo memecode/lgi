@@ -27,6 +27,7 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/FindReplaceDlg.h"
 #include "lgi/common/Homoglyphs.h"
+#include "lgi/common/Charset.h"
 
 #include "HtmlPriv.h"
 
@@ -3435,13 +3436,13 @@ void GTag::SetCssStyle(const char *Style)
 	if (Style)
 	{
 		// Strip out comments
-		char *Comment = 0;
+		char *Comment = NULL;
 		while ((Comment = strstr((char*)Style, "/*")))
 		{
 			char *End = strstr(Comment+2, "*/");
 			if (!End)
 				break;
-			for (char *c = Comment; c<=End+2; c++)
+			for (char *c = Comment; c<End+2; c++)
 				*c = ' ';
 		}
 

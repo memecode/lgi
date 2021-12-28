@@ -4,7 +4,7 @@
 
 class LWordStore
 {
-	class GWordStorePriv *d;
+	class LWordStorePriv *d;
 
 public:
 	LWordStore(const char *file = 0);

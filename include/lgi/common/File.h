@@ -446,12 +446,6 @@ public:
 	virtual ssize_t ReadStr(char *Buf, ssize_t Size);
 	virtual ssize_t WriteStr(char *Buf, ssize_t Size);
 
-	// Helpers
-	bool Write(LString s)
-	{
-		return Write(s.Get(), s.Length()) == s.Length();
-	}
-
 	// Operators
 	#define GFileOp(type)		virtual LFile &operator >> (type &i);
 	GFileOps();
@@ -667,6 +661,12 @@ public:
 			s.Get()[i] = 0;
 		}
 		return s;
+	}
+
+	/// Write a string
+	bool Write(const LString &s)
+	{
+		return Write(s.Get(), s.Length()) == s.Length();
 	}
 
 	/// Sets the file to zero size.
