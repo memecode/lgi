@@ -408,7 +408,9 @@ public:
 		/// The first 32-bits of data. Equivalent to wParam on Win32.
 		LMessage::Param a = 0,
 		/// The second 32-bits of data. Equivalent to lParam on Win32.
-		LMessage::Param b = 0
+		LMessage::Param b = 0,
+		/// Optional timeout in milliseconds
+		int64_t TimeoutMs = -1
 	) override;
 
 	template<typename T>

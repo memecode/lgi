@@ -59,11 +59,13 @@ extern LRect GtkGetPos(Gtk::GtkWidget *w);
 #if !WINNATIVE
 #include "lgi/common/ThreadEvent.h"
 
-class LPulseThread : public LThread
+class LPulseThread : public LThread, public LCancel
 {
-	LView *View;
-	int Length;
+	LView *View = NULL;
+	LString ViewClass;
+	int Length = 0;
 	LThreadEvent Event;
+	uint64_t WarnTs = 0;
 
 	LString MakeName(LView *v, const char *Type)
 	{
@@ -73,8 +75,6 @@ class LPulseThread : public LThread
 	}
 
 public:
-	bool Loop;
-
 	LPulseThread(LView *view, int len) :
 		View(view),
 		LThread(MakeName(view, "Thread")),
@@ -82,34 +82,43 @@ public:
 	{
 		LAssert(View);
 		
-		Loop = true;
 		Length = len;
+		ViewClass = View->GetClass();
 		
 		Run();
 	}
 	
 	~LPulseThread()
 	{
-		Loop = false;
+		Cancel();
 		View = NULL;
 		Event.Signal();
 
 		while (!IsExited())
-			LSleep(0);
+			LSleep(1);
 	}
 	
 	int Main()
 	{
-		while (Loop && LAppInst)
+		while (!IsCancelled() && LAppInst)
 		{
 			auto s = Event.Wait(Length);
-			if (!Loop || s == LThreadEvent::WaitError)
+			if (IsCancelled() || s == LThreadEvent::WaitError)
 				break;
 			
 			if (View)
 			{
-				if (!View->PostEvent(M_PULSE))
-					Loop = false;
+				auto r = View->PostEvent(M_PULSE, 0, 0, 50/*milliseconds*/);
+				if (!r)
+				{
+					auto now = LCurrentTime();
+					if (now - WarnTs >= 5000)
+					{
+						WarnTs = now;
+						printf("%s:%i - PulseThread::PostEvent failed for %p/%s.\n", _FL, View, ViewClass.Get());
+					}
+				}
+				// Cancel();
 			}
 		}
 		
@@ -232,4 +241,5 @@ public:
 		return 0;
 	}
 };
+
 

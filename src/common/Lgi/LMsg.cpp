@@ -162,8 +162,6 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 			printf("DoModal(%s,%s)\n", Title, Msg.Get());
 			result = a->Go();
 			printf("result=%i\n", result);
-			if (a->LockLooper())
-				a->Quit();
 		}
 
 		if (result < 0)

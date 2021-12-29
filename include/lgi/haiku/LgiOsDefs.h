@@ -2,6 +2,9 @@
 	\file
 	\author Matthew Allen
 	\brief Haiku defs.
+	
+	Debugging memory issues in Haiku:
+	LD_PRELOAD=/boot/system/lib/libroot_debug.so MALLOC_DEBUG=g ./my_app
  */
 
 #ifndef __LGI_OS_DEFS_H

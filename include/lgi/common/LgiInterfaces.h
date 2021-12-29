@@ -338,7 +338,7 @@ class LEventSinkI
 {
 public:
 	virtual ~LEventSinkI() {}
-	virtual bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0) = 0;
+	virtual bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0, int64_t TimeoutMs = -1) = 0;
 };
 
 class LEventTargetI

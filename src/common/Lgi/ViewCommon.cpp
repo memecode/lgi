@@ -2056,7 +2056,7 @@ bool LView::InThread()
 	#endif
 }
 
-bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b)
+bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t timeoutMs)
 {
 	#ifdef LGI_SDL
 		return LPostEvent(this, Cmd, a, b);
@@ -2067,6 +2067,7 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b)
 			return false;
 		}
 		
+		auto start = LCurrentTime();
 		bool locked = false;
 		BView *lockView = NULL;
 		BWindow *lockWindow = NULL;
@@ -2081,10 +2082,12 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b)
 				return false;
 			}
 
-			auto start = LCurrentTime();
 			do
 			{
-				auto r = lockWindow->LockWithTimeout(2/*sec*/ * 1000 * 1000);
+				int64_t elapsedMs = LCurrentTime() - start;
+				int64_t remainingMs = timeoutMs >= 0 ? timeoutMs - elapsedMs : 2000;
+				
+				auto r = lockWindow->LockWithTimeout(remainingMs * 1000);
 				if (r == B_OK)
 				{
 					locked = true;
@@ -2097,6 +2100,9 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b)
 				}
 				else
 				{
+					if (timeoutMs >= 0)
+						return false;
+
 					printf("%s waiting on lock for %gs (r=%x, me=%i, locker=%i)\n",
 						GetClass(), (double)(LCurrentTime()-start)/1000.0,
 						r, GetCurrentThreadId(), lockWindow->LockingThread());
@@ -2129,10 +2135,12 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b)
 				return false;
 			}
 			
-			auto start = LCurrentTime();
 			do
 			{
-				auto r = lockView->LockLooperWithTimeout(2/*sec*/ * 1000 * 1000);
+				int64_t elapsedMs = LCurrentTime() - start;
+				int64_t remainingMs = timeoutMs >= 0 ? timeoutMs - elapsedMs : 2000;
+
+				auto r = lockView->LockLooperWithTimeout(remainingMs * 1000);
 				if (r == B_OK)
 				{
 					locked = true;
@@ -2145,6 +2153,9 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b)
 				}
 				else
 				{
+					if (timeoutMs >= 0)
+						return false;
+
 					printf("%s waiting on lock for %gs (r=%x, me=%i, locker=%i)\n",
 						GetClass(), (double)(LCurrentTime()-start)/1000.0,
 						r, GetCurrentThreadId(), lockWindow->LockingThread());

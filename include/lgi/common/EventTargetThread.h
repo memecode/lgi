@@ -294,7 +294,7 @@ public:
 		return Msgs.Length() + Processing;
 	}
 
-	bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0)
+	bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0, int64_t timeout = -1)
 	{
 		if (IsCancelled())
 			return false;
