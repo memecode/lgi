@@ -205,19 +205,12 @@ int DocEditStyling::Main()
 				StyleDefault(p);
 				break;
 		}
-		if (ParentState != KCancel)
+		if (ParentState != KCancel && ParentState != KExiting)
 		{
 			#if LOG_STYLE
 			LgiTrace("DocEdit.Worker finished style... Items=%i ParentState=%i\n", (int)p.Styles.Length(), ParentState);
 			#endif
 			auto r = View->PostEvent(M_STYLING_DONE);
-			if (ParentState != KExiting)
-			{
-				#if LOG_STYLE
-				LgiTrace("PostEvent(M_STYLING_DONE)=%i\n", (int)r);
-				#endif
-				LAssert(r);
-			}
 		}
 		else
 		{

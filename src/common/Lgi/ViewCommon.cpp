@@ -2074,11 +2074,35 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b)
 		if (wnd)
 		{
 			lockWindow = wnd->WindowHandle();
-			if (!lockWindow || !(locked = lockWindow->LockLooper()))
+			if (!lockWindow)
 			{
-				printf("%s:%i - Failed to window: cls=%s\n",
+				printf("%s:%i - No window to lock (%s)\n",
 					_FL, GetClass());
+				return false;
 			}
+
+			auto start = LCurrentTime();
+			do
+			{
+				auto r = lockWindow->LockWithTimeout(2/*sec*/ * 1000 * 1000);
+				if (r == B_OK)
+				{
+					locked = true;
+					break;
+				}
+				else if (r == B_BAD_VALUE)
+				{
+					printf("%s:%i - Lock destroyed.\n", _FL);
+					return false;
+				}
+				else
+				{
+					printf("%s waiting on lock for %gs (r=%x, me=%i, locker=%i)\n",
+						GetClass(), (double)(LCurrentTime()-start)/1000.0,
+						r, GetCurrentThreadId(), lockWindow->LockingThread());
+				}
+			}
+			while (true);					
 		}
 		else
 		{
@@ -2094,17 +2118,40 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b)
 			}
 			
 			// Try and lock the looper...
-			if (!lockView || !(locked = lockView->LockLooper()))
+			if (!lockView)
 			{
+				#if 0
 				auto wnd = lockView ? lockView->Window() : NULL;
 				auto par = lockView ? lockView->Parent() : NULL;
-				#if 0
 				printf("%s:%i - Failed to locklooper: %p %i %p %p cls=%s\n",
 					_FL, lockView, locked, wnd, par, GetClass());
 				#endif
 				return false;
 			}
-		}
+			
+			auto start = LCurrentTime();
+			do
+			{
+				auto r = lockView->LockLooperWithTimeout(2/*sec*/ * 1000 * 1000);
+				if (r == B_OK)
+				{
+					locked = true;
+					break;
+				}
+				else if (r == B_BAD_VALUE)
+				{
+					printf("%s:%i - Lock destroyed.\n", _FL);
+					return false;
+				}
+				else
+				{
+					printf("%s waiting on lock for %gs (r=%x, me=%i, locker=%i)\n",
+						GetClass(), (double)(LCurrentTime()-start)/1000.0,
+						r, GetCurrentThreadId(), lockWindow->LockingThread());
+				}
+			}
+			while (true);
+ 		}
 
 		BMessage *m = new BMessage(Cmd);
 		if (!m)

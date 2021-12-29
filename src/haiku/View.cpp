@@ -367,13 +367,18 @@ LViewPrivate::~LViewPrivate()
 
 	if (Hnd)
 	{
-		if (Hnd->LockLooper())
-		{
-			if (Hnd->Parent())
-				Hnd->RemoveSelf();
-			delete Hnd;
-		}
-		Hnd = NULL;
+		auto Wnd = Hnd->Window();
+
+		if (Wnd)
+			Wnd->LockLooper();
+
+		if (Hnd->Parent())
+			Hnd->RemoveSelf();
+		
+		DeleteObj(Hnd);
+
+		if (Wnd)
+			Wnd->UnlockLooper();
 	}
 }
 

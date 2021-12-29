@@ -148,7 +148,7 @@ Sources =	src/haiku/Window.cpp \
 			src/common/Gdc2/Font/StringLayout.cpp \
 			src/common/Gdc2/Font/FontType.cpp \
 			src/common/Gdc2/Font/FontSystem.cpp \
-			src/common/Gdc2/Font/FontCodePages.cpp \
+			src/common/Gdc2/Font/Charset.cpp \
 			src/common/Gdc2/Font/Font.cpp \
 			src/common/Gdc2/Font/DisplayString.cpp \
 			src/common/Gdc2/Filters/Filter.cpp \
