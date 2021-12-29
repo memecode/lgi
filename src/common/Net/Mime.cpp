@@ -357,14 +357,14 @@ public:
 #define BASE64_LINE_SZ			76
 #define BASE64_READ_SZ			(BASE64_LINE_SZ*3/4)
 
-class GMimeBase64Encode : public LCoderStream
+class LMimeBase64Encode : public LCoderStream
 {
-	GMemQueue Buf;
+	LMemQueue Buf;
 
 public:
-	GMimeBase64Encode(LStreamI *o) : LCoderStream(o) {}
+	LMimeBase64Encode(LStreamI *o) : LCoderStream(o) {}
 	
-	~GMimeBase64Encode()
+	~LMimeBase64Encode()
 	{
 		uchar b[100];
 
@@ -452,7 +452,7 @@ public:
 
 			char t[256];
 			ssize_t r = MIN(sizeof(t), Size);
-			if ((r = Buf.GMemQueue::Read((uchar*)t, r)) > 0)
+			if ((r = Buf.LMemQueue::Read((uchar*)t, r)) > 0)
 			{
 				uchar b[256];
 				ssize_t w = ConvertBase64ToBinary(b, sizeof(b), t, r);
@@ -466,7 +466,7 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////
-GMimeBuf::GMimeBuf(LStreamI *src, LStreamEnd *end)
+LMimeBuf::LMimeBuf(LStreamI *src, LStreamEnd *end)
 {
 	Total = 0;
 	Src = src;
@@ -475,7 +475,7 @@ GMimeBuf::GMimeBuf(LStreamI *src, LStreamEnd *end)
 	Src->SetPos(0);
 }
 
-ssize_t GMimeBuf::Pop(LArray<char> &Out)
+ssize_t LMimeBuf::Pop(LArray<char> &Out)
 {
 	ssize_t Ret = 0;
 
@@ -533,7 +533,7 @@ ssize_t GMimeBuf::Pop(LArray<char> &Out)
 	return Ret;
 }
 
-ssize_t GMimeBuf::Pop(char *Str, ssize_t BufSize)
+ssize_t LMimeBuf::Pop(char *Str, ssize_t BufSize)
 {
 	ssize_t Ret = 0;
 
@@ -1136,9 +1136,9 @@ bool LMime::SetSub(const char *Field, const char *Sub, const char *Value, const 
 // Mime Text Conversion
 
 // Rfc822 Text -> Object
-ssize_t LMime::GMimeText::GMimeDecode::Pull(LStreamI *Source, LStreamEnd *End)
+ssize_t LMime::LMimeText::LMimeDecode::Pull(LStreamI *Source, LStreamEnd *End)
 {
-	GMimeBuf Buf(Source, End); // Stream -> Lines
+	LMimeBuf Buf(Source, End); // Stream -> Lines
 	return Parse(&Buf);
 }
 
@@ -1155,7 +1155,7 @@ public:
 	}
 };
 
-int LMime::GMimeText::GMimeDecode::Parse(LStringPipe *Source, ParentState *State)
+int LMime::LMimeText::LMimeDecode::Parse(LStringPipe *Source, ParentState *State)
 {
 	int Status = 0;
 
@@ -1339,12 +1339,12 @@ int LMime::GMimeText::GMimeDecode::Parse(LStringPipe *Source, ParentState *State
 	return Status;
 }
 
-void LMime::GMimeText::GMimeDecode::Empty()
+void LMime::LMimeText::LMimeDecode::Empty()
 {
 }
 
 // Object -> Rfc822 Text
-ssize_t LMime::GMimeText::GMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
+ssize_t LMime::LMimeText::LMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 {
 	int Status = 0;
 
@@ -1460,7 +1460,7 @@ ssize_t LMime::GMimeText::GMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 			}
 			else if (_stricmp(Encoding, MimeBase64) == 0)
 			{
-				Encoder = new GMimeBase64Encode(Dest);
+				Encoder = new LMimeBase64Encode(Dest);
 			}
 		}
 		if (!Encoder)
@@ -1530,7 +1530,7 @@ ssize_t LMime::GMimeText::GMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 	return Status;
 }
 
-void LMime::GMimeText::GMimeEncode::Empty()
+void LMime::LMimeText::LMimeEncode::Empty()
 {
 }
 
@@ -1538,7 +1538,7 @@ void LMime::GMimeText::GMimeEncode::Empty()
 // Mime Binary Serialization
 
 // Source -> Object
-ssize_t LMime::GMimeBinary::GMimeRead::Pull(LStreamI *Source, LStreamEnd *End)
+ssize_t LMime::LMimeBinary::LMimeRead::Pull(LStreamI *Source, LStreamEnd *End)
 {
 	if (Source)
 	{
@@ -1582,12 +1582,12 @@ ssize_t LMime::GMimeBinary::GMimeRead::Pull(LStreamI *Source, LStreamEnd *End)
 	return 0; // failure
 }
 
-void LMime::GMimeBinary::GMimeRead::Empty()
+void LMime::LMimeBinary::LMimeRead::Empty()
 {
 }
 
 // Object -> Dest
-int64 LMime::GMimeBinary::GMimeWrite::GetSize()
+int64 LMime::LMimeBinary::LMimeWrite::GetSize()
 {
 	int64 Size = 0;
 
@@ -1607,7 +1607,7 @@ int64 LMime::GMimeBinary::GMimeWrite::GetSize()
 	return Size;
 }
 
-ssize_t LMime::GMimeBinary::GMimeWrite::Push(LStreamI *Dest, LStreamEnd *End)
+ssize_t LMime::LMimeBinary::LMimeWrite::Push(LStreamI *Dest, LStreamEnd *End)
 {
 	if (Dest && Mime)
 	{
@@ -1665,7 +1665,7 @@ ssize_t LMime::GMimeBinary::GMimeWrite::Push(LStreamI *Dest, LStreamEnd *End)
 	return 0;
 }
 
-void LMime::GMimeBinary::GMimeWrite::Empty()
+void LMime::LMimeBinary::LMimeWrite::Empty()
 {
 }
 

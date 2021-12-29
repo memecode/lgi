@@ -1267,7 +1267,7 @@ bool MailSmtp::WriteText(const char *Str)
 	bool Status = false;
 	if (Str)
 	{
-		GMemQueue Temp;
+		LMemQueue Temp;
 
 		const char *Start = Str;
 		while (*Str)
@@ -2684,7 +2684,7 @@ bool MailPop3::ReadMultiLineReply(char *&Str)
 	bool Status = false;
 	if (Socket)
 	{
-		GMemQueue Temp;
+		LMemQueue Temp;
 		ssize_t ReadLen = Socket->Read(Buffer, sizeof(Buffer), 0);
 		if (ReadLen > 0 && Buffer[0] == '+')
 		{

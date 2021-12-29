@@ -314,7 +314,7 @@ public:
 	void SetTag(const char *Tag);
 	void GetTagByPos(GTagHit &hit, int x, int y);
 	GTag *GetTagByName(const char *Name);
-	void CopyClipboard(GMemQueue &p);
+	void CopyClipboard(LMemQueue &p);
 	GTag *IsAnchor(LAutoString *Uri);
 	bool CreateSource(LStringPipe &p, int Depth = 0, bool LastWasBlock = true);
 	void Find(int TagType, LArray<GTag*> &Tags);

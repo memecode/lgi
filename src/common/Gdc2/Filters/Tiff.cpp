@@ -454,7 +454,7 @@ IFD *GdcTiff::FindTag(ushort n)
 	return NULL;
 }
 
-class TiffPipe : public GMemQueue
+class TiffPipe : public LMemQueue
 {
 	Progress *p;
 	int Scansize;
@@ -462,7 +462,7 @@ class TiffPipe : public GMemQueue
 	int64 Size;
 
 public:
-	TiffPipe(Progress *prog, int scansize, int size) : GMemQueue(size)
+	TiffPipe(Progress *prog, int scansize, int size) : LMemQueue(size)
 	{
 		p = prog;
 		Last = 0;
@@ -472,7 +472,7 @@ public:
 
 	ssize_t Write(const void *buf, ssize_t size, int flags)
 	{
-		int Status = GMemQueue::Write(buf, size, flags);
+		int Status = LMemQueue::Write(buf, size, flags);
 		Size += size;
 
 		if (p)

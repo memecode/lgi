@@ -103,17 +103,17 @@ bool UnitTest_ListClass()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-GMemQueue::GMemQueue(size_t prealloc)
+LMemQueue::LMemQueue(size_t prealloc)
 {
 	PreAlloc = prealloc;
 }
 
-GMemQueue::~GMemQueue()
+LMemQueue::~LMemQueue()
 {
 	Empty();
 }
 
-GMemQueue &GMemQueue::operator=(GMemQueue &p)
+LMemQueue &LMemQueue::operator=(LMemQueue &p)
 {
 	Empty();
 
@@ -134,14 +134,14 @@ GMemQueue &GMemQueue::operator=(GMemQueue &p)
 	return *this;
 }
 
-void GMemQueue::Empty()
+void LMemQueue::Empty()
 {
 	for (auto b: Mem)
 		free(b);
 	Mem.Empty();
 }
 
-int64 GMemQueue::GetSize()
+int64 LMemQueue::GetSize()
 {
 	int Size = 0;
 	for (auto b: Mem)
@@ -150,7 +150,7 @@ int64 GMemQueue::GetSize()
 }
 
 #if 0
-int GMemQueue::Find(char *Str)
+int LMemQueue::Find(char *Str)
 {
 	if (Str)
 	{
@@ -245,7 +245,7 @@ int GMemQueue::Find(char *Str)
 	return -1;
 }
 
-int64 GMemQueue::Peek(LStreamI *Str, int Size)
+int64 LMemQueue::Peek(LStreamI *Str, int Size)
 {
 	int64 Status = 0;
 
@@ -267,7 +267,7 @@ int64 GMemQueue::Peek(LStreamI *Str, int Size)
 	return Status;
 }
 
-int GMemQueue::Pop(short &i)
+int LMemQueue::Pop(short &i)
 {
 	short n;
 	if (Read((uchar*) &n, sizeof(n)))
@@ -278,7 +278,7 @@ int GMemQueue::Pop(short &i)
 	return 0;
 }
 
-int GMemQueue::Pop(int &i)
+int LMemQueue::Pop(int &i)
 {
 	int n;
 	if (Read((uchar*) &n, sizeof(n)))
@@ -289,7 +289,7 @@ int GMemQueue::Pop(int &i)
 	return 0;
 }
 
-int GMemQueue::Pop(double &i)
+int LMemQueue::Pop(double &i)
 {
 	double n;
 	if (Read((uchar*) &n, sizeof(n)))
@@ -302,7 +302,7 @@ int GMemQueue::Pop(double &i)
 
 #endif
 
-int64 GMemQueue::Peek(uchar *Ptr, int Size)
+int64 LMemQueue::Peek(uchar *Ptr, int Size)
 {
 	int64 Status = 0;
 
@@ -326,7 +326,7 @@ int64 GMemQueue::Peek(uchar *Ptr, int Size)
 	return Status;
 }
 
-void *GMemQueue::New(int AddBytes)
+void *LMemQueue::New(int AddBytes)
 {
 	int64 Len = GetSize();
 	uchar *Data = Len > 0 ? new uchar[Len+AddBytes] : 0;
@@ -342,7 +342,7 @@ void *GMemQueue::New(int AddBytes)
 	return Data;
 }
 
-ssize_t GMemQueue::Read(void *Ptr, ssize_t Size, int Flags)
+ssize_t LMemQueue::Read(void *Ptr, ssize_t Size, int Flags)
 {
 	int Status = 0;
 
@@ -378,7 +378,7 @@ ssize_t GMemQueue::Read(void *Ptr, ssize_t Size, int Flags)
 	return Status;
 }
 
-ssize_t GMemQueue::Write(const void *Ptr, ssize_t Size, int Flags)
+ssize_t LMemQueue::Write(const void *Ptr, ssize_t Size, int Flags)
 {
 	ssize_t Status = 0;
 

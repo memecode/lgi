@@ -1718,7 +1718,7 @@ LColour GTag::_Colour(bool f)
 	return LColour();
 }
 
-void GTag::CopyClipboard(GMemQueue &p, bool &InSelection)
+void GTag::CopyClipboard(LMemQueue &p, bool &InSelection)
 {
 	ssize_t Min = -1;
 	ssize_t Max = -1;
@@ -7741,7 +7741,7 @@ char *GHtml::GetSelection()
 
 	if (Cursor && Selection)
 	{
-		GMemQueue p;
+		LMemQueue p;
 		bool InSelection = false;
 		Tag->CopyClipboard(p, InSelection);
 

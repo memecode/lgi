@@ -183,7 +183,7 @@ bool GPrinter::Serialize(LString &Str, bool Write)
 		GMem DevNames(d->Info.hDevNames);
 		DEVMODE *Mode = (DEVMODE*) DevMode.Lock();
 		DEVNAMES *Names = (DEVNAMES*) DevNames.Lock();
-		GMemQueue Temp;
+		LMemQueue Temp;
 		int32 m;
 
 		// Dlg
@@ -241,7 +241,7 @@ bool GPrinter::Serialize(LString &Str, bool Write)
 		if (Str)
 		{
 			// Convert to binary
-			GMemQueue Temp;
+			LMemQueue Temp;
 
 			auto Base64Len = Str.Length();
 			auto BinaryLen = BufferLen_64ToBin(Base64Len);

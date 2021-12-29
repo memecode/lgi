@@ -61,7 +61,7 @@ GMemStream::GMemStream(LStreamI *Src, int64 Start, int64 len)
 			else
 			{
 				char Buf[512];
-				GMemQueue p(4 << 10);
+				LMemQueue p(4 << 10);
 				ssize_t r;
 				while ((r = Src->Read(Buf, sizeof(Buf))) > 0)
 				{

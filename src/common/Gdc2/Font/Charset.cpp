@@ -1163,7 +1163,7 @@ void *LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t
 	if (!InInfo || !OutInfo)
 		return NULL;
 
-	GMemQueue b;
+	LMemQueue b;
 	if (InLen < 0)
 	{
 		switch (InInfo->Type)

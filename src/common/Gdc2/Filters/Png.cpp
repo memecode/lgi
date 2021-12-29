@@ -330,7 +330,7 @@ class GdcPng : public LFilter
 	int Pos;
 	uchar *PrevScanLine;
 	LSurface *pDC;
-	GMemQueue DataPipe;
+	LMemQueue DataPipe;
 
 	LView *Parent;
 	jmp_buf Here;

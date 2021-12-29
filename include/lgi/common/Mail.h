@@ -304,41 +304,33 @@ struct ImapMailFlags
 			uint8_t ImapSeen : 1;
 			uint8_t ImapExpunged :1;
 		};
-		uint16 All;
+		uint16 All = 0;
 	};
 
 	ImapMailFlags(char *init = 0)
 	{
-		ImapAnswered = 0;
-		ImapDeleted = 0;
-		ImapDraft = 0;
-		ImapFlagged = 0;
-		ImapRecent = 0;
-		ImapSeen = 0;
-		ImapExpunged = 0;
-
 		if (init)
 			Set(init);
 	}
 
-	char *Get()
+	LString Get()
 	{
 		char s[256] = "";
 		int ch = 0;
 
 		if (ImapAnswered) ch += sprintf_s(s+ch, sizeof(s)-ch, "\\answered ");
-		if (ImapDeleted) ch += sprintf_s(s+ch, sizeof(s)-ch, "\\deleted ");
-		if (ImapDraft) ch += sprintf_s(s+ch, sizeof(s)-ch, "\\draft ");
-		if (ImapFlagged) ch += sprintf_s(s+ch, sizeof(s)-ch, "\\flagged ");
-		if (ImapRecent) ch += sprintf_s(s+ch, sizeof(s)-ch, "\\recent ");
-		if (ImapSeen) ch += sprintf_s(s+ch, sizeof(s)-ch, "\\seen ");
+		if (ImapDeleted)  ch += sprintf_s(s+ch, sizeof(s)-ch, "\\deleted ");
+		if (ImapDraft)    ch += sprintf_s(s+ch, sizeof(s)-ch, "\\draft ");
+		if (ImapFlagged)  ch += sprintf_s(s+ch, sizeof(s)-ch, "\\flagged ");
+		if (ImapRecent)   ch += sprintf_s(s+ch, sizeof(s)-ch, "\\recent ");
+		if (ImapSeen)     ch += sprintf_s(s+ch, sizeof(s)-ch, "\\seen ");
 
 		if (ch == 0)
 			return NULL;
 
 		LAssert(ch < sizeof(s));
 		s[--ch] = 0;
-		return NewStr(s);
+		return s;
 	}
 
 	void Set(const char *s)
@@ -375,26 +367,20 @@ struct ImapMailFlags
 		}
 	}
 
-	bool operator ==(ImapMailFlags &f)
+	ImapMailFlags &operator =(const ImapMailFlags &f)
 	{
-		return 	ImapAnswered == f.ImapAnswered &&
-				ImapDeleted == f.ImapDeleted &&
-				ImapDraft == f.ImapDraft &&
-				ImapFlagged == f.ImapFlagged &&
-				ImapRecent == f.ImapRecent &&
-				ImapSeen == f.ImapSeen &&
-				ImapExpunged == f.ImapExpunged;
+		All = f.All;
+		return *this;
 	}
 
-	bool operator !=(ImapMailFlags &f)
+	bool operator ==(ImapMailFlags &f) const
 	{
-		return !(ImapAnswered == f.ImapAnswered &&
-				ImapDeleted == f.ImapDeleted &&
-				ImapDraft == f.ImapDraft &&
-				ImapFlagged == f.ImapFlagged &&
-				ImapRecent == f.ImapRecent &&
-				ImapSeen == f.ImapSeen &&
-				ImapExpunged == f.ImapExpunged);
+		return All == f.All;
+	}
+
+	bool operator !=(ImapMailFlags &f) const
+	{
+		return All != f.All;
 	}
 };
 

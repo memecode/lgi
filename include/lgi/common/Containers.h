@@ -924,7 +924,7 @@ public:
 /// PreAlloc size to the constructor. This can reduce the number of blocks
 /// of memory being used (and their associated alloc/free time and
 /// tracking overhead) in high volume situations.
-class LgiClass GMemQueue : public LStream
+class LgiClass LMemQueue : public LStream
 {
 protected:
 	/// Data block. These can contain a mix of 3 types of data:
@@ -967,16 +967,16 @@ protected:
 
 public:
 	/// Constructor
-	GMemQueue
+	LMemQueue
 	(
 		/// Sets the block size, which means allocating ahead and then joining
 		/// together smaller inserts into 1 continuous block.
 		size_t PreAlloc = 0
 	);
 	/// Destructor
-	virtual ~GMemQueue();
+	virtual ~LMemQueue();
 
-	GMemQueue &operator =(GMemQueue &p);
+	LMemQueue &operator =(LMemQueue &p);
 
 	/// Empties the container freeing any memory used.
 	virtual void Empty();
@@ -1014,7 +1014,7 @@ public:
 };
 
 /// A version of GBytePipe for strings. Adds some special handling for strings.
-class LgiClass LStringPipe : public GMemQueue
+class LgiClass LStringPipe : public LMemQueue
 {
 	ssize_t LineChars();
 	ssize_t SaveToBuffer(char *Str, ssize_t BufSize, ssize_t Chars);
@@ -1025,7 +1025,7 @@ public:
 	(
 		/// Number of bytes to allocate per block.
 		int PreAlloc = -1
-	) : GMemQueue(PreAlloc) {}
+	) : LMemQueue(PreAlloc) {}
 	
 	~LStringPipe() {}
 
