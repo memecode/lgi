@@ -1144,7 +1144,11 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 			Fx += b.X();
 		}
 	
-	#elif defined MAC && !defined(LGI_SDL)
+	#elif defined(LGI_SDL)
+	
+		LAssert(!"Impl me");
+	
+	#elif defined(MAC)
 
 		if (Hnd && Str)
 		{
@@ -1183,10 +1187,6 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 
 			#endif
 		}
-	
-	#elif defined(LGI_SDL)
-	
-		LAssert(!"Impl me");
 	
 	#else // This case is for Win32 and Haiku.
 	

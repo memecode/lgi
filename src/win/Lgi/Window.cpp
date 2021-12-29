@@ -141,6 +141,12 @@ LWindow::~LWindow()
 	DeleteObj(d);
 }
 
+int LWindow::WaitThread()
+{
+	// No thread to wait on...
+	return 0;
+}
+
 bool LWindow::SetIcon(const char *Icon)
 {
 	return CreateClassW32(LAppInst->Name(), LoadIcon(LProcessInst(), (LPCWSTR)Icon)) != 0;

@@ -253,10 +253,10 @@ public:
 	AppWnd();
 	~AppWnd();
 	
-	const char *GetClass() const { return "AppWnd"; }
+	const char *GetClass() override { return "AppWnd"; }
 
 	bool IsClean();
-	void SaveAll(std::function<void(bool)> Callback);
+	void SaveAll(std::function<void(bool)> Callback, bool CloseDirty = false);
 	void CloseAll();
 	IdeDoc *OpenFile(const char *FileName, NodeSource *Src = 0);
 	IdeDoc *NewDocWnd(const char *FileName, NodeSource *Src);

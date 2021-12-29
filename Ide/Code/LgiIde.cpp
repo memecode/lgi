@@ -2463,6 +2463,7 @@ struct SaveState
 	LArray<IdeProject*> Projects;
 	std::function<void(bool)> Callback;
 	bool Status = true;
+	bool CloseDirty = false;
 
 	void Iterate()
 	{
@@ -2477,7 +2478,11 @@ struct SaveState
 				if (ok)
 					d->OnFile(doc->GetFileName());
 				else
+				{
+					if (CloseDirty)
+						delete doc;
 					Status = false;
+				}
 				// printf("SetClean cb iter\n", ok);
 				Iterate();
 			});
@@ -2492,7 +2497,11 @@ struct SaveState
 				if (ok)
 					d->OnFile(proj->GetFileName(), true);
 				else
+				{
+					if (CloseDirty)
+						delete proj;
 					Status = false;
+				}
 				Iterate();
 			});
 		}
@@ -2508,11 +2517,12 @@ struct SaveState
 	}
 };
 
-void AppWnd::SaveAll(std::function<void(bool)> Callback)
+void AppWnd::SaveAll(std::function<void(bool)> Callback, bool CloseDirty)
 {
 	auto ss = new SaveState;	
 	ss->d = d;
 	ss->Callback = Callback;
+	ss->CloseDirty = CloseDirty;
 	for (auto Doc: d->Docs)
 	{
 		if (!Doc->GetClean())
@@ -2556,9 +2566,8 @@ bool AppWnd::OnRequestClose(bool IsOsQuit)
 	{
 		SaveAll([](bool status)
 		{
-			if (status)
-				LCloseApp();
-		});	
+			LCloseApp();
+		},	true);	
 	
 		return false;
 	}
