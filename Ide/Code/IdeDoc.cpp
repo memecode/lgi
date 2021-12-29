@@ -1807,6 +1807,37 @@ void IdeDoc::SetDirty()
 	d->UpdateName();
 }
 
+bool IdeDoc::GetClean()
+{
+	return !d->Edit->IsDirty();
+}
+
+LString IdeDoc::GetFullPath()
+{
+	LAutoString Base;
+	if (GetProject())
+		Base = GetProject()->GetBasePath();
+	
+	LString LocalPath;
+	if (d->GetLocalFile() &&
+		LIsRelativePath(LocalPath) &&
+		Base)
+	{
+		char p[MAX_PATH];
+		LMakePath(p, sizeof(p), Base, d->GetLocalFile());
+		LocalPath = p;
+	}
+	else
+	{
+		LocalPath = d->GetLocalFile();
+	}
+	
+	if (d->Project)
+		d->Project->CheckExists(LocalPath);
+
+	return LocalPath;
+}
+
 void IdeDoc::SetClean(std::function<void(bool)> Callback)
 {
 	static bool Processing = false;
@@ -1819,23 +1850,7 @@ void IdeDoc::SetClean(std::function<void(bool)> Callback)
 		LAutoString Base;
 		if (GetProject())
 			Base = GetProject()->GetBasePath();
-		
-		LString LocalPath;
-		if (d->GetLocalFile() &&
-			LIsRelativePath(LocalPath) &&
-			Base)
-		{
-			char p[MAX_PATH];
-			LMakePath(p, sizeof(p), Base, d->GetLocalFile());
-			LocalPath = p;
-		}
-		else
-		{
-			LocalPath = d->GetLocalFile();
-		}
-		
-		if (d->Project)
-			d->Project->CheckExists(LocalPath);
+		LString LocalPath = GetFullPath();
 
 		auto OnSave = [&](bool ok)
 		{

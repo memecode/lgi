@@ -216,7 +216,7 @@
 				<Node File="./src/common/Gdc2/Font/Font.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/Font.h" Type="3" Platforms="15" />
 				<Node File="./include/lgi/common/FontCache.h" Type="3" Platforms="15" />
-				<Node File="./src/common/Gdc2/Font/FontCodePages.cpp" Type="2" Platforms="15" />
+				<Node File=".\src\common\Gdc2\Font\Charset.cpp" Type="2" Platforms="15" />
 				<Node File="./private/common/FontPriv.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/FontSystem.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/FontType.cpp" Type="2" Platforms="15" />
@@ -467,7 +467,7 @@
 				<All>0</All>
 			</DebugAdmin>
 			<Executable>
-				<Linux />
+				<Windows />
 			</Executable>
 			<CCrossCompiler />
 			<CppCrossCompiler />
@@ -513,6 +513,7 @@
 /usr/include/libappindicator3-0.1
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -536,6 +537,7 @@ network
 be</Release>
 				</Haiku>
 				<All />
+				<Windows />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -546,6 +548,7 @@ be</Release>
 					<Debug>lgi</Debug>
 					<Release>lgi</Release>
 				</Haiku>
+				<Windows />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
@@ -563,17 +566,17 @@ _FILE_OFFSET_BITS=64</Debug>
 _GNU_SOURCE
 _FILE_OFFSET_BITS=64</Release>
 				</Haiku>
-				<Linux />
+				<Windows />
 			</Defines>
 			<LibraryPaths>
 				<All />
-				<Linux />
+				<Windows />
 			</LibraryPaths>
 			<ApplicationIcon />
 		</Build>
 		<Advanced>
 			<PostBuildCommands>
-				<Linux />
+				<Windows />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>

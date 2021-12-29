@@ -3037,6 +3037,18 @@ bool IdeProject::CheckExists(LAutoString &p, bool Debug)
 		}, Debug);
 }
 
+bool IdeProject::GetClean()
+{
+	for (auto i: *this)
+	{
+		ProjectNode *p = dynamic_cast<ProjectNode*>(i);
+		if (p && !p->GetClean())
+			return false;
+	}
+	
+	return !d->Dirty && !d->UserFileDirty;
+}
+
 void IdeProject::SetClean(std::function<void(bool)> OnDone)
 {
 	auto CleanNodes = [&]()

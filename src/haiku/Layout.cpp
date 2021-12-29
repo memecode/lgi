@@ -13,8 +13,6 @@
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Notifications.h"
 
-#define M_SET_SCROLL		(M_USER + 0x2000)
-
 //////////////////////////////////////////////////////////////////////////////
 LLayout::LLayout()
 {
@@ -135,7 +133,6 @@ void LLayout::AttachScrollBars()
 
 bool LLayout::SetScrollBars(bool x, bool y)
 {
-	#ifdef M_SET_SCROLL
 	if (x ^ (HScroll != NULL)
 		||
 		y ^ (VScroll != NULL))
@@ -150,15 +147,14 @@ bool LLayout::SetScrollBars(bool x, bool y)
 			_SetScroll.x = x;
 			_SetScroll.y = y;
 			_SetScroll.SentMsg = true;
+			
+			// printf("%s:%i - sending M_SET_SCROLL to myself=%s.\n", _FL, GetClass());
 			return PostEvent(M_SET_SCROLL, x, y);
 		}
 		
 		// Duplicate... ignore...
 		return true;
 	}
-	#else
-	_SetScrollBars(x, y);
-	#endif
 
 	return true;
 }
@@ -287,22 +283,20 @@ LRect &LLayout::GetClient(bool ClientSpace)
 
 LMessage::Param LLayout::OnEvent(LMessage *Msg)
 {
-	#ifdef M_SET_SCROLL
 	if (Msg->Msg() == M_SET_SCROLL)
 	{
 		_SetScroll.SentMsg = false;
+		// printf("%s:%i - receiving M_SET_SCROLL myself=%s.\n", _FL, GetClass());
 		_SetScrollBars(Msg->A(), Msg->B());
 		
 		if (HScroll)
 			HScroll->SendNotify(LNotifyScrollBarCreate);
 		if (VScroll)
 			VScroll->SendNotify(LNotifyScrollBarCreate);
+		
 		return 0;
 	}
-	#endif
 
-	// if (VScroll) VScroll->OnEvent(Msg);
-	// if (HScroll) HScroll->OnEvent(Msg);
 	int Status = LView::OnEvent(Msg);
 	if (Msg->Msg() == M_CHANGE &&
 		Status == -1 &&

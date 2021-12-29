@@ -341,6 +341,14 @@ void ProjectNode::AddNodes(LArray<ProjectNode*> &Nodes)
 	}
 }
 
+bool ProjectNode::GetClean()
+{
+	if (Dep)
+		return Dep->GetClean();
+
+	return true;
+}
+
 void ProjectNode::SetClean()
 {
 	auto CleanProj = [&]()

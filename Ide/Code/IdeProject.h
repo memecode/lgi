@@ -184,6 +184,7 @@ public:
 	void CreateProject();
 	ProjectStatus OpenFile(const char *FileName);
 	bool SaveFile();
+	bool GetClean();
 	void SetClean(std::function<void(bool)> OnDone);
 	void SetDirty();
 	void SetUserFileDirty();

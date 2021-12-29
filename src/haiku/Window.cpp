@@ -98,7 +98,10 @@ public:
 
 	bool QuitRequested()
 	{
-		return Wnd->OnRequestClose(false);
+		printf("QuitRequested() starting.. %s\n", Wnd->GetClass());
+		auto r = Wnd->OnRequestClose(false);
+		printf("QuitRequested()=%i\n", r);
+		return r;
 	}
 
 	void MessageReceived(BMessage *message)
@@ -305,6 +308,8 @@ bool LWindow::Attach(LViewI *p)
 
 bool LWindow::OnRequestClose(bool OsShuttingDown)
 {
+	printf("%s:%i - on req close.\n", _FL);
+
 	if (GetQuitOnClose())
 		LCloseApp();
 

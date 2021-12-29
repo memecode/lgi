@@ -265,7 +265,24 @@ public:
 		}
 		else d->View->OnEvent((LMessage*)message);
 		
+		if (message->what == B_MOUSE_WHEEL_CHANGED)
+		{
+			float x = 0.0f, y = 0.0f;
+			message->FindFloat("be:wheel_delta_x", &x);
+			message->FindFloat("be:wheel_delta_y", &y);
+			d->View->OnMouseWheel(y * 3.0f);
+		}
+		else if (message->what == M_SET_SCROLL)
+		{
+			return;
+		}
+		
+		#if 1
+		// If we call this it will start passing it to our parent views...
+		// Which is definately NOT what we want. There may be cases where
+		// this is desirable. Unknown at this point.
 		Parent::MessageReceived(message);
+		#endif
 	}
 
 	void Draw(BRect updateRect)

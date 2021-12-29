@@ -109,6 +109,7 @@ public:
 			if (View)
 			{
 				auto r = View->PostEvent(M_PULSE, 0, 0, 50/*milliseconds*/);
+				#if 0
 				if (!r)
 				{
 					auto now = LCurrentTime();
@@ -118,7 +119,7 @@ public:
 						printf("%s:%i - PulseThread::PostEvent failed for %p/%s.\n", _FL, View, ViewClass.Get());
 					}
 				}
-				// Cancel();
+				#endif
 			}
 		}
 		

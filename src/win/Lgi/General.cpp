@@ -902,8 +902,6 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 				assert(0);
 			}
 
-			
-
 			#endif
 
 			Asserting = false;

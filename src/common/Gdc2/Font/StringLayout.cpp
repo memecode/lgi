@@ -307,6 +307,12 @@ bool LStringLayout::DoLayout(int Width, int MinYSize, bool DebugLog)
 	for (auto Run: Text)
 	{
 		char *Start = Run->Text;
+		if (!Start)
+		{
+			LgiTrace("%s:%i - Empty text.\n", _FL);
+			break;
+		}
+		
 		LUtf8Ptr s(Start);
 
 		#if DEBUG_LAYOUT

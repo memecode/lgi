@@ -51,6 +51,8 @@ class LMdiParent : public LLayout
 	#endif
 	LMdiChild *IsChild(LViewI *v);
 	::LArray<LMdiChild*> &PrivChildren();
+	
+	bool SetScrollBars(bool x, bool y);
 
 public:
 	LMdiParent();

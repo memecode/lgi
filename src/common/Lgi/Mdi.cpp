@@ -799,20 +799,19 @@ LMdiChild *LMdiParent::IsChild(LViewI *View)
 		{
 			LMdiChild *c = dynamic_cast<LMdiChild*>(v);
 			if (c)
-			{
 				return c;
-			}
-			LAssert(0);
+
+			printf("%s:%i - Unexpected view '%s' in IsChild.\n", _FL, v->GetClass());			
 			break;
 		}
 	}
 	
-	return 0;
+	return NULL;
 }
 
 bool LMdiParent::OnViewMouse(LView *View, LMouse &m)
 {
-	if (m.Down())
+	if (m.Down() && Children.Length() > 0)
 	{
 		LMdiChild *v = IsChild(View);
 		LMdiChild *l = IsChild(*Children.rbegin());
@@ -983,9 +982,20 @@ bool LMdiParent::Detach()
 	return LLayout::Detach();
 }
 
+bool LMdiParent::SetScrollBars(bool x, bool y)
+{
+	LAssert(!"Attempt to set scroll bars on LMdiParent.\n");
+	return false;
+}
+
 void LMdiParent::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	#if MDI_TAB_STYLE
+	if (Attaching && Stricmp(Wnd->GetClass(), "LMdiChild"))
+	{
+		LAssert(0);
+	}
+	
 	if (!d->InOnPosChange /*&& Attaching*/)
 	{
 		d->Tabs.ZOff(-1, -1);

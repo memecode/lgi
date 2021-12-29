@@ -26,8 +26,10 @@ public:
 	void SetProject(IdeProject *p);	
 	IdeProject *GetProject();
 	const char *GetFileName();
+	LString GetFullPath();
 	void SetFileName(const char *f, bool Write);
 	void Focus(bool f) override;
+	bool GetClean();
 	void SetClean(std::function<void(bool)> Callback);
 	void SetDirty();
 	bool OnRequestClose(bool OsShuttingDown) override;

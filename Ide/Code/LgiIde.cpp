@@ -1735,6 +1735,8 @@ AppWnd::AppWnd()
 
 AppWnd::~AppWnd()
 {
+	LAssert(IsClean());
+
 	if (d->HBox)
 	{
 		LVariant v = d->HBox->Value();
@@ -1748,9 +1750,7 @@ AppWnd::~AppWnd()
 
 	ShutdownFtpThread();
 
-	CloseAll();
-	
-	LAppInst->AppWnd = 0;
+	LAppInst->AppWnd = NULL;
 	DeleteObj(d);
 }
 
@@ -2442,47 +2442,133 @@ void AppWnd::AppendOutput(char *Txt, AppWnd::Channels Channel)
 	}
 }
 
-void AppWnd::SaveAll()
+bool AppWnd::IsClean()
 {
 	for (auto Doc: d->Docs)
 	{
-		Doc->SetClean([&](bool ok)
-		{
-			if (ok)
-				d->OnFile(Doc->GetFileName());
-		});
+		if (!Doc->GetClean())
+			return false;
 	}
-	
+
 	for (auto Proj: d->Projects)
 	{
-		Proj->SetClean([&](bool ok)
-		{
-			if (ok)
-				d->OnFile(Proj->GetFileName(), true);
-		});
+		if (!Proj->GetClean())
+			return false;
 	}
+	
+	return true;
+}
+
+struct SaveState
+{
+	AppWndPrivate *d = NULL;
+	LArray<IdeDoc*> Docs;
+	LArray<IdeProject*> Projects;
+	std::function<void(bool)> Callback;
+	bool Status = true;
+
+	void Iterate()
+	{
+		if (Docs.Length())
+		{
+			auto doc = Docs[0];
+			Docs.DeleteAt(0);
+			printf("Saving doc...\n");
+			doc->SetClean([&](bool ok)
+			{
+				if (ok)
+					d->OnFile(doc->GetFileName());
+				else
+					Status = false;
+				Iterate();
+			});
+		}
+		else if (Projects.Length())
+		{
+			auto proj = Projects[0];
+			Projects.DeleteAt(0);
+			printf("Saving proj...\n");
+			proj->SetClean([&](bool ok)
+			{
+				if (ok)
+					d->OnFile(proj->GetFileName(), true);
+				else
+					Status = false;
+				Iterate();
+			});
+		}
+		else
+		{
+			printf("Doing callback...\n");
+			if (Callback)
+				Callback(Status);
+
+			printf("Deleting...\n");
+			delete this;
+		}
+	}
+};
+
+void AppWnd::SaveAll(std::function<void(bool)> Callback)
+{
+	auto ss = new SaveState;	
+	ss->d = d;
+	ss->Callback = Callback;
+	for (auto Doc: d->Docs)
+	{
+		if (!Doc->GetClean())
+			ss->Docs.Add(Doc);
+	}	
+	for (auto Proj: d->Projects)
+	{
+		if (!Proj->GetClean())
+			ss->Projects.Add(Proj);
+	}	
+	ss->Iterate();
 }
 
 void AppWnd::CloseAll()
 {
-	SaveAll();
-	while (d->Docs[0])
-		delete d->Docs[0];
-	
-	IdeProject *p = RootProject();
-	if (p)
-		DeleteObj(p);
-	
-	while (d->Projects[0])
-		delete d->Projects[0];	
+	SaveAll([&](auto status)
+	{	
+		if (!status)
+		{
+			LgiTrace("%s:%i - status=%i\n", _FL, status);
+			return;
+		}
+			
+		while (d->Docs[0])
+			delete d->Docs[0];
+		
+		IdeProject *p = RootProject();
+		if (p)
+			DeleteObj(p);
+		
+		while (d->Projects[0])
+			delete d->Projects[0];	
 
-	DeleteObj(d->DbgContext);
+		DeleteObj(d->DbgContext);
+	});
 }
 
-bool AppWnd::OnRequestClose(bool IsClose)
+bool AppWnd::OnRequestClose(bool IsOsQuit)
 {
-	SaveAll();
-	return LWindow::OnRequestClose(IsClose);
+	printf("AppWnd::OnRequestClose.. %i\n", IsClean());
+	if (!IsClean())
+	{
+		SaveAll([](bool status)
+		{
+			printf("SaveAll handler: %i\n", status);
+			if (status)
+				LCloseApp();
+		});	
+	
+		return false;
+	}
+	else
+	{
+		return LWindow::OnRequestClose(IsOsQuit);
+	}
 }
 
 bool AppWnd::OnBreakPoint(GDebugger::BreakPoint &b, bool Add)
@@ -3325,24 +3411,29 @@ bool AppWnd::IsReleaseMode()
 
 bool AppWnd::Build()
 {
-	SaveAll();
-	
-	IdeDoc *Top;
-	IdeProject *p = RootProject();
-	if (p)
-	{		
-		UpdateState(-1, true);
+	SaveAll([&](bool status)
+	{	
+		if (!status)
+		{
+			LgiTrace("%s:%i - status=%i\n", _FL);
+			return;
+		}
+		
+		IdeDoc *Top;
+		IdeProject *p = RootProject();
+		if (p)
+		{		
+			UpdateState(-1, true);
 
-		LMenuItem *Release = GetMenu()->FindItem(IDM_RELEASE_MODE);
-		bool IsRelease = Release ? Release->Checked() : false;
-		p->Build(false, IsRelease);
-
-		return true;
-	}
-	else if ((Top = TopDoc()))
-	{
-		return Top->Build();
-	}
+			LMenuItem *Release = GetMenu()->FindItem(IDM_RELEASE_MODE);
+			bool IsRelease = Release ? Release->Checked() : false;
+			p->Build(false, IsRelease);
+		}
+		else if ((Top = TopDoc()))
+		{
+			Top->Build();
+		}
+	});
 
 	return false;
 }
@@ -3486,7 +3577,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_SAVE_ALL:
 		{
-			SaveAll();
+			SaveAll(NULL);
 			break;
 		}
 		case IDM_SAVE:
@@ -3735,8 +3826,10 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			}
 			else
 			{
-				FindInProject Dlg(this);
-				Dlg.DoModal(NULL);
+				auto d = new FindInProject(this);
+				d->DoModal([](auto dlg, auto ctrlId){
+					delete dlg;
+				});
 			}
 			break;
 		}
@@ -3864,22 +3957,34 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_RUN:
 		{
-			SaveAll();
-			IdeProject *p = RootProject();
-			if (p)
+			SaveAll([&](bool status)
 			{
-				p->Execute();
-			}
+				if (!status)
+				{
+					LgiTrace("%s:%i - status=%i\n", _FL, status);
+					return;
+				}
+				
+				IdeProject *p = RootProject();
+				if (p)
+					p->Execute();
+			});
 			break;
 		}
 		case IDM_VALGRIND:
 		{
-			SaveAll();
-			IdeProject *p = RootProject();
-			if (p)
+			SaveAll([&](bool status)
 			{
-				p->Execute(ExeValgrind);
-			}
+				if (!status)
+				{
+					LgiTrace("%s:%i - status=%i\n", _FL, status);
+					return;
+				}
+				
+				IdeProject *p = RootProject();
+				if (p)
+					p->Execute(ExeValgrind);
+			});
 			break;
 		}
 		case IDM_FIX_MISSING_FILES:
@@ -3908,34 +4013,42 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_START_DEBUG:
 		{
-			SaveAll();
-			IdeProject *p = RootProject();
-			if (!p)
+			SaveAll([&](bool status)
 			{
-				LgiMsg(this, "No project loaded.", "Error");
-				break;
-			}
+				if (!status)
+				{
+					LgiTrace("%s:%i - status=%i\n", _FL, status);
+					return;
+				}
+				
+				IdeProject *p = RootProject();
+				if (!p)
+				{
+					LgiMsg(this, "No project loaded.", "Error");
+					return;
+				}
 
-			if (d->DbgContext)
-			{
-				d->DbgContext->OnCommand(IDM_CONTINUE);
-			}
-			else if ((d->DbgContext = p->Execute(ExeDebug)))
-			{
-				d->DbgContext->DebuggerLog = d->Output->DebuggerLog;
-				d->DbgContext->Watch = d->Output->Watch;
-				d->DbgContext->Locals = d->Output->Locals;
-				d->DbgContext->CallStack = d->Output->CallStack;
-				d->DbgContext->Threads = d->Output->Threads;
-				d->DbgContext->ObjectDump = d->Output->ObjectDump;
-				d->DbgContext->Registers = d->Output->Registers;
-				d->DbgContext->MemoryDump = d->Output->MemoryDump;
-				
-				d->DbgContext->OnCommand(IDM_START_DEBUG);
-				
-				d->Output->Value(AppWnd::DebugTab);
-				d->Output->DebugEdit->Focus(true);
-			}
+				if (d->DbgContext)
+				{
+					d->DbgContext->OnCommand(IDM_CONTINUE);
+				}
+				else if ((d->DbgContext = p->Execute(ExeDebug)))
+				{
+					d->DbgContext->DebuggerLog = d->Output->DebuggerLog;
+					d->DbgContext->Watch = d->Output->Watch;
+					d->DbgContext->Locals = d->Output->Locals;
+					d->DbgContext->CallStack = d->Output->CallStack;
+					d->DbgContext->Threads = d->Output->Threads;
+					d->DbgContext->ObjectDump = d->Output->ObjectDump;
+					d->DbgContext->Registers = d->Output->Registers;
+					d->DbgContext->MemoryDump = d->Output->MemoryDump;
+					
+					d->DbgContext->OnCommand(IDM_START_DEBUG);
+					
+					d->Output->Value(AppWnd::DebugTab);
+					d->Output->DebugEdit->Focus(true);
+				}
+			});
 			break;
 		}
 		case IDM_TOGGLE_BREAKPOINT:
@@ -3979,10 +4092,18 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_CLEAN:
 		{
-			SaveAll();
-			IdeProject *p = RootProject();
-			if (p)
-				p->Clean(true, IsReleaseMode());
+			SaveAll([&](bool status)
+			{
+				if (!status)
+				{
+					LgiTrace("%s:%i - status=%i\n", _FL, status);
+					return;
+				}
+				
+				IdeProject *p = RootProject();
+				if (p)
+					p->Clean(true, IsReleaseMode());
+			});
 			break;
 		}
 		case IDM_NEXT_MSG:
