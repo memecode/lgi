@@ -353,23 +353,19 @@ public:
 		LgiTrace("%s %s\n", Msg ? Msg : (char*)"", ToString().Get());
 	}
 
-	/// True if the left mouse button was clicked
-	bool Left() const	{ return TestFlag(Flags, LGI_EF_LEFT); }
-	/// True if the middle mouse button was clicked
-	bool Middle() const	{ return TestFlag(Flags, LGI_EF_MIDDLE); }
-	/// True if the right mouse button was clicked
-	bool Right() const	{ return TestFlag(Flags, LGI_EF_RIGHT); }
-	/// True if the mouse event is a move, false for a click event.
-	bool IsMove() const	{ return TestFlag(Flags, LGI_EF_MOVE); }
+	bool Left() const		{ return TestFlag(Flags, LGI_EF_LEFT); }
+	bool Middle() const		{ return TestFlag(Flags, LGI_EF_MIDDLE); }
+	bool Right() const		{ return TestFlag(Flags, LGI_EF_RIGHT); }
+	bool Button1() const	{ return TestFlag(Flags, LGI_EF_XBTN1); }
+	bool Button2() const	{ return TestFlag(Flags, LGI_EF_XBTN2); }
+	bool IsMove() const		{ return TestFlag(Flags, LGI_EF_MOVE); }
 
-	/// Sets the left button flag
-	void Left(bool i)	{ AssignFlag(Flags, LGI_EF_LEFT, i); }
-	/// Sets the middle button flag
-	void Middle(bool i)	{ AssignFlag(Flags, LGI_EF_MIDDLE, i); }
-	/// Sets the right button flag
-	void Right(bool i)	{ AssignFlag(Flags, LGI_EF_RIGHT, i); }
-	/// Sets the move flag
-	void IsMove(bool i)	{ AssignFlag(Flags, LGI_EF_MOVE, i); }
+	void Left(bool i)		{ AssignFlag(Flags, LGI_EF_LEFT, i); }
+	void Middle(bool i)		{ AssignFlag(Flags, LGI_EF_MIDDLE, i); }
+	void Right(bool i)		{ AssignFlag(Flags, LGI_EF_RIGHT, i); }
+	void Button1(bool i)	{ AssignFlag(Flags, LGI_EF_XBTN1, i); }
+	void Button2(bool i)	{ AssignFlag(Flags, LGI_EF_XBTN2, i); }
+	void IsMove(bool i)		{ AssignFlag(Flags, LGI_EF_MOVE, i); }
 	
 	/// Converts to screen coordinates
 	bool ToScreen();

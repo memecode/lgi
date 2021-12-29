@@ -788,7 +788,7 @@ public:
 
 struct SearchParams
 {
-	LString Text;
+	LString::Array Text;
 	#if NEW_UI
 	bool LimitToText;
 	bool LimitToDefine;
@@ -820,6 +820,7 @@ class SearchThread : public LEventTargetThread
 	AppWnd *App;
 	LList *Results;
 	SearchParams Params;
+	LCancel State;
 
 	bool HasContent(char *s);
 	class Result *Test(class ResString *s);

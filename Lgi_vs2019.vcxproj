@@ -425,7 +425,7 @@
     <ClCompile Include="src\common\Gdc2\Filters\Filter.cpp" />
     <ClCompile Include="src\common\Gdc2\Font\DisplayString.cpp" />
     <ClCompile Include="src\common\Gdc2\Font\Font.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\FontCodePages.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\Charset.cpp" />
     <ClCompile Include="src\common\Gdc2\Font\FontSystem.cpp" />
     <ClCompile Include="src\common\Gdc2\Font\FontType.cpp" />
     <ClCompile Include="src\common\Gdc2\Font\StringLayout.cpp" />

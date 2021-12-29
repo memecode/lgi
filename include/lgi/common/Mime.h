@@ -18,7 +18,7 @@ enum LMimeEncodings
 
 class LMime;
 
-class GMimeAction
+class LMimeAction
 {
 	friend class LMime;
 
@@ -27,7 +27,7 @@ protected:
 	LMime *Mime;
 
 public:
-	GMimeAction()
+	LMimeAction()
 	{
 		Mime = 0;
 	}
@@ -35,14 +35,14 @@ public:
 	virtual void Empty() {} // reset to initial state
 };
 
-class GMimeBuf : public LStringPipe
+class LMimeBuf : public LStringPipe
 {
 	int Total;
 	LStreamI *Src;
 	LStreamEnd *End;
 
 public:
-	GMimeBuf(LStreamI *src, LStreamEnd *end);
+	LMimeBuf(LStreamI *src, LStreamEnd *end);
 
 	ssize_t Pop(LArray<char> &Buf) override;
 	ssize_t Pop(char *Str, ssize_t BufSize) override;
@@ -115,10 +115,10 @@ public:
 	bool SetFileName(const char *s)	{ return SetSub("Content-Type", "Name", s, DefaultCharset); }
 
 	// Streaming
-	class GMimeText
+	class LMimeText
 	{
 	public:
-		class GMimeDecode : public LPullStreamer, public GMimeAction
+		class LMimeDecode : public LPullStreamer, public LMimeAction
 		{
 		public:
 			ssize_t Pull(LStreamI *Source, LStreamEnd *End = 0);
@@ -126,7 +126,7 @@ public:
 			void Empty();
 		} Decode;
 
-		class GMimeEncode : public GPushStreamer, public GMimeAction
+		class LMimeEncode : public GPushStreamer, public LMimeAction
 		{
 		public:
 			ssize_t Push(LStreamI *Dest, LStreamEnd *End = 0);
@@ -135,20 +135,20 @@ public:
 
 	} Text;
 
-	friend class LMime::GMimeText::GMimeDecode;
-	friend class LMime::GMimeText::GMimeEncode;
+	friend class LMime::LMimeText::LMimeDecode;
+	friend class LMime::LMimeText::LMimeEncode;
 
-	class GMimeBinary
+	class LMimeBinary
 	{
 	public:
-		class GMimeRead : public LPullStreamer, public GMimeAction
+		class LMimeRead : public LPullStreamer, public LMimeAction
 		{
 		public:
 			ssize_t Pull(LStreamI *Source, LStreamEnd *End = 0);
 			void Empty();
 		} Read;
 
-		class GMimeWrite : public GPushStreamer, public GMimeAction
+		class LMimeWrite : public GPushStreamer, public LMimeAction
 		{
 		public:
 			int64 GetSize();
@@ -158,8 +158,8 @@ public:
 
 	} Binary;
 
-	friend class LMime::GMimeBinary::GMimeRead;
-	friend class LMime::GMimeBinary::GMimeWrite;
+	friend class LMime::LMimeBinary::LMimeRead;
+	friend class LMime::LMimeBinary::LMimeWrite;
 };
 
 #endif

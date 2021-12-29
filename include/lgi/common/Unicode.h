@@ -296,7 +296,9 @@ protected:
 	uint8_t *Ptr;
 
 public:
-	LUtf8Ptr(const void *p = 0);
+	static bool Warn;
+
+	LUtf8Ptr(const void *p = NULL);
 
 	/// Assign a new pointer to the string
 	LUtf8Ptr &operator =(char *s) { Ptr = (uint8_t*)s; return *this; }

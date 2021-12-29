@@ -211,7 +211,7 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\common\Gdc2\Font\FontCodePages.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\Charset.cpp" />
     <ClCompile Include="src\common\General\Containers.cpp" />
     <ClCompile Include="src\common\General\DateTime.cpp" />
     <ClCompile Include="src\common\General\FileCommon.cpp" />

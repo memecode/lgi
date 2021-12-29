@@ -2,6 +2,7 @@
 #include "lgi/common/TextConvert.h"
 #include "lgi/common/Mime.h"
 #include "lgi/common/Base64.h"
+#include "lgi/common/Charset.h"
 
 // return true if there are any characters with the 0x80 bit set
 bool Is8Bit(char *Text)
@@ -176,7 +177,10 @@ char *DecodeRfc2047(char *Str)
 						}
 						else
 						{
-							LAutoString Utf8((char*)LNewConvertCp("utf-8", Block, Cp, Len));
+							auto Inst = LCharsetSystem::Inst();
+							LString Detect = Inst && Inst->DetectCharset ? Inst->DetectCharset(LString(Block, Len)) : NULL;
+
+							LAutoString Utf8((char*)LNewConvertCp("utf-8", Block, Detect ? Detect : Cp, Len));
 							if (Utf8)
 							{
 								if (LIsUtf8(Utf8))
@@ -256,7 +260,7 @@ char *EncodeRfc2047(char *Str, const char *CodePage, List<char> *CharsetPrefs, s
 		size_t Len = strlen(Str);;
 		if (_stricmp(CodePage, "utf-8") == 0)
 		{
-			DestCp = LDetectCharset(Str, Len, CharsetPrefs);
+			DestCp = LUnicodeToCharset(Str, Len, CharsetPrefs);
 		}
 
 		int Chars = 0;

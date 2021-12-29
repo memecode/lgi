@@ -7,6 +7,7 @@
 #include "lgi/common/Cancel.h"
 #include "lgi/common/StringClass.h"
 #include "lgi/common/Dom.h"
+#include "lgi/common/DateTime.h"
 
 /// Generic progress class, keeps track of how far through a task you are.
 class LgiClass Progress :
@@ -16,13 +17,14 @@ class LgiClass Progress :
 {
 protected:
 	LString Description, Type;
-	int64 Start;
-	int64 Val;
-	int64 Low, High;
-	double Scale;
+	uint64_t Start = 0;
+	LDateTime StartDt;
+	int64_t Val = 0;
+	int64_t Low = 0, High = 0;
+	double Scale = 1.0;
 
 public:
-	uint64 UserData;
+	uint64 UserData = 0;
 	
 	Progress();
 	Progress(char *desc, int64 l, int64 h, char *type = NULL, double scale = 1.0);

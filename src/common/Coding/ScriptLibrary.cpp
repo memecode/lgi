@@ -548,41 +548,41 @@ bool SystemFunctions::Print(LScriptArguments &Args)
 		}
 
 		#if 1
-		size_t Len = strlen(f);
-		Out->Write(f, Len);
+			size_t Len = strlen(f);
+			Out->Write(f, Len);
 		#else
-		char *i = f, *o = f;
-		for (; *i; i++)
-		{
-			if (*i == '\\')
+			char *i = f, *o = f;
+			for (; *i; i++)
 			{
-				i++;
-				switch (*i)
+				if (*i == '\\')
 				{
-					case 'n':
-						*o++ = '\n';
-						break;
-					case 'r':
-						*o++ = '\r';
-						break;
-					case 't':
-						*o++ = '\t';
-						break;
-					case '\\':
-						*o++ = '\\';
-						break;
-					case '0':
-						*o++ = 0;
-						break;
+					i++;
+					switch (*i)
+					{
+						case 'n':
+							*o++ = '\n';
+							break;
+						case 'r':
+							*o++ = '\r';
+							break;
+						case 't':
+							*o++ = '\t';
+							break;
+						case '\\':
+							*o++ = '\\';
+							break;
+						case '0':
+							*o++ = 0;
+							break;
+					}
+				}
+				else
+				{
+					*o++ = *i;
 				}
 			}
-			else
-			{
-				*o++ = *i;
-			}
-		}
-		*o = 0;
-		Out->Write(f, o - f);
+			*o = 0;
+			Out->Write(f, o - f);
 		#endif
 	}
 
@@ -1051,6 +1051,12 @@ bool SystemFunctions::OsVersion(LScriptArguments &Args)
 	return true;
 }
 
+bool SystemFunctions::Yeild(LScriptArguments &Args)
+{
+	LYield();
+	return true;
+}
+
 #define DefFn(Name) \
 	GHostFunc(#Name, 0, (ScriptCmd)&SystemFunctions::Name)
 
@@ -1104,6 +1110,7 @@ GHostFunc SystemLibrary[] =
 	DefFn(System),
 	DefFn(OsName),
 	DefFn(OsVersion),
+	DefFn(Yeild),
 
 	// End of list marker
 	GHostFunc(0, 0, 0),

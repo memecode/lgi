@@ -175,7 +175,7 @@ public:
 	bool GetAllNodes(LArray<ProjectNode*> &Nodes);
 	bool HasNode(ProjectNode *Node);
 
-	// Project heirarchy
+	// Project hierarchy
 	IdeProject *GetParentProject();
 	bool GetChildProjects(List<IdeProject> &c);
 	void SetParentProject(IdeProject *p);

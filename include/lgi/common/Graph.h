@@ -16,11 +16,16 @@ public:
         PointGraph,
     };
 
-    struct GGraphPair
+    struct Pair
     {
 	    LVariant x, y;
 	    void *UserData;
     };
+
+	struct Range
+	{
+		LVariant Min, Max;
+	};
     
 	LGraph(	/// Control identifier
 			int Id,
@@ -40,9 +45,13 @@ public:
 	bool AddPair(char *x, char *y, void *UserData = 0);
 	void SetStyle(Style s);
 	Style GetStyle();
-	LArray<GGraphPair*> *GetSelection();
+	LArray<Pair*> *GetSelection();
 	bool ShowCursor();
 	void ShowCursor(bool show);
+	const char *GetLabel(bool XAxis);
+	void SetLabel(bool XAxis, const char *Label);
+	Range GetRange(bool XAxis);
+	void SetRange(bool XAxis, Range r);
 
     // Impl
 	void OnPaint(LSurface *pDC);

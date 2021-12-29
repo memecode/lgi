@@ -50,7 +50,7 @@ class LFileSelectPrivate
 
 	char16 *TypeStrW()
 	{
-		GMemQueue p;
+		LMemQueue p;
 
 		for (auto Type: TypeList)
 		{

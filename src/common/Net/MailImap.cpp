@@ -2491,7 +2491,9 @@ bool MailIMap::Append(const char *Folder, ImapMailFlags *Flags, const char *Msg,
 
 	if (Folder && Msg && Lock(_FL))
 	{
-		LAutoString Flag(Flags ? Flags->Get() : NULL);
+		LString Flag;
+		if (Flags)
+			Flag = Flags->Get();
 		LAutoString Path(EncodePath(Folder));
 
 		int Cmd = d->NextCmd++;

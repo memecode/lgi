@@ -918,7 +918,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			LAutoWString WEnv;
 			if (d->EnvironmentChanged)
 			{
-				GMemQueue q(256);
+				LMemQueue q(256);
 				for (unsigned i=0; i<d->Environment.Length(); i++)
 				{
 					Variable &v = d->Environment[i];

@@ -1732,7 +1732,14 @@ LString LDateTime::DescribePeriod(LDateTime to)
 	hrs -= days * 24;
 	
 	LString s;
-	s.Printf("%id %ih %im %is", days, hrs, mins, (int)seconds);
+	if (days > 0)
+		s.Printf("%id %ih %im %is", days, hrs, mins, (int)seconds);
+	else if (hrs > 0)
+		s.Printf("%ih %im %is", hrs, mins, (int)seconds);
+	else if (mins > 0)
+		s.Printf("%im %is", mins, (int)seconds);
+	else
+		s.Printf("%is", (int)seconds);
 	return s;
 }
 

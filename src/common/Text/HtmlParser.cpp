@@ -4,6 +4,7 @@
 #include "lgi/common/HtmlCommon.h"
 #include "lgi/common/HtmlParser.h"
 #include "lgi/common/Unicode.h"
+#include "lgi/common/Charset.h"
 
 #define FEATURE_REATTACH_ELEMENTS		1
 #define IsBlock(d)						((d) == LCss::DispBlock)
@@ -354,6 +355,15 @@ void DumpDomTree(LHtmlElement *e, int Depth = 0)
 
 bool LHtmlParser::Parse(LHtmlElement *Root, const char *Doc)
 {
+	/*
+	if (Doc)
+	{
+		LFile f("c:\\tmp\\parser.html", O_WRITE);
+		f.SetSize(0);
+		f.Write(Doc, strlen(Doc));
+	}
+	*/
+
 	SourceData.Empty();
 	CurrentSrc = Doc;
 	OpenTags.Length(0);

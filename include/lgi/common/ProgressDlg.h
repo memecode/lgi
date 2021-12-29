@@ -16,17 +16,15 @@ class LgiClass LProgressPane : public Progress, public LLayout
 {
 	friend class LProgressDlg;
 
-	Progress *Ref;
-	LProgressDlg *Dlg;
+	Progress *Ref = NULL;
+	LProgressDlg *Dlg = NULL;
 
 protected:
-	LTableLayout *t;
-	LTextLabel *Desc;
-	LTextLabel *ValText;
-	LTextLabel *Rate;
+	LTableLayout *t = NULL;
+	LTextLabel *Desc = NULL, *ValText = NULL, *Rate = NULL, *Remaining = NULL;
 	LProgressView *Bar;
-	LButton *But;
-	bool UiDirty;
+	LButton *But = NULL;
+	bool UiDirty = false;
 
 public:
 	LProgressPane(LProgressDlg *dlg);

@@ -5,6 +5,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Token.h"
 #include "lgi/common/Font.h"
+#include "lgi/common/Charset.h"
 
 struct UnicodeMappings
 {
@@ -193,15 +194,18 @@ bool LIsUtf8(const char *s, ssize_t len)
 		}
 		else goto Utf8Error;
 	}
+
 	return true;
 
 Utf8Error:
+	#if 0
 	LgiTrace("%s:%i - Invalid utf, len=%i, bytes=", _FL, len);
 	for (int i=0; len < 0 ? s[i] : i<MIN(16, len); i++)
 	{
 		LgiTrace("%02.2x,", (uint8_t)s[i]);
 	}
 	LgiTrace("\n");
+	#endif
 	return false;
 }
 				
@@ -774,6 +778,10 @@ LCharset()
 };
 
 static LCharsetSystem CharsetSystem;
+LCharsetSystem *LCharsetSystem::Inst()
+{
+	return &CharsetSystem;
+}
 
 LCharset *LGetCpInfo(const char *Cs)
 {
@@ -1155,7 +1163,7 @@ void *LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t
 	if (!InInfo || !OutInfo)
 		return NULL;
 
-	GMemQueue b;
+	LMemQueue b;
 	if (InLen < 0)
 	{
 		switch (InInfo->Type)
@@ -1444,7 +1452,7 @@ bool LMatchCharset(short *Map, char16 *Utf, bool &Has8Bit)
 	return false;
 }
 
-const char *LDetectCharset(const char *Utf8, ssize_t Len, List<char> *Prefs)
+const char *LUnicodeToCharset(const char *Utf8, ssize_t Len, List<char> *Prefs)
 {
 	const char *Status = "utf-8"; // The default..
 

@@ -27,6 +27,7 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/FindReplaceDlg.h"
 #include "lgi/common/Homoglyphs.h"
+#include "lgi/common/Charset.h"
 
 #include "HtmlPriv.h"
 
@@ -1717,7 +1718,7 @@ LColour GTag::_Colour(bool f)
 	return LColour();
 }
 
-void GTag::CopyClipboard(GMemQueue &p, bool &InSelection)
+void GTag::CopyClipboard(LMemQueue &p, bool &InSelection)
 {
 	ssize_t Min = -1;
 	ssize_t Max = -1;
@@ -3435,13 +3436,13 @@ void GTag::SetCssStyle(const char *Style)
 	if (Style)
 	{
 		// Strip out comments
-		char *Comment = 0;
+		char *Comment = NULL;
 		while ((Comment = strstr((char*)Style, "/*")))
 		{
 			char *End = strstr(Comment+2, "*/");
 			if (!End)
 				break;
-			for (char *c = Comment; c<=End+2; c++)
+			for (char *c = Comment; c<End+2; c++)
 				*c = ' ';
 		}
 
@@ -7740,7 +7741,7 @@ char *GHtml::GetSelection()
 
 	if (Cursor && Selection)
 	{
-		GMemQueue p;
+		LMemQueue p;
 		bool InSelection = false;
 		Tag->CopyClipboard(p, InSelection);
 

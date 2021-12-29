@@ -143,7 +143,7 @@ public:
 		
 		return PostObject(GetHandle(), M_CHECK_TEXT, (LMessage::Param)ResponseHnd, c);
 	}
-	
+
 	bool InstallDictionary()
 	{
 		return PostEvent(M_INSTALL_DICTIONARY);

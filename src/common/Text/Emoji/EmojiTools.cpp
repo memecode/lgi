@@ -128,9 +128,9 @@ const char16 *mail_link = L"<a href=\'mailto:%.*s\'>%.*s</a>";
 const char16 *anchor = L"<a href=\'%.*s\'>%.*s</a>";
 const char16 *img = L"<img src=\'file:/%S\' style=\'x-rect:rect(%S);\'>";
 
-struct EmojiMemQ : GMemQueue
+struct EmojiMemQ : LMemQueue
 {
-	EmojiMemQ() : GMemQueue(1024)
+	EmojiMemQ() : LMemQueue(1024)
 	{
 	}
 	
@@ -139,13 +139,13 @@ struct EmojiMemQ : GMemQueue
 	{
 		LAutoPtr<uint32_t> c((uint32_t*)LNewConvertCp("utf-32", s, LGI_WideCharset, bytes));
 		int len = Strlen(c.Get());
-		return GMemQueue::Write(c, len * sizeof(uint32_t));
+		return LMemQueue::Write(c, len * sizeof(uint32_t));
 	}
 	#endif
 	
 	ssize_t WriteWide(const WChar *s, ssize_t bytes)
 	{
-		return GMemQueue::Write(s, bytes);
+		return LMemQueue::Write(s, bytes);
 	}
 };
 

@@ -540,6 +540,8 @@ LHtmlStatic::LHtmlStatic() :
 
 LHtmlStatic::~LHtmlStatic()
 {
+	if (Inst == this)
+		Inst = NULL;
 }
 
 LHtmlElemInfo *LHtmlStatic::GetTagInfo(const char *Tag)

@@ -64,20 +64,20 @@ public:
 	LibSSL()
 	{
 		#if defined MAC
-		char p[MAX_PATH];
-		LMakePath(p, sizeof(p), LGetExeFile(), "Contents/Frameworks/" SSL_LIBRARY);
-		if (!Load(p))
-			LgiTrace("%s:%i - Failed to load '%s'\n", _FL, p);
+			char p[MAX_PATH];
+			LMakePath(p, sizeof(p), LGetExeFile(), "Contents/Frameworks/" SSL_LIBRARY);
+			if (!Load(p))
+				LgiTrace("%s:%i - Failed to load '%s'\n", _FL, p);
 		#elif defined LINUX
-		char p[MAX_PATH];
-		if (LMakePath(p, sizeof(p), LGetExePath(), "libssl.so"))
-		{
-			if (LFileExists(p))
+			char p[MAX_PATH];
+			if (LMakePath(p, sizeof(p), LGetExePath(), "libssl.so"))
 			{
-			    LgiTrace("%s:%i - loading SSL library '%s'\n", _FL, p);
-				Load(p);
+				if (LFileExists(p))
+				{
+					LgiTrace("%s:%i - loading SSL library '%s'\n", _FL, p);
+					Load(p);
+				}
 			}
-		}
 		#endif
 
 		if (!IsLoaded())
@@ -86,31 +86,31 @@ public:
 		if (!IsLoaded())
 		{
 			#ifdef WIN32
-			char p[MAX_PATH], leaf[32];
-			int bits = sizeof(size_t)*8;
-			sprintf_s(leaf, sizeof(leaf), "OpenSSL-Win%i", bits);
-			LMakePath(p, sizeof(p), LGetSystemPath(LSP_USER_APPS, bits), leaf);
-			auto prev = FileDev->GetCurrentFolder();
-			FileDev->SetCurrentFolder(p);
-			LMakePath(p, sizeof(p), p, SSL_LIBRARY);
-			auto loaded = Load(p);
-			FileDev->SetCurrentFolder(prev);
+				char p[MAX_PATH], leaf[32];
+				int bits = sizeof(size_t)*8;
+				sprintf_s(leaf, sizeof(leaf), "OpenSSL-Win%i", bits);
+				LMakePath(p, sizeof(p), LGetSystemPath(LSP_USER_APPS, bits), leaf);
+				auto prev = FileDev->GetCurrentFolder();
+				FileDev->SetCurrentFolder(p);
+				LMakePath(p, sizeof(p), p, SSL_LIBRARY);
+				auto loaded = Load(p);
+				FileDev->SetCurrentFolder(prev);
 			#endif
 		}
     }
 
 	#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	DynFunc0(int, OPENSSL_library_init);
-	DynFunc0(int, OPENSSL_load_error_strings);
-	DynFunc2(int, OPENSSL_init_ssl, uint64_t, opts, const OPENSSL_INIT_SETTINGS *, settings);
-	DynFunc0(const SSL_METHOD *, TLS_method);
-	DynFunc0(const SSL_METHOD *, TLS_server_method);
-	DynFunc0(const SSL_METHOD *, TLS_client_method);
+		DynFunc0(int, OPENSSL_library_init);
+		DynFunc0(int, OPENSSL_load_error_strings);
+		DynFunc2(int, OPENSSL_init_ssl, uint64_t, opts, const OPENSSL_INIT_SETTINGS *, settings);
+		DynFunc0(const SSL_METHOD *, TLS_method);
+		DynFunc0(const SSL_METHOD *, TLS_server_method);
+		DynFunc0(const SSL_METHOD *, TLS_client_method);
 	#else
-	DynFunc0(int, SSL_library_init);
-	DynFunc0(int, SSL_load_error_strings);
-	DynFunc0(SSL_METHOD*, SSLv23_client_method);
-	DynFunc0(SSL_METHOD*, SSLv23_server_method);
+		DynFunc0(int, SSL_library_init);
+		DynFunc0(int, SSL_load_error_strings);
+		DynFunc0(SSL_METHOD*, SSLv23_client_method);
+		DynFunc0(SSL_METHOD*, SSLv23_server_method);
 	#endif
 	DynFunc1(int, SSL_open, SSL*, s);
 	DynFunc1(int, SSL_connect, SSL*, s);
@@ -153,15 +153,15 @@ public:
 		if (!IsLoaded())
 		{
 			#ifdef WIN32
-			char p[MAX_PATH], leaf[32];
-			int bits = sizeof(size_t)*8;
-			sprintf_s(leaf, sizeof(leaf), "OpenSSL-Win%i", bits);
-			LMakePath(p, sizeof(p), LGetSystemPath(LSP_USER_APPS, bits), leaf);
-			auto prev = FileDev->GetCurrentFolder();
-			FileDev->SetCurrentFolder(p);
-			LMakePath(p, sizeof(p), p, EAY_LIBRARY);
-			auto loaded = Load(p);
-			FileDev->SetCurrentFolder(prev);
+				char p[MAX_PATH], leaf[32];
+				int bits = sizeof(size_t)*8;
+				sprintf_s(leaf, sizeof(leaf), "OpenSSL-Win%i", bits);
+				LMakePath(p, sizeof(p), LGetSystemPath(LSP_USER_APPS, bits), leaf);
+				auto prev = FileDev->GetCurrentFolder();
+				FileDev->SetCurrentFolder(p);
+				LMakePath(p, sizeof(p), p, EAY_LIBRARY);
+				auto loaded = Load(p);
+				FileDev->SetCurrentFolder(prev);
 			#endif
 		}
 	}
@@ -186,16 +186,16 @@ public:
 
 	DynFunc0(int, ERR_load_BIO_strings);
 	#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	DynFunc0(int, ERR_free_strings);
-	DynFunc0(int, EVP_cleanup);
-	DynFunc0(int, OPENSSL_add_all_algorithms_noconf);
-	DynFunc1(int, CRYPTO_set_locking_callback, locking_callback, func);
-	DynFunc1(int, CRYPTO_set_id_callback, id_callback, func);
-	DynFunc0(int, CRYPTO_num_locks);
-	DynFunc1(const char *, SSLeay_version, int, type);
+		DynFunc0(int, ERR_free_strings);
+		DynFunc0(int, EVP_cleanup);
+		DynFunc0(int, OPENSSL_add_all_algorithms_noconf);
+		DynFunc1(int, CRYPTO_set_locking_callback, locking_callback, func);
+		DynFunc1(int, CRYPTO_set_id_callback, id_callback, func);
+		DynFunc0(int, CRYPTO_num_locks);
+		DynFunc1(const char *, SSLeay_version, int, type);
 	#else
-	DynFunc2(int, OPENSSL_init_crypto, uint64_t, opts, const OPENSSL_INIT_SETTINGS *, settings);
-	DynFunc1(const char *, OpenSSL_version, int, type);
+		DynFunc2(int, OPENSSL_init_crypto, uint64_t, opts, const OPENSSL_INIT_SETTINGS *, settings);
+		DynFunc1(const char *, OpenSSL_version, int, type);
 	#endif
 	DynFunc1(const char *, ERR_lib_error_string, unsigned long, e);
 	DynFunc1(const char *, ERR_func_error_string, unsigned long, e);

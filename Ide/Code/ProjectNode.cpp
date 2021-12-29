@@ -5,6 +5,8 @@
 #include "lgi/common/TableLayout.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/FileSelect.h"
+#include "lgi/common/Charset.h"
+
 #include "LgiIde.h"
 #include "IdeProject.h"
 #include "ProjectNode.h"

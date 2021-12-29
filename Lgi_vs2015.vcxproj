@@ -425,7 +425,7 @@
     <ClCompile Include="src\common\Gdc2\Filters\Filter.cpp" />
     <ClCompile Include="src\common\Gdc2\Font\DisplayString.cpp" />
     <ClCompile Include="src\common\Gdc2\Font\Font.cpp" />
-    <ClCompile Include="src\common\Gdc2\Font\FontCodePages.cpp" />
+    <ClCompile Include="src\common\Gdc2\Font\Charset.cpp" />
     <ClCompile Include="src\common\Gdc2\Font\FontSystem.cpp" />
     <ClCompile Include="src\common\Gdc2\Font\FontType.cpp" />
     <ClCompile Include="src\common\Gdc2\Font\StringLayout.cpp" />
@@ -597,6 +597,7 @@
     <ClInclude Include="include\lgi\common\Box.h" />
     <ClInclude Include="include\lgi\common\Button.h" />
     <ClInclude Include="include\lgi\common\Capabilities.h" />
+    <ClInclude Include="include\lgi\common\Charset.h" />
     <ClInclude Include="include\lgi\common\CheckBox.h" />
     <ClInclude Include="include\lgi\common\Colour.h" />
     <ClInclude Include="include\lgi\common\ColourSpace.h" />

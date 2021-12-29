@@ -213,7 +213,7 @@ public:
 				}
 				else
 				{
-					GMemQueue p(1024);
+					LMemQueue p(1024);
 					LString Err;
 					auto r = LgiGetUri(this, &p, &Err, Job->Uri);
 					if (r)

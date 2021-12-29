@@ -1640,7 +1640,7 @@ int BuildThread::Main()
 	const char *Err = 0;
 	char ErrBuf[256];
 
-	LString Exe = FindExe();
+	auto Exe = FindExe();
 	if (Exe)
 	{
 		bool Status = false;

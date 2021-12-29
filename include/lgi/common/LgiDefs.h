@@ -386,30 +386,33 @@ enum LCursor
 };
 
 // General Event Flags
-#define LGI_EF_LCTRL					0x00000001
-#define LGI_EF_RCTRL					0x00000002
+#define LGI_EF_LCTRL					(1 << 0)
+#define LGI_EF_RCTRL					(1 << 1)
 #define LGI_EF_CTRL						(LGI_EF_LCTRL | LGI_EF_RCTRL)
 
-#define LGI_EF_LALT						0x00000004
-#define LGI_EF_RALT						0x00000008
+#define LGI_EF_LALT						(1 << 2)
+#define LGI_EF_RALT						(1 << 3)
 #define LGI_EF_ALT						(LGI_EF_LALT | LGI_EF_RALT)
 
-#define LGI_EF_LSHIFT					0x00000010
-#define LGI_EF_RSHIFT					0x00000020
+#define LGI_EF_LSHIFT					(1 << 4)
+#define LGI_EF_RSHIFT					(1 << 5)
 #define LGI_EF_SHIFT					(LGI_EF_LSHIFT | LGI_EF_RSHIFT)
 
-#define LGI_EF_DOWN						0x00000040
-#define LGI_EF_DOUBLE					0x00000080
-#define LGI_EF_CAPS_LOCK				0x00000100
-#define LGI_EF_IS_CHAR					0x00000200
-#define LGI_EF_IS_NOT_CHAR				0x00000400
-#define LGI_EF_SYSTEM					0x00000800 // Windows key/Apple key etc
+#define LGI_EF_DOWN						(1 << 6)
+#define LGI_EF_DOUBLE					(1 << 7)
+#define LGI_EF_CAPS_LOCK				(1 << 8)
+#define LGI_EF_IS_CHAR					(1 << 9)
+#define LGI_EF_IS_NOT_CHAR				(1 << 10)
+#define LGI_EF_SYSTEM					(1 << 11) // Windows key/Apple key etc
 
 // Mouse Event Flags
-#define LGI_EF_LEFT						0x00001000
-#define LGI_EF_MIDDLE					0x00002000
-#define LGI_EF_RIGHT					0x00004000
-#define LGI_EF_MOVE						0x00008000
+#define LGI_EF_LEFT						(1 << 16)
+#define LGI_EF_MIDDLE					(1 << 17)
+#define LGI_EF_RIGHT					(1 << 18)
+#define LGI_EF_MOVE						(1 << 19)
+#define LGI_EF_XBTN1					(1 << 20)
+#define LGI_EF_XBTN2					(1 << 21)
+
 
 // Emit compiler warnings
 #define __STR2__(x) #x

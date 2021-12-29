@@ -95,40 +95,50 @@ Result *SearchThread::Test(ResString *s)
 	if (!s)
 		return NULL;
 
-	if (Params.Text)
+	if (Params.LimitToDefine &&
+		!Params.LimitToText &&
+		!Params.InLang)
 	{
-		if (Params.LimitToDefine &&
-			!Params.LimitToText &&
-			!Params.InLang)
+		if (s->GetDefine())
 		{
-			if (s->GetDefine())
-			{
-				if (stristr(s->GetDefine(), Params.Text))
-					return new Result(App, s);
-			}
+			size_t matches = 0;
+			for (auto &t: Params.Text)
+				if (stristr(s->GetDefine(), t))
+					matches++;
+			if (Params.Text.Length() == matches)
+				return new Result(App, s);
 		}
-
-		if (Params.LimitToDefine)
-			return NULL;
-
-		if (Params.InLang)
-		{
-			char *Txt = s->Get(Params.InLang);
-			if (Txt && stristr(Txt, Params.Text))
-				return new Result(App, s, Params.InLang);
-		}
-		else
-		{
-			for (auto t: s->Items)
-			{
-				if (t->GetStr() && stristr(t->GetStr(), Params.Text))
-					return new Result(App, s, t->GetLang());
-			}
-		}
-
-		if (Params.LimitToText)
-			return NULL;
 	}
+
+	if (Params.LimitToDefine)
+		return NULL;
+
+	if (Params.InLang)
+	{
+		char *Txt = s->Get(Params.InLang);
+		size_t matches = 0;
+		for (auto &t: Params.Text)
+			if (Txt && stristr(Txt, t))
+				matches++;
+		if (Params.Text.Length() == matches)
+			return new Result(App, s, Params.InLang);
+	}
+	else
+	{
+		for (auto item: s->Items)
+		{
+			size_t matches = 0;
+			for (auto &t: Params.Text)
+				if (item->GetStr() && stristr(item->GetStr(), t))
+					matches++;
+
+			if (Params.Text.Length() == matches)
+				return new Result(App, s, item->GetLang());
+		}
+	}
+
+	if (Params.LimitToText)
+		return NULL;
 
 	if (Params.NotInLang)
 	{
@@ -159,16 +169,21 @@ Result *SearchThread::Test(ResMenuItem *mi)
 	if (r)
 		return r;
 	
-	if (ValidStr(Params.Text) && mi->Shortcut())
+	if (mi->Shortcut())
 	{
-		if (stristr(mi->Shortcut(), Params.Text))
+		size_t matches = 0;
+		for (auto &t: Params.Text)
 		{
+			if (stristr(mi->Shortcut(), t))
+				matches++;
+		}
+
+		if (Params.Text.Length() == matches)
 			if ((r = new Result(App, mi->GetStr(), Params.InLang)))
 			{
 				r->Menu = mi;
 				return r;
-			}				
-		}
+			}
 	}
 	
 	return NULL;
@@ -183,7 +198,7 @@ SearchThread::SearchThread(AppWnd *app, LList *results) :
 
 void SearchThread::Search(SearchParams &p)
 {
-	Cancel(true);
+	State.Cancel(true);
 	PostEvent(M_SEARCH, (LMessage::Param)new SearchParams(p));
 }
 
@@ -204,18 +219,18 @@ LMessage::Result SearchThread::OnEvent(LMessage *Msg)
 			return 0;
 	}
 
-	Cancel(false);
+	State.Cancel(false);
 	Results->Empty();
 
 	for (auto r: Res)
 	{
-		if (IsCancelled() || Results->Length() > 100)
+		if (State.IsCancelled() || Results->Length() > 100)
 			break;
 
 		if (r->IsStringGroup())
 		{
 			List<ResString>::I it = r->IsStringGroup()->GetStrs()->begin();
-			for (ResString *s = *it; s && !IsCancelled(); s = *++it)
+			for (ResString *s = *it; s && !State.IsCancelled(); s = *++it)
 			{
 				Result *Res = Test(s);
 				if (Res)
@@ -231,7 +246,7 @@ LMessage::Result SearchThread::OnEvent(LMessage *Msg)
 			r->IsDialog()->EnumCtrls(Ctrls);
 			for (auto c: Ctrls)
 			{
-				if (IsCancelled())
+				if (State.IsCancelled())
 					break;
 
 				Result *Res = Test(c->GetStr());
@@ -249,7 +264,7 @@ LMessage::Result SearchThread::OnEvent(LMessage *Msg)
 			r->IsMenu()->EnumItems(Items);
 			for (auto c: Items)
 			{
-				if (IsCancelled())
+				if (State.IsCancelled())
 					break;
 
 				Result *Res = Test(c);
@@ -360,7 +375,7 @@ int Search::OnNotify(LViewI *c, LNotification n)
 		case IDC_TEXT:
 		{
 			if (!Thread) break;
-			Text = c->Name();
+			Text = LString(c->Name()).SplitDelimit();
 			Thread->Search(*this);
 			break;
 		}
@@ -628,7 +643,7 @@ Results::Results(AppWnd *app, Search *params)
 {
 	d = new ResultsPrivate;
 	d->App = app;
-	d->Text = NewStr(params->Text);
+	d->Text = LString(" ").Join(params->Text);
 	#if !NEW_UI
 	d->Define = NewStr(params->Define);
 	#endif
