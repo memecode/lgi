@@ -861,7 +861,7 @@ void LToolButton::OnMouseClick(LMouse &m)
 {
 	LToolBar *ToolBar = dynamic_cast<LToolBar*>(GetParent());
 
-	#if 1
+	#if 0
 	printf("tool button click %i,%i down=%i, left=%i right=%i middle=%i, ctrl=%i alt=%i shift=%i Double=%i\n",
 		m.x, m.y,
 		m.Down(), m.Left(), m.Right(), m.Middle(),

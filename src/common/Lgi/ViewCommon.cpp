@@ -191,11 +191,6 @@ LView::LView(OsView view)
 	#elif LGI_VIEW_HANDLE && !defined(HAIKU)
 	_View = view;
 	#endif
-	_Window = 0;
-	_Lock = 0;
-	_InLock = 0;
-	_BorderSize = 0;
-	_IsToolBar = false;
 	Pos.ZOff(-1, -1);
 	WndFlags = GWF_VISIBLE;
 
@@ -223,14 +218,14 @@ LView::~LView()
 	{
 		LPopup *pu = LPopup::CurrentPopups[i];
 		if (pu->Owner == this)
-		{
-			// printf("%s:%i - ~%s setting %s->Owner to NULL\n", _FL, GetClass(), pu->GetClass());
 			pu->Owner = NULL;
-		}
 	}
 
 	_Delete();
-	DeleteObj(d);
+
+	// printf("%p::~LView delete %p th=%u\n", this, d, GetCurrentThreadId());
+	DeleteObj(d);	
+	// printf("%p::~LView\n", this);
 }
 
 int LView::AddDispatch()
@@ -328,35 +323,66 @@ LWindow *LView::GetWindow()
 
 bool LView::Lock(const char *file, int line, int TimeOut)
 {
-	if (!_Window)
-		GetWindow();
-
-	_InLock++;
-	// LgiTrace("%s::%p Lock._InLock=%i %s:%i\n", GetClass(), this, _InLock, file, line);
-	if (_Window && _Window->_Lock)
+	if (!d || !d->Hnd)
+		return false;
+	
+	if (d->Hnd->Parent() == NULL)
 	{
-		if (TimeOut < 0)
-		{
-			return _Window->_Lock->Lock(file, line);
-		}
-		else
-		{
-			return _Window->_Lock->LockWithTimeout(TimeOut, file, line);
-		}
+		// printf("%s:%p - Lock() no parent.\n", GetClass(), this);
+		return true;
 	}
-
-	return true;
+		
+	if (TimeOut >= 0)
+	{
+		auto r = d->Hnd->LockLooperWithTimeout(TimeOut * 1000);
+		if (r == B_OK)
+		{
+			_InLock++;
+			// printf("%s:%p - Lock() cnt=%i par=%p.\n", GetClass(), this, _InLock, d->Hnd->Parent());
+			return true;
+		}
+		
+		printf("%s:%i - Lock(%i) failed with %x.\n", _FL, TimeOut, r);
+		return false;
+	}
+	
+	auto r = d->Hnd->LockLooper();
+	if (r)
+	{
+		_InLock++;
+		// printf("%s:%p - Lock() cnt=%i par=%p.\n", GetClass(), this, _InLock, d->Hnd->Parent());
+		return true;
+	}
+	
+	printf("%s:%i - Lock(%s:%i) failed.\n", _FL, file, line);
+	return false;
 }
 
 void LView::Unlock()
 {
-	if (_Window &&
-		_Window->_Lock)
+	if (!d || !d->Hnd)
 	{
-		_Window->_Lock->Unlock();
+		printf("%s:%i - Unlock() error, no hnd.\n", _FL);
+		return false;
 	}
-	_InLock--;
-	// LgiTrace("%s::%p Unlock._InLock=%i\n", GetClass(), this, _InLock);
+	
+	if (!d->Hnd->Parent())
+	{
+		// printf("%s:%p - Unlock() no parent.\n", GetClass(), this);
+		return;
+	}
+	
+	if (_InLock > 0)
+	{
+		// printf("%s:%p - Calling UnlockLooper: %i.\n", GetClass(), this, _InLock);
+		d->Hnd->UnlockLooper();
+		_InLock--;
+		// printf("%s:%p - UnlockLooper done: %i.\n", GetClass(), this, _InLock);
+	}
+	else
+	{
+		printf("%s:%i - Unlock() without lock.\n", _FL);
+	}
 }
 
 void LView::OnMouseClick(LMouse &m)

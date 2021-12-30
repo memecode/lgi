@@ -146,7 +146,7 @@ void LSort(T *v, ssize_t left, ssize_t right, std::function<ssize_t(T, T)> comp)
 #elif LGI_CARBON
 	typedef EventRef OsEvent;
 #elif LGI_HAIKU
-	typedef BMessage OsEvent;
+	typedef BMessage *OsEvent;
 #else
 	#error "Impl me."
 #endif

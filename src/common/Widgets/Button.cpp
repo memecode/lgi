@@ -15,7 +15,7 @@
 #define DOWN_MOUSE		0x1
 #define DOWN_KEY		0x2
 
-#if 1
+#if 0
 #define DEBUG_LOG(...) printf(__VA_ARGS__)
 #else
 #define DEBUG_LOG(...)

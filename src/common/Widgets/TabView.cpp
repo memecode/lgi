@@ -384,7 +384,6 @@ int64 LTabView::Value()
 
 void LTabView::OnCreate()
 {
-	printf("LTabView::OnCreate\n");
 	LResources::StyleElement(this);			
 
 	d->Depth = 0;

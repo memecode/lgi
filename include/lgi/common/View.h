@@ -88,7 +88,7 @@ private:
 
 
 	LRect				Pos;
-	int					_InLock;
+	int					_InLock = 0;
 
 protected:
 	class LViewPrivate	*d = NULL;
@@ -97,11 +97,13 @@ protected:
 	OsView				_View; // OS specific handle to view object
 	#endif
 
-	LView				*_Window;
-	LMutex				*_Lock;
-	uint16				_BorderSize;
-	uint16				_IsToolBar;
-	int					WndFlags;
+	LView				*_Window = NULL;
+	#ifndef HAIKU
+	LMutex				*_Lock = NULL;
+	#endif
+	uint16				_BorderSize = 0;
+	uint16				_IsToolBar = 0;
+	int					WndFlags = 0;
 
 	static LViewI		*_Capturing;
 	static LViewI		*_Over;

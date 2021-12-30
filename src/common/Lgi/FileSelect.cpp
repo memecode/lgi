@@ -785,36 +785,38 @@ class LFileSelectDlg :
 	LArray<LFolderItem*> Hidden;
 	
 public:
-	LFileSelectPrivate *d;
+	LFileSelectPrivate *d = NULL;
 
-	LTableLayout *Tbl;
-	LBox *Sub;
+	LTableLayout *Tbl = NULL;
+	LBox *Sub = NULL;
 
-	LTree *Bookmarks;
-	LTextLabel *Ctrl1;
+	LTree *Bookmarks = NULL;
+	LTextLabel *Ctrl1 = NULL;
 
 	#if USE_FOLDER_CTRL
-	FolderCtrl *Ctrl2;
+	FolderCtrl *Ctrl2 = NULL;
 	#else
-	LEdit *Ctrl2;
+	LEdit *Ctrl2 = NULL;
 	#endif
 	
-	GFolderDrop *Ctrl3;
-	GIconButton *BackBtn;
-	GIconButton *UpBtn;
-	GIconButton *NewDirBtn;
-	GFolderList *FileLst;
-	LTextLabel *Ctrl8;
-	LTextLabel *Ctrl9;
-	LEdit *FileNameEdit;
-	LCombo *FileTypeCbo;
-	LButton *SaveBtn;
-	LButton *CancelBtn;
-	LCheckBox *ShowHidden;
-	LEdit *FilterEdit;
+	GFolderDrop *Ctrl3 = NULL;
+	GIconButton *BackBtn = NULL;
+	GIconButton *UpBtn = NULL;
+	GIconButton *NewDirBtn = NULL;
+	GFolderList *FileLst = NULL;
+	LTextLabel *Ctrl8 = NULL;
+	LTextLabel *Ctrl9 = NULL;
+	LEdit *FileNameEdit = NULL;
+	LCombo *FileTypeCbo = NULL;
+	LButton *SaveBtn = NULL;
+	LButton *CancelBtn = NULL;
+	LCheckBox *ShowHidden = NULL;
+	LEdit *FilterEdit = NULL;
 
 	LFileSelectDlg(LFileSelectPrivate *Select);
 	~LFileSelectDlg();
+
+	const char *GetClass() override { return "LFileSelectDlg"; }
 
 	int OnNotify(LViewI *Ctrl, LNotification n);
 	void OnUpFolder();
@@ -872,24 +874,6 @@ public:
 
 LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 {
-	SaveBtn = NULL;
-	BackBtn = NULL;
-	CancelBtn = NULL;
-	ShowHidden = NULL;
-	FileTypeCbo = NULL;
-	FileNameEdit = NULL;
-	Ctrl8 = NULL;
-	Ctrl9 = NULL;
-	FileLst = NULL;
-	Ctrl3 = NULL;
-	BackBtn = NULL;
-	UpBtn = NULL;
-	NewDirBtn = NULL;
-	Ctrl2 = NULL;
-	Sub = NULL;
-	Bookmarks = NULL;
-	FilterEdit = NULL;
-
 	d = select;
 	SetParent(d->Parent);
 	MinSize.ZOff(450, 300);
@@ -2179,44 +2163,50 @@ void LFileSelect::Open(SelectCb Cb)
 	// printf("LFileSelect domodal.. thread=%p\n", LGetCurrentThread());
 	Dlg->DoModal([select=this, cb=Cb](auto dlg, auto code)
 	{
-		printf("LFileSelect cb.. thread=%u lock=%u\n", GetCurrentThreadId(), dlg->WindowHandle()->LockingThread());
+		// printf("LFileSelect cb.. thread=%u lock=%u\n", GetCurrentThreadId(), dlg->WindowHandle()->LockingThread());
 		if (cb)
 			cb(select, code == IDOK);
-		printf("LFileSelect deleting.. lock=%u\n", dlg->WindowHandle()->LockingThread());
+		// printf("LFileSelect deleting.. lock=%u\n", dlg->WindowHandle()->LockingThread());
 		delete dlg;
-		printf("LFileSelect deleted..\n");
+		// printf("LFileSelect deleted..\n");
 	});
 }
 
 void LFileSelect::OpenFolder(SelectCb Cb)
 {
-	LFileSelectDlg Dlg(d);
+	auto Dlg = new LFileSelectDlg(d);
 
 	d->Type = TypeOpenFolder;
-	Dlg.SaveBtn->Enabled(true);
-	Dlg.FileNameEdit->Enabled(false);
-	Dlg.Name("Open Folder");
-	Dlg.SaveBtn->Name("Open");
+	Dlg->SaveBtn->Enabled(true);
+	Dlg->FileNameEdit->Enabled(false);
+	Dlg->Name("Open Folder");
+	Dlg->SaveBtn->Name("Open");
 
-	Dlg.DoModal([FileSelect=this,Cb](auto d, auto code)
+	Dlg->DoModal([FileSelect=this,Cb](auto d, auto code)
 	{
 		if (Cb)
 			Cb(FileSelect, code != IDOK);
+		delete d;
 	});
 }
 
 void LFileSelect::Save(SelectCb Cb)
 {
-	LFileSelectDlg Dlg(d);
+	auto *Dlg = new LFileSelectDlg(d);
 	
 	d->Type = TypeSaveFile;
-	Dlg.Name("Save As");
-	Dlg.SaveBtn->Name("Save As");
+	Dlg->Name("Save As");
+	Dlg->SaveBtn->Name("Save As");
 
-	Dlg.DoModal([FileSelect=this,Cb](auto d, auto code)
+	// printf("LFileSelect domodal.. thread=%u\n", GetCurrentThreadId());
+	Dlg->DoModal([FileSelect=this,Cb](auto dlg, auto code)
 	{
+		// printf("LFileSelect cb.. thread=%u lock=%u\n", GetCurrentThreadId(), dlg->WindowHandle()->LockingThread());
 		if (Cb)
 			Cb(FileSelect, code != IDOK);
+		// printf("LFileSelect deleting.. lock=%u\n", dlg->WindowHandle()->LockingThread());
+		delete dlg;
+		// printf("LFileSelect deleted..\n");
 	});
 }
 

@@ -49,7 +49,10 @@ public:
 
 	~LWindowPrivate()
 	{
-		Wnd->d = NULL;		
+		DeleteObj(Wnd->Menu);
+		if (IsMinimized())
+			Wnd->_PrevZoom = LZoomMin;
+		Wnd->d = NULL;
 	}
 	
 	int GetHookIndex(LView *Target, bool Create = false)
@@ -98,9 +101,9 @@ public:
 
 	bool QuitRequested()
 	{
-		printf("QuitRequested() starting.. %s\n", Wnd->GetClass());
+		// printf("%s::QuitRequested() starting..\n", Wnd->GetClass());
 		auto r = Wnd->OnRequestClose(false);
-		printf("QuitRequested()=%i\n", r);
+		// printf("%s::QuitRequested()=%i\n", Wnd->GetClass(), r);
 		return r;
 	}
 
@@ -108,9 +111,10 @@ public:
 	{
 		if (message->what == M_LWINDOW_DELETE)
 		{
-			// printf("Processing M_LWINDOW_DELETE\n");
+			// printf("Processing M_LWINDOW_DELETE th=%u\n", GetCurrentThreadId());
 			Wnd->Handle()->RemoveSelf();			
 			Quit();
+			// printf("Processed M_LWINDOW_DELETE\n");
 		}
 		else
 		{
@@ -133,8 +137,6 @@ LWindow::LWindow() : LView(0)
 	_Window = this;
 	WndFlags |= GWND_CREATE;
 	ClearFlag(WndFlags, GWF_VISIBLE);
-
-    _Lock = new ::LMutex;
 }
 
 LWindow::~LWindow()
@@ -142,31 +144,44 @@ LWindow::~LWindow()
 	if (LAppInst->AppWnd == this)
 		LAppInst->AppWnd = NULL;
 
-	DeleteObj(Menu);
-	DeleteObj(_Lock);
+	LAssert(!Menu);
+	WaitThread();
+}
 
-	if (d)
-	{	
-		// printf("~LWindow thread=%u lock=%u\n", GetCurrentThreadId(), d->LockingThread());
-		if (d->Thread() == GetCurrentThreadId())
+int LWindow::WaitThread()
+{
+	if (!d)
+		return -1;
+
+	thread_id id = d->Thread();
+
+	// printf("%s::~LWindow thread=%u lock=%u\n", Name(), GetCurrentThreadId(), d->LockingThread());
+	if (d->Thread() == GetCurrentThreadId())
+	{
+		// We are in thread... can delete easily.
+		if (d->Lock())
 		{
-			// We are in thread... can delete easily.
-			if (d->Lock())
-			{
-				// printf("~LWindow Quiting\n");
-				Handle()->RemoveSelf();
-				d->Quit();
-			}
+			// printf("%s::~LWindow Quiting\n", Name());
+			Handle()->RemoveSelf();
+			d->Quit();
+			// printf("%s::~LWindow Quit finished\n", Name());
 		}
-		else
-		{
-			// Post event to the window's thread to delete itself...
-			// printf("~LWindow posting M_LWINDOW_DELETE\n");
-			d->PostMessage(new BMessage(M_LWINDOW_DELETE));
-		}
-		
-		d = NULL;
 	}
+	else
+	{
+		// Post event to the window's thread to delete itself...
+		// printf("%s::~LWindow posting M_LWINDOW_DELETE from th=%u\n", Name(), GetCurrentThreadId());
+		d->PostMessage(new BMessage(M_LWINDOW_DELETE));
+	}
+	
+	d = NULL;
+
+	status_t value = 0;
+	// printf("wait_for_thread(%u) start..\n", id);
+	wait_for_thread(id, &value);
+	// printf("wait_for_thread(%u) end=%i\n", id, value);
+	
+	return value;
 }
 
 OsWindow LWindow::WindowHandle()
@@ -308,8 +323,6 @@ bool LWindow::Attach(LViewI *p)
 
 bool LWindow::OnRequestClose(bool OsShuttingDown)
 {
-	printf("%s:%i - on req close.\n", _FL);
-
 	if (GetQuitOnClose())
 		LCloseApp();
 
@@ -541,10 +554,7 @@ void LWindow::Raise()
 LWindowZoom LWindow::GetZoom()
 {
 	if (!d)
-	{
-		LgiTrace("%s:%i - No priv ptr?\n", _FL);
-		return LZoomNormal;
-	}
+		return _PrevZoom;
 
 	LLocker lck(d, _FL);
 	if (!IsAttached() || lck.Lock())

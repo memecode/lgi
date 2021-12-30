@@ -52,7 +52,11 @@ protected:
 		LRect OldPos;
 		LWindow *_Dialog;
 
-	#elif !defined(HAIKU)
+	#elif defined(HAIKU)
+		
+		LWindowZoom _PrevZoom = LZoomNormal;
+	
+	#else
 
 		OsWindow Wnd;
 		void SetDeleteOnClose(bool i);
@@ -91,6 +95,9 @@ protected:
 
 	void SetChildDialog(LDialog *Dlg);
 	void SetDragHandlers(bool On);
+	
+	/// Haiku: This shuts down the window's thread cleanly.
+	int WaitThread();
 
 public:
 	#ifdef _DEBUG

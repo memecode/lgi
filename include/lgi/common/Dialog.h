@@ -171,7 +171,7 @@ public:
 	/// Destructor
 	~LDialog();
 
-	const char *GetClass() { return "LDialog"; }
+	const char *GetClass() override { return "LDialog"; }
 
 	/// Load the dialog from a resource
 	bool LoadFromResource

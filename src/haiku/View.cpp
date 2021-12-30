@@ -116,12 +116,11 @@ LKey::LKey(int Vkey, uint32_t flags)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename Parent = BView>
-class LBView : public Parent
+struct LBView : public Parent
 {
 	LViewPrivate *d = NULL;
 	static uint32 MouseButtons;
 
-public:
 	LBView(LViewPrivate *priv) :
 		d(priv),
 		Parent
@@ -138,12 +137,14 @@ public:
 	
 	~LBView()
 	{
-		d->Hnd = NULL;
+		if (d)
+			d->Hnd = NULL;
 	}		
 
 	void AttachedToWindow()
 	{
-		d->View->OnCreate();
+		if (d)
+			d->View->OnCreate();
 	}
 	
 	LKey ConvertKey(const char *bytes, int32 numBytes)
@@ -219,9 +220,10 @@ public:
 	
 	void KeyDown(const char *bytes, int32 numBytes)
 	{
+		if (!d) return;
+		
 		auto k = ConvertKey(bytes, numBytes);
 		k.Down(true);
-		// k.Trace("KeyDown");
 
 		auto wnd = d->View->GetWindow();
 		if (wnd)
@@ -232,9 +234,9 @@ public:
 	
 	void KeyUp(const char *bytes, int32 numBytes)
 	{
-		auto k = ConvertKey(bytes, numBytes);
-		// k.Trace("KeyUp");
+		if (!d) return;
 
+		auto k = ConvertKey(bytes, numBytes);
 		auto wnd = d->View->GetWindow();
 		if (wnd)
 			wnd->HandleViewKey(d->View, k);
@@ -244,18 +246,21 @@ public:
 
 	void FrameMoved(BPoint newPosition)
 	{
+		if (!d) return;
 		d->View->Pos = Frame();
 		d->View->OnPosChange();
 	}
 
 	void FrameResized(float newWidth, float newHeight)
 	{
+		if (!d) return;
 		d->View->Pos = Frame();
 		d->View->OnPosChange();
 	}
 
 	void MessageReceived(BMessage *message)
 	{
+		if (!d) return;
 		void *v = NULL;
 		if (message->FindPointer(LMessage::PropView, &v) == B_OK)
 		{
@@ -277,16 +282,12 @@ public:
 			return;
 		}
 		
-		#if 1
-		// If we call this it will start passing it to our parent views...
-		// Which is definately NOT what we want. There may be cases where
-		// this is desirable. Unknown at this point.
 		Parent::MessageReceived(message);
-		#endif
 	}
 
 	void Draw(BRect updateRect)
 	{
+		if (!d) return;
 		LScreenDC dc(d->View);
 		LPoint off(0,0);
 		d->View->_Paint(&dc, &off, NULL);
@@ -329,6 +330,7 @@ public:
 	
 	void MouseDown(BPoint where)
 	{
+		if (!d) return;
 		static uint64_t lastClick = 0;
 		bigtime_t interval = 0;
 		status_t r = get_click_speed(&interval);
@@ -343,6 +345,7 @@ public:
 	
 	void MouseUp(BPoint where) 
 	{
+		if (!d) return;
 		LMouse m = ConvertMouse(where);
 		m.Down(false);
 		d->View->_Mouse(m, false);
@@ -350,6 +353,7 @@ public:
 	
 	void MouseMoved(BPoint where, uint32 code, const BMessage *dragMessage)
 	{
+		if (!d) return;
 		LMouse m = ConvertMouse(where);
 		m.Down(	m.Left() ||
 				m.Middle() ||
@@ -360,6 +364,7 @@ public:
 
 	void MakeFocus(bool focus=true)
 	{
+		if (!d) return;
 		Parent::MakeFocus(focus);
 		d->View->OnFocus(focus);
 	}
@@ -384,11 +389,16 @@ LViewPrivate::~LViewPrivate()
 
 	if (Hnd)
 	{
+		auto *bv = dynamic_cast<LBView<BView>*>(Hnd);
+		// printf("%p::~LViewPrivate View=%p bv=%p th=%u\n", this, View, bv, GetCurrentThreadId());
+		if (bv)
+			bv->d = NULL;
+
 		auto Wnd = Hnd->Window();
 
 		if (Wnd)
 			Wnd->LockLooper();
-
+			
 		if (Hnd->Parent())
 			Hnd->RemoveSelf();
 		
@@ -763,7 +773,7 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 		}
 		case M_COMMAND:
 		{
-			printf("M_COMMAND %i\n", (int)Msg->A());
+			// printf("M_COMMAND %i\n", (int)Msg->A());
 			return OnCommand(Msg->A(), 0, 0);
 		}
 	}
@@ -773,6 +783,12 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 
 OsView LView::Handle() const
 {
+	if (!d)
+	{
+		printf("%s:%i - No priv?\n", _FL);
+		return NULL;
+	}
+	
 	return d->Hnd;
 }
 

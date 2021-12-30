@@ -1852,29 +1852,35 @@ void IdeDoc::SetClean(std::function<void(bool)> Callback)
 			Base = GetProject()->GetBasePath();
 		LString LocalPath = GetFullPath();
 
-		auto OnSave = [&](bool ok)
+		// printf("OnSave setup d=%p\n", d);
+		auto OnSave = [this, Callback](bool ok)
 		{
+			// printf("OnSave %i d=%p\n", ok, d);
 			if (ok)
 				d->Save();
+			// printf("OnSave cb\n");
 			if (Callback)
 				Callback(ok);
-		};
-		
+			// printf("OnSave done\n");
+		};		
 		
 		if (d->Edit->IsDirty() &&
 			!LFileExists(LocalPath))
 		{
 			// We need a valid filename to save to...			
-			LFileSelect s;
-			s.Parent(this);
+			auto s = new LFileSelect;
+			s->Parent(this);
 			if (Base)
-				s.InitialDir(Base);
-			
-			s.Save([&](auto fileSel, auto ok)
+				s->InitialDir(Base);			
+			s->Save([this, OnSave](auto fileSel, auto ok)
 			{
+				// printf("Doc.Save.Cb ok=%i d=%p\n", ok, d);
 				if (ok)
-					d->SetFileName(s.Name());				
+					d->SetFileName(fileSel->Name());
+				// printf("Doc.Save.Cb onsave\n", ok);
 				OnSave(ok);
+				// printf("Doc.Save.Cb del\n", ok);
+				delete fileSel;
 			});
 		}
 		else OnSave(true);

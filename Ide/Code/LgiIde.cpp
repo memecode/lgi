@@ -1104,11 +1104,6 @@ public:
 	
 	~AppWndPrivate()
 	{
-		if (RecentFilesMenu)
-			RecentFilesMenu->Empty();
-		if (RecentProjectsMenu)
-			RecentProjectsMenu->Empty();
-
 		FindSym.Reset();
 		Finder.Reset();
 		if (Output)
@@ -1118,7 +1113,8 @@ public:
 		SerializeStringList("RecentProjects", &RecentProjects, true);
 		Options.SerializeFile(true);
 		
-		Docs.DeleteObjects();
+		while (Docs.Length())
+			delete Docs[0];
 		Projects.DeleteObjects();
 		DeleteObj(Icons);
 	}
@@ -1736,6 +1732,7 @@ AppWnd::AppWnd()
 AppWnd::~AppWnd()
 {
 	LAssert(IsClean());
+	WaitThread();
 
 	if (d->HBox)
 	{
@@ -2473,13 +2470,15 @@ struct SaveState
 		{
 			auto doc = Docs[0];
 			Docs.DeleteAt(0);
-			printf("Saving doc...\n");
-			doc->SetClean([&](bool ok)
+			// printf("Saving doc...\n");
+			doc->SetClean([this, doc](bool ok)
 			{
+				// printf("SetClean cb ok=%i\n", ok);
 				if (ok)
 					d->OnFile(doc->GetFileName());
 				else
 					Status = false;
+				// printf("SetClean cb iter\n", ok);
 				Iterate();
 			});
 		}
@@ -2487,8 +2486,8 @@ struct SaveState
 		{
 			auto proj = Projects[0];
 			Projects.DeleteAt(0);
-			printf("Saving proj...\n");
-			proj->SetClean([&](bool ok)
+			// printf("Saving proj...\n");
+			proj->SetClean([this, proj](bool ok)
 			{
 				if (ok)
 					d->OnFile(proj->GetFileName(), true);
@@ -2499,11 +2498,11 @@ struct SaveState
 		}
 		else
 		{
-			printf("Doing callback...\n");
+			// printf("Doing callback...\n");
 			if (Callback)
 				Callback(Status);
 
-			printf("Deleting...\n");
+			// printf("Deleting...\n");
 			delete this;
 		}
 	}
@@ -2553,12 +2552,10 @@ void AppWnd::CloseAll()
 
 bool AppWnd::OnRequestClose(bool IsOsQuit)
 {
-	printf("AppWnd::OnRequestClose.. %i\n", IsClean());
 	if (!IsClean())
 	{
 		SaveAll([](bool status)
 		{
-			printf("SaveAll handler: %i\n", status);
 			if (status)
 				LCloseApp();
 		});	
@@ -4365,11 +4362,13 @@ void AppWnd::OnProjectChange()
 
 void AppWnd::OnDocDestroy(IdeDoc *Doc)
 {
-	if (d)
+	if (d && Lock(_FL))
 	{
 		d->Docs.Delete(Doc);
 		d->UpdateMenus();
+		Unlock();
 	}
+	else printf("OnDocDestroy failed to lock...\n");
 }
 
 int AppWnd::GetBuildMode()

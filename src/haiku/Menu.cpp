@@ -787,6 +787,14 @@ public:
 	~LMenuPrivate()
 	{
 		Menu->d = NULL;
+
+		auto bwnd = Window();
+		bool locked = bwnd && bwnd->LockLooper();
+		if (locked)
+		{
+			RemoveSelf();
+			bwnd->UnlockLooper();
+		}		
 	}
 
 	void MessageReceived(BMessage *message)
@@ -902,7 +910,7 @@ bool LMenu::Attach(LViewI *p)
 		return false;
 	}
 
-	printf("Attaching menubar...\n");	
+	// printf("Attaching menubar...\n");	
 	auto menubar = dynamic_cast<BMenuBar*>(Info);
 	bwnd->AddChild(menubar);
 	

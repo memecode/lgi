@@ -102,17 +102,18 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 		printf("alert result=%i\n", result);
 		switch (result)
 		{
-			case 1:
+			case 0: // Abort
 			{
 				exit(-1);
 				break;
 			}
-			case 2:
+			case 1: // Debug
 			{
 				int *i = 0;
 				*i = 0;
 				break;
 			}
+			// default: Ignore..
 		}
 
 		Asserting = false;
