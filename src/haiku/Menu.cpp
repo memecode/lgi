@@ -18,6 +18,7 @@
 #include <Menu.h>
 #include <MenuBar.h>
 #include <MenuItem.h>
+#include <PopUpMenu.h>
 
 #define DEBUG_MENUS		1
 
@@ -29,21 +30,26 @@
 
 struct MenuLock : public LLocker
 {
-	LMenu *menu = NULL;
-	LViewI *lwnd = NULL;
-	BWindow *bwnd = NULL;
-	bool unattached = false;
+	LMenu *menu;
+	LViewI *lwnd;
+	BWindow *bwnd;
+	bool unattached;
 	
 	template<typename T>
 	BHandler *Init(T *s)
 	{
+		menu = NULL;
+		lwnd = NULL;
+		bwnd = NULL;
+		unattached = false;
+		
 		if (s)
 			menu = s->GetMenu();
 		if (menu)
 			lwnd = menu->WindowHandle();
 		if (lwnd)
 			bwnd = lwnd->WindowHandle();
-		// printf("\tInit %p,%p,%p\n", menu, lwnd, bwnd);
+		// printf("%s:%i - %p,%p,%p\n", _FL, menu, lwnd, bwnd);
 		return bwnd;
 	}
 	
@@ -88,7 +94,8 @@ LSubMenu::LSubMenu(OsSubMenu Hnd)
 LSubMenu::LSubMenu(const char *name, bool Popup)
 {
 	Active.Add(this);
-	Info = new BMenu(name);
+	Info = new BPopUpMenu(name);
+	printf("Info=%p\n", Info);
 	if (name)
 		Name(name);
 }
@@ -228,6 +235,33 @@ bool LSubMenu::RemoveItem(LMenuItem *Item)
 
 int LSubMenu::Float(LView *From, int x, int y, int Button)
 {
+	BPopUpMenu *popup = dynamic_cast<BPopUpMenu*>(Info);
+	if (!popup)
+	{
+		LAssert(!"Not a popup.");
+		return 0;
+	}
+	
+	if (!From)
+	{
+		LAssert(!"No from view.");
+		return 0;
+	}
+	
+	auto item = popup->Go(BPoint(x, y));
+	printf("item=%p\n", item);
+	if (item)
+	{
+		BMessage *msg = item->Message();
+		if (!msg)
+		{
+			printf("%s:%i - No message in item.\n", _FL);
+			return 0;
+		}
+		
+		return ((LMessage*)msg)->A();
+	}
+
 	return 0;
 }
 
@@ -705,7 +739,7 @@ void LMenuItem::Enabled(bool e)
 	if (Menu)
 		Menu->PostMessage(new LMessage(M_LMENUITEM_ENABLE, Id(), e));
 	else
-		printf("%s:%i - No menu.\n", _FL);
+		Info->SetEnabled(e);
 }
 
 void LMenuItem::Focus(bool f)

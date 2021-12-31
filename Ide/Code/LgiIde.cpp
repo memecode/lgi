@@ -4371,13 +4371,17 @@ void AppWnd::OnProjectChange()
 
 void AppWnd::OnDocDestroy(IdeDoc *Doc)
 {
-	if (d && Lock(_FL))
+	if (d)
 	{
+		auto locked = Lock(_FL);
 		d->Docs.Delete(Doc);
 		d->UpdateMenus();
-		Unlock();
+		if (locked) Unlock();
 	}
-	else printf("OnDocDestroy failed to lock...\n");
+	else
+	{
+		LAssert(!"OnDocDestroy no priv...\n");
+	}
 }
 
 int AppWnd::GetBuildMode()

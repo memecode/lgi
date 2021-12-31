@@ -154,9 +154,10 @@ int LWindow::WaitThread()
 		return -1;
 
 	thread_id id = d->Thread();
+	bool thisThread = id == GetCurrentThreadId();
 
 	// printf("%s::~LWindow thread=%u lock=%u\n", Name(), GetCurrentThreadId(), d->LockingThread());
-	if (d->Thread() == GetCurrentThreadId())
+	if (thisThread)
 	{
 		// We are in thread... can delete easily.
 		if (d->Lock())
@@ -166,21 +167,20 @@ int LWindow::WaitThread()
 			d->Quit();
 			// printf("%s::~LWindow Quit finished\n", Name());
 		}
+
+		d = NULL;
+		return 0; // If we're in thread... no need to wait.
 	}
-	else
-	{
-		// Post event to the window's thread to delete itself...
-		// printf("%s::~LWindow posting M_LWINDOW_DELETE from th=%u\n", Name(), GetCurrentThreadId());
-		d->PostMessage(new BMessage(M_LWINDOW_DELETE));
-	}
-	
+
+	// Post event to the window's thread to delete itself...
+	// printf("%s::~LWindow posting M_LWINDOW_DELETE from th=%u\n", Name(), GetCurrentThreadId());
+	d->PostMessage(new BMessage(M_LWINDOW_DELETE));
 	d = NULL;
 
 	status_t value = 0;
 	// printf("wait_for_thread(%u) start..\n", id);
 	wait_for_thread(id, &value);
 	// printf("wait_for_thread(%u) end=%i\n", id, value);
-	
 	return value;
 }
 
