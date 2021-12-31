@@ -2033,7 +2033,7 @@ void LTableLayoutPrivate::Layout(const LRect Client, int Depth)
 	s.Printf("Layout id %i: %i x %i", Ctrl->GetId(), Client.X(), Client.Y());
 	LAutoPtr<LProfile> Prof(/*Debug ? new LProfile(s) :*/ NULL);
 
-	LgiTrace("%s%s\n", Indent(Depth).Get(), s.Get());
+	// LgiTrace("%s%s\n", Indent(Depth).Get(), s.Get());
 	if (Prof) Prof->Add("Horz");
 
 	LayoutHorizontal(Client, Depth);
