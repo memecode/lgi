@@ -26,6 +26,27 @@ public:
 	{
 		LVariant Min, Max;
 	};
+
+	class DataSeries : public LBase
+	{
+		friend class LGraph;
+		struct DataSeriesPriv *d;
+		LGraphPriv *priv;
+
+	public:
+		DataSeries(LGraphPriv *graphPriv, const char *name);
+		~DataSeries();
+
+		LColour GetColour();
+		void SetColour(LColour c);
+		bool SetDataSource(	/// Source of records
+							LDbRecordset *Rs,
+							/// Index into the data source of the X axis value
+							int XAxis = AUTO_AXIS,
+							/// Index into the data source of the Y axis value
+							int YAxis = AUTO_AXIS);
+		bool AddPair(char *x, char *y, void *UserData = NULL);
+	};
     
 	LGraph(	/// Control identifier
 			int Id,
@@ -36,13 +57,10 @@ public:
 	~LGraph();
 
 	// Api
-	bool SetDataSource(	/// Source of records
-						LDbRecordset *Rs,
-						/// Index into the data source of the X axis value
-						int XAxis = AUTO_AXIS,
-						/// Index into the data source of the Y axis value
-						int YAxis = AUTO_AXIS);
-	bool AddPair(char *x, char *y, void *UserData = 0);
+	DataSeries *GetData(const char *name, bool create = true);
+	DataSeries *GetDataAt(size_t index);
+	size_t GetDataLength();
+
 	void SetStyle(Style s);
 	Style GetStyle();
 	LArray<Pair*> *GetSelection();
@@ -52,6 +70,8 @@ public:
 	void SetLabel(bool XAxis, const char *Label);
 	Range GetRange(bool XAxis);
 	void SetRange(bool XAxis, Range r);
+
+	void Empty();
 
     // Impl
 	void OnPaint(LSurface *pDC);

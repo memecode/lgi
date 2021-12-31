@@ -14,6 +14,12 @@ struct GraphAv
     uint64 Count;
 };
 
+struct DataSeriesPriv
+{
+	LColour colour;
+	LArray<LGraph::Pair> values;
+};
+
 struct LGraphPriv
 {
 	constexpr static int AxisMarkPx = 8;
@@ -23,7 +29,9 @@ struct LGraphPriv
 	LVariantType XType, YType;
 	LVariant MaxX, MinX;
 	LVariant MaxY, MinY;
-    LArray<LGraph::Pair> Val;
+    
+	LArray<LGraph::DataSeries*> Data;
+	
 	LGraph::Style Style;
 	LPoint MouseLoc;
 	bool ShowCursor = false;
@@ -46,11 +54,30 @@ struct LGraphPriv
         #else
         Style = LGraph::LineGraph;
         #endif
-	    Average = false;
-	    BucketSize = 500;
+		Empty();
+	}
 
+	~LGraphPriv()
+	{
+		Empty();
+	}
+
+	void Empty()
+	{
+		Zoom = 1.0;
+		Px = 0.0;
+		Py = 0.0;
+		LabelX.Empty();
+		LabelY.Empty();
+		Average = false;
+		BucketSize = 500;
+		Data.DeleteObjects();
 	    XType = GV_NULL;
 	    YType = GV_NULL;
+		MinX.Empty();
+		MinY.Empty();
+		MaxX.Empty();
+		MaxY.Empty();
 	}
 
 	LVariantType GuessType(char *s)
@@ -451,8 +478,131 @@ struct LGraphPriv
 			ds.Draw(pDC, r.Center().x, r.y2-ds.Y());
 		}
 	}
+
+	LColour GenerateColour()
+	{
+		LColour c;
+		c.SetHLS(Data.Length() * 360 / 8, 255, 128);
+		c.ToRGB();
+		return c;
+	}
 };
 
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+LGraph::DataSeries::DataSeries(LGraphPriv *graphPriv, const char *name)
+{
+	d = new DataSeriesPriv;
+	priv = graphPriv;
+	Name(name);
+}
+
+LGraph::DataSeries::~DataSeries()
+{
+}
+
+LColour LGraph::DataSeries::GetColour()
+{
+	return d->colour;
+}
+
+void LGraph::DataSeries::SetColour(LColour c)
+{
+	d->colour = c;
+}
+
+bool LGraph::DataSeries::AddPair(char *x, char *y, void *UserData)
+{
+    if (!x || !y)
+        return false;
+
+    if (priv->XType == GV_NULL)
+        priv->XType = priv->GuessType(x);
+    if (priv->YType == GV_NULL)
+        priv->YType = priv->GuessType(y);
+
+    Pair &p = d->values.New();
+    p.UserData = UserData;
+    
+    if (priv->Convert(p.x, priv->XType, x))
+    {
+	    if (priv->MaxX.IsNull() || priv->Compare(p.x, priv->MaxX) > 0)
+		    priv->MaxX = p.x;
+	    if (priv->MinX.IsNull() || priv->Compare(p.x, priv->MinX) < 0)
+		    priv->MinX = p.x;
+    }
+    else
+    {
+		d->values.PopLast();
+		return false;
+    }
+
+    if (priv->Convert(p.y, priv->YType, y))
+    {
+	    if (priv->MaxY.IsNull() || priv->Compare(p.y, priv->MaxY) > 0)
+		    priv->MaxY = p.y;
+	    if (priv->MinY.IsNull() || priv->Compare(p.y, priv->MinY) < 0)
+		    priv->MinY = p.y;
+    }
+    else
+    {
+        d->values.PopLast();
+        return false;
+    }
+    
+    return true;
+}
+
+bool LGraph::DataSeries::SetDataSource(LDbRecordset *Rs, int XAxis, int YAxis)
+{
+	if (!Rs)
+		return false;
+
+	priv->XType = GV_NULL;
+	priv->YType = GV_NULL;
+
+    if (XAxis >= 0)
+        priv->XAxis = XAxis;
+    if (YAxis >= 0)
+        priv->YAxis = YAxis;
+
+	if (Rs->Fields() >= 2)
+	{
+	    int Idx = 0;
+		for (bool b = Rs->MoveFirst(); b; b = Rs->MoveNext(), Idx++)
+		{
+		    if (priv->XAxis < 0 || priv->YAxis < 0)
+		    {
+                for (int i=0; i<Rs->Fields(); i++)
+                {
+                    char *s = (*Rs)[i];
+                    LVariantType t = priv->GuessType(s);
+                    if (t != GV_NULL && t != GV_STRING)
+                    {
+                        if (priv->XAxis < 0)
+                        {
+                            priv->XAxis = i;
+                            priv->XType = t;
+                        }
+                        else if (priv->YAxis < 0)
+                        {
+                            priv->YAxis = i;
+                            priv->YType = t;
+                        }
+                        else break;
+                    }
+                }
+            }			
+			
+			if (priv->XAxis >= 0 && priv->YAxis >= 0)
+			    AddPair((*Rs)[priv->XAxis], (*Rs)[priv->YAxis]);
+		}
+	}
+
+	return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 LGraph::LGraph(int Id, int XAxis, int YAxis)
 {
 	d = new LGraphPriv(this);
@@ -466,95 +616,38 @@ LGraph::~LGraph()
 	DeleteObj(d);
 }
 
-bool LGraph::AddPair(char *x, char *y, void *UserData)
+void LGraph::Empty()
 {
-    if (!x || !y)
-        return false;
-
-    if (d->XType == GV_NULL)
-        d->XType = d->GuessType(x);
-    if (d->YType == GV_NULL)
-        d->YType = d->GuessType(y);
-
-    Pair &p = d->Val.New();
-    p.UserData = UserData;
-    
-    if (d->Convert(p.x, d->XType, x))
-    {
-	    if (d->MaxX.IsNull() || d->Compare(p.x, d->MaxX) > 0)
-		    d->MaxX = p.x;
-	    if (d->MinX.IsNull() || d->Compare(p.x, d->MinX) < 0)
-		    d->MinX = p.x;
-    }
-    else
-    {
-        d->Val.Length(d->Val.Length()-1);
-        return false;
-    }
-
-    if (d->Convert(p.y, d->YType, y))
-    {
-	    if (d->MaxY.IsNull() || d->Compare(p.y, d->MaxY) > 0)
-		    d->MaxY = p.y;
-	    if (d->MinY.IsNull() || d->Compare(p.y, d->MinY) < 0)
-		    d->MinY = p.y;
-    }
-    else
-    {
-        d->Val.Length(d->Val.Length()-1);
-        return false;
-    }
-    
-    return true;
+	d->Empty();
+	Invalidate();
 }
 
-bool LGraph::SetDataSource(LDbRecordset *Rs, int XAxis, int YAxis)
+LGraph::DataSeries *LGraph::GetData(const char *Name, bool Create)
 {
-	if (!Rs)
-		return false;
+	for (auto s: d->Data)
+		if (!Stricmp(s->Name(), Name))
+			return s;
 
-	d->XType = GV_NULL;
-	d->YType = GV_NULL;
+	if (!Create)
+		return NULL;
 
-    if (XAxis >= 0)
-        d->XAxis = XAxis;
-    if (YAxis >= 0)
-        d->YAxis = YAxis;
+	auto s = new DataSeries(d, Name);
+	if (!s)
+		return NULL;
 
-	if (Rs->Fields() >= 2)
-	{
-	    int Idx = 0;
-		for (bool b = Rs->MoveFirst(); b; b = Rs->MoveNext(), Idx++)
-		{
-		    if (d->XAxis < 0 || d->YAxis < 0)
-		    {
-                for (int i=0; i<Rs->Fields(); i++)
-                {
-                    char *s = (*Rs)[i];
-                    LVariantType t = d->GuessType(s);
-                    if (t != GV_NULL && t != GV_STRING)
-                    {
-                        if (d->XAxis < 0)
-                        {
-                            d->XAxis = i;
-                            d->XType = t;
-                        }
-                        else if (d->YAxis < 0)
-                        {
-                            d->YAxis = i;
-                            d->YType = t;
-                        }
-                        else break;
-                    }
-                }
-            }			
-			
-			if (d->XAxis >= 0 && d->YAxis >= 0)
-			    AddPair((*Rs)[d->XAxis], (*Rs)[d->YAxis]);
-		}
-	}
+	s->SetColour(d->GenerateColour());
+	d->Data.Add(s);
+	return s;
+}
 
-	return true;
+LGraph::DataSeries *LGraph::GetDataAt(size_t index)
+{
+	return d->Data.IdxCheck(index) ? d->Data[index] : NULL;
+}
+
+size_t LGraph::GetDataLength()
+{
+	return d->Data.Length();
 }
 
 void LGraph::SetStyle(Style s)
@@ -825,82 +918,94 @@ void LGraph::OnPaint(LSurface *pDC)
 
     if (d->Average && !d->Ave.Length())
     {
-        for (int i=0; i<d->Val.Length(); i++)
-        {
-	        Pair &p = d->Val[i];
-	        auto Bucket = d->DataToView(p.x, d->BucketSize, d->MinX, d->MaxX);
-            d->Ave[Bucket].Sum += p.y.CastInt64();
-            d->Ave[Bucket].Count++;
-        }
+		for (auto data: d->Data)
+		{
+			auto &values = data->d->values;
+			for (int i=0; i<values.Length(); i++)
+			{
+				Pair &p = values[i];
+				auto Bucket = d->DataToView(p.x, d->BucketSize, d->MinX, d->MaxX);
+				d->Ave[Bucket].Sum += p.y.CastInt64();
+				d->Ave[Bucket].Count++;
+			}
+		}
     }
 	
 	switch (d->Style)
 	{
 	    case LineGraph:
 	    {
-	        for (int i=0; i<d->Val.Length(); i++)
-	        {
-		        Pair &p = d->Val[i];
-		        cx = x.x1 + (int)d->DataToView(p.x, x.X(), d->MinX, d->MaxX);
-		        cy = y.y2 - (int)d->DataToView(p.y, y.Y(), d->MinY, d->MaxY);
-		        if (i)
-		        {
-			        pDC->Line(cx, cy, px, py);
-		        }
-		        px = cx;
-		        py = cy;
-	        }
+			for (auto data: d->Data)
+			{
+				auto &values = data->d->values;
+				pDC->Colour(data->GetColour());
+				for (int i=0; i<values.Length(); i++)
+				{
+					Pair &p = values[i];
+					cx = x.x1 + (int)d->DataToView(p.x, x.X(), d->MinX, d->MaxX);
+					cy = y.y2 - (int)d->DataToView(p.y, y.Y(), d->MinY, d->MaxY);
+					if (i)
+						pDC->Line(cx, cy, px, py);
+					px = cx;
+					py = cy;
+				}
+			}
 	        break;
 	    }
 	    case PointGraph:
 	    {
-	        for (int i=0; i<d->Val.Length(); i++)
-	        {
-		        Pair &p = d->Val[i];
+			for (auto data: d->Data)
+			{
+				auto &values = data->d->values;
+				pDC->Colour(data->GetColour());
+				for (int i=0; i<values.Length(); i++)
+				{
+					Pair &p = values[i];
 
-				int xmap = (int)d->DataToView(p.x, x.X(), d->MinX, d->MaxX);
-				int ymap = (int)d->DataToView(p.y, y.Y(), d->MinY, d->MaxY);
-				// LgiTrace("%s -> %i (%s, %s)\n", p.x.Value.Date->Get().Get(), xmap, d->MinX.Value.Date->Get().Get(), d->MaxX.Value.Date->Get().Get());
-		        cx = x.x1 + xmap;
-		        cy = y.y2 - ymap;
-		        pDC->Set(cx, cy);
+					int xmap = (int)d->DataToView(p.x, x.X(), d->MinX, d->MaxX);
+					int ymap = (int)d->DataToView(p.y, y.Y(), d->MinY, d->MaxY);
+					// LgiTrace("%s -> %i (%s, %s)\n", p.x.Value.Date->Get().Get(), xmap, d->MinX.Value.Date->Get().Get(), d->MaxX.Value.Date->Get().Get());
+					cx = x.x1 + xmap;
+					cy = y.y2 - ymap;
+					pDC->Set(cx, cy);
 		        
-		        if (d->Select &&
-		            abs(d->Select->x - cx) < SELECTION_SIZE &&
-		            abs(d->Select->y - cy) < SELECTION_SIZE)
-		        {
-		            d->Selection.Add(&p);
-		        }
-	        }
+					if (d->Select &&
+						abs(d->Select->x - cx) < SELECTION_SIZE &&
+						abs(d->Select->y - cy) < SELECTION_SIZE)
+					{
+						d->Selection.Add(&p);
+					}
+				}
 	        
-	        if (d->Average)
-	        {
-	            int px = -1, py = -1;
-	            pDC->Colour(LColour(255, 0, 0));
-	            for (int b=0; b<d->BucketSize; b++)
-	            {
-	                if (d->Ave[b].Count)
-	                {
-	                    int cx = x.x1 + (((b * x.X()) + (x.X() >> 1)) / d->BucketSize);
-	                    LVariant v = d->Ave[b].Sum / d->Ave[b].Count;
-	                    int cy = y.y2 - (int)d->DataToView(v, y.Y(), d->MinY, d->MaxY);
+				if (d->Average)
+				{
+					int px = -1, py = -1;
+					pDC->Colour(LColour(255, 0, 0));
+					for (int b=0; b<d->BucketSize; b++)
+					{
+						if (d->Ave[b].Count)
+						{
+							int cx = x.x1 + (((b * x.X()) + (x.X() >> 1)) / d->BucketSize);
+							LVariant v = d->Ave[b].Sum / d->Ave[b].Count;
+							int cy = y.y2 - (int)d->DataToView(v, y.Y(), d->MinY, d->MaxY);
 	                    
-	                    if (py >= 0)
-	                    {
-	                        pDC->Line(cx, cy, px, py);
-	                    }	                    
+							if (py >= 0)
+							{
+								pDC->Line(cx, cy, px, py);
+							}	                    
 	                    
-	                    px = cx;
-	                    py = cy;
-	                }
-	            }
-	        }
-	        
-	        if (d->Select)
-	        {
-	            d->Select.Reset();
-	            SendNotify();
-	        }
+							px = cx;
+							py = cy;
+						}
+					}
+				}
+			}
+
+			if (d->Select)
+			{
+				d->Select.Reset();
+				SendNotify();
+			}
 	        break;
 	    }
 	}

@@ -160,7 +160,7 @@ public:
 	void Intersection(LRect *a, LRect *b);
 
 	/// Returns a static string formated to include the points in the order: x1,y1,x2,y2
-	char *GetStr();
+	char *GetStr() const;
 	char *Describe() { return GetStr(); }
 
 	/// Sets the rect from a string containing: x1,y1,x2,y2

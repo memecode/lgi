@@ -283,7 +283,7 @@ void LRect::Intersection(LRect *a, LRect *b)
 	}
 }
 
-char *LRect::GetStr()
+char *LRect::GetStr() const
 {
 	#define BUFFERS	5
 	static char Str[BUFFERS][48];
