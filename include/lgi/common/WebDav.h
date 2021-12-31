@@ -10,6 +10,7 @@ class LWebdav
 {
 protected:
 	LString EndPoint, EndPointPath, User, Pass;
+	LCancel *Cancel = NULL;
 
 	LAutoPtr<LSocketI> GetSocket()
 	{
@@ -19,6 +20,7 @@ protected:
 		if (ssl)
 		{
 			ssl->SetSslOnConnect(true);
+			ssl->SetCancel(Cancel);
 			s.Reset(ssl);
 		}
 
@@ -68,7 +70,7 @@ public:
 		}
 	};
 
-	LWebdav(LString endPoint, LString user, LString pass);
+	LWebdav(LString endPoint, LString user, LString pass, LCancel *cancel);
 
 	LString::Array GetOptions(LString Resource);
 	bool PropFind(LArray<FileProps> &Files, LString Resource, int Depth = 1);

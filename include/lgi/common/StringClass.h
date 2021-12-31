@@ -519,6 +519,20 @@ public:
 		
 		return *this;
 	}
+
+	LString operator *(ssize_t mul)
+	{
+		LString s;
+		if (Str)
+		{
+			s.Length(Str->Len * mul);
+			char *out = s.Get();
+			for (ssize_t i=0; i<mul; i++, out += Str->Len)
+				memcpy(out, Str->Str, Str->Len);
+			*out = 0;
+		}
+		return s;
+	}
 	
 	/// Gets the length in bytes
 	size_t Length() const

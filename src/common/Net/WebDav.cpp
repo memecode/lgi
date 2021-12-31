@@ -14,7 +14,8 @@ bool LFindXml(LArray<LXmlTag*> &Results, LXmlTag *t, const char *Name)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-LWebdav::LWebdav(LString endPoint, LString user, LString pass)
+LWebdav::LWebdav(LString endPoint, LString user, LString pass, LCancel *cancel) :
+	Cancel(cancel)
 {
 	EndPoint = endPoint;
 	User = user;

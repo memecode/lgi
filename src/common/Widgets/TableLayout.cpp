@@ -3,20 +3,6 @@
 #include "lgi/common/CssTools.h"
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/LgiRes.h"
-
-enum CellFlag
-{
-	// A null value when the call flag is not known yet
-	SizeUnknown,
-	// The cell contains fixed size objects
-	SizeFixed,
-	// The cell contains objects that have variable size
-	SizeGrow,
-	// The cell contains objects that will use all available space
-	SizeFill,
-};
-
-#include "lgi/common/Token.h"
 #include "lgi/common/Variant.h"
 #include "lgi/common/TextLabel.h"
 #include "lgi/common/Button.h"
@@ -31,11 +17,28 @@ enum CellFlag
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Css.h"
 
+enum CellFlag
+{
+	// A null value when the call flag is not known yet
+	SizeUnknown,
+	// The cell contains fixed size objects
+	SizeFixed,
+	// The cell contains objects that have variable size
+	SizeGrow,
+	// The cell contains objects that will use all available space
+	SizeFill,
+};
+
+static LString Indent(int Depth)
+{
+	return LString(" ") * (Depth << 2);
+}
+
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		82
+// #define DEBUG_LAYOUT		539
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
-// #define DEBUG_CTRL_ID		90
+// #define DEBUG_CTRL_ID		508
 
 int LTableLayout::CellSpacing = 4;
 
@@ -330,11 +333,12 @@ public:
 	int MaxCellWidth();
 
 	/// Calculates the minimum and maximum widths this cell can occupy.
-	void PreLayout(int &MinX, int &MaxX, CellFlag &Flag);
+	void LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag);
 	/// Calculate the height of the cell based on the given width
-	void Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags);
+	void LayoutHeight(int Depth, int Width, int &MinY, int &MaxY, CellFlag &Flags);
 	/// Called after the layout has been done to move the controls into place
-	void PostLayout();
+	void PostLayout(int Depth);
+	
 	void OnPaint(LSurface *pDC);
 	void OnChange(PropType Prop) override;
 };
@@ -389,12 +393,12 @@ public:
 	LArray<CellFlag> ColFlags, RowFlags;
 
 	// Layout staged methods, call in order to complete the layout
-	void LayoutHorizontal(LRect &Client, int *MinX = NULL, int *MaxX = NULL, CellFlag *Flag = NULL);
-	void LayoutVertical(LRect &Client, int *MinY = NULL, int *MaxY = NULL, CellFlag *Flag = NULL, int Depth = 0);
-	void LayoutPost(LRect &Client);
+	void LayoutHorizontal(const LRect Client, int Depth, int *MinX = NULL, int *MaxX = NULL, CellFlag *Flag = NULL);
+	void LayoutVertical(const LRect Client, int Depth, int *MinY = NULL, int *MaxY = NULL, CellFlag *Flag = NULL);
+	void LayoutPost(const LRect Client, int Depth);
 	
 	// This does the whole layout, basically calling all the stages for you
-	void Layout(LRect &Client);
+	void Layout(const LRect Client, int Depth);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -697,11 +701,13 @@ int TableCell::MaxCellWidth()
 }
 
 /// Calculates the minimum and maximum widths this cell can occupy.
-void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
+void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 {
 	int MaxBtnX = 0;
 	int TotalBtnX = 0;
 	int Min = 0, Max = 0;
+
+	Pos = Pos.ZeroTranslate();
 
 	// Calculate CSS padding
 	#define CalcCssPadding(Prop, Axis, Edge) \
@@ -768,19 +774,21 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 				continue;
 
 			ZeroObj(c->Inf);
-			c->r = v->GetPos();
+			c->r = v->GetPos().ZeroTranslate();
 			
 			LCss *Css = v->GetCss();
 			LCss::Len ChildWid;
 			if (Css)
 				ChildWid = Css->Width();
 
+			/*
 			#ifdef DEBUG_CTRL_ID
 			if (v->GetId() == DEBUG_CTRL_ID)
-			{
-				int asd=0;
-			}
+				LgiTrace("%s%s:%i - pos=%s c->r=%s\n",
+					Indent(Depth).Get(),
+					_FL, Pos.GetStr(), c->r.GetStr());
 			#endif
+			*/
 				
 			if (ChildWid.IsValid())
 			{
@@ -898,7 +906,7 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 				if (Tbl)
 				{
 					Tbl->d->InitBorderSpacing();
-					Tbl->d->LayoutHorizontal(Table->GetClient(), &Min, &Max, &Flag);
+					Tbl->d->LayoutHorizontal(Table->GetClient(), Depth+1, &Min, &Max, &Flag);
 					
 					if (Wid.IsDynamic())
 					{
@@ -938,7 +946,7 @@ void TableCell::PreLayout(int &MinX, int &MaxX, CellFlag &Flag)
 }
 
 /// Calculate the height of the cell based on the given width
-void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
+void TableCell::LayoutHeight(int Depth, int Width, int &MinY, int &MaxY, CellFlag &Flags)
 {
 	Pos.ZOff(Width-1, 0);
 	if (Disp == DispNone)
@@ -977,12 +985,14 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		if (!v)
 			continue;
 
+		/*
 		#ifdef DEBUG_CTRL_ID
 		if (v->GetId() == DEBUG_CTRL_ID)
-		{
-			int asd=0;
-		}
+			LgiTrace("%s%s:%i - pos=%s c->r=%s\n",
+				Indent(Depth).Get(),
+				_FL, Pos.GetStr(), c->r.GetStr());
 		#endif
+		*/
 
 		if (CssWidth.Type != LenInherit)
 		{
@@ -1023,7 +1033,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 			if (!Ht.IsDynamic() && MinY < CtrlHeight)
 				MinY = CtrlHeight;
 			
-			c->r = v->GetPos();
+			c->r = v->GetPos().ZeroTranslate();
 			c->r.y2 = c->r.y1 + CtrlHeight - 1;			
 			Pos.y2 = MAX(Pos.y2, c->r.Y()-1);
 		}
@@ -1128,9 +1138,9 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 		{
 			c->r.ZOff(Width-1, Table->Y()-1);
 			Tbl->d->InitBorderSpacing();
-			Tbl->d->LayoutHorizontal(c->r);
-			Tbl->d->LayoutVertical(c->r, &MinY, &MaxY, &Flags, 1);
-			Tbl->d->LayoutPost(c->r);
+			Tbl->d->LayoutHorizontal(c->r, Depth+1);
+			Tbl->d->LayoutVertical(c->r, Depth+1, &MinY, &MaxY, &Flags);
+			Tbl->d->LayoutPost(c->r, Depth+1);
 			Pos.y2 += MinY;
 			
 			c->Inf.Height.Min = MinY;
@@ -1141,6 +1151,15 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 			// Doesn't support layout info
 			Pos.y2 += v->Y();
 		}
+
+		#ifdef DEBUG_CTRL_ID
+		if (v->GetId() == DEBUG_CTRL_ID)
+		{
+			LgiTrace("%s%s:%i - pos=%s c->r=%s\n",
+				Indent(Depth).Get(),
+				_FL, Pos.GetStr(), c->r.GetStr());
+		}
+		#endif
 	}
 	
 	// Fix: This if statement is needed to stop LFileSelect dialogs only growing in size, and
@@ -1153,7 +1172,7 @@ void TableCell::Layout(int Width, int &MinY, int &MaxY, CellFlag &Flags)
 }
 
 /// Called after the layout has been done to move the controls into place
-void TableCell::PostLayout()
+void TableCell::PostLayout(int Depth)
 {
 	int Cx = Padding.x1;
 	int Cy = Padding.y1;
@@ -1184,6 +1203,11 @@ void TableCell::PostLayout()
 		if (v->GetId() == DEBUG_CTRL_ID)
 		{
 			HasDebugCtrl = true;
+			if (Pos.x1 == 4)
+			{
+				int asd=0;
+			}
+			/// LgiTrace("%s:%i - c->r=%s padding=%s cur=%i,%i\n", _FL, c->r.GetStr(), Padding.GetStr(), Cx, Cy);
 		}
 		#endif
 
@@ -1212,6 +1236,17 @@ void TableCell::PostLayout()
 			Cx = Padding.x1;
 			Cy = MaxY + Table->d->BorderSpacing;
 		}
+
+		/*
+		#ifdef DEBUG_CTRL_ID
+		if (v->GetId() == DEBUG_CTRL_ID)
+		{
+			LgiTrace("%s:%i - offset %i %i %i, %i %i %i\n", _FL,
+				Pos.x1, c->r.x1, Cx,
+				Pos.y1, c->r.y1, Cy);
+		}
+		#endif
+		*/
 
 		c->r.Offset(Pos.x1 - c->r.x1 + Cx, Pos.y1 - c->r.y1 + Cy);
 
@@ -1263,6 +1298,17 @@ void TableCell::PostLayout()
 		}
 
 		New[i] = c->r;
+
+		/*
+		#ifdef DEBUG_CTRL_ID
+		if (v->GetId() == DEBUG_CTRL_ID)
+		{
+			HasDebugCtrl = true;
+			LgiTrace("%s:%i - c->r=%s\n", _FL, c->r.GetStr());
+		}
+		#endif
+		*/
+
 		MaxY = MAX(MaxY, c->r.y2 - Pos.y1);
 		Cx += c->r.X() + Table->d->BorderSpacing;
 	}
@@ -1329,9 +1375,14 @@ void TableCell::PostLayout()
 
 		New[n].Offset(0, OffsetY);
 
-		#if DEBUG_LAYOUT
-		if (Table->d->DebugLayout)
+		#if DEBUG_CTRL_ID
+		if (HasDebugCtrl) // Table->d->DebugLayout)
 		{
+			if (New[n].x1 == 4)
+			{
+				int asd=0;
+			}
+
 			Table->d->Dbg.Print("\t\t%s[%i]=%s, %ix%i, Offy=%i %s\n",
 				v->GetClass(), n,
 				New[n].GetStr(),
@@ -1423,17 +1474,13 @@ void LTableLayoutPrivate::Empty(LRect *Range)
 TableCell *LTableLayoutPrivate::GetCellAt(int cx, int cy)
 {
 	for (int i=0; i<Cells.Length(); i++)
-	{
 		if (Cells[i]->Cell.Overlap(cx, cy))
-		{
 			return Cells[i];
-		}
-	}
 
-	return 0;
+	return NULL;
 }
 
-void LTableLayoutPrivate::LayoutHorizontal(LRect &Client, int *MinX, int *MaxX, CellFlag *Flag)
+void LTableLayoutPrivate::LayoutHorizontal(const LRect Client, int Depth, int *MinX, int *MaxX, CellFlag *Flag)
 {
 	// This only gets called when you nest LTableLayout controls. It's 
 	// responsible for doing pre layout stuff for an entire control of cells.
@@ -1481,7 +1528,7 @@ void LTableLayoutPrivate::LayoutHorizontal(LRect &Client, int *MinX, int *MaxX, 
 					int &MinC = MinCol[Cx];
 					int &MaxC = MaxCol[Cx];
 					CellFlag &ColF = ColFlags[Cx];
-					c->PreLayout(MinC, MaxC, ColF);
+					c->LayoutWidth(Depth, MinC, MaxC, ColF);
 				}
 
 				Cx += c->Cell.X();
@@ -1543,7 +1590,7 @@ void LTableLayoutPrivate::LayoutHorizontal(LRect &Client, int *MinX, int *MaxX, 
 							int Px = l.ToPx(Client.X(), Ctrl->GetFont());;
 							if (l.IsDynamic())
 							{
-								c->PreLayout(Min, Max, Flag);
+								c->LayoutWidth(Depth, Min, Max, Flag);
 							}
 							else
 							{
@@ -1553,7 +1600,7 @@ void LTableLayoutPrivate::LayoutHorizontal(LRect &Client, int *MinX, int *MaxX, 
 					}
 					else
 					{
-						c->PreLayout(Min, Max, Flag);
+						c->LayoutWidth(Depth, Min, Max, Flag);
 					}
 
 					// Dbg.Print("Spanned cell: %i,%i\n", Min, Max);
@@ -1684,7 +1731,7 @@ void LTableLayoutPrivate::LayoutHorizontal(LRect &Client, int *MinX, int *MaxX, 
 	Prof.Reset();
 }
 
-void LTableLayoutPrivate::LayoutVertical(LRect &Client, int *MinY, int *MaxY, CellFlag *Flag, int Depth)
+void LTableLayoutPrivate::LayoutVertical(const LRect Client, int Depth, int *MinY, int *MaxY, CellFlag *Flag)
 {
 	int Cx, Cy, i;
 
@@ -1705,7 +1752,7 @@ void LTableLayoutPrivate::LayoutVertical(LRect &Client, int *MinY, int *MaxY, Ce
 					int &Min = MinRow[Cy];
 					int &Max = MaxRow[Cy];
 					CellFlag &Flags = RowFlags[Cy];
-					c->Layout(x, Min, Max, Flags);
+					c->LayoutHeight(Depth, x, Min, Max, Flags);
 				}
 
 				Cx += c->Cell.X();
@@ -1745,7 +1792,7 @@ void LTableLayoutPrivate::LayoutVertical(LRect &Client, int *MinY, int *MaxY, Ce
 					// int RemainingY   = Client.Y() - AllocY;
 					CellFlag RowFlag = SizeUnknown;
 
-					c->Layout(WidthPx, MinY, MaxY, RowFlag);
+					c->LayoutHeight(Depth, WidthPx, MinY, MaxY, RowFlag);
 
 					// This code stops the max being set on spanned cells.
 					LArray<int> AddTo;
@@ -1871,7 +1918,7 @@ void LTableLayoutPrivate::LayoutVertical(LRect &Client, int *MinY, int *MaxY, Ce
 	}
 }
 
-void LTableLayoutPrivate::LayoutPost(LRect &Client)
+void LTableLayoutPrivate::LayoutPost(const LRect Client, int Depth)
 {
 	int Px = 0, Py = 0, Cx, Cy;
 	LFont *Fnt = Ctrl->GetFont();
@@ -1914,8 +1961,11 @@ void LTableLayoutPrivate::LayoutPost(LRect &Client)
 					else
 					{
 						c->Pos.Offset(Client.x1 + Px, Client.y1 + Py);
+						#ifdef DEBUG_CTRL_ID
+						// LgiTrace("%s:%i - Client=%s pos=%s p=%i,%i\n", _FL, Client.GetStr(), c->Pos.GetStr(), Px, Py);
+						#endif
 					}
-					c->PostLayout();
+					c->PostLayout(Depth);
 
 					MaxY = MAX(MaxY, c->Pos.y2);
 
@@ -1955,7 +2005,7 @@ void LTableLayoutPrivate::InitBorderSpacing()
 	}
 }
 
-void LTableLayoutPrivate::Layout(LRect &Client)
+void LTableLayoutPrivate::Layout(const LRect Client, int Depth)
 {
 	if (InLayout)
 	{    
@@ -1980,20 +2030,21 @@ void LTableLayoutPrivate::Layout(LRect &Client)
 	#endif
 
 	LString s;
-	s.Printf("Layout %i x %i", Client.X(), Client.Y());
+	s.Printf("Layout id %i: %i x %i", Ctrl->GetId(), Client.X(), Client.Y());
 	LAutoPtr<LProfile> Prof(/*Debug ? new LProfile(s) :*/ NULL);
 
+	LgiTrace("%s%s\n", Indent(Depth).Get(), s.Get());
 	if (Prof) Prof->Add("Horz");
 
-	LayoutHorizontal(Client);
+	LayoutHorizontal(Client, Depth);
 
 	if (Prof) Prof->Add("Vert");
 
-	LayoutVertical(Client);
+	LayoutVertical(Client, Depth);
 
 	if (Prof) Prof->Add("Post");
 
-	LayoutPost(Client);
+	LayoutPost(Client, Depth);
 
 	if (Prof) Prof->Add("Notify");
 
@@ -2069,7 +2120,6 @@ bool LTableLayout::SizeChanged()
 void LTableLayout::OnPosChange()
 {
 	LRect r = GetClient();
-
 	bool Up = SizeChanged() || d->LayoutDirty;
 	// LgiTrace("%s:%i - Up=%i for Id=%i\n", _FL, Up, GetId());
 	if (Up)
@@ -2085,8 +2135,8 @@ void LTableLayout::OnPosChange()
 				r = t.ApplyPadding(r);
 			}
 			
-			d->LayoutDirty = false;			
-			d->Layout(r);
+			d->LayoutDirty = false;
+			d->Layout(r, 0);
 		}
 	}
 }
@@ -2198,11 +2248,8 @@ bool LTableLayout::GetVariant(const char *Name, LVariant &Value, const char *Arr
 
 bool ConvertNumbers(LArray<double> &a, char *s)
 {
-	GToken t(s, ",");
-	for (int i=0; i<t.Length(); i++)
-	{
-		a.Add(atof(t[i]));
-	}
+	for (auto &i: LString(s).SplitDelimit(","))
+		a.Add(i.Float());
 	return a.Length() > 0;
 }
 
@@ -2278,7 +2325,23 @@ int LTableLayout::OnNotify(LViewI *c, LNotification n)
 {
 	if (n.Type == LNotifyTableLayoutRefresh)
 	{
-		if (!d->LayoutDirty)
+		bool hasTableParent = false;
+		for (LViewI *p = GetParent(); p; p = p->GetParent())
+		{
+			if (dynamic_cast<LTableLayout*>(p))
+			{
+				hasTableParent = true;
+				break;
+			}
+		}
+
+		if (hasTableParent)
+		{
+			// One of the parent controls is a table layout, which when it receives this
+			// notification will lay this control out too... so don't do it twice.
+			// LgiTrace("%s:%i - Ignoring LNotifyTableLayoutRefresh because hasTableParent.\n", _FL);
+		}
+		else if (!d->LayoutDirty)
 		{
 			d->LayoutDirty = true;
 			if (IsAttached())
