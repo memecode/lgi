@@ -325,7 +325,10 @@ LRect LScreenDC::ClipRgn(LRect *Rgn)
 		Clip.x2 = min(Rgn->x2 - Origin.x, d->Sx-1);
 		Clip.y2 = min(Rgn->y2 - Origin.y, d->Sy-1);
 
-		LAssert(d->Sx > 0 && d->Sy > 0);
+		if (Clip.x2 < Clip.x1)
+			Clip.x2 = Clip.x1-1;
+		if (Clip.y2 < Clip.y1)
+			Clip.y2 = Clip.y1-1;
 
 		HRGN hRgn = CreateRectRgn(Clip.x1, Clip.y1, Clip.x2+1, Clip.y2+1);
 		if (hRgn)
