@@ -3,14 +3,14 @@
 #include "lgi/common/Printer.h"
 
 ////////////////////////////////////////////////////////////////////
-class GPrinterPrivate
+class LPrinterPrivate
 {
 public:
 	PRINTDLG Info;
 	LString Err;
 	bool NeedsDC;
 
-	GPrinterPrivate()
+	LPrinterPrivate()
 	{
 		NeedsDC = false;
 		ZeroObj(Info);
@@ -19,22 +19,22 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////
-GPrinter::GPrinter()
+LPrinter::LPrinter()
 {
-	d = new GPrinterPrivate;
+	d = new LPrinterPrivate;
 }
 
-GPrinter::~GPrinter()
+LPrinter::~LPrinter()
 {
 	DeleteObj(d);
 }
 
-LString GPrinter::GetErrorMsg()
+LString LPrinter::GetErrorMsg()
 {
 	return d->Err;
 }
 
-bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages, LView *Parent)
+bool LPrinter::Print(LPrintEvents *Events, const char *PrintJobName, int Pages, LView *Parent)
 {
 	if (!Events)
 		return false;
@@ -138,7 +138,7 @@ bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages, 
 	return Status;
 }
 
-bool GPrinter::Browse(LView *Parent)
+bool LPrinter::Browse(LView *Parent)
 {
 	d->Info.hwndOwner = (Parent) ? Parent->Handle() : 0;
 	d->Info.Flags = PD_PRINTSETUP | PD_PAGENUMS;
@@ -174,7 +174,7 @@ bool GPrinter::GetPageRange(LArray<int> &p)
 #define MAGIC_DEVMODE					0xAAFF0101
 #define MAGIC_DEVNAMES					0xAAFF0102
 
-bool GPrinter::Serialize(LString &Str, bool Write)
+bool LPrinter::Serialize(LString &Str, bool Write)
 {
 	int Size = sizeof(d->Info);
 	if (Write)

@@ -3,13 +3,12 @@
 	\author Matthew Allen
 */
 
-#ifndef _GPRINTER_H_
-#define _GPRINTER_H_
+#pragma once
 
-class GPrintEvents
+class LPrintEvents
 {
 public:
-	virtual ~GPrintEvents() {}
+	virtual ~LPrintEvents() {}
 
 	/*
 	/// Get the number of pages in the document
@@ -29,13 +28,13 @@ public:
 };
 
 /// Class to connect to a printer and start printing pages.
-class LgiClass GPrinter
+class LgiClass LPrinter
 {
-	class GPrinterPrivate *d;
+	class LPrinterPrivate *d;
 
 public:
-	GPrinter();
-	virtual ~GPrinter();
+	LPrinter();
+	virtual ~LPrinter();
 
 	/// Browse to a printer
 	bool Browse(LView *Parent);
@@ -44,7 +43,7 @@ public:
 	bool Print
 	(
 		/// The event callback for pagination and printing of pages
-		GPrintEvents *Events,
+		LPrintEvents *Events,
 		/// [Optional] The name of the print job
 		const char *PrintJobName = NULL,
 		/// [Optional] The maximum number of pages to print
@@ -60,4 +59,3 @@ public:
 	bool Serialize(LString &Str, bool Write);
 };
 
-#endif
