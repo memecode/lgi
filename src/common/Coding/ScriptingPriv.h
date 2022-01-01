@@ -554,8 +554,9 @@ public:
 		bool OsName(LScriptArguments &Args);
 		/// Gets the operating system version.
 		bool OsVersion(LScriptArguments &Args);
-		/// Yeilds the msg loop (if supported)
-		bool Yeild(LScriptArguments &Args);
+		/// Yields the msg loop (if supported)
+		#undef Yield // Windows... gah.
+		bool Yield(LScriptArguments &Args);
 };
 
 #endif
