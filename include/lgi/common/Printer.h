@@ -5,6 +5,42 @@
 
 #pragma once
 
+struct LPrintPageRanges : public LArray<LRange>
+{
+	LPrintPageRanges(LString PageRanges)
+	{
+		for (auto r: PageRanges.SplitDelimit(","))
+		{
+			auto p = r.SplitDelimit("-");
+			if (p.Length() == 1)
+			{
+				auto &range = New();
+				range.Start = p[0].Int();
+				range.Len = 1;
+			}
+			else if (p.Length() == 2)
+			{
+				auto &range = New();
+				range.Start = p[0].Int();
+				range.Len = p[1].Int() - range.Start + 1;
+			}
+		}
+	}
+
+	bool InRanges(int Page)
+	{
+		if (Length() == 0)
+			return true;
+
+		for (auto &r: *this)
+			if (r.Overlap(Page))
+				return true;
+
+		return false;
+	}
+};
+
+
 class LPrintEvents
 {
 public:
@@ -25,6 +61,7 @@ public:
 
 	virtual int OnBeginPrint(LPrintDC *pDC) { return 1; }
 	virtual bool OnPrintPage(LPrintDC *pDC, int PageIndex) = 0;
+	virtual LPrintPageRanges *GetPageRanges() { return NULL; }
 };
 
 /// Class to connect to a printer and start printing pages.
@@ -40,7 +77,7 @@ public:
 	bool Browse(LView *Parent);
 
 	/// Start a print job
-	bool Print
+	int Print
 	(
 		/// The event callback for pagination and printing of pages
 		LPrintEvents *Events,

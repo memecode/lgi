@@ -113,7 +113,7 @@ char16 *ConvertToCrLf(char16 *Text)
 
 //////////////////////////////////////////////////////////////////////////////////
 #include "lgi/common/Net.h"
-LDocumentEnv::LoadType GDefaultDocumentEnv::GetContent(LoadJob *&j)
+LDocumentEnv::LoadType LDefaultDocumentEnv::GetContent(LoadJob *&j)
 {
 	if (!j || !ValidStr(j->Uri))
 		return LoadError;
@@ -159,7 +159,7 @@ LDocumentEnv::LoadType GDefaultDocumentEnv::GetContent(LoadJob *&j)
 	return LoadError;
 }
 
-bool GDefaultDocumentEnv::OnNavigate(LDocView *Parent, const char *Uri)
+bool LDefaultDocumentEnv::OnNavigate(LDocView *Parent, const char *Uri)
 {
 	if (Uri)
 	{

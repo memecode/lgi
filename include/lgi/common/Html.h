@@ -24,7 +24,7 @@ class LFontCache;
 /// environment if set. Likewise any content inside active scripting tags, e.g. &lt;? ?&gt;
 /// will be striped out of the document and passed to LDocumentEnv::OnDynamicContent, which
 /// should return the relevant HTML that the script resolves to. A reasonable default
-/// implementation of the LDocumentEnv interface is the GDefaultDocumentEnv object.
+/// implementation of the LDocumentEnv interface is the LDefaultDocumentEnv object.
 ///
 /// You can set the content of the control through the GHtml2::Name method.
 ///

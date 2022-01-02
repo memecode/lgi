@@ -34,7 +34,7 @@ LString LPrinter::GetErrorMsg()
 	return d->Err;
 }
 
-bool LPrinter::Print(LPrintEvents *Events, const char *PrintJobName, int Pages, LView *Parent)
+int LPrinter::Print(LPrintEvents *Events, const char *PrintJobName, int Pages, LView *Parent)
 {
 	if (!Events)
 		return false;
@@ -101,9 +101,11 @@ bool LPrinter::Print(LPrintEvents *Events, const char *PrintJobName, int Pages, 
 		return false;
 	}	
 	
-	int JobPages = Events->OnBeginPrint(&dc);
-	bool Status = false;
+	auto JobPages = Events->OnBeginPrint(&dc);
+	if (JobPages <= 0)
+		return JobPages;
 
+	bool Status = false;
 	DOCINFO Info;
 	LAutoWString DocName(Utf8ToWide(PrintJobName ? PrintJobName : "Lgi Print Job"));
 
@@ -114,18 +116,22 @@ bool LPrinter::Print(LPrintEvents *Events, const char *PrintJobName, int Pages, 
 	if (Pages > 0)
 		JobPages = min(JobPages, Pages);
 		
+	auto PageRanges = Events->GetPageRanges();
 	for (int i=0; i<JobPages; i++)
 	{
-		if (StartPage(dc.Handle()) > 0)
+		if (!PageRanges || PageRanges->InRanges(i + 1))
 		{
-			Status |= Events->OnPrintPage(&dc, i);
-			EndPage(dc.Handle());
-		}
-		else
-		{
-			d->Err.Printf("%s:%i - StartPage failed.", _FL);
-			Status = false;
-			break;
+			if (StartPage(dc.Handle()) > 0)
+			{
+				Status |= Events->OnPrintPage(&dc, i);
+				EndPage(dc.Handle());
+			}
+			else
+			{
+				d->Err.Printf("%s:%i - StartPage failed.", _FL);
+				Status = false;
+				break;
+			}
 		}
 	}
 	

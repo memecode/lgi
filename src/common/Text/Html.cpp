@@ -55,7 +55,6 @@
 #ifndef IDC_HAND
 #define IDC_HAND					MAKEINTRESOURCE(32649)
 #endif
-#define M_JOBS_LOADED				(M_USER+4000)
 
 #undef CellSpacing
 #define DefaultCellSpacing			0
@@ -8829,7 +8828,7 @@ void GHtml::OnContent(LDocumentEnv::LoadJob *Res)
 	if (JobSem.Lock(_FL))
 	{
 		JobSem.Jobs.Add(Res);
-		JobSem.Unlock();
+		JobSem.Unlock();		
 		PostEvent(M_JOBS_LOADED);
 	}
 }
@@ -8959,7 +8958,7 @@ class LHtml_Factory : public LViewFactory
 	{
 		if (_stricmp(Class, "LHtml") == 0)
 		{
-			return new GHtml(-1, 0, 0, 100, 100, new GDefaultDocumentEnv);
+			return new GHtml(-1, 0, 0, 100, 100, new LDefaultDocumentEnv);
 		}
 
 		return 0;

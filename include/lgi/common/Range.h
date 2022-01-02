@@ -45,7 +45,7 @@ struct LRange
 	bool Overlap(ssize_t Val)
 	{
 		return Val >= Start &&
-				Val <= End();
+				Val < End();
 	}
 
 	ssize_t End() const
