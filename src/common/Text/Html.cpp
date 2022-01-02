@@ -289,7 +289,7 @@ public:
 		auto Scale = Owner->GetDpiScale();
 		if (Size.Type == LCss::LenPx)
 		{
-			Size.Value *= Scale.y;
+			Size.Value *= (float) Scale.y;
 		    int RequestPx = (int) Size.Value;
 
 			// Look for cached fonts of the right size...
@@ -340,7 +340,7 @@ public:
 			// in their parent tree, so we just use the default font size times
 			// the requested percent
 			Size.Type = LCss::LenPt;
-			Size.Value *= Default->PointSize() / 100.0;
+			Size.Value *= Default->PointSize() / 100.0f;
 			if (Size.Value < MinimumPointSize)
 				Size.Value = MinimumPointSize;
 		}
@@ -4270,7 +4270,7 @@ void GHtmlTableLayout::AllocatePx(int StartCol, int Cols, int MinPx, bool HasToF
 			}
 			else
 			{
-				AddPx = RemainingPx / Growable.Length();
+				AddPx = RemainingPx / (int)Growable.Length();
 			}
 								
 			LAssert(AddPx >= 0);
@@ -4298,7 +4298,7 @@ void GHtmlTableLayout::AllocatePx(int StartCol, int Cols, int MinPx, bool HasToF
 				Growable[0] = Largest;
 			}
 
-			int AddPx = (RemainingPx - Added) / Growable.Length();
+			int AddPx = (RemainingPx - Added) / (int)Growable.Length();
 			for (unsigned i=0; i<Growable.Length(); i++)
 			{
 				int x = Growable[i];
@@ -5692,7 +5692,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 					else if (LineHt.Type == LCss::LenPx)
 					{
 						auto Scale = Html->GetDpiScale().y;
-						LineHt.Value *= Scale;
+						LineHt.Value *= (float)Scale;
 						LineHeightCache = LineHt.ToPx(FontPx, f);
 						// LgiTrace("LineHeight FontPx=%i Px=%i (Scale=%f)\n", FontPx, LineHeightCache, Scale);
 					}
@@ -7997,7 +7997,7 @@ bool GHtml::OnFind(GFindReplaceCommon *Params)
 bool GHtml::DoFind()
 {
 	GFindDlg Dlg(this, 0, FindCallback, this);
-	return Dlg.DoModal();
+	return Dlg.DoModal() != 0;
 }
 
 bool GHtml::OnKey(LKey &k)
@@ -8055,9 +8055,8 @@ bool GHtml::OnKey(LKey &k)
 			{
 				if (VScroll)
 				{
-					int64 Low, High;
-					VScroll->Limits(Low, High);
-					Dy = (int) ((High - Page) - VScroll->Value());
+					LRange r = VScroll->GetRange();
+					Dy = (int)(r.End() - Page);
 				}
 				Status = true;
 				break;

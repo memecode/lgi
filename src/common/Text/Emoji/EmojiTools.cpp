@@ -21,8 +21,8 @@ bool HasEmoji(char *Txt)
 	WChar u;
 	while ((u = p++))
 	{
-		int IcoIdx = EmojiToIconIndex((uint32_t*)&u, 1);
-		if (IcoIdx >= 0)
+		auto Emoji = EmojiToIconIndex((uint32_t*)&u, 1);
+		if (Emoji.Index >= 0)
 			return true;
 	}
 
@@ -36,8 +36,8 @@ bool HasEmoji(uint32_t *Txt)
 
 	for (uint32_t *s = Txt; *s; s++)
 	{
-		int IcoIdx = EmojiToIconIndex(s, 2);
-		if (IcoIdx >= 0)
+		auto Emoji = EmojiToIconIndex(s, 2);
+		if (Emoji.Index >= 0)
 			return true;
 	}
 

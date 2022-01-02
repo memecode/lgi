@@ -64,7 +64,7 @@
 		) \
 		|| \
 		( \
-			EmojiToIconIndex(&(ch), 1) >= 0 \
+			EmojiToIconIndex(&(ch), 1).Index >= 0 \
 		) \
 	)
 

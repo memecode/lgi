@@ -128,7 +128,7 @@ public:
 	}
 
 	/// Does a range check on an index...
-	bool IdxCheck(ssize_t i)
+	bool IdxCheck(ssize_t i) const
 	{
 		return i >= 0 && i < (ssize_t)len;
 	}

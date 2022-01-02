@@ -7,13 +7,20 @@
 #define _EMOJI_H_
 
 /// Size of the graphics cells
-#define EMOJI_CELL_SIZE			20
+#define EMOJI_CELL_SIZE			32
 
 /// The width of each group in cells
 #define EMOJI_GROUP_X			16
 /// The height of each group in cells
 #define EMOJI_GROUP_Y			6
 
-extern int EmojiToIconIndex(const uint32_t *Str, ssize_t Len);
+struct EmojiChar
+{
+	int16_t Index; // Icon index
+	int16_t Size; // Number of chars: 1 or 2
+	const char *Description; // Textual description
+};
+
+extern EmojiChar EmojiToIconIndex(const uint32_t *Str, ssize_t Len);
 
 #endif

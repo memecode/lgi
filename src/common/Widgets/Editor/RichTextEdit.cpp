@@ -2873,11 +2873,11 @@ EmojiMenu::EmojiMenu(LRichTextPriv *priv, LPoint p) : LPopup(priv->View)
 		for (int i=0; i<r.Len; i++)
 		{
 			uint32_t u = (int)r.Start + i;
-			int Idx = EmojiToIconIndex(&u, 1);
-			if (Idx >= 0)
+			auto Emoji = EmojiToIconIndex(&u, 1);
+			if (Emoji.Index >= 0)
 			{
-				Map.Add(Idx, u);
-				MaxIdx = MAX(MaxIdx, Idx);
+				Map.Add(Emoji.Index, u);
+				MaxIdx = MAX(MaxIdx, Emoji.Index);
 			}
 		}
 	}

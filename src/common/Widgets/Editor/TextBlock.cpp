@@ -82,12 +82,12 @@ LRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, LSurface *img, L
 
 	for (int i=0; i<Chars; i++)
 	{
-		int Idx = EmojiToIconIndex(u + i, Chars - i);
-		LAssert(Idx >= 0);
-		if (Idx >= 0)
+		auto Emoji = EmojiToIconIndex(u + i, Chars - i);
+		LAssert(Emoji.Index >= 0);
+		if (Emoji.Index >= 0)
 		{
-			int x = Idx % EMOJI_GROUP_X;
-			int y = Idx / EMOJI_GROUP_X;
+			int x = Emoji.Index % EMOJI_GROUP_X;
+			int y = Emoji.Index / EMOJI_GROUP_X;
 			LRect &rc = SrcRect[i];
 			rc.ZOff(EMOJI_CELL_SIZE-1, EMOJI_CELL_SIZE-1);
 			rc.Offset(x * EMOJI_CELL_SIZE, y * EMOJI_CELL_SIZE);
@@ -1505,7 +1505,7 @@ bool LRichTextPriv::TextBlock::AddText(Transaction *Trans, ssize_t AtOffset, con
 	LArray<int> EmojiIdx;
 	EmojiIdx.Length(InChars);
 	for (int i=0; i<InChars; i++)
-		EmojiIdx[i] = EmojiToIconIndex(InStr + i, InChars - i);
+		EmojiIdx[i] = EmojiToIconIndex(InStr + i, InChars - i).Index;
 
 	ssize_t InitialOffset = AtOffset >= 0 ? AtOffset : Len;
 	int Chars = 0; // Length of run to insert
