@@ -42,7 +42,7 @@
 #define DOCUMENT_LOAD_IMAGES		1
 #define MAX_RECURSION_DEPTH			300
 #define ALLOW_TABLE_GROWTH			1
-#define LGI_HTML_MAXPAINT_TIME		250 // ms
+#define LGI_HTML_MAXPAINT_TIME		350 // ms
 #define FLOAT_TOLERANCE				0.001
 
 #define CRASH_TRACE					0
@@ -158,6 +158,10 @@ public:
 	bool IsParsing;
 	bool IsLoaded;
 	bool StyleDirty;
+
+	// Paint time limits...
+	bool MaxPaintTimeout = false;
+	int MaxPaintTime = LGI_HTML_MAXPAINT_TIME;
 	
 	// Find settings
 	LAutoWString FindText;
@@ -6438,9 +6442,14 @@ static void FillRectWithImage(LSurface *pDC, LRect *r, LSurface *Image, LCss::Re
 void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 {
 	if (Depth >= MAX_RECURSION_DEPTH ||
-		Display() == DispNone ||
-		LCurrentTime() - Html->PaintStart > LGI_HTML_MAXPAINT_TIME)
+		Display() == DispNone)
 		return;
+	if (!Html->_Debug &&
+		LCurrentTime() - Html->PaintStart > Html->d->MaxPaintTime)
+	{
+		Html->d->MaxPaintTimeout = true;
+		return;
+	}
 
 	int Px, Py;
 	pDC->GetOrigin(Px, Py);
@@ -6861,6 +6870,7 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 					for (unsigned i=0; i<TextPos.Length(); i++)
 					{
 						GFlowRect *Tr = TextPos[i];
+
 						LDisplayString ds(f, Tr->Text, Tr->Len);
 						ds.Draw(pDC, Tr->x1, Tr->y1 + LineHtOff, IsEditor ? Tr : NULL);
 					}
@@ -7468,26 +7478,29 @@ void GHtml::OnPaint(LSurface *ScreenDC)
 
 	#if GHTML_USE_DOUBLE_BUFFER
 	LRect Client = GetClient();
-	if (!MemDC ||
-		(MemDC->X() < Client.X() || MemDC->Y() < Client.Y()))
+	if (ScreenDC->IsScreen())
 	{
-		if (MemDC.Reset(new LMemDC))
+		if (!MemDC ||
+			(MemDC->X() < Client.X() || MemDC->Y() < Client.Y()))
 		{
-			int Sx = Client.X() + 10;
-			int Sy = Client.Y() + 10;
-			if (!MemDC->Create(Sx, Sy, System32BitColourSpace))
+			if (MemDC.Reset(new LMemDC))
 			{
-				MemDC.Reset();
+				int Sx = Client.X() + 10;
+				int Sy = Client.Y() + 10;
+				if (!MemDC->Create(Sx, Sy, System32BitColourSpace))
+				{
+					MemDC.Reset();
+				}
 			}
 		}
-	}
-	if (MemDC)
-	{
-		MemDC->ClipRgn(NULL);
-		#if 0//def _DEBUG
-		MemDC->Colour(LColour(255, 0, 255));
-		MemDC->Rectangle();
-		#endif
+		if (MemDC)
+		{
+			MemDC->ClipRgn(NULL);
+			#if 0//def _DEBUG
+			MemDC->Colour(LColour(255, 0, 255));
+			MemDC->Rectangle();
+			#endif
+		}
 	}
 	#endif
 
@@ -7527,8 +7540,20 @@ void GHtml::OnPaint(LSurface *ScreenDC)
 		}
 
 		bool InSelection = false;
-		PaintStart = LCurrentTime();		
+		PaintStart = LCurrentTime();
+		d->MaxPaintTimeout = false;
+
+		if (_Debug)
+		{
+			int asd=0;
+		}
+
 		Tag->OnPaint(pDC, InSelection, 0);
+
+		if (d->MaxPaintTimeout)
+		{
+			LgiTrace("%s:%i - Html max paint time reached: %i ms.\n", _FL, LCurrentTime() - PaintStart);
+		}
 	}
 
 	#if GHTML_USE_DOUBLE_BUFFER
@@ -8949,6 +8974,16 @@ bool GHtml::GetEmoji()
 void GHtml::SetEmoji(bool i)
 {
 	d->DecodeEmoji = i;
+}
+
+void GHtml::SetMaxPaintTime(int Ms)
+{
+	d->MaxPaintTime = Ms;
+}
+
+bool GHtml::GetMaxPaintTimeout()
+{
+	return d->MaxPaintTimeout;
 }
 
 ////////////////////////////////////////////////////////////////////////

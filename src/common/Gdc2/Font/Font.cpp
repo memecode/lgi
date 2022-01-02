@@ -1330,6 +1330,14 @@ void LFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, L
 				rc.right = x + Size.cx;
 				rc.top = y + Size.cy;
 			}
+
+			/* Debugging stuff...
+			POINT _ori;
+			auto res = GetWindowOrgEx(hDC, &_ori);
+			RECT _rc;
+			int res2 = GetClipBox(hDC, &_rc);
+			auto Addr = (*pDC)[y - _ori.y + 6] + ((x - _ori.x + 4) * pDC->GetBits() / 8);
+			*/
 			
 			ExtTextOutW(hDC, x, y, ETO_CLIPPED | (Transparent()?0:ETO_OPAQUE), &rc, Str, Len, 0);
 		}

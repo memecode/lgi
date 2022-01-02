@@ -104,6 +104,8 @@ public:
 	void SetLoadImages(bool i) override;
 	bool GetEmoji();
 	void SetEmoji(bool i);
+	void SetMaxPaintTime(int Ms);
+	bool GetMaxPaintTimeout();
 
 	// LDocView
 	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
