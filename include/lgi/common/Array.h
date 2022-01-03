@@ -865,5 +865,37 @@ public:
 
 		return r;
 	}
+
+	/// This requires a sorted list...
+	Type BinarySearch(std::function<int(Type&)> Compare)
+	{
+		static Type Empty;
+		if (!Compare)
+			return Empty;
+		
+		for (size_t s = 0, e = len - 1; s <= e; )
+		{
+			if (e - s < 2)
+			{
+				if (Compare(p[s]) == 0)
+					return p[s];
+				if (e > s && Compare(p[e]) == 0)
+					return p[e];
+				break; // Not found
+			}
+
+			size_t mid = s + ((e - s) >> 1);
+			int result = Compare(p[mid]);
+			if (result == 0)
+				return p[mid];
+
+			if (result < 0)
+				s = mid + 1; // search after the mid point
+			else
+				e = mid - 1; // search before
+		}
+
+		return Empty;
+	}
 };
 

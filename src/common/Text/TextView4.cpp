@@ -977,6 +977,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 				l->r.x2 = l->r.x1;
 			}
 
+			LAssert(l->Len > 0);
 			Line.Add(l);
 
 			if (*e == '\n')
@@ -1130,6 +1131,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 				l->r.y1 = Cy;
 				l->r.y2 = l->r.y1 + LineY - 1;
 
+				LAssert(l->Len > 0);
 				Line.Add(l);
 				if (PourToDisplayEnd)
 				{
@@ -1183,11 +1185,12 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 		if (!Last ||
 			Last->Start + Last->Len < Size)
 		{
+			auto LastEnd = Last ? Last->End() : 0;
 			LTextLine *l = new LTextLine;
 			if (l)
 			{
-				l->Start = Size;
-				l->Len = 0;
+				l->Start = LastEnd;
+				l->Len = Size - LastEnd;
 				l->r.x1 = l->r.x2 = d->rPadding.x1;
 				l->r.y1 = Cy;
 				l->r.y2 = l->r.y1 + LineY - 1;
@@ -1792,6 +1795,11 @@ LArray<LTextView4::LTextLine*>::I LTextView4::GetTextLineIt(ssize_t Offset, ssiz
 				mid = s;
 			else if (Line[e]->Overlap(Offset))
 				mid = e;
+			else
+			{
+				LAssert(!"Needs to match Line s or e...");
+				break;
+			}
 		}
 		else mid = s + ((e - s) >> 1);
 		

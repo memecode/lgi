@@ -848,7 +848,7 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 		if (Asserting || !LAppInst || !LSysFont)
 		{
 			// Woah boy...
-			assert(0);
+			LgiTrace("%s:%i - Assert: %s failed.\n", file, line, test);
 		}
 		else
 		{
