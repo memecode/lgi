@@ -6444,7 +6444,10 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 	if (Depth >= MAX_RECURSION_DEPTH ||
 		Display() == DispNone)
 		return;
-	if (!Html->_Debug &&
+	if (
+		#ifdef _DEBUG
+		!Html->_Debug &&
+		#endif
 		LCurrentTime() - Html->PaintStart > Html->d->MaxPaintTime)
 	{
 		Html->d->MaxPaintTimeout = true;
@@ -7542,11 +7545,6 @@ void GHtml::OnPaint(LSurface *ScreenDC)
 		bool InSelection = false;
 		PaintStart = LCurrentTime();
 		d->MaxPaintTimeout = false;
-
-		if (_Debug)
-		{
-			int asd=0;
-		}
 
 		Tag->OnPaint(pDC, InSelection, 0);
 

@@ -7,18 +7,42 @@ EmojiChar EmojiToIconIndex(const uint32_t *Str, ssize_t Len)
 {
 	switch (*Str)
 	{
-		case 0x23: return {1495, 1, "keycap: #"};
-		case 0x2a: return {1496, 1, "keycap: *"};
-		case 0x30: return {1497, 1, "keycap: 0"};
-		case 0x31: return {1498, 1, "keycap: 1"};
-		case 0x32: return {1499, 1, "keycap: 2"};
-		case 0x33: return {1500, 1, "keycap: 3"};
-		case 0x34: return {1501, 1, "keycap: 4"};
-		case 0x35: return {1502, 1, "keycap: 5"};
-		case 0x36: return {1503, 1, "keycap: 6"};
-		case 0x37: return {1504, 1, "keycap: 7"};
-		case 0x38: return {1505, 1, "keycap: 8"};
-		case 0x39: return {1506, 1, "keycap: 9"};
+		case 0x23:
+			if (Len >= 3 && Str[1]==0xfe0f && Str[2]==0x20e3) return {1495, 3, "keycap: #"};
+			break;
+		case 0x2a:
+			if (Len >= 3 && Str[1]==0xfe0f && Str[2]==0x20e3) return {1496, 3, "keycap: *"};
+			break;
+		case 0x30:
+			if (Len >= 3 && Str[1]==0xfe0f && Str[2]==0x20e3) return {1497, 3, "keycap: 0"};
+			break;
+		case 0x31:
+			if (Len >= 3 && Str[1]==0xfe0f && Str[2]==0x20e3) return {1498, 3, "keycap: 1"};
+			break;
+		case 0x32:
+			if (Len >= 3 && Str[1]==0xfe0f && Str[2]==0x20e3) return {1499, 3, "keycap: 2"};
+			break;
+		case 0x33:
+			if (Len >= 3 && Str[1]==0xfe0f && Str[2]==0x20e3) return {1500, 3, "keycap: 3"};
+			break;
+		case 0x34:
+			if (Len >= 3 && Str[1]==0xfe0f && Str[2]==0x20e3) return {1501, 3, "keycap: 4"};
+			break;
+		case 0x35:
+			if (Len >= 3 && Str[1]==0xfe0f && Str[2]==0x20e3) return {1502, 3, "keycap: 5"};
+			break;
+		case 0x36:
+			if (Len >= 3 && Str[1]==0xfe0f && Str[2]==0x20e3) return {1503, 3, "keycap: 6"};
+			break;
+		case 0x37:
+			if (Len >= 3 && Str[1]==0xfe0f && Str[2]==0x20e3) return {1504, 3, "keycap: 7"};
+			break;
+		case 0x38:
+			if (Len >= 3 && Str[1]==0xfe0f && Str[2]==0x20e3) return {1505, 3, "keycap: 8"};
+			break;
+		case 0x39:
+			if (Len >= 3 && Str[1]==0xfe0f && Str[2]==0x20e3) return {1506, 3, "keycap: 9"};
+			break;
 		case 0xa9: return {1492, 1, "copyright"};
 		case 0xae: return {1493, 1, "registered"};
 		case 0x203c: return {1466, 1, "double exclamation mark"};
@@ -416,7 +440,9 @@ EmojiChar EmojiToIconIndex(const uint32_t *Str, ssize_t Len)
 			if (Len >= 2 && Str[1]==0x1f1fa) return {1764, 2, "flag: Niue"};
 			if (Len >= 2 && Str[1]==0x1f1ff) return {1765, 2, "flag: New Zealand"};
 			break;
-		case 0x1f1f4: return {1766, 1, "flag: Oman"};
+		case 0x1f1f4:
+			if (Len >= 2 && Str[1]==0x1f1f2) return {1766, 2, "flag: Oman"};
+			break;
 		case 0x1f1f5:
 			if (Len >= 2 && Str[1]==0x1f1e6) return {1767, 2, "flag: Panama"};
 			if (Len >= 2 && Str[1]==0x1f1ea) return {1768, 2, "flag: Peru"};
@@ -433,7 +459,9 @@ EmojiChar EmojiToIconIndex(const uint32_t *Str, ssize_t Len)
 			if (Len >= 2 && Str[1]==0x1f1fc) return {1779, 2, "flag: Palau"};
 			if (Len >= 2 && Str[1]==0x1f1fe) return {1780, 2, "flag: Paraguay"};
 			break;
-		case 0x1f1f6: return {1781, 1, "flag: Qatar"};
+		case 0x1f1f6:
+			if (Len >= 2 && Str[1]==0x1f1e6) return {1781, 2, "flag: Qatar"};
+			break;
 		case 0x1f1f7:
 			if (Len >= 2 && Str[1]==0x1f1ea) return {1782, 2, "flag: Réunion"};
 			if (Len >= 2 && Str[1]==0x1f1f4) return {1783, 2, "flag: Romania"};
@@ -505,7 +533,9 @@ EmojiChar EmojiToIconIndex(const uint32_t *Str, ssize_t Len)
 			if (Len >= 2 && Str[1]==0x1f1eb) return {1839, 2, "flag: Wallis & Futuna"};
 			if (Len >= 2 && Str[1]==0x1f1f8) return {1840, 2, "flag: Samoa"};
 			break;
-		case 0x1f1fd: return {1841, 1, "flag: Kosovo"};
+		case 0x1f1fd:
+			if (Len >= 2 && Str[1]==0x1f1f0) return {1841, 2, "flag: Kosovo"};
+			break;
 		case 0x1f1fe:
 			if (Len >= 2 && Str[1]==0x1f1ea) return {1842, 2, "flag: Yemen"};
 			if (Len >= 2 && Str[1]==0x1f1f9) return {1843, 2, "flag: Mayotte"};
@@ -1541,9 +1571,9 @@ EmojiChar EmojiToIconIndex(const uint32_t *Str, ssize_t Len)
 		case 0x1f6d5: return {849, 1, "hindu temple"};
 		case 0x1f6d6: return {826, 1, "hut"};
 		case 0x1f6d7: return {1332, 1, "elevator"};
-		case 0x1f6dd: return {865, 1, "⊛ playground slide"};
-		case 0x1f6de: return {914, 1, "⊛ wheel"};
-		case 0x1f6df: return {921, 1, "⊛ ring buoy"};
+		case 0x1f6dd: return {865, 1, "playground slide"};
+		case 0x1f6de: return {914, 1, "wheel"};
+		case 0x1f6df: return {921, 1, "ring buoy"};
 		case 0x1f6e0: return {1296, 1, "hammer and wrench"};
 		case 0x1f6e1: return {1302, 1, "shield"};
 		case 0x1f6e2: return {912, 1, "oil drum"};
@@ -1576,7 +1606,7 @@ EmojiChar EmojiToIconIndex(const uint32_t *Str, ssize_t Len)
 		case 0x1f7e9: return {1559, 1, "green square"};
 		case 0x1f7ea: return {1561, 1, "purple square"};
 		case 0x1f7eb: return {1562, 1, "brown square"};
-		case 0x1f7f0: return {1464, 1, "⊛ heavy equals sign"};
+		case 0x1f7f0: return {1464, 1, "heavy equals sign"};
 		case 0x1f90c: return {173, 1, "pinched fingers"};
 		case 0x1f90d: return {148, 1, "white heart"};
 		case 0x1f90e: return {146, 1, "brown heart"};
@@ -1716,7 +1746,7 @@ EmojiChar EmojiToIconIndex(const uint32_t *Str, ssize_t Len)
 		case 0x1f976: return {61, 1, "cold face"};
 		case 0x1f977: return {337, 1, "ninja"};
 		case 0x1f978: return {68, 1, "disguised face"};
-		case 0x1f979: return {82, 1, "⊛ face holding back tears"};
+		case 0x1f979: return {82, 1, "face holding back tears"};
 		case 0x1f97a: return {81, 1, "pleading face"};
 		case 0x1f97b: return {1122, 1, "sari"};
 		case 0x1f97c: return {1111, 1, "lab coat"};
@@ -1807,7 +1837,7 @@ EmojiChar EmojiToIconIndex(const uint32_t *Str, ssize_t Len)
 		case 0x1f9c9: return {795, 1, "mate"};
 		case 0x1f9ca: return {796, 1, "ice"};
 		case 0x1f9cb: return {793, 1, "bubble tea"};
-		case 0x1f9cc: return {393, 1, "⊛ troll"};
+		case 0x1f9cc: return {393, 1, "troll"};
 		case 0x1f9cd:
 			if (Len >= 1) return {403, 1, "person standing"};
 			if (Len >= 4 && Str[1]==0x200d && Str[2]==0x2640 && Str[3]==0xfe0f) return {405, 4, "woman standing"};
@@ -1951,8 +1981,8 @@ EmojiChar EmojiToIconIndex(const uint32_t *Str, ssize_t Len)
 		case 0x1fa78: return {1325, 1, "drop of blood"};
 		case 0x1fa79: return {1327, 1, "adhesive bandage"};
 		case 0x1fa7a: return {1329, 1, "stethoscope"};
-		case 0x1fa7b: return {1330, 1, "⊛ x-ray"};
-		case 0x1fa7c: return {1328, 1, "⊛ crutch"};
+		case 0x1fa7b: return {1330, 1, "x-ray"};
+		case 0x1fa7c: return {1328, 1, "crutch"};
 		case 0x1fa80: return {1077, 1, "yo-yo"};
 		case 0x1fa81: return {1078, 1, "kite"};
 		case 0x1fa82: return {933, 1, "parachute"};
@@ -1985,10 +2015,10 @@ EmojiChar EmojiToIconIndex(const uint32_t *Str, ssize_t Len)
 		case 0x1faa6: return {1358, 1, "headstone"};
 		case 0x1faa7: return {1361, 1, "placard"};
 		case 0x1faa8: return {824, 1, "rock"};
-		case 0x1faa9: return {1091, 1, "⊛ mirror ball"};
-		case 0x1faaa: return {1362, 1, "⊛ identification card"};
-		case 0x1faab: return {1187, 1, "⊛ low battery"};
-		case 0x1faac: return {1083, 1, "⊛ hamsa"};
+		case 0x1faa9: return {1091, 1, "mirror ball"};
+		case 0x1faaa: return {1362, 1, "identification card"};
+		case 0x1faab: return {1187, 1, "low battery"};
+		case 0x1faac: return {1083, 1, "hamsa"};
 		case 0x1fab0: return {643, 1, "fly"};
 		case 0x1fab1: return {644, 1, "worm"};
 		case 0x1fab2: return {635, 1, "beetle"};
@@ -1996,16 +2026,16 @@ EmojiChar EmojiToIconIndex(const uint32_t *Str, ssize_t Len)
 		case 0x1fab4: return {658, 1, "potted plant"};
 		case 0x1fab5: return {825, 1, "wood"};
 		case 0x1fab6: return {606, 1, "feather"};
-		case 0x1fab7: return {649, 1, "⊛ lotus"};
-		case 0x1fab8: return {629, 1, "⊛ coral"};
-		case 0x1fab9: return {670, 1, "⊛ empty nest"};
-		case 0x1faba: return {671, 1, "⊛ nest with eggs"};
+		case 0x1fab7: return {649, 1, "lotus"};
+		case 0x1fab8: return {629, 1, "coral"};
+		case 0x1fab9: return {670, 1, "empty nest"};
+		case 0x1faba: return {671, 1, "nest with eggs"};
 		case 0x1fac0: return {213, 1, "anatomical heart"};
 		case 0x1fac1: return {214, 1, "lungs"};
 		case 0x1fac2: return {522, 1, "people hugging"};
-		case 0x1fac3: return {356, 1, "⊛ pregnant man"};
-		case 0x1fac4: return {357, 1, "⊛ pregnant person"};
-		case 0x1fac5: return {341, 1, "⊛ person with crown"};
+		case 0x1fac3: return {356, 1, "pregnant man"};
+		case 0x1fac4: return {357, 1, "pregnant person"};
+		case 0x1fac5: return {341, 1, "person with crown"};
 		case 0x1fad0: return {686, 1, "blueberries"};
 		case 0x1fad1: return {697, 1, "bell pepper"};
 		case 0x1fad2: return {689, 1, "olive"};
@@ -2013,27 +2043,31 @@ EmojiChar EmojiToIconIndex(const uint32_t *Str, ssize_t Len)
 		case 0x1fad4: return {727, 1, "tamale"};
 		case 0x1fad5: return {734, 1, "fondue"};
 		case 0x1fad6: return {780, 1, "teapot"};
-		case 0x1fad7: return {791, 1, "⊛ pouring liquid"};
-		case 0x1fad8: return {705, 1, "⊛ beans"};
-		case 0x1fad9: return {802, 1, "⊛ jar"};
-		case 0x1fae0: return {10, 1, "⊛ melting face"};
-		case 0x1fae1: return {35, 1, "⊛ saluting face"};
-		case 0x1fae2: return {31, 1, "⊛ face with open eyes and hand over mouth"};
-		case 0x1fae3: return {32, 1, "⊛ face with peeking eye"};
-		case 0x1fae4: return {73, 1, "⊛ face with diagonal mouth"};
-		case 0x1fae5: return {41, 1, "⊛ dotted line face"};
-		case 0x1fae6: return {221, 1, "⊛ biting lip"};
-		case 0x1fae7: return {1351, 1, "⊛ bubbles"};
-		case 0x1faf0: return {177, 1, "⊛ hand with index finger and thumb crossed"};
-		case 0x1faf1: return {168, 1, "⊛ rightwards hand"};
-		case 0x1faf2: return {169, 1, "⊛ leftwards hand"};
-		case 0x1faf3: return {170, 1, "⊛ palm down hand"};
-		case 0x1faf4: return {171, 1, "⊛ palm up hand"};
-		case 0x1faf5: return {187, 1, "⊛ index pointing at the viewer"};
-		case 0x1faf6: return {196, 1, "⊛ heart hands"};
-		default: break;
+		case 0x1fad7: return {791, 1, "pouring liquid"};
+		case 0x1fad8: return {705, 1, "beans"};
+		case 0x1fad9: return {802, 1, "jar"};
+		case 0x1fae0: return {10, 1, "melting face"};
+		case 0x1fae1: return {35, 1, "saluting face"};
+		case 0x1fae2: return {31, 1, "face with open eyes and hand over mouth"};
+		case 0x1fae3: return {32, 1, "face with peeking eye"};
+		case 0x1fae4: return {73, 1, "face with diagonal mouth"};
+		case 0x1fae5: return {41, 1, "dotted line face"};
+		case 0x1fae6: return {221, 1, "biting lip"};
+		case 0x1fae7: return {1351, 1, "bubbles"};
+		case 0x1faf0: return {177, 1, "hand with index finger and thumb crossed"};
+		case 0x1faf1: return {168, 1, "rightwards hand"};
+		case 0x1faf2: return {169, 1, "leftwards hand"};
+		case 0x1faf3: return {170, 1, "palm down hand"};
+		case 0x1faf4: return {171, 1, "palm up hand"};
+		case 0x1faf5: return {187, 1, "index pointing at the viewer"};
+		case 0x1faf6: return {196, 1, "heart hands"};
 	}
 
 	return {-1, 0, NULL};
 }
+
+LRange EmojiRanges[2] = {
+	LRange(0x203c, 0x125e),
+	LRange(0x1f004, 0xaf3)
+};
 

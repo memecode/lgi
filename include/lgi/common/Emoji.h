@@ -22,5 +22,6 @@ struct EmojiChar
 };
 
 extern EmojiChar EmojiToIconIndex(const uint32_t *Str, ssize_t Len);
+extern LRange EmojiRanges[2];
 
 #endif

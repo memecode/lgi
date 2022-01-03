@@ -174,15 +174,14 @@ bool LEmojiFont::Create(const char *Face, LCss::Len Sz, LSurface *pSurface)
 		{
 			memset(d->GlyphMap, 0, Bytes);
 			
-			for (uint32_t u=0x203c; u<=0x3299; u++)
+			for (int r=0; r<CountOf(EmojiRanges); r++)
 			{
-				if (EmojiToIconIndex(&u, 1).Index >= 0)
-					d->GlyphMap[u>>3] |= 1 << (u & 7);
-			}
-			for (uint32_t u=0x1f004; u<=0x1faf6; u++)
-			{
-				if (EmojiToIconIndex(&u, 1).Index >= 0)
-					d->GlyphMap[u>>3] |= 1 << (u & 7);
+				auto &rng = EmojiRanges[r];
+				for (uint32_t u=rng.Start; u<rng.End(); u++)
+				{
+					if (EmojiToIconIndex(&u, 1).Index >= 0)
+						d->GlyphMap[u>>3] |= 1 << (u & 7);
+				}
 			}
 		}
 	}
