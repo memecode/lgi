@@ -58,7 +58,7 @@ private:
 
 public:
 	GBrowser *Wnd;
-	Html1::GHtml *Html;
+	Html1::LHtml *Html;
 	LAutoPtr<GBrowserThread> Thread;
 	LEdit *UriEdit;
 	LEdit *SearchEdit;
@@ -416,7 +416,7 @@ GBrowser::GBrowser(LViewI *owner, const char *Title, char *Uri)
 		AddView(d->UriEdit = new LEdit(IDC_URI, 0, 0, 100, 20, 0));
 		AddView(d->SearchEdit = new LEdit(IDC_SEARCH_TXT, 0, 0, 100, 20, ""));
 		AddView(d->Search = new LButton(IDC_SEARCH, 0, 0, -1, 20, "Search"));
-		AddView(d->Html = new Html1::GHtml(IDC_HTML, 0, 0, 100, 100));
+		AddView(d->Html = new Html1::LHtml(IDC_HTML, 0, 0, 100, 100));
 
 		AttachChildren();
 		OnPosChange();

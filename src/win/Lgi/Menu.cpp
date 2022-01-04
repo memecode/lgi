@@ -825,7 +825,7 @@ bool LMenuItem::ScanForAccel()
 			
 			if (Key && Menu)
 			{
-				Menu->Accel.Insert( new GAccelerator(Flags, Key, Id()) );
+				Menu->Accel.Insert( new LAccelerator(Flags, Key, Id()) );
 			}
 		}
 	}
@@ -1222,14 +1222,14 @@ bool LMenu::SetPrefAndAboutItems(int PrefId, int AboutId)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-GAccelerator::GAccelerator(int flags, int key, int id)
+LAccelerator::LAccelerator(int flags, int key, int id)
 {
 	Flags = flags;
 	Key = key;
 	Id = id;
 }
 
-bool GAccelerator::Match(LKey &k)
+bool LAccelerator::Match(LKey &k)
 {
 	if (!k.IsChar &&
 		tolower(k.vkey) == tolower(Key))

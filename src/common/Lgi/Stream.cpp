@@ -111,7 +111,7 @@ ssize_t LStreamOp::GetElapsedTime()
 
 ////////////////////////////////////////////////////////////////
 // Stateful parser that matches the start of lines to the 'prefix'
-GLinePrefix::GLinePrefix(const char *p, bool eol)
+LHtmlLinePrefix::LHtmlLinePrefix(const char *p, bool eol)
 {
 	Start = true;
 	At = 0;
@@ -120,19 +120,19 @@ GLinePrefix::GLinePrefix(const char *p, bool eol)
 	Prefix = NewStr(p);
 }
 
-GLinePrefix::~GLinePrefix()
+LHtmlLinePrefix::~LHtmlLinePrefix()
 {
 	DeleteArray(Prefix);
 }
 
-void GLinePrefix::Reset()
+void LHtmlLinePrefix::Reset()
 {
 	Start = true;
 	At = 0;
 	Pos = 0;
 }
 
-ssize_t GLinePrefix::IsEnd(void *v, ssize_t Len)
+ssize_t LHtmlLinePrefix::IsEnd(void *v, ssize_t Len)
 {
 	if (Prefix)
 	{

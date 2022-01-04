@@ -150,7 +150,7 @@ public:
 	}
 };
 
-class GLinearGradient : public GGradient
+class LHtmlLinearGradient : public GGradient
 {
 public:
 	void Rectangle(int X, int Y)
@@ -350,7 +350,7 @@ public:
 	{
 		if (Op == 5)
 		{
-			return new GLinearGradient;
+			return new LHtmlLinearGradient;
 		}
 		else if (Op == 6)
 		{

@@ -170,7 +170,7 @@ enum LgiMessages
 	M_INVALIDATE, // A=(LRect*)Rectangle, B=(LView*)this
 	M_RESIZE_TO_CONTENT, // LItemContainer
 	M_SCROLL_TO, // LTreeItem->LTree
-	M_JOBS_LOADED, // GHtml
+	M_JOBS_LOADED, // LHtml
 
 	#ifdef WINDOWS
 	M_USER = WM_APP + 200

@@ -17,8 +17,8 @@
 #include "lgi/common/RichTextEdit.h"
 typedef LRichTextEdit EditCtrl;
 #else
-#include "GHtmlEdit.h"
-typedef GHtmlEdit EditCtrl;
+#include "LHtmlEdit.h"
+typedef LHtmlEdit EditCtrl;
 #endif
 
 enum Ctrls

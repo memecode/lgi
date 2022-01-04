@@ -57,7 +57,7 @@ public:
 };
 
 /// Stateful parser that matches the start of lines to the 'prefix'
-class LgiClass GLinePrefix : public LStreamEnd
+class LgiClass LHtmlLinePrefix : public LStreamEnd
 {
 	bool Start;
 	int Pos;
@@ -67,7 +67,7 @@ class LgiClass GLinePrefix : public LStreamEnd
 
 public:
 	/// Finds some text on the start of a line
-	GLinePrefix
+	LHtmlLinePrefix
 	(
 		/// The string to look for on the start of the line
 		const char *p,
@@ -76,7 +76,7 @@ public:
 		bool eol = true
 	);
 	
-	~GLinePrefix();
+	~LHtmlLinePrefix();
 
 	void Reset();
 	ssize_t IsEnd(void *s, ssize_t Len);

@@ -83,9 +83,9 @@ public:
 
 class HtmlScriptContext :
 	#ifdef _GHTML2_H
-	public Html2::GHtml2,
+	public Html2::LHtml2,
 	#else
-	public Html1::GHtml,
+	public Html1::LHtml,
 	#endif
 	public LScriptContext
 {
@@ -96,9 +96,9 @@ public:
 
 	HtmlScriptContext(int Id, LDocumentEnv *Env) :
 		#ifdef _GHTML2_H
-		Html2::GHtml2
+		Html2::LHtml2
 		#else
-		Html1::GHtml
+		Html1::LHtml
 		#endif
 		(Id, 0, 0, 100, 100, Env)
 	{
@@ -495,7 +495,7 @@ public:
 						strcat_s(Png, sizeof(Png), ".png");
 						LMakePath(p, sizeof(p), OutPath, Png);
 
-						Html1::GHtml Html(100, 0, 0, PageSize.x, PageSize.y, this);
+						Html1::LHtml Html(100, 0, 0, PageSize.x, PageSize.y, this);
 						Html.Name(Content);
 						LMemDC Screen(PageSize.x, PageSize.y, System24BitColourSpace);
 						Screen.Colour(LColour(255, 255, 255));
