@@ -324,7 +324,10 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 {
 	#ifdef HAIKU
 		if (!d || !d->Hnd)
+		{
+			// printf("%s:%i - no handle %p %p\n", _FL, d, d ? d->Hnd : NULL);
 			return false;
+		}
 	
 		if (d->Hnd->Parent() == NULL)
 		{

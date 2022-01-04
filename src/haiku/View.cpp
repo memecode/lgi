@@ -802,7 +802,9 @@ bool LView::PointToScreen(LPoint &p)
 
 	LPoint Offset;
 	WindowVirtualOffset(&Offset);
+	printf("p=%i,%i offset=%i,%i\n", p.x, p.y, Offset.x, Offset.y);
 	p += Offset;
+	printf("p=%i,%i\n", p.x, p.y);
 
 	LLocker lck(Handle(), _FL);
 	if (!lck.Lock())
@@ -811,9 +813,11 @@ bool LView::PointToScreen(LPoint &p)
 		return false;
 	}
 	
-	BPoint pt = Handle()->ConvertToScreen(BPoint(Offset.x, Offset.y));
-	Offset.x = pt.x;
-	Offset.y = pt.y;
+	BPoint pt = Handle()->ConvertToScreen(BPoint(p.x, p.y));
+	printf("pt=%g,%g\n", pt.x, pt.y);
+	p.x = pt.x;
+	p.y = pt.y;
+	printf("p=%i,%i\n\n", p.x, p.y);
 
 	return true;
 }

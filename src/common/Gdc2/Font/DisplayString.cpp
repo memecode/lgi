@@ -486,39 +486,7 @@ void LDisplayString::Layout(bool Debug)
 
 	LaidOut = 1;
 
-	#if defined(HAIKU)
-
-		if (!Font)
-		{
-			LgiTrace("%s:%i - Missing pointer: %p\n", _FL, Font);
-			return;
-		}
-
-		BFont *fnt = Font->Handle();
-		if (!fnt)
-		{
-			LgiTrace("%s:%i - Missing handle. %p/%p\n", _FL, fnt);
-			return;
-		}
-		
-		auto &l = Info[0];
-		l.Str = Str;
-		l.Len = Str ? strlen(Str) : 0;
-
-		const char *strArr[] = { Str };
-		const int32 strLen[] = { l.Len };
-		float width[1] = { 0 };
-		fnt->GetStringWidths(strArr, strLen, 1, width);
-		
-		xf = x = l.X = (int)(width[0] + 0.5);
-		
-		font_height height = {0};
-		fnt->GetHeight(&height);
-		yf = y = height.ascent + height.descent + height.leading;
-
-		// printf("Layout str=%s sz=%i,%i\n", Str, x, y);
-	
-	#elif defined(LGI_SDL)
+	#if defined(LGI_SDL)
 	
 		FT_Face Fnt = Font->Handle();
 		FT_Error error;
@@ -806,6 +774,72 @@ void LDisplayString::Layout(bool Debug)
 			ATSUSetTransientFontMatching(Hnd, true);
 
 		#endif
+	
+	#elif defined(HAIKU)
+
+		if (!Font)
+		{
+			LgiTrace("%s:%i - Missing pointer: %p\n", _FL, Font);
+			return;
+		}
+
+		BFont *fnt = Font->Handle();
+		if (!fnt)
+		{
+			LgiTrace("%s:%i - Missing handle. %p/%p\n", _FL, fnt);
+			return;
+		}
+		
+		int tabSize = Font->TabSize() ? Font->TabSize() : 32;		
+		font_height height = {0};
+		fnt->GetHeight(&height);
+		yf = y = height.ascent + height.descent + height.leading;
+		
+		if (!Str)
+			return;
+			
+		LUtf8Ptr start(Str);
+		int isTab = -1;
+		for (LUtf8Ptr p(Str); true; p++)
+		{
+			int32_t ch = p;
+			if (isTab < 0)
+			{
+				isTab = IsTabChar(ch);
+			}
+			else if (!ch || IsTabChar(ch) ^ isTab)
+			{		
+				auto &l = Info.New();
+				l.Str = start.GetPtr();
+				l.Len = p.GetPtr() - start.GetPtr();
+
+				const char *strArr[] = { l.Str };
+				const int32 strLen[] = { l.Len };
+				float width[1] = { 0 };
+				fnt->GetStringWidths(strArr, strLen, 1, width);
+
+				if (isTab)
+				{				
+					// Handle tab(s)
+					for (int t=0; t<l.Len; t++)
+						l.X += tabSize - ((l.X + x + GetDrawOffset()) % tabSize);
+				}
+				else
+				{
+					l.X = (int)(width[0] + 0.5);
+				}
+				
+				xf += l.X;
+				x += l.X;
+				
+				start = p;
+				isTab = IsTabChar(ch);
+			}
+			if (!ch)
+				break;
+		}
+
+		// printf("Layout str=%s sz=%i,%i\n", Str, x, y);
 	
 	#elif defined WINNATIVE
 	
@@ -1704,10 +1738,15 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 				view->FillRect(BRect(px, py, px+x, py+y));
 		}
 
-		auto &i = Info[0];
 		view->SetFont(fnt);
 		view->SetHighColor(Font->Fore());
-		view->DrawString(i.Str, i.Len, BPoint(px, py + height.ascent));	
+
+		int cx = px;
+		for (auto &i: Info)
+		{
+			view->DrawString(i.Str, i.Len, BPoint(cx, py + height.ascent));
+			cx += i.X;
+		}
 	
 	#elif defined(LGI_SDL)
 	
