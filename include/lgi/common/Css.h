@@ -103,7 +103,7 @@ public:
 		PropBorderRightWidth,
 		PropBorderBottomWidth,
 		PropBorderRadius,
-		Prop_CellPadding, // not real CSS, but used by GHtml2 to store 'cellpadding'
+		Prop_CellPadding, // not real CSS, but used by LHtml2 to store 'cellpadding'
 
 		// LRect based props
 		PropClip = TypeGRect<<8,
@@ -1249,7 +1249,7 @@ public:
     Map.Add(PropFontFamily, new LCss::PropArray);
 	Map.Add(PropFontSize, new LCss::PropArray);
 	Map.Add(PropFontStyle, new LCss::PropArray);
-	for (GTag *t = Parent; t; t = t->Parent)
+	for (LTag *t = Parent; t; t = t->Parent)
 	{
 		if (!c.InheritCollect(*t, Map))
 			break;

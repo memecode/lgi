@@ -193,7 +193,7 @@
 		<li> LTree (Heirarchy of LTreeItem)
 		<li> LRadioGroup (One of many selection using LRadioButton)
 		<li> LTabView (Containing LTabPage)
-		<li> GHtml
+		<li> LHtml
 		<li> LScrollBar
 	</ul>
 	However it's fairly easy to write custom controls by inheriting from LLayout (or LView for the hardcore) and implementing 

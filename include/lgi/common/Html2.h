@@ -9,44 +9,44 @@
 namespace Html2
 {
 
-class GTag;
+class LTag;
 class LFontCache;
 
 /// A lightwight scripting safe HTML control. It has limited CSS support, renders
 /// most tables, even when nested. You can provide support for loading external
 /// images by implementing the LDocumentEnv::GetImageUri method of the 
-/// LDocumentEnv interface and passing it into GHtml2::SetEnv.
+/// LDocumentEnv interface and passing it into LHtml2::SetEnv.
 /// All attempts to open URL's are passed into LDocumentEnv::OnNavigate method of the
 /// environment if set. Likewise any content inside active scripting tags, e.g. &lt;? ?&gt;
 /// will be striped out of the document and passed to LDocumentEnv::OnDynamicContent, which
 /// should return the relevant HTML that the script resolves to. A reasonable default
 /// implementation of the LDocumentEnv interface is the GDefaultDocumentEnv object.
 ///
-/// You can set the content of the control through the GHtml2::Name method.
+/// You can set the content of the control through the LHtml2::Name method.
 ///
-/// Retreive any selected content through GHtml2::GetSelection.
-class GHtml2 :
+/// Retreive any selected content through LHtml2::GetSelection.
+class LHtml2 :
 	public LDocView,
 	public ResObject
 {
-	friend class GTag;
-	friend class GFlowRegion;
+	friend class LTag;
+	friend class LFlowRegion;
 
-	class GHtmlPrivate2 *d;
+	class LHtmlPrivate2 *d;
 
 protected:	
 	// Data
 	LFontCache			*FontCache;
-	GTag				*Tag;				// Tree root
-	GTag				*Cursor;			// Cursor location..
-	GTag				*Selection;			// Edge of selection or NULL
-	List<GTag>			OpenTags;
+	LTag				*Tag;				// Tree root
+	LTag				*Cursor;			// Cursor location..
+	LTag				*Selection;			// Edge of selection or NULL
+	List<LTag>			OpenTags;
 	char				*Source;
 	char				*DocCharSet;
 	char				IsHtml;
 	int					ViewWidth;
 	GToolTip			Tip;
-	GTag				*PrevTip;
+	LTag				*PrevTip;
 	LCss::Store			CssStore;
 	
 	// Display
@@ -64,8 +64,8 @@ protected:
 	void _New();
 	void _Delete();
 	LFont *DefFont();
-	GTag *GetOpenTag(char *Tag);
-	void CloseTag(GTag *t);
+	LTag *GetOpenTag(char *Tag);
+	void CloseTag(LTag *t);
 	void Parse();
 	void AddCss(char *Css);
 	int ScrollY();
@@ -73,21 +73,21 @@ protected:
 	bool GetCursorVis();
 	LRect *GetCursorPos();
 	bool IsCursorFirst();
-	int GetTagDepth(GTag *Tag);
-	GTag *PrevTag(GTag *t);
-	GTag *NextTag(GTag *t);
-	GTag *GetLastChild(GTag *t);
+	int GetTagDepth(LTag *Tag);
+	LTag *PrevTag(LTag *t);
+	LTag *NextTag(LTag *t);
+	LTag *GetLastChild(LTag *t);
 
 public:
-	GHtml2(int Id, int x, int y, int cx, int cy, LDocumentEnv *system = 0);
-	~GHtml2();
+	LHtml2(int Id, int x, int y, int cx, int cy, LDocumentEnv *system = 0);
+	~LHtml2();
 
 	// Html
-	const char *GetClass() { return "GHtml2"; }
+	const char *GetClass() { return "LHtml2"; }
 	bool GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocView::ContentMedia> *Media = 0);
 
 	/// Get the tag at an x,y location
-	GTag *GetTagByPos(int x, int y, int *Index);
+	LTag *GetTagByPos(int x, int y, int *Index);
 	/// Layout content and return size.
 	LPoint Layout();
 
@@ -145,7 +145,7 @@ public:
 
 	// Events
 	bool OnFind(class LFindReplaceCommon *Params);
-	virtual bool OnSubmitForm(GTag *Form);
+	virtual bool OnSubmitForm(LTag *Form);
 	virtual void OnCursorChanged() {}
 };
 

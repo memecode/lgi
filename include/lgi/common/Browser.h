@@ -1,7 +1,7 @@
 /**
 	\file
 	\author Matthew Allen <fret@memecode.com>
-	\brief Simple single window wrapper around the GHtml2 control
+	\brief Simple single window wrapper around the LHtml2 control
  */
 #ifndef _GBROWSER_H_
 #define _GBROWSER_H_

@@ -47,9 +47,9 @@
 
 #define CRASH_TRACE					0
 #ifdef MAC
-#define GHTML_USE_DOUBLE_BUFFER		0
+#define HTML_USE_DOUBLE_BUFFER		0
 #else
-#define GHTML_USE_DOUBLE_BUFFER		1
+#define HTML_USE_DOUBLE_BUFFER		1
 #endif
 #define GT_TRANSPARENT				0x00000000
 #ifndef IDC_HAND
@@ -138,10 +138,10 @@ using namespace Html1;
 namespace Html1
 {
 
-class GHtmlPrivate
+class LHtmlPrivate
 {
 public:
-	LHashTbl<ConstStrKey<char>, GTag*> Loading;
+	LHashTbl<ConstStrKey<char>, LTag*> Loading;
 	LHtmlStaticInst Inst;
 	bool CursorVis;
 	LRect CursorPos;
@@ -167,7 +167,7 @@ public:
 	LAutoWString FindText;
 	bool MatchCase;
 	
-	GHtmlPrivate()
+	LHtmlPrivate()
 	{
 		IsLoaded = false;
 		StyleDirty = false;
@@ -196,22 +196,17 @@ public:
 			DecodeEmoji = false;
 	}
 
-	~GHtmlPrivate()
+	~LHtmlPrivate()
 	{
 	}
 };
 
-};
-
-//////////////////////////////////////////////////////////////////////
-namespace Html1 {
-
 class InputButton : public LButton
 {
-	GTag *Tag;
+	LTag *Tag;
 	
 public:
-	InputButton(GTag *tag, int Id, const char *Label) : LButton(Id, 0, 0, -1, -1, Label)
+	InputButton(LTag *tag, int Id, const char *Label) : LButton(Id, 0, 0, -1, -1, Label)
 	{
 		Tag = tag;
 	}
@@ -224,11 +219,11 @@ public:
 
 class LFontCache
 {
-	GHtml *Owner;
+	LHtml *Owner;
 	List<LFont> Fonts;
 
 public:
-	LFontCache(GHtml *owner)
+	LFontCache(LHtml *owner)
 	{
 		Owner = owner;
 	}
@@ -430,7 +425,7 @@ public:
 	}
 };
 
-class GFlowRegion
+class LFlowRegion
 {
 	List<GFlowRect> Line;	// These pointers aren't owned by the flow region
 							// When the line is finish, all the tag regions
@@ -445,7 +440,7 @@ class GFlowRegion
 	LArray<GFlowStack> Stack;
 
 public:
-	GHtml *Html;
+	LHtml *Html;
 	int x1, x2;					// Left and right margins
 	int y1;						// Current y position
 	int y2;						// Maximum used y position
@@ -456,7 +451,7 @@ public:
 
 	int InBody;
 
-	GFlowRegion(GHtml *html, bool inbody)
+	LFlowRegion(LHtml *html, bool inbody)
 	{
 		Html = html;
 		x1 = x2 = y1 = y2 = cx = my = 0;
@@ -464,7 +459,7 @@ public:
 		InBody = inbody;
 	}
 
-	GFlowRegion(GHtml *html, LRect r, bool inbody)
+	LFlowRegion(LHtml *html, LRect r, bool inbody)
 	{
 		Html = html;
 		MAX.x = cx = x1 = r.x1;
@@ -475,7 +470,7 @@ public:
 		InBody = inbody;
 	}
 
-	GFlowRegion(GFlowRegion &r)
+	LFlowRegion(LFlowRegion &r)
 	{
 		Html = r.Html;
 		x1 = r.x1;
@@ -513,7 +508,7 @@ public:
 		return x2 - x1 + 1;
 	}
 
-	GFlowRegion &operator +=(LRect r)
+	LFlowRegion &operator +=(LRect r)
 	{
 		x1 += r.x1;
 		cx += r.x1;
@@ -524,7 +519,7 @@ public:
 		return *this;
 	}
 
-	GFlowRegion &operator -=(LRect r)
+	LFlowRegion &operator -=(LRect r)
 	{
 		x1 -= r.x1;
 		cx -= r.x1;
@@ -540,14 +535,14 @@ public:
 	void Insert(GFlowRect *Tr);
 	LRect *LineBounds();
 
-	void Indent(GTag *Tag,
+	void Indent(LTag *Tag,
 				LCss::Len Left,
 				LCss::Len Top,
 				LCss::Len Right,
 				LCss::Len Bottom,
 				bool IsMargin)
 	{
-		GFlowRegion This(*this);
+		LFlowRegion This(*this);
 		GFlowStack &Fs = Stack.New();
 
 		Fs.LeftAbs = Left.IsValid() ? ResolveX(Left, Tag, IsMargin) : 0;
@@ -566,7 +561,7 @@ public:
 	void Indent(LRect &Px,
 				bool IsMargin)
 	{
-		GFlowRegion This(*this);
+		LFlowRegion This(*this);
 		GFlowStack &Fs = Stack.New();
 
 		Fs.LeftAbs = Px.x1;
@@ -586,7 +581,7 @@ public:
 	void Outdent(LRect &Px,
 				bool IsMargin)
 	{
-		GFlowRegion This = *this;
+		LFlowRegion This = *this;
 
 		ssize_t len = Stack.Length();
 		if (len > 0)
@@ -607,14 +602,14 @@ public:
 		else LAssert(!"Nothing to pop.");
 	}
 
-	void Outdent(GTag *Tag,
+	void Outdent(LTag *Tag,
 				LCss::Len Left,
 				LCss::Len Top,
 				LCss::Len Right,
 				LCss::Len Bottom,
 				bool IsMargin)
 	{
-		GFlowRegion This = *this;
+		LFlowRegion This = *this;
 
 		ssize_t len = Stack.Length();
 		if (len > 0)
@@ -635,7 +630,7 @@ public:
 		else LAssert(!"Nothing to pop.");
 	}
 
-	int ResolveX(LCss::Len l, GTag *t, bool IsMargin)
+	int ResolveX(LCss::Len l, LTag *t, bool IsMargin)
 	{
 		LFont *f = t->GetFont();
 		switch (l.Type)
@@ -723,7 +718,7 @@ public:
 		return Limited;
 	}
 
-	int ResolveY(LCss::Len l, GTag *t, bool IsMargin)
+	int ResolveY(LCss::Len l, LTag *t, bool IsMargin)
 	{
 		LFont *f = t->GetFont();
 		switch (l.Type)
@@ -760,7 +755,7 @@ public:
 			{
 				// Walk up tree of tags to find an absolute size...
 				LCss::Len Ab;
-				for (GTag *p = ToTag(t->Parent); p; p = ToTag(p->Parent))
+				for (LTag *p = ToTag(t->Parent); p; p = ToTag(p->Parent))
 				{
 					auto h = p->Height();
 					if (h.IsValid() && !h.IsDynamic())
@@ -844,7 +839,7 @@ public:
 		return Limited;
 	}
 
-	LRect ResolveMargin(LCss *Src, GTag *Tag)
+	LRect ResolveMargin(LCss *Src, LTag *Tag)
 	{
 		LRect r;
 		r.x1 = ResolveX(Src->MarginLeft(), Tag, true);
@@ -854,7 +849,7 @@ public:
 		return r;
 	}
 
-	LRect ResolveBorder(LCss *Src, GTag *Tag)
+	LRect ResolveBorder(LCss *Src, LTag *Tag)
 	{
 		LRect r;
 		r.x1 = ResolveX(Src->BorderLeft(), Tag, true);
@@ -864,7 +859,7 @@ public:
 		return r;
 	}
 
-	LRect ResolvePadding(LCss *Src, GTag *Tag)
+	LRect ResolvePadding(LCss *Src, LTag *Tag)
 	{
 		LRect r;
 		r.x1 = ResolveX(Src->PaddingLeft(), Tag, true);
@@ -904,46 +899,46 @@ static bool ParseDistance(char *s, float &d, char *units = 0)
 	return true;
 }
 
-GLength::GLength()
+LHtmlLength::LHtmlLength()
 {
 	d = 0;
 	PrevAbs = 0;
 	u = LCss::LenInherit;
 }
 
-GLength::GLength(char *s)
+LHtmlLength::LHtmlLength(char *s)
 {
 	Set(s);
 }
 
-bool GLength::IsValid()
+bool LHtmlLength::IsValid()
 {
 	return u != LCss::LenInherit;
 }
 
-bool GLength::IsDynamic()
+bool LHtmlLength::IsDynamic()
 {
 	return u == LCss::LenPercent || d == 0.0;
 }
 
-GLength::operator float ()
+LHtmlLength::operator float ()
 {
 	return d;
 }
 
-GLength &GLength::operator =(float val)
+LHtmlLength &LHtmlLength::operator =(float val)
 {
 	d = val;
 	u = LCss::LenPx;
 	return *this;
 }
 
-LCss::LengthType GLength::GetUnits()
+LCss::LengthType LHtmlLength::GetUnits()
 {
 	return u;
 }
 
-void GLength::Set(char *s)
+void LHtmlLength::Set(char *s)
 {
 	if (ValidStr(s))
 	{
@@ -981,7 +976,7 @@ void GLength::Set(char *s)
 	}
 }
 
-float GLength::Get(GFlowRegion *Flow, LFont *Font, bool Lock)
+float LHtmlLength::Get(LFlowRegion *Flow, LFont *Font, bool Lock)
 {
 	switch (u)
 	{
@@ -1014,23 +1009,23 @@ float GLength::Get(GFlowRegion *Flow, LFont *Font, bool Lock)
 	return PrevAbs = MIN(FlowX, d);
 }
 
-GLine::GLine()
+LHtmlLine::LHtmlLine()
 {
 	LineStyle = -1;
 	LineReset = 0x80000000;
 }
 
-GLine::~GLine()
+LHtmlLine::~LHtmlLine()
 {
 }
 
-GLine &GLine::operator =(int i)
+LHtmlLine &LHtmlLine::operator =(int i)
 {
 	d = (float)i;
 	return *this;
 }
 
-void GLine::Set(char *s)
+void LHtmlLine::Set(char *s)
 {
 	GToken t(s, " \t");
 	LineReset = 0x80000000;
@@ -1062,7 +1057,7 @@ void GLine::Set(char *s)
 		}
 		else if (IsDigit(*c))
 		{
-			GLength::Set(c);
+			LHtmlLength::Set(c);
 		}
 		else if (_stricmp(c, "none") == 0)
 		{
@@ -1144,12 +1139,12 @@ void GLine::Set(char *s)
 }
 
 //////////////////////////////////////////////////////////////////////
-LRect GTag::GetRect(bool Client)
+LRect LTag::GetRect(bool Client)
 {
 	LRect r(Pos.x, Pos.y, Pos.x + Size.x - 1, Pos.y + Size.y - 1);
 	if (!Client)
 	{
-		for (GTag *p = ToTag(Parent); p; p=ToTag(p->Parent))
+		for (LTag *p = ToTag(Parent); p; p=ToTag(p->Parent))
 		{
 			r.Offset(p->Pos.x, p->Pos.y);
 		}
@@ -1157,9 +1152,9 @@ LRect GTag::GetRect(bool Client)
 	return r;
 }
 
-LCss::LengthType GTag::GetAlign(bool x)
+LCss::LengthType LTag::GetAlign(bool x)
 {
-	for (GTag *t = this; t; t = ToTag(t->Parent))
+	for (LTag *t = this; t; t = ToTag(t->Parent))
 	{
 		LCss::Len l;
 		
@@ -1188,7 +1183,7 @@ LCss::LengthType GTag::GetAlign(bool x)
 }
 
 //////////////////////////////////////////////////////////////////////
-void GFlowRegion::EndBlock(LCss::LengthType Align)
+void LFlowRegion::EndBlock(LCss::LengthType Align)
 {
 	if (cx > x1)
 	{
@@ -1196,7 +1191,7 @@ void GFlowRegion::EndBlock(LCss::LengthType Align)
 	}
 }
 
-void GFlowRegion::FinishLine(LCss::LengthType Align, bool Margin)
+void LFlowRegion::FinishLine(LCss::LengthType Align, bool Margin)
 {
 	if (Align != LCss::AlignLeft)
 	{
@@ -1237,7 +1232,7 @@ void GFlowRegion::FinishLine(LCss::LengthType Align, bool Margin)
 	Line.Empty();
 }
 
-LRect *GFlowRegion::LineBounds()
+LRect *LFlowRegion::LineBounds()
 {
 	auto It = Line.begin();
 	GFlowRect *Prev = *It;
@@ -1277,13 +1272,13 @@ LRect *GFlowRegion::LineBounds()
 	return 0;
 }
 
-void GFlowRegion::Insert(GFlowRect *Tr)
+void LFlowRegion::Insert(GFlowRect *Tr)
 {
 	if (Tr) Line.Insert(Tr);
 }
 
 //////////////////////////////////////////////////////////////////////
-GTag::GTag(GHtml *h, LHtmlElement *p) :
+LTag::LTag(LHtml *h, LHtmlElement *p) :
 	LHtmlElement(p),
 	Attr(8)
 {
@@ -1310,7 +1305,7 @@ GTag::GTag(GHtml *h, LHtmlElement *p) :
 	#endif
 }
 
-GTag::~GTag()
+LTag::~LTag()
 {
 	if (Html->Cursor == this)
 	{
@@ -1327,11 +1322,11 @@ GTag::~GTag()
 	DeleteObj(Cell);
 }
 
-void GTag::OnChange(PropType Prop)
+void LTag::OnChange(PropType Prop)
 {
 }
 
-bool GTag::OnClick(const LMouse &m)
+bool LTag::OnClick(const LMouse &m)
 {
 	if (!Html->Environment)
 		return false;
@@ -1349,7 +1344,7 @@ bool GTag::OnClick(const LMouse &m)
 	return true;
 }
 
-void GTag::Set(const char *attr, const char *val)
+void LTag::Set(const char *attr, const char *val)
 {
 	char *existing = Attr.Find(attr);
 	if (existing) DeleteArray(existing);
@@ -1358,7 +1353,7 @@ void GTag::Set(const char *attr, const char *val)
 		Attr.Add(attr, NewStr(val));
 }
 
-bool GTag::GetVariant(const char *Name, LVariant &Value, const char *Array)
+bool LTag::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	LDomProperty Fld = LStringToDomProp(Name);
 	switch (Fld)
@@ -1388,7 +1383,7 @@ bool GTag::GetVariant(const char *Name, LVariant &Value, const char *Array)
 	return false;
 }
 
-bool GTag::SetVariant(const char *Name, LVariant &Value, const char *Array)
+bool LTag::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	LDomProperty Fld = LStringToDomProp(Name);
 	switch (Fld)
@@ -1425,7 +1420,7 @@ bool GTag::SetVariant(const char *Name, LVariant &Value, const char *Array)
 				
 				while (Doc && *Doc)
 				{
-					GTag *t = new GTag(Html, this);
+					LTag *t = new LTag(Html, this);
 					if (t)
 					{
 						Doc = Html->ParseHtml(t, Doc, 1, false, &BackOut);
@@ -1450,7 +1445,7 @@ bool GTag::SetVariant(const char *Name, LVariant &Value, const char *Array)
 	return true;
 }
 
-ssize_t GTag::GetTextStart()
+ssize_t LTag::GetTextStart()
 {
 	if (PreText() && TextPos.Length() > 1)
 	{
@@ -1516,7 +1511,7 @@ static bool TextToStream(LStream &Out, char16 *Text)
 	return true;
 }
 
-bool GTag::CreateSource(LStringPipe &p, int Depth, bool LastWasBlock)
+bool LTag::CreateSource(LStringPipe &p, int Depth, bool LastWasBlock)
 {
 	char *Tabs = new char[Depth+1];
 	memset(Tabs, '\t', Depth);
@@ -1636,7 +1631,7 @@ bool GTag::CreateSource(LStringPipe &p, int Depth, bool LastWasBlock)
 		bool Last = IsBlock();
 		for (unsigned i=0; i<Children.Length(); i++)
 		{
-			GTag *c = ToTag(Children[i]);
+			LTag *c = ToTag(Children[i]);
 			c->CreateSource(p, Parent ? Depth+1 : 0, Last);
 			Last = c->IsBlock();
 		}
@@ -1675,7 +1670,7 @@ bool GTag::CreateSource(LStringPipe &p, int Depth, bool LastWasBlock)
 	return true;
 }
 
-void GTag::SetTag(const char *NewTag)
+void LTag::SetTag(const char *NewTag)
 {
 	Tag.Reset(NewStr(NewTag));
 
@@ -1697,9 +1692,9 @@ void GTag::SetTag(const char *NewTag)
 	SetStyle();
 }
 
-LColour GTag::_Colour(bool f)
+LColour LTag::_Colour(bool f)
 {
-	for (GTag *t = this; t; t = ToTag(t->Parent))
+	for (LTag *t = this; t; t = ToTag(t->Parent))
 	{
 		ColorDef c = f ? t->Color() : t->BackgroundColor();
 		if (c.Type != ColorInherit)
@@ -1721,7 +1716,7 @@ LColour GTag::_Colour(bool f)
 	return LColour();
 }
 
-void GTag::CopyClipboard(LMemQueue &p, bool &InSelection)
+void LTag::CopyClipboard(LMemQueue &p, bool &InSelection)
 {
 	ssize_t Min = -1;
 	ssize_t Max = -1;
@@ -1793,7 +1788,7 @@ void GTag::CopyClipboard(LMemQueue &p, bool &InSelection)
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		GTag *c = ToTag(Children[i]);
+		LTag *c = ToTag(Children[i]);
 		c->CopyClipboard(p, InSelection);
 	}
 }
@@ -1820,7 +1815,7 @@ _DumpColour(LCss::ColorDef c)
 	return b;
 }
 
-void GTag::_Dump(LStringPipe &Buf, int Depth)
+void LTag::_Dump(LStringPipe &Buf, int Depth)
 {
 	LString Tabs;
 	Tabs.Set(NULL, Depth);
@@ -1871,7 +1866,7 @@ void GTag::_Dump(LStringPipe &Buf, int Depth)
 	
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		GTag *t = ToTag(Children[i]);
+		LTag *t = ToTag(Children[i]);
 		t->_Dump(Buf, Depth+1);
 	}
 
@@ -1881,7 +1876,7 @@ void GTag::_Dump(LStringPipe &Buf, int Depth)
 	}
 }
 
-LAutoWString GTag::DumpW()
+LAutoWString LTag::DumpW()
 {
 	LStringPipe Buf;
 	// Buf.Print("Html pos=%s\n", Html?Html->GetPos().GetStr():0);
@@ -1891,7 +1886,7 @@ LAutoWString GTag::DumpW()
 	return w;
 }
 
-LAutoString GTag::DescribeElement()
+LAutoString LTag::DescribeElement()
 {
 	LStringPipe s(256);
 	s.Print("%s", Tag ? Tag.Get() : "CONTENT");
@@ -1902,7 +1897,7 @@ LAutoString GTag::DescribeElement()
 	return LAutoString(s.NewStr());
 }
 
-LFont *GTag::NewFont()
+LFont *LTag::NewFont()
 {
 	LFont *f = new LFont;
 	if (f)
@@ -1914,7 +1909,7 @@ LFont *GTag::NewFont()
 	return f;
 }
 
-LFont *GTag::GetFont()
+LFont *LTag::GetFont()
 {
 	if (!Font)
 	{
@@ -1935,7 +1930,7 @@ LFont *GTag::GetFont()
 			Map.Add(PropFontWeight, new LCss::PropArray);
 			Map.Add(PropTextDecoration, new LCss::PropArray);
 
-			for (GTag *t = this; t; t = ToTag(t->Parent))
+			for (LTag *t = this; t; t = ToTag(t->Parent))
 			{
 				if (t->TagId == TAG_IFRAME)
 					break;
@@ -1952,7 +1947,7 @@ LFont *GTag::GetFont()
 		}
 		else
 		{
-			GTag *t = this;
+			LTag *t = this;
 			while (!t->Font && t->Parent)
 			{
 				t = ToTag(t->Parent);
@@ -1968,7 +1963,7 @@ LFont *GTag::GetFont()
 	return Font;
 }
 
-GTag *GTag::PrevTag()
+LTag *LTag::PrevTag()
 {
 	if (Parent)
 	{
@@ -1982,20 +1977,20 @@ GTag *GTag::PrevTag()
 	return 0;
 }
 
-void GTag::Invalidate()
+void LTag::Invalidate()
 {
 	LRect p = GetRect();
-	for (GTag *t=ToTag(Parent); t; t=ToTag(t->Parent))
+	for (LTag *t=ToTag(Parent); t; t=ToTag(t->Parent))
 	{
 		p.Offset(t->Pos.x, t->Pos.y);
 	}
 	Html->Invalidate(&p);
 }
 
-GTag *GTag::IsAnchor(LString *Uri)
+LTag *LTag::IsAnchor(LString *Uri)
 {
-	GTag *a = 0;
-	for (GTag *t = this; t; t = ToTag(t->Parent))
+	LTag *a = 0;
+	for (LTag *t = this; t; t = ToTag(t->Parent))
 	{
 		if (t->TagId == TAG_A)
 		{
@@ -2020,7 +2015,7 @@ GTag *GTag::IsAnchor(LString *Uri)
 	return a;
 }
 
-bool GTag::OnMouseClick(LMouse &m)
+bool LTag::OnMouseClick(LMouse &m)
 {
 	bool Processed = false;
 
@@ -2028,7 +2023,7 @@ bool GTag::OnMouseClick(LMouse &m)
 	{
 		LString Uri;
 		const char *ImgSrc = NULL;
-		GTag *a = IsAnchor(&Uri);
+		LTag *a = IsAnchor(&Uri);
 		bool IsImg = TagId == TAG_IMG;
 		if (IsImg)
 			Get("src", ImgSrc);
@@ -2105,7 +2100,7 @@ bool GTag::OnMouseClick(LMouse &m)
 			
 			p.Print("\nParent tags:\n");
 			LDisplayString Sp(LSysFont, " ");
-			for (GTag *t=ToTag(Parent); t && t->Parent; t=ToTag(t->Parent))
+			for (LTag *t=ToTag(Parent); t && t->Parent; t=ToTag(t->Parent))
 			{
 				LStringPipe Tmp;
 				Tmp.Print("    %s", t->Tag ? t->Tag.Get() : "CONTENT");
@@ -2176,7 +2171,7 @@ bool GTag::OnMouseClick(LMouse &m)
 	return Processed;
 }
 
-GTag *GTag::GetBlockParent(ssize_t *Idx)
+LTag *LTag::GetBlockParent(ssize_t *Idx)
 {
 	if (IsBlock())
 	{
@@ -2186,7 +2181,7 @@ GTag *GTag::GetBlockParent(ssize_t *Idx)
 		return this;
 	}
 
-	for (GTag *t = this; t; t = ToTag(t->Parent))
+	for (LTag *t = this; t; t = ToTag(t->Parent))
 	{
 		if (ToTag(t->Parent)->IsBlock())
 		{
@@ -2202,7 +2197,7 @@ GTag *GTag::GetBlockParent(ssize_t *Idx)
 	return 0;
 }
 
-GTag *GTag::GetAnchor(char *Name)
+LTag *LTag::GetAnchor(char *Name)
 {
 	if (!Name)
 		return 0;
@@ -2215,15 +2210,15 @@ GTag *GTag::GetAnchor(char *Name)
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		GTag *t = ToTag(Children[i]);
-		GTag *Result = t->GetAnchor(Name);
+		LTag *t = ToTag(Children[i]);
+		LTag *Result = t->GetAnchor(Name);
 		if (Result) return Result;
 	}
 
 	return 0;
 }
 
-GTag *GTag::GetTagByName(const char *Name)
+LTag *LTag::GetTagByName(const char *Name)
 {
 	if (Name)
 	{
@@ -2234,8 +2229,8 @@ GTag *GTag::GetTagByName(const char *Name)
 
 		for (unsigned i=0; i<Children.Length(); i++)
 		{
-			GTag *t = ToTag(Children[i]);
-			GTag *Result = t->GetTagByName(Name);
+			LTag *t = ToTag(Children[i]);
+			LTag *Result = t->GetTagByName(Name);
 			if (Result) return Result;
 		}
 	}
@@ -2301,7 +2296,7 @@ static int IsNearRect(LRect *r, int x, int y)
 	return (int) sqrt( (double) ( (dx * dx) + (dy * dy) ) );
 }
 
-ssize_t GTag::NearestChar(GFlowRect *Tr, int x, int y)
+ssize_t LTag::NearestChar(GFlowRect *Tr, int x, int y)
 {
 	LFont *f = GetFont();
 	if (f)
@@ -2332,7 +2327,7 @@ ssize_t GTag::NearestChar(GFlowRect *Tr, int x, int y)
 	return -1;
 }
 
-void GTag::GetTagByPos(GTagHit &TagHit, int x, int y, int Depth, bool InBody, bool DebugLog)
+void LTag::GetTagByPos(LTagHit &TagHit, int x, int y, int Depth, bool InBody, bool DebugLog)
 {
 	/*
 	InBody: Originally I had this test in the code but it seems that some test cases
@@ -2437,7 +2432,7 @@ void GTag::GetTagByPos(GTagHit &TagHit, int x, int y, int Depth, bool InBody, bo
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		GTag *t = ToTag(Children[i]);
+		LTag *t = ToTag(Children[i]);
 		if (t->Pos.x >= 0 &&
 			t->Pos.y >= 0)
 		{
@@ -2446,7 +2441,7 @@ void GTag::GetTagByPos(GTagHit &TagHit, int x, int y, int Depth, bool InBody, bo
 	}
 }
 
-int GTag::OnNotify(LNotification n)
+int LTag::OnNotify(LNotification n)
 {
 	if (!Ctrl || !Html->InThread())
 		return 0;
@@ -2455,7 +2450,7 @@ int GTag::OnNotify(LNotification n)
 	{
 		case CtrlSubmit:
 		{
-			GTag *Form = this;
+			LTag *Form = this;
 			while (Form && Form->TagId != TAG_FORM)
 				Form = ToTag(Form->Parent);
 			if (Form)
@@ -2472,7 +2467,7 @@ int GTag::OnNotify(LNotification n)
 	return 0;
 }
 
-void GTag::CollectFormValues(LHashTbl<ConstStrKey<char,false>,char*> &f)
+void LTag::CollectFormValues(LHashTbl<ConstStrKey<char,false>,char*> &f)
 {
 	if (CtrlType != CtrlNone)
 	{
@@ -2507,20 +2502,20 @@ void GTag::CollectFormValues(LHashTbl<ConstStrKey<char,false>,char*> &f)
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		GTag *t = ToTag(Children[i]);
+		LTag *t = ToTag(Children[i]);
 		t->CollectFormValues(f);
 	}
 }
 
-GTag *GTag::FindCtrlId(int Id)
+LTag *LTag::FindCtrlId(int Id)
 {
 	if (Ctrl && Ctrl->GetId() == Id)
 		return this;
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		GTag *t = ToTag(Children[i]);
-		GTag *f = t->FindCtrlId(Id);
+		LTag *t = ToTag(Children[i]);
+		LTag *f = t->FindCtrlId(Id);
 		if (f)
 			return f;
 	}
@@ -2528,7 +2523,7 @@ GTag *GTag::FindCtrlId(int Id)
 	return NULL;
 }
 
-void GTag::Find(int TagType, LArray<GTag*> &Out)
+void LTag::Find(int TagType, LArray<LTag*> &Out)
 {
 	if (TagId == TagType)
 	{
@@ -2536,12 +2531,12 @@ void GTag::Find(int TagType, LArray<GTag*> &Out)
 	}
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		GTag *t = ToTag(Children[i]);
+		LTag *t = ToTag(Children[i]);
 		t->Find(TagType, Out);
 	}
 }
 
-void GTag::SetImage(const char *Uri, LSurface *Img)
+void LTag::SetImage(const char *Uri, LSurface *Img)
 {
 	if (Img)
 	{
@@ -2583,7 +2578,7 @@ void GTag::SetImage(const char *Uri, LSurface *Img)
 
 		for (unsigned i=0; i<Children.Length(); i++)
 		{
-			GTag *t = ToTag(Children[i]);
+			LTag *t = ToTag(Children[i]);
 			if (t->Cell)
 			{
 				t->Cell->MinContent = 0;
@@ -2597,7 +2592,7 @@ void GTag::SetImage(const char *Uri, LSurface *Img)
 	}
 }
 
-void GTag::LoadImage(const char *Uri)
+void LTag::LoadImage(const char *Uri)
 {
 	#if DOCUMENT_LOAD_IMAGES
 	if (!Html->Environment)
@@ -2676,7 +2671,7 @@ void GTag::LoadImage(const char *Uri)
 	#endif
 }
 
-void GTag::LoadImages()
+void LTag::LoadImages()
 {
 	const char *Uri = 0;
 	if (Html->Environment &&
@@ -2689,12 +2684,12 @@ void GTag::LoadImages()
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		GTag *t = ToTag(Children[i]);
+		LTag *t = ToTag(Children[i]);
 		t->LoadImages();
 	}
 }
 
-void GTag::ImageLoaded(char *uri, LSurface *Img, int &Used)
+void LTag::ImageLoaded(char *uri, LSurface *Img, int &Used)
 {
 	const char *Uri = 0;
 	if (!Image &&
@@ -2716,54 +2711,54 @@ void GTag::ImageLoaded(char *uri, LSurface *Img, int &Used)
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		GTag *t = ToTag(Children[i]);
+		LTag *t = ToTag(Children[i]);
 		t->ImageLoaded(uri, Img, Used);
 	}
 }
 
-struct LTagElementCallback : public LCss::ElementCallback<GTag>
+struct LTagElementCallback : public LCss::ElementCallback<LTag>
 {
 	const char *Val;
 
-	const char *GetElement(GTag *obj)
+	const char *GetElement(LTag *obj)
 	{
 		return obj->Tag;
 	}
 	
-	const char *GetAttr(GTag *obj, const char *Attr)
+	const char *GetAttr(LTag *obj, const char *Attr)
 	{
 		if (obj->Get(Attr, Val))
 			return Val;
 		return NULL;
 	}
 	
-	bool GetClasses(LString::Array &Classes, GTag *obj) 
+	bool GetClasses(LString::Array &Classes, LTag *obj) 
 	{
 		Classes = obj->Class;
 		return Classes.Length() > 0;
 	}
 	
-	GTag *GetParent(GTag *obj)
+	LTag *GetParent(LTag *obj)
 	{
 		return ToTag(obj->Parent);
 	}
 	
-	LArray<GTag*> GetChildren(GTag *obj)
+	LArray<LTag*> GetChildren(LTag *obj)
 	{
-		LArray<GTag*> c;
+		LArray<LTag*> c;
 		for (unsigned i=0; i<obj->Children.Length(); i++)
 			c.Add(ToTag(obj->Children[i]));
 		return c;
 	}
 };
 
-void GTag::RestyleAll()
+void LTag::RestyleAll()
 {
 	Restyle();
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
 		LHtmlElement *c = Children[i];
-		GTag *t = ToTag(c);
+		LTag *t = ToTag(c);
 		if (t)
 			t->RestyleAll();
 	}
@@ -2771,7 +2766,7 @@ void GTag::RestyleAll()
 
 // After CSS has changed this function scans through the CSS and applies any rules
 // that match the current tag.
-void GTag::Restyle()
+void LTag::Restyle()
 {
 	// Use the matching built into the LCss Store.
 	LCss::SelArray Styles;
@@ -2800,7 +2795,7 @@ void GTag::Restyle()
 	#endif
 }
 
-void GTag::SetStyle()
+void LTag::SetStyle()
 {
 	const static float FntMul[] =
 	{
@@ -2874,7 +2869,7 @@ void GTag::SetStyle()
 				if (j)
 				{
 					LAssert(Html != NULL);
-					GTag *t = this;
+					LTag *t = this;
 					
 					j->Uri.Reset(NewStr(Href));
 					j->Env = Html->Environment;
@@ -2999,7 +2994,7 @@ void GTag::SetStyle()
 			if (!Cell)
 				Cell = new TblCell;
 
-			GTag *Table = GetTable();
+			LTag *Table = GetTable();
 			if (Table)
 			{
 				Len l = Table->_CellPadding();
@@ -3171,7 +3166,7 @@ void GTag::SetStyle()
 			LCss::ColorDef Bk = BackgroundColor();
 			if (Bk.Type != ColorInherit)
 			{
-				// Copy the background up to the GHtml wrapper
+				// Copy the background up to the LHtml wrapper
 				Html->GetCss(true)->BackgroundColor(Bk);
 			}
 			
@@ -3425,7 +3420,7 @@ void GTag::SetStyle()
 	}
 }
 
-void GTag::OnStyleChange(const char *name)
+void LTag::OnStyleChange(const char *name)
 {
 	if (!Stricmp(name, "display") && Html)
 	{
@@ -3434,7 +3429,7 @@ void GTag::OnStyleChange(const char *name)
 	}
 }
 
-void GTag::SetCssStyle(const char *Style)
+void LTag::SetCssStyle(const char *Style)
 {
 	if (Style)
 	{
@@ -3455,7 +3450,7 @@ void GTag::SetCssStyle(const char *Style)
 	}
 }
 
-char16 *GTag::CleanText(const char *s, ssize_t Len, const char *SourceCs,  bool ConversionAllowed, bool KeepWhiteSpace)
+char16 *LTag::CleanText(const char *s, ssize_t Len, const char *SourceCs,  bool ConversionAllowed, bool KeepWhiteSpace)
 {
 	if (!s || Len <= 0)
 		return NULL;
@@ -3612,7 +3607,7 @@ char16 *GTag::CleanText(const char *s, ssize_t Len, const char *SourceCs,  bool 
 	return t;
 }
 
-char *GTag::ParseText(char *Doc)
+char *LTag::ParseText(char *Doc)
 {
 	ColorDef c;
 	c.Type = ColorRgb;
@@ -3665,7 +3660,7 @@ char *GTag::ParseText(char *Doc)
 			char16 *Line = Utf16.NewStrW();
 			if (Line)
 			{
-				GTag *t = new GTag(Html, this);
+				LTag *t = new LTag(Html, this);
 				if (t)
 				{
 					t->Color(LColour(L_TEXT));
@@ -3676,7 +3671,7 @@ char *GTag::ParseText(char *Doc)
 			if (*s == '\n')
 			{
 				s++;
-				GTag *t = new GTag(Html, this);
+				LTag *t = new LTag(Html, this);
 				if (t)
 				{
 					t->TagId = TAG_BR;
@@ -3709,7 +3704,7 @@ char *GTag::ParseText(char *Doc)
 	return 0;
 }
 
-bool GTag::ConvertToText(TextConvertState &State)
+bool LTag::ConvertToText(TextConvertState &State)
 {
 	const static char *Rule = "------------------------------------------------------";
 	int DepthInc = 0;
@@ -3752,7 +3747,7 @@ bool GTag::ConvertToText(TextConvertState &State)
 	
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		GTag *c = ToTag(Children[i]);
+		LTag *c = ToTag(Children[i]);
 		c->ConvertToText(State);
 	}
 
@@ -3808,7 +3803,7 @@ bool GTag::ConvertToText(TextConvertState &State)
 	return true;
 }
 
-char *GTag::NextTag(char *s)
+char *LTag::NextTag(char *s)
 {
 	while (s && *s)
 	{
@@ -3831,7 +3826,7 @@ char *GTag::NextTag(char *s)
 	return 0;
 }
 
-void GHtml::CloseTag(GTag *t)
+void LHtml::CloseTag(LTag *t)
 {
 	if (!t)
 		return;
@@ -3839,7 +3834,7 @@ void GHtml::CloseTag(GTag *t)
 	OpenTags.Delete(t);
 }
 
-bool GTag::OnUnhandledColor(LCss::ColorDef *def, const char *&s)
+bool LTag::OnUnhandledColor(LCss::ColorDef *def, const char *&s)
 {
 	const char *e = s;
 	while (*e && (IsText(*e) || *e == '_'))
@@ -3862,7 +3857,7 @@ bool GTag::OnUnhandledColor(LCss::ColorDef *def, const char *&s)
 	return false;
 }
 
-void GTag::ZeroTableElements()
+void LTag::ZeroTableElements()
 {
 	if (TagId == TAG_TABLE ||
 		TagId == TAG_TR ||
@@ -3878,19 +3873,19 @@ void GTag::ZeroTableElements()
 
 		for (unsigned i=0; i<Children.Length(); i++)
 		{
-			GTag *t = ToTag(Children[i]);
+			LTag *t = ToTag(Children[i]);
 			t->ZeroTableElements();
 		}
 	}
 }
 
-void GTag::ResetCaches()
+void LTag::ResetCaches()
 {
 	/*
 	If during the parse process a callback causes a layout to happen then it's possible
-	to have partial information in the GHtmlTableLayout structure, like missing TD cells.
+	to have partial information in the LHtmlTableLayout structure, like missing TD cells.
 	Because they haven't been parsed yet.
-	This is called at the end of the parsing to reset all the cached info in GHtmlTableLayout.
+	This is called at the end of the parsing to reset all the cached info in LHtmlTableLayout.
 	That way when the first real layout happens all the data is there.
 	*/
 	if (Cell)
@@ -3899,7 +3894,7 @@ void GTag::ResetCaches()
 		ToTag(Children[i])->ResetCaches();
 }
 
-LPoint GTag::GetTableSize()
+LPoint LTag::GetTableSize()
 {
 	LPoint s(0, 0);
 	
@@ -3911,9 +3906,9 @@ LPoint GTag::GetTableSize()
 	return s;
 }
 
-GTag *GTag::GetTableCell(int x, int y)
+LTag *LTag::GetTableCell(int x, int y)
 {
-	GTag *t = this;
+	LTag *t = this;
 	while (	t &&
 			!t->Cell &&
 			!t->Cell->Cells &&
@@ -3932,7 +3927,7 @@ GTag *GTag::GetTableCell(int x, int y)
 
 // This function gets the largest and smallest piece of content
 // in this cell and all it's children.
-bool GTag::GetWidthMetrics(GTag *Table, uint16 &Min, uint16 &Max)
+bool LTag::GetWidthMetrics(LTag *Table, uint16 &Min, uint16 &Max)
 {
 	bool Status = true;
 	int MarginPx = 0;
@@ -4069,7 +4064,7 @@ bool GTag::GetWidthMetrics(GTag *Table, uint16 &Min, uint16 &Max)
 			else
 			{
 				LPoint s;
-				GHtmlTableLayout c(this);
+				LHtmlTableLayout c(this);
 				c.GetSize(s.x, s.y);
 
 				// Auto layout table
@@ -4078,7 +4073,7 @@ bool GTag::GetWidthMetrics(GTag *Table, uint16 &Min, uint16 &Max)
 				{
 					for (int x=0; x<s.x;)
 					{
-						GTag *t = c.Get(x, y);
+						LTag *t = c.Get(x, y);
 						if (t)
 						{
 							uint16 a = 0, b = 0;							
@@ -4111,7 +4106,7 @@ bool GTag::GetWidthMetrics(GTag *Table, uint16 &Min, uint16 &Max)
 
 	for (unsigned i = 0; i < Children.Length(); i++)
 	{
-		GTag *c = ToTag(Children[i]);
+		LTag *c = ToTag(Children[i]);
 		uint16 TagMax = 0;
 		
 		Status &= c->GetWidthMetrics(Table, Min, TagMax);
@@ -4164,7 +4159,7 @@ T Sum(LArray<T> &a)
 	return s;
 }
 
-void GTag::LayoutTable(GFlowRegion *f, uint16 Depth)
+void LTag::LayoutTable(LFlowRegion *f, uint16 Depth)
 {
 	if (!Cell->Cells)
 	{
@@ -4174,7 +4169,7 @@ void GTag::LayoutTable(GFlowRegion *f, uint16 Depth)
 			//int asd=0;
 		}
 		#endif
-		Cell->Cells = new GHtmlTableLayout(this);
+		Cell->Cells = new LHtmlTableLayout(this);
 		#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
 		if (Cell->Cells && Debug)
 			Cell->Cells->Dump();
@@ -4184,7 +4179,7 @@ void GTag::LayoutTable(GFlowRegion *f, uint16 Depth)
 		Cell->Cells->LayoutTable(f, Depth);
 }
 
-void GHtmlTableLayout::AllocatePx(int StartCol, int Cols, int MinPx, bool HasToFillAllAvailable)
+void LHtmlTableLayout::AllocatePx(int StartCol, int Cols, int MinPx, bool HasToFillAllAvailable)
 {
 	// Get the existing total size and size of the column set
 	int CurrentTotalX = GetTotalX();
@@ -4333,7 +4328,7 @@ int ColInfoCmp(ColInfo *a, ColInfo *b)
 	return LDiff + LGrow + LSize;
 }
 
-void GHtmlTableLayout::DeallocatePx(int StartCol, int Cols, int MaxPx)
+void LHtmlTableLayout::DeallocatePx(int StartCol, int Cols, int MaxPx)
 {
 	int TotalPx = GetTotalX(StartCol, Cols);
 	if (TotalPx <= MaxPx || MaxPx == 0)
@@ -4373,7 +4368,7 @@ void GHtmlTableLayout::DeallocatePx(int StartCol, int Cols, int MaxPx)
 	}
 }
 
-int GHtmlTableLayout::GetTotalX(int StartCol, int Cols)
+int LHtmlTableLayout::GetTotalX(int StartCol, int Cols)
 {
 	if (Cols < 0)
 		Cols = s.x;
@@ -4385,7 +4380,7 @@ int GHtmlTableLayout::GetTotalX(int StartCol, int Cols)
 	return TotalX;
 }
 
-void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
+void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 {
 	GetSize(s.x, s.y);
 	if (s.x == 0 || s.y == 0)
@@ -4444,7 +4439,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 	{
 		for (int x=0; x<s.x; )
 		{
-			GTag *t = Get(x, y);
+			LTag *t = Get(x, y);
 			if (t)
 			{
 				// This is needed for the metrics...
@@ -4545,7 +4540,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 	{
 		for (int x=0; x<s.x; )
 		{
-			GTag *t = Get(x, y);
+			LTag *t = Get(x, y);
 			if (t && t->Cell->Pos.x == x && t->Cell->Pos.y == y)
 			{
 				if (t->Cell->Span.x > 1 || t->Cell->Span.y > 1)
@@ -4673,7 +4668,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 		int XPos = CellSpacing;
 		for (int x=0; x<s.x; )
 		{
-			GTag *t = Get(x, y);
+			LTag *t = Get(x, y);
 			if (t)
 			{
 				if (t->Cell->Pos.x == x && t->Cell->Pos.y == y)
@@ -4698,7 +4693,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 					}
 					
 					LCss::Len Ht = t->Height();
-					GFlowRegion r(Table->Html, Box, true);
+					LFlowRegion r(Table->Html, Box, true);
 
 					t->OnFlow(&r, Depth+1);
 
@@ -4740,7 +4735,7 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 	{
 		for (int x=0; x<s.x; )
 		{
-			GTag *t = Get(x, y);
+			LTag *t = Get(x, y);
 			if (t)
 			{
 				if (t->Cell->Pos.x == x && t->Cell->Pos.y == y)
@@ -4764,23 +4759,23 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 	
 	for (y=0; y<s.y; y++)
 	{
-		GTag *Prev = 0;
+		LTag *Prev = 0;
 		for (int x=0; x<s.x; )
 		{
-			GTag *t = Get(x, y);
+			LTag *t = Get(x, y);
 			if (!t && Prev)
 			{
 				// Add missing cell
-				GTag *Row = ToTag(Prev->Parent);
+				LTag *Row = ToTag(Prev->Parent);
 				if (Row && Row->TagId == TAG_TR)
 				{
-					t = new GTag(Table->Html, Row);
+					t = new LTag(Table->Html, Row);
 					if (t)
 					{
 						t->TagId = TAG_TD;
 						t->Tag.Reset(NewStr("td"));
 						t->Info = Table->Html->GetTagInfo(t->Tag);
-						if ((t->Cell = new GTag::TblCell))
+						if ((t->Cell = new LTag::TblCell))
 						{
 							t->Cell->Pos.x = x;
 							t->Cell->Pos.y = y;
@@ -4871,13 +4866,13 @@ void GHtmlTableLayout::LayoutTable(GFlowRegion *f, uint16 Depth)
 	Table->Size.y = Cy + TablePadding.y2 + TableBorder.y2;
 }
 
-LRect GTag::ChildBounds()
+LRect LTag::ChildBounds()
 {
 	LRect b(0, 0, -1, -1);
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		GTag *t = ToTag(Children[i]);
+		LTag *t = ToTag(Children[i]);
 		if (i)
 		{
 			LRect c = t->GetRect();
@@ -4892,27 +4887,27 @@ LRect GTag::ChildBounds()
 	return b;
 }
 
-LPoint GTag::AbsolutePos()
+LPoint LTag::AbsolutePos()
 {
 	LPoint p;
-	for (GTag *t=this; t; t=ToTag(t->Parent))
+	for (LTag *t=this; t; t=ToTag(t->Parent))
 	{
 		p += t->Pos;
 	}
 	return p;
 }
 
-void GTag::SetSize(LPoint &s)
+void LTag::SetSize(LPoint &s)
 {
 	Size = s;
 }
 
-GArea::~GArea()
+LHtmlArea::~LHtmlArea()
 {
 	DeleteObjects();
 }
 
-LRect GArea::Bounds()
+LRect LHtmlArea::Bounds()
 {
 	LRect n(0, 0, -1, -1);
 
@@ -4931,7 +4926,7 @@ LRect GArea::Bounds()
 	return n;
 }
 
-LRect *GArea::TopRect(LRegion *c)
+LRect *LHtmlArea::TopRect(LRegion *c)
 {
 	LRect *Top = 0;
 	
@@ -4947,7 +4942,7 @@ LRect *GArea::TopRect(LRegion *c)
 	return Top;
 }
 
-void GArea::FlowText(GTag *Tag, GFlowRegion *Flow, LFont *Font, int LineHeight, char16 *Text, LCss::LengthType Align)
+void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, int LineHeight, char16 *Text, LCss::LengthType Align)
 {
 	if (!Flow || !Text || !Font)
 		return;
@@ -5105,7 +5100,7 @@ char16 htoi(char16 c)
 	return 0;
 }
 
-bool GTag::Serialize(LXmlTag *t, bool Write)
+bool LTag::Serialize(LXmlTag *t, bool Write)
 {
 	LRect pos;
 	if (Write)
@@ -5154,7 +5149,7 @@ bool GTag::Serialize(LXmlTag *t, bool Write)
 		for (unsigned i=0; i<Children.Length(); i++)
 		{
 			LXmlTag *child = new LXmlTag("e");
-			GTag *tag = ToTag(Children[i]);
+			LTag *tag = ToTag(Children[i]);
 			if (!child || !tag)
 			{
 				LAssert(0);
@@ -5232,7 +5227,7 @@ bool GTag::Serialize(LXmlTag *t, bool Write)
 			LXmlTag *child = t->Children[i];
 			if (child->IsTag("e"))
 			{
-				GTag *tag = new GTag(Html, NULL);
+				LTag *tag = new LTag(Html, NULL);
 				if (!tag)
 				{
 					LAssert(0);
@@ -5253,7 +5248,7 @@ bool GTag::Serialize(LXmlTag *t, bool Write)
 }
 
 /// This method centers the text in the area given to the tag. Used for inline block elements.
-void GTag::CenterText()
+void LTag::CenterText()
 {
 	if (!Parent)
 		return;
@@ -5287,7 +5282,7 @@ void GTag::CenterText()
 	}
 }
 
-void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
+void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 {
 	if (Depth >= MAX_RECURSION_DEPTH)
 		return;
@@ -5297,7 +5292,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 		return;
 
 	LFont *f = GetFont();
-	GFlowRegion Local(*Flow);
+	LFlowRegion Local(*Flow);
 	bool Restart = true;
 	int BlockFlowWidth = 0;
 	const char *ImgAltText = NULL;
@@ -5326,14 +5321,14 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 		}
 		case TAG_IFRAME:
 		{
-			GFlowRegion Temp = *Flow;
+			LFlowRegion Temp = *Flow;
 			Flow->EndBlock(GetAlign(true));
 			Flow->Indent(this, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
 
 			// Flow children
 			for (unsigned i=0; i<Children.Length(); i++)
 			{
-				GTag *t = ToTag(Children[i]);
+				LTag *t = ToTag(Children[i]);
 				t->OnFlow(&Temp, Depth + 1);
 
 				if (TagId == TAG_TR)
@@ -5642,7 +5637,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 						}
 						case ListDisc:
 						{
-							PreText(NewStrW(GHtmlListItem));
+							PreText(NewStrW(LHtmlListItem));
 							break;
 						}
 					}
@@ -5671,7 +5666,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 				LCss::Len LineHt;
 				LFont *LineFnt = GetFont();
 
-				for (GTag *t = this; t && !LineHt.IsValid(); t = ToTag(t->Parent))
+				for (LTag *t = this; t && !LineHt.IsValid(); t = ToTag(t->Parent))
 				{
 					LineHt = t->LineHeight();
 					if (t->TagId == TAG_TABLE)
@@ -5714,7 +5709,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 	// Flow children
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		GTag *t = ToTag(Children[i]);
+		LTag *t = ToTag(Children[i]);
 
 		switch (t->Position())
 		{
@@ -5722,7 +5717,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 			case PosAbsolute:
 			case PosFixed:
 			{
-				GFlowRegion old = *Flow;
+				LFlowRegion old = *Flow;
 				t->OnFlow(Flow, Depth + 1);
 				
 				// Try and reset the flow to how it was before...
@@ -5891,7 +5886,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 				int Px = Flow->X();
 				for (auto e: Children)
 				{
-					GTag *t = ToTag(e);
+					LTag *t = ToTag(e);
 					if (t && t->IsBlock() && t->Size.x < Px)
 						t->Pos.x = (Px - t->Size.x) >> 1;
 				}
@@ -5939,7 +5934,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 	}
 }
 
-bool GTag::PeekTag(char *s, char *tag)
+bool LTag::PeekTag(char *s, char *tag)
 {
 	bool Status = false;
 
@@ -5961,21 +5956,21 @@ bool GTag::PeekTag(char *s, char *tag)
 	return Status;
 }
 
-GTag *GTag::GetTable()
+LTag *LTag::GetTable()
 {
-	GTag *t = 0;
+	LTag *t = 0;
 	for (t=ToTag(Parent); t && t->TagId != TAG_TABLE; t = ToTag(t->Parent))
 		;
 	return t;
 }
 
-void GTag::BoundParents()
+void LTag::BoundParents()
 {
 	if (!Parent)
 		return;
 
-	GTag *np;
-	for (GTag *n=this; n; n = np)
+	LTag *np;
+	for (LTag *n=this; n; n = np)
 	{
 		np = ToTag(n->Parent);
 
@@ -6067,7 +6062,7 @@ struct DrawBorder
 	}
 };
 
-void GTag::GetInlineRegion(LRegion &rgn, int ox, int oy)
+void LTag::GetInlineRegion(LRegion &rgn, int ox, int oy)
 {
 	if (TagId == TAG_IMG)
 	{
@@ -6087,7 +6082,7 @@ void GTag::GetInlineRegion(LRegion &rgn, int ox, int oy)
 	
 	for (unsigned c=0; c<Children.Length(); c++)
 	{
-		GTag *ch = ToTag(Children[c]);
+		LTag *ch = ToTag(Children[c]);
 		ch->GetInlineRegion(rgn, ox + Pos.x, oy + Pos.y);
 	}
 }
@@ -6207,7 +6202,7 @@ public:
 	}
 };
 
-void GTag::PaintBorderAndBackground(LSurface *pDC, LColour &Back, LRect *BorderPx)
+void LTag::PaintBorderAndBackground(LSurface *pDC, LColour &Back, LRect *BorderPx)
 {
 	LArray<LRect> r;
 	LRect BorderPxRc;
@@ -6439,7 +6434,7 @@ static void FillRectWithImage(LSurface *pDC, LRect *r, LSurface *Image, LCss::Re
 	pDC->Op(Old);
 }
 
-void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
+void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 {
 	if (Depth >= MAX_RECURSION_DEPTH ||
 		Display() == DispNone)
@@ -6886,7 +6881,7 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 	#if DEBUG_TABLE_LAYOUT && 0
 	if (IsTableCell(TagId))
 	{
-		GTag *Tbl = this;
+		LTag *Tbl = this;
 		while (Tbl->TagId != TAG_TABLE && Tbl->Parent)
 			Tbl = Tbl->Parent;
 		if (Tbl && Tbl->TagId == TAG_TABLE && Tbl->Debug)
@@ -6899,7 +6894,7 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
-		GTag *t = ToTag(Children[i]);
+		LTag *t = ToTag(Children[i]);
 		pDC->SetOrigin(Px - t->Pos.x, Py - t->Pos.y);
 		t->OnPaint(pDC, InSelection, Depth + 1);
 		pDC->SetOrigin(Px, Py);
@@ -6908,7 +6903,7 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 	#if DEBUG_DRAW_TD
 	if (TagId == TAG_TD)
 	{
-		GTag *Tbl = this;
+		LTag *Tbl = this;
 		while (Tbl && Tbl->TagId != TAG_TABLE)
 			Tbl = ToTag(Tbl->Parent);
 		if (Tbl && Tbl->Debug)
@@ -6923,13 +6918,13 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 }
 
 //////////////////////////////////////////////////////////////////////
-GHtml::GHtml(int id, int x, int y, int cx, int cy, LDocumentEnv *e) :
+LHtml::LHtml(int id, int x, int y, int cx, int cy, LDocumentEnv *e) :
 	LDocView(e),
 	ResObject(Res_Custom),
 	LHtmlParser(NULL)
 {
 	View = this;
-	d = new GHtmlPrivate;
+	d = new LHtmlPrivate;
 	SetReadOnly(true);
 	ViewWidth = -1;
 	SetId(id);
@@ -6942,7 +6937,7 @@ GHtml::GHtml(int id, int x, int y, int cx, int cy, LDocumentEnv *e) :
 	_New();
 }
 
-GHtml::~GHtml()
+LHtml::~LHtml()
 {
 	_Delete();
 	DeleteObj(d);
@@ -6954,7 +6949,7 @@ GHtml::~GHtml()
 	}
 }
 
-void GHtml::_New()
+void LHtml::_New()
 {
 	d->StyleDirty = false;
 	d->IsLoaded = false;
@@ -6980,7 +6975,7 @@ void GHtml::_New()
 	SetScrollBars(false, false);
 }
 
-void GHtml::_Delete()
+void LHtml::_Delete()
 {
 	LAssert(!d->IsParsing);
 
@@ -6992,12 +6987,12 @@ void GHtml::_Delete()
 	DeleteObj(FontCache);
 }
 
-LFont *GHtml::DefFont()
+LFont *LHtml::DefFont()
 {
 	return GetFont();
 }
 
-void GHtml::OnAddStyle(const char *MimeType, const char *Styles)
+void LHtml::OnAddStyle(const char *MimeType, const char *Styles)
 {
 	if (Styles)
 	{
@@ -7041,11 +7036,11 @@ void GHtml::OnAddStyle(const char *MimeType, const char *Styles)
 	}
 }
 
-void GHtml::ParseDocument(const char *Doc)
+void LHtml::ParseDocument(const char *Doc)
 {
 	if (!Tag)
 	{
-		Tag = new GTag(this, 0);
+		Tag = new LTag(this, 0);
 	}
 
 	if (GetCss())
@@ -7060,21 +7055,21 @@ void GHtml::ParseDocument(const char *Doc)
 			Parse(Tag, Doc);
 
 			// Add body tag if not specified...
-			GTag *Html = Tag->GetTagByName("html");
-			GTag *Body = Tag->GetTagByName("body");
+			LTag *Html = Tag->GetTagByName("html");
+			LTag *Body = Tag->GetTagByName("body");
 
 			if (!Html && !Body)
 			{
-				if ((Html = new GTag(this, 0)))
+				if ((Html = new LTag(this, 0)))
 					Html->SetTag("html");
-				if ((Body = new GTag(this, Html)))
+				if ((Body = new LTag(this, Html)))
 					Body->SetTag("body");
 				
 				Html->Attach(Body);
 
 				if (Tag->Text())
 				{
-					GTag *Content = new GTag(this, Body);
+					LTag *Content = new LTag(this, Body);
 					if (Content)
 					{
 						Content->TagId = CONTENT;
@@ -7083,7 +7078,7 @@ void GHtml::ParseDocument(const char *Doc)
 				}
 				while (Tag->Children.Length())
 				{
-					GTag *t = ToTag(Tag->Children.First());
+					LTag *t = ToTag(Tag->Children.First());
 					Body->Attach(t, Body->Children.Length());
 				}
 				DeleteObj(Tag);
@@ -7092,12 +7087,12 @@ void GHtml::ParseDocument(const char *Doc)
 			}
 			else if (!Body)
 			{
-				if ((Body = new GTag(this, Html)))
+				if ((Body = new LTag(this, Html)))
 					Body->SetTag("body");
 					
 				for (unsigned i=0; i<Html->Children.Length(); i++)
 				{
-					GTag *t = ToTag(Html->Children[i]);
+					LTag *t = ToTag(Html->Children[i]);
 					if (t->TagId != TAG_HEAD)
 					{
 						Body->Attach(t);
@@ -7115,7 +7110,7 @@ void GHtml::ParseDocument(const char *Doc)
 				{
 					if (ValidStrW(t))
 					{
-						GTag *Content = new GTag(this, 0);
+						LTag *Content = new LTag(this, 0);
 						if (Content)
 						{
 							Content->Text(NewStrW(Tag->Text()));
@@ -7126,7 +7121,7 @@ void GHtml::ParseDocument(const char *Doc)
 				}
 
 				#if 0 // Enabling this breaks the test file 'gw2.html'.
-				for (GTag *t = Html->Tags.First(); t; )
+				for (LTag *t = Html->Tags.First(); t; )
 				{
 					if (t->Tag && t->Tag[0] == '!')
 					{
@@ -7138,7 +7133,7 @@ void GHtml::ParseDocument(const char *Doc)
 					{
 						if (t->TagId == TAG_HTML)
 						{
-							GTag *c;
+							LTag *c;
 							while ((c = t->Tags.First()))
 							{
 								Html->Attach(c, 0);
@@ -7184,19 +7179,19 @@ void GHtml::ParseDocument(const char *Doc)
 	Invalidate();
 }
 
-bool GHtml::NameW(const char16 *s)
+bool LHtml::NameW(const char16 *s)
 {
 	LAutoPtr<char, true> utf(WideToUtf8(s));
 	return Name(utf);
 }
 
-const char16 *GHtml::NameW()
+const char16 *LHtml::NameW()
 {
 	LBase::Name(Source);
 	return LBase::NameW();
 }
 
-bool GHtml::Name(const char *s)
+bool LHtml::Name(const char *s)
 {
 	int Uid = -1;
 	if (Environment)
@@ -7246,7 +7241,7 @@ bool GHtml::Name(const char *s)
 	return true;
 }
 
-const char *GHtml::Name()
+const char *LHtml::Name()
 {
 	if (!Source && Tag)
 	{
@@ -7258,7 +7253,7 @@ const char *GHtml::Name()
 	return Source;
 }
 
-LMessage::Result GHtml::OnEvent(LMessage *Msg)
+LMessage::Result LHtml::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
@@ -7284,7 +7279,7 @@ LMessage::Result GHtml::OnEvent(LMessage *Msg)
 					if (j->UserUid == MyUid &&
 						j->UserData != NULL)
 					{
-						Html1::GTag *r = static_cast<Html1::GTag*>(j->UserData);
+						Html1::LTag *r = static_cast<Html1::LTag*>(j->UserData);
 						
 						if (d->DeferredLoads > 0)
 							d->DeferredLoads--;
@@ -7349,7 +7344,7 @@ LMessage::Result GHtml::OnEvent(LMessage *Msg)
 						else
 						{
 							/*
-							Html1::GTag *p = ToTag(r->Parent);
+							Html1::LTag *p = ToTag(r->Parent);
 							while (p && p->Parent)
 								p = ToTag(p->Parent);
 							*/
@@ -7381,7 +7376,7 @@ LMessage::Result GHtml::OnEvent(LMessage *Msg)
 	return LDocView::OnEvent(Msg);
 }
 
-int GHtml::OnNotify(LViewI *c, LNotification n)
+int LHtml::OnNotify(LViewI *c, LNotification n)
 {
 	switch (c->GetId())
 	{
@@ -7406,7 +7401,7 @@ int GHtml::OnNotify(LViewI *c, LNotification n)
 		}
 		default:
 		{
-			GTag *Ctrl = Tag ? Tag->FindCtrlId(c->GetId()) : NULL;
+			LTag *Ctrl = Tag ? Tag->FindCtrlId(c->GetId()) : NULL;
 			if (Ctrl)
 				return Ctrl->OnNotify(n);
 			break;
@@ -7416,7 +7411,7 @@ int GHtml::OnNotify(LViewI *c, LNotification n)
 	return LLayout::OnNotify(c, n);
 }
 
-void GHtml::OnPosChange()
+void LHtml::OnPosChange()
 {
 	LLayout::OnPosChange();
 	if (ViewWidth != X())
@@ -7425,12 +7420,12 @@ void GHtml::OnPosChange()
 	}
 }
 
-LPoint GHtml::Layout(bool ForceLayout)
+LPoint LHtml::Layout(bool ForceLayout)
 {
 	LRect Client = GetClient();
 	if (Tag && (ViewWidth != Client.X() || ForceLayout))
 	{
-		GFlowRegion f(this, Client, false);
+		LFlowRegion f(this, Client, false);
 
 		// Flow text, width is different
 		Tag->OnFlow(&f, 0);
@@ -7466,7 +7461,7 @@ LPoint GHtml::Layout(bool ForceLayout)
 	return d->Content;
 }
 
-LPointF GHtml::GetDpiScale()
+LPointF LHtml::GetDpiScale()
 {
 	LPointF Scale(1.0, 1.0);
 	auto Wnd = GetWindow();
@@ -7475,11 +7470,11 @@ LPointF GHtml::GetDpiScale()
 	return Scale;
 }
 
-void GHtml::OnPaint(LSurface *ScreenDC)
+void LHtml::OnPaint(LSurface *ScreenDC)
 {
-	// LProfile Prof("GHtml::OnPaint");
+	// LProfile Prof("LHtml::OnPaint");
 
-	#if GHTML_USE_DOUBLE_BUFFER
+	#if HTML_USE_DOUBLE_BUFFER
 	LRect Client = GetClient();
 	if (ScreenDC->IsScreen())
 	{
@@ -7554,7 +7549,7 @@ void GHtml::OnPaint(LSurface *ScreenDC)
 		}
 	}
 
-	#if GHTML_USE_DOUBLE_BUFFER
+	#if HTML_USE_DOUBLE_BUFFER
 	if (MemDC)
 	{
 		pDC->SetOrigin(0, 0);
@@ -7570,7 +7565,7 @@ void GHtml::OnPaint(LSurface *ScreenDC)
 	}
 }
 
-bool GHtml::HasSelection()
+bool LHtml::HasSelection()
 {
 	if (Cursor && Selection)
 	{
@@ -7582,7 +7577,7 @@ bool GHtml::HasSelection()
 	return false;
 }
 
-void GHtml::UnSelectAll()
+void LHtml::UnSelectAll()
 {
 	bool i = false;
 	if (Cursor)
@@ -7603,17 +7598,17 @@ void GHtml::UnSelectAll()
 	}
 }
 
-void GHtml::SelectAll()
+void LHtml::SelectAll()
 {
 }
 
-GTag *GHtml::GetLastChild(GTag *t)
+LTag *LHtml::GetLastChild(LTag *t)
 {
 	if (t && t->Children.Length())
 	{
-		for (GTag *i = ToTag(t->Children.Last()); i; )
+		for (LTag *i = ToTag(t->Children.Last()); i; )
 		{
-			GTag *c = i->Children.Length() ? ToTag(i->Children.Last()) : NULL;
+			LTag *c = i->Children.Length() ? ToTag(i->Children.Last()) : NULL;
 			if (c)
 				i = c;
 			else
@@ -7624,24 +7619,24 @@ GTag *GHtml::GetLastChild(GTag *t)
 	return 0;
 }
 
-GTag *GHtml::PrevTag(GTag *t)
+LTag *LHtml::PrevTag(LTag *t)
 {
 	// This returns the previous tag in the tree as if all the tags were
 	// listed via recursion using "in order".
 
 	// Walk up the parent chain looking for a prev
-	for (GTag *p = t; p; p = ToTag(p->Parent))
+	for (LTag *p = t; p; p = ToTag(p->Parent))
 	{
 		// Does this tag have a parent?
 		if (p->Parent)
 		{
 			// Prev?
-			GTag *pp = ToTag(p->Parent);
+			LTag *pp = ToTag(p->Parent);
 			ssize_t Idx = pp->Children.IndexOf(p);
-			GTag *Prev = Idx > 0 ? ToTag(pp->Children[Idx - 1]) : NULL;
+			LTag *Prev = Idx > 0 ? ToTag(pp->Children[Idx - 1]) : NULL;
 			if (Prev)
 			{
-				GTag *Last = GetLastChild(Prev);
+				LTag *Last = GetLastChild(Prev);
 				return Last ? Last : Prev;
 			}
 			else
@@ -7654,7 +7649,7 @@ GTag *GHtml::PrevTag(GTag *t)
 	return 0;
 }
 
-GTag *GHtml::NextTag(GTag *t)
+LTag *LHtml::NextTag(LTag *t)
 {
 	// This returns the next tag in the tree as if all the tags were
 	// listed via recursion using "in order".
@@ -7667,15 +7662,15 @@ GTag *GHtml::NextTag(GTag *t)
 	else
 	{
 		// Walk up the parent chain
-		for (GTag *p = t; p; p = ToTag(p->Parent))
+		for (LTag *p = t; p; p = ToTag(p->Parent))
 		{
 			// Does this tag have a next?
 			if (p->Parent)
 			{
-				GTag *pp = ToTag(p->Parent);
+				LTag *pp = ToTag(p->Parent);
 				size_t Idx = pp->Children.IndexOf(p);
 				
-				GTag *Next = pp->Children.Length() > Idx + 1 ? ToTag(pp->Children[Idx + 1]) : NULL;
+				LTag *Next = pp->Children.Length() > Idx + 1 ? ToTag(pp->Children[Idx + 1]) : NULL;
 				if (Next)
 				{
 					return Next;
@@ -7687,25 +7682,25 @@ GTag *GHtml::NextTag(GTag *t)
 	return 0;
 }
 
-int GHtml::GetTagDepth(GTag *Tag)
+int LHtml::GetTagDepth(LTag *Tag)
 {
 	// Returns the depth of the tag in the tree.
 	int n = 0;
-	for (GTag *t = Tag; t; t = ToTag(t->Parent))
+	for (LTag *t = Tag; t; t = ToTag(t->Parent))
 	{
 		n++;
 	}
 	return n;
 }
 
-bool GHtml::IsCursorFirst()
+bool LHtml::IsCursorFirst()
 {
 	if (!Cursor || !Selection)
 		return false;
 	return CompareTagPos(Cursor, Cursor->Cursor, Selection, Selection->Selection);
 }
 
-bool GHtml::CompareTagPos(GTag *a, ssize_t AIdx, GTag *b, ssize_t BIdx)
+bool LHtml::CompareTagPos(LTag *a, ssize_t AIdx, LTag *b, ssize_t BIdx)
 {
 	// Returns true if the 'a' is before 'b' point.
 	if (!a || !b)
@@ -7717,21 +7712,21 @@ bool GHtml::CompareTagPos(GTag *a, ssize_t AIdx, GTag *b, ssize_t BIdx)
 	}
 	else
 	{
-		LArray<GTag*> ATree, BTree;
-		for (GTag *t = a; t; t = ToTag(t->Parent))
+		LArray<LTag*> ATree, BTree;
+		for (LTag *t = a; t; t = ToTag(t->Parent))
 			ATree.AddAt(0, t);
-		for (GTag *t = b; t; t = ToTag(t->Parent))
+		for (LTag *t = b; t; t = ToTag(t->Parent))
 			BTree.AddAt(0, t);
 
 		ssize_t Depth = MIN(ATree.Length(), BTree.Length());
 		for (int i=0; i<Depth; i++)
 		{
-			GTag *at = ATree[i];
-			GTag *bt = BTree[i];
+			LTag *at = ATree[i];
+			LTag *bt = BTree[i];
 			if (at != bt)
 			{
 				LAssert(i > 0);
-				GTag *p = ATree[i-1];
+				LTag *p = ATree[i-1];
 				LAssert(BTree[i-1] == p);
 				ssize_t ai = p->Children.IndexOf(at);
 				ssize_t bi = p->Children.IndexOf(bt);
@@ -7743,7 +7738,7 @@ bool GHtml::CompareTagPos(GTag *a, ssize_t AIdx, GTag *b, ssize_t BIdx)
 	return false;
 }
 
-void GHtml::SetLoadImages(bool i)
+void LHtml::SetLoadImages(bool i)
 {
 	if (i ^ GetLoadImages())
 	{
@@ -7757,7 +7752,7 @@ void GHtml::SetLoadImages(bool i)
 	}
 }
 
-char *GHtml::GetSelection()
+char *LHtml::GetSelection()
 {
 	char *s = 0;
 
@@ -7787,7 +7782,7 @@ char *GHtml::GetSelection()
 	return s;
 }
 
-bool GHtml::SetVariant(const char *Name, LVariant &Value, const char *Array)
+bool LHtml::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	if (!Name)
 		return false;
@@ -7800,7 +7795,7 @@ bool GHtml::SetVariant(const char *Name, LVariant &Value, const char *Array)
 	return true;
 }
 
-bool GHtml::Copy()
+bool LHtml::Copy()
 {
 	LAutoString s(GetSelection());
 	if (s)
@@ -7837,17 +7832,17 @@ bool GHtml::Copy()
 /*
 static bool FindCallback(LFindReplaceCommon *Dlg, bool Replace, void *User)
 {
-	GHtml *h = (GHtml*)User;
+	LHtml *h = (LHtml*)User;
 	return h->OnFind(Dlg);
 }
 */
 
-void BuildTagList(LArray<GTag*> &t, GTag *Tag)
+void BuildTagList(LArray<LTag*> &t, LTag *Tag)
 {
 	t.Add(Tag);
 	for (unsigned i=0; i<Tag->Children.Length(); i++)
 	{
-		GTag *c = ToTag(Tag->Children[i]);
+		LTag *c = ToTag(Tag->Children[i]);
 		BuildTagList(t, c);
 	}
 }
@@ -7874,7 +7869,7 @@ static void FormEncode(LStringPipe &p, const char *c)
 	}
 }
 
-bool GHtml::OnSubmitForm(GTag *Form)
+bool LHtml::OnSubmitForm(LTag *Form)
 {
 	if (!Form || !Environment)
 	{
@@ -7929,7 +7924,7 @@ bool GHtml::OnSubmitForm(GTag *Form)
 	return Status;
 }
 
-bool GHtml::OnFind(LFindReplaceCommon *Params)
+bool LHtml::OnFind(LFindReplaceCommon *Params)
 {
 	bool Status = false;
 
@@ -7947,13 +7942,13 @@ bool GHtml::OnFind(LFindReplaceCommon *Params)
 
 	if (Cursor && d->FindText)
 	{
-		LArray<GTag*> Tags;
+		LArray<LTag*> Tags;
 		BuildTagList(Tags, Tag);
 		ssize_t Start = Tags.IndexOf(Cursor);
 		for (unsigned i=1; i<Tags.Length(); i++)
 		{
 			ssize_t Idx = (Start + i) % Tags.Length();
-			GTag *s = Tags[Idx];
+			LTag *s = Tags[Idx];
 
 			if (s->Text())
 			{
@@ -7994,7 +7989,7 @@ bool GHtml::OnFind(LFindReplaceCommon *Params)
 	return Status;
 }
 
-void GHtml::DoFind(std::function<void(bool)> Callback)
+void LHtml::DoFind(std::function<void(bool)> Callback)
 {
 	LFindDlg *Dlg = new LFindDlg(this,
 		[&](auto dlg, auto action)
@@ -8006,7 +8001,7 @@ void GHtml::DoFind(std::function<void(bool)> Callback)
 	Dlg->DoModal(NULL);
 }
 
-bool GHtml::OnKey(LKey &k)
+bool LHtml::OnKey(LKey &k)
 {
 	bool Status = false;
 
@@ -8106,12 +8101,12 @@ bool GHtml::OnKey(LKey &k)
 	return Status;
 }
 
-int GHtml::ScrollY()
+int LHtml::ScrollY()
 {
 	return GetFont()->GetHeight() * (VScroll ? (int)VScroll->Value() : 0);
 }
 
-void GHtml::OnMouseClick(LMouse &m)
+void LHtml::OnMouseClick(LMouse &m)
 {
 	Capture(m.Down());
 	SetPulse(m.Down() ? 200 : -1);
@@ -8123,7 +8118,7 @@ void GHtml::OnMouseClick(LMouse &m)
 		int Offset = ScrollY();
 		bool TagProcessedClick = false;
 
-		GTagHit Hit;
+		LTagHit Hit;
 		if (Tag)
 		{
 			Tag->GetTagByPos(Hit, m.x, m.y + Offset, 0, false, DEBUG_TAG_BY_POS);
@@ -8510,22 +8505,22 @@ void GHtml::OnMouseClick(LMouse &m)
 	}
 }
 
-void GHtml::OnLoad()
+void LHtml::OnLoad()
 {
 	d->IsLoaded = true;
 	SendNotify(LNotifyDocLoaded);
 }
 
-GTag *GHtml::GetTagByPos(int x, int y, ssize_t *Index, LPoint *LocalCoords, bool DebugLog)
+LTag *LHtml::GetTagByPos(int x, int y, ssize_t *Index, LPoint *LocalCoords, bool DebugLog)
 {
-	GTag *Status = NULL;
+	LTag *Status = NULL;
 
 	if (Tag)
 	{
 		if (DebugLog)
 			LgiTrace("GetTagByPos starting...\n");
 
-		GTagHit Hit;
+		LTagHit Hit;
 		Tag->GetTagByPos(Hit, x, y, 0, DebugLog);
 
 		if (DebugLog)
@@ -8542,7 +8537,7 @@ GTag *GHtml::GetTagByPos(int x, int y, ssize_t *Index, LPoint *LocalCoords, bool
 	return Status;
 }
 
-void GHtml::SetVScroll(int64 v)
+void LHtml::SetVScroll(int64 v)
 {
 	if (!VScroll)
 		return;
@@ -8554,19 +8549,19 @@ void GHtml::SetVScroll(int64 v)
 	Invalidate();
 }
 
-bool GHtml::OnMouseWheel(double Lines)
+bool LHtml::OnMouseWheel(double Lines)
 {
 	if (VScroll)
 		SetVScroll(VScroll->Value() + (int64)Lines);
 	return true;
 }
 
-LCursor GHtml::GetCursor(int x, int y)
+LCursor LHtml::GetCursor(int x, int y)
 {
 	int Offset = ScrollY();
 	ssize_t Index = -1;
 	LPoint LocalCoords;
-	GTag *Tag = GetTagByPos(x, y + Offset, &Index, &LocalCoords);
+	LTag *Tag = GetTagByPos(x, y + Offset, &Index, &LocalCoords);
 	if (Tag)
 	{
 		LString Uri;
@@ -8586,7 +8581,7 @@ LCursor GHtml::GetCursor(int x, int y)
 	return LCUR_Normal;
 }
 
-void GTag::ClearToolTips()
+void LTag::ClearToolTips()
 {
 	if (TipId)
 	{
@@ -8599,19 +8594,19 @@ void GTag::ClearToolTips()
 }
 
 
-void GHtml::OnMouseMove(LMouse &m)
+void LHtml::OnMouseMove(LMouse &m)
 {
 	if (!Tag)
 		return;
 
 	int Offset = ScrollY();
-	GTagHit Hit;
+	LTagHit Hit;
 	Tag->GetTagByPos(Hit, m.x, m.y + Offset, 0, false);
 	if (!Hit.Direct && !Hit.NearestText)
 		return;
 
 	LString Uri;
-	GTag *HitTag = Hit.NearestText && Hit.Near == 0 ? Hit.NearestText : Hit.Direct;
+	LTag *HitTag = Hit.NearestText && Hit.Near == 0 ? Hit.NearestText : Hit.Direct;
 	if (HitTag &&
 		HitTag->TipId == 0 &&
 		Hit.LocalCoords.x >= 0 &&
@@ -8703,7 +8698,7 @@ void GHtml::OnMouseMove(LMouse &m)
 	}
 }
 
-void GHtml::OnPulse()
+void LHtml::OnPulse()
 {
 	if (VScroll && IsCapturing())
 	{
@@ -8731,12 +8726,12 @@ void GHtml::OnPulse()
 	}
 }
 
-LRect *GHtml::GetCursorPos()
+LRect *LHtml::GetCursorPos()
 {
 	return &d->CursorPos;
 }
 
-void GHtml::SetCursorVis(bool b)
+void LHtml::SetCursorVis(bool b)
 {
 	if (d->CursorVis ^ b)
 	{
@@ -8745,12 +8740,12 @@ void GHtml::SetCursorVis(bool b)
 	}
 }
 
-bool GHtml::GetCursorVis()
+bool LHtml::GetCursorVis()
 {
 	return d->CursorVis;
 }
 
-LDom *ElementById(GTag *t, char *id)
+LDom *ElementById(LTag *t, char *id)
 {
 	if (t && id)
 	{
@@ -8760,7 +8755,7 @@ LDom *ElementById(GTag *t, char *id)
 
 		for (unsigned i=0; i<t->Children.Length(); i++)
 		{
-			GTag *c = ToTag(t->Children[i]);
+			LTag *c = ToTag(t->Children[i]);
 			LDom *n = ElementById(c, id);
 			if (n) return n;
 		}
@@ -8769,22 +8764,22 @@ LDom *ElementById(GTag *t, char *id)
 	return 0;
 }
 
-LDom *GHtml::getElementById(char *Id)
+LDom *LHtml::getElementById(char *Id)
 {
 	return ElementById(Tag, Id);
 }
 
-bool GHtml::GetLinkDoubleClick()
+bool LHtml::GetLinkDoubleClick()
 {
 	return d->LinkDoubleClick;
 }
 
-void GHtml::SetLinkDoubleClick(bool b)
+void LHtml::SetLinkDoubleClick(bool b)
 {
 	d->LinkDoubleClick = b;
 }
 
-bool GHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocView::ContentMedia> *Media)
+bool LHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocView::ContentMedia> *Media)
 {
 	if (!MimeType)
 	{
@@ -8795,7 +8790,7 @@ bool GHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocV
 	if (!_stricmp(MimeType, "text/html"))
 	{
 		// We can handle this type...
-		LArray<GTag*> Imgs;
+		LArray<LTag*> Imgs;
 		if (Media)
 		{
 			// Find all the image tags...
@@ -8804,7 +8799,7 @@ bool GHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocV
 			// Give them CID's if they don't already have them
 			for (unsigned i=0; i<Imgs.Length(); i++)
 			{
-				GTag *Img = Imgs[i];
+				LTag *Img = Imgs[i];
 				if (!Img)
 					continue;
 				
@@ -8844,7 +8839,7 @@ bool GHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocV
 		LStringPipe p(512);
 		if (Tag)
 		{
-			GTag::TextConvertState State(&p);
+			LTag::TextConvertState State(&p);
 			Tag->ConvertToText(State);
 		}
 		Out = p.NewGStr();
@@ -8853,7 +8848,7 @@ bool GHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocV
 	return false;
 }
 
-void GHtml::OnContent(LDocumentEnv::LoadJob *Res)
+void LHtml::OnContent(LDocumentEnv::LoadJob *Res)
 {
 	if (JobSem.Lock(_FL))
 	{
@@ -8863,12 +8858,12 @@ void GHtml::OnContent(LDocumentEnv::LoadJob *Res)
 	}
 }
 
-LHtmlElement *GHtml::CreateElement(LHtmlElement *Parent)
+LHtmlElement *LHtml::CreateElement(LHtmlElement *Parent)
 {
-	return new GTag(this, Parent);
+	return new LTag(this, Parent);
 }
 
-bool GHtml::GetVariant(const char *Name, LVariant &Value, const char *Array)
+bool LHtml::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	if (!_stricmp(Name, "supportLists")) // Type: Bool
 		Value = false;
@@ -8884,7 +8879,7 @@ bool GHtml::GetVariant(const char *Name, LVariant &Value, const char *Array)
 	return true;
 }
 
-bool GHtml::EvaluateCondition(const char *Cond)
+bool LHtml::EvaluateCondition(const char *Cond)
 {
 	if (!Cond)
 		return true;
@@ -8936,7 +8931,7 @@ bool GHtml::EvaluateCondition(const char *Cond)
 			}
 			else
 			{
-				// If this fires: update GHtml::GetVariant with the variable.
+				// If this fires: update LHtml::GetVariant with the variable.
 				// LgiTrace("%s:%i - Unsupported variable '%s'\n", _FL, s);
 			}
 			Not = false;
@@ -8948,11 +8943,11 @@ bool GHtml::EvaluateCondition(const char *Cond)
 	return Result;
 }
 
-bool GHtml::GotoAnchor(char *Name)
+bool LHtml::GotoAnchor(char *Name)
 {
 	if (Tag)
 	{
-		GTag *a = Tag->GetAnchor(Name);
+		LTag *a = Tag->GetAnchor(Name);
 		if (a)
 		{
 			if (VScroll)
@@ -8971,22 +8966,22 @@ bool GHtml::GotoAnchor(char *Name)
 	return false;
 }
 
-bool GHtml::GetEmoji()
+bool LHtml::GetEmoji()
 {
 	return d->DecodeEmoji;
 }
 
-void GHtml::SetEmoji(bool i)
+void LHtml::SetEmoji(bool i)
 {
 	d->DecodeEmoji = i;
 }
 
-void GHtml::SetMaxPaintTime(int Ms)
+void LHtml::SetMaxPaintTime(int Ms)
 {
 	d->MaxPaintTime = Ms;
 }
 
-bool GHtml::GetMaxPaintTimeout()
+bool LHtml::GetMaxPaintTimeout()
 {
 	return d->MaxPaintTimeout;
 }
@@ -8998,22 +8993,22 @@ class LHtml_Factory : public LViewFactory
 	{
 		if (_stricmp(Class, "LHtml") == 0)
 		{
-			return new GHtml(-1, 0, 0, 100, 100, new LDefaultDocumentEnv);
+			return new LHtml(-1, 0, 0, 100, 100, new LDefaultDocumentEnv);
 		}
 
 		return 0;
 	}
 
-} GHtml_Factory;
+} LHtml_Factory;
 
 //////////////////////////////////////////////////////////////////////
 struct BuildContext
 {
-	GHtmlTableLayout *Layout;
-	GTag *Table;
-	GTag *TBody;
-	GTag *CurTr;
-	GTag *CurTd;
+	LHtmlTableLayout *Layout;
+	LTag *Table;
+	LTag *TBody;
+	LTag *CurTr;
+	LTag *CurTd;
 	int cx, cy;
 	
 	BuildContext()
@@ -9027,7 +9022,7 @@ struct BuildContext
 		CurTd = NULL;
 	}
 
-	bool Build(GTag *t, int Depth)
+	bool Build(LTag *t, int Depth)
 	{
 		bool RetReattach = false;
 		
@@ -9064,8 +9059,8 @@ struct BuildContext
 						(Table || TBody)
 					)
 					{
-						GTag *p = TBody ? TBody : Table;
-						CurTr = new GTag(p->Html, p);
+						LTag *p = TBody ? TBody : Table;
+						CurTr = new LTag(p->Html, p);
 						if (CurTr)
 						{
 							CurTr->Tag.Reset(NewStr("tr"));
@@ -9104,7 +9099,7 @@ struct BuildContext
 
 		for (unsigned n=0; n<t->Children.Length(); n++)
 		{
-			GTag *c = ToTag(t->Children[n]);
+			LTag *c = ToTag(t->Children[n]);
 			bool Reattached = Build(c, Depth+1);
 			if (Reattached)
 				n--;
@@ -9128,7 +9123,7 @@ struct BuildContext
 	}
 };
 
-GHtmlTableLayout::GHtmlTableLayout(GTag *table)
+LHtmlTableLayout::LHtmlTableLayout(LTag *table)
 {
 	Table = table;
 	if (!Table)
@@ -9143,10 +9138,10 @@ GHtmlTableLayout::GHtmlTableLayout(GTag *table)
 	#else
 
 	int y = 0;
-	GTag *FakeRow = 0;
-	GTag *FakeCell = 0;
+	LTag *FakeRow = 0;
+	LTag *FakeCell = 0;
 
-	GTag *r;
+	LTag *r;
 	for (size_t i=0; i<Table->Children.Length(); i++)
 	{
 		r = ToTag(Table->Children[i]);
@@ -9163,7 +9158,7 @@ GHtmlTableLayout::GHtmlTableLayout(GTag *table)
 			ssize_t Index = Table->Children.IndexOf(r);
 			for (size_t n=0; n<r->Children.Length(); n++)
 			{
-				GTag *t = ToTag(r->Children[n]);
+				LTag *t = ToTag(r->Children[n]);
 				Table->Children.AddAt(++Index, t);
 				t->Parent = Table;
 				
@@ -9180,7 +9175,7 @@ GHtmlTableLayout::GHtmlTableLayout(GTag *table)
 		{
 			if (!FakeRow)
 			{
-				if ((FakeRow = new GTag(Table->Html, 0)))
+				if ((FakeRow = new LTag(Table->Html, 0)))
 				{
 					FakeRow->Tag.Reset(NewStr("tr"));
 					FakeRow->TagId = TAG_TR;
@@ -9193,11 +9188,11 @@ GHtmlTableLayout::GHtmlTableLayout(GTag *table)
 			{
 				if (!IsTableCell(r->TagId) && !FakeCell)
 				{
-					if ((FakeCell = new GTag(Table->Html, FakeRow)))
+					if ((FakeCell = new LTag(Table->Html, FakeRow)))
 					{
 						FakeCell->Tag.Reset(NewStr("td"));
 						FakeCell->TagId = TAG_TD;
-						if ((FakeCell->Cell = new GTag::TblCell))
+						if ((FakeCell->Cell = new LTag::TblCell))
 						{
 							FakeCell->Cell->Span.x = 1;
 							FakeCell->Cell->Span.y = 1;
@@ -9225,22 +9220,22 @@ GHtmlTableLayout::GHtmlTableLayout(GTag *table)
 	FakeCell = NULL;
 	for (size_t n=0; n<Table->Children.Length(); n++)
 	{
-		GTag *r = ToTag(Table->Children[n]);
+		LTag *r = ToTag(Table->Children[n]);
 		if (r->TagId == TAG_TR)
 		{
 			int x = 0;
 			for (size_t i=0; i<r->Children.Length(); i++)
 			{
-				GTag *cell = ToTag(r->Children[i]);
+				LTag *cell = ToTag(r->Children[i]);
 				if (!IsTableCell(cell->TagId))
 				{
 					if (!FakeCell)
 					{
 						// Make a fake TD cell
-						FakeCell = new GTag(Table->Html, NULL);
+						FakeCell = new LTag(Table->Html, NULL);
 						FakeCell->Tag.Reset(NewStr("td"));
 						FakeCell->TagId = TAG_TD;
-						if ((FakeCell->Cell = new GTag::TblCell))
+						if ((FakeCell->Cell = new LTag::TblCell))
 						{
 							FakeCell->Cell->Span.x = 1;
 							FakeCell->Cell->Span.y = 1;
@@ -9292,7 +9287,7 @@ GHtmlTableLayout::GHtmlTableLayout(GTag *table)
 	#endif
 }
 
-void GHtmlTableLayout::Dump()
+void LHtmlTableLayout::Dump()
 {
 	int Sx, Sy;
 	GetSize(Sx, Sy);
@@ -9309,14 +9304,14 @@ void GHtmlTableLayout::Dump()
 		int x;
 		for (x=0; x<Sx; x++)
 		{
-			GTag *t = Get(x, y);
+			LTag *t = Get(x, y);
 			LgiTrace("%-10p", t);
 		}
 		LgiTrace("\n");
 
 		for (x=0; x<Sx; x++)
 		{
-			GTag *t = Get(x, y);
+			LTag *t = Get(x, y);
 			char s[256] = "";
 			if (t)
 				sprintf_s(s, sizeof(s), "%i,%i-%i,%i", t->Cell->Pos.x, t->Cell->Pos.y, t->Cell->Span.x, t->Cell->Span.y);
@@ -9328,7 +9323,7 @@ void GHtmlTableLayout::Dump()
 	LgiTrace("\n");
 }
 
-void GHtmlTableLayout::GetAll(List<GTag> &All)
+void LHtmlTableLayout::GetAll(List<LTag> &All)
 {
 	LHashTbl<PtrKey<void*>, bool> Added;
 	for (size_t y=0; y<c.Length(); y++)
@@ -9336,7 +9331,7 @@ void GHtmlTableLayout::GetAll(List<GTag> &All)
 		CellArray &a = c[y];
 		for (size_t x=0; x<a.Length(); x++)
 		{
-			GTag *t = a[x];
+			LTag *t = a[x];
 			if (t && !Added.Find(t))
 			{
 				Added.Add(t, true);
@@ -9346,7 +9341,7 @@ void GHtmlTableLayout::GetAll(List<GTag> &All)
 	}
 }
 
-void GHtmlTableLayout::GetSize(int &x, int &y)
+void LHtmlTableLayout::GetSize(int &x, int &y)
 {
 	x = 0;
 	y = (int)c.Length();
@@ -9357,7 +9352,7 @@ void GHtmlTableLayout::GetSize(int &x, int &y)
 	}
 }
 
-GTag *GHtmlTableLayout::Get(int x, int y)
+LTag *LHtmlTableLayout::Get(int x, int y)
 {
 	if (y >= (int) c.Length())
 		return NULL;
@@ -9369,7 +9364,7 @@ GTag *GHtmlTableLayout::Get(int x, int y)
 	return a[x];
 }
 
-bool GHtmlTableLayout::Set(GTag *t)
+bool LHtmlTableLayout::Set(LTag *t)
 {
 	if (!t)
 		return false;
@@ -9386,10 +9381,10 @@ bool GHtmlTableLayout::Set(GTag *t)
 	return true;
 }
 
-void GTagHit::Dump(const char *Desc)
+void LTagHit::Dump(const char *Desc)
 {
-	LArray<GTag*> d, n;
-	GTag *t = Direct;
+	LArray<LTag*> d, n;
+	LTag *t = Direct;
 	unsigned i;
 	for (i=0; i<3 && t; t = ToTag(t->Parent), i++)
 	{

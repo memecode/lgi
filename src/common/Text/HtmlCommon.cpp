@@ -53,7 +53,7 @@ static LHtmlElemInfo TagInfo[] =
 	{TAG_LAST,			NULL,			0,			LHtmlElemInfo::TI_BLOCK}
 };
 
-char16 GHtmlListItem[] = { 0x2022, ' ', 0 };
+char16 LHtmlListItem[] = { 0x2022, ' ', 0 };
 
 char16 *WcharToChar16(const wchar_t *i)
 {

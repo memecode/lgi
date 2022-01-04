@@ -1,20 +1,20 @@
 #ifndef _RICH_EDIT_H_
 #define _RICH_EDIT_H_
 
-#include "GHtml.h"
+#include "LHtml.h"
 #include "LTree.h"
 
-class GHtmlEdit : public LDocView
+class LHtmlEdit : public LDocView
 {
-	class GHtmlEditPriv *d;
+	class LHtmlEditPriv *d;
 	friend class HtmlEdit;
 	void SetIgnorePulse(bool b);
 
 public:
-	GHtmlEdit(int Id = -1);
-	~GHtmlEdit();
+	LHtmlEdit(int Id = -1);
+	~LHtmlEdit();
 
-	const char *GetClass() { return "GHtmlEdit"; }
+	const char *GetClass() { return "LHtmlEdit"; }
 	const char *GetMimeType() { return "text/html"; }
 	void OnPaint(LSurface *pDC);
 	void OnCreate();

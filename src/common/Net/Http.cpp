@@ -178,7 +178,7 @@ bool LHttp::Request
 	bool IsHTTPS = u.sProtocol && !_stricmp(u.sProtocol, "https");
 	LString EncPath = u.EncodeStr(u.sPath.Get() ? u.sPath.Get() : (char*)"/"), Mem;
 	char s[1024];
-	GLinePrefix EndHeaders("\r\n");
+	LHtmlLinePrefix EndHeaders("\r\n");
 	LStringPipe Headers;
 
 	if (IsHTTPS && Proxy)
@@ -642,7 +642,7 @@ LgiTrace("IHTTP::Post Socket.Write=%i\n", w);
 LgiTrace("IHTTP::Post Starting on response\n");
 #endif
 				// Read the response
-				GLinePrefix EndHeaders("\r\n");
+				LHtmlLinePrefix EndHeaders("\r\n");
 				int Total = 0;
 				LStringPipe Headers;
 				while (Out)

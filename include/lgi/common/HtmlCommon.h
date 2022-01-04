@@ -4,7 +4,7 @@
 #include "lgi/common/Css.h"
 #include "lgi/common/HashTable.h"
 
-extern char16 GHtmlListItem[];
+extern char16 LHtmlListItem[];
 
 #define SkipWhiteSpace(s)			while (*s && IsWhiteSpace(*s)) s++;
 

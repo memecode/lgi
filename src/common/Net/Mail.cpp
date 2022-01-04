@@ -1974,7 +1974,7 @@ char *MailReceiveFolder::GetHeaders(int Message)
 		{
 			LStringPipe o;
 			GCopyStreamer c;
-			GLinePrefix e("", false);
+			LHtmlLinePrefix e("", false);
 			if (c.Copy(&i, &o, &e))
 			{
 				return o.NewStr();
@@ -2373,7 +2373,7 @@ bool MailPop3::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks
 					}
 					VERIFY_RET_VAL(Write(0, true));
 
-					GLinePrefix End(".\r\n");
+					LHtmlLinePrefix End(".\r\n");
 
 					if (Transfer)
 					{

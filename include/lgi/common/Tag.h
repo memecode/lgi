@@ -14,7 +14,7 @@ public:
 	}
 };
 
-class GTag : public List<GNamedVariant>, public GDom
+class LTag : public List<GNamedVariant>, public GDom
 {
 protected:
 	char *Element;
@@ -23,12 +23,12 @@ protected:
 	LVariantType TypeOf(char *Name);
 
 public:
-	GTag(char *e);
-	~GTag();
+	LTag(char *e);
+	~LTag();
 
 	bool IsNumber(char *s);
 	bool operator ==(char *s);
-	GTag &operator =(GTag &t);
+	LTag &operator =(LTag &t);
 	GNamedVariant *GetNamed(char *Name);
 	void Empty();
 	bool Read(LXmlTag *t);

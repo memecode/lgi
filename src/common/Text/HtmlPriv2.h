@@ -23,17 +23,17 @@ enum TagInfoFlags
 // Structs & Classes                                                            //
 //////////////////////////////////////////////////////////////////////////////////
 class GFlowRect;
-class GFlowRegion;
+class LFlowRegion;
 
-struct GTagHit
+struct LTagHit
 {
-	GTag *Hit; // Tag that was hit, or nearest tag, otherwise NULL
+	LTag *Hit; // Tag that was hit, or nearest tag, otherwise NULL
 	int Near; // 0 if a direct hit, >0 is near miss, -1 if invalid.
 
 	GFlowRect *Block; // Text block hit
 	int Index; // If Block!=NULL then index into text, otherwise -1.
 
-	GTagHit()
+	LTagHit()
 	{
 		Hit = 0;
 		Block = 0;
@@ -42,7 +42,7 @@ struct GTagHit
 	}
 
 	/// Return true if the current object is a closer than 'h'
-	bool operator <(GTagHit &h)
+	bool operator <(LTagHit &h)
 	{
 		// We didn't hit anything, so we can't be closer
 		if (!Hit)
@@ -76,7 +76,7 @@ public:
 	bool Block()		{ return TestFlag(Flags, TI_BLOCK); }
 };
 
-class GLength
+class LHtmlLength
 {
 protected:
 	float d;
@@ -84,38 +84,38 @@ protected:
 	LCss::LengthType u;
 
 public:
-	GLength();
-	GLength(char *s);
+	LHtmlLength();
+	LHtmlLength(char *s);
 
 	bool IsValid();
 	bool IsDynamic();
 	float GetPrevAbs() { return PrevAbs; }
 	operator float();
-	GLength &operator =(float val);
+	LHtmlLength &operator =(float val);
 	LCss::LengthType GetUnits();
 	void Set(char *s);
-	float Get(GFlowRegion *Flow, LFont *Font, bool Lock = false);
+	float Get(LFlowRegion *Flow, LFont *Font, bool Lock = false);
 	float GetRaw() { return d; }
 };
 
-class GLine : public GLength
+class LHtmlLine : public LHtmlLength
 {
 public:
 	int LineStyle;
 	int LineReset;
 	LCss::ColorDef Colour;
 
-	GLine();
-	~GLine();
+	LHtmlLine();
+	~LHtmlLine();
 
-	GLine &operator =(int i);
+	LHtmlLine &operator =(int i);
 	void Set(char *s);
 };
 
 class GFlowRect : public LRect
 {
 public:
-	GTag *Tag;
+	LTag *Tag;
 	char16 *Text;
 	int Len;
 
@@ -137,33 +137,33 @@ public:
 	bool OverlapY(GFlowRect *b) { return !(b->y2 < y1 || b->y1 > y2); }
 };
 
-class GArea : public List<GFlowRect>
+class LHtmlArea : public List<GFlowRect>
 {
 public:
-	~GArea();
+	~LHtmlArea();
 
 	LRect Bounds();
 	LRect *TopRect(LRegion *c);
-	void FlowText(GTag *Tag, GFlowRegion *c, LFont *Font, char16 *Text, LCss::LengthType Align);
+	void FlowText(LTag *Tag, LFlowRegion *c, LFont *Font, char16 *Text, LCss::LengthType Align);
 };
 
 class GCellStore
 {
-	typedef LArray<GTag*> CellArray;
+	typedef LArray<LTag*> CellArray;
 	LArray<CellArray> c;
 
 public:
-	GCellStore(GTag *Table);
+	GCellStore(LTag *Table);
 
 	void GetSize(int &x, int &y);
-	void GetAll(List<GTag> &All);
-	GTag *Get(int x, int y);
-	bool Set(GTag *t);
+	void GetAll(List<LTag> &All);
+	LTag *Get(int x, int y);
+	bool Set(LTag *t);
 	
 	void Dump();
 };
 
-class GTag : public GDom, public LCss
+class LTag : public GDom, public LCss
 {
 public:
 	enum HtmlControlType
@@ -199,14 +199,14 @@ protected:
 	// Private methods
 	LFont *NewFont();
 	int NearestChar(GFlowRect *Fr, int x, int y);
-	GTag *HasOpenTag(char *t);
-	GTag *PrevTag();
+	LTag *HasOpenTag(char *t);
+	LTag *PrevTag();
 	LRect ChildBounds();
 	bool GetWidthMetrics(uint16 &Min, uint16 &Max);
-	void LayoutTable(GFlowRegion *f);
+	void LayoutTable(LFlowRegion *f);
 	void BoundParents();
 	bool PeekTag(char *s, char *tag);
-	GTag *GetTable();
+	LTag *GetTable();
 	char *NextTag(char *s);
 	void ZeroTableElements();
 	bool OnUnhandledColor(LCss::ColorDef *def, const char *&s);
@@ -230,13 +230,13 @@ public:
 	DisplayType Disp;
 
 	// Heirarchy
-	GHtml2 *Html;
-	GTag *Parent;
-	List<GTag> Tags;
-	bool HasChild(GTag *c);
-	bool Attach(GTag *Child, int Idx = -1);
+	LHtml2 *Html;
+	LTag *Parent;
+	List<LTag> Tags;
+	bool HasChild(LTag *c);
+	bool Attach(LTag *Child, int Idx = -1);
 	void Detach();
-	GTag *GetBlockParent(int *Idx = 0);
+	LTag *GetBlockParent(int *Idx = 0);
 	LFont *GetFont();
 
 	// Style
@@ -264,10 +264,10 @@ public:
 	// Text
 	int Cursor; // index into text of the cursor
 	int Selection; // index into the text of the selection edge
-	GArea TextPos;
+	LHtmlArea TextPos;
 
-	GTag(GHtml2 *h, GTag *p);
-	~GTag();
+	LTag(LHtml2 *h, LTag *p);
+	~LTag();
 
 	// Events
 	void OnChange(PropType Prop);
@@ -302,7 +302,7 @@ public:
 	//// overwriting any duplicate properties.
 	void SetCssStyle(const char *Style);
 	/// Positions the tag according to the flow region passed in
-	void OnFlow(GFlowRegion *Flow);
+	void OnFlow(LFlowRegion *Flow);
 	/// Paints the border of the tag
 	void OnPaintBorder(
 		/// The surface to paint on
@@ -312,16 +312,16 @@ public:
 	void OnPaint(LSurface *pDC);
 	void SetSize(LPoint &s);
 	void SetTag(const char *Tag);
-	void GetTagByPos(GTagHit &hit, int x, int y);
-	GTag *GetTagByName(const char *Name);
+	void GetTagByPos(LTagHit &hit, int x, int y);
+	LTag *GetTagByName(const char *Name);
 	void CopyClipboard(LMemQueue &p);
-	GTag *IsAnchor(LAutoString *Uri);
+	LTag *IsAnchor(LAutoString *Uri);
 	bool CreateSource(LStringPipe &p, int Depth = 0, bool LastWasBlock = true);
-	void Find(int TagType, LArray<GTag*> &Tags);
-	GTag *GetAnchor(char *Name);
+	void Find(int TagType, LArray<LTag*> &Tags);
+	LTag *GetAnchor(char *Name);
 
 	// Control handling
-	GTag *FindCtrlId(int Id);
+	LTag *FindCtrlId(int Id);
 	int OnNotify(int f);
 	void CollectFormValues(LHashTbl<ConstStrKey<char,false>,char*> &f);
 
@@ -342,7 +342,7 @@ public:
 	LCss::LengthType GetAlign(bool x);
 
 	// Tables
-	GTag *GetTableCell(int x, int y);
+	LTag *GetTableCell(int x, int y);
 	LPoint GetTableSize();
 };
 

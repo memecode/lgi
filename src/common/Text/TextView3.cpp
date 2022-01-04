@@ -2963,7 +2963,7 @@ ptrdiff_t LTextView3::MatchText(const char16 *Find, bool MatchWord, bool MatchCa
 	StringCompareFn CmpFn = MatchCase ? StrncmpW : StrnicmpW;
 	char16 FindCh = MatchCase ? Find[0] : toupper(Find[0]);
 
-	for (; SearchUpwards ? i >= Begin : i <= End - FindLen; i += SearchUpwards ? -1 : 1)
+	for (; SearchUpwards ? i >= Begin : i <= End; i += SearchUpwards ? -1 : 1)
 	{
 		if
 		(
@@ -2992,9 +2992,11 @@ ptrdiff_t LTextView3::MatchText(const char16 *Find, bool MatchWord, bool MatchCa
 					}
 				}
 						
+				/* What was this even supposed to do?
 				LRange r(Possible - Text, FindLen);
 				if (!r.Overlap(Cursor))
-					return r.Start;
+				*/
+				return i;
 			}
 		}
 				
