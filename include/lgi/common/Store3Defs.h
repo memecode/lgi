@@ -419,26 +419,27 @@ enum Store3Fields
 	FIELD_ATTACHMENTS_NAME = 156,		// Meta field for specifying attachment file names
 	FIELD_MEMBER_OF_GROUP = 157,		// Meta field for specifying membership of a content group
 
-	FIELD_TEMP_PATH,					// (char*) A temporary path to store files...
-	FIELD_HTML_RELATED,					// Array of related attachments for the HTML content.
+	FIELD_TEMP_PATH = 158,				// (char*) A temporary path to store files...
+	FIELD_HTML_RELATED = 159,			// Array of related attachments for the HTML content.
 										// Pass this to an email's SetObj member to add a
 										// related attachment.
-	FIELD_CAL_REMINDERS,				// Individual reminders as CSV, fields are:
+	FIELD_CAL_REMINDERS = 160,			// Individual reminders as CSV, fields are:
 										//		Number, CalendarReminderUnits, CalendarReminderType, Param
 										//
 										//		CalEmail: param option email address to send to as well as the guests
 										//		CalPopup: not used
 										//		CalScriptCallback: not impl (but will be the script function and args)
 										//
-	FIELD_CAL_LAST_CHECK,				// (LDateTime) Ts the calendar event was last checked for reminders
-	FIELD_DATE_MODIFIED,				// (LDateTime) Ts of modification
-	FIELD_INBOX,						// (GDataFolderI*) Inbox for mail store
-	FIELD_OUTBOX,						// (GDataFolderI*) Outbox for mail store
-	FIELD_SENT,							// (GDataFolderI*) Sent folder for mail store
-	FIELD_TRASH,						// (GDataFolderI*) Trash folder for mail store
-	FIELD_IMAP_SEQ,						// (uint32_t) IMAP sequence number
-	FIELD_CAL_STATUS,					// (char*) Status of the vCal event.
-	FIELD_STORE_STATUS,					// (ScribeAccountletStatusIcon) Status (icon) of a GDataStoreI
+	FIELD_CAL_LAST_CHECK = 161,			// (LDateTime) Ts the calendar event was last checked for reminders
+	FIELD_DATE_MODIFIED = 162,			// (LDateTime) Ts of modification
+	FIELD_INBOX = 163,					// (GDataFolderI*) Inbox for mail store
+	FIELD_OUTBOX = 164,					// (GDataFolderI*) Outbox for mail store
+	FIELD_SENT = 165,					// (GDataFolderI*) Sent folder for mail store
+	FIELD_TRASH = 166,					// (GDataFolderI*) Trash folder for mail store
+	FIELD_IMAP_SEQ = 167,				// (uint32_t) IMAP sequence number
+	FIELD_CAL_STATUS = 168,				// (char*) Status of the vCal event.
+	FIELD_STORE_STATUS = 169,			// (ScribeAccountletStatusIcon) Status (icon) of a GDataStoreI
+	FIELD_RECEIVED_DOMAIN = 170,		// (char*) First "Received:" header domain. (See also SdReceivedDomain)
 
 	FIELD_MAX,
 };

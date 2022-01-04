@@ -56,15 +56,15 @@ const char *LCss::PropName(PropType p)
 	return 0;
 }
 
-double LCss::FontSizeTable[7] =
+float LCss::FontSizeTable[7] =
 {
-	0.6, // SizeXXSmall
-	0.75, // SizeXSmall
-	0.85, // SizeSmall
-	1.0, // SizeMedium
-	1.2, // SizeLarge
-	1.5, // SizeXLarge
-	2.0, // SizeXXLarge
+	0.6f,  // SizeXXSmall
+	0.75f, // SizeXSmall
+	0.85f, // SizeSmall
+	1.0f,  // SizeMedium
+	1.2f,  // SizeLarge
+	1.5f,  // SizeXLarge
+	2.0f,  // SizeXXLarge
 };
 
 /////////////////////////////////////////////////////////////////////////////

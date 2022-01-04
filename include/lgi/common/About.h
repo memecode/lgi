@@ -7,7 +7,7 @@
 #include "lgi/common/DocView.h"
 
 /// A simple about dialog
-class LAbout : public LDialog, public GDefaultDocumentEnv
+class LAbout : public LDialog, public LDefaultDocumentEnv
 {
 public:
 	/// Constructor

@@ -95,11 +95,11 @@ void LEmojiFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int len, LRect 
 
 		LSurface *Src = priv->Scaled ? priv->Scaled : priv->Img;
 
-		auto Idx = EmojiToIconIndex(&u32, 1);
-		if (Idx >= 0)
+		auto Emoji = EmojiToIconIndex(&u32, 1);
+		if (Emoji.Index >= 0)
 		{
-			int Cx = Idx % EMOJI_GROUP_X;
-			int Cy = Idx / EMOJI_GROUP_X;
+			int Cx = Emoji.Index % EMOJI_GROUP_X;
+			int Cy = Emoji.Index / EMOJI_GROUP_X;
 
 			LRect Icon(0, 0, priv->Cell-1, priv->Cell-1);
 			Icon.Offset(Cx * priv->Cell, Cy * priv->Cell);
@@ -112,9 +112,9 @@ void LEmojiFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int len, LRect 
 					pDC->Rectangle(x, y, x + priv->Cell - 1, y + priv->Cell - 1);
 			}
 
-			if (priv->Scaled && !priv->Resampled[Idx])
+			if (priv->Scaled && !priv->Resampled[Emoji.Index])
 			{
-				priv->Resampled[Idx] = true;			
+				priv->Resampled[Emoji.Index] = true;
 				LAutoPtr<LSurface> s(priv->Scaled->SubImage(Icon));
 				LRect Src(0, 0, EMOJI_CELL_SIZE-1, EMOJI_CELL_SIZE-1);
 				Src.Offset(Cx * EMOJI_CELL_SIZE, Cy * EMOJI_CELL_SIZE);
@@ -174,15 +174,14 @@ bool LEmojiFont::Create(const char *Face, LCss::Len Sz, LSurface *pSurface)
 		{
 			memset(d->GlyphMap, 0, Bytes);
 			
-			for (uint32_t u=0x203c; u<=0x3299; u++)
+			for (int r=0; r<CountOf(EmojiRanges); r++)
 			{
-				if (EmojiToIconIndex(&u, 1) >= 0)
-					d->GlyphMap[u>>3] |= 1 << (u & 7);
-			}
-			for (uint32_t u=0x1f004; u<=0x1f6c5; u++)
-			{
-				if (EmojiToIconIndex(&u, 1) >= 0)
-					d->GlyphMap[u>>3] |= 1 << (u & 7);
+				auto &rng = EmojiRanges[r];
+				for (uint32_t u=rng.Start; u<rng.End(); u++)
+				{
+					if (EmojiToIconIndex(&u, 1).Index >= 0)
+						d->GlyphMap[u>>3] |= 1 << (u & 7);
+				}
 			}
 		}
 	}

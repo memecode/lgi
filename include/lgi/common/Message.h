@@ -183,6 +183,7 @@ enum LgiMessages
 	M_RESIZE_TO_CONTENT, // LItemContainer
 	M_SCROLL_TO, // LTreeItem->LTree
 	M_SET_SCROLL, // LScrollBar
+	M_JOBS_LOADED, // GHtml
 
 	#ifdef WINDOWS
 	M_USER = WM_APP + 200

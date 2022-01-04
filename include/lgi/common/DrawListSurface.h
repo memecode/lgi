@@ -1,14 +1,14 @@
 #ifndef _GDRAW_LIST_SURFACE_H_
 #define _GDRAW_LIST_SURFACE_H_
 
-class GDrawListSurface : public LSurface
+class LDrawListSurface : public LSurface
 {
-	struct GDrawListSurfacePriv *d;
+	struct LDrawListSurfacePriv *d;
 
 public:
-	GDrawListSurface(int Width, int Height, LColourSpace Cs = CsRgba32);
-	GDrawListSurface(LSurface *FromSurface);
-	~GDrawListSurface();
+	LDrawListSurface(int Width, int Height, LColourSpace Cs = CsRgba32);
+	LDrawListSurface(LSurface *FromSurface);
+	~LDrawListSurface();
 
 	// Calls specific to this class:
 	ssize_t Length();

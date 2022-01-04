@@ -64,7 +64,7 @@
 		) \
 		|| \
 		( \
-			EmojiToIconIndex(&(ch), 1) >= 0 \
+			EmojiToIconIndex(&(ch), 1).Index >= 0 \
 		) \
 	)
 
@@ -971,12 +971,14 @@ public:
 	struct EmojiDisplayStr : public DisplayStr
 	{
 		LArray<LRect> SrcRect;
-		LSurface *Img;
+		LSurface *Img = NULL;
+		LCss::Len Size;
+		int CharPx = 0;
 		#if defined(_MSC_VER)
-		LArray<uint32_t> Utf32;
+			LArray<uint32_t> Utf32;
 		#endif
 
-		EmojiDisplayStr(StyleText *src, LSurface *img, LFont *f, const uint32_t *s, ssize_t l = -1);
+		EmojiDisplayStr(StyleText *src, LSurface *img, LCss::Len &fntSize, const uint32_t *s, ssize_t l = -1);
 		LAutoPtr<DisplayStr> Clone(ssize_t Start, ssize_t Len = -1);
 		void Paint(LSurface *pDC, int &FixX, int FixY, LColour &Back);
 		double GetAscent();

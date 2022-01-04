@@ -187,7 +187,11 @@ bool SystemFunctions::Assert(LScriptArguments &Args)
 bool SystemFunctions::DebuggerEnabled(LScriptArguments &Args)
 {
 	if (Args.Length() == 0)
+	{
+		LAssert(!"Wrong args.");
 		return false;
+	}
+
 	Args.GetVm()->SetDebuggerEnabled(Args[0]->CastInt32() != 0);
 	return true;
 }
@@ -202,7 +206,10 @@ bool SystemFunctions::Throw(LScriptArguments &Args)
 bool SystemFunctions::LoadString(LScriptArguments &Args)
 {
 	if (Args.Length() != 1)
+	{
+		LAssert(!"Wrong args.");
 		return false;
+	}
 
 	*Args.GetReturn() = LLoadString(Args[0]->CastInt32());
 	return true;	
@@ -211,7 +218,11 @@ bool SystemFunctions::LoadString(LScriptArguments &Args)
 bool SystemFunctions::Sprintf(LScriptArguments &Args)
 {
 	if (Args.Length() < 1)
+	{
+		LAssert(!"Wrong args.");
 		return false;
+	}
+
 	char *Fmt = Args[0]->Str();
 	if (!Fmt)
 		return false;
@@ -509,7 +520,10 @@ bool SystemFunctions::SelectFolder(LScriptArguments &Args)
 bool SystemFunctions::Sleep(LScriptArguments &Args)
 {
 	if (Args.Length() != 1)
+	{
+		LAssert(!"Wrong args.");
 		return false;
+	}
 
 	LSleep(Args[0]->CastInt32());
 	return true;
@@ -618,7 +632,10 @@ bool SystemFunctions::Now(LScriptArguments &Args)
 bool SystemFunctions::New(LScriptArguments &Args)
 {
 	if (Args.Length() < 1 || !Args[0])
+	{
+		LAssert(!"Wrong args.");
 		return false;
+	}
 
 	Args.GetReturn()->Empty();
 	char *sType = Args[0]->CastString();
@@ -748,7 +765,10 @@ bool SystemFunctions::Len(LScriptArguments &Args)
 bool SystemFunctions::Delete(LScriptArguments &Args)
 {
 	if (Args.Length() != 1)
+	{
+		LAssert(!"Wrong args.");
 		return false;
+	}
 
 	LVariant *v = Args[0];
 	if (v->Type == GV_CUSTOM)
@@ -808,7 +828,10 @@ public:
 bool SystemFunctions::DeleteFile(LScriptArguments &Args)
 {
 	if (Args.Length() != 1)
+	{
+		LAssert(!"Wrong args.");
 		return false;
+	}
 
 	char *f = Args[0]->CastString();
 	if (f)
@@ -833,7 +856,10 @@ bool SystemFunctions::CurrentScript(LScriptArguments &Args)
 bool SystemFunctions::PathExists(LScriptArguments &Args)
 {
 	if (Args.Length() == 0)
+	{
+		LAssert(!"Wrong args.");
 		return false;
+	}
 		
 	LDirectory d;
 	if (d.First(Args[0]->CastString(), NULL))
@@ -879,7 +905,10 @@ bool SystemFunctions::PathSep(LScriptArguments &Args)
 bool SystemFunctions::ListFiles(LScriptArguments &Args)
 {
 	if (Args.Length() < 1)
+	{
+		LAssert(!"Wrong args.");
 		return false;
+	}
 
 	Args.GetReturn()->SetList();
 	LDirectory d;
@@ -902,7 +931,10 @@ bool SystemFunctions::CreateSurface(LScriptArguments &Args)
 	Args.GetReturn()->Empty();
 
 	if (Args.Length() < 2)
+	{
+		LAssert(!"Wrong args.");
 		return false;
+	}
 
 	int x = Args[0]->CastInt32();
 	int y = Args[1]->CastInt32();
@@ -939,15 +971,18 @@ bool SystemFunctions::CreateSurface(LScriptArguments &Args)
 
 bool SystemFunctions::MessageDlg(LScriptArguments &Args)
 {
-	if (Args.Length() < 4)
+	if (Args.Length() < 2)
+	{
+		LAssert(!"Wrong args.");
 		return false;
+	}
 
 	LViewI *Parent = CastLView(*Args[0]);
-	char *Msg = Args[1]->Str();
-	char *Title = Args[2]->Str();
-	uint32_t Btns = Args[3]->CastInt32();
+	auto *Msg = Args[1]->Str();
+	auto *Title = Args.IdxCheck(2) ? Args[2]->Str() : LAppInst->Name();
+	uint32_t Btns = Args.IdxCheck(3) ? Args[3]->CastInt32() : MB_OK;
 
-	int Btn = LgiMsg(Parent, Msg, Title, Btns);
+	auto Btn = LgiMsg(Parent, Msg, Title, Btns);
 	*Args.GetReturn() = Btn;
 
 	return true;
@@ -956,7 +991,10 @@ bool SystemFunctions::MessageDlg(LScriptArguments &Args)
 bool SystemFunctions::GetInputDlg(LScriptArguments &Args)
 {
 	if (Args.Length() < 4)
+	{
+		LAssert(!"Wrong args.");
 		return false;
+	}
 
 	LViewI *Parent = CastLView(*Args[0]);
 	char *InitVal = Args[1]->Str();
@@ -979,7 +1017,10 @@ bool SystemFunctions::GetViewById(LScriptArguments &Args)
 	Args.GetReturn()->Empty();
 
 	if (Args.Length() < 2)
+	{
+		LAssert(!"Wrong args.");
 		return false;
+	}
 
 	LViewI *Parent = CastLView(*Args[0]);
 	int Id = Args[1]->CastInt32();
@@ -997,7 +1038,10 @@ bool SystemFunctions::GetViewById(LScriptArguments &Args)
 bool SystemFunctions::Execute(LScriptArguments &Args)
 {
 	if (Args.Length() < 2)
+	{
+		LAssert(!"Wrong args.");
 		return false;
+	}
 
 	LStringPipe p;
 	char *Exe = Args[0]->CastString();
@@ -1026,7 +1070,10 @@ bool SystemFunctions::Execute(LScriptArguments &Args)
 bool SystemFunctions::System(LScriptArguments &Args)
 {
 	if (Args.Length() < 2)
+	{
+		LAssert(!"Wrong args.");
 		return false;
+	}
 
 	char *Exe = Args[0]->Str();
 	char *Arg = Args[1]->Str();
@@ -1051,7 +1098,7 @@ bool SystemFunctions::OsVersion(LScriptArguments &Args)
 	return true;
 }
 
-bool SystemFunctions::Yeild(LScriptArguments &Args)
+bool SystemFunctions::Yield(LScriptArguments &Args)
 {
 	LYield();
 	return true;
@@ -1110,7 +1157,7 @@ GHostFunc SystemLibrary[] =
 	DefFn(System),
 	DefFn(OsName),
 	DefFn(OsVersion),
-	DefFn(Yeild),
+	DefFn(Yield),
 
 	// End of list marker
 	GHostFunc(0, 0, 0),

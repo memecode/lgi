@@ -42,7 +42,7 @@
 #define DOCUMENT_LOAD_IMAGES		1
 #define MAX_RECURSION_DEPTH			300
 #define ALLOW_TABLE_GROWTH			1
-#define LGI_HTML_MAXPAINT_TIME		250 // ms
+#define LGI_HTML_MAXPAINT_TIME		350 // ms
 #define FLOAT_TOLERANCE				0.001
 
 #define CRASH_TRACE					0
@@ -55,7 +55,6 @@
 #ifndef IDC_HAND
 #define IDC_HAND					MAKEINTRESOURCE(32649)
 #endif
-#define M_JOBS_LOADED				(M_USER+4000)
 
 #undef CellSpacing
 #define DefaultCellSpacing			0
@@ -159,6 +158,10 @@ public:
 	bool IsParsing;
 	bool IsLoaded;
 	bool StyleDirty;
+
+	// Paint time limits...
+	bool MaxPaintTimeout = false;
+	int MaxPaintTime = LGI_HTML_MAXPAINT_TIME;
 	
 	// Find settings
 	LAutoWString FindText;
@@ -286,7 +289,7 @@ public:
 		auto Scale = Owner->GetDpiScale();
 		if (Size.Type == LCss::LenPx)
 		{
-			Size.Value *= Scale.y;
+			Size.Value *= (float) Scale.y;
 		    int RequestPx = (int) Size.Value;
 
 			// Look for cached fonts of the right size...
@@ -337,7 +340,7 @@ public:
 			// in their parent tree, so we just use the default font size times
 			// the requested percent
 			Size.Type = LCss::LenPt;
-			Size.Value *= Default->PointSize() / 100.0;
+			Size.Value *= Default->PointSize() / 100.0f;
 			if (Size.Value < MinimumPointSize)
 				Size.Value = MinimumPointSize;
 		}
@@ -4267,7 +4270,7 @@ void GHtmlTableLayout::AllocatePx(int StartCol, int Cols, int MinPx, bool HasToF
 			}
 			else
 			{
-				AddPx = RemainingPx / Growable.Length();
+				AddPx = RemainingPx / (int)Growable.Length();
 			}
 								
 			LAssert(AddPx >= 0);
@@ -4295,7 +4298,7 @@ void GHtmlTableLayout::AllocatePx(int StartCol, int Cols, int MinPx, bool HasToF
 				Growable[0] = Largest;
 			}
 
-			int AddPx = (RemainingPx - Added) / Growable.Length();
+			int AddPx = (RemainingPx - Added) / (int)Growable.Length();
 			for (unsigned i=0; i<Growable.Length(); i++)
 			{
 				int x = Growable[i];
@@ -5689,7 +5692,7 @@ void GTag::OnFlow(GFlowRegion *Flow, uint16 Depth)
 					else if (LineHt.Type == LCss::LenPx)
 					{
 						auto Scale = Html->GetDpiScale().y;
-						LineHt.Value *= Scale;
+						LineHt.Value *= (float)Scale;
 						LineHeightCache = LineHt.ToPx(FontPx, f);
 						// LgiTrace("LineHeight FontPx=%i Px=%i (Scale=%f)\n", FontPx, LineHeightCache, Scale);
 					}
@@ -6439,9 +6442,17 @@ static void FillRectWithImage(LSurface *pDC, LRect *r, LSurface *Image, LCss::Re
 void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 {
 	if (Depth >= MAX_RECURSION_DEPTH ||
-		Display() == DispNone ||
-		LCurrentTime() - Html->PaintStart > LGI_HTML_MAXPAINT_TIME)
+		Display() == DispNone)
 		return;
+	if (
+		#ifdef _DEBUG
+		!Html->_Debug &&
+		#endif
+		LCurrentTime() - Html->PaintStart > Html->d->MaxPaintTime)
+	{
+		Html->d->MaxPaintTimeout = true;
+		return;
+	}
 
 	int Px, Py;
 	pDC->GetOrigin(Px, Py);
@@ -6862,6 +6873,7 @@ void GTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 					for (unsigned i=0; i<TextPos.Length(); i++)
 					{
 						GFlowRect *Tr = TextPos[i];
+
 						LDisplayString ds(f, Tr->Text, Tr->Len);
 						ds.Draw(pDC, Tr->x1, Tr->y1 + LineHtOff, IsEditor ? Tr : NULL);
 					}
@@ -7469,26 +7481,29 @@ void GHtml::OnPaint(LSurface *ScreenDC)
 
 	#if GHTML_USE_DOUBLE_BUFFER
 	LRect Client = GetClient();
-	if (!MemDC ||
-		(MemDC->X() < Client.X() || MemDC->Y() < Client.Y()))
+	if (ScreenDC->IsScreen())
 	{
-		if (MemDC.Reset(new LMemDC))
+		if (!MemDC ||
+			(MemDC->X() < Client.X() || MemDC->Y() < Client.Y()))
 		{
-			int Sx = Client.X() + 10;
-			int Sy = Client.Y() + 10;
-			if (!MemDC->Create(Sx, Sy, System32BitColourSpace))
+			if (MemDC.Reset(new LMemDC))
 			{
-				MemDC.Reset();
+				int Sx = Client.X() + 10;
+				int Sy = Client.Y() + 10;
+				if (!MemDC->Create(Sx, Sy, System32BitColourSpace))
+				{
+					MemDC.Reset();
+				}
 			}
 		}
-	}
-	if (MemDC)
-	{
-		MemDC->ClipRgn(NULL);
-		#if 0//def _DEBUG
-		MemDC->Colour(LColour(255, 0, 255));
-		MemDC->Rectangle();
-		#endif
+		if (MemDC)
+		{
+			MemDC->ClipRgn(NULL);
+			#if 0//def _DEBUG
+			MemDC->Colour(LColour(255, 0, 255));
+			MemDC->Rectangle();
+			#endif
+		}
 	}
 	#endif
 
@@ -7528,8 +7543,15 @@ void GHtml::OnPaint(LSurface *ScreenDC)
 		}
 
 		bool InSelection = false;
-		PaintStart = LCurrentTime();		
+		PaintStart = LCurrentTime();
+		d->MaxPaintTimeout = false;
+
 		Tag->OnPaint(pDC, InSelection, 0);
+
+		if (d->MaxPaintTimeout)
+		{
+			LgiTrace("%s:%i - Html max paint time reached: %i ms.\n", _FL, LCurrentTime() - PaintStart);
+		}
 	}
 
 	#if GHTML_USE_DOUBLE_BUFFER
@@ -8039,9 +8061,8 @@ bool GHtml::OnKey(LKey &k)
 			{
 				if (VScroll)
 				{
-					int64 Low, High;
-					VScroll->Limits(Low, High);
-					Dy = (int) ((High - Page) - VScroll->Value());
+					LRange r = VScroll->GetRange();
+					Dy = (int)(r.End() - Page);
 				}
 				Status = true;
 				break;
@@ -8837,7 +8858,7 @@ void GHtml::OnContent(LDocumentEnv::LoadJob *Res)
 	if (JobSem.Lock(_FL))
 	{
 		JobSem.Jobs.Add(Res);
-		JobSem.Unlock();
+		JobSem.Unlock();		
 		PostEvent(M_JOBS_LOADED);
 	}
 }
@@ -8960,6 +8981,16 @@ void GHtml::SetEmoji(bool i)
 	d->DecodeEmoji = i;
 }
 
+void GHtml::SetMaxPaintTime(int Ms)
+{
+	d->MaxPaintTime = Ms;
+}
+
+bool GHtml::GetMaxPaintTimeout()
+{
+	return d->MaxPaintTimeout;
+}
+
 ////////////////////////////////////////////////////////////////////////
 class LHtml_Factory : public LViewFactory
 {
@@ -8967,7 +8998,7 @@ class LHtml_Factory : public LViewFactory
 	{
 		if (_stricmp(Class, "LHtml") == 0)
 		{
-			return new GHtml(-1, 0, 0, 100, 100, new GDefaultDocumentEnv);
+			return new GHtml(-1, 0, 0, 100, 100, new LDefaultDocumentEnv);
 		}
 
 		return 0;

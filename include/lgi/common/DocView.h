@@ -214,10 +214,10 @@ public:
 
 /// Default text view environment
 ///
-/// This class defines the default behaviour of the environment,
+/// This class defines the default behavior of the environment,
 /// However you will need to instantiate this yourself and call
 /// SetEnv with your instance. i.e. it's not automatic.
-class LgiClass GDefaultDocumentEnv :
+class LgiClass LDefaultDocumentEnv :
 	public LDocumentEnv
 {
 public:

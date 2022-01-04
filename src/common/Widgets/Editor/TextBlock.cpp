@@ -4,6 +4,7 @@
 #include "lgi/common/Emoji.h"
 #include "lgi/common/DocView.h"
 #include "lgi/common/Menu.h"
+#include "lgi/common/GdcTools.h"
 
 #define DEBUG_LAYOUT				0
 
@@ -67,35 +68,52 @@ void LRichTextPriv::StyleText::SetStyle(LNamedStyle *s)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-LRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, LSurface *img, LFont *f, const uint32_t *s, ssize_t l) :
+LRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, LSurface *img, LCss::Len &fntSize, const uint32_t *s, ssize_t l) :
 	DisplayStr(src, NULL, s, l)
 {
 	Img = img;
+
 	#if defined(_MSC_VER)
-	Utf32.Add(s, l);
-	uint32_t *u = &Utf32[0];
+		Utf32.Add(s, l);
+		uint32_t *u = &Utf32[0];
 	#else
-	LAssert(sizeof(char16) == 4);
-	uint32_t *u = (uint32_t*)Wide;
-	Chars = Strlen(u);
+		LAssert(sizeof(char16) == 4);
+		uint32_t *u = (uint32_t*)Wide;
+		Chars = Strlen(u);
 	#endif
 
-	for (int i=0; i<Chars; i++)
+	CharPx = EMOJI_CELL_SIZE;
+	Size = fntSize;
+	if (Size.IsValid())
 	{
-		int Idx = EmojiToIconIndex(u + i, Chars - i);
-		LAssert(Idx >= 0);
-		if (Idx >= 0)
+		int Px = Size.ToPx();
+		if (Px > 0)
+			CharPx = Px / 0.8;
+	}
+
+	for (int i=0; i<Chars; )
+	{
+		auto Emoji = EmojiToIconIndex(u + i, Chars - i);
+		LAssert(Emoji.Index >= 0);
+		if (Emoji.Index >= 0)
 		{
-			int x = Idx % EMOJI_GROUP_X;
-			int y = Idx / EMOJI_GROUP_X;
+			int x = Emoji.Index % EMOJI_GROUP_X;
+			int y = Emoji.Index / EMOJI_GROUP_X;
 			LRect &rc = SrcRect[i];
 			rc.ZOff(EMOJI_CELL_SIZE-1, EMOJI_CELL_SIZE-1);
 			rc.Offset(x * EMOJI_CELL_SIZE, y * EMOJI_CELL_SIZE);
+
+			i += Emoji.Size;
+		}
+		else
+		{
+			LAssert(!"Not an emoji.");
+			break;
 		}
 	}
 
-	x = (int)SrcRect.Length() * EMOJI_CELL_SIZE;
-	y = EMOJI_CELL_SIZE;
+	x = (int)SrcRect.Length() * CharPx;
+	y = CharPx;
 	xf = IntToFixed(x);
 	yf = IntToFixed(y);
 }
@@ -105,11 +123,11 @@ LAutoPtr<LRichTextPriv::DisplayStr> LRichTextPriv::EmojiDisplayStr::Clone(ssize_
 	if (Len < 0)
 		Len = Chars - Start;
 	#if defined(_MSC_VER)
-	LAssert(	Start >= 0 &&
-				Start < (int)Utf32.Length() &&
-				Start + Len <= (int)Utf32.Length());
+		LAssert(	Start >= 0 &&
+					Start < (int)Utf32.Length() &&
+					Start + Len <= (int)Utf32.Length());
 	#endif
-	LAutoPtr<DisplayStr> s(new EmojiDisplayStr(Src, Img, NULL,
+	LAutoPtr<DisplayStr> s(new EmojiDisplayStr(Src, Img, Size,
 		#if defined(_MSC_VER)
 		&Utf32[Start]
 		#else
@@ -122,6 +140,7 @@ LAutoPtr<LRichTextPriv::DisplayStr> LRichTextPriv::EmojiDisplayStr::Clone(ssize_
 void LRichTextPriv::EmojiDisplayStr::Paint(LSurface *pDC, int &FixX, int FixY, LColour &Back)
 {
 	LRect f(0, 0, x-1, y-1);
+
 	f.Offset(FixedToInt(FixX), FixedToInt(FixY));
 	pDC->Colour(Back);
 	pDC->Rectangle(&f);
@@ -129,16 +148,26 @@ void LRichTextPriv::EmojiDisplayStr::Paint(LSurface *pDC, int &FixX, int FixY, L
 	int Op = pDC->Op(GDC_ALPHA);
 	for (unsigned i=0; i<SrcRect.Length(); i++)
 	{
-		pDC->Blt(f.x1, f.y1, Img, &SrcRect[i]);
-		f.x1 += EMOJI_CELL_SIZE;
-		FixX += IntToFixed(EMOJI_CELL_SIZE);
+		if (CharPx != EMOJI_CELL_SIZE)
+		{
+			LMemDC mem(CharPx, CharPx, System32BitColourSpace);
+			ResampleDC(&mem, Img, &SrcRect[i]);
+			pDC->Blt(f.x1, f.y1, &mem);
+		}
+		else
+		{
+			pDC->Blt(f.x1, f.y1, Img, &SrcRect[i]);
+		}
+		f.x1 += CharPx;
+		FixX += IntToFixed(CharPx);
 	}
+
 	pDC->Op(Op);
 }
 
 double LRichTextPriv::EmojiDisplayStr::GetAscent()
 {
-	return EMOJI_CELL_SIZE * 0.8;
+	return CharPx * 0.8;
 }
 
 ssize_t LRichTextPriv::EmojiDisplayStr::PosToIndex(int XPos, bool Nearest)
@@ -147,7 +176,7 @@ ssize_t LRichTextPriv::EmojiDisplayStr::PosToIndex(int XPos, bool Nearest)
 		return Chars;
 	if (XPos <= 0)
 		return 0;
-	return (XPos + (Nearest ? EMOJI_CELL_SIZE >> 1 : 0)) / EMOJI_CELL_SIZE;
+	return (XPos + (Nearest ? CharPx >> 1 : 0)) / CharPx;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1110,7 +1139,7 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 			(
 				t->Emoji
 				?
-				new EmojiDisplayStr(t, d->GetEmojiImage(), f, s, Chars)
+				new EmojiDisplayStr(t, d->GetEmojiImage(), f ? f->Size() : LCss::Len(), s, Chars)
 				:
 				new DisplayStr(t, f, s, Chars, flow.pDC)
 			);
@@ -1170,7 +1199,7 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 						(
 							t->Emoji
 							?
-							new EmojiDisplayStr(t, d->GetEmojiImage(), f, s, Chars)
+							new EmojiDisplayStr(t, d->GetEmojiImage(), f ? f->Size() : LCss::Len(), s, Chars)
 							:
 							new DisplayStr(t, f, s, Chars, flow.pDC)
 						)
@@ -1502,10 +1531,16 @@ bool LRichTextPriv::TextBlock::AddText(Transaction *Trans, ssize_t AtOffset, con
 
 	PreEdit(Trans);
 	
-	LArray<int> EmojiIdx;
-	EmojiIdx.Length(InChars);
-	for (int i=0; i<InChars; i++)
-		EmojiIdx[i] = EmojiToIconIndex(InStr + i, InChars - i);
+	LArray<EmojiChar> EmojiIdx;
+	for (int i=0; i<InChars;)
+	{
+		auto &e = EmojiIdx[i];
+		e = EmojiToIconIndex(InStr + i, InChars - i);
+		if (e.Index >= 0)
+			i += e.Size;
+		else
+			i++;
+	}
 
 	ssize_t InitialOffset = AtOffset >= 0 ? AtOffset : Len;
 	int Chars = 0; // Length of run to insert
@@ -1515,14 +1550,34 @@ bool LRichTextPriv::TextBlock::AddText(Transaction *Trans, ssize_t AtOffset, con
 	for (int i = 0; i < InChars; i += Chars)
 	{
 		// Work out the run of chars that are either
-		// emoji or not emoji...
-		bool IsEmoji = EmojiIdx[i] >= 0;
-		Chars = 1;
-		for (int n = i + 1; n < InChars; n++)
+		// Emoji or not Emoji...
+		bool IsEmoji = EmojiIdx[i].Index >= 0;
+		Chars = 0;
+		for (int n = i; n < InChars;)
 		{
-			if ( IsEmoji ^ (EmojiIdx[n] >= 0) )
+			if ( IsEmoji ^ (EmojiIdx[n].Index >= 0) )
 				break;
-			Chars++;
+
+			if (IsEmoji)
+			{
+				auto &e = EmojiIdx[n];
+				if (e.Index >= 0 && e.Size > 0)
+				{
+					Chars += e.Size;
+					n += e.Size;
+				}
+				else
+				{
+					LAssert(!"Something went wrong.");
+					Chars++;
+					n++;
+				}
+			}
+			else
+			{
+				Chars++;
+				n++;
+			}
 		}
 		
 		// Now process 'Char' chars

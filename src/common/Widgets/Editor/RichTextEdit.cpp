@@ -2865,19 +2865,18 @@ EmojiMenu::EmojiMenu(LRichTextPriv *priv, LPoint p) : LPopup(priv->View)
 	d->GetEmojiImage();
 
 	int MaxIdx = 0;
-	LRange EmojiBlocks[2] = { LRange(0x203c, 0x3299 - 0x203c + 1), LRange(0x1f004, 0x1f6c5 - 0x1f004 + 1) };
 	LHashTbl<IntKey<int>, int> Map;
-	for (int b=0; b<CountOf(EmojiBlocks); b++)
+	for (int b=0; b<CountOf(EmojiRanges); b++)
 	{
-		LRange &r = EmojiBlocks[b];
+		LRange &r = EmojiRanges[b];
 		for (int i=0; i<r.Len; i++)
 		{
 			uint32_t u = (int)r.Start + i;
-			int Idx = EmojiToIconIndex(&u, 1);
-			if (Idx >= 0)
+			auto Emoji = EmojiToIconIndex(&u, 1);
+			if (Emoji.Index >= 0)
 			{
-				Map.Add(Idx, u);
-				MaxIdx = MAX(MaxIdx, Idx);
+				Map.Add(Emoji.Index, u);
+				MaxIdx = MAX(MaxIdx, Emoji.Index);
 			}
 		}
 	}

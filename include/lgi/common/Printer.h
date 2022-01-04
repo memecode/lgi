@@ -3,13 +3,48 @@
 	\author Matthew Allen
 */
 
-#ifndef _GPRINTER_H_
-#define _GPRINTER_H_
+#pragma once
 
-class GPrintEvents
+struct LPrintPageRanges : public LArray<LRange>
+{
+	LPrintPageRanges(LString PageRanges)
+	{
+		for (auto r: PageRanges.SplitDelimit(","))
+		{
+			auto p = r.SplitDelimit("-");
+			if (p.Length() == 1)
+			{
+				auto &range = New();
+				range.Start = p[0].Int();
+				range.Len = 1;
+			}
+			else if (p.Length() == 2)
+			{
+				auto &range = New();
+				range.Start = p[0].Int();
+				range.Len = p[1].Int() - range.Start + 1;
+			}
+		}
+	}
+
+	bool InRanges(int Page)
+	{
+		if (Length() == 0)
+			return true;
+
+		for (auto &r: *this)
+			if (r.Overlap(Page))
+				return true;
+
+		return false;
+	}
+};
+
+
+class LPrintEvents
 {
 public:
-	virtual ~GPrintEvents() {}
+	virtual ~LPrintEvents() {}
 
 	/*
 	/// Get the number of pages in the document
@@ -26,25 +61,26 @@ public:
 
 	virtual int OnBeginPrint(LPrintDC *pDC) { return 1; }
 	virtual bool OnPrintPage(LPrintDC *pDC, int PageIndex) = 0;
+	virtual LPrintPageRanges *GetPageRanges() { return NULL; }
 };
 
 /// Class to connect to a printer and start printing pages.
-class LgiClass GPrinter
+class LgiClass LPrinter
 {
-	class GPrinterPrivate *d;
+	class LPrinterPrivate *d;
 
 public:
-	GPrinter();
-	virtual ~GPrinter();
+	LPrinter();
+	virtual ~LPrinter();
 
 	/// Browse to a printer
 	bool Browse(LView *Parent);
 
 	/// Start a print job
-	bool Print
+	int Print
 	(
 		/// The event callback for pagination and printing of pages
-		GPrintEvents *Events,
+		LPrintEvents *Events,
 		/// [Optional] The name of the print job
 		const char *PrintJobName = NULL,
 		/// [Optional] The maximum number of pages to print
@@ -60,4 +96,3 @@ public:
 	bool Serialize(LString &Str, bool Write);
 };
 
-#endif

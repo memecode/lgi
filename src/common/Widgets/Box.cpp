@@ -10,25 +10,46 @@
 #define DEFAULT_MINIMUM_SIZE_PX		5
 #define ACTIVE_SPACER_SIZE_PX		9
 
+#if 0//def _DEBUG
+#define LOG(...)		if (_Debug) LgiTrace(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
 enum LBoxMessages
 {
 	M_CHILDREN_CHANGED = M_USER + 0x2000
 };
 
+struct LBoxViewInfo
+{
+	LViewI *View = NULL;
+	LCss::Len Size; // Original size before layout
+};
+
 struct LBoxPriv
 {
 public:
-	bool Vertical;
+	bool Vertical = false;
+	bool Dirty = false;
 	LArray<LBox::Spacer> Spacers;
-	LBox::Spacer *Dragging;
+	LBox::Spacer *Dragging = NULL;
 	LPoint DragOffset;
-	bool Dirty;
+	LArray<LBoxViewInfo> Info;
 	
 	LBoxPriv()
 	{
-		Dirty = false;
-		Vertical = false;
-		Dragging = NULL;
+	}
+
+	LBoxViewInfo *GetInfo(LViewI *v)
+	{
+		for (auto &i: Info)
+			if (i.View == v)
+				return &i;
+		
+		auto &i = Info.New();
+		i.View = v;
+		return &i;
 	}
 	
 	int GetBox(LRect &r)
@@ -263,14 +284,39 @@ void LBox::OnPaint(LSurface *pDC)
 
 struct BoxRange
 {
-	int Min, Max;
-	LCss::Len Size;
+	int MinPx, MaxPx;
+	LCss::Len Size, Min, Max;
 	LViewI *View;
 	
-	BoxRange()
+	BoxRange &Init()
 	{
-		Min = Max = 0;
+		MinPx = MaxPx = DEFAULT_MINIMUM_SIZE_PX;
 		View = NULL;
+		return *this;
+	}
+
+	LString toString(const char *label, LCss::Len &l)
+	{
+		if (!l.IsValid())
+			return "";
+
+		LStringPipe p;
+		l.ToString(p);
+		return LString(", ") + label + "=" + p.NewGStr();
+	}
+
+	LString toString()
+	{
+		LStringPipe p;
+		Size.ToString(p);
+
+		LString s;
+		s.Printf("%s/%p, %i->%i%s%s%s",
+			View?View->GetClass():NULL, View,
+			MinPx, MaxPx,
+			toString("sz", Size).Get(), toString("min", Min).Get(), toString("max", Max).Get());
+		
+		return s;
 	}
 };
 
@@ -290,9 +336,7 @@ void LBox::OnPosChange()
 	int AvailablePx = d->GetBox(content);
 	if (AvailablePx <= 0)
 	{
-		#ifdef _DEBUG
-		if (_Debug) LgiTrace("%s:%i - No available px.\n", _FL);
-		#endif
+		LOG("%s:%i - No available px.\n", _FL);
 		return;
 	}
 
@@ -301,23 +345,23 @@ void LBox::OnPosChange()
 	int SpacerPx = 0;
 
 	int FixedPx = 0;
-	int FixedChildren = 0;
+	LArray<int> FixedChildren;
+	int MinPx = 0;
 	
 	int PercentPx = 0;
-	int PercentChildren = 0;
+	LArray<int> PercentChildren;
 	float PercentCount = 0.0f;
 	
-	int AutoChildren = 0;
+	LArray<int> AutoChildren;
 
-	#ifdef _DEBUG
-	if (_Debug) LgiTrace("%s:%i - %i views.\n", _FL, (int)views.Length());
-	#endif
+	LOG("%s:%i - %i views, %i avail px\n", _FL, (int)views.Length(), AvailablePx);
 
 	// Do first pass over children and find their sizes
 	for (LViewI *c: views)
 	{
 		LCss *css = c->GetCss();
-		BoxRange &box = Sizes.New();
+		BoxRange &box = Sizes[Idx].Init();
+		auto vi = d->GetInfo(c);
 		
 		box.View = c;
 		
@@ -325,36 +369,61 @@ void LBox::OnPosChange()
 		if (css)
 		{
 			if (IsVertical())
+			{
 				box.Size = css->Height();
+				box.Min = css->MinHeight();
+				box.Max = css->MaxHeight();
+			}
 			else
+			{
 				box.Size = css->Width();
+				box.Min = css->MinWidth();
+				box.Max = css->MaxWidth();
+			}
 		}
 
 		// Work out some min and max values		
 		if (box.Size.IsValid())
 		{
+			if (!vi->Size.IsValid())
+				vi->Size = box.Size;
+
 			if (box.Size.Type == LCss::LenPercent)
 			{
-				box.Max = box.Size.ToPx(AvailablePx, GetFont());
-				PercentPx += box.Max;
+				box.MaxPx = box.Size.ToPx(AvailablePx, GetFont());
+				PercentPx += box.MaxPx;
 				PercentCount += box.Size.Value;
-				PercentChildren++;
+				PercentChildren.Add(Idx);
 			}
 			else if (box.Size.IsDynamic())
 			{
-				AutoChildren++;
+				AutoChildren.Add(Idx);
 			}
 			else
 			{
 				// Fixed children get first crack at the space
-				box.Min
-					= box.Max
+				box.MaxPx
 					= box.Size.ToPx(AvailablePx, GetFont());
-				FixedPx += box.Min;
-				FixedChildren++;
+				FixedPx += box.MaxPx;
+				FixedChildren.Add(Idx);
 			}
 		}
-		else AutoChildren++;
+		else
+		{
+			AutoChildren.Add(Idx);
+
+			if (vi)
+			{
+				if (IsVertical())
+					vi->Size = LCss::Len(LCss::LenPx, c->Y());
+				else
+					vi->Size = LCss::Len(LCss::LenPx, c->X());
+			}
+		}
+
+		MinPx += box.MinPx;
+
+		LOG("        %s\n", box.toString().Get());
 
 		// Allocate area for spacers in the Fixed portion
 		if (Idx < Children.Length() - 1)
@@ -366,21 +435,56 @@ void LBox::OnPosChange()
 		Idx++;
 	}
 
+	LOG("    FixedChildren=" LPrintfSizeT " AutoChildren=" LPrintfSizeT "\n",
+		FixedChildren.Length(), AutoChildren.Length());
+
 	// Convert all the percentage sizes to px
 	int RemainingPx = AvailablePx - SpacerPx - FixedPx;
+	LOG("    RemainingPx=%i (%i - %i - %i)\n", RemainingPx, AvailablePx, SpacerPx, FixedPx);
+	if (RemainingPx < 0)
+	{
+		// De-allocate space from the fixed size views...
+		int FitPx = AvailablePx - SpacerPx - MinPx;
+		double Ratio = (double)FitPx / FixedPx;
+		LOG("    Dealloc FitPx=%i Ratio=%.2f\n", FitPx, Ratio);
+		for (size_t i=0; i<views.Length(); i++)
+		{
+			auto c = views[i];
+			LCss *css = c->GetCss();
+			BoxRange &box = Sizes[i];
+			if (css)
+			{
+				if (!box.Size.IsDynamic())
+				{
+					int OldPx = box.MaxPx;
+					int NewPx = (int)(OldPx * Ratio);
+					LAssert(NewPx == 0 || NewPx < OldPx);
+					box.MaxPx = NewPx;					
+					box.Size = LCss::Len(LCss::LenPx, NewPx);					
+					LOG("        %s: px=%i->%i\n", c->GetClass(), OldPx, NewPx);
+					FixedPx -= OldPx - NewPx;
+				}
+			}			
+		}
+
+		RemainingPx = AvailablePx - SpacerPx - FixedPx;
+	}
+
+	LOG("    RemainingPx=%i (%i - %i - %i)\n", RemainingPx, AvailablePx, SpacerPx, FixedPx);
 	for (int i=0; i<Sizes.Length(); i++)
 	{
 		BoxRange &box = Sizes[i];
 		if (box.Size.Type == LCss::LenPercent)
 		{
+			LOG("        PercentSize: %s, %i > %i\n", box.toString().Get(), PercentPx, RemainingPx);
 			if (PercentPx > RemainingPx)
 			{
-				if (AutoChildren > 0 || PercentChildren > 1)
+				if (AutoChildren.Length() > 0 || PercentChildren.Length() > 1)
 				{
 					// Well... ah... we better leave _some_ space for them.
-					int AutoPx = 16 * AutoChildren;
+					auto AutoPx = 16 * AutoChildren.Length();
 					float Ratio = ((float)RemainingPx - AutoPx) / PercentPx;
-					int Px = (int) (box.Max * Ratio);
+					int Px = (int) (box.MaxPx * Ratio);
 					box.Size.Type = LCss::LenPx;
 					box.Size.Value = (float) Px;
 					RemainingPx -= Px;
@@ -396,32 +500,36 @@ void LBox::OnPosChange()
 			else
 			{
 				box.Size.Type = LCss::LenPx;
-				box.Size.Value = (float) box.Max;
-				RemainingPx -= box.Max;
+				box.Size.Value = (float) box.MaxPx;
+				RemainingPx -= box.MaxPx;
 			}
 		}
 	}
 
 	// Convert auto children to px
-	int AutoPx = AutoChildren > 0 ? RemainingPx / AutoChildren : 0;
-	for (int i=0; i<Sizes.Length(); i++)
+	auto AutoPx = AutoChildren.Length() > 0 ? RemainingPx / AutoChildren.Length() : 0;
+	LOG("    AutoPx=%i, %i / " LPrintfSizeT "\n", AutoPx, RemainingPx, AutoChildren.Length());
+	while (AutoChildren.Length())
 	{
+		auto i = AutoChildren[0];
 		BoxRange &box = Sizes[i];
-		if (box.Size.Type != LCss::LenPx)
+		AutoChildren.DeleteAt(0, true);
+
+		LOG("        Auto: %s\n", box.toString().Get());
+		
+		box.Size.Type = LCss::LenPx;
+		if (AutoChildren.Length() > 0)
 		{
-			box.Size.Type = LCss::LenPx;
-			if (AutoChildren > 1)
-			{
-				box.Size.Value = (float) AutoPx;
-				RemainingPx -= AutoPx;
-			}
-			else
-			{
-				box.Size.Value = (float) RemainingPx;
-				RemainingPx = 0;
-			}
-			AutoChildren--;
+			box.Size.Value = (float) AutoPx;
+			RemainingPx -= (int)AutoPx;
 		}
+		else
+		{
+			box.Size.Value = (float) RemainingPx;
+			RemainingPx = 0;
+		}
+
+		LOG("        AutoAlloc: %s\n", box.toString().Get());
 	}
 	
 	for (int i=0; i<Sizes.Length(); i++)
@@ -429,6 +537,8 @@ void LBox::OnPosChange()
 		BoxRange &box = Sizes[i];
 		LAssert(box.Size.Type == LCss::LenPx);
 		int Px = (int) (box.Size.Value + 0.01);
+
+		LOG("    Px[%i]=%i box=%s\n", i, Px, box.toString().Get());
 
 		// Allocate space for view
 		LRect viewPos = content;
@@ -443,9 +553,7 @@ void LBox::OnPosChange()
 			viewPos.x2 = Cur + Px - 1;
 		}
 		box.View->SetPos(viewPos);
-		#ifdef _DEBUG
-		if (_Debug) LgiTrace("%s:%i - view[%i] = %s.\n", _FL, i, viewPos.GetStr());
-		#endif
+		LOG("    View[%i] = %s.\n", i, viewPos.GetStr());
 		#ifdef WIN32
 		// This forces the update, otherwise the child's display lags till the
 		// mouse is released *rolls eyes*

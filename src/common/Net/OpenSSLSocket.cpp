@@ -884,7 +884,7 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 								sprintf_s(m, sizeof(m), "Connected to '%s' using SSL", h);
 								OnInformation(m);
 							}
-							else
+							else if (!d->Cancel->IsCancelled())
 							{
 								LString Err = SslGetErrorAsString(Library).Strip();
 								if (!Err)

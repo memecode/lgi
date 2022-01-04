@@ -5,10 +5,10 @@
 struct LCmd
 {
 	virtual ~LCmd() {}
-	virtual bool OnPaint(GDrawListSurfacePriv *d, LSurface *pDC) = 0;
+	virtual bool OnPaint(LDrawListSurfacePriv *d, LSurface *pDC) = 0;
 };
 
-struct GDrawListSurfacePriv : public LArray<LCmd*>
+struct LDrawListSurfacePriv : public LArray<LCmd*>
 {
 	int x, y, Bits;
 	int DpiX, DpiY;
@@ -16,14 +16,14 @@ struct GDrawListSurfacePriv : public LArray<LCmd*>
 	LSurface *CreationSurface;
 	LFont *Font;
 
-	GDrawListSurfacePriv()
+	LDrawListSurfacePriv()
 	{
 		x = y = 0;
 		CreationSurface = NULL;
 		Font = NULL;
 	}
 
-	~GDrawListSurfacePriv()
+	~LDrawListSurfacePriv()
 	{
 		DeleteObjects();
 	}
@@ -53,7 +53,7 @@ struct LCmdTxt : public LCmd
 		Ds = ds;
 	}
 	
-	bool OnPaint(GDrawListSurfacePriv *d, LSurface *pDC)
+	bool OnPaint(LDrawListSurfacePriv *d, LSurface *pDC)
 	{
 		LFont *f = Ds->GetFont();
 		f->Transparent(!d->Back.IsValid());
@@ -88,7 +88,7 @@ struct LCmdBlt : public LCmd
 			LAssert(Src.Valid() && Dst.Valid());
 	}
 	
-	bool OnPaint(GDrawListSurfacePriv *d, LSurface *pDC)
+	bool OnPaint(LDrawListSurfacePriv *d, LSurface *pDC)
 	{
 		if (Stretch)
 			pDC->StretchBlt(&Dst, Img, &Src);
@@ -109,7 +109,7 @@ struct LCmdRect : public LCmd
 		Filled = filled;
 	}
 
-	bool OnPaint(GDrawListSurfacePriv *d, LSurface *pDC)
+	bool OnPaint(LDrawListSurfacePriv *d, LSurface *pDC)
 	{
 		if (Filled)
 			pDC->Rectangle(&r);
@@ -127,7 +127,7 @@ struct LCmdPixel : public LCmd
 	{
 	}
 
-	bool OnPaint(GDrawListSurfacePriv *d, LSurface *pDC)
+	bool OnPaint(LDrawListSurfacePriv *d, LSurface *pDC)
 	{
 		pDC->Set(p.x, p.y);
 		return true;
@@ -143,7 +143,7 @@ struct LCmdColour : public LCmd
 		c = col;
 	}
 
-	bool OnPaint(GDrawListSurfacePriv *d, LSurface *pDC)
+	bool OnPaint(LDrawListSurfacePriv *d, LSurface *pDC)
 	{
 		pDC->Colour(c);
 		return true;
@@ -158,16 +158,16 @@ struct LCmdLine : public LCmd
 	{
 	}
 
-	bool OnPaint(GDrawListSurfacePriv *d, LSurface *pDC)
+	bool OnPaint(LDrawListSurfacePriv *d, LSurface *pDC)
 	{
 		pDC->Line(s.x, s.y, e.x, e.y);
 		return true;
 	}
 };
 
-GDrawListSurface::GDrawListSurface(int Width, int Height, LColourSpace Cs)
+LDrawListSurface::LDrawListSurface(int Width, int Height, LColourSpace Cs)
 {
-	d = new GDrawListSurfacePriv;
+	d = new LDrawListSurfacePriv;
 	d->x = Width;
 	d->y = Height;
 	d->DpiX = d->DpiY = LScreenDpi();
@@ -176,9 +176,9 @@ GDrawListSurface::GDrawListSurface(int Width, int Height, LColourSpace Cs)
 	ColourSpace = Cs;
 }
 
-GDrawListSurface::GDrawListSurface(LSurface *FromSurface)
+LDrawListSurface::LDrawListSurface(LSurface *FromSurface)
 {
-	d = new GDrawListSurfacePriv;
+	d = new LDrawListSurfacePriv;
 	d->x = FromSurface->X();
 	d->y = FromSurface->Y();
 	d->DpiX = FromSurface->DpiX();
@@ -189,44 +189,44 @@ GDrawListSurface::GDrawListSurface(LSurface *FromSurface)
 	d->CreationSurface = FromSurface;
 }
 
-GDrawListSurface::~GDrawListSurface()
+LDrawListSurface::~LDrawListSurface()
 {
 	delete d;
 }
 
-ssize_t GDrawListSurface::Length()
+ssize_t LDrawListSurface::Length()
 {
 	return d->Length();
 }
 
-bool GDrawListSurface::OnPaint(LSurface *Dest)
+bool LDrawListSurface::OnPaint(LSurface *Dest)
 {
 	return d->OnPaint(Dest);
 }
 
-LFont *GDrawListSurface::GetFont()
+LFont *LDrawListSurface::GetFont()
 {
 	return d->Font;
 }
 
-void GDrawListSurface::SetFont(LFont *Font)
+void LDrawListSurface::SetFont(LFont *Font)
 {
 	d->Font = Font;
 }
 
-LColour GDrawListSurface::Background()
+LColour LDrawListSurface::Background()
 {
 	return d->Back;
 }
 
-LColour GDrawListSurface::Background(LColour c)
+LColour LDrawListSurface::Background(LColour c)
 {
 	LColour Prev = d->Back;
 	d->Back = c;
 	return Prev;	
 }
 
-LDisplayString *GDrawListSurface::Text(int x, int y, const char *Str, int Len)
+LDisplayString *LDrawListSurface::Text(int x, int y, const char *Str, int Len)
 {
 	if (!d->Font)
 	{
@@ -252,18 +252,18 @@ LDisplayString *GDrawListSurface::Text(int x, int y, const char *Str, int Len)
 	return Ds;
 }
 
-LRect GDrawListSurface::ClipRgn()
+LRect LDrawListSurface::ClipRgn()
 {
 	return Clip;
 }
 
-LRect GDrawListSurface::ClipRgn(LRect *Rgn)
+LRect LDrawListSurface::ClipRgn(LRect *Rgn)
 {
 	Clip = *Rgn;
 	return Clip;
 }
 
-COLOUR GDrawListSurface::Colour()
+COLOUR LDrawListSurface::Colour()
 {
 	switch (d->Bits)
 	{
@@ -281,7 +281,7 @@ COLOUR GDrawListSurface::Colour()
 	return 0;
 }
 
-COLOUR GDrawListSurface::Colour(COLOUR c, int Bits)
+COLOUR LDrawListSurface::Colour(COLOUR c, int Bits)
 {
 	COLOUR Prev = Colour();
 	d->Fore.Set(c, Bits);
@@ -295,7 +295,7 @@ COLOUR GDrawListSurface::Colour(COLOUR c, int Bits)
 	return Prev;
 }
 
-LColour GDrawListSurface::Colour(LColour c)
+LColour LDrawListSurface::Colour(LColour c)
 {
 	LColour Prev = d->Fore;
 	d->Fore = c;
@@ -309,43 +309,43 @@ LColour GDrawListSurface::Colour(LColour c)
 	return Prev;
 }
 
-int GDrawListSurface::X()
+int LDrawListSurface::X()
 {
 	return d->x;
 }
 
-int GDrawListSurface::Y()
+int LDrawListSurface::Y()
 {
 	return d->y;
 }
 
-ssize_t GDrawListSurface::GetRowStep()
+ssize_t LDrawListSurface::GetRowStep()
 {
 	ssize_t Row = (d->Bits * d->x + 7) >> 3;
 	return Row;
 }
 
-int GDrawListSurface::DpiX()
+int LDrawListSurface::DpiX()
 {
 	return d->DpiX;
 }
 
-int GDrawListSurface::DpiY()
+int LDrawListSurface::DpiY()
 {
 	return d->DpiY;
 }
 
-int GDrawListSurface::GetBits()
+int LDrawListSurface::GetBits()
 {
 	return d->Bits;
 }
 
-void GDrawListSurface::SetOrigin(int x, int y)
+void LDrawListSurface::SetOrigin(int x, int y)
 {
 	LSurface::SetOrigin(x, y);
 }
 
-void GDrawListSurface::Set(int x, int y)
+void LDrawListSurface::Set(int x, int y)
 {
 	LCmdPixel *c = new LCmdPixel(x, y);
 	if (c)
@@ -354,7 +354,7 @@ void GDrawListSurface::Set(int x, int y)
 		LAssert(0);
 }
 
-void GDrawListSurface::HLine(int x1, int x2, int y)
+void LDrawListSurface::HLine(int x1, int x2, int y)
 {
 	LCmdLine *c = new LCmdLine(x1, y, x2, y);
 	if (c)
@@ -363,7 +363,7 @@ void GDrawListSurface::HLine(int x1, int x2, int y)
 		LAssert(0);
 }
 
-void GDrawListSurface::VLine(int x, int y1, int y2)
+void LDrawListSurface::VLine(int x, int y1, int y2)
 {
 	LCmdLine *c = new LCmdLine(x, y1, x, y2);
 	if (c)
@@ -372,7 +372,7 @@ void GDrawListSurface::VLine(int x, int y1, int y2)
 		LAssert(0);
 }
 
-void GDrawListSurface::Line(int x1, int y1, int x2, int y2)
+void LDrawListSurface::Line(int x1, int y1, int x2, int y2)
 {
 	LCmdLine *c = new LCmdLine(x1, y1, x2, y2);
 	if (c)
@@ -381,43 +381,43 @@ void GDrawListSurface::Line(int x1, int y1, int x2, int y2)
 		LAssert(0);
 }
 
-uint GDrawListSurface::LineStyle(uint32_t Bits, uint32_t Reset)
+uint LDrawListSurface::LineStyle(uint32_t Bits, uint32_t Reset)
 {
 	LAssert(!"Impl me.");
 	return 0;
 }
 
-void GDrawListSurface::Circle(double cx, double cy, double radius)
+void LDrawListSurface::Circle(double cx, double cy, double radius)
 {
 	LAssert(!"Impl me.");
 }
 
-void GDrawListSurface::FilledCircle(double cx, double cy, double radius)
+void LDrawListSurface::FilledCircle(double cx, double cy, double radius)
 {
 	LAssert(!"Impl me.");
 }
 
-void GDrawListSurface::Arc(double cx, double cy, double radius, double start, double end)
+void LDrawListSurface::Arc(double cx, double cy, double radius, double start, double end)
 {
 	LAssert(!"Impl me.");
 }
 
-void GDrawListSurface::FilledArc(double cx, double cy, double radius, double start, double end)
+void LDrawListSurface::FilledArc(double cx, double cy, double radius, double start, double end)
 {
 	LAssert(!"Impl me.");
 }
 
-void GDrawListSurface::Ellipse(double cx, double cy, double x, double y)
+void LDrawListSurface::Ellipse(double cx, double cy, double x, double y)
 {
 	LAssert(!"Impl me.");
 }
 
-void GDrawListSurface::FilledEllipse(double cx, double cy, double x, double y)
+void LDrawListSurface::FilledEllipse(double cx, double cy, double x, double y)
 {
 	LAssert(!"Impl me.");
 }
 
-void GDrawListSurface::Box(int x1, int y1, int x2, int y2)
+void LDrawListSurface::Box(int x1, int y1, int x2, int y2)
 {
 	LRect r(x1, y1, x2, y2);
 	LCmdRect *c = new LCmdRect(r, false);
@@ -427,7 +427,7 @@ void GDrawListSurface::Box(int x1, int y1, int x2, int y2)
 		LAssert(0);
 }
 
-void GDrawListSurface::Box(LRect *r)
+void LDrawListSurface::Box(LRect *r)
 {
     LRect rc = r ? r : Bounds();
 	LCmdRect *c = new LCmdRect(rc, false);
@@ -437,7 +437,7 @@ void GDrawListSurface::Box(LRect *r)
 		LAssert(0);
 }
 
-void GDrawListSurface::Rectangle(int x1, int y1, int x2, int y2)
+void LDrawListSurface::Rectangle(int x1, int y1, int x2, int y2)
 {
 	LRect r(x1, y1, x2, y2);
 	LCmdRect *c = new LCmdRect(r, true);
@@ -447,7 +447,7 @@ void GDrawListSurface::Rectangle(int x1, int y1, int x2, int y2)
 		LAssert(0);
 }
 
-void GDrawListSurface::Rectangle(LRect *r)
+void LDrawListSurface::Rectangle(LRect *r)
 {
     LRect rc = r ? r : Bounds();
 	LCmdRect *c = new LCmdRect(rc, true);
@@ -457,7 +457,7 @@ void GDrawListSurface::Rectangle(LRect *r)
 		LAssert(0);
 }
 
-void GDrawListSurface::Blt(int x, int y, LSurface *Src, LRect *SrcRc)
+void LDrawListSurface::Blt(int x, int y, LSurface *Src, LRect *SrcRc)
 {
 	if (!Src)
 	{
@@ -472,7 +472,7 @@ void GDrawListSurface::Blt(int x, int y, LSurface *Src, LRect *SrcRc)
 		LAssert(0);	
 }
 
-void GDrawListSurface::StretchBlt(LRect *drc, LSurface *Src, LRect *s)
+void LDrawListSurface::StretchBlt(LRect *drc, LSurface *Src, LRect *s)
 {
 	if (!d || !Src || !s)
 	{
@@ -487,17 +487,17 @@ void GDrawListSurface::StretchBlt(LRect *drc, LSurface *Src, LRect *s)
 		LAssert(0);	
 }
 
-void GDrawListSurface::Polygon(int Points, LPoint *Data)
+void LDrawListSurface::Polygon(int Points, LPoint *Data)
 {
 	LAssert(!"Impl me.");
 }
 
-void GDrawListSurface::Bezier(int Threshold, LPoint *Pt)
+void LDrawListSurface::Bezier(int Threshold, LPoint *Pt)
 {
 	LAssert(!"Impl me.");
 }
 
-void GDrawListSurface::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
+void LDrawListSurface::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
 {
 	LAssert(!"Impl me.");
 }

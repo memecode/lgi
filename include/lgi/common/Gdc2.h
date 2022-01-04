@@ -560,8 +560,12 @@ public:
 
 	/// Gets the surface origin
 	virtual void GetOrigin(int &x, int &y) { x = OriginX; y = OriginY; }
+	/// Gets the surface origin
+	LPoint GetOrigin() { int x, y; GetOrigin(x, y); return LPoint(x, y); }
 	/// Sets the surface origin
 	virtual void SetOrigin(int x, int y) { OriginX = x; OriginY = y; }
+	/// Sets the surface origin
+	void SetOrigin(LPoint p) { SetOrigin(p.x, p.y); }
 	
 	/// Sets a pixel with the current colour
 	virtual void Set(int x, int y);
