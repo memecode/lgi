@@ -230,6 +230,28 @@ char *LHtmlParser::ParsePropValue(char *s, char16 *&Value)
 				s++;
 			Value = DecodeEntities(Start, s - Start);
 		}
+
+		if (Value && View && View->GetEnv())
+		{
+			while (true)
+			{
+				auto Start = Strstr(Value, L"<?");
+				if (!Start)
+					break;
+
+				auto End = Strstr(Start + 2, L"?>");
+				if (!End)
+					break;
+
+				LString Code = LString(Start + 2, End - Start - 2).Strip();
+				LString Result = View->GetEnv()->OnDynamicContent(View, Code);
+				LString NewValue = LString(Value, Start - Value) +
+					Result +
+					LString(End + 2);
+				DeleteArray(Value);
+				Value = Utf8ToWide(NewValue);
+			}
+		}
 	}
 
 	return s;
@@ -438,7 +460,7 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 					char *Start = s;
 					while (*s && (!(s[0] == '?' && s[1] == '>')))
 					{
-						if (strchr("\'\"", *s))
+						if (IsQuote(*s))
 						{
 							char d = *s++;
 							s = strchr(s, d);
@@ -457,14 +479,14 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 							char *e = s - 1;
 							while (e > Start && IsWhiteSpace(*e)) e--;
 							e++;
-							LAutoString Code(NewStr(Start, e - Start));
+							LString Code(Start, e - Start);
 							if (Code)
 							{
-								LAutoString Result(View->GetEnv()->OnDynamicContent(View, Code));
+								LString Result = View->GetEnv()->OnDynamicContent(View, Code);
 								if (Result)
 								{
 									// Save the dynamic code to the source pipe
-									SourceData.Write(Result, strlen(Result));
+									SourceData.Write(Result, Result.Length());
 									
 									// Create some new elements based on the dynamically generated string
 									char *p = Result;
@@ -753,9 +775,7 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 								{
 									LHtmlElement *l = OpenTags.Last();
 									if (l && l->TagId == TAG_TABLE)
-									{
 										CloseTag(l);
-									}
 
 									*BackOut = true;
 									return StartTag;
