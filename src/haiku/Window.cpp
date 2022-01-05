@@ -14,6 +14,13 @@
 #define DEBUG_SETFOCUS			0
 #define DEBUG_HANDLEVIEWKEY		0
 
+LString ToString(BRect &r)
+{
+	LString s;
+	s.Printf("%g,%g,%g,%g", r.left, r.top, r.right, r.bottom);
+	return s;
+}
+
 ///////////////////////////////////////////////////////////////////////
 class HookInfo
 {
@@ -93,7 +100,8 @@ public:
 		auto Pos = Frame();
 		if (Pos != Wnd->Pos)
 		{
-			Wnd->Pos = Pos;
+			Wnd->Pos.Dimension(newWidth, newHeight);
+			printf("Wnd->Pos=%s %i,%i %g,%g\n", Wnd->Pos.GetStr(), Wnd->Pos.X(), Wnd->Pos.Y(), newWidth, newHeight);
 			Wnd->OnPosChange();
 		}
 		BWindow::FrameResized(newWidth, newHeight);
@@ -175,12 +183,13 @@ int LWindow::WaitThread()
 	// Post event to the window's thread to delete itself...
 	// printf("%s::~LWindow posting M_LWINDOW_DELETE from th=%u\n", Name(), GetCurrentThreadId());
 	d->PostMessage(new BMessage(M_LWINDOW_DELETE));
-	d = NULL;
 
 	status_t value = 0;
 	// printf("wait_for_thread(%u) start..\n", id);
 	wait_for_thread(id, &value);
 	// printf("wait_for_thread(%u) end=%i\n", id, value);
+	d = NULL;
+
 	return value;
 }
 
@@ -633,7 +642,13 @@ LRect &LWindow::GetClient(bool ClientSpace)
 	LLocker lck(WindowHandle(), _FL);
 	if (lck.Lock())
 	{
-		r = Handle()->Bounds();
+		auto br = Handle()->Bounds();
+		r = br;
+		
+		auto frm = d->Frame();
+		frm.OffsetBy(-frm.left, -frm.top);
+		printf("Frame=%s Bounds=%s r=%s\n", ToString(frm).Get(), ToString(br).Get(), r.GetStr());
+		
 		lck.Unlock();
 	}
 	
@@ -730,13 +745,6 @@ void LWindow::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(L_MED);
 	pDC->Rectangle();
-}
-
-LString ToString(BRect &r)
-{
-	LString s;
-	s.Printf("%g,%g,%g,%g", r.left, r.top, r.right, r.bottom);
-	return s;
 }
 
 void LWindow::OnPosChange()

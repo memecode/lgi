@@ -193,6 +193,8 @@ public:
 	bool Pour(LRegion &r) override;
 	bool Insert(size_t At, const char16 *Data, ssize_t Len) override;
 	bool Delete(size_t At, ssize_t Len) override;
+	
+	void OnPaint(LSurface *pDC);
 };
 
 #endif

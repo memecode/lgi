@@ -2,7 +2,9 @@
 import os
 import sys
 import paramiko
+import re
 
+ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
 password = open("haikuPassword.txt", "r").read().strip()
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -14,7 +16,8 @@ def cmd(c):
 	while True:
 		ln = stdout.readline()
 		if len(ln) > 0:
-			print(ln[0:-1], flush=True)
+			s = ansi_escape.sub('', ln[0:-1])
+			print(s, flush=True)
 		else:
 			break
 

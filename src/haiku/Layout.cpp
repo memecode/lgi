@@ -86,14 +86,9 @@ void LLayout::GetScrollPos(int64 &x, int64 &y)
 void LLayout::SetScrollPos(int64 x, int64 y)
 {
 	if (HScroll)
-	{
 		HScroll->Value(x);
-	}
-
 	if (VScroll)
-	{
 		VScroll->Value(y);
-	}
 }
 
 bool LLayout::Attach(LViewI *p)
@@ -137,7 +132,11 @@ bool LLayout::SetScrollBars(bool x, bool y)
 		||
 		y ^ (VScroll != NULL))
 	{
-		if (_SetScroll.x != x ||
+		if (!IsAttached())
+		{
+			_SetScrollBars(x, y);
+		}
+		else if (_SetScroll.x != x ||
 			_SetScroll.y != y ||
 			!_SetScroll.SentMsg)
 		{
@@ -148,8 +147,10 @@ bool LLayout::SetScrollBars(bool x, bool y)
 			_SetScroll.y = y;
 			_SetScroll.SentMsg = true;
 			
-			// printf("%s:%i - sending M_SET_SCROLL to myself=%s.\n", _FL, GetClass());
-			return PostEvent(M_SET_SCROLL, x, y);
+			auto r = PostEvent(M_SET_SCROLL, x, y);
+			if (!r)
+				printf("%s:%i - sending M_SET_SCROLL(%i,%i) to myself=%s, r=%i, attached=%i.\n", _FL, x, y, GetClass(), r, IsAttached());
+			return r;
 		}
 		
 		// Duplicate... ignore...
@@ -225,9 +226,14 @@ void LLayout::OnPosChange()
 		h.x2 = v.x1 - 1;
 		v.y2 = h.y1 - 1;
 	}
-	
+
 	if (VScroll)
 	{
+		printf("%s.OnPos %s\n", GetClass(), v.GetStr());
+		/*
+		v.Offset(-4, 0);
+		v.y2 -= 2;
+		*/
 		VScroll->Visible(true);
 		VScroll->SetPos(v, true);
 	}
@@ -270,13 +276,13 @@ LRect &LLayout::GetClient(bool ClientSpace)
 
 	if (VScroll && VScroll->Visible())
 	{
+		// printf("\tLayout.GetCli r=%s -> ", r.GetStr());
 		r.x2 = VScroll->GetPos().x1 - 1;
+		// printf("%s\n", r.GetStr());
 	}
 
 	if (HScroll && HScroll->Visible())
-	{
 		r.y2 = HScroll->GetPos().y1 - 1;
-	}
 	
 	return r;
 }

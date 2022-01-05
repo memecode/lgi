@@ -249,20 +249,18 @@ int LSubMenu::Float(LView *From, int x, int y, int Button)
 	}
 	
 	auto item = popup->Go(BPoint(x, y));
-	printf("item=%p\n", item);
-	if (item)
-	{
-		BMessage *msg = item->Message();
-		if (!msg)
-		{
-			printf("%s:%i - No message in item.\n", _FL);
-			return 0;
-		}
-		
-		return ((LMessage*)msg)->A();
-	}
+	// printf("item=%p\n", item);
+	if (!item)
+		return 0;
 
-	return 0;
+	auto *msg = item->Message();
+	if (!msg)
+	{
+		printf("%s:%i - No message in item.\n", _FL);
+		return 0;
+	}
+	
+	return ((LMessage*)msg)->A();
 }
 
 LSubMenu *LSubMenu::FindSubMenu(int Id)

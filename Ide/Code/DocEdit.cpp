@@ -141,7 +141,26 @@ void DocEdit::InvalidateLine(int Idx)
 		Invalidate(&r);
 	}
 }
+
+void DocEdit::OnPaint(LSurface *pDC)
+{
+	LTextView3::OnPaint(pDC);
 	
+	LRect cli = GetClient();
+	pDC->Colour(LColour::Red);
+	pDC->Box(cli.x1, cli.y1, cli.x2, cli.y2);
+	
+	for (LViewI *p = GetParent(); p; p = p->GetParent())
+	{
+		if (p == (LViewI*)GetWindow())
+			break;
+		auto pos = p->GetPos();
+		cli.Offset(pos.x1, pos.y1);
+	}
+	
+	printf("cli=%s\n", cli.GetStr());
+}
+
 void DocEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
 {
 	LColour GutterColour(0xfa, 0xfa, 0xfa);
@@ -304,7 +323,11 @@ bool DocEdit::GetVisible(LStyle &s)
 bool DocEdit::Pour(LRegion &r)
 {
 	LRect c = r.Bound();
+	
+	printf("DocEdit pour %s -> ", c.GetStr());
 	c.y2 -= EDIT_TRAY_HEIGHT;
+	printf("%s\n", c.GetStr());
+	
 	SetPos(c);
 		
 	return true;

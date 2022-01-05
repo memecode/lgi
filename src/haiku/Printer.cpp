@@ -4,44 +4,44 @@
 #include "lgi/common/Printer.h"
 
 ////////////////////////////////////////////////////////////////////
-class GPrinterPrivate
+class LPrinterPrivate
 {
 public:
 	::LString JobName;
 	::LString Printer;
 	::LString Err;
 	::LString PrinterName;
-	GPrintEvents *Events;
+	LPrintEvents *Events;
 	
 	LAutoPtr<LPrintDC> PrintDC;
 	
-	GPrinterPrivate()
+	LPrinterPrivate()
 	{
 		Events = NULL;
 	}
 	
-	~GPrinterPrivate()
+	~LPrinterPrivate()
 	{
 	}
 };
 
 ////////////////////////////////////////////////////////////////////
-GPrinter::GPrinter()
+LPrinter::LPrinter()
 {
-	d = new GPrinterPrivate;
+	d = new LPrinterPrivate;
 }
 
-GPrinter::~GPrinter()
+LPrinter::~LPrinter()
 {
 	DeleteObj(d);
 }
 
-bool GPrinter::Browse(LView *Parent)
+bool LPrinter::Browse(LView *Parent)
 {
 	return false;
 }
 
-bool GPrinter::Serialize(::LString &Str, bool Write)
+bool LPrinter::Serialize(::LString &Str, bool Write)
 {
 	if (Write)
 		Str = d->Printer;
@@ -52,12 +52,12 @@ bool GPrinter::Serialize(::LString &Str, bool Write)
 }
 
 	
-::LString GPrinter::GetErrorMsg()
+::LString LPrinter::GetErrorMsg()
 {
 	return d->Err;
 }
 	
-bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages /* = -1 */, LView *Parent /* = 0 */)
+int LPrinter::Print(LPrintEvents *Events, const char *PrintJobName, int Pages, LView *Parent)
 {
 	if (!Events)
 	{

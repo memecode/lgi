@@ -2136,8 +2136,7 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 			lockWindow = wnd->WindowHandle();
 			if (!lockWindow)
 			{
-				printf("%s:%i - No window to lock (%s)\n",
-					_FL, GetClass());
+				printf("%s:%i - No window to lock (%s)\n", _FL, GetClass());
 				return false;
 			}
 
