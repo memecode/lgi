@@ -1969,6 +1969,12 @@ bool MailIMap::SelectFolder(const char *Path, StrMap *Values)
 {
 	bool Status = false;
 
+	if (!Path)
+	{
+		LAssert(!"Path is missing.");
+		return false;
+	}
+
 	if (Socket && Lock(_FL))
 	{
 		int Cmd = d->NextCmd++;
@@ -2039,6 +2045,12 @@ bool MailIMap::SelectFolder(const char *Path, StrMap *Values)
 int MailIMap::GetMessages(const char *Path)
 {
 	int Status = 0;
+
+	if (!Path)
+	{
+		LAssert(!"No path.");
+		return 0;
+	}
 
 	if (Socket && Lock(_FL))
 	{
@@ -2892,7 +2904,12 @@ char *MailIMap::EncodePath(const char *Path)
 
 	char Sep = GetFolderSep();
 	char Native[MAX_PATH], *o = Native, *e = Native + sizeof(Native) - 1;
-	for (const char *i = *Path == '/' ? Path + 1 : Path; *i && o < e; i++)
+	for (const char *i =
+		Path[0] == '/' && Path[1] ?
+		Path + 1 :
+		Path;
+		*i && o < e;
+		i++)
 	{
 		if (*i == '/')
 			*o++ = Sep;
