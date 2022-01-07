@@ -155,7 +155,7 @@ struct LBView : public Parent
 		ssize_t len = numBytes;
 		auto w = LgiUtf8To32(utf, len);
 
-		#if 0
+		#if 1
 		LString::Array a;
 		for (int i=0; i<numBytes; i++)
 			a.New().Printf("%i(%x)", (uint8_t)bytes[i], (uint8_t)bytes[i]);		

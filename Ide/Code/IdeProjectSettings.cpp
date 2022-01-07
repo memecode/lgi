@@ -884,8 +884,8 @@ void IdeProjectSettings::Edit(LViewI *parent, std::function<void()> OnChanged)
 	d->Editing.Copy(d->Active, true);
 	
 	// Show the dialog...
-	ProjectSettingsDlg Dlg(parent, d);
-	Dlg.DoModal([&](auto dlg, auto code)
+	auto *Dlg = new ProjectSettingsDlg(parent, d);
+	Dlg->DoModal([this,OnChanged](auto dlg, auto code)
 	{
 		if (code)
 		{
@@ -897,6 +897,8 @@ void IdeProjectSettings::Edit(LViewI *parent, std::function<void()> OnChanged)
 			if (OnChanged)
 				OnChanged();
 		}
+		
+		delete dlg;
 	});
 }
 

@@ -229,7 +229,7 @@ void LLayout::OnPosChange()
 
 	if (VScroll)
 	{
-		printf("%s.OnPos %s\n", GetClass(), v.GetStr());
+		// printf("%s.OnPos %s\n", GetClass(), v.GetStr());
 		/*
 		v.Offset(-4, 0);
 		v.y2 -= 2;

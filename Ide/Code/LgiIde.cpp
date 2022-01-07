@@ -1114,8 +1114,20 @@ public:
 		Options.SerializeFile(true);
 		
 		while (Docs.Length())
+		{
+			auto len = Docs.Length();
 			delete Docs[0];
-		Projects.DeleteObjects();
+			LAssert(Docs.Length() != len); // doc must delete itself...
+		}
+
+		auto root = App->RootProject();
+		if (root)
+		{
+			// printf("Deleting proj %s\n", root->GetFileName());
+			delete root;
+		}
+		LAssert(!Projects.Length());
+			
 		DeleteObj(Icons);
 	}
 
@@ -2901,18 +2913,11 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 
 IdeProject *AppWnd::RootProject()
 {
-	IdeProject *Root = 0;
-	
 	for (auto p: d->Projects)
-	{
 		if (!p->GetParentProject())
-		{
-			LAssert(Root == 0);
-			Root = p;
-		}
-	}
+			return p;
 	
-	return Root;
+	return NULL;
 }
 
 IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bool Create, bool Dep)
@@ -3099,7 +3104,8 @@ bool AppWnd::OnNode(const char *Path, ProjectNode *Node, FindSymbolSystem::SymAc
 	if (!Path || !Node)
 		return false;
 
-	d->FindSym->OnFile(Path, Action, Node->GetPlatforms());
+	if (d->FindSym)
+		d->FindSym->OnFile(Path, Action, Node->GetPlatforms());
 	return true;
 }
 
@@ -4352,7 +4358,14 @@ IdeDoc *AppWnd::FocusDoc()
 
 void AppWnd::OnProjectDestroy(IdeProject *Proj)
 {
-	d->Projects.Delete(Proj);
+	if (d)
+	{
+		auto locked = Lock(_FL);
+		// printf("OnProjectDestroy(%s) %i\n", Proj->GetFileName(), locked);
+		d->Projects.Delete(Proj);
+		if (locked) Unlock();
+	}
+	else LAssert(!"No priv");
 }
 
 void AppWnd::OnProjectChange()

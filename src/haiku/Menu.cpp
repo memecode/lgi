@@ -561,18 +561,18 @@ bool LMenuItem::ScanForAccel()
 			{
 				switch (k[0])
 				{
-					case ';': Key = 186; break;
-					case '=': Key = 187; break;
-					case ',': Key = 188; break;
-					case '_': Key = 189; break;
-					case '.': Key = 190; break;
-					case '/': Key = 191; break;
-					case '`': Key = 192; break;
-					case '[': Key = 219; break;
+					case ';':  Key = 186; break;
+					case '=':  Key = 187; break;
+					case ',':  Key = 188; break;
+					case '_':  Key = 189; break;
+					case '.':  Key = 190; break;
+					case '/':  Key = 191; break;
+					case '`':  Key = 192; break;
+					case '[':  Key = 219; break;
 					case '\\': Key = 220; break;
-					case ']': Key = 221; break;
+					case ']':  Key = 221; break;
 					case '\'': Key = 222; break;
-					default: LAssert(!"Unknown key."); break;
+					default:   LAssert(!"Unknown key."); break;
 				}
 			}
 			else
@@ -608,6 +608,7 @@ bool LMenuItem::ScanForAccel()
 				
 				#else
 				
+					// This is not supported yet...
 					auto bwnd = Menu && Menu->WindowHandle() ? Menu->WindowHandle()->WindowHandle() : NULL;
 					if (bwnd)
 					{
@@ -978,6 +979,9 @@ bool LMenu::SetPrefAndAboutItems(int a, int b)
 
 bool LMenu::OnKey(LView *v, LKey &k)
 {
+	LOG("LMenu::OnKey(%s):\n", v ? v->GetClass() : NULL);
+	k.Trace("   ");
+	
 	if (k.Down())
 	{
 		for (auto a: Accel)
@@ -1091,10 +1095,10 @@ bool LAccelerator::Match(LKey &k)
 			((TestFlag(Flags, LGI_EF_SHIFT)  ^ k.Shift())  == 0) &&
 			((TestFlag(Flags, LGI_EF_SYSTEM) ^ k.System()) == 0)
 		)
-		{
 			return true;
-		}
+		// else LOG("No match\n");
 	}
+	// else LOG("Press/key not matched\n");
 
 	return false;
 }

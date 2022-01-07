@@ -101,7 +101,7 @@ public:
 		if (Pos != Wnd->Pos)
 		{
 			Wnd->Pos.Dimension(newWidth, newHeight);
-			printf("Wnd->Pos=%s %i,%i %g,%g\n", Wnd->Pos.GetStr(), Wnd->Pos.X(), Wnd->Pos.Y(), newWidth, newHeight);
+			// printf("Wnd->Pos=%s %i,%i %g,%g\n", Wnd->Pos.GetStr(), Wnd->Pos.X(), Wnd->Pos.Y(), newWidth, newHeight);
 			Wnd->OnPosChange();
 		}
 		BWindow::FrameResized(newWidth, newHeight);
@@ -647,7 +647,7 @@ LRect &LWindow::GetClient(bool ClientSpace)
 		
 		auto frm = d->Frame();
 		frm.OffsetBy(-frm.left, -frm.top);
-		printf("Frame=%s Bounds=%s r=%s\n", ToString(frm).Get(), ToString(br).Get(), r.GetStr());
+		// printf("Frame=%s Bounds=%s r=%s\n", ToString(frm).Get(), ToString(br).Get(), r.GetStr());
 		
 		lck.Unlock();
 	}
