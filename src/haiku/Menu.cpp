@@ -667,6 +667,18 @@ bool LMenuItem::Remove()
 	if (!Parent)
 		return false;
 
+	if (Info)
+	{
+		MenuLock lck(this, _FL);
+		if (lck)
+		{
+			auto m = Info->Menu();
+			if (m)
+				m->RemoveItem(Info);
+		}
+		else printf("%s:%i - Can't lock to Remove item.\n", _FL);
+	}
+	
 	LAssert(Parent->Items.HasItem(this));
 	Parent->Items.Delete(this);
 	Parent = NULL;

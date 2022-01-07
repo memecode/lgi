@@ -1068,9 +1068,9 @@ public:
 	
 	// Mru
 	LString::Array RecentFiles;
-	LSubMenu *RecentFilesMenu;
+	LSubMenu *RecentFilesMenu = NULL;
 	LString::Array RecentProjects;
-	LSubMenu *RecentProjectsMenu;
+	LSubMenu *RecentProjectsMenu = NULL;
 
 	// Object
 	AppWndPrivate(AppWnd *a) :
@@ -1090,8 +1090,6 @@ public:
 		Debugging = false;
 		Running = false;
 		Building = false;
-		RecentFilesMenu = 0;
-		RecentProjectsMenu = 0;
 
 		Icons = LLoadImageList("icons.png", 16, 16);
 
@@ -1639,10 +1637,9 @@ AppWnd::AppWnd()
 
 			LMenuItem *Debug = GetMenu()->FindItem(IDM_DEBUG_MODE);
 			if (Debug)
-			{
 				Debug->Checked(true);
-			}
-			else LgiTrace("%s:%i - FindSubMenu failed.\n", _FL);
+			else
+				LgiTrace("%s:%i - FindSubMenu failed.\n", _FL);
 			
 			d->UpdateMenus();
 		}
