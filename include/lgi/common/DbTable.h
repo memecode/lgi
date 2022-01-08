@@ -24,7 +24,7 @@ struct LDbField
 	bool Serialize(LPointer &p, bool Write);
 };
 
-class LDbRow : public GDataPropI
+class LDbRow : public LDataPropI
 {
 	friend class LDbTable;
 	friend struct DbTablePriv;
@@ -81,7 +81,7 @@ public:
 	LString ToString();
 
 	// Data access
-	bool CopyProps(GDataPropI &p);
+	bool CopyProps(LDataPropI &p);
 	const char *GetStr(int id);
 	Store3Status SetStr(int id, const char *str);
 	int64 GetInt(int id);
@@ -90,8 +90,8 @@ public:
 	Store3Status SetDate(int id, const LDateTime *i);
 	LVariant *GetVar(int id);
 	Store3Status SetVar(int id, LVariant *i);
-	GDataPropI *GetObj(int id);
-	Store3Status SetObj(int id, GDataPropI *i);
+	LDataPropI *GetObj(int id);
+	Store3Status SetObj(int id, LDataPropI *i);
 	GDataIt GetList(int id);
 	Store3Status SetRfc822(LStreamI *Rfc822Msg);
 };

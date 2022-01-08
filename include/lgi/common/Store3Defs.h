@@ -234,7 +234,7 @@ enum Store3ItemTypes
 	MAGIC_MAX						= (MAGIC_BASE+14)	// One past the end
 };
 
-// When setting this via GDataI::SetInt the return value is:
+// When setting this via LDataI::SetInt the return value is:
 // - true if you need to mark the object dirty so that it gets saved
 // - false if the flags is stored elsewhere and you don't have to save.
 enum Store3Fields
@@ -432,14 +432,15 @@ enum Store3Fields
 										//
 	FIELD_CAL_LAST_CHECK = 161,			// (LDateTime) Ts the calendar event was last checked for reminders
 	FIELD_DATE_MODIFIED = 162,			// (LDateTime) Ts of modification
-	FIELD_INBOX = 163,					// (GDataFolderI*) Inbox for mail store
-	FIELD_OUTBOX = 164,					// (GDataFolderI*) Outbox for mail store
-	FIELD_SENT = 165,					// (GDataFolderI*) Sent folder for mail store
-	FIELD_TRASH = 166,					// (GDataFolderI*) Trash folder for mail store
+	FIELD_INBOX = 163,					// (LDataFolderI*) Inbox for mail store
+	FIELD_OUTBOX = 164,					// (LDataFolderI*) Outbox for mail store
+	FIELD_SENT = 165,					// (LDataFolderI*) Sent folder for mail store
+	FIELD_TRASH = 166,					// (LDataFolderI*) Trash folder for mail store
 	FIELD_IMAP_SEQ = 167,				// (uint32_t) IMAP sequence number
 	FIELD_CAL_STATUS = 168,				// (char*) Status of the vCal event.
-	FIELD_STORE_STATUS = 169,			// (ScribeAccountletStatusIcon) Status (icon) of a GDataStoreI
+	FIELD_STORE_STATUS = 169,			// (ScribeAccountletStatusIcon) Status (icon) of a LDataStoreI
 	FIELD_RECEIVED_DOMAIN = 170,		// (char*) First "Received:" header domain. (See also SdReceivedDomain)
+	FIELD_FOLDER_ITEMS = 171,			// (int64) Number of items in a folder..
 
 	FIELD_MAX,
 };

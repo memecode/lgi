@@ -14,16 +14,16 @@
 
 	Given the mail object ptr:
 
-		GDataI *m;
+		LDataI *m;
 
 	Query that the mail for it's root mime segment:
 
-		GDataI *Seg = dynamic_cast<GDataI*>(m->GetObj(FIELD_MIME_SEG));
+		LDataI *Seg = dynamic_cast<LDataI*>(m->GetObj(FIELD_MIME_SEG));
 
 	Query a seg for it's children:
 
 		GDataIt Children = Seg->GetList(FIELD_MIME_SEG);
-		GDataI *FirstChild = Children->First();
+		LDataI *FirstChild = Children->First();
 
 	Access segment's charset and mimetype:
 
@@ -53,10 +53,10 @@
 #include "lgi/common/OptionsFile.h"
 #include "lgi/common/Variant.h"
 
-class GDataI;
-class GDataFolderI;
-class GDataStoreI;
-class GDataPropI;
+class LDataI;
+class LDataFolderI;
+class LDataStoreI;
+class LDataPropI;
 typedef LAutoPtr<LStreamI> LAutoStreamI;
 void ParseIdList(char *In, List<char> &Out);
 extern const char *Store3ItemTypeToMime(Store3ItemTypes type);
@@ -64,7 +64,7 @@ extern const char *Store3ItemTypeToMime(Store3ItemTypes type);
 /// A storage event
 ///		a = StoreId
 ///     b = (void*)UserParam
-/// \sa GDataEventsI::Post
+/// \sa LDataEventsI::Post
 #define M_STORAGE_EVENT				(M_USER+0x500)
 
 /// The storage class has this property (positive properties are owned by the app
@@ -72,27 +72,27 @@ extern const char *Store3ItemTypeToMime(Store3ItemTypes type);
 #define FIELD_PROFILE_IMAP_LISTING	-101
 #define FIELD_PROFILE_IMAP_SELECT	-102
 
-#define GDATA_INT32_PROP(name, id) \
+#define LDATA_INT32_PROP(name, id) \
 	int32 Get##name() { return GetObject() ? (int32)GetObject()->GetInt(id) : OnError(_FL); } \
 	bool Set##name(int32 val) { return GetObject() ? GetObject()->SetInt(id, val) >= Store3Delayed : OnError(_FL); }
 
-#define GDATA_INT64_PROP(name, id) \
+#define LDATA_INT64_PROP(name, id) \
 	int64 Get##name() { return GetObject() ? GetObject()->GetInt(id) : OnError(_FL); } \
 	bool Set##name(int64 val) { return GetObject() ? GetObject()->SetInt(id, val) >= Store3Delayed : OnError(_FL); }
 
-#define GDATA_ENUM_PROP(name, id, type) \
+#define LDATA_ENUM_PROP(name, id, type) \
 	type Get##name() { return (type) (GetObject() ? GetObject()->GetInt(id) : OnError(_FL)); } \
 	bool Set##name(type val) { return GetObject() ? GetObject()->SetInt(id, (int)val) >= Store3Delayed : OnError(_FL); }
 
-#define GDATA_STR_PROP(name, id) \
+#define LDATA_STR_PROP(name, id) \
 	const char *Get##name() { auto o = GetObject(); return o ? o->GetStr(id) : (const char*)OnError(_FL); } \
 	bool Set##name(const char *val) { return GetObject() ? GetObject()->SetStr(id, val) >= Store3Delayed : OnError(_FL); }
 
-#define GDATA_DATE_PROP(name, id) \
+#define LDATA_DATE_PROP(name, id) \
 	const LDateTime *Get##name() { return (GetObject() ? GetObject()->GetDate(id) : (LDateTime*)OnError(_FL)); } \
 	bool Set##name(const LDateTime *val) { return GetObject() ? GetObject()->SetDate(id, val) >= Store3Delayed : OnError(_FL); }
 
-#define GDATA_PERM_PROP(name, id) \
+#define LDATA_PERM_PROP(name, id) \
 	ScribePerm Get##name() { return (ScribePerm) (GetObject() ? GetObject()->GetInt(id) : OnError(_FL)); } \
 	bool Set##name(ScribePerm val) { return GetObject() ? GetObject()->SetInt(id, val) >= Store3Delayed : OnError(_FL); }
 
@@ -107,7 +107,7 @@ public:
 	virtual ~LDataIterator() {}
 
 	/// \returns an empty object of the right type.
-	virtual T Create(GDataStoreI *Store) = 0;
+	virtual T Create(LDataStoreI *Store) = 0;
 	/// \returns the first object (NOT thread-safe)
 	virtual T First() = 0;
 	/// \returns the first object (NOT thread-safe)
@@ -137,22 +137,22 @@ public:
 };
 
 
-typedef LDataIterator<GDataPropI*> *GDataIt;
+typedef LDataIterator<LDataPropI*> *GDataIt;
 
 #define EmptyVirtual(t)		LAssert(0); return t
-#define Store3CopyDecl		bool CopyProps(GDataPropI &p) override
-#define Store3CopyImpl(Cls)	bool Cls::CopyProps(GDataPropI &p)
+#define Store3CopyDecl		bool CopyProps(LDataPropI &p) override
+#define Store3CopyImpl(Cls)	bool Cls::CopyProps(LDataPropI &p)
 
 /// A generic interface for getting / setting properties.
-class GDataPropI : virtual public LDom
+class LDataPropI : virtual public LDom
 {
-	virtual GDataPropI &operator =(GDataPropI &p) { return *this; }
+	virtual LDataPropI &operator =(LDataPropI &p) { return *this; }
 
 public:
-	virtual ~GDataPropI() {}
+	virtual ~LDataPropI() {}
 
 	/// Copy all the values from 'p' over to this object
-	virtual bool CopyProps(GDataPropI &p) { return false; }
+	virtual bool CopyProps(LDataPropI &p) { return false; }
 
 	/// Gets a string property
 	virtual const char *GetStr(int id) { EmptyVirtual(NULL); }
@@ -176,9 +176,9 @@ public:
 	virtual Store3Status SetVar(int id, LVariant *i) { EmptyVirtual(Store3Error); }
 
 	/// Gets a sub object pointer
-	virtual GDataPropI *GetObj(int id) { EmptyVirtual(NULL); }
+	virtual LDataPropI *GetObj(int id) { EmptyVirtual(NULL); }
 	/// Sets a sub object pointer
-	virtual Store3Status SetObj(int id, GDataPropI *i) { EmptyVirtual(Store3Error); }
+	virtual Store3Status SetObj(int id, LDataPropI *i) { EmptyVirtual(Store3Error); }
 	
 	/// Gets an iterator interface to a list of sub-objects.
 	virtual GDataIt GetList(int id) { EmptyVirtual(NULL); }
@@ -188,31 +188,31 @@ public:
 
 #pragma warning(default:4263)
 
-class GDataUserI
+class LDataUserI
 {
-	friend class GDataI;
-	GDataI *Object;
+	friend class LDataI;
+	LDataI *Object;
 
 public:
-	GDataUserI();
-	virtual ~GDataUserI();
+	LDataUserI();
+	virtual ~LDataUserI();
 
-	GDataI *GetObject();
-	virtual bool SetObject(GDataI *o);
+	LDataI *GetObject();
+	virtual bool SetObject(LDataI *o);
 };
 
 /// This class is an interface between the UI and the backend for things
 /// like email, contacts, calendar events, groups and filters
-class GDataI : virtual public GDataPropI
+class LDataI : virtual public LDataPropI
 {
-	friend class GDataUserI;
-	virtual GDataI &operator =(GDataI &p) { return *this; }
+	friend class LDataUserI;
+	virtual LDataI &operator =(LDataI &p) { return *this; }
 
 public:
-	GDataUserI *UserData;
+	LDataUserI *UserData;
 
-	GDataI() { UserData = NULL; }
-	virtual ~GDataI()
+	LDataI() { UserData = NULL; }
+	virtual ~LDataI()
 	{
 		if (UserData)
 			UserData->Object = NULL;
@@ -232,20 +232,20 @@ public:
 	/// is deleted, so if it returns false, stop using the ptr you
 	/// have to it.
 	/// \returns true if successful.
-	virtual Store3Status Save(GDataI *Parent = 0) = 0;
-	/// Delete the on disk representation of the object. This will cause GDataEventsI::OnDelete
+	virtual Store3Status Save(LDataI *Parent = 0) = 0;
+	/// Delete the on disk representation of the object. This will cause LDataEventsI::OnDelete
 	/// to be called after which this object will be freed from heap memory automatically. So
 	/// Once you call this method assume the object pointed at is gone.
 	virtual Store3Status Delete(bool ToTrash = true) = 0;
 	/// Gets the storage that this object belongs to.
-	virtual GDataStoreI *GetStore() = 0;
+	virtual LDataStoreI *GetStore() = 0;
 	/// \returns a stream to access the data stored at this node. The caller
 	/// is responsible to free the stream when finished with it.
 	/// For Type == MAGIC_ATTACHMENT: the decoded body of the MIME segment.
 	/// For Type == MAGIC_MAIL: is an RFC822 encoded version of the email.
 	/// For other objects the stream is not defined.
 	virtual LAutoStreamI GetStream(const char *file, int line) = 0;
-	/// Sets the stream, which is used during the next call to GDataI::Save, which
+	/// Sets the stream, which is used during the next call to LDataI::Save, which
 	/// also deletes the object when it's used. The caller loses ownership of the
 	/// object passed into this function.
 	virtual bool SetStream(LAutoStreamI stream) { return false; }
@@ -254,19 +254,19 @@ public:
 };
 
 /// An interface to a folder structure
-class GDataFolderI : virtual public GDataI
+class LDataFolderI : virtual public LDataI
 {
-	virtual GDataFolderI &operator =(GDataFolderI &p) { return *this; }
+	virtual LDataFolderI &operator =(LDataFolderI &p) { return *this; }
 
 public:
-	virtual ~GDataFolderI() {}
+	virtual ~LDataFolderI() {}
 
 	/// \returns an iterator for the sub-folders.
-	virtual LDataIterator<GDataFolderI*> &SubFolders() = 0;
+	virtual LDataIterator<LDataFolderI*> &SubFolders() = 0;
 	/// \returns an iterator for the child objects
-	virtual LDataIterator<GDataI*> &Children() = 0;
+	virtual LDataIterator<LDataI*> &Children() = 0;
 	/// \returns an iterator for the fields this folder defines
-	virtual LDataIterator<GDataPropI*> &Fields() = 0;
+	virtual LDataIterator<LDataPropI*> &Fields() = 0;
 	/// Deletes all child objects from disk and memory.
 	/// \return true on success;
 	virtual Store3Status DeleteAllChildren() { return Store3Error; }
@@ -283,10 +283,10 @@ public:
 /// Event callback interface. Calls to these methods may be in a worker
 /// thread, so make appropriate locking or pass the event off to the GUI
 /// thread via a message.
-class GDataEventsI
+class LDataEventsI
 {
 public:
-	virtual ~GDataEventsI() {}
+	virtual ~LDataEventsI() {}
 
 	/// This allows the caller to pass source:line info for debugging
 	/// It should be called prior to one of the following functions and
@@ -295,35 +295,35 @@ public:
 
 	/// Posts something to the GUI thread
 	/// \sa M_STORAGE_EVENT
-	virtual void Post(GDataStoreI *store, void *Param) {}
+	virtual void Post(LDataStoreI *store, void *Param) {}
 	/// \returns the system path
 	virtual bool GetSystemPath(int Folder, LVariant &Path) { return false; }
 	/// \returns the options object
 	virtual LOptionsFile *GetOptions(bool Create = false) { return 0; }
 	/// A new item is available
-	virtual void OnNew(GDataFolderI *parent, LArray<GDataI*> &new_items, int pos, bool is_new) = 0;
+	virtual void OnNew(LDataFolderI *parent, LArray<LDataI*> &new_items, int pos, bool is_new) = 0;
 	/// When an item is deleted
-	virtual bool OnDelete(GDataFolderI *parent, LArray<GDataI*> &items) = 0;
+	virtual bool OnDelete(LDataFolderI *parent, LArray<LDataI*> &items) = 0;
 	/// When an item is moved to a new folder
-	virtual bool OnMove(GDataFolderI *new_parent, GDataFolderI *old_parent, LArray<GDataI*> &items) = 0;
+	virtual bool OnMove(LDataFolderI *new_parent, LDataFolderI *old_parent, LArray<LDataI*> &items) = 0;
 	/// When an item changes
-	virtual bool OnChange(LArray<GDataI*> &items, int FieldHint) = 0;
+	virtual bool OnChange(LArray<LDataI*> &items, int FieldHint) = 0;
 	/// Notifcation of property change
-	virtual void OnPropChange(GDataStoreI *Store, int Prop, LVariantType Type) {}
+	virtual void OnPropChange(LDataStoreI *Store, int Prop, LVariantType Type) {}
 	/// Get the logging stream
-	virtual LStreamI *GetLogger(GDataStoreI *store) { return 0; }
+	virtual LStreamI *GetLogger(LDataStoreI *store) { return 0; }
 	/// Search for a object by type and name
-	virtual bool Match(GDataStoreI *store, GDataPropI *Addr, int ObjectType, LArray<LDom*> &Matches) { return 0; }
+	virtual bool Match(LDataStoreI *store, LDataPropI *Addr, int ObjectType, LArray<LDom*> &Matches) { return 0; }
 };
 
 /// The virtual mail storage interface from which all mail stores inherit from.
 ///
-/// The data store should implement GDataPropI::GetInt and handle these properties:
+/// The data store should implement LDataPropI::GetInt and handle these properties:
 ///	- FIELD_STATUS, acceptable returns value are:
 ///		* 0 - mail store is in error.
 ///		* 1 - mail store is ready to use / ok.
 ///		* 2 - mail store requires upgrading to use.
-///		These are codified in the enum GDataStoreI::DataStoreStatus
+///		These are codified in the enum LDataStoreI::DataStoreStatus
 /// - FIELD_READONLY, return values are:
 ///		* false - mail store is read/write
 ///		* true - mail store is read only
@@ -335,34 +335,34 @@ public:
 ///	- FIELD_IS_ONLINE, optionally returned if mail store is online or not.
 /// - FIELD_ACCOUNT_ID, optionally return if the mail store is associated with an account.
 ///
-/// The data store may optionally implement GDataPropI::SetInt to handle this property:
+/// The data store may optionally implement LDataPropI::SetInt to handle this property:
 ///	- FIELD_IS_ONLINE, acceptable values are:
 ///		* false - take the mail store offline.
 ///		* true - go online.
 ///		This is currently only implemented on the IMAP mail store.
-class GDataStoreI : virtual public GDataPropI
+class LDataStoreI : virtual public LDataPropI
 {
 public:
-	static LHashTbl<IntKey<int>,GDataStoreI*> Map;
+	static LHashTbl<IntKey<int>,LDataStoreI*> Map;
 	int Id;
 
-	class GDsTransaction
+	class LDsTransaction
 	{
 	protected:
-		GDataStoreI *Store;
+		LDataStoreI *Store;
 
 	public:
-		GDsTransaction(GDataStoreI *s)
+		LDsTransaction(LDataStoreI *s)
 		{
 			Store = s;
 		}
 
-		virtual ~GDsTransaction() {}
+		virtual ~LDsTransaction() {}
 	};
 
-	typedef LAutoPtr<GDsTransaction> StoreTrans;
+	typedef LAutoPtr<LDsTransaction> StoreTrans;
 
-	GDataStoreI()
+	LDataStoreI()
 	{
 		LAssert(LAppInst->InThread());
 		while (Map.Find(Id = LRand(1000)))
@@ -370,7 +370,7 @@ public:
 		Map.Add(Id, this);
 	}
 
-	virtual ~GDataStoreI()
+	virtual ~LDataStoreI()
 	{
 		LAssert(LAppInst->InThread());
 		if (!Map.Delete(Id))
@@ -381,16 +381,16 @@ public:
 	virtual uint64 Size() = 0;
 	
 	/// Create a new data object that isn't written to disk yet
-	virtual GDataI *Create(int Type) = 0;
+	virtual LDataI *Create(int Type) = 0;
 	
 	/// Get the root folder object
-	virtual GDataFolderI *GetRoot(bool create = false) = 0;
+	virtual LDataFolderI *GetRoot(bool create = false) = 0;
 	
 	/// Move objects into a different folder.
 	///
 	/// Success:
 	///		'Items' are owned by 'NewFolder', and not any previous folder.
-	///		Any GDataEventsI interface owned by the data store has it's 'OnMove' method called.
+	///		Any LDataEventsI interface owned by the data store has it's 'OnMove' method called.
 	///
 	/// Failure:
 	///		'Item' is owned by it's previous folder.
@@ -399,9 +399,9 @@ public:
 	virtual Store3Status Move
 	(
 		/// The folder to move the object to
-		GDataFolderI *NewFolder,
+		LDataFolderI *NewFolder,
 		/// The object to move
-		LArray<GDataI*> &Items
+		LArray<LDataI*> &Items
 	) = 0;
 	
 	/// Deletes items, which results in either the items being moved to the local trash folder 
@@ -410,10 +410,10 @@ public:
 	///
 	/// Success:
 	///		'Items' are either owned by the local trash and not any previous folder, and
-	///		GDataEventsI::OnMove is called.
+	///		LDataEventsI::OnMove is called.
 	///			-or-
 	///		'Items' are completely deleted and removed from it's parent and
-	///		GDataEventsI::OnDelete is called, after which the objects are freed.
+	///		LDataEventsI::OnDelete is called, after which the objects are freed.
 	///
 	/// Failure:
 	///		'Items' are owned by it's previous folder.
@@ -422,7 +422,7 @@ public:
 	virtual Store3Status Delete
 	(
 		/// The object to delete
-		LArray<GDataI*> &Items,
+		LArray<LDataI*> &Items,
 		/// Send to the trash or not...
 		bool ToTrash
 	) = 0;
@@ -430,7 +430,7 @@ public:
 	/// Changes items, which results in either the items properties being adjusted.
 	///
 	/// Success:
-	///		The items properties are changed, and the GDataEventsI::OnChange callback 
+	///		The items properties are changed, and the LDataEventsI::OnChange callback 
 	///		is made.
 	///
 	/// Failure:
@@ -440,7 +440,7 @@ public:
 	virtual Store3Status Change
 	(
 		/// The object to change
-		LArray<GDataI*> &Items,
+		LArray<LDataI*> &Items,
 		/// The property to change...
 		int PropId,
 		/// The value to assign
@@ -454,7 +454,7 @@ public:
 		/// The parent window of the UI
 		LViewI *Parent,
 		/// The store should pass information up to the UI via setting various parameters from Store3UiFields
-		GDataPropI *Props
+		LDataPropI *Props
 	) = 0;
 	
 	/// Upgrades the mail store to the current version for this build. You should call this in response
@@ -464,7 +464,7 @@ public:
 		/// The parent window of the UI
 		LViewI *Parent,
 		/// The store should pass information up to the UI via setting various parameters from Store3UiFields
-		GDataPropI *Props
+		LDataPropI *Props
 	) { return false; }
 
 	/// Tries to repair the database.
@@ -473,7 +473,7 @@ public:
 		/// The parent window of the UI
 		LViewI *Parent,
 		/// The store should pass information up to the UI via setting various parameters from Store3UiFields
-		GDataPropI *Props
+		LDataPropI *Props
 	) { return false; }
 	
 	/// Set the sub-format
@@ -482,7 +482,7 @@ public:
 		/// The parent window of the UI
 		LViewI *Parent,
 		/// The store should pass information up to the UI via setting various parameters from Store3UiFields
-		GDataPropI *Props
+		LDataPropI *Props
 	) { return false; }
 	
 	/// Called when event posted
@@ -493,7 +493,7 @@ public:
 	virtual bool OnIdle() = 0;
 	
 	/// Gets the events interface
-	virtual GDataEventsI *GetEvents() = 0;
+	virtual LDataEventsI *GetEvents() = 0;
 	
 	/// Start a scoped transaction
 	virtual StoreTrans StartTransaction() { return StoreTrans(0); }
@@ -501,19 +501,19 @@ public:
 
 /// Open a mail3 folder
 /// \return a valid ptr or NULL on failure
-extern GDataStoreI *OpenMail3
+extern LDataStoreI *OpenMail3
 (
 	/// The file to open
 	const char *Mail3Folder,
 	/// Event interface,
-	GDataEventsI *Callback,
+	LDataEventsI *Callback,
 	/// true if you want to create a new mail3 file.
 	bool Create = false
 );
 
 /// Open am imap store
 /// \return a valid ptr or NULL on failure
-extern GDataStoreI *OpenImap
+extern LDataStoreI *OpenImap
 (
 	/// The host name of the IMAP server
 	char *Host,
@@ -527,7 +527,7 @@ extern GDataStoreI *OpenImap
 	/// \sa #MAIL_SSL, #MAIL_SECURE_AUTH
 	int ConnectFlags,
 	/// Callback interface for various events...
-	GDataEventsI *Callback,
+	LDataEventsI *Callback,
 	/// This allows the IMAP client to request SSL support from the
 	/// parent applications.
 	LCapabilityClient *caps,
@@ -544,7 +544,7 @@ extern GDataStoreI *OpenImap
 #ifdef WIN32
 /// Open a MAPI store
 /// \return a valid ptr or NULL on failure
-extern GDataStoreI *OpenMapiStore
+extern LDataStoreI *OpenMapiStore
 (
 	/// The MAPI profile name
 	const char *Profile,
@@ -555,7 +555,7 @@ extern GDataStoreI *OpenMapiStore
 	/// The account ID
 	uint64 AccountId,
 	/// Event interface,
-	GDataEventsI *Callback
+	LDataEventsI *Callback
 );
 #endif
 
@@ -606,7 +606,7 @@ public:
 		a.Swap(di.a);
 	}
 
-	TPub *Create(GDataStoreI *Store)
+	TPub *Create(LDataStoreI *Store)
 	{
 		LAssert(State == Store3Loaded);
 		return new TPriv(dynamic_cast<TStore*>(Store));

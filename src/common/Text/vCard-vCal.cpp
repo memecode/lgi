@@ -329,7 +329,7 @@ char *VIo::UnMultiLine(char *In)
 
 /////////////////////////////////////////////////////////////
 // VCard class
-bool VCard::Import(GDataPropI *c, LStreamI *s)
+bool VCard::Import(LDataPropI *c, LStreamI *s)
 {
 	bool Status = false;
 
@@ -740,7 +740,7 @@ void VIo::WriteField(LStreamI &s, const char *Name, ParamArray *Params, const ch
 	}	
 }
 
-bool VCard::Export(GDataPropI *c, LStreamI *o)
+bool VCard::Export(LDataPropI *c, LStreamI *o)
 {
 	if (!c || !o)
 		return false;
@@ -1029,7 +1029,7 @@ struct LAlarm
 	}
 };
 
-bool VCal::Import(GDataPropI *c, LStreamI *In)
+bool VCal::Import(LDataPropI *c, LStreamI *In)
 {
 	bool Status = false;
 
@@ -1371,7 +1371,7 @@ LString ToString(LDateTime &dt)
 	return s;
 }
 
-bool VCal::Export(GDataPropI *c, LStreamI *o)
+bool VCal::Export(LDataPropI *c, LStreamI *o)
 {
 	if (!c || !o)
 		return false;
