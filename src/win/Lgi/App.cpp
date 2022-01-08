@@ -299,7 +299,7 @@ DumpTime("exception handler");
 	
 	{
 		/*
-		GLibrary ComCtl32("ComCtl32.dll");
+		LLibrary ComCtl32("ComCtl32.dll");
 		DLLVERSIONINFO info;
 		ZeroObj(info);
 		info.cbSize = sizeof(info);

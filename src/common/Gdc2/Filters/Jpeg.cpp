@@ -54,10 +54,10 @@
 
 // JPEG
 #if LIBJPEG_SHARED
-class LibJpeg : public GLibrary
+class LibJpeg : public LLibrary
 {
 public:
-	LibJpeg() : GLibrary(sLibrary)
+	LibJpeg() : LLibrary(sLibrary)
 	{
 		static bool First = true;
 		if (First)

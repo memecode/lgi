@@ -134,7 +134,7 @@
 
 ////////////////////////////////////////////////////////////////////
 #ifdef WINDOWS
-LAutoPtr<GLibrary> LFontPrivate::Gdi32;
+LAutoPtr<LLibrary> LFontPrivate::Gdi32;
 #endif
 
 LFont::LFont(const char *face, LCss::Len size)
@@ -794,7 +794,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 					typedef DWORD (WINAPI *Proc_GetFontUnicodeRanges)(HDC, LPGLYPHSET);
 
 					if (!d->Gdi32)
-						d->Gdi32.Reset(new GLibrary("Gdi32"));
+						d->Gdi32.Reset(new LLibrary("Gdi32"));
 					if (d->Gdi32)
 					{
 						Proc_GetFontUnicodeRanges GetFontUnicodeRanges = (Proc_GetFontUnicodeRanges)d->Gdi32->GetAddress("GetFontUnicodeRanges");

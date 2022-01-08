@@ -824,7 +824,7 @@ void LColour::OnChange()
 	#if defined(LINUX) && !defined(LGI_SDL)
 	WmColour c;
 	Proc_LgiWmGetColour WmGetColour = 0;
-	GLibrary *WmLib = LAppInst->GetWindowManagerLib();
+	LLibrary *WmLib = LAppInst->GetWindowManagerLib();
 	if (WmLib)
 	{
 		WmGetColour = (Proc_LgiWmGetColour) WmLib->GetAddress("LgiWmGetColour");

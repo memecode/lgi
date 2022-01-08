@@ -318,7 +318,7 @@ public:
 
 	#elif defined(LINUX)
 	
-		class GLibrary *GetWindowManagerLib();
+		class LLibrary *GetWindowManagerLib();
 
 		class DesktopInfo
 		{

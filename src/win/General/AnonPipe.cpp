@@ -31,12 +31,12 @@ struct Msg
 	int b;
 };
 
-struct GAnonPipePriv : public GLibrary, public GSemaphore
+struct GAnonPipePriv : public LLibrary, public GSemaphore
 {
 	HANDLE r, w;
 	HANDLE Timer;
 
-	GAnonPipePriv() : GLibrary("Kernel32")
+	GAnonPipePriv() : LLibrary("Kernel32")
 	{
 		Timer = r = w = INVALID_HANDLE;
 		CreatePipe(&r, &w, 0, 0);

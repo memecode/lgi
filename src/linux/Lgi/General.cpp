@@ -187,7 +187,7 @@ bool _GetSystemFont(char *FontType, char *Font, int FontBufSize, int &PointSize)
 	bool Status = false;
 
 	#ifndef LGI_SDL
-	GLibrary *WmLib = LAppInst->GetWindowManagerLib();
+	LLibrary *WmLib = LAppInst->GetWindowManagerLib();
 	if (WmLib)
 	{
 		Proc_LgiWmGetSysFont GetSysFont = (Proc_LgiWmGetSysFont) WmLib->GetAddress("LgiWmGetSysFont");

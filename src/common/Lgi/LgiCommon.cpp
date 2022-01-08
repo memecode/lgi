@@ -213,7 +213,7 @@ void LExitApp()
 #ifdef WIN32
 bool RegisterActiveXControl(char *Dll)
 {
-	GLibrary Lib(Dll);
+	LLibrary Lib(Dll);
 	if (Lib.IsLoaded())
 	{
 		#ifdef _MSC_VER
@@ -1011,7 +1011,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 	/*
 	#if defined(LINUX) && !defined(LGI_SDL)
 	// Ask our window manager add-on if it knows the path
-	GLibrary *WmLib = LAppInst ? LAppInst->GetWindowManagerLib() : NULL;
+	LLibrary *WmLib = LAppInst ? LAppInst->GetWindowManagerLib() : NULL;
 	if (WmLib)
 	{
 		Proc_LgiWmGetPath WmGetPath = (Proc_LgiWmGetPath) WmLib->GetAddress("LgiWmGetPath");
@@ -1046,7 +1046,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 				GUID FOLDERID_Downloads = {0x374DE290,0x123F,0x4565,{0x91,0x64,0x39,0xC4,0x92,0x5E,0x46,0x7B}};
 				#endif
 			
-				GLibrary Shell("Shell32.dll");
+				LLibrary Shell("Shell32.dll");
 				typedef HRESULT (STDAPICALLTYPE *pSHGetKnownFolderPath)(REFKNOWNFOLDERID rfid, DWORD dwFlags, HANDLE hToken, PWSTR *ppszPath);
 				pSHGetKnownFolderPath SHGetKnownFolderPath = (pSHGetKnownFolderPath)Shell.GetAddress("SHGetKnownFolderPath");
 				if (SHGetKnownFolderPath)

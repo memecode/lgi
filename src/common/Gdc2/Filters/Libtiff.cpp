@@ -26,11 +26,11 @@ namespace t {
 }
 
 // Libtiff support
-class LibTiff : public GLibrary
+class LibTiff : public LLibrary
 {
 public:
 	LibTiff() :
-		GLibrary
+		LLibrary
 		(
 			"libtiff"
 			#if defined(_WIN64)

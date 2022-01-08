@@ -13,7 +13,7 @@ public:
 	LFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
 	OsAppArguments Args;
-	GLibrary *SkinLib;
+	LLibrary *SkinLib;
 	OsThread GuiThread;
 	int LinuxWine;
 	LAutoString Mime, ProductId;

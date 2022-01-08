@@ -1290,7 +1290,7 @@ LLanguage *LGetLanguageId()
 
 	#elif defined(LINUX) && !defined(LGI_SDL)
 
-	GLibrary *WmLib = LAppInst->GetWindowManagerLib();
+	LLibrary *WmLib = LAppInst->GetWindowManagerLib();
 	if (WmLib)
 	{
 		Proc_LgiWmGetLanguage GetLanguage = (Proc_LgiWmGetLanguage) WmLib->GetAddress("LgiWmGetLanguage");

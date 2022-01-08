@@ -99,10 +99,10 @@ const char *sLibrary =
 	;
 
 // Library interface
-class LibPng : public GLibrary
+class LibPng : public LLibrary
 {
 public:
-	LibPng() : GLibrary(sLibrary)
+	LibPng() : LLibrary(sLibrary)
 	{
 		static bool First = true;
 		if (First)

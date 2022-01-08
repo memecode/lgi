@@ -63,7 +63,7 @@ class LFontPrivate
 {
 public:
 	#ifdef WINDOWS
-	static LAutoPtr<GLibrary> Gdi32;
+	static LAutoPtr<LLibrary> Gdi32;
 	#endif
 
 	// Data

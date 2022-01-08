@@ -58,7 +58,7 @@ SSL_locking_function(int mode, int n, const char *file, int line);
 unsigned long
 SSL_id_function();
 
-class LibSSL : public GLibrary
+class LibSSL : public LLibrary
 {
 public:
 	LibSSL()
@@ -145,10 +145,10 @@ public:
 // the code reflects that.
 };
 
-class LibEAY : public GLibrary
+class LibEAY : public LLibrary
 {
 public:
-	LibEAY() : GLibrary(EAY_LIBRARY)
+	LibEAY() : LLibrary(EAY_LIBRARY)
 	{
 		if (!IsLoaded())
 		{

@@ -37,7 +37,7 @@ typedef char IconvChar;
 
 /////////////////////////////////////////////////////////////////////
 // Private growable class for binary compatability
-class LFontSystemPrivate : public GLibrary
+class LFontSystemPrivate : public LLibrary
 {
 public:
 	bool DefaultGlyphSub;

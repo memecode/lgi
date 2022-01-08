@@ -37,10 +37,10 @@ public:
 };
 
 // Plugin
-class SpiPlugin : public GLibrary
+class SpiPlugin : public LLibrary
 {
 public:
-	SpiPlugin(char *f) : GLibrary(f)
+	SpiPlugin(char *f) : LLibrary(f)
 	{
 	}
 

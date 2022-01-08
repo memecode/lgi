@@ -13,14 +13,14 @@
 #include <math.h>
 
 #include "Gdc2.h"
-#include "GLibrary.h"
+#include "LLibrary.h"
 #include "zlib.h"
 #include "GFilterUtils.h"
 
-class ZLib : public GLibrary
+class ZLib : public LLibrary
 {
 public:
-	ZLib() : GLibrary("zlib") {}
+	ZLib() : LLibrary("zlib") {}
 
 	DynFunc1(int, inflateEnd, z_streamp, strm);
 	DynFunc2(int, inflate, z_streamp, strm, int, flush);

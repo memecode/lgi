@@ -2452,7 +2452,7 @@ LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LVariant *Ret, ArgumentA
 
 	if (ArgVal.Length() == Args.Length())
 	{
-		GLibrary Lib(Library);
+		LLibrary Lib(Library);
 		if (Lib.IsLoaded())
 		{
 			void *c = Lib.GetAddress(Method);

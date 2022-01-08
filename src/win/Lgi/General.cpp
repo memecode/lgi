@@ -804,7 +804,7 @@ bool GRegKey::GetValueNames(List<char> &n)
 //////////////////////////////////////////////////////////////////////////////////////
 LString WinGetSpecialFolderPath(int Id)
 {
-	GLibrary Shell("Shell32");
+	LLibrary Shell("Shell32");
 	LString s;
 	char16 wp[MAX_PATH] = { 0 };
 	pSHGetSpecialFolderPathW w = (pSHGetSpecialFolderPathW) Shell.GetAddress("SHGetSpecialFolderPathW");

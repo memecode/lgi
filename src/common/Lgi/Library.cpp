@@ -10,7 +10,7 @@
 #endif
 #include "lgi/common/Token.h"
 
-GLibrary::GLibrary(const char *File, bool Quiet)
+LLibrary::LLibrary(const char *File, bool Quiet)
 {
 	FileName = 0;
 	hLib = 0;
@@ -18,12 +18,12 @@ GLibrary::GLibrary(const char *File, bool Quiet)
 		Load(File, Quiet);	
 }
 
-GLibrary::~GLibrary()
+LLibrary::~LLibrary()
 {
 	Unload();
 }
 
-bool GLibrary::Load(const char *File, bool Quiet)
+bool LLibrary::Load(const char *File, bool Quiet)
 {
 	Unload();
 
@@ -114,7 +114,7 @@ bool GLibrary::Load(const char *File, bool Quiet)
 							if (r == 0)
 							{
 								LMakePath(Path, sizeof(Path), Path, File);
-								printf("GLibrary loaded: '%s'\n", Path);
+								printf("LLibrary loaded: '%s'\n", Path);
 							}
 							else printf("%s:%i - dlinfo failed.\n", _FL);
 						#endif
@@ -195,7 +195,7 @@ bool GLibrary::Load(const char *File, bool Quiet)
 	return hLib != 0;
 }
 
-bool GLibrary::Unload()
+bool LLibrary::Unload()
 {
 	if (hLib)
 	{
@@ -214,7 +214,7 @@ bool GLibrary::Unload()
 	return true;
 }
 
-void *GLibrary::GetAddress(const char *Resource)
+void *LLibrary::GetAddress(const char *Resource)
 {
 	void *p = NULL;
 	
@@ -325,7 +325,7 @@ void *GLibrary::GetAddress(const char *Resource)
 	#include <link.h>
 #endif
 
-LString GLibrary::GetFullPath()
+LString LLibrary::GetFullPath()
 {
 	#if defined(MAC)
 		if (hLib)

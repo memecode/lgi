@@ -2,7 +2,7 @@
 #include "GZipLibrary.h"
 
 #ifdef WIN32
-class GZipLibPrivate : public GLibrary
+class GZipLibPrivate : public LLibrary
 {
 public:
 	typedef void	(EXPENTRY *_ZpVersion)(ZpVer far *);
@@ -75,7 +75,7 @@ public:
 		return 0;
 	}
 	
-	GZipLibPrivate() : GLibrary("Zip32")
+	GZipLibPrivate() : LLibrary("Zip32")
 	{
 		#ifdef _DEBUG
 		if (!IsLoaded())

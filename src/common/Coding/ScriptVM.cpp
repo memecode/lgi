@@ -296,7 +296,7 @@ LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LScriptArguments &Args)
 		}
 	}
 
-	GLibrary Library(Lib);
+	LLibrary Library(Lib);
 	if (!Library.IsLoaded())
 	{
 		if (Log)
