@@ -4,39 +4,39 @@
 #include "lgi/common/Printer.h"
 
 ////////////////////////////////////////////////////////////////////
-class GPrinterPrivate
+class LPrinterPrivate
 {
 public:
 	LString Printer;
 	LString Err;
 	
-	GPrinterPrivate()
+	LPrinterPrivate()
 	{
 	}
 	
-	~GPrinterPrivate()
+	~LPrinterPrivate()
 	{
 	}
 };
 
 
 ////////////////////////////////////////////////////////////////////
-GPrinter::GPrinter()
+LPrinter::LPrinter()
 {
-	d = new GPrinterPrivate;
+	d = new LPrinterPrivate;
 }
 
-GPrinter::~GPrinter()
+LPrinter::~LPrinter()
 {
 	DeleteObj(d);
 }
 
-bool GPrinter::Browse(LView *Parent)
+bool LPrinter::Browse(LView *Parent)
 {
 	return false;
 }
 
-bool GPrinter::Serialize(LString &Str, bool Write)
+bool LPrinter::Serialize(LString &Str, bool Write)
 {
 	if (Write)
 	{
@@ -50,7 +50,7 @@ bool GPrinter::Serialize(LString &Str, bool Write)
 	return true;
 }
 
-LString GPrinter::GetErrorMsg()
+LString LPrinter::GetErrorMsg()
 {
 	return d->Err;
 }
@@ -64,7 +64,7 @@ if (e != noErr) \
 }
 
 
-bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int MaxPages, LView *Parent)
+int LPrinter::Print(LPrintEvents *Events, const char *PrintJobName, int MaxPages, LView *Parent)
 {
 	if (!Events)
 	{
