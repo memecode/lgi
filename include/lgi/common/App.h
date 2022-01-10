@@ -199,14 +199,14 @@ public:
 	/// Enters the message loop.
 	bool Run
 	(
-		/// If true this function will return when the application exits (with LCloseApp()).
-		/// Otherwise if false only pending events will be processed and then the function returns.
-		bool Loop = true,
 		/// Idle callback
 		OnIdleProc IdleCallback = NULL,
 		/// Param for IdleCallback
 		void *IdleParam = NULL
 	);
+	
+	/// Processes any messages in the queue and then returns.
+	[[deprecated]] bool Yield();
 	
 	/// Event called to process the command line
 	void OnCommandLine();

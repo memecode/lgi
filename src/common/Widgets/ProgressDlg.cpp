@@ -196,7 +196,7 @@ void LProgressPane::UpdateUI()
 		if (Remaining && PerSec > 0.0)
 		{
 			auto TotalSeconds = (High - Low + 1) / PerSec;
-			auto RemainingSeconds = TotalSeconds - ElapsedSeconds;
+			// auto RemainingSeconds = TotalSeconds - ElapsedSeconds;
 			LDateTime End;
 			End.Set(StartDt.Ts() + (uint64_t)(TotalSeconds * LDateTime::Second64Bit));
 			if (auto Dur = LDateTime::Now().DescribePeriod(End))

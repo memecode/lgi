@@ -1638,7 +1638,6 @@ public:
 						// Can't know until later... flag it as a unresolved external...
 						//
 						// Allow the assembly for the call to occur.
-						int asd=0;
 					}
 				}
 				
@@ -1858,12 +1857,6 @@ public:
 			}
 			else
 			{
-				if (!Stricmp(t, L"Len") &&
-					!Stricmp(GetTok(Cur+1), L"="))
-				{
-					int asd=0;
-				}
-
 				GOperator o = IsOp(t, PrevIsOp);
 				if (o != OpNull)
 				{

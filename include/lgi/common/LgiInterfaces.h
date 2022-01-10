@@ -254,14 +254,14 @@ public:
 	/// Enters the message loop.
 	virtual bool Run
 	(
-		/// If true this function will return when the application exits (with LCloseApp()).
-		/// Otherwise if false only pending events will be processed and then the function returns.
-		bool Loop = true,
 		/// [Optional] Idle callback
 		OnIdleProc IdleCallback = 0,
 		/// [Optional] User param for IdleCallback
 		void *IdleParam = 0
 	) = 0;
+	
+	/// Processed queued events and then return
+	virtual bool Yield() = 0;
 	
 	/// Event called to process the command line
 	virtual void OnCommandLine() = 0;

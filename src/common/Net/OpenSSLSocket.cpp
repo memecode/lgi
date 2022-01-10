@@ -1374,7 +1374,7 @@ DebugTrace("%s:%i - BIO_read(%p,%i)=%i\n", _FL, Data, Len, r);
 DebugTrace("%s:%i - BIO_should_retry=%i IsBlocking=%i\n", _FL, Retry, d->IsBlocking);
 					if (!Retry)
 					{
-						auto Reason = Library->BIO_get_retry_reason(Bio);
+						Library->BIO_get_retry_reason(Bio);
 						break;
 					}
 					if (d->IsBlocking)
