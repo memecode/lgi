@@ -25,9 +25,12 @@ class LKey;
 class LWindow;
 class LVariant;
 class LCss;
-
 class LViewI;
 class LView;
+
+#ifdef Yield
+#undef Yield
+#endif
 
 // Classes
 class LDomI
