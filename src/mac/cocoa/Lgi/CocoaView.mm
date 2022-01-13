@@ -558,19 +558,19 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 		printf("Got drop format '%s'..\n", dd.Format.Get());
 
 		NSString *NsFmt = dd.Format.NsStr();
-		NSData *d = [pb dataForType:NsFmt];
-		if (d)
+		
+		for (NSPasteboardItem *item in [pb pasteboardItems])
 		{
-			// System type...
-			dd.Data[0].SetBinary(d.length, (void*)d.bytes);
-		}
-		else
-		{
-			// Lgi type?
-			NSArray<NSPasteboardItem *> *all = [pb pasteboardItems];
-			for (id i in all)
+			NSData *d = [item dataForType:NsFmt];
+			if (d)
 			{
-				NSData *data = [i dataForType:LBinaryDataPBoardType];
+				// System type...
+				dd.Data.New().SetBinary(d.length, (void*)d.bytes);
+			}
+			else
+			{
+				// Lgi type?
+				NSData *data = [item dataForType:LBinaryDataPBoardType];
 				if (data)
 				{
 					LBinaryData *bin = [[LBinaryData alloc] init:data];
