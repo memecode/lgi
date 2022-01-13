@@ -191,9 +191,6 @@ typedef CRITICAL_SECTION				OsSemaphore;
 #define ValidSocket(s)					((s) != INVALID_SOCKET)
 typedef SOCKET							OsSocket;
 
-// Run the message loop to process any pending messages
-#define LYield()						LApp::ObjInstance()->Run(false)
-
 #define LGI_GViewMagic					0x14412662
 #define LGI_FileDropFormat				"CF_HDROP"
 #define LGI_StreamDropFormat			CFSTR_FILEDESCRIPTORW

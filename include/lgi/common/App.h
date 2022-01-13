@@ -17,6 +17,9 @@ typedef int							OsProcessId;
 /// of a global static class which is initialized before the main begins executing.
 #define LAppInst						(LApp::ObjInstance())
 
+/// Process any pending messages in the applications message que and then return.
+#define LYield()						LAppInst->Yield()
+
 /// Returns a system font pointer.
 ///
 /// \warning Don't use this before you have created your LApp object. i.e. in a constructor
