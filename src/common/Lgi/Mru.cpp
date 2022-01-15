@@ -6,7 +6,7 @@
 #include "lgi/common/Menu.h"
 
 ////////////////////////////////////////////////////////////////////
-#define DEBUG_LOG				1
+#define DEBUG_LOG				0
 #define M_MRU_BASE				(M_USER+0x3500)
 
 struct GMruEntry

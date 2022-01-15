@@ -48,16 +48,18 @@ bool LClipBoard::Text(const char *Str, bool AutoEmpty)
 {
 	LAutoPool Ap;
 	
-	if (AutoEmpty)
-		Empty();
+	LAssert(AutoEmpty); // If the pasteboard isn't emptied we can't set it's value
+	Empty();
 	
 	Txt = Str;
 	wTxt.Reset();
-	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
-	NSArray *array = [NSArray arrayWithObject:Txt.NsStr()];
-	[pasteboard writeObjects:array];
-
-	return Txt;
+	
+	auto *pb = [NSPasteboard generalPasteboard];
+	auto *text = Txt.NsStr();
+	[pb addTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+	auto result = [pb setString:text forType:NSStringPboardType];
+	LAssert(result);
+	return result != 0;
 }
 
 char *LClipBoard::Text()

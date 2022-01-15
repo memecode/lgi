@@ -3641,12 +3641,12 @@ void ResDialog::OnMouseClick(LMouse &m)
 						DragGoober = i;
 						DragCtrl = c;
 						
-						LgiTrace("IN goober[%i]=%s %i,%i\n", i, c->Goobers[i].GetStr(), m.x, m.y);
+						// LgiTrace("IN goober[%i]=%s %i,%i\n", i, c->Goobers[i].GetStr(), m.x, m.y);
 						break;
 					}
 					else
 					{
-						LgiTrace("goober[%i]=%s %i,%i\n", i, c->Goobers[i].GetStr(), m.x, m.y);
+						// LgiTrace("goober[%i]=%s %i,%i\n", i, c->Goobers[i].GetStr(), m.x, m.y);
 					}
 				}
 			}
