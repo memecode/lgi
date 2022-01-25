@@ -12,8 +12,10 @@ Known bugs:
 #define DEBUG_LINE		550
 #endif
 
+#ifndef IsWhiteSpace
 #define IsWhiteSpace(c) \
 	(strchr(WhiteSpace, c) != NULL)
+#endif
 #define IsBracket(c) \
 	((c) == '{' || (c) == '}')
 #define SkipWs(c) \
