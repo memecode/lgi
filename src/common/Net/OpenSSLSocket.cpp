@@ -43,7 +43,7 @@
 #elif defined MAC
 // Building openssl:
 // ./configure darwin64-x86_64-cc -mmacosx-version-min=10.10
-#define SSL_LIBRARY					"libssl.1.1"
+#define SSL_LIBRARY					"libssl.3"
 #else
 #define SSL_LIBRARY					"libssl"
 #endif

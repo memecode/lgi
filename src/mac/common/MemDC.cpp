@@ -1,5 +1,5 @@
 /*hdr
-**	FILE:			LMemDC.h
+**	FILE:			MemDC.h
 **	AUTHOR:			Matthew Allen
 **	DATE:			27/11/2001
 **	DESCRIPTION:	GDC v2.xx header

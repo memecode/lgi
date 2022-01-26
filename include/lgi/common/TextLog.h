@@ -44,7 +44,7 @@ protected:
 	}
 
 public:
-	LThreadSafeTextView(int id) : TView(id, 0, 0, 2000, 1000)
+	LThreadSafeTextView(int id) : TView(id, 0, 0, 2000, 1000), Sem("LThreadSafeTextView")
 	{
 		ProcessReturns = true;
 		Pos = 0;

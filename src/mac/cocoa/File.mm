@@ -1,5 +1,5 @@
 /*hdr
- **	FILE:			File.cpp
+ **	FILE:			File.mm
  **	AUTHOR:			Matthew Allen
  **	DATE:			8/10/2000
  **	DESCRIPTION:	The new file subsystem

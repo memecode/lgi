@@ -120,7 +120,7 @@ public:
 	bool SelectionOnly;
 	bool SearchUpwards;
 	
-	GDocFindReplaceParams3()
+	GDocFindReplaceParams3() : LMutex("GDocFindReplaceParams3")
 	{
 		MatchCase = false;
 		MatchWord = false;

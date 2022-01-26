@@ -32,7 +32,7 @@ bool LLibrary::Load(const char *File, bool Quiet)
 		char f[MAX_PATH];
 		int ch = sprintf_s(f, sizeof(f), "%s", File);
 		
-		#ifndef HAIKU
+        #ifndef HAIKU
 			// check for default extension..
 			// if you specify no extension in the application this will correctly set
 			// it for the OS your running thus removing the need for #ifdef's in your
