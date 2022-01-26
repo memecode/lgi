@@ -27,30 +27,30 @@
 #include "lgi/common/Net.h"
 
 #define PATH_OFFSET					"../"
-#ifdef WIN32
-	#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-		#ifdef _WIN64
-			#define SSL_LIBRARY		"libssl-1_1-x64"
-			#define EAY_LIBRARY		"libcrypto-1_1-x64"
-		#else // 32bit
-			#define SSL_LIBRARY		"libssl-1_1"
-			#define EAY_LIBRARY		"libcrypto-1_1"
-		#endif
-	#else
-		#define SSL_LIBRARY			"ssleay32"
-		#define EAY_LIBRARY         "libeay32"
+
+LString LibName(const char *Fmt)
+{
+	LString s;
+	s.Printf(Fmt, OPENSSL_SHLIB_VERSION);
+	#ifdef _WIN64
+	s += "-x64";
 	#endif
-#elif defined MAC
-// Building openssl:
-// ./configure darwin64-x86_64-cc -mmacosx-version-min=10.10
-#define SSL_LIBRARY					"libssl.3"
+	return s;
+}
+
+#ifdef WIN32
+	#define SSL_LIBRARY			LibName("libssl-%i")
+	#define EAY_LIBRARY			LibName("libcrypto-%i")
 #else
-#define SSL_LIBRARY					"libssl"
+	// Building openssl on mac:
+	// ./configure darwin64-x86_64-cc -mmacosx-version-min=10.10
+	#define SSL_LIBRARY			LibName("libssl.%i")
 #endif
-#define HasntTimedOut()				((To < 0) || (LCurrentTime() - Start < To))
+
+#define HasntTimedOut()			((To < 0) || (LCurrentTime() - Start < To))
 
 static const char*
-	MinimumVersion					= "1.0.1g";
+	MinimumVersion				= "3.0.1";
 
 void
 SSL_locking_function(int mode, int n, const char *file, int line);
@@ -283,7 +283,7 @@ class OpenSSL :
 public:
 	SSL_CTX *Client;
 	LArray<LMutex*> Locks;
-	LAutoString ErrorMsg;
+	LString ErrorMsg;
 
     bool IsLoaded()
     {
@@ -379,7 +379,7 @@ public:
 		return true;
 
 	OnError:
-		ErrorMsg.Reset(Err.NewStr());
+		ErrorMsg = Err.NewGStr();
 		if (sock)
 			sock->DebugTrace("%s", ErrorMsg.Get());
 		return false;
@@ -428,7 +428,7 @@ public:
 				char *Msg = ERR_error_string(e, 0);
 				LStringPipe p;
 				p.Print("%s:%i - SSL_CTX_new(server) failed with '%s' (%i)\n", _FL, Msg, e);
-				ErrorMsg.Reset(p.NewStr());
+				ErrorMsg = p.NewGStr();
 				sock->DebugTrace("%s", ErrorMsg.Get());
 			}
 		}
@@ -504,7 +504,7 @@ SSL_id_function()
 	return (unsigned long) GetCurrentThreadId();
 }
 
-bool StartSSL(LAutoString &ErrorMsg, SslSocket *sock)
+bool StartSSL(LString &ErrorMsg, SslSocket *sock)
 {
 	static LMutex Lock("StartSSL");
 	
@@ -581,7 +581,7 @@ SslSocket::SslSocket(LStreamI *logger, LCapabilityClient *caps, bool sslonconnec
 	d->Logger = logger;
 	d->IsBlocking = true;
 	
-	LAutoString ErrMsg;
+	LString ErrMsg;
 	if (StartSSL(ErrMsg, this))
 	{
 		if (Library->IsOk(this))

@@ -75,7 +75,7 @@ public:
 	const char *GetErrorString() override;
 };
 
-extern bool StartSSL(LAutoString &ErrorMsg, SslSocket *Sock);
+extern bool StartSSL(LString &ErrorMsg, SslSocket *Sock);
 extern void EndSSL();
 
 #endif

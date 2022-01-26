@@ -92,9 +92,9 @@ extern const char *Store3ItemTypeToMime(Store3ItemTypes type);
 	const LDateTime *Get##name() { return (GetObject() ? GetObject()->GetDate(id) : (LDateTime*)OnError(_FL)); } \
 	bool Set##name(const LDateTime *val) { return GetObject() ? GetObject()->SetDate(id, val) >= Store3Delayed : OnError(_FL); }
 
-#define LDATA_PERM_PROP(name, id) \
-	ScribePerm Get##name() { return (ScribePerm) (GetObject() ? GetObject()->GetInt(id) : OnError(_FL)); } \
-	bool Set##name(ScribePerm val) { return GetObject() ? GetObject()->SetInt(id, val) >= Store3Delayed : OnError(_FL); }
+#define LDATA_INT_TYPE_PROP(type, name, id, defaultVal) \
+	type Get##name() { return (type) (GetObject() ? GetObject()->GetInt(id) : OnError(_FL)); } \
+	bool Set##name(type val = defaultVal) { return GetObject() ? GetObject()->SetInt(id, val) >= Store3Delayed : OnError(_FL); }
 
 
 /// This class is an interface to a collection of objects (NOT thread-safe).

@@ -195,7 +195,7 @@ struct FtpThreadPriv : public LMutex
 	LArray<FtpCmd*> Cmds;
 	FtpRedir *Redir;
 
-	FtpThreadPriv()
+	FtpThreadPriv() : LMutex("FtpThreadPriv")
 	{
 		Loop = true;
 		Redir = new FtpRedir;

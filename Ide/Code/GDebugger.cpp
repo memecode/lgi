@@ -642,7 +642,7 @@ class Gdb : public GDebugger, public LThread, public Callback
 	}
 	
 public:
-	Gdb(LStream *log) : LThread("Gdb"), Log(log)
+	Gdb(LStream *log) : LThread("Gdb"), Log(log), StateMutex("Gdb.StateMutex")
 	{
 		Events = NULL;
 		State = Init;
