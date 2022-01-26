@@ -476,7 +476,7 @@ SSL_locking_function(int mode, int n, const char *file, int line)
 			#ifdef SSL_DEBUG_LOCKING
 			LgiTrace("SSL[%i] create\n", n);
 			#endif
-			Library->Locks[n] = new LMutex;
+			Library->Locks[n] = new LMutex("SSL_locking_function");
 		}
 
 		#ifdef SSL_DEBUG_LOCKING
@@ -506,7 +506,7 @@ SSL_id_function()
 
 bool StartSSL(LAutoString &ErrorMsg, SslSocket *sock)
 {
-	static LMutex Lock;
+	static LMutex Lock("StartSSL");
 	
 	if (Lock.Lock(_FL))
 	{
@@ -569,7 +569,8 @@ struct SslSocketPriv : public LCancel
 
 bool SslSocket::DebugLogging = false;
 
-SslSocket::SslSocket(LStreamI *logger, LCapabilityClient *caps, bool sslonconnect, bool RawLFCheck)
+SslSocket::SslSocket(LStreamI *logger, LCapabilityClient *caps, bool sslonconnect, bool RawLFCheck) :
+	Lock("SslSocket")
 {
 	d = new SslSocketPriv;
 	Bio = 0;

@@ -841,7 +841,8 @@ LString AddressDescriptor::Print()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-MailProtocol::MailProtocol()
+MailProtocol::MailProtocol() :
+	SocketLock("MailProtocol")
 {
 	Buffer[0] = 0;
 	Logger = 0;

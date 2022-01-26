@@ -298,7 +298,9 @@ public:
 	}
 };
 
-GBrowserThread::GBrowserThread(GBrowserPriv *priv) : LThread("GBrowserThread")
+GBrowserThread::GBrowserThread(GBrowserPriv *priv) :
+	LThread("GBrowserThread.Thread"),
+	LMutex("GBrowserThread.Mutex")
 {
 	Loop = true;
 	d = priv;

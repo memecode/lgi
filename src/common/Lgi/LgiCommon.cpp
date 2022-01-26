@@ -555,7 +555,7 @@ void LgiTrace(const char *Msg, ...)
 		return;
 
 	#ifdef WIN32
-		static LMutex Sem;
+		static LMutex Sem("LgiTrace");
 		Sem.Lock(_FL, true);
 	#endif
 

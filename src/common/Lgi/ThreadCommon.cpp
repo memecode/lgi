@@ -17,7 +17,7 @@ void LThread::WaitForExit(int WarnAfterMs)
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-LThreadTarget::LThreadTarget()
+LThreadTarget::LThreadTarget() : LMutex("LThreadTarget")
 {
 	Worker = 0;
 }

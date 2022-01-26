@@ -22,7 +22,7 @@ Progress::Progress() : LMutex("ProgressObj")
 {
 }
 
-Progress::Progress(char *desc, int64 l, int64 h, char *type, double scale)
+Progress::Progress(char *desc, int64 l, int64 h, char *type, double scale) : LMutex("Progress")
 {
 	Description = desc;
 	Val = Low = l;
