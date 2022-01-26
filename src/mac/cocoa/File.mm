@@ -456,7 +456,6 @@ bool LGetDriveInfo
 	return Status;
 }
 
-/****************************** Classes *************************************************************************************/
 /////////////////////////////////////////////////////////////////////////
 #include <sys/types.h>
 #include <pwd.h>
@@ -465,29 +464,17 @@ struct LVolumePriv
 {
 	LString Name;
 	LString Path;
-	int Type;			// VT_??
-	int Flags;			// VA_??
-	int64 Size;
-	int64 Free;
+	int Type = VT_NONE;
+	int Flags = 0;
+	int64 Size = 0;
+	int64 Free = 0;
 	LAutoPtr<LSurface> Icon;
 
-	LSystemPath SysPath;
-	List<LVolume> Sub;
-	List<LVolume>::I It;
+	LSystemPath SysPath = LSP_ROOT;
+	LVolume *Next = NULL, *Child = NULL;
 
-	void Init()
+	LVolumePriv(const char *init)
 	{
-		Type = VT_NONE;
-		Flags = 0;
-		Size = 0;
-		Free = 0;
-		SysPath = LSP_ROOT;
-	}
-
-	LVolumePriv(const char *init) : It(Sub.end())
-	{
-		Init();
-		
 		if (init)
 		{
 			Name = LGetLeaf(init);
@@ -496,10 +483,8 @@ struct LVolumePriv
 		}
 	}
 
-	LVolumePriv(LSystemPath type, const char *name) : It(Sub.end())
+	LVolumePriv(LSystemPath type, const char *name)
 	{
-		Init();
-		
 		if (type)
 		{
 			Name = name;
@@ -515,10 +500,22 @@ struct LVolumePriv
 			Path = LGetSystemPath(type);
 		}
 	}
-
-	~LVolumePriv()
+	
+	void Insert(LVolume *v)
 	{
-		Sub.DeleteObjects();
+		if (!Child)
+			Child = v;
+		else
+		{
+			for (auto i = Child; i; i = i->Next())
+			{
+				if (!i->d->Next)
+				{
+					i->d->Next = v;
+					break;
+				}
+			}
+		}
 	}
 };
 
@@ -534,6 +531,8 @@ LVolume::LVolume(LSystemPath syspath, const char *name)
 
 LVolume::~LVolume()
 {
+	DeleteObj(d->Child);
+	DeleteObj(d->Next);
 	DeleteObj(d);
 }
 
@@ -587,7 +586,7 @@ LDirectory *LVolume::GetContents()
 LVolume *LVolume::First()
 {
 	if (d->SysPath == LSP_DESKTOP &&
-		!d->Sub.Length())
+		!d->Child)
 	{
 		LVolume *v = NULL;
 
@@ -632,7 +631,7 @@ LVolume *LVolume::First()
 							CFRelease(IcoRef);
 						}
 
-						d->Sub.Insert(v);
+						d->Insert(v);
 					}
 				}
 
@@ -687,19 +686,18 @@ LVolume *LVolume::First()
 					v->d->Name = [name UTF8String];
 					v->d->Type = VT_HARDDISK;
 					v->d->Size = size.longLongValue;
-					d->Sub.Insert(v);
+					d->Insert(v);
 				}
 			}
 		}
 	}
 	
-	d->It = d->Sub.begin();
-	return *d->It;
+	return d->Child;
 }
 
 LVolume *LVolume::Next()
 {
-	return *(++d->It);
+	return d->Next;
 }
 
 bool LVolume::IsMounted() const
@@ -714,10 +712,8 @@ bool LVolume::SetMounted(bool Mount)
 
 void LVolume::Insert(LAutoPtr<LVolume> v)
 {
-	d->Sub.Insert(v.Release());
+	d->Insert(v.Release());
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 LFileSystem *LFileSystem::Instance = 0;
