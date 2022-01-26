@@ -312,6 +312,10 @@ public:
 		}
 		return Png;
 	}
+	
+	InitLibPng() : LMutex("InitLibPng")
+	{
+	}
 
 } CurrentLibPng;
 #else

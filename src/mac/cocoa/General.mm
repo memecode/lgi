@@ -107,7 +107,7 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 		
 		LStringPipe p;
 		p.Print("Assert failed, file: %s, line: %i\n%s", file, line, test);
-		int Result = -1;
+		int Result = 2;
 		
 #if LGI_COCOA
         if (LAppInst)
