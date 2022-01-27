@@ -65,7 +65,7 @@ public:
 	{
 		#if defined MAC
 			char p[MAX_PATH];
-			LMakePath(p, sizeof(p), LGetExeFile(), "Contents/Frameworks/" SSL_LIBRARY);
+			LMakePath(p, sizeof(p), LGetExeFile(), LString("Contents/Frameworks/") + SSL_LIBRARY);
 			if (!Load(p))
 				LgiTrace("%s:%i - Failed to load '%s'\n", _FL, p);
 		#elif defined LINUX
@@ -306,9 +306,9 @@ public:
 		if (!IsLoaded())
 		{
 			#ifdef EAY_LIBRARY
-			Err.Print("%s:%i - SSL libraries missing (%s, %s)\n", _FL, SSL_LIBRARY, EAY_LIBRARY);
+			Err.Print("%s:%i - SSL libraries missing (%s, %s)\n", _FL, SSL_LIBRARY.Get(), EAY_LIBRARY.Get());
 			#else
-			Err.Print("%s:%i - SSL library missing (%s)\n", _FL, SSL_LIBRARY);
+			Err.Print("%s:%i - SSL library missing (%s)\n", _FL, SSL_LIBRARY.Get());
 			#endif
 			goto OnError;
 		}
