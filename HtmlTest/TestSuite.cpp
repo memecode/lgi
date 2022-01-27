@@ -143,7 +143,9 @@ class HtmlImageLoader : public LThread, public LMutex, public LCancel
 	LArray<LDocumentEnv::LoadJob*> In;
 
 public:
-	HtmlImageLoader() : LThread("HtmlImageLoader")
+	HtmlImageLoader() :
+		LThread("HtmlImageLoader.Thread"),
+		LMutex("HtmlImageLoader.Mutex")
 	{
 		Run();
 	}
