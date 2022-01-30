@@ -194,11 +194,13 @@ class LDataUserI
 	LDataI *Object;
 
 public:
+	LString SetterRef;
+
 	LDataUserI();
 	virtual ~LDataUserI();
 
 	LDataI *GetObject();
-	virtual bool SetObject(LDataI *o);
+	virtual bool SetObject(LDataI *o, const char *File, int Line);
 };
 
 /// This class is an interface between the UI and the backend for things
