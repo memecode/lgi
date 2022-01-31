@@ -105,7 +105,7 @@ Depends =	DateTime.o \
 			GdcTools.o \
 			DisplayString.o \
 			Font.o \
-			FontCodePages.o \
+			Charset.o \
 			FontSystem.o \
 			StringLayout.o \
 			TypeFace.o \
@@ -597,9 +597,10 @@ Font.o : ./src/common/Gdc2/Font/Font.cpp ./include/lgi/common/Lgi.h \
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
-FontCodePages.o : ./src/common/Gdc2/Font/FontCodePages.cpp ./include/lgi/common/Lgi.h \
+Charset.o : ./src/common/Gdc2/Font/Charset.cpp ./include/lgi/common/Lgi.h \
 	./include/lgi/common/Token.h \
-	./include/lgi/common/Font.h
+	./include/lgi/common/Font.h \
+	./include/lgi/common/Charset.h
 	@echo $(<F) [$(Build)]
 	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $(BuildDir)/$(@F)
 
@@ -1010,7 +1011,6 @@ TableLayout.o : ./src/common/Widgets/TableLayout.cpp ./include/lgi/common/Lgi.h 
 	./include/lgi/common/CssTools.h \
 	./include/lgi/common/DisplayString.h \
 	./include/lgi/common/LgiRes.h \
-	./include/lgi/common/Token.h \
 	./include/lgi/common/Variant.h \
 	./include/lgi/common/TextLabel.h \
 	./include/lgi/common/Button.h \
@@ -1086,6 +1086,8 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 ./include/lgi/common/Bitmap.h : 
 
 ./include/lgi/common/GdcTools.h : 
+
+./include/lgi/common/Charset.h : 
 
 ./include/lgi/common/Lgi.h : ./include/lgi/mac/cocoa/LgiOsDefs.h \
 	./include/lgi/common/LgiMsgs.h \
@@ -1479,7 +1481,8 @@ MDStringToDigest.o : ./src/common/Net/MDStringToDigest.cpp ./include/lgi/common/
 ./include/lgi/common/Progress.h : ./include/lgi/common/Mutex.h \
 	./include/lgi/common/Cancel.h \
 	./include/lgi/common/StringClass.h \
-	./include/lgi/common/Dom.h
+	./include/lgi/common/Dom.h \
+	./include/lgi/common/DateTime.h
 
 ./include/lgi/common/TrayIcon.h : 
 

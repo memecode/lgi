@@ -120,7 +120,7 @@ LWindow::LWindow(GtkWidget *w) : LView(0)
 	WndFlags |= GWND_CREATE;
 	ClearFlag(WndFlags, GWF_VISIBLE);
 
-    _Lock = new ::LMutex;
+    _Lock = new ::LMutex("LWindow");
 }
 
 LWindow::~LWindow()

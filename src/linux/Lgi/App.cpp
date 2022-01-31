@@ -521,7 +521,7 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 }
 
 static GtkIdle idle = {0};
-bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
+bool LApp::Run(OnIdleProc IdleCallback, void *IdleParam)
 {
 	if (!InThread())
 	{
@@ -529,30 +529,28 @@ bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 		return false;
 	}
 
-	if (Loop)
+	if (!idle.d)
 	{
-		if (!idle.d)
-		{
-			idle.d = d;
-			idle.cb = IdleCallback;
-			idle.param = IdleParam;
-		}
-
-		static bool CmdLineDone = false;
-		if (!CmdLineDone)
-		{
-			CmdLineDone = true;
-			OnCommandLine();
-		}
-		
-	    Gtk::gtk_main();
-	}
-	else
-	{
-	    Gtk::gtk_main_iteration_do(false);
+		idle.d = d;
+		idle.cb = IdleCallback;
+		idle.param = IdleParam;
 	}
 
+	static bool CmdLineDone = false;
+	if (!CmdLineDone)
+	{
+		CmdLineDone = true;
+		OnCommandLine();
+	}
+	
+    Gtk::gtk_main();
 	return true;
+}
+
+bool LApp::Yield()
+{
+    Gtk::gtk_main_iteration_do(false);
+    return true;
 }
 
 void LApp::Exit(int Code)

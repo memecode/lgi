@@ -853,6 +853,8 @@ public:
 				SetAsmType = true;
 				Cmd("set disassembly-flavor intel");
 				Cmd("handle SIGTTIN nostop");
+				Cmd("handle SIGTTOU ignore nostop");
+				Cmd("handle SIG34 ignore nostop");
 			}
 			
 			LString a;
@@ -909,10 +911,6 @@ public:
 					
 					// Redetect the process id from the new threads...
 					ProcessId = -1;
-					
-					if (Cmd("handle SIGTTOU ignore nostop", &p))
-					{
-					}
 					
 					bool Status = Cmd("c"); // Continue
 					if (Status)

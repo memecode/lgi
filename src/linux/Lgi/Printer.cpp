@@ -6,7 +6,7 @@
 using namespace Gtk;
 
 ////////////////////////////////////////////////////////////////////
-class GPrinterPrivate
+class LPrinterPrivate
 {
 public:
 	GtkPrintOperation *Op;
@@ -15,18 +15,18 @@ public:
 	::LString Printer;
 	::LString Err;
 	::LString PrinterName;
-	GPrintEvents *Events;
+	LPrintEvents *Events;
 	
 	LAutoPtr<LPrintDC> PrintDC;
 	
-	GPrinterPrivate()
+	LPrinterPrivate()
 	{
 		Settings = NULL;
 		Events = NULL;
 		Op = NULL;
 	}
 	
-	~GPrinterPrivate()
+	~LPrinterPrivate()
 	{
 		if (Op)
 			g_object_unref(Op);
@@ -34,17 +34,17 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////
-GPrinter::GPrinter()
+LPrinter::LPrinter()
 {
-	d = new GPrinterPrivate;
+	d = new LPrinterPrivate;
 }
 
-GPrinter::~GPrinter()
+LPrinter::~LPrinter()
 {
 	DeleteObj(d);
 }
 
-bool GPrinter::Browse(LView *Parent)
+bool LPrinter::Browse(LView *Parent)
 {
 	if (d->Settings != NULL)
 		Gtk::gtk_print_operation_set_print_settings(d->Op, d->Settings);
@@ -52,7 +52,7 @@ bool GPrinter::Browse(LView *Parent)
 	return false;
 }
 
-bool GPrinter::Serialize(::LString &Str, bool Write)
+bool LPrinter::Serialize(::LString &Str, bool Write)
 {
 	if (Write)
 		Str = d->Printer;
@@ -63,7 +63,7 @@ bool GPrinter::Serialize(::LString &Str, bool Write)
 }
 
 	
-::LString GPrinter::GetErrorMsg()
+::LString LPrinter::GetErrorMsg()
 {
 	return d->Err;
 }
@@ -71,7 +71,7 @@ bool GPrinter::Serialize(::LString &Str, bool Write)
 static void
 GtkPrintBegin(	GtkPrintOperation	*operation,
 				GtkPrintContext		*context,
-				GPrinterPrivate		*d)
+				LPrinterPrivate		*d)
 {
 	bool Status = false;
 
@@ -98,7 +98,7 @@ static void
 GtkPrintDrawPage(	GtkPrintOperation	*operation,
 					GtkPrintContext		*context,
 					gint				page_number,
-					GPrinterPrivate		*d)
+					LPrinterPrivate		*d)
 {
 	cairo_t *ct = gtk_print_context_get_cairo_context(context);
 	if (ct && d->PrintDC)
@@ -107,7 +107,7 @@ GtkPrintDrawPage(	GtkPrintOperation	*operation,
 	d->Events->OnPrintPage(d->PrintDC, page_number);
 }
 
-bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages /* = -1 */, LView *Parent /* = 0 */)
+int LPrinter::Print(LPrintEvents *Events, const char *PrintJobName, int Pages /* = -1 */, LView *Parent /* = 0 */)
 {
 	if (!Events)
 	{
