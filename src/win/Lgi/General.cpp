@@ -752,9 +752,18 @@ bool GRegKey::GetInt(const char *Name, uint32_t &Value)
 
 bool GRegKey::SetInt(const char *Name, uint32_t Value)
 {
-	if (!k) return false;
-	LONG r = RegSetValueExA(k, Name, 0, REG_DWORD, (uchar*)&Value, sizeof(Value));
-	return r == ERROR_SUCCESS;
+	if (!k)
+	{
+		LgiTrace("%s:%i - No key name.\n", _FL);
+		return false;
+	}
+	
+	auto r = RegSetValueExA(k, Name, 0, REG_DWORD, (uchar*)&Value, sizeof(Value));
+	if (r == ERROR_SUCCESS)
+		return true;
+
+	LgiTrace("%s:%i - RegSetValueExA(%s) returned error: %x.\n", _FL, Name, r);
+	return false;
 }
 
 bool GRegKey::GetBinary(char *Name, void *&Ptr, int &Len)
