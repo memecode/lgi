@@ -134,7 +134,7 @@ struct LSubProcessPriv
 		DWORD ExitValue;
 		LSubProcess::Pipe ChildOutput, ChildInput;
 		HPCON hConsole;
-		GLibrary Kernel;
+		LLibrary Kernel;
 		ProcCreatePseudoConsole CreatePseudoConsole;
 	#endif
 

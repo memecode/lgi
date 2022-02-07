@@ -130,7 +130,7 @@ private:
 	T Map;
 
 public:
-	ViewTbl() : Map(2000)
+	ViewTbl() : Map(2000), LMutex("ViewTbl")
 	{
 	}
 

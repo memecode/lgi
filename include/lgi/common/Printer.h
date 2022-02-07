@@ -15,14 +15,14 @@ struct LPrintPageRanges : public LArray<LRange>
 			if (p.Length() == 1)
 			{
 				auto &range = New();
-				range.Start = p[0].Int();
+				range.Start = (ssize_t)p[0].Int();
 				range.Len = 1;
 			}
 			else if (p.Length() == 2)
 			{
 				auto &range = New();
-				range.Start = p[0].Int();
-				range.Len = p[1].Int() - range.Start + 1;
+				range.Start = (ssize_t)p[0].Int();
+				range.Len = (ssize_t)(p[1].Int() - range.Start + 1);
 			}
 		}
 	}

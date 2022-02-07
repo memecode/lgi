@@ -8,7 +8,7 @@
 #define COMP_FUNCTIONS 0  // set to '1' if you need detailed compression functions
 #endif
 
-class Zlib : public GLibrary
+class Zlib : public LLibrary
 {
 public:
 	const char *Name()
@@ -38,7 +38,7 @@ public:
 				;
 	}
 
-	Zlib() : GLibrary(Name()) {}
+	Zlib() : LLibrary(Name()) {}
 	bool Reload() { return Load(Name()); }
 
 	DynFunc0(const char *, zlibVersion);

@@ -641,6 +641,7 @@ LRect &LPopup::GetPos()
 bool LPopup::SetPos(LRect &r, bool repaint)
 {
 	Pos = r;
+	OnPosChange();
 	
 	if (Panel)
 	{

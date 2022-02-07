@@ -120,7 +120,7 @@ public:
 	bool SelectionOnly;
 	bool SearchUpwards;
 	
-	GDocFindReplaceParams3()
+	GDocFindReplaceParams3() : LMutex("GDocFindReplaceParams3")
 	{
 		MatchCase = false;
 		MatchWord = false;
@@ -3301,8 +3301,8 @@ void LTextView3::OnPosChange()
 		bool ScrollChange = ScrollYNeeded ^ (VScroll != NULL);
 		if (ScrollChange)
 		{
-			auto Client = GetClient();
 			#if 0
+			auto Client = GetClient();
 			LgiTrace("%s:%i - %p::SetScrollBars(%i) cliy=%i content=%i partial=%i\n",
 				_FL, this, ScrollYNeeded, Client.Y(), (Line.Length() * LineY), PartialPour);
 			#endif

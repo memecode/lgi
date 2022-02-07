@@ -401,7 +401,7 @@ LWindow::LWindow(OsWindow wnd) : LView(NULL)
 	WndFlags |= GWND_CREATE;
 	LView::Visible(false);
 	
-	_Lock = new LMutex;
+	_Lock = new LMutex("LWindow");
 	
 	LRect pos(200, 200, 200, 200);
 	NSRect frame = pos;

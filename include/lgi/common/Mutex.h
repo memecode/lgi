@@ -29,7 +29,7 @@ public:
 	LMutex
 	(
 		/// Optional name for the semaphore
-		const char *name = 0
+		const char *name
 	);
 	virtual ~LMutex();
 

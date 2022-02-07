@@ -121,33 +121,41 @@ enum Store3Backend
 enum EmailFlags
 {
 	// Mail flags
-	MAIL_SENT = 					0x00000001,
-	MAIL_RECEIVED =					0x00000002,
-	MAIL_CREATED =					0x00000004,
-	MAIL_FORWARDED =				0x00000008,
-	MAIL_REPLIED =					0x00000010,
-	MAIL_ATTACHMENTS =				0x00000020,
-	MAIL_READ = 					0x00000040,
-	// #define MAIL_MARK			0x00000080,	// Deprecated
-	MAIL_READY_TO_SEND =			0x00000100,	// If this flag is set then the user
+	MAIL_SENT = 					(1 << 0),
+	MAIL_RECEIVED =					(1 << 1),
+	MAIL_CREATED =					(1 << 2),
+	MAIL_FORWARDED =				(1 << 3),
+
+	MAIL_REPLIED =					(1 << 4),
+	MAIL_ATTACHMENTS =				(1 << 5),
+	MAIL_READ = 					(1 << 6),
+	// #define MAIL_MARK			(1 << 7),	// Deprecated
+	
+	MAIL_READY_TO_SEND =			(1 << 8),	// If this flag is set then the user
 												// wants to send the mail on the next
 												// run. When the user just saves a new
 												// message in the outbox this isn't set
 												// and isn't sent until they go in and
 												// say "send". At which point this flag
 												// is set and the message sent
-	MAIL_READ_RECEIPT =				0x00000200,
-	MAIL_IGNORE =					0x00000400,
-	MAIL_FIXED_WIDTH_FONT =			0x00000800,
-	MAIL_BOUNCED =					0x00001000,	// The bounce source mail
-	MAIL_BOUNCE =					0x00002000,	// The outgoing copy of a bounced mail
-	MAIL_SHOW_IMAGES =				0x00004000,	// User selected to show images in HTML
-	MAIL_BAYES_HAM =				0x00010000,	// Bayesian classified originally as ham
-	MAIL_BAYES_SPAM =				0x00020000,	// Bayesian classified originally as spam
-	MAIL_NEW =	                    0x00040000, // Mail is new, cleared after the OnNew event happens
-	MAIL_STORED_FLAT =				0x00080000, // Message is signed and/or encrypted and needs
+	MAIL_READ_RECEIPT =				(1 << 9),
+	MAIL_IGNORE =					(1 << 10),
+	MAIL_FIXED_WIDTH_FONT =			(1 << 11),
+	
+	MAIL_BOUNCED =					(1 << 12),	// The bounce source mail
+	MAIL_BOUNCE =					(1 << 13),	// The outgoing copy of a bounced mail
+	MAIL_SHOW_IMAGES =				(1 << 14),	// User selected to show images in HTML
+	
+	MAIL_NEW =	                    (1 << 18),  // Mail is new, cleared after the OnNew event happens
+	MAIL_STORED_FLAT =				(1 << 19),  // Message is signed and/or encrypted and needs
 												// to be stored in such a way as the RFC822 image
 												// is not damaged.
+
+	// Bayesian filter flags:
+	MAIL_BAYES_HAM =				(1 << 16),	// Bayesian classified originally as ham
+	MAIL_BAYES_SPAM =				(1 << 17),	// Bayesian classified originally as spam
+	MAIL_HAM_DB =					(1 << 20),	// In Bayesian ham word database
+	MAIL_SPAM_DB =					(1 << 21),	// In Bayesian spam word database
 };
 
 extern LString EmailFlagsToStr(int flags);
@@ -234,7 +242,7 @@ enum Store3ItemTypes
 	MAGIC_MAX						= (MAGIC_BASE+14)	// One past the end
 };
 
-// When setting this via GDataI::SetInt the return value is:
+// When setting this via LDataI::SetInt the return value is:
 // - true if you need to mark the object dirty so that it gets saved
 // - false if the flags is stored elsewhere and you don't have to save.
 enum Store3Fields
@@ -432,14 +440,15 @@ enum Store3Fields
 										//
 	FIELD_CAL_LAST_CHECK = 161,			// (LDateTime) Ts the calendar event was last checked for reminders
 	FIELD_DATE_MODIFIED = 162,			// (LDateTime) Ts of modification
-	FIELD_INBOX = 163,					// (GDataFolderI*) Inbox for mail store
-	FIELD_OUTBOX = 164,					// (GDataFolderI*) Outbox for mail store
-	FIELD_SENT = 165,					// (GDataFolderI*) Sent folder for mail store
-	FIELD_TRASH = 166,					// (GDataFolderI*) Trash folder for mail store
+	FIELD_INBOX = 163,					// (LDataFolderI*) Inbox for mail store
+	FIELD_OUTBOX = 164,					// (LDataFolderI*) Outbox for mail store
+	FIELD_SENT = 165,					// (LDataFolderI*) Sent folder for mail store
+	FIELD_TRASH = 166,					// (LDataFolderI*) Trash folder for mail store
 	FIELD_IMAP_SEQ = 167,				// (uint32_t) IMAP sequence number
 	FIELD_CAL_STATUS = 168,				// (char*) Status of the vCal event.
-	FIELD_STORE_STATUS = 169,			// (ScribeAccountletStatusIcon) Status (icon) of a GDataStoreI
+	FIELD_STORE_STATUS = 169,			// (ScribeAccountletStatusIcon) Status (icon) of a LDataStoreI
 	FIELD_RECEIVED_DOMAIN = 170,		// (char*) First "Received:" header domain. (See also SdReceivedDomain)
+	FIELD_FOLDER_ITEMS = 171,			// (int64) Number of items in a folder..
 
 	FIELD_MAX,
 };

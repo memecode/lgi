@@ -1969,6 +1969,12 @@ bool MailIMap::SelectFolder(const char *Path, StrMap *Values)
 {
 	bool Status = false;
 
+	if (!Path)
+	{
+		LAssert(!"Path is missing.");
+		return false;
+	}
+
 	if (Socket && Lock(_FL))
 	{
 		int Cmd = d->NextCmd++;
@@ -2039,6 +2045,12 @@ bool MailIMap::SelectFolder(const char *Path, StrMap *Values)
 int MailIMap::GetMessages(const char *Path)
 {
 	int Status = 0;
+
+	if (!Path)
+	{
+		LAssert(!"No path.");
+		return 0;
+	}
 
 	if (Socket && Lock(_FL))
 	{
@@ -2134,17 +2146,25 @@ int MailIMap::Fetch(bool ByUid,
 					FetchCallback Callback,
 					void *UserData,
 					LStreamI *RawCopy,
-					int64 SizeHint)
+					int64 SizeHint,
+					LError *Error)
 {
+	LError Local;
+	if (!Error) Error = &Local;
+		
 	if (!Parts || !Callback || !Seq)
 	{
 		LgiTrace("%s:%i - Invalid FETCH argument.\n", _FL);
+		Error->Set(EINVAL);
+		Error->AddNote(_FL, "Invalid arg: %p,%p,%p.", Parts, Callback, Seq);
 		return false;
 	}
 
 	if (!Lock(_FL))
 	{
 		LgiTrace("%s:%i - Failed to get lock.\n", _FL);
+		Error->Set(ENOLCK);
+		Error->AddNote(_FL, "Failed to get lock.");
 		return false;
 	}
 	
@@ -2155,7 +2175,12 @@ int MailIMap::Fetch(bool ByUid,
 	p.Write(Seq, strlen(Seq));
 	p.Print(" (%s)\r\n", Parts);
 	LAutoString WrBuf(p.NewStr());
-	if (WriteBuf(false, WrBuf))
+	if (!WriteBuf(false, WrBuf))
+	{
+		Error->Set(EIO);
+		Error->AddNote(_FL, "Write failed.");
+	}
+	else
 	{
 		ClearDialog();
 
@@ -2178,9 +2203,16 @@ int MailIMap::Fetch(bool ByUid,
 
 		uint64 LastActivity = LCurrentTime();
 		bool Debug = false;
-		while (!Done && Socket->IsOpen())
+		while (!Done)
 		{
 			ssize_t r;
+
+			if (!Socket->IsOpen())
+			{
+				Error->Set(ENOTSOCK);
+				Error->AddNote(_FL, "Socket closed.");
+				break;
+			}
 
 			// We don't wait for 'readable' with select here because
 			// a) The socket is in non-blocking mode and
@@ -2257,6 +2289,9 @@ int MailIMap::Fetch(bool ByUid,
 					ParseImapResponse(&Buf[0], Used, Ranges, 2);
 					#endif
 					Done = true;
+					
+					Error->Set(ENODATA);
+					Error->AddNote(_FL, "Wrong data size.");
 					break;
 				}
 				
@@ -2297,6 +2332,8 @@ int MailIMap::Fetch(bool ByUid,
 					}
 					else
 					{
+						Error->Set(ECANCELED);
+						Error->AddNote(_FL, "Callback failed.");
 						#if DEBUG_FETCH
 						LgiTrace("%s:%i - Fetch: Callback return FALSE?\n", _FL);
 						#endif
@@ -2336,7 +2373,13 @@ int MailIMap::Fetch(bool ByUid,
 								break;
 							}
 						}
-						else Log(&Buf[0], LSocketI::SocketMsgError);
+						else
+						{
+							Error->Set(EPROTO);
+							Error->AddNote(_FL, "ImapErr: %s", &Buf[0]);
+						
+							Log(&Buf[0], LSocketI::SocketMsgError);
+						}
 					}
 					else
 					{
@@ -2354,8 +2397,14 @@ int MailIMap::Fetch(bool ByUid,
 		LgiTrace("%s:%i - Fetch finished, status=%i\n", _FL, Status);
 		#endif
 	}
-		
+
 	Unlock();
+
+	if (!Status && !Error->GetCode())
+	{
+		Error->Set(ENODATA);
+		Error->AddNote(_FL, "No records received.");
+	}
 	return Status;
 }
 
@@ -2892,7 +2941,12 @@ char *MailIMap::EncodePath(const char *Path)
 
 	char Sep = GetFolderSep();
 	char Native[MAX_PATH], *o = Native, *e = Native + sizeof(Native) - 1;
-	for (const char *i = *Path == '/' ? Path + 1 : Path; *i && o < e; i++)
+	for (const char *i =
+		Path[0] == '/' && Path[1] ?
+		Path + 1 :
+		Path;
+		*i && o < e;
+		i++)
 	{
 		if (*i == '/')
 			*o++ = Sep;

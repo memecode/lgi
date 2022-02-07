@@ -9,6 +9,7 @@
 #ifndef _LERROR_H_
 #define _LERROR_H_
 
+#include <stdarg.h>
 #ifdef POSIX
 #include "errno.h"
 #endif
@@ -46,6 +47,8 @@ class LgiClass LError
 	LString Msg;
 	
 public:
+	LString::Array DevNotes;
+
 	LError(int code = 0, const char *msg = NULL)
 	{
 		Set(code, msg);
@@ -70,6 +73,22 @@ public:
 		if (!Msg)
 			Msg = GetErrorName(Code);
 		return Msg;
+	}
+	
+	void AddNote(const char *File, int Line, const char *Fmt, ...)
+	{
+		char buffer[512] = {0};
+		va_list arg;
+		va_start(arg, Fmt);
+		vsprintf_s(buffer, sizeof(buffer), Fmt, arg);
+		va_end(arg);
+		
+		DevNotes.New().Printf("%s:%i - %s", File, Line, buffer);
+	}
+	
+	LString GetNotes()
+	{
+		return LString("\n").Join(DevNotes);
 	}
 };
 

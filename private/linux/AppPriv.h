@@ -28,12 +28,12 @@ public:
 	LFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
 	OsAppArguments Args;
-	GLibrary *SkinLib;
+	LLibrary *SkinLib;
 	LHashTbl<StrKey<char,false>,AppArray*> MimeToApp;
 	#if HAS_SHARED_MIME
 	GSharedMime *Sm;
 	#endif
-	GLibrary *WmLib;
+	LLibrary *WmLib;
 	LHashTbl<IntKey<int>, LView*> Handles;
 	OsThread GuiThread;
 	OsThreadId GuiThreadId;

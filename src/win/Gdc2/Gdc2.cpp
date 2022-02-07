@@ -793,9 +793,9 @@ bool GGlobalColour::RemapBitmap(LSurface *pDC)
 class GdcDevicePrivate
 {
 public:
-	// class GLibrary *Iconv;
+	// class LLibrary *Iconv;
 	// Iconv startup
-	// extern GLibrary *_LgiStartIconv();
+	// extern LLibrary *_LgiStartIconv();
 	// Iconv = _LgiStartIconv();
 	// DeleteObj(Iconv);
 
@@ -822,7 +822,7 @@ public:
 
 	// Alpha
 	#if defined WIN32
-	GLibrary MsImg;
+	LLibrary MsImg;
 	#elif defined LINUX
 	int Pixel24Size;
 	#endif

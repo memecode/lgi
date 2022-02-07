@@ -131,14 +131,14 @@ OsAppArguments &OsAppArguments::operator =(OsAppArguments &a)
 #include "GFilterUtils.h"
 #include "mime-types.h"
 
-class GSharedMime : public GLibrary
+class GSharedMime : public LLibrary
 {
 public:
 	GSharedMime() :
 		#ifdef _DEBUG
-		GLibrary("libsharedmime1d")
+		LLibrary("libsharedmime1d")
 		#else
-		GLibrary("libsharedmime1")
+		LLibrary("libsharedmime1")
 		#endif
 	{
 	}
@@ -521,7 +521,7 @@ Gtk::gboolean IdleWrapper(Gtk::gpointer data)
 }
 
 static GtkIdle idle = {0};
-bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
+bool LApp::Run(OnIdleProc IdleCallback, void *IdleParam)
 {
 	if (!InThread())
 	{
@@ -529,30 +529,28 @@ bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 		return false;
 	}
 
-	if (Loop)
+	if (!idle.d)
 	{
-		if (!idle.d)
-		{
-			idle.d = d;
-			idle.cb = IdleCallback;
-			idle.param = IdleParam;
-		}
-
-		static bool CmdLineDone = false;
-		if (!CmdLineDone)
-		{
-			CmdLineDone = true;
-			OnCommandLine();
-		}
-		
-	    Gtk::gtk_main();
-	}
-	else
-	{
-	    Gtk::gtk_main_iteration_do(false);
+		idle.d = d;
+		idle.cb = IdleCallback;
+		idle.param = IdleParam;
 	}
 
+	static bool CmdLineDone = false;
+	if (!CmdLineDone)
+	{
+		CmdLineDone = true;
+		OnCommandLine();
+	}
+	
+    Gtk::gtk_main();
 	return true;
+}
+
+bool LApp::Yield()
+{
+    Gtk::gtk_main_iteration_do(false);
+    return true;
 }
 
 void LApp::Exit(int Code)
@@ -998,7 +996,7 @@ bool LApp::GetAppsForMimeType(char *Mime, ::LArray<::LAppInfo*> &Apps)
 }
 
 #if defined(LINUX)
-GLibrary *LApp::GetWindowManagerLib()
+LLibrary *LApp::GetWindowManagerLib()
 {
 	if (this != NULL && !d->WmLib)
 	{
@@ -1020,7 +1018,7 @@ GLibrary *LApp::GetWindowManagerLib()
 		strcat(Lib, "d");
 		#endif
 		
-		d->WmLib = new GLibrary(Lib, true);
+		d->WmLib = new LLibrary(Lib, true);
 		if (d->WmLib)
 		{
 			if (d->WmLib->IsLoaded())

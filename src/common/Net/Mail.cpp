@@ -841,7 +841,8 @@ LString AddressDescriptor::Print()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-MailProtocol::MailProtocol()
+MailProtocol::MailProtocol() :
+	SocketLock("MailProtocol")
 {
 	Buffer[0] = 0;
 	Logger = 0;
@@ -2681,45 +2682,54 @@ char *MailPop3::GetHeaders(int Message)
 
 bool MailPop3::ReadMultiLineReply(char *&Str)
 {
-	bool Status = false;
-	if (Socket)
+	if (!Socket)
 	{
-		LMemQueue Temp;
-		ssize_t ReadLen = Socket->Read(Buffer, sizeof(Buffer), 0);
-		if (ReadLen > 0 && Buffer[0] == '+')
-		{
-			// positive response
-			char *Eol = strchr(Buffer, '\n');
-			if (Eol)
-			{
-				char *Ptr = Eol + 1;
-				ReadLen -= Ptr-Buffer;
-				memmove(Buffer, Ptr, ReadLen);
-				Temp.Write((uchar*) Buffer, ReadLen);
-
-				while (!MailIsEnd(Buffer, ReadLen))
-				{
-					ReadLen = Socket->Read(Buffer, sizeof(Buffer), 0);
-					if (ReadLen > 0)
-					{
-						Temp.Write((uchar*) Buffer, ReadLen);
-					}
-					else break;
-				}
-
-				int Len = (int)Temp.GetSize();
-				Str = new char[Len+1];
-				if (Str)
-				{
-					Temp.Read((uchar*)Str, Len);
-					Str[Len] = 0;
-					Status = true;
-				}
-			}
-		}
+		LAssert(!"No socket.");
+		return false;
 	}
 
-	return Status;
+	LMemQueue Temp;
+	ssize_t ReadLen = Socket->Read(Buffer, sizeof(Buffer), 0);
+	if (ReadLen <= 0 || Buffer[0] != '+')
+		return false;
+
+	// positive response
+	char *Eol = strnchr(Buffer, '\n', ReadLen);
+	if (!Eol)
+		return false;
+
+	char *Ptr = Eol + 1;
+	ReadLen -= Ptr-Buffer;
+	if (ReadLen <= 0)
+	{
+		LAssert(!"Invalid readLen");
+		return false;
+	}
+
+	memmove(Buffer, Ptr, ReadLen);
+	Temp.Write((uchar*) Buffer, ReadLen);
+
+	while (!MailIsEnd(Buffer, ReadLen))
+	{
+		ReadLen = Socket->Read(Buffer, sizeof(Buffer), 0);
+		if (ReadLen > 0)
+			Temp.Write((uchar*) Buffer, ReadLen);
+		else
+			break;
+	}
+
+	auto Len = Temp.GetSize();
+	Str = new char[Len+1];
+	if (!Str)
+	{
+		LAssert(!"Alloc error.");
+		return false;
+	}
+
+	Temp.Read((uchar*)Str, Len);
+	Str[Len] = 0;
+
+	return true;
 }
 
 bool MailPop3::Close()

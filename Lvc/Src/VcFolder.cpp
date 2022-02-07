@@ -609,27 +609,24 @@ void VcFolder::OnBranchesChange()
 	{
 		LString::Array a;
 		for (auto b: Branches)
-		{
 			a.Add(b.key);
-		}
+
 		dd->SetList(IDC_BRANCH, a);
 	}
 
-	if (Branches.Length() > 0)
+	LViewI *b;
+	if (Branches.Length() > 0 &&
+		w->GetViewById(IDC_BRANCH, b))
 	{
-		LViewI *b;
-		if (w->GetViewById(IDC_BRANCH, b))
+		if (CurrentBranch)
 		{
-			if (!ValidStr(b->Name()))
-			{
-				if (CurrentBranch)
-					b->Name(CurrentBranch);
-				else
-				{
-					auto it = Branches.begin();
-					b->Name((*it).key);
-				}
-			}
+			b->Name(CurrentBranch);
+		}
+		else
+		{
+			auto it = Branches.begin();
+			if (it != Branches.end())
+				b->Name((*it).key);
 		}
 	}
 }
@@ -2674,6 +2671,12 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 							File = ConvertUPlus(p.Last());
 						else
 							File = p.Last();
+
+						if (GetType() == VcSvn &&
+							File.Find("+    ") == 0)
+						{
+							File = File(5, -1);
+						}
 
 						VcFile *f = new VcFile(d, this, NULL, IsWorking);
 						f->SetText(p[0], COL_STATE);

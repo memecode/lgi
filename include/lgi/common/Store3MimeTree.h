@@ -85,7 +85,7 @@ public:
 		GDataIt It = Seg->GetList(FIELD_MIME_SEG);
 		if (It)
 		{
-			for (GDataPropI *i=It->First(); i; i=It->Next())
+			for (LDataPropI *i=It->First(); i; i=It->Next())
 			{
 				TAttachment *a = dynamic_cast<TAttachment*>(i);
 				if (!a) continue;

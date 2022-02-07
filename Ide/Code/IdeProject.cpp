@@ -1560,7 +1560,7 @@ LString BuildThread::FindExe()
 	else if (Compiler == Cygwin)
 	{
 		#ifdef WINDOWS
-		GRegKey k(false, "HKEY_CURRENT_USER\\Software\\Cygwin\\Installations");
+		LRegKey k(false, "HKEY_CURRENT_USER\\Software\\Cygwin\\Installations");
 		List<char> n;
 		k.GetValueNames(n);
 		LString s;
@@ -3575,11 +3575,6 @@ bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool In
 						(n->GetPlatforms() & (1 << Platform)) != 0)	// Exclude files not on this platform.
 					{
 						auto f = n->GetFileName();
-						if (Stristr(f, "linux"))
-						{
-							int as=0;
-						}
-
 						char p[MAX_PATH];
 						if (f &&
 							LMakePath(p, sizeof(p), Base, f))

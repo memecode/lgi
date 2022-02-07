@@ -23,7 +23,7 @@ extern bool In_SetWindowPos;
 
 typedef UINT (WINAPI *ProcGetDpiForWindow)(_In_ HWND hwnd);
 typedef UINT (WINAPI *ProcGetDpiForSystem)(VOID);
-GLibrary User32("User32");
+LLibrary User32("User32");
 
 UINT LGetDpiForWindow(HWND hwnd)
 {

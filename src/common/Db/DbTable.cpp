@@ -571,7 +571,7 @@ bool LDbRow::Delete()
 	return d->DeleteRow(this);
 }
 
-bool LDbRow::CopyProps(GDataPropI &p)
+bool LDbRow::CopyProps(LDataPropI &p)
 {
 	for (size_t i=0; i<GetFields(); i++)
 	{
@@ -748,13 +748,13 @@ Store3Status LDbRow::SetVar(int id, LVariant *i)
 	return Store3Error;
 }
 
-GDataPropI *LDbRow::GetObj(int id)
+LDataPropI *LDbRow::GetObj(int id)
 {
 	LAssert(0);
 	return NULL;
 }
 
-Store3Status LDbRow::SetObj(int id, GDataPropI *i)
+Store3Status LDbRow::SetObj(int id, LDataPropI *i)
 {
 	LAssert(0);
 	return Store3Error;

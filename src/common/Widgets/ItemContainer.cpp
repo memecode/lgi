@@ -503,7 +503,7 @@ LDragColumn::LDragColumn(LItemContainer *list, int col)
 		{
 			SetWindowLong(Handle(), GWL_EXSTYLE, GetWindowLong(Handle(), GWL_EXSTYLE) | WS_EX_LAYERED);
 
-			GLibrary User32("User32");
+			LLibrary User32("User32");
 			_SetLayeredWindowAttributes SetLayeredWindowAttributes = (_SetLayeredWindowAttributes)User32.GetAddress("SetLayeredWindowAttributes");
 			if (SetLayeredWindowAttributes)
 			{

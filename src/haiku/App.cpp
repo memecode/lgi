@@ -128,14 +128,14 @@ OsAppArguments &OsAppArguments::operator =(OsAppArguments &a)
 #include "GFilterUtils.h"
 #include "mime-types.h"
 
-class GSharedMime : public GLibrary
+class GSharedMime : public LLibrary
 {
 public:
 	GSharedMime() :
 		#ifdef _DEBUG
-		GLibrary("libsharedmime1d")
+		LLibrary("libsharedmime1d")
 		#else
-		GLibrary("libsharedmime1")
+		LLibrary("libsharedmime1")
 		#endif
 	{
 	}
@@ -655,7 +655,7 @@ bool LApp::GetAppsForMimeType(char *Mime, ::LArray<::LAppInfo*> &Apps)
 }
 
 #if defined(LINUX)
-GLibrary *LApp::GetWindowManagerLib()
+LLibrary *LApp::GetWindowManagerLib()
 {
 	if (this != NULL && !d->WmLib)
 	{
@@ -677,7 +677,7 @@ GLibrary *LApp::GetWindowManagerLib()
 		strcat(Lib, "d");
 		#endif
 		
-		d->WmLib = new GLibrary(Lib, true);
+		d->WmLib = new LLibrary(Lib, true);
 		if (d->WmLib)
 		{
 			if (d->WmLib->IsLoaded())

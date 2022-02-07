@@ -89,8 +89,8 @@ public:
 class VCard : public VIo
 {
 public:
-	bool Import(GDataPropI *c, LStreamI *s);
-	bool Export(GDataPropI *c, LStreamI *s);
+	bool Import(LDataPropI *c, LStreamI *s);
+	bool Export(LDataPropI *c, LStreamI *s);
 };
 
 class VCal : public VIo
@@ -103,8 +103,8 @@ public:
         IsCal = false;
     }
 
-	bool Import(GDataPropI *c, LStreamI *s);
-	bool Export(GDataPropI *c, LStreamI *s);
+	bool Import(LDataPropI *c, LStreamI *s);
+	bool Export(LDataPropI *c, LStreamI *s);
 };
 
 #endif

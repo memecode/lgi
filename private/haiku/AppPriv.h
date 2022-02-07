@@ -20,7 +20,7 @@ public:
 	LFileSystem *FileSystem;
 	GdcDevice *GdcSystem;
 	OsAppArguments Args;
-	GLibrary *SkinLib;
+	LLibrary *SkinLib;
 	LHashTbl<StrKey<char,false>,AppArray*> MimeToApp;
 	LHashTbl<IntKey<int>, LView*> Handles;
 	OsThread GuiThread;

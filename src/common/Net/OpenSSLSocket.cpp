@@ -27,30 +27,34 @@
 #include "lgi/common/Net.h"
 
 #define PATH_OFFSET					"../"
-#ifdef WIN32
-	#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-		#ifdef _WIN64
-			#define SSL_LIBRARY		"libssl-1_1-x64"
-			#define EAY_LIBRARY		"libcrypto-1_1-x64"
-		#else // 32bit
-			#define SSL_LIBRARY		"libssl-1_1"
-			#define EAY_LIBRARY		"libcrypto-1_1"
-		#endif
+
+LString LibName(const char *Fmt)
+{
+	LString s;
+	#ifdef LINUX
+	s = LString(Fmt).Strip(".");
 	#else
-		#define SSL_LIBRARY			"ssleay32"
-		#define EAY_LIBRARY         "libeay32"
+	s.Printf(Fmt, OPENSSL_SHLIB_VERSION);
 	#endif
-#elif defined MAC
-// Building openssl:
-// ./configure darwin64-x86_64-cc -mmacosx-version-min=10.10
-#define SSL_LIBRARY					"libssl.1.1"
+	#ifdef _WIN64
+	s += "-x64";
+	#endif
+	return s;
+}
+
+#ifdef WIN32
+	#define SSL_LIBRARY			LibName("libssl-%i")
+	#define EAY_LIBRARY			LibName("libcrypto-%i")
 #else
-#define SSL_LIBRARY					"libssl"
+	// Building openssl on mac:
+	// ./configure darwin64-x86_64-cc -mmacosx-version-min=10.10
+	#define SSL_LIBRARY			LibName("libssl.%i")
 #endif
-#define HasntTimedOut()				((To < 0) || (LCurrentTime() - Start < To))
+
+#define HasntTimedOut()			((To < 0) || (LCurrentTime() - Start < To))
 
 static const char*
-	MinimumVersion					= "1.0.1g";
+	MinimumVersion				= "3.0.1";
 
 void
 SSL_locking_function(int mode, int n, const char *file, int line);
@@ -58,14 +62,14 @@ SSL_locking_function(int mode, int n, const char *file, int line);
 unsigned long
 SSL_id_function();
 
-class LibSSL : public GLibrary
+class LibSSL : public LLibrary
 {
 public:
 	LibSSL()
 	{
 		#if defined MAC
 			char p[MAX_PATH];
-			LMakePath(p, sizeof(p), LGetExeFile(), "Contents/Frameworks/" SSL_LIBRARY);
+			LMakePath(p, sizeof(p), LGetExeFile(), LString("Contents/Frameworks/") + SSL_LIBRARY);
 			if (!Load(p))
 				LgiTrace("%s:%i - Failed to load '%s'\n", _FL, p);
 		#elif defined LINUX
@@ -145,10 +149,10 @@ public:
 // the code reflects that.
 };
 
-class LibEAY : public GLibrary
+class LibEAY : public LLibrary
 {
 public:
-	LibEAY() : GLibrary(EAY_LIBRARY)
+	LibEAY() : LLibrary(EAY_LIBRARY)
 	{
 		if (!IsLoaded())
 		{
@@ -283,7 +287,7 @@ class OpenSSL :
 public:
 	SSL_CTX *Client;
 	LArray<LMutex*> Locks;
-	LAutoString ErrorMsg;
+	LString ErrorMsg;
 
     bool IsLoaded()
     {
@@ -306,9 +310,9 @@ public:
 		if (!IsLoaded())
 		{
 			#ifdef EAY_LIBRARY
-			Err.Print("%s:%i - SSL libraries missing (%s, %s)\n", _FL, SSL_LIBRARY, EAY_LIBRARY);
+			Err.Print("%s:%i - SSL libraries missing (%s, %s)\n", _FL, SSL_LIBRARY.Get(), EAY_LIBRARY.Get());
 			#else
-			Err.Print("%s:%i - SSL library missing (%s)\n", _FL, SSL_LIBRARY);
+			Err.Print("%s:%i - SSL library missing (%s)\n", _FL, SSL_LIBRARY.Get());
 			#endif
 			goto OnError;
 		}
@@ -379,7 +383,7 @@ public:
 		return true;
 
 	OnError:
-		ErrorMsg.Reset(Err.NewStr());
+		ErrorMsg = Err.NewGStr();
 		if (sock)
 			sock->DebugTrace("%s", ErrorMsg.Get());
 		return false;
@@ -428,7 +432,7 @@ public:
 				char *Msg = ERR_error_string(e, 0);
 				LStringPipe p;
 				p.Print("%s:%i - SSL_CTX_new(server) failed with '%s' (%i)\n", _FL, Msg, e);
-				ErrorMsg.Reset(p.NewStr());
+				ErrorMsg = p.NewGStr();
 				sock->DebugTrace("%s", ErrorMsg.Get());
 			}
 		}
@@ -476,7 +480,7 @@ SSL_locking_function(int mode, int n, const char *file, int line)
 			#ifdef SSL_DEBUG_LOCKING
 			LgiTrace("SSL[%i] create\n", n);
 			#endif
-			Library->Locks[n] = new LMutex;
+			Library->Locks[n] = new LMutex("SSL_locking_function");
 		}
 
 		#ifdef SSL_DEBUG_LOCKING
@@ -504,9 +508,9 @@ SSL_id_function()
 	return (unsigned long) GetCurrentThreadId();
 }
 
-bool StartSSL(LAutoString &ErrorMsg, SslSocket *sock)
+bool StartSSL(LString &ErrorMsg, SslSocket *sock)
 {
-	static LMutex Lock;
+	static LMutex Lock("StartSSL");
 	
 	if (Lock.Lock(_FL))
 	{
@@ -569,7 +573,8 @@ struct SslSocketPriv : public LCancel
 
 bool SslSocket::DebugLogging = false;
 
-SslSocket::SslSocket(LStreamI *logger, LCapabilityClient *caps, bool sslonconnect, bool RawLFCheck)
+SslSocket::SslSocket(LStreamI *logger, LCapabilityClient *caps, bool sslonconnect, bool RawLFCheck) :
+	Lock("SslSocket")
 {
 	d = new SslSocketPriv;
 	Bio = 0;
@@ -580,7 +585,7 @@ SslSocket::SslSocket(LStreamI *logger, LCapabilityClient *caps, bool sslonconnec
 	d->Logger = logger;
 	d->IsBlocking = true;
 	
-	LAutoString ErrMsg;
+	LString ErrMsg;
 	if (StartSSL(ErrMsg, this))
 	{
 		if (Library->IsOk(this))
@@ -1374,7 +1379,7 @@ DebugTrace("%s:%i - BIO_read(%p,%i)=%i\n", _FL, Data, Len, r);
 DebugTrace("%s:%i - BIO_should_retry=%i IsBlocking=%i\n", _FL, Retry, d->IsBlocking);
 					if (!Retry)
 					{
-						auto Reason = Library->BIO_get_retry_reason(Bio);
+						Library->BIO_get_retry_reason(Bio);
 						break;
 					}
 					if (d->IsBlocking)

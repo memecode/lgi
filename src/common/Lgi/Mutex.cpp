@@ -19,6 +19,7 @@ char *SemPrint(OsSemaphore *s)
 
 LMutex::LMutex(const char *name)
 {
+    LAssert(name != NULL);
 	_Thread = 0;
 	_Count = 0;
 	File = 0;

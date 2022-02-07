@@ -103,7 +103,7 @@ GInlineBmp Cursors =
 ////////////////////////////////////////////////////////////////////////////
 void _lgi_yield()
 {
-	LAppInst->Run(false);
+	LAppInst->Yield();
 }
 
 bool LgiIsKeyDown(int Key)

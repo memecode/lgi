@@ -22,7 +22,7 @@ Progress::Progress() : LMutex("ProgressObj")
 {
 }
 
-Progress::Progress(char *desc, int64 l, int64 h, char *type, double scale)
+Progress::Progress(char *desc, int64 l, int64 h, char *type, double scale) : LMutex("Progress")
 {
 	Description = desc;
 	Val = Low = l;
@@ -196,7 +196,7 @@ void LProgressPane::UpdateUI()
 		if (Remaining && PerSec > 0.0)
 		{
 			auto TotalSeconds = (High - Low + 1) / PerSec;
-			auto RemainingSeconds = TotalSeconds - ElapsedSeconds;
+			// auto RemainingSeconds = TotalSeconds - ElapsedSeconds;
 			LDateTime End;
 			End.Set(StartDt.Ts() + (uint64_t)(TotalSeconds * LDateTime::Second64Bit));
 			if (auto Dur = LDateTime::Now().DescribePeriod(End))

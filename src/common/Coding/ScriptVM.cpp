@@ -296,7 +296,7 @@ LExecutionStatus LExternFunc::Call(LScriptContext *Ctx, LScriptArguments &Args)
 		}
 	}
 
-	GLibrary Library(Lib);
+	LLibrary Library(Lib);
 	if (!Library.IsLoaded())
 	{
 		if (Log)
@@ -1724,7 +1724,7 @@ void LVmDebuggerWnd::Run()
 	d->RunLoop = true;
 	while (d->RunLoop && Visible())
 	{
-		LAppInst->Run(false);
+		LYield();
 		LSleep(1);
 	}
 	Quit();

@@ -9,10 +9,10 @@ LPTOP_LEVEL_EXCEPTION_FILTER _PrevExceptionHandler = 0;
 // VS2005 or later, write a mini-dump
 #include <dbghelp.h>
 
-class DbgHelp : public GLibrary
+class DbgHelp : public LLibrary
 {
 public:
-	DbgHelp() : GLibrary("Dbghelp")
+	DbgHelp() : LLibrary("Dbghelp")
 	{
 		WCHAR   DllPath[MAX_PATH] = {0};
 		GetModuleFileNameW(Handle(), DllPath, _countof(DllPath));		

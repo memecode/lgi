@@ -8,10 +8,10 @@
 #include "GLibraryUtils.h"
 
 /*
-class GCups : public GLibrary
+class GCups : public LLibrary
 {
 public:
-	GCups() : GLibrary("libcups")
+	GCups() : LLibrary("libcups")
 	{
 		if (!IsLoaded())
 		{

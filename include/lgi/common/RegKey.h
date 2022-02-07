@@ -4,7 +4,7 @@
 /// Registry access class
 #include "lgi/common/Containers.h"
 
-class LgiClass GRegKey
+class LgiClass LRegKey
 {
 	HKEY k, Root;
 	char s[256];
@@ -14,7 +14,7 @@ public:
 	static bool AssertOnError;
 
 	/// Constructor
-	GRegKey
+	LRegKey
 	(
 		/// The access type required
 		bool WriteAccess,
@@ -22,7 +22,7 @@ public:
 		char *Key,
 		...
 	);
-	~GRegKey();
+	~LRegKey();
 
 	/// Returns true if the key was openned
 	bool IsOk();

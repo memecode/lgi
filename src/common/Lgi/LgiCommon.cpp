@@ -213,7 +213,7 @@ void LExitApp()
 #ifdef WIN32
 bool RegisterActiveXControl(char *Dll)
 {
-	GLibrary Lib(Dll);
+	LLibrary Lib(Dll);
 	if (Lib.IsLoaded())
 	{
 		#ifdef _MSC_VER
@@ -555,7 +555,7 @@ void LgiTrace(const char *Msg, ...)
 		return;
 
 	#ifdef WIN32
-		static LMutex Sem;
+		static LMutex Sem("LgiTrace");
 		Sem.Lock(_FL, true);
 	#endif
 
@@ -1011,7 +1011,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 	/*
 	#if defined(LINUX) && !defined(LGI_SDL)
 	// Ask our window manager add-on if it knows the path
-	GLibrary *WmLib = LAppInst ? LAppInst->GetWindowManagerLib() : NULL;
+	LLibrary *WmLib = LAppInst ? LAppInst->GetWindowManagerLib() : NULL;
 	if (WmLib)
 	{
 		Proc_LgiWmGetPath WmGetPath = (Proc_LgiWmGetPath) WmLib->GetAddress("LgiWmGetPath");
@@ -1046,7 +1046,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 				GUID FOLDERID_Downloads = {0x374DE290,0x123F,0x4565,{0x91,0x64,0x39,0xC4,0x92,0x5E,0x46,0x7B}};
 				#endif
 			
-				GLibrary Shell("Shell32.dll");
+				LLibrary Shell("Shell32.dll");
 				typedef HRESULT (STDAPICALLTYPE *pSHGetKnownFolderPath)(REFKNOWNFOLDERID rfid, DWORD dwFlags, HANDLE hToken, PWSTR *ppszPath);
 				pSHGetKnownFolderPath SHGetKnownFolderPath = (pSHGetKnownFolderPath)Shell.GetAddress("SHGetKnownFolderPath");
 				if (SHGetKnownFolderPath)
@@ -1064,7 +1064,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 
 				if (!Path.Get())
 				{
-					GRegKey k(false, "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders");
+					LRegKey k(false, "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders");
 					char *p = k.GetStr("{374DE290-123F-4565-9164-39C4925E467B}");
 					if (LDirExists(p))
 						Path = p;
@@ -2766,7 +2766,7 @@ LString LGetAppForProtocol(const char *Protocol)
 		return App;
 
 	#ifdef WINDOWS
-		GRegKey k(false, "HKEY_CLASSES_ROOT\\%s\\shell\\open\\command", Protocol);
+		LRegKey k(false, "HKEY_CLASSES_ROOT\\%s\\shell\\open\\command", Protocol);
 		if (k.IsOk())
 		{
 			const char *p = k.GetStr();

@@ -68,7 +68,11 @@ void LRichTextPriv::StyleText::SetStyle(LNamedStyle *s)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-LRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src, LSurface *img, LCss::Len &fntSize, const uint32_t *s, ssize_t l) :
+LRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src,
+												LSurface *img,
+												LCss::Len &fntSize,
+												const uint32_t *s,
+												ssize_t l) :
 	DisplayStr(src, NULL, s, l)
 {
 	Img = img;
@@ -1134,12 +1138,20 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 				e++;
 					
 			// Add 't' to current line
+			LCss::Len fntSize;
+			if (f)
+				fntSize = f->Size();
+			
 			ssize_t Chars = MIN(1024, e - s);
 			LAutoPtr<DisplayStr> Ds
 			(
 				t->Emoji
 				?
-				new EmojiDisplayStr(t, d->GetEmojiImage(), f ? f->Size() : LCss::Len(), s, Chars)
+				new EmojiDisplayStr(t,
+									d->GetEmojiImage(),
+									fntSize,
+									s,
+									Chars)
 				:
 				new DisplayStr(t, f, s, Chars, flow.pDC)
 			);
@@ -1192,6 +1204,9 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 						Chars = FitChars;
 							
 					// Create a new display string of the right size...
+					LCss::Len fntSize;
+					if (f)
+						fntSize = f->Size();
 					if
 					(
 						!
@@ -1199,7 +1214,7 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 						(
 							t->Emoji
 							?
-							new EmojiDisplayStr(t, d->GetEmojiImage(), f ? f->Size() : LCss::Len(), s, Chars)
+							new EmojiDisplayStr(t, d->GetEmojiImage(), fntSize, s, Chars)
 							:
 							new DisplayStr(t, f, s, Chars, flow.pDC)
 						)

@@ -13,8 +13,8 @@
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="6">
 					<Node File=".\src\linux\Lgi\DragAndDrop.cpp" Type="2" Platforms="2" />
 				</Node>
-				<Node Name="Mac" Type="1" Platforms="4" Id="1">
-					<Node File=".\src\mac\cocoa\Lgi\DragAndDrop.mm" Type="8" Platforms="4" />
+				<Node Name="Mac" Type="1" Platforms="15" Id="1">
+					<Node File="./src/mac/cocoa/DragAndDrop.mm" Type="8" Platforms="4" />
 				</Node>
 				<Node Name="Windows" Type="1" Platforms="15" Open="0" Id="7">
 					<Node File=".\include\lgi\common\Com.h" Type="3" Platforms="15" />
@@ -33,8 +33,8 @@
 					<Node File="./src/linux/General/File.cpp" Type="2" Platforms="2" />
 					<Node File="./src/linux/General/ShowFileProp_Linux.cpp" Type="2" Platforms="2" />
 				</Node>
-				<Node Name="Mac" Type="1" Platforms="4" Id="1">
-					<Node File="./src/mac/cocoa/General/ShowFileProp_Mac.mm" Type="8" Platforms="4" />
+				<Node Name="Mac" Type="1" Platforms="15" Id="1">
+					<Node File="./src/mac/cocoa/ShowFileProp_Mac.mm" Type="8" Platforms="15" />
 				</Node>
 				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="11">
 					<Node File=".\src\win\General\File.cpp" Type="2" Platforms="1" />
@@ -63,9 +63,9 @@
 					<Node File="./src/linux/Lgi/View.cpp" Type="2" Platforms="2" />
 					<Node File="./src/linux/Lgi/Window.cpp" Type="2" Platforms="2" />
 					<Node File="./src/linux/Gtk/LgiWidget.cpp" Type="2" Platforms="2" />
-					<Node File="./include/lgi/linux/Gtk/LgiWidget.h" Type="3" Platforms="2" />
+					<Node File="./include/lgi/linux/Gtk/LgiWidget.h" Type="3" Platforms="15" />
 				</Node>
-				<Node Name="Mac" Type="1" Platforms="4" Id="1" />
+				<Node Name="Mac" Type="1" Platforms="15" Id="1" />
 				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="16">
 					<Node File=".\src\win\Lgi\App.cpp" Type="2" Platforms="1" />
 					<Node File=".\src\win\Lgi\General.cpp" Type="2" Platforms="1" />
@@ -134,8 +134,7 @@
 			</Node>
 			<Node Name="Skin" Type="1" Platforms="15" Open="0" Id="29">
 				<Node File=".\src\common\Skins\Gel\Gel.cpp" Type="2" Platforms="15" />
-				<Node File="./src/common/Gdc2/Path/Path.cpp" Type="2" Platforms="15" />
-				<Node File="./include/lgi/common/Path.h" Type="3" Platforms="15" />
+				<Node File=".\src\common\Gdc2\Path\Path.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\SkinEngine.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Stream" Type="1" Platforms="15" Open="0" Id="30">
@@ -217,7 +216,7 @@
 				<Node File="./src/common/Gdc2/Font/Font.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/Font.h" Type="3" Platforms="15" />
 				<Node File="./include/lgi/common/FontCache.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Gdc2\Font\Charset.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Font/Charset.cpp" Type="2" Platforms="15" />
 				<Node File="./private/common/FontPriv.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/FontSystem.cpp" Type="2" Platforms="15" />
 				<Node File="./src/common/Gdc2/Font/FontType.cpp" Type="2" Platforms="15" />
@@ -251,19 +250,20 @@
 					<Node File="./src/linux/Gtk/MemDC.cpp" Type="2" Platforms="2" />
 					<Node File="./src/linux/Gtk/PrintDC.cpp" Type="2" Platforms="2" />
 					<Node File="./src/linux/Gtk/ScreenDC.cpp" Type="2" Platforms="2" />
-					<Node File=".\src\linux\Lgi\Printer.cpp" Type="2" Platforms="2" />
+					<Node File="./src/linux/Lgi/Printer.cpp" Type="2" Platforms="2" />
 				</Node>
-				<Node Name="Mac" Type="1" Platforms="4" Open="0" Id="51">
-					<Node File="./src/mac/common/MemDC.cpp" Type="2" Platforms="4" />
-					<Node File="./src/mac/common/PrintDC.cpp" Type="2" Platforms="4" />
-					<Node File="./src/mac/common/ScreenDC.cpp" Type="2" Platforms="4" />
+				<Node Name="Mac" Type="1" Platforms="15" Open="0" Id="51">
+					<Node File="./src/linux/Gtk/MemDC.cpp" Type="2" Platforms="4" />
+					<Node File="./src/linux/Gtk/PrintDC.cpp" Type="2" Platforms="4" />
+					<Node File="./src/linux/Gtk/ScreenDC.cpp" Type="2" Platforms="4" />
 				</Node>
 				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="52">
 					<Node File=".\src\win\Gdc2\ScreenDC.cpp" Type="2" Platforms="1" />
 					<Node File=".\src\win\Gdc2\PrintDC.cpp" Type="2" Platforms="1" />
 					<Node File=".\src\win\Gdc2\MemDC.cpp" Type="2" Platforms="1" />
 				</Node>
-				<Node File=".\src\common\Gdc2\Surface.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/Printer.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Gdc2/Surface.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Gdi Leak" Type="1" Platforms="15" Open="0" Id="53">
 				<Node File=".\src\win\Gdc2\GdiLeak.cpp" Type="2" Platforms="1" />
@@ -419,14 +419,14 @@
 		<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="75">
 			<Node File=".\include\lgi\linux\Gtk\LgiOsDefs.h" Type="3" Platforms="2" />
 		</Node>
-		<Node Name="Mac" Type="1" Platforms="4" Id="1">
-			<Node File="./include/lgi/mac/cocoa/LCocoaView.h" Type="3" Platforms="4" />
-			<Node File="./include/lgi/mac/cocoa/LgiMac.h" Type="3" Platforms="4" />
-			<Node File="./include/lgi/mac/cocoa/LgiOs.h" Type="3" Platforms="4" />
-			<Node File="./include/lgi/mac/cocoa/LgiOsClasses.h" Type="3" Platforms="4" />
-			<Node File="./include/lgi/mac/cocoa/LgiOsDefs.h" Type="3" Platforms="4" />
-			<Node File="./include/lgi/mac/cocoa/ObjCWrapper.h" Type="3" Platforms="4" />
-			<Node File="./include/lgi/mac/cocoa/SymLookup.h" Type="3" Platforms="4" />
+		<Node Name="Mac" Type="1" Platforms="15" Id="1">
+			<Node File="./include/lgi/mac/cocoa/LCocoaView.h" Type="3" Platforms="15" />
+			<Node File="./include/lgi/mac/cocoa/LgiMac.h" Type="3" Platforms="15" />
+			<Node File="./include/lgi/mac/cocoa/LgiOs.h" Type="3" Platforms="15" />
+			<Node File="./include/lgi/mac/cocoa/LgiOsClasses.h" Type="3" Platforms="15" />
+			<Node File="./include/lgi/mac/cocoa/LgiOsDefs.h" Type="3" Platforms="15" />
+			<Node File="./include/lgi/mac/cocoa/ObjCWrapper.h" Type="3" Platforms="15" />
+			<Node File="./include/lgi/mac/cocoa/SymLookup.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Win" Type="1" Platforms="15" Open="0" Id="76">
 			<Node File=".\include\lgi\win\LgiOsDefs.h" Type="3" Platforms="1" />
@@ -459,7 +459,6 @@
 				<Linux>Makefile.linux</Linux>
 				<Windows>Makefile.win64</Windows>
 				<Mac>Makefile.macosx</Mac>
-				<Haiku>Makefile.haiku</Haiku>
 			</Makefile>
 			<Compiler>
 				<Linux>gcc</Linux>
@@ -467,11 +466,7 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Executable>
-				<Windows />
-			</Executable>
-			<CCrossCompiler />
-			<CppCrossCompiler />
+			<Executable />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -494,16 +489,6 @@
 					<Debug>include/lgi/win</Debug>
 					<Release>include/lgi/win</Release>
 				</Windows>
-				<Haiku>
-					<Debug>./private/haiku
-./include/lgi/haiku
-./include
-./private/common</Debug>
-					<Release>./private/haiku
-./include/lgi/haiku
-./include
-./private/common</Release>
-				</Haiku>
 			</IncludePaths>
 			<SystemIncludes>
 				<Linux>
@@ -527,17 +512,6 @@ appindicator3
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
-				<Haiku>
-					<Debug>-static-libgcc
-gnu
-network
-be</Debug>
-					<Release>-static-libgcc
-gnu
-network
-be</Release>
-				</Haiku>
-				<All />
 				<Windows />
 			</Libraries>
 			<TargetName>
@@ -545,61 +519,23 @@ be</Release>
 					<Debug>lgi-dev</Debug>
 					<Release>lgi-dev</Release>
 				</Linux>
-				<Haiku>
-					<Debug>lgi</Debug>
-					<Release>lgi</Release>
-				</Haiku>
 				<Windows />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
 			</TargetType>
-			<Defines>
-				<All>
-					<Debug>LGI_LIBRARY</Debug>
-					<Release>LGI_LIBRARY</Release>
-				</All>
-				<Haiku>
-					<Debug>POSIX
-_GNU_SOURCE
-_FILE_OFFSET_BITS=64</Debug>
-					<Release>POSIX
-_GNU_SOURCE
-_FILE_OFFSET_BITS=64</Release>
-				</Haiku>
-				<Windows />
-			</Defines>
-			<LibraryPaths>
-				<All />
-				<Windows />
-			</LibraryPaths>
-			<ApplicationIcon />
+			<Defines />
+			<LibraryPaths />
 		</Build>
 		<Advanced>
-			<PostBuildCommands>
-				<Windows />
-			</PostBuildCommands>
+			<PostBuildCommands />
 			<OtherMakefileRules />
 		</Advanced>
 		<Debug>
-			<Arguments>
-				<All />
-			</Arguments>
+			<Arguments />
 			<Environment />
-			<DebugAdmin />
-			<InitialDir />
 		</Debug>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
-		<Editor>
-			<TabSize />
-			<IndentSize />
-			<ShowWhiteSpace />
-			<UseHardTabs />
-			<CommentFile />
-			<CommentFunction />
-		</Editor>
+		<Remote />
+		<Editor />
 	</Settings>
 </Project>

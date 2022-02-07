@@ -1613,7 +1613,7 @@ AppWnd::AppWnd()
 		return;
 	}
 
-	if (Menu = new LMenu)
+    if ((Menu = new LMenu))
 	{
 		Menu->Attach(this);
 		bool Loaded = Menu->Load(this, "IDM_MENU");

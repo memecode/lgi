@@ -124,7 +124,7 @@ bool LGetDisplays(::LArray<GDisplayInfo*> &Displays, LRect *AllDisplays)
 		if (AllDisplays)
 			AllDisplays->ZOff(-1, -1);
 
-		GLibrary User32("User32");
+		LLibrary User32("User32");
 		DISPLAY_DEVICEW disp;
 		ZeroObj(disp);
 		disp.cb = sizeof(disp);

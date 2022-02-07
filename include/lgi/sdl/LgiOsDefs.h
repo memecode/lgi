@@ -184,11 +184,6 @@ LgiFunc void LSleep(uint32 i);
 #define _snprintf					snprintf
 #define _vsnprintf					vsnprintf
 
-/// Process any pending messages in the applications message que and then return.
-#define LYield()					LAppInst->Run(false)
-
-#define K_CHAR						0x0
-
 /// Drag and drop format for a file
 #define LGI_FileDropFormat			"text/uri-list"
 #define LGI_IllegalFileNameChars	"\t\r\n/\\:*?\"<>|"

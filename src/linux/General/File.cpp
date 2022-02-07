@@ -640,7 +640,7 @@ struct LVolumePriv
 						auto &Mount = M[1];
 						auto &FileSys = M[2];
 						
-						printf("fstab %s %s %s\n", Device.Get(), Mount.Get(), FileSys.Get());
+						// printf("fstab %s %s %s\n", Device.Get(), Mount.Get(), FileSys.Get());
 						
 						if
 						(

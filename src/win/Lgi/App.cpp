@@ -299,7 +299,7 @@ DumpTime("exception handler");
 	
 	{
 		/*
-		GLibrary ComCtl32("ComCtl32.dll");
+		LLibrary ComCtl32("ComCtl32.dll");
 		DLLVERSIONINFO info;
 		ZeroObj(info);
 		info.cbSize = sizeof(info);
@@ -734,107 +734,108 @@ int LApp::GetShow()
 	return IsOk() ? d->Args.nCmdShow : 0;
 }
 
-bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
+bool LApp::Run(OnIdleProc IdleCallback, void *IdleParam)
 {
-	MSG Msg;
+	MSG Msg = {0};
 	bool status = true;
-	ZeroObj(Msg);
 
-	if (Loop)
+	OnCommandLine();
+
+	if (IdleCallback)
 	{
-		OnCommandLine();
+		bool DontWait = true;
 
-		if (IdleCallback)
+		while (!d->QuitReceived)
 		{
-			bool DontWait = true;
-
-			while (!d->QuitReceived)
+			while (1)
 			{
-				while (1)
+				bool Status;
+				if (DontWait)
 				{
-					bool Status;
-					if (DontWait)
-					{
-						Status = PeekMessage(&Msg, NULL, 0, 0, PM_REMOVE) != 0;
-					}
-					else
-					{
-						Status = GetMessage(&Msg, NULL, 0, 0) > 0;
-						DontWait = true;
-					}
-					
-					#if 0
-					char m[256];
-					sprintf_s(m, sizeof(m), "Msg=%i hwnd=%p %i,%i\n", Msg.message, Msg.hwnd, Msg.wParam, Msg.lParam);
-					OutputDebugStringA(m);
-					#endif
-					
-					if (!Status || Msg.message == WM_QUIT)
-						break;
-
-					#ifdef _DEBUG
-					int64 Last = LCurrentTime();
-					#endif
-					
-					TranslateMessage(&Msg);
-					DispatchMessage(&Msg);
-
-					#ifdef _DEBUG
-					int64 Now = LCurrentTime();
-					if (Now - Last > 10000)
-					{
-						LgiTrace("%s:%i - Msg Loop Blocked: %i ms (Msg: 0x%.4x)\n",
-							_FL, (int) (Now - Last), Msg.message);
-					}
-					#endif
-				}
-
-				if (Msg.message == WM_QUIT)
-				{
-					d->QuitReceived = true;
+					Status = PeekMessage(&Msg, NULL, 0, 0, PM_REMOVE) != 0;
 				}
 				else
 				{
-					DontWait = IdleCallback(IdleParam);
+					Status = GetMessage(&Msg, NULL, 0, 0) > 0;
+					DontWait = true;
 				}
-			}
-		}
-		else
-		{	
-			while (!d->QuitReceived && GetMessage(&Msg, NULL, 0, 0) > 0)
-			{
+					
+				#if 0
+				char m[256];
+				sprintf_s(m, sizeof(m), "Msg=%i hwnd=%p %i,%i\n", Msg.message, Msg.hwnd, Msg.wParam, Msg.lParam);
+				OutputDebugStringA(m);
+				#endif
+					
+				if (!Status || Msg.message == WM_QUIT)
+					break;
+
 				#ifdef _DEBUG
 				int64 Last = LCurrentTime();
 				#endif
-				
+					
 				TranslateMessage(&Msg);
 				DispatchMessage(&Msg);
 
 				#ifdef _DEBUG
 				int64 Now = LCurrentTime();
-				if (Now - Last > 1000)
+				if (Now - Last > 10000)
 				{
 					LgiTrace("%s:%i - Msg Loop Blocked: %i ms (Msg: 0x%.4x)\n",
-						_FL,
-						(int) (Now - Last), Msg.message);
+						_FL, (int) (Now - Last), Msg.message);
 				}
 				#endif
+			}
+
+			if (Msg.message == WM_QUIT)
+			{
+				d->QuitReceived = true;
+			}
+			else
+			{
+				DontWait = IdleCallback(IdleParam);
 			}
 		}
 	}
 	else
-	{
-		while (	PeekMessage(&Msg, NULL, 0, 0, PM_REMOVE) &&
-				Msg.message != WM_QUIT)
+	{	
+		while (!d->QuitReceived && GetMessage(&Msg, NULL, 0, 0) > 0)
 		{
+			#ifdef _DEBUG
+			int64 Last = LCurrentTime();
+			#endif
+				
 			TranslateMessage(&Msg);
 			DispatchMessage(&Msg);
-		}
 
-		if (Msg.message == WM_QUIT)
-		{
-			d->QuitReceived = true;
+			#ifdef _DEBUG
+			int64 Now = LCurrentTime();
+			if (Now - Last > 1000)
+			{
+				LgiTrace("%s:%i - Msg Loop Blocked: %i ms (Msg: 0x%.4x)\n",
+					_FL,
+					(int) (Now - Last), Msg.message);
+			}
+			#endif
 		}
+	}
+
+	return Msg.message != WM_QUIT;
+}
+
+bool LApp::Yield()
+{
+	MSG Msg = {0};
+
+	while (	PeekMessage(&Msg, NULL, 0, 0, PM_REMOVE) &&
+			Msg.message != WM_QUIT)
+	{
+		TranslateMessage(&Msg);
+		DispatchMessage(&Msg);
+	}
+
+	if (Msg.message == WM_QUIT)
+	{
+		d->QuitReceived = true;
 	}
 
 	return Msg.message != WM_QUIT;

@@ -3,25 +3,25 @@
 
 // Os specific wrapper typedefs/defines
 #if defined(WINDOWS)
-	typedef HMODULE _SysLibHandle;
+	typedef HMODULE OsLibHandle;
 #elif defined(POSIX)
-	typedef void *_SysLibHandle;
+	typedef void *OsLibHandle;
 #else // atheos/linux
-	typedef int _SysLibHandle;
+	typedef int OsLibHandle;
 #endif
 
 // Generic shared library loader
-class LgiClass GLibrary
+class LgiClass LLibrary
 {
 	char *FileName;
-	_SysLibHandle hLib;
+	OsLibHandle hLib;
 
 public:
-	GLibrary(const char *File = 0, bool Quiet = false);
-	virtual ~GLibrary();
+	LLibrary(const char *File = 0, bool Quiet = false);
+	virtual ~LLibrary();
 
-	_SysLibHandle Handle() { return hLib; }
-	char *GetFileName() { return FileName; }
+	OsLibHandle Handle() { return hLib; }
+	const char *GetFileName() { return FileName; }
 	virtual bool IsLoaded()
 	{
 		#ifdef HAIKU

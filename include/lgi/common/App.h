@@ -17,6 +17,9 @@ typedef int							OsProcessId;
 /// of a global static class which is initialized before the main begins executing.
 #define LAppInst						(LApp::ObjInstance())
 
+/// Process any pending messages in the applications message que and then return.
+#define LYield()						LAppInst->Yield()
+
 /// Returns a system font pointer.
 ///
 /// \warning Don't use this before you have created your LApp object. i.e. in a constructor
@@ -199,14 +202,14 @@ public:
 	/// Enters the message loop.
 	bool Run
 	(
-		/// If true this function will return when the application exits (with LCloseApp()).
-		/// Otherwise if false only pending events will be processed and then the function returns.
-		bool Loop = true,
 		/// Idle callback
 		OnIdleProc IdleCallback = NULL,
 		/// Param for IdleCallback
 		void *IdleParam = NULL
 	);
+	
+	/// Processes any messages in the queue and then returns.
+	[[deprecated]] bool Yield();
 	
 	/// Event called to process the command line
 	void OnCommandLine();
@@ -318,7 +321,7 @@ public:
 
 	#elif defined(LINUX)
 	
-		class GLibrary *GetWindowManagerLib();
+		class LLibrary *GetWindowManagerLib();
 
 		class DesktopInfo
 		{

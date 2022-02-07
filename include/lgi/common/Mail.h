@@ -787,9 +787,11 @@ public:
 		/// A user defined param to pass back to the 'Callback' function.
 		void *UserData,
 		/// [Optional] The raw data received will be written to this stream if provided, else NULL.
-		LStreamI *RawCopy = 0,
+		LStreamI *RawCopy = NULL,
 		/// [Optional] The rough size of the fetch... used to pre-allocate a buffer to receive data.
-		int64 SizeHint = -1
+		int64 SizeHint = -1,
+		/// [Optional] An error object
+		LError *Error = NULL
 	);
 
 	/// Appends a message to the specified folder

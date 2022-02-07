@@ -19,6 +19,7 @@ public:
 	static LEventSinkMap Dispatch;
 
 	LEventSinkMap(int SizeHint = 0) :
+        LMutex("LEventSinkMap"),
 		ToPtr(SizeHint),
 		ToHnd(SizeHint)
 	{

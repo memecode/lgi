@@ -640,7 +640,7 @@ void IdleGlue(EventLoopTimerRef inTimer, void *inUserData)
 }
 #endif
 
-bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
+bool LApp::Run(OnIdleProc IdleCallback, void *IdleParam)
 {
 	if (!d->NsApp)
 	{
@@ -648,45 +648,42 @@ bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 		return false;
 	}
 
-	if (Loop)
-	{
-		#if CUSTOM_LOOP
+	#if CUSTOM_LOOP
+
+		// This impl allows for us to exit gracefully.
+		int Depth = ++d->RunDepth;
 	
-			// This impl allows for us to exit gracefully.
-			int Depth = ++d->RunDepth;
-		
-			do
-			{
-				NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		do
+		{
+			NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-				NSEvent *event =
-					[	d->NsApp
-						nextEventMatchingMask:NSAnyEventMask
-						untilDate:[NSDate distantFuture]
-						inMode:NSDefaultRunLoopMode
-						dequeue:YES];
+			NSEvent *event =
+				[	d->NsApp
+					nextEventMatchingMask:NSAnyEventMask
+					untilDate:[NSDate distantFuture]
+					inMode:NSDefaultRunLoopMode
+					dequeue:YES];
 
-				[d->NsApp sendEvent:event];
-				[d->NsApp updateWindows];
+			[d->NsApp sendEvent:event];
+			[d->NsApp updateWindows];
 
-				[pool release];
-			}
-			while (d->RunDepth >= Depth);
+			[pool release];
+		}
+		while (d->RunDepth >= Depth);
+
+	#else
 	
-		#else
-		
-			OnCommandLine();
-			NSApplicationMain(GetArgs(), GetArg());
-		
-		#endif
-		return true;
-	}
-	else
-	{
-		// NSWindow nextEventMatchingMask may be useful here.
-	}
-		
-	return 0;
+		OnCommandLine();
+		NSApplicationMain(GetArgs(), GetArg());
+	
+	#endif
+	return true;
+}
+
+bool LApp::Yield()
+{
+	printf("%s:%i - Yield not supported.\n", _FL);
+	return false;
 }
 
 void LApp::Exit(int Code)

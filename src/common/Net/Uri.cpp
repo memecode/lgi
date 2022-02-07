@@ -324,7 +324,7 @@ LProxyUri::LProxyUri()
 {
 	#if defined(WIN32)
 
-	GRegKey k(false, "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
+	LRegKey k(false, "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
 	if (k.IsOk())
 	{
 	    uint32_t Enabled = 0;
