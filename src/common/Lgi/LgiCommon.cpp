@@ -1064,7 +1064,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 
 				if (!Path.Get())
 				{
-					GRegKey k(false, "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders");
+					LRegKey k(false, "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders");
 					char *p = k.GetStr("{374DE290-123F-4565-9164-39C4925E467B}");
 					if (LDirExists(p))
 						Path = p;
@@ -2762,7 +2762,7 @@ LString LGetAppForProtocol(const char *Protocol)
 		return App;
 
 	#ifdef WINDOWS
-		GRegKey k(false, "HKEY_CLASSES_ROOT\\%s\\shell\\open\\command", Protocol);
+		LRegKey k(false, "HKEY_CLASSES_ROOT\\%s\\shell\\open\\command", Protocol);
 		if (k.IsOk())
 		{
 			const char *p = k.GetStr();

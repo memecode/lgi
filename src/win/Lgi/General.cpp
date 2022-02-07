@@ -8,6 +8,14 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/RegKey.h"
 
+#define DEBUG_LOG_WRITES		1
+
+#if DEBUG_LOG_WRITES
+#define LOG_WRITE(...) LgiTrace(__VA_ARGS__)
+#else
+#define LOG_WRITE(...)
+#endif
+
 ////////////////////////////////////////////////////////////////
 // Implementations
 void LSleep(DWORD i)
@@ -28,7 +36,7 @@ bool LGetMimeTypeExtensions(const char *Mime, LArray<LString> &Ext)
 	auto Start = Ext.Length();
 	char *e;
 
-	GRegKey t(false, "HKEY_LOCAL_MACHINE\\SOFTWARE\\Classes\\MIME\\Database\\Content Type\\%s", Mime);
+	LRegKey t(false, "HKEY_LOCAL_MACHINE\\SOFTWARE\\Classes\\MIME\\Database\\Content Type\\%s", Mime);
 	if (t.IsOk() && (e = t.GetStr("Extension")))
 	{
 		if (*e == '.') e++;
@@ -64,10 +72,10 @@ LString LGetFileMimeType(const char *File)
 		char *Dot = strrchr((char*)File, '.');
 		if (Dot)
 		{
-			bool AssertOnError = GRegKey::AssertOnError;
-			GRegKey::AssertOnError = false;
+			bool AssertOnError = LRegKey::AssertOnError;
+			LRegKey::AssertOnError = false;
 			
-			GRegKey Key(false, "HKEY_CLASSES_ROOT\\%s", Dot);
+			LRegKey Key(false, "HKEY_CLASSES_ROOT\\%s", Dot);
 			if (Key.IsOk())
 			{
 				char *Ct = Key.GetStr("Content Type");
@@ -80,12 +88,12 @@ LString LGetFileMimeType(const char *File)
 				else
 				{
 					// Search mime type DB.
-					GRegKey Db(false, "HKEY_LOCAL_MACHINE\\SOFTWARE\\Classes\\MIME\\Database\\Content Type");
+					LRegKey Db(false, "HKEY_LOCAL_MACHINE\\SOFTWARE\\Classes\\MIME\\Database\\Content Type");
 					List<char> Sub;
 					Db.GetKeyNames(Sub);
 					for (auto k: Sub)
 					{
-						GRegKey Type(false, "HKEY_LOCAL_MACHINE\\SOFTWARE\\Classes\\MIME\\Database\\Content Type\\%s", k);
+						LRegKey Type(false, "HKEY_LOCAL_MACHINE\\SOFTWARE\\Classes\\MIME\\Database\\Content Type\\%s", k);
 						char *Ext = Type.GetStr("Extension");
 						if (Ext && stricmp(Ext, Dot) == 0)
 						{
@@ -103,7 +111,7 @@ LString LGetFileMimeType(const char *File)
 				}
 			}
 
-			GRegKey::AssertOnError = AssertOnError;
+			LRegKey::AssertOnError = AssertOnError;
 		}
 
 		// no extension?
@@ -231,7 +239,7 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 		if (stricmp(Mime, "application/email") == 0)
 		{
 			// get email app
-			GRegKey Key(false, "HKEY_CLASSES_ROOT\\mailto\\shell\\open\\command");
+			LRegKey Key(false, "HKEY_CLASSES_ROOT\\mailto\\shell\\open\\command");
 			if (Key.IsOk())
 			{
 				// get app path
@@ -250,7 +258,7 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 			char Base[] = "SOFTWARE\\Clients\\StartMenuInternet";
 			for (int i=0; i<CountOf(Keys); i++)
 			{
-				GRegKey k1(false, "%s\\%s", Keys[i], Base);
+				LRegKey k1(false, "%s\\%s", Keys[i], Base);
 				if (k1.IsOk())
 				{
 					char *Def = k1.GetStr();
@@ -258,7 +266,7 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 					{
 						for (int n=0; n<CountOf(Keys); n++)
 						{
-							GRegKey k2(false, "%s\\SOFTWARE\\Classes\\Applications\\%s\\shell\\open\\command", Keys[n], Def);
+							LRegKey k2(false, "%s\\SOFTWARE\\Classes\\Applications\\%s\\shell\\open\\command", Keys[n], Def);
 							if (k2.IsOk())
 							{
 								char *App = k2.GetStr();
@@ -283,11 +291,11 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 
 				// This is a hack to get around file types without a MIME database entry
 				// but do have a .ext entry. LGetFileMimeType knows about the hack too.
-				GRegKey ExtEntry(false, "HKEY_CLASSES_ROOT\\%s", Ext + 1);
+				LRegKey ExtEntry(false, "HKEY_CLASSES_ROOT\\%s", Ext + 1);
 				char *Name = ExtEntry.GetStr();
 				if (Name)
 				{
-					GRegKey Edit(false, "HKEY_CLASSES_ROOT\\%s\\shell\\edit\\command", Name);
+					LRegKey Edit(false, "HKEY_CLASSES_ROOT\\%s\\shell\\edit\\command", Name);
 					char *App;
 					if (Edit.IsOk() &&
 						(App = Edit.GetStr()))
@@ -296,7 +304,7 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 					}
 					else
 					{
-						GRegKey Open(false, "HKEY_CLASSES_ROOT\\%s\\shell\\open\\command", Name);
+						LRegKey Open(false, "HKEY_CLASSES_ROOT\\%s\\shell\\open\\command", Name);
 						char *App = Open.GetStr();
 						if (App)
 						{
@@ -310,14 +318,14 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 				// This branch gets the list of application available to edit/open the file
 
 				// Map the MIME type to a .ext
-				GRegKey MimeEntry(false, "HKEY_CLASSES_ROOT\\MIME\\Database\\Content Type\\%s", Mime);
+				LRegKey MimeEntry(false, "HKEY_CLASSES_ROOT\\MIME\\Database\\Content Type\\%s", Mime);
 				char *e = MimeEntry.IsOk() ? MimeEntry.GetStr("Extension") : NULL;
 				if (e)
 					strcpy_s(Ext, sizeof(Ext), e);
 				if (Ext[0])
 				{
 					// Get list of "Open With" apps
-					GRegKey Other(false, "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\%s\\OpenWithList", Ext);
+					LRegKey Other(false, "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\%s\\OpenWithList", Ext);
 					char *Mru = NewStr(Other.GetStr("MRUList"));
 					if (Mru)
 					{
@@ -327,11 +335,11 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 							char *Application = Other.GetStr(Str);
 							if (Application)
 							{
-								GRegKey Shell(false, "HKEY_CLASSES_ROOT\\Applications\\%s\\shell", Application);
+								LRegKey Shell(false, "HKEY_CLASSES_ROOT\\Applications\\%s\\shell", Application);
 								List<char> Keys;
 								if (Shell.GetKeyNames(Keys))
 								{
-									GRegKey First(false, "HKEY_CLASSES_ROOT\\Applications\\%s\\shell\\%s\\command", Application, Keys[0]);
+									LRegKey First(false, "HKEY_CLASSES_ROOT\\Applications\\%s\\shell\\%s\\command", Application, Keys[0]);
 									char *Path;
 									if (Path = First.GetStr())
 									{
@@ -348,11 +356,11 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 					if (!Status)
 					{
 						// Explorers file extensions
-						GRegKey FileExt(false, "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\%s", Ext);
+						LRegKey FileExt(false, "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\%s", Ext);
 						char *Application;
 						if (Application = FileExt.GetStr("Application"))
 						{
-							GRegKey App(false, "HKEY_CLASSES_ROOT\\Applications\\%s\\shell\\open\\command", Application);
+							LRegKey App(false, "HKEY_CLASSES_ROOT\\Applications\\%s\\shell\\open\\command", Application);
 							char *Path;
 							if (Path = App.GetStr())
 							{
@@ -364,8 +372,8 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 					if (!Status)
 					{
 						// get classes location
-						GRegKey ExtEntry(false, "HKEY_CLASSES_ROOT\\%s", Ext);
-						GRegKey TypeEntry(false, "HKEY_CLASSES_ROOT\\%s\\shell\\open\\command", ExtEntry.GetStr());
+						LRegKey ExtEntry(false, "HKEY_CLASSES_ROOT\\%s", Ext);
+						LRegKey TypeEntry(false, "HKEY_CLASSES_ROOT\\%s\\shell\\open\\command", ExtEntry.GetStr());
 						char *Path = TypeEntry.GetStr();
 						if (Path)
 						{
@@ -543,9 +551,9 @@ HKEY GetRootKey(char *s)
 	return Root;
 }
 
-bool GRegKey::AssertOnError = true;
+bool LRegKey::AssertOnError = true;
 
-GRegKey::GRegKey(bool WriteAccess, char *Key, ...)
+LRegKey::LRegKey(bool WriteAccess, char *Key, ...)
 {
 	char Buffer[1025];
 
@@ -587,17 +595,17 @@ GRegKey::GRegKey(bool WriteAccess, char *Key, ...)
 	}
 }
 
-GRegKey::~GRegKey()
+LRegKey::~LRegKey()
 {
 	if (k) RegCloseKey(k);
 }
 
-bool GRegKey::IsOk()
+bool LRegKey::IsOk()
 {
 	return k != NULL;
 }
 
-bool GRegKey::Create()
+bool LRegKey::Create()
 {
 	bool Status = false;
 
@@ -623,12 +631,12 @@ bool GRegKey::Create()
 	return Status;
 }
 
-char *GRegKey::Name()
+char *LRegKey::Name()
 {
 	return KeyName;
 }
 
-bool GRegKey::DeleteValue(char *Name)
+bool LRegKey::DeleteValue(char *Name)
 {
 	if (k)
 	{
@@ -646,7 +654,7 @@ bool GRegKey::DeleteValue(char *Name)
 	return false;
 }
 
-bool GRegKey::DeleteKey()
+bool LRegKey::DeleteKey()
 {
 	bool Status = false;
 
@@ -673,7 +681,7 @@ bool GRegKey::DeleteKey()
 	return false;
 }
 
-char *GRegKey::GetStr(const char *Name)
+char *LRegKey::GetStr(const char *Name)
 {
 	if (!k)
 	{
@@ -693,7 +701,7 @@ char *GRegKey::GetStr(const char *Name)
 	return s;
 }
 
-bool GRegKey::GetStr(const char *Name, LString &Str)
+bool LRegKey::GetStr(const char *Name, LString &Str)
 {
 	if (!k)
 	{
@@ -723,7 +731,7 @@ OnError:
 	return false;
 }
 
-bool GRegKey::SetStr(const char *Name, const char *Value)
+bool LRegKey::SetStr(const char *Name, const char *Value)
 {
 	if (!k)
 	{
@@ -731,8 +739,9 @@ bool GRegKey::SetStr(const char *Name, const char *Value)
 		return false;
 	}
 
-	LONG Ret = RegSetValueExA(k, Name, 0, REG_SZ, (uchar*)Value, Value ? (DWORD)strlen(Value) : 0);
-	if (Ret != ERROR_SUCCESS)
+	auto r = RegSetValueExA(k, Name, 0, REG_SZ, (uchar*)Value, Value ? (DWORD)strlen(Value) : 0);
+	LOG_WRITE("RegSetValueExA(%s,%s,'%s')=%i\n", KeyName.Get(), Name, Value, r);
+	if (r != ERROR_SUCCESS)
 	{
 		if (AssertOnError)
 			LAssert(!"RegSetValueEx failed.");
@@ -742,7 +751,7 @@ bool GRegKey::SetStr(const char *Name, const char *Value)
 	return true;
 }
 
-bool GRegKey::GetInt(const char *Name, uint32_t &Value)
+bool LRegKey::GetInt(const char *Name, uint32_t &Value)
 {
 	if (!k) return false;
 	DWORD Size = sizeof(Value), Type;
@@ -750,7 +759,7 @@ bool GRegKey::GetInt(const char *Name, uint32_t &Value)
 	return r == ERROR_SUCCESS;
 }
 
-bool GRegKey::SetInt(const char *Name, uint32_t Value)
+bool LRegKey::SetInt(const char *Name, uint32_t Value)
 {
 	if (!k)
 	{
@@ -759,6 +768,7 @@ bool GRegKey::SetInt(const char *Name, uint32_t Value)
 	}
 	
 	auto r = RegSetValueExA(k, Name, 0, REG_DWORD, (uchar*)&Value, sizeof(Value));
+	LOG_WRITE("RegSetValueExA(%s,%s,%i)=%i\n", KeyName.Get(), Name, Value, r);
 	if (r == ERROR_SUCCESS)
 		return true;
 
@@ -766,7 +776,7 @@ bool GRegKey::SetInt(const char *Name, uint32_t Value)
 	return false;
 }
 
-bool GRegKey::GetBinary(char *Name, void *&Ptr, int &Len)
+bool LRegKey::GetBinary(char *Name, void *&Ptr, int &Len)
 {
 	DWORD Size = 0, Type;
 	if (k && RegQueryValueExA(k, Name, 0, &Type, 0, &Size) == ERROR_SUCCESS)
@@ -779,12 +789,13 @@ bool GRegKey::GetBinary(char *Name, void *&Ptr, int &Len)
 	return false;
 }
 
-bool GRegKey::SetBinary(char *Name, void *Ptr, int Len)
+bool LRegKey::SetBinary(char *Name, void *Ptr, int Len)
 {
+	LAssert(!"Not impl.");
 	return false;
 }
 
-bool GRegKey::GetKeyNames(List<char> &n)
+bool LRegKey::GetKeyNames(List<char> &n)
 {
 	FILETIME t;
 	TCHAR Buf[256];
@@ -798,7 +809,7 @@ bool GRegKey::GetKeyNames(List<char> &n)
 	return n.Length() > 0;
 }
 
-bool GRegKey::GetValueNames(List<char> &n)
+bool LRegKey::GetValueNames(List<char> &n)
 {
 	TCHAR Buf[256];
 	DWORD Type, Size = CountOf(Buf), i = 0;
