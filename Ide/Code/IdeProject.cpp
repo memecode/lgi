@@ -1560,7 +1560,7 @@ LString BuildThread::FindExe()
 	else if (Compiler == Cygwin)
 	{
 		#ifdef WINDOWS
-		GRegKey k(false, "HKEY_CURRENT_USER\\Software\\Cygwin\\Installations");
+		LRegKey k(false, "HKEY_CURRENT_USER\\Software\\Cygwin\\Installations");
 		List<char> n;
 		k.GetValueNames(n);
 		LString s;
