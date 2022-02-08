@@ -411,7 +411,7 @@ bool LApp::InThread()
 	return Gui == Me;
 }
 
-bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
+bool LApp::Run(OnIdleProc IdleCallback, void *IdleParam)
 {
 	if (!InThread())
 	{
@@ -419,17 +419,16 @@ bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 		return false;
 	}
 
-	if (Loop)
-	{
-		printf("Running main loop...\n");
-		d->Run();
-		printf("Main loop finished.\n");
-	}
-	else
-	{
-	}
+	printf("Running main loop...\n");
+	d->Run();
+	printf("Main loop finished.\n");
 
 	return true;
+}
+
+bool LApp::Yield()
+{
+	return false;
 }
 
 void LApp::Exit(int Code)

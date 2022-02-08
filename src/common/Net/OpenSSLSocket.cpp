@@ -31,7 +31,7 @@
 LString LibName(const char *Fmt)
 {
 	LString s;
-	#ifdef LINUX
+	#if defined(LINUX) || defined(HAIKU)
 	s = LString(Fmt).Strip(".");
 	#else
 	s.Printf(Fmt, OPENSSL_SHLIB_VERSION);

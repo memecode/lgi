@@ -91,7 +91,7 @@ GInlineBmp Cursors =
 ////////////////////////////////////////////////////////////////////////////
 void _lgi_yield()
 {
-	LAppInst->Run(false);
+	LAppInst->Yield();
 }
 
 void *IsAttached(BView *v)
