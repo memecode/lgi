@@ -623,7 +623,7 @@ void LCombo::OnPaint(LSurface *pDC)
 		r.y2--;
 		pDC->Colour(L_LOW);
 		pDC->Box(&r);
-		r.Size(1, 1);
+		r.Inset(1, 1);
 		pDC->Colour(L_HIGH);
 		pDC->Line(r.x1, r.y1, r.x2, r.y1);
 		pDC->Line(r.x1, r.y1+1, r.x1, r.y2);
@@ -651,7 +651,7 @@ void LCombo::OnPaint(LSurface *pDC)
 		r.x2--;
 
 		// draw the text
-		r.Size(1, 1);
+		r.Inset(1, 1);
 		if (r.Valid())
 		{
 			LDisplayString *ds = d->GetText(_FL);

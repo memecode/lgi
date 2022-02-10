@@ -123,7 +123,7 @@ public:
 		if (s.Reset(new LDisplayString(LSysFont, LView::Name())))
 		{
 			LRect r = GetPos();
-			r.Dimension(s->X()+NativeTip::Padding.x, s->Y()+NativeTip::Padding.y);
+			r.SetSize(s->X()+NativeTip::Padding.x, s->Y()+NativeTip::Padding.y);
 			SetPos(r);
 		}
 		return Status;
@@ -141,7 +141,7 @@ public:
 		pDC->Colour(L_BLACK);
 		#endif
 		pDC->Box(&c);
-		c.Size(1, 1);
+		c.Inset(1, 1);
 		
 		// Draw text interior
 		LSysFont->Colour(L_TEXT, b);

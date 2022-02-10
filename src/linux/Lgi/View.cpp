@@ -573,7 +573,7 @@ LRect &LView::GetClient(bool ClientSpace)
 	else
 	{
 		c.ZOff(Pos.X()-1, Pos.Y()-1);
-		c.Size(Edge, Edge);
+		c.Inset(Edge, Edge);
 	}
 	
 	return c;

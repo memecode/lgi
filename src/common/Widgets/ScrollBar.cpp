@@ -345,11 +345,11 @@ public:
 			Slide = Widget->GetClient();
 			if (IsVertical())
 			{
-				Slide.Size(0, Sub.y2 + 1);
+				Slide.Inset(0, Sub.y2 + 1);
 			}
 			else
 			{
-				Slide.Size(Sub.x2 + 1, 0);
+				Slide.Inset(Sub.x2 + 1, 0);
 			}
 		}
 	}

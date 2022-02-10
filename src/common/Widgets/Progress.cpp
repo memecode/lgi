@@ -115,7 +115,7 @@ void LProgressView::OnPaint(LSurface *pDC)
 			pDC->Line(p.x1, p.y1, p.x2, p.y1);
 			pDC->Line(p.x1, p.y1, p.x1, p.y2);
 
-			p.Size(1, 1);
+			p.Inset(1, 1);
 
 			LCss::ColorDef f;
 			if (GetCss())

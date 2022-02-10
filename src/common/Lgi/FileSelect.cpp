@@ -1504,7 +1504,7 @@ public:
 		c.Offset(-c.x1, -c.y1);
 		pDC->Colour(L_BLACK);
 		pDC->Box(&c);
-		c.Size(1, 1);
+		c.Inset(1, 1);
 	}
 
 	void OnActivate(GFileSystemItem *i)
