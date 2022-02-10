@@ -34,7 +34,7 @@ public:
 		// Box
 		pDC->Colour(LColour(L_TEXT));
 		pDC->Box(&c);
-		c.Size(1, 1);
+		c.Inset(1, 1);
 		pDC->Colour(LColour(L_WORKSPACE));
 		pDC->Rectangle(&c);
 

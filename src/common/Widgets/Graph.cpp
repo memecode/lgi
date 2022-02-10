@@ -874,9 +874,9 @@ void LGraph::OnPaint(LSurface *pDC)
 	LColour cBorder(222, 222, 222);
 	LRect c = GetClient();
 	LRect data = c;
-	data.Size(20, 20);
+	data.Inset(20, 20);
 	data.x2 -= 40;
-	data.Dimension((int)(d->Zoom * data.X()), (int)(d->Zoom * data.Y()));
+	data.SetSize((int)(d->Zoom * data.X()), (int)(d->Zoom * data.Y()));
 	data.Offset((int)(d->Px * data.X()), (int)(d->Py * data.Y()));
 	
 	LRect y = data;

@@ -764,7 +764,7 @@ void LRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 
 			Ctx.pDC->Colour(L_MED);
 			Ctx.pDC->Box(&Bounds);
-			Bounds.Size(1, 1);
+			Bounds.Inset(1, 1);
 			Ctx.pDC->Colour(L_WORKSPACE);
 			Ctx.pDC->Rectangle(&Bounds);
 

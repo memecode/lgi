@@ -187,7 +187,7 @@ void LToolTabBar::_PaintTab(LSurface *pDC, LToolTab *Tab)
 	
 	if (!Tab->Value())
 	{
-		t.Size(2, 2);
+		t.Inset(2, 2);
 		if (IsVertical())
 		{
 			t.x2++;
@@ -252,7 +252,7 @@ void LToolTabBar::OnPaint(LSurface *pScreen)
 		LThinBorder(pDC, r, DefaultRaisedEdge);
 		pDC->Colour(L_MED);
 		pDC->Rectangle(&r);
-		r.Size(5, 5);
+		r.Inset(5, 5);
 	}
 	else
 	{
@@ -432,7 +432,7 @@ bool LToolTabBar::Pour(LRegion &r)
 		{
 			Client.y1 += GetBx() + 4;
 		}
-		Client.Size(1, 1);
+		Client.Inset(1, 1);
 
 		p.Offset(Best->x1, Best->y1);
 		p.Bound(Best);

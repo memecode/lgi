@@ -463,7 +463,7 @@ void LDisplayString::DrawWhiteSpace(LSurface *pDC, char Ch, LRect &r)
 {
 	if (Ch == '\t')
 	{
-		r.Size(3, 3);
+		r.Inset(3, 3);
 		if (r.Y()/2 == 0)
 			r.y2++;
 		int Cy = (r.Y() >> 1);

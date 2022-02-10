@@ -116,7 +116,7 @@ void GFindDlg::OnPosChange()
     if (GetViewById(IDC_FIND_TABLE, t))
     {
         LRect c = GetClient();
-        c.Size(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
+        c.Inset(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
         t->SetPos(c);
     }
 }
@@ -312,7 +312,7 @@ void GReplaceDlg::OnPosChange()
     if (GetViewById(IDC_FIND_TABLE, t))
     {
         LRect c = GetClient();
-        c.Size(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
+        c.Inset(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
         t->SetPos(c);
     }
 }

@@ -270,7 +270,7 @@ LRect LCssTools::PaintBorder(LSurface *pDC, LRect &in)
 				for (int i=0; i<Px; i++)
 				{
 					pDC->Box(&Content);
-					Content.Size(1, 1);
+					Content.Inset(1, 1);
 				}
 			}
 			break;

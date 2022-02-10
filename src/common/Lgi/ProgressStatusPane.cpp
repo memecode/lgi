@@ -30,9 +30,9 @@ void GProgressStatusPane::OnPaint(LSurface *pDC)
 
 	pDC->Colour(L_MED);
 	pDC->Box(&r);
-	r.Size(1, 1);
+	r.Inset(1, 1);
 	pDC->Box(&r);
-	r.Size(1, 1);
+	r.Inset(1, 1);
 
 	double Pos = (High != Low) ? (double) Val / ((double) High - (double) Low) : 0;
 	int x = (int) (r.X() * Pos);

@@ -217,4 +217,25 @@ LMessage::Result LLayout::OnEvent(LMessage *Msg)
 	return Status;
 }
 
+LRect &LLayout::GetClient(bool InClientSpace)
+{
+	static LRect r;
+	
+	r = LView::GetClient(InClientSpace);
+	if (Handle())
+	{
+		SCROLLBARINFO i = {0};
+		i.cbSize = sizeof(i);
+		if (HScroll)
+		{
+			auto r = GetScrollBarInfo(Handle(), OBJID_HSCROLL, &i);
+			if (r)
+			{
+				int asd=0;
+			}
+		}
+	}
+
+	return r;
+}
 

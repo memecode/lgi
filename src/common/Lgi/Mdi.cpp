@@ -252,7 +252,7 @@ void GMdiChild::OnPaintButton(LSurface *pDC, LRect &rc)
 	LRect r = rc;
 	pDC->Colour(LColour(192,192,192));
 	
-	r.Size(3, 3);
+	r.Inset(3, 3);
 	pDC->Line(r.x1, r.y1, r.x2, r.y2);
 	pDC->Line(r.x1+1, r.y1, r.x2, r.y2-1);
 	pDC->Line(r.x1, r.y1+1, r.x2-1, r.y2);
@@ -711,7 +711,7 @@ void GMdiParent::OnPaint(LSurface *pDC)
 		if (d->Btn)
 		{
 			c->d->Btn = c->d->Tab;
-			c->d->Btn.Size(2, 2);
+			c->d->Btn.Inset(2, 2);
 			c->d->Btn.x1 = c->d->Btn.x2 - BtnWidth + 1;
 			c->d->Btn.Offset(-2, 0);
 		}
@@ -741,7 +741,7 @@ void GMdiParent::OnPaint(LSurface *pDC)
 		pDC->Colour(Edge);
 		pDC->HLine(r.x1 + OffX - 1, r.x2, r.y1);
 		pDC->VLine(r.x2, r.y1, r.y2);
-		r.Size(1, 1);
+		r.Inset(1, 1);
 		r.y2 += 1;
 		Fnt->Fore(Txt);
 		Fnt->Back(Bk);

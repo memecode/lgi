@@ -763,7 +763,7 @@ void FieldView::OnSelect(FieldSource *s)
 void FieldView::OnPosChange()
 {
 	LRect c = GetClient();
-	c.Size(6, 6);
+	c.Inset(6, 6);
 
 	LViewI *v;
 	if (GetViewById(IDC_TABLE, v))
@@ -2228,7 +2228,7 @@ public:
 		LRect c = GetClient();
 		if (Lst)
 		{
-			c.Size(7, 7);
+			c.Inset(7, 7);
 			Lst->SetPos(c);
 		}
 	}

@@ -110,27 +110,32 @@ public:
 	bool Pour(LRegion &r) override;
 
 	// Impl
-	#if defined(__GTK_H__) || !defined(WINNATIVE)
+	#if defined(WINNATIVE)
 
-	bool Attach(LViewI *p) override;
-	bool Detach() override;
-	LRect &GetClient(bool InClientSpace = true) override;
-	void OnCreate() override;
+		LRect &GetClient(bool InClientSpace = true) override;
+
+	#elif defined(__GTK_H__)
+
+		bool Attach(LViewI *p) override;
+		bool Detach() override;
+		LRect &GetClient(bool InClientSpace = true) override;
+		void OnCreate() override;
 	
-	#if defined(MAC) && !XPLATFORM_GLAYOUT
+		#if defined(MAC) && !XPLATFORM_GLAYOUT
 
-	bool Invalidate(LRect *r = NULL, bool Repaint = false, bool NonClient = false) override;
-	bool Focus() override;
-	void Focus(bool f) override;
-	bool SetPos(LRect &p, bool Repaint = false) override;
+			bool Invalidate(LRect *r = NULL, bool Repaint = false, bool NonClient = false) override;
+			bool Focus() override;
+			void Focus(bool f) override;
+			bool SetPos(LRect &p, bool Repaint = false) override;
 
-	#else
+		#else
 	
-	void OnPosChange() override;
-	int OnNotify(LViewI *c, LNotification n) override;
-	void OnNcPaint(LSurface *pDC, LRect &r) override;
+			void OnPosChange() override;
+			int OnNotify(LViewI *c, LNotification n) override;
+			void OnNcPaint(LSurface *pDC, LRect &r) override;
 
-	#endif
+		#endif
+
 	#endif
 	
 	LViewI *FindControl(int Id) override;

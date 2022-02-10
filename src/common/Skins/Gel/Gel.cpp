@@ -728,7 +728,7 @@ public:
 			Mem.Colour(Rgb24(0xe0, 0xe0, 0xe0), 24);
 			Mem.Line(r.x1+1, r.y1+1, r.x1+1, r.y2-2);
 		}
-		r.Size(2, 2);
+		r.Inset(2, 2);
 		if (Callback)
 		{
 			Mem.Op(GDC_ALPHA);
@@ -803,7 +803,7 @@ public:
 					{
 						LRect b(tx-2, ty, tx + sx + 1, ty + sy - 2);
 						b.Offset(Off, Off);
-						c.Size(-2, 0);
+						c.Inset(-2, 0);
 						b.Bound(&c);
 
 						Mem.Colour(Rgb24(180, 180, 180), 24);

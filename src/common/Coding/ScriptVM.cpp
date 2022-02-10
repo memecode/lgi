@@ -1499,7 +1499,7 @@ void GDebugView::OnPaint(LSurface *pDC)
 		int Pad = 3;
 		LDisplayString Ds(f, Error);
 		LRect r(0, 0, Ds.X()-1, Ds.Y()-1);
-		r.Size(-Pad, -Pad);
+		r.Inset(-Pad, -Pad);
 		r.Offset(c.X()-r.X(), Ln ? Ln->r.y1 - ScrollYPixel(): 0);
 		f->Transparent(false);
 		f->Colour(LColour::White, LColour::Red);

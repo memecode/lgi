@@ -285,7 +285,7 @@ void LWideBorder(LSurface *pDC, LRect &r, LEdge Type)
 		}	
 	}
 
-	r.Size(2, 2);
+	r.Inset(2, 2);
 	pDC->Colour(Old);
 }
 
@@ -308,7 +308,7 @@ void LThinBorder(LSurface *pDC, LRect &r, LEdge Type)
 			pDC->Line(r.x1, r.y1, r.x1, r.y2);
 			pDC->Line(r.x1, r.y1, r.x2, r.y1);
 
-			r.Size(1, 1);
+			r.Inset(1, 1);
 			break;
 		}
 		case EdgeXpRaised:
@@ -321,7 +321,7 @@ void LThinBorder(LSurface *pDC, LRect &r, LEdge Type)
 			pDC->Line(r.x1, r.y1, r.x1, r.y2);
 			pDC->Line(r.x1, r.y1, r.x2, r.y1);
 
-			r.Size(1, 1);
+			r.Inset(1, 1);
 			break;
 		}
 		default:
@@ -348,7 +348,7 @@ void LFlatBorder(LSurface *pDC, LRect &r, int Width)
 		pDC->Rectangle(r.x1, r.y2-Width+1, r.x2, r.y2);
 		pDC->Rectangle(r.x1, r.y1+Width, r.x1+Width-1, r.y2-Width);
 		pDC->Rectangle(r.x2-Width+1, r.y1+Width, r.x2, r.y2-Width);
-		r.Size(Width, Width);
+		r.Inset(Width, Width);
 	}
 }
 

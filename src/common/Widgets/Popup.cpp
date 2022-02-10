@@ -1058,7 +1058,7 @@ void LDropDown::OnPaint(LSurface *pDC)
 
 		LApp::SkinEngine->DrawBtn(&Mem, r, LColour(L_HIGH), IsOpen(), Enabled());
 		pDC->Blt(0, 0, &Mem);
-		r.Size(2, 2);
+		r.Inset(2, 2);
 		r.x2 -= 2;
 	}
 	else

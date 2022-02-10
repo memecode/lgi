@@ -1224,14 +1224,30 @@ void LZoomView::UpdateScrollBars(LPoint *MaxScroll, bool ResetPos)
 		LPoint DocSize(Src->X(), Src->Y());		
 		LPoint DocClientSize(c.X(), c.Y());
 		DocClientSize = d->ScreenToDoc(DocClientSize);
+
+		// This can change the client area...
 		SetScrollBars(DocSize.x > DocClientSize.x, DocSize.y > DocClientSize.y);
 
-		LgiTrace("Scroll %i,%i %i,%i\n", DocClientSize.x, DocClientSize.y, Src->X(), Src->Y());
+		// So recalculate everything....
+		auto OldC = c;
+		c = GetClient();
+		DocClientSize = d->ScreenToDoc(DocClientSize = c.GetSize());
+
+		LgiTrace("Scroll cli=%i,%i(raw=%s) doc=%i,%i %s->%s\n",
+			DocClientSize.x, DocClientSize.y, c.GetStr(),
+			DocSize.x, DocSize.y,
+			OldC.GetStr(), c.GetStr());
 
 		if (HScroll)
 		{
+			#if 1
 			HScroll->SetRange(LRange(0, DocSize.x));
 			HScroll->SetPage(DocClientSize.x);
+			#else
+			HScroll->SetRange(LRange(0, 100));
+			HScroll->SetPage(10);
+			#endif
+
 			if (ResetPos) HScroll->Value(0);
 		}
 		if (VScroll)
@@ -1536,21 +1552,14 @@ bool LZoomView::OnMouseWheel(double Lines)
 					NewSx = (int) (DocPt.x - m.x);
 					NewSy = (int) (DocPt.y - m.y);
 				}
-				
+
+				UpdateScrollBars();
+
+				/*				
 				LPoint ScaledDocSize(Src->X(), Src->Y());
 				ScaledDocSize = d->DocToScreen(ScaledDocSize);
 
 				SetScrollBars(ScaledDocSize.x > c.X(), ScaledDocSize.y > c.Y());
-
-				/*
-				LPoint MaxScroll(	HScroll ? ScaledDocSize.x - c.X() : 0,
-									VScroll ? ScaledDocSize.y - c.Y() : 0);
-				MaxScroll = d->ScreenToDoc(MaxScroll);
-				if (NewSx > MaxScroll.x)
-					NewSx = MaxScroll.x;
-				if (NewSy > MaxScroll.y)
-					NewSy = MaxScroll.y;
-				*/
 
 				LPoint ScaledClient(c.X(), c.Y());
 				ScaledClient = d->ScreenToDoc(ScaledClient);
@@ -1573,13 +1582,6 @@ bool LZoomView::OnMouseWheel(double Lines)
 					GPointF NewDocPt;
 					bool In = Convert(NewDocPt, m.x, m.y);
 
-					/*
-					LgiTrace("Scroll: doc=%i,%i cli=%i,%i maxx=%i maxy=%i\n",
-						Src->X(), Src->Y(),
-						c.X(), c.Y(),
-						MaxScroll.x, MaxScroll.y);
-					*/
-
 					LgiTrace("Zoom: DocPt=%.2f,%.2f->%.2f,%.2f Mouse=%i,%i Factor: %i Zoom: %i DocSize: %i,%i NewScroll: %i,%i\n",
 						DocPt.x, DocPt.y,
 						NewDocPt.x, NewDocPt.y,
@@ -1590,6 +1592,7 @@ bool LZoomView::OnMouseWheel(double Lines)
 						NewSx, NewSy);
 				}
 				#endif
+				*/
 			}
 		}
 
@@ -1705,6 +1708,16 @@ int LZoomView::OnNotify(LViewI *v, LNotification n)
 			UpdateWindow(Handle());
 			#endif
 			SendNotify(LNotifyViewportChanged);
+
+			if (HScroll)
+			{
+				auto r = HScroll->GetRange();
+				auto p = HScroll->Page();
+				auto v = HScroll->Value();
+
+				LgiTrace("Notify v=%i p=%i r=%i,%i exp=%i\n",
+					(int)v, (int)p, (int)r.Start, (int)r.End(), (int)(r.End()-p));
+			}
 			break;
 		}
 	}
@@ -1742,6 +1755,11 @@ void LZoomView::OnPaint(LSurface *pDC)
 		LPoint ScaledScroll((int)Sx, (int)Sy);
 		ScaledScroll = d->DocToScreen(ScaledScroll);
 		s.Offset(-ScaledScroll.x, -ScaledScroll.y);
+
+		LgiTrace("Paint scroll=%i,%i cli=%s doc=%s(%ix%i)\n",
+			Sx, Sy,
+			d->ScreenToDoc(c).GetStr(), d->ScreenToDoc(s).GetStr(),
+			Src->X(), Src->Y());
 
 		// Work out the visible tiles...
 		LRect vis = s;

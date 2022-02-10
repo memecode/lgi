@@ -256,7 +256,7 @@ void LSplitter::CalcRegions(bool Follow)
 	r = d->PosA;
 	if (d->BorderA)
 	{
-		r.Size(SPLITER_INSET, SPLITER_INSET);
+		r.Inset(SPLITER_INSET, SPLITER_INSET);
 	}
 
 	if (d->ViewA)
@@ -280,7 +280,7 @@ void LSplitter::CalcRegions(bool Follow)
 	r = d->PosB;
 	if (d->BorderB)
 	{
-		r.Size(SPLITER_INSET, SPLITER_INSET);
+		r.Inset(SPLITER_INSET, SPLITER_INSET);
 	}
 
 	if (d->ViewB)

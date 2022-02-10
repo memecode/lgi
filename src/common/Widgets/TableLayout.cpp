@@ -1262,7 +1262,7 @@ void TableCell::PostLayout(int Depth)
 
 		if (Tbl)
 		{
-			c->r.Dimension(Pos.X(), MIN(Pos.Y(), c->Inf.Height.Min));
+			c->r.SetSize(Pos.X(), MIN(Pos.Y(), c->Inf.Height.Min));
 		}
 		else if
 		(

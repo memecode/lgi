@@ -269,24 +269,22 @@ void LScrollBar::SetLimits(int64 Low, int64 High)
 
 LRange LScrollBar::GetRange() const
 {
-	return LRange(d->Min, d->Max - d->Min);
+	return LRange(d->Min, d->Max - d->Min + 1);
 }
 
 bool LScrollBar::SetRange(const LRange &r)
 {
-	int64 h = r.End();
+	int64 Last = r.End() - 1;
 	d->Shift = 0;
-	while (h > 0 && ((h >> d->Shift) >> 31) != 0)
-	{
+	while (Last > 0 && ((Last >> d->Shift) >> 31) != 0)
 		d->Shift++;
-	}
  
 	LAssert(r.Start < 1000000);
  
 	d->Min = r.Start;
-	d->Max = r.End();
+	d->Max = Last;
 	d->Info.nMin = (int) (r.Start >> d->Shift);
-	d->Info.nMax = (int) (r.End() >> d->Shift);
+	d->Info.nMax = (int) (Last >> d->Shift);
 
 	Update();
 	return true;

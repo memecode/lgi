@@ -652,7 +652,7 @@ void LToolButton::OnPaint(LSurface *pDC)
 				Background = cBack;
 				pDC->Colour(Background);
 				pDC->Box(&p);
-				p.Size(1, 1);
+				p.Inset(1, 1);
 			}
 
 			LRect IconPos;

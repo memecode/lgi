@@ -66,12 +66,12 @@ public:
 			if (Vertical)
 			{
 				while (Pos.Y() < ACTIVE_SPACER_SIZE_PX)
-					Pos.Size(0, -1);
+					Pos.Inset(0, -1);
 			}
 			else
 			{
 				while (Pos.X() < ACTIVE_SPACER_SIZE_PX)
-					Pos.Size(-1, 0);
+					Pos.Inset(-1, 0);
 			}
 				
 			if (Pos.Overlap(x, y))

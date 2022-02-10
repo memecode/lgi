@@ -6583,9 +6583,9 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 				// Border
 				pDC->Colour(Border);
 				pDC->Box(&b);
-				b.Size(1, 1);
+				b.Inset(1, 1);
 				pDC->Box(&b);
-				b.Size(1, 1);
+				b.Inset(1, 1);
 				pDC->Colour(Fill);
 				pDC->Rectangle(&b);
 
