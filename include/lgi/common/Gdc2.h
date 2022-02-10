@@ -1387,7 +1387,7 @@ public:
 };
 
 /// Reduces a images colour depth
-LgiFunc bool GReduceBitDepth(LSurface *pDC, int Bits, GPalette *Pal = 0, GReduceOptions *Reduce = 0);
+LgiFunc bool LReduceBitDepth(LSurface *pDC, int Bits, GPalette *Pal = 0, GReduceOptions *Reduce = 0);
 
 struct GColourStop
 {
