@@ -32,7 +32,7 @@ public:
 	int			Mode;
 	COLOUR		Col;
 	int			Sx, Sy;
-	GGlobalColour *Gc;
+	LGlobalColour *Gc;
 	NativeInt	ConstAlpha;
 	
 	class NullObjects

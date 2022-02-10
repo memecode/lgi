@@ -108,10 +108,10 @@ LString LSurface::GetStr()
 	LString::Array s;
 	s.SetFixedLength(false);
 	s.New().Printf("Size(%ix%i)", X(), Y());
-	s.New().Printf("ColourSpace(%s)", GColourSpaceToString(ColourSpace));
+	s.New().Printf("ColourSpace(%s)", LColourSpaceToString(ColourSpace));
 	s.New().Printf("IsScreen(%i)", IsScreen());
 	if (pAlphaDC)
-		s.New().Printf("pAlphaDC(%ix%i,%s)", pAlphaDC->X(), pAlphaDC->Y(), GColourSpaceToString(pAlphaDC->GetColourSpace()));
+		s.New().Printf("pAlphaDC(%ix%i,%s)", pAlphaDC->X(), pAlphaDC->Y(), LColourSpaceToString(pAlphaDC->GetColourSpace()));
 	if (Clip.Valid())
 		s.New().Printf("Clip(%s)", Clip.GetStr());
 	s.New().Printf("Op(%i)", Op());
@@ -136,7 +136,7 @@ LSurface *LSurface::SubImage(LRect r)
 		return NULL;
 	
 	int BytePx = pMem->GetBits() >> 3;
-	s->pMem = new GBmpMem;
+	s->pMem = new LBmpMem;
 	s->pMem->Base = pMem->Base + (pMem->Line * clip.y1) + (BytePx * clip.x1);
 	s->pMem->x = clip.X();
 	s->pMem->y = clip.Y();
@@ -1092,7 +1092,7 @@ void LSurface::Blt(int x, int y, LSurface *Src, LRect *a)
 
 			if (DClip.Valid() && SClip.Valid())
 			{
-				GBmpMem Bits, Alpha;
+				LBmpMem Bits, Alpha;
 
 				int PixelBytes = GColourSpaceToBits(Src->pMem->Cs) >> 3;
 				
@@ -1107,7 +1107,7 @@ void LSurface::Blt(int x, int y, LSurface *Src, LRect *a)
 
 				if (Src->pAlphaDC && !Src->DrawOnAlpha())
 				{
-					GBmpMem *ASurface = Src->pAlphaDC->pMem;
+					LBmpMem *ASurface = Src->pAlphaDC->pMem;
 					Alpha = Bits;
 					Alpha.Cs = CsIndex8;
 					Alpha.Line = ASurface->Line;
@@ -1529,7 +1529,7 @@ bool LSurface::DrawOnAlpha(bool Draw)
 
     if (Swap)
     {
-		GBmpMem *Temp = pMem;
+		LBmpMem *Temp = pMem;
 		pMem = pAlphaDC->pMem;
 		pAlphaDC->pMem = Temp;
 		
@@ -1593,7 +1593,7 @@ LApplicator *LSurface::CreateApplicator(int Op, LColourSpace Cs)
 	else
 	{
 		LApplicatorFactory::NewApp(Cs, Op);
-		const char *CsStr = GColourSpaceToString(Cs);
+		const char *CsStr = LColourSpaceToString(Cs);
 		LgiTrace("Error: GDeviceContext::CreateApplicator(%i, %x, %s) failed.\n", Op, Cs, CsStr);
 		LAssert(!"No applicator");
 	}

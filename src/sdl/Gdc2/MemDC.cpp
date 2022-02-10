@@ -170,7 +170,7 @@ bool LMemDC::SupportsAlphaCompositing()
 bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 {
 	bool Status = false;
-	GBmpMem *pOldMem = pMem;
+	LBmpMem *pOldMem = pMem;
 
 	DrawOnAlpha(false);
 	DeleteObj(pAlphaDC);
@@ -188,7 +188,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 			if (ColourSpace)
 			{
 				// Non-native image data
-				pMem = new GBmpMem;
+				pMem = new LBmpMem;
 				if (pMem)
 				{
 					pMem->x = x;

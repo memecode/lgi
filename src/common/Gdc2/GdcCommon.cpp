@@ -352,12 +352,12 @@ void LFlatBorder(LSurface *pDC, LRect &r, int Width)
 	}
 }
 
-void LFillGradient(LSurface *pDC, LRect &r, bool Vert, LArray<GColourStop> &Stops)
+void LFillGradient(LSurface *pDC, LRect &r, bool Vert, LArray<LColourStop> &Stops)
 {
 	int CurStop = 0;
-	GColourStop *This = Stops.Length() > CurStop ? &Stops[CurStop] : 0;
+	LColourStop *This = Stops.Length() > CurStop ? &Stops[CurStop] : 0;
 	CurStop++;
-	GColourStop *Next = Stops.Length() > CurStop ? &Stops[CurStop] : 0;
+	LColourStop *Next = Stops.Length() > CurStop ? &Stops[CurStop] : 0;
 
 	int Limit = Vert ? r.Y() : r.X();
 	for (int n=0; n<Limit; n++)
@@ -617,7 +617,7 @@ COLOUR CBit(int DstBits, COLOUR c, int SrcBits, GPalette *Pal)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-const char *GColourSpaceToString(LColourSpace cs)
+const char *LColourSpaceToString(LColourSpace cs)
 {
 	#define CS_STR_BUF 4
 	static int Cur = 0;
@@ -939,12 +939,12 @@ bool GColourSpaceTest()
 }
 
 ////////////////////////////////////////////////////////////////////////
-LSurface *GInlineBmp::Create(uint32_t TransparentPx)
+LSurface *LInlineBmp::Create(uint32_t TransparentPx)
 {
 	LSurface *pDC = new LMemDC;
 	if (pDC->Create(X, Y, System32BitColourSpace, LSurface::SurfaceRequireExactCs))
 	{
-		GBmpMem Src, Dst;
+		LBmpMem Src, Dst;
 		
 		Src.Base = (uint8_t*)Data;
 		Src.Line = X * Bits >> 3;
@@ -1054,7 +1054,7 @@ bool LRopRgb(uint8_t *d, LColourSpace DstCs, uint8_t *s, LColourSpace SrcCs, int
 			Src.All = SrcCs;
 			Dst.All = DstCs;
 			
-			LgiTrace("%s:%i - Unsupported ROP: %s -> %s\n", _FL, GColourSpaceToString(SrcCs), GColourSpaceToString(DstCs));
+			LgiTrace("%s:%i - Unsupported ROP: %s -> %s\n", _FL, LColourSpaceToString(SrcCs), LColourSpaceToString(DstCs));
 			LAssert(!"Unsupported pixel conversion.");
 			return false;
 		}
@@ -1063,7 +1063,7 @@ bool LRopRgb(uint8_t *d, LColourSpace DstCs, uint8_t *s, LColourSpace SrcCs, int
 }
 
 /// Universal bit blt method
-bool LRopUniversal(GBmpMem *Dst, GBmpMem *Src, bool Composite)
+bool LRopUniversal(LBmpMem *Dst, LBmpMem *Src, bool Composite)
 {
 	if (!Dst || !Src)
 		return false;

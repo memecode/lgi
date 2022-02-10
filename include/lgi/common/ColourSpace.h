@@ -363,7 +363,7 @@ union LColourSpaceBits
 #endif
 
 /// Converts a colour space into a string for debugging/reporting.
-LgiFunc const char *GColourSpaceToString(LColourSpace cs);
+LgiFunc const char *LColourSpaceToString(LColourSpace cs);
 
 /// Works out how many bits required for a pixel in a particular colour space.
 LgiFunc int GColourSpaceToBits(LColourSpace ColourSpace);

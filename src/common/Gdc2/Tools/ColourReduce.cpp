@@ -514,7 +514,7 @@ bool CreatePalette(GPalette *Out, LSurface *In, int DestSize)
 	return true;
 }
 
-bool LReduceBitDepth(LSurface *pDC, int Bits, GPalette *Pal, GReduceOptions *Reduce)
+bool LReduceBitDepth(LSurface *pDC, int Bits, GPalette *Pal, LReduceOptions *Reduce)
 {
 	bool Status = false;
 

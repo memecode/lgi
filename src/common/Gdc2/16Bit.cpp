@@ -33,7 +33,7 @@ public:
 
 	const char *GetClass() { return "GdcApp16"; }
 
-	bool SetSurface(GBmpMem *d, GPalette *p, GBmpMem *a)
+	bool SetSurface(LBmpMem *d, GPalette *p, LBmpMem *a)
 	{
 		if (d && d->Cs == Cs)
 		{
@@ -136,7 +136,7 @@ public:
 		}
 	}
 
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
 	{
 		if (!Src)
 			return false;
@@ -182,7 +182,7 @@ public:
 			}
 			default:
 			{
-				GBmpMem Dst;
+				LBmpMem Dst;
 				Dst.Base = this->Ptr.u8;
 				Dst.x = Src->x;
 				Dst.y = Src->y;
@@ -208,7 +208,7 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
 };
 
 template<typename Pixel, LColourSpace Cs>
@@ -218,7 +218,7 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
 };
 
 template<typename Pixel, LColourSpace Cs>
@@ -228,10 +228,10 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
 };
 
-LApplicator *GApp16::Create(LColourSpace Cs, int Op)
+LApplicator *LApp16::Create(LColourSpace Cs, int Op)
 {
 	if (Cs == CsRgb16)
 	{
@@ -294,7 +294,7 @@ void GdcApp16Or::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp16Or::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
+bool GdcApp16Or::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (Src && Src->Cs == Dest->Cs)
 	{
@@ -333,7 +333,7 @@ void GdcApp16And::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp16And::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
+bool GdcApp16And::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (Src && Src->Cs == Dest->Cs)
 	{
@@ -372,7 +372,7 @@ void GdcApp16Xor::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp16Xor::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
+bool GdcApp16Xor::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (Src && Src->Cs == Dest->Cs)
 	{

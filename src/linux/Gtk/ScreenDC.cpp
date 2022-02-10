@@ -534,7 +534,7 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 	LRect RealClient = d->Client;
 	d->Client.ZOff(-1, -1); // Clear this so the blit rgn calculation uses the
 							// full context size rather than just the client.
-	GBlitRegions br(this, x, y, Src, a);
+	LBlitRegions br(this, x, y, Src, a);
 	d->Client = RealClient;
 	if (!br.Valid())
 	{

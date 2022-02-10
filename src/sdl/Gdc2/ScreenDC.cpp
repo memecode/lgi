@@ -49,7 +49,7 @@ LScreenDC::LScreenDC(LView *view, void *Param)
 		
 		SDL_LockSurface(d->Screen);
 
-		pMem = new GBmpMem;
+		pMem = new LBmpMem;
 		LAssert(pMem != NULL);
 		if (pMem)
 		{

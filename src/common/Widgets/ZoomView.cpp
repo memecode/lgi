@@ -49,7 +49,7 @@ struct ZoomTile : public LMemDC
 			Cs = GBitsToColourSpace(Bits);
 		#endif
 
-		// printf("MapBits = %s\n", GColourSpaceToString(Cs));
+		// printf("MapBits = %s\n", LColourSpaceToString(Cs));
 		return Cs;
 	}
 	
@@ -1219,14 +1219,14 @@ void LZoomView::UpdateScrollBars(LPoint *MaxScroll, bool ResetPos)
 	if (!Updating)
 	{
 		Updating = true;	
-		LRect c = GetClient();    
-		// int Factor = d->Factor();
-		// int Fmin1 = Factor - 1;
+		LRect c = GetClient();
 
 		LPoint DocSize(Src->X(), Src->Y());		
 		LPoint DocClientSize(c.X(), c.Y());
 		DocClientSize = d->ScreenToDoc(DocClientSize);
 		SetScrollBars(DocSize.x > DocClientSize.x, DocSize.y > DocClientSize.y);
+
+		LgiTrace("Scroll %i,%i %i,%i\n", DocClientSize.x, DocClientSize.y, Src->X(), Src->Y());
 
 		if (HScroll)
 		{
@@ -1720,7 +1720,6 @@ void LZoomView::OnPaint(LSurface *pDC)
 	pDC->Rectangle();
 	#endif
 
-
 	LRect c = GetClient();
 	LRegion Rgn(c);
 
@@ -1820,9 +1819,9 @@ void LZoomView::OnPaint(LSurface *pDC)
 						#if 0
 						LgiTrace("Zoom: %i,%i %s %s->%s (%s)\n",
 							px, py, tile_source.GetStr(),
-							GColourSpaceToString(pTile->GetColourSpace()),
-							GColourSpaceToString(pDC->GetColourSpace()),
-							GColourSpaceToString(GdcD->GetColourSpace()));
+							LColourSpaceToString(pTile->GetColourSpace()),
+							LColourSpaceToString(pDC->GetColourSpace()),
+							LColourSpaceToString(GdcD->GetColourSpace()));
 						#endif
 
 						#if DEBUG_TILE_BOUNDARIES

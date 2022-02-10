@@ -22,13 +22,13 @@ public:
 };
 
 LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName) :
-	LScreenDC((GPrintDcParams*)Handle)
+	LScreenDC((LPrintDcParams*)Handle)
 {
 	d = new GPrintDCPrivate;
 	d->PrintJobName = PrintJobName;
 	d->PrinterName = PrinterName;
 	
-	GPrintDcParams *Params = (GPrintDcParams*)Handle;
+	LPrintDcParams *Params = (LPrintDcParams*)Handle;
 	if (Params)
 	{
 		#if LGI_COCOA

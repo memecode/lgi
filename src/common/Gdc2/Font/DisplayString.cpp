@@ -1378,7 +1378,7 @@ LPoint LDisplayString::Size()
 #if defined LGI_SDL
 
 template<typename OutPx>
-bool CompositeText8Alpha(LSurface *Out, LSurface *In, LFont *Font, int px, int py, GBlitRegions &Clip)
+bool CompositeText8Alpha(LSurface *Out, LSurface *In, LFont *Font, int px, int py, LBlitRegions &Clip)
 {
 	OutPx map[256];
 
@@ -1480,7 +1480,7 @@ bool CompositeText8Alpha(LSurface *Out, LSurface *In, LFont *Font, int px, int p
 }
 
 template<typename OutPx>
-bool CompositeText8NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int py, GBlitRegions &Clip)
+bool CompositeText8NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int py, LBlitRegions &Clip)
 {
 	LRgba32 map[256];
 
@@ -1590,7 +1590,7 @@ bool CompositeText8NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int
 }
 
 template<typename OutPx>
-bool CompositeText5NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int py, GBlitRegions &Clip)
+bool CompositeText5NoAlpha(LSurface *Out, LSurface *In, LFont *Font, int px, int py, LBlitRegions &Clip)
 {
 	OutPx map[256];
 
@@ -1775,7 +1775,7 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 	{
 		int Ox = 0, Oy = 0;
 		pDC->GetOrigin(Ox, Oy);
-		GBlitRegions Clip(pDC, px-Ox, py-Oy, Img, r);
+		LBlitRegions Clip(pDC, px-Ox, py-Oy, Img, r);
 		LColourSpace DstCs = pDC->GetColourSpace();
 		switch (DstCs)
 		{

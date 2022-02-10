@@ -241,7 +241,7 @@ LImageList::LImageList(int x, int y, LSurface *pDC)
 		
 		#if 0
 		printf("Toolbar input image is %s, has_alpha=%i, has_pad=%i\n",
-			GColourSpaceToString(pDC->GetColourSpace()),
+			LColourSpaceToString(pDC->GetColourSpace()),
 			pDC->HasAlpha(),
 			HasPad(pDC->GetColourSpace()));
 		#endif

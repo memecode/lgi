@@ -178,7 +178,7 @@ class LSurface;
 #include "lgi/common/Point.h"
 #include "lgi/common/Colour.h"
 
-class LgiClass GBmpMem
+class LgiClass LBmpMem
 {
 public:
 	enum GdcMemFlags
@@ -193,8 +193,8 @@ public:
 	LColourSpace Cs;
 	int Flags;
 
-	GBmpMem();
-	~GBmpMem();
+	LBmpMem();
+	~LBmpMem();
 	
 	bool PreMul()
 	{
@@ -239,7 +239,7 @@ public:
 		}
 	}
 	
-	bool Overlap(GBmpMem *Mem)
+	bool Overlap(LBmpMem *Mem)
 	{
 		uchar *ThisStart, *ThisEnd;
 		GetMemoryExtents(ThisStart, ThisEnd);
@@ -271,8 +271,8 @@ public:
 class LgiClass LApplicator
 {
 protected:
-	GBmpMem *Dest;
-	GBmpMem *Alpha;
+	LBmpMem *Dest;
+	LBmpMem *Alpha;
 	GPalette *Pal;
 	int Op;
 
@@ -309,7 +309,7 @@ public:
 	GPalette *GetPal() { return Pal; }
 
 	/// Sets the bitmap to write onto
-	virtual bool SetSurface(GBmpMem *d, GPalette *p = 0, GBmpMem *a = 0) = 0; // sets Dest, returns FALSE on error
+	virtual bool SetSurface(LBmpMem *d, GPalette *p = 0, LBmpMem *a = 0) = 0; // sets Dest, returns FALSE on error
 	/// Sets the current position to an x,y
 	virtual void SetPtr(int x, int y) = 0;			// calculates Ptr from x, y
 	/// Moves the current position one pixel left
@@ -328,7 +328,7 @@ public:
 	/// Draws a rectangle starting from the current position, 'x' pixels across and 'y' pixels down
 	virtual void Rectangle(int x, int y) = 0;
 	/// Copies bitmap data to the current position
-	virtual bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha = 0) = 0;
+	virtual bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = 0) = 0;
 };
 
 /// Creates applications from parameters.
@@ -343,37 +343,37 @@ public:
 	virtual LApplicator *Create(LColourSpace Cs, int Op) = 0;
 };
 
-class LgiClass GApp15 : public LApplicatorFactory
+class LgiClass LApp15 : public LApplicatorFactory
 {
 public:
 	LApplicator *Create(LColourSpace Cs, int Op);
 };
 
-class LgiClass GApp16 : public LApplicatorFactory
+class LgiClass LApp16 : public LApplicatorFactory
 {
 public:
 	LApplicator *Create(LColourSpace Cs, int Op);
 };
 
-class LgiClass GApp24 : public LApplicatorFactory
+class LgiClass LApp24 : public LApplicatorFactory
 {
 public:
 	LApplicator *Create(LColourSpace Cs, int Op);
 };
 
-class LgiClass GApp32 : public LApplicatorFactory
+class LgiClass LApp32 : public LApplicatorFactory
 {
 public:
 	LApplicator *Create(LColourSpace Cs, int Op);
 };
 
-class LgiClass GApp8 : public LApplicatorFactory
+class LgiClass LApp8 : public LApplicatorFactory
 {
 public:
 	LApplicator *Create(LColourSpace Cs, int Op);
 };
 
-class GAlphaFactory : public LApplicatorFactory
+class LAlphaFactory : public LApplicatorFactory
 {
 public:
 	LApplicator *Create(LColourSpace Cs, int Op);
@@ -402,7 +402,7 @@ protected:
 	int				PrevOp;
 	LRect			Clip;
 	LColourSpace	ColourSpace;
-	GBmpMem			*pMem;
+	LBmpMem			*pMem;
 	LSurface		*pAlphaDC;
 	GPalette		*pPalette;
 	LApplicator		*pApp;
@@ -683,7 +683,7 @@ public:
 
 #if defined(MAC) && !defined(__GTK_H__)
 
-struct GPrintDcParams
+struct LPrintDcParams
 {
 	#if LGI_COCOA
 	#else
@@ -745,7 +745,7 @@ public:
 		#elif defined(MAC)
 	
 			LScreenDC(LWindow *wnd, void *Param = 0);
-			LScreenDC(GPrintDcParams *Params); // Used by LPrintDC
+			LScreenDC(LPrintDcParams *Params); // Used by LPrintDC
 			LRect GetPos();
 			void PushState();
 			void PopState();
@@ -817,7 +817,7 @@ public:
 
 /// \brief Blitting region helper class, can calculate the right source and dest rectangles
 /// for a blt operation including propagating clipping back to the source rect.
-class GBlitRegions
+class LBlitRegions
 {
 	// Raw image bounds
 	LRect SrcBounds;
@@ -834,7 +834,7 @@ public:
 	LRect DstClip;
 
 	/// Calculate the rectangles.
-	GBlitRegions
+	LBlitRegions
 	(
 		/// Destination surface
 		LSurface *Dst,
@@ -1109,13 +1109,13 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////
-class LgiClass GGlobalColour
+class LgiClass LGlobalColour
 {
 	class GGlobalColourPrivate *d;
 
 public:
-	GGlobalColour();
-	~GGlobalColour();
+	LGlobalColour();
+	~LGlobalColour();
 
 	// Add all the colours first
 	COLOUR AddColour(COLOUR c24);
@@ -1210,7 +1210,7 @@ public:
 	/// Returns the size of the screen as a rectangle.
 	LRect Bounds() { return LRect(0, 0, X()-1, Y()-1); }
 
-	GGlobalColour *GetGlobalColour();
+	LGlobalColour *GetGlobalColour();
 
 	/// Set a global graphics option
 	int GetOption(int Opt);
@@ -1295,7 +1295,7 @@ public:
 
 /// \brief Defines a bitmap inline in C++ code.
 ///
-/// The easiest way I know of create the raw data for an GInlineBmp
+/// The easiest way I know of create the raw data for an LInlineBmp
 /// is to use <a href='http://www.memecode.com/image.php'>i.Mage</a> to
 /// load a file or create a image and then use the Edit->Copy As Code
 /// menu. Then paste into your C++ and put a uint32 array declaration
@@ -1304,7 +1304,7 @@ public:
 ///
 /// I use this for embeding resource images directly into the code so
 /// that a) they load instantly and b) they can't get lost as a separate file.
-class LgiClass GInlineBmp
+class LgiClass LInlineBmp
 {
 public:
 	/// The width of the image.
@@ -1344,7 +1344,7 @@ LgiClass LColour GdcMixColour(LColour a, LColour b, float HowMuchA = 0.5);
 #endif
 
 /// Colour reduction option to define what palette to go to
-enum GColourReducePalette
+enum LColourReducePalette
 {
 	CR_PAL_NONE = -1,
     CR_PAL_CUBE = 0,
@@ -1353,7 +1353,7 @@ enum GColourReducePalette
 };
 
 /// Colour reduction option to define how to deal with reduction error
-enum GColourReduceMatch
+enum LColourReduceMatch
 {
 	CR_MATCH_NONE = -1,
     CR_MATCH_NEAR = 0,
@@ -1362,14 +1362,14 @@ enum GColourReduceMatch
 };
 
 /// Colour reduction options
-class GReduceOptions
+class LReduceOptions
 {
 public:
 	/// Type of palette
-	GColourReducePalette PalType;
+	LColourReducePalette PalType;
 	
 	/// Reduction error handling
-	GColourReduceMatch MatchType;
+	LColourReduceMatch MatchType;
 	
 	/// 1-256
 	int Colours;
@@ -1377,7 +1377,7 @@ public:
 	/// Specific palette to reduce to
 	GPalette *Palette;
 
-	GReduceOptions()
+	LReduceOptions()
 	{
 		Palette = 0;
 		Colours = 256;
@@ -1387,9 +1387,9 @@ public:
 };
 
 /// Reduces a images colour depth
-LgiFunc bool LReduceBitDepth(LSurface *pDC, int Bits, GPalette *Pal = 0, GReduceOptions *Reduce = 0);
+LgiFunc bool LReduceBitDepth(LSurface *pDC, int Bits, GPalette *Pal = 0, LReduceOptions *Reduce = 0);
 
-struct GColourStop
+struct LColourStop
 {
 	LColour Colour;
 	float Pos;
@@ -1402,7 +1402,7 @@ struct GColourStop
 };
 
 /// Draws a horizontal or vertical gradient
-LgiFunc void LFillGradient(LSurface *pDC, LRect &r, bool Vert, LArray<GColourStop> &Stops);
+LgiFunc void LFillGradient(LSurface *pDC, LRect &r, bool Vert, LArray<LColourStop> &Stops);
 
 #ifdef WIN32
 /// Draws a windows HICON onto a surface at Dx, Dy
@@ -1427,7 +1427,7 @@ LgiFunc bool LRopRgb
 );
 
 /// Universal bit blt method
-LgiFunc bool LRopUniversal(GBmpMem *Dst, GBmpMem *Src, bool Composite);
+LgiFunc bool LRopUniversal(LBmpMem *Dst, LBmpMem *Src, bool Composite);
 
 /// Gets the screens DPI
 LgiFunc int LScreenDpi();
