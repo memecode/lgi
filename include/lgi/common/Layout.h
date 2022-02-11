@@ -112,7 +112,7 @@ public:
 	// Impl
 	#if defined(WINNATIVE)
 
-	#elif defined(__GTK_H__)
+	#else
 
 		bool Attach(LViewI *p) override;
 		bool Detach() override;

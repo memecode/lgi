@@ -953,7 +953,7 @@ void LItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
 			pDC->Line(r.x2, r.y1, r.x2, r.y2);
 
 			LRect n = r;
-			n.Size(2, 2);
+			n.Inset(2, 2);
 			OnPaint_Content(pDC, n, false);
 
 		#else

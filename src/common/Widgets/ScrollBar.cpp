@@ -131,7 +131,7 @@ public:
 			if (IsValid())
 			{
 				LRect r = Slide;
-				r.Size(3, 3);
+				r.Inset(3, 3);
 				pDC->Colour(L_LOW);
 				
 				// pDC->Rectangle(&r);

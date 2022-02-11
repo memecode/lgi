@@ -1111,7 +1111,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 class LgiClass LGlobalColour
 {
-	class GGlobalColourPrivate *d;
+	class LGlobalColourPrivate *d;
 
 public:
 	LGlobalColour();
