@@ -15,6 +15,7 @@ Notes:
 
 #define MAX_FACTOR				32
 #define DEBUG_TILE_BOUNDARIES	0
+#define RIGHT_BOTTOM_WHITESPACE	2
 
 enum Messages
 {
@@ -68,7 +69,10 @@ class LZoomViewPriv
 
 public:
 	/// If this is true, then we own the pDC object.
-	bool OwnDC;
+	bool OwnDC = false;
+
+	/// This is set if there is recursion in the scroll bar update..
+	bool ScrollBarsDirty = false;
 	
 	/// The image surface we are displaying
 	LSurface *pDC;
@@ -1226,33 +1230,22 @@ void LZoomView::UpdateScrollBars(LPoint *MaxScroll, bool ResetPos)
 		DocClientSize = d->ScreenToDoc(DocClientSize);
 
 		// This can change the client area...
+		// Which will cause a OnPosChange event to occur.
 		SetScrollBars(DocSize.x > DocClientSize.x, DocSize.y > DocClientSize.y);
 
-		// So recalculate everything....
-		auto OldC = c;
-		c = GetClient();
-		DocClientSize = d->ScreenToDoc(DocClientSize = c.GetSize());
-
-		LgiTrace("Scroll cli=%i,%i(raw=%s) doc=%i,%i %s->%s\n",
+		LgiTrace("Scroll cli=%i,%i(raw=%s) doc=%i,%i\n",
 			DocClientSize.x, DocClientSize.y, c.GetStr(),
-			DocSize.x, DocSize.y,
-			OldC.GetStr(), c.GetStr());
+			DocSize.x, DocSize.y);
 
 		if (HScroll)
 		{
-			#if 1
-			HScroll->SetRange(LRange(0, DocSize.x));
+			HScroll->SetRange(LRange(0, DocSize.x+RIGHT_BOTTOM_WHITESPACE));
 			HScroll->SetPage(DocClientSize.x);
-			#else
-			HScroll->SetRange(LRange(0, 100));
-			HScroll->SetPage(10);
-			#endif
-
 			if (ResetPos) HScroll->Value(0);
 		}
 		if (VScroll)
 		{
-			VScroll->SetRange(LRange(0, DocSize.y));
+			VScroll->SetRange(LRange(0, DocSize.y+RIGHT_BOTTOM_WHITESPACE));
 			VScroll->SetPage(DocClientSize.y);
 			if (ResetPos) VScroll->Value(0);
 		}
@@ -1263,6 +1256,7 @@ void LZoomView::UpdateScrollBars(LPoint *MaxScroll, bool ResetPos)
 		}
 		Updating = false;
 	}
+	else d->ScrollBarsDirty = true; // Update them later
 }
 
 void LZoomView::OnPosChange()
@@ -1732,6 +1726,12 @@ void LZoomView::OnPaint(LSurface *pDC)
 	pDC->Colour(LColour(255, 0, 255));
 	pDC->Rectangle();
 	#endif
+
+	if (d->ScrollBarsDirty)
+	{
+		d->ScrollBarsDirty = false;
+		UpdateScrollBars();
+	}
 
 	LRect c = GetClient();
 	LRegion Rgn(c);

@@ -112,8 +112,6 @@ public:
 	// Impl
 	#if defined(WINNATIVE)
 
-		LRect &GetClient(bool InClientSpace = true) override;
-
 	#elif defined(__GTK_H__)
 
 		bool Attach(LViewI *p) override;
