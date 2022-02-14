@@ -982,9 +982,10 @@ public:
 					else if (!stricmp(TargetType, "StaticLibrary"))
 					{
 						m.Print("TargetFile = lib$(Target)$(Tag).%s\n"
-								"$(TargetFile) : outputfolder $(Depends)\n"
+								"$(TargetFile) : $(Objects)\n"
+								"	mkdir -p $(BuildDir)\n"
 								"	@echo Linking $(TargetFile) [$(Build)]...\n"
-								"	ar rcs $(BuildDir)/$(TargetFile) $(addprefix $(BuildDir)/,$(Depends))\n",
+								"	ar rcs $(BuildDir)/$(TargetFile) $(Objects)\n",
 								PlatformStaticLibExt);
 
 						LString PostBuildCmds = d->Settings.GetStr(ProjPostBuildCommands, NULL, Platform);

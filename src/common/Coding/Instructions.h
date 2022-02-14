@@ -1714,7 +1714,7 @@ case IDomCall:
 					char *sStart = (char*)s + start;
 					char *pos;
 					if (end >= 0)
-						pos = strnstr(sStart, sub, end);
+						pos = Strnstr(sStart, sub, end);
 					else
 						pos = strstr(sStart, sub);
 
@@ -1751,7 +1751,7 @@ case IDomCall:
 					{
 						cur =	(end)
 								?
-								strnstr(cur, sub, end - cur)
+								Strnstr(cur, sub, end - cur)
 								:
 								strstr(cur, sub);
 						if (cur)

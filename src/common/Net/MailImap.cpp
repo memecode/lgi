@@ -113,7 +113,7 @@ ssize_t MailIMap::ParseImapResponse(char *Buffer, ssize_t BufferLen, LArray<StrR
 	SkipSpaces(s);
 	if (*s != '(')
 	{
-		char *Eol = strnstr(Buffer, "\r\n", BufferLen);
+		char *Eol = Strnstr(Buffer, "\r\n", BufferLen);
 		if (Eol)
 		{
 			s = Eol + 2;
@@ -299,7 +299,7 @@ bool MailIMap::Http(LSocketI *S,
 		}
 		else
 		{
-			char *Eoh = strnstr(&Res[0], "\r\n\r\n", Res.Length());
+			auto Eoh = Strnstr(&Res[0], "\r\n\r\n", Res.Length());
 			if (Eoh)
 			{
 				HdrLen = Eoh - &Res[0];
@@ -313,7 +313,7 @@ bool MailIMap::Http(LSocketI *S,
 	}
 
 	char *Rp = &Res[0];
-	char *Eoh = strnstr(Rp, "\r\n\r\n", Res.Length());
+	auto Eoh = Strnstr(Rp, "\r\n\r\n", Res.Length());
 	if (Eoh)
 	{
 		if (OutHeaders)
@@ -1114,7 +1114,7 @@ public:
 						if (r > 0)
 						{
 							Mem.Add(buf, r);
-							bool End = strnstr(&Mem[0], "\r\n\r\n", Mem.Length()) != NULL;
+							bool End = Strnstr(&Mem[0], "\r\n\r\n", Mem.Length()) != NULL;
 							if (End)
 								break;
 						}	
