@@ -170,13 +170,14 @@ Source =	src/linux/Lgi/Window.cpp \
 			src/common/Gdc2/16Bit.cpp \
 			src/common/Gdc2/15Bit.cpp
 
-SourceLst := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(Sources)))
+SourceLst := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(Source)))
 
 Objects := $(addprefix $(BuildDir)/,$(SourceLst))
 
 # Target
 TargetFile = lib$(Target)$(Tag).so
 $(TargetFile) : $(Objects)
+	mkdir -p $(BuildDir)
 	@echo Linking $(TargetFile) [$(Build)]...
 	$(CPP)$s -shared \
 		 \

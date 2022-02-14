@@ -207,14 +207,14 @@ char *dirchar(char *s, bool rev = false)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-class Dependency : public LTreeItem
+class AppDependency : public LTreeItem
 {
 	char *File;
 	bool Loaded;
 	LTreeItem *Fake;
 
 public:
-	Dependency(const char *file)
+	AppDependency(const char *file)
 	{
 		File = NewStr(file);
 		char *d = strrchr(File, DIR_CHAR);
@@ -233,7 +233,7 @@ public:
 		}
 	}
 	
-	~Dependency()
+	~AppDependency()
 	{
 		DeleteArray(File);
 	}
@@ -257,7 +257,7 @@ public:
 		{
 			for (LTreeItem *i=GetChild(); i; i=i->GetNext())
 			{
-				((Dependency*)i)->Copy(p, Depth+1);
+				((AppDependency*)i)->Copy(p, Depth+1);
 			}
 		}
 	}
@@ -326,7 +326,7 @@ public:
 								*e++ = 0;
 
 								char *Dep = Find(SharedLib);
-								Insert(new Dependency(Dep?Dep:SharedLib));
+								Insert(new AppDependency(Dep?Dep:SharedLib));
 								DeleteArray(Dep);
 							}
 						}
@@ -346,7 +346,7 @@ public:
 #define IDC_COPY 100
 class Depends : public LDialog
 {
-	Dependency *Root;
+	AppDependency *Root;
 
 public:
 	Depends(LView *Parent, const char *File)
@@ -363,7 +363,7 @@ public:
 		{
 			t->Sunken(true);
 			
-			Root = new Dependency(File);
+			Root = new AppDependency(File);
 			if (Root)
 			{
 				t->Insert(Root);
