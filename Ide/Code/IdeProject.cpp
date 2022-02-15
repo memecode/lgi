@@ -1892,12 +1892,9 @@ int BuildThread::Main()
 				// Read all the output					
 				char Buf[256];
 				ssize_t rd;
-				LFile log("c:\\tmp\\build.txt", O_WRITE);
-				log.SetSize(0);
 
 				while ( (rd = SubProc->Read(Buf, sizeof(Buf))) > 0 )
 				{
-					log.Write(Buf, rd);
 					Write(Buf, rd);
 				}
 					

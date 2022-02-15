@@ -360,7 +360,7 @@ struct MonthHash : public LHashTbl<ConstStrKey<char,false>,int>
 
 LString::Array Zdump;
 
-#define DEBUG_DST_INFO		1
+#define DEBUG_DST_INFO		0
 
 bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start, LDateTime *End)
 {

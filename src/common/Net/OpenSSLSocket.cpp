@@ -20,7 +20,7 @@
 #include "lgi/common/OpenSSLSocket.h"
 #include <openssl/rand.h>
 #ifdef WIN32
-#include <mmsystem.h>
+	#include <mmsystem.h>
 #endif
 #include "lgi/common/Token.h"
 #include "lgi/common/Variant.h"
@@ -31,13 +31,9 @@
 LString LibName(const char *Fmt)
 {
 	LString s;
-	#ifdef LINUX
-	s = LString(Fmt).Strip(".");
-	#else
 	s.Printf(Fmt, OPENSSL_SHLIB_VERSION);
-	#endif
 	#ifdef _WIN64
-	s += "-x64";
+		s += "-x64";
 	#endif
 	return s;
 }
@@ -45,9 +41,16 @@ LString LibName(const char *Fmt)
 #ifdef WIN32
 	#define SSL_LIBRARY			LibName("libssl-%i")
 	#define EAY_LIBRARY			LibName("libcrypto-%i")
+#elif defined(LINUX)
+	// Building openssl on linux:
+	//	git clone https://github.com/openssl/openssl.git
+	//	cd openssl
+	//	./config
+	//	make -j8
+	#define SSL_LIBRARY			LibName("libssl.so.%i")
 #else
 	// Building openssl on mac:
-	// ./configure darwin64-x86_64-cc -mmacosx-version-min=10.10
+	//	./configure darwin64-x86_64-cc -mmacosx-version-min=10.10
 	#define SSL_LIBRARY			LibName("libssl.%i")
 #endif
 
