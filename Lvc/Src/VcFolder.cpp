@@ -94,6 +94,13 @@ int Ver2Int(LString v)
 
 int ToolVersion[VcMax] = {0};
 
+#define DEBUG_READER_THREAD		0
+#if DEBUG_READER_THREAD
+	#define LOG_READER(...) printf(__VA_ARGS__)
+#else
+	#define LOG_READER(...)
+#endif
+
 ReaderThread::ReaderThread(VersionCtrl vcs, LAutoPtr<LSubProcess> p, LStream *out) : LThread("ReaderThread")
 {
 	Vcs = vcs;
@@ -150,6 +157,8 @@ int ReaderThread::OnLine(char *s, ssize_t len)
 
 bool ReaderThread::OnData(char *Buf, ssize_t &r)
 {
+	LOG_READER("OnData %i\n", (int)r);
+	
 	#if 1
 	char *Start = Buf;
 	for (char *c = Buf; c < Buf + r;)
@@ -197,14 +206,14 @@ int ReaderThread::Main()
 	char Buf[1024];
 	ssize_t r;
 	
-	// printf("%s:%i - starting reader loop.\n", _FL);
+	LOG_READER("%s:%i - starting reader loop, pid=%i\n", _FL, Process->Handle());
 	while (Process->IsRunning())
 	{
 		if (Out)
 		{
-			// printf("%s:%i - starting read.\n", _FL);
+			LOG_READER("%s:%i - starting read.\n", _FL);
 			r = Process->Read(Buf, sizeof(Buf));
-			// printf("%s:%i - read=%i.\n", _FL, (int)r);
+			LOG_READER("%s:%i - read=%i.\n", _FL, (int)r);
 			if (r > 0)
 			{
 				if (!OnData(Buf, r))
@@ -219,14 +228,14 @@ int ReaderThread::Main()
 		}
 	}
 
-	// printf("%s:%i - process loop done.\n", _FL);
+	LOG_READER("%s:%i - process loop done.\n", _FL);
 	if (Out)
 	{
 		while ((r = Process->Read(Buf, sizeof(Buf))) > 0)
 			OnData(Buf, r);
 	}
 
-	// printf("%s:%i - loop done.\n", _FL);
+	LOG_READER("%s:%i - loop done.\n", _FL);
 	Result = (int) Process->GetExitValue();
 	#if _DEBUG
 	if (Result)
@@ -1066,6 +1075,8 @@ VcLeaf *VcFolder::FindLeaf(const char *Path, bool OpenTree)
 
 bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 {
+printf("ParseLog %i\n", (int)s.Length());
+
 	LHashTbl<StrKey<char>, VcCommit*> Map;
 	for (auto pc: Log)
 		Map.Add(pc->GetRev(), pc);
