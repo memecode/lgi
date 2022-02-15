@@ -34,7 +34,8 @@ ifeq ($(Build),Debug)
 		-I./Code \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
-		-I../include
+		-I../include \
+		-I../../../../codelib/openssl/include
 else
 	Flags += -s -Os -std=c++14
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
@@ -52,7 +53,8 @@ else
 		-I./Code \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
-		-I../include
+		-I../include \
+		-I../../../../codelib/openssl/include
 endif
 
 # Dependencies
@@ -406,6 +408,7 @@ cleanall :
 	+make -C "../" -f "Makefile.linux" clean
 
 VPATH=%.cpp \
+	../../../../codelib/openssl/include \
 	../include/lgi/linux/Gtk \
 	../include/lgi/linux \
 	../include/lgi/common \
