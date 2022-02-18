@@ -684,7 +684,7 @@ LFilter::IoStatus GdcGif::ReadImage(LSurface *pdc, LStream *in)
 					{ \
 						Done = true; \
 						LgiTrace("%s:%i - Failed to read %i (" LPrintfInt64 " of " LPrintfInt64 ")\n", \
-								(int)sizeof(Var), in->GetPos(), in->GetSize()); \
+								_FL, (int)sizeof(Var), in->GetPos(), in->GetSize()); \
 						break; \
 					}
 					
