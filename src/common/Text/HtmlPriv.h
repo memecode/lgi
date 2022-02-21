@@ -14,7 +14,7 @@ namespace Html1
 //////////////////////////////////////////////////////////////////////////////////
 // Structs & Classes                                                            //
 //////////////////////////////////////////////////////////////////////////////////
-class GFlowRect;
+class LFlowRect;
 class LFlowRegion;
 
 #define ToTag(t)					dynamic_cast<LTag*>(t)
@@ -28,7 +28,7 @@ struct LTagHit
 	bool NearSameRow;	// True if 'NearestText' on the same row as click.
 	LPoint LocalCoords;	// The position in local co-ords of the tag
 
-	GFlowRect *Block;	// Text block hit
+	LFlowRect *Block;	// Text block hit
 	ssize_t Index; // If Block!=NULL then index into text, otherwise -1.
 
 	LTagHit()
@@ -81,32 +81,32 @@ public:
 	void Set(char *s);
 };
 
-class GFlowRect : public LRect
+class LFlowRect : public LRect
 {
 public:
 	LTag *Tag;
 	char16 *Text;
 	ssize_t Len;
 
-	GFlowRect()
+	LFlowRect()
 	{
 		Tag = 0;
 		Text = 0;
 		Len = 0;
 	}
 
-	~GFlowRect()
+	~LFlowRect()
 	{
 	}
 
 	int Start();
 	bool OverlapX(int x) { return x >= x1 && x <= x2; }
 	bool OverlapY(int y) { return y >= y1 && y <= y2; }
-	bool OverlapX(GFlowRect *b) { return !(b->x2 < x1 || b->x1 > x2); }
-	bool OverlapY(GFlowRect *b) { return !(b->y2 < y1 || b->y1 > y2); }
+	bool OverlapX(LFlowRect *b) { return !(b->x2 < x1 || b->x1 > x2); }
+	bool OverlapY(LFlowRect *b) { return !(b->y2 < y1 || b->y1 > y2); }
 };
 
-class LHtmlArea : public LArray<GFlowRect*>
+class LHtmlArea : public LArray<LFlowRect*>
 {
 public:
 	~LHtmlArea();
@@ -274,6 +274,26 @@ protected:
 	/// All strings stored in here should be in UTF-8. Each string is allocated on the heap.
 	LHashTbl<ConstStrKey<char,false>, char*> Attr;
 
+	// Post flow alignment
+	struct AlignInfo
+	{
+		DisplayType Disp;
+		LCss::LengthType XAlign;
+		LTag *t;
+
+		bool Overlap(LTag *b)
+		{
+			LRange tRng(t->Pos.y, t->Size.y);
+			LRange bRng(b->Pos.y, b->Size.y);
+			return tRng.Overlap(bRng).Valid();
+		}
+	};
+	struct AlignGroup : public LArray<AlignInfo>
+	{
+		int x1, x2;
+	};
+	LArray<AlignGroup> PostFlowAlign;
+
 	// Forms
 	LViewI *Ctrl;
 	LVariant CtrlValue;
@@ -288,7 +308,7 @@ protected:
 
 	// Private methods
 	LFont *NewFont();
-	ssize_t NearestChar(GFlowRect *Fr, int x, int y);
+	ssize_t NearestChar(LFlowRect *Fr, int x, int y);
 	LTag *HasOpenTag(char *t);
 	LTag *PrevTag();
 	LRect ChildBounds();

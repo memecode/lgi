@@ -427,17 +427,18 @@ public:
 
 class LFlowRegion
 {
-	List<GFlowRect> Line;	// These pointers aren't owned by the flow region
+	LCss::LengthType Align = LCss::LenInherit;
+	List<LFlowRect> Line;	// These pointers aren't owned by the flow region
 							// When the line is finish, all the tag regions
 							// will need to be vertically aligned
 
-	struct GFlowStack
+	struct LFlowStack
 	{
 		int LeftAbs;
 		int RightAbs;
 		int TopAbs;
 	};
-	LArray<GFlowStack> Stack;
+	LArray<LFlowStack> Stack;
 
 public:
 	LHtml *Html;
@@ -448,7 +449,6 @@ public:
 	int my;						// How much of the area above y2 was just margin
 	LPoint MAX;					// Max dimensions
 	int Inline;
-
 	int InBody;
 
 	LFlowRegion(LHtml *html, bool inbody)
@@ -530,9 +530,9 @@ public:
 		return *this;
 	}
 	
-	void FinishLine(LCss::LengthType Align, bool Margin = false);
-	void EndBlock(LCss::LengthType Align);
-	void Insert(GFlowRect *Tr);
+	void FinishLine(bool Margin = false);
+	void EndBlock();
+	void Insert(LFlowRect *Tr, LCss::LengthType Align);
 	LRect *LineBounds();
 
 	void Indent(LTag *Tag,
@@ -543,7 +543,7 @@ public:
 				bool IsMargin)
 	{
 		LFlowRegion This(*this);
-		GFlowStack &Fs = Stack.New();
+		LFlowStack &Fs = Stack.New();
 
 		Fs.LeftAbs = Left.IsValid() ? ResolveX(Left, Tag, IsMargin) : 0;
 		Fs.RightAbs = Right.IsValid() ? ResolveX(Right, Tag, IsMargin) : 0;
@@ -562,7 +562,7 @@ public:
 				bool IsMargin)
 	{
 		LFlowRegion This(*this);
-		GFlowStack &Fs = Stack.New();
+		LFlowStack &Fs = Stack.New();
 
 		Fs.LeftAbs = Px.x1;
 		Fs.RightAbs = Px.x2;
@@ -586,7 +586,7 @@ public:
 		ssize_t len = Stack.Length();
 		if (len > 0)
 		{
-			GFlowStack &Fs = Stack[len-1];
+			LFlowStack &Fs = Stack[len-1];
 
 			int &BottomAbs = Px.y2;
 
@@ -614,7 +614,7 @@ public:
 		ssize_t len = Stack.Length();
 		if (len > 0)
 		{
-			GFlowStack &Fs = Stack[len-1];
+			LFlowStack &Fs = Stack[len-1];
 
 			int BottomAbs = Bottom.IsValid() ? ResolveY(Bottom, Tag, IsMargin) : 0;
 
@@ -1183,15 +1183,13 @@ LCss::LengthType LTag::GetAlign(bool x)
 }
 
 //////////////////////////////////////////////////////////////////////
-void LFlowRegion::EndBlock(LCss::LengthType Align)
+void LFlowRegion::EndBlock()
 {
 	if (cx > x1)
-	{
-		FinishLine(Align);
-	}
+		FinishLine();
 }
 
-void LFlowRegion::FinishLine(LCss::LengthType Align, bool Margin)
+void LFlowRegion::FinishLine(bool Margin)
 {
 	if (Align != LCss::AlignLeft)
 	{
@@ -1235,8 +1233,8 @@ void LFlowRegion::FinishLine(LCss::LengthType Align, bool Margin)
 LRect *LFlowRegion::LineBounds()
 {
 	auto It = Line.begin();
-	GFlowRect *Prev = *It;
-	GFlowRect *r=Prev;
+	LFlowRect *Prev = *It;
+	LFlowRect *r=Prev;
 	if (r)
 	{
 		LRect b;
@@ -1272,9 +1270,13 @@ LRect *LFlowRegion::LineBounds()
 	return 0;
 }
 
-void LFlowRegion::Insert(GFlowRect *Tr)
+void LFlowRegion::Insert(LFlowRect *Tr, LCss::LengthType align)
 {
-	if (Tr) Line.Insert(Tr);
+	if (Tr)
+	{
+		Align = align;
+		Line.Insert(Tr);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1449,13 +1451,13 @@ ssize_t LTag::GetTextStart()
 {
 	if (PreText() && TextPos.Length() > 1)
 	{
-		GFlowRect *t = TextPos[1];
+		LFlowRect *t = TextPos[1];
 		if (t)
 			return t->Text - Text();
 	}
 	else if (TextPos.Length() > 0)
 	{
-		GFlowRect *t = TextPos[0];
+		LFlowRect *t = TextPos[0];
 		if (t && Text())
 		{
 			LAssert(t->Text >= Text() && t->Text <= Text()+2);
@@ -1606,7 +1608,7 @@ bool LTag::CreateSource(LStringPipe &p, int Depth, bool LastWasBlock)
 			}
 			
 			// Convert CSS props to a string and emit them...
-			LAutoString s = Css->ToString();
+			auto s = Css->ToString();
 			if (ValidStr(s))
 			{			
 				// Clean off any trailing whitespace...
@@ -1843,7 +1845,7 @@ void LTag::_Dump(LStringPipe &Buf, int Depth)
 
 	for (unsigned i=0; i<TextPos.Length(); i++)
 	{
-		GFlowRect *Tr = TextPos[i];
+		LFlowRect *Tr = TextPos[i];
 		
 		LAutoString Utf8(WideToUtf8(Tr->Text, Tr->Len));
 		if (Utf8)
@@ -2076,7 +2078,7 @@ bool LTag::OnMouseClick(LMouse &m)
 		#ifdef _DEBUG
 		if (m.Ctrl())
 		{
-			LAutoString Style = ToString();
+			auto Style = ToString();
 			LStringPipe p(256);
 			p.Print("Tag: %s\n", Tag ? Tag.Get() : "CONTENT");
 			if (Class.Length())
@@ -2296,7 +2298,7 @@ static int IsNearRect(LRect *r, int x, int y)
 	return (int) sqrt( (double) ( (dx * dx) + (dy * dy) ) );
 }
 
-ssize_t LTag::NearestChar(GFlowRect *Tr, int x, int y)
+ssize_t LTag::NearestChar(LFlowRect *Tr, int x, int y)
 {
 	LFont *f = GetFont();
 	if (f)
@@ -2348,7 +2350,7 @@ void LTag::GetTagByPos(LTagHit &TagHit, int x, int y, int Depth, bool InBody, bo
 	{
 		for (unsigned i=0; i<TextPos.Length(); i++)
 		{
-			GFlowRect *Tr = TextPos[i];
+			LFlowRect *Tr = TextPos[i];
 			if (!Tr)
 				break;
 			
@@ -2789,7 +2791,7 @@ void LTag::Restyle()
 	#if DEBUG_RESTYLE && defined(_DEBUG)
 	if (Debug)
 	{
-		LAutoString Style = ToString();
+		auto Style = ToString();
 		LgiTrace(">>>> %s <<<<:\n%s\n\n", Tag.Get(), Style.Get());
 	}
 	#endif
@@ -3397,7 +3399,8 @@ void LTag::SetStyle()
 	{
 		LCss::ImageDef bk = BackgroundImage();
 		if (bk.Type == LCss::ImageUri &&
-			ValidStr(bk.Uri))
+			ValidStr(bk.Uri) &&
+			!bk.Uri.Equals("transparent"))
 		{
 			LoadImage(bk.Uri);
 		} 
@@ -3408,15 +3411,6 @@ void LTag::SetStyle()
 		LFont *f = GetFont();
 		if (f)
 			Ctrl->SetFont(f, false);
-	}
-
-	if (Display() == DispBlock && Html->Environment)
-	{
-		LCss::ImageDef Img = BackgroundImage();
-		if (Img.Type == ImageUri)
-		{
-			LoadImage(Img.Uri);
-		}
 	}
 }
 
@@ -4913,7 +4907,7 @@ LRect LHtmlArea::Bounds()
 
 	for (unsigned i=0; i<Length(); i++)
 	{
-		GFlowRect *r = (*this)[i];
+		LFlowRect *r = (*this)[i];
 		if (r)
 		{
 			if (i)
@@ -4956,7 +4950,7 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, int LineHeig
 	{
 		// Insert a text rect for this tag, even though it's empty.
 		// This allows the user to place the cursor on a blank line.
-		GFlowRect *Tr = new GFlowRect;
+		LFlowRect *Tr = new LFlowRect;
 		Tr->Tag = Tag;
 		Tr->Text = Text;
 		Tr->x1 = Flow->cx;
@@ -4968,14 +4962,14 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, int LineHeig
 		Flow->cx = Tr->x2 + 1;
 
 		Add(Tr);
-		Flow->Insert(Tr);
+		Flow->Insert(Tr, Align);
 		return;				
 	}
 	#endif
 	
 	while (*Text)
 	{
-		GFlowRect *Tr = new GFlowRect;
+		LFlowRect *Tr = new LFlowRect;
 		if (!Tr)
 			break;
 
@@ -5029,7 +5023,7 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, int LineHeig
 				else
 				{
 					// Not at the start of the margin
-					Flow->FinishLine(Align);
+					Flow->FinishLine();
 					goto Restart;
 				}
 			}
@@ -5067,7 +5061,7 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, int LineHeig
 		Flow->y2 = MAX(Flow->y2, Tr->y2 + 1);
 		
 		Add(Tr);
-		Flow->Insert(Tr);
+		Flow->Insert(Tr, Align);
 		
 		Text += Tr->Len;
 		if (Wrap)
@@ -5129,7 +5123,7 @@ bool LTag::Serialize(LXmlTag *t, bool Write)
 		}
 		if (Props.Length())
 		{
-			LAutoString CssStyles = ToString();
+			auto CssStyles = ToString();
 			LAssert(!strchr(CssStyles, '\"'));
 			t->SetAttr("style", CssStyles);
 		}
@@ -5257,7 +5251,7 @@ void LTag::CenterText()
 	int ContentPx = 0;
 	for (unsigned i=0; i<TextPos.Length(); i++)
 	{
-		GFlowRect *fr = TextPos[i];
+		LFlowRect *fr = TextPos[i];
 		ContentPx += fr->X();
 	}
 	
@@ -5276,7 +5270,7 @@ void LTag::CenterText()
 		int OffPx = (AvailPx - ContentPx) >> 1;
 		for (unsigned i=0; i<TextPos.Length(); i++)
 		{
-			GFlowRect *fr = TextPos[i];
+			LFlowRect *fr = TextPos[i];
 			fr->Offset(OffPx, 0);
 		}
 	}
@@ -5322,7 +5316,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		case TAG_IFRAME:
 		{
 			LFlowRegion Temp = *Flow;
-			Flow->EndBlock(GetAlign(true));
+			Flow->EndBlock();
 			Flow->Indent(this, MarginLeft(), MarginTop(), MarginRight(), MarginBottom(), true);
 
 			// Flow children
@@ -5449,7 +5443,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 				if (Flow->cx > Flow->x1 &&
 					Size.x > Flow->X())
 				{
-					Flow->FinishLine(GetAlign(true));
+					Flow->FinishLine();
 				}
 
 				Pos.y = Flow->y1;
@@ -5480,7 +5474,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		}
 		case TAG_HR:
 		{
-			Flow->FinishLine(GetAlign(true));
+			Flow->FinishLine();
 			
 			Pos.x = Flow->x1;
 			Pos.y = Flow->y1 + 7;
@@ -5490,13 +5484,13 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			Flow->cx ++;
 			Flow->y2 += 16;
 
-			Flow->FinishLine(GetAlign(true));
+			Flow->FinishLine();
 			return;
 			break;
 		}
 		case TAG_TABLE:
 		{
-			Flow->EndBlock(GetAlign(true));
+			Flow->EndBlock();
 			
 			LCss::Len left = GetCssLen(MarginLeft, Margin);
 			LCss::Len top = GetCssLen(MarginTop, Margin);
@@ -5518,13 +5512,16 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		}
 	}
 
+	if (Debug)
+	{
+		int asd=0;
+	}
+
 	if (Disp == DispBlock || Disp == DispInlineBlock)
 	{
 		// This is a block level element, so end the previous non-block elements
 		if (Disp == DispBlock)
-		{		
-			Flow->EndBlock(GetAlign(true));
-		}
+			Flow->EndBlock();
 		
 		#ifdef _DEBUG
 		if (Debug)
@@ -5569,6 +5566,8 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 
 		Pos.x = Disp == DispInlineBlock ? Flow->cx : Flow->x1;
 		Pos.y = Flow->y1;
+		if (Debug)
+			LgiTrace("%s:%i - Setting pos=%i,%i\n", _FL, Pos.x, Pos.y);
 
 		Flow->y1 -= Pos.y;
 		Flow->y2 -= Pos.y;
@@ -5707,6 +5706,8 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 	}
 
 	// Flow children
+	PostFlowAlign.Length(0);
+
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
 		LTag *t = ToTag(Children[i]);
@@ -5745,6 +5746,40 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 
 	LCss::LengthType XAlign = GetAlign(true);
 	int FlowSz = Flow->Width();
+
+	// Align the children...
+	for (auto &group: PostFlowAlign)
+	{
+		int MinX = FlowSz, MaxX = 0;
+		for (auto &a: group)
+		{
+			MinX = MIN(MinX, a.t->Pos.x);
+			MaxX = MAX(MaxX, a.t->Pos.x + a.t->Size.x - 1);
+		}
+		int TotalX = MaxX - MinX + 1;
+		int FirstX = group.Length() ? group[0].t->Pos.x : 0;
+
+		for (auto &a: group)
+		{
+			if (a.XAlign == LCss::AlignCenter)
+			{
+				int OffX = (Size.x - TotalX) >> 1;
+				if (OffX > 0)
+				{
+					a.t->Pos.x += OffX;
+				}
+			}
+			else if (a.XAlign == LCss::AlignRight)
+			{
+				int OffX = FlowSz - FirstX - TotalX;
+				if (OffX > 0)
+				{
+					a.t->Pos.x += OffX;
+				}
+			}
+		}
+	}
+
 	if (Disp == DispBlock || Disp == DispInlineBlock)
 	{		
 		LCss::Len Ht = Height();
@@ -5779,7 +5814,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 
 		if (Disp == DispBlock)
 		{
-			Flow->EndBlock(XAlign);
+			Flow->EndBlock();
 
 			int OldFlowSize = Flow->x2 - Flow->x1 + 1;
 			Flow->Outdent(this, PaddingLeft(), PaddingTop(), PaddingRight(), PaddingBottom(), false);
@@ -5876,7 +5911,7 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			case TAG_BR:
 			{
 				int OldFlowY2 = Flow->y2;
-				Flow->FinishLine(GetAlign(true));
+				Flow->FinishLine();
 				Size.y = Flow->y2 - OldFlowY2;
 				Flow->y2 = MAX(Flow->y2, Flow->y1 + Size.y - 1);
 				break;
@@ -5888,7 +5923,11 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 				{
 					LTag *t = ToTag(e);
 					if (t && t->IsBlock() && t->Size.x < Px)
+					{
 						t->Pos.x = (Px - t->Size.x) >> 1;
+						if (Debug)
+							LgiTrace("%s:%i - Setting pos=%i,%i\n", _FL, Pos.x, Pos.y);
+					}
 				}
 				break;
 			}
@@ -5910,21 +5949,37 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 
 	if (Disp == DispBlock || Disp == DispInlineBlock)
 	{
-		if (XAlign == LCss::AlignCenter)
+		if (XAlign == LCss::AlignCenter ||
+			XAlign == LCss::AlignRight)
 		{
-			int OffX = (FlowSz - Size.x) >> 1;
-			if (OffX > 0)
+			int Match = 0;
+			auto parent = ToTag(Parent);
+			for (auto &grp: parent->PostFlowAlign)
 			{
-				Pos.x += OffX;
+				bool Overlaps = false;
+				for (auto &a: grp)
+				{
+					if (a.Overlap(this))
+					{
+						Overlaps = true;
+						break;
+					}
+				}
+
+				if (!Overlaps)
+					Match++;
 			}
-		}
-		else if (XAlign == LCss::AlignRight)
-		{
-			int OffX = FlowSz - Size.x;
-			if (OffX > 0)
+			
+			auto &grp = parent->PostFlowAlign[Match];
+			if (grp.Length() == 0)
 			{
-				Pos.x += OffX;
+				grp.x1 = Flow->x1;
+				grp.x2 = Flow->x2;
 			}
+			auto &pf = grp.New();
+			pf.Disp = Disp;
+			pf.XAlign = XAlign;
+			pf.t = this;
 		}
 	}
 
@@ -6448,6 +6503,10 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 		Html->d->MaxPaintTimeout = true;
 		return;
 	}
+	if (Debug)
+	{
+		int asd=0;
+	}
 
 	int Px, Py;
 	pDC->GetOrigin(Px, Py);
@@ -6655,7 +6714,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 				// This is the pixel height we're aiming to fill
 				int EffectiveLineHt = LineHeightCache >= 0 ? MAX(FontPx, LineHeightCache) : FontPx;
 				
-				// This gets added to the y coord of each peice of text
+				// This gets added to the y coord of each piece of text
 				int LineHtOff = ((EffectiveLineHt - FontPx + 1) >> 1) - LeadingPx;
 								
 				#define FontColour(InSelection) \
@@ -6698,7 +6757,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 
 					for (unsigned i=0; i<TextPos.Length(); i++)
 					{
-						GFlowRect *Tr = TextPos[i];
+						LFlowRect *Tr = TextPos[i];
 						ssize_t Start = Tr->Text - Text();
 						ssize_t Done = 0;
 						int x = Tr->x1;
@@ -6815,7 +6874,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 					ssize_t Base = GetTextStart();
 					for (unsigned i=0; i<TextPos.Length(); i++)
 					{
-						GFlowRect *Tr = TextPos[i];
+						LFlowRect *Tr = TextPos[i];
 						if (!Tr)
 							break;
 						ssize_t Pos = (Tr->Text - Text()) - Base;
@@ -6865,10 +6924,8 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 				{
 					FontColour(InSelection);
 
-					for (unsigned i=0; i<TextPos.Length(); i++)
+					for (auto &Tr: TextPos)
 					{
-						GFlowRect *Tr = TextPos[i];
-
 						LDisplayString ds(f, Tr->Text, Tr->Len);
 						ds.Draw(pDC, Tr->x1, Tr->y1 + LineHtOff, IsEditor ? Tr : NULL);
 					}
@@ -7428,6 +7485,7 @@ LPoint LHtml::Layout(bool ForceLayout)
 		LFlowRegion f(this, Client, false);
 
 		// Flow text, width is different
+		LgiTrace("Start onflow..\n");
 		Tag->OnFlow(&f, 0);
 		ViewWidth = Client.X();
 		d->Content.x = f.MAX.x + 1;
