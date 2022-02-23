@@ -1417,67 +1417,17 @@ int LDateTime::Compare(const LDateTime *Date) const
 	return Diff > 0 ? 1 : 0;
 }
 
-bool LDateTime::operator <(const LDateTime &dt) const
-{
-	if (_Year < dt._Year) return true;
-	else if (_Year > dt._Year) return false;
-
-	if (_Month < dt._Month) return true;
-	else if (_Month > dt._Month) return false;
-
-	if (_Day < dt._Day) return true;
-	else if (_Day > dt._Day) return false;
-
-	if (_Hours < dt._Hours) return true;
-	else if (_Hours > dt._Hours) return false;
-
-	if (_Minutes < dt._Minutes) return true;
-	else if (_Minutes > dt._Minutes) return false;
-
-	if (_Seconds < dt._Seconds) return true;
-	else if (_Seconds > dt._Seconds) return false;
-
-	if (_Thousands < dt._Thousands) return true;
-	else if (_Thousands > dt._Thousands) return false;
-
-	return false;
-}
-
-bool LDateTime::operator <=(const LDateTime &dt) const
-{
-	return !(*this > dt);
-}
-
-bool LDateTime::operator >(const LDateTime &dt) const
-{
-	if (_Year > dt._Year) return true;
-	else if (_Year < dt._Year) return false;
-
-	if (_Month > dt._Month) return true;
-	else if (_Month < dt._Month) return false;
-
-	if (_Day > dt._Day) return true;
-	else if (_Day < dt._Day) return false;
-
-	if (_Hours > dt._Hours) return true;
-	else if (_Hours < dt._Hours) return false;
-
-	if (_Minutes > dt._Minutes) return true;
-	else if (_Minutes < dt._Minutes) return false;
-
-	if (_Seconds > dt._Seconds) return true;
-	else if (_Seconds < dt._Seconds) return false;
-
-	if (_Thousands > dt._Thousands) return true;
-	else if (_Thousands < dt._Thousands) return false;
-
-	return false;
-}
-
-bool LDateTime::operator >=(const LDateTime &dt) const
-{
-	return !(*this < dt);
-}
+#define DATETIME_OP(op) \
+	bool LDateTime::operator op(const LDateTime &dt) const \
+	{ \
+		auto a = Ts(); \
+		auto b = dt.Ts(); \
+		return a op b; \
+	}
+DATETIME_OP(<)
+DATETIME_OP(<=)
+DATETIME_OP(>)
+DATETIME_OP(>=)
 
 bool LDateTime::operator ==(const LDateTime &dt) const
 {
