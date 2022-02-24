@@ -7485,7 +7485,6 @@ LPoint LHtml::Layout(bool ForceLayout)
 		LFlowRegion f(this, Client, false);
 
 		// Flow text, width is different
-		LgiTrace("Start onflow..\n");
 		Tag->OnFlow(&f, 0);
 		ViewWidth = Client.X();
 		d->Content.x = f.MAX.x + 1;
