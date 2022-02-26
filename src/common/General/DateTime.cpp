@@ -35,7 +35,7 @@ constexpr const char *LDateTime::MonthsShort[];
 constexpr const char *LDateTime::MonthsLong[];
 
 #define MIN_YEAR		1800
-#define OFFSET_1800		5364662400
+#define OFFSET_1800		5364662400 // Seconds from 1/1/1800 to 1/1/1970
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -444,16 +444,24 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start,
 	
 		LDateTime Before = Start;
 		Before.AddMonths(-6);
-		// NSTimeZone *utc = [NSTimeZone timeZoneWithName:@"UTC"];
+
 		NSTimeZone *tz = [NSTimeZone systemTimeZone];
-		NSDate *startDate = [[NSDate alloc] initWithTimeIntervalSince1970:Before.Ts()/1000];
+		NSDate *startDate = [[NSDate alloc] initWithTimeIntervalSince1970:(Before.Ts() / Second64Bit) - OFFSET_1800];
 		for (int n=0; n<6; n++)
 		{
 			NSDate *next = [tz nextDaylightSavingTimeTransitionAfterDate:startDate];
 			auto &i = Info.New();
 			
-			i.UtcTimeStamp = [next timeIntervalSince1970] * 1000;
+			i.UtcTimeStamp = ([next timeIntervalSince1970] + OFFSET_1800) * Second64Bit;
 			i.Offset = (int)([tz secondsFromGMTForDate:[next dateByAddingTimeInterval:60]]/60);
+			
+			#if DEBUG_DST_INFO
+			{
+				LDateTime dt;
+				dt.Set(i.UtcTimeStamp);
+				LgiTrace("%s:%i - Ts=%s Off=%i\n", _FL, dt.Get().Get(), i.Offset);
+			}
+			#endif
 			
 			[startDate release];
 			startDate = next;
