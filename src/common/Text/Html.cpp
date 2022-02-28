@@ -530,6 +530,7 @@ public:
 		return *this;
 	}
 	
+	void AlignText();
 	void FinishLine(bool Margin = false);
 	void EndBlock();
 	void Insert(LFlowRect *Tr, LCss::LengthType Align);
@@ -1189,7 +1190,7 @@ void LFlowRegion::EndBlock()
 		FinishLine();
 }
 
-void LFlowRegion::FinishLine(bool Margin)
+void LFlowRegion::AlignText()
 {
 	if (Align != LCss::AlignLeft)
 	{
@@ -1212,6 +1213,11 @@ void LFlowRegion::FinishLine(bool Margin)
 				}
 		}
 	}
+}
+
+void LFlowRegion::FinishLine(bool Margin)
+{
+	// AlignText();
 
 	if (y2 > y1)
 	{
@@ -5241,6 +5247,7 @@ bool LTag::Serialize(LXmlTag *t, bool Write)
 	return true;
 }
 
+/*
 /// This method centers the text in the area given to the tag. Used for inline block elements.
 void LTag::CenterText()
 {
@@ -5275,6 +5282,7 @@ void LTag::CenterText()
 		}
 	}
 }
+*/
 
 void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 {
@@ -5512,11 +5520,6 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 		}
 	}
 
-	if (Debug)
-	{
-		int asd=0;
-	}
-
 	if (Disp == DispBlock || Disp == DispInlineBlock)
 	{
 		// This is a block level element, so end the previous non-block elements
@@ -5566,8 +5569,6 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 
 		Pos.x = Disp == DispInlineBlock ? Flow->cx : Flow->x1;
 		Pos.y = Flow->y1;
-		if (Debug)
-			LgiTrace("%s:%i - Setting pos=%i,%i\n", _FL, Pos.x, Pos.y);
 
 		Flow->y1 -= Pos.y;
 		Flow->y2 -= Pos.y;
@@ -5860,12 +5861,11 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 				Size.y = Flow->y2;
 			}
 
-			Flow->y1 = Local.y1;
-			Flow->y2 = MAX(Local.y2, Local.y1 + Size.y);
+			Flow->y1 = Local.y1 - Pos.y;
+			Flow->y2 = MAX(Local.y2, Flow->y1+Size.y-1);
 			
 			if (!IsTableTag())
 				Flow->Inline--;
-			CenterText();
 		}
 
 		// Can't do alignment here because pos is used to
@@ -5925,8 +5925,6 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 					if (t && t->IsBlock() && t->Size.x < Px)
 					{
 						t->Pos.x = (Px - t->Size.x) >> 1;
-						if (Debug)
-							LgiTrace("%s:%i - Setting pos=%i,%i\n", _FL, Pos.x, Pos.y);
 					}
 				}
 				break;
@@ -6502,10 +6500,6 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 	{
 		Html->d->MaxPaintTimeout = true;
 		return;
-	}
-	if (Debug)
-	{
-		int asd=0;
 	}
 
 	int Px, Py;

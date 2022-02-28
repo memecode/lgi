@@ -224,6 +224,7 @@
   <ItemGroup>
     <None Include="Files\amp-super.html" />
     <None Include="Files\cisra_new_building.html" />
+    <None Include="Files\pccg-order.html" />
     <None Include="Files\steam1.html" />
     <None Include="Files\steam3.html" />
     <None Include="Files\steam4.html" />

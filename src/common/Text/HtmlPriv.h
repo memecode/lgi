@@ -320,7 +320,7 @@ protected:
 	char *NextTag(char *s);
 	void ZeroTableElements();
 	bool OnUnhandledColor(LCss::ColorDef *def, const char *&s);
-	void CenterText();
+	// void CenterText();
 	bool Serialize(LXmlTag *t, bool Write);
 	LColour _Colour(bool Fore);
 
