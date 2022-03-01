@@ -468,6 +468,13 @@ struct LVolumePriv
 					else
 						Desc = "Hard Disk";
 					Type = VT_HARDDISK;
+
+					ULARGE_INTEGER Avail, TotalBytes, FreeBytes;
+					if (GetDiskFreeSpaceExA(Drive, &Avail, &TotalBytes, &FreeBytes))
+					{
+						Free = FreeBytes.QuadPart;
+						Size = TotalBytes.QuadPart;
+					}
 					break;
 				}
 			}
@@ -592,14 +599,14 @@ LDirectory *LVolume::GetContents()
 ////////////////////////////////////////////////////////////////////////////////
 LFileSystem *LFileSystem::Instance = 0;
 
-class GFileSystemPrivate
+class LFileSystemPrivate
 {
 public:
-	GFileSystemPrivate()
+	LFileSystemPrivate()
 	{
 	}
 
-	~GFileSystemPrivate()
+	~LFileSystemPrivate()
 	{
 	}
 };
@@ -607,7 +614,7 @@ public:
 LFileSystem::LFileSystem()
 {
 	Instance = this;
-	d = new GFileSystemPrivate;
+	d = new LFileSystemPrivate;
 	Root = 0;
 }
 
