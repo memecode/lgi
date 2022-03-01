@@ -698,7 +698,7 @@ LVolume *LVolume::Next()
 					v->d->Free = freeSize.longLongValue;
 					d->Next->d->Insert(v);
 					
-					printf("Vol: s=%s p=%s name=%s\n", s.Get(), p.Get(), v->d->Name.Get());
+					// printf("Vol: s=%s p=%s name=%s\n", s.Get(), p.Get(), v->d->Name.Get());
 				}
 			}
 		}
