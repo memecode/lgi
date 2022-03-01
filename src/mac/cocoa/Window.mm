@@ -1059,19 +1059,16 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 			LRect Position(0, 0, -1, -1);
 			LWindowZoom State = LZoomNormal;
 			
-			GToken t(v.Str(), ";");
-			for (int i=0; i<t.Length(); i++)
+			auto t = LString(v.Str()).SplitDelimit(";");
+			for (auto s: t)
 			{
-				char *Var = t[i];
-				char *Value = strchr(Var, '=');
-				if (Value)
+				auto v = s.SplitDelimit("=", 1);
+				if (v.Length() == 2)
 				{
-					*Value++ = 0;
-					
-					if (stricmp(Var, "State") == 0)
-						State = (LWindowZoom) atoi(Value);
-					else if (stricmp(Var, "Pos") == 0)
-						Position.SetStr(Value);
+					if (v[0].Equals("State"))
+						State = (LWindowZoom)v[1].Int();
+					else if (v[0].Equals("Pos"))
+						Position.SetStr(v[1]);
 				}
 				else return false;
 			}
