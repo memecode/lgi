@@ -15,13 +15,6 @@
 #define TIMEOUT_PROMPT			1000
 
 //////////////////////////////////////////////////////////////////
-enum SshMsgs
-{
-	M_DETECT_VCS = M_USER + 100,
-	M_RUN_CMD,
-	M_RESPONSE,
-};
-
 SshConnection *AppPriv::GetConnection(const char *Uri, bool Create)
 {
 	LUri u(Uri);
@@ -1194,8 +1187,22 @@ public:
 
 	LMessage::Result OnEvent(LMessage *Msg)
 	{
-		if (Msg->Msg() == M_RESPONSE)
-			SshConnection::HandleMsg(Msg);
+		switch (Msg->Msg())
+		{
+			case M_RESPONSE:
+			{
+				SshConnection::HandleMsg(Msg);
+				break;
+			}
+			case M_HANDLE_CALLBACK:
+			{
+				LAutoPtr<ProcessCallback> Pc((ProcessCallback*)Msg->A());
+				if (Pc)
+					Pc->OnComplete();
+				break;
+			}
+		}
+
 		return LWindow::OnEvent(Msg);
 	}
 

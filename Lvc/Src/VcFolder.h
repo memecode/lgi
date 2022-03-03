@@ -2,6 +2,7 @@
 #define _VcFolder_h_
 
 #include "lgi/common/SubProcess.h"
+#include <functional>
 
 class VcLeaf;
 
@@ -54,6 +55,23 @@ struct Result
 	LString Out;
 };
 
+struct ProcessCallback : public LThread, public LSubProcess
+{
+	Result Ret;
+	LView *View = NULL;
+	LTextLog *Log = NULL;
+	std::function<void(Result)> Callback;
+
+public:
+	ProcessCallback(LString exe,
+					LString args,
+					LString localPath,
+					LTextLog *log,
+					LView *view,
+					std::function<void(Result)> callback);
+	int Main();
+	void OnComplete();
+};
 struct VcBranch
 {
 	bool Default;
@@ -201,13 +219,13 @@ class VcFolder : public LTreeItem
 	void Init(AppPriv *priv);
 	const char *GetVcName();
 	bool StartCmd(const char *Args, ParseFn Parser = NULL, ParseParams *Params = NULL, LoggingType Logging = LogNone);
-	Result RunCmd(const char *Args, LoggingType Logging = LogNone);
+	bool RunCmd(const char *Args, LoggingType Logging, std::function<void(Result)> Callback);
 	void OnBranchesChange();
 	void OnCmdError(LString Output, const char *Msg);
 	void ClearError();
 	VcFile *FindFile(const char *Path);
 	void LinkParents();
-	LString CurrentRev();
+	void CurrentRev(std::function<void(LString)> Callback);
 	LColour BranchColour(const char *Name);
 	void Empty();
 
