@@ -257,7 +257,7 @@ public:
 	LRect DefaultPos()
 	{
 		auto c = GetClient();
-		c.Size(20, 20);
+		c.Inset(20, 20);
 		return c;
 	}
 

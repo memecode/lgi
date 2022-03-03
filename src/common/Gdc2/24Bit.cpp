@@ -34,7 +34,7 @@ public:
 	}
 
 	const char *GetClass() { return "GdcApp24"; }
-	bool SetSurface(GBmpMem *d, GPalette *p, GBmpMem *a);
+	bool SetSurface(LBmpMem *d, GPalette *p, LBmpMem *a);
 	void SetPtr(int x, int y);
 	void IncX();
 	void IncY();
@@ -48,7 +48,7 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
 };
 
 class LgiClass GdcApp24And : public GdcApp24 {
@@ -57,7 +57,7 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
 };
 
 class LgiClass GdcApp24Or : public GdcApp24 {
@@ -66,7 +66,7 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
 };
 
 class LgiClass GdcApp24Xor : public GdcApp24 {
@@ -75,7 +75,7 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
 };
 
 template<typename Pixel, LColourSpace ColourSpace>
@@ -122,7 +122,7 @@ public:
 		return 0;
 	}
 
-	bool SetSurface(GBmpMem *d, GPalette *pal = NULL, GBmpMem *a = NULL)
+	bool SetSurface(LBmpMem *d, GPalette *pal = NULL, LBmpMem *a = NULL)
 	{
 		if (d && d->Cs == ColourSpace)
 		{
@@ -201,7 +201,7 @@ public:
 	}
 	
 	template<typename T>
-	bool CopyBlt(GBmpMem *Src)
+	bool CopyBlt(LBmpMem *Src)
 	{
 		for (int y=0; y<Src->y; y++)
 		{
@@ -225,7 +225,7 @@ public:
 	}
 	
 	template<typename T>
-	bool AlphaBlt(GBmpMem *Src, GBmpMem *SrcAlpha)
+	bool AlphaBlt(LBmpMem *Src, LBmpMem *SrcAlpha)
 	{
 		uchar *DivLut = Div255Lut;
 
@@ -263,7 +263,7 @@ public:
 		return true;
 	}
 	
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha = NULL)
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = NULL)
 	{
 		if (!Src)
 			return false;
@@ -302,7 +302,7 @@ public:
 			}
 			else
 			{
-				GBmpMem Dst;
+				LBmpMem Dst;
 				Dst.Base = u8;
 				Dst.x = Src->x;
 				Dst.y = Src->y;
@@ -343,7 +343,7 @@ public:
 	}
 };
 
-LApplicator *GApp24::Create(LColourSpace Cs, int Op)
+LApplicator *LApp24::Create(LColourSpace Cs, int Op)
 {
 	if (Cs == System24BitColourSpace)
 	{
@@ -384,7 +384,7 @@ LApplicator *GApp24::Create(LColourSpace Cs, int Op)
 	REG uint8_t G = p24.g; \
 	REG uint8_t B = p24.b
 
-bool GdcApp24::SetSurface(GBmpMem *d, GPalette *p, GBmpMem *a)
+bool GdcApp24::SetSurface(LBmpMem *d, GPalette *p, LBmpMem *a)
 {
 	if (d && d->Cs == System24BitColourSpace)
 	{
@@ -462,7 +462,7 @@ void GdcApp24Set::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp24Set::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
+bool GdcApp24Set::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (Src)
 	{
@@ -532,7 +532,7 @@ bool GdcApp24Set::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
 			}
 			default:
 			{
-				GBmpMem Dst;
+				LBmpMem Dst;
 				Dst.Base = u8;
 				Dst.x = Src->x;
 				Dst.y = Src->y;
@@ -586,7 +586,7 @@ void GdcApp24Or::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp24Or::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
+bool GdcApp24Or::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (Src)
 	{
@@ -647,7 +647,7 @@ void GdcApp24And::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp24And::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
+bool GdcApp24And::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (Src && Src->Cs == Dest->Cs)
 	{
@@ -699,7 +699,7 @@ void GdcApp24Xor::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp24Xor::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
+bool GdcApp24Xor::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (Src && Src->Cs == Dest->Cs)
 	{

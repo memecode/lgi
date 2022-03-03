@@ -19,7 +19,7 @@
 
 #define METHOD_GetContext	"GetContext"
 
-#define APP_VERSION		"0.7"
+#define APP_VERSION			"0.8"
 extern const char *AppName;
 
 enum LvcIcon
@@ -87,6 +87,14 @@ enum AppIds
 	IDM_COPY_PATH,
 	IDM_COPY_LEAF,
 	IDM_EDIT,
+};
+
+enum AppMessages
+{
+	M_DETECT_VCS = M_USER + 100,
+	M_RUN_CMD,
+	M_RESPONSE,
+	M_HANDLE_CALLBACK,
 };
 
 enum VersionCtrl

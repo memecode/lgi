@@ -82,12 +82,12 @@ public:
 			if (GetViewById(IDC_TABLE, t))
 			{
 				LRect u = t->GetUsedArea();
-				u.Size(-LTableLayout::CellSpacing, -LTableLayout::CellSpacing);
+				u.Inset(-LTableLayout::CellSpacing, -LTableLayout::CellSpacing);
 				LRect p = GetPos();
 				if (u.X() < p.X() ||
 					u.Y() < p.Y())
 				{
-					p.Dimension(MAX(u.X(), p.X()),
+					p.SetSize(MAX(u.X(), p.X()),
 								MAX(u.Y(), p.Y()));
 					SetPos(p);
 				}				

@@ -14,7 +14,7 @@ protected:
 public:
 	const char *GetClass() { return "GGradient"; }
 
-	bool SetSurface(GBmpMem *d, GPalette *p = 0, GBmpMem *a = 0)
+	bool SetSurface(LBmpMem *d, GPalette *p = 0, LBmpMem *a = 0)
 	{
 		Ptr = 0;
 		Bytes = 0;
@@ -94,7 +94,7 @@ public:
 	{
 	}
 
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha = 0)
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = 0)
 	{
 		return false;
 	}

@@ -135,7 +135,7 @@ bool LStatusPane::Name(const char *n)
 		{
 			Status = LBase::Name(n);
 			LRect p(0, 0, X()-1, Y()-1);
-			p.Size(1, 1);
+			p.Inset(1, 1);
 			Invalidate(&p);
 		}
 		Unlock();

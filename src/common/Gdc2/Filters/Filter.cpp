@@ -336,7 +336,7 @@ LFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, LStream *In)
 		}
 	}
 
-	GBmpMem *pMem = GetSurface(pDC);
+	LBmpMem *pMem = GetSurface(pDC);
 	In->SetPos(File.OffsetToData);
 
 	LFilter::IoStatus Status = IoSuccess;
@@ -622,7 +622,7 @@ LFilter::IoStatus GdcBmp::WriteImage(LStream *Out, LSurface *pDC)
 
 	BMP_FILE File;
 	BMP_WININFO Info;
-	GBmpMem *pMem = GetSurface(pDC);
+	LBmpMem *pMem = GetSurface(pDC);
 	int Colours = (pMem->Cs == CsIndex8) ? 1 << 8 : 0;
 	int UsedBits = GColourSpaceToBits(pMem->Cs);
 

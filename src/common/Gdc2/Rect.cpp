@@ -166,7 +166,7 @@ void LRect::Offset(LRect *a)
 	y2 += a->y2;
 }
 
-void LRect::Size(int x, int y)
+void LRect::Inset(int x, int y)
 {
 	x1 += x;
 	y1 += y;
@@ -174,7 +174,7 @@ void LRect::Size(int x, int y)
 	y2 -= y;
 }
 
-void LRect::Size(LRect *a)
+void LRect::Inset(LRect *a)
 {
 	x1 += a->x1;
 	y1 += a->y1;
@@ -182,13 +182,13 @@ void LRect::Size(LRect *a)
 	y2 -= a->y2;
 }
 
-void LRect::Dimension(int x, int y)
+void LRect::SetSize(int x, int y)
 {
 	x2 = x1 + x - 1;
 	y2 = y1 + y - 1;
 }
 
-void LRect::Dimension(LRect *a)
+void LRect::SetSize(LRect *a)
 {
 	x2 = x1 + a->X() - 1;
 	y2 = y1 + a->Y() - 1;
@@ -346,7 +346,7 @@ LRegion::LRegion(LRegion &c) : LRect(c.x1, c.y1, c.x2, c.y2)
 	Current = 0;
 	a = 0;
 
-	SetSize(c.Length());
+	SetLength(c.Length());
 	for (int i=0; i<Size; i++)
 	{
 		a[i] = c.a[i];
@@ -359,7 +359,7 @@ LRegion::LRegion(int X1, int Y1, int X2, int Y2) : LRect(X1, Y1, X2, Y2)
 	Current = 0;
 	a = 0;
 
-	SetSize(1);
+	SetLength(1);
 	if (a)
 	{
 		a[0].x1 = X1;
@@ -375,7 +375,7 @@ LRegion::LRegion(const LRect &r) : LRect(r)
 	Current = 0;
 	a = 0;
 
-	SetSize(1);
+	SetLength(1);
 	if (a)
 	{
 		a[0].x1 = r.x1;
@@ -391,7 +391,7 @@ LRegion::LRegion(OsRect &r) : LRect(0, 0, 0, 0)
 	Current = 0;
 	a = 0;
 
-	SetSize(1);
+	SetLength(1);
 	if (a)
 	{
 		#if defined(__GTK_H__)
@@ -427,7 +427,7 @@ LRegion::~LRegion()
 
 LRegion &LRegion::operator =(const LRect &r)
 {
-	SetSize(1);
+	SetLength(1);
 	if (a)
 	{
 		*a = r;
@@ -460,7 +460,7 @@ LRect *LRegion::Prev()
 	return (Current >= 0 && Current < Size) ? a+Current : 0;
 }
 
-bool LRegion::SetSize(int s)
+bool LRegion::SetLength(int s)
 {
 	bool Status = true;
 
@@ -517,7 +517,7 @@ void LRegion::Empty()
 
 void LRegion::ZOff(int x, int y)
 {
-	if (SetSize(1))
+	if (SetLength(1))
 	{
 		a[0].ZOff(x, y);
 	}

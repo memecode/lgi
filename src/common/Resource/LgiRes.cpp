@@ -1419,14 +1419,14 @@ bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, LAutoStrin
 					if (Dpi.x)
 					{
 						LPointF s((double)Dpi.x / 96.0, (double)Dpi.y / 96.0);
-						Pos->Dimension(	(int) (s.x * Pos->X()),
+						Pos->SetSize(	(int) (s.x * Pos->X()),
 										(int) (s.y * Pos->Y()));
 					}
 				}
 				else if (Parent && stricmp(Parent->GetClass(), "LTabPage"))
 				{
 					LRect r = Parent->GetPos();
-					r.Dimension(x, y);
+					r.SetSize(x, y);
 					Parent->SetPos(r);
 				}
 

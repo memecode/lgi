@@ -6,8 +6,8 @@
 			<Node File="./Code/GDebugContext.h" Type="3" Platforms="15" />
 			<Node File="./Code/GDebugger.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/GDebugger.h" Type="3" Platforms="15" />
-			<Node File="..\src\common\Lgi\SubProcess.cpp" Type="2" Platforms="15" />
-			<Node File="..\include\lgi\common\SubProcess.h" Type="3" Platforms="15" />
+			<Node File="../src/common/Lgi/SubProcess.cpp" Type="2" Platforms="15" />
+			<Node File="../include/lgi/common/SubProcess.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="3">
 			<Node File="./Code/AddFtpFile.cpp" Type="2" Platforms="15" />
@@ -160,9 +160,10 @@ WINNATIVE</Release>
 				<Linux>
 					<Debug>../include/lgi/linux
 ../include/lgi/linux/Gtk
-</Debug>
+../../../../codelib/openssl/include</Debug>
 					<Release>../include/lgi/linux
 ../include/lgi/linux/Gtk
+../../../../codelib/openssl/include
 </Release>
 				</Linux>
 				<Haiku>
@@ -201,6 +202,7 @@ pthread
 					<Release>..\Release</Release>
 				</All>
 				<Windows />
+				<Linux />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -237,6 +239,7 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<Defines>
 				<All />
 				<Windows />
+				<Linux />
 			</Defines>
 		</Build>
 		<Editor>
@@ -268,6 +271,7 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 		<Advanced>
 			<PostBuildCommands>
 				<Windows />
+				<Linux />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>

@@ -185,7 +185,6 @@
     <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Font\EmojiFont.cpp" />
     <ClCompile Include="..\src\common\Gdc2\Tools\GdcTools.cpp" />
-    <ClCompile Include="..\src\common\General\Properties.cpp" />
     <ClCompile Include="..\src\common\Images\Compare\ImageComparison.cpp" />
     <ClCompile Include="..\src\common\Net\Http.cpp" />
     <ClCompile Include="..\src\common\Net\OpenSSLSocket.cpp" />
@@ -206,7 +205,11 @@
     <ClInclude Include="..\include\common\HtmlPriv.h" />
     <ClInclude Include="..\include\common\GScripting.h" />
     <ClInclude Include="..\include\common\ImageComparison.h" />
+    <ClInclude Include="..\include\lgi\common\Html.h" />
+    <ClInclude Include="..\include\lgi\common\HtmlCommon.h" />
+    <ClInclude Include="..\include\lgi\common\HtmlParser.h" />
     <ClInclude Include="..\src\common\Coding\ScriptingPriv.h" />
+    <ClInclude Include="..\src\common\Text\HtmlPriv.h" />
   </ItemGroup>
   <ItemGroup>
     <MASM Include="..\src\common\Coding\ExternCall.asm">
@@ -221,6 +224,7 @@
   <ItemGroup>
     <None Include="Files\amp-super.html" />
     <None Include="Files\cisra_new_building.html" />
+    <None Include="Files\pccg-order.html" />
     <None Include="Files\steam1.html" />
     <None Include="Files\steam3.html" />
     <None Include="Files\steam4.html" />

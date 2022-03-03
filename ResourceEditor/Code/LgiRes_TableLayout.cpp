@@ -1655,7 +1655,7 @@ public:
             if (Dlg->GetRes()->LoadDialog(Dlg->Str->Id, this, &Size))
             {
                 LRect r = GetPos();
-                r.Dimension(Size.X(), Size.Y());
+                r.SetSize(Size.X(), Size.Y());
                 SetPos(r);
                 AttachChildren();
                 

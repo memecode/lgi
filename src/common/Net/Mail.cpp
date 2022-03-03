@@ -2085,7 +2085,7 @@ bool MailPop3::ListCmd(const char *Cmd, LHashTbl<ConstStrKey<char,false>, bool> 
 	while ((r = Socket->Read(b, sizeof(Buffer)-(b-Buffer))) > 0)
 	{
 		b += r;
-		if (strnstr(Buffer, "\r\n.\r\n", b-Buffer))
+		if (Strnstr(Buffer, "\r\n.\r\n", b-Buffer))
 			break;
 	}
 

@@ -33,7 +33,7 @@ public:
 
 	const char *GetClass() { return "GdcApp15"; }
 
-	bool SetSurface(GBmpMem *d, GPalette *p, GBmpMem *a)
+	bool SetSurface(LBmpMem *d, GPalette *p, LBmpMem *a)
 	{
 		if (d && d->Cs == Cs)
 		{
@@ -135,7 +135,7 @@ public:
 		this->u8 = d8;
 	}
 
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
 	{
 		if (!Src)
 			return false;
@@ -179,7 +179,7 @@ public:
 			}
 			default:
 			{
-				GBmpMem Dst;
+				LBmpMem Dst;
 				Dst.Base = this->u8;
 				Dst.x = Src->x;
 				Dst.y = Src->y;
@@ -197,7 +197,7 @@ public:
 	}
 };
 
-LApplicator *GApp15::Create(LColourSpace Cs, int Op)
+LApplicator *LApp15::Create(LColourSpace Cs, int Op)
 {
 	if (Op == GDC_SET)
 	{

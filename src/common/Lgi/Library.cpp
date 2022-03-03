@@ -37,8 +37,15 @@ bool LLibrary::Load(const char *File, bool Quiet)
 			// if you specify no extension in the application this will correctly set
 			// it for the OS your running thus removing the need for #ifdef's in your
 			// app. sweet!
-			char *Ext = LGetExtension((char*)File);
-			if (!Ext || _stricmp(Ext, LGI_LIBRARY_EXT))
+			auto Parts = LString(LGetLeaf(File)).SplitDelimit(".");
+			if (Parts.Length() >= 3 &&
+				Parts.Last().Int() >= 0 &&
+				Parts[Parts.Length()-2].Equals(LGI_LIBRARY_EXT))
+			{
+				// Is normal linux "library.so.version" form.
+			}
+			else if (Parts.Length() == 1 ||
+				!Parts.Last().Equals(LGI_LIBRARY_EXT))
 			{
 				ch += sprintf_s(f+ch, sizeof(f)-ch, ".%s", LGI_LIBRARY_EXT);
 			}

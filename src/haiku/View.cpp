@@ -83,7 +83,7 @@ CursorMetrics[] =
 // bundle extra files with your application. Which have a tendancy to get lost along the
 // way etc.
 extern uint32_t CursorData[];
-GInlineBmp Cursors =
+LInlineBmp Cursors =
 {
 	300, 20, 8, CursorData
 };

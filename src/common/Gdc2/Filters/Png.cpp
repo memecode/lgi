@@ -780,8 +780,8 @@ LFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 					
 					/*
 					printf("PngRead %s->%s\n",
-						GColourSpaceToString(InCs),
-						GColourSpaceToString(pDC->GetColourSpace()));
+						LColourSpaceToString(InCs),
+						LColourSpaceToString(pDC->GetColourSpace()));
 					*/
 					#endif
 				
@@ -912,7 +912,7 @@ LFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 										LgiTrace("%s:%i - Unsupported colour space: 0x%x (%s)\n",
 												_FL,	
 												pDC->GetColourSpace(),
-												GColourSpaceToString(pDC->GetColourSpace()));
+												LColourSpaceToString(pDC->GetColourSpace()));
 										LAssert(!"Not impl.");
 										break;
 								}
@@ -950,7 +950,7 @@ LFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 										LgiTrace("%s:%i - Unsupported colour space: 0x%x (%s)\n",
 												_FL,	
 												pDC->GetColourSpace(),
-												GColourSpaceToString(pDC->GetColourSpace()));
+												LColourSpaceToString(pDC->GetColourSpace()));
 										LAssert(!"Not impl.");
 										if (Props)
 											Props->SetValue(LGI_FILTER_ERROR, v = "Missing scan convertor");

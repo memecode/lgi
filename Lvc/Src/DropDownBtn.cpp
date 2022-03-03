@@ -44,7 +44,7 @@ public:
 	void OnPosChange()
 	{
 		LRect c = GetClient();
-		c.Size(1, 1);
+		c.Inset(1, 1);
 		if (Lst)
 			Lst->SetPos(c);
 	}

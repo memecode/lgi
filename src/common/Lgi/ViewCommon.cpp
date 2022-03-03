@@ -1138,7 +1138,9 @@ bool LView::HandleCapture(LView *Wnd, bool c)
 			
 			#if defined(__GTK_H__)
 			
-				d->CaptureThread.Reset(new LCaptureThread(this));
+				if (d->CaptureThread)
+					d->CaptureThread->Cancel();
+				d->CaptureThread = new LCaptureThread(this);
 			
 			#elif WINNATIVE
 				
@@ -1168,7 +1170,11 @@ bool LView::HandleCapture(LView *Wnd, bool c)
 		
 		#if defined(__GTK_H__)
 		
-			d->CaptureThread.Reset();
+			if (d->CaptureThread)
+			{
+				d->CaptureThread->Cancel();
+				d->CaptureThread = NULL; // It'll delete itself...
+			}
 		
 		#elif WINNATIVE
 

@@ -28,7 +28,7 @@ public:
 	}
 
 	const char *GetClass() { return "GdcApp8"; }
-	bool SetSurface(GBmpMem *d, GPalette *p, GBmpMem *a);
+	bool SetSurface(LBmpMem *d, GPalette *p, LBmpMem *a);
 	void SetPtr(int x, int y);
 	void IncX();
 	void IncY();
@@ -43,7 +43,7 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
 };
 
 class LgiClass GdcApp8And : public GdcApp8
@@ -53,7 +53,7 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
 };
 
 class LgiClass GdcApp8Or : public GdcApp8
@@ -63,7 +63,7 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
 };
 
 class LgiClass GdcApp8Xor : public GdcApp8
@@ -73,10 +73,10 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
 };
 
-LApplicator *GApp8::Create(LColourSpace Cs, int Op)
+LApplicator *LApp8::Create(LColourSpace Cs, int Op)
 {
 	if (Cs == CsIndex8 ||
 		Cs == CsAlpha8)
@@ -97,7 +97,7 @@ LApplicator *GApp8::Create(LColourSpace Cs, int Op)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-bool GdcApp8::SetSurface(GBmpMem *d, GPalette *p, GBmpMem *a)
+bool GdcApp8::SetSurface(LBmpMem *d, GPalette *p, LBmpMem *a)
 {
 	if (d && d->Cs == CsIndex8)
 	{
@@ -387,7 +387,7 @@ void GConvertRgb24(OutPx *out, InPx *in, int len, LColourSpace inCs, GPalette *p
 	}
 }
 
-void Convert(System24BitPixel *Dst, GBmpMem *Src, int Line, GPalette *SPal)
+void Convert(System24BitPixel *Dst, LBmpMem *Src, int Line, GPalette *SPal)
 {
 	uchar *In = Src->Base + (Line * Src->Line);
 	switch (Src->Cs)
@@ -451,7 +451,7 @@ void BltNearest48(uchar *Lookup, uint8_t *out, Pixel *p, int x)
 
 #define LookupIdx5bit(r, g, b) ( ((int)(r)<<10) | ((int)(g)<<5) | (b) )
 
-bool GdcApp8Set::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
+bool GdcApp8Set::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
 {
 	Dest->Flags &= ~GDC_UPDATED_PALETTE;
 	if (Src)
@@ -780,7 +780,7 @@ void GdcApp8Or::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp8Or::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
+bool GdcApp8Or::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (Src)
 	{
@@ -831,7 +831,7 @@ void GdcApp8And::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp8And::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
+bool GdcApp8And::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (Src && Src->Cs == Dest->Cs)
 	{
@@ -870,7 +870,7 @@ void GdcApp8Xor::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp8Xor::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
+bool GdcApp8Xor::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (Src && Src->Cs == Dest->Cs)
 	{

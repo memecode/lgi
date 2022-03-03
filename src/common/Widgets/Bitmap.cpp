@@ -50,7 +50,7 @@ public:
 				#endif
 
 				LRect r = Bmp->GetPos();
-				r.Dimension(pDC->X()+4, pDC->Y()+4);
+				r.SetSize(pDC->X()+4, pDC->Y()+4);
 				Bmp->SetPos(r, true);
                 Bmp->SendNotify();
 
@@ -86,7 +86,7 @@ LBitmap::LBitmap(int id, int x, int y, char *FileName, bool Async)
 			pDC = GdcD->Load(FileName);
 			if (pDC)
 			{
-				r.Dimension(pDC->X()+4, pDC->Y()+4);
+				r.SetSize(pDC->X()+4, pDC->Y()+4);
 			}
 		#ifdef _MT
 		}
@@ -137,7 +137,7 @@ void LBitmap::SetDC(LSurface *pNewDC)
 			pDC->Blt(0, 0, pNewDC);
 
 			LRect r = GetPos();
-			r.Dimension(pDC->X() + 4, pDC->Y() + 4);
+			r.SetSize(pDC->X() + 4, pDC->Y() + 4);
 			SetPos(r);
 			Invalidate();
 

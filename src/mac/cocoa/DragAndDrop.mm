@@ -352,7 +352,7 @@ static NSArray* BuildImageComponentsForItem(NSPasteboardItem *_item)
 			r.Offset(10 + (i*3), 8 + (i*3));
 			Mem.Colour(L_BLACK);
 			Mem.Box(&r);
-			r.Size(1, 1);
+			r.Inset(1, 1);
 			Mem.Colour(L_WHITE);
 			Mem.Rectangle(&r);
 		}
@@ -398,7 +398,7 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 	}
 	else
 	{
-		// Synthesis an image..
+		// synthesize an image..
 		if (!d->Icon.X())
 			d->Icon.Create(32, 32, System32BitColourSpace);
 		Mem = &d->Icon;
@@ -411,7 +411,7 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 			r.Offset(10 + (i*3), 8 + (i*3));
 			Mem->Colour(L_BLACK);
 			Mem->Box(&r);
-			r.Size(1, 1);
+			r.Inset(1, 1);
 			Mem->Colour(L_WHITE);
 			Mem->Rectangle(&r);
 		}

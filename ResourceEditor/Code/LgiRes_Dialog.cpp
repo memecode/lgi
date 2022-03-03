@@ -410,7 +410,7 @@ bool ResDialogCtrl::SetPos(LRect &p, bool Repaint)
 		OnFieldChange();
 
 		LRect r(0, 0, p.X()-1, p.Y()-1);
-		r.Size(-GOOBER_BORDER, -GOOBER_BORDER);
+		r.Inset(-GOOBER_BORDER, -GOOBER_BORDER);
 		View()->Invalidate(&r, false, true);
 		
 		// check our parents are big enough to show us...
@@ -582,7 +582,7 @@ bool ResDialogCtrl::Serialize(FieldTree &Fields)
 		View()->Enabled(e);
 		SetPos(r);
 		r.Union(&Old);
-		r.Size(-GOOBER_BORDER, -GOOBER_BORDER);
+		r.Inset(-GOOBER_BORDER, -GOOBER_BORDER);
 		if (View()->GetParent())
 		{
 			View()->GetParent()->Invalidate(&r);
@@ -911,7 +911,7 @@ void ResDialogCtrl::OnMouseMove(LMouse &m)
 		Dlg->SnapRect(&DragRgn, this);
 
 		Old.Union(&DragRgn);
-		Old.Size(-1, -1);
+		Old.Inset(-1, -1);
 
 		View()->Invalidate(&Old);
 	}
@@ -1001,7 +1001,7 @@ LRect &CtrlDlg::GetClient(bool InClientSpace)
 	static LRect r;
 	
 	Client.Set(0, 0, View()->X()-1, View()->Y()-1);
-	Client.Size(2, 2);
+	Client.Inset(2, 2);
 	Client.y1 += LAppInst->GetMetric(LGI_MET_DECOR_CAPTION);
 	if (Client.y1 > Client.y2) Client.y1 = Client.y2;
 
@@ -1557,7 +1557,7 @@ void CtrlTabs::OnPaint(LSurface *pDC)
 
 		if (Current == i)
 		{
-			t.Size(-2, -2);
+			t.Inset(-2, -2);
 
 			if (Tab->IterateViews().Length() > 0)
 				FromTab();
@@ -1580,7 +1580,7 @@ void CtrlTabs::OnPaint(LSurface *pDC)
 		pDC->Colour(0, 24);
 		pDC->Line(t.x2, t.y1+2, t.x2, t.y2);
 
-		t.Size(2, 2);
+		t.Inset(2, 2);
 		t.y2 += 2;
 
 		LSysFont->Fore(L_TEXT);
@@ -3181,13 +3181,13 @@ void ResDialog::MoveSelection(int Dx, int Dy)
 		}
 
 		LRect Up = w->AbsPos();
-		Up.Size(-GOOBER_BORDER, -GOOBER_BORDER);
+		Up.Inset(-GOOBER_BORDER, -GOOBER_BORDER);
 		Update.Union(&Up);
 
 		w->SetPos(New, false);
 
 		Up = w->AbsPos();
-		Up.Size(-GOOBER_BORDER, -GOOBER_BORDER);
+		Up.Inset(-GOOBER_BORDER, -GOOBER_BORDER);
 		Update.Union(&Up);
 	}
 
@@ -3762,13 +3762,13 @@ void ResDialog::OnMouseMove(LMouse &m)
 				NewPos.y2 += New.y2 - Old.y2;
 
 				LRect Up = c->AbsPos();
-				Up.Size(-GOOBER_BORDER, -GOOBER_BORDER);
+				Up.Inset(-GOOBER_BORDER, -GOOBER_BORDER);
 				Update.Union(&Up);
 				
 				c->SetPos(NewPos);
 
 				Up = c->AbsPos();
-				Up.Size(-GOOBER_BORDER, -GOOBER_BORDER);
+				Up.Inset(-GOOBER_BORDER, -GOOBER_BORDER);
 				Update.Union(&Up);
 			}
 

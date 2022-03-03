@@ -47,7 +47,7 @@ public:
 		if (Lst)
 		{
 			LRect r = GetClient();
-			r.Size(1, 1);
+			r.Inset(1, 1);
 			Lst->SetPos(r);
 		}
 	}

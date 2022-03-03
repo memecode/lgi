@@ -61,6 +61,8 @@
 					<Release>./TestCases/test.html</Release>
 				</All>
 			</Arguments>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -72,9 +74,11 @@
 				</All>
 				<Linux>
 					<Debug>../include/lgi/linux
-../include/lgi/linux/Gtk</Debug>
+../include/lgi/linux/Gtk
+../../../../codelib/openssl/include</Debug>
 					<Release>../include/lgi/linux
-../include/lgi/linux/Gtk</Release>
+../include/lgi/linux/Gtk
+../../../../codelib/openssl/include</Release>
 				</Linux>
 				<Windows>
 					<Debug>../include/lgi/win</Debug>
@@ -91,6 +95,7 @@
 					<Release>pthread
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
+				<All />
 			</Libraries>
 			<SystemIncludes>
 				<Linux>
@@ -102,9 +107,18 @@
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
 			</SystemIncludes>
-			<Defines />
-			<LibraryPaths />
-			<TargetName />
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<TargetName>
+				<Linux />
+			</TargetName>
+			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -116,13 +130,27 @@
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<ShowWhiteSpace />
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
 		<Advanced>
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+			<OtherMakefileRules />
 		</Advanced>
 		<Debug>
-			<Arguments />
+			<Arguments>
+				<All />
+			</Arguments>
+			<Environment />
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
-		<Remote />
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>

@@ -106,7 +106,7 @@ char *strnchr(const char *s, char c, NativeInt Len)
 	return 0;
 }
 
-char *strnstr(const char *a, const char *b, size_t n)
+char *Strnstr(const char *a, const char *b, size_t n)
 {
 	if (a && b)
 	{

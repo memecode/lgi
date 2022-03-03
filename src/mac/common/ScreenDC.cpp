@@ -120,7 +120,7 @@ LScreenDC::LScreenDC()
 	d = new LScreenPrivate;
 }
 
-LScreenDC::LScreenDC(GPrintDcParams *Params)
+LScreenDC::LScreenDC(LPrintDcParams *Params)
 {
 	d = new LScreenPrivate;
 	

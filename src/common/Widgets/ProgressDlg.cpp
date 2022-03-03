@@ -314,7 +314,7 @@ void LProgressPane::OnPosChange()
 	if (t)
 	{
 		LRect cr = GetClient();
-		cr.Size(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
+		cr.Inset(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
 		t->SetPos(cr);
 	}
 }
@@ -457,7 +457,7 @@ int LProgressDlg::OnNotify(LViewI *Ctrl, LNotification n)
 			int x = u.X();
 			int y = u.Y();
 			LRect p = GetPos();
-			p.Dimension(x + LAppInst->GetMetric(LGI_MET_DECOR_X),
+			p.SetSize(x + LAppInst->GetMetric(LGI_MET_DECOR_X),
 						y + LAppInst->GetMetric(LGI_MET_DECOR_Y));
 			SetPos(p);
 		}

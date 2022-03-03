@@ -57,7 +57,7 @@ public:
 	void OnMouseClick(LMouse &m)
 	{
 		LRect r = GetClient();
-		r.Size(2, 2);
+		r.Inset(2, 2);
 		if (m.Down() && r.Overlap(m.x, m.y))
 		{
 			int i = m.y / Ly;
@@ -147,14 +147,14 @@ void LColourSelect::OnPaint(LSurface *pDC)
 	LRect r = GetClient();
 	r.x1 += 2;
 	r.x2 -= 14;
-	r.Size(5, 5);
+	r.Inset(5, 5);
 	if (IsOpen()) r.Offset(1, 1);
 
 	bool HasColour = Enabled() && c.IsValid();
 	pDC->Colour(HasColour ? L_BLACK : L_LOW);
 	pDC->Box(&r);
 
-	r.Size(1, 1);
+	r.Inset(1, 1);
 	pDC->Colour(HasColour ? c : LColour(L_LOW));
 	if (HasColour)
 	{

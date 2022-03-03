@@ -236,7 +236,7 @@ void LDataGridPriv::Invalidate()
 	if (e)
 	{
 		LRect p = e->GetPos();
-		p.Size(-CELL_EDGE, -CELL_EDGE);
+		p.Inset(-CELL_EDGE, -CELL_EDGE);
 		This->Invalidate(&p);
 	}
 }
@@ -538,7 +538,7 @@ void LDataGrid::OnPaint(LSurface *pDC)
 	{
 		pDC->Colour(L_BLACK);
 		LRect p = d->e->GetPos();
-		p.Size(-CELL_EDGE, -CELL_EDGE);
+		p.Inset(-CELL_EDGE, -CELL_EDGE);
 		pDC->Box(&p);
 	}
 }

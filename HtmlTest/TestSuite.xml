@@ -46,10 +46,10 @@
 				<Linux>
 					<Debug>../include/lgi/linux
 ../include/lgi/linux/Gtk
-</Debug>
+../../../../codelib/openssl/include</Debug>
 					<Release>../include/lgi/linux
 ../include/lgi/linux/Gtk
-</Release>
+../../../../codelib/openssl/include</Release>
 				</Linux>
 				<Windows>
 					<Debug>../include/lgi/win</Debug>

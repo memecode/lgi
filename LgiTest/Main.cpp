@@ -141,7 +141,7 @@ public:
 		{
 			char s[256];
 			Test *t = a[i];
-			sprintf_s(s, sizeof(s), "%s->%s", GColourSpaceToString(t->Src), GColourSpaceToString(t->Dst));
+			sprintf_s(s, sizeof(s), "%s->%s", LColourSpaceToString(t->Src), LColourSpaceToString(t->Dst));
 			LDisplayString ds(LSysFont, s);
 			ds.Draw(pDC, x, y);
 			y += ds.Y();

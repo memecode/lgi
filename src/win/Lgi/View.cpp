@@ -785,7 +785,7 @@ LRect &LView::GetClient(bool InClientSpace)
 		}
 		else if (Sunken() || Raised())
 		{
-			Client.Size(_BorderSize, _BorderSize);
+			Client.Inset(_BorderSize, _BorderSize);
 		}
 	}
 
@@ -1180,7 +1180,7 @@ void LView::DrawThemeBorder(LSurface *pDC, LRect &r)
 		pDC->Set(r.x1, r.y2);
 		pDC->Set(r.x2, r.y2);
 		
-		r.Size(2, 2);
+		r.Inset(2, 2);
 	}
 	else
 	{

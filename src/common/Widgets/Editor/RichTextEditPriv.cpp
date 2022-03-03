@@ -1487,7 +1487,7 @@ void LRichTextPriv::PaintBtn(LSurface *pDC, LRichTextEdit::RectType t)
 	pDC->Colour(Down ? Low : LColour::White);
 	pDC->Line(r.x1, r.y1, r.x2, r.y1);
 	pDC->Line(r.x1, r.y1, r.x1, r.y2);
-	r.Size(1, 1);
+	r.Inset(1, 1);
 	
 	switch (v.Type)
 	{
@@ -1842,7 +1842,7 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 		pDC->Rectangle(&t);
 
 		LRect r = t;
-		r.Size(3, 3);
+		r.Inset(3, 3);
 		#define AllocPx(sz, border) \
 			LRect(r.x1, r.y1, r.x1 + (int)(sz) - 1, r.y2); r.x1 += (int)(sz) + border
 

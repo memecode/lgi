@@ -216,5 +216,3 @@ LMessage::Result LLayout::OnEvent(LMessage *Msg)
 	}
 	return Status;
 }
-
-

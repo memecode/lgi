@@ -152,7 +152,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 		return false;
 	}
 
-	pMem = new GBmpMem;
+	pMem = new LBmpMem;
 	if (!pMem)
 		return false;
 
@@ -188,7 +188,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 
 	Clip.ZOff(X()-1, Y()-1);
 
-	// printf("CreatedBmp: %i,%i %s,%i,%p\n", pMem->x, pMem->y, GColourSpaceToString(pMem->Cs), pMem->Line, pMem->Base);
+	// printf("CreatedBmp: %i,%i %s,%i,%p\n", pMem->x, pMem->y, LColourSpaceToString(pMem->Cs), pMem->Line, pMem->Base);
 
 	return true;
 }
@@ -199,7 +199,7 @@ void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 		return;
 
 	bool Status = false;
-	GBlitRegions br(this, x, y, Src, a);
+	LBlitRegions br(this, x, y, Src, a);
 	if (!br.Valid())
 		return;
 

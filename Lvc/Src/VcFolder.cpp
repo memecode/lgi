@@ -94,6 +94,13 @@ int Ver2Int(LString v)
 
 int ToolVersion[VcMax] = {0};
 
+#define DEBUG_READER_THREAD		0
+#if DEBUG_READER_THREAD
+	#define LOG_READER(...) printf(__VA_ARGS__)
+#else
+	#define LOG_READER(...)
+#endif
+
 ReaderThread::ReaderThread(VersionCtrl vcs, LAutoPtr<LSubProcess> p, LStream *out) : LThread("ReaderThread")
 {
 	Vcs = vcs;
@@ -150,6 +157,8 @@ int ReaderThread::OnLine(char *s, ssize_t len)
 
 bool ReaderThread::OnData(char *Buf, ssize_t &r)
 {
+	LOG_READER("OnData %i\n", (int)r);
+	
 	#if 1
 	char *Start = Buf;
 	for (char *c = Buf; c < Buf + r;)
@@ -197,14 +206,14 @@ int ReaderThread::Main()
 	char Buf[1024];
 	ssize_t r;
 	
-	// printf("%s:%i - starting reader loop.\n", _FL);
+	LOG_READER("%s:%i - starting reader loop, pid=%i\n", _FL, Process->Handle());
 	while (Process->IsRunning())
 	{
 		if (Out)
 		{
-			// printf("%s:%i - starting read.\n", _FL);
+			LOG_READER("%s:%i - starting read.\n", _FL);
 			r = Process->Read(Buf, sizeof(Buf));
-			// printf("%s:%i - read=%i.\n", _FL, (int)r);
+			LOG_READER("%s:%i - read=%i.\n", _FL, (int)r);
 			if (r > 0)
 			{
 				if (!OnData(Buf, r))
@@ -219,14 +228,14 @@ int ReaderThread::Main()
 		}
 	}
 
-	// printf("%s:%i - process loop done.\n", _FL);
+	LOG_READER("%s:%i - process loop done.\n", _FL);
 	if (Out)
 	{
 		while ((r = Process->Read(Buf, sizeof(Buf))) > 0)
 			OnData(Buf, r);
 	}
 
-	// printf("%s:%i - loop done.\n", _FL);
+	LOG_READER("%s:%i - loop done.\n", _FL);
 	Result = (int) Process->GetExitValue();
 	#if _DEBUG
 	if (Result)
@@ -396,57 +405,32 @@ const char *VcFolder::GetVcName()
 	return VcCmd;
 }
 
-Result VcFolder::RunCmd(const char *Args, LoggingType Logging)
+
+bool VcFolder::RunCmd(const char *Args, LoggingType Logging, std::function<void(Result)> Callback)
 {
 	Result Ret;
 	Ret.Code = -1;
 
 	const char *Exe = GetVcName();
 	if (!Exe || CmdErrors > 2)
-		return Ret;
+		return false;
 
 	if (Uri.IsFile())
 	{
-		LSubProcess Process(Exe, Args);
-		Process.SetInitFolder(LocalPath());
-		if (!Process.Start())
-		{
-			Ret.Out.Printf("Process failed with %i", Process.GetErrorCode());
-			return Ret;
-		}
-
-		if (Logging == LogNormal)
-			d->Log->Print("%s %s\n", Exe, Args);
-
-		while (Process.IsRunning())
-		{
-			auto Rd = Process.Read();
-			if (Rd.Length())
-			{
-				Ret.Out += Rd;
-				if (Logging == LogNormal)
-					d->Log->Write(Rd.Get(), Rd.Length());
-			}
-
-			LYield();
-		}
-
-		auto Rd = Process.Read();
-		if (Rd.Length())
-		{
-			Ret.Out += Rd;
-			if (Logging == LogNormal)
-				d->Log->Write(Rd.Get(), Rd.Length());
-		}
-
-		Ret.Code = Process.GetExitValue();
+		new ProcessCallback(Exe,
+							Args,
+							LocalPath(),
+							Logging == LogNone ? d->Log : NULL, 
+							GetTree()->GetWindow(),
+							Callback);
 	}
 	else
 	{
 		LAssert(!"Impl me.");
+		return false;
 	}
 
-	return Ret;
+	return true;
 }
 
 bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, LoggingType Logging)
@@ -1066,6 +1050,8 @@ VcLeaf *VcFolder::FindLeaf(const char *Path, bool OpenTree)
 
 bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 {
+printf("ParseLog %i\n", (int)s.Length());
+
 	LHashTbl<StrKey<char>, VcCommit*> Map;
 	for (auto pc: Log)
 		Map.Add(pc->GetRev(), pc);
@@ -3562,14 +3548,15 @@ LColour VcFolder::BranchColour(const char *Name)
 	return b ? b->Colour : GetPaletteColour(0);
 }
 
-LString VcFolder::CurrentRev()
+void VcFolder::CurrentRev(std::function<void(LString)> Callback)
 {
-	LString Cmd, Id;
+	LString Cmd;
 	Cmd.Printf("id -i");
-	Result r = RunCmd(Cmd);
-	if (r.Code == 0)
-		Id = r.Out.Strip();	
-	return Id;
+	RunCmd(Cmd, LogNormal, [Callback](auto r)
+	{
+		if (r.Code == 0)
+			Callback(r.Out.Strip());
+	});
 }
 
 bool VcFolder::RenameBranch(LString NewName, LArray<VcCommit*> &Revs)
@@ -3627,43 +3614,52 @@ bool VcFolder::RenameBranch(LString NewName, LArray<VcCommit*> &Revs)
 			auto First = Ancestors.First();
 			LString Cmd;
 			Cmd.Printf("update -r " LPrintfInt64, First->GetIndex());
-			Result r = RunCmd(Cmd, LogNormal);
-			if (r.Code)
+			RunCmd(Cmd, LogNormal, [this, &Cmd, NewName, &Top](auto r)
 			{
-				d->Log->Print("Error: Cmd '%s' failed. (%s:%i)\n", Cmd.Get(), _FL);
-				return false;
-			}
+				if (r.Code)
+				{
+					d->Log->Print("Error: Cmd '%s' failed. (%s:%i)\n", Cmd.Get(), _FL);
+					return;
+				}
 
-			Cmd.Printf("branch \"%s\"", NewName.Get());
-			r = RunCmd(Cmd, LogNormal);
-			if (r.Code)
-			{
-				d->Log->Print("Error: Cmd '%s' failed. (%s:%i)\n", Cmd.Get(), _FL);
-				return false;
-			}
+				Cmd.Printf("branch \"%s\"", NewName.Get());
+				RunCmd(Cmd, LogNormal, [this, &Cmd, NewName, &Top](auto r)
+				{
+					if (r.Code)
+					{
+						d->Log->Print("Error: Cmd '%s' failed. (%s:%i)\n", Cmd.Get(), _FL);
+						return;
+					}
 
-			// Commit it to get a revision point to rebase to
-			Cmd.Printf("commit -m \"Branch: %s\"", NewName.Get());
-			r = RunCmd(Cmd, LogNormal);
-			if (r.Code)
-			{
-				d->Log->Print("Error: Cmd '%s' failed. (%s:%i)\n", Cmd.Get(), _FL);
-				return false;
-			}
+					// Commit it to get a revision point to rebase to
+					Cmd.Printf("commit -m \"Branch: %s\"", NewName.Get());
+					RunCmd(Cmd, LogNormal, [this, &Cmd, NewName, &Top](auto r)
+					{
+						if (r.Code)
+						{
+							d->Log->Print("Error: Cmd '%s' failed. (%s:%i)\n", Cmd.Get(), _FL);
+							return;
+						}
 
-			auto BranchNode = CurrentRev();
+						CurrentRev([this, &Cmd, NewName, &Top](auto BranchNode)
+						{
+							// Rebase the old tree to this point
+							Cmd.Printf("rebase -s %s -d %s", Top.First()->GetRev(), BranchNode.Get());
+							RunCmd(Cmd, LogNormal, [this, &Cmd, NewName, Top](auto r)
+							{
+								if (r.Code)
+								{
+									d->Log->Print("Error: Cmd '%s' failed. (%s:%i)\n", Cmd.Get(), _FL);
+									return;
+								}
 
-			// Rebase the old tree to this point
-			Cmd.Printf("rebase -s %s -d %s", Top.First()->GetRev(), BranchNode.Get());
-			r = RunCmd(Cmd, LogNormal);
-			if (r.Code)
-			{
-				d->Log->Print("Error: Cmd '%s' failed. (%s:%i)\n", Cmd.Get(), _FL);
-				return false;
-			}
-
-			CommitListDirty = true;
-			d->Log->Print("Finished rename.\n", _FL);
+								CommitListDirty = true;
+								d->Log->Print("Finished rename.\n", _FL);
+							});
+						});
+					});
+				});
+			});
 			break;
 		}
 		default:
@@ -4273,3 +4269,64 @@ void VcLeaf::OnMouseClick(LMouse &m)
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+ProcessCallback::ProcessCallback(LString exe,
+								LString args,
+								LString localPath,
+								LTextLog *log,
+								LView *view,
+								std::function<void(Result)> callback) :
+	Log(log),
+	View(view),
+	Callback(callback),
+	LThread("ProcessCallback.Thread"),
+	LSubProcess(exe, args)
+{
+	SetInitFolder(localPath);
+
+	if (Log)
+		Log->Print("%s %s\n", exe.Get(), args.Get());
+
+	Run();
+}
+
+int ProcessCallback::Main()
+{
+	if (!Start())
+	{
+		Ret.Out.Printf("Process failed with %i", GetErrorCode());
+		Callback(Ret);
+	}
+	else
+	{
+
+		while (IsRunning())
+		{
+			auto Rd = Read();
+			if (Rd.Length())
+			{
+				Ret.Out += Rd;
+				if (Log)
+					Log->Write(Rd.Get(), Rd.Length());
+			}
+		}
+
+		auto Rd = Read();
+		if (Rd.Length())
+		{
+			Ret.Out += Rd;
+			if (Log)
+				Log->Write(Rd.Get(), Rd.Length());
+		}
+
+		Ret.Code = GetExitValue();
+	}
+
+	View->PostEvent(M_HANDLE_CALLBACK, (LMessage::Param)this);
+	return 0;
+}
+
+void ProcessCallback::OnComplete() // Called in the GUI thread...
+{
+	Callback(Ret);
+}

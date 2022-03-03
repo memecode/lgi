@@ -48,7 +48,7 @@ class LgiClass LFilter : public LDom
 	LArray<uint8_t> Buf;
 
 protected:
-	GBmpMem *GetSurface(LSurface *pDC) { return pDC->pMem; }
+	LBmpMem *GetSurface(LSurface *pDC) { return pDC->pMem; }
 	LRect *GetClip(LSurface *pDC) { return &pDC->Clip; }
 	ssize_t GetLineLength(LSurface *pDC) { return (pDC->pMem) ? pDC->pMem->Line : 0; }
 

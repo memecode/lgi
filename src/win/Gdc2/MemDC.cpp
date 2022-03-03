@@ -259,7 +259,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 	bool Status = FALSE;
 	HBITMAP hOldBmp = hBmp;
 	BITMAPINFO *OldInfo = d->Info;
-	GBmpMem *pOldMem = pMem;
+	LBmpMem *pOldMem = pMem;
 
 	DrawOnAlpha(FALSE);
 	DeleteObj(pAlphaDC);
@@ -408,7 +408,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 					hBmp = CreateDIBSection(hDC, d->Info, DIB_RGB_COLORS, &d->pBits, NULL, 0);
 					if (hBmp)
 					{
-						pMem = new GBmpMem;
+						pMem = new LBmpMem;
 						if (pMem)
 						{
 							if (d->UpsideDown)
@@ -446,14 +446,14 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 				if (ColourSpace)
 				{
 					// Non-native image data
-					pMem = new GBmpMem;
+					pMem = new LBmpMem;
 					if (pMem)
 					{
 						pMem->x = x;
 						pMem->y = y;
 						pMem->Line = ((x * Bits + 31) / 32) << 2;
 						pMem->Cs = ColourSpace;
-						pMem->Flags = GBmpMem::BmpOwnMemory;
+						pMem->Flags = LBmpMem::BmpOwnMemory;
 						pMem->Base = new uchar[pMem->y * pMem->Line];
 						
 						Status = pMem->Base != NULL;

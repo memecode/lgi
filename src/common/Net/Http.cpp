@@ -367,7 +367,7 @@ bool LHttp::Request
 					while (true)
 					{
 						// Try and get chunk header
-						char *End = strnstr(s, "\r\n", Used);
+						char *End = Strnstr(s, "\r\n", Used);
 						if (!End)
 						{
 							ssize_t r = Socket->Read(s + Used, sizeof(s) - Used);
@@ -376,7 +376,7 @@ bool LHttp::Request
 							
 							Used += r;
 							
-							End = strnstr(s, "\r\n", Used);
+							End = Strnstr(s, "\r\n", Used);
 							if (!End)
 							{
 								LAssert(!"No chunk header");

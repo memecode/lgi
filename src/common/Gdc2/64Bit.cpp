@@ -74,7 +74,7 @@ public:
 		return 0;
 	}
 
-	bool SetSurface(GBmpMem *d, GPalette *pal = NULL, GBmpMem *a = NULL)
+	bool SetSurface(LBmpMem *d, GPalette *pal = NULL, LBmpMem *a = NULL)
 	{
 		if (d && d->Cs == ColourSpace)
 		{
@@ -163,7 +163,7 @@ public:
 	}
 	
 	template<typename T>
-	bool CopyBltNoAlphaUpScale(GBmpMem *Src)
+	bool CopyBltNoAlphaUpScale(LBmpMem *Src)
 	{
 		for (int y=0; y<Src->y; y++)
 		{
@@ -188,7 +188,7 @@ public:
 	}
 	
 	template<typename T>
-	bool CopyBltWithAlphaUpScale(GBmpMem *Src)
+	bool CopyBltWithAlphaUpScale(LBmpMem *Src)
 	{
 		for (int y=0; y<Src->y; y++)
 		{
@@ -213,7 +213,7 @@ public:
 	}
 	
 	template<typename T>
-	bool CopyBltNoAlpha(GBmpMem *Src)
+	bool CopyBltNoAlpha(LBmpMem *Src)
 	{
 		for (int y=0; y<Src->y; y++)
 		{
@@ -238,7 +238,7 @@ public:
 	}
 	
 	template<typename T>
-	bool CopyBltWithAlpha(GBmpMem *Src)
+	bool CopyBltWithAlpha(LBmpMem *Src)
 	{
 		for (int y=0; y<Src->y; y++)
 		{
@@ -263,7 +263,7 @@ public:
 	}
 	
 	template<typename T>
-	bool AlphaBlt(GBmpMem *Src, GBmpMem *SrcAlpha)
+	bool AlphaBlt(LBmpMem *Src, LBmpMem *SrcAlpha)
 	{
 		for (int y=0; y<Src->y; y++)
 		{
@@ -299,7 +299,7 @@ public:
 		return true;
 	}
 	
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha = NULL)
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = NULL)
 	{
 		if (!Src)
 			return false;
@@ -339,7 +339,7 @@ public:
 			}
 			else
 			{
-				GBmpMem Dst;
+				LBmpMem Dst;
 				Dst.Base = u8;
 				Dst.x = Src->x;
 				Dst.y = Src->y;

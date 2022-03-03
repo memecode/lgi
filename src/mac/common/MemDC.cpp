@@ -463,7 +463,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 			}
 		}
 		
-		pMem = new GBmpMem;
+		pMem = new LBmpMem;
 		if (pMem)
 		{
 			pMem->Flags = 0;
@@ -492,7 +492,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 								break;
 							case kCGImageAlphaPremultipliedLast:  /* For example, premultiplied RGBA */
 								pMem->Cs = CsRgba32;
-								pMem->Flags |= GBmpMem::BmpPreMulAlpha;
+								pMem->Flags |= LBmpMem::BmpPreMulAlpha;
 								break;
 							case kCGImageAlphaFirst:              /* For example, non-premultiplied ARGB */
 							case kCGImageAlphaNoneSkipFirst:      /* For example, XRGB. */
@@ -500,7 +500,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 								break;
 							case kCGImageAlphaPremultipliedFirst: /* For example, premultiplied ARGB */
 								pMem->Cs = CsArgb32;
-								pMem->Flags |= GBmpMem::BmpPreMulAlpha;
+								pMem->Flags |= LBmpMem::BmpPreMulAlpha;
 								break;
 							default:
 								LAssert(0);
@@ -529,7 +529,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 			{
 				pMem->Line = ((Bits * x + 31) / 32) * 4;
 				pMem->Base = new uint8[pMem->Line * y];
-				pMem->Flags |= GBmpMem::BmpOwnMemory;
+				pMem->Flags |= LBmpMem::BmpOwnMemory;
 				pMem->Cs = Cs;
 			}
 			

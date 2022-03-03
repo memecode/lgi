@@ -49,7 +49,7 @@ LAlert::LAlert(	LViewI *parent,
 	LRect r(0, 0, 1000, 1000);
 	Tbl->SetPos(r);
 	r = Tbl->GetUsedArea();
-	r.Size(-10, -10);
+	r.Inset(-10, -10);
 	int x = LAppInst->GetMetric(LGI_MET_DECOR_X);
 	int y = LAppInst->GetMetric(LGI_MET_DECOR_Y) +
 			LAppInst->GetMetric(LGI_MET_DECOR_CAPTION);

@@ -43,16 +43,17 @@ class LDndSourcePriv
 {
 public:
 	LDragData FileStream;
+	LString CurDataInUse;
 	LArray<LDragData> CurData;
-	LDataObject *InDrag;
+	LDataObject *InDrag = NULL;
 
 	LDndSourcePriv()
 	{
-		InDrag = NULL;
 	}
 
 	~LDndSourcePriv()
 	{
+		LAssert(!CurDataInUse);
 		if (InDrag)
 			InDrag->Source = NULL;
 	}
@@ -121,7 +122,12 @@ HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *pMedium)
 	HRESULT Ret = DV_E_FORMATETC;
 	int CurFormat = 0;
 	LDragFormats Formats(true);
-	Source->d->CurData.Length(0);
+	if (Source->d->CurDataInUse)
+	{
+		LAssert(!"Something is using CurData");
+		return E_UNEXPECTED;
+	}
+	else Source->d->CurData.Length(0);
 	Source->GetFormats(Formats);
 	for (auto f: Formats.Formats)
 	{
@@ -129,8 +135,15 @@ HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *pMedium)
 		if (n == pFormatEtc->cfFormat)
 		{
 			CurFormat = n;
-			LDragData &CurData = Source->d->CurData.New();
-			CurData.Format = f;
+			if (Source->d->CurDataInUse)
+			{
+				LAssert(!"CurData in use.");
+			}
+			else
+			{
+				LDragData &CurData = Source->d->CurData.New();
+				CurData.Format = f;
+			}
 		}
 	}
 	Formats.Empty();
@@ -154,6 +167,7 @@ HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *pMedium)
 	if (Source->d->CurData.Length())
 	{
 		// the users don't HAVE to use this...
+		Source->d->CurDataInUse.Printf("%s:%i", _FL);
 		Source->GetData(Source->d->CurData);
 
 		ZeroObj(*pMedium);
@@ -287,6 +301,8 @@ HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *pMedium)
 			LgiTrace("GetData 2, Ret=%i\n", Ret);
 			#endif
 		}
+
+		Source->d->CurDataInUse.Empty();
 	}
 
 	return Ret;
@@ -408,21 +424,32 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 	if (!SourceWnd)
 		return -1;
 
-	DWORD dwEffect = 0;
-	Reset();
-	IDataObject *Data = 0;
-	if (QueryInterface(IID_IDataObject, (void**)&Data) == S_OK)
-	{
-		int Ok = ::DoDragDrop(Data, this, Effect, &dwEffect) == DRAGDROP_S_DROP;
-		Data->Release();
+	DWORD dwEffect = DROPEFFECT_NONE;
 
-		if (Ok)
+	static bool InDrag = false;
+	if (!InDrag) // Don't allow recursive drags...
+	{
+		InDrag = true;
+
+		Reset();
+		IDataObject *Data = 0;
+		if (QueryInterface(IID_IDataObject, (void**)&Data) == S_OK)
 		{
-			return Effect;
+			int Ok = ::DoDragDrop(Data, this, Effect, &dwEffect) == DRAGDROP_S_DROP;
+			Data->Release();
+
+			if (!Ok)
+				Effect = DROPEFFECT_NONE;
 		}
+
+		InDrag = false;
+	}
+	else
+	{
+		LgiTrace("%s:%i - Already in drag?\n", _FL);
 	}
 
-	return DROPEFFECT_NONE;
+	return dwEffect;
 }
 
 ULONG STDMETHODCALLTYPE

@@ -15,6 +15,7 @@ Notes:
 
 #define MAX_FACTOR				32
 #define DEBUG_TILE_BOUNDARIES	0
+#define RIGHT_BOTTOM_WHITESPACE	2
 
 enum Messages
 {
@@ -49,7 +50,7 @@ struct ZoomTile : public LMemDC
 			Cs = GBitsToColourSpace(Bits);
 		#endif
 
-		// printf("MapBits = %s\n", GColourSpaceToString(Cs));
+		// printf("MapBits = %s\n", LColourSpaceToString(Cs));
 		return Cs;
 	}
 	
@@ -68,7 +69,10 @@ class LZoomViewPriv
 
 public:
 	/// If this is true, then we own the pDC object.
-	bool OwnDC;
+	bool OwnDC = false;
+
+	/// This is set if there is recursion in the scroll bar update..
+	bool ScrollBarsDirty = false;
 	
 	/// The image surface we are displaying
 	LSurface *pDC;
@@ -1219,24 +1223,29 @@ void LZoomView::UpdateScrollBars(LPoint *MaxScroll, bool ResetPos)
 	if (!Updating)
 	{
 		Updating = true;	
-		LRect c = GetClient();    
-		// int Factor = d->Factor();
-		// int Fmin1 = Factor - 1;
+		LRect c = GetClient();
 
 		LPoint DocSize(Src->X(), Src->Y());		
 		LPoint DocClientSize(c.X(), c.Y());
 		DocClientSize = d->ScreenToDoc(DocClientSize);
+
+		// This can change the client area...
+		// Which will cause a OnPosChange event to occur.
 		SetScrollBars(DocSize.x > DocClientSize.x, DocSize.y > DocClientSize.y);
+
+		LgiTrace("Scroll cli=%i,%i(raw=%s) doc=%i,%i\n",
+			DocClientSize.x, DocClientSize.y, c.GetStr(),
+			DocSize.x, DocSize.y);
 
 		if (HScroll)
 		{
-			HScroll->SetRange(LRange(0, DocSize.x));
+			HScroll->SetRange(LRange(0, DocSize.x+RIGHT_BOTTOM_WHITESPACE));
 			HScroll->SetPage(DocClientSize.x);
 			if (ResetPos) HScroll->Value(0);
 		}
 		if (VScroll)
 		{
-			VScroll->SetRange(LRange(0, DocSize.y));
+			VScroll->SetRange(LRange(0, DocSize.y+RIGHT_BOTTOM_WHITESPACE));
 			VScroll->SetPage(DocClientSize.y);
 			if (ResetPos) VScroll->Value(0);
 		}
@@ -1247,6 +1256,7 @@ void LZoomView::UpdateScrollBars(LPoint *MaxScroll, bool ResetPos)
 		}
 		Updating = false;
 	}
+	else d->ScrollBarsDirty = true; // Update them later
 }
 
 void LZoomView::OnPosChange()
@@ -1536,21 +1546,14 @@ bool LZoomView::OnMouseWheel(double Lines)
 					NewSx = (int) (DocPt.x - m.x);
 					NewSy = (int) (DocPt.y - m.y);
 				}
-				
+
+				UpdateScrollBars();
+
+				/*				
 				LPoint ScaledDocSize(Src->X(), Src->Y());
 				ScaledDocSize = d->DocToScreen(ScaledDocSize);
 
 				SetScrollBars(ScaledDocSize.x > c.X(), ScaledDocSize.y > c.Y());
-
-				/*
-				LPoint MaxScroll(	HScroll ? ScaledDocSize.x - c.X() : 0,
-									VScroll ? ScaledDocSize.y - c.Y() : 0);
-				MaxScroll = d->ScreenToDoc(MaxScroll);
-				if (NewSx > MaxScroll.x)
-					NewSx = MaxScroll.x;
-				if (NewSy > MaxScroll.y)
-					NewSy = MaxScroll.y;
-				*/
 
 				LPoint ScaledClient(c.X(), c.Y());
 				ScaledClient = d->ScreenToDoc(ScaledClient);
@@ -1573,13 +1576,6 @@ bool LZoomView::OnMouseWheel(double Lines)
 					GPointF NewDocPt;
 					bool In = Convert(NewDocPt, m.x, m.y);
 
-					/*
-					LgiTrace("Scroll: doc=%i,%i cli=%i,%i maxx=%i maxy=%i\n",
-						Src->X(), Src->Y(),
-						c.X(), c.Y(),
-						MaxScroll.x, MaxScroll.y);
-					*/
-
 					LgiTrace("Zoom: DocPt=%.2f,%.2f->%.2f,%.2f Mouse=%i,%i Factor: %i Zoom: %i DocSize: %i,%i NewScroll: %i,%i\n",
 						DocPt.x, DocPt.y,
 						NewDocPt.x, NewDocPt.y,
@@ -1590,6 +1586,7 @@ bool LZoomView::OnMouseWheel(double Lines)
 						NewSx, NewSy);
 				}
 				#endif
+				*/
 			}
 		}
 
@@ -1705,6 +1702,16 @@ int LZoomView::OnNotify(LViewI *v, LNotification n)
 			UpdateWindow(Handle());
 			#endif
 			SendNotify(LNotifyViewportChanged);
+
+			if (HScroll)
+			{
+				auto r = HScroll->GetRange();
+				auto p = HScroll->Page();
+				auto v = HScroll->Value();
+
+				LgiTrace("Notify v=%i p=%i r=%i,%i exp=%i\n",
+					(int)v, (int)p, (int)r.Start, (int)r.End(), (int)(r.End()-p));
+			}
 			break;
 		}
 	}
@@ -1720,6 +1727,11 @@ void LZoomView::OnPaint(LSurface *pDC)
 	pDC->Rectangle();
 	#endif
 
+	if (d->ScrollBarsDirty)
+	{
+		d->ScrollBarsDirty = false;
+		UpdateScrollBars();
+	}
 
 	LRect c = GetClient();
 	LRegion Rgn(c);
@@ -1743,6 +1755,11 @@ void LZoomView::OnPaint(LSurface *pDC)
 		LPoint ScaledScroll((int)Sx, (int)Sy);
 		ScaledScroll = d->DocToScreen(ScaledScroll);
 		s.Offset(-ScaledScroll.x, -ScaledScroll.y);
+
+		LgiTrace("Paint scroll=%i,%i cli=%s doc=%s(%ix%i)\n",
+			Sx, Sy,
+			d->ScreenToDoc(c).GetStr(), d->ScreenToDoc(s).GetStr(),
+			Src->X(), Src->Y());
 
 		// Work out the visible tiles...
 		LRect vis = s;
@@ -1820,9 +1837,9 @@ void LZoomView::OnPaint(LSurface *pDC)
 						#if 0
 						LgiTrace("Zoom: %i,%i %s %s->%s (%s)\n",
 							px, py, tile_source.GetStr(),
-							GColourSpaceToString(pTile->GetColourSpace()),
-							GColourSpaceToString(pDC->GetColourSpace()),
-							GColourSpaceToString(GdcD->GetColourSpace()));
+							LColourSpaceToString(pTile->GetColourSpace()),
+							LColourSpaceToString(pDC->GetColourSpace()),
+							LColourSpaceToString(GdcD->GetColourSpace()));
 						#endif
 
 						#if DEBUG_TILE_BOUNDARIES

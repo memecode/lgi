@@ -313,7 +313,7 @@ bool LCairoSurface::Create(int x, int y, LColourSpace Cs, int Flags)
 	}
 
 	if (!pMem)
-		pMem = new GBmpMem;
+		pMem = new LBmpMem;
 	if (!pMem)
 		return false;
 
@@ -406,7 +406,7 @@ void LCairoSurface::Blt(int x, int y, LSurface *Src, LRect *a)
 		return;
 
 	bool Status = false;
-	GBlitRegions br(this, x, y, Src, a);
+	LBlitRegions br(this, x, y, Src, a);
 	if (!br.Valid())
 		return;
 

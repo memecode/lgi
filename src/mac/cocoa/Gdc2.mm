@@ -385,13 +385,13 @@ bool GPalette::operator !=(GPalette &p)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-GBmpMem::GBmpMem()
+LBmpMem::LBmpMem()
 {
 	Base = 0;
 	Flags = 0;
 }
 
-GBmpMem::~GBmpMem()
+LBmpMem::~LBmpMem()
 {
 	if (Base && (Flags & BmpOwnMemory))
 	{
@@ -415,7 +415,7 @@ public:
 	}
 };
 
-class GGlobalColourPrivate
+class LGlobalColourPrivate
 {
 public:
 	GlobalColourEntry c[256];
@@ -438,7 +438,7 @@ public:
 		return f;
 	}
 	
-	GGlobalColourPrivate()
+	LGlobalColourPrivate()
 	{
 		FirstUnused = 0;
 		Global = 0;
@@ -464,23 +464,23 @@ public:
 #endif
 	}
 	
-	~GGlobalColourPrivate()
+	~LGlobalColourPrivate()
 	{
 		Cache.DeleteObjects();
 	}
 };
 
-GGlobalColour::GGlobalColour()
+LGlobalColour::LGlobalColour()
 {
-	d = new GGlobalColourPrivate;
+	d = new LGlobalColourPrivate;
 }
 
-GGlobalColour::~GGlobalColour()
+LGlobalColour::~LGlobalColour()
 {
 	DeleteObj(d);
 }
 
-COLOUR GGlobalColour::AddColour(COLOUR c24)
+COLOUR LGlobalColour::AddColour(COLOUR c24)
 {
 	for (int i=0; i<256; i++)
 	{
@@ -509,7 +509,7 @@ COLOUR GGlobalColour::AddColour(COLOUR c24)
 	return c24;
 }
 
-bool GGlobalColour::AddBitmap(LSurface *pDC)
+bool LGlobalColour::AddBitmap(LSurface *pDC)
 {
 	if (pDC)
 	{
@@ -543,7 +543,7 @@ void KeyBlt(LSurface *To, LSurface *From, COLOUR Key)
 	}
 }
 
-bool GGlobalColour::AddBitmap(LImageList *il)
+bool LGlobalColour::AddBitmap(LImageList *il)
 {
 	if (il)
 	{
@@ -570,7 +570,7 @@ bool GGlobalColour::AddBitmap(LImageList *il)
 	return false;
 }
 
-bool GGlobalColour::MakeGlobalPalette()
+bool LGlobalColour::MakeGlobalPalette()
 {
 	if (!d->Global)
 	{
@@ -623,7 +623,7 @@ bool GGlobalColour::MakeGlobalPalette()
 	return d->Global != 0;
 }
 
-GPalette *GGlobalColour::GetPalette()
+GPalette *LGlobalColour::GetPalette()
 {
 	if (!d->Global)
 	{
@@ -633,7 +633,7 @@ GPalette *GGlobalColour::GetPalette()
 	return d->Global;
 }
 
-COLOUR GGlobalColour::GetColour(COLOUR c24)
+COLOUR LGlobalColour::GetColour(COLOUR c24)
 {
 	for (int i=0; i<256; i++)
 	{
@@ -647,7 +647,7 @@ COLOUR GGlobalColour::GetColour(COLOUR c24)
 	return c24;
 }
 
-bool GGlobalColour::RemapBitmap(LSurface *pDC)
+bool LGlobalColour::RemapBitmap(LSurface *pDC)
 {
 	return false;
 }
@@ -668,7 +668,7 @@ public:
 	double GammaCorrection;
 	uchar GammaTable[256];
 	GPalette *pSysPal;
-	GGlobalColour *GlobalColour;
+	LGlobalColour *GlobalColour;
 	
 	// Data
 	ulong *CharSquareData;
@@ -790,7 +790,7 @@ GdcDevice::GdcDevice()
 	pInstance = this;
 	d = new GdcDevicePrivate(this);
 	SetGamma(LGI_DEFAULT_GAMMA);
-	d->GlobalColour = new GGlobalColour;
+	d->GlobalColour = new LGlobalColour;
 }
 
 GdcDevice::~GdcDevice()
@@ -822,7 +822,7 @@ uchar *GdcDevice::GetDiv255()
 	return d->Div255;
 }
 
-GGlobalColour *GdcDevice::GetGlobalColour()
+LGlobalColour *GdcDevice::GetGlobalColour()
 {
 	return d->GlobalColour;
 }
@@ -1019,12 +1019,12 @@ COLOUR GdcDevice::GetColour(COLOUR Rgb24, LSurface *pDC)
 static int _Factories;
 static LApplicatorFactory *_Factory[16];
 
-GApp8 Factory8;
-GApp15 Factory15;
-GApp16 Factory16;
-GApp24 Factory24;
-GApp32 Factory32;
-GAlphaFactory FactoryAlpha;
+LApp8 Factory8;
+LApp15 Factory15;
+LApp16 Factory16;
+LApp24 Factory24;
+LApp32 Factory32;
+LAlphaFactory FactoryAlpha;
 
 LApplicatorFactory::LApplicatorFactory()
 {

@@ -239,7 +239,7 @@ class LgiClass LFileSystem
 {
 	friend class LFile;
 	static LFileSystem *Instance;
-	class GFileSystemPrivate *d;
+	class LFileSystemPrivate *d;
 
 	LVolume *Root = NULL;
 

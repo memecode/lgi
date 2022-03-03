@@ -204,7 +204,7 @@ public:
 
 	#if defined(__GTK_H__)
 
-		LAutoPtr<LCaptureThread> CaptureThread;
+		LCaptureThread *CaptureThread = NULL;
 		LMouse PrevMouse;
 	
 	#elif defined(MAC)

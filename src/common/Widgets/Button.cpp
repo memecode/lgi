@@ -426,7 +426,7 @@ void LButton::OnPaint(LSurface *pDC)
 			if (Focus())
 			{
 				LRect r = GetClient();
-				r.Size(5, 3);
+				r.Inset(5, 3);
 				pDC->Colour(LColour(180, 180, 180));
 				pDC->LineStyle(LSurface::LineAlternate);
 				pDC->Box(&r);
@@ -440,7 +440,7 @@ void LButton::OnPaint(LSurface *pDC)
 			{
 				pDC->Colour(L_BLACK);
 				pDC->Box(&r);
-				r.Size(1, 1);
+				r.Inset(1, 1);
 			}
 			LWideBorder(pDC, r, d->Pressed ? DefaultSunkenEdge : DefaultRaisedEdge);
 
@@ -491,8 +491,8 @@ void LButton::SetPreferredSize(int x, int y)
 	int Cx = d->TxtSz.X() + Ix + (d->TxtSz.X() && d->Image ? LTableLayout::CellSpacing : 0);
 	int Cy = MAX(d->TxtSz.Y(), Iy);
 	
-	r.Dimension((x > 0 ? x : Cx + Overhead.x) - 1,
-				(y > 0 ? y : Cy + Overhead.y) - 1);
+	r.SetSize((x > 0 ? x : Cx + Overhead.x),
+			  (y > 0 ? y : Cy + Overhead.y));
 
 	SetPos(r);
 }

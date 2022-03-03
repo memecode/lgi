@@ -39,7 +39,7 @@ public:
 	int GetVar(int Var) { return 0; }
 	int SetVar(int Var, NativeInt Value) { return 0; }
 
-	bool SetSurface(GBmpMem *d, GPalette *pal = NULL, GBmpMem *a = NULL)
+	bool SetSurface(LBmpMem *d, GPalette *pal = NULL, LBmpMem *a = NULL)
 	{
 		if (d && d->Cs == ColourSpace)
 		{
@@ -128,7 +128,7 @@ public:
 	}
 	
 	template<typename T>
-	bool AlphaBlt(GBmpMem *Src, GBmpMem *SrcAlpha)
+	bool AlphaBlt(LBmpMem *Src, LBmpMem *SrcAlpha)
 	{
 		uchar *DivLut = Div255Lut;
 
@@ -170,7 +170,7 @@ public:
 		return true;
 	}
 	
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha = NULL)
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = NULL)
 	{
 		if (!Src)
 			return false;
@@ -219,7 +219,7 @@ public:
 			}
 			else
 			{
-				GBmpMem Dst;
+				LBmpMem Dst;
 				Dst.Base = this->u8;
 				Dst.x = Src->x;
 				Dst.y = Src->y;
@@ -324,7 +324,7 @@ public:
 	}
 	
 	template<typename T>
-	bool CopyBlt24(GBmpMem *Src)
+	bool CopyBlt24(LBmpMem *Src)
 	{
 		for (int y=0; y<Src->y; y++)
 		{
@@ -349,7 +349,7 @@ public:
 	}
 
 	template<typename T>
-	bool CopyBlt32(GBmpMem *Src)
+	bool CopyBlt32(LBmpMem *Src)
 	{
 		for (int y=0; y<Src->y; y++)
 		{
@@ -374,7 +374,7 @@ public:
 	}
 	
 	template<typename T>
-	bool AlphaBlt24(GBmpMem *Src, GBmpMem *SrcAlpha)
+	bool AlphaBlt24(LBmpMem *Src, LBmpMem *SrcAlpha)
 	{
 		uchar *DivLut = Div255Lut;
 
@@ -411,7 +411,7 @@ public:
 	}
 
 	template<typename T>
-	bool AlphaBlt32(GBmpMem *Src, GBmpMem *SrcAlpha)
+	bool AlphaBlt32(LBmpMem *Src, LBmpMem *SrcAlpha)
 	{
 		REG uchar *DivLut = Div255Lut;
 
@@ -447,7 +447,7 @@ public:
 		return true;
 	}
 	
-	void ConvertPreMul(GBmpMem *m)
+	void ConvertPreMul(LBmpMem *m)
 	{
 		REG uchar *DivLut = Div255Lut;
 		for (int y=0; y<m->y; y++)
@@ -464,7 +464,7 @@ public:
 		}
 	}
 	
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha = NULL)
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = NULL)
 	{
 		if (!Src)
 			return false;
@@ -554,7 +554,7 @@ public:
 			}
 			else
 			{
-				GBmpMem Dst;
+				LBmpMem Dst;
 				Dst.Base = this->u8;
 				Dst.x = Src->x;
 				Dst.y = Src->y;
@@ -637,7 +637,7 @@ public:
 				this->u8 += ystep;																\
 			}																					\
 		}																						\
-		bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha = 0) { return false; }			\
+		bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = 0) { return false; }			\
 	};
 
 #define CreateOpAlpha(name, opcode, alpha)														\
@@ -675,7 +675,7 @@ public:
 				this->u8 += ystep;																\
 			}																					\
 		}																						\
-		bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha = 0) { return false; }			\
+		bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = 0) { return false; }			\
 	};
 
 
@@ -687,7 +687,7 @@ CreateOpNoAlpha(Xor, ^=, NoAlpha)
 CreateOpAlpha(Xor, ^=, Alpha)
 
 /////////////////////////////////////////////////////////////////////////////////////////
-LApplicator *GApp32::Create(LColourSpace Cs, int Op)
+LApplicator *LApp32::Create(LColourSpace Cs, int Op)
 {
 	if (Op == GDC_SET)
 	{

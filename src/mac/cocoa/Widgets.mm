@@ -92,7 +92,7 @@ void LDialog::OnPosChange()
 		if (t)
 		{
 			auto r = GetClient();
-			r.Size(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
+			r.Inset(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
 			t->SetPos(r);
 		}
 	}

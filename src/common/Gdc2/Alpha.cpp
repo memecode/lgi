@@ -118,7 +118,7 @@ public:
 		return 0;
 	}
 
-	bool SetSurface(GBmpMem *d, GPalette *p, GBmpMem *a)
+	bool SetSurface(LBmpMem *d, GPalette *p, LBmpMem *a)
 	{
 		if (d && d->GetBits() == Bits)
 		{
@@ -191,10 +191,10 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
 
 	template<typename Pixel>
-	void AlphaBlt15(GBmpMem *Src, GPalette *DPal, uchar *Lut)
+	void AlphaBlt15(LBmpMem *Src, GPalette *DPal, uchar *Lut)
 	{
 		System24BitPixel dc[256];
 		CreatePaletteLut(dc, DPal, oma);
@@ -222,7 +222,7 @@ public:
 	}
 
 	template<typename Pixel>
-	void AlphaBlt16(GBmpMem *Src, GPalette *DPal, uchar *Lut)
+	void AlphaBlt16(LBmpMem *Src, GPalette *DPal, uchar *Lut)
 	{
 		System24BitPixel dc[256];
 		CreatePaletteLut(dc, DPal, oma);
@@ -250,7 +250,7 @@ public:
 	}
 
 	template<typename Pixel>
-	void AlphaBlt24(GBmpMem *Src, GPalette *DPal, uchar *Lut)
+	void AlphaBlt24(LBmpMem *Src, GPalette *DPal, uchar *Lut)
 	{
 		System24BitPixel dc[256];
 		CreatePaletteLut(dc, DPal, oma);
@@ -278,7 +278,7 @@ public:
 	}
 
 	template<typename Pixel>
-	void AlphaBlt32(GBmpMem *Src, GPalette *DPal, uchar *Lut)
+	void AlphaBlt32(LBmpMem *Src, GPalette *DPal, uchar *Lut)
 	{
 		GdcRGB *dc = (*DPal)[0];
 		if (!Lut) Lut = DPal->MakeLut(15);
@@ -302,7 +302,7 @@ public:
 	}
 
 	template<typename Pixel>
-	void AlphaBlt48(GBmpMem *Src, GPalette *DPal, uchar *Lut)
+	void AlphaBlt48(LBmpMem *Src, GPalette *DPal, uchar *Lut)
 	{
 		System24BitPixel dc[256];
 		CreatePaletteLut(dc, DPal, oma);
@@ -333,7 +333,7 @@ public:
 	}
 
 	template<typename Pixel>
-	void AlphaBlt64(GBmpMem *Src, GPalette *DPal, uchar *Lut)
+	void AlphaBlt64(LBmpMem *Src, GPalette *DPal, uchar *Lut)
 	{
 		System24BitPixel dc[256];
 		CreatePaletteLut(dc, DPal, 0xff);
@@ -406,7 +406,7 @@ public:
 		return 0;
 	}
 
-	bool SetSurface(GBmpMem *d, GPalette *p = 0, GBmpMem *a = 0)
+	bool SetSurface(LBmpMem *d, GPalette *p = 0, LBmpMem *a = 0)
 	{
 		if (d && d->Cs == ColourSpace)
 		{
@@ -509,7 +509,7 @@ public:
 		}
 	}
 
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
 	{
 		if (!Src)
 			return false;
@@ -553,7 +553,7 @@ public:
 		}
 		else
 		{
-			GBmpMem Dst;
+			LBmpMem Dst;
 			Dst.Base = this->u8;
 			Dst.x = Src->x;
 			Dst.y = Src->y;
@@ -625,7 +625,7 @@ public:
 		}
 	}
 
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
 	{
 		if (!Src)
 			return false;
@@ -669,7 +669,7 @@ public:
 		}
 		else
 		{
-			GBmpMem Dst;
+			LBmpMem Dst;
 			Dst.Base = this->u8;
 			Dst.x = Src->x;
 			Dst.y = Src->y;
@@ -766,7 +766,7 @@ public:
 	}
 	
 	template<typename SrcPx>
-	void CompositeBlt24(GBmpMem *Src)
+	void CompositeBlt24(LBmpMem *Src)
 	{
 		uchar *Lut = Div255Lut;
 		REG uint8_t a = this->alpha;
@@ -807,7 +807,7 @@ public:
 	}
 	
 	template<typename SrcPx>
-	void CompositeBlt32(GBmpMem *Src)
+	void CompositeBlt32(LBmpMem *Src)
 	{
 		uchar *Lut = Div255Lut;
 		REG uint8_t a = this->alpha;
@@ -858,7 +858,7 @@ public:
 		}
 	}
 
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha = 0)
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = 0)
 	{
 		if (!Src)
 			return false;
@@ -925,7 +925,7 @@ public:
 				#undef Blt24Case
 				default:
 				{
-					GBmpMem Dst;
+					LBmpMem Dst;
 					Dst.Base = this->u8;
 					Dst.x = Src->x;
 					Dst.y = Src->y;
@@ -1034,7 +1034,7 @@ public:
 	}
 	
 	template<typename SrcPx>
-	void PmBlt32(GBmpMem *Src)
+	void PmBlt32(LBmpMem *Src)
 	{
 		REG uchar *DivLut = Div255Lut;
 		for (int y=0; y<Src->y; y++)
@@ -1053,7 +1053,7 @@ public:
 		}
 	}
 
-	bool Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha = 0)
+	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = 0)
 	{
 		if (!Src) return 0;
 		REG uchar *DivLut = Div255Lut;
@@ -1278,7 +1278,7 @@ public:
 		{
 			default:
 			{
-				GBmpMem Dst;
+				LBmpMem Dst;
 				Dst.Base = this->u8;
 				Dst.x = Src->x;
 				Dst.y = Src->y;
@@ -1344,7 +1344,7 @@ public:
 	}
 };
 
-LApplicator *GAlphaFactory::Create(LColourSpace Cs, int Op)
+LApplicator *LAlphaFactory::Create(LColourSpace Cs, int Op)
 {
 	if (Op != GDC_ALPHA)
 		return NULL;
@@ -1380,7 +1380,7 @@ LApplicator *GAlphaFactory::Create(LColourSpace Cs, int Op)
 			LgiTrace("%s:%i - Unknown colour space: 0x%x %s\n",
 					_FL,
 					Cs,
-					GColourSpaceToString(Cs));
+					LColourSpaceToString(Cs));
 			// LAssert(0);
 			break;
 	}
@@ -1486,7 +1486,7 @@ void GdcApp8Alpha::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp8Alpha::Blt(GBmpMem *Src, GPalette *SPal, GBmpMem *SrcAlpha)
+bool GdcApp8Alpha::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (!Src)
 		return false;

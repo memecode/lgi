@@ -95,7 +95,7 @@ CursorMetrics[] =
 // bundle extra files with your application. Which have a tendancy to get lost along the
 // way etc.
 extern uint32_t CursorData[];
-GInlineBmp Cursors =
+LInlineBmp Cursors =
 {
 	300, 20, 8, CursorData
 };
@@ -573,7 +573,7 @@ LRect &LView::GetClient(bool ClientSpace)
 	else
 	{
 		c.ZOff(Pos.X()-1, Pos.Y()-1);
-		c.Size(Edge, Edge);
+		c.Inset(Edge, Edge);
 	}
 	
 	return c;

@@ -751,7 +751,7 @@ public:
 				}
 				m.Print("\n"
 						"\n"
-						"SourceLst := $(patsubst %%.c,%%.o,$(patsubst %%.cpp,%%.o,$(Sources)))\n"
+						"SourceLst := $(patsubst %%.c,%%.o,$(patsubst %%.cpp,%%.o,$(Source)))\n"
 						"\n"
 						"Objects := $(addprefix $(BuildDir)/,$(SourceLst))\n"
 						"\n");
@@ -851,10 +851,11 @@ public:
 							}
 						}
 
-						m.Print(" $(Depends)\n"
+						m.Print(" $(Objects)\n"
+								"	mkdir -p $(BuildDir)\n"
 								"	@echo Linking $(Target) [$(Build)]...\n"
 								"	$(CPP)%s%s %s%s -o \\\n"
-								"		$(Target) $(addprefix $(BuildDir)/,$(Depends)) $(Libs)\n",
+								"		$(Target) $(Objects) $(Libs)\n",
 								ExtraLinkFlags,
 								ExeFlags,
 								ValidStr(LinkerFlags) ? "-Wl" : "", LinkerFlags.Get());
@@ -935,6 +936,7 @@ public:
 					{
 						m.Print("TargetFile = lib$(Target)$(Tag).%s\n"
 								"$(TargetFile) : $(Objects)\n"
+								"	mkdir -p $(BuildDir)\n"
 								"	@echo Linking $(TargetFile) [$(Build)]...\n"
 								"	$(CPP)$s -shared \\\n"
 								"		%s%s \\\n"
@@ -980,9 +982,10 @@ public:
 					else if (!stricmp(TargetType, "StaticLibrary"))
 					{
 						m.Print("TargetFile = lib$(Target)$(Tag).%s\n"
-								"$(TargetFile) : outputfolder $(Depends)\n"
+								"$(TargetFile) : $(Objects)\n"
+								"	mkdir -p $(BuildDir)\n"
 								"	@echo Linking $(TargetFile) [$(Build)]...\n"
-								"	ar rcs $(BuildDir)/$(TargetFile) $(addprefix $(BuildDir)/,$(Depends))\n",
+								"	ar rcs $(BuildDir)/$(TargetFile) $(Objects)\n",
 								PlatformStaticLibExt);
 
 						LString PostBuildCmds = d->Settings.GetStr(ProjPostBuildCommands, NULL, Platform);
@@ -1889,12 +1892,9 @@ int BuildThread::Main()
 				// Read all the output					
 				char Buf[256];
 				ssize_t rd;
-				LFile log("c:\\tmp\\build.txt", O_WRITE);
-				log.SetSize(0);
 
 				while ( (rd = SubProc->Read(Buf, sizeof(Buf))) > 0 )
 				{
-					log.Write(Buf, rd);
 					Write(Buf, rd);
 				}
 					
@@ -3704,12 +3704,12 @@ LString IdeProject::GetTargetFile(IdePlatform Platform)
 	return Ret;
 }
 
-struct Dependency
+struct ProjDependency
 {
 	bool Scanned;
 	LAutoString File;
 	
-	Dependency(const char *f)
+	ProjDependency(const char *f)
 	{
 		Scanned = false;
 		File.Reset(NewStr(f));
@@ -3721,7 +3721,7 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, IdePlatform Platform)
 	if (!GetTree()->Lock(_FL))
 		return false;
 		
-	LHashTbl<StrKey<char>, Dependency*> Deps;
+	LHashTbl<StrKey<char>, ProjDependency*> Deps;
 	LAutoString Base = GetBasePath();
 	
 	// Build list of all the source files...
@@ -3736,18 +3736,18 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, IdePlatform Platform)
 	for (int i=0; i<Src.Length(); i++)
 	{
 		char *f = Src[i];
-		Dependency *dep = Deps.Find(f);
+		ProjDependency *dep = Deps.Find(f);
 		if (!dep)
-			Deps.Add(f, new Dependency(f));
+			Deps.Add(f, new ProjDependency(f));
 	}
 	
 	// Scan all dependencies for includes
-	LArray<Dependency*> Unscanned;
+	LArray<ProjDependency*> Unscanned;
 	do
 	{
 		// Find all the unscanned dependencies
 		Unscanned.Length(0);
-		// for (Dependency *d = Deps.First(); d; d = Deps.Next())
+		// for (ProjDependency *d = Deps.First(); d; d = Deps.Next())
 		for (auto d : Deps)
 		{
 			if (!d.value->Scanned)
@@ -3757,7 +3757,7 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, IdePlatform Platform)
 		for (int i=0; i<Unscanned.Length(); i++)
 		{
 			// Then scan source for includes...
-			Dependency *d = Unscanned[i];
+			ProjDependency *d = Unscanned[i];
 			d->Scanned = true;
 			
 			char *Src = d->File;
@@ -3784,7 +3784,7 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, IdePlatform Platform)
 
 					if (!Deps.Find(File))
 					{						
-						Deps.Add(File, new Dependency(File));
+						Deps.Add(File, new ProjDependency(File));
 					}
 				}
 				SrcDeps.DeleteArrays();
@@ -3793,7 +3793,7 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, IdePlatform Platform)
 	}
 	while (Unscanned.Length() > 0);
 	
-	// for (Dependency *d = Deps.First(); d; d = Deps.Next())
+	// for (ProjDependency *d = Deps.First(); d; d = Deps.Next())
 	for (auto d : Deps)
 	{
 		Files.Add(d.value->File.Release());

@@ -73,14 +73,14 @@ LgiFunc char *strnchr
 );
 
 #if defined(MAC)
-LgiFunc char *strncpy_s(char *dest, size_t dest_size, const char *src, size_t src_size);
+LgiFunc char *Strncpy_s(char *dest, size_t dest_size, const char *src, size_t src_size);
 #else
 /// \brief Search for a substring in another string.
 ///
 /// The search is case sensitive.
 /// 
 /// \returns A pointer to the sub-string or NULL if not found
-LgiFunc char *strnstr
+LgiFunc char *Strnstr
 (
 	/// The string to search
 	const char *a,

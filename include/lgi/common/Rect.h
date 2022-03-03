@@ -81,6 +81,7 @@ public:
 	}
 	
 	LPoint Center() { return LPoint(x1 + (X()/2), y1 + (Y()/2)); }
+	LPoint GetSize() { return LPoint(X(), Y()); }
 
 	/// Returns the width
 	int X() const { return x2 - x1 + 1; }
@@ -121,16 +122,16 @@ public:
 	}
 	
 	/// Zooms the rectangle
-	void Size(int x, int y);
+	void Inset(int x, int y);
 
 	/// Zooms the rectangle
-	void Size(LRect *a);
+	void Inset(LRect *a);
 
 	/// Sets the width and height
-	void Dimension(int x, int y);
+	void SetSize(int x, int y);
 
 	/// Sets the width and height
-	void Dimension(LRect *a);
+	void SetSize(LRect *a);
 
 	/// Sets the rectangle to the intersection of this object and 'b'
 	void Bound(LRect *b);
@@ -391,8 +392,8 @@ class LgiClass LRegion : public LRect
 	/// The array of rectangles
 	LRect *a;
 
-	bool SetSize(int s);
-	LRect *NewOne() { return (SetSize(Size+1)) ? a+(Size-1) : 0; }
+	bool SetLength(int s);
+	LRect *NewOne() { return (SetLength(Size+1)) ? a+(Size-1) : 0; }
 	bool Delete(int i);
 
 public:

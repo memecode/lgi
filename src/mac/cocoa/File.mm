@@ -583,78 +583,83 @@ LDirectory *LVolume::GetContents()
 	return Dir;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // IDGF Apple.. provide an alternative you dumbass
+
 LVolume *LVolume::First()
 {
 	if (d->SysPath == LSP_DESKTOP &&
 		!d->Child)
 	{
 		LVolume *v = NULL;
+		LString DesktopPath = LGetSystemPath(LSP_DESKTOP);
 
+		// List any favorites
+		UInt32 seed;
+		auto sflRef = LSSharedFileListCreate(NULL, kLSSharedFileListFavoriteItems, NULL);
+		auto items = LSSharedFileListCopySnapshot( sflRef, &seed );
+		for( size_t i = 0; i < CFArrayGetCount(items); i++ )
 		{
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // IDGF Apple.. provide an alternative you dumbass
-			LString DesktopPath = LGetSystemPath(LSP_DESKTOP);
+			auto item = (LSSharedFileListItemRef)CFArrayGetValueAtIndex(items, i);
+			if( !item )
+				continue;
+			auto outURL = LSSharedFileListItemCopyResolvedURL(item,kLSSharedFileListNoUserInteraction, NULL);
+			if( !outURL )
+				continue;
+			
+			CFStringRef itemPath = CFURLCopyFileSystemPath(outURL,kCFURLPOSIXPathStyle);
+			LString s = itemPath;
 
-			// List any favorites
-			UInt32 seed;
-			LSSharedFileListRef sflRef = LSSharedFileListCreate(NULL,
-																kLSSharedFileListFavoriteItems,
-																NULL);
-			CFArrayRef items = LSSharedFileListCopySnapshot( sflRef, &seed );
-			for( size_t i = 0; i < CFArrayGetCount(items); i++ )
+			if (!s.Equals(DesktopPath)) // This is the root item, don't duplicate
 			{
-				LSSharedFileListItemRef item = (LSSharedFileListItemRef)CFArrayGetValueAtIndex(items, i);
-				if( !item )
-					continue;
-				auto outURL = LSSharedFileListItemCopyResolvedURL(item,kLSSharedFileListNoUserInteraction, NULL);
-				if( !outURL )
-					continue;
-				
-				CFStringRef itemPath = CFURLCopyFileSystemPath(outURL,kCFURLPOSIXPathStyle);
-				LString s = itemPath;
-
-				if (!s.Equals(DesktopPath)) // This is the root item, don't duplicate
+				v = new LVolume();
+				if (v)
 				{
-					v = new LVolume();
-					if (v)
+					v->d->Path = s;
+					v->d->Name = LGetLeaf(s);
+					v->d->Type = VT_FOLDER;
+
+					auto IcoRef = LSSharedFileListItemCopyIconRef(item);
+					if (IcoRef)
 					{
-						v->d->Path = s;
-						v->d->Name = LGetLeaf(s);
-						v->d->Type = VT_FOLDER;
-
-						auto IcoRef = LSSharedFileListItemCopyIconRef(item);
-						if (IcoRef)
-						{
-							NSImage *img = [[NSImage alloc] initWithIconRef:IcoRef];
-							v->d->Icon.Reset(new LMemDC(img));
-							[img release];
-							CFRelease(IcoRef);
-						}
-
-						d->Insert(v);
+						NSImage *img = [[NSImage alloc] initWithIconRef:IcoRef];
+						v->d->Icon.Reset(new LMemDC(img));
+						[img release];
+						CFRelease(IcoRef);
 					}
-				}
 
-				CFRelease(outURL);
-				CFRelease(itemPath);
+					d->Insert(v);
+				}
 			}
-			CFRelease(items);
-			CFRelease(sflRef);
-#pragma GCC diagnostic pop
+
+			CFRelease(outURL);
+			CFRelease(itemPath);
 		}
+
+		CFRelease(items);
+		CFRelease(sflRef);
+	}
+	
+	return d->Child;
+}
+
+LVolume *LVolume::Next()
+{
+	if (d->SysPath == LSP_DESKTOP &&
+		!d->Next)
+	{
+		d->Next = new LVolume("Volumes");
 		
 		// List the local hard disks
-		NSWorkspace   *ws = [NSWorkspace sharedWorkspace];
-		NSArray     *vols = [ws mountedLocalVolumePaths];
-		NSFileManager *fm = [NSFileManager defaultManager];
-		// [fm mountedVolumeURLsIncludingResourceValuesForKeys];
+		auto      *ws = [NSWorkspace sharedWorkspace];
+		auto    *vols = [ws mountedLocalVolumePaths];
+		auto	  *fm = [NSFileManager defaultManager];
 
 		for (NSString *path in vols)
 		{
 			NSDictionary* fsAttributes;
-			NSString *description, *type, *name;
+			NSString *description, *type, *volName;
 			BOOL removable, writable, unmountable, res;
-			NSNumber *size;
 
 			res = [ws getFileSystemInfoForPath:path
 								   isRemovable:&removable
@@ -664,10 +669,11 @@ LVolume *LVolume::First()
 										  type:&type];
 			if (!res) continue;
 			// fsAttributes = [fm fileSystemAttributesAtPath:path];
-			NSError *err = nil;
-			fsAttributes = [fm attributesOfFileSystemForPath:path error:&err];
-			name         = [fm displayNameAtPath:path];
-			size         = [fsAttributes objectForKey:NSFileSystemSize];
+			NSError *err  = nil;
+			fsAttributes  = [fm attributesOfFileSystemForPath:path error:&err];
+			volName            = [fm displayNameAtPath:path];
+			NSNumber *size     = [fsAttributes objectForKey:NSFileSystemSize];
+			NSNumber *freeSize = [fsAttributes objectForKey:NSFileSystemFreeSize];
 
 			#if 0
 			NSLog(@"path=%@\nname=%@\nremovable=%d\nwritable=%d\nunmountable=%d\n"
@@ -677,28 +683,31 @@ LVolume *LVolume::First()
 			
 			LString s = [type UTF8String];
 			LString p = [path UTF8String];
-			if (!s.Equals("autofs") && p.Find("/private") < 0)
+			LString name = [volName UTF8String];
+			if (!s.Equals("autofs") &&
+				p.Find("/System/Volumes") < 0 &&
+				p.Find("/private") < 0)
 			{
-				v = new LVolume();
+				auto v = new LVolume();
 				if (v)
 				{
 					v->d->Path = p;
-					v->d->Name = [name UTF8String];
+					v->d->Name = name;
 					v->d->Type = VT_HARDDISK;
 					v->d->Size = size.longLongValue;
-					d->Insert(v);
+					v->d->Free = freeSize.longLongValue;
+					d->Next->d->Insert(v);
+					
+					// printf("Vol: s=%s p=%s name=%s\n", s.Get(), p.Get(), v->d->Name.Get());
 				}
 			}
 		}
 	}
-	
-	return d->Child;
-}
 
-LVolume *LVolume::Next()
-{
 	return d->Next;
 }
+
+#pragma GCC diagnostic pop
 
 bool LVolume::IsMounted() const
 {

@@ -1065,6 +1065,8 @@ class LMenuPrivate
 {
 public:
 	int PrefId, AboutId;
+	LMenuItem *PrefItem = NULL;
+	LMenuItem *AboutItem = NULL;
 	
 	LMenuPrivate()
 	{
@@ -1081,9 +1083,9 @@ LMenu::LMenu(const char *AppName) : LSubMenu("", false)
 	auto s = AppendSub("Root");
 	if (s)
 	{
-		s->AppendItem("About", M_ABOUT);
+		d->AboutItem = s->AppendItem("About", M_ABOUT);
 		s->AppendSeparator();
-		s->AppendItem("Preferences", M_PERFERENCES, true, -1, "Cmd+,");
+		d->PrefItem = s->AppendItem("Preferences", M_PERFERENCES, true, -1, "Cmd+,");
 		s->AppendItem("Hide", M_HIDE, true, -1, "Cmd+H");
 		s->AppendSeparator();
 		s->AppendItem("Quit", M_QUIT, true, -1, "Cmd+Q");
@@ -1129,7 +1131,13 @@ void LMenu::OnActivate(LMenuItem *item)
 bool LMenu::SetPrefAndAboutItems(int PrefId, int AboutId)
 {
 	d->PrefId = PrefId;
+	if (d->PrefItem)
+		d->PrefItem->Enabled(d->PrefId > 0);
+	
 	d->AboutId = AboutId;
+	if (d->AboutItem)
+		d->AboutItem->Enabled(d->AboutId > 0);
+		
 	return true;
 }
 

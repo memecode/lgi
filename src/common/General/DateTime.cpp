@@ -33,6 +33,9 @@ constexpr const char *LDateTime::WeekdaysShort[];
 constexpr const char *LDateTime::WeekdaysLong[];
 constexpr const char *LDateTime::MonthsShort[];
 constexpr const char *LDateTime::MonthsLong[];
+
+#define MIN_YEAR		1800
+#define OFFSET_1800		5364662400 // Seconds from 1/1/1800 to 1/1/1970
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -360,7 +363,7 @@ struct MonthHash : public LHashTbl<ConstStrKey<char,false>,int>
 
 LString::Array Zdump;
 
-#define DEBUG_DST_INFO		1
+#define DEBUG_DST_INFO		0
 
 bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start, LDateTime *End)
 {
@@ -441,16 +444,24 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start,
 	
 		LDateTime Before = Start;
 		Before.AddMonths(-6);
-		// NSTimeZone *utc = [NSTimeZone timeZoneWithName:@"UTC"];
+
 		NSTimeZone *tz = [NSTimeZone systemTimeZone];
-		NSDate *startDate = [[NSDate alloc] initWithTimeIntervalSince1970:Before.Ts()/1000];
+		NSDate *startDate = [[NSDate alloc] initWithTimeIntervalSince1970:(Before.Ts() / Second64Bit) - OFFSET_1800];
 		for (int n=0; n<6; n++)
 		{
 			NSDate *next = [tz nextDaylightSavingTimeTransitionAfterDate:startDate];
 			auto &i = Info.New();
 			
-			i.UtcTimeStamp = [next timeIntervalSince1970] * 1000;
+			i.UtcTimeStamp = ([next timeIntervalSince1970] + OFFSET_1800) * Second64Bit;
 			i.Offset = (int)([tz secondsFromGMTForDate:[next dateByAddingTimeInterval:60]]/60);
+			
+			#if DEBUG_DST_INFO
+			{
+				LDateTime dt;
+				dt.Set(i.UtcTimeStamp);
+				LgiTrace("%s:%i - Ts=%s Off=%i\n", _FL, dt.Get().Get(), i.Offset);
+			}
+			#endif
 			
 			[startDate release];
 			startDate = next;
@@ -480,12 +491,11 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start,
 		MonthHash Lut;
 		LDateTime Prev;
 		int PrevOff = 0;
-		for (int i=0; i<Zdump.Length(); i++)
+		for (auto Line: Zdump)
 		{
-			char *Line = Zdump[i];
-			GToken l(Line, " \t");
+			auto l = Line.SplitDelimit(" \t");
 			if (l.Length() >= 16 &&
-				!stricmp(l[0], "/etc/localtime"))
+				l[0].Equals("/etc/localtime"))
 			{
 				// /etc/localtime  Sat Oct  3 15:59:59 2037 UTC = Sun Oct  4 01:59:59 2037 EST isdst=0 gmtoff=36000
 				// 0               1   2    3 4        5    6   7 8   9    10 11      12   13  14      15
@@ -494,8 +504,8 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start,
 				#endif				
 				
 				LDateTime Utc;
-				Utc.Year(atoi(l[5]));
-				GToken Tm(l[4], ":");
+				Utc.Year(l[5].Int());
+				auto Tm = l[4].SplitDelimit(":");
 				if (Tm.Length() != 3)
 				{
 					#if DEBUG_DST_INFO
@@ -504,9 +514,9 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start,
 					continue;
 				}
 
-				Utc.Hours(atoi(Tm[0]));
-				Utc.Minutes(atoi(Tm[1]));
-				Utc.Seconds(atoi(Tm[2]));
+				Utc.Hours(Tm[0].Int());
+				Utc.Minutes(Tm[1].Int());
+				Utc.Seconds(Tm[2].Int());
 				if (Utc.Minutes() < 0)
 				{
 					#if DEBUG_DST_INFO
@@ -524,7 +534,7 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start,
 					continue;
 				}
 
-				Utc.Day(atoi(l[3]));
+				Utc.Day(l[3].Int());
 				Utc.Month(m);
 
 				LAutoString Var, Val;
@@ -547,6 +557,9 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start,
 				}
 				
 				int Off = atoi(Val) / 60;
+
+				if (Utc.Ts() == 0)
+					continue;
 
 				if (Prev.Year() &&
 					Prev < Start &&
@@ -572,7 +585,10 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start,
 					#endif
 					
 					if (End && Utc > *End)
+					{
+						// printf("Utc after end: %s > %s\n", Utc.Get().Get(), End->Get().Get());
 						break;
+					}
 				}
 
 				Prev = Utc;
@@ -599,6 +615,7 @@ bool LDateTime::DstToLocal(LArray<GDstInfo> &Dst, LDateTime &dt)
 	}
 
 	// LgiTrace("DstToLocal: %s\n", dt.Get().Get());
+	LAssert(Dst.Length() > 1); // Needs to have at least 2 entries...?
 	for (size_t i=0; i<Dst.Length()-1; i++)
 	{
 		auto &a = Dst[i];
@@ -858,7 +875,8 @@ bool LDateTime::Set(uint64 s)
 
 	#else
 
-	Set((time_t)(s / Second64Bit));
+	time_t t = (time_t) (((int64)(s / Second64Bit)) - OFFSET_1800);
+	Set(t);
 	_Thousands = s % Second64Bit;
 	return true;
 	
@@ -934,6 +952,9 @@ bool LDateTime::Get(uint64 &s) const
 	
 	#else
 	
+		if (_Year < MIN_YEAR)
+			return false;
+	
 		struct tm t;
 		ZeroObj(t);
 		t.tm_year	= _Year - 1900;
@@ -963,8 +984,7 @@ bool LDateTime::Get(uint64 &s) const
 			// printf("Adjusting -= %i (%i)\n", _Tz * 60, _Tz);
 		}
 		
-		s = (uint64)sec * Second64Bit + _Thousands;
-		
+		s = (uint64)(sec + OFFSET_1800) * Second64Bit + _Thousands;		
 		return true;
 	
 	#endif
@@ -1417,67 +1437,17 @@ int LDateTime::Compare(const LDateTime *Date) const
 	return Diff > 0 ? 1 : 0;
 }
 
-bool LDateTime::operator <(const LDateTime &dt) const
-{
-	if (_Year < dt._Year) return true;
-	else if (_Year > dt._Year) return false;
-
-	if (_Month < dt._Month) return true;
-	else if (_Month > dt._Month) return false;
-
-	if (_Day < dt._Day) return true;
-	else if (_Day > dt._Day) return false;
-
-	if (_Hours < dt._Hours) return true;
-	else if (_Hours > dt._Hours) return false;
-
-	if (_Minutes < dt._Minutes) return true;
-	else if (_Minutes > dt._Minutes) return false;
-
-	if (_Seconds < dt._Seconds) return true;
-	else if (_Seconds > dt._Seconds) return false;
-
-	if (_Thousands < dt._Thousands) return true;
-	else if (_Thousands > dt._Thousands) return false;
-
-	return false;
-}
-
-bool LDateTime::operator <=(const LDateTime &dt) const
-{
-	return !(*this > dt);
-}
-
-bool LDateTime::operator >(const LDateTime &dt) const
-{
-	if (_Year > dt._Year) return true;
-	else if (_Year < dt._Year) return false;
-
-	if (_Month > dt._Month) return true;
-	else if (_Month < dt._Month) return false;
-
-	if (_Day > dt._Day) return true;
-	else if (_Day < dt._Day) return false;
-
-	if (_Hours > dt._Hours) return true;
-	else if (_Hours < dt._Hours) return false;
-
-	if (_Minutes > dt._Minutes) return true;
-	else if (_Minutes < dt._Minutes) return false;
-
-	if (_Seconds > dt._Seconds) return true;
-	else if (_Seconds < dt._Seconds) return false;
-
-	if (_Thousands > dt._Thousands) return true;
-	else if (_Thousands < dt._Thousands) return false;
-
-	return false;
-}
-
-bool LDateTime::operator >=(const LDateTime &dt) const
-{
-	return !(*this < dt);
-}
+#define DATETIME_OP(op) \
+	bool LDateTime::operator op(const LDateTime &dt) const \
+	{ \
+		auto a = Ts(); \
+		auto b = dt.Ts(); \
+		return a op b; \
+	}
+DATETIME_OP(<)
+DATETIME_OP(<=)
+DATETIME_OP(>)
+DATETIME_OP(>=)
 
 bool LDateTime::operator ==(const LDateTime &dt) const
 {

@@ -390,27 +390,16 @@ struct LVolumePriv
 {
 	LString Name;
 	LString Path;
-	int Type;			// VT_??
-	int Flags;			// VA_??
-	int64 Size;
-	int64 Free;
-	LSystemPath SysPath;
+	int Type = VT_NONE;
+	int Flags = 0;	// VA_??
+	int64 Size = 0;
+	int64 Free = 0;
+	LSystemPath SysPath = LSP_ROOT;
 	LAutoPtr<LSurface> Icon;
-	List<LVolume> Sub;
-	List<LVolume>::I It;
+	LVolume *NextVol = NULL, *ChildVol = NULL;
 
-	void Init()
+	LVolumePriv(LSystemPath sysPath, const char *name)
 	{
-		Type = VT_NONE;
-		Flags = 0;
-		Size = 0;
-		Free = 0;
-		SysPath = LSP_ROOT;
-	}
-
-	LVolumePriv(LSystemPath sysPath, const char *name) : It(Sub.end())
-	{
-		Init();
 		SysPath = sysPath;
 		Name = name;
 		Type = VT_FOLDER;
@@ -437,9 +426,8 @@ struct LVolumePriv
 			Path = LGetSystemPath(SysPath);
 	}
 
-	LVolumePriv(const char *Drive) : It(Sub.end())
+	LVolumePriv(const char *Drive)
 	{
-		Init();
 		int type = GetDriveTypeA(Drive);
 		if (type != DRIVE_UNKNOWN &&
 			type != DRIVE_NO_ROOT_DIR)
@@ -480,6 +468,13 @@ struct LVolumePriv
 					else
 						Desc = "Hard Disk";
 					Type = VT_HARDDISK;
+
+					ULARGE_INTEGER Avail, TotalBytes, FreeBytes;
+					if (GetDiskFreeSpaceExA(Drive, &Avail, &TotalBytes, &FreeBytes))
+					{
+						Free = FreeBytes.QuadPart;
+						Size = TotalBytes.QuadPart;
+					}
 					break;
 				}
 			}
@@ -496,7 +491,44 @@ struct LVolumePriv
 
 	~LVolumePriv()
 	{
-		Sub.DeleteObjects();
+		DeleteObj(NextVol);
+		DeleteObj(ChildVol);
+	}
+
+	void Insert(LVolume *newVol)
+	{
+		if (ChildVol)
+		{
+			for (auto v = ChildVol; v; v = v->d->NextVol)
+			{
+				if (!v->d->NextVol)
+				{
+					v->d->NextVol = newVol;
+					break;
+				}
+			}
+		}
+		else ChildVol = newVol;
+	}	
+
+	LVolume *First()
+	{
+		if (SysPath == LSP_DESKTOP && !ChildVol)
+		{
+			// Add some basic shortcuts
+			LSystemPath Paths[] = {LSP_HOME, LSP_USER_DOCUMENTS, LSP_USER_MUSIC, LSP_USER_VIDEO, LSP_USER_DOWNLOADS, LSP_USER_PICTURES};
+			const char   *Names[] = {"Home",   "Documents",        "Music",        "Video",        "Downloads",        "Pictures"};
+			for (unsigned i=0; i<CountOf(Paths); i++)
+				Insert(new LVolume(Paths[i], Names[i]));
+
+			// Get drive list
+			char Str[512];
+			if (GetLogicalDriveStringsA(sizeof(Str), Str) > 0)
+				for (char *p = Str; *p; p += strlen(p) + 1)
+					Insert(new LVolume(p));
+		}
+
+		return ChildVol;
 	}
 };
 
@@ -517,11 +549,11 @@ LVolume::~LVolume()
 
 const char *LVolume::Name() const { return d->Name; }
 const char *LVolume::Path() const { return d->Path; }
-int LVolume::Type() const { return d->Type; } // VT_??
-int LVolume::Flags() const { return d->Flags; }
-uint64 LVolume::Size() const { return d->Size; }
-uint64 LVolume::Free() const { return d->Free; }
-LSurface *LVolume::Icon() const { return d->Icon; }
+int LVolume::Type()			const { return d->Type; } // VT_??
+int LVolume::Flags()		const { return d->Flags; }
+uint64 LVolume::Size()		const { return d->Size; }
+uint64 LVolume::Free()		const { return d->Free; }
+LSurface *LVolume::Icon()	const { return d->Icon; }
 
 bool LVolume::IsMounted() const
 {
@@ -535,42 +567,17 @@ bool LVolume::SetMounted(bool Mount)
 
 void LVolume::Insert(LAutoPtr<LVolume> v)
 {
-	d->Sub.Insert(v.Release());		
+    d->Insert(v.Release());
 }
 	
 LVolume *LVolume::First()
 {
-	if (d->SysPath == LSP_DESKTOP && !d->Sub.Length())
-	{
-		// Add some basic shortcuts
-		LSystemPath Paths[] = {LSP_HOME, LSP_USER_DOCUMENTS, LSP_USER_MUSIC, LSP_USER_VIDEO, LSP_USER_DOWNLOADS, LSP_USER_PICTURES};
-		const char   *Names[] = {"Home",   "Documents",        "Music",        "Video",        "Downloads",        "Pictures"};
-		for (unsigned i=0; i<CountOf(Paths); i++)
-		{
-			LAutoPtr<LVolume> a(new LVolume(Paths[i], Names[i]));
-			Insert(a);
-		}
-
-		// Get drive list
-		char Str[512];
-		if (GetLogicalDriveStringsA(sizeof(Str), Str) > 0)
-		{
-			for (char *p = Str; *p; p += strlen(p) + 1)
-			{
-				LVolume *v = new LVolume(p);
-				if (v)
-					d->Sub.Insert(v);
-			}
-		}
-	}
-
-	d->It = d->Sub.begin();
-	return *d->It;
+	return d->First();
 }
 
 LVolume *LVolume::Next()
 {
-	return *(++d->It);
+	return d->NextVol;
 }
 
 LDirectory *LVolume::GetContents()
@@ -592,14 +599,14 @@ LDirectory *LVolume::GetContents()
 ////////////////////////////////////////////////////////////////////////////////
 LFileSystem *LFileSystem::Instance = 0;
 
-class GFileSystemPrivate
+class LFileSystemPrivate
 {
 public:
-	GFileSystemPrivate()
+	LFileSystemPrivate()
 	{
 	}
 
-	~GFileSystemPrivate()
+	~LFileSystemPrivate()
 	{
 	}
 };
@@ -607,7 +614,7 @@ public:
 LFileSystem::LFileSystem()
 {
 	Instance = this;
-	d = new GFileSystemPrivate;
+	d = new LFileSystemPrivate;
 	Root = 0;
 }
 

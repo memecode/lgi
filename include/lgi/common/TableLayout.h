@@ -88,7 +88,7 @@ public:
 	{
 		Spacing = spacing;
 		((LRect&)*this) = c->GetClient();
-		Size(Spacing, Spacing);
+		Inset(Spacing, Spacing);
 	}
 
 	GLayoutRect(LRect rc, int spacing = LTableLayout::CellSpacing)

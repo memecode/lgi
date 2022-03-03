@@ -526,6 +526,7 @@ bool LGetDriveInfo
 
 /////////////////////////////////////////////////////////////////////////
 #include <sys/types.h>
+#include <sys/statvfs.h>
 #include <pwd.h>
 
 struct LVolumePriv
@@ -556,6 +557,19 @@ struct LVolumePriv
 		
 		if (Path)
 			Type = sys == LSP_DESKTOP ? VT_DESKTOP : VT_FOLDER;
+			
+		if (sys == LSP_DESKTOP)
+		{
+			struct statvfs s = {0};
+			int r = statvfs(Path, &s);
+			if (r)
+				LgiTrace("%s:%i - statvfs failed with %i\n", _FL, r);
+			else
+			{
+				Size = (uint64_t) s.f_blocks * s.f_frsize;
+				Free = (uint64_t) s.f_bfree * s.f_frsize;
+			}			
+		}
 	}
 	
 	~LVolumePriv()
@@ -591,11 +605,11 @@ struct LVolumePriv
 			if (pw)
 				Insert(Owner, new LVolume(LSP_HOME, "Home"));
 
-			LSystemPath p[] = {LSP_USER_DOCUMENTS,
+			LSystemPath p[] = {	LSP_USER_DOCUMENTS,
 								LSP_USER_MUSIC,
 								LSP_USER_VIDEO,
 								LSP_USER_DOWNLOADS,
-								LSP_USER_PICTURES};
+								LSP_USER_PICTURES };
 			for (int i=0; i<CountOf(p); i++)
 			{
 				LString Path = LGetSystemPath(p[i]);
@@ -639,9 +653,7 @@ struct LVolumePriv
 						auto &Device = M[0];
 						auto &Mount = M[1];
 						auto &FileSys = M[2];
-						
-						// printf("fstab %s %s %s\n", Device.Get(), Mount.Get(), FileSys.Get());
-						
+												
 						if
 						(
 							(Device.Find("/dev/") == 0 || Mount.Find("/mnt/") == 0)
@@ -660,6 +672,18 @@ struct LVolumePriv
 								v->d->Name = (MountName ? MountName + 1 : Mount.Get());
 								v->d->Path = Mount;
 								v->d->Type = VT_HARDDISK;
+
+								struct statvfs s = {0};
+								int r = statvfs(Mount, &s);
+								if (r)
+								{
+									LgiTrace("%s:%i - statvfs(%s) failed.\n", _FL, Mount);
+								}
+								else
+								{
+									v->d->Size = (uint64_t) s.f_blocks * s.f_frsize;
+									v->d->Free = (uint64_t) s.f_bfree * s.f_frsize;
+								}
 
 								char *Device = M[0];
 								// char *FileSys = M[2];

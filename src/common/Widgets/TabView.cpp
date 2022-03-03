@@ -540,7 +540,7 @@ LRect &LTabView::GetTabClient()
 	if (d->Style == TvMac)
 	{
 		d->TabClient = CalcInset();
-		d->TabClient.Size(2, 2); // The inset border
+		d->TabClient.Inset(2, 2); // The inset border
 		d->TabClient.y1 = d->Tabs.y2 + 1; // The tab strip
 
 		LTabPage *p = Children.Length() ? GetCurrent() : NULL;
@@ -558,7 +558,7 @@ LRect &LTabView::GetTabClient()
 	{
 		d->TabClient = LView::GetClient();
 		d->TabClient.Offset(-d->TabClient.x1, -d->TabClient.y1);
-		d->TabClient.Size(2, 2);
+		d->TabClient.Inset(2, 2);
 		d->TabClient.y1 += TabY();
 	}
 	
@@ -832,9 +832,9 @@ void LTabView::OnPaint(LSurface *pDC)
 			LRect Bounds = d->Inset;
 			pDC->Colour(d->cBorder);
 			pDC->Box(&Bounds);
-			Bounds.Size(1, 1);
+			Bounds.Inset(1, 1);
 			pDC->Box(&Bounds);
-			Bounds.Size(1, 1);
+			Bounds.Inset(1, 1);
 			pDC->Colour(d->cFill);
 			pDC->Rectangle(&Bounds);
 
@@ -924,7 +924,7 @@ void LTabView::OnPaint(LSurface *pDC)
 					pDC->Colour(cInterTabBorder);
 					pDC->Line(b.x2, b.y2-1, b.x2, b.y1+1); // right edge between tabs
 				}
-				b.Size(1, 1);
+				b.Inset(1, 1);
 				
 				pDC->Colour(cTabFill);
 				pDC->Rectangle(&b);
@@ -1031,7 +1031,7 @@ void LTabView::OnPaint(LSurface *pDC)
 		{
 			LRect r = GetTabClient();
 
-			r.Size(-2, -2);
+			r.Inset(-2, -2);
 			LWideBorder(pDC, r, DefaultRaisedEdge);
 
 			pDC->Colour(L_MED);
@@ -1157,7 +1157,7 @@ void LTabView::OnPosChange()
 					if (tl)
 					{
 						LRect r = p->GetClient();
-						r.Size(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
+						r.Inset(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
 						tl->SetPos(r);
 					}
 				}
@@ -1321,7 +1321,7 @@ void LTabPage::PaintTab(LSurface *pDC, bool Selected)
 	LRect r = TabPos;
 	if (Selected)
 	{
-		r.Size(-2, -2);
+		r.Inset(-2, -2);
 	}
 	
 	pDC->Colour(L_LIGHT);
@@ -1373,7 +1373,7 @@ void LTabPage::PaintTab(LSurface *pDC, bool Selected)
 		if (TabCtrl->Focus() && Selected)
 		{
 			r.Set(Cx, y, Cx+ds.X(), y+ds.Y());
-			r.Size(-2, -1);
+			r.Inset(-2, -1);
 			r.y1++;
 			pDC->Colour(L_LOW);
 			pDC->Box(&r);

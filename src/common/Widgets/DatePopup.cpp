@@ -98,7 +98,7 @@ void LDatePopup::OnPaint(LSurface *pDC)
 	pDC->Colour(L_WORKSPACE);
 	pDC->Rectangle(&Date);
 
-	Date.Size(3, 3);
+	Date.Inset(3, 3);
 	r = Date;
 	Cx = r.X() / Mv.X();
 	Cy = r.Y() / Mv.Y();

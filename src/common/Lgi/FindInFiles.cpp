@@ -106,7 +106,7 @@ LHistoryPopup::LHistoryPopup(GHistory *h) : LPopup(h)
 	
 	LRect r(0, 0, 300, 200);
 	SetPos(r);
-	r.Size(1, 1);
+	r.Inset(1, 1);
 	AddView(Lst = new LList(100, r.x1, r.y1, r.X()-1, r.Y()-1));
 	Lst->Sunken(false);
 	Lst->ShowColumnHeader(false);

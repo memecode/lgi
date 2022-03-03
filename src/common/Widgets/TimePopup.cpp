@@ -255,7 +255,7 @@ void LTimePopup::OnPaint(LSurface *pDC)
 	r.Offset(-r.x1, -r.y1);
 	pDC->Colour(L_TEXT);
 	pDC->Box(&r);
-	r.Size(1, 1);
+	r.Inset(1, 1);
 
 	// Client
 	if (Times)

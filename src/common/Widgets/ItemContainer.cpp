@@ -69,7 +69,7 @@ public:
 };
 
 static LColour cActiveCol(0x86, 0xba, 0xe9);
-static void FillStops(LArray<GColourStop> &Stops, LRect &r, bool Active)
+static void FillStops(LArray<LColourStop> &Stops, LRect &r, bool Active)
 {
 	if (Active)
 	{
@@ -174,7 +174,7 @@ void LItemContainer::PaintColumnHeadings(LSurface *pDC)
 	{
 		// Draw end section where there are no columns
 		#ifdef MAC
-			LArray<GColourStop> Stops;
+			LArray<LColourStop> Stops;
 			LRect j(cr.x1, cr.y1, cr.x2-1, cr.y2-1);
 		
 			FillStops(Stops, j, false);
@@ -941,7 +941,7 @@ void LItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
 	{
 		#ifdef MAC
 
-			LArray<GColourStop> Stops;
+			LArray<LColourStop> Stops;
 			LRect j(r.x1, r.y1, r.x2-1, r.y2-1);
 			FillStops(Stops, j, d->cMark != 0);
 			LFillGradient(pDC, j, true, Stops);
@@ -953,7 +953,7 @@ void LItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
 			pDC->Line(r.x2, r.y1, r.x2, r.y2);
 
 			LRect n = r;
-			n.Size(2, 2);
+			n.Inset(2, 2);
 			OnPaint_Content(pDC, n, false);
 
 		#else
