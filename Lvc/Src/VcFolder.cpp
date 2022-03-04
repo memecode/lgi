@@ -1050,8 +1050,6 @@ VcLeaf *VcFolder::FindLeaf(const char *Path, bool OpenTree)
 
 bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 {
-printf("ParseLog %i\n", (int)s.Length());
-
 	LHashTbl<StrKey<char>, VcCommit*> Map;
 	for (auto pc: Log)
 		Map.Add(pc->GetRev(), pc);
