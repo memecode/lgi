@@ -806,7 +806,7 @@ public:
 	}
 };
 
-class GGlobalColourPrivate
+class LGlobalColourPrivate
 {
 public:
 	GlobalColourEntry c[256];
@@ -829,11 +829,11 @@ public:
 		return f;
 	}
 
-	GGlobalColourPrivate()
+	LGlobalColourPrivate()
 	{
 	}
 
-	~GGlobalColourPrivate()
+	~LGlobalColourPrivate()
 	{
 		Cache.DeleteObjects();
 	}
@@ -841,7 +841,7 @@ public:
 
 LGlobalColour::LGlobalColour()
 {
-	d = new GGlobalColourPrivate;
+	d = new LGlobalColourPrivate;
 }
 
 LGlobalColour::~LGlobalColour()

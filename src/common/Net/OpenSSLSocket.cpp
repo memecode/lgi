@@ -31,7 +31,11 @@
 LString LibName(const char *Fmt)
 {
 	LString s;
+	#if defined(HAIKU)
+	s = LString(Fmt).Strip(".");
+	#else
 	s.Printf(Fmt, OPENSSL_SHLIB_VERSION);
+	#endif
 	#ifdef _WIN64
 		s += "-x64";
 	#endif
