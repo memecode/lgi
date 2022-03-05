@@ -49,13 +49,23 @@ protected:
 	#endif
 
 protected:
+	/// Auto deletes the thread after ::Main has finished.
 	bool DeleteOnExit;
+	/// Aka from LView::AddDispatch().
+	int ViewHandle;
 
 public:
 	static const OsThread InvalidHandle;
 	static const OsThreadId InvalidId;
 
-	LThread(const char *Name);
+	LThread(
+		/// Name for the thread.
+		const char *Name,
+		/// [Optional] Handle from LView::AddDispatch()
+		/// This enables the OnComplete event to be called
+		/// from the GUI thread after the thread exits.
+		int viewHandle = -1
+	);
 	virtual ~LThread();
 
 	// Properties
@@ -63,6 +73,7 @@ public:
 	const char *GetName() { return Name; }
 	OsThreadId GetId() { return ThreadId; }
 	ThreadState GetState() { return State; } // Volatile at best... only use for 'debug'
+	bool GetDeleteOnExit() { return DeleteOnExit; }
 	virtual int ExitCode();
 	virtual bool IsExited();
 
@@ -77,6 +88,12 @@ public:
 	// Events
 	virtual void OnBeforeMain() {}
 	virtual void OnAfterMain() {}
+
+	/// This event runs after the thread has finished but 
+	/// is called from the main GUI thread. It requires a valid
+	/// viewHandle to be passed to the constructor. Which can
+	/// be aquired by calling LView::AddDispatch().
+	virtual void OnComplete() {}
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////

@@ -171,6 +171,7 @@ enum LgiMessages
 	M_RESIZE_TO_CONTENT, // LItemContainer
 	M_SCROLL_TO, // LTreeItem->LTree
 	M_JOBS_LOADED, // LHtml
+	M_THREAD_COMPLETED, // A=(LThread*)Thread
 
 	#ifdef WINDOWS
 	M_USER = WM_APP + 200

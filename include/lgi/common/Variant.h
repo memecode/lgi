@@ -352,9 +352,9 @@ public:
 	/// Sets the value to a copy of	block of binary data
 	bool SetBinary(ssize_t Len, void *Data, bool Own = false);
 	/// Sets the value to a copy of the list
-	bool SetList(List<LVariant> *Lst = 0);
+	bool SetList(List<LVariant> *Lst = NULL);
 	/// Sets the value to a hashtable
-	bool SetHashTable(LHash *Table = 0, bool Copy = true);
+	bool SetHashTable(LHash *Table = NULL, bool Copy = true);
 	/// Set the value to a surface
 	bool SetSurface(class LSurface *Ptr, bool Own);
 	/// Set the value to a stream

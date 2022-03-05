@@ -3,7 +3,7 @@
 #include <process.h>
 
 #include "lgi/common/Lgi.h"
-#include "lgi/common/Thread.h"
+#include "lgi/common/EventTargetThread.h"
 
 const DWORD MS_VC_EXCEPTION = 0x406D1388;
 
@@ -75,10 +75,20 @@ uint WINAPI ThreadEntryPoint(void *i)
 
 		// Shutdown...
 		Thread->State = LThread::THREAD_EXITED;
-		if (Thread->DeleteOnExit)
+		bool DelayDelete = false;
+		if (Thread->ViewHandle >= 0)
+		{
+			// If DeleteOnExit is set AND ViewHandle then the LView::OnEvent handle will
+			// process the delete... don't do it here.
+			DelayDelete = PostThreadEvent(Thread->ViewHandle, M_THREAD_COMPLETED, (LMessage::Param)Thread);
+			// However if PostThreadEvent fails... do honour DeleteOnExit.
+		}
+		
+		if (!DelayDelete && Thread->DeleteOnExit)
 		{
 			DeleteObj(Thread);
 		}
+
 		_endthreadex(Status);
 	}
 #endif
@@ -89,13 +99,14 @@ uint WINAPI ThreadEntryPoint(void *i)
 const OsThread LThread::InvalidHandle = 0;
 const OsThreadId LThread::InvalidId = 0;
 
-LThread::LThread(const char *name)
+LThread::LThread(const char *name, int viewHandle)
 {
 	State = THREAD_INIT;
 	hThread = InvalidHandle;
 	ThreadId = InvalidId;
 	ReturnValue = 0;
 	DeleteOnExit = false;
+	ViewHandle = viewHandle;
 	Priority = ThreadPriorityNormal;
 	Name = name;
 	Create(this, hThread, ThreadId);
