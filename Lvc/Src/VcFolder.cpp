@@ -1692,10 +1692,11 @@ void VcFolder::Diff(VcFile *file)
 		{
 			LString a;
 
-			if (file->GetRevision())
-				LAssert(!"impl the revision cmd line arg.");
-
-			a.Printf("diff \"%s\"", Fn);
+			auto rev = file->GetRevision();
+			if (rev)
+				a.Printf("diff %s \"%s\"", rev, Fn);
+			else
+				a.Printf("diff \"%s\"", Fn);
 			StartCmd(a, &VcFolder::ParseDiff);
 			break;
 		}
