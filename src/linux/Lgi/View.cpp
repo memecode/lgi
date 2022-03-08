@@ -787,6 +787,18 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 		{
 			return OnCommand(Msg->A(), 0, (OsView) Msg->B());
 		}
+		case M_THREAD_COMPLETED:
+		{
+			auto Th = (LThread*)Msg->A();
+			if (!Th)
+				break;
+
+			Th->OnComplete();
+			if (Th->GetDeleteOnExit())
+				delete Th;
+
+			return true;
+		}
 	}
 
 	return 0;
