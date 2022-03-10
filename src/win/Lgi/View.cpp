@@ -2111,7 +2111,7 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 				if (Th->GetDeleteOnExit())
 					delete Th;
 
-				return false;
+				return true;
 			}
 			default:
 			{

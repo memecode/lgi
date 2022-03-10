@@ -5,6 +5,7 @@
 #include "lgi/common/XmlTreeUi.h"
 #include "lgi/common/Tree.h"
 #include "lgi/common/FileSelect.h"
+#include "lgi/common/StructuredLog.h"
 
 #include "Lvc.h"
 #include "../Resources/resdefs.h"
@@ -138,17 +139,18 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 		}
 
 		out += LString(buf, rd);
-		if (Debug)
-		{
-			LgiTrace("WaitPrompt.%s out='%s'\n", Debug, out.Get());
-		}
 
 		Count += rd;
 		Total += rd;
 		DeEscape(out);
 		auto lines = out.SplitDelimit("\n");
 		auto last = lines.Last();
-		if (MatchStr(Prompt, last))
+		auto result = MatchStr(Prompt, last);
+		if (Debug)
+		{
+			LgiTrace("WaitPrompt.%s match='%s' with '%s' = %i\n", Debug, Prompt.Get(), last.Get(), result);
+		}
+		if (result)
 		{
 			if (Data)
 			{
@@ -295,9 +297,10 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 				break;
 
 			LAssert(p->Args.Find("\n") < 0);
-			bool Debug = false; // p->Args.Find("lib_system_control_v2/include/CTrack.h") >= 0;
+			bool Debug = p->Args.Find("rev-list --all") >= 0;
 			if (Debug)
 			{
+				int asd=0;
 			}
 
 			LString cmd;
@@ -1819,6 +1822,10 @@ int LgiMain(OsAppArguments &AppArgs)
 	LApp a(AppArgs, AppName);
 	if (a.IsOk())
 	{
+		LStructuredLog Log("my-test-log.struct");
+		LString asd = "asd";
+		Log.Log("asd:", asd);
+
 		a.AppWnd = new App;
 		a.Run();
 	}

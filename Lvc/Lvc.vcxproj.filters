@@ -11,6 +11,9 @@
     <Filter Include="Resources">
       <UniqueIdentifier>{ceabde46-f0f5-4728-929b-43ebf21b9fa0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\StructuredLog">
+      <UniqueIdentifier>{699395fd-5c52-485b-aee9-12ca42fecba2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\common\Lgi\LgiMain.cpp">
@@ -46,6 +49,9 @@
     <ClCompile Include="..\src\common\Text\XmlTreeUi.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\common\Lgi\StructuredLog.cpp">
+      <Filter>Source Files\StructuredLog</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\src\win\General\Lgi.manifest" />
@@ -62,6 +68,9 @@
     </ClInclude>
     <ClInclude Include="Src\VcFile.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\StructuredLog.h">
+      <Filter>Source Files\StructuredLog</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

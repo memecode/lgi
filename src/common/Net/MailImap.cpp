@@ -2303,14 +2303,14 @@ int MailIMap::Fetch(bool ByUid,
 				char *Name = b + Ranges[1].Start;
 				Name[Ranges[1].Len()] = 0;
 
-				if (_stricmp(Name, "FETCH"))
+				if (Stricmp(Name, "FETCH"))
 				{
 					// Not the response we're looking for.
 					#if DEBUG_FETCH
 					LgiTrace("%s:%i - Fetch: Wrong response: %s\n", _FL, Name);
 					#endif
 				}
-				else
+				else if (Stricmp(Param, "BYE"))
 				{
 					// Process ranges into a hash table
 					StrMap Parts;
