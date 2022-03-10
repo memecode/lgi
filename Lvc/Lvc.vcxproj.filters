@@ -49,9 +49,6 @@
     <ClCompile Include="..\src\common\Text\XmlTreeUi.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Lgi\StructuredLog.cpp">
-      <Filter>Source Files\StructuredLog</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\src\win\General\Lgi.manifest" />
@@ -70,6 +67,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\StructuredLog.h">
+      <Filter>Source Files\StructuredLog</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\StructuredIo.h">
       <Filter>Source Files\StructuredLog</Filter>
     </ClInclude>
   </ItemGroup>

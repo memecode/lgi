@@ -5,7 +5,6 @@
 #include "lgi/common/XmlTreeUi.h"
 #include "lgi/common/Tree.h"
 #include "lgi/common/FileSelect.h"
-#include "lgi/common/StructuredLog.h"
 
 #include "Lvc.h"
 #include "../Resources/resdefs.h"
@@ -1822,10 +1821,6 @@ int LgiMain(OsAppArguments &AppArgs)
 	LApp a(AppArgs, AppName);
 	if (a.IsOk())
 	{
-		LStructuredLog Log("my-test-log.struct");
-		LString asd = "asd";
-		Log.Log("asd:", asd);
-
 		a.AppWnd = new App;
 		a.Run();
 	}

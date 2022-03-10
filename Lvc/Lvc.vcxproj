@@ -174,7 +174,6 @@
   <ItemGroup>
     <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp" />
     <ClCompile Include="..\src\common\Lgi\LgiMain.cpp" />
-    <ClCompile Include="..\src\common\Lgi\StructuredLog.cpp" />
     <ClCompile Include="..\src\common\Text\DeEscape.cpp" />
     <ClCompile Include="..\src\common\Text\XmlTreeUi.cpp" />
     <ClCompile Include="..\src\common\Widgets\ControlTree.cpp" />
@@ -195,6 +194,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\lgi\common\StructuredIo.h" />
     <ClInclude Include="..\include\lgi\common\StructuredLog.h" />
     <ClInclude Include="Src\Lvc.h" />
     <ClInclude Include="Src\VcCommit.h" />
