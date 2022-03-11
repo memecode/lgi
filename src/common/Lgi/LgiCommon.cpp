@@ -2112,6 +2112,7 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 		"../../Resources",
 		#if defined(LINUX)
 		// AppDir support:
+		"../..",
 		"../../usr/share/applications",
 		#elif defined(WIN32)
 		"../Debug",
@@ -2139,8 +2140,11 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 		size_t PathLen = strlen(Path);
 		LAssert(PathLen < sizeof(Path));
 
-		// printf("\t%s\n", Path);
-		if (LFileExists(Path))
+		bool Exists = LFileExists(Path);
+		#if DEBUG_FIND_FILE
+		printf("\t%s = %i\n", Path, Exists);
+		#endif
+		if (Exists)
 		{
 			if (GStr)
 				*GStr = Path;

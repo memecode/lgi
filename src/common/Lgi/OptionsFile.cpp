@@ -123,41 +123,64 @@ bool LOptionsFile::SerializeFile(bool Write)
 	if (File && Lock(_FL))
 	{
 		LFile f;
-		if
-		(
-			(
-				Write
-				||
-				LFileExists(File)
-			)
-			&&
-			f.Open(File, Write ? O_WRITE : O_READ)
-		)
+
+		#if DEBUG_OPTS_FILE
+		LgiTrace("%s:%i - LOptionsFile::Serialize(%i) File='%s'\n", 
+			_FL, Write, File.Get());
+		#endif
+
+		LXmlTree Tree(GXT_PRETTY_WHITESPACE);
+		if (Write)
 		{
-			#if DEBUG_OPTS_FILE
-			LgiTrace("%s:%i - LOptionsFile::Serialize(%i) File='%s'\n", 
-				_FL, Write, File.Get());
-			#endif
-			
-			LXmlTree Tree(GXT_PRETTY_WHITESPACE);
-			if (Write)
+			if (f.Open(File, O_WRITE))
 			{
 				f.SetSize(0);
 				Status = Tree.Write(this, &f);
 			}
 			else
 			{
-				Empty(true);
-				if ((Status = Tree.Read(this, &f, 0)))
-				{
-					_Defaults();
-				}
+				LgiTrace("%s:%i - Failed to open '%s' for writing\n", _FL, File.Get());
+				LAssert(!"Failed to open file.");
 			}
 		}
-		else if (Write)
+		else // Read
 		{
-			LgiTrace("%s:%i - Failed to open '%s'\n", _FL, File.Get());
-			LAssert(!"Failed to open file.");
+			if (!LFileExists(File))
+			{
+				// Potentially we're installed to a read-only location...
+				// Check that here and relocate options file path to a RW location.
+				if (!f.Open(File, O_WRITE))
+				{
+					if (Mode == PortableMode)
+					{
+						// Change to desktop mode...
+						// FYI: This happens when running in an AppImage.
+						SetMode(DesktopMode);
+					}
+					else
+					{
+						printf("%s:%i - Write check for '%s' failed. Mode=%i\n", _FL, File.Get(), Mode);
+						return false;
+					}
+				}
+			}
+			
+			if (LFileExists(File))
+			{
+				if (f.Open(File, O_READ))
+				{
+					Empty(true);
+					if ((Status = Tree.Read(this, &f, 0)))
+					{
+						_Defaults();
+					}
+				}
+				else
+				{
+					LgiTrace("%s:%i - Failed to open '%s' for reading\n", _FL, File.Get());
+					LAssert(!"Failed to open file.");
+				}
+			}
 		}
 
 		Unlock();

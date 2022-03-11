@@ -1150,7 +1150,7 @@ int LDirectory::First(const char *Name, const char *Pattern)
 	if (!Name)
 		return 0;
 
-	strcpy(d->BasePath, Name);
+	strcpy_s(d->BasePath, sizeof(d->BasePath), Name);
 	if (!Pattern || stricmp(Pattern, LGI_ALL_FILES) == 0)
 	{
 		struct stat S;
@@ -1536,11 +1536,11 @@ int64 LFile::SetPos(int64 Pos)
 	if (p < 0)
 	{
 		int e = errno;
-		printf("%s:%i - lseek64(%Lx) failed (error %i: %s).\n",
+		printf("%s:%i - lseek64(" LPrintfHex64 ") failed (error %i: %s).\n",
 			__FILE__, __LINE__,
 			Pos, e, GetErrorName(e));
-		
 	}
+	return p;
 	#else
 	return lseek(d->hFile, Pos, SEEK_SET);
 	#endif

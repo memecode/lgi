@@ -43,14 +43,14 @@ protected:
 	virtual void _Defaults() {}
 
 public:
-	LOptionsFile(const char *FileName = 0);
-	LOptionsFile(PortableType mode, const char *BaseName = 0);
+	LOptionsFile(const char *FileName = NULL);
+	LOptionsFile(PortableType mode, const char *BaseName = NULL);
 	~LOptionsFile();
 
 	void SetFile(const char *f);
 	PortableType GuessMode();
 	PortableType GetMode() { return Mode; }
-	bool SetMode(PortableType mode, const char *BaseName = 0);
+	bool SetMode(PortableType mode, const char *BaseName = NULL);
 
 	bool IsValid();
 	char *GetFile() { return File; }

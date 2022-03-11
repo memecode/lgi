@@ -57,7 +57,7 @@
 /////////////////////////////////////////////////////////////////////
 // Defines
 #define FileDev							(LFileSystem::GetInstance())
-#define MAX_PATH						260
+#define MAX_PATH						512
 
 // File system types (used by LDirectory and LVolume)
 enum LVolumeTypes
