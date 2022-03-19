@@ -4,6 +4,7 @@
 #include "lgi/common/Mem.h"
 #include "lgi/common/Containers.h"
 #include "lgi/common/LgiString.h"
+#include "lgi/common/Token.h"
 
 /////////////////////////////////////////////////////////////////////////
 char *LSkipDelim(char *p, const char *Delimiter, bool NotDelim)

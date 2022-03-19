@@ -775,12 +775,12 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			bool HasExt = Ext && _stricmp(Ext, "exe") == 0;
 			
 			#if defined(WIN32) && !defined(PLATFORM_MINGW)
-			GToken p;
+			LString::Array p;
 			char *sPath = NULL;
 			size_t sSize;
 			errno_t err = _dupenv_s(&sPath, &sSize, "PATH");
 			if (err == 0)
-				p.Parse(sPath, LGI_PATH_SEPARATOR);
+				p = LString(sPath).SplitDelimit(LGI_PATH_SEPARATOR);
 			free(sPath);
 			#else
 			GToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
