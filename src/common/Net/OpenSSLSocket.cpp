@@ -30,7 +30,11 @@
 LString LibName(const char *Fmt)
 {
 	LString s;
-	s.Printf(Fmt, OPENSSL_SHLIB_VERSION);
+	#ifdef OPENSSL_SHLIB_VERSION
+		s.Printf(Fmt, OPENSSL_SHLIB_VERSION);
+	#else
+		s.Printf(Fmt, "1");
+	#endif
 	#ifdef _WIN64
 		s += "-x64";
 	#endif

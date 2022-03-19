@@ -321,7 +321,7 @@ int LGetOs
 		utsname Buf;
 		if (!uname(&Buf))
 		{
-			GToken t(Buf.release, ".");
+			auto t = LString(Buf.release).SplitDelimit(".");
 			for (int i=0; i<t.Length(); i++)
 			{
 				Ver->Add(atoi(t[i]));
@@ -708,7 +708,7 @@ LAutoString LMakeRelativePath(const char *Base, const char *Path)
 			auto b = LString(Base + 1).SplitDelimit(":\\/");
 			auto p = LString(Path + 1).SplitDelimit(":\\/");
 			int Same = 0;
-			while (b[Same] && p[Same] && stricmp(b[Same], p[Same]) == 0)
+			while (Same < b.Length() && Same < p.Length() && stricmp(b[Same], p[Same]) == 0)
 			{
 				Same++;
 			}
@@ -1976,10 +1976,10 @@ LString LGetExeFile()
 						char *PsOutput = Ps.NewStr();
 						if (PsOutput)
 						{
-							GToken n(PsOutput, "\r\n");
+							auto n = LString(PsOutput).SplitDelimit("\r\n");
 							for (int i=0; !Status && i<n.Length(); i++)
 							{
-								GToken t(n[i], " \t\r\n");
+								auto t = n[i].SplitDelimit(" \t\r\n");
 								if (t.Length() > 7)
 								{
 									int LinePid = 0;
