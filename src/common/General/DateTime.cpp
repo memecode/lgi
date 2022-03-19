@@ -80,12 +80,12 @@ uint16 LDateTime::GetDefaultFormat()
 		{
 			char Sep[] = { DefaultSeparator, '/', '\\', '-', '.', 0 };
 			LString Str = s;
-			GToken t(Str, Sep);
+			auto t = Str.SplitDelimit(Sep);
 			for (int i=0; i<t.Length(); i++)
 			{
-				if (!stricmp(t[i], "mm"))
+				if (t[i].Equals("mm"))
 					DefaultFormat |= GDTF_MONTH_LEADINGZ;
-				else if (!stricmp(t[i], "dd"))
+				else if (t[i].Equals("dd"))
 					DefaultFormat |= GDTF_DAY_LEADINGZ;
 			}
 		}
