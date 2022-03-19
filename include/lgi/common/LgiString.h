@@ -316,4 +316,60 @@ LgiFunc bool ValidStrW(const char16 *s);
 /// Does a widecard match between wide strings.
 LgiFunc bool MatchStrW(const char16 *Template, const char16 *Data);
 
+/// \returns true if the string represents a int or float number
+template<typename T>
+bool LIsNumber(T *p)
+{
+	if (!p)
+		return false;
+
+	if (*p == '0' && ToLower(p[1]) == 'x')
+	{
+		p += 2;
+		while (*p)
+		{
+			if
+			(
+				!
+				(
+					(*p >= '0' && *p <= '9')
+					||
+					(*p >= 'a' && *p <= 'f')
+					||
+					(*p >= 'A' && *p <= 'F')
+				)
+			)
+				return false;
+			p++;
+		}
+		
+		return true;
+	}
+	
+	// Integer or float...?
+	if (*p == '-')
+		p++;
+
+	while (*p)
+	{
+		if
+		(
+			!
+			(
+				(*p >= '0' && *p <= '9')
+				||
+				(*p == '.')
+				||
+				(ToLower(*p) == 'e')
+			)
+		)
+			return false;
+		p++;
+	}
+
+	return true;
+}
+
+
+
 #endif

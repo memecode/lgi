@@ -14,7 +14,6 @@
 #include <ctype.h>
 
 #include "lgi/common/Lgi.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/List.h"
 #include "lgi/common/TableLayout.h"
 #if defined(LINUX) && !defined(LGI_SDL)
@@ -34,10 +33,10 @@
 
 class TagHash : public LHashTbl<StrKey<char>,bool>, public ResReadCtx
 {
-	GToken Toks;
+	LString::Array Toks;
 
 public:
-	TagHash(const char *TagList) : Toks(TagList)
+	TagHash(const char *TagList) : Toks(LString(TagList).SplitDelimit())
 	{
 		for (int i=0; i<Toks.Length(); i++)
 			Add(Toks[i], true);
@@ -48,7 +47,7 @@ public:
 		bool Result = true;
 		if (Tags)
 		{
-			GToken t(Tags);
+			auto t = LString(Tags).SplitDelimit();
 			for (int i=0; i<t.Length(); i++)
 			{
 				char *Tag = t[i];
@@ -870,10 +869,10 @@ void LResources::Res_SetPos(ResObject *Obj, char *s)
 {
 	if (Obj && s)
 	{
-		GToken T(s, ",");
+		auto T = LString(s).SplitDelimit(",");
 		if (T.Length() == 4)
 		{
-			Res_SetPos(Obj, atoi(T[0]), atoi(T[1]), atoi(T[2]), atoi(T[3]));
+			Res_SetPos(Obj, (int)T[0].Int(), (int)T[1].Int(), (int)T[2].Int(), (int)T[3].Int());
 		}
 	}
 }
@@ -1156,7 +1155,7 @@ bool LDialogRes::Read(LXmlTag *t, ResFileFormat Format)
 		}
 		if ((n = Dialog->GetAttr("pos")))
 		{
-			GToken T(n, ",");
+			auto T = LString(n).SplitDelimit(",");
 			if (T.Length() == 4)
 			{
 				Pos.x1 = atoi(T[0]);

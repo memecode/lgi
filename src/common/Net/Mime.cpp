@@ -3,7 +3,6 @@
 #include "lgi/common/LgiNetInc.h"
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Mime.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Base64.h"
 
 #define DEBUG_MIME						0
@@ -1442,7 +1441,7 @@ ssize_t LMime::LMimeText::LMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 		}
 
 		// Write the headers
-		GToken h(Mime->Headers, MimeEol);
+		auto h = LString(Mime->Headers).SplitDelimit(MimeEol);
 		for (unsigned i=0; i<h.Length(); i++)
 		{
 			Dest->Write(h[i], CastInt(strlen(h[i])));

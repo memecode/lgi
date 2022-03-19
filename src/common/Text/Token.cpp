@@ -3,7 +3,6 @@
 #include <string.h>
 #include "lgi/common/Mem.h"
 #include "lgi/common/Containers.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/LgiString.h"
 
 /////////////////////////////////////////////////////////////////////////

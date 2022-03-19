@@ -1,6 +1,5 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DocView.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/HtmlCommon.h"
 #include "lgi/common/HtmlParser.h"
 #include "lgi/common/Unicode.h"

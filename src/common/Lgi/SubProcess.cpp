@@ -30,7 +30,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/SubProcess.h"
-#include "lgi/common/Token.h"
 
 #define DEBUG_SUBPROCESS		0
 #define DEBUG_ARGS				0
@@ -405,7 +404,7 @@ bool LSubProcess::SetEnvironment(const char *Var, const char *Value)
 	if (IsPath)
 	{
 		// Remove missing paths from the list
-		GToken t(v->Val, LGI_PATH_SEPARATOR);
+		auto t = LString(v->Val).SplitDelimit(LGI_PATH_SEPARATOR);
 		LStringPipe p;
 		for (unsigned i=0; i<t.Length(); i++)
 		{

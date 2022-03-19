@@ -167,6 +167,7 @@
 		34F6151F27E55C5D00FE5B0C /* Thread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6151D27E55C5D00FE5B0C /* Thread.h */; };
 		34F6152027E55C5D00FE5B0C /* ThreadEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6151E27E55C5D00FE5B0C /* ThreadEvent.h */; };
 		34F6153227E55CB100FE5B0C /* EventTargetThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6153127E55CB100FE5B0C /* EventTargetThread.h */; };
+		34F6153E27E5628600FE5B0C /* Token.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6153D27E5628600FE5B0C /* Token.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -333,6 +334,7 @@
 		34F6151D27E55C5D00FE5B0C /* Thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Thread.h; path = ../../../../../lgi/trunk/include/lgi/common/Thread.h; sourceTree = "<group>"; };
 		34F6151E27E55C5D00FE5B0C /* ThreadEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadEvent.h; path = ../../../../../lgi/trunk/include/lgi/common/ThreadEvent.h; sourceTree = "<group>"; };
 		34F6153127E55CB100FE5B0C /* EventTargetThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EventTargetThread.h; path = ../../../../../lgi/trunk/include/lgi/common/EventTargetThread.h; sourceTree = "<group>"; };
+		34F6153D27E5628600FE5B0C /* Token.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Token.h; path = ../../../../../lgi/trunk/include/lgi/common/Token.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -474,6 +476,7 @@
 		3477C29A1CBF0A700028B84B /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				34F6153D27E5628600FE5B0C /* Token.h */,
 				34F6153127E55CB100FE5B0C /* EventTargetThread.h */,
 				34F6151D27E55C5D00FE5B0C /* Thread.h */,
 				34F6151E27E55C5D00FE5B0C /* ThreadEvent.h */,
@@ -716,6 +719,7 @@
 				3477C2AC1CBF72170028B84B /* ViewPriv.h in Headers */,
 				3409C0CA27580ED60050302A /* ListItemRadioBtn.h in Headers */,
 				3477C35D1CC2253E0028B84B /* LgiInterfaces.h in Headers */,
+				34F6153E27E5628600FE5B0C /* Token.h in Headers */,
 				3477C2A51CBF0A920028B84B /* LgiOsClasses.h in Headers */,
 				3491A28523678DB800604C29 /* DropFiles.h in Headers */,
 				3415169326EC32FF007EE35F /* TextView3.h in Headers */,

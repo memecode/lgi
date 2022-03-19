@@ -21,7 +21,6 @@
 
 #include "lgi/common/File.h"
 #include "lgi/common/Containers.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/LgiCommon.h"
 #include "lgi/common/LgiString.h"
@@ -1096,7 +1095,7 @@ bool LFileSystem::CreateFolder(const char *PathName, bool CreateParentFolders, L
 			}
 			while (!LDirExists(Base));
 			
-			GToken Parts(PathName + strlen(Base), DIR_STR);
+			auto Parts = LString(PathName + strlen(Base)).SplitDelimit(DIR_STR);
 			for (int i=0; i<Parts.Length(); i++)
 			{
 				LMakePath(Base, sizeof(Base), Base, Parts[i]);

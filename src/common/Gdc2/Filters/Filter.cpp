@@ -28,7 +28,6 @@
 #include "lgi/common/LgiString.h"
 #include "lgi/common/Variant.h"
 #include "lgi/common/ClipBoard.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Palette.h"
 
 int FindHeader(int Offset, const char *Str, LStream *f)
@@ -1609,7 +1608,7 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
 		LAssert(c != NULL);
 		if (c)
 		{
-			GToken t(c, ",");
+			auto t = LString(c).SplitDelimit(",");
 			for (int i=0; i<t.Length(); i++)
 				NeedsCapability(t[i]);
 		}

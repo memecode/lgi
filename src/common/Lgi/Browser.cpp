@@ -5,7 +5,6 @@
 #include "lgi/common/Http.h"
 #include "lgi/common/Edit.h"
 #include "lgi/common/Button.h"
-#include "lgi/common/Token.h"
 
 #define M_LOADED		(M_USER+3000)
 #define M_BUSY			(M_USER+3001)
@@ -191,7 +190,7 @@ public:
 			
 			// Trim off filename...
 			char *Last = strrchr(Cur, Sep);
-			GToken t(Uri, "\\/");
+			auto t = LString(Uri).SplitDelimit("\\/");
 			if (*Uri != '#' && Last)
 				sprintf_s(Buf, sizeof(Buf), "%.*s", (int) (Last - Cur), Cur);
 			else
@@ -213,12 +212,12 @@ public:
 				else if (t[i][0] == '#')
 				{
 					size_t len = strlen(Buf);
-					sprintf_s(Buf+len, sizeof(Buf)-len, "%s", t[i]);
+					sprintf_s(Buf+len, sizeof(Buf)-len, "%s", t[i].Get());
 				}
 				else
 				{
 					size_t len = strlen(Buf);
-					sprintf_s(Buf+len, sizeof(Buf)-len, "%c%s", Sep, t[i]);
+					sprintf_s(Buf+len, sizeof(Buf)-len, "%c%s", Sep, t[i].Get());
 				}
 			}
 

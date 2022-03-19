@@ -3,7 +3,6 @@
 #include "lgi/common/Scripting.h"
 #include "lgi/common/LexCpp.h"
 #include "lgi/common/LgiString.h"
-#include "lgi/common/Token.h"
 #include "ScriptingPriv.h"
 
 // #define DEBUG_SCRIPT_FILE	"Mail Filters Menu.script"

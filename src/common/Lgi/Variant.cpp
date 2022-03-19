@@ -3,7 +3,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Variant.h"
-#include "lgi/common/Token.h"
 
 const char *LVariant::TypeToString(LVariantType t)
 {

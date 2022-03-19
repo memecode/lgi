@@ -4,7 +4,6 @@
 #include "lgi/common/HttpTools.h"
 #include "lgi/common/Net.h"
 #include "lgi/common/NetTools.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Http.h"
 
 #ifdef _DEBUG
@@ -396,7 +395,7 @@ char *FormPost::EncodeFields(LStream *Debug, char *RealFields, bool EncodePlus)
 
 	if (RealFields)
 	{
-		GToken t(RealFields, "\n");
+		auto t = LString(RealFields).SplitDelimit("\n");
 		for (unsigned i=0; i<t.Length(); i++)
 		{
 			char *v = strchr(t[i], '=');

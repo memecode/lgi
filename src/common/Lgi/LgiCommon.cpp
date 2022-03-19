@@ -23,7 +23,6 @@
 #endif
 
 #include "lgi/common/Lgi.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Capabilities.h"
 
 #if defined(LINUX) && !defined(LGI_SDL)
@@ -706,8 +705,8 @@ LAutoString LMakeRelativePath(const char *Base, const char *Path)
 		#endif
 		if (SameNs)
 		{
-			GToken b(Base + 1, ":\\/");
-			GToken p(Path + 1, ":\\/");
+			auto b = LString(Base + 1).SplitDelimit(":\\/");
+			auto p = LString(Path + 1).SplitDelimit(":\\/");
 			int Same = 0;
 			while (b[Same] && p[Same] && stricmp(b[Same], p[Same]) == 0)
 			{
@@ -806,7 +805,7 @@ bool LMakePath(char *Str, int StrSize, const char *Path, const char *File)
 			*End = 0;
 		}
 
-		GToken T(File, Dir);
+		auto T = LString(File).SplitDelimit(Dir);
 		for (int i=0; i<T.Length(); i++)
 		{
 			if (!stricmp(T[i], "."))
@@ -2305,7 +2304,7 @@ bool LIsVolumeRoot(const char *Path)
 			return true;
 		}
 	#else
-		GToken t(Path, DIR_STR);
+		auto t = LString(Path).SplitDelimit(DIR_STR);
 		if (t.Length() == 0)
 			return true;
 		#ifdef MAC

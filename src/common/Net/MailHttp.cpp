@@ -3,7 +3,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Mail.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/DocView.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -337,12 +336,12 @@ bool MailPhp::Open(LSocketI *S, const char *RemoteHost, int Port, const char *Us
 			bool PopOverHttp = false;
 			bool GotToken = false;
 
-			GToken Lines(m, "\r\n");
+			auto Lines = LString(m).SplitDelimit("\r\n");
 			if (_strnicmp(m, "error:", 6) == 0)
 			{
 				for (unsigned Line=0; Line<Lines.Length(); Line++)
 				{
-					Log(Lines[Line] + 7, LSocketI::SocketMsgError);
+					Log(Lines[Line].Get() + 7, LSocketI::SocketMsgError);
 				}
 			}
 			else if (Lines.Length() > 1)
@@ -361,7 +360,7 @@ bool MailPhp::Open(LSocketI *S, const char *RemoteHost, int Port, const char *Us
 						{
 							if (PopOverHttp)
 							{
-								GToken p(Val, " ");
+								auto p = LString(Val).SplitDelimit(" ");
 								if (p.Length() > 1)
 								{
 									Msg *m = new Msg;

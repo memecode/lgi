@@ -258,7 +258,7 @@ public:
 	self.contentView = NULL;
 	
 	[super dealloc];
-	printf("LNsWindow.dealloc.\n");
+	// printf("LNsWindow.dealloc.\n");
 }
 
 - (LWindow*)getWindow

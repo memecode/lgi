@@ -13,7 +13,6 @@
 #include "lgi/common/TextLabel.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/Net.h"
-#include "lgi/common/Token.h"
 
 #include <sys/types.h>
 #include <pwd.h>
@@ -184,7 +183,7 @@ bool _GetIniField(char *Grp, char *Field, char *In, char *Out, int OutSize)
 	if (ValidStr(In))
 	{
 		bool InGroup = false;
-		GToken t(In, "\r\n");
+		auto t = LString(In).SplitDelimit("\r\n");
 		
 		for (int i=0; i<t.Length(); i++)
 		{

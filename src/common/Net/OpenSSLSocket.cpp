@@ -22,7 +22,6 @@
 #ifdef WIN32
 	#include <mmsystem.h>
 #endif
-#include "lgi/common/Token.h"
 #include "lgi/common/Variant.h"
 #include "lgi/common/Net.h"
 
@@ -221,7 +220,7 @@ typedef LArray<int> SslVer;
 
 SslVer ParseSslVersion(const char *v)
 {
-	GToken t(v, ".");
+	auto t = LString(v).SplitDelimit(".");
 	SslVer out;
 	for (unsigned i=0; i<t.Length(); i++)
 	{
@@ -306,7 +305,7 @@ public:
 		LStringPipe Err;
 		LArray<int> Ver;
 		LArray<int> MinimumVer = ParseSslVersion(MinimumVersion);
-		GToken t;
+		LString::Array t;
 		int Len = 0;
 		const char *v = NULL;
 
@@ -337,7 +336,7 @@ public:
 			goto OnError;
 		}
 
-		t.Parse(v, " ");
+		t = LString(v).SplitDelimit(" ");
 		if (t.Length() < 2)
 		{
 			Err.Print("%s:%i - SSLeay_version: no version\n", _FL);
@@ -364,7 +363,7 @@ public:
 				#endif
 				,
 				_FL,
-				t[1],
+				t[1].Get(),
 				MinimumVersion
 				#if WINDOWS
 				,FileName

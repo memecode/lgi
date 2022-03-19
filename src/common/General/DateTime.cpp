@@ -25,7 +25,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DateTime.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/DocView.h"
 
 #if !defined(WINDOWS)
@@ -1053,7 +1052,7 @@ bool LDateTime::SetDate(const char *Str)
 
 	if (Str)
 	{
-		GToken T(Str, "/-.,_\\");
+		auto T = LString(Str).SplitDelimit("/-.,_\\");
 		if (T.Length() == 3)
 		{
 			int i[3] = { DateComponent(T[0]), DateComponent(T[1]), DateComponent(T[2]) };
@@ -1130,7 +1129,7 @@ bool LDateTime::SetDate(const char *Str)
 		else
 		{
 			// Fall back to fuzzy matching
-			GToken T(Str, " ,");
+			auto T = LString(Str).SplitDelimit(" ,");
 			MonthHash Lut;
 			int FMonth = 0;
 			int FDay = 0;
@@ -1187,12 +1186,12 @@ bool LDateTime::SetTime(const char *Str)
 	if (!Str)
 		return false;
 
-	GToken T(Str, ":.");
+	auto T = LString(Str).SplitDelimit(":.");
 	if (T.Length() < 2 || T.Length() > 4)
 		return false;
 
-	_Hours = (int)Atoi(T[0]);
-	_Minutes = (int)Atoi(T[1]);
+	_Hours = (int)T[0].Int();
+	_Minutes = (int)T[1].Int();
 
 	if (_Hours < 0 || _Minutes < 0)
 		return false;

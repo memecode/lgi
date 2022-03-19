@@ -23,7 +23,6 @@
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/TextConvert.h"
 #include "lgi/common/Mime.h"
-#include "lgi/common/Token.h"
 #include "../Hash/md5/md5.h"
 
 const char *sTextPlain = "text/plain";
@@ -2092,11 +2091,9 @@ bool MailPop3::ListCmd(const char *Cmd, LHashTbl<ConstStrKey<char,false>, bool> 
 	if (r <= 0)
 		return false;
 
-	GToken t(Buffer, "\r\n");
-	for (unsigned i=1; i<t.Length()-1; i++)
-	{
-		Results.Add(t[i], true);
-	}
+	auto Lines = LString(Buffer).SplitDelimit("\r\n");
+	for (unsigned i=1; i<Lines.Length()-1; i++)
+		Results.Add(Lines[i], true);
 
 	return true;
 }
@@ -2546,15 +2543,13 @@ bool MailPop3::GetSizes(LArray<int> &Sizes)
 		char *s = 0;
 		if (ReadMultiLineReply(s))
 		{
-			GToken l(s, "\r\n");
+			auto lines = LString(s).SplitDelimit("\r\n");
 			DeleteArray(s);
-			for (unsigned i=0; i<l.Length(); i++)
+			for (size_t i=0; i<lines.Length(); i++)
 			{
-				char *sp = strrchr(l[i], ' ');
+				char *sp = strrchr(lines[i], ' ');
 				if (sp)
-				{
 					Sizes[i] = atoi(sp+1);
-				}
 			}
 		}
 	}
@@ -2644,17 +2639,14 @@ bool MailPop3::GetUidList(List<char> &Id)
 		if (Str)
 		{
 			Status = true;
-			GToken T(Str, "\r\n");
-			for (unsigned i=0; i<T.Length(); i++)
+			auto lines = LString(Str).SplitDelimit("\r\n");
+			for (auto s: lines)
 			{
-				char *s = T[i];
-				if (s && *s != '.')
+				if (s(0) != '.')
 				{
 					char *Space = strchr(s, ' ');
 					if (Space++)
-					{
 						Id.Insert(NewStr(Space));
-					}
 				}
 			}
 

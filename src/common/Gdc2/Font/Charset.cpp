@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 #include "lgi/common/Lgi.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Font.h"
 #include "lgi/common/Charset.h"
 
@@ -1647,7 +1646,7 @@ LCharsetSystem::LCharsetSystem()
 
 		d->Charsets.Add(l, Cs);
 
-		GToken a(Cs->AlternateNames, ",");
+		auto a = LString(Cs->AlternateNames).SplitDelimit(",");
 		for (int n=0; n<a.Length(); n++)
 		{
 			strcpy_s(l, sizeof(l), a[n]);

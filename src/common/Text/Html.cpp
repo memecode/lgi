@@ -6,7 +6,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Html.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Variant.h"
 #include "lgi/common/FindReplaceDlg.h"

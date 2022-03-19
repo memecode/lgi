@@ -2,7 +2,6 @@
 #include "lgi/common/RichTextEdit.h"
 #include "RichTextEditPriv.h"
 #include "lgi/common/GdcTools.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Menu.h"
 
 #define LOADER_THREAD_LOGGING		1
@@ -1219,7 +1218,7 @@ LMessage::Result LRichTextPriv::ImageBlock::OnEvent(LMessage *Msg)
 
 			if (Component)
 			{
-				GToken t(*Component, ",");
+				auto t = LString(*Component).SplitDelimit(",");
 				for (int i=0; i<t.Length(); i++)
 					d->View->NeedsCapability(t[i]);
 			}
