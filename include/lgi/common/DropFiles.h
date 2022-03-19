@@ -7,8 +7,6 @@
 
 #if WINNATIVE
 #include <Shlobj.h>
-#elif defined LINUX
-#include "lgi/common/Token.h"
 #elif defined MAC
 #include "lgi/common/Net.h"
 LgiFunc bool LMacFileToPath(LString &a);

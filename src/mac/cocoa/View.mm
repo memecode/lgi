@@ -477,6 +477,18 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 			Invalidate(rc.Get());
 			break;
 		}
+		case M_THREAD_COMPLETED:
+		{
+			auto Th = (LThread*)Msg->A();
+			if (!Th)
+				break;
+
+			Th->OnComplete();
+			if (Th->GetDeleteOnExit())
+				delete Th;
+
+			return true;
+		}
 		default:
 		{
 			break;

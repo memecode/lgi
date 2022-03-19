@@ -164,6 +164,9 @@
 		34D28929275B3DB0005961A8 /* Variant.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D28928275B3DB0005961A8 /* Variant.h */; };
 		34D6AA1722D3749A005D739E /* Gdc2.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D6AA1622D3749A005D739E /* Gdc2.h */; };
 		34EE8BB12748A55600F12915 /* TextFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 34EE8BB02748A55600F12915 /* TextFile.h */; };
+		34F6151F27E55C5D00FE5B0C /* Thread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6151D27E55C5D00FE5B0C /* Thread.h */; };
+		34F6152027E55C5D00FE5B0C /* ThreadEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6151E27E55C5D00FE5B0C /* ThreadEvent.h */; };
+		34F6153227E55CB100FE5B0C /* EventTargetThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6153127E55CB100FE5B0C /* EventTargetThread.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -327,6 +330,9 @@
 		34D28928275B3DB0005961A8 /* Variant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Variant.h; path = ../../../include/lgi/common/Variant.h; sourceTree = SOURCE_ROOT; };
 		34D6AA1622D3749A005D739E /* Gdc2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Gdc2.h; path = ../../../include/lgi/common/Gdc2.h; sourceTree = SOURCE_ROOT; };
 		34EE8BB02748A55600F12915 /* TextFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TextFile.h; path = ../../../include/lgi/common/TextFile.h; sourceTree = "<group>"; };
+		34F6151D27E55C5D00FE5B0C /* Thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Thread.h; path = ../../../../../lgi/trunk/include/lgi/common/Thread.h; sourceTree = "<group>"; };
+		34F6151E27E55C5D00FE5B0C /* ThreadEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadEvent.h; path = ../../../../../lgi/trunk/include/lgi/common/ThreadEvent.h; sourceTree = "<group>"; };
+		34F6153127E55CB100FE5B0C /* EventTargetThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EventTargetThread.h; path = ../../../../../lgi/trunk/include/lgi/common/EventTargetThread.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -468,6 +474,9 @@
 		3477C29A1CBF0A700028B84B /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				34F6153127E55CB100FE5B0C /* EventTargetThread.h */,
+				34F6151D27E55C5D00FE5B0C /* Thread.h */,
+				34F6151E27E55C5D00FE5B0C /* ThreadEvent.h */,
 				34EE8BB02748A55600F12915 /* TextFile.h */,
 				3449B8CD26BBF6B10022A9B8 /* Notifications.h */,
 				34114C8A23091E6E00F342B1 /* LgiClasses.h */,
@@ -714,10 +723,12 @@
 				34114C8B23091E6E00F342B1 /* LgiClasses.h in Headers */,
 				34D28926275B3D9F005961A8 /* DateTime.h in Headers */,
 				3477C35B1CC1AEEA0028B84B /* LgiInc.h in Headers */,
+				34F6152027E55C5D00FE5B0C /* ThreadEvent.h in Headers */,
 				348362421F233A77003B2A6D /* Stream.h in Headers */,
 				3477C2A61CBF0A920028B84B /* LgiOsDefs.h in Headers */,
 				3409C0CC27580ED60050302A /* ListItemCheckBox.h in Headers */,
 				345EB84E235C6C01007D05DB /* Popup.h in Headers */,
+				34F6151F27E55C5D00FE5B0C /* Thread.h in Headers */,
 				34D21CEC217981AE003D1EA6 /* EventTargetThread.h in Headers */,
 				343BE8C72355D0CE00742E21 /* PopupList.h in Headers */,
 				34EE8BB12748A55600F12915 /* TextFile.h in Headers */,
@@ -729,6 +740,7 @@
 				3477C5171CC303B70028B84B /* LgiUiBase.h in Headers */,
 				3477C2AA1CBF22A00028B84B /* File.h in Headers */,
 				343874B5230F46B200CF96B4 /* Window.h in Headers */,
+				34F6153227E55CB100FE5B0C /* EventTargetThread.h in Headers */,
 				34D28929275B3DB0005961A8 /* Variant.h in Headers */,
 				3477C2A21CBF0A920028B84B /* SymLookup.h in Headers */,
 				34D6AA1722D3749A005D739E /* Gdc2.h in Headers */,
