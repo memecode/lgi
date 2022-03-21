@@ -160,10 +160,6 @@ public:
 			if (io)
 				io->Encode(GV_VOID_PTR, NULL, 0, NULL);
 		}
-
-		ObjRef &operator=(ObjRef &r)
-		{
-		}
 	};
 
 	ObjRef StartObj(const char *name)
