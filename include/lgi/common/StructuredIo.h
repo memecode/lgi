@@ -146,7 +146,7 @@ public:
 	{
 		LStructuredIo *io;
 
-		ObjRef(ObjRef &r) : io(NULL)
+		ObjRef(ObjRef &&r) : io(NULL)
 		{			
 			LSwap(io, r.io);
 		}
