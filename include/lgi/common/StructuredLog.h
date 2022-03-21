@@ -6,8 +6,8 @@
 #include "lgi/common/StructuredIo.h"
 #endif
 
-#define IntIo(type) void StructIo(LStructuredIo &io, type i) { io.Int(i); }
-#define StrIo(type) void StructIo(LStructuredIo &io, type i) { io.String(i); }
+#define IntIo(type) inline void StructIo(LStructuredIo &io, type i) { io.Int(i); }
+#define StrIo(type) inline void StructIo(LStructuredIo &io, type i) { io.String(i); }
 
 IntIo(char)
 IntIo(unsigned char)
@@ -23,7 +23,7 @@ StrIo(const char*);
 StrIo(wchar_t*);
 StrIo(const wchar_t*);
 
-void StructIo(LStructuredIo &io, LString &s)
+inline void StructIo(LStructuredIo &io, LString &s)
 {
 	if (io.GetWrite())
 		io.String(s.Get(), s.Length());
@@ -35,8 +35,9 @@ void StructIo(LStructuredIo &io, LString &s)
 		});
 }
 
-void StructIo(LStructuredIo &io, LRect &r)
+inline void StructIo(LStructuredIo &io, LRect &r)
 {
+	auto obj = io.StartObj("LRect");
 	io.Int(r.x1, "x1");
 	io.Int(r.y1, "y1");
 	io.Int(r.x2, "x2");
@@ -106,23 +107,39 @@ public:
 		LStringPipe p;
 		while (Read([&p](auto type, auto sz, auto ptr, auto name)
 			{
+				LString prefix;
+
 				if (p.GetSize())
-					p.Print(" ");
+					prefix = " ";
 				if (name)
-					p.Print("%s=", name);
+				{
+					prefix += name;
+					prefix += "=";
+				}
+
 				switch (type)
 				{
 					case GV_STRING:
 					{
-						p.Print("%.*s", (int)sz, ptr);
+						p.Print("%s%.*s", prefix ? prefix.Get() : "", (int)sz, ptr);
 						break;
 					}
 					case GV_INT64:
 					{
 						if (sz > 4)
-							p.Print(LPrintfInt64, *((int64*)ptr));
+							p.Print("%s" LPrintfInt64, prefix ? prefix.Get() : "", *((int64*)ptr));
 						else
-							p.Print("%i", *((int*)ptr));
+							p.Print("%s%i", prefix ? prefix.Get() : "", *((int*)ptr));
+						break;
+					}
+					case GV_CUSTOM:
+					{
+						p.Print("%s {", name);
+						break;
+					}
+					case GV_VOID_PTR:
+					{
+						p.Print(" }");
 						break;
 					}
 					default:

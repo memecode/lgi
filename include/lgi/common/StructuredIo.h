@@ -6,6 +6,23 @@
 
 #define DEBUG_STRUCT_IO			0
 
+/*
+	Generic base data field:
+	(where size_t == EncSize/DecSize field)
+
+		uint8_t type; // LVariantType
+		size_t name_len;
+		char name[name_len];
+		size_t data_size;
+		uint8_t data[data_size];
+
+	Objects are wrapped with generic fields of the type
+
+		GV_CUSTOM // start of object...
+			...array of member fields....
+		GV_VOID_PTR // end of object
+
+*/
 class LStructuredIo : public LArray<uint8_t>
 {
 	bool Write = true;
@@ -125,8 +142,36 @@ public:
 		Encode(GV_STRING, str, sz * sizeof(T), name);
 	}
 
-	void StartObj(const char *name = NULL);
-	void EndObj();
+	struct ObjRef
+	{
+		LStructuredIo *io;
+
+		ObjRef(ObjRef &r) : io(NULL)
+		{			
+			LSwap(io, r.io);
+		}
+
+		ObjRef(LStructuredIo *parent) : io(parent)
+		{
+		}
+
+		~ObjRef()
+		{
+			if (io)
+				io->Encode(GV_VOID_PTR, NULL, 0, NULL);
+		}
+
+		ObjRef &operator=(ObjRef &r)
+		{
+		}
+	};
+
+	ObjRef StartObj(const char *name)
+	{
+		ObjRef r(this);
+		Encode(GV_CUSTOM, NULL, 0, name);
+		return r;
+	}
 
 	bool Decode(std::function<void(LVariantType, size_t, void*, const char*)> callback)
 	{

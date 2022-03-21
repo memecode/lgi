@@ -5,6 +5,7 @@
 #include "lgi/common/XmlTreeUi.h"
 #include "lgi/common/Tree.h"
 #include "lgi/common/FileSelect.h"
+#include "lgi/common/StructuredLog.h"
 
 #include "Lvc.h"
 #include "../Resources/resdefs.h"
@@ -124,6 +125,7 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 	while (!LSsh::Cancel->IsCancelled())
 	{
 		auto rd = con->Read(buf, sizeof(buf));
+d->sLog.Log("waitPrompt rd:", rd);
 		if (rd < 0)
 		{
 			if (Debug)
@@ -138,6 +140,7 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 		}
 
 		out += LString(buf, rd);
+d->sLog.Log("waitPrompt out:", out);
 
 		Count += rd;
 		Total += rd;
@@ -145,6 +148,7 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 		auto lines = out.SplitDelimit("\n");
 		auto last = lines.Last();
 		auto result = MatchStr(Prompt, last);
+d->sLog.Log("waitPrompt result:", result, Prompt, last);
 		if (Debug)
 		{
 			LgiTrace("WaitPrompt.%s match='%s' with '%s' = %i\n", Debug, Prompt.Get(), last.Get(), result);
@@ -156,6 +160,7 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 				lines.DeleteAt(0, true);
 				lines.PopLast();
 				*Data = LString("\n").Join(lines);
+d->sLog.Log("waitPrompt data:", *Data);
 			}
 
 			if (Debug)
@@ -304,17 +309,18 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 
 			LString cmd;
 			cmd.Printf("cd %s\n", path.Get());
+d->sLog.Log("cd:", path);
 			auto wr = con->Write(cmd, cmd.Length());
 			auto pr = WaitPrompt(con, NULL, Debug?"Cd":NULL);
 
 			cmd.Printf("%s %s\n", p->Exe.Get(), p->Args.Get());
+d->sLog.Log("cmd:", cmd);
 			wr = con->Write(cmd, cmd.Length());
 			pr = WaitPrompt(con, &p->Output, Debug?"Cmd":NULL);
 			
-			// LgiTrace("Ssh: %s\n%s\n", cmd.Get(), p->Output.Get());
-
 			LString result;
 			cmd = "echo $?\n";
+d->sLog.Log("result:", cmd);
 			wr = con->Write(cmd, cmd.Length());
 			pr = WaitPrompt(con, &result, Debug?"Echo":NULL);
 			if (pr)
@@ -1821,6 +1827,8 @@ int LgiMain(OsAppArguments &AppArgs)
 	LApp a(AppArgs, AppName);
 	if (a.IsOk())
 	{
+		LStructuredLog::UnitTest();
+
 		a.AppWnd = new App;
 		a.Run();
 	}
