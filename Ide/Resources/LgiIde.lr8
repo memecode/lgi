@@ -61,6 +61,7 @@
 		<String Ref="73" Cid="1" Define="IDOK" en="Create" />
 		<String Ref="74" Cid="2" Define="IDCANCEL" en="Cancel" />
 		<String Ref="75" Cid="558" Define="IDC_75" />
+		<String Ref="76" Cid="76" Define="IDC_DEFAULTS" en="Set Defaults" />
 		<String Ref="78" Cid="79" Define="IDC_WIN32" en="Windows" />
 		<String Ref="79" Cid="80" Define="IDC_LINUX" en="Linux" />
 		<String Ref="80" Cid="81" Define="IDC_MAC" en="Mac OS X" />
@@ -512,10 +513,12 @@
 				</td>
 			</tr>
 			<tr>
-				<td addr="0,2" align="Max" />
+				<td addr="0,2">
+					<Button pos="28,378,139,398" ref="76" toggle="0" />
+				</td>
 				<td addr="1,2" align="Max">
-					<Button pos="336,378,370,398" ref="2" toggle="0" />
-					<Button pos="399,371,461,391" ref="4" toggle="0" />
+					<Button pos="399,378,433,398" ref="2" toggle="0" />
+					<Button pos="462,378,524,398" ref="4" toggle="0" />
 				</td>
 			</tr>
 		</TableLayout>

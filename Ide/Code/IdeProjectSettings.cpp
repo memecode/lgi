@@ -1,14 +1,16 @@
 #include "lgi/common/Lgi.h"
-#include "LgiIde.h"
-#include "IdeProject.h"
 #include "lgi/common/TableLayout.h"
-#include "resdefs.h"
 #include "lgi/common/TextLabel.h"
 #include "lgi/common/Edit.h"
 #include "lgi/common/CheckBox.h"
 #include "lgi/common/Combo.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/FileSelect.h"
+
+#include "LgiIde.h"
+#include "IdeProject.h"
+#include "ProjectNode.h"
+#include "resdefs.h"
 
 const char TagSettings[] = "Settings";
 
@@ -172,7 +174,7 @@ static void ClearEmptyTags(LXmlTag *t)
 
 struct IdeProjectSettingsPriv
 {
-	char PathBuf[256];
+	char PathBuf[MAX_PATH];
 
 public:
 	IdeProject *Project;
@@ -180,8 +182,8 @@ public:
 	IdeProjectSettings *Parent;
 	LXmlTag Active;
 	LXmlTag Editing;
-	LAutoString CurConfig;
-	LArray<char*> Configs;
+	LString CurConfig;
+	LString::Array Configs;
 	
 	LAutoString StrBuf; // Temporary storage for generated settings
 	
@@ -196,21 +198,20 @@ public:
 			Map.Add(i->Setting, i);
 		}
 		
-		Configs.Add(NewStr(sDebug));
-		Configs.Add(NewStr(sRelease));
-		CurConfig.Reset(NewStr(sDebug));
+		Configs.New() = sDebug;
+		Configs.New() = sRelease;
+		CurConfig = sDebug;
 	}
 	
 	~IdeProjectSettingsPriv()
 	{
-		Configs.DeleteArrays();
 	}
 
 	int FindConfig(const char *Cfg)
 	{
 		for (int i=0; i<Configs.Length(); i++)
 		{
-			if (!stricmp(Configs[i], Cfg))
+			if (Configs[i].Equals(Cfg))
 				return i;
 		}
 		return -1;
@@ -252,7 +253,7 @@ public:
 		{
 			sprintf_s(	PathBuf+Ch, sizeof(PathBuf)-Ch,
 						".%s",
-						Config >= 0 ? Configs[Config] : CurConfig);
+						Config >= 0 ? Configs[Config].Get() : CurConfig.Get());
 		}
 		
 		return PathBuf;
@@ -598,6 +599,88 @@ public:
 			Tree->Focus(true);
 		}
 	}
+
+	bool InsertPath(ProjSetting setting, IdePlatform platform, bool PlatformSpecific, LString newPath)
+	{
+		for (size_t Cfg = 0; Cfg < 2; Cfg++)
+		{
+			LString path = d->BuildPath(setting, PlatformSpecific ? SF_PLATFORM_SPECIFC : 0, platform, Cfg);
+			auto t = d->Editing.GetChildTag(path);
+			if (!t)
+			{
+				LgiTrace("%s:%i - Can't find element for '%s'\n", _FL, path.Get());
+				return false;
+			}
+			
+			LString nl("\n");
+			auto lines = LString(t->GetContent()).Split(nl);
+			bool has = false;
+			for (auto ln: lines)
+				if (ln.Equals(newPath))
+					has = true;
+					
+			if (!has)
+			{
+				lines.SetFixedLength(false);
+				lines.New() = newPath;
+				auto newVal = nl.Join(lines);
+				t->SetContent(newVal);
+			}
+		}
+		
+		return true;
+	}
+	
+	void SetDefaults()
+	{
+		// Find path to Lgi...
+		IdeProject *LgiProj = NULL;
+		if (d->Project)
+		{
+			LArray<ProjectNode*> Nodes;
+			if (d->Project->GetAllNodes(Nodes))
+			{
+				for (auto n: Nodes)
+				{
+					auto dep = n->GetDep();
+					if (dep)
+					{
+						auto fn = LString(dep->GetFileName()).SplitDelimit(DIR_STR);
+						if (fn.Last().Equals("Lgi.xml"))
+						{
+							LgiProj = dep;
+							break;
+						}
+					}
+				}
+			}
+		}
+	
+		#ifdef LINUX
+		
+		if (LgiProj)
+		{
+			auto lgiBase = LgiProj->GetBasePath();
+			LFile::Path lgiInc(lgiBase, "include");
+
+			LString lgiIncPath;
+			if (!d->Project->RelativePath(lgiIncPath, lgiInc))
+				lgiIncPath = lgiInc;
+
+			LFile::Path lgiLinuxInc(lgiIncPath, "lgi/linux");
+			LFile::Path lgiGtkInc(lgiIncPath, "lgi/linux/Gtk");
+
+			InsertPath(ProjIncludePaths, PlatformLinux, false, lgiIncPath);
+			InsertPath(ProjIncludePaths, PlatformLinux, true, lgiLinuxInc.GetFull());
+			InsertPath(ProjIncludePaths, PlatformLinux, true, lgiGtkInc.GetFull());
+			InsertPath(ProjSystemIncludes, PlatformLinux, true, "`pkg-config --cflags gtk+-3.0`");
+			InsertPath(ProjLibraries, PlatformLinux, true, "pthread");
+			InsertPath(ProjLibraries, PlatformLinux, true, "`pkg-config --libs gtk+-3.0`");
+			InsertPath(ProjLibraries, PlatformLinux, true, "-static-libgcc");
+		}
+		
+		#endif
+	}
 	
 	int OnNotify(LViewI *Ctrl, LNotification n)
 	{
@@ -643,6 +726,11 @@ public:
 					break;
 				EndModal(0);
 				break;
+			}
+			case IDC_DEFAULTS:
+			{
+				SetDefaults();
+				return 0; // bypass default btn handler
 			}
 			default:
 			{
@@ -733,7 +821,7 @@ bool IdeProjectSettings::SetCurrentConfig(const char *Config)
 	if (i < 0)
 		return false;
 	
-	d->CurConfig.Reset(NewStr(d->Configs[i]));
+	d->CurConfig = d->Configs[i];
 	return true;
 }
 
@@ -743,7 +831,7 @@ bool IdeProjectSettings::AddConfig(const char *Config)
 	if (i >= 0)
 		return true;
 
-	d->Configs.Add(NewStr(Config));
+	d->Configs.New() = Config;
 	return true;
 }
 
@@ -753,8 +841,7 @@ bool IdeProjectSettings::DeleteConfig(const char *Config)
 	if (i < 0)
 		return false;
 	
-	delete [] d->Configs[i];
-	d->Configs.DeleteAt(i);
+	d->Configs.DeleteAt(i, true);
 	return true;
 }
 
@@ -992,10 +1079,10 @@ int IdeProjectSettings::GetInt(ProjSetting Setting, int Default, IdePlatform Pla
 	return Status;
 }
 
-bool IdeProjectSettings::Set(ProjSetting Setting, const char *Value, IdePlatform Platform)
+bool IdeProjectSettings::Set(ProjSetting Setting, const char *Value, IdePlatform Platform, bool PlatformSpecific)
 {
 	bool Status = false;
-	char *path = d->BuildPath(Setting, true, Platform);
+	char *path = d->BuildPath(Setting, PlatformSpecific ? SF_PLATFORM_SPECIFC : 0, Platform);
 	LXmlTag *t = d->Active.GetChildTag(path, true);
 	if (t)
 	{
@@ -1006,10 +1093,10 @@ bool IdeProjectSettings::Set(ProjSetting Setting, const char *Value, IdePlatform
 	return Status;
 }
 
-bool IdeProjectSettings::Set(ProjSetting Setting, int Value, IdePlatform Platform)
+bool IdeProjectSettings::Set(ProjSetting Setting, int Value, IdePlatform Platform, bool PlatformSpecific)
 {
 	bool Status = false;
-	char *path = d->BuildPath(Setting, true, Platform);
+	char *path = d->BuildPath(Setting, PlatformSpecific ? SF_PLATFORM_SPECIFC : 0, Platform);
 	LXmlTag *t = d->Active.GetChildTag(path, true);
 	if (t)
 	{
