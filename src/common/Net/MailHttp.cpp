@@ -288,7 +288,7 @@ bool MailPhp::Get(LSocketI *S, char *Uri, LStream &Out, bool MailTransfer)
 						}
 					}
 					
-					GCopyStreamer s;
+					LCopyStreamer s;
 					Status = s.Copy(&Buf, &Out) > 0;
 				}
 			}

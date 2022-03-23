@@ -150,7 +150,7 @@ public:
 				{
 					LXmlTree t;
 					LXmlTag r;
-					GMemStream ms(v->Value.Binary.Data, v->Value.Binary.Length, false);
+					LMemStream ms(v->Value.Binary.Data, v->Value.Binary.Length, false);
 					if (t.Read(&r, &ms))
 					{
 						auto Arr = r.GetChildTag("array");

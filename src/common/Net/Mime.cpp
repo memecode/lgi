@@ -726,7 +726,7 @@ bool LMime::CreateTempData()
 	DataPos = 0;
 	DataSize = 0;
 	OwnDataStore = true;
-	if ((DataStore = new GTempStream(GetTmpPath(), 4 << 20)))
+	if ((DataStore = new LTempStream(GetTmpPath(), 4 << 20)))
 	{
 		Status = true;
 	}
@@ -789,7 +789,7 @@ bool LMime::SetData(char *Str, int Len)
 		DataLock = 0;
 		DataPos = 0;
 		DataSize = Len;
-		DataStore = new GTempStream(GetTmpPath(), 4 << 20);
+		DataStore = new LTempStream(GetTmpPath(), 4 << 20);
 		if (DataStore)
 		{
 			DataStore->Write(Str, Len);

@@ -624,7 +624,7 @@ LStreamI *FileDescriptor::GotoObject()
 	}
 	else if (Data && Size > 0)
 	{
-		DataStream.Reset(new GMemStream(Data, Size, false));
+		DataStream.Reset(new LMemStream(Data, Size, false));
 		return DataStream;
 	}
 
@@ -1877,7 +1877,7 @@ bool MailReceiveFolder::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *
 				LFile i;
 				if (i.Open(m->File, O_READ))
 				{
-					GCopyStreamer c;
+					LCopyStreamer c;
 					if (c.Copy(&i, t->Stream))
 					{
 						Status = t->Status = true;
@@ -1973,7 +1973,7 @@ char *MailReceiveFolder::GetHeaders(int Message)
 		if (i.Open(m->File, O_READ))
 		{
 			LStringPipe o;
-			GCopyStreamer c;
+			LCopyStreamer c;
 			LHtmlLinePrefix e("", false);
 			if (c.Copy(&i, &o, &e))
 			{

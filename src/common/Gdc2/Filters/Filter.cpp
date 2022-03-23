@@ -1491,7 +1491,7 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
 		}
 		else
 		{
-			GMemStream ms(In, 0, -1);
+			LMemStream ms(In, 0, -1);
 			CFDataRef data = CFDataCreate(NULL, (const UInt8 *)ms.GetBasePtr(), ms.GetSize());
 			CGImageSourceRef Src = CGImageSourceCreateWithData(data, NULL);
 			if (!Src)

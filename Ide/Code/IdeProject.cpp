@@ -2885,7 +2885,7 @@ bool IdeProject::SaveFile()
 			LStringPipe Buf(4096);			
 			if (x.Write(this, &Buf, &Prog))
 			{
-				GCopyStreamer Cp;
+				LCopyStreamer Cp;
 				Prog.SetDescription("Writing XML...");
 				LYield();
 				if (Cp.Copy(&Buf, &f))

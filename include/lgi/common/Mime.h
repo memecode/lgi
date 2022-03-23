@@ -126,7 +126,7 @@ public:
 			void Empty();
 		} Decode;
 
-		class LMimeEncode : public GPushStreamer, public LMimeAction
+		class LMimeEncode : public LPushStreamer, public LMimeAction
 		{
 		public:
 			ssize_t Push(LStreamI *Dest, LStreamEnd *End = 0);
@@ -148,7 +148,7 @@ public:
 			void Empty();
 		} Read;
 
-		class LMimeWrite : public GPushStreamer, public LMimeAction
+		class LMimeWrite : public LPushStreamer, public LMimeAction
 		{
 		public:
 			int64 GetSize();
