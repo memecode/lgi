@@ -568,9 +568,8 @@ int MailPhp::Sizeof(int Message)
 bool MailPhp::GetSizes(LArray<int> &Sizes)
 {
 	for (auto m: d->Msgs)
-	{
 		Sizes.Add(m->Size);
-	}
+
 	return Sizes.Length() == d->Msgs.Length();
 }
 
@@ -584,15 +583,11 @@ bool MailPhp::GetUid(int Message, char *Id, int IdLen)
 	return true;
 }
 
-bool MailPhp::GetUidList(List<char> &Id)
+bool MailPhp::GetUidList(LString::Array &Id)
 {
 	for (auto m: d->Msgs)
-	{
 		if (m->Uid)
-		{
-			Id.Insert(NewStr(m->Uid));
-		}
-	}
+			Id.New() = m->Uid;
 
 	return Id.Length() > 0;
 }

@@ -1941,7 +1941,7 @@ bool MailReceiveFolder::GetUid(int Message, char *Id, int IdLen)
 	return false;
 }
 
-bool MailReceiveFolder::GetUidList(List<char> &Id)
+bool MailReceiveFolder::GetUidList(LString::Array &Id)
 {
 	bool Status = false;
 
@@ -1951,11 +1951,10 @@ bool MailReceiveFolder::GetUidList(List<char> &Id)
 		if (GetUid(i, Uid, sizeof(Uid)))
 		{
 			Status = true;
-			Id.Insert(NewStr(Uid));
+			Id.New() = Uid;
 		}
 		else
 		{
-			Id.DeleteArrays();
 			Status = false;
 			break;
 		}
@@ -2626,12 +2625,12 @@ bool MailPop3::GetUid(int Index, char *Id, int IdLen)
 	return false;
 }
 
-bool MailPop3::GetUidList(List<char> &Id)
+bool MailPop3::GetUidList(LString::Array &Id)
 {
 	bool Status = false;
 	if (Socket)
 	{
-		char *Str = 0;
+		char *Str = NULL;
 
 		sprintf_s(Buffer, sizeof(Buffer), "UIDL\r\n");
 		VERIFY_RET_VAL(Write(0, true));
@@ -2646,7 +2645,7 @@ bool MailPop3::GetUidList(List<char> &Id)
 				{
 					char *Space = strchr(s, ' ');
 					if (Space++)
-						Id.Insert(NewStr(Space));
+						Id.New() = Space;
 				}
 			}
 

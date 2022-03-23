@@ -2799,7 +2799,7 @@ bool MailIMap::FillUidList()
 	return Status;
 }
 
-bool MailIMap::GetUidList(List<char> &Id)
+bool MailIMap::GetUidList(LString::Array &Id)
 {
 	bool Status = false;
 
@@ -2808,9 +2808,7 @@ bool MailIMap::GetUidList(List<char> &Id)
 		if (FillUidList())
 		{
 			for (auto s: Uid)
-			{
-				Id.Insert(NewStr(s));
-			}
+				Id.New() = s;
 
 			Status = true;
 		}

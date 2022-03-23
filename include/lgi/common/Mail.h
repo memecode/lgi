@@ -515,7 +515,7 @@ public:
 	/// Gets the unique identifier of the message
 	virtual bool GetUid(int Message, char *Id, int IdLen) = 0;
 	/// Gets the unique identifiers of a list of messages
-	virtual bool GetUidList(List<char> &Id) = 0;
+	virtual bool GetUidList(LString::Array &Id) = 0;
 	/// Gets the headers associated with a given message
 	virtual char *GetHeaders(int Message) = 0;
 	/// Sets the proxy server. e.g. HTTP mail.
@@ -591,7 +591,7 @@ public:
 	int Sizeof(int Message);
 	bool GetSizes(LArray<int> &Sizes);
 	bool GetUid(int Message, char *Id, int IdLen);
-	bool GetUidList(List<char> &Id);
+	bool GetUidList(LString::Array &Id);
 	char *GetHeaders(int Message);
 };
 
@@ -614,7 +614,7 @@ public:
 	bool Delete(int Message);
 	int Sizeof(int Message);
 	bool GetUid(int Message, char *Id, int IdLen);
-	bool GetUidList(List<char> &Id);
+	bool GetUidList(LString::Array &Id);
 	char *GetHeaders(int Message);
 };
 
@@ -640,7 +640,7 @@ public:
 	int Sizeof(int Message);
 	bool GetSizes(LArray<int> &Sizes);
 	bool GetUid(int Message, char *Id, int IdLen);
-	bool GetUidList(List<char> &Id);
+	bool GetUidList(LString::Array &Id);
 	char *GetHeaders(int Message);
 	void SetProxy(char *Server, int Port);
 };
@@ -766,7 +766,7 @@ public:
 	int Sizeof(int Message);
 	bool GetSizes(LArray<int> &Sizes);
 	bool GetUid(int Message, char *Id, int IdLen);
-	bool GetUidList(List<char> &Id);
+	bool GetUidList(LString::Array &Id);
 	char *GetHeaders(int Message);
 	char *SequenceToString(LArray<int> *Seq);
 
