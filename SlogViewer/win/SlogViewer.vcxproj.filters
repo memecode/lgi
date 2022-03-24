@@ -23,4 +23,12 @@
   <ItemGroup>
     <Manifest Include="..\..\src\win\General\Lgi.manifest" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\lgi\common\StructuredIo.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\StructuredLog.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>

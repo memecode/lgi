@@ -58,9 +58,16 @@ class LStructuredLog
 public:
 	LStructuredLog(const char *FileName, bool write = true) : io(write)
 	{
-		LFile::Path p(LSP_APP_INSTALL);
-		p += FileName;
-		if (f.Open(p, write ? O_WRITE : O_READ) && write)
+		LString fn;
+		if (LIsRelativePath(FileName))
+		{
+			LFile::Path p(LSP_APP_INSTALL);
+			p += FileName;
+			fn = p.GetFull();
+		}
+		else fn = FileName;
+
+		if (f.Open(fn, write ? O_WRITE : O_READ) && write)
 			f.SetSize(0);
 	}
 
@@ -109,6 +116,9 @@ public:
 			{
 				LString prefix;
 
+				if (type == LStructuredIo::EndRow)
+					return;
+
 				if (p.GetSize())
 					prefix = " ";
 				if (name)
@@ -132,12 +142,12 @@ public:
 							p.Print("%s%i", prefix ? prefix.Get() : "", *((int*)ptr));
 						break;
 					}
-					case GV_CUSTOM:
+					case LStructuredIo::StartObject:
 					{
 						p.Print("%s {", name);
 						break;
 					}
-					case GV_VOID_PTR:
+					case LStructuredIo::EndObject:
 					{
 						p.Print(" }");
 						break;

@@ -71,7 +71,7 @@ protected:
 		while (bits & 0x80);
 	}
 
-	bool Encode(uint8_t type, const void *obj, size_t sz, const char *name)
+	bool Encode(uint8_t type, const void *obj = NULL, size_t sz = 0, const char *name = NULL)
 	{
 		LPointer p;
 		LAssert(Write);
@@ -109,6 +109,10 @@ LgiTrace("Encode(%i @ %i,%i sz=%i) after=%i\n", type, (int)type_addr, (int)data_
 	}
 
 public:
+	constexpr static LVariantType StartObject	= GV_CUSTOM;
+	constexpr static LVariantType EndObject		= GV_VOID_PTR;
+	constexpr static LVariantType EndRow		= GV_NULL;
+
 	LStructuredIo(bool write) :
 		Write(write)
 	{
@@ -158,14 +162,14 @@ public:
 		~ObjRef()
 		{
 			if (io)
-				io->Encode(GV_VOID_PTR, NULL, 0, NULL);
+				io->Encode(EndObject);
 		}
 	};
 
 	ObjRef StartObj(const char *name)
 	{
 		ObjRef r(this);
-		Encode(GV_CUSTOM, NULL, 0, name);
+		Encode(StartObject, NULL, 0, name);
 		return r;
 	}
 
@@ -182,6 +186,14 @@ auto type_addr = p.u8 - AddressOf();
 		LVariantType type = (LVariantType)(*p.u8++);
 		if (type >= GV_MAX)
 			return false;
+
+		if (type == EndRow)
+		{
+			callback(type, 0, NULL, NULL);
+			Pos = p.u8 - AddressOf();
+			return true;
+		}
+
 		size_t name_len, data_size;
 		
 		DecSize(p, name_len);
@@ -206,9 +218,14 @@ LgiTrace("Decode(%i @ %i,%i sz=%i) after=%i\n", type, (int)type_addr, (int)data_
 
 	bool Flush(LStream *s)
 	{
-		if (!s) return false;
+		if (!s)
+			return false;
+
+		(*this)[Pos++] = EndRow;
 		bool Status = s->Write(AddressOf(), Pos) == Pos;
+
 		Pos = 0;
+		
 		return Status;
 	}
 };
