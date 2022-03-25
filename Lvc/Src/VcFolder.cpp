@@ -940,11 +940,6 @@ bool VcFolder::GetBranches(ParseParams *Params)
 
 bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 {
-	/*
-	LHashTbl<StrKey<char>, int> Map(0, -1);
-	for (unsigned i=0; i<Log.Length(); i++)
-		Map.Add(Log[i]->GetRev(), i);
-	*/
 	Log.DeleteObjects();
 
 	int Errors = 0;
