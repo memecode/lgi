@@ -5,6 +5,7 @@
 #include "lgi/common/Box.h"
 #include "lgi/common/List.h"
 #include "lgi/common/TextView3.h"
+#include "lgi/common/TabView.h"
 #include "lgi/common/StructuredLog.h"
 
 #include "resdefs.h"
@@ -12,17 +13,27 @@
 //////////////////////////////////////////////////////////////////
 const char *AppName = "SlogViewer";
 
+enum DisplayMode
+{
+	DisplayHex,
+	DisplayEscaped
+};
+
 enum Ctrls 
 {
 	IDC_BOX = 100,
 	IDC_LOG,
-	IDC_DETAIL,
+	IDC_HEX,
+	IDC_ESCAPED,
+	IDC_TABS,
 };
 
 struct Context
 {
 	LList *log = NULL;
-	LTextView3 *detail = NULL;
+	LTabView *tabs = NULL;
+	LTextView3 *hex = NULL;
+	LTextView3 *escaped = NULL;
 };
 
 class Entry : public LListItem
@@ -96,6 +107,11 @@ public:
 
 	void Select(bool b) override
 	{
+		LListItem::Select(b);
+
+		auto mode = (DisplayMode)c->tabs->Value();
+		auto ctrl = mode ? c->escaped : c->hex;
+
 		if (b)
 		{
 			LStringPipe p;
@@ -119,41 +135,74 @@ public:
 							auto i = (int64_t*) v.data.AddressOf();
 							p.Print(LPrintfInt64 " 0x" LPrintfHex64 "\n", *i, *i);
 						}
+						else
+							LAssert(!"Impl me.");
 						break;
 					}
 					case GV_STRING:
 					{
-						char line[300];
-						int ch = 0;
-						
-						const int rowSize = 16;
-						const int colHex = 10;
-						const int colAscii = colHex + (rowSize * 3) + 2;
-						const int colEnd = colAscii + rowSize;
-
-						for (size_t addr = 0; addr < v.data.Length() ; addr += rowSize)
+						if (mode == DisplayHex)
 						{
-							ZeroObj(line);
-							sprintf(line, "%08.8x", (int)addr);
-							auto rowBytes = MIN(v.data.Length() - addr, rowSize);
-							if (rowBytes > 16)
-							{
-								int asd=0;
-							}
+							char line[300];
+							int ch = 0;
+						
+							const int rowSize = 16;
+							const int colHex = 10;
+							const int colAscii = colHex + (rowSize * 3) + 2;
+							const int colEnd = colAscii + rowSize;
 
-							auto rowPtr = v.data.AddressOf(addr);
-							for (int i=0; i<rowBytes; i++)
+							for (size_t addr = 0; addr < v.data.Length() ; addr += rowSize)
 							{
-								sprintf(line + colHex + (i * 3), "%02.2x", rowPtr[i]);
-								line[colAscii + i] = rowPtr[i] >= ' ' ? rowPtr[i] : '.';
+								ZeroObj(line);
+								sprintf(line, "%08.8x", (int)addr);
+								auto rowBytes = MIN(v.data.Length() - addr, rowSize);
+								LAssert(rowBytes <= rowSize);
+								auto rowPtr = v.data.AddressOf(addr);
+								for (int i=0; i<rowBytes; i++)
+								{
+									sprintf(line + colHex + (i * 3), "%02.2x", rowPtr[i]);
+									line[colAscii + i] = rowPtr[i] >= ' ' && rowPtr[i] < 128 ? rowPtr[i] : '.';
+								}
+								for (int i=0; i<colEnd; i++)
+								{
+									if (line[i] == 0)
+										line[i] = ' ';
+								}
+								p.Print("%.*s\n", colEnd, line);
 							}
-							for (int i=0; i<colEnd; i++)
-							{
-								if (line[i] == 0)
-									line[i] = ' ';
-							}
-							p.Print("%.*s\n", colEnd, line);
 						}
+						else if (mode == DisplayEscaped)
+						{
+							auto s = v.data.AddressOf();
+							auto e = s + v.data.Length();
+
+							for (auto c = s; c < e; c++)
+							{
+								switch (*c)
+								{
+									case '\\': p.Print("\\\\"); break;
+									case '\t': p.Print("\\t"); break;
+									case '\r': p.Print("\\r"); break;
+									case '\n': p.Print("\\n\n"); break;
+									case 0x07: p.Print("\\b"); break;
+									case 0x1b: p.Print("\\e"); break;
+									default:
+										if (*c < ' ' || *c >= 128)
+											p.Write("\\x%x", (uint8_t)*c);
+										else
+											p.Write(c, 1);
+										break;
+
+								}
+							}
+							if (e > s && e[-1] != '\n')
+								p.Write("\n");
+						}
+						break;
+					}
+					default:
+					{
+						LAssert(!"Impl me.");
 						break;
 					}
 				}
@@ -161,7 +210,7 @@ public:
 				p.Print("\n");
 			}
 
-			c->detail->Name(p.NewGStr());
+			ctrl->Name(p.NewGStr());
 		}
 	}
 };
@@ -188,8 +237,18 @@ public:
 			log->GetCss(true)->Width("40%");
 			log->ShowColumnHeader(false);
 			log->AddColumn("Items", 1000);
-			box->AddView(detail = new LTextView3(IDC_DETAIL));
-			detail->Sunken(true);
+
+			box->AddView(tabs = new LTabView(IDC_TABS));
+
+			auto tab = tabs->Append("Hex");
+			tab->Append(hex = new LTextView3(IDC_HEX));
+			hex->Sunken(true);
+			hex->SetPourLargest(true);
+
+			tab = tabs->Append("Escaped");
+			tab->Append(escaped = new LTextView3(IDC_ESCAPED));
+			escaped->Sunken(true);
+			escaped->SetPourLargest(true);
 
 			AttachChildren();
             Visible(true);
@@ -207,11 +266,13 @@ public:
 		LStructuredLog file(FileName, false);
 
 		LAutoPtr<Entry> cur;
-		while (file.Read([this, &cur](auto type, auto size, auto ptr, auto name)
+		List<LListItem> items;
+
+		while (file.Read([this, &cur, &items](auto type, auto size, auto ptr, auto name)
 			{
 				if (type == LStructuredIo::EndRow)
 				{
-					log->Insert(cur.Release());
+					items.Insert(cur.Release());
 					return;
 				}
 
@@ -222,12 +283,25 @@ public:
 			}))
 			;
 
+		log->Insert(items);
 		return true;
 	}
 
 	bool SaveFile(const char *FileName)
 	{
 		return false;
+	}
+
+	int OnNotify(LViewI *Ctrl, LNotification n)
+	{
+		if (Ctrl->GetId() == IDC_TABS)
+		{
+			auto item = log->GetSelected();
+			if (item)
+				item->Select(true);
+		}
+
+		return 0;
 	}
 };
 
