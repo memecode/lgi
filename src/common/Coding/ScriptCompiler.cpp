@@ -400,7 +400,7 @@ public:
 	bool Debug;
 
 	#ifdef _DEBUG
-	LArray<LVariant> RegAllocators;
+	LString::Array RegAllocators;
 	#endif
 
 	LCompilerPriv()
@@ -2048,11 +2048,9 @@ public:
 		{
 			for (unsigned n=0; n<RegAllocators.Length(); n++)
 			{
-				char *a = RegAllocators[n].Str();
+				auto a = RegAllocators[n].Get();
 				if (a)
-				{
 					Log->Print("CompileError:Register[%i] allocated by %s\n", n, a);
-				}
 			}
 		}
 		#endif
