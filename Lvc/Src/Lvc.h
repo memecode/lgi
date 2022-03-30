@@ -13,6 +13,7 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/Ssh.h"
 #include "lgi/common/EventTargetThread.h"
+#include "lgi/common/StructuredLog.h"
 
 #define OPT_Folders			"Folders"
 #define OPT_Folder			"Folder"
@@ -141,11 +142,14 @@ struct AppPriv
 	LTextLog *Log;
 	LTabView *Tabs;
 	VersionCtrl PrevType;
+	LStructuredLog sLog;
 	int Resort;
 
 	LHashTbl<StrKey<char,false>,SshConnection*> Connections;
 	
-	AppPriv()  : Opts(LOptionsFile::DesktopMode, AppName)
+	AppPriv() :
+		Opts(LOptionsFile::DesktopMode, AppName),
+		sLog("Lvc.slog")
 	{
 		Commits = NULL;
 		PrevType = VcNone;

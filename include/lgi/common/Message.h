@@ -184,6 +184,7 @@ enum LgiMessages
 	M_SCROLL_TO, // LTreeItem->LTree
 	M_SET_SCROLL, // LScrollBar
 	M_JOBS_LOADED, // LHtml
+	M_THREAD_COMPLETED, // A=(LThread*)Thread
 
 	#ifdef WINDOWS
 	M_USER = WM_APP + 200

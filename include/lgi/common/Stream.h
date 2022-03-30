@@ -117,22 +117,22 @@ public:
 };
 
 /// API to writes to a destination
-class LgiClass GPushStreamer : public LStreamOp
+class LgiClass LPushStreamer : public LStreamOp
 {
 public:
 	virtual ssize_t Push(LStreamI *Dest, LStreamEnd *End = 0) = 0;
 };
 
 /// API to read from source and then write to a destination
-class LgiClass GCopyStreamer : public LStreamOp
+class LgiClass LCopyStreamer : public LStreamOp
 {
 public:
-	GCopyStreamer(int64 BufSz = -1) : LStreamOp(BufSz) {}
+	LCopyStreamer(int64 BufSz = -1) : LStreamOp(BufSz) {}
 	virtual ssize_t Copy(LStreamI *Source, LStreamI *Dest, LStreamEnd *End = 0);
 };
 
 /// In memory stream for storing sub-streams or memory blocks
-class LgiClass GMemStream : public LStream
+class LgiClass LMemStream : public LStream
 {
 	char *Mem;
 	int64 Len, Pos, Alloc;
@@ -143,9 +143,9 @@ class LgiClass GMemStream : public LStream
 
 public:
 	/// Builds an empty memory stream
-	GMemStream();
+	LMemStream();
 	/// Builds memory from sub-stream
-	GMemStream
+	LMemStream
 	(
 		/// The source stream
 		LStreamI *Src,
@@ -155,7 +155,7 @@ public:
 		int64 Len
 	);
 	/// Builds a memory stream by copying from another memory block
-	GMemStream
+	LMemStream
 	(
 		/// The source memory block
 		const void *Mem,
@@ -165,12 +165,12 @@ public:
 		bool Copy = true
 	);
 	/// Growable array to write to
-	GMemStream
+	LMemStream
 	(
 		int GrowBlockSize
 	);
 
-	~GMemStream();
+	~LMemStream();
 	
 	char *GetBasePtr() { return Mem; }
 	
@@ -195,13 +195,13 @@ public:
 
 /// Wraps another stream in a LStreamI interface. Useful for
 /// giving objects to downstream consumers that they can delete.
-class LgiClass GProxyStream : public LStreamI
+class LgiClass LProxyStream : public LStreamI
 {
 protected:
 	LStreamI *s;
 
 public:
-	GProxyStream(LStreamI *p)
+	LProxyStream(LStreamI *p)
 	{
 		s = p;
 	}
@@ -218,32 +218,32 @@ public:
 	bool GetValue(const char *n, LVariant &v) override { return s->GetValue(n, v); }
 	bool SetValue(const char *n, LVariant &v) override { return s->SetValue(n, v); }
 
-	LStreamI *Clone() override { return new GProxyStream(s); }
+	LStreamI *Clone() override { return new LProxyStream(s); }
 };
 
 /// A temporary FIFO stream that stores data in memory up until you
 /// reach the 'MaxMemSize' limit at which point the class begins storing
 /// data in a temporary file on disk.
-class LgiClass GTempStream : public GProxyStream
+class LgiClass LTempStream : public LProxyStream
 {
 	LStream Null;
 	int MaxMemSize;
 
 protected:
-	class GMemStream *Mem;
+	class LMemStream *Mem;
 	class LFile *Tmp;
 	LString TmpFolder;
 
 public:
-	GTempStream(const char *TmpFolder = 0, int maxMemSize = 1 << 20);
-	~GTempStream();
+	LTempStream(const char *TmpFolder = 0, int maxMemSize = 1 << 20);
+	~LTempStream();
 
 	int GetMaxMemSize() { return MaxMemSize; }
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0);
 	void Empty();
 	int64 GetSize();
 	
-	GTempStream &operator =(const GTempStream &ts)
+	LTempStream &operator =(const LTempStream &ts)
 	{
 		LAssert(0);
 		return *this;

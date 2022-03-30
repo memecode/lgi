@@ -12,7 +12,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Db.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/TextFile.h"
 
 ///////////////////////////////////////////////////////////////////

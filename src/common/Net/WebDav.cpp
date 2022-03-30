@@ -53,7 +53,7 @@ bool LWebdav::Request(Req &r, const char *Name, LString Resource)
 		auto Res = Delim + Delim.Join(Path);
 		u.sPath = Res;
 		auto Full = u.ToString();
-		GMemStream In(r.InBody.Get(), r.InBody.Length(), false);
+		LMemStream In(r.InBody.Get(), r.InBody.Length(), false);
 
 		http.SetAuth(User, Pass);
 		r.Status = http.Request(Name, Full, &r.ProtocolStatus, r.InHdrs, r.InBody ? &In : NULL, &OutPipe, &OutHdrsPipe, &r.Encoding);
@@ -112,7 +112,7 @@ bool LWebdav::PropFind(LArray<FileProps> &Files, LString Resource, int Depth)
 
 	LXmlTag x;
 	LXmlTree t;
-	GMemStream m(r.OutBody.Get(), r.OutBody.Length(), false);
+	LMemStream m(r.OutBody.Get(), r.OutBody.Length(), false);
 	if (!t.Read(&x, &m))
 		return false;
 

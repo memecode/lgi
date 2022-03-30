@@ -4,7 +4,6 @@
 
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/Http.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/LgiCommon.h"
 #include "lgi/common/NetTools.h"
 #include "lgi/common/LgiString.h"
@@ -864,7 +863,7 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *In
 		if (Enc == LHttp::EncodeRaw)
 		{
 			// Copy TmpFile to Out
-			GCopyStreamer Cp;
+			LCopyStreamer Cp;
 			if (!Cp.Copy(&TmpFile, Out))
 			{
 				if (OutError)

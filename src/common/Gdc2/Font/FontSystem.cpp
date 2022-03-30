@@ -2,7 +2,6 @@
 #include <locale.h>
 
 #include "lgi/common/Lgi.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Library.h"
 #include "lgi/common/LibraryUtils.h"
 

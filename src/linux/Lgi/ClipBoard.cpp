@@ -156,11 +156,12 @@ bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 	return Status;
 }
 
-void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LAutoPtr<LSurface> *Out)
+void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LClipBoard::BitmapCb *Cb)
 {
 	auto chan = gdk_pixbuf_get_n_channels(Img);
 	auto alpha = gdk_pixbuf_get_has_alpha(Img);
 	LColourSpace cs = System32BitColourSpace;
+	LAutoPtr<LSurface> Out;
 	if (chan == 3)
 	{
 		if (alpha)
@@ -174,75 +175,99 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LAutoPtr<LS
 	}
 	else
 	{
-		LAssert(!"Unexpected colourspace.");
+		LString s;
+		s.Printf("Unexpected colourspace: %i channels.", (int)chan);
+		(*Cb)(Out, s);
+		return;
 	}
 
 	auto x = gdk_pixbuf_get_width(Img), y = gdk_pixbuf_get_height(Img);
 	LAutoPtr<LMemDC> m(new LMemDC(x, y, cs));
-	if (m)
+	if (!m)
 	{
-		auto px = gdk_pixbuf_get_pixels(Img);
-		auto row = gdk_pixbuf_get_rowstride(Img);
-		for (int yy=0; yy<y; yy++)
-		{
-			#define Rop24(out_cs, in_cs) \
-				case Cs##out_cs: \
-				{ \
-					auto in = (L##in_cs*)(px + (yy*row)); \
-					auto out = (L##out_cs*) ((*m)[yy]); \
-					auto end = out + x; \
-					while (out < end) \
-					{ \
-						out->r = in->r; out->g = in->g; out->b = in->b; \
-						out++; in++; \
-					} \
-					break; \
-				}
-			#define Rop32(out_cs, in_cs) \
-				case Cs##out_cs: \
-				{ \
-					auto in = (L##in_cs*)(px + (yy*row)); \
-					auto out = (L##out_cs*) (*m)[yy]; \
-					auto end = out + x; \
-					while (out < end) \
-					{ \
-						out->r = in->r; out->g = in->g; out->b = in->b; out->a = in->a; \
-						out++; in++; \
-					} \
-					break; \
-				}
-
-			switch (m->GetColourSpace())
-			{
-				Rop24(Bgr24, Rgb24);
-				Rop24(Rgb24, Rgb24);
-
-				Rop24(Bgrx32, Rgb24);
-				Rop24(Rgbx32, Rgb24);
-				Rop24(Xrgb32, Rgb24);
-				Rop24(Xbgr32, Rgb24);
-
-				default:
-					LAssert(!"Unsupported colour space.");
-					yy = y;
-					break;
-			}
-		}
-
-		Out->Reset(m.Release());
+		(*Cb)(Out, "Alloc failed");
+		return;
 	}
+	
+	auto px = gdk_pixbuf_get_pixels(Img);
+	auto row = gdk_pixbuf_get_rowstride(Img);
+	for (int yy=0; yy<y; yy++)
+	{
+		#define Rop24(out_cs, in_cs) \
+			case Cs##out_cs: \
+			{ \
+				auto in = (L##in_cs*)(px + (yy*row)); \
+				auto out = (L##out_cs*) ((*m)[yy]); \
+				auto end = out + x; \
+				while (out < end) \
+				{ \
+					out->r = in->r; out->g = in->g; out->b = in->b; \
+					out++; in++; \
+				} \
+				break; \
+			}
+		#define Rop32(out_cs, in_cs) \
+			case Cs##out_cs: \
+			{ \
+				auto in = (L##in_cs*)(px + (yy*row)); \
+				auto out = (L##out_cs*) (*m)[yy]; \
+				auto end = out + x; \
+				while (out < end) \
+				{ \
+					out->r = in->r; out->g = in->g; out->b = in->b; out->a = in->a; \
+					out++; in++; \
+				} \
+				break; \
+			}
+
+		switch (m->GetColourSpace())
+		{
+			Rop24(Bgr24, Rgb24);
+			Rop24(Rgb24, Rgb24);
+
+			Rop24(Bgrx32, Rgb24);
+			Rop24(Rgbx32, Rgb24);
+			Rop24(Xrgb32, Rgb24);
+			Rop24(Xbgr32, Rgb24);
+
+			default:
+				LAssert(!"Unsupported colour space.");
+				yy = y;
+				break;
+		}
+	}
+
+	Out.Reset(m.Release());
+	(*Cb)(Out, NULL);
 }
 
+bool LClipBoard::Bitmap(LClipBoard::BitmapCb Callback)
+{
+	if (!Callback)
+		return false;
+		
+	gtk_clipboard_request_image(d->c, (GtkClipboardImageReceivedFunc) ClipboardImageReceived, &Callback);
+	return true;
+}
+		
 LAutoPtr<LSurface> LClipBoard::Bitmap()
 {
-	LAutoPtr<LSurface> img;
-	gtk_clipboard_request_image(d->c, (GtkClipboardImageReceivedFunc) ClipboardImageReceived, &img);
+	auto Ts = LCurrentTime();
+	LString Error;
+	LAutoPtr<LSurface> Img;
+	
+	LClipBoard::BitmapCb Callback = [&](auto img, auto err)
+	{
+		Img = img;
+		Error = err;
+	};
 
-	uint64 Ts = LCurrentTime();
-	while (!img && (LCurrentTime() - Ts) < LGI_RECEIVE_CLIPBOARD_TIMEOUT)
+	gtk_clipboard_request_image(d->c, (GtkClipboardImageReceivedFunc) ClipboardImageReceived, &Callback);
+
+	while (!Error && !Img && (LCurrentTime() - Ts) < LGI_RECEIVE_CLIPBOARD_TIMEOUT)
 		LYield();
-
-	return img;
+				
+	return Img;
 }
 
 void LgiClipboardGetFunc(GtkClipboard *clipboard,

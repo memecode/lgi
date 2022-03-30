@@ -3,7 +3,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/FontSelect.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/CheckBox.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/List.h"
@@ -317,14 +316,14 @@ bool LFontSelect::Serialize(void *Data, int DataLen, bool Write)
 
 		#else
 
-		GToken T((char*)Data, ",");
+		auto T = LString((char*)Data).SplitDelimit(",");
 		if (T[0])
 		{
 			Face = T[0];
 		}
 		if (T[1])
 		{
-			Size = atoi(T[1]);
+			Size = T[1].Int();
 		}
 
 		Bold = Underline = Italic = false;

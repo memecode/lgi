@@ -105,6 +105,12 @@ public:
 
 	bool SetParams(LAutoPtr<Params> p)
 	{
+		if (!p)
+		{
+			LAssert(!"No params.");
+			return false;
+		}
+
 		return PostObject(GetHandle(), M_SET_PARAMS, p);
 	}
 

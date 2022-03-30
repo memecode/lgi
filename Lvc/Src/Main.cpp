@@ -5,6 +5,7 @@
 #include "lgi/common/XmlTreeUi.h"
 #include "lgi/common/Tree.h"
 #include "lgi/common/FileSelect.h"
+#include "lgi/common/StructuredLog.h"
 
 #include "Lvc.h"
 #include "../Resources/resdefs.h"
@@ -13,6 +14,13 @@
 #endif
 
 #define TIMEOUT_PROMPT			1000
+
+#define DEBUG_SSH_LOGGING		0
+#if DEBUG_SSH_LOGGING
+	#define SSH_LOG(...)		d->sLog.Log(__VA_ARGS__)
+#else
+	#define SSH_LOG(...)
+#endif
 
 //////////////////////////////////////////////////////////////////
 SshConnection *AppPriv::GetConnection(const char *Uri, bool Create)
@@ -133,28 +141,53 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 
 		if (rd == 0)
 		{
-			LSleep(10);
+// SSH_LOG("waitPrompt no data.");
+			LSleep(100);
 			continue;
 		}
 
-		out += LString(buf, rd);
-		if (Debug)
-		{
-			LgiTrace("WaitPrompt.%s out='%s'\n", Debug, out.Get());
-		}
+		#if 0
+		// De-null the data... FFS
+		char *i, *o;
+		for (i = buf, o = buf; i - buf < rd; i++) { if (*i) *o++ = *i; }
+		rd = o - buf;
+		#endif
+
+		// Add new data to 'out'...
+		LString newData(buf, rd);
+SSH_LOG("waitPrompt rd:", newData);
+
+		out += newData;
+SSH_LOG("waitPrompt out:", out);
 
 		Count += rd;
 		Total += rd;
+
 		DeEscape(out);
-		auto lines = out.SplitDelimit("\n");
+
+		auto lines = out.SplitDelimit("\r\n\b");
 		auto last = lines.Last();
-		if (MatchStr(Prompt, last))
+		auto result = MatchStr(Prompt, last);
+SSH_LOG("waitPrompt result:", result, Prompt, last, out);
+		if (Debug)
+		{
+			LgiTrace("WaitPrompt.%s match='%s' with '%s' = %i\n", Debug, Prompt.Get(), last.Get(), result);
+		}
+		if (result)
 		{
 			if (Data)
 			{
-				lines.DeleteAt(0, true);
-				lines.PopLast();
-				*Data = LString("\n").Join(lines);
+				auto start = out.Get();
+				auto end = start + out.Length();
+				auto second = start;
+				while (second < end && second[-1] != '\n')
+					second++;
+				auto last = end;
+				while (last > start && last[-1] != '\n')
+					last--;
+
+				*Data = out(second - start, last - start);
+SSH_LOG("waitPrompt data:", *Data);
 			}
 
 			if (Debug)
@@ -253,6 +286,7 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 
 			LString ls, out;
 			ls.Printf("find %s -maxdepth 1 -printf \"%%f\n\"\n", path.Get());
+SSH_LOG("detectVcs:", ls);
 			con->Write(ls, ls.Length());
 			auto pr = WaitPrompt(con, &out);
 			auto lines = out.SplitDelimit("\r\n");
@@ -295,24 +329,26 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 				break;
 
 			LAssert(p->Args.Find("\n") < 0);
-			bool Debug = false; // p->Args.Find("lib_system_control_v2/include/CTrack.h") >= 0;
+			bool Debug = p->Args.Find("rev-list --all") >= 0;
 			if (Debug)
 			{
+				int asd=0;
 			}
 
 			LString cmd;
 			cmd.Printf("cd %s\n", path.Get());
+SSH_LOG("cd:", path);
 			auto wr = con->Write(cmd, cmd.Length());
 			auto pr = WaitPrompt(con, NULL, Debug?"Cd":NULL);
 
 			cmd.Printf("%s %s\n", p->Exe.Get(), p->Args.Get());
+SSH_LOG("cmd:", cmd);
 			wr = con->Write(cmd, cmd.Length());
 			pr = WaitPrompt(con, &p->Output, Debug?"Cmd":NULL);
 			
-			// LgiTrace("Ssh: %s\n%s\n", cmd.Get(), p->Output.Get());
-
 			LString result;
 			cmd = "echo $?\n";
+SSH_LOG("result:", cmd);
 			wr = con->Write(cmd, cmd.Length());
 			pr = WaitPrompt(con, &result, Debug?"Echo":NULL);
 			if (pr)
@@ -1819,6 +1855,8 @@ int LgiMain(OsAppArguments &AppArgs)
 	LApp a(AppArgs, AppName);
 	if (a.IsOk())
 	{
+		LStructuredLog::UnitTest();
+
 		a.AppWnd = new App;
 		a.Run();
 	}

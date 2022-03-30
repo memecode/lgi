@@ -21,6 +21,7 @@
 #include "lgi/common/Edit.h"
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/Menu.h"
+#include "lgi/common/Thread.h"
 #include "ViewPriv.h"
 
 #define DEBUG_MOUSE_CLICKS		0
@@ -2100,6 +2101,18 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 						Wnd->SysOnNotify(Msg->Msg(), Hdr->code);
 				}
 				break;
+			}
+			case M_THREAD_COMPLETED:
+			{
+				auto Th = (LThread*)Msg->A();
+				if (!Th)
+					break;
+
+				Th->OnComplete();
+				if (Th->GetDeleteOnExit())
+					delete Th;
+
+				return true;
 			}
 			default:
 			{

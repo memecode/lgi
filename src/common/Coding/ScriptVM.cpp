@@ -6,7 +6,6 @@
 #include "lgi/common/TextLog.h"
 #include "lgi/common/List.h"
 #include "lgi/common/ToolBar.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/TableLayout.h"
 #include "lgi/common/TextLabel.h"
 #include "lgi/common/ScrollBar.h"
@@ -1760,7 +1759,7 @@ void LVmDebuggerWnd::SetSource(const char *Mixed)
 	CodeBlock *Cur = &d->Blocks.New();
 
 	// Parse the mixed source
-	GToken t(Mixed, "\n", false);
+	auto t = LString(Mixed).SplitDelimit("\n", -1, false);
 	bool InGlobals = true;
 	int InAsm = -1;
 	
@@ -1818,7 +1817,7 @@ void LVmDebuggerWnd::SetSource(const char *Mixed)
 	Tmp.Empty();
 	
 	LStringPipe Txt;
-	GToken Src(d->Script, "\n", false);
+	auto Src = d->Script.SplitDelimit("\n", -1, false);
 	unsigned SrcLine = 1;
 	unsigned ViewLine = 1;
 	for (unsigned i=0; i<d->Blocks.Length(); i++)
@@ -1858,7 +1857,7 @@ void LVmDebuggerWnd::SetSource(const char *Mixed)
 	}
 	while (SrcLine <= Src.Length())
 	{
-		Txt.Print("%i: %s\n", SrcLine, Src[SrcLine-1]);
+		Txt.Print("%i: %s\n", SrcLine, Src[SrcLine-1].Get());
 		SrcLine++;
 	}
 	

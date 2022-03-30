@@ -3,7 +3,6 @@
 #include "lgi/common/Scripting.h"
 #include "lgi/common/LexCpp.h"
 #include "lgi/common/LgiString.h"
-#include "lgi/common/Token.h"
 #include "ScriptingPriv.h"
 
 // #define DEBUG_SCRIPT_FILE	"Mail Filters Menu.script"
@@ -401,7 +400,7 @@ public:
 	bool Debug;
 
 	#ifdef _DEBUG
-	LArray<LVariant> RegAllocators;
+	LString::Array RegAllocators;
 	#endif
 
 	LCompilerPriv()
@@ -1312,6 +1311,7 @@ public:
 			{
 				// Variable
 				unsigned p = 0;
+				bool ArrayDeindexed = false;
 				bool HasScriptArgs = Scopes.Length() <= 1 && ScriptArgs != NULL;
 				GVarRef v = FindVariable(n.Variable[p].Name, /*!HasScriptArgs ||*/ LValue != NULL);
 				if (v.Index < 0)
@@ -1333,11 +1333,17 @@ public:
 								v.Value.Dom = ScriptArgs;								
 							}
 							
-							GVarRef Name, Null;
+							GVarRef Name, Array;
 							AllocConst(Name, VarName, -1);
-							AllocNull(Null);
+							if (n.Variable[p].Array.Length())
+							{
+								if (!AsmExpression(&Array, n.Variable[p].Array))
+									return OnError(n.Tok, "Can't assemble array expression.");
+								ArrayDeindexed = true;
+							}
+							else AllocNull(Array);
 							
-							Asm4(n.Tok, IDomGet, v, ScriptArgsRef, Name, Null);
+							Asm4(n.Tok, IDomGet, v, ScriptArgsRef, Name, Array);
 						}
 						else return false;
 					}
@@ -1394,7 +1400,8 @@ public:
 				LAssert(v.Scope != SCOPE_OBJECT);
 
 				// Does it have an array deref?
-				if (n.Variable[p].Array.Length())
+				if (!ArrayDeindexed &&
+					n.Variable[p].Array.Length())
 				{
 					// Evaluate the array indexing expression
 					if (!AsmExpression(&n.ArrayIdx, n.Variable[p].Array))
@@ -2041,11 +2048,9 @@ public:
 		{
 			for (unsigned n=0; n<RegAllocators.Length(); n++)
 			{
-				char *a = RegAllocators[n].Str();
+				auto a = RegAllocators[n].Get();
 				if (a)
-				{
 					Log->Print("CompileError:Register[%i] allocated by %s\n", n, a);
-				}
 			}
 		}
 		#endif
@@ -3771,7 +3776,7 @@ LExecutionStatus LScriptEngine::RunTemporary(LCompiledCode *Obj, char *Script, L
 	return Status;
 }
 
-bool LScriptEngine::EvaluateExpression(LVariant *Result, LDom *VariableSource, char *Expression)
+bool LScriptEngine::EvaluateExpression(LVariant *Result, LDom *VariableSource, const char *Expression)
 {
 	if (!Result || !VariableSource || !Expression)
 	{
@@ -3780,9 +3785,8 @@ bool LScriptEngine::EvaluateExpression(LVariant *Result, LDom *VariableSource, c
 	}
 
 	// Create trivial script to evaluate the expression
-	LStringPipe p;
-	p.Print("return %s;", Expression);
-	LAutoString a(p.NewStr());
+	LString a;
+	a.Printf("return %s;", Expression);
 	
 	// Compile the script
 	GCompiler Comp;

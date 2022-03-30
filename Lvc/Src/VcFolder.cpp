@@ -940,11 +940,6 @@ bool VcFolder::GetBranches(ParseParams *Params)
 
 bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 {
-	/*
-	LHashTbl<StrKey<char>, int> Map(0, -1);
-	for (unsigned i=0; i<Log.Length(); i++)
-		Map.Add(Log[i]->GetRev(), i);
-	*/
 	Log.DeleteObjects();
 
 	int Errors = 0;
@@ -1050,8 +1045,6 @@ VcLeaf *VcFolder::FindLeaf(const char *Path, bool OpenTree)
 
 bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 {
-printf("ParseLog %i\n", (int)s.Length());
-
 	LHashTbl<StrKey<char>, VcCommit*> Map;
 	for (auto pc: Log)
 		Map.Add(pc->GetRev(), pc);
@@ -1694,10 +1687,11 @@ void VcFolder::Diff(VcFile *file)
 		{
 			LString a;
 
-			if (file->GetRevision())
-				LAssert(!"impl the revision cmd line arg.");
-
-			a.Printf("diff \"%s\"", Fn);
+			auto rev = file->GetRevision();
+			if (rev)
+				a.Printf("diff %s \"%s\"", rev, Fn);
+			else
+				a.Printf("diff \"%s\"", Fn);
 			StartCmd(a, &VcFolder::ParseDiff);
 			break;
 		}

@@ -8,7 +8,6 @@
 #if defined(POSIX)
 #include <dlfcn.h>
 #endif
-#include "lgi/common/Token.h"
 
 LLibrary::LLibrary(const char *File, bool Quiet)
 {

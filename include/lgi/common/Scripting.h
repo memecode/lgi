@@ -412,7 +412,7 @@ public:
 					LDom *Args = NULL);
 	LExecutionStatus Run(LCompiledCode *Obj, LVariant *Ret = NULL, const char *TempPath = NULL);
 	LExecutionStatus RunTemporary(LCompiledCode *Obj, char *Script, LVariant *Ret = NULL);
-	bool EvaluateExpression(LVariant *Result, LDom *VariableSource, char *Expression);
+	bool EvaluateExpression(LVariant *Result, LDom *VariableSource, const char *Expression);
 	bool CallMethod(LCompiledCode *Obj, const char *Method, LScriptArguments &Args);
 	LScriptContext *GetSystemContext();
 };

@@ -7,8 +7,6 @@
 
 #if WINNATIVE
 #include <Shlobj.h>
-#elif defined LINUX
-#include "lgi/common/Token.h"
 #elif defined MAC
 #include "lgi/common/Net.h"
 LgiFunc bool LMacFileToPath(LString &a);
@@ -152,7 +150,7 @@ public:
 				{
 					LXmlTree t;
 					LXmlTag r;
-					GMemStream ms(v->Value.Binary.Data, v->Value.Binary.Length, false);
+					LMemStream ms(v->Value.Binary.Data, v->Value.Binary.Length, false);
 					if (t.Read(&r, &ms))
 					{
 						auto Arr = r.GetChildTag("array");

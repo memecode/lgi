@@ -3,7 +3,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Scripting.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/SubProcess.h"
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/FileSelect.h"
@@ -447,10 +446,9 @@ bool SystemFunctions::SelectFiles(LScriptArguments &Args)
 	if (Args.Length() > 0)
 		s->Parent(CastLView(*Args[0]));
 	
-	GToken t(Args.Length() > 1 ? Args[1]->CastString() : 0, ",;:");
-	for (unsigned i=0; i<t.Length(); i++)
+	auto t = LString(Args.Length() > 1 ? Args[1]->CastString() : NULL).SplitDelimit(",;:");
+	for (auto c: t)
 	{
-		char *c = t[i];
 		char *sp = strrchr(c, ' ');
 		if (sp)
 		{

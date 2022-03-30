@@ -383,7 +383,7 @@ enum Store3Fields
 	FIELD_TITLE = 114,					// (char*)
 	FIELD_TIMEZONE = 115,				// (char*)
 	FIELD_REFERENCES = 116,				// (char*)
-	FIELD_SERVER_UID = 117,				// (char*) Server identifier
+	FIELD_SERVER_UID = 117,				// (int64) Server identifier
 	FIELD_FOLDER_PERM_READ = 118,		// (int64)
 	FIELD_FOLDER_PERM_WRITE = 119,		// (int64)
 	FIELD_GROUP_NAME = 120,				// (char*) The name of a contact group

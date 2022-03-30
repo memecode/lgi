@@ -194,6 +194,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\lgi\common\StructuredIo.h" />
+    <ClInclude Include="..\include\lgi\common\StructuredLog.h" />
     <ClInclude Include="Src\Lvc.h" />
     <ClInclude Include="Src\VcCommit.h" />
     <ClInclude Include="Src\VcFile.h" />

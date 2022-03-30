@@ -6,7 +6,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Html.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Variant.h"
 #include "lgi/common/FindReplaceDlg.h"
@@ -2640,7 +2639,7 @@ void LTag::LoadImage(const char *Uri)
 
 		auto slen = strlen(s);
 		auto blen = BufferLen_64ToBin(slen);
-		GMemStream bin;
+		LMemStream bin;
 		bin.SetSize(blen);
 		ConvertBase64ToBinary((uint8_t*)bin.GetBasePtr(), blen, s, slen);
 		

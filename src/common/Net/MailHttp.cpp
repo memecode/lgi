@@ -3,7 +3,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Mail.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/DocView.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -289,7 +288,7 @@ bool MailPhp::Get(LSocketI *S, char *Uri, LStream &Out, bool MailTransfer)
 						}
 					}
 					
-					GCopyStreamer s;
+					LCopyStreamer s;
 					Status = s.Copy(&Buf, &Out) > 0;
 				}
 			}
@@ -337,12 +336,12 @@ bool MailPhp::Open(LSocketI *S, const char *RemoteHost, int Port, const char *Us
 			bool PopOverHttp = false;
 			bool GotToken = false;
 
-			GToken Lines(m, "\r\n");
+			auto Lines = LString(m).SplitDelimit("\r\n");
 			if (_strnicmp(m, "error:", 6) == 0)
 			{
 				for (unsigned Line=0; Line<Lines.Length(); Line++)
 				{
-					Log(Lines[Line] + 7, LSocketI::SocketMsgError);
+					Log(Lines[Line].Get() + 7, LSocketI::SocketMsgError);
 				}
 			}
 			else if (Lines.Length() > 1)
@@ -361,7 +360,7 @@ bool MailPhp::Open(LSocketI *S, const char *RemoteHost, int Port, const char *Us
 						{
 							if (PopOverHttp)
 							{
-								GToken p(Val, " ");
+								auto p = LString(Val).SplitDelimit(" ");
 								if (p.Length() > 1)
 								{
 									Msg *m = new Msg;
@@ -569,9 +568,8 @@ int MailPhp::Sizeof(int Message)
 bool MailPhp::GetSizes(LArray<int> &Sizes)
 {
 	for (auto m: d->Msgs)
-	{
 		Sizes.Add(m->Size);
-	}
+
 	return Sizes.Length() == d->Msgs.Length();
 }
 
@@ -585,15 +583,11 @@ bool MailPhp::GetUid(int Message, char *Id, int IdLen)
 	return true;
 }
 
-bool MailPhp::GetUidList(List<char> &Id)
+bool MailPhp::GetUidList(LString::Array &Id)
 {
 	for (auto m: d->Msgs)
-	{
 		if (m->Uid)
-		{
-			Id.Insert(NewStr(m->Uid));
-		}
-	}
+			Id.New() = m->Uid;
 
 	return Id.Length() > 0;
 }

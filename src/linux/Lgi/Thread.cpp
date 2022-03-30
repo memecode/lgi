@@ -1,7 +1,9 @@
-#include "lgi/common/Lgi.h"
 #include <errno.h>
 #include <unistd.h>
 #include <sys/syscall.h>
+
+#include "lgi/common/Lgi.h"
+#include "lgi/common/EventTargetThread.h"
 
 OsThreadId GetCurrentThreadId()
 {
@@ -38,9 +40,17 @@ void *ThreadEntryPoint(void *i)
 		Thread->ReturnValue = Thread->Main();
 		Thread->OnAfterMain();
 
-		// mark thread over...
+		// Shutdown...
 		Thread->State = LThread::THREAD_EXITED;
-
+		bool DelayDelete = false;
+		if (Thread->ViewHandle >= 0)
+		{
+			// If DeleteOnExit is set AND ViewHandle then the LView::OnEvent handle will
+			// process the delete... don't do it here.
+			DelayDelete = PostThreadEvent(Thread->ViewHandle, M_THREAD_COMPLETED, (LMessage::Param)Thread);
+			// However if PostThreadEvent fails... do honour DeleteOnExit.
+		}
+		
 		if (Thread->DeleteOnExit)
 		{
 			DeleteObj(Thread);
@@ -51,9 +61,10 @@ void *ThreadEntryPoint(void *i)
 	return 0;
 }
 
-LThread::LThread(const char *ThreadName)
+LThread::LThread(const char *ThreadName, int viewHandle)
 {
 	Name = ThreadName;
+	ViewHandle = viewHandle;
 	ThreadId = 0;
 	State = LThread::THREAD_INIT;
 	ReturnValue = -1;

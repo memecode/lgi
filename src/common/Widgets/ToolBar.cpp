@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "lgi/common/Lgi.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Variant.h"
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/Palette.h"
@@ -493,7 +492,7 @@ public:
 		char *o;
 		if ((o = v.Str()))
 		{
-			GToken t(o, ",");
+			auto t = LString(o).SplitDelimit(",");
 			if (t.Length() >= 1)
 			{
 				Text = stricmp(t[0], "text") == 0;
@@ -574,7 +573,7 @@ void LToolButton::Layout()
 	char Buf[256];
 	strcpy_s(Buf, sizeof(Buf), s);
 
-	GToken t(Buf, " ");
+	auto t = LString(Buf).SplitDelimit(" ");
 	if (t.Length() < 3)
 	{
 		if (t.Length() > 0)
@@ -584,9 +583,9 @@ void LToolButton::Layout()
 	}
 	else if (t.Length() == 3)
 	{
-		sprintf_s(Buf, sizeof(Buf), "%s %s", t[0], t[1]);
+		sprintf_s(Buf, sizeof(Buf), "%s %s", t[0].Get(), t[1].Get());
 		LDisplayString *d1 = new LDisplayString(ToolBar->d->Font, Buf);
-		sprintf_s(Buf, sizeof(Buf), "%s %s", t[1], t[2]);
+		sprintf_s(Buf, sizeof(Buf), "%s %s", t[1].Get(), t[2].Get());
 		LDisplayString *d2 = new LDisplayString(ToolBar->d->Font, Buf);
 		if (d1 && d2)
 		{

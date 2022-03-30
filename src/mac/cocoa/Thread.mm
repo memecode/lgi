@@ -3,6 +3,7 @@
 #include "lgi/common/Mutex.h"
 #include "lgi/common/StringClass.h"
 #include "lgi/common/Thread.h"
+#include "lgi/common/EventTargetThread.h"
 #include <errno.h>
 
 #include <pthread.h>
@@ -26,9 +27,7 @@ void *ThreadEntryPoint(void *i)
 		
 		// Make sure we have finished executing the setup
 		while (Thread->State == LThread::THREAD_INIT)
-		{
-			LSleep(5);
-		}
+			LSleep(1);
 		
 		pthread_detach(Thread->hThread);
 		
@@ -39,8 +38,16 @@ void *ThreadEntryPoint(void *i)
 		
 		// mark thread over...
 		Thread->State = LThread::THREAD_EXITED;
+		bool DelayDelete = false;
+		if (Thread->ViewHandle >= 0)
+		{
+			// If DeleteOnExit is set AND ViewHandle then the LView::OnEvent handle will
+			// process the delete... don't do it here.
+			DelayDelete = PostThreadEvent(Thread->ViewHandle, M_THREAD_COMPLETED, (LMessage::Param)Thread);
+			// However if PostThreadEvent fails... do honour DeleteOnExit.
+		}
 		
-		if (Thread->DeleteOnExit)
+		if (!DelayDelete && Thread->DeleteOnExit)
 		{
 			DeleteObj(Thread);
 		}
@@ -50,11 +57,12 @@ void *ThreadEntryPoint(void *i)
 	return 0;
 }
 
-LThread::LThread(const char *name)
+LThread::LThread(const char *name, int viewHnd)
 {
 	State = THREAD_INIT;
 	ReturnValue = -1;
 	hThread = 0;
+	ViewHandle = viewHnd;
 	DeleteOnExit = false;
 	Priority = ThreadPriorityNormal;
 }
