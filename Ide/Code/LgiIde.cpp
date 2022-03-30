@@ -3140,8 +3140,6 @@ public:
 				SetCtrlValue(IDC_JOBS, v.CastInt32());
 			else
 				SetCtrlValue(IDC_JOBS, 2);
-			
-			DoModal(NULL);
 		}
 	}
 	
@@ -3536,7 +3534,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_OPTIONS:
 		{
-			Options Dlg(this);
+			auto dlg = new Options(this);
+			dlg->DoModal(NULL);
 			break;
 		}
 		case IDM_HELP:

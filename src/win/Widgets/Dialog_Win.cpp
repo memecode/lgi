@@ -25,17 +25,16 @@ struct LDialogPriv
 	int ModalStatus;
 	int BtnId;
 
-	#if WINNATIVE
-    #if USE_DIALOGBOXINDIRECTPARAM
-	GMem *Mem;
-    #else
-    int ModalResult;
-	#endif
-	#elif defined BEOS
+	// Modal state
+	OsView ParentHnd = NULL;
+	LWindow *ParentWnd = NULL;
+	LDialog::OnClose Callback;
 
+	#if WINNATIVE
+    int ModalResult;
+	#elif defined BEOS
 	sem_id ModalSem;
 	int ModalRet;
-
 	#endif
 
     LDialogPriv()
@@ -124,6 +123,7 @@ LDialog::LDialog()
 
 LDialog::~LDialog()
 {
+	LAssert(!d->IsModal && !d->IsModeless); // Can't delete while still active...
     DeleteObj(d);
 }
 
@@ -178,83 +178,9 @@ bool LDialog::IsModal()
 
 void LDialog::DoModal(OnClose Callback, OsView ParentHnd)
 {
-	int Status = -1;
-
 	d->IsModal = true;
+	d->Callback = Callback;
 	
-	#if USE_DIALOGBOXINDIRECTPARAM
-	
-	d->Mem = new GMem(16<<10);
-	if (d->Mem)
-	{
-		DLGTEMPLATE *Template = (DLGTEMPLATE*) d->Mem->Lock();
-		if (Template)
-		{
-			LRect r = GetPos();
-
-			r.x1 = (double)r.x1 / DIALOG_X;
-			r.y1 = (double)r.y1 / DIALOG_Y;
-			r.x2 = (double)r.x2 / DIALOG_X;
-			r.y2 = (double)r.y2 / DIALOG_Y;
-
-			Template->style =	// DS_ABSALIGN |
-								DS_SETFONT |
-								DS_NOFAILCREATE |
-								DS_3DLOOK |
-								WS_SYSMENU |
-								WS_CAPTION |
-								DS_SETFOREGROUND |
-								DS_MODALFRAME;
-
-			Template->dwExtendedStyle = WS_EX_DLGMODALFRAME;
-			Template->cdit = 0;
-			Template->x = r.x1;
-			Template->y = r.y1;
-			Template->cx = r.X();
-			Template->cy = r.Y();
-
-			short *A = (short*) (Template+1);
-			// menu
-			*A++ = 0;
-			// class
-			*A++ = 0;
-			// title
-			A = DlgStrCopy(A, NameW());
-			// font
-			*A++ = LSysFont->PointSize();
-			A = DlgStrCopy(A, LSysFont->Face());
-			A = DlgPadToDWord(A);
-
-			LViewI *p = GetParent();
-			while (	p &&
-					!p->Handle() &&
-					p->GetParent())
-			{
-				p = p->GetParent();
-			}
-
-			HWND hWindow = 0;
-			if (ParentHnd)
-			{
-				hWindow = ParentHnd;
-			}
-			else if (p)
-			{
-				hWindow = p->Handle();
-			}
-
-			Status = DialogBoxIndirectParam(LProcessInst(),
-											Template,
-											hWindow,
-											(DLGPROC) DlgRedir, 
-											(LPARAM) this);
-		}
-
-		DeleteObj(d->Mem);
-	}
-	
-	#else
-
     LViewI *p = GetParent();
     if (p && p->GetWindow() != p)
         p = p->GetWindow();
@@ -263,9 +189,9 @@ void LDialog::DoModal(OnClose Callback, OsView ParentHnd)
 	{
 	    AttachChildren();
 	    
-	    LWindow *ParentWnd = dynamic_cast<LWindow*>(p);
-	    if (ParentWnd)
-	        ParentWnd->_Dialog = this;
+	    d->ParentWnd = dynamic_cast<LWindow*>(p);
+	    if (d->ParentWnd)
+	        d->ParentWnd->_Dialog = this;
 
 	    if (p)
 	    {
@@ -286,29 +212,39 @@ void LDialog::DoModal(OnClose Callback, OsView ParentHnd)
 	    
 	    Visible(true);
 	    
-	    OsView pwnd = ParentHnd ? ParentHnd : (p ? p->Handle() : NULL);
-	    if (pwnd) EnableWindow(pwnd, false);
-	    while (d->ModalResult < 0)
-	    {
-	        LYield();
-	        LSleep(20);
-	    }
-	    if (pwnd) EnableWindow(pwnd, true);
-	    if (ParentWnd)
-	        ParentWnd->_Dialog = NULL;
-	    
-	    Visible(false);
-	    Status = d->ModalResult;
+	    d->ParentHnd = d->ParentHnd ? d->ParentHnd : (p ? p->Handle() : NULL);
+	    if (d->ParentHnd)
+			EnableWindow(d->ParentHnd, false);
 	}
 	else
 	{
 	    LAssert(!"Attach failed.");
 	}
-	
-	#endif
+}
 
-	if (Callback)
-		Callback(this, Status);
+void LDialog::EndModal(int Code)
+{
+	if (!d->IsModal)
+	{
+		LAssert(!"Not a modal dialog.");
+		return;
+	}
+
+	d->ModalResult = max(Code, 0);
+
+	if (d->ParentHnd)
+		EnableWindow(d->ParentHnd, true);
+	if (d->ParentWnd)
+	    d->ParentWnd->_Dialog = NULL;
+	    
+	Visible(false);
+
+	d->IsModal = false;
+
+	if (d->Callback)
+		d->Callback(this, d->ModalResult);
+	else
+		delete this; // default action is to delete the dialog
 }
 
 static char *BaseStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -532,18 +468,6 @@ void LDialog::OnPosChange()
             t->SetPos(r);
         }
     }
-}
-
-void LDialog::EndModal(int Code)
-{
-	if (d->IsModal)
-	{
-		#if USE_DIALOGBOXINDIRECTPARAM
-		EndDialog(Handle(), Code);
-		#else
-		d->ModalResult = max(Code, 0);
-		#endif
-	}
 }
 
 void LDialog::EndModeless(int Code)
