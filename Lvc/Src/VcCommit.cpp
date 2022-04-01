@@ -257,9 +257,8 @@ bool VcCommit::GitParse(LString s, bool RevList)
 		Ts.SetUnix((uint64) a[0].Int());
 		Rev = a[1];
 
-		for (int i=0; i<lines.Length(); i++)
+		for (auto Ln: lines)
 		{
-			LString &Ln = lines[i];
 			if (IsWhiteSpace(Ln(0)))
 			{
 				if (Msg)
