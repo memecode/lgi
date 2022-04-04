@@ -195,8 +195,6 @@ public:
 		int Flags = 0
 	);
 
-	ssize_t Write(const LString &s) { return Write(s.Get(), s.Length()); }
-	
 	/// \brief Reads data from the remote host.
 	/// \return the number of bytes read or <= 0 on error.
 	///
@@ -212,7 +210,7 @@ public:
 		/// The flags to pass to recv
 		int Flags = 0
 	);
-	
+
 	/// Returns the last error or 0.
 	int Error(void *Param = 0);
 	const char *GetErrorString();

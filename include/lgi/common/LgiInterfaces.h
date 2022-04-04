@@ -102,6 +102,23 @@ public:
 	virtual LStreamI *Clone() { return 0; }
 
 	virtual void ChangeThread() {}
+
+	/// Utility: Read as LString.
+	LString Read(size_t bufLen = 256)
+	{
+		LString s;
+		s.Length(bufLen);
+		auto rd = Read(s.Get(), s.Length());
+		if (rd < (ssize_t) s.Length())
+			s.Length(rd);
+		return s;
+	}
+
+	/// Utility: Write a LString
+	size_t Write(const LString &s)
+	{
+		return Write(s.Get(), s.Length());
+	}
 };
 
 /// Socket logging types..
@@ -140,7 +157,7 @@ public:
 	virtual LCancel *GetCancel() { return NULL; }
 	virtual void SetCancel(LCancel *c) { }
 
-	// Logging
+	// Logging and utility
 	virtual class LStreamI *GetLog() { return NULL; }
 
 	// Host/Port meta data

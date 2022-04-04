@@ -2412,18 +2412,18 @@ bool IMapHeadersCallback(MailIMap *Imap, uint32_t Msg, MailIMap::StrMap &Parts, 
 	{
 		Parts.Delete(sRfc822Header);
 
-		LAutoString *Hdrs = (LAutoString*)UserData;
-		Hdrs->Reset(s);
+		LString *Hdrs = (LString*)UserData;
+		*Hdrs = s;
 	}
 	
 	return true;
 }
 
-char *MailIMap::GetHeaders(int Message)
+LString MailIMap::GetHeaders(int Message)
 {
-	LAutoString Text;
+	LString Text;
 	
-	if (Lock(_FL))
+	if (!Lock(_FL))
 	{
 		char Seq[64];
 		sprintf_s(Seq, sizeof(Seq), "%i", Message + 1);
@@ -2438,7 +2438,7 @@ char *MailIMap::GetHeaders(int Message)
 		Unlock();
 	}
 	
-	return Text.Release();
+	return Text;
 }
 
 struct ReceiveCallbackState
@@ -2731,7 +2731,7 @@ bool ImapSizeCallback(MailIMap *Imap, uint32_t Msg, MailIMap::StrMap &Parts, voi
 	return true;
 }
 
-bool MailIMap::GetSizes(LArray<int> &Sizes)
+bool MailIMap::GetSizes(LArray<int64_t> &Sizes)
 {
 	return Fetch(false, "1:*", sRfc822Size, ImapSizeCallback, &Sizes) != 0;	
 }
