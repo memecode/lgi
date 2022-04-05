@@ -115,7 +115,7 @@ public:
 	}
 
 	/// Utility: Write a LString
-	size_t Write(const LString &s)
+	size_t Write(const LString s)
 	{
 		return Write(s.Get(), s.Length());
 	}
