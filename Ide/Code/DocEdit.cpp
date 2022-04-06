@@ -148,7 +148,7 @@ void DocEdit::OnPaint(LSurface *pDC)
 	
 	LRect cli = GetClient();
 	pDC->Colour(LColour::Red);
-	pDC->Box(cli.x1, cli.y1, cli.x2, cli.y2);
+	pDC->Box(&cli);
 	
 	for (LViewI *p = GetParent(); p; p = p->GetParent())
 	{
@@ -158,7 +158,7 @@ void DocEdit::OnPaint(LSurface *pDC)
 		cli.Offset(pos.x1, pos.y1);
 	}
 	
-	printf("cli=%s\n", cli.GetStr());
+	LgiTrace("cli=%s\n", cli.GetStr());
 }
 
 void DocEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)

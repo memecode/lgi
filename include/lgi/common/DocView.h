@@ -240,7 +240,7 @@ class LgiClass LDocView :
 	friend class LDocumentEnv;
 
 protected:
-	LDocumentEnv *Environment;
+	LDocumentEnv *Environment = NULL;
 	LString Charset;
 
 public:
@@ -311,14 +311,12 @@ public:
 		LoadImages = false;
 		OverideDocCharset = false;
 
-		Environment = 0;
-
 		SetEnv(e);
 	}
 
 	virtual ~LDocView()
 	{
-		SetEnv(0);
+		SetEnv(NULL);
 	}
 
 	const char *GetClass() { return "LDocView"; }
