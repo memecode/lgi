@@ -2604,23 +2604,39 @@ LPoint &LView::GetWindowBorderSize()
 		}
 	}
 
-#elif defined(HAIKU)
+#elif defined(HAIKU) || defined(WINDOWS)
 
 	template<typename T>
-	void _Dump(int Depth, T *v)
+	void _Dump(int Depth, T v)
 	{
 		LString Sp, Name;
 		Sp.Length(Depth<<1);
 		memset(Sp.Get(), ' ', Depth<<1);
 		Sp.Get()[Depth<<1] = 0;
 		
-		LRect Frame = v->Frame();
-		printf("%s%p::%s frame=%s vis=%i\n",
-			Sp.Get(), v, v->Name(), Frame.GetStr(), !v->IsHidden());
+		#if defined(HAIKU)
+			LRect Frame = v->Frame();
+			Name = v->Name();
+			bool IsHidden = v->IsHidden();
+		#else
+			RECT rc; GetWindowRect(v, &rc);
+			LRect Frame = rc;
+			wchar_t txt[256];
+			GetWindowTextW(v, txt, CountOf(txt));
+			Name = txt;
+			bool IsHidden = !(GetWindowLong(v, GWL_STYLE) & WS_VISIBLE);
+		#endif
+
+		LgiTrace("%s%p::%s frame=%s vis=%i\n",
+			Sp.Get(), v, Name.Get(), Frame.GetStr(), !IsHidden);
+
+		#if defined(HAIKU)
 		for (int32 i=0; i<v->CountChildren(); i++)
-		{
 			_Dump(Depth + 1, v->ChildAt(i));
-		}
+		#else
+		for (auto h = GetWindow(v, GW_CHILD); h; h = GetWindow(h, GW_HWNDNEXT))
+			_Dump(Depth + 1, h);
+		#endif
 	}
 
 #endif
@@ -2651,10 +2667,12 @@ void LView::_Dump(int Depth)
 
 		// DumpGtk(_View);
 	
-	#elif defined(HAIKU)
+	#else
 	
+		#if defined(HAIKU)
 		LLocker lck(WindowHandle(), _FL);
 		if (lck.Lock())
+		#endif
 			::_Dump(0, WindowHandle());
 	
 	#endif
