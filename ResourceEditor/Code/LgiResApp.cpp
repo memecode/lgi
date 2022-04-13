@@ -829,7 +829,7 @@ int FieldView::OnNotify(LViewI *Ctrl, LNotification n)
 						{
 							LFile::Path p = File;
 							p--;
-							LAutoString Rel = LMakeRelativePath(p, s.Name());
+							auto Rel = LMakeRelativePath(p, s.Name());
 							if (Rel)
 								SetCtrlName(c->Id, Rel);
 							else
@@ -1407,7 +1407,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		}
 		case IDM_HELP:
 		{
-			char ExeName[MAX_PATH];
+			char ExeName[MAX_PATH_LEN];
 			sprintf_s(ExeName, sizeof(ExeName), "%s", LGetExePath().Get());
 
 			while (strchr(ExeName, DIR_CHAR) && strlen(ExeName) > 3)
@@ -3065,7 +3065,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 	// Rename the existing file to 'xxxxxx.bak'
 	if (LFileExists(FileName))
 	{
-		char Bak[MAX_PATH];
+		char Bak[MAX_PATH_LEN];
 		strcpy_s(Bak, sizeof(Bak), FileName);
 		char *e = LGetExtension(Bak);
 		if (e)

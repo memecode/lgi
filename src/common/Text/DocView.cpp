@@ -118,7 +118,7 @@ LDocumentEnv::LoadType LDefaultDocumentEnv::GetContent(LoadJob *&j)
 	if (!j || !ValidStr(j->Uri))
 		return LoadError;
 
-	char p[MAX_PATH];
+	char p[MAX_PATH_LEN];
 	char *FullPath = NULL;
 	char *FileName = NULL;
 	LUri u(j->Uri);

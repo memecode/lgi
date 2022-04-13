@@ -1110,7 +1110,7 @@ LSurface *GetHttpImage(char *Uri)
 			{
 				if (Code == 200)
 				{
-					char n[MAX_PATH], r[32];
+					char n[MAX_PATH_LEN], r[32];
 					do
 					{
 						sprintf_s(r, sizeof(r), "_%x", LRand());

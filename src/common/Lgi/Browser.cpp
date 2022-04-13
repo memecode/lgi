@@ -178,7 +178,7 @@ public:
 			return false;
 
 		LUri u(Uri);
-		char Sep, Buf[MAX_PATH];
+		char Sep, Buf[MAX_PATH_LEN];
 		if (!u.sProtocol)
 		{
 			// Relative link?
@@ -251,7 +251,7 @@ public:
 		
 		if (LoadFileName)
 		{
-			char p[MAX_PATH];
+			char p[MAX_PATH_LEN];
 			LMakePath(p, sizeof(p), !BaseUri.sPath.IsEmpty() ? BaseUri.sPath : Uri, "..");
 			LMakePath(p, sizeof(p), p, LoadFileName);
 			if (LFileExists(p))
@@ -441,7 +441,7 @@ bool GBrowser::SetUri(const char *Uri)
 {
 	if (Uri)
 	{
-		char s[MAX_PATH];
+		char s[MAX_PATH_LEN];
 		if (LDirExists(Uri))
 		{
 			sprintf_s(s, sizeof(s), "%s%cindex.html", Uri, DIR_CHAR);

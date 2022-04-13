@@ -14,7 +14,7 @@ class DbgHelp : public LLibrary
 public:
 	DbgHelp() : LLibrary("Dbghelp")
 	{
-		WCHAR   DllPath[MAX_PATH] = {0};
+		WCHAR   DllPath[MAX_PATH_LEN] = {0};
 		GetModuleFileNameW(Handle(), DllPath, _countof(DllPath));		
 		LgiTrace("Loaded '%S'\n", DllPath);
 	}
@@ -47,7 +47,7 @@ HRESULT GenerateCrashDump(MINIDUMP_TYPE flags, EXCEPTION_POINTERS *seh=NULL)
 	GetComputerNameA(compName, &compNameLen);
 
 	// build the filename: APPNAME_COMPUTERNAME_DATE_TIME.DMP
-	char path[MAX_PATH] = {0};
+	char path[MAX_PATH_LEN] = {0};
 	sprintf_s(path, ARRAYSIZE(path),
 			"c:\\myapp_%s_%04u-%02u-%02u_%02u-%02u-%02u.dmp",
 			compName, sysTime.wYear, sysTime.wMonth, sysTime.wDay,
@@ -105,7 +105,7 @@ LONG __stdcall LApp::_ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId)
 									// ourself, so let the default handler
 									// do it.
 
-	char p[MAX_PATH];
+	char p[MAX_PATH_LEN];
 	LGetSystemPath(LSP_APP_ROOT, p, sizeof(p));
 	if (!LDirExists(p))
 		FileDev->CreateFolder(p);

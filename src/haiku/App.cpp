@@ -239,7 +239,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	LgiArgsAppPath = AppArgs.Arg[0];
 	if (LIsRelativePath(LgiArgsAppPath))
 	{
-		char Cwd[MAX_PATH];
+		char Cwd[MAX_PATH_LEN];
 		getcwd(Cwd, sizeof(Cwd));
 		LMakePath(Cwd, sizeof(Cwd), Cwd, LgiArgsAppPath);
 		LgiArgsAppPath = Cwd;
@@ -570,7 +570,7 @@ void LApp::OnCommandLine()
 ::LString LApp::GetFileMimeType(const char *File)
 {
 	::LString Status;
-	char Full[MAX_PATH] = "";
+	char Full[MAX_PATH_LEN] = "";
 
 	if (!LFileExists(File))
 	{

@@ -106,7 +106,7 @@ bool FindInPath(LString &Exe)
 	LString::Array Path = LString(getenv("PATH")).Split(LGI_PATH_SEPARATOR);
 	for (unsigned i=0; i<Path.Length(); i++)
 	{
-		char p[MAX_PATH];
+		char p[MAX_PATH_LEN];
 		LMakePath(p, sizeof(p), Path[i], Exe);
 		if (LFileExists(p))
 		{
@@ -411,7 +411,7 @@ public:
 					m.Print("Target = %s\n", ToPlatformPath(Exe, Platform).Get());
 				else
 				{
-					LAutoString RelExe = LMakeRelativePath(Base, Exe);
+					auto RelExe = LMakeRelativePath(Base, Exe);
 					if (Base && RelExe)
 					{
 						m.Print("Target = %s\n", ToPlatformPath(RelExe, Platform).Get());
@@ -523,7 +523,7 @@ public:
 					}
 					else
 					{
-						LAutoString Rel;
+						LString Rel;
 						if (!LIsRelativePath(in))
 							Rel = LMakeRelativePath(Base, in);
 
@@ -565,7 +565,7 @@ public:
 				LString Target = dep->GetTargetName(Platform);
 				if (Target)
 				{
-					char t[MAX_PATH];
+					char t[MAX_PATH_LEN];
 					strcpy_s(t, sizeof(t), Target);
 					if (!strnicmp(t, "lib", 3))
 						memmove(t, t + 3, strlen(t + 3) + 1);
@@ -583,8 +583,7 @@ public:
 					{
 						LString DepPath = DepBase.Get();
 						
-						LAutoString Rel;
-						Rel = LMakeRelativePath(Base, DepPath);
+						auto Rel = LMakeRelativePath(Base, DepPath);
 
 						LString Final = Rel ? Rel.Get() : DepPath.Get();
 						Proj->CheckExists(Final);
@@ -657,7 +656,7 @@ public:
 							}
 						}						
 
-						char Path[MAX_PATH];
+						char Path[MAX_PATH_LEN];
 						strcpy_s(Path, sizeof(Path), Fn);
 
 						LTrimDir(Path);
@@ -920,7 +919,7 @@ public:
 								LAutoString dep_base = d->GetBasePath();
 								d->CheckExists(dep_base);
 
-								LAutoString rel_dir = LMakeRelativePath(my_base, dep_base);
+								auto rel_dir = LMakeRelativePath(my_base, dep_base);
 								d->CheckExists(rel_dir);
 								
 								char *mk_leaf = strrchr(mk, DIR_CHAR);
@@ -1032,7 +1031,7 @@ public:
 					{
 						if (!LIsRelativePath(p))
 						{
-							LAutoString a = LMakeRelativePath(Base, p);
+							auto a = LMakeRelativePath(Base, p);
 							m.Print("\t%s \\\n", ToPlatformPath(a ? a.Get() : p.Get(), Platform).Get());
 						}
 						else
@@ -1284,7 +1283,7 @@ LString BuildThread::FindExe()
 			const char *binName[] = {"python3", "python"};
 			for (int i=0; i<p.Length(); i++)
 			{
-				char Path[MAX_PATH];
+				char Path[MAX_PATH_LEN];
 				for (unsigned n=0; n<CountOf(binName); n++)
 				{
 					LMakePath(Path, sizeof(Path), p[i], LString(binName[n]) + LGI_EXECUTABLE_EXT);
@@ -1370,7 +1369,7 @@ LString BuildThread::FindExe()
 							i->Guid = p[5].Strip(" \t\"");
 							if (LIsRelativePath(i->File))
 							{
-								char f[MAX_PATH];
+								char f[MAX_PATH_LEN];
 								LMakePath(f, sizeof(f), Makefile, "..");
 								LMakePath(f, sizeof(f), f, i->File);
 								if (LFileExists(f))
@@ -1528,7 +1527,7 @@ LString BuildThread::FindExe()
 		// const char *Def = "c:\\Program Files (x86)\\IAR Systems\\Embedded Workbench 7.0\\common\\bin\\IarBuild.exe";
 		
 		LString ProgFiles = LGetSystemPath(LSP_USER_APPS, 32);
-		char p[MAX_PATH];
+		char p[MAX_PATH_LEN];
 		if (!LMakePath(p, sizeof(p), ProgFiles, "IAR Systems"))
 			return LString();
 		LDirectory d;
@@ -1599,7 +1598,7 @@ LString BuildThread::FindExe()
 		
 		for (int i=0; i<p.Length(); i++)
 		{
-			char Exe[MAX_PATH];
+			char Exe[MAX_PATH_LEN];
 			LMakePath
 			(
 				Exe,
@@ -1990,7 +1989,7 @@ bool IdeProject::OnNode(const char *Path, ProjectNode *Node, bool Add)
 		return false;
 	}
 
-	char Full[MAX_PATH];
+	char Full[MAX_PATH_LEN];
 	if (LIsRelativePath(Path))
 	{
 		LAutoString Base = GetBasePath();
@@ -2063,7 +2062,7 @@ if (Debug) LgiTrace("XmlBase='%s'\n		In='%s'\n", Base.Get(), In);
 		
 	GToken b(Base, DIR_STR);
 	GToken i(In, DIR_STR);
-	char out[MAX_PATH] = "";
+	char out[MAX_PATH_LEN] = "";
 	
 if (Debug) LgiTrace("Len %i-%i\n", b.Length(), i.Length());
 	
@@ -2154,7 +2153,7 @@ LString IdeProject::GetMakefile(IdePlatform Platform)
 			LAutoString Base = GetBasePath();
 			if (Base)
 			{
-				char p[MAX_PATH];
+				char p[MAX_PATH_LEN];
 				LMakePath(p, sizeof(p), Base, PMakefile);
 				Path = p;
 			}
@@ -2248,7 +2247,7 @@ public:
 				LString ExePath = Proj->GetExecutable(GetCurrentPlatform());
 				if (ExePath)
 				{
-					char Path[MAX_PATH];
+					char Path[MAX_PATH_LEN];
 					char *ExeLeaf = LGetLeaf(Exe);
 					strcpy_s(Path, sizeof(Path), ExeLeaf ? ExeLeaf : Exe.Get());
 					LTrimDir(Path);
@@ -2320,7 +2319,7 @@ GDebugContext *IdeProject::Execute(ExeAction Act)
 	if (d->Settings.GetStr(ProjExe) &&
 		Base)
 	{
-		char e[MAX_PATH];
+		char e[MAX_PATH_LEN];
 		if (GetExePath(e, sizeof(e)))
 		{
 			if (LFileExists(e))
@@ -2588,7 +2587,7 @@ LString IdeProject::GetExecutable(IdePlatform Platform)
 	{
 		if (LIsRelativePath(Bin) && Base)
 		{
-			char p[MAX_PATH];
+			char p[MAX_PATH_LEN];
 			if (LMakePath(p, sizeof(p), Base, Bin))
 				Bin = p;
 		}
@@ -2647,7 +2646,7 @@ LString IdeProject::GetExecutable(IdePlatform Platform)
 			return LString();
 		}
 			
-		char Path[MAX_PATH];
+		char Path[MAX_PATH_LEN];
 		LMakePath(Path, sizeof(Path), Base, Name);
 		LMakePath(Path, sizeof(Path), Path, Bin);
 		if (LFileExists(Path))
@@ -2697,7 +2696,7 @@ LAutoString IdeProject::GetFullPath()
 		return Status; // No absolute path in the parent projects?
 	}
 
-	char p[MAX_PATH];
+	char p[MAX_PATH_LEN];
 	strcpy_s(p, sizeof(p), proj->GetFileName()); // Copy the base path
 	if (sections.Length() > 0)
 		LTrimDir(p); // Trim off the filename
@@ -2763,7 +2762,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 	d->UserNodeFlags.Empty();
 	if (LIsRelativePath(FileName))
 	{
-		char p[MAX_PATH];
+		char p[MAX_PATH_LEN];
 		getcwd(p, sizeof(p));
 		LMakePath(p, sizeof(p), p, FileName);
 		d->FileName = p;
@@ -3501,7 +3500,7 @@ bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool In
 		for (int i=0; i<Out.Length(); i++)
 		{
 			char *Path = Out[i];
-			char *Full = 0, Buf[MAX_PATH];
+			char *Full = 0, Buf[MAX_PATH_LEN];
 			if
 			(
 				*Path != '/'
@@ -3541,7 +3540,7 @@ bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool In
 						(n->GetPlatforms() & (1 << Platform)) != 0)	// Exclude files not on this platform.
 					{
 						auto f = n->GetFileName();
-						char p[MAX_PATH];
+						char p[MAX_PATH_LEN];
 						if (f &&
 							LMakePath(p, sizeof(p), Base, f))
 						{
@@ -3614,7 +3613,7 @@ LString IdeProject::GetTargetName(IdePlatform Platform)
 		if (s)
 		{
 			// Generate the target executable name
-			char Target[MAX_PATH];
+			char Target[MAX_PATH_LEN];
 			strcpy_s(Target, sizeof(Target), s + 1);
 			s = strrchr(Target, '.');
 			if (s) *s = 0;
@@ -3650,7 +3649,7 @@ LString IdeProject::GetTargetFile(IdePlatform Platform)
 			}
 			else if (!stricmp(TargetType, "DynamicLibrary"))
 			{
-				char t[MAX_PATH];
+				char t[MAX_PATH_LEN];
 				auto DefExt = PlatformDynamicLibraryExt(Platform);
 				strcpy_s(t, sizeof(t), Target);
 				char *ext = LGetExtension(t);
@@ -3727,7 +3726,7 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, IdePlatform Platform)
 			d->Scanned = true;
 			
 			char *Src = d->File;
-			char Full[MAX_PATH];
+			char Full[MAX_PATH_LEN];
 			if (LIsRelativePath(d->File))
 			{
 				LMakePath(Full, sizeof(Full), Base, d->File);

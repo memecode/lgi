@@ -2933,7 +2933,7 @@ char *MailIMap::EncodePath(const char *Path)
 		return 0;
 
 	char Sep = GetFolderSep();
-	char Native[MAX_PATH], *o = Native, *e = Native + sizeof(Native) - 1;
+	char Native[MAX_PATH_LEN], *o = Native, *e = Native + sizeof(Native) - 1;
 	for (const char *i =
 		Path[0] == '/' && Path[1] ?
 		Path + 1 :

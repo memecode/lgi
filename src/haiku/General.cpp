@@ -145,7 +145,7 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 {
 	bool Status = false;
 
-	char Args[MAX_PATH];
+	char Args[MAX_PATH_LEN];
 	sprintf(Args, "query default %s", Mime);
 	LStringPipe Output;
 
@@ -173,7 +173,7 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 			while (e > o && strchr(" \t\r\n", e[-1]))
 				*(--e) = 0;
 			
-			char p[MAX_PATH];
+			char p[MAX_PATH_LEN];
 			if (LMakePath(p, sizeof(p), "/usr/share/applications", o))
 			{
 				if (LFileExists(p))
@@ -280,7 +280,7 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LString *Erro
 	{
 		bool IsUrl = false;
 
-		char App[MAX_PATH] = "";
+		char App[MAX_PATH_LEN] = "";
 		if (strnicmp(File, "http://", 7) == 0 ||
 			strnicmp(File, "https://", 8) == 0)
 		{
@@ -290,7 +290,7 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LString *Erro
 		else
 		{
 			struct stat f;
-			char Path[MAX_PATH];
+			char Path[MAX_PATH_LEN];
 			
 			// see if the file is executable
 			bool InPath = false;

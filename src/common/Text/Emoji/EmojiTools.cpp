@@ -156,7 +156,7 @@ LAutoWString TextToEmoji(uint32_t *Txt, bool IsHtml)
 	int Lnk = 0;
 	ssize_t Ch;
 	WChar Buf[BUF_SIZE];
-	char EmojiPng[MAX_PATH];
+	char EmojiPng[MAX_PATH_LEN];
 
 	#ifdef MAC
 	LgiGetExeFile(EmojiPng, sizeof(EmojiPng));

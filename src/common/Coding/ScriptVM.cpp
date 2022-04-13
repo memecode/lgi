@@ -725,7 +725,7 @@ public:
 
 		#ifdef _DEBUG
 		const char *SourceFileName = Code->GetFileName();
-		char Obj[MAX_PATH];
+		char Obj[MAX_PATH_LEN];
 		if (SourceFileName)
 		{
 			if (strchr(SourceFileName, DIR_CHAR))
@@ -1655,7 +1655,7 @@ LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmDebuggerCallback *Callback, LVi
 		Visible(true);
 		
 		{
-			char p[MAX_PATH];
+			char p[MAX_PATH_LEN];
 			LMakePath(p, sizeof(p), LGetExePath(), "../Scripts");
 			LDirectory dir;
 			LListItem *Match = NULL;

@@ -1610,7 +1610,7 @@ public:
 				    }
 				    if (HasTl)
 				    {
-			            LAutoString r = LMakeRelativePath(Base, Files[i]);
+			            auto r = LMakeRelativePath(Base, Files[i]);
 			            Tree->Insert(new Lr8Item(Wnd, Res, r));
 				    }
 				}
@@ -1685,7 +1685,7 @@ TableLayoutTest::TableLayoutTest(LViewI *par)
 	c->TextAlign(LCss::AlignRight);
 	c->Add(new LButton(IDOK, 0, 0, -1, -1, "Close"));
 
-	char e[MAX_PATH];
+	char e[MAX_PATH_LEN];
 	LGetSystemPath(LSP_APP_INSTALL, e, sizeof(e));
 	LMakePath(e, sizeof(e), e, "../../..");
 	Base.Reset(NewStr(e));

@@ -930,7 +930,7 @@ ImageCompareDlg::ImageCompareDlg(LView *p, const char *OutPath)
 				{
 					if (dir.IsDir())
 					{
-						char p[MAX_PATH];
+						char p[MAX_PATH_LEN];
 						if (dir.Path(p, sizeof(p)))
 						{
 							d->l->Insert(p);
@@ -969,12 +969,12 @@ int ImageCompareDlg::OnNotify(LViewI *Ctrl, LNotification n)
 					const char *right = s->GetText(1);
 					
 					#if 0
-					char p[MAX_PATH];
+					char p[MAX_PATH_LEN];
 					LgiGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
 					LMakePath(p, sizeof(p), p, "../../../../i.Mage/trunk/Win32Debug/image.exe");
 					if (FileExists(p))
 					{
-						char args[MAX_PATH];
+						char args[MAX_PATH_LEN];
 						sprintf_s(args, sizeof(args), "\"%s\" \"%s\"", left, right);
 						LExecute(p, args);
 					}
@@ -1005,7 +1005,7 @@ int ImageCompareDlg::OnNotify(LViewI *Ctrl, LNotification n)
 		{
 			LHashTbl<StrKey<char,false>, char*> Left;
 			LDirectory LDir, RDir;
-			char p[MAX_PATH];				
+			char p[MAX_PATH_LEN];				
 			for (bool b=LDir.First(d->l->Name()); b; b=LDir.Next())
 			{
 				if (LDir.IsDir())

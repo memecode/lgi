@@ -174,7 +174,7 @@ static void ClearEmptyTags(LXmlTag *t)
 
 struct IdeProjectSettingsPriv
 {
-	char PathBuf[MAX_PATH];
+	char PathBuf[MAX_PATH_LEN];
 
 public:
 	IdeProject *Project;
@@ -766,7 +766,7 @@ public:
 						if (BrowseFolder ? s.OpenFolder() : s.Open())
 						{
 							const char *Base = GetCtrlName(IDC_PATH);
-							LAutoString Rel;
+							LString Rel;
 							if (Base)
 							{
 								LFile::Path p = Base;

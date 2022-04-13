@@ -12,7 +12,7 @@ char *FindHeader(char *Short, LArray<LString> &Paths)
 	{
 		char *Path = Paths[i];
 		
-		char f[MAX_PATH];
+		char f[MAX_PATH_LEN];
 		LMakePath(f, sizeof(f), Path, Short);
 		if (LFileExists(f))
 		{

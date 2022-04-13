@@ -27,7 +27,7 @@ public:
 
 		Ext = "*.c* *.h *.java";
 
-		char Exe[MAX_PATH];
+		char Exe[MAX_PATH_LEN];
 		LMakePath(Exe, sizeof(Exe), LGetExePath(), "..");
 		Dir = Exe;
 		

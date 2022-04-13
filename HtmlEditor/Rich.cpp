@@ -220,7 +220,7 @@ public:
 						LMemStream File(1024);
 						if (LgiGetUri(this, &File, &err, Link))
 						{
-							char p[MAX_PATH];
+							char p[MAX_PATH_LEN];
 							LMakePath(p, sizeof(p), LGetExeFile(), "..");
 							LMakePath(p, sizeof(p), p, LGetLeaf(Link));
 
@@ -419,7 +419,7 @@ public:
 					#ifndef SrcFileName
 					Edit->Name(Src);
 					#else
-					char p[MAX_PATH];
+					char p[MAX_PATH_LEN];
 					LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
 					LMakePath(p, sizeof(p), p, "Test");
 					LMakePath(p, sizeof(p), p, SrcFileName);

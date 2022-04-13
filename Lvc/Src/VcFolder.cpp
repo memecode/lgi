@@ -55,7 +55,7 @@ bool TerminalAt(LString Path)
 	#if defined(MAC)
 		return LExecute("/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal", Path);
 	#elif defined(WINDOWS)
-		TCHAR w[MAX_PATH];
+		TCHAR w[MAX_PATH_LEN];
 		auto r = GetWindowsDirectory(w, CountOf(w));
 		if (r > 0)
 		{

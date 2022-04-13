@@ -849,7 +849,7 @@ bool SystemFunctions::PathExists(LScriptArguments &Args)
 
 bool SystemFunctions::PathJoin(LScriptArguments &Args)
 {
-	char p[MAX_PATH] = "";
+	char p[MAX_PATH_LEN] = "";
 	for (unsigned i=0; i<Args.Length(); i++)
 	{
 		char *s = Args[i]->CastString();

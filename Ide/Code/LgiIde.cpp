@@ -1167,7 +1167,7 @@ public:
 				LAutoString Base = p->GetBasePath();
 				if (Base)
 				{
-					char Path[MAX_PATH];
+					char Path[MAX_PATH_LEN];
 					LMakePath(Path, sizeof(Path), Base, File);
 					if (LFileExists(Path))
 					{
@@ -2258,7 +2258,7 @@ int AppWnd::OnFixBuildErrors()
 											{
 												for (int sub=0; !newPath && sub<CountOf(SubStr); sub++)
 												{
-													char path[MAX_PATH];
+													char path[MAX_PATH_LEN];
 													LMakePath(path, sizeof(path), inc, SubStr[sub]);
 													LMakePath(path, sizeof(path), path, wrongName);
 													if (LFileExists(path))
@@ -2695,7 +2695,7 @@ IdeDoc *AppWnd::FindOpenFile(char *FileName)
 				LAutoString Base = p->GetBasePath();
 				if (Base)
 				{
-					char Path[MAX_PATH];
+					char Path[MAX_PATH_LEN];
 					if (*f == '.')
 						LMakePath(Path, sizeof(Path), Base, f);
 					else
@@ -2741,7 +2741,7 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 			for (auto Project : Projs)
 			{
 				auto ProjPath = Project->GetBasePath();
-				char p[MAX_PATH];
+				char p[MAX_PATH_LEN];
 				LMakePath(p, sizeof(p), ProjPath, File);
 				LString Path = p;
 				if (Project->CheckExists(Path))
@@ -4296,7 +4296,7 @@ bool AppWnd::GetSystemIncludePaths(::LArray<LString> &Paths)
 			}
 		}
 		#else
-		char p[MAX_PATH];
+		char p[MAX_PATH_LEN];
 		LGetSystemPath(LSP_USER_DOCUMENTS, p, sizeof(p));
 		LMakePath(p, sizeof(p), p, "Visual Studio 2008\\Settings\\CurrentSettings.xml");
 		if (LFileExists(p))

@@ -715,7 +715,7 @@ void LGraph::OnMouseClick(LMouse &m)
                 LFileSelect s;
                 s.Parent(this);
                 s.Name("average.csv");
-                char Desktop[MAX_PATH];
+                char Desktop[MAX_PATH_LEN];
                 LGetSystemPath(LSP_DESKTOP, Desktop, sizeof(Desktop));
                 s.InitialDir(Desktop);
                 if (!s.Save())

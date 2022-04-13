@@ -179,7 +179,7 @@ public:
 		CursorPos.ZOff(-1, -1);
 		DeferredLoads = 0;
 
-		char EmojiPng[MAX_PATH];
+		char EmojiPng[MAX_PATH_LEN];
 		#ifdef MAC
 		LMakePath(EmojiPng, sizeof(EmojiPng), LGetExeFile(), "Contents/Resources/Emoji.png");
 		#else
@@ -7057,7 +7057,7 @@ void LHtml::OnAddStyle(const char *MimeType, const char *Styles)
 		bool LogCss = false;
 		if (!Status)
 		{
-			char p[MAX_PATH];
+			char p[MAX_PATH_LEN];
 			sprintf_s(p, sizeof(p), "c:\\temp\\css_parse_failure_%i.txt", LRand());
 			LFile f;
 			if (f.Open(p, O_WRITE))
@@ -8365,7 +8365,7 @@ void LHtml::OnMouseClick(LMouse &m)
 							break;
 						}
 
-						char Path[MAX_PATH];
+						char Path[MAX_PATH_LEN];
 						if (!LGetSystemPath(LSP_TEMP, Path, sizeof(Path)))
 						{
 							LgiTrace("%s:%i - Failed to get the system path.\n", _FL);
@@ -8418,7 +8418,7 @@ void LHtml::OnMouseClick(LMouse &m)
 									}
 									else
 									{
-										char File[MAX_PATH] = "";
+										char File[MAX_PATH_LEN] = "";
 										if (Environment)
 										{
 											LDocumentEnv::LoadJob *j = Environment->NewJob();

@@ -271,7 +271,7 @@ class TokenRanges
 	};
 
 	LArray<Range> Ranges;
-	char fl[MAX_PATH + 32];
+	char fl[MAX_PATH_LEN + 32];
 
 public:
 	TokenRanges()
@@ -748,7 +748,7 @@ public:
 						{
 							if (LIsRelativePath(v.Str()))
 							{
-								char p[MAX_PATH];
+								char p[MAX_PATH_LEN];
 								LMakePath(p, sizeof(p), FileName, "..");
 								LMakePath(p, sizeof(p), p, v.Str());
 								v = p;

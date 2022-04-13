@@ -106,7 +106,7 @@ public:
 			_getcwd(s, sizeof(s));
 
 			#ifdef _MSC_VER
-			char path[MAX_PATH] = "";
+			char path[MAX_PATH_LEN] = "";
 			size_t sz;
 			getenv_s(&sz, path, sizeof(path), "path");
 			#else

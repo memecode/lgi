@@ -787,7 +787,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			#endif
 			for (unsigned i=0; i<p.Length(); i++)
 			{
-				char s[MAX_PATH];
+				char s[MAX_PATH_LEN];
 				LMakePath(s, sizeof(s), p[i], d->Exe);
 				if (LFileExists(s))
 				{

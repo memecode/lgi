@@ -404,7 +404,7 @@ bool LFileSelect::OpenFolder()
 	if  (::SHGetMalloc(&pMalloc) == NOERROR)
 	{
 		BROWSEINFO      bi;
-		char16          pszBuffer[MAX_PATH];
+		char16          pszBuffer[MAX_PATH_LEN];
 		LPITEMIDLIST    pidl;
 
 		ZeroObj(bi);

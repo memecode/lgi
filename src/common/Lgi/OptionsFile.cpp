@@ -60,7 +60,7 @@ LOptionsFile::PortableType LOptionsFile::GuessMode()
 
 bool LOptionsFile::SetMode(PortableType mode, const char *BaseName)
 {
-	char FullPath[MAX_PATH];
+	char FullPath[MAX_PATH_LEN];
 
 	if (!mode)
 		mode = GuessMode();

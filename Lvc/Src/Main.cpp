@@ -374,7 +374,7 @@ const char *AppName =			"Lvc";
 
 VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 {
-	char p[MAX_PATH];
+	char p[MAX_PATH_LEN];
 	LUri u = Fld->GetUri();
 
 	if (!u.IsFile() || !u.sPath)

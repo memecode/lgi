@@ -22,7 +22,7 @@
 #include "LgiOsDefs.h"
 #include "GMem.h"
 
-#define MAX_PATH					256
+#define MAX_PATH_LEN					256
 
 #define O_READ						O_RDONLY
 #define O_WRITE						O_WRONLY
@@ -90,7 +90,7 @@ class VDirView : public VDirectory {
 	int Items;
 	int Files;
 	int Dirs;
-	char CurrentDir[MAX_PATH];
+	char CurrentDir[MAX_PATH_LEN];
 
 	class Node : public NodeInfo {
 

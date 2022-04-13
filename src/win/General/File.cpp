@@ -265,7 +265,7 @@ bool LResolveShortcut(const char *LinkFile, char *Path, ssize_t Len)
 					if (SUCCEEDED(hres) && Strlen(szGotPath) > 0)
 					{
 						#ifdef UNICODE
-						TCHAR TmpPath[MAX_PATH];
+						TCHAR TmpPath[MAX_PATH_LEN];
 						ssize_t TpLen = _GetLongPathName(szGotPath, TmpPath, CountOf(TmpPath)) * sizeof(TmpPath[0]);
 						const void *Tp = TmpPath;
 						ssize_t OutLen = LBufConvertCp(Path, "utf-8", Len-1, Tp, LGI_WideCharset, TpLen);

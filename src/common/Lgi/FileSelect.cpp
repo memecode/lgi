@@ -1117,7 +1117,7 @@ void LFileSelectDlg::OnUpFolder()
 	auto Cur = GetCtrlName(IDC_PATH);
 	if (Cur)
 	{
-		char Dir[MAX_PATH];
+		char Dir[MAX_PATH_LEN];
 		strcpy(Dir, Cur);
 		if (strlen(Dir) > 3)
 		{
@@ -1384,7 +1384,7 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification n)
 			auto File = GetCtrlName(IDC_FILE);
 			if (Path)
 			{
-				char f[MAX_PATH];
+				char f[MAX_PATH_LEN];
 				d->Files.DeleteArrays();
 
 				if (d->Type == TypeOpenFolder)
@@ -2214,7 +2214,7 @@ bool LgiGetUsersLinks(LArray<LString> &Links)
 			char *s = d.GetName();
 			if (s && stristr(s, ".lnk"))
 			{
-				char lnk[MAX_PATH];
+				char lnk[MAX_PATH_LEN];
 				if (d.Path(lnk, sizeof(lnk)) &&
 					LResolveShortcut(lnk, lnk, sizeof(lnk)))
 				{
@@ -2223,7 +2223,7 @@ bool LgiGetUsersLinks(LArray<LString> &Links)
 			}
 		}		
 	#elif defined(LINUX)
-		char p[MAX_PATH];
+		char p[MAX_PATH_LEN];
 		if (!LMakePath(p, sizeof(p), Folder, "bookmarks"))
 		{
 			LgiTrace("%s:%i - Failed to make path '%s'\n", _FL, Folder.Get());
