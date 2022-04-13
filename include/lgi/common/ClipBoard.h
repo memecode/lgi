@@ -2,6 +2,8 @@
 #ifndef _GCLIPBOARD_H
 #define _GCLIPBOARD_H
 
+#include <functional>
+
 /// Clipboard API
 class LgiClass LClipBoard
 {
@@ -20,6 +22,7 @@ class LgiClass LClipBoard
 public:
 	/// On windows, this equates to a CF_TEXT, CF_BITMAP, CF_DIB type #define
 	typedef uint32_t FormatType;
+	typedef std::function<void(LAutoPtr<LSurface>, LString)> BitmapCb;
 	static LString FmtToStr(FormatType Fmt);
 	static FormatType StrToFmt(LString Fmt);
 
@@ -47,7 +50,9 @@ public:
 
 	// Bitmap
 	bool Bitmap(LSurface *pDC, bool AutoEmpty = true);
-	LAutoPtr<LSurface> Bitmap();
+	bool Bitmap(BitmapCb Callback);
+
+	[[deprecated]] LAutoPtr<LSurface> Bitmap();
 	#if WINNATIVE
 	LAutoPtr<LSurface> ConvertFromPtr(void *Ptr);
 	#endif

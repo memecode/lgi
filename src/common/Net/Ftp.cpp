@@ -5,7 +5,6 @@
 
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/Ftp.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/LgiString.h"
 #include "lgi/common/LgiCommon.h"
 
@@ -153,7 +152,7 @@ IFtpEntry::IFtpEntry(char *Entry, const char *Cs)
 	if (Entry)
 	{
 		const char *Ws = " \t";
-		GToken T(Entry, Ws);
+		auto T = LString(Entry).SplitDelimit(Ws);
 		if (T.Length() > 0)
 		{
 			char *_Size = 0, *_Perm = 0;
@@ -1193,11 +1192,11 @@ bool IFtp::SetupData(bool Binary)
 						if (End)
 						{
 							*End = 0;
-							GToken T(Start, ",");
+							auto T = LString(Start).SplitDelimit(",");
 							if (T.Length() == 6)
 							{
-								sprintf_s(Ip, sizeof(Ip), "%s.%s.%s.%s", T[0], T[1], T[2], T[3]);
-								Port = (atoi(T[4])<<8) | atoi(T[5]);
+								sprintf_s(Ip, sizeof(Ip), "%s.%s.%s.%s", T[0].Get(), T[1].Get(), T[2].Get(), T[3].Get());
+								Port = (int) ((T[4].Int()<<8) | T[5].Int());
 								PassiveMode = true;
 								return true;
 							}

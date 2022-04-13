@@ -511,13 +511,13 @@ public:
 	/// Gets the size of the message on the server
 	virtual int Sizeof(int Message) = 0;
 	/// Gets the size of all the messages on the server
-	virtual bool GetSizes(LArray<int> &Sizes) { return false; }
+	virtual bool GetSizes(LArray<int64_t> &Sizes) { return false; }
 	/// Gets the unique identifier of the message
 	virtual bool GetUid(int Message, char *Id, int IdLen) = 0;
 	/// Gets the unique identifiers of a list of messages
-	virtual bool GetUidList(List<char> &Id) = 0;
+	virtual bool GetUidList(LString::Array &Id) = 0;
 	/// Gets the headers associated with a given message
-	virtual char *GetHeaders(int Message) = 0;
+	virtual LString GetHeaders(int Message) = 0;
 	/// Sets the proxy server. e.g. HTTP mail.
 	virtual void SetProxy(char *Server, int Port) {}
 };
@@ -567,7 +567,7 @@ class MailPop3 : public MailSource
 {
 protected:
 	bool ReadReply();
-	bool ReadMultiLineReply(char *&Str);
+	LString ReadMultiLineReply();
 	int GetInt();
 	bool MailIsEnd(char *Ptr, ssize_t Len);
 	bool ListCmd(const char *Cmd, LHashTbl<ConstStrKey<char,false>, bool> &Results);
@@ -589,10 +589,10 @@ public:
 	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
 	bool Delete(int Message);
 	int Sizeof(int Message);
-	bool GetSizes(LArray<int> &Sizes);
+	bool GetSizes(LArray<int64_t> &Sizes);
 	bool GetUid(int Message, char *Id, int IdLen);
-	bool GetUidList(List<char> &Id);
-	char *GetHeaders(int Message);
+	bool GetUidList(LString::Array &Id);
+	LString GetHeaders(int Message);
 };
 
 class MailReceiveFolder : public MailSource
@@ -614,8 +614,8 @@ public:
 	bool Delete(int Message);
 	int Sizeof(int Message);
 	bool GetUid(int Message, char *Id, int IdLen);
-	bool GetUidList(List<char> &Id);
-	char *GetHeaders(int Message);
+	bool GetUidList(LString::Array &Id);
+	LString GetHeaders(int Message);
 };
 
 class MailPhp : public MailSource
@@ -638,10 +638,10 @@ public:
 	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
 	bool Delete(int Message);
 	int Sizeof(int Message);
-	bool GetSizes(LArray<int> &Sizes);
+	bool GetSizes(LArray<int64_t> &Sizes);
 	bool GetUid(int Message, char *Id, int IdLen);
-	bool GetUidList(List<char> &Id);
-	char *GetHeaders(int Message);
+	bool GetUidList(LString::Array &Id);
+	LString GetHeaders(int Message);
 	void SetProxy(char *Server, int Port);
 };
 
@@ -764,10 +764,10 @@ public:
 	bool Delete(int Message);
 	bool Delete(bool ByUid, const char *Seq);
 	int Sizeof(int Message);
-	bool GetSizes(LArray<int> &Sizes);
+	bool GetSizes(LArray<int64_t> &Sizes);
 	bool GetUid(int Message, char *Id, int IdLen);
-	bool GetUidList(List<char> &Id);
-	char *GetHeaders(int Message);
+	bool GetUidList(LString::Array &Id);
+	LString GetHeaders(int Message);
 	char *SequenceToString(LArray<int> *Seq);
 
 	// Imap specific commands

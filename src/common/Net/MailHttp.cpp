@@ -3,7 +3,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Mail.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/DocView.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -289,7 +288,7 @@ bool MailPhp::Get(LSocketI *S, char *Uri, LStream &Out, bool MailTransfer)
 						}
 					}
 					
-					GCopyStreamer s;
+					LCopyStreamer s;
 					Status = s.Copy(&Buf, &Out) > 0;
 				}
 			}
@@ -337,12 +336,12 @@ bool MailPhp::Open(LSocketI *S, const char *RemoteHost, int Port, const char *Us
 			bool PopOverHttp = false;
 			bool GotToken = false;
 
-			GToken Lines(m, "\r\n");
+			auto Lines = LString(m).SplitDelimit("\r\n");
 			if (_strnicmp(m, "error:", 6) == 0)
 			{
 				for (unsigned Line=0; Line<Lines.Length(); Line++)
 				{
-					Log(Lines[Line] + 7, LSocketI::SocketMsgError);
+					Log(Lines[Line].Get() + 7, LSocketI::SocketMsgError);
 				}
 			}
 			else if (Lines.Length() > 1)
@@ -361,7 +360,7 @@ bool MailPhp::Open(LSocketI *S, const char *RemoteHost, int Port, const char *Us
 						{
 							if (PopOverHttp)
 							{
-								GToken p(Val, " ");
+								auto p = LString(Val).SplitDelimit(" ");
 								if (p.Length() > 1)
 								{
 									Msg *m = new Msg;
@@ -566,12 +565,11 @@ int MailPhp::Sizeof(int Message)
 	return m ? m->Size : 0;
 }
 
-bool MailPhp::GetSizes(LArray<int> &Sizes)
+bool MailPhp::GetSizes(LArray<int64_t> &Sizes)
 {
 	for (auto m: d->Msgs)
-	{
 		Sizes.Add(m->Size);
-	}
+
 	return Sizes.Length() == d->Msgs.Length();
 }
 
@@ -585,68 +583,62 @@ bool MailPhp::GetUid(int Message, char *Id, int IdLen)
 	return true;
 }
 
-bool MailPhp::GetUidList(List<char> &Id)
+bool MailPhp::GetUidList(LString::Array &Id)
 {
 	for (auto m: d->Msgs)
-	{
 		if (m->Uid)
-		{
-			Id.Insert(NewStr(m->Uid));
-		}
-	}
+			Id.New() = m->Uid;
 
 	return Id.Length() > 0;
 }
 
-char *MailPhp::GetHeaders(int Message)
+LString MailPhp::GetHeaders(int Message)
 {
 	Msg *TheMsg = d->Msgs[Message];
-	if (TheMsg)
+	if (!TheMsg)
+		return NULL;
+
+	if (!d->HeadersRetreived)
 	{
-		if (!d->HeadersRetreived)
+		d->HeadersRetreived = true;
+
+		char *e = d->Uri + strlen(d->Uri);
+		sprintf_s(e, sizeof(d->Uri)-(e-d->Uri), "?top=1");
+
+		LStringPipe Text;
+		if (Get(new LSocket, d->Uri, Text, false))
 		{
-			d->HeadersRetreived = true;
-
-			char *e = d->Uri + strlen(d->Uri);
-			sprintf_s(e, sizeof(d->Uri)-(e-d->Uri), "?top=1");
-
-			LStringPipe Text;
-			if (Get(new LSocket, d->Uri, Text, false))
+			int n = 0;
+			char *All = Text.NewStr();
+			// int AllLen = strlen(All);
+			for (char *s = All; s && *s; )
 			{
-				int n = 0;
-				char *All = Text.NewStr();
-				// int AllLen = strlen(All);
-				for (char *s = All; s && *s; )
+				Msg *m = d->Msgs[n++];
+				if (m)
 				{
-					Msg *m = d->Msgs[n++];
-					if (m)
+					DeleteArray(m->Headers);
+
+					char *e = stristr(s, "\r\n.\r\n");
+					if (e)
 					{
-						DeleteArray(m->Headers);
-
-						char *e = stristr(s, "\r\n.\r\n");
-						if (e)
-						{
-							m->Headers = NewStr(s, e-s);
-							s = e + 5;
-							while (*s == '\r' || *s == '\n') s++;
-						}
-						else
-						{
-							m->Headers = NewStr(s, strlen(s)-3);
-							s = 0;
-						}
+						m->Headers = NewStr(s, e-s);
+						s = e + 5;
+						while (*s == '\r' || *s == '\n') s++;
 					}
-					else break;
+					else
+					{
+						m->Headers = NewStr(s, strlen(s)-3);
+						s = 0;
+					}
 				}
-
-				DeleteArray(All);
+				else break;
 			}
-			*e = 0;
-		}
 
-		return NewStr(TheMsg->Headers);
+			DeleteArray(All);
+		}
+		*e = 0;
 	}
 
-	return 0;
+	return TheMsg->Headers;
 }
 

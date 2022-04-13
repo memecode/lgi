@@ -23,7 +23,6 @@
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/TextConvert.h"
 #include "lgi/common/Mime.h"
-#include "lgi/common/Token.h"
 #include "../Hash/md5/md5.h"
 
 const char *sTextPlain = "text/plain";
@@ -625,7 +624,7 @@ LStreamI *FileDescriptor::GotoObject()
 	}
 	else if (Data && Size > 0)
 	{
-		DataStream.Reset(new GMemStream(Data, Size, false));
+		DataStream.Reset(new LMemStream(Data, Size, false));
 		return DataStream;
 	}
 
@@ -1878,7 +1877,7 @@ bool MailReceiveFolder::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *
 				LFile i;
 				if (i.Open(m->File, O_READ))
 				{
-					GCopyStreamer c;
+					LCopyStreamer c;
 					if (c.Copy(&i, t->Stream))
 					{
 						Status = t->Status = true;
@@ -1942,7 +1941,7 @@ bool MailReceiveFolder::GetUid(int Message, char *Id, int IdLen)
 	return false;
 }
 
-bool MailReceiveFolder::GetUidList(List<char> &Id)
+bool MailReceiveFolder::GetUidList(LString::Array &Id)
 {
 	bool Status = false;
 
@@ -1952,11 +1951,10 @@ bool MailReceiveFolder::GetUidList(List<char> &Id)
 		if (GetUid(i, Uid, sizeof(Uid)))
 		{
 			Status = true;
-			Id.Insert(NewStr(Uid));
+			Id.New() = Uid;
 		}
 		else
 		{
-			Id.DeleteArrays();
 			Status = false;
 			break;
 		}
@@ -1965,25 +1963,23 @@ bool MailReceiveFolder::GetUidList(List<char> &Id)
 	return Status;
 }
 
-char *MailReceiveFolder::GetHeaders(int Message)
+LString MailReceiveFolder::GetHeaders(int Message)
 {
 	MailItem *m = d->Mail[Message];
-	if (m)
-	{
-		LFile i;
-		if (i.Open(m->File, O_READ))
-		{
-			LStringPipe o;
-			GCopyStreamer c;
-			LHtmlLinePrefix e("", false);
-			if (c.Copy(&i, &o, &e))
-			{
-				return o.NewStr();
-			}
-		}
-	}
+	if (!m)
+		return NULL;
+	
+	LFile i;
+	if (!i.Open(m->File, O_READ))
+		return NULL;
 
-	return 0;
+	LStringPipe o;
+	LCopyStreamer c;
+	LHtmlLinePrefix e("", false);
+	if (!c.Copy(&i, &o, &e))
+		return NULL;
+
+	return o.NewGStr();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2092,11 +2088,9 @@ bool MailPop3::ListCmd(const char *Cmd, LHashTbl<ConstStrKey<char,false>, bool> 
 	if (r <= 0)
 		return false;
 
-	GToken t(Buffer, "\r\n");
-	for (unsigned i=1; i<t.Length()-1; i++)
-	{
-		Results.Add(t[i], true);
-	}
+	auto Lines = LString(Buffer).SplitDelimit("\r\n");
+	for (unsigned i=1; i<Lines.Length()-1; i++)
+		Results.Add(Lines[i], true);
 
 	return true;
 }
@@ -2536,27 +2530,23 @@ bool MailPop3::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks
 	return Status;
 }
 
-bool MailPop3::GetSizes(LArray<int> &Sizes)
+bool MailPop3::GetSizes(LArray<int64_t> &Sizes)
 {
-	if (Socket)
-	{
-		strcpy_s(Buffer, sizeof(Buffer), (char*)"LIST\r\n");
-		VERIFY_RET_VAL(Write(0, true));
+	if (!Socket)
+		return false;
 
-		char *s = 0;
-		if (ReadMultiLineReply(s))
-		{
-			GToken l(s, "\r\n");
-			DeleteArray(s);
-			for (unsigned i=0; i<l.Length(); i++)
-			{
-				char *sp = strrchr(l[i], ' ');
-				if (sp)
-				{
-					Sizes[i] = atoi(sp+1);
-				}
-			}
-		}
+	strcpy_s(Buffer, sizeof(Buffer), (char*)"LIST\r\n");
+	VERIFY_RET_VAL(Write(0, true));
+
+	auto s = ReadMultiLineReply();
+	if (!s)
+		return false;
+
+	for (auto ln: s.SplitDelimit("\r\n"))
+	{
+		auto p = ln.SplitDelimit();
+		if (p.Length() > 1)
+			Sizes.Add((int)p.Last().Int());
 	}
 
 	return Sizes.Length() > 0;
@@ -2631,56 +2621,44 @@ bool MailPop3::GetUid(int Index, char *Id, int IdLen)
 	return false;
 }
 
-bool MailPop3::GetUidList(List<char> &Id)
+bool MailPop3::GetUidList(LString::Array &Id)
 {
-	bool Status = false;
-	if (Socket)
+	if (!Socket)
+		return false;
+
+	sprintf_s(Buffer, sizeof(Buffer), "UIDL\r\n");
+	VERIFY_RET_VAL(Write(0, true));
+	auto Str = ReadMultiLineReply();
+	if (!Str)
+		return false;
+
+	auto lines = Str.SplitDelimit("\r\n");
+	for (auto s: lines)
 	{
-		char *Str = 0;
-
-		sprintf_s(Buffer, sizeof(Buffer), "UIDL\r\n");
-		VERIFY_RET_VAL(Write(0, true));
-		VERIFY_RET_VAL(ReadMultiLineReply(Str));
-		if (Str)
+		if (s(0) != '.')
 		{
-			Status = true;
-			GToken T(Str, "\r\n");
-			for (unsigned i=0; i<T.Length(); i++)
-			{
-				char *s = T[i];
-				if (s && *s != '.')
-				{
-					char *Space = strchr(s, ' ');
-					if (Space++)
-					{
-						Id.Insert(NewStr(Space));
-					}
-				}
-			}
-
-			DeleteArray(Str);
+			char *Space = strchr(s, ' ');
+			if (Space++)
+				Id.New() = Space;
 		}
 	}
 
-	return Status;
+	return true;
 }
 
-char *MailPop3::GetHeaders(int Message)
+LString MailPop3::GetHeaders(int Message)
 {
-	char *Header = 0;
-	if (Socket)
-	{
-		sprintf_s(Buffer, sizeof(Buffer), "TOP %i 0\r\n", Message + 1);
-		if (Write(0, true))
-		{
-			ReadMultiLineReply(Header);
-		}
-	}
+	if (!Socket)
+		return NULL;
 
-	return Header;
+	sprintf_s(Buffer, sizeof(Buffer), "TOP %i 0\r\n", Message + 1);
+	if (!Write(NULL, true))
+		return NULL;
+
+	return ReadMultiLineReply();
 }
 
-bool MailPop3::ReadMultiLineReply(char *&Str)
+LString MailPop3::ReadMultiLineReply()
 {
 	if (!Socket)
 	{
@@ -2688,48 +2666,23 @@ bool MailPop3::ReadMultiLineReply(char *&Str)
 		return false;
 	}
 
-	LMemQueue Temp;
-	ssize_t ReadLen = Socket->Read(Buffer, sizeof(Buffer), 0);
-	if (ReadLen <= 0 || Buffer[0] != '+')
-		return false;
+	LString a;
 
-	// positive response
-	char *Eol = strnchr(Buffer, '\n', ReadLen);
-	if (!Eol)
-		return false;
-
-	char *Ptr = Eol + 1;
-	ReadLen -= Ptr-Buffer;
-	if (ReadLen <= 0)
+	do
 	{
-		LAssert(!"Invalid readLen");
-		return false;
-	}
-
-	memmove(Buffer, Ptr, ReadLen);
-	Temp.Write((uchar*) Buffer, ReadLen);
-
-	while (!MailIsEnd(Buffer, ReadLen))
-	{
-		ReadLen = Socket->Read(Buffer, sizeof(Buffer), 0);
-		if (ReadLen > 0)
-			Temp.Write((uchar*) Buffer, ReadLen);
-		else
+		LString s = Socket->Read();
+		if (!s)
 			break;
+
+		a += s;
+		if (a[0] != '+')
+			return NULL;
 	}
+	while (!MailIsEnd(a.Get(), a.Length()));
 
-	auto Len = Temp.GetSize();
-	Str = new char[Len+1];
-	if (!Str)
-	{
-		LAssert(!"Alloc error.");
-		return false;
-	}
-
-	Temp.Read((uchar*)Str, Len);
-	Str[Len] = 0;
-
-	return true;
+	// Strip off the first line...
+	auto FirstNewLen = a.Find("\n");
+	return FirstNewLen >= 0 ? a(FirstNewLen, -1) : NULL;
 }
 
 bool MailPop3::Close()

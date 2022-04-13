@@ -666,12 +666,12 @@ public:
 		if (Str)
 		{
 			const char *delim = Delimiters ? Delimiters : " \t\r\n";
-			const char *s = Get();
-			while (*s)
+			const char *s = Get(), *end = s + Length();
+			while (s < end)
 			{
 				// Skip over non-delimiters
 				const char *e = s;
-				while (*e && !strchr(delim, *e))
+				while (e < end && !strchr(delim, *e))
 					e++;
 
 				if (e > s || !GroupDelimiters)
@@ -682,7 +682,7 @@ public:
 				if (GroupDelimiters)
 				{
 					// Skip any delimiters
-					while (*s && strchr(delim, *s))
+					while (s < end && strchr(delim, *s))
 						s++;
 				}
 
@@ -693,7 +693,7 @@ public:
 			
 			if
 			(
-				*s ||
+				s < end ||
 				(
 					!GroupDelimiters &&
 					s > Get() &&

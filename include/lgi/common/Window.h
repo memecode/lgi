@@ -267,6 +267,10 @@ public:
 		void OnCreate() override;
 		virtual void OnFrontSwitch(bool b);
 
+	#else
+
+		OsWindow WindowHandle() override { return _View; }
+		
 	#endif
 
 	#if defined(LGI_SDL)

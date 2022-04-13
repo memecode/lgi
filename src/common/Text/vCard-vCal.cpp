@@ -4,7 +4,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/vCard-vCal.h"
-#include "lgi/common/Token.h"
 #include "ScribeDefs.h"
 #include "lgi/common/Json.h"
 

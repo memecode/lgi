@@ -30,7 +30,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/SubProcess.h"
-#include "lgi/common/Token.h"
 
 #define DEBUG_SUBPROCESS		0
 #define DEBUG_ARGS				0
@@ -405,7 +404,7 @@ bool LSubProcess::SetEnvironment(const char *Var, const char *Value)
 	if (IsPath)
 	{
 		// Remove missing paths from the list
-		GToken t(v->Val, LGI_PATH_SEPARATOR);
+		auto t = LString(v->Val).SplitDelimit(LGI_PATH_SEPARATOR);
 		LStringPipe p;
 		for (unsigned i=0; i<t.Length(); i++)
 		{
@@ -776,12 +775,12 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			bool HasExt = Ext && _stricmp(Ext, "exe") == 0;
 			
 			#if defined(WIN32) && !defined(PLATFORM_MINGW)
-			GToken p;
+			LString::Array p;
 			char *sPath = NULL;
 			size_t sSize;
 			errno_t err = _dupenv_s(&sPath, &sSize, "PATH");
 			if (err == 0)
-				p.Parse(sPath, LGI_PATH_SEPARATOR);
+				p = LString(sPath).SplitDelimit(LGI_PATH_SEPARATOR);
 			free(sPath);
 			#else
 			GToken p(getenv("PATH"), LGI_PATH_SEPARATOR);

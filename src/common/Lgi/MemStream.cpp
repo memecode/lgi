@@ -6,7 +6,7 @@
 #include "lgi/common/Stream.h"
 
 //////////////////////////////////////////////////////////////////////////////
-void GMemStream::_Init()
+void LMemStream::_Init()
 {
 	GrowBlockSize = 0;
 	Len = Pos = Alloc = 0;
@@ -14,12 +14,12 @@ void GMemStream::_Init()
 	Own = true;
 }
 
-GMemStream::GMemStream()
+LMemStream::LMemStream()
 {
 	_Init();
 }
 
-GMemStream::GMemStream(LStreamI *Src, int64 Start, int64 len)
+LMemStream::LMemStream(LStreamI *Src, int64 Start, int64 len)
 {
 	_Init();
 
@@ -75,7 +75,7 @@ GMemStream::GMemStream(LStreamI *Src, int64 Start, int64 len)
 	}
 }
 
-GMemStream::GMemStream(const void *mem, int64 len, bool copy)
+LMemStream::LMemStream(const void *mem, int64 len, bool copy)
 {
 	_Init();
 
@@ -93,18 +93,18 @@ GMemStream::GMemStream(const void *mem, int64 len, bool copy)
 	}
 }
 
-GMemStream::GMemStream(int growBlockSize)
+LMemStream::LMemStream(int growBlockSize)
 {
 	_Init();
 	GrowBlockSize = growBlockSize;
 }
 
-GMemStream::~GMemStream()
+LMemStream::~LMemStream()
 {
 	Close();
 }
 
-int GMemStream::Open(const char *Str, int Int)
+int LMemStream::Open(const char *Str, int Int)
 {
 	LFile f;
 	if (f.Open(Str, O_READ))
@@ -124,7 +124,7 @@ int GMemStream::Open(const char *Str, int Int)
 	return 0;
 }
 
-int GMemStream::Close()
+int LMemStream::Close()
 {
 	if (Own)
 		DeleteArray(Mem);
@@ -135,7 +135,7 @@ int GMemStream::Close()
 	return true;
 }
 
-int64 GMemStream::SetSize(int64 Size)
+int64 LMemStream::SetSize(int64 Size)
 {
 	if (Mem)
 	{
@@ -166,12 +166,12 @@ int64 GMemStream::SetSize(int64 Size)
 	return Len;
 }
 
-bool GMemStream::IsOk()
+bool LMemStream::IsOk()
 {
 	return Len == 0 || Mem != 0;
 }
 
-ssize_t GMemStream::Read(void *Buffer, ssize_t Size, int Flags)
+ssize_t LMemStream::Read(void *Buffer, ssize_t Size, int Flags)
 {
 	ssize_t Bytes = 0;
 	if (Buffer && Pos >= 0 && Pos < Len)
@@ -183,7 +183,7 @@ ssize_t GMemStream::Read(void *Buffer, ssize_t Size, int Flags)
 	return Bytes;
 }
 
-ssize_t GMemStream::Write(const void *Buffer, ssize_t Size, int Flags)
+ssize_t LMemStream::Write(const void *Buffer, ssize_t Size, int Flags)
 {
 	if (!Buffer || Size <= 0)
 		return 0;
@@ -238,12 +238,12 @@ ssize_t GMemStream::Write(const void *Buffer, ssize_t Size, int Flags)
 	return Bytes;
 }
 
-LStreamI *GMemStream::Clone()
+LStreamI *LMemStream::Clone()
 {
-	return new GMemStream(Mem, Len, true);
+	return new LMemStream(Mem, Len, true);
 }
 
-ssize_t GMemStream::Write(LStream *Out, ssize_t Size)
+ssize_t LMemStream::Write(LStream *Out, ssize_t Size)
 {
 	ssize_t Wr = -1;
 
@@ -257,7 +257,7 @@ ssize_t GMemStream::Write(LStream *Out, ssize_t Size)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-GTempStream::GTempStream(const char *tmp, int maxMemSize) : GProxyStream(0)
+LTempStream::LTempStream(const char *tmp, int maxMemSize) : LProxyStream(0)
 {
 	s = &Null;
 	MaxMemSize = maxMemSize;
@@ -269,12 +269,12 @@ GTempStream::GTempStream(const char *tmp, int maxMemSize) : GProxyStream(0)
 	Mem = 0;
 }
 
-GTempStream::~GTempStream()
+LTempStream::~LTempStream()
 {
 	Empty();
 }
 
-int64 GTempStream::GetSize()
+int64 LTempStream::GetSize()
 {
 	if (s == (LStreamI*)&Null)
 		return 0;
@@ -282,7 +282,7 @@ int64 GTempStream::GetSize()
 	return s->GetSize();
 }
 
-void GTempStream::Empty()
+void LTempStream::Empty()
 {
 	DeleteObj(Mem);
 	if (Tmp)
@@ -295,14 +295,14 @@ void GTempStream::Empty()
 	s = 0;
 }
 
-ssize_t GTempStream::Write(const void *Buffer, ssize_t Size, int Flags)
+ssize_t LTempStream::Write(const void *Buffer, ssize_t Size, int Flags)
 {
 	if (s == &Null)
 	{
-		s = Mem = new GMemStream(16 << 10);
+		s = Mem = new LMemStream(16 << 10);
 	}
 
-	ssize_t Status = GProxyStream::Write(Buffer, Size, Flags);
+	ssize_t Status = LProxyStream::Write(Buffer, Size, Flags);
 	
 	if (Mem != 0 && s->GetSize() > MaxMemSize)
 	{
@@ -311,7 +311,7 @@ ssize_t GTempStream::Write(const void *Buffer, ssize_t Size, int Flags)
 		int i=0;
 		do
 		{
-			sprintf_s(f, sizeof(f), "GTempStream-%x.tmp", (int)(((NativeInt)this)+i++));
+			sprintf_s(f, sizeof(f), "LTempStream-%x.tmp", (int)(((NativeInt)this)+i++));
 			
 			if (!TmpFolder)
 				TmpFolder = LGetSystemPath(LSP_TEMP);

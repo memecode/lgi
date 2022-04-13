@@ -5,7 +5,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/XmlTree.h"
 #include "lgi/common/Variant.h"
-#include "lgi/common/Token.h"
 
 static char LXmlHeader[] = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
 
@@ -505,7 +504,7 @@ void LXmlTag::SetTag(const char *Str, ssize_t Len)
 
 LXmlTag *LXmlTag::GetChildTag(const char *Name, bool Create, const char *TagSeparator)
 {
-	GToken p(Name, TagSeparator);
+	auto p = LString(Name).SplitDelimit(TagSeparator);
 
 	LXmlTag *t = this;
 	for (int i=0; i<p.Length() && t; i++)

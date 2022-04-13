@@ -23,7 +23,6 @@
 #endif
 
 #include "lgi/common/Lgi.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Capabilities.h"
 
 #if defined(LINUX) && !defined(LGI_SDL)
@@ -322,7 +321,7 @@ int LGetOs
 		utsname Buf;
 		if (!uname(&Buf))
 		{
-			GToken t(Buf.release, ".");
+			auto t = LString(Buf.release).SplitDelimit(".");
 			for (int i=0; i<t.Length(); i++)
 			{
 				Ver->Add(atoi(t[i]));
@@ -706,10 +705,10 @@ LAutoString LMakeRelativePath(const char *Base, const char *Path)
 		#endif
 		if (SameNs)
 		{
-			GToken b(Base + 1, ":\\/");
-			GToken p(Path + 1, ":\\/");
+			auto b = LString(Base + 1).SplitDelimit(":\\/");
+			auto p = LString(Path + 1).SplitDelimit(":\\/");
 			int Same = 0;
-			while (b[Same] && p[Same] && stricmp(b[Same], p[Same]) == 0)
+			while (Same < b.Length() && Same < p.Length() && stricmp(b[Same], p[Same]) == 0)
 			{
 				Same++;
 			}
@@ -806,7 +805,7 @@ bool LMakePath(char *Str, int StrSize, const char *Path, const char *File)
 			*End = 0;
 		}
 
-		GToken T(File, Dir);
+		auto T = LString(File).SplitDelimit(Dir);
 		for (int i=0; i<T.Length(); i++)
 		{
 			if (!stricmp(T[i], "."))
@@ -1977,10 +1976,10 @@ LString LGetExeFile()
 						char *PsOutput = Ps.NewStr();
 						if (PsOutput)
 						{
-							GToken n(PsOutput, "\r\n");
+							auto n = LString(PsOutput).SplitDelimit("\r\n");
 							for (int i=0; !Status && i<n.Length(); i++)
 							{
-								GToken t(n[i], " \t\r\n");
+								auto t = n[i].SplitDelimit(" \t\r\n");
 								if (t.Length() > 7)
 								{
 									int LinePid = 0;
@@ -2309,7 +2308,7 @@ bool LIsVolumeRoot(const char *Path)
 			return true;
 		}
 	#else
-		GToken t(Path, DIR_STR);
+		auto t = LString(Path).SplitDelimit(DIR_STR);
 		if (t.Length() == 0)
 			return true;
 		#ifdef MAC

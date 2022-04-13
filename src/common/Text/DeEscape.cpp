@@ -29,8 +29,8 @@ char *SkipEscape(char *c)
 
 void DeEscape(LString &s)
 {
-	char *c = s, *out = s;
-	while (*c)
+	char *c = s, *out = s, *end = s.Get() + s.Length();
+	while (c < end)
 	{
 		if (*c == 0x1b)
 		{

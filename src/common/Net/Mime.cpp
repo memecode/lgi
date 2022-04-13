@@ -3,7 +3,6 @@
 #include "lgi/common/LgiNetInc.h"
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Mime.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Base64.h"
 
 #define DEBUG_MIME						0
@@ -727,7 +726,7 @@ bool LMime::CreateTempData()
 	DataPos = 0;
 	DataSize = 0;
 	OwnDataStore = true;
-	if ((DataStore = new GTempStream(GetTmpPath(), 4 << 20)))
+	if ((DataStore = new LTempStream(GetTmpPath(), 4 << 20)))
 	{
 		Status = true;
 	}
@@ -790,7 +789,7 @@ bool LMime::SetData(char *Str, int Len)
 		DataLock = 0;
 		DataPos = 0;
 		DataSize = Len;
-		DataStore = new GTempStream(GetTmpPath(), 4 << 20);
+		DataStore = new LTempStream(GetTmpPath(), 4 << 20);
 		if (DataStore)
 		{
 			DataStore->Write(Str, Len);
@@ -1442,7 +1441,7 @@ ssize_t LMime::LMimeText::LMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 		}
 
 		// Write the headers
-		GToken h(Mime->Headers, MimeEol);
+		auto h = LString(Mime->Headers).SplitDelimit(MimeEol);
 		for (unsigned i=0; i<h.Length(); i++)
 		{
 			Dest->Write(h[i], CastInt(strlen(h[i])));

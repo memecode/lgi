@@ -12,7 +12,6 @@
 #include <math.h>
 
 #include "lgi/common/Gdc2.h"
-#include "lgi/common/Token.h"
 
 bool LPoint::Inside(LRect &r)
 {
@@ -303,13 +302,13 @@ bool LRect::SetStr(const char *s)
 	bool Status = false;
 	if (s)
 	{
-		GToken t(s, ",");
+		auto t = LString(s).SplitDelimit(",");
 		if (t.Length() == 4)
 		{
-			x1 = atoi(t[0]);
-			y1 = atoi(t[1]);
-			x2 = atoi(t[2]);
-			y2 = atoi(t[3]);
+			x1 = (int)t[0].Int();
+			y1 = (int)t[1].Int();
+			x2 = (int)t[2].Int();
+			y2 = (int)t[3].Int();
 			Status = true;
 		}
 	}
@@ -319,17 +318,17 @@ bool LRect::SetStr(const char *s)
 bool operator ==(LRect &a, LRect &b)
 {
 	return (a.x1 == b.x1 &&
-		a.y1 == b.y1 &&
-		a.x2 == b.x2 &&
-		a.y2 == b.y2);
+			a.y1 == b.y1 &&
+			a.x2 == b.x2 &&
+			a.y2 == b.y2);
 }
 
 bool operator !=(LRect &a, LRect &b)
 {
-	return !((a.x1 == b.x1 &&
-		a.y1 == b.y1 &&
-		a.x2 == b.x2 &&
-		a.y2 == b.y2));
+	return !((	a.x1 == b.x1 &&
+				a.y1 == b.y1 &&
+				a.x2 == b.x2 &&
+				a.y2 == b.y2));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////

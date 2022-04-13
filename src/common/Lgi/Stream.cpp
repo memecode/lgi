@@ -186,7 +186,7 @@ ssize_t LEndOfLine::IsEnd(void *s, ssize_t Len)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-ssize_t GCopyStreamer::Copy(LStreamI *Source, LStreamI *Dest, LStreamEnd *End)
+ssize_t LCopyStreamer::Copy(LStreamI *Source, LStreamI *Dest, LStreamEnd *End)
 {
 	if (!Source || !Dest)
 		return -1;

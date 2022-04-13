@@ -188,7 +188,7 @@ public:
 				s += "&tags=vc9";
 				#endif
 
-				GMemStream o(1024);
+				LMemStream o(1024);
 				LString err;
 				int Installed = 0;
 				if (!LgiGetUri(this, &o, &err, s))
@@ -217,7 +217,7 @@ public:
 					if (c->IsTag("file"))
 					{
 						const char *Link = c->GetContent();
-						GMemStream File(1024);
+						LMemStream File(1024);
 						if (LgiGetUri(this, &File, &err, Link))
 						{
 							char p[MAX_PATH];
@@ -277,7 +277,7 @@ public:
 			{
 				if (Cm->Stream)
 				{
-					GCopyStreamer Cp;
+					LCopyStreamer Cp;
 					Cp.Copy(Cm->Stream, &f);
 				}
 				else if (Cm->Data.Type == GV_BINARY)
@@ -624,7 +624,7 @@ public:
 										f.Write(Cm.Data.CastVoidPtr(), Cm.Data.Value.Binary.Length);
 									else if (Cm.Stream)
 									{
-										GCopyStreamer Cp;
+										LCopyStreamer Cp;
 										Cp.Copy(Cm.Stream, &f);
 									}
 									else

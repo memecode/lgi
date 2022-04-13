@@ -218,7 +218,7 @@ struct LSoftwareUpdatePriv
 		}
 	};
 
-	class UpdateDownload : public LThread, public GProxyStream
+	class UpdateDownload : public LThread, public LProxyStream
 	{
 		LSoftwareUpdate::UpdateInfo *Info;
 		LUri *Uri;
@@ -235,7 +235,7 @@ struct LSoftwareUpdatePriv
 		                LUri *proxy,		                
 		                LStream *local,
 		                LAutoString *err,
-		                int *status) : LThread("UpdateDownload"), GProxyStream(local)
+		                int *status) : LThread("UpdateDownload"), LProxyStream(local)
 		{
 			Info = info;
 			Uri = uri;

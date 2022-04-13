@@ -225,6 +225,8 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/Stream.h \
 	../include/lgi/common/StringClass.h \
 	../include/lgi/common/StringLayout.h \
+	../include/lgi/common/StructuredIo.h \
+	../include/lgi/common/StructuredLog.h \
 	../include/lgi/common/SubProcess.h \
 	../include/lgi/common/TableLayout.h \
 	../include/lgi/common/TabView.h \

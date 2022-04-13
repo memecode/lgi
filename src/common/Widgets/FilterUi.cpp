@@ -5,7 +5,6 @@
 #include "lgi/common/Path.h"
 #include "lgi/common/Edit.h"
 #include "lgi/common/Combo.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/Menu.h"

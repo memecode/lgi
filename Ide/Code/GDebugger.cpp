@@ -70,30 +70,30 @@ public:
 
 class Gdb : public GDebugger, public LThread, public Callback
 {
-	GDebugEvents *Events;
+	GDebugEvents *Events = NULL;
 	LAutoPtr<LSubProcess> Sp;
 	LString Exe, Args, InitDir;
 	LString ChildEnv;
-	bool RunAsAdmin;
-	bool AtPrompt;
-	char Line[256], *LinePtr;
-	int CurFrame;
-	bool SetAsmType;
-	bool SetPendingOn;
+	bool RunAsAdmin = false;
+	bool AtPrompt = false;
+	char Line[256], *LinePtr = NULL;
+	int CurFrame = 0;
+	bool SetAsmType = false;
+	bool SetPendingOn = false;
 	LArray<BreakPoint> BreakPoints;
-	int BreakPointIdx;
-	int ProcessId;
-	bool SuppressNextFileLine;
+	int BreakPointIdx = -1;
+	int ProcessId = -1;
+	bool SuppressNextFileLine = false;
 	LArray<Visualizer*> Vis;
-	LStream *Log;
+	LStream *Log = NULL;
 
 	LMutex StateMutex;
-	bool DebuggingProcess;
-	bool Running;
+	bool DebuggingProcess = false;
+	bool Running = false;
 
 	// Current location tracking
 	LString CurFile;
-	int CurLine;
+	int CurLine = -1;
 	LString::Array Untagged;
 
 	// Parse state
@@ -101,12 +101,12 @@ class Gdb : public GDebugger, public LThread, public Callback
 	{
 		ParseNone,
 		ParseBreakPoint,
-	}	ParseState;
+	}	ParseState = ParseNone;
 	LString::Array BreakInfo;
 
 	// Various output modes.
-	LStream *OutStream;
-	LString::Array *OutLines;
+	LStream *OutStream = NULL;
+	LString::Array *OutLines = NULL;
 	
 	enum ThreadState
 	{
@@ -644,21 +644,9 @@ class Gdb : public GDebugger, public LThread, public Callback
 public:
 	Gdb(LStream *log) : LThread("Gdb"), Log(log), StateMutex("Gdb.StateMutex")
 	{
-		Events = NULL;
 		State = Init;
-		AtPrompt = false;
 		LinePtr = Line;
-		RunAsAdmin = false;
-		OutStream = NULL;
-		OutLines = NULL;
-		CurFrame = 0;
-		SetAsmType = false;
-		SetPendingOn = false;
-		DebuggingProcess = false;
-		BreakPointIdx = -1;
-		ProcessId = -1;
-		SuppressNextFileLine = false;
-		ParseState = ParseNone;
+		ParseState;
 		
 		Vis.Add(new GStringVis);
 	}
@@ -855,6 +843,7 @@ public:
 				Cmd("handle SIGTTIN nostop");
 				Cmd("handle SIGTTOU ignore nostop");
 				Cmd("handle SIG34 ignore nostop");
+				Cmd("handle SIGPIPE nostop");
 			}
 			
 			LString a;

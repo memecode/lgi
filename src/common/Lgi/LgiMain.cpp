@@ -7,7 +7,6 @@
 #endif
 
 #include "lgi/common/Lgi.h"
-#include "lgi/common/Token.h"
 #ifdef LGI_SDL
 #include <SDL.h>
 #endif

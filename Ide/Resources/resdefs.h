@@ -35,6 +35,7 @@
 #define IDC_TYPE_HISTORY						70
 #define IDC_FOLDER								71
 #define IDC_BROWSE_OUTPUT						72
+#define IDC_DEFAULTS							76
 #define IDC_WIN32								79
 #define IDC_LINUX								80
 #define IDC_MAC									81

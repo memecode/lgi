@@ -2,7 +2,6 @@
 #include "lgi/common/RichTextEdit.h"
 #include "RichTextEditPriv.h"
 #include "lgi/common/GdcTools.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Menu.h"
 
 #define LOADER_THREAD_LOGGING		1
@@ -154,7 +153,7 @@ public:
 					return PostSink(M_IMAGE_ERROR);
 				}
 				
-				GMemStream *Mem = new GMemStream(Stream, 0, -1);
+				LMemStream *Mem = new LMemStream(Stream, 0, -1);
 				In.Reset(Mem);
 				if (!Filter.Reset(GFilterFactory::New(FileName ? *FileName : 0, O_READ, (const uchar*)Mem->GetBasePtr())))
 				{
@@ -274,7 +273,7 @@ public:
 				f->Props = &Props;
 				Props.SetAttr(LGI_FILTER_QUALITY, RICH_TEXT_RESIZED_JPEG_QUALITY);
 				
-				LAutoPtr<GMemStream> jpg(new GMemStream(1024));
+				LAutoPtr<LMemStream> jpg(new LMemStream(1024));
 				if (!f->WriteImage(jpg, img))
 				{
 					#if LOADER_THREAD_LOGGING
@@ -606,7 +605,7 @@ bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia
 		{
 			// Attach a copy of the resized JPEG...
 			Si->Compressed->SetPos(0);
-			Cm.Stream.Reset(new GMemStream(Si->Compressed, 0, -1));
+			Cm.Stream.Reset(new LMemStream(Si->Compressed, 0, -1));
 			Cm.MimeType = Si->MimeType;
 
 			if (FileName)
@@ -1177,7 +1176,7 @@ LMessage::Result LRichTextPriv::ImageBlock::OnEvent(LMessage *Msg)
 		}
 		case M_IMAGE_COMPRESS:
 		{
-			LAutoPtr<GMemStream> Jpg((GMemStream*)Msg->A());
+			LAutoPtr<LMemStream> Jpg((LMemStream*)Msg->A());
 			ScaleInf *Si = (ScaleInf*)Msg->B();
 			if (!Jpg || !Si)
 			{
@@ -1219,7 +1218,7 @@ LMessage::Result LRichTextPriv::ImageBlock::OnEvent(LMessage *Msg)
 
 			if (Component)
 			{
-				GToken t(*Component, ",");
+				auto t = LString(*Component).SplitDelimit(",");
 				for (int i=0; i<t.Length(); i++)
 					d->View->NeedsCapability(t[i]);
 			}

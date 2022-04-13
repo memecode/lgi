@@ -177,68 +177,71 @@ bool ResMenuItem::Serialize(FieldTree &Fields)
 
 bool ResMenuItem::Read(LXmlTag *t, ResMenuItem *Parent)
 {
-	bool Status = false;
-	if (t)
+	if (!t)
 	{
-		bool SubMenu = t->IsTag("submenu");
-		bool MenuItem = t->IsTag("menuitem");
+		LAssert(0);
+		return false;
+	}
 
-		if (SubMenu || MenuItem)
+	bool SubMenu = t->IsTag("submenu");
+	bool MenuItem = t->IsTag("menuitem");
+
+	if (!SubMenu && !MenuItem)
+	{
+		LAssert(!"Wrong tag.");
+		return false;
+	}
+
+	// Read item
+	char *n = 0;
+	Sep = (n = t->GetAttr("sep")) ? atoi(n) : false;
+	Enabled = (n = t->GetAttr("enabled")) ? atoi(n) : true;
+	Short.Reset(NewStr(t->GetAttr("shortcut")));
+
+	if ((n = t->GetAttr("ref")) &&
+		Menu &&
+		Menu->Group)
+	{
+		int Ref = atoi(n);
+		_Str = Menu->GetStringByRef(Ref);
+		LAssert(_Str);
+		if (!_Str)
 		{
-			// Read item
-			char *n = 0;
-			Sep = (n = t->GetAttr("sep")) ? atoi(n) : false;
-			Enabled = (n = t->GetAttr("enabled")) ? atoi(n) : true;
-			Short.Reset(NewStr(t->GetAttr("shortcut")));
-
-			if ((n = t->GetAttr("ref")) &&
-				Menu &&
-				Menu->Group)
+			if (!(_Str = Menu->GetStringGroup()->CreateStr()))
 			{
-				int Ref = atoi(n);
-				_Str = Menu->GetStringByRef(Ref);
-				LAssert(_Str);
-				if (!_Str)
-				{
-					if (!(_Str = Menu->GetStringGroup()->CreateStr()))
-					{
-						LAssert(!"Create str failed.");
-					}
-				}
-			}
-
-			// Attach item
-			Status = MenuItem;
-			if (Parent)
-			{
-				Parent->Insert(this);
-			}
-			else if (Menu)
-			{
-				Menu->Insert(this);
-			}
-
-			// Read sub items
-			if (SubMenu)
-			{
-				for (auto c: t->Children)
-				{
-					ResMenuItem *i = new ResMenuItem(Menu);
-					if (i && i->Read(c, this))
-					{
-						Status = true;
-					}
-					else
-					{
-						LAssert(0);
-						DeleteObj(i);
-					}
-				}
+				LAssert(!"Create str failed.");
+				return false;
 			}
 		}
 	}
 
-	return Status;
+	// Attach item
+	if (Parent)
+		Parent->Insert(this);
+	else if (Menu)
+		Menu->Insert(this);
+	else
+	{
+		LAssert(0);
+		return false;
+	}
+
+	// Read sub items
+	if (SubMenu)
+	{
+		for (auto c: t->Children)
+		{
+			ResMenuItem *i = new ResMenuItem(Menu);
+			if (!i || !i->Read(c, this))
+			{
+				LAssert(0);
+				DeleteObj(i);
+				return false;
+			}
+		}
+	}
+
+	return true;
 }
 
 bool ResMenuItem::Write(LXmlTag *t, int Tabs)

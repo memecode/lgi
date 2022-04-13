@@ -5,7 +5,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Popup.h"
 #include "lgi/common/MonthView.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/List.h"
 #include "lgi/common/Edit.h"
 #include "lgi/common/DateTimeCtrls.h"

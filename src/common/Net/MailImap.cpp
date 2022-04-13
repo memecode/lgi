@@ -4,7 +4,6 @@
 #endif
 
 #include "lgi/common/Lgi.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Mail.h"
 #include "lgi/common/Base64.h"
 #include "lgi/common/NetTools.h"
@@ -327,11 +326,9 @@ bool MailIMap::Http(LSocketI *S,
 			char *Eol = strchr(Rp, '\n');
 			if (Eol)
 			{
-				GToken t(Rp, " \t\r\n", true, Eol - Rp);
+				auto t = LString(Rp, Eol-Rp).SplitDelimit(" \t\r\n");
 				if (t.Length() > 2)
-				{
-					*StatusCode = atoi(t[1]);
-				}
+					*StatusCode = t[1].Int();
 			}
 		}
 	}
@@ -1246,7 +1243,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 				{
 					for (auto r: Dialog)
 					{
-						GToken T(r, " ");
+						auto T = LString(r).SplitDelimit(" ");
 						if (T.Length() > 1 &&
 							_stricmp(T[1], "CAPABILITY") == 0)
 						{
@@ -1259,7 +1256,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 								}
 								if (_strnicmp(T[i], "AUTH=", 5) == 0)
 								{
-									char *Type = T[i] + 5;
+									char *Type = T[i].Get() + 5;
 									AddIfMissing(Auths, Type);
 								}
 
@@ -2358,7 +2355,7 @@ int MailIMap::Fetch(bool ByUid,
 					#if DEBUG_FETCH
 					LgiTrace("%s:%i - Fetch: Line='%s'\n", _FL, Line.Get());
 					#endif
-					GToken t(Line, " \r\n");
+					auto t = LString(Line).SplitDelimit(" \r\n");
 					if (t.Length() >= 2)
 					{
 						char *r = t[0];
@@ -2415,18 +2412,18 @@ bool IMapHeadersCallback(MailIMap *Imap, uint32_t Msg, MailIMap::StrMap &Parts, 
 	{
 		Parts.Delete(sRfc822Header);
 
-		LAutoString *Hdrs = (LAutoString*)UserData;
-		Hdrs->Reset(s);
+		LString *Hdrs = (LString*)UserData;
+		*Hdrs = s;
 	}
 	
 	return true;
 }
 
-char *MailIMap::GetHeaders(int Message)
+LString MailIMap::GetHeaders(int Message)
 {
-	LAutoString Text;
+	LString Text;
 	
-	if (Lock(_FL))
+	if (!Lock(_FL))
 	{
 		char Seq[64];
 		sprintf_s(Seq, sizeof(Seq), "%i", Message + 1);
@@ -2441,7 +2438,7 @@ char *MailIMap::GetHeaders(int Message)
 		Unlock();
 	}
 	
-	return Text.Release();
+	return Text;
 }
 
 struct ReceiveCallbackState
@@ -2625,7 +2622,7 @@ bool MailIMap::Append(const char *Folder, ImapMailFlags *Flags, const char *Msg,
 
 								while ((a = ImapBasicTokenize(Line)).Get())
 								{
-									GToken t(a, " ");
+									auto t = LString(a).SplitDelimit(" ");
 									if (t.Length() > 2 && !_stricmp(t[0], "APPENDUID"))
 									{
 										NewUid = t[2];
@@ -2734,7 +2731,7 @@ bool ImapSizeCallback(MailIMap *Imap, uint32_t Msg, MailIMap::StrMap &Parts, voi
 	return true;
 }
 
-bool MailIMap::GetSizes(LArray<int> &Sizes)
+bool MailIMap::GetSizes(LArray<int64_t> &Sizes)
 {
 	return Fetch(false, "1:*", sRfc822Size, ImapSizeCallback, &Sizes) != 0;	
 }
@@ -2778,13 +2775,11 @@ bool MailIMap::FillUidList()
 				{
 					for (auto d: Dialog)
 					{
-						GToken T(d, " ");
+						auto T = LString(d).SplitDelimit(" ");
 						if (T[1] && strcmp(T[1], "SEARCH") == 0)
 						{
 							for (unsigned i=2; i<T.Length(); i++)
-							{
 								Uid.Insert(NewStr(T[i]));
-							}
 						}
 					}
 
@@ -2804,7 +2799,7 @@ bool MailIMap::FillUidList()
 	return Status;
 }
 
-bool MailIMap::GetUidList(List<char> &Id)
+bool MailIMap::GetUidList(LString::Array &Id)
 {
 	bool Status = false;
 
@@ -2813,9 +2808,7 @@ bool MailIMap::GetUidList(List<char> &Id)
 		if (FillUidList())
 		{
 			for (auto s: Uid)
-			{
-				Id.Insert(NewStr(s));
-			}
+				Id.New() = s;
 
 			Status = true;
 		}

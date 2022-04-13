@@ -13,7 +13,6 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Popup.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/List.h"
 #include "lgi/common/TextLabel.h"
 #include "lgi/common/Edit.h"
@@ -125,7 +124,7 @@ LInlineBmp TreeIconsImg = { 308, 22, 8, Icons2 };
 char *LFileType::DefaultExtension()
 {
 	char *Status = 0;
-	GToken T(Extension(), ";");
+	auto T = LString(Extension()).SplitDelimit(";");
 	if (T.Length())
 	{
 		char s[256];
@@ -1617,7 +1616,7 @@ void GFileSystemItem::OnPath(const char *p)
 					char s[256];
 					strcpy(s, Path);
 
-					GToken T(Start, DIR_STR);
+					auto T = LString(Start).SplitDelimit(DIR_STR);
 					for (int i=0; i<T.Length(); i++)
 					{
 						if (s[strlen(s)-1] != DIR_CHAR) strcat(s, DIR_STR);
@@ -1993,7 +1992,7 @@ void GFolderList::OnFolder()
 	List<char> Ext;
 	if (Type)
 	{
-		GToken T(Type->Extension(), ";");
+		auto T = LString(Type->Extension()).SplitDelimit(";");
 		for (int i=0; i<T.Length(); i++)
 		{
 			Ext.Insert(NewStr(T[i]));

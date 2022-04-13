@@ -17,7 +17,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Res.h"
 #include "lgi/common/Variant.h"
-#include "lgi/common/Token.h"
 
 ////////////////////////////////////////////////////////////////////
 #ifdef WIN32
@@ -1495,8 +1494,7 @@ ResObjectImpl::SStatus ResDialogObj::Res_Write(LXmlTag *t)
 ////////////////////////////////////////////////////////////////////////////
 int CountNumbers(char *s)
 {
-	GToken t(s, ",");
-	return (int)t.Length();
+	return (int)LString(s).SplitDelimit(",").Length();
 }
 
 ResObjectImpl::SStatus ResTableLayout::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)

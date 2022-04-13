@@ -11,7 +11,6 @@
 #include "lgi/common/Process.h"
 #include "lgi/common/SkinEngine.h"
 #include "lgi/common/Array.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Thread.h"
 #include "lgi/common/EventTargetThread.h"
 #include "lgi/common/Menu.h"
@@ -847,7 +846,7 @@ LString LApp::GetFileMimeType(const char *File)
 	if (!LFileExists(File))
 	{
 		// Look in the path
-		GToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
+		auto p = LString(getenv("PATH")).SplitDelimit(LGI_PATH_SEPARATOR);
 		for (int i=0; i<p.Length(); i++)
 		{
 			char Full[MAX_PATH];
