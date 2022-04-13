@@ -66,6 +66,7 @@ Source =	Src/VcFolder.cpp \
 			../src/common/Text/XmlTreeUi.cpp \
 			../src/common/Text/DeEscape.cpp \
 			../src/common/Lgi/SubProcess.cpp \
+			../src/common/Lgi/StructuredLog.cpp \
 			../src/common/Lgi/LgiMain.cpp \
 			../src/common/Gdc2/Filters/Png.cpp
 
@@ -381,6 +382,7 @@ VPATH=%.cpp \
 	./Resources \
 	../include/lgi/linux/Gtk \
 	../include/lgi/linux \
+	../include/lgi/common \
 	../include \
 	$(BuildDir)
 

@@ -57,7 +57,7 @@
 /////////////////////////////////////////////////////////////////////
 // Defines
 #define FileDev							(LFileSystem::GetInstance())
-#define MAX_PATH						260
+#define MAX_PATH						512
 
 // File system types (used by LDirectory and LVolume)
 enum LVolumeTypes
@@ -707,7 +707,7 @@ LgiExtern char *LGetLeaf(char *Path);
 LgiFunc bool LIsRelativePath(const char *Path);
 
 /// Creates a relative path
-LgiClass LAutoString LMakeRelativePath(const char *Base, const char *Path);
+LgiClass LString LMakeRelativePath(const char *Base, const char *Path);
 
 /// Appends 'File' to 'Dir' and puts the result in 'Str'. Dir and Str can be the same buffer.
 LgiFunc bool LMakePath(char *Str, int StrBufLen, const char *Dir, const char *File);

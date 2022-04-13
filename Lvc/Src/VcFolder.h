@@ -266,8 +266,9 @@ public:
 
 	VersionCtrl GetType();
 	AppPriv *GetPriv() { return d; }
-	const char *LocalPath();
+	const char *LocalPath(LUri *uri = NULL);
 	LUri GetUri() { return Uri; }
+	LString UriToRelativePath(const char *uri);
 	VcLeaf *FindLeaf(const char *Path, bool OpenTree);
 	void DefaultFields();
 	void UpdateColumns();

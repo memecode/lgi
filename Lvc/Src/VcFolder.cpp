@@ -303,18 +303,24 @@ VersionCtrl VcFolder::GetType()
 	return Type;
 }
 
-const char *VcFolder::LocalPath()
+const char *VcFolder::LocalPath(LUri *uri)
 {
-	if (!Uri.IsProtocol("file") || Uri.sPath.IsEmpty())
+	if (!uri)
+		uri = &Uri;
+
+	if (!uri->IsProtocol("file") || uri->sPath.IsEmpty())
 	{
 		LAssert(!"Shouldn't call this if not a file path.");
 		return NULL;
 	}
-	auto c = Uri.sPath.Get();
+
+	auto c = uri->sPath.Get();
+	
 	#ifdef WINDOWS
 	if (*c == '/')
 		c++;
 	#endif
+	
 	return c;
 }
 
@@ -3920,31 +3926,39 @@ bool VcFolder::ParseBlame(int Result, LString s, ParseParams *Params)
 	return false;
 }
 
+LString VcFolder::UriToRelativePath(const char *uri)
+{
+	LUri u(uri);
+	if (!u.IsFile())
+		return NULL;
+
+	auto localPath = LocalPath(&u);
+	auto localBase = LocalPath();
+	return LMakeRelativePath(localBase, localPath);
+}
+
 bool VcFolder::Blame(const char *Path)
 {
 	if (!Path)
 		return false;
 
+	auto RelativePath = UriToRelativePath(Path);
+	if (RelativePath)
+		Path = RelativePath;
+
 	switch (GetType())
 	{
 		case VcGit:
+		case VcSvn:
 		{
 			LString a;
 			a.Printf("blame \"%s\"", Path);
 			return StartCmd(a, &VcFolder::ParseBlame);
-			break;
 		}
 		case VcHg:
 		{
 			LString a;
 			a.Printf("annotate -un \"%s\"", Path);
-			return StartCmd(a, &VcFolder::ParseBlame);
-			break;
-		}
-		case VcSvn:
-		{
-			LString a;
-			a.Printf("blame \"%s\"", Path);
 			return StartCmd(a, &VcFolder::ParseBlame);
 			break;
 		}

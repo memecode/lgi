@@ -28,6 +28,7 @@ ifeq ($(Build),Debug)
 		-L../$(BuildDir)
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
+		-I./resources \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
 		-I../include
@@ -42,6 +43,7 @@ else
 		-L../$(BuildDir)
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
+		-I./resources \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
 		-I../include
@@ -49,7 +51,8 @@ endif
 
 # Dependencies
 Source =	src/SlogViewerMain.cpp \
-			../src/common/Lgi/LgiMain.cpp
+			../src/common/Lgi/LgiMain.cpp \
+			../src/common/Lgi/DocApp.cpp
 
 SourceLst := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(Source)))
 
@@ -359,6 +362,7 @@ cleanall :
 	+make -C "../" -f "Makefile.linux" clean
 
 VPATH=%.cpp \
+	./resources \
 	../include/lgi/linux/Gtk \
 	../include/lgi/linux \
 	../include \

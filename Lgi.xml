@@ -39,9 +39,9 @@
 					<Node File=".\src\win\General\File.cpp" Type="2" Platforms="1" />
 					<Node File=".\src\win\General\ShowFileProp_Win.cpp" Type="2" Platforms="1" />
 				</Node>
-				<Node File=".\src\common\General\ExeCheck.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\File.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\General\FileCommon.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/General/ExeCheck.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/File.h" Type="3" Platforms="15" />
+				<Node File="./src/common/General/FileCommon.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Interface" Type="1" Platforms="15" Open="1" Id="12">
 				<Node Name="Haiku" Type="1" Platforms="15" Id="1">
@@ -296,9 +296,10 @@
 				<Node File=".\src\common\Lgi\Mru.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\Mru.h" Type="3" Platforms="15" />
 			</Node>
-			<Node File=".\src\common\Net\Base64.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Lgi\OptionsFile.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Lgi\Rand.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Net/Base64.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/OptionsFile.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/OptionsFile.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Lgi/Rand.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Text" Type="1" Platforms="15" Open="0" Id="61">
 			<Node File=".\src\common\Text\String.cpp" Type="2" Platforms="15" />
