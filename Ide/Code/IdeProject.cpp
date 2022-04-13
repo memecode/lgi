@@ -411,7 +411,7 @@ public:
 					m.Print("Target = %s\n", ToPlatformPath(Exe, Platform).Get());
 				else
 				{
-					auto RelExe = LMakeRelativePath(Base, Exe);
+					LAutoString RelExe = LMakeRelativePath(Base, Exe);
 					if (Base && RelExe)
 					{
 						m.Print("Target = %s\n", ToPlatformPath(RelExe, Platform).Get());
@@ -523,7 +523,7 @@ public:
 					}
 					else
 					{
-						LString Rel;
+						LAutoString Rel;
 						if (!LIsRelativePath(in))
 							Rel = LMakeRelativePath(Base, in);
 
@@ -583,7 +583,8 @@ public:
 					{
 						LString DepPath = DepBase.Get();
 						
-						auto Rel = LMakeRelativePath(Base, DepPath);
+						LAutoString Rel;
+						Rel = LMakeRelativePath(Base, DepPath);
 
 						LString Final = Rel ? Rel.Get() : DepPath.Get();
 						Proj->CheckExists(Final);
@@ -919,7 +920,7 @@ public:
 								LAutoString dep_base = d->GetBasePath();
 								d->CheckExists(dep_base);
 
-								auto rel_dir = LMakeRelativePath(my_base, dep_base);
+								LAutoString rel_dir = LMakeRelativePath(my_base, dep_base);
 								d->CheckExists(rel_dir);
 								
 								char *mk_leaf = strrchr(mk, DIR_CHAR);
@@ -1031,7 +1032,7 @@ public:
 					{
 						if (!LIsRelativePath(p))
 						{
-							auto a = LMakeRelativePath(Base, p);
+							LAutoString a = LMakeRelativePath(Base, p);
 							m.Print("\t%s \\\n", ToPlatformPath(a ? a.Get() : p.Get(), Platform).Get());
 						}
 						else

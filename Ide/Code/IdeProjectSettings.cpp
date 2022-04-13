@@ -766,7 +766,7 @@ public:
 						if (BrowseFolder ? s.OpenFolder() : s.Open())
 						{
 							const char *Base = GetCtrlName(IDC_PATH);
-							LString Rel;
+							LAutoString Rel;
 							if (Base)
 							{
 								LFile::Path p = Base;

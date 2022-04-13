@@ -1536,7 +1536,7 @@ class Lr8Item : public LTreeItem
 	LAutoPtr<LResources> Res;
 
 public:
-	Lr8Item(TableLayoutTest *w, LAutoPtr<LResources> res, LString file)
+	Lr8Item(TableLayoutTest *w, LAutoPtr<LResources> res, char *file)
 	{
 	    Wnd = w;
 		Res = res;
@@ -1610,7 +1610,7 @@ public:
 				    }
 				    if (HasTl)
 				    {
-			            auto r = LMakeRelativePath(Base, Files[i]);
+			            LAutoString r = LMakeRelativePath(Base, Files[i]);
 			            Tree->Insert(new Lr8Item(Wnd, Res, r));
 				    }
 				}
