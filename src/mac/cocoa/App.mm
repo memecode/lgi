@@ -371,8 +371,8 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	Name(AppName);
 	if (LIsRelativePath(AppArgs.Arg[0]))
 	{
-		char wd[MAX_PATH];
-		char exe[MAX_PATH];
+		char wd[MAX_PATH_LEN];
+		char exe[MAX_PATH_LEN];
 		if (LMakePath(exe, sizeof(exe), getcwd(wd, sizeof(wd)), AppArgs.Arg[0]))
 			LgiArgsAppPath = exe;
 		else
@@ -849,7 +849,7 @@ LString LApp::GetFileMimeType(const char *File)
 		auto p = LString(getenv("PATH")).SplitDelimit(LGI_PATH_SEPARATOR);
 		for (int i=0; i<p.Length(); i++)
 		{
-			char Full[MAX_PATH];
+			char Full[MAX_PATH_LEN];
 			LMakePath(Full, sizeof(Full), p[i], File);
 			if (LFileExists(Full))
 			{

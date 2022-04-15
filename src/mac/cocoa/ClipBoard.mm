@@ -122,6 +122,12 @@ bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 	return false;
 }
 
+bool LClipBoard::Bitmap(BitmapCb Callback)
+{
+	LAssert(!"Not impl.");
+	return false;
+}
+
 LAutoPtr<LSurface> LClipBoard::Bitmap()
 {
 	LAssert(!"Not impl.");
