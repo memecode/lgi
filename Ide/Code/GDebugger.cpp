@@ -646,7 +646,6 @@ public:
 	{
 		State = Init;
 		LinePtr = Line;
-		ParseState;
 		
 		Vis.Add(new GStringVis);
 	}

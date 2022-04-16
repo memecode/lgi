@@ -772,7 +772,7 @@ public:
 								LFile::Path p = Base;
 								Rel = LMakeRelativePath(--p, s.Name());
 							}
-							e->Name(Rel ? Rel : s.Name());
+							e->Name(Rel ? Rel.Get() : s.Name());
 						}
 
 						return 0; // no default btn handling.
