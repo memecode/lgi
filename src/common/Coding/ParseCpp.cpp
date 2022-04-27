@@ -1050,7 +1050,7 @@ int GCppParserWorker::Evaluate(LArray<char16*> &Exp)
 		}
 		else
 		{
-			GOperator Op = IsOp(t, false);
+			LOperator Op = IsOp(t, false);
 			if (Op != OpNull)
 			{
 				LVariant &o = Values.New();

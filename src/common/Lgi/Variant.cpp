@@ -35,7 +35,7 @@ const char *LVariant::TypeToString(LVariantType t)
 	return NULL;
 }
 
-const char *LVariant::OperatorToString(GOperator op)
+const char *LVariant::OperatorToString(LOperator op)
 {
 	switch (op)
 	{
@@ -164,7 +164,7 @@ LVariant::LVariant(const LDateTime *d)
 	*this = d;
 }
 
-LVariant::LVariant(GOperator Op)
+LVariant::LVariant(LOperator Op)
 {
 	Type = GV_OPERATOR;
 	Value.Op = Op;
@@ -2013,7 +2013,7 @@ ssize_t LCustomType::CustomField::Sizeof()
 		case GV_HASHTABLE:
 			return sizeof(LVariant::LHash);
 		case GV_OPERATOR:
-			return sizeof(GOperator);
+			return sizeof(LOperator);
 		case GV_LMOUSE:
 			return sizeof(LMouse);
 		case GV_LKEY:

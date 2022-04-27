@@ -202,7 +202,7 @@ class SystemFunctions;
 class GCompileTools
 {
 protected:
-	OperatorType OpType(GOperator o)
+	OperatorType OpType(LOperator o)
 	{
 		switch (o)
 		{
@@ -222,7 +222,7 @@ protected:
 		}
 	}
 
-	int GetPrecedence(GOperator o)
+	int GetPrecedence(LOperator o)
 	{
 		// Taken from:
 		// http://www.cppreference.com/operator_precedence.html
@@ -282,7 +282,7 @@ protected:
 		return -1;
 	}
 
-	GOperator IsOp(char16 *s, int PrevIsOp)
+	LOperator IsOp(char16 *s, int PrevIsOp)
 	{
 		if (!s) return OpNull;
 

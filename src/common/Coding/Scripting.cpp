@@ -78,7 +78,7 @@ struct GCode
 		struct
 		{
 			/// The operator after the L-value
-			GOperator Op;
+			LOperator Op;
 			/// The index of the expression
 			int Expression;
 
@@ -1493,7 +1493,7 @@ bool LScriptEnginePrivate::Compile_Expression(int &Cur, int Depth)
 			}
 			else
 			{
-				GOperator Top = IsOp(t, PrevIsOp);
+				LOperator Top = IsOp(t, PrevIsOp);
 				if (Top != OpNull)
 				{
 					if (PrevIsOp == 1)
@@ -1624,7 +1624,7 @@ LVariant *LScriptEnginePrivate::Execute_Expression(int &Cur, GDom *Src, int Dept
 			}
 			else
 			{
-				GOperator Top = IsOp(t, PrevIsOp);
+				LOperator Top = IsOp(t, PrevIsOp);
 				if (Top != OpNull)
 				{
 					if (PrevIsOp == 1)
@@ -3358,7 +3358,7 @@ bool LScriptEnginePrivate::Compile_Statement(LArray<GCode> &To, int &Cur)
 					char16 *n = ThisToken();
 					if (n)
 					{
-						GOperator Op = IsOp(n, 0);
+						LOperator Op = IsOp(n, 0);
 						switch (Op)
 						{
 							case OpPlusEquals:

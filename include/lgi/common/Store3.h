@@ -447,7 +447,9 @@ public:
 		int PropId,
 		/// The value to assign
 		/// (GV_INT32/64 -> SetInt, GV_DATETIME -> SetDateTime, GV_STRING -> SetStr)
-		LVariant &Value
+		LVariant &Value,
+		/// Optional operator for action
+		LOperator Operator
 	) = 0;
 	
 	/// Compact the mail store
