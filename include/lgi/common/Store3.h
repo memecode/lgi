@@ -146,7 +146,7 @@ typedef LDataIterator<LDataPropI*> *GDataIt;
 /// A generic interface for getting / setting properties.
 class LDataPropI : virtual public LDom
 {
-	virtual LDataPropI &operator =(LDataPropI &p) { return *this; }
+	LDataPropI &operator =(LDataPropI &p) = delete;
 
 public:
 	virtual ~LDataPropI() {}
@@ -162,7 +162,7 @@ public:
 
 	/// Gets an integer property.
 	virtual int64 GetInt(int id) { EmptyVirtual(false); }
-	/// Sets an interger property.
+	/// Sets an integer property.
 	virtual Store3Status SetInt(int id, int64 i) { EmptyVirtual(Store3Error); }
 
 	/// Gets a date property
@@ -208,7 +208,7 @@ public:
 class LDataI : virtual public LDataPropI
 {
 	friend class LDataUserI;
-	virtual LDataI &operator =(LDataI &p) { return *this; }
+	LDataI &operator =(LDataI &p) = delete;
 
 public:
 	LDataUserI *UserData;
@@ -258,7 +258,7 @@ public:
 /// An interface to a folder structure
 class LDataFolderI : virtual public LDataI
 {
-	virtual LDataFolderI &operator =(LDataFolderI &p) { return *this; }
+	LDataFolderI &operator =(LDataFolderI &p) = delete;
 
 public:
 	virtual ~LDataFolderI() {}

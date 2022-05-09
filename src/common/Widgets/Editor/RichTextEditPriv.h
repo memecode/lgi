@@ -285,7 +285,7 @@ struct ButtonState
 	uint8_t MouseOver : 1;
 };
 
-extern bool Utf16to32(LArray<uint32_t> &Out, const uint16_t *In, int Len);
+extern bool Utf16to32(LArray<uint32_t> &Out, const uint16_t *In, ssize_t Len);
 
 class LEmojiImage
 {
@@ -722,7 +722,7 @@ public:
 			virtual void OnPaint(PaintContext &Ctx) = 0;
 			virtual bool ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rgn) = 0;
 			virtual bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY) = 0;
-			virtual int LineToOffset(int Line) = 0;
+			virtual ssize_t LineToOffset(ssize_t Line) = 0;
 			virtual int GetLines() = 0;
 			virtual ssize_t FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params) = 0;
 			virtual void SetSpellingErrors(LArray<LSpellCheck::SpellingError> &Errors, LRange r) {}
@@ -886,7 +886,7 @@ public:
 		}
 		
 		template<typename T>
-		T *Utf16Seek(T *s, int i)
+		T *Utf16Seek(T *s, ssize_t i)
 		{
 			T *e = s + i;
 			while (s < e)
@@ -999,7 +999,7 @@ public:
 		uint8_t NewLine;
 		
 		TextLine(int XOffsetPx, int WidthPx, int YOffsetPx);
-		int Length();
+		ssize_t Length();
 		
 		/// This runs after the layout line has been filled with display strings.
 		/// It measures the line and works out the right offsets for each strings
@@ -1015,7 +1015,7 @@ public:
 		LSpellCheck::SpellingError *SpErr;
 
 		bool PreEdit(Transaction *Trans);
-		void DrawDisplayString(LSurface *pDC, DisplayStr *Ds, int &FixX, int FixY, LColour &Bk, int &Pos);
+		void DrawDisplayString(LSurface *pDC, DisplayStr *Ds, int &FixX, int FixY, LColour &Bk, ssize_t &Pos);
 	
 	public:
 		// Runs of characters in the same style: pre-layout.
@@ -1048,7 +1048,7 @@ public:
 		const char *GetClass() { return "TextBlock"; }
 		int GetLines();
 		bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY);
-		int LineToOffset(int Line);
+		ssize_t LineToOffset(ssize_t Line);
 		LRect GetPos() { return Pos; }
 		void Dump();
 		LNamedStyle *GetStyle(ssize_t At = -1);
@@ -1102,7 +1102,7 @@ public:
 		const char *GetClass() { return "HorzRuleBlock"; }
 		int GetLines();
 		bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY);
-		int LineToOffset(int Line);
+		ssize_t LineToOffset(ssize_t Line);
 		LRect GetPos() { return Pos; }
 		void Dump();
 		LNamedStyle *GetStyle(ssize_t At = -1);
@@ -1197,7 +1197,7 @@ public:
 		// No state change methods
 		int GetLines();
 		bool OffsetToLine(ssize_t Offset, int *ColX, LArray<int> *LineY);
-		int LineToOffset(int Line);
+		ssize_t LineToOffset(ssize_t Line);
 		LRect GetPos() { return Pos; }
 		void Dump();
 		LNamedStyle *GetStyle(ssize_t At = -1);

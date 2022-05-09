@@ -37,7 +37,7 @@ public:
 
 class LMimeBuf : public LStringPipe
 {
-	int Total;
+	ssize_t Total;
 	LStreamI *Src;
 	LStreamEnd *End;
 

@@ -1855,9 +1855,9 @@ bool MailReceiveFolder::Close()
 	return true;
 }
 
-int MailReceiveFolder::GetMessages()
+ssize_t MailReceiveFolder::GetMessages()
 {
-	return (int)d->Mail.Length();
+	return d->Mail.Length();
 }
 
 bool MailReceiveFolder::Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks)
@@ -1994,7 +1994,7 @@ MailPop3::~MailPop3()
 {
 }
 
-int MailPop3::GetMessages()
+ssize_t MailPop3::GetMessages()
 {
 	if (Messages < 0)
 	{

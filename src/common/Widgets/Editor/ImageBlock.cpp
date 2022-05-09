@@ -543,7 +543,7 @@ bool LRichTextPriv::ImageBlock::OffsetToLine(ssize_t Offset, int *ColX, LArray<i
 	return true;
 }
 
-int LRichTextPriv::ImageBlock::LineToOffset(int Line)
+ssize_t LRichTextPriv::ImageBlock::LineToOffset(ssize_t Line)
 {
 	return 0;
 }

@@ -532,8 +532,8 @@ void LRichTextEdit::SetLine(int i)
 		int Lines = b->GetLines();
 		if (i >= Count && i < Count + Lines)
 		{
-			int BlockLine = i - Count;
-			int Offset = b->LineToOffset(BlockLine);
+			auto BlockLine = i - Count;
+			auto Offset = b->LineToOffset(BlockLine);
 			if (Offset >= 0)
 			{
 				AutoCursor c(new BlkCursor(b, Offset, BlockLine));
@@ -574,8 +574,8 @@ ssize_t LRichTextEdit::GetCaret(bool Cur)
 	if (!d->Cursor)
 		return -1;
 		
-	int CharPos = 0;
-	for (unsigned i=0; i<d->Blocks.Length(); i++)
+	ssize_t CharPos = 0;
+	for (ssize_t i=0; i<(ssize_t)d->Blocks.Length(); i++)
 	{
 		LRichTextPriv::Block *b = d->Blocks[i];
 		if (d->Cursor->Blk == b)
@@ -674,13 +674,16 @@ bool LRichTextEdit::Paste()
 	{
 		LClipBoard Cb(this);
 		
-		Img = Cb.Bitmap();
-		if (!Img)
-		{	
-			Html = Cb.Html();
-			if (!Html)
-				Text.Reset(NewStrW(Cb.TextW()));
-		}
+		Cb.Bitmap([&](auto bmp, auto str)
+		{
+			Img = bmp;
+			if (!Img)
+			{	
+				Html = Cb.Html();
+				if (!Html)
+					Text.Reset(NewStrW(Cb.TextW()));
+			}
+		});
 	}
 
 	if (!Html && !Text && !Img)
@@ -1126,7 +1129,7 @@ int LRichTextEdit::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 			LPoint TestPt(	Pt.x - d->Areas[ContentArea].x1,
 							Pt.y - d->Areas[ContentArea].y1);
 			if (VScroll)
-				TestPt.y += VScroll->Value() * d->ScrollLinePx;
+				TestPt.y += (int)(VScroll->Value() * d->ScrollLinePx);
 
 			LDropFiles Df(dd);
 			for (unsigned n=0; n<Df.Length(); n++)
@@ -1390,7 +1393,7 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 			LInput i(this, s, "Indent Size:", "Text");
 			if (i.DoModal())
 			{
-				IndentSize = i.GetStr().Int();
+				IndentSize = (uint8_t)i.GetStr().Int();
 			}
 			break;
 		}
@@ -1401,7 +1404,7 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 			LInput i(this, s, "Tab Size:", "Text");
 			if (i.DoModal())
 			{
-				SetTabSize(i.GetStr().Int());
+				SetTabSize((uint8_t)i.GetStr().Int());
 			}
 			break;
 		}

@@ -783,6 +783,21 @@ LAutoPtr<LSurface> LClipBoard::ConvertFromPtr(void *Ptr)
 	return pDC;
 }
 
+bool LClipBoard::Bitmap(BitmapCb Callback)
+{
+	if (!Callback)
+		return false;
+	HGLOBAL hMem = GetClipboardData(CF_DIB);
+	if (void *Ptr = GlobalLock(hMem))
+	{
+		LAutoPtr<LSurface> pDC = ConvertFromPtr(Ptr);
+		GlobalUnlock(hMem);
+		Callback(pDC, NULL);
+		return true;
+	}
+	else return false;
+}
+
 LAutoPtr<LSurface> LClipBoard::Bitmap()
 {
 	HGLOBAL hMem = GetClipboardData(CF_DIB);

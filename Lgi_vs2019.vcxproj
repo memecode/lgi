@@ -102,45 +102,45 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>.\Lib\</OutDir>
-    <IntDir>$(Platform)$(Configuration)16\</IntDir>
+    <IntDir>$(Platform)$(Configuration)19\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\CodeLib\libiconv-1.14\include</IncludePath>
     <TargetName>Lgi16x32</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>.\Lib\</OutDir>
-    <IntDir>$(Platform)$(Configuration)16\</IntDir>
+    <IntDir>$(Platform)$(Configuration)19\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\CodeLib\libiconv-1.14\include</IncludePath>
-    <TargetName>Lgi16x64</TargetName>
+    <TargetName>Lgi19x64</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>.\Lib\</OutDir>
-    <IntDir>$(Platform)$(Configuration)16\</IntDir>
+    <IntDir>$(Platform)$(Configuration)19\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\CodeLib\libiconv-1.14\include</IncludePath>
     <TargetName>Lgi16x32d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>.\Lib\</OutDir>
-    <IntDir>$(Platform)$(Configuration)16\</IntDir>
+    <IntDir>$(Platform)$(Configuration)19\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\CodeLib\libiconv-1.14\include</IncludePath>
-    <TargetName>Lgi16x64d</TargetName>
+    <TargetName>Lgi19x64d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|Win32'">
     <OutDir>.\Lib\</OutDir>
-    <IntDir>$(Platform)$(Configuration)16\</IntDir>
+    <IntDir>$(Platform)$(Configuration)19\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\CodeLib\libiconv-1.14\include</IncludePath>
     <TargetName>Lgi16x32nop</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|x64'">
     <OutDir>.\Lib\</OutDir>
-    <IntDir>$(Platform)$(Configuration)16\</IntDir>
+    <IntDir>$(Platform)$(Configuration)19\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\CodeLib\libiconv-1.14\include</IncludePath>
-    <TargetName>Lgi16x64nop</TargetName>
+    <TargetName>Lgi19x64nop</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -484,6 +484,7 @@
     <ClCompile Include="src\common\Text\DocView.cpp" />
     <ClCompile Include="src\common\Text\String.cpp" />
     <ClCompile Include="src\common\Text\TextView3.cpp" />
+    <ClCompile Include="src\common\Text\TextView4.cpp" />
     <ClCompile Include="src\common\Text\Token.cpp" />
     <ClCompile Include="src\common\Text\Unicode.cpp" />
     <ClCompile Include="src\common\Text\Utf8.cpp" />

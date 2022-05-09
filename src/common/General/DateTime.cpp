@@ -8,7 +8,6 @@
 **		fret@memecode.com
 */
 
-#define _INTEGRAL_MAX_BITS 64
 #define _DEFAULT_SOURCE
 #include <time.h>
 

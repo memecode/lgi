@@ -37,7 +37,7 @@ bool LRichTextPriv::HorzRuleBlock::OffsetToLine(ssize_t Offset, int *ColX, LArra
 	return true;
 }
 
-int LRichTextPriv::HorzRuleBlock::LineToOffset(int Line)
+ssize_t LRichTextPriv::HorzRuleBlock::LineToOffset(ssize_t Line)
 {
 	return 0;
 }

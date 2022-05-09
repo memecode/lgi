@@ -328,7 +328,7 @@ bool MailIMap::Http(LSocketI *S,
 			{
 				auto t = LString(Rp, Eol-Rp).SplitDelimit(" \t\r\n");
 				if (t.Length() > 2)
-					*StatusCode = t[1].Int();
+					*StatusCode = (int)t[1].Int();
 			}
 		}
 	}
@@ -985,7 +985,7 @@ void _unpack(void *ptr, int ptrsize, char *b64)
 
 bool MailIMap::ReadLine()
 {
-	int Len = 0;
+	ssize_t Len = 0;
 	Buf[0] = 0;
 	do
 	{
@@ -1497,8 +1497,8 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 									}
 
 									ZeroObj(Buf);
-									int negotiateLen = SmbLength(&negotiate);
-									int c = ConvertBinaryToBase64(Buf, sizeof(Buf), (uchar*)&negotiate, negotiateLen);
+									auto negotiateLen = SmbLength(&negotiate);
+									auto c = ConvertBinaryToBase64(Buf, sizeof(Buf), (uchar*)&negotiate, negotiateLen);
 									strcpy_s(Buf+c, sizeof(Buf)-c, "\r\n");
 									WriteBuf(false, NULL, true);
 
@@ -1515,13 +1515,13 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 											char *Line = Dialog[0];
 											LAssert(Line != NULL);
 											ChopNewLine(Line);
-											int LineLen = strlen(Line);
-											int challengeLen = sizeof(challenge);
+											auto LineLen = strlen(Line);
+											auto challengeLen = sizeof(challenge);
 											c = ConvertBase64ToBinary((uchar*) &challenge, sizeof(challenge), Line+2, LineLen-2);
 											if (NTLM_VER(&challenge) == 2)
-												challenge.v2.bufIndex = c - (challenge.v2.buffer-(uint8*)&challenge);
+												challenge.v2.bufIndex = (uint32)(c - (challenge.v2.buffer-(uint8*)&challenge));
 											else
-												challenge.v1.bufIndex = c - (challenge.v1.buffer-(uint8*)&challenge);
+												challenge.v1.bufIndex = (uint32)(c - (challenge.v1.buffer-(uint8*)&challenge));
 
 										#endif
 
@@ -2067,7 +2067,7 @@ int MailIMap::GetMessages(const char *Path)
 	return Status;
 }
 
-int MailIMap::GetMessages()
+ssize_t MailIMap::GetMessages()
 {
 	return GetMessages("INBOX");
 }
@@ -2253,7 +2253,7 @@ int MailIMap::Fetch(bool ByUid,
 			
 			// See if we can parse out a single response
 			LArray<StrRange> Ranges;
-			LAssert(Used < Buf.Length());
+			LAssert(Used < (ssize_t)Buf.Length());
 			Buf[Used] = 0; // NULL terminate before we parse
 
 			while (true)
@@ -2580,7 +2580,7 @@ bool MailIMap::Append(const char *Folder, ImapMailFlags *Flags, const char *Msg,
 				
 				if (GotPlus)
 				{
-					int Wrote = 0;
+					ssize_t Wrote = 0;
 					for (const char *m = Msg; *m; )
 					{
 						while (*m == '\r' || *m == '\n')

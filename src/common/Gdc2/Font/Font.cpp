@@ -1138,7 +1138,7 @@ bool LFont::Create(LFontType *LogFont, LSurface *pSurface)
 }
 #endif
 
-LFont &LFont::operator =(LFont &f)
+LFont &LFont::operator =(const LFont &f)
 {
 	Face(f.Face());
 	Size(f.Size());

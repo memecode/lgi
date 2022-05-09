@@ -300,7 +300,7 @@ bool MailPhp::Get(LSocketI *S, char *Uri, LStream &Out, bool MailTransfer)
 	return Status;
 }
 
-int MailPhp::GetMessages()
+ssize_t MailPhp::GetMessages()
 {
 	return d->Messages;
 }

@@ -496,7 +496,7 @@ public:
 	virtual bool Close() = 0;
 
 	/// Returns the number of messages available on the server
-	virtual int GetMessages() = 0;
+	virtual ssize_t GetMessages() = 0;
 	/// Receives a list of messages from the server.
 	virtual bool Receive
 	(
@@ -585,7 +585,7 @@ public:
 	bool Close();
 
 	// Commands available while connected
-	int GetMessages();
+	ssize_t GetMessages() override;
 	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
 	bool Delete(int Message);
 	int Sizeof(int Message);
@@ -609,7 +609,7 @@ public:
 	bool Close();
 
 	// Commands available while connected
-	int GetMessages();
+	ssize_t GetMessages() override;
 	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
 	bool Delete(int Message);
 	int Sizeof(int Message);
@@ -634,7 +634,7 @@ public:
 	bool Close();
 
 	// Commands available while connected
-	int GetMessages();
+	ssize_t GetMessages() override;
 	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
 	bool Delete(int Message);
 	int Sizeof(int Message);
@@ -760,7 +760,7 @@ public:
 
 	// Commands available while connected
 	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
-	int GetMessages();
+	ssize_t GetMessages() override;
 	bool Delete(int Message);
 	bool Delete(bool ByUid, const char *Seq);
 	int Sizeof(int Message);

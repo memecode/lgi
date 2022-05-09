@@ -169,17 +169,17 @@ void LTypeFace::SubGlyphs(bool i)
 
 ////////////////////////
 // get
-char *LTypeFace::Face()
+char *LTypeFace::Face() const
 {
 	return d->_Face;
 }
 
-LCss::Len LTypeFace::Size()
+LCss::Len LTypeFace::Size() const
 {
 	return d->_Size;
 }
 
-int LTypeFace::PointSize()
+int LTypeFace::PointSize() const
 {
 	if (d->_Size.Type == LCss::LenPt)
 		return (int)d->_Size.Value;
@@ -191,62 +191,62 @@ int LTypeFace::PointSize()
 	return 0;
 }
 
-int LTypeFace::TabSize()
+int LTypeFace::TabSize() const
 {
 	return d->_TabSize;
 }
 
-int LTypeFace::Quality()
+int LTypeFace::Quality() const
 {
 	return d->_Quality;
 }
 
-LColour LTypeFace::Fore()
+LColour LTypeFace::Fore() const
 {
 	return d->_Fore;
 }
 
-LColour LTypeFace::Back()
+LColour LTypeFace::Back() const
 {
 	return d->_Back;
 }
 
-int LTypeFace::GetWeight()
+int LTypeFace::GetWeight() const
 {
 	return d->_Weight;
 }
 
-bool LTypeFace::Italic()
+bool LTypeFace::Italic() const
 {
 	return d->_Italic;
 }
 
-bool LTypeFace::Underline()
+bool LTypeFace::Underline() const
 {
 	return d->_Underline;
 }
 
-bool LTypeFace::Transparent()
+bool LTypeFace::Transparent() const
 {
 	return d->_Transparent;
 }
 
-bool LTypeFace::SubGlyphs()
+bool LTypeFace::SubGlyphs() const
 {
 	return d->_SubGlyphs;
 }
 
-double LTypeFace::Ascent()
+double LTypeFace::Ascent() const
 {
 	return d->_Ascent;
 }
 
-double LTypeFace::Descent()
+double LTypeFace::Descent() const
 {
 	return d->_Descent;
 }
 
-double LTypeFace::Leading()
+double LTypeFace::Leading() const
 {
 	return d->_Leading;
 }

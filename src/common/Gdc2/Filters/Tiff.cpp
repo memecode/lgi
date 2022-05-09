@@ -472,7 +472,7 @@ public:
 
 	ssize_t Write(const void *buf, ssize_t size, int flags)
 	{
-		int Status = LMemQueue::Write(buf, size, flags);
+		auto Status = LMemQueue::Write(buf, size, flags);
 		Size += size;
 
 		if (p)
@@ -565,7 +565,7 @@ LFilter::IoStatus GdcTiff::ProcessRead(LSurface *pDC)
 			Lib.MeterBlock = (X * Bits) >> (DownSam ? 2 : 3);
 			Lib.Meter = Meter;
 			Meter->SetDescription("scanlines");
-			Meter->SetLimits(0, Y-1);
+			Meter->SetRange(LRange(0, Y));
 		}
 
 		pDC->Colour(0);
