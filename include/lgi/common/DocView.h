@@ -41,17 +41,17 @@ enum LDocWrapType
 /// Returns true if 'c' is email address character
 #define EmailChar(c)				(strchr("._-:+", (c)) || AlphaOrDigit((c)))
 
-extern char16 *ConvertToCrLf(char16 *Text);
+LgiFunc char16 *ConvertToCrLf(char16 *Text);
 
-/// This class contains infomation about a link.
+/// This class contains information about a link.
 /// \sa LDetectLinks
-struct GLinkInfo
+struct LLinkInfo
 {
-	NativeInt Start;
-	NativeInt Len;
+	ssize_t Start;
+	ssize_t Len;
 	bool Email;
 	
-	void Set(NativeInt start, NativeInt len, bool email)
+	void Set(ssize_t start, ssize_t len, bool email)
 	{
 		Start = start;
 		Len = len;
@@ -444,7 +444,7 @@ public:
 
 /// Detects links in text, returning their location and type
 template<typename T>
-bool LDetectLinks(LArray<GLinkInfo> &Links, T *Text, ssize_t TextCharLen = -1)
+bool LDetectLinks(LArray<LLinkInfo> &Links, T *Text, ssize_t TextCharLen = -1)
 {
 	if (!Text)
 		return false;

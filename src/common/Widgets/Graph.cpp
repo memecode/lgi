@@ -482,7 +482,7 @@ struct LGraphPriv
 	LColour GenerateColour()
 	{
 		LColour c;
-		c.SetHLS(Data.Length() * 360 / 8, 255, 128);
+		c.SetHLS((uint16_t) (Data.Length() * 360 / 8), 255, 128);
 		c.ToRGB();
 		return c;
 	}

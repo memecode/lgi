@@ -24,8 +24,7 @@ extern char Delimiters[];
 class LTextView4;
 
 /// Unicode text editor control.
-class LgiClass
-	LTextView4 :
+class LTextView4 :
 	public LDocView,
 	public ResObject,
 	public LDragDropTarget
@@ -318,7 +317,7 @@ public:
 	int64 Value() override;
 	void Value(int64 i) override;
 	const char *GetMimeType() override { return "text/plain"; }
-	size_t Length() { return Size; }
+	size_t Length() const { return Size; }
 	LString operator[](ssize_t LineIdx);
 
 	ssize_t HitText(int x, int y, bool Nearest);

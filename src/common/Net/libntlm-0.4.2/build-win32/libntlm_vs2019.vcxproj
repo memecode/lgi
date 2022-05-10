@@ -149,7 +149,6 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..;..\build-win32;..\lib;..\..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;WINDOWS;_USRDLL;LIBNTLM_EXPORTS;LGI_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeaderOutputFile>.\$(IntDir)libntlm.pch</PrecompiledHeaderOutputFile>
@@ -191,7 +190,6 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..;..\build-win32;..\lib;..\..\..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN64;_DEBUG;WINDOWS;_USRDLL;LIBNTLM_EXPORTS;LGI_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeaderOutputFile>$(IntDir)libntlm.pch</PrecompiledHeaderOutputFile>
