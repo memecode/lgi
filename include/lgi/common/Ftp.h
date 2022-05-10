@@ -181,7 +181,7 @@ public:
 class IFtp : public IFileProtocol
 {
 protected:
-	class IFtpPrivate *d;
+	struct IFtpPrivate *d;
 
 	/// The command connection
 	LAutoPtr<LSocketI> Socket;	// commands
@@ -191,22 +191,22 @@ protected:
 	bool TransferFile(const char *Local, const char *Remote, int64 RemoteSize, bool Upload, bool Binary);
 
 	// Data connections
-	char Ip[64];
-	int Port;
-	bool PassiveMode;
-	bool ForceActive;
-	bool LongList;
-	bool ShowHidden;
-	Progress *Meter;
-	bool Authenticated;
+	char Ip[64] = "";
+	int Port = 0;
+	bool PassiveMode = false;
+	bool ForceActive = false;
+	bool LongList = true;
+	bool ShowHidden = false;
+	Progress *Meter = NULL;
+	bool Authenticated = false;
 
 	// Socket factory details.
 	// FtpSocketFactory SockFactory;
 	// void *FactoryParam;
 
 	// State
-	int64 RestorePos;
-	bool AbortTransfer;
+	int64 RestorePos = 0;
+	bool AbortTransfer = false;
 	
 	bool SetupData(bool Binary);
 	bool ConnectData();
@@ -215,7 +215,7 @@ protected:
 
 public:
 	/// Construct an FTP protocol handler.
-	IFtp(IFtpCallback *cb = NULL);
+	IFtp(IFtpCallback *cb = NULL, bool UseTLS = false);
 	virtual ~IFtp();
 
 	/// \returns the current charset
