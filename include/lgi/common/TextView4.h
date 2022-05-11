@@ -24,7 +24,7 @@ extern char Delimiters[];
 class LTextView4;
 
 /// Unicode text editor control.
-class LTextView4 :
+class LgiClass LTextView4 :
 	public LDocView,
 	public ResObject,
 	public LDragDropTarget
