@@ -497,6 +497,9 @@
     <ClCompile Include="src\common\Text\XmlTree.cpp">
       <Filter>Source Files\Text</Filter>
     </ClCompile>
+    <ClCompile Include="src\common\Text\TextView4.cpp">
+      <Filter>Source Files\Widgets\Xp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\common\LgiRes.h">

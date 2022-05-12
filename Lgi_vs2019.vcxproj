@@ -484,6 +484,7 @@
     <ClCompile Include="src\common\Text\DocView.cpp" />
     <ClCompile Include="src\common\Text\String.cpp" />
     <ClCompile Include="src\common\Text\TextView3.cpp" />
+    <ClCompile Include="src\common\Text\TextView4.cpp" />
     <ClCompile Include="src\common\Text\Token.cpp" />
     <ClCompile Include="src\common\Text\Unicode.cpp" />
     <ClCompile Include="src\common\Text\Utf8.cpp" />
