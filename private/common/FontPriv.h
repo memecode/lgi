@@ -12,13 +12,13 @@ class LTypeFacePrivate
 {
 public:
 	// Type
-	char *_Face;			// type face
+	LString _Face;			// type face
+	LString _CodePage;
 	LCss::Len _Size;		// size
 	int _Weight;
+	int _Quality;
 	bool _Italic;
 	bool _Underline;
-	char *_CodePage;
-	int _Quality;
 
 	// Output
 	LColour _Fore;
@@ -38,24 +38,17 @@ public:
 	{
 		IsSymbol = false;
 		_Ascent = _Descent = _Leading = 0.0;
-		_Face = 0;
 		_Size = LCss::Len(LCss::LenPt, 8.0f);
 		_Weight = FW_NORMAL;
 		_Italic = false;
 		_Underline = false;
-		_CodePage = NewStr("utf-8");
+		_CodePage = "utf-8";
 		_Fore.Rgb(0, 0, 0);
 		_Back.Rgb(255, 255, 255);
 		_TabSize = 32; // px
 		_Transparent = false;
 		_Quality = DEFAULT_QUALITY;
 		_SubGlyphs = LFontSystem::Inst()->GetDefaultGlyphSub();
-	}
-
-	~LTypeFacePrivate()
-	{
-		DeleteArray(_Face);
-		DeleteArray(_CodePage);
 	}
 };
 

@@ -379,7 +379,7 @@ public:
 		LFont *f;
 		if ((f = new LFont))
 		{
-			char *ff = ValidStr(Face[0]) ? Face[0] : Default->Face();
+			auto ff = ValidStr(Face[0]) ? Face[0] : Default->Face();
 			f->Face(ff);
 			f->Size(Size.IsValid() ? Size : Default->Size());
 			f->Bold(IsBold);

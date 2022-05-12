@@ -132,7 +132,7 @@ public:
 	void SubGlyphs(bool i);
 
 	/// \returns the font face
-	char *Face() const;
+	const char *Face() const;
 	/// \returns the point size (avoid, use 'Size' instead)
 	int PointSize() const;
 	/// \returns the size

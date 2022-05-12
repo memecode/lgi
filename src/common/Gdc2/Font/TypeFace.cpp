@@ -33,10 +33,9 @@ void LTypeFace::Face(const char *s)
 {
 	if (s &&
 		s != d->_Face &&
-		stricmp(s, d->_Face?d->_Face:(char*)"") != 0)
+		Stricmp(s, d->_Face.Get()) != 0)
 	{
-		DeleteArray(d->_Face);
-		d->_Face = NewStr(s);
+		d->_Face = s;
 		LAssert(d->_Face != NULL);
 		_OnPropChange(true);
 	}
@@ -169,7 +168,7 @@ void LTypeFace::SubGlyphs(bool i)
 
 ////////////////////////
 // get
-char *LTypeFace::Face() const
+const char *LTypeFace::Face() const
 {
 	return d->_Face;
 }

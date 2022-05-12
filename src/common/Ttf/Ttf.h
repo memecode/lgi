@@ -1,3 +1,4 @@
+/*
 class TtfTable;
 class GdcTtf;
 
@@ -546,6 +547,4 @@ public:
 	void Size(int *x, int *y, char *Str, int Len = -1, int Flags = 0);
 	int CharAt(int x, char *Str, int Len = -1);
 };
-
-
-
+*/
