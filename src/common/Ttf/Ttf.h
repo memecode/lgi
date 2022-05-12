@@ -83,8 +83,8 @@ class LgiClass TtfFileHeader {
 public:
 	TTF_FIXED Version;			// 0x00010000 for version 1.0.
 	ushort	NumTables;			// Number of tables. 
-	ushort	SearchRange;			// (Maximum power of 2 £ numTables) x 16.
-	ushort	EntrySelector;			// Log2(maximum power of 2 £ numTables).
+	ushort	SearchRange;			// (Maximum power of 2 ^ numTables) x 16.
+	ushort	EntrySelector;			// Log2(maximum power of 2 ^ numTables).
 	ushort	RangeShift;			// NumTables x 16-searchRange.
 
 	bool Read(LFile &F);
