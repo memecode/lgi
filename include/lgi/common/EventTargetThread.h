@@ -302,7 +302,9 @@ public:
 		if (!Lock(_FL))
 			return false;
 		
-		Msgs.Add(new LMessage(Cmd, a, b));
+		auto Msg = new LMessage(Cmd, a, b);
+		if (Msg)
+			Msgs.Add(Msg);
 		Unlock();
 		
 		// printf("%x: PostEvent and sig %i\n", GetCurrentThreadId(), (int)Msgs.Length());
@@ -340,10 +342,7 @@ public:
 				if (Lock(_FL))
 				{
 					if (Msgs.Length())
-					{
-						m = Msgs;
-						Msgs.Length(0);
-					}
+						m.Swap(Msgs);
 					Unlock();
 				}
 
@@ -351,14 +350,12 @@ public:
 				for (unsigned i=0; !IsCancelled() && i < m.Length(); i++)
 				{
 					Processing--;
-					/*
-					printf("%x: Processing=%i of %i\n",
-						GetCurrentThreadId(),
-						(int)Processing, (int)m.Length());
-					*/
-					OnEvent(m[i]);
+					auto Msg = m[i];
+					if (Msg)
+						OnEvent(Msg);
+					else
+						LAssert(!"NULL Msg?");
 				}
-				// printf("%x: Done Processing, %i to go\n", GetCurrentThreadId(), (int)Msgs.Length());
 				m.DeleteObjects();
 			}
 			else if (s == LThreadEvent::WaitError)

@@ -25,7 +25,7 @@ class LAutoPtr
 	X *Ptr;
 
 public:
- 	explicit LAutoPtr(X* p=0)
+ 	explicit LAutoPtr(X* p=NULL)
 	{
 		Ptr = p;
 	}
@@ -94,7 +94,7 @@ public:
 		return p;
 	}
 
-	bool Reset(X* p=0)
+	bool Reset(X* p=NULL)
 	{
 		if (Ptr == p)
 			return Ptr != 0;

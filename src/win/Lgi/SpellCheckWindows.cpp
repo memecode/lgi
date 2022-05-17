@@ -43,14 +43,15 @@ class WindowsSpellCheck : public LSpellCheck
 		LString File = __FILE__;
 		File = File.Replace(".cpp", ".csv");
 		if (!LFileExists(File))
-		{
-			auto f = LFindFile(LGetLeaf(File));
-			File = f.Get();
-		}
+			File = LFindFile(LGetLeaf(File));
 
 		LFile f;
 		if (!f.Open(File, O_READ))
+		{
+			LAssert(!"Csv file missing?");
 			return false;
+		}
+
 		LString::Array Lines = f.Read().SplitDelimit("\r\n");
 		for (auto Ln: Lines)
 		{
@@ -161,13 +162,39 @@ public:
 		
 		LAutoWString WLang(Utf8ToWide(Lang));
 		HRESULT r = Factory->CreateSpellChecker(WLang, &Sc);
-		if (FAILED(r))
+		if(FAILED(r))
 		{
-			LgiTrace("%s:%i - CreateSpellChecker failed: %i.\n", _FL, r);
+			auto l = FindLanguage(Lang);
+			if (l && WLang.Reset(Utf8ToWide(l->Id)))
+				r = Factory->CreateSpellChecker(WLang, &Sc);
+		}
+
+		if(FAILED(r))
+		{
+			LgiTrace("%s:%i - CreateSpellChecker(%s) failed: 0x%x.\n", _FL, Lang, r);
 			return NULL;
 		}
 
 		return Sc;
+	}
+
+	Lang *FindLanguage(LString str)
+	{
+		Lang* l = Languages.Find(str);
+		if (l)
+			return l;
+
+		// Search by full name?
+		for (auto i : Languages)
+		{
+			if (i.value->English.Equals(str) ||
+				i.value->Native.Equals(str))
+			{
+				return i.value;
+			}
+		}
+
+		return NULL;
 	}
 
 	LMessage::Result OnEvent(LMessage *Msg)
@@ -196,8 +223,6 @@ public:
 				int ResponseHnd = (int)Msg->A();
 				LAutoPtr< LArray<LanguageId> > Langs(new LArray<LanguageId>);
 
-				// const char *Id;
-				// for (Lang *l = Languages.First(&Id); l; l = Languages.Next(&Id))
 				for (auto l : Languages)
 				{
 					LanguageId &i = Langs->New();
@@ -223,16 +248,21 @@ public:
 					LgiTrace("%s:%i - No factory.\n", _FL);
 					break;
 				}
+				if (!Param)
+				{
+					LAssert(!"No param.");
+					break;
+				}
 
 				LAutoPtr< LArray<DictionaryId> > Out(new LArray<DictionaryId>);
-				Lang *l = Languages.Find(*Param);
+				Lang *l = FindLanguage(*Param);
 				if (!l)
 				{
 					LgiTrace("%s:%i - Language '%s' not found.\n", _FL, Param->Get());
 					break;
 				}
 				
-				for (unsigned i=0; i<l->Dictionaries.Length(); i++)
+				for (size_t i=0; i<l->Dictionaries.Length(); i++)
 				{
 					LString &d = l->Dictionaries[i];
 					LString::Array a = d.Split("-", 1);
@@ -259,7 +289,10 @@ public:
 				if (Dict)
 				{
 					LString Lang;
-					Lang.Printf("%s-%s", Dict->Lang.Get(), Dict->Dict.Get());
+					if (Dict->Dict)
+						Lang.Printf("%s-%s", Dict->Lang.Get(), Dict->Dict.Get());
+					else
+						Lang = Dict->Lang;
 					Success = GetSpellCheck(Lang) != NULL;
 				}
 
