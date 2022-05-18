@@ -1043,7 +1043,7 @@ void AppWnd::OnLanguagesChange(LLanguageId Lang, bool Add, bool Update)
 		if (Add && !Has)
 		{
 			Change = true;
-			Languages.Add(GFindLang(Lang));
+			Languages.Add(LFindLang(Lang));
 		}
 	}
 
@@ -1124,7 +1124,7 @@ LLanguage *AppWnd::GetCurLang()
 	if (CurLang >= 0 && CurLang < Languages.Length())
 		return Languages[CurLang];
 
-	return GFindLang("en");
+	return LFindLang("en");
 }
 
 void AppWnd::SetCurLang(LLanguage *L)
@@ -3638,7 +3638,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 									char *Language = NewStr(T[1]);
 									if (Language)
 									{
-										LLanguage *Info = GFindLang(0, Language);
+										LLanguage *Info = LFindLang(0, Language);
 										if (Info)
 										{
 											LanguageId = Info->Id;
@@ -4111,7 +4111,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 									if (Str)
 									{
 										// get the language
-										LLanguage *Lang = GFindLang(Language);
+										LLanguage *Lang = LFindLang(Language);
 										LLanguageId SLang = (Lang) ? Lang->Id : (char*)"en";
 										StrLang *s = 0;
 
@@ -4222,7 +4222,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 
 											if (i)
 											{
-												LLanguage *Lang = GFindLang(Language);
+												LLanguage *Lang = LFindLang(Language);
 												i->GetStr()->Set(Text, (Lang) ? Lang->Id : (char*)"en");
 											}
 
@@ -4284,7 +4284,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 													}
 
 													// Set Text
-													LLanguage *Lang = GFindLang(Language);
+													LLanguage *Lang = LFindLang(Language);
 													i->GetStr()->Set(Text, (Lang) ? Lang->Id : (char*)"en");
 												}
 											}

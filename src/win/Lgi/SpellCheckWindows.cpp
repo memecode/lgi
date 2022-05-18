@@ -206,9 +206,17 @@ public:
 				LAutoPtr<LSpellCheck::Params> Params((LSpellCheck::Params*)Msg->A());
 				if (Params)
 				{
-					auto l = GFindLang("", Params->Lang);
+					auto l = LFindLang("", Params->Lang);
 					if (l)
-						GetSpellCheck(l->Id);
+					{
+						LString s;
+						if (Params->Dict)
+							s.Printf("%s-%s", l->Id, Params->Dict.Get());
+						else
+							s = l->Id;
+
+						GetSpellCheck(s);
+					}
 				}
 				break;
 			}

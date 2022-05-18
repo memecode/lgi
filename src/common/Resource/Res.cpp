@@ -30,7 +30,7 @@
 /// A table of all the languages supported.
 ///
 /// If you change this table you HAVE to rerun _LgiGenLangLookup()
-/// and insert the output into GFindLang and GFindLangOldId
+/// and insert the output into LFindLang and GFindLangOldId
 ///
 /// \ingroup Resources
 LLanguage LgiLanguageTable[] =
@@ -211,7 +211,7 @@ LLanguage LgiLanguageTable[] =
 	{0}
 };
 
-LLanguage *GFindLang(LLanguageId Id, const char *Name)
+LLanguage *LFindLang(LLanguageId Id, const char *Name)
 {
 	if (!Id)
 		return LgiLanguageTable;

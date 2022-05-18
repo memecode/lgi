@@ -73,7 +73,7 @@ struct LLanguage
 /// This function is very fast, it's not a linear search through the
 /// list of all languages. So you can call it often without worrying
 /// about speed.
-LgiExtern LLanguage *GFindLang
+LgiExtern LLanguage *LFindLang
 (
 	/// [Optional] The language code to search for.
 	/// If not provided the start of the table is returned.

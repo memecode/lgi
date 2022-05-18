@@ -60,7 +60,7 @@ public:
 			for (int i=0; i<t->Attr.Length(); i++)
 			{
 				LXmlAttr &a = t->Attr[i];
-				LLanguage *l = GFindLang(a.GetName());
+				LLanguage *l = LFindLang(a.GetName());
 				if (l)
 				{
 					if (!Langs.Find(l->Id))
@@ -136,7 +136,7 @@ public:
 		{
 			for (int i=0; i<t->Attr.Length(); i++)
 			{
-				LLanguage *l = GFindLang(t->Attr[i].GetName());
+				LLanguage *l = LFindLang(t->Attr[i].GetName());
 				if (l)
 				{
 					if (!Langs.Find(l->Id))
