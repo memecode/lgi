@@ -419,6 +419,12 @@ bool LControlTree::CallMethod(const char *MethodName, LVariant *ReturnValue, LAr
 			}
 			
 			auto *Store = Args[0]->CastDom();
+			if (!Store)
+			{
+				LAssert(!"Missing store object.");
+				return false;
+			}
+
 			auto Write = Args[1]->CastInt32() != 0;
 			*ReturnValue = Serialize(Store, Write);
 			return true;
@@ -435,15 +441,18 @@ bool LControlTree::Serialize(LDom *Store, bool Write)
 	bool Error = false;
 
 	if (!Store)
+	{
+		LAssert(!"Invalid param.");
 		return false;
+	}
 
 	for (LTreeItem *i = GetChild(); i; i = i->GetNext())
 	{
 		LControlTree::Item *ci = dynamic_cast<LControlTree::Item*>(i);
 		if (ci)
-		{
 			Error = Error | ci->Serialize(Store, Write);
-		}
+		else
+			LAssert(!"Not a control tree item.");
 	}
 
 	return !Error;
