@@ -200,7 +200,7 @@ public:
 			return false;
 		}
 
-		return FrameSize.Reset(new uint16(size));
+		return FrameSize.Reset(new uint16((uint16)size));
 	}
 
 	bool ValidStartAddr()
