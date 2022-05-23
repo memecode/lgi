@@ -183,7 +183,11 @@ public:
 	/// Gets an iterator interface to a list of sub-objects.
 	virtual GDataIt GetList(int id) { EmptyVirtual(NULL); }
 	/// Set the mime segments
-	virtual Store3Status SetRfc822(LStreamI *Rfc822Msg) { LAssert(!"Pretty sure you should be implementing this"); return Store3Error; }
+	virtual Store3Status SetRfc822(LStreamI *Rfc822Msg)
+	{
+		LAssert(!"Pretty sure you should be implementing this")
+			; return Store3Error;
+	}
 };
 
 #pragma warning(default:4263)
