@@ -165,7 +165,7 @@ public:
 	double Leading() const;
 
 	/// \returns true if the font types are the same
-	bool operator ==(LTypeFace &t);
+	bool operator ==(const LTypeFace &t);
 
 	/// Set the foreground and background in 24-bit colour.
 	/// \sa LTypeFace::Fore() and LTypeFace::Back()

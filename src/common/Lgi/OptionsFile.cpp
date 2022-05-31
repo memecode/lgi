@@ -173,10 +173,10 @@ bool LOptionsFile::SerializeFile(bool Write)
 			if (f.Open(File, O_READ))
 			{
 				Empty(true);
-				if ((Status = Tree.Read(this, &f, 0)))
-				{
-					_Defaults();
-				}
+				if (!Tree.Read(this, &f, 0))
+					return false;
+
+				_Defaults();
 			}
 			else
 			{
