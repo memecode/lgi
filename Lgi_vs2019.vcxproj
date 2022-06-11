@@ -662,7 +662,6 @@
     <ClInclude Include="include\common\LgiClasses.h" />
     <ClInclude Include="include\common\LgiCommon.h" />
     <ClInclude Include="include\common\LgiDefs.h" />
-    <ClInclude Include="include\common\LgiInc.h" />
     <ClInclude Include="include\common\LgiInterfaces.h" />
     <ClInclude Include="include\common\LgiRes.h" />
     <ClInclude Include="include\common\List.h" />
@@ -674,6 +673,7 @@
     <ClInclude Include="include\common\Thread.h" />
     <ClInclude Include="include\common\ThreadEvent.h" />
     <ClInclude Include="include\common\Res.h" />
+    <ClInclude Include="include\lgi\common\LgiInc.h" />
     <ClInclude Include="include\win\GCom.h" />
     <ClInclude Include="include\win\LgiOsClasses.h" />
     <ClInclude Include="include\win\LgiOsDefs.h" />
