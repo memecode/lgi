@@ -11,7 +11,7 @@ LTypeFace::~LTypeFace()
 	DeleteObj(d);
 }
 
-bool LTypeFace::operator ==(LTypeFace &t)
+bool LTypeFace::operator ==(const LTypeFace &t)
 {
 	if ((Face() == 0) ^ (t.Face() == 0))
 		return false;
