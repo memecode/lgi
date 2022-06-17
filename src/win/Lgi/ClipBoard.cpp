@@ -787,15 +787,17 @@ bool LClipBoard::Bitmap(BitmapCb Callback)
 {
 	if (!Callback)
 		return false;
+
 	HGLOBAL hMem = GetClipboardData(CF_DIB);
+	LAutoPtr<LSurface> pDC;
 	if (void *Ptr = GlobalLock(hMem))
 	{
-		LAutoPtr<LSurface> pDC = ConvertFromPtr(Ptr);
+		pDC.Reset(ConvertFromPtr(Ptr));
 		GlobalUnlock(hMem);
-		Callback(pDC, NULL);
-		return true;
 	}
-	else return false;
+
+	Callback(pDC, pDC ? NULL : "No bitmap on clipboard.");
+	return true;
 }
 
 LAutoPtr<LSurface> LClipBoard::Bitmap()

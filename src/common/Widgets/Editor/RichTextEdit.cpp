@@ -670,133 +670,130 @@ bool LRichTextEdit::Paste()
 	LString Html;
 	LAutoWString Text;
 	LAutoPtr<LSurface> Img;
-
-	{
-		LClipBoard Cb(this);
+	LClipBoard Cb(this);
 		
-		Cb.Bitmap([&](auto bmp, auto str)
-		{
-			Img = bmp;
-			if (!Img)
-			{	
-				Html = Cb.Html();
-				if (!Html)
-					Text.Reset(NewStrW(Cb.TextW()));
-			}
-		});
-	}
-
-	if (!Html && !Text && !Img)
-		return false;
-	
-	if (!d->Cursor ||
-		!d->Cursor->Blk)
+	return Cb.Bitmap([&](auto bmp, auto str)
 	{
-		LAssert(0);
-		return false;
-	}
-
-	AutoTrans Trans(new LRichTextPriv::Transaction);						
-
-	if (HasSelection())
-	{
-		if (!d->DeleteSelection(Trans, NULL))
-			return false;
-	}
-
-	if (Html)
-	{
-		LHtmlElement Root(NULL);
-
-		if (!d->CreationCtx.Reset(new LRichTextPriv::CreateContext(d)))
-			return false;
-
-		if (!d->LHtmlParser::Parse(&Root, Html))
-			return d->Error(_FL, "Failed to parse HTML.");
-	
-		LHtmlElement *Body = FindElement(&Root, TAG_BODY);
-		if (!Body)
-			Body = &Root;
-
-		if (d->Cursor)
-		{
-			auto *b = d->Cursor->Blk;
-			ssize_t BlkIdx = d->Blocks.IndexOf(b);
-			LRichTextPriv::Block *After = NULL;
-			ssize_t AddIndex = BlkIdx;;
-
-			// Split 'b' to make room for pasted objects
-			if (d->Cursor->Offset > 0)
-			{
-				After = b->Split(Trans, d->Cursor->Offset);
-				AddIndex = BlkIdx+1;									
-			}
-			// else Insert before cursor block
-
-			auto *PastePoint = new LRichTextPriv::TextBlock(d);
-			if (PastePoint)
-			{
-				d->Blocks.AddAt(AddIndex++, PastePoint);
-				if (After) d->Blocks.AddAt(AddIndex++, After);
-
-				d->CreationCtx->Tb = PastePoint;
-				d->FromHtml(Body, *d->CreationCtx);
-			}
+		Img = bmp;
+		if (!Img)
+		{	
+			Html = Cb.Html();
+			if (!Html)
+				Text.Reset(NewStrW(Cb.TextW()));
 		}
-	}
-	else if (Text)
-	{
-		LAutoPtr<uint32_t,true> Utf32((uint32_t*)LNewConvertCp("utf-32", Text, LGI_WideCharset));
-		ptrdiff_t Len = Strlen(Utf32.Get());
-		if (!d->Cursor->Blk->AddText(Trans, d->Cursor->Offset, Utf32.Get(), (int)Len))
+
+		if (!Html && !Text && !Img)
+			return false;
+	
+		if (!d->Cursor ||
+			!d->Cursor->Blk)
 		{
 			LAssert(0);
 			return false;
 		}
 
-		d->Cursor->Offset += Len;
-		d->Cursor->LineHint = -1;
-	}
-	else if (Img)
-	{
-		LRichTextPriv::Block *b = d->Cursor->Blk;
-		ssize_t BlkIdx = d->Blocks.IndexOf(b);
-		LRichTextPriv::Block *After = NULL;
-		ssize_t AddIndex;
+		AutoTrans Trans(new LRichTextPriv::Transaction);						
+
+		if (HasSelection())
+		{
+			if (!d->DeleteSelection(Trans, NULL))
+				return false;
+		}
+
+		if (Html)
+		{
+			LHtmlElement Root(NULL);
+
+			if (!d->CreationCtx.Reset(new LRichTextPriv::CreateContext(d)))
+				return false;
+
+			if (!d->LHtmlParser::Parse(&Root, Html))
+				return d->Error(_FL, "Failed to parse HTML.");
+	
+			LHtmlElement *Body = FindElement(&Root, TAG_BODY);
+			if (!Body)
+				Body = &Root;
+
+			if (d->Cursor)
+			{
+				auto *b = d->Cursor->Blk;
+				ssize_t BlkIdx = d->Blocks.IndexOf(b);
+				LRichTextPriv::Block *After = NULL;
+				ssize_t AddIndex = BlkIdx;;
+
+				// Split 'b' to make room for pasted objects
+				if (d->Cursor->Offset > 0)
+				{
+					After = b->Split(Trans, d->Cursor->Offset);
+					AddIndex = BlkIdx+1;									
+				}
+				// else Insert before cursor block
+
+				auto *PastePoint = new LRichTextPriv::TextBlock(d);
+				if (PastePoint)
+				{
+					d->Blocks.AddAt(AddIndex++, PastePoint);
+					if (After) d->Blocks.AddAt(AddIndex++, After);
+
+					d->CreationCtx->Tb = PastePoint;
+					d->FromHtml(Body, *d->CreationCtx);
+				}
+			}
+		}
+		else if (Text)
+		{
+			LAutoPtr<uint32_t,true> Utf32((uint32_t*)LNewConvertCp("utf-32", Text, LGI_WideCharset));
+			ptrdiff_t Len = Strlen(Utf32.Get());
+			if (!d->Cursor->Blk->AddText(Trans, d->Cursor->Offset, Utf32.Get(), (int)Len))
+			{
+				LAssert(0);
+				return false;
+			}
+
+			d->Cursor->Offset += Len;
+			d->Cursor->LineHint = -1;
+		}
+		else if (Img)
+		{
+			LRichTextPriv::Block *b = d->Cursor->Blk;
+			ssize_t BlkIdx = d->Blocks.IndexOf(b);
+			LRichTextPriv::Block *After = NULL;
+			ssize_t AddIndex;
 		
-		LAssert(BlkIdx >= 0);
+			LAssert(BlkIdx >= 0);
 
-		// Split 'b' to make room for the image
-		if (d->Cursor->Offset > 0)
-		{
-			After = b->Split(Trans, d->Cursor->Offset);
-			AddIndex = BlkIdx+1;									
-		}
-		else
-		{
-			// Insert before..
-			AddIndex = BlkIdx;
-		}
+			// Split 'b' to make room for the image
+			if (d->Cursor->Offset > 0)
+			{
+				After = b->Split(Trans, d->Cursor->Offset);
+				AddIndex = BlkIdx+1;									
+			}
+			else
+			{
+				// Insert before..
+				AddIndex = BlkIdx;
+			}
 
-		LRichTextPriv::ImageBlock *ImgBlk = new LRichTextPriv::ImageBlock(d);
-		if (ImgBlk)
-		{
-			d->Blocks.AddAt(AddIndex++, ImgBlk);
-			if (After)
-				d->Blocks.AddAt(AddIndex++, After);
+			LRichTextPriv::ImageBlock *ImgBlk = new LRichTextPriv::ImageBlock(d);
+			if (ImgBlk)
+			{
+				d->Blocks.AddAt(AddIndex++, ImgBlk);
+				if (After)
+					d->Blocks.AddAt(AddIndex++, After);
 
-			Img->MakeOpaque();
-			ImgBlk->SetImage(Img);
+				Img->MakeOpaque();
+				ImgBlk->SetImage(Img);
 			
-			AutoCursor c(new BlkCursor(ImgBlk, 1, -1));
-			d->SetCursor(c);			
+				AutoCursor c(new BlkCursor(ImgBlk, 1, -1));
+				d->SetCursor(c);			
+			}
 		}
-	}
 
-	Invalidate();
-	SendNotify(LNotifyDocChanged);
+		Invalidate();
+		SendNotify(LNotifyDocChanged);
 
-	return d->AddTrans(Trans);
+		return d->AddTrans(Trans);
+	});
 }
 
 bool LRichTextEdit::ClearDirty(bool Ask, const char *FileName)
