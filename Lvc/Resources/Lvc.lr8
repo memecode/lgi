@@ -239,7 +239,7 @@
 		</TableLayout>
 	</Dialog>
 	<Dialog pos="7,7,998,136" ref="1">
-		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" cols="0.091,0.094,0.088,0.060,0.045,0.082,0.060,0.149,0.149,0.091,0.091" rows="1.000">
+		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" cols="0.091,0.094,0.088,0.060,0.045,0.050,0.197,0.044,0.149,0.091,0.091" rows="1.000">
 			<tr>
 				<td addr="0,0" valign="Center" style="padding-left: 4px;&#10;padding-right: 1em;">
 					<Button pos="7,21,71,48" ref="18" toggle="0" />
@@ -261,19 +261,19 @@
 					<StaticText pos="359,21,399,41" ref="7" />
 				</td>
 				<td addr="6,0">
-					<EditBox Pos="435,14,490,41" Style="width: 200px;" ref="8" />
+					<EditBox Pos="413,14,573,41" Style="width: 200px;" ref="8" />
 				</td>
 				<td addr="7,0" style="padding-right: 1em;">
-					<Button pos="513,14,540,41" ref="17" toggle="0" />
+					<Button pos="596,14,623,41" ref="17" toggle="0" />
 				</td>
 				<td addr="8,0" valign="Center">
-					<CheckBox pos="639,21,701,41" ref="38" />
+					<CheckBox pos="638,21,700,41" ref="38" />
 				</td>
 				<td addr="9,0" valign="Center">
-					<StaticText pos="784,21,860,48" ref="44" />
+					<StaticText pos="783,21,859,48" ref="44" />
 				</td>
 				<td addr="10,0">
-					<ComboBox pos="868,21,951,41" ref="45" />
+					<ComboBox pos="867,21,950,41" ref="45" />
 				</td>
 			</tr>
 		</TableLayout>

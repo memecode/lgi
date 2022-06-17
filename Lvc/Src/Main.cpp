@@ -1518,9 +1518,11 @@ public:
 			}
 			case IDC_FILTER:
 			{
-				VcFolder *f = dynamic_cast<VcFolder*>(Tree->Selection());
-				if (f)
-					f->Select(true);
+				auto f = dynamic_cast<VcFolder*>(Tree->Selection());
+				if (!f)
+					break;
+				f->Select(true);
+				f->FilterCurrentFiles();
 				break;
 			}
 			case IDC_COMMIT_AND_PUSH:
