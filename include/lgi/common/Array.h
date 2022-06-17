@@ -556,9 +556,16 @@ public:
 		return true;
 	}
 
-	LArray<Type> &operator +(LArray<Type> &a)
+	LArray<Type> operator +(const LArray<Type> &b)
 	{
-		Add(a);
+		LArray<Type> a = *this;
+		a.Add(b);
+		return a;
+	}
+
+	LArray<Type> &operator +=(const LArray<Type> &b)
+	{
+		Add(b);
 		return *this;
 	}
 
