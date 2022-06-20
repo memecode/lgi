@@ -792,7 +792,7 @@ bool LClipBoard::Bitmap(BitmapCb Callback)
 	LAutoPtr<LSurface> pDC;
 	if (void *Ptr = GlobalLock(hMem))
 	{
-		pDC.Reset(ConvertFromPtr(Ptr));
+		pDC = ConvertFromPtr(Ptr);
 		GlobalUnlock(hMem);
 	}
 
