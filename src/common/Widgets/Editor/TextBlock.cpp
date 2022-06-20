@@ -1502,41 +1502,6 @@ ssize_t LRichTextPriv::TextBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset
 	return Deleted;
 }
 		
-LMessage::Result LRichTextPriv::TextBlock::OnEvent(LMessage *Msg)
-{
-	switch (Msg->Msg())
-	{
-		case M_COMMAND:
-		{
-			LSpellCheck::SpellingError *e = SpellingErrors.AddressOf(ClickErrIdx);
-			if (e)
-			{
-				// Replacing text with spell check suggestion:
-				int i = (int)Msg->A() - SPELLING_BASE;
-				if (i >= 0 && i < (int)e->Suggestions.Length())
-				{
-					auto Start = e->Start;
-					LString s = e->Suggestions[i];
-					AutoTrans t(new LRichTextPriv::Transaction);
-					
-					// Delete the old text...
-					DeleteAt(t, Start, e->Len); // 'e' might disappear here
-
-					// Insert the new text....
-					LAutoPtr<uint32_t,true> u((uint32_t*)LNewConvertCp("utf-32", s, "utf-8"));
-					AddText(t, Start, u.Get(), Strlen(u.Get()));
-					
-					d->AddTrans(t);
-					return true;
-				}
-			}
-			break;
-		}
-	}
-
-	return false;
-}
-
 bool LRichTextPriv::TextBlock::AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *InStr, ssize_t InChars, LNamedStyle *Style)
 {
 	if (!InStr)
@@ -1988,37 +1953,95 @@ bool LRichTextPriv::TextBlock::StripLast(Transaction *Trans, const char *Set)
 	return true;
 }
 
-bool LRichTextPriv::TextBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling)
+bool LRichTextPriv::TextBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool TopOfMenu)
 {
-	if (Spelling)
+	if (!TopOfMenu)
+		return false;
+
+	// Is there a spelling error at 'Offset'?		
+	for (unsigned i=0; i<SpellingErrors.Length(); i++)
 	{
-		// Is there a spelling error at 'Offset'?		
-		for (unsigned i=0; i<SpellingErrors.Length(); i++)
+		LSpellCheck::SpellingError &e = SpellingErrors[i];
+		if (Offset >= e.Start && Offset < e.End())
 		{
-			LSpellCheck::SpellingError &e = SpellingErrors[i];
-			if (Offset >= e.Start && Offset < e.End())
+			ClickErrIdx = i;
+			if (e.Suggestions.Length())
 			{
-				ClickErrIdx = i;
-				if (e.Suggestions.Length())
+				auto Sp = s.AppendSub("Spelling");
+				if (Sp)
 				{
-					auto Sp = s.AppendSub("Spelling");
-					if (Sp)
-					{
-						s.AppendSeparator();
-						for (unsigned n=0; n<e.Suggestions.Length(); n++)
-							Sp->AppendItem(e.Suggestions[n], SPELLING_BASE+n);
-					}
-					// else printf("%s:%i - No sub menu.\n", _FL);
+					s.AppendSeparator();
+					for (unsigned n=0; n<e.Suggestions.Length(); n++)
+						Sp->AppendItem(e.Suggestions[n], SPELLING_BASE+n);
 				}
-				// else printf("%s:%i - No Suggestion.\n", _FL);
+				// else printf("%s:%i - No sub menu.\n", _FL);
+			}
+			// else printf("%s:%i - No Suggestion.\n", _FL);
+			break;
+		}
+		// else printf("%s:%i - Outside area, Offset=%i e=%i,%i.\n", _FL, Offset, e.Start, e.End());
+	}
+
+	// Check for URLs under the cursor?
+	ssize_t pos = 0;
+	for (auto t: Txt)
+	{
+		// LgiTrace("t: %i %i\n", (int)pos, t->Element);
+		if (t->Element == TAG_A)
+		{
+			// LgiTrace("off: %i %i %i\n", (int)Offset, (int)pos, (int)pos + (int)t->Length());
+			if (Offset >= pos && Offset < pos + (ssize_t)t->Length())
+			{
+				// Is over a link...
+				s.AppendItem("Open URL", IDM_OPEN_URL);
+				ClickedUri = t->Param;
 				break;
 			}
-			// else printf("%s:%i - Outside area, Offset=%i e=%i,%i.\n", _FL, Offset, e.Start, e.End());
 		}
+
+		pos += t->Length();
 	}
-	// else printf("%s:%i - No Spelling.\n", _FL);
 
 	return true;
+}
+
+LMessage::Result LRichTextPriv::TextBlock::OnEvent(LMessage* Msg)
+{
+	switch (Msg->Msg())
+	{
+		case M_COMMAND:
+		{
+			if (Msg->A() == IDM_OPEN_URL)
+			{
+				if (ClickedUri)
+					LExecute(ClickedUri);
+			}
+			else if (auto e = SpellingErrors.AddressOf(ClickErrIdx))
+			{
+				// Replacing text with spell check suggestion:
+				int i = (int)Msg->A() - SPELLING_BASE;
+				if (i >= 0 && i < (int)e->Suggestions.Length())
+				{
+					auto Start = e->Start;
+					LString s = e->Suggestions[i];
+					AutoTrans t(new LRichTextPriv::Transaction);
+
+					// Delete the old text...
+					DeleteAt(t, Start, e->Len); // 'e' might disappear here
+
+					// Insert the new text....
+					LAutoPtr<uint32_t, true> u((uint32_t*)LNewConvertCp("utf-32", s, "utf-8"));
+					AddText(t, Start, u.Get(), Strlen(u.Get()));
+
+					d->AddTrans(t);
+					return true;
+				}
+			}
+			break;
+		}
+	}
+
+	return false;
 }
 
 bool LRichTextPriv::TextBlock::IsEmptyLine(BlockCursor *Cursor)

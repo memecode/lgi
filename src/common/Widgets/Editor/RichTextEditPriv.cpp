@@ -1197,7 +1197,7 @@ LSurface *LEmojiImage::GetEmojiImage()
 	return EmojiImg;
 }
 
-ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk)
+ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk, ssize_t *BlkOffset)
 {
 	ssize_t CharPos = 0;
 	HitTestResult r(x, y);
@@ -1224,7 +1224,12 @@ ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk)
 		if (b->HitTest(r))
 		{
 			LineHint = r.LineHint;
-			if (Blk) *Blk = b;
+
+			if (Blk)
+				*Blk = b;
+			if (BlkOffset)
+				*BlkOffset = r.Idx;
+
 			return CharPos + r.Idx;
 		}
 		else if (Over)

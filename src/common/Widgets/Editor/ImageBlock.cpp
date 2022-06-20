@@ -943,9 +943,9 @@ void LRichTextPriv::ImageBlock::IncAllStyleRefs()
 		Style->RefCount++;
 }
 
-bool LRichTextPriv::ImageBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling)
+bool LRichTextPriv::ImageBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool TopOfMenu)
 {
-	if (SourceImg && !Spelling)
+	if (SourceImg && !TopOfMenu)
 	{
 		s.AppendSeparator();
 		

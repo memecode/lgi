@@ -195,7 +195,7 @@ void LRichTextPriv::HorzRuleBlock::IncAllStyleRefs()
 {
 }
 
-bool LRichTextPriv::HorzRuleBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling)
+bool LRichTextPriv::HorzRuleBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool TopOfMenu)
 {
 	return false;
 }

@@ -65,27 +65,6 @@
     <ClCompile Include="..\src\common\Widgets\Editor\HorzRuleBlock.cpp">
       <Filter>Controls\RichTextEdit</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Net\Http.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\Net\OpenSSLSocket.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\Text\Html.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\Text\HtmlCommon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\Text\HtmlParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\Widgets\Editor\RichTextEdit.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\Widgets\Editor\RichTextEditPriv.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\win\Lgi\SpellCheckWindows.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -93,6 +72,27 @@
       <Filter>Lgi</Filter>
     </ClCompile>
     <ClCompile Include="..\src\common\Text\Homoglyphs\HomoglyphsTable.cpp">
+      <Filter>Lgi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Widgets\Editor\RichTextEdit.cpp">
+      <Filter>Controls\RichTextEdit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Widgets\Editor\RichTextEditPriv.cpp">
+      <Filter>Controls\RichTextEdit</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Text\Html.cpp">
+      <Filter>Controls\Html</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Text\HtmlCommon.cpp">
+      <Filter>Controls\Html</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Text\HtmlParser.cpp">
+      <Filter>Controls\Html</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Net\Http.cpp">
+      <Filter>Controls\Html</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Net\OpenSSLSocket.cpp">
       <Filter>Lgi</Filter>
     </ClCompile>
   </ItemGroup>

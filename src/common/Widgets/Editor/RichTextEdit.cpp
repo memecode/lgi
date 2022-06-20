@@ -1275,15 +1275,14 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 	LRichTextPriv::Block *Over = NULL;
 	LRect &Content = d->Areas[ContentArea];
 	LPoint Doc = d->ScreenToDoc(m.x, m.y);
-	// int BlockIndex = -1;
-	ssize_t Offset = -1;
+	ssize_t Offset = -1, BlkOffset = -1;
 	if (Content.Overlap(m.x, m.y))
 	{
 		int LineHint;
-		Offset = d->HitTest(Doc.x, Doc.y, LineHint, &Over);
+		Offset = d->HitTest(Doc.x, Doc.y, LineHint, &Over, &BlkOffset);
 	}
 	if (Over)
-		Over->DoContext(RClick, Doc, Offset, true);
+		Over->DoContext(RClick, Doc, BlkOffset, true);
 
 	RClick.AppendItem(LLoadString(L_TEXTCTRL_CUT, "Cut"), IDM_RTE_CUT, HasSelection());
 	RClick.AppendItem(LLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_RTE_COPY, HasSelection());
@@ -1327,7 +1326,7 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 		#ifdef _DEBUG
 		// RClick.AppendItem(Over->GetClass(), -1, false);
 		#endif
-		Over->DoContext(RClick, Doc, Offset, false);
+		Over->DoContext(RClick, Doc, BlkOffset, false);
 	}
 	if (Environment)
 		Environment->AppendItems(&RClick, NULL);
@@ -1436,9 +1435,7 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 			}
 			
 			if (Environment)
-			{
 				Environment->OnMenu(this, Id, 0);
-			}
 			break;
 		}
 	}

@@ -96,6 +96,7 @@ enum RteCommands
 	IDM_X_FLIP,
 	IDM_Y_FLIP,
 	IDM_SCALE_IMAGE,
+	IDM_OPEN_URL,
 	CODEPAGE_BASE = 100,
 	CONVERT_CODEPAGE_BASE = 200,
 	SPELLING_BASE = 300
@@ -730,7 +731,7 @@ public:
 			virtual void Dump() {}
 			virtual LNamedStyle *GetStyle(ssize_t At = -1) = 0;
 			virtual int GetUid() const { return BlockUid; }
-			virtual bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling) { return false; }
+			virtual bool DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset /* internal to this block, not the whole doc. */, bool TopOfMenu) { return false; }
 			#ifdef _DEBUG
 			virtual void DumpNodes(LTreeItem *Ti) = 0;
 			#endif
@@ -1013,6 +1014,7 @@ public:
 		LArray<LSpellCheck::SpellingError> SpellingErrors;
 		int PaintErrIdx, ClickErrIdx;
 		LSpellCheck::SpellingError *SpErr;
+		LString ClickedUri;
 
 		bool PreEdit(Transaction *Trans);
 		void DrawDisplayString(LSurface *pDC, DisplayStr *Ds, int &FixX, int FixY, LColour &Bk, ssize_t &Pos);
@@ -1246,7 +1248,7 @@ public:
 	LRect SelectionRect();
 	bool GetSelection(LArray<char16> *Text, LAutoString *Html);
 	ssize_t IndexOfCursor(BlockCursor *c);
-	ssize_t HitTest(int x, int y, int &LineHint, Block **Blk = NULL);
+	ssize_t HitTest(int x, int y, int &LineHint, Block **Blk = NULL, ssize_t *BlkOffset = NULL);
 	bool CursorFromPos(int x, int y, LAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx);
 	Block *GetBlockByIndex(ssize_t Index, ssize_t *Offset = NULL, int *BlockIdx = NULL, int *LineCount = NULL);
 	bool Layout(LScrollBar *&ScrollY);
