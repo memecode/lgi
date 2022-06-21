@@ -511,9 +511,9 @@ public:
 			if (ValidStr(PLibPaths))
 			{
 				LString::Array LibPaths = PLibPaths.Split("\n");
-				for (unsigned i=0; i<LibPaths.Length(); i++)
+				for (auto i: LibPaths)
 				{
-					LString s, in = LibPaths[i].Strip();
+					LString s, in = i.Strip();
 					if (!in.Length())
 						continue;
 					
@@ -791,9 +791,9 @@ public:
 								ToUnixPath(Rel);
 								
 								// Add tag to target name
-								GToken Parts(TargetFile, ".");
+								auto Parts = TargetFile.SplitDelimit(".");
 								if (Parts.Length() == 2)
-									TargetFile.Printf("lib%s$(Tag).%s", Parts[0], Parts[1]);
+									TargetFile.Printf("lib%s$(Tag).%s", Parts[0].Get(), Parts[1].Get());
 
 								sprintf(Buf, "%s/$(BuildDir)/%s", Rel.Get(), TargetFile.Get());
 								m.Print(" %s", Buf);
@@ -3636,37 +3636,44 @@ LString IdeProject::GetTargetName(IdePlatform Platform)
 
 LString IdeProject::GetTargetFile(IdePlatform Platform)
 {
-	LString Ret;
 	LString Target = GetTargetName(PlatformCurrent);
-	if (Target)
+	if (!Target)
 	{
-		const char *TargetType = d->Settings.GetStr(ProjTargetType);
-		if (TargetType)
-		{
-			if (!stricmp(TargetType, "Executable"))
-			{
-				Ret = Target;
-			}
-			else if (!stricmp(TargetType, "DynamicLibrary"))
-			{
-				char t[MAX_PATH_LEN];
-				auto DefExt = PlatformDynamicLibraryExt(Platform);
-				strcpy_s(t, sizeof(t), Target);
-				char *ext = LGetExtension(t);
-				if (!ext)
-					sprintf(t + strlen(t), ".%s", DefExt);
-				else if (stricmp(ext, DefExt))
-					strcpy(ext, DefExt);				
-				Ret = t;
-			}
-			else if (!stricmp(TargetType, "StaticLibrary"))
-			{
-				Ret.Printf("lib%s.%s", Target.Get(), PlatformSharedLibraryExt(Platform));
-			}
-		}
+		LAssert(!"No target?");
+		return NULL;
+	}
+
+	const char *TargetType = d->Settings.GetStr(ProjTargetType);
+	if (!TargetType)
+	{
+		LAssert(!"Needs a target type.");
+		return NULL;
+	}
+
+	if (!stricmp(TargetType, "Executable"))
+	{
+		return Target;
+	}
+	else if (!stricmp(TargetType, "DynamicLibrary"))
+	{
+		char t[MAX_PATH_LEN];
+		auto DefExt = PlatformDynamicLibraryExt(Platform);
+		strcpy_s(t, sizeof(t), Target);
+		char *ext = LGetExtension(t);
+		if (!ext)
+			sprintf(t + strlen(t), ".%s", DefExt);
+		else if (stricmp(ext, DefExt))
+			strcpy(ext, DefExt);
+		return t;
+	}
+	else if (!stricmp(TargetType, "StaticLibrary"))
+	{
+		LString Ret;
+		Ret.Printf("%s.%s", Target.Get(), PlatformSharedLibraryExt(Platform));
+		return Ret;
 	}
 	
-	return Ret;
+	return NULL;
 }
 
 struct ProjDependency
