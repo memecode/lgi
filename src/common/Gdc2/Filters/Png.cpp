@@ -681,6 +681,12 @@ LFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 	pDC = pDeviceContext;
 	DeleteArray(PrevScanLine);
 
+	if (!pDC)
+	{
+		LAssert(!"No DC.");
+		return Status;
+	}
+
 	LVariant v;
 	if (Props &&
 		Props->GetValue(LGI_FILTER_PARENT_WND, v) &&
@@ -716,7 +722,7 @@ LFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 		return Status;
 	}
 
-	png_ptr = LIBPNG png_create_read_struct(	PNG_LIBPNG_VER_STRING,
+	png_ptr = LIBPNG png_create_read_struct(PNG_LIBPNG_VER_STRING,
 											(void*)this,
 											LibPngError,
 											LibPngWarning);

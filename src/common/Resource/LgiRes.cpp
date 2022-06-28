@@ -322,7 +322,7 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 		if (Exe)
 		{
 			#if DEBUG_RES_FILE
-			LgiTrace("%s:%i - Str='%s'\n", _FL, Exe.Get());
+			LgiTrace("%s:%i - Exe='%s'\n", _FL, Exe.Get());
 			#endif
 			auto p = Exe.SplitDelimit(DIR_STR);
 			File = p.Last();
@@ -367,6 +367,18 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 	FullPath = LFindFile(BaseFile);
 	if (!FullPath)
 		FullPath = LFindFile(AltFile);
+	#if !WINDOWS
+	if (!FullPath)
+	{
+		auto leaf = LGetLeaf(BaseFile);
+		if (leaf && *leaf >= 'a' && *leaf <= 'z')
+		{
+			// Try upper case?
+			*leaf = ToUpper(*leaf);
+			FullPath = LFindFile(BaseFile);
+		}
+	}
+	#endif
 
 	#if DEBUG_RES_FILE
 	LgiTrace("%s:%i - FullPath='%s'\n", _FL, FullPath.Get());
@@ -1609,6 +1621,10 @@ bool LMenu::Load(LView *w, const char *Res, const char *TagList)
 
 LResources *LgiGetResObj(bool Warn, const char *filename, bool LoadOnDemand)
 {
+	#if DEBUG_RES_FILE
+	LgiTrace("LgiGetResObj(%i,%s,%i)\n", Warn, filename, LoadOnDemand);
+	#endif
+
 	// Look for existing file?
 	if (filename && LoadOnDemand)
 	{

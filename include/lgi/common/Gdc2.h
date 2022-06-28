@@ -530,10 +530,8 @@ public:
 	LRect Bounds() { return LRect(0, 0, X()-1, Y()-1); }
 	/// Gets the length of a scanline in bytes
 	virtual ssize_t GetRowStep() { return (pMem) ? pMem->Line : 0; }
-	/// Returns the horizontal resolution of the device
-	virtual int DpiX() { return 100; }
-	/// Returns the vertical resolution of the device
-	virtual int DpiY() { return 100; }
+	/// Returns the resolution of the device
+	virtual LPoint GetDpi() { return LPoint(96,96); }
 	/// Gets the bits per pixel
 	virtual int GetBits() { return (pMem) ? GColourSpaceToBits(pMem->Cs) : 0; }
 	/// Gets the colour space of the pixels
@@ -775,6 +773,7 @@ public:
 	int GetBits();
 	LScreenDC *IsScreen() { return this; }
 	bool SupportsAlphaCompositing();
+	LPoint GetDpi() override;
 
 	#ifndef LGI_SDL
 	uchar *operator[](int y) { return NULL; }
@@ -1064,10 +1063,8 @@ public:
 	int Y();
 	int GetBits();
 
-	/// Returns the horizontal DPI of the printer or 0 on error
-	int DpiX();
-	/// Returns the vertical DPI of the printer or 0 on error
-	int DpiY();
+	/// Returns the DPI of the printer or 0,0 on error
+	LPoint GetDpi() override;
 
 	#if defined __GTK_H__
 	
@@ -1430,7 +1427,7 @@ LgiFunc bool LRopRgb
 LgiFunc bool LRopUniversal(LBmpMem *Dst, LBmpMem *Src, bool Composite);
 
 /// Gets the screens DPI
-LgiFunc int LScreenDpi();
+LgiFunc LPoint LScreenDpi();
 
 /// Find the bounds of an image.
 /// \return true if there is some non-transparent image	 in 'rc'

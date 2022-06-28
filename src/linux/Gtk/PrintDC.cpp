@@ -75,14 +75,10 @@ int LPrintDC::GetBits()
 	return 24;
 }
 
-int LPrintDC::DpiX()
+LPoint LPrintDC::GetDpi()
 {
-	return Gtk::gtk_print_context_get_dpi_x(d->Handle);
-}
-
-int LPrintDC::DpiY()
-{
-	return Gtk::gtk_print_context_get_dpi_y(d->Handle);
+	return LPoint(	Gtk::gtk_print_context_get_dpi_x(d->Handle),
+					Gtk::gtk_print_context_get_dpi_y(d->Handle));
 }
 
 LRect LPrintDC::ClipRgn(LRect *Rgn)

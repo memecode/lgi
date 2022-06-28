@@ -642,9 +642,9 @@ public:
 				// return MIN((int)l.Value, X());
 				return (int)l.Value;
 			case LCss::LenPt:
-				return (int) (l.Value * LScreenDpi() / 72.0);
+				return (int) (l.Value * LScreenDpi().x / 72.0);
 			case LCss::LenCm:
-				return (int) (l.Value * LScreenDpi() / 2.54);
+				return (int) (l.Value * LScreenDpi().x / 2.54);
 			case LCss::LenEm:
 			{
 				if (!f)
@@ -729,9 +729,9 @@ public:
 			case LCss::LenPx:
 				return (int)l.Value;
 			case LCss::LenPt:
-				return (int) (l.Value * LScreenDpi() / 72.0);
+				return (int) (l.Value * LScreenDpi().y / 72.0);
 			case LCss::LenCm:
-				return (int) (l.Value * LScreenDpi() / 2.54);
+				return (int) (l.Value * LScreenDpi().y / 2.54);
 
 			case LCss::LenEm:
 			{

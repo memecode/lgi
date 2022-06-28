@@ -1334,7 +1334,7 @@ void ClientCallback(GtkWidget *w, CallbackParams *p)
 
 LPoint LWindow::GetDpi()
 {
-	return LPoint(96,96);
+	return LPoint(96, 96);
 }
 
 LPointF LWindow::GetDpiScale()

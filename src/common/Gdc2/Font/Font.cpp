@@ -846,6 +846,9 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 	#elif defined __GTK_H__
 	
 		Destroy();
+
+		auto Dpi = pSurface ? pSurface->GetDpi() : LScreenDpi();
+		float DpiScale = (float)Dpi.x / 96.0;
 	
 		d->hFont = Gtk::pango_font_description_new();
 		if (!d->hFont)
@@ -861,9 +864,9 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 			LString sFace = Face();
 			Gtk::pango_font_description_set_family(d->hFont, sFace);
 			if (Sz.Type == LCss::LenPt)
-				Gtk::pango_font_description_set_size(d->hFont, Sz.Value * PANGO_SCALE);
+				Gtk::pango_font_description_set_size(d->hFont, Sz.Value * DpiScale * PANGO_SCALE);
 			else if (Sz.Type == LCss::LenPx)
-				Gtk::pango_font_description_set_absolute_size(d->hFont, Sz.Value * PANGO_SCALE);
+				Gtk::pango_font_description_set_absolute_size(d->hFont, Sz.Value * DpiScale * PANGO_SCALE);
 			else
 			{
 				LAssert(0);
