@@ -11,7 +11,7 @@ struct LCmd
 struct LDrawListSurfacePriv : public LArray<LCmd*>
 {
 	int x, y, Bits;
-	int DpiX, DpiY;
+	LPoint Dpi;
 	LColour Fore, Back;
 	LSurface *CreationSurface;
 	LFont *Font;
@@ -170,7 +170,7 @@ LDrawListSurface::LDrawListSurface(int Width, int Height, LColourSpace Cs)
 	d = new LDrawListSurfacePriv;
 	d->x = Width;
 	d->y = Height;
-	d->DpiX = d->DpiY = LScreenDpi();
+	d->Dpi = LScreenDpi();
 	d->Bits = GColourSpaceToBits(Cs);
 	d->Fore = LColour::Black;
 	ColourSpace = Cs;
@@ -181,8 +181,7 @@ LDrawListSurface::LDrawListSurface(LSurface *FromSurface)
 	d = new LDrawListSurfacePriv;
 	d->x = FromSurface->X();
 	d->y = FromSurface->Y();
-	d->DpiX = FromSurface->DpiX();
-	d->DpiY = FromSurface->DpiX();
+	d->Dpi = FromSurface->GetDpi();
 	ColourSpace = FromSurface->GetColourSpace();
 	d->Bits = GColourSpaceToBits(ColourSpace);
 	d->Fore = LColour::Black;
@@ -325,14 +324,9 @@ ssize_t LDrawListSurface::GetRowStep()
 	return Row;
 }
 
-int LDrawListSurface::DpiX()
+LPoint LDrawListSurface::GetDpi()
 {
-	return d->DpiX;
-}
-
-int LDrawListSurface::DpiY()
-{
-	return d->DpiY;
+	return d->Dpi;
 }
 
 int LDrawListSurface::GetBits()

@@ -25,7 +25,7 @@ typedef UINT (WINAPI *ProcGetDpiForWindow)(_In_ HWND hwnd);
 typedef UINT (WINAPI *ProcGetDpiForSystem)(VOID);
 LLibrary User32("User32");
 
-UINT LGetDpiForWindow(HWND hwnd)
+LPoint LGetDpiForWindow(HWND hwnd)
 {
 	static bool init = false;
 	static ProcGetDpiForWindow pGetDpiForWindow = NULL;
@@ -38,7 +38,10 @@ UINT LGetDpiForWindow(HWND hwnd)
 	}
 
 	if (pGetDpiForWindow && pGetDpiForSystem)
-		return hwnd ? pGetDpiForWindow(hwnd) : pGetDpiForSystem();
+	{
+		auto Dpi = hwnd ? pGetDpiForWindow(hwnd) : pGetDpiForSystem();
+		return LPoint(Dpi, Dpi);
+	}
 
 	return LScreenDpi();
 }
@@ -1129,7 +1132,7 @@ LMessage::Result LWindow::OnEvent(LMessage *Msg)
 LPoint LWindow::GetDpi()
 {
 	if (!d->Dpi.x)
-		d->Dpi.x = d->Dpi.y = LGetDpiForWindow(_View);
+		d->Dpi = LGetDpiForWindow(_View);
 
 	return d->Dpi;
 }

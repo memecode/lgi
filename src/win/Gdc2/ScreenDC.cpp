@@ -520,6 +520,11 @@ bool LScreenDC::SupportsAlphaCompositing()
 	return true;
 }
 
+LPoint LScreenDC::GetDpi()
+{
+	return LPoint(GetDeviceCaps(hDC, HORZRES), GetDeviceCaps(hDC, VERTRES));
+}
+
 void LScreenDC::Set(int x, int y)
 {
 	uint32_t WinCol = RGB( R24(d->Col), G24(d->Col), B24(d->Col) );

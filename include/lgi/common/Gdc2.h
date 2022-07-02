@@ -1427,7 +1427,7 @@ LgiFunc bool LRopRgb
 LgiFunc bool LRopUniversal(LBmpMem *Dst, LBmpMem *Src, bool Composite);
 
 /// Gets the screens DPI
-LgiFunc LPoint LScreenDpi();
+LgiClass LPoint LScreenDpi();
 
 /// Find the bounds of an image.
 /// \return true if there is some non-transparent image	 in 'rc'

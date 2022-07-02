@@ -30,7 +30,7 @@ public:
 	int X();
 	int Y();
 	ssize_t GetRowStep();
-	int DpiX();
+	LPoint GetDpi() override;
 	int DpiY();
 	int GetBits();
 	uchar *operator[](int y) { return NULL; }
