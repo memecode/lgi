@@ -709,7 +709,7 @@ public:
 	LScreenDC();
 	virtual ~LScreenDC();
 
-	const char *GetClass() { return "LScreenDC"; }
+	const char *GetClass() override { return "LScreenDC"; }
 
 	// OS Sepcific
 	#if WINNATIVE
@@ -750,67 +750,67 @@ public:
 	
 		#endif
 
-		OsPainter Handle();
+		OsPainter Handle() override;
 		LView *GetView();
-		int GetFlags();
+		int GetFlags() override;
 		LRect *GetClient();
 
 	#endif
 
 	// Properties
-	bool GetClient(LRect *c);
-	void SetClient(LRect *c);
+	bool GetClient(LRect *c) override;
+	void SetClient(LRect *c) override;
 
-	int X();
-	int Y();
+	int X() override;
+	int Y() override;
 
-	GPalette *Palette();
-	void Palette(GPalette *pPal, bool bOwnIt = true);
+	GPalette *Palette() override;
+	void Palette(GPalette *pPal, bool bOwnIt = true) override;
 
-	uint LineStyle();
-	uint LineStyle(uint Bits, uint32_t Reset = 0x80000000);
+	uint LineStyle() override;
+	uint LineStyle(uint Bits, uint32_t Reset = 0x80000000) override;
 
-	int GetBits();
-	LScreenDC *IsScreen() { return this; }
-	bool SupportsAlphaCompositing();
+	int GetBits() override;
+	LScreenDC *IsScreen() override { return this; }
+	bool SupportsAlphaCompositing() override;
 	LPoint GetDpi() override;
 
 	#ifndef LGI_SDL
-	uchar *operator[](int y) { return NULL; }
+	uchar *operator[](int y) override { return NULL; }
 
-	void GetOrigin(int &x, int &y);
-	void SetOrigin(int x, int y);
-	LRect ClipRgn();
-	LRect ClipRgn(LRect *Rgn);
-	COLOUR Colour();
-	COLOUR Colour(COLOUR c, int Bits = 0);
-	LColour Colour(LColour c);
-	LString Dump();
+	void GetOrigin(int &x, int &y) override;
+	void SetOrigin(int x, int y) override;
+	LRect ClipRgn() override;
+	LRect ClipRgn(LRect *Rgn) override;
+	COLOUR Colour() override;
+	COLOUR Colour(COLOUR c, int Bits = 0) override;
+	LColour Colour(LColour c) override;
+	LString Dump() override;
 
-	int Op();
-	int Op(int Op, NativeInt Param = -1);
+	int Op() override;
+	int Op(int Op, NativeInt Param = -1) override;
 
 	// Primitives
-	void Set(int x, int y);
-	COLOUR Get(int x, int y);
-	void HLine(int x1, int x2, int y);
-	void VLine(int x, int y1, int y2);
-	void Line(int x1, int y1, int x2, int y2);
-	void Circle(double cx, double cy, double radius);
-	void FilledCircle(double cx, double cy, double radius);
-	void Arc(double cx, double cy, double radius, double start, double end);
-	void FilledArc(double cx, double cy, double radius, double start, double end);
-	void Ellipse(double cx, double cy, double x, double y);
-	void FilledEllipse(double cx, double cy, double x, double y);
-	void Box(int x1, int y1, int x2, int y2);
-	void Box(LRect *a);
-	void Rectangle(int x1, int y1, int x2, int y2);
-	void Rectangle(LRect *a = NULL);
-	void Blt(int x, int y, LSurface *Src, LRect *a = NULL);
-	void StretchBlt(LRect *d, LSurface *Src, LRect *s = NULL);
-	void Polygon(int Points, LPoint *Data);
-	void Bezier(int Threshold, LPoint *Pt);
-	void FloodFill(int x, int y, int Mode, COLOUR Border = 0, LRect *Bounds = NULL);
+	void Set(int x, int y) override;
+	COLOUR Get(int x, int y) override;
+	void HLine(int x1, int x2, int y) override;
+	void VLine(int x, int y1, int y2) override;
+	void Line(int x1, int y1, int x2, int y2) override;
+	void Circle(double cx, double cy, double radius) override;
+	void FilledCircle(double cx, double cy, double radius) override;
+	void Arc(double cx, double cy, double radius, double start, double end) override;
+	void FilledArc(double cx, double cy, double radius, double start, double end) override;
+	void Ellipse(double cx, double cy, double x, double y) override;
+	void FilledEllipse(double cx, double cy, double x, double y) override;
+	void Box(int x1, int y1, int x2, int y2) override;
+	void Box(LRect *a) override;
+	void Rectangle(int x1, int y1, int x2, int y2) override;
+	void Rectangle(LRect *a = NULL) override;
+	void Blt(int x, int y, LSurface *Src, LRect *a = NULL) override;
+	void StretchBlt(LRect *d, LSurface *Src, LRect *s = NULL) override;
+	void Polygon(int Points, LPoint *Data) override;
+	void Bezier(int Threshold, LPoint *Pt) override;
+	void FloodFill(int x, int y, int Mode, COLOUR Border = 0, LRect *Bounds = NULL) override;
 	#endif
 };
 
@@ -1055,13 +1055,13 @@ public:
 	LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName = NULL);
 	~LPrintDC();
 
-	const char *GetClass() { return "LPrintDC"; }
+	const char *GetClass() override { return "LPrintDC"; }
 
-	bool IsPrint() { return true; }
+	bool IsPrint() override { return true; }
 	const char *GetOutputFileName();
-	int X();
-	int Y();
-	int GetBits();
+	int X() override;
+	int Y() override;
+	int GetBits() override;
 
 	/// Returns the DPI of the printer or 0,0 on error
 	LPoint GetDpi() override;

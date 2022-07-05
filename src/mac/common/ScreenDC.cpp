@@ -177,6 +177,11 @@ LView *LScreenDC::GetView()
 	return d->View;
 }
 
+LPoint LScreenDC::GetDpi()
+{
+	return LScreenDpi();
+}
+
 void LScreenDC::PushState()
 {
 	if (d->Ctx)

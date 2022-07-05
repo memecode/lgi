@@ -1101,8 +1101,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 
 LPoint LWindow::GetDpi()
 {
-	auto Dpi = LScreenDpi();
-	return LPoint(Dpi, Dpi);
+	return LScreenDpi();
 }
 
 LPointF LWindow::GetDpiScale()
