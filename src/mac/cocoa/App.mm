@@ -44,7 +44,7 @@ OsAppArguments::~OsAppArguments()
 	DeleteObj(d);
 }
 
-void OsAppArguments::Set(char *CmdLine)
+void OsAppArguments::Set(const char *CmdLine)
 {
 	d->Str.Reset();
 	d->Ptr.Length(0);
@@ -66,13 +66,13 @@ void OsAppArguments::Set(char *CmdLine)
 	
 	if (CmdLine)
 	{
-		for (char *s = CmdLine; *s; )
+		for (auto s = CmdLine; *s; )
 		{
 			while (*s && strchr(WhiteSpace, *s)) s++;
-			char *e;
+			const char *e;
 			if (*s == '\'' || *s == '\"')
 			{
-				char delim = *s++;
+				auto delim = *s++;
 				Offsets.Add(Raw.Length());
 				e = s;
 				while (*e && *e != delim)

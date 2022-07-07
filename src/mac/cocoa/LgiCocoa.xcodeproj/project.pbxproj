@@ -149,6 +149,7 @@
 		348362421F233A77003B2A6D /* Stream.h in Headers */ = {isa = PBXBuildFile; fileRef = 348362411F233A77003B2A6D /* Stream.h */; };
 		34837C4925C677ED00D103B4 /* AppPriv.h in Headers */ = {isa = PBXBuildFile; fileRef = 34837C4825C677ED00D103B4 /* AppPriv.h */; };
 		348CD46A25C63E56001AA32B /* AppCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 348CD46925C63E56001AA32B /* AppCommon.cpp */; };
+		348E99CE2876850F0067E92A /* ObjCWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 348E99CD2876850F0067E92A /* ObjCWrapper.h */; };
 		3491A28523678DB800604C29 /* DropFiles.h in Headers */ = {isa = PBXBuildFile; fileRef = 3491A28423678DB700604C29 /* DropFiles.h */; };
 		34A3ACE820568D5800B1D62A /* StringLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A3ACE720568D5800B1D62A /* StringLayout.cpp */; };
 		34A3ACEA20568D9700B1D62A /* MenuCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A3ACE920568D9700B1D62A /* MenuCommon.cpp */; };
@@ -317,6 +318,7 @@
 		348362411F233A77003B2A6D /* Stream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Stream.h; path = ../../../include/lgi/common/Stream.h; sourceTree = SOURCE_ROOT; };
 		34837C4825C677ED00D103B4 /* AppPriv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppPriv.h; path = ../../../private/mac/AppPriv.h; sourceTree = SOURCE_ROOT; };
 		348CD46925C63E56001AA32B /* AppCommon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = AppCommon.cpp; path = ../../common/Lgi/AppCommon.cpp; sourceTree = SOURCE_ROOT; };
+		348E99CD2876850F0067E92A /* ObjCWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ObjCWrapper.h; path = ../../../include/lgi/mac/cocoa/ObjCWrapper.h; sourceTree = "<group>"; };
 		3491A28423678DB700604C29 /* DropFiles.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = DropFiles.h; path = ../../../include/lgi/common/DropFiles.h; sourceTree = SOURCE_ROOT; };
 		34A3ACE720568D5800B1D62A /* StringLayout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StringLayout.cpp; path = ../../common/Gdc2/Font/StringLayout.cpp; sourceTree = SOURCE_ROOT; };
 		34A3ACE920568D9700B1D62A /* MenuCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MenuCommon.cpp; path = ../../common/Lgi/MenuCommon.cpp; sourceTree = SOURCE_ROOT; };
@@ -477,6 +479,7 @@
 		3477C29A1CBF0A700028B84B /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				348E99CD2876850F0067E92A /* ObjCWrapper.h */,
 				34BF15062871503B001B4CA5 /* DrawListSurface.h */,
 				34F6153127E55CB100FE5B0C /* EventTargetThread.h */,
 				3477C2A71CBF0AAF0028B84B /* Lgi.h */,
@@ -750,6 +753,7 @@
 				343874B5230F46B200CF96B4 /* Window.h in Headers */,
 				34F6153227E55CB100FE5B0C /* EventTargetThread.h in Headers */,
 				34D28929275B3DB0005961A8 /* Variant.h in Headers */,
+				348E99CE2876850F0067E92A /* ObjCWrapper.h in Headers */,
 				3477C2A21CBF0A920028B84B /* SymLookup.h in Headers */,
 				34D6AA1722D3749A005D739E /* Gdc2.h in Headers */,
 				3477C2A41CBF0A920028B84B /* LgiOs.h in Headers */,
