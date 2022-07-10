@@ -55,7 +55,7 @@ bool TerminalAt(LString Path)
 	#if defined(MAC)
 		return LExecute("/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal", Path);
 	#elif defined(WINDOWS)
-		TCHAR w[MAX_PATH];
+		TCHAR w[MAX_PATH_LEN];
 		auto r = GetWindowsDirectory(w, CountOf(w));
 		if (r > 0)
 		{
@@ -665,6 +665,47 @@ void VcFolder::UpdateColumns()
 	}
 }
 
+LString VcFolder::GetFilter()
+{
+	auto Ctrl = d->Wnd()->GetCtrlName(IDC_FILTER);
+	return ValidStr(Ctrl) ? Ctrl : NULL;
+}
+
+void VcFolder::FilterCurrentFiles()
+{
+	auto Filter = GetFilter();
+	LArray<LListItem*> All, AddFiltered;
+	d->Files->GetAll(All);
+
+	// Remove any current items that no longer match...
+	for (auto i: All)
+	{
+		auto fn = i->GetText(COL_FILENAME);
+		if (Filter && !Stristr(fn, Filter.Get()))
+		{
+			d->Files->Remove(i);
+			AddFiltered.Add(i);
+		}
+	}
+
+	// Add any filtered items that now match...
+	for (unsigned n=0; n<d->Filtered.Length();)
+	{
+		auto i = d->Filtered[n];
+		auto fn = i->GetText(COL_FILENAME);
+		if (!Filter || Stristr(fn, Filter.Get()))
+		{
+			d->Files->Insert(i);
+			d->Filtered.DeleteAt(n);
+		}
+		else n++;
+	}
+
+	d->Filtered += AddFiltered;
+	d->Files->Sort(0);
+	d->Files->ResizeColumnsToContent();
+}
+
 void VcFolder::Select(bool b)
 {
 	#if PROFILE_FN
@@ -741,9 +782,7 @@ void VcFolder::Select(bool b)
 		if (GetBranches())
 			OnBranchesChange();
 
-		auto Ctrl = d->Commits->GetWindow()->GetCtrlName(IDC_FILTER);
-		LString Filter = ValidStr(Ctrl) ? Ctrl : NULL;
-
+		LString Filter = GetFilter();
 		if (d->CurFolder != this)
 		{
 			PROF("RemoveAll");
@@ -1124,7 +1163,7 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 				}
 				else if (Raw)
 				{
-					LgiTrace("%s:%i - Failed:\n%s\n\n", _FL, Raw.Get());
+					OnCmdError(Raw, "ParseLog Failed");
 					Errors++;
 				}
 			}
@@ -1447,7 +1486,7 @@ void VcFolder::LinkParents()
 	// Find all the "heads", i.e. a commit without any children
 	PROF("Find heads.");
 	LCombo *Heads;
-	if (d->Files->GetWindow()->GetViewById(IDC_HEADS, Heads))
+	if (d->Wnd()->GetViewById(IDC_HEADS, Heads))
 	{
 		Heads->Empty();
 		for (auto c:Log)
@@ -1625,6 +1664,7 @@ bool VcFolder::ParseWorking(int Result, LString s, ParseParams *Params)
 	}
 	
 	IsWorkingFld = false;
+	FilterCurrentFiles();
 	d->Files->ResizeColumnsToContent();
 
 	if (GetType() == VcSvn)
@@ -1913,6 +1953,7 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 		}
 	}
 
+	FilterCurrentFiles();
 	return true;
 }
 
@@ -1921,7 +1962,7 @@ bool VcFolder::ParseFiles(int Result, LString s, ParseParams *Params)
 	d->ClearFiles();
 	ParseDiffs(s, Params->Str, false);
 	IsFilesCmd = false;
-	d->Files->ResizeColumnsToContent();
+	FilterCurrentFiles();
 
 	return false;
 }
@@ -2418,7 +2459,7 @@ void VcFolder::ListCommit(VcCommit *c)
 						d->Files->Insert(f);
 					}
 				}
-				d->Files->ResizeColumnsToContent();
+				FilterCurrentFiles();
 				break;
 			}
 			case VcHg:
@@ -2473,7 +2514,7 @@ LString ConvertUPlus(LString s)
 
 bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 {
-	bool ShowUntracked = d->Files->GetWindow()->GetCtrlValue(IDC_UNTRACKED) != 0;
+	bool ShowUntracked = d->Wnd()->GetCtrlValue(IDC_UNTRACKED) != 0;
 	bool IsWorking = Params ? Params->IsWorking : false;
 	List<LListItem> Ins;
 
@@ -2697,7 +2738,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 	if (LTreeItem::Select())
 	{
 		d->Files->Insert(Ins);
-		d->Files->ResizeColumnsToContent();
+		FilterCurrentFiles();
 	}
 	else
 	{

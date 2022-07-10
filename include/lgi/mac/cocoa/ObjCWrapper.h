@@ -1,5 +1,5 @@
-#ifndef _OBVC_WRAPPER_H_
-#define _OBVC_WRAPPER_H_
+#ifndef _OBJC_WRAPPER_H_
+#define _OBJC_WRAPPER_H_
 
 #ifdef __OBJC__
 	#define ObjCWrapper(Type, Name) \
@@ -19,15 +19,15 @@
 	#define ObjCWrapper(Type, Name) \
 		class Name \
 		{ \
-			void *p; \
+			void * _Nullable p; \
 		public: \
-			Name(void *i) { p = i; } \
+			Name(void * _Nullable i) { p = i; } \
 			Name(long i = 0) { p = NULL; } \
-			Name &operator=(void *i) { p = i; return *this; } \
+			Name &operator=(void * _Nullable i) { p = i; return *this; } \
 			Name &operator=(long i) { p = NULL; return *this; } \
 			operator bool() { return p != NULL; } \
-			operator void*() { return p; } \
-			bool operator ==(const void *obj) { return p == obj; } \
+			operator void * _Nullable() { return p; } \
+			bool operator ==(const void * _Nullable obj) { return p == obj; } \
 		};
 #endif
 

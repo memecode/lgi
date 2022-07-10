@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Project>
 	<Node Name="Source" Type="1" Platforms="15" Id="1">
-		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
+		<Node Name="Lgi" Type="1" Platforms="15" Id="1">
+			<Node File="../src/common/Lgi/DocApp.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
+		</Node>
 		<Node File="./src/SlogViewerMain.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Headers" Type="1" Platforms="15" Id="2" />
 	<Node File="../Lgi.xml" Type="4" Platforms="15" />
 	<Settings>
-		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-		</Advanced>
+		<Advanced />
 		<General>
 			<Makefile>
 				<Linux>Makefile.linux</Linux>
@@ -26,25 +24,18 @@
 			<Compiler>
 				<Linux>gcc</Linux>
 			</Compiler>
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
-		<Debug>
-			<Environment />
-			<Arguments>
-				<All />
-			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
-		</Debug>
+		<Debug />
 		<Build>
 			<TargetType>
 				<All>Executable</All>
 			</TargetType>
 			<IncludePaths>
 				<All>
-					<Debug>../include</Debug>
-					<Release>../include</Release>
+					<Debug>../include
+./resources</Debug>
+					<Release>../include
+./resources</Release>
 				</All>
 				<Linux>
 					<Debug>../include/lgi/linux
@@ -53,18 +44,7 @@
 ../include/lgi/linux/Gtk</Release>
 				</Linux>
 			</IncludePaths>
-			<Defines>
-				<All />
-				<Linux />
-			</Defines>
-			<SystemIncludes>
-				<Linux>
-					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
-					<Release>`pkg-config --cflags gtk+-3.0`</Release>
-				</Linux>
-			</SystemIncludes>
 			<Libraries>
-				<All />
 				<Linux>
 					<Debug>pthread
 `pkg-config --libs gtk+-3.0`
@@ -74,14 +54,12 @@
 -static-libgcc</Release>
 				</Linux>
 			</Libraries>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<TargetName>
-				<Linux />
-			</TargetName>
-			<ApplicationIcon />
+			<SystemIncludes>
+				<Linux>
+					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
+					<Release>`pkg-config --cflags gtk+-3.0`</Release>
+				</Linux>
+			</SystemIncludes>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -93,13 +71,6 @@
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<ShowWhiteSpace />
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
 	</Settings>
 </Project>

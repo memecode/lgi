@@ -95,7 +95,7 @@ public:
 	}
 };
 
-class GdcBmpFactory : public GFilterFactory
+class GdcBmpFactory : public LFilterFactory
 {
 	bool CheckFile(const char *File, int Access, const uchar *Hint)
 	{
@@ -863,7 +863,7 @@ public:
 	bool GetVariant(const char *n, LVariant &v, const char *a) override;
 };
 
-class GdcIcoFactory : public GFilterFactory
+class GdcIcoFactory : public LFilterFactory
 {
 	bool CheckFile(const char *File, int Access, const uchar *Hint)
 	{
@@ -1287,15 +1287,15 @@ LFilter::IoStatus GdcIco::WriteImage(LStream *Out, LSurface *pDC)
 }
 
 ////////////////////////////////////////////////////////////////////
-GFilterFactory *GFilterFactory::First = 0;
-GFilterFactory::GFilterFactory()
+LFilterFactory *LFilterFactory::First = 0;
+LFilterFactory::LFilterFactory()
 {
 	// add this filter to the global list
 	Next = First;
 	First = this;
 }
 
-GFilterFactory::~GFilterFactory()
+LFilterFactory::~LFilterFactory()
 {
 	// delete from the global list
 	if (First == this)
@@ -1304,7 +1304,7 @@ GFilterFactory::~GFilterFactory()
 	}
 	else
 	{
-		GFilterFactory *i = First;
+		LFilterFactory *i = First;
 		while (i->Next && i->Next != this)
 		{
 			i = i->Next;
@@ -1322,41 +1322,41 @@ GFilterFactory::~GFilterFactory()
 	}
 }
 
-LFilter *GFilterFactory::New(const char *File, int Access, const uchar *Hint)
+LAutoPtr<LFilter> LFilterFactory::New(const char *File, int Access, const uchar *Hint)
 {
-	GFilterFactory *i = First;
+	LFilterFactory *i = First;
+	
 	while (i)
 	{
 		if (i->CheckFile(File, Access, Hint))
-		{
-			return i->NewObject();
-		}
+			return LAutoPtr<LFilter>(i->NewObject());
+
 		i = i->Next;
 	}
-	return 0;
+
+	return LAutoPtr<LFilter>();
 }
 
-LFilter *GFilterFactory::NewAt(int n)
+LAutoPtr<LFilter> LFilterFactory::NewAt(int n)
 {
 	int Status = 0;
-	GFilterFactory *i = First;
+	LFilterFactory *i = First;
+
 	while (i)
 	{
 		if (Status++ == n)
-		{
-			return i->NewObject();
-		}
+			return LAutoPtr<LFilter>(i->NewObject());
 
 		i = i->Next;
 	}
 
-	return 0;
+	return LAutoPtr<LFilter>();
 }
 
-int GFilterFactory::GetItems()
+int LFilterFactory::GetItems()
 {
 	int Status = 0;
-	GFilterFactory *i = First;
+	LFilterFactory *i = First;
 	while (i)
 	{
 		Status++;
@@ -1440,7 +1440,7 @@ LSurface *GdcDevice::Load(LStream *In, const char *Name, bool UseOSLoader)
 	}
 
 	LXmlTag Props;
-	LAutoPtr<LFilter> Filter(GFilterFactory::New(Name, FILTER_CAP_READ, Hint));
+	auto Filter = LFilterFactory::New(Name, FILTER_CAP_READ, Hint);
 	LAutoPtr<LSurface> pDC;
 	if (Filter &&
 		pDC.Reset(new LMemDC))
@@ -1627,7 +1627,7 @@ bool GdcDevice::Save(LStream *Out, LSurface *In, const char *FileType)
 	if (!Out || !In || !FileType)
 		return false;
 
-	LAutoPtr<LFilter> F(GFilterFactory::New(FileType, FILTER_CAP_WRITE, 0));
+	auto F = LFilterFactory::New(FileType, FILTER_CAP_WRITE, 0);
 	if (!F)
 	{
 		LgiTrace("%s:%i - No filter for '%s'\n", _FL, FileType);

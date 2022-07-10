@@ -41,7 +41,7 @@ public:
 };
 
 // Object Factory
-class GdcPcxFactory : public GFilterFactory
+class GdcPcxFactory : public LFilterFactory
 {
 	bool CheckFile(const char *File, int Access, const uchar *Hint)
 	{

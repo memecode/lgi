@@ -829,7 +829,7 @@ int FieldView::OnNotify(LViewI *Ctrl, LNotification n)
 						{
 							LFile::Path p = File;
 							p--;
-							LAutoString Rel = LMakeRelativePath(p, s.Name());
+							auto Rel = LMakeRelativePath(p, s.Name());
 							if (Rel)
 								SetCtrlName(c->Id, Rel);
 							else
@@ -1043,7 +1043,7 @@ void AppWnd::OnLanguagesChange(LLanguageId Lang, bool Add, bool Update)
 		if (Add && !Has)
 		{
 			Change = true;
-			Languages.Add(GFindLang(Lang));
+			Languages.Add(LFindLang(Lang));
 		}
 	}
 
@@ -1124,7 +1124,7 @@ LLanguage *AppWnd::GetCurLang()
 	if (CurLang >= 0 && CurLang < Languages.Length())
 		return Languages[CurLang];
 
-	return GFindLang("en");
+	return LFindLang("en");
 }
 
 void AppWnd::SetCurLang(LLanguage *L)
@@ -1407,7 +1407,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		}
 		case IDM_HELP:
 		{
-			char ExeName[MAX_PATH];
+			char ExeName[MAX_PATH_LEN];
 			sprintf_s(ExeName, sizeof(ExeName), "%s", LGetExePath().Get());
 
 			while (strchr(ExeName, DIR_CHAR) && strlen(ExeName) > 3)
@@ -3065,7 +3065,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 	// Rename the existing file to 'xxxxxx.bak'
 	if (LFileExists(FileName))
 	{
-		char Bak[MAX_PATH];
+		char Bak[MAX_PATH_LEN];
 		strcpy_s(Bak, sizeof(Bak), FileName);
 		char *e = LGetExtension(Bak);
 		if (e)
@@ -3638,7 +3638,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 									char *Language = NewStr(T[1]);
 									if (Language)
 									{
-										LLanguage *Info = GFindLang(0, Language);
+										LLanguage *Info = LFindLang(0, Language);
 										if (Info)
 										{
 											LanguageId = Info->Id;
@@ -4111,7 +4111,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 									if (Str)
 									{
 										// get the language
-										LLanguage *Lang = GFindLang(Language);
+										LLanguage *Lang = LFindLang(Language);
 										LLanguageId SLang = (Lang) ? Lang->Id : (char*)"en";
 										StrLang *s = 0;
 
@@ -4222,7 +4222,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 
 											if (i)
 											{
-												LLanguage *Lang = GFindLang(Language);
+												LLanguage *Lang = LFindLang(Language);
 												i->GetStr()->Set(Text, (Lang) ? Lang->Id : (char*)"en");
 											}
 
@@ -4284,7 +4284,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 													}
 
 													// Set Text
-													LLanguage *Lang = GFindLang(Language);
+													LLanguage *Lang = LFindLang(Language);
 													i->GetStr()->Set(Text, (Lang) ? Lang->Id : (char*)"en");
 												}
 											}

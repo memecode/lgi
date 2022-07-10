@@ -77,7 +77,7 @@ public:
 };
 
 // Object Factory
-class GdcPngFactory : public GFilterFactory
+class GdcPngFactory : public LFilterFactory
 {
 	bool CheckFile(char *File, int Access)
 	{

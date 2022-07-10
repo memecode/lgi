@@ -134,40 +134,40 @@ public:
 	void SubGlyphs(bool i);
 
 	/// \returns the font face
-	char *Face();
+	const char *Face() const;
 	/// \returns the point size (avoid, use 'Size' instead)
-	int PointSize();
+	int PointSize() const;
 	/// \returns the size
-	LCss::Len Size();
+	LCss::Len Size() const;
 	/// \returns the tabsize in pixels
-	int TabSize();
+	int TabSize() const;
 	/// \returns the quality setting
-	int Quality();
+	int Quality() const;
 	/// \returns the foreground colour.
-	LColour Fore();
+	LColour Fore() const;
 	/// \returns the background colour.
-	LColour Back();
+	LColour Back() const;
 	/// \returns the font weight.
-	int GetWeight();
+	int GetWeight() const;
 	/// \returns true if this is a bold font.
-	bool Bold() { return GetWeight() >= FW_BOLD; }
+	bool Bold() const { return GetWeight() >= FW_BOLD; }
 	/// \returns true if this is a italic font.
-	bool Italic();
+	bool Italic() const;
 	/// \returns true if this font is drawn with an underline.
-	bool Underline();
+	bool Underline() const;
 	/// \returns true if no background will be drawn.
-	bool Transparent();
+	bool Transparent() const;
 	/// \returns true if glyph substitution will be done.
-	bool SubGlyphs();
+	bool SubGlyphs() const;
 	/// \returns the amount of space above the baseline.
-	double Ascent();
+	double Ascent() const;
 	/// \returns the amount of space below the baseline.
-	double Descent();
+	double Descent() const;
 	/// \returns the amount of normally unused space at the top of the Ascent.
-	double Leading();
+	double Leading() const;
 
 	/// \returns true if the font types are the same
-	bool operator ==(LTypeFace &t);
+	bool operator ==(const LTypeFace &t);
 
 	/// Set the foreground and background in 24-bit colour.
 	/// \sa LTypeFace::Fore() and LTypeFace::Back()
@@ -245,7 +245,7 @@ public:
 	virtual OsFont Handle();
 
 	/// Copies the font
-	virtual LFont &operator =(LFont &f);
+	virtual LFont &operator =(const LFont &f);
 
 	/// Returns the pixel height of the font
 	virtual int GetHeight();

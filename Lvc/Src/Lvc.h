@@ -132,18 +132,19 @@ class SshConnection;
 
 struct AppPriv
 {
-	LTree *Tree;
-	VcFolder *CurFolder;
-	LList *Commits;
-	LList *Files;
-	LOptionsFile Opts;
-	LEdit *Msg;
-	LTextLog *Diff;
-	LTextLog *Log;
-	LTabView *Tabs;
-	VersionCtrl PrevType;
-	LStructuredLog sLog;
-	int Resort;
+	VcFolder		*CurFolder	= NULL;
+	LTree			*Tree		= NULL;
+	LList			*Commits	= NULL;
+	LList			*Files		= NULL;
+	LEdit			*Msg		= NULL;
+	LTextLog		*Diff		= NULL;
+	LTextLog		*Log		= NULL;
+	LTabView		*Tabs		= NULL;
+	VersionCtrl		PrevType	= VcNone;
+	LOptionsFile	Opts;
+	LStructuredLog	sLog;
+	int				Resort = -1;
+	LArray<LListItem*> Filtered;
 
 	LHashTbl<StrKey<char,false>,SshConnection*> Connections;
 	
@@ -151,19 +152,16 @@ struct AppPriv
 		Opts(LOptionsFile::DesktopMode, AppName),
 		sLog("Lvc.slog")
 	{
-		Commits = NULL;
-		PrevType = VcNone;
-		Tree = NULL;
-		Files = NULL;
-		Diff = NULL;
-		Log = NULL;
-		Msg = NULL;
-		Tabs = NULL;
-		CurFolder = NULL;
-		Resort = -1;
+		
+	}
+
+	~AppPriv()
+	{
+		Filtered.DeleteObjects();
 	}
 
 	SshConnection *GetConnection(const char *Uri, bool Create = true);
+	auto Wnd() { return Commits ? Commits->GetWindow() : LAppInst->AppWnd; }
 	
 	void ClearFiles()
 	{

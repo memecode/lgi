@@ -374,7 +374,7 @@ const char *AppName =			"Lvc";
 
 VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 {
-	char p[MAX_PATH];
+	char p[MAX_PATH_LEN];
 	LUri u = Fld->GetUri();
 
 	if (!u.IsFile() || !u.sPath)
@@ -1518,9 +1518,11 @@ public:
 			}
 			case IDC_FILTER:
 			{
-				VcFolder *f = dynamic_cast<VcFolder*>(Tree->Selection());
-				if (f)
-					f->Select(true);
+				auto f = dynamic_cast<VcFolder*>(Tree->Selection());
+				if (!f)
+					break;
+				f->Select(true);
+				f->FilterCurrentFiles();
 				break;
 			}
 			case IDC_COMMIT_AND_PUSH:

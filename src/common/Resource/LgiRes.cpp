@@ -156,7 +156,7 @@ bool LStringRes::Read(LXmlTag *t, ResFileFormat Format)
 		{
 			// no string, try english
 			n = t->GetAttr("en");
-			LLanguage *Lang = GFindLang("en");
+			LLanguage *Lang = LFindLang("en");
 			if (Lang)
 			{
 				Cp = Lang->Charset;
@@ -209,7 +209,7 @@ bool LStringRes::Read(LXmlTag *t, ResFileFormat Format)
 				LXmlAttr *v = &t->Attr[a];
 				char *Name = v->GetName();
 
-				if (GFindLang(Name))
+				if (LFindLang(Name))
 				{
 					Res->AddLang(Name);
 				}
@@ -322,7 +322,7 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 		if (Exe)
 		{
 			#if DEBUG_RES_FILE
-			LgiTrace("%s:%i - Str='%s'\n", _FL, Exe.Get());
+			LgiTrace("%s:%i - Exe='%s'\n", _FL, Exe.Get());
 			#endif
 			auto p = Exe.SplitDelimit(DIR_STR);
 			File = p.Last();
@@ -367,6 +367,18 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 	FullPath = LFindFile(BaseFile);
 	if (!FullPath)
 		FullPath = LFindFile(AltFile);
+	#if !WINDOWS
+	if (!FullPath)
+	{
+		auto leaf = LGetLeaf(BaseFile);
+		if (leaf && *leaf >= 'a' && *leaf <= 'z')
+		{
+			// Try upper case?
+			*leaf = ToUpper(*leaf);
+			FullPath = LFindFile(BaseFile);
+		}
+	}
+	#endif
 
 	#if DEBUG_RES_FILE
 	LgiTrace("%s:%i - FullPath='%s'\n", _FL, FullPath.Get());
@@ -1244,7 +1256,7 @@ LLanguage *LGetLanguageId()
 	char Buf[64];
 	if (LAppInst->GetOption("i", Buf))
 	{
-		LLanguage *i = GFindLang(Buf);
+		LLanguage *i = LFindLang(Buf);
 		if (i)
 			return i;
 	}
@@ -1253,7 +1265,7 @@ LLanguage *LGetLanguageId()
 	auto LangId = LAppInst->GetConfig("Language");
 	if (LangId)
 	{
-		LLanguage *l = GFindLang(LangId);
+		LLanguage *l = LFindLang(LangId);
 		if (l)
 			return l;
 	}
@@ -1274,14 +1286,14 @@ LLanguage *LGetLanguageId()
 	LLanguage *i, *English = 0;
 
 	// Search for exact match
-	for (i = GFindLang(NULL); i->Id; i++)
+	for (i = LFindLang(NULL); i->Id; i++)
 	{
 		if (i->Win32Id == Lang)
 			return i;
 	}
 
 	// Search for PRIMARYLANGID match
-	for (i = GFindLang(NULL); i->Id; i++)
+	for (i = LFindLang(NULL); i->Id; i++)
 	{
 		if (PRIMARYLANGID(i->Win32Id) == PRIMARYLANGID(Lang))
 			return i;
@@ -1298,13 +1310,13 @@ LLanguage *LGetLanguageId()
 		if (GetLanguage &&
 			GetLanguage(Lang))
 		{
-			LLanguage *l = GFindLang(Lang);
+			LLanguage *l = LFindLang(Lang);
 			if (l)
 				return l;
 		}
 	}
 
-	return GFindLang("en");
+	return LFindLang("en");
 
 	/*
 	// Read in KDE language setting
@@ -1324,7 +1336,7 @@ LLanguage *LGetLanguageId()
 				GToken Langs(Lang, ":,; \t");
 				for (int i=0; i<Langs.Length(); i++)
 				{
-					if (Ret = GFindLang(Langs[i]))
+					if (Ret = LFindLang(Langs[i]))
 					{
 						break;
 					}
@@ -1342,7 +1354,7 @@ LLanguage *LGetLanguageId()
 	#endif
 
 	// Return a default of English
-	return GFindLang("en");
+	return LFindLang("en");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -1609,6 +1621,10 @@ bool LMenu::Load(LView *w, const char *Res, const char *TagList)
 
 LResources *LgiGetResObj(bool Warn, const char *filename, bool LoadOnDemand)
 {
+	#if DEBUG_RES_FILE
+	LgiTrace("LgiGetResObj(%i,%s,%i)\n", Warn, filename, LoadOnDemand);
+	#endif
+
 	// Look for existing file?
 	if (filename && LoadOnDemand)
 	{

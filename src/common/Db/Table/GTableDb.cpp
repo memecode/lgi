@@ -92,7 +92,7 @@ GBlockArray::Block *GBlockArray::New()
 	}
 	if (n)
 	{
-		char p[MAX_PATH];
+		char p[MAX_PATH_LEN];
 		sprintf_s(p, sizeof(p), "%s.%i.%s", Base.Get(), n->Id, Ext);
 		n->File.Reset(NewStr(p));
 		n->Data.Reset(new char[BlockSize]);
@@ -528,7 +528,7 @@ bool GTableDb::Open(const char *BaseFolder)
 	LDirectory Dir;
 	GHashTbl<char*, Table*> Tables;
 	
-	char p[MAX_PATH];
+	char p[MAX_PATH_LEN];
 	for (int b = Dir.First(BaseFolder); b; b = Dir.Next())
 	{
 		if (!Dir.IsDir())

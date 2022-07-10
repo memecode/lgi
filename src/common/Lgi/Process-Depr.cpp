@@ -382,7 +382,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 			LString::Array p = LGetEnv("PATH").Split(LGI_PATH_SEPARATOR);
 			for (auto Path : p)
 			{
-				char s[MAX_PATH];
+				char s[MAX_PATH_LEN];
 				LMakePath(s, sizeof(s), Path, Exe);
 				if (LFileExists(s))
 				{

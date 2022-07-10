@@ -121,7 +121,7 @@ bool GMru::_SaveFile(const char *FileName)
 
 	if (FileName)
 	{
-		char File[MAX_PATH];
+		char File[MAX_PATH_LEN];
 		strcpy_s(File, sizeof(File), FileName);
 		
 		LFileType *st;

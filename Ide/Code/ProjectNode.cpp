@@ -652,7 +652,7 @@ bool ProjectNode::Serialize(bool Write)
 					if (!LIsRelativePath(File))
 					{
 						// Try and fix up any non-relative paths that have crept in...
-						char Rel[MAX_PATH];
+						char Rel[MAX_PATH_LEN];
 						if (Project->RelativePath(Rel, File))
 						{
 							if (File)
@@ -789,7 +789,7 @@ LString ProjectNode::GetFullPath()
 		auto Path = Project->GetBasePath();
 		if (Path)
 		{
-			char p[MAX_PATH];
+			char p[MAX_PATH_LEN];
 			LMakePath(p, sizeof(p), Path, sFile);
 			FullPath = p;
 		}
@@ -855,7 +855,7 @@ IdeDoc *ProjectNode::Open()
 					auto FullPath = GetFullPath();
 					if (FullPath)
 					{
-						char Exe[MAX_PATH];
+						char Exe[MAX_PATH_LEN];
 						LMakePath(Exe, sizeof(Exe), LGetExePath(), "..");
 						#if defined WIN32
 						LMakePath(Exe, sizeof(Exe), Exe, "Debug\\LgiRes.exe");
@@ -1321,7 +1321,7 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 		else if (strchr(In, DIR_CHAR))
 		{
 			// Match partial or full path
-			char Full[MAX_PATH] = "";
+			char Full[MAX_PATH_LEN] = "";
 			
 			if (LIsRelativePath(sFile))
 			{

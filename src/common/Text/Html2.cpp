@@ -127,7 +127,7 @@ public:
 		CursorPos.ZOff(-1, -1);
 		RefreshTime = -1;
 
-		char EmojiPng[MAX_PATH];
+		char EmojiPng[MAX_PATH_LEN];
 		#ifdef MAC
 		LgiGetExeFile(EmojiPng, sizeof(EmojiPng));
 		LMakePath(EmojiPng, sizeof(EmojiPng), EmojiPng, "Contents/Resources/Emoji.png");
@@ -7717,7 +7717,7 @@ void LHtml2::OnMouseClick(LMouse &m)
 												}
 												else
 												{
-													char File[MAX_PATH] = "";
+													char File[MAX_PATH_LEN] = "";
 													if (Environment)
 													{
 														LDocumentEnv::LoadJob *j = Environment->NewJob();

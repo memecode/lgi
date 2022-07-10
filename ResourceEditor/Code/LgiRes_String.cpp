@@ -427,7 +427,7 @@ bool ResString::Read(LXmlTag *t, SerialiseContext &Ctx)
 		LXmlAttr *v = &t->Attr[i];
 		if (v->GetName())
 		{
-			LLanguage *Lang = GFindLang(v->GetName());
+			LLanguage *Lang = LFindLang(v->GetName());
 			if (Lang)
 			{
 				if (Ctx.Format == Lr8File)
@@ -503,7 +503,7 @@ bool ResString::Write(LXmlTag *t, SerialiseContext &Ctx)
 			}
 			else if (Ctx.Format == CodepageFile)
 			{
-				LLanguage *Li = GFindLang(s->GetLang());
+				LLanguage *Li = LFindLang(s->GetLang());
 				if (Li)
 				{
 					Mem = String = (char*)LNewConvertCp(Li->Charset, s->GetStr(), "utf-8");
@@ -865,7 +865,7 @@ void ResString::PasteText()
 				{
 					*Translation++ = 0;
 
-					LLanguage *l = GFindLang(Lines[i]);
+					LLanguage *l = LFindLang(Lines[i]);
 					if (l)
 					{
 						Set(Translation, l->Id);
@@ -1084,7 +1084,7 @@ void ResStringGroup::AppendLanguage(LLanguageId Id)
 
 	if (Index < 0)
 	{
-		LLanguage *n = GFindLang(Id);
+		LLanguage *n = LFindLang(Id);
 		if (n)
 		{
 			Lang[Lang.Length()] = n;
@@ -1144,7 +1144,7 @@ int ResStringGroup::OnCommand(int Cmd, int Event, OsView hWnd)
 			// List all the languages minus the ones already
 			// being edited
 			List<LLanguage> l;
-			for (LLanguage *li = GFindLang(NULL); li->Id; li++)
+			for (LLanguage *li = LFindLang(NULL); li->Id; li++)
 			{
 				bool Present = false;
 				for (int i=0; i<Lang.Length(); i++)
@@ -1315,7 +1315,7 @@ void ResStringGroup::SetLanguages()
 			
 			if (!li)
 			{
-				LLanguage *NewLang = GFindLang(sl->GetLang());
+				LLanguage *NewLang = LFindLang(sl->GetLang());
 				if (NewLang) l.Insert(NewLang);
 				
 				if (*sl == (LLanguageId)"en")
@@ -1330,12 +1330,12 @@ void ResStringGroup::SetLanguages()
 	Lang.Length(l.Length() + ((EnglishFound) ? 0 : 1));
 
 	int n = 0;
-	Lang[n++] = GFindLang("en");
+	Lang[n++] = LFindLang("en");
 	for (auto li: l)
 	{
 		if (stricmp(li->Id, "en") != 0) // !English
 		{
-			Lang[n] = GFindLang(li->Id);
+			Lang[n] = LFindLang(li->Id);
 			LAssert(Lang[n]);
 			n++;
 		}

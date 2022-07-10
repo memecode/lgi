@@ -179,7 +179,7 @@ public:
 		CursorPos.ZOff(-1, -1);
 		DeferredLoads = 0;
 
-		char EmojiPng[MAX_PATH];
+		char EmojiPng[MAX_PATH_LEN];
 		#ifdef MAC
 		LMakePath(EmojiPng, sizeof(EmojiPng), LGetExeFile(), "Contents/Resources/Emoji.png");
 		#else
@@ -379,7 +379,7 @@ public:
 		LFont *f;
 		if ((f = new LFont))
 		{
-			char *ff = ValidStr(Face[0]) ? Face[0] : Default->Face();
+			auto ff = ValidStr(Face[0]) ? Face[0] : Default->Face();
 			f->Face(ff);
 			f->Size(Size.IsValid() ? Size : Default->Size());
 			f->Bold(IsBold);
@@ -642,9 +642,9 @@ public:
 				// return MIN((int)l.Value, X());
 				return (int)l.Value;
 			case LCss::LenPt:
-				return (int) (l.Value * LScreenDpi() / 72.0);
+				return (int) (l.Value * LScreenDpi().x / 72.0);
 			case LCss::LenCm:
-				return (int) (l.Value * LScreenDpi() / 2.54);
+				return (int) (l.Value * LScreenDpi().x / 2.54);
 			case LCss::LenEm:
 			{
 				if (!f)
@@ -729,9 +729,9 @@ public:
 			case LCss::LenPx:
 				return (int)l.Value;
 			case LCss::LenPt:
-				return (int) (l.Value * LScreenDpi() / 72.0);
+				return (int) (l.Value * LScreenDpi().y / 72.0);
 			case LCss::LenCm:
-				return (int) (l.Value * LScreenDpi() / 2.54);
+				return (int) (l.Value * LScreenDpi().y / 2.54);
 
 			case LCss::LenEm:
 			{
@@ -2633,7 +2633,7 @@ void LTag::LoadImage(const char *Uri)
 		if (p.Length() != 2 || !p.Last().Equals("base64"))
 			return;
 		LString Name = LString("name.") + p[0];
-		LAutoPtr<LFilter> Filter(GFilterFactory::New(Name, FILTER_CAP_READ, NULL));
+		auto Filter = LFilterFactory::New(Name, FILTER_CAP_READ, NULL);
 		if (!Filter)
 			return;
 
@@ -7057,7 +7057,7 @@ void LHtml::OnAddStyle(const char *MimeType, const char *Styles)
 		bool LogCss = false;
 		if (!Status)
 		{
-			char p[MAX_PATH];
+			char p[MAX_PATH_LEN];
 			sprintf_s(p, sizeof(p), "c:\\temp\\css_parse_failure_%i.txt", LRand());
 			LFile f;
 			if (f.Open(p, O_WRITE))
@@ -8373,7 +8373,7 @@ void LHtml::OnMouseClick(LMouse &m)
 							break;
 						}
 
-						char Path[MAX_PATH];
+						char Path[MAX_PATH_LEN];
 						if (!LGetSystemPath(LSP_TEMP, Path, sizeof(Path)))
 						{
 							LgiTrace("%s:%i - Failed to get the system path.\n", _FL);
@@ -8426,7 +8426,7 @@ void LHtml::OnMouseClick(LMouse &m)
 									}
 									else
 									{
-										char File[MAX_PATH] = "";
+										char File[MAX_PATH_LEN] = "";
 										if (Environment)
 										{
 											LDocumentEnv::LoadJob *j = Environment->NewJob();

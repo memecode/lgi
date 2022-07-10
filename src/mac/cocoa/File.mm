@@ -320,10 +320,10 @@ bool LFileExists(const char *FileName, char *CorrectCase)
 		{
 			Status = true;
 		}
-		else if (strlen(FileName) < MAX_PATH)
+		else if (strlen(FileName) < MAX_PATH_LEN)
 		{
 			// Look for altenate case by enumerating the directory
-			char d[MAX_PATH];
+			char d[MAX_PATH_LEN];
 			strcpy_s(d, sizeof(d), FileName);
 			char *e = strrchr(d, DIR_CHAR);
 			if (e)
@@ -1085,7 +1085,7 @@ bool LFileSystem::CreateFolder(const char *PathName, bool CreateParentFolders, L
 			*ErrorCode = errno;
 		if (CreateParentFolders)
 		{
-			char Base[MAX_PATH];
+			char Base[MAX_PATH_LEN];
 			strcpy_s(Base, sizeof(Base), PathName);
 			do
 			{

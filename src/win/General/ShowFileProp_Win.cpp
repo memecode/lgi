@@ -26,7 +26,7 @@ void LShowFileProperties(OsView Parent, const char *Filename)
 
 bool LBrowseToFile(const char *Filename)
 {
-	char Args[MAX_PATH];
+	char Args[MAX_PATH_LEN];
 	sprintf_s(Args, sizeof(Args), "/e,/select,\"%s\"", Filename);
 	return LExecute("explorer", Args);
 }

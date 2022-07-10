@@ -23,6 +23,7 @@ public:
 
 	bool Create(const char *Face = NULL, LCss::Len Size = LCss::LenInherit, LSurface *pSurface = NULL) override;
 	int GetHeight() override;
+	LFont &operator =(const LFont &f) override;
 };
 
 #endif

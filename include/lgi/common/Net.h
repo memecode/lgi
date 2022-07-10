@@ -103,57 +103,57 @@ public:
 	~LSocket();
 
 	/// Gets the active cancellation object
-	LCancel *GetCancel();
+	LCancel *GetCancel() override;
 
 	/// Sets the active cancellation object
-	void SetCancel(LCancel *c);
+	void SetCancel(LCancel *c) override;
 
 	/// Returns the operating system handle to the socket.
-	OsSocket Handle(OsSocket Set = INVALID_SOCKET);
+	OsSocket Handle(OsSocket Set = INVALID_SOCKET) override;
 	OsSocket ReleaseHandle();
 
 	/// Returns true if the internal state of the class is ok
 	bool IsOK();
 	
 	/// Returns the IP address at this end of the socket.
-	bool GetLocalIp(char *IpAddr);
+	bool GetLocalIp(char *IpAddr) override;
 	
 	/// Returns the port at this end of the socket.
-	int GetLocalPort();
+	int GetLocalPort() override;
 	
 	/// Gets the IP address at the remote end of the socket.
 	bool GetRemoteIp(uint32_t *IpAddr);
-	bool GetRemoteIp(char *IpAddr);
+	bool GetRemoteIp(char *IpAddr) override;
 
 	/// Gets the IP address at the remote end of the socket.
-	int GetRemotePort();
+	int GetRemotePort() override;
 
 	/// Gets the current timeout for operations in ms
-	int GetTimeout();
+	int GetTimeout() override;
 
 	/// Sets the current timeout for operations in ms
-	void SetTimeout(int ms);
+	void SetTimeout(int ms) override;
 
 	/// Returns whether there is data available for reading.
-	bool IsReadable(int TimeoutMs = 0);
+	bool IsReadable(int TimeoutMs = 0) override;
 
 	/// Returns whether there is data available for reading.
-	bool IsWritable(int TimeoutMs = 0);
+	bool IsWritable(int TimeoutMs = 0) override;
 
 	/// Returns if the socket is ready to accept a connection
-	bool CanAccept(int TimeoutMs = 0);
+	bool CanAccept(int TimeoutMs = 0) override;
 
 	/// Returns if the socket is set to block
-	bool IsBlocking();
+	bool IsBlocking() override;
 
 	/// Set the socket to block
-	void IsBlocking(bool block);
+	void IsBlocking(bool block) override;
 
 	/// Get the send delay setting
-	bool IsDelayed();
+	bool IsDelayed() override;
 
 	/// Set the send delay setting
-	void IsDelayed(bool Delay);
+	void IsDelayed(bool Delay) override;
 
 	/// Opens a connection.
 	int Open
@@ -162,26 +162,26 @@ public:
 		const char *HostAddr,
 		/// The port on the remote host.
 		int Port
-	);
+	)	override;
 	
 	/// Returns true if the socket is connected.
-	bool IsOpen();
+	bool IsOpen() override;
 	
 	/// Closes the connection to the remote host.
-	int Close();
+	int Close() override;
 
 	/// Binds on a given port.
 	bool Bind(int Port, bool reuseAddr = true);
 
 	/// Binds and listens on a given port for an incomming connection.
-	bool Listen(int Port = 0);
+	bool Listen(int Port = 0) override;
 	
 	/// Accepts an incomming connection and connects the socket you pass in to the remote host.
 	bool Accept
 	(
 		/// The socket to handle the connection.
 		LSocketI *c
-	);
+	)	override;
 
 	/// \brief Sends data to the remote host.
 	/// \return the number of bytes written or <= 0 on error.
@@ -193,10 +193,10 @@ public:
 		ssize_t Len,
 		/// Flags to pass to send
 		int Flags = 0
-	);
+	)	override;
 
-	ssize_t Write(const LString &s) { return Write(s.Get(), s.Length()); }
-	
+	inline ssize_t Write(const LString s) { return LStreamI::Write(s); }
+
 	/// \brief Reads data from the remote host.
 	/// \return the number of bytes read or <= 0 on error.
 	///
@@ -211,35 +211,35 @@ public:
 		ssize_t Len,
 		/// The flags to pass to recv
 		int Flags = 0
-	);
-	
+	)	override;
+
 	/// Returns the last error or 0.
-	int Error(void *Param = 0);
-	const char *GetErrorString();
+	int Error(void *Param = 0) override;
+	const char *GetErrorString() override;
 
 	/// Not supported
-	int64 GetSize() { return -1; }
+	int64 GetSize() override { return -1; }
 	/// Not supported
-	int64 SetSize(int64 Size) { return -1; }
+	int64 SetSize(int64 Size) override { return -1; }
 	/// Not supported
-	int64 GetPos() { return -1; }
+	int64 GetPos() override { return -1; }
 	/// Not supported
-	int64 SetPos(int64 Pos) { return -1; }
+	int64 SetPos(int64 Pos) override { return -1; }
 
 	/// Gets called when the connection is disconnected
-	void OnDisconnect();
+	void OnDisconnect() override;
 	
 	/// Gets called when data is received.
-	void OnRead(char *Data, ssize_t Len) {}
+	void OnRead(char *Data, ssize_t Len) override {}
 
 	/// Gets called when data is sent.
-	void OnWrite(const char *Data, ssize_t Len) {}
+	void OnWrite(const char *Data, ssize_t Len) override {}
 	
 	/// Gets called when an error occurs.
-	void OnError(int ErrorCode, const char *ErrorDescription);
+	void OnError(int ErrorCode, const char *ErrorDescription) override;
 	
 	/// Gets called when some information is available.
-	void OnInformation(const char *Str) {}
+	void OnInformation(const char *Str) override {}
 	
 	/// Parameter change handler.
 	int SetParameter
@@ -250,21 +250,21 @@ public:
 	) { return false; }
 
 	/// Get UPD mode
-	bool GetUdp();
+	bool GetUdp() override;
 	/// Set UPD mode
-	void SetUdp(bool isUdp = true);
+	void SetUdp(bool isUdp = true) override;
 	/// Makes the socket able to broadcast
 	void SetBroadcast(bool isBroadcast = true);
 	/// Read UPD packet
-	int ReadUdp(void *Buffer, int Size, int Flags, uint32_t *Ip = 0, uint16_t *Port = 0);
+	int ReadUdp(void *Buffer, int Size, int Flags, uint32_t *Ip = 0, uint16_t *Port = 0) override;
 	/// Write UPD packet
-	int WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t Port);
+	int WriteUdp(void *Buffer, int Size, int Flags, uint32_t Ip, uint16_t Port) override;
 	
 	bool AddMulticastMember(uint32_t MulticastIp, uint32_t LocalInterface);
 	bool SetMulticastInterface(uint32_t Interface);
 
 	// Impl
-	LStreamI *Clone()
+	LStreamI *Clone() override
 	{
 		LSocket *s = new LSocket;
 		if (s)

@@ -36,7 +36,11 @@
 			"libjpeg9a"
 			#if defined(WINDOWS)
 				"_"
+				#if _MSC_VER >= _MSC_VER_VS2019
+				_MSC_YEAR_STR
+				#else
 				_MSC_VER_STR
+				#endif
 				#ifdef LGI_64BIT
 				"x64"
 				#else
@@ -63,10 +67,20 @@ public:
 		if (First)
 		{
 			First = false;
+
 			if (IsLoaded())
+			{
 				LgiTrace("%s:%i - JPEG: %s\n", _FL, GetFullPath().Get());
+			}
 			else
+			{
+				#if defined(WINDOWS) && defined(_DEBUG)
+				auto ReleaseLib = LString(sLibrary)(0, -2);
+				if (!Load(ReleaseLib))
+				#endif
+
 				LgiTrace("%s:%i - JPEG: failed to find '%s'\n", _FL, sLibrary);
+			}
 		}
 	}
 
@@ -111,7 +125,7 @@ LAutoPtr<LibJpeg> JpegLibrary;
 #define IJG_JFIF_ICC_HEADER_LENGTH      14
 
 /////////////////////////////////////////////////////////////////////
-class GdcJpegFactory : public GFilterFactory
+class GdcJpegFactory : public LFilterFactory
 {
 	bool CheckFile(const char *File, int Access, const uchar *Hint)
 	{
@@ -313,7 +327,7 @@ void j_skip_input_data(j_decompress_ptr cinfo, long num_bytes)
     
     while (num_bytes)
     {
-        auto Remain = MIN(cinfo->src->bytes_in_buffer, (size_t)num_bytes);
+        long Remain = MIN((long)cinfo->src->bytes_in_buffer, num_bytes);
 		if (!Remain)
 			break;
         cinfo->src->next_input_byte += Remain;

@@ -87,7 +87,7 @@ protected:
 		}
 		if (ExtractTo)
 		{
-			char o[MAX_PATH];
+			char o[MAX_PATH_LEN];
 			
 			if (f.Dir)
 			{

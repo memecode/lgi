@@ -1412,13 +1412,13 @@ void LTextView3::PourStyle(size_t Start, ssize_t EditSize)
 
 	if (UrlDetect)
 	{		
-		LArray<GLinkInfo> Links;		
+		LArray<LLinkInfo> Links;		
 		LAssert((ssize_t)Start + Length <= Size);		
 		if (LDetectLinks(Links, Text + Start, Length))
 		{
 			for (uint32_t i=0; i<Links.Length(); i++)
 			{
-				GLinkInfo &Inf = Links[i];
+				LLinkInfo &Inf = Links[i];
                 LAutoPtr<LTextView3::LStyle> Url(new LStyle(STYLE_URL));
 				if (Url)
 				{

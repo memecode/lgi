@@ -160,7 +160,7 @@ bool IdeCommon::AddFiles(AddFilesProgress *Prog, const char *Path)
 			LDirectory d;
 			for (int b = d.First(Path); b && !Prog->Cancel; b = d.Next())
 			{
-				char p[MAX_PATH];
+				char p[MAX_PATH_LEN];
 				if (d.Path(p, sizeof(p)))
 				{
 					char *Name = d.GetName();

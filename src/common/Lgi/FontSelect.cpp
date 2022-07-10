@@ -323,11 +323,11 @@ bool LFontSelect::Serialize(void *Data, int DataLen, bool Write)
 		}
 		if (T[1])
 		{
-			Size = T[1].Int();
+			Size = (int)T[1].Int();
 		}
 
 		Bold = Underline = Italic = false;
-		char *t = T[2];
+		auto t = T.IdxCheck(2) ? T[2] : NULL;
 		if (t)
 		{
 			if (strchr(t, 'b')) Bold = true;

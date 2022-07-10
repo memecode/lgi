@@ -174,7 +174,7 @@ static void ClearEmptyTags(LXmlTag *t)
 
 struct IdeProjectSettingsPriv
 {
-	char PathBuf[MAX_PATH];
+	char PathBuf[MAX_PATH_LEN];
 
 public:
 	IdeProject *Project;
@@ -768,13 +768,13 @@ public:
 							if (!ok)
 								return;
 							const char *Base = GetCtrlName(IDC_PATH);
-							LAutoString Rel;
+							LString Rel;
 							if (Base)
 							{
 								LFile::Path p = Base;
 								Rel = LMakeRelativePath(--p, s->Name());
 							}
-							e->Name(Rel ? Rel : s->Name());
+							e->Name(Rel ? Rel.Get() : s.Name());
 
 							delete s;
 						};

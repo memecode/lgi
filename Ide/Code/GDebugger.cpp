@@ -646,7 +646,6 @@ public:
 	{
 		State = Init;
 		LinePtr = Line;
-		ParseState;
 		
 		Vis.Add(new GStringVis);
 	}
@@ -938,7 +937,7 @@ public:
 				SetPendingOn = true;
 			}
 			
-			char cmd[MAX_PATH];
+			char cmd[MAX_PATH_LEN];
 			char *File = bp.File.Get();
 			if (File)
 			{

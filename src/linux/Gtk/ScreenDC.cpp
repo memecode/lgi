@@ -129,6 +129,11 @@ OsPainter LScreenDC::Handle()
 	return d->cr;
 }
 
+LPoint LScreenDC::GetDpi()
+{
+	return LScreenDpi();
+}
+
 ::LString LScreenDC::Dump()
 {
 	::LString s;

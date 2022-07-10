@@ -406,7 +406,7 @@ int Search::OnNotify(LViewI *c, LNotification n)
 			if (GetCtrlValue(IDC_IN_LANG))
 			{
 				auto FullName = GetCtrlName(IDC_LANG);
-				LLanguage *l = GFindLang("", FullName);
+				LLanguage *l = LFindLang("", FullName);
 				InLang = l ? l->Id : NULL;
 			}
 			Thread->Search(*this);
@@ -424,7 +424,7 @@ int Search::OnNotify(LViewI *c, LNotification n)
 			if (!Thread) break;
 			if (GetCtrlValue(IDC_NOT_IN_LANG))
 			{
-				LLanguage *l = GFindLang("", GetCtrlName(IDC_NOT_LANG));
+				LLanguage *l = LFindLang("", GetCtrlName(IDC_NOT_LANG));
 				NotInLang = l ? l->Id : NULL;
 			}
 			Thread->Search(*this);
@@ -493,13 +493,13 @@ int Search::OnNotify(LViewI *c, LNotification n)
 			
 			if (GetCtrlValue(IDC_IN_LANG))
 			{
-				LLanguage *l = GFindLang(0, GetCtrlName(IDC_LANG));
+				LLanguage *l = LFindLang(0, GetCtrlName(IDC_LANG));
 				if (l) InLang = l->Id;
 			}
 			
 			if (GetCtrlValue(IDC_NOT_IN_LANG))
 			{
-				LLanguage *l = GFindLang(0, GetCtrlName(IDC_NOT_LANG));
+				LLanguage *l = LFindLang(0, GetCtrlName(IDC_NOT_LANG));
 				if (l) NotInLang = l->Id;
 			}
 			

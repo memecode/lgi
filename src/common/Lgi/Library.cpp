@@ -28,7 +28,7 @@ bool LLibrary::Load(const char *File, bool Quiet)
 
 	if (File)
 	{
-		char f[MAX_PATH];
+		char f[MAX_PATH_LEN];
 		int ch = sprintf_s(f, sizeof(f), "%s", File);
 		
         #ifndef HAIKU
@@ -115,7 +115,7 @@ bool LLibrary::Load(const char *File, bool Quiet)
 					if (hLib)
 					{
 						#if 0 // defined(LINUX) && defined(__USE_GNU)
-							char Path[MAX_PATH];
+							char Path[MAX_PATH_LEN];
 							int r = dlinfo(hLib, RTLD_DI_ORIGIN, Path);
 							if (r == 0)
 							{
@@ -130,7 +130,7 @@ bool LLibrary::Load(const char *File, bool Quiet)
 						if (LIsRelativePath(FileName))
 						{
 							// Explicitly try the full path to the executable folder
-							char p[MAX_PATH];
+							char p[MAX_PATH_LEN];
 							#if LGI_COCOA || defined(__GTK_H__)
 							LMakePath(p, sizeof(p), LgiArgsAppPath, "../../Frameworks");
 							#else
@@ -161,7 +161,7 @@ bool LLibrary::Load(const char *File, bool Quiet)
 								GToken t("/opt/local/lib", ":");
 								for (int i=0; i<t.Length(); i++)
 								{
-									char full[MAX_PATH];
+									char full[MAX_PATH_LEN];
 									LMakePath(full, sizeof(full), t[i], f);
 									if (LFileExists(full))
 									{
@@ -339,7 +339,7 @@ LString LLibrary::GetFullPath()
 	#elif defined(WINDOWS)
 		if (hLib)
 		{
-			wchar_t File[MAX_PATH] = L"";
+			wchar_t File[MAX_PATH_LEN] = L"";
 			GetModuleFileNameW(Handle(), File, sizeof(File));
 			return File;
 		}

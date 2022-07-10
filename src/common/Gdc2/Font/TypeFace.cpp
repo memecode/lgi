@@ -11,7 +11,7 @@ LTypeFace::~LTypeFace()
 	DeleteObj(d);
 }
 
-bool LTypeFace::operator ==(LTypeFace &t)
+bool LTypeFace::operator ==(const LTypeFace &t)
 {
 	if ((Face() == 0) ^ (t.Face() == 0))
 		return false;
@@ -33,10 +33,9 @@ void LTypeFace::Face(const char *s)
 {
 	if (s &&
 		s != d->_Face &&
-		stricmp(s, d->_Face?d->_Face:(char*)"") != 0)
+		Stricmp(s, d->_Face.Get()) != 0)
 	{
-		DeleteArray(d->_Face);
-		d->_Face = NewStr(s);
+		d->_Face = s;
 		LAssert(d->_Face != NULL);
 		_OnPropChange(true);
 	}
@@ -169,84 +168,84 @@ void LTypeFace::SubGlyphs(bool i)
 
 ////////////////////////
 // get
-char *LTypeFace::Face()
+const char *LTypeFace::Face() const
 {
 	return d->_Face;
 }
 
-LCss::Len LTypeFace::Size()
+LCss::Len LTypeFace::Size() const
 {
 	return d->_Size;
 }
 
-int LTypeFace::PointSize()
+int LTypeFace::PointSize() const
 {
 	if (d->_Size.Type == LCss::LenPt)
 		return (int)d->_Size.Value;
 	
 	if (d->_Size.Type == LCss::LenPx)
-		return (int) (d->_Size.Value * 72 / LScreenDpi());
+		return (int) (d->_Size.Value * 72 / LScreenDpi().x);
 
 	LAssert(!"What now?");
 	return 0;
 }
 
-int LTypeFace::TabSize()
+int LTypeFace::TabSize() const
 {
 	return d->_TabSize;
 }
 
-int LTypeFace::Quality()
+int LTypeFace::Quality() const
 {
 	return d->_Quality;
 }
 
-LColour LTypeFace::Fore()
+LColour LTypeFace::Fore() const
 {
 	return d->_Fore;
 }
 
-LColour LTypeFace::Back()
+LColour LTypeFace::Back() const
 {
 	return d->_Back;
 }
 
-int LTypeFace::GetWeight()
+int LTypeFace::GetWeight() const
 {
 	return d->_Weight;
 }
 
-bool LTypeFace::Italic()
+bool LTypeFace::Italic() const
 {
 	return d->_Italic;
 }
 
-bool LTypeFace::Underline()
+bool LTypeFace::Underline() const
 {
 	return d->_Underline;
 }
 
-bool LTypeFace::Transparent()
+bool LTypeFace::Transparent() const
 {
 	return d->_Transparent;
 }
 
-bool LTypeFace::SubGlyphs()
+bool LTypeFace::SubGlyphs() const
 {
 	return d->_SubGlyphs;
 }
 
-double LTypeFace::Ascent()
+double LTypeFace::Ascent() const
 {
 	return d->_Ascent;
 }
 
-double LTypeFace::Descent()
+double LTypeFace::Descent() const
 {
 	return d->_Descent;
 }
 
-double LTypeFace::Leading()
+double LTypeFace::Leading() const
 {
 	return d->_Leading;
 }

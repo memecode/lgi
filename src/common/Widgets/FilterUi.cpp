@@ -1045,9 +1045,8 @@ void LFilterItem::OnMouseClick(LMouse &m)
 					LTreeItem *m = this;
 					size_t Count = p->Items.Length();
 					ssize_t Idx = p->Items.IndexOf(m);
-					if (Idx + Delta >= 0 && Idx + Delta < Count - 1)
+					if (Idx + Delta >= 0 && Idx + Delta < (ssize_t)Count - 1)
 					{
-						// LTreeItem *i = p->Items[Idx + Delta];
 						p->Items.Delete(m);
 						p->Items.Insert(m, Idx + Delta);
 						p->_RePour();

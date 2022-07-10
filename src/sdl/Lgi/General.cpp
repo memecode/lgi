@@ -185,7 +185,7 @@ bool _GetApps_Add(LArray<LAppInfo*> &Apps, char *In)
 			a->Path.Reset(p.NewStr());
 			if (a->Path)
 			{
-				char e[MAX_PATH];
+				char e[MAX_PATH_LEN];
 				char *d = strrchr(a->Path, DIR_CHAR);
 				if (d) strcpy_s(e, sizeof(e), d + 1);
 				else strcpy_s(e, sizeof(e), a->Path);
@@ -789,7 +789,7 @@ LString WinGetSpecialFolderPath(int Id)
 {
 	LLibrary Shell("Shell32");
 	LString s;
-	char16 wp[MAX_PATH] = { 0 };
+	char16 wp[MAX_PATH_LEN] = { 0 };
 	pSHGetSpecialFolderPathW w = (pSHGetSpecialFolderPathW) Shell.GetAddress("SHGetSpecialFolderPathW");
 	if (w)
 	{

@@ -50,6 +50,9 @@ COLOUR Map(LSurface *pDC, COLOUR c);
 ////////////////////////////////////////////////////////////////////////
 LImageList *LLoadImageList(const char *File, int x, int y)
 {
+	if (!File)
+		return NULL;
+
 	if (x < 0 || y < 0)
 	{
 		// Detect dimensions in the filename.

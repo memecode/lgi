@@ -76,12 +76,7 @@ int LPrintDC::GetBits()
 	return 24;
 }
 
-int LPrintDC::DpiX()
+LPoint LPrintDC::GetDpi()
 {
-	return d->Dpi.x;
-}
-
-int LPrintDC::DpiY()
-{
-	return d->Dpi.y;
+	return d->Dpi;
 }

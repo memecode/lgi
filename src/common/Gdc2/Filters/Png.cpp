@@ -84,7 +84,11 @@ const char *sLibrary =
 			"libpng15"
 			#ifdef _MSC_VER_STR
 				"_"
+				#if _MSC_VER >= _MSC_VER_VS2019
+				_MSC_YEAR_STR
+				#else
 				_MSC_VER_STR
+				#endif
 				#if defined(LGI_64BIT)
 				"x64"
 				#else
@@ -111,9 +115,18 @@ public:
 
 			auto Loaded = IsLoaded();
 			if (Loaded)
+			{
 				LgiTrace("%s:%i - PNG: %s\n", _FL, GetFullPath().Get());
+			}
 			else
+			{
+				#if defined(WINDOWS) && defined(_DEBUG)
+				auto ReleaseLib = LString(sLibrary)(0, -2);
+				if (!Load(ReleaseLib))
+				#endif
+
 				LgiTrace("%s:%i - Failed to load '%s'.\n", _FL, sLibrary);
+			}
 		}
 	}
 
@@ -372,7 +385,7 @@ public:
 };
 
 // Object Factory
-class GdcPngFactory : public GFilterFactory
+class GdcPngFactory : public LFilterFactory
 {
 	bool CheckFile(const char *File, int Access, const uchar *Hint)
 	{
@@ -681,6 +694,12 @@ LFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 	pDC = pDeviceContext;
 	DeleteArray(PrevScanLine);
 
+	if (!pDC)
+	{
+		LAssert(!"No DC.");
+		return Status;
+	}
+
 	LVariant v;
 	if (Props &&
 		Props->GetValue(LGI_FILTER_PARENT_WND, v) &&
@@ -716,7 +735,7 @@ LFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 		return Status;
 	}
 
-	png_ptr = LIBPNG png_create_read_struct(	PNG_LIBPNG_VER_STRING,
+	png_ptr = LIBPNG png_create_read_struct(PNG_LIBPNG_VER_STRING,
 											(void*)this,
 											LibPngError,
 											LibPngWarning);

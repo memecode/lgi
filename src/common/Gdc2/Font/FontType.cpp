@@ -325,7 +325,7 @@ bool LFontType::GetSystemFont(const char *Which)
 		if (First)
 		{
 			bool ConfigFontUsed = false;
-			char p[MAX_PATH];
+			char p[MAX_PATH_LEN];
 			LGetSystemPath(LSP_HOME, p, sizeof(p));
 			LMakePath(p, sizeof(p), p, ".lgi.conf");
 			if (LFileExists(p))
@@ -378,7 +378,7 @@ bool LFontType::GetSystemFont(const char *Which)
 					if (Gtk::pango_font_description_get_size_is_absolute(s->font_desc))
 					{
 						float Px = Gtk::pango_font_description_get_size(s->font_desc) / PANGO_SCALE;
-						float Dpi = (float)LScreenDpi();
+						float Dpi = (float)LScreenDpi().x;
 						DefSize = (Px * 72.0) / Dpi;
 						printf("pango px=%f, Dpi=%f\n", Px, Dpi);
 					}

@@ -94,6 +94,7 @@ void LXmlTreeUi::EmptyAll(LViewI *Ui)
 				Ui->SetCtrlName(m.value->Id, 0);
 		}
 	}
+	else LAssert(!"Invalid params");
 }
 
 void LXmlTreeUi::EnableAll(LViewI *Ui, bool Enable)
@@ -106,6 +107,7 @@ void LXmlTreeUi::EnableAll(LViewI *Ui, bool Enable)
 			Ui->SetCtrlEnabled(m.value->Id, Enable);
 		}
 	}
+	else LAssert(!"Invalid params");
 }
 
 bool LXmlTreeUi::IsMapped(const char *Attr)
@@ -116,7 +118,7 @@ bool LXmlTreeUi::IsMapped(const char *Attr)
 void LXmlTreeUi::Map(const char *Attr, int UiIdent, int Type)
 {
 	if (UiIdent > 0 &&
-		(Attr != 0 || Type == GV_DOM))
+		(Attr != NULL || Type == GV_DOM))
 	{		
 		Mapping *m = new Mapping;
 		if (m)
@@ -128,10 +130,7 @@ void LXmlTreeUi::Map(const char *Attr, int UiIdent, int Type)
 			d->Maps.Add(Attr, m);
 		}
 	}
-	else
-	{
-		LAssert(0);
-	}
+	else LAssert(!"Invalid params");
 }
 
 void LXmlTreeUi::Map(const char *Attr, int UiIdent, CreateListItem Factory, const char *ChildElements, void *User)
@@ -151,10 +150,7 @@ void LXmlTreeUi::Map(const char *Attr, int UiIdent, CreateListItem Factory, cons
 			d->Maps.Add(Attr, m);
 		}
 	}
-	else
-	{
-		LAssert(0);
-	}
+	else LAssert(!"Invalid params");
 }
 
 void LXmlTreeUi::Map(const char *Attr, int UiIdent, CreateTreeItem Factory, const char *ChildElements, void *User)
@@ -174,10 +170,7 @@ void LXmlTreeUi::Map(const char *Attr, int UiIdent, CreateTreeItem Factory, cons
 			d->Maps.Add(Attr, m);
 		}
 	}
-	else
-	{
-		LAssert(0);
-	}
+	else LAssert(!"Invalid params");
 }
 
 void LXmlTreeUi::EmptyMaps()
@@ -244,6 +237,7 @@ int GetDataType(char *str)
 
 		return GV_INT32;
 	}
+	else LAssert(!"Invalid params");
 
 	return GV_NULL;
 }
@@ -304,9 +298,10 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 					{
 						LVariant Ret;
 						LArray<LVariant*> Args;
-						Args[0] = new LVariant(&Xml);
+						Args[0] = new LVariant(Xml);
 						Args[1] = new LVariant(false);
-						ct->CallMethod(LDomPropToString(ControlSerialize), &Ret, Args);
+						auto Param = LDomPropToString(ControlSerialize);
+						ct->CallMethod(Param, &Ret, Args);
 						Args.DeleteObjects();
 					}
 				}
@@ -400,7 +395,7 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 							{
 								LVariant Ret;
 								LArray<LVariant*> Args;
-								Args[0] = new LVariant(&Xml);
+								Args[0] = new LVariant(Xml);
 								Args[1] = new LVariant(true);
 								ct->CallMethod(LDomPropToString(ControlSerialize), &Ret, Args);
 								Args.DeleteObjects();
@@ -430,6 +425,7 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 			}
 		}
 	}
+	else LAssert(!"Invalid params");
 
 	return Status;
 }

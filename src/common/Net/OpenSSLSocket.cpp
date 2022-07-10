@@ -76,12 +76,12 @@ public:
 	LibSSL()
 	{
 		#if defined MAC
-			char p[MAX_PATH];
+			char p[MAX_PATH_LEN];
 			LMakePath(p, sizeof(p), LGetExeFile(), LString("Contents/Frameworks/") + SSL_LIBRARY);
 			if (!Load(p))
 				LgiTrace("%s:%i - Failed to load '%s'\n", _FL, p);
 		#elif defined LINUX
-			char p[MAX_PATH];
+			char p[MAX_PATH_LEN];
 			if (LMakePath(p, sizeof(p), LGetExePath(), "libssl.so"))
 			{
 				if (LFileExists(p))
@@ -98,7 +98,7 @@ public:
 		if (!IsLoaded())
 		{
 			#ifdef WIN32
-				char p[MAX_PATH], leaf[32];
+				char p[MAX_PATH_LEN], leaf[32];
 				int bits = sizeof(size_t)*8;
 				sprintf_s(leaf, sizeof(leaf), "OpenSSL-Win%i", bits);
 				LMakePath(p, sizeof(p), LGetSystemPath(LSP_USER_APPS, bits), leaf);
@@ -165,7 +165,7 @@ public:
 		if (!IsLoaded())
 		{
 			#ifdef WIN32
-				char p[MAX_PATH], leaf[32];
+				char p[MAX_PATH_LEN], leaf[32];
 				int bits = sizeof(size_t)*8;
 				sprintf_s(leaf, sizeof(leaf), "OpenSSL-Win%i", bits);
 				LMakePath(p, sizeof(p), LGetSystemPath(LSP_USER_APPS, bits), leaf);
@@ -359,7 +359,7 @@ public:
 		if (Ver < MinimumVer)
 		{
 			#if WINDOWS
-			char FileName[MAX_PATH] = "";
+			char FileName[MAX_PATH_LEN] = "";
 			DWORD r = GetModuleFileNameA(LibEAY::Handle(), FileName, sizeof(FileName));
 			#endif
 
@@ -598,9 +598,9 @@ SslSocket::SslSocket(LStreamI *logger, LCapabilityClient *caps, bool sslonconnec
 	{
 		if (Library->IsOk(this))
 		{
-			char s[MAX_PATH];
+			char s[MAX_PATH_LEN];
 			#ifdef WIN32
-			char n[MAX_PATH];
+			char n[MAX_PATH_LEN];
 			if (GetModuleFileNameA(Library->LibSSL::Handle(), n, sizeof(n)))
 			{
 				sprintf_s(s, sizeof(s), "Using '%s'", n);

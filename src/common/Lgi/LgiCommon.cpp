@@ -561,7 +561,7 @@ void LgiTrace(const char *Msg, ...)
 	char Buffer[2049] = "";
 	#ifdef LGI_TRACE_TO_FILE
 		static LFile f;
-		static char LogPath[MAX_PATH] = "";
+		static char LogPath[MAX_PATH_LEN] = "";
 	
 		if (!_LgiTraceStream && LogPath[0] == 0)
 			LgiTraceGetFilePath(LogPath, sizeof(LogPath));
@@ -635,7 +635,7 @@ void LStackTrace(const char *Msg, ...)
 	{
 		#ifdef LGI_TRACE_TO_FILE
 			static LFile f;
-			static char LogPath[MAX_PATH] = "";
+			static char LogPath[MAX_PATH_LEN] = "";
 		
 			if (!_LgiTraceStream)
 			{
@@ -692,7 +692,7 @@ bool LTrimDir(char *Path)
 	return true;
 }
 
-LAutoString LMakeRelativePath(const char *Base, const char *Path)
+LString LMakeRelativePath(const char *Base, const char *Path)
 {
 	LStringPipe Status;
 
@@ -733,7 +733,7 @@ LAutoString LMakeRelativePath(const char *Base, const char *Path)
 		}
 	}
 
-	return LAutoString(Status.NewStr());
+	return Status.NewGStr();
 }
 
 bool LIsRelativePath(const char *Path)
@@ -1014,7 +1014,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 	if (WmLib)
 	{
 		Proc_LgiWmGetPath WmGetPath = (Proc_LgiWmGetPath) WmLib->GetAddress("LgiWmGetPath");
-		char Buf[MAX_PATH];
+		char Buf[MAX_PATH_LEN];
 		if (WmGetPath && WmGetPath(Which, Buf, sizeof(Buf)))
 		{
 			Path = Buf;
@@ -1074,7 +1074,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 					LString MyDoc = WinGetSpecialFolderPath(CSIDL_MYDOCUMENTS);
 					if (MyDoc)
 					{
-						char Buf[MAX_PATH];
+						char Buf[MAX_PATH_LEN];
 						LMakePath(Buf, sizeof(Buf), MyDoc, "Downloads");
 						if (LDirExists(Buf))
 							Path = Buf;
@@ -1086,7 +1086,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 					LString Profile = WinGetSpecialFolderPath(CSIDL_PROFILE);
 					if (Profile)
 					{
-						char Buf[MAX_PATH];
+						char Buf[MAX_PATH_LEN];
 						LMakePath(Buf, sizeof(Buf), Profile, "Downloads");
 						if (LDirExists(Buf))
 							Path = Buf;
@@ -1119,13 +1119,13 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			
 			#if defined(WIN32)
 
-				char p[MAX_PATH];
+				char p[MAX_PATH_LEN];
 				if (LMakePath(p, sizeof(p), Home, "Links"))
 					Path = p;
 
 			#elif defined(LINUX)
 
-				char p[MAX_PATH];
+				char p[MAX_PATH_LEN];
 				if (LMakePath(p, sizeof(p), Home, ".config/gtk-3.0"))
 					Path = p;
 			
@@ -1157,7 +1157,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#endif
 
 			// Default to ~/Pictures
-			char hm[MAX_PATH];
+			char hm[MAX_PATH_LEN];
 			LString Home = LGetSystemPath(LSP_HOME);
 			if (LMakePath(hm, sizeof(hm), Home, "Pictures"))
 				Path = hm;
@@ -1188,7 +1188,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#endif
 
 			// Default to ~/Documents
-			char hm[MAX_PATH];
+			char hm[MAX_PATH_LEN];
 			LString Home = LGetSystemPath(LSP_HOME);
 			if (LMakePath(hm, sizeof(hm), Home, "Documents"))
 				Path = hm;
@@ -1231,7 +1231,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			if (!Path)
 			{
 				// Default to ~/Music
-				char p[MAX_PATH];
+				char p[MAX_PATH_LEN];
 				LString Home = LGetSystemPath(LSP_HOME);
 				if (LMakePath(p, sizeof(p), Home, "Music"))
 					Path = p;
@@ -1275,7 +1275,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			if (!Path)
 			{
 				// Default to ~/Video
-				char p[MAX_PATH];
+				char p[MAX_PATH_LEN];
 				LString Home = LGetSystemPath(LSP_HOME);
 				if (LMakePath(p, sizeof(p), Home, "Video"))
 					Path = p;
@@ -1304,7 +1304,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#elif defined(HAIKU)
 
 				dev_t volume = dev_for_path("/boot");
-				char path[MAX_PATH] = "";
+				char path[MAX_PATH_LEN] = "";
 				if (find_directory(B_SYSTEM_APPS_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
 					Path = path;
 			
@@ -1437,7 +1437,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#elif defined(HAIKU)
 
 				dev_t volume = dev_for_path("/boot");
-				char path[MAX_PATH] = "";
+				char path[MAX_PATH_LEN] = "";
 				if (find_directory(B_USER_DIRECTORY , volume, true, path, sizeof(path)) == B_OK)
 					Path = path;
 
@@ -1459,14 +1459,14 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 		{
 			#if defined WIN32
 
-				char16 p[MAX_PATH];
+				char16 p[MAX_PATH_LEN];
 				if (GetWindowsDirectoryW(p, CountOf(p)) > 0)
 					Path = p;
 
 			#elif defined(HAIKU)
 
 				dev_t volume = dev_for_path("/boot");
-				char path[MAX_PATH] = "";
+				char path[MAX_PATH_LEN] = "";
 				if (find_directory(B_SYSTEM_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
 					Path = path;
 			
@@ -1502,14 +1502,14 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 		{
 			#if defined WIN32
 
-				char16 p[MAX_PATH];
+				char16 p[MAX_PATH_LEN];
 				if (GetSystemDirectoryW(p, CountOf(p)) > 0)
 					Path = p;
 			
 			#elif defined(HAIKU)
 
 				dev_t volume = dev_for_path("/boot");
-				char path[MAX_PATH] = "";
+				char path[MAX_PATH_LEN] = "";
 				if (find_directory(B_SYSTEM_LIB_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
 					Path = path;
 			
@@ -1528,7 +1528,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 		{
 			#if defined WIN32
 
-				char16 t[MAX_PATH];
+				char16 t[MAX_PATH_LEN];
 				if (GetTempPathW(CountOf(t), t) > 0)
 				{
 					LAutoString utf(WideToUtf8(t));
@@ -1640,7 +1640,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#elif defined HAIKU
 
 				dev_t volume = dev_for_path("/boot");
-				char path[MAX_PATH] = "";
+				char path[MAX_PATH_LEN] = "";
 				if (find_directory(B_USER_SETTINGS_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
 					Path = path;
 
@@ -1681,7 +1681,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#elif defined(HAIKU)
 
 				dev_t volume = dev_for_path("/boot");
-				char path[MAX_PATH] = "";
+				char path[MAX_PATH_LEN] = "";
 				if (find_directory(B_DESKTOP_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
 					Path = path;
 			
@@ -1745,7 +1745,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#elif defined(HAIKU)
 
 				dev_t volume = dev_for_path("/boot");
-				char path[MAX_PATH] = "";
+				char path[MAX_PATH_LEN] = "";
 				if (find_directory(B_USER_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
 					Path = path;
 			
@@ -1836,7 +1836,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 							break;
 						}
 						
-						char p[MAX_PATH];
+						char p[MAX_PATH_LEN];
 						if (!LMakePath(p, sizeof(p), Home, ".local/share/Trash/files") ||
 							!LDirExists(p))
 						{
@@ -1852,7 +1852,7 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#elif defined(HAIKU)
 
 				dev_t volume = dev_for_path("/boot");
-				char path[MAX_PATH] = "";
+				char path[MAX_PATH_LEN] = "";
 				if (find_directory(B_TRASH_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
 					Path = path;
 			
@@ -1892,7 +1892,7 @@ LString LGetExeFile()
 {
 	#if defined WIN32
 
-		char16 Exe[MAX_PATH];
+		char16 Exe[MAX_PATH_LEN];
 		if (GetModuleFileNameW(NULL, Exe, CountOf(Exe)) > 0)
 		{
 			LString e = Exe;
@@ -1919,7 +1919,7 @@ LString LGetExeFile()
 
 	#elif defined LINUX
 
-		static char ExePathCache[MAX_PATH] = "";
+		static char ExePathCache[MAX_PATH_LEN] = "";
 		bool Status = false;
 
 		// this is _REALLY_ lame way to do it... but hey there aren't any
@@ -2021,7 +2021,7 @@ LString LGetExeFile()
 	
 		#if LGI_COCOA || defined __GTK_H__
 
-		char Dest[MAX_PATH];
+		char Dest[MAX_PATH_LEN];
 		if (LFileExists(LgiArgsAppPath))
 		{
 			LMakePath(Dest, sizeof(Dest), LgiArgsAppPath, "../../..");
@@ -2097,7 +2097,7 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 	printf("%s:%i - Exe='%s'\n", _FL, Exe.Get());
 	#endif
 
-	char CurWorking[MAX_PATH];
+	char CurWorking[MAX_PATH_LEN];
 	_getcwd(CurWorking, sizeof(CurWorking));
 	const char *PrefPath[] =
 	{
@@ -2115,6 +2115,7 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 		"../../Resources",
 		#if defined(LINUX)
 		// AppDir support:
+		"../..",
 		"../../usr/share/applications",
 		#elif defined(WIN32)
 		"../Debug",
@@ -2129,7 +2130,7 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 	// Look in prefered paths first...
 	for (const char **Pref = PrefPath; *Pref; Pref++)
 	{
-		char Path[MAX_PATH];
+		char Path[MAX_PATH_LEN];
 		if (LIsRelativePath(*Pref))
 		{
 			LMakePath(Path, sizeof(Path), Exe, *Pref);
@@ -2142,8 +2143,11 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 		size_t PathLen = strlen(Path);
 		LAssert(PathLen < sizeof(Path));
 
-		// printf("\t%s\n", Path);
-		if (LFileExists(Path))
+		bool Exists = LFileExists(Path);
+		#if DEBUG_FIND_FILE
+		printf("\t%s = %i\n", Path, Exists);
+		#endif
+		if (Exists)
 		{
 			if (GStr)
 				*GStr = Path;

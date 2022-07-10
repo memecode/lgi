@@ -92,7 +92,7 @@ LRichTextPriv::EmojiDisplayStr::EmojiDisplayStr(StyleText *src,
 	{
 		int Px = Size.ToPx();
 		if (Px > 0)
-			CharPx = Px / 0.8;
+			CharPx = (int)(Px / 0.8);
 	}
 
 	for (int i=0; i<Chars; )
@@ -191,9 +191,9 @@ LRichTextPriv::TextLine::TextLine(int XOffsetPx, int WidthPx, int YOffsetPx)
 	PosOff.Offset(XOffsetPx, YOffsetPx);
 }
 
-int LRichTextPriv::TextLine::Length()
+ssize_t LRichTextPriv::TextLine::Length()
 {
-	int Len = NewLine;
+	ssize_t Len = NewLine;
 	for (unsigned i=0; i<Strs.Length(); i++)
 		Len += Strs[i]->Chars;
 	return Len;
@@ -501,7 +501,7 @@ bool LRichTextPriv::TextBlock::GetPosFromIndex(BlockCursor *Cursor)
 		return false;
 	}
 		
-	int CharPos = 0;
+	ssize_t CharPos = 0;
 	int LastY = 0;
 	for (unsigned i=0; i<Layout.Length(); i++)
 	{
@@ -607,7 +607,7 @@ bool LRichTextPriv::TextBlock::HitTest(HitTestResult &htr)
 	if (htr.In.y < Pos.y1 || htr.In.y > Pos.y2)
 		return false;
 
-	int CharPos = 0;
+	ssize_t CharPos = 0;
 	for (unsigned i=0; i<Layout.Length(); i++)
 	{
 		TextLine *tl = Layout[i];
@@ -697,7 +697,7 @@ void DrawDecor(LSurface *pDC, LRichTextPriv::DisplayStr *Ds, int Fx, int Fy, ssi
 	}
 }
 
-bool Overlap(LSpellCheck::SpellingError *e, int start, ssize_t len)
+bool Overlap(LSpellCheck::SpellingError *e, ssize_t start, ssize_t len)
 {
 	if (!e)
 		return false;
@@ -708,7 +708,7 @@ bool Overlap(LSpellCheck::SpellingError *e, int start, ssize_t len)
 	return true;
 }
 
-void LRichTextPriv::TextBlock::DrawDisplayString(LSurface *pDC, DisplayStr *Ds, int &FixX, int FixY, LColour &Bk, int &Pos)
+void LRichTextPriv::TextBlock::DrawDisplayString(LSurface *pDC, DisplayStr *Ds, int &FixX, int FixY, LColour &Bk, ssize_t &Pos)
 {
 	int OldX = FixX;
 
@@ -747,10 +747,10 @@ void LRichTextPriv::TextBlock::DrawDisplayString(LSurface *pDC, DisplayStr *Ds, 
 
 void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 {
-	int CharPos = 0;
-	int EndPoints = 0;
+	ssize_t CharPos = 0;
+	ssize_t EndPoints = 0;
 	ssize_t EndPoint[2] = {-1, -1};
-	int CurEndPoint = 0;
+	ssize_t CurEndPoint = 0;
 
 	if (Cursors > 0 && Ctx.Select)
 	{
@@ -868,7 +868,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 			{
 				// Process string into parts based on the selection boundaries
 				ssize_t Ch = EndPoint[CurEndPoint] - CharPos;
-				int TmpPos = CharPos;
+				ssize_t TmpPos = CharPos;
 				LAutoPtr<DisplayStr> ds1 = Ds->Clone(0, Ch);
 						
 				// First part...
@@ -939,7 +939,7 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 				int OldFixX = FixX;
 				#endif
 
-				int TmpPos = CharPos;
+				auto TmpPos = CharPos;
 				DrawDisplayString(Ctx.pDC, Ds, FixX, FixY, Bk, TmpPos);
 
 				#if DEBUG_OUTLINE_CUR_DISPLAY_STR
@@ -1066,8 +1066,8 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 	if (!CurLine)
 		return flow.d->Error(_FL, "alloc failed.");
 
-	int LayoutSize = 0;
-	int TextSize = 0;
+	ssize_t LayoutSize = 0;
+	ssize_t TextSize = 0;
 	for (unsigned i=0; i<Txt.Length(); i++)
 	{
 		StyleText *t = Txt[i];
@@ -1090,7 +1090,7 @@ bool LRichTextPriv::TextBlock::OnLayout(Flow &flow)
 		
 		uint32_t *sStart = t->At(0);
 		uint32_t *sEnd = sStart + t->Length();
-		for (unsigned Off = 0; Off < t->Length(); )
+		for (ssize_t Off = 0; Off < (ssize_t)t->Length(); )
 		{
 			// How much of 't' is on the same line?
 			uint32_t *s = sStart + Off;
@@ -1296,7 +1296,7 @@ ssize_t LRichTextPriv::TextBlock::GetTextAt(ssize_t Offset, LArray<StyleText*> &
 	StyleText **e = t + Txt.Length();
 	Out.Length(0);
 
-	uint32_t Pos = 0;
+	ssize_t Pos = 0;
 	while (t < e)
 	{
 		ssize_t Len = (*t)->Length();
@@ -1313,7 +1313,7 @@ ssize_t LRichTextPriv::TextBlock::GetTextAt(ssize_t Offset, LArray<StyleText*> &
 
 bool LRichTextPriv::TextBlock::IsValid()
 {
-	int TxtLen = 0;
+	ssize_t TxtLen = 0;
 	for (unsigned i = 0; i < Txt.Length(); i++)
 	{
 		StyleText *t = Txt[i];
@@ -1354,12 +1354,12 @@ bool LRichTextPriv::TextBlock::OffsetToLine(ssize_t Offset, int *ColX, LArray<in
 	}
 
 	bool Found = false;
-	int Pos = 0;
+	ssize_t Pos = 0;
 
 	for (unsigned i=0; i<Layout.Length(); i++)
 	{
 		TextLine *tl = Layout[i];
-		int Len = tl->Length();
+		auto Len = tl->Length();
 
 		if (Offset >= Pos && Offset <= Pos + Len - tl->NewLine)
 		{
@@ -1374,7 +1374,7 @@ bool LRichTextPriv::TextBlock::OffsetToLine(ssize_t Offset, int *ColX, LArray<in
 	return Found;
 }
 
-int LRichTextPriv::TextBlock::LineToOffset(int Line)
+ssize_t LRichTextPriv::TextBlock::LineToOffset(ssize_t Line)
 {
 	if (LayoutDirty)
 		return -1;
@@ -1382,11 +1382,11 @@ int LRichTextPriv::TextBlock::LineToOffset(int Line)
 	if (Line <= 0)
 		return 0;
 
-	int Pos = 0;
-	for (unsigned i=0; i<Layout.Length(); i++)
+	ssize_t Pos = 0;
+	for (size_t i=0; i<Layout.Length(); i++)
 	{
-		TextLine *tl = Layout[i];
-		int Len = tl->Length();
+		auto tl = Layout[i];
+		auto Len = tl->Length();
 		if (i == Line)
 			return Pos;
 		Pos = Len;
@@ -1502,41 +1502,6 @@ ssize_t LRichTextPriv::TextBlock::DeleteAt(Transaction *Trans, ssize_t BlkOffset
 	return Deleted;
 }
 		
-LMessage::Result LRichTextPriv::TextBlock::OnEvent(LMessage *Msg)
-{
-	switch (Msg->Msg())
-	{
-		case M_COMMAND:
-		{
-			LSpellCheck::SpellingError *e = SpellingErrors.AddressOf(ClickErrIdx);
-			if (e)
-			{
-				// Replacing text with spell check suggestion:
-				int i = (int)Msg->A() - SPELLING_BASE;
-				if (i >= 0 && i < (int)e->Suggestions.Length())
-				{
-					auto Start = e->Start;
-					LString s = e->Suggestions[i];
-					AutoTrans t(new LRichTextPriv::Transaction);
-					
-					// Delete the old text...
-					DeleteAt(t, Start, e->Len); // 'e' might disappear here
-
-					// Insert the new text....
-					LAutoPtr<uint32_t,true> u((uint32_t*)LNewConvertCp("utf-32", s, "utf-8"));
-					AddText(t, Start, u.Get(), Strlen(u.Get()));
-					
-					d->AddTrans(t);
-					return true;
-				}
-			}
-			break;
-		}
-	}
-
-	return false;
-}
-
 bool LRichTextPriv::TextBlock::AddText(Transaction *Trans, ssize_t AtOffset, const uint32_t *InStr, ssize_t InChars, LNamedStyle *Style)
 {
 	if (!InStr)
@@ -1558,17 +1523,17 @@ bool LRichTextPriv::TextBlock::AddText(Transaction *Trans, ssize_t AtOffset, con
 	}
 
 	ssize_t InitialOffset = AtOffset >= 0 ? AtOffset : Len;
-	int Chars = 0; // Length of run to insert
-	int Pos = 0; // Current character position in this block
+	ssize_t Chars = 0; // Length of run to insert
+	ssize_t Pos = 0; // Current character position in this block
 	uint32_t TxtIdx = 0; // Index into Txt array
 	
-	for (int i = 0; i < InChars; i += Chars)
+	for (ssize_t i = 0; i < InChars; i += Chars)
 	{
 		// Work out the run of chars that are either
 		// Emoji or not Emoji...
 		bool IsEmoji = EmojiIdx[i].Index >= 0;
 		Chars = 0;
-		for (int n = i; n < InChars;)
+		for (auto n = i; n < InChars;)
 		{
 			if ( IsEmoji ^ (EmojiIdx[n].Index >= 0) )
 				break;
@@ -1896,7 +1861,7 @@ void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, LRange
 		r.Start--;
 		r.Len++;
 	}
-	while (r.End() < Text.Length() && !IsWhiteSpace(Text[r.End()]))
+	while (r.End() < (ssize_t)Text.Length() && !IsWhiteSpace(Text[r.End()]))
 		r.Len++;
 
 	// Create array of words...
@@ -1988,37 +1953,95 @@ bool LRichTextPriv::TextBlock::StripLast(Transaction *Trans, const char *Set)
 	return true;
 }
 
-bool LRichTextPriv::TextBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling)
+bool LRichTextPriv::TextBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool TopOfMenu)
 {
-	if (Spelling)
+	if (!TopOfMenu)
+		return false;
+
+	// Is there a spelling error at 'Offset'?		
+	for (unsigned i=0; i<SpellingErrors.Length(); i++)
 	{
-		// Is there a spelling error at 'Offset'?		
-		for (unsigned i=0; i<SpellingErrors.Length(); i++)
+		LSpellCheck::SpellingError &e = SpellingErrors[i];
+		if (Offset >= e.Start && Offset < e.End())
 		{
-			LSpellCheck::SpellingError &e = SpellingErrors[i];
-			if (Offset >= e.Start && Offset < e.End())
+			ClickErrIdx = i;
+			if (e.Suggestions.Length())
 			{
-				ClickErrIdx = i;
-				if (e.Suggestions.Length())
+				auto Sp = s.AppendSub("Spelling");
+				if (Sp)
 				{
-					auto Sp = s.AppendSub("Spelling");
-					if (Sp)
-					{
-						s.AppendSeparator();
-						for (unsigned n=0; n<e.Suggestions.Length(); n++)
-							Sp->AppendItem(e.Suggestions[n], SPELLING_BASE+n);
-					}
-					// else printf("%s:%i - No sub menu.\n", _FL);
+					s.AppendSeparator();
+					for (unsigned n=0; n<e.Suggestions.Length(); n++)
+						Sp->AppendItem(e.Suggestions[n], SPELLING_BASE+n);
 				}
-				// else printf("%s:%i - No Suggestion.\n", _FL);
+				// else printf("%s:%i - No sub menu.\n", _FL);
+			}
+			// else printf("%s:%i - No Suggestion.\n", _FL);
+			break;
+		}
+		// else printf("%s:%i - Outside area, Offset=%i e=%i,%i.\n", _FL, Offset, e.Start, e.End());
+	}
+
+	// Check for URLs under the cursor?
+	ssize_t pos = 0;
+	for (auto t: Txt)
+	{
+		// LgiTrace("t: %i %i\n", (int)pos, t->Element);
+		if (t->Element == TAG_A)
+		{
+			// LgiTrace("off: %i %i %i\n", (int)Offset, (int)pos, (int)pos + (int)t->Length());
+			if (Offset >= pos && Offset < pos + (ssize_t)t->Length())
+			{
+				// Is over a link...
+				s.AppendItem("Open URL", IDM_OPEN_URL);
+				ClickedUri = t->Param;
 				break;
 			}
-			// else printf("%s:%i - Outside area, Offset=%i e=%i,%i.\n", _FL, Offset, e.Start, e.End());
 		}
+
+		pos += t->Length();
 	}
-	// else printf("%s:%i - No Spelling.\n", _FL);
 
 	return true;
+}
+
+LMessage::Result LRichTextPriv::TextBlock::OnEvent(LMessage* Msg)
+{
+	switch (Msg->Msg())
+	{
+		case M_COMMAND:
+		{
+			if (Msg->A() == IDM_OPEN_URL)
+			{
+				if (ClickedUri)
+					LExecute(ClickedUri);
+			}
+			else if (auto e = SpellingErrors.AddressOf(ClickErrIdx))
+			{
+				// Replacing text with spell check suggestion:
+				int i = (int)Msg->A() - SPELLING_BASE;
+				if (i >= 0 && i < (int)e->Suggestions.Length())
+				{
+					auto Start = e->Start;
+					LString s = e->Suggestions[i];
+					AutoTrans t(new LRichTextPriv::Transaction);
+
+					// Delete the old text...
+					DeleteAt(t, Start, e->Len); // 'e' might disappear here
+
+					// Insert the new text....
+					LAutoPtr<uint32_t, true> u((uint32_t*)LNewConvertCp("utf-32", s, "utf-8"));
+					AddText(t, Start, u.Get(), Strlen(u.Get()));
+
+					d->AddTrans(t);
+					return true;
+				}
+			}
+			break;
+		}
+	}
+
+	return false;
 }
 
 bool LRichTextPriv::TextBlock::IsEmptyLine(BlockCursor *Cursor)
@@ -2030,7 +2053,7 @@ bool LRichTextPriv::TextBlock::IsEmptyLine(BlockCursor *Cursor)
 	if (!Line)
 		return false;
 
-	int LineLen = Line->Length();
+	auto LineLen = Line->Length();
 	return LineLen == 0;
 }
 
@@ -2046,8 +2069,8 @@ ssize_t LRichTextPriv::TextBlock::CopyAt(ssize_t Offset, ssize_t Chars, LArray<u
 	if (Chars < 0)
 		Chars = Length() - Offset;
 
-	int Pos = 0;
-	for (unsigned i=0; i<Txt.Length(); i++)
+	ssize_t Pos = 0;
+	for (size_t i=0; i<Txt.Length(); i++)
 	{
 		StyleText *t = Txt[i];
 		if (Offset >= Pos && Offset < Pos + (int)t->Length())
@@ -2073,8 +2096,8 @@ ssize_t LRichTextPriv::TextBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, 
 
 	size_t InLen = Strlen(Str);
 	bool Match;
-	int CharPos = 0;
-	for (unsigned i=0; i<Txt.Length(); i++)
+	ssize_t CharPos = 0;
+	for (size_t i=0; i<Txt.Length(); i++)
 	{
 		StyleText *t = Txt[i];
 		uint32_t *s = &t->First();
@@ -2188,7 +2211,7 @@ LRichTextPriv::Block *LRichTextPriv::TextBlock::Split(Transaction *Trans, ssize_
 
 	After->SetStyle(GetStyle());
 	
-	int Pos = 0;
+	ssize_t Pos = 0;
 	unsigned i;
 	for (i=0; i<Txt.Length(); i++)
 	{
@@ -2263,7 +2286,7 @@ bool LRichTextPriv::TextBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, s
 	if (Trans)
 		Trans->Add(new CompleteTextBlockState(d, this));
 
-	int CharPos = 0;
+	ssize_t CharPos = 0;
 	ssize_t RestyleEnd = Offset + Chars;
 	for (unsigned i=0; i<Txt.Length(); i++)
 	{
@@ -2371,9 +2394,9 @@ bool LRichTextPriv::TextBlock::ChangeStyle(Transaction *Trans, ssize_t Offset, s
 bool LRichTextPriv::TextBlock::Seek(SeekType To, BlockCursor &Cur)
 {
 	int XOffset = Cur.Pos.x1 - Pos.x1;
-	int CharPos = 0;
-	LArray<int> LineOffset;
-	LArray<int> LineLen;
+	ssize_t CharPos = 0;
+	LArray<ssize_t> LineOffset;
+	LArray<ssize_t> LineLen;
 	int CurLine = -1;
 	int CurLineScore = 0;
 	
@@ -2381,7 +2404,7 @@ bool LRichTextPriv::TextBlock::Seek(SeekType To, BlockCursor &Cur)
 	{
 		TextLine *Line = Layout[i];
 		PtrCheckBreak(Line);
-		int Len = Line->Length();				
+		auto Len = Line->Length();				
 				
 		LineOffset[i] = CharPos;
 		LineLen[i] = Len;
@@ -2467,7 +2490,7 @@ bool LRichTextPriv::TextBlock::Seek(SeekType To, BlockCursor &Cur)
 		if (Line->Strs.Length() > 0)
 		{
 			int FixX = 0;
-			int CharOffset = 0;
+			ssize_t CharOffset = 0;
 			for (unsigned i=0; i<Line->Strs.Length(); i++)
 			{
 				DisplayStr *Ds = Line->Strs[i];
@@ -2519,8 +2542,8 @@ void LRichTextPriv::TextBlock::DumpNodes(LTreeItem *Ti)
 	LTreeItem *TxtRoot = PrintNode(Ti, "Txt(%i)", Txt.Length());
 	if (TxtRoot)
 	{
-		int Pos = 0;
-		for (unsigned i=0; i<Txt.Length(); i++)
+		ssize_t Pos = 0;
+		for (size_t i=0; i<Txt.Length(); i++)
 		{
 			StyleText *St = Txt[i];
 			ssize_t Len = St->Length();
@@ -2562,8 +2585,8 @@ void LRichTextPriv::TextBlock::DumpNodes(LTreeItem *Ti)
 	LTreeItem *LayoutRoot = PrintNode(Ti, "Layout(%i)", Layout.Length());
 	if (LayoutRoot)
 	{
-		int Pos = 0;
-		for (unsigned i=0; i<Layout.Length(); i++)
+		ssize_t Pos = 0;
+		for (size_t i=0; i<Layout.Length(); i++)
 		{
 			TextLine *Tl = Layout[i];
 			LTreeItem *Elem = PrintNode(LayoutRoot,

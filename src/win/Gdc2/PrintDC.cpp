@@ -112,36 +112,10 @@ int LPrintDC::GetBits()
 	return GetDeviceCaps(hDC, BITSPIXEL);
 }
 
-int LPrintDC::DpiX()
+LPoint LPrintDC::GetDpi()
 {
-	return GetDeviceCaps(hDC, LOGPIXELSX); 
+	return LPoint(	GetDeviceCaps(hDC, LOGPIXELSX),
+					GetDeviceCaps(hDC, LOGPIXELSY));
 }
 
-int LPrintDC::DpiY()
-{
-	return GetDeviceCaps(hDC, LOGPIXELSY);
-}
-
-/*
-bool LPrintDC::StartPage()
-{
-	bool Status = false;
-	if (hDC && d->DocOpen)
-	{
-		EndPage();
-		d->PageOpen = Status = ::StartPage(hDC) > 0;
-	}
-
-	return Status;
-}
-
-void LPrintDC::EndPage()
-{
-	if (hDC && d->PageOpen)
-	{
-		::EndPage(hDC);
-		d->PageOpen = false;
-	}
-}
-*/
 

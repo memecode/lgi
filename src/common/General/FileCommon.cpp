@@ -31,7 +31,7 @@ LString LFileSystem::GetCurrentFolder()
 		if (::GetCurrentDirectoryW(DIR_PATH_SIZE, w) > 0)
 			Cwd = w;
 	#else
-	char p[MAX_PATH];
+	char p[MAX_PATH_LEN];
 	if (getcwd(p, sizeof(p)))
 		Cwd = p;
 	#endif

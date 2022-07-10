@@ -1115,27 +1115,41 @@ bool LRopUniversal(LBmpMem *Dst, LBmpMem *Src, bool Composite)
 	return false;
 }
 
-int LScreenDpi()
+LPoint LScreenDpi()
 {
 	#if LGI_COCOA
 	
-		static int Dpi = 0;
-		if (!Dpi)
+		static LPoint Dpi;
+		if (!Dpi.x)
 		{
 			NSScreen *screen = [NSScreen mainScreen];
 			NSDictionary *description = [screen deviceDescription];
 			NSSize displayPixelSize = [[description objectForKey:NSDeviceSize] sizeValue];
 			CGSize displayPhysicalSize = CGDisplayScreenSize(
 						[[description objectForKey:@"NSScreenNumber"] unsignedIntValue]);
-			Dpi = (int) ((displayPixelSize.width / displayPhysicalSize.width) * 25.4f);
+			Dpi.x = (int) ((displayPixelSize.width / displayPhysicalSize.width) * 25.4f);
+			Dpi.y = (int) ((displayPixelSize.height / displayPhysicalSize.height) * 25.4f);
 		}
-		return Dpi;
+
+	#elif defined(__GTK_H__)
+
+		static LPoint Dpi;
+		if (!Dpi.x)
+		{
+			auto dpi = Gtk::gdk_screen_get_resolution(Gtk::gdk_screen_get_default());
+			if (dpi > 0)
+				Dpi.Set((int)dpi, (int)dpi);
+			if (Dpi.x <= 0)
+				Dpi.Set(96, 96);
+		}
 
 	#else
 
-		return 96; // A reasonable default.
+		static LPoint Dpi(96, 96); // A reasonable default.
 	
 	#endif
+
+	return Dpi;
 }
 
 bool LMemDC::SwapRedAndBlue()

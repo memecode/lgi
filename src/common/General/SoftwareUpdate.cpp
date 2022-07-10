@@ -339,7 +339,7 @@ bool LSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *W
 	if (!File) File = Uri.sPath;
 	else File++;
 
-	char Tmp[MAX_PATH];
+	char Tmp[MAX_PATH_LEN];
 	if (d->TempPath)
 		LMakePath(Tmp, sizeof(Tmp), d->TempPath, File);
 	else
@@ -403,7 +403,7 @@ bool LSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *W
 			else
 			{
 				// Calculate the local path...
-				char Path[MAX_PATH];
+				char Path[MAX_PATH_LEN];
 				LMakePath(Path, sizeof(Path), LGetExePath(), File);
 
 				if (!_stricmp(Ext, "dll"))

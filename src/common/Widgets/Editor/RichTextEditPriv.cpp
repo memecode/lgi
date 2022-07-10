@@ -6,7 +6,7 @@
 #include "RichTextEditPriv.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Utf16to32(LArray<uint32_t> &Out, const uint16_t *In, int WordLen)
+bool Utf16to32(LArray<uint32_t> &Out, const uint16_t *In, ssize_t WordLen)
 {
 	if (WordLen == 0)
 	{
@@ -527,7 +527,7 @@ bool LRichTextPriv::AddTrans(LAutoPtr<Transaction> &t)
 		}
 
 		// Delete any transaction history after 'UndoPos'
-		for (ssize_t i=UndoPos; i<UndoQue.Length(); i++)
+		for (size_t i=UndoPos; i<UndoQue.Length(); i++)
 		{
 			delete UndoQue[i];
 		}
@@ -1130,7 +1130,7 @@ ssize_t LRichTextPriv::IndexOfCursor(BlockCursor *c)
 		return -1;
 	}
 
-	int CharPos = 0;
+	ssize_t CharPos = 0;
 	for (unsigned i=0; i<Blocks.Length(); i++)
 	{
 		Block *b = Blocks[i];
@@ -1184,7 +1184,7 @@ LSurface *LEmojiImage::GetEmojiImage()
 			return NULL;
 		}
 
-		char File[MAX_PATH] = "";
+		char File[MAX_PATH_LEN] = "";
 		LMakePath(File, sizeof(File), p, "..\\src\\common\\Text\\Emoji\\EmojiMap.png");
 		LString a;
 		if (!LFileExists(File))
@@ -1197,9 +1197,9 @@ LSurface *LEmojiImage::GetEmojiImage()
 	return EmojiImg;
 }
 
-ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk)
+ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk, ssize_t *BlkOffset)
 {
-	int CharPos = 0;
+	ssize_t CharPos = 0;
 	HitTestResult r(x, y);
 
 	if (Blocks.Length() == 0)
@@ -1224,7 +1224,12 @@ ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk)
 		if (b->HitTest(r))
 		{
 			LineHint = r.LineHint;
-			if (Blk) *Blk = b;
+
+			if (Blk)
+				*Blk = b;
+			if (BlkOffset)
+				*BlkOffset = r.Idx;
+
 			return CharPos + r.Idx;
 		}
 		else if (Over)
@@ -1248,7 +1253,7 @@ ssize_t LRichTextPriv::HitTest(int x, int y, int &LineHint, Block **Blk)
 	
 bool LRichTextPriv::CursorFromPos(int x, int y, LAutoPtr<BlockCursor> *Cursor, ssize_t *GlobalIdx)
 {
-	int CharPos = 0;
+	ssize_t CharPos = 0;
 	HitTestResult r(x, y);
 
 	for (unsigned i=0; i<Blocks.Length(); i++)
@@ -1272,7 +1277,7 @@ bool LRichTextPriv::CursorFromPos(int x, int y, LAutoPtr<BlockCursor> *Cursor, s
 
 LRichTextPriv::Block *LRichTextPriv::GetBlockByIndex(ssize_t Index, ssize_t *Offset, int *BlockIdx, int *LineCount)
 {
-	int CharPos = 0;
+	ssize_t CharPos = 0;
 	int Lines = 0;
 		
 	for (unsigned i=0; i<Blocks.Length(); i++)
@@ -2003,7 +2008,7 @@ bool LRichTextPriv::ToHtml(LArray<LDocView::ContentMedia> *Media, BlockCursor *F
 	ssize_t StartIdx = From ? From->Offset : 0;
 	ssize_t EndIdx = To ? To->Offset : Blocks.Last()->Length();
 
-	for (size_t i=Start; i<=End; i++)
+	for (ssize_t i=Start; i<=End; i++)
 	{
 		Blocks[i]->IncAllStyleRefs();
 	}
@@ -2018,7 +2023,7 @@ bool LRichTextPriv::ToHtml(LArray<LDocView::ContentMedia> *Media, BlockCursor *F
 	p.Print("</head>\n"
 			"<body>\n");
 		
-	for (size_t i=Start; i<=End; i++)
+	for (ssize_t i=Start; i<=End; i++)
 	{
 		Block *b = Blocks[i];
 		LRange r;

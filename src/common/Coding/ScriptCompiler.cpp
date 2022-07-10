@@ -53,7 +53,7 @@ struct Node
 	NodeExp Child;
 
 	// One of the following are valid:
-	GOperator Op = OpNull;
+	LOperator Op = OpNull;
 	// -or-
 	bool Constant = false;
 	int Tok = -1;
@@ -77,7 +77,7 @@ struct Node
 		ArrayIdx.Empty();
 	}
 
-	void SetOp(GOperator o, int t)
+	void SetOp(LOperator o, int t)
 	{
 		Init();
 		Op = o;
@@ -271,7 +271,7 @@ class TokenRanges
 	};
 
 	LArray<Range> Ranges;
-	char fl[MAX_PATH + 32];
+	char fl[MAX_PATH_LEN + 32];
 
 public:
 	TokenRanges()
@@ -442,7 +442,7 @@ public:
 		Types.Add("void", GV_VOID_PTR);
 		Types.Add("LDateTime", GV_DATETIME);
 		Types.Add("GHashTable", GV_HASHTABLE);
-		Types.Add("GOperator", GV_OPERATOR);
+		Types.Add("LOperator", GV_OPERATOR);
 		Types.Add("LView", GV_GVIEW);
 		Types.Add("LMouse", GV_LMOUSE);
 		Types.Add("LKey", GV_LKEY);
@@ -748,7 +748,7 @@ public:
 						{
 							if (LIsRelativePath(v.Str()))
 							{
-								char p[MAX_PATH];
+								char p[MAX_PATH_LEN];
 								LMakePath(p, sizeof(p), FileName, "..");
 								LMakePath(p, sizeof(p), p, v.Str());
 								v = p;
@@ -1864,7 +1864,7 @@ public:
 			}
 			else
 			{
-				GOperator o = IsOp(t, PrevIsOp);
+				LOperator o = IsOp(t, PrevIsOp);
 				if (o != OpNull)
 				{
 					// Operator
@@ -2224,7 +2224,7 @@ public:
 			}
 			
 			// Evaluate
-			GOperator Op = n[OpIdx].Op;
+			LOperator Op = n[OpIdx].Op;
 			OperatorType Type = OpType(Op);
 			if (Type == OpPrefix ||
 				Type == OpPostfix)
@@ -3197,7 +3197,7 @@ public:
 
 	struct ExpPart
 	{
-		GOperator Op;
+		LOperator Op;
 		int Value;
 		ExpPart()
 		{
@@ -3227,7 +3227,7 @@ public:
 			}
 			else
 			{
-				GOperator op = IsOp(t, 0);
+				LOperator op = IsOp(t, 0);
 				if (op)
 				{
 					p.New().Op = op;

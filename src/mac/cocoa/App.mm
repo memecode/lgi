@@ -44,7 +44,7 @@ OsAppArguments::~OsAppArguments()
 	DeleteObj(d);
 }
 
-void OsAppArguments::Set(char *CmdLine)
+void OsAppArguments::Set(const char *CmdLine)
 {
 	d->Str.Reset();
 	d->Ptr.Length(0);
@@ -66,13 +66,13 @@ void OsAppArguments::Set(char *CmdLine)
 	
 	if (CmdLine)
 	{
-		for (char *s = CmdLine; *s; )
+		for (auto s = CmdLine; *s; )
 		{
 			while (*s && strchr(WhiteSpace, *s)) s++;
-			char *e;
+			const char *e;
 			if (*s == '\'' || *s == '\"')
 			{
-				char delim = *s++;
+				auto delim = *s++;
 				Offsets.Add(Raw.Length());
 				e = s;
 				while (*e && *e != delim)
@@ -371,8 +371,8 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	Name(AppName);
 	if (LIsRelativePath(AppArgs.Arg[0]))
 	{
-		char wd[MAX_PATH];
-		char exe[MAX_PATH];
+		char wd[MAX_PATH_LEN];
+		char exe[MAX_PATH_LEN];
 		if (LMakePath(exe, sizeof(exe), getcwd(wd, sizeof(wd)), AppArgs.Arg[0]))
 			LgiArgsAppPath = exe;
 		else
@@ -849,7 +849,7 @@ LString LApp::GetFileMimeType(const char *File)
 		auto p = LString(getenv("PATH")).SplitDelimit(LGI_PATH_SEPARATOR);
 		for (int i=0; i<p.Length(); i++)
 		{
-			char Full[MAX_PATH];
+			char Full[MAX_PATH_LEN];
 			LMakePath(Full, sizeof(Full), p[i], File);
 			if (LFileExists(Full))
 			{

@@ -59,8 +59,8 @@ class ResMenu : public Resource, public LTree
 	friend class ResMenuUi;
 
 protected:
-	ResMenuUi *Ui;
-	ResStringGroup *Group;
+	ResMenuUi *Ui = NULL;
+	ResStringGroup *Group = NULL;
 
 public:
 	ResMenu(AppWnd *w, int type = TYPE_MENU);

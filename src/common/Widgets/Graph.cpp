@@ -482,7 +482,7 @@ struct LGraphPriv
 	LColour GenerateColour()
 	{
 		LColour c;
-		c.SetHLS(Data.Length() * 360 / 8, 255, 128);
+		c.SetHLS((uint16_t) (Data.Length() * 360 / 8), 255, 128);
 		c.ToRGB();
 		return c;
 	}
@@ -715,7 +715,7 @@ void LGraph::OnMouseClick(LMouse &m)
                 LFileSelect s;
                 s.Parent(this);
                 s.Name("average.csv");
-                char Desktop[MAX_PATH];
+                char Desktop[MAX_PATH_LEN];
                 LGetSystemPath(LSP_DESKTOP, Desktop, sizeof(Desktop));
                 s.InitialDir(Desktop);
                 if (!s.Save())

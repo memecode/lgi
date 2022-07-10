@@ -55,7 +55,8 @@ public:
 	{
 		if (_DebugTrace)
 			LgiTrace("%s:%i - GRefCount.DecRef=%i\n", _FL, _Count);
-		LAssert(_Count > 0);
+		LAssert(_Count > 0)
+			;
 		#if defined(_WIN32)
 			if (InterlockedDecrement(&_Count) == 0)
 		#elif defined(__GNUC__)

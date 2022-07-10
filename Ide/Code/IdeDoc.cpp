@@ -833,7 +833,7 @@ void IdeDocPrivate::OnDelete()
 
 void IdeDocPrivate::UpdateName()
 {
-	char n[MAX_PATH+30];
+	char n[MAX_PATH_LEN+30];
 	
 	LString Dsp = GetDisplayName();
 	char *File = Dsp;
@@ -1179,7 +1179,7 @@ void IdeDoc::OnTitleClick(LMouse &m)
 	
 	if (m.IsContextMenu())
 	{
-		char Full[MAX_PATH] = "", sFile[MAX_PATH] = "", sFull[MAX_PATH] = "", sBrowse[MAX_PATH] = "";
+		char Full[MAX_PATH_LEN] = "", sFile[MAX_PATH_LEN] = "", sFull[MAX_PATH_LEN] = "", sBrowse[MAX_PATH_LEN] = "";
 		const char *Fn = GetFileName(), *Dir = NULL;
 		IdeProject *p = GetProject();
 		if (Fn)
@@ -1823,7 +1823,7 @@ LString IdeDoc::GetFullPath()
 		LIsRelativePath(LocalPath) &&
 		Base)
 	{
-		char p[MAX_PATH];
+		char p[MAX_PATH_LEN];
 		LMakePath(p, sizeof(p), Base, d->GetLocalFile());
 		LocalPath = p;
 	}
@@ -2033,7 +2033,7 @@ bool IdeDoc::FindDefn(char16 *Symbol, const char16 *Source, List<DefnInfo> &Matc
 		// return false;
 	}
 
-	char Local[MAX_PATH];
+	char Local[MAX_PATH_LEN];
 	strcpy_s(Local, sizeof(Local), GetFileName());
 	LTrimDir(Local);
 	Paths.New() = Local;

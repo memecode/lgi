@@ -48,7 +48,7 @@ public:
 	{
 		// Get options file
 		LString Status;
-		char Opt[MAX_PATH];
+		char Opt[MAX_PATH_LEN];
 		if (LAppInst->GetOption("o", Opt, sizeof(Opt)))
 		{
 			if (LFileExists(Opt))
@@ -77,7 +77,7 @@ public:
 					Status += LString(".") + Ext;
 				}
 				
-				char p[MAX_PATH];
+				char p[MAX_PATH_LEN];
 				if (Mode == InstallPortable)
 				{
 					LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
@@ -195,7 +195,7 @@ LDocApp<OptionsFmt>::LDocApp(const char *appname, LIcon icon, char *optsname)
 	_FileMenu = 0;
 	d->AppName = NewStr(appname?appname:(char*)"Lgi.LDocApp");
 
-	char p[MAX_PATH];
+	char p[MAX_PATH_LEN];
 	if (LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p)))
 	{
 		LMakePath(p, sizeof(p), p, "_write_test.txt");
@@ -504,7 +504,7 @@ void LDocApp<OptionsFmt>::SetCurFile(const char *f)
 	LString Display;
 	if (SerializeEntry(&Display, &d->CurFile, NULL))
 	{
-		char s[MAX_PATH + 100];
+		char s[MAX_PATH_LEN + 100];
 		
 		if (Display)
 		{

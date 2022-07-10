@@ -881,7 +881,7 @@ bool VCard::Export(LDataPropI *c, LStreamI *o)
 				LStreamPrint(o, "photo;type=jpeg;encoding=base64:\r\n");
 				
 				int LineChar = 76;
-				for (int i=0; i<Bytes; )
+				for (ssize_t i=0; i<Bytes; )
 				{
 					ssize_t Remain = Bytes - i;
 					ssize_t Wr = Remain > LineChar ? LineChar : Remain;

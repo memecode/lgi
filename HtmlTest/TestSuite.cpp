@@ -73,7 +73,7 @@ public:
             if (s.Float(GetList(), m.x, m.y, m.Left()) == 100)
             {
                 LClipBoard c(GetList());
-                char Path[MAX_PATH];
+                char Path[MAX_PATH_LEN];
                 LMakePath(Path, sizeof(Path), Base, GetText(0));
                 c.Text(Path);
             }
@@ -222,7 +222,7 @@ public:
 					{
 						uchar Hint[16];
 						p.Peek(Hint, sizeof(Hint));
-						LAutoPtr<LFilter> Filter(GFilterFactory::New(u.sPath, FILTER_CAP_READ, Hint));
+						auto Filter = LFilterFactory::New(u.sPath, FILTER_CAP_READ, Hint);
 						if (Filter)
 						{
 							LAutoPtr<LSurface> Img(new LMemDC);
@@ -270,7 +270,7 @@ class AppWnd : public LWindow, public LDefaultDocumentEnv
 		LUri u(j->Uri);
 		if (!u.sProtocol)
 		{
-			char p[MAX_PATH];
+			char p[MAX_PATH_LEN];
 			if (LMakePath(p, sizeof(p), Base, j->Uri) &&
 				LFileExists(p))
 			{
@@ -449,7 +449,7 @@ public:
 				LProgressDlg Prog(this, true);
 				Prog.SetDescription("Scanning for HTML...");
 				
-				char p[MAX_PATH];
+				char p[MAX_PATH_LEN];
 				LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
 				LArray<const char*> Ext;
 				LArray<char*> Files;
@@ -459,7 +459,7 @@ public:
 				{
 					LDateTime Now;
 					Now.SetNow();
-					char OutPath[MAX_PATH], NowStr[32];
+					char OutPath[MAX_PATH_LEN], NowStr[32];
 					sprintf_s(	NowStr, sizeof(NowStr),
 								"%.4i-%.2i-%.2i_%.2i-%.2i-%.2i",
 								Now.Year(), Now.Month(), Now.Day(),
@@ -515,14 +515,14 @@ public:
 			}
 			case IDM_COMPARE_IMAGES:
 			{
-				char p[MAX_PATH];
+				char p[MAX_PATH_LEN];
 				LGetSystemPath(LSP_APP_INSTALL, p, sizeof(p));
 				LArray<const char*> Ext;
 				LArray<char*> Files;
 				Ext.Add("*.png");
 				// if (LRecursiveFileSearch(p, &Ext, &Files))
 
-				char OutPath[MAX_PATH];
+				char OutPath[MAX_PATH_LEN];
 				LMakePath(OutPath, sizeof(OutPath), p, "Output");
 				if (!LDirExists(OutPath))
 				{

@@ -287,7 +287,7 @@ void LTempStream::Empty()
 	DeleteObj(Mem);
 	if (Tmp)
 	{
-		char s[MAX_PATH];
+		char s[MAX_PATH_LEN];
 		strcpy_s(s, sizeof(s), Tmp->GetName());
 		DeleteObj(Tmp);
 		FileDev->Delete(s, false);
@@ -307,7 +307,7 @@ ssize_t LTempStream::Write(const void *Buffer, ssize_t Size, int Flags)
 	if (Mem != 0 && s->GetSize() > MaxMemSize)
 	{
 		// Convert stream from memory to disk as it's getting too large
-		char c[MAX_PATH], f[32];
+		char c[MAX_PATH_LEN], f[32];
 		int i=0;
 		do
 		{

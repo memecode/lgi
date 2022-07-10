@@ -496,7 +496,7 @@ public:
 	virtual bool Close() = 0;
 
 	/// Returns the number of messages available on the server
-	virtual int GetMessages() = 0;
+	virtual ssize_t GetMessages() = 0;
 	/// Receives a list of messages from the server.
 	virtual bool Receive
 	(
@@ -511,13 +511,13 @@ public:
 	/// Gets the size of the message on the server
 	virtual int Sizeof(int Message) = 0;
 	/// Gets the size of all the messages on the server
-	virtual bool GetSizes(LArray<int> &Sizes) { return false; }
+	virtual bool GetSizes(LArray<int64_t> &Sizes) { return false; }
 	/// Gets the unique identifier of the message
 	virtual bool GetUid(int Message, char *Id, int IdLen) = 0;
 	/// Gets the unique identifiers of a list of messages
 	virtual bool GetUidList(LString::Array &Id) = 0;
 	/// Gets the headers associated with a given message
-	virtual char *GetHeaders(int Message) = 0;
+	virtual LString GetHeaders(int Message) = 0;
 	/// Sets the proxy server. e.g. HTTP mail.
 	virtual void SetProxy(char *Server, int Port) {}
 };
@@ -567,7 +567,7 @@ class MailPop3 : public MailSource
 {
 protected:
 	bool ReadReply();
-	bool ReadMultiLineReply(char *&Str);
+	LString ReadMultiLineReply();
 	int GetInt();
 	bool MailIsEnd(char *Ptr, ssize_t Len);
 	bool ListCmd(const char *Cmd, LHashTbl<ConstStrKey<char,false>, bool> &Results);
@@ -581,18 +581,18 @@ public:
 	~MailPop3();
 
 	// Connection
-	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *SettingStore, int Flags = 0);
-	bool Close();
+	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *SettingStore, int Flags = 0) override;
+	bool Close() override;
 
 	// Commands available while connected
-	int GetMessages();
-	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
-	bool Delete(int Message);
-	int Sizeof(int Message);
-	bool GetSizes(LArray<int> &Sizes);
-	bool GetUid(int Message, char *Id, int IdLen);
-	bool GetUidList(LString::Array &Id);
-	char *GetHeaders(int Message);
+	ssize_t GetMessages() override;
+	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0) override;
+	bool Delete(int Message) override;
+	int Sizeof(int Message) override;
+	bool GetSizes(LArray<int64_t> &Sizes) override;
+	bool GetUid(int Message, char *Id, int IdLen) override;
+	bool GetUidList(LString::Array &Id) override;
+	LString GetHeaders(int Message) override;
 };
 
 class MailReceiveFolder : public MailSource
@@ -605,17 +605,17 @@ public:
 	~MailReceiveFolder();
 
 	// Connection
-	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *SettingStore, int Flags = 0);
-	bool Close();
+	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *SettingStore, int Flags = 0) override;
+	bool Close() override;
 
 	// Commands available while connected
-	int GetMessages();
-	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
-	bool Delete(int Message);
-	int Sizeof(int Message);
-	bool GetUid(int Message, char *Id, int IdLen);
-	bool GetUidList(LString::Array &Id);
-	char *GetHeaders(int Message);
+	ssize_t GetMessages() override;
+	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0) override;
+	bool Delete(int Message) override;
+	int Sizeof(int Message) override;
+	bool GetUid(int Message, char *Id, int IdLen) override;
+	bool GetUidList(LString::Array &Id) override;
+	LString GetHeaders(int Message) override;
 };
 
 class MailPhp : public MailSource
@@ -630,19 +630,19 @@ public:
 	~MailPhp();
 
 	// Connection
-	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *SettingStore, int Flags = 0);
-	bool Close();
+	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *SettingStore, int Flags = 0) override;
+	bool Close() override;
 
 	// Commands available while connected
-	int GetMessages();
-	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
-	bool Delete(int Message);
-	int Sizeof(int Message);
-	bool GetSizes(LArray<int> &Sizes);
-	bool GetUid(int Message, char *Id, int IdLen);
-	bool GetUidList(LString::Array &Id);
-	char *GetHeaders(int Message);
-	void SetProxy(char *Server, int Port);
+	ssize_t GetMessages() override;
+	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0) override;
+	bool Delete(int Message) override;
+	int Sizeof(int Message) override;
+	bool GetSizes(LArray<int64_t> &Sizes) override;
+	bool GetUid(int Message, char *Id, int IdLen) override;
+	bool GetUidList(LString::Array &Id) override;
+	LString GetHeaders(int Message) override;
+	void SetProxy(char *Server, int Port) override;
 };
 
 class MailImapFolder
@@ -754,20 +754,20 @@ public:
 	ssize_t ParseImapResponse(char *Buffer, ssize_t BufferLen, LArray<StrRange> &Ranges, int Names);
 
 	// Connection
-	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *SettingStore, int Flags = 0);
-	bool Close(); // Non-threadsafe soft close (normal operation)
+	bool Open(LSocketI *S, const char *RemoteHost, int Port, const char *User, const char *Password, LDom *SettingStore, int Flags = 0) override;
+	bool Close() override; // Non-threadsafe soft close (normal operation)
 	bool GetCapabilities(LArray<char*> &s);
 
 	// Commands available while connected
-	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0);
-	int GetMessages();
-	bool Delete(int Message);
+	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0) override;
+	ssize_t GetMessages() override;
+	bool Delete(int Message) override;
 	bool Delete(bool ByUid, const char *Seq);
-	int Sizeof(int Message);
-	bool GetSizes(LArray<int> &Sizes);
-	bool GetUid(int Message, char *Id, int IdLen);
-	bool GetUidList(LString::Array &Id);
-	char *GetHeaders(int Message);
+	int Sizeof(int Message) override;
+	bool GetSizes(LArray<int64_t> &Sizes) override;
+	bool GetUid(int Message, char *Id, int IdLen) override;
+	bool GetUidList(LString::Array &Id) override;
+	LString GetHeaders(int Message) override;
 	char *SequenceToString(LArray<int> *Seq);
 
 	// Imap specific commands

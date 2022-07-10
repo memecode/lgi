@@ -152,11 +152,11 @@ struct EmojiMemQ : LMemQueue
 LAutoWString TextToEmoji(uint32_t *Txt, bool IsHtml)
 {
 	EmojiMemQ p;
-	LArray<GLinkInfo> Links;
+	LArray<LLinkInfo> Links;
 	int Lnk = 0;
 	ssize_t Ch;
 	WChar Buf[BUF_SIZE];
-	char EmojiPng[MAX_PATH];
+	char EmojiPng[MAX_PATH_LEN];
 
 	#ifdef MAC
 	LgiGetExeFile(EmojiPng, sizeof(EmojiPng));
@@ -182,7 +182,7 @@ LAutoWString TextToEmoji(uint32_t *Txt, bool IsHtml)
 	{
 		if (Lnk < (int)Links.Length() && s - (WChar*)Txt == Links[Lnk].Start)
 		{
-			GLinkInfo &l = Links[Lnk];
+			LLinkInfo &l = Links[Lnk];
 
 			// Start of embedded link, convert into <A>
 			if (s > Start) p.Write(Start, (int) ((s - Start) * sizeof(*s)));

@@ -138,6 +138,12 @@ int LEmojiFont::GetHeight()
 	return priv->Cell;
 }
 
+LFont& LEmojiFont::operator =(const LFont& f)
+{
+	LAssert(!"Impl me");
+	return *this;
+}
+
 bool LEmojiFont::Create(const char *Face, LCss::Len Sz, LSurface *pSurface)
 {
 	if (Sz.IsValid())
@@ -177,7 +183,7 @@ bool LEmojiFont::Create(const char *Face, LCss::Len Sz, LSurface *pSurface)
 			for (int r=0; r<CountOf(EmojiRanges); r++)
 			{
 				auto &rng = EmojiRanges[r];
-				for (uint32_t u=rng.Start; u<rng.End(); u++)
+				for (uint32_t u = (uint32_t)rng.Start; u < rng.End(); u++)
 				{
 					if (EmojiToIconIndex(&u, 1).Index >= 0)
 						d->GlyphMap[u>>3] |= 1 << (u & 7);
@@ -190,7 +196,7 @@ bool LEmojiFont::Create(const char *Face, LCss::Len Sz, LSurface *pSurface)
 	Sz = Size();
 	if (Sz.IsValid() && priv->Img)
 	{
-		int NewCell = (int) (Sz.Value * Dpi / 50);
+		int NewCell = (int) (Sz.Value * Dpi.x / 50);
 		int Cx = priv->Img->X() / EMOJI_CELL_SIZE;
 		int Cy = priv->Img->Y() / EMOJI_CELL_SIZE;
 		int Nx = Cx * NewCell;

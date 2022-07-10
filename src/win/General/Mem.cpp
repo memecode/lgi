@@ -390,7 +390,7 @@ bool LDumpMemoryStats(char *filename)
 
 			if (SymInitialize(hProcess, all, true))
 			{
-			    char FullPath[MAX_PATH];
+			    char FullPath[MAX_PATH_LEN];
 			    _getcwd(FullPath, sizeof(FullPath));
 			    strcat(FullPath, "\\");
 			    strcat(FullPath, filename ? filename : "stats.mem");

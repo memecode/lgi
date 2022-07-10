@@ -7,6 +7,8 @@
 #include "lgi/common/Ftp.h"
 #include "lgi/common/LgiString.h"
 #include "lgi/common/LgiCommon.h"
+#include "lgi/common/OpenSSLSocket.h"
+#include "lgi/common/Variant.h"
 
 #include "FtpListParser.cpp"
 
@@ -18,36 +20,25 @@ enum FtpTransferMode
 	FT_Binary
 };
 
-class IFtpPrivate
+struct IFtpPrivate
 {
-public:
-	char OutBuf[256];
-	char InBuf[256];
+	char OutBuf[256] = "";
+	char InBuf[256] = "";
 	List<char> In;
-	FtpTransferMode CurMode;
+	FtpTransferMode CurMode = FT_Unknown;
 	LAutoPtr<LSocket> Listen;	// listen for data
 	LAutoPtr<LSocketI> Data;	// get data
-	LFile *F;
-	char *Charset;
+	LAutoPtr<LFile> F;
+	LString Charset = DefaultFtpCharset;
 	LString ErrBuf;
-	IFtpCallback *Callback;
+	IFtpCallback *Callback = NULL;
+	bool UseTLS = false;
 	
-	LAutoString Host;
-	int Port;
+	LString Host;
+	int Port = 0;
 
 	IFtpPrivate(IFtpCallback *cb) : Callback(cb)
 	{
-		Charset = NewStr(DefaultFtpCharset);
-		InBuf[0] = 0;
-		CurMode = FT_Unknown;
-		F = 0;
-		Port = 0;
-	}
-
-	~IFtpPrivate()
-	{
-		DeleteArray(Charset);
-		DeleteObj(F);
 	}
 };
 
@@ -275,21 +266,10 @@ IFtpEntry &IFtpEntry::operator =(const IFtpEntry &e)
 #define Verify(i, ret) { ssize_t Code = i; if (Code != (ret)) throw Code; }
 #define VerifyRange(i, range) { ssize_t Code = i; if ((Code/100) != range) throw Code; }
 
-IFtp::IFtp(IFtpCallback *cb)
+IFtp::IFtp(IFtpCallback *cb, bool useTLS)
 {
-	d = new IFtpPrivate(cb);	
-	Authenticated = false;
-	Meter = 0;
-
-	Ip[0] = 0;
-	Port = 0;
-	PassiveMode = false;
-	ForceActive = false;
-	LongList = true;
-	ShowHidden = false;
-
-	RestorePos = 0;
-	AbortTransfer = false;
+	d = new IFtpPrivate(cb);
+	d->UseTLS = useTLS;	
 }
 
 IFtp::~IFtp()
@@ -319,8 +299,7 @@ const char *IFtp::GetCharset()
 
 void IFtp::SetCharset(const char *cs)
 {
-	DeleteArray(d->Charset);
-	d->Charset = NewStr(cs ? cs : (char*)DefaultFtpCharset);
+	d->Charset = cs ? cs : DefaultFtpCharset;
 }
 
 ssize_t IFtp::WriteLine(char *Msg)
@@ -437,10 +416,15 @@ void IFtp::GetHost(LString *Host, int *Port)
 
 FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, char *Password)
 {
-	FtpOpenStatus Status = FO_ConnectFailed;
-
 	try
 	{
+		SslSocket *SslSock = dynamic_cast<SslSocket*>(S);
+		if (d->UseTLS && !SslSock)
+		{
+			LAssert(!"Must use SslSocket for TLS based connections.");
+			return FO_Error;
+		}
+
 		Socket.Reset(S);
 		if (S->GetTimeout() < 0)
 			S->SetTimeout(15 * 1000);
@@ -449,82 +433,108 @@ FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, ch
 		if (!Port)
 			Port = 21;
 
-		d->Host.Reset(NewStr(RemoteHost));
+		d->Host = RemoteHost;
 		d->Port = Port;
 
-		if (Socket && Socket->Open(RemoteHost, Port))
+		if (!Socket || !Socket->Open(RemoteHost, Port))
+			return FO_ConnectFailed;
+
+		if (d->Callback)
+			d->Callback->OnSocketConnect();
+
+		Verify(ReadLine(), 220);
+
+		if (d->UseTLS)
 		{
-			if (d->Callback)
-				d->Callback->OnSocketConnect();
+			// https://datatracker.ietf.org/doc/html/rfc4217
+			// https://datatracker.ietf.org/doc/html/rfc2228
 
-			Verify(ReadLine(), 220);
+			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "AUTH TLS\r\n");
+			if (!WriteLine())
+				return FO_Error;
 
-			if (User)
-			{
-				// User/pass
-				sprintf_s(d->OutBuf, sizeof(d->OutBuf), "USER %s\r\n", User);
-				if (WriteLine())
-				{
-					Verify(ReadLine(), 331);
+			auto Result = ReadLine();
+			if (Result != 234)
+				return FO_Error;
 
-					sprintf_s(d->OutBuf, sizeof(d->OutBuf), "PASS %s\r\n", ValidStr(Password) ? Password : (char*)"");
-					if (WriteLine())
-					{
-						Verify(ReadLine(), 230);
-						Authenticated = true;
-					}
-				}
-			}
-			else
-			{
-				// Anonymous
-				sprintf_s(d->OutBuf, sizeof(d->OutBuf), "USER anonymous\r\n");
-				if (WriteLine())
-				{
-					ssize_t Code = ReadLine();
-					if (Code / 100 > 3)
-						throw Code;
+			// Switch on TLS
+			LVariant v = "ssl";
+			auto IsSsl = SslSock->SetValue(LSocket_Protocol, v);
+			if (!IsSsl)
+				return FO_Error;
 
-					sprintf_s(d->OutBuf, sizeof(d->OutBuf), "PASS me@privacy.net\r\n"); // garrenteed to never
-															// be allocated to an IP
-					if (WriteLine())
-					{
-						Verify(ReadLine(), 230);
-						Authenticated = true;
-					}
-				}
-			}
+			// Protection buffer size...
+			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "PBSZ 0\r\n");
+			if (!WriteLine())
+				return FO_Error;
+			Verify(ReadLine(), 200);
 
-			if (Authenticated)
-			{
-				Status = FO_Connected;
-			}
-			else
-			{
-				Status = FO_LoginFailed;
-			}
+			// Protected data transfers...
+			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "PROT P\r\n");
+			if (!WriteLine())
+				return FO_Error;
+			Verify(ReadLine(), 200);
+		}
 
-			#if 0
-			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "FEAT\r\n");
+		if (User)
+		{
+			// User/pass
+			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "USER %s\r\n", User);
+			if (!WriteLine())
+				return FO_Error;
+
+			Verify(ReadLine(), 331);
+
+			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "PASS %s\r\n", ValidStr(Password) ? Password : (char*)"");
+			if (!WriteLine())
+				return FO_Error;
+
+			Verify(ReadLine(), 230);
+			Authenticated = true;
+		}
+		else
+		{
+			// Anonymous
+			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "USER anonymous\r\n");
 			if (WriteLine())
 			{
-				int r = ReadLine();
-				if (r / 100 == 2)
+				ssize_t Code = ReadLine();
+				if (Code / 100 > 3)
+					throw Code;
+
+				sprintf_s(d->OutBuf, sizeof(d->OutBuf), "PASS me@privacy.net\r\n"); // garrenteed to never
+														// be allocated to an IP
+				if (WriteLine())
 				{
-					// Is utf8 there?
-					// FIXME
+					Verify(ReadLine(), 230);
+					Authenticated = true;
 				}
 			}
-			#endif
 		}
+
+		#if 0
+		sprintf_s(d->OutBuf, sizeof(d->OutBuf), "FEAT\r\n");
+		if (WriteLine())
+		{
+			int r = ReadLine();
+			if (r / 100 == 2)
+			{
+				// Is utf8 there?
+				// FIXME
+			}
+		}
+		#endif
+
+		if (!Authenticated)
+			return FO_LoginFailed;
+
+		return FO_Connected;
 	}
 	catch (ssize_t Error)
 	{
 		LgiTrace("%s:%i - Error: " LPrintfSSizeT "\n", _FL, Error);
-		Status = FO_Error;
+		return FO_Error;
 	}
-
-	return Status;
 }
 
 bool IFtp::Close()
@@ -919,7 +929,7 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 	bool Status = false;
 	bool Aborted = false;
 
-	d->F = new LFile;
+	d->F.Reset(new LFile);
 	
 	try
 	{
@@ -1028,7 +1038,9 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 									d->F->Seek(RestorePos, SEEK_SET);
 									if (Meter && RestorePos > 0)
 									{
-										Meter->SetParameter(10, (int)RestorePos);
+										// Meter->SetParameter(10, (int)RestorePos);
+										LVariant v;
+										Meter->SetValue("RestorePos", v = RestorePos);
 									}
 									RestorePos = 0;
 
@@ -1076,23 +1088,15 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 							}
 
 							if (d->Data)
-							{
 								d->Data->Close();
-							}
 
 							if (Size < 0)
-							{
 								Status = true;
-							}
 							else
-							{
 								Status = Size == Processed;
-							}
 
 							if (Meter)
-							{
 								Meter->Value(0);
-							}
 
 							DeleteArray(Temp);
 						}
@@ -1123,8 +1127,7 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 		Status = false;
 	}
 
-	DeleteObj(d->F);
-
+	d->F.Reset();
 	return Status;
 }
 
@@ -1139,8 +1142,8 @@ bool IFtp::SetupData(bool Binary)
 		{
 			if (Socket)
 			{
-				LStreamI *nstream = Socket->Clone();
-				LSocket *nsock = dynamic_cast<LSocket*>(nstream);
+				auto nstream = Socket->Clone();
+				auto nsock = dynamic_cast<LSocketI*>(nstream);
 				LAssert(nsock != NULL);
 				d->Data.Reset(nsock);
 			}

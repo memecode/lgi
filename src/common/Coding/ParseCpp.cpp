@@ -436,7 +436,7 @@ struct GSourceFile
 		LXmlTree t;
 		LFile f;
 		char *Leaf = strrchr(Path, DIR_CHAR);
-		char Out[MAX_PATH];
+		char Out[MAX_PATH_LEN];
 		LMakePath(Out, sizeof(Out), "c:\\temp", Leaf + 1);
 		char *Ext = LGetExtension(Out);
 		strcpy(Ext, "xml");
@@ -679,7 +679,7 @@ char *GCppParserWorker::FindInclude(char *File)
 		for (int i=0; i<w->IncludePaths.Length(); i++)
 		{
 			LDirectory dir;
-			char p[MAX_PATH];
+			char p[MAX_PATH_LEN];
 			for (bool b=dir.First(w->IncludePaths[i]); b; b=dir.Next())
 			{
 				char *Leaf = dir.GetName();
@@ -1050,7 +1050,7 @@ int GCppParserWorker::Evaluate(LArray<char16*> &Exp)
 		}
 		else
 		{
-			GOperator Op = IsOp(t, false);
+			LOperator Op = IsOp(t, false);
 			if (Op != OpNull)
 			{
 				LVariant &o = Values.New();
@@ -2212,7 +2212,7 @@ bool GCppParserWorker::ParsePreprocessor(GSourceFile *sf)
 			}
 
 			// Resolve filename
-			char p[MAX_PATH];
+			char p[MAX_PATH_LEN];
 			bool Exists = false;
 			char *IncPath = NULL;
 			if (LIsRelativePath(FileName8))

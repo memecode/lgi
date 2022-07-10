@@ -54,7 +54,7 @@ public:
 	OsAppArguments(int args = 0, const char **arg = 0);
 	~OsAppArguments();
 
-	void Set(char *CmdLine);
+	void Set(const char *CmdLine);
 	OsAppArguments &operator =(OsAppArguments &a);
 };
 

@@ -278,6 +278,10 @@ public:
 
 		OsWindow WindowHandle() override { return _View; }
 
+	#else
+
+		OsWindow WindowHandle() override { return _View; }
+		
 	#endif
 
 	#if defined(LGI_SDL)

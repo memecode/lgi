@@ -167,7 +167,7 @@ public:
 		UriEdit->Name(a);
 
 		Wnd->SetCtrlEnabled(IDC_BACK, CurHistory > 0);
-		Wnd->SetCtrlEnabled(IDC_FORWARD, CurHistory < History.Length() - 1);
+		Wnd->SetCtrlEnabled(IDC_FORWARD, CurHistory < (ssize_t)History.Length() - 1);
 
 		return true;
 	}
@@ -178,7 +178,7 @@ public:
 			return false;
 
 		LUri u(Uri);
-		char Sep, Buf[MAX_PATH];
+		char Sep, Buf[MAX_PATH_LEN];
 		if (!u.sProtocol)
 		{
 			// Relative link?
@@ -251,7 +251,7 @@ public:
 		
 		if (LoadFileName)
 		{
-			char p[MAX_PATH];
+			char p[MAX_PATH_LEN];
 			LMakePath(p, sizeof(p), !BaseUri.sPath.IsEmpty() ? BaseUri.sPath : Uri, "..");
 			LMakePath(p, sizeof(p), p, LoadFileName);
 			if (LFileExists(p))
@@ -441,7 +441,7 @@ bool GBrowser::SetUri(const char *Uri)
 {
 	if (Uri)
 	{
-		char s[MAX_PATH];
+		char s[MAX_PATH_LEN];
 		if (LDirExists(Uri))
 		{
 			sprintf_s(s, sizeof(s), "%s%cindex.html", Uri, DIR_CHAR);
@@ -449,7 +449,7 @@ bool GBrowser::SetUri(const char *Uri)
 		}
 
 		// Delete history past the current point
-		while (d->History.Length() > d->CurHistory + 1)
+		while ((ssize_t)d->History.Length() > d->CurHistory + 1)
 		{
 			d->History.DeleteAt(d->CurHistory + 1);
 		}
@@ -460,7 +460,7 @@ bool GBrowser::SetUri(const char *Uri)
 
 		// Enabled the controls accordingly
 		d->Back->Enabled(d->CurHistory > 0);
-		d->Forward->Enabled(d->CurHistory < d->History.Length() - 1);
+		d->Forward->Enabled(d->CurHistory < (ssize_t)d->History.Length() - 1);
 
 		// Show the content
 		d->LoadCurrent();
@@ -525,7 +525,7 @@ bool GBrowser::SetHtml(char *Html)
 	d->Html->Name(Html);
 	d->UriEdit->Name(0);
 	d->Back->Enabled(d->CurHistory > 0);
-	d->Forward->Enabled(d->CurHistory < d->History.Length() - 1);
+	d->Forward->Enabled(d->CurHistory < (ssize_t)d->History.Length() - 1);
 
 	return true;
 }
@@ -571,7 +571,7 @@ int GBrowser::OnNotify(LViewI *c, LNotification n)
 		}
 		case IDC_FORWARD:
 		{
-			if (d->CurHistory < d->History.Length() - 1)
+			if (d->CurHistory < (ssize_t)d->History.Length() - 1)
 			{
 				d->CurHistory++;
 				d->LoadCurrent();

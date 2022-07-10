@@ -8,7 +8,7 @@ static char Ws[] = " \r\t\n";
 
 bool HasTag(List<char> &Tags, const char *Tag)
 {
-	int Len = strlen(Tag);
+	auto Len = strlen(Tag);
 	for (auto t: Tags)
 	{
 		if (_strnicmp(Tag, t, Len) == 0) return true;
@@ -41,7 +41,7 @@ void ParseRtf(LStringPipe &p, char *&s)
 			while (*s && (IsAlpha(*s) || strchr("*\'", *s))) s++;
 			while (*s && IsDigit(*s)) s++;
 
-			int Len = s - Start;
+			auto Len = s - Start;
 			if (Len > 1)
 			{
 				char *Tag = NewStr(Start, s - Start);

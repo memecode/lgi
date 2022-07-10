@@ -58,7 +58,7 @@ public:
 	
 	char *GetIncludeFile(char *FileName)
 	{
-		char p[MAX_PATH];
+		char p[MAX_PATH_LEN];
 		LMakePath(p, sizeof(p), SrcFile, "..");
 		LMakePath(p, sizeof(p), p, FileName);
 		if (LFileExists(p))

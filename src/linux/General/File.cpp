@@ -881,7 +881,7 @@ bool LFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, boo
 
 	if (ToTrash)
 	{
-		char p[MAX_PATH];
+		char p[MAX_PATH_LEN];
 		if (LGetSystemPath(LSP_TRASH, p, sizeof(p)))
 		{
 			for (int i=0; i<Files.Length(); i++)
@@ -1096,7 +1096,7 @@ bool LDirectory::ConvertToDate(char *Str, int SLen, uint64 Time) const
 /////////////////////////////////////////////////////////////////////////////////
 struct LDirectoryPriv
 {
-	char			BasePath[MAX_PATH];
+	char			BasePath[MAX_PATH_LEN];
 	DIR				*Dir;
 	struct dirent	*De;
 	struct stat		Stat;
@@ -1150,7 +1150,7 @@ int LDirectory::First(const char *Name, const char *Pattern)
 	if (!Name)
 		return 0;
 
-	strcpy(d->BasePath, Name);
+	strcpy_s(d->BasePath, sizeof(d->BasePath), Name);
 	if (!Pattern || stricmp(Pattern, LGI_ALL_FILES) == 0)
 	{
 		struct stat S;
@@ -1227,7 +1227,7 @@ int LDirectory::Close()
 
 const char *LDirectory::FullPath()
 {
-	static char s[MAX_PATH];
+	static char s[MAX_PATH_LEN];
 	#warning this should really be optimized, and thread safe...
 	Path(s, sizeof(s));
 	return s;
@@ -1536,11 +1536,11 @@ int64 LFile::SetPos(int64 Pos)
 	if (p < 0)
 	{
 		int e = errno;
-		printf("%s:%i - lseek64(%Lx) failed (error %i: %s).\n",
+		printf("%s:%i - lseek64(" LPrintfHex64 ") failed (error %i: %s).\n",
 			__FILE__, __LINE__,
 			Pos, e, GetErrorName(e));
-		
 	}
+	return p;
 	#else
 	return lseek(d->hFile, Pos, SEEK_SET);
 	#endif

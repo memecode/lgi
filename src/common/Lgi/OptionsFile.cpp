@@ -60,7 +60,7 @@ LOptionsFile::PortableType LOptionsFile::GuessMode()
 
 bool LOptionsFile::SetMode(PortableType mode, const char *BaseName)
 {
-	char FullPath[MAX_PATH];
+	char FullPath[MAX_PATH_LEN];
 
 	if (!mode)
 		mode = GuessMode();
@@ -118,52 +118,76 @@ void LOptionsFile::SetFile(const char *f)
 
 bool LOptionsFile::SerializeFile(bool Write)
 {
-	bool Status = false;
+	if (!File)
+		return false;
+		
+	LMutex::Auto Lck(this, _FL);
+	if (!Lck)
+		return false;
 
-	if (File && Lock(_FL))
+	LFile f;
+	#if DEBUG_OPTS_FILE
+	LgiTrace("%s:%i - LOptionsFile::Serialize(%i) File='%s'\n",
+		_FL, Write, File.Get());
+	#endif
+
+	LXmlTree Tree(GXT_PRETTY_WHITESPACE);
+	if (Write)
 	{
-		LFile f;
-		if
-		(
-			(
-				Write
-				||
-				LFileExists(File)
-			)
-			&&
-			f.Open(File, Write ? O_WRITE : O_READ)
-		)
+		if (f.Open(File, O_WRITE))
 		{
-			#if DEBUG_OPTS_FILE
-			LgiTrace("%s:%i - LOptionsFile::Serialize(%i) File='%s'\n", 
-				_FL, Write, File.Get());
-			#endif
-			
-			LXmlTree Tree(GXT_PRETTY_WHITESPACE);
-			if (Write)
+			f.SetSize(0);
+			Tree.Write(this, &f);
+		}
+		else
+		{
+			LgiTrace("%s:%i - Failed to open '%s' for writing\n", _FL, File.Get());
+			// LAssert(!"Failed to open file.");
+			return false;
+		}
+	}
+	else // Read
+	{
+		if (!LFileExists(File))
+		{
+			// Potentially we're installed to a read-only location...
+			// Check that here and relocate options file path to a RW location.
+			if (!f.Open(File, O_WRITE))
 			{
-				f.SetSize(0);
-				Status = Tree.Write(this, &f);
-			}
-			else
-			{
-				Empty(true);
-				if ((Status = Tree.Read(this, &f, 0)))
+				if (Mode == PortableMode)
 				{
-					_Defaults();
+					// Change to desktop mode...
+					// FYI: This happens when running in an AppImage.
+					SetMode(DesktopMode);
+				}
+				else
+				{
+					LgiTrace("%s:%i - Write check for '%s' failed. Mode=%i\n", _FL, File.Get(), Mode);
+					return false;
 				}
 			}
 		}
-		else if (Write)
+		
+		if (LFileExists(File))
 		{
-			LgiTrace("%s:%i - Failed to open '%s'\n", _FL, File.Get());
-			LAssert(!"Failed to open file.");
-		}
+			if (f.Open(File, O_READ))
+			{
+				Empty(true);
+				if (!Tree.Read(this, &f, 0))
+					return false;
 
-		Unlock();
+				_Defaults();
+			}
+			else
+			{
+				LgiTrace("%s:%i - Failed to open '%s' for reading\n", _FL, File.Get());
+				// LAssert(!"Failed to open file.");
+				return false;
+			}
+		}
 	}
 
-	return Status;
+	return true;
 }
 
 bool LOptionsFile::DeleteValue(const char *Name)

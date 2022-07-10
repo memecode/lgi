@@ -37,7 +37,7 @@ bool LRichTextPriv::HorzRuleBlock::OffsetToLine(ssize_t Offset, int *ColX, LArra
 	return true;
 }
 
-int LRichTextPriv::HorzRuleBlock::LineToOffset(int Line)
+ssize_t LRichTextPriv::HorzRuleBlock::LineToOffset(ssize_t Line)
 {
 	return 0;
 }
@@ -195,7 +195,7 @@ void LRichTextPriv::HorzRuleBlock::IncAllStyleRefs()
 {
 }
 
-bool LRichTextPriv::HorzRuleBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool Spelling)
+bool LRichTextPriv::HorzRuleBlock::DoContext(LSubMenu &s, LPoint Doc, ssize_t Offset, bool TopOfMenu)
 {
 	return false;
 }

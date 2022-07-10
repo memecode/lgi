@@ -10,7 +10,7 @@ bool LBrowseToFile(const char *Filename)
 	if (!Filename)
 		return false;
 
-	char Browser[MAX_PATH];
+	char Browser[MAX_PATH_LEN];
 	if (!LGetAppForMimeType("inode/directory", Browser, sizeof(Browser)))
 		return false;
 	

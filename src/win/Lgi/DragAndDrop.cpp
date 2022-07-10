@@ -229,7 +229,7 @@ HRESULT LDataObject::GetData(FORMATETC *pFormatEtc, STGMEDIUM *pMedium)
 							}
 
 							LAutoWString w(Utf8ToWide(Contents.GetFileStreamName()));
-							wcsncpy_s(f.cFileName, w, MAX_PATH);
+							wcsncpy_s(f.cFileName, w, MAX_PATH_LEN);
 
 							pMedium->tymed = TYMED_HGLOBAL;
 							Ptr = (uchar*)&grp;

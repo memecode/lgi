@@ -139,7 +139,7 @@ public:
 	{
 		// Make sure any new lines are \r\n
 		char *s = (char*)p, *e = s + size;
-		int wr = 0;
+		ssize_t wr = 0;
 		
 		while (s < e)
 		{
@@ -426,7 +426,7 @@ public:
 
 	ssize_t Write(const void *p, ssize_t size, int f = 0)
 	{
-		int Status = 0;
+		ssize_t Status = 0;
 
 		// Push non whitespace into the memory buf
 		char *s = (char*)p;
@@ -521,7 +521,7 @@ ssize_t LMimeBuf::Pop(LArray<char> &Out)
 			int64 Sz = LStringPipe::GetSize();
 			if (Sz > 0)
 			{
-				if (Out.Length() < Sz)
+				if ((int64)Out.Length() < Sz)
 					Out.Length(Sz);
 				Ret = LStringPipe::Read(Out.AddressOf(), Sz);
 			}
@@ -1386,7 +1386,7 @@ ssize_t LMime::LMimeText::LMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 			{
 				Mime->DataStore->SetPos(Mime->DataPos);
 				int x = 0;
-				for (int i=0; i<Mime->DataSize; )
+				for (ssize_t i=0; i<Mime->DataSize; )
 				{
 					ssize_t m = MIN(Mime->DataSize - i, sizeof(Buf));
 					ssize_t r = Mime->DataStore->Read(Buf, m);

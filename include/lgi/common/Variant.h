@@ -76,7 +76,7 @@ enum LVariantType
 };
 
 /// Language operators
-enum GOperator
+enum LOperator
 {
 	OpNull,
 	OpAssign,
@@ -242,7 +242,7 @@ public:
 			char *Name;
 		} DomRef;
 		/// Valid when Type == #GV_OPERATOR
-		GOperator Op;		
+		LOperator Op;		
 		/// Valid when Type == #GV_LSURFACE
 		struct
 		{
@@ -307,7 +307,7 @@ public:
 	/// Constructor for variant
 	LVariant(LVariant const &v);
 	/// Constructor for operator
-	LVariant(GOperator Op);
+	LVariant(LOperator Op);
 	/// Destructor
 	~LVariant();
 
@@ -427,7 +427,7 @@ public:
 	/// Converts the varient type to a string
 	static const char *TypeToString(LVariantType t);
 	/// Converts an operator to a string
-	static const char *OperatorToString(GOperator op);
+	static const char *OperatorToString(LOperator op);
 	/// Converts the varient value to a string
 	LString ToString();
 };

@@ -783,6 +783,23 @@ LAutoPtr<LSurface> LClipBoard::ConvertFromPtr(void *Ptr)
 	return pDC;
 }
 
+bool LClipBoard::Bitmap(BitmapCb Callback)
+{
+	if (!Callback)
+		return false;
+
+	HGLOBAL hMem = GetClipboardData(CF_DIB);
+	LAutoPtr<LSurface> pDC;
+	if (void *Ptr = GlobalLock(hMem))
+	{
+		pDC = ConvertFromPtr(Ptr);
+		GlobalUnlock(hMem);
+	}
+
+	Callback(pDC, pDC ? NULL : "No bitmap on clipboard.");
+	return true;
+}
+
 LAutoPtr<LSurface> LClipBoard::Bitmap()
 {
 	HGLOBAL hMem = GetClipboardData(CF_DIB);

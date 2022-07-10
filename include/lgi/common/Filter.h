@@ -42,7 +42,7 @@ LgiFunc int FindHeader(int Offset, const char *Str, LStream *f);
 
 /// General base class for image filters. If you are creating a new filter you will
 /// need to also create a factory for it by inheriting another singleton class from
-/// GFilterFactory.
+/// LFilterFactory.
 class LgiClass LFilter : public LDom
 {
 	LArray<uint8_t> Buf;
@@ -149,12 +149,12 @@ public:
 ////////////////////////////////////////////////////////////////
 
 /// Factory class for creating filter objects. You should create a static
-/// instance of a class inheriting from GFilterFactory in your filter code
+/// instance of a class inheriting from LFilterFactory in your filter code
 /// that can create instances of your filter.
-class LgiClass GFilterFactory
+class LgiClass LFilterFactory
 {
-	static class GFilterFactory *First;
-	class GFilterFactory *Next;
+	static class LFilterFactory *First;
+	class LFilterFactory *Next;
 
 	/// Override this to detect whether you can handle openning a file.
 	/// \returns true if this filter can handle a given file.
@@ -173,11 +173,11 @@ class LgiClass GFilterFactory
 	virtual LFilter *NewObject() = 0;
 	
 public:
-	GFilterFactory();
-	virtual ~GFilterFactory();
+	LFilterFactory();
+	virtual ~LFilterFactory();
 
-	static LFilter *New(const char *File, int Access, const uchar *Hint);
-	static LFilter *NewAt(int i);
+	static LAutoPtr<LFilter> New(const char *File, int Access, const uchar *Hint);
+	static LAutoPtr<LFilter> NewAt(int i);
 	static int GetItems();
 };
 

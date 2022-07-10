@@ -52,7 +52,7 @@ bool _BuildCheck()
 	{
 		LgiTrace("Build check failed, app=%s lgi=%s\n", AppBuild, LgiBuild);
 		return LgiMsg(	NULL,
-						"This application and it's Dll's are mismatched:\n"
+						"This application and it's libraries are mismatched:\n"
 						"\n"
 						"   Application:\t%s\n"
 						"   Lgi:\t\t%s\n"

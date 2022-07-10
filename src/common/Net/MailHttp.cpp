@@ -300,7 +300,7 @@ bool MailPhp::Get(LSocketI *S, char *Uri, LStream &Out, bool MailTransfer)
 	return Status;
 }
 
-int MailPhp::GetMessages()
+ssize_t MailPhp::GetMessages()
 {
 	return d->Messages;
 }
@@ -565,7 +565,7 @@ int MailPhp::Sizeof(int Message)
 	return m ? m->Size : 0;
 }
 
-bool MailPhp::GetSizes(LArray<int> &Sizes)
+bool MailPhp::GetSizes(LArray<int64_t> &Sizes)
 {
 	for (auto m: d->Msgs)
 		Sizes.Add(m->Size);
@@ -592,55 +592,53 @@ bool MailPhp::GetUidList(LString::Array &Id)
 	return Id.Length() > 0;
 }
 
-char *MailPhp::GetHeaders(int Message)
+LString MailPhp::GetHeaders(int Message)
 {
 	Msg *TheMsg = d->Msgs[Message];
-	if (TheMsg)
+	if (!TheMsg)
+		return NULL;
+
+	if (!d->HeadersRetreived)
 	{
-		if (!d->HeadersRetreived)
+		d->HeadersRetreived = true;
+
+		char *e = d->Uri + strlen(d->Uri);
+		sprintf_s(e, sizeof(d->Uri)-(e-d->Uri), "?top=1");
+
+		LStringPipe Text;
+		if (Get(new LSocket, d->Uri, Text, false))
 		{
-			d->HeadersRetreived = true;
-
-			char *e = d->Uri + strlen(d->Uri);
-			sprintf_s(e, sizeof(d->Uri)-(e-d->Uri), "?top=1");
-
-			LStringPipe Text;
-			if (Get(new LSocket, d->Uri, Text, false))
+			int n = 0;
+			char *All = Text.NewStr();
+			// int AllLen = strlen(All);
+			for (char *s = All; s && *s; )
 			{
-				int n = 0;
-				char *All = Text.NewStr();
-				// int AllLen = strlen(All);
-				for (char *s = All; s && *s; )
+				Msg *m = d->Msgs[n++];
+				if (m)
 				{
-					Msg *m = d->Msgs[n++];
-					if (m)
+					DeleteArray(m->Headers);
+
+					char *e = stristr(s, "\r\n.\r\n");
+					if (e)
 					{
-						DeleteArray(m->Headers);
-
-						char *e = stristr(s, "\r\n.\r\n");
-						if (e)
-						{
-							m->Headers = NewStr(s, e-s);
-							s = e + 5;
-							while (*s == '\r' || *s == '\n') s++;
-						}
-						else
-						{
-							m->Headers = NewStr(s, strlen(s)-3);
-							s = 0;
-						}
+						m->Headers = NewStr(s, e-s);
+						s = e + 5;
+						while (*s == '\r' || *s == '\n') s++;
 					}
-					else break;
+					else
+					{
+						m->Headers = NewStr(s, strlen(s)-3);
+						s = 0;
+					}
 				}
-
-				DeleteArray(All);
+				else break;
 			}
-			*e = 0;
-		}
 
-		return NewStr(TheMsg->Headers);
+			DeleteArray(All);
+		}
+		*e = 0;
 	}
 
-	return 0;
+	return TheMsg->Headers;
 }
 
