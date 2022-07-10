@@ -774,7 +774,7 @@ public:
 								LFile::Path p = Base;
 								Rel = LMakeRelativePath(--p, s->Name());
 							}
-							e->Name(Rel ? Rel.Get() : s.Name());
+							e->Name(Rel ? Rel.Get() : s->Name());
 
 							delete s;
 						};
