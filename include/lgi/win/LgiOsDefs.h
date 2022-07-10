@@ -50,14 +50,24 @@
 #define _MSC_VER_VC6	1200 // MSVC++ 6.0
 #define _MSC_VER_VC5	1100 // MSVC++ 5.0
 
-#if _MSC_VER >= _MSC_VER_VS2015
+#if _MSC_VER >= _MSC_VER_VS2019
+#define _MSC_VER_STR	"16"
+#define _MSC_YEAR_STR	"19"
+#elif _MSC_VER >= _MSC_VER_VS2017
+#define _MSC_VER_STR	"15"
+#define _MSC_YEAR_STR	"17"
+#elif _MSC_VER >= _MSC_VER_VS2015
 #define _MSC_VER_STR	"14"
+#define _MSC_YEAR_STR	"15"
 #elif _MSC_VER >= _MSC_VER_VS2013
 #define _MSC_VER_STR	"12"
+#define _MSC_YEAR_STR	"13"
 #elif _MSC_VER >= _MSC_VER_VS2012
 #define _MSC_VER_STR	"11"
+#define _MSC_YEAR_STR	"12"
 #elif _MSC_VER >= _MSC_VER_VS2010
 #define _MSC_VER_STR	"10"
+#define _MSC_YEAR_STR	"10"
 #else
 #define _MSC_VER_STR	"9"
 #endif

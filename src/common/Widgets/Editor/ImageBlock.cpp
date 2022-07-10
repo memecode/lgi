@@ -80,7 +80,8 @@ public:
 				LgiTrace("%s:%i - Thread.Receive(M_IMAGE_LOAD_FILE): '%s'\n", _FL, File.Get());
 				#endif
 				
-				if (!Filter.Reset(GFilterFactory::New(File, O_READ, NULL)))
+				Filter = LFilterFactory::New(File, O_READ, NULL);
+				if (!Filter)
 				{
 					#if LOADER_THREAD_LOGGING
 					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): no filter\n", _FL);
@@ -155,7 +156,8 @@ public:
 				
 				LMemStream *Mem = new LMemStream(Stream, 0, -1);
 				In.Reset(Mem);
-				if (!Filter.Reset(GFilterFactory::New(FileName ? *FileName : 0, O_READ, (const uchar*)Mem->GetBasePtr())))
+				Filter = LFilterFactory::New(FileName ? *FileName : 0, O_READ, (const uchar*)Mem->GetBasePtr());
+				if (!Filter)
 				{
 					#if LOADER_THREAD_LOGGING
 					LgiTrace("%s:%i - Thread.Send(M_IMAGE_ERROR): no filter\n", _FL);
@@ -249,7 +251,7 @@ public:
 					break;
 				}
 				
-				LAutoPtr<LFilter> f(GFilterFactory::New("a.jpg", O_READ, NULL));
+				auto f = LFilterFactory::New("a.jpg", O_READ, NULL);
 				if (!f)
 				{
 					#if LOADER_THREAD_LOGGING

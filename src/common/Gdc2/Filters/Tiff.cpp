@@ -116,7 +116,7 @@ public:
 };
 
 // Object Factory
-class GdcTiffFactory : public GFilterFactory
+class GdcTiffFactory : public LFilterFactory
 {
 	bool CheckFile(const char *File, int Access, const uchar *Hint)
 	{

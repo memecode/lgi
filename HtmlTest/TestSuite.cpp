@@ -222,7 +222,7 @@ public:
 					{
 						uchar Hint[16];
 						p.Peek(Hint, sizeof(Hint));
-						LAutoPtr<LFilter> Filter(GFilterFactory::New(u.sPath, FILTER_CAP_READ, Hint));
+						auto Filter = LFilterFactory::New(u.sPath, FILTER_CAP_READ, Hint);
 						if (Filter)
 						{
 							LAutoPtr<LSurface> Img(new LMemDC);

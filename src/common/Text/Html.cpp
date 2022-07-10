@@ -2633,7 +2633,7 @@ void LTag::LoadImage(const char *Uri)
 		if (p.Length() != 2 || !p.Last().Equals("base64"))
 			return;
 		LString Name = LString("name.") + p[0];
-		LAutoPtr<LFilter> Filter(GFilterFactory::New(Name, FILTER_CAP_READ, NULL));
+		auto Filter = LFilterFactory::New(Name, FILTER_CAP_READ, NULL);
 		if (!Filter)
 			return;
 

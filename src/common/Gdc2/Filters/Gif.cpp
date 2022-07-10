@@ -82,7 +82,7 @@ public:
 // Filter factory
 // tells the application we're here
 
-class GdcGifFactory : public GFilterFactory
+class GdcGifFactory : public LFilterFactory
 {
 	bool CheckFile(const char *File, int Access, const uchar *Hint)
 	{

@@ -78,7 +78,7 @@ public:
 };
 
 // Factory
-class GdcSpiPluginFactory : public GFilterFactory
+class GdcSpiPluginFactory : public LFilterFactory
 {
 	friend class GdcSpiPlugin;
 	List<SpiPlugin> Plugins;

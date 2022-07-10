@@ -126,7 +126,7 @@ public:
 	}
 };
 
-class GdcTgaFactory : public GFilterFactory
+class GdcTgaFactory : public LFilterFactory
 {
 	bool CheckFile(const char *File, int Access, const uchar *Hint)
 	{
