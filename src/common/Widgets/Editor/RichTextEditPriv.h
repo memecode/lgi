@@ -693,7 +693,7 @@ public:
 		}
 		
 		// Events
-		bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0)
+		bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0, int64_t TimeoutMs = -1)
 		{
 			bool r = d->View->PostEvent(M_BLOCK_MSG,
 										(LMessage::Param)(Block*)this,

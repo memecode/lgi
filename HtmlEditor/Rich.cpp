@@ -582,11 +582,15 @@ public:
 			}
 			case IDC_SAVE_FILE:
 			{
-				LFileSelect s;
-				s.Parent(this);
-				s.Type("HTML", "*.html");
-				if (s.Save())
-					Edit->Save(s.Name());
+				auto s = new LFileSelect;
+				s->Parent(this);
+				s->Type("HTML", "*.html");
+				s->Save([&](auto dlg, auto status)
+				{
+					if (status)
+						Edit->Save(dlg->Name());
+					delete dlg;
+				});
 				break;
 			}
 			case IDC_SAVE:

@@ -1693,32 +1693,36 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 			if (a)
 			{
 				// Edit the existing link...
-				LInput i(View, a->Param, "Edit link:", "Link");
-				if (i.DoModal())
+				auto i = new LInput(View, a->Param, "Edit link:", "Link");
+				i->DoModal([&](auto dlg, auto ctrlId)
 				{
-					a->Param = i.GetStr();
-				}
+					if (ctrlId == IDOK)
+						a->Param = i->GetStr();
+					delete dlg;
+				});
 			}
 			else if (Selection)
 			{
 				// Turn current selection into link
-				LInput i(View, NULL, "Edit link:", "Link");
-				if (i.DoModal())
+				auto i = new LInput(View, NULL, "Edit link:", "Link");
+				i->DoModal([&](auto dlg, auto ctrlId)
 				{
-					BlockCursor *Start = CursorFirst() ? Cursor : Selection;
-					BlockCursor *End = CursorFirst() ? Selection : Cursor;
-					if (!Start || !End) return false;
-					if (Start->Blk != End->Blk)
+					if (ctrlId == IDOK)
 					{
-						LgiMsg(View, "Selection too large.", "Error");
-						return false;
+						BlockCursor *Start = CursorFirst() ? Cursor : Selection;
+						BlockCursor *End = CursorFirst() ? Selection : Cursor;
+						if (!Start || !End)
+							;
+						else if (Start->Blk != End->Blk)
+							LgiMsg(View, "Selection too large.", "Error");
+						else
+							MakeLink(tb,
+									Start->Offset,
+									End->Offset - Start->Offset,
+									i->GetStr());
 					}
-					
-					MakeLink(tb,
-							Start->Offset,
-							End->Offset - Start->Offset,
-							i.GetStr());
-				}
+					delete dlg;
+				});
 			}
 			break;
 		}
