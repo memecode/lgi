@@ -2207,13 +2207,17 @@ void VcFolder::OnMouseClick(LMouse &m)
 			}
 			case IDM_EDIT:
 			{
-				LInput Dlg(GetTree(), Uri.ToString(), "URI:", "Remote Folder Location");
-				if (Dlg.DoModal())
+				auto Dlg = new LInput(GetTree(), Uri.ToString(), "URI:", "Remote Folder Location");
+				Dlg->DoModal([&](auto dlg, auto ctrlId)
 				{
-					Uri.Set(Dlg.GetStr());
-					Empty();
-					Select(true);
-				}
+					if (ctrlId)
+					{
+						Uri.Set(Dlg->GetStr());
+						Empty();
+						Select(true);
+					}
+					delete dlg;
+				});
 				break;
 			}
 			default:
@@ -2973,24 +2977,30 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 			{
 				if (s.Find("Please tell me who you are") >= 0)
 				{
+					auto i = new LInput(GetTree(), "", "Git user name:", AppName);
+					i->DoModal([&](auto dlg, auto ctrlId)
 					{
-						LInput i(GetTree(), "", "Git user name:", AppName);
-						if (i.DoModal())
+						if (ctrlId)
 						{
 							LString Args;
-							Args.Printf("config --global user.name \"%s\"", i.GetStr().Get());
+							Args.Printf("config --global user.name \"%s\"", i->GetStr().Get());
 							StartCmd(Args);
+
+							i = new LInput(GetTree(), "", "Git user email:", AppName);
+							i->DoModal([&](auto dlg, auto ctrlId)
+							{
+								if (ctrlId)
+								{
+									LString Args;
+									Args.Printf("config --global user.email \"%s\"", i->GetStr().Get());
+									StartCmd(Args);
+								}
+								delete dlg;
+							});
 						}
-					}
-					{
-						LInput i(GetTree(), "", "Git user email:", AppName);
-						if (i.DoModal())
-						{
-							LString Args;
-							Args.Printf("config --global user.email \"%s\"", i.GetStr().Get());
-							StartCmd(Args);
-						}
-					}
+
+						delete dlg;
+					});
 				}
 				break;
 			}

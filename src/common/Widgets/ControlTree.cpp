@@ -607,13 +607,17 @@ int LControlTree::OnNotify(LViewI *c, LNotification n)
 			Item *i = dynamic_cast<Item*>(Selection());
 			if (i)
 			{
-				LFileSelect s;
-				s.Parent(this);
-				if (s.Open())
+				auto s = new LFileSelect;
+				s->Parent(this);
+				s->Open([&](auto dlg, auto status)
 				{
-					LVariant v;
-					i->SetValue(v = s.Name());
-				}
+					if (status)
+					{
+						LVariant v;
+						i->SetValue(v = dlg->Name());
+					}
+					delete dlg;
+				});
 			}
 			return 0;
 		}

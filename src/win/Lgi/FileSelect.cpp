@@ -198,9 +198,11 @@ class LFileSelectPrivate
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-LFileSelect::LFileSelect()
+LFileSelect::LFileSelect(LViewI *Window)
 {
 	d = new LFileSelectPrivate;
+	if (Window)
+		Parent(Window);
 }
 
 LFileSelect::~LFileSelect()

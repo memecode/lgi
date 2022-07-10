@@ -1729,6 +1729,9 @@ LMessage::Param TableLayoutTest::OnEvent(LMessage *m)
 
 void OpenTableLayoutTest(LViewI *p)
 {
-	TableLayoutTest Dlg(p);
-	Dlg.DoModal();
+	auto Dlg = new TableLayoutTest(p);
+	Dlg->DoModal([](auto dlg, auto id)
+	{
+		delete dlg;
+	});
 }

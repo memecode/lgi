@@ -407,38 +407,45 @@ void ObjTreeItem::OnMouseClick(LMouse &m)
 				}
 				case IDM_RENAME:
 				{
-					LInput Dlg(Tree, GetText(), "Enter the name for the object", "Object Name");
-					if (Dlg.DoModal())
+					auto Dlg = new LInput(Tree, GetText(), "Enter the name for the object", "Object Name");
+					Dlg->DoModal([&](auto dlg, auto id)
 					{
-						Obj->Wnd()->Name(Dlg.GetStr());
-						Update();
-						Obj->App()->SetDirty(true);
-					}
+						if (id)
+						{
+							Obj->Wnd()->Name(Dlg->GetStr());
+							Update();
+							Obj->App()->SetDirty(true);
+						}
+						delete dlg;
+					});
 					break;
 				}
 				case IDM_IMPORT:
 				{
-					LFileSelect Select;
-					Select.Parent(Obj->App());
-					Select.Type("Text", "*.txt");
-					if (Select.Open())
+					auto Select = new LFileSelect(Obj->App());
+					Select->Type("Text", "*.txt");
+					Select->Open([&](auto dlg, auto status)
 					{
-						LFile F;
-						if (F.Open(Select.Name(), O_READ))
+						if (status)
 						{
-							SerialiseContext Ctx;
-							Resource *Res = Obj->App()->NewObject(Ctx, 0, -Obj->Type());
-							if (Res)
+							LFile F;
+							if (F.Open(dlg->Name(), O_READ))
 							{
-								// TODO
-								// Res->Read();
+								SerialiseContext Ctx;
+								Resource *Res = Obj->App()->NewObject(Ctx, 0, -Obj->Type());
+								if (Res)
+								{
+									// TODO
+									// Res->Read();
+								}
+							}
+							else
+							{
+								LgiMsg(Obj->App(), "Couldn't open file for reading.");
 							}
 						}
-						else
-						{
-							LgiMsg(Obj->App(), "Couldn't open file for reading.");
-						}
-					}
+						delete dlg;
+					});
 					break;
 				}
 				case IDM_IMPORT_WIN32:
@@ -820,29 +827,30 @@ int FieldView::OnNotify(LViewI *Ctrl, LNotification n)
 				}
 				else if (c->Id == -Ctrl->GetId())
 				{
-					LFileSelect s;
-					s.Parent(this);
-					if (s.Open())
+					auto s = new LFileSelect(this);
+					s->Open([&](auto dlg, auto status)
 					{
-						auto File = App->GetCurFile();
-						if (File)
+						if (status)
 						{
-							LFile::Path p = File;
-							p--;
-							auto Rel = LMakeRelativePath(p, s.Name());
-							if (Rel)
-								SetCtrlName(c->Id, Rel);
-							else
-								SetCtrlName(c->Id, s.Name());
+							auto File = App->GetCurFile();
+							if (File)
+							{
+								LFile::Path p = File;
+								p--;
+								auto Rel = LMakeRelativePath(p, dlg->Name());
+								if (Rel)
+									SetCtrlName(c->Id, Rel);
+								else
+									SetCtrlName(c->Id, dlg->Name());
+							}
+							else SetCtrlName(c->Id, dlg->Name());
+
+							Fields.SetMode(FieldTree::UiToObj);
+							Fields.SetView(this);
+							Source->Serialize(Fields);
 						}
-						else SetCtrlName(c->Id, s.Name());
-
-						Fields.SetMode(FieldTree::UiToObj);
-						Fields.SetView(this);
-						Source->Serialize(Fields);
-
-						return 0;
-					}
+						delete dlg;
+					});
 				}
 			}
 		}
@@ -1227,7 +1235,11 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 	{
 		case IDM_SHOW_LANG:
 		{
-			ShowLanguagesDlg Dlg(this);
+			auto Dlg = new ShowLanguagesDlg(this);
+			Dlg->DoModal([](auto dlg, auto ctrlId)
+			{
+				delete dlg;
+			});
 			break;
 		}
 		case IDM_NEW_CSS:
@@ -1343,11 +1355,13 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		}
 		case IDM_FIND:
 		{
-			Search s(this);
-			if (s.DoModal())
+			auto s = new Search(this);
+			s->DoModal([&](auto dlg, auto id)
 			{
-				new Results(this, &s);
-			}
+				if (id)
+					new Results(this, s);
+				delete dlg;
+			});
 			break;
 		}
 		case IDM_NEXT:
@@ -2236,265 +2250,272 @@ public:
 
 void AppWnd::Compare()
 {
-	LFileSelect s;
-	s.Parent(this);
-	s.Type("Lgi Resource", "*.lr8");
-	if (s.Open())
+	auto s = new LFileSelect(this);
+	s->Type("Lgi Resource", "*.lr8");
+	s->Open([&](auto dlg, auto status)
 	{
-		new ResCompare(GetCurFile(), s.Name());
-	}
+		if (status)
+			new ResCompare(GetCurFile(), dlg->Name());
+		delete dlg;
+	});
 }
 
 void AppWnd::ImportLang()
 {
 	// open dialog
-	LFileSelect Select;
-
-	Select.Parent(this);
-	Select.Type("Lgi Resources", "*.lr8;*.xml");
-
-	if (Select.Open())
+	auto Select = new LFileSelect(this);
+	Select->Type("Lgi Resources", "*.lr8;*.xml");
+	Select->Open([&](auto dlg, auto status)
 	{
-		LFile F;
-		if (F.Open(Select.Name(), O_READ))
+		if (status)
 		{
-			SerialiseContext Ctx;
-			Ctx.Format = GetFormat(Select.Name());
-
-			// convert file to Xml objects
-			LXmlTag *Root = new LXmlTag;
-			if (Root)
+			LFile F;
+			if (F.Open(dlg->Name(), O_READ))
 			{
-				LXmlTree Tree(GXT_NO_ENTITIES);
-				if (Tree.Read(Root, &F, 0))
+				SerialiseContext Ctx;
+				Ctx.Format = GetFormat(dlg->Name());
+
+				// convert file to Xml objects
+				LXmlTag *Root = new LXmlTag;
+				if (Root)
 				{
-					List<ResMenu> Menus;
-					List<ResStringGroup> Groups;
-					for (auto t: Root->Children)
+					LXmlTree Tree(GXT_NO_ENTITIES);
+					if (Tree.Read(Root, &F, 0))
 					{
-						if (t->IsTag("menu"))
+						List<ResMenu> Menus;
+						List<ResStringGroup> Groups;
+						for (auto t: Root->Children)
 						{
-							ResMenu *Menu = new ResMenu(this);
-							if (Menu && Menu->Read(t, Ctx))
+							if (t->IsTag("menu"))
 							{
-								Menus.Insert(Menu);
+								ResMenu *Menu = new ResMenu(this);
+								if (Menu && Menu->Read(t, Ctx))
+								{
+									Menus.Insert(Menu);
+								}
+								else break;
 							}
-							else break;
-						}
-						else if (t->IsTag("string-group"))
-						{
-							ResStringGroup *g = new ResStringGroup(this);
-							if (g && g->Read(t, Ctx))
+							else if (t->IsTag("string-group"))
 							{
-								Groups.Insert(g);
+								ResStringGroup *g = new ResStringGroup(this);
+								if (g && g->Read(t, Ctx))
+								{
+									Groups.Insert(g);
+								}
+								else break;
 							}
-							else break;
 						}
-					}
 					
-					Ctx.PostLoad(this);
+						Ctx.PostLoad(this);
 
-					bool HasData = false;
-					for (auto g: Groups)
-					{
-						g->SetLanguages();
-
-						if (g->GetStrs()->Length() > 0 &&
-							g->GetLanguages() > 0)
-						{
-							HasData = true;
-						}
-					}
-
-					if (HasData)
-					{
-						List<LLanguage> Langs;
+						bool HasData = false;
 						for (auto g: Groups)
 						{
-							for (int i=0; i<g->GetLanguages(); i++)
+							g->SetLanguages();
+
+							if (g->GetStrs()->Length() > 0 &&
+								g->GetLanguages() > 0)
 							{
-								LLanguage *Lang = g->GetLanguage(i);
-								if (Lang)
-								{
-									bool Has = false;
-									for (auto l: Langs)
-									{
-										if (stricmp((char*)l, (char*)Lang) == 0)
-										{
-											Has = true;
-											break;
-										}
-									}
-									if (!Has)
-									{
-										Langs.Insert(Lang);
-									}
-								}
+								HasData = true;
 							}
 						}
 
-						LangDlg Dlg(this, Langs);
-						if (Dlg.DoModal() == IDOK &&
-							Dlg.Lang)
+						if (HasData)
 						{
-							LStringPipe Errors;
-							
-							int Matches = 0;
-							int NotFound = 0;
-							int Imported = 0;
-							int Different = 0;
-							
+							List<LLanguage> Langs;
 							for (auto g: Groups)
 							{
-								List<ResString>::I Strings = g->GetStrs()->begin();
-								for (ResString *s=*Strings; s; s=*++Strings)
+								for (int i=0; i<g->GetLanguages(); i++)
 								{
-									ResString *d = GetStrFromRef(s->GetRef());
-									if (d)
+									LLanguage *Lang = g->GetLanguage(i);
+									if (Lang)
 									{
-										Matches++;
-
-										char *Str = s->Get(Dlg.Lang->Id);
-										char *Dst = d->Get(Dlg.Lang->Id);
-										if
-										(
-											(
-												Str &&
-												Dst &&
-												strcmp(Dst, Str) != 0
-											)
-											||
-											(
-												(Str != 0) ^
-												(Dst != 0)
-											)
-										)
+										bool Has = false;
+										for (auto l: Langs)
 										{
-											Different++;
-											d->Set(Str, Dlg.Lang->Id);
-											Imported++;
+											if (stricmp((char*)l, (char*)Lang) == 0)
+											{
+												Has = true;
+												break;
+											}
 										}
-									}
-									else
-									{
-										NotFound++;
-										
-										char e[256];
-										sprintf(e, "String ref=%i (%s)\n", s->GetRef(), s->GetDefine());
-										Errors.Push(e);
+										if (!Has)
+										{
+											Langs.Insert(Lang);
+										}
 									}
 								}
 							}
 
-							List<Resource> Lst;
-							if (ListObjects(Lst))
+							auto Dlg = new LangDlg(this, Langs);
+							Dlg->DoModal([&](auto dlg, auto id)
 							{
-								for (auto m: Menus)
+								if (id == IDOK && Dlg->Lang)
 								{
-									// find matching menu in our list
-									ResMenu *Match = 0;
-									for (auto r: Lst)
+									LStringPipe Errors;
+							
+									int Matches = 0;
+									int NotFound = 0;
+									int Imported = 0;
+									int Different = 0;
+							
+									for (auto g: Groups)
 									{
-										ResMenu *n = dynamic_cast<ResMenu*>(r);
-										if (n && stricmp(n->Name(), m->Name()) == 0)
+										List<ResString>::I Strings = g->GetStrs()->begin();
+										for (ResString *s=*Strings; s; s=*++Strings)
 										{
-											Match = n;
-											break;
-										}
-									}
-
-									if (Match)
-									{
-										// match strings
-										List<ResString> *Src = m->GetStrs();
-										List<ResString> *Dst = Match->GetStrs();
-										
-										for (auto s: *Src)
-										{
-											bool FoundRef = false;
-											for (auto d: *Dst)
+											ResString *d = GetStrFromRef(s->GetRef());
+											if (d)
 											{
-												if (s->GetRef() == d->GetRef())
+												Matches++;
+
+												char *Str = s->Get(Dlg->Lang->Id);
+												char *Dst = d->Get(Dlg->Lang->Id);
+												if
+												(
+													(
+														Str &&
+														Dst &&
+														strcmp(Dst, Str) != 0
+													)
+													||
+													(
+														(Str != 0) ^
+														(Dst != 0)
+													)
+												)
 												{
-													FoundRef = true;
-
-													char *Str = s->Get(Dlg.Lang->Id);
-													if (Str)
-													{
-														char *Dst = d->Get(Dlg.Lang->Id);
-														if (!Dst || strcmp(Dst, Str))
-														{
-															Different++;
-														}
-
-														d->Set(Str, Dlg.Lang->Id);
-														Imported++;
-													}
-													break;
+													Different++;
+													d->Set(Str, Dlg->Lang->Id);
+													Imported++;
 												}
 											}
-											if (!FoundRef)
+											else
 											{
 												NotFound++;
-
+										
 												char e[256];
-												sprintf(e, "MenuString ref=%i (%s)\n", s->GetRef(), s->GetDefine());
+												sprintf(e, "String ref=%i (%s)\n", s->GetRef(), s->GetDefine());
 												Errors.Push(e);
 											}
 										}
-
-										Match->SetLanguages();
 									}
-								}
 
-								for (auto r: Lst)
-								{
-									ResStringGroup *StrRes = dynamic_cast<ResStringGroup*>(r);
-									if (StrRes)
+									List<Resource> Lst;
+									if (ListObjects(Lst))
 									{
-										StrRes->SetLanguages();
-									}
-								}
-							}
+										for (auto m: Menus)
+										{
+											// find matching menu in our list
+											ResMenu *Match = 0;
+											for (auto r: Lst)
+											{
+												ResMenu *n = dynamic_cast<ResMenu*>(r);
+												if (n && stricmp(n->Name(), m->Name()) == 0)
+												{
+													Match = n;
+													break;
+												}
+											}
 
-							char *ErrorStr = Errors.NewStr();
+											if (Match)
+											{
+												// match strings
+												List<ResString> *Src = m->GetStrs();
+												List<ResString> *Dst = Match->GetStrs();
+										
+												for (auto s: *Src)
+												{
+													bool FoundRef = false;
+													for (auto d: *Dst)
+													{
+														if (s->GetRef() == d->GetRef())
+														{
+															FoundRef = true;
+
+															char *Str = s->Get(Dlg->Lang->Id);
+															if (Str)
+															{
+																char *Dst = d->Get(Dlg->Lang->Id);
+																if (!Dst || strcmp(Dst, Str))
+																{
+																	Different++;
+																}
+
+																d->Set(Str, Dlg->Lang->Id);
+																Imported++;
+															}
+															break;
+														}
+													}
+													if (!FoundRef)
+													{
+														NotFound++;
+
+														char e[256];
+														sprintf(e, "MenuString ref=%i (%s)\n", s->GetRef(), s->GetDefine());
+														Errors.Push(e);
+													}
+												}
+
+												Match->SetLanguages();
+											}
+										}
+
+										for (auto r: Lst)
+										{
+											ResStringGroup *StrRes = dynamic_cast<ResStringGroup*>(r);
+											if (StrRes)
+											{
+												StrRes->SetLanguages();
+											}
+										}
+									}
+
+									char *ErrorStr = Errors.NewStr();
 							
-							LgiMsg(	this,
-									"Imported: %i\n"
-									"Matched: %i\n"
-									"Not matched: %i\n"
-									"Different: %i\n"
-									"Total: %i\n"
-									"\n"
-									"Import complete.\n"
-									"\n%s",
-									AppName,
-									MB_OK,
-									Imported,
-									Matches,
-									NotFound,
-									Different,
-									Matches + NotFound,
-									ErrorStr?ErrorStr:(char*)"");
+									LgiMsg(	this,
+											"Imported: %i\n"
+											"Matched: %i\n"
+											"Not matched: %i\n"
+											"Different: %i\n"
+											"Total: %i\n"
+											"\n"
+											"Import complete.\n"
+											"\n%s",
+											AppName,
+											MB_OK,
+											Imported,
+											Matches,
+											NotFound,
+											Different,
+											Matches + NotFound,
+											ErrorStr?ErrorStr:(char*)"");
+								}
+
+								delete dlg;
+							});
 						}
+						else
+						{
+							LgiMsg(this, "No language information to import", AppName, MB_OK);
+						}
+
+						// Groups.DeleteObjects();
+						// Menus.DeleteObjects();
 					}
 					else
 					{
-						LgiMsg(this, "No language information to import", AppName, MB_OK);
+						LgiMsg(this, "Failed to parse XML from file.\nError: %s", AppName, MB_OK, Tree.GetErrorMsg());
 					}
 
-					// Groups.DeleteObjects();
-					// Menus.DeleteObjects();
+					DeleteObj(Root);
 				}
-				else
-				{
-					LgiMsg(this, "Failed to parse XML from file.\nError: %s", AppName, MB_OK, Tree.GetErrorMsg());
-				}
-
-				DeleteObj(Root);
 			}
 		}
-	}
+
+		delete dlg;
+	});
 }
 
 bool AppWnd::Empty()
@@ -2530,7 +2551,8 @@ bool AppWnd::OpenFile(const char *FileName, bool Ro)
 	}
 	else if (stristr(FileName, ".rc"))
 	{
-		return LoadWin32(FileName);
+		LoadWin32(FileName);
+		return true;
 	}
 
 	return false;
@@ -3432,10 +3454,11 @@ void TokLine(LArray<char*> &T, char *Line)
 	}
 }
 
-bool AppWnd::LoadWin32(const char *FileName)
+
+
+void AppWnd::LoadWin32(const char *FileName)
 {
 	bool Status = false;
-	LFileSelect Select;
 	LHashTbl<ConstStrKey<char,false>,bool> CtrlNames;
 	CtrlNames.Add("LTEXT", true);
 	CtrlNames.Add("EDITTEXT", true);
@@ -3450,25 +3473,18 @@ bool AppWnd::LoadWin32(const char *FileName)
 
 	Empty();
 
-	if (!FileName)
+	auto Load = [&](const char *FileName)
 	{
-		Select.Parent(this);
-		Select.Type("Win32 Resource Script", "*.rc");
-		if (Select.Open())
-		{
-			FileName = Select.Name();
-		}
-	}
+		if (!FileName)
+			return;
 
-	if (FileName)
-	{
 		LProgressDlg Progress(this);
 
 		Progress.SetDescription("Initializing...");
 		Progress.SetType("K");
 		Progress.SetScale(1.0/1024.0);
 
-		char *FileTxt = LReadTextFile(Select.Name());
+		char *FileTxt = LReadTextFile(FileName);
 		if (FileTxt)
 		{
 			GToken Lines(FileTxt, "\r\n");
@@ -3497,7 +3513,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 
 			// Include defines
 			char IncPath[256];
-			strcpy(IncPath, Select.Name());
+			strcpy(IncPath, FileName);
 			LTrimDir(IncPath);
 			Defines.IncludeDirs.Insert(NewStr(IncPath));
 
@@ -4322,9 +4338,21 @@ bool AppWnd::LoadWin32(const char *FileName)
 		}
 
 		Invalidate();
-	}
+	};
 
-	return Status;
+	if (FileName)
+		Load(FileName);
+	else
+	{
+		auto Select = new LFileSelect(this);
+		Select->Type("Win32 Resource Script", "*.rc");
+		Select->Open([&](auto dlg, auto status)
+		{
+			if (status)
+				Load(dlg->Name());
+			delete dlg;
+		});
+	}
 }
 
 bool AppWnd::SaveWin32()

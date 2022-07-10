@@ -56,7 +56,7 @@ class LgiClass LFileSelect :
 public:
 	typedef std::function<void(LFileSelect*, bool)> SelectCb;
 
-	LFileSelect();
+	LFileSelect(LViewI *Window = NULL);
 	~LFileSelect();
 
 	// Properties

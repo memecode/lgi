@@ -599,12 +599,14 @@ public:
 
 	void Browse(int EditId)
 	{
-		LFileSelect s;
-		s.Parent(this);
-		if (s.Open())
+		auto s = new LFileSelect;
+		s->Parent(this);
+		s->Open([&](auto dlg, auto status)
 		{
-			SetCtrlName(EditId, s.Name());
-		}
+			if (status)
+				SetCtrlName(EditId, s->Name());
+			delete dlg;
+		});
 	}
 
 	void BrowseFiles(LViewI *Ctrl, const char *Bin, int EditId)
@@ -1267,32 +1269,41 @@ public:
 			}
 			case IDM_OPEN_DIFF:
 			{
-				LFileSelect s;
-				s.Parent(this);
-				if (s.Open())
+				auto s = new LFileSelect;
+				s->Parent(this);
+				s->Open([&](auto dlg, auto status)
 				{
-					OpenDiff(s.Name());
-				}
+					if (status)
+						OpenDiff(dlg->Name());
+					delete dlg;
+				});
 				break;
 			}
 			case IDM_OPTIONS:
 			{
-				OptionsDlg Dlg(this, Opts);
-				Dlg.DoModal();
+				auto Dlg = new OptionsDlg(this, Opts);
+				Dlg->DoModal([](auto dlg, auto ctrlId)
+				{
+					delete dlg;
+				});
 				break;
 			}
 			case IDM_FIND:
 			{
-				LInput i(this, "", "Search string:");
-				if (i.DoModal())
+				auto i = new LInput(this, "", "Search string:");
+				i->DoModal([&](auto dlg, auto ctrlId)
 				{
-					LString::Array Revs;
-					Revs.Add(i.GetStr());
+					if (ctrlId == IDOK)
+					{
+						LString::Array Revs;
+						Revs.Add(i->GetStr());
 
-					CommitList *cl;
-					if (GetViewById(IDC_LIST, cl))
-						cl->SelectRevisions(Revs);
-				}
+						CommitList *cl;
+						if (GetViewById(IDC_LIST, cl))
+							cl->SelectRevisions(Revs);
+					}
+					delete dlg;
+				});
 				break;
 			}
 			case IDM_UNTRACKED:
@@ -1374,16 +1385,7 @@ public:
 
 	void OpenLocalFolder(const char *Fld = NULL)
 	{
-		LFileSelect s;
-
-		if (!Fld)
-		{
-			s.Parent(this);
-			if (s.OpenFolder())
-				Fld = s.Name();
-		}
-
-		if (Fld)
+		auto Load = [&](const char *Fld)
 		{
 			// Check the folder isn't already loaded...
 			bool Has = false;
@@ -1405,16 +1407,31 @@ public:
 				u.SetFile(Fld);
 				Tree->Insert(new VcFolder(this, u.ToString()));
 			}
+		};
+
+		if (!Fld)
+		{
+			auto s = new LFileSelect;
+			s->Parent(this);
+			s->OpenFolder([&](auto dlg, auto status)
+			{
+				if (status)
+					Load(dlg->Name());
+				delete dlg;
+			});
 		}
+		else Load(Fld);
 	}
 
 	void OpenRemoteFolder()
 	{
-		RemoteFolderDlg dlg(this);
-		if (!dlg.DoModal())
-			return;
-
-		Tree->Insert(new VcFolder(this, dlg.Uri));
+		auto Dlg = new RemoteFolderDlg(this);
+		Dlg->DoModal([&](auto dlg, auto status)
+		{
+			if (status)
+				Tree->Insert(new VcFolder(this, Dlg->Uri));
+			delete dlg;
+		});
 	}
 	
 	void OpenDiff(const char *File)
