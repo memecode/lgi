@@ -146,6 +146,7 @@ void DocEdit::OnPaint(LSurface *pDC)
 {
 	LTextView3::OnPaint(pDC);
 	
+	#if 0
 	LRect cli = GetClient();
 	pDC->Colour(LColour::Red);
 	pDC->Box(&cli);
@@ -159,6 +160,7 @@ void DocEdit::OnPaint(LSurface *pDC)
 	}
 	
 	LgiTrace("cli=%s\n", cli.GetStr());
+	#endif
 }
 
 void DocEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
