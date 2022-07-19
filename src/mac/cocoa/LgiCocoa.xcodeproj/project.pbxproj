@@ -168,7 +168,6 @@
 		34EE8BB12748A55600F12915 /* TextFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 34EE8BB02748A55600F12915 /* TextFile.h */; };
 		34F6151F27E55C5D00FE5B0C /* Thread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6151D27E55C5D00FE5B0C /* Thread.h */; };
 		34F6152027E55C5D00FE5B0C /* ThreadEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6151E27E55C5D00FE5B0C /* ThreadEvent.h */; };
-		34F6153227E55CB100FE5B0C /* EventTargetThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6153127E55CB100FE5B0C /* EventTargetThread.h */; };
 		34F6153E27E5628600FE5B0C /* Token.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6153D27E5628600FE5B0C /* Token.h */; };
 /* End PBXBuildFile section */
 
@@ -337,7 +336,6 @@
 		34EE8BB02748A55600F12915 /* TextFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TextFile.h; path = ../../../include/lgi/common/TextFile.h; sourceTree = "<group>"; };
 		34F6151D27E55C5D00FE5B0C /* Thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Thread.h; path = ../../../../../lgi/trunk/include/lgi/common/Thread.h; sourceTree = "<group>"; };
 		34F6151E27E55C5D00FE5B0C /* ThreadEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadEvent.h; path = ../../../../../lgi/trunk/include/lgi/common/ThreadEvent.h; sourceTree = "<group>"; };
-		34F6153127E55CB100FE5B0C /* EventTargetThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EventTargetThread.h; path = ../../../../../lgi/trunk/include/lgi/common/EventTargetThread.h; sourceTree = "<group>"; };
 		34F6153D27E5628600FE5B0C /* Token.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Token.h; path = ../../../../../lgi/trunk/include/lgi/common/Token.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -481,7 +479,6 @@
 			children = (
 				348E99CD2876850F0067E92A /* ObjCWrapper.h */,
 				34BF15062871503B001B4CA5 /* DrawListSurface.h */,
-				34F6153127E55CB100FE5B0C /* EventTargetThread.h */,
 				3477C2A71CBF0AAF0028B84B /* Lgi.h */,
 				34114C8A23091E6E00F342B1 /* LgiClasses.h */,
 				3477C35A1CC1AEEA0028B84B /* LgiInc.h */,
@@ -751,7 +748,6 @@
 				3477C5171CC303B70028B84B /* LgiUiBase.h in Headers */,
 				3477C2AA1CBF22A00028B84B /* File.h in Headers */,
 				343874B5230F46B200CF96B4 /* Window.h in Headers */,
-				34F6153227E55CB100FE5B0C /* EventTargetThread.h in Headers */,
 				34D28929275B3DB0005961A8 /* Variant.h in Headers */,
 				348E99CE2876850F0067E92A /* ObjCWrapper.h in Headers */,
 				3477C2A21CBF0A920028B84B /* SymLookup.h in Headers */,
