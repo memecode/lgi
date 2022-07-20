@@ -99,6 +99,9 @@ enum LgiMessages
 		/// Send when a window is losing it's mouse capture. Usually
 		// because something else has requested it.
 		M_LOSING_CAPTURE,
+
+		// A: code
+		M_DIALOG_END_MODAL,
 	
 	#elif defined(LGI_SDL) || defined(HAIKU)
 

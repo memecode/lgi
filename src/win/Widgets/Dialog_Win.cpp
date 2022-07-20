@@ -230,21 +230,9 @@ void LDialog::EndModal(int Code)
 		return;
 	}
 
-	d->ModalResult = max(Code, 0);
-
-	if (d->ParentHnd)
-		EnableWindow(d->ParentHnd, true);
-	if (d->ParentWnd)
-	    d->ParentWnd->_Dialog = NULL;
-	    
-	Visible(false);
-
-	d->IsModal = false;
-
-	if (d->Callback)
-		d->Callback(this, d->ModalResult);
-	else
-		delete this; // default action is to delete the dialog
+	// This is so the calling code can unwind all it's stack frames without
+	// worrying about accessing things that have been deleted.
+	PostEvent(M_DIALOG_END_MODAL, (LMessage::Param)Code);
 }
 
 static char *BaseStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -420,6 +408,26 @@ LMessage::Result LDialog::OnEvent(LMessage *Msg)
 			// If we don't return true here the LWindow::OnEvent handler for
 			// WM_CREATE will call OnCreate again.
 			return true;
+		}
+		case M_DIALOG_END_MODAL:
+		{
+			// See ::EndModal for comment on why this is here.
+			d->ModalResult = max((int)Msg->A(), 0);
+
+			if (d->ParentHnd)
+				EnableWindow(d->ParentHnd, true);
+			if (d->ParentWnd)
+				d->ParentWnd->_Dialog = NULL;
+	    
+			Visible(false);
+
+			d->IsModal = false;
+
+			if (d->Callback)
+				d->Callback(this, d->ModalResult);
+			else
+				delete this; // default action is to delete the dialog
+			return 1;
 		}
 	}
 
