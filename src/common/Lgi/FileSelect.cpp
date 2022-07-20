@@ -1345,7 +1345,7 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification n)
 			LInput Dlg(this, "", "Create new folder:", "New Folder");
 			Dlg.DoModal([&](auto d, auto code)
 			{
-				char New[MAX_PATH];
+				char New[MAX_PATH_LEN];
 				strcpy(New, GetCtrlName(IDC_PATH));
 				if (New[strlen(New)-1] != DIR_CHAR) strcat(New, DIR_STR);
 				strcat(New, Dlg.GetStr());
@@ -1736,10 +1736,10 @@ void LFolderItem::OnRename()
 		if (!code)
 			return;
 			
-		char Old[MAX_PATH];
+		char Old[MAX_PATH_LEN];
 		strcpy_s(Old, sizeof(Old), Path);
 
-		char New[MAX_PATH];
+		char New[MAX_PATH_LEN];
 		File[0] = 0;
 		LMakePath(New, sizeof(New), Path, Inp->GetStr());
 		
@@ -2033,9 +2033,11 @@ void GFolderList::OnFolder()
 }
 
 //////////////////////////////////////////////////////////////////////////
-LFileSelect::LFileSelect()
+LFileSelect::LFileSelect(LViewI *Window)
 {
 	d = new LFileSelectPrivate(this);
+	if (Window)
+		Parent(Window);
 }
 
 LFileSelect::~LFileSelect()
