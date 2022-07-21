@@ -166,7 +166,7 @@ public:
     typedef std::function<void(LDialog *dlg, int ctrlId)> OnClose;
 
 	/// Constructor
-	LDialog();
+	LDialog(LViewI *Parent = NULL);
 	
 	/// Destructor
 	~LDialog();

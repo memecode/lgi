@@ -185,7 +185,6 @@ struct LSoftwareUpdatePriv
 					r.y2 = (r.Y()-c.Y()) + 30 + t->Y() + btn->Y();
 					SetPos(r);
 					MoveToCenter();
-					DoModal();
 				}
 			}
 		}
@@ -306,7 +305,8 @@ bool LSoftwareUpdate::CheckForUpdate(UpdateInfo &Info, LViewI *WithUi, bool IncB
 	
 	if (WithUi)
 	{
-		LSoftwareUpdatePriv::Spinner s(WithUi, &Update);
+		auto s = new LSoftwareUpdatePriv::Spinner(WithUi, &Update);
+		s->DoModal(NULL);		
 	}
 	else
 	{

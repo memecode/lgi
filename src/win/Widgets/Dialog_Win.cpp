@@ -105,12 +105,14 @@ short *DlgPadToDWord(short *A, bool Seek = false)
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-LDialog::LDialog()
+LDialog::LDialog(LViewI *parent)
 	: ResObject(Res_Dialog)
 {
 	d = new LDialogPriv;
 	_Window = this;
 	Name("Dialog");
+	if (parent)
+		SetParent(parent);
 
 	#if USE_DIALOGBOXINDIRECTPARAM
 	WndFlags |= GWF_DIALOG;
