@@ -73,25 +73,22 @@ GtkPrintBegin(	GtkPrintOperation	*operation,
 				GtkPrintContext		*context,
 				LPrinterPrivate		*d)
 {
-	bool Status = false;
-
 	GtkPrintSettings *settings = gtk_print_operation_get_print_settings(operation);
 	if (settings)
 	{
 		d->PrinterName = gtk_print_settings_get_printer(settings);
 	}
 
-	if (d->PrintDC.Reset(new LPrintDC(context, d->JobName, d->PrinterName)))
+	if (!d->PrintDC.Reset(new LPrintDC(context, d->JobName, d->PrinterName)))
+		return;
+		
+	d->Events->OnBeginPrint(d->PrintDC, [&](auto Pages)
 	{
-		int Pages = d->Events->OnBeginPrint(d->PrintDC);
 		if (Pages > 0)
-		{
 			gtk_print_operation_set_n_pages(d->Op, Pages);
-			Status = true;
-		}
-	}
-	if (!Status)
-		gtk_print_operation_cancel(d->Op);
+		else
+			gtk_print_operation_cancel(d->Op);
+	});
 }
 	
 static void
@@ -107,7 +104,11 @@ GtkPrintDrawPage(	GtkPrintOperation	*operation,
 	d->Events->OnPrintPage(d->PrintDC, page_number);
 }
 
-int LPrinter::Print(LPrintEvents *Events, const char *PrintJobName, int Pages /* = -1 */, LView *Parent /* = 0 */)
+void LPrinter::Print(	LPrintEvents *Events,
+						std::function<void(int)> Callback,
+						const char *PrintJobName,
+						int Pages,
+						LView *Parent)
 {
 	if (!Events)
 	{

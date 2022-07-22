@@ -8,7 +8,7 @@
 
 CC = gcc
 CPP = g++
-Target = lgi-gtk3
+Target = lgi-dev
 ifndef Build
 	Build = Debug
 endif
@@ -73,6 +73,7 @@ Source =	src/linux/Lgi/Window.cpp \
 			src/linux/General/ShowFileProp_Linux.cpp \
 			src/linux/General/Mem.cpp \
 			src/linux/General/File.cpp \
+			src/haiku/ShowFileProp_Haiku.cpp \
 			src/common/Widgets/Tree.cpp \
 			src/common/Widgets/ToolBar.cpp \
 			src/common/Widgets/TextLabel.cpp \
@@ -113,15 +114,12 @@ Source =	src/linux/Lgi/Window.cpp \
 			src/common/Lgi/WindowCommon.cpp \
 			src/common/Lgi/ViewCommon.cpp \
 			src/common/Lgi/Variant.cpp \
-			src/common/Lgi/TrayIcon.cpp \
-			src/common/Lgi/ToolTip.cpp \
 			src/common/Lgi/ThreadEvent.cpp \
 			src/common/Lgi/ThreadCommon.cpp \
 			src/common/Lgi/SubProcess.cpp \
 			src/common/Lgi/Stream.cpp \
 			src/common/Lgi/Rand.cpp \
 			src/common/Lgi/OptionsFile.cpp \
-			src/common/Lgi/Object.cpp \
 			src/common/Lgi/Mutex.cpp \
 			src/common/Lgi/Mru.cpp \
 			src/common/Lgi/MenuCommon.cpp \
