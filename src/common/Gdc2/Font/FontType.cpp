@@ -76,27 +76,27 @@ void LFontType::DoUI(LView *Parent, std::function<void(LFontType*)> Callback)
 	bool Status = false;
 
 	#if WINNATIVE
-	void *i = &Info;
 	int bytes = sizeof(Info);
 	#else
-	char i[128];
+	char Info[256];
 	int bytes = sprintf_s(i, sizeof(i), "%s,%i", Info.Face(), Info.PointSize());
 	#endif
 
-	LFontSelect *Dlg = new LFontSelect(Parent, i, bytes);
-	Dlg->DoModal([&,FontType=this](auto d, auto code)
+	LFontSelect *Dlg = new LFontSelect(Parent, &Info, bytes);
+	Dlg->DoModal([Dlg, this, Callback](auto dlg, auto id)
 	{
-		if (code == IDOK)
+		if (id == IDOK)
 		{
 			#if WINNATIVE
-			Dlg->Serialize(i, sizeof(Info), true);
+			Dlg->Serialize(&this->Info, sizeof(this->Info), true);
 			#else
-			if (Dlg->Face) FontType->Info.Face(Dlg->Face);
+			if (Dlg->Face)
+				FontType->Info.Face(Dlg->Face);
 			FontType->Info.PointSize(Dlg->Size);
 			#endif
 			
 			if (Callback)
-				Callback(FontType);
+				Callback(this);
 		}
 		
 		delete Dlg;
