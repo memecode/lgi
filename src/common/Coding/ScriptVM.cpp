@@ -401,7 +401,7 @@ struct CodeBlock
 	int AsmLines;
 };
 
-class LVirtualMachinePriv : public GRefCount
+class LVirtualMachinePriv : public LRefCount
 {
 	LVariant ArrayTemp;
 	

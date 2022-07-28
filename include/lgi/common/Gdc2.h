@@ -386,7 +386,7 @@ public:
 #define OrgRgn(r)		r.Offset(-OriginX, -OriginY)
 
 /// Base class API for graphics operations
-class LgiClass LSurface : public GRefCount, public LDom
+class LgiClass LSurface : public LRefCount, public LDom
 {
 	friend class LFilter;
 	friend class LView;

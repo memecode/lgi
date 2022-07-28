@@ -3,7 +3,7 @@
 
 #include "lgi/common/LgiUiBase.h"
 
-class GRefCount
+class LRefCount
 {
 	#if defined(_WIN32)
 	LONG _Count;
@@ -17,12 +17,12 @@ public:
     int _GetCount() { return _Count; }
     #endif
 
-	GRefCount(bool trace = false)
+	LRefCount(bool trace = false)
 	{
 		_Count = 0;
 		_DebugTrace = trace;
 		if (_DebugTrace)
-			LgiTrace("%s:%i - GRefCount.Construct=%i\n", _FL, _Count);
+			LgiTrace("%s:%i - LRefCount.Construct=%i\n", _FL, _Count);
 	}
 
 	void SetDebug(bool b)
@@ -30,10 +30,10 @@ public:
 		_DebugTrace = b;
 	}
 
-	virtual ~GRefCount()
+	virtual ~LRefCount()
 	{
 		if (_DebugTrace)
-			LgiTrace("%s:%i - ~GRefCount=%i\n", _FL, _Count);
+			LgiTrace("%s:%i - ~LRefCount=%i\n", _FL, _Count);
 		LAssert(_Count == 0);
 	}
 
@@ -48,13 +48,13 @@ public:
 			_Count++;
 		#endif
 		if (_DebugTrace)
-			LgiTrace("%s:%i - GRefCount.AddRef=%i\n", _FL, _Count);
+			LgiTrace("%s:%i - LRefCount.AddRef=%i\n", _FL, _Count);
 	}
 
 	virtual bool DecRef()
 	{
 		if (_DebugTrace)
-			LgiTrace("%s:%i - GRefCount.DecRef=%i\n", _FL, _Count);
+			LgiTrace("%s:%i - LRefCount.DecRef=%i\n", _FL, _Count);
 		LAssert(_Count > 0)
 			;
 		#if defined(_WIN32)

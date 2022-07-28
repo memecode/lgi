@@ -137,7 +137,7 @@ struct LExternFunc : public LFunc
 	LExecutionStatus Call(LScriptContext *Ctx, LScriptArguments &Args) override;
 };
 
-class LFunctionInfo : public GRefCount
+class LFunctionInfo : public LRefCount
 {
 	static int _Infos;
 

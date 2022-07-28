@@ -23,7 +23,7 @@
 class LXmlTree;
 class LXmlTreePrivate;
 
-class LgiClass LXmlAlloc : public GRefCount
+class LgiClass LXmlAlloc : public LRefCount
 {
 public:
 	virtual ~LXmlAlloc() {}
