@@ -518,10 +518,13 @@ void VcCommit::OnMouseClick(LMouse &m)
 				{
 					auto Fld = Folder;
 					auto Inp = new LInput(GetList(), "", "New branch name:", AppName);
-					Inp->DoModal([&](auto dlg, auto ctrlId)
+					Inp->DoModal([this, Fld, Inp, Revs](auto dlg, auto ctrlId)
 					{
 						if (ctrlId)
-							Fld->RenameBranch(Inp->GetStr(), Revs);
+						{
+							auto Revisions = Revs;
+							Fld->RenameBranch(Inp->GetStr(), Revisions);
+						}
 						delete dlg;
 					});
 				}

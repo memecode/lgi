@@ -328,7 +328,7 @@ SSH_LOG("detectVcs:", ls);
 			if (!con)
 				break;
 
-			LAssert(p->Args.Find("\n") < 0);
+			// LAssert(p->Args.Find("\n") < 0);
 			bool Debug = p->Args.Find("rev-list --all") >= 0;
 			if (Debug)
 			{
@@ -1291,7 +1291,7 @@ public:
 			case IDM_FIND:
 			{
 				auto i = new LInput(this, "", "Search string:");
-				i->DoModal([&](auto dlg, auto ctrlId)
+				i->DoModal([this, i](auto dlg, auto ctrlId)
 				{
 					if (ctrlId == IDOK)
 					{
@@ -1426,7 +1426,7 @@ public:
 	void OpenRemoteFolder()
 	{
 		auto Dlg = new RemoteFolderDlg(this);
-		Dlg->DoModal([&](auto dlg, auto status)
+		Dlg->DoModal([this, Dlg](auto dlg, auto status)
 		{
 			if (status)
 				Tree->Insert(new VcFolder(this, Dlg->Uri));

@@ -2723,7 +2723,7 @@ void LTextView3::SetLine(int64_t i)
 void LTextView3::DoGoto(std::function<void(bool)> Callback)
 {
 	LInput *Dlg = new LInput(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto line:"), "Text");	
-	Dlg->DoModal([&](auto d, auto code)
+	Dlg->DoModal([this, Dlg, Callback](auto d, auto code)
 	{
 		auto ok = code == IDOK && Dlg->GetStr();
 		if (ok)
@@ -3637,7 +3637,7 @@ void LTextView3::DoContextMenu(LMouse &m)
 			sprintf_s(s, sizeof(s), "%i", IndentSize);
 			
 			LInput *i = new LInput(this, s, "Indent Size:", "Text");
-			i->DoModal([&](auto dlg, auto code)
+			i->DoModal([this, i](auto dlg, auto code)
 			{
 				if (code)
 					IndentSize = atoi(i->GetStr());
@@ -3651,7 +3651,7 @@ void LTextView3::DoContextMenu(LMouse &m)
 			sprintf_s(s, sizeof(s), "%i", TabSize);
 			
 			LInput *i = new LInput(this, s, "Tab Size:", "Text");
-			i->DoModal([&](auto dlg, auto code)
+			i->DoModal([this, i](auto dlg, auto code)
 			{
 				SetTabSize(atoi(i->GetStr()));
 				delete i;

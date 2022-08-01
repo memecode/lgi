@@ -2208,7 +2208,7 @@ void VcFolder::OnMouseClick(LMouse &m)
 			case IDM_EDIT:
 			{
 				auto Dlg = new LInput(GetTree(), Uri.ToString(), "URI:", "Remote Folder Location");
-				Dlg->DoModal([&](auto dlg, auto ctrlId)
+				Dlg->DoModal([this, Dlg](auto dlg, auto ctrlId)
 				{
 					if (ctrlId)
 					{
@@ -2978,7 +2978,7 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 				if (s.Find("Please tell me who you are") >= 0)
 				{
 					auto i = new LInput(GetTree(), "", "Git user name:", AppName);
-					i->DoModal([&](auto dlg, auto ctrlId)
+					i->DoModal([this, i](auto dlg, auto ctrlId)
 					{
 						if (ctrlId)
 						{
@@ -2986,13 +2986,13 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 							Args.Printf("config --global user.name \"%s\"", i->GetStr().Get());
 							StartCmd(Args);
 
-							i = new LInput(GetTree(), "", "Git user email:", AppName);
-							i->DoModal([&](auto dlg, auto ctrlId)
+							auto inp = new LInput(GetTree(), "", "Git user email:", AppName);
+							i->DoModal([this, inp](auto dlg, auto ctrlId)
 							{
 								if (ctrlId)
 								{
 									LString Args;
-									Args.Printf("config --global user.email \"%s\"", i->GetStr().Get());
+									Args.Printf("config --global user.email \"%s\"", inp->GetStr().Get());
 									StartCmd(Args);
 								}
 								delete dlg;
@@ -3612,7 +3612,7 @@ bool VcFolder::RenameBranch(LString NewName, LArray<VcCommit*> &Revs)
 		{
 			// Update to the ancestor of the commits
 			LHashTbl<StrKey<char>,int> Refs(0, -1);
-			for (auto c:Revs)
+			for (auto c: Revs)
 			{
 				for (auto p:*c->GetParents())
 					if (Refs.Find(p) < 0)

@@ -959,7 +959,7 @@ void LRichTextEdit::DoCase(std::function<void(bool)> Callback, bool Upper)
 void LRichTextEdit::DoGoto(std::function<void(bool)> Callback)
 {
 	auto input = new LInput(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto line:"), "Text");
-	input->DoModal([&](auto dlg, auto ctrlId)
+	input->DoModal([this, input, Callback](auto dlg, auto ctrlId)
 	{
 		if (ctrlId == IDOK)
 		{
@@ -1013,7 +1013,7 @@ void LRichTextEdit::DoFind(std::function<void(bool)> Callback)
 								return OnFind(dlg);
 							},
 							u);
-	Dlg->DoModal([&](auto dlg, auto ctrlId)
+	Dlg->DoModal([this, Dlg, Callback](auto dlg, auto ctrlId)
 	{
 		if (Callback)
 			Callback(ctrlId != IDCANCEL);
@@ -1417,7 +1417,7 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 			char s[32];
 			sprintf_s(s, sizeof(s), "%i", IndentSize);
 			auto i = new LInput(this, s, "Indent Size:", "Text");
-			i->DoModal([&](auto dlg, auto ctrlId)
+			i->DoModal([this, i](auto dlg, auto ctrlId)
 			{
 				if (ctrlId == IDOK)
 				{
@@ -1433,7 +1433,7 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 			char s[32];
 			sprintf_s(s, sizeof(s), "%i", TabSize);
 			auto i = new LInput(this, s, "Tab Size:", "Text");
-			i->DoModal([&](auto dlg, auto ctrlId)
+			i->DoModal([this, i](auto dlg, auto ctrlId)
 			{
 				if (ctrlId == IDOK)
 				{
