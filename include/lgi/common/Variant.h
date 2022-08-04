@@ -397,29 +397,29 @@ public:
 	LVariant &Cast(LVariantType NewType);
 	/// Casts the value to int, from whatever source type. The
 	/// LVariant type does not change after calling this.
-	int32 CastInt32();
+	int32 CastInt32() const;
 	/// Casts the value to a 64 bit int, from whatever source type. The
 	/// LVariant type does not change after calling this.
-	int64 CastInt64();
+	int64 CastInt64() const;
 	/// Casts the value to double, from whatever source type. The
 	/// LVariant type does not change after calling this.
-	double CastDouble();
+	double CastDouble() const;
 	/// Cast to a string from whatever source type, the LVariant will
 	/// take the type GV_STRING after calling this. This is because
 	/// returning a static string is not thread safe.
 	char *CastString();
 	/// Casts to a DOM ptr
-	LDom *CastDom();
+	LDom *CastDom() const;
 	/// Casts to a boolean. You probably DON'T want to use this function. The
 	/// behaviour for strings -> bool is such that if the string is value it
 	/// always evaluates to true, and false if it's not a valid string. Commonly
 	/// what you want is to evaluate whether the string is zero or non-zero in
 	/// which cast you should use "CastInt32() != 0" instead.
-	bool CastBool();
+	bool CastBool() const;
 	/// Returns the pointer if available.
-	void *CastVoidPtr();
+	void *CastVoidPtr() const;
 	/// Returns a LView
-	LView *CastView() { return Type == GV_GVIEW ? Value.View : NULL; }
+	LView *CastView() const { return Type == GV_GVIEW ? Value.View : NULL; }
 
 	/// List insert
 	bool Add(LVariant *v, int Where = -1);	

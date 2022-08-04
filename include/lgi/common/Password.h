@@ -10,15 +10,15 @@ class LgiClass GPassword
 	char *Data; // this is binary data... may contain NULL's
 	ssize_t Len;
 
-	void Process(char *Out, const char *In, ssize_t Len);
+	void Process(char *Out, const char *In, ssize_t Len) const;
 
 public:
 	GPassword(GPassword *p = 0);
 	virtual ~GPassword();
 
 	bool IsValid() { return Data && Len > 0; }
-	void Get(char *Buf);
-	LString Get();
+	void Get(char *Buf) const;
+	LString Get() const;
 	void Set(const char *Buf);
 	
 	// bool Serialize(ObjProperties *Options, char *Option, int Write);

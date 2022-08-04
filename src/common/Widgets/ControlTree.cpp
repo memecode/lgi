@@ -609,7 +609,7 @@ int LControlTree::OnNotify(LViewI *c, LNotification n)
 			{
 				auto s = new LFileSelect;
 				s->Parent(this);
-				s->Open([&](auto dlg, auto status)
+				s->Open([i](auto dlg, auto status)
 				{
 					if (status)
 					{
