@@ -742,7 +742,16 @@ void VcFolder::Select(bool b)
 			{
 				case VcGit:
 				{
-					IsLogging = StartCmd("rev-list --all --header --timestamp --author-date-order", &VcFolder::ParseRevList);
+					LVariant Limit;
+					d->Opts.GetValue("git-limit", Limit);
+
+					LString s;
+					if (Limit.CastInt32() > 0)
+						s.Printf("rev-list --all --header --timestamp --author-date-order -n %i", Limit.CastInt32());
+					else
+						s.Printf("rev-list --all --header --timestamp --author-date-order");
+
+					IsLogging = StartCmd(s, &VcFolder::ParseRevList);
 					break;
 				}
 				case VcSvn:
@@ -757,7 +766,7 @@ void VcFolder::Select(bool b)
 					}
 					
 					LString s;
-					if (Limit.CastInt32())
+					if (Limit.CastInt32() > 0)
 						s.Printf("log --limit %i", Limit.CastInt32());
 					else
 						s = "log";
@@ -1026,7 +1035,7 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 	}
 
 	IsLogging = false;
-	return true;
+	return Errors == 0;
 }
 
 LString VcFolder::GetFilePart(const char *uri)
