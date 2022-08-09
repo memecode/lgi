@@ -52,8 +52,7 @@
 #endif
 #define GT_TRANSPARENT				0x00000000
 #ifndef IDC_HAND
-#define IDC_HAND			
-		MAKEINTRESOURCE(32649)
+#define IDC_HAND					MAKEINTRESOURCE(32649)
 #endif
 
 #undef CellSpacing
