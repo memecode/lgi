@@ -40,12 +40,13 @@
 #endif
 
 #ifdef HAIKU
-#include <FindDirectory.h>
-#include <fs_info.h>
+	#include <FindDirectory.h>
+	#include <fs_info.h>
 #else
-#include "SymLookup.h"
+	#include "SymLookup.h"
 #endif
 #include "lgi/common/Library.h"
+#include "lgi/common/Net.h"
 
 #if defined(__GTK_H__)
 namespace Gtk {
@@ -2797,27 +2798,24 @@ LString LGetAppForProtocol(const char *Protocol)
 		LAssert(!"What to do?");
 	#elif defined(MAC)
 		// Get the handler type
-		CFStringRef Type = LString(Protocol).CreateStringRef();
-		CFStringRef Handler = LSCopyDefaultHandlerForURLScheme(Type);
-		CFRelease(Type);
-		if (Handler)
+		LString s;
+		s.Printf("%s://domain/path", Protocol);
+		auto str = s.NsStr();
+		auto type = [NSURL URLWithString:str];
+		[str release];
+		auto handlerUrl = [[NSWorkspace sharedWorkspace] URLForApplicationToOpenURL:type];
+		[type release];
+		if (handlerUrl)
 		{
 			// Convert to app path
-			CFErrorRef Err;
-			auto a = LSCopyApplicationURLsForBundleIdentifier(Handler, &Err);
-			if (a)
-			{
-				if (CFArrayGetCount(a) > 0)
-				{
-					CFURLRef nsurl = (CFURLRef)CFArrayGetValueAtIndex(a, 0);
-					App = CFURLGetString(nsurl);
-					if (App.Find("file:///") == 0)
-						App = App(7,-2);
-				}
-				CFRelease(a);
-			}
+			s = [handlerUrl absoluteString];
+			LUri uri(s);
+			if (uri.sProtocol.Equals("file"))
+				App = uri.sPath.RStrip("/");
+			else
+				LgiTrace("%s:%i - Error: unknown protocol '%s'\n", _FL, uri.sProtocol.Get());
 		}
-		CFRelease(Handler);
+		[handlerUrl release];
 	#else
 		#warning "Impl me."
 	#endif
