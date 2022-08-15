@@ -14,6 +14,9 @@
     <Filter Include="Source Files\StructuredLog">
       <UniqueIdentifier>{699395fd-5c52-485b-aee9-12ca42fecba2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Ssh">
+      <UniqueIdentifier>{954c3d3b-a151-4c83-b7cc-c36301353e1b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\common\Lgi\LgiMain.cpp">
@@ -49,6 +52,9 @@
     <ClCompile Include="..\src\common\Text\XmlTreeUi.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
+    <ClCompile Include="Src\SshConnection.cpp">
+      <Filter>Source Files\Ssh</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\src\win\General\Lgi.manifest" />
@@ -71,6 +77,9 @@
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\StructuredIo.h">
       <Filter>Source Files\StructuredLog</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\SshConnection.h">
+      <Filter>Source Files\Ssh</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

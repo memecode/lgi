@@ -180,6 +180,7 @@
     <ClCompile Include="Src\BlameUi.cpp" />
     <ClCompile Include="Src\DropDownBtn.cpp" />
     <ClCompile Include="Src\Main.cpp" />
+    <ClCompile Include="Src\SshConnection.cpp" />
     <ClCompile Include="Src\VcCommit.cpp" />
     <ClCompile Include="Src\VcFile.cpp" />
     <ClCompile Include="Src\VcFolder.cpp" />
@@ -197,6 +198,7 @@
     <ClInclude Include="..\include\lgi\common\StructuredIo.h" />
     <ClInclude Include="..\include\lgi\common\StructuredLog.h" />
     <ClInclude Include="Src\Lvc.h" />
+    <ClInclude Include="Src\SshConnection.h" />
     <ClInclude Include="Src\VcCommit.h" />
     <ClInclude Include="Src\VcFile.h" />
     <ClInclude Include="Src\VcFolder.h" />

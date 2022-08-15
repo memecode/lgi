@@ -745,13 +745,14 @@ void VcFolder::Select(bool b)
 					LVariant Limit;
 					d->Opts.GetValue("git-limit", Limit);
 
-					LString s;
+					LString cmd = "rev-list --all --header --timestamp --author-date-order", s;
 					if (Limit.CastInt32() > 0)
-						s.Printf("rev-list --all --header --timestamp --author-date-order -n %i", Limit.CastInt32());
-					else
-						s.Printf("rev-list --all --header --timestamp --author-date-order");
-
-					IsLogging = StartCmd(s, &VcFolder::ParseRevList);
+					{
+						s.Printf(" -n %i", Limit.CastInt32());
+						cmd += s;
+					}
+					
+					IsLogging = StartCmd(cmd, &VcFolder::ParseRevList);
 					break;
 				}
 				case VcSvn:
@@ -966,7 +967,7 @@ bool VcFolder::GetBranches(ParseParams *Params)
 	switch (GetType())
 	{
 		case VcGit:
-			if (StartCmd("branch -a", &VcFolder::ParseBranches, Params))
+			if (StartCmd("-P branch -a", &VcFolder::ParseBranches, Params))
 				IsBranches = StatusActive;
 			break;
 		case VcSvn:
@@ -2448,8 +2449,7 @@ void VcFolder::ListCommit(VcCommit *c)
 		switch (GetType())
 		{
 			case VcGit:
-				// Args.Printf("show --oneline --name-only %s", Rev);
-				Args.Printf("show %s", c->GetRev());
+				Args.Printf("-P show %s", c->GetRev());
 				IsFilesCmd = StartCmd(Args, &VcFolder::ParseFiles, new ParseParams(c->GetRev()));
 				break;
 			case VcSvn:
@@ -2902,38 +2902,39 @@ bool VcFolder::ParseCountToTip(int Result, LString s, ParseParams *Params)
 
 void VcFolder::ListWorkingFolder()
 {
-	if (!IsWorkingFld)
-	{
-		d->ClearFiles();
+	if (IsWorkingFld)
+		return;
+
+	d->ClearFiles();
 		
-		bool Untracked = d->IsMenuChecked(IDM_UNTRACKED);
+	bool Untracked = d->IsMenuChecked(IDM_UNTRACKED);
 
-		LString Arg;
-		switch (GetType())
-		{
-			case VcCvs:
-				if (Untracked)
-					Arg = "-qn update";
-				else
-					Arg = "-q diff --brief";
-				break;
-			case VcSvn:
-				Arg = "status";
-				break;
-			case VcGit:
-				StartCmd("diff --staged", &VcFolder::ParseWorking);
-				Arg = "diff --diff-filter=ACDMRTU";
-				break;
-			case VcHg:
-				Arg = "status -mard";
-				break;
-			default:
-				Arg ="diff";
-				break;
-		}
-
-		IsWorkingFld = StartCmd(Arg, &VcFolder::ParseWorking);
+	LString Arg;
+	switch (GetType())
+	{
+		case VcCvs:
+			if (Untracked)
+				Arg = "-qn update";
+			else
+				Arg = "-q diff --brief";
+			break;
+		case VcSvn:
+			Arg = "status";
+			break;
+		case VcGit:
+			Arg = "-P diff --diff-filter=ACDMRTU";
+			// StartCmd("diff --staged", &VcFolder::ParseWorking);
+			break;
+		case VcHg:
+			Arg = "status -mard";
+			break;
+		default:
+			return;
 	}
+
+	auto params = new ParseParams;
+	params->Debug = true;
+	IsWorkingFld = StartCmd(Arg, &VcFolder::ParseWorking, params);
 }
 
 void VcFolder::GitAdd()
