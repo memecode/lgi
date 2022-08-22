@@ -220,14 +220,13 @@ bool SshConnection::HandleMsg(LMessage *m)
 				LgiTrace("%s:%i - Folder no longer in tree (recently deleted?).\n", _FL);
 		}
 	}
-	else if (u->Output) // Cmd output
+	else
 	{
 		if (d && d->Tree->HasItem(u->f))
 			u->f->OnSshCmd(u);
 		else
 			LgiTrace("%s:%i - Folder no longer in tree (recently deleted?).\n", _FL);
 	}
-	else return false; // ?
 
 	return true;
 }
@@ -308,10 +307,6 @@ SSH_LOG("detectVcs:", ls);
 				break;
 
 			auto Debug = p->Params && p->Params->Debug;
-			if (Debug)
-			{
-				int asd=0;
-			}
 
 			LString cmd;
 			cmd.Printf("cd %s\n", path.Get());
@@ -321,6 +316,8 @@ SSH_LOG(">>>> cd:", path);
 
 			cmd.Printf("%s %s\n", p->Exe.Get(), p->Args.Get());
 SSH_LOG(">>>> cmd:", cmd);
+			if (Log)
+				Log->Print("%s", cmd.Get());
 			wr = con->Write(cmd, cmd.Length());
 			pr = WaitPrompt(con, &p->Output, Debug?"Cmd":NULL);
 			
@@ -330,7 +327,13 @@ SSH_LOG(">>>> result:", cmd);
 			wr = con->Write(cmd, cmd.Length());
 			pr = WaitPrompt(con, &result, Debug?"Echo":NULL);
 			if (pr)
+			{
 				p->ExitCode = (int)result.Int();
+				if (Log)
+					Log->Print("... result=%i\n", p->ExitCode);
+			}
+			else if (Log)
+				Log->Print("... result=failed\n");
 
 			PostObject(GuiHnd, M_RESPONSE, p);
 			break;

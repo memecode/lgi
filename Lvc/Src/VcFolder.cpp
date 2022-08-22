@@ -441,11 +441,11 @@ bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, L
 	if (CmdErrors > 2)
 		return false;
 
-	if (d->Log && Logging != LogSilo)
-		d->Log->Print("%s %s\n", Exe, Args);
-
 	if (Uri.IsFile())
 	{
+		if (d->Log && Logging != LogSilo)
+			d->Log->Print("%s %s\n", Exe, Args);
+
 		LAutoPtr<LSubProcess> Process(new LSubProcess(Exe, Args));
 		if (!Process)
 			return false;
@@ -1438,7 +1438,10 @@ void VcFolder::LinkParents()
 							NewIndex = (int)Active.Length();
 
 						Edges.Delete(e);
+						
 						Active[NewIndex].Add(e);
+						Edges = Active[i]; // The 'Add' above can invalidate the object 'Edges' refers to
+
 						e->Idx = NewIndex;
 						c->Pos.Add(e, NewIndex);
 						n--;
@@ -2923,7 +2926,6 @@ void VcFolder::ListWorkingFolder()
 			break;
 		case VcGit:
 			Arg = "-P diff --diff-filter=ACDMRTU";
-			// StartCmd("diff --staged", &VcFolder::ParseWorking);
 			break;
 		case VcHg:
 			Arg = "status -mard";

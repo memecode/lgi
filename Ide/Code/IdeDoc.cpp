@@ -1429,7 +1429,10 @@ void IdeDoc::SplitSelection(LString Sep)
 	if (!s)
 		return;
 
-	LAutoWString w(Utf8ToWide(s.Replace(Sep, "\n")));
+	auto parts = s.SplitDelimit(Sep);
+	auto joined = LString("\n").Join(parts);
+
+	LAutoWString w(Utf8ToWide(joined));
 	d->Edit->DeleteSelection();
 	d->Edit->Insert(r.Start, w, StrlenW(w));
 }
