@@ -2405,7 +2405,7 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 	Parent->Sort(FolderCompare);
 }
 
-void VcFolder::OnVcsType()
+void VcFolder::OnVcsType(LString errorMsg)
 {
 	if (!d)
 	{
@@ -2418,12 +2418,19 @@ void VcFolder::OnVcsType()
 		auto NewType = c->Types.Find(Uri.sPath);
 		if (NewType && NewType != Type)
 		{
-			Type = NewType;
-			ClearError();
-			Update();
+			if (NewType == VcError)
+			{
+				OnCmdError(NULL, errorMsg);
+			}
+			else
+			{
+				Type = NewType;
+				ClearError();
+				Update();
 
-			if (LTreeItem::Select())
-				Select(true);
+				if (LTreeItem::Select())
+					Select(true);
+			}
 		}
 	}
 }

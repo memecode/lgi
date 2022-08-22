@@ -311,7 +311,7 @@ public:
 	void OnMouseClick(LMouse &m);
 	void OnRemove();
 	void OnExpand(bool b);
-	void OnVcsType();
+	void OnVcsType(LString errorMsg);
 	void OnSshCmd(SshParams *p);
 };
 

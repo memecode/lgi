@@ -108,6 +108,7 @@ enum VersionCtrl
 	VcHg,
 	
 	VcPending,
+	VcError,
 	VcMax,
 };
 

@@ -215,7 +215,7 @@ bool SshConnection::HandleMsg(LMessage *m)
 		for (auto f: c.TypeNotify)
 		{
 			if (d->Tree->HasItem(f))
-				f->OnVcsType();
+				f->OnVcsType(u->Output);
 			else
 				LgiTrace("%s:%i - Folder no longer in tree (recently deleted?).\n", _FL);
 		}
@@ -255,44 +255,60 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 		{
 			LAutoPtr<LString> p;
 			if (!ReceiveA(p, Msg))
+			{
+				LAssert(!"Incorrect param.");
 				break;
+			}
 
+			LAutoPtr<SshParams> r(new SshParams(this));
+
+			LString ls, out;
+			LString::Array lines;
+			VersionCtrl Vcs = VcNone;
 			LString path = PathFilter(*p);
 			LStream *con = GetConsole();
 			if (!con)
-				break;
-
-			LString ls, out;
-			ls.Printf("find %s -maxdepth 1 -printf \"%%f\n\"\n", path.Get());
-SSH_LOG("detectVcs:", ls);
-			con->Write(ls, ls.Length());
-			auto pr = WaitPrompt(con, &out);
-			auto lines = out.SplitDelimit("\r\n");
-
-			VersionCtrl Vcs = VcNone;
-			for (auto ln: lines)
 			{
-				if (ln.Equals(".svn"))
-					Vcs = VcSvn;
-				else if (ln.Equals("CVS"))
-					Vcs = VcCvs;
-				else if (ln.Equals(".hg"))
-					Vcs = VcHg;
-				else if (ln.Equals(".git"))
-					Vcs = VcGit;
-			}
-
-			if (Vcs)
-			{
-				LAutoPtr<SshParams> r(new SshParams(this));
-				r->Path = *p;
-				r->Vcs = Vcs;
-				PostObject(GuiHnd, M_RESPONSE, r);
+				r->Output = "Error: Failed to get console.";
 			}
 			else
 			{
-				Log->Print("Error: no VCS detected.\n%s\n%s\n", ls.Get(), lines.Last().Get());
+				ls.Printf("find %s -maxdepth 1 -printf \"%%f\n\"\n", path.Get());
+SSH_LOG("detectVcs:", ls);
+				con->Write(ls, ls.Length());
+				auto pr = WaitPrompt(con, &out);
+				lines = out.SplitDelimit("\r\n");
+
+				VersionCtrl Vcs = VcNone;
+				for (auto ln: lines)
+				{
+					if (ln.Equals(".svn"))
+						Vcs = VcSvn;
+					else if (ln.Equals("CVS"))
+						Vcs = VcCvs;
+					else if (ln.Equals(".hg"))
+						Vcs = VcHg;
+					else if (ln.Equals(".git"))
+						Vcs = VcGit;
+				}
 			}
+
+			r->Path = *p;
+
+			if (Vcs)
+			{
+				r->Vcs = Vcs;
+				r->ExitCode = 0;
+			}
+			else
+			{
+				r->Vcs = VcError;
+				r->Output.Printf("Error: no VCS detected.\n%s\n%s",
+								ls.Get(),
+								lines.Length() ? lines.Last().Get() : "#nodata");
+			}
+
+			PostObject(GuiHnd, M_RESPONSE, r);
 			break;
 		}
 		case M_RUN_CMD:
