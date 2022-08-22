@@ -279,7 +279,6 @@ SSH_LOG("detectVcs:", ls);
 				auto pr = WaitPrompt(con, &out);
 				lines = out.SplitDelimit("\r\n");
 
-				VersionCtrl Vcs = VcNone;
 				for (auto ln: lines)
 				{
 					if (ln.Equals(".svn"))
