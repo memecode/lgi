@@ -504,6 +504,22 @@ int LogDateCmp(LListItem *a, LListItem *b, NativeInt Data)
 	return -A->GetTs().Compare(&B->GetTs());
 }
 
+void VcFolder::AddGitName(LString Hash, LString Name)
+{
+	LString Existing = GitNames.Find(Hash);
+	if (Existing)
+		GitNames.Add(Hash, Existing + "," + Name);
+	else
+		GitNames.Add(Hash, Name);		
+}
+
+LString VcFolder::GetGitNames(LString Hash)
+{
+	LString Short = Hash(0, 11);
+	printf("Check git name: %s\n", Short.Get());
+	return GitNames.Find(Short);
+}
+
 bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 {
 	switch (GetType())
@@ -513,19 +529,18 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 			LString::Array a = s.SplitDelimit("\r\n");
 			for (auto &l: a)
 			{
-				LString n = l.Strip();
-				if (n(0) == '*')
+				LString::Array c = l.SplitDelimit(" \t");
+				if (c[0].Equals("*"))
 				{
-					LString::Array c = n.SplitDelimit(" \t", 1);
-					if (c.Length() > 1)
-					{
-						CurrentBranch = c[1];
-						Branches.Add(CurrentBranch, new VcBranch(CurrentBranch));
-					}
-					else
-						Branches.Add(n, new VcBranch(n));
+					CurrentBranch = c[1];					
+					AddGitName(c[2], CurrentBranch);
+					Branches.Add(CurrentBranch, new VcBranch(CurrentBranch, c[2]));
 				}
-				else Branches.Add(n, new VcBranch(n));
+				else
+				{
+					AddGitName(c[1], c[0]);
+					Branches.Add(c[0], new VcBranch(c[0], c[1]));
+				}
 			}
 			break;
 		}
@@ -625,6 +640,16 @@ void VcFolder::DefaultFields()
 			{
 				Fields.Add(LGraph);
 				Fields.Add(LIndex);
+				Fields.Add(LRevision);
+				Fields.Add(LBranch);
+				Fields.Add(LAuthor);
+				Fields.Add(LTimeStamp);
+				Fields.Add(LMessageTxt);
+				break;
+			}
+			case VcGit:
+			{
+				Fields.Add(LGraph);
 				Fields.Add(LRevision);
 				Fields.Add(LBranch);
 				Fields.Add(LAuthor);
@@ -967,7 +992,7 @@ bool VcFolder::GetBranches(ParseParams *Params)
 	switch (GetType())
 	{
 		case VcGit:
-			if (StartCmd("-P branch -a", &VcFolder::ParseBranches, Params))
+			if (StartCmd("-P branch -a -v", &VcFolder::ParseBranches, Params))
 				IsBranches = StatusActive;
 			break;
 		case VcSvn:
@@ -1026,7 +1051,6 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 				}
 			}
 
-			// Log.Sort(CommitDateCmp);
 			LinkParents();
 			break;
 		}
@@ -3543,9 +3567,13 @@ bool VcFolder::ParseMerge(int Result, LString s, ParseParams *Params)
 void VcFolder::Refresh()
 {
 	CommitListDirty = true;
+	
 	CurrentCommit.Empty();
+	GitNames.Empty();
+	Branches.DeleteObjects();
 	if (Uncommit && Uncommit->LListItem::Select())
 		Uncommit->Select(true);
+	
 	Select(true);
 }
 

@@ -72,15 +72,22 @@ public:
 	int Main();
 	void OnComplete();
 };
-struct VcBranch
+
+struct VcBranch : public LString
 {
 	bool Default;
 	LColour Colour;
+	LString Hash;
 
-	VcBranch(const char *n)
+	VcBranch(LString name, LString hash = NULL)
 	{
-		Default =	!stricmp(n, "default") ||
-					!stricmp(n, "trunk");
+		Default =	name.Equals("default") ||
+					name.Equals("trunk") ||
+					name.Equals("main");
+		
+		Set(name);
+		if (hash)
+			Hash = hash;
 	}
 };
 
@@ -194,6 +201,11 @@ class VcFolder : public LTreeItem
 	LTreeItem *Tmp = NULL;
 	int CmdErrors = 0;
 	LArray<CommitField> Fields;
+
+	// Git specific
+	LHashTbl<ConstStrKey<char>,LString> GitNames;
+	void AddGitName(LString Hash, LString Name);
+	LString VcFolder::GetGitNames(LString Hash);
 
 	static int CmdMaxThreads;
 	static int CmdActiveThreads;

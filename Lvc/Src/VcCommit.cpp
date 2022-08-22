@@ -50,6 +50,7 @@ VcCommit::VcCommit(AppPriv *priv, VcFolder *folder) : Pos(32, -1)
 	d = priv;
 	Index = -1;
 	Folder = folder;
+	Vcs = Folder->GetType();
 	Current = false;
 	NodeIdx = -1;
 	NodeColour = GetPaletteColour(0);
@@ -202,22 +203,35 @@ const char *VcCommit::GetFieldText(CommitField Fld)
 		case LRevision:
 			return Rev;
 		case LIndex:
-			Cache.Printf(LPrintfInt64, Index);
-			return Cache;
+			if (!sIndex)
+				sIndex.Printf(LPrintfInt64, Index);
+			return sIndex;
 		case LBranch:
-			if (Branch)
-				return Branch;
-			return "default";
+			if (Vcs == VcGit)
+			{
+				if (!sNames)
+					sNames = Folder->GetGitNames(Rev);
+				return sNames;
+			}
+			else
+			{
+				if (Branch)
+					return Branch;
+				return "default";
+			}
+			break;
 		case LAuthor:
 			return Author;
 		case LTimeStamp:
-			Cache = Ts.Get();
-			return Cache;
+			if (!sTimeStamp)
+				sTimeStamp = Ts.Get();
+			return sTimeStamp;
 		case LMessageTxt:
 			if (!Msg)
 				return NULL;
-			Cache = Msg.Split("\n", 1)[0];
-			return Cache;
+			if (!sMsg)
+				sMsg = Msg.Split("\n", 1)[0];
+			return sMsg;
 		default:
 			break;
 	}
