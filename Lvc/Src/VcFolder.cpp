@@ -1387,10 +1387,11 @@ void VcFolder::LinkParents()
 		// Now for all active edges... assign positions
 		for (unsigned i=0; i<Active.Length(); i++)
 		{
-			EdgeArr &Edges = Active[i];
-			for (unsigned n=0; n<Edges.Length(); n++)
+			EdgeArr *Edges = &Active[i];
+			for (unsigned n=0; n<Edges->Length(); n++)
 			{
-				VcEdge *e = Edges[n];
+				LAssert(Active.PtrCheck(Edges));
+				VcEdge *e = (*Edges)[n];
 
 				if (c == e->Child || c == e->Parent)
 				{
@@ -1401,7 +1402,7 @@ void VcFolder::LinkParents()
 				{
 					// May need to untangle edges with different parents here
 					bool Diff = false;
-					for (auto edge: Edges)
+					for (auto edge: *Edges)
 					{
 						if (edge != e &&
 							edge->Child != c &&
@@ -1421,7 +1422,7 @@ void VcFolder::LinkParents()
 							if (ii == i) continue;
 							// Match e->Parent?
 							bool Match = true;
-							for (auto ee:Active[ii])
+							for (auto ee: Active[ii])
 							{
 								if (ee->Parent != e->Parent)
 								{
@@ -1437,11 +1438,11 @@ void VcFolder::LinkParents()
 							// Create new index for this parent
 							NewIndex = (int)Active.Length();
 
-						Edges.Delete(e);
+						Edges->Delete(e);
 						
-						auto NewEdges = Active[NewIndex];
+						auto &NewEdges = Active[NewIndex];
 						NewEdges.Add(e);
-						Edges = Active[i]; // The 'Add' above can invalidate the object 'Edges' refers to
+						Edges = &Active[i]; // The 'Add' above can invalidate the object 'Edges' refers to
 
 						e->Idx = NewIndex;
 						c->Pos.Add(e, NewIndex);
@@ -1457,7 +1458,7 @@ void VcFolder::LinkParents()
 		}
 		
 		// Process terminating edges
-		for (auto e:c->Edges)
+		for (auto e: c->Edges)
 		{
 			if (e->Parent == c)
 			{
