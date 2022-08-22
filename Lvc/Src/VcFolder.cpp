@@ -1390,7 +1390,7 @@ void VcFolder::LinkParents()
 			EdgeArr &Edges = Active[i];
 			for (unsigned n=0; n<Edges.Length(); n++)
 			{
-				auto e = Edges[n];
+				VcEdge *e = Edges[n];
 
 				if (c == e->Child || c == e->Parent)
 				{
@@ -1439,7 +1439,8 @@ void VcFolder::LinkParents()
 
 						Edges.Delete(e);
 						
-						Active[NewIndex].Add(e);
+						auto NewEdges = Active[NewIndex];
+						NewEdges.Add(e);
 						Edges = Active[i]; // The 'Add' above can invalidate the object 'Edges' refers to
 
 						e->Idx = NewIndex;
@@ -1470,8 +1471,10 @@ void VcFolder::LinkParents()
 				if (c->NodeIdx < 0)
 					c->NodeIdx = i;
 
-				LAssert(Active[i].HasItem(e));
-				Active[i].Delete(e);
+				if (Active[i].HasItem(e))
+					Active[i].Delete(e);
+				else
+					LgiTrace("%s:%i - Warning: Active doesn't have 'e'.\n", _FL);
 			}
 		}
 
