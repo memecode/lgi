@@ -516,7 +516,6 @@ void VcFolder::AddGitName(LString Hash, LString Name)
 LString VcFolder::GetGitNames(LString Hash)
 {
 	LString Short = Hash(0, 11);
-	printf("Check git name: %s\n", Short.Get());
 	return GitNames.Find(Short);
 }
 
@@ -1735,8 +1734,18 @@ void VcFolder::DiffRange(const char *FromRev, const char *ToRev)
 			StartCmd(a, &VcFolder::ParseDiff, p);
 			break;
 		}
-		case VcCvs:
 		case VcGit:
+		{
+			ParseParams *p = new ParseParams;
+			p->IsWorking = false;
+			p->Str = LString(FromRev) + ":" + ToRev;
+
+			LString a;
+			a.Printf("-P diff %s..%s", FromRev, ToRev);
+			StartCmd(a, &VcFolder::ParseDiff, p);
+			break;
+		}
+		case VcCvs:
 		case VcHg:
 		default:
 			LAssert(!"Impl me.");
