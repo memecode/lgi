@@ -40,12 +40,13 @@
 #endif
 
 #ifdef HAIKU
-#include <FindDirectory.h>
-#include <fs_info.h>
+	#include <FindDirectory.h>
+	#include <fs_info.h>
 #else
-#include "SymLookup.h"
+	#include "SymLookup.h"
 #endif
 #include "lgi/common/Library.h"
+#include "lgi/common/Net.h"
 
 #if defined(__GTK_H__)
 namespace Gtk {
@@ -2553,9 +2554,9 @@ LProfile::~LProfile()
 {
 	Add("End");
 	
+	uint64 TotalMs = s.Last().Time - s[0].Time;
 	if (MinMs > 0)
 	{
-		uint64 TotalMs = s.Last().Time - s[0].Time;
 		if (TotalMs < MinMs
 			#if PROFILE_MICRO
 			* 1000
@@ -2566,31 +2567,33 @@ LProfile::~LProfile()
 		}
 	}
 	
+	uint64 accum = 0;
 	for (int i=0; i<s.Length()-1; i++)
 	{
 		Sample &a = s[i];
 		Sample &b = s[i+1];
 		
-		#if 1
+		auto indent = i ? "    " : "";
+		auto diff = b.Time - a.Time;
+		accum += diff;
 
-			#if PROFILE_MICRO
-			LgiTrace("%s%s = %.2f ms\n", i ? "    " : "", a.Name, (double)(b.Time - a.Time)/1000.0);
-			#else
-			LgiTrace("%s%s = %i ms\n", i ? "    " : "", a.Name, (int)(b.Time - a.Time));
-			#endif
-		
+		#if PROFILE_MICRO
+		LgiTrace("%s%s = +%.2f = %.2f ms\n", indent, a.Name,
+			(double)diff/1000.0,
+			(double)accum/1000.0);
 		#else
-
-			#if PROFILE_MICRO
-			ch += sprintf_s(c+ch, sizeof(c)-ch, "%s%s = %.2f ms\n", i ? "    " : "", a.Name, (double)(b.Time - a.Time)/1000.0);
-			#else
-			ch += sprintf_s(c+ch, sizeof(c)-ch, "%s%s = %i ms\n", i ? "    " : "", a.Name, (int)(b.Time - a.Time));
-			#endif
-
+		LgiTrace("%s%s = +" LPrintfInt64 " = " LPrintfInt64 " ms\n", indent, a.Name,
+			diff,
+			accum);
 		#endif
 	}
 
-	// OutputDebugStringA(c);
+	#if PROFILE_MICRO
+	LgiTrace("    Total = %.2f ms\n", (double)TotalMs/1000.0);
+	#else
+	LgiTrace("    Total = " LPrintfInt64 " ms\n", TotalMs);
+	#endif
+
 	DeleteArray(Buf);
 }
 
@@ -2801,27 +2804,24 @@ LString LGetAppForProtocol(const char *Protocol)
 		LAssert(!"What to do?");
 	#elif defined(MAC)
 		// Get the handler type
-		CFStringRef Type = LString(Protocol).CreateStringRef();
-		CFStringRef Handler = LSCopyDefaultHandlerForURLScheme(Type);
-		CFRelease(Type);
-		if (Handler)
+		LString s;
+		s.Printf("%s://domain/path", Protocol);
+		auto str = s.NsStr();
+		auto type = [NSURL URLWithString:str];
+		[str release];
+		auto handlerUrl = [[NSWorkspace sharedWorkspace] URLForApplicationToOpenURL:type];
+		[type release];
+		if (handlerUrl)
 		{
 			// Convert to app path
-			CFErrorRef Err;
-			auto a = LSCopyApplicationURLsForBundleIdentifier(Handler, &Err);
-			if (a)
-			{
-				if (CFArrayGetCount(a) > 0)
-				{
-					CFURLRef nsurl = (CFURLRef)CFArrayGetValueAtIndex(a, 0);
-					App = CFURLGetString(nsurl);
-					if (App.Find("file:///") == 0)
-						App = App(7,-2);
-				}
-				CFRelease(a);
-			}
+			s = [handlerUrl absoluteString];
+			LUri uri(s);
+			if (uri.sProtocol.Equals("file"))
+				App = uri.sPath.RStrip("/");
+			else
+				LgiTrace("%s:%i - Error: unknown protocol '%s'\n", _FL, uri.sProtocol.Get());
 		}
-		CFRelease(Handler);
+		[handlerUrl release];
 	#else
 		#warning "Impl me."
 	#endif

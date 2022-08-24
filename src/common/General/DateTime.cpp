@@ -840,23 +840,25 @@ bool LDateTime::SetUnix(uint64 s)
 	#if defined(WINDOWS)
 	return Set(s * LDateTime::Second64Bit + 116445168000000000LL);
 	#else
-	return Set(s);
+	return Set((s + OFFSET_1800) * LDateTime::Second64Bit);
 	#endif
 }
 
 bool LDateTime::Set(uint64 s)
 {
 	#if defined WIN32
-	FILETIME Utc;
-	SYSTEMTIME System;
 
-	// Adjust to the desired timezone
-	uint64 u = s + ((int64)_Tz * 60 * Second64Bit);
+		FILETIME Utc;
+		SYSTEMTIME System;
 
-	Utc.dwHighDateTime = u >> 32;
-	Utc.dwLowDateTime = u & 0xffffffff;
-	if (FileTimeToSystemTime(&Utc, &System))
-	{
+		// Adjust to the desired timezone
+		uint64 u = s + ((int64)_Tz * 60 * Second64Bit);
+
+		Utc.dwHighDateTime = u >> 32;
+		Utc.dwLowDateTime = u & 0xffffffff;
+		if (!FileTimeToSystemTime(&Utc, &System))
+			return false;
+			
 		_Year = System.wYear;
 		_Month = System.wMonth;
 		_Day = System.wDay;
@@ -867,16 +869,13 @@ bool LDateTime::Set(uint64 s)
 		_Thousands = System.wMilliseconds;
 
 		return true;
-	}
-	
-	return false;
 
 	#else
 
-	time_t t = (time_t) (((int64)(s / Second64Bit)) - OFFSET_1800);
-	Set(t);
-	_Thousands = s % Second64Bit;
-	return true;
+		time_t t = (time_t) (((int64)(s / Second64Bit)) - OFFSET_1800);
+		Set(t);
+		_Thousands = s % Second64Bit;
+		return true;
 	
 	#endif
 }

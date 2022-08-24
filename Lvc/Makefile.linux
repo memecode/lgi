@@ -59,6 +59,7 @@ endif
 Source =	Src/VcFolder.cpp \
 			Src/VcFile.cpp \
 			Src/VcCommit.cpp \
+			Src/SshConnection.cpp \
 			Src/Main.cpp \
 			Src/DropDownBtn.cpp \
 			Src/BlameUi.cpp \

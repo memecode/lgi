@@ -30,7 +30,7 @@
 
 #include "HtmlPriv.h"
 
-#define DEBUG_TABLE_LAYOUT			0
+#define DEBUG_TABLE_LAYOUT			1
 #define DEBUG_DRAW_TD				0
 #define DEBUG_RESTYLE				0
 #define DEBUG_TAG_BY_POS			0
@@ -79,6 +79,12 @@
 #define DefaultTableBorder			Rgb32(0xf8, 0xf8, 0xf8)
 #else
 #define DefaultTableBorder			GT_TRANSPARENT
+#endif
+
+#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
+#define DEBUG_LOG(...)				if (Table->Debug) LgiTrace(__VA_ARGS__)
+#else
+#define DEBUG_LOG(...)
 #endif
 
 #define IsTableCell(id)				( ((id) == TAG_TD) || ((id) == TAG_TH) )
@@ -4718,15 +4724,10 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 		}
 	}
 
-	#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
-	if (Table->Debug)
-	{
-		LgiTrace("%s:%i - AfterCellFlow\n", _FL);
-		for (unsigned i=0; i<MaxRow.Length(); i++)
-		{
-			LgiTrace("[%i] = %i\n", i, MaxRow[i]);
-		}
-	}
+	#if defined(_DEBUG)
+	DEBUG_LOG("%s:%i - AfterCellFlow\n", _FL);
+	for (unsigned i=0; i<MaxRow.Length(); i++)
+		DEBUG_LOG("[%i] = %i\n", i, MaxRow[i]);
 	#endif
 
 	// Calculate row height
@@ -4756,6 +4757,11 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 	int Cx = BorderX1 + CellSpacing;
 	int Cy = TableBorder.y1 + TablePadding.y1 + CellSpacing;
 	
+	if (Table->Debug)
+	{
+		int asd=0;
+	}
+
 	for (y=0; y<s.y; y++)
 	{
 		LTag *Prev = 0;
@@ -4847,16 +4853,19 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 			int fx = f->X();
 			int Ox = (fx-Table->Size.x) >> 1;
 			Table->Pos.x = f->x1 + MAX(Ox, 0);
+			DEBUG_LOG("%s:%i - AlignCenter fx=%i ox=%i pos.x=%i size.x=%i\n", _FL, fx, Ox, Table->Pos.x, Table->Size.x);
 			break;
 		}
 		case LCss::AlignRight:
 		{
 			Table->Pos.x = f->x2 - Table->Size.x;
+			DEBUG_LOG("%s:%i - AlignRight f->x2=%i size.x=%i pos.x=%i\n", _FL, f->x2, Table->Size.x, Table->Pos.x);
 			break;
 		}
 		default:
 		{
 			Table->Pos.x = f->x1;
+			DEBUG_LOG("%s:%i - AlignLeft f->x1=%i size.x=%i pos.x=%i\n", _FL, f->x2, Table->Size.x, Table->Pos.x);
 			break;
 		}
 	}
@@ -5702,6 +5711,11 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			char16 *Txt = Text();
 			LCss::LengthType Align = GetAlign(true);
 			TextPos.FlowText(this, Flow, f, LineHeightCache, Txt, Align);
+
+			if (Debug)
+			{
+				LgiTrace("%s:%i - %p.size=%p\n", _FL, this, &Size.x);
+			}
 		}
 	}
 
@@ -6026,12 +6040,16 @@ void LTag::BoundParents()
 	{
 		np = ToTag(n->Parent);
 
-		if (!np ||
-			n->Parent->TagId == TAG_IFRAME)
+		if (!np || np->TagId == TAG_IFRAME)
 			break;
 				
 		np->Size.x = MAX(np->Size.x, n->Pos.x + n->Size.x);
 		np->Size.y = MAX(np->Size.y, n->Pos.y + n->Size.y);
+
+		if (np->Debug && np->Size.x > 1000)
+		{
+			int asd=0;
+		}
 	}
 }
 

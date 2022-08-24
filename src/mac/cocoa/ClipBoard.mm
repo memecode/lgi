@@ -56,8 +56,8 @@ bool LClipBoard::Text(const char *Str, bool AutoEmpty)
 	
 	auto *pb = [NSPasteboard generalPasteboard];
 	auto *text = Txt.NsStr();
-	[pb addTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-	auto result = [pb setString:text forType:NSStringPboardType];
+	[pb addTypes:[NSArray arrayWithObject:NSPasteboardTypeString] owner:nil];
+	auto result = [pb setString:text forType:NSPasteboardTypeString];
 	LAssert(result);
 	return result != 0;
 }

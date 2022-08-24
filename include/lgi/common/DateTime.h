@@ -251,7 +251,7 @@ public:
 	bool Set(const char *Str);
 	/// Sets the date and time from a 64 bit int (os specific)
 	bool Set(uint64 s);
-	bool SetUnix(uint64 s); // Assume unix timestamp
+	bool SetUnix(uint64 s); // Assume unix timestamp (seconds since 1/1/1970)
 	/// Sets the time from a time_t
 	bool Set(time_t tt);
 	/// Parses the date from a string

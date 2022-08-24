@@ -410,6 +410,7 @@ TableCell::TableCell(LTableLayout *t, int Cx, int Cy)
 	Cell.ZOff(0, 0);
 	Cell.Offset(Cx, Cy);
 	Padding.ZOff(0, 0);
+	Pos.ZOff(-1, -1);
 	Disp = LCss::DispBlock;
 
 	Children.SetFixedLength(true);

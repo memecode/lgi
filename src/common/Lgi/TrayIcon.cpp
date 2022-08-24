@@ -147,8 +147,8 @@ public:
 				Handler = [[LStatusItem alloc] init:p];
 				if (Handler)
 				{
-					StatusItem.target = Handler;
-					StatusItem.action = @selector(onClick);
+					StatusItem.button.target = Handler;
+					StatusItem.button.action = @selector(onClick);
 				}
 			}
 		
@@ -528,8 +528,7 @@ void GTrayIcon::Value(int64 v)
 			if (d->StatusItem)
 			{
 				auto img = d->Icon[d->Val];
-				[d->StatusItem setImage:img];
-				// printf("setImage %i/%p\n", (int)d->Val, img);
+				d->StatusItem.button.image = img;
 			}
 			else LgiTrace("%s:%i - No status item?\n", _FL);
 

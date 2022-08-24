@@ -13,6 +13,10 @@
 			<Node File="../src/common/Lgi/SubProcess.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Text/XmlTreeUi.cpp" Type="2" Platforms="15" />
 		</Node>
+		<Node Name="Ssh" Type="1" Platforms="15" Id="1">
+			<Node File="./Src/SshConnection.cpp" Type="2" Platforms="15" />
+			<Node File="./Src/SshConnection.h" Type="3" Platforms="15" />
+		</Node>
 		<Node File="./Src/BlameUi.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Text/DeEscape.cpp" Type="2" Platforms="15" />
 		<Node File="./Src/DropDownBtn.cpp" Type="2" Platforms="15" />
@@ -52,6 +56,8 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -101,9 +107,18 @@
 			<TargetType>
 				<All>Executable</All>
 			</TargetType>
-			<LibraryPaths />
-			<TargetName />
-			<Defines />
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<TargetName>
+				<Linux />
+			</TargetName>
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
+			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -115,13 +130,27 @@
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<ShowWhiteSpace />
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
 		<Advanced>
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+			<OtherMakefileRules />
 		</Advanced>
-		<Remote />
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 		<Debug>
-			<Arguments />
+			<Arguments>
+				<All />
+			</Arguments>
+			<Environment />
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
 	</Settings>
 </Project>

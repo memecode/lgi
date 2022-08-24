@@ -15,7 +15,10 @@ char *SkipEscape(char *c)
 		return c + 1;
 
 	if (*c != '[')
-		return NULL;
+	{
+		LgiTrace("%s:%i - Error: Expecting bracket.\n", _FL);
+		return c;
+	}
 
 	c++;
 	while (*c >= '0' && *c <= '?')
@@ -24,6 +27,7 @@ char *SkipEscape(char *c)
 		c++;
 	if (*c >= '@' && *c <= '~')
 		c++;
+
 	return c;
 }
 
@@ -35,7 +39,8 @@ void DeEscape(LString &s)
 		if (*c == 0x1b)
 		{
 			auto e = SkipEscape(c);
-			if (!e) goto OnError;
+			if (!e)
+				break;
 			c = e;
 		}
 		else if (*c == 7)

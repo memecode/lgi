@@ -940,7 +940,7 @@ void LMenuItem::Checked(bool c)
 		ClearFlag(_Flags, ODS_CHECKED);
 	
 	if (Info)
-		[Info.p setState: c ? NSOnState : NSOffState];
+		[Info.p setState: c ? NSControlStateValueOn : NSControlStateValueOff];
 }
 
 bool LMenuItem::Name(const char *n)

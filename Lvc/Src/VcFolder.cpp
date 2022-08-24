@@ -441,11 +441,11 @@ bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, L
 	if (CmdErrors > 2)
 		return false;
 
-	if (d->Log && Logging != LogSilo)
-		d->Log->Print("%s %s\n", Exe, Args);
-
 	if (Uri.IsFile())
 	{
+		if (d->Log && Logging != LogSilo)
+			d->Log->Print("%s %s\n", Exe, Args);
+
 		LAutoPtr<LSubProcess> Process(new LSubProcess(Exe, Args));
 		if (!Process)
 			return false;
@@ -504,6 +504,21 @@ int LogDateCmp(LListItem *a, LListItem *b, NativeInt Data)
 	return -A->GetTs().Compare(&B->GetTs());
 }
 
+void VcFolder::AddGitName(LString Hash, LString Name)
+{
+	LString Existing = GitNames.Find(Hash);
+	if (Existing)
+		GitNames.Add(Hash, Existing + "," + Name);
+	else
+		GitNames.Add(Hash, Name);		
+}
+
+LString VcFolder::GetGitNames(LString Hash)
+{
+	LString Short = Hash(0, 11);
+	return GitNames.Find(Short);
+}
+
 bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 {
 	switch (GetType())
@@ -513,19 +528,18 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 			LString::Array a = s.SplitDelimit("\r\n");
 			for (auto &l: a)
 			{
-				LString n = l.Strip();
-				if (n(0) == '*')
+				LString::Array c = l.SplitDelimit(" \t");
+				if (c[0].Equals("*"))
 				{
-					LString::Array c = n.SplitDelimit(" \t", 1);
-					if (c.Length() > 1)
-					{
-						CurrentBranch = c[1];
-						Branches.Add(CurrentBranch, new VcBranch(CurrentBranch));
-					}
-					else
-						Branches.Add(n, new VcBranch(n));
+					CurrentBranch = c[1];					
+					AddGitName(c[2], CurrentBranch);
+					Branches.Add(CurrentBranch, new VcBranch(CurrentBranch, c[2]));
 				}
-				else Branches.Add(n, new VcBranch(n));
+				else
+				{
+					AddGitName(c[1], c[0]);
+					Branches.Add(c[0], new VcBranch(c[0], c[1]));
+				}
 			}
 			break;
 		}
@@ -625,6 +639,16 @@ void VcFolder::DefaultFields()
 			{
 				Fields.Add(LGraph);
 				Fields.Add(LIndex);
+				Fields.Add(LRevision);
+				Fields.Add(LBranch);
+				Fields.Add(LAuthor);
+				Fields.Add(LTimeStamp);
+				Fields.Add(LMessageTxt);
+				break;
+			}
+			case VcGit:
+			{
+				Fields.Add(LGraph);
 				Fields.Add(LRevision);
 				Fields.Add(LBranch);
 				Fields.Add(LAuthor);
@@ -742,7 +766,17 @@ void VcFolder::Select(bool b)
 			{
 				case VcGit:
 				{
-					IsLogging = StartCmd("rev-list --all --header --timestamp --author-date-order", &VcFolder::ParseRevList);
+					LVariant Limit;
+					d->Opts.GetValue("git-limit", Limit);
+
+					LString cmd = "rev-list --all --header --timestamp --author-date-order", s;
+					if (Limit.CastInt32() > 0)
+					{
+						s.Printf(" -n %i", Limit.CastInt32());
+						cmd += s;
+					}
+					
+					IsLogging = StartCmd(cmd, &VcFolder::ParseRevList);
 					break;
 				}
 				case VcSvn:
@@ -757,7 +791,7 @@ void VcFolder::Select(bool b)
 					}
 					
 					LString s;
-					if (Limit.CastInt32())
+					if (Limit.CastInt32() > 0)
 						s.Printf("log --limit %i", Limit.CastInt32());
 					else
 						s = "log";
@@ -957,7 +991,7 @@ bool VcFolder::GetBranches(ParseParams *Params)
 	switch (GetType())
 	{
 		case VcGit:
-			if (StartCmd("branch -a", &VcFolder::ParseBranches, Params))
+			if (StartCmd("-P branch -a -v", &VcFolder::ParseBranches, Params))
 				IsBranches = StatusActive;
 			break;
 		case VcSvn:
@@ -1016,7 +1050,6 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 				}
 			}
 
-			// Log.Sort(CommitDateCmp);
 			LinkParents();
 			break;
 		}
@@ -1026,7 +1059,7 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 	}
 
 	IsLogging = false;
-	return true;
+	return Errors == 0;
 }
 
 LString VcFolder::GetFilePart(const char *uri)
@@ -1377,10 +1410,11 @@ void VcFolder::LinkParents()
 		// Now for all active edges... assign positions
 		for (unsigned i=0; i<Active.Length(); i++)
 		{
-			EdgeArr &Edges = Active[i];
-			for (unsigned n=0; n<Edges.Length(); n++)
+			EdgeArr *Edges = &Active[i];
+			for (unsigned n=0; n<Edges->Length(); n++)
 			{
-				auto e = Edges[n];
+				LAssert(Active.PtrCheck(Edges));
+				VcEdge *e = (*Edges)[n];
 
 				if (c == e->Child || c == e->Parent)
 				{
@@ -1391,7 +1425,7 @@ void VcFolder::LinkParents()
 				{
 					// May need to untangle edges with different parents here
 					bool Diff = false;
-					for (auto edge: Edges)
+					for (auto edge: *Edges)
 					{
 						if (edge != e &&
 							edge->Child != c &&
@@ -1411,7 +1445,7 @@ void VcFolder::LinkParents()
 							if (ii == i) continue;
 							// Match e->Parent?
 							bool Match = true;
-							for (auto ee:Active[ii])
+							for (auto ee: Active[ii])
 							{
 								if (ee->Parent != e->Parent)
 								{
@@ -1427,8 +1461,12 @@ void VcFolder::LinkParents()
 							// Create new index for this parent
 							NewIndex = (int)Active.Length();
 
-						Edges.Delete(e);
-						Active[NewIndex].Add(e);
+						Edges->Delete(e);
+						
+						auto &NewEdges = Active[NewIndex];
+						NewEdges.Add(e);
+						Edges = &Active[i]; // The 'Add' above can invalidate the object 'Edges' refers to
+
 						e->Idx = NewIndex;
 						c->Pos.Add(e, NewIndex);
 						n--;
@@ -1443,7 +1481,7 @@ void VcFolder::LinkParents()
 		}
 		
 		// Process terminating edges
-		for (auto e:c->Edges)
+		for (auto e: c->Edges)
 		{
 			if (e->Parent == c)
 			{
@@ -1457,8 +1495,10 @@ void VcFolder::LinkParents()
 				if (c->NodeIdx < 0)
 					c->NodeIdx = i;
 
-				LAssert(Active[i].HasItem(e));
-				Active[i].Delete(e);
+				if (Active[i].HasItem(e))
+					Active[i].Delete(e);
+				else
+					LgiTrace("%s:%i - Warning: Active doesn't have 'e'.\n", _FL);
 			}
 		}
 
@@ -1694,8 +1734,18 @@ void VcFolder::DiffRange(const char *FromRev, const char *ToRev)
 			StartCmd(a, &VcFolder::ParseDiff, p);
 			break;
 		}
-		case VcCvs:
 		case VcGit:
+		{
+			ParseParams *p = new ParseParams;
+			p->IsWorking = false;
+			p->Str = LString(FromRev) + ":" + ToRev;
+
+			LString a;
+			a.Printf("-P diff %s..%s", FromRev, ToRev);
+			StartCmd(a, &VcFolder::ParseDiff, p);
+			break;
+		}
+		case VcCvs:
 		case VcHg:
 		default:
 			LAssert(!"Impl me.");
@@ -2396,7 +2446,7 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 	Parent->Sort(FolderCompare);
 }
 
-void VcFolder::OnVcsType()
+void VcFolder::OnVcsType(LString errorMsg)
 {
 	if (!d)
 	{
@@ -2409,12 +2459,19 @@ void VcFolder::OnVcsType()
 		auto NewType = c->Types.Find(Uri.sPath);
 		if (NewType && NewType != Type)
 		{
-			Type = NewType;
-			ClearError();
-			Update();
+			if (NewType == VcError)
+			{
+				OnCmdError(NULL, errorMsg);
+			}
+			else
+			{
+				Type = NewType;
+				ClearError();
+				Update();
 
-			if (LTreeItem::Select())
-				Select(true);
+				if (LTreeItem::Select())
+					Select(true);
+			}
 		}
 	}
 }
@@ -2443,8 +2500,7 @@ void VcFolder::ListCommit(VcCommit *c)
 		switch (GetType())
 		{
 			case VcGit:
-				// Args.Printf("show --oneline --name-only %s", Rev);
-				Args.Printf("show %s", c->GetRev());
+				Args.Printf("-P show %s", c->GetRev());
 				IsFilesCmd = StartCmd(Args, &VcFolder::ParseFiles, new ParseParams(c->GetRev()));
 				break;
 			case VcSvn:
@@ -2897,38 +2953,36 @@ bool VcFolder::ParseCountToTip(int Result, LString s, ParseParams *Params)
 
 void VcFolder::ListWorkingFolder()
 {
-	if (!IsWorkingFld)
-	{
-		d->ClearFiles();
+	if (IsWorkingFld)
+		return;
+
+	d->ClearFiles();
 		
-		bool Untracked = d->IsMenuChecked(IDM_UNTRACKED);
+	bool Untracked = d->IsMenuChecked(IDM_UNTRACKED);
 
-		LString Arg;
-		switch (GetType())
-		{
-			case VcCvs:
-				if (Untracked)
-					Arg = "-qn update";
-				else
-					Arg = "-q diff --brief";
-				break;
-			case VcSvn:
-				Arg = "status";
-				break;
-			case VcGit:
-				StartCmd("diff --staged", &VcFolder::ParseWorking);
-				Arg = "diff --diff-filter=ACDMRTU";
-				break;
-			case VcHg:
-				Arg = "status -mard";
-				break;
-			default:
-				Arg ="diff";
-				break;
-		}
-
-		IsWorkingFld = StartCmd(Arg, &VcFolder::ParseWorking);
+	LString Arg;
+	switch (GetType())
+	{
+		case VcCvs:
+			if (Untracked)
+				Arg = "-qn update";
+			else
+				Arg = "-q diff --brief";
+			break;
+		case VcSvn:
+			Arg = "status";
+			break;
+		case VcGit:
+			Arg = "-P diff --diff-filter=ACDMRTU";
+			break;
+		case VcHg:
+			Arg = "status -mard";
+			break;
+		default:
+			return;
 	}
+
+	IsWorkingFld = StartCmd(Arg, &VcFolder::ParseWorking);
 }
 
 void VcFolder::GitAdd()
@@ -3530,9 +3584,13 @@ bool VcFolder::ParseMerge(int Result, LString s, ParseParams *Params)
 void VcFolder::Refresh()
 {
 	CommitListDirty = true;
+	
 	CurrentCommit.Empty();
+	GitNames.Empty();
+	Branches.DeleteObjects();
 	if (Uncommit && Uncommit->LListItem::Select())
 		Uncommit->Select(true);
+	
 	Select(true);
 }
 

@@ -35,12 +35,13 @@ struct VcEdge
 
 class VcCommit : public LListItem
 {
-	LString Cache;
+	LString sIndex, sNames, sTimeStamp, sMsg;
 	bool Current;
 
 protected:
 	AppPriv *d;
 	VcFolder *Folder;
+	VersionCtrl Vcs;
 
 	// Commit Meta
 	LString Rev;
