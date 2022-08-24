@@ -55,7 +55,6 @@ void DeEscape(LString &s)
 			*out++ = *c++;
 	}
 
-	OnError:
 	size_t new_len = out - s.Get();
 	if (new_len < s.Length())
 		s.Length(new_len);
