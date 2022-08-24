@@ -4,6 +4,8 @@
 #include "SshConnection.h"
 
 #define TIMEOUT_PROMPT			1000
+#define PROFILE_WaitPrompt		0
+#define PROFILE_OnEvent			0
 
 #define DEBUG_SSH_LOGGING		0
 #if DEBUG_SSH_LOGGING
@@ -100,16 +102,38 @@ public:
 	}
 };
 
+#if PROFILE_WaitPrompt
+#define PROFILE(name) prof.Add(name)
+#else
+#define PROFILE(name)
+#endif
+
+LString LastLine(LString &input)
+{
+	#define Ws(ch) ( ((ch) == '\r') || ((ch) == '\n') || ((ch) == '\b') )
+	char *e = input.Get() + input.Length();
+	while (e > input.Get() && Ws(e[-1]))
+		e--;
+	char *s = e;
+	while (s > input.Get() && !Ws(s[-1]))
+		s--;
+	return LString(s, e - s);
+}
+
 bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 {
-	char buf[1024];
+	char buf[8 << 10];
 	LString out;
 	auto Ts = LCurrentTime();
 	int64 Count = 0, Total = 0;
 	ProgressListItem *Prog = NULL;
+	#if PROFILE_WaitPrompt
+	LProfile prof("WaitPrompt", 100);
+	#endif
 
 	while (!LSsh::Cancel->IsCancelled())
 	{
+		PROFILE("read");
 		auto rd = con->Read(buf, sizeof(buf));
 		if (rd < 0)
 		{
@@ -121,7 +145,7 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 		if (rd == 0)
 		{
 // SSH_LOG("waitPrompt no data.");
-			LSleep(100);
+			LSleep(1);
 			continue;
 		}
 
@@ -133,19 +157,23 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 		#endif
 
 		// Add new data to 'out'...
+		PROFILE("new data");
 		LString newData(buf, rd);
 
+		PROFILE("append");
 		out += newData;
 
 		Count += rd;
 		Total += rd;
 
 SSH_LOG("waitPrompt rd:", out);
+		PROFILE("DeEscape");
 		DeEscape(out);
 SSH_LOG("waitPrompt DeEscape:", out);
 
-		auto lines = out.SplitDelimit("\r\n\b");
-		auto last = lines.Last();
+		PROFILE("LastLine");
+		auto last = LastLine(out);
+		PROFILE("matchstr");
 		auto result = MatchStr(Prompt, last);
 SSH_LOG("waitPrompt result:", result, Prompt, last, out);
 		if (Debug)
@@ -156,6 +184,7 @@ SSH_LOG("waitPrompt result:", result, Prompt, last, out);
 		{
 			if (Data)
 			{
+				PROFILE("data process");
 				auto start = out.Get();
 				auto end = start + out.Length();
 				auto second = start;
@@ -170,7 +199,7 @@ SSH_LOG("waitPrompt data:", *Data);
 			}
 
 			if (Debug)
-				LgiTrace("WaitPrompt.%s Prompt line=%i data=%i\n", Debug, (int)lines.Length(), Data?(int)Data->Length():0);
+				LgiTrace("WaitPrompt.%s Prompt data=%i\n", Debug, Data?(int)Data->Length():0);
 			break;
 		}
 
@@ -247,6 +276,12 @@ LString PathFilter(LString s)
 	return s.Replace(" ", "\\ ");
 }
 
+#if PROFILE_OnEvent
+#define PROF(name) prof.Add(name)
+#else
+#define PROF(name)
+#endif
+
 LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
@@ -312,10 +347,15 @@ SSH_LOG("detectVcs:", ls);
 		}
 		case M_RUN_CMD:
 		{
+			#if PROFILE_OnEvent
+			LProfile prof("OnEvent");
+			#endif
+
 			LAutoPtr<SshParams> p;
 			if (!ReceiveA(p, Msg))
 				break;
 
+			PROF("get console");
 			LString path = PathFilter(p->Path);
 			LStream *con = GetConsole();
 			if (!con)
@@ -323,23 +363,29 @@ SSH_LOG("detectVcs:", ls);
 
 			auto Debug = p->Params && p->Params->Debug;
 
+			PROF("cd");
 			LString cmd;
 			cmd.Printf("cd %s\n", path.Get());
 SSH_LOG(">>>> cd:", path);
 			auto wr = con->Write(cmd, cmd.Length());
+			PROF("cd wait");
 			auto pr = WaitPrompt(con, NULL, Debug?"Cd":NULL);
 
+			PROF("cmd");
 			cmd.Printf("%s %s\n", p->Exe.Get(), p->Args.Get());
 SSH_LOG(">>>> cmd:", cmd);
 			if (Log)
 				Log->Print("%s", cmd.Get());
 			wr = con->Write(cmd, cmd.Length());
+			PROF("cmd wait");
 			pr = WaitPrompt(con, &p->Output, Debug?"Cmd":NULL);
 			
+			PROF("result");
 			LString result;
 			cmd = "echo $?\n";
 SSH_LOG(">>>> result:", cmd);
 			wr = con->Write(cmd, cmd.Length());
+			PROF("result wait");
 			pr = WaitPrompt(con, &result, Debug?"Echo":NULL);
 			if (pr)
 			{

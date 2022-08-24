@@ -2978,9 +2978,7 @@ void VcFolder::ListWorkingFolder()
 			return;
 	}
 
-	auto params = new ParseParams;
-	params->Debug = true;
-	IsWorkingFld = StartCmd(Arg, &VcFolder::ParseWorking, params);
+	IsWorkingFld = StartCmd(Arg, &VcFolder::ParseWorking);
 }
 
 void VcFolder::GitAdd()

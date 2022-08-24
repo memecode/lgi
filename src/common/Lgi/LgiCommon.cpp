@@ -2550,9 +2550,9 @@ LProfile::~LProfile()
 {
 	Add("End");
 	
+	uint64 TotalMs = s.Last().Time - s[0].Time;
 	if (MinMs > 0)
 	{
-		uint64 TotalMs = s.Last().Time - s[0].Time;
 		if (TotalMs < MinMs
 			#if PROFILE_MICRO
 			* 1000
@@ -2563,31 +2563,33 @@ LProfile::~LProfile()
 		}
 	}
 	
+	uint64 accum = 0;
 	for (int i=0; i<s.Length()-1; i++)
 	{
 		Sample &a = s[i];
 		Sample &b = s[i+1];
 		
-		#if 1
+		auto indent = i ? "    " : "";
+		auto diff = b.Time - a.Time;
+		accum += diff;
 
-			#if PROFILE_MICRO
-			LgiTrace("%s%s = %.2f ms\n", i ? "    " : "", a.Name, (double)(b.Time - a.Time)/1000.0);
-			#else
-			LgiTrace("%s%s = %i ms\n", i ? "    " : "", a.Name, (int)(b.Time - a.Time));
-			#endif
-		
+		#if PROFILE_MICRO
+		LgiTrace("%s%s = +%.2f = %.2f ms\n", indent, a.Name,
+			(double)diff/1000.0,
+			(double)accum/1000.0);
 		#else
-
-			#if PROFILE_MICRO
-			ch += sprintf_s(c+ch, sizeof(c)-ch, "%s%s = %.2f ms\n", i ? "    " : "", a.Name, (double)(b.Time - a.Time)/1000.0);
-			#else
-			ch += sprintf_s(c+ch, sizeof(c)-ch, "%s%s = %i ms\n", i ? "    " : "", a.Name, (int)(b.Time - a.Time));
-			#endif
-
+		LgiTrace("%s%s = +" LPrintfInt64 " = " LPrintfInt64 " ms\n", indent, a.Name,
+			diff,
+			accum);
 		#endif
 	}
 
-	// OutputDebugStringA(c);
+	#if PROFILE_MICRO
+	LgiTrace("    Total = %.2f ms\n", (double)TotalMs/1000.0);
+	#else
+	LgiTrace("    Total = " LPrintfInt64 " ms\n", TotalMs);
+	#endif
+
 	DeleteArray(Buf);
 }
 
