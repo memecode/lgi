@@ -84,6 +84,11 @@ bool LScreenDC::SupportsAlphaCompositing()
 	return false;
 }
 
+LPoint LScreenDC::GetDpi()
+{
+	return LScreenDpi();
+}
+
 bool LScreenDC::GetClient(LRect *c)
 {
 	if (!c)

@@ -52,18 +52,19 @@ bool LPrinter::Serialize(::LString &Str, bool Write)
 }
 
 	
-::LString LPrinter::GetErrorMsg()
+LString LPrinter::GetErrorMsg()
 {
 	return d->Err;
 }
 	
-int LPrinter::Print(LPrintEvents *Events, const char *PrintJobName, int Pages, LView *Parent)
+void LPrinter::Print(LPrintEvents *Events,
+					std::function<void(int)> callback,
+					const char *PrintJobName,
+					int Pages,
+					LView *Parent)
 {
 	if (!Events)
-	{
 		LgiTrace("%s:%i - Error: missing param.\n", _FL);
-		return false;
-	}
-	
-    return false;
+
+	LAssert(!"Impl me.");
 }

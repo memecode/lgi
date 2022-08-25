@@ -41,7 +41,7 @@ struct LDialogPriv
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-LDialog::LDialog()
+LDialog::LDialog(LViewI *parent)
 	:
 	#ifdef __GTK_H__
 	// , LWindow(gtk_dialog_new())
@@ -51,6 +51,8 @@ LDialog::LDialog()
 {
 	d = new LDialogPriv();
 	Name("Dialog");
+	if (parent)
+		SetParent(parent);
 }
 
 LDialog::~LDialog()

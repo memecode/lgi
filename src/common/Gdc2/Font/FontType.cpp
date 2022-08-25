@@ -78,8 +78,8 @@ void LFontType::DoUI(LView *Parent, std::function<void(LFontType*)> Callback)
 	#if WINNATIVE
 	int bytes = sizeof(Info);
 	#else
-	char Info[256];
-	int bytes = sprintf_s(i, sizeof(i), "%s,%i", Info.Face(), Info.PointSize());
+	char str[256];
+	int bytes = sprintf_s(str, sizeof(str), "%s,%i", Info.Face(), Info.PointSize());
 	#endif
 
 	LFontSelect *Dlg = new LFontSelect(Parent, &Info, bytes);
@@ -91,8 +91,8 @@ void LFontType::DoUI(LView *Parent, std::function<void(LFontType*)> Callback)
 			Dlg->Serialize(&this->Info, sizeof(this->Info), true);
 			#else
 			if (Dlg->Face)
-				FontType->Info.Face(Dlg->Face);
-			FontType->Info.PointSize(Dlg->Size);
+				Info.Face(Dlg->Face);
+			Info.PointSize(Dlg->Size);
 			#endif
 			
 			if (Callback)
