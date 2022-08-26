@@ -205,7 +205,7 @@ class VcFolder : public LTreeItem
 	// Git specific
 	LHashTbl<ConstStrKey<char>,LString> GitNames;
 	void AddGitName(LString Hash, LString Name);
-	LString VcFolder::GetGitNames(LString Hash);
+	LString GetGitNames(LString Hash);
 
 	static int CmdMaxThreads;
 	static int CmdActiveThreads;
