@@ -1516,10 +1516,14 @@ bool LXmlTree::Read(LXmlTag *Root, LStreamI *File, LXmlFactory *Factory)
 	return true;
 }
 
-void LXmlTree::Output(LXmlTag *t, int Depth)
+bool LXmlTree::Output(LXmlTag *t, int Depth)
 {
+	#define OutputWrite(buf, size) \
+		if (d->File->Write(buf, size) != size) \
+			goto WriteError;
+
 	#define Tabs if (!TestFlag(d->Flags, GXT_NO_PRETTY_WHITESPACE)) \
-		{ for (int i=0; i<Depth; i++) d->File->Write((void*)"\t", 1); }
+		{ for (int i=0; i<Depth; i++) OutputWrite((void*)"\t", 1); }
 
 	if (d->Prog)
 		d->Prog->Value(d->Prog->Value()+1);
@@ -1529,25 +1533,37 @@ void LXmlTree::Output(LXmlTag *t, int Depth)
 	// Test to see if the tag is valid
 	bool ValidTag = ValidStr(t->Tag) && !IsDigit(t->Tag[0]);
 	if (ValidTag)
-		LStreamPrint(d->File, "<%s", t->Tag);
+	{
+		if (LStreamPrint(d->File, "<%s", t->Tag) <= 0)
+			goto StreamPrintError;
+	}
+	else
+	{
+		LAssert(!"Invalid tag.");
+		return false;
+	}
 
 	for (int i=0; i<t->Attr.Length(); i++)
 	{
 		LXmlAttr &a = t->Attr[i];
 
 		// Write the attribute name
-		LStreamPrint(d->File, " %s=\"", a.Name);
+		if (LStreamPrint(d->File, " %s=\"", a.Name) <= 0)
+			goto StreamPrintError;
 		
 		// Encode the value
-		EncodeEntities(d->File, a.Value, -1, EncodeEntitiesAttr);
+		if (!EncodeEntities(d->File, a.Value, -1, EncodeEntitiesAttr))
+			goto EncoderEntitiesError;
 
 		// Write the delimiter
-		d->File->Write((void*)"\"", 1);
+		OutputWrite("\"", 1);
 
-		if (i<t->Attr.Length()-1 && TestFlag(d->Flags, GXT_PRETTY_WHITESPACE))
+		if (i < t->Attr.Length() - 1 &&
+			TestFlag(d->Flags, GXT_PRETTY_WHITESPACE))
 		{
-			d->File->Write((void*)"\n", 1);
-			for (int i=0; i<=Depth; i++) d->File->Write((void*)"\t", 1);
+			OutputWrite("\n", 1);
+			for (int n=0; n<=Depth; n++)
+				OutputWrite("\t", 1);
 		}
 	}
 	
@@ -1558,14 +1574,16 @@ void LXmlTree::Output(LXmlTag *t, int Depth)
 		auto It = t->Children.begin();
 		LXmlTag *c = t->Children.Length() ? *It : NULL;
 		if (ValidTag)
-			d->File->Write(">", 1);
+			OutputWrite(">", 1);
 		
 		if (HasContent)
 		{
-			EncodeEntities(d->File, t->Content, -1, EncodeEntitiesContent);
+			if (!EncodeEntities(d->File, t->Content, -1, EncodeEntitiesContent))
+				goto EncoderEntitiesError;
+			
 			if (c)
 			{
-				d->File->Write((char*)"\n", 1);
+				OutputWrite((char*)"\n", 1);
 				Tabs
 			}
 		}
@@ -1574,53 +1592,78 @@ void LXmlTree::Output(LXmlTag *t, int Depth)
 		{
 			if (!HasContent)
 			{
-				d->File->Write((char*)"\n", 1);
+				OutputWrite((char*)"\n", 1);
 			}
 
 			for (; It != t->Children.end(); It++)
 			{
 				c = *It;
-				Output(c, Depth + (d->NoDom() ? 0 : 1));
+				if (!Output(c, Depth + (d->NoDom() ? 0 : 1)))
+					return false;
 			}
 
 			Tabs
 		}
 	
 		if (!d->NoDom())
-			LStreamPrint(d->File, "</%s>\n", t->Tag);
+		{
+			if (LStreamPrint(d->File, "</%s>\n", t->Tag) <= 0)
+				goto StreamPrintError;
+		}
 	}
 	else if (ValidTag)
 	{
 		if (d->NoDom())
-			d->File->Write(">\n", 2);
+		{
+			OutputWrite(">\n", 2);
+		}
 		else
-			d->File->Write(" />\n", 4);
+		{
+			OutputWrite(" />\n", 4);
+		}
 	}
 	
 	#undef Tabs
+
+	return true;
+
+EncoderEntitiesError:
+	LAssert(!"EncodeEntities failed.");
+	d->Error = "EncodeEntities failed.";
+	return false;
+
+StreamPrintError:
+	LAssert(!"StreamPrint failed.");
+	d->Error = "StreamPrint failed.";
+	return false;
+
+WriteError:
+	LAssert(!"Write failed.");
+	d->Error = "Write failed.";
+	return false;
 }
 
 bool LXmlTree::Write(LXmlTag *Root, LStreamI *File, Progress *Prog)
 {
-	bool Status = false;
-	
-	if (Root && File)
+	if (!Root || !File)
 	{
-		d->File = File;
-		if ((d->Prog = Prog))
-			d->Prog->SetRange(LRange(0, Root->CountTags()));
-
-		if (!TestFlag(d->Flags, GXT_NO_HEADER))
-			File->Write(LXmlHeader, strlen(LXmlHeader));
-		if (d->StyleFile && d->StyleType)
-			LStreamPrint(d->File, "<?xml-stylesheet href=\"%s\" type=\"%s\"?>\n", d->StyleFile, d->StyleType);
-
-		Output(Root, 0);
-
-		d->File = NULL;
-		d->Prog = NULL;
-		Status = true;
+		LAssert(!"Missing param.");
+		return false;
 	}
+
+	d->File = File;
+	if ((d->Prog = Prog))
+		d->Prog->SetRange(LRange(0, Root->CountTags()));
+
+	if (!TestFlag(d->Flags, GXT_NO_HEADER))
+		File->Write(LXmlHeader, strlen(LXmlHeader));
+	if (d->StyleFile && d->StyleType)
+		LStreamPrint(d->File, "<?xml-stylesheet href=\"%s\" type=\"%s\"?>\n", d->StyleFile, d->StyleType);
+
+	auto Status = Output(Root, 0);
+
+	d->File = NULL;
+	d->Prog = NULL;
 	
 	return Status;
 }

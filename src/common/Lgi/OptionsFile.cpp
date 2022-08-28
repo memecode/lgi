@@ -137,7 +137,12 @@ bool LOptionsFile::SerializeFile(bool Write)
 		if (f.Open(File, O_WRITE))
 		{
 			f.SetSize(0);
-			Tree.Write(this, &f);
+			if (!Tree.Write(this, &f))
+			{
+				LgiTrace("%s:%i - Failed encode xml to '%s'\n", _FL, File.Get());
+				LAssert("Xml write failed.");
+				return false;
+			}
 		}
 		else
 		{
@@ -173,10 +178,13 @@ bool LOptionsFile::SerializeFile(bool Write)
 			if (f.Open(File, O_READ))
 			{
 				Empty(true);
-				if (!Tree.Read(this, &f, 0))
-					return false;
 
-				_Defaults();
+				auto Status = Tree.Read(this, &f, 0);
+				if (!Status)
+					_Init(); // re init
+
+				_Defaults();				
+				return Status;
 			}
 			else
 			{
