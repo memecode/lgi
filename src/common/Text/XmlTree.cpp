@@ -1540,6 +1540,7 @@ bool LXmlTree::Output(LXmlTag *t, int Depth)
 	else
 	{
 		LAssert(!"Invalid tag.");
+		d->Error = "Invalid or missing tag.";
 		return false;
 	}
 
