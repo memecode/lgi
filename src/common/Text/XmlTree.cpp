@@ -1525,13 +1525,15 @@ bool LXmlTree::Output(LXmlTag *t, int Depth)
 	#define Tabs if (!TestFlag(d->Flags, GXT_NO_PRETTY_WHITESPACE)) \
 		{ for (int i=0; i<Depth; i++) OutputWrite((void*)"\t", 1); }
 
+	bool HasContent = false;
+	bool ValidTag = false;
 	if (d->Prog)
 		d->Prog->Value(d->Prog->Value()+1);
 	t->Serialize(t->Write = true);
 	Tabs
 
 	// Test to see if the tag is valid
-	bool ValidTag = ValidStr(t->Tag) && !IsDigit(t->Tag[0]);
+	ValidTag = ValidStr(t->Tag) && !IsDigit(t->Tag[0]);
 	if (ValidTag)
 	{
 		if (LStreamPrint(d->File, "<%s", t->Tag) <= 0)
@@ -1569,7 +1571,7 @@ bool LXmlTree::Output(LXmlTag *t, int Depth)
 	}
 	
 	// Write the child tags
-	bool HasContent = ValidStr(t->Content);
+	HasContent = ValidStr(t->Content);
 	if (t->Children.Length() || HasContent)
 	{
 		auto It = t->Children.begin();

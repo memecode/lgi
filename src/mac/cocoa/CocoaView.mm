@@ -6,7 +6,7 @@
 //  Copyright © 2018 Matthew Allen. All rights reserved.
 //
 
-#import "Lgi.h"
+#import "lgi/common/Lgi.h"
 #import <Foundation/Foundation.h>
 #import "LCocoaView.h"
 #include "lgi/common/EventTargetThread.h"

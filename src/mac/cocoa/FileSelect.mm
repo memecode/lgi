@@ -4,27 +4,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Lgi.h"
-#include "GToken.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/Token.h"
+#include "lgi/common/FileSelect.h"
 
 //////////////////////////////////////////////////////////////////////////
 // This is just a private data container to make it easier to change the
 // implementation of this class without effecting headers and applications.
-class GFileSelectPrivate
+class LFileSelectPrivate
 {
-	friend class GFileSelect;
-	friend class GFileSelectDlg;
+	friend class LFileSelect;
+	friend class LFileSelectDlg;
 	friend class GFolderList;
 
-	GView *Parent;
-	GFileSelect *Select;
+	LView *Parent;
+	LFileSelect *Select;
 
 	char *Title;
 	char *DefExt;
 	bool MultiSelect;
 	List<char> Files;
 	int CurrentType;
-	List<GFileType> Types;
+	List<LFileType> Types;
 	List<char> History;
 	bool ShowReadOnly;
 	bool ReadOnly;
@@ -34,9 +35,9 @@ class GFileSelectPrivate
 public:
 	static char *InitPath;
 	static bool InitShowHiddenFiles;
-	static GRect InitSize;
+	static LRect InitSize;
 
-	GFileSelectPrivate(GFileSelect *select)
+	LFileSelectPrivate(LFileSelect *select)
 	{
 		ShowReadOnly = false;
 		ReadOnly = false;
@@ -49,7 +50,7 @@ public:
 		CurrentType = -1;
 	}
 
-	virtual ~GFileSelectPrivate()
+	virtual ~LFileSelectPrivate()
 	{
 		DeleteArray(Title);
 		DeleteArray(DefExt);
@@ -62,35 +63,35 @@ public:
 
 };
 
-char *GFileSelectPrivate::InitPath = 0;
+char *LFileSelectPrivate::InitPath = 0;
 
 //////////////////////////////////////////////////////////////////////////
-GFileSelect::GFileSelect()
+LFileSelect::LFileSelect()
 {
-	d = new GFileSelectPrivate(this);
+	d = new LFileSelectPrivate(this);
 }
 
-GFileSelect::~GFileSelect()
+LFileSelect::~LFileSelect()
 {
 	DeleteObj(d);
 }
 
-void GFileSelect::ShowReadOnly(bool b)
+void LFileSelect::ShowReadOnly(bool b)
 {
 	d->ShowReadOnly = b;;
 }
 
-bool GFileSelect::ReadOnly()
+bool LFileSelect::ReadOnly()
 {
 	return d->ReadOnly;
 }
 
-char *GFileSelect::Name()
+const char *LFileSelect::Name()
 {
 	return d->Files[0];
 }
 
-bool GFileSelect::Name(const char *n)
+bool LFileSelect::Name(const char *n)
 {
 	d->Files.DeleteArrays();
 	if (n)
@@ -101,34 +102,34 @@ bool GFileSelect::Name(const char *n)
 	return true;
 }
 
-char *GFileSelect::operator [](size_t i)
+char *LFileSelect::operator [](size_t i)
 {
 	return d->Files.ItemAt(i);
 }
 
-size_t GFileSelect::Length()
+size_t LFileSelect::Length()
 {
 	return d->Files.Length();
 }
 
-size_t GFileSelect::Types()
+size_t LFileSelect::Types()
 {
 	return d->Types.Length();
 }
 
-void GFileSelect::ClearTypes()
+void LFileSelect::ClearTypes()
 {
 	d->Types.DeleteObjects();
 }
 
-GFileType *GFileSelect::TypeAt(ssize_t n)
+LFileType *LFileSelect::TypeAt(ssize_t n)
 {
 	return d->Types.ItemAt(n);
 }
 
-bool GFileSelect::Type(const char *Description, const char *Extension, int Data)
+bool LFileSelect::Type(const char *Description, const char *Extension, int Data)
 {
-	GFileType *Type = new GFileType;
+	LFileType *Type = new LFileType;
 	if (Type)
 	{
 		Type->Description(Description);
@@ -139,37 +140,37 @@ bool GFileSelect::Type(const char *Description, const char *Extension, int Data)
 	return Type != 0;
 }
 
-ssize_t GFileSelect::SelectedType()
+ssize_t LFileSelect::SelectedType()
 {
 	return d->CurrentType;
 }
 
-GViewI *GFileSelect::Parent()
+LViewI *LFileSelect::Parent()
 {
 	return d->Parent;
 }
 
-void GFileSelect::Parent(GViewI *Window)
+void LFileSelect::Parent(LViewI *Window)
 {
-	d->Parent = dynamic_cast<GView*>(Window);
+	d->Parent = dynamic_cast<LView*>(Window);
 }
 
-bool GFileSelect::MultiSelect()
+bool LFileSelect::MultiSelect()
 {
 	return d->MultiSelect;
 }
 
-void GFileSelect::MultiSelect(bool Multi)
+void LFileSelect::MultiSelect(bool Multi)
 {
 	d->MultiSelect = Multi;
 }
 
 #define CharPropImpl(Func, Var)				\
-	char *GFileSelect::Func()				\
+	char *LFileSelect::Func()				\
 	{										\
 		return Var;							\
 	}										\
-	void GFileSelect::Func(const char *i)	\
+	void LFileSelect::Func(const char *i)	\
 	{										\
 		DeleteArray(Var);					\
 		if (i)								\
@@ -182,7 +183,7 @@ CharPropImpl(InitialDir, d->InitPath);
 CharPropImpl(Title, d->Title);
 CharPropImpl(DefaultExtension, d->DefExt);
    
-bool GFileSelect::Open()
+bool LFileSelect::Open()
 {
 	bool Status = false;
 	
@@ -190,7 +191,7 @@ bool GFileSelect::Open()
 	return Status;
 }
 
-bool GFileSelect::OpenFolder()
+bool LFileSelect::OpenFolder()
 {
 	bool Status = false;
 	
@@ -198,7 +199,7 @@ bool GFileSelect::OpenFolder()
 	return Status;
 }
 
-bool GFileSelect::Save()
+bool LFileSelect::Save()
 {
 	bool Status = false;
 	

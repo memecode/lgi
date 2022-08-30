@@ -1,7 +1,7 @@
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required (VERSION 3.18)
 
-SET (CMAKE_OSX_ARCHITECTURES "x86_64")
-set (CMAKE_CXX_STANDARD 11)
+set(CMAKE_OSX_ARCHITECTURES "x86_64")
+set(CMAKE_CXX_STANDARD 14)
 
 project (Lgi)
 set (LGI_VERSION_MAJOR 1)
@@ -12,7 +12,6 @@ if (UNIX AND NOT APPLE)
 endif()
 
 get_filename_component(CODE ../.. ABSOLUTE)
-message("CODE=${CODE}")
 get_filename_component(CODELIB ${CODE}/../codelib ABSOLUTE)
 if (NOT EXISTS "${CODELIB}")
 	message(FATAL_ERROR "Expecting external libraries in: ${CODELIB}")
@@ -20,8 +19,12 @@ else()
 	message("CODELIB=${CODELIB}")
 endif()
 set(ICONV_PATH "${CODELIB}/libiconv")
-if (NOT EXISTS "${ICONV_PATH}")
-	message(FATAL_ERROR "Missing iconv at: ${ICONV_PATH}")
+if (NOT EXISTS "${ICONV_PATH}/include")
+	if (APPLE AND EXISTS "/opt/local/include/iconv.h")
+		set(ICONV_PATH "/opt/local")
+	else()
+		message(FATAL_ERROR "Missing iconv at: ${ICONV_PATH}")
+	endif()
 endif()
 
 if (APPLE)
@@ -101,6 +104,7 @@ set (CommonSource
 	src/common/Lgi/LgiCommon.cpp
 	src/common/Lgi/LMsg.cpp
 	src/common/Lgi/Rand.cpp
+	src/common/Lgi/DropFiles.cpp
 	src/common/Lgi/MenuCommon.cpp
 	src/common/Resource/LgiRes.cpp
 	src/common/Resource/Res.cpp
@@ -126,39 +130,41 @@ set (CommonSource
 	src/common/Widgets/TextLabel.cpp
 	src/common/Widgets/ToolBar.cpp	
 	src/common/Widgets/Tree.cpp
+	src/common/Widgets/Slider.cpp
 	)
 
 if (APPLE)
 
 	set(Source
 		${CommonSource}
-		src/common/Widgets/GCheckBox.cpp
-		src/common/Widgets/GCombo.cpp
-		src/common/Widgets/GScrollBar.cpp
-		src/common/Widgets/GButton.cpp
-		src/common/Widgets/GRadioGroup.cpp
-		src/common/Widgets/GEdit.cpp
-		src/common/Lgi/GLayout.cpp
-		src/common/Widgets/GProgress.cpp
-		src/mac/cocoa/General/ShowFileProp_Mac.mm
-		src/mac/carbon/Gdc2/Gdc2.cpp
-		src/mac/common/GMemDC.cpp
-		src/mac/common/GPrintDC.cpp
-		src/mac/common/GScreenDC.cpp
-		src/mac/cocoa/General/GFile.mm
-		src/mac/cocoa/General/GMem.mm
-		src/mac/cocoa/Lgi/GApp.mm
-		src/mac/cocoa/Lgi/GClipBoard.mm
-		src/mac/cocoa/Lgi/GDragAndDrop.mm
-		src/mac/cocoa/Lgi/GGeneral.mm
-		src/mac/cocoa/Lgi/GFileSelect.mm
-		src/mac/cocoa/Lgi/LMenu.mm
-		src/mac/cocoa/Lgi/GPrinter.mm
-		src/mac/cocoa/Lgi/LThread.mm
-		src/mac/cocoa/Lgi/GView.mm
-		src/mac/cocoa/Lgi/GWidgets.mm
-		src/mac/cocoa/Lgi/GWindow.mm
-		src/mac/cocoa/Lgi/LCocoaView.mm)
+		src/common/Widgets/CheckBox.cpp
+		src/common/Widgets/Combo.cpp
+		src/common/Widgets/ScrollBar.cpp
+		src/common/Widgets/Button.cpp
+		src/common/Widgets/RadioGroup.cpp
+		src/common/Widgets/Edit.cpp
+		src/common/Lgi/Layout.cpp
+		src/common/Widgets/Progress.cpp
+		src/mac/cocoa/ShowFileProp_Mac.mm
+		src/mac/common/MemDC.cpp
+		src/mac/common/PrintDC.cpp
+		src/mac/common/ScreenDC.cpp
+		src/mac/cocoa/File.mm
+		src/mac/cocoa/Mem.mm
+		src/mac/cocoa/App.mm
+		src/mac/cocoa/ClipBoard.mm
+		src/mac/cocoa/DragAndDrop.mm
+		src/mac/cocoa/General.mm
+		src/mac/cocoa/FileSelect.mm
+		src/mac/cocoa/Menu.mm
+		src/mac/cocoa/Printer.mm
+		src/mac/cocoa/Thread.mm
+		src/mac/cocoa/View.mm
+		src/mac/cocoa/Widgets.mm
+		src/mac/cocoa/Window.mm
+		src/mac/cocoa/CocoaView.mm
+		src/mac/cocoa/Gdc2.mm
+		)
 
 elseif (LINUX)
 
@@ -233,31 +239,47 @@ add_library(lgi SHARED ${Source})
 
 if (APPLE)
 
+	set_target_properties(lgi
+		PROPERTIES
+		XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_WEAK "YES"
+		)
+
 	target_include_directories(lgi
 		PUBLIC
-			include/mac/cocoa
-			include/posix
+			include/lgi/mac/cocoa
 			/opt/local/include
 			${CODELIB}/libpng
 			${CODELIB}/libpng/build
-		)
+		PRIVATE
+			private/mac
+			)
 
 	target_link_libraries(lgi
 		PUBLIC
 			${EXTRA_LIBS})
 
+	target_compile_options(lgi
+		PUBLIC
+			-Wno-nullability-completeness)
+
 	set(OBJCPP_SOURCE
+		src/common/Gdc2/Font/FontSystem.cpp
+		src/common/Gdc2/GdcCommon.cpp
 		src/common/Lgi/LgiCommon.cpp
-		src/common/Lgi/GGuiUtils.cpp
-		src/common/Gdc2/Font/GFontSystem.cpp
-		src/common/Lgi/GProcess.cpp
-		src/common/Lgi/GViewCommon.cpp
-		src/common/Lgi/GTrayIcon.cpp
-		src/common/Lgi/LgiMsg.cpp
-		src/common/Widgets/GPopup.cpp
-		src/mac/common/GMemDC.cpp
-		src/mac/common/GScreenDC.cpp
-		src/mac/cocoa/Lgi/GGeneral.cpp
+		src/common/Lgi/GuiUtils.cpp
+		src/common/Lgi/Process.cpp
+		src/common/Lgi/ViewCommon.cpp
+		src/common/Lgi/TrayIcon.cpp
+		src/common/Lgi/LMsg.cpp
+		src/common/Lgi/ViewCommon.cpp
+		src/common/Lgi/SubProcess.cpp
+		src/common/Lgi/AppCommon.cpp
+		src/common/Lgi/DropFiles.cpp
+		src/common/Widgets/Popup.cpp
+		src/common/General/DateTime.cpp
+		src/mac/common/MemDC.cpp
+		src/mac/common/ScreenDC.cpp
+		src/mac/cocoa/General.cpp		
 		)
 
 	set_source_files_properties(${OBJCPP_SOURCE} PROPERTIES 

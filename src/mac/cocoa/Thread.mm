@@ -1,5 +1,4 @@
-#include "Lgi.h"
-#include "LgiOsDefs.h"
+#include "lgi/common/Lgi.h"
 #include "lgi/common/Mutex.h"
 #include "lgi/common/StringClass.h"
 #include "lgi/common/Thread.h"
