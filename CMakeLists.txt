@@ -129,8 +129,7 @@ set (CommonSource
 	src/common/Widgets/TabView.cpp
 	src/common/Widgets/TextLabel.cpp
 	src/common/Widgets/ToolBar.cpp	
-	src/common/Widgets/Tree.cpp
-	src/common/Widgets/Slider.cpp
+	src/common/Widgets/Tree.cpp	
 	)
 
 if (APPLE)
@@ -145,6 +144,7 @@ if (APPLE)
 		src/common/Widgets/Edit.cpp
 		src/common/Lgi/Layout.cpp
 		src/common/Widgets/Progress.cpp
+		src/common/Widgets/Slider.cpp
 		src/mac/cocoa/ShowFileProp_Mac.mm
 		src/mac/common/MemDC.cpp
 		src/mac/common/PrintDC.cpp
@@ -190,13 +190,15 @@ elseif (LINUX)
 		src/linux/Lgi/GWidgets.cpp
 		src/linux/Lgi/GWindow.cpp
 		src/common/Lgi/GFileSelect.cpp
-		src/common/Widgets/GCheckBox.cpp
-		src/common/Widgets/GEdit.cpp
-		src/common/Widgets/GScrollBar.cpp
-		src/common/Widgets/GCombo.cpp
-		src/common/Widgets/GButton.cpp
-		src/common/Widgets/GRadioGroup.cpp
-		src/common/Widgets/GProgress.cpp)
+		src/common/Widgets/CheckBox.cpp
+		src/common/Widgets/Edit.cpp
+		src/common/Widgets/ScrollBar.cpp
+		src/common/Widgets/Combo.cpp
+		src/common/Widgets/Button.cpp
+		src/common/Widgets/RadioGroup.cpp
+		src/common/Widgets/Progress.cpp
+		src/common/Widgets/Slider.cpp
+		)
 
 elseif (MSVC)
 
