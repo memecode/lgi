@@ -305,6 +305,7 @@ LMessage::Result SshConnection::OnEvent(LMessage *Msg)
 			if (!con)
 			{
 				r->Output = "Error: Failed to get console.";
+				r->Vcs = VcError;
 			}
 			else
 			{
@@ -329,7 +330,10 @@ SSH_LOG("detectVcs:", ls);
 
 			r->Path = *p;
 
-			if (Vcs)
+			printf("r->Output=%s\n", r->Output.Get());
+			if (Vcs == VcError)
+				;
+			else if (Vcs != VcNone)
 			{
 				r->Vcs = Vcs;
 				r->ExitCode = 0;

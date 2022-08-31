@@ -22,6 +22,8 @@ set(ICONV_PATH "${CODELIB}/libiconv")
 if (NOT EXISTS "${ICONV_PATH}/include")
 	if (APPLE AND EXISTS "/opt/local/include/iconv.h")
 		set(ICONV_PATH "/opt/local")
+	elseif (LINUX)
+		find_package(Iconv REQUIRED)
 	else()
 		message(FATAL_ERROR "Missing iconv at: ${ICONV_PATH}")
 	endif()
@@ -36,8 +38,8 @@ if (APPLE)
 
 elseif (LINUX)
 
-	find_package(GTK2 COMPONENTS gtk)
 	find_package(PkgConfig)
+	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
 	pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4)
 	                               
 endif()
@@ -171,25 +173,25 @@ elseif (LINUX)
 	set(Source
 		${CommonSource}
 		src/linux/Gtk/Gdc2.cpp
-		src/linux/Gtk/GMemDC.cpp
-		src/linux/Gtk/GPrintDC.cpp
-		src/linux/Gtk/GScreenDC.cpp
+		src/linux/Gtk/MemDC.cpp
+		src/linux/Gtk/PrintDC.cpp
+		src/linux/Gtk/ScreenDC.cpp
 		src/linux/Gtk/LgiWidget.cpp
-		src/linux/General/GFile.cpp
-		src/linux/General/GMem.cpp
+		src/linux/General/File.cpp
+		src/linux/General/Mem.cpp
 		src/linux/General/ShowFileProp_Linux.cpp
-		src/linux/Lgi/GApp.cpp
-		src/linux/Lgi/GClipBoard.cpp
-		src/linux/Lgi/GDragAndDrop.cpp
-		src/linux/Lgi/GGeneral.cpp
-		src/linux/Lgi/GLayout.cpp
-		src/linux/Lgi/LMenu.cpp
-		src/linux/Lgi/GPrinter.cpp
-		src/linux/Lgi/LThread.cpp
-		src/linux/Lgi/GView.cpp
-		src/linux/Lgi/GWidgets.cpp
-		src/linux/Lgi/GWindow.cpp
-		src/common/Lgi/GFileSelect.cpp
+		src/linux/Lgi/App.cpp
+		src/linux/Lgi/ClipBoard.cpp
+		src/linux/Lgi/DragAndDrop.cpp
+		src/linux/Lgi/General.cpp
+		src/linux/Lgi/Layout.cpp
+		src/linux/Lgi/Menu.cpp
+		src/linux/Lgi/Printer.cpp
+		src/linux/Lgi/Thread.cpp
+		src/linux/Lgi/View.cpp
+		src/linux/Lgi/Widgets.cpp
+		src/linux/Lgi/Window.cpp
+		src/common/Lgi/FileSelect.cpp
 		src/common/Widgets/CheckBox.cpp
 		src/common/Widgets/Edit.cpp
 		src/common/Widgets/ScrollBar.cpp
@@ -298,6 +300,7 @@ elseif (LINUX)
 	target_compile_definitions(lgi
 		PUBLIC
 			LINUX
+			POSIX
 		)
 
 	target_compile_options(lgi
@@ -310,15 +313,17 @@ elseif (LINUX)
 
 	target_include_directories(lgi
 		PUBLIC
-			include/linux/Gtk
-			include/linux
-			${GTK2_INCLUDE_DIRS}
+			include/lgi/linux/Gtk
+			include/lgi/linux
+			${GTK3_INCLUDE_DIRS}
 			${GST_INCLUDE_DIRS}
+		PRIVATE
+			private/linux
 		)
 	
 	target_link_libraries(lgi
 		PUBLIC
-			${GTK2_LIBRARIES}
+			${GTK3_LIBRARIES}
 			${GST_LIBRARIES}
 			magic
 		)
