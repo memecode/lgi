@@ -87,6 +87,23 @@ public:
 		x = 0;
 		y = 0;
 	}
+
+	LString GetStr()
+	{
+		LString s;
+		s.Printf("%i,%i", x, y);
+		return s;
+	}
+
+	bool SetStr(LString s)
+	{
+		auto p = s.SplitDelimit(" ,");
+		if (p.Length() != 2)
+			return false;
+		x = (int)p[0].Int();
+		y = (int)p[1].Int();
+		return true;
+	}
 };
 
 /// 3d Point
