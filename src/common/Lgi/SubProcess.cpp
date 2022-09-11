@@ -538,9 +538,27 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			// Execute the child
 			d->Args.Add(NULL);
 			
+			LString::Array Path;
+			if (!LFileExists(d->Exe))
+			{
+				// Apparently 'execve' doesn't search the path... so we're going to look up the
+				// full executable path ourselves.
+				if (!Path.Length())
+					Path = LGetPath();
+				for (auto s: Path)
+				{
+					LFile::Path p(s, d->Exe);
+					if (p.Exists())
+					{
+						d->Exe = p.GetFull();
+						break;
+					}
+				}
+			}
+				
 			if (d->Environment.Length())
 			{
-				LString::Array Vars, Path;
+				LString::Array Vars;
 				LArray<char*> Env;
                 
 				Vars.SetFixedLength(false);
@@ -555,23 +573,6 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 				}
 				Env.Add(NULL);
                 
-                if (!LFileExists(d->Exe))
-                {
-                    // Apparently 'execve' doesn't search the path... so we're going to look up the
-                    // full executable path ourselves.
-                    if (!Path.Length())
-                        Path = LGetPath();
-                    for (auto s: Path)
-                    {
-                        LFile::Path p(s, d->Exe);
-                        if (p.Exists())
-                        {
-                            d->Exe = p.GetFull();
-                            break;
-                        }
-                    }
-                }
-				
 				#if DEBUG_SUBPROCESS
 				printf("Exe=%s\n", d->Exe.Get());
 				printf("Env.Len=%i\n", (int)Env.Length());

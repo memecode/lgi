@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		341EF791255A991B0045CB3B /* libssh.4.7.2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 347D147E252D44EE00422DA9 /* libssh.4.7.2.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		342D52A50F0CBA2F002A1C7C /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 342D52A40F0CBA2F002A1C7C /* LgiMain.cpp */; };
 		3448F8C62081D2500038AE76 /* mac-icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 3448F8C52081D2500038AE76 /* mac-icon.icns */; };
 		3449AB5828B96C8A00F8AAD4 /* SshConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3449AB5728B96C8A00F8AAD4 /* SshConnection.cpp */; };
@@ -19,7 +18,7 @@
 		3457FE4E2081CB3D00014BE4 /* VcFolder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE472081CB3D00014BE4 /* VcFolder.cpp */; };
 		3457FE502081CBE500014BE4 /* SubProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE4F2081CBE500014BE4 /* SubProcess.cpp */; };
 		3457FE522081CC4800014BE4 /* Lvc.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 3457FE512081CC4800014BE4 /* Lvc.lr8 */; };
-		347D1484252D450500422DA9 /* libssh.4.7.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 347D147E252D44EE00422DA9 /* libssh.4.7.2.dylib */; };
+		347D1484252D450500422DA9 /* libssh.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 347D147E252D44EE00422DA9 /* libssh.dylib */; };
 		347D1487252D451C00422DA9 /* libpng15.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34CE07222327B3F900807DCB /* libpng15.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		347D1489252D453300422DA9 /* DeEscape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 347D1488252D453300422DA9 /* DeEscape.cpp */; };
 		34BD35B120C5484A0001838A /* ControlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B020C5484A0001838A /* ControlTree.cpp */; };
@@ -30,6 +29,7 @@
 		34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34C032B92319CDFE00470DF2 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		34CE07102327B3B100807DCB /* Png.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CE070F2327B3B100807DCB /* Png.cpp */; };
 		34E1910C20B1898E00005243 /* image-list.png in Resources */ = {isa = PBXBuildFile; fileRef = 34E1910B20B1898E00005243 /* image-list.png */; };
+		34F591A328CDE742000CABAB /* libssh.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 347D147E252D44EE00422DA9 /* libssh.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0867D6AAFE840B52C02AAC07 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
@@ -108,7 +108,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 347D145B252D44EE00422DA9 /* libssh.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = EC84925CF7364C10983CF4CF;
+			remoteGlobalIDString = CFAD76B4C417416CA885FE58;
 			remoteInfo = ssh_shared;
 		};
 		34C032B82319CDFE00470DF2 /* PBXContainerItemProxy */ = {
@@ -178,7 +178,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 6E0E6C089FA643D996341259;
+			remoteGlobalIDString = 653188B7D5934D8792688F46;
 			remoteInfo = libpng15;
 		};
 /* End PBXContainerItemProxy section */
@@ -190,7 +190,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				341EF791255A991B0045CB3B /* libssh.4.7.2.dylib in CopyFiles */,
+				34F591A328CDE742000CABAB /* libssh.dylib in CopyFiles */,
 				347D1487252D451C00422DA9 /* libpng15.dylib in CopyFiles */,
 				34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */,
 			);
@@ -236,7 +236,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				347D1484252D450500422DA9 /* libssh.4.7.2.dylib in Frameworks */,
+				347D1484252D450500422DA9 /* libssh.dylib in Frameworks */,
 				34C032BB2319CE8C00470DF2 /* LgiCocoa.framework in Frameworks */,
 				34C032B32319CDE900470DF2 /* Cocoa.framework in Frameworks */,
 			);
@@ -342,7 +342,7 @@
 				347D1478252D44EE00422DA9 /* scp_download */,
 				347D147A252D44EE00422DA9 /* senddata */,
 				347D147C252D44EE00422DA9 /* ssh-client */,
-				347D147E252D44EE00422DA9 /* libssh.4.7.2.dylib */,
+				347D147E252D44EE00422DA9 /* libssh.dylib */,
 				347D1480252D44EE00422DA9 /* sshnetcat */,
 			);
 			name = Products;
@@ -499,9 +499,10 @@
 			remoteRef = 347D147B252D44EE00422DA9 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		347D147E252D44EE00422DA9 /* libssh.4.7.2.dylib */ = {
+		347D147E252D44EE00422DA9 /* libssh.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
+			name = libssh.dylib;
 			path = libssh.4.7.2.dylib;
 			remoteRef = 347D147D252D44EE00422DA9 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -603,7 +604,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nexport FW=${CONFIGURATION_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}\nrm -f ${FW}/libssh.4.dylib\nln -s ./libssh.4.7.2.dylib ${FW}/libssh.4.dylib\n";
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nexport FW=${CONFIGURATION_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}\necho fw=${FW}\nrm -f ${FW}/libssh.4.dylib\nln -s ./libssh.4.7.2.dylib ${FW}/libssh.4.dylib\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
