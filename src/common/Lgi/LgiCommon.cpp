@@ -2438,6 +2438,14 @@ LString::Array LGetPath()
 		// The GUI application path is NOT the same as what is configured for the terminal.
 		// At least in 10.12. And I don't know how to make them the same. This works around
 		// that for the time being.
+		
+		#if 1
+		
+		LFile EctPaths("/etc/paths", O_READ);
+		Paths = EctPaths.Read().Split("\n");
+		
+		#else
+		
 		LFile::Path Home(LSP_HOME);
 		Home += ".profile";
 		if (!Home.Exists())
@@ -2470,6 +2478,9 @@ LString::Array LGetPath()
 				break;
 			}
 		}
+		
+		#endif
+		
 	#else
 		auto Path = LGetEnv("PATH");
 		// printf("Path='%s'\n", Path.Get());
