@@ -155,25 +155,42 @@ public:
 
 #endif
 
-#if 1
 /////////////////////////////////////////////////////////////////////////////
 //
 // Attempts to cleanup and call drkonqi to process the crash
 //
+static LString CrashHandlerApp;
 void LgiCrashHandler(int Sig)
 {
 	// Don't get into an infinite loop
    	signal(SIGSEGV, SIG_DFL);
 
 	#ifndef _MSC_VER
+	
 	// Our pid
-	int MyPid = getpid();	
-	printf("LgiCrashHandler trigger MyPid=%i\n", MyPid);
+	LString pid;
+	pid.Printf("%i", getpid());
+	LgiTrace("LgiCrashHandler trigger pid=%s\n", pid.Get());
+
+	auto child = fork();
+	if (!child)
+	{
+		LFile::Path workingDir = CrashHandlerApp;
+		workingDir--;
+		chdir(workingDir);
+		
+		const char *args[] = { CrashHandlerApp, "--pid", pid, NULL };
+		execvp(CrashHandlerApp, args);
+		exit(0);
+	}
+	
+	LgiTrace("LgiCrashHandler showing dlg\n");
+	LgiMsg(NULL, "Application crashed... dumping details.", "Crash");
+	
 	#endif
 
 	exit(-1);
 }
-#endif
 
 /////////////////////////////////////////////////////////////////////////////
 #ifndef XK_Num_Lock
@@ -250,12 +267,12 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 
 	int WCharSz = sizeof(wchar_t);
 	#if defined(_MSC_VER)
-	LAssert(WCharSz == 2);
-	::LFile::Path Dlls(LgiArgsAppPath);
-	Dlls--;
-	SetDllDirectoryA(Dlls);
+		LAssert(WCharSz == 2);
+		::LFile::Path Dlls(LgiArgsAppPath);
+		Dlls--;
+		SetDllDirectoryA(Dlls);
 	#else
-	LAssert(WCharSz == 4);
+		LAssert(WCharSz == 4);
 	#endif
 
 	#ifdef _MSC_VER
@@ -265,7 +282,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	#endif
   	
 	// We want our printf's NOW!
-	setvbuf(stdout,(char *)NULL,_IONBF,0); // print mesgs immediately.
+	setvbuf(stdout, (char*)NULL,_IONBF, 0); // print mesgs immediately.
 
 	// Setup the file and graphics sub-systems
 	d->FileSystem = new LFileSystem;
@@ -275,7 +292,6 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 
 	srand(LCurrentTime());
 	LColour::OnChange();
-	AppWnd = NULL;
 
 	Gtk::gchar id[256];
 	sprintf_s(id, sizeof(id), "com.memecode.%s", name);
@@ -284,14 +300,27 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 
 	MouseHook = new LMouseHook;
 
-	#if 0
-	// Setup the SIGSEGV signal to call the KDE crash handler
-	if (!GetOption("nch") &&
-		LGetWindowManager() == WM_Kde)
+	// Setup the SIGSEGV signal to call the crash handler
+	if (!GetOption("nch"))
 	{
-		signal(SIGSEGV, LgiCrashHandler);
+		LFile::Path p(LSP_APP_INSTALL);
+		p += "crash-handler";
+		if (p.Exists())
+		{
+			CrashHandlerApp = p;
+			signal(SIGSEGV, LgiCrashHandler);
+			LgiTrace("Crash handler: '%s' installed.\n", CrashHandlerApp.Get());
+		}
+		else
+		{
+			LgiTrace("Crash handler: No crash handler '%s' found, SIGSEGV handler not installed.\n",
+				p.GetFull().Get());
+		}
 	}
-	#endif
+	else
+	{
+		LgiTrace("Crash hanlder: disabled.\n");
+	}
 
 	d->GetConfig();
 
