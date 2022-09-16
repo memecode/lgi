@@ -1555,7 +1555,8 @@ bool LXmlTree::Output(LXmlTag *t, int Depth)
 			goto StreamPrintError;
 		
 		// Encode the value
-		if (!EncodeEntities(d->File, a.Value, -1, EncodeEntitiesAttr))
+		if (a.Value &&
+			!EncodeEntities(d->File, a.Value, -1, EncodeEntitiesAttr))
 			goto EncoderEntitiesError;
 
 		// Write the delimiter
