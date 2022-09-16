@@ -61,14 +61,17 @@ void *ThreadEntryPoint(void *i)
 	return 0;
 }
 
+const OsThread LThread::InvalidHandle = NULL;
+const OsThreadId LThread::InvalidId = 0;
+
 LThread::LThread(const char *ThreadName, int viewHandle)
 {
 	Name = ThreadName;
 	ViewHandle = viewHandle;
-	ThreadId = 0;
+	ThreadId = InvalidId;
 	State = LThread::THREAD_INIT;
 	ReturnValue = -1;
-	hThread = 0;
+	hThread = InvalidHandle;
 	DeleteOnExit = false;
 }
 

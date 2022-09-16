@@ -6,6 +6,9 @@ LEventSinkMap LEventSinkMap::Dispatch(128);
 //////////////////////////////////////////////////////////////////////////////////
 void LThread::WaitForExit(int WarnAfterMs)
 {
+	if (Handle() == InvalidHandle)
+		return;
+
 	auto Start = LCurrentTime();
 	while (!IsExited())
 	{
