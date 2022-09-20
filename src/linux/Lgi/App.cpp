@@ -320,7 +320,9 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
     			p = dlInfo.dli_fname;
 				p += "../../src/linux/CrashHandler";
 				p += programName;
-				printf("Alternative path found: %s\n", p.GetFull().Get());
+				printf("Alternative path %s: %s\n",
+					p.Exists() ? "found" : "missing",
+					p.GetFull().Get());
     		}
 		}		
 		
@@ -338,7 +340,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	}
 	else
 	{
-		LgiTrace("Crash hanlder: disabled.\n");
+		LgiTrace("Crash handler: disabled.\n");
 	}
 
 	d->GetConfig();

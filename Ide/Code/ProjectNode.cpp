@@ -617,6 +617,7 @@ bool ProjectNode::Serialize(bool Write)
 	}
 	else if (Type == NodeDependancy)
 	{
+		SerializeAttr("LinkAgainst", LinkAgainst);
 		if (!Write)
 		{
 			auto Full = GetFullPath();				
@@ -1375,6 +1376,48 @@ ProjectNode *ProjectNode::FindFile(const char *In, char **Full)
 	return 0;
 }
 
+struct DepDlg : public LDialog
+{
+	ProjectNode *Node;
+	
+	DepDlg(ProjectNode *node) : Node(node)
+	{
+		auto proj = node->GetProject();
+		auto app = proj ? proj->GetApp() : NULL;
+		if (!app)
+			LAssert(!"Can't get app ptr.");
+		else
+		{
+			SetParent(app);
+			MoveSameScreen(app);
+		}		
+		
+		if (!LoadFromResource(IDD_DEP_NODE))
+			LAssert(!"Resource missing.");
+		else
+		{
+			auto Path = node->GetFullPath();
+			if (Path)
+				SetCtrlName(IDC_PATH, Path);
+			SetCtrlValue(IDC_LINK_AGAINST, node->GetLinkAgainst());
+		}
+	}
+	
+	int OnNotify(LViewI *Ctrl, LNotification n)
+	{
+		switch (Ctrl->GetId())
+		{
+			case IDOK:
+			{
+				Node->SetLinkAgainst(GetCtrlValue(IDC_LINK_AGAINST));
+				break;
+			}
+		}
+		
+		return LDialog::OnNotify(Ctrl, n);
+	}
+};
+
 void ProjectNode::OnProperties()
 {
 	if (IsWeb())
@@ -1404,8 +1447,8 @@ void ProjectNode::OnProperties()
 	}
 	else if (Type == NodeDependancy)
 	{
-		auto Path = GetFullPath();
-		LgiMsg(Tree, "Path: %s", AppName, MB_OK, Path.Get());
+		DepDlg dlg(this);
+		dlg.DoModal();
 	}
 	else
 	{

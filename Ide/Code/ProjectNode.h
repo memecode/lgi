@@ -31,10 +31,12 @@ class ProjectNode : public IdeCommon, public LDragDropSource, public FtpCallback
 	LString sLocalCache;
 	LString sName;
 	LString Charset;
-	IdeProject *Dep;
 	bool IgnoreExpand;
 	int64 ChildCount;
 	LString Label;
+
+	IdeProject *Dep;
+	int LinkAgainst = true;
 
 	void OpenLocalCache(IdeDoc *&Doc);
 	void OnCmdComplete(FtpCmd *Cmd) override;
@@ -53,6 +55,8 @@ public:
 	
 	// Props
 	int GetId();
+	int GetLinkAgainst() { return LinkAgainst; }
+	void SetLinkAgainst(bool b) { LinkAgainst = b; }
 	bool IsWeb() override;
 	IdeProject *GetDep();
 	IdeProject *GetProject() override;
