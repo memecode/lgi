@@ -2561,6 +2561,7 @@ public:
 			// Compile and asm code to evaluate the expression
 			GVarRef Result;
 			int ExpressionTok = Cur;
+			Result.Empty();
 			if (DoExpression(Cur, &Result))
 			{
 				t = GetTok(Cur);
@@ -2713,6 +2714,7 @@ public:
 
 		// Compile condition evalulation
 		GVarRef r;
+		r.Empty();
 		if (!DoExpression(Cur, &r))
 			return false;
 
@@ -2803,6 +2805,7 @@ public:
 		
 		// Compile initial statement
 		GVarRef r;
+		r.Empty();
 		t = GetTok(Cur);
 		if (!t)
 			return false;
