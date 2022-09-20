@@ -8,6 +8,9 @@
 #endif
 #include <ctype.h>
 
+#define _GNU_SOURCE
+#include <dlfcn.h>
+
 #include "lgi/common/Lgi.h"
 #include "lgi/common/SkinEngine.h"
 #include "lgi/common/Array.h"
@@ -303,8 +306,24 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	// Setup the SIGSEGV signal to call the crash handler
 	if (!GetOption("nch"))
 	{
+		auto programName = "crash-handler";
 		LFile::Path p(LSP_APP_INSTALL);
-		p += "crash-handler";
+		p += programName;
+		
+		if (!p.Exists())
+		{
+			// Check alternate location for development builds
+			Dl_info dlInfo;
+    		dladdr(LgiCrashHandler, &dlInfo);
+    		if (dlInfo.dli_sname != NULL && dlInfo.dli_saddr != NULL)
+    		{
+    			p = dlInfo.dli_fname;
+				p += "../../src/linux/CrashHandler";
+				p += programName;
+				printf("Alternative path found: %s\n", p.GetFull().Get());
+    		}
+		}		
+		
 		if (p.Exists())
 		{
 			CrashHandlerApp = p;

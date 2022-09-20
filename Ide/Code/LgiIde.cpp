@@ -2738,13 +2738,14 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 			Projs.Insert(Proj);
 			Proj->CollectAllSubProjects(Projs);
 
-			for (auto Project : Projs)
+			for (auto p: Projs)
 			{
-				auto ProjPath = Project->GetBasePath();
-				char p[MAX_PATH_LEN];
-				LMakePath(p, sizeof(p), ProjPath, File);
-				LString Path = p;
-				if (Project->CheckExists(Path))
+				auto ProjPath = p->GetBasePath();
+				char s[MAX_PATH_LEN];
+				LMakePath(s, sizeof(s), ProjPath, File);
+				
+				LString Path = s;
+				if (p->CheckExists(Path))
 				{
 					FullPath = Path;
 					File = FullPath;
