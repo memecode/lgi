@@ -580,18 +580,28 @@ struct LVolumePriv
 
 	void Insert(LVolume *vol, LVolume *newVol)
 	{
+		if (!vol || !newVol)
+			return;
+			
 		if (vol->d->ChildVol)
 		{
 			for (auto v = vol->d->ChildVol; v; v = v->d->NextVol)
 			{
 				if (!v->d->NextVol)
 				{
+					LAssert(newVol != v->d->Owner);
 					v->d->NextVol = newVol;
+					// printf("Insert %p:%s into %p:%s\n", newVol, newVol->Name(), vol, vol->Name());
 					break;
 				}
 			}
 		}
-		else vol->d->ChildVol = newVol;
+		else
+		{
+			LAssert(newVol != vol->d->Owner);
+			vol->d->ChildVol = newVol;
+			// printf("Insert %p:%s into %p:%s\n", newVol, newVol->Name(), vol, vol->Name());
+		}
 	}	
 
 	LVolume *First()
@@ -645,13 +655,13 @@ struct LVolumePriv
 				f.Close();
 
 				auto Lines = Buf.SplitDelimit("\r\n");
-				for (auto ln : Lines)
+				for (auto ln: Lines)
 				{
 					auto M = ln.Strip().SplitDelimit(" \t");
 					if (M[0](0) != '#' && M.Length() > 2)
 					{
-						auto &Device = M[0];
-						auto &Mount = M[1];
+						auto &Device  = M[0];
+						auto &Mount   = M[1];
 						auto &FileSys = M[2];
 												
 						if
@@ -686,15 +696,10 @@ struct LVolumePriv
 								}
 
 								char *Device = M[0];
-								// char *FileSys = M[2];
 								if (stristr(Device, "fd"))
-								{
 									v->d->Type = VT_FLOPPY;
-								}
 								else if (stristr(Device, "cdrom"))
-								{
 									v->d->Type = VT_CDROM;
-								}
 
 								Insert(NextVol, v);
 							}
