@@ -362,6 +362,8 @@ public:
 
 	/// Returns the string if valid (will convert a GV_WSTRING to utf)
 	char *Str();
+	/// Returns the value as an LString
+	LString LStr();
 	/// Returns a wide string if valid (will convert a GV_STRING to wide)
 	char16 *WStr();
 	/// Returns the string, releasing ownership of the memory to caller and
@@ -428,7 +430,7 @@ public:
 	static const char *TypeToString(LVariantType t);
 	/// Converts an operator to a string
 	static const char *OperatorToString(LOperator op);
-	/// Converts the varient value to a string
+	/// Converts the value to a string description include type.
 	LString ToString();
 };
 
