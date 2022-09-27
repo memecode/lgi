@@ -196,15 +196,10 @@ LTreeItem *LTreeNode::Insert(LTreeItem *Obj, ssize_t Idx)
 {
 	LAssert(Obj != this);
 
-	if (Obj)
-	{
-		if (Obj->Tree)
-		{
-			Obj->Remove();
-		}
-	}
+	if (Obj && Obj->Tree)
+		Obj->Remove();
 	
-	LTreeItem *NewObj = (Obj) ? Obj : new LTreeItem;
+	LTreeItem *NewObj = Obj ? Obj : new LTreeItem;
 	if (NewObj)
 	{
 		NewObj->Parent = Item();
@@ -217,13 +212,9 @@ LTreeItem *LTreeNode::Insert(LTreeItem *Obj, ssize_t Idx)
 		{
 			Tree->d->LayoutDirty = true;
 			if (Pos() && Pos()->Y() > 0)
-			{
 				Tree->_UpdateBelow(Pos()->y1);
-			}
 			else
-			{
 				Tree->Invalidate();
-			}
 		}
 	}
 
