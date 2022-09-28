@@ -1485,7 +1485,7 @@ void ProjectNode::OnProperties()
 	else if (Type == NodeDependancy)
 	{
 		DepDlg dlg(this);
-		dlg.DoModal();
+		dlg.DoModal(NULL);
 	}
 	else
 	{
