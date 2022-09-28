@@ -447,7 +447,7 @@ public:
 		{
 			for (auto ip : interface_ips)
 			{
-				printf("AddMulticastMember(%s, %s)\n", LIpStr(mc_ip).Get(), LIpStr(ip).Get());
+				LgiTrace("AddMulticastMember(%s, %s)\n", LIpStr(mc_ip).Get(), LIpStr(ip).Get());
 				AddMulticastMember(mc_ip, ip);
 			}
 		}
@@ -460,11 +460,11 @@ public:
 			OnError(err, NULL);
 			#endif
 
-			printf("Error: Bind on %s:%i\n", LIpStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
+			LgiTrace("Error: Bind on %s:%i\n", LIpStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
 		}
 		else
 		{
-			printf("Ok: Bind on %s:%i\n", LIpStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
+			LgiTrace("Ok: Bind on %s:%i\n", LIpStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
 		}
 
 	}
@@ -519,7 +519,7 @@ public:
 			addr.s_addr = htonl(SelectIf);
 			auto r = setsockopt(Handle(), IPPROTO_IP, IP_MULTICAST_IF, (char*)&addr, sizeof(addr));
 			if (r)
-				printf("%s:%i - set IP_MULTICAST_IF failed.\n", _FL);
+				LgiTrace("%s:%i - set IP_MULTICAST_IF failed.\n", _FL);
 			SelectIf = 0;
 		}
 		
@@ -539,7 +539,7 @@ public:
 		
 		uint32_t BroadcastIp = Ip;
 		#if 0
-		printf("Broadcast %i.%i.%i.%i\n", 
+		LgiTrace("Broadcast %i.%i.%i.%i\n", 
 			(BroadcastIp >> 24) & 0xff,
 			(BroadcastIp >> 16) & 0xff,
 			(BroadcastIp >> 8) & 0xff,
