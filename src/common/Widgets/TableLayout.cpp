@@ -29,16 +29,18 @@ enum CellFlag
 	SizeFill,
 };
 
-static LString Indent(int Depth)
-{
-	return LString(" ") * (Depth << 2);
-}
-
 #define Izza(c)				dynamic_cast<c*>(v)
 // #define DEBUG_LAYOUT		539
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
 // #define DEBUG_CTRL_ID		508
+
+#ifdef DEBUG_CTRL_ID
+static LString Indent(int Depth)
+{
+	return LString(" ") * (Depth << 2);
+}
+#endif
 
 int LTableLayout::CellSpacing = 4;
 
