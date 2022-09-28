@@ -513,22 +513,37 @@ struct LVolumePriv
 
 	LVolume *First()
 	{
-		if (SysPath == LSP_DESKTOP && !ChildVol)
+		if (!ChildVol)
 		{
-			// Add some basic shortcuts
-			LSystemPath Paths[] = {LSP_HOME, LSP_USER_DOCUMENTS, LSP_USER_MUSIC, LSP_USER_VIDEO, LSP_USER_DOWNLOADS, LSP_USER_PICTURES};
-			const char   *Names[] = {"Home",   "Documents",        "Music",        "Video",        "Downloads",        "Pictures"};
-			for (unsigned i=0; i<CountOf(Paths); i++)
-				Insert(new LVolume(Paths[i], Names[i]));
-
-			// Get drive list
-			char Str[512];
-			if (GetLogicalDriveStringsA(sizeof(Str), Str) > 0)
-				for (char *p = Str; *p; p += strlen(p) + 1)
-					Insert(new LVolume(p));
+			if (SysPath == LSP_DESKTOP)
+			{
+				// Add some basic shortcuts
+				LSystemPath Paths[] = {LSP_HOME, LSP_USER_DOCUMENTS, LSP_USER_MUSIC, LSP_USER_VIDEO, LSP_USER_DOWNLOADS, LSP_USER_PICTURES};
+				const char *Names[] = {"Home",   "Documents",        "Music",        "Video",        "Downloads",        "Pictures"};
+				for (unsigned i=0; i<CountOf(Paths); i++)
+					Insert(new LVolume(Paths[i], Names[i]));
+			}
+			else if (SysPath == LSP_MOUNT_POINT)
+			{
+				// Get drive list
+				char Str[512];
+				if (GetLogicalDriveStringsA(sizeof(Str), Str) > 0)
+					for (char *p = Str; *p; p += strlen(p) + 1)
+						Insert(new LVolume(p));
+			}
 		}
 
 		return ChildVol;
+	}
+
+	LVolume *Next()
+	{
+		if (SysPath == LSP_DESKTOP && !NextVol)
+		{
+			NextVol = new LVolume(LSP_MOUNT_POINT, "Drives");
+		}
+
+		return NextVol;
 	}
 };
 
@@ -577,7 +592,7 @@ LVolume *LVolume::First()
 
 LVolume *LVolume::Next()
 {
-	return d->NextVol;
+	return d->Next();
 }
 
 LDirectory *LVolume::GetContents()

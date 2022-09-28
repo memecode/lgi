@@ -9,8 +9,8 @@
 */
 
 #include <stdio.h>
-#include "Lgi.h"
-#include "LScrollBar.h"
+#include "lgi/common/Lgi.h"
+#include "lgi/common/ScrollBar.h"
 
 //////////////////////////////////////////////////////////////////////////////
 LLayout::LLayout()
@@ -178,9 +178,9 @@ bool LLayout::SetScrollBars(bool x, bool y)
 	return true;
 }
 
-int LLayout::OnNotify(LViewI *c, int f)
+int LLayout::OnNotify(LViewI *c, LNotification n)
 {
-	return LView::OnNotify(c, f);
+	return LView::OnNotify(c, n);
 }
 
 void LLayout::OnPosChange()
@@ -233,7 +233,7 @@ void LLayout::OnNcPaint(LSurface *pDC, LRect &r)
 		// Draw square at the end of each scroll bar
 		LRect s(	VScroll->GetPos().x1, HScroll->GetPos().y1,
 					VScroll->GetPos().x2, HScroll->GetPos().y2);
-		pDC->Colour(LC_MED);
+		pDC->Colour(L_MED);
 		pDC->Rectangle(&s);
 	}
 }

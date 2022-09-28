@@ -167,6 +167,55 @@ public:
 	{
 		Log = log;
 	}
+	
+	struct ConfigHost
+	{
+		LString HostName, User;
+		int Port = -1;
+		bool UseKeychain;
+	};
+
+	ConfigHost ConfigHostLookup(const char *Host)
+	{
+		ConfigHost c;
+		
+		LFile::Path p(LSP_HOME);
+		p += ".ssh";
+		p += "config";
+		if (!p.Exists())
+			return c;
+		
+		LFile f(p, O_READ);
+		if (!f)
+			return c;
+		
+		auto lines = f.Read().Split("\n");
+		bool inHost = false;
+		for (auto l: lines)
+		{
+			auto p = l.SplitDelimit();
+			if (p.Length() <= 1)
+				continue;
+
+			if (p[0].Equals("Host"))
+			{
+				inHost = p[1].Equals(Host);
+			}
+			else if (inHost)
+			{
+				if (p[0].Equals("HostName"))
+					c.HostName = p[1];
+				else if (p[0].Equals("Port"))
+					c.Port = (int)p[1].Int();
+				else if (p[0].Equals("User"))
+					c.User = p[1];
+				else if (p[0].Equals("UseKeychain"))
+					c.UseKeychain = p[1].Equals("yes");
+			}
+		}
+		
+		return c;
+	}
 
 	bool Open(const char *Host, const char *Username, const char *Password, bool PublicKey)
 	{
@@ -178,6 +227,18 @@ public:
 		auto r = ssh_options_set(Ssh, SSH_OPTIONS_HOST, Host);
 		r = ssh_options_set(Ssh, SSH_OPTIONS_PORT, &Port);
 		r = ssh_options_set(Ssh, SSH_OPTIONS_TIMEOUT, &Timeout);
+
+		// Check for a config entry...
+		auto c = ConfigHostLookup(Host);
+		if (c.HostName)
+		{
+			r = ssh_options_set(Ssh, SSH_OPTIONS_HOST, c.HostName);
+			if (c.Port > 0)
+				r = ssh_options_set(Ssh, SSH_OPTIONS_PORT, &c.Port);
+				
+			if (c.User)
+				Username = c.User;
+		}
 
 		r = ssh_connect(Ssh);
 		if (r != SSH_OK)

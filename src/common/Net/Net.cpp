@@ -1362,7 +1362,10 @@ bool LSocket::AddMulticastMember(uint32_t MulticastIp, uint32_t LocalInterface)
 	mreq.imr_interface.s_addr = htonl(LocalInterface);	// your incoming interface IP
 	int r = setsockopt(Handle(), IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char*) &mreq, sizeof(mreq));
 	if (!r)
+	{
+		LgiTrace("AddMulticastMember(%s, %s)\n", LIpStr(MulticastIp).Get(), LIpStr(LocalInterface).Get());
 		return true;
+	}
 
 	Error();
 	return false;

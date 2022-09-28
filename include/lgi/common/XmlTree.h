@@ -202,7 +202,7 @@ protected:
 	LXmlTag *Parse(LXmlTag *Tag, LXmlAlloc *Alloc, char *&t, bool &NoChildren, bool InTypeDef);
 	virtual void OnParseComment(LXmlTag *Ref, const char *Comment, ssize_t Bytes) {}
 
-	void Output(LXmlTag *t, int Depth);
+	bool Output(LXmlTag *t, int Depth);
 
 public:
 	/// Constructor

@@ -62,6 +62,7 @@
 		<String Ref="74" Cid="2" Define="IDCANCEL" en="Cancel" />
 		<String Ref="75" Cid="558" Define="IDC_75" />
 		<String Ref="76" Cid="76" Define="IDC_DEFAULTS" en="Set Defaults" />
+		<String Ref="77" Cid="77" Define="IDD_DEP_NODE" en="Dependency" />
 		<String Ref="78" Cid="79" Define="IDC_WIN32" en="Windows" />
 		<String Ref="79" Cid="80" Define="IDC_LINUX" en="Linux" />
 		<String Ref="80" Cid="81" Define="IDC_MAC" en="Mac OS X" />
@@ -115,6 +116,13 @@
 		<String Ref="181" Cid="12" Define="IDC_RESULTS" />
 		<String Ref="182" Cid="182" Define="IDC_182" en="File" />
 		<String Ref="183" Cid="183" Define="IDC_183" en="Line" />
+		<String Ref="184" Cid="184" Define="IDC_184" />
+		<String Ref="185" Cid="-1" Define="IDC_STATIC" en="Project path:" />
+		<String Ref="186" Cid="97" Define="IDC_PATH" />
+		<String Ref="187" Cid="-1" Define="IDC_STATIC" en="Link against:" />
+		<String Ref="188" Cid="188" Define="IDC_LINK_AGAINST" en="dependency" />
+		<String Ref="189" Cid="1" Define="IDOK" en="Ok" />
+		<String Ref="190" Cid="2" Define="IDCANCEL" en="Cancel" />
 		<String Ref="192" Cid="192" Define="IDC_STR" />
 		<String Ref="193" Cid="1" Define="IDOK" en="Search" />
 		<String Ref="194" Cid="2" Define="IDCANCEL" en="Cancel" />
@@ -213,6 +221,33 @@
 			<Column ref="87" width="125" />
 			<Column ref="92" width="111" />
 		</ListView>
+	</Dialog>
+	<Dialog pos="7,7,533,181" ref="77">
+		<TableLayout pos="7,7,503,146" ref="184" cols="0.500,0.500" rows="0.333,0.333,0.333">
+			<tr>
+				<td addr="0,0">
+					<StaticText pos="21,20,132,40" ref="185" />
+				</td>
+				<td addr="1,0">
+					<EditBox Pos="262,6,415,40" ref="186" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,1">
+					<StaticText pos="21,55,125,82" ref="187" />
+				</td>
+				<td addr="1,1">
+					<CheckBox pos="269,55,380,82" ref="188" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,2" />
+				<td addr="1,2">
+					<Button pos="266,99,335,126" ref="189" toggle="0" />
+					<Button pos="350,99,419,126" ref="190" toggle="0" />
+				</td>
+			</tr>
+		</TableLayout>
 	</Dialog>
 	<Dialog pos="7,7,405,305" ref="33">
 		<TableLayout pos="7,7,384,265" ref="24" cols="0.500,0.500" rows="0.189,0.181,0.193,0.305,0.132">

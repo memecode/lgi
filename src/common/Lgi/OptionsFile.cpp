@@ -119,11 +119,17 @@ void LOptionsFile::SetFile(const char *f)
 bool LOptionsFile::SerializeFile(bool Write)
 {
 	if (!File)
+	{
+		Error = "No file name provided.";
 		return false;
+	}
 		
 	LMutex::Auto Lck(this, _FL);
 	if (!Lck)
+	{
+		Error = "Failed to lock mutex.";
 		return false;
+	}
 
 	LFile f;
 	#if DEBUG_OPTS_FILE
@@ -137,12 +143,18 @@ bool LOptionsFile::SerializeFile(bool Write)
 		if (f.Open(File, O_WRITE))
 		{
 			f.SetSize(0);
-			Tree.Write(this, &f);
+			if (!Tree.Write(this, &f))
+			{
+				Error.Printf("%s:%i - Failed encode xml to '%s'", _FL, File.Get());
+				LgiTrace("%s\n", Error.Get());
+				LAssert("Xml write failed.");
+				return false;
+			}
 		}
 		else
 		{
-			LgiTrace("%s:%i - Failed to open '%s' for writing\n", _FL, File.Get());
-			// LAssert(!"Failed to open file.");
+			Error.Printf("%s:%i - Failed to open '%s' for writing", _FL, File.Get());
+			LgiTrace("%s\n", Error.Get());
 			return false;
 		}
 	}
@@ -162,7 +174,8 @@ bool LOptionsFile::SerializeFile(bool Write)
 				}
 				else
 				{
-					LgiTrace("%s:%i - Write check for '%s' failed. Mode=%i\n", _FL, File.Get(), Mode);
+					Error.Printf("%s:%i - Write check for '%s' failed. Mode=%i", _FL, File.Get(), Mode);
+					LgiTrace("%s\n", Error.Get());
 					return false;
 				}
 			}
@@ -173,15 +186,23 @@ bool LOptionsFile::SerializeFile(bool Write)
 			if (f.Open(File, O_READ))
 			{
 				Empty(true);
-				if (!Tree.Read(this, &f, 0))
-					return false;
 
-				_Defaults();
+				auto Status = Tree.Read(this, &f, 0);
+				if (!Status)
+				{
+					_Init(); // re init
+
+					Error.Printf("%s:%i - Xml parse of '%s' failed", _FL, File.Get());
+					LgiTrace("%s\n", Error.Get());
+				}
+
+				_Defaults();				
+				return Status;
 			}
 			else
 			{
-				LgiTrace("%s:%i - Failed to open '%s' for reading\n", _FL, File.Get());
-				// LAssert(!"Failed to open file.");
+				Error.Printf("%s:%i - Failed to open '%s' for reading", _FL, File.Get());
+				LgiTrace("%s\n", Error.Get());
 				return false;
 			}
 		}

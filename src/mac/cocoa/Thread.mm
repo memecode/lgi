@@ -1,5 +1,4 @@
-#include "Lgi.h"
-#include "LgiOsDefs.h"
+#include "lgi/common/Lgi.h"
 #include "lgi/common/Mutex.h"
 #include "lgi/common/StringClass.h"
 #include "lgi/common/Thread.h"
@@ -13,7 +12,7 @@
 
 OsThreadId GetCurrentThreadId()
 {
-	uint64_t tid = 0;
+	uint64_t tid = LThread::InvalidId;
 	pthread_threadid_np(NULL, &tid);
 	return tid;
 }
@@ -24,6 +23,8 @@ void *ThreadEntryPoint(void *i)
 	if (i)
 	{
 		LThread *Thread = (LThread*) i;
+		
+		Thread->ThreadId = GetCurrentThreadId();
 		
 		// Make sure we have finished executing the setup
 		while (Thread->State == LThread::THREAD_INIT)
@@ -57,11 +58,15 @@ void *ThreadEntryPoint(void *i)
 	return 0;
 }
 
+const OsThread LThread::InvalidHandle = NULL;
+const OsThreadId LThread::InvalidId = 0;
+
 LThread::LThread(const char *name, int viewHnd)
 {
 	State = THREAD_INIT;
 	ReturnValue = -1;
-	hThread = 0;
+	hThread = InvalidHandle;
+	ThreadId = InvalidId;
 	ViewHandle = viewHnd;
 	DeleteOnExit = false;
 	Priority = ThreadPriorityNormal;

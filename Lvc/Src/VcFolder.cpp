@@ -2088,7 +2088,15 @@ void VcFolder::OnPulse()
 				}
 				else if (c->PostOp)
 				{
-					Reselect |= CALL_MEMBER_FN(*this, c->PostOp)(Result, s, c->Params);
+					if (s.Length() == 18 &&
+						s.Equals("GSUBPROCESS_ERROR\n"))
+					{
+						OnCmdError(s, "Sub process failed.");
+					}
+					else
+					{
+						Reselect |= CALL_MEMBER_FN(*this, c->PostOp)(Result, s, c->Params);
+					}
 				}
 					
 				Cmds.DeleteAt(i--, true);

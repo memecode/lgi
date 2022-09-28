@@ -1,19 +1,41 @@
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required (VERSION 3.18)
 
-SET (CMAKE_OSX_ARCHITECTURES "x86_64")
-set (CMAKE_CXX_STANDARD 11)
+set(CMAKE_OSX_ARCHITECTURES "x86_64")
+set(CMAKE_CXX_STANDARD 14)
 
 project (Lgi)
-set (LGI_VERSION_MAJOR 1)
-set (LGI_VERSION_MINOR 0)
+set(LGI_VERSION_MAJOR 1)
+set(LGI_VERSION_MINOR 0)
+set(LGI_DIR "${CMAKE_CURRENT_LIST_DIR}" PARENT_SCOPE)
 
 if (UNIX AND NOT APPLE)
 	set(LINUX TRUE)
 endif()
 
+get_filename_component(CODE ../.. ABSOLUTE)
+get_filename_component(CODELIB ${CODE}/../codelib ABSOLUTE)
+if (NOT EXISTS "${CODELIB}")
+	message(FATAL_ERROR "Expecting external libraries in: ${CODELIB}")
+else()
+	message("CODELIB=${CODELIB}")
+endif()
+set(ICONV_PATH "${CODELIB}/libiconv")
+if (NOT EXISTS "${ICONV_PATH}/include")
+	if (APPLE)
+		if (EXISTS "/opt/local/include/iconv.h")
+			set(ICONV_PATH "/opt/local")
+		else()
+			find_package(Iconv REQUIRED)
+		endif()
+	elseif (LINUX)
+		find_package(Iconv REQUIRED)
+	else()
+		message(FATAL_ERROR "Missing iconv at: ${ICONV_PATH}")
+	endif()
+endif()
+
 if (APPLE)
 
-	add_definitions("-DMAC -DLGI_LIBRARY -D_DEBUG -DLGI_RES -DLGI_COCOA")
 	# SET(GUI_TYPE MACOSX_BUNDLE)
 	find_library(COCOA_LIBRARY Cocoa)
 	mark_as_advanced (COCOA_LIBRARY)
@@ -21,16 +43,11 @@ if (APPLE)
 
 elseif (LINUX)
 
-	add_definitions("-DLINUX -DLGI_LIBRARY -D_DEBUG -DLGI_RES -fPIC -w -fno-inline -fpermissive")
-	find_package(GTK2 COMPONENTS gtk)
 	find_package(PkgConfig)
+	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
 	pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4)
 	                               
-elseif (MSVC)
-
-	add_definitions("/W2 -DWINDOWS -DWIN32 -DLGI_LIBRARY -D_DEBUG -DLGI_RES -D_WINDLL -D_UNICODE -DUNICODE")
-
-endif ()
+endif()
 
 set (CommonSource
 	src/common/Gdc2/15Bit.cpp
@@ -40,230 +57,327 @@ set (CommonSource
 	src/common/Gdc2/64Bit.cpp
 	src/common/Gdc2/8Bit.cpp
 	src/common/Gdc2/Alpha.cpp
-	src/common/Gdc2/Filters/GFilter.cpp
-	src/common/Gdc2/Font/GDisplayString.cpp
-	src/common/Gdc2/Font/LStringLayout.cpp
-	src/common/Gdc2/Font/GFont.cpp
-	src/common/Gdc2/Font/GFont_A.cpp
-	src/common/Gdc2/Font/GFont_W.cpp
-	src/common/Gdc2/Font/GFontCodePages.cpp
-	src/common/Gdc2/Font/GFontSystem.cpp
-	src/common/Gdc2/GColour.cpp
+	src/common/Gdc2/Filters/Filter.cpp
+	src/common/Gdc2/Font/DisplayString.cpp
+	src/common/Gdc2/Font/StringLayout.cpp
+	src/common/Gdc2/Font/Font.cpp
+	src/common/Gdc2/Font/FontSystem.cpp
+	src/common/Gdc2/Font/FontType.cpp
+	src/common/Gdc2/Font/TypeFace.cpp
+	src/common/Gdc2/Font/Charset.cpp
+	src/common/Gdc2/Colour.cpp
 	src/common/Gdc2/GdcCommon.cpp
-	src/common/Gdc2/GRect.cpp
-	src/common/Gdc2/GSurface.cpp
-	src/common/Gdc2/Path/GPath.cpp
-	src/common/Gdc2/Tools/GColourReduce.cpp
-	src/common/General/GContainers.cpp
-	src/common/General/LDateTime.cpp
-	src/common/General/GExeCheck.cpp
-	src/common/General/GFileCommon.cpp
-	src/common/General/GGrowl.cpp
-	src/common/General/GPassword.cpp
+	src/common/Gdc2/Rect.cpp
+	src/common/Gdc2/Surface.cpp
+	src/common/Gdc2/Path/Path.cpp
+	src/common/Gdc2/Tools/ColourReduce.cpp
+	src/common/General/Containers.cpp
+	src/common/General/DateTime.cpp
+	src/common/General/ExeCheck.cpp
+	src/common/General/FileCommon.cpp
+	src/common/General/Growl.cpp
+	src/common/General/Password.cpp
 	src/common/Hash/md5/md5.c
 	src/common/Hash/sha1/sha1.c
-	src/common/INet/Base64.cpp
-	src/common/INet/GUri.cpp
-	src/common/INet/INet.cpp
-	src/common/INet/INetTools.cpp
-	src/common/INet/MDStringToDigest.cpp
-	src/common/Lgi/GAlert.cpp
-	src/common/Lgi/GCss.cpp
-	src/common/Lgi/GCssTools.cpp
-	src/common/Lgi/GFindReplace.cpp
-	src/common/Lgi/GFontSelect.cpp
-	src/common/Lgi/GGuiUtils.cpp
-	src/common/Lgi/GInput.cpp
-	src/common/Lgi/GLibrary.cpp
-	src/common/Lgi/GMemStream.cpp
-	src/common/Lgi/GMru.cpp
-	src/common/Lgi/LMutex.cpp
-	src/common/Lgi/GObject.cpp
-	src/common/Lgi/GOptionsFile.cpp
-	src/common/Lgi/GProcess.cpp
-	src/common/Lgi/GStream.cpp
-	src/common/Lgi/LThreadCommon.cpp
-	src/common/Lgi/LThreadEvent.cpp
-	src/common/Lgi/GToolTip.cpp
-	src/common/Lgi/GTrayIcon.cpp
-	src/common/Lgi/GVariant.cpp
-	src/common/Lgi/GViewCommon.cpp
-	src/common/Lgi/GWindowCommon.cpp
+	src/common/Net/Base64.cpp
+	src/common/Net/Uri.cpp
+	src/common/Net/Net.cpp
+	src/common/Net/NetTools.cpp
+	src/common/Net/MDStringToDigest.cpp
+	src/common/Lgi/Alert.cpp
+	src/common/Lgi/Css.cpp
+	src/common/Lgi/CssTools.cpp
+	src/common/Lgi/FindReplace.cpp
+	src/common/Lgi/FontSelect.cpp
+	src/common/Lgi/GuiUtils.cpp
+	src/common/Lgi/Input.cpp
+	src/common/Lgi/Library.cpp
+	src/common/Lgi/MemStream.cpp
+	src/common/Lgi/Mru.cpp
+	src/common/Lgi/Mutex.cpp
+	src/common/Lgi/Object.cpp
+	src/common/Lgi/OptionsFile.cpp
+	src/common/Lgi/SubProcess.cpp
+	src/common/Lgi/Stream.cpp
+	src/common/Lgi/ThreadCommon.cpp
+	src/common/Lgi/ThreadEvent.cpp
+	src/common/Lgi/ToolTip.cpp
+	src/common/Lgi/TrayIcon.cpp
+	src/common/Lgi/Variant.cpp
+	src/common/Lgi/AppCommon.cpp
+	src/common/Lgi/ViewCommon.cpp
+	src/common/Lgi/WindowCommon.cpp
+	src/common/Lgi/DragAndDropCommon.cpp
 	src/common/Lgi/LgiCommon.cpp
-	src/common/Lgi/LgiMsg.cpp
-	src/common/Lgi/LgiRand.cpp
-	src/common/Lgi/LMenuCommon.cpp
+	src/common/Lgi/LMsg.cpp
+	src/common/Lgi/Rand.cpp
+	src/common/Lgi/DropFiles.cpp
+	src/common/Lgi/MenuCommon.cpp
 	src/common/Resource/LgiRes.cpp
 	src/common/Resource/Res.cpp
 	src/common/Skins/Gel/Gel.cpp
-	src/common/Text/GDocView.cpp
-	src/common/Text/GString.cpp
-	src/common/Text/GTextView3.cpp
-	src/common/Text/GToken.cpp
-	src/common/Text/GUnicode.cpp
-	src/common/Text/GUtf8.cpp
-	src/common/Text/GXmlTree.cpp
-	src/common/Widgets/GBitmap.cpp
-	src/common/Widgets/GBox.cpp
-	src/common/Widgets/GItemContainer.cpp
-	src/common/Widgets/LList.cpp
-	src/common/Widgets/GPanel.cpp
-	src/common/Widgets/GPopup.cpp
-	src/common/Widgets/GProgressDlg.cpp
-	src/common/Widgets/GSplitter.cpp
-	src/common/Widgets/GStatusBar.cpp
-	src/common/Widgets/GTableLayout.cpp
-	src/common/Widgets/GTabView.cpp
-	src/common/Widgets/GTextLabel.cpp
-	src/common/Widgets/GToolBar.cpp	
-	src/common/Widgets/GTree.cpp
-	)
-
-set (WindowsSource
-	src/win32/Gdc2/Gdc2.cpp
-	src/win32/Gdc2/GdiLeak.cpp
-	src/win32/Gdc2/GMemDC.cpp
-	src/win32/Gdc2/GPrintDC.cpp
-	src/win32/Gdc2/GScreenDC.cpp
-	src/win32/General/GFile.cpp
-	src/win32/General/GMem.cpp
-	src/win32/General/ShowFileProp_Win.cpp
-	src/win32/INet/MibAccess.cpp
-	src/win32/Lgi/GApp.cpp
-	src/win32/Lgi/GClipBoard.cpp
-	src/win32/Lgi/GDragAndDrop.cpp
-	src/win32/Lgi/GFileSelect.cpp
-	src/win32/Lgi/GGeneral.cpp
-	src/win32/Lgi/GLayout.cpp
-	src/win32/Lgi/LMenu.cpp
-	src/win32/Lgi/GPrinter.cpp
-	src/win32/Lgi/GScrollBar.cpp
-	src/win32/Lgi/LThread.cpp
-	src/win32/Lgi/GView.cpp
-	src/win32/Lgi/GWindow.cpp
-	src/win32/Lgi/LgiException.cpp
-	src/win32/Widgets/GButton_Win.cpp
-	src/win32/Widgets/GCheckBox_Win.cpp
-	src/win32/Widgets/GCombo_Win.cpp
-	src/win32/Widgets/GDialog.cpp
-	src/win32/Widgets/GEdit_Win.cpp
-	src/win32/Widgets/GRadioGroup_Win.cpp
-	src/win32/Widgets/GSlider.cpp
-	src/win32/Widgets/GProgress.cpp
-	)
-
-
-set (LinuxSource
-	src/linux/Gtk/Gdc2.cpp
-	src/linux/Gtk/GMemDC.cpp
-	src/linux/Gtk/GPrintDC.cpp
-	src/linux/Gtk/GScreenDC.cpp
-	src/linux/Gtk/LgiWidget.cpp
-	src/linux/General/GFile.cpp
-	src/linux/General/GMem.cpp
-	src/linux/General/ShowFileProp_Linux.cpp
-	src/linux/Lgi/GApp.cpp
-	src/linux/Lgi/GClipBoard.cpp
-	src/linux/Lgi/GDragAndDrop.cpp
-	src/linux/Lgi/GGeneral.cpp
-	src/linux/Lgi/GLayout.cpp
-	src/linux/Lgi/LMenu.cpp
-	src/linux/Lgi/GPrinter.cpp
-	src/linux/Lgi/LThread.cpp
-	src/linux/Lgi/GView.cpp
-	src/linux/Lgi/GWidgets.cpp
-	src/linux/Lgi/GWindow.cpp
-	src/common/Lgi/GFileSelect.cpp
-	src/common/Widgets/GCheckBox.cpp
-	src/common/Widgets/GEdit.cpp
-	src/common/Widgets/GScrollBar.cpp
-	src/common/Widgets/GCombo.cpp
-	src/common/Widgets/GButton.cpp
-	src/common/Widgets/GRadioGroup.cpp
-	src/common/Widgets/GProgress.cpp
-	)
-
-set (MacSource
-	src/common/Widgets/GCheckBox.cpp
-	src/common/Widgets/GCombo.cpp
-	src/common/Widgets/GScrollBar.cpp
-	src/common/Widgets/GButton.cpp
-	src/common/Widgets/GRadioGroup.cpp
-	src/common/Widgets/GEdit.cpp
-	src/common/Lgi/GLayout.cpp
-	src/common/Widgets/GProgress.cpp
-	src/mac/cocoa/General/ShowFileProp_Mac.mm
-	src/mac/carbon/Gdc2/Gdc2.cpp
-	src/mac/common/GMemDC.cpp
-	src/mac/common/GPrintDC.cpp
-	src/mac/common/GScreenDC.cpp
-	src/mac/cocoa/General/GFile.mm
-	src/mac/cocoa/General/GMem.mm
-	src/mac/cocoa/Lgi/GApp.mm
-	src/mac/cocoa/Lgi/GClipBoard.mm
-	src/mac/cocoa/Lgi/GDragAndDrop.mm
-	src/mac/cocoa/Lgi/GGeneral.mm
-	src/mac/cocoa/Lgi/GFileSelect.mm
-	src/mac/cocoa/Lgi/LMenu.mm
-	src/mac/cocoa/Lgi/GPrinter.mm
-	src/mac/cocoa/Lgi/LThread.mm
-	src/mac/cocoa/Lgi/GView.mm
-	src/mac/cocoa/Lgi/GWidgets.mm
-	src/mac/cocoa/Lgi/GWindow.mm
-	src/mac/cocoa/Lgi/LCocoaView.mm
+	src/common/Text/DocView.cpp
+	src/common/Text/String.cpp
+	src/common/Text/TextView3.cpp
+	src/common/Text/Token.cpp
+	src/common/Text/Unicode.cpp
+	src/common/Text/Utf8.cpp
+	src/common/Text/XmlTree.cpp
+	src/common/Widgets/Bitmap.cpp
+	src/common/Widgets/Box.cpp
+	src/common/Widgets/ItemContainer.cpp
+	src/common/Widgets/List.cpp
+	src/common/Widgets/Panel.cpp
+	src/common/Widgets/Popup.cpp
+	src/common/Widgets/ProgressDlg.cpp
+	src/common/Widgets/Splitter.cpp
+	src/common/Widgets/StatusBar.cpp
+	src/common/Widgets/TableLayout.cpp
+	src/common/Widgets/TabView.cpp
+	src/common/Widgets/TextLabel.cpp
+	src/common/Widgets/ToolBar.cpp	
+	src/common/Widgets/Tree.cpp	
 	)
 
 if (APPLE)
-	set(Source ${CommonSource} ${MacSource})
+
+	set(Source
+		${CommonSource}
+		src/common/Widgets/CheckBox.cpp
+		src/common/Widgets/Combo.cpp
+		src/common/Widgets/ScrollBar.cpp
+		src/common/Widgets/Button.cpp
+		src/common/Widgets/RadioGroup.cpp
+		src/common/Widgets/Edit.cpp
+		src/common/Lgi/Layout.cpp
+		src/common/Widgets/Progress.cpp
+		src/common/Widgets/Slider.cpp
+		src/mac/cocoa/ShowFileProp_Mac.mm
+		src/mac/common/MemDC.cpp
+		src/mac/common/PrintDC.cpp
+		src/mac/common/ScreenDC.cpp
+		src/mac/cocoa/File.mm
+		src/mac/cocoa/Mem.mm
+		src/mac/cocoa/App.mm
+		src/mac/cocoa/ClipBoard.mm
+		src/mac/cocoa/DragAndDrop.mm
+		src/mac/cocoa/General.mm
+		src/mac/cocoa/FileSelect.mm
+		src/mac/cocoa/Menu.mm
+		src/mac/cocoa/Printer.mm
+		src/mac/cocoa/Thread.mm
+		src/mac/cocoa/View.mm
+		src/mac/cocoa/Widgets.mm
+		src/mac/cocoa/Window.mm
+		src/mac/cocoa/CocoaView.mm
+		src/mac/cocoa/Gdc2.mm
+		)
+
 elseif (LINUX)
-	set(Source ${CommonSource} ${LinuxSource})
+
+	set(Source
+		${CommonSource}
+		src/linux/Gtk/Gdc2.cpp
+		src/linux/Gtk/MemDC.cpp
+		src/linux/Gtk/PrintDC.cpp
+		src/linux/Gtk/ScreenDC.cpp
+		src/linux/Gtk/LgiWidget.cpp
+		src/linux/General/File.cpp
+		src/linux/General/Mem.cpp
+		src/linux/General/ShowFileProp_Linux.cpp
+		src/linux/Lgi/App.cpp
+		src/linux/Lgi/ClipBoard.cpp
+		src/linux/Lgi/DragAndDrop.cpp
+		src/linux/Lgi/General.cpp
+		src/linux/Lgi/Layout.cpp
+		src/linux/Lgi/Menu.cpp
+		src/linux/Lgi/Printer.cpp
+		src/linux/Lgi/Thread.cpp
+		src/linux/Lgi/View.cpp
+		src/linux/Lgi/Widgets.cpp
+		src/linux/Lgi/Window.cpp
+		src/common/Lgi/FileSelect.cpp
+		src/common/Widgets/CheckBox.cpp
+		src/common/Widgets/Edit.cpp
+		src/common/Widgets/ScrollBar.cpp
+		src/common/Widgets/Combo.cpp
+		src/common/Widgets/Button.cpp
+		src/common/Widgets/RadioGroup.cpp
+		src/common/Widgets/Progress.cpp
+		src/common/Widgets/Slider.cpp
+		)
+
 elseif (MSVC)
-	set(Source ${CommonSource} ${WindowsSource})
+
+	set(Source
+		${CommonSource}
+		src/win/Gdc2/Gdc2.cpp
+		src/win/Gdc2/GdiLeak.cpp
+		src/win/Gdc2/MemDC.cpp
+		src/win/Gdc2/PrintDC.cpp
+		src/win/Gdc2/ScreenDC.cpp
+		src/win/General/File.cpp
+		src/win/General/Mem.cpp
+		src/win/General/ShowFileProp_Win.cpp
+		src/win/INet/MibAccess.cpp
+		src/win/Lgi/App.cpp
+		src/win/Lgi/ClipBoard.cpp
+		src/win/Lgi/DragAndDrop.cpp
+		src/win/Lgi/FileSelect.cpp
+		src/win/Lgi/General.cpp
+		src/win/Lgi/Layout.cpp
+		src/win/Lgi/Menu.cpp
+		src/win/Lgi/Printer.cpp
+		src/win/Lgi/ScrollBar.cpp
+		src/win/Lgi/Thread.cpp
+		src/win/Lgi/View.cpp
+		src/win/Lgi/Window.cpp
+		src/win/Lgi/LgiException.cpp
+		src/win/Widgets/Button_Win.cpp
+		src/common/Widgets/CheckBox.cpp # Use XP check box
+		src/win/Widgets/Combo_Win.cpp
+		src/win/Widgets/Dialog_Win.cpp
+		src/win/Widgets/Edit_Win.cpp
+		src/win/Widgets/RadioGroup_Win.cpp
+		src/win/Widgets/Slider_Win.cpp
+		src/win/Widgets/Progress_Win.cpp)
+
 endif ()
 
-add_library(Lgi SHARED ${Source})
+add_library(lgi SHARED ${Source})
 
 if (APPLE)
-	target_include_directories(Lgi PUBLIC
-		"include/mac/cocoa"
-		"include/posix"
-		"/opt/local/include"
-		"${CMAKE_CURRENT_SOURCE_DIR}/../../../CodeLib/libpng"
-		"${CMAKE_CURRENT_SOURCE_DIR}/../../../CodeLib/libpng/build"
+
+	set_target_properties(lgi
+		PROPERTIES
+		XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_WEAK "YES"
 		)
-	target_link_libraries(Lgi ${EXTRA_LIBS})
-	set(	OBJCPP_SOURCE
+
+	target_include_directories(lgi
+		PUBLIC
+			include/lgi/mac/cocoa
+			/opt/local/include
+			${CODELIB}/libpng
+			${CODELIB}/libpng/build
+		PRIVATE
+			private/mac
+			)
+
+	target_link_libraries(lgi
+		PUBLIC
+			${EXTRA_LIBS})
+
+	target_compile_options(lgi
+		PUBLIC
+			-Wno-nullability-completeness)
+
+	set(OBJCPP_SOURCE
+		src/common/Gdc2/Font/FontSystem.cpp
+		src/common/Gdc2/GdcCommon.cpp
 		src/common/Lgi/LgiCommon.cpp
-		src/common/Lgi/GGuiUtils.cpp
-		src/common/Gdc2/Font/GFontSystem.cpp
-		src/common/Lgi/GProcess.cpp
-		src/common/Lgi/GViewCommon.cpp
-		src/common/Lgi/GTrayIcon.cpp
-		src/common/Lgi/LgiMsg.cpp
-		src/common/Widgets/GPopup.cpp
-		src/mac/common/GMemDC.cpp
-		src/mac/common/GScreenDC.cpp
-		src/mac/cocoa/Lgi/GGeneral.cpp
+		src/common/Lgi/GuiUtils.cpp
+		src/common/Lgi/Process.cpp
+		src/common/Lgi/ViewCommon.cpp
+		src/common/Lgi/TrayIcon.cpp
+		src/common/Lgi/LMsg.cpp
+		src/common/Lgi/ViewCommon.cpp
+		src/common/Lgi/SubProcess.cpp
+		src/common/Lgi/AppCommon.cpp
+		src/common/Lgi/DropFiles.cpp
+		src/common/Widgets/Popup.cpp
+		src/common/General/DateTime.cpp
+		src/mac/common/MemDC.cpp
+		src/mac/common/ScreenDC.cpp
+		src/mac/cocoa/General.cpp		
 		)
+
 	set_source_files_properties(${OBJCPP_SOURCE} PROPERTIES 
                             COMPILE_FLAGS "-x objective-c++")
+
+	target_compile_definitions(lgi
+		PUBLIC
+			MAC
+			LGI_COCOA
+		)
+
 elseif (LINUX)
-	target_include_directories(Lgi PUBLIC "include/linux/Gtk" "include/linux" ${GTK2_INCLUDE_DIRS} ${GST_INCLUDE_DIRS})
-	target_link_libraries(Lgi ${GTK2_LIBRARIES} ${GST_LIBRARIES} magic)
+
+	target_compile_definitions(lgi
+		PUBLIC
+			LINUX
+			POSIX
+		)
+
+	target_compile_options(lgi
+		PUBLIC
+			-fPIC
+			-w
+			-fno-inline
+			-fpermissive
+		)
+
+	target_include_directories(lgi
+		PUBLIC
+			include/lgi/linux/Gtk
+			include/lgi/linux
+			${GTK3_INCLUDE_DIRS}
+			${GST_INCLUDE_DIRS}
+		PRIVATE
+			private/linux
+		)
+	
+	target_link_libraries(lgi
+		PUBLIC
+			${GTK3_LIBRARIES}
+			${GST_LIBRARIES}
+			magic
+		)
+
 elseif (MSVC)
-	target_include_directories(Lgi PUBLIC "include/win32")
-	target_link_libraries(	Lgi
-							ComCtl32.lib
-							Ws2_32.lib
-							UxTheme.lib
-							imm32.lib)
-endif ()
 
-target_include_directories (Lgi PUBLIC
-							"include/common"
-							${PNGLIB_INCLUDE_DIR}
-							"${CMAKE_CURRENT_SOURCE_DIR}/../../../CodeLib/libiconv-1.14/include")
+	target_compile_definitions(lgi
+		PUBLIC
+			WINDOWS
+			WIN32
+			_WINDLL
+			_UNICODE
+			UNICODE
+		)
 
+	target_compile_options(lgi
+		PRIVATE
+			/W2
+		)
 
+	target_include_directories(lgi
+		PUBLIC
+			include/lgi/win
+		PRIVATE
+			private/win)
+	
+	target_link_libraries(lgi
+		PUBLIC
+			ComCtl32.lib
+			Ws2_32.lib
+			UxTheme.lib
+			imm32.lib)
 
-set_target_properties(Lgi PROPERTIES LINKER_LANGUAGE CXX)
+endif()
+
+target_compile_definitions(lgi
+	PUBLIC
+		LGI_RES
+	PRIVATE
+		LGI_LIBRARY
+	)
+
+target_include_directories(lgi
+	PUBLIC
+		include
+	PRIVATE
+		private/common
+		${PNGLIB_INCLUDE_DIR}
+		${ICONV_PATH}/include
+	)
+
+set_target_properties(lgi PROPERTIES LINKER_LANGUAGE CXX)

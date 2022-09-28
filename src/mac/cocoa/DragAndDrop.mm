@@ -10,12 +10,13 @@ Useful info:
 
 #include <stdio.h>
 
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "lgi/common/DragAndDrop.h"
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/Net.h"
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/ProgressDlg.h"
+
 #include "ViewPriv.h"
 
 // #define DND_DEBUG_TRACE

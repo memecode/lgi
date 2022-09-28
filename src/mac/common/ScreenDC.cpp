@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "Lgi.h"
+#include "lgi/common/Lgi.h"
 
 class LScreenPrivate
 {

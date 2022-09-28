@@ -771,6 +771,11 @@ char *LVariant::ReleaseStr()
 	return Ret;
 }
 
+LString LVariant::LStr()
+{
+	return Str();
+}
+
 char *LVariant::Str()
 {
 	if (Type == GV_STRING)

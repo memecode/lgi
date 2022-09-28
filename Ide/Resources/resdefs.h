@@ -36,6 +36,7 @@
 #define IDC_FOLDER								71
 #define IDC_BROWSE_OUTPUT						72
 #define IDC_DEFAULTS							76
+#define IDD_DEP_NODE							77
 #define IDC_WIN32								79
 #define IDC_LINUX								80
 #define IDC_MAC									81
@@ -63,6 +64,8 @@
 #define IDD_FIND_SYMBOL							179
 #define IDC_182									182
 #define IDC_183									183
+#define IDC_184									184
+#define IDC_LINK_AGAINST						188
 #define IDC_STR									192
 #define IDC_SHOW_CURRENT_ONLY					195
 #define IDD_PROJECT_SETTINGS					199

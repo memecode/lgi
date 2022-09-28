@@ -2845,13 +2845,14 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 			Projs.Insert(Proj);
 			Proj->CollectAllSubProjects(Projs);
 
-			for (auto Project : Projs)
+			for (auto p: Projs)
 			{
-				auto ProjPath = Project->GetBasePath();
-				char p[MAX_PATH_LEN];
-				LMakePath(p, sizeof(p), ProjPath, File);
-				LString Path = p;
-				if (Project->CheckExists(Path))
+				auto ProjPath = p->GetBasePath();
+				char s[MAX_PATH_LEN];
+				LMakePath(s, sizeof(s), ProjPath, File);
+				
+				LString Path = s;
+				if (p->CheckExists(Path))
 				{
 					FullPath = Path;
 					File = FullPath;
@@ -2859,6 +2860,26 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 				}
 			}
 		}
+	}
+
+	// Sniff type...
+	bool isLgiProj = false;
+	if (!Stricmp(LGetExtension(File), "xml"))
+	{	
+		LFile f(File, O_READ);
+		if (f)
+		{
+			char buf[256];
+			auto rd = f.Read(buf, sizeof(buf));
+			if (rd > 0)
+				isLgiProj = Strnistr(buf, "<Project ", rd) != NULL;
+		}
+	}
+	
+	if (isLgiProj)
+	{
+		OpenProject(File, NULL);
+		return NULL;
 	}
 		
 	Doc = d->IsFileOpen(File);

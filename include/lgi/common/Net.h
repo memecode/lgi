@@ -426,9 +426,17 @@ class LUdpListener : public LSocket
 	LString Context;
 
 public:
+	/*
+	
+	If this isn't working on Linux, most likely it's a firewall issue.
+	
+	For instance if you are running 'ufw' as your firewall you could allow packets through with:
+	
+		sudo ufw allow ${port}/udp
+	
+	*/
 	LUdpListener(LArray<uint32_t> interface_ips, uint32_t mc_ip, uint16_t port, LStream *log = NULL) : Log(log)
 	{
-		//SetBroadcast();
 		SetUdp(true);
 
 		struct sockaddr_in addr;
@@ -443,15 +451,6 @@ public:
 		addr.sin_addr.s_addr = INADDR_ANY;
 		#endif
 
-		if (mc_ip)
-		{
-			for (auto ip : interface_ips)
-			{
-				printf("AddMulticastMember(%s, %s)\n", LIpStr(mc_ip).Get(), LIpStr(ip).Get());
-				AddMulticastMember(mc_ip, ip);
-			}
-		}
-		
 		int r = bind(Handle(), (struct sockaddr*)&addr, sizeof(addr));
 		if (r)
 		{
@@ -460,13 +459,22 @@ public:
 			OnError(err, NULL);
 			#endif
 
-			printf("Error: Bind on %s:%i\n", LIpStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
+			LgiTrace("Error: Bind on %s:%i = %i\n", LIpStr(ntohl(addr.sin_addr.s_addr)).Get(), port, r);
 		}
 		else
 		{
-			printf("Ok: Bind on %s:%i\n", LIpStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
+			LgiTrace("Ok: Bind on %s:%i\n", LIpStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
 		}
 
+		if (mc_ip)
+		{
+			#if 0
+			AddMulticastMember(mc_ip, INADDR_ANY);
+			#else
+			for (auto ip: interface_ips)
+				AddMulticastMember(mc_ip, ip);
+			#endif
+		}
 	}
 
 	bool ReadPacket(LString &d, uint32_t &Ip, uint16_t &Port)
@@ -519,7 +527,7 @@ public:
 			addr.s_addr = htonl(SelectIf);
 			auto r = setsockopt(Handle(), IPPROTO_IP, IP_MULTICAST_IF, (char*)&addr, sizeof(addr));
 			if (r)
-				printf("%s:%i - set IP_MULTICAST_IF failed.\n", _FL);
+				LgiTrace("%s:%i - set IP_MULTICAST_IF for '%s' failed: %i\n", _FL, LIpStr(SelectIf).Get(), r);
 			SelectIf = 0;
 		}
 		
@@ -539,7 +547,7 @@ public:
 		
 		uint32_t BroadcastIp = Ip;
 		#if 0
-		printf("Broadcast %i.%i.%i.%i\n", 
+		LgiTrace("Broadcast %i.%i.%i.%i\n", 
 			(BroadcastIp >> 24) & 0xff,
 			(BroadcastIp >> 16) & 0xff,
 			(BroadcastIp >> 8) & 0xff,
