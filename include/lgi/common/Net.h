@@ -443,15 +443,6 @@ public:
 		addr.sin_addr.s_addr = INADDR_ANY;
 		#endif
 
-		if (mc_ip)
-		{
-			for (auto ip : interface_ips)
-			{
-				LgiTrace("AddMulticastMember(%s, %s)\n", LIpStr(mc_ip).Get(), LIpStr(ip).Get());
-				AddMulticastMember(mc_ip, ip);
-			}
-		}
-		
 		int r = bind(Handle(), (struct sockaddr*)&addr, sizeof(addr));
 		if (r)
 		{
@@ -467,6 +458,14 @@ public:
 			LgiTrace("Ok: Bind on %s:%i\n", LIpStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
 		}
 
+		if (mc_ip)
+		{
+			for (auto ip: interface_ips)
+			{
+				LgiTrace("AddMulticastMember(%s, %s)\n", LIpStr(mc_ip).Get(), LIpStr(ip).Get());
+				AddMulticastMember(mc_ip, ip);
+			}
+		}
 	}
 
 	bool ReadPacket(LString &d, uint32_t &Ip, uint16_t &Port)
@@ -519,7 +518,7 @@ public:
 			addr.s_addr = htonl(SelectIf);
 			auto r = setsockopt(Handle(), IPPROTO_IP, IP_MULTICAST_IF, (char*)&addr, sizeof(addr));
 			if (r)
-				LgiTrace("%s:%i - set IP_MULTICAST_IF failed.\n", _FL);
+				LgiTrace("%s:%i - set IP_MULTICAST_IF for '%s' failed: %i\n", _FL, LIpStr(SelectIf).Get(), r);
 			SelectIf = 0;
 		}
 		
