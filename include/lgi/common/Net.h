@@ -426,9 +426,17 @@ class LUdpListener : public LSocket
 	LString Context;
 
 public:
+	/*
+	
+	If this isn't working on Linux, most likely it's a firewall issue.
+	
+	For instance if you are running 'ufw' as your firewall you could allow packets through with:
+	
+		sudo ufw allow ${port}/udp
+	
+	*/
 	LUdpListener(LArray<uint32_t> interface_ips, uint32_t mc_ip, uint16_t port, LStream *log = NULL) : Log(log)
 	{
-		//SetBroadcast();
 		SetUdp(true);
 
 		struct sockaddr_in addr;
@@ -451,7 +459,7 @@ public:
 			OnError(err, NULL);
 			#endif
 
-			LgiTrace("Error: Bind on %s:%i\n", LIpStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
+			LgiTrace("Error: Bind on %s:%i = %i\n", LIpStr(ntohl(addr.sin_addr.s_addr)).Get(), port, r);
 		}
 		else
 		{
@@ -460,11 +468,12 @@ public:
 
 		if (mc_ip)
 		{
+			#if 0
+			AddMulticastMember(mc_ip, INADDR_ANY);
+			#else
 			for (auto ip: interface_ips)
-			{
-				LgiTrace("AddMulticastMember(%s, %s)\n", LIpStr(mc_ip).Get(), LIpStr(ip).Get());
 				AddMulticastMember(mc_ip, ip);
-			}
+			#endif
 		}
 	}
 
