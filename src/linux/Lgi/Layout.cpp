@@ -120,6 +120,7 @@ bool LLayout::SetScrollBars(bool x, bool y)
 		||
 		y ^ (VScroll != NULL))
 	{
+		printf("SetScrollBars %i,%i\n", x, y);
 		if (_SetScroll.x != x ||
 			_SetScroll.y != y ||
 			!_SetScroll.SentMsg)
@@ -147,48 +148,58 @@ bool LLayout::_SetScrollBars(bool x, bool y)
 {
 	static bool Processing = false;
 
-	if (!Processing &&
-		(((HScroll!=0) ^ x ) || ((VScroll!=0) ^ y )) )
+	if (!Processing)
 	{
-		Processing = true;
-
-		if (x)
+		if (
+			((HScroll!=0) ^ x)
+			||
+			((VScroll!=0) ^ y)
+		)
 		{
-			if (!HScroll)
+			Processing = true;
+
+			int ScrollPx = LScrollBar::GetScrollSize();
+			if (x)
 			{
-				HScroll = new LScrollBar(IDC_HSCROLL, 0, 0, 100, 10, "LLayout->HScroll");
-				if (HScroll)
+				if (!HScroll)
 				{
-					HScroll->SetVertical(false);
-					HScroll->Visible(false);
+					HScroll = new LScrollBar(IDC_HSCROLL, 0, 0, 100, ScrollPx-1, "LLayout.HScroll");
+					if (HScroll)
+					{
+						HScroll->SetVertical(false);
+						HScroll->Visible(false);
+					}
 				}
 			}
-		}
-		else
-		{
-			DeleteObj(HScroll);
-		}
-		if (y)
-		{
-			if (!VScroll)
+			else
 			{
-				VScroll = new LScrollBar(IDC_VSCROLL, 0, 0, 10, 100, "LLayout->VScroll");
-				if (VScroll)
+				DeleteObj(HScroll);
+			}
+			if (y)
+			{
+				if (!VScroll)
 				{
-					VScroll->Visible(false);
+					VScroll = new LScrollBar(IDC_VSCROLL, 0, 0, ScrollPx-1, 100, "LLayout.VScroll");
+					if (VScroll)
+						VScroll->Visible(false);
 				}
 			}
-		}
-		else if (VScroll)
-		{
-			DeleteObj(VScroll);
-		}
+			else
+			{
+				DeleteObj(VScroll);
+			}
 
-		AttachScrollBars();
-		OnPosChange();
-		Invalidate();
+			AttachScrollBars();
+			OnPosChange();
+			Invalidate();
 
-		Processing = false;
+			Processing = false;
+		}
+		// else no change...
+	}
+	else
+	{
+		LgiTrace("%s:%i - _SetScrollBars is processing???!?!\n", _FL);
 	}
 	
 	return true;
@@ -201,9 +212,10 @@ int LLayout::OnNotify(LViewI *c, LNotification n)
 
 void LLayout::OnPosChange()
 {
+	auto ScrollPx = LScrollBar::GetScrollSize();
 	LRect r = LView::GetClient();
-	LRect v(r.x2-SCROLL_BAR_SIZE+1, r.y1, r.x2, r.y2);
-	LRect h(r.x1, r.y2-SCROLL_BAR_SIZE+1, r.x2, r.y2);
+	LRect v(r.x2 - ScrollPx + 1, r.y1, r.x2, r.y2);
+	LRect h(r.x1, r.y2 - ScrollPx + 1, r.x2, r.y2);
 	if (VScroll && HScroll)
 	{
 		h.x2 = v.x1 - 1;

@@ -5,8 +5,6 @@
 #ifndef __GScrollBar_h
 #define __GScrollBar_h
 
-#define SCROLL_BAR_SIZE			15
-
 /// \brief Scroll bar control
 ///
 /// This control can be used as an actual free standing window or to address built in controls on a LLayout
@@ -27,6 +25,11 @@ protected:
 	#endif
 
 public:
+	static int SCROLL_BAR_SIZE;
+
+	/// Returns the size of the bar, i.e. the width if vertical or the height if horizontal
+	static int GetScrollSize();
+
 	/// Call this constructor for embeded scrollbar say in a window
 	LScrollBar();
 	
@@ -35,9 +38,6 @@ public:
 	/// Call this constructor for a control based scrollbar, say in a dialog
 	LScrollBar(int id, int x, int y, int cx, int cy, const char *name);
 	~LScrollBar();
-
-	/// Returns the size of the bar, i.e. the width if vertical or the height if horizontal
-	static int GetScrollSize();
 
 	/// True if vertical
 	bool Vertical();
