@@ -2101,24 +2101,26 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 		".",
 		"..",
 		"Code",
+		"src",
 		#ifdef MAC
-		"./Contents/Resources",
+			"./Contents/Resources",
 		#else
-		"./Resources",
-		"../Resources",
-		"../resources",
+			"./Resources",
+			"./resources",
+			"../Resources",
+			"../resources",
 		#endif
 		"../Code",
 		"../../Resources",
 		#if defined(LINUX)
-		// AppDir support:
-		"../..",
-		"../../usr/share/applications",
+			// AppDir support:
+			"../..",
+			"../../usr/share/applications",
 		#elif defined(WIN32)
-		"../Debug",
-		"../Release",
-		"../../Debug",
-		"../../Release",
+			"../Debug",
+			"../Release",
+			"../../Debug",
+			"../../Release",
 		#endif
 		CurWorking,
 		0

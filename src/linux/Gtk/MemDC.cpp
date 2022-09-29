@@ -440,9 +440,47 @@ void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 	}
 }
 
-void LMemDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
+void LMemDC::StretchBlt(LRect *Dst, LSurface *Src, LRect *s)
 {
-	// LAssert(!"Not implemented");
+	if (!Dst || !Src)
+	{
+		LAssert(!"param err.");
+		return;
+	}
+		
+	LRect rSrc;
+	if (s)
+		rSrc = *s;
+	else
+		rSrc = Src->Bounds();
+	
+	if (rSrc.X() <= 0 ||
+		rSrc.Y() <= 0)
+	{
+		LAssert(!"Invalid size.");
+		return;
+	}
+
+	// I know this is the dumbest possible way to do this, but I'd rather this
+	// than nothing happen at all....	
+	double Sx = (double)Dst->X() / rSrc.X();
+	double Sy = (double)Dst->Y() / rSrc.Y();
+	double y1 = Dst->y1;
+	for (int y = rSrc.y1; y <= rSrc.y2; y++)
+	{
+		double y2 = Dst->y1 + ((y + 1) * Sy);		
+		double x1 = Dst->x1;
+		
+		for (int x = rSrc.x1; x <= rSrc.x2; x++)
+		{
+			double x2 = Dst->x1 + ((x + 1) * Sx);
+			Colour(Src->Get(x, y));
+			Rectangle( (int)x1, (int)y1, (int)x2, (int)y2 );
+			x1 = x2;
+		}
+		
+		y1 = y2;
+	}
 }
 
 void LMemDC::HorzLine(int x1, int x2, int y, COLOUR a, COLOUR b)

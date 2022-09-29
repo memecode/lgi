@@ -1137,10 +1137,6 @@ public:
 
 				Dst->Colour(LColour(0xbb, 0, 0xbb));
 				Dst->Rectangle();
-				if (s.y2 > Src->Y())
-				{
-					int asd=0;
-				}
 
 				int sy = s.Y();
 				auto sm2 = (*Src)[s.y2-1];
@@ -1153,9 +1149,6 @@ public:
 
 				Dst->Op(GDC_ALPHA);
 				Dst->Blt(0, 0, Src, &s);
-
-
-				// LgiTrace("Dst %i,%i - %s\n", x, y, s.GetStr());
 			}
 			
 			// Draw any foreground elements
