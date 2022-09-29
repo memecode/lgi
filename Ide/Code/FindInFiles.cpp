@@ -12,6 +12,7 @@
 #include "LgiIde.h"
 
 #define DEBUG_HIST		0
+#define DEBUG_SEARCH	0
 
 /////////////////////////////////////////////////////////////////////////////////////
 FindInFiles::FindInFiles(AppWnd *app, FindParams *params)
@@ -143,7 +144,7 @@ void FindInFiles::OnCreate()
 		SetCtrlValue(IDC_CASE, Params->MatchCase);
 		SetCtrlValue(IDC_SUB_DIRS, Params->SubDirs);
 		
-		SerializeHistory(TypeHistory, "TypeHist", App->GetOptions(), false);
+		SerializeHistory(TypeHistory,   "TypeHist",   App->GetOptions(), false);
 		SerializeHistory(FolderHistory, "FolderHist", App->GetOptions(), false);
 
 		LEdit *v;
@@ -197,7 +198,7 @@ int FindInFiles::OnNotify(LViewI *v, LNotification n)
 			Params->SubDirs = GetCtrlValue(IDC_SUB_DIRS);
 		
 			if (TypeHistory) TypeHistory->Add(Params->Ext);
-			SerializeHistory(TypeHistory, "TypeHist", App->GetOptions(), true);
+			SerializeHistory(TypeHistory,   "TypeHist",   App->GetOptions(), true);
 			if (FolderHistory) FolderHistory->Add(Params->Dir);
 			SerializeHistory(FolderHistory, "FolderHist", App->GetOptions(), true);
 			
@@ -231,6 +232,8 @@ FindInFilesThread::FindInFilesThread(int AppHnd) : LEventTargetThread("FindInFil
 
 FindInFilesThread::~FindInFilesThread()
 {
+	d->Loop = false;
+	EndThread();
 	DeleteObj(d);
 }
 
@@ -359,83 +362,99 @@ LMessage::Result FindInFilesThread::OnEvent(LMessage *Msg)
 		case M_START_SEARCH:
 		{
 			d->Params.Reset((FindParams*)Msg->A());
-			if (d->AppHnd &&
-				d->Params &&
-				ValidStr(d->Params->Text))
+			if (!d->AppHnd ||
+				!d->Params ||
+				!ValidStr(d->Params->Text))
 			{
-				char Msg[256];
+				LAssert(!"Invalid params.");
+				break;
+			}
 
-				PostThreadEvent(d->AppHnd, M_SELECT_TAB, AppWnd::FindTab);
-				
-				d->Loop = true;
-				d->Busy = true;
-				snprintf(Msg, sizeof(Msg), "Searching for '%s'...\n", d->Params->Text.Get());
-				Log(NULL);
-				Log(NewStr(Msg));
+			char Msg[256];
 
-				LArray<const char*> Ext;
-				GToken e(d->Params->Ext, ";, ");
-				for (int i=0; i<e.Length(); i++)
+			PostThreadEvent(d->AppHnd, M_SELECT_TAB, AppWnd::FindTab);
+			
+			d->Loop = true;
+			d->Busy = true;
+			snprintf(Msg, sizeof(Msg), "Searching for '%s'...\n", d->Params->Text.Get());
+			Log(NULL);
+			Log(NewStr(Msg));
+
+			LArray<const char*> Ext;
+			GToken e(d->Params->Ext, ";, ");
+			for (int i=0; i<e.Length(); i++)
+			{
+				Ext.Add(e[i]);
+			}
+	
+			LArray<char*> Files;
+			if (d->Params->Type == FifSearchSolution)
+			{
+				// Do the extension filtering...
+				for (auto p: d->Params->ProjectFiles)
 				{
-					Ext.Add(e[i]);
-				}
-		
-				LArray<char*> Files;
-				if (d->Params->Type == FifSearchSolution)
-				{
-					// Do the extension filtering...
-					for (auto p: d->Params->ProjectFiles)
+					if (p)
 					{
-						if (p)
+						const char *Leaf = LGetLeaf(p);
+						for (auto e: Ext)
 						{
-							const char *Leaf = LGetLeaf(p);
-							for (auto e: Ext)
+							if (MatchStr(e, Leaf))
 							{
-								if (MatchStr(e, Leaf))
-									Files.Add(NewStr(p));
+								Files.Add(NewStr(p));
+								break;
 							}
 						}
-						else LgiTrace("%s:%i - Null string in project files array.\n", _FL);
 					}
+					else LgiTrace("%s:%i - Null string in project files array.\n", _FL);
 				}
-				else
-				{
-					// Find the files recursively...
-					LRecursiveFileSearch(d->Params->Dir, &Ext, &Files, 0, 0, FindInFilesCallback);
-				}
-
-				if (Files.Length() > 0)
-				{			
-					sprintf(Msg, "in %i files...\n", (int)Files.Length());
-					Log(NewStr(Msg));
-
-					for (int i=0; i<Files.Length() && d->Loop; i++)
-					{
-						auto f = Files[i];
-						if (f)
-						{
-							auto Dir = strrchr(f, DIR_CHAR);
-							if (!Dir || Dir[1] != '.')
-								SearchFile(f);
-						}
-						else LgiTrace("%s:%i - NULL Ptr in list????", _FL);
-					}
-			
-					char *Str = d->Pipe.NewStr();
-					if (Str)
-						Log(Str);
-			
-					Files.DeleteArrays();
-
-					Log(NewStr("Done.\n"));
-				}
-				else
-				{
-					Log(NewStr("No files matched.\n"));
-				}
-				
-				d->Busy = false;
 			}
+			else
+			{
+				// Find the files recursively...
+				LRecursiveFileSearch(d->Params->Dir, &Ext, &Files, 0, 0, FindInFilesCallback);
+			}
+
+			if (Files.Length() > 0)
+			{			
+				sprintf(Msg, "in %i files...\n", (int)Files.Length());
+				Log(NewStr(Msg));
+
+				for (auto f: Files)
+				{
+					if (!d->Loop)
+						break;
+					
+					if (f)
+					{
+						auto Dir = strrchr(f, DIR_CHAR);
+						if (!Dir || Dir[1] != '.')
+						{
+							#if DEBUG_SEARCH
+							LgiTrace("Searching '%s'\n", f);
+							#endif
+							SearchFile(f);
+						}
+						#if DEBUG_SEARCH
+						else LgiTrace("Skipping '%s'\n", f);
+						#endif
+					}
+					else LgiTrace("%s:%i - NULL Ptr in list????", _FL);
+				}
+		
+				auto Str = d->Pipe.NewStr();
+				if (Str)
+					Log(Str);
+		
+				Files.DeleteArrays();
+
+				Log(NewStr("Done.\n"));
+			}
+			else
+			{
+				Log(NewStr("No files matched.\n"));
+			}
+			
+			d->Busy = false;
 			break;
 		}
 	}

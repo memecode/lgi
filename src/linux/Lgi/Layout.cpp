@@ -120,7 +120,6 @@ bool LLayout::SetScrollBars(bool x, bool y)
 		||
 		y ^ (VScroll != NULL))
 	{
-		printf("SetScrollBars %i,%i\n", x, y);
 		if (_SetScroll.x != x ||
 			_SetScroll.y != y ||
 			!_SetScroll.SentMsg)
