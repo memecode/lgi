@@ -9,9 +9,19 @@
 #define __GDC2_H_
 
 #include <stdio.h>
+#include "LgiOsDefs.h"				// Platform specific
+
+// Alpha Bliting
+#ifdef WINNATIVE
+	#include <wingdi.h>
+	#include <objidl.h>
+	#pragma warning(disable:4263)
+	#include <gdiplus.h>
+	#pragma warning(error:4263)
+	#pragma comment (lib,"Gdiplus.lib")
+#endif
 
 // sub-system headers
-#include "LgiOsDefs.h"				// Platform specific
 #include "lgi/common/LgiInc.h"
 #include "lgi/common/LgiUiBase.h"
 #include "lgi/common/File.h"
@@ -21,16 +31,16 @@
 #include "lgi/common/Capabilities.h"
 #include "lgi/common/RefCount.h"
 #include "lgi/common/Palette.h"
+#include "lgi/common/ColourSpace.h"
+#include "lgi/common/Rect.h"
+#include "lgi/common/Point.h"
+#include "lgi/common/Colour.h"
 
-// Alpha Blting
-#ifdef WIN32
-#include "wingdi.h"
-#endif
 #ifndef AC_SRC_OVER
-#define AC_SRC_OVER					0
+	#define AC_SRC_OVER				0
 #endif
 #ifndef AC_SRC_ALPHA
-#define AC_SRC_ALPHA				1
+	#define AC_SRC_ALPHA			1
 #endif
 #include "lgi/common/Library.h"
 
@@ -142,6 +152,7 @@
 #define GDC_CACHED_APPLICATOR		0x0040
 #define GDC_OWN_PALETTE				0x0080
 #define GDC_DRAW_ON_ALPHA			0x0100
+#define GDC_ANTI_ALIAS				0x0200
 
 // Region types
 #define GDC_RGN_NONE				0	// No clipping
@@ -165,7 +176,6 @@
 // Misc
 #define BMPWIDTH(bits)				((((bits)+31)/32)<<2)
 
-#include "lgi/common/ColourSpace.h"
 
 // Look up tables
 #define Div255Lut					(GdcDevice::GetInst()->GetDiv255())
@@ -173,10 +183,6 @@
 //				Classes
 class LFilter;
 class LSurface;
-
-#include "lgi/common/Rect.h"
-#include "lgi/common/Point.h"
-#include "lgi/common/Colour.h"
 
 class LgiClass LBmpMem
 {
@@ -418,6 +424,7 @@ protected:
 	#if WINNATIVE
 		OsPainter	hDC;
 		OsBitmap	hBmp;
+		LAutoPtr<Gdiplus::Graphics> GdiplusGfx;
 	#endif
 
 public:
@@ -428,22 +435,21 @@ public:
 	// Win32
 	#if defined(__GTK_H__)
 
-	/// Gets the drawable size, regardless of clipping or client rect
-	virtual LPoint GetSize() { LPoint p; return p; }
-	virtual Gtk::GtkPrintContext *GetPrintContext() { return NULL; }
-	virtual Gtk::GdkPixbuf *CreatePixBuf() { return NULL; }
+		/// Gets the drawable size, regardless of clipping or client rect
+		virtual LPoint GetSize() { LPoint p; return p; }
+		virtual Gtk::GtkPrintContext *GetPrintContext() { return NULL; }
+		virtual Gtk::GdkPixbuf *CreatePixBuf() { return NULL; }
 
 	#elif defined(WINNATIVE)
 
-	virtual HDC StartDC() { return hDC; }
-	virtual void EndDC() {}
+		virtual HDC StartDC() { return hDC; }
+		virtual void EndDC() {}
+		Gdiplus::Graphics *GetGfx();
+		Gdiplus::Color GdiColour();
 	
 	#elif defined MAC
 	
-	#if LGI_COCOA
-	#else
-	virtual CGColorSpaceRef GetColourSpaceRef() { return 0; }
-	#endif
+		virtual CGColorSpaceRef GetColourSpaceRef() { return 0; }
 	
 	#endif
 
@@ -474,6 +480,10 @@ public:
 	bool DrawOnAlpha(bool Draw);
 	/// Returns the surface of the alpha channel.
 	LSurface *AlphaDC() { return pAlphaDC; }
+	/// \returns the anti-alias setting
+	bool AntiAlias();
+	/// Set the anti-alias setting
+	bool AntiAlias(bool antiAlias);
 
 	/// Lowers the alpha of the whole image to Alpha/255.0.
 	/// Only works on bitmaps with an alpha channel (i.e. CsRgba32 or it's variants)

@@ -73,6 +73,7 @@ public:
 	void OnCreate();
 	void OnMouseClick(LMouse &m);
 	int OnNotify(LViewI *c, LNotification n);
+	void OnPosChange();
 };
 
 #endif

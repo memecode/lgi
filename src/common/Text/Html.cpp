@@ -5707,10 +5707,10 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			LCss::LengthType Align = GetAlign(true);
 			TextPos.FlowText(this, Flow, f, LineHeightCache, Txt, Align);
 
+			#ifdef _DEBUG
 			if (Debug)
-			{
 				LgiTrace("%s:%i - %p.size=%p\n", _FL, this, &Size.x);
-			}
+			#endif
 		}
 	}
 

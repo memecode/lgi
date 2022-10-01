@@ -21,6 +21,7 @@ LToolTab::LToolTab() : LToolButton(16, 16)
 	#ifdef WINDOWS
 	SetClassW32("LToolTab");
 	#endif
+	GetCss(true)->BackgroundColor(LColour(L_MED));
 }
 
 LToolTab::~LToolTab()
@@ -35,6 +36,13 @@ void LToolTab::OnPaint(LSurface *pDC)
 	pDC->Colour(LColour(255, 0, 255));
 	#endif
 	pDC->Rectangle();
+
+	#if 0
+	auto c = GetClient();
+	pDC->Colour(LColour::Red);
+	pDC->Line(c.x1, c.y1, c.x2, c.y2);
+	pDC->Line(c.x2, c.y1, c.x1, c.y2);
+	#endif
 }
 
 bool LToolTab::SetPos(LRect &r, bool Repaint)
@@ -138,7 +146,7 @@ void LToolTabBar::OnChange(LToolButton *Btn)
 	{
 		Invalidate(&Current->TabPos);
 		Current->Visible(false);
-		Current = 0;
+		Current = NULL;
 	}
 
 	// Attach new button
@@ -146,7 +154,7 @@ void LToolTabBar::OnChange(LToolButton *Btn)
 	{
 		Current->Value(true);
 		Current->Visible(true);
-		Current->SetPos(Client);
+		OnPosChange();
 
 		if (Current->First)
 		{
@@ -164,7 +172,8 @@ void LToolTabBar::OnChange(LToolButton *Btn)
 void LToolTabBar::_PaintTab(LSurface *pDC, LToolTab *Tab)
 {
 	LRect t = Tab->TabPos;
-	LColour Background(L_MED);
+	LColour CtrlBackground(L_MED);
+	LColour TabBackground(L_MED);
 
 	if (Tab->Value())
 	{
@@ -174,44 +183,38 @@ void LToolTabBar::_PaintTab(LSurface *pDC, LToolTab *Tab)
 		if (!c.IsValid())
 		{
 			c.Type = LCss::ColorRgb;
-			c.Rgb32 = Background.c32();
+			c.Rgb32 = TabBackground.c32();
 		}
 		
 		pDC->Colour(c.Rgb32, 32);
 	}
 	else
 	{
-		pDC->Colour(Background);
+		TabBackground = TabBackground.Mix(LColour(L_BLACK), 0.06f);
+		pDC->Colour(TabBackground);
 	}
-	pDC->Rectangle(&t);
 	
 	if (!Tab->Value())
 	{
 		t.Inset(2, 2);
 		if (IsVertical())
-		{
 			t.x2++;
-		}
 		else
-		{
 			t.y2++;
-		}
+		pDC->Rectangle(&t);
 	}
 	else
 	{
-		pDC->Colour(L_MED);
+		pDC->Rectangle(&t);
+		pDC->Colour(CtrlBackground);
 		if (IsVertical())
-		{
 			pDC->Rectangle(t.x1+1, t.y1+1, t.x2, t.y2-1);
-		}
 		else
-		{
 			pDC->Rectangle(t.x1+1, t.y1+1, t.x2-1, t.y2);
-		}
 	}
 
 	// draw lines around tab
-	pDC->Colour(L_LIGHT);
+	pDC->Colour(L_HIGH);
 	if (IsVertical())
 	{
 		pDC->Line(t.x1, t.y1+1, t.x1, t.y2-1);
@@ -230,18 +233,19 @@ void LToolTabBar::_PaintTab(LSurface *pDC, LToolTab *Tab)
 	// draw icon
 	int Off = Tab->Value() ? 2 : 1;
 	if (GetImageList())
-		GetImageList()->Draw(pDC, t.x1 + Off, t.y1 + Off, Tab->Image(), Background);
+		GetImageList()->Draw(pDC, t.x1 + Off, t.y1 + Off, Tab->Image(), TabBackground);
 }
 
-void LToolTabBar::OnPaint(LSurface *pScreen)
+void LToolTabBar::OnPaint(LSurface *pDC)
 {
 	LRect r = GetClient();
 
 	#ifdef WIN32
-	LMemDC Mem(r.X(), r.Y(), GdcD->GetColourSpace());
-	LSurface *pDC = &Mem;
-	#else
-	LSurface *pDC = pScreen;
+	LDoubleBuffer Buf(pDC);
+	#endif
+	#if 0 // Coverage test
+	pDC->Colour(LColour(255, 0, 255));
+	pDC->Rectangle();
 	#endif
 
 	int Off = 4 + ((Border) ? 6 : 0);
@@ -258,24 +262,17 @@ void LToolTabBar::OnPaint(LSurface *pScreen)
 	{
 		pDC->Colour(L_MED);
 		if (IsVertical())
-		{
 			pDC->Rectangle(r.x1, r.y1, r.x1 + GetBx() + Off, r.y2);
-		}
 		else
-		{
 			pDC->Rectangle(r.x1, r.y1, r.x2, r.y1 + GetBy() + Off);
-		}
 	}
 
 	// Draw rest of the box
 	if (IsVertical())
-	{
 		r.x1 = GetBx() + Off;
-	}
 	else
-	{
 		r.y1 = GetBy() + Off;
-	}
+
 	LThinBorder(pDC, r, DefaultRaisedEdge);
 	pDC->Colour(L_MED);
 	pDC->Rectangle(&r);
@@ -288,13 +285,9 @@ void LToolTabBar::OnPaint(LSurface *pScreen)
 		if (Tab)
 		{
 			if (!Tab->Value())
-			{
 				_PaintTab(pDC, Tab);
-			}
 			else
-			{
 				Down.Add(Tab);
-			}
 		}
 	}
 
@@ -303,15 +296,12 @@ void LToolTabBar::OnPaint(LSurface *pScreen)
 		c.Rgb(255, 0, 0);
 	else
 		c.Rgb(255, 255, 255);
+
 	for (unsigned i=0; i<Down.Length(); i++)
 	{
-		Down[i]->GetCss(true)->Color(LCss::ColorDef(LCss::ColorRgb, c.c32()));
+		// Down[i]->GetCss(true)->Color(LCss::ColorDef(LCss::ColorRgb, c.c32()));
 		_PaintTab(pDC, Down[i]);
 	}
-
-	#ifdef WIN32
-	pScreen->Blt(0, 0, &Mem);
-	#endif
 }
 
 void LToolTabBar::OnMouseClick(LMouse &m)
@@ -336,6 +326,26 @@ void LToolTabBar::OnMouseClick(LMouse &m)
 	}
 }
 
+void LToolTabBar::OnPosChange()
+{
+	Client = GetClient();
+	if (IsVertical())
+		Client.x1 += GetBx() + 4;
+	else
+		Client.y1 += GetBx() + 4;
+	Client.Inset(1, 1);
+
+	auto v = Value();
+	if (v >= 0)
+	{
+		LToolTab *btn = dynamic_cast<LToolTab*>(Children[v]);
+		if (btn)
+		{
+			btn->SetPos(Client);
+		}
+	}
+}
+
 bool LToolTabBar::Pour(LRegion &r)
 {
 	bool Status = false;
@@ -352,13 +362,9 @@ bool LToolTabBar::Pour(LRegion &r)
 			if (Btn->GetId() == IDM_SEPARATOR)
 			{
 				if (IsVertical())
-				{
 					y += 10;
-				}
 				else
-				{
 					x += 10;
-				}
 			}
 			else
 			{
@@ -379,13 +385,9 @@ bool LToolTabBar::Pour(LRegion &r)
 				LRect Rgn(x, y, x + GetBx() + 4, y + GetBy() + 4);
 				Btn->TabPos = Rgn;
 				if (IsVertical())
-				{
 					y += GetBy() + 1;
-				}
 				else
-				{
 					x += GetBx() + 1;
-				}
 			}
 
 			Btn->Visible(Btn->Value() != 0);
@@ -414,25 +416,10 @@ bool LToolTabBar::Pour(LRegion &r)
 		else
 		{
 			if (IsVertical())
-			{
 				p.Set(0, 0, 200, Tab.Y());
-			}
 			else
-			{
 				p.Set(0, 0, Tab.X(), 200);
-			}
 		}
-
-		Client = GetClient();
-		if (IsVertical())
-		{
-			Client.x1 += GetBx() + 4;
-		}
-		else
-		{
-			Client.y1 += GetBx() + 4;
-		}
-		Client.Inset(1, 1);
 
 		p.Offset(Best->x1, Best->y1);
 		p.Bound(Best);

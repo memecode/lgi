@@ -103,6 +103,49 @@ LSurface::~LSurface()
 	}
 }
 
+#ifdef WINNATIVE
+
+Gdiplus::Graphics *LSurface::GetGfx()
+{
+	static Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+	static ULONG_PTR gdiplusToken = 0;
+
+	if (!gdiplusToken)
+		GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+
+	if (!GdiplusGfx)
+		GdiplusGfx.Reset(new Gdiplus::Graphics(StartDC()));
+
+	if (!GdiplusGfx)
+	{
+		LAssert(!"Failed to create gdi+ graphics obj.");
+		return NULL;
+	}
+
+	GdiplusGfx->SetSmoothingMode(AntiAlias() ?
+		Gdiplus::SmoothingModeAntiAlias :
+		Gdiplus::SmoothingModeNone);
+
+	return GdiplusGfx;
+}
+
+Gdiplus::Color LSurface::GdiColour()
+{
+	COLOUR col = Colour();
+	switch (GetBits())
+	{
+		default:
+			LAssert(!"Impl me.");
+			// fall through
+		case 32:
+			return Gdiplus::Color(A32(col), R32(col), G32(col), B32(col));
+		case 24:
+			return Gdiplus::Color(R24(col), G24(col), B24(col));
+	}
+}
+
+#endif
+
 LString LSurface::GetStr()
 {
 	LString::Array s;
@@ -448,8 +491,6 @@ void LSurface::Line(int x1, int y1, int x2, int y2)
 		int dy = abs(y2-y1);
 		int EInc, ENoInc, E, Inc = 1;
 	
-		// printf("Dx: %i\nDy: %i\n", dx, dy);
-
 		if (dy < dx)
 		{
 			// flat
@@ -571,6 +612,23 @@ void LSurface::Line(int x1, int y1, int x2, int y2)
 
 void LSurface::Circle(double Cx, double Cy, double radius)
 {
+	#if defined WINNATIVE
+
+		if (Op() == GDC_SET && GetBits() > 8)
+		{
+			auto g = GetGfx();
+			Gdiplus::Pen pen(GdiColour());
+			Gdiplus::RectF r((Gdiplus::REAL)(Cx-radius),
+							(Gdiplus::REAL)(Cy-radius),
+							(Gdiplus::REAL)(radius*2.0)-1,
+							(Gdiplus::REAL)(radius*2.0)-1);
+			auto status = g->DrawEllipse(&pen, r);
+			Update(GDC_BITS_CHANGE);
+			return;
+		}
+
+	#endif
+
 	int cx = (int)Cx;
 	int cy = (int)Cy;
 	int d = (int) (3 - (2 * radius));
@@ -631,6 +689,26 @@ void LSurface::Circle(double Cx, double Cy, double radius)
 
 void LSurface::FilledCircle(double Cx, double Cy, double radius)
 {
+	#if defined WINNATIVE
+
+		if (Op() == GDC_SET && GetBits() > 8)
+		{
+			auto g = GetGfx();
+			auto col = Colour();
+			Gdiplus::SolidBrush brush(GdiColour());
+			Gdiplus::RectF r((Gdiplus::REAL)(Cx-radius),
+							(Gdiplus::REAL)(Cy-radius),
+							(Gdiplus::REAL)(radius*2.0-1.0),
+							(Gdiplus::REAL)(radius*2.0-1.0));
+			if (!AntiAlias())
+				r.Inflate(1.0f, 1.0f);
+			auto status = g->FillEllipse(&brush, r);
+			Update(GDC_BITS_CHANGE);
+			return;
+		}
+
+	#endif
+
 	int cx = (int)Cx;
 	int cy = (int)Cy;
 	int d = (int) (3 - 2 * radius);
@@ -740,16 +818,33 @@ void LSurface::Rectangle(int x1, int y1, int x2, int y2)
 	Rectangle(&a);
 }
 
-void LSurface::Ellipse(double Cx, double Cy, double A, double B)
+void LSurface::Ellipse(double Cx, double Cy, double radiusX, double radiusY)
 {
+	#if defined WINNATIVE
+
+		if (Op() == GDC_SET && GetBits() > 8)
+		{
+			auto g = GetGfx();
+			Gdiplus::Pen pen(GdiColour());
+			Gdiplus::RectF r((Gdiplus::REAL)(Cx-radiusX),
+							(Gdiplus::REAL)(Cy-radiusY),
+							(Gdiplus::REAL)(radiusX*2.0)-1,
+							(Gdiplus::REAL)(radiusY*2.0)-1);
+			auto status = g->DrawEllipse(&pen, r);
+			Update(GDC_BITS_CHANGE);
+			return;
+		}
+
+	#endif
+
 	#define incx() x++, dxt += d2xt, t += dxt
 	#define incy() y--, dyt += d2yt, t += dyt
 
-	int x = 0, y = (int)B;
-	int a = (int)A;
+	int x = 0, y = (int)radiusY;
+	int a = (int)radiusX;
 	if (a % 2 == 0)
 		a--;
-	int b = (int)B;
+	int b = (int)radiusY;
 	int xc = (int)Cx;
 	int yc = (int)Cy;
 	long a2 = (long)(a*a), b2 = (long)(b*b);
@@ -810,27 +905,27 @@ void LSurface::Ellipse(double Cx, double Cy, double A, double B)
 	Update(GDC_BITS_CHANGE);
 }
 
-void LSurface::FilledEllipse(double Cx, double Cy, double Width, double Height)
+void LSurface::FilledEllipse(double Cx, double Cy, double radiusX, double radiusY)
 {
-	#if 0
-	
-	double Width2 = Width * Width;
-	double Height2 = Height * Height;
-	int end_y = (int) ceil(Cy + Height);
-	for (int y = (int) floor(Cy - Height); y <= end_y; y++)
-	{
-		double Y = (double) y + 0.5;
-		double p2 = (Y - Cy);
-		p2 = (p2 * p2) / Height2;
-		double p3 = Width2 * (1 - p2);
-		if (p3 > 0.0)
+	#if defined WINNATIVE
+
+		if (Op() == GDC_SET && GetBits() > 8)
 		{
-			double X = sqrt( p3 );
-			Line((int) floor(Cx - x + 0.5), y, (int) ceil(Cx + x - 0.5), y);
+			auto g = GetGfx();
+			auto col = Colour();
+			Gdiplus::SolidBrush brush(GdiColour());
+			Gdiplus::RectF r((Gdiplus::REAL)(Cx-radiusX),
+							(Gdiplus::REAL)(Cy-radiusY),
+							(Gdiplus::REAL)(radiusX*2.0-1.0),
+							(Gdiplus::REAL)(radiusY*2.0-1.0));
+			if (!AntiAlias())
+				r.Inflate(1.0f, 1.0f);
+			auto status = g->FillEllipse(&brush, r);
+			Update(GDC_BITS_CHANGE);
+			return;
 		}
-	}	
-	
-	#else
+
+	#endif
 
 	// TODO: fix this primitive for odd widths and heights
 	int cx = (int)Cx;
@@ -840,15 +935,16 @@ void LSurface::FilledEllipse(double Cx, double Cy, double Width, double Height)
 	b = floor(b);
 	*/
 
-	long aSq = (long) (Width * Width);
-	long bSq = (long) (Height * Height);
+	long aSq = (long) (radiusX * radiusX);
+	long bSq = (long) (radiusY * radiusY);
 	long two_aSq = aSq+aSq;
 	long two_bSq = bSq+bSq;
-	long x=0, y=(long)Height, two_xBsq = 0, two_yAsq = y * two_aSq, error = -y * aSq;
+	long x=0, y=(long)radiusY, two_xBsq = 0, two_yAsq = y * two_aSq, error = -y * aSq;
 
 	if (aSq && bSq && error)
 	{
 		while (two_xBsq <= two_yAsq)
+		if (Op() == GDC_SET)
 		{
 			x++;
 			two_xBsq += two_bSq;
@@ -871,7 +967,7 @@ void LSurface::FilledEllipse(double Cx, double Cy, double Width, double Height)
 			}
 		}
 	
-		x=(long)Width;
+		x=(long)radiusX;
 		y=0;
 		two_xBsq = x * two_bSq;
 		two_yAsq = 0;
@@ -901,8 +997,7 @@ void LSurface::FilledEllipse(double Cx, double Cy, double Width, double Height)
 		}
 	}
 	
-	#endif
-	
+
 	Update(GDC_BITS_CHANGE);
 }
 
@@ -1471,6 +1566,20 @@ void LSurface::FloodFill(int StartX, int StartY, int Mode, COLOUR Border, LRect 
 void LSurface::Arc(double cx, double cy, double radius, double start, double end) {}
 void LSurface::FilledArc(double cx, double cy, double radius, double start, double end) {}
 void LSurface::StretchBlt(LRect *d, LSurface *Src, LRect *s) {}
+
+bool LSurface::AntiAlias()
+{
+	return (Flags & GDC_ANTI_ALIAS) != 0;
+}
+
+bool LSurface::AntiAlias(bool antiAlias)
+{
+	if (antiAlias)
+		Flags |= GDC_ANTI_ALIAS;
+	else
+		Flags &= ~GDC_ANTI_ALIAS;
+	return true;
+}
 
 bool LSurface::HasAlpha(bool b)
 {

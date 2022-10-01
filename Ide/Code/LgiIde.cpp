@@ -3696,7 +3696,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 						{
 							LString s = Nodes[i]->GetFullPath();
 							if (s)
-w								Dlg.Params->ProjectFiles.Add(s);
+								Dlg.Params->ProjectFiles.Add(s);
 						}
 					}
 
