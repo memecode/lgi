@@ -29,7 +29,7 @@
 		<Node File="./Src/VcFolder.cpp" Type="2" Platforms="15" />
 		<Node File="./Src/VcFolder.h" Type="3" Platforms="15" />
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" />
+	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Node Name="Resources" Type="1" Platforms="15" Id="1">
 		<Node File="./Resources/icon32.png" Type="6" Platforms="15" />
 		<Node File="./installer-zip.py" Type="8" Platforms="15" />
@@ -56,16 +56,16 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
 				<All>
 					<Debug>Src
-../include</Debug>
+../include
+../../../../codelib/libssh/include</Debug>
 					<Release>Src
-../include</Release>
+../include
+../../../../codelib/libssh/include</Release>
 				</All>
 				<Linux>
 					<Debug>../include/lgi/linux
@@ -108,17 +108,11 @@
 				<All>Executable</All>
 			</TargetType>
 			<LibraryPaths>
-				<All />
-				<Linux />
+				<All>
+					<Debug>../../../../codelib/libssh/build/src</Debug>
+					<Release>../../../../codelib/libssh/build/src</Release>
+				</All>
 			</LibraryPaths>
-			<TargetName>
-				<Linux />
-			</TargetName>
-			<Defines>
-				<All />
-				<Linux />
-			</Defines>
-			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -130,27 +124,6 @@
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<ShowWhiteSpace />
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
-		<Advanced>
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-			<OtherMakefileRules />
-		</Advanced>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
-		<Debug>
-			<Arguments>
-				<All />
-			</Arguments>
-			<Environment />
-			<DebugAdmin />
-			<InitialDir />
-		</Debug>
 	</Settings>
 </Project>

@@ -17,12 +17,12 @@
 
 class LMidi : public LMutex
 {
-	struct GMidiPriv *d;
+	struct LMidiPriv *d;
 
-	void OnError(char *Func, LAutoString *Error, uint32_t Code, char *File, int Line);
+	void OnError(char *Func, LString *Error, uint32_t Code, char *File, int Line);
 
 	#if defined WIN32
-	friend class GMidiNotifyWnd;
+	friend class LMidiNotifyWnd;
 	friend void CALLBACK MidiInProc(HMIDIIN hmi, UINT wMsg, MIDI_TYPE dwInstance, MIDI_TYPE dwParam1, MIDI_TYPE dwParam2);
 	void StoreMidi(uint8_t *ptr, int len);
 	void ParseMidi();
@@ -33,7 +33,7 @@ protected:
 	LArray<uint8_t> MidiIn;
 
 	// Arrays of device names
-	LArray<LAutoString> In, Out;
+	LString::Array In, Out;
     
     #ifdef MAC
     friend void MidiNotify(const MIDINotification *message, void *refCon);

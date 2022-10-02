@@ -6,12 +6,12 @@
 #ifdef WINDOWS
 
 #define M_MIDI_IN	(M_USER + 2000)
-class GMidiNotifyWnd : public LWindow
+class LMidiNotifyWnd : public LWindow
 {
 	LMidi *m;
 	
 public:
-	GMidiNotifyWnd(LMidi *midi)
+	LMidiNotifyWnd(LMidi *midi)
 	{
 		m = midi;
 		Attach(0);
@@ -30,44 +30,34 @@ public:
 
 #endif
 
-struct GMidiPriv
+struct LMidiPriv
 {
 	LMidi *Midi;
 	
 	#if defined(MAC)
-		MIDIClientRef Client;
+		MIDIClientRef Client = 0;
 		MIDIPortRef InPort, OutPort;
 		LArray<MIDIDeviceRef> Devs;
 		LArray<MIDIEndpointRef> Srcs, Dsts;
-		MIDIEndpointRef Dst;
+		MIDIEndpointRef Dst = 0;
 		LArray<uint8_t> Data;
 	#elif defined(WINDOWS)
-		HMIDIIN hIn;
-		HMIDIOUT hOut;
+		HMIDIIN hIn = 0;
+		HMIDIOUT hOut = 0;
 		MIDIHDR InHdr;
 		char InBuf[2 << 10];
 		GMidiNotifyWnd Notify;
 	#elif defined(LINUX)
-		int Hnd;
+		int Hnd = -1;
 		LAutoPtr<LThread> Reader;
 	#endif
 	
-	GMidiPriv(LMidi *m)
+	LMidiPriv(LMidi *m)
 		#ifdef WINDOWS
 		: Notify(m)
 		#endif
 	{
 		Midi = m;
-
-		#if defined(MAC)
-		Client = 0;
-		Dst = 0;
-		#elif defined(WINDOWS)
-		hIn = 0;
-		hOut = 0;
-		#elif defined(LINUX)
-		Hnd = -1;
-		#endif
 	}
 };
 
@@ -251,11 +241,11 @@ struct GMidiPriv
 
 	class ReaderThread : public LThread
 	{
-		GMidiPriv *d;
+		LMidiPriv *d;
 		bool loop;
 		
 	public:
-		ReaderThread(GMidiPriv *priv) : LThread("MidiReaderThread")
+		ReaderThread(LMidiPriv *priv) : LThread("MidiReaderThread")
 		{
 			d = priv;
 			loop = true;
@@ -289,7 +279,7 @@ struct GMidiPriv
 
 LMidi::LMidi() : LMutex("LMidi")
 {
-	d = new GMidiPriv(this);
+	d = new LMidiPriv(this);
 
 	#if defined(MAC)
 
@@ -377,8 +367,8 @@ LMidi::LMidi() : LMutex("LMidi")
 				char Full[128];
 				LMakePath(Full, sizeof(Full), Path, Dir.GetName());
 				printf("Midi[%i] = %s\n", In.Length(), Full);
-				In.New().Reset(NewStr(Full));
-				Out.New().Reset(NewStr(Full));
+				In.New() = Full;
+				Out.New() = Full;
 			}
 		}
 	
@@ -617,7 +607,7 @@ bool LMidi::Connect(int InIdx, int OutIdx, LAutoString *ErrorMsg)
 			else if (ErrorMsg)
 			{
 				int e = errno;
-				LAutoString msg = LErrorCodeToString(e);
+				auto msg = LErrorCodeToString(e);
 				LString s;
 				s.Printf("Error opening the device: %i (%s)\n", e, msg.Get());
 				ErrorMsg->Reset(NewStr(s));
@@ -769,12 +759,12 @@ void LMidi::OnMidiOut(uint8_t *p, size_t len)
 	#endif
 }
 
-void LMidi::OnError(char *Func, LAutoString *ErrorMsg, uint32_t Code, char *File, int Line)
+void LMidi::OnError(char *Func, LString *ErrorMsg, uint32_t Code, char *File, int Line)
 {
 	char m[256];
 	sprintf_s(m, sizeof(m), "%s failed with %i", Func, Code);
 	if (ErrorMsg)
-		ErrorMsg->Reset(NewStr(m));
+		*ErrorMsg = m;
 	if (GetLog())
 		GetLog()->Print("%s:%i - %s\n", File, Line, m);
 }
