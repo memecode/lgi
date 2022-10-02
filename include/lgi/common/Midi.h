@@ -15,7 +15,7 @@
 #define MIDI_SYSEX_START	0xf0
 #define MIDI_SYSEX_END		0xf7
 
-class GMidi : public LMutex
+class LMidi : public LMutex
 {
 	struct GMidiPriv *d;
 
@@ -42,8 +42,8 @@ protected:
     #endif
 
 public:	
-	GMidi();
-	~GMidi();
+	LMidi();
+	~LMidi();
 
 	static int GetMidiPacketSize(uint8_t *ptr, size_t len);
 	

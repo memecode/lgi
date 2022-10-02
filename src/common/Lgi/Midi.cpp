@@ -8,10 +8,10 @@
 #define M_MIDI_IN	(M_USER + 2000)
 class GMidiNotifyWnd : public LWindow
 {
-	GMidi *m;
+	LMidi *m;
 	
 public:
-	GMidiNotifyWnd(GMidi *midi)
+	GMidiNotifyWnd(LMidi *midi)
 	{
 		m = midi;
 		Attach(0);
@@ -32,7 +32,7 @@ public:
 
 struct GMidiPriv
 {
-	GMidi *Midi;
+	LMidi *Midi;
 	
 	#if defined(MAC)
 		MIDIClientRef Client;
@@ -52,7 +52,7 @@ struct GMidiPriv
 		LAutoPtr<LThread> Reader;
 	#endif
 	
-	GMidiPriv(GMidi *m)
+	GMidiPriv(LMidi *m)
 		#ifdef WINDOWS
 		: Notify(m)
 		#endif
@@ -98,13 +98,13 @@ struct GMidiPriv
 
 	void MidiNotify(const MIDINotification *message, void *refCon)
 	{
-		GMidi *a = (GMidi*)refCon;
+		LMidi *a = (LMidi*)refCon;
 		a->OnMidiNotify(message);
 	}
 
 	void MidiRead(const MIDIPacketList *pktlist, void *readProcRefCon, void *srcConnRefCon)
 	{
-		GMidi *a = (GMidi*)readProcRefCon;
+		LMidi *a = (LMidi*)readProcRefCon;
 		if (a)
 		{
 			LArray<uint8_t> *d = &a->d->Data;
@@ -150,7 +150,7 @@ struct GMidiPriv
 		}
 	}
 
-	void GMidi::OnMidiNotify(const MIDINotification *message)
+	void LMidi::OnMidiNotify(const MIDINotification *message)
 	{
 		printf("MIDI notify: %li\n", message->messageID);
 	}
@@ -159,7 +159,7 @@ struct GMidiPriv
 
 	void CALLBACK MidiOutProc(HMIDIOUT hmo, UINT wMsg, MIDI_TYPE dwInstance, MIDI_TYPE wParam, MIDI_TYPE lParam)
 	{
-		GMidi *a = (GMidi*)dwInstance;
+		LMidi *a = (LMidi*)dwInstance;
 		switch (wMsg)
 		{
 			case MM_MOM_OPEN:
@@ -184,7 +184,7 @@ struct GMidiPriv
 
 	void CALLBACK MidiInProc(HMIDIIN hmi, UINT wMsg, MIDI_TYPE dwInstance, MIDI_TYPE dwParam1, MIDI_TYPE dwParam2)
 	{
-		GMidi *a = (GMidi*)dwInstance;
+		LMidi *a = (LMidi*)dwInstance;
 		uint8_t *b = 0;
 		int len = 0;
 		uint8_t buf[3];
@@ -287,7 +287,7 @@ struct GMidiPriv
 
 #endif
 
-GMidi::GMidi() : LMutex("GMidi")
+LMidi::LMidi() : LMutex("LMidi")
 {
 	d = new GMidiPriv(this);
 
@@ -385,13 +385,13 @@ GMidi::GMidi() : LMutex("GMidi")
 	#endif
 }
 
-GMidi::~GMidi()
+LMidi::~LMidi()
 {
 	CloseMidi();
 	delete d;
 }
 
-bool GMidi::IsMidiOpen()
+bool LMidi::IsMidiOpen()
 {
 	#if defined(MAC)
 	return d->Client != 0;
@@ -402,7 +402,7 @@ bool GMidi::IsMidiOpen()
 	#endif
 }
 
-int GMidi::GetMidiPacketSize(uint8_t *ptr, size_t len)
+int LMidi::GetMidiPacketSize(uint8_t *ptr, size_t len)
 {
 	if (!ptr || len < 1)
 		return 0;
@@ -444,7 +444,7 @@ int GMidi::GetMidiPacketSize(uint8_t *ptr, size_t len)
 
 #ifdef WINDOWS
 
-void GMidi::ParseMidi()
+void LMidi::ParseMidi()
 {
 	if (Lock(_FL))
 	{
@@ -476,7 +476,7 @@ void GMidi::ParseMidi()
 	}
 }
 
-void GMidi::StoreMidi(uint8_t *ptr, int len)
+void LMidi::StoreMidi(uint8_t *ptr, int len)
 {
 	if (Lock(_FL))
 	{
@@ -491,7 +491,7 @@ void GMidi::StoreMidi(uint8_t *ptr, int len)
 
 #endif
 
-bool GMidi::Connect(int InIdx, int OutIdx, LAutoString *ErrorMsg)
+bool LMidi::Connect(int InIdx, int OutIdx, LAutoString *ErrorMsg)
 {
 	if (IsMidiOpen())
 	{
@@ -629,7 +629,7 @@ bool GMidi::Connect(int InIdx, int OutIdx, LAutoString *ErrorMsg)
 	return Status;
 }
 
-void GMidi::CloseMidi()
+void LMidi::CloseMidi()
 {
 	#if defined(MAC)
 
@@ -666,14 +666,14 @@ void GMidi::CloseMidi()
 	#endif
 }
 
-void GMidi::OnMidiIn(uint8_t *midi, size_t midi_len)
+void LMidi::OnMidiIn(uint8_t *midi, size_t midi_len)
 {
 	#if MIDI_MIRROR_IN_TO_OUT
 	SendMidi(p, len);
 	#endif
 }
 
-void GMidi::SendMidi(uint8_t *ptr, size_t len, bool quiet)
+void LMidi::SendMidi(uint8_t *ptr, size_t len, bool quiet)
 {
 	LAssert(ptr != NULL);
 	if (!ptr)
@@ -754,7 +754,7 @@ void GMidi::SendMidi(uint8_t *ptr, size_t len, bool quiet)
 	#endif
 }
 
-void GMidi::OnMidiOut(uint8_t *p, size_t len)
+void LMidi::OnMidiOut(uint8_t *p, size_t len)
 {
 	if (GetLog())
 	{
@@ -769,7 +769,7 @@ void GMidi::OnMidiOut(uint8_t *p, size_t len)
 	#endif
 }
 
-void GMidi::OnError(char *Func, LAutoString *ErrorMsg, uint32_t Code, char *File, int Line)
+void LMidi::OnError(char *Func, LAutoString *ErrorMsg, uint32_t Code, char *File, int Line)
 {
 	char m[256];
 	sprintf_s(m, sizeof(m), "%s failed with %i", Func, Code);
