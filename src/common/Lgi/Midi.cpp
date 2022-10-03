@@ -46,7 +46,7 @@ struct LMidiPriv
 		HMIDIOUT hOut = 0;
 		MIDIHDR InHdr;
 		char InBuf[2 << 10];
-		GMidiNotifyWnd Notify;
+		LMidiNotifyWnd Notify;
 	#elif defined(LINUX)
 		int Hnd = -1;
 		LAutoPtr<LThread> Reader;
@@ -332,13 +332,7 @@ LMidi::LMidi() : LMutex("LMidi")
 		{
 			MMRESULT r = midiInGetDevCaps(n, &InCaps, sizeof(InCaps));
 			if (r == MMSYSERR_NOERROR)
-			{
-				#ifdef UNICODE
-				In.New().Reset(WideToUtf8(InCaps.szPname));
-				#else
-				In.New().Reset(NewStr(InCaps.szPname));
-				#endif
-			}
+				In.New() = InCaps.szPname;
 		}
 
 		MIDIOUTCAPS OutCaps;
@@ -346,13 +340,7 @@ LMidi::LMidi() : LMutex("LMidi")
 		{
 			MMRESULT r = midiOutGetDevCaps(n, &OutCaps, sizeof(OutCaps));
 			if (r == MMSYSERR_NOERROR)
-			{
-				#ifdef UNICODE
-				Out.New().Reset(WideToUtf8(OutCaps.szPname));
-				#else
-				Out.New().Reset(NewStr(OutCaps.szPname));
-				#endif
-			}
+				Out.New() = OutCaps.szPname;
 		}
 	
 	#elif defined(LINUX)
@@ -481,12 +469,12 @@ void LMidi::StoreMidi(uint8_t *ptr, int len)
 
 #endif
 
-bool LMidi::Connect(int InIdx, int OutIdx, LAutoString *ErrorMsg)
+bool LMidi::Connect(int InIdx, int OutIdx, LString *ErrorMsg)
 {
 	if (IsMidiOpen())
 	{
 		if (ErrorMsg)
-			ErrorMsg->Reset(NewStr("Already connected."));
+			*ErrorMsg = "Already connected.";
 		return false;
 	}
 
