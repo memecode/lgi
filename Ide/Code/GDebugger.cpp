@@ -1,3 +1,9 @@
+#ifdef POSIX
+	#include <sys/types.h>
+	#include <signal.h>
+	#include <errno.h>
+	#include <unistd.h>
+#endif
 #include "lgi/common/Lgi.h"
 #include "lgi/common/SubProcess.h"
 #include "lgi/common/Token.h"
@@ -5,12 +11,6 @@
 #include "lgi/common/StringClass.h"
 #include "lgi/common/LgiString.h"
 #include "GDebugger.h"
-#ifdef POSIX
-#include <sys/types.h>
-#include <signal.h>
-#include <errno.h>
-#include <unistd.h>
-#endif
 
 #define DEBUG_SHOW_GDB_IO		0
 #define ECHO_GDB_OUTPUT			0
@@ -1517,11 +1517,7 @@ public:
 		
 		SuppressNextFileLine = SuppressFL;
 		// LogMsg("Break: Sending SIGINT to %i(0x%x)...\n", ProcessId, ProcessId);
-		int result = 
-			#ifdef __GTK_H__
-			Gtk::
-			#endif
-			kill(ProcessId, SIGINT);
+		int result = kill(ProcessId, SIGINT);
 		auto ErrNo = errno;
 		// LogMsg("Break: result=%i\n", result);
 		if (!result)

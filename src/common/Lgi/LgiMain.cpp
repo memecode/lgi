@@ -86,8 +86,6 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdS
 	*/
 	#ifdef __GTK_H__
 	{
-		using namespace Gtk;
-
 		#ifdef _MSC_VER
 		// Really? REALLY? Get your shit together GTK.
 		_putenv("GDK_WIN32_USE_EXPERIMENTAL_OLE2_DND=1");

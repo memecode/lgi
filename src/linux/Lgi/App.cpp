@@ -23,6 +23,7 @@
 #define DEBUG_HND_WARNINGS			0
 #define IDLE_ALWAYS					0
 
+using namespace Gtk;
 
 bool GlibWidgetSearch(GtkWidget *p, GtkWidget *w, bool Debug, int depth = 0);
 
@@ -298,7 +299,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 
 	Gtk::gchar id[256];
 	sprintf_s(id, sizeof(id), "com.memecode.%s", name);
-	d->App = gtk_application_new(id, G_APPLICATION_FLAGS_NONE); 
+	d->App = Gtk::gtk_application_new(id, Gtk::G_APPLICATION_FLAGS_NONE); 
 	LAssert(d->App != NULL);
 
 	MouseHook = new LMouseHook;
@@ -617,7 +618,7 @@ void LApp::Exit(int Code)
 		if (d->IdleId.Length() > 0)
 		{
 			size_t Last = d->IdleId.Length() - 1;
-			g_source_remove(d->IdleId[Last]);
+			Gtk::g_source_remove(d->IdleId[Last]);
 			d->IdleId.Length(Last);
 		}
 	}

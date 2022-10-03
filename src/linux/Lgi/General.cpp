@@ -1,4 +1,5 @@
 // Linux Implementation of General LGI functions
+#include <errno.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -17,7 +18,6 @@
 #endif
 #include "lgi/common/Token.h"
 
-#include <errno.h>
 #include <pwd.h>
 
 #define DEBUG_GET_APPS_FOR_MIMETYPE			0

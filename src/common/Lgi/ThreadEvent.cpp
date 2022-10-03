@@ -1,11 +1,11 @@
+#if defined(LINUX) || LGI_COCOA
+	#include <errno.h>
+#endif
 #include "lgi/common/Lgi.h"
 #include "lgi/common/ThreadEvent.h"
 
 #if USE_POSIX_SEM
 	#define SEM_NULL -1
-#endif
-#if defined(LINUX) || LGI_COCOA
-	#include <errno.h>
 #endif
 #if USE_MACH_SEM
 	#include <mach/task.h>
@@ -14,9 +14,6 @@
 #endif
 
 #if POSIX
-	
-	#include <sys/time.h>
-
 	void TimeoutToTimespec(struct timespec &to, uint64_t TimeoutMs)
 	{
 		timeval tv;
@@ -32,7 +29,6 @@
 			to.tv_sec++;
 		}
 	}
-
 #endif
 
 #define DEBUG_THREADING     0

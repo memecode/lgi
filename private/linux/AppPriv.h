@@ -15,14 +15,13 @@
 #include "LgiWinManGlue.h"
 
 typedef LArray<LAppInfo*> AppArray;
-using namespace Gtk;
 
 class LAppPrivate : public LSymLookup
 {
 public:
 	// Common
 	LApp *Owner;
-	GtkApplication *App;
+	Gtk::GtkApplication *App;
 	LAutoPtr<LJson> Config;
 	LAutoPtr<LApp::KeyModFlags> ModFlags;
 	LFileSystem *FileSystem;
