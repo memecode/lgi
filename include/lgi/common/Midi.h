@@ -50,7 +50,7 @@ public:
 	virtual LStream *GetLog() { return NULL; }
 
 	bool IsMidiOpen();
-	bool Connect(int InIdx, int OutIdx, LAutoString *ErrorMsg = NULL);
+	bool Connect(int InIdx, int OutIdx, LString *ErrorMsg = NULL);
 	void SendMidi(uint8_t *ptr, size_t len, bool quiet);
 	void CloseMidi();
 
