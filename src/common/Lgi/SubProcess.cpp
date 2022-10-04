@@ -372,22 +372,35 @@ bool LSubProcess::SetUser(const char *User, const char *Pass)
 		return false;
 	}
 	
-    if (0 != strcmp( entry->pw_passwd, "x" ))
+    if (0 != strcmp(entry->pw_passwd, "x"))
     {
-        return strcmp( entry->pw_passwd, crypt( Pass, entry->pw_passwd ) );
+        if (strcmp(entry->pw_passwd, crypt(Pass, entry->pw_passwd)))
+        {
+        	LgiTrace("%s:%i - SetUser: Wrong password.\n", _FL);
+        	return false;
+        }
     }
     else
     {
         // password is in shadow file
-        struct spwd* shadowEntry = getspnam(User);
+        auto shadowEntry = getspnam(User);
         if (!shadowEntry)
         {
             LgiTrace("%s:%i - SetUser: Failed to read shadow entry for user '%s'\n", User);
             return false;
         }
 
-        return !strcmp(shadowEntry->sp_pwdp, crypt(Pass, shadowEntry->sp_pwdp));
+        if (strcmp(shadowEntry->sp_pwdp, crypt(Pass, shadowEntry->sp_pwdp)))
+        {
+        	LgiTrace("%s:%i - SetUser: Wrong password.\n", _FL);
+        	return false;
+        }
     }
+
+    d->UserId = entry->pw_uid;
+    d->GrpId = entry->pw_gid;
+    
+    return true;
 }
 
 void LSubProcess::SetInitFolder(const char *f)
