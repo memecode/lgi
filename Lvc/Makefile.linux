@@ -35,8 +35,7 @@ ifeq ($(Build),Debug)
 		-I/usr/include/gstreamer-1.0 \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
-		-I../include \
-		-I../../../../codelib/libssh/include
+		-I../include
 else
 	Flags += -s -Os -std=c++14
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
@@ -55,8 +54,7 @@ else
 		-I/usr/include/gstreamer-1.0 \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
-		-I../include \
-		-I../../../../codelib/libssh/include
+		-I../include
 endif
 
 # Dependencies
@@ -70,7 +68,6 @@ Source =	Src/VcFolder.cpp \
 			../src/common/Widgets/ControlTree.cpp \
 			../src/common/Text/XmlTreeUi.cpp \
 			../src/common/Text/DeEscape.cpp \
-			../src/common/Lgi/SubProcess.cpp \
 			../src/common/Lgi/StructuredLog.cpp \
 			../src/common/Lgi/LgiMain.cpp \
 			../src/common/Gdc2/Filters/Png.cpp
@@ -227,6 +224,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/linux/Gtk/LgiOsDefs.h \
 	../include/lgi/linux/Gtk/LgiWidget.h \
 	../include/lgi/linux/Gtk/LgiWinManGlue.h \
+	../include/lgi/linux/SymLookup.h \
 	../include/lgi/mac/cocoa/LCocoaView.h \
 	../include/lgi/mac/cocoa/LgiMac.h \
 	../include/lgi/mac/cocoa/LgiOs.h \

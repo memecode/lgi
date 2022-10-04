@@ -94,7 +94,6 @@ Source =	Code/WebFldDlg.cpp \
 			../src/common/Net/OpenSSLSocket.cpp \
 			../src/common/Net/Http.cpp \
 			../src/common/Net/Ftp.cpp \
-			../src/common/Lgi/SubProcess.cpp \
 			../src/common/Lgi/Mdi.cpp \
 			../src/common/Lgi/LgiMain.cpp \
 			../src/common/Lgi/About.cpp \

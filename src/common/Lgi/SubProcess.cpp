@@ -28,6 +28,12 @@
 	#include <sys/types.h>
 #endif
 
+#if defined(POSIX)
+	#include <pwd.h>
+	#include <shadow.h>
+	#include <crypt.h>
+#endif
+
 #include "lgi/common/Lgi.h"
 #include "lgi/common/SubProcess.h"
 
@@ -128,6 +134,8 @@ struct LSubProcessPriv
 	#if defined(POSIX)
 		LSubProcess::Pipe Io;
 		int ExitValue; // was uint32
+		int UserId = -1;
+		int GrpId = -1;
 	#elif defined(WIN32)
 		HANDLE ChildHnd;
 		DWORD ExitValue;
@@ -349,6 +357,39 @@ int32 LSubProcess::GetExitValue()
 	return d->ExitValue;
 }
 
+bool LSubProcess::SetUser(const char *User, const char *Pass)
+{
+	if (!User || !Pass)
+	{
+		LgiTrace("%s:%i - SetUser param err.\n", _FL);
+		return false;
+	}
+
+	auto entry = getpwnam(User);
+	if (!entry)
+	{
+		LgiTrace("%s:%i - SetUser: User '%s' doesn't exist.\n", _FL, User);
+		return false;
+	}
+	
+    if (0 != strcmp( entry->pw_passwd, "x" ))
+    {
+        return strcmp( entry->pw_passwd, crypt( Pass, entry->pw_passwd ) );
+    }
+    else
+    {
+        // password is in shadow file
+        struct spwd* shadowEntry = getspnam(User);
+        if (!shadowEntry)
+        {
+            LgiTrace("%s:%i - SetUser: Failed to read shadow entry for user '%s'\n", User);
+            return false;
+        }
+
+        return !strcmp(shadowEntry->sp_pwdp, crypt(Pass, shadowEntry->sp_pwdp));
+    }
+}
+
 void LSubProcess::SetInitFolder(const char *f)
 {
 	d->InitialFolder = f;
@@ -555,7 +596,12 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 					}
 				}
 			}
-				
+			
+			if (d->UserId >= 0)
+				setuid(d->UserId);
+			if (d->GrpId >= 0)
+				setgid(d->GrpId);
+     				
 			if (d->Environment.Length())
 			{
 				LString::Array Vars;

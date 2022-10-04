@@ -99,6 +99,7 @@ public:
 	void SetInitFolder(const char *f);
 	const char *GetEnvironment(const char *Var);	
 	bool SetEnvironment(const char *Var, const char *Value);
+	bool SetUser(const char *User, const char *Pass);
 
 	// Dom (support StreamReadable/StreamWritable)
 	bool GetValue(const char *Var, LVariant &Value) override;

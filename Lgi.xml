@@ -487,22 +487,24 @@
 			</IncludePaths>
 			<SystemIncludes>
 				<Linux>
-					<Debug>/usr/include/gstreamer-1.0
-/usr/include/libappindicator3-0.1
-`pkg-config --cflags gtk+-3.0`</Debug>
-					<Release>/usr/include/gstreamer-1.0
-/usr/include/libappindicator3-0.1
-`pkg-config --cflags gtk+-3.0`</Release>
+					<Debug>/usr/include/libappindicator3-0.1
+`pkg-config --cflags gtk+-3.0`
+`pkg-config --cflags gstreamer-1.0`</Debug>
+					<Release>/usr/include/libappindicator3-0.1
+`pkg-config --cflags gtk+-3.0`
+`pkg-config --cflags gstreamer-1.0`</Release>
 				</Linux>
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
 					<Debug>magic
 appindicator3
+crypt
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Debug>
 					<Release>magic
 appindicator3
+crypt
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>

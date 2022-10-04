@@ -10,7 +10,6 @@
 			<Node File="../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Lgi/StructuredLog.cpp" Type="2" Platforms="15" />
 			<Node File="../include/lgi/common/StructuredLog.h" Type="3" Platforms="15" />
-			<Node File="../src/common/Lgi/SubProcess.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Text/XmlTreeUi.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Ssh" Type="1" Platforms="15" Id="1">
@@ -56,6 +55,8 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -112,7 +113,16 @@
 					<Debug>../../../../codelib/libssh/build/src</Debug>
 					<Release>../../../../codelib/libssh/build/src</Release>
 				</All>
+				<Linux />
 			</LibraryPaths>
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
+			<TargetName>
+				<Linux />
+			</TargetName>
+			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -124,6 +134,27 @@
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<ShowWhiteSpace />
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
 	</Settings>
 </Project>
