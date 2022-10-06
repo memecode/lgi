@@ -6,8 +6,6 @@
 			<Node File="./Code/GDebugContext.h" Type="3" Platforms="15" />
 			<Node File="./Code/GDebugger.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/GDebugger.h" Type="3" Platforms="15" />
-			<Node File="../src/common/Lgi/SubProcess.cpp" Type="2" Platforms="15" />
-			<Node File="../include/lgi/common/SubProcess.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="3">
 			<Node File="./Code/AddFtpFile.cpp" Type="2" Platforms="15" />
@@ -93,7 +91,7 @@
 		<Node File="./Makefile.linux" Type="9" Platforms="15" />
 		<Node File="./Resources/resource.h" Type="3" Platforms="15" />
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" />
+	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>
 		<General>
 			<Makefile>
@@ -136,8 +134,6 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -192,14 +188,12 @@ pthread
 					<Debug>be</Debug>
 					<Release>be</Release>
 				</Haiku>
-				<All />
 			</Libraries>
 			<LibraryPaths>
 				<All>
 					<Debug>..\Debug</Debug>
 					<Release>..\Release</Release>
 				</All>
-				<Linux />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -233,10 +227,6 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<ApplicationIcon>
 				<Haiku>./Code/icon-haiku</Haiku>
 			</ApplicationIcon>
-			<Defines>
-				<All />
-				<Linux />
-			</Defines>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -251,28 +241,17 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Environment>
 				<All>SOME_TEST=testing</All>
 			</Environment>
 			<Arguments>
-				<All />
+				<All>
+					<Debug>/home/matthew/code/scribe/trunk_os/Linux/ScribeProj.xml</Debug>
+				</All>
 			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
 		</Debug>
-		<Advanced>
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-			<OtherMakefileRules />
-		</Advanced>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
+		<Advanced />
 	</Settings>
 </Project>

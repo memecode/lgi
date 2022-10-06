@@ -40,8 +40,8 @@ Known bugs:
 #if 0
 // #define DEBUG_FILE		"\\ape-apcp.c"
 #define DEBUG_FILE		"gen_probe.c"
-#define DEBUG_LINE		280
 #endif
+#define DEBUG_LINE		593
 
 const char *TypeToStr(DefnType t)
 {
@@ -153,6 +153,42 @@ bool SeekPtr(char16 *&s, char16 *end, int &Line)
 	}
 
 	return true;
+}
+
+DefnType GuessDefnType(char16 *def, bool debug)
+{
+	// In the context of a class member, this could be a variable defn:
+	//
+	//		bool myVar = true;
+	//		bool myVar = someFn();
+	//
+	// or a function defn:
+	//
+	//		bool myFunction(int someArg = 10);
+	//
+	// Try to guess which it is:
+
+	int roundDepth = 0;
+	int equalsAtZero = 0;
+	for (auto s = def; *s; s++)
+	{
+		if (*s == '(')
+			roundDepth++;
+		else if (*s == ')')
+			roundDepth--;
+		else if (*s == '=')
+		{
+			if (roundDepth == 0)
+				equalsAtZero++;
+		}
+	}
+
+	/*
+	if (equalsAtZero && debug)
+		printf("equalsAtZero: %S\n", def);
+	*/
+
+	return equalsAtZero ? DefnVariable : DefnFunc;
 }
 
 bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns, int LimitTo, bool Debug)
@@ -497,13 +533,12 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 					{
 						End++;
 
-						char16 *Buf = NewStrW(Start, End-Start);
+						auto Buf = NewStrW(Start, End-Start);
 						if (Buf)
 						{
 							// remove new-lines
-							char16 *Out = Buf;
-							bool HasEquals = false;
-							for (char16 *In = Buf; *In; In++)
+							auto Out = Buf;
+							for (auto In = Buf; *In; In++)
 							{
 								if (*In == '\r' || *In == '\n' || *In == '\t' || *In == ' ')
 								{
@@ -518,8 +553,6 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 								}
 								else
 								{
-									if (*In == '=')
-										HasEquals = true;
 									*Out++ = *In;
 								}
 							}
@@ -580,7 +613,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 							}
 
 							// cache f(n) def
-							DefnType Type = HasEquals ? DefnVariable : DefnFunc;
+							auto Type = GuessDefnType(Buf, Debug);
 							if
 							(
 								(
@@ -591,6 +624,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 								*Buf != ')'
 							)
 								Defns.New().Set(Type, FileName, Buf, Line + 1);
+
 							DeleteArray(Buf);
 							
 							while (*End && !strchr(";:{#", *End))

@@ -20,7 +20,7 @@
 
 #define DEBUG_FIND_SYMBOL		0
 #define DEBUG_NO_THREAD			1
-// #define DEBUG_FILE				"dante_config_common.h"
+#define DEBUG_FILE				"BayesianFilter.cpp"
 
 int SYM_FILE_SENT = 0;
 
@@ -63,7 +63,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		bool IsPython;
 		bool IsJavascript;
 		
-		bool Parse(LAutoWString Source)
+		bool Parse(LAutoWString Source, bool Debug)
 		{
 			IsSource = false;
 			IsHeader = false;
@@ -89,11 +89,11 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 				IsJavascript = !_stricmp(Ext, "js");
 
 				if (IsSource || IsHeader)
-					Status = BuildCppDefnList(Path, Source, Defs, DefnNone);
+					Status = BuildCppDefnList(Path, Source, Defs, DefnNone, Debug);
 				else if (IsJavascript)
-					Status = BuildJsDefnList(Path, Source, Defs, DefnNone);
+					Status = BuildJsDefnList(Path, Source, Defs, DefnNone, Debug);
 				else if (IsPython)
-					Status = BuildPyDefnList(Path, Source, Defs, DefnNone);
+					Status = BuildPyDefnList(Path, Source, Defs, DefnNone, Debug);
 			}
 
 			return Status;
@@ -159,7 +159,11 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	
 	bool AddFile(LString Path, int Platforms)
 	{
-		// printf("AddFile %s\n", Path.Get());		
+		#ifdef DEBUG_FILE
+		bool Debug = false;
+		if ((Debug = Path.Find(DEBUG_FILE) >= 0))
+			printf("%s:%i - AddFile(%s)\n", _FL, Path.Get());
+		#endif
 		
 		// Already added?
 		#if USE_HASH
@@ -172,12 +176,6 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		}
 		#else
 		int Idx = GetFileIndex(Path);
-
-		#ifdef DEBUG_FILE
-		bool Debug = false;
-		if ((Debug = Path.Find(DEBUG_FILE) >= 0))
-			printf("%s:%i - AddFile(%s) = %i\n", _FL, Path.Get(), Idx);
-		#endif
 
 		if (Idx >= 0)
 		{
@@ -225,19 +223,17 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		LArray<LString> EmptyInc;
 		if (BuildHeaderList(Source, Headers, f->Inc ? *f->Inc : EmptyInc, false))
 		{
-			for (unsigned i=0; i<Headers.Length(); i++)
-			{
-				AddFile(Headers[i], 0);
-			}
+			for (auto h: Headers)
+				AddFile(h, 0);
 		}
 		Headers.DeleteArrays();
 		
 		// Parse for symbols...
 		#ifdef DEBUG_FILE
 		if (Debug)
-			printf("%s:%i - About to parse '%s' containing %i chars.\n", _FL, f->Path.Get(), StrlenW(f->Source));
+			printf("%s:%i - About to parse '%s'.\n", _FL, f->Path.Get());
 		#endif
-		return f->Parse(LAutoWString(Utf8ToWide(Source)));
+		return f->Parse(LAutoWString(Utf8ToWide(Source)), Debug);
 	}
 	
 	bool ReparseFile(LString Path)
