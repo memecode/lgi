@@ -20,7 +20,7 @@ static int DefaultSpacerPx()
 	if (px < 0)
 	{
 		auto dpi = LScreenDpi();
-		px = dpi.x / 17;
+		px = std::max(dpi.x / 17, 5);
 	}
 	
 	return px;
