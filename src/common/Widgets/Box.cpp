@@ -5,16 +5,27 @@
 #include "lgi/common/Popup.h"
 #include "lgi/common/Notifications.h"
 
-#define DEFAULT_SPACER_PX			5
-// #define DEFAULT_SPACER_COLOUR24		LColour(L_MED)
 #define DEFAULT_MINIMUM_SIZE_PX		5
 #define ACTIVE_SPACER_SIZE_PX		9
 
-#if 0//def _DEBUG
+#if 0 //def _DEBUG
 #define LOG(...)		if (_Debug) LgiTrace(__VA_ARGS__)
 #else
 #define LOG(...)
 #endif
+
+static int DefaultSpacerPx()
+{
+	static int px = -1;
+	if (px < 0)
+	{
+		auto dpi = LScreenDpi();
+		px = dpi.x / 17;
+	}
+	
+	return px;
+};
+#define DEFAULT_SPACER_PX DefaultSpacerPx()
 
 enum LBoxMessages
 {
