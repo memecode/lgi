@@ -577,12 +577,12 @@ bool LMidi::Connect(int InIdx, int OutIdx, LString *ErrorMsg)
 		if (InIdx != OutIdx)
 		{
 			if (ErrorMsg)
-				ErrorMsg->Reset(NewStr("Different indexes not supported yet."));
+				*ErrorMsg = "Different indexes not supported yet.";
 		}
 		else if (InIdx < 0 || InIdx >= In.Length())
 		{
 			if (ErrorMsg)
-				ErrorMsg->Reset(NewStr("Invalid index."));
+				*ErrorMsg = "Invalid index.";
 		}
 		else
 		{				
@@ -596,9 +596,7 @@ bool LMidi::Connect(int InIdx, int OutIdx, LString *ErrorMsg)
 			{
 				int e = errno;
 				auto msg = LErrorCodeToString(e);
-				LString s;
-				s.Printf("Error opening the device: %i (%s)\n", e, msg.Get());
-				ErrorMsg->Reset(NewStr(s));
+				ErrorMsg->Printf("Error opening the device: %i (%s)\n", e, msg.Get());
 			}
 		}
 
