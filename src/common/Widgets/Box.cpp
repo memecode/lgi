@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Box.h"
 #include "lgi/common/CssTools.h"
@@ -5,6 +7,7 @@
 #include "lgi/common/Popup.h"
 #include "lgi/common/Notifications.h"
 
+#undef max
 #define DEFAULT_MINIMUM_SIZE_PX		5
 #define ACTIVE_SPACER_SIZE_PX		9
 
