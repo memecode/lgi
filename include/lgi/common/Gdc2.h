@@ -1169,6 +1169,8 @@ public:
 	{
 		if (Valid)
 		{
+			if (Mem.Handle())
+				Mem.EndDC();
 			Mem.SetOrigin(0, 0);
 			Screen->Blt(Rgn.x1, Rgn.y1, &Mem);
 		}

@@ -1040,7 +1040,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 														WEnv,				// lpEnvironment
 														WInitialFolder,		// lpCurrentDirectory
 														&Info,				// lpStartupInfo
-														&ProcInfo);
+														&ProcInfo) != 0;
 			}
 			else
 			{
@@ -1053,7 +1053,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 												WEnv,				// lpEnvironment
 												WInitialFolder,		// lpCurrentDirectory
 												&Info,				// lpStartupInfo
-												&ProcInfo);
+												&ProcInfo) != 0;
 			}
 
 			if (createResult)

@@ -114,7 +114,10 @@ Gdiplus::Graphics *LSurface::GetGfx()
 		GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
 	if (!GdiplusGfx)
-		GdiplusGfx.Reset(new Gdiplus::Graphics(StartDC()));
+	{
+		auto dc = StartDC();
+		GdiplusGfx.Reset(new Gdiplus::Graphics(dc));
+	}
 
 	if (!GdiplusGfx)
 	{
