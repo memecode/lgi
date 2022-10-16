@@ -664,8 +664,7 @@ void LMemDC::StretchBlt(LRect *Dest, LSurface *Src, LRect *s)
 			}
 			case GDC_ALPHA:
 			{
-				if (GdcD->AlphaBlend &&
-					Src->GetBits() == 32)
+				if (GdcD->AlphaBlend)
 				{
 					HDC hDestDC = StartDC();
 					HDC hSrcDC = Src->StartDC();
@@ -677,7 +676,7 @@ void LMemDC::StretchBlt(LRect *Dest, LSurface *Src, LRect *s)
 												d->ConstAlpha <= 255 ?
 												d->ConstAlpha :
 												255;
-					Blend.AlphaFormat = AC_SRC_ALPHA;
+					Blend.AlphaFormat = Src->GetBits() == 32 ? AC_SRC_ALPHA : 0;
 
 					if (!GdcD->AlphaBlend(	hDestDC,
 											DestR.x1, DestR.y1, DestR.X(), DestR.Y(),
