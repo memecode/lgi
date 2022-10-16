@@ -14,6 +14,7 @@
 #endif
 
 #if POSIX
+	#include <sys/time.h>
 	void TimeoutToTimespec(struct timespec &to, uint64_t TimeoutMs)
 	{
 		timeval tv;

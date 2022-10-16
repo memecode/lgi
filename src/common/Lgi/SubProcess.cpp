@@ -30,14 +30,6 @@
 
 #endif
 
-#if defined(POSIX)
-
-	#include <pwd.h>
-	#include <shadow.h>
-	#include <crypt.h>
-
-#endif
-
 #include "lgi/common/Lgi.h"
 #include "lgi/common/SubProcess.h"
 
@@ -59,6 +51,16 @@
 	#define NULL_PIPE -1
 	#define ClosePipe close
 	#define INVALID_PID -1
+
+#endif
+
+#if defined(POSIX)
+
+	#include <pwd.h>
+	#if !defined(MAC)
+		#include <crypt.h>
+		#include <shadow.h>
+	#endif
 
 #endif
 
@@ -394,6 +396,7 @@ bool LSubProcess::SetUser(const char *User, const char *Pass)
         		return false;
 			}
 		}
+		#if !defined(MAC)
 		else
 		{
 			// password is in shadow file
@@ -410,6 +413,7 @@ bool LSubProcess::SetUser(const char *User, const char *Pass)
         		return false;
 			}
 		}
+		#endif
 
 		d->UserId = entry->pw_uid;
 		d->GrpId = entry->pw_gid;

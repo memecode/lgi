@@ -229,8 +229,8 @@ int LLayout::OnNotify(LViewI *c, LNotification n)
 void LLayout::OnPosChange()
 {
 	auto r = LView::GetClient();
-	LRect v(r.x2-SCROLL_BAR_SIZE+1, r.y1, r.x2, r.y2);
-	LRect h(r.x1, r.y2-SCROLL_BAR_SIZE+1, r.x2, r.y2);
+	LRect v(r.x2-LScrollBar::SCROLL_BAR_SIZE+1, r.y1, r.x2, r.y2);
+	LRect h(r.x1, r.y2-LScrollBar::SCROLL_BAR_SIZE+1, r.x2, r.y2);
 	if (VScroll && HScroll)
 	{
 		h.x2 = v.x1 - 1;

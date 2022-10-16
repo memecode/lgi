@@ -1169,8 +1169,10 @@ public:
 	{
 		if (Valid)
 		{
+			#if WINDOWS
 			if (Mem.Handle())
 				Mem.EndDC();
+			#endif
 			Mem.SetOrigin(0, 0);
 			Screen->Blt(Rgn.x1, Rgn.y1, &Mem);
 		}
