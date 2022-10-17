@@ -268,7 +268,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 	pMem = NULL;
 	d->Info = NULL;
 
-	int Bits = GColourSpaceToBits(Cs);
+	int Bits = LColourSpaceToBits(Cs);
 	int LineLen = (((x * Bits) + 31) / 32) * 4;
 	if (x > 0 && y > 0)
 	{

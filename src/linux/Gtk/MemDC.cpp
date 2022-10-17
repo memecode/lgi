@@ -85,7 +85,7 @@ LCairoSurfaceT LMemDC::GetSubImage(LRect &r)
 	if (d->Img)
 	{
 		cairo_format_t fmt = cairo_image_surface_get_format(d->Img);
-		int pixel_bytes = GColourSpaceToBits(ColourSpace) >> 3;
+		int pixel_bytes = LColourSpaceToBits(ColourSpace) >> 3;
 		return cairo_image_surface_create_for_data(	pMem->Base + (r.y1 * pMem->Line) + (r.x1 * pixel_bytes),
 													fmt,
 													r.X(),
@@ -270,7 +270,7 @@ LColourSpace LMemDC::GetCreateCs()
 
 bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 {
-	int Bits = GColourSpaceToBits(Cs);
+	int Bits = LColourSpaceToBits(Cs);
 	if (x < 1 || y < 1 || Bits < 1)
 		return false;
 	if (Bits < 8)

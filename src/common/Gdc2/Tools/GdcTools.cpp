@@ -649,8 +649,8 @@ bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *FromRgn, Progress *Prog)
 	LSurface *pAlpha = pSrc->AlphaDC();
 	LColourSpace SrcCs = pSrc->GetColourSpace();
 	LColourSpace DstCs = pDest->GetColourSpace();
-	bool HasSrcAlpha = GColourSpaceHasAlpha(SrcCs);
-	bool HasDestAlpha = GColourSpaceHasAlpha(DstCs);
+	bool HasSrcAlpha = LColourSpaceHasAlpha(SrcCs);
+	bool HasDestAlpha = LColourSpaceHasAlpha(DstCs);
 	bool ProcessAlpha = HasSrcAlpha && HasDestAlpha;
 	for (int Dy = 0; Dy<pDest->Y(); Dy++)
 	{

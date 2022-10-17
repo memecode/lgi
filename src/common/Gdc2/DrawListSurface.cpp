@@ -171,7 +171,7 @@ LDrawListSurface::LDrawListSurface(int Width, int Height, LColourSpace Cs)
 	d->x = Width;
 	d->y = Height;
 	d->Dpi = LScreenDpi();
-	d->Bits = GColourSpaceToBits(Cs);
+	d->Bits = LColourSpaceToBits(Cs);
 	d->Fore = LColour::Black;
 	ColourSpace = Cs;
 }
@@ -183,7 +183,7 @@ LDrawListSurface::LDrawListSurface(LSurface *FromSurface)
 	d->y = FromSurface->Y();
 	d->Dpi = FromSurface->GetDpi();
 	ColourSpace = FromSurface->GetColourSpace();
-	d->Bits = GColourSpaceToBits(ColourSpace);
+	d->Bits = LColourSpaceToBits(ColourSpace);
 	d->Fore = LColour::Black;
 	d->CreationSurface = FromSurface;
 }

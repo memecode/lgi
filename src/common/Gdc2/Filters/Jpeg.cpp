@@ -641,7 +641,7 @@ LFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 	}
 
 	int Bits = cinfo.num_components * 8;
-	if (pDC->Create(cinfo.image_width, cinfo.image_height, GBitsToColourSpace(Bits)))
+	if (pDC->Create(cinfo.image_width, cinfo.image_height, LBitsToColourSpace(Bits)))
 	{
 		// zero out bitmap
 		pDC->Colour(0, Bits);

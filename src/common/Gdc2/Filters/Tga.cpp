@@ -72,7 +72,7 @@ public:
 			}
 
 			// load pixels
-			if (pDC->Create(X, Y, GBitsToColourSpace(Bits)))
+			if (pDC->Create(X, Y, LBitsToColourSpace(Bits)))
 			{
 				switch (ImgType)
 				{

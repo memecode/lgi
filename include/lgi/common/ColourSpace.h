@@ -366,24 +366,24 @@ union LColourSpaceBits
 LgiFunc const char *LColourSpaceToString(LColourSpace cs);
 
 /// Works out how many bits required for a pixel in a particular colour space.
-LgiFunc int GColourSpaceToBits(LColourSpace ColourSpace);
+LgiFunc int LColourSpaceToBits(LColourSpace ColourSpace);
 
 /// /returns the number of channels in the colour space
-LgiFunc int GColourSpaceChannels(LColourSpace Cs);
+LgiFunc int LColourSpaceChannels(LColourSpace Cs);
 
 /// /returns true if the colour space has an alpha channel
-LgiFunc bool GColourSpaceHasAlpha(LColourSpace Cs);
+LgiFunc bool LColourSpaceHasAlpha(LColourSpace Cs);
 
 /// Converts a bit-depth into the default colour space for that depth. Used mostly
 /// in interfacing old bit-depth based code to newer colour space code.
-LgiFunc LColourSpace GBitsToColourSpace(int Bits);
+LgiFunc LColourSpace LBitsToColourSpace(int Bits);
 
 /// Converts a string representation into a colour space.
-LgiFunc LColourSpace GStringToColourSpace(const char *c);
+LgiFunc LColourSpace LStringToColourSpace(const char *c);
 
 /// Tests that the bit and byte ordering of the pixel structures are compiled correctly.
 /// \return true if #LEAST_SIG_BIT_FIRST and #LEAST_SIG_BYTE_FIRST are correct for this platform.
-LgiFunc bool GColourSpaceTest();
+LgiFunc bool LColourSpaceTest();
 
 #ifdef __GTK_H__
 /// Converts a GTK visual to a Lgi colour space.
