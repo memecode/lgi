@@ -382,12 +382,6 @@ ssize_t LMemQueue::Write(const void *Ptr, ssize_t Size, int Flags)
 {
 	ssize_t Status = 0;
 
-	/*
-	char m[256];
-	sprintf_s(m, sizeof(m), "%p::Write(%p, %i, %i)\n", this, Ptr, Size, Flags);
-	OutputDebugStringA(m);
-	*/
-
 	if (Ptr && Size > 0)
 	{
 		if (PreAlloc > 0)
@@ -428,6 +422,44 @@ ssize_t LMemQueue::Write(const void *Ptr, ssize_t Size, int Flags)
 	}
 
 	return Status;
+}
+
+ssize_t LMemQueue::Find(LString str, bool caseSensitive)
+{
+	if (!str.Get())
+		return -1;
+
+	if (!caseSensitive)
+		str = str.Lower();
+
+	ssize_t pos = 0;
+	char *s = str.Get();
+	ssize_t si = 0;
+	for (auto b: Mem)
+	{
+		auto p = b->Ptr() + b->Next;
+		auto e = b->Ptr() + b->Used;
+		while (p < e)
+		{
+			if
+			(
+				(caseSensitive && (s[si] == *p))
+				||
+				(!caseSensitive && (s[si] == ToLower(*p)))
+			)
+			{
+				si++;
+				if (si == str.Length())
+					return pos - si + 1;
+			}
+			else si = 0;
+
+			p++;
+			pos++;
+		}
+	}
+
+	return -1;
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -1011,6 +1011,9 @@ public:
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0) override;
 
 	bool Write(const LString &s) { return Write(s.Get(), s.Length()) == s.Length(); }
+
+	/// Search for a substring and return it's index, or -1 if not found.
+	ssize_t Find(LString str, bool caseSensitive = true);
 };
 
 /// A version of GBytePipe for strings. Adds some special handling for strings.
