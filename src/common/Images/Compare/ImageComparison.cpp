@@ -722,7 +722,7 @@ public:
 				LAutoString Bpix = DescribePixel(b, LPoint(m.x, m.y), &bp);
 				Pane[2]->Name(Bpix);
 
-				int Channels = GColourSpaceChannels(a->GetColourSpace());
+				int Channels = LColourSpaceChannels(a->GetColourSpace());
 				int TileX = Callback->TileX();
 				int TileY = Callback->TileY();
 				int Tx = m.x / TileX;

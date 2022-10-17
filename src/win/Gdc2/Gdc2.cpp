@@ -933,7 +933,7 @@ GdcDevice *GdcDevice::pInstance = 0;
 
 GdcDevice::GdcDevice()
 {
-	GColourSpaceTest();
+	LColourSpaceTest();
 	LAssert(pInstance == 0);
 
 	pInstance = this;

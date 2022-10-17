@@ -310,7 +310,7 @@ LFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, LStream *In)
 	ActualBits = Info.Bits;
 	ScanSize = BMPWIDTH(Info.Sx * Info.Bits);
 	int MemBits = MAX(Info.Bits, 8);
-	if (!pDC->Create(Info.Sx, Info.Sy, GBitsToColourSpace(MemBits), ScanSize))
+	if (!pDC->Create(Info.Sx, Info.Sy, LBitsToColourSpace(MemBits), ScanSize))
 	{
 		LgiTrace("%s:%i - MemDC(%i,%i,%i) failed.\n", _FL, Info.Sx, Info.Sy, MAX(Info.Bits, 8));
 		return LFilter::IoError;
@@ -623,7 +623,7 @@ LFilter::IoStatus GdcBmp::WriteImage(LStream *Out, LSurface *pDC)
 	BMP_WININFO Info;
 	LBmpMem *pMem = GetSurface(pDC);
 	int Colours = (pMem->Cs == CsIndex8) ? 1 << 8 : 0;
-	int UsedBits = GColourSpaceToBits(pMem->Cs);
+	int UsedBits = LColourSpaceToBits(pMem->Cs);
 
 	GPalette *Palette = pDC->Palette();
 	if (pMem->Cs == CsIndex8 && Palette)
@@ -1006,7 +1006,7 @@ LFilter::IoStatus GdcIco::ReadImage(LSurface *pDC, LStream *In)
 		if (Colours &&
 			XorBytes &&
 			(Header.Bits > MyBits || Width > pDC->X() || Height > pDC->Y()) &&
-			pDC->Create(Width, Height, GBitsToColourSpace(MAX(8, Header.Bits)) ))
+			pDC->Create(Width, Height, LBitsToColourSpace(MAX(8, Header.Bits)) ))
 		{
 			MyBits = Header.Bits;
 			pDC->Colour(0, 24);

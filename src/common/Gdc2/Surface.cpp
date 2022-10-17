@@ -228,7 +228,7 @@ void SetAlphaNpm(Px *src, int x, uint8_t a)
 
 bool LSurface::SetConstantAlpha(uint8_t Alpha)
 {
-	bool HasAlpha = GColourSpaceHasAlpha(GetColourSpace());
+	bool HasAlpha = LColourSpaceHasAlpha(GetColourSpace());
 	if (!HasAlpha)
 		return false;
 	
@@ -1192,7 +1192,7 @@ void LSurface::Blt(int x, int y, LSurface *Src, LRect *a)
 			{
 				LBmpMem Bits, Alpha;
 
-				int PixelBytes = GColourSpaceToBits(Src->pMem->Cs) >> 3;
+				int PixelBytes = LColourSpaceToBits(Src->pMem->Cs) >> 3;
 				
 				Bits.Base =	Src->pMem->Base +
 						(SClip.y1 * Src->pMem->Line) +

@@ -228,7 +228,7 @@ public:
 
 	int GetBits()
 	{
-		return GColourSpaceToBits(Cs);
+		return LColourSpaceToBits(Cs);
 	}
 	
 	void GetMemoryExtents(uchar *&Start, uchar *&End)
@@ -308,7 +308,7 @@ public:
 	/// Gets the operator
 	int GetOp() { return Op; }
 	/// Gets the bit depth
-	int GetBits() { return (Dest) ? GColourSpaceToBits(Dest->Cs) : 0; }
+	int GetBits() { return (Dest) ? LColourSpaceToBits(Dest->Cs) : 0; }
 	/// Gets the flags in operation
 	int GetFlags() { return (Dest) ? Dest->Flags : 0; }
 	/// Gets the palette
@@ -543,7 +543,7 @@ public:
 	/// Returns the resolution of the device
 	virtual LPoint GetDpi() { return LPoint(96,96); }
 	/// Gets the bits per pixel
-	virtual int GetBits() { return (pMem) ? GColourSpaceToBits(pMem->Cs) : 0; }
+	virtual int GetBits() { return (pMem) ? LColourSpaceToBits(pMem->Cs) : 0; }
 	/// Gets the colour space of the pixels
 	virtual LColourSpace GetColourSpace() { return ColourSpace; }
 	/// Gets any flags associated with the surface

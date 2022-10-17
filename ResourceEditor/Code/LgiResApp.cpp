@@ -2912,14 +2912,12 @@ int PairCmp(DefinePair *a, DefinePair *b)
 	return a->Value - b->Value;
 }
 
-bool AppWnd::WriteDefines(LFile &Defs)
+bool AppWnd::WriteDefines(LStream &Defs)
 {
 	bool Status = false;
 	ResTree Tree;
 
 	// Empty file
-	Defs.Seek(0, SEEK_SET);
-	Defs.SetSize(0);
 	Defs.Write(HeaderStr, strlen(HeaderStr));
 
 	// make a unique list of #define's
@@ -3057,9 +3055,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 	if (!TestLgi())
 	{
 		if (LgiMsg(this, "Do you want to save the file with errors?", AppName, MB_YESNO) == IDNO)
-		{
 			return false;
-		}
 	}
 
 	// Rename the existing file to 'xxxxxx.bak'
@@ -3081,12 +3077,13 @@ bool AppWnd::SaveLgi(const char *FileName)
 	// Save the file to xml
 	if (FileName)
 	{
-		LFile f, Defs;		
+		LFile f;
 		LFile::Path DefsName = FileName;
 		DefsName += "../resdefs.h";
 
-		if (f.Open(FileName, O_WRITE) &&
-			Defs.Open(DefsName, O_WRITE))
+		LStringPipe Defs;
+
+		if (f.Open(FileName, O_WRITE))
 		{
 			SerialiseContext Ctx;
 			
@@ -3102,9 +3099,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 				{
 					ResDialog *Dlg = dynamic_cast<ResDialog*>(r);
 					if (Dlg)
-					{
 						Dlg->CleanSymbols();
-					}
 				}
 
 				// write defines
@@ -3160,10 +3155,26 @@ bool AppWnd::SaveLgi(const char *FileName)
 
 				LXmlTree Tree(GXT_NO_ENTITIES);
 				Status = Tree.Write(&Root, &f);
+				if (Status)
+				{
+					// Also write the header... but only if it's changed...
+					auto DefsContent = Defs.NewGStr();
+					LAutoString OldDefsContent(LReadTextFile(DefsName));
+					if (!Stricmp(DefsContent.Get(), OldDefsContent.Get()))
+					{
+						LFile DefsFile;
+						if (!DefsFile.Open(DefsName, O_WRITE))
+							goto FileErrorMsg;
+
+						DefsFile.SetSize(0);
+						DefsFile.Write(DefsContent);
+					}
+				}
 			}
 		}
 		else
 		{
+			FileErrorMsg:
 			LgiMsg(this,
 					"Couldn't open these files for output:\n"
 					"\t%s\n"

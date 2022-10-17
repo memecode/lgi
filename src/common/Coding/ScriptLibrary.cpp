@@ -917,12 +917,12 @@ bool SystemFunctions::CreateSurface(LScriptArguments &Args)
 		if (Type->IsInt())
 		{
 			// Bit depth... convert to default Colour Space.
-			Cs = GBitsToColourSpace(Type->CastInt32());
+			Cs = LBitsToColourSpace(Type->CastInt32());
 		}
 		else if ((c = Type->Str()))
 		{
 			// Parse string colour space def
-			Cs = GStringToColourSpace(Type->Str());
+			Cs = LStringToColourSpace(Type->Str());
 		}
 	}
 
