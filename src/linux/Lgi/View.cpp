@@ -907,9 +907,9 @@ bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 		m.x = (int)axes[0];
 		m.y = (int)axes[1];
 	}
-	else
+	else if (auto widget = GTK_WIDGET(w->WindowHandle()))
 	{
-		GdkWindow *wnd = gtk_widget_get_window(GTK_WIDGET(w->WindowHandle()));
+		auto wnd = gtk_widget_get_window(widget);
 		gdk_device_get_state(device, wnd, axes, &mask);
 		
 		if (axes[0] == 0.0 || axes[0] > 10000)

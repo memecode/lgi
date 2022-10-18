@@ -223,10 +223,13 @@ public:
 
 				auto s = p->GetBasePath();
 				if (s)
+				{
+					LTrimDir(s);
 					Flds.Add(s, true);
+				}
 			}
 
-			for (auto i : Flds)
+			for (auto i: Flds)
 				PostThreadEvent(SearchHnd, M_ADD_SEARCH_PATH, (LMessage::Param) new LString(i.key));
 
 			PostThreadEvent(SearchHnd, M_RECURSE);
