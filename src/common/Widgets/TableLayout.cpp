@@ -17,8 +17,6 @@
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Css.h"
 
-bool _HasLine = false;
-
 #undef _FL
 #define _FL LGetLeaf(__FILE__), __LINE__
 
@@ -35,10 +33,10 @@ enum CellFlag
 };
 
 #define Izza(c)				dynamic_cast<c*>(v)
-#define DEBUG_LAYOUT		24
+// #define DEBUG_LAYOUT		260
 #define DEBUG_PROFILE		0
-#define DEBUG_DRAW_CELLS	1
-#define DEBUG_CTRL_ID		260
+#define DEBUG_DRAW_CELLS	0
+// #define DEBUG_CTRL_ID		246
 
 #ifdef DEBUG_CTRL_ID
 static LString Indent(int Depth)
@@ -452,7 +450,6 @@ LStream &TableCell::Log()
 		}
 
 		TopLevelLog = &Top->d->Dbg;
-		LgiTrace("TopLevelLog=%p id=%i\n", TopLevelLog, Top->GetId());
 	}
 
 	LAssert(TopLevelLog != NULL);
@@ -1186,30 +1183,21 @@ void TableCell::LayoutHeight(int Depth, int Width, int &MinY, int &MaxY, CellFla
 			#endif
 
 			c->r.ZOff(Width-1, Table->Y()-1);
+
+			LCssTools tools(Tbl->GetCss(), Tbl->GetFont());
+			auto client = tools.ApplyBorder(c->r);
 			Tbl->d->InitBorderSpacing();
-			Tbl->d->LayoutHorizontal(c->r, Depth+1);
-			Tbl->d->LayoutVertical(c->r, Depth+1, &MinY, &MaxY, &Flags);
+			Tbl->d->LayoutHorizontal(client, Depth+1);
+			Tbl->d->LayoutVertical(client, Depth+1, &MinY, &MaxY, &Flags);
 
 			if ((v->GetId() == 260 ||
 				v->GetId() == 246) &&
 				Children.Length())
 			{
-				_HasLine |= v->GetId() == 246;
 				Log().Print("\t\t\tid=%i LayoutVertical=%i->%i\n", v->GetId(), MinY, MaxY);
-				if (v->GetId() == 246)
-				{
-					LgiTrace("Print to %p\n", &Log());
-				}
-
-				if (_HasLine)
-				{
-					LStringPipe *p = dynamic_cast<LStringPipe*>(&Log());
-					auto pos = p->Find("id=246");
-					LAssert(pos >= 0);
-				}
 			}
 
-			Tbl->d->LayoutPost(c->r, Depth+1);
+			Tbl->d->LayoutPost(client, Depth+1);
 			Pos.y2 += MinY;
 			
 			c->Inf.Height.Min = MinY;
@@ -1794,7 +1782,7 @@ void LTableLayoutPrivate::LayoutHorizontal(const LRect Client, int Depth, int *M
 
 		if (Css)
 		{
-			auto MaxWid = Css->MinWidth();
+			auto MaxWid = Css->MaxWidth();
 			if (MaxWid.IsValid())
 			{
 				int px = MaxWid.ToPx(Ctrl->X(), Ctrl->GetFont());
@@ -2068,7 +2056,7 @@ void LTableLayoutPrivate::LayoutPost(const LRect Client, int Depth)
 					{
 						c->Pos.Offset(Client.x1 + Px, Client.y1 + Py);
 						#ifdef DEBUG_CTRL_ID
-						// Dbg.Print("\t\tClient=%s pos=%s p=%i,%i (%s:%i)\n", Client.GetStr(), c->Pos.GetStr(), Px, Py, _FL);
+						c->Log().Print("\t\tClient=%s pos=%s p=%i,%i (%s:%i)\n", Client.GetStr(), c->Pos.GetStr(), Px, Py, _FL);
 						#endif
 					}
 					c->LayoutPost(Depth);
@@ -2077,7 +2065,9 @@ void LTableLayoutPrivate::LayoutPost(const LRect Client, int Depth)
 
 					#if DEBUG_LAYOUT
 					if (DebugLayout)
-						Dbg.Print("\t\t\tCell[%i][%i]: %ix%i, %s\n", Cx, Cy, c->Cell.X(), c->Cell.Y(), c->Pos.GetStr());
+					{
+						c->Log().Print("\t\t\tCell[%i][%i]: %s %s\n", Cx, Cy, c->Pos.GetStr(), Client.GetStr());
+					}
 					#endif
 				}
 
@@ -2125,10 +2115,11 @@ void LTableLayoutPrivate::Layout(const LRect Client, int Depth)
 	
 	#if DEBUG_LAYOUT
 	int CtrlId = Ctrl->GetId();
-	DebugLayout = CtrlId == DEBUG_LAYOUT;
+	// auto CtrlChildren = Ctrl->IterateViews();
+	DebugLayout = CtrlId == DEBUG_LAYOUT; // && CtrlChildren.Length() > 0;
 	if (DebugLayout)
 	{
-		// int asd=0;
+		int asd=0;
 	}
 	#endif
 
@@ -2163,20 +2154,12 @@ void LTableLayoutPrivate::Layout(const LRect Client, int Depth)
 	#endif
 
 	#if DEBUG_LAYOUT
-	// if (DebugLayout)
+	if (DebugLayout)
 	{
 		auto s = Dbg.NewGStr();
 		if (s)
 		{
-			// LgiTrace("NewGStr from %p id=%i\n", &Dbg, Ctrl->GetId());
-
-			if (_HasLine && s.Length() > 0)
-				LAssert(s.Find("id=246") >= 0);
 			LgiTrace("%s", s.Get());
-		}
-		else
-		{
-			// LgiTrace("No str from %p id=%i\n", &Dbg, Ctrl->GetId());
 		}
 	}
 	#endif
