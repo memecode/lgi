@@ -2444,7 +2444,7 @@ int LTableLayout::OnNotify(LViewI *c, LNotification n)
 	if (n.Type == LNotifyTableLayoutRefresh)
 	{
 		bool hasTableParent = false;
-		for (LViewI *p = GetParent(); p; p = p->GetParent())
+		for (LViewI *p = this; p; p = p->GetParent())
 		{
 			auto tbl = dynamic_cast<LTableLayout*>(p);
 			if (tbl)
