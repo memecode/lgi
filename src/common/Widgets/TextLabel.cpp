@@ -184,10 +184,11 @@ void LTextLabel::OnStyleChange()
 		d->Add(LView::Name(), GetCss());
 		d->DoLayout(X());
 		d->Unlock();
-		Invalidate();
 
 		if (d->GetFont())
 			newsz = d->GetFont()->Size();
+
+		Invalidate();
 	}
 }
 
@@ -282,10 +283,10 @@ void LTextLabel::OnPaint(LSurface *pDC)
 			Name(d->ThreadName);
 			d->ThreadName.Empty();
 		}
-		
-		LRect c = GetClient();
-		LPoint pt(c.x1, c.y1);
-		d->Paint(pDC, pt, Back, c, Enabled(), false);
+
+		LRect client = GetClient();
+		LPoint pt(client.x1, client.y1);
+		d->Paint(pDC, pt, Back, client, Enabled(), false);
 		d->Unlock();
 	}
 	else if (!Back.IsTransparent())
