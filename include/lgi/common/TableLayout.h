@@ -46,6 +46,7 @@ public:
 	~LTableLayout();
 
 	const char *GetClass() override { return "LTableLayout"; }
+	LStream &Log();
 
 	/// Return the number of cells across (columns).
 	int CellX();

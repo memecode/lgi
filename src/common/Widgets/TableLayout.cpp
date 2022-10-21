@@ -33,10 +33,10 @@ enum CellFlag
 };
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		260
+// #define DEBUG_LAYOUT		20
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
-// #define DEBUG_CTRL_ID		246
+// #define DEBUG_CTRL_ID		506
 
 #ifdef DEBUG_CTRL_ID
 static LString Indent(int Depth)
@@ -44,6 +44,17 @@ static LString Indent(int Depth)
 	return LString(" ") * (Depth << 2);
 }
 #endif
+
+struct LPrintfLogger : public LStream
+{
+public:
+	ssize_t Write(const void *Ptr, ssize_t Size, int Flags = 0)
+	{
+		if (!Ptr)
+			return 0;
+		return printf("%.*s", (int)Size, Ptr);
+	}
+}	PrintfLogger;
 
 int LTableLayout::CellSpacing = 4;
 
@@ -368,6 +379,8 @@ public:
 	int LayoutMinX, LayoutMaxX;
 	LTableLayout *Ctrl;
 
+	LStream &Log() { return PrintfLogger; }
+
 	// Object
 	LTableLayoutPrivate(LTableLayout *ctrl);
 	~LTableLayoutPrivate();
@@ -395,7 +408,6 @@ public:
 	}
 
 	// Layout temporary values
-	LStringPipe Dbg;
 	LArray<int> MinCol, MaxCol;
 	LArray<int> MinRow, MaxRow;
 	LArray<CellFlag> ColFlags, RowFlags;
@@ -436,6 +448,7 @@ void TableCell::OnChange(PropType Prop)
 
 LStream &TableCell::Log()
 {
+	/*
 	if (!TopLevelLog)
 	{
 		// Find the top most table layout
@@ -454,6 +467,9 @@ LStream &TableCell::Log()
 
 	LAssert(TopLevelLog != NULL);
 	return *TopLevelLog;
+	*/
+
+	return PrintfLogger;
 }
 
 TableCell::Child *TableCell::HasView(LView *v)
@@ -827,8 +843,8 @@ void TableCell::LayoutWidth(int Depth, int &MinX, int &MaxX, CellFlag &Flag)
 
 			#ifdef DEBUG_CTRL_ID
 			if (v->GetId() == DEBUG_CTRL_ID)
-				Log().Print("\t\t\tpos=%s c->r=%s (%s:%i)\n",
-					Pos.GetStr(), c->r.GetStr(), _FL);
+				Log().Print("\t\tdbgCtrl=%i pos=%s c->r=%s (%s:%i)\n",
+					v->GetId(), Pos.GetStr(), c->r.GetStr(), _FL);
 			#endif
 				
 			if (ChildWid.IsValid())
@@ -1027,8 +1043,8 @@ void TableCell::LayoutHeight(int Depth, int Width, int &MinY, int &MaxY, CellFla
 
 		#ifdef DEBUG_CTRL_ID
 		if (v->GetId() == DEBUG_CTRL_ID)
-			Log().Print("\t\t\tpos=%s c->r=%s (%s:%i)\n",
-				Pos.GetStr(), c->r.GetStr(), _FL);
+			Log().Print("\t\tdbgCtrl=%i pos=%s c->r=%s (%s:%i)\n",
+				v->GetId(), Pos.GetStr(), c->r.GetStr(), _FL);
 		#endif
 
 		if (CssWidth.Type != LenInherit)
@@ -1175,13 +1191,6 @@ void TableCell::LayoutHeight(int Depth, int Width, int &MinY, int &MaxY, CellFla
 		{
 			auto Children = Tbl->IterateViews();
 			
-			#ifdef DEBUG_CTRL_ID
-			if (v->GetId() == 246 && Children.Length())
-			{
-				int asd=0;
-			}
-			#endif
-
 			c->r.ZOff(Width-1, Table->Y()-1);
 
 			LCssTools tools(Tbl->GetCss(), Tbl->GetFont());
@@ -1212,8 +1221,8 @@ void TableCell::LayoutHeight(int Depth, int Width, int &MinY, int &MaxY, CellFla
 		#ifdef DEBUG_CTRL_ID
 		if (v->GetId() == DEBUG_CTRL_ID)
 		{
-			Log().Print("\t\t\tpos=%s c->r=%s (%s:%i)\n",
-				Pos.GetStr(), c->r.GetStr(), _FL);
+			Log().Print("\t\tdbgCtrl=%i pos=%s c->r=%s (%s:%i)\n",
+				v->GetId(), Pos.GetStr(), c->r.GetStr(), _FL);
 		}
 		#endif
 	}
@@ -1259,7 +1268,7 @@ void TableCell::LayoutPost(int Depth)
 		if (v->GetId() == DEBUG_CTRL_ID)
 		{
 			HasDebugCtrl = true;
-			Log().Print("\t\t\tid=%i c->r=%s padding=%s cur=%i,%i (%s:%i)\n",
+			Log().Print("\t\tdbgCtrl=%i c->r=%s padding=%s cur=%i,%i (%s:%i)\n",
 				v->GetId(), c->r.GetStr(), Padding.GetStr(), Cx, Cy, _FL);
 		}
 		#endif
@@ -1293,7 +1302,8 @@ void TableCell::LayoutPost(int Depth)
 		#ifdef DEBUG_CTRL_ID
 		if (v->GetId() == DEBUG_CTRL_ID)
 		{
-			Log().Print("\t\t\toffset %i %i %i, %i %i %i %s:%i\n",
+			Log().Print("\t\tdbgCtrl=%i offset %i %i %i, %i %i %i %s:%i\n",
+				v->GetId(), 
 				Pos.x1, c->r.x1, Cx,
 				Pos.y1, c->r.y1, Cy,
 				_FL);
@@ -1355,7 +1365,8 @@ void TableCell::LayoutPost(int Depth)
 		if (v->GetId() == DEBUG_CTRL_ID)
 		{
 			HasDebugCtrl = true;
-			Log().Print("\t\t\tc->r=%s (%s:%i)\n", c->r.GetStr(), _FL);
+			Log().Print("\t\tdbgCtrl=%i c->r=%s (%s:%i)\n",
+				v->GetId(), c->r.GetStr(), _FL);
 		}
 		#endif
 
@@ -1392,7 +1403,8 @@ void TableCell::LayoutPost(int Depth)
 
 	#ifdef DEBUG_CTRL_ID
 	if (HasDebugCtrl)
-		Log().Print("\t\t\tVAlign.Type=%i (%s:%i)\n", VAlign.Type, _FL);
+		Log().Print("\t\tdbgCtrl=%i VAlign.Type=%i (%s:%i)\n",
+			DEBUG_CTRL_ID, VAlign.Type, _FL);
 	#endif
 
 	if (VAlign.Type == VerticalMiddle)
@@ -1401,7 +1413,8 @@ void TableCell::LayoutPost(int Depth)
 		OffsetY = (Py - MaxY) / 2;
 		#ifdef DEBUG_CTRL_ID
 		if (HasDebugCtrl)
-			Log().Print("\t\t\tPy=%i MaxY=%i OffsetY=%i\n", Py, MaxY, OffsetY);
+			Log().Print("\t\tdbgCtrl=%i Py=%i MaxY=%i OffsetY=%i\n",
+				DEBUG_CTRL_ID, Py, MaxY, OffsetY);
 		#endif
 	}
 	else if (VAlign.Type == VerticalBottom)
@@ -1425,15 +1438,11 @@ void TableCell::LayoutPost(int Depth)
 
 		New[n].Offset(0, OffsetY);
 
-		#if DEBUG_CTRL_ID
-		if (HasDebugCtrl) // Table->d->DebugLayout)
+		#ifdef DEBUG_CTRL_ID
+		if (v->GetId() == DEBUG_CTRL_ID)
 		{
-			if (New[n].x1 == 4)
-			{
-				int asd=0;
-			}
-
-			Log().Print("\t\t\t%s[%i]=%s, %ix%i, Offy=%i %s (%s:%i)\n",
+			Log().Print("\t\tdbgCtrl=%i %s[%i]=%s, %ix%i, Offy=%i %s (%s:%i)\n",
+				v->GetId(), 
 				v->GetClass(), n,
 				New[n].GetStr(),
 				New[n].X(), New[n].Y(),
@@ -1590,10 +1599,10 @@ void LTableLayoutPrivate::LayoutHorizontal(const LRect Client, int Depth, int *M
 	#if DEBUG_LAYOUT
 	if (DebugLayout)
 	{
-		Dbg.Print("\t\t\tLayout Id=%i, Size=%i,%i (%s:%i)\n", Ctrl->GetId(), Client.X(), Client.Y(), _FL);
+		Log().Print("\tLayout Id=%i, Size=%i,%i (%s:%i)\n", Ctrl->GetId(), Client.X(), Client.Y(), _FL);
 		for (i=0; i<Cols.Length(); i++)
 		{
-			Dbg.Print(	"\tLayoutHorizontal.AfterSingle[%i]: min=%i max=%i (%s)\n",
+			Log().Print(	"\tLayoutHorizontal.AfterSingle[%i]: min=%i max=%i (%s)\n",
 						i,
 						MinCol[i], MaxCol[i],
 						FlagToString(ColFlags[i]));
@@ -1652,7 +1661,7 @@ void LTableLayoutPrivate::LayoutHorizontal(const LRect Client, int Depth, int *M
 						c->LayoutWidth(Depth, Min, Max, Flag);
 					}
 
-					// Dbg.Print("Spanned cell: %i,%i\n", Min, Max);
+					// Log().Print("Spanned cell: %i,%i\n", Min, Max);
 
 					if (Max > Client.X())
 						Max = Client.X();
@@ -1698,7 +1707,7 @@ void LTableLayoutPrivate::LayoutHorizontal(const LRect Client, int Depth, int *M
 					
 					int Remaining = Client.X() - AllPx;
 					
-					// Dbg.Print("AllPx=%i MyPx=%i, Remaining=%i\n", AllPx, MyPx, Remaining);
+					// Log().Print("AllPx=%i MyPx=%i, Remaining=%i\n", AllPx, MyPx, Remaining);
 			
 					// This is the total remaining px we could add...
 					if (Remaining > 0)
@@ -1731,7 +1740,7 @@ void LTableLayoutPrivate::LayoutHorizontal(const LRect Client, int Depth, int *M
 	{
 		for (i=0; i<Cols.Length(); i++)
 		{
-			Dbg.Print(	"\tLayoutHorizontal.AfterSpanned[%i]: min=%i max=%i (%s)\n",
+			Log().Print("\tLayoutHorizontal.AfterSpanned[%i]: min=%i max=%i (%s)\n",
 						i,
 						MinCol[i], MaxCol[i],
 						FlagToString(ColFlags[i]));
@@ -1741,14 +1750,14 @@ void LTableLayoutPrivate::LayoutHorizontal(const LRect Client, int Depth, int *M
 
 	// Now allocate unused space
 	if (Prof) Prof->Add("DistributeUnusedSpace");
-	DistributeUnusedSpace(MinCol, MaxCol, ColFlags, Client.X(), BorderSpacing, DebugLayout?&Dbg:NULL);
+	DistributeUnusedSpace(MinCol, MaxCol, ColFlags, Client.X(), BorderSpacing, DebugLayout?&Log():NULL);
 
 	#if DEBUG_LAYOUT
 	if (DebugLayout)
 	{
 		for (i=0; i<Cols.Length(); i++)
 		{
-			Dbg.Print(	"\tLayoutHorizontal.AfterDist[%i]: min=%i max=%i (%s)\n",
+			Log().Print("\tLayoutHorizontal.AfterDist[%i]: min=%i max=%i (%s)\n",
 						i,
 						MinCol[i], MaxCol[i],
 						FlagToString(ColFlags[i]));
@@ -1838,7 +1847,7 @@ void LTableLayoutPrivate::LayoutVertical(const LRect Client, int Depth, int *Min
 	if (DebugLayout)
 	{
 		for (i=0; i<Rows.Length(); i++)
-			Dbg.Print("\tLayoutVertical.AfterSingle[%i]: min=%i max=%i (%s)\n", i, MinRow[i], MaxRow[i], FlagToString(RowFlags[i]));
+			Log().Print("\tLayoutVertical.AfterSingle[%i]: min=%i max=%i (%s)\n", i, MinRow[i], MaxRow[i], FlagToString(RowFlags[i]));
 	}
 	#endif
 
@@ -1948,7 +1957,7 @@ void LTableLayoutPrivate::LayoutVertical(const LRect Client, int Depth, int *Min
 	if (DebugLayout)
 	{
 		for (i=0; i<Rows.Length(); i++)
-			Dbg.Print("\tLayoutVertical.AfterSpanned[%i]: min=%i max=%i (%s)\n", i, MinRow[i], MaxRow[i], FlagToString(RowFlags[i]));
+			Log().Print("\tLayoutVertical.AfterSpanned[%i]: min=%i max=%i (%s)\n", i, MinRow[i], MaxRow[i], FlagToString(RowFlags[i]));
 	}
 	#endif
 
@@ -1961,11 +1970,11 @@ void LTableLayoutPrivate::LayoutVertical(const LRect Client, int Depth, int *Min
 	{
 		for (i=0; i<Rows.Length(); i++)
 		{
-			Dbg.Print("\tLayoutVertical.AfterDist[%i]: min=%i max=%i (%s)\n", i, MinRow[i], MaxRow[i], FlagToString(RowFlags[i]));
+			Log().Print("\tLayoutVertical.AfterDist[%i]: min=%i max=%i (%s)\n", i, MinRow[i], MaxRow[i], FlagToString(RowFlags[i]));
 		}
 		for (i=0; i<Cols.Length(); i++)
 		{
-			Dbg.Print("\tLayoutHorizontal.Final[%i]=%i\n", i, MinCol[i]);
+			Log().Print("\tLayoutHorizontal.Final[%i]=%i\n", i, MinCol[i]);
 		}
 	}
 	#endif
@@ -2019,7 +2028,7 @@ void LTableLayoutPrivate::LayoutPost(const LRect Client, int Depth)
 	// Move cells into their final positions
 	#if DEBUG_LAYOUT
 	if (DebugLayout && Cols.Length() == 7)
-		Dbg.Print("\tLayoutPost %ix%i\n", Cols.Length(), Rows.Length());
+		Log().Print("\tLayoutPost %ix%i\n", Cols.Length(), Rows.Length());
 	#endif
 	for (Cy=0; Cy<Rows.Length(); Cy++)
 	{
@@ -2055,8 +2064,9 @@ void LTableLayoutPrivate::LayoutPost(const LRect Client, int Depth)
 					else
 					{
 						c->Pos.Offset(Client.x1 + Px, Client.y1 + Py);
-						#ifdef DEBUG_CTRL_ID
-						c->Log().Print("\t\tClient=%s pos=%s p=%i,%i (%s:%i)\n", Client.GetStr(), c->Pos.GetStr(), Px, Py, _FL);
+						#if 0//def DEBUG_CTRL_ID
+						Log().Print("\t\tdbgCtrl=%i Client=%s pos=%s p=%i,%i (%s:%i)\n",
+							DEBUG_CTRL_ID, Client.GetStr(), c->Pos.GetStr(), Px, Py, _FL);
 						#endif
 					}
 					c->LayoutPost(Depth);
@@ -2066,7 +2076,7 @@ void LTableLayoutPrivate::LayoutPost(const LRect Client, int Depth)
 					#if DEBUG_LAYOUT
 					if (DebugLayout)
 					{
-						c->Log().Print("\t\t\tCell[%i][%i]: %s %s\n", Cx, Cy, c->Pos.GetStr(), Client.GetStr());
+						c->Log().Print("\tCell[%i][%i]: %s %s\n", Cx, Cy, c->Pos.GetStr(), Client.GetStr());
 					}
 					#endif
 				}
@@ -2087,7 +2097,7 @@ void LTableLayoutPrivate::LayoutPost(const LRect Client, int Depth)
 	LayoutBounds.ZOff(Px-1, Py-1);
 	#if DEBUG_LAYOUT
 	if (DebugLayout)
-		Dbg.Print("\tLayoutBounds: %s\n", LayoutBounds.GetStr());
+		Log().Print("\tLayoutBounds: %s\n", LayoutBounds.GetStr());
 	#endif
 }
 
@@ -2116,7 +2126,7 @@ void LTableLayoutPrivate::Layout(const LRect Client, int Depth)
 	#if DEBUG_LAYOUT
 	int CtrlId = Ctrl->GetId();
 	// auto CtrlChildren = Ctrl->IterateViews();
-	DebugLayout = CtrlId == DEBUG_LAYOUT; // && CtrlChildren.Length() > 0;
+	DebugLayout = CtrlId == DEBUG_LAYOUT && Ctrl->IterateViews().Length() > 0;
 	if (DebugLayout)
 	{
 		int asd=0;
@@ -2133,7 +2143,7 @@ void LTableLayoutPrivate::Layout(const LRect Client, int Depth)
 
 	#if DEBUG_LAYOUT
 	if (DebugLayout)
-		LgiTrace("%s\n", s.Get());
+		Log().Print("%s\n", s.Get());
 	#endif
 	if (Prof) Prof->Add("Horz");
 
@@ -2150,20 +2160,9 @@ void LTableLayoutPrivate::Layout(const LRect Client, int Depth)
 	if (Prof) Prof->Add("Notify");
 
 	#if DEBUG_PROFILE
-	LgiTrace("LTableLayout::Layout(%i) = %i ms\n", Ctrl->GetId(), (int)(LCurrentTime()-Start));
+	Log().Print("LTableLayout::Layout(%i) = %i ms\n", Ctrl->GetId(), (int)(LCurrentTime()-Start));
 	#endif
 
-	#if DEBUG_LAYOUT
-	if (DebugLayout)
-	{
-		auto s = Dbg.NewGStr();
-		if (s)
-		{
-			LgiTrace("%s", s.Get());
-		}
-	}
-	#endif
-	
 	InLayout = false;
 
 	Ctrl->SendNotify(LNotifyTableLayoutChanged);
@@ -2305,16 +2304,23 @@ void LTableLayout::OnPaint(LSurface *pDC)
 {
 	if (SizeChanged() || d->LayoutDirty)
 	{
+		if (GetId() == 20)
+			Log().Print("20 : clearing layout dirty LGI_VIEW_HANDLE=%i\n", LGI_VIEW_HANDLE);
+
 		#if LGI_VIEW_HANDLE
 		if (!Handle())
 		#endif
 			OnPosChange();
 		#if LGI_VIEW_HANDLE
 		else
-			if (!PostEvent(M_TABLE_LAYOUT))
+			if (PostEvent(M_TABLE_LAYOUT))
+				return;
+			else
 				LAssert(!"Post event failed.");
-		return;
 		#endif
+
+		if (GetId() == 20)
+			Log().Print("20 : painting\n");
 	}
 
 	d->Dpi = GetWindow()->GetDpi();
@@ -2451,6 +2457,7 @@ int LTableLayout::OnNotify(LViewI *c, LNotification n)
 			{
 				hasTableParent = true;
 				tbl->d->LayoutDirty = true;
+				tbl->Invalidate();
 				break;
 			}
 		}
@@ -2521,4 +2528,9 @@ LLayoutCell *LTableLayout::GetCell(int cx, int cy, bool create, int colspan, int
 	}
 	
 	return c;
+}
+
+LStream &LTableLayout::Log()
+{
+	return PrintfLogger;
 }
