@@ -188,8 +188,16 @@ void LgiCrashHandler(int Sig)
 		exit(0);
 	}
 	
-	LgiTrace("LgiCrashHandler showing dlg\n");
-	LgiMsg(NULL, "Application crashed... dumping details.", "Crash");
+	if (LAppInst->InThread())
+	{
+		LgiTrace("LgiCrashHandler showing dlg\n");
+		LgiMsg(NULL, "Application crashed... dumping details.", "Crash");
+	}
+	else
+	{
+		LgiTrace("LgiCrashHandler called from worker thread.\n");
+		LSleep(10000); // Wait for the crash handler to do it's thing...
+	}
 	
 	#endif
 
