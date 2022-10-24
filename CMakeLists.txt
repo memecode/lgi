@@ -123,6 +123,7 @@ set (CommonSource
 	src/common/Text/Unicode.cpp
 	src/common/Text/Utf8.cpp
 	src/common/Text/XmlTree.cpp
+	src/common/Widgets/Button.cpp
 	src/common/Widgets/Bitmap.cpp
 	src/common/Widgets/Box.cpp
 	src/common/Widgets/ItemContainer.cpp
@@ -130,6 +131,7 @@ set (CommonSource
 	src/common/Widgets/Panel.cpp
 	src/common/Widgets/Popup.cpp
 	src/common/Widgets/ProgressDlg.cpp
+	src/common/Widgets/RadioGroup.cpp
 	src/common/Widgets/Splitter.cpp
 	src/common/Widgets/StatusBar.cpp
 	src/common/Widgets/TableLayout.cpp
@@ -146,8 +148,6 @@ if (APPLE)
 		src/common/Widgets/CheckBox.cpp
 		src/common/Widgets/Combo.cpp
 		src/common/Widgets/ScrollBar.cpp
-		src/common/Widgets/Button.cpp
-		src/common/Widgets/RadioGroup.cpp
 		src/common/Widgets/Edit.cpp
 		src/common/Lgi/Layout.cpp
 		src/common/Widgets/Progress.cpp
@@ -201,7 +201,6 @@ elseif (LINUX)
 		src/common/Widgets/Edit.cpp
 		src/common/Widgets/ScrollBar.cpp
 		src/common/Widgets/Combo.cpp
-		src/common/Widgets/Button.cpp
 		src/common/Widgets/RadioGroup.cpp
 		src/common/Widgets/Progress.cpp
 		src/common/Widgets/Slider.cpp
@@ -211,6 +210,7 @@ elseif (MSVC)
 
 	set(Source
 		${CommonSource}
+		src/win/General/Lgi.manifest
 		src/win/Gdc2/Gdc2.cpp
 		src/win/Gdc2/GdiLeak.cpp
 		src/win/Gdc2/MemDC.cpp
@@ -245,6 +245,15 @@ elseif (MSVC)
 endif ()
 
 add_library(lgi SHARED ${Source})
+
+if (DEFINED LGI_LIB_POSTFIX)
+	set_target_properties(lgi
+		PROPERTIES 
+			DEBUG_POSTFIX
+				${LGI_LIB_POSTFIX}d
+			RELEASE_POSTFIX
+				${LGI_LIB_POSTFIX})
+endif()
 
 if (APPLE)
 

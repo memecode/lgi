@@ -52,7 +52,7 @@ public:
 	{
 		if (!Ptr)
 			return 0;
-		return printf("%.*s", (int)Size, Ptr);
+		return printf("%.*s", (int)Size, (const char*)Ptr);
 	}
 }	PrintfLogger;
 
