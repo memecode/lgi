@@ -1199,13 +1199,6 @@ void TableCell::LayoutHeight(int Depth, int Width, int &MinY, int &MaxY, CellFla
 			Tbl->d->LayoutHorizontal(client, Depth+1);
 			Tbl->d->LayoutVertical(client, Depth+1, &MinY, &MaxY, &Flags);
 
-			if ((v->GetId() == 260 ||
-				v->GetId() == 246) &&
-				Children.Length())
-			{
-				Log().Print("\t\t\tid=%i LayoutVertical=%i->%i\n", v->GetId(), MinY, MaxY);
-			}
-
 			Tbl->d->LayoutPost(client, Depth+1);
 			Pos.y2 += MinY;
 			
