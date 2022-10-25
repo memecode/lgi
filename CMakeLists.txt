@@ -39,13 +39,14 @@ if (APPLE)
 	# SET(GUI_TYPE MACOSX_BUNDLE)
 	find_library(COCOA_LIBRARY Cocoa)
 	mark_as_advanced (COCOA_LIBRARY)
-	set(EXTRA_LIBS ${COCOA_LIBRARY})
+	set(PUBLIC_LIBS ${COCOA_LIBRARY})
 
 elseif (LINUX)
 
 	find_package(PkgConfig)
 	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
 	pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4)
+	set(PUBLIC_LIBS pthread crypt)
 	                               
 endif()
 
@@ -372,6 +373,10 @@ elseif (MSVC)
 			imm32.lib)
 
 endif()
+
+target_link_libraries(lgi
+	PUBLIC
+		${PUBLIC_LIBS})
 
 target_compile_definitions(lgi
 	PUBLIC

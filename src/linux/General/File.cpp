@@ -440,9 +440,11 @@ bool LFileExists(const char *FileName, char *CorrectCase)
 
 bool LResolveShortcut(const char *LinkFile, char *Path, ssize_t Len)
 {
-	bool Status = false;
+	if (!LinkFile || !Path || Len <= 0)
+		return false;
 
-	return Status;
+	ssize_t r = readlink(LinkFile, Path, Len);
+	return r > 0;
 }
 
 void WriteStr(LFile &f, const char *s)
