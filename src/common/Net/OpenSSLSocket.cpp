@@ -1074,44 +1074,24 @@ int SslSocket::Close()
 	d->Cancel->Cancel();
 	LMutex::Auto Lck(&Lock, _FL);
 
-	bool Status = Library != NULL;
-	if (Library)
+	if (!Library)
 	{
-		if (Ssl)
-		{
-DebugTrace("%s:%i - SSL_shutdown\n", _FL);
-
-			int r = 0;
-			if ((r = Library->SSL_shutdown(Ssl)) >= 0)
-			{
-				#ifdef WIN32
-				closesocket
-				#else
-				close
-				#endif
-					(Library->SSL_get_fd(Ssl));
-			}
-
-			Library->SSL_free(Ssl);
-			OnInformation("SSL connection closed.");
-
-			// I think the Ssl object "owns" the Bio object...
-			// So assume it gets fread by SSL_shutdown
-		}
-		else if (Bio)
-		{
-DebugTrace("%s:%i - BIO_free\n", _FL);
-			Library->BIO_free(Bio);
-			OnInformation("Connection closed.");
-		}
-
-		Ssl = NULL;
-		Bio = NULL;
+		LgiTrace("%s:%i - Error: no library.\n", _FL);
+		return false;
 	}
+
+	if (Bio)
+	{
+		auto result = Library->BIO_free_all(Bio);
+		if (result != 1)
+			printf("%s:%i result =%i\n", _FL, result);
+	}	
+	Ssl = NULL;
+	Bio = NULL;
 
 	d->Cancel->Cancel(Prev);
 
-	return Status;
+	return true;
 }
 
 bool SslSocket::Listen(int Port)
