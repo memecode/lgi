@@ -143,7 +143,7 @@ void LMemQueue::Empty()
 
 int64 LMemQueue::GetSize()
 {
-	int Size = 0;
+	int64 Size = 0;
 	for (auto b: Mem)
 		Size += b->Used - b->Next;
 	return Size;
@@ -307,6 +307,88 @@ ssize_t LMemQueue::Find(LString str, bool caseSensitive)
 	}
 
 	return -1;
+}
+
+void LMemQueue::Iterate(std::function<bool(uint8_t*, size_t)> callback, bool reverse)
+{
+	if (!callback)
+	{
+		LAssert(!"No callback.");
+		return;
+	}
+	
+	if (reverse)
+	{
+		for (auto it = Mem.rbegin(); it >= Mem.begin(); it--)
+		{
+			auto p = (*it)->Ptr();
+			if (!callback(p, (*it)->Used))
+				break;
+		}
+	}
+	else
+	{
+		for (auto b: Mem)
+		{
+			auto p = b->Ptr();
+			if (!callback(p, b->Used))
+				break;
+		}
+	}
+}
+
+LMemQueue::Buffer LMemQueue::GetBuffer()
+{
+	Buffer b(this);
+	
+	if (Mem.Length())
+	{
+		// Check if last block has space left:
+		auto it = Mem.rbegin();
+		b.blk = *it;
+		if (b.blk->Used < b.blk->Size)
+		{
+			b.ptr = b.blk->Ptr() + b.blk->Used;
+			b.len = b.blk->Size - b.blk->Used;
+			return b;
+		}
+	}
+	
+	// Otherwise allocate a block
+	int sz = PreAlloc > 0 ? PreAlloc : 1024/* some reasonable default? */;
+	int alloc = sizeof(Block) + sz;
+	alloc = LGI_ALLOC_ALIGN(alloc);
+	b.blk = (Block*) malloc(alloc);
+	if (b.blk)
+	{
+		b.blk->Next = 0;
+		b.blk->Used = 0;
+		b.blk->Size = sz;
+		b.ptr = b.blk->Ptr();
+		b.len = sz;
+		Mem.Insert(b.blk);
+	}
+	
+	return b;
+}
+
+bool LMemQueue::Buffer::Commit(size_t bytes)
+{
+	if (!blk || !ptr)
+	{
+		LAssert(!"Invalid param.");
+		return false;
+	}
+		
+	if (blk->Used + bytes > blk->Size)
+	{
+		LAssert(!"Wrote too much data?");
+		blk->Used = blk->Size;
+		return false;
+	}
+	
+	blk->Used += bytes;
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -120,21 +120,55 @@ LString LastLine(LString &input)
 	return LString(s, e - s);
 }
 
+LString LastLine(LStringPipe &input)
+{
+	#define Ws(ch) ( ((ch) == '\r') || ((ch) == '\n') || ((ch) == '\b') )
+
+	LString s, ln;
+	input.Iterate([&s, &ln](auto ptr, auto bytes)
+		{
+			s = LString(ptr, bytes) + s;
+			for (auto p = s.Get() + s.Length() - 1; p > s.Get(); p--)
+			{
+				if (Ws(*p))
+				{
+					ln = p + 1;
+					break;
+				}
+			}
+			return ln.Get() != NULL;
+		},
+		true);
+
+	if (!ln)
+		ln = s;
+	DeEscape(ln);
+	return ln;
+}
+
 bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 {
-	char buf[4 << 10];
-	LString out;
+	LStringPipe out(4 << 10);
 	auto Ts = LCurrentTime();
-	int64 Count = 0, Total = 0;
 	ProgressListItem *Prog = NULL;
 	#if PROFILE_WaitPrompt
 	LProfile prof("WaitPrompt", 100);
 	#endif
+	size_t BytesRead = 0;
 
 	while (!LSsh::Cancel->IsCancelled())
 	{
 		PROFILE("read");
-		auto rd = con->Read(buf, sizeof(buf));
+		
+		auto buf = out.GetBuffer();
+		if (!buf.ptr)
+		{
+			LAssert(!"Alloc failed.");
+			LgiTrace("WaitPrompt.%s alloc failed.\n", Debug);
+			return false;
+		}
+		
+		auto rd = con->Read(buf.ptr, buf.len);
 		if (rd < 0)
 		{
 			if (Debug)
@@ -153,39 +187,31 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 				// Various version control CLI's do that to pageinate data.
 				// Obviously we're not going to deal with that directly, 
 				// but the developer will need to know that's happened.
-				if (out.Length() > 3)
+				if (out.GetSize() > 2)
 				{
-					if (out(-3,-1) == "\n:")
-					{
-						// Looks pretty much like we've hung.
-						LAssert(!"Pagination mark.");
-					}
+					bool hung = false;
+					out.Iterate([&hung](auto ptr, auto len)
+						{
+							auto e = ptr + len;
+							if (len >= 2 && e[-1] == ':' && e[-2] == '\n')
+							{
+								// Looks pretty much like we've hung.
+								LAssert(!"Pagination mark.");
+								hung = true;
+							}
+							return false; // Only look at last block...
+						},
+						true /* reverse */);
+					
+					if (hung)
+						return false;
 				}
 			}
 			continue;
 		}
 
-		#if 0
-		// De-null the data... FFS
-		char *i, *o;
-		for (i = buf, o = buf; i - buf < rd; i++) { if (*i) *o++ = *i; }
-		rd = o - buf;
-		#endif
-
-		// Add new data to 'out'...
-		PROFILE("new data");
-		LString newData(buf, rd);
-
-		PROFILE("append");
-		out += newData;
-
-		Count += rd;
-		Total += rd;
-
-SSH_LOG("waitPrompt rd:", out);
-		PROFILE("DeEscape");
-		DeEscape(out);
-SSH_LOG("waitPrompt DeEscape:", out);
+		BytesRead + rd;
+		buf.Commit(rd);
 
 		PROFILE("LastLine");
 		auto last = LastLine(out);
@@ -201,16 +227,17 @@ SSH_LOG("waitPrompt result:", result, Prompt, last, out);
 			if (Data)
 			{
 				PROFILE("data process");
-				auto start = out.Get();
-				auto end = start + out.Length();
-				auto second = start;
-				while (second < end && second[-1] != '\n')
-					second++;
-				auto last = end;
-				while (last > start && last[-1] != '\n')
-					last--;
 
-				*Data = out(second - start, last - start);
+				auto d = out.NewGStr();
+				if (d)
+				{
+					// Strip first line off the start..
+					auto pos = d.Find("\n");
+					if (pos >= 0)
+						*Data = d(pos + 1, -1);
+					else
+						*Data = d; // No first line? Just give them everything I guess?
+				}
 SSH_LOG("waitPrompt data:", *Data);
 			}
 
@@ -228,10 +255,10 @@ SSH_LOG("waitPrompt data:", *Data);
 				d->Commits->Insert(Prog);
 			}
 			if (Prog)
-				Prog->Value(Total);
+				Prog->Value(out.GetSize());
 
-			Log->Print("...reading: %s\n", LFormatSize(Count).Get());
-			Count = 0;
+			Log->Print("...reading: %s\n", LFormatSize(BytesRead).Get());
+			BytesRead = 0;
 			Ts = Now;
 		}
 	}
