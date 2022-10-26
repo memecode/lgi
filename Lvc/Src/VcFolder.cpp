@@ -2887,9 +2887,9 @@ void VcFolder::FolderStatus(const char *uri, VcLeaf *Notify)
 			// What version did =2 become available? It's definitely not in v2.5.4
 			// Not in v2.7.4 either...
 			if (ToolVersion[VcGit] >= Ver2Int("2.8.0"))
-				Arg = "status --porcelain=2";
+				Arg = "-P status --porcelain=2";
 			else
-				Arg = "status --porcelain";
+				Arg = "-P status --porcelain";
 			break;
 		default:
 			return;
@@ -4041,7 +4041,7 @@ bool VcFolder::Blame(const char *Path)
 		case VcGit:
 		{
 			LString a;
-			a.Printf("blame \"%s\"", Path);
+			a.Printf("-P blame \"%s\"", Path);
 			return StartCmd(a, &VcFolder::ParseBlame);
 			break;
 		}
