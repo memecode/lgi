@@ -1770,18 +1770,22 @@ void VcFolder::Diff(VcFile *file)
 		!Stricmp(Fn, ".."))
 		return;
 
+	const char *Prefix = "";
 	switch (GetType())
 	{
 		case VcGit:
+			Prefix = "-P ";
+			// fall through
 		case VcHg:
 		{
 			LString a;
 
 			auto rev = file->GetRevision();
 			if (rev)
-				a.Printf("diff %s \"%s\"", rev, Fn);
+				a.Printf("%sdiff %s \"%s\"", Prefix, rev, Fn);
 			else
-				a.Printf("diff \"%s\"", Fn);
+				a.Printf("%sdiff \"%s\"", Prefix, Fn);
+			
 			StartCmd(a, &VcFolder::ParseDiff);
 			break;
 		}

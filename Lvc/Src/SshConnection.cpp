@@ -122,7 +122,7 @@ LString LastLine(LString &input)
 
 bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 {
-	char buf[8 << 10];
+	char buf[4 << 10];
 	LString out;
 	auto Ts = LCurrentTime();
 	int64 Count = 0, Total = 0;
@@ -146,6 +146,22 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 		{
 // SSH_LOG("waitPrompt no data.");
 			LSleep(1);
+
+			if (LCurrentTime() - Ts > 4000)
+			{
+				// Does the buffer end with a ':' on a line by itself?
+				// Various version control CLI's do that to pageinate data.
+				// Obviously we're not going to deal with that directly, 
+				// but the developer will need to know that's happened.
+				if (out.Length() > 3)
+				{
+					if (out(-3,-1) == "\n:")
+					{
+						// Looks pretty much like we've hung.
+						LAssert(!"Pagination mark.");
+					}
+				}
+			}
 			continue;
 		}
 
