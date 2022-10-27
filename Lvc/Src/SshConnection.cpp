@@ -127,21 +127,25 @@ LString LastLine(LStringPipe &input)
 	LString s, ln;
 	input.Iterate([&s, &ln](auto ptr, auto bytes)
 		{
-			s = LString(ptr, bytes) + s;
-			for (auto p = s.Get() + s.Length() - 1; p > s.Get(); p--)
+			s = LString((char*)ptr, bytes) + s;
+			auto end = s.Get() + s.Length();
+			for (auto p = end - 1; p >= s.Get(); p--)
 			{
 				if (Ws(*p))
 				{
-					ln = p + 1;
+					while (p < end && (*p == 0 || Ws(*p)))
+						p++;
+					ln = p;
 					break;
 				}
 			}
-			return ln.Get() != NULL;
+			return ln.Get() == NULL;
 		},
 		true);
 
-	if (!ln)
+	if (!ln.Get())
 		ln = s;
+	LAssert(ln.Find("\n") < 0);
 	DeEscape(ln);
 	return ln;
 }
@@ -183,6 +187,8 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 
 			if (LCurrentTime() - Ts > 4000)
 			{
+				auto last = LastLine(out);
+
 				// Does the buffer end with a ':' on a line by itself?
 				// Various version control CLI's do that to pageinate data.
 				// Obviously we're not going to deal with that directly, 
@@ -210,11 +216,18 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 			continue;
 		}
 
-		BytesRead + rd;
+		for (auto ptr = buf.ptr; ptr < buf.ptr + rd; ptr++)
+		{
+			if (*ptr == 0)
+				LgiTrace("NULLL byte at %p in read data.\n", ptr);
+		}
+
+		BytesRead += rd;
 		buf.Commit(rd);
 
 		PROFILE("LastLine");
 		auto last = LastLine(out);
+		LgiTrace("last='%s'\n", last.Get());
 		PROFILE("matchstr");
 		auto result = MatchStr(Prompt, last);
 SSH_LOG("waitPrompt result:", result, Prompt, last, out);
@@ -231,6 +244,8 @@ SSH_LOG("waitPrompt result:", result, Prompt, last, out);
 				auto d = out.NewGStr();
 				if (d)
 				{
+					DeEscape(d);
+
 					// Strip first line off the start..
 					auto pos = d.Find("\n");
 					if (pos >= 0)

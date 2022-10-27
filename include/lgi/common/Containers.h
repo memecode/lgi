@@ -1024,7 +1024,7 @@ public:
 	/// So this allows allocating internal blocks and returning them directly to the writer. After
 	/// the source has written into the internal block the client calls Buffer::Commit to tell the
 	/// LMemQueue how much data has been written.
-	class Buffer
+	class LgiClass Buffer
 	{
 		friend class LMemQueue;
 		LMemQueue *mq = NULL;
