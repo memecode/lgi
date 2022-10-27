@@ -535,14 +535,10 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 					AddGitName(c[2], CurrentBranch);
 					Branches.Add(CurrentBranch, new VcBranch(CurrentBranch, c[2]));
 				}
-				else if (c.Length() > 1)
+				else
 				{
 					AddGitName(c[1], c[0]);
 					Branches.Add(c[0], new VcBranch(c[0], c[1]));
-				}
-				else
-				{
-					LAssert(!"Shouldn't happen?");
 				}
 			}
 			break;
@@ -4027,26 +4023,27 @@ bool VcFolder::Blame(const char *Path)
 	if (!Path)
 		return false;
 
+	LUri u(Path);
 	switch (GetType())
 	{
 		case VcGit:
 		{
 			LString a;
-			a.Printf("-P blame \"%s\"", Path);
+			a.Printf("-P blame \"%s\"", u.sPath.Get());
 			return StartCmd(a, &VcFolder::ParseBlame);
 			break;
 		}
 		case VcHg:
 		{
 			LString a;
-			a.Printf("annotate -un \"%s\"", Path);
+			a.Printf("annotate -un \"%s\"", u.sPath.Get());
 			return StartCmd(a, &VcFolder::ParseBlame);
 			break;
 		}
 		case VcSvn:
 		{
 			LString a;
-			a.Printf("blame \"%s\"", Path);
+			a.Printf("blame \"%s\"", u.sPath.Get());
 			return StartCmd(a, &VcFolder::ParseBlame);
 			break;
 		}
