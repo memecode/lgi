@@ -350,22 +350,32 @@ LMemQueue::Buffer LMemQueue::GetBuffer()
 		{
 			b.ptr = b.blk->Ptr() + b.blk->Used;
 			b.len = b.blk->Size - b.blk->Used;
+
+			#ifdef _DEBUG
+			memset(b.ptr, 0xcd, b.len);
+			#endif
+
 			return b;
 		}
 	}
 	
 	// Otherwise allocate a block
-	int sz = PreAlloc > 0 ? PreAlloc : 1024/* some reasonable default? */;
-	int alloc = sizeof(Block) + sz;
+	auto sz = PreAlloc > 0 ? PreAlloc : 1024/* some reasonable default? */;
+	auto alloc = sizeof(Block) + sz;
 	alloc = LGI_ALLOC_ALIGN(alloc);
 	b.blk = (Block*) malloc(alloc);
 	if (b.blk)
 	{
 		b.blk->Next = 0;
 		b.blk->Used = 0;
-		b.blk->Size = sz;
+		b.blk->Size = (int)sz;
 		b.ptr = b.blk->Ptr();
 		b.len = sz;
+
+		#ifdef _DEBUG
+		memset(b.ptr, 0xcd, b.len);
+		#endif
+
 		Mem.Insert(b.blk);
 	}
 	
@@ -387,7 +397,7 @@ bool LMemQueue::Buffer::Commit(size_t bytes)
 		return false;
 	}
 	
-	blk->Used += bytes;
+	blk->Used += (int)bytes;
 	return true;
 }
 

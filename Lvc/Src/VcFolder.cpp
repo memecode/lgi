@@ -535,10 +535,14 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 					AddGitName(c[2], CurrentBranch);
 					Branches.Add(CurrentBranch, new VcBranch(CurrentBranch, c[2]));
 				}
-				else
+				else if (c.Length() > 1)
 				{
 					AddGitName(c[1], c[0]);
 					Branches.Add(c[0], new VcBranch(c[0], c[1]));
+				}
+				else
+				{
+					LAssert(!"Shouldn't happen?");
 				}
 			}
 			break;
