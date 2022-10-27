@@ -2412,26 +2412,13 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 		LDirectory Dir;
 		for (int b = Dir.First(u.LocalPath()); b; b = Dir.Next())
 		{
-			if (Dir.IsDir())
-			{
-				if (Dir.GetName()[0] != '.')
-				{
-					new VcLeaf(this, Parent, u.ToString(), Dir.GetName(), true);
-				}
-			}
-			else if (!Dir.IsHidden())
-			{
-				char *Ext = LGetExtension(Dir.GetName());
-				if (!Ext) continue;
-				if (!stricmp(Ext, "c") ||
-					!stricmp(Ext, "cpp") ||
-					!stricmp(Ext, "h"))
-				{
-					LUri Path = u;
-					Path += Dir.GetName();
-					new VcLeaf(this, Parent, u.ToString(), Dir.GetName(), false);
-				}
-			}
+			auto name = Dir.GetName();
+			if (Dir.IsHidden())
+				continue;
+				
+			LUri Path = u;
+			Path += name;
+			new VcLeaf(this, Parent, u.ToString(), name, Dir.IsDir());
 		}
 	}
 	else
