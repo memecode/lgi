@@ -143,8 +143,8 @@ LString LastLine(LStringPipe &input)
 		},
 		true);
 
-	if (!ln.Get())
-		ln = s;
+	// if (!ln.Get())
+	// 	ln = s;
 	LAssert(ln.Find("\n") < 0);
 	DeEscape(ln);
 	return ln;
@@ -187,40 +187,27 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 
 			if (LCurrentTime() - Ts > 4000)
 			{
-				auto last = LastLine(out);
-
 				// Does the buffer end with a ':' on a line by itself?
 				// Various version control CLI's do that to pageinate data.
 				// Obviously we're not going to deal with that directly, 
 				// but the developer will need to know that's happened.
 				if (out.GetSize() > 2)
 				{
-					bool hung = false;
-					out.Iterate([&hung](auto ptr, auto len)
-						{
-							auto e = ptr + len;
-							if (len >= 2 && e[-1] == ':' && e[-2] == '\n')
-							{
-								// Looks pretty much like we've hung.
-								LAssert(!"Pagination mark.");
-								hung = true;
-							}
-							return false; // Only look at last block...
-						},
-						true /* reverse */);
-					
-					if (hung)
+					auto last = LastLine(out);
+					if (last == ":")
 						return false;
 				}
 			}
 			continue;
 		}
 
+		/*
 		for (auto ptr = buf.ptr; ptr < buf.ptr + rd; ptr++)
 		{
 			if (*ptr == 0)
 				LgiTrace("NULLL byte at %p in read data.\n", ptr);
 		}
+		*/
 
 		BytesRead += rd;
 		buf.Commit(rd);
@@ -246,12 +233,18 @@ SSH_LOG("waitPrompt result:", result, Prompt, last, out);
 				{
 					DeEscape(d);
 
-					// Strip first line off the start..
-					auto pos = d.Find("\n");
-					if (pos >= 0)
-						*Data = d(pos + 1, -1);
-					else
-						*Data = d; // No first line? Just give them everything I guess?
+					// Strip first line off the start.. it's the command...
+					// And the last line... it's the prompt
+					auto start = d.Get();
+					auto end = d.Get() + d.Length();
+					while (start < end && *start != '\n')
+						start++;
+					while (start < end && (*start == '\n' || *start == 0))
+						start++;
+					while (end > start && end[-1] != '\n')
+						end--;
+
+					Data->Set(start, end - start);
 				}
 SSH_LOG("waitPrompt data:", *Data);
 			}
