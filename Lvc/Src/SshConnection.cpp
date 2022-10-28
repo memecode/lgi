@@ -7,7 +7,7 @@
 #define PROFILE_WaitPrompt		0
 #define PROFILE_OnEvent			0
 
-#define DEBUG_SSH_LOGGING		0
+#define DEBUG_SSH_LOGGING		1
 #if DEBUG_SSH_LOGGING
 	#define SSH_LOG(...)		d->sLog.Log(__VA_ARGS__)
 #else
@@ -228,15 +228,15 @@ SSH_LOG("waitPrompt result:", result, Prompt, last, out);
 			{
 				PROFILE("data process");
 
-				auto d = out.NewGStr();
-				if (d)
+				auto response = out.NewGStr();
+				if (response)
 				{
-					DeEscape(d);
+					DeEscape(response);
 
 					// Strip first line off the start.. it's the command...
 					// And the last line... it's the prompt
-					auto start = d.Get();
-					auto end = d.Get() + d.Length();
+					auto start = response.Get();
+					auto end = response.Get() + response.Length();
 					while (start < end && *start != '\n')
 						start++;
 					while (start < end && (*start == '\n' || *start == 0))

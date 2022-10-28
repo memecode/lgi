@@ -1,25 +1,26 @@
 #pragma once
 
 #include "lgi/common/Layout.h"
+#include "lgi/common/Progress.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-#define STATUSBAR_SEPARATOR			4
-#define GSP_SUNKEN					0x0001
-
 class LgiClass LStatusBar : public LLayout
 {
 	friend class LStatusPane;
 
 public:
-	LStatusBar();
+	constexpr static int SEPARATOR_PX = 4;
+
+	LStatusBar(int id = -1);
 	~LStatusBar();
 
 	const char *GetClass() { return "LStatusBar"; }
 	bool Pour(LRegion &r);
 	void OnPaint(LSurface *pDC);
 	void OnPosChange();
+	int OnNotify(LViewI *Ctrl, LNotification n);
 
-	LStatusPane *AppendPane(const char *Text, int Width);
+	LStatusPane *AppendPane(const char *Text, int WidthPx = 0);
 	bool AppendPane(LStatusPane *Pane);
 };
 
@@ -29,13 +30,10 @@ class LgiClass LStatusPane :
 	friend class LStatusBar;
 
 protected:
-	int		Flags;
-	int		Width;
-	LSurface *pDC;
+	LAutoPtr<LSurface> Icon;
 
 public:
 	LStatusPane();
-	~LStatusPane();
 
 	const char *GetClass() { return "LStatusPane"; }
 	const char *Name() { return LBase::Name(); }
@@ -43,9 +41,19 @@ public:
 	void OnPaint(LSurface *pDC);
 
 	int GetWidth();
-	void SetWidth(int x);
+	void SetWidth(int px);
 	bool Sunken();
-	void Sunken(bool i);
+	void Sunken(bool inset);
 	LSurface *Bitmap();
-	void Bitmap(LSurface *pdc);
+	void Bitmap(LAutoPtr<LSurface> pdc); // will take ownership
+};
+
+class LgiClass LProgressStatus :
+	public LStatusPane,
+	public Progress
+{
+public:
+	int64 Value() override;
+	void Value(int64 v) override;
+	void OnPaint(LSurface *pDC) override;
 };

@@ -3,6 +3,7 @@
 
 #include <functional>
 #include "lgi/common/Variant.h"
+#include "lgi/common/LMallocArray.h"
 
 #define DEBUG_STRUCT_IO			0
 
@@ -23,7 +24,8 @@
 		GV_VOID_PTR // end of object
 
 */
-class LStructuredIo : public LArray<uint8_t>
+
+class LStructuredIo : public LMallocArray<uint8_t>
 {
 	bool Write = true;
 	size_t Pos = 0;
@@ -173,7 +175,7 @@ public:
 		return r;
 	}
 
-	bool Decode(std::function<void(LVariantType, size_t, void*, const char*)> callback)
+	bool Decode(std::function<void(LVariantType, size_t, void*, const char*)> callback, Progress *prog = NULL)
 	{
 		LPointer p;
 		auto end = AddressOf()+Length();
