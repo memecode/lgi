@@ -7,7 +7,7 @@
 #define PROFILE_WaitPrompt		0
 #define PROFILE_OnEvent			0
 
-#define DEBUG_SSH_LOGGING		1
+#define DEBUG_SSH_LOGGING		0
 #if DEBUG_SSH_LOGGING
 	#define SSH_LOG(...)		d->sLog.Log(__VA_ARGS__)
 #else
@@ -154,11 +154,13 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 {
 	LStringPipe out(4 << 10);
 	auto Ts = LCurrentTime();
+	auto LastReadTs = Ts;
 	ProgressListItem *Prog = NULL;
 	#if PROFILE_WaitPrompt
 	LProfile prof("WaitPrompt", 100);
 	#endif
 	size_t BytesRead = 0;
+	bool CheckLast = true;
 
 	while (!LSsh::Cancel->IsCancelled())
 	{
@@ -175,49 +177,57 @@ bool SshConnection::WaitPrompt(LStream *con, LString *Data, const char *Debug)
 		auto rd = con->Read(buf.ptr, buf.len);
 		if (rd < 0)
 		{
+			// Error case
 			if (Debug)
 				LgiTrace("WaitPrompt.%s rd=%i\n", Debug, rd);
 			return false;
 		}
 
-		if (rd == 0)
+		if (rd > 0)
 		{
-// SSH_LOG("waitPrompt no data.");
-			LSleep(1);
+			// Got some data... keep asking for more:
+			LString tmp((char*)buf.ptr, rd);
+SSH_LOG("waitPrompt data:", rd, tmp);
 
-			if (LCurrentTime() - Ts > 4000)
-			{
-				// Does the buffer end with a ':' on a line by itself?
-				// Various version control CLI's do that to pageinate data.
-				// Obviously we're not going to deal with that directly, 
-				// but the developer will need to know that's happened.
-				if (out.GetSize() > 2)
-				{
-					auto last = LastLine(out);
-					if (last == ":")
-						return false;
-				}
-			}
+			BytesRead += rd;
+			buf.Commit(rd);
+			CheckLast = true;
+			LastReadTs = LCurrentTime();
 			continue;
 		}
 
-		/*
-		for (auto ptr = buf.ptr; ptr < buf.ptr + rd; ptr++)
+		if (LCurrentTime() - LastReadTs > 4000)
 		{
-			if (*ptr == 0)
-				LgiTrace("NULLL byte at %p in read data.\n", ptr);
-		}
-		*/
+			auto sz = out.GetSize();
+SSH_LOG("waitPrompt out:", sz, out);
+			auto last = LastLine(out);
 
-		BytesRead += rd;
-		buf.Commit(rd);
+			// Does the buffer end with a ':' on a line by itself?
+			// Various version control CLI's do that to pageinate data.
+			// Obviously we're not going to deal with that directly, 
+			// but the developer will need to know that's happened.
+			if (out.GetSize() > 2)
+			{
+				auto last = LastLine(out);
+				if (last == ":")
+					return false;
+			}
+		}
+
+		if (!CheckLast)
+		{
+			// We've already checked the buffer for the prompt... 
+			LSleep(10); // Don't use too much CPU
+			continue;
+		}
 
 		PROFILE("LastLine");
+		CheckLast = false;
 		auto last = LastLine(out);
 		LgiTrace("last='%s'\n", last.Get());
 		PROFILE("matchstr");
 		auto result = MatchStr(Prompt, last);
-SSH_LOG("waitPrompt result:", result, Prompt, last, out);
+SSH_LOG("waitPrompt result:", result, Prompt, last);
 		if (Debug)
 		{
 			LgiTrace("WaitPrompt.%s match='%s' with '%s' = %i\n", Debug, Prompt.Get(), last.Get(), result);
