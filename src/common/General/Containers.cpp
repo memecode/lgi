@@ -319,7 +319,7 @@ void LMemQueue::Iterate(std::function<bool(uint8_t*, size_t)> callback, bool rev
 	
 	if (reverse)
 	{
-		for (auto it = Mem.rbegin(); it >= Mem.begin(); it--)
+		for (auto it = Mem.rbegin(); it >= Mem.begin(); --it)
 		{
 			auto p = (*it)->Ptr();
 			if (!callback(p, (*it)->Used))

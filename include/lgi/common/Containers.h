@@ -114,6 +114,30 @@ public:
 			return !(*this == it);
 		}
 
+		bool operator <(const Iter &it) const
+		{
+			CHECK_THREAD
+			return Cur < it.Cur;
+		}
+
+		bool operator <=(const Iter &it) const
+		{
+			CHECK_THREAD
+			return Cur <= it.Cur;
+		}
+
+		bool operator >(const Iter &it) const
+		{
+			CHECK_THREAD
+			return Cur > it.Cur;
+		}
+
+		bool operator >=(const Iter &it) const
+		{
+			CHECK_THREAD
+			return Cur >= it.Cur;
+		}
+
 		bool In() const
 		{
 			CHECK_THREAD
