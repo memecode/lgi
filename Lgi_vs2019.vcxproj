@@ -58,7 +58,6 @@
   <PropertyGroup>
     <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
   </PropertyGroup>
-    <TargetName>Lgi19x32</TargetName>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>.\Lib\</OutDir>
     <IntDir>$(Platform)$(Configuration)19\</IntDir>
@@ -66,7 +65,6 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\CodeLib\libiconv-1.14\include</IncludePath>
     <TargetName>LgiHaiku19x64</TargetName>
   </PropertyGroup>
-    <TargetName>Lgi19x32d</TargetName>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>.\Lib\</OutDir>
     <IntDir>$(Platform)$(Configuration)19\</IntDir>
@@ -74,7 +72,6 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\CodeLib\libiconv-1.14\include</IncludePath>
     <TargetName>LgiHaiku19x64d</TargetName>
   </PropertyGroup>
-    <TargetName>Lgi19x32nop</TargetName>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|x64'">
     <OutDir>.\Lib\</OutDir>
     <IntDir>$(Platform)$(Configuration)19\</IntDir>
