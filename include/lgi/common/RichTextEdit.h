@@ -158,6 +158,7 @@ public:
 	void GetTextExtent(int &x, int &y);
 	char *GetSelection();
 	void SetStylePrefix(LString s);
+	bool IsBusy(bool Stop = false);
 
 	// File IO
 	bool Open(const char *Name, const char *Cs = 0);

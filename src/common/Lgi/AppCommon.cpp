@@ -53,6 +53,8 @@ LJson *LAppPrivate::GetConfig()
 			#define DEFAULT(var, val) \
 				if (Config->Get(var).Length() == 0) \
 					Dirty |= Config->Set(var, val);
+
+			#ifdef LINUX
 			DEFAULT(LApp::CfgLinuxKeysShift, "GDK_SHIFT_MASK");
 			DEFAULT(LApp::CfgLinuxKeysCtrl, "GDK_CONTROL_MASK");
 			DEFAULT(LApp::CfgLinuxKeysAlt, "GDK_MOD1_MASK");
@@ -65,6 +67,8 @@ LJson *LAppPrivate::GetConfig()
 				#endif
 			DEFAULT(LApp::CfgLinuxKeysSystem, Sys);
 			DEFAULT("Linux.Keys.Debug", "0");
+			#endif
+
 			DEFAULT("Language", "-");
 
 			DEFAULT("Fonts.Comment", "Use CSS hex definitions here, ie #RRGGBB in hex.");

@@ -348,7 +348,6 @@ void LProgressPane::SetDescription(const char *d)
 LProgressDlg::LProgressDlg(LView *parent, uint64 timeout)
 {
 	Ts = LCurrentTime();
-	YieldTs = 0;
 	Timeout = timeout;
 	CanCancel = true;
 	SetParent(parent);
@@ -581,14 +580,6 @@ void LProgressDlg::TimeCheck()
 		{
 			DoModeless();
 			Timeout = 0;
-		}
-	}
-	else if (YieldTs)
-	{
-		if (Now - Ts >= YieldTs)
-		{
-			Ts = Now;
-			LYield();
 		}
 	}
 }

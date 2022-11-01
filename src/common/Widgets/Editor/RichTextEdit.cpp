@@ -467,6 +467,11 @@ void LRichTextEdit::SetStylePrefix(LString s)
 	d->SetPrefix(s);
 }
 
+bool LRichTextEdit::IsBusy(bool Stop)
+{
+	return d->IsBusy(Stop);
+}
+
 size_t LRichTextEdit::GetLines()
 {
 	uint32_t Count = 0;

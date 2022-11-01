@@ -52,7 +52,7 @@ class LgiClass LProgressDlg : public LDialog, public Progress
 	friend class LProgressPane;
 
 protected:
-	uint64 Ts, Timeout, YieldTs;
+	uint64 Ts, Timeout;
 	LArray<LProgressPane*> Panes;
 	bool CanCancel;
 
@@ -77,9 +77,6 @@ public:
 	/// Gets the pane at index 'i'
 	LProgressPane *ItemAt(int i);
 
-	/// Sets up the Value function to yield every so often
-	/// to update the screen
-	void SetYieldTime(uint64 yt) { SetPulse((int) (YieldTs = yt)); }
 	/// Set ability to cancel
 	void SetCanCancel(bool cc);
 
