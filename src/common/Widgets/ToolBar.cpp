@@ -843,8 +843,11 @@ void LToolButton::Value(int64 b)
 			}
 
 			Down = b != 0;
-			GetParent()->Invalidate();
-			SendNotify(LNotifyValueChanged);
+			if (GetParent())
+			{
+				GetParent()->Invalidate();
+				SendNotify(LNotifyValueChanged);
+			}
 			break;
 		}
 	}

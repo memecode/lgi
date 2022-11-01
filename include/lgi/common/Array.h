@@ -203,9 +203,7 @@ public:
 			else if (i < len)
 			{
 				for (size_t n=i; n<len; n++)
-				{
 					p[n].~Type();
-				}
 			}
 
 			len = i;
@@ -216,11 +214,10 @@ public:
 			{
 				size_t Length = len;
 				for (size_t i=0; i<Length; i++)
-				{
 					p[i].~Type();
-				}
+
 				free(p);
-				p = 0;
+				p = NULL;
 			}
 			len = alloc = 0;
 		}
@@ -233,10 +230,8 @@ public:
 		Length(a.Length());
 		if (p && a.p)
 		{
-			for (uint32_t i=0; i<len; i++)
-			{
+			for (size_t i=0; i<len; i++)
 				p[i] = a.p[i];
-			}
 		}
 		return *this;
 	}

@@ -15,37 +15,36 @@
 #include "LgiWinManGlue.h"
 
 typedef LArray<LAppInfo*> AppArray;
-using namespace Gtk;
 
 class LAppPrivate : public LSymLookup
 {
 public:
 	// Common
-	LApp *Owner;
-	GtkApplication *App;
+	LApp *Owner = NULL;
+	Gtk::GtkApplication *App = NULL;
 	LAutoPtr<LJson> Config;
 	LAutoPtr<LApp::KeyModFlags> ModFlags;
-	LFileSystem *FileSystem;
-	GdcDevice *GdcSystem;
+	LFileSystem *FileSystem = NULL;
+	GdcDevice *GdcSystem = NULL;
 	OsAppArguments Args;
-	LLibrary *SkinLib;
+	LLibrary *SkinLib = NULL;
 	LHashTbl<StrKey<char,false>,AppArray*> MimeToApp;
 	#if HAS_SHARED_MIME
-	GSharedMime *Sm;
+	GSharedMime *Sm = NULL;
 	#endif
-	LLibrary *WmLib;
+	LLibrary *WmLib = NULL;
 	LHashTbl<IntKey<int>, LView*> Handles;
 	OsThread GuiThread;
 	OsThreadId GuiThreadId;
-	int MessageLoopDepth;
-	int CurEvent;
+	int MessageLoopDepth = 0;
+	int CurEvent = 0;
 	#if DEBUG_MSG_TYPES
 	LArray<int> Types;
 	#endif
-	::LArray<LViewI*> DeleteLater;
+	LArray<LViewI*> DeleteLater;
 	LMouse LastMove;
 	LAutoString Name;
-	::LArray<Gtk::guint> IdleId;
+	LArray<Gtk::guint> IdleId;
 	
 	#if defined(LINUX)
 	/// Desktop info
@@ -54,48 +53,25 @@ public:
 
 	#if HAS_LIB_MAGIC
 	LMutex MagicLock;
-	magic_t hMagic;
+	magic_t hMagic = NULL;
 	#endif
-
+	
 	/// Any fonts needed for styling the elements
 	LAutoPtr<LFontCache> FontCache;
 	
 	// Clipboard handling
 	int Clipboard, Utf8, Utf8String;
-	::LVariant ClipData;
+	LVariant ClipData;
 	LHashTbl<IntKey<int>, ::LVariant*> ClipNotify;
-
-	// Mouse click info
-	uint64 LastClickTime;
-	OsView LastClickWnd;
-	int LastClickX;
-	int LastClickY;
 
 	LAppPrivate(LApp *a) : Args(0, 0), Owner(a)
 		#if HAS_LIB_MAGIC
 		, MagicLock("MagicLock")
 		#endif
 	{
-		IdleId = 0;
-		CurEvent = 0;
 		GuiThread = LGetCurrentThread();
 		GuiThreadId = GetCurrentThreadId();
-		WmLib = 0;
-		FileSystem = 0;
-		GdcSystem = 0;
-		SkinLib = 0;
-		MessageLoopDepth = 0;
-		#if HAS_SHARED_MIME
-		Sm = 0;
-		#endif
-		#if HAS_LIB_MAGIC
-		hMagic = NULL;
-		#endif
-
-		LastClickTime = 0;
-		LastClickWnd = 0;
-		LastClickX = 0;
-		LastClickY = 0;
+		printf("GuiThread: %p id=%i\n", GuiThread, GuiThreadId);
 	}
 
 	~LAppPrivate()

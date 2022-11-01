@@ -500,7 +500,7 @@ public:
 GdcDevice *GdcDevice::pInstance = 0;
 GdcDevice::GdcDevice()
 {
-	GColourSpaceTest();
+	LColourSpaceTest();
 	d = new GdcDevicePrivate(this);
 	pInstance = this;
 }
@@ -919,7 +919,7 @@ LColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 			default:
 			{
 				LAssert(!"impl me");
-				c = GBitsToColourSpace(Depth);
+				c = LBitsToColourSpace(Depth);
 				break;
 			}
 			case Gtk::GDK_VISUAL_PSEUDO_COLOR:
@@ -953,7 +953,7 @@ LColourSpace GdkVisualToColourSpace(Gtk::GdkVisual *v, int output_bits)
 					c = (blue << 16) | (green << 8) | red;
 				}
 	
-				int bits = GColourSpaceToBits((LColourSpace) c);
+				int bits = LColourSpaceToBits((LColourSpace) c);
 	
 				#if VisualToColourSpaceDebug
 				{

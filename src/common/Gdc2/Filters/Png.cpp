@@ -774,7 +774,7 @@ LFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 				int RequestBits = FinalBits * Channels;
 				LColourSpace InCs = ColourType == PNG_COLOR_TYPE_GRAY_ALPHA ?
 										CsIndex8 :
-										GBitsToColourSpace(MAX(RequestBits, 8));
+										LBitsToColourSpace(MAX(RequestBits, 8));
 				
 				if (!pDC->Create(	LIBPNG png_get_image_width(png_ptr, info_ptr),
 									LIBPNG png_get_image_height(png_ptr, info_ptr),

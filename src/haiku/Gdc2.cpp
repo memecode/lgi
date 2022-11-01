@@ -459,7 +459,7 @@ public:
 		ScrX = screen.Frame().IntegerWidth() + 1;
 		ScrY = screen.Frame().IntegerHeight() + 1;
 		ScrColourSpace = HaikuColourSpace(screen.ColorSpace());
-		ScrBits = GColourSpaceToBits(ScrColourSpace);
+		ScrBits = LColourSpaceToBits(ScrColourSpace);
 
 		printf("Screen: %i x %i @ %i bpp (%s)\n", ScrX, ScrY, ScrBits, LColourSpaceToString(ScrColourSpace));
 		
@@ -503,7 +503,7 @@ public:
 GdcDevice *GdcDevice::pInstance = 0;
 GdcDevice::GdcDevice()
 {
-	GColourSpaceTest();
+	LColourSpaceTest();
 	d = new GdcDevicePrivate(this);
 	pInstance = this;
 }

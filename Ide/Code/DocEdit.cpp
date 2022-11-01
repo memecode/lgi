@@ -12,6 +12,7 @@
 int DocEdit::LeftMarginPx = EDIT_LEFT_MARGIN;
 
 LAutoPtr<GDocFindReplaceParams> GlobalFindReplace;
+
 DocEdit::DocEdit(IdeDoc *d, LFontType *f) :
 	LTextView3(IDC_EDIT, 0, 0, 100, 100, f),
 	DocEditStyling(this)
@@ -370,6 +371,7 @@ bool DocEdit::OnKey(LKey &k)
 			return false;
 		}
 	}
+
 	if (k.AltCmd())
 	{
 		if (ToLower(k.c16) == 'm')
@@ -386,6 +388,7 @@ bool DocEdit::OnKey(LKey &k)
 			return true;
 		}
 	}
+
 	return LTextView3::OnKey(k); 
 }
 
@@ -397,6 +400,7 @@ LMessage::Result DocEdit::OnEvent(LMessage *m)
 			OnApplyStyles();
 			break;
 	}
+
 	return LTextView3::OnEvent(m);
 }
 

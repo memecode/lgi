@@ -503,8 +503,15 @@ bool LScrollBar::Valid()
 	return d->Max > d->Min;
 }
 
+int LScrollBar::SCROLL_BAR_SIZE = 0;
+
 int LScrollBar::GetScrollSize()
 {
+	if (!SCROLL_BAR_SIZE)
+	{
+		SCROLL_BAR_SIZE = std::max(15, LScreenDpi().x / 5);
+	}
+	
 	return SCROLL_BAR_SIZE;
 }
 

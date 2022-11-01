@@ -39,13 +39,14 @@ if (APPLE)
 	# SET(GUI_TYPE MACOSX_BUNDLE)
 	find_library(COCOA_LIBRARY Cocoa)
 	mark_as_advanced (COCOA_LIBRARY)
-	set(EXTRA_LIBS ${COCOA_LIBRARY})
+	set(PUBLIC_LIBS ${COCOA_LIBRARY})
 
 elseif (LINUX)
 
 	find_package(PkgConfig)
 	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
 	pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4)
+	set(PUBLIC_LIBS pthread crypt)
 	                               
 endif()
 
@@ -123,6 +124,7 @@ set (CommonSource
 	src/common/Text/Unicode.cpp
 	src/common/Text/Utf8.cpp
 	src/common/Text/XmlTree.cpp
+	src/common/Widgets/Button.cpp
 	src/common/Widgets/Bitmap.cpp
 	src/common/Widgets/Box.cpp
 	src/common/Widgets/ItemContainer.cpp
@@ -130,6 +132,7 @@ set (CommonSource
 	src/common/Widgets/Panel.cpp
 	src/common/Widgets/Popup.cpp
 	src/common/Widgets/ProgressDlg.cpp
+	src/common/Widgets/RadioGroup.cpp
 	src/common/Widgets/Splitter.cpp
 	src/common/Widgets/StatusBar.cpp
 	src/common/Widgets/TableLayout.cpp
@@ -146,8 +149,6 @@ if (APPLE)
 		src/common/Widgets/CheckBox.cpp
 		src/common/Widgets/Combo.cpp
 		src/common/Widgets/ScrollBar.cpp
-		src/common/Widgets/Button.cpp
-		src/common/Widgets/RadioGroup.cpp
 		src/common/Widgets/Edit.cpp
 		src/common/Lgi/Layout.cpp
 		src/common/Widgets/Progress.cpp
@@ -201,7 +202,6 @@ elseif (LINUX)
 		src/common/Widgets/Edit.cpp
 		src/common/Widgets/ScrollBar.cpp
 		src/common/Widgets/Combo.cpp
-		src/common/Widgets/Button.cpp
 		src/common/Widgets/RadioGroup.cpp
 		src/common/Widgets/Progress.cpp
 		src/common/Widgets/Slider.cpp
@@ -211,6 +211,7 @@ elseif (MSVC)
 
 	set(Source
 		${CommonSource}
+		src/win/General/Lgi.manifest
 		src/win/Gdc2/Gdc2.cpp
 		src/win/Gdc2/GdiLeak.cpp
 		src/win/Gdc2/MemDC.cpp
@@ -245,6 +246,15 @@ elseif (MSVC)
 endif ()
 
 add_library(lgi SHARED ${Source})
+
+if (DEFINED LGI_LIB_POSTFIX)
+	set_target_properties(lgi
+		PROPERTIES 
+			DEBUG_POSTFIX
+				${LGI_LIB_POSTFIX}d
+			RELEASE_POSTFIX
+				${LGI_LIB_POSTFIX})
+endif()
 
 if (APPLE)
 
@@ -363,6 +373,10 @@ elseif (MSVC)
 			imm32.lib)
 
 endif()
+
+target_link_libraries(lgi
+	PUBLIC
+		${PUBLIC_LIBS})
 
 target_compile_definitions(lgi
 	PUBLIC

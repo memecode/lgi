@@ -298,7 +298,7 @@ static int LDateCmp(LDateTime *a, LDateTime *b)
 	return a->Compare(b);
 }
 
-#elif defined POSIX
+#elif defined(LINUX)
 
 static bool ParseValue(char *s, LAutoString &var, LAutoString &val)
 {

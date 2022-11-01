@@ -179,7 +179,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 
 	if (x > 0 && y > 0)
 	{
-		int Bits = GColourSpaceToBits(Cs);
+		int Bits = LColourSpaceToBits(Cs);
 		int Colours = Bits <= 8 ? 1 << Bits : 0;
 
 		{

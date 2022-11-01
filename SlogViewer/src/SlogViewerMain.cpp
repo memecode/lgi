@@ -7,6 +7,7 @@
 #include "lgi/common/TextView3.h"
 #include "lgi/common/TabView.h"
 #include "lgi/common/StructuredLog.h"
+#include "lgi/common/StatusBar.h"
 
 #include "resdefs.h"
 
@@ -26,6 +27,7 @@ enum Ctrls
 	IDC_HEX,
 	IDC_ESCAPED,
 	IDC_TABS,
+	IDC_STATUS,
 };
 
 struct Context
@@ -215,9 +217,73 @@ public:
 	}
 };
 
+class ReaderThread : public LThread
+{
+	Context *Ctx;
+	LString FileName;
+	LList *Lst = NULL;
+	Progress *Prog = NULL;
+
+public:
+	ReaderThread(Context *ctx,
+				const char *filename,
+				LList *lst,
+				Progress *prog)
+		: LThread("ReaderThread")
+	{
+		Ctx = ctx;
+		FileName = filename;
+		Lst = lst;
+		Prog = prog;
+
+		Run();
+	}
+
+	~ReaderThread()
+	{
+		Prog->Cancel();
+		WaitForExit(10000);
+	}
+
+	int Main()
+	{
+		LStructuredLog file(FileName, false);
+
+		LAutoPtr<Entry> cur;
+		List<LListItem> items;
+
+		while (file.Read([this, &cur, &items](auto type, auto size, auto ptr, auto name)
+			{
+				if (type == LStructuredIo::EndRow)
+				{
+					items.Insert(cur.Release());
+					if (items.Length() > 100)
+					{
+						Lst->Insert(items);
+						items.Empty();
+					}
+					return;
+				}
+
+				if (!cur && !cur.Reset(new Entry(Ctx)))
+					return;
+
+				cur->add(type, size, ptr, name);
+			},	Prog))
+			;
+
+		Lst->Insert(items);
+
+		return 0;
+	}
+};
+
 class App : public LDocApp<LOptionsFile>, public Context
 {
 	LBox *box = NULL;
+	LAutoPtr<ReaderThread> Reader;
+	LStatusBar *Status = NULL;
+	LProgressStatus *Prog = NULL;
 
 public:
     App() : LDocApp<LOptionsFile>(AppName)
@@ -231,6 +297,12 @@ public:
         if (_Create())
         {
 			_LoadMenu();
+
+			AddView(Status = new LStatusBar(IDC_STATUS));
+			Status->AppendPane("Some text");
+			Status->AppendPane(Prog = new LProgressStatus());
+			Prog->GetCss(true)->Width("200px");
+			Prog->GetCss()->TextAlign(LCss::AlignRight);
 
 			AddView(box = new LBox(IDC_BOX));
 			box->AddView(log = new LList(IDC_LOG, 0, 0, 200, 200));
@@ -263,28 +335,7 @@ public:
 
 	bool OpenFile(const char *FileName, bool ReadOnly = false)
 	{
-		LStructuredLog file(FileName, false);
-
-		LAutoPtr<Entry> cur;
-		List<LListItem> items;
-
-		while (file.Read([this, &cur, &items](auto type, auto size, auto ptr, auto name)
-			{
-				if (type == LStructuredIo::EndRow)
-				{
-					items.Insert(cur.Release());
-					return;
-				}
-
-				if (!cur && !cur.Reset(new Entry(this)))
-					return;
-
-				cur->add(type, size, ptr, name);
-			}))
-			;
-
-		log->Insert(items);
-		return true;
+		return Reader.Reset(new ReaderThread(this, FileName, log, Prog));
 	}
 
 	bool SaveFile(const char *FileName)

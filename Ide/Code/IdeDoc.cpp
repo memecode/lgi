@@ -53,9 +53,9 @@ EditTray::EditTray(LTextView3 *ctrl, IdeDoc *doc)
 	SymBtn.ZOff(-1, -1);
 		
 	int Ht = LSysFont->GetHeight() + 6;
-	AddView(FileSearch = new LEdit(IDC_FILE_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
-	AddView(FuncSearch = new LEdit(IDC_METHOD_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
-	AddView(SymSearch = new LEdit(IDC_SYMBOL_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
+	AddView(FileSearch   = new LEdit(IDC_FILE_SEARCH,   0, 0, EDIT_CTRL_WIDTH, Ht));
+	AddView(FuncSearch   = new LEdit(IDC_METHOD_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
+	AddView(SymSearch    = new LEdit(IDC_SYMBOL_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
 	AddView(AllPlatforms = new LCheckBox(IDC_ALL_PLATFORMS, 0, 0, 20, Ht, "All Platforms"));
 }
 	
@@ -1326,7 +1326,7 @@ void IdeDoc::GotoSearch(int CtrlId, char *InitialText)
 		|| \
 		IsDigit(ch) \
 		|| \
-		strchr("-_", ch) != NULL \
+		strchr("-_~", ch) != NULL \
 	)
 
 void IdeDoc::SearchSymbol()

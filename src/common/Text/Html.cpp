@@ -4757,11 +4757,6 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 	int Cx = BorderX1 + CellSpacing;
 	int Cy = TableBorder.y1 + TablePadding.y1 + CellSpacing;
 	
-	if (Table->Debug)
-	{
-		int asd=0;
-	}
-
 	for (y=0; y<s.y; y++)
 	{
 		LTag *Prev = 0;
@@ -5712,10 +5707,10 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			LCss::LengthType Align = GetAlign(true);
 			TextPos.FlowText(this, Flow, f, LineHeightCache, Txt, Align);
 
+			#ifdef _DEBUG
 			if (Debug)
-			{
 				LgiTrace("%s:%i - %p.size=%p\n", _FL, this, &Size.x);
-			}
+			#endif
 		}
 	}
 
@@ -6045,11 +6040,6 @@ void LTag::BoundParents()
 				
 		np->Size.x = MAX(np->Size.x, n->Pos.x + n->Size.x);
 		np->Size.y = MAX(np->Size.y, n->Pos.y + n->Size.y);
-
-		if (np->Debug && np->Size.x > 1000)
-		{
-			int asd=0;
-		}
 	}
 }
 

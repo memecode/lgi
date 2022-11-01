@@ -89,6 +89,10 @@ bool LButton::GetIsToggle()
 	return d->Toggle;
 }
 
+void LButton::OnStyleChange()
+{
+}
+
 void LButton::SetIsToggle(bool toggle)
 {
 	d->Toggle = toggle;

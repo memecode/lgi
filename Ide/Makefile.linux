@@ -94,7 +94,6 @@ Source =	Code/WebFldDlg.cpp \
 			../src/common/Net/OpenSSLSocket.cpp \
 			../src/common/Net/Http.cpp \
 			../src/common/Net/Ftp.cpp \
-			../src/common/Lgi/SubProcess.cpp \
 			../src/common/Lgi/Mdi.cpp \
 			../src/common/Lgi/LgiMain.cpp \
 			../src/common/Lgi/About.cpp \
@@ -108,14 +107,14 @@ Objects := $(addprefix $(BuildDir)/,$(SourceLst))
 
 # Target
 # Executable target
-$(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
+$(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	mkdir -p $(BuildDir)
 	@echo Linking $(Target) [$(Build)]...
 	$(CPP) -Wl,-export-dynamic,-R. -o \
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../$(BuildDir)/liblgi-gtk3$(Tag).so : ../include/lgi/common/App.h \
+../$(BuildDir)/liblgi$(Tag).so : ../include/lgi/common/App.h \
 	../include/lgi/common/Array.h \
 	../include/lgi/common/AutoPtr.h \
 	../include/lgi/common/Base64.h \

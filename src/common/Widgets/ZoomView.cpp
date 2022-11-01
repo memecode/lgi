@@ -35,26 +35,7 @@ struct ZoomTile : public LMemDC
 {
 	bool Dirty;
 	
-	LColourSpace MapBits(int Bits)
-	{
-		LColourSpace Cs;
-		#ifdef LINUX
-		Cs = GdcD->GetColourSpace();
-		#else
-		if (Bits > 32)
-			Bits >>= 1;
-		
-		if (Bits <= 8)
-			Cs = System32BitColourSpace;
-		else
-			Cs = GBitsToColourSpace(Bits);
-		#endif
-
-		// printf("MapBits = %s\n", LColourSpaceToString(Cs));
-		return Cs;
-	}
-	
-	ZoomTile(int Size, int Bits) : LMemDC(Size, Size, MapBits(Bits))
+	ZoomTile(int Size, LColourSpace Cs) : LMemDC(Size, Size, Cs)
 	{
 		Dirty = true;
 	}
@@ -236,110 +217,111 @@ public:
 
 	void SetZoom(int z)
 	{
-		if (Zoom != z)
-		{
-			Zoom = z;
-			EmptyTiles();
-			View->Invalidate();
-		}
+		if (Zoom == z)
+			return;
+
+		Zoom = z;
+		EmptyTiles();
+		View->UpdateScrollBars();
+		View->Invalidate();
 	}
 	
 	void SetDefaultZoom()
 	{
-		if (pDC)
-		{
-			LRect c = View->GetClient();
-			int z;
+		if (!pDC)
+			return;
 
-			bool Loop = true;
-			for (z=-20; Loop && z<=0; z++)
+		LRect c = View->GetClient();
+		int z;
+
+		bool Loop = true;
+		for (z=-20; Loop && z<=0; z++)
+		{
+			float s = ZoomToScale(z);
+			int x = (int) (s * pDC->X());
+			int y = (int) (s * pDC->Y());
+			
+			switch (DefaultZoom)
 			{
-				float s = ZoomToScale(z);
-				int x = (int) (s * pDC->X());
-				int y = (int) (s * pDC->Y());
-				
-				switch (DefaultZoom)
+				case LZoomView::ZoomFitBothAxis:
 				{
-					case LZoomView::ZoomFitBothAxis:
+					if (x >= c.X() || y >= c.Y())
 					{
-						if (x >= c.X() || y >= c.Y())
-						{
-							z--;
-							Loop = false;
-						}
-						break;
+						z--;
+						Loop = false;
 					}
-					case LZoomView::ZoomFitX:
+					break;
+				}
+				case LZoomView::ZoomFitX:
+				{
+					if (x >= c.X())
 					{
-						if (x >= c.X())
-						{
-							z--;
-							Loop = false;
-						}
-						break;
+						z--;
+						Loop = false;
 					}
-					case LZoomView::ZoomFitY:
+					break;
+				}
+				case LZoomView::ZoomFitY:
+				{
+					if (y >= c.Y())
 					{
-						if (y >= c.Y())
-						{
-							z--;
-							Loop = false;
-						}
-						break;
+						z--;
+						Loop = false;
 					}
+					break;
 				}
 			}
-			
-			SetZoom(MIN(z, 0));
-			ResetTiles();
 		}
+		
+		SetZoom(MIN(z, 0));
+		ResetTiles();
 	}
 	
 	void EmptyTiles()
 	{
-		if (Tile)
+		if (!Tile)
+			return;
+
+		for (int x=0; x<Tiles.x; x++)
 		{
-			for (int x=0; x<Tiles.x; x++)
+			for (int y=0; y<Tiles.y; y++)
 			{
-				for (int y=0; y<Tiles.y; y++)
-				{
-					delete Tile[x][y];
-				}
-				delete [] Tile[x];
+				delete Tile[x][y];
 			}
-			delete [] Tile;
-			Tile = NULL;
+			delete [] Tile[x];
 		}
+		delete [] Tile;
+		Tile = NULL;
 	}
 
 	void ResetTiles()
 	{
 		EmptyTiles();
 		
-		if (pDC)
+		if (!pDC)
+			return;
+
+		LRect full = DocToScreen(pDC->Bounds());
+		
+		// Pick a suitable tile size
+		TileSize = 128;
+		if (Zoom >= 2)
 		{
-			LRect full = DocToScreen(pDC->Bounds());
-			
-			// Pick a suitable tile size
-			TileSize = 128;
-			if (Zoom >= 2)
-			{
-				// When scaling up the tile size needs to be
-				// an even multiple of the factor. Otherwise
-				// we have part of a scaled pixel in one tile
-				// and part in another. Which is messy to handle.
-				while (TileSize % Factor())
-					TileSize++;
-			}
-			
-			Tiles.x = (full.X() + TileSize - 1) / TileSize;
-			Tiles.y = (full.Y() + TileSize - 1) / TileSize;
-			Tile = new SuperTilePtr*[Tiles.x];
-			for (int x=0; x<Tiles.x; x++)
-			{
-				Tile[x] = new SuperTilePtr[Tiles.y];
-				memset(Tile[x], 0, sizeof(SuperTilePtr) * Tiles.y);
-			}
+			// When scaling up the tile size needs to be
+			// an even multiple of the factor. Otherwise
+			// we have part of a scaled pixel in one tile
+			// and part in another. Which is messy to handle.
+			while (TileSize % Factor())
+				TileSize++;
+		}
+		
+		Tiles.x = (full.X() + TileSize - 1) / TileSize;
+		Tiles.y = (full.Y() + TileSize - 1) / TileSize;
+		Tile = new SuperTilePtr*[Tiles.x];
+		for (int x=0; x<Tiles.x; x++)
+		{
+			Tile[x] = new SuperTilePtr[Tiles.y];
+			memset(Tile[x], 0, sizeof(SuperTilePtr) * Tiles.y);
 		}
 	}
 
@@ -1155,10 +1137,6 @@ public:
 
 				Dst->Colour(LColour(0xbb, 0, 0xbb));
 				Dst->Rectangle();
-				if (s.y2 > Src->Y())
-				{
-					int asd=0;
-				}
 
 				int sy = s.Y();
 				auto sm2 = (*Src)[s.y2-1];
@@ -1171,9 +1149,6 @@ public:
 
 				Dst->Op(GDC_ALPHA);
 				Dst->Blt(0, 0, Src, &s);
-
-
-				// LgiTrace("Dst %i,%i - %s\n", x, y, s.GetStr());
 			}
 			
 			// Draw any foreground elements
@@ -1233,19 +1208,22 @@ void LZoomView::UpdateScrollBars(LPoint *MaxScroll, bool ResetPos)
 		// Which will cause a OnPosChange event to occur.
 		SetScrollBars(DocSize.x > DocClientSize.x, DocSize.y > DocClientSize.y);
 
-		LgiTrace("Scroll cli=%i,%i(raw=%s) doc=%i,%i\n",
+		#if 0
+		LgiTrace("Scroll bars=%i,%i cli=%i,%i(raw=%s) doc=%i,%i\n",
+			DocSize.x > DocClientSize.x, DocSize.y > DocClientSize.y,
 			DocClientSize.x, DocClientSize.y, c.GetStr(),
 			DocSize.x, DocSize.y);
+		#endif
 
 		if (HScroll)
 		{
-			HScroll->SetRange(LRange(0, DocSize.x+RIGHT_BOTTOM_WHITESPACE));
+			HScroll->SetRange(LRange(0, DocSize.x + RIGHT_BOTTOM_WHITESPACE));
 			HScroll->SetPage(DocClientSize.x);
 			if (ResetPos) HScroll->Value(0);
 		}
 		if (VScroll)
 		{
-			VScroll->SetRange(LRange(0, DocSize.y+RIGHT_BOTTOM_WHITESPACE));
+			VScroll->SetRange(LRange(0, DocSize.y + RIGHT_BOTTOM_WHITESPACE));
 			VScroll->SetPage(DocClientSize.y);
 			if (ResetPos) VScroll->Value(0);
 		}
@@ -1256,11 +1234,16 @@ void LZoomView::UpdateScrollBars(LPoint *MaxScroll, bool ResetPos)
 		}
 		Updating = false;
 	}
-	else d->ScrollBarsDirty = true; // Update them later
+	else
+	{
+		// LgiTrace("LZoomView::UpdateScrollBars is already updating..\n");
+		d->ScrollBarsDirty = true; // Update them later
+	}
 }
 
 void LZoomView::OnPosChange()
 {
+	LLayout::OnPosChange();
 	UpdateScrollBars();
 }
 
@@ -1503,7 +1486,12 @@ bool LZoomView::OnMouseWheel(double Lines)
 		{
 			d->SetZoom(d->GetZoom() - 1);
 		}
-		else return true;
+		else
+		{
+			LAssert(!"No lines value?");
+			return true;
+		}
+		
 		d->ResetTiles();
 		
 		if (d->Callback)
@@ -1548,47 +1536,10 @@ bool LZoomView::OnMouseWheel(double Lines)
 				}
 
 				UpdateScrollBars();
-
-				/*				
-				LPoint ScaledDocSize(Src->X(), Src->Y());
-				ScaledDocSize = d->DocToScreen(ScaledDocSize);
-
-				SetScrollBars(ScaledDocSize.x > c.X(), ScaledDocSize.y > c.Y());
-
-				LPoint ScaledClient(c.X(), c.Y());
-				ScaledClient = d->ScreenToDoc(ScaledClient);
-
-				if (HScroll)
-				{
-					HScroll->SetRange(LRange(0, Src->X()));
-					HScroll->SetPage(ScaledClient.x);
-					HScroll->Value(NewSx);
-				}
-				if (VScroll)
-				{
-					VScroll->SetRange(LRange(0, Src->Y()));
-					VScroll->SetPage(ScaledClient.y);
-					VScroll->Value(NewSy);
-				}
-
-				#if 0
-				{
-					GPointF NewDocPt;
-					bool In = Convert(NewDocPt, m.x, m.y);
-
-					LgiTrace("Zoom: DocPt=%.2f,%.2f->%.2f,%.2f Mouse=%i,%i Factor: %i Zoom: %i DocSize: %i,%i NewScroll: %i,%i\n",
-						DocPt.x, DocPt.y,
-						NewDocPt.x, NewDocPt.y,
-						m.x, m.y,
-						Factor,
-						d->GetZoom(),
-						Src->X(), Src->Y(),
-						NewSx, NewSy);
-				}
-				#endif
-				*/
 			}
+			// else printf("%s:%i - No 'src'?\n", _FL);
 		}
+		// else printf("%s:%i - No 'in'?\n", _FL);
 
 		// Update the screen        
 		// FIXME... mark stuff dirty
@@ -1709,8 +1660,10 @@ int LZoomView::OnNotify(LViewI *v, LNotification n)
 				auto p = HScroll->Page();
 				auto v = HScroll->Value();
 
+				#if 0
 				LgiTrace("Notify v=%i p=%i r=%i,%i exp=%i\n",
 					(int)v, (int)p, (int)r.Start, (int)r.End(), (int)(r.End()-p));
+				#endif
 			}
 			break;
 		}
@@ -1756,10 +1709,12 @@ void LZoomView::OnPaint(LSurface *pDC)
 		ScaledScroll = d->DocToScreen(ScaledScroll);
 		s.Offset(-ScaledScroll.x, -ScaledScroll.y);
 
+		#if 0
 		LgiTrace("Paint scroll=%i,%i cli=%s doc=%s(%ix%i)\n",
 			Sx, Sy,
 			d->ScreenToDoc(c).GetStr(), d->ScreenToDoc(s).GetStr(),
 			Src->X(), Src->Y());
+		#endif
 
 		// Work out the visible tiles...
 		LRect vis = s;
@@ -1779,15 +1734,15 @@ void LZoomView::OnPaint(LSurface *pDC)
 		LAssert(tile.y2 >= 0 && tile.y2 < d->Tiles.y);
 		
 		// Make sure we have tiles available and they are up to date
-		int Bits = Src->GetBits() <= 8 ? 32 : Src->GetBits();
+		LColourSpace Cs = Src->GetBits() <= 8 ? System32BitColourSpace : Src->GetColourSpace();
 		for (int y=tile.y1; y<=tile.y2; y++)
 		{
 			for (int x=tile.x1; x<=tile.x2; x++)
 			{
-				if (!d->Tile[x][y] || d->Tile[x][y]->GetBits() != Bits)
+				if (!d->Tile[x][y] || d->Tile[x][y]->GetColourSpace() != Cs)
 				{
 					DeleteObj(d->Tile[x][y]);
-					d->Tile[x][y] = new ZoomTile(d->TileSize, Bits);
+					d->Tile[x][y] = new ZoomTile(d->TileSize, Cs);
 				}
 				if (d->Tile[x][y] &&
 					d->Tile[x][y]->Dirty)

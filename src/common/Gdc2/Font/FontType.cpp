@@ -173,26 +173,27 @@ bool LFontType::Serialize(LDom *Options, const char *OptName, bool Write)
 
 bool LFontType::GetConfigFont(const char *Tag)
 {
-	bool Status = false;
-
+	// read from config file
 	auto Font = LAppInst->GetConfig(Tag);
-	if (Font)
-	{
-		// read from config file
-		auto p = Font.Split(":");
-		if (p.Length() == 2)
-		{
-			SetFace(p[0]);
-			SetPointSize((int)p[1].Int());
-			Status = true;
-		}
-		else LgiTrace("%s:%i - Font specification should be: <font>:<pointSize>\n", _FL);
-	}
+	if (!Font)
+		return false;
 
-	return Status;
+	if (Font == "-")
+		return false; // default string added for discoverability
+
+	auto p = Font.Split(":");
+	if (p.Length() != 2)
+	{
+		LgiTrace("%s:%i - Font specification '%s' should have the format: <font>:<pointSize>\n", _FL, Font.Get());
+		return false;
+	}
+	
+	SetFace(p[0]);
+	SetPointSize((int)p[1].Int());
+	return true;
 }
 
-class GFontTypeCache
+class LFontTypeCache
 {
 	char DefFace[64];
 	int DefSize;
@@ -200,7 +201,7 @@ class GFontTypeCache
 	int Size;
 
 public:
-	GFontTypeCache(char *defface, int defsize)
+	LFontTypeCache(char *defface, int defsize)
 	{
 		ZeroObj(Face);
 		Size = -1;
@@ -397,9 +398,18 @@ bool LFontType::GetSystemFont(const char *Which)
 	
 	#endif
 
+	int PtSizeOffset = 0;
+	auto Offset = LAppInst->GetConfig(LApp::CfgFontsPointSizeOffset);
+	if (Offset)
+	{
+		auto i = Offset.Int();
+		if (i != 0 && std::abs(i < 20))
+			PtSizeOffset = (int)i;
+	}
+
 	if (!_stricmp(Which, "System"))
 	{
-		Status = GetConfigFont("Font-System");
+		Status = GetConfigFont(LApp::CfgFontsSystemFont);
 		if (!Status)
 		{
 			// read from system
@@ -479,7 +489,7 @@ bool LFontType::GetSystemFont(const char *Which)
 	}
 	else if (!stricmp(Which, "Menu"))
 	{
-		Status = GetConfigFont("Font-Menu");
+		Status = GetConfigFont(LApp::CfgFontsMenuFont);
 		if (!Status)
 		{
 			#if LGI_SDL
@@ -532,7 +542,7 @@ bool LFontType::GetSystemFont(const char *Which)
 	}
 	else if (!stricmp(Which, "Caption"))
 	{
-		Status = GetConfigFont("Font-Caption");
+		Status = GetConfigFont(LApp::CfgFontsCaptionFont);
 		if (!Status)
 		{
 			#if LGI_SDL
@@ -640,7 +650,7 @@ bool LFontType::GetSystemFont(const char *Which)
 	}
 	else if (!stricmp(Which, "Small"))
 	{
-		Status = GetConfigFont("Font-Small");
+		Status = GetConfigFont(LApp::CfgFontsSmallFont);
 		if (!Status)
 		{
 			#if LGI_SDL
@@ -702,7 +712,7 @@ bool LFontType::GetSystemFont(const char *Which)
 	}
 	else if (!stricmp(Which, "Fixed"))
 	{
-		Status = GetConfigFont("Font-Fixed");
+		Status = GetConfigFont(LApp::CfgFontsMonoFont);
 		if (!Status)
 		{
 			#if LGI_SDL
@@ -746,6 +756,10 @@ bool LFontType::GetSystemFont(const char *Which)
 	{
 		LAssert(!"Invalid param supplied.");
 	}
+
+
+	if (Status && PtSizeOffset)
+		SetPointSize(GetPointSize() + PtSizeOffset);
 	
 	// printf("GetSystemFont(%s)=%i %s,%i\n", Which, Status, Info.Face(), Info.PointSize());
 	return Status;

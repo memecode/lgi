@@ -146,6 +146,21 @@ protected:
 
 public:
 	// Static publics
+	#ifdef LINUX
+	constexpr static const char *CfgLinuxKeysShift  = "Linux.Keys.Shift";
+	constexpr static const char *CfgLinuxKeysCtrl   = "Linux.Keys.Ctrl";
+	constexpr static const char *CfgLinuxKeysAlt    = "Linux.Keys.Alt";
+	constexpr static const char *CfgLinuxKeysSystem = "Linux.Keys.System";
+	#endif
+
+	constexpr static const char *CfgFontsGlyphSub        = "Fonts.GlyphSub";
+	constexpr static const char *CfgFontsPointSizeOffset = "Fonts.PointSizeOffset";
+	constexpr static const char *CfgFontsSystemFont      = "Fonts.SystemFont";
+	constexpr static const char *CfgFontsBoldFont        = "Fonts.BoldFont";
+	constexpr static const char *CfgFontsMonoFont        = "Fonts.MonoFont";
+	constexpr static const char *CfgFontsSmallFont       = "Fonts.SmallFont";
+	constexpr static const char *CfgFontsCaptionFont     = "Fonts.CaptionFont";
+	constexpr static const char *CfgFontsMenuFont        = "Fonts.MenuFont";
 	
 	/// Use 'LAppInst' to return a pointer to the LApp object
 	static LApp *ObjInstance();

@@ -9,10 +9,17 @@
 */
 
 #define _WINSOCK_DEPRECATED_NO_WARNINGS 1
-#ifdef LINUX
-#include <netinet/tcp.h>
-#include <unistd.h>
-#include <poll.h>
+#if defined(LINUX)
+	#include <netinet/tcp.h>
+	#include <unistd.h>
+	#include <poll.h>
+	#include <errno.h>
+#elif defined(MAC)
+	#include <SystemConfiguration/SCDynamicStoreCopySpecific.h>
+	#include <SystemConfiguration/SCSchemaDefinitions.h>
+	#include <sys/types.h>
+	#include <sys/socket.h>
+	#include <ifaddrs.h>
 #endif
 #include <ctype.h>
 
@@ -22,13 +29,6 @@
 #include "lgi/common/LgiCommon.h"
 #include "LgiOsClasses.h"
 #include "lgi/common/RegKey.h"
-#ifdef MAC
-#include <SystemConfiguration/SCDynamicStoreCopySpecific.h>
-#include <SystemConfiguration/SCSchemaDefinitions.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <ifaddrs.h>
-#endif
 
 #define USE_BSD_SOCKETS			1
 #define DEBUG_CONNECT			0

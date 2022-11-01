@@ -522,7 +522,7 @@ LFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 			}
 			else
 			{
-	            if (pDC->Create(img.width, img.height, GBitsToColourSpace(max(Bits, 8))))
+	            if (pDC->Create(img.width, img.height, LBitsToColourSpace(max(Bits, 8))))
 	            {
 	                if (Meter)
 	                    Meter->SetLimits(0, img.height);

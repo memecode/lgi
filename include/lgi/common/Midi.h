@@ -15,14 +15,14 @@
 #define MIDI_SYSEX_START	0xf0
 #define MIDI_SYSEX_END		0xf7
 
-class GMidi : public LMutex
+class LMidi : public LMutex
 {
-	struct GMidiPriv *d;
+	struct LMidiPriv *d;
 
-	void OnError(char *Func, LAutoString *Error, uint32_t Code, char *File, int Line);
+	void OnError(char *Func, LString *Error, uint32_t Code, char *File, int Line);
 
 	#if defined WIN32
-	friend class GMidiNotifyWnd;
+	friend class LMidiNotifyWnd;
 	friend void CALLBACK MidiInProc(HMIDIIN hmi, UINT wMsg, MIDI_TYPE dwInstance, MIDI_TYPE dwParam1, MIDI_TYPE dwParam2);
 	void StoreMidi(uint8_t *ptr, int len);
 	void ParseMidi();
@@ -33,7 +33,7 @@ protected:
 	LArray<uint8_t> MidiIn;
 
 	// Arrays of device names
-	LArray<LAutoString> In, Out;
+	LString::Array In, Out;
     
     #ifdef MAC
     friend void MidiNotify(const MIDINotification *message, void *refCon);
@@ -42,15 +42,15 @@ protected:
     #endif
 
 public:	
-	GMidi();
-	~GMidi();
+	LMidi();
+	~LMidi();
 
 	static int GetMidiPacketSize(uint8_t *ptr, size_t len);
 	
 	virtual LStream *GetLog() { return NULL; }
 
 	bool IsMidiOpen();
-	bool Connect(int InIdx, int OutIdx, LAutoString *ErrorMsg = NULL);
+	bool Connect(int InIdx, int OutIdx, LString *ErrorMsg = NULL);
 	void SendMidi(uint8_t *ptr, size_t len, bool quiet);
 	void CloseMidi();
 

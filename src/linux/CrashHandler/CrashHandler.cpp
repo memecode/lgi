@@ -53,9 +53,10 @@ T *strnchr(T *str, char ch, size_t len)
 enum AppState
 {
 	sInit,
+	sFrameSwitch,
 	sLocals,
 	sArgs,
-	sStack,
+	sList,
 	sGetThreads,
 	sThreadSwitch,
 	sThreadBt,
@@ -117,19 +118,64 @@ void DumpOutput(const char *Label)
 	output->Length(0);
 }
 
+/*
+
+Basic state flow:
+
+	sInit
+	sGetThreads				# display all the threads
+	for each thread:
+		sThreadBt			# back trace the thread
+		sThreadSwitch		# display back trace and check for crashed frame
+		if has crash frame:
+			sFrameSwitch	# get to the right frame...
+			sLocals			# display the locals
+			sArgs			# display any function args
+			sList			# list the source code around the crash point
+			
+*/
 void AtPrompt()
 {
+	auto GotoNextThread = [&]()
+	{
+		if (curThread <= threads)
+		{
+			// Check out the next thread...
+			char cmd[256];
+			auto cmdSz = snprintf(cmd, sizeof(cmd), "thread %i\n", curThread);
+			int wr = write(in[hWrite], cmd, cmdSz);
+			state = sThreadBt;
+		}
+		else loop = false;
+	};
+
+
 	switch (state)
 	{
 		case sInit:
 		{
-			auto cmd = "info locals\n";
+			/*			
+			First thing is to look through all the threads and find the one that crashed...
+			No point dumping locals and args from the thread that didn't crash.			
+			*/
+			auto cmd = "info threads\n";
 			int wr = write(in[hWrite], cmd, strlen(cmd));
 			
-			state = sLocals;
+			state = sGetThreads;
 			output = new LString::Array;
 			
 			OpenCrashLog();
+			break;
+		}
+		case sFrameSwitch:
+		{
+			DumpOutput("Frame");
+
+			// Then start dumping out the locals and args...
+			auto cmd = "info locals\n";
+			auto wr = write(in[hWrite], cmd, strlen(cmd));
+
+			state = sLocals;
 			break;
 		}
 		case sLocals:
@@ -146,20 +192,18 @@ void AtPrompt()
 		{
 			DumpOutput("Args");
 		
-			auto cmd = "bt\n";
+			auto cmd = "list\n";
 			int wr = write(in[hWrite], cmd, strlen(cmd));
 			
-			state = sStack;
+			state = sList;
 			break;
 		}
-		case sStack:
+		case sList:
 		{
-			DumpOutput("Stack");
+			DumpOutput("List");
 		
-			auto cmd = "info threads\n";
-			int wr = write(in[hWrite], cmd, strlen(cmd));
-			
-			state = sGetThreads;
+			// If there are more threads... go back trace them
+			GotoNextThread();
 			break;
 		}
 		case sGetThreads:
@@ -175,38 +219,63 @@ void AtPrompt()
 				}
 			}
 			
-			Log("threads=%i\n", threads);
+			DumpOutput("Threads");
 			output->Length(0);
 			
 			if (threads > 0)
 			{
-				state = sThreadBt;
-				// fall through
+				GotoNextThread();
 			}
 			else
 			{
 				Log("%s:%i - Error: failed to get thread count.\n", _FL);
 				loop = false;
-				break;
 			}
+			break;
 		}
 		case sThreadSwitch:
 		{
+			bool hasCrash = false;
+			int crashFrame = -1;
 			if (output->Length() > 0)
 			{
 				char label[64];
 				snprintf(label, sizeof(label), "Thread %i", curThread++);
+				
+				// Scan through the output and look for some crash indication
+				int curFrame = -1;
+				for (unsigned i=0; i<output->Length(); i++)
+				{
+					auto ln = (*output)[i];
+					
+					auto s = ln.Strip();
+					if (s.Length() && s(0) == '#')
+						curFrame = s.SplitDelimit()[0].Strip("#").Int();
+					
+					if (ln.Find("LgiCrashHandler") >= 0 ||
+						ln.Find("signal handler called") >= 0)
+					{
+						hasCrash = true;
+						crashFrame = curFrame + 1;
+					}
+				}
+				
 				DumpOutput(label);
 			}
 
-			if (curThread <= threads)
+			char cmd[256];
+			if (hasCrash && crashFrame >= 0)
 			{
-				char cmd[256];
-				auto cmdSz = snprintf(cmd, sizeof(cmd), "thread %i\n", curThread);
+				// Switch to the crashing frame here...
+				auto cmdSz = snprintf(cmd, sizeof(cmd), "frame %i\n", crashFrame);
 				int wr = write(in[hWrite], cmd, cmdSz);
-				state = sThreadBt;
+				state = sFrameSwitch;
 			}
-			else loop = false;
+			else
+			{
+				// Check out the next thread...
+				GotoNextThread();
+			}
 			break;
 		}
 		case sThreadBt:

@@ -4,7 +4,7 @@
 
 class LWordStore
 {
-	class LWordStorePriv *d;
+	struct LWordStorePriv *d;
 
 public:
 	LWordStore(const char *file = 0);
@@ -23,10 +23,6 @@ public:
 	void Empty();
 	char *GetFile();
 	void SetFile(const char *file);
-
-	// Iterate
-	const char *First();
-	const char *Next();
 	unsigned long Length();
 
 	#ifdef _DEBUG

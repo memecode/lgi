@@ -945,12 +945,12 @@ bool SystemFunctions::CreateSurface(LScriptArguments &Args)
 		if (Type->IsInt())
 		{
 			// Bit depth... convert to default Colour Space.
-			Cs = GBitsToColourSpace(Type->CastInt32());
+			Cs = LBitsToColourSpace(Type->CastInt32());
 		}
 		else if ((c = Type->Str()))
 		{
 			// Parse string colour space def
-			Cs = GStringToColourSpace(Type->Str());
+			Cs = LStringToColourSpace(Type->Str());
 		}
 	}
 
@@ -1096,12 +1096,6 @@ bool SystemFunctions::OsVersion(LScriptArguments &Args)
 	return true;
 }
 
-bool SystemFunctions::Yield(LScriptArguments &Args)
-{
-	LYield();
-	return true;
-}
-
 #define DefFn(Name) \
 	GHostFunc(#Name, 0, (ScriptCmd)&SystemFunctions::Name)
 
@@ -1155,7 +1149,6 @@ GHostFunc SystemLibrary[] =
 	DefFn(System),
 	DefFn(OsName),
 	DefFn(OsVersion),
-	DefFn(Yield),
 
 	// End of list marker
 	GHostFunc(0, 0, 0),

@@ -730,7 +730,7 @@ LAutoPtr<LSurface> LClipBoard::ConvertFromPtr(void *Ptr)
 			(
 				Info->bmiHeader.biWidth,
 				Info->bmiHeader.biHeight,
-				GBitsToColourSpace(max(Info->bmiHeader.biPlanes * Info->bmiHeader.biBitCount, 8))
+				LBitsToColourSpace(max(Info->bmiHeader.biPlanes * Info->bmiHeader.biBitCount, 8))
 			)
 		)
 		{

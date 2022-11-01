@@ -14,6 +14,9 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <wchar.h>
+#include <sys/stat.h>
+#include <netinet/in.h>
+#include <sys/time.h>
 
 #include "lgi/common/LgiDefs.h"
 
@@ -74,11 +77,9 @@
 #undef stricmp
 
 #include "lgi/common/LgiInc.h"
-#ifdef MAC
-	#include <sys/stat.h>
-	#include <netinet/in.h>
-#endif
+
 #define GtkVer(major, minor)			( (GTK_MAJOR_VERSION > major) || (GTK_MAJOR_VERSION == major && GTK_MINOR_VERSION >= minor) )
+
 namespace Gtk {
 // sudo apt-get install libmagic-dev libgtk3.0-dev libgstreamer1.0-dev
 #include <gtk/gtk.h>
@@ -403,6 +404,7 @@ enum MessageBoxType
 
 
 #define abs(a)						( (a) < 0 ? -(a) : (a) )
+
 
 #if !defined(WINNATIVE)
 

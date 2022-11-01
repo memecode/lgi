@@ -143,164 +143,11 @@ void LMemQueue::Empty()
 
 int64 LMemQueue::GetSize()
 {
-	int Size = 0;
+	int64 Size = 0;
 	for (auto b: Mem)
 		Size += b->Used - b->Next;
 	return Size;
 }
-
-#if 0
-int LMemQueue::Find(char *Str)
-{
-	if (Str)
-	{
-		int Pos = 0;
-		uint8_t *UStr = (uint8_t*) Str;
-
-		int SLen = strlen(Str);
-		if (SLen > 0)
-		{
-			for (List<Block>::I Blocks = Mem.Start(); Blocks.In(); Blocks++)
-			{
-				Block *m = *Blocks;
-				uint8_t *Base = ((uint8_t*)m->Ptr()) + m->Next;
-				uint8_t *End = Base + (m->Used - m->Next);
-
-				for (uint8_t *Ptr = Base; Ptr < End; Ptr++)
-				{
-					if (*Ptr == *UStr)
-					{
-						// Check rest of string
-						if (Ptr + SLen > End)
-						{
-							// Setup separate iterator to get to the next block
-							List<Block>::I Match = Blocks;
-							Block *Cur = *Match;
-							if (Cur == m)
-							{
-								uint8_t *b = Base;
-								uint8_t *e = End;
-								uint8_t *p = Ptr;
-								bool m = true;
-
-								for (int i=1; i<SLen; i++)
-								{
-									if (p + i >= e)
-									{
-										Match++;
-										Cur = *Match;
-										if (Cur)
-										{
-											b = ((uint8_t*)Cur->Ptr()) + Cur->Next;
-											e = b + (Cur->Used - Cur->Next);
-											p = b - i;
-										}
-										else break;
-									}
-
-									if (p[i] != UStr[i])
-									{
-										m = false;
-										break;
-									}
-								}
-
-								if (m)
-								{
-									return Pos + (Ptr - Base);
-								}
-							}
-							else
-							{
-								LAssert(0);
-							}
-						}
-						else
-						{
-							// String is entirely in this block...
-							bool m = true;
-
-							for (int i=1; i<SLen; i++)
-							{
-								if (Ptr[i] != UStr[i])
-								{
-									m = false;
-									break;
-								}
-							}
-
-							if (m)
-							{
-								return Pos + (Ptr - Base);
-							}
-						}
-					}
-				}
-
-				Pos += m->Used - m->Next;
-			}
-		}
-	}
-
-	return -1;
-}
-
-int64 LMemQueue::Peek(LStreamI *Str, int Size)
-{
-	int64 Status = 0;
-
-	if (Str && Size <= GetSize())
-	{
-		Block *b = 0;
-		for (b = Mem.First(); b && Size > 0; b = Mem.Next())
-		{
-			int Copy = min(Size, b->Size - b->Next);
-			if (Copy > 0)
-			{
-				Str->Write(b->Ptr() + b->Next, Copy);
-				Size -= Copy;
-				Status += Copy;
-			}
-		}
-	}
-
-	return Status;
-}
-
-int LMemQueue::Pop(short &i)
-{
-	short n;
-	if (Read((uchar*) &n, sizeof(n)))
-	{
-		i = n;
-		return sizeof(n);
-	}
-	return 0;
-}
-
-int LMemQueue::Pop(int &i)
-{
-	int n;
-	if (Read((uchar*) &n, sizeof(n)))
-	{
-		i = n;
-		return sizeof(n);
-	}
-	return 0;
-}
-
-int LMemQueue::Pop(double &i)
-{
-	double n;
-	if (Read((uchar*) &n, sizeof(n)))
-	{
-		i = n;
-		return sizeof(n);
-	}
-	return 0;
-}
-
-#endif
 
 int64 LMemQueue::Peek(uchar *Ptr, int Size)
 {
@@ -382,12 +229,6 @@ ssize_t LMemQueue::Write(const void *Ptr, ssize_t Size, int Flags)
 {
 	ssize_t Status = 0;
 
-	/*
-	char m[256];
-	sprintf_s(m, sizeof(m), "%p::Write(%p, %i, %i)\n", this, Ptr, Size, Flags);
-	OutputDebugStringA(m);
-	*/
-
 	if (Ptr && Size > 0)
 	{
 		if (PreAlloc > 0)
@@ -428,6 +269,136 @@ ssize_t LMemQueue::Write(const void *Ptr, ssize_t Size, int Flags)
 	}
 
 	return Status;
+}
+
+ssize_t LMemQueue::Find(LString str, bool caseSensitive)
+{
+	if (!str.Get())
+		return -1;
+
+	if (!caseSensitive)
+		str = str.Lower();
+
+	ssize_t pos = 0;
+	char *s = str.Get();
+	ssize_t si = 0;
+	for (auto b: Mem)
+	{
+		auto p = b->Ptr() + b->Next;
+		auto e = b->Ptr() + b->Used;
+		while (p < e)
+		{
+			if
+			(
+				(caseSensitive && (s[si] == *p))
+				||
+				(!caseSensitive && (s[si] == ToLower(*p)))
+			)
+			{
+				si++;
+				if (si == str.Length())
+					return pos - si + 1;
+			}
+			else si = 0;
+
+			p++;
+			pos++;
+		}
+	}
+
+	return -1;
+}
+
+void LMemQueue::Iterate(std::function<bool(uint8_t*, size_t)> callback, bool reverse)
+{
+	if (!callback)
+	{
+		LAssert(!"No callback.");
+		return;
+	}
+	
+	if (reverse)
+	{
+		for (auto it = Mem.rbegin(); it >= Mem.begin(); --it)
+		{
+			auto p = (*it)->Ptr();
+			if (!callback(p, (*it)->Used))
+				break;
+		}
+	}
+	else
+	{
+		for (auto b: Mem)
+		{
+			auto p = b->Ptr();
+			if (!callback(p, b->Used))
+				break;
+		}
+	}
+}
+
+LMemQueue::Buffer LMemQueue::GetBuffer()
+{
+	Buffer b(this);
+	
+	if (Mem.Length())
+	{
+		// Check if last block has space left:
+		auto it = Mem.rbegin();
+		b.blk = *it;
+		if (b.blk->Used < b.blk->Size)
+		{
+			b.ptr = b.blk->Ptr() + b.blk->Used;
+			b.len = b.blk->Size - b.blk->Used;
+
+			#ifdef _DEBUG
+			memset(b.ptr, 0xcd, b.len);
+			#endif
+
+			return b;
+		}
+	}
+	
+	// Otherwise allocate a block
+	auto sz = PreAlloc > 0 ? PreAlloc : 1024/* some reasonable default? */;
+	auto alloc = sizeof(Block) + sz;
+	alloc = LGI_ALLOC_ALIGN(alloc);
+	b.blk = (Block*) malloc(alloc);
+	if (b.blk)
+	{
+		b.blk->Next = 0;
+		b.blk->Used = 0;
+		b.blk->Size = (int)sz;
+		b.ptr = b.blk->Ptr();
+		b.len = sz;
+
+		#ifdef _DEBUG
+		memset(b.ptr, 0xcd, b.len);
+		#endif
+
+		Mem.Insert(b.blk);
+	}
+	
+	return b;
+}
+
+bool LMemQueue::Buffer::Commit(size_t bytes)
+{
+	if (!blk || !ptr)
+	{
+		LAssert(!"Invalid param.");
+		return false;
+	}
+		
+	if (blk->Used + bytes > blk->Size)
+	{
+		LAssert(!"Wrote too much data?");
+		blk->Used = blk->Size;
+		return false;
+	}
+	
+	blk->Used += (int)bytes;
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////

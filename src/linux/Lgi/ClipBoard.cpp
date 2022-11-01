@@ -162,7 +162,12 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LClipBoard:
 	auto alpha = gdk_pixbuf_get_has_alpha(Img);
 	LColourSpace cs = System32BitColourSpace;
 	LAutoPtr<LSurface> Out;
-	if (chan == 3)
+
+	if (chan == 4)
+	{
+		cs = System32BitColourSpace;
+	}
+	else if (chan == 3)
 	{
 		if (alpha)
 			cs = System32BitColourSpace;
@@ -178,6 +183,7 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LClipBoard:
 		LString s;
 		s.Printf("Unexpected colourspace: %i channels.", (int)chan);
 		(*Cb)(Out, s);
+		delete Cb;
 		return;
 	}
 
@@ -186,6 +192,7 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LClipBoard:
 	if (!m)
 	{
 		(*Cb)(Out, "Alloc failed");
+		delete Cb;
 		return;
 	}
 	
@@ -229,6 +236,11 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LClipBoard:
 			Rop24(Rgbx32, Rgb24);
 			Rop24(Xrgb32, Rgb24);
 			Rop24(Xbgr32, Rgb24);
+			
+			Rop32(Bgra32, Rgba32);
+			Rop32(Rgba32, Rgba32);
+			Rop32(Argb32, Rgba32);
+			Rop32(Abgr32, Rgba32);
 
 			default:
 				LAssert(!"Unsupported colour space.");
@@ -239,6 +251,7 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LClipBoard:
 
 	Out.Reset(m.Release());
 	(*Cb)(Out, NULL);
+	delete Cb;
 }
 
 bool LClipBoard::Bitmap(LClipBoard::BitmapCb Callback)
@@ -246,7 +259,7 @@ bool LClipBoard::Bitmap(LClipBoard::BitmapCb Callback)
 	if (!Callback)
 		return false;
 		
-	gtk_clipboard_request_image(d->c, (GtkClipboardImageReceivedFunc) ClipboardImageReceived, &Callback);
+	gtk_clipboard_request_image(d->c, (GtkClipboardImageReceivedFunc) ClipboardImageReceived, new LClipBoard::BitmapCb(Callback));
 	return true;
 }
 		
@@ -262,7 +275,7 @@ LAutoPtr<LSurface> LClipBoard::Bitmap()
 		Error = err;
 	};
 
-	gtk_clipboard_request_image(d->c, (GtkClipboardImageReceivedFunc) ClipboardImageReceived, &Callback);
+	gtk_clipboard_request_image(d->c, (GtkClipboardImageReceivedFunc) ClipboardImageReceived, new LClipBoard::BitmapCb(Callback));
 
 	while (!Error && !Img && (LCurrentTime() - Ts) < LGI_RECEIVE_CLIPBOARD_TIMEOUT)
 		LYield();

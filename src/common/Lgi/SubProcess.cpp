@@ -20,12 +20,14 @@
 */ 
 
 #if defined(MAC) || defined(POSIX)
+
 	#define _GNU_SOURCE
 	#include <errno.h>
 	#include <signal.h>
 	#include <sys/wait.h>
 	#include <sys/ioctl.h>
 	#include <sys/types.h>
+
 #endif
 
 #include "lgi/common/Lgi.h"
@@ -35,14 +37,31 @@
 #define DEBUG_ARGS				0
 
 #if defined(WIN32)
+	
+	#include <Lm.h>
+	#pragma comment(lib, "netapi32.lib")
+
 	#define NULL_PIPE NULL
 	#define ClosePipe CloseHandle
 
 	typedef HRESULT (WINAPI *ProcCreatePseudoConsole)(_In_ COORD size, _In_ HANDLE hInput, _In_ HANDLE hOutput, _In_ DWORD dwFlags, _Out_ HPCON* phPC);
+
 #else
+
 	#define NULL_PIPE -1
 	#define ClosePipe close
 	#define INVALID_PID -1
+
+#endif
+
+#if defined(POSIX)
+
+	#include <pwd.h>
+	#if !defined(MAC)
+		#include <crypt.h>
+		#include <shadow.h>
+	#endif
+
 #endif
 
 #ifdef HAIKU
@@ -128,6 +147,8 @@ struct LSubProcessPriv
 	#if defined(POSIX)
 		LSubProcess::Pipe Io;
 		int ExitValue; // was uint32
+		int UserId = -1;
+		int GrpId = -1;
 	#elif defined(WIN32)
 		HANDLE ChildHnd;
 		DWORD ExitValue;
@@ -135,6 +156,7 @@ struct LSubProcessPriv
 		HPCON hConsole;
 		LLibrary Kernel;
 		ProcCreatePseudoConsole CreatePseudoConsole;
+		LString User, Password;
 	#endif
 
 	LSubProcessPriv(bool pseudoConsole)
@@ -349,6 +371,76 @@ int32 LSubProcess::GetExitValue()
 	return d->ExitValue;
 }
 
+bool LSubProcess::SetUser(const char *User, const char *Pass)
+{
+	if (!User || !Pass)
+	{
+		LgiTrace("%s:%i - SetUser param err.\n", _FL);
+		return false;
+	}
+
+	#if defined(POSIX)
+
+		auto entry = getpwnam(User);
+		if (!entry)
+		{
+			LgiTrace("%s:%i - SetUser: User '%s' doesn't exist.\n", _FL, User);
+			return false;
+		}
+	
+		if (0 != strcmp(entry->pw_passwd, "x"))
+		{
+			if (strcmp(entry->pw_passwd, crypt(Pass, entry->pw_passwd)))
+			{
+        		LgiTrace("%s:%i - SetUser: Wrong password.\n", _FL);
+        		return false;
+			}
+		}
+		#if !defined(MAC)
+		else
+		{
+			// password is in shadow file
+			auto shadowEntry = getspnam(User);
+			if (!shadowEntry)
+			{
+				LgiTrace("%s:%i - SetUser: Failed to read shadow entry for user '%s'\n", User);
+				return false;
+			}
+
+			if (strcmp(shadowEntry->sp_pwdp, crypt(Pass, shadowEntry->sp_pwdp)))
+			{
+        		LgiTrace("%s:%i - SetUser: Wrong password.\n", _FL);
+        		return false;
+			}
+		}
+		#endif
+
+		d->UserId = entry->pw_uid;
+		d->GrpId = entry->pw_gid;
+
+	#elif defined(WINDOWS)
+	
+		LAutoWString u(Utf8ToWide(User));
+
+		USER_INFO_0 *info = NULL;
+		auto result = NetUserGetInfo(NULL, u, 0, (LPBYTE*)&info);
+		if (result != NERR_Success)
+		{
+			return false;
+		}
+
+		d->User = User;
+		d->Password = Pass;
+
+	#else
+
+		#error "Impl me."
+
+	#endif
+    
+    return true;
+}
+
 void LSubProcess::SetInitFolder(const char *f)
 {
 	d->InitialFolder = f;
@@ -555,7 +647,12 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 					}
 				}
 			}
-				
+			
+			if (d->UserId >= 0)
+				setuid(d->UserId);
+			if (d->GrpId >= 0)
+				setgid(d->GrpId);
+     				
 			if (d->Environment.Length())
 			{
 				LString::Array Vars;
@@ -931,16 +1028,39 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 				WEnv.Reset((char16*)q.New(4));
 			}
 
-			if (CreateProcessW(	WExe,
-								WArg,
-								&Attr,				// lpProcessAttributes
-								NULL,				// lpThreadAttributes
-								TRUE,				// bInheritHandles
-								CreateFlags,		// dwCreationFlags
-								WEnv,				// lpEnvironment
-								WInitialFolder,		// lpCurrentDirectory
-								&Info,				// lpStartupInfo
-								&ProcInfo))
+			bool createResult = false;
+			if (d->User)
+			{
+				LAutoWString WUser(Utf8ToWide(d->User));
+				LAutoWString WPass(Utf8ToWide(d->Password));
+
+				createResult = CreateProcessWithLogonW(	WUser,
+														NULL,
+														WPass,
+														LOGON_NETCREDENTIALS_ONLY,
+														WExe,
+														WArg,
+														CreateFlags,		// dwCreationFlags
+														WEnv,				// lpEnvironment
+														WInitialFolder,		// lpCurrentDirectory
+														&Info,				// lpStartupInfo
+														&ProcInfo) != 0;
+			}
+			else
+			{
+				createResult = CreateProcessW(	WExe,
+												WArg,
+												&Attr,				// lpProcessAttributes
+												NULL,				// lpThreadAttributes
+												TRUE,				// bInheritHandles
+												CreateFlags,		// dwCreationFlags
+												WEnv,				// lpEnvironment
+												WInitialFolder,		// lpCurrentDirectory
+												&Info,				// lpStartupInfo
+												&ProcInfo) != 0;
+			}
+
+			if (createResult)
 			{
 				d->ChildPid = ProcInfo.dwProcessId;
 				d->ChildHnd = ProcInfo.hProcess;

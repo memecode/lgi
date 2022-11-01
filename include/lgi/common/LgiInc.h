@@ -1,6 +1,4 @@
-
-#ifndef __LGI_INC_H
-#define __LGI_INC_H
+#pragma once
 
 #define LGI_EXCEPTIONS				0
 #define LGI_DRMEMORY				1
@@ -85,4 +83,3 @@
 
 #endif
 
-#endif

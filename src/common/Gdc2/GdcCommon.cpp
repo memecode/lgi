@@ -407,7 +407,7 @@ void LFillGradient(LSurface *pDC, LRect &r, bool Vert, LArray<LColourStop> &Stop
 LSurface *ConvertDC(LSurface *pDC, int Bits)
 {
 	LSurface *pNew = new LMemDC;
-	if (pNew && pNew->Create(pDC->X(), pDC->Y(), GBitsToColourSpace(Bits)))
+	if (pNew && pNew->Create(pDC->X(), pDC->Y(), LBitsToColourSpace(Bits)))
 	{
 		pNew->Blt(0, 0, pDC);
 		DeleteObj(pDC);
@@ -677,7 +677,7 @@ const char *LColourSpaceToString(LColourSpace cs)
 	return start;
 }
 
-int GColourSpaceChannels(LColourSpace Cs)
+int LColourSpaceChannels(LColourSpace Cs)
 {
 	int Channels = 0;
 	
@@ -694,7 +694,7 @@ int GColourSpaceChannels(LColourSpace Cs)
 	return Channels;
 }
 
-bool GColourSpaceHasAlpha(LColourSpace Cs)
+bool LColourSpaceHasAlpha(LColourSpace Cs)
 {
 	while (Cs)
 	{
@@ -709,7 +709,7 @@ bool GColourSpaceHasAlpha(LColourSpace Cs)
 	return false;
 }
 
-int GColourSpaceToBits(LColourSpace ColourSpace)
+int LColourSpaceToBits(LColourSpace ColourSpace)
 {
 	uint32_t c = ColourSpace;
 	int bits = 0;
@@ -725,7 +725,7 @@ int GColourSpaceToBits(LColourSpace ColourSpace)
 	return bits;
 }
 
-LColourSpace GStringToColourSpace(const char *c)
+LColourSpace LStringToColourSpace(const char *c)
 {
 	if (!c)
 		return CsNone;
@@ -858,13 +858,13 @@ LColourSpace GStringToColourSpace(const char *c)
 		c += 6;
 		int Depth = ::atoi(c);
 		if (Depth)
-			return GBitsToColourSpace(Depth);
+			return LBitsToColourSpace(Depth);
 	}
 	
 	return CsNone;
 }
 
-LColourSpace GBitsToColourSpace(int Bits)
+LColourSpace LBitsToColourSpace(int Bits)
 {
 	switch (Bits)
 	{
@@ -886,7 +886,7 @@ LColourSpace GBitsToColourSpace(int Bits)
 	return CsNone;
 }
 
-bool GColourSpaceTest()
+bool LColourSpaceTest()
 {
 	union {
 		uint8_t b4[4];
@@ -1073,8 +1073,8 @@ bool LRopUniversal(LBmpMem *Dst, LBmpMem *Src, bool Composite)
 	int Cy = MIN(Dst->y, Src->y);
 
 	// Size of src and dst pixels:
-	int SrcBits = GColourSpaceToBits(Src->Cs);
-	int DstBits = GColourSpaceToBits(Dst->Cs);
+	int SrcBits = LColourSpaceToBits(Src->Cs);
+	int DstBits = LColourSpaceToBits(Dst->Cs);
 
 	if (Dst->Cs == Src->Cs && !Composite)
 	{

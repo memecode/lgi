@@ -23,12 +23,13 @@ ifeq ($(Build),Debug)
 	Libs =  \
 		-lmagic \
 		-lappindicator3 \
+		-lcrypt \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
+		`pkg-config --cflags gstreamer-1.0` \
 		-I/usr/include/libappindicator3-0.1 \
-		-I/usr/include/gstreamer-1.0 \
 		-I./private/linux \
 		-I./private/common \
 		-I./include/lgi/linux/Gtk \
@@ -40,12 +41,13 @@ else
 	Libs =  \
 		-lmagic \
 		-lappindicator3 \
+		-lcrypt \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
+		`pkg-config --cflags gstreamer-1.0` \
 		-I/usr/include/libappindicator3-0.1 \
-		-I/usr/include/gstreamer-1.0 \
 		-I./private/linux \
 		-I./private/common \
 		-I./include/lgi/linux/Gtk \

@@ -1770,18 +1770,22 @@ void VcFolder::Diff(VcFile *file)
 		!Stricmp(Fn, ".."))
 		return;
 
+	const char *Prefix = "";
 	switch (GetType())
 	{
 		case VcGit:
+			Prefix = "-P ";
+			// fall through
 		case VcHg:
 		{
 			LString a;
 
 			auto rev = file->GetRevision();
 			if (rev)
-				a.Printf("diff %s \"%s\"", rev, Fn);
+				a.Printf("%sdiff %s \"%s\"", Prefix, rev, Fn);
 			else
-				a.Printf("diff \"%s\"", Fn);
+				a.Printf("%sdiff \"%s\"", Prefix, Fn);
+			
 			StartCmd(a, &VcFolder::ParseDiff);
 			break;
 		}
@@ -2412,26 +2416,13 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 		LDirectory Dir;
 		for (int b = Dir.First(u.LocalPath()); b; b = Dir.Next())
 		{
-			if (Dir.IsDir())
-			{
-				if (Dir.GetName()[0] != '.')
-				{
-					new VcLeaf(this, Parent, u.ToString(), Dir.GetName(), true);
-				}
-			}
-			else if (!Dir.IsHidden())
-			{
-				char *Ext = LGetExtension(Dir.GetName());
-				if (!Ext) continue;
-				if (!stricmp(Ext, "c") ||
-					!stricmp(Ext, "cpp") ||
-					!stricmp(Ext, "h"))
-				{
-					LUri Path = u;
-					Path += Dir.GetName();
-					new VcLeaf(this, Parent, u.ToString(), Dir.GetName(), false);
-				}
-			}
+			auto name = Dir.GetName();
+			if (Dir.IsHidden())
+				continue;
+				
+			LUri Path = u;
+			Path += name;
+			new VcLeaf(this, Parent, u.ToString(), name, Dir.IsDir());
 		}
 	}
 	else
@@ -2887,9 +2878,9 @@ void VcFolder::FolderStatus(const char *uri, VcLeaf *Notify)
 			// What version did =2 become available? It's definitely not in v2.5.4
 			// Not in v2.7.4 either...
 			if (ToolVersion[VcGit] >= Ver2Int("2.8.0"))
-				Arg = "status --porcelain=2";
+				Arg = "-P status --porcelain=2";
 			else
-				Arg = "status --porcelain";
+				Arg = "-P status --porcelain";
 			break;
 		default:
 			return;
@@ -4042,26 +4033,27 @@ bool VcFolder::Blame(const char *Path)
 	if (!Path)
 		return false;
 
+	LUri u(Path);
 	switch (GetType())
 	{
 		case VcGit:
 		{
 			LString a;
-			a.Printf("blame \"%s\"", Path);
+			a.Printf("-P blame \"%s\"", u.sPath.Get());
 			return StartCmd(a, &VcFolder::ParseBlame);
 			break;
 		}
 		case VcHg:
 		{
 			LString a;
-			a.Printf("annotate -un \"%s\"", Path);
+			a.Printf("annotate -un \"%s\"", u.sPath.Get());
 			return StartCmd(a, &VcFolder::ParseBlame);
 			break;
 		}
 		case VcSvn:
 		{
 			LString a;
-			a.Printf("blame \"%s\"", Path);
+			a.Printf("blame \"%s\"", u.sPath.Get());
 			return StartCmd(a, &VcFolder::ParseBlame);
 			break;
 		}

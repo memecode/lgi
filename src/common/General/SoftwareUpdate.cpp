@@ -102,9 +102,11 @@ struct LSoftwareUpdatePriv
 					LHttp::ContentEncoding Enc;
 					if (Http.Get(GetUri, NULL, &ProtocolStatus, &RawXml, &Enc))
 					{
+						auto Xml = RawXml.NewGStr();
+						LMemStream XmlStream(Xml.Get(), Xml.Length(), false);
 						LXmlTree Tree;
 						LXmlTag Root;
-						if (Tree.Read(&Root, &RawXml))
+						if (Tree.Read(&Root, &XmlStream))
 						{
 							LXmlTag *StatusCode;
 							if (Root.IsTag("software") &&
@@ -137,13 +139,29 @@ struct LSoftwareUpdatePriv
 									LgiTrace("UpdateURI=%s\n", GetUri.Get());
 								}
 							}
-							else d->SetError(L_ERROR_UNEXPECTED_XML, sUnexpectedXml);
+							else
+							{
+								d->SetError(L_ERROR_UNEXPECTED_XML, sUnexpectedXml);
+								LgiTrace("%s:%i - Bad XML: %s\n", _FL, Xml.Get());
+							}
 						}
-						else d->SetError(L_ERROR_XML_PARSE, sXmlParsingFailed);
+						else
+						{
+							d->SetError(L_ERROR_XML_PARSE, sXmlParsingFailed);
+							LgiTrace("%s:%i - Bad XML: %s\n", _FL, Xml.Get());
+						}
 					}
-					else d->SetError(L_ERROR_HTTP_FAILED, sHttpDownloadFailed);
+					else
+					{
+						d->SetError(L_ERROR_HTTP_FAILED, sHttpDownloadFailed);
+						LgiTrace("%s:%i - Bad URI: %s\n", _FL, GetUri.Get());
+					}
 				}
-				else d->SetError(L_ERROR_CONNECT_FAILED, sSocketConnectFailed);
+				else
+				{
+					d->SetError(L_ERROR_CONNECT_FAILED, sSocketConnectFailed);
+					LgiTrace("%s:%i - Bad connect: %s:%i\n", _FL, Uri.sHost.Get(), Uri.Port);
+				}
 			}
 			else d->SetError(L_ERROR_NO_URI, sNoUpdateUri);
 

@@ -84,7 +84,7 @@ GPaneThrottle::GPaneThrottle(LDom *app)
 {
 	Pipe = -1;
 	App = app;
-	Width = 80+THROTTLE_TEXT_WIDTH;
+	SetWidth(80+THROTTLE_TEXT_WIDTH);
 	Slider = new LSlider(SLIDER_ID, 0, 0, 100, 20, "Throttle", false);
 }
 
@@ -254,7 +254,7 @@ public:
 
 GPaneHistory::GPaneHistory(LDom *app)
 {
-	Width = HISTORY_TEXT_WIDTH + MAX_SAMPLE + 2;
+	SetWidth(HISTORY_TEXT_WIDTH + MAX_SAMPLE + 2);
 	App = app;
 	pMemDC = 0;
 	Cur = 0;

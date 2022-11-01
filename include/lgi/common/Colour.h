@@ -7,29 +7,36 @@
 
 #define _SystemColour() \
 	_(TRANSPARENT) \
+	\
 	_(BLACK) \
 	_(DKGREY) \
 	_(MIDGREY) \
 	_(LTGREY) \
 	_(WHITE) \
-	_(SHADOW) /* 3d dark shadow */ \
-	_(LOW) /* 3d light shadow */ \
-	_(MED) /* Flat colour for dialogs, windows and buttons */ \
-	_(HIGH) /* 3d dark highlight */ \
-	_(LIGHT) /* 3d light highlight */ \
-	_(DIALOG) /* Dialog colour */ \
-	_(WORKSPACE) /* Workspace area */ \
-	_(TEXT) /* Default text colour */ \
-	_(FOCUS_SEL_BACK) /* Selection background colour when in focus */ \
-	_(FOCUS_SEL_FORE) /* Selection foreground colour when in focus */ \
+	\
+	_(SHADOW)				/* 3d dark shadow */ \
+	_(LOW)					/* 3d light shadow */ \
+	_(MED)					/* Flat colour for dialogs, windows and buttons */ \
+	_(HIGH)					/* 3d dark highlight */ \
+	_(LIGHT)				/* 3d light highlight */ \
+	\
+	_(DIALOG)				/* Dialog colour */ \
+	_(WORKSPACE)			/* Workspace area */ \
+	\
+	_(TEXT)					/* Default text colour */ \
+	_(FOCUS_SEL_BACK)		/* Selection background colour when in focus */ \
+	_(FOCUS_SEL_FORE)		/* Selection foreground colour when in focus */ \
+	_(NON_FOCUS_SEL_BACK)	/* Selection background colour when not in focus */ \
+	_(NON_FOCUS_SEL_FORE)	/* Selection foreground colour when not in focus */ \
+	\
 	_(ACTIVE_TITLE) \
 	_(ACTIVE_TITLE_TEXT) \
 	_(INACTIVE_TITLE) \
 	_(INACTIVE_TITLE_TEXT) \
+	\
 	_(MENU_BACKGROUND) \
 	_(MENU_TEXT) \
-	_(NON_FOCUS_SEL_BACK) /* Selection background colour when not in focus */ \
-	_(NON_FOCUS_SEL_FORE) /* Selection foreground colour when not in focus */ \
+	\
 	_(DEBUG_CURRENT_LINE) \
 	_(TOOL_TIP) \
 	_(MAXIMUM)

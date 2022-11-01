@@ -1147,21 +1147,11 @@ const char *LDirectory::FullPath()
 
 bool LDirectory::Path(char *s, int BufLen) const
 {
-	char *Name = GetName();
-	auto Len = strlen(d->BasePath) + 2;
-	if (Name) Len += strlen(Name);
-	bool Status = false;
-
-	if (Name && (BufLen < 0 || Len <= BufLen))
-	{
-		LMakePath(s, BufLen, d->BasePath, Name);
-		Status = true;
-	}
-	else LAssert(!"Not enough output buffer to write path.");
-
-	return Status;
+	auto e = d->BasePath + strlen(d->BasePath);
+	auto sep = e > d->BasePath && e[-1] == DIR_CHAR ? "" : DIR_STR;
+	auto ch = sprintf_s(s, BufLen, "%s%s%s", d->BasePath, sep, GetName());
+	return ch > 0;
 }
-
 
 size_t Utf8To16Cpy(uint16_t *out, ssize_t outChar, uint8_t *in, ssize_t inChar = -1)
 {

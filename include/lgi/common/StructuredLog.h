@@ -35,6 +35,27 @@ inline void StructIo(LStructuredIo &io, LString &s)
 		});
 }
 
+inline void StructIo(LStructuredIo &io, LStringPipe &p)
+{
+	// auto obj = io.StartObj("LStringPipe");
+	if (io.GetWrite())
+	{
+		p.Iterate([&io](auto ptr, auto bytes)
+		{
+			io.String(ptr, bytes);
+			return true;
+		});
+	}
+	else
+	{
+		io.Decode([&p](auto type, auto sz, auto ptr, auto name)
+		{
+			if (type == GV_STRING && ptr && sz > 0)
+				p.Write(ptr, sz);
+		});
+	}
+}
+
 inline void StructIo(LStructuredIo &io, LRect &r)
 {
 	auto obj = io.StartObj("LRect");
@@ -89,7 +110,7 @@ public:
 	}
 
 	// Read and decode to string objects.
-	bool Read(std::function<void(LVariantType, size_t, void*, const char*)> callback)
+	bool Read(std::function<void(LVariantType, size_t, void*, const char*)> callback, Progress *prog = NULL)
 	{
 		if (io.GetWrite())
 		{
@@ -101,11 +122,29 @@ public:
 		{
 			if (!io.Length(f.GetSize()))
 				return false;
-			if (f.Read(io.AddressOf(), f.GetSize()) != f.GetSize())
-				return false;
+
+			if (prog)
+				prog->SetRange(LRange(0, f.GetSize()));
+
+			for (int64_t i=0; i<f.GetSize(); )
+			{
+				size_t blk = MIN(f.GetSize() - i, 128 << 20);
+				if (f.Read(io.AddressOf(i), blk) != blk)
+					return false;
+				i += blk;
+				if (prog)
+				{
+					prog->Value(i);
+					if (prog->IsCancelled())
+						return false;
+				}
+			}
 		}
 
-		return io.Decode(callback);
+		if (prog && prog->IsCancelled())
+			return false;
+
+		return io.Decode(callback, prog);
 	}
 
 	// Read and convert to a string.

@@ -96,7 +96,7 @@ bool LStringLayout::Add(const char *Str, LCss *Style)
 				r = new LLayoutRun(Style);
 				r->TextDecoration(LCss::TextDecorUnderline);
 				s = e + 1; // Skip the '&' itself
-				LUtf8Ptr p(s); // Find the end of the next unicode char
+				LUtf8Ptr p(s); // Find the end of the next Unicode char
 				p++;
 				if ((const char*)p.GetPtr() == s)
 					break; // No more text: exit
@@ -558,19 +558,19 @@ void LStringLayout::Paint(	LSurface *pDC,
 		return;
 
 	#ifdef WINNATIVE
-	LRegion Rgn(rc);
+		LRegion Rgn(rc);
 	#else
-	// Fill the background...
-	if (!Back.IsTransparent())
-	{
-		pDC->Colour(Back);
-		pDC->Rectangle(&rc);
-	}
-	int Shift = LDisplayString::FShift;
+		// Fill the background...
+		if (!Back.IsTransparent())
+		{
+			pDC->Colour(Back);
+			pDC->Rectangle(&rc);
+		}
+		int Shift = LDisplayString::FShift;
 	#endif		
 	
 	LColour FocusFore = LColour(L_FOCUS_SEL_FORE);
-	
+
 	// Draw all the text
 	for (auto ds: Strs)
 	{
@@ -594,10 +594,10 @@ void LStringLayout::Paint(	LSurface *pDC,
 		{
 			f->Colour(Focused ? FocusFore : s->Fore, Bk);
 			#ifdef WINNATIVE
-			s->Draw(pDC, r.x1, r.y1, &r);
+				s->Draw(pDC, r.x1, r.y1, &r);
 			#else
-			LPoint k((pt.x << Shift) + s->Fx, (pt.y + s->y) << Shift);
-			s->FDraw(pDC, k.x, k.y);
+				LPoint k((pt.x << Shift) + s->Fx, (pt.y + s->y) << Shift);
+				s->FDraw(pDC, k.x, k.y);
 			#endif
 		}
 		else
@@ -605,29 +605,29 @@ void LStringLayout::Paint(	LSurface *pDC,
 			f->Transparent(Bk.IsTransparent());
 			f->Colour(LColour(L_LIGHT), Bk);
 			#ifdef WINNATIVE
-			s->Draw(pDC, r.x1+1, r.y1+1, &r);
+				s->Draw(pDC, r.x1+1, r.y1+1, &r);
 			#else
-			LPoint k(((pt.x+1) << Shift) + s->Fx, (pt.y + 1 + s->y) << Shift);
-			s->FDraw(pDC, k.x, k.y);
+				LPoint k(((pt.x+1) << Shift) + s->Fx, (pt.y + 1 + s->y) << Shift);
+				s->FDraw(pDC, k.x, k.y);
 			#endif
 				
 			f->Transparent(true);
 			f->Colour(LColour(L_LOW), LColour(L_MED));
 			#ifdef WINNATIVE
-			s->Draw(pDC, r.x1, r.y1, &r);
+				s->Draw(pDC, r.x1, r.y1, &r);
 			#else
-			s->FDraw(pDC, (pt.x << Shift) + s->Fx, (pt.y + s->y) << Shift);
+				s->FDraw(pDC, (pt.x << Shift) + s->Fx, (pt.y + s->y) << Shift);
 			#endif
 		}
 	}
 
 	#ifdef WINNATIVE
-	// Fill any remaining area with background...
-	if (!Back.IsTransparent())
-	{
-		pDC->Colour(Back);
-		for (LRect *r=Rgn.First(); r; r=Rgn.Next())
-			pDC->Rectangle(r);
-	}
+		// Fill any remaining area with background...
+		if (!Back.IsTransparent())
+		{
+			pDC->Colour(Back);
+			for (LRect *r=Rgn.First(); r; r=Rgn.Next())
+				pDC->Rectangle(r);
+		}
 	#endif
 }

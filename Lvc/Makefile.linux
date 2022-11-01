@@ -21,6 +21,7 @@ ifeq ($(Build),Debug)
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
+		-L../../../../codelib/libssh/build/src \
 		-lssh \
 		-lmagic \
 		-static-libgcc  \
@@ -39,6 +40,7 @@ else
 	Flags += -s -Os -std=c++14
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
+		-L../../../../codelib/libssh/build/src \
 		-lssh \
 		-lmagic \
 		-static-libgcc  \
@@ -66,7 +68,6 @@ Source =	Src/VcFolder.cpp \
 			../src/common/Widgets/ControlTree.cpp \
 			../src/common/Text/XmlTreeUi.cpp \
 			../src/common/Text/DeEscape.cpp \
-			../src/common/Lgi/SubProcess.cpp \
 			../src/common/Lgi/StructuredLog.cpp \
 			../src/common/Lgi/LgiMain.cpp \
 			../src/common/Gdc2/Filters/Png.cpp
@@ -379,6 +380,7 @@ cleanall :
 	+make -C "../" -f "Makefile.linux" clean
 
 VPATH=%.cpp \
+	../../../../codelib/libssh/include \
 	./Src \
 	./Resources \
 	../include/lgi/linux/Gtk \

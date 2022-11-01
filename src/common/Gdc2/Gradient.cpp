@@ -30,7 +30,7 @@ public:
 			Alpha = 0;
 
 			Ptr = d->Base;
-			Bytes = GColourSpaceToBits(d->Cs) / 8;
+			Bytes = LColourSpaceToBits(d->Cs) / 8;
 			return true;
 		}
 
@@ -155,12 +155,12 @@ class LHtmlLinearGradient : public GGradient
 public:
 	void Rectangle(int X, int Y)
 	{
-		COLOUR Fore = CBit(24, c, GColourSpaceToBits(Dest->Cs));
+		COLOUR Fore = CBit(24, c, LColourSpaceToBits(Dest->Cs));
 		int Fr = R24(Fore);
 		int Fg = G24(Fore);
 		int Fb = B24(Fore);
 
-		COLOUR Back = CBit(24, Background, GColourSpaceToBits(Dest->Cs));
+		COLOUR Back = CBit(24, Background, LColourSpaceToBits(Dest->Cs));
 		int Br = R24(Back);
 		int Bg = G24(Back);
 		int Bb = B24(Back);
@@ -212,7 +212,7 @@ public:
 			double CosA = cos(Ang);
 			int CompY = sin(Ang) * (y - Ky);
 
-			switch (GColourSpaceToBits(Dest->Cs))
+			switch (LColourSpaceToBits(Dest->Cs))
 			{
 				case 16:
 				{
@@ -269,12 +269,12 @@ public:
 
 	void Rectangle(int X, int Y)
 	{
-		COLOUR Fore = CBit(24, c, GColourSpaceToBits(Dest->Cs));
+		COLOUR Fore = CBit(24, c, LColourSpaceToBits(Dest->Cs));
 		int Fr = R24(Fore);
 		int Fg = G24(Fore);
 		int Fb = B24(Fore);
 
-		COLOUR Back = CBit(24, Background, GColourSpaceToBits(Dest->Cs));
+		COLOUR Back = CBit(24, Background, LColourSpaceToBits(Dest->Cs));
 		int Br = R24(Back);
 		int Bg = G24(Back);
 		int Bb = B24(Back);
@@ -293,7 +293,7 @@ public:
 			DySq *= DySq;
 			double Dx;
 
-			switch (GColourSpaceToBits(Dest->Cs))
+			switch (LColourSpaceToBits(Dest->Cs))
 			{
 				case 16:
 				{

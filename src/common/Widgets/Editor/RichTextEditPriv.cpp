@@ -365,26 +365,7 @@ LRichTextPriv::~LRichTextPriv()
 {
 	if (IsBusy(true))
 	{
-		uint64 Start = LCurrentTime();
-		uint64 Msg = Start;
-		while (IsBusy())
-		{
-			uint64 Now = LCurrentTime();
-			LSleep(10);
-			LYield();
-
-			if (Now - Msg > 1000)
-			{
-				LgiTrace("%s:%i - Waiting for blocks: %i\n", _FL, (int)(Now-Start));
-				Msg = Now;
-			}
-
-			if (Now - Start > 10000)
-			{
-				LAssert(0);
-				Start = Now;
-			}
-		}
+		LgiMsg(View, "LRichText worker thread still busy with tasks.", "Error");
 	}
 	
 	Empty();

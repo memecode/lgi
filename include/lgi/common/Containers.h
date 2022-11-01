@@ -114,6 +114,30 @@ public:
 			return !(*this == it);
 		}
 
+		bool operator <(const Iter &it) const
+		{
+			CHECK_THREAD
+			return Cur < it.Cur;
+		}
+
+		bool operator <=(const Iter &it) const
+		{
+			CHECK_THREAD
+			return Cur <= it.Cur;
+		}
+
+		bool operator >(const Iter &it) const
+		{
+			CHECK_THREAD
+			return Cur > it.Cur;
+		}
+
+		bool operator >=(const Iter &it) const
+		{
+			CHECK_THREAD
+			return Cur >= it.Cur;
+		}
+
 		bool In() const
 		{
 			CHECK_THREAD
@@ -1011,6 +1035,38 @@ public:
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0) override;
 
 	bool Write(const LString &s) { return Write(s.Get(), s.Length()) == s.Length(); }
+
+	/// Search for a substring and return it's index, or -1 if not found.
+	ssize_t Find(LString str, bool caseSensitive = true);
+
+	/// Iterate over the data in the container
+	/// Callback should return true to keep iterating...
+	void Iterate(std::function<bool(uint8_t*, size_t)> callback, bool reverse = false);
+
+	/// For processes that read from one source and then write into this container, it is better
+	/// to not have to copy the data into some local buffer and then again into the mem queue.
+	/// So this allows allocating internal blocks and returning them directly to the writer. After
+	/// the source has written into the internal block the client calls Buffer::Commit to tell the
+	/// LMemQueue how much data has been written.
+	class LgiClass Buffer
+	{
+		friend class LMemQueue;
+		LMemQueue *mq = NULL;
+		Block *blk = NULL;
+		
+	public:
+		uint8_t *ptr = NULL;
+		size_t len = 0;	
+	
+		Buffer(LMemQueue *memq) : mq(memq) {}
+
+		// Call this after writing data into the 'ptr' buffer.
+		bool Commit(size_t bytes);
+	};
+	
+	/// Find a buffer and return it. Call Buffer::Commit after writting data to the start of the block.
+	/// On error Buffer.ptr is NULL.
+	Buffer GetBuffer();
 };
 
 /// A version of GBytePipe for strings. Adds some special handling for strings.

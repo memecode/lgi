@@ -19,7 +19,7 @@ public:
 	bool MatchWord;
 	bool MatchCase;
 	bool SubDirs;
-	LArray<LString> ProjectFiles;
+	LString::Array ProjectFiles;
 	
 	FindParams(const FindParams *Set = NULL)
 	{

@@ -10,10 +10,10 @@
 			<Node File="../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Lgi/StructuredLog.cpp" Type="2" Platforms="15" />
 			<Node File="../include/lgi/common/StructuredLog.h" Type="3" Platforms="15" />
-			<Node File="../src/common/Lgi/SubProcess.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Text/XmlTreeUi.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Ssh" Type="1" Platforms="15" Id="1">
+			<Node File="../include/lgi/common/Ssh.h" Type="3" Platforms="15" />
 			<Node File="./Src/SshConnection.cpp" Type="2" Platforms="15" />
 			<Node File="./Src/SshConnection.h" Type="3" Platforms="15" />
 		</Node>
@@ -29,7 +29,7 @@
 		<Node File="./Src/VcFolder.cpp" Type="2" Platforms="15" />
 		<Node File="./Src/VcFolder.h" Type="3" Platforms="15" />
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" />
+	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Node Name="Resources" Type="1" Platforms="15" Id="1">
 		<Node File="./Resources/icon32.png" Type="6" Platforms="15" />
 		<Node File="./installer-zip.py" Type="8" Platforms="15" />
@@ -63,9 +63,11 @@
 			<IncludePaths>
 				<All>
 					<Debug>Src
-../include</Debug>
+../include
+../../../../codelib/libssh/include</Debug>
 					<Release>Src
-../include</Release>
+../include
+../../../../codelib/libssh/include</Release>
 				</All>
 				<Linux>
 					<Debug>../include/lgi/linux
@@ -108,16 +110,19 @@
 				<All>Executable</All>
 			</TargetType>
 			<LibraryPaths>
-				<All />
+				<All>
+					<Debug>../../../../codelib/libssh/build/src</Debug>
+					<Release>../../../../codelib/libssh/build/src</Release>
+				</All>
 				<Linux />
 			</LibraryPaths>
-			<TargetName>
-				<Linux />
-			</TargetName>
 			<Defines>
 				<All />
 				<Linux />
 			</Defines>
+			<TargetName>
+				<Linux />
+			</TargetName>
 			<ApplicationIcon />
 		</Build>
 		<Editor>
@@ -134,23 +139,23 @@
 			<CommentFile />
 			<CommentFunction />
 		</Editor>
-		<Advanced>
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-			<OtherMakefileRules />
-		</Advanced>
 		<Remote>
 			<RemoteUri />
 			<RemotePass />
 		</Remote>
 		<Debug>
+			<Environment />
 			<Arguments>
 				<All />
 			</Arguments>
-			<Environment />
 			<DebugAdmin />
 			<InitialDir />
 		</Debug>
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
 	</Settings>
 </Project>
