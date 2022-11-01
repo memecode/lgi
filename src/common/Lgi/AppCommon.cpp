@@ -53,9 +53,9 @@ LJson *LAppPrivate::GetConfig()
 			#define DEFAULT(var, val) \
 				if (Config->Get(var).Length() == 0) \
 					Dirty |= Config->Set(var, val);
-			DEFAULT("Linux.Keys.Shift", "GDK_SHIFT_MASK");
-			DEFAULT("Linux.Keys.Ctrl", "GDK_CONTROL_MASK");
-			DEFAULT("Linux.Keys.Alt", "GDK_MOD1_MASK");
+			DEFAULT(LApp::CfgLinuxKeysShift, "GDK_SHIFT_MASK");
+			DEFAULT(LApp::CfgLinuxKeysCtrl, "GDK_CONTROL_MASK");
+			DEFAULT(LApp::CfgLinuxKeysAlt, "GDK_MOD1_MASK");
 
 			auto Sys =
 				#if defined(MAC)
@@ -63,12 +63,21 @@ LJson *LAppPrivate::GetConfig()
 				#else
 				"GDK_SUPER_MASK";
 				#endif
-			DEFAULT("Linux.Keys.System", Sys);
+			DEFAULT(LApp::CfgLinuxKeysSystem, Sys);
 			DEFAULT("Linux.Keys.Debug", "0");
 			DEFAULT("Language", "-");
-			DEFAULT("Fonts.GlyphSub", "1");
+
+			DEFAULT("Fonts.Comment", "Use CSS hex definitions here, ie #RRGGBB in hex.");
+			DEFAULT(LApp::CfgFontsGlyphSub, "1");
+			DEFAULT(LApp::CfgFontsPointSizeOffset, "0");
+			DEFAULT(LApp::CfgFontsSystemFont, "-");
+			DEFAULT(LApp::CfgFontsBoldFont, "-");
+			DEFAULT(LApp::CfgFontsMonoFont, "-");
+			DEFAULT(LApp::CfgFontsSmallFont, "-");
+			DEFAULT(LApp::CfgFontsCaptionFont, "-");
+			DEFAULT(LApp::CfgFontsMenuFont, "-");
 				
-			DEFAULT("Colours.Comment", "Use CSS hex definitions here, ie #RRGGBB in hex.");
+			DEFAULT("Colours.Comment", "Fonts are specified in the <face>:<pointSize> format.");
 			#define _(name) \
 				if (L_##name < L_MAXIMUM) \
 					DEFAULT("Colours.L_" #name, "-");

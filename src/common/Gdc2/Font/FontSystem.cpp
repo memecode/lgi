@@ -168,11 +168,9 @@ bool LFontSystem::GetDefaultGlyphSub()
 {
 	if (!d->CheckedConfig && LAppInst)
 	{
-		auto GlyphSub = LAppInst->GetConfig("Fonts.GlyphSub");
+		auto GlyphSub = LAppInst->GetConfig(LApp::CfgFontsGlyphSub);
 		if (GlyphSub)
-		{
 			d->DefaultGlyphSub = atoi(GlyphSub) != 0;
-		}
 		d->CheckedConfig = true;
 	}
 
