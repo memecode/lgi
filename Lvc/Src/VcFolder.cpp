@@ -1886,7 +1886,7 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 
 			Prog.SetDescription("Reading diff lines...");
 			Prog.SetRange(LRange(0, a.Length()));
-			Prog.SetYieldTime(300);
+			// Prog.SetYieldTime(300);
 
 			for (unsigned i=0; i<a.Length(); i++)
 			{

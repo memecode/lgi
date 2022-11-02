@@ -2864,7 +2864,6 @@ bool IdeProject::SaveFile()
 {
 	auto Full = GetFullPath();
 
-	printf("IdeProject::SaveFile %s %i\n", Full.Get(), d->Dirty);
 	if (ValidStr(Full) && d->Dirty)
 	{
 		LFile f;
@@ -2873,24 +2872,12 @@ bool IdeProject::SaveFile()
 			f.SetSize(0);
 
 			LXmlTree x;
-			LProgressDlg Prog(d->App, 1000);
-			Prog.SetAlwaysOnTop(true);
-			Prog.SetDescription("Serializing project XML...");
-			Prog.SetYieldTime(200);
-			Prog.SetCanCancel(false);
-
 			d->Settings.Serialize(this, true /* write */);
-			
-			LStringPipe Buf(4096);			
-			if (x.Write(this, &Buf, &Prog))
-			{
-				LCopyStreamer Cp;
-				Prog.SetDescription("Writing XML...");
-				LYield();
-				if (Cp.Copy(&Buf, &f))
-					d->Dirty = false;
-			}
-			else LgiTrace("%s:%i - Failed to write XML.\n", _FL);
+
+			if (x.Write(this, &f))
+				d->Dirty = false;
+			else
+				LgiTrace("%s:%i - Failed to write XML.\n", _FL);
 		}
 		else LgiTrace("%s:%i - Couldn't open '%s' for writing.\n", _FL, Full.Get());
 	}
