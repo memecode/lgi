@@ -1724,7 +1724,7 @@ void LVmDebuggerWnd::Run()
 	while (d->RunLoop && Visible())
 	{
 		LYield();
-		LSleep(1);
+		LSleep(20);
 	}
 	Quit();
 }

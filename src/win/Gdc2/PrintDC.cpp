@@ -15,18 +15,20 @@ public:
 	}
 };
 
+/*
 BOOL CALLBACK LAbortProc(HDC hdc, int iError)
 {
-	LYield();
 	return true;
 }
+*/
 
 LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName)
 {
 	d = new GPrintDCPrivate;
 	hDC = (HDC) Handle;
 
-	SetAbortProc(hDC, LAbortProc);
+	// Does this even do anything useful?
+	// SetAbortProc(hDC, LAbortProc);
 	
 	// Start document
 	if (hDC)

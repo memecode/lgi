@@ -17,15 +17,15 @@ static char sUpdateError[] = "Update script error: %s";
 
 struct LSoftwareUpdatePriv
 {
-	LAutoString Name;
-	LAutoString UpdateUri;
-	LAutoString Proxy;
-	LAutoString Error;
-	LAutoString TempPath;
+	LString Name;
+	LString UpdateUri;
+	LString Proxy;
+	LString Error;
+	LString TempPath;
 
 	void SetError(int Id, const char *Def = 0)
 	{
-		Error.Reset(NewStr(LLoadString(Id, Def)));
+		Error = LLoadString(Id, Def);
 	}
 
 	class UpdateThread : public LThread
@@ -117,11 +117,11 @@ struct LSoftwareUpdatePriv
 								{
 									LXmlTag *t;
 									if ((t = Root.GetChildTag("version")))
-										Info->Version.Reset(NewStr(t->GetContent()));
+										Info->Version = t->GetContent();
 									if ((t = Root.GetChildTag("revision")))
-										Info->Build.Reset(NewStr(t->GetContent()));
+										Info->Build = t->GetContent();
 									if ((t = Root.GetChildTag("uri")))
-										Info->Uri.Reset(NewStr(t->GetContent()));
+										Info->Uri = t->GetContent();
 									if ((t = Root.GetChildTag("date")))
 									{
 										Info->Date.SetFormat(GDTF_YEAR_MONTH_DAY);
@@ -135,7 +135,7 @@ struct LSoftwareUpdatePriv
 									LXmlTag *Msg = Root.GetChildTag("msg");
 									LStringPipe p;
 									p.Print(LLoadString(L_ERROR_UPDATE, sUpdateError), Msg?Msg->GetContent():(char*)"Unknown");
-									d->Error.Reset(p.NewStr());
+									d->Error = p.NewGStr();
 									LgiTrace("UpdateURI=%s\n", GetUri.Get());
 								}
 							}
@@ -238,21 +238,21 @@ struct LSoftwareUpdatePriv
 
 	class UpdateDownload : public LThread, public LProxyStream
 	{
-		LSoftwareUpdate::UpdateInfo *Info;
+		const LSoftwareUpdate::UpdateInfo *Info;
 		LUri *Uri;
 		LUri *Proxy;
 		LStream *Local;
-		LAutoString *Err;
+		LString *Err;
 		int *Status;
 
 	public:
 		int64 Progress, Total;
 
-		UpdateDownload( LSoftwareUpdate::UpdateInfo *info,
+		UpdateDownload( const LSoftwareUpdate::UpdateInfo *info,
 		                LUri *uri,
 		                LUri *proxy,		                
 		                LStream *local,
-		                LAutoString *err,
+		                LString *err,
 		                int *status) : LThread("UpdateDownload"), LProxyStream(local)
 		{
 			Info = info;
@@ -289,11 +289,11 @@ struct LSoftwareUpdatePriv
 			LHttp::ContentEncoding Enc;
 			if (!Http.Open(s, Uri->sHost, Uri->Port))
 			{
-				Err->Reset(NewStr(LLoadString(L_ERROR_CONNECT_FAILED, sSocketConnectFailed)));
+				*Err = LLoadString(L_ERROR_CONNECT_FAILED, sSocketConnectFailed);
 			}
 			else if (!Http.Get(Info->Uri, 0, Status, this, &Enc))
 			{
-				Err->Reset(NewStr(LLoadString(L_ERROR_HTTP_FAILED, sHttpDownloadFailed)));
+				*Err = LLoadString(L_ERROR_HTTP_FAILED, sHttpDownloadFailed);
 			}
 
 			return 0;
@@ -307,10 +307,10 @@ LSoftwareUpdate::LSoftwareUpdate(const char *SoftwareName,
 								const char *OptionalTempPath)
 {
 	d = new LSoftwareUpdatePriv;
-	d->Name.Reset(NewStr(SoftwareName));
-	d->UpdateUri.Reset(NewStr(UpdateUri));
-	d->Proxy.Reset(NewStr(ProxyUri));
-	d->TempPath.Reset(NewStr(OptionalTempPath));
+	d->Name = SoftwareName;
+	d->UpdateUri = UpdateUri;
+	d->Proxy = ProxyUri;
+	d->TempPath = OptionalTempPath;
 }
 
 LSoftwareUpdate::~LSoftwareUpdate()
@@ -318,7 +318,7 @@ LSoftwareUpdate::~LSoftwareUpdate()
 	DeleteObj(d);
 }
 
-bool LSoftwareUpdate::CheckForUpdate(UpdateInfo &Info, LViewI *WithUi, bool IncBetas)
+void LSoftwareUpdate::CheckForUpdate(UpdateInfo &Info, LViewI *WithUi, bool IncBetas, std::function<void(bool, const char*)> callback)
 {
 	LSoftwareUpdatePriv::UpdateThread Update(d, &Info, IncBetas);
 	
@@ -335,10 +335,11 @@ bool LSoftwareUpdate::CheckForUpdate(UpdateInfo &Info, LViewI *WithUi, bool IncB
 		}
 	}
 
-	return Update.Status;
+	if (callback)
+		callback(Update.Status, GetErrorMessage());
 }
 
-bool LSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *WithUi)
+bool LSoftwareUpdate::ApplyUpdate(const UpdateInfo &Info, bool DownloadOnly, LViewI *WithUi)
 {
 	if (!Info.Uri)
 	{
@@ -447,7 +448,7 @@ bool LSoftwareUpdate::ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *W
 	return false;
 }
 
-char *LSoftwareUpdate::GetErrorMessage()
+const char *LSoftwareUpdate::GetErrorMessage()
 {
 	return d->Error;
 }
