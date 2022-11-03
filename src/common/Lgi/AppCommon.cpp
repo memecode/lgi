@@ -1,7 +1,13 @@
 #include "lgi/common/Lgi.h"
 #include "AppPriv.h"
 
-::LString LApp::GetConfigPath()
+#ifdef LINUX
+namespace Gtk {
+#include "LgiWidget.h"
+}
+#endif
+
+LString LApp::GetConfigPath()
 {
 	#if defined(LINUX)
 	::LFile::Path p(LSP_HOME);
@@ -55,23 +61,38 @@ LJson *LAppPrivate::GetConfig()
 					Dirty |= Config->Set(var, val);
 
 			#ifdef LINUX
-			DEFAULT(LApp::CfgLinuxKeysShift, "GDK_SHIFT_MASK");
-			DEFAULT(LApp::CfgLinuxKeysCtrl, "GDK_CONTROL_MASK");
-			DEFAULT(LApp::CfgLinuxKeysAlt, "GDK_MOD1_MASK");
 
-			auto Sys =
-				#if defined(MAC)
-				"GDK_MOD2_MASK";
-				#else
-				"GDK_SUPER_MASK";
-				#endif
-			DEFAULT(LApp::CfgLinuxKeysSystem, Sys);
-			DEFAULT("Linux.Keys.Debug", "0");
+				DEFAULT(LApp::CfgLinuxKeysShift, "GDK_SHIFT_MASK");
+				DEFAULT(LApp::CfgLinuxKeysCtrl, "GDK_CONTROL_MASK");
+				DEFAULT(LApp::CfgLinuxKeysAlt, "GDK_MOD1_MASK");
+
+				auto Sys =
+					#if defined(MAC)
+					"GDK_MOD2_MASK";
+					#else
+					"GDK_SUPER_MASK";
+					#endif
+				DEFAULT(LApp::CfgLinuxKeysSystem, Sys);
+				DEFAULT("Linux.Keys.Debug", "0");
+				
+				auto str = [](Gtk::GDK_MouseButtons btn)
+				{
+					LString s;
+					s.Printf("%i", btn);
+					return s;
+				};
+				
+				DEFAULT(LApp::CfgLinuxMouseLeft,    str(Gtk::GDK_LEFT_BTN));
+				DEFAULT(LApp::CfgLinuxMouseMiddle,  str(Gtk::GDK_MIDDLE_BTN));
+				DEFAULT(LApp::CfgLinuxMouseRight,   str(Gtk::GDK_RIGHT_BTN));
+				DEFAULT(LApp::CfgLinuxMouseBack,    str(Gtk::GDK_BACK_BTN));
+				DEFAULT(LApp::CfgLinuxMouseForward, str(Gtk::GDK_FORWARD_BTN));
+
 			#endif
 
 			DEFAULT("Language", "-");
 
-			DEFAULT("Fonts.Comment", "Use CSS hex definitions here, ie #RRGGBB in hex.");
+			DEFAULT("Fonts.Comment", "Fonts are specified in the <face>:<pointSize> format.");
 			DEFAULT(LApp::CfgFontsGlyphSub, "1");
 			DEFAULT(LApp::CfgFontsPointSizeOffset, "0");
 			DEFAULT(LApp::CfgFontsSystemFont, "-");
@@ -81,7 +102,7 @@ LJson *LAppPrivate::GetConfig()
 			DEFAULT(LApp::CfgFontsCaptionFont, "-");
 			DEFAULT(LApp::CfgFontsMenuFont, "-");
 				
-			DEFAULT("Colours.Comment", "Fonts are specified in the <face>:<pointSize> format.");
+			DEFAULT("Colours.Comment", "Use CSS hex definitions here, ie #RRGGBB in hex.");
 			#define _(name) \
 				if (L_##name < L_MAXIMUM) \
 					DEFAULT("Colours.L_" #name, "-");

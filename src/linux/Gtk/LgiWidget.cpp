@@ -179,11 +179,28 @@ gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 			ev->type == GDK_2BUTTON_PRESS ||
 			ev->type == GDK_3BUTTON_PRESS);
 
-	m.Left		(ev->button == GDK_LEFT_BTN);
-	m.Middle	(ev->button == GDK_MIDDLE_BTN);
-	m.Right		(ev->button == GDK_RIGHT_BTN);
-	m.Button1	(ev->button == GDK_BACK_BTN);
-	m.Button2	(ev->button == GDK_FORWARD_BTN);
+	#define BTN_CONFIG(option, gtkSym) \
+		static int Btn##option = -1; \
+		if (Btn##option < 0) \
+		{ \
+			auto cfg = LAppInst->GetConfig(LApp::CfgLinuxMouse##option); \
+			if (cfg) Btn##option = Atoi(cfg.Get()); \
+			else Btn##option = gtkSym; \
+		}
+	
+	// This user can override the default button mappings by editing 'lgi.json'.
+	// See also LAppPrivate::GetConfig() for where the defaults are written.	
+	BTN_CONFIG(Left,    GDK_LEFT_BTN);
+	BTN_CONFIG(Middle,  GDK_MIDDLE_BTN);
+	BTN_CONFIG(Right,   GDK_RIGHT_BTN);
+	BTN_CONFIG(Back,    GDK_BACK_BTN);
+	BTN_CONFIG(Forward, GDK_FORWARD_BTN);
+
+	m.Left		(ev->button == BtnLeft);
+	m.Middle	(ev->button == BtnMiddle);
+	m.Right		(ev->button == BtnRight);
+	m.Button1	(ev->button == BtnBack);
+	m.Button2	(ev->button == BtnForward);
 
 	m.Ctrl  ((ev->state & GDK_CONTROL_MASK) != 0);
 	m.Shift ((ev->state & GDK_SHIFT_MASK)   != 0);
