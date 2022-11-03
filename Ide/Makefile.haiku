@@ -45,8 +45,8 @@ else
 endif
 
 # Dependencies
-Sources =	Code/GDebugContext.cpp \
-			Code/GDebugger.cpp \
+Sources =	Code/DebugContext.cpp \
+			Code/Debugger.cpp \
 			Code/AddFtpFile.cpp \
 			Code/WebFldDlg.cpp \
 			Code/DocEdit.cpp \

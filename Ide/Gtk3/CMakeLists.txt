@@ -79,10 +79,10 @@ set (CommonSource
 	Code/FindSymbol.cpp
 	Code/FtpThread.h
 	Code/FtpThread.cpp
-	Code/GDebugContext.h
-	Code/GDebugContext.cpp
-	Code/GDebugger.h
-	Code/GDebugger.cpp
+	Code/DebugContext.h
+	Code/DebugContext.cpp
+	Code/Debugger.h
+	Code/Debugger.cpp
 	Code/GHistory.h
 	Code/GHistory.cpp
 	Code/IdeDoc.h

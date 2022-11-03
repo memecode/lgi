@@ -161,10 +161,10 @@
     <ClCompile Include="Code\SimpleCppParser.cpp">
       <Filter>Source Files\Search\Simple Cpp Parser</Filter>
     </ClCompile>
-    <ClCompile Include="Code\GDebugContext.cpp">
+    <ClCompile Include="Code\DebugContext.cpp">
       <Filter>Source Files\Debugger</Filter>
     </ClCompile>
-    <ClCompile Include="Code\GDebugger.cpp">
+    <ClCompile Include="Code\Debugger.cpp">
       <Filter>Source Files\Debugger</Filter>
     </ClCompile>
     <ClCompile Include="Code\AddFtpFile.cpp">

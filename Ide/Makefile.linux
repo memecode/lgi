@@ -76,8 +76,8 @@ Source =	Code/WebFldDlg.cpp \
 			Code/IdeDoc.cpp \
 			Code/IdeCommon.cpp \
 			Code/GHistory.cpp \
-			Code/GDebugger.cpp \
-			Code/GDebugContext.cpp \
+			Code/Debugger.cpp \
+			Code/DebugContext.cpp \
 			Code/FtpThread.cpp \
 			Code/FindSymbol.cpp \
 			Code/FindInFiles.cpp \

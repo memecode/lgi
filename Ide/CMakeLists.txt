@@ -85,9 +85,9 @@ set (CommonSource
 	Code/MemDumpViewer.cpp
 	Code/SpaceTabConv.cpp
 	Code/SysCharSupport.cpp
-	Code/GDebugContext.cpp
-	Code/GDebugger.cpp
-	Code/GHistory.cpp
+	Code/DebugContext.cpp
+	Code/Debugger.cpp
+	Code/History.cpp
 	Code/FindInFiles.cpp
 	Code/FindSymbol.cpp
 	Code/FtpThread.cpp
