@@ -676,7 +676,7 @@ bool LDataGrid::GetData(LArray<LDragData> &Data)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-class LDataGridFactory : public LViewFactory
+static class LDataGridFactory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
@@ -688,6 +688,5 @@ class LDataGridFactory : public LViewFactory
 
 		return 0;
 	}
-};
+}	DataGridFactory;
 
-static GDataGridFactory _Factory;

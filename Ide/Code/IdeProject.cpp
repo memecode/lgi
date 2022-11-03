@@ -491,11 +491,11 @@ public:
 		for (int Cfg = BuildDebug; Cfg < BuildMax; Cfg++)
 		{
 			// Set the config
-			auto cfgName = toString(Cfg);
+			auto cfgName = toString((BuildConfig)Cfg);
 			d->Settings.SetCurrentConfig(cfgName);
 		
 			// Get the defines setup
-			const char *PDefs = d->Settings.GetStr(ProjDefines, NULL, Platform);
+			auto PDefs = d->Settings.GetStr(ProjDefines, NULL, Platform);
 			if (ValidStr(PDefs))
 			{
 				LToken Defs(PDefs, " ;,\r\n");

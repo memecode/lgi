@@ -2622,7 +2622,7 @@ bool AppWnd::LoadLgi(const char *FileName)
 				Progress.SetDescription("Lexing...");
 				if (Xml.Read(Root, &f, 0))
 				{
-					Progress.SetLimits(0, Root->Children.Length()-1);
+					Progress.SetRange(LRange(0, Root->Children.Length()));
 
 					// convert Xml list into objects
 					int i=0;
@@ -3517,7 +3517,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 
 			DoEvery Ticker(200);
 			Progress.SetDescription("Reading resources...");
-			Progress.SetLimits(0, Lines.Length()-1);
+			Progress.SetRange(LRange(0, Lines.Length()));
 
 			if (String)
 			{

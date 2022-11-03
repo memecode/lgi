@@ -195,7 +195,7 @@
     <ClInclude Include="Code\FindSymbol.h" />
     <ClInclude Include="Code\FtpFile.h" />
     <ClInclude Include="Code\FtpThread.h" />
-    <ClInclude Include="Code\GDebugger.h" />
+    <ClInclude Include="Code\Debugger.h" />
     <ClInclude Include="Code\GHistory.h" />
     <ClInclude Include="Code\IdeDoc.h" />
     <ClInclude Include="Code\IdeDocPrivate.h" />
@@ -229,9 +229,9 @@
     <ClCompile Include="Code\FindInFiles.cpp" />
     <ClCompile Include="Code\FindSymbol.cpp" />
     <ClCompile Include="Code\FtpThread.cpp" />
-    <ClCompile Include="Code\GDebugContext.cpp" />
-    <ClCompile Include="Code\GDebugger.cpp" />
-    <ClCompile Include="Code\GHistory.cpp" />
+    <ClCompile Include="Code\DebugContext.cpp" />
+    <ClCompile Include="Code\Debugger.cpp" />
+    <ClCompile Include="Code\History.cpp" />
     <ClCompile Include="Code\IdeCommon.cpp" />
     <ClCompile Include="Code\IdeDoc.cpp" />
     <ClCompile Include="Code\IdeProject.cpp" />
