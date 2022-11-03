@@ -42,17 +42,6 @@ public:
 	virtual void SetType(const char *t);
 	
 	Progress &operator =(Progress &p);
-
-	[[deprecated]] virtual void SetParameter(int Which, int What) {}
-	[[deprecated]] virtual void GetLimits(int64 *l, int64 *h)
-	{
-		if (l) *l = Low;
-		if (h) *h = High;
-	}
-	[[deprecated]] virtual void SetLimits(int64 l, int64 h)
-	{
-		SetRange(LRange((ssize_t)l, (ssize_t)(h - l + 1)));
-	}
 };
 
 #endif
