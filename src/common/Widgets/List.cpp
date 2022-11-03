@@ -848,6 +848,9 @@ void LList::KeyScroll(int iTo, int iFrom, bool SelectItems)
 		if (End < 0) End = i - 1;
 	}
 
+	if (Items.Length() == 0)
+		return;
+
 	iTo = limit(iTo, 0, (int)Items.Length()-1);
 	iFrom = limit(iFrom, 0, (int)Items.Length()-1);
 	LListItem *To = Items.ItemAt(iTo);

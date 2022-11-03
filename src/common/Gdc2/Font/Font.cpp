@@ -848,7 +848,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 		Destroy();
 
 		auto Dpi = pSurface ? pSurface->GetDpi() : LScreenDpi();
-		float DpiScale = (float)Dpi.x / 96.0;
+		float DpiScale = (float)Dpi.x / 96.0f;
 	
 		d->hFont = Gtk::pango_font_description_new();
 		if (!d->hFont)

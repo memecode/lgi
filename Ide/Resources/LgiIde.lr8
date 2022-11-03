@@ -309,7 +309,7 @@
 					<EditBox Pos="140,28,321,48" ref="22" />
 				</td>
 				<td addr="3,1" class="fixed">
-					<Custom pos="371,28,384,48" ref="69" Ctrl="GHistory" />
+					<Custom pos="371,28,384,48" ref="69" Ctrl="LHistory" />
 				</td>
 			</tr>
 			<tr>
@@ -330,7 +330,7 @@
 					<Button pos="265,80,285,100" ref="25" toggle="0" />
 				</td>
 				<td addr="3,3" class="fixed">
-					<Custom pos="371,80,384,100" ref="23" Ctrl="GHistory" />
+					<Custom pos="371,80,384,100" ref="23" Ctrl="LHistory" />
 				</td>
 			</tr>
 			<tr>
@@ -544,7 +544,7 @@
 					<TreeView pos="21,187,209,270" ref="204" />
 				</td>
 				<td addr="1,1">
-					<Custom pos="350,194,510,284" ref="207" Ctrl="GSettingDetail" />
+					<Custom pos="350,194,510,284" ref="207" Ctrl="LSettingDetail" />
 				</td>
 			</tr>
 			<tr>

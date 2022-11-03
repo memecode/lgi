@@ -303,7 +303,7 @@ bool LDebugContext::UpdateLocals()
 				case GV_DOUBLE:
 				{
 					it->SetText(v.Type ? v.Type.Get() : "double", 1);
-					sprintf_s(s, sizeof(s), "%f", v.Value.Value.Dbl);
+					sprintf_s(s, sizeof(s), "%g", v.Value.Value.Dbl);
 					break;
 				}
 				case GV_STRING:

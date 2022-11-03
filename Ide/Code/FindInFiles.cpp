@@ -35,6 +35,12 @@ FindInFiles::FindInFiles(AppWnd *app, FindParams *params)
 
 	if (LoadFromResource(IDD_FIND_IN_FILES))
 	{
+		auto r = GetPos();
+		auto Scale = (float)LScreenDpi().x / 96.0;
+		r.x2 *= Scale;
+		r.y2 *= Scale;
+		SetPos(r);
+
 		MoveToCenter();
 
 		if (GetViewById(IDC_TYPE_HISTORY, TypeHistory))

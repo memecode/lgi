@@ -251,7 +251,7 @@ LImageList *LFileSelectPrivate::BtnIcons = NULL;
 LImageList *LFileSelectPrivate::TreeIcons = NULL;
 char *LFileSelectPrivate::InitPath = 0;
 bool LFileSelectPrivate::InitShowHiddenFiles = false;
-LRect LFileSelectPrivate::InitSize(0, 0, 600, 500);
+LRect LFileSelectPrivate::InitSize(0, 0, -1, -1);
 
 //////////////////////////////////////////////////////////////////////////
 // This class implements the UI for the selector.
@@ -892,8 +892,15 @@ LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 	d = select;
 	SetParent(d->Parent);
 	MinSize.ZOff(450, 300);
-	OldPos.Set(0, 0, 475, 350 + LAppInst->GetMetric(LGI_MET_DECOR_Y) );
-	SetPos(OldPos);
+
+	if (!d->InitSize.Valid())
+	{
+		auto Dpi = LScreenDpi();
+		auto Scale = (float)Dpi.x / 96.0;	
+		d->InitSize.Set(0, 0, (int)(650*Scale), (int)(450*Scale) + LAppInst->GetMetric(LGI_MET_DECOR_Y) );
+	}
+
+	SetPos(d->InitSize);
 
 	int x = 0, y = 0;
 	AddView(Tbl = new LTableLayout);
