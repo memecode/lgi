@@ -65,7 +65,7 @@ public:
             #if 1
             Menu = new GMenu();
             Menu->Attach(this);
-            GSubMenu *s = Menu->AppendSub("File");
+            LSubMenu *s = Menu->AppendSub("File");
             s->AppendItem("Open", 1, true);
             s->AppendItem("Save", 2, true);
             s->AppendItem("Close", 3, true);

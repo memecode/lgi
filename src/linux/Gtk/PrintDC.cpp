@@ -5,7 +5,7 @@
 #define PS_SCALE			10
 
 ///////////////////////////////////////////////////////////////////////////////////////
-class GPrintDCPrivate // : public GCups
+class LPrintDCPrivate // : public GCups
 {
 public:
 	class PrintPainter *p;
@@ -17,7 +17,7 @@ public:
 	LRect Clip;
 	Gtk::cairo_t *cr;
 	
-	GPrintDCPrivate(Gtk::GtkPrintContext *handle)
+	LPrintDCPrivate(Gtk::GtkPrintContext *handle)
 	{
 		cr = NULL;
 		p = 0;
@@ -25,7 +25,7 @@ public:
 		Handle = handle;
 	}
 	
-	~GPrintDCPrivate()
+	~LPrintDCPrivate()
 	{
 	}
 	
@@ -42,7 +42,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////
 LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName)
 {
-	d = new GPrintDCPrivate((Gtk::GtkPrintContext*)Handle);
+	d = new LPrintDCPrivate((Gtk::GtkPrintContext*)Handle);
 	d->PrintJobName = PrintJobName;
 	d->PrinterName = PrinterName;
 	d->cr = gtk_print_context_get_cairo_context(d->Handle);

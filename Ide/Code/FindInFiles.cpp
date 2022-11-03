@@ -51,7 +51,7 @@ FindInFiles::~FindInFiles()
 		DeleteObj(Params);
 }
 
-void SerializeHistory(GHistory *h, const char *opt, LOptionsFile *p, bool Write)
+void SerializeHistory(LHistory *h, const char *opt, LOptionsFile *p, bool Write)
 {
 	if (h && p)
 	{
@@ -381,7 +381,7 @@ LMessage::Result FindInFilesThread::OnEvent(LMessage *Msg)
 			Log(NewStr(Msg));
 
 			LArray<const char*> Ext;
-			GToken e(d->Params->Ext, ";, ");
+			LToken e(d->Params->Ext, ";, ");
 			for (int i=0; i<e.Length(); i++)
 			{
 				Ext.Add(e[i]);

@@ -31,7 +31,7 @@ struct GSymbolResult
 };
 
 /// A parser library for C++ code.
-class GCppParser
+class LCppParser
 {
 	struct GCppParserPriv *d;
 
@@ -55,8 +55,8 @@ public:
 		}
 	};
 	
-	GCppParser();
-	virtual ~GCppParser();
+	LCppParser();
+	virtual ~LCppParser();
 	
 	/// Parse a group of source code files.
 	void ParseCode

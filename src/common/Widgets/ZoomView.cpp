@@ -449,7 +449,7 @@ public:
 		Pal32 pal[256];
 		if (Src->GetColourSpace() == CsIndex8)
 		{
-			GPalette *inPal = Src->Palette();
+			LPalette *inPal = Src->Palette();
 			for (int i=0; i<256; i++)
 			{
 				GdcRGB *rgb = inPal ? (*inPal)[i] : NULL;
@@ -733,7 +733,7 @@ public:
 			}
 			case CsIndex8:
 			{
-				GPalette *inPal = Src->Palette();
+				LPalette *inPal = Src->Palette();
 				for (int i=0; i<256; i++)
 				{
 					GdcRGB *rgb = inPal ? (*inPal)[i] : NULL;

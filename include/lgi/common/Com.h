@@ -13,7 +13,7 @@
 #include "lgi/common/Variant.h"
 
 template <class T>
-class GUnknownImpl : public T
+class LUnknownImpl : public T
 {
 	int Count;
 
@@ -44,13 +44,13 @@ protected:
 	}
 
 public:
-	GUnknownImpl()
+	LUnknownImpl()
 	{
 		Count = 0;
 		TraceRefs = false;
 	}
 
-	virtual ~GUnknownImpl()
+	virtual ~LUnknownImpl()
 	{
 		Interfaces.DeleteObjects();
 	}
@@ -120,7 +120,7 @@ public:
 };
 
 template <class T>
-class GDispatchImpl : public T
+class LDispatchImpl : public T
 {
 public:
     HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT __RPC_FAR *pctinfo)
@@ -265,7 +265,7 @@ public:
 };
 
 /// This class wraps a LStream in an IStream interface...
-class LStreamWrap : public GUnknownImpl<IStream>
+class LStreamWrap : public LUnknownImpl<IStream>
 {
 	bool Own;
 	LString FileName;

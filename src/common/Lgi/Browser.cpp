@@ -19,23 +19,23 @@ enum {
 	IDC_SEARCH,
 };
 
-class GBrowserPriv;
-class GBrowserThread : public LThread, public LMutex
+class LBrowserPriv;
+class LBrowserThread : public LThread, public LMutex
 {
-	GBrowserPriv *d;
+	LBrowserPriv *d;
 	LArray<LAutoString> Work;
 	bool Loop;
 
 public:
-	GBrowserThread(GBrowserPriv *priv);
-	~GBrowserThread();
+	LBrowserThread(LBrowserPriv *priv);
+	~LBrowserThread();
 
 	bool Add(char *Uri);
 	void Stop();
 	int Main();
 };
 
-class GBrowserPriv : public LDocumentEnv
+class LBrowserPriv : public LDocumentEnv
 {
 public:
 	typedef LHashTbl<StrKey<char,false>,LStream*> Collection;
@@ -56,9 +56,9 @@ private:
 	Collection Files; // requires locking to access
 
 public:
-	GBrowser *Wnd;
+	LBrowser *Wnd;
 	Html1::LHtml *Html;
-	LAutoPtr<GBrowserThread> Thread;
+	LAutoPtr<LBrowserThread> Thread;
 	LEdit *UriEdit;
 	LEdit *SearchEdit;
 	LButton *Back;
@@ -68,10 +68,10 @@ public:
 	LArray<LString> History;
 	ssize_t CurHistory;
 	bool Loading;
-	GBrowser::GBrowserEvents *Events;
+	LBrowser::LBrowserEvents *Events;
 	LHttp Http;
 
-	GBrowserPriv(GBrowser *wnd)
+	LBrowserPriv(LBrowser *wnd)
 	{
 		Wnd = wnd;
 		Html = 0;
@@ -154,7 +154,7 @@ public:
 		else if (IsHttp)
 		{
 			if (!Thread)
-				Thread.Reset(new GBrowserThread(this));
+				Thread.Reset(new LBrowserThread(this));
 			Thread->Add(Uri);
 		}
 
@@ -297,28 +297,28 @@ public:
 	}
 };
 
-GBrowserThread::GBrowserThread(GBrowserPriv *priv) :
-	LThread("GBrowserThread.Thread"),
-	LMutex("GBrowserThread.Mutex")
+LBrowserThread::LBrowserThread(LBrowserPriv *priv) :
+	LThread("LBrowserThread.Thread"),
+	LMutex("LBrowserThread.Mutex")
 {
 	Loop = true;
 	d = priv;
 	Run();
 }
 
-GBrowserThread::~GBrowserThread()
+LBrowserThread::~LBrowserThread()
 {
 	Loop = false;
 	while (!IsExited())
 		LSleep(10);
 }
 
-void GBrowserThread::Stop()
+void LBrowserThread::Stop()
 {
 	d->Http.Close();
 }
 
-bool GBrowserThread::Add(char *Uri)
+bool LBrowserThread::Add(char *Uri)
 {
 	if (Lock(_FL))
 	{
@@ -329,7 +329,7 @@ bool GBrowserThread::Add(char *Uri)
 	return false;
 }
 
-int GBrowserThread::Main()
+int LBrowserThread::Main()
 {
 	bool IsBusy = false;
 
@@ -371,7 +371,7 @@ int GBrowserThread::Main()
 				{
 					LHttp::ContentEncoding Enc;
 					bool b = d->Http.Get(Uri, "Cache-Control:no-cache", &Status, p, &Enc);
-					GBrowserPriv::FilePtr f = d->Lock();
+					LBrowserPriv::FilePtr f = d->Lock();
 					if (!b)
 					{
 						p->Print("<h1>HTTP Error</h1>\nCode: %i<br>", Status);
@@ -387,9 +387,9 @@ int GBrowserThread::Main()
 	return false;
 }
 
-GBrowser::GBrowser(LViewI *owner, const char *Title, char *Uri)
+LBrowser::LBrowser(LViewI *owner, const char *Title, char *Uri)
 {
-	d = new GBrowserPriv(this);
+	d = new LBrowserPriv(this);
 	d->Back = 0;
 	d->Forward = 0;
 	d->UriEdit = 0;
@@ -432,12 +432,12 @@ GBrowser::GBrowser(LViewI *owner, const char *Title, char *Uri)
 	}
 }
 
-GBrowser::~GBrowser()
+LBrowser::~LBrowser()
 {
 	DeleteObj(d);
 }
 
-bool GBrowser::SetUri(const char *Uri)
+bool LBrowser::SetUri(const char *Uri)
 {
 	if (Uri)
 	{
@@ -473,7 +473,7 @@ bool GBrowser::SetUri(const char *Uri)
 	return true;
 }
 
-void GBrowser::OnPosChange()
+void LBrowser::OnPosChange()
 {
 	LRect c = GetClient();
 	LRect e = c;
@@ -514,12 +514,12 @@ void GBrowser::OnPosChange()
 		d->Html->SetPos(html);
 }
 
-void GBrowser::SetEvents(GBrowserEvents *Events)
+void LBrowser::SetEvents(LBrowserEvents *Events)
 {
 	d->Events = Events;
 }
 
-bool GBrowser::SetHtml(char *Html)
+bool LBrowser::SetHtml(char *Html)
 {
 	d->History.Length(++d->CurHistory);
 	d->Html->Name(Html);
@@ -530,7 +530,7 @@ bool GBrowser::SetHtml(char *Html)
 	return true;
 }
 
-int GBrowser::OnNotify(LViewI *c, LNotification n)
+int LBrowser::OnNotify(LViewI *c, LNotification n)
 {
 	switch (c->GetId())
 	{
@@ -595,13 +595,13 @@ int GBrowser::OnNotify(LViewI *c, LNotification n)
 	return 0;
 }
 
-LMessage::Result GBrowser::OnEvent(LMessage *m)
+LMessage::Result LBrowser::OnEvent(LMessage *m)
 {
 	switch (m->Msg())
 	{
 		case M_LOADED:
 		{
-			GBrowserPriv::FilePtr f = d->Lock();
+			LBrowserPriv::FilePtr f = d->Lock();
 
 			char *Uri = d->History[d->CurHistory];
 			LStream *s = f->Files->Find(Uri);

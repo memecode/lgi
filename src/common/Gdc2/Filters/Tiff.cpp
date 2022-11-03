@@ -579,7 +579,7 @@ LFilter::IoStatus GdcTiff::ProcessRead(LSurface *pDC)
 			if (s && Palette->Type == TYPE_USHORT)
 			{
 				int Colours = Palette->Count / 3;
-				GPalette *Pal = new GPalette(0, Colours);
+				LPalette *Pal = new LPalette(0, Colours);
 				if (Pal)
 				{
 					for (int i=0; i<Colours; i++)

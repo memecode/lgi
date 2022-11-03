@@ -17,7 +17,7 @@
 
 #include "resdefs.h"
 #include "FindSymbol.h"
-#include "GDebugger.h"
+#include "Debugger.h"
 #ifdef WIN32
 #include "resource.h"
 #endif
@@ -125,8 +125,21 @@ enum IdeMenuCmds
 	IDM_CONTINUE = 900
 };
 
-#define BUILD_TYPE_DEBUG		0
-#define BUILD_TYPE_RELEASE		1
+enum BuildConfig
+{
+	BuildDebug,
+	BuildRelease,
+	BuildMax
+};
+inline const char *toString(BuildConfig c)
+{
+	switch (c)
+	{
+		case BuildDebug: return "Debug";
+		case BuildRelease: return "Release";
+	}
+	return "#err";
+}
 
 #define OPT_EditorFont			"EdFont"
 #define OPT_Jobs				"Jobs"
@@ -268,7 +281,7 @@ public:
 	void OnBuildStateChanged(bool NewState);
 	void UpdateState(int Debugging = -1, int Building = -1);
 	void OnReceiveFiles(LArray<const char*> &Files) override;
-	int GetBuildMode();
+	BuildConfig GetBuildMode();
 	LTree *GetTree();
 	LOptionsFile *GetOptions();
 	LList *GetFtpLog();
@@ -278,7 +291,6 @@ public:
 	IdeDoc *GotoReference(const char *File, int Line, bool CurIp, bool WithHistory = true);
 	void FindSymbol(int ResultsSinkHnd, const char *Sym, bool AllPlatforms);
 	bool GetSystemIncludePaths(LArray<LString> &Paths);
-	bool IsReleaseMode();
 	bool ShowInProject(const char *Fn);
 	bool Build();
 	
@@ -296,11 +308,11 @@ public:
 	void OnPulse() override;
 
 	// Debugging support
-	class GDebugContext *GetDebugContext();
+	class LDebugContext *GetDebugContext();
 	bool ToggleBreakpoint(const char *File, ssize_t Line);
-	bool OnBreakPoint(GDebugger::BreakPoint &b, bool Add);
+	bool OnBreakPoint(LDebugger::BreakPoint &b, bool Add);
 	bool LoadBreakPoints(IdeDoc *doc);
-	bool LoadBreakPoints(GDebugger *db);
+	bool LoadBreakPoints(LDebugger *db);
 	void OnDebugState(bool Debugging, bool Running);
 };
 

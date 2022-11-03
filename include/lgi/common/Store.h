@@ -12,7 +12,7 @@
 #define __STORE_H
 
 #include "Gdc2.h"
-#include "GContainers.h"
+#include "LContainers.h"
 #include "Progress.h"
 #include "StoreCommon.h"
 
@@ -119,7 +119,7 @@ namespace Storage1
 	private:
 		LMutex Lock;
 		char *FileName;
-		GSubFile File;
+		LSubFile File;
 		bool Status;
 		int StoreLoc;
 		int Version;

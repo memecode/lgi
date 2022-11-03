@@ -1,10 +1,9 @@
 /// \file
 /// \author Matthew Allen (fret@memecode.com)
-#ifndef __GFINDREPLACEDLG_H
-#define __GFINDREPLACEDLG_H
+#pragma once
 
 /// Common find/replace window parameters
-class LgiClass GFindReplaceCommon : public LDialog
+class LgiClass LFindReplaceCommon : public LDialog
 {
 	// bool OnViewKey(LView *v, LKey &k);
 
@@ -20,30 +19,30 @@ public:
 	/// Whether to search only in the selection
 	bool SearchUpwards;
 	
-	GFindReplaceCommon();
+	LFindReplaceCommon();
 };
 
-typedef bool (*GFrCallback)(GFindReplaceCommon *Dlg, bool Replace, void *User);
+typedef bool (*LFindReplaceCallback)(LFindReplaceCommon *Dlg, bool Replace, void *User);
 
 /// Find dialog
-class LgiClass GFindDlg : public GFindReplaceCommon
+class LgiClass LFindDlg : public LFindReplaceCommon
 {
-	class GFindDlgPrivate *d;
+	class LFindDlgPrivate *d;
 
 public:
 	/// Constructor
-	GFindDlg
+	LFindDlg
 	(
 		/// The parent window
 		LView *Parent,
 		/// The initial string for the find argument
 		char *Init = 0,
 		/// Callback
-		GFrCallback Callback = 0,
+		LFindReplaceCallback Callback = 0,
 		/// User defined data for callback
 		void *UserData = 0
 	);
-	~GFindDlg();
+	~LFindDlg();
 
 	void OnCreate();
 	void OnPosChange();
@@ -56,15 +55,15 @@ public:
 #define IDC_FR_REPLACE				21007
 
 /// Replace dialog
-class LgiClass GReplaceDlg : public GFindReplaceCommon
+class LgiClass LReplaceDlg : public LFindReplaceCommon
 {
-	class GReplaceDlgPrivate *d;
+	class LReplaceDlgPrivate *d;
 
 public:
 	LString Replace;
 
 	/// Constructor
-	GReplaceDlg
+	LReplaceDlg
 	(
 		/// The parent window
 		LView *Parent,
@@ -73,11 +72,11 @@ public:
 		/// The initial value to replace with
 		char *InitReplace = 0,
 		/// Callback
-		GFrCallback Callback = 0,
+		LFindReplaceCallback Callback = 0,
 		/// User defined data for callback
 		void *UserData = 0
 	);
-	~GReplaceDlg();
+	~LReplaceDlg();
 
 	void OnCreate();
 	void OnPosChange();
@@ -87,6 +86,4 @@ public:
 	int OnNotify(LViewI *Ctrl, LNotification n);
 };
 
-
-#endif
 

@@ -3,7 +3,7 @@
 #include "lgi/common/UnrolledList.h"
 #include "lgi/common/HashTable.h"
 
-class GContainersPriv
+class LContainersPriv
 {
 public:
 	bool ListDeleteOne(int pos, int sz)
@@ -61,16 +61,16 @@ public:
 	}
 };
 
-GContainers::GContainers() : UnitTest("GContainers")
+LContainers::LContainers() : UnitTest("LContainers")
 {
 	UnitTest_ListClass();
 }
 
-GContainers::~GContainers()
+LContainers::~LContainers()
 {
 }
 
-bool GContainers::Run()
+bool LContainers::Run()
 {
 	int ref[] = {1, 4, 5, 8, -1, -1};
 

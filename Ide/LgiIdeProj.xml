@@ -2,10 +2,10 @@
 <Project TabSize="4" IndentSize="4" UseTabs="1" Makefile="./Makefile.linux" Exe="./lgiide" ShowWhitespace="0" BuildType="0" TargetType="0" TargetName="lgiide" Compiler="0">
 	<Node Name="Source Files" Type="1" Platforms="15" Open="1" Id="1">
 		<Node Name="Debugger" Type="1" Platforms="15" Open="0" Id="2">
-			<Node File="./Code/GDebugContext.cpp" Type="2" Platforms="15" />
-			<Node File="./Code/GDebugContext.h" Type="3" Platforms="15" />
-			<Node File="./Code/GDebugger.cpp" Type="2" Platforms="15" />
-			<Node File="./Code/GDebugger.h" Type="3" Platforms="15" />
+			<Node File="./Code/DebugContext.cpp" Type="2" Platforms="15" />
+			<Node File="./Code/DebugContext.h" Type="3" Platforms="15" />
+			<Node File="./Code/Debugger.cpp" Type="2" Platforms="15" />
+			<Node File="./Code/Debugger.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="3">
 			<Node File="./Code/AddFtpFile.cpp" Type="2" Platforms="15" />
@@ -45,8 +45,8 @@
 			<Node File="./Code/FindInFiles.h" Type="3" Platforms="15" />
 			<Node File="./Code/FindSymbol.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/FindSymbol.h" Type="3" Platforms="15" />
-			<Node File="./Code/GHistory.cpp" Type="2" Platforms="15" />
-			<Node File="./Code/GHistory.h" Type="3" Platforms="15" />
+			<Node File="./Code/History.cpp" Type="2" Platforms="15" />
+			<Node File="./Code/History.h" Type="3" Platforms="15" />
 			<Node File="./Code/JavascriptParser.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/ParserCommon.h" Type="3" Platforms="15" />
 			<Node File="./Code/PythonParser.cpp" Type="2" Platforms="15" />
@@ -134,6 +134,8 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -188,12 +190,14 @@ pthread
 					<Debug>be</Debug>
 					<Release>be</Release>
 				</Haiku>
+				<All />
 			</Libraries>
 			<LibraryPaths>
 				<All>
 					<Debug>..\Debug</Debug>
 					<Release>..\Release</Release>
 				</All>
+				<Linux />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -227,6 +231,10 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<ApplicationIcon>
 				<Haiku>./Code/icon-haiku</Haiku>
 			</ApplicationIcon>
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -241,6 +249,8 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Environment>
@@ -251,7 +261,18 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 					<Debug>/home/matthew/code/scribe/trunk_os/Linux/ScribeProj.xml</Debug>
 				</All>
 			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
-		<Advanced />
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>

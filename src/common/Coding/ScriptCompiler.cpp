@@ -171,7 +171,7 @@ LFunctionInfo *LCompiledCode::GetMethod(const char *Name, bool Create)
 
 	if (Create)
 	{
-		GAutoRefPtr<LFunctionInfo> n(new LFunctionInfo(Name));
+		LAutoRefPtr<LFunctionInfo> n(new LFunctionInfo(Name));
 		if (n)
 		{
 			Methods.Add(n);
@@ -372,7 +372,7 @@ public:
 
 /// Scripting language compiler implementation
 class LCompilerPriv :
-	public GCompileTools,
+	public LCompileTools,
 	public LScriptUtils
 {
 	LHashTbl<ConstStrKey<char>, LVariantType> Types;
@@ -2324,7 +2324,7 @@ public:
 				else
 				{
 					GVarRef *NullRef = NULL;
-					LAutoPtr<GJumpZero> Jmp;
+					LAutoPtr<LJumpZero> Jmp;
 					
 					if (!TokenToVarRef(a, NullRef))
 						return OnError(a.Tok, "Can't convert left token to var ref.");
@@ -2332,7 +2332,7 @@ public:
 					if (Op == OpAnd)
 					{
 						// Jump over 'b' if 'a' is FALSE
-						Jmp.Reset(new GJumpZero(this, a.Tok, a.Reg, false));
+						Jmp.Reset(new LJumpZero(this, a.Tok, a.Reg, false));
 					}
 					else if (Op == OpOr)
 					{
@@ -2573,7 +2573,7 @@ public:
 					return OnError(Cur, "if missing body statement.");
 
 				// Output the jump instruction
-				LAutoPtr<GJumpZero> Jmp(new GJumpZero(this, ExpressionTok, Result));
+				LAutoPtr<LJumpZero> Jmp(new LJumpZero(this, ExpressionTok, Result));
 				if (!StricmpW(t, sStartCurlyBracket))
 				{
 					// Statement block
@@ -2675,13 +2675,13 @@ public:
 		return Code->ByteCode;
 	}
 
-	class GJumpZero
+	class LJumpZero
 	{
 		LCompilerPriv *Comp;
 		int JzOffset;
 
 	public:
-		GJumpZero(LCompilerPriv *d, int Tok, GVarRef &r, bool DeallocReg = true)
+		LJumpZero(LCompilerPriv *d, int Tok, GVarRef &r, bool DeallocReg = true)
 		{
 			// Create jump instruction to jump over the body if the expression evaluates to false
 			Comp = d;
@@ -2692,7 +2692,7 @@ public:
 			Comp->GetByteCode().Length(JzOffset + sizeof(int32));
 		}
 
-		~GJumpZero()
+		~LJumpZero()
 		{
 			// Resolve jump
 			int32 *Ptr = (int32*) &Comp->GetByteCode()[JzOffset];
@@ -2720,7 +2720,7 @@ public:
 
 		// Create jump instruction to jump over the body if the expression evaluates to false
 		{
-			GJumpZero Jump(this, Cur, r);
+			LJumpZero Jump(this, Cur, r);
 
 			if (!(t = GetTok(Cur)) || StricmpW(t, sEndRdBracket))
 				return OnError(Cur, "Expecting ')'");
@@ -2826,7 +2826,7 @@ public:
 			return false;
 
 		{
-			GJumpZero Jmp(this, Cur, r);
+			LJumpZero Jmp(this, Cur, r);
 			t = GetTok(Cur);
 
 			// Look for ';'
@@ -3586,17 +3586,17 @@ public:
 	}
 };
 
-GCompiler::GCompiler()
+LCompiler::LCompiler()
 {
 	d = new LCompilerPriv;
 }
 
-GCompiler::~GCompiler()
+LCompiler::~LCompiler()
 {
 	DeleteObj(d);
 }
 
-bool GCompiler::Compile
+bool LCompiler::Compile
 (
 	LAutoPtr<LCompiledCode> &Code,
 	LScriptContext *SysContext,
@@ -3730,7 +3730,7 @@ bool LScriptEngine::Compile(LAutoPtr<LCompiledCode> &Obj, LScriptContext *UserCo
 		return NULL;
 	}
 
-	GCompiler Comp;
+	LCompiler Comp;
 	return Comp.Compile(Obj,
 						&d->SysContext,
 						UserContext ? UserContext : d->UserContext,
@@ -3766,7 +3766,7 @@ LExecutionStatus LScriptEngine::RunTemporary(LCompiledCode *Obj, char *Script, L
 		uint32_t TempLen = (uint32_t) Temp->Length();
 		d->Code = Temp;
 		
-		GCompiler Comp;
+		LCompiler Comp;
 		if (Comp.Compile(Temp, &d->SysContext, d->UserContext, Temp->GetFileName(), Script, NULL))
 		{
 			LVirtualMachine Vm(d->Callback);
@@ -3792,7 +3792,7 @@ bool LScriptEngine::EvaluateExpression(LVariant *Result, LDom *VariableSource, c
 	a.Printf("return %s;", Expression);
 	
 	// Compile the script
-	GCompiler Comp;
+	LCompiler Comp;
 	LAutoPtr<LCompiledCode> Obj;
 	if (!Comp.Compile(Obj, NULL, NULL, NULL, a, VariableSource))
 	{

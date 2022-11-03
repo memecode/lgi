@@ -61,7 +61,7 @@ public:
 // Text
 class TextDocument;
 
-class GCursor {
+class LCursor {
 
 	friend class TextDocument;
 
@@ -74,8 +74,8 @@ class GCursor {
 	void GoDownLine();
 
 public:
-	GCursor();
-	~GCursor();
+	LCursor();
+	~LCursor();
 
 	int X() { return x; }
 	int Y() { return y; }
@@ -93,45 +93,45 @@ public:
 	void MoveX(int Dx);
 	void MoveY(int Dy);
 	
-	bool operator ==(GCursor &c)
+	bool operator ==(LCursor &c)
 	{
 		return	(x == c.x) AND
 				(y == c.y) AND
 				(Parent == c.Parent);
 	}
 
-	bool operator !=(GCursor &c)
+	bool operator !=(LCursor &c)
 	{
 		return	(x != c.x) ||
 				(y != c.y) ||
 				(Parent != c.Parent);
 	}
 
-	bool operator <(GCursor &c)
+	bool operator <(LCursor &c)
 	{
 		return	(y < c.y) ||
 				((y == c.y) AND (x < c.x));
 	}
 
-	bool operator <=(GCursor &c)
+	bool operator <=(LCursor &c)
 	{
 		return	(y < c.y) ||
 				((y == c.y) AND (x <= c.x));
 	}
 
-	bool operator >(GCursor &c)
+	bool operator >(LCursor &c)
 	{
 		return	(y > c.y) ||
 				((y == c.y) AND (x > c.x));
 	}
 
-	bool operator >=(GCursor &c)
+	bool operator >=(LCursor &c)
 	{
 		return	(y > c.y) ||
 				((y == c.y) AND (x >= c.x));
 	}
 	
-	int operator -(GCursor &c)
+	int operator -(LCursor &c)
 	{
 		return (Offset + x) - (c.Offset + c.x);
 	}
@@ -171,7 +171,7 @@ public:
 
 class TextDocument : public Document {
 public:
-	friend GCursor;
+	friend LCursor;
 
 	int Flags;
 	int LockCount;
@@ -184,7 +184,7 @@ public:
 	int UndoPos;
 	List<UserAction> Queue;
 	void TruncateQueue();
-	void ApplyAction(UserAction *a, GCursor &c, bool Reverse = false);
+	void ApplyAction(UserAction *a, LCursor &c, bool Reverse = false);
 
 	// Data
 	int Lines;		// Total lines of text
@@ -223,15 +223,15 @@ public:
 	bool MoveLock(TextLock *Lock, int Dy);
 
 	// cursor support
-	bool CursorCreate(GCursor *c, int X, int Y);
+	bool CursorCreate(LCursor *c, int X, int Y);
 
 	// data io
-	bool Insert(GCursor *At, char *Text, int Len = -1);
-	bool Delete(GCursor *From, int Len, char *Buffer = NULL);
+	bool Insert(LCursor *At, char *Text, int Len = -1);
+	bool Delete(LCursor *From, int Len, char *Buffer = NULL);
 
 	// undo
-	void Undo(GCursor &c);
-	void Redo(GCursor &c);
+	void Undo(LCursor &c);
+	void Redo(LCursor &c);
 	void ClearUndoQueue();
 	bool UndoAvailable(bool Redo = false);
 };
@@ -272,12 +272,12 @@ protected:
 	// Data storage
 	TextDocument Doc;
 	bool OnInsertText(char *Text, int Len = -1);
-	bool OnDeleteText(GCursor *c, int Len, bool Clip);
+	bool OnDeleteText(LCursor *c, int Len, bool Clip);
 
 	// Current cursor location
 	int HiddenLines;
 	int DisplayLines;
-	GCursor User;
+	LCursor User;
 	virtual bool UpdateHiddenCheck();
 	virtual bool OnMoveCursor(int Dx, int Dy = 0, bool NoSelect = FALSE);
 	virtual void OnSetHidden(int Hidden);
@@ -285,8 +285,8 @@ protected:
 	virtual bool OnMultiLineTab(bool In) { return FALSE; } // return TRUE if processed
 
 	// Selection
-	GCursor Start, End;
-	void OnStartSelection(GCursor *c);
+	LCursor Start, End;
+	void OnStartSelection(LCursor *c);
 	void OnEndSelection();
 	void OnDeleteSelection(bool Clip);
 

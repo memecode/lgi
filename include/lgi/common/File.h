@@ -354,7 +354,7 @@ public:
 #endif
 
 /// Generic file access class
-class LgiClass LFile : public LStream, public GRefCount
+class LgiClass LFile : public LStream, public LRefCount
 {
 protected:
 	class LFilePrivate *d;

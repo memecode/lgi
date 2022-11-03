@@ -71,7 +71,7 @@ char Src[] =
 
 #endif
 
-class GCapabilityInstallTarget : public LCapabilityTarget
+class LCapabilityInstallTarget : public LCapabilityTarget
 {
 public:
 	virtual void StartInstall(CapsHash *Caps) = 0;
@@ -79,12 +79,12 @@ public:
 
 class CapsBar : public LView
 {
-	GCapabilityInstallTarget *App;
+	LCapabilityInstallTarget *App;
 	LCapabilityTarget::CapsHash *Caps;
 	LButton *Ok, *Install;
 
 public:
-	CapsBar(GCapabilityInstallTarget *Parent, LCapabilityTarget::CapsHash *caps)
+	CapsBar(LCapabilityInstallTarget *Parent, LCapabilityTarget::CapsHash *caps)
 	{
 		App = Parent;
 		Caps = caps;
@@ -325,7 +325,7 @@ public:
 	}
 };
 
-class App : public LWindow, public GCapabilityInstallTarget
+class App : public LWindow, public LCapabilityInstallTarget
 {
 	LBox *Split;
 	LTextView3 *Txt;

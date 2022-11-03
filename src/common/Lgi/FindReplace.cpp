@@ -19,7 +19,7 @@
 #include "lgi/common/LgiRes.h"
 
 ////////////////////////////////////////////////////////////////////////////
-GFindReplaceCommon::GFindReplaceCommon()
+LFindReplaceCommon::LFindReplaceCommon()
 {
 	MatchWord = false;
 	MatchCase = false;
@@ -37,17 +37,17 @@ GFindReplaceCommon::GFindReplaceCommon()
 #define IDC_FIND_TABLE              1008
 #define IDC_SEARCH_UP				1009
 
-class GFindDlgPrivate
+class LFindDlgPrivate
 {
 public:
 	LEdit *Edit;
-	GFrCallback Callback;
+	LFindReplaceCallback Callback;
 	void *CallbackData;
 };
 
-GFindDlg::GFindDlg(LView *Parent, char *Init, GFrCallback Callback, void *UserData)
+LFindDlg::LFindDlg(LView *Parent, char *Init, LFindReplaceCallback Callback, void *UserData)
 {
-	d = new GFindDlgPrivate;
+	d = new LFindDlgPrivate;
 	if (Init)
 		Find = Init;
 	d->Callback = Callback;
@@ -105,12 +105,12 @@ GFindDlg::GFindDlg(LView *Parent, char *Init, GFrCallback Callback, void *UserDa
 		d->Edit->Focus(true);
 }
 
-GFindDlg::~GFindDlg()
+LFindDlg::~LFindDlg()
 {
 	DeleteObj(d);
 }
 
-void GFindDlg::OnPosChange()
+void LFindDlg::OnPosChange()
 {
     LTableLayout *t;
     if (GetViewById(IDC_FIND_TABLE, t))
@@ -121,7 +121,7 @@ void GFindDlg::OnPosChange()
     }
 }
 
-void GFindDlg::OnCreate()
+void LFindDlg::OnCreate()
 {
 	// Load controls
 	if (Find)
@@ -136,7 +136,7 @@ void GFindDlg::OnCreate()
 	}
 }
 
-int GFindDlg::OnNotify(LViewI *Ctrl, LNotification n)
+int LFindDlg::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{
@@ -178,16 +178,16 @@ int GFindDlg::OnNotify(LViewI *Ctrl, LNotification n)
 #define IDC_REPLACE_WITH			1010
 #define IDC_PREV_REPLACE			1011
 
-class GReplaceDlgPrivate
+class LReplaceDlgPrivate
 {
 public:
-	GFrCallback Callback;
+	LFindReplaceCallback Callback;
 	void *CallbackData;
 };
 
-GReplaceDlg::GReplaceDlg(LView *Parent, char *InitFind, char *InitReplace, GFrCallback Callback, void *UserData)
+LReplaceDlg::LReplaceDlg(LView *Parent, char *InitFind, char *InitReplace, LFindReplaceCallback Callback, void *UserData)
 {
-	d = new GReplaceDlgPrivate;
+	d = new LReplaceDlgPrivate;
 	d->Callback = Callback;
 	d->CallbackData = UserData;
 	if (InitFind)
@@ -257,12 +257,12 @@ GReplaceDlg::GReplaceDlg(LView *Parent, char *InitFind, char *InitReplace, GFrCa
 	if (f) f->Focus(true);
 }
 
-GReplaceDlg::~GReplaceDlg()
+LReplaceDlg::~LReplaceDlg()
 {
 	DeleteObj(d);
 }
 
-void GReplaceDlg::OnCreate()
+void LReplaceDlg::OnCreate()
 {
 	if (Find)
 		SetCtrlName(IDC_TEXT, Find);
@@ -274,7 +274,7 @@ void GReplaceDlg::OnCreate()
 	SetCtrlValue(IDC_SEARCH_UP, SearchUpwards);
 }
 
-int GReplaceDlg::OnNotify(LViewI *Ctrl, LNotification n)
+int LReplaceDlg::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{
@@ -306,7 +306,7 @@ int GReplaceDlg::OnNotify(LViewI *Ctrl, LNotification n)
 	return 0;
 }
 
-void GReplaceDlg::OnPosChange()
+void LReplaceDlg::OnPosChange()
 {
     LTableLayout *t;
     if (GetViewById(IDC_FIND_TABLE, t))

@@ -1075,7 +1075,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 				{
 					LArray<char*> Files;
 					LArray<const char*> Ext;
-					GToken e(SourcePatterns, ";");
+					LToken e(SourcePatterns, ";");
 					for (int i=0; i<e.Length(); i++)
 					{
 						Ext.Add(e[i]);
@@ -1087,7 +1087,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 						for (int i=0; i<Files.Length(); i++)
 						{
 							char *f = Files[i];
-							GToken p(f + Start, DIR_STR);
+							LToken p(f + Start, DIR_STR);
 							ProjectNode *Insert = this;
 							
 							// Find sub nodes, and drill into directory heirarchy,

@@ -11,14 +11,14 @@ enum DebugMessages
 	M_FILE_LINE,
 };
 
-class GDebugContextPriv : public LMutex
+class LDebugContextPriv : public LMutex
 {
 public:
-	GDebugContext *Ctx;
+	LDebugContext *Ctx;
 	AppWnd *App;
 	IdeProject *Proj;
 	bool InDebugging;
-	LAutoPtr<GDebugger> Db;
+	LAutoPtr<LDebugger> Db;
 	LString Exe, Args;
 	
 	LString SeekFile;
@@ -29,7 +29,7 @@ public:
 	NativeInt MemDumpStart;
 	LArray<uint8_t> MemDump;
 
-	GDebugContextPriv(GDebugContext *ctx) : LMutex("GDebugContextPriv")
+	LDebugContextPriv(LDebugContext *ctx) : LMutex("LDebugContextPriv")
 	{
 		Ctx = ctx;
 		MemDumpStart = 0;
@@ -40,10 +40,10 @@ public:
 		SeekCurrentIp = false;
 	}
 	
-	~GDebugContextPriv()
+	~LDebugContextPriv()
 	{
 		#if DEBUG_SESSION_LOGGING
-		LgiTrace("~GDebugContextPriv freeing debugger...\n");
+		LgiTrace("~LDebugContextPriv freeing debugger...\n");
 		#endif
 		Db.Reset();
 		#if DEBUG_SESSION_LOGGING
@@ -150,7 +150,7 @@ public:
 	}
 };
 
-GDebugContext::GDebugContext(AppWnd *App, IdeProject *Proj, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir)
+LDebugContext::LDebugContext(AppWnd *App, IdeProject *Proj, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir)
 {
 	Watch = NULL;
 	Locals = NULL;
@@ -159,7 +159,7 @@ GDebugContext::GDebugContext(AppWnd *App, IdeProject *Proj, const char *Exe, con
 	Registers = NULL;
 	Threads = NULL;
 
-	d = new GDebugContextPriv(this);
+	d = new LDebugContextPriv(this);
 	d->App = App;
 	d->Proj = Proj;
 	d->Exe = Exe;
@@ -185,19 +185,19 @@ GDebugContext::GDebugContext(AppWnd *App, IdeProject *Proj, const char *Exe, con
 	}
 }
 
-GDebugContext::~GDebugContext()
+LDebugContext::~LDebugContext()
 {
 	DeleteObj(d);
 }
 
-LMessage::Param GDebugContext::OnEvent(LMessage *m)
+LMessage::Param LDebugContext::OnEvent(LMessage *m)
 {
 	switch (m->Msg())
 	{
 		case M_ON_CRASH:
 		{
 			#if DEBUG_SESSION_LOGGING
-			LgiTrace("GDebugContext::OnEvent(M_ON_CRASH)\n");
+			LgiTrace("LDebugContext::OnEvent(M_ON_CRASH)\n");
 			#endif
 			d->UpdateCallStack();
 			break;
@@ -205,7 +205,7 @@ LMessage::Param GDebugContext::OnEvent(LMessage *m)
 		case M_FILE_LINE:
 		{
 			#if DEBUG_SESSION_LOGGING
-			LgiTrace("GDebugContext::OnEvent(M_FILE_LINE)\n");
+			LgiTrace("LDebugContext::OnEvent(M_FILE_LINE)\n");
 			#endif
 			LString File;
 			{
@@ -223,12 +223,12 @@ LMessage::Param GDebugContext::OnEvent(LMessage *m)
 	return 0;
 }
 
-bool GDebugContext::SetFrame(int Frame)
+bool LDebugContext::SetFrame(int Frame)
 {
 	return d->Db ? d->Db->SetFrame(Frame) : false;
 }
 
-bool GDebugContext::DumpObject(const char *Var, const char *Val)
+bool LDebugContext::DumpObject(const char *Var, const char *Val)
 {
 	if (!d->Db || !Var || !ObjectDump || !d->InDebugging)
 		return false;
@@ -241,7 +241,7 @@ bool GDebugContext::DumpObject(const char *Var, const char *Val)
 	return true;	
 }
 
-bool GDebugContext::UpdateRegisters()
+bool LDebugContext::UpdateRegisters()
 {
 	if (!d->Db || !Registers || !d->InDebugging)
 		return false;
@@ -249,32 +249,32 @@ bool GDebugContext::UpdateRegisters()
 	return d->Db->GetRegisters(Registers);
 }
 
-bool GDebugContext::UpdateLocals()
+bool LDebugContext::UpdateLocals()
 {
 	if (!Locals || !d->Db || !d->InDebugging)
 		return false;
 
-	LArray<GDebugger::Variable> Vars;
+	LArray<LDebugger::Variable> Vars;
 	if (!d->Db->GetVariables(true, Vars, false))
 		return false;
 	
 	Locals->Empty();
 	for (int i=0; i<Vars.Length(); i++)
 	{
-		GDebugger::Variable &v = Vars[i];
+		LDebugger::Variable &v = Vars[i];
 		LListItem *it = new LListItem;
 		if (it)
 		{
 			switch (v.Scope)
 			{
 				default:
-				case GDebugger::Variable::Local:
+				case LDebugger::Variable::Local:
 					it->SetText("local", 0);
 					break;
-				case GDebugger::Variable::Global:
+				case LDebugger::Variable::Global:
 					it->SetText("global", 0);
 					break;
-				case GDebugger::Variable::Arg:
+				case LDebugger::Variable::Arg:
 					it->SetText("arg", 0);
 					break;
 			}
@@ -349,12 +349,12 @@ bool GDebugContext::UpdateLocals()
 	return true;
 }
 
-bool GDebugContext::UpdateWatches()
+bool LDebugContext::UpdateWatches()
 {
-	LArray<GDebugger::Variable> Vars;
+	LArray<LDebugger::Variable> Vars;
 	for (LTreeItem *i = Watch->GetChild(); i; i = i->GetNext())
 	{
-		GDebugger::Variable &v = Vars.New();
+		LDebugger::Variable &v = Vars.New();
 		v.Name = i->GetText(0);
 		v.Type = i->GetText(1);
 	}
@@ -366,7 +366,7 @@ bool GDebugContext::UpdateWatches()
 	int Idx = 0;
 	for (LTreeItem *i = Watch->GetChild(); i; i = i->GetNext(), Idx++)
 	{
-		GDebugger::Variable &v = Vars[Idx];
+		LDebugger::Variable &v = Vars[Idx];
 		WatchItem *wi = dynamic_cast<WatchItem*>(i);
 		if (!wi)
 		{
@@ -387,17 +387,17 @@ bool GDebugContext::UpdateWatches()
 	return true;
 }
 
-void GDebugContext::UpdateCallStack()
+void LDebugContext::UpdateCallStack()
 {
 	d->UpdateCallStack();
 }
 
-void GDebugContext::UpdateThreads()
+void LDebugContext::UpdateThreads()
 {
 	d->UpdateThreads();
 }
 
-bool GDebugContext::SelectThread(int ThreadId)
+bool LDebugContext::SelectThread(int ThreadId)
 {
 	if (!d->Db)
 	{
@@ -408,7 +408,7 @@ bool GDebugContext::SelectThread(int ThreadId)
 	return d->Db->SetCurrentThread(ThreadId);
 }
 
-bool GDebugContext::ParseFrameReference(const char *Frame, LAutoString &File, int &Line)
+bool LDebugContext::ParseFrameReference(const char *Frame, LAutoString &File, int &Line)
 {
 	if (!Frame)
 		return false;
@@ -436,10 +436,10 @@ bool GDebugContext::ParseFrameReference(const char *Frame, LAutoString &File, in
 	return Line > 0;
 }
 
-bool GDebugContext::OnCommand(int Cmd)
+bool LDebugContext::OnCommand(int Cmd)
 {
 	#if DEBUG_SESSION_LOGGING
-	LgiTrace("GDebugContext::OnCommand(%i)\n", Cmd);
+	LgiTrace("LDebugContext::OnCommand(%i)\n", Cmd);
 	#endif
 	
 	switch (Cmd)
@@ -516,7 +516,7 @@ bool GDebugContext::OnCommand(int Cmd)
 	return true;
 }
 
-void GDebugContext::OnUserCommand(const char *Cmd)
+void LDebugContext::OnUserCommand(const char *Cmd)
 {
 	if (d->Db)
 		d->Db->UserCommand(Cmd);
@@ -551,7 +551,7 @@ void NonPrintable(uint64 ch, uint8_t *&out, ssize_t &len)
 	}
 }
 
-void GDebugContext::FormatMemoryDump(int WordSize, int Width, bool InHex)
+void LDebugContext::FormatMemoryDump(int WordSize, int Width, bool InHex)
 {
 	if (!MemoryDump)
 	{
@@ -659,7 +659,7 @@ void GDebugContext::FormatMemoryDump(int WordSize, int Width, bool InHex)
 	MemoryDump->Name(p.NewGStr());
 }
 
-void GDebugContext::OnMemoryDump(const char *Addr, int WordSize, int Width, bool IsHex)
+void LDebugContext::OnMemoryDump(const char *Addr, int WordSize, int Width, bool IsHex)
 {
 	if (MemoryDump && d->Db)
 	{
@@ -677,10 +677,10 @@ void GDebugContext::OnMemoryDump(const char *Addr, int WordSize, int Width, bool
 	}
 }
 
-void GDebugContext::OnState(bool Debugging, bool Running)
+void LDebugContext::OnState(bool Debugging, bool Running)
 {
 	#if DEBUG_SESSION_LOGGING
-	LgiTrace("GDebugContext::OnState(%i, %i)\n", Debugging, Running);
+	LgiTrace("LDebugContext::OnState(%i, %i)\n", Debugging, Running);
 	#endif
 	
 	if (d->InDebugging != Debugging && d->Db)
@@ -695,13 +695,13 @@ void GDebugContext::OnState(bool Debugging, bool Running)
 	}
 	
 	#if DEBUG_SESSION_LOGGING
-	LgiTrace("GDebugContext::OnState(%i, %i) ###ENDED###\n", Debugging, Running);
+	LgiTrace("LDebugContext::OnState(%i, %i) ###ENDED###\n", Debugging, Running);
 	#endif
 	
 	// This object may be deleted at this point... don't access anything.
 }
 
-void GDebugContext::OnFileLine(const char *File, int Line, bool CurrentIp)
+void LDebugContext::OnFileLine(const char *File, int Line, bool CurrentIp)
 {
 	if (!d->App)
 	{
@@ -736,7 +736,7 @@ void GDebugContext::OnFileLine(const char *File, int Line, bool CurrentIp)
 	}
 }
 
-ssize_t GDebugContext::Write(const void *Ptr, ssize_t Size, int Flags)
+ssize_t LDebugContext::Write(const void *Ptr, ssize_t Size, int Flags)
 {
 	if (DebuggerLog && Ptr)
 	{
@@ -747,18 +747,18 @@ ssize_t GDebugContext::Write(const void *Ptr, ssize_t Size, int Flags)
 	return -1;
 }
 
-void GDebugContext::OnError(int Code, const char *Str)
+void LDebugContext::OnError(int Code, const char *Str)
 {
 	if (DebuggerLog)
 		DebuggerLog->Print("Error(%i): %s\n", Code, Str);
 }
 
-void GDebugContext::OnCrash(int Code)
+void LDebugContext::OnCrash(int Code)
 {
 	d->App->PostEvent(M_ON_CRASH);
 }
 
-bool GDebugContext::OnBreakPoint(GDebugger::BreakPoint &b, bool Add)
+bool LDebugContext::OnBreakPoint(LDebugger::BreakPoint &b, bool Add)
 {
 	if (!d->Db)
 	{

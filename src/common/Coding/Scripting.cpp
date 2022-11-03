@@ -6,7 +6,7 @@
 #include <ctype.h>
 
 #include "Lgi.h"
-#include "GToken.h"
+#include "LToken.h"
 #include "Scripting.h"
 #include "GLexCpp.h"
 #include "GScriptingPriv.h"
@@ -115,12 +115,12 @@ struct GCode
 	}
 };
 
-class GExternType;
-class GExternType
+class LExternType;
+class LExternType
 {
 public:
 	LVariantType Simple;
-	LArray<GExternType*> Struct;
+	LArray<LExternType*> Struct;
 
 	int Sizeof()
 	{
@@ -150,7 +150,7 @@ public:
 		return 0;
 	}
 
-	GExternType()
+	LExternType()
 	{
 		Simple = GV_NULL;
 	}
@@ -160,8 +160,8 @@ struct LExternFunc : public LFunc
 {
 	LScriptEnginePrivate *Priv;
 	char *Library;
-	GExternType Return;
-	LArray<GExternType*> Args;
+	LExternType Return;
+	LArray<LExternType*> Args;
 
 	LExternFunc(LScriptEnginePrivate *p) : LFunc(0, ExternFunc)
 	{
@@ -402,7 +402,7 @@ public:
 	}
 };
 
-class LScriptEnginePrivate : public LScriptUtils, public GCompileTools
+class LScriptEnginePrivate : public LScriptUtils, public LCompileTools
 {
 public:
 	GScriptEngine1 *Engine;
@@ -606,7 +606,7 @@ public:
 	LVariant *Var(char16 *name, bool create = true);
 	bool ToVar(LVariant &v, char16 *s);
 	bool Require(int &Cur, const char *tok);
-	bool Type(int &Cur, class GExternType &Type);
+	bool Type(int &Cur, class LExternType &Type);
 	bool CallExtern(int &Cur, uint32 &ReturnValue, struct LExternFunc *Func);
 
 	// Dom addressing
@@ -2352,7 +2352,7 @@ int LScriptEnginePrivate::FindEndOfBlock(int Cur)
 	return -1;
 }
 
-bool LScriptEnginePrivate::Type(int &Cur, GExternType &Type)
+bool LScriptEnginePrivate::Type(int &Cur, LExternType &Type)
 {
 	char16 *t = Tokens[Cur];
 	if (t)
@@ -3149,7 +3149,7 @@ bool LScriptEnginePrivate::Compile_Statement(LArray<GCode> &To, int &Cur)
 							// Parse arguments to the func
 							while (true)
 							{
-								GExternType *k = new GExternType;
+								LExternType *k = new LExternType;
 								if (k)
 								{
 									if (Type(Cur, *k))

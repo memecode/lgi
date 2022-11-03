@@ -251,7 +251,7 @@ bool StorageItemImpl::EndOfObj(LFile &f)
 
 LFile *StorageItemImpl::GotoObject(const char *file, int line)
 {
-	GSubFilePtr *f = 0;
+	LSubFilePtr *f = 0;
 	
 	if (Header &&
 		Tree &&
@@ -305,7 +305,7 @@ bool StorageItemImpl::SetDirty(bool Dirty)
 	{
 		if (Object && Object->GetDirty())
 		{
-			GSubFilePtr *Ptr = Tree->CreateFilePtr(_FL);
+			LSubFilePtr *Ptr = Tree->CreateFilePtr(_FL);
 			if (Ptr)
 			{
 				Status &= SerializeObject(*Ptr, true);
@@ -373,7 +373,7 @@ bool StorageItemImpl::SerializeHeader(LFile &f, bool Write)
 	return Status;
 }
 
-bool StorageItemImpl::SerializeObject(GSubFilePtr &f, bool Write)
+bool StorageItemImpl::SerializeObject(LSubFilePtr &f, bool Write)
 {
 	bool Status = false;
 
@@ -507,7 +507,7 @@ bool StorageItemImpl::Save()
 	{
 		Tree->StorageObj_SetDirty(Object, true);
 		
-		GSubFilePtr *Sub = Tree->CreateFilePtr(_FL);
+		LSubFilePtr *Sub = Tree->CreateFilePtr(_FL);
 		if (Sub)
 		{
 			Status = SerializeObject(*Sub, true);
@@ -1596,7 +1596,7 @@ namespace Storage2
 StorageKitImpl::StorageKitImpl(char *filename) : LMutex("StorageKitImpl2")
 {
 	d = new StorageKitImplPrivate(this);
-	File = new GSubFile(this, false);
+	File = new LSubFile(this, false);
 	Status = false;
 	ReadOnly = false;
 	StoreLoc = 0;
@@ -2205,7 +2205,7 @@ LMutex *StorageKitImpl::GetLock()
 	return this;
 }
 
-GSubFilePtr *StorageKitImpl::CreateFilePtr(const char *file, int line)
+LSubFilePtr *StorageKitImpl::CreateFilePtr(const char *file, int line)
 {
 	return File ? File->Create(file, line) : 0;
 }

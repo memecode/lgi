@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "Lgi.h"
 #include "IDns.h"
-#include "GToken.h"
+#include "LToken.h"
 #include "INet.h"
 
 #ifndef WIN32
@@ -30,7 +30,7 @@ bool GetDnsServers(LArray<char*> &Servers)
 
 			if (NameServers)
 			{
-				GToken Ns(NameServers, " ");
+				LToken Ns(NameServers, " ");
 				for (int i=0; i<Ns.Length(); i++)
 				{
 					bool Has = false;
@@ -58,10 +58,10 @@ bool GetDnsServers(LArray<char*> &Servers)
 	char *s = LReadTextFile("/etc/resolv.conf");
 	if (s)
 	{
-		GToken t(s, "\r\n");
+		LToken t(s, "\r\n");
 		for (int i=0; i<t.Length(); i++)
 		{
-			GToken s(t[i], " ");
+			LToken s(t[i], " ");
 			if (s.Length() == 2 && !stricmp(s[0], "nameserver"))
 			{
 				Servers.Add(NewStr(s[1]));
@@ -111,7 +111,7 @@ uchar *DnsMethods::ReadLabel(void *Header, uchar *s, char *&Label)
 
 uchar *DnsMethods::WriteLabel(uchar *s, char *Label)
 {
-	GToken n(Label, ".");
+	LToken n(Label, ".");
 	for (int i=0; i<n.Length(); i++)
 	{
 		*s = min(strlen(n[i]), 255);

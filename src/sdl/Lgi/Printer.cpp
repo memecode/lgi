@@ -3,12 +3,12 @@
 #include "GPrinter.h"
 
 ////////////////////////////////////////////////////////////////////
-class GPrinterPrivate
+class LPrinterPrivate
 {
 public:
 	int Pages;
 
-	GPrinterPrivate()
+	LPrinterPrivate()
 	{
 		Pages = 3;
 	}
@@ -17,7 +17,7 @@ public:
 //////////////////////////////////////////////////////////////////////
 GPrinter::GPrinter()
 {
-	d = new GPrinterPrivate;
+	d = new LPrinterPrivate;
 }
 
 GPrinter::~GPrinter()

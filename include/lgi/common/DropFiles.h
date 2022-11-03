@@ -207,10 +207,10 @@ public:
 	}
 };
 
-class GDropStreams : public LArray<LStreamI*>
+class LDropStreams : public LArray<LStreamI*>
 {
 public:
-	GDropStreams(LDragData &dd)
+	LDropStreams(LDragData &dd)
 	{
 		#if defined(WINDOWS)
 		for (unsigned i=0; i<dd.Data.Length(); i++)
@@ -233,7 +233,7 @@ public:
 		#endif
 	}
 
-	~GDropStreams()
+	~LDropStreams()
 	{
 		DeleteObjects();
 	}

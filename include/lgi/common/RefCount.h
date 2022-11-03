@@ -3,7 +3,7 @@
 
 #include "lgi/common/LgiUiBase.h"
 
-class GRefCount
+class LRefCount
 {
 	#if defined(_WIN32)
 	LONG _Count;
@@ -17,12 +17,12 @@ public:
     int _GetCount() { return _Count; }
     #endif
 
-	GRefCount(bool trace = false)
+	LRefCount(bool trace = false)
 	{
 		_Count = 0;
 		_DebugTrace = trace;
 		if (_DebugTrace)
-			LgiTrace("%s:%i - GRefCount.Construct=%i\n", _FL, _Count);
+			LgiTrace("%s:%i - LRefCount.Construct=%i\n", _FL, _Count);
 	}
 
 	void SetDebug(bool b)
@@ -30,10 +30,10 @@ public:
 		_DebugTrace = b;
 	}
 
-	virtual ~GRefCount()
+	virtual ~LRefCount()
 	{
 		if (_DebugTrace)
-			LgiTrace("%s:%i - ~GRefCount=%i\n", _FL, _Count);
+			LgiTrace("%s:%i - ~LRefCount=%i\n", _FL, _Count);
 		LAssert(_Count == 0);
 	}
 
@@ -48,13 +48,13 @@ public:
 			_Count++;
 		#endif
 		if (_DebugTrace)
-			LgiTrace("%s:%i - GRefCount.AddRef=%i\n", _FL, _Count);
+			LgiTrace("%s:%i - LRefCount.AddRef=%i\n", _FL, _Count);
 	}
 
 	virtual bool DecRef()
 	{
 		if (_DebugTrace)
-			LgiTrace("%s:%i - GRefCount.DecRef=%i\n", _FL, _Count);
+			LgiTrace("%s:%i - LRefCount.DecRef=%i\n", _FL, _Count);
 		LAssert(_Count > 0)
 			;
 		#if defined(_WIN32)
@@ -74,13 +74,13 @@ public:
 };
 
 template <typename T>
-class GAutoRefPtr
+class LAutoRefPtr
 {
 	T *Ptr;
 	bool Debug;
 
 public:
-	GAutoRefPtr(T *ptr = 0, bool debug = false)
+	LAutoRefPtr(T *ptr = 0, bool debug = false)
 	{
 		Ptr = ptr;
 		Debug = debug;
@@ -88,12 +88,12 @@ public:
 			Ptr->AddRef();
 	}
 
-	~GAutoRefPtr()
+	~LAutoRefPtr()
 	{
 		Empty();
 	}
 
-	void Swap(GAutoRefPtr<T> &p)
+	void Swap(LAutoRefPtr<T> &p)
 	{
 		LSwap(Ptr, p.Ptr);
 	}
@@ -114,28 +114,28 @@ public:
 		if (Ptr)
 		{
 		    #ifdef _DEBUG
-			if (Debug) printf("GAutoRefPtr.Empty %p %i->%i\n", Ptr, Ptr->_GetCount(), Ptr->_GetCount()-1);
+			if (Debug) printf("LAutoRefPtr.Empty %p %i->%i\n", Ptr, Ptr->_GetCount(), Ptr->_GetCount()-1);
 			#endif
 			Ptr->DecRef();
 			Ptr = NULL;
 		}
 	}
 
-	GAutoRefPtr<T> &operator =(T *p)
+	LAutoRefPtr<T> &operator =(T *p)
 	{
 		Empty();
 		Ptr = p;
 		if (Ptr)
 		{
 		    #ifdef _DEBUG
-			if (Debug) printf("GAutoRefPtr.Assign %p %i->%i\n", Ptr, Ptr->_GetCount(), Ptr->_GetCount()+1);
+			if (Debug) printf("LAutoRefPtr.Assign %p %i->%i\n", Ptr, Ptr->_GetCount(), Ptr->_GetCount()+1);
 			#endif
 			Ptr->AddRef();
 		}
 		return *this;
 	}
 
-	GAutoRefPtr &operator =(const GAutoRefPtr<T> &refptr)
+	LAutoRefPtr &operator =(const LAutoRefPtr<T> &refptr)
 	{
 		Empty();
 		Ptr = refptr.Ptr;
@@ -143,7 +143,7 @@ public:
 		if (Ptr)
 		{
 		    #ifdef _DEBUG
-			if (Debug) printf("GAutoRefPtr.ObjAssign %p %i->%i\n", Ptr, Ptr->_GetCount(), Ptr->_GetCount()+1);
+			if (Debug) printf("LAutoRefPtr.ObjAssign %p %i->%i\n", Ptr, Ptr->_GetCount(), Ptr->_GetCount()+1);
 			#endif
 			Ptr->AddRef();
 		}

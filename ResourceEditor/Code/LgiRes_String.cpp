@@ -852,7 +852,7 @@ void ResString::PasteText()
 
 	if (Clip)
 	{
-		GToken Lines(Clip, "\r\n");
+		LToken Lines(Clip, "\r\n");
 		if (Lines.Length() > 0 &&
 			strcmp(Lines[0], TranslationStrMagic) == 0)
 		{

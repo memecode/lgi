@@ -48,7 +48,7 @@ protected:
 	char				IsHtml;
 	int					ViewWidth;
 	uint64_t			PaintStart;
-	GToolTip			Tip;
+	LToolTip			Tip;
 	LCss::Store			CssStore;
 	LHashTbl<ConstStrKey<char,false>, bool> CssHref;
 	
@@ -158,7 +158,7 @@ public:
 	LDom *getElementById(char *Id);
 
 	// Events
-	bool OnFind(GFindReplaceCommon *Params);
+	bool OnFind(LFindReplaceCommon *Params);
 	virtual bool OnSubmitForm(LTag *Form);
 	virtual void OnCursorChanged() {}
 	virtual void OnLoad();

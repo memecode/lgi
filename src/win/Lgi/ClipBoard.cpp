@@ -12,7 +12,7 @@ public:
 };
 
 #if 0
-class LFileEnum : public GUnknownImpl<IEnumFORMATETC>
+class LFileEnum : public LUnknownImpl<IEnumFORMATETC>
 {
 	int Idx;
 	LArray<LClipBoard::FormatType> Types;
@@ -66,7 +66,7 @@ public:
 	}
 };
 
-struct LFileName : public GUnknownImpl<IUnknown>
+struct LFileName : public LUnknownImpl<IUnknown>
 {
 	char16 *w;
 
@@ -83,7 +83,7 @@ struct LFileName : public GUnknownImpl<IUnknown>
 	}
 };
 
-class LFileData : public GUnknownImpl<IDataObject>
+class LFileData : public LUnknownImpl<IDataObject>
 {
 	int Cur;
 	LClipBoard::FormatType Type, PrefDrop, ShellIdList;
@@ -635,7 +635,7 @@ bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 				if (pDC->GetBits() <= 8)
 				{
 					// Palette
-					GPalette *Pal = pDC->Palette();
+					LPalette *Pal = pDC->Palette();
 					RGBQUAD *Rgb = Info->bmiColors;
 					if (Pal)
 					{
@@ -745,7 +745,7 @@ LAutoPtr<LSurface> LClipBoard::ConvertFromPtr(void *Ptr)
 				else
 					Colours = 1 << pDC->GetBits();
 
-				GPalette *Pal = new GPalette(NULL, Colours);
+				LPalette *Pal = new LPalette(NULL, Colours);
 				if (Pal)
 				{
 					GdcRGB *d = (*Pal)[0];

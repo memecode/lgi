@@ -1,15 +1,15 @@
 #include "lgi/common/Lgi.h"
 #include "UnitTests.h"
 
-class GAutoPtrTestPriv
+class LAutoPtrTestPriv
 {
 };
 
-GAutoPtrTest::GAutoPtrTest() : UnitTest("GAutoPtrTest")
+LAutoPtrTest::LAutoPtrTest() : UnitTest("LAutoPtrTest")
 {
 }
 
-GAutoPtrTest::~GAutoPtrTest()
+LAutoPtrTest::~LAutoPtrTest()
 {
 }
 
@@ -18,7 +18,7 @@ LAutoString CreateAutoString(char **Ptr)
 	return LAutoString(*Ptr = NewStr("Something"));
 }
 
-bool GAutoPtrTest::Run()
+bool LAutoPtrTest::Run()
 {
 	char *Ptr;
 	LAutoString s1(Ptr = NewStr("string1"));

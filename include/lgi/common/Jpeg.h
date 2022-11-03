@@ -13,7 +13,7 @@ public:
     };
 
 private:
-	friend class GJpegOptions;
+	friend class LJpegOptions;
 	#if LIBJPEG_SHARED
 	class LibJpeg *d;
 	#endif

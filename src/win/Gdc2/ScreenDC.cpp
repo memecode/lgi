@@ -59,7 +59,7 @@ public:
 		}
 	};
 
-	static GPalette *LastRealized;
+	static LPalette *LastRealized;
 	static NullObjects Null;
 
 	LScreenPrivate()
@@ -98,7 +98,7 @@ public:
 };
 
 LScreenPrivate::NullObjects LScreenPrivate::Null;
-GPalette *LScreenPrivate::LastRealized = 0;
+LPalette *LScreenPrivate::LastRealized = 0;
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -266,7 +266,7 @@ bool LScreenDC::CreateFromHandle(HDC hdc)
 		d->Gc = GdcD->GetGlobalColour();
 		if (d->Gc)
 		{
-			GPalette *Pal = d->Gc->GetPalette();
+			LPalette *Pal = d->Gc->GetPalette();
 			if (Pal)
 			{
 				HPALETTE hpal = SelectPalette(hdc, Pal->Handle(), false);
@@ -301,12 +301,12 @@ void LScreenDC::SetOrigin(int x, int y)
 	}
 }
 
-GPalette *LScreenDC::Palette()
+LPalette *LScreenDC::Palette()
 {
 	return LSurface::Palette();
 }
 
-void LScreenDC::Palette(GPalette *pPal, bool bOwnIt)
+void LScreenDC::Palette(LPalette *pPal, bool bOwnIt)
 {
 	LSurface::Palette(pPal, bOwnIt);
 }
@@ -784,7 +784,7 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 			hSrcDC = Src->StartDC();
 		}
 
-		GPalette *Pal = Src->DrawOnAlpha() ? NULL : Src->Palette();
+		LPalette *Pal = Src->DrawOnAlpha() ? NULL : Src->Palette();
 		HPALETTE sPal = 0, dPal = 0;
 		if (Pal)
 		{

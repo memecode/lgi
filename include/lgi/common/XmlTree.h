@@ -23,7 +23,7 @@
 class LXmlTree;
 class LXmlTreePrivate;
 
-class LgiClass LXmlAlloc : public GRefCount
+class LgiClass LXmlAlloc : public LRefCount
 {
 public:
 	virtual ~LXmlAlloc() {}
@@ -71,7 +71,7 @@ class LgiClass LXmlTag : virtual public LDom
 
 protected:
 	/// This allocator is responsible for all the string memory used by the Attributes and Tag
-	GAutoRefPtr<LXmlAlloc> Allocator;
+	LAutoRefPtr<LXmlAlloc> Allocator;
 
 	bool Write;
 	LXmlAttr *_Attr(const char *Name, bool Write);

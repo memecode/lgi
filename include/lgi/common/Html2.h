@@ -45,7 +45,7 @@ protected:
 	char				*DocCharSet;
 	char				IsHtml;
 	int					ViewWidth;
-	GToolTip			Tip;
+	LToolTip			Tip;
 	LTag				*PrevTip;
 	LCss::Store			CssStore;
 	
@@ -144,7 +144,7 @@ public:
 	GDom *getElementById(char *Id);
 
 	// Events
-	bool OnFind(class GFindReplaceCommon *Params);
+	bool OnFind(class LFindReplaceCommon *Params);
 	virtual bool OnSubmitForm(LTag *Form);
 	virtual void OnCursorChanged() {}
 };

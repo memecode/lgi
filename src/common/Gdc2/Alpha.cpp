@@ -19,7 +19,7 @@
 #define Div255(a)	((a)/255)
 
 template<typename T>
-void CreatePaletteLut(T *c, GPalette *Pal, int Scale = 255)
+void CreatePaletteLut(T *c, LPalette *Pal, int Scale = 255)
 {
 	if (Scale < 255)
 	{
@@ -68,7 +68,7 @@ void CreatePaletteLut(T *c, GPalette *Pal, int Scale = 255)
 }
 
 /// Alpha blending applicators
-class GAlphaApp : public LApplicator
+class LAlphaApp : public LApplicator
 {
 protected:
 	uchar alpha, oma;
@@ -76,10 +76,10 @@ protected:
 	uchar *Ptr;
 	uchar *APtr;
 
-	const char *GetClass() { return "GAlphaApp"; }
+	const char *GetClass() { return "LAlphaApp"; }
 
 public:
-	GAlphaApp()
+	LAlphaApp()
 	{
 		Op = GDC_ALPHA;
 		alpha = 0xFF;
@@ -118,7 +118,7 @@ public:
 		return 0;
 	}
 
-	bool SetSurface(LBmpMem *d, GPalette *p, LBmpMem *a)
+	bool SetSurface(LBmpMem *d, LPalette *p, LBmpMem *a)
 	{
 		if (d && d->GetBits() == Bits)
 		{
@@ -179,7 +179,7 @@ public:
 	}
 };
 
-class GdcApp8Alpha : public GAlphaApp
+class GdcApp8Alpha : public LAlphaApp
 {
 	char Remap[256];
 	uchar *DivLut;
@@ -191,10 +191,10 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha);
 
 	template<typename Pixel>
-	void AlphaBlt15(LBmpMem *Src, GPalette *DPal, uchar *Lut)
+	void AlphaBlt15(LBmpMem *Src, LPalette *DPal, uchar *Lut)
 	{
 		System24BitPixel dc[256];
 		CreatePaletteLut(dc, DPal, oma);
@@ -222,7 +222,7 @@ public:
 	}
 
 	template<typename Pixel>
-	void AlphaBlt16(LBmpMem *Src, GPalette *DPal, uchar *Lut)
+	void AlphaBlt16(LBmpMem *Src, LPalette *DPal, uchar *Lut)
 	{
 		System24BitPixel dc[256];
 		CreatePaletteLut(dc, DPal, oma);
@@ -250,7 +250,7 @@ public:
 	}
 
 	template<typename Pixel>
-	void AlphaBlt24(LBmpMem *Src, GPalette *DPal, uchar *Lut)
+	void AlphaBlt24(LBmpMem *Src, LPalette *DPal, uchar *Lut)
 	{
 		System24BitPixel dc[256];
 		CreatePaletteLut(dc, DPal, oma);
@@ -278,7 +278,7 @@ public:
 	}
 
 	template<typename Pixel>
-	void AlphaBlt32(LBmpMem *Src, GPalette *DPal, uchar *Lut)
+	void AlphaBlt32(LBmpMem *Src, LPalette *DPal, uchar *Lut)
 	{
 		GdcRGB *dc = (*DPal)[0];
 		if (!Lut) Lut = DPal->MakeLut(15);
@@ -302,7 +302,7 @@ public:
 	}
 
 	template<typename Pixel>
-	void AlphaBlt48(LBmpMem *Src, GPalette *DPal, uchar *Lut)
+	void AlphaBlt48(LBmpMem *Src, LPalette *DPal, uchar *Lut)
 	{
 		System24BitPixel dc[256];
 		CreatePaletteLut(dc, DPal, oma);
@@ -333,7 +333,7 @@ public:
 	}
 
 	template<typename Pixel>
-	void AlphaBlt64(LBmpMem *Src, GPalette *DPal, uchar *Lut)
+	void AlphaBlt64(LBmpMem *Src, LPalette *DPal, uchar *Lut)
 	{
 		System24BitPixel dc[256];
 		CreatePaletteLut(dc, DPal, 0xff);
@@ -406,7 +406,7 @@ public:
 		return 0;
 	}
 
-	bool SetSurface(LBmpMem *d, GPalette *p = 0, LBmpMem *a = 0)
+	bool SetSurface(LBmpMem *d, LPalette *p = 0, LBmpMem *a = 0)
 	{
 		if (d && d->Cs == ColourSpace)
 		{
@@ -509,7 +509,7 @@ public:
 		}
 	}
 
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 	{
 		if (!Src)
 			return false;
@@ -625,7 +625,7 @@ public:
 		}
 	}
 
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 	{
 		if (!Src)
 			return false;
@@ -858,7 +858,7 @@ public:
 		}
 	}
 
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = 0)
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha = 0)
 	{
 		if (!Src)
 			return false;
@@ -1053,7 +1053,7 @@ public:
 		}
 	}
 
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = 0)
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha = 0)
 	{
 		if (!Src) return 0;
 		REG uchar *DivLut = Div255Lut;
@@ -1399,13 +1399,13 @@ GdcApp8Alpha::GdcApp8Alpha()
 
 int GdcApp8Alpha::SetVar(int Var, NativeInt Value)
 {
-	int Status = GAlphaApp::SetVar(Var, Value);
+	int Status = LAlphaApp::SetVar(Var, Value);
 
 	switch (Var)
 	{
 		case GAPP_ALPHA_PAL:
 		{
-			GPalette *Pal = (GPalette*)Value;
+			LPalette *Pal = (LPalette*)Value;
 
 			if (Pal && alpha < 255)
 			{
@@ -1486,15 +1486,15 @@ void GdcApp8Alpha::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp8Alpha::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
+bool GdcApp8Alpha::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (!Src)
 		return false;
 	if (!SPal)
 		SPal = Pal;
 
-	GPalette Grey;
-	GPalette *DPal;
+	LPalette Grey;
+	LPalette *DPal;
 	if (Pal)
 	{
 		DPal = Pal;

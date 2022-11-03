@@ -161,7 +161,7 @@ int GdcGif::out_line(uchar *pixels, int linewidth, int interlaced, int BitDepth)
 	    {
 	        LBgr16 *s = (LBgr16*) (*pDC)[lines];
 	        LBgr16 *e = s + pDC->X();
-	        GPalette *pal = pDC->Palette();
+	        LPalette *pal = pDC->Palette();
         	GdcRGB *p = (*pal)[0], *pix;
         	
 	        while (s < e)
@@ -178,7 +178,7 @@ int GdcGif::out_line(uchar *pixels, int linewidth, int interlaced, int BitDepth)
 	    {
 	        LRgb16 *s = (LRgb16*) (*pDC)[lines];
 	        LRgb16 *e = s + pDC->X();
-	        GPalette *pal = pDC->Palette();
+	        LPalette *pal = pDC->Palette();
         	GdcRGB *p = (*pal)[0], *pix;
         	
 	        while (s < e)
@@ -195,7 +195,7 @@ int GdcGif::out_line(uchar *pixels, int linewidth, int interlaced, int BitDepth)
 	    {
 	        System32BitPixel *s = (System32BitPixel*) (*pDC)[lines];
 	        System32BitPixel *e = s + pDC->X();
-	        GPalette *pal = pDC->Palette();
+	        LPalette *pal = pDC->Palette();
         	GdcRGB *p = (*pal)[0], *pix;
         	
 	        while (s < e)
@@ -624,7 +624,7 @@ bool GifLoadPalette(LStream *s, LSurface *pDC, int TableBits)
 	if (s->Read(Rgb, Bytes) != Bytes)
 		return false;
 
-	GPalette *Pal = new GPalette((uint8_t*)Rgb, 256);
+	LPalette *Pal = new LPalette((uint8_t*)Rgb, 256);
 	if (!Pal)
 		return false;
 		
@@ -890,7 +890,7 @@ LFilter::IoStatus GdcGif::WriteImage(LStream *Out, LSurface *pDC)
 		    else
 		    {
 			    // put up a dialog to ask about transparent colour
-			    GTransparentDlg Dlg((LView*)Parent.Value.Ptr, &Transparent);
+			    LTransparentDlg Dlg((LView*)Parent.Value.Ptr, &Transparent);
 			    if (!Dlg.DoModal())
 			    {
 				    Props->SetValue("Cancel", v = 1);
@@ -909,7 +909,7 @@ LFilter::IoStatus GdcGif::WriteImage(LStream *Out, LSurface *pDC)
 	}
 	#endif
 
-	GPalette *Pal = pDC->Palette();
+	LPalette *Pal = pDC->Palette();
 
 	// Intel byte ordering
 	Out->SetSize(0);

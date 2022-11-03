@@ -26,14 +26,14 @@ enum Ctrls
 	IDC_TYPES_HISTORY
 };
 
-class GHistory;
+class LHistory;
 class LHistoryPopup : public LPopup
 {
-	GHistory *History;
+	LHistory *History;
 	LList *Lst;
 
 public:
-	LHistoryPopup(GHistory *h);
+	LHistoryPopup(LHistory *h);
 	
 	void OnPaint(LSurface *pDC)
 	{
@@ -42,14 +42,14 @@ public:
 	}
 };
 
-class GHistory : public LDropDown, public ResObject
+class LHistory : public LDropDown, public ResObject
 {
 	friend class LHistoryPopup;
 	LString All;
 	LString::Array Strs;
 	
 public:
-	GHistory(int Id) :
+	LHistory(int Id) :
 		LDropDown(Id, 0, 0, 80, 20, 0),
 		ResObject(Res_Custom)
 	{
@@ -100,7 +100,7 @@ public:
 	}
 };
 
-LHistoryPopup::LHistoryPopup(GHistory *h) : LPopup(h)
+LHistoryPopup::LHistoryPopup(LHistory *h) : LPopup(h)
 {
 	History = h;
 	
@@ -119,14 +119,14 @@ LHistoryPopup::LHistoryPopup(GHistory *h) : LPopup(h)
 	}
 }
 
-struct GFindInFilesPriv : public LXmlTreeUi
+struct LFindInFilesPriv : public LXmlTreeUi
 {
 	LTableLayout *Tbl;
 	LAutoString Search;
 	LDom *Store;
-	GHistory *SearchHistory, *WhereHistory, *TypesHistory;
+	LHistory *SearchHistory, *WhereHistory, *TypesHistory;
 
-	GFindInFilesPriv()
+	LFindInFilesPriv()
 	{
 		Tbl = NULL;
 		Store = NULL;
@@ -142,14 +142,14 @@ struct GFindInFilesPriv : public LXmlTreeUi
 		Map("fif_types_history", IDC_TYPES_HISTORY);
 	}
 	
-	~GFindInFilesPriv()
+	~LFindInFilesPriv()
 	{
 	}
 };
 	
-GFindInFiles::GFindInFiles(LViewI *Parent, LAutoString Search, LDom *Store)
+LFindInFiles::LFindInFiles(LViewI *Parent, LAutoString Search, LDom *Store)
 {
-	d = new GFindInFilesPriv;
+	d = new LFindInFilesPriv;
 	d->Search = Search;
 	d->Store = Store;
 	SetParent(Parent);
@@ -171,7 +171,7 @@ GFindInFiles::GFindInFiles(LViewI *Parent, LAutoString Search, LDom *Store)
 	c->Add(v = new LEdit(IDC_SEARCH, 0, 0, 60, 20));
 	v->Focus(true);
 	c = d->Tbl->GetCell(2, y);
-	c->Add(d->SearchHistory = new GHistory(IDC_SEARCH_HISTORY));
+	c->Add(d->SearchHistory = new LHistory(IDC_SEARCH_HISTORY));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
 	c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Look in:"));
@@ -181,7 +181,7 @@ GFindInFiles::GFindInFiles(LViewI *Parent, LAutoString Search, LDom *Store)
 	c = d->Tbl->GetCell(1, y);
 	c->Add(new LButton(IDC_WHERE_BROWSE, 0, 0, 20, 20, "..."));
 	c = d->Tbl->GetCell(2, y);
-	c->Add(d->WhereHistory = new GHistory(IDC_WHERE_HISTORY));
+	c->Add(d->WhereHistory = new LHistory(IDC_WHERE_HISTORY));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
 	c->PaddingTop(LCss::Len("0.5em"));
@@ -200,7 +200,7 @@ GFindInFiles::GFindInFiles(LViewI *Parent, LAutoString Search, LDom *Store)
 	c = d->Tbl->GetCell(0, ++y, true, cols-1);
 	c->Add(new LEdit(IDC_FILE_TYPES, 0, 0, 60, 20));
 	c = d->Tbl->GetCell(cols-1, y);
-	c->Add(d->TypesHistory = new GHistory(IDC_TYPES_HISTORY));
+	c->Add(d->TypesHistory = new LHistory(IDC_TYPES_HISTORY));
 
 	c = d->Tbl->GetCell(0, ++y, true, cols);
 	c->TextAlign(LCss::AlignRight);
@@ -211,13 +211,13 @@ GFindInFiles::GFindInFiles(LViewI *Parent, LAutoString Search, LDom *Store)
 	MoveToCenter();
 }
 
-GFindInFiles::~GFindInFiles()
+LFindInFiles::~LFindInFiles()
 {
 	d->Convert(d->Store, this, false);
 	DeleteObj(d);
 }
 
-int GFindInFiles::OnNotify(LViewI *Ctrl, LNotification n)
+int LFindInFiles::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{

@@ -2,7 +2,7 @@
 #include "UnitTests.h"
 #include "lgi/common/Css.h"
 
-class GCssTestPriv
+class LCssTestPriv
 {
 public:
 	LCss c;
@@ -153,17 +153,17 @@ public:
 	}
 };
 
-GCssTest::GCssTest() : UnitTest("GCssTest")
+LCssTest::LCssTest() : UnitTest("LCssTest")
 {
-	d = new GCssTestPriv;
+	d = new LCssTestPriv;
 }
 
-GCssTest::~GCssTest()
+LCssTest::~LCssTest()
 {
 	DeleteObj(d);
 }
 
-bool GCssTest::Run()
+bool LCssTest::Run()
 {
 	return	d->Test1() &&
 			d->Test2();

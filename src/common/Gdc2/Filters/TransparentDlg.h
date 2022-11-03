@@ -7,13 +7,13 @@
 #include "lgi/common/Variant.h"
 #include "lgi/common/RadioGroup.h"
 
-class GTransparentDlg : public LDialog
+class LTransparentDlg : public LDialog
 {
 	LRadioGroup *Grp;
 	LVariant *Trans;
 
 public:
-	GTransparentDlg(LView *parent, LVariant *trans);
+	LTransparentDlg(LView *parent, LVariant *trans);
 	int OnNotify(LViewI *Ctrl, LNotification n);
 };
 #endif

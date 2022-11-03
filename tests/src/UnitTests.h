@@ -20,68 +20,68 @@ public:
 	}
 };
 
-class GAutoPtrTest : public UnitTest
+class LAutoPtrTest : public UnitTest
 {
-	class GAutoPtrTestPriv *d;
+	class LAutoPtrTestPriv *d;
 
 public:
-	GAutoPtrTest();
-	~GAutoPtrTest();
+	LAutoPtrTest();
+	~LAutoPtrTest();
 
 	bool Run();
 };
 
-class GCssTest : public UnitTest
+class LCssTest : public UnitTest
 {
-	class GCssTestPriv *d;
+	class LCssTestPriv *d;
 
 public:
-	GCssTest();
-	~GCssTest();
+	LCssTest();
+	~LCssTest();
 
 	bool Run();
 };
 
-class GMatrixTest : public UnitTest
+class LMatrixTest : public UnitTest
 {
-	class GMatrixTestPriv *d;
+	class LMatrixTestPriv *d;
 
 public:
-	GMatrixTest();
-	~GMatrixTest();
+	LMatrixTest();
+	~LMatrixTest();
 
 	bool Run();
 };
 
-class GContainers : public UnitTest
+class LContainers : public UnitTest
 {
-	class GContainersPriv *d;
+	class LContainersPriv *d;
 
 public:
-	GContainers();
-	~GContainers();
+	LContainers();
+	~LContainers();
 
 	bool Run();
 };
 
-class GStringClassTest : public UnitTest
+class LStringClassTest : public UnitTest
 {
-	class GStringClassTestPriv *d;
+	class LStringClassTestPriv *d;
 
 public:
-	GStringClassTest();
-	~GStringClassTest();
+	LStringClassTest();
+	~LStringClassTest();
 
 	bool Run();
 };
 
-class GStringPipeTest : public UnitTest
+class LStringPipeTest : public UnitTest
 {
-	class GStringPipeTestPriv *d;
+	class LStringPipeTestPriv *d;
 
 public:
-	GStringPipeTest();
-	~GStringPipeTest();
+	LStringPipeTest();
+	~LStringPipeTest();
 
 	bool Run();
 };

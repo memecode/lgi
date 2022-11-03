@@ -1,34 +1,34 @@
 #ifndef __GUNDO_H__
 #define __GUNDO_H__
 
-class GUndoEvent
+class LUndoEvent
 {
 public:
-    virtual ~GUndoEvent() {}
+    virtual ~LUndoEvent() {}
     virtual void ApplyChange() {}
     virtual void RemoveChange() {}
 };
 
-class GUndo
+class LUndo
 {
 	unsigned Pos;
-	List<GUndoEvent> Events;
+	List<LUndoEvent> Events;
 
 public:
-	GUndo() { Pos = 0; }
-	~GUndo() { Empty(); }
+	LUndo() { Pos = 0; }
+	~LUndo() { Empty(); }
 
 	int GetPos() { return Pos; }
 	bool CanUndo() { return (Pos > 0) && (Events.Length() > 0); }
 	bool CanRedo() { return (Pos < Events.Length()) && (Events.Length() > 0); }
 	void Empty() { Events.DeleteObjects(); Pos = 0; }
 
-	GUndo &operator +=(GUndoEvent *e)
+	LUndo &operator +=(LUndoEvent *e)
 	{
 		while (Events.Length() > Pos)
 		{
 			auto It = Events.rbegin();
-			GUndoEvent *u = *It;
+			LUndoEvent *u = *It;
 			Events.Delete(It);
 			DeleteObj(u);
 		}
@@ -42,7 +42,7 @@ public:
 	{
 		if (CanUndo())
 		{
-			GUndoEvent *e = Events.ItemAt(Pos-1);
+			LUndoEvent *e = Events.ItemAt(Pos-1);
 			if (e)
 			{
 				e->RemoveChange();
@@ -55,7 +55,7 @@ public:
 	{
 		if (CanRedo())
 		{
-			GUndoEvent *e = Events.ItemAt(Pos);
+			LUndoEvent *e = Events.ItemAt(Pos);
 			if (e)
 			{
 				e->ApplyChange();

@@ -18,7 +18,7 @@ bool IsGreyScale(LSurface *pDC)
 	bool Status = false;
 	if (pDC)
 	{
-		GPalette *Pal = pDC->Palette();
+		LPalette *Pal = pDC->Palette();
 		Status = true;
 		if (Pal && Pal->GetSize() > 0)
 		{
@@ -58,7 +58,7 @@ bool GreyScaleDC(LSurface *pDest, LSurface *pSrc)
 				// 8 -> 8 greyscale convert
 				if (pDest->Create(pSrc->X(), pSrc->Y(), CsIndex8))
 				{
-					GPalette *Pal = pSrc->Palette();
+					LPalette *Pal = pSrc->Palette();
 					if (Pal)
 					{
 						// convert palette
@@ -104,12 +104,12 @@ bool GreyScaleDC(LSurface *pDest, LSurface *pSrc)
 				if (pDest->Create(pSrc->X(), pSrc->Y(), CsIndex8))
 				{
 					uchar RMap[256];
-					uchar GMap[256];
+					uchar LMap[256];
 					uchar BMap[256];
 					for (int i=0; i<256; i++)
 					{
 						RMap[i] = ((i << 16) * FP_RED_TO_GREY) >> 16;
-						GMap[i] = ((i << 16) * FP_GREEN_TO_GREY) >> 16;
+						LMap[i] = ((i << 16) * FP_GREEN_TO_GREY) >> 16;
 						BMap[i] = ((i << 16) * FP_BLUE_TO_GREY) >> 16;
 					}
 					
@@ -128,7 +128,7 @@ bool GreyScaleDC(LSurface *pDest, LSurface *pSrc)
 									uchar r = R16(Src[x]) << 3;
 									uchar g = G16(Src[x]) << 2;
 									uchar b = B16(Src[x]) << 3;
-									Dest[x] = RMap[r] + GMap[g] + BMap[b];
+									Dest[x] = RMap[r] + LMap[g] + BMap[b];
 								}
 								break;
 							}
@@ -140,7 +140,7 @@ bool GreyScaleDC(LSurface *pDest, LSurface *pSrc)
 								for (int x=0; x<pSrc->X(); x++)
 								{
 									uchar *x3 = Src + ((x<<1) + x);
-									Dest[x] = RMap[ x3[2] ] + GMap[ x3[1] ] + BMap[ x3[0] ];
+									Dest[x] = RMap[ x3[2] ] + LMap[ x3[1] ] + BMap[ x3[0] ];
 								}
 								break;
 							}
@@ -154,14 +154,14 @@ bool GreyScaleDC(LSurface *pDest, LSurface *pSrc)
 									uchar r = R32(Src[x]);
 									uchar g = G32(Src[x]);
 									uchar b = B32(Src[x]);
-									Dest[x] = RMap[r] + GMap[g] + BMap[b];
+									Dest[x] = RMap[r] + LMap[g] + BMap[b];
 								}
 								break;
 							}
 						}
 					}
 
-					GPalette *Pal = new GPalette(0, 256);
+					LPalette *Pal = new LPalette(0, 256);
 					if (Pal)
 					{
 						// convert palette
@@ -213,7 +213,7 @@ bool InvertDC(LSurface *pDC)
 				}
 				else
 				{
-					GPalette *Pal = pDC->Palette();
+					LPalette *Pal = pDC->Palette();
 					if (Pal)
 					{
 						GdcRGB *p = (*Pal)[0];
@@ -470,12 +470,12 @@ bool FlipYDC(LSurface *pDC, Progress *Prog)
 }
 
 // Remaps DC to new palette
-bool RemapDC(LSurface *pDC, GPalette *DestPal)
+bool RemapDC(LSurface *pDC, LPalette *DestPal)
 {
 	bool Status = false;
 	if (pDC && pDC->GetBits() <= 8 && DestPal)
 	{
-		GPalette *SrcPal = pDC->Palette();
+		LPalette *SrcPal = pDC->Palette();
 		int Colours = (SrcPal) ? SrcPal->GetSize() : 1 << pDC->GetBits();
 		uchar *Remap = new uchar[Colours];
 		if (Remap)
@@ -621,11 +621,11 @@ bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *FromRgn, Progress *Prog)
 	Sr.x2 <<= 8;
 	Sr.y2 <<= 8;
 
-	GPalette *DestPal = pDest->Palette();
+	LPalette *DestPal = pDest->Palette();
 	System32BitPixel pal8[256];
 	if (pSrc->GetBits() <= 8)
 	{
-		GPalette *p = pSrc->Palette();
+		LPalette *p = pSrc->Palette();
 		for (int i=0; i<256; i++)
 		{
 			if (p && i < p->GetSize())

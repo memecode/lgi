@@ -1,23 +1,23 @@
 #include <stdio.h>
 
 #include "Lgi.h"
-#include "GFileAssoc.h"
+#include "LFileAssoc.h"
 
 /////////////////////////////////////////////////////////////////////
-GFileAssocAction::GFileAssocAction()
+LFileAssocAction::LFileAssocAction()
 {
 	App = 0;
 	Action = 0;
 }
 
-GFileAssocAction::~GFileAssocAction()
+LFileAssocAction::~LFileAssocAction()
 {
 	DeleteArray(App);
 	DeleteArray(Action);
 }
 
 /////////////////////////////////////////////////////////////////////
-class GFileAssocPrivate
+class LFileAssocPrivate
 {
 public:
 	char *Mime;
@@ -27,7 +27,7 @@ public:
 	char *Class;
 	#endif
 
-	GFileAssocPrivate(char *mime, char *ext)
+	LFileAssocPrivate(char *mime, char *ext)
 	{
 		Mime = NewStr(mime);
 		Ext = NewStr(ext);
@@ -77,7 +77,7 @@ public:
 		#endif
 	}
 
-	~GFileAssocPrivate()
+	~LFileAssocPrivate()
 	{
 		DeleteArray(Mime);
 		DeleteArray(Ext);
@@ -88,27 +88,27 @@ public:
 	}
 };
 
-GFileAssoc::GFileAssoc(char *mime, char *ext)
+LFileAssoc::LFileAssoc(char *mime, char *ext)
 {
-	d = new GFileAssocPrivate(mime, ext);
+	d = new LFileAssocPrivate(mime, ext);
 }
 
-GFileAssoc::~GFileAssoc()
+LFileAssoc::~LFileAssoc()
 {
 	DeleteObj(d);
 }
 
-char *GFileAssoc::GetMimeType()
+char *LFileAssoc::GetMimeType()
 {
 	return d->Mime;
 }
 
-char *GFileAssoc::GetExtension()
+char *LFileAssoc::GetExtension()
 {
 	return d->Ext;
 }
 
-bool GFileAssoc::GetExtensions(LArray<char*> &Ext)
+bool LFileAssoc::GetExtensions(LArray<char*> &Ext)
 {
 	bool Status = false;
 
@@ -125,7 +125,7 @@ bool GFileAssoc::GetExtensions(LArray<char*> &Ext)
 	return Status;
 }
 
-bool GFileAssoc::GetActions(LArray<GFileAssocAction*> &Actions)
+bool LFileAssoc::GetActions(LArray<LFileAssocAction*> &Actions)
 {
 	bool Status = false;
 
@@ -139,7 +139,7 @@ bool GFileAssoc::GetActions(LArray<GFileAssocAction*> &Actions)
 		{
 			for (char *s = a.First(); s; s = a.Next())
 			{
-				GFileAssocAction *Act = new GFileAssocAction;
+				LFileAssocAction *Act = new LFileAssocAction;
 				if (Act)
 				{
 					Actions.Add(Act);
@@ -158,7 +158,7 @@ bool GFileAssoc::GetActions(LArray<GFileAssocAction*> &Actions)
 	return Status;
 }
 
-bool GFileAssoc::SetAction(GFileAssocAction *Action)
+bool LFileAssoc::SetAction(LFileAssocAction *Action)
 {
 	bool Status = false;
 
@@ -180,7 +180,7 @@ bool GFileAssoc::SetAction(GFileAssocAction *Action)
 	return Status;
 }
 
-bool GFileAssoc::SetIcon(char *File, int Index)
+bool LFileAssoc::SetIcon(char *File, int Index)
 {
 	bool Status = false;
 

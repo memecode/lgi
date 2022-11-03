@@ -33,7 +33,7 @@ public:
 
 	const char *GetClass() { return "GdcApp16"; }
 
-	bool SetSurface(LBmpMem *d, GPalette *p, LBmpMem *a)
+	bool SetSurface(LBmpMem *d, LPalette *p, LBmpMem *a)
 	{
 		if (d && d->Cs == Cs)
 		{
@@ -136,7 +136,7 @@ public:
 		}
 	}
 
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 	{
 		if (!Src)
 			return false;
@@ -208,7 +208,7 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha);
 };
 
 template<typename Pixel, LColourSpace Cs>
@@ -218,7 +218,7 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha);
 };
 
 template<typename Pixel, LColourSpace Cs>
@@ -228,7 +228,7 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha);
 };
 
 LApplicator *LApp16::Create(LColourSpace Cs, int Op)
@@ -294,7 +294,7 @@ void GdcApp16Or::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp16Or::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
+bool GdcApp16Or::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (Src && Src->Cs == Dest->Cs)
 	{
@@ -333,7 +333,7 @@ void GdcApp16And::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp16And::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
+bool GdcApp16And::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (Src && Src->Cs == Dest->Cs)
 	{
@@ -372,7 +372,7 @@ void GdcApp16Xor::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp16Xor::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
+bool GdcApp16Xor::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (Src && Src->Cs == Dest->Cs)
 	{

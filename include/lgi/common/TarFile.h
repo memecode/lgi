@@ -7,7 +7,7 @@
 #include "lgi/common/StringClass.h"
 
 /// Tar file parser
-class GTarParser
+class LTarParser
 {
 public:
 	/// A tar file listing.
@@ -197,7 +197,7 @@ protected:
 	}
 
 public:
-	GTarParser()
+	LTarParser()
 	{
 		Files = 0;
 		ExtractTo = 0;

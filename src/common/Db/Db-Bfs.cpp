@@ -1,13 +1,13 @@
 #include "Lgi.h"
-#include "GDb.h"
+#include "LDb.h"
 #include "Bfs/LgiBfs.h"
 
-class GBfsDb : public GDb
+class LBfsDb : public LDb
 {
 	Bfs *Db;
 
 public:
-	GBfsDb(char *s)
+	LBfsDb(char *s)
 	{
 		Db = BfsCreate(s);
 		if (Db)
@@ -25,7 +25,7 @@ public:
 		}
 	}
 
-	~GBfsDb()
+	~LBfsDb()
 	{
 		DeleteObj(Db);
 	}
@@ -51,8 +51,8 @@ public:
 	}
 };
 
-GDb *OpenBfsDatabase(char *s)
+LDb *OpenBfsDatabase(char *s)
 {
-	return new GBfsDb(s);
+	return new LBfsDb(s);
 }
 

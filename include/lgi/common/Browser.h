@@ -7,23 +7,23 @@
 #define _GBROWSER_H_
 
 
-class GBrowser : public LWindow
+class LBrowser : public LWindow
 {
-	class GBrowserPriv *d;
+	class LBrowserPriv *d;
 
 public:
-	class GBrowserEvents
+	class LBrowserEvents
 	{
 	public:
-		virtual ~GBrowserEvents() {}
+		virtual ~LBrowserEvents() {}
 
-		virtual bool OnSearch(GBrowser *br, const char *txt) { return false; }
+		virtual bool OnSearch(LBrowser *br, const char *txt) { return false; }
 	};
 	
-	GBrowser(LViewI *owner, const char *Title, char *Uri = 0);
-	~GBrowser();
+	LBrowser(LViewI *owner, const char *Title, char *Uri = 0);
+	~LBrowser();
 
-	void SetEvents(GBrowserEvents *Events);
+	void SetEvents(LBrowserEvents *Events);
 	bool SetUri(const char *Uri = 0);
 	bool SetHtml(char *Html);
 

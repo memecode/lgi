@@ -95,20 +95,20 @@ public:
 	DynFunc1(int, gzclearerr,gzFile, file);
 };
 
-class GZlibFile : public LStream
+class LZlibFile : public LStream
 {
 	Zlib *z;
 	gzFile f;
 
 public:
-	GZlibFile(Zlib *zlib)
+	LZlibFile(Zlib *zlib)
 	{
 		z = zlib;
 		f = 0;
 		LAssert(z != NULL);
 	}
 
-	~GZlibFile()
+	~LZlibFile()
 	{
 		Close();
 	}

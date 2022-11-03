@@ -1,7 +1,7 @@
 #ifndef _TEXT_FILE_H_
 #define _TEXT_FILE_H_
 
-class GTextFile : public LFile
+class LTextFile : public LFile
 {
 public:
 	enum EncodingType
@@ -24,7 +24,7 @@ protected:
 	LAutoString Charset;
 
 public:
-	GTextFile(const char *charset = NULL)
+	LTextFile(const char *charset = NULL)
 	{
 		First = true;
 		InEndOfLine = false;

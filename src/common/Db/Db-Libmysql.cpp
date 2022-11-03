@@ -1,5 +1,5 @@
 #include "Lgi.h"
-#include "GDb.h"
+#include "LDb.h"
 #include "mysql.h"
 #include "INet.h"
 
@@ -280,7 +280,7 @@ bool MysqlRs::DeleteRecord()
 }
 
 //////////////////////////////////////////////////////////////////////
-class MysqlDb : public GDb
+class MysqlDb : public LDb
 {
 	MYSQL Db;
 
@@ -387,7 +387,7 @@ public:
 	}
 };
 
-GDb *OpenMysqlDatabase(char *s)
+LDb *OpenMysqlDatabase(char *s)
 {
 	static bool Init = false;
 	if (!Init)

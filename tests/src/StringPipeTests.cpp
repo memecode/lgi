@@ -1,22 +1,22 @@
 #include "lgi/common/Lgi.h"
 #include "UnitTests.h"
 
-class GStringPipeTestPriv
+class LStringPipeTestPriv
 {
 public:
 };
 
-GStringPipeTest::GStringPipeTest() : UnitTest("GStringPipeTest")
+LStringPipeTest::LStringPipeTest() : UnitTest("LStringPipeTest")
 {
-	d = new GStringPipeTestPriv;
+	d = new LStringPipeTestPriv;
 }
 
-GStringPipeTest::~GStringPipeTest()
+LStringPipeTest::~LStringPipeTest()
 {
 	DeleteObj(d);
 }
 
-bool GStringPipeTest::Run()
+bool LStringPipeTest::Run()
 {
 
 

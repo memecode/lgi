@@ -1380,7 +1380,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 // printf("SerializeState load %s\n", v.Str());
 
 
-			GToken t(v.Str(), ";");
+			LToken t(v.Str(), ";");
 			for (int i=0; i<t.Length(); i++)
 			{
 				char *Var = t[i];
@@ -1679,7 +1679,7 @@ static LAutoString DescribeView(LViewI *v)
 	for (int n=MIN(3, p.Length()-1); n>=0; n--)
 	{
 		char Buf[256] = "";
-		if (!stricmp(v->GetClass(), "GMdiChild"))
+		if (!stricmp(v->GetClass(), "LMdiChild"))
 			sprintf(Buf, "'%s'", v->Name());
 		v = p[n];
 		

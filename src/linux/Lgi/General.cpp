@@ -267,7 +267,7 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 						LAppInfo *ai = new LAppInfo;
 						Apps.Add(ai);
 						
-						GToken t(txt, "\n");
+						LToken t(txt, "\n");
 						for (int i=0; i<t.Length(); i++)
 						{
 							char *Var = t[i];
@@ -380,7 +380,7 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LString *Erro
 			{
 				// look in the path
 				InPath = true;
-				GToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
+				LToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
 				for (int i=0; i<p.Length() && !Ok; i++)
 				{
 					LMakePath(Path, sizeof(Path), p[i], File);

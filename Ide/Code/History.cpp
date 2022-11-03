@@ -1,6 +1,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/List.h"
-#include "GHistory.h"
+#include "History.h"
 
 //////////////////////////////////////////////////////////////
 // LHistoryPopup
@@ -77,34 +77,34 @@ public:
 	} 
 };
 /////////////////////////////////////////////////////////////
-// GHistory
-class GHistoryPrivate
+// LHistory
+class LHistoryPrivate
 {
 public:
 	LHistoryPopup *Popup;
 	int TargetId;
 	int64 Value;
 	
-	GHistoryPrivate()
+	LHistoryPrivate()
 	{
 		Popup = 0;
 		TargetId = 0;
 		Value = 0;
 	}
 };
-GHistory::GHistory() :
+LHistory::LHistory() :
 	LDropDown(-1, 0, 0, 10, 10, 0),
 	ResObject(Res_Custom)
 {
-	d = new GHistoryPrivate;
+	d = new LHistoryPrivate;
 	SetPopup(d->Popup = new LHistoryPopup);
 }
-GHistory::~GHistory()
+LHistory::~LHistory()
 {
 	DeleteObj(d);
 	DeleteArrays();
 }
-bool GHistory::OnLayout(LViewLayoutInfo &Inf)
+bool LHistory::OnLayout(LViewLayoutInfo &Inf)
 {
 	if (!Inf.Width.Min)
 		Inf.Width.Min = Inf.Width.Max = 24;
@@ -113,22 +113,22 @@ bool GHistory::OnLayout(LViewLayoutInfo &Inf)
 	
 	return true;
 }
-int GHistory::GetTargetId()
+int LHistory::GetTargetId()
 {
 	return d->TargetId;
 }
-void GHistory::SetTargetId(int id)
+void LHistory::SetTargetId(int id)
 {
 	d->TargetId = id;
 }
-int64 GHistory::Value()
+int64 LHistory::Value()
 {
 	if (d && d->Popup)
 		return d->Popup->Index;
 	
 	return -1;
 }
-void GHistory::Value(int64 i)
+void LHistory::Value(int64 i)
 {
 	if (!d || !d->Popup)
 	{
@@ -150,7 +150,7 @@ void GHistory::Value(int64 i)
 	}
 	else LgiTrace("%s:%i - No list?\n", _FL);
 }
-int GHistory::Add(const char *Str)
+int LHistory::Add(const char *Str)
 {
 	if (!Str)
 		return -1;
@@ -176,7 +176,7 @@ int GHistory::Add(const char *Str)
 	}
 	return Idx;
 }
-void GHistory::Update()
+void LHistory::Update()
 {
 	LList *Lst = d->Popup ? d->Popup->Lst : 0;
 	if (Lst)
@@ -193,7 +193,7 @@ void GHistory::Update()
 		}
 	}
 }
-void GHistory::OnPopupClose()
+void LHistory::OnPopupClose()
 {
 	if (!d->Popup->GetCancelled() &&
 		d->TargetId &&
@@ -205,7 +205,7 @@ void GHistory::OnPopupClose()
 }
 ////////////////////////////////////////////////////////////
 // Factory
-class GHistoryFactory : public LViewFactory
+class LHistoryFactory : public LViewFactory
 {
 public:
 	virtual LView *NewView
@@ -215,9 +215,9 @@ public:
 		const char *Text
 	)
 	{
-		if (stricmp(Class, "GHistory") == 0)
+		if (stricmp(Class, "LHistory") == 0)
 		{
-			return new GHistory;
+			return new LHistory;
 		}
 		return 0;
 	}

@@ -1,14 +1,14 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/GdiLeak.h"
 
-class GPrintDCPrivate
+class LPrintDCPrivate
 {
 public:
 	bool PageOpen;
 	bool DocOpen;
 	LString OutputFileName;
 
-	GPrintDCPrivate()
+	LPrintDCPrivate()
 	{
 		PageOpen = false;
 		DocOpen = false;
@@ -24,7 +24,7 @@ BOOL CALLBACK LAbortProc(HDC hdc, int iError)
 
 LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName)
 {
-	d = new GPrintDCPrivate;
+	d = new LPrintDCPrivate;
 	hDC = (HDC) Handle;
 
 	// Does this even do anything useful?

@@ -1,7 +1,7 @@
 #ifndef _FIND_IN_FILES_H_
 #define _FIND_IN_FILES_H_
 
-#include "GHistory.h"
+#include "History.h"
 
 enum FifSearchType
 {
@@ -63,8 +63,8 @@ public:
 class FindInFiles : public LDialog
 {
 	AppWnd *App;
-	GHistory *TypeHistory;
-	GHistory *FolderHistory;
+	LHistory *TypeHistory;
+	LHistory *FolderHistory;
 	bool OwnParams;
 
 public:

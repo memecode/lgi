@@ -22,7 +22,7 @@ enum TagInfoFlags
 //////////////////////////////////////////////////////////////////////////////////
 // Structs & Classes                                                            //
 //////////////////////////////////////////////////////////////////////////////////
-class GFlowRect;
+class LFlowRect;
 class LFlowRegion;
 
 struct LTagHit
@@ -30,7 +30,7 @@ struct LTagHit
 	LTag *Hit; // Tag that was hit, or nearest tag, otherwise NULL
 	int Near; // 0 if a direct hit, >0 is near miss, -1 if invalid.
 
-	GFlowRect *Block; // Text block hit
+	LFlowRect *Block; // Text block hit
 	int Index; // If Block!=NULL then index into text, otherwise -1.
 
 	LTagHit()
@@ -112,32 +112,32 @@ public:
 	void Set(char *s);
 };
 
-class GFlowRect : public LRect
+class LFlowRect : public LRect
 {
 public:
 	LTag *Tag;
 	char16 *Text;
 	int Len;
 
-	GFlowRect()
+	LFlowRect()
 	{
 		Tag = 0;
 		Text = 0;
 		Len = 0;
 	}
 
-	~GFlowRect()
+	~LFlowRect()
 	{
 	}
 
 	int Start();
 	bool OverlapX(int x) { return x >= x1 && x <= x2; }
 	bool OverlapY(int y) { return y >= y1 && y <= y2; }
-	bool OverlapX(GFlowRect *b) { return !(b->x2 < x1 || b->x1 > x2); }
-	bool OverlapY(GFlowRect *b) { return !(b->y2 < y1 || b->y1 > y2); }
+	bool OverlapX(LFlowRect *b) { return !(b->x2 < x1 || b->x1 > x2); }
+	bool OverlapY(LFlowRect *b) { return !(b->y2 < y1 || b->y1 > y2); }
 };
 
-class LHtmlArea : public List<GFlowRect>
+class LHtmlArea : public List<LFlowRect>
 {
 public:
 	~LHtmlArea();
@@ -147,13 +147,13 @@ public:
 	void FlowText(LTag *Tag, LFlowRegion *c, LFont *Font, char16 *Text, LCss::LengthType Align);
 };
 
-class GCellStore
+class LCellStore
 {
 	typedef LArray<LTag*> CellArray;
 	LArray<CellArray> c;
 
 public:
-	GCellStore(LTag *Table);
+	LCellStore(LTag *Table);
 
 	void GetSize(int &x, int &y);
 	void GetAll(List<LTag> &All);
@@ -198,7 +198,7 @@ protected:
 
 	// Private methods
 	LFont *NewFont();
-	int NearestChar(GFlowRect *Fr, int x, int y);
+	int NearestChar(LFlowRect *Fr, int x, int y);
 	LTag *HasOpenTag(char *t);
 	LTag *PrevTag();
 	LRect ChildBounds();
@@ -220,7 +220,7 @@ public:
 	HtmlTag TagId;
 	char *Tag; // My tag
 
-	GToken Class;
+	LToken Class;
 	const char *HtmlId;
 
 	LAutoString Condition;
@@ -256,7 +256,7 @@ public:
 	LPoint Span;
 	uint16 MinContent, MaxContent;
 	LCss::LengthType XAlign;
-	GCellStore *Cells;
+	LCellStore *Cells;
 	#ifdef _DEBUG
 	int Debug;
 	#endif

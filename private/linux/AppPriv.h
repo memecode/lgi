@@ -30,7 +30,7 @@ public:
 	LLibrary *SkinLib = NULL;
 	LHashTbl<StrKey<char,false>,AppArray*> MimeToApp;
 	#if HAS_SHARED_MIME
-	GSharedMime *Sm = NULL;
+	LSharedMime *Sm = NULL;
 	#endif
 	LLibrary *WmLib = NULL;
 	LHashTbl<IntKey<int>, LView*> Handles;

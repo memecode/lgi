@@ -5,7 +5,7 @@
 #include "Lgi.h"
 #include "IScp.h"
 #include "INetTools.h"
-#include "GToken.h"
+#include "LToken.h"
 
 char *CmdNames[] =
 {
@@ -341,7 +341,7 @@ bool IScp::ReadData(LSocketI *&s, IScpData *&d, int *HttpErr)
 					else
 					{
 						// HTML response
-						GToken T(Headers, "\r\n");
+						LToken T(Headers, "\r\n");
 						if (T.Length() > 0)
 						{
 							bool Http11 = strnicmp("http/1.1", T[0], 8) == 0;
@@ -797,7 +797,7 @@ bool IScpClient::Poll(List<int> &Changed)
 			int i = Dec->GetInt("Status");
 			if (i > 0)
 			{
-				GToken T(Dec->Data, "\r\n");
+				LToken T(Dec->Data, "\r\n");
 				for (int i=0; i<T.Length(); i++)
 				{
 					Changed.Insert(new int(atoi(T[i])));

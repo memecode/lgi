@@ -1851,7 +1851,7 @@ void LTree::OnPaint(LSurface *pDC)
 		{
 			if (d->IconCache->GetColourSpace() == CsIndex8)
 			{
-				d->IconCache->Palette(new GPalette(GdcD->GetGlobalColour()->GetPalette()));
+				d->IconCache->Palette(new LPalette(GdcD->GetGlobalColour()->GetPalette()));
 			}
 
 			d->IconCache->Colour(Background);

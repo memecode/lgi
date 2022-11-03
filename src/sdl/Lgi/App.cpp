@@ -20,9 +20,9 @@
 #else
 #include "LSymLookup.h"
 #endif
-#include "GToken.h"
+#include "LToken.h"
 #include "GViewPriv.h"
-#include "GRegionClipDC.h"
+#include "LRegionClipDC.h"
 #include "LFontCache.h"
 
 #define DEBUG_MSG_TYPES				0
@@ -173,7 +173,7 @@ public:
 	LLibrary *SkinLib;
 	LHashTbl<StrKey<char,false>,AppArray*> MimeToApp;
 	#if HAS_SHARED_MIME
-	GSharedMime *Sm;
+	LSharedMime *Sm;
 	#endif
 	LHashTbl<IntKey<int>, LView*> Handles;
 	OsThread GuiThread;
@@ -906,7 +906,7 @@ LAutoString LApp::GetFileMimeType(const char *File)
 	if (!FileExists(File))
 	{
 		// Look in the path
-		GToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
+		LToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
 		for (int i=0; i<p.Length(); i++)
 		{
 			LMakePath(Full, sizeof(Full), p[i], File);
@@ -923,7 +923,7 @@ LAutoString LApp::GetFileMimeType(const char *File)
 	if (!d->Sm)
 	{
 		// Not loaded, go and try to load it...
-		d->Sm = new GSharedMime;
+		d->Sm = new LSharedMime;
 		if (d->Sm && d->Sm->IsLoaded())
 		{
 			d->Sm->mimetypes_init();
@@ -959,7 +959,7 @@ LAutoString LApp::GetFileMimeType(const char *File)
 	LStringPipe Output;
 	char Args[256];
 	sprintf(Args, "-i \"%s\"", File);
-	GProcess p;
+	LProcess p;
 	if (p.Run("file", Args, 0, true, 0, &Output))
 	{
 		char *Out = Output.NewStr();

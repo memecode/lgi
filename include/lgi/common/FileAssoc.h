@@ -6,24 +6,24 @@
 #define _FILE_ASSOC_H_
 
 /// A single file association action
-class GFileAssocAction
+class LFileAssocAction
 {
 public:
 	char *App;
 	char *Action;
 
-	GFileAssocAction();
-	~GFileAssocAction();
+	LFileAssocAction();
+	~LFileAssocAction();
 };
 
 /// A file type, with a list of associated actions
-class GFileAssoc
+class LFileAssoc
 {
-	class GFileAssocPrivate *d;
+	class LFileAssocPrivate *d;
 
 public:
-	GFileAssoc(char *MimeType, char *Extension);
-	~GFileAssoc();
+	LFileAssoc(char *MimeType, char *Extension);
+	~LFileAssoc();
 
 	/// Returns the mimetype
 	char *GetMimeType();
@@ -35,10 +35,10 @@ public:
 	bool GetExtensions(LArray<char*> &Ext);
 
 	/// Gets the action for this association.
-	bool GetActions(LArray<GFileAssocAction*> &Actions);
+	bool GetActions(LArray<LFileAssocAction*> &Actions);
 
 	/// Sets an action.
-	bool SetAction(GFileAssocAction *Action);
+	bool SetAction(LFileAssocAction *Action);
 
 	/// Sets the icon assocaited with the file type
 	bool SetIcon(char *File, int Index);

@@ -7,13 +7,13 @@
 #include "lgi/common/Popup.h"
 
 /// A history drop down for an edit box
-class GHistory : public LDropDown, public List<char>, public ResObject
+class LHistory : public LDropDown, public List<char>, public ResObject
 {
-	class GHistoryPrivate *d;
+	class LHistoryPrivate *d;
 
 public:
-	GHistory();
-	~GHistory();
+	LHistory();
+	~LHistory();
 
 	// Props
 	int GetTargetId();

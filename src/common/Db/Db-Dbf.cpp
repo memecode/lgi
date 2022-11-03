@@ -1,8 +1,8 @@
 /*hdr
-**      FILE:           GDb-Dbf.h
+**      FILE:           LDb-Dbf.h
 **      AUTHOR:         Matthew Allen
 **      DATE:           8/2/2000
-**      DESCRIPTION:    Dbf implementation of the GDb API
+**      DESCRIPTION:    Dbf implementation of the LDb API
 **
 **      Copyright (C) 2000 Matthew Allen
 **						fret@memecode.com
@@ -12,22 +12,22 @@
 #include <stdlib.h>
 
 #include "Lgi.h"
-#include "GDb.h"
+#include "LDb.h"
 
 ///////////////////////////////////////////////////////////////////
 // Forward decl
-class GDbfField;
-class GDbfRecord;
-class GDbfRecordset;
+class LDbfField;
+class LDbfRecord;
+class LDbfRecordset;
 
 // Classes
-class GDbfDb : public GDb
+class LDbfDb : public LDb
 {
 	char *Dir;
 
 public:
-	GDbfDb();
-	~GDbfDb();
+	LDbfDb();
+	~LDbfDb();
 
 	// Attaching to data
 	bool Connect(char *Init);
@@ -38,24 +38,24 @@ public:
 	LDbRecordset *TableAt(int i) { return 0; }
 };
 
-class GDbfRecord
+class LDbfRecord
 {
-	GDbfRecordset *Recordset;
+	LDbfRecordset *Recordset;
 	char *Data;
 
 public:
-	GDbfRecord(GDbfRecordset *rs);
-	virtual ~GDbfRecord();
+	LDbfRecord(LDbfRecordset *rs);
+	virtual ~LDbfRecord();
 
 	char *GetData();
 };
 
-class GDbfField : public LDbField
+class LDbfField : public LDbField
 {
-	friend class GDbfRecord;
-	friend class GDbfRecordset;
+	friend class LDbfRecord;
+	friend class LDbfRecordset;
 
-	GDbfRecordset *Recordset;
+	LDbfRecordset *Recordset;
 
 	char *FldName;
 	int FldType;
@@ -68,8 +68,8 @@ class GDbfField : public LDbField
 	char *GetPtr();
 
 public:
-	GDbfField(GDbfRecordset *rs);
-	~GDbfField();
+	LDbfField(LDbfRecordset *rs);
+	~LDbfField();
 
 	// Properties
 	char *Name();
@@ -90,10 +90,10 @@ public:
 	bool Get(void *&Data, int &Length) { return false; }
 };
 
-class GDbfRecordset : public LDbRecordset
+class LDbfRecordset : public LDbRecordset
 {
-	friend class GDbfRecord;
-	friend class GDbfField;
+	friend class LDbfRecord;
+	friend class LDbfField;
 
 	char *FileName;				// Name of DBF file
 	LFile *File;					// Open file
@@ -103,14 +103,14 @@ class GDbfRecordset : public LDbRecordset
 	ushort HeaderLength;
 	uint RecordCount;
 	
-	List<GDbfField> F;
-	List<GDbfRecord> R;
-	GDbfRecord *Current;
-	GDbfField *NullField;
+	List<LDbfField> F;
+	List<LDbfRecord> R;
+	LDbfRecord *Current;
+	LDbfField *NullField;
 
 public:
-	GDbfRecordset(char *file);
-	~GDbfRecordset();
+	LDbfRecordset(char *file);
+	~LDbfRecordset();
 
 	// State
 	bool IsOpen()
@@ -150,24 +150,24 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////
-GDbfDb::GDbfDb()
+LDbfDb::LDbfDb()
 {
 	Dir = 0;
 }
 
-GDbfDb::~GDbfDb()
+LDbfDb::~LDbfDb()
 {
 	DeleteArray(Dir);
 }
 
-bool GDbfDb::Connect(char *Init)
+bool LDbfDb::Connect(char *Init)
 {
 	DeleteArray(Dir);
 	Dir = NewStr(Init);
 	return Dir != 0;
 }
 
-LDbRecordset *GDbfDb::Open(char *Name)
+LDbRecordset *LDbfDb::Open(char *Name)
 {
 	if (Dir AND Name)
 	{
@@ -178,7 +178,7 @@ LDbRecordset *GDbfDb::Open(char *Name)
 		sprintf(d, "%s%c%s", Dir, DIR_CHAR, Name);
 		if (FileExists(d))
 		{
-			return new GDbfRecordset(d);
+			return new LDbfRecordset(d);
 		}
 	}
 
@@ -186,18 +186,18 @@ LDbRecordset *GDbfDb::Open(char *Name)
 }
 
 ///////////////////////////////////////////////////////////////////
-GDbfRecord::GDbfRecord(GDbfRecordset *rs)
+LDbfRecord::LDbfRecord(LDbfRecordset *rs)
 {
 	Recordset = rs;
 	Data = 0;
 }
 
-GDbfRecord::~GDbfRecord()
+LDbfRecord::~LDbfRecord()
 {
 	DeleteArray(Data);
 }
 
-char *GDbfRecord::GetData()
+char *LDbfRecord::GetData()
 {
 	if (!Data AND
 		Recordset AND
@@ -219,7 +219,7 @@ char *GDbfRecord::GetData()
 				// Read the record in
 				if (Recordset->File->Read(Data, Recordset->DiskLength-1) == (Recordset->DiskLength-1))
 				{
-					for (GDbfField *f = Recordset->F.Last();
+					for (LDbfField *f = Recordset->F.Last();
 						f; f = Recordset->F.Prev())
 					{
 						// move the data into place
@@ -259,7 +259,7 @@ char *GDbfRecord::GetData()
 }
 
 /////////////////////////////////////////////////////////////////////////
-GDbfField::GDbfField(GDbfRecordset *rs)
+LDbfField::LDbfField(LDbfRecordset *rs)
 {
 	Recordset = rs;
 	FldName = 0;
@@ -270,17 +270,17 @@ GDbfField::GDbfField(GDbfRecordset *rs)
 	MemOffset = 0;
 }
 
-GDbfField::~GDbfField()
+LDbfField::~LDbfField()
 {
 	DeleteArray(FldName);
 }
 
-char *GDbfField::Name()
+char *LDbfField::Name()
 {
 	return FldName;
 }
 
-bool GDbfField::Name(char *Str)
+bool LDbfField::Name(char *Str)
 {
 	if (Str)
 	{
@@ -292,18 +292,18 @@ bool GDbfField::Name(char *Str)
 	return false;
 }
 
-int GDbfField::Type()
+int LDbfField::Type()
 {
 	return FldType;
 }
 
-bool GDbfField::Type(int NewType)
+bool LDbfField::Type(int NewType)
 {
 	// TODO: implement field conversion
 	return NewType == FldType;
 }
 
-int GDbfField::Length()
+int LDbfField::Length()
 {
 	switch (FldType)
 	{
@@ -318,13 +318,13 @@ int GDbfField::Length()
 	return 0;
 }
 
-bool GDbfField::Length(int NewLength)
+bool LDbfField::Length(int NewLength)
 {
 	// TODO: implement length conversion
 	return false;
 }
 
-char *GDbfField::GetPtr()
+char *LDbfField::GetPtr()
 {
 	if (Recordset AND Recordset->Current)
 	{
@@ -338,7 +338,7 @@ char *GDbfField::GetPtr()
 	return 0;
 }
 
-bool GDbfField::Set(LVariant &v)
+bool LDbfField::Set(LVariant &v)
 {
 	char *Data = GetPtr();
 
@@ -394,7 +394,7 @@ bool GDbfField::Set(LVariant &v)
 	return false;
 }
 
-bool GDbfField::Get(LVariant &v)
+bool LDbfField::Get(LVariant &v)
 {
 	char *Data = GetPtr();
 
@@ -421,7 +421,7 @@ bool GDbfField::Get(LVariant &v)
 }
 
 ///////////////////////////////////////////////////////////////////////////
-GDbfRecordset::GDbfRecordset(char *file)
+LDbfRecordset::LDbfRecordset(char *file)
 {
 	FileName = NewStr(file);
 	File = (FileName) ? new LFile : 0;
@@ -430,7 +430,7 @@ GDbfRecordset::GDbfRecordset(char *file)
 	HeaderLength = 0;
 	RecordCount = 0;
 	Current = 0;
-	NullField = new GDbfField(0);
+	NullField = new LDbfField(0);
 
 	int MemOffset = 0;
 	if (File AND File->Open(FileName, O_READ))
@@ -454,7 +454,7 @@ GDbfRecordset::GDbfRecordset(char *file)
 			File->Read(Name, 11);
 			if (Name[0] != 0x0d)
 			{
-				GDbfField *Fld = new GDbfField(this);
+				LDbfField *Fld = new LDbfField(this);
 				if (Fld)
 				{
 					Fld->FldName = NewStr(Name);
@@ -542,29 +542,29 @@ GDbfRecordset::GDbfRecordset(char *file)
 		// Create record objects
 		for (uint i=0; i<RecordCount; i++)
 		{
-			R.Insert(new GDbfRecord(this));
+			R.Insert(new LDbfRecord(this));
 		}
 	}
 }
 
-GDbfRecordset::~GDbfRecordset()
+LDbfRecordset::~LDbfRecordset()
 {
 	F.DeleteObjects();
 	R.DeleteObjects();
 	Current = 0;
 }
 
-LDbField *GDbfRecordset::operator [](int Index)
+LDbField *LDbfRecordset::operator [](int Index)
 {
-	GDbfField *f = F.ItemAt(Index);
+	LDbfField *f = F.ItemAt(Index);
 	return (f) ? f : NullField;
 }
 
-LDbField *GDbfRecordset::operator [](char *Name)
+LDbField *LDbfRecordset::operator [](char *Name)
 {
 	if (Name)
 	{
-		for (GDbfField *f = F.First(); f; f = F.Next())
+		for (LDbfField *f = F.First(); f; f = F.Next())
 		{
 			if (f->Name() AND
 				stricmp(f->Name(), Name) == 0)
@@ -577,83 +577,83 @@ LDbField *GDbfRecordset::operator [](char *Name)
 	return NullField;
 }
 
-bool GDbfRecordset::InsertField(LDbField *Fld, int Index)
+bool LDbfRecordset::InsertField(LDbField *Fld, int Index)
 {
 	// TODO
 	return false;
 }
 
-bool GDbfRecordset::DeleteField(LDbField *Fld)
+bool LDbfRecordset::DeleteField(LDbField *Fld)
 {
 	// TODO
 	return false;
 }
 
-int GDbfRecordset::Fields()
+int LDbfRecordset::Fields()
 {
 	return F.GetItems();
 }
 
-bool GDbfRecordset::Bof()
+bool LDbfRecordset::Bof()
 {
 	return Current == 0;
 }
 
-bool GDbfRecordset::Eof()
+bool LDbfRecordset::Eof()
 {
 	return Current == 0;
 }
 
-bool GDbfRecordset::MoveFirst()
+bool LDbfRecordset::MoveFirst()
 {
 	Current = R.First();
 	return Current != 0;
 }
 
-bool GDbfRecordset::MoveNext()
+bool LDbfRecordset::MoveNext()
 {
 	Current = R.Next();
 	return Current != 0;
 }
 
-bool GDbfRecordset::MovePrev()
+bool LDbfRecordset::MovePrev()
 {
 	Current = R.Prev();
 	return Current != 0;
 }
 
-bool GDbfRecordset::MoveLast()
+bool LDbfRecordset::MoveLast()
 {
 	Current = R.Last();
 	return Current != 0;
 }
 
-int GDbfRecordset::SeekRecord(int i)
+int LDbfRecordset::SeekRecord(int i)
 {
 	Current = R.ItemAt(i);
 	return Current != 0;
 }
 
-int GDbfRecordset::RecordIndex()
+int LDbfRecordset::RecordIndex()
 {
 	return (Current) ? R.IndexOf(Current) : -1;
 }
 
-int GDbfRecordset::CountRecords()
+int LDbfRecordset::CountRecords()
 {
 	return R.GetItems();
 }
 
-bool GDbfRecordset::DeleteRecord()
+bool LDbfRecordset::DeleteRecord()
 {
 	// TODO
 	return false;
 }
 
 ///////////////////////////////////////////////////////////////////
-GDb *OpenDbfDatabase(char *Dir)
+LDb *OpenDbfDatabase(char *Dir)
 {
-	GDbfDb *Dbf = new GDbfDb;
+	LDbfDb *Dbf = new LDbfDb;
 	if (Dbf AND Dbf->Connect(Dir))
 	{
 		return Dbf;

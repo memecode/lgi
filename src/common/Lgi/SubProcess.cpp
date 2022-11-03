@@ -881,7 +881,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 				p = LString(sPath).SplitDelimit(LGI_PATH_SEPARATOR);
 			free(sPath);
 			#else
-			GToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
+			LToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
 			#endif
 			for (unsigned i=0; i<p.Length(); i++)
 			{

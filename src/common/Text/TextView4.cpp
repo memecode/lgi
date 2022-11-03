@@ -107,7 +107,7 @@ static LArray<LTextView4*> Ctrls;
 
 //////////////////////////////////////////////////////////////////////
 class GDocFindReplaceParams4 :
-	public GDocFindReplaceParams,
+	public LDocFindReplaceParams,
 	public LMutex
 {
 public:
@@ -228,7 +228,7 @@ struct Change : public LRange
 	LArray<char16> Txt;
 };
 
-struct LTextView4Undo : public GUndoEvent
+struct LTextView4Undo : public LUndoEvent
 {
 	LTextView4 *View;
 	LArray<Change> Changes;
@@ -267,7 +267,7 @@ struct LTextView4Undo : public GUndoEvent
 		}
 	}
 
-	// GUndoEvent
+	// LUndoEvent
     void ApplyChange()
 	{
 		View->UndoOn = false;
@@ -2766,12 +2766,12 @@ bool LTextView4::DoGoto()
 	return true;
 }
 
-GDocFindReplaceParams *LTextView4::CreateFindReplaceParams()
+LDocFindReplaceParams *LTextView4::CreateFindReplaceParams()
 {
 	return new GDocFindReplaceParams4;
 }
 
-void LTextView4::SetFindReplaceParams(GDocFindReplaceParams *Params)
+void LTextView4::SetFindReplaceParams(LDocFindReplaceParams *Params)
 {
 	if (Params)
 	{
@@ -2812,7 +2812,7 @@ bool LTextView4::DoFindNext()
 }
 
 bool
-Text4_FindCallback(GFindReplaceCommon *Dlg, bool Replace, void *User)
+Text4_FindCallback(LFindReplaceCommon *Dlg, bool Replace, void *User)
 {
 	LTextView4 *v = (LTextView4*) User;
 
@@ -2847,7 +2847,7 @@ bool LTextView4::DoFind()
 		u = d->FindReplaceParams->LastFind.Get();
 	}
 
-	GFindDlg Dlg(this, u, Text4_FindCallback, this);
+	LFindDlg Dlg(this, u, Text4_FindCallback, this);
 	Dlg.DoModal();
 	Focus(true);
 
@@ -2874,7 +2874,7 @@ bool LTextView4::DoReplace()
 	char *LastFind8 = SingleLineSelection ? GetSelection() : WideToUtf8(d->FindReplaceParams->LastFind);
 	char *LastReplace8 = WideToUtf8(d->FindReplaceParams->LastReplace);
 	
-	GReplaceDlg Dlg(this, LastFind8, LastReplace8);
+	LReplaceDlg Dlg(this, LastFind8, LastReplace8);
 
 	Dlg.MatchWord = d->FindReplaceParams->MatchWord;
 	Dlg.MatchCase = d->FindReplaceParams->MatchCase;

@@ -570,7 +570,7 @@ LFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 							int Result = Lib->TIFFGetField(tif, TIFFTAG_COLORMAP, &rmap, &gmap, &bmap);
 							if (Result)
 							{
-								GPalette *p = new GPalette;
+								LPalette *p = new LPalette;
 								if (p)
 								{
 									p->SetSize(256);
@@ -845,7 +845,7 @@ LFilter::IoStatus GdcLibTiff::WriteImage(LStream *Out, LSurface *pDC)
 			{
 				Lib->TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_PALETTE);
 
-				GPalette *p = pDC->Palette();
+				LPalette *p = pDC->Palette();
 				if (p)
 				{
 					uint16 rmap[256], gmap[256], bmap[256];

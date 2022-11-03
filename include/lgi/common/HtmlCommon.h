@@ -144,12 +144,12 @@ public:
 	}
 };
 
-class GCssStyle : public LDom
+class LCssStyle : public LDom
 {
 public:
 	LCss *Css;
 
-	GCssStyle()
+	LCssStyle()
 	{
 		Css = NULL;
 	}
@@ -167,7 +167,7 @@ class LHtmlElement : public LDom, public LCss
 protected:
 	LAutoWString Txt;
 	uint8_t WasClosed : 1;
-	GCssStyle StyleDom;
+	LCssStyle StyleDom;
 
 public:
 	HtmlTag TagId;

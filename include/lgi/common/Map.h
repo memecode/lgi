@@ -1,11 +1,11 @@
 #ifndef _GMAP_H
 #define _GMAP_H
 
-#define GMapTemplate		template <typename N, typename V>
-#define GMapClass			GMap<N,V>
+#define LMapTemplate		template <typename N, typename V>
+#define LMapClass			LMap<N,V>
 
-GMapTemplate
-class GMap
+LMapTemplate
+class LMap
 {
 	class Mapping
 	{
@@ -77,13 +77,13 @@ protected:
 	}
 
 public:
-	GMap(bool Case = false)
+	LMap(bool Case = false)
 	{
 		NewName = 0;
 		CaseSen = Case;
 	}
 	
-	~GMap()
+	~LMap()
 	{
 		Empty();
 	}
@@ -133,13 +133,13 @@ public:
 		return Get(s) != 0;
 	}
 	
-	GMapClass &operator [](N s)
+	LMapClass &operator [](N s)
 	{
 		NewName = s;
 		return *this;
 	}
 
-	GMapClass &operator =(V v)
+	LMapClass &operator =(V v)
 	{
 		if (NewName)
 		{
@@ -176,6 +176,6 @@ public:
 	}
 };
 
-typedef GMap<char*, char*> GStrMap;
+typedef LMap<char*, char*> GStrMap;
 
 #endif

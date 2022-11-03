@@ -37,7 +37,7 @@ public:
 	
 	LArray<RuleArr*> Cond;
 	
-	ParseRule(GToken &t, int &i);
+	ParseRule(LToken &t, int &i);
 	ParseRule(char *s);
 
 	virtual ~ParseRule();
@@ -156,7 +156,7 @@ public:
 			DeleteArray(f);
 			if (Grammar)
 			{
-				GToken t(Grammar, "\n", false);
+				LToken t(Grammar, "\n", false);
 				for (int i=0; i<t.Length(); )
 				{
 					if (!t[i] || t[i][0] == '#')
@@ -239,7 +239,7 @@ ParseRule::ParseRule(char *s)
 	}
 }
 
-ParseRule::ParseRule(GToken &t, int &i)
+ParseRule::ParseRule(LToken &t, int &i)
 {
 	List = false;
 	Const = 0;
@@ -266,7 +266,7 @@ ParseRule::ParseRule(GToken &t, int &i)
 						Cond[c] = new RuleArr;
 					}
 					
-					GToken p(s, " ");
+					LToken p(s, " ");
 					for (int n=0; n<p.Length(); n++)
 					{
 						(*Cond[c])[Cond[c]->Length()] = new ParseRule(p[n]);

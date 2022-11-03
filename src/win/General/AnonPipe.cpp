@@ -1,5 +1,5 @@
 #include "Lgi.h"
-#include "GAnonPipe.h"
+#include "LAnonPipe.h"
 
 #define WT_EXECUTEDEFAULT 0x00000000
 #define WT_EXECUTEINIOTHREAD 0x00000001
@@ -20,7 +20,7 @@ typedef BOOL (WINAPI *pDeleteTimerQueueTimer)(HANDLE, HANDLE, HANDLE);
 
 VOID CALLBACK PipeTimer_Callback(PVOID lpParameter, BOOLEAN TimerOrWaitFired)
 {
-	GAnonPipe *Ap = (GAnonPipe*)lpParameter;
+	LAnonPipe *Ap = (LAnonPipe*)lpParameter;
 	Ap->PostEvent(WM_TIMER);
 }
 
@@ -63,29 +63,29 @@ struct GAnonPipePriv : public LLibrary, public GSemaphore
 	}
 };
 
-GAnonPipe::GAnonPipe()
+LAnonPipe::LAnonPipe()
 {
 	d = new GAnonPipePriv;
 }
 
-GAnonPipe::~GAnonPipe()
+LAnonPipe::~LAnonPipe()
 {
 	DeleteObj(d);
 }
 
-void GAnonPipe::Close()
+void LAnonPipe::Close()
 {
 	d->Close();
 }
 
-bool GAnonPipe::IsOk()
+bool LAnonPipe::IsOk()
 {
 	return  d &&
 			d->r != INVALID_HANDLE &&
 			d->w != INVALID_HANDLE;
 }
 
-bool GAnonPipe::SetPulse(int i)
+bool LAnonPipe::SetPulse(int i)
 {
 	if (d->Timer != INVALID_HANDLE)
 	{
@@ -110,7 +110,7 @@ bool GAnonPipe::SetPulse(int i)
 	return true;
 }
 
-int GAnonPipe::OnEvent(LMessage *Msg)
+int LAnonPipe::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg)
 	{
@@ -124,7 +124,7 @@ int GAnonPipe::OnEvent(LMessage *Msg)
 	return 0;
 }
 
-void GAnonPipe::PostEvent(int cmd, int a, int b)
+void LAnonPipe::PostEvent(int cmd, int a, int b)
 {
 	if (!IsOk())
 	{
@@ -141,7 +141,7 @@ void GAnonPipe::PostEvent(int cmd, int a, int b)
 	}
 }
 
-LMessage *GAnonPipe::GetMessage()
+LMessage *LAnonPipe::GetMessage()
 {
 	if (!IsOk())
 	{

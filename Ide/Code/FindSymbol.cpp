@@ -210,11 +210,11 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		#endif
 		
 		// Parse for headers...
-		GTextFile Tf;
+		LTextFile Tf;
 		if (!Tf.Open(Path, O_READ)  ||
 			Tf.GetSize() < 4)
 		{
-			LgiTrace("%s:%i - Error: GTextFile.Open(%s) failed.\n", _FL, Path.Get());
+			LgiTrace("%s:%i - Error: LTextFile.Open(%s) failed.\n", _FL, Path.Get());
 			return false;
 		}
 

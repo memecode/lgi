@@ -3,10 +3,10 @@
 
 /// This class keeps an array of ranges in sorted order, merging 
 /// adjacent ranges when new ranges are added.
-class GRanges : public LArray<LRange>
+class LRanges : public LArray<LRange>
 {
 public:
-	GRanges &operator +=(const LRange &r)
+	LRanges &operator +=(const LRange &r)
 	{
 		// Insert at the right position
 		if (Length() == 0)

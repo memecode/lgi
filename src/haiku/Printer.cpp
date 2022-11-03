@@ -4,7 +4,7 @@
 #include "lgi/common/Printer.h"
 
 ////////////////////////////////////////////////////////////////////
-class GPrinterPrivate
+class LPrinterPrivate
 {
 public:
 	::LString JobName;
@@ -15,12 +15,12 @@ public:
 	
 	LAutoPtr<LPrintDC> PrintDC;
 	
-	GPrinterPrivate()
+	LPrinterPrivate()
 	{
 		Events = NULL;
 	}
 	
-	~GPrinterPrivate()
+	~LPrinterPrivate()
 	{
 	}
 };
@@ -28,7 +28,7 @@ public:
 ////////////////////////////////////////////////////////////////////
 GPrinter::GPrinter()
 {
-	d = new GPrinterPrivate;
+	d = new LPrinterPrivate;
 }
 
 GPrinter::~GPrinter()

@@ -159,7 +159,7 @@ bool HasToken(LArray<char16*> &a, const char *b)
 struct WorkUnit
 {
 	LArray<LAutoString> IncludePaths;
-	LArray<GCppParser::ValuePair*> PreDefines;
+	LArray<LCppParser::ValuePair*> PreDefines;
 	LArray<LAutoString> Source;
 
 	LAutoString SearchTerm;
@@ -167,7 +167,7 @@ struct WorkUnit
 	WorkUnit
 	(
 		LArray<const char*> &IncPaths,
-		LArray<GCppParser::ValuePair*> &PreDefs,
+		LArray<LCppParser::ValuePair*> &PreDefs,
 		LArray<char*> &Src
 	)
 	{
@@ -178,7 +178,7 @@ struct WorkUnit
 		}
 		for (i=0; i<PreDefs.Length(); i++)
 		{
-			PreDefs.Add(new GCppParser::ValuePair(*PreDefs[i]));
+			PreDefs.Add(new LCppParser::ValuePair(*PreDefs[i]));
 		}
 		for (i=0; i<Src.Length(); i++)
 		{
@@ -534,7 +534,7 @@ void AddHash(T tbl, const char *name, V type)
 	tbl.Add(s, type);
 }
 
-struct GCppParserWorker : public GCompileTools
+struct GCppParserWorker : public LCompileTools
 {
 	GCppParserPriv *d;
 	LAutoPtr<WorkUnit> w;
@@ -2300,17 +2300,17 @@ void GCppParserWorker::DoWork(WorkUnit *wk)
 	else LAssert(!"Unknown work unit type.");
 }
 
-GCppParser::GCppParser()
+LCppParser::LCppParser()
 {
 	d = new GCppParserPriv;
 }
 
-GCppParser::~GCppParser()
+LCppParser::~LCppParser()
 {
 	delete d;
 }
 
-void GCppParser::ParseCode
+void LCppParser::ParseCode
 (
 	LArray<const char*> &IncludePaths,
 	LArray<ValuePair*> &PreDefines,
@@ -2326,7 +2326,7 @@ void GCppParser::ParseCode
 	}
 }
 
-void GCppParser::Search(const char *Str, SearchResultsCb Callback, void *CallbackData)
+void LCppParser::Search(const char *Str, SearchResultsCb Callback, void *CallbackData)
 {
 	WorkUnit *w = new WorkUnit(Str);
 	if (w)

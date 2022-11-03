@@ -174,7 +174,7 @@ bool LColourSelect::OnLayout(LViewLayoutInfo &Inf)
     return true;
 }
 
-class GColourFactory : public LViewFactory
+class LColourFactory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{

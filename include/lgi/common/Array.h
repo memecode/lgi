@@ -843,7 +843,10 @@ public:
 	{
 		LArray<Type> a;
 
-		if (Start < 0) Start = 0;
+		// Range limit the inputs...
+		if (Start < 0) Start = len + Start;
+		if (Start > (ssize_t)len) Start = len;
+		
 		if (End < 0) End = len + End + 1;
 		if (End > (ssize_t)len) End = len;
 

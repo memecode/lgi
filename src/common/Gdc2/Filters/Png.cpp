@@ -1009,7 +1009,7 @@ LFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 						int num_pal = 0;
 						if (LIBPNG png_get_PLTE(png_ptr, info_ptr, &pal, &num_pal) == PNG_INFO_PLTE)
 						{
-						    GPalette *Pal = new GPalette(0, num_pal);
+						    LPalette *Pal = new LPalette(0, num_pal);
 						    if (Pal)
 						    {
 							    for (int i=0; i<num_pal; i++)
@@ -1195,7 +1195,7 @@ LFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 	if (Parent && Transparent.IsNull())
 	{
 		// put up a dialog to ask about transparent colour
-		GTransparentDlg Dlg(Parent, &Transparent);
+		LTransparentDlg Dlg(Parent, &Transparent);
 		if (!Dlg.DoModal())
 		{
 			if (Props)
@@ -1336,7 +1336,7 @@ LFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 					case 8:
 					{
 						// Output the palette
-						GPalette *Pal = pDC->Palette();
+						LPalette *Pal = pDC->Palette();
 						if (Pal)
 						{
 							int Colours = Pal->GetSize();

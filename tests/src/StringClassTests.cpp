@@ -6,22 +6,22 @@
 int32 LString::RefStrCount = 0;
 #endif
 
-class GStringClassTestPriv
+class LStringClassTestPriv
 {
 public:
 };
 
-GStringClassTest::GStringClassTest() : UnitTest("GStringClassTest")
+LStringClassTest::LStringClassTest() : UnitTest("LStringClassTest")
 {
-	d = new GStringClassTestPriv;
+	d = new LStringClassTestPriv;
 }
 
-GStringClassTest::~GStringClassTest()
+LStringClassTest::~LStringClassTest()
 {
 	DeleteObj(d);
 }
 
-bool GStringClassTest::Run()
+bool LStringClassTest::Run()
 {
 	// Constructor test
 	{

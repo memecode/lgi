@@ -1033,7 +1033,7 @@ LHtmlLine &LHtmlLine::operator =(int i)
 
 void LHtmlLine::Set(char *s)
 {
-	GToken t(s, " \t");
+	LToken t(s, " \t");
 	LineReset = 0x80000000;
 	LineStyle = -1;
 	char *Style = 0;
@@ -1371,7 +1371,7 @@ bool LTag::GetVariant(const char *Name, LVariant &Value, const char *Array)
 	LDomProperty Fld = LStringToDomProp(Name);
 	switch (Fld)
 	{
-		case ObjStyle: // Type: GCssStyle
+		case ObjStyle: // Type: LCssStyle
 		{
 			Value = &StyleDom;
 			return true;
@@ -2107,7 +2107,7 @@ bool LTag::OnMouseClick(LMouse &m)
 			}
 			p.Print("Pos: %i,%i   Size: %i,%i\n\n", Pos.x, Pos.y, Size.x, Size.y);
 			p.Print("Style:\n", Style.Get());
-			GToken s(Style, "\n");
+			LToken s(Style, "\n");
 			for (unsigned i=0; i<s.Length(); i++)
 				p.Print("    %s\n", s[i]);
 			
@@ -3301,7 +3301,7 @@ void LTag::SetStyle()
 				char16 *cw = CleanText(s, strlen(s), "utf-8", true);
 				char *c8 = WideToUtf8(cw);
 				DeleteArray(cw);
-				GToken Faces(c8, ",");
+				LToken Faces(c8, ",");
 				DeleteArray(c8);
 				char *face = TrimStr(Faces[0]);
 				if (ValidStr(face))
@@ -6623,7 +6623,7 @@ void LTag::OnPaint(LSurface *pDC, bool &InSelection, uint16 Depth)
 					if (r)
 					{
 						if (Cs == CsIndex8)
-							r->Palette(new GPalette(Image->Palette()));
+							r->Palette(new LPalette(Image->Palette()));
 						ResampleDC(r, Image);
 						Image = r;
 					}
@@ -7887,7 +7887,7 @@ bool LHtml::Copy()
 	return false;
 }
 
-static bool FindCallback(GFindReplaceCommon *Dlg, bool Replace, void *User)
+static bool FindCallback(LFindReplaceCommon *Dlg, bool Replace, void *User)
 {
 	LHtml *h = (LHtml*)User;
 	return h->OnFind(Dlg);
@@ -7980,7 +7980,7 @@ bool LHtml::OnSubmitForm(LTag *Form)
 	return Status;
 }
 
-bool LHtml::OnFind(GFindReplaceCommon *Params)
+bool LHtml::OnFind(LFindReplaceCommon *Params)
 {
 	bool Status = false;
 
@@ -8047,7 +8047,7 @@ bool LHtml::OnFind(GFindReplaceCommon *Params)
 
 bool LHtml::DoFind()
 {
-	GFindDlg Dlg(this, 0, FindCallback, this);
+	LFindDlg Dlg(this, 0, FindCallback, this);
 	return Dlg.DoModal() != 0;
 }
 

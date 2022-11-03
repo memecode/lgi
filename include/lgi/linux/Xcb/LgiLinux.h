@@ -3,11 +3,11 @@
 
 #include <stdio.h>
 #include "GMem.h"
-#include "GToken.h"
+#include "LToken.h"
 #include "LRect.h"
 
 extern "C" uint64 LCurrentTime();
-extern bool _GetKdePaths(GToken &t, char *Type);
+extern bool _GetKdePaths(LToken &t, char *Type);
 extern bool _GetIniField(char *Grp, char *Field, char *In, char *Out, int OutSize);
 extern bool _GetSystemFont(char *FontType, char *Font, int FontBufSize, int &PointSize);
 

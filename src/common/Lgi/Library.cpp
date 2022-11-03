@@ -158,7 +158,7 @@ bool LLibrary::Load(const char *File, bool Quiet)
 							#endif
 
 							#if ALLOW_FALLBACK_PATH
-								GToken t("/opt/local/lib", ":");
+								LToken t("/opt/local/lib", ":");
 								for (int i=0; i<t.Length(); i++)
 								{
 									char full[MAX_PATH_LEN];

@@ -39,7 +39,7 @@ struct ElfProgramHeader
 	uint16		ShstRndx;
 };
 
-class GExecuteCheck
+class LExecuteCheck
 {
 	char *Name;
 	bool OwnFile;
@@ -207,7 +207,7 @@ class GExecuteCheck
 	}
 
 public:
-	GExecuteCheck(const char *FileName)
+	LExecuteCheck(const char *FileName)
 	{
 		Name = NewStr(FileName);
 		OwnFile = true;
@@ -222,7 +222,7 @@ public:
 		}
 	}
 
-	GExecuteCheck(const char *name, LStreamI *f, int64 start, int64 len)
+	LExecuteCheck(const char *name, LStreamI *f, int64 start, int64 len)
 	{
 		Name = NewStr(name);
 		OwnFile = false;
@@ -231,7 +231,7 @@ public:
 		Len = len < 0 ? f->GetSize() : len;
 	}
 
-	~GExecuteCheck()
+	~LExecuteCheck()
 	{
 		DeleteArray(Name)
 		if (OwnFile)
@@ -250,12 +250,12 @@ public:
 
 LgiFunc bool LIsFileNameExecutable(const char *Str)
 {
-	GExecuteCheck c(Str);
+	LExecuteCheck c(Str);
 	return c.IsExecutable();
 }
 
 LgiFunc bool LIsFileExecutable(const char *name, LStreamI *f, int64 Start, int64 Len)
 {
-	GExecuteCheck c(name, f, Start, Len);
+	LExecuteCheck c(name, f, Start, Len);
 	return c.IsExecutable();
 }

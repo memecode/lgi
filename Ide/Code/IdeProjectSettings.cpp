@@ -260,7 +260,7 @@ public:
 	}
 };
 
-class GSettingDetail : public LLayout, public ResObject
+class LSettingDetail : public LLayout, public ResObject
 {
 	LTableLayout *Tbl;
 	IdeProjectSettingsPriv *d;
@@ -286,7 +286,7 @@ class GSettingDetail : public LLayout, public ResObject
 	LArray<CtrlInfo> Ctrls;
 
 public:
-	GSettingDetail() : ResObject(Res_Custom)
+	LSettingDetail() : ResObject(Res_Custom)
 	{
 		Flags = 0;
 		d = NULL;
@@ -463,7 +463,7 @@ public:
 	}
 };
 
-class GSettingDetailFactory : public LViewFactory
+class LSettingDetailFactory : public LViewFactory
 {
 	LView *NewView
 	(
@@ -472,8 +472,8 @@ class GSettingDetailFactory : public LViewFactory
 		const char *Text
 	)
 	{
-		if (!stricmp(Class, "GSettingDetail"))
-			return new GSettingDetail;
+		if (!stricmp(Class, "LSettingDetail"))
+			return new LSettingDetail;
 		return NULL;
 	}
 } SettingDetailFactory;
@@ -501,7 +501,7 @@ class ProjectSettingsDlg : public LDialog
 {
 	IdeProjectSettingsPriv *d;
 	LTree *Tree;
-	GSettingDetail *Detail;
+	LSettingDetail *Detail;
 	uint64 DefLockOut;
 
 public:

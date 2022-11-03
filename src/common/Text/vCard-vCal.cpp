@@ -135,7 +135,7 @@ bool VIo::ParseDate(LDateTime &Out, char *In)
 	{
 		Out.SetTimeZone(0, false);
 
-		GToken v(In, "T");
+		LToken v(In, "T");
 		if (v.Length() > 0)
 		{
 			char *d = v[0];
@@ -355,7 +355,7 @@ bool VCard::Import(LDataPropI *c, LStreamI *s)
 
 				if (IsVar(Field, "n"))
 				{
-					GToken Name(Data, ";", false);
+					LToken Name(Data, ";", false);
 					char *First = Name[1];
 					char *Last = Name[0];
 					char *Title = Name[3];
@@ -384,7 +384,7 @@ bool VCard::Import(LDataPropI *c, LStreamI *s)
 				}
 				else if (IsVar(Field, "tel"))
 				{
-					GToken Phone(Data, ";", false);
+					LToken Phone(Data, ";", false);
 					for (uint32_t p=0; p<Phone.Length(); p++)
 					{
 						if (IsType("cell"))
@@ -432,17 +432,17 @@ bool VCard::Import(LDataPropI *c, LStreamI *s)
 				}
 				else if (IsVar(Field, "org"))
 				{
-					GToken Org(Data, ";", false);
+					LToken Org(Data, ";", false);
 					if (Org[0]) c->SetStr(FIELD_COMPANY, Org[0]);
 				}
 				else if (IsVar(Field, "adr"))
 				{
 					bool IsWork = IsType("work");
 					// bool IsHome = IsType("home");
-					GToken Addr(Data, ";", false);
+					LToken Addr(Data, ";", false);
 					if (Addr[2])
 					{
-						GToken A(Addr[2], "\r\n");
+						LToken A(Addr[2], "\r\n");
 						if (A.Length() > 1)
 						{
 							c->SetStr(IsWork ? FIELD_WORK_STREET : FIELD_HOME_STREET, A[0]);
@@ -466,7 +466,7 @@ bool VCard::Import(LDataPropI *c, LStreamI *s)
 				}
 				else if (IsVar(Field, "uid"))
 				{
-					GToken n(Data, ";", false);
+					LToken n(Data, ";", false);
 					c->SetStr(FIELD_UID, n[0]);
 				}
 				else if (IsVar(Field, "x-perm"))
@@ -646,7 +646,7 @@ bool VIo::ReadField(LStreamI &s, LString &Name, ParamArray *Params, LString &Dat
 		if (e)
 		{
 			*e++ = 0;
-			GToken t(f, ";");
+			LToken t(f, ";");
 			if (t.Length() > 0)
 			{
 				Name = t[0];
@@ -793,7 +793,7 @@ bool VCard::Export(LDataPropI *c, LStreamI *o)
 	const char *Alt;
 	if ((Alt = c->GetStr(FIELD_ALT_EMAIL)))
 	{
-		GToken t(Alt, ",");
+		LToken t(Alt, ",");
 		for (unsigned i=0; i<t.Length(); i++)
 		{
 			WriteField(*o, "email", &Inet, t[i]);

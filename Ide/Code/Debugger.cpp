@@ -10,7 +10,7 @@
 #include "lgi/common/DocView.h"
 #include "lgi/common/StringClass.h"
 #include "lgi/common/LgiString.h"
-#include "GDebugger.h"
+#include "Debugger.h"
 
 #define DEBUG_STOP_ON_GTK_ERROR	0
 #define DEBUG_SHOW_GDB_IO		0
@@ -33,7 +33,7 @@ public:
 	virtual bool Transform(LString name, LString val, Callback *Cb, LVariant &Value, LString &Detail) = 0;
 };
 
-class GStringVis : public Visualizer
+class LStringVis : public Visualizer
 {
 public:
 	bool Match(LString s)
@@ -69,9 +69,9 @@ public:
 	}
 };
 
-class Gdb : public GDebugger, public LThread, public Callback
+class Gdb : public LDebugger, public LThread, public Callback
 {
-	GDebugEvents *Events = NULL;
+	LDebugEvents *Events = NULL;
 	LAutoPtr<LSubProcess> Sp;
 	LString Exe, Args, InitDir;
 	LString ChildEnv;
@@ -652,7 +652,7 @@ public:
 		State = Init;
 		LinePtr = Line;
 		
-		Vis.Add(new GStringVis);
+		Vis.Add(new LStringVis);
 	}
 	
 	~Gdb()
@@ -673,7 +673,7 @@ public:
 		}
 	}
 
-	bool Load(GDebugEvents *EventHandler, const char *exe, const char *args, bool runAsAdmin, const char *initDir, const char *Env)
+	bool Load(LDebugEvents *EventHandler, const char *exe, const char *args, bool runAsAdmin, const char *initDir, const char *Env)
 	{
 		Events = EventHandler;
 		Exe = exe;
@@ -1089,9 +1089,9 @@ public:
 		return false;
 	}
 	
-	void ParseVariables(const char *a, LArray<Variable> &vars, GDebugger::Variable::ScopeType scope, bool Detailed)
+	void ParseVariables(const char *a, LArray<Variable> &vars, LDebugger::Variable::ScopeType scope, bool Detailed)
 	{
-		GToken t(a, "\r\n");
+		LToken t(a, "\r\n");
 		LString CurLine;
 		for (int i=0; i<t.Length(); i++)
 		{
@@ -1556,7 +1556,7 @@ public:
 	}
 };
 
-GDebugger *CreateGdbDebugger(LStream *Log)
+LDebugger *CreateGdbDebugger(LStream *Log)
 {
 	return new Gdb(Log);
 }

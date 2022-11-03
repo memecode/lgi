@@ -755,7 +755,7 @@ bool SystemFunctions::Delete(LScriptArguments &Args)
 	return true;
 }
 
-class GFileListEntry : public LDom
+class LFileListEntry : public LDom
 {
 	bool Folder;
 	LVariant Name;
@@ -763,7 +763,7 @@ class GFileListEntry : public LDom
 	LDateTime Modified;
 
 public:
-	GFileListEntry(LDirectory *d)
+	LFileListEntry(LDirectory *d)
 	{
 		Folder = d->IsDir();
 		Name = d->GetName();
@@ -889,7 +889,7 @@ bool SystemFunctions::ListFiles(LScriptArguments &Args)
 	{
 		if (!Pattern || MatchStr(Pattern, d.GetName()))
 		{
-			Args.GetReturn()->Value.Lst->Insert(new LVariant(new GFileListEntry(&d)));
+			Args.GetReturn()->Value.Lst->Insert(new LVariant(new LFileListEntry(&d)));
 		}
 	}
 

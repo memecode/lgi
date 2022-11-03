@@ -12,7 +12,7 @@
 #include "lgi/common/RadioGroup.h"
 #include "lgi/common/Button.h"
 
-GTransparentDlg::GTransparentDlg(LView *parent, LVariant *trans)
+LTransparentDlg::LTransparentDlg(LView *parent, LVariant *trans)
 {
 	Trans = trans;
 	SetParent(parent);
@@ -33,7 +33,7 @@ GTransparentDlg::GTransparentDlg(LView *parent, LVariant *trans)
 	Children.Insert(new LButton(IDOK, 65, 82, 60, 20, "Ok"));
 }
 
-int GTransparentDlg::OnNotify(LViewI *Ctrl, LNotification n)
+int LTransparentDlg::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
 	{

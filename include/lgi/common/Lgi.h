@@ -169,8 +169,8 @@
 		<li> LFontSelect
 		<li> GPrinter::Browse
 		<li> LProgressViewDlg
-		<li> GFindDlg
-		<li> GReplaceDlg
+		<li> LFindDlg
+		<li> LReplaceDlg
 		<li> LAbout
 	</ul>
 	To create your own custom dialog you derive from:

@@ -53,7 +53,7 @@ enum LSystemColour
 class LgiClass LColour
 {
 protected:
-	class GPalette *pal;
+	class LPalette *pal;
 	union {
 		uint32_t flat;
 		uint8_t  index;
@@ -81,11 +81,11 @@ public:
 	/// System colour
 	LColour(LSystemColour sc);
 	/// Indexed colour
-	LColour(uint8_t idx8, GPalette *palette);
+	LColour(uint8_t idx8, LPalette *palette);
 	/// True colour
 	LColour(int r, int g, int b, int a = 255);
 	/// Conversion from COLOUR
-	LColour(uint32_t c, int bits, GPalette *palette = NULL);
+	LColour(uint32_t c, int bits, LPalette *palette = NULL);
 	/// Web colour
 	LColour(const char *Str);
 	#ifdef __GTK_H__
@@ -118,7 +118,7 @@ public:
 	/// Sets the colour to a rgb(a) value
 	void Rgb(int r, int g, int b, int a = 255);
 	/// Sets the colour
-	void Set(uint32_t c, int bits, GPalette *palette = NULL);
+	void Set(uint32_t c, int bits, LPalette *palette = NULL);
 	/// Set to a system colour
 	void Set(LSystemColour c);
 	uint32_t Get(int bits);
@@ -139,7 +139,7 @@ public:
 	// Gets the indexed colour
 	uint8_t c8() const;
 	// Sets indexed colour
-	void c8(uint8_t c, GPalette *p);
+	void c8(uint8_t c, LPalette *p);
 	// Get as 24 bit colour
 	uint32_t c24() const;
 	/// Set 24 bit colour

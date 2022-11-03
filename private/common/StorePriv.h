@@ -16,11 +16,11 @@ enum NodeRelation
 
 #define GSUBFILE_NOBUFFERING		0
 
-class GSubFilePtr;
-class GSubFile : public LFile
+class LSubFilePtr;
+class LSubFile : public LFile
 {
 	GSemaphore *Lck;
-	LArray<GSubFilePtr*> Ptrs;
+	LArray<LSubFilePtr*> Ptrs;
 	
 	#if GSUBFILE_NOBUFFERING
 	bool Buffer;
@@ -35,11 +35,11 @@ class GSubFile : public LFile
 	#endif
 	
 public:
-	GSubFile(GSemaphore *lock, bool Buffering = true);
-	~GSubFile();
+	LSubFile(GSemaphore *lock, bool Buffering = true);
+	~LSubFile();
 
-	GSubFilePtr *Create(char *file, int line);
-	void Detach(GSubFilePtr *Ptr);
+	LSubFilePtr *Create(char *file, int line);
+	void Detach(LSubFilePtr *Ptr);
 	bool Lock();
 	bool LockWithTimeout(int Timeout /* in ms */);
 	void Unlock();
@@ -53,10 +53,10 @@ public:
 	#endif
 };
 
-class GSubFilePtr : public LFile
+class LSubFilePtr : public LFile
 {
-	friend class GSubFile;
-	GSubFile *File;
+	friend class LSubFile;
+	LSubFile *File;
 
 	// Sub file bound box
 	bool Sub;
@@ -80,8 +80,8 @@ class GSubFilePtr : public LFile
 	bool RestoreState();
 	
 public:
-	GSubFilePtr(GSubFile *Parent, char *file, int line);
-	~GSubFilePtr();
+	LSubFilePtr(LSubFile *Parent, char *file, int line);
+	~LSubFilePtr();
 
 	/// Sets the valid section of the file.
 	void SetSub

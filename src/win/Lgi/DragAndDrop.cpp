@@ -16,7 +16,7 @@
 
 #define DND_DEBUG_TRACE 0
 
-class LDataObject : public GUnknownImpl<IDataObject>
+class LDataObject : public LUnknownImpl<IDataObject>
 {
 	friend class LDndSourcePriv;
 	LDragDropSource *Source;

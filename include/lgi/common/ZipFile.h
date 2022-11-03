@@ -1,13 +1,13 @@
 #ifndef _GZIPFILE_H_
 #define _GZIPFILE_H_
 
-class GZipFile
+class LZipFile
 {
-	class GZipFilePrivate *d;
+	class LZipFilePrivate *d;
 
 public:
-	GZipFile(char *zip = 0);
-	~GZipFile();
+	LZipFile(char *zip = 0);
+	~LZipFile();
 	
 	bool IsOpen();
 	bool Open(char *Zip, int Mode);

@@ -199,7 +199,7 @@ union GPtr
 
 class SystemFunctions;
 
-class GCompileTools
+class LCompileTools
 {
 protected:
 	OperatorType OpType(LOperator o)
@@ -359,14 +359,14 @@ protected:
 };
 
 /// This class compiles the source down to byte code
-class GCompiler : public LScriptUtils
+class LCompiler : public LScriptUtils
 {
 	class LCompilerPriv *d;
 
 public:
 	/// Constructor
-	GCompiler();
-	~GCompiler();
+	LCompiler();
+	~LCompiler();
 
 	/// Compile the source into byte code.
 	bool Compile

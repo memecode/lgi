@@ -177,7 +177,7 @@ LArray<NativeTip*> NativeTip::All;
 
 #endif
 
-class GToolTipPrivate
+class LToolTipPrivate
 {
 public:
 	int NextUid;
@@ -189,7 +189,7 @@ public:
 	HMHelpContentRec Tag;
 	#endif
 	
-	GToolTipPrivate()
+	LToolTipPrivate()
 	{
 		NextUid = 1;
 		#if LGI_NATIVE_TIPS
@@ -197,7 +197,7 @@ public:
 		#endif
 	}
 
-	~GToolTipPrivate()
+	~LToolTipPrivate()
 	{
 		#if LGI_NATIVE_TIPS
 		for (auto t : Tips)
@@ -209,17 +209,17 @@ public:
 	}
 };
 
-GToolTip::GToolTip() : LView(NULL)
+LToolTip::LToolTip() : LView(NULL)
 {
-	d = new GToolTipPrivate;
+	d = new LToolTipPrivate;
 }
 
-GToolTip::~GToolTip()
+LToolTip::~LToolTip()
 {
 	DeleteObj(d);
 }
 
-int GToolTip::NewTip(const char *Name, LRect &Pos)
+int LToolTip::NewTip(const char *Name, LRect &Pos)
 {
 	int Status = 0;
 
@@ -290,7 +290,7 @@ int GToolTip::NewTip(const char *Name, LRect &Pos)
 	return Status;
 }
 
-void GToolTip::DeleteTip(int Id)
+void LToolTip::DeleteTip(int Id)
 {
 	#if LGI_NATIVE_TIPS
 	
@@ -322,7 +322,7 @@ void GToolTip::DeleteTip(int Id)
 	#endif
 }
 
-bool GToolTip::Attach(LViewI *p)
+bool LToolTip::Attach(LViewI *p)
 {
 	#if LGI_NATIVE_TIPS
 	

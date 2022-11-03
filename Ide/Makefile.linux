@@ -75,14 +75,14 @@ Source =	Code/WebFldDlg.cpp \
 			Code/IdeProject.cpp \
 			Code/IdeDoc.cpp \
 			Code/IdeCommon.cpp \
-			Code/GHistory.cpp \
-			Code/GDebugger.cpp \
-			Code/GDebugContext.cpp \
+			Code/History.cpp \
 			Code/FtpThread.cpp \
 			Code/FindSymbol.cpp \
 			Code/FindInFiles.cpp \
 			Code/DocEditStyling.cpp \
 			Code/DocEdit.cpp \
+			Code/Debugger.cpp \
+			Code/DebugContext.cpp \
 			Code/AddFtpFile.cpp \
 			../src/common/Text/TextConvert.cpp \
 			../src/common/Text/HtmlParser.cpp \
@@ -107,14 +107,14 @@ Objects := $(addprefix $(BuildDir)/,$(SourceLst))
 
 # Target
 # Executable target
-$(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
+$(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	mkdir -p $(BuildDir)
 	@echo Linking $(Target) [$(Build)]...
 	$(CPP) -Wl,-export-dynamic,-R. -o \
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../$(BuildDir)/liblgi$(Tag).so : ../include/lgi/common/App.h \
+../$(BuildDir)/liblgi-gtk3$(Tag).so : ../include/lgi/common/App.h \
 	../include/lgi/common/Array.h \
 	../include/lgi/common/AutoPtr.h \
 	../include/lgi/common/Base64.h \
@@ -180,6 +180,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../include/lgi/common/List.h \
 	../include/lgi/common/ListItemCheckBox.h \
 	../include/lgi/common/ListItemRadioBtn.h \
+	../include/lgi/common/LMallocArray.h \
 	../include/lgi/common/Mail.h \
 	../include/lgi/common/Matrix.h \
 	../include/lgi/common/Mem.h \

@@ -11,10 +11,10 @@
 #define	IDM_SAVEAS			15001
 
 // Classes
-class LgiClass GMru
+class LgiClass LMru
 {
 private:
-	class GMruPrivate *d;
+	class LMruPrivate *d;
 	void _Update();
 
 protected:
@@ -44,8 +44,8 @@ protected:
 
 
 public:
-	GMru();
-	virtual ~GMru();
+	LMru();
+	virtual ~LMru();
 
 	// Impl
 	bool Set(LSubMenu *parent, int size = -1);

@@ -107,8 +107,8 @@ static LArray<LTextView3*> Ctrls;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-class GDocFindReplaceParams3 :
-	public GDocFindReplaceParams,
+class LDocFindReplaceParams3 :
+	public LDocFindReplaceParams,
 	public LMutex
 {
 public:
@@ -120,7 +120,7 @@ public:
 	bool SelectionOnly;
 	bool SearchUpwards;
 	
-	GDocFindReplaceParams3() : LMutex("GDocFindReplaceParams3")
+	LDocFindReplaceParams3() : LMutex("LDocFindReplaceParams3")
 	{
 		MatchCase = false;
 		MatchWord = false;
@@ -149,7 +149,7 @@ public:
 
 	// Find/Replace Params
 	bool OwnFindReplaceParams;
-	GDocFindReplaceParams3 *FindReplaceParams;
+	LDocFindReplaceParams3 *FindReplaceParams;
 
 	// Map buffer
 	ssize_t MapLen;
@@ -182,7 +182,7 @@ public:
 		MapLen = 0;
 		
 		OwnFindReplaceParams = true;
-		FindReplaceParams = new GDocFindReplaceParams3;
+		FindReplaceParams = new LDocFindReplaceParams3;
 	}
 	
 	~LTextView3Private()
@@ -229,7 +229,7 @@ struct Change : public LRange
 	LArray<char16> Txt;
 };
 
-struct LTextView3Undo : public GUndoEvent
+struct LTextView3Undo : public LUndoEvent
 {
 	LTextView3 *View;
 	LArray<Change> Changes;
@@ -268,7 +268,7 @@ struct LTextView3Undo : public GUndoEvent
 		}
 	}
 
-	// GUndoEvent
+	// LUndoEvent
     void ApplyChange()
 	{
 		View->UndoOn = false;
@@ -2717,12 +2717,12 @@ bool LTextView3::DoGoto()
 	return true;
 }
 
-GDocFindReplaceParams *LTextView3::CreateFindReplaceParams()
+LDocFindReplaceParams *LTextView3::CreateFindReplaceParams()
 {
-	return new GDocFindReplaceParams3;
+	return new LDocFindReplaceParams3;
 }
 
-void LTextView3::SetFindReplaceParams(GDocFindReplaceParams *Params)
+void LTextView3::SetFindReplaceParams(LDocFindReplaceParams *Params)
 {
 	if (Params)
 	{
@@ -2732,7 +2732,7 @@ void LTextView3::SetFindReplaceParams(GDocFindReplaceParams *Params)
 		}
 		
 		d->OwnFindReplaceParams = false;
-		d->FindReplaceParams = (GDocFindReplaceParams3*) Params;
+		d->FindReplaceParams = (LDocFindReplaceParams3*) Params;
 	}
 }
 
@@ -2763,7 +2763,7 @@ bool LTextView3::DoFindNext()
 }
 
 bool
-Text3_FindCallback(GFindReplaceCommon *Dlg, bool Replace, void *User)
+Text3_FindCallback(LFindReplaceCommon *Dlg, bool Replace, void *User)
 {
 	LTextView3 *v = (LTextView3*) User;
 
@@ -2798,7 +2798,7 @@ bool LTextView3::DoFind()
 		u = d->FindReplaceParams->LastFind.Get();
 	}
 
-	GFindDlg Dlg(this, u, Text3_FindCallback, this);
+	LFindDlg Dlg(this, u, Text3_FindCallback, this);
 	Dlg.DoModal();
 	Focus(true);
 
@@ -2825,7 +2825,7 @@ bool LTextView3::DoReplace()
 	char *LastFind8 = SingleLineSelection ? GetSelection() : WideToUtf8(d->FindReplaceParams->LastFind);
 	char *LastReplace8 = WideToUtf8(d->FindReplaceParams->LastReplace);
 	
-	GReplaceDlg Dlg(this, LastFind8, LastReplace8);
+	LReplaceDlg Dlg(this, LastFind8, LastReplace8);
 
 	Dlg.MatchWord = d->FindReplaceParams->MatchWord;
 	Dlg.MatchCase = d->FindReplaceParams->MatchCase;

@@ -346,7 +346,7 @@ char *LXmlTree::DecodeEntities(LXmlAlloc *Alloc, char *In, ssize_t Len)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-GAutoRefPtr<LXmlAlloc> TagHeapAllocator(new XmlNormalAlloc);
+LAutoRefPtr<LXmlAlloc> TagHeapAllocator(new XmlNormalAlloc);
 
 LXmlTag::LXmlTag(const char *tag, LXmlAlloc *alloc)
 {
@@ -1213,7 +1213,7 @@ ParsingStart:
 				else
 				{
 					LAutoString Tmp(Before.NewStr());
-					GAutoRefPtr<LXmlAlloc> LocalAlloc(new XmlNormalAlloc);
+					LAutoRefPtr<LXmlAlloc> LocalAlloc(new XmlNormalAlloc);
 					PreContent->Content = DecodeEntities(Tag ? Tag->Allocator : LocalAlloc, Tmp, strlen(Tmp));
 				}
 
@@ -1381,7 +1381,7 @@ bool LXmlTree::Read(LXmlTag *Root, LStreamI *File, LXmlFactory *Factory)
 	
 	LString t = Root->Tag;
 	Root->SetTag(NULL);	
-	GAutoRefPtr<LXmlAlloc> Allocator(new XmlPoolAlloc);
+	LAutoRefPtr<LXmlAlloc> Allocator(new XmlPoolAlloc);
 	Root->Allocator = Allocator;
 	Root->SetTag(t);
 

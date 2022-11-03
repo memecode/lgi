@@ -225,10 +225,10 @@ public:
 };
 
 /// Find params
-class GDocFindReplaceParams
+class LDocFindReplaceParams
 {
 public:
-	virtual ~GDocFindReplaceParams() {}
+	virtual ~LDocFindReplaceParams() {}
 };
 
 /// TextView class is a base for all text controls
@@ -333,8 +333,8 @@ public:
 	virtual bool DoFind() { return false; }
 	/// Replace window handler
 	virtual bool DoReplace() { return false; }
-	virtual GDocFindReplaceParams *CreateFindReplaceParams() { return 0; }
-	virtual void SetFindReplaceParams(GDocFindReplaceParams *Params) { }
+	virtual LDocFindReplaceParams *CreateFindReplaceParams() { return 0; }
+	virtual void SetFindReplaceParams(LDocFindReplaceParams *Params) { }
 
 	///////////////////////////////////////////////////////////////////////
 

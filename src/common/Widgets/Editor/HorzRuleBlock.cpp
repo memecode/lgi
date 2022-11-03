@@ -186,7 +186,7 @@ bool LRichTextPriv::HorzRuleBlock::Seek(SeekType To, BlockCursor &Cursor)
 	return true;
 }
 
-ssize_t LRichTextPriv::HorzRuleBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, GFindReplaceCommon *Params)
+ssize_t LRichTextPriv::HorzRuleBlock::FindAt(ssize_t StartIdx, const uint32_t *Str, LFindReplaceCommon *Params)
 {
 	return 0;
 }

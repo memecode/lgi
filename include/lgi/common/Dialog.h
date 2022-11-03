@@ -216,13 +216,12 @@ public:
 	int GetButtonId();
 	
 	#if defined(__GTK_H__)
-	friend Gtk::gboolean GtkDialogDestroy(Gtk::GtkWidget *widget, LDialog *This);
-    bool IsResizeable();
-    void IsResizeable(bool r);
-	// Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
-	bool SetupDialog(bool Modal);
+		friend Gtk::gboolean GtkDialogDestroy(Gtk::GtkWidget *widget, LDialog *This);
+	    bool IsResizeable();
+	    void IsResizeable(bool r);
+		bool SetupDialog(bool Modal);
 	#elif defined(LGI_CARBON)
-	void OnPaint(LSurface *pDC);
+		void OnPaint(LSurface *pDC);
 	#endif
 };
 

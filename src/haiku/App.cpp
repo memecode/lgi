@@ -128,10 +128,10 @@ OsAppArguments &OsAppArguments::operator =(OsAppArguments &a)
 #include "GFilterUtils.h"
 #include "mime-types.h"
 
-class GSharedMime : public LLibrary
+class LSharedMime : public LLibrary
 {
 public:
-	GSharedMime() :
+	LSharedMime() :
 		#ifdef _DEBUG
 		LLibrary("libsharedmime1d")
 		#else
@@ -575,7 +575,7 @@ void LApp::OnCommandLine()
 	if (!LFileExists(File))
 	{
 		// Look in the path
-		GToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
+		LToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
 		for (int i=0; i<p.Length(); i++)
 		{
 			LMakePath(Full, sizeof(Full), p[i], File);

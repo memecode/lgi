@@ -764,7 +764,7 @@ bool LMenuItem::ScanForAccel()
 	if (!Sc)
 		return false;
 
-	GToken Keys(Sc, "+-");
+	LToken Keys(Sc, "+-");
 	if (Keys.Length() > 0)
 	{
 		int Flags = 0;

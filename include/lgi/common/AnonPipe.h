@@ -2,13 +2,13 @@
 #define _GANONPIPE_H_
 
 /// Anonymous pipe
-class GAnonPipe
+class LAnonPipe
 {
 	struct GAnonPipePriv *d;
 
 public:
-	GAnonPipe();
-	~GAnonPipe();
+	LAnonPipe();
+	~LAnonPipe();
 
 	void Close();
 	bool IsOk();

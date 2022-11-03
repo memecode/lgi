@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 #include "Lgi.h"
-#include "GDb.h"
+#include "LDb.h"
 
 // Metakit
 #include "mk4.h"
@@ -84,7 +84,7 @@ public:
 	bool DeleteRecord(); // delete's the current record
 };
 
-class MkDb : public GDb
+class MkDb : public LDb
 {
 public:
 	c4_Storage *File;
@@ -408,7 +408,7 @@ LDbRecordset *MkDb::TableAt(int i)
 }
 
 //////////////////////////////////////////////////////////////////
-GDb *OpenMetakitDatabase(char *s)
+LDb *OpenMetakitDatabase(char *s)
 {
 	return new MkDb(s);
 }

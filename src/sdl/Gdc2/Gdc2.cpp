@@ -7,39 +7,39 @@
 #include <math.h>
 
 #include "Lgi.h"
-#include "GPalette.h"
+#include "LPalette.h"
 
 #define LGI_PI				3.141592654
 #define LGI_RAD				(360/(2*LGI_PI))
 
 /****************************** Classes *************************************************************************************/
-GPalette::GPalette()
+LPalette::LPalette()
 {
 	Data = 0;
 	Size = 0;
 }
 
-GPalette::GPalette(GPalette *pPal)
+LPalette::LPalette(LPalette *pPal)
 {
 	Size = 0;
 	Data = 0;
 	Set(pPal);
 }
 
-GPalette::GPalette(uchar *pPal, int s)
+LPalette::LPalette(uchar *pPal, int s)
 {
 	Size = 0;
 	Data = 0;
 	Set(pPal, s);
 }
 
-GPalette::~GPalette()
+LPalette::~LPalette()
 {
 	DeleteArray(Data);
 	Size = 0;
 }
 
-void GPalette::Set(GPalette *pPal)
+void LPalette::Set(LPalette *pPal)
 {
 	DeleteArray(Data);
 	Size = 0;
@@ -58,7 +58,7 @@ void GPalette::Set(GPalette *pPal)
 	}
 }
 
-void GPalette::Set(int Index, int r, int g, int b)
+void LPalette::Set(int Index, int r, int g, int b)
 {
 	GdcRGB *rgb = (*this)[Index];
 	if (rgb)
@@ -69,7 +69,7 @@ void GPalette::Set(int Index, int r, int g, int b)
 	}
 }
 
-void GPalette::Set(uchar *pPal, int s)
+void LPalette::Set(uchar *pPal, int s)
 {
 	DeleteArray(Data);
 	Size = 0;
@@ -90,12 +90,12 @@ void GPalette::Set(uchar *pPal, int s)
 	}
 }
 
-bool GPalette::Update()
+bool LPalette::Update()
 {
 	return true;
 }
 
-bool GPalette::SetSize(int s)
+bool LPalette::SetSize(int s)
 {
 	GdcRGB *New = new GdcRGB[s];
 	if (New)
@@ -115,7 +115,7 @@ bool GPalette::SetSize(int s)
 	return false;
 }
 
-void GPalette::SwapRAndB()
+void LPalette::SwapRAndB()
 {
 	if (Data)
 	{
@@ -130,7 +130,7 @@ void GPalette::SwapRAndB()
 	Update();
 }
 
-uchar *GPalette::MakeLut(int Bits)
+uchar *LPalette::MakeLut(int Bits)
 {
 	uchar *Lut = 0;
 	GdcRGB *p = (*this)[0];
@@ -175,7 +175,7 @@ uchar *GPalette::MakeLut(int Bits)
 	return Lut;
 }
 
-int GPalette::MatchRgb(COLOUR Rgb)
+int LPalette::MatchRgb(COLOUR Rgb)
 {
 	if (Data)
 	{
@@ -211,7 +211,7 @@ int GPalette::MatchRgb(COLOUR Rgb)
 	return 0;
 }
 
-void GPalette::CreateGreyScale()
+void LPalette::CreateGreyScale()
 {
 	SetSize(256);
 	GdcRGB *p = (*this)[0];
@@ -226,7 +226,7 @@ void GPalette::CreateGreyScale()
 	}
 }
 
-void GPalette::CreateCube()
+void LPalette::CreateCube()
 {
 	SetSize(256);
 	GdcRGB *p = (*this)[0];
@@ -273,7 +273,7 @@ void TrimWhite(char *s)
 	}
 }
 
-bool GPalette::Load(LFile &F)
+bool LPalette::Load(LFile &F)
 {
 	bool Status = false;
 	char Buf[256];
@@ -312,7 +312,7 @@ bool GPalette::Load(LFile &F)
 	return Status;
 }
 
-bool GPalette::Save(LFile &F, int Format)
+bool LPalette::Save(LFile &F, int Format)
 {
 	bool Status = false;
 
@@ -343,7 +343,7 @@ bool GPalette::Save(LFile &F, int Format)
 	return Status;
 }
 
-bool GPalette::operator ==(GPalette &p)
+bool LPalette::operator ==(LPalette &p)
 {
 	if (GetSize() == p.GetSize())
 	{
@@ -369,7 +369,7 @@ bool GPalette::operator ==(GPalette &p)
 	return false;
 }
 
-bool GPalette::operator !=(GPalette &p)
+bool LPalette::operator !=(LPalette &p)
 {
 	return !((*this) == p);
 }
@@ -532,7 +532,7 @@ public:
 	// Palette
 	double GammaCorrection;
 	uchar GammaTable[256];
-	GPalette *pSysPal;
+	LPalette *pSysPal;
 	LGlobalColour *GlobalColour;
 
 	// Data
@@ -717,7 +717,7 @@ double GdcDevice::GetGamma()
 	return d->GammaCorrection;
 }
 
-void GdcDevice::SetSystemPalette(int Start, int Size, GPalette *pPal)
+void GdcDevice::SetSystemPalette(int Start, int Size, LPalette *pPal)
 {
 	/*
 	if (pPal)
@@ -739,7 +739,7 @@ void GdcDevice::SetSystemPalette(int Start, int Size, GPalette *pPal)
 	*/
 }
 
-GPalette *GdcDevice::GetSystemPalette()
+LPalette *GdcDevice::GetSystemPalette()
 {
 	return d->pSysPal;
 }
@@ -934,11 +934,11 @@ public:
 	}
 };
 
-class GGlobalColourPrivate
+class LGlobalColourPrivate
 {
 public:
 	GlobalColourEntry c[256];
-	GPalette *Global;
+	LPalette *Global;
 	List<LSurface> Cache;
 	int FirstUnused;
 	
@@ -957,11 +957,11 @@ public:
 		return f;
 	}
 
-	GGlobalColourPrivate()
+	LGlobalColourPrivate()
 	{
 	}
 
-	~GGlobalColourPrivate()
+	~LGlobalColourPrivate()
 	{
 		Cache.DeleteObjects();
 	}
@@ -969,7 +969,7 @@ public:
 
 LGlobalColour::LGlobalColour()
 {
-	d = new GGlobalColourPrivate;
+	d = new LGlobalColourPrivate;
 }
 
 LGlobalColour::~LGlobalColour()
@@ -997,7 +997,7 @@ bool LGlobalColour::MakeGlobalPalette()
 	return 0;
 }
 
-GPalette *LGlobalColour::GetPalette()
+LPalette *LGlobalColour::GetPalette()
 {
 	return 0;
 }

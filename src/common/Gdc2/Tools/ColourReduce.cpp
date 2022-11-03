@@ -194,7 +194,7 @@ uint32_t ColourDistance24(ImgColour *a, B *b)
 	return abs(dr) + abs(dg) + abs(db);
 }
 
-class GPaletteReduce
+class LPaletteReduce
 {
 	int TableSize;
 	ImgColour *Col;
@@ -202,7 +202,7 @@ class GPaletteReduce
 	unsigned DestSize;
 	
 public:
-	GPaletteReduce(GPalette *Out, LSurface *In, unsigned destSize)
+	LPaletteReduce(LPalette *Out, LSurface *In, unsigned destSize)
 	{
 		TableSize = TABLE_SIZE;
 		ColUsed = 0;
@@ -217,7 +217,7 @@ public:
 		}		
 	}
 	
-	~GPaletteReduce()
+	~LPaletteReduce()
 	{
 		DeleteArray(Col);
 	}
@@ -352,7 +352,7 @@ public:
 		}
 	}
 	
-	bool Reduce(GPalette *Out)
+	bool Reduce(LPalette *Out)
 	{
 		// remove unused colours
 		unsigned Cols = 0, i;
@@ -502,19 +502,19 @@ public:
 	}
 };
 
-bool CreatePalette(GPalette *Out, LSurface *In, int DestSize)
+bool CreatePalette(LPalette *Out, LSurface *In, int DestSize)
 {
 	if (!Out || !In || In->GetBits() <= 8)
 		return false;
 
-	GPaletteReduce Pr(Out, In, DestSize);
+	LPaletteReduce Pr(Out, In, DestSize);
 	Pr.Scan(In);
 	Pr.Reduce(Out);
 
 	return true;
 }
 
-bool LReduceBitDepth(LSurface *pDC, int Bits, GPalette *Pal, LReduceOptions *Reduce)
+bool LReduceBitDepth(LSurface *pDC, int Bits, LPalette *Pal, LReduceOptions *Reduce)
 {
 	bool Status = false;
 
@@ -525,7 +525,7 @@ bool LReduceBitDepth(LSurface *pDC, int Bits, GPalette *Pal, LReduceOptions *Red
 	{
 		if (Bits <= 8 && Pal)
 		{
-			pTemp->Palette(new GPalette(Pal));
+			pTemp->Palette(new LPalette(Pal));
 		}
 
 		if ((Bits <= 8) && (pDC->GetBits() > 8) && Reduce)
@@ -544,7 +544,7 @@ bool LReduceBitDepth(LSurface *pDC, int Bits, GPalette *Pal, LReduceOptions *Red
 					case CR_PAL_CUBE:
 					{
 						// RGB cube palette
-						pTemp->Palette(Pal = new GPalette);
+						pTemp->Palette(Pal = new LPalette);
 						if (Pal)
 						{
 							Pal->CreateCube();
@@ -554,7 +554,7 @@ bool LReduceBitDepth(LSurface *pDC, int Bits, GPalette *Pal, LReduceOptions *Red
 					case CR_PAL_OPT:
 					{
 						// optimal palette
-						pTemp->Palette(Pal = new GPalette(0, Reduce->Colours));
+						pTemp->Palette(Pal = new LPalette(0, Reduce->Colours));
 						if (Pal)
 						{
 							CreatePalette(Pal, pDC, Reduce->Colours);
@@ -599,7 +599,7 @@ bool LReduceBitDepth(LSurface *pDC, int Bits, GPalette *Pal, LReduceOptions *Red
 		if (pDC->Create(pTemp->X(), pTemp->Y(), pTemp->GetColourSpace()))
 		{
 			if (Pal)
-				pDC->Palette(new GPalette(Pal));
+				pDC->Palette(new LPalette(Pal));
 			pDC->Blt(0, 0, pTemp);
 			Status = true;
 		}

@@ -34,14 +34,14 @@
 	}
 	using namespace Gtk;
 
-	class GTrayIconPrivate;
-	static void tray_icon_on_click(GtkStatusIcon *status_icon, GTrayIconPrivate *d);
-	static void tray_icon_on_menu(GtkStatusIcon *status_icon, guint button, guint activate_time, GTrayIconPrivate *d);
+	class LTrayIconPrivate;
+	static void tray_icon_on_click(GtkStatusIcon *status_icon, LTrayIconPrivate *d);
+	static void tray_icon_on_menu(GtkStatusIcon *status_icon, guint button, guint activate_time, LTrayIconPrivate *d);
 
 #endif
 
 ////////////////////////////////////////////////////////////////////////////
-class GTrayIconPrivate
+class LTrayIconPrivate
 {
 public:
 	LWindow *Parent;	// parent window
@@ -125,7 +125,7 @@ public:
 	#endif
 
 
-	GTrayIconPrivate(LWindow *p)
+	LTrayIconPrivate(LWindow *p)
 	{
 		Parent = p;
 		Val = 0;
@@ -176,7 +176,7 @@ public:
 		#endif
 	}	
 	
-	~GTrayIconPrivate()
+	~LTrayIconPrivate()
 	{
 		#if WINNATIVE
 		
@@ -206,12 +206,12 @@ public:
 
 #if defined(__GTK_H__)
 
-	void tray_icon_on_click(GtkStatusIcon *status_icon, GTrayIconPrivate *d)
+	void tray_icon_on_click(GtkStatusIcon *status_icon, LTrayIconPrivate *d)
 	{
 		d->OnClick();
 	}
 
-	void tray_icon_on_menu(GtkStatusIcon *status_icon, guint button, guint activate_time, GTrayIconPrivate *d)
+	void tray_icon_on_menu(GtkStatusIcon *status_icon, guint button, guint activate_time, LTrayIconPrivate *d)
 	{
 		d->OnMenu(button, activate_time);
 	}
@@ -243,18 +243,18 @@ public:
 #endif
 
 ////////////////////////////////////////////////////////////////////////////
-GTrayIcon::GTrayIcon(LWindow *p)
+LTrayIcon::LTrayIcon(LWindow *p)
 {
-	d = new GTrayIconPrivate(p);
+	d = new LTrayIconPrivate(p);
 }
 
-GTrayIcon::~GTrayIcon()
+LTrayIcon::~LTrayIcon()
 {
 	Visible(false);
 	DeleteObj(d);
 }
 
-bool GTrayIcon::Load(const TCHAR *Str)
+bool LTrayIcon::Load(const TCHAR *Str)
 {
 	#if WINNATIVE
 	
@@ -342,7 +342,7 @@ bool GTrayIcon::Load(const TCHAR *Str)
 	return false;
 }
 
-bool GTrayIcon::Visible()
+bool LTrayIcon::Visible()
 {
 	#if WINNATIVE
 		return d->TrayIcon.cbSize != 0;
@@ -355,7 +355,7 @@ bool GTrayIcon::Visible()
 	#endif
 }
 
-void GTrayIcon::Visible(bool v)
+void LTrayIcon::Visible(bool v)
 {
 	if (Visible() != v)
 	{
@@ -396,7 +396,7 @@ void GTrayIcon::Visible(bool v)
 						d->Val = 0;
 					if (d->Val < d->Icon.Length())
 					{
-						GTrayIconPrivate::IconRef Ref = d->Icon[d->Val];
+						LTrayIconPrivate::IconRef Ref = d->Icon[d->Val];
 						if (Ref)
 						{
 							Gtk::gtk_status_icon_set_from_pixbuf(d->tray_icon, Ref);
@@ -467,12 +467,12 @@ void GTrayIcon::Visible(bool v)
 	d->Visible = v;
 }
 
-int64 GTrayIcon::Value()
+int64 LTrayIcon::Value()
 {
 	return d->Val;
 }
 
-void GTrayIcon::Value(int64 v)
+void LTrayIcon::Value(int64 v)
 {
 	if (d->Val != v)
 	{
@@ -514,7 +514,7 @@ void GTrayIcon::Value(int64 v)
 					d->Val = 0;
 				if (d->Val < d->Icon.Length())
 				{
-					GTrayIconPrivate::IconRef Ref = d->Icon[d->Val];
+					LTrayIconPrivate::IconRef Ref = d->Icon[d->Val];
 					if (Ref)
 						Gtk::gtk_status_icon_set_from_pixbuf(d->tray_icon, Ref);
 				}
@@ -587,7 +587,7 @@ void GTrayIcon::Value(int64 v)
 	}
 }
 
-LMessage::Result GTrayIcon::OnEvent(LMessage *Message)
+LMessage::Result LTrayIcon::OnEvent(LMessage *Message)
 {
 	#if WINNATIVE
 	

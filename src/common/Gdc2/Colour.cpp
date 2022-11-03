@@ -24,7 +24,7 @@ LColour::LColour(const char *Str)
 	SetStr(Str);
 }
 
-LColour::LColour(uint8_t idx8, GPalette *palette)
+LColour::LColour(uint8_t idx8, LPalette *palette)
 {
 	pal = NULL;
 	c8(idx8, palette);
@@ -40,7 +40,7 @@ LColour::LColour(int r, int g, int b, int a)
 	rgb.a = limit(a, 0, 255);
 }
 
-LColour::LColour(uint32_t c, int bits, GPalette *palette)
+LColour::LColour(uint32_t c, int bits, LPalette *palette)
 {
 	pal = NULL;
 	Set(c, bits, palette);
@@ -116,7 +116,7 @@ void LColour::Set(LSystemColour c)
 	*this = LColour(c);
 }
 
-void LColour::Set(uint32_t c, int bits, GPalette *palette)
+void LColour::Set(uint32_t c, int bits, LPalette *palette)
 {
 	pal = 0;
 	switch (bits)
@@ -251,7 +251,7 @@ uint8_t LColour::c8() const
 	return index;
 }
 
-void LColour::c8(uint8_t c, GPalette *p)
+void LColour::c8(uint8_t c, LPalette *p)
 {
 	space = CsIndex8;
 	pal = p;

@@ -4,7 +4,7 @@
 #include "lgi/common/Array.h"
 #include "lgi/common/LgiInterfaces.h"
 
-class GMemoryPool : public LMemoryPoolI
+class LMemoryPool : public LMemoryPoolI
 {
 	struct Block
 	{
@@ -32,7 +32,7 @@ class GMemoryPool : public LMemoryPoolI
 	LArray<Block> Mem;
 
 public:
-	GMemoryPool(int block_size = 32 << 10)
+	LMemoryPool(int block_size = 32 << 10)
 	{
 		BlockSize = block_size;
 	}

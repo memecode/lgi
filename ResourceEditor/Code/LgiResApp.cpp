@@ -947,7 +947,7 @@ AppWnd::AppWnd() :
 		if (GetOptions()->GetValue(OPT_ShowLanguages, Langs))
 		{
 			ShowLanguages.Empty();
-			GToken L(Langs.Str(), ",");
+			LToken L(Langs.Str(), ",");
 			for (int i=0; i<L.Length(); i++)
 			{
 				ShowLanguages.Add(L[i], true);
@@ -1179,7 +1179,7 @@ public:
 
 LMessage::Result AppWnd::OnEvent(LMessage *m)
 {
-	GMru::OnEvent(m);
+	LMru::OnEvent(m);
 
 	switch (m->Msg())
 	{
@@ -1213,7 +1213,7 @@ void _CountGroup(ResStringGroup *Grp, int &Words, int &Multi)
 			char *e = s->Get("en");
 			if (e)
 			{
-				GToken t(e, " ");
+				LToken t(e, " ");
 				Words += t.Length();
 			}
 		}
@@ -3316,7 +3316,7 @@ public:
 		if (Line && *Line == '#')
 		{
 			Line++;
-			GToken T(Line);
+			LToken T(Line);
 
 			if (T.Length() > 0)
 			{
@@ -3482,7 +3482,7 @@ bool AppWnd::LoadWin32(const char *FileName)
 		char *FileTxt = LReadTextFile(Select.Name());
 		if (FileTxt)
 		{
-			GToken Lines(FileTxt, "\r\n");
+			LToken Lines(FileTxt, "\r\n");
 			DeleteArray(FileTxt);
 
 			DefineList Defines;

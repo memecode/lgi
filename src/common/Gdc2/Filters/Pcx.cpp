@@ -96,7 +96,7 @@ LFilter::IoStatus GdcPcx::ReadImage(LSurface *pDC, LStream *In)
 			int Sx = Header.x2 - Header.x1 + 1;
 			int Sy = Header.y2 - Header.y1  + 1;
 			// int Len = (((Sx * Bits + 15) / 16) * 2);
-			GPalette *Pal = 0;
+			LPalette *Pal = 0;
 			uchar PalData[768];
 
 			memcpy(PalData, Header.Palette, 48);
@@ -104,19 +104,19 @@ LFilter::IoStatus GdcPcx::ReadImage(LSurface *pDC, LStream *In)
 			{
 				case 1:
 				{
-					Pal = new GPalette(PalData, 2);
+					Pal = new LPalette(PalData, 2);
 					break;
 				}
 				case 4:
 				{
-					Pal = new GPalette(PalData, 16);
+					Pal = new LPalette(PalData, 16);
 					break;
 				}
 				case 8:
 				{
 					In->SetPos(In->GetSize()-768);
 					In->Read(PalData, 768);
-					Pal = new GPalette(PalData);
+					Pal = new LPalette(PalData);
 					break;
 				}
 			}
@@ -273,7 +273,7 @@ LFilter::IoStatus GdcPcx::WriteImage(LStream *Out, LSurface *pDC)
 	{
 		Out->SetSize(0);
 
-		GPalette *Pal = pDC->Palette();
+		LPalette *Pal = pDC->Palette();
 		PCX_HEADER Header;
 		int Bits = pDC->GetBits();
 		char c;

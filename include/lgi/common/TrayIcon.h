@@ -3,22 +3,21 @@
 
 /////////////////////////////////////////////////////////////////////////
 /// Put an icon in the system tray
-class LgiClass GTrayIcon :
+class LgiClass LTrayIcon :
 	public LBase
 	// public GFlags
 {
-	friend class GTrayWnd;
-	class GTrayIconPrivate *d;
+	class LTrayIconPrivate *d;
 
 public:
 	/// Constructor
-	GTrayIcon
+	LTrayIcon
 	(
 		/// The owner LWindow
 		LWindow *p
 	);
 	
-	~GTrayIcon();
+	~LTrayIcon();
 
 	/// Add an icon to the list
 	bool Load(const TCHAR *Str);

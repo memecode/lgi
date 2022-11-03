@@ -1009,7 +1009,7 @@ LView *LItem::EditLabel(int Col)
 	c->Capture(false);
 	if (!c->ItemEdit)
 	{
-		c->ItemEdit = new GItemEdit(c, this, Col, SelectionStart, SelectionEnd);
+		c->ItemEdit = new LItemEdit(c, this, Col, SelectionStart, SelectionEnd);
 		SelectionStart = SelectionEnd = -1;
 	}
 
@@ -1033,12 +1033,12 @@ void LItem::SetEditLabelSelection(int SelStart, int SelEnd)
 #define M_END_POPUP			(M_USER+0x1500)
 #define M_LOSING_FOCUS		(M_USER+0x1501)
 
-class GItemEditBox : public LEdit
+class LItemEditBox : public LEdit
 {
-	GItemEdit *ItemEdit;
+	LItemEdit *ItemEdit;
 
 public:
-	GItemEditBox(GItemEdit *i, int x, int y, const char *s) : LEdit(100, 1, 1, x-3, y-3, s)
+	LItemEditBox(LItemEdit *i, int x, int y, const char *s) : LEdit(100, 1, 1, x-3, y-3, s)
 	{
 		ItemEdit = i;
 		Sunken(false);
@@ -1049,7 +1049,7 @@ public:
 		#endif
 	}
 	
-	const char *GetClass() { return "GItemEditBox"; }
+	const char *GetClass() { return "LItemEditBox"; }
 
 	void OnCreate()
 	{
@@ -1062,7 +1062,7 @@ public:
 		if (!f && GetParent())
 		{
 			#if DEBUG_EDIT_LABEL
-			LgiTrace("%s:%i - GItemEditBox posting M_LOSING_FOCUS\n", _FL);
+			LgiTrace("%s:%i - LItemEditBox posting M_LOSING_FOCUS\n", _FL);
 			#endif
 			GetParent()->PostEvent(M_LOSING_FOCUS);
 		}
@@ -1098,7 +1098,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////
-class GItemEditPrivate
+class LItemEditPrivate
 {
 public:
 	LItem *Item;
@@ -1106,7 +1106,7 @@ public:
 	int Index;
 	bool Esc;
 
-	GItemEditPrivate()
+	LItemEditPrivate()
 	{
 		Esc = false;
 		Item = 0;
@@ -1114,10 +1114,10 @@ public:
 	}
 };
 
-GItemEdit::GItemEdit(LView *parent, LItem *item, int index, int SelStart, int SelEnd)
+LItemEdit::LItemEdit(LView *parent, LItem *item, int index, int SelStart, int SelEnd)
 	: LPopup(parent)
 {
-	d = new GItemEditPrivate;
+	d = new LItemEditPrivate;
 	d->Item = item;
 	d->Index = index;
 
@@ -1126,7 +1126,7 @@ GItemEdit::GItemEdit(LView *parent, LItem *item, int index, int SelStart, int Se
 	Raised(false);
 	
 	#if DEBUG_EDIT_LABEL
-	LgiTrace("%s:%i - GItemEdit(%p/%s, %i, %i, %i)\n",
+	LgiTrace("%s:%i - LItemEdit(%p/%s, %i, %i, %i)\n",
 		_FL,
 		parent, parent?parent->GetClass():0,
 		index,
@@ -1146,7 +1146,7 @@ GItemEdit::GItemEdit(LView *parent, LItem *item, int index, int SelStart, int Se
 
 	if (Attach(parent))
 	{
-		d->Edit = new GItemEditBox(this, r.X(), r.Y(), d->Item->GetText(d->Index));
+		d->Edit = new LItemEditBox(this, r.X(), r.Y(), d->Item->GetText(d->Index));
 		if (d->Edit)
 		{
 			d->Edit->Attach(this);
@@ -1162,7 +1162,7 @@ GItemEdit::GItemEdit(LView *parent, LItem *item, int index, int SelStart, int Se
 	}
 }
 
-GItemEdit::~GItemEdit()
+LItemEdit::~LItemEdit()
 {
 	if (d->Item)
 	{
@@ -1170,7 +1170,7 @@ GItemEdit::~GItemEdit()
 		{
 			auto Str = d->Edit->Name();
 			#if DEBUG_EDIT_LABEL
-			LgiTrace("%s:%i - ~GItemEdit, updating item(%i) with '%s'\n", _FL,
+			LgiTrace("%s:%i - ~LItemEdit, updating item(%i) with '%s'\n", _FL,
 				d->Index, Str);
 			#endif
 
@@ -1203,18 +1203,18 @@ GItemEdit::~GItemEdit()
 	DeleteObj(d);
 }
 
-LItem *GItemEdit::GetItem()
+LItem *LItemEdit::GetItem()
 {
 	return d->Item;
 }
 
-void GItemEdit::OnPaint(LSurface *pDC)
+void LItemEdit::OnPaint(LSurface *pDC)
 {
 	pDC->Colour(L_BLACK);
 	pDC->Rectangle();
 }
 
-int GItemEdit::OnNotify(LViewI *v, LNotification n)
+int LItemEdit::OnNotify(LViewI *v, LNotification n)
 {
 	switch (v->GetId())
 	{
@@ -1224,14 +1224,14 @@ int GItemEdit::OnNotify(LViewI *v, LNotification n)
 			{
 				d->Esc = true;
 				#if DEBUG_EDIT_LABEL
-				LgiTrace("%s:%i - GItemEdit got escape\n", _FL);
+				LgiTrace("%s:%i - LItemEdit got escape\n", _FL);
 				#endif
 			}
 
 			if (n.Type == LNotifyEscapeKey || n.Type == LNotifyReturnKey)
 			{
 				#if DEBUG_EDIT_LABEL
-				LgiTrace("%s:%i - GItemEdit hiding on esc/enter\n", _FL);
+				LgiTrace("%s:%i - LItemEdit hiding on esc/enter\n", _FL);
 				#endif
 				d->Edit->KeyProcessed();
 				Visible(false);
@@ -1244,39 +1244,39 @@ int GItemEdit::OnNotify(LViewI *v, LNotification n)
 	return 0;
 }
 
-void GItemEdit::Visible(bool i)
+void LItemEdit::Visible(bool i)
 {
 	LPopup::Visible(i);
 	if (!i)
 	{
 		#if DEBUG_EDIT_LABEL
-		LgiTrace("%s:%i - GItemEdit posting M_END_POPUP\n", _FL);
+		LgiTrace("%s:%i - LItemEdit posting M_END_POPUP\n", _FL);
 		#endif
 		PostEvent(M_END_POPUP);
 	}
 }
 
-bool GItemEdit::OnKey(LKey &k)
+bool LItemEdit::OnKey(LKey &k)
 {
 	if (d->Edit)
 		return d->Edit->OnKey(k);
 	return false;
 }
 
-void GItemEdit::OnFocus(bool f)
+void LItemEdit::OnFocus(bool f)
 {
 	if (f && d->Edit)
 		d->Edit->Focus(true);
 }
 
-LMessage::Result GItemEdit::OnEvent(LMessage *Msg)
+LMessage::Result LItemEdit::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
 		case M_LOSING_FOCUS:
 		{
 			#if DEBUG_EDIT_LABEL
-			LgiTrace("%s:%i - GItemEdit get M_LOSING_FOCUS\n", _FL);
+			LgiTrace("%s:%i - LItemEdit get M_LOSING_FOCUS\n", _FL);
 			#endif
 
 			// One of us has to retain focus... don't care which control.
@@ -1285,13 +1285,13 @@ LMessage::Result GItemEdit::OnEvent(LMessage *Msg)
 
 			// else fall thru to end the popup
 			#if DEBUG_EDIT_LABEL
-			LgiTrace("%s:%i - GItemEdit falling thru to M_END_POPUP\n", _FL);
+			LgiTrace("%s:%i - LItemEdit falling thru to M_END_POPUP\n", _FL);
 			#endif
 		}
 		case M_END_POPUP:
 		{
 			#if DEBUG_EDIT_LABEL
-			LgiTrace("%s:%i - GItemEdit got M_END_POPUP, quiting\n", _FL);
+			LgiTrace("%s:%i - LItemEdit got M_END_POPUP, quiting\n", _FL);
 			#endif
 			
 			if (d->Item &&

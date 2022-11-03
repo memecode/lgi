@@ -1,13 +1,13 @@
 #include "Lgi.h"
 #include "GdiLeak.h"
 
-class GPrintDCPrivate
+class LPrintDCPrivate
 {
 public:
 	bool PageOpen;
 	bool DocOpen;
 
-	GPrintDCPrivate()
+	LPrintDCPrivate()
 	{
 		PageOpen = false;
 		DocOpen = false;
@@ -16,7 +16,7 @@ public:
 
 LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName)
 {
-	d = new GPrintDCPrivate;
+	d = new LPrintDCPrivate;
 }
 
 LPrintDC::~LPrintDC()

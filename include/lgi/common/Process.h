@@ -5,13 +5,13 @@
 #include "lgi/common/Stream.h"
 
 /// A process wrapper class
-class GProcess
+class LProcess
 {
-	class GProcessPrivate *d;
+	class LProcessPrivate *d;
 
 public:
-	GProcess();
-	~GProcess();
+	LProcess();
+	~LProcess();
 	
 	/// \returns the process handle
 	OsProcess Handle();
