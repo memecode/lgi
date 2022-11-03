@@ -111,6 +111,11 @@ public:
 	static constexpr const char *WeekdaysLong[]	= {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 	static constexpr const char *MonthsShort[]	= {"Jan",     "Feb",      "Mar",   "Apr",   "May", "Jun",  "Jul",  "Aug",    "Sep",       "Oct",     "Nov",      "Dec"};
 	static constexpr const char *MonthsLong[]		= {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+	
+	// On Posix systems this allows representation of times before 1/1/1970.
+	// The Lgi epoch is considered to be 1/1/1800 instead and this offset converts
+	// from one to the other.
+	static constexpr int64_t Offset1800		= 5364662400; // Seconds from 1/1/1800 to 1/1/1970
 
 	/// Returns true if all the components are in a valid range
 	bool IsValid() const;
