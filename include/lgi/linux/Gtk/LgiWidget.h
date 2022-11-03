@@ -1,6 +1,16 @@
 #ifndef _LGIWIDGET_H_
 #define _LGIWIDGET_H_
 
+enum GDK_MouseButtons
+{
+	GDK_LEFT_BTN = 1,
+	GDK_MIDDLE_BTN = 2,
+	GDK_RIGHT_BTN = 3,
+	
+	GDK_BACK_BTN = 8,
+	GDK_FORWARD_BTN = 9,
+};
+
 G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE(LgiWidget, lgi_widget, LGI, WIDGET, GtkContainer)

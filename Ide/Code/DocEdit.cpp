@@ -173,6 +173,19 @@ void DocEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
 
 void DocEdit::OnMouseClick(LMouse &m)
 {
+	if (m.Button1())
+	{
+		if (m.Down())
+			Doc->GetApp()->SeekHistory(-1);
+		return;
+	}
+	else if (m.Button2())
+	{
+		if (m.Down())
+			Doc->GetApp()->SeekHistory(1);
+		return;
+	}
+
 	if (m.Down())
 	{
 		if (HasSelection())
@@ -205,6 +218,7 @@ void DocEdit::OnMouseClick(LMouse &m)
 			Doc->OnMarginClick(Idx);
 		}
 	}
+	
 	LTextView3::OnMouseClick(m);
 }
 

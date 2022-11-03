@@ -178,13 +178,19 @@ gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 	m.Down( ev->type == GDK_BUTTON_PRESS ||
 			ev->type == GDK_2BUTTON_PRESS ||
 			ev->type == GDK_3BUTTON_PRESS);
-	m.Left  (ev->button == 1);
-	m.Middle(ev->button == 2);
-	m.Right (ev->button == 3);
+
+	m.Left		(ev->button == GDK_LEFT_BTN);
+	m.Middle	(ev->button == GDK_MIDDLE_BTN);
+	m.Right		(ev->button == GDK_RIGHT_BTN);
+	m.Button1	(ev->button == GDK_BACK_BTN);
+	m.Button2	(ev->button == GDK_FORWARD_BTN);
+
 	m.Ctrl  ((ev->state & GDK_CONTROL_MASK) != 0);
 	m.Shift ((ev->state & GDK_SHIFT_MASK)   != 0);
 	m.Alt   ((ev->state & GDK_MOD1_MASK)    != 0);
 	m.System((ev->state & GDK_MOD2_MASK)    != 0);
+
+	printf("ev->button=%i\n", ev->button);
 
 	#if 0
 	char s[256];

@@ -293,6 +293,7 @@ public:
 	bool GetSystemIncludePaths(LArray<LString> &Paths);
 	bool ShowInProject(const char *Fn);
 	bool Build();
+	void SeekHistory(int Offset);
 	
 	// Events
 	void OnLocationChange(const char *File, int Line);

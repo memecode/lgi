@@ -3409,6 +3409,11 @@ public:
 	}
 };
 
+void AppWnd::SeekHistory(int Offset)
+{
+	d->SeekHistory(Offset);
+}
+
 RenameDlg *RenameDlg::Inst = NULL;
 
 bool AppWnd::ShowInProject(const char *Fn)
