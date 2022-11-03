@@ -201,13 +201,17 @@ gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 	m.Right		(ev->button == BtnRight);
 	m.Button1	(ev->button == BtnBack);
 	m.Button2	(ev->button == BtnForward);
+	if (ev->button != BtnLeft &&
+		ev->button != BtnMiddle &&
+		ev->button != BtnRight &&
+		ev->button != BtnBack &&
+		ev->button != BtnForward)
+		printf("%s:%i - Unknown button: %i\n", _FL, ev->button);
 
 	m.Ctrl  ((ev->state & GDK_CONTROL_MASK) != 0);
 	m.Shift ((ev->state & GDK_SHIFT_MASK)   != 0);
 	m.Alt   ((ev->state & GDK_MOD1_MASK)    != 0);
 	m.System((ev->state & GDK_MOD2_MASK)    != 0);
-
-	printf("ev->button=%i\n", ev->button);
 
 	#if 0
 	char s[256];
