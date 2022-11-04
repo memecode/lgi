@@ -718,7 +718,7 @@ LFilter::IoStatus GdcGif::ReadImage(LSurface *pdc, LStream *in)
 							if (Meter)
 							{
 								Meter->SetDescription("scanlines");
-								Meter->SetRange(LRange(0, sy));
+								Meter->SetRange(sy);
 							}
 
 							// Decode image

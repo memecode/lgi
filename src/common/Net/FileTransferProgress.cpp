@@ -126,7 +126,7 @@ void LPaneThrottle::OnPaint(LSurface *pDC)
 			Slider->Attach(this);
 			#endif
 			Slider->SetNotify(this);
-			Slider->SetRange(LRange(0, 100));
+			Slider->SetRange(100);
 			Slider->Value(100);
 
 			if (Pipe < 0)

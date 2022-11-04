@@ -91,7 +91,7 @@ public:
 								if (Meter)
 								{
 									Meter->SetDescription("Scanlines");
-									Meter->SetRange(LRange(0, Y));
+									Meter->SetRange(Y);
 								}
 
 								for (int y=0; y<Y; y++)

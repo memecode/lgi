@@ -2651,7 +2651,7 @@ void LTextView4::UpdateScrollBars(bool Reset)
 
 		int DisplayLines = Y() / LineY;
 		ssize_t Lines = GetLines();
-		VScroll->SetRange(LRange(0, Lines));
+		VScroll->SetRange(Lines);
 		if (VScroll)
 		{
 			VScroll->SetPage(DisplayLines);

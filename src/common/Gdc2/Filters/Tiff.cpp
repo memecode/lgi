@@ -565,7 +565,7 @@ LFilter::IoStatus GdcTiff::ProcessRead(LSurface *pDC)
 			Lib.MeterBlock = (X * Bits) >> (DownSam ? 2 : 3);
 			Lib.Meter = Meter;
 			Meter->SetDescription("scanlines");
-			Meter->SetRange(LRange(0, Y));
+			Meter->SetRange(Y);
 		}
 
 		pDC->Colour(0);

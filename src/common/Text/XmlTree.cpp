@@ -1657,7 +1657,7 @@ bool LXmlTree::Write(LXmlTag *Root, LStreamI *File, Progress *Prog)
 
 	d->File = File;
 	if ((d->Prog = Prog))
-		d->Prog->SetRange(LRange(0, Root->CountTags()));
+		d->Prog->SetRange(Root->CountTags());
 
 	if (!TestFlag(d->Flags, GXT_NO_HEADER))
 		File->Write(LXmlHeader, strlen(LXmlHeader));

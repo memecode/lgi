@@ -124,7 +124,7 @@ public:
 				return false;
 
 			if (prog)
-				prog->SetRange(LRange(0, f.GetSize()));
+				prog->SetRange(f.GetSize());
 
 			for (int64_t i=0; i<f.GetSize(); )
 			{

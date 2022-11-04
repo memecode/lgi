@@ -486,7 +486,7 @@ LFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 					pDC->Create(img.width, img.height, System32BitColourSpace))
 				{
 				    if (Meter)
-				        Meter->SetLimits(0, img.height);
+				        Meter->SetRange(img.height);
 				    
 					for (unsigned y=0; y<img.height; y++)
 					{
@@ -525,7 +525,7 @@ LFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 	            if (pDC->Create(img.width, img.height, LBitsToColourSpace(max(Bits, 8))))
 	            {
 	                if (Meter)
-	                    Meter->SetLimits(0, img.height);
+	                    Meter->SetRange(img.height);
 
 					switch (Bits)
 					{
@@ -881,7 +881,7 @@ LFilter::IoStatus GdcLibTiff::WriteImage(LStream *Out, LSurface *pDC)
 		SwapRB(pDC);
 
         if (Meter)
-            Meter->SetLimits(0, pDC->Y());
+            Meter->SetRange(pDC->Y());
 
 		for (int y=0; y<pDC->Y(); y++)
 		{

@@ -2231,7 +2231,7 @@ void LList::Empty()
 		if (VScroll)
 		{
 			VScroll->Value(0);
-			VScroll->SetRange(LRange());
+			VScroll->SetRange(0);
 		}
 
 		Invalidate();
@@ -2266,7 +2266,7 @@ void LList::RemoveAll()
 			// "SetLimits" can cause the VScroll object to
 			// be deleted and becoming NULL
 			VScroll->Value(0);
-			VScroll->SetRange(LRange());
+			VScroll->SetRange(0);
 		}
 
 		Invalidate();
@@ -2299,13 +2299,13 @@ void LList::UpdateScrollBars()
 			}
 
 			VScroll->SetPage(Vis);
-			VScroll->SetRange(LRange(0, Items.Length()));
+			VScroll->SetRange(Items.Length());
 		}
 		
 		if (HScroll)
 		{
 			HScroll->SetPage(d->VisibleColumns);
-			HScroll->SetRange(LRange(0, d->Columns));
+			HScroll->SetRange(d->Columns);
 		}
 		
 		Processing = false;

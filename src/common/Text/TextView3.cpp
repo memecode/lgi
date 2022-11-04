@@ -2603,7 +2603,7 @@ void LTextView3::UpdateScrollBars(bool Reset)
 
 	int DisplayLines = Y() / LineY;
 	ssize_t Lines = std::max(PartialPourLines, Line.Length());
-	VScroll->SetRange(LRange(0, Lines));
+	VScroll->SetRange(Lines);
 	if (VScroll)
 	{
 		VScroll->SetPage(DisplayLines);

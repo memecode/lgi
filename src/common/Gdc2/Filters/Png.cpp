@@ -1329,7 +1329,7 @@ LFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 				uchar *TempBits = new uchar[pDC->Y() * TempLine];
 
 				if (Meter)
-					Meter->SetRange(LRange(0, pDC->Y()));
+					Meter->SetRange(pDC->Y());
 
 				switch (pDC->GetBits())
 				{
