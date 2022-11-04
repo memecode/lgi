@@ -306,7 +306,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 							bool Debug = false;
 							Debug = fs->Path.Find(DEBUG_FILE) >= 0;
 							if (Debug)
-								printf("%s:%i - Searching '%s' with %i syms...\n", _FL, fs->Path.Get(), fs->Defs.Length());
+								printf("%s:%i - Searching '%s' with %i syms...\n", _FL, fs->Path.Get(), (int)fs->Defs.Length());
 							#endif
 
 							// Check platforms...

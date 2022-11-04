@@ -28,6 +28,10 @@
 	#include <sys/ioctl.h>
 	#include <sys/types.h>
 
+#elif defined(WINDOWS)
+
+	#define NTDDI_VERSION 0x0A000006
+
 #endif
 
 #include "lgi/common/Lgi.h"
@@ -38,6 +42,7 @@
 
 #if defined(WIN32)
 	
+	#include <ConsoleApi.h>
 	#include <Lm.h>
 	#pragma comment(lib, "netapi32.lib")
 
