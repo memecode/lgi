@@ -9,6 +9,11 @@ if (UNIX AND NOT APPLE)
 	set(LINUX TRUE)
 endif()
 
+if (NOT TARGET libpng15)
+    get_filename_component(LIBPNG_DIR "${CODELIB}/libpng" ABSOLUTE)
+    add_subdirectory(${LIBPNG_DIR} libpng)
+endif()
+
 if (APPLE)
 
 	set(GUI_TYPE MACOSX_BUNDLE)
@@ -106,18 +111,18 @@ target_link_libraries(LgiIde lgi libpng15)
 target_include_directories(LgiIde PRIVATE Code Resources)
 
 if (APPLE)
-	add_custom_command(TARGET LgiIde POST_BUILD 
-		COMMAND "${CMAKE_COMMAND}" -E copy 
-			"$<TARGET_FILE:lgi>"
-			"LgiIde.app/Contents/MacOS/$<TARGET_FILE_NAME:lgi>" 
-		COMMENT "Copying to output directory")
+
 	target_link_libraries(LgiIde ${EXTRA_LIBS})
 	set_target_properties(LgiIde PROPERTIES
 		MACOSX_BUNDLE TRUE
 		MACOSX_FRAMEWORK_IDENTIFIER com.memecode.LgiIde
 		RESOURCE "${ResourceFiles}"
 		)
+	message("macBundlePostBuild(LgiIde)")
+	macBundlePostBuild(LgiIde)
+
 elseif (MSVC)
+
 	target_link_libraries(LgiIde ComCtl32.lib Ws2_32.lib UxTheme.lib imm32.lib)
 	add_custom_command(TARGET LgiIde POST_BUILD 
 					COMMAND "${CMAKE_COMMAND}" -E copy 
@@ -131,6 +136,7 @@ elseif (MSVC)
 						"$<TARGET_FILE_DIR:LgiIde>/libpng${VS_VER}x${WORDSIZE}.dll" 
 					COMMENT "Copying Lgi to output directory")
 	endif()
+
 endif ()
 
 # Create a resources sub-folder and copy over the resource files (images and lr8)

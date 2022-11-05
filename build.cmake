@@ -4,6 +4,7 @@ function(macCopyDeps topTarget target)
 
     # Process all the target's dependencies:
     get_target_property(LIBS ${target} LINK_LIBRARIES)
+    # message("Deps for ${target} = ${LIBS}")
     foreach(LIB ${LIBS})
         if (TARGET ${LIB}) # We only look at Cmake targets at the moment
             get_target_property(LIB_FRAMEWORK ${LIB} FRAMEWORK)
@@ -32,6 +33,8 @@ function(macCopyDeps topTarget target)
                 macCopyDeps(${topTarget} ${LIB})
             
             endif()
+        elseif (NOT ${LIB} MATCHES "\.tbd")
+            # message("Warning: ${LIB} is not a target.")
         endif()
     endforeach()
 
