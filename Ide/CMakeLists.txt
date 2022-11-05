@@ -23,7 +23,7 @@ elseif (LINUX)
 
 elseif (MSVC)
 
-	set(CommonResourceFiles
+	set(ResourceFiles
 		../src/win/General/Lgi.manifest
 		Resources/Script1.rc)
 	if (NOT EXISTS ${OPENSSL_INCLUDE_DIR})
@@ -82,7 +82,7 @@ set (CommonSource
 	../src/common/Coding/LexCpp.cpp
 	)
 
-list(APPEND CommonResourceFiles
+list(APPEND ResourceFiles
 	Resources/cmds-32px.png
 	Resources/icons.png
 	Resources/cmds-16px.png
@@ -92,35 +92,30 @@ list(APPEND CommonResourceFiles
 
 if (APPLE)
 	set(MacResourceFiles
-		MacCarbon/Info.plist
-		MacCarbon/English.lproj/InfoPlist.strings
-		MacCarbon/English.lproj/main.nib)
-	
+		MacCocoa/Info.plist
+		Resources/mac-icon.icns)
+	set(APP_TYPE MACOSX_BUNDLE)
 	set_source_files_properties(${MacResourceFiles} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-
-	add_executable(LgiIde MACOSX_BUNDLE ${CommonSource} ${CommonResourceFiles} ${MacResourceFiles})
-	
-	# set(MACOSX_BUNDLE_ICON_FILE ".icns")
-	add_custom_command(TARGET LgiIde POST_BUILD 
-					COMMAND "${CMAKE_COMMAND}" -E copy 
-						"$<TARGET_FILE:Lgi>"
-						"LgiIde.app/Contents/MacOS/$<TARGET_FILE_NAME:Lgi>" 
-					COMMENT "Copying to output directory")
-elseif (LINUX)
-	add_executable(LgiIde ${CommonSource})
+	list(APPEND ResourceFiles ${MacResourceFiles})
 elseif (MSVC)
-	add_executable(LgiIde WIN32 ${CommonSource} ${CommonResourceFiles})
+	set(APP_TYPE WIN32)
 endif ()
 
+add_executable(LgiIde ${APP_TYPE} ${CommonSource} ${ResourceFiles})
 target_link_libraries(LgiIde lgi libpng15)
 target_include_directories(LgiIde PRIVATE Code Resources)
 
 if (APPLE)
+	add_custom_command(TARGET LgiIde POST_BUILD 
+		COMMAND "${CMAKE_COMMAND}" -E copy 
+			"$<TARGET_FILE:lgi>"
+			"LgiIde.app/Contents/MacOS/$<TARGET_FILE_NAME:lgi>" 
+		COMMENT "Copying to output directory")
 	target_link_libraries(LgiIde ${EXTRA_LIBS})
 	set_target_properties(LgiIde PROPERTIES
 		MACOSX_BUNDLE TRUE
 		MACOSX_FRAMEWORK_IDENTIFIER com.memecode.LgiIde
-		RESOURCE "${RESOURCE_FILES}"
+		RESOURCE "${ResourceFiles}"
 		)
 elseif (MSVC)
 	target_link_libraries(LgiIde ComCtl32.lib Ws2_32.lib UxTheme.lib imm32.lib)

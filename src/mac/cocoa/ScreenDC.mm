@@ -180,12 +180,12 @@ void GScreenDC::SetOrigin(int x, int y)
 	GSurface::SetOrigin(x, y);
 }
 
-GPalette *GScreenDC::Palette()
+LPalette *GScreenDC::Palette()
 {
 	return GSurface::Palette();
 }
 
-void GScreenDC::Palette(GPalette *pPal, bool bOwnIt)
+void GScreenDC::Palette(LPalette *pPal, bool bOwnIt)
 {
 	GSurface::Palette(pPal, bOwnIt);
 }

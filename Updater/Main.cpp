@@ -2,8 +2,13 @@
    even when installed in the Program Files tree, where they do not have write access to
    their own install folder. This util is built with a manifest that requests admin rights,
    allowing it to write to the target folder. */
+#if WINDOWS
 #include <windows.h>
 #include <tchar.h>
+#else
+typedef char TCHAR;
+#define _T(str) str
+#endif
 #include <stdio.h>
 #include "../include/lgi/common/LgiDefs.h"
 #include "../include/lgi/common/Array.h"
@@ -26,6 +31,7 @@ char *NewStr(char *s, size_t len = 0)
 	return n;
 }
 
+#if WINDOWS
 WCHAR *NewStr(WCHAR *s, size_t len = 0)
 {
 	if (!s)
@@ -139,4 +145,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	MessageBox(NULL, Msg, AppName, MB_OK);
 	return 0;
 }
-
+#else
+int main(int args, char **arg)
+{
+	assert(!"impl me");
+	return -1;
+}
+#endif

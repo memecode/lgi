@@ -4,10 +4,12 @@ if(WIN32)
 	set(CMAKE_SYSTEM_VERSION 10.0.19041.0)
 endif()
 
+project (Lgi)
+
+include(build.cmake)
+
 set(CMAKE_OSX_ARCHITECTURES "x86_64")
 set(CMAKE_CXX_STANDARD 14)
-
-project (Lgi)
 set(LGI_VERSION_MAJOR 1)
 set(LGI_VERSION_MINOR 0)
 
@@ -297,6 +299,10 @@ if (APPLE)
 		PROPERTIES
 		XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_WEAK "YES"
 		)
+	
+	set_target_properties(lgi PROPERTIES FRAMEWORK true)
+	set_target_properties(lgi PROPERTIES
+		XCODE_ATTRIBUTE_INSTALL_PATH @executable_path/../Frameworks/)
 
 	target_include_directories(lgi
 		PUBLIC

@@ -5,14 +5,14 @@ if (WIN32)
 	set(APP_TYPE WIN32)
 	set(APP_ICON Rich.rc)
 	set(APP_MANIFEST ../src/win/General/Lgi.manifest)
+    set(SPELL_CHECK ${LGI_DIR}/src/win/Lgi/SpellCheckWindows.cpp)
 elseif (APPLE)
 	set(APP_TYPE MACOSX_BUNDLE)
-	set(APP_ICON Resources/mac-icon.icns)
-	set_source_files_properties(${APP_ICON}
-		PROPERTIES
-			MACOSX_PACKAGE_LOCATION "Resources")
+    set(SPELL_CHECK ${LGI_DIR}/src/mac/cocoa/SpellCheckMac.mm)
 elseif (LINUX)
 	set(APP_ICON Resources/icon128.png)
+    message("FIXME: where is the aspell spell checker?")
+    set(SPELL_CHECK)
 endif()
 
 if (NOT TARGET libjpeg9a)
@@ -41,7 +41,7 @@ add_executable(HtmlEdit ${APP_TYPE}
     ${LGI_DIR}/src/common/Widgets/Editor/HorzRuleBlock.cpp
     ${LGI_DIR}/src/common/Widgets/Editor/ImageBlock.cpp
     ${LGI_DIR}/src/common/Widgets/Editor/TextBlock.cpp
-    ${LGI_DIR}/src/win/Lgi/SpellCheckWindows.cpp
+    ${SPELL_CHECK}
     resource.h
 
 	${APP_ICON}
