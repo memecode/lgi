@@ -52,3 +52,5 @@ if (APPLE)
 else()
 	file(COPY ${CMAKE_CURRENT_LIST_DIR}/Resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endif()
+
+set_target_properties(LgiRes PROPERTIES EXCLUDE_FROM_ALL TRUE)

@@ -21,3 +21,5 @@ elseif (WIN32)
 		PROPERTIES
 			LINK_FLAGS "/MANIFESTUAC:\"level='requireAdministrator' uiAccess='false'\" /SUBSYSTEM:WINDOWS")
 endif()
+
+set_target_properties(Updater PROPERTIES EXCLUDE_FROM_ALL TRUE)

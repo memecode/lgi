@@ -24,3 +24,5 @@ target_include_directories(SlogViewer
 if (APPLE)
 	macBundlePostBuild(SlogViewer)
 endif()
+
+set_target_properties(SlogViewer PROPERTIES EXCLUDE_FROM_ALL TRUE)

@@ -63,3 +63,5 @@ target_link_libraries(HtmlEdit
 if (APPLE)
     macBundlePostBuild(HtmlEdit)
 endif()
+
+set_target_properties(HtmlEdit PROPERTIES EXCLUDE_FROM_ALL TRUE)

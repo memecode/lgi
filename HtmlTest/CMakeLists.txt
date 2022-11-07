@@ -74,3 +74,5 @@ target_link_libraries(HtmlTest
 if (APPLE)
     macBundlePostBuild(HtmlTest)
 endif()
+
+set_target_properties(HtmlTest PROPERTIES EXCLUDE_FROM_ALL TRUE)

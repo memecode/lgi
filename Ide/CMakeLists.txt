@@ -148,3 +148,5 @@ target_include_directories (LgiIde PUBLIC
 							${PNG_INCLUDE_DIR}
 							${OPENSSL_INCLUDE_DIR}
 							"${CODELIB}/libiconv-1.14/include")
+
+set_target_properties(LgiIde PROPERTIES EXCLUDE_FROM_ALL TRUE)

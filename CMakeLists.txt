@@ -38,9 +38,8 @@ endif()
 get_directory_property(hasParent PARENT_DIRECTORY)
 if(hasParent)
 	set(LGI_DIR "${CMAKE_CURRENT_LIST_DIR}" PARENT_SCOPE)
-else()
-	set(LGI_DIR "${CMAKE_CURRENT_LIST_DIR}")
 endif()
+set(LGI_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
 get_filename_component(CODE ../.. ABSOLUTE)
 get_filename_component(CODELIB ${CODE}/../codelib ABSOLUTE)
@@ -157,6 +156,7 @@ set (CommonSource
 	src/common/Text/DocView.cpp
 	src/common/Text/String.cpp
 	src/common/Text/TextView3.cpp
+	src/common/Text/TextView4.cpp
 	src/common/Text/Token.cpp
 	src/common/Text/Unicode.cpp
 	src/common/Text/Utf8.cpp

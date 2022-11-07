@@ -30,3 +30,5 @@ if (APPLE)
 elseif (WIN32)
 	target_sources(LgiScript PRIVATE ../src/common/Coding/ExternCall.asm)
 endif()
+
+set_target_properties(LgiScript PROPERTIES EXCLUDE_FROM_ALL TRUE)
