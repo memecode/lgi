@@ -70,3 +70,7 @@ target_link_libraries(HtmlTest
 		lgi
 		libpng15
 		libjpeg9a)
+
+if (APPLE)
+    macBundlePostBuild(HtmlTest)
+endif()

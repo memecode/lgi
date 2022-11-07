@@ -14,7 +14,9 @@ add_executable(Updater ${APP_TYPE}
 target_compile_definitions(Updater PRIVATE LGI_STATIC)
 target_link_libraries(Updater lgi)
 
-if (WIN32)
+if (APPLE)
+	macBundlePostBuild(Updater)
+elseif (WIN32)
 	set_target_properties(Updater
 		PROPERTIES
 			LINK_FLAGS "/MANIFESTUAC:\"level='requireAdministrator' uiAccess='false'\" /SUBSYSTEM:WINDOWS")

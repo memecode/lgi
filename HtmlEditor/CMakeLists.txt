@@ -59,3 +59,7 @@ target_link_libraries(HtmlEdit
 		lgi
 		libpng15
 		libjpeg9a)
+
+if (APPLE)
+    macBundlePostBuild(HtmlEdit)
+endif()

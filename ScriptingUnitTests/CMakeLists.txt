@@ -25,6 +25,8 @@ add_executable(LgiScript ${APP_TYPE}
 
 target_link_libraries(LgiScript lgi)
 
-if (WIN32)
+if (APPLE)
+	macBundlePostBuild(LgiScript)
+elseif (WIN32)
 	target_sources(LgiScript PRIVATE ../src/common/Coding/ExternCall.asm)
 endif()

@@ -16,8 +16,6 @@ elseif (LINUX)
 	set(APP_ICON Resources/icon128.png)
 endif()
 
-
-
 add_executable(LgiRes ${APP_TYPE}
 
 	Code/LgiResEdit.h
@@ -49,4 +47,8 @@ add_executable(LgiRes ${APP_TYPE}
 target_include_directories(LgiRes PRIVATE Code Resources)
 target_link_libraries(LgiRes lgi libpng15)
 
-file(COPY ${CMAKE_CURRENT_LIST_DIR}/Resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+if (APPLE)
+    macBundlePostBuild(LgiRes)
+else()
+	file(COPY ${CMAKE_CURRENT_LIST_DIR}/Resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+endif()

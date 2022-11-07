@@ -21,3 +21,6 @@ target_include_directories(SlogViewer
 	PRIVATE
 		Resources)
 		
+if (APPLE)
+	macBundlePostBuild(SlogViewer)
+endif()

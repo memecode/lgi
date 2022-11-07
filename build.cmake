@@ -1,4 +1,6 @@
 
+set(CODE_SIGN_IDENTITY "fret@memecode.com") # Replace with your code signing identity
+
 # Scan all the deps and copy them into the app bundle:
 function(macCopyDeps topTarget target)
 
@@ -15,9 +17,12 @@ function(macCopyDeps topTarget target)
                 add_custom_command(
                     TARGET ${topTarget} POST_BUILD 
                     COMMAND "${CMAKE_COMMAND}" -E echo "Copy framework ${LIB} to ${target} Frameworks folder"
-                    COMMAND "${CMAKE_COMMAND}" -E copy_directory 
+                    COMMAND rm -rf "$<TARGET_BUNDLE_CONTENT_DIR:${topTarget}>/Frameworks/$<TARGET_BUNDLE_DIR_NAME:${LIB}>"
+                    COMMAND cp -R
                             "$<TARGET_BUNDLE_DIR:${LIB}>"
-                            "$<TARGET_BUNDLE_CONTENT_DIR:${topTarget}>/Frameworks/$<TARGET_BUNDLE_DIR_NAME:${LIB}>")
+                            "$<TARGET_BUNDLE_CONTENT_DIR:${topTarget}>/Frameworks/$<TARGET_BUNDLE_DIR_NAME:${LIB}>"
+                    COMMAND codesign -f -s ${CODE_SIGN_IDENTITY} "$<TARGET_BUNDLE_CONTENT_DIR:${topTarget}>/Frameworks/$<TARGET_BUNDLE_DIR_NAME:${LIB}>/Versions/A"
+                    )
     
             elseif (LIB_TYPE MATCHES "SHARED")
                 
@@ -25,9 +30,11 @@ function(macCopyDeps topTarget target)
                 add_custom_command(
                     TARGET ${topTarget} POST_BUILD 
                     COMMAND "${CMAKE_COMMAND}" -E echo "Copy dylib ${LIB} to ${target} Frameworks folder"
-                    COMMAND "${CMAKE_COMMAND}" -E copy 
+                    COMMAND "${CMAKE_COMMAND}" -E copy
                         "$<TARGET_FILE:${LIB}>"
-                        "$<TARGET_BUNDLE_CONTENT_DIR:${topTarget}>/Frameworks")
+                        "$<TARGET_BUNDLE_CONTENT_DIR:${topTarget}>/Frameworks"
+                    COMMAND codesign -f -s ${CODE_SIGN_IDENTITY} "$<TARGET_BUNDLE_CONTENT_DIR:${topTarget}>/Frameworks/$<TARGET_FILE_NAME:${LIB}>"
+                    )
 
                 # Also do child deps:
                 macCopyDeps(${topTarget} ${LIB})
@@ -65,6 +72,9 @@ function(macBundlePostBuild target)
         COMMAND "${LGI_DIR}/src/mac/fixInstallPaths.py" "$<TARGET_FILE:${target}>")
 
     # Finally code sign the application binary again (we broke it fixing the install paths):
-    message("FIXME: impl code signing here...")
-
+    add_custom_command(
+        TARGET ${target} POST_BUILD 
+        COMMAND "${CMAKE_COMMAND}" -E echo "Signing the ${target} app bundle..."
+        COMMAND codesign -f -s ${CODE_SIGN_IDENTITY} "$<TARGET_BUNDLE_CONTENT_DIR:${target}>/Macos/$<TARGET_FILE_NAME:${target}>"
+        )
 endfunction()
