@@ -8,6 +8,7 @@
 
 #define LAssert assert
 
+#include "lgi/common/LgiDefs.h"
 #include "lgi/common/Array.h"
 #include "lgi/common/StringClass.h"
 
@@ -299,13 +300,13 @@ void OnLine(char *str)
 		AtPrompt();
 }
 
-int main(int args, char **arg)
+int main(int argCount, char **arg)
 {
 	int pid = -1;
-	for (int i=1; i<args; i++)
+	for (int i=1; i<argCount; i++)
 	{
 		if (!strcasecmp(arg[i], "--pid") &&
-			i < args - 1)
+			i < argCount - 1)
 		{
 			pid = atoi(arg[i+1]);
 			break;
@@ -336,7 +337,7 @@ int main(int args, char **arg)
 		// child process..
 		char pidArg[64];
 		snprintf(pidArg, sizeof(pidArg), "--pid=%i", pid);
-		const char *args[] = { "gdb", pidArg, NULL };
+		char *const args[] = { "gdb", pidArg, NULL };
 
 		// Child shouldn't write to its stdin.
 		if (close(in[hWrite]))

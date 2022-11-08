@@ -75,7 +75,7 @@ elseif (LINUX)
 	find_package(PkgConfig)
 	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
 	pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4)
-	set(PUBLIC_LIBS pthread crypt)
+	set(PUBLIC_LIBS pthread crypt z)
 
 elseif (WIN32)
 
