@@ -181,11 +181,18 @@ HDC LMemDC::StartDC()
 	if (!hBmp)
 		return NULL;
 		
-	hDC = CreateCompatibleDC(NULL);
 	if (hDC)
 	{
-		hBmp = (HBITMAP) SelectObject(hDC, hBmp);
-		SetWindowOrgEx(hDC, OriginX, OriginY, NULL);
+		LgiTrace("%s:%i - MemDC already started?\n", _FL);
+	}
+	else
+	{
+		hDC = CreateCompatibleDC(NULL);
+		if (hDC)
+		{
+			hBmp = (HBITMAP) SelectObject(hDC, hBmp);
+			SetWindowOrgEx(hDC, OriginX, OriginY, NULL);
+		}
 	}
 
 	return hDC;
@@ -197,7 +204,7 @@ void LMemDC::EndDC()
 	{
 		hBmp = (HBITMAP) SelectObject(hDC, hBmp);
 		DeleteDC(hDC);
-		hDC = 0;
+		hDC = NULL;
 	}
 }
 
