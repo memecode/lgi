@@ -2087,7 +2087,7 @@ bool LFileSelect::Name(const char *n)
 	return true;
 }
 
-char *LFileSelect::operator [](size_t i)
+const char *LFileSelect::operator [](size_t i)
 {
 	return d->Files.ItemAt(i);
 }
@@ -2151,7 +2151,7 @@ void LFileSelect::MultiSelect(bool Multi)
 }
 
 #define CharPropImpl(Func, Var)				\
-	char *LFileSelect::Func()				\
+	const char *LFileSelect::Func()			\
 	{										\
 		return Var;							\
 	}										\
