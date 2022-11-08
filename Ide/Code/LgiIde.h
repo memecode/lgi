@@ -135,6 +135,7 @@ inline const char *toString(BuildConfig c)
 {
 	switch (c)
 	{
+		default:
 		case BuildDebug: return "Debug";
 		case BuildRelease: return "Release";
 	}
