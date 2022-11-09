@@ -4459,11 +4459,7 @@ int LgiMain(OsAppArguments &AppArgs)
 	LApp a(AppArgs, "LgiIde");
 	if (a.IsOk())
 	{
-		#if 0
-		a.AppWnd = new Test;
-		#else
 		a.AppWnd = new AppWnd;
-		#endif
 		a.Run();
 	}
 
