@@ -66,7 +66,7 @@ public:
 	/// Sets the file name
 	bool Name(const char *n) override;
 	/// Returns the n'th file name selected
-	char *operator [](size_t i);
+	const char *operator [](size_t i);
 	/// Returns the number of file names selected
 	size_t Length();
 	/// Returns the parent window
@@ -82,15 +82,15 @@ public:
 	/// Sets whether the user sees a read only option
 	void ShowReadOnly(bool ro);
 	/// Gets the initial directory to open in
-	char *InitialDir();
+	const char *InitialDir();
 	/// Sets the initial directory to open in
 	void InitialDir(const char *InitDir);
 	/// Gets the title of the dialog box
-	char *Title();
+	const char *Title();
 	/// Sets the title of the dialog box
 	void Title(const char *Title);
 	/// Gets the default extension to append to files selected without an extension
-	char *DefaultExtension();
+	const char *DefaultExtension();
 	/// Sets the default extension to append to files selected without an extension
 	void DefaultExtension(const char *DefExt);
 

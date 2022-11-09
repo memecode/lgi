@@ -157,7 +157,8 @@ class BuildThread : public LThread, public LStream
 {
 	IdeProject *Proj;
 	LString Makefile, CygwinPath;
-	bool Clean, Release, All;
+	bool Clean, All;
+	BuildConfig Config;
 	int WordSize;
 	LAutoPtr<LSubProcess> SubProc;
 	LString::Array BuildConfigs;
@@ -190,7 +191,7 @@ class BuildThread : public LThread, public LStream
 		Arch;
 
 public:
-	BuildThread(IdeProject *proj, char *makefile, bool clean, bool release, bool all, int wordsize);
+	BuildThread(IdeProject *proj, char *makefile, bool clean, BuildConfig config, bool all, int wordsize);
 	~BuildThread();
 	
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0) override;
@@ -442,16 +443,16 @@ public:
 		}
 
 		// Output the build mode, flags and some paths
-		int BuildMode = d->App->GetBuildMode();
-		auto BuildModeName = BuildMode ? "Release" : "Debug";
+		auto BuildMode = d->App->GetBuildMode();
+		auto BuildModeName = toString(BuildMode);
 		m.Print("ifndef Build\n"
 				"	Build = %s\n"
 				"endif\n",
 				BuildModeName);
 		
-		LString sDefines[2];
-		LString sLibs[2];
-		LString sIncludes[2];
+		LString sDefines[BuildMax];
+		LString sLibs[BuildMax];
+		LString sIncludes[BuildMax];
 		const char *ExtraLinkFlags = NULL;
 		const char *ExeFlags = NULL;
 		if (Platform == PlatformWin)
@@ -487,17 +488,17 @@ public:
 		List<IdeProject> Deps;
 		Proj->GetChildProjects(Deps);
 
-		const char *sConfig[] = {"Debug", "Release"};
-		for (int Cfg = 0; Cfg < CountOf(sConfig); Cfg++)
+		for (int Cfg = BuildDebug; Cfg < BuildMax; Cfg++)
 		{
 			// Set the config
-			d->Settings.SetCurrentConfig(sConfig[Cfg]);
+			auto cfgName = toString((BuildConfig)Cfg);
+			d->Settings.SetCurrentConfig(cfgName);
 		
 			// Get the defines setup
-			const char *PDefs = d->Settings.GetStr(ProjDefines, NULL, Platform);
+			auto PDefs = d->Settings.GetStr(ProjDefines, NULL, Platform);
 			if (ValidStr(PDefs))
 			{
-				GToken Defs(PDefs, " ;,\r\n");
+				LToken Defs(PDefs, " ;,\r\n");
 				for (int i=0; i<Defs.Length(); i++)
 				{
 					LString s;
@@ -543,7 +544,7 @@ public:
 			const char *PLibs = d->Settings.GetStr(ProjLibraries, NULL, Platform);
 			if (ValidStr(PLibs))
 			{
-				GToken Libs(PLibs, "\r\n");
+				LToken Libs(PLibs, "\r\n");
 				for (int i=0; i<Libs.Length(); i++)
 				{
 					LString l = Libs[i];
@@ -601,7 +602,7 @@ public:
 			if (ValidStr(ProjIncludes))
 			{
 				// Add settings include paths.
-				GToken Paths(ProjIncludes, "\r\n");
+				LToken Paths(ProjIncludes, "\r\n");
 				for (int i=0; i<Paths.Length(); i++)
 				{
 					char *p = Paths[i];
@@ -616,7 +617,7 @@ public:
 			if (ValidStr(SysIncludes))
 			{
 				// Add settings include paths.
-				GToken Paths(SysIncludes, "\r\n");
+				LToken Paths(SysIncludes, "\r\n");
 				for (int i=0; i<Paths.Length(); i++)
 				{
 					char *p = Paths[i];
@@ -1151,12 +1152,12 @@ bool ReadVsProjFile(LString File, LString &Ver, LString::Array &Configs)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, bool release, bool all, int wordsize) : LThread("BuildThread")
+BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, BuildConfig config, bool all, int wordsize) : LThread("BuildThread")
 {
 	Proj = proj;
 	Makefile = makefile;
 	Clean = clean;
-	Release = release;
+	Config = config;
 	All = all;
 	WordSize = wordsize;
 	Arch = DefaultArch;
@@ -1621,7 +1622,7 @@ LString BuildThread::FindExe()
 
 LAutoString BuildThread::WinToMingWPath(const char *path)
 {
-	GToken t(path, "\\");
+	LToken t(path, "\\");
 	LStringPipe a(256);
 	for (int i=0; i<t.Length(); i++)
 	{
@@ -1664,7 +1665,7 @@ int BuildThread::Main()
 			LString BuildConf = "All - Win32 Debug";
 			if (BuildConfigs.Length())
 			{
-				const char *Key = Release ? "Release" : "Debug";
+				auto Key = toString(Config);
 				for (size_t i=0; i<BuildConfigs.Length(); i++)
 				{
 					LString c = BuildConfigs[i];
@@ -1854,7 +1855,7 @@ int BuildThread::Main()
 				else
 					TmpArgs += " clean";
             }
-			if (Release)
+			if (Config == BuildRelease)
 				TmpArgs += " Build=Release";
 		}
 
@@ -2060,8 +2061,8 @@ bool IdeProject::RelativePath(LString &Out, const char *In, bool Debug)
 	CheckExists(Base);
 if (Debug) LgiTrace("XmlBase='%s'\n		In='%s'\n", Base.Get(), In);
 		
-	GToken b(Base, DIR_STR);
-	GToken i(In, DIR_STR);
+	LToken b(Base, DIR_STR);
+	LToken i(In, DIR_STR);
 	char out[MAX_PATH_LEN] = "";
 	
 if (Debug) LgiTrace("Len %i-%i\n", b.Length(), i.Length());
@@ -2167,7 +2168,7 @@ LString IdeProject::GetMakefile(IdePlatform Platform)
 	return Path;
 }
 
-void IdeProject::Clean(bool All, bool Release)
+void IdeProject::Clean(bool All, BuildConfig Config)
 {
 	if (!d->Thread &&
 		d->Settings.GetStr(ProjMakefile))
@@ -2176,7 +2177,7 @@ void IdeProject::Clean(bool All, bool Release)
 		if (m)		
 		{
 			CheckExists(m);
-			d->Thread.Reset(new BuildThread(this, m, true, Release, All, sizeof(ssize_t)*8));
+			d->Thread.Reset(new BuildThread(this, m, true, Config, All, sizeof(ssize_t)*8));
 		}
 	}
 }
@@ -2313,7 +2314,7 @@ public:
 	}
 };
 
-GDebugContext *IdeProject::Execute(ExeAction Act)
+LDebugContext *IdeProject::Execute(ExeAction Act)
 {
 	LAutoString Base = GetBasePath();
 	if (d->Settings.GetStr(ProjExe) &&
@@ -2337,7 +2338,7 @@ GDebugContext *IdeProject::Execute(ExeAction Act)
 						InitDir = p.GetFull();
 					}
 						
-					return new GDebugContext(d->App, this, e, Args, RunAsAdmin != 0, Env, InitDir);
+					return new LDebugContext(d->App, this, e, Args, RunAsAdmin != 0, Env, InitDir);
 				}
 				else
 				{
@@ -2508,7 +2509,7 @@ bool IdeProject::FixMissingFiles()
 	return true;
 }
 
-void IdeProject::Build(bool All, bool Release)
+void IdeProject::Build(bool All, BuildConfig Config)
 {
 	if (d->Thread)
 	{
@@ -2543,7 +2544,7 @@ void IdeProject::Build(bool All, bool Release)
 					this,
 					m,
 					false,
-					Release,
+					Config,
 					All,
 					sizeof(size_t)*8
 				)
@@ -2868,7 +2869,6 @@ bool IdeProject::SaveFile()
 {
 	auto Full = GetFullPath();
 
-	printf("IdeProject::SaveFile %s %i\n", Full.Get(), d->Dirty);
 	if (ValidStr(Full) && d->Dirty)
 	{
 		LFile f;
@@ -2877,24 +2877,12 @@ bool IdeProject::SaveFile()
 			f.SetSize(0);
 
 			LXmlTree x;
-			LProgressDlg Prog(d->App, 1000);
-			Prog.SetAlwaysOnTop(true);
-			Prog.SetDescription("Serializing project XML...");
-			Prog.SetYieldTime(200);
-			Prog.SetCanCancel(false);
-
 			d->Settings.Serialize(this, true /* write */);
-			
-			LStringPipe Buf(4096);			
-			if (x.Write(this, &Buf, &Prog))
-			{
-				LCopyStreamer Cp;
-				Prog.SetDescription("Writing XML...");
-				LYield();
-				if (Cp.Copy(&Buf, &f))
-					d->Dirty = false;
-			}
-			else LgiTrace("%s:%i - Failed to write XML.\n", _FL);
+
+			if (x.Write(this, &f))
+				d->Dirty = false;
+			else
+				LgiTrace("%s:%i - Failed to write XML.\n", _FL);
 		}
 		else LgiTrace("%s:%i - Couldn't open '%s' for writing.\n", _FL, Full.Get());
 	}
@@ -3194,31 +3182,31 @@ void IdeProject::OnMouseClick(LMouse &m)
 			case IDM_BUILD:
 			{
 				StopBuild();
-				Build(true, d->App->IsReleaseMode());
+				Build(true, d->App->GetBuildMode());
 				break;
 			}
 			case IDM_CLEAN_PROJECT:
 			{
-				Clean(false, d->App->IsReleaseMode());
+				Clean(false, d->App->GetBuildMode());
 				break;
 			}
 			case IDM_CLEAN_ALL:
 			{
-				Clean(true, d->App->IsReleaseMode());
+				Clean(true, d->App->GetBuildMode());
 				break;
 			}
 			case IDM_REBUILD_PROJECT:
 			{
 				StopBuild();
-				Clean(false, d->App->IsReleaseMode());
-				Build(false, d->App->IsReleaseMode());
+				Clean(false, d->App->GetBuildMode());
+				Build(false, d->App->GetBuildMode());
 				break;
 			}
 			case IDM_REBUILD_ALL:
 			{
 				StopBuild();
-				Clean(true, d->App->IsReleaseMode());
-				Build(true, d->App->IsReleaseMode());
+				Clean(true, d->App->GetBuildMode());
+				Build(true, d->App->GetBuildMode());
 				break;
 			}
 			case IDM_SORT_CHILDREN:
@@ -3391,7 +3379,7 @@ void IdeProject::ImportDsp(const char *File)
 		char *Dsp = LReadTextFile(File);
 		if (Dsp)
 		{
-			GToken Lines(Dsp, "\r\n");
+			LToken Lines(Dsp, "\r\n");
 			IdeCommon *Current = this;
 			bool IsSource = false;
 			for (int i=0; i<Lines.Length(); i++)

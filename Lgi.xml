@@ -121,8 +121,8 @@
 				<Node File=".\src\common\Lgi\MenuCommon.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Process" Type="1" Platforms="15" Open="0" Id="27">
-				<Node File=".\src\common\Lgi\SubProcess.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\SubProcess.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Lgi/SubProcess.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/SubProcess.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Resources" Type="1" Platforms="15" Open="0" Id="28">
 				<Node File="./src/common/Resource/LgiRes.cpp" Type="2" Platforms="15" />
@@ -374,9 +374,10 @@
 				<Node File=".\include\lgi\common\TableLayout.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="66">
-				<Node File=".\src\linux\Lgi\Layout.cpp" Type="2" Platforms="2" />
-				<Node File=".\src\linux\Lgi\Widgets.cpp" Type="2" Platforms="2" />
-				<Node File=".\include\lgi\common\Widgets.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Dialog.h" Type="3" Platforms="15" />
+				<Node File="./src/linux/Lgi/Layout.cpp" Type="2" Platforms="2" />
+				<Node File="./src/linux/Lgi/Widgets.cpp" Type="2" Platforms="2" />
+				<Node File="./include/lgi/common/Widgets.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Win" Type="1" Platforms="15" Open="0" Id="67">
 				<Node File=".\src\win\Widgets\Edit_Win.cpp" Type="2" Platforms="1" />
@@ -441,7 +442,6 @@
 		<Node File="./include/lgi/common/Token.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
-		<Node File="./Ide/Gtk3/CMakeLists.txt" Type="8" Platforms="15" />
 		<Node File="./Makefile.linux" Type="9" Platforms="15" />
 	</Node>
 	<Settings>

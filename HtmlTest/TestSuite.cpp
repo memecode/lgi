@@ -472,7 +472,7 @@ public:
 						FileDev->CreateFolder(OutPath);
 					
 					Prog.SetDescription("Saving renders...");
-					Prog.SetRange(LRange(0, Files.Length()));
+					Prog.SetRange(Files.Length());
 					for (int i=0; i<Files.Length() && !Prog.IsCancelled(); i++)
 					{
 						char *File = Files[i];

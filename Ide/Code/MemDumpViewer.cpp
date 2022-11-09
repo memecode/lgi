@@ -214,8 +214,8 @@ public:
 		LHashTbl<ConstStrKey<char,false>, bool> Except(0, false);
 		Except.Add("LString.cpp", true);
 		Except.Add("LVariant.cpp", true);
-		Except.Add("GContainers.cpp", true);
-		Except.Add("GContainers.h", true);
+		Except.Add("LContainers.cpp", true);
+		Except.Add("LContainers.h", true);
 		Except.Add("LFile.cpp", true);
 		Except.Add("Mail.h", true);
 		Except.Add("LArray.h", true);
@@ -235,7 +235,7 @@ public:
 			LHashTbl<StrKeyPool<char,false>,DumpItem*> h;
 
 			Prog.SetDescription("Reading memory dump...");
-			Prog.SetRange(LRange(0, f.GetSize()));
+			Prog.SetRange(f.GetSize());
 			Prog.SetScale(1.0 / 1024.0 / 1024.0);
 			Prog.SetType("MB");
 
@@ -250,7 +250,7 @@ public:
 					if (First)
 					{
 						First = false;
-						GToken t(Cur, " \t\r\n", true, End-Cur);
+						LToken t(Cur, " \t\r\n", true, End-Cur);
 						char *Blocks = t[0];
 						if (Blocks)
 						{
@@ -264,7 +264,7 @@ public:
 					else
 					{
 						int Size = 0;
-						GToken Lines(Cur, "\r\n", true, End - Cur);
+						LToken Lines(Cur, "\r\n", true, End - Cur);
 						LArray<char*> Stack;
 						for (int i=0; i<Lines.Length(); i++)
 						{

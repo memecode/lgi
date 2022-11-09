@@ -252,12 +252,12 @@ int LScreenDC::GetBits()
 	return d->Bits;
 }
 
-GPalette *LScreenDC::Palette()
+LPalette *LScreenDC::Palette()
 {
 	return NULL; // not supported.
 }
 
-void LScreenDC::Palette(GPalette *pPal, bool bOwnIt)
+void LScreenDC::Palette(LPalette *pPal, bool bOwnIt)
 {
 }
 

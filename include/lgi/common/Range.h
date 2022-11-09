@@ -15,10 +15,25 @@ struct LRange
 	ssize_t Start;
 	ssize_t Len;
 
-	LRange(ssize_t s = 0, ssize_t l = 0)
+	// No arguments
+	LRange()
 	{
-		Start = s;
-		Len = l;
+		Start = 0;
+		Len = 0;
+	}
+
+	// One argument = length
+	LRange(ssize_t len)
+	{
+		Start = 0;
+		Len = len;
+	}
+
+	// Both arguments
+	LRange(ssize_t start, ssize_t len)
+	{
+		Start = start;
+		Len = len;
 	}
 
 	LRange &Set(ssize_t s, ssize_t l)

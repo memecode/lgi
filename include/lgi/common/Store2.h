@@ -12,12 +12,12 @@
 #define __STORE2_H
 
 #include "Gdc2.h"
-#include "GContainers.h"
+#include "LContainers.h"
 #include "Progress.h"
 #include "StoreCommon.h"
 
 class WriterItem;
-class GSubFilePtr;
+class LSubFilePtr;
 
 namespace Storage2
 {
@@ -76,7 +76,7 @@ namespace Storage2
 
 		bool SetDirty(bool Dirty);
 		bool SerializeHeader(LFile &f, bool Write);
-		bool SerializeObject(GSubFilePtr &f, bool Write);
+		bool SerializeObject(LSubFilePtr &f, bool Write);
 		
 		/// Saves this object and all it's children.
 		void CleanAll();
@@ -155,8 +155,8 @@ namespace Storage2
 		bool ReadOnly;
 		GPassword Password;
 
-		class GSubFile *File;
-		class GSubFilePtr *CreateFilePtr(const char *file, int line);
+		class LSubFile *File;
+		class LSubFilePtr *CreateFilePtr(const char *file, int line);
 
 		// Root stuff
 		StorageItemHeader RootHeader;

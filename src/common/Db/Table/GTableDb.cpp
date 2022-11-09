@@ -1,6 +1,6 @@
 #include "Lgi.h"
-#include "GToken.h"
-#include "GTableDb.h"
+#include "LToken.h"
+#include "LTableDb.h"
 #include "GTableDbPriv.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -16,7 +16,7 @@ static LAutoString ReadStr(LPointer &p)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 #define BaseIntegerSerialize(bits) \
-	bool GTableDb::Base::Io(uint##bits &i, LPointer &p, bool write) \
+	bool LTableDb::Base::Io(uint##bits &i, LPointer &p, bool write) \
 	{ \
 		if (write)	*p.u##bits++ = i; \
 		else		i = *p.u##bits++; \
@@ -27,7 +27,7 @@ BaseIntegerSerialize(16)
 BaseIntegerSerialize(32)
 BaseIntegerSerialize(64)
 
-bool GTableDb::Base::Io(LAutoString &str, LPointer &p, bool write)
+bool LTableDb::Base::Io(LAutoString &str, LPointer &p, bool write)
 {
 	if (write)
 	{
@@ -135,14 +135,14 @@ bool GBlockArray::Add(const char *File, uint32 id)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-GTableDb::Field::Field()
+LTableDb::Field::Field()
 {
 	Id = 0;
 	Null = 0;
 	Type = GV_NULL;
 }
 
-GTableDb::Field::Field(int id, int type, const char *name, int flags)
+LTableDb::Field::Field(int id, int type, const char *name, int flags)
 {
 	Null = 0;
 	Id = id;
@@ -151,7 +151,7 @@ GTableDb::Field::Field(int id, int type, const char *name, int flags)
 	Name.Reset(NewStr(name));
 }
 
-void GTableDb::Field::Set(int id, int type, const char *name, int flags)
+void LTableDb::Field::Set(int id, int type, const char *name, int flags)
 {
 	Null = 0;
 	Id = id;
@@ -160,7 +160,7 @@ void GTableDb::Field::Set(int id, int type, const char *name, int flags)
 	Name.Reset(NewStr(name));
 }
 
-bool GTableDb::Field::Serialize(LPointer &p, bool Write)
+bool LTableDb::Field::Serialize(LPointer &p, bool Write)
 {
 	return	Io(Id,    p, Write) &&
 			Io(Type,  p, Write) &&
@@ -168,7 +168,7 @@ bool GTableDb::Field::Serialize(LPointer &p, bool Write)
 			Io(Name,  p, Write);
 }
 
-bool GTableDb::Field::operator !=(const Field &b)
+bool LTableDb::Field::operator !=(const Field &b)
 {
 	LAssert(Name && b.Name);
 
@@ -179,7 +179,7 @@ bool GTableDb::Field::operator !=(const Field &b)
 			Type != b.Type;
 }
 
-GTableDb::Field &GTableDb::Field::operator=(const Field &b)
+LTableDb::Field &LTableDb::Field::operator=(const Field &b)
 {
 	Id = b.Id;
 	Type = b.Type;
@@ -188,7 +188,7 @@ GTableDb::Field &GTableDb::Field::operator=(const Field &b)
 	return *this;
 }
 
-bool GTableDb::CompareSchema(Schema &a, Schema &b)
+bool LTableDb::CompareSchema(Schema &a, Schema &b)
 {
 	if (a.Length() != b.Length())
 		return false;
@@ -202,7 +202,7 @@ bool GTableDb::CompareSchema(Schema &a, Schema &b)
 	return true;
 }
 
-bool GTableDb::CopySchema(Schema &dest, Schema &src)
+bool LTableDb::CopySchema(Schema &dest, Schema &src)
 {
 	dest.Length(0);
 	for (unsigned i=0; i<src.Length(); i++)
@@ -365,7 +365,7 @@ bool GIndexFile::Parse()
 		{
 			switch (*p.u32++)
 			{
-				case GTableDb::DbIndexHeader:
+				case LTableDb::DbIndexHeader:
 				{
 					uint32 Size = *p.u32++;
 					uint8 *Next = p.u8 + Size;
@@ -378,12 +378,12 @@ bool GIndexFile::Parse()
 					p.u8 = Next;
 					break;
 				}
-				case GTableDb::DbFieldDef:
+				case LTableDb::DbFieldDef:
 				{
 					uint32 Size = *p.u32++;
 					uint8 *Next = p.u8 + Size;
 
-					GTableDb::Field &f = Table->Fields.New();
+					LTableDb::Field &f = Table->Fields.New();
 					f.Id = *p.u32++;
 					f.Type = (LVariantType)*p.u8++;
 					f.Name = ReadStr(p);
@@ -392,7 +392,7 @@ bool GIndexFile::Parse()
 					p.u8 = Next;
 					break;
 				}
-				case GTableDb::DbEmpty:
+				case LTableDb::DbEmpty:
 				{
 					uint32 Size = *p.u32++;
 					p.u8 += Size;
@@ -432,96 +432,96 @@ bool GTablePriv::DeleteTable()
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
-GTableDb::Table::Table(GTableDbPriv *db, const char *name)
+LTableDb::Table::Table(GTableDbPriv *db, const char *name)
 {
 	d = new GTablePriv(db);
 	Name(name);
 }
 
-GTableDb::Table::~Table()
+LTableDb::Table::~Table()
 {
 	DeleteObj(d);
 }
 
-bool GTableDb::Table::AddFile(const char *Path, int Number, bool IsIndex)
+bool LTableDb::Table::AddFile(const char *Path, int Number, bool IsIndex)
 {
 	return false;
 }
 
-bool GTableDb::Table::DeleteTable()
+bool LTableDb::Table::DeleteTable()
 {
 	return d->DeleteTable();
 }
 
-bool GTableDb::Table::ChangeSchema(LArray<Field> &NewFields)
+bool LTableDb::Table::ChangeSchema(LArray<Field> &NewFields)
 {
 	return false;
 }
 
-GTableDb::Field *GTableDb::Table::GetField(int FieldId)
+LTableDb::Field *LTableDb::Table::GetField(int FieldId)
 {
 	return false;
 }
 
-GTableDb::Field *GTableDb::Table::GetFieldAt(int Index)
+LTableDb::Field *LTableDb::Table::GetFieldAt(int Index)
 {
 	return false;
 }
 
-GTableDb::RowId GTableDb::Table::NewRow(uint32 *Auto)
+LTableDb::RowId LTableDb::Table::NewRow(uint32 *Auto)
 {
 	RowId r = {0, 0};
 	return r;
 }
 
-GTableDb::RowId GTableDb::Table::NewRow(uint32 Key)
+LTableDb::RowId LTableDb::Table::NewRow(uint32 Key)
 {
 	RowId r = {0, 0};
 	return r;
 }
 
-GTableDb::RowId GTableDb::Table::NewRow(const char *Key)
+LTableDb::RowId LTableDb::Table::NewRow(const char *Key)
 {
 	RowId r = {0, 0};
 	return r;
 }
 
-GTableDb::RowId GTableDb::Table::SeekKey(uint32 key)
+LTableDb::RowId LTableDb::Table::SeekKey(uint32 key)
 {
 	RowId r = {0, 0};
 	return r;
 }
 
-GTableDb::RowId GTableDb::Table::SeekKey(const char *key)
+LTableDb::RowId LTableDb::Table::SeekKey(const char *key)
 {
 	RowId r = {0, 0};
 	return r;
 }
 
-bool GTableDb::Table::Set(RowId row, uint32 Fld, uint32 i)
+bool LTableDb::Table::Set(RowId row, uint32 Fld, uint32 i)
 {
 	return false;
 }
 
-bool GTableDb::Table::Set(RowId row, uint32 Fld, const char *str)
+bool LTableDb::Table::Set(RowId row, uint32 Fld, const char *str)
 {
 	return false;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-GTableDb::GTableDb(const char *BaseFolder)
+LTableDb::LTableDb(const char *BaseFolder)
 {
 	d = new GTableDbPriv;
 	if (BaseFolder)
 		Open(BaseFolder);
 }
 
-GTableDb::~GTableDb()
+LTableDb::~LTableDb()
 {
 	DeleteObj(d);
 }
 
-bool GTableDb::Open(const char *BaseFolder)
+bool LTableDb::Open(const char *BaseFolder)
 {
 	Empty();
 	
@@ -533,7 +533,7 @@ bool GTableDb::Open(const char *BaseFolder)
 	{
 		if (!Dir.IsDir())
 		{
-			GToken t(Dir.GetName(), ".");
+			LToken t(Dir.GetName(), ".");
 			if (t.Length() == 3)
 			{
 				Table *tbl = Tables.Find(t[0]);
@@ -548,22 +548,22 @@ bool GTableDb::Open(const char *BaseFolder)
 	return true;
 }
 
-void GTableDb::Empty()
+void LTableDb::Empty()
 {
 	d->Tables.DeleteObjects();
 }
 
-void GTableDb::SetLogStream(LStream *log)
+void LTableDb::SetLogStream(LStream *log)
 {
 	d->Log = log;
 }
 
-LArray<GTableDb::Table*> &GTableDb::Tables()
+LArray<LTableDb::Table*> &LTableDb::Tables()
 {
 	return d->Tables;
 }
 
-GTableDb::Table *GTableDb::GetTable(const char *Name)
+LTableDb::Table *LTableDb::GetTable(const char *Name)
 {
 	if (!Name)
 		return NULL;
@@ -577,17 +577,17 @@ GTableDb::Table *GTableDb::GetTable(const char *Name)
 	return NULL;
 }
 
-GTableDb::Table *GTableDb::CreateTable(const char *Name, const Schema &Sch)
+LTableDb::Table *LTableDb::CreateTable(const char *Name, const Schema &Sch)
 {
 	return 0;
 }
 
-bool GTableDb::Commit()
+bool LTableDb::Commit()
 {
 	return false;
 }
 
-bool GTableDb::IsOk()
+bool LTableDb::IsOk()
 {
 	return true;
 }
@@ -599,7 +599,7 @@ bool RunTableDbTest(LStream *Log)
 		LArray<char> Mem;
 		Mem.Length(4 << 10);
 		char Flds[] = {"key \1\0Key\0name\5\0Name\0data\5\0Data\0" };
-		GTableDb::Schema sc;
+		LTableDb::Schema sc;
 		LPointer p;
 		p.s8 = Flds;
 		if (!sc.New().Serialize(p, false)) return false;
@@ -615,10 +615,10 @@ bool RunTableDbTest(LStream *Log)
 		if (memcmp(&Mem[0], Flds, sizeof(Flds) - 1))
 			return false;
 			
-		GTableDb::Schema sc2;
-		if (!GTableDb::CopySchema(sc2, sc))
+		LTableDb::Schema sc2;
+		if (!LTableDb::CopySchema(sc2, sc))
 			return false;
-		if (!GTableDb::CompareSchema(sc, sc2))
+		if (!LTableDb::CompareSchema(sc, sc2))
 			return false;
 	}
 

@@ -4,13 +4,13 @@
 #include "lgi/common/Dom.h"
 #include "lgi/common/Variant.h"
 
-class GIccProfile : public LDom
+class LIccProfile : public LDom
 {
-	class GIccProfilePrivate *d;
+	class LIccProfilePrivate *d;
 
 public:
-	GIccProfile(char *file = 0);
-	~GIccProfile();
+	LIccProfile(char *file = 0);
+	~LIccProfile();
 
 	// I/O
 	bool CreateNamed(const char *name);
@@ -24,8 +24,8 @@ public:
 	char *GetError();
 
 	// Conversion
-	bool Convert(COLOUR *Out32, COLOUR In32, GIccProfile *Profile = 0);
-	bool Convert(LSurface *Dest, LSurface *Src, GIccProfile *Profile = 0);
+	bool Convert(COLOUR *Out32, COLOUR In32, LIccProfile *Profile = 0);
+	bool Convert(LSurface *Dest, LSurface *Src, LIccProfile *Profile = 0);
 
 	// Dom
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array = 0);

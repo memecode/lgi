@@ -76,14 +76,14 @@ void LDrawIcon(LSurface *pDC, int Dx, int Dy, HICON ico)
 }
 
 /****************************** Classes *************************************************************************************/
-GPalette::GPalette()
+LPalette::LPalette()
 {
 	Data = 0;
 	hPal = NULL;
 	Lut = 0;
 }
 
-GPalette::GPalette(GPalette *pPal)
+LPalette::LPalette(LPalette *pPal)
 {
 	Data = 0;
 	hPal = NULL;
@@ -91,7 +91,7 @@ GPalette::GPalette(GPalette *pPal)
 	Set(pPal);
 }
 
-GPalette::GPalette(uchar *pPal, int s)
+LPalette::LPalette(uchar *pPal, int s)
 {
 	Data = 0;
 	hPal = NULL;
@@ -100,14 +100,14 @@ GPalette::GPalette(uchar *pPal, int s)
 		Set(pPal, s);
 }
 
-GPalette::~GPalette()
+LPalette::~LPalette()
 {
 	DeleteArray(Lut);
 	DeleteArray(Data);
 	if (hPal) DeleteObject(hPal);
 }
 
-void GPalette::Set(GPalette *pPal)
+void LPalette::Set(LPalette *pPal)
 {
     if (pPal == this)
         return;
@@ -127,7 +127,7 @@ void GPalette::Set(GPalette *pPal)
 	}
 }
 
-void GPalette::Set(uchar *pPal, int s)
+void LPalette::Set(uchar *pPal, int s)
 {
 	DeleteArray(Data);
 	if (hPal) DeleteObject(hPal);
@@ -158,7 +158,7 @@ void GPalette::Set(uchar *pPal, int s)
 	}
 }
 
-void GPalette::Set(int Index, int r, int g, int b)
+void LPalette::Set(int Index, int r, int g, int b)
 {
 	GdcRGB *rgb = (*this)[Index];
 	if (rgb)
@@ -169,7 +169,7 @@ void GPalette::Set(int Index, int r, int g, int b)
 	}
 }
 
-bool GPalette::Update()
+bool LPalette::Update()
 {
 	if (Data && hPal)
 	{
@@ -179,7 +179,7 @@ bool GPalette::Update()
 	return FALSE;
 }
 
-bool GPalette::SetSize(int s)
+bool LPalette::SetSize(int s)
 {
 	int Len = sizeof(LOGPALETTE) + (s * sizeof(GdcRGB));
 	LOGPALETTE *NewData = (LOGPALETTE*) new char[Len];
@@ -204,7 +204,7 @@ bool GPalette::SetSize(int s)
 	return (Data != 0) && (hPal != 0);
 }
 
-void GPalette::SwapRAndB()
+void LPalette::SwapRAndB()
 {
 	if (Data)
 	{
@@ -219,7 +219,7 @@ void GPalette::SwapRAndB()
 	Update();
 }
 
-uchar *GPalette::MakeLut(int Bits)
+uchar *LPalette::MakeLut(int Bits)
 {
 	if (Bits)
 	{
@@ -273,7 +273,7 @@ uchar *GPalette::MakeLut(int Bits)
 	return Lut;
 }
 
-int GPalette::MatchRgb(COLOUR Rgb)
+int LPalette::MatchRgb(COLOUR Rgb)
 {
 	if (Data)
 	{
@@ -314,7 +314,7 @@ int GPalette::MatchRgb(COLOUR Rgb)
 	return 0;
 }
 
-void GPalette::CreateGreyScale()
+void LPalette::CreateGreyScale()
 {
 	SetSize(256);
 	GdcRGB *p = (*this)[0];
@@ -329,7 +329,7 @@ void GPalette::CreateGreyScale()
 	}
 }
 
-void GPalette::CreateCube()
+void LPalette::CreateCube()
 {
 	SetSize(216);
 	GdcRGB *p = (*this)[0];
@@ -371,7 +371,7 @@ void TrimWhite(char *s)
 	}
 }
 
-bool GPalette::Load(LFile &F)
+bool LPalette::Load(LFile &F)
 {
 	#if 1
 
@@ -460,7 +460,7 @@ bool GPalette::Load(LFile &F)
 	#endif
 }
 
-bool GPalette::Save(LFile &F, int Format)
+bool LPalette::Save(LFile &F, int Format)
 {
 	bool Status = FALSE;
 
@@ -491,7 +491,7 @@ bool GPalette::Save(LFile &F, int Format)
 	return Status;
 }
 
-bool GPalette::operator ==(GPalette &p)
+bool LPalette::operator ==(LPalette &p)
 {
 	if (GetSize() == p.GetSize())
 	{
@@ -517,7 +517,7 @@ bool GPalette::operator ==(GPalette &p)
 	return FALSE;
 }
 
-bool GPalette::operator !=(GPalette &p)
+bool LPalette::operator !=(LPalette &p)
 {
 	return !((*this) == p);
 }
@@ -558,7 +558,7 @@ class LGlobalColourPrivate
 {
 public:
 	GlobalColourEntry c[256];
-	GPalette *Global;
+	LPalette *Global;
 	List<LSurface> Cache;
 	int FirstUnused;
 	
@@ -666,7 +666,7 @@ bool LGlobalColour::AddBitmap(LSurface *pDC)
 void KeyBlt(LSurface *To, LSurface *From, COLOUR Key)
 {
 	int Bits = From->GetBits();
-	GPalette *Pal = From->Palette();
+	LPalette *Pal = From->Palette();
 
 	for (int y=0; y<From->Y(); y++)
 	{
@@ -713,7 +713,7 @@ bool LGlobalColour::MakeGlobalPalette()
 {
 	if (!d->Global)
 	{
-		d->Global = new GPalette(0, 256);
+		d->Global = new LPalette(0, 256);
 		if (d->Global)
 		{
 			for (auto pDC: d->Cache)
@@ -760,7 +760,7 @@ bool LGlobalColour::MakeGlobalPalette()
 	return d->Global != 0;
 }
 
-GPalette *LGlobalColour::GetPalette()
+LPalette *LGlobalColour::GetPalette()
 {
 	if (!d->Global)
 	{
@@ -810,7 +810,7 @@ public:
 	// Palette
 	double GammaCorrection;
 	uchar GammaTable[256];
-	GPalette *pSysPal;
+	LPalette *pSysPal;
 	LGlobalColour *GlobalColour;
 
 	// Data
@@ -871,7 +871,7 @@ public:
 		}
 
 		int Colours = 1 << ScrBits;
-		pSysPal = (ScrBits <= 8) ? new GPalette(0, Colours) : 0;
+		pSysPal = (ScrBits <= 8) ? new LPalette(0, Colours) : 0;
 		if (pSysPal)
 		{
 			GdcRGB *p = (*pSysPal)[0];
@@ -1016,7 +1016,7 @@ double GdcDevice::GetGamma()
 	return d->GammaCorrection;
 }
 
-void GdcDevice::SetSystemPalette(int Start, int Size, GPalette *pPal)
+void GdcDevice::SetSystemPalette(int Start, int Size, LPalette *pPal)
 {
 	/*
 	if (pPal)
@@ -1038,7 +1038,7 @@ void GdcDevice::SetSystemPalette(int Start, int Size, GPalette *pPal)
 	*/
 }
 
-GPalette *GdcDevice::GetSystemPalette()
+LPalette *GdcDevice::GetSystemPalette()
 {
 	return d->pSysPal;
 }
@@ -1213,7 +1213,7 @@ class NullApplicator : public LApplicator
 public:
 	const char *GetClass() { return "NullApplicator"; }
 
-	bool SetSurface(LBmpMem *d, GPalette *p = 0, LBmpMem *a = 0) { return false; }
+	bool SetSurface(LBmpMem *d, LPalette *p = 0, LBmpMem *a = 0) { return false; }
 	void SetPtr(int x, int y) {}
 	void IncX() {}
 	void IncY() {}
@@ -1222,7 +1222,7 @@ public:
 	COLOUR Get() { return 0; }
 	void VLine(int height) {}
 	void Rectangle(int x, int y) {}
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = 0) { return false; }
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha = 0) { return false; }
 };
 
 LApplicator *LApplicatorFactory::NewApp(LColourSpace Cs, int Op)

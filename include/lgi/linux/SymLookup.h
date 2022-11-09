@@ -61,7 +61,7 @@ public:
 				char *man = NewStr(s, e - s);
 				if (man)
 				{			
-					GProcess p;
+					LProcess p;
 					p.Run("c++filt", man, 0, true, 0, &un);
 					un.Write(e, strlen(e));
 					

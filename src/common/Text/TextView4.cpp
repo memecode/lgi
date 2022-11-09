@@ -107,7 +107,7 @@ static LArray<LTextView4*> Ctrls;
 
 //////////////////////////////////////////////////////////////////////
 class GDocFindReplaceParams4 :
-	public GDocFindReplaceParams,
+	public LDocFindReplaceParams,
 	public LMutex
 {
 public:
@@ -228,7 +228,7 @@ struct Change : public LRange
 	LArray<char16> Txt;
 };
 
-struct LTextView4Undo : public GUndoEvent
+struct LTextView4Undo : public LUndoEvent
 {
 	LTextView4 *View;
 	LArray<Change> Changes;
@@ -267,7 +267,7 @@ struct LTextView4Undo : public GUndoEvent
 		}
 	}
 
-	// GUndoEvent
+	// LUndoEvent
     void ApplyChange()
 	{
 		View->UndoOn = false;
@@ -2665,7 +2665,7 @@ void LTextView4::UpdateScrollBars(bool Reset)
 
 		int DisplayLines = Y() / LineY;
 		ssize_t Lines = GetLines();
-		VScroll->SetRange(LRange(0, Lines));
+		VScroll->SetRange(Lines);
 		if (VScroll)
 		{
 			VScroll->SetPage(DisplayLines);
@@ -2783,12 +2783,12 @@ void LTextView4::DoGoto(std::function<void(bool)> Callback)
 	});
 }
 
-GDocFindReplaceParams *LTextView4::CreateFindReplaceParams()
+LDocFindReplaceParams *LTextView4::CreateFindReplaceParams()
 {
 	return new GDocFindReplaceParams4;
 }
 
-void LTextView4::SetFindReplaceParams(GDocFindReplaceParams *Params)
+void LTextView4::SetFindReplaceParams(LDocFindReplaceParams *Params)
 {
 	if (Params)
 	{

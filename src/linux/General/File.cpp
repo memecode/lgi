@@ -1316,19 +1316,22 @@ char *LDirectory::GetName() const
 	return (d->De) ? d->De->d_name : NULL;
 }
 
+#define UNIX_TO_LGI(unixTs) \
+	(((uint64) unixTs + LDateTime::Offset1800) * LDateTime::Second64Bit)
+
 uint64 LDirectory::GetCreationTime() const
 {
-	return (uint64) d->Stat.st_ctime * LDateTime::Second64Bit;
+	return UNIX_TO_LGI(d->Stat.st_ctime);
 }
 
 uint64 LDirectory::GetLastAccessTime() const
 {
-	return (uint64) d->Stat.st_atime * LDateTime::Second64Bit;
+	return UNIX_TO_LGI(d->Stat.st_atime);
 }
 
 uint64 LDirectory::GetLastWriteTime() const
 {
-	return (uint64) d->Stat.st_mtime * LDateTime::Second64Bit;
+	return UNIX_TO_LGI(d->Stat.st_mtime);
 }
 
 uint64 LDirectory::GetSize() const

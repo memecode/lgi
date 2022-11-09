@@ -848,6 +848,9 @@ void LList::KeyScroll(int iTo, int iFrom, bool SelectItems)
 		if (End < 0) End = i - 1;
 	}
 
+	if (Items.Length() == 0)
+		return;
+
 	iTo = limit(iTo, 0, (int)Items.Length()-1);
 	iFrom = limit(iFrom, 0, (int)Items.Length()-1);
 	LListItem *To = Items.ItemAt(iTo);
@@ -2204,7 +2207,7 @@ void LList::Empty()
 		if (VScroll)
 		{
 			VScroll->Value(0);
-			VScroll->SetRange(LRange());
+			VScroll->SetRange(0);
 		}
 
 		Invalidate();
@@ -2239,7 +2242,7 @@ void LList::RemoveAll()
 			// "SetLimits" can cause the VScroll object to
 			// be deleted and becoming NULL
 			VScroll->Value(0);
-			VScroll->SetRange(LRange());
+			VScroll->SetRange(0);
 		}
 
 		Invalidate();
@@ -2272,13 +2275,13 @@ void LList::UpdateScrollBars()
 			}
 
 			VScroll->SetPage(Vis);
-			VScroll->SetRange(LRange(0, Items.Length()));
+			VScroll->SetRange(Items.Length());
 		}
 		
 		if (HScroll)
 		{
 			HScroll->SetPage(d->VisibleColumns);
-			HScroll->SetRange(LRange(0, d->Columns));
+			HScroll->SetRange(d->Columns);
 		}
 		
 		Processing = false;

@@ -1380,7 +1380,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 // printf("SerializeState load %s\n", v.Str());
 
 
-			GToken t(v.Str(), ";");
+			LToken t(v.Str(), ";");
 			for (int i=0; i<t.Length(); i++)
 			{
 				char *Var = t[i];

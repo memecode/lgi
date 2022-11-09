@@ -4,7 +4,7 @@
 
 #include "xwidget.h"
 #include "LgiOsDefs.h"
-#include "GContainers.h"
+#include "LContainers.h"
 #include "GSemaphore.h"
 
 #define XA_WmDeleteWindow	XAtom[0]

@@ -249,14 +249,14 @@ bool LDatePopup::OnKey(LKey &k)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-GDateDropDown::GDateDropDown() :
+LDateDropDown::LDateDropDown() :
 	LDropDown(-1, 0, 0, 10, 10, 0),
 	ResObject(Res_Custom)
 {
 	SetPopup(Drop = new LDatePopup(this));
 }
 
-int GDateDropDown::OnNotify(LViewI *Wnd, LNotification n)
+int LDateDropDown::OnNotify(LViewI *Wnd, LNotification n)
 {
 	if (Wnd == (LViewI*)Drop)
 	{
@@ -269,7 +269,7 @@ int GDateDropDown::OnNotify(LViewI *Wnd, LNotification n)
 	return LDropDown::OnNotify(Wnd, n);
 }
 
-void GDateDropDown::OnChildrenChanged(LViewI *Wnd, bool Attaching)
+void LDateDropDown::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	if (Wnd == (LViewI*)Drop && !Attaching)
 	{
@@ -277,7 +277,7 @@ void GDateDropDown::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 	}
 }
 
-bool GDateDropDown::OnLayout(LViewLayoutInfo &Inf)
+bool LDateDropDown::OnLayout(LViewLayoutInfo &Inf)
 {
     if (!Inf.Width.Max)
     {
@@ -292,7 +292,7 @@ bool GDateDropDown::OnLayout(LViewLayoutInfo &Inf)
     return true;
 }
 
-void GDateDropDown::SetDate(char *d)
+void LDateDropDown::SetDate(char *d)
 {
 	LViewI *n = GetNotify();
 	if (n && d)
@@ -323,7 +323,7 @@ void GDateDropDown::SetDate(char *d)
 	}
 }
 
-void GDateDropDown::OnMouseClick(LMouse &m)
+void LDateDropDown::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -353,14 +353,14 @@ void GDateDropDown::OnMouseClick(LMouse &m)
 	LDropDown::OnMouseClick(m);
 }
 
-class GDatePopupFactory : public LViewFactory
+class LDatePopupFactory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{
 		if (Class &&
-			_stricmp(Class, "GDateDropDown") == 0)
+			_stricmp(Class, "LDateDropDown") == 0)
 		{
-			return new GDateDropDown;
+			return new LDateDropDown;
 		}
 
 		return 0;

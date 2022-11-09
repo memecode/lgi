@@ -17,7 +17,7 @@ typedef LRgba32 GdcRGB;
 #endif
 
 /// Palette of colours
-class LgiClass GPalette
+class LgiClass LPalette
 {
 protected:
 	#if WINNATIVE
@@ -30,16 +30,16 @@ protected:
 	uchar *Lut;
 
 public:
-	GPalette();
-	virtual ~GPalette();
+	LPalette();
+	virtual ~LPalette();
 
 	#if WINNATIVE
 	HPALETTE Handle() { return hPal; }
 	#endif
 
-	GPalette(GPalette *pPal);	
-	GPalette(uchar *pPal, int s = 256);
-	void Set(GPalette *pPal);
+	LPalette(LPalette *pPal);	
+	LPalette(uchar *pPal, int s = 256);
+	void Set(LPalette *pPal);
 	void Set(uchar *pPal, int s = 256);
 	void Set(int Index, int r, int g, int b);
 
@@ -53,8 +53,8 @@ public:
 	bool Save(LFile &F, int Format);
 	uchar *MakeLut(int Bits = 16);
 
-	bool operator ==(GPalette &p);
-	bool operator !=(GPalette &p);
+	bool operator ==(LPalette &p);
+	bool operator !=(LPalette &p);
 
 	#if WINNATIVE
 	LRgba32 *operator [](int i)

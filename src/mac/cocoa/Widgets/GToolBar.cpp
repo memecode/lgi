@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "Lgi.h"
-#include "GToken.h"
+#include "LToken.h"
 #include "LVariant.h"
 
 #define AttachButton(b) b->Attach(this);
@@ -132,7 +132,7 @@ LImageList::LImageList(int x, int y, LSurface *pDC)
 			GetSystemPaletteEntries(hDC, 0, 256, Entries);
 			DeleteDC(hDC);
 
-			GPalette *Pal = new GPalette(0, 256);
+			LPalette *Pal = new LPalette(0, 256);
 			if (Pal)
 			{
 				for (int i=0; i<256; i++)
@@ -163,8 +163,8 @@ LImageList::LImageList(int x, int y, LSurface *pDC)
 
 			// gotta remap here
 			char Remap[256];
-			GPalette *SrcPal = pDC->Palette();
-			GPalette *DstPal = Palette();
+			LPalette *SrcPal = pDC->Palette();
+			LPalette *DstPal = Palette();
 			if (SrcPal && DstPal)
 			{
 				// build remap table
@@ -233,10 +233,10 @@ LImageList::LImageList(int x, int y, LSurface *pDC)
 		int Bits = (GdcD->GetBits() == 32) ? 32 : 15;
 		if (Create(pDC->X(), pDC->Y(), Bits))
 		{
-			GPalette *Pal = pDC->Palette();
+			LPalette *Pal = pDC->Palette();
 			if (Pal)
 			{
-				Palette(new GPalette(Pal));
+				Palette(new LPalette(Pal));
 			}
 
 			Blt(0, 0, pDC);
@@ -529,7 +529,7 @@ void LImageList::Draw(LSurface *pDest, int Dx, int Dy, int Image, int Flags)
 					int b = GetBits();
 					if (b == 8)
 					{
-						GPalette *Pal = Palette();
+						LPalette *Pal = Palette();
 						if (Pal)
 						{
 							for (int i=0; i<Pal->GetSize(); i++)
@@ -647,7 +647,7 @@ public:
 	bool OwnImgList;
 	LImageList *ImgList;
 	LFont *Font;
-	GToolTip *Tip;
+	LToolTip *Tip;
 	
 	// Customization menu
 	GDom *CustomDom;
@@ -714,7 +714,7 @@ public:
 		char *o;
 		if (o = v.Str())
 		{
-			GToken t(o, ",");
+			LToken t(o, ",");
 			if (t.Length() >= 1)
 			{
 				Text = stricmp(t[0], "text") == 0;
@@ -802,7 +802,7 @@ void LToolButton::Layout()
 		char Buf[256];
 		strsafecpy(Buf, s, sizeof(Buf));
 
-		GToken t(Buf, " ");
+		LToken t(Buf, " ");
 		if (t.Length() < 3)
 		{
 			if (t.Length() > 0)
@@ -1289,7 +1289,7 @@ void LToolBar::ContextMenu(LMouse &m)
 {
 	if (IsCustomizable())
 	{
-		GSubMenu *Sub = new GSubMenu;
+		LSubMenu *Sub = new LSubMenu;
 		if (Sub)
 		{
 			int n = 1;
@@ -1303,7 +1303,7 @@ void LToolBar::ContextMenu(LMouse &m)
 				}
 				else
 				{
-					GMenuItem *Item = Sub->AppendItem(v->Name(), n, true);
+					LMenuItem *Item = Sub->AppendItem(v->Name(), n, true);
 					if (Item)
 					{
 						Item->Checked(v->Visible());
@@ -1311,7 +1311,7 @@ void LToolBar::ContextMenu(LMouse &m)
 				}
 			}
 			Sub->AppendSeparator();
-			GMenuItem *Txt = Sub->AppendItem(LLoadString(L_TOOLBAR_SHOW_TEXT, "Show Text Labels"), 1000, true);
+			LMenuItem *Txt = Sub->AppendItem(LLoadString(L_TOOLBAR_SHOW_TEXT, "Show Text Labels"), 1000, true);
 			Txt->Checked(d->Text);
 
 			bool Save = false;
@@ -1476,7 +1476,7 @@ void LToolBar::_BuildCache(LImageList *From)
 				if (d->pColour &&
 					d->pColour->Create(From->X(), From->Y(), Bits))
 				{
-					d->pColour->Palette(new GPalette(GdcD->GetGlobalColour()->GetPalette()));
+					d->pColour->Palette(new LPalette(GdcD->GetGlobalColour()->GetPalette()));
 
 					int OldType = GdcD->GetOption(GDC_REDUCE_TYPE);
 					GdcD->SetOption(GDC_REDUCE_TYPE, REDUCE_ERROR_DIFFUSION);
@@ -1493,7 +1493,7 @@ void LToolBar::_BuildCache(LImageList *From)
 				if (d->pDisabled &&
 					d->pDisabled->Create(From->X(), From->Y(), Bits))
 				{
-					d->pDisabled->Palette(new GPalette(GdcD->GetGlobalColour()->GetPalette()));
+					d->pDisabled->Palette(new LPalette(GdcD->GetGlobalColour()->GetPalette()));
 
 					LRect t(0, From->Y(), From->X()-1, (From->Y() * 2)-1);
 
@@ -1857,7 +1857,7 @@ void LToolBar::OnMouseEnter(LMouse &m)
 {
 	if (!d->Tip)
 	{
-		d->Tip = new GToolTip;
+		d->Tip = new LToolTip;
 		if (d->Tip)
 		{
 			d->Tip->Attach(this);

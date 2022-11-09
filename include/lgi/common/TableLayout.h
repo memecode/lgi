@@ -80,19 +80,19 @@ public:
 
 
 /// This is just a light-weight layout system for doing things manually.
-class GLayoutRect : public LRect
+class LLayoutRect : public LRect
 {
 	int Spacing;
 
 public:
-	GLayoutRect(LViewI *c, int spacing = LTableLayout::CellSpacing)
+	LLayoutRect(LViewI *c, int spacing = LTableLayout::CellSpacing)
 	{
 		Spacing = spacing;
 		((LRect&)*this) = c->GetClient();
 		Inset(Spacing, Spacing);
 	}
 
-	GLayoutRect(LRect rc, int spacing = LTableLayout::CellSpacing)
+	LLayoutRect(LRect rc, int spacing = LTableLayout::CellSpacing)
 	{
 		Spacing = spacing;
 		((LRect&)*this) = rc;		
@@ -100,7 +100,7 @@ public:
 
 	// Allocate object on left edge
 	// ------------------------------------
-		GLayoutRect Left(LRect &rc, int Px)
+		LLayoutRect Left(LRect &rc, int Px)
 		{
 			rc = *this;
 			rc.x2 = rc.x1 + Px - 1;
@@ -108,7 +108,7 @@ public:
 			return *this;
 		}
 
-		GLayoutRect Left(LViewI *v, int Px)
+		LLayoutRect Left(LViewI *v, int Px)
 		{
 			LRect r;
 			Left(r, Px);
@@ -118,7 +118,7 @@ public:
 
 	// Allocate on right edge...
 	// ------------------------------------
-		GLayoutRect Right(LRect &rc, int Px)
+		LLayoutRect Right(LRect &rc, int Px)
 		{
 			rc = *this;
 			rc.x1 = rc.x2 - Px + 1;
@@ -126,7 +126,7 @@ public:
 			return *this;
 		}
 
-		GLayoutRect Right(LViewI *v, int Px)
+		LLayoutRect Right(LViewI *v, int Px)
 		{
 			LRect r;
 			Right(r, Px);
@@ -136,7 +136,7 @@ public:
 
 	// Allocate on top edge...
 	// ------------------------------------
-		GLayoutRect Top(LRect &rc, int Px)
+		LLayoutRect Top(LRect &rc, int Px)
 		{
 			rc = *this;
 			rc.y2 = rc.y1 + Px - 1;
@@ -144,7 +144,7 @@ public:
 			return *this;
 		}
 
-		GLayoutRect Top(LViewI *v, int Px)
+		LLayoutRect Top(LViewI *v, int Px)
 		{
 			LRect r;
 			Top(r, Px);
@@ -154,7 +154,7 @@ public:
 
 	// Allocate on top edge...
 	// ------------------------------------
-		GLayoutRect Bottom(LRect &rc, int Px)
+		LLayoutRect Bottom(LRect &rc, int Px)
 		{
 			rc = *this;
 			rc.y2 = rc.y1 + Px - 1;
@@ -162,7 +162,7 @@ public:
 			return *this;
 		}
 
-		GLayoutRect Bottom(LViewI *v, int Px)
+		LLayoutRect Bottom(LViewI *v, int Px)
 		{
 			LRect r;
 			Bottom(r, Px);

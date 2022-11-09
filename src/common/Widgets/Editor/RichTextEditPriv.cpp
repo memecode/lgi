@@ -1332,7 +1332,7 @@ bool LRichTextPriv::Layout(LScrollBar *&ScrollY)
 		int Lines = (f.CurY + ScrollLinePx - 1) / ScrollLinePx;
 		int PageLines = (Client.Y() + ScrollLinePx - 1) / ScrollLinePx;
 		ScrollY->SetPage(PageLines);
-		ScrollY->SetRange(LRange(0, Lines));
+		ScrollY->SetRange(Lines);
 	}
 		
 	if (Cursor)

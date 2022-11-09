@@ -226,10 +226,10 @@ public:
 };
 
 /// Find params
-class GDocFindReplaceParams
+class LDocFindReplaceParams
 {
 public:
-	virtual ~GDocFindReplaceParams() {}
+	virtual ~LDocFindReplaceParams() {}
 };
 
 /// TextView class is a base for all text controls
@@ -332,8 +332,8 @@ public:
 	virtual void DoFind(std::function<void(bool)> Callback) { if (Callback) Callback(false); }
 	/// Replace window handler
 	virtual void DoReplace(std::function<void(bool)> Callback) { if (Callback) Callback(false); }
-	virtual GDocFindReplaceParams *CreateFindReplaceParams() { return 0; }
-	virtual void SetFindReplaceParams(GDocFindReplaceParams *Params) { }
+	virtual LDocFindReplaceParams *CreateFindReplaceParams() { return 0; }
+	virtual void SetFindReplaceParams(LDocFindReplaceParams *Params) { }
 
 	///////////////////////////////////////////////////////////////////////
 

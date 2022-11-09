@@ -5,7 +5,7 @@
 
 #define ID(c)		c
 
-class GTableDb : public LDom
+class LTableDb : public LDom
 {
 	struct GTableDbPriv *d;
 
@@ -129,8 +129,8 @@ public:
 		const char *GetStr(RowId row, uint32_t Fld);
 	};
 
-	GTableDb(const char *BaseFolder);
-	~GTableDb();
+	LTableDb(const char *BaseFolder);
+	~LTableDb();
 	
 	/// Open a base folder
 	bool Open(const char *BaseFolder);

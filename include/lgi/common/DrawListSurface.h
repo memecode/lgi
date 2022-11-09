@@ -65,8 +65,8 @@ public:
 	bool HasAlpha(bool b) override { return false; }
 	bool Applicator(LApplicator *pApp) override { return false; }
 	LApplicator *Applicator() override { return NULL; }
-	GPalette *Palette() override { return NULL; }
-	void Palette(GPalette *pPal, bool bOwnIt = true) override { }
+	LPalette *Palette() override { return NULL; }
+	void Palette(LPalette *pPal, bool bOwnIt = true) override { }
 };
 
 #endif

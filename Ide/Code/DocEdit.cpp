@@ -10,8 +10,7 @@
 #define EDIT_LEFT_MARGIN	16 // gutter for debug break points
 
 int DocEdit::LeftMarginPx = EDIT_LEFT_MARGIN;
-
-LAutoPtr<GDocFindReplaceParams> GlobalFindReplace;
+LAutoPtr<LDocFindReplaceParams> GlobalFindReplace;
 
 DocEdit::DocEdit(IdeDoc *d, LFontType *f) :
 	LTextView3(IDC_EDIT, 0, 0, 100, 100, f),
@@ -203,6 +202,19 @@ void DocEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
 
 void DocEdit::OnMouseClick(LMouse &m)
 {
+	if (m.Button1())
+	{
+		if (m.Down())
+			Doc->GetApp()->SeekHistory(-1);
+		return;
+	}
+	else if (m.Button2())
+	{
+		if (m.Down())
+			Doc->GetApp()->SeekHistory(1);
+		return;
+	}
+
 	if (m.Down())
 	{
 		if (HasSelection())
@@ -235,6 +247,7 @@ void DocEdit::OnMouseClick(LMouse &m)
 			Doc->OnMarginClick(Idx);
 		}
 	}
+	
 	LTextView3::OnMouseClick(m);
 }
 

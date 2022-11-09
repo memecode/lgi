@@ -955,7 +955,7 @@ AppWnd::AppWnd() :
 		if (GetOptions()->GetValue(OPT_ShowLanguages, Langs))
 		{
 			ShowLanguages.Empty();
-			GToken L(Langs.Str(), ",");
+			LToken L(Langs.Str(), ",");
 			for (int i=0; i<L.Length(); i++)
 			{
 				ShowLanguages.Add(L[i], true);
@@ -1187,7 +1187,7 @@ public:
 
 LMessage::Result AppWnd::OnEvent(LMessage *m)
 {
-	GMru::OnEvent(m);
+	LMru::OnEvent(m);
 
 	switch (m->Msg())
 	{
@@ -1221,7 +1221,7 @@ void _CountGroup(ResStringGroup *Grp, int &Words, int &Multi)
 			char *e = s->Get("en");
 			if (e)
 			{
-				GToken t(e, " ");
+				LToken t(e, " ");
 				Words += t.Length();
 			}
 		}
@@ -2644,7 +2644,7 @@ bool AppWnd::LoadLgi(const char *FileName)
 				Progress.SetDescription("Lexing...");
 				if (Xml.Read(Root, &f, 0))
 				{
-					Progress.SetLimits(0, Root->Children.Length()-1);
+					Progress.SetRange(Root->Children.Length());
 
 					// convert Xml list into objects
 					int i=0;
@@ -3338,7 +3338,7 @@ public:
 		if (Line && *Line == '#')
 		{
 			Line++;
-			GToken T(Line);
+			LToken T(Line);
 
 			if (T.Length() > 0)
 			{
@@ -3498,7 +3498,7 @@ void AppWnd::LoadWin32(const char *FileName)
 		char *FileTxt = LReadTextFile(FileName);
 		if (FileTxt)
 		{
-			GToken Lines(FileTxt, "\r\n");
+			LToken Lines(FileTxt, "\r\n");
 			DeleteArray(FileTxt);
 
 			DefineList Defines;
@@ -3533,7 +3533,7 @@ void AppWnd::LoadWin32(const char *FileName)
 
 			DoEvery Ticker(200);
 			Progress.SetDescription("Reading resources...");
-			Progress.SetLimits(0, Lines.Length()-1);
+			Progress.SetRange(Lines.Length());
 
 			if (String)
 			{

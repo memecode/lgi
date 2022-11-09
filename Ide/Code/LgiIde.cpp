@@ -29,7 +29,7 @@
 #include "LgiIde.h"
 #include "FtpThread.h"
 #include "FindSymbol.h"
-#include "GDebugger.h"
+#include "Debugger.h"
 #include "ProjectNode.h"
 
 #define IDM_RECENT_FILE			1000
@@ -264,7 +264,7 @@ public:
 	
 	char *Find(const char *Paths, char *e)
 	{
-		GToken Path(Paths, LGI_PATH_SEPARATOR);
+		LToken Path(Paths, LGI_PATH_SEPARATOR);
 		for (int p=0; p<Path.Length(); p++)
 		{
 			char Full[256];
@@ -313,7 +313,7 @@ public:
 				// LgiTrace("o=%s\n", o);
 				if (o)
 				{
-					GToken t(o, "\r\n");
+					LToken t(o, "\r\n");
 					for (int i=0; i<t.Length(); i++)
 					{
 						char *SharedLib = stristr(t[i], "Shared library:");
@@ -1035,10 +1035,10 @@ public:
 	LSubMenu *CreateMakefileMenu;
 	LAutoPtr<FindSymbolSystem> FindSym;
 	LArray<LAutoString> SystemIncludePaths;
-	LArray<GDebugger::BreakPoint> BreakPoints;
+	LArray<LDebugger::BreakPoint> BreakPoints;
 	
 	// Debugging
-	GDebugContext *DbgContext;
+	LDebugContext *DbgContext;
 	
 	// Cursor history tracking
 	int HistoryLoc;
@@ -1782,7 +1782,7 @@ void AppWnd::OnPulse()
 	}
 }
 
-GDebugContext *AppWnd::GetDebugContext()
+LDebugContext *AppWnd::GetDebugContext()
 {
 	return d->DbgContext;
 }
@@ -2589,7 +2589,7 @@ bool AppWnd::OnRequestClose(bool IsOsQuit)
 	}
 }
 
-bool AppWnd::OnBreakPoint(GDebugger::BreakPoint &b, bool Add)
+bool AppWnd::OnBreakPoint(LDebugger::BreakPoint &b, bool Add)
 {
 	List<IdeDoc>::I it = d->Docs.begin();
 
@@ -2615,7 +2615,7 @@ bool AppWnd::LoadBreakPoints(IdeDoc *doc)
 	auto fn = doc->GetFileName();
 	for (int i=0; i<d->BreakPoints.Length(); i++)
 	{
-		GDebugger::BreakPoint &b = d->BreakPoints[i];
+		LDebugger::BreakPoint &b = d->BreakPoints[i];
 		if (!_stricmp(fn, b.File))
 		{
 			doc->AddBreakPoint(b.Line, true);
@@ -2625,14 +2625,14 @@ bool AppWnd::LoadBreakPoints(IdeDoc *doc)
 	return true;
 }
 
-bool AppWnd::LoadBreakPoints(GDebugger *db)
+bool AppWnd::LoadBreakPoints(LDebugger *db)
 {
 	if (!db)
 		return false;
 
 	for (int i=0; i<d->BreakPoints.Length(); i++)
 	{
-		GDebugger::BreakPoint &bp = d->BreakPoints[i];
+		LDebugger::BreakPoint &bp = d->BreakPoints[i];
 		db->SetBreakPoint(&bp);
 	}
 
@@ -2645,7 +2645,7 @@ bool AppWnd::ToggleBreakpoint(const char *File, ssize_t Line)
 
 	for (int i=0; i<d->BreakPoints.Length(); i++)
 	{
-		GDebugger::BreakPoint &b = d->BreakPoints[i];
+		LDebugger::BreakPoint &b = d->BreakPoints[i];
 		if (!_stricmp(File, b.File) &&
 			b.Line == Line)
 		{
@@ -2658,7 +2658,7 @@ bool AppWnd::ToggleBreakpoint(const char *File, ssize_t Line)
 	
 	if (!DeleteBp)
 	{
-		GDebugger::BreakPoint &b = d->BreakPoints.New();
+		LDebugger::BreakPoint &b = d->BreakPoints.New();
 		b.File = File;
 		b.Line = Line;
 		OnBreakPoint(b, true);
@@ -3026,7 +3026,7 @@ LMessage::Result AppWnd::OnEvent(LMessage *m)
 		{
 			IdeProject *p = RootProject();
 			if (p)
-				p->Build(true, IsReleaseMode());
+				p->Build(true, GetBuildMode());
 			else
 				printf("%s:%i - No root project.\n", _FL);
 			break;
@@ -3433,13 +3433,6 @@ int AppWnd::OnNotify(LViewI *Ctrl, LNotification n)
 	return 0;
 }
 
-bool AppWnd::IsReleaseMode()
-{
-	LMenuItem *Release = GetMenu()->FindItem(IDM_RELEASE_MODE);
-	bool IsRelease = Release ? Release->Checked() : false;
-	return IsRelease;
-}
-
 bool AppWnd::Build()
 {
 	SaveAll([&](bool status)
@@ -3456,9 +3449,7 @@ bool AppWnd::Build()
 		{		
 			UpdateState(-1, true);
 
-			LMenuItem *Release = GetMenu()->FindItem(IDM_RELEASE_MODE);
-			bool IsRelease = Release ? Release->Checked() : false;
-			p->Build(false, IsRelease);
+			p->Build(false, GetBuildMode());
 		}
 		else if ((Top = TopDoc()))
 		{
@@ -3521,6 +3512,11 @@ public:
 		return 0;
 	}
 };
+
+void AppWnd::SeekHistory(int Offset)
+{
+	d->SeekHistory(Offset);
+}
 
 RenameDlg *RenameDlg::Inst = NULL;
 
@@ -4134,7 +4130,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				
 				IdeProject *p = RootProject();
 				if (p)
-					p->Clean(true, IsReleaseMode());
+					p->Clean(true, GetBuildMode());
 			});
 			break;
 		}
@@ -4417,15 +4413,15 @@ void AppWnd::OnDocDestroy(IdeDoc *Doc)
 	}
 }
 
-int AppWnd::GetBuildMode()
+BuildConfig AppWnd::GetBuildMode()
 {
 	LMenuItem *Release = GetMenu()->FindItem(IDM_RELEASE_MODE);
 	if (Release && Release->Checked())
 	{
-		return BUILD_TYPE_RELEASE;
+		return BuildRelease;
 	}
 
-	return BUILD_TYPE_DEBUG;
+	return BuildDebug;
 }
 
 LList *AppWnd::GetFtpLog()
@@ -4535,7 +4531,7 @@ bool AppWnd::GetSystemIncludePaths(::LArray<LString> &Paths)
 									!stricmp(Name, "IncludeDirectories"))
 								{
 									char *Bar = strchr(prop->GetContent(), '|');
-									GToken t(Bar ? Bar + 1 : prop->GetContent(), ";");
+									LToken t(Bar ? Bar + 1 : prop->GetContent(), ";");
 									for (int i=0; i<t.Length(); i++)
 									{
 										char *s = t[i];

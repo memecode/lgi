@@ -12,7 +12,7 @@
 #include <math.h>
 
 #include "Gdc2.h"
-#include "GPalette.h"
+#include "LPalette.h"
 
 class LScreenPrivate
 {
@@ -124,12 +124,12 @@ void LScreenDC::SetClient(LRect *c)
 	}
 }
 
-GPalette *LScreenDC::Palette()
+LPalette *LScreenDC::Palette()
 {
 	return LSurface::Palette();
 }
 
-void LScreenDC::Palette(GPalette *pPal, bool bOwnIt)
+void LScreenDC::Palette(LPalette *pPal, bool bOwnIt)
 {
 	LSurface::Palette(pPal, bOwnIt);
 }

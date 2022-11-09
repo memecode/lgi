@@ -135,7 +135,7 @@ LAutoPtr<LMemDC> CreateDiff(LViewI *Parent, LSurface *A, LSurface *B)
 			(*C)[0])
 	{
 		uchar Pal[] = {0, 0, 0, 0xc0, 0xc0, 0xc0, 0xff, 0, 0};
-		C->Palette(new GPalette(Pal, 3));
+		C->Palette(new LPalette(Pal, 3));
 			
 		for (int y=0; y<Cy; y++)
 		{
@@ -146,8 +146,8 @@ LAutoPtr<LMemDC> CreateDiff(LViewI *Parent, LSurface *A, LSurface *B)
 			{
 				case CsIndex8:
 				{
-					GPalette *apal = A->Palette();
-					GPalette *bpal = B->Palette();
+					LPalette *apal = A->Palette();
+					LPalette *bpal = B->Palette();
 					if (apal && bpal)
 					{
 						GdcRGB *ap = (*apal)[0];

@@ -1,8 +1,8 @@
 /*hdr
-**      FILE:           GDb-Ado.cpp
+**      FILE:           LDb-Ado.cpp
 **      AUTHOR:         Matthew Allen
 **      DATE:           8/2/2000
-**      DESCRIPTION:    Ado implemetation of the GDb API
+**      DESCRIPTION:    Ado implemetation of the LDb API
 **
 **      Copyright (C) 2000 Matthew Allen
 **						fret@memecode.com
@@ -10,18 +10,18 @@
 
 #include <stdio.h>
 #include "Lgi.h"
-#include "GDb.h"
+#include "LDb.h"
 
 #import <msado15.dll> no_namespace rename("EOF", "adoEOF") implementation_only
 
-class GAdoField : public LDbField
+class LAdoField : public LDbField
 {
 	char *Value;
 	char *FldName;
 	ADODB::Field *Fld;
 
 public:
-	GAdoField(ADODB::_RecordsetPtr Rs1, int i)
+	LAdoField(ADODB::_RecordsetPtr Rs1, int i)
 	{
 		Value = 0;
 		FldName = 0;
@@ -33,7 +33,7 @@ public:
 		}
 	}
 
-	GAdoField(ADODB::_RecordsetPtr Rs1, char *FieldName)
+	LAdoField(ADODB::_RecordsetPtr Rs1, char *FieldName)
 	{
 		Value = 0;
 		FldName = 0;
@@ -45,7 +45,7 @@ public:
 		}
 	}
 
-	~GAdoField()
+	~LAdoField()
 	{
 		DeleteArray(Value);
 		DeleteArray(FldName);
@@ -311,16 +311,16 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////
-class GAdoRecordset : public LDbRecordset
+class LAdoRecordset : public LDbRecordset
 {
 	ADODB::_RecordsetPtr Rs1;
-	List<GAdoField> Fields;
-	GAdoField *NullField;
+	List<LAdoField> Fields;
+	LAdoField *NullField;
 
 public:
-	GAdoRecordset(ADODB::_ConnectionPtr &Con, char *Sql)
+	LAdoRecordset(ADODB::_ConnectionPtr &Con, char *Sql)
 	{
-		NullField = new GAdoField(0, 0);
+		NullField = new LAdoField(0, 0);
 		if (Sql)
 		{
 			Rs1.CreateInstance(__uuidof(ADODB::Recordset));
@@ -332,7 +332,7 @@ public:
 				{
 					for (int i=0; i<CountFields(); i++)
 					{
-						Fields.Insert(new GAdoField(Rs1, i));
+						Fields.Insert(new LAdoField(Rs1, i));
 					}
 				}
 				else
@@ -345,7 +345,7 @@ public:
 		}
 	}
 
-	~GAdoRecordset()
+	~LAdoRecordset()
 	{
 		if (Rs1)
 		{
@@ -356,7 +356,7 @@ public:
 
 	LDbField *Field(int Index)
 	{
-		GAdoField *f = Fields.ItemAt(Index);
+		LAdoField *f = Fields.ItemAt(Index);
 		return (f) ? f : NullField;
 	}
 
@@ -364,7 +364,7 @@ public:
 	{
 		if (Name)
 		{
-			for (GAdoField *f = Fields.First(); f; f = Fields.Next())
+			for (LAdoField *f = Fields.First(); f; f = Fields.Next())
 			{
 				if (stricmp(Name, f->Name()) == 0)
 				{
@@ -512,18 +512,18 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////
-class GAdoDb : public GDb
+class LAdoDb : public LDb
 {
 	ADODB::_ConnectionPtr Con;
 	char *ErrorStr;
 
 public:
-	GAdoDb()
+	LAdoDb()
 	{
 		ErrorStr = 0;
 	}
 
-	~GAdoDb()
+	~LAdoDb()
 	{
 		DeleteArray(ErrorStr);
 		Disconnect();
@@ -568,7 +568,7 @@ public:
 	// Retrieving data
 	LDbRecordset *OpenRecordset(char *Sql)
 	{
-		return new GAdoRecordset(Con, Sql);
+		return new LAdoRecordset(Con, Sql);
 	}
 
 	LDbRecordset *GetTables()
@@ -583,9 +583,9 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////
-GDb *OpenAdoDatabase(char *Name)
+LDb *OpenAdoDatabase(char *Name)
 {
-	GAdoDb *Db = new GAdoDb;
+	LAdoDb *Db = new LAdoDb;
 	if (Db AND !Db->Connect(Name))
 	{
 		DeleteObj(Db);

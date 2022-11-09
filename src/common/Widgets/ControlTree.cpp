@@ -627,7 +627,7 @@ int LControlTree::OnNotify(LViewI *c, LNotification n)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-class GControlTree_Factory : public LViewFactory
+class LControlTree_Factory : public LViewFactory
 {
 	LView *NewView(const char *Class, LRect *Pos, const char *Text)
 	{

@@ -6,13 +6,13 @@ void UnitTests()
 	LArray<UnitTest*> Tests;
 
 	Tests.Add(new LRangeTest);
-	Tests.Add(new GContainers);
-	Tests.Add(new GAutoPtrTest);
-	Tests.Add(new GCssTest);
-	Tests.Add(new GMatrixTest);
-	Tests.Add(new GStringClassTest);
+	Tests.Add(new LContainers);
+	Tests.Add(new LAutoPtrTest);
+	Tests.Add(new LCssTest);
+	Tests.Add(new LMatrixTest);
+	Tests.Add(new LStringClassTest);
 	Tests.Add(new LDateTimeTest);
-	Tests.Add(new GStringPipeTest);
+	Tests.Add(new LStringPipeTest);
 	Tests.Add(new LBitsTest);
 	Tests.Add(new JsonTest);
 

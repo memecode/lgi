@@ -34,7 +34,7 @@ public:
 	}
 
 	const char *GetClass() { return "GdcApp24"; }
-	bool SetSurface(LBmpMem *d, GPalette *p, LBmpMem *a);
+	bool SetSurface(LBmpMem *d, LPalette *p, LBmpMem *a);
 	void SetPtr(int x, int y);
 	void IncX();
 	void IncY();
@@ -48,7 +48,7 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha);
 };
 
 class LgiClass GdcApp24And : public GdcApp24 {
@@ -57,7 +57,7 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha);
 };
 
 class LgiClass GdcApp24Or : public GdcApp24 {
@@ -66,7 +66,7 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha);
 };
 
 class LgiClass GdcApp24Xor : public GdcApp24 {
@@ -75,7 +75,7 @@ public:
 	void Set();
 	void VLine(int height);
 	void Rectangle(int x, int y);
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha);
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha);
 };
 
 template<typename Pixel, LColourSpace ColourSpace>
@@ -88,7 +88,7 @@ class App24 : public LApplicator
 	};
 	
 	int ConstAlpha;
-	GPalette *PalAlpha;
+	LPalette *PalAlpha;
 
 public:
 	App24()
@@ -115,14 +115,14 @@ public:
 			}
 			case GAPP_ALPHA_PAL:
 			{
-				PalAlpha = (GPalette*)Value;
+				PalAlpha = (LPalette*)Value;
 				break;
 			}
 		}
 		return 0;
 	}
 
-	bool SetSurface(LBmpMem *d, GPalette *pal = NULL, LBmpMem *a = NULL)
+	bool SetSurface(LBmpMem *d, LPalette *pal = NULL, LBmpMem *a = NULL)
 	{
 		if (d && d->Cs == ColourSpace)
 		{
@@ -263,7 +263,7 @@ public:
 		return true;
 	}
 	
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = NULL)
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha = NULL)
 	{
 		if (!Src)
 			return false;
@@ -384,7 +384,7 @@ LApplicator *LApp24::Create(LColourSpace Cs, int Op)
 	REG uint8_t G = p24.g; \
 	REG uint8_t B = p24.b
 
-bool GdcApp24::SetSurface(LBmpMem *d, GPalette *p, LBmpMem *a)
+bool GdcApp24::SetSurface(LBmpMem *d, LPalette *p, LBmpMem *a)
 {
 	if (d && d->Cs == System24BitColourSpace)
 	{
@@ -462,7 +462,7 @@ void GdcApp24Set::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp24Set::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
+bool GdcApp24Set::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (Src)
 	{
@@ -586,7 +586,7 @@ void GdcApp24Or::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp24Or::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
+bool GdcApp24Or::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (Src)
 	{
@@ -647,7 +647,7 @@ void GdcApp24And::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp24And::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
+bool GdcApp24And::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (Src && Src->Cs == Dest->Cs)
 	{
@@ -699,7 +699,7 @@ void GdcApp24Xor::Rectangle(int x, int y)
 	}
 }
 
-bool GdcApp24Xor::Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
+bool GdcApp24Xor::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 {
 	if (Src && Src->Cs == Dest->Cs)
 	{

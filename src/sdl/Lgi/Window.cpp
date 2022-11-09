@@ -2,7 +2,7 @@
 
 #include "Lgi.h"
 #include "GDragAndDrop.h"
-#include "GToken.h"
+#include "LToken.h"
 #include "LPopup.h"
 #include "LPanel.h"
 
@@ -17,7 +17,7 @@ public:
 	LView *Target;
 };
 
-class GWindowPrivate
+class LWindowPrivate
 {
 public:
 	int Sx, Sy;
@@ -35,7 +35,7 @@ public:
 	LViewI *Focus;
 	bool Active;
 
-	GWindowPrivate()
+	LWindowPrivate()
 	{
 		FirstFocus = NULL;
 		Focus = NULL;
@@ -75,7 +75,7 @@ public:
 
 LWindow::LWindow()
 {
-	d = new GWindowPrivate;
+	d = new LWindowPrivate;
 	_QuitOnClose = false;
 	Menu = NULL;
 	Wnd = NULL;
@@ -540,7 +540,7 @@ bool LWindow::SerializeState(GDom *Store, const char *FieldName, bool Load)
 // printf("SerializeState load %s\n", v.Str());
 
 
-			GToken t(v.Str(), ";");
+			LToken t(v.Str(), ";");
 			for (int i=0; i<t.Length(); i++)
 			{
 				char *Var = t[i];
@@ -799,7 +799,7 @@ int LWindow::OnDrop(char *Format, ::LVariant *Data, LPoint Pt, int KeyState)
 			::LArray<char*> Files;
 			if (Data->IsBinary())
 			{
-				GToken Uri(	(char*)Data->Value.Binary.Data,
+				LToken Uri(	(char*)Data->Value.Binary.Data,
 							"\r\n,",
 							true,
 							Data->Value.Binary.Length);
@@ -1060,7 +1060,7 @@ void LWindow::OnTrayClick(LMouse &m)
 {
 	if (m.Down() || m.IsContextMenu())
 	{
-		GSubMenu RClick;
+		LSubMenu RClick;
 		OnTrayMenu(RClick);
 		if (GetMouse(m, true))
 		{

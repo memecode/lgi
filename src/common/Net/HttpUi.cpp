@@ -3,21 +3,21 @@
 #include "INet.h"
 #include "INetTools.h"
 
-struct GHttpServerPriv;
+struct LHttpServerPriv;
 
 #define LOG_HTTP            0
 
-class GHttpThread : public LThread
+class LHttpThread : public LThread
 {
 	LSocket *s;
-	GHttpServerPriv *p;
+	LHttpServerPriv *p;
 
 public:
-	GHttpThread(LSocket *sock, GHttpServerPriv *priv);
+	LHttpThread(LSocket *sock, LHttpServerPriv *priv);
 	int Main();
 };
 
-class GHttpServer_TraceSocket : public LSocket
+class LHttpServer_TraceSocket : public LSocket
 {
 public:
 	void OnInformation(char *Str)
@@ -31,20 +31,20 @@ public:
 	}
 };
 
-struct GHttpServerPriv : public LThread
+struct LHttpServerPriv : public LThread
 {
-	GHttpCallback *Callback;
-	GHttpServer_TraceSocket Listen;
+	LHttpCallback *Callback;
+	LHttpServer_TraceSocket Listen;
 	int Port;
 
-	GHttpServerPriv(GHttpCallback *cb, int port)
+	LHttpServerPriv(LHttpCallback *cb, int port)
 	{
 		Callback = cb;
 		Port = port;
 		Run();
 	}
 
-	~GHttpServerPriv()
+	~LHttpServerPriv()
 	{
 		Listen.Close();
 		while (!IsExited())
@@ -78,7 +78,7 @@ struct GHttpServerPriv : public LThread
                 #if LOG_HTTP
 				LgiTrace("Got new connection...\n");
 				#endif
-				new GHttpThread(s, this);
+				new LHttpThread(s, this);
 			}
 		}
 
@@ -86,14 +86,14 @@ struct GHttpServerPriv : public LThread
 	}
 };
 
-GHttpThread::GHttpThread(LSocket *sock, GHttpServerPriv *priv)
+LHttpThread::LHttpThread(LSocket *sock, LHttpServerPriv *priv)
 {
 	s = sock;
 	p = priv;
 	Run();
 }
 
-int GHttpThread::Main()
+int LHttpThread::Main()
 {
 	LArray<char> Buf;
 	int Block = 4 << 10, Used = 0, ContentLen = 0;
@@ -213,17 +213,17 @@ int GHttpThread::Main()
 	return 0;
 }
 
-GHttpServer::GHttpServer(GHttpCallback *cb, int port)
+LHttpServer::LHttpServer(LHttpCallback *cb, int port)
 {
-	d = new GHttpServerPriv(cb, port);
+	d = new LHttpServerPriv(cb, port);
 }
 
-GHttpServer::~GHttpServer()
+LHttpServer::~LHttpServer()
 {
 	DeleteObj(d);
 }
 
-char *GHttpCallback::FormDecode(char *s)
+char *LHttpCallback::FormDecode(char *s)
 {
 	char *i = s, *o = s;
 	while (*i)
@@ -248,7 +248,7 @@ char *GHttpCallback::FormDecode(char *s)
 	return s;
 }
 
-char *GHttpCallback::HtmlEncode(char *s)
+char *LHttpCallback::HtmlEncode(char *s)
 {
 	LStringPipe p;
 	char *e = "<>";
@@ -272,7 +272,7 @@ char *GHttpCallback::HtmlEncode(char *s)
 	return p.NewStr();
 }
 
-bool GHttpCallback::ParseHtmlWithDom(LVariant &Out, GDom *Dom, char *Html)
+bool LHttpCallback::ParseHtmlWithDom(LVariant &Out, GDom *Dom, char *Html)
 {
 	if (!Dom || !Html)
 		return false;

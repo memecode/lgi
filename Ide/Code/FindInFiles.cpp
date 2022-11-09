@@ -35,6 +35,12 @@ FindInFiles::FindInFiles(AppWnd *app, FindParams *params)
 
 	if (LoadFromResource(IDD_FIND_IN_FILES))
 	{
+		auto r = GetPos();
+		auto Scale = (float)LScreenDpi().x / 96.0;
+		r.x2 *= Scale;
+		r.y2 *= Scale;
+		SetPos(r);
+
 		MoveToCenter();
 
 		if (GetViewById(IDC_TYPE_HISTORY, TypeHistory))
@@ -51,7 +57,7 @@ FindInFiles::~FindInFiles()
 		DeleteObj(Params);
 }
 
-void SerializeHistory(GHistory *h, const char *opt, LOptionsFile *p, bool Write)
+void SerializeHistory(LHistory *h, const char *opt, LOptionsFile *p, bool Write)
 {
 	if (h && p)
 	{
@@ -381,7 +387,7 @@ LMessage::Result FindInFilesThread::OnEvent(LMessage *Msg)
 			Log(NewStr(Msg));
 
 			LArray<const char*> Ext;
-			GToken e(d->Params->Ext, ";, ");
+			LToken e(d->Params->Ext, ";, ");
 			for (int i=0; i<e.Length(); i++)
 			{
 				Ext.Add(e[i]);

@@ -17,92 +17,18 @@
 #include "lgi/common/Button.h"
 #include "lgi/common/LgiRes.h"
 
-#define USE_DIALOGBOXINDIRECTPARAM         0
-
 struct LDialogPriv
 {
-	bool IsModal, IsModeless, _Resizable;
-	int ModalStatus;
-	int BtnId;
-
+	bool IsModal = false, IsModeless = false, _Resizable = true;
+	int ModalStatus = -1;
+	int BtnId = -1;
+    int ModalResult = -1;
 	// Modal state
 	OsView ParentHnd = NULL;
 	LWindow *ParentWnd = NULL;
 	LDialog::OnClose Callback;
 
-	#if WINNATIVE
-    int ModalResult;
-	#elif defined BEOS
-	sem_id ModalSem;
-	int ModalRet;
-	#endif
-
-    LDialogPriv()
-    {
-        #if USE_DIALOGBOXINDIRECTPARAM
-    	Mem = 0;
-    	#else
-    	ModalResult = -1;
-    	#endif
-    	IsModal = false;
-		IsModeless = false;
-		BtnId = -1;
-    }
-    
-    ~LDialogPriv()
-    {
-    	#if USE_DIALOGBOXINDIRECTPARAM
-        DeleteObj(Mem);
-        #endif
-    }
 };
-
-///////////////////////////////////////////////////////////////////////////////////////////
-#if USE_DIALOGBOXINDIRECTPARAM
-short *DlgStrCopy(short *A, char *N)
-{
-	uchar *n = (uchar*) N;
-	if (n)
-	{
-		while (*n)
-		{
-			*A++ = *n++;
-		}
-	}
-	*A++ = 0;
-	return A;
-}
-
-short *DlgStrCopy(short *A, char16 *n)
-{
-	if (n)
-	{
-		while (*n)
-		{
-			*A++ = *n++;
-		}
-	}
-	*A++ = 0;
-	return A;
-}
-
-short *DlgPadToDWord(short *A, bool Seek = false)
-{
-	char *c = (char*) A;
-	while (((NativeInt) c) & 3)
-	{
-		if (Seek)
-		{
-			c++;
-		}
-		else
-		{
-			*c++ = 0;
-		}
-	}
-	return (short*) c;
-}
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 LDialog::LDialog(LViewI *parent)
@@ -114,13 +40,8 @@ LDialog::LDialog(LViewI *parent)
 	if (parent)
 		SetParent(parent);
 
-	#if USE_DIALOGBOXINDIRECTPARAM
-	WndFlags |= GWF_DIALOG;
-	SetExStyle(GetExStyle() | WS_EX_CONTROLPARENT);
-	#else
 	SetStyle(GetStyle() & ~(WS_MINIMIZEBOX | WS_MAXIMIZEBOX));
 	SetStyle(GetStyle() | WS_DLGFRAME);
-	#endif
 }
 
 LDialog::~LDialog()
@@ -250,75 +171,6 @@ int LDialog::DoModeless()
 	d->IsModeless = true;
 	d->IsModal = false;
 
-	#if USE_DIALOGBOXINDIRECTPARAM
-	d->Mem = new GMem(16<<10);
-	LRect OldPos = GetPos();
-	if (d->Mem)
-	{
-		LONG DlgUnits = GetDialogBaseUnits();
-		uint16 old_baseunitX = DlgUnits & 0xffff;
-		uint16 old_baseunitY = DlgUnits >> 16;
-		LDisplayString Bs(LSysFont, BaseStr);
-		int baseunitX = (Bs.X() / 26 + 1) / 2;
-		int baseunitY = Bs.Y();
-		
-		DLGTEMPLATE *Template = (DLGTEMPLATE*) d->Mem->Lock();
-		if (Template)
-		{
-			LRect r = Pos;
-			r.x1 = MulDiv(r.x1, 4, baseunitX);
-			r.y1 = MulDiv(r.y1, 8, baseunitY);
-			r.x2 = MulDiv(r.x2, 4, baseunitX);
-			r.y2 = MulDiv(r.y2, 8, baseunitY);
-
-			Template->style =	WS_VISIBLE |
-								DS_ABSALIGN |
-								WS_SYSMENU |
-								WS_CAPTION |
-								DS_SETFONT |
-								DS_NOFAILCREATE |
-								DS_3DLOOK;
-
-			Template->style |= DS_MODALFRAME;
-			Template->dwExtendedStyle = WS_EX_DLGMODALFRAME;
-			Template->cdit = 0;
-			Template->x = r.x1;
-			Template->y = r.y1;
-			Template->cx = r.X();
-			Template->cy = r.Y();
-
-			short *A = (short*) (Template+1);
-			// menu
-			*A++ = 0;
-			// class
-			*A++ = 0;
-			// title
-			A = DlgStrCopy(A, NameW());
-			// font
-			*A++ = LSysFont->PointSize(); // point size
-			A = DlgStrCopy(A, LSysFont->Face());
-			A = DlgPadToDWord(A);
-
-			LViewI *p = GetParent();
-			while (	p &&
-					!p->Handle() &&
-					p->GetParent())
-			{
-				p = p->GetParent();
-			}
-
-			HWND hWindow = (p)?p->Handle():0;
-
-			CreateDialogIndirectParam(	LProcessInst(),
-										Template,
-										hWindow,
-										(DLGPROC) DlgRedir, 
-										(LPARAM) this);
-		}
-	}
-
-	#else
-
     LViewI *p = GetParent();
     if (p && p->GetWindow() != p)
         p = p->GetWindow();
@@ -358,8 +210,6 @@ int LDialog::DoModeless()
 	    LAssert(!"Attach failed.");
 	}
 
-	#endif
-
 	return Status;
 }
 
@@ -367,11 +217,7 @@ LMessage::Result LDialog::OnEvent(LMessage *Msg)
 {
 	switch (Msg->m)
 	{
-		#if USE_DIALOGBOXINDIRECTPARAM
-		case WM_INITDIALOG:
-		#else
 		case WM_CREATE:
-		#endif
 		{
 			LRect r = Pos;
 			Pos.ZOff(-1, -1);
@@ -392,21 +238,6 @@ LMessage::Result LDialog::OnEvent(LMessage *Msg)
 			// arises, update this comment to reflect that.
 			OnCreate();
 
-    		#if USE_DIALOGBOXINDIRECTPARAM
-			LViewI *v = LAppInst->GetFocus();
-			LWindow *w = v ? v->GetWindow() : NULL;
-			if (v && (w != v) && (w == this))
-			{
-				// Application has set the focus, don't set to default focus.
-				return false;
-			}
-			else
-			{
-				// Set the default focus.
-				return true;
-			}
-			#endif
-			
 			// If we don't return true here the LWindow::OnEvent handler for
 			// WM_CREATE will call OnCreate again.
 			return true;

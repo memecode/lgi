@@ -642,7 +642,7 @@ public:
 
 class LFlowRegion
 {
-	List<GFlowRect> Line;	// These pointers aren't owned by the flow region
+	List<LFlowRect> Line;	// These pointers aren't owned by the flow region
 							// When the line is finish, all the tag regions
 							// will need to be vertically aligned
 
@@ -728,7 +728,7 @@ public:
 	
 	void FinishLine(bool Margin = false);
 	void EndBlock();
-	void Insert(GFlowRect *Tr);
+	void Insert(LFlowRect *Tr);
 	LRect *LineBounds();
 
 	void Indent(LFont *Font,
@@ -1054,7 +1054,7 @@ LHtmlLine &LHtmlLine::operator =(int i)
 
 void LHtmlLine::Set(char *s)
 {
-	GToken t(s, " \t");
+	LToken t(s, " \t");
 	LineReset = 0x80000000;
 	LineStyle = -1;
 	char *Style = 0;
@@ -1269,7 +1269,7 @@ void LFlowRegion::FinishLine(bool Margin)
 	LRect *b = LineBounds();
 	if (b)
 	{
-		for (GFlowRect *Tr=Line.First(); Tr; Tr=Line.Next())
+		for (LFlowRect *Tr=Line.First(); Tr; Tr=Line.Next())
 		{
 			LRect n = *Tr;
 			// int Base = b->y1 - n.y1;
@@ -1300,8 +1300,8 @@ void LFlowRegion::FinishLine(bool Margin)
 
 LRect *LFlowRegion::LineBounds()
 {
-	GFlowRect *Prev = Line.First();
-	GFlowRect *r=Prev;
+	LFlowRect *Prev = Line.First();
+	LFlowRect *r=Prev;
 	if (r)
 	{
 		LRect b;
@@ -1337,7 +1337,7 @@ LRect *LFlowRegion::LineBounds()
 	return 0;
 }
 
-void LFlowRegion::Insert(GFlowRect *Tr)
+void LFlowRegion::Insert(LFlowRect *Tr)
 {
 	if (Tr)
 	{
@@ -1484,13 +1484,13 @@ int LTag::GetTextStart()
 {
 	if (PreText())
 	{
-		GFlowRect *t = TextPos[1];
+		LFlowRect *t = TextPos[1];
 		if (t)
 			return t->Text - Text();
 	}
 	else
 	{
-		GFlowRect *t = TextPos[0];
+		LFlowRect *t = TextPos[0];
 		if (t)
 		{
 			LAssert(t->Text >= Text() && t->Text <= Text()+2);
@@ -1783,7 +1783,7 @@ void LTag::_Dump(LStringPipe &Buf, int Depth)
 	Tab[Depth] = 0;
 
 	char Trs[1024] = "";
-	for (GFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
+	for (LFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
 	{
 		LAutoString Utf8(LgiNewUtf16To8(Tr->Text, Tr->Len*sizeof(char16)));
 		if (Utf8)
@@ -1966,7 +1966,7 @@ bool LTag::OnMouseClick(LMouse &m)
 		LTag *a = IsAnchor(&Uri);
 		if (a && ValidStr(Uri))
 		{
-			GSubMenu RClick;
+			LSubMenu RClick;
 
 			#define IDM_COPY_LINK	100
 			if (Html->GetMouse(m, true))
@@ -2192,7 +2192,7 @@ static int IsNearRect(LRect *r, int x, int y)
 	return (int) sqrt( (double) ( (dx * dx) + (dy * dy) ) );
 }
 
-int LTag::NearestChar(GFlowRect *Tr, int x, int y)
+int LTag::NearestChar(LFlowRect *Tr, int x, int y)
 {
 	LFont *f = GetFont();
 	if (f)
@@ -2255,7 +2255,7 @@ void LTag::GetTagByPos(LTagHit &hit, int x, int y)
 
 		if (Text())
 		{
-			for (GFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
+			for (LFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
 			{
 				LTagHit Tmp;
 				Tmp.Hit = this;
@@ -3167,7 +3167,7 @@ void LTag::SetStyle()
 				char16 *cw = CleanText(s, strlen(s), true);
 				char *c8 = LgiNewUtf16To8(cw);
 				DeleteArray(cw);
-				GToken Faces(c8, ",");
+				LToken Faces(c8, ",");
 				DeleteArray(c8);
 				char *face = TrimStr(Faces[0]);
 				if (ValidStr(face))
@@ -3954,7 +3954,7 @@ char *LTag::ParseHtml(char *Doc, int Depth, bool InPreTag, bool *BackOut)
 
 					if (Info->ReattachTo)
 					{
-						GToken T(Info->ReattachTo, ",");
+						LToken T(Info->ReattachTo, ",");
 						const char *Reattach = Info->ReattachTo;
 						for (int i=0; i<T.Length(); i++)
 						{
@@ -4418,7 +4418,7 @@ bool LTag::GetWidthMetrics(uint16 &Min, uint16 &Max)
 			else
 			{
 				LPoint s;
-				GCellStore c(this);
+				LCellStore c(this);
 				c.GetSize(s.x, s.y);
 
 				// Auto layout table
@@ -4547,7 +4547,7 @@ void LTag::LayoutTable(LFlowRegion *f)
 
 	if (!Cells)
 	{
-		Cells = new GCellStore(this);
+		Cells = new LCellStore(this);
 		#if defined(_DEBUG) && DEBUG_TABLE_LAYOUT
 		if (Cells && Debug)
 			Cells->Dump();
@@ -5167,7 +5167,7 @@ LHtmlArea::~LHtmlArea()
 
 LRect LHtmlArea::Bounds()
 {
-	GFlowRect *r = First();
+	LFlowRect *r = First();
 	if (r)
 	{
 		LRect n = *r;
@@ -5207,7 +5207,7 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, char16 *Text
 	#if 1
 	if (!Tag->Html->GetReadOnly() && !*Text)
 	{
-		GFlowRect *Tr = new GFlowRect;
+		LFlowRect *Tr = new LFlowRect;
 		Tr->Tag = Tag;
 		Tr->Text = Text;
 		Tr->x1 = Tr->x2 = Flow->cx;
@@ -5222,7 +5222,7 @@ void LHtmlArea::FlowText(LTag *Tag, LFlowRegion *Flow, LFont *Font, char16 *Text
 
 	while (*Text)
 	{
-		GFlowRect *Tr = new GFlowRect;
+		LFlowRect *Tr = new LFlowRect;
 		if (!Tr)
 			break;
 
@@ -5916,7 +5916,7 @@ void LTag::OnPaintBorder(LSurface *pDC, LRect *Px)
 		}
 		case DispInline:
 		{
-			for (GFlowRect *f=TextPos.First(); f; f=TextPos.Next())
+			for (LFlowRect *f=TextPos.First(); f; f=TextPos.Next())
 			{
 				r.New() = *f;
 			}
@@ -6256,7 +6256,7 @@ void LTag::OnPaint(LSurface *pDC)
 				}
 				else
 				{
-					for (GFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
+					for (LFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
 					{
 						pDC->Rectangle(Tr);
 					}
@@ -6311,7 +6311,7 @@ void LTag::OnPaint(LSurface *pDC)
 					LRect CursorPos;
 					CursorPos.ZOff(-1, -1);
 
-					for (GFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
+					for (LFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
 					{
 						int Start = Tr->Text - Text();
 						int Done = 0;
@@ -6419,7 +6419,7 @@ void LTag::OnPaint(LSurface *pDC)
 					FontColour(Selected);
 
 					int Base = GetTextStart();
-					for (GFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
+					for (LFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
 					{
 						int Pos = (Tr->Text - Text()) - Base;
 
@@ -6467,7 +6467,7 @@ void LTag::OnPaint(LSurface *pDC)
 				{
 					FontColour(Selected);
 
-					for (GFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
+					for (LFlowRect *Tr=TextPos.First(); Tr; Tr=TextPos.Next())
 					{
 						LDisplayString ds(f, Tr->Text, Tr->Len);
 						ds.Draw(pDC, Tr->x1, Tr->y1 + LineHtOff);
@@ -7579,7 +7579,7 @@ void LHtml2::OnMouseClick(LMouse &m)
 		if (!TagProcessedClick &&
 			m.IsContextMenu())
 		{
-			GSubMenu *RClick = new GSubMenu;
+			LSubMenu *RClick = new LSubMenu;
 			if (RClick)
 			{
 				#define IDM_DUMP			100
@@ -7591,12 +7591,12 @@ void LHtml2::OnMouseClick(LMouse &m)
 				#define IDM_CHARSET_BASE	1000
 
 				RClick->AppendItem					(LLoadString(L_TEXTCTRL_COPY, "Copy"), IDM_COPY, HasSelection());
-				GMenuItem *Vs = RClick->AppendItem	(LLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
+				LMenuItem *Vs = RClick->AppendItem	(LLoadString(L_VIEW_SOURCE, "View Source"), IDM_VIEW_SRC, Source != 0);
 				RClick->AppendItem					(LLoadString(L_COPY_SOURCE, "Copy Source"), IDM_COPY_SRC, Source != 0);
-				GMenuItem *Load = RClick->AppendItem(LLoadString(L_VIEW_IMAGES, "View External Images"), IDM_VIEW_IMAGES, true);
+				LMenuItem *Load = RClick->AppendItem(LLoadString(L_VIEW_IMAGES, "View External Images"), IDM_VIEW_IMAGES, true);
 				if (Load) Load->Checked(GetLoadImages());
 				RClick->AppendItem					(LLoadString(L_VIEW_IN_DEFAULT_BROWSER, "View in Default Browser"), IDM_EXTERNAL, Source != 0);
-				GSubMenu *Cs = RClick->AppendSub	(LLoadString(L_CHANGE_CHARSET, "Change Charset"));
+				LSubMenu *Cs = RClick->AppendSub	(LLoadString(L_CHANGE_CHARSET, "Change Charset"));
 				if (Cs)
 				{
 					int n=0;
@@ -8194,7 +8194,7 @@ class LHtml_Factory2 : public LViewFactory
 } LHtml_Factory2;
 
 //////////////////////////////////////////////////////////////////////
-GCellStore::GCellStore(LTag *Table)
+LCellStore::LCellStore(LTag *Table)
 {
 	if (!Table)
 		return;
@@ -8290,7 +8290,7 @@ GCellStore::GCellStore(LTag *Table)
 	}
 }
 
-void GCellStore::Dump()
+void LCellStore::Dump()
 {
 	int Sx, Sy;
 	GetSize(Sx, Sy);
@@ -8328,7 +8328,7 @@ void GCellStore::Dump()
 	LgiTrace("\n");
 }
 
-void GCellStore::GetAll(List<LTag> &All)
+void LCellStore::GetAll(List<LTag> &All)
 {
 	GHashTbl<void*, bool> Added;
 	for (int y=0; y<c.Length(); y++)
@@ -8346,7 +8346,7 @@ void GCellStore::GetAll(List<LTag> &All)
 	}
 }
 
-void GCellStore::GetSize(int &x, int &y)
+void LCellStore::GetSize(int &x, int &y)
 {
 	x = 0;
 	y = c.Length();
@@ -8357,7 +8357,7 @@ void GCellStore::GetSize(int &x, int &y)
 	}
 }
 
-LTag *GCellStore::Get(int x, int y)
+LTag *LCellStore::Get(int x, int y)
 {
 	if (y >= c.Length())
 		return NULL;
@@ -8369,7 +8369,7 @@ LTag *GCellStore::Get(int x, int y)
 	return a[x];
 }
 
-bool GCellStore::Set(LTag *t)
+bool LCellStore::Set(LTag *t)
 {
 	if (!t)
 		return false;

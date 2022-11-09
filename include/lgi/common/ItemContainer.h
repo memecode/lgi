@@ -137,13 +137,13 @@ public:
 };
 
 /// The popup label for LItem's
-class GItemEdit : public LPopup
+class LItemEdit : public LPopup
 {
-	class GItemEditPrivate *d;
+	class LItemEditPrivate *d;
 
 public:
-	GItemEdit(LView *parent, LItem *item, int index, int selstart, int selend);
-	~GItemEdit();
+	LItemEdit(LView *parent, LItem *item, int index, int selstart, int selend);
+	~LItemEdit();
 	
 	LItem *GetItem();
 	void OnPaint(LSurface *pDC);
@@ -263,7 +263,7 @@ class LgiClass LItemContainer :
 {
 	friend class LItemColumn;
 	friend class LItem;
-	friend class GItemEdit;
+	friend class LItemEdit;
 
 public:
 	struct ColInfo
@@ -287,7 +287,7 @@ protected:
 	LRect ColumnHeader;
 	int ColClick;
 	LMouse ColMouse;
-	GItemEdit *ItemEdit;
+	LItemEdit *ItemEdit;
 
 	LArray<LItemColumn*> Columns;
 	LAutoPtr<LItemColumn> IconCol;

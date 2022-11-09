@@ -1,42 +1,41 @@
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required (VERSION 3.18)
 
-SET (CMAKE_OSX_ARCHITECTURES "i386")
-set (CMAKE_CXX_STANDARD 11)
+set(CMAKE_OSX_ARCHITECTURES "x86_64")
+set(CMAKE_CXX_STANDARD 14)
 
 project (LgiIde)
 
 if (UNIX AND NOT APPLE)
 	set(LINUX TRUE)
 endif()
-add_subdirectory(.. LgiDir)
+
+if (NOT TARGET libpng15)
+    get_filename_component(LIBPNG_DIR "${CODELIB}/libpng" ABSOLUTE)
+    add_subdirectory(${LIBPNG_DIR} libpng)
+endif()
 
 if (APPLE)
 
-	add_definitions("-DMAC -DLGI_LIBRARY -D_DEBUG -DLGI_RES -DLGI_COCOA")
-	SET(GUI_TYPE MACOSX_BUNDLE)
-	# INCLUDE_DIRECTORIES ( /Developer/Headers/FlatCarbon )
-	FIND_LIBRARY(COCOA_LIBRARY Cocoa)
-	MARK_AS_ADVANCED (COCOA_LIBRARY)
-	SET(EXTRA_LIBS ${COCOA_LIBRARY})
+	set(GUI_TYPE MACOSX_BUNDLE)
+	find_library(COCOA_LIBRARY Cocoa)
+	mark_as_advanced(COCOA_LIBRARY)
+	set(EXTRA_LIBS ${COCOA_LIBRARY})
 
 elseif (LINUX)
 
-	add_definitions("-DLINUX -DLGI_LIBRARY -D_DEBUG -DLGI_RES -DPOSIX -fPIC -w -fno-inline -fpermissive")
-	find_package(GTK2 COMPONENTS gtk)
+	add_definitions("-fPIC -w -fno-inline -fpermissive")
 	find_package(PNG REQUIRED)
 
 elseif (MSVC)
 
-	if ("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
-		set(WORDSIZE 64)
-		set(OPENSSL_INCLUDE_DIR "c:/Program Files/OpenSSL-Win64/include")
-	else()
-		set(WORDSIZE 32)
-		set(OPENSSL_INCLUDE_DIR "c:/Program Files (x86)/OpenSSL-Win32/include")
-	endif()
-	
+	set(ResourceFiles
+		../src/win/General/Lgi.manifest
+		Resources/Script1.rc)
 	if (NOT EXISTS ${OPENSSL_INCLUDE_DIR})
-		message(FATAL_ERROR "OpenSSL not found @ ${OPENSSL_INCLUDE_DIR}")
+		message(FATAL_ERROR "OpenSSL not found: '${OPENSSL_INCLUDE_DIR}'")
+	endif()
+	if (NOT EXISTS ${CODELIB})
+		message(FATAL_ERROR "Codelib not found: '${CODELIB}'")
 	endif()
 	
 	if (${MSVC_VERSION} GREATER_EQUAL 1900)
@@ -47,28 +46,6 @@ elseif (MSVC)
 		message(FATAL_ERROR "Unknown Visual Studio version: ${MSVC_VERSION}")
 	endif()
 
-	add_definitions("/W2 -DWINDOWS -DWIN32 -D_DEBUG -DLGI_RES -D_UNICODE -DUNICODE")
-	get_filename_component(CODELIB "${CMAKE_CURRENT_SOURCE_DIR}/../../../../CodeLib" ABSOLUTE)
-	get_filename_component(LIBPNG_SEARCH "${CODELIB}/libpng" ABSOLUTE)
-	get_filename_component(ZLIB_SEARCH "${CODELIB}/zlib" ABSOLUTE)
-	set(_FIND_ZLIB_ARG HINTS ${LIBPNG_SEARCH})
-	include(FindPNG)
-	if (NOT PNG_FOUND)
-		set(PNG_CMAKE "${LIBPNG_SEARCH}/CMakeLists.txt")
-		if (EXISTS "${PNG_CMAKE}")
-			set(PNG_INCLUDE_DIR
-				${LIBPNG_SEARCH}
-				${LIBPNG_SEARCH}/build${WORDSIZE}
-				${ZLIB_SEARCH}
-				${ZLIB_SEARCH}/build${WORDSIZE})
-			set(PNG_DLL
-				${LIBPNG_SEARCH}/build${WORDSIZE}/Release/libpng15.dll)
-		else()
-			message(FATAL_ERROR "PNG not found @ ${LIBPNG_SEARCH}")
-		endif()
-	endif ()
-	
-	
 endif ()
 
 set (CommonSource
@@ -96,20 +73,21 @@ set (CommonSource
 	Code/MissingFiles.cpp
 	Code/DocEditStyling.cpp
 	Code/levenshtein.c
-	../src/common/INet/OpenSSLSocket.cpp
-	../src/common/INet/IHttp.cpp
-	../src/common/INet/IFtp.cpp
+	Code/JavascriptParser.cpp
+	Code/NewProjectFromTemplate.cpp
+	../src/common/Net/OpenSSLSocket.cpp
+	../src/common/Net/Http.cpp
+	../src/common/Net/Ftp.cpp
 	../src/common/Gdc2/Filters/Png.cpp
-	../src/common/Lgi/GAbout.cpp
-	../src/common/Lgi/GSubProcess.cpp
-	../src/common/Lgi/GMdi.cpp
+	../src/common/Lgi/About.cpp
+	../src/common/Lgi/Mdi.cpp
 	../src/common/Lgi/LgiMain.cpp
-	../src/common/Widgets/GControlTree.cpp
-	../src/common/Coding/GParseCpp.cpp
-	../src/common/Coding/GLexCpp.cpp
+	../src/common/Widgets/ControlTree.cpp
+	../src/common/Coding/ParseCpp.cpp
+	../src/common/Coding/LexCpp.cpp
 	)
 
-set(CommonResourceFiles
+list(APPEND ResourceFiles
 	Resources/cmds-32px.png
 	Resources/icons.png
 	Resources/cmds-16px.png
@@ -119,49 +97,37 @@ set(CommonResourceFiles
 
 if (APPLE)
 	set(MacResourceFiles
-		MacCarbon/Info.plist
-		MacCarbon/English.lproj/InfoPlist.strings
-		MacCarbon/English.lproj/main.nib)
-	
+		MacCocoa/Info.plist
+		Resources/mac-icon.icns)
+	set(APP_TYPE MACOSX_BUNDLE)
 	set_source_files_properties(${MacResourceFiles} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-
-	add_executable(LgiIde MACOSX_BUNDLE ${CommonSource} ${CommonResourceFiles} ${MacResourceFiles})
-	
-	# set(MACOSX_BUNDLE_ICON_FILE ".icns")
-	add_custom_command(TARGET LgiIde POST_BUILD 
-					COMMAND "${CMAKE_COMMAND}" -E copy 
-						"$<TARGET_FILE:Lgi>"
-						"LgiIde.app/Contents/MacOS/$<TARGET_FILE_NAME:Lgi>" 
-					COMMENT "Copying to output directory")
-elseif (LINUX)
-	add_executable(LgiIde ${CommonSource})
+	list(APPEND ResourceFiles ${MacResourceFiles})
 elseif (MSVC)
-	add_executable(LgiIde WIN32 ${CommonSource} ${CommonResourceFiles})
+	set(APP_TYPE WIN32)
 endif ()
 
+add_executable(LgiIde ${APP_TYPE} ${CommonSource} ${ResourceFiles})
+target_link_libraries(LgiIde lgi libpng15)
+target_include_directories(LgiIde PRIVATE Code Resources)
+
 if (APPLE)
-	target_include_directories(LgiIde PUBLIC "../include/mac/carbon" "../include/posix")
-	target_link_libraries(LgiIde Lgi ${EXTRA_LIBS})
+
+	target_link_libraries(LgiIde ${EXTRA_LIBS})
 	set_target_properties(LgiIde PROPERTIES
 		MACOSX_BUNDLE TRUE
 		MACOSX_FRAMEWORK_IDENTIFIER com.memecode.LgiIde
-		RESOURCE "${RESOURCE_FILES}"
+		RESOURCE "${ResourceFiles}"
 		)
-elseif (LINUX)
-	target_include_directories(LgiIde PUBLIC "../include/linux/Gtk" "../include/linux" ${GTK2_INCLUDE_DIRS} ${PNG_INCLUDE_DIR})
-	target_link_libraries(LgiIde Lgi pthread ${GTK2_LIBRARIES} libpng15)
+	message("macBundlePostBuild(LgiIde)")
+	macBundlePostBuild(LgiIde)
+
 elseif (MSVC)
-	target_include_directories(LgiIde PUBLIC "../include/win32" ${PNG_INCLUDE_DIRS})
-	target_link_libraries(	LgiIde
-							Lgi
-							ComCtl32.lib
-							Ws2_32.lib
-							UxTheme.lib
-							imm32.lib)
+
+	target_link_libraries(LgiIde ComCtl32.lib Ws2_32.lib UxTheme.lib imm32.lib)
 	add_custom_command(TARGET LgiIde POST_BUILD 
 					COMMAND "${CMAKE_COMMAND}" -E copy 
-						"$<TARGET_FILE:Lgi>"
-						"$<TARGET_FILE_DIR:LgiIde>/$<TARGET_FILE_NAME:Lgi>" 
+						"$<TARGET_FILE:lgi>"
+						"$<TARGET_FILE_DIR:LgiIde>/$<TARGET_FILE_NAME:lgi>" 
 					COMMENT "Copying Lgi to output directory")
 	if (EXISTS ${PNG_DLL})
 		add_custom_command(TARGET LgiIde POST_BUILD 
@@ -170,24 +136,17 @@ elseif (MSVC)
 						"$<TARGET_FILE_DIR:LgiIde>/libpng${VS_VER}x${WORDSIZE}.dll" 
 					COMMENT "Copying Lgi to output directory")
 	endif()
+
 endif ()
 
 # Create a resources sub-folder and copy over the resource files (images and lr8)
-set(RESOURCE_DIR ${CMAKE_BINARY_DIR}/Resources)
-if (NOT EXISTS ${RESOURCE_DIR})
-	add_custom_target(build-time-make-directory ALL
-	    COMMAND ${CMAKE_COMMAND} -E make_directory ${RESOURCE_DIR})
-endif()
-foreach(infileName ${CommonResourceFiles})
-	add_custom_command(TARGET LgiIde POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${infileName} ${RESOURCE_DIR})
-endforeach()
+file(COPY ${CMAKE_CURRENT_LIST_DIR}/Resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 target_include_directories (LgiIde PUBLIC
-							"../include/common"
+							Code
 							"Resources"
 							${PNG_INCLUDE_DIR}
 							${OPENSSL_INCLUDE_DIR}
-							"${CMAKE_CURRENT_SOURCE_DIR}/../../../../CodeLib/libiconv-1.14/include")
-# "${CMAKE_CURRENT_SOURCE_DIR}/../../../../CodeLib/libpng"
-# "${CMAKE_CURRENT_SOURCE_DIR}/../../../../CodeLib/libpng-1.6.26"
+							"${CODELIB}/libiconv-1.14/include")
 
+set_target_properties(LgiIde PROPERTIES EXCLUDE_FROM_ALL TRUE)

@@ -33,7 +33,7 @@ class LgiClass LPopup :
     static LArray<LPopup*> CurrentPopups;
 
 protected:
-	class GPopupPrivate *d;
+	class LPopupPrivate *d;
 	bool Cancelled;
 	LView *Owner;
 	uint64 Start;

@@ -986,12 +986,12 @@ void LRichTextEdit::DoGoto(std::function<void(bool)> Callback)
 	});
 }
 
-GDocFindReplaceParams *LRichTextEdit::CreateFindReplaceParams()
+LDocFindReplaceParams *LRichTextEdit::CreateFindReplaceParams()
 {
-	return new GDocFindReplaceParams3;
+	return new LDocFindReplaceParams3;
 }
 
-void LRichTextEdit::SetFindReplaceParams(GDocFindReplaceParams *Params)
+void LRichTextEdit::SetFindReplaceParams(LDocFindReplaceParams *Params)
 {
 	if (Params)
 	{

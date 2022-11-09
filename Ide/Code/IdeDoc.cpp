@@ -107,7 +107,7 @@ int MeasureText(const char *s)
 	
 void EditTray::OnPosChange()
 {
-	GLayoutRect c(this, 2);
+	LLayoutRect c(this, 2);
 
 	c.Left(FileBtn, MeasureText(HEADER_BTN_LABEL)+10);
 	if (FileSearch)
@@ -517,14 +517,14 @@ void EditTray::OnMouseClick(LMouse &m)
 	}
 }
 
-class ProjMethodPopup : public GPopupList<DefnInfo>
+class ProjMethodPopup : public LPopupList<DefnInfo>
 {
 	AppWnd *App;
 
 public:
 	LArray<DefnInfo> All;
 
-	ProjMethodPopup(AppWnd *app, LViewI *target) : GPopupList(target, PopupAbove, POPUP_WIDTH)
+	ProjMethodPopup(AppWnd *app, LViewI *target) : LPopupList(target, PopupAbove, POPUP_WIDTH)
 	{
 		App = app;
 	}
@@ -575,11 +575,11 @@ public:
 			Name(Edit->Name());
 		}
 		
-		return GPopupList<DefnInfo>::OnNotify(Ctrl, n);
+		return LPopupList<DefnInfo>::OnNotify(Ctrl, n);
 	}
 };
 
-class ProjSymPopup : public GPopupList<FindSymResult>
+class ProjSymPopup : public LPopupList<FindSymResult>
 {
 	AppWnd *App;
 	IdeDoc *Doc;
@@ -588,7 +588,7 @@ class ProjSymPopup : public GPopupList<FindSymResult>
 public:
 	LArray<FindSymResult*> All;
 
-	ProjSymPopup(AppWnd *app, IdeDoc *doc, LViewI *target) : GPopupList(target, PopupAbove, POPUP_WIDTH)
+	ProjSymPopup(AppWnd *app, IdeDoc *doc, LViewI *target) : LPopupList(target, PopupAbove, POPUP_WIDTH)
 	{
 		App = app;
 		Doc = doc;
@@ -662,7 +662,7 @@ public:
 				App->FindSymbol(Doc->AddDispatch(), s, AllPlatforms != 0);
 		}
 		
-		return GPopupList<FindSymResult>::OnNotify(Ctrl, n);
+		return LPopupList<FindSymResult>::OnNotify(Ctrl, n);
 	}
 };
 
@@ -729,14 +729,14 @@ void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LSt
 	Perfect.Add(Partial);
 }
 
-class ProjFilePopup : public GPopupList<ProjectNode>
+class ProjFilePopup : public LPopupList<ProjectNode>
 {
 	AppWnd *App;
 
 public:
 	LArray<ProjectNode*> Nodes;
 
-	ProjFilePopup(AppWnd *app, LViewI *target) : GPopupList(target, PopupAbove, POPUP_WIDTH)
+	ProjFilePopup(AppWnd *app, LViewI *target) : LPopupList(target, PopupAbove, POPUP_WIDTH)
 	{
 		App = app;
 	}
@@ -781,7 +781,7 @@ public:
 				Update(s);
 		}
 		
-		return GPopupList<ProjectNode>::OnNotify(Ctrl, n);
+		return LPopupList<ProjectNode>::OnNotify(Ctrl, n);
 	}
 };
 
@@ -897,8 +897,8 @@ bool IdeDocPrivate::IsFile(const char *File)
 	if (!f)
 		return false;
 
-	GToken doc(f, DIR_STR);
-	GToken in(File, DIR_STR);
+	LToken doc(f, DIR_STR);
+	LToken in(File, DIR_STR);
 	ssize_t in_pos = (ssize_t)in.Length() - 1;
 	ssize_t doc_pos = (ssize_t)doc.Length() - 1;
 	while (in_pos >= 0 && doc_pos >= 0)

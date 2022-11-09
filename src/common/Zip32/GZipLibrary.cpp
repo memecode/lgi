@@ -1,8 +1,8 @@
 #include "Lgi.h"
-#include "GZipLibrary.h"
+#include "LZipLibrary.h"
 
 #ifdef WIN32
-class GZipLibPrivate : public LLibrary
+class LZipLibPrivate : public LLibrary
 {
 public:
 	typedef void	(EXPENTRY *_ZpVersion)(ZpVer far *);
@@ -20,7 +20,7 @@ public:
 	ZIPUSERFUNCTIONS UserFuncs;
 	int InitResult;
 
-	static GLogTarget *Log;
+	static LLogTarget *Log;
 
 	static int WINAPI DllPrint(LPSTR str, unsigned long i)
 	{
@@ -75,7 +75,7 @@ public:
 		return 0;
 	}
 	
-	GZipLibPrivate() : LLibrary("Zip32")
+	LZipLibPrivate() : LLibrary("Zip32")
 	{
 		#ifdef _DEBUG
 		if (!IsLoaded())
@@ -160,19 +160,19 @@ public:
 	}
 };
 #else
-#include "GToken.h"
-class GZipLibPrivate
+#include "LToken.h"
+class LZipLibPrivate
 {
 	bool HasZip;
 
 public:
-	static GLogTarget *Log;
+	static LLogTarget *Log;
 	
-	GZipLibPrivate()
+	LZipLibPrivate()
 	{
 		HasZip = 0;
 		
-		GToken Path(getenv("PATH"), ":");
+		LToken Path(getenv("PATH"), ":");
 		for (int i=0; i<Path.Length(); i++)
 		{
 			char p[256];
@@ -224,20 +224,20 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 // Zip lib support
 
-GLogTarget *GZipLibPrivate::Log = 0;
+LLogTarget *LZipLibPrivate::Log = 0;
 
-GZipLibrary::GZipLibrary(GLogTarget *log)
+LZipLibrary::LZipLibrary(LLogTarget *log)
 {
-	d = new GZipLibPrivate;
+	d = new LZipLibPrivate;
 	d->Log = log;
 }
 
-bool GZipLibrary::IsOk()
+bool LZipLibrary::IsOk()
 {
 	return d->IsOk();
 }
 
-bool GZipLibrary::Zip(char *ZipFile, char *BaseDir, List<char> &Extensions, char *AfterDate)
+bool LZipLibrary::Zip(char *ZipFile, char *BaseDir, List<char> &Extensions, char *AfterDate)
 {
 	return d->Zip(ZipFile, BaseDir, Extensions, AfterDate);
 }

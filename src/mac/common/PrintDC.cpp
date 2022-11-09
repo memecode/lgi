@@ -1,7 +1,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/GdiLeak.h"
 
-class GPrintDCPrivate
+class LPrintDCPrivate
 {
 public:
 	int x, y;
@@ -12,7 +12,7 @@ public:
 	LString PrintJobName;
 	LString PrinterName;
 
-	GPrintDCPrivate()
+	LPrintDCPrivate()
 	{
 		PageOpen = false;
 		DocOpen = false;
@@ -24,7 +24,7 @@ public:
 LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName) :
 	LScreenDC((LPrintDcParams*)Handle)
 {
-	d = new GPrintDCPrivate;
+	d = new LPrintDCPrivate;
 	d->PrintJobName = PrintJobName;
 	d->PrinterName = PrinterName;
 	

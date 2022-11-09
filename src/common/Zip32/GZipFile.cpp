@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #include "Lgi.h"
-#include "GZipFile.h"
+#include "LZipFile.h"
 #include "Lzw.h"
 
 #define LOCAL_HEADER_MAGIC		0x04034b50
@@ -55,17 +55,17 @@ public:
 	}
 };
 
-class GZipFilePrivate
+class LZipFilePrivate
 {
 public:
 	LFile Zip;
 	LArray<ZipLocalHeader*> Files;
 
-	GZipFilePrivate()
+	LZipFilePrivate()
 	{
 	}
 
-	~GZipFilePrivate()
+	~LZipFilePrivate()
 	{
 		Empty();
 	}
@@ -96,7 +96,7 @@ public:
 	}
 };
 
-class GZipDir : public LDirectory
+class LZipDir : public LDirectory
 {
 	int Cur;
 	LArray<ZipLocalHeader*> *Files;
@@ -111,7 +111,7 @@ class GZipDir : public LDirectory
 	}
 
 public:
-	GZipDir(LArray<ZipLocalHeader*> *files)
+	LZipDir(LArray<ZipLocalHeader*> *files)
 	{
 		Cur = -1;
 		Files = files;
@@ -164,31 +164,31 @@ public:
 	bool IsDir() { return false; }
 	bool IsReadOnly() { return false; }
 	bool IsHidden() { return false; }
-	LDirectory *Clone() { return new GZipDir(Files); }
+	LDirectory *Clone() { return new LZipDir(Files); }
 	int GetType() { return VT_FILE; }
 };
 
-GZipFile::GZipFile(char *zip)
+LZipFile::LZipFile(char *zip)
 {
-	d = new GZipFilePrivate;
+	d = new LZipFilePrivate;
 	if (zip)
 	{
 		Open(zip, O_READWRITE);
 	}
 }
 
-GZipFile::~GZipFile()
+LZipFile::~LZipFile()
 {
 	Close();
 	DeleteObj(d);
 }
 
-bool GZipFile::IsOpen()
+bool LZipFile::IsOpen()
 {
 	return d->Zip.IsOpen();
 }
 
-bool GZipFile::Open(char *Zip, int Mode)
+bool LZipFile::Open(char *Zip, int Mode)
 {
 	d->Empty();
 
@@ -264,7 +264,7 @@ bool GZipFile::Open(char *Zip, int Mode)
 	return d->Files.Length() > 0;
 }
 
-void GZipFile::Close()
+void LZipFile::Close()
 {
 	if (IsOpen())
 	{
@@ -272,12 +272,12 @@ void GZipFile::Close()
 	}
 }
 
-LDirectory *GZipFile::List()
+LDirectory *LZipFile::List()
 {
-	return new GZipDir(&d->Files);
+	return new LZipDir(&d->Files);
 }
 
-bool GZipFile::Decompress(char *File, LStream *To)
+bool LZipFile::Decompress(char *File, LStream *To)
 {
 	ZipLocalHeader *h = d->Find(File);
 	if (h)
@@ -331,12 +331,12 @@ bool GZipFile::Decompress(char *File, LStream *To)
 	return false;
 }
 
-bool GZipFile::Compress(char *File, LStream *From)
+bool LZipFile::Compress(char *File, LStream *From)
 {
 	return false;
 }
 
-bool GZipFile::Delete(char *File)
+bool LZipFile::Delete(char *File)
 {
 	return false;
 }

@@ -279,7 +279,7 @@ class LgiClass LApplicator
 protected:
 	LBmpMem *Dest;
 	LBmpMem *Alpha;
-	GPalette *Pal;
+	LPalette *Pal;
 	int Op;
 
 public:
@@ -312,10 +312,10 @@ public:
 	/// Gets the flags in operation
 	int GetFlags() { return (Dest) ? Dest->Flags : 0; }
 	/// Gets the palette
-	GPalette *GetPal() { return Pal; }
+	LPalette *GetPal() { return Pal; }
 
 	/// Sets the bitmap to write onto
-	virtual bool SetSurface(LBmpMem *d, GPalette *p = 0, LBmpMem *a = 0) = 0; // sets Dest, returns FALSE on error
+	virtual bool SetSurface(LBmpMem *d, LPalette *p = 0, LBmpMem *a = 0) = 0; // sets Dest, returns FALSE on error
 	/// Sets the current position to an x,y
 	virtual void SetPtr(int x, int y) = 0;			// calculates Ptr from x, y
 	/// Moves the current position one pixel left
@@ -334,7 +334,7 @@ public:
 	/// Draws a rectangle starting from the current position, 'x' pixels across and 'y' pixels down
 	virtual void Rectangle(int x, int y) = 0;
 	/// Copies bitmap data to the current position
-	virtual bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = 0) = 0;
+	virtual bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha = 0) = 0;
 };
 
 /// Creates applications from parameters.
@@ -398,7 +398,7 @@ class LgiClass LSurface : public LRefCount, public LDom
 	friend class LView;
 	friend class LWindow;
 	friend class LVariant;
-	friend class GRegionClipDC;
+	friend class LRegionClipDC;
 	friend class LMemDC;
 
 	void Init();
@@ -410,7 +410,7 @@ protected:
 	LColourSpace	ColourSpace;
 	LBmpMem			*pMem;
 	LSurface		*pAlphaDC;
-	GPalette		*pPalette;
+	LPalette		*pPalette;
 	LApplicator		*pApp;
 	LApplicator		*pAppCache[GDC_CACHE_SIZE];
 	int				OriginX, OriginY;
@@ -502,8 +502,8 @@ public:
 	virtual LApplicator *Applicator();
 
 	// Palette
-	virtual GPalette *Palette();
-	virtual void Palette(GPalette *pPal, bool bOwnIt = true);
+	virtual LPalette *Palette();
+	virtual void Palette(LPalette *pPal, bool bOwnIt = true);
 
 	// Clip region
 	virtual LRect ClipRgn(LRect *Rgn);
@@ -774,8 +774,8 @@ public:
 	int X() override;
 	int Y() override;
 
-	GPalette *Palette() override;
-	void Palette(GPalette *pPal, bool bOwnIt = true) override;
+	LPalette *Palette() override;
+	void Palette(LPalette *pPal, bool bOwnIt = true) override;
 
 	uint LineStyle() override;
 	uint LineStyle(uint Bits, uint32_t Reset = 0x80000000) override;
@@ -1059,7 +1059,7 @@ class LgiClass LPrintDC
 	: public LSurface
 #endif
 {
-	class GPrintDCPrivate *d;
+	class LPrintDCPrivate *d;
 
 public:
 	LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName = NULL);
@@ -1134,7 +1134,7 @@ public:
 
 	// Which will give you a palette that
 	// includes everything
-	GPalette *GetPalette();
+	LPalette *GetPalette();
 
 	// Convert a bitmap to the global palette
 	COLOUR GetColour(COLOUR c24);
@@ -1238,8 +1238,8 @@ public:
 	double GetGamma();
 
 	// Palette
-	void SetSystemPalette(int Start, int Size, GPalette *Pal);
-	GPalette *GetSystemPalette();
+	void SetSystemPalette(int Start, int Size, LPalette *Pal);
+	LPalette *GetSystemPalette();
 	void SetColourPaletteType(int Type);	// Type = PALTYPE_xxx define
 	COLOUR GetColour(COLOUR Rgb24, LSurface *pDC = NULL);
 
@@ -1347,7 +1347,7 @@ LgiFunc LSurface *ConvertDC
 );
 
 /// Converts a colour to a different bit depth
-LgiFunc COLOUR CBit(int DstBits, COLOUR c, int SrcBits = 24, GPalette *Pal = 0);
+LgiFunc COLOUR CBit(int DstBits, COLOUR c, int SrcBits = 24, LPalette *Pal = 0);
 
 #ifdef __cplusplus
 /// blends 2 colours by the amount specified
@@ -1386,7 +1386,7 @@ public:
 	int Colours;
 	
 	/// Specific palette to reduce to
-	GPalette *Palette;
+	LPalette *Palette;
 
 	LReduceOptions()
 	{
@@ -1398,7 +1398,7 @@ public:
 };
 
 /// Reduces a images colour depth
-LgiFunc bool LReduceBitDepth(LSurface *pDC, int Bits, GPalette *Pal = 0, LReduceOptions *Reduce = 0);
+LgiFunc bool LReduceBitDepth(LSurface *pDC, int Bits, LPalette *Pal = 0, LReduceOptions *Reduce = 0);
 
 struct LColourStop
 {

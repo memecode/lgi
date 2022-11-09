@@ -107,8 +107,8 @@ static LArray<LTextView3*> Ctrls;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-class GDocFindReplaceParams3 :
-	public GDocFindReplaceParams,
+class LDocFindReplaceParams3 :
+	public LDocFindReplaceParams,
 	public LMutex
 {
 public:
@@ -120,7 +120,7 @@ public:
 	bool SelectionOnly;
 	bool SearchUpwards;
 	
-	GDocFindReplaceParams3() : LMutex("GDocFindReplaceParams3")
+	LDocFindReplaceParams3() : LMutex("LDocFindReplaceParams3")
 	{
 		MatchCase = false;
 		MatchWord = false;
@@ -149,7 +149,7 @@ public:
 
 	// Find/Replace Params
 	bool OwnFindReplaceParams;
-	GDocFindReplaceParams3 *FindReplaceParams;
+	LDocFindReplaceParams3 *FindReplaceParams;
 
 	// Map buffer
 	ssize_t MapLen;
@@ -182,7 +182,7 @@ public:
 		MapLen = 0;
 		
 		OwnFindReplaceParams = true;
-		FindReplaceParams = new GDocFindReplaceParams3;
+		FindReplaceParams = new LDocFindReplaceParams3;
 	}
 	
 	~LTextView3Private()
@@ -229,7 +229,7 @@ struct Change : public LRange
 	LArray<char16> Txt;
 };
 
-struct LTextView3Undo : public GUndoEvent
+struct LTextView3Undo : public LUndoEvent
 {
 	LTextView3 *View;
 	LArray<Change> Changes;
@@ -268,7 +268,7 @@ struct LTextView3Undo : public GUndoEvent
 		}
 	}
 
-	// GUndoEvent
+	// LUndoEvent
     void ApplyChange()
 	{
 		View->UndoOn = false;
@@ -2617,7 +2617,7 @@ void LTextView3::UpdateScrollBars(bool Reset)
 
 	int DisplayLines = Y() / LineY;
 	ssize_t Lines = std::max(PartialPourLines, Line.Length());
-	VScroll->SetRange(LRange(0, Lines));
+	VScroll->SetRange(Lines);
 	if (VScroll)
 	{
 		VScroll->SetPage(DisplayLines);
@@ -2734,12 +2734,12 @@ void LTextView3::DoGoto(std::function<void(bool)> Callback)
 	});
 }
 
-GDocFindReplaceParams *LTextView3::CreateFindReplaceParams()
+LDocFindReplaceParams *LTextView3::CreateFindReplaceParams()
 {
-	return new GDocFindReplaceParams3;
+	return new LDocFindReplaceParams3;
 }
 
-void LTextView3::SetFindReplaceParams(GDocFindReplaceParams *Params)
+void LTextView3::SetFindReplaceParams(LDocFindReplaceParams *Params)
 {
 	if (Params)
 	{
@@ -2749,7 +2749,7 @@ void LTextView3::SetFindReplaceParams(GDocFindReplaceParams *Params)
 		}
 		
 		d->OwnFindReplaceParams = false;
-		d->FindReplaceParams = (GDocFindReplaceParams3*) Params;
+		d->FindReplaceParams = (LDocFindReplaceParams3*) Params;
 	}
 }
 

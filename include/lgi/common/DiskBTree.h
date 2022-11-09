@@ -1,13 +1,13 @@
 #ifndef _GDiskBTree_h_
 #define _GDiskBTree_h_
 
-class GDiskBTree
+class LDiskBTree
 {
-	class GDiskBTreePrivate *d;
+	class LDiskBTreePrivate *d;
 	
 public:
-	GDiskBTree(char *File, int DataSize = sizeof(int));
-	virtual ~GDiskBTree();
+	LDiskBTree(char *File, int DataSize = sizeof(int));
+	virtual ~LDiskBTree();
 
 	// File
 	bool Open(char *File);

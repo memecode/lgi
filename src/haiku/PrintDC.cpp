@@ -3,7 +3,7 @@
 #define PS_SCALE			10
 
 ///////////////////////////////////////////////////////////////////////////////////////
-class GPrintDCPrivate // : public GCups
+class LPrintDCPrivate // : public GCups
 {
 public:
 	class PrintPainter *p;
@@ -13,13 +13,13 @@ public:
 	LColour c;
 	LRect Clip;
 	
-	GPrintDCPrivate()
+	LPrintDCPrivate()
 	{
 		p = 0;
 		Pages = 0;
 	}
 	
-	~GPrintDCPrivate()
+	~LPrintDCPrivate()
 	{
 	}
 	
@@ -36,7 +36,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////
 LPrintDC::LPrintDC(void *Handle, const char *PrintJobName, const char *PrinterName)
 {
-	d = new GPrintDCPrivate();
+	d = new LPrintDCPrivate();
 	d->PrintJobName = PrintJobName;
 	d->PrinterName = PrinterName;
 	ColourSpace = CsRgb24;

@@ -651,14 +651,14 @@ LFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 		if (Meter)
 		{
 			Meter->SetDescription("scanlines");
-			Meter->SetRange(LRange(0, cinfo.image_height));
+			Meter->SetRange(cinfo.image_height);
 		}
 
 		// Read
 		if (cinfo.num_components == 1)
 		{
 			// greyscale
-			GPalette *Pal = new GPalette(0, 256);
+			LPalette *Pal = new LPalette(0, 256);
 			if (Pal)
 			{
 				GdcRGB *p = (*Pal)[0];
@@ -971,7 +971,7 @@ LFilter::IoStatus GdcJpeg::_Write(LStream *Out, LSurface *pDC, int Quality, SubS
 	cinfo.dest = &Dest;
 
 	bool GreyScale = FALSE;
-	GPalette *Pal = pDC->Palette();
+	LPalette *Pal = pDC->Palette();
 	if (pDC->GetBits() == 8)
 	{
 		if (Pal)
@@ -1061,7 +1061,7 @@ LFilter::IoStatus GdcJpeg::_Write(LStream *Out, LSurface *pDC, int Quality, SubS
 		if (Meter)
 		{
 			Meter->SetDescription("scanlines");
-			Meter->SetRange(LRange(0, cinfo.image_height));
+			Meter->SetRange(cinfo.image_height);
 		}
 
 		// Write

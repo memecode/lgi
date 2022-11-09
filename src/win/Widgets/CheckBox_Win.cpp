@@ -10,17 +10,17 @@
 #include "LgiRes.h"
 #include "LCssTools.h"
 
-class GCheckBoxPrivate
+class LCheckBoxPrivate
 {
 public:
 	int64 InitState;
 
-	GCheckBoxPrivate()
+	LCheckBoxPrivate()
 	{
 		InitState = 0;
 	}
 
-	~GCheckBoxPrivate()
+	~LCheckBoxPrivate()
 	{
 	}
 };
@@ -28,7 +28,7 @@ public:
 LCheckBox::LCheckBox(int id, int x, int y, int cx, int cy, const char *name, int initstate) :
 	ResObject(Res_CheckBox)
 {
-	d = new GCheckBoxPrivate;
+	d = new LCheckBoxPrivate;
 	d->InitState = initstate;
 
 	Name(name);

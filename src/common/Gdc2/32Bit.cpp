@@ -28,7 +28,7 @@ protected:
 		Pixel *p;
 	};
 	
-	GPalette *PalAlpha;
+	LPalette *PalAlpha;
 
 public:
 	App32Base()
@@ -39,7 +39,7 @@ public:
 	int GetVar(int Var) { return 0; }
 	int SetVar(int Var, NativeInt Value) { return 0; }
 
-	bool SetSurface(LBmpMem *d, GPalette *pal = NULL, LBmpMem *a = NULL)
+	bool SetSurface(LBmpMem *d, LPalette *pal = NULL, LBmpMem *a = NULL)
 	{
 		if (d && d->Cs == ColourSpace)
 		{
@@ -170,7 +170,7 @@ public:
 		return true;
 	}
 	
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = NULL)
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha = NULL)
 	{
 		if (!Src)
 			return false;
@@ -464,7 +464,7 @@ public:
 		}
 	}
 	
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = NULL)
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha = NULL)
 	{
 		if (!Src)
 			return false;
@@ -637,7 +637,7 @@ public:
 				this->u8 += ystep;																\
 			}																					\
 		}																						\
-		bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = 0) { return false; }			\
+		bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha = 0) { return false; }			\
 	};
 
 #define CreateOpAlpha(name, opcode, alpha)														\
@@ -675,7 +675,7 @@ public:
 				this->u8 += ystep;																\
 			}																					\
 		}																						\
-		bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = 0) { return false; }			\
+		bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha = 0) { return false; }			\
 	};
 
 

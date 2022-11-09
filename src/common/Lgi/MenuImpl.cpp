@@ -13,8 +13,8 @@ static MenuItemImpl *Over = 0;
 class SubMenuImplPrivate
 {
 public:
-	GSubMenu *Sub;
-	GMenuItem *Clicked;
+	LSubMenu *Sub;
+	LMenuItem *Clicked;
 	
 	SubMenuImplPrivate()
 	{
@@ -24,11 +24,11 @@ public:
 	
 	void Move(int Inc)
 	{
-		GSubMenu *p = Sub->GetParent() ? Sub->GetParent()->GetParent() : 0;
+		LSubMenu *p = Sub->GetParent() ? Sub->GetParent()->GetParent() : 0;
 		if (p)
 		{
 			int Index = p->Items.IndexOf(Sub->GetParent());
-			GMenuItem *i = p->Items[Index + Inc];
+			LMenuItem *i = p->Items[Index + Inc];
 			if (i)
 			{
 				i->Info->ShowSub();
@@ -42,14 +42,14 @@ public:
 		if (Over &&
 			Over->Item())
 		{
-			GSubMenu *s = Over->Item()->GetParent();
+			LSubMenu *s = Over->Item()->GetParent();
 			if (s == Sub)
 			{
 				int Index = s->Items.IndexOf(Over->Item());
 				int NewIdx = Index + Inc;
 				while (NewIdx >= 0 && NewIdx < s->Items.Length())
 				{
-					GMenuItem *Sel = s->Items[NewIdx];
+					LMenuItem *Sel = s->Items[NewIdx];
 					if (Sel)
 					{
 						if (Sel->Separator() || !Sel->Enabled())
@@ -68,7 +68,7 @@ public:
 			}
 			else
 			{
-				GMenuItem *i = Sub->Items.First();
+				LMenuItem *i = Sub->Items.First();
 				if (i)
 				{
 					NewOver = i->Info;
@@ -77,7 +77,7 @@ public:
 		}
 		else
 		{
-			GMenuItem *i = Sub->Items.First();
+			LMenuItem *i = Sub->Items.First();
 			if (i)
 			{
 				NewOver = i->Info;
@@ -99,7 +99,7 @@ public:
 	}
 };
 
-SubMenuImpl::SubMenuImpl(GSubMenu *Sub) : LPopup(0)
+SubMenuImpl::SubMenuImpl(LSubMenu *Sub) : LPopup(0)
 {
 	d = new SubMenuImplPrivate;
 	d->Sub = Sub;
@@ -111,7 +111,7 @@ SubMenuImpl::~SubMenuImpl()
 	DeleteObj(d);
 }
 
-GSubMenu *SubMenuImpl::GetSub()
+LSubMenu *SubMenuImpl::GetSub()
 {
 	return d->Sub;
 }
@@ -145,7 +145,7 @@ bool SubMenuImpl::OnKey(LKey &k)
 				{
 					if (k.Down())
 					{
-						for (GMenuItem *i = d->Sub->Items.First(); i; i = d->Sub->Items.Next())
+						for (LMenuItem *i = d->Sub->Items.First(); i; i = d->Sub->Items.Next())
 						{
 							char *n = i->Name();
 							if (n)
@@ -274,7 +274,7 @@ void SubMenuImpl::Layout(int Bx, int By)
 		int y = 0;
 		
 		int n = 0;
-		for (GMenuItem *i=d->Sub->Items[c * Col]; i && n < Col; i=d->Sub->Items.Next(), n++)
+		for (LMenuItem *i=d->Sub->Items[c * Col]; i && n < Col; i=d->Sub->Items.Next(), n++)
 		{
 			LPoint Size;
 			i->_Measure(Size);
@@ -282,7 +282,7 @@ void SubMenuImpl::Layout(int Bx, int By)
 		}
 
 		n = 0;
-		for (GMenuItem *i=d->Sub->Items[c * Col]; i && n < Col; i=d->Sub->Items.Next(), n++)
+		for (LMenuItem *i=d->Sub->Items[c * Col]; i && n < Col; i=d->Sub->Items.Next(), n++)
 		{
 			LPoint Size;
 			i->_Measure(Size);
@@ -342,10 +342,10 @@ void SubMenuImpl::Visible(bool b)
 		}
 		Over = d->Sub->Items[0] ? d->Sub->Items[0]->Info : 0;
 
-		GSubMenu *Parent = d->Sub->Parent ? d->Sub->Parent->Parent : 0;
+		LSubMenu *Parent = d->Sub->Parent ? d->Sub->Parent->Parent : 0;
 		if (Parent)
 		{
-			for (GMenuItem *i = Parent->Items.First(); i; i = Parent->Items.Next())
+			for (LMenuItem *i = Parent->Items.First(); i; i = Parent->Items.Next())
 			{
 				if (i->Child &&
 					i->Child->Info != this)
@@ -364,10 +364,10 @@ void SubMenuImpl::Visible(bool b)
 	}
 	else
 	{
-		GSubMenu *s = d->Sub;
+		LSubMenu *s = d->Sub;
 		if (s)
 		{
-			for (GMenuItem *i = s->Items.First(); i; i = s->Items.Next())
+			for (LMenuItem *i = s->Items.First(); i; i = s->Items.Next())
 			{
 				if (i->Child &&
 					i->Child->Info != this)
@@ -418,9 +418,9 @@ MenuImpl::~MenuImpl()
 
 bool MenuImpl::HasSubOpen()
 {
-	for (::GMenuItem *i = d->Menu->Items.First(); i; i = d->Menu->Items.Next())
+	for (::LMenuItem *i = d->Menu->Items.First(); i; i = d->Menu->Items.Next())
 	{
-		GSubMenu *s = i->Sub();
+		LSubMenu *s = i->Sub();
 		if (s &&
 		    s->Info &&
 			s->Info->View() &&
@@ -452,7 +452,7 @@ bool MenuImpl::Pour(LRegion &r)
 	int y = 1;
 	int Ly = LSysFont->GetHeight() + 4;
 	
-	for (::GMenuItem *i=d->Menu->Items.First(); i; i=d->Menu->Items.Next())
+	for (::LMenuItem *i=d->Menu->Items.First(); i; i=d->Menu->Items.Next())
 	{
 		LPoint Size;
 		i->_Measure(Size);
@@ -500,7 +500,7 @@ bool MenuImpl::Pour(LRegion &r)
 class MenuItemImplPrivate
 {
 public:
-	::GMenuItem *Item;
+	::LMenuItem *Item;
 	bool Clicked;
 	
 	MenuItemImplPrivate()
@@ -510,7 +510,7 @@ public:
 	}
 };
 
-MenuItemImpl::MenuItemImpl(::GMenuItem *Item)
+MenuItemImpl::MenuItemImpl(::LMenuItem *Item)
 {
 	d = new MenuItemImplPrivate;
 	d->Item = Item;
@@ -528,7 +528,7 @@ MenuItemImpl::~MenuItemImpl()
 	DeleteObj(d);
 }
 
-::GMenuItem *MenuItemImpl::Item()
+::LMenuItem *MenuItemImpl::Item()
 {
 	return d->Item;
 }
@@ -567,7 +567,7 @@ void MenuItemImpl::Activate()
 
 void MenuItemImpl::HideSub(bool SetClick)
 {
-	for (GSubMenu *	s = d->Item->GetParent();
+	for (LSubMenu *	s = d->Item->GetParent();
 					s;
 					s = s->GetParent() ? s->GetParent()->GetParent() : 0)
 	{
@@ -697,7 +697,7 @@ void MenuItemImpl::OnMouseEnter(LMouse &m)
 				d->Item->GetParent() &&
 				d->Item->GetParent()->Info)
 			{
-				GSubMenu *Sub = d->Item->GetParent();
+				LSubMenu *Sub = d->Item->GetParent();
 				MenuImpl *Impl = Sub->Info->IsMenu();
 				if (Impl)
 				{

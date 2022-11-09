@@ -168,7 +168,7 @@ UserAction::~UserAction()
 }
 
 /****************************** Cursor Class ********************************************************************************/
-GCursor::GCursor()
+LCursor::LCursor()
 {
 	x = 0;
 	y = 0;
@@ -176,16 +176,16 @@ GCursor::GCursor()
 	Offset = 0;
 }
 
-GCursor::~GCursor()
+LCursor::~LCursor()
 {
 }
 
-GCursor::operator char*()
+LCursor::operator char*()
 {
 	return Parent->Data + (Offset + x);
 }
 
-char *GCursor::GetStr()
+char *LCursor::GetStr()
 {
 	if (Parent)
 	{
@@ -194,7 +194,7 @@ char *GCursor::GetStr()
 	return NULL;
 }
 
-void GCursor::GoUpLine()
+void LCursor::GoUpLine()
 {
 	if (y > 0)
 	{
@@ -220,7 +220,7 @@ void GCursor::GoUpLine()
 	}
 }
 
-void GCursor::GoDownLine()
+void LCursor::GoDownLine()
 {
 	if (y < Parent->Lines-1)
 	{
@@ -238,22 +238,22 @@ void GCursor::GoDownLine()
 	}
 }
 
-bool GCursor::AtEndOfLine()
+bool LCursor::AtEndOfLine()
 {
 	return x == Length;
 }
 
-bool GCursor::AtBeginningOfLine()
+bool LCursor::AtBeginningOfLine()
 {
 	return x == 0;
 }
 
-void GCursor::SetX(int X)
+void LCursor::SetX(int X)
 {
 	x = limit(X, 0, Length);
 }
 
-void GCursor::SetY(int Y)
+void LCursor::SetY(int Y)
 {
 	Y = limit(Y, 0, Parent->Lines-1);
 	char *c = Parent->FindLine(Y);
@@ -265,7 +265,7 @@ void GCursor::SetY(int Y)
 	}
 }
 
-void GCursor::MoveX(int Dx)
+void LCursor::MoveX(int Dx)
 {
 	char *c = Parent->Data + Offset;
 	while (Dx)
@@ -304,7 +304,7 @@ void GCursor::MoveX(int Dx)
 	}
 }
 
-void GCursor::MoveY(int Dy)
+void LCursor::MoveY(int Dy)
 {
 	while (Dy)
 	{
@@ -321,7 +321,7 @@ void GCursor::MoveY(int Dy)
 	}
 }
 
-int GCursor::CursorX(int TabSize)
+int LCursor::CursorX(int TabSize)
 {
 	char *c = Parent->Data + Offset;
 	int cx = 0;
@@ -699,7 +699,7 @@ bool TextDocument::MoveLock(TextLock *Lock, int Dy)
 	return Status;
 }
 
-bool TextDocument::CursorCreate(GCursor *c, int X, int Y)
+bool TextDocument::CursorCreate(LCursor *c, int X, int Y)
 {
 	bool Status = FALSE;
 	if (c)
@@ -717,7 +717,7 @@ bool TextDocument::CursorCreate(GCursor *c, int X, int Y)
 	return Status;
 }
 
-bool TextDocument::Insert(GCursor *At, char *Text, int Len)
+bool TextDocument::Insert(LCursor *At, char *Text, int Len)
 {
 	bool Status = FALSE;
 
@@ -766,7 +766,7 @@ bool TextDocument::Insert(GCursor *At, char *Text, int Len)
 	return Status;
 }
 
-bool TextDocument::Delete(GCursor *From, int Len, char *Buffer)
+bool TextDocument::Delete(LCursor *From, int Len, char *Buffer)
 {
 	bool Status = FALSE;
 
@@ -826,7 +826,7 @@ void TextDocument::TruncateQueue()
 	}
 }
 
-void TextDocument::ApplyAction(UserAction *a, GCursor &c, bool Reverse)
+void TextDocument::ApplyAction(UserAction *a, LCursor &c, bool Reverse)
 {
 	if (a)
 	{
@@ -851,7 +851,7 @@ void TextDocument::ApplyAction(UserAction *a, GCursor &c, bool Reverse)
 	}
 }
 
-void TextDocument::Undo(GCursor &c)
+void TextDocument::Undo(LCursor &c)
 {
 	if (UndoPos > 0)
 	{
@@ -860,7 +860,7 @@ void TextDocument::Undo(GCursor &c)
 	}
 }
 
-void TextDocument::Redo(GCursor &c)
+void TextDocument::Redo(LCursor &c)
 {
 	if (UndoPos < Queue.GetItems())
 	{
@@ -1252,7 +1252,7 @@ bool TextView::OnInsertText(char *Text, int Len)
 	return Status;
 }
 
-bool TextView::OnDeleteText(GCursor *c, int Len, bool Clip)
+bool TextView::OnDeleteText(LCursor *c, int Len, bool Clip)
 {
 	bool Status = false;
 
@@ -1313,11 +1313,11 @@ bool TextView::OnMoveCursor(int Dx, int Dy, bool NoSelect)
 	bool Status = FALSE;
 	bool StartSelect = (Flags & TVF_SHIFT) AND !(Flags & TVF_SELECTION);
 	bool EndSelect = !(Flags & TVF_SHIFT) AND (Flags & TVF_SELECTION);
-	GCursor Old = User;
+	LCursor Old = User;
 
 	if (EndSelect)
 	{
-		GCursor S, E;
+		LCursor S, E;
 		if (Start < End)
 		{
 			S = Start;
@@ -1399,7 +1399,7 @@ void TextView::OnSetHidden(int Hidden)
 
 void TextView::OnSetCursor(int X, int Y)
 {
-	GCursor Old = User;
+	LCursor Old = User;
 
 	User.SetY(Y);
 	User.SetX(X);
@@ -1417,7 +1417,7 @@ void TextView::OnSetCursor(int X, int Y)
 	}
 }
 
-void TextView::OnStartSelection(GCursor *c)
+void TextView::OnStartSelection(LCursor *c)
 {
 	Start = *c;
 	End = *c;
@@ -1435,7 +1435,7 @@ void TextView::OnDeleteSelection(bool Clip)
 {
 	if (Flags & TVF_SELECTION)
 	{
-		GCursor S;
+		LCursor S;
 		int Len;
 		
 		if (Start < End)
@@ -1488,7 +1488,7 @@ bool TextView::Copy()
 {
 	if (Flags & TVF_SELECTION)
 	{
-		GCursor S;
+		LCursor S;
 		int Len;
 
 		if (Start < End)
@@ -1564,7 +1564,7 @@ void TextView::OnEnter(LKey &K)
 	
 	if (bAutoIndent)
 	{
-		GCursor S = User;
+		LCursor S = User;
 		S.MoveY(-1);
 		S.SetX(0);
 

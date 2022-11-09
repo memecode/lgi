@@ -255,7 +255,7 @@ protected:
 
 	// Undo stuff
 	bool UndoOn;
-	GUndo UndoQue;
+	LUndo UndoQue;
 	struct LTextView4Undo *UndoCur;
 
 	// private methods
@@ -382,8 +382,8 @@ public:
 	void UpdateScrollBars(bool Reset = false);
 	ssize_t GetLine();
 	void SetLine(int64_t Line);
-	GDocFindReplaceParams *CreateFindReplaceParams() override;
-	void SetFindReplaceParams(GDocFindReplaceParams *Params) override;
+	LDocFindReplaceParams *CreateFindReplaceParams() override;
+	void SetFindReplaceParams(LDocFindReplaceParams *Params) override;
 
 	// Object Events
 	virtual bool OnFind(	const char16 *Find,

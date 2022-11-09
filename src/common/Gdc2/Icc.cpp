@@ -849,7 +849,7 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-class GIccProfilePrivate
+class LIccProfilePrivate
 {
 public:
 	char *Err;
@@ -862,7 +862,7 @@ public:
 	#endif
 	LArray<LDom*> Dom;
 
-	GIccProfilePrivate()
+	LIccProfilePrivate()
 	{
 		Err = 0;
 		Data = 0;
@@ -874,7 +874,7 @@ public:
 		LAssert(sizeof(IccProfileHeader) == 128);
 	}
 
-	~GIccProfilePrivate()
+	~LIccProfilePrivate()
 	{
 		Empty();
 	}
@@ -933,17 +933,17 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-GIccProfile::GIccProfile(char *file)
+LIccProfile::LIccProfile(char *file)
 {
-	d = new GIccProfilePrivate;
+	d = new LIccProfilePrivate;
 }
 
-GIccProfile::~GIccProfile()
+LIccProfile::~LIccProfile()
 {
 	DeleteObj(d);
 }
 
-bool GIccProfile::CreateNamed(const char *name)
+bool LIccProfile::CreateNamed(const char *name)
 {
 	if (name)
 	{
@@ -965,7 +965,7 @@ bool GIccProfile::CreateNamed(const char *name)
 	return false;
 }
 
-bool GIccProfile::Open(const char *file)
+bool LIccProfile::Open(const char *file)
 {
 	LFile f;
 	if (file && f.Open(file, O_READ))
@@ -975,7 +975,7 @@ bool GIccProfile::Open(const char *file)
 	return false;
 }
 
-bool GIccProfile::Open(LStream *Stream)
+bool LIccProfile::Open(LStream *Stream)
 {
 	if (Stream)
 	{
@@ -1027,7 +1027,7 @@ bool GIccProfile::Open(LStream *Stream)
 	return false;
 }
 
-bool GIccProfile::Save(const char *file)
+bool LIccProfile::Save(const char *file)
 {
 	LFile f;
 	if (f.Open(file, O_WRITE))
@@ -1038,7 +1038,7 @@ bool GIccProfile::Save(const char *file)
 	return false;
 }
 
-bool GIccProfile::Save(LStream *stream)
+bool LIccProfile::Save(LStream *stream)
 {
 	if (stream)
 	{
@@ -1051,22 +1051,22 @@ bool GIccProfile::Save(LStream *stream)
 	return false;
 }
 
-char *GIccProfile::GetError()
+char *LIccProfile::GetError()
 {
 	return d->Err;
 }
 
-char *GIccProfile::GetName()
+char *LIccProfile::GetName()
 {
 	return d->Name;
 }
 
-bool GIccProfile::Convert(COLOUR *Out32, COLOUR In32, GIccProfile *Profile)
+bool LIccProfile::Convert(COLOUR *Out32, COLOUR In32, LIccProfile *Profile)
 {
 	return false;
 }
 
-bool GIccProfile::Convert(LSurface *Dest, LSurface *Src, GIccProfile *Profile)
+bool LIccProfile::Convert(LSurface *Dest, LSurface *Src, LIccProfile *Profile)
 {
 	#if USE_LCMS
 	if (!Dest || !Src || !Profile)
@@ -1157,7 +1157,7 @@ bool GIccProfile::Convert(LSurface *Dest, LSurface *Src, GIccProfile *Profile)
 	return false;
 }
 
-bool GIccProfile::GetVariant(const char *Name, LVariant &Value, const char *Array)
+bool LIccProfile::GetVariant(const char *Name, LVariant &Value, const char *Array)
 {
 	if (!Name)
 		return false;

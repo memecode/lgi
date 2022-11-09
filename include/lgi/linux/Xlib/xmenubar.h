@@ -8,7 +8,7 @@
 /*
 class QMenuData;
 class QMenuBar;
-class GMenuItem;
+class LMenuItem;
 
 class QMenuItem : public QWidget
 {
@@ -24,7 +24,7 @@ class QMenuItem : public QWidget
 	int y();
 
 public:
-	QMenuItem(QMenuBar *Menu, QMenuData *Parent, GMenuItem *Item);
+	QMenuItem(QMenuBar *Menu, QMenuData *Parent, LMenuItem *Item);
 	~QMenuItem();
 
 	// Api
@@ -64,8 +64,8 @@ public:
 	~QMenuData();
 
 	// Api
-	virtual QMenuItem *insertItem(GMenuItem *item, int id, int where = -1); // char *text, int cmd
-	virtual QMenuItem *insertItem(GMenuItem *item, QPopupMenu *sub, int where = -1);
+	virtual QMenuItem *insertItem(LMenuItem *item, int id, int where = -1); // char *text, int cmd
+	virtual QMenuItem *insertItem(LMenuItem *item, QPopupMenu *sub, int where = -1);
 	virtual QMenuItem *insertSeparator(int where = -1);
 	virtual void deleteItem(QMenuItem *i);
 

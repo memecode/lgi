@@ -14,13 +14,13 @@
 #define LGI_RAD				(360/(2*LGI_PI))
 
 /****************************** Classes *************************************************************************************/
-GPalette::GPalette()
+LPalette::LPalette()
 {
 	Data = 0;
 	Size = 0;
 }
 
-GPalette::GPalette(GPalette *pPal)
+LPalette::LPalette(LPalette *pPal)
 {
 	// printf("%s:%i - %p::new(%p) %i\n", _FL, this, pPal, pPal?pPal->GetSize():0);
 
@@ -29,7 +29,7 @@ GPalette::GPalette(GPalette *pPal)
 	Set(pPal);
 }
 
-GPalette::GPalette(uchar *pPal, int s)
+LPalette::LPalette(uchar *pPal, int s)
 {
 	// printf("%s:%i - %p::new(%p) %i\n", _FL, this, pPal, s);
 
@@ -38,13 +38,13 @@ GPalette::GPalette(uchar *pPal, int s)
 	Set(pPal, s);
 }
 
-GPalette::~GPalette()
+LPalette::~LPalette()
 {
 	DeleteArray(Data);
 	Size = 0;
 }
 
-void GPalette::Set(GPalette *pPal)
+void LPalette::Set(LPalette *pPal)
 {
 	if (pPal == this)
 		return;
@@ -69,7 +69,7 @@ void GPalette::Set(GPalette *pPal)
 	}
 }
 
-void GPalette::Set(int Index, int r, int g, int b)
+void LPalette::Set(int Index, int r, int g, int b)
 {
 	GdcRGB *rgb = (*this)[Index];
 	if (rgb)
@@ -80,7 +80,7 @@ void GPalette::Set(int Index, int r, int g, int b)
 	}
 }
 
-void GPalette::Set(uchar *pPal, int s)
+void LPalette::Set(uchar *pPal, int s)
 {
 	// printf("%s:%i - SetPal %p %i\n", _FL, pPal, s);
 
@@ -103,12 +103,12 @@ void GPalette::Set(uchar *pPal, int s)
 	}
 }
 
-bool GPalette::Update()
+bool LPalette::Update()
 {
 	return true;
 }
 
-bool GPalette::SetSize(int s)
+bool LPalette::SetSize(int s)
 {
 	// printf("%s:%i - SetSz %i\n", _FL, s);
 
@@ -130,7 +130,7 @@ bool GPalette::SetSize(int s)
 	return false;
 }
 
-void GPalette::SwapRAndB()
+void LPalette::SwapRAndB()
 {
 	if (Data)
 	{
@@ -145,7 +145,7 @@ void GPalette::SwapRAndB()
 	Update();
 }
 
-uchar *GPalette::MakeLut(int Bits)
+uchar *LPalette::MakeLut(int Bits)
 {
 	uchar *Lut = 0;
 	// GdcRGB *p = (*this)[0];
@@ -190,7 +190,7 @@ uchar *GPalette::MakeLut(int Bits)
 	return Lut;
 }
 
-int GPalette::MatchRgb(COLOUR Rgb)
+int LPalette::MatchRgb(COLOUR Rgb)
 {
 	if (Data)
 	{
@@ -226,7 +226,7 @@ int GPalette::MatchRgb(COLOUR Rgb)
 	return 0;
 }
 
-void GPalette::CreateGreyScale()
+void LPalette::CreateGreyScale()
 {
 	SetSize(256);
 	GdcRGB *p = (*this)[0];
@@ -241,7 +241,7 @@ void GPalette::CreateGreyScale()
 	}
 }
 
-void GPalette::CreateCube()
+void LPalette::CreateCube()
 {
 	SetSize(256);
 	GdcRGB *p = (*this)[0];
@@ -288,7 +288,7 @@ void TrimWhite(char *s)
 	}
 }
 
-bool GPalette::Load(LFile &F)
+bool LPalette::Load(LFile &F)
 {
 	bool Status = false;
 	char Buf[256];
@@ -327,7 +327,7 @@ bool GPalette::Load(LFile &F)
 	return Status;
 }
 
-bool GPalette::Save(LFile &F, int Format)
+bool LPalette::Save(LFile &F, int Format)
 {
 	bool Status = false;
 
@@ -358,7 +358,7 @@ bool GPalette::Save(LFile &F, int Format)
 	return Status;
 }
 
-bool GPalette::operator ==(GPalette &p)
+bool LPalette::operator ==(LPalette &p)
 {
 	if (GetSize() == p.GetSize())
 	{
@@ -384,7 +384,7 @@ bool GPalette::operator ==(GPalette &p)
 	return false;
 }
 
-bool GPalette::operator !=(GPalette &p)
+bool LPalette::operator !=(LPalette &p)
 {
 	return !((*this) == p);
 }
@@ -434,7 +434,7 @@ public:
 	// Palette
 	double GammaCorrection;
 	uchar GammaTable[256];
-	GPalette *pSysPal;
+	LPalette *pSysPal;
 	LGlobalColour *GlobalColour;
 
 	// Data
@@ -589,7 +589,7 @@ double GdcDevice::GetGamma()
 	return d->GammaCorrection;
 }
 
-void GdcDevice::SetSystemPalette(int Start, int Size, GPalette *pPal)
+void GdcDevice::SetSystemPalette(int Start, int Size, LPalette *pPal)
 {
 	/*
 	if (pPal)
@@ -611,7 +611,7 @@ void GdcDevice::SetSystemPalette(int Start, int Size, GPalette *pPal)
 	*/
 }
 
-GPalette *GdcDevice::GetSystemPalette()
+LPalette *GdcDevice::GetSystemPalette()
 {
 	return d->pSysPal;
 }
@@ -810,7 +810,7 @@ class LGlobalColourPrivate
 {
 public:
 	GlobalColourEntry c[256];
-	GPalette *Global;
+	LPalette *Global;
 	List<LSurface> Cache;
 	int FirstUnused;
 	
@@ -869,7 +869,7 @@ bool LGlobalColour::MakeGlobalPalette()
 	return 0;
 }
 
-GPalette *LGlobalColour::GetPalette()
+LPalette *LGlobalColour::GetPalette()
 {
 	return 0;
 }

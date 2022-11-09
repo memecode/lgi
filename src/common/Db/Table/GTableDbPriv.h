@@ -95,7 +95,7 @@ struct GBlockArray
 struct GTableDbPriv
 {
 	LAutoString BasePath;
-	LArray<GTableDb::Table*> Tables;
+	LArray<LTableDb::Table*> Tables;
 	LStream *Log;
 	
 	GTableDbPriv();	
@@ -105,7 +105,7 @@ struct GTableDbPriv
 struct GTablePriv
 {
 	GTableDbPriv *Db;
-	LArray<GTableDb::Field> Fields;
+	LArray<LTableDb::Field> Fields;
 	LAutoPtr<GBlockArray> Data;
 	
 	GTablePriv(GTableDbPriv *db);

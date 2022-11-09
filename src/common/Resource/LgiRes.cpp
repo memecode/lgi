@@ -693,12 +693,12 @@ char *LResources::StringFromRef(int Ref)
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Tree.h"
 
-class GMissingCtrl : public LLayout, public ResObject
+class LMissingCtrl : public LLayout, public ResObject
 {
     LAutoString n;
 
 public:
-    GMissingCtrl(char *name) : ResObject(Res_Custom)
+    LMissingCtrl(char *name) : ResObject(Res_Custom)
     {
         n.Reset(NewStr(name));
     }    
@@ -828,7 +828,7 @@ ResObject *LResources::CreateObject(LXmlTag *t, ResObject *Parent)
 			LView *v = LViewFactory::Create(Control);
 
 			if (!v)
-			    v = new GMissingCtrl(Control);
+			    v = new LMissingCtrl(Control);
 
 			if (v)
 			{
@@ -1333,7 +1333,7 @@ LLanguage *LGetLanguageId()
 			LLanguage *Ret = 0;
 			if (_GetIniField("Locale", "Language", Txt, Lang, sizeof(Lang)))
 			{
-				GToken Langs(Lang, ":,; \t");
+				LToken Langs(Lang, ":,; \t");
 				for (int i=0; i<Langs.Length(); i++)
 				{
 					if (Ret = LFindLang(Langs[i]))

@@ -5,9 +5,9 @@
 		http://forge.mysql.com/wiki/MySQL_Internals_ClientServer_Protocol
 */
 #include "Lgi.h"
-#include "GDb.h"
+#include "LDb.h"
 #include "INet.h"
-#include "GToken.h"
+#include "LToken.h"
 #include "../../src/common/Hash/sha1/sha1.h"
 
 #define CLIENT_LONG_PASSWORD		1		/* new more secure passwords */
@@ -105,7 +105,7 @@ LDbField Null;
 LArray<char> Hex(char *h)
 {
 	LArray<char> r;
-	GToken t(h, " ");
+	LToken t(h, " ");
 	for (int i=0; i<t.Length(); i++)
 	{
 		r.Add(htoi(t[i]));
@@ -745,7 +745,7 @@ bool MysqlDirectRs::DeleteRecord()
 }
 
 //////////////////////////////////////////////////////////////////////
-class MysqlDirectDb : public GDb, public MysqlDirectContext
+class MysqlDirectDb : public LDb, public MysqlDirectContext
 {
 	char Err[1024];
 	
@@ -1031,7 +1031,7 @@ public:
 	}
 };
 
-GDb *OpenMysqlDirectDatabase(char *s)
+LDb *OpenMysqlDirectDatabase(char *s)
 {
 	return new MysqlDirectDb(s);
 }

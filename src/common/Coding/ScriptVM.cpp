@@ -1303,7 +1303,7 @@ enum DbgCtrls
 };
 
 struct LScriptVmDebuggerPriv;
-class GDebugView : public LTextView3
+class LDebugView : public LTextView3
 {
 	LScriptVmDebuggerPriv *d;
 	int CurLine;
@@ -1314,8 +1314,8 @@ class GDebugView : public LTextView3
 	LArray<int> BreakPts;
 	
 public:
-	GDebugView(LScriptVmDebuggerPriv *priv);
-	~GDebugView();
+	LDebugView(LScriptVmDebuggerPriv *priv);
+	~LDebugView();
 
 	void SetError(const char *Err);
 	int GetCurLine() { return CurLine; }
@@ -1348,7 +1348,7 @@ struct LScriptVmDebuggerPriv
 	LBox *Sub;
 	LList *SourceLst;
 	LTabView *Tabs;
-	GDebugView *Text;
+	LDebugView *Text;
 	LList *Locals, *Globals, *Registers, *Stack;
 	LTextLog *Log;
 	LToolBar *Tools;
@@ -1374,7 +1374,7 @@ struct LScriptVmDebuggerPriv
 	}
 };
 
-GDebugView::GDebugView(LScriptVmDebuggerPriv *priv) : LTextView3(IDC_TEXT, 0, 0, 100, 100)
+LDebugView::LDebugView(LScriptVmDebuggerPriv *priv) : LTextView3(IDC_TEXT, 0, 0, 100, 100)
 {
 	d = priv;
 	ErrorLine = -1;
@@ -1382,11 +1382,11 @@ GDebugView::GDebugView(LScriptVmDebuggerPriv *priv) : LTextView3(IDC_TEXT, 0, 0,
 	GetCss(true)->PaddingLeft(LCss::Len(LCss::LenPx, 18));
 }
 
-GDebugView::~GDebugView()
+LDebugView::~LDebugView()
 {
 }
 
-void GDebugView::SetError(const char *Err)
+void LDebugView::SetError(const char *Err)
 {
 	ErrorLine = CurLine;
 	Error = Err;
@@ -1415,7 +1415,7 @@ int IsAddr(char16 *Ln)
 	return HtoiW(Ln);
 }
 
-int GDebugView::GetAddr()
+int LDebugView::GetAddr()
 {
 	ssize_t Index;
 	LTextLine *t = GetTextLine(Cursor, &Index);
@@ -1426,12 +1426,12 @@ int GDebugView::GetAddr()
 	return Addr;
 }
 
-void GDebugView::ScrollToCurLine()
+void LDebugView::ScrollToCurLine()
 {
 	SetLine(CurLine);
 }
 
-bool GDebugView::Breakpoint(int Addr)
+bool LDebugView::Breakpoint(int Addr)
 {
 	if (BreakPts.HasItem(Addr))
 	{
@@ -1447,7 +1447,7 @@ bool GDebugView::Breakpoint(int Addr)
 	}
 }
 
-void GDebugView::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
+void LDebugView::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
 {
 	LTextView3::OnPaintLeftMargin(pDC, r, colour);
 
@@ -1486,7 +1486,7 @@ void GDebugView::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
 	f->Colour(L_TEXT, L_WORKSPACE);
 }
 
-void GDebugView::OnPaint(LSurface *pDC)
+void LDebugView::OnPaint(LSurface *pDC)
 {
 	LTextView3::OnPaint(pDC);
 	if (Error)
@@ -1506,7 +1506,7 @@ void GDebugView::OnPaint(LSurface *pDC)
 	}
 }
 
-void GDebugView::PourText(size_t Start, ssize_t Len)
+void LDebugView::PourText(size_t Start, ssize_t Len)
 {
 	LTextView3::PourText(Start, Len);
 
@@ -1612,7 +1612,7 @@ LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmDebuggerCallback *Callback, LVi
 		d->Sub->AddView(d->SourceLst = new LList(IDC_SOURCE_LST, 0, 0, 100, 100));
 		d->SourceLst->GetCss(true)->Width(LCss::Len("200px"));
 		d->SourceLst->AddColumn("Source", 200);
-		d->Sub->AddView(d->Text = new GDebugView(d));
+		d->Sub->AddView(d->Text = new LDebugView(d));
 		
 		d->Main->AddView(d->Tabs = new LTabView(IDC_TABS));
 		d->Tabs->GetCss(true)->Height(LCss::Len("250px"));
@@ -1724,7 +1724,7 @@ void LVmDebuggerWnd::Run()
 	while (d->RunLoop && Visible())
 	{
 		LYield();
-		LSleep(1);
+		LSleep(20);
 	}
 	Quit();
 }

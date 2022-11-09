@@ -647,7 +647,7 @@ LVolume *LVolume::Next()
 	if (d->SysPath == LSP_DESKTOP &&
 		!d->Next)
 	{
-		d->Next = new LVolume("Volumes");
+		d->Next = new LVolume("/Volumes");
 		
 		// List the local hard disks
 		auto      *ws = [NSWorkspace sharedWorkspace];

@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "Lgi.h"
-#include "GToken.h"
+#include "LToken.h"
 #include "LVariant.h"
 
 //char *PluginDir = "D:\\Documents and Settings\\Administrator.FRET\\Desktop\\Susie";
@@ -163,7 +163,7 @@ GdcSpiPlugin::GdcSpiPlugin(GdcSpiPluginFactory *f)
 			char Type[256];
 			if (p->GetPluginInfo(2, Type, sizeof(Type)) > 0)
 			{
-				GToken T(Type, ";");
+				LToken T(Type, ";");
 				for (int i=0; i<T.Length(); i++)
 				{
 					char *Dot=strchr(T[i], '.');
@@ -241,7 +241,7 @@ bool GdcSpiPlugin::ReadImage(LSurface *pDC, LStream *In)
 									Colours = 1 << pDC->GetBits();
 								}
 
-								GPalette *Pal = new GPalette(NULL, Colours);
+								LPalette *Pal = new LPalette(NULL, Colours);
 								if (Pal)
 								{
 									GdcRGB *d = (*Pal)[0];

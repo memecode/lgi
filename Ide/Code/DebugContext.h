@@ -3,9 +3,9 @@
 
 #include "lgi/common/TextLog.h"
 
-class GDebugContext : public GDebugEvents
+class LDebugContext : public LDebugEvents
 {
-	class GDebugContextPriv *d;
+	class LDebugContextPriv *d;
 	
 public:
 	LTree *Watch;
@@ -18,8 +18,8 @@ public:
 	LTextLog *Registers;
 
 	// Object
-	GDebugContext(AppWnd *App, class IdeProject *Proj, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir);
-	virtual ~GDebugContext();
+	LDebugContext(AppWnd *App, class IdeProject *Proj, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir);
+	virtual ~LDebugContext();
 
 	// Impl
 	bool ParseFrameReference(const char *Frame, LAutoString &File, int &Line);
@@ -31,7 +31,7 @@ public:
 	void UpdateThreads();
 	bool SelectThread(int ThreadId);
 	bool DumpObject(const char *Var, const char *Val);
-	bool OnBreakPoint(GDebugger::BreakPoint &b, bool Add);
+	bool OnBreakPoint(LDebugger::BreakPoint &b, bool Add);
 	
 	// Ui events...
 	bool OnCommand(int Cmd);

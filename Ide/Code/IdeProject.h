@@ -5,7 +5,7 @@
 #include "lgi/common/DragAndDrop.h"
 #include "lgi/common/Tree.h"
 #include "lgi/common/OptionsFile.h"
-#include "GDebugger.h"
+#include "Debugger.h"
 #include "lgi/common/ProgressDlg.h"
 #include "lgi/common/List.h"
 
@@ -115,7 +115,7 @@ public:
 };
 
 #include "IdeProjectSettings.h"
-#include "GDebugContext.h"
+#include "DebugContext.h"
 
 class IdeProject : public LXmlFactory, public IdeCommon
 {
@@ -147,10 +147,10 @@ public:
 	LString GetMakefile(IdePlatform Platform);
 	bool GetExePath(char *Path, int Len);
 	bool RelativePath(LString &Out, const char *In, bool Debug = false);
-	void Build(bool All, bool Release);
+	void Build(bool All, BuildConfig Config);
 	void StopBuild();
-	void Clean(bool All, bool Release);
-	GDebugContext *Execute(ExeAction Act = ExeRun);
+	void Clean(bool All, BuildConfig Config);
+	LDebugContext *Execute(ExeAction Act = ExeRun);
 	bool FixMissingFiles();
 	bool FindDuplicateSymbols();
 	bool InProject(bool FuzzyMatch, const char *Path, bool Open, class IdeDoc **Doc = 0);

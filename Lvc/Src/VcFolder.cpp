@@ -1885,8 +1885,8 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 			LProgressDlg Prog(GetTree(), 1000);
 
 			Prog.SetDescription("Reading diff lines...");
-			Prog.SetRange(LRange(0, a.Length()));
-			Prog.SetYieldTime(300);
+			Prog.SetRange(a.Length());
+			// Prog.SetYieldTime(300);
 
 			for (unsigned i=0; i<a.Length(); i++)
 			{

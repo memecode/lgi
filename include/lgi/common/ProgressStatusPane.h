@@ -5,11 +5,11 @@
 #include "lgi/common/StatusBar.h"
 
 // Progress pane
-class GProgressStatusPane : public LStatusPane, public Progress, public DoEvery {
+class LProgressStatusPane : public LStatusPane, public Progress, public DoEvery {
 
 public:
-	GProgressStatusPane();
-	~GProgressStatusPane();
+	LProgressStatusPane();
+	~LProgressStatusPane();
 
 	void OnPaint(LSurface *pDC);
 	int64 Value();

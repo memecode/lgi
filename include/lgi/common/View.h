@@ -24,9 +24,7 @@ class LgiClass LView : virtual public LViewI, virtual public LBase
 	friend		class LControl;
 	friend		class LMenu;
 	friend		class LSubMenu;
-	friend		class GWnd;
 	friend		class LScrollBar;
-	friend		class GFileTarget;
 	friend		class LDialog;
 	friend		class LDragDropTarget;
 	friend		class LPopup;
@@ -205,7 +203,6 @@ protected:
 	virtual void OnNcPaint(LSurface *pDC, LRect &r);
 
 	/// List of children views.
-	friend class GViewIter;
 	List<LViewI>	Children;
 
 #if defined(LGI_SDL) || defined(LGI_COCOA)

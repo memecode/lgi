@@ -423,7 +423,7 @@ bool GdcPng::ReadImage(LSurface *pDeviceContext)
 				case PLTE:
 				{
 					int Colours = Length / 3;
-					GPalette *Pal = new GPalette;
+					LPalette *Pal = new LPalette;
 					if (Pal AND Pal->SetSize(Colours))
 					{
 						for (int i=0; i<Colours; i++)
@@ -565,7 +565,7 @@ bool GdcPng::WriteImage(LSurface *pDC)
 	if (pDC AND Open())
 	{
 		char PngSig[] = {137, 80, 78, 71, 13, 10, 26, 10, 0};
-		GPalette *Pal = pDC->Palette();
+		LPalette *Pal = pDC->Palette();
 
 		// setup
 		SetSize(0);

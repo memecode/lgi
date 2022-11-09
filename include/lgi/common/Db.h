@@ -1,5 +1,5 @@
 /*hdr
-**      FILE:           GDb.h
+**      FILE:           LDb.h
 **      AUTHOR:         Matthew Allen
 **      DATE:           8/2/2000
 **      DESCRIPTION:    Db API definitions
@@ -82,10 +82,10 @@ public:
 	virtual bool DeleteRecord() = 0; // delete's the current record
 };
 
-class GDb : public LDom
+class LDb : public LDom
 {
 public:
-	virtual ~GDb() {}
+	virtual ~LDb() {}
 
 	// Attaching to data
 	virtual bool Connect(const char *Init) = 0;
@@ -99,16 +99,16 @@ public:
 };
 
 // Actual implementations
-extern GDb *OpenDbfDatabase(const char *s);		// add 'GDb-Dbf.cpp' to your project
-extern GDb *OpenAdoDatabase(const char *s);		// add 'GDb-Ado.cpp' to your project
-extern GDb *OpenCsvDatabase(const char *s, bool HasHeader = true);		// add 'GDb-Csv.cpp' to your project
-extern GDb *OpenTsvDatabase(const char *s, bool HasHeader = true);		// add 'GDb-Csv.cpp' to your project
-extern GDb *OpenMetakitDatabase(const char *s);	// add 'GDb-Metakit.cpp' to your project
-extern GDb *OpenBfsDatabase(const char *s);		// add 'GDb-Bfs.cpp' and 'Bfs.cpp' to your project
-extern GDb *OpenLibmysqlDatabase(const char *s);	// add 'GDb-Libmysql.cpp'
+extern LDb *OpenDbfDatabase(const char *s);		// add 'LDb-Dbf.cpp' to your project
+extern LDb *OpenAdoDatabase(const char *s);		// add 'LDb-Ado.cpp' to your project
+extern LDb *OpenCsvDatabase(const char *s, bool HasHeader = true);		// add 'LDb-Csv.cpp' to your project
+extern LDb *OpenTsvDatabase(const char *s, bool HasHeader = true);		// add 'LDb-Csv.cpp' to your project
+extern LDb *OpenMetakitDatabase(const char *s);	// add 'LDb-Metakit.cpp' to your project
+extern LDb *OpenBfsDatabase(const char *s);		// add 'LDb-Bfs.cpp' and 'Bfs.cpp' to your project
+extern LDb *OpenLibmysqlDatabase(const char *s);	// add 'LDb-Libmysql.cpp'
 											// pass 'mysql://username:password@host/database'
 											// (will cause your app to become GPL)
-extern GDb *OpenMysqlDirectDatabase(char *s); // add 'GDb-Mysql-direct.cpp'
+extern LDb *OpenMysqlDirectDatabase(char *s); // add 'LDb-Mysql-direct.cpp'
 											// pass 'mysql://username:password@host/database'
 											// (will _NOT_ cause your app to become GPL)
 

@@ -31,7 +31,7 @@ enum GDocAppInstallMode
 template<typename OptionsFmt>
 class LDocApp :
 	public LWindow,
-	public GMru
+	public LMru
 {
 public:
 	#ifdef _WIN32
@@ -41,7 +41,7 @@ public:
 	#endif
 
 private:
-	class GDocAppPrivate *d;
+	class LDocAppPrivate *d;
 	OptionsFmt		*Options;
 
 	void			_Close();

@@ -2,13 +2,13 @@
 #define _GTOOLTIP_H_
 
 /// Puts a tool tip on screen when the mouse wanders over a region.
-class LgiClass GToolTip : public LView
+class LgiClass LToolTip : public LView
 {
-	class GToolTipPrivate *d;
+	class LToolTipPrivate *d;
 
 public:
-	GToolTip();
-	~GToolTip();
+	LToolTip();
+	~LToolTip();
 
 	/// Create a tip
 	/// \returns the id of the tip or 0 on failure.

@@ -47,7 +47,7 @@ int PipeSize[] =
     0
 };
 
-class GPaneThrottle : public LStatusPane
+class LPaneThrottle : public LStatusPane
 {
 	LSlider *Slider;
 	LDom *App;
@@ -72,7 +72,7 @@ class GPaneThrottle : public LStatusPane
 	}
 
 public:
-	GPaneThrottle(LDom *app);
+	LPaneThrottle(LDom *app);
 
 	int OnNotify(LViewI *Ctrl, LNotification n);
 	void OnPaint(LSurface *pDC);
@@ -80,7 +80,7 @@ public:
 	void OnMouseClick(LMouse &m);
 };
 
-GPaneThrottle::GPaneThrottle(LDom *app)
+LPaneThrottle::LPaneThrottle(LDom *app)
 {
 	Pipe = -1;
 	App = app;
@@ -88,7 +88,7 @@ GPaneThrottle::GPaneThrottle(LDom *app)
 	Slider = new LSlider(SLIDER_ID, 0, 0, 100, 20, "Throttle", false);
 }
 
-int GPaneThrottle::OnNotify(LViewI *Ctrl, LNotification n)
+int LPaneThrottle::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	if (Ctrl && Ctrl->GetId() == SLIDER_ID)
 	{
@@ -98,7 +98,7 @@ int GPaneThrottle::OnNotify(LViewI *Ctrl, LNotification n)
 	return 0;
 }
 
-void GPaneThrottle::OnPaint(LSurface *pDC)
+void LPaneThrottle::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 
@@ -126,7 +126,7 @@ void GPaneThrottle::OnPaint(LSurface *pDC)
 			Slider->Attach(this);
 			#endif
 			Slider->SetNotify(this);
-			Slider->SetRange(LRange(0, 100));
+			Slider->SetRange(100);
 			Slider->Value(100);
 
 			if (Pipe < 0)
@@ -169,12 +169,12 @@ void GPaneThrottle::OnPaint(LSurface *pDC)
 	}
 }
 
-int64 GPaneThrottle::Value()
+int64 LPaneThrottle::Value()
 {
 	return (Slider) ? Slider->Value() : 100;
 }
 
-void GPaneThrottle::OnMouseClick(LMouse &m)
+void LPaneThrottle::OnMouseClick(LMouse &m)
 {
 	if (m.Down())
 	{
@@ -217,7 +217,7 @@ void GPaneThrottle::OnMouseClick(LMouse &m)
 #define MAX_SAMPLE				70
 #define HISTORY_DIV				1000
 
-class GPaneHistory : public LStatusPane
+class LPaneHistory : public LStatusPane
 {
 	LDom *App;
 	int64 Cur; // Current value
@@ -245,14 +245,14 @@ class GPaneHistory : public LStatusPane
 	}
 
 public:
-	GPaneHistory(LDom *app);
-	~GPaneHistory();
+	LPaneHistory(LDom *app);
+	~LPaneHistory();
 
 	void OnPaint(LSurface *pDC);
 	void Value(int64 i);
 };
 
-GPaneHistory::GPaneHistory(LDom *app)
+LPaneHistory::LPaneHistory(LDom *app)
 {
 	SetWidth(HISTORY_TEXT_WIDTH + MAX_SAMPLE + 2);
 	App = app;
@@ -263,12 +263,12 @@ GPaneHistory::GPaneHistory(LDom *app)
 	Clear();
 }
 
-GPaneHistory::~GPaneHistory()
+LPaneHistory::~LPaneHistory()
 {
 	DeleteObj(pMemDC);
 }
 
-void GPaneHistory::OnPaint(LSurface *pDC)
+void LPaneHistory::OnPaint(LSurface *pDC)
 {
 	LRect r(0, 0, X()-1, Y()-1);
 
@@ -310,7 +310,7 @@ void GPaneHistory::OnPaint(LSurface *pDC)
 	}
 }
 
-void GPaneHistory::Value(int64 i)
+void LPaneHistory::Value(int64 i)
 {
 	if (i <= 0)
 	{
@@ -403,11 +403,11 @@ FileTransferProgress::FileTransferProgress(	LDom *App,
 	SetWidth(70);
 
 	// Download throttle
-	StatusInfo[_STATUS_THROTTLE]	= (Limit) ? new GPaneThrottle(App) : 0;
+	StatusInfo[_STATUS_THROTTLE]	= (Limit) ? new LPaneThrottle(App) : 0;
 	if (StatusInfo[_STATUS_THROTTLE]) Status->AppendPane(StatusInfo[_STATUS_THROTTLE]);
 	
 	// Historical graph
-	StatusInfo[_STATUS_HISTORY]		= new GPaneHistory(App);
+	StatusInfo[_STATUS_HISTORY]		= new LPaneHistory(App);
 	if (StatusInfo[_STATUS_HISTORY]) Status->AppendPane(StatusInfo[_STATUS_HISTORY]);
 
 	// current download position
@@ -415,7 +415,7 @@ FileTransferProgress::FileTransferProgress(	LDom *App,
 	if (StatusInfo[_STATUS_POSITION]) StatusInfo[_STATUS_POSITION]->Sunken(true);
 	
 	// progress meter
-	StatusInfo[_STATUS_PROGRESS]	= ProgressPane = new GProgressStatusPane;
+	StatusInfo[_STATUS_PROGRESS]	= ProgressPane = new LProgressStatusPane;
 	if (StatusInfo[_STATUS_PROGRESS]) Status->AppendPane(ProgressPane);
 	
 	// download rate ('this' will be the rate, as we need a window handle to post events to)

@@ -210,11 +210,11 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		#endif
 		
 		// Parse for headers...
-		GTextFile Tf;
+		LTextFile Tf;
 		if (!Tf.Open(Path, O_READ)  ||
 			Tf.GetSize() < 4)
 		{
-			LgiTrace("%s:%i - Error: GTextFile.Open(%s) failed.\n", _FL, Path.Get());
+			LgiTrace("%s:%i - Error: LTextFile.Open(%s) failed.\n", _FL, Path.Get());
 			return false;
 		}
 
@@ -306,7 +306,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 							bool Debug = false;
 							Debug = fs->Path.Find(DEBUG_FILE) >= 0;
 							if (Debug)
-								printf("%s:%i - Searching '%s' with %i syms...\n", _FL, fs->Path.Get(), fs->Defs.Length());
+								printf("%s:%i - Searching '%s' with %i syms...\n", _FL, fs->Path.Get(), (int)fs->Defs.Length());
 							#endif
 
 							// Check platforms...

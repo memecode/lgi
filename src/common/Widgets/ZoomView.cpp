@@ -449,7 +449,7 @@ public:
 		Pal32 pal[256];
 		if (Src->GetColourSpace() == CsIndex8)
 		{
-			GPalette *inPal = Src->Palette();
+			LPalette *inPal = Src->Palette();
 			for (int i=0; i<256; i++)
 			{
 				GdcRGB *rgb = inPal ? (*inPal)[i] : NULL;
@@ -733,7 +733,7 @@ public:
 			}
 			case CsIndex8:
 			{
-				GPalette *inPal = Src->Palette();
+				LPalette *inPal = Src->Palette();
 				for (int i=0; i<256; i++)
 				{
 					GdcRGB *rgb = inPal ? (*inPal)[i] : NULL;
@@ -1217,13 +1217,13 @@ void LZoomView::UpdateScrollBars(LPoint *MaxScroll, bool ResetPos)
 
 		if (HScroll)
 		{
-			HScroll->SetRange(LRange(0, DocSize.x + RIGHT_BOTTOM_WHITESPACE));
+			HScroll->SetRange(DocSize.x + RIGHT_BOTTOM_WHITESPACE);
 			HScroll->SetPage(DocClientSize.x);
 			if (ResetPos) HScroll->Value(0);
 		}
 		if (VScroll)
 		{
-			VScroll->SetRange(LRange(0, DocSize.y + RIGHT_BOTTOM_WHITESPACE));
+			VScroll->SetRange(DocSize.y + RIGHT_BOTTOM_WHITESPACE);
 			VScroll->SetPage(DocClientSize.y);
 			if (ResetPos) VScroll->Value(0);
 		}

@@ -328,7 +328,7 @@ class LCompiledCode
 {
 	friend class LCompilerPriv;
 	friend class LVirtualMachinePriv;
-	friend class GCompiler;
+	friend class LCompiler;
 	friend class LVmDebuggerWnd;
 
 	/// The global variables
@@ -338,7 +338,7 @@ class LCompiledCode
 	LArray<uint8_t> ByteCode;
 	
 	/// All the methods defined in the byte code and their arguments.
-	LArray< GAutoRefPtr<LFunctionInfo> > Methods;
+	LArray< LAutoRefPtr<LFunctionInfo> > Methods;
 	
 	/// All the externs defined in the code.
 	LArray<LExternFunc*> Externs;

@@ -215,7 +215,7 @@ bool StorageItemImpl::MoveToLoc(int NewLoc)
 
 LFile *StorageItemImpl::GotoObject(const char *file, int line)
 {
-	GSubFilePtr *f = 0;
+	LSubFilePtr *f = 0;
 	
 	if (Tree)
 	{

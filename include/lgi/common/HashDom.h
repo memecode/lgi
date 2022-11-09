@@ -3,14 +3,14 @@
 
 #include "lgi/common/Variant.h"
 
-class GHashDom : public LHashTbl<ConstStrKey<char,false>, LVariant*>, public LDom
+class LHashDom : public LHashTbl<ConstStrKey<char,false>, LVariant*>, public LDom
 {
 public:
-	GHashDom(int Size = 0) : LHashTbl<ConstStrKey<char,false>, LVariant*>(Size)
+	LHashDom(int Size = 0) : LHashTbl<ConstStrKey<char,false>, LVariant*>(Size)
 	{
 	}
 	
-	~GHashDom()
+	~LHashDom()
 	{
 	    DeleteObjects();
 	}

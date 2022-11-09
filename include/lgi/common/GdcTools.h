@@ -55,7 +55,7 @@ public:
 };
 
 // remap dc to new palette
-extern bool RemapDC(LSurface *pDC, GPalette *DestPal);
+extern bool RemapDC(LSurface *pDC, LPalette *DestPal);
 
 // flip dc
 #define		FLIP_X					1

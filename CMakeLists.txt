@@ -1,16 +1,45 @@
 cmake_minimum_required (VERSION 3.18)
 
-set(CMAKE_OSX_ARCHITECTURES "x86_64")
-set(CMAKE_CXX_STANDARD 14)
+if(WIN32)
+	set(CMAKE_SYSTEM_VERSION 10.0.19041.0)
+endif()
 
 project (Lgi)
+
+include(build.cmake)
+
+set(CMAKE_OSX_ARCHITECTURES "x86_64")
+set(CMAKE_CXX_STANDARD 14)
 set(LGI_VERSION_MAJOR 1)
 set(LGI_VERSION_MINOR 0)
-set(LGI_DIR "${CMAKE_CURRENT_LIST_DIR}" PARENT_SCOPE)
 
 if (UNIX AND NOT APPLE)
 	set(LINUX TRUE)
 endif()
+
+if(WIN32)
+	message("CMAKE_GENERATOR=${CMAKE_GENERATOR}")
+	message("CMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}")
+	if (CMAKE_GENERATOR MATCHES "Win64" OR
+		CMAKE_GENERATOR_PLATFORM MATCHES "x64")
+		set(WORDSIZE 64)
+		set(OPENSSL_DIR "c:/Program Files/OpenSSL-Win64")
+	else()
+		set(WORDSIZE 32)
+		set(OPENSSL_DIR "c:/Program Files (x86)/OpenSSL-Win32")
+	endif()
+	set(OPENSSL_INCLUDE_DIR "${OPENSSL_DIR}/include")
+
+	if (CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION MATCHES "14393")
+		message("SDK too old: ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+	endif()
+endif()
+
+get_directory_property(hasParent PARENT_DIRECTORY)
+if(hasParent)
+	set(LGI_DIR "${CMAKE_CURRENT_LIST_DIR}" PARENT_SCOPE)
+endif()
+set(LGI_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
 get_filename_component(CODE ../.. ABSOLUTE)
 get_filename_component(CODELIB ${CODE}/../codelib ABSOLUTE)
@@ -46,8 +75,15 @@ elseif (LINUX)
 	find_package(PkgConfig)
 	pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
 	pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4)
-	set(PUBLIC_LIBS pthread crypt)
-	                               
+	set(PUBLIC_LIBS pthread crypt z)
+
+elseif (WIN32)
+
+	get_filename_component(PNG_LIBRARY "${CODELIB}/libpng" ABSOLUTE)
+	if (EXISTS ${PNG_LIBRARY})
+		add_subdirectory(${PNG_LIBRARY} libpng)
+	endif()
+
 endif()
 
 set (CommonSource
@@ -120,6 +156,7 @@ set (CommonSource
 	src/common/Text/DocView.cpp
 	src/common/Text/String.cpp
 	src/common/Text/TextView3.cpp
+	src/common/Text/TextView4.cpp
 	src/common/Text/Token.cpp
 	src/common/Text/Unicode.cpp
 	src/common/Text/Utf8.cpp
@@ -262,6 +299,10 @@ if (APPLE)
 		PROPERTIES
 		XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_WEAK "YES"
 		)
+	
+	set_target_properties(lgi PROPERTIES FRAMEWORK true)
+	set_target_properties(lgi PROPERTIES
+		XCODE_ATTRIBUTE_INSTALL_PATH @executable_path/../Frameworks/)
 
 	target_include_directories(lgi
 		PUBLIC
@@ -395,3 +436,18 @@ target_include_directories(lgi
 	)
 
 set_target_properties(lgi PROPERTIES LINKER_LANGUAGE CXX)
+
+add_subdirectory(Ide)
+add_subdirectory(Lvc)
+add_subdirectory(ResourceEditor)
+add_subdirectory(HtmlEditor)
+add_subdirectory(HtmlTest)
+add_subdirectory(ScriptingUnitTests)
+add_subdirectory(SlogViewer)
+add_subdirectory(Updater)
+if(WIN32)
+	add_subdirectory(VsLaunch)
+endif()
+if(LINUX)
+	add_subdirectory(src/linux/CrashHandler)
+endif()

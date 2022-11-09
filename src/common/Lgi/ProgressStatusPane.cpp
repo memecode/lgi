@@ -1,5 +1,5 @@
 /*
-**	FILE:			GProgressStatusPane.cpp
+**	FILE:			LProgressStatusPane.cpp
 **	AUTHOR:			Matthew Allen
 **	DATE:			13/12/1999
 **	DESCRIPTION:	Progress meter for the status bar
@@ -13,18 +13,18 @@
 #include "lgi/common/ProgressStatusPane.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-GProgressStatusPane::GProgressStatusPane() : DoEvery(200)
+LProgressStatusPane::LProgressStatusPane() : DoEvery(200)
 {
 	SetWidth(100);
 	Sunken(true);
 	_BorderSize = 1;
 }
 
-GProgressStatusPane::~GProgressStatusPane()
+LProgressStatusPane::~LProgressStatusPane()
 {
 }
 
-void GProgressStatusPane::OnPaint(LSurface *pDC)
+void LProgressStatusPane::OnPaint(LSurface *pDC)
 {
 	LRect r = GetClient();
 
@@ -45,12 +45,12 @@ void GProgressStatusPane::OnPaint(LSurface *pDC)
 	pDC->Rectangle(r.x1, r.y1, r.x1+x-1, r.y2);
 }
 
-int64 GProgressStatusPane::Value()
+int64 LProgressStatusPane::Value()
 {
 	return Progress::Value();
 }
 
-void GProgressStatusPane::Value(int64 v)
+void LProgressStatusPane::Value(int64 v)
 {
 	Progress::Value(v);
 

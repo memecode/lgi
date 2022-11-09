@@ -103,7 +103,7 @@ PsFontMapping PsFontMap[] =
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
-class GPrintDCPrivate // : public GCups
+class LPrintDCPrivate // : public GCups
 {
 public:
 	class PrintPainter *p;
@@ -117,7 +117,7 @@ public:
 	char *FileName;
 	LFile Ps;
 	
-	GPrintDCPrivate()
+	LPrintDCPrivate()
 	{
 		p = 0;
 		c = -1;
@@ -129,7 +129,7 @@ public:
 		DocOpen = false;
 	}
 	
-	~GPrintDCPrivate()
+	~LPrintDCPrivate()
 	{
 		if (DocOpen)
 		{
@@ -447,7 +447,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////
 LPrintDC::LPrintDC(void *Handle, const char *PrintJobName)
 {
-	d = new GPrintDCPrivate;
+	d = new LPrintDCPrivate;
 	d->Handle = Handle;
 	d->PrintJobName = NewStr(PrintJobName);
 }

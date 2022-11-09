@@ -565,7 +565,7 @@ LFilter::IoStatus GdcTiff::ProcessRead(LSurface *pDC)
 			Lib.MeterBlock = (X * Bits) >> (DownSam ? 2 : 3);
 			Lib.Meter = Meter;
 			Meter->SetDescription("scanlines");
-			Meter->SetRange(LRange(0, Y));
+			Meter->SetRange(Y);
 		}
 
 		pDC->Colour(0);
@@ -579,7 +579,7 @@ LFilter::IoStatus GdcTiff::ProcessRead(LSurface *pDC)
 			if (s && Palette->Type == TYPE_USHORT)
 			{
 				int Colours = Palette->Count / 3;
-				GPalette *Pal = new GPalette(0, Colours);
+				LPalette *Pal = new LPalette(0, Colours);
 				if (Pal)
 				{
 					for (int i=0; i<Colours; i++)

@@ -16,11 +16,11 @@ enum NodeRelation
 
 #define GSUBFILE_NOBUFFERING		0
 
-class GSubFilePtr;
-class GSubFile : public LFile
+class LSubFilePtr;
+class LSubFile : public LFile
 {
 	LMutex *Lck;
-	LArray<GSubFilePtr*> Ptrs;
+	LArray<LSubFilePtr*> Ptrs;
 	
 	#if GSUBFILE_NOBUFFERING
 	bool Buffer;
@@ -37,11 +37,11 @@ class GSubFile : public LFile
 public:
 	typedef LAutoPtr<LMutex::Auto> SubLock;
 
-	GSubFile(LMutex *lock, bool Buffering = true);
-	~GSubFile();
+	LSubFile(LMutex *lock, bool Buffering = true);
+	~LSubFile();
 
-	GSubFilePtr *Create(const char *file, int line);
-	void Detach(GSubFilePtr *Ptr);
+	LSubFilePtr *Create(const char *file, int line);
+	void Detach(LSubFilePtr *Ptr);
 	SubLock Lock(const char *file, int line);
 
 	#if GSUBFILE_NOBUFFERING
@@ -53,10 +53,10 @@ public:
 	#endif
 };
 
-class GSubFilePtr : public LFile
+class LSubFilePtr : public LFile
 {
-	friend class GSubFile;
-	GSubFile *File;
+	friend class LSubFile;
+	LSubFile *File;
 
 	// Sub file bound box
 	bool Sub; // true if we have a sub file area to serve to callers
@@ -81,8 +81,8 @@ class GSubFilePtr : public LFile
 	bool RestoreState();
 	
 public:
-	GSubFilePtr(GSubFile *Parent, const char *file, int line);
-	~GSubFilePtr();
+	LSubFilePtr(LSubFile *Parent, const char *file, int line);
+	~LSubFilePtr();
 
 	/// Sets the valid section of the file.
 	bool SetSub

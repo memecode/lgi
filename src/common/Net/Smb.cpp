@@ -4,7 +4,7 @@
 
 #include "Gdc2.h"
 #include "ISmb.h"
-#include "GToken.h"
+#include "LToken.h"
 
 ///////////////////////////////////////////////////////////////////
 class SmbUtils
@@ -303,7 +303,7 @@ bool ISmb::GetFile(char *File, GBytePipe &Out)
 						// check data
 						if (LinesRead == 0)
 						{
-							GToken T(Line, " ");
+							LToken T(Line, " ");
 							if (T.Tokens >= 2)
 							{
 								StatusCode = atoi(T.Get(1));

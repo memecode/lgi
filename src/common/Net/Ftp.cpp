@@ -743,7 +743,7 @@ bool IFtp::ListDir(LArray<IFtpEntry*> &Dir)
 
 				if (Meter)
 				{
-					Meter->SetRange(LRange());
+					Meter->SetRange(0);
 					Meter->Value(0);
 				}
 
@@ -972,7 +972,7 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 							ssize_t Len = 0;
 
 							if (Meter)
-								Meter->SetRange(LRange(0, Size));
+								Meter->SetRange(Size);
 
 							if (!Upload)
 								Size -= RestorePos;

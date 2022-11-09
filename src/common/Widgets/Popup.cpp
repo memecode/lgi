@@ -522,13 +522,13 @@ WindowRef CreateBorderlessWindow()
 #endif
 
 /////////////////////////////////////////////////////////////////////////////////////
-class GPopupPrivate
+class LPopupPrivate
 {
 public:
 	bool TakeFocus;
 	bool GotOnCreate;
 	
-	GPopupPrivate()
+	LPopupPrivate()
 	{
 		TakeFocus = true;
 		GotOnCreate = false;
@@ -544,7 +544,7 @@ LPopup::LPopup(LView *owner)
 	: LWindow(gtk_window_new(GTK_WINDOW_POPUP))
 	#endif
 {
-	d = new GPopupPrivate;
+	d = new LPopupPrivate;
 	Start = 0;
 	Cancelled = false;
     CurrentPopups.Add(this);

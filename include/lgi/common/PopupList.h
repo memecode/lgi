@@ -14,7 +14,7 @@
 /// The user can select an item with [Enter] or click on it.
 /// [Escape] cancels the popup.
 template<typename T>
-class GPopupList : public LPopup
+class LPopupList : public LPopup
 {
 public:
 	enum {
@@ -53,7 +53,7 @@ protected:
 	}
 
 public:
-	GPopupList(LViewI *edit, PositionType pos, int width = 200, int height = 300) : LPopup(edit->GetGView())
+	LPopupList(LViewI *edit, PositionType pos, int width = 200, int height = 300) : LPopup(edit->GetGView())
 	{
 		Registered = false;
 		PosType = pos;
@@ -78,14 +78,14 @@ public:
 		Attach(Edit);
 	}
 	
-	~GPopupList()
+	~LPopupList()
 	{
 		auto Wnd = HookWnd();
 		if (Wnd && Registered)
 			Wnd->UnregisterHook(this);
 	}
 
-	const char *GetClass() { return "GPopupList"; }
+	const char *GetClass() { return "LPopupList"; }
 
 	// Events:
 	// ------------------------------------------------------------------------

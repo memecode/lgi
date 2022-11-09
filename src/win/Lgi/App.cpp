@@ -130,7 +130,7 @@ static LAutoString ParseStr(LPointer &p, bool Pad = true)
 
 static LAutoString ParseVer(void *Resource, char *Part)
 {
-	GToken Parts(Part, ".");
+	LToken Parts(Part, ".");
 	if (Parts.Length() == 3)
 	{
 		LPointer p;

@@ -45,8 +45,8 @@
 			<Node File="./Code/FindInFiles.h" Type="3" Platforms="15" />
 			<Node File="./Code/FindSymbol.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/FindSymbol.h" Type="3" Platforms="15" />
-			<Node File="./Code/GHistory.cpp" Type="2" Platforms="15" />
-			<Node File="./Code/GHistory.h" Type="3" Platforms="15" />
+			<Node File="./Code/History.cpp" Type="2" Platforms="15" />
+			<Node File="./Code/History.h" Type="3" Platforms="15" />
 			<Node File="./Code/JavascriptParser.cpp" Type="2" Platforms="15" />
 			<Node File="./Code/ParserCommon.h" Type="3" Platforms="15" />
 			<Node File="./Code/PythonParser.cpp" Type="2" Platforms="15" />
@@ -136,6 +136,8 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -190,6 +192,7 @@ pthread
 					<Debug>be</Debug>
 					<Release>be</Release>
 				</Haiku>
+				<All />
 			</Libraries>
 			<LibraryPaths>
 				<All>
@@ -197,6 +200,7 @@ pthread
 					<Release>..\Release</Release>
 				</All>
 				<Windows />
+				<Linux />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -230,7 +234,10 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<ApplicationIcon>
 				<Haiku>./Code/icon-haiku</Haiku>
 			</ApplicationIcon>
-				<Windows />
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -245,6 +252,8 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Environment>
@@ -255,8 +264,18 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 					<Debug>/home/matthew/code/scribe/trunk_os/Linux/ScribeProj.xml</Debug>
 				</All>
 			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
-		<Advanced />
-				<Windows />
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>

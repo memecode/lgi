@@ -27,7 +27,7 @@ class App48 : public LApplicator
 	
 	int Op;
 	int ConstAlpha;
-	GPalette *PalAlpha;
+	LPalette *PalAlpha;
 
 public:
 	App48(int op)
@@ -67,7 +67,7 @@ public:
 			}
 			case GAPP_ALPHA_PAL:
 			{
-				PalAlpha = (GPalette*)Value;
+				PalAlpha = (LPalette*)Value;
 				break;
 			}
 			default:
@@ -79,7 +79,7 @@ public:
 		return 0;
 	}
 
-	bool SetSurface(LBmpMem *d, GPalette *pal = NULL, LBmpMem *a = NULL)
+	bool SetSurface(LBmpMem *d, LPalette *pal = NULL, LBmpMem *a = NULL)
 	{
 		if (d && d->Cs == ColourSpace)
 		{
@@ -218,7 +218,7 @@ public:
 		return true;
 	}
 	
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = NULL)
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha = NULL)
 	{
 		if (!Src)
 			return false;

@@ -2454,7 +2454,7 @@ public:
 
 	const char *GetClass() { return "GdcFontApp"; }
 
-	bool SetSurface(LBmpMem *d, GPalette *p, LBmpMem *a)
+	bool SetSurface(LBmpMem *d, LPalette *p, LBmpMem *a)
 	{
 		Dest = d;
 		Pal = p;
@@ -2493,7 +2493,7 @@ public:
 	void VLine(int height) {}
 	void Rectangle(int x, int y) {}
 
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 	{
 		bool Status = FALSE;
 

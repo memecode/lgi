@@ -1,8 +1,8 @@
 /*hdr
-**      FILE:           GDb-Dbf.h
+**      FILE:           LDb-Dbf.h
 **      AUTHOR:         Matthew Allen
 **      DATE:           8/2/2000
-**      DESCRIPTION:    Separated variables implementation of the GDb API
+**      DESCRIPTION:    Separated variables implementation of the LDb API
 **
 **      Copyright (C) 2003 Matthew Allen
 **			fret@memecode.com
@@ -94,7 +94,7 @@ public:
 	char GetSep();
 };
 
-class SvDb : public GDb
+class SvDb : public LDb
 {
 	friend class SvRecordset;
 
@@ -447,7 +447,7 @@ void SvRecordset::Read()
 {
 	Empty();
 
-	GTextFile f;
+	LTextFile f;
 	if (f.Open(FileName, O_READ|O_SHARE))
 	{
 		LArray<char16> Line;
@@ -764,7 +764,7 @@ LDbRecordset *SvDb::TableAt(int i)
 }
 
 ///////////////////////////////////////////////////////////////////
-GDb *OpenCsvDatabase(const char *Path, bool HasHeader)
+LDb *OpenCsvDatabase(const char *Path, bool HasHeader)
 {
 	SvDb *Db = new SvDb(',', HasHeader);
 	if (Db && Db->Connect(Path))
@@ -775,7 +775,7 @@ GDb *OpenCsvDatabase(const char *Path, bool HasHeader)
 	return 0;
 }
 
-GDb *OpenTsvDatabase(const char *Path, bool HasHeader)
+LDb *OpenTsvDatabase(const char *Path, bool HasHeader)
 {
 	SvDb *Db = new SvDb('\t', HasHeader);
 	if (Db && Db->Connect(Path))

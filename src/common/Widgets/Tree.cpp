@@ -1221,7 +1221,7 @@ void LTree::_UpdateScrollBars()
 			// x scroll... in pixels
 			if (HScroll)
 			{
-				HScroll->SetRange(LRange(0, d->Limit.x));
+				HScroll->SetRange(d->Limit.x);
 				HScroll->SetPage(Client.X());
 
 				int Max = d->Limit.x - Client.X();
@@ -1237,7 +1237,7 @@ void LTree::_UpdateScrollBars()
 				int All = (d->Limit.y + TREE_BLOCK - 1) / TREE_BLOCK;
 				int Visible = Client.Y() / TREE_BLOCK;
 
-				VScroll->SetRange(LRange(0, All));
+				VScroll->SetRange(All);
 				VScroll->SetPage(Visible);
 
 				/* Why is this commented out? -fret Dec2018
@@ -1851,7 +1851,7 @@ void LTree::OnPaint(LSurface *pDC)
 		{
 			if (d->IconCache->GetColourSpace() == CsIndex8)
 			{
-				d->IconCache->Palette(new GPalette(GdcD->GetGlobalColour()->GetPalette()));
+				d->IconCache->Palette(new LPalette(GdcD->GetGlobalColour()->GetPalette()));
 			}
 
 			d->IconCache->Colour(Background);

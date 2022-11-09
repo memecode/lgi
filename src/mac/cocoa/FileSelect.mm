@@ -17,53 +17,37 @@ class LFileSelectPrivate
 	friend class LFileSelectDlg;
 	friend class GFolderList;
 
-	LView *Parent;
-	LFileSelect *Select;
+	LView *Parent = NULL;
+	LFileSelect *Select = NULL;
 
-	char *Title;
-	char *DefExt;
-	bool MultiSelect;
-	List<char> Files;
-	int CurrentType;
+	LString Title;
+	LString DefExt;
+	bool MultiSelect = false;
+	LString::Array Files;
+	int CurrentType = -1;
 	List<LFileType> Types;
-	List<char> History;
-	bool ShowReadOnly;
-	bool ReadOnly;
-	
-	bool EatClose;
+	LString::Array History;
+	bool ShowReadOnly = false;
+	bool ReadOnly = false;
+	bool EatClose = false;
 
 public:
-	static char *InitPath;
+	static LString InitPath;
 	static bool InitShowHiddenFiles;
 	static LRect InitSize;
 
 	LFileSelectPrivate(LFileSelect *select)
 	{
-		ShowReadOnly = false;
-		ReadOnly = false;
-		EatClose = false;
 		Select = select;
-		Title = 0;
-		DefExt = 0;
-		MultiSelect = false;
-		Parent = 0;
-		CurrentType = -1;
 	}
 
 	virtual ~LFileSelectPrivate()
 	{
-		DeleteArray(Title);
-		DeleteArray(DefExt);
-
 		Types.DeleteObjects();
-		Files.DeleteArrays();
-		History.DeleteArrays();
 	}
-
-
 };
 
-char *LFileSelectPrivate::InitPath = 0;
+LString LFileSelectPrivate::InitPath;
 
 //////////////////////////////////////////////////////////////////////////
 LFileSelect::LFileSelect()
@@ -93,16 +77,14 @@ const char *LFileSelect::Name()
 
 bool LFileSelect::Name(const char *n)
 {
-	d->Files.DeleteArrays();
+	d->Files.Empty();
 	if (n)
-	{
-		d->Files.Insert(NewStr(n));
-	}
+		d->Files.New() = n;
 
 	return true;
 }
 
-char *LFileSelect::operator [](size_t i)
+const char *LFileSelect::operator [](size_t i)
 {
 	return d->Files.ItemAt(i);
 }
@@ -166,17 +148,13 @@ void LFileSelect::MultiSelect(bool Multi)
 }
 
 #define CharPropImpl(Func, Var)				\
-	char *LFileSelect::Func()				\
+	const char *LFileSelect::Func()			\
 	{										\
 		return Var;							\
 	}										\
 	void LFileSelect::Func(const char *i)	\
 	{										\
-		DeleteArray(Var);					\
-		if (i)								\
-		{									\
-			Var = NewStr(i);				\
-		}									\
+		Var = i;							\
 	}
 
 CharPropImpl(InitialDir, d->InitPath);
@@ -185,25 +163,67 @@ CharPropImpl(DefaultExtension, d->DefExt);
    
 bool LFileSelect::Open()
 {
-	bool Status = false;
-	
+	auto openDlg = [NSOpenPanel openPanel];
 
-	return Status;
+	[openDlg setCanChooseFiles:YES];
+	[openDlg setAllowsMultipleSelection:d->MultiSelect];
+	if (d->InitPath)
+		[openDlg setDirectoryURL:[NSURL fileURLWithPath:d->InitPath.NsStr() isDirectory:true]];
+
+	NSModalResponse result = [openDlg runModal];
+	if (result == NSModalResponseOK)
+	{
+		d->Files.Empty();
+		
+		auto urls = [openDlg URLs];
+		for (unsigned i=0; i<[urls count]; i++)
+		{
+			auto url = [urls objectAtIndex:i];
+			d->Files.New() = [url path];
+		}
+	}
+
+	return result == NSModalResponseOK;
 }
 
 bool LFileSelect::OpenFolder()
 {
-	bool Status = false;
-	
+	NSOpenPanel* openDlg = [NSOpenPanel openPanel];
 
-	return Status;
+	[openDlg setCanChooseDirectories:YES];
+	if (d->InitPath)
+		[openDlg setDirectoryURL:[NSURL fileURLWithPath:d->InitPath.NsStr() isDirectory:true]];
+	
+	NSModalResponse result = [openDlg runModal];
+	if (result == NSModalResponseOK)
+	{
+		d->Files.Empty();
+		
+		auto urls = [openDlg URLs];
+		for (unsigned i=0; i<[urls count]; i++)
+		{
+			auto url = [urls objectAtIndex:i];
+			d->Files.New() = [url path];
+		}
+	}
+
+	return result == NSModalResponseOK;
 }
 
 bool LFileSelect::Save()
 {
-	bool Status = false;
-	
+	auto saveDlg = [NSSavePanel savePanel];
 
-	return Status;
+	if (d->InitPath)
+		[saveDlg setDirectoryURL:[NSURL fileURLWithPath:d->InitPath.NsStr() isDirectory:true]];
+
+	NSModalResponse result = [saveDlg runModal];
+	if (result == NSModalResponseOK)
+	{
+		d->Files.Empty();
+		d->Files.New() = [[saveDlg URL] path];
+	}
+
+	return result == NSModalResponseOK;
 }
 

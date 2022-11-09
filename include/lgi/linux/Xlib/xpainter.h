@@ -30,7 +30,7 @@ public:
 class XPainter : public XObject
 {
 protected:
-	class GPainterPrivate *d;
+	class LPainterPrivate *d;
 
 public:
 	enum RowOperation

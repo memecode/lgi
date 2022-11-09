@@ -3,10 +3,10 @@
 
 #include "LOptionsFile.h"
 
-class GHttpCallback
+class LHttpCallback
 {
 public:
-	virtual ~GHttpCallback() {}
+	virtual ~LHttpCallback() {}
 
 	char *FormDecode(char *s);
 	char *HtmlEncode(char *s);
@@ -15,13 +15,13 @@ public:
 	virtual int OnRequest(char *Action, char *Uri, char *Headers, char *Body, LVariant &Out) = 0;
 };
 
-class GHttpServer
+class LHttpServer
 {
-	struct GHttpServerPriv *d;
+	struct LHttpServerPriv *d;
 
 public:
-	GHttpServer(GHttpCallback *cb, int port);
-	~GHttpServer();
+	LHttpServer(LHttpCallback *cb, int port);
+	~LHttpServer();
 };
 
 #endif

@@ -48,7 +48,7 @@ protected:
 	char				IsHtml;
 	int					ViewWidth;
 	uint64_t			PaintStart;
-	GToolTip			Tip;
+	LToolTip			Tip;
 	LCss::Store			CssStore;
 	LHashTbl<ConstStrKey<char,false>, bool> CssHref;
 	

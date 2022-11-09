@@ -60,7 +60,7 @@ LSurface::LSurface(LSurface *pDC)
 		Blt(0, 0, pDC);
 		if (pDC->Palette())
 		{
-			GPalette *Pal = new GPalette(pDC->Palette());
+			LPalette *Pal = new LPalette(pDC->Palette());
 			if (Pal)
 			{
 				Palette(Pal, true);
@@ -1215,14 +1215,14 @@ void LSurface::Blt(int x, int y, LSurface *Src, LRect *a)
 				}
 
 				pApp->SetPtr(DClip.x1, DClip.y1);
-				GPalette *SrcPal = Src->DrawOnAlpha() ? NULL : Src->Palette();
+				LPalette *SrcPal = Src->DrawOnAlpha() ? NULL : Src->Palette();
 				// printf("\t%p::Blt pApp=%p, %s\n", this, pApp, pApp->GetClass());
 				pApp->Blt(&Bits, SrcPal, Alpha.Base ? &Alpha : NULL);
 				Update(GDC_BITS_CHANGE);
 
 				if (pApp->GetFlags() & GDC_UPDATED_PALETTE)
 				{
-					Palette(new GPalette(pApp->GetPal()));
+					Palette(new LPalette(pApp->GetPal()));
 				}
 			}
 		}
@@ -1799,7 +1799,7 @@ LColour LSurface::Colour(LColour c)
 			}
 			else
 			{
-				GPalette *p = Palette();
+				LPalette *p = Palette();
 				if (p)
 					// Colour
 					pApp->c = p->MatchRgb(Rgb32To24(c32));
@@ -1936,7 +1936,7 @@ int LSurface::Op(int NewOp, NativeInt Param)
 	return PrevOp;
 }
 
-GPalette *LSurface::Palette()
+LPalette *LSurface::Palette()
 {
 	if (!pPalette && pMem && (pMem->Flags & GDC_ON_SCREEN) && pMem->Cs == CsIndex8)
 	{
@@ -1951,7 +1951,7 @@ GPalette *LSurface::Palette()
 	return pPalette;
 }
 
-void LSurface::Palette(GPalette *pPal, bool bOwnIt)
+void LSurface::Palette(LPalette *pPal, bool bOwnIt)
 {
 	if (pPal == pPalette)
 	{

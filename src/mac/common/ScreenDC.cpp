@@ -292,12 +292,12 @@ void LScreenDC::SetOrigin(int x, int y)
 	}
 }
 
-GPalette *LScreenDC::Palette()
+LPalette *LScreenDC::Palette()
 {
 	return LSurface::Palette();
 }
 
-void LScreenDC::Palette(GPalette *pPal, bool bOwnIt)
+void LScreenDC::Palette(LPalette *pPal, bool bOwnIt)
 {
 	LSurface::Palette(pPal, bOwnIt);
 }

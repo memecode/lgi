@@ -684,7 +684,7 @@ LgiTrace("IHTTP::Post Headers=\n%s\n\n", h);
 						char *Eol = strchr(h, '\r');
 						if (Eol)
 						{
-							GToken Resp(h, " ", true, Eol-h);
+							LToken Resp(h, " ", true, Eol-h);
 							if (Resp.Length() > 1)
 								*ProtocolStatus = atoi(Resp[1]);
 						}

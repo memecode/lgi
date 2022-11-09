@@ -1,5 +1,5 @@
 /*
-**	FILE:			GLog.h
+**	FILE:			LLog.h
 **	AUTHOR:			Matthew Allen
 **	DATE:			28/6/99
 **	DESCRIPTION:	Reality logging system
@@ -13,12 +13,12 @@
 
 class RLogEntry;
 class RLogView;
-class GLog;
+class LLog;
 
 class RLogEntry
 {
 friend class RLogView;
-friend class GLog;
+friend class LLog;
 
 	char *Desc;
 	char *Text;
@@ -32,10 +32,10 @@ public:
 class RLogView : public LLayout
 {
 friend class RLogEntry;
-friend class GLog;
+friend class LLog;
 
 protected:
-	GLog *Log;
+	LLog *Log;
 	bool HasBorder;
 	bool IsTopDown;
 	int SplitPos;
@@ -45,7 +45,7 @@ protected:
 	int GetTotalItems();
 
 public:
-	RLogView(GLog *log);
+	RLogView(LLog *log);
 
 	void OnPaint(LSurface *pDC);
 	// void OnNcPaint(LSurface *pDC, LRect &r);
@@ -62,7 +62,7 @@ public:
 	void Split(int i) { SplitPos = i; }
 };
 
-class GLog
+class LLog
 {
 friend class RLogEntry;
 friend class RLogView;
@@ -72,8 +72,8 @@ friend class RLogView;
 	List<RLogEntry> Entries;
 
 public:
-	GLog(char *File = 0);
-	~GLog();
+	LLog(char *File = 0);
+	~LLog();
 
 	void SetView(RLogView *View);
 	void Print(LColour c, const char *Str, ...);

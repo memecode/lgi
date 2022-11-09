@@ -5,7 +5,7 @@
 #include "GWordStore.h"
 // #define DBG_MSGS
 
-class GWordStorePriv
+class LWordStorePriv
 {
 public:
 	char *File;
@@ -13,7 +13,7 @@ public:
 	bool Dirty;
 	int Items;
 
-	GWordStorePriv() : Table(0, false, 0, -1)
+	LWordStorePriv() : Table(0, false, 0, -1)
 	{
 		Dirty = false;
 		Table.IsCase(false);
@@ -21,7 +21,7 @@ public:
 		Table.SetStringPool(true);
 	}
 
-	~GWordStorePriv()
+	~LWordStorePriv()
 	{
 		DeleteArray(File);
 	}
@@ -29,7 +29,7 @@ public:
 
 LWordStore::LWordStore(const char *file)
 {
-	d = new GWordStorePriv;
+	d = new LWordStorePriv;
 	d->File = NewStr(file);
 	if (d->File)
 	{

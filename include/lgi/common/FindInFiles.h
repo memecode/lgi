@@ -5,13 +5,13 @@
 #define OPT_SearchFolder	"FIF_Folder"
 #define OPT_SearchPattern	"FIF_Pattern"
 
-class GFindInFiles : public LDialog
+class LFindInFiles : public LDialog
 {
-	struct GFindInFilesPriv *d;
+	struct LFindInFilesPriv *d;
 	
 public:
-	GFindInFiles(LViewI *Parent, LAutoString Search, LDom *Store);
-	~GFindInFiles();
+	LFindInFiles(LViewI *Parent, LAutoString Search, LDom *Store);
+	~LFindInFiles();
 	
 	int OnNotify(LViewI *Ctrl, LNotification n);
 };

@@ -257,7 +257,7 @@ LMemDC::LMemDC(LSurface *pDC)
 	{
 		if (pDC->Palette())
 		{
-			Palette(new GPalette(pDC->Palette()));
+			Palette(new LPalette(pDC->Palette()));
 		}
 
 		Blt(0, 0, pDC);

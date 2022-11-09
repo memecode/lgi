@@ -2,7 +2,7 @@
 #include "UnitTests.h"
 #include "lgi/common/Matrix.h"
 
-class GMatrixTestPriv
+class LMatrixTestPriv
 {
 public:
 	bool Error(char *Fmt, ...)
@@ -61,17 +61,17 @@ public:
 	}
 };
 
-GMatrixTest::GMatrixTest() : UnitTest("GMatrixTest")
+LMatrixTest::LMatrixTest() : UnitTest("LMatrixTest")
 {
-	d = new GMatrixTestPriv;
+	d = new LMatrixTestPriv;
 }
 
-GMatrixTest::~GMatrixTest()
+LMatrixTest::~LMatrixTest()
 {
 	DeleteObj(d);
 }
 
-bool GMatrixTest::Run()
+bool LMatrixTest::Run()
 {
 	return	d->Test1();
 }

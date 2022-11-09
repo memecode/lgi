@@ -169,7 +169,7 @@ class LFileSelectPrivate
 {
 	friend class LFileSelect;
 	friend class LFileSelectDlg;
-	friend class GFolderList;
+	friend class LFolderList;
 
 	LView *Parent;
 	LFileSelect *Select;
@@ -251,19 +251,19 @@ LImageList *LFileSelectPrivate::BtnIcons = NULL;
 LImageList *LFileSelectPrivate::TreeIcons = NULL;
 char *LFileSelectPrivate::InitPath = 0;
 bool LFileSelectPrivate::InitShowHiddenFiles = false;
-LRect LFileSelectPrivate::InitSize(0, 0, 600, 500);
+LRect LFileSelectPrivate::InitSize(0, 0, -1, -1);
 
 //////////////////////////////////////////////////////////////////////////
 // This class implements the UI for the selector.
 class LFileSelectDlg;
 
-class GFolderView
+class LFolderView
 {
 protected:
 	LFileSelectDlg *Dlg;
 
 public:
-	GFolderView(LFileSelectDlg *dlg)
+	LFolderView(LFileSelectDlg *dlg)
 	{
 		Dlg = dlg;
 	}
@@ -271,10 +271,10 @@ public:
 	virtual void OnFolder() {}
 };
 
-class GFolderDrop : public LDropDown, public GFolderView
+class LFolderDrop : public LDropDown, public LFolderView
 {
 public:
-	GFolderDrop(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy);
+	LFolderDrop(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy);
 
 	void OnFolder();
 
@@ -286,14 +286,14 @@ public:
 	}
 };
 
-class GIconButton : public LLayout
+class LIconButton : public LLayout
 {
 	LImageList *Icons;
 	int Icon;
 	bool Down;
 
 public:
-	GIconButton(int Id, int x, int y, int cx, int cy, LImageList *icons, int icon)
+	LIconButton(int Id, int x, int y, int cx, int cy, LImageList *icons, int icon)
 	{
 		Icons = icons;
 		Icon = icon;
@@ -401,13 +401,13 @@ public:
 	}
 };
 
-class GFolderList : public LList, public GFolderView
+class LFolderList : public LList, public LFolderView
 {
 	LString FilterKey;
 
 public:
-	GFolderList(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy);
-	~GFolderList()
+	LFolderList(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy);
+	~LFolderList()
 	{
 	}	
 
@@ -798,11 +798,11 @@ public:
 	LEdit *Ctrl2 = NULL;
 	#endif
 	
-	GFolderDrop *Ctrl3 = NULL;
-	GIconButton *BackBtn = NULL;
-	GIconButton *UpBtn = NULL;
-	GIconButton *NewDirBtn = NULL;
-	GFolderList *FileLst = NULL;
+	LFolderDrop *Ctrl3 = NULL;
+	LIconButton *BackBtn = NULL;
+	LIconButton *UpBtnBtn = NULL;
+	LIconButton *NewDirBtn = NULL;
+	LFolderList *FileLst = NULL;
 	LTextLabel *Ctrl8 = NULL;
 	LTextLabel *Ctrl9 = NULL;
 	LEdit *FileNameEdit = NULL;
@@ -876,8 +876,15 @@ LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 	d = select;
 	SetParent(d->Parent);
 	MinSize.ZOff(450, 300);
-	OldPos.Set(0, 0, 475, 350 + LAppInst->GetMetric(LGI_MET_DECOR_Y) );
-	SetPos(OldPos);
+
+	if (!d->InitSize.Valid())
+	{
+		auto Dpi = LScreenDpi();
+		auto Scale = (float)Dpi.x / 96.0;	
+		d->InitSize.Set(0, 0, (int)(650*Scale), (int)(450*Scale) + LAppInst->GetMetric(LGI_MET_DECOR_Y) );
+	}
+
+	SetPos(d->InitSize);
 
 	int x = 0, y = 0;
 	AddView(Tbl = new LTableLayout);
@@ -893,13 +900,13 @@ LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 	c->Add(Ctrl2 = new LEdit(IDC_PATH, 0, 0, 245, 21, ""));
 	#endif
 	c = Tbl->GetCell(x++, y);
-	c->Add(Ctrl3 = new GFolderDrop(this, IDC_DROP, 336, 7, 16, 21));
+	c->Add(Ctrl3 = new LFolderDrop(this, IDC_DROP, 336, 7, 16, 21));
 	c = Tbl->GetCell(x++, y);
-	c->Add(BackBtn = new GIconButton(IDC_BACK, 378, 7, 27, 21, d->BtnIcons, FSI_BACK));
+	c->Add(BackBtn = new LIconButton(IDC_BACK, 378, 7, 27, 21, d->BtnIcons, FSI_BACK));
 	c = Tbl->GetCell(x++, y);
-	c->Add(UpBtn = new GIconButton(IDC_UP, 406, 7, 27, 21, d->BtnIcons, FSI_UPDIR));
+	c->Add(UpBtn = new LIconButton(IDC_UP, 406, 7, 27, 21, d->BtnIcons, FSI_UPDIR));
 	c = Tbl->GetCell(x++, y);
-	c->Add(NewDirBtn = new GIconButton(IDC_NEW, 434, 7, 27, 21, d->BtnIcons, FSI_NEWDIR));
+	c->Add(NewDirBtn = new LIconButton(IDC_NEW, 434, 7, 27, 21, d->BtnIcons, FSI_NEWDIR));
 
 	// Folders/items row
 	x = 0; y++;
@@ -919,7 +926,7 @@ LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 	c = t->GetCell(1, 0);
 	c->Add(FilterEdit = new LEdit(IDC_FILTER, 0, 0, 60, 20));
 	c = t->GetCell(0, 1, true, 2);
-	c->Add(FileLst = new GFolderList(this, IDC_VIEW, 14, 35, 448, 226));
+	c->Add(FileLst = new LFolderList(this, IDC_VIEW, 14, 35, 448, 226));
 	
 	// File name row
 	x = 0; y++;
@@ -1413,13 +1420,13 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification n)
 }
 
 //////////////////////////////////////////////////////////////////////////
-class GFileSystemItem : public LTreeItem
+class LFileSystemItem : public LTreeItem
 {
-	class GFileSystemPopup *Popup;
+	class LFileSystemPopup *Popup;
 	LString Path;
 
 public:
-	GFileSystemItem(GFileSystemPopup *popup, LVolume *vol, char *path = 0);
+	LFileSystemItem(LFileSystemPopup *popup, LVolume *vol, char *path = 0);
 
 	char *GetPath()
 	{
@@ -1432,16 +1439,16 @@ public:
 };
 
 #define IDC_TREE 100
-class GFileSystemPopup : public LPopup
+class LFileSystemPopup : public LPopup
 {
-	friend class GFileSystemItem;
+	friend class LFileSystemItem;
 
 	LFileSelectDlg *Dlg;
 	LTree *Tree;
-	GFileSystemItem *Root;
+	LFileSystemItem *Root;
 
 public:
-	GFileSystemPopup(LView *owner, LFileSelectDlg *dlg, int x) : LPopup(owner)
+	LFileSystemPopup(LView *owner, LFileSelectDlg *dlg, int x) : LPopup(owner)
 	{
 		Dlg = dlg;
 		LRect r(0, 0, x, 150);
@@ -1455,18 +1462,18 @@ public:
 			if (v)
 			{
 				Tree->SetImageList(Dlg->d->BtnIcons, false);
-				Tree->Insert(Root = new GFileSystemItem(this, v));
+				Tree->Insert(Root = new LFileSystemItem(this, v));
 				
 				for (auto next = v->Next(); next; next = next->Next())
 				{
 					Tree->SetImageList(Dlg->d->BtnIcons, false);
-					Tree->Insert(Root = new GFileSystemItem(this, next));
+					Tree->Insert(Root = new LFileSystemItem(this, next));
 				}
 			}
 		}
 	}
 
-	~GFileSystemPopup()
+	~LFileSystemPopup()
 	{
 	}
 
@@ -1490,7 +1497,7 @@ public:
 		c.Inset(1, 1);
 	}
 
-	void OnActivate(GFileSystemItem *i)
+	void OnActivate(LFileSystemItem *i)
 	{
 		if (i)
 		{
@@ -1501,7 +1508,7 @@ public:
 	}
 };
 
-GFileSystemItem::GFileSystemItem(GFileSystemPopup *popup, LVolume *Vol, char *path)
+LFileSystemItem::LFileSystemItem(LFileSystemPopup *popup, LVolume *Vol, char *path)
 {
 	Popup = popup;
 	Expanded(true);
@@ -1536,7 +1543,7 @@ GFileSystemItem::GFileSystemItem(GFileSystemPopup *popup, LVolume *Vol, char *pa
 
 		for (LVolume *v=Vol->First(); v; v=v->Next())
 		{
-			Insert(new GFileSystemItem(Popup, v));
+			Insert(new LFileSystemItem(Popup, v));
 		}
 	}
 	else
@@ -1547,7 +1554,7 @@ GFileSystemItem::GFileSystemItem(GFileSystemPopup *popup, LVolume *Vol, char *pa
 	}
 }
 
-void GFileSystemItem::OnPath(const char *p)
+void LFileSystemItem::OnPath(const char *p)
 {
 	switch (GetImage())
 	{
@@ -1606,7 +1613,7 @@ void GFileSystemItem::OnPath(const char *p)
 						if (s[strlen(s)-1] != DIR_CHAR) strcat(s, DIR_STR);
 						strcat(s, T[i]);
 
-						GFileSystemItem *New = new GFileSystemItem(Popup, 0, s);
+						LFileSystemItem *New = new LFileSystemItem(Popup, 0, s);
 						if (New)
 						{
 							Item->Insert(New);
@@ -1625,13 +1632,13 @@ void GFileSystemItem::OnPath(const char *p)
 
 	for (auto item: Items)
 	{
-		GFileSystemItem *i = dynamic_cast<GFileSystemItem*>(item);
+		LFileSystemItem *i = dynamic_cast<LFileSystemItem*>(item);
 		if (i)
 			i->OnPath(p);
 	}
 }
 
-void GFileSystemItem::OnMouseClick(LMouse &m)
+void LFileSystemItem::OnMouseClick(LMouse &m)
 {
 	if (m.Left() && m.Down())
 	{
@@ -1639,7 +1646,7 @@ void GFileSystemItem::OnMouseClick(LMouse &m)
 	}
 }
 
-bool GFileSystemItem::OnKey(LKey &k)
+bool LFileSystemItem::OnKey(LKey &k)
 {
 	if ((k.c16 == ' ' || k.c16 == LK_RETURN))
 	{
@@ -1654,14 +1661,14 @@ bool GFileSystemItem::OnKey(LKey &k)
 	return false;
 }
 
-GFolderDrop::GFolderDrop(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy) :
+LFolderDrop::LFolderDrop(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy) :
 	LDropDown(Id, x, y, cx, cy, 0),
-	GFolderView(dlg)
+	LFolderView(dlg)
 {
-	SetPopup(new GFileSystemPopup(this, dlg, cx + (dlg->Ctrl2 ? dlg->Ctrl2->X() : 0) ));
+	SetPopup(new LFileSystemPopup(this, dlg, cx + (dlg->Ctrl2 ? dlg->Ctrl2->X() : 0) ));
 }
 
-void GFolderDrop::OnFolder()
+void LFolderDrop::OnFolder()
 {
 }
 
@@ -1854,9 +1861,9 @@ int GFolderItemCompare(LListItem *A, LListItem *B, NativeInt Data)
 	return 0;
 }
 
-GFolderList::GFolderList(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy) :
+LFolderList::LFolderList(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy) :
 	LList(Id, x, y, cx, cy),
-	GFolderView(dlg)
+	LFolderView(dlg)
 {
 	SetImageList(Dlg->d->BtnIcons, false);
 	ShowColumnHeader(false);
@@ -1864,7 +1871,7 @@ GFolderList::GFolderList(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int 
 	SetMode(LListColumns);
 }
 
-bool GFolderList::OnKey(LKey &k)
+bool LFolderList::OnKey(LKey &k)
 {
 	bool Status = LList::OnKey(k);
 	
@@ -1964,12 +1971,12 @@ bool GFolderList::OnKey(LKey &k)
 		}
 	}
 
-	// LgiTrace("%s:%i GFolderList::OnKey, key=%i down=%i status=%i\n", _FL, k.vkey, k.Down(), Status);
+	// LgiTrace("%s:%i LFolderList::OnKey, key=%i down=%i status=%i\n", _FL, k.vkey, k.Down(), Status);
 	
 	return Status;
 }
 
-void GFolderList::OnFolder()
+void LFolderList::OnFolder()
 {
 	Empty();
 
@@ -2071,7 +2078,7 @@ bool LFileSelect::Name(const char *n)
 	return true;
 }
 
-char *LFileSelect::operator [](size_t i)
+const char *LFileSelect::operator [](size_t i)
 {
 	return d->Files.ItemAt(i);
 }
@@ -2135,7 +2142,7 @@ void LFileSelect::MultiSelect(bool Multi)
 }
 
 #define CharPropImpl(Func, Var)				\
-	char *LFileSelect::Func()				\
+	const char *LFileSelect::Func()			\
 	{										\
 		return Var;							\
 	}										\

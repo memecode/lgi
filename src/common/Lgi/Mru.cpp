@@ -22,7 +22,7 @@ struct GMruEntry
 	}
 };
 
-class GMruPrivate
+class LMruPrivate
 {
 public:
 	int Size;
@@ -30,31 +30,31 @@ public:
 	LSubMenu *Parent;
 	LFileType *SelectedType;
 
-	GMruPrivate()	
+	LMruPrivate()	
 	{
 		Parent = 0;
 		Size = 10;
 		SelectedType = 0;
 	}
 
-	~GMruPrivate()	
+	~LMruPrivate()	
 	{
 		Items.DeleteObjects();
 	}
 };	
 
 ////////////////////////////////////////////////////////////////////
-GMru::GMru()
+LMru::LMru()
 {
-	d = new GMruPrivate;
+	d = new LMruPrivate;
 }
 
-GMru::~GMru()
+LMru::~LMru()
 {
 	DeleteObj(d);
 }
 
-bool GMru::SerializeEntry
+bool LMru::SerializeEntry
 (
 	/// The displayable version of the reference (this should have any passwords blanked out)
 	LString *Display,
@@ -82,24 +82,24 @@ bool GMru::SerializeEntry
 	return true;
 }
 
-void GMru::GetFileTypes(LFileSelect *Dlg, bool Write)
+void LMru::GetFileTypes(LFileSelect *Dlg, bool Write)
 {
 	Dlg->Type("All Files", LGI_ALL_FILES);
 }
 
-char *GMru::_GetCurFile()
+char *LMru::_GetCurFile()
 {
 	if (d->Items.Length())
 		return d->Items[0]->Raw;
 	return NULL;
 }
 
-LFileType *GMru::GetSelectedType()
+LFileType *LMru::GetSelectedType()
 {
 	return d->SelectedType;
 }
 
-bool GMru::_OpenFile(const char *File, bool ReadOnly)
+bool LMru::_OpenFile(const char *File, bool ReadOnly)
 {
 	bool Status = OpenFile(File, ReadOnly);
 
@@ -115,7 +115,7 @@ bool GMru::_OpenFile(const char *File, bool ReadOnly)
 	return Status;
 }
 
-bool GMru::_SaveFile(const char *FileName)
+bool LMru::_SaveFile(const char *FileName)
 {
 	bool Status = false;
 
@@ -171,7 +171,7 @@ bool GMru::_SaveFile(const char *FileName)
 	return Status;
 }
 
-void GMru::_Update()
+void LMru::_Update()
 {
 	if (d->Items.Length() > d->Size)
 	{
@@ -199,7 +199,7 @@ void GMru::_Update()
 	}
 }
 
-bool GMru::Set(LSubMenu *parent, int size)
+bool LMru::Set(LSubMenu *parent, int size)
 {
 	d->Parent = parent;
 	if (size > 0)
@@ -212,7 +212,7 @@ bool GMru::Set(LSubMenu *parent, int size)
 	return true;
 }
 
-const char *GMru::AddFile(const char *FileName, bool Update)
+const char *LMru::AddFile(const char *FileName, bool Update)
 {
 	#if DEBUG_LOG
 	LgiTrace("%s:%i - AddFile(%s,%i)\n", _FL, FileName, Update);
@@ -281,7 +281,7 @@ const char *GMru::AddFile(const char *FileName, bool Update)
 	return Status;
 }
 
-void GMru::RemoveFile(const char *FileName, bool Update)
+void LMru::RemoveFile(const char *FileName, bool Update)
 {
 	// remove from list if there
 	for (int i=0; i<d->Items.Length(); i++)
@@ -301,7 +301,7 @@ void GMru::RemoveFile(const char *FileName, bool Update)
 	}
 }
 
-void GMru::DoFileDlg(LFileSelect &Select, bool Open, std::function<void(bool)> OnSelect)
+void LMru::DoFileDlg(LFileSelect &Select, bool Open, std::function<void(bool)> OnSelect)
 {
 	GetFileTypes(&Select, false);
 	Select.ShowReadOnly(Open);
@@ -327,7 +327,7 @@ void GMru::DoFileDlg(LFileSelect &Select, bool Open, std::function<void(bool)> O
 		Select.Save(Cb);
 }
 
-void GMru::OnCommand(int Cmd, std::function<void(bool)> OnStatus)
+void LMru::OnCommand(int Cmd, std::function<void(bool)> OnStatus)
 {
 	bool Status = false;
 
@@ -375,7 +375,7 @@ void GMru::OnCommand(int Cmd, std::function<void(bool)> OnStatus)
 	}
 }
 
-LMessage::Result GMru::OnEvent(LMessage *Msg)
+LMessage::Result LMru::OnEvent(LMessage *Msg)
 {
 	/*
 	if (d->Parent &&
@@ -397,7 +397,7 @@ LMessage::Result GMru::OnEvent(LMessage *Msg)
 	return false;
 }
 
-bool GMru::Serialize(LDom *Store, const char *Prefix, bool Write)
+bool LMru::Serialize(LDom *Store, const char *Prefix, bool Write)
 {
 	bool Status = false;
 	LVariant v;

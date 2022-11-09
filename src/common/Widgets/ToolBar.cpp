@@ -425,7 +425,7 @@ public:
 	bool OwnImgList;
 	LImageList *ImgList;
 	LFont *Font;
-	GToolTip *Tip;
+	LToolTip *Tip;
 	
 	// Customization menu
 	LDom *CustomDom;
@@ -1440,7 +1440,7 @@ void LToolBar::OnMouseEnter(LMouse &m)
 {
 	if (!d->Tip)
 	{
-		d->Tip = new GToolTip;
+		d->Tip = new LToolTip;
 		if (d->Tip)
 		{
 			d->Tip->Attach(this);

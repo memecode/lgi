@@ -147,10 +147,18 @@ protected:
 public:
 	// Static publics
 	#ifdef LINUX
-	constexpr static const char *CfgLinuxKeysShift  = "Linux.Keys.Shift";
-	constexpr static const char *CfgLinuxKeysCtrl   = "Linux.Keys.Ctrl";
-	constexpr static const char *CfgLinuxKeysAlt    = "Linux.Keys.Alt";
-	constexpr static const char *CfgLinuxKeysSystem = "Linux.Keys.System";
+
+	constexpr static const char *CfgLinuxKeysShift       = "Linux.Keys.Shift";
+	constexpr static const char *CfgLinuxKeysCtrl        = "Linux.Keys.Ctrl";
+	constexpr static const char *CfgLinuxKeysAlt         = "Linux.Keys.Alt";
+	constexpr static const char *CfgLinuxKeysSystem      = "Linux.Keys.System";
+
+	constexpr static const char *CfgLinuxMouseLeft       = "Linux.Mouse.Left";
+	constexpr static const char *CfgLinuxMouseMiddle     = "Linux.Mouse.Middle";
+	constexpr static const char *CfgLinuxMouseRight      = "Linux.Mouse.Right";
+	constexpr static const char *CfgLinuxMouseBack       = "Linux.Mouse.Back";
+	constexpr static const char *CfgLinuxMouseForward    = "Linux.Mouse.Forward";
+
 	#endif
 
 	constexpr static const char *CfgFontsGlyphSub        = "Fonts.GlyphSub";

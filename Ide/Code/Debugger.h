@@ -6,10 +6,10 @@
 
 #define DEBUG_SESSION_LOGGING		0
 
-class GDebugEvents : public LStream
+class LDebugEvents : public LStream
 {
 public:
-	virtual ~GDebugEvents() {}
+	virtual ~LDebugEvents() {}
 	
 	virtual void OnState(bool Debugging, bool Running) = 0;
 	virtual void OnFileLine(const char *File, int Line, bool CurrentIp) = 0;
@@ -17,7 +17,7 @@ public:
 	virtual void OnCrash(int Code) = 0;
 };
 
-class GDebugger
+class LDebugger
 {
 public:
 	struct BreakPoint
@@ -74,9 +74,9 @@ public:
 		LString Detail;
 	};
 	
-	virtual ~GDebugger() {}
+	virtual ~LDebugger() {}
 	
-	virtual bool Load(GDebugEvents *EventHandler, const char *Exe, const char *Args, bool RunAsAdmin, const char *InitDir, const char *Env) = 0;
+	virtual bool Load(LDebugEvents *EventHandler, const char *Exe, const char *Args, bool RunAsAdmin, const char *InitDir, const char *Env) = 0;
 	virtual bool Restart() = 0;
 	virtual bool Unload() = 0;
 	
@@ -108,6 +108,6 @@ public:
 	virtual bool UserCommand(const char *Cmd) = 0;
 };
 
-extern GDebugger *CreateGdbDebugger(LStream *Log);
+extern LDebugger *CreateGdbDebugger(LStream *Log);
 
 #endif

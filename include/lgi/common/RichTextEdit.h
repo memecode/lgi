@@ -187,8 +187,8 @@ public:
 	void UpdateScrollBars(bool Reset = false);
 	int GetLine();
 	void SetLine(int Line);
-	GDocFindReplaceParams *CreateFindReplaceParams();
-	void SetFindReplaceParams(GDocFindReplaceParams *Params);
+	LDocFindReplaceParams *CreateFindReplaceParams();
+	void SetFindReplaceParams(LDocFindReplaceParams *Params);
 	void OnAddStyle(const char *MimeType, const char *Styles);
 
 	// Object Events

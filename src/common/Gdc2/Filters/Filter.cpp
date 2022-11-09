@@ -319,7 +319,7 @@ LFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, LStream *In)
 	if (pDC->GetBits() <= 8)
 	{
 		int Colours = 1 << ActualBits;
-		GPalette *Palette = new GPalette;
+		LPalette *Palette = new LPalette;
 		if (Palette)
 		{
 			Palette->SetSize(Colours);
@@ -432,7 +432,7 @@ LFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, LStream *In)
 		if (Meter)
 		{
 			Meter->SetDescription("scanlines");
-			Meter->SetRange(LRange(0, pMem->y));
+			Meter->SetRange(pMem->y);
 		}
 		
 		LColourSpace SrcCs = CsNone;
@@ -625,7 +625,7 @@ LFilter::IoStatus GdcBmp::WriteImage(LStream *Out, LSurface *pDC)
 	int Colours = (pMem->Cs == CsIndex8) ? 1 << 8 : 0;
 	int UsedBits = LColourSpaceToBits(pMem->Cs);
 
-	GPalette *Palette = pDC->Palette();
+	LPalette *Palette = pDC->Palette();
 	if (pMem->Cs == CsIndex8 && Palette)
 	{
 		int Size = Palette->GetSize();
@@ -729,7 +729,7 @@ LFilter::IoStatus GdcBmp::WriteImage(LStream *Out, LSurface *pDC)
 		if (Meter)
 		{
 			Meter->SetDescription("scanlines");
-			Meter->SetRange(LRange(0, pMem->y));
+			Meter->SetRange(pMem->y);
 		}
 
 		int Bytes = BMPWIDTH(pMem->x * UsedBits);
@@ -1012,7 +1012,7 @@ LFilter::IoStatus GdcIco::ReadImage(LSurface *pDC, LStream *In)
 			pDC->Colour(0, 24);
 			pDC->Rectangle();
 
-			GPalette *Pal = new GPalette;
+			LPalette *Pal = new LPalette;
 			if (Pal)
 			{
 				Pal->SetSize(ColorCount);
@@ -1128,7 +1128,7 @@ LFilter::IoStatus GdcIco::WriteImage(LStream *Out, LSurface *pDC)
 	Out->SetSize(0);
 
 	int ActualBits = pDC->GetBits();
-	GPalette *Pal = pDC->Palette();
+	LPalette *Pal = pDC->Palette();
 	if (Pal)
 	{
 		if (Pal->GetSize() <= 2)

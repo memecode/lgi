@@ -1,7 +1,7 @@
 #include <math.h>
 #include "lgi/common/Gdc2.h"
 
-class GGradient : public LApplicator
+class LGradient : public LApplicator
 {
 protected:
 	int Sx, Sy;
@@ -12,9 +12,9 @@ protected:
 	LRect Rect;
 
 public:
-	const char *GetClass() { return "GGradient"; }
+	const char *GetClass() { return "LGradient"; }
 
-	bool SetSurface(LBmpMem *d, GPalette *p = 0, LBmpMem *a = 0)
+	bool SetSurface(LBmpMem *d, LPalette *p = 0, LBmpMem *a = 0)
 	{
 		Ptr = 0;
 		Bytes = 0;
@@ -94,7 +94,7 @@ public:
 	{
 	}
 
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha = 0)
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha = 0)
 	{
 		return false;
 	}
@@ -150,7 +150,7 @@ public:
 	}
 };
 
-class LHtmlLinearGradient : public GGradient
+class LHtmlLinearGradient : public LGradient
 {
 public:
 	void Rectangle(int X, int Y)
@@ -262,10 +262,10 @@ public:
 	}
 };
 
-class GRadialGradient : public GGradient
+class LRadialGradient : public LGradient
 {
 public:
-	const char *GetClass() { return "GRadialGradient"; }
+	const char *GetClass() { return "LRadialGradient"; }
 
 	void Rectangle(int X, int Y)
 	{
@@ -343,7 +343,7 @@ public:
 	}
 };
 
-class GGradientFactory : public LApplicatorFactory
+class LGradientFactory : public LApplicatorFactory
 {
 public:
 	LApplicator *Create(LColourSpace Cs, int Op)
@@ -354,7 +354,7 @@ public:
 		}
 		else if (Op == 6)
 		{
-			return new GRadialGradient;
+			return new LRadialGradient;
 		}
 
 		return 0;

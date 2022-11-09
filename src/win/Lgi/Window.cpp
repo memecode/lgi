@@ -843,15 +843,15 @@ void LWindow::PourAll()
 	}
 }
 
-class GTempView : public LView
+class LTempView : public LView
 {
 public:
-	GTempView(OsView v)
+	LTempView(OsView v)
 	{
 		_View = v;
 	}
 
-	~GTempView()
+	~LTempView()
 	{
 		_View = 0;
 	}
@@ -1099,7 +1099,7 @@ LMessage::Result LWindow::OnEvent(LMessage *Msg)
 		{
 			// This receives events fired from the LMouseHookPrivate class so that
 			// non-LGI windows create mouse hook events as well.
-			GTempView v((OsView)Msg->B());
+			LTempView v((OsView)Msg->B());
 			LMouse m;
 			m.x = LOWORD(Msg->A());
 			m.y = HIWORD(Msg->A());
@@ -1232,7 +1232,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 			LgiTrace("\t::SerializeState:%i v=%s\n", __LINE__, v.Str());
 			#endif
 
-			GToken t(v.Str(), ";");
+			LToken t(v.Str(), ";");
 			for (int i=0; i<t.Length(); i++)
 			{
 				char *Var = t[i];

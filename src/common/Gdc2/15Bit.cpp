@@ -33,7 +33,7 @@ public:
 
 	const char *GetClass() { return "GdcApp15"; }
 
-	bool SetSurface(LBmpMem *d, GPalette *p, LBmpMem *a)
+	bool SetSurface(LBmpMem *d, LPalette *p, LBmpMem *a)
 	{
 		if (d && d->Cs == Cs)
 		{
@@ -135,7 +135,7 @@ public:
 		this->u8 = d8;
 	}
 
-	bool Blt(LBmpMem *Src, GPalette *SPal, LBmpMem *SrcAlpha)
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 	{
 		if (!Src)
 			return false;

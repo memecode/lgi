@@ -82,14 +82,14 @@ public:
 /// name "LDatePopup". Then at runtime bind it to an editbox by getting the
 /// LView handle using LView::FindControl then give it the pointer to the
 /// edit box using LView::SetNotify.
-class GDateDropDown :
+class LDateDropDown :
 	public LDropDown,
 	public ResObject
 {
 	LDatePopup *Drop;
 
 public:
-	GDateDropDown();
+	LDateDropDown();
 
 	/// This function sets the date src edit box, the date source is used
 	/// to select an appropriate starting point if the Notify control is

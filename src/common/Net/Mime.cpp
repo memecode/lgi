@@ -177,7 +177,7 @@ public:
 	}
 };
 
-class GMimeQuotedPrintableEncode : public LCoderStream
+class LMimeQuotedPrintableEncode : public LCoderStream
 {
 	// 'd' is our current position in 'Buf'
 	char *d;
@@ -186,13 +186,13 @@ class GMimeQuotedPrintableEncode : public LCoderStream
 	char Buf[128];
 
 public:
-	GMimeQuotedPrintableEncode(LStreamI *o) : LCoderStream(o)
+	LMimeQuotedPrintableEncode(LStreamI *o) : LCoderStream(o)
 	{
 		Buf[0] = 0;
 		d = Buf;
 	}
 	
-	~GMimeQuotedPrintableEncode()
+	~LMimeQuotedPrintableEncode()
 	{
 		if (d > Buf)
 		{
@@ -275,7 +275,7 @@ public:
 	}
 };
 
-class GMimeQuotedPrintableDecode : public LCoderStream
+class LMimeQuotedPrintableDecode : public LCoderStream
 {
 	uint8_t ConvHexToBin(char c)
 	{
@@ -289,7 +289,7 @@ class GMimeQuotedPrintableDecode : public LCoderStream
 	}
 
 public:
-	GMimeQuotedPrintableDecode(LStreamI *o) : LCoderStream(o) {}
+	LMimeQuotedPrintableDecode(LStreamI *o) : LCoderStream(o) {}
 
 	ssize_t Write(const void *p, ssize_t size, int f = 0)
 	{
@@ -407,13 +407,13 @@ public:
 };
 
 
-class GMimeBase64Decode : public LCoderStream
+class LMimeBase64Decode : public LCoderStream
 {
 	LStringPipe Buf;
 	uint8_t Lut[256];
 
 public:
-	GMimeBase64Decode(LStreamI *o) : LCoderStream(o)
+	LMimeBase64Decode(LStreamI *o) : LCoderStream(o)
 	{
 		ZeroObj(Lut);
 		memset(Lut+(int)'a', 1, 'z'-'a'+1);
@@ -1210,13 +1210,13 @@ int LMime::LMimeText::LMimeDecode::Parse(LStringPipe *Source, ParentState *State
 	{
 		if (_stricmp(Encoding, MimeQuotedPrintable) == 0)
 		{
-			Decoder = new GMimeQuotedPrintableDecode(Mime->DataStore);
-			LOG("%s:%i - Using GMimeQuotedPrintableDecode\n", _FL);
+			Decoder = new LMimeQuotedPrintableDecode(Mime->DataStore);
+			LOG("%s:%i - Using LMimeQuotedPrintableDecode\n", _FL);
 		}
 		else if (_stricmp(Encoding, MimeBase64) == 0)
 		{
-			Decoder = new GMimeBase64Decode(Mime->DataStore);
-			LOG("%s:%i - Using GMimeBase64Decode\n", _FL);
+			Decoder = new LMimeBase64Decode(Mime->DataStore);
+			LOG("%s:%i - Using LMimeBase64Decode\n", _FL);
 		}
 		else
 		{
@@ -1455,7 +1455,7 @@ ssize_t LMime::LMimeText::LMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 		{
 			if (_stricmp(Encoding, MimeQuotedPrintable) == 0)
 			{
-				Encoder = new GMimeQuotedPrintableEncode(Dest);
+				Encoder = new LMimeQuotedPrintableEncode(Dest);
 			}
 			else if (_stricmp(Encoding, MimeBase64) == 0)
 			{

@@ -21,15 +21,14 @@ class LFileSelectPrivate
 	bool			CanMultiSelect;
 	bool			MultiSelected;
 
-	char			*FileStr;
-	char			*InitDir;
-	char			*DefExt;
-	char			*TitleStr;
+	LString			InitDir;
+	LString			DefExt;
+	LString			TitleStr;
 	bool			WaitForMessage;
 	int				SelectedType;
 	LViewI			*ParentWnd;
 	List<LFileType> TypeList;
-	List<char>		Files;
+	LString::Array	Files;
 	bool			ShowReadOnly;
 	bool			ReadOnly;
 
@@ -110,11 +109,11 @@ class LFileSelectPrivate
 		{
 			memset(Info.lpstrFile, 0, sizeof(*Info.lpstrFile) * Info.nMaxFile);
 
-			char16 *s = Utf8ToWide(FileStr);
-			if (s)
+			if (Files.Length())
 			{
-				StrcpyW(Info.lpstrFile, s);
-				DeleteArray(s);
+				LAutoWString s(Utf8ToWide(Files[0]));
+				if (s)
+					StrcpyW(Info.lpstrFile, s);
 			}
 		}
 
@@ -131,12 +130,11 @@ class LFileSelectPrivate
 			Info.Flags |= OFN_HIDEREADONLY;
 
 		Info.Flags |= OFN_EXPLORER | OFN_ENABLESIZING | OFN_NOCHANGEDIR;
-		Files.DeleteArrays();
 	}
 
 	void AfterDlg(OPENFILENAMEW &Info, bool Status)
 	{
-		DeleteArray(FileStr);
+		Files.Empty();
 		if (Status)
 		{
 			MultiSelected = StrlenW(Info.lpstrFile) < Info.nFileOffset;
@@ -150,15 +148,13 @@ class LFileSelectPrivate
 				while (*f)
 				{
 					StrcpyW(e, f);
-					Files.Insert(WideToUtf8(s));
+					Files.New() = s;
 					f += StrlenW(f) + 1;
 				}
 			}
 			else
 			{
-				char *f = WideToUtf8(Info.lpstrFile);
-				if (f)
-					Files.Insert(f);
+				Files.New() = Info.lpstrFile;
 			}
 
 			ReadOnly = TestFlag(Info.Flags, OFN_READONLY);
@@ -184,16 +180,12 @@ class LFileSelectPrivate
 		TitleStr = 0;
 		SelectedType = 0;
 		ParentWnd = 0;
-		FileStr = 0;
 		ReadOnly = false;
 		ShowReadOnly = false;
 	}
 
 	~LFileSelectPrivate()
 	{
-		DeleteArray(FileStr);
-		DeleteArray(InitDir);
-		Files.DeleteArrays();
 	}
 };
 
@@ -213,25 +205,18 @@ LFileSelect::~LFileSelect()
 
 const char *LFileSelect::Name()
 {
-	return d->Files[0];
+	return d->Files.Length() ? d->Files[0] : NULL;
 }
 
 bool LFileSelect::Name(const char *n)
 {
-	bool Status = FALSE;
-
-	DeleteArray(d->FileStr);
-	if (n)
-	{
-		d->FileStr = NewStr(n);
-	}
-
-	return Status;
+	d->Files.Empty();
+	return d->Files.New().Set(n);
 }
 
-char *LFileSelect::operator [](size_t i)
+const char *LFileSelect::operator [](size_t i)
 {
-	return d->Files[i];
+	return d->Files.IdxCheck(i) ? d->Files[i] : NULL;
 }
 
 size_t LFileSelect::Length()
@@ -303,37 +288,34 @@ void LFileSelect::MultiSelect(bool Multi)
 	d->CanMultiSelect = Multi;
 }
 
-char *LFileSelect::InitialDir()
+const char *LFileSelect::InitialDir()
 {
 	return d->InitDir;
 }
 
 void LFileSelect::InitialDir(const char *InitDir)
 {
-	DeleteArray(d->InitDir);
-	d->InitDir = NewStr(InitDir);
+	d->InitDir = InitDir;
 }
 
-char *LFileSelect::Title()
+const char *LFileSelect::Title()
 {
 	return d->TitleStr;
 }
 
 void LFileSelect::Title(const char *Title)
 {
-	DeleteArray(d->TitleStr);
-	d->TitleStr = NewStr(Title);
+	d->TitleStr = Title;
 }
 
-char *LFileSelect::DefaultExtension()
+const char *LFileSelect::DefaultExtension()
 {
 	return d->DefExt;
 }
 
 void LFileSelect::DefaultExtension(const char *DefExt)
 {
-	DeleteArray(d->DefExt);
-	d->DefExt = NewStr(DefExt);
+	d->DefExt = DefExt;
 }
 
 void LFileSelect::Open(SelectCb Cb)
@@ -376,8 +358,8 @@ void LFileSelect::OpenFolder(SelectCb Cb)
 	Info.Flags &= ~OFN_ALLOWMULTISELECT;
 	Info.Flags |= OFN_NOVALIDATE;
 	Info.Flags |= OFN_NOTESTFILECREATE;
-	if (!Info.lpstrInitialDir && d->FileStr)
-		Info.lpstrInitialDir = Utf8ToWide(d->FileStr);
+	if (!Info.lpstrInitialDir && d->InitDir)
+		Info.lpstrInitialDir = Utf8ToWide(d->InitDir);
 	Status = GetSaveFileNameW(&Info) != 0;
 	d->AfterDlg(Info, Status);
 	

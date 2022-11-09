@@ -10,26 +10,21 @@ class LSoftwareUpdate
 public:
 	struct UpdateInfo
 	{
-		LAutoString Name;
-		LAutoString Version;
-		LAutoString Build;
-		LAutoString Uri;
-		LAutoString Proxy;
+		LString Name;
+		LString Version;
+		LString Build;
+		LString Uri;
+		LString Proxy;
 		LDateTime Date;
-		bool Cancel;
-		
-		UpdateInfo()
-		{
-		    Cancel = false;
-		}
+		bool Cancel = false;
 	};
 
 	LSoftwareUpdate(const char *SoftwareName, const char *UpdateUri, const char *ProxyUri, const char *OptionalTempPath = 0);
 	virtual ~LSoftwareUpdate();
 
-	bool CheckForUpdate(UpdateInfo &Info, LViewI *WithUi, bool IncBetas);
-	bool ApplyUpdate(UpdateInfo &Info, bool DownloadOnly, LViewI *WithUi);
-	char *GetErrorMessage();
+	void CheckForUpdate(UpdateInfo &Info, LViewI *WithUi, bool IncBetas, std::function<void(bool, const char*)> callback);
+	bool ApplyUpdate(const UpdateInfo &Info, bool DownloadOnly, LViewI *WithUi);
+	const char *GetErrorMessage();
 };
 
 #endif

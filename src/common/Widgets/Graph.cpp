@@ -133,7 +133,7 @@ struct LGraphPriv
 				break;
 			}
 			case GV_INT64:
-				v = atoi64(in);
+				v = (int64_t)atoi64(in);
 				break;
 			case GV_STRING:
 				v = in;

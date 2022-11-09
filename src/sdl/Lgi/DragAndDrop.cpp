@@ -16,16 +16,16 @@
 static int NextDndType = 600;
 static LHashTbl<ConstStrKey<char,false>, int> DndTypes(0, -1);
 
-class GDndSourcePriv
+class LDndSourcePriv
 {
 public:
 	LAutoString CurrentFormat;
 	
-	GDndSourcePriv()
+	LDndSourcePriv()
 	{
 	}
 	
-	~GDndSourcePriv()
+	~LDndSourcePriv()
 	{
 	}
 };
@@ -33,7 +33,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////////
 LDragDropSource::LDragDropSource()
 {
-	d = new GDndSourcePriv;
+	d = new LDndSourcePriv;
 	OnRegister(true);
 }
 

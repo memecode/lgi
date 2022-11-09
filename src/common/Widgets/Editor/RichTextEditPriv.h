@@ -164,7 +164,7 @@ struct LRichEditElemContext : public LCss::ElementCallback<LRichEditElem>
 	LArray<LRichEditElem*> GetChildren(LRichEditElem *obj);
 };
 
-class GDocFindReplaceParams3 : public GDocFindReplaceParams
+class LDocFindReplaceParams3 : public LDocFindReplaceParams
 {
 public:
 	// Find/Replace History
@@ -174,7 +174,7 @@ public:
 	bool MatchWord;
 	bool SelectionOnly;
 	
-	GDocFindReplaceParams3()
+	LDocFindReplaceParams3()
 	{
 		LastFind = 0;
 		LastReplace = 0;
@@ -183,7 +183,7 @@ public:
 		SelectionOnly = false;
 	}
 
-	~GDocFindReplaceParams3()
+	~LDocFindReplaceParams3()
 	{
 		DeleteArray(LastFind);
 		DeleteArray(LastReplace);

@@ -10,7 +10,7 @@
 #include "lgi/common/DocView.h"
 #include "lgi/common/StringClass.h"
 #include "lgi/common/LgiString.h"
-#include "GDebugger.h"
+#include "Debugger.h"
 
 #define DEBUG_STOP_ON_GTK_ERROR	0
 #define DEBUG_SHOW_GDB_IO		0
@@ -33,7 +33,7 @@ public:
 	virtual bool Transform(LString name, LString val, Callback *Cb, LVariant &Value, LString &Detail) = 0;
 };
 
-class GStringVis : public Visualizer
+class LStringVis : public Visualizer
 {
 public:
 	bool Match(LString s)
@@ -69,9 +69,9 @@ public:
 	}
 };
 
-class Gdb : public GDebugger, public LThread, public Callback
+class Gdb : public LDebugger, public LThread, public Callback
 {
-	GDebugEvents *Events = NULL;
+	LDebugEvents *Events = NULL;
 	LAutoPtr<LSubProcess> Sp;
 	LString Exe, Args, InitDir;
 	LString ChildEnv;
@@ -652,7 +652,7 @@ public:
 		State = Init;
 		LinePtr = Line;
 		
-		Vis.Add(new GStringVis);
+		Vis.Add(new LStringVis);
 	}
 	
 	~Gdb()
@@ -673,7 +673,7 @@ public:
 		}
 	}
 
-	bool Load(GDebugEvents *EventHandler, const char *exe, const char *args, bool runAsAdmin, const char *initDir, const char *Env)
+	bool Load(LDebugEvents *EventHandler, const char *exe, const char *args, bool runAsAdmin, const char *initDir, const char *Env)
 	{
 		Events = EventHandler;
 		Exe = exe;
@@ -1089,11 +1089,11 @@ public:
 		return false;
 	}
 	
-	void ParseVariables(const char *a, LArray<Variable> &vars, GDebugger::Variable::ScopeType scope, bool Detailed)
+	void ParseVariables(const char *a, LArray<Variable> &vars, LDebugger::Variable::ScopeType scope, bool Detailed)
 	{
-		GToken t(a, "\r\n");
+		LToken t(a, "\r\n");
 		LString CurLine;
-		for (int i=0; i<t.Length(); i++)
+		for (unsigned i=0; i<t.Length(); i++)
 		{
 			CurLine = t[i];
 			while (	i < t.Length() - 1 &&
@@ -1103,7 +1103,7 @@ public:
 				continue;
 			}
 
-			ssize_t EqPos = CurLine.Find("=");
+			auto EqPos = CurLine.Find("=");
 			if (EqPos > 0)
 			{
 				char *val = CurLine.Get() + EqPos + 1;
@@ -1117,13 +1117,24 @@ public:
 					v.Value.Type = GV_VOID_PTR;
 					v.Value.Value.Ptr = (void*) htoi64(val);
 				}
-				else if (IsDigit(*val))
+				else if (IsDigit(*val) || strchr(".-", *val))
 				{
-					int64 tmp = atoi64(val);
-					if (tmp & 0xffffffff00000000L)
+					// Is it floating point?
+					auto isFloat = strchr(val, '.') != NULL;
+					printf("numeric type for '%s' is %i\n", val, isFloat);
+					if (isFloat)
+					{
+						double tmp = atof(val);
 						v.Value = tmp;
+					}
 					else
-						v.Value = (int)tmp;
+					{					
+						int64 tmp = atoi64(val);
+						if (tmp & 0xffffffff00000000L)
+							v.Value = tmp;
+						else
+							v.Value = (int)tmp;
+					}
 				}
 				else
 				{
@@ -1180,8 +1191,7 @@ public:
 	
 	bool GetVariables(bool Locals, LArray<Variable> &vars, bool Detailed)
 	{
-		// LProfile Prof("GetVars");
-		LStringPipe p(256);
+		LStringPipe p(512);
 
 		if (vars.Length())
 		{
@@ -1194,11 +1204,10 @@ public:
 				c.Printf("whatis %s", v.Name.Get());
 				if (Cmd(c, &p))
 				{
-					LString a = p.NewGStr();
-					printf("Type='%s'\n", a.Get());
+					auto a = p.NewGStr();
 					if (a.Find("=") >= 0)
 					{
-						LString::Array tmp = a.Split("=", 1);
+						auto tmp = a.Split("=", 1);
 						v.Type = tmp[1].Strip().Replace("\n", " ");
 					}
 					else
@@ -1206,7 +1215,7 @@ public:
 						v.Type = a.Get();
 					}
 				}
-				else printf("%s:%i - Cmd failed '%s'\n", _FL, c.Get());
+				else LgiTrace("%s:%i - Cmd failed '%s'\n", _FL, c.Get());
 				
 				c.Printf("p %s", v.Name.Get());
 				if (Cmd(c, &p))
@@ -1245,20 +1254,14 @@ public:
 		{
 			if (!Cmd("info args", &p))
 				return false;
-
-			// Prof.Add("ParseArgs");
 			
-			LAutoString a(p.NewStr());
+			auto a = p.NewGStr();
 			ParseVariables(a, vars, Variable::Arg, Detailed);
-
-			// Prof.Add("InfoLocals");
 
 			if (!Cmd("info locals", &p))
 				return false;
 
-			// Prof.Add("ParseLocals");
-			
-			a.Reset(p.NewStr());
+			a = p.NewGStr();
 			ParseVariables(a, vars, Variable::Local, Detailed);
 		}
 		
@@ -1556,7 +1559,7 @@ public:
 	}
 };
 
-GDebugger *CreateGdbDebugger(LStream *Log)
+LDebugger *CreateGdbDebugger(LStream *Log)
 {
 	return new Gdb(Log);
 }

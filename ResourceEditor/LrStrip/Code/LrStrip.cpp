@@ -3,7 +3,7 @@
 #include "LXmlTree.h"
 #include "GList.h"
 #include "GListItemCheckBox.h"
-#include "GToken.h"
+#include "LToken.h"
 
 char AppName[] = "LrStrip";
 
@@ -296,7 +296,7 @@ int LgiMain(OsAppArguments &AppArgs)
 				{
 					w->Langs.Empty();
 
-					GToken l(Langs, " ,;");
+					LToken l(Langs, " ,;");
 					for (int i=0; i<l.Length(); i++)
 					{
 						w->Langs.Add(l[i], true);

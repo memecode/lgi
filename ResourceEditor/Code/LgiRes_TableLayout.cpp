@@ -840,7 +840,7 @@ bool CtrlTable::SetVariant(const char *Name, LVariant &Value, const char *Array)
 		{
 			d->Cells.DeleteObjects();
 
-			GToken t(Value.Str(), ",");
+			LToken t(Value.Str(), ",");
 			d->ColSize.Length(0);
 			for (int i=0; i<t.Length(); i++)
 			{
@@ -856,7 +856,7 @@ bool CtrlTable::SetVariant(const char *Name, LVariant &Value, const char *Array)
 		{
 			d->Cells.DeleteObjects();
 
-			GToken t(Value.Str(), ",");
+			LToken t(Value.Str(), ",");
 			d->RowSize.Length(0);
 			for (int i=0; i<t.Length(); i++)
 			{

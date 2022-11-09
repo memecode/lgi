@@ -187,7 +187,7 @@ public:
 			// Set the scrollbar
 			if (Scroll)
 			{
-				Scroll->SetRange(LRange(0, Records->Length()));
+				Scroll->SetRange(Records->Length());
 				Scroll->Value((Current) ? Records->IndexOf(Current) : 0);
 				Scroll->SetPage(1);
 			}

@@ -1,8 +1,8 @@
 #ifndef _GMENU_IMPL_H_
 #define _GMENU_IMPL_H_
 
-class GSubMenu;
-class GMenuItem;
+class LSubMenu;
+class LMenuItem;
 class SubMenuImpl;
 class MenuImpl;
 
@@ -13,7 +13,7 @@ class MenuClickImpl
 	friend class MenuItemImpl;
 
 protected:
-	GMenuItem *Clicked;
+	LMenuItem *Clicked;
 
 public:
 	MenuClickImpl()
@@ -25,7 +25,7 @@ public:
 	{
 	}
 	
-	GMenuItem *ItemClicked()
+	LMenuItem *ItemClicked()
 	{
 		return Clicked;
 	}
@@ -40,7 +40,7 @@ class SubMenuImpl : public LPopup, public MenuClickImpl
 	class SubMenuImplPrivate *d;
 
 public:
-	SubMenuImpl(GSubMenu *Sub);
+	SubMenuImpl(LSubMenu *Sub);
 	~SubMenuImpl();
 	
 	const char *GetClass() { return "SubMenuImpl"; }
@@ -52,7 +52,7 @@ public:
 	
 	LView *View() { return this; }
 	SubMenuImpl *IsSub() { return this; }
-	GSubMenu *GetSub();
+	LSubMenu *GetSub();
 };
 
 class MenuImpl : public LView, public MenuClickImpl
@@ -77,11 +77,11 @@ class MenuItemImpl : public LView
 	class MenuItemImplPrivate *d;
 
 public:
-	MenuItemImpl(GMenuItem *Item);
+	MenuItemImpl(LMenuItem *Item);
 	~MenuItemImpl();
 	
 	const char *GetClass() { return "MenuItemImpl"; }
-	GMenuItem *Item();
+	LMenuItem *Item();
 	void ShowSub();
 	void HideSub(bool SetClick = false);
 	void Activate();

@@ -1,5 +1,5 @@
 /*
-**	FILE:			GLog.cpp
+**	FILE:			LLog.cpp
 **	AUTHOR:			Matthew Allen
 **	DATE:			28/6/99
 **	DESCRIPTION:	Reality logging system
@@ -12,7 +12,7 @@
 #include <time.h>
 
 #include "Lgi.h"
-#include "GLog.h"
+#include "LLog.h"
 #include "LScrollBar.h"
 #include "LDisplayString.h"
 
@@ -55,7 +55,7 @@ RLogEntry::~RLogEntry()
 }
 
 ////////////////////////////////////////////////////////////////////
-RLogView::RLogView(GLog *log)
+RLogView::RLogView(LLog *log)
 {
 	Log = log;
 	HasBorder = true;
@@ -268,7 +268,7 @@ LMessage::Result RLogView::OnEvent(LMessage *Msg)
 }
 
 ////////////////////////////////////////////////////////////////////
-GLog::GLog(char *File)
+LLog::LLog(char *File)
 {
 	LogView = 0;
 	FileName = (File) ? NewStr(File) : 0;
@@ -278,7 +278,7 @@ GLog::GLog(char *File)
 	}
 }
 
-GLog::~GLog()
+LLog::~LLog()
 {
 	if (LogView)
 	{
@@ -289,12 +289,12 @@ GLog::~GLog()
 	Entries.DeleteObjects();
 }
 
-void GLog::SetView(RLogView *View)
+void LLog::SetView(RLogView *View)
 {
 	LogView = View;
 }
 
-void GLog::Write(LColour c, const char *Buffer, int Len, char *Desc)
+void LLog::Write(LColour c, const char *Buffer, int Len, char *Desc)
 {
 	if (Buffer)
 	{
@@ -325,7 +325,7 @@ void GLog::Write(LColour c, const char *Buffer, int Len, char *Desc)
 	}
 }
 
-void GLog::Print(LColour c, const char *Str, ...)
+void LLog::Print(LColour c, const char *Str, ...)
 {
 	if (Str)
 	{

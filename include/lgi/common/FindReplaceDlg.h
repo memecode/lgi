@@ -1,7 +1,6 @@
 /// \file
 /// \author Matthew Allen (fret@memecode.com)
-#ifndef __GFINDREPLACEDLG_H
-#define __GFINDREPLACEDLG_H
+#pragma once
 
 #include <functional>
 
@@ -30,7 +29,7 @@ public:
 /// Find dialog
 class LgiClass LFindDlg : public LFindReplaceCommon
 {
-	class GFindDlgPrivate *d;
+	class LFindDlgPrivate *d;
 
 public:
 	/// Constructor
@@ -41,7 +40,7 @@ public:
 		/// Callback
 		Callback Cb,
 		/// The initial string for the find argument
-		char *Init = NULL
+		const char *Init = NULL
 	);
 	~LFindDlg();
 
@@ -85,6 +84,4 @@ public:
 	int OnNotify(LViewI *Ctrl, LNotification n);
 };
 
-
-#endif
 

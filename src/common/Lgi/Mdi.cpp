@@ -400,7 +400,7 @@ void LMdiChild::OnMouseClick(LMouse &m)
 					/*
 					LPoint p(d->System.x1, d->System.y2+1);
 					PointToScreen(p);
-					GSubMenu *Sub = new GSubMenu;
+					LSubMenu *Sub = new LSubMenu;
 					if (Sub)
 					{
 						Sub->AppendItem("Close", 1, true);

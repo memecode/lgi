@@ -37,17 +37,17 @@ LFindReplaceCommon::LFindReplaceCommon()
 #define IDC_FIND_TABLE              1008
 #define IDC_SEARCH_UP				1009
 
-class GFindDlgPrivate
+class LFindDlgPrivate
 {
 public:
 	LEdit *Edit;
-	LFindDlg::Callback Callback;
+	LFindReplaceCommon::Callback Callback;
 	void *CallbackData;
 };
 
-LFindDlg::LFindDlg(LView *Parent, Callback Cb, char *Init)
+LFindDlg::LFindDlg(LView *Parent, Callback Cb, const char *Init)
 {
-	d = new GFindDlgPrivate;
+	d = new LFindDlgPrivate;
 	if (Init)
 		Find = Init;
 	d->Callback = Cb;
@@ -56,6 +56,11 @@ LFindDlg::LFindDlg(LView *Parent, Callback Cb, char *Init)
 	Name(LLoadString(L_FR_FIND, "Find"));
 
 	LRect r(0, 0, 450, 370);
+	auto Dpi = LScreenDpi();
+	auto Scale = (float)Dpi.x / 96.0;
+	r.x2 *= Scale;
+	r.y2 *= Scale;
+
 	SetPos(r);
 	MoveSameScreen(Parent);
 
@@ -200,6 +205,11 @@ LReplaceDlg::LReplaceDlg(LView *Parent, Callback Cb, char *InitFind, char *InitR
 	LView *f = 0;
 	
 	LRect r(0, 0, 450, 300);
+	auto Dpi = LScreenDpi();
+	auto Scale = (float)Dpi.x / 96.0;
+	r.x2 *= Scale;
+	r.y2 *= Scale;
+
 	SetPos(r);
 	MoveToCenter();
 	

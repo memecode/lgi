@@ -428,7 +428,7 @@ LColour GdcMixColour(LColour c1, LColour c2, float HowMuchC1)
 	return LColour(r, g, b, a);
 }
 
-COLOUR CBit(int DstBits, COLOUR c, int SrcBits, GPalette *Pal)
+COLOUR CBit(int DstBits, COLOUR c, int SrcBits, LPalette *Pal)
 {
 	if (SrcBits == DstBits)
 	{

@@ -17,8 +17,8 @@
 #endif
 
 #include "Lgi.h"
-#include "GProcess.h"
-#include "GToken.h"
+#include "LProcess.h"
+#include "LToken.h"
 
 #ifndef STILL_ACTIVE
 #define STILL_ACTIVE	254
@@ -126,7 +126,7 @@ bool LIsProcess(OsProcessId Pid)
 	return Status;
 }
 
-class GProcessPrivate
+class LProcessPrivate
 {
 public:
 	OsProcess Pid;
@@ -135,7 +135,7 @@ public:
 	uint32_t ErrorCode;
 	char *Exe;
 	
-	GProcessPrivate()
+	LProcessPrivate()
 	{
 		Pid = 0;
 		ProcessId = 0;
@@ -144,43 +144,43 @@ public:
 		ExitValue = STILL_ACTIVE;
 	}
 	
-	~GProcessPrivate()
+	~LProcessPrivate()
 	{
 		DeleteArray(Exe);
 	}
 };
 
-GProcess::GProcess()
+LProcess::LProcess()
 {
-	d = new GProcessPrivate;
+	d = new LProcessPrivate;
 }
 
-GProcess::~GProcess()
+LProcess::~LProcess()
 {
 	DeleteObj(d);
 }
 
-OsProcess GProcess::Handle()
+OsProcess LProcess::Handle()
 {
 	return d->Pid;
 }
 
-OsProcessId GProcess::GetId()
+OsProcessId LProcess::GetId()
 {
 	return d->ProcessId;
 }
 
-uint32_t GProcess::GetErrorCode()
+uint32_t LProcess::GetErrorCode()
 {
 	return d->ErrorCode;
 }
 
-ulong GProcess::ExitValue()
+ulong LProcess::ExitValue()
 {
 	return d->ExitValue;
 }
 
-bool GProcess::IsRunning()
+bool LProcess::IsRunning()
 {
 	if (d->Pid)
 	{
@@ -226,7 +226,7 @@ bool GProcess::IsRunning()
 	return d->Pid != 0;
 }
 
-class GNativeString
+class LNativeString
 {
 	static bool WinNT;
 
@@ -234,13 +234,13 @@ class GNativeString
 	LAutoWString w;
 
 public:
-	GNativeString(const char *utf = NULL)
+	LNativeString(const char *utf = NULL)
 	{
 		if (utf)
 			*this = utf;
 	}
 
-	GNativeString(const GNativeString &ns)
+	LNativeString(const LNativeString &ns)
 	{
 		if (ns.n)
 			n = ns.n;
@@ -254,7 +254,7 @@ public:
 		w.Reset();
 	}
 
-	GNativeString &operator =(const char *utf)
+	LNativeString &operator =(const char *utf)
 	{
 		Empty();
 		if (utf)
@@ -272,7 +272,7 @@ public:
 		return *this;
 	}
 
-	GNativeString &operator =(GNativeString &s)
+	LNativeString &operator =(LNativeString &s)
 	{
 		Empty();
 		#ifdef WIN32
@@ -286,7 +286,7 @@ public:
 		return *this;
 	}
 
-	GNativeString &operator += (GNativeString &add)
+	LNativeString &operator += (LNativeString &add)
 	{
 		if (WinNT)
 		{
@@ -345,7 +345,7 @@ public:
 	}
 };
 
-bool GProcess::Terminate()
+bool LProcess::Terminate()
 {
 	#if defined(WIN32)
 	return TerminateProcess(d->Pid, -1) != 0;
@@ -355,9 +355,9 @@ bool GProcess::Terminate()
 	#endif
 }
 
-bool GNativeString::WinNT = LGetOs() == LGI_OS_WIN32 || LGetOs() == LGI_OS_WIN64;
+bool LNativeString::WinNT = LGetOs() == LGI_OS_WIN32 || LGetOs() == LGI_OS_WIN64;
 
-bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool Wait, LStream *In, LStream *Out, int Priority)
+bool LProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool Wait, LStream *In, LStream *Out, int Priority)
 {
 	bool Status = false;
 
@@ -370,7 +370,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 	}
 	#endif
 
-	GNativeString NExe;
+	LNativeString NExe;
 	if (Exe)
 	{
 		if (LFileExists((char*)Exe))
@@ -395,16 +395,16 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 
 	if (NExe.GetSize())
 	{
-		GNativeString Buf;
-		GNativeString Delim;
+		LNativeString Buf;
+		LNativeString Delim;
 		#ifdef WIN32
 		if (LFileExists(Exe))
 			Delim = "\"";
 		#endif
-		GNativeString Space = " ";
+		LNativeString Space = " ";
 
-		GNativeString NPath = Dir;
-		GNativeString NArgs = Arguments;
+		LNativeString NPath = Dir;
+		LNativeString NArgs = Arguments;
 		
 		Buf += Delim;
 		Buf += NExe;
@@ -483,7 +483,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 					}
 				}
 
-				GNativeString StartingPath;
+				LNativeString StartingPath;
 				if (NPath.GetSize())
 				{
 					StartingPath = NPath;
@@ -686,7 +686,7 @@ bool GProcess::Run(const char *Exe, const char *Arguments, const char *Dir, bool
 			if (!LFileExists(Exe))
 			{
 				// Find exe in path
-				GToken Path(getenv("PATH"), ":");
+				LToken Path(getenv("PATH"), ":");
 				for (int i=0; i<Path.Length(); i++)
 				{
 					LMakePath(ExeName, sizeof(ExeName), Path[i], Exe);

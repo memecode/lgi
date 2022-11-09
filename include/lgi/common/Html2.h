@@ -45,7 +45,7 @@ protected:
 	char				*DocCharSet;
 	char				IsHtml;
 	int					ViewWidth;
-	GToolTip			Tip;
+	LToolTip			Tip;
 	LTag				*PrevTip;
 	LCss::Store			CssStore;
 	

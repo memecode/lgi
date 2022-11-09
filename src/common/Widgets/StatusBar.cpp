@@ -105,7 +105,7 @@ void LStatusBar::OnPosChange()
 	if (remainingPx > 0)
 	{
 		// Allocate remaining space...
-		int perPane = remainingPx / adjustable;
+		int perPane = adjustable ? remainingPx / adjustable : remainingPx;
 		for (unsigned i=0; i<children.Length(); i++)
 		{
 			auto &l = layout[i];

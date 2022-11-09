@@ -33,7 +33,6 @@ constexpr const char *LDateTime::MonthsShort[];
 constexpr const char *LDateTime::MonthsLong[];
 
 #define MIN_YEAR		1800
-#define OFFSET_1800		5364662400 // Seconds from 1/1/1800 to 1/1/1970
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -444,13 +443,13 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start,
 		Before.AddMonths(-6);
 
 		NSTimeZone *tz = [NSTimeZone systemTimeZone];
-		NSDate *startDate = [[NSDate alloc] initWithTimeIntervalSince1970:(Before.Ts() / Second64Bit) - OFFSET_1800];
+		NSDate *startDate = [[NSDate alloc] initWithTimeIntervalSince1970:(Before.Ts() / Second64Bit) - Offset1800];
 		for (int n=0; n<6; n++)
 		{
 			NSDate *next = [tz nextDaylightSavingTimeTransitionAfterDate:startDate];
 			auto &i = Info.New();
 			
-			i.UtcTimeStamp = ([next timeIntervalSince1970] + OFFSET_1800) * Second64Bit;
+			i.UtcTimeStamp = ([next timeIntervalSince1970] + Offset1800) * Second64Bit;
 			i.Offset = (int)([tz secondsFromGMTForDate:[next dateByAddingTimeInterval:60]]/60);
 			
 			#if DEBUG_DST_INFO
@@ -840,7 +839,7 @@ bool LDateTime::SetUnix(uint64 s)
 	#if defined(WINDOWS)
 	return Set(s * LDateTime::Second64Bit + 116445168000000000LL);
 	#else
-	return Set((s + OFFSET_1800) * LDateTime::Second64Bit);
+	return Set((s + Offset1800) * LDateTime::Second64Bit);
 	#endif
 }
 
@@ -872,7 +871,7 @@ bool LDateTime::Set(uint64 s)
 
 	#else
 
-		time_t t = (time_t) (((int64)(s / Second64Bit)) - OFFSET_1800);
+		time_t t = (time_t) (((int64)(s / Second64Bit)) - Offset1800);
 		Set(t);
 		_Thousands = s % Second64Bit;
 		return true;
@@ -981,7 +980,7 @@ bool LDateTime::Get(uint64 &s) const
 			// printf("Adjusting -= %i (%i)\n", _Tz * 60, _Tz);
 		}
 		
-		s = (uint64)(sec + OFFSET_1800) * Second64Bit + _Thousands;		
+		s = (uint64)(sec + Offset1800) * Second64Bit + _Thousands;		
 		return true;
 	
 	#endif

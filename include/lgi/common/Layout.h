@@ -38,7 +38,7 @@
 /// with the control ID of the scrollbar, which is either #IDC_VSCROLL or #IDC_HSCROLL.
 class LgiClass LLayout : public LView
 {
-	friend class GScroll;
+	friend class LScroll;
 	friend class LView;
 
 	// Private variables
@@ -72,7 +72,6 @@ protected:
 	bool _SetScrollBars(bool x, bool y);
 	#endif
 	#if defined(MAC) && !XPLATFORM_GLAYOUT
-	friend class GLayoutScrollBar;
 	HISize Line;
 	
 	OsView RealWnd;

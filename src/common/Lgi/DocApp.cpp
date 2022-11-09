@@ -17,7 +17,7 @@
 #include "lgi/common/Menu.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////
-class GDocAppPrivate
+class LDocAppPrivate
 {
 public:
 	// Data
@@ -29,7 +29,7 @@ public:
 	bool				Dirty;
 	GDocAppInstallMode	Mode;
 
-	GDocAppPrivate(LWindow *app, char *param)
+	LDocAppPrivate(LWindow *app, char *param)
 	{
 		App = app;
 		OptionsParam = param;
@@ -38,7 +38,7 @@ public:
 		Mode = InstallPortable;
 	}
 	
-	~GDocAppPrivate()
+	~LDocAppPrivate()
 	{
 		// Release memory
 		DeleteArray(AppName);
@@ -187,7 +187,7 @@ LDocApp<OptionsFmt>::LDocApp(const char *appname, LIcon icon, char *optsname)
 {
 	Options = 0;
 	_LangOptsName = 0;
-	d = new GDocAppPrivate(this, optsname);
+	d = new LDocAppPrivate(this, optsname);
 	
 	LRect r(0, 0, 800, 600);
 	SetPos(r);
@@ -306,7 +306,7 @@ bool LDocApp<OptionsFmt>::_DoSerialize(bool Write)
 
 		LOptionsFile *Of = dynamic_cast<LOptionsFile*>(Options);
 		if (Of) Of->CreateTag("Mru");
-		GMru::Serialize(Options, "Mru", true);
+		LMru::Serialize(Options, "Mru", true);
 	}
 
 	// do the work
@@ -322,7 +322,7 @@ bool LDocApp<OptionsFmt>::_DoSerialize(bool Write)
 		}
 
 		// read misc options
-		GMru::Serialize(Options, "Mru", false);
+		LMru::Serialize(Options, "Mru", false);
 		SerializeOptions(Options, false);
 
 		// window pos
@@ -427,7 +427,7 @@ bool LDocApp<OptionsFmt>::_LoadMenu(const char *Resource, const char *Tags, int 
 			{
 				Set(Recent);
 				//_FileMenu->AppendSeparator();
-				GMru::Serialize(Options, "Mru", false);
+				LMru::Serialize(Options, "Mru", false);
 			}
 
 			if (!_FileMenu->FindItem(IDM_EXIT))
@@ -450,7 +450,7 @@ bool LDocApp<OptionsFmt>::_OpenFile(const char *File, bool ReadOnly)
 			File = RealPath;
 		}
 
-		Status = GMru::_OpenFile(File, ReadOnly);
+		Status = LMru::_OpenFile(File, ReadOnly);
 		if (Status)
 		{
 			d->Dirty = false;
@@ -474,7 +474,7 @@ bool LDocApp<OptionsFmt>::_SaveFile(const char *File)
 		strcpy_s(RealPath, sizeof(RealPath), File);
 	}
 
-	bool Status = GMru::_SaveFile(RealPath);
+	bool Status = LMru::_SaveFile(RealPath);
 	if (Status)
 	{
 		d->Dirty = false;
@@ -552,7 +552,7 @@ bool LDocApp<OptionsFmt>::SetDirty(bool Dirty)
 			{
 				if (!ValidStr(d->CurFile))
 				{
-					GMru::OnCommand(IDM_SAVEAS, [&](auto status)
+					LMru::OnCommand(IDM_SAVEAS, [&](auto status)
 					{
 						if (status)
 						{
@@ -600,7 +600,7 @@ void LDocApp<OptionsFmt>::OnReceiveFiles(LArray<const char*> &Files)
 	const char *f = Files.Length() ? Files[0] : 0;
 	if (f && _OpenFile(f, false))
 	{
-		GMru::AddFile(f);
+		LMru::AddFile(f);
 	}
 }
 
@@ -624,7 +624,7 @@ int LDocApp<OptionsFmt>::OnCommand(int Cmd, int Event, OsView Window)
 		{
 			if (!GetCurFile())
 			{
-				GMru::OnCommand(IDM_SAVEAS, NULL);
+				LMru::OnCommand(IDM_SAVEAS, NULL);
 				return 0;
 			}
 			else
@@ -647,14 +647,14 @@ int LDocApp<OptionsFmt>::OnCommand(int Cmd, int Event, OsView Window)
 		}
 	}
 
-	GMru::OnCommand(Cmd, NULL);
+	LMru::OnCommand(Cmd, NULL);
 	return 0;
 }
 
 template <typename OptionsFmt>
 LMessage::Result LDocApp<OptionsFmt>::OnEvent(LMessage *m)
 {
-	GMru::OnEvent(m);
+	LMru::OnEvent(m);
 
 	/*
 	switch (MsgCode(m))

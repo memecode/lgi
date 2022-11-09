@@ -6,7 +6,7 @@
 /// \brief This class can limit the reading/writing to a specific sub section of a file
 /// Which should protect the application using the storage system from overwriting parts
 /// of the file is shouldn't have access to. The default region is the whole file.
-GSubFilePtr::GSubFilePtr(GSubFile *Parent, const char *file, int line)
+LSubFilePtr::LSubFilePtr(LSubFile *Parent, const char *file, int line)
 {
 	File = Parent;
 	SrcFile = NewStr(file);
@@ -18,13 +18,13 @@ GSubFilePtr::GSubFilePtr(GSubFile *Parent, const char *file, int line)
 	ClearSub();
 }
 
-GSubFilePtr::~GSubFilePtr()
+LSubFilePtr::~LSubFilePtr()
 {
 	File->Detach(this);
 	DeleteArray(SrcFile);
 }
 
-bool GSubFilePtr::SaveState()
+bool LSubFilePtr::SaveState()
 {
 	ActualPos = File->GetPos();
 	ActualStatus = File->GetStatus();
@@ -45,7 +45,7 @@ bool GSubFilePtr::SaveState()
 	return false;
 }
 
-bool GSubFilePtr::RestoreState()
+bool LSubFilePtr::RestoreState()
 {
 	SetSwap(File->GetSwap());
 	OurStatus = File->GetStatus();
@@ -56,14 +56,14 @@ bool GSubFilePtr::RestoreState()
 	return File->SetPos(ActualPos) == ActualPos;
 }
 
-bool GSubFilePtr::GetSub(int64 &start, int64 &len)
+bool LSubFilePtr::GetSub(int64 &start, int64 &len)
 {
 	start = Start;
 	len = Len;
 	return Sub;
 }
 
-bool GSubFilePtr::SetSub(int64 start, int64 len)
+bool LSubFilePtr::SetSub(int64 start, int64 len)
 {
 	Sub = true;
 	Start = start;
@@ -73,30 +73,30 @@ bool GSubFilePtr::SetSub(int64 start, int64 len)
 	return true;
 }
 
-void GSubFilePtr::ClearSub()
+void LSubFilePtr::ClearSub()
 {
 	Sub = false;
 	Start = Len = 0;
 }
 
-int GSubFilePtr::Open(const char *Str, int Int)
+int LSubFilePtr::Open(const char *Str, int Int)
 {
 	LAssert(0);
 	return 0;
 }
 
-bool GSubFilePtr::IsOpen()
+bool LSubFilePtr::IsOpen()
 {
 	return true;
 }
 
-int GSubFilePtr::Close()
+int LSubFilePtr::Close()
 {
 	LAssert(0);
 	return 0;
 }
 
-int64 GSubFilePtr::GetSize()
+int64 LSubFilePtr::GetSize()
 {
 	int64 s = -1;
 	
@@ -106,25 +106,25 @@ int64 GSubFilePtr::GetSize()
 	}
 	else
 	{
-		GSubFile::SubLock Lock = File->Lock(_FL);
+		LSubFile::SubLock Lock = File->Lock(_FL);
 		s = File->GetSize();
 	}
 	
 	return s;
 }
 
-int64 GSubFilePtr::SetSize(int64 Size)
+int64 LSubFilePtr::SetSize(int64 Size)
 {
 	LAssert(0);
 	return -1;
 }
 
-int64 GSubFilePtr::GetPos()
+int64 LSubFilePtr::GetPos()
 {
 	return Pos;
 }
 
-int64 GSubFilePtr::SetPos(int64 pos)
+int64 LSubFilePtr::SetPos(int64 pos)
 {
 	if (pos < 0)
 	{
@@ -134,7 +134,7 @@ int64 GSubFilePtr::SetPos(int64 pos)
 	return Pos = pos;
 }
 
-int64 GSubFilePtr::Seek(int64 To, int Whence)
+int64 LSubFilePtr::Seek(int64 To, int Whence)
 {
 	switch (Whence)
 	{
@@ -152,13 +152,13 @@ int64 GSubFilePtr::Seek(int64 To, int Whence)
 	return GetPos();
 }
 
-LStreamI *GSubFilePtr::Clone()
+LStreamI *LSubFilePtr::Clone()
 {
 	LAssert(0);
 	return 0;
 }
 
-bool GSubFilePtr::Eof()
+bool LSubFilePtr::Eof()
 {
 	bool Status = false;
 	
@@ -168,28 +168,28 @@ bool GSubFilePtr::Eof()
 	}
 	else
 	{
-		GSubFile::SubLock Lock = File->Lock(_FL);
+		LSubFile::SubLock Lock = File->Lock(_FL);
 		Status = File->Eof();
 	}
 	
 	return Status;		
 }
 
-bool GSubFilePtr::GetStatus()
+bool LSubFilePtr::GetStatus()
 {
 	return OurStatus;
 }
 
-void GSubFilePtr::SetStatus(bool s)
+void LSubFilePtr::SetStatus(bool s)
 {
 	OurStatus = s;
 }
 
-ssize_t GSubFilePtr::Read(void *Buffer, ssize_t Size, int Flags)
+ssize_t LSubFilePtr::Read(void *Buffer, ssize_t Size, int Flags)
 {
 	int Status = 0;
 	
-	GSubFile::SubLock Lock = File->Lock(_FL);
+	LSubFile::SubLock Lock = File->Lock(_FL);
 	if (!Sub || (Pos >= 0 && Pos <= Len))
 	{
 		if (SaveState())
@@ -208,11 +208,11 @@ ssize_t GSubFilePtr::Read(void *Buffer, ssize_t Size, int Flags)
 	return Status;
 }
 
-ssize_t GSubFilePtr::Write(const void *Buffer, ssize_t Size, int Flags)
+ssize_t LSubFilePtr::Write(const void *Buffer, ssize_t Size, int Flags)
 {
 	int Status = 0;
 	
-	GSubFile::SubLock Lock = File->Lock(_FL);
+	LSubFile::SubLock Lock = File->Lock(_FL);
 
 	int64 End = Pos + Size;
 	if (!Sub ||
@@ -226,27 +226,27 @@ ssize_t GSubFilePtr::Write(const void *Buffer, ssize_t Size, int Flags)
 	}
 	else
 	{
-		LgiTrace("GSubFilePtr error, Pos=" LPrintfInt64 " Start=" LPrintfInt64 " End=" LPrintfInt64 " Len=" LPrintfInt64 "\n",
+		LgiTrace("LSubFilePtr error, Pos=" LPrintfInt64 " Start=" LPrintfInt64 " End=" LPrintfInt64 " Len=" LPrintfInt64 "\n",
 			Pos, Start, End, Len);
 	}
 	
 	return Status;
 }
 
-ssize_t GSubFilePtr::ReadStr(char *Buf, ssize_t Size)
+ssize_t LSubFilePtr::ReadStr(char *Buf, ssize_t Size)
 {
 	LAssert(0);
 	return 0;
 }
 
-ssize_t GSubFilePtr::WriteStr(char *Buf, ssize_t Size)
+ssize_t LSubFilePtr::WriteStr(char *Buf, ssize_t Size)
 {
 	LAssert(0);
 	return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////
-GSubFile::GSubFile(LMutex *lock, bool Buffering)
+LSubFile::LSubFile(LMutex *lock, bool Buffering)
 {
 	Lck = lock;
 
@@ -261,14 +261,14 @@ GSubFile::GSubFile(LMutex *lock, bool Buffering)
 	#endif
 }
 
-GSubFile::~GSubFile()
+LSubFile::~LSubFile()
 {
 	while (Ptrs.Length())
 	{
-		GSubFilePtr *p = Ptrs[0];
+		LSubFilePtr *p = Ptrs[0];
 		if (p)
 		{
-			printf("%s:%i - GSubFilePtr not released.\n", p->SrcFile, p->SrcLine);
+			printf("%s:%i - LSubFilePtr not released.\n", p->SrcFile, p->SrcLine);
 			DeleteObj(p);
 		}
 		else break;
@@ -279,11 +279,11 @@ GSubFile::~GSubFile()
 	#endif
 }
 
-GSubFilePtr *GSubFile::Create(const char *file, int line)
+LSubFilePtr *LSubFile::Create(const char *file, int line)
 {
-	GSubFilePtr *p = 0;
+	LSubFilePtr *p = 0;
 	
-	p = new GSubFilePtr(this, file, line);
+	p = new LSubFilePtr(this, file, line);
 	if (p)
 	{
 		SubLock Lck = Lock(_FL);
@@ -293,20 +293,20 @@ GSubFilePtr *GSubFile::Create(const char *file, int line)
 	return p;
 }
 
-void GSubFile::Detach(GSubFilePtr *Ptr)
+void LSubFile::Detach(LSubFilePtr *Ptr)
 {
 	SubLock Lck = Lock(_FL);
 	LAssert(Ptrs.HasItem(Ptr));
 	Ptrs.Delete(Ptr);
 }
 
-GSubFile::SubLock GSubFile::Lock(const char *file, int line)
+LSubFile::SubLock LSubFile::Lock(const char *file, int line)
 {
 	return SubLock(new LMutex::Auto(Lck, file, line));
 }
 
 #if GSUBFILE_NOBUFFERING
-int GSubFile::Open(char *Str, int Int)
+int LSubFile::Open(char *Str, int Int)
 {
 	int s = LFile::Open(Str, Int | (!Buffer ? O_NO_CACHE : 0));
 	if (s && !Buffer)
@@ -321,7 +321,7 @@ int GSubFile::Open(char *Str, int Int)
 	return s;
 }
 
-int GSubFile::Read(void *OutBuf, int Size, int Flags)
+int LSubFile::Read(void *OutBuf, int Size, int Flags)
 {
 	int Status = 0;
 
@@ -364,7 +364,7 @@ int GSubFile::Read(void *OutBuf, int Size, int Flags)
 	return Status;
 }
 
-int GSubFile::Write(const void *InBuf, int Size, int Flags)
+int LSubFile::Write(const void *InBuf, int Size, int Flags)
 {
 	int Status = 0;
 
@@ -408,17 +408,17 @@ int GSubFile::Write(const void *InBuf, int Size, int Flags)
 	return Status;
 }
 
-int64 GSubFile::GetPos()
+int64 LSubFile::GetPos()
 {
 	return Pos;
 }
 
-int64 GSubFile::SetPos(int64 pos)
+int64 LSubFile::SetPos(int64 pos)
 {
 	return Pos = pos;
 }
 
-bool GSubFile::SetBlock(int64 Blk)
+bool LSubFile::SetBlock(int64 Blk)
 {
 	if (Blk != Cur)
 	{

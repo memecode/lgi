@@ -1,13 +1,13 @@
 #include <stdio.h>
 
 #include "Lgi.h"
-#include "GDiskBTree.h"
+#include "LDiskBTree.h"
 
 #define NODE_SHIFT			10
 #define NODE_SIZE			(1 << NODE_SHIFT)		// 1kb
 #define NODE_MAGIC			'ednB'					// 'bnde'
 #define TREE_MAGIC			'ertB'					// 'btre'
-class GDiskBTreePrivate;
+class LDiskBTreePrivate;
 
 // The disk format of the node
 struct BNodeFmt
@@ -94,9 +94,9 @@ public:
 	// The on disk data (may be NULL until read in)
 	uint8 *D;
 	// The owner
-	GDiskBTreePrivate *Tree;
+	LDiskBTreePrivate *Tree;
 
-	BNode(GDiskBTreePrivate *t);
+	BNode(LDiskBTreePrivate *t);
 	~BNode();
 
 	bool Read(int64 Offset, bool Create = false);
@@ -110,7 +110,7 @@ public:
 	bool Insert(char *Key, void *Data);
 };
 
-class GDiskBTreePrivate
+class LDiskBTreePrivate
 {
 public:
 	LFile F;
@@ -119,14 +119,14 @@ public:
 	BNode *Root;
 	LArray<uint8> Bmp;
 
-	GDiskBTreePrivate()
+	LDiskBTreePrivate()
 	{
 		DataSize = 0;
 		Size = 0;
 		Root = 0;
 	}
 
-	~GDiskBTreePrivate()
+	~LDiskBTreePrivate()
 	{
 		DeleteObj(Root);
 	}
@@ -179,7 +179,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////////////
-BNode::BNode(GDiskBTreePrivate *t)
+BNode::BNode(LDiskBTreePrivate *t)
 {
 	Tree = t;
 	Left = 0;
@@ -463,25 +463,25 @@ bool BNode::Insert(char *Key, void *Data)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
-GDiskBTree::GDiskBTree(char *File, int DataSize)
+LDiskBTree::LDiskBTree(char *File, int DataSize)
 {
-	d = new GDiskBTreePrivate;
+	d = new LDiskBTreePrivate;
 	d->DataSize = DataSize;
 	if (File) Open(File);
 }
 
-GDiskBTree::~GDiskBTree()
+LDiskBTree::~LDiskBTree()
 {
 	Close();
 	DeleteObj(d);
 }
 
-int64 GDiskBTree::GetSize()
+int64 LDiskBTree::GetSize()
 {
 	return d->Size;
 }
 
-bool GDiskBTree::Open(char *File)
+bool LDiskBTree::Open(char *File)
 {
 	bool Status = false;
 
@@ -520,7 +520,7 @@ bool GDiskBTree::Open(char *File)
 	return Status;
 }
 
-bool GDiskBTree::Close()
+bool LDiskBTree::Close()
 {
 	bool Status = false;
 
@@ -532,22 +532,22 @@ bool GDiskBTree::Close()
 	return Status;
 }
 
-bool GDiskBTree::Insert(char *Key, void *Data)
+bool LDiskBTree::Insert(char *Key, void *Data)
 {
 	return d->Root ? d->Root->Insert(Key, Data) : 0;
 }
 
-bool GDiskBTree::Delete(char *Key)
+bool LDiskBTree::Delete(char *Key)
 {
 	return false;
 }
 
-void *GDiskBTree::HasItem(char *Key)
+void *LDiskBTree::HasItem(char *Key)
 {
 	return d->Root ? d->Root->HasItem(Key) : 0;
 }
 
-bool GDiskBTree::Empty()
+bool LDiskBTree::Empty()
 {
 	bool Status = false;
 
