@@ -16,10 +16,6 @@ elseif (LINUX)
 	set(APP_ICON)
 endif()
 
-if (NOT TARGET libjpeg9a)
-	add_subdirectory(${CODELIB}/libjpeg-9a libjpeg)
-endif()
-
 add_executable(HtmlTest ${APP_TYPE}
 
     TestSuite.cpp

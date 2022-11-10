@@ -10,8 +10,7 @@ if (UNIX AND NOT APPLE)
 endif()
 
 if (NOT TARGET libpng15)
-    get_filename_component(LIBPNG_DIR "${CODELIB}/libpng" ABSOLUTE)
-    add_subdirectory(${LIBPNG_DIR} libpng)
+	message(FATAL_ERROR "Find the libpng target (see parent folder cmake)")
 endif()
 
 if (APPLE)

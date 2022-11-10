@@ -35,10 +35,6 @@ if (NOT TARGET ssh_shared)
                 INTERFACE_LINK_LIBRARIES "ssh")
     endif()
 endif()
-if (NOT TARGET libpng15)
-    get_filename_component(LIBPNG_DIR "${CODELIB}/libpng" ABSOLUTE)
-    add_subdirectory(${LIBPNG_DIR} libpng)
-endif()
 
 add_executable(Lvc ${APP_TYPE}
     ../src/common/Gdc2/Filters/Png.cpp

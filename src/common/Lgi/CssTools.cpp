@@ -241,24 +241,20 @@ LRect LCssTools::PaintBorder(LSurface *pDC, LRect &in)
 		{
 			int Px = b.ToPx(Content.X(), Font);
 			Drawn = true;
-			if (Px == 1)
-				LThinBorder(pDC, Content, DefaultSunkenEdge);
-			else if (Px == 2)
+			if (Px == 2)
 				LWideBorder(pDC, Content, DefaultSunkenEdge);
 			else
-				LAssert(!"Unsupported sunken border width");
+				LThinBorder(pDC, Content, DefaultSunkenEdge);
 			break;
 		}
 		case LCss::BorderOutset: // Raised
 		{
 			int Px = b.ToPx(Content.X(), Font);
 			Drawn = true;
-			if (Px == 1)
-				LThinBorder(pDC, Content, DefaultRaisedEdge);
-			else if (Px == 2)
+			if (Px == 2)
 				LWideBorder(pDC, Content, DefaultRaisedEdge);
 			else
-				LAssert(!"Unsupported raised border width");
+				LThinBorder(pDC, Content, DefaultRaisedEdge);
 			break;
 		}
 		case LCss::BorderSolid:

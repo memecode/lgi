@@ -14,10 +14,6 @@ elseif (LINUX)
     set(SPELL_CHECK ${LGI_DIR}/src/common/Text/SpellCheckAspell.cpp)
 endif()
 
-if (NOT TARGET libjpeg9a)
-	add_subdirectory(${CODELIB}/libjpeg-9a libjpeg)
-endif()
-
 add_executable(HtmlEdit ${APP_TYPE}
 
     Rich.cpp
