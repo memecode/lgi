@@ -58,8 +58,8 @@ LFindDlg::LFindDlg(LView *Parent, Callback Cb, const char *Init)
 	LRect r(0, 0, 450, 370);
 	auto Dpi = LScreenDpi();
 	auto Scale = (float)Dpi.x / 96.0;
-	r.x2 *= Scale;
-	r.y2 *= Scale;
+	r.x2 = (int)(r.x2 * Scale);
+	r.y2 = (int)(r.y2 * Scale);
 
 	SetPos(r);
 	MoveSameScreen(Parent);
@@ -207,8 +207,8 @@ LReplaceDlg::LReplaceDlg(LView *Parent, Callback Cb, char *InitFind, char *InitR
 	LRect r(0, 0, 450, 300);
 	auto Dpi = LScreenDpi();
 	auto Scale = (float)Dpi.x / 96.0;
-	r.x2 *= Scale;
-	r.y2 *= Scale;
+	r.x2 = (int)(r.x2 * Scale);
+	r.y2 = (int)(r.y2 * Scale);
 
 	SetPos(r);
 	MoveToCenter();
