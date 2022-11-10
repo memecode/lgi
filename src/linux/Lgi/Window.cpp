@@ -153,12 +153,10 @@ LWindow::~LWindow()
 	DeleteObj(_Lock);
 }
 
-/*
-static void PixbufDestroyNotify(guchar *pixels, LSurface *data)
+int LWindow::WaitThread()
 {
-	delete data;
+	return 0; // Nop for linux
 }
-*/
 
 bool LWindow::SetIcon(const char *FileName)
 {

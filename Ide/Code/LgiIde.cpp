@@ -1738,7 +1738,6 @@ AppWnd::AppWnd()
 	#endif
 
 	OnCommand(IDM_NEW, 0, NULL);
-	_Dump();
 }
 
 AppWnd::~AppWnd()

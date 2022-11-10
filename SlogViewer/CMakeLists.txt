@@ -19,7 +19,7 @@ target_link_libraries(SlogViewer lgi)
 
 target_include_directories(SlogViewer
 	PRIVATE
-		Resources)
+		resources)
 		
 if (APPLE)
 	macBundlePostBuild(SlogViewer)

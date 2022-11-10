@@ -9,6 +9,7 @@
 typedef char TCHAR;
 #define _T(str) str
 #endif
+#include <string.h>
 #include <stdio.h>
 #include "../include/lgi/common/LgiDefs.h"
 #include "../include/lgi/common/Array.h"
