@@ -279,7 +279,7 @@ bool SystemFunctions::Sprintf(LScriptArguments &Args)
 					break;
 				}
 			}
-			f++;
+			
 			i++;
 		}
 		else s.Add(*f);

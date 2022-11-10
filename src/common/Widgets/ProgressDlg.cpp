@@ -18,7 +18,7 @@
 #include "lgi/common/LgiRes.h"
 
 /////////////////////////////////////////////////////////////////////////////////////////
-Progress::Progress() : LMutex("ProgressObj")
+Progress::Progress() : LMutex("Progress")
 {
 }
 
@@ -29,6 +29,10 @@ Progress::Progress(char *desc, int64 l, int64 h, char *type, double scale) : LMu
 	High = h;
 	Type = type;
 	Scale = scale;
+}
+
+Progress::~Progress()
+{
 }
 
 LString Progress::GetDescription()
