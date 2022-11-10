@@ -800,7 +800,7 @@ public:
 	
 	LFolderDrop *Ctrl3 = NULL;
 	LIconButton *BackBtn = NULL;
-	LIconButton *UpBtnBtn = NULL;
+	LIconButton *UpBtn = NULL;
 	LIconButton *NewDirBtn = NULL;
 	LFolderList *FileLst = NULL;
 	LTextLabel *Ctrl8 = NULL;
