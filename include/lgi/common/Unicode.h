@@ -342,7 +342,7 @@ public:
 };
 
 /// Unicode string class. Allows traversing a utf-8 strings.
-class LgiClass GUtf8Str : public LUtf8Ptr
+class LgiClass LUtf8Str : public LUtf8Ptr
 {
 	// Complete buffer
 	uint8_t *Start;
@@ -354,7 +354,7 @@ class LgiClass GUtf8Str : public LUtf8Ptr
 
 public:
 	/// Constructor
-	GUtf8Str
+	LUtf8Str
 	(
 		/// The string pointer to start with
 		char *utf,
@@ -364,17 +364,17 @@ public:
 		bool Copy = false
 	);
 	/// Constructor
-	GUtf8Str
+	LUtf8Str
 	(
 		/// The string pointer to start with. A utf-8 copy of the string will be created.
 		wchar_t *wide,
 		/// The number of wide chars, or -1 if NULL terminated.
 		int chars = -1
 	);
-	~GUtf8Str();
+	~LUtf8Str();
 
 	/// Assign a new pointer to the string
-	GUtf8Str &operator =(char *s);
+	LUtf8Str &operator =(char *s);
 
 	/// Allocates a block of memory containing the wide representation of the string.
 	wchar_t *ToWide();

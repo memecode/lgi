@@ -423,7 +423,7 @@ public:
 		uint32_t CurrentFrameSize;
 		ssize_t PrevFrameStart;
 		size_t ReturnIp;
-		GVarRef ReturnValue;
+		LVarRef ReturnValue;
 	};
 
 	enum RunType
@@ -623,7 +623,7 @@ public:
 			if (Frames.Length())
 			{
 				StackFrame Sf = Frames[0];
-				GVarRef &Ret = Sf.ReturnValue;
+				LVarRef &Ret = Sf.ReturnValue;
 				LVariant *RetVar = &Scope[Ret.Scope][Ret.Index];
 				*RetVar = false;
 			}			
@@ -639,7 +639,7 @@ public:
 	LExecutionStatus Decompile(LScriptContext *Context, LCompiledCode *Code, LStream *log)
 	{
 		LExecutionStatus Status = ScriptSuccess;
-		LAssert(sizeof(GVarRef) == 4);
+		LAssert(sizeof(LVarRef) == 4);
 
 		GPtr c;
 		uint8_t *Base = &Code->ByteCode[0];
@@ -712,7 +712,7 @@ public:
 			Log = Code->UserContext->GetLog();
 		// else LgiTrace("%s:%i - Execution without a log?\n", _FL);
 			
-		LAssert(sizeof(GVarRef) == 4);
+		LAssert(sizeof(LVarRef) == 4);
 
 		uint8_t *Base = c.u8 = &Code->ByteCode[0];
 		uint8_t *e = c.u8 + Code->ByteCode.Length();

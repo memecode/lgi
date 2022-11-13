@@ -123,7 +123,7 @@ extern const char *InstToString(GInstruction i);
 #define MAX_REGISTER		16
 
 /// 32bit variable reference, used to track where a variable is during compilation.
-struct GVarRef
+struct LVarRef
 {
 	/// \sa #SCOPE_REGISTER, #SCOPE_LOCAL or #SCOPE_GLOBAL
 	unsigned Scope : 8;
@@ -152,12 +152,12 @@ struct GVarRef
 		Index = i;
 	}
 
-	bool operator ==(GVarRef &r)
+	bool operator ==(LVarRef &r)
 	{
 		return r.Scope == Scope && r.Index == Index;
 	}
 
-	bool operator !=(GVarRef &r)
+	bool operator !=(LVarRef &r)
 	{
 		return r.Scope != Scope || r.Index != Index;
 	}
@@ -193,7 +193,7 @@ union GPtr
 	int32 *i32;
 	double *dbl;
 	float *flt;
-	GVarRef *r;
+	LVarRef *r;
 	LFunc **fn;
 };
 

@@ -14,7 +14,7 @@
 #else
 #define Resolve()			c.r++
 #define GResolveRef(nm)		
-// GVarRef *
+// LVarRef *
 #endif
 
 default:
@@ -702,7 +702,7 @@ case IRet:
 	if (Frames.Length() > 0)
 	{
 		StackFrame Sf = Frames[Frames.Length()-1];
-		GVarRef &Ret = Sf.ReturnValue;
+		LVarRef &Ret = Sf.ReturnValue;
 		LVariant *RetVar = &Scope[Ret.Scope][Ret.Index];
 		// LgiTrace("IRet to %i:%i\n", Ret.Scope, Ret.Index);
 		if (Ret.Scope == SCOPE_LOCAL)
@@ -1288,7 +1288,7 @@ case IDomCall:
 					c.r[1].GetStr(),
 					c.r[2].GetStr());
 	#else
-	GVarRef DstRef = *c.r;
+	LVarRef DstRef = *c.r;
 	#endif
 
 	GResolveRef(Dst) Resolve();
