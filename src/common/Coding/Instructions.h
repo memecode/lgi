@@ -1059,6 +1059,114 @@ case IDomGet:
 					(*Dst) = Dom->Value.Binary.Length;
 				break;
 			}
+			case GV_INT32:
+			{
+				char *sName = Name->Str();
+				CheckParam(sName);
+				LDomProperty p = LStringToDomProp(sName);
+				switch (p)
+				{
+					case TypeString:
+					{
+						char s[32];
+						sprintf_s(s, sizeof(s), "%i", Dom->Value.Int);
+						*Dst = s;
+						break;
+					}
+					case TypeDouble:
+					{
+						*Dst = (double)Dom->Value.Int;
+						break;
+					}
+					default:
+					{
+						Dst->Empty();
+						LString s;
+						s.Printf("%s IDomGet warning: Unexpected int32 member '%s'.\n",
+								Code->AddrToSourceRef(CurrentScriptAddress),
+								sName);
+						if (Log)
+							Log->Write(s, s.Length());
+						if (LVirtualMachine::BreakOnWarning)
+							OnException(NULL, -1, CurrentScriptAddress, s);
+						Status = ScriptWarning;
+						break;
+					}
+				}
+				break;
+			}
+			case GV_INT64:
+			{
+				char *sName = Name->Str();
+				CheckParam(sName);
+				LDomProperty p = LStringToDomProp(sName);
+				switch (p)
+				{
+					case TypeString:
+					{
+						char s[32];
+						sprintf_s(s, sizeof(s), LPrintfInt64, Dom->Value.Int64);
+						*Dst = s;
+						break;
+					}
+					case TypeDouble:
+					{
+						*Dst = (double)Dom->Value.Int64;
+						break;
+					}
+					default:
+					{
+						Dst->Empty();
+						LString s;
+						s.Printf("%s IDomGet warning: Unexpected int64 member '%s'.\n",
+								Code->AddrToSourceRef(CurrentScriptAddress),
+								sName);
+						if (Log)
+							Log->Write(s, s.Length());
+						if (LVirtualMachine::BreakOnWarning)
+							OnException(NULL, -1, CurrentScriptAddress, s);
+						Status = ScriptWarning;
+						break;
+					}
+				}
+				break;
+			}
+			case GV_DOUBLE:
+			{
+				char *sName = Name->Str();
+				CheckParam(sName);
+				LDomProperty p = LStringToDomProp(sName);
+				switch (p)
+				{
+					case TypeString:
+					{
+						char s[32];
+						sprintf_s(s, sizeof(s), "%g", Dom->Value.Dbl);
+						*Dst = s;
+						break;
+					}
+					case TypeInt:
+					{
+						*Dst = (int64)Dom->Value.Dbl;
+						break;
+					}
+					default:
+					{
+						Dst->Empty();
+						LString s;
+						s.Printf("%s IDomGet warning: Unexpected double member '%s'.\n",
+								Code->AddrToSourceRef(CurrentScriptAddress),
+								sName);
+						if (Log)
+							Log->Write(s, s.Length());
+						if (LVirtualMachine::BreakOnWarning)
+							OnException(NULL, -1, CurrentScriptAddress, s);
+						Status = ScriptWarning;
+						break;
+					}
+				}
+				break;
+			}
 			case GV_STRING:
 			{
 				char *sName = Name->Str();
