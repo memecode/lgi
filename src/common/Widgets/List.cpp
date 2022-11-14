@@ -88,18 +88,16 @@ public:
 class LListItemPrivate
 {
 public:
-	bool Selected;
-	int ListItem_Image;
+	bool Selected = false;
+	bool Visible = true;
+	int ListItem_Image = -1;
 	List<LListItemColumn> Cols;
 	LArray<char*> Str;
 	LArray<LDisplayString*> Display;
-	int16 LayoutColumn;
+	int16 LayoutColumn = -1;
 
 	LListItemPrivate()
 	{
-		Selected = 0;
-		ListItem_Image = -1;
-		LayoutColumn = -1;
 	}
 
 	~LListItemPrivate()
@@ -111,20 +109,12 @@ public:
 
 	void EmptyStrings()
 	{
-		for (int i=0; i<Str.Length(); i++)
-		{
-			DeleteArray(Str[i]);
-		}
-		Str.Length(0);
+		Str.DeleteArrays();
 	}
 
 	void EmptyDisplay()
 	{
-		for (int i=0; i<Display.Length(); i++)
-		{
-			DeleteObj(Display[i]);
-		}
-		Display.Length(0);
+		Display.DeleteObjects();
 	}
 };
 
@@ -535,7 +525,7 @@ void LListItem::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 
 void LListItem::OnPaint(LItem::ItemPaintCtx &Ctx)
 {
-	if (!Parent)
+	if (!Parent || !d->Visible)
 	    return;
 
 	int x = Ctx.x1;
@@ -2346,11 +2336,25 @@ void LList::PourAll()
 		CompletelyVisible = 0;
 		bool SomeHidden = false;
 
+		// Process visible flag
+		ForAllItems(i)
+		{
+			auto css = i->GetCss();
+			i->d->Visible = !css || css->Display() != LCss::DispNone;
+		}
+
 		#if LList_POUR_PROFILE
 		Prof.Add("List items");
 		#endif
 		ForAllItems(i)
 		{
+			if (!i->d->Visible)
+			{
+				i->Pos.Set(-1, -1, -2, -2);
+				SomeHidden = true;
+				continue; // Don't increment 'n'
+			}
+
 			if (n < FirstVisible || n > LastVisible)
 			{
 				i->Pos.Set(-1, -1, -2, -2);
@@ -2605,10 +2609,6 @@ void LList::OnPaint(LSurface *pDC)
 
 				LastY = i->Pos.y2 + 1;
 			}
-			else
-			{
-				break;
-			}
 		}
 	}
 		
@@ -2661,14 +2661,22 @@ void LList::UpdateAllItems()
 {
     if (Lock(_FL))
     {
+		bool needsRepour = false;
+
 	    ForAllItems(i)
 	    {
+			auto css = i->GetCss();
+			bool vis = !css || css->Display() != LCss::DispNone;
+			if (i->d->Visible != vis)
+				needsRepour = true;
 		    i->d->EmptyDisplay();
 	    }
 	    Unlock();
-	}
-	
-	Invalidate();
+
+		if (needsRepour)
+			PourAll();
+		Invalidate();
+	}	
 }
 
 int LList::GetContentSize(int Index)
