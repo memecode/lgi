@@ -315,7 +315,6 @@ public:
 	bool UpdateSubs(); // Clone/checkout any sub-repositries.
 	void LogFile(const char *Path);
 	LString GetFilePart(const char *uri);
-	LString GetFilter();
 	void FilterCurrentFiles();
 
 	void OnPulse();

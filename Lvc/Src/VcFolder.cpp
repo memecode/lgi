@@ -689,44 +689,23 @@ void VcFolder::UpdateColumns()
 	}
 }
 
-LString VcFolder::GetFilter()
-{
-	auto Ctrl = d->Wnd()->GetCtrlName(IDC_FILTER);
-	return ValidStr(Ctrl) ? Ctrl : NULL;
-}
-
 void VcFolder::FilterCurrentFiles()
 {
-	auto Filter = GetFilter();
-	LArray<LListItem*> All, AddFiltered;
+	LArray<LListItem*> All;
 	d->Files->GetAll(All);
 
-	// Remove any current items that no longer match...
+	// Update the display property
 	for (auto i: All)
 	{
 		auto fn = i->GetText(COL_FILENAME);
-		if (Filter && !Stristr(fn, Filter.Get()))
-		{
-			d->Files->Remove(i);
-			AddFiltered.Add(i);
-		}
+		bool vis = !d->FileFilter || Stristr(fn, d->FileFilter.Get());
+		i->GetCss(true)->Display(vis ? LCss::DispBlock : LCss::DispNone);
+
+		LgiTrace("Filter '%s' by '%s' = %i\n", fn, d->FileFilter.Get(), vis);
 	}
 
-	// Add any filtered items that now match...
-	for (unsigned n=0; n<d->Filtered.Length();)
-	{
-		auto i = d->Filtered[n];
-		auto fn = i->GetText(COL_FILENAME);
-		if (!Filter || Stristr(fn, Filter.Get()))
-		{
-			d->Files->Insert(i);
-			d->Filtered.DeleteAt(n);
-		}
-		else n++;
-	}
-
-	d->Filtered += AddFiltered;
 	d->Files->Sort(0);
+	d->Files->UpdateAllItems();
 	d->Files->ResizeColumnsToContent();
 }
 
@@ -816,7 +795,6 @@ void VcFolder::Select(bool b)
 		if (GetBranches())
 			OnBranchesChange();
 
-		LString Filter = GetFilter();
 		if (d->CurFolder != this)
 		{
 			PROF("RemoveAll");
@@ -859,19 +837,19 @@ void VcFolder::Select(bool b)
 				}
 			}
 
-			bool Add = !Filter;
-			if (Filter)
+			bool Add = !d->CommitFilter;
+			if (d->CommitFilter)
 			{
 				const char *s = l->GetRev();
-				if (s && strstr(s, Filter) != NULL)
+				if (s && strstr(s, d->CommitFilter) != NULL)
 					Add = true;
 
 				s = l->GetAuthor();
-				if (s && stristr(s, Filter) != NULL)
+				if (s && stristr(s, d->CommitFilter) != NULL)
 					Add = true;
 				
 				s = l->GetMsg();
-				if (s && stristr(s, Filter) != NULL)
+				if (s && stristr(s, d->CommitFilter) != NULL)
 					Add = true;
 				
 			}
