@@ -20,7 +20,7 @@
 
 #define DEBUG_FIND_SYMBOL		0
 #define DEBUG_NO_THREAD			1
-#define DEBUG_FILE				"BayesianFilter.cpp"
+// #define DEBUG_FILE				"FileSelect.cpp"
 
 int SYM_FILE_SENT = 0;
 
@@ -159,8 +159,8 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	
 	bool AddFile(LString Path, int Platforms)
 	{
-		#ifdef DEBUG_FILE
 		bool Debug = false;
+		#ifdef DEBUG_FILE
 		if ((Debug = Path.Find(DEBUG_FILE) >= 0))
 			printf("%s:%i - AddFile(%s)\n", _FL, Path.Get());
 		#endif
@@ -312,12 +312,19 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 							// Check platforms...
 							if (!AllPlatforms &&
 								(fs->Platforms & PLATFORM_CURRENT) == 0)
+							{
 								continue;
+							}
 
 							// For each symbol...
 							for (unsigned i=0; i<fs->Defs.Length(); i++)
 							{
 								DefnInfo &Def = fs->Defs[i];
+								
+								#ifdef DEBUG_FILE
+								if (Debug)
+									printf("%s:%i - '%s'\n", _FL, Def.Name.Get());
+								#endif
 								
 								// For each search term...
 								bool Match = true;

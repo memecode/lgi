@@ -171,40 +171,30 @@ class LFileSelectPrivate
 	friend class LFileSelectDlg;
 	friend class LFolderList;
 
-	LView *Parent;
-	LFileSelect *Select;
+	LView *Parent = NULL;
+	LFileSelect *Select = NULL;
 
-	DlgType Type;
-	char *Title;
-	char *DefExt;
-	bool MultiSelect;
+	DlgType Type = TypeNone;
+	LString Title;
+	LString DefExt;
+	bool MultiSelect = false;
 	List<char> Files;
-	int CurrentType;
+	int CurrentType = -1;
 	List<LFileType> Types;
 	List<char> History;
-	bool ShowReadOnly;
-	bool ReadOnly;
-	
-	bool EatClose;
+	bool ShowReadOnly = false;
+	bool ReadOnly = false;	
+	bool EatClose = false;
 
 public:
 	static LImageList *BtnIcons, *TreeIcons;
-	static char *InitPath;
+	static LString InitPath;
 	static bool InitShowHiddenFiles;
 	static LRect InitSize;
 
 	LFileSelectPrivate(LFileSelect *select)
 	{
-		ShowReadOnly = false;
-		ReadOnly = false;
-		EatClose = false;
 		Select = select;
-		Type = TypeNone;
-		Title = 0;
-		DefExt = 0;
-		MultiSelect = false;
-		Parent = 0;
-		CurrentType = -1;
 
 		if (!BtnIcons)
 			BtnIcons = new LImageList(16, 16, FileSelectIcons.Create(0xF81F));
@@ -238,9 +228,6 @@ public:
 
 	virtual ~LFileSelectPrivate()
 	{
-		DeleteArray(Title);
-		DeleteArray(DefExt);
-
 		Types.DeleteObjects();
 		Files.DeleteArrays();
 		History.DeleteArrays();
@@ -249,7 +236,7 @@ public:
 
 LImageList *LFileSelectPrivate::BtnIcons = NULL;
 LImageList *LFileSelectPrivate::TreeIcons = NULL;
-char *LFileSelectPrivate::InitPath = 0;
+LString LFileSelectPrivate::InitPath;
 bool LFileSelectPrivate::InitShowHiddenFiles = false;
 LRect LFileSelectPrivate::InitSize(0, 0, -1, -1);
 
@@ -407,30 +394,30 @@ class LFolderList : public LList, public LFolderView
 
 public:
 	LFolderList(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy);
-	~LFolderList()
-	{
-	}	
 
 	void OnFolder();
 	bool OnKey(LKey &k);
 	void SetFilterKey(LString s) { FilterKey = s; OnFolder(); }
 };
 
-#define IDC_STATIC					-1
-#define IDD_FILE_SELECT				1000
-#define IDC_PATH					1002
-#define IDC_DROP					1003
-#define IDC_BACK					1004
-#define IDC_UP						1005
-#define IDC_NEW						1006
-#define IDC_VIEW					1007
-#define IDC_FILE					1010
-#define IDC_TYPE					1011
-#define IDC_SHOWHIDDEN				1012
-#define IDC_SUB_TBL					1013
-#define IDC_BOOKMARKS				1014
-#define IDC_FILTER					1015
-#define IDC_FILTER_CLEAR			1016
+enum Ctrls
+{
+	IDC_STATIC = -1,
+	IDD_FILE_SELECT = 1000,
+	IDC_PATH,
+	IDC_DROP,
+	IDC_BACK,
+	IDC_UP,
+	IDC_NEW,
+	IDC_VIEW,
+	IDC_FILE,
+	IDC_TYPE,
+	IDC_SHOWHIDDEN,
+	IDC_SUB_TBL,
+	IDC_BOOKMARKS,
+	IDC_FILTER,
+	IDC_FILTER_CLEAR,
+};
 
 #if 1
 #define USE_FOLDER_CTRL				1
@@ -784,33 +771,33 @@ class LFileSelectDlg :
 	LArray<LFolderItem*> Hidden;
 	
 public:
-	LFileSelectPrivate *d;
+	LFileSelectPrivate *d = NULL;
 
-	LTableLayout *Tbl;
-	LBox *Sub;
+	LTableLayout *Tbl = NULL;
+	LBox *Sub = NULL;
 
-	LTree *Bookmarks;
-	LTextLabel *Ctrl1;
+	LTree *Bookmarks = NULL;
+	LTextLabel *Ctrl1 = NULL;
 
 	#if USE_FOLDER_CTRL
-	FolderCtrl *Ctrl2;
+	FolderCtrl *Ctrl2 = NULL;
 	#else
-	LEdit *Ctrl2;
+	LEdit *Ctrl2 = NULL;
 	#endif
 	
-	LFolderDrop *Ctrl3;
-	LIconButton *BackBtn;
-	LIconButton *UpBtn;
-	LIconButton *NewDirBtn;
-	LFolderList *FileLst;
-	LTextLabel *Ctrl8;
-	LTextLabel *Ctrl9;
-	LEdit *FileNameEdit;
-	LCombo *FileTypeCbo;
-	LButton *SaveBtn;
-	LButton *CancelBtn;
-	LCheckBox *ShowHidden;
-	LEdit *FilterEdit;
+	LFolderDrop *Ctrl3 = NULL;
+	LIconButton *BackBtn = NULL;
+	LIconButton *UpBtn = NULL;
+	LIconButton *NewDirBtn = NULL;
+	LFolderList *FileLst = NULL;
+	LTextLabel *Ctrl8 = NULL;
+	LTextLabel *Ctrl9 = NULL;
+	LEdit *FileNameEdit = NULL;
+	LCombo *FileTypeCbo = NULL;
+	LButton *SaveBtn = NULL;
+	LButton *CancelBtn = NULL;
+	LCheckBox *ShowHidden = NULL;
+	LEdit *FilterEdit = NULL;
 
 	LFileSelectDlg(LFileSelectPrivate *Select);
 	~LFileSelectDlg();
@@ -871,24 +858,6 @@ public:
 
 LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 {
-	SaveBtn = NULL;
-	BackBtn = NULL;
-	CancelBtn = NULL;
-	ShowHidden = NULL;
-	FileTypeCbo = NULL;
-	FileNameEdit = NULL;
-	Ctrl8 = NULL;
-	Ctrl9 = NULL;
-	FileLst = NULL;
-	Ctrl3 = NULL;
-	BackBtn = NULL;
-	UpBtn = NULL;
-	NewDirBtn = NULL;
-	Ctrl2 = NULL;
-	Sub = NULL;
-	Bookmarks = NULL;
-	FilterEdit = NULL;
-
 	d = select;
 	SetParent(d->Parent);
 	MinSize.ZOff(450, 300);
@@ -1080,10 +1049,7 @@ LFileSelectDlg::~LFileSelectDlg()
 
 	auto CurPath = GetCtrlName(IDC_PATH);
 	if (ValidStr(CurPath))
-	{
-		DeleteArray(d->InitPath);
-		d->InitPath = NewStr(CurPath);
-	}
+		d->InitPath = CurPath;
 }
 
 void LFileSelectDlg::OnFile(char *f)
@@ -1138,8 +1104,6 @@ void LFileSelectDlg::OnUpFolder()
 		}
 	}
 }
-
-
 
 void LFileSelectDlg::OnFilter(const char *Key)
 {
@@ -1852,7 +1816,7 @@ void LFolderItem::OnMouseClick(LMouse &m)
 	}
 }
 
-int GFolderItemCompare(LListItem *A, LListItem *B, NativeInt Data)
+int LFolderItemCompare(LListItem *A, LListItem *B, NativeInt Data)
 {
 	LFolderItem *a = dynamic_cast<LFolderItem*>(A);
 	LFolderItem *b = dynamic_cast<LFolderItem*>(B);
@@ -2000,10 +1964,8 @@ void LFolderList::OnFolder()
 	if (Type)
 	{
 		auto T = LString(Type->Extension()).SplitDelimit(";");
-		for (int i=0; i<T.Length(); i++)
-		{
+		for (size_t i=0; i<T.Length(); i++)
 			Ext.Insert(NewStr(T[i]));
-		}
 	}
 
 	// Get items
@@ -2044,7 +2006,7 @@ void LFolderList::OnFolder()
 	}
 
 	// Sort items...
-	New.Sort(GFolderItemCompare);
+	New.Sort(LFolderItemCompare);
 
 	// Display items...
 	Insert(New);
@@ -2157,11 +2119,7 @@ void LFileSelect::MultiSelect(bool Multi)
 	}										\
 	void LFileSelect::Func(const char *i)	\
 	{										\
-		DeleteArray(Var);					\
-		if (i)								\
-		{									\
-			Var = NewStr(i);				\
-		}									\
+		Var = i;							\
 	}
 
 CharPropImpl(InitialDir, d->InitPath);

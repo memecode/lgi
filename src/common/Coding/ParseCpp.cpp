@@ -74,7 +74,7 @@ const char *PreprocessSymbolNames[] =
 /// on having to re-lex files over and over.
 class PreprocessBlock
 {
-	friend struct GSourceFile;
+	friend struct LSourceFile;
 	
 	LArray<int> Lines;
 
@@ -108,7 +108,7 @@ public:
 	char16 *NextToken()
 	{
 		if (Start != NULL)
-			LAssert(0); // Call GSourceFile::Lex first
+			LAssert(0); // Call LSourceFile::Lex first
 			
 		if (CurToken >= Tokens.Length())
 			return NULL;
@@ -197,15 +197,15 @@ struct WorkUnit
 	}
 };
 
-struct GSymbol
+struct LSymbol
 {
-	GSymbolType Type;
+	LSymbolType Type;
 	char *File;
 	uint32_t Line;
 	LArray<char16*> Tokens;
 	
-	GSymbol *Parent;
-	LArray<GSymbol*> Children;
+	LSymbol *Parent;
+	LArray<LSymbol*> Children;
 	
 	const char *DefineFile;
 	int DefineLine;
@@ -213,7 +213,7 @@ struct GSymbol
 	bool FriendDecl;
 	bool ForwardDecl;
 	
-	GSymbol(const char *def_file, int def_line)
+	LSymbol(const char *def_file, int def_line)
 	{
 		Parent = 0;
 		Type = SymNone;
@@ -225,12 +225,12 @@ struct GSymbol
 		DefineLine = def_line;
 	}
 
-	~GSymbol()
+	~LSymbol()
 	{
 		Children.DeleteObjects();
 	}
 	
-	void Add(GSymbol *s)
+	void Add(LSymbol *s)
 	{
 		if (!Children.HasItem(s))
 		{
@@ -240,18 +240,18 @@ struct GSymbol
 	}
 };
 
-struct GCppStringPool
+struct LCppStringPool
 {
 	int Size;
 	int Used;
 	LArray<char16*> Mem;
 	
-	GCppStringPool(int sz)
+	LCppStringPool(int sz)
 	{
 		Used = Size = sz;
 	}	
 	
-	~GCppStringPool()
+	~LCppStringPool()
 	{
 		Mem.DeleteArrays();
 	}
@@ -285,14 +285,14 @@ struct GCppStringPool
 
 char16 *LexPoolAlloc(void *Context, const char16 *s, ssize_t len)
 {
-	return ((GCppStringPool*)Context)->Alloc(s, len);
+	return ((LCppStringPool*)Context)->Alloc(s, len);
 }
 
-struct GSourceFile
+struct LSourceFile
 {
 	uint32_t Id;
 	LAutoString Path;
-	GCppStringPool Pool;
+	LCppStringPool Pool;
 
 	LAutoWString Raw;
 	bool Active;
@@ -302,7 +302,7 @@ struct GSourceFile
 	LArray<PreprocessBlock> Blocks;
 	PreprocessBlock *Block;
 	
-	GSourceFile() : Pool(64 << 10)
+	LSourceFile() : Pool(64 << 10)
 	{
 		Id = 0;
 		CurBlock = 0;
@@ -474,19 +474,19 @@ struct GSourceFile
 	*/
 };
 
-typedef LHashTbl<StrKeyPool<char16>, GSymbol*> SourceScopeMap;
-struct GSourceScope : public SourceScopeMap
+typedef LHashTbl<StrKeyPool<char16>, LSymbol*> SourceScopeMap;
+struct LSourceScope : public SourceScopeMap
 {
-	GSourceScope() : SourceScopeMap(5000)
+	LSourceScope() : SourceScopeMap(5000)
 	{
 	}
 
-	~GSourceScope()
+	~LSourceScope()
 	{
 		DeleteObjects();
 	}
 
-	bool Add(char16 *k, GSymbol *v)
+	bool Add(char16 *k, LSymbol *v)
 	{
 		if (Find(k))
 		{
@@ -496,10 +496,10 @@ struct GSourceScope : public SourceScopeMap
 		return SourceScopeMap::Add(k, v);
 	}
 
-	GSymbol *Define(char16 *name, GSymbolType Type, const char *def_file, int def_line)
+	LSymbol *Define(char16 *name, LSymbolType Type, const char *def_file, int def_line)
 	{
-		GSymbol *s = Find(name);
-		if (!s) Add(name, s = new GSymbol(def_file, def_line));
+		LSymbol *s = Find(name);
+		if (!s) Add(name, s = new LSymbol(def_file, def_line));
 		s->Type = Type;
 		s->File = NULL;
 		s->Line = 0;		
@@ -534,50 +534,50 @@ void AddHash(T tbl, const char *name, V type)
 	tbl.Add(s, type);
 }
 
-struct GCppParserWorker : public LCompileTools
+struct LCppParserWorker : public LCompileTools
 {
-	GCppParserPriv *d;
+	LCppParserPriv *d;
 	LAutoPtr<WorkUnit> w;
-	GCppStringPool GeneralPool;
+	LCppStringPool GeneralPool;
 	
-	LArray<GSourceFile*> Srcs;
-	LArray<GSourceScope*> Scopes; // from global to local
+	LArray<LSourceFile*> Srcs;
+	LArray<LSourceScope*> Scopes; // from global to local
 	
 	LHashTbl<StrKey<char16>, KeywordType> Keywords;
 	LHashTbl<StrKey<char16>, PreprocessSymbol> PreprocessSyms;
 	
 	LHashTbl<StrKey<char,false>, char*> IncludePathFiles;
 	char *FindInclude(char *file);
-	bool Preprocess(GSourceFile *sf);
+	bool Preprocess(LSourceFile *sf);
 	
 	void InitScopes();
-	GSourceScope *CurrentScope() { return Scopes[Scopes.Length()-1]; }
+	LSourceScope *CurrentScope() { return Scopes[Scopes.Length()-1]; }
 	LAutoWString GetSymbolName(LArray<char16*> &a, bool IsEnum = false);
 
-	GSymbol *ParseDecl(GSourceFile *sf, char16 *t);
-	GSymbol *ParseUserType(GSourceFile *sf, char16 *t);
-	GSymbol *ParseTypedef(GSourceFile *sf);
-	bool ParsePreprocessor(GSourceFile *sf);
+	LSymbol *ParseDecl(LSourceFile *sf, char16 *t);
+	LSymbol *ParseUserType(LSourceFile *sf, char16 *t);
+	LSymbol *ParseTypedef(LSourceFile *sf);
+	bool ParsePreprocessor(LSourceFile *sf);
 	
 public:
-	GCppParserWorker(GCppParserPriv *priv);
-	~GCppParserWorker();
+	LCppParserWorker(LCppParserPriv *priv);
+	~LCppParserWorker();
 	
-	GSourceFile *ParseCpp(const char *Path);	
-	GSymbol *Resolve(char16 *Symbol);
+	LSourceFile *ParseCpp(const char *Path);	
+	LSymbol *Resolve(char16 *Symbol);
 	int Evaluate(LArray<char16*> &Exp);
 	void DoWork(WorkUnit *wk);
 	int Main();
 	void Msg(MsgType Type, const char *Fmt, ...);
 };
 
-struct GCppParserPriv
+struct LCppParserPriv
 {
 	LArray<char*> IncPaths;
-	LAutoPtr<GCppParserWorker> Worker;
+	LAutoPtr<LCppParserWorker> Worker;
 };
 
-GCppParserWorker::GCppParserWorker(GCppParserPriv *priv) :
+LCppParserWorker::LCppParserWorker(LCppParserPriv *priv) :
 	GeneralPool(4 << 10)
 {
 	d = priv;
@@ -645,14 +645,14 @@ GCppParserWorker::GCppParserWorker(GCppParserPriv *priv) :
 	AddHash(PreprocessSyms, "#include", HashInclude);
 }
 
-GCppParserWorker::~GCppParserWorker()
+LCppParserWorker::~LCppParserWorker()
 {
 	Srcs.DeleteObjects();
 	Scopes.DeleteObjects();
 	IncludePathFiles.DeleteArrays();
 }
 
-void GCppParserWorker::Msg(MsgType Type, const char *Fmt, ...)
+void LCppParserWorker::Msg(MsgType Type, const char *Fmt, ...)
 {
 	va_list Arg;
 	va_start(Arg, Fmt);
@@ -672,7 +672,7 @@ void GCppParserWorker::Msg(MsgType Type, const char *Fmt, ...)
 		Debug;
 }
 
-char *GCppParserWorker::FindInclude(char *File)
+char *LCppParserWorker::FindInclude(char *File)
 {
 	if (IncludePathFiles.Length() == 0)
 	{
@@ -703,15 +703,15 @@ char *GCppParserWorker::FindInclude(char *File)
 	return p;
 }
 
-void GCppParserWorker::InitScopes()
+void LCppParserWorker::InitScopes()
 {
 	Scopes.DeleteObjects();
 
-	Scopes.Add(new GSourceScope);
+	Scopes.Add(new LSourceScope);
 	
 	#ifdef WIN32
 	char16 buf[256];
-	GSymbol *s;
+	LSymbol *s;
 
 	#ifdef _MSC_VER
 	s = Scopes[0]->Define(L"_MSC_VER", SymDefineValue, _FL);
@@ -772,7 +772,7 @@ struct RoundBracket
 	}
 };
 
-LAutoWString GCppParserWorker::GetSymbolName(LArray<char16*> &in, bool IsEnum)
+LAutoWString LCppParserWorker::GetSymbolName(LArray<char16*> &in, bool IsEnum)
 {
 	LArray<char16*> a = in;
 	LAutoWString ret;
@@ -791,7 +791,7 @@ LAutoWString GCppParserWorker::GetSymbolName(LArray<char16*> &in, bool IsEnum)
 	for (int i=0; i<a.Length(); i++)
 	{
 		t = a[i];
-		GSymbol *sym;
+		LSymbol *sym;
 		
 		KeywordType kt = Keywords.Find(t);
 		if (kt)
@@ -954,12 +954,12 @@ LAutoWString GCppParserWorker::GetSymbolName(LArray<char16*> &in, bool IsEnum)
 	return ret;
 }
 
-GSymbol *GCppParserWorker::Resolve(char16 *Symbol)
+LSymbol *LCppParserWorker::Resolve(char16 *Symbol)
 {
 	for (auto i = Scopes.Length()-1; i >= 0; i--)
 	{
-		GSourceScope *scope = Scopes[i];
-		GSymbol *sym = scope->Find(Symbol);
+		LSourceScope *scope = Scopes[i];
+		LSymbol *sym = scope->Find(Symbol);
 		if (sym)
 			return sym;
 	}
@@ -996,7 +996,7 @@ int FindMatchingBracket(LArray<char16*> &Exp, int Start)
 	return -1;	
 }
 
-int GCppParserWorker::Evaluate(LArray<char16*> &Exp)
+int LCppParserWorker::Evaluate(LArray<char16*> &Exp)
 {
 	bool Error = false;
 	LArray<LVariant> Values;
@@ -1021,7 +1021,7 @@ int GCppParserWorker::Evaluate(LArray<char16*> &Exp)
 					break;
 				}
 			}
-			GSymbol *DefineSym = Resolve(Define);
+			LSymbol *DefineSym = Resolve(Define);
 			Values.New() = DefineSym != NULL;
 		}
 		else if (*t == '(')
@@ -1071,7 +1071,7 @@ int GCppParserWorker::Evaluate(LArray<char16*> &Exp)
 						break;
 					}
 					
-					GSymbol *Sym = Resolve(t);
+					LSymbol *Sym = Resolve(t);
 					if (Sym)
 					{
 						Msg(MsgError, "Implement macro calling.\n");
@@ -1083,7 +1083,7 @@ int GCppParserWorker::Evaluate(LArray<char16*> &Exp)
 				else
 				{
 					// Straight value
-					GSymbol *Sym = Resolve(t);
+					LSymbol *Sym = Resolve(t);
 					if (Sym)
 					{
 						int Val = Evaluate(Sym->Tokens);
@@ -1228,7 +1228,7 @@ int GCppParserWorker::Evaluate(LArray<char16*> &Exp)
 		Cur++; \
 	Line++;
 
-bool GCppParserWorker::Preprocess(GSourceFile *sf)
+bool LCppParserWorker::Preprocess(LSourceFile *sf)
 {
 	char16 *Cur = sf->Raw;
 	int Line = 1;
@@ -1379,13 +1379,13 @@ bool GCppParserWorker::Preprocess(GSourceFile *sf)
 	return true;
 }
 
-GSourceFile *GCppParserWorker::ParseCpp(const char *Path)
+LSourceFile *LCppParserWorker::ParseCpp(const char *Path)
 {
-	GSourceFile *sf = NULL;
+	LSourceFile *sf = NULL;
 
 	for (int i=0; i<Srcs.Length(); i++)
 	{
-		GSourceFile *s = Srcs[i];
+		LSourceFile *s = Srcs[i];
 		if (s->Path && !strcmp(s->Path, Path))
 		{
 			sf = s;
@@ -1395,7 +1395,7 @@ GSourceFile *GCppParserWorker::ParseCpp(const char *Path)
 	
 	if (!sf)
 	{
-		sf = new GSourceFile;
+		sf = new LSourceFile;
 		if (sf)
 		{
 			if (!sf->Read(Path))
@@ -1445,7 +1445,7 @@ GSourceFile *GCppParserWorker::ParseCpp(const char *Path)
 					}
 					case KwUserType:
 					{
-						GSymbol *sym = ParseUserType(sf, t);
+						LSymbol *sym = ParseUserType(sf, t);
 						if (sym)
 						{
 							if (sf->Active)
@@ -1509,13 +1509,13 @@ GSourceFile *GCppParserWorker::ParseCpp(const char *Path)
 						}
 						else if (CmpToken(t, "typedef"))
 						{
-							GSymbol *sym = ParseTypedef(sf);
+							LSymbol *sym = ParseTypedef(sf);
 							if (sym)
 							{
 								LAutoWString Name = GetSymbolName(sym->Tokens);
 								if (Name)
 								{
-									GSymbol *existing = CurrentScope()->Find(Name);
+									LSymbol *existing = CurrentScope()->Find(Name);
 									if (existing)
 									{
 										Msg(MsgError, "Symbol '%S' already exists.\n", Name.Get());
@@ -1537,7 +1537,7 @@ GSourceFile *GCppParserWorker::ParseCpp(const char *Path)
 						}
 						else
 						{
-							GSymbol *sym = ParseDecl(sf, t);
+							LSymbol *sym = ParseDecl(sf, t);
 							if (sym)
 							{
 								if (sf->Active)
@@ -1552,7 +1552,7 @@ GSourceFile *GCppParserWorker::ParseCpp(const char *Path)
 										LAutoWString Name = GetSymbolName(sym->Tokens);
 										if (Name)
 										{
-											GSymbol *e = Scopes[0]->Find(Name);
+											LSymbol *e = Scopes[0]->Find(Name);
 											if (e)
 											{
 												DeleteObj(sym);
@@ -1594,11 +1594,11 @@ GSourceFile *GCppParserWorker::ParseCpp(const char *Path)
 	return sf;
 }
 
-GSymbol *GCppParserWorker::ParseDecl(GSourceFile *sf, char16 *t)
+LSymbol *LCppParserWorker::ParseDecl(LSourceFile *sf, char16 *t)
 {
 	PreprocessBlock *blk = sf->Current();
 	int ExternC = CmpToken(t, "extern") ? 1 : 0;
-	GSymbol *sym = new GSymbol(_FL);
+	LSymbol *sym = new LSymbol(_FL);
 
 	sym->Type = SymVariable;
 	sym->File = sf->Path;
@@ -1689,7 +1689,7 @@ GSymbol *GCppParserWorker::ParseDecl(GSourceFile *sf, char16 *t)
 					KeywordType kt = Keywords.Find(t);
 					if (kt == KwUserType && sym->Type != SymFunction)
 					{
-						GSymbol *ut = ParseUserType(sf, t);
+						LSymbol *ut = ParseUserType(sf, t);
 						if (ut)
 							ut->FriendDecl = sym->FriendDecl;
 						DeleteObj(sym);
@@ -1739,9 +1739,9 @@ GSymbol *GCppParserWorker::ParseDecl(GSourceFile *sf, char16 *t)
 	return sym;
 }
 
-GSymbol *GCppParserWorker::ParseTypedef(GSourceFile *sf)
+LSymbol *LCppParserWorker::ParseTypedef(LSourceFile *sf)
 {
-	GSymbol *sym = new GSymbol(_FL);
+	LSymbol *sym = new LSymbol(_FL);
 	sym->Type = SymTypedef;
 	PreprocessBlock *blk = sf->Current();
 	
@@ -1772,12 +1772,12 @@ GSymbol *GCppParserWorker::ParseTypedef(GSourceFile *sf)
 	return sym;
 }
 
-GSymbol *GCppParserWorker::ParseUserType(GSourceFile *sf, char16 *t)
+LSymbol *LCppParserWorker::ParseUserType(LSourceFile *sf, char16 *t)
 {
 	if (!sf || !t)
 		return NULL;
 
-	GSymbol *sym = new GSymbol(_FL);
+	LSymbol *sym = new LSymbol(_FL);
 	
 	int InScope = 0;
 	bool InParentList = false;
@@ -1867,7 +1867,7 @@ GSymbol *GCppParserWorker::ParseUserType(GSourceFile *sf, char16 *t)
 					}
 					else if (kt == KwUserType)
 					{
-						GSymbol *cls = ParseUserType(sf, t);
+						LSymbol *cls = ParseUserType(sf, t);
 						if (cls)
 						{
 							if (sf->Active)
@@ -1887,7 +1887,7 @@ GSymbol *GCppParserWorker::ParseUserType(GSourceFile *sf, char16 *t)
 					{
 						if (sym->Type == SymEnum)
 						{
-							GSymbol *def = new GSymbol(_FL);
+							LSymbol *def = new LSymbol(_FL);
 							if (def)
 							{
 								bool GotEquals = false;
@@ -1921,7 +1921,7 @@ GSymbol *GCppParserWorker::ParseUserType(GSourceFile *sf, char16 *t)
 						}
 						else
 						{
-							GSymbol *def = ParseDecl(sf, t);
+							LSymbol *def = ParseDecl(sf, t);
 							if (def)
 							{
 								if (sf->Active && !def->FriendDecl)
@@ -2024,7 +2024,7 @@ bool HasNonWhiteSpace(char16 *Start, char16 *End)
 	return false;
 }
 
-bool GCppParserWorker::ParsePreprocessor(GSourceFile *sf)
+bool LCppParserWorker::ParsePreprocessor(LSourceFile *sf)
 {
 	char16 *t;
 	
@@ -2082,7 +2082,7 @@ bool GCppParserWorker::ParsePreprocessor(GSourceFile *sf)
 				break;
 			}
 
-			GSymbol *def = Resolve(t);
+			LSymbol *def = Resolve(t);
 
 			PreprocessState &ps = sf->Stack.New();
 			ps.ParentIsActive = sf->Active;
@@ -2105,7 +2105,7 @@ bool GCppParserWorker::ParsePreprocessor(GSourceFile *sf)
 				break;
 			}
 				
-			GSymbol *def = Resolve(t);
+			LSymbol *def = Resolve(t);
 			PreprocessState &ps = sf->Stack.New();
 			ps.ParentIsActive = sf->Active;
 			ps.IfBranchClaimed = def != NULL &&
@@ -2155,7 +2155,7 @@ bool GCppParserWorker::ParsePreprocessor(GSourceFile *sf)
 				break;
 			}
 
-			GSymbol *sym = NULL;
+			LSymbol *sym = NULL;
 			if (sf->Active)
 			{
 				sym = Scopes[0]->Define(t, SymDefineValue, _FL);
@@ -2186,7 +2186,7 @@ bool GCppParserWorker::ParsePreprocessor(GSourceFile *sf)
 				break;
 			}
 
-			GSymbol *s = Scopes[0]->Find(t);
+			LSymbol *s = Scopes[0]->Find(t);
 			if (s)
 			{
 				Scopes[0]->Delete(t);
@@ -2247,7 +2247,7 @@ bool GCppParserWorker::ParsePreprocessor(GSourceFile *sf)
 	return Status;
 }
 
-void GCppParserWorker::DoWork(WorkUnit *wk)
+void LCppParserWorker::DoWork(WorkUnit *wk)
 {
 	w.Reset(wk);
 	
@@ -2281,7 +2281,7 @@ void GCppParserWorker::DoWork(WorkUnit *wk)
 				
 				#if 0
 				char16 *k;
-				for (GSymbol *s = Scopes[0]->First(&k); s; s = Scopes[0]->Next(&k))
+				for (LSymbol *s = Scopes[0]->First(&k); s; s = Scopes[0]->Next(&k))
 				{
 					LgiTrace("    %S = %p\n", k, s);
 				}
@@ -2302,7 +2302,7 @@ void GCppParserWorker::DoWork(WorkUnit *wk)
 
 LCppParser::LCppParser()
 {
-	d = new GCppParserPriv;
+	d = new LCppParserPriv;
 }
 
 LCppParser::~LCppParser()
@@ -2321,7 +2321,7 @@ void LCppParser::ParseCode
 	if (w)
 	{
 		if (!d->Worker)
-			d->Worker.Reset(new GCppParserWorker(d));
+			d->Worker.Reset(new LCppParserWorker(d));
 		d->Worker->DoWork(w);
 	}
 }
@@ -2332,7 +2332,7 @@ void LCppParser::Search(const char *Str, SearchResultsCb Callback, void *Callbac
 	if (w)
 	{
 		if (!d->Worker)
-			d->Worker.Reset(new GCppParserWorker(d));
+			d->Worker.Reset(new LCppParserWorker(d));
 		d->Worker->DoWork(w);
 	}
 }
