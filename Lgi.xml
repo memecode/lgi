@@ -174,7 +174,7 @@
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="36">
 			<Node Name="File Select Win" Type="1" Platforms="15" Open="0" Id="38">
-				<Node File="./src/win/Lgi/FileSelect.cpp" Type="2" Platforms="15" />
+				<Node File="./src/win/Lgi/FileSelect.cpp" Type="2" Platforms="1" />
 			</Node>
 			<Node Name="File Select XP" Type="1" Platforms="15" Open="0" Id="37">
 				<Node File="./src/common/Lgi/FileSelect.cpp" Type="2" Platforms="14" />

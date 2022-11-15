@@ -1334,13 +1334,21 @@ void ClientCallback(GtkWidget *w, CallbackParams *p)
 
 LPoint LWindow::GetDpi()
 {
-	return LPoint(96, 96);
+	return LScreenDpi();
 }
 
 LPointF LWindow::GetDpiScale()
 {
 	auto Dpi = GetDpi();
 	return LPointF((double)Dpi.x/96.0, (double)Dpi.y/96.0);
+}
+
+void LWindow::ScaleSizeToDpi()
+{
+	auto s = GetDpiScale();
+	auto p = GetPos();
+	p.SetSize( (int) (p.X() * s.x), (int) (p.Y() * s.y) );
+	SetPos(p);
 }
 
 LRect &LWindow::GetClient(bool ClientSpace)
