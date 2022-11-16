@@ -939,6 +939,32 @@ bool SystemFunctions::CreateSurface(LScriptArguments &Args)
 	return true;
 }
 
+bool SystemFunctions::ColourSpaceToString(LScriptArguments &Args)
+{
+	Args.GetReturn()->Empty();
+	if (Args.Length() != 1)
+	{
+		LAssert(!"Wrong args.");
+		return false;
+	}
+
+	*Args.GetReturn() = LColourSpaceToString((LColourSpace)Args[0]->CastInt32());
+	return true;
+}
+
+bool SystemFunctions::StringToColourSpace(LScriptArguments &Args)
+{
+	Args.GetReturn()->Empty();
+	if (Args.Length() != 1)
+	{
+		LAssert(!"Wrong args.");
+		return false;
+	}
+
+	*Args.GetReturn() = (int)LStringToColourSpace(Args[0]->Str());
+	return true;
+}
+
 bool SystemFunctions::MessageDlg(LScriptArguments &Args)
 {
 	if (Args.Length() < 2)
@@ -1106,6 +1132,8 @@ GHostFunc SystemLibrary[] =
 
 	// Images
 	DefFn(CreateSurface),
+	DefFn(ColourSpaceToString),
+	DefFn(StringToColourSpace),
 
 	// UI
 	DefFn(MessageDlg),

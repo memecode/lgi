@@ -1343,14 +1343,6 @@ LPointF LWindow::GetDpiScale()
 	return LPointF((double)Dpi.x/96.0, (double)Dpi.y/96.0);
 }
 
-void LWindow::ScaleSizeToDpi()
-{
-	auto s = GetDpiScale();
-	auto p = GetPos();
-	p.SetSize( (int) (p.X() * s.x), (int) (p.Y() * s.y) );
-	SetPos(p);
-}
-
 LRect &LWindow::GetClient(bool ClientSpace)
 {
 	static LRect r;

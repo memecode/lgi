@@ -182,6 +182,9 @@ set (CommonSource
 	src/common/Widgets/TextLabel.cpp
 	src/common/Widgets/ToolBar.cpp	
 	src/common/Widgets/Tree.cpp	
+	include/lgi/common/App.h
+	include/lgi/common/View.h
+	include/lgi/common/Thread.h
 	)
 
 if (APPLE)

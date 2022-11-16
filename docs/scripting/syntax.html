@@ -63,6 +63,7 @@
 		<pre>function <span class=name>method_name</span>([<span class=exp>arg1</span>, <span class=exp>arg2</span>, ...])
 {
     <span class=state>statements</span>;
+    <span class=opt1>[</span>return <span class=exp>expression</span>;<span class=opt1>]</span>
 }</pre>
 		<pre>struct <span class=name>structure_name</span>
 {
@@ -110,51 +111,63 @@
 			<li>DOM:
 				<ul>
 					<li>"member_name" - depends on the object, they all have different member names.
-						For example see the <a href="http://www.memecode.com/scribe/dom.php">Scribe Object Model</a>.
-				</ul>
+						For example see the <a href="http://www.memecode.com/scribe/dom.php">Scribe Object Model</a>.</li>
+				</ul></li>
 			<li>String:
 				<ul>
-					<li>Length - the length of the string in bytes (strings are utf-8).
-					<li>Int - the string as an int (atoi).
-					<li>Float - the string as a double (atof).
-					<li>Split(&lt;separator&gt;[, &lt;max_split&gt;]) - Splits the string into a list.
-					<li>Join(&lt;list&gt;) - Joins all the elements in 'list' using the string as a separator.
-					<li>Find(&lt;sub-string&gt;[, &lt;start&gt;[, &lt;end&gt;]]) - Finds a sub-string.
-					<li>Strip() - Removes all leading and trailing whitespace.
-					<li>Upper() - Converts all alpha characters to upper case.
-					<li>Lower() - Converts all alpha characters to lower case.
-				</ul>
+					<li>Length - the length of the string in bytes (strings are utf-8).</li>
+					<li>Int - the string as an int (atoi).</li>
+					<li>Float - the string as a double (atof).</li>
+					<li>Split(&lt;separator&gt;[, &lt;max_split&gt;]) - Splits the string into a list.</li>
+					<li>Join(&lt;list&gt;) - Joins all the elements in 'list' using the string as a separator.</li>
+					<li>Find(&lt;sub-string&gt;[, &lt;start&gt;[, &lt;end&gt;]]) - Finds a sub-string.</li>
+					<li>Strip() - Removes all leading and trailing whitespace.</li>
+					<li>Upper() - Converts all alpha characters to upper case.</li>
+					<li>Lower() - Converts all alpha characters to lower case.</li>
+				</ul></li>
+			<li>Int:
+				<ul>
+					<li>String - the int as an string.</li>
+					<li>Float - the int converted to floating point.</li>
+				</ul></li>
+			<li>Double:
+				<ul>
+					<li>String - the double as an string.</li>
+					<li>Int - the double converted to integer.</li>
+				</ul></li>
 			<li>List:
 				<ul>
-					<li>Length - the number of objects in the container.
-					<li>Add(&lt;element&gt;) - Add a new element to the end of the list.
-					<li>Delete(&lt;index&gt;) - Deletes the entry at 'index'.
-				</ul>
+					<li>Length - the number of objects in the container.</li>
+					<li>Add(&lt;element&gt;) - Add a new element to the end of the list.</li>
+					<li>Delete(&lt;index&gt;) - Deletes the entry at 'index'.</li>
+				</ul></li>
 			<li>HashTable:
 				<ul>
-					<li>Length - the number of objects in the container.
-					<li>Add(&lt;key&gt;, &lt;element&gt;) - Add a new element using the string 'key'.
-					<li>Delete(&lt;key&gt;) - Deletes the element at using the string 'key'.
-				</ul>
+					<li>Length - the number of objects in the container.</li>
+					<li>Add(&lt;key&gt;, &lt;element&gt;) - Add a new element using the string 'key'.</li>
+					<li>Delete(&lt;key&gt;) - Deletes the element at using the string 'key'.</li>
+				</ul></li>
 			<li>DateTime:
 				<ul>
-					<li>Year - just the year as an int.
-					<li>Month - just the month as an int.
-					<li>Day - just the day as an int.
-					<li>Hour - just the hour as an int.
-					<li>Minute - just the minute as an int.
-					<li>Second - just the second as an int.
-					<li>Date - the date part as a string.
-					<li>Time - the time part as a string.
-					<li>DateTime - the date and time as a string.
-				</ul>
+					<li>Year - just the year as an int.</li>
+					<li>Month - just the month as an int.</li>
+					<li>Day - just the day as an int.</li>
+					<li>Hour - just the hour as an int.</li>
+					<li>Minute - just the minute as an int.</li>
+					<li>Second - just the second as an int.</li>
+					<li>Date - the date part as a string.</li>
+					<li>Time - the time part as a string.</li>
+					<li>DateTime - the date and time as a string (also responds to the name "string").</li>
+					<li>TimeStamp - a 64bit int timestamp of the date (also responds to the name "int").</li>
+					<li>Second64Bit - the size of a second when comparing timestamps.</li>
+				</ul></li>
 			<li>Image (GSurface):
 				<ul>
-					<li>x - The width in pixels.
-					<li>y - The height in pixels.
-					<li>Bits - The bit depth.
-					<li>ColourSpace - The surface's colour space (a GColourSpace variable as a uint32)
-				</ul>
+					<li>x - The width in pixels.</li>
+					<li>y - The height in pixels.</li>
+					<li>Bits - The bit depth.</li>
+					<li>ColourSpace - The surface's colour space (a LColourSpace variable as a uint32)</li>
+				</ul></li>
 
 		</ul>
 
@@ -187,19 +200,19 @@
 			<li> uint16 </li>
 			<li> uint32 </li>
 			<li> uint64 </li>
-			<li> bool/boolean </li>
+			<li> bool / boolean </li>
 			<li> double </li>
 			<li> float </li>
 			<li> char* </li>
-			<li> GDom </li>
 			<li> void* </li>
-			<li> GDateTime </li>
-			<li> GHashTable </li>
-			<li> GOperator </li>
-			<li> GView </li>
-			<li> GMouse </li>
-			<li> GKey </li>
-			<li> GVariant </li>
+			<li> LDom </li>
+			<li> LDateTime </li>
+			<li> LHashTable </li>
+			<li> LOperator </li>
+			<li> LView </li>
+			<li> LMouse </li>
+			<li> LKey </li>
+			<li> LVariant </li>
 		</ul><br>
 		Some of these types don't have any implementation or testing done. Integers and strings should work fine though.
 
@@ -249,6 +262,21 @@ buf = New(256); // Allocate a buffer for the return value
 r = GetWindowsDirectoryA(buf, buf.Length);
 Print("Dir='"+buf+"'");</pre>
 				<pre class=output>Dir='c:\Windows'</pre>
+
+		<h3>Casting between types</h3>
+
+		There is limited support for casting between these types: int, string, date and double. The syntax is just:
+		<pre>my_str.int;
+my_str.double;
+
+my_int.string;
+my_int.double;
+
+my_dbl.string;
+my_dbl.int;
+
+my_date.int;
+my_date.string;</pre>
 
 	</div>
 

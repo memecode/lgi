@@ -533,6 +533,8 @@ public:
 	// Bitmaps
 		/// Creates a memory context
 		bool CreateSurface(LScriptArguments &Args);
+		bool ColourSpaceToString(LScriptArguments &Args);
+		bool StringToColourSpace(LScriptArguments &Args);
 
 	// User interface
 		/// Standard alert message box

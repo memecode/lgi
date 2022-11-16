@@ -593,9 +593,9 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 		}
 		else
 		{
-			int Dpi = LScreenDpi();
+			auto Dpi = LScreenDpi();
 			int PtSize = PointSize();
-			int PxSize = (int) (PtSize * Dpi / 72.0);
+			int PxSize = (int) (PtSize * Dpi.x / 72.0);
 			
 			error = FT_Set_Char_Size(	d->hFont,		/* handle to face object           */
 										0,				/* char_width in 1/64th of points  */
