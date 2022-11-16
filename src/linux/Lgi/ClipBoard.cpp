@@ -133,27 +133,41 @@ char16 *LClipBoard::TextW()
 
 bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 {
-	bool Status = false;
-	if (pDC && d->c)
+	if (!pDC || !d->c)
 	{
-		LMemDC *Mem = dynamic_cast<LMemDC*>(pDC);
-		if (Mem)
-		{
-			/*
-			GdkPixbuf *pb = gdk_pixbuf_new_from_data (	const guchar *data,
-														GDK_COLORSPACE_RGB,
-														gboolean has_alpha,
-														int bits_per_sample,
-														int width,
-														int height,
-														int rowstride,
-														GdkPixbufDestroyNotify destroy_fn,
-														gpointer destroy_fn_data);
-			// gtk_clipboard_set_image(d->c, pb);
-			*/
-		}
+		LAssert(!"Param error.");
+		return false;
 	}
-	return Status;
+	
+	LMemDC *Mem = dynamic_cast<LMemDC*>(pDC);
+	if (!Mem)
+	{
+		LAssert(!"Only support setting clipboard with LMemDC.");
+		return false;
+	}
+	
+	auto pb = gdk_pixbuf_new_from_data(	(*pDC)[0],
+										GDK_COLORSPACE_RGB,
+										LColourSpaceHasAlpha(Mem->GetColourSpace()),
+										8,
+										Mem->X(),
+										Mem->Y(),
+										Mem->GetRowStep(),
+										NULL,
+										NULL);
+	if (!pb)
+	{
+		LgiTrace("%s:%i - gdk_pixbuf_new_from_data  failed for %s, params:\n"
+				"ptr: %p, alpha: %i, bits: %i, size: %ix%i, row: %i\n",
+				LColourSpaceToString(Mem->GetColourSpace()),
+				(*pDC)[0], LColourSpaceHasAlpha(Mem->GetColourSpace()),
+				Mem->GetBits(), Mem->X(), Mem->Y(), Mem->GetRowStep());
+		LAssert(!"gdk_pixbuf_new_from_data failed.");
+		return false;
+	}	
+
+	gtk_clipboard_set_image(d->c, pb);
+	return true; // have to assume it worked...
 }
 
 void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LClipBoard::BitmapCb *Cb)
