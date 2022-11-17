@@ -26,6 +26,8 @@ public:
 	GtkClipboard *c;
 };
 
+static LAutoPtr<LMemDC> Img;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 LClipBoard::LClipBoard(LView *o)
 {
@@ -131,6 +133,17 @@ char16 *LClipBoard::TextW()
 	return Utf8ToWide(u);
 }
 
+void LClipBoard::FreeImage(unsigned char *pixels)
+{
+	if (Img)
+	{
+		if (pixels == (*Img)[0])
+			Img.Reset();
+		else
+			LgiTrace("%s:%i - LClipBoard::FreeImage wrong ptr.\n", _FL);
+	}
+}
+
 bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 {
 	if (!pDC || !d->c)
@@ -139,29 +152,49 @@ bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 		return false;
 	}
 	
-	LMemDC *Mem = dynamic_cast<LMemDC*>(pDC);
-	if (!Mem)
+	if (!Img.Reset(new LMemDC))
 	{
-		LAssert(!"Only support setting clipboard with LMemDC.");
+		LAssert(!"Can't create surface...");
 		return false;
 	}
 	
-	auto pb = gdk_pixbuf_new_from_data(	(*pDC)[0],
+	if (!Img->Create(pDC->X(), pDC->Y(), CsArgb32))
+	{
+		LAssert(!"Can't create surface copy...");
+		return false;
+	}
+	
+	// We have to create a copy to get the byte order right:
+	Img->Blt(0, 0, pDC);
+	
+	// Img->SwapRedAndBlue();
+	// Img->Colour(LColour(0xff, 0, 0));
+	// Img->Rectangle();
+	
+	// And also if the caller free's their copy of the image before the pixbuf is done it'll crash...	
+	auto pb = gdk_pixbuf_new_from_data(	(*Img)[0],
 										GDK_COLORSPACE_RGB,
-										LColourSpaceHasAlpha(Mem->GetColourSpace()),
+										LColourSpaceHasAlpha(Img->GetColourSpace()),
 										8,
-										Mem->X(),
-										Mem->Y(),
-										Mem->GetRowStep(),
-										NULL,
-										NULL);
+										Img->X(),
+										Img->Y(),
+										Img->GetRowStep(),
+										[](auto pixels, auto obj)
+										{
+											auto This = (LClipBoard*)obj;
+											This->FreeImage(pixels);
+										},
+										this);
 	if (!pb)
 	{
-		LgiTrace("%s:%i - gdk_pixbuf_new_from_data  failed for %s, params:\n"
-				"ptr: %p, alpha: %i, bits: %i, size: %ix%i, row: %i\n",
-				LColourSpaceToString(Mem->GetColourSpace()),
-				(*pDC)[0], LColourSpaceHasAlpha(Mem->GetColourSpace()),
-				Mem->GetBits(), Mem->X(), Mem->Y(), Mem->GetRowStep());
+		if (Img)
+		{
+			LgiTrace("%s:%i - gdk_pixbuf_new_from_data  failed for %s, params:\n"
+					"ptr: %p, alpha: %i, bits: %i, size: %ix%i, row: %i\n",
+					LColourSpaceToString(Img->GetColourSpace()),
+					(*Img)[0], LColourSpaceHasAlpha(Img->GetColourSpace()),
+					Img->GetBits(), Img->X(), Img->Y(), Img->GetRowStep());
+		}
 		LAssert(!"gdk_pixbuf_new_from_data failed.");
 		return false;
 	}	

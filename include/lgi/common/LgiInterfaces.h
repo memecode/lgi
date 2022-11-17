@@ -408,7 +408,7 @@ public:
 		}
 	};
 
-	Range Width; 
+	Range Width;
 	Range Height;
 };
 
