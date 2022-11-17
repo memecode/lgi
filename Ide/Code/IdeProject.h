@@ -150,7 +150,7 @@ public:
 	void Build(bool All, BuildConfig Config);
 	void StopBuild();
 	void Clean(bool All, BuildConfig Config);
-	LDebugContext *Execute(ExeAction Act = ExeRun);
+	LDebugContext *Execute(ExeAction Act = ExeRun, LString *ErrMsg = NULL);
 	bool FixMissingFiles();
 	bool FindDuplicateSymbols();
 	bool InProject(bool FuzzyMatch, const char *Path, bool Open, class IdeDoc **Doc = 0);

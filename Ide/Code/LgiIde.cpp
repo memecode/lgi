@@ -2756,7 +2756,7 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 	}
 
 	// Sniff type...
-	bool isLgiProj = false;
+	bool probablyLgiProj = false;
 	if (!Stricmp(LGetExtension(File), "xml"))
 	{	
 		LFile f(File, O_READ);
@@ -2765,14 +2765,18 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 			char buf[256];
 			auto rd = f.Read(buf, sizeof(buf));
 			if (rd > 0)
-				isLgiProj = Strnistr(buf, "<Project ", rd) != NULL;
+				probablyLgiProj = Strnistr(buf, "<Project", rd) != NULL;
 		}
 	}
 	
-	if (isLgiProj)
+	if (probablyLgiProj)
 	{
-		OpenProject(File, NULL);
-		return NULL;
+		CloseAll();
+		if (OpenProject(File, NULL))
+		{
+			return NULL;
+		}
+		// else lets just open it as text...
 	}
 		
 	Doc = d->IsFileOpen(File);
@@ -3915,11 +3919,12 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				break;
 			}
 
+			LString ErrMsg;
 			if (d->DbgContext)
 			{
 				d->DbgContext->OnCommand(IDM_CONTINUE);
 			}
-			else if ((d->DbgContext = p->Execute(ExeDebug)))
+			else if ((d->DbgContext = p->Execute(ExeDebug, &ErrMsg)))
 			{
 				d->DbgContext->DebuggerLog = d->Output->DebuggerLog;
 				d->DbgContext->Watch = d->Output->Watch;
@@ -3934,6 +3939,10 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				
 				d->Output->Value(AppWnd::DebugTab);
 				d->Output->DebugEdit->Focus(true);
+			}
+			else if (ErrMsg)
+			{
+				LgiMsg(this, "Error: %s", AppName, MB_OK, ErrMsg.Get());
 			}
 			break;
 		}
