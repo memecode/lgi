@@ -2012,6 +2012,7 @@ bool LDateTime::GetVariant(const char *Name, LVariant &Dst, char *Array)
 			Dst = s;
 			break;
 		}
+		case TypeString: // Type: String
 		case DateDateAndTime: // Type: String
 		{
 			char s[32];
@@ -2019,6 +2020,7 @@ bool LDateTime::GetVariant(const char *Name, LVariant &Dst, char *Array)
 			Dst = s;
 			break;
 		}
+		case TypeInt: // Type: Int64
 		case DateTimestamp: // Type: Int64
 		{
 			uint64 i = 0;

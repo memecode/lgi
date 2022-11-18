@@ -13,7 +13,7 @@ const char *sDebugger		= "Debugger";
 
 int LFunctionInfo::_Infos = 0;
 
-enum GTokenType
+enum LTokenType
 {
 	#define _(type, str) T##type,
 	#include "TokenType.h"
@@ -58,7 +58,7 @@ struct Node
 	bool Constant = false;
 	int Tok = -1;
 	LArray<int> Lst;
-	GTokenType ConstTok = TNone;
+	LTokenType ConstTok = TNone;
 	// -or-
 	LFunc *ContextFunc = NULL;
 	LArray<NodeExp> Args;
@@ -68,8 +68,8 @@ struct Node
 	LArray<VariablePart> Variable;
 	
 	// Used during building
-	GVarRef Reg;
-	GVarRef ArrayIdx;
+	LVarRef Reg;
+	LVarRef ArrayIdx;
 
 	void Init()
 	{
@@ -84,7 +84,7 @@ struct Node
 		Tok = t;
 	}
 
-	void SetConst(int t, GTokenType e)
+	void SetConst(int t, LTokenType e)
 	{
 		Init();
 		Constant = true;
@@ -92,7 +92,7 @@ struct Node
 		ConstTok = e;
 	}
 
-	void SetConst(LArray<int> &list_tokens, GTokenType e)
+	void SetConst(LArray<int> &list_tokens, LTokenType e)
 	{
 		Init();
 		Constant = true;
@@ -392,9 +392,9 @@ public:
 	LArray<LVariables*> Scopes;
 	LArray<LinkFixup> Fixups;
 	LHashTbl<StrKey<char16>, char16*> Defines;
-	LHashTbl<ConstStrKey<char16,false>, GTokenType> ExpTok;
+	LHashTbl<ConstStrKey<char16,false>, LTokenType> ExpTok;
 	LDom *ScriptArgs;
-	GVarRef ScriptArgsRef;
+	LVarRef ScriptArgsRef;
 	bool ErrShowFirstOnly;
 	LArray<LString> ErrLog;
 	bool Debug;
@@ -530,7 +530,7 @@ public:
 	}
 
 	/// Assemble one arg instruction
-	bool Asm1(int Tok, uint8_t Op, GVarRef a)
+	bool Asm1(int Tok, uint8_t Op, LVarRef a)
 	{
 		DebugInfo(Tok);
 
@@ -548,7 +548,7 @@ public:
 	}
 
 	/// Assemble two arg instruction
-	bool Asm2(int Tok, uint8_t Op, GVarRef a, GVarRef b)
+	bool Asm2(int Tok, uint8_t Op, LVarRef a, LVarRef b)
 	{
 		DebugInfo(Tok);
 
@@ -567,12 +567,12 @@ public:
 	}
 
 	/// Assemble three arg instruction
-	bool Asm3(int Tok, uint8_t Op, GVarRef a, GVarRef b, GVarRef c)
+	bool Asm3(int Tok, uint8_t Op, LVarRef a, LVarRef b, LVarRef c)
 	{
 		DebugInfo(Tok);
 
 		ssize_t Len = Code->ByteCode.Length();
-		if (Code->ByteCode.Length(Len + 1 + (sizeof(GVarRef) * 3) ))
+		if (Code->ByteCode.Length(Len + 1 + (sizeof(LVarRef) * 3) ))
 		{
 			GPtr p;
 			p.u8 = &Code->ByteCode[Len];
@@ -587,12 +587,12 @@ public:
 	}
 
 	/// Assemble four arg instruction
-	bool Asm4(int Tok, uint8_t Op, GVarRef a, GVarRef b, GVarRef c, GVarRef d)
+	bool Asm4(int Tok, uint8_t Op, LVarRef a, LVarRef b, LVarRef c, LVarRef d)
 	{
 		DebugInfo(Tok);
 
 		ssize_t Len = Code->ByteCode.Length();
-		if (Code->ByteCode.Length(Len + 1 + (sizeof(GVarRef) * 4) ))
+		if (Code->ByteCode.Length(Len + 1 + (sizeof(LVarRef) * 4) ))
 		{
 			GPtr p;
 			p.u8 = &Code->ByteCode[Len];
@@ -613,12 +613,12 @@ public:
 	}
 
 	/// Assemble 'n' length arg instruction
-	bool AsmN(int Tok, uint8_t Op, LArray<GVarRef> &Args)
+	bool AsmN(int Tok, uint8_t Op, LArray<LVarRef> &Args)
 	{
 		DebugInfo(Tok);
 
 		ssize_t Len = Code->ByteCode.Length();
-		if (Code->ByteCode.Length(Len + 1 + (sizeof(GVarRef) * Args.Length()) ))
+		if (Code->ByteCode.Length(Len + 1 + (sizeof(LVarRef) * Args.Length()) ))
 		{
 			GPtr p;
 			p.u8 = &Code->ByteCode[Len];
@@ -823,7 +823,7 @@ public:
 	}
 
 	/// Create a null var ref
-	void AllocNull(GVarRef &r)
+	void AllocNull(LVarRef &r)
 	{
 		r.Scope = SCOPE_GLOBAL;
 
@@ -835,7 +835,7 @@ public:
 	}
 
 	/// Allocate a variant and ref
-	LVariant *PreAllocVariant(GVarRef &r)
+	LVariant *PreAllocVariant(LVarRef &r)
 	{
 		r.Scope = SCOPE_GLOBAL;
 		r.Index = (int)Code->Globals.Length();
@@ -843,7 +843,7 @@ public:
 	}
 
 	/// Allocate a constant double
-	void AllocConst(GVarRef &r, double d)
+	void AllocConst(LVarRef &r, double d)
 	{
 		r.Scope = SCOPE_GLOBAL;
 
@@ -869,7 +869,7 @@ public:
 	}
 
 	/// Allocate a constant bool
-	void AllocConst(GVarRef &r, bool b)
+	void AllocConst(LVarRef &r, bool b)
 	{
 		r.Scope = SCOPE_GLOBAL;
 
@@ -895,7 +895,7 @@ public:
 	}
 
 	/// Allocate a constant int
-	void AllocConst(GVarRef &r, int64 i)
+	void AllocConst(LVarRef &r, int64 i)
 	{
 		r.Scope = SCOPE_GLOBAL;
 
@@ -935,13 +935,13 @@ public:
 			Code->Globals[r.Index] = i;
 	}
 
-	void AllocConst(GVarRef &r, int i)
+	void AllocConst(LVarRef &r, int i)
 	{
 		AllocConst(r, (int64)i);
 	}
 
 	/// Allocate a constant string
-	void AllocConst(GVarRef &r, char *s, ssize_t len = -1)
+	void AllocConst(LVarRef &r, char *s, ssize_t len = -1)
 	{
 		LAssert(s != 0);
 		if (len < 0)
@@ -972,7 +972,7 @@ public:
 	}
 
 	/// Allocate a constant wide string
-	void AllocConst(GVarRef &r, char16 *s, ssize_t len)
+	void AllocConst(LVarRef &r, char16 *s, ssize_t len)
 	{
 		LAssert(s != 0);
 
@@ -1006,9 +1006,9 @@ public:
 	}
 
 	/// Find a variable by name, creating it if needed
-	GVarRef FindVariable(LVariant &Name, bool Create)
+	LVarRef FindVariable(LVariant &Name, bool Create)
 	{
-		GVarRef r = {0, -1};
+		LVarRef r = {0, -1};
 
 		// Look for existing variable...
 		ssize_t i;
@@ -1034,7 +1034,7 @@ public:
 	}
 
 	/// Build asm to assign a var ref
-	bool AssignVarRef(Node &n, GVarRef &Value)
+	bool AssignVarRef(Node &n, LVarRef &Value)
 	{
 		/*
 		Examples and what their assembly should look like:
@@ -1117,7 +1117,7 @@ public:
 		}
 
 		// Gets the first part of the variable.
-		GVarRef Cur = FindVariable(n.Variable[0].Name, true);
+		LVarRef Cur = FindVariable(n.Variable[0].Name, true);
 		if (!Cur.Valid())
 			return false;
 		
@@ -1127,12 +1127,12 @@ public:
 			if (n.Variable[0].Array.Length())
 			{
 				// Assemble the array index's expression into 'Idx'
-				GVarRef Idx;
+				LVarRef Idx;
 				Idx.Empty();
 				if (!AsmExpression(&Idx, n.Variable[0].Array))
 					return OnError(n.Tok, "Error creating bytecode for array index.");
 
-				GVarRef Dst = Cur;
+				LVarRef Dst = Cur;
 				if (!Dst.IsReg())
 				{
 					AllocReg(Dst, n.Tok, _FL);
@@ -1150,7 +1150,7 @@ public:
 			unsigned p;
 			for (p=0; p<n.Variable.Length() - 2; p++)
 			{
-				GVarRef Idx;
+				LVarRef Idx;
 				Idx.Empty();
 
 				// Does the next part have an array deref?
@@ -1164,13 +1164,13 @@ public:
 				}
 
 				// Alloc constant string for the DOM get
-				GVarRef DomName;
+				LVarRef DomName;
 				AllocConst(DomName, n.Variable[p+1].Name.Str());
 
 				// Move temp into register?
 				if (Cur.Scope != SCOPE_REGISTER)
 				{
-					GVarRef Dest;
+					LVarRef Dest;
 					AllocReg(Dest, n.Tok, _FL);
 					Asm4(n.Tok, IDomGet, Dest, Cur, DomName, Idx);
 					Cur = Dest;
@@ -1186,7 +1186,7 @@ public:
 			}
 
 			// Do final assignment
-			GVarRef Idx;
+			LVarRef Idx;
 			Idx.Empty();
 
 			ssize_t Last = n.Variable.Length() - 1;
@@ -1200,7 +1200,7 @@ public:
 			}
 
 			// Alloc constant string for the DOM get
-			GVarRef DomName;
+			LVarRef DomName;
 			AllocConst(DomName, n.Variable[p+1].Name.Str());
 
 			// Final instruction to set DOM value
@@ -1213,18 +1213,18 @@ public:
 		else
 		{
 			// Look up the array index if any
-			GVarRef This = { SCOPE_LOCAL, 0 };
+			LVarRef This = { SCOPE_LOCAL, 0 };
 			if (n.Variable[0].Array.Length())
 			{
 				// Assemble the array index's expression into 'Idx'
-				GVarRef Idx;
+				LVarRef Idx;
 				Idx.Empty();
 				if (!AsmExpression(&Idx, n.Variable[0].Array))
 					return OnError(n.Tok, "Error creating bytecode for array index.");
 
 				if (Cur.Scope == SCOPE_OBJECT)
 				{
-					GVarRef Name;
+					LVarRef Name;
 					AllocConst(Name, n.Variable[0].Name.Str());
 					Asm4(n.Tok, IDomSet, This, Name, Idx, Value);
 				}
@@ -1241,7 +1241,7 @@ public:
 			{
 				if (Cur.Scope == SCOPE_OBJECT)
 				{
-					GVarRef Name, Null;
+					LVarRef Name, Null;
 					AllocNull(Null);
 					AllocConst(Name, n.Variable[0].Name.Str());
 					Asm4(n.Tok, IDomSet, This, Name, Null, Value);
@@ -1294,7 +1294,7 @@ public:
 	}
 
 	/// Convert a token stream to a var ref
-	bool TokenToVarRef(Node &n, GVarRef *&LValue)
+	bool TokenToVarRef(Node &n, LVarRef *&LValue)
 	{
 		if (n.Reg.Valid())
 		{
@@ -1313,7 +1313,7 @@ public:
 				unsigned p = 0;
 				bool ArrayDeindexed = false;
 				bool HasScriptArgs = Scopes.Length() <= 1 && ScriptArgs != NULL;
-				GVarRef v = FindVariable(n.Variable[p].Name, /*!HasScriptArgs ||*/ LValue != NULL);
+				LVarRef v = FindVariable(n.Variable[p].Name, /*!HasScriptArgs ||*/ LValue != NULL);
 				if (v.Index < 0)
 				{
 					if (HasScriptArgs)
@@ -1333,7 +1333,7 @@ public:
 								v.Value.Dom = ScriptArgs;								
 							}
 							
-							GVarRef Name, Array;
+							LVarRef Name, Array;
 							AllocConst(Name, VarName, -1);
 							if (n.Variable[p].Array.Length())
 							{
@@ -1358,7 +1358,7 @@ public:
 					if (v.Scope == SCOPE_OBJECT)
 					{
 						// We have to load the variable into a register
-						GVarRef Reg, ThisPtr, MemberIndex, Null;
+						LVarRef Reg, ThisPtr, MemberIndex, Null;
 						if (!AllocReg(Reg, n.Tok, _FL))
 							return OnError(n.Tok, "Couldn't alloc register.");
 						
@@ -1378,7 +1378,7 @@ public:
 							// Because we are casting to it's DOM ptr,
 							// make sure it's a register first so we don't lose the
 							// actual variable.
-							GVarRef reg;
+							LVarRef reg;
 							if (!AllocReg(reg, n.Tok, _FL))
 								return OnError(n.Tok, "Couldn't alloc register.");
 							
@@ -1410,7 +1410,7 @@ public:
 					}
 
 					// Do we need to create code to load the value from the array?
-					GVarRef Val;
+					LVarRef Val;
 					if (AllocReg(Val, n.Tok, _FL))
 					{
 						Asm3(n.Tok, IArrayGet, Val, n.Reg, n.ArrayIdx);
@@ -1422,8 +1422,8 @@ public:
 				// Load DOM parts...
 				for (++p; p<n.Variable.Length(); p++)
 				{
-					GVarRef Name, Arr;
-					LArray<GVarRef> Args;
+					LVarRef Name, Arr;
+					LArray<LVarRef> Args;
 					Node::VariablePart &Part = n.Variable[p];
 					
 					Name.Empty();
@@ -1443,7 +1443,7 @@ public:
 					{
 						for (unsigned i=0; i<Part.Args.Length(); i++)
 						{
-							GVarRef &a = Args.New();
+							LVarRef &a = Args.New();
 							a.Empty();
 							if (!AsmExpression(&a, *Part.Args[i]))
 							{
@@ -1456,7 +1456,7 @@ public:
 						AllocNull(Arr);
 					}
 
-					GVarRef Dst;
+					LVarRef Dst;
 					if (n.Reg.IsReg())
 					{
 						Dst = n.Reg;
@@ -1470,7 +1470,7 @@ public:
 					{
 						DebugInfo(n.Tok);
 
-						LArray<GVarRef> Call;
+						LArray<LVarRef> Call;
 						Call[0] = Dst;
 						Call[1] = n.Reg;
 						Call[2] = Name;
@@ -1566,7 +1566,7 @@ public:
 			else if (n.IsContextFunc())
 			{
 				// Method call, create byte codes to put func value into n.Reg
-				GVarRef *OutRef;
+				LVarRef *OutRef;
 				if (LValue)
 				{
 					OutRef = LValue;
@@ -1582,7 +1582,7 @@ public:
 				
 				DebugInfo(n.Tok);
 
-				LArray<GVarRef> a;
+				LArray<LVarRef> a;
 				for (unsigned i=0; i<n.Args.Length(); i++)
 				{
 					auto &AsmResult = a.New();
@@ -1592,7 +1592,7 @@ public:
 				}
 
 				ssize_t Len = Code->ByteCode.Length();
-				ssize_t Size = 1 + sizeof(LFunc*) + sizeof(GVarRef) + 2 + (a.Length() * sizeof(GVarRef));
+				ssize_t Size = 1 + sizeof(LFunc*) + sizeof(LVarRef) + 2 + (a.Length() * sizeof(LVarRef));
 				Code->ByteCode.Length(Len + Size);
 				GPtr p;
 				uint8_t *Start = &Code->ByteCode[Len];
@@ -1649,7 +1649,7 @@ public:
 				}
 				
 				// Call to a script function, create byte code to call function
-				GVarRef *OutRef;
+				LVarRef *OutRef;
 				if (LValue)
 				{
 					OutRef = LValue;
@@ -1665,7 +1665,7 @@ public:
 				
 				DebugInfo(n.Tok);
 
-				LArray<GVarRef> a;
+				LArray<LVarRef> a;
 				for (unsigned i=0; i<n.Args.Length(); i++)
 				{
 					auto &r = a.New();
@@ -1680,9 +1680,9 @@ public:
 				size_t Size =	1 + // instruction
 								sizeof(uint32_t) + // address of function
 								sizeof(uint16) + // size of frame
-								sizeof(GVarRef) + // return value
+								sizeof(LVarRef) + // return value
 								2 + // number of args
-								(a.Length() * sizeof(GVarRef)); // args
+								(a.Length() * sizeof(LVarRef)); // args
 
 				Code->ByteCode.Length(Len + Size);
 				GPtr p;
@@ -1818,7 +1818,7 @@ public:
 		bool PrevIsOp = true;
 		while ((t = Tokens[Cur]))
 		{
-			GTokenType Tok = ExpTok.Find(t);
+			LTokenType Tok = ExpTok.Find(t);
 			
 			if (Tok == TTypeId)
 			{
@@ -1901,7 +1901,7 @@ public:
 						// Parse the args as expressions
 						while ((t = GetTok(Cur)))
 						{
-							GTokenType Tok = ExpTok.Find(t);
+							LTokenType Tok = ExpTok.Find(t);
 							if (Tok == TComma)
 							{
 								// Do nothing...
@@ -1982,7 +1982,7 @@ public:
 						int Index = 0;
 						while ((t = Tokens[Cur]))
 						{
-							GTokenType Tok = ExpTok.Find(t);
+							LTokenType Tok = ExpTok.Find(t);
 							if (Tok == TComma)
 							{
 								Index++;
@@ -2020,7 +2020,7 @@ public:
 	}
 
 	/// Allocate a register (must be mirrored with DeallocReg)
-	bool AllocReg(GVarRef &r, int LineOrTok, const char *file, int line)
+	bool AllocReg(LVarRef &r, int LineOrTok, const char *file, int line)
 	{
 		for (int i=0; i<MAX_REGISTER; i++)
 		{
@@ -2059,7 +2059,7 @@ public:
 	}
 
 	/// Deallocate a register
-	bool DeallocReg(GVarRef &r)
+	bool DeallocReg(LVarRef &r)
 	{
 		if (r.Scope == SCOPE_REGISTER && r.Index >= 0)
 		{
@@ -2147,7 +2147,7 @@ public:
 	bool AsmExpression
 	(
 		/// Where the result got stored
-		GVarRef *Result,
+		LVarRef *Result,
 		/// The nodes to create code for
 		LArray<Node> &n,
 		/// The depth of recursion
@@ -2217,7 +2217,7 @@ public:
 					LAutoString e(DumpExp(n));
 					return OnError(n[0].Tok, "No operator found in expression '%s'.", e.Get());
 					#else
-					GVarRef *NullRef = NULL;
+					LVarRef *NullRef = NULL;
 					return TokenToVarRef(n[0], NullRef);
 					#endif
 				}
@@ -2231,10 +2231,10 @@ public:
 			{
 				Node &a = n[OpIdx + (Type == OpPrefix ? 1 : -1)];
 
-				GVarRef *NullRef = NULL;
+				LVarRef *NullRef = NULL;
 				if (TokenToVarRef(a, NullRef))
 				{
-					GVarRef Reg;
+					LVarRef Reg;
 					if (a.Reg.Scope != SCOPE_REGISTER)
 					{
 						if (AllocReg(Reg, a.Tok, _FL))
@@ -2257,7 +2257,7 @@ public:
 						// Write value back to origin
 						LVariant &VarName = a.Variable[0].Name;
 
-						GVarRef n = FindVariable(VarName, false);
+						LVarRef n = FindVariable(VarName, false);
 						if (n.Valid())
 						{
 							if (a.Child.Length())
@@ -2292,8 +2292,8 @@ public:
 				Node &a = n[OpIdx-1];
 				Node &b = n[OpIdx+1];
 				
-				GVarRef *LValue = NULL;
-				GVarRef LRef;
+				LVarRef *LValue = NULL;
+				LVarRef LRef;
 				if (Op == OpAssign &&
 					OpIdx == 1 &&
 					a.Variable.Length() == 1)
@@ -2323,7 +2323,7 @@ public:
 				}
 				else
 				{
-					GVarRef *NullRef = NULL;
+					LVarRef *NullRef = NULL;
 					LAutoPtr<LJumpZero> Jmp;
 					
 					if (!TokenToVarRef(a, NullRef))
@@ -2342,7 +2342,7 @@ public:
 					if (!TokenToVarRef(b, LValue))
 						return OnError(b.Tok, "Can't convert right token to var ref.");
 					
-					GVarRef Reg;
+					LVarRef Reg;
 					Reg.Empty();
 					if (a.Reg.Scope != SCOPE_REGISTER)
 					{
@@ -2393,7 +2393,7 @@ public:
 			auto &k = n[0];
 			if (!k.Reg.Valid())
 			{
-				GVarRef *NullRef = NULL;
+				LVarRef *NullRef = NULL;
 				if (!TokenToVarRef(k, NullRef))
 				{
 					return false;
@@ -2418,7 +2418,7 @@ public:
 	}
 
 	/// Parses and assembles an expression
-	bool DoExpression(uint32_t &Cur, GVarRef *Result)
+	bool DoExpression(uint32_t &Cur, LVarRef *Result)
 	{
 		LArray<Node> n;
 		if (Expression(Cur, n))
@@ -2459,7 +2459,7 @@ public:
 			char16 *t = GetTok(Cur);
 			if (!t)
 				break;
-			GTokenType Tok = ExpTok.Find(t);
+			LTokenType Tok = ExpTok.Find(t);
 			switch (Tok)
 			{
 				case TTypeId:
@@ -2532,7 +2532,7 @@ public:
 					if (!DoExpression(Cur, 0))
 						return false;
 
-					GTokenType Tok = ExpTok.Find(GetTok(Cur));
+					LTokenType Tok = ExpTok.Find(GetTok(Cur));
 					if (Tok == TSemiColon)
 						Cur++;
 
@@ -2559,7 +2559,7 @@ public:
 			Cur++;
 
 			// Compile and asm code to evaluate the expression
-			GVarRef Result;
+			LVarRef Result;
 			int ExpressionTok = Cur;
 			Result.Empty();
 			if (DoExpression(Cur, &Result))
@@ -2681,7 +2681,7 @@ public:
 		int JzOffset;
 
 	public:
-		LJumpZero(LCompilerPriv *d, int Tok, GVarRef &r, bool DeallocReg = true)
+		LJumpZero(LCompilerPriv *d, int Tok, LVarRef &r, bool DeallocReg = true)
 		{
 			// Create jump instruction to jump over the body if the expression evaluates to false
 			Comp = d;
@@ -2713,7 +2713,7 @@ public:
 		size_t ConditionStart = Code->ByteCode.Length();
 
 		// Compile condition evalulation
-		GVarRef r;
+		LVarRef r;
 		r.Empty();
 		if (!DoExpression(Cur, &r))
 			return false;
@@ -2804,7 +2804,7 @@ public:
 		Cur++;
 		
 		// Compile initial statement
-		GVarRef r;
+		LVarRef r;
 		r.Empty();
 		t = GetTok(Cur);
 		if (!t)
@@ -2902,7 +2902,7 @@ public:
 	/// Compiles return construct
 	bool DoReturn(uint32_t &Cur)
 	{
-		GVarRef ReturnValue;
+		LVarRef ReturnValue;
 		char16 *t;
 		int StartTok = Cur;
 		ReturnValue.Empty();
@@ -3069,7 +3069,7 @@ public:
 
 		if (!LastInstIsReturn)
 		{
-			GVarRef RetVal;
+			LVarRef RetVal;
 			AllocNull(RetVal);
 			Asm1(Cur, IRet, RetVal);
 		}
@@ -3381,7 +3381,7 @@ public:
 		while ((t = GetTok(Cur)))
 		{
 			// End of type def?
-			GTokenType tt = ExpTok.Find(t);
+			LTokenType tt = ExpTok.Find(t);
 			if (tt == TEndCurlyBracket)
 			{
 				Cur++;

@@ -84,13 +84,14 @@ public:
 				LgiTrace("%s:%i - Failed to load '%s'\n", _FL, p);
 		#elif defined LINUX
 			char p[MAX_PATH_LEN];
-			if (LMakePath(p, sizeof(p), LGetExePath(), "libssl.so"))
+			if (LMakePath(p, sizeof(p), LGetExePath(), SSL_LIBRARY))
 			{
 				if (LFileExists(p))
 				{
-					LgiTrace("%s:%i - loading SSL library '%s'\n", _FL, p);
-					Load(p);
+					auto result = Load(p);
+					LgiTrace("%s:%i - Local SSL '%s' = %i\n", _FL, p, result);
 				}
+				else LgiTrace("%s:%i - No local SSL library '%s'\n", _FL, p);
 			}
 		#endif
 

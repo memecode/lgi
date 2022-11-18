@@ -55,7 +55,7 @@ public:
 			Match->Empty();
 			NonMatch->Empty();
 
-			GUtf8Str Utf((char*)ch);
+			LUtf8Str Utf((char*)ch);
 			uint32_t c = Utf;
 
 			char msg[256];

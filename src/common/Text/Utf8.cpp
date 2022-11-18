@@ -188,7 +188,7 @@ int LUtf8Ptr::GetChars()
 }
 
 /////////////////////////////////////////////////////////////////////////////
-GUtf8Str::GUtf8Str(char *utf, int bytes, bool Copy)
+LUtf8Str::LUtf8Str(char *utf, int bytes, bool Copy)
 {
 	Own = Copy;
 	Ptr = Start = Copy ? (uint8_t*)NewStr(utf) : (uint8_t*)utf;
@@ -196,7 +196,7 @@ GUtf8Str::GUtf8Str(char *utf, int bytes, bool Copy)
 	Cur = Start;
 }
 
-GUtf8Str::GUtf8Str(wchar_t *wide, int chars)
+LUtf8Str::LUtf8Str(wchar_t *wide, int chars)
 {
 	Own = true;
 	Start = (uint8_t*)WideToUtf8(wide);
@@ -204,12 +204,12 @@ GUtf8Str::GUtf8Str(wchar_t *wide, int chars)
 	Cur = Start;
 }
 
-GUtf8Str::~GUtf8Str()
+LUtf8Str::~LUtf8Str()
 {
 	Empty();
 }
 
-void GUtf8Str::Empty()
+void LUtf8Str::Empty()
 {
 	if (Own)
 	{
@@ -221,7 +221,7 @@ void GUtf8Str::Empty()
 	Own = false;
 }
 
-GUtf8Str &GUtf8Str::operator =(char *s)
+LUtf8Str &LUtf8Str::operator =(char *s)
 {
 	Empty();
 	Start = (uint8_t*)s;
@@ -230,7 +230,7 @@ GUtf8Str &GUtf8Str::operator =(char *s)
 	return *this;
 }
 
-wchar_t *GUtf8Str::ToWide()
+wchar_t *LUtf8Str::ToWide()
 {
 	if (End)
 	{
@@ -248,7 +248,7 @@ wchar_t *GUtf8Str::ToWide()
 	return 0;
 }
 
-bool GUtf8Str::Valid()
+bool LUtf8Str::Valid()
 {
 	if (!Start || !Ptr)
 		return false;
@@ -262,12 +262,12 @@ bool GUtf8Str::Valid()
 	return true;
 }
 
-bool GUtf8Str::IsStart()
+bool LUtf8Str::IsStart()
 {
 	return !Ptr || Ptr == Start;
 }
 
-bool GUtf8Str::IsEnd()
+bool LUtf8Str::IsEnd()
 {
 	if (End)
 		return Ptr >= End;

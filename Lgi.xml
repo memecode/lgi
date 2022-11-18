@@ -174,18 +174,18 @@
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="36">
 			<Node Name="File Select Win" Type="1" Platforms="15" Open="0" Id="38">
-				<Node File=".\src\common\Lgi\FileSelect.cpp" Type="2" Platforms="1" />
+				<Node File="./src/win/Lgi/FileSelect.cpp" Type="2" Platforms="1" />
 			</Node>
 			<Node Name="File Select XP" Type="1" Platforms="15" Open="0" Id="37">
-				<Node File=".\src\common\Lgi\FileSelect.cpp" Type="2" Platforms="14" />
-				<Node File=".\include\lgi\common\FileSelect.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Lgi/FileSelect.cpp" Type="2" Platforms="14" />
+				<Node File="./include/lgi/common/FileSelect.h" Type="3" Platforms="15" />
 			</Node>
-			<Node File=".\src\common\Lgi\Alert.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Lgi\FindReplace.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Lgi\FontSelect.cpp" Type="2" Platforms="15" />
-			<Node File=".\include\lgi\common\FontSelect.h" Type="3" Platforms="15" />
-			<Node File=".\src\common\Lgi\Input.cpp" Type="2" Platforms="15" />
-			<Node File=".\include\lgi\common\Input.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Lgi/Alert.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/FindReplace.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/FontSelect.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/FontSelect.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Lgi/Input.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/Input.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Graphics" Type="1" Platforms="15" Open="0" Id="39">
 			<Node Name="_Core" Type="1" Platforms="15" Open="0" Id="40">

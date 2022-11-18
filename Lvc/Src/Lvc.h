@@ -49,17 +49,26 @@ enum FileColumns
 
 enum AppIds
 {
-	IDC_LIST = 100,
-	IDC_TOOLS_BOX,
+	IDC_TOOLS_BOX = 100,
 	IDC_FOLDERS_BOX,
 	IDC_COMMITS_BOX,
-	IDC_TREE,
-	IDC_FILES,
 	IDC_FILES_BOX,
 	IDC_TXT,
 	IDC_LOG,
 	IDC_MSG_BOX,
 	IDC_TAB_VIEW,
+	IDC_FOLDER_TBL, // Contains the following controls:
+		IDC_TREE,
+		IDC_FILTER_FOLDERS,
+		IDC_CLEAR_FILTER_FOLDERS,
+	IDC_COMMITS_TBL, // Contains the following controls:
+		IDC_LIST,
+		IDC_FILTER_COMMITS,
+		IDC_CLEAR_FILTER_COMMITS,
+	IDC_FILES_TBL, // Contains the following controls:
+		IDC_FILES,
+		IDC_FILTER_FILES,
+		IDC_CLEAR_FILTER_FILES,
 
 	IDM_ADD_LOCAL = 200,
 	IDM_ADD_REMOTE,
@@ -144,7 +153,9 @@ struct AppPriv
 	LOptionsFile	Opts;
 	LStructuredLog	sLog;
 	int				Resort = -1;
-	LArray<LListItem*> Filtered;
+
+	// Filtering
+	LString			FolderFilter, CommitFilter, FileFilter;
 
 	LHashTbl<StrKey<char,false>,SshConnection*> Connections;
 	
@@ -153,11 +164,6 @@ struct AppPriv
 		sLog("Lvc.slog")
 	{
 		
-	}
-
-	~AppPriv()
-	{
-		Filtered.DeleteObjects();
 	}
 
 	SshConnection *GetConnection(const char *Uri, bool Create = true);

@@ -77,7 +77,7 @@ public:
 
 	/// Call to tell the container that the data displayed by the item has changed
 	virtual void Update() {}
-	/// Moves the item onscreen
+	/// Moves the item on screen
 	virtual void ScrollTo() {}
 	/// Shows a editable label above the item allowing the user to change the value associated with the column 'Col'
 	virtual LView *EditLabel(int Col = -1);

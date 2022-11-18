@@ -78,6 +78,8 @@
 					<a href="#Now">Now</a><br>
 				<td>
 					<a href="#CreateSurface">CreateSurface</a><br>
+					<a href="#ColourSpaceToString">ColourSpaceToString</a><br>
+					<a href="#StringToColourSpace">StringToColourSpace</a><br>
 				<td>
 					<a href="#LoadDialog">LoadDialog</a><br>
 					<a href="#MessageDlg">MessageDlg</a><br>
@@ -787,7 +789,10 @@ System.script is 837 bytes</pre>
 
 		<h4>bool <a name="open">obj.Open</a>(path[, mode]);</h4>
 			<div>
-				Opens a file.
+				Opens a file. Typically this follows creating a file object with <a href='#New'>New</a> and once the file
+				operations are done, use <a href='#Delete'>Delete</a> to clean up the memory.<br>
+				<br>
+				Also of note: to get or change the size of the file use the <a href='#length'>Length</a> member.
 				<br><br>
 				Arguments:
 				<ul>
@@ -1001,7 +1006,7 @@ System.script is 837 bytes</pre>
 								The exact colour space will be determined to be one of the System##BitColourSpace 
 								values.
 							<li> a <b>string</b>: which specifies the exact colour space. <br>
-								Possible values are taken from the GColourSpace enum in Lgi but in string form, ie:
+								Possible values are taken from the LColourSpace enum in Lgi but in string form, ie:
 								<ul>
 									<li> "CsIndex8" - Creates a 8 bit indexed image with a palette.
 									<li> "CsRgb16" - An rgb image with 5 red, 6 green and 5 blue bits per pixel.
@@ -1035,6 +1040,23 @@ Print(c.Type(), ": ", c.x, ", ", c.y, ", ", c.Bits, ", ", c.ColourSpace, "\n");<
 				lower nibble is the number of bits (and zero = 16 bits).
 			</div>
 
+		<h4>string <a name="ColourSpaceToString">ColourSpaceToString</a>(intColourSpace);</h4>
+			<div>
+				Converts a <a href='https://phab.mallen.id.au/source/lgi/browse/default/include/lgi/common/ColourSpace.h'>LColourSpace</a> 
+				integer to a string.
+			</div>
+
+		<h4>int <a name="StringToColourSpace">StringToColourSpace</a>(stringColourSpace);</h4>
+			<div>
+				Converts a string colour space representation to a 
+				<a href='https://phab.mallen.id.au/source/lgi/browse/default/include/lgi/common/ColourSpace.h'>LColourSpace</a>.<br>
+				<br>
+				Returns:
+				<ul>
+					<li> Non zero LColourSpace entry on success, or CsNone on error (value 0).
+				</ul>
+			</div>
+
 		<h4>int <a name="x">obj.X</a>;</h4>
 			<div>
 				The width of the image in pixels (read only).
@@ -1052,7 +1074,7 @@ Print(c.Type(), ": ", c.x, ", ", c.y, ", ", c.Bits, ", ", c.ColourSpace, "\n");<
 
 		<h4>colour_space <a name="colourspace">obj.ColourSpace</a>;</h4>
 			<div>
-				The colour space of the image (read only). This is a integer value that maps to a GColourSpace enum.
+				The colour space of the image (read only). This is a integer value that maps to a LColourSpace enum.
 			</div>
 
 		<h4>list <a name="palette">obj.Palette</a>;</h4>
@@ -1305,7 +1327,7 @@ Print(c.Type(), "\n");</pre>
 				<ul>
 					<li> List or HashTable: number of objects in the container.
 					<li> String: The number of bytes.
-					<li> File: The length of the file in bytes.
+					<li> File: Reading the value gives the length of the file in bytes. Writing to the value sets the file's size.
 					<li> Bitmap: Number of pixels.
 					<li> View: Number of child views.
 				</ul>

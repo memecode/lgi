@@ -32,21 +32,6 @@ class LFileSelectPrivate
 	bool			ShowReadOnly;
 	bool			ReadOnly;
 
-	char *TypeStrA()
-	{
-		LStringPipe p;
-
-		for (auto Type: TypeList)
-		{
-			p.Push(Type->Description());
-			p.Push("", 1);
-			p.Push(Type->Extension());
-			p.Push("", 1);
-		}
-
-		return (char*)p.New(1);
-	}
-
 	char16 *TypeStrW()
 	{
 		LMemQueue p;

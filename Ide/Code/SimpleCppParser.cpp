@@ -38,10 +38,9 @@ Known bugs:
 #include "ParserCommon.h"
 
 #if 0
-// #define DEBUG_FILE		"\\ape-apcp.c"
-#define DEBUG_FILE		"gen_probe.c"
+#define DEBUG_FILE		"FileSelect.cpp"
 #endif
-#define DEBUG_LINE		593
+#define DEBUG_LINE		400
 
 const char *TypeToStr(DefnType t)
 {
@@ -240,7 +239,9 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 		if (Debug)
 		{
 			if (Line >= DEBUG_LINE - 1)
+			{
 				int asd=0;
+			}
 			else if (PrevLine != Line)
 			{
 				PrevLine = Line;

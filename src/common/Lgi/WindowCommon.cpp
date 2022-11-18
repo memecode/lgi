@@ -9,6 +9,14 @@
 #include "lgi/common/Net.h"
 #include "lgi/common/DropFiles.h"
 
+void LWindow::ScaleSizeToDpi()
+{
+	auto s = GetDpiScale();
+	auto p = GetPos();
+	p.SetSize( (int) (p.X() * s.x), (int) (p.Y() * s.y) );
+	SetPos(p);
+}
+
 void LWindow::BuildShortcuts(ShortcutMap &Map, LViewI *v)
 {
 	if (!v) v = this;

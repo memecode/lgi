@@ -2862,7 +2862,7 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 	}
 
 	// Sniff type...
-	bool isLgiProj = false;
+	bool probablyLgiProj = false;
 	if (!Stricmp(LGetExtension(File), "xml"))
 	{	
 		LFile f(File, O_READ);
@@ -2871,14 +2871,18 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 			char buf[256];
 			auto rd = f.Read(buf, sizeof(buf));
 			if (rd > 0)
-				isLgiProj = Strnistr(buf, "<Project ", rd) != NULL;
+				probablyLgiProj = Strnistr(buf, "<Project", rd) != NULL;
 		}
 	}
 	
-	if (isLgiProj)
+	if (probablyLgiProj)
 	{
-		OpenProject(File, NULL);
-		return NULL;
+		CloseAll();
+		if (OpenProject(File, NULL))
+		{
+			return NULL;
+		}
+		// else lets just open it as text...
 	}
 		
 	Doc = d->IsFileOpen(File);
@@ -4055,27 +4059,31 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 					return;
 				}
 
-				if (d->DbgContext)
-				{
-					d->DbgContext->OnCommand(IDM_CONTINUE);
-				}
-				else if ((d->DbgContext = p->Execute(ExeDebug)))
-				{
-					d->DbgContext->DebuggerLog = d->Output->DebuggerLog;
-					d->DbgContext->Watch = d->Output->Watch;
-					d->DbgContext->Locals = d->Output->Locals;
-					d->DbgContext->CallStack = d->Output->CallStack;
-					d->DbgContext->Threads = d->Output->Threads;
-					d->DbgContext->ObjectDump = d->Output->ObjectDump;
-					d->DbgContext->Registers = d->Output->Registers;
-					d->DbgContext->MemoryDump = d->Output->MemoryDump;
-					
-					d->DbgContext->OnCommand(IDM_START_DEBUG);
-					
-					d->Output->Value(AppWnd::DebugTab);
-					d->Output->DebugEdit->Focus(true);
-				}
-			});
+			LString ErrMsg;
+			if (d->DbgContext)
+			{
+				d->DbgContext->OnCommand(IDM_CONTINUE);
+			}
+			else if ((d->DbgContext = p->Execute(ExeDebug, &ErrMsg)))
+			{
+				d->DbgContext->DebuggerLog = d->Output->DebuggerLog;
+				d->DbgContext->Watch = d->Output->Watch;
+				d->DbgContext->Locals = d->Output->Locals;
+				d->DbgContext->CallStack = d->Output->CallStack;
+				d->DbgContext->Threads = d->Output->Threads;
+				d->DbgContext->ObjectDump = d->Output->ObjectDump;
+				d->DbgContext->Registers = d->Output->Registers;
+				d->DbgContext->MemoryDump = d->Output->MemoryDump;
+				
+				d->DbgContext->OnCommand(IDM_START_DEBUG);
+				
+				d->Output->Value(AppWnd::DebugTab);
+				d->Output->DebugEdit->Focus(true);
+			}
+			else if (ErrMsg)
+			{
+				LgiMsg(this, "Error: %s", AppName, MB_OK, ErrMsg.Get());
+			}
 			break;
 		}
 		case IDM_TOGGLE_BREAKPOINT:
@@ -4637,12 +4645,8 @@ int LgiMain(OsAppArguments &AppArgs)
 	LApp a(AppArgs, "LgiIde");
 	if (a.IsOk())
 	{
-		#if 0
-		a.AppWnd = new Test;
-		#else
 		a.AppWnd = new AppWnd;
 		// a.AppWnd->_Dump();
-		#endif
 		a.Run();
 	}
 

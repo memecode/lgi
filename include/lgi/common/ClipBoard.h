@@ -52,11 +52,6 @@ public:
 	bool Bitmap(LSurface *pDC, bool AutoEmpty = true);
 	bool Bitmap(BitmapCb Callback);
 
-	[[deprecated]] LAutoPtr<LSurface> Bitmap();
-	#if WINNATIVE
-	LAutoPtr<LSurface> ConvertFromPtr(void *Ptr);
-	#endif
-
 	// Files
 	LString::Array Files();
 	bool Files(LString::Array &Paths, bool AutoEmpty = true);
@@ -64,6 +59,14 @@ public:
 	// Binary
 	bool Binary(FormatType Format, uint8_t *Ptr, ssize_t Len, bool AutoEmpty);	// Set
 	bool Binary(FormatType Format, LAutoPtr<uint8_t,true> &Ptr, ssize_t *Len);	// Get
+
+
+	[[deprecated]] LAutoPtr<LSurface> Bitmap();
+	#if WINNATIVE
+	LAutoPtr<LSurface> ConvertFromPtr(void *Ptr);
+	#elif defined(LINUX)
+	void FreeImage(unsigned char *pixels);
+	#endif
 };
 
 #ifdef __OBJC__

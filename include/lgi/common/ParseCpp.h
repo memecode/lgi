@@ -2,7 +2,7 @@
 #define _GPARSECPP_H_
 
 /// C++ symbol types
-enum GSymbolType
+enum LSymbolType
 {
 	SymNone,
 	SymDefineValue,
@@ -18,10 +18,10 @@ enum GSymbolType
 };
 
 /// A reference to a matched symbol
-struct GSymbolResult
+struct LSymbolResult
 {
 	/// The type of the symbol
-	GSymbolType Type;
+	LSymbolType Type;
 	/// Which file the symbol is in
 	const char *File;
 	/// The line number in that file
@@ -33,10 +33,10 @@ struct GSymbolResult
 /// A parser library for C++ code.
 class LCppParser
 {
-	struct GCppParserPriv *d;
+	struct LCppParserPriv *d;
 
 public:
-	typedef void (*SearchResultsCb)(void *CallbackData, LArray<GSymbolResult*> &Syms);
+	typedef void (*SearchResultsCb)(void *CallbackData, LArray<LSymbolResult*> &Syms);
 	
 	struct ValuePair
 	{

@@ -1125,7 +1125,7 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 		#if defined __GTK_H__
 			if (Str)
 			{
-				GUtf8Str u(Str);
+				LUtf8Str u(Str);
 				return u.GetChars();
 			}
 			return 0;
@@ -1157,7 +1157,7 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 						(double)Fpos/FScale, (double)b.X()/FScale, Status,
 						(double)Foffset/FScale, Index, Trailing);
 
-				GUtf8Str u(Str);
+				LUtf8Str u(Str);
 				while ((OsChar*)u.GetPtr() < Str + Index + Trailing)
 				{
 					u++;
@@ -2076,7 +2076,7 @@ void LDisplayString::FDraw(LSurface *pDC, int fx, int fy, LRect *frc, bool Debug
 
 	    		if (VisibleTab && Str)
 	    		{
-	    			GUtf8Str Ptr(Str);
+	    			LUtf8Str Ptr(Str);
 	    			auto Ws = Font->WhitespaceColour();
 	    			pDC->Colour(Ws);
 	    			

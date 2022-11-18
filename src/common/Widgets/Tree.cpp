@@ -468,19 +468,6 @@ LRect *LTreeItem::_GetRect(LTreeItemRect Which)
 	return 0;
 }
 
-/*
-bool LTreeItem::SortChildren(int (*compare)(LTreeItem *a, LTreeItem *b, NativeInt data), NativeInt data)
-{
-	Items.Sort(compare, data);
-	if (Tree)
-	{
-		Tree->_Pour();
-		Tree->Invalidate();
-	}
-	return true;
-}
-*/
-
 bool LTreeItem::IsDropTarget()
 {
 	LTree *t = GetTree();
@@ -527,9 +514,7 @@ LRect *LTreeItem::GetPos(int Col)
 void LTreeItem::_RePour()
 {
 	if (Tree)
-	{
 		Tree->_Pour();
-	}
 }
 
 void LTreeItem::ScrollTo()
@@ -675,7 +660,10 @@ void LTreeItem::_PaintText(LItem::ItemPaintCtx &Ctx)
 
 void LTreeItem::_Pour(LPoint *Limit, int ColumnPx, int Depth, bool Visible)
 {
-	d->Visible = Visible;
+	auto css = GetCss(false);
+	auto display = css ? css->Display() != LCss::DispNone : true;
+
+	d->Visible = display && Visible;
 	d->Depth = Depth;
 
 	if (d->Visible)
@@ -859,9 +847,7 @@ void LTreeItem::_MouseClick(LMouse &m)
 			Select(true);
 
 			if (Tree)
-			{
 				Tree->OnItemClick(this, m);
-			}
 		}
 	}
 }
@@ -869,6 +855,8 @@ void LTreeItem::_MouseClick(LMouse &m)
 void LTreeItem::OnPaint(ItemPaintCtx &Ctx)
 {
 	LAssert(Tree != NULL);
+	if (!d->Visible)
+		return;
 
 	// background up to text
 	LSurface *&pDC = Ctx.pDC;

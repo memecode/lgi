@@ -41,6 +41,7 @@ if(hasParent)
 endif()
 set(LGI_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
+# External libs:
 get_filename_component(CODE ../.. ABSOLUTE)
 get_filename_component(CODELIB ${CODE}/../codelib ABSOLUTE)
 if (NOT EXISTS "${CODELIB}")
@@ -63,6 +64,16 @@ if (NOT EXISTS "${ICONV_PATH}/include")
 	endif()
 endif()
 
+get_filename_component(PNG_LIBRARY "${CODELIB}/libpng" ABSOLUTE)
+if (EXISTS ${PNG_LIBRARY} AND NOT TARGET libpng15)
+	add_subdirectory(${PNG_LIBRARY} libpng)
+endif()
+
+get_filename_component(JPEG_LIBRARY "${CODELIB}/libjpeg-9a" ABSOLUTE)
+if (NOT TARGET libjpeg9a)
+	add_subdirectory(${CODELIB}/libjpeg-9a libjpeg)
+endif()
+
 if (APPLE)
 
 	# SET(GUI_TYPE MACOSX_BUNDLE)
@@ -77,15 +88,9 @@ elseif (LINUX)
 	pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.4)
 	set(PUBLIC_LIBS pthread crypt z)
 
-elseif (WIN32)
-
-	get_filename_component(PNG_LIBRARY "${CODELIB}/libpng" ABSOLUTE)
-	if (EXISTS ${PNG_LIBRARY})
-		add_subdirectory(${PNG_LIBRARY} libpng)
-	endif()
-
 endif()
 
+# Lgi source code:
 set (CommonSource
 	src/common/Gdc2/15Bit.cpp
 	src/common/Gdc2/16Bit.cpp
@@ -177,6 +182,9 @@ set (CommonSource
 	src/common/Widgets/TextLabel.cpp
 	src/common/Widgets/ToolBar.cpp	
 	src/common/Widgets/Tree.cpp	
+	include/lgi/common/App.h
+	include/lgi/common/View.h
+	include/lgi/common/Thread.h
 	)
 
 if (APPLE)
@@ -308,8 +316,6 @@ if (APPLE)
 		PUBLIC
 			include/lgi/mac/cocoa
 			/opt/local/include
-			${CODELIB}/libpng
-			${CODELIB}/libpng/build
 		PRIVATE
 			private/mac
 			)

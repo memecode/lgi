@@ -14,7 +14,7 @@
 #else
 #define Resolve()			c.r++
 #define GResolveRef(nm)		
-// GVarRef *
+// LVarRef *
 #endif
 
 default:
@@ -702,7 +702,7 @@ case IRet:
 	if (Frames.Length() > 0)
 	{
 		StackFrame Sf = Frames[Frames.Length()-1];
-		GVarRef &Ret = Sf.ReturnValue;
+		LVarRef &Ret = Sf.ReturnValue;
 		LVariant *RetVar = &Scope[Ret.Scope][Ret.Index];
 		// LgiTrace("IRet to %i:%i\n", Ret.Scope, Ret.Index);
 		if (Ret.Scope == SCOPE_LOCAL)
@@ -1059,6 +1059,114 @@ case IDomGet:
 					(*Dst) = Dom->Value.Binary.Length;
 				break;
 			}
+			case GV_INT32:
+			{
+				char *sName = Name->Str();
+				CheckParam(sName);
+				LDomProperty p = LStringToDomProp(sName);
+				switch (p)
+				{
+					case TypeString:
+					{
+						char s[32];
+						sprintf_s(s, sizeof(s), "%i", Dom->Value.Int);
+						*Dst = s;
+						break;
+					}
+					case TypeDouble:
+					{
+						*Dst = (double)Dom->Value.Int;
+						break;
+					}
+					default:
+					{
+						Dst->Empty();
+						LString s;
+						s.Printf("%s IDomGet warning: Unexpected int32 member '%s'.\n",
+								Code->AddrToSourceRef(CurrentScriptAddress),
+								sName);
+						if (Log)
+							Log->Write(s, s.Length());
+						if (LVirtualMachine::BreakOnWarning)
+							OnException(NULL, -1, CurrentScriptAddress, s);
+						Status = ScriptWarning;
+						break;
+					}
+				}
+				break;
+			}
+			case GV_INT64:
+			{
+				char *sName = Name->Str();
+				CheckParam(sName);
+				LDomProperty p = LStringToDomProp(sName);
+				switch (p)
+				{
+					case TypeString:
+					{
+						char s[32];
+						sprintf_s(s, sizeof(s), LPrintfInt64, Dom->Value.Int64);
+						*Dst = s;
+						break;
+					}
+					case TypeDouble:
+					{
+						*Dst = (double)Dom->Value.Int64;
+						break;
+					}
+					default:
+					{
+						Dst->Empty();
+						LString s;
+						s.Printf("%s IDomGet warning: Unexpected int64 member '%s'.\n",
+								Code->AddrToSourceRef(CurrentScriptAddress),
+								sName);
+						if (Log)
+							Log->Write(s, s.Length());
+						if (LVirtualMachine::BreakOnWarning)
+							OnException(NULL, -1, CurrentScriptAddress, s);
+						Status = ScriptWarning;
+						break;
+					}
+				}
+				break;
+			}
+			case GV_DOUBLE:
+			{
+				char *sName = Name->Str();
+				CheckParam(sName);
+				LDomProperty p = LStringToDomProp(sName);
+				switch (p)
+				{
+					case TypeString:
+					{
+						char s[32];
+						sprintf_s(s, sizeof(s), "%g", Dom->Value.Dbl);
+						*Dst = s;
+						break;
+					}
+					case TypeInt:
+					{
+						*Dst = (int64)Dom->Value.Dbl;
+						break;
+					}
+					default:
+					{
+						Dst->Empty();
+						LString s;
+						s.Printf("%s IDomGet warning: Unexpected double member '%s'.\n",
+								Code->AddrToSourceRef(CurrentScriptAddress),
+								sName);
+						if (Log)
+							Log->Write(s, s.Length());
+						if (LVirtualMachine::BreakOnWarning)
+							OnException(NULL, -1, CurrentScriptAddress, s);
+						Status = ScriptWarning;
+						break;
+					}
+				}
+				break;
+			}
 			case GV_STRING:
 			{
 				char *sName = Name->Str();
@@ -1288,7 +1396,7 @@ case IDomCall:
 					c.r[1].GetStr(),
 					c.r[2].GetStr());
 	#else
-	GVarRef DstRef = *c.r;
+	LVarRef DstRef = *c.r;
 	#endif
 
 	GResolveRef(Dst) Resolve();

@@ -402,7 +402,7 @@ public:
 			1 << Platform
 		);
 		
-		LAutoString Base = Proj->GetBasePath();
+		auto Base = Proj->GetBasePath();
 		if (IsExecutableTarget)
 		{
 			LString Exe = Proj->GetExecutable(Platform);
@@ -464,8 +464,8 @@ public:
 					"Flags = -fPIC -w -fno-inline -fpermissive\n");
 			
 			const char *DefDefs = "-DWIN32 -D_REENTRANT";
-			sDefines[0] = DefDefs;
-			sDefines[1] = DefDefs;
+			sDefines[BuildDebug] = DefDefs;
+			sDefines[BuildRelease] = DefDefs;
 		}
 		else
 		{
@@ -479,10 +479,10 @@ public:
 					);
 			sDefines[0].Printf("-D%s -D_REENTRANT", PlatformCap.Upper().Get());
 			#ifdef LINUX
-			sDefines[0] += " -D_FILE_OFFSET_BITS=64"; // >:-(
-			sDefines[0] += " -DPOSIX";
+			sDefines[BuildDebug] += " -D_FILE_OFFSET_BITS=64"; // >:-(
+			sDefines[BuildDebug] += " -DPOSIX";
 			#endif
-			sDefines[1] = sDefines[0];
+			sDefines[BuildRelease] = sDefines[BuildDebug];
 		}
 
 		List<IdeProject> Deps;
@@ -518,7 +518,7 @@ public:
 					if (!in.Length())
 						continue;
 					
-					if (in(0) == '-')
+					if (strchr("`-", in(0)))
 					{
 						s.Printf(" \\\n\t\t%s", in.Get());
 					}
@@ -2121,26 +2121,36 @@ if (Debug) LgiTrace("Back=%i\n", (int)Back);
 
 bool IdeProject::GetExePath(char *Path, int Len)
 {
-	const char *PExe = d->Settings.GetStr(ProjExe);
-	if (PExe)
+	auto PExe = d->Settings.GetStr(ProjExe);
+	LString Exe;
+	if (!PExe)
 	{
-		if (LIsRelativePath(PExe))
+		// Use the default exe name?
+		Exe = GetExecutable(GetCurrentPlatform());
+		if (Exe)
 		{
-			LAutoString Base = GetBasePath();
-			if (Base)
-			{
-				LMakePath(Path, Len, Base, PExe);
-			}
-			else return false;
+			printf("Exe='%s'\n", Exe.Get());
+			PExe = Exe;
 		}
-		else
-		{
-			strcpy_s(Path, Len, PExe);
-		}
-		
-		return true;
 	}
-	else return false;
+	
+	if (!PExe)
+		return false;	
+	
+	if (LIsRelativePath(PExe))
+	{
+		auto Base = GetBasePath();
+		if (Base)
+			LMakePath(Path, Len, Base, PExe);
+		else
+			return false;
+	}
+	else
+	{
+		strcpy_s(Path, Len, PExe);
+	}
+	
+	return true;
 }
 
 LString IdeProject::GetMakefile(IdePlatform Platform)
@@ -2314,44 +2324,47 @@ public:
 	}
 };
 
-LDebugContext *IdeProject::Execute(ExeAction Act)
+LDebugContext *IdeProject::Execute(ExeAction Act, LString *ErrMsg)
 {
-	LAutoString Base = GetBasePath();
-	if (d->Settings.GetStr(ProjExe) &&
-		Base)
+	auto Base = GetBasePath();
+	
+	if (!Base)
 	{
-		char e[MAX_PATH_LEN];
-		if (GetExePath(e, sizeof(e)))
-		{
-			if (LFileExists(e))
-			{
-				const char *Args = d->Settings.GetStr(ProjArgs);
-				const char *Env = d->Settings.GetStr(ProjEnv);
-				LString InitDir = d->Settings.GetStr(ProjInitDir);
-				int RunAsAdmin = d->Settings.GetInt(ProjDebugAdmin);
-				if (Act == ExeDebug)
-				{
-					if (InitDir && LIsRelativePath(InitDir))
-					{
-						LFile::Path p(Base);
-						p += InitDir;
-						InitDir = p.GetFull();
-					}
-						
-					return new LDebugContext(d->App, this, e, Args, RunAsAdmin != 0, Env, InitDir);
-				}
-				else
-				{
-					new ExecuteThread(this, e, Args, Base, Act);
-				}
-			}
-			else
-			{
-				LgiMsg(Tree, "Executable '%s' doesn't exist.\n", AppName, MB_OK, e);
-			}
-		}
+		if (ErrMsg) *ErrMsg = "No base path for project.";
+		return NULL;		
 	}
 	
+	char e[MAX_PATH_LEN];
+	if (!GetExePath(e, sizeof(e)))
+	{
+		if (ErrMsg) *ErrMsg = "GetExePath failed.";
+		return NULL;		
+	}
+	
+	if (!LFileExists(e))
+	{
+		if (ErrMsg) ErrMsg->Printf("Executable '%s' doesn't exist.\n", e);
+		return NULL;
+	}
+
+	const char *Args = d->Settings.GetStr(ProjArgs);
+	const char *Env = d->Settings.GetStr(ProjEnv);
+	LString InitDir = d->Settings.GetStr(ProjInitDir);
+	int RunAsAdmin = d->Settings.GetInt(ProjDebugAdmin);
+	if (Act == ExeDebug)
+	{
+		if (InitDir && LIsRelativePath(InitDir))
+		{
+			LFile::Path p(Base);
+			p += InitDir;
+			InitDir = p.GetFull();
+		}
+			
+		return new LDebugContext(d->App, this, e, Args, RunAsAdmin != 0, Env, InitDir);
+	}
+
+	// Run without debugging...
+	new ExecuteThread(this, e, Args, Base, Act);
 	return NULL;
 }
 

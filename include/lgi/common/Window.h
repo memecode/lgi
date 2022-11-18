@@ -249,6 +249,7 @@ public:
 	void SetDecor(bool Visible);
 	LPoint GetDpi();
 	LPointF GetDpiScale();
+	void ScaleSizeToDpi();
 	
 	// D'n'd
 	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState) override;

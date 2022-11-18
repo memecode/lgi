@@ -7,7 +7,6 @@
 		<String Ref="5" Cid="502" Define="IDC_PULL" en="Pull" />
 		<String Ref="6" Cid="503" Define="IDC_PUSH" en="Push" />
 		<String Ref="7" Cid="-1" Define="IDC_STATIC" en="Filter:" />
-		<String Ref="8" Cid="505" Define="IDC_FILTER" />
 		<String Ref="9" Cid="507" Define="IDD_COMMIT" en="Commit" />
 		<String Ref="10" Cid="504" Define="IDC_COMMIT_TABLE" />
 		<String Ref="11" Cid="11" Define="IDC_BRANCH" />
@@ -239,41 +238,32 @@
 		</TableLayout>
 	</Dialog>
 	<Dialog pos="7,7,998,136" ref="1">
-		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" cols="0.091,0.094,0.088,0.060,0.045,0.050,0.197,0.044,0.149,0.091,0.091" rows="1.000">
+		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" cols="0.128,0.133,0.124,0.085,0.063,0.210,0.128,0.128" rows="1.000">
 			<tr>
 				<td addr="0,0" valign="Center" style="padding-left: 4px;&#10;padding-right: 1em;">
 					<Button pos="7,21,71,48" ref="18" toggle="0" />
 				</td>
 				<td addr="1,0" valign="Center">
-					<Button pos="96,14,130,41" ref="5" toggle="0" />
-					<Button pos="131,14,158,41" ref="39" toggle="0" />
+					<Button pos="132,14,166,41" ref="5" toggle="0" />
+					<Button pos="167,14,194,41" ref="39" toggle="0" />
 				</td>
 				<td addr="2,0" valign="Center" style="padding-right: 1em;">
-					<CheckBox pos="189,21,223,41" ref="48" />
+					<CheckBox pos="262,21,296,41" ref="48" />
 				</td>
 				<td addr="3,0" valign="Center" style="padding-right: 1em;">
-					<Button pos="260,14,301,41" ref="6" toggle="0" />
+					<Button pos="368,14,409,41" ref="6" toggle="0" />
 				</td>
 				<td addr="4,0" valign="Center" style="padding-right: 1em;">
-					<Button pos="315,14,355,41" ref="40" toggle="0" />
+					<Button pos="446,14,486,41" ref="40" toggle="0" />
 				</td>
 				<td addr="5,0" valign="Center">
-					<StaticText pos="359,21,399,41" ref="7" />
+					<CheckBox pos="512,21,574,41" ref="38" />
 				</td>
-				<td addr="6,0">
-					<EditBox Pos="413,14,573,41" Style="width: 200px;" ref="8" />
+				<td addr="6,0" valign="Center">
+					<StaticText pos="714,21,790,48" ref="44" />
 				</td>
-				<td addr="7,0" style="padding-right: 1em;">
-					<Button pos="596,14,623,41" ref="17" toggle="0" />
-				</td>
-				<td addr="8,0" valign="Center">
-					<CheckBox pos="638,21,700,41" ref="38" />
-				</td>
-				<td addr="9,0" valign="Center">
-					<StaticText pos="783,21,859,48" ref="44" />
-				</td>
-				<td addr="10,0">
-					<ComboBox pos="867,21,950,41" ref="45" />
+				<td addr="7,0">
+					<ComboBox pos="835,21,918,41" ref="45" />
 				</td>
 			</tr>
 		</TableLayout>

@@ -28,7 +28,7 @@ public:
 	
 	Progress();
 	Progress(char *desc, int64 l, int64 h, char *type = NULL, double scale = 1.0);
-	virtual ~Progress() {}
+	virtual ~Progress();
 
 	virtual bool SetRange(const LRange &r) { Low = r.Start; High = r.End(); return true; }
 	virtual LRange GetRange() { return LRange((ssize_t)Low, (ssize_t)(High - Low)); }
