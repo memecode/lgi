@@ -4059,31 +4059,32 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 					return;
 				}
 
-			LString ErrMsg;
-			if (d->DbgContext)
-			{
-				d->DbgContext->OnCommand(IDM_CONTINUE);
-			}
-			else if ((d->DbgContext = p->Execute(ExeDebug, &ErrMsg)))
-			{
-				d->DbgContext->DebuggerLog = d->Output->DebuggerLog;
-				d->DbgContext->Watch = d->Output->Watch;
-				d->DbgContext->Locals = d->Output->Locals;
-				d->DbgContext->CallStack = d->Output->CallStack;
-				d->DbgContext->Threads = d->Output->Threads;
-				d->DbgContext->ObjectDump = d->Output->ObjectDump;
-				d->DbgContext->Registers = d->Output->Registers;
-				d->DbgContext->MemoryDump = d->Output->MemoryDump;
+				LString ErrMsg;
+				if (d->DbgContext)
+				{
+					d->DbgContext->OnCommand(IDM_CONTINUE);
+				}
+				else if ((d->DbgContext = p->Execute(ExeDebug, &ErrMsg)))
+				{
+					d->DbgContext->DebuggerLog = d->Output->DebuggerLog;
+					d->DbgContext->Watch = d->Output->Watch;
+					d->DbgContext->Locals = d->Output->Locals;
+					d->DbgContext->CallStack = d->Output->CallStack;
+					d->DbgContext->Threads = d->Output->Threads;
+					d->DbgContext->ObjectDump = d->Output->ObjectDump;
+					d->DbgContext->Registers = d->Output->Registers;
+					d->DbgContext->MemoryDump = d->Output->MemoryDump;
 				
-				d->DbgContext->OnCommand(IDM_START_DEBUG);
+					d->DbgContext->OnCommand(IDM_START_DEBUG);
 				
-				d->Output->Value(AppWnd::DebugTab);
-				d->Output->DebugEdit->Focus(true);
-			}
-			else if (ErrMsg)
-			{
-				LgiMsg(this, "Error: %s", AppName, MB_OK, ErrMsg.Get());
-			}
+					d->Output->Value(AppWnd::DebugTab);
+					d->Output->DebugEdit->Focus(true);
+				}
+				else if (ErrMsg)
+				{
+					LgiMsg(this, "Error: %s", AppName, MB_OK, ErrMsg.Get());
+				}
+			});
 			break;
 		}
 		case IDM_TOGGLE_BREAKPOINT:
