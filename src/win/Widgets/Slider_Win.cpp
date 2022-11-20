@@ -15,8 +15,6 @@ LSlider::LSlider(int id, int x, int y, int cx, int cy, const char *name, bool ve
 	SetPos(r);
 	Name(name);
 	Vertical = vert;
-	Min = Max = 0;
-	Val = 0;
 
 	SetStyle(GetStyle() | WS_VISIBLE | WS_CHILD | WS_TABSTOP | ((Vertical) ? TBS_VERT : TBS_HORZ));
 	if (SubClass && !SubClass->SubClass(TRACKBAR_CLASSA))
@@ -85,6 +83,15 @@ LMessage::Result LSlider::OnEvent(LMessage *Msg)
 {
 	switch (Msg->Msg())
 	{
+		/*
+		case WM_WINDOWPOSCHANGED:
+		{
+			WINDOWPOS *Info = (LPWINDOWPOS) Msg->b;
+			if (Info)
+				LgiTrace("slider pos = %i,%i - %ix%i\n", Info->x, Info->y, Info->cx, Info->cy);
+			break;
+		}
+		*/
 		case WM_HSCROLL:
 		case WM_VSCROLL:
 		{
@@ -147,7 +154,7 @@ LMessage::Result LSlider::OnEvent(LMessage *Msg)
 	{
 		case WM_CREATE:
 		{
-			SetRange(LRange(Min, Max-Min+1));
+			SetRange(LRange(Min, Max-Min));
 			Value(Val);
 			break;
 		}
