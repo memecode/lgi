@@ -500,7 +500,7 @@ public:
 
 class LUdpBroadcast : public LSocket
 {
-	LArray<Interface> Intf;
+	// LArray<Interface> Intf;
 	uint32_t SelectIf;
 
 public:
@@ -508,7 +508,7 @@ public:
 	{
         SetBroadcast();
 		SetUdp(true);
-		EnumInterfaces(Intf);
+		// EnumInterfaces(Intf);
 	}
 
 	bool BroadcastPacket(LString Data, uint32_t Ip, uint16_t Port)
@@ -530,20 +530,6 @@ public:
 				LgiTrace("%s:%i - set IP_MULTICAST_IF for '%s' failed: %i\n", _FL, LIpStr(SelectIf).Get(), r);
 			SelectIf = 0;
 		}
-		
-		/*
-		uint32 Netmask = 0xffffff00;
-		Interface *Cur = NULL;
-		for (auto &i : Intf)
-		{
-			if (i.Ip4 == Ip)
-			{
-				Netmask = i.Netmask4;
-				Cur = &i;
-				break;
-			}
-		}
-		*/
 		
 		uint32_t BroadcastIp = Ip;
 		#if 0
