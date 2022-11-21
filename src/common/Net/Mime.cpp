@@ -1184,12 +1184,20 @@ int LMime::LMimeText::LMimeDecode::Parse(LStringPipe *Source, ParentState *State
 	LOG("%s:%i - Reading headers...\n", _FL);
 	while ((r = Source->Pop(Buffer)) > 0)
 	{
-		if (!strchr(MimeEol, Buffer[0]))
+		if
+		(
+			(r == 1 && Buffer[0] == '\n')
+			||
+			(r == 2 && Buffer[0] == '\r' && Buffer[1] == '\n')
+		)
+		{
+			break;
+		}
+		else
 		{
 			// Store part of the headers
 			HeaderBuf.Push(Buffer.AddressOf(), r);
 		}
-		else break;
 	}
 
 	if (r < 0)
