@@ -166,11 +166,6 @@ public:
 	/// Paints the item
 	void OnPaint(ItemPaintCtx &Ctx) override;
 	void OnPaint(LSurface *pDC) override { LAssert(0); }
-
-	/*
-	/// Sort the child folder
-	bool SortChildren(int (*compare)(LTreeItem *a, LTreeItem *b, NativeInt UserData), NativeInt UserData = 0);
-	*/
 };
 
 /// A tree control.
