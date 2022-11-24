@@ -2024,7 +2024,7 @@ LString LGetExeFile()
 			LMakePath(Dest, sizeof(Dest), LgiArgsAppPath, "../../..");
 			return Dest;
 		}
-		else printf("%s:%i - No executable path.", _FL);
+		else printf("%s:%i - No executable path: %s\n", _FL, LgiArgsAppPath.Get());
 	
 		#else
 	
