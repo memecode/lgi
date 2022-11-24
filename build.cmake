@@ -1,10 +1,26 @@
 
 if (APPLE)
 
-    set(CODE_SIGN_IDENTITY "fret@memecode.com") # Replace with your code signing identity
+    macro(macDefaultSigningId)
+        # Replace with your code signing identity
+        if (DEFINED ENV{SIGNING_IDENTITY})
+            set(CODE_SIGN_IDENTITY "$ENV{SIGNING_IDENTITY}")
+        else()
+            set(CODE_SIGN_IDENTITY "fret@memecode.com")
+        endif()
+        if (${CODE_SIGN_IDENTITY} STREQUAL "")
+            message(FATAL_ERROR "CODE_SIGN_IDENTITY can't be empty.")
+        endif()
+    endmacro()
+
+    macDefaultSigningId()
 
     # Scan all the deps and copy them into the app bundle:
     function(macCopyDeps topTarget target)
+
+        if (NOT DEFINED CODE_SIGN_IDENTITY)
+            message(FATAL_ERROR "No CODE_SIGN_IDENTITY set.")
+        endif()
 
         # Process all the target's dependencies:
         get_target_property(LIBS ${target} LINK_LIBRARIES)
@@ -56,6 +72,10 @@ if (APPLE)
     # Requires 'python3' to run fixInstallPaths.py. That could be implemented
     # in cmake, but it'd be 3 times as long and right now I don't wanna.
     function(macBundlePostBuild target)
+
+        if (NOT DEFINED CODE_SIGN_IDENTITY)
+            message(FATAL_ERROR "No CODE_SIGN_IDENTITY set.")
+        endif()
 
         # Create the frameworks folder
         add_custom_command(
