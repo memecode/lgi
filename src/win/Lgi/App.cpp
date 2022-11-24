@@ -33,7 +33,7 @@ OsAppArguments::OsAppArguments()
 	_Default();
 }
 
-OsAppArguments::OsAppArguments(int Args, char **Arg)
+OsAppArguments::OsAppArguments(int Args, const char **Arg)
 {
 	_Default();
 	Set(Args, Arg);
@@ -59,7 +59,7 @@ void OsAppArguments::_Default()
 	nCmdShow = SW_RESTORE;
 }
 
-void OsAppArguments::Set(int Args, char **Arg)
+void OsAppArguments::Set(int Args, const char **Arg)
 {
 	LStringPipe p;
 	for (int i=0; i<Args; i++)

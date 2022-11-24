@@ -426,6 +426,8 @@ class LUdpListener : public LSocket
 	LString Context;
 
 public:
+	bool Status = false;
+
 	/*
 	
 	If this isn't working on Linux, most likely it's a firewall issue.
@@ -444,26 +446,25 @@ public:
 		addr.sin_family = AF_INET;
 		addr.sin_port = htons(port);
 		#ifdef WINDOWS
-		addr.sin_addr.S_un.S_addr = INADDR_ANY;
+			addr.sin_addr.S_un.S_addr = INADDR_ANY;
 		#elif defined(MAC)
-		addr.sin_addr.s_addr = htonl(mc_ip);
+			addr.sin_addr.s_addr = htonl(mc_ip);
 		#else
-		addr.sin_addr.s_addr = INADDR_ANY;
+			addr.sin_addr.s_addr = INADDR_ANY;
 		#endif
 
-		int r = bind(Handle(), (struct sockaddr*)&addr, sizeof(addr));
-		if (r)
+		Status = bind(Handle(), (struct sockaddr*)&addr, sizeof(addr)) == 0;
+		if (!Status)
 		{
+			Context = "bind";
 			#ifdef WIN32
 			int err = WSAGetLastError();
-			OnError(err, NULL);
+			#else
+			int err = errno;
 			#endif
+			OnError(err, GetErrorName(err));
 
-			LgiTrace("Error: Bind on %s:%i = %i\n", LIpStr(ntohl(addr.sin_addr.s_addr)).Get(), port, r);
-		}
-		else
-		{
-			LgiTrace("Ok: Bind on %s:%i\n", LIpStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
+			LgiTrace("Error: Bind on %s:%i\n", LIpStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
 		}
 
 		if (mc_ip)
@@ -493,8 +494,12 @@ public:
 
 	void OnError(int ErrorCode, const char *ErrorDescription)
 	{
+		LString s;
+		s.Printf("Error: %s - %i, %s\n", Context.Get(), ErrorCode, ErrorDescription);
 		if (Log)
-			Log->Print("Error: %s - %i, %s\n", Context.Get(), ErrorCode, ErrorDescription);
+			Log->Print("%s", s.Get());
+		else
+			LgiTrace("%s", s.Get());
 	}
 };
 
