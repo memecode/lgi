@@ -33,7 +33,7 @@ void UnitTests()
 	Tests.DeleteObjects();
 }
 
-int main(int args, char **arg)
+int main(int args, const char **arg)
 {
 	OsAppArguments Args(args, arg);
 	LApp a(Args, "LgiUnitTests");
