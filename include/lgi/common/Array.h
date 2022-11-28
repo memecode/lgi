@@ -225,6 +225,23 @@ public:
 		return true;
 	}
 
+	bool operator ==(const LArray<Type> &a) const
+	{
+		if (Length() != a.Length())
+			return false;
+
+		for (size_t i=0; i<len; i++)
+			if (p[i] != a.ItemAt(i))
+				return false;
+
+		return true;
+	}
+
+	bool operator !=(const LArray<Type> &a) const
+	{
+		return !(*this == a);
+	}
+
 	LArray<Type> &operator =(const LArray<Type> &a)
 	{
 		Length(a.Length());
