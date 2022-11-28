@@ -261,7 +261,6 @@ int LGetOs
 		IsWow64Process(GetCurrentProcess(), &IsWow64);
 		#endif
 
-		#if 1
 		SERVER_INFO_101 *v = NULL;
 		auto r = NetServerGetInfo(NULL, 101, (LPBYTE*)&v);
 		if (r == NERR_Success)
@@ -280,31 +279,7 @@ int LGetOs
 
 			NetApiBufferFree(v);
 		}
-		else
-		{
-			LAssert(0);
-		}
-		#else
-		OSVERSIONINFO v;
-		v.dwOSVersionInfoSize = sizeof(v);
-		GetVersionEx(&v);
-
-		Version = v.dwMajorVersion;
-		Revision = v.dwMinorVersion;
-		#ifdef WIN32
-		BOOL IsWow64 = FALSE;
-		IsWow64Process(GetCurrentProcess(), &IsWow64);
-		#endif
-		Os = (v.dwPlatformId == VER_PLATFORM_WIN32_NT)
-			?
-			#ifdef WIN32
-			(IsWow64 ? LGI_OS_WIN64 : LGI_OS_WIN32)
-			#else
-			LGI_OS_WIN64
-			#endif
-			:
-			LGI_OS_WIN9X;
-		#endif
+		else LAssert(0);
 	}
 
 	if (Ver)
