@@ -54,7 +54,7 @@ add_executable(Lvc ${APP_TYPE}
 	${APP_MANIFEST}
 	)
 
-target_link_libraries(Lvc lgi libpng15 ssh_shared)
+target_link_libraries(Lvc lgi libpng16 ssh_shared)
 
 if (APPLE)
     macBundlePostBuild(Lvc)

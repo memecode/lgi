@@ -43,11 +43,11 @@
 #include "lgi/common/Variant.h"
 
 // Pixel formats
-typedef uint8_t   Png8;
-typedef LRgb24  Png24;
-typedef LRgba32 Png32;
-typedef LRgb48  Png48;
-typedef LRgba64 Png64;
+typedef uint8_t   	Png8;
+typedef LRgb24  	Png24;
+typedef LRgba32 	Png32;
+typedef LRgb48  	Png48;
+typedef LRgba64 	Png64;
 
 #if PNG_LIBPNG_VER_MAJOR <= 1 && PNG_LIBPNG_VER_MINOR <= 2
 #define png_const_infop png_infop
@@ -55,11 +55,12 @@ typedef LRgba64 Png64;
 #endif
 
 #ifdef LINUX
+
 const char *LinuxLibName()
 {
 	static char lib[64];
 	sprintf_s(lib, sizeof(lib), "libpng%i", PNG_LIBPNG_VER_SONUM);
-	// printf("png lib name = '%s' (%s)\n", lib);
+	printf("png lib name = '%s'\n", lib);
 	return lib;
 }
 #endif
@@ -81,7 +82,7 @@ const char *sLibrary =
 		#if defined(__CYGWIN__)
 			"cygpng12"
 		#else
-			"libpng15"
+			"libpng16"
 			#ifdef _MSC_VER_STR
 				"_"
 				#if _MSC_VER >= _MSC_VER_VS2019
