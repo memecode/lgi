@@ -60,7 +60,7 @@ const char *LinuxLibName()
 {
 	static char lib[64];
 	sprintf_s(lib, sizeof(lib), "libpng%i", PNG_LIBPNG_VER_SONUM);
-	printf("png lib name = '%s'\n", lib);
+	// printf("png lib name = '%s'\n", lib);
 	return lib;
 }
 #endif
