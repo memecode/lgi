@@ -66,8 +66,9 @@ typedef int SOCKET;
 // Functions
 LgiNetFunc bool HaveNetConnection();
 LgiNetFunc bool WhatsMyIp(LAutoString &Ip);
-LgiExtern LString LIpStr(uint32_t ip);
-LgiExtern uint32_t LIpHostInt(LString str);
+LgiExtern LString LIpToStr(uint32_t ip);
+LgiExtern uint32_t LIpToInt(LString str); // Convert IP as string to host order int
+LgiExtern uint32_t LHostnameToIp(const char *HostName); // Hostname lookup (DNS), returns IP in host order or 0 on error
 
 /// Make md5 hash
 LgiNetFunc void MDStringToDigest
@@ -464,7 +465,7 @@ public:
 			#endif
 			OnError(err, GetErrorName(err));
 
-			LgiTrace("Error: Bind on %s:%i\n", LIpStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
+			LgiTrace("Error: Bind on %s:%i\n", LIpToStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
 		}
 
 		if (mc_ip)
@@ -532,7 +533,7 @@ public:
 			addr.s_addr = htonl(SelectIf);
 			auto r = setsockopt(Handle(), IPPROTO_IP, IP_MULTICAST_IF, (char*)&addr, sizeof(addr));
 			if (r)
-				LgiTrace("%s:%i - set IP_MULTICAST_IF for '%s' failed: %i\n", _FL, LIpStr(SelectIf).Get(), r);
+				LgiTrace("%s:%i - set IP_MULTICAST_IF for '%s' failed: %i\n", _FL, LIpToStr(SelectIf).Get(), r);
 			SelectIf = 0;
 		}
 		

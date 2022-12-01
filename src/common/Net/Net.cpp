@@ -1363,7 +1363,7 @@ bool LSocket::AddMulticastMember(uint32_t MulticastIp, uint32_t LocalInterface)
 	int r = setsockopt(Handle(), IPPROTO_IP, IP_ADD_MEMBERSHIP, (const char*) &mreq, sizeof(mreq));
 	if (!r)
 	{
-		LgiTrace("AddMulticastMember(%s, %s)\n", LIpStr(MulticastIp).Get(), LIpStr(LocalInterface).Get());
+		LgiTrace("AddMulticastMember(%s, %s)\n", LIpToStr(MulticastIp).Get(), LIpToStr(LocalInterface).Get());
 		return true;
 	}
 
@@ -1545,7 +1545,7 @@ bool HaveNetConnection()
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-LString LIpStr(uint32_t ip)
+LString LIpToStr(uint32_t ip)
 {
 	LString s;
 	s.Printf("%i.%i.%i.%i",
@@ -1556,7 +1556,7 @@ LString LIpStr(uint32_t ip)
 	return s;
 }
 
-uint32_t LIpHostInt(LString str)
+uint32_t LIpToInt(LString str)
 {
 	auto p = str.Split(".");
 	if (p.Length() != 4)
@@ -1574,6 +1574,32 @@ uint32_t LIpHostInt(LString str)
 		}
 		ip |= (uint8_t)s.Int();
 	}
+	return ip;
+}
+
+uint32_t LHostnameToIp(const char *Host)
+{
+	if (!Host)
+		return 0;
+		
+	struct addrinfo hints = {};
+	struct addrinfo *res = NULL;
+	auto result = getaddrinfo(Host, NULL, NULL, &res);
+	if (!res)
+		return 0;
+
+	uint32_t ip = 0;
+	if (res->ai_addr)
+	{
+		auto fam = res->ai_addr->sa_family;
+		if (fam == AF_INET)
+		{
+			auto a = (sockaddr_in*)res->ai_addr;
+			ip = ntohl(a->sin_addr.s_addr);
+		}
+	}
+	freeaddrinfo(res);
+	
 	return ip;
 }
 
