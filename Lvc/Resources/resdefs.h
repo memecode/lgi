@@ -40,7 +40,7 @@
 #define IDC_PULL								502
 #define IDC_PUSH								503
 #define IDC_COMMIT_TABLE						504
-#define IDC_CLEAR_FILTER						506
+#define IDM_PATCH_VIEWER						505
 #define IDD_COMMIT								507
 #define IDD_TOOLBAR								508
 #define IDC_OPEN								509

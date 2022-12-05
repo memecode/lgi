@@ -22,6 +22,7 @@
 
 #define APP_VERSION			"0.8"
 extern const char *AppName;
+extern void OpenPatchViewer(LViewI *Parent, LOptionsFile *Opts);
 
 enum LvcIcon
 {

@@ -190,10 +190,6 @@ protected:
 	class LTextLine : public LRange
 	{
 	public:
-		/*
-		ssize_t Start;	// Start offset
-		ssize_t Len;	// length of text
-		*/
 		LRect r;		// Screen location
 		LColour c;		// Colour of line... transparent = default colour
 		LColour Back;	// Background colour or transparent
@@ -325,6 +321,7 @@ public:
 	const char *GetMimeType() override { return "text/plain"; }
 	size_t Length() { return Size; }
 	LString operator[](ssize_t LineIdx);
+	const char16 *TextAtLine(size_t Index);
 
 	ssize_t HitText(int x, int y, bool Nearest);
 	void DeleteSelection(char16 **Cut = 0);
@@ -361,8 +358,8 @@ public:
 	LRange GetSelectionRange();
 
 	// File IO
-	bool Open(const char *Name, const char *Cs = 0) override;
-	bool Save(const char *Name, const char *Cs = 0) override;
+	bool Open(const char *Name, const char *Cs = NULL) override;
+	bool Save(const char *Name, const char *Cs = NULL) override;
 	const char *GetLastError();
 
 	// Clipboard IO
@@ -387,7 +384,7 @@ public:
 	bool ClearDirty(bool Ask, const char *FileName = 0);
 	void UpdateScrollBars(bool Reset = false);
 	ssize_t GetLine();
-	void SetLine(int Line);
+	void SetLine(int Line, bool select = false);
 	LDocFindReplaceParams *CreateFindReplaceParams() override;
 	void SetFindReplaceParams(LDocFindReplaceParams *Params) override;
 

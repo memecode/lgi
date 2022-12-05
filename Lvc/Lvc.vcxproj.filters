@@ -17,6 +17,9 @@
     <Filter Include="Source Files\Ssh">
       <UniqueIdentifier>{954c3d3b-a151-4c83-b7cc-c36301353e1b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\PatchViewer">
+      <UniqueIdentifier>{9ebbbfd3-1106-4ecf-b05d-f0366063de49}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\common\Lgi\LgiMain.cpp">
@@ -54,6 +57,9 @@
     </ClCompile>
     <ClCompile Include="Src\SshConnection.cpp">
       <Filter>Source Files\Ssh</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\PatchViewer.cpp">
+      <Filter>Source Files\PatchViewer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

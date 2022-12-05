@@ -534,11 +534,13 @@ void LBox::OnPosChange()
 		box.Size.Type = LCss::LenPx;
 		if (AutoChildren.Length() > 0)
 		{
+			box.Size.Type = LCss::LenPx;
 			box.Size.Value = (float) AutoPx;
 			RemainingPx -= (int)AutoPx;
 		}
 		else
 		{
+			box.Size.Type = LCss::LenPx;
 			box.Size.Value = (float) RemainingPx;
 			RemainingPx = 0;
 		}
@@ -546,11 +548,12 @@ void LBox::OnPosChange()
 		LOG("        AutoAlloc: %s\n", box.toString().Get());
 	}
 	
+	auto Fnt = GetFont();
 	for (int i=0; i<Sizes.Length(); i++)
 	{
 		BoxRange &box = Sizes[i];
-		LAssert(box.Size.Type == LCss::LenPx);
-		int Px = (int) (box.Size.Value + 0.01);
+		// LAssert(box.Size.Type == LCss::LenPx);
+		auto Px = box.Size.ToPx(IsVertical() ? Y() : X(), Fnt);
 
 		LOG("    Px[%i]=%i box=%s\n", i, Px, box.toString().Get());
 

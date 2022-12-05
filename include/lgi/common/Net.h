@@ -454,10 +454,10 @@ public:
 			addr.sin_addr.s_addr = INADDR_ANY;
 		#endif
 
+		Context = "LUdpListener.bind";
 		Status = bind(Handle(), (struct sockaddr*)&addr, sizeof(addr)) == 0;
 		if (!Status)
 		{
-			Context = "bind";
 			#ifdef WIN32
 			int err = WSAGetLastError();
 			#else
@@ -470,12 +470,9 @@ public:
 
 		if (mc_ip)
 		{
-			#if 0
-			AddMulticastMember(mc_ip, INADDR_ANY);
-			#else
+			Context = "LUdpListener.AddMulticastMember";
 			for (auto ip: interface_ips)
 				AddMulticastMember(mc_ip, ip);
-			#endif
 		}
 	}
 
@@ -496,7 +493,10 @@ public:
 	void OnError(int ErrorCode, const char *ErrorDescription)
 	{
 		LString s;
-		s.Printf("Error: %s - %i, %s\n", Context.Get(), ErrorCode, ErrorDescription);
+		if (Context)
+			s.Printf("Error: %s - %i, %s\n", Context.Get(), ErrorCode, ErrorDescription);
+		else
+			s.Printf("Error: %i, %s\n", ErrorCode, ErrorDescription);
 		if (Log)
 			Log->Print("%s", s.Get());
 		else

@@ -933,6 +933,11 @@ public:
 	{
 		switch (Cmd)
 		{
+			case IDM_PATCH_VIEWER:
+			{
+				OpenPatchViewer(this, &Opts);
+				break;
+			}
 			case IDM_OPEN_LOCAL:
 			{
 				OpenLocalFolder();
