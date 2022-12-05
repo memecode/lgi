@@ -1598,7 +1598,7 @@ int LgiMain(OsAppArguments &AppArgs)
 	LApp a(AppArgs, AppName);
 	if (a.IsOk())
 	{
-		LStructuredLog::UnitTest();
+		// LStructuredLog::UnitTest();
 
 		a.AppWnd = new App;
 		a.Run();

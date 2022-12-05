@@ -21,6 +21,8 @@ enum Ctrls
 	IDC_BROWSE_PATCH,
 	IDC_BASE_DIR,
 	IDC_BROWSE_BASE,
+	IDC_APPLY,
+	IDC_SAVE_PATCH,
 };
 
 template<typename T>
@@ -137,7 +139,7 @@ public:
 
 		AddView(box1 = new LBox(IDC_BOX1, true));			
 		box1->AddView(tbl = new LTableLayout(IDC_TBL));
-		tbl->GetCss(true)->Height("4em");
+		tbl->GetCss(true)->Height("6em");
 			
 		int y = 0;
 		auto c = tbl->GetCell(0, y);
@@ -159,8 +161,16 @@ public:
 			c->PaddingLeft("0.5em");
 		c = tbl->GetCell(1, y);
 			c->Add(new LEdit(IDC_BASE_DIR, 0, 0, 60, 20));
-		c = tbl->GetCell(2, y);
+		c = tbl->GetCell(2, y++);
 			c->Add(new LButton(IDC_BROWSE_BASE, 0, 0, -1, -1, "..."));
+			c->PaddingRight("0.5em");
+
+		c = tbl->GetCell(0, y);
+		c = tbl->GetCell(1, y);
+			c->Add(new LButton(IDC_SAVE_PATCH, 0, 0, -1, -1, "Save Patch"));
+			c->TextAlign(LCss::AlignRight);
+		c = tbl->GetCell(2, y);
+			c->Add(new LButton(IDC_APPLY, 0, 0, -1, -1, "Apply"));
 			c->PaddingRight("0.5em");
 
 		box1->AddView(box2 = new LBox(IDC_BOX2));
@@ -192,6 +202,225 @@ public:
 		return true;
 	}
 
+	template<typename T>
+	LArray<T*> GetLines(T *txt)
+	{
+		LArray<T*> lines;
+		lines.Add(txt);
+		for (auto t = txt; *t; t++)
+		{
+			if (*t == '\n' && *t)
+				lines.Add(t + 1);
+		}
+		return lines;
+	}
+
+	struct FilePatch
+	{
+		LString File;
+		LArray<LRange> Hunks;
+	};
+
+	bool Apply()
+	{
+		auto patch = out->NameW();
+		auto lines = GetLines(out->NameW());
+		LArray<FilePatch> Patches;
+
+		auto error = [](const char *msg) -> bool
+		{
+			LgiTrace("Apply error: %s\n", msg);
+			return false;
+		};
+
+		auto scanLines = [&lines](const char16 *key, size_t from) -> ssize_t
+		{
+			auto len = Strlen(key);
+			for (size_t i = from; i<lines.Length(); i++)
+			{
+				auto ln = lines[i];
+				if (!Strnicmp(ln, key, len))
+					return i;
+			}
+			return -1;
+		};
+
+		auto lineAt = [&lines](size_t idx) -> LString
+		{
+			auto ptr = lines[idx];
+			LString s(ptr, lineLen(ptr));
+			return s;
+		};
+
+		ssize_t aFile = -1, bFile = -1;
+		for (size_t i=0; i<lines.Length(); i++)
+		{
+			auto ln = lines[i];
+			if (!Strnicmp(ln, L"--- ", 4))
+				aFile = i;
+			else if (!Strnicmp(ln, L"+++ ", 4))
+				bFile = i;
+
+			if (aFile > 0 &&
+				bFile > 0 &&
+				aFile == bFile - 1)
+			{
+				FilePatch &fp = Patches.New();
+				auto s = lineAt(aFile);
+				fp.File = s(6,-1);
+				LgiTrace("File: %s\n", fp.File.Get());
+
+				// Collect blobs
+				LRange *cur = NULL;
+				size_t n = bFile + 1;
+				for (; n < lines.Length(); n++)
+				{
+					auto ln = lines[n];
+					if (*ln == ' ')
+						continue;
+
+					bool start = ln[0] == '@' && ln[1] == '@';
+					bool end = (ln[0] == '-' && ln[1] == '-');
+					bool finish = Strnicmp(ln, L"diff ", 5) == 0;
+					
+					if ((start || end || finish) && cur)
+					{
+						cur->Len = n - cur->Start;
+						cur = NULL;
+					}
+					if (start && !cur)
+					{
+						cur = &fp.Hunks.New();
+						cur->Start = n;
+					}
+					if (finish)
+						break;
+				}
+
+				for (auto &b: fp.Hunks)
+					LgiTrace("    Blob: %i:%i\n", (int)b.Start, (int)b.Len);
+				i = n;
+				aFile = bFile = -1;
+			}
+		}
+
+		// Iterate all the patches and apply them...
+		for (auto &fp: Patches)
+		{
+			LFile::Path path(GetCtrlName(IDC_BASE_DIR), fp.File);
+			if (!path.Exists())
+			{
+				LgiTrace("%s:%i - File to patch '%s' doesn't exist.\n", _FL, path.GetFull().Get());
+				return false;
+			}
+
+			LFile f(path, O_READ);
+			auto utf = f.Read();
+			size_t crlf = 0, lf = 0;
+			for (const char *s = utf; *s; s++)
+			{
+				if (s[0] == '\r' && s[1] == '\n') { crlf++; s++; }
+				else if (s[0] == '\n') { lf++; }
+			}
+			auto eol = crlf > lf ? L"\r\n" : L"\n";
+			auto eolLen = Strlen(eol);
+			LAutoWString wide(Utf8ToWide(utf));
+			LArray<LAutoWString> docLines;
+			for (char16 *w = wide; *w; )
+			{
+				for (auto e = w; true; e++)
+				{
+					if (!Strncmp(e, eol, eolLen))
+					{
+						docLines.New().Reset(NewStrW(w, e - w));
+						w = e + eolLen;
+						break;
+					}
+
+					if (!*e)
+					{
+						docLines.New().Reset(NewStrW(w, e - w));
+						w = e;
+						break;
+					}
+				}
+			}
+			
+			/*
+			for (size_t i=0; i<docLines.Length(); i++)
+			{
+				auto &ln = docLines[i];
+				auto len = lineLen(ln.Get());
+				LgiTrace("[%i]=%i: %.*S\n", (int)i, (int)len, (int)len, ln.Get());
+			}
+			*/
+
+			for (auto &hunk: fp.Hunks)
+			{
+				auto hdr = lines[hunk.Start];
+				if (Strnicmp(hdr, L"@@ ", 3))
+					return error("hunk header missing start '@@'");
+				hdr += 3;
+				auto e = Strstr(hdr, L" @@");
+				if (!e)
+					return error("hunk header missing end '@@'");
+				auto parts = LString(hdr, e - hdr).Strip().SplitDelimit();
+				if (parts.Length() != 2)
+					return error("hunk header has wrong part count.");
+				auto before = parts[0].SplitDelimit(",");
+				auto after = parts[1].SplitDelimit(",");
+				auto beforeLine = -before[0].Int();
+				if (beforeLine < 1)
+					return error("hunk: expecting negative beforeLine.");
+				auto beforeLines = before[1].Int();
+
+				auto afterLine = after[0].Int();
+				auto afterLines = after[1].Int();
+
+				auto inputLine = 1;
+				auto inputTxt = lines[hunk.Start + inputLine];
+				auto docLine = afterLine - 1/*1 based indexing to 0 based*/;
+				while (inputLine < hunk.Len)
+				{
+					// Check the inputTxt matches the input document
+					if (docLine > (ssize_t)docLines.Length())
+						return error("docLine out of range.");
+					auto docTxt = docLines[docLine].Get();
+					auto docTxtLen = lineLen(docTxt);
+					auto inputLineLen = lineLen(inputTxt);
+
+					if (*inputTxt == '+')
+					{
+						// Process insert: add 'inputLine' at docLine
+						LAutoWString insert(NewStrW(inputTxt + 1, inputLineLen - 1));
+						docLines.AddAt(docLine, insert);
+					}
+					else
+					{
+						// Check content...
+						if (docTxtLen != inputLineLen - 1)
+							return error("doc and input line lengths don't match.");
+
+						auto cmp = Strncmp(docTxt, inputTxt + 1/*prefix char*/, docTxtLen);
+						if (cmp)
+							return error("doc and input line content don't match.");
+
+						if (*inputTxt == '-')
+						{
+							// Process delete...
+							docLines.DeleteAt(docLine--, true);
+						}
+					}
+
+					docLine++;
+					inputTxt = lines[hunk.Start + ++inputLine];
+				}
+			}
+		}
+
+		return true;
+	}
+
 	int OnNotify(LViewI *Ctrl, LNotification n)
 	{
 		switch (Ctrl->GetId())
@@ -216,6 +445,12 @@ public:
 				}
 				break;
 			}
+			case IDC_SAVE_PATCH:
+			{
+				auto patchFile = GetCtrlName(IDC_PATCH_FILE);
+				out->Save(patchFile);
+				break;
+			}
 			case IDC_OUT:
 			{
 				if (n.Type != LNotifyCursorChanged)
@@ -224,30 +459,30 @@ public:
 				auto car = out->GetCaret();
 				LgiTrace("CursorChanged: %i\n", (int)car);
 				auto txt = out->NameW();
-				ssize_t carLine = -1;
-				LArray<const char16*> lines;
+				ssize_t caratLine = -1;
+				LArray<const char16 *> lines;
 				lines.Add(txt);
 				for (auto t = txt; *t; t++)
 				{
-					if (carLine < 0 && (t - txt) >= car)
-						carLine = lines.Length() - 1;
+					if (caratLine < 0 && (t - txt) >= car)
+						caratLine = lines.Length() - 1;
 					if (*t == '\n' && *t)
 						lines.Add(t + 1);
 				}
 					
-				if (carLine < 0)
+				if (caratLine < 0)
 				{
 					LgiTrace("%s:%i - No line num for carat pos.\n", _FL);
 					break;
 				}
-				if (carLine >= (ssize_t)lines.Length())
+				if (caratLine >= (ssize_t)lines.Length())
 				{
 					LgiTrace("%s:%i - carat line greater than lines.len.\n", _FL);
 					break;
 				}
 
 				LRange blob(-1, 0);
-				for (ssize_t s = carLine; s >= 0; s--)
+				for (ssize_t s = caratLine; s >= 0; s--)
 				{
 					auto ln = lines[s];
 					if (ln[0] == '@' && ln[1] == '@')
@@ -256,7 +491,7 @@ public:
 						break;
 					}
 				}
-				for (ssize_t e = carLine; e < (ssize_t)lines.Length(); e++)
+				for (ssize_t e = caratLine; e < (ssize_t)lines.Length(); e++)
 				{
 					auto ln = lines[e];
 					if ( (ln[0] == '@' && ln[1] == '@') ||
@@ -328,7 +563,7 @@ public:
 					while (*patchLn == '+')
 						patchLn = lines[blobIdx++];
 
-					if (*patchLn == '-')
+					if (*patchLn != '+')
 					{
 						auto inTxt = in->TextAtLine(i);
 						auto inLen = lineLen(inTxt);
@@ -338,13 +573,19 @@ public:
 						}
 						else
 						{
-							in->Fore[i] = LColour::Green;
+							if (*patchLn == '-')
+								in->Fore[i] = LColour::Green;
 						}
 					}							
 				}
 
 				in->Update();
 				in->SetLine((int)beforeLn);
+				break;
+			}
+			case IDC_APPLY:
+			{
+				Apply();
 				break;
 			}
 		}
