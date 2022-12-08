@@ -49,6 +49,7 @@ add_executable(Lvc ${APP_TYPE}
     Src/VcCommit.cpp
     Src/VcFile.cpp
     Src/VcFolder.cpp
+    Src/PatchViewer.cpp
 	${APP_ICON}
     ${APP_RESOURCES}
 	${APP_MANIFEST}
