@@ -25,7 +25,7 @@ const char LSpellCheck::Delimiters[] =
 	0
 };
 
-HINSTANCE _lgi_app_instance = 0;
+HINSTANCE _lgi_app_instance = NULL;
 extern LPTOP_LEVEL_EXCEPTION_FILTER _PrevExceptionHandler;
 
 OsAppArguments::OsAppArguments()

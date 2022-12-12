@@ -359,6 +359,49 @@ endif ()
 
 add_library(lgi SHARED ${Source})
 
+add_library(lgi-stub STATIC
+    src/common/Gdc2/Font/Charset.cpp
+    src/common/General/Containers.cpp
+    src/common/General/DateTime.cpp
+    src/common/General/FileCommon.cpp
+    src/common/Lgi/Library.cpp
+    src/common/Lgi/LgiCommon.cpp
+    src/common/Lgi/Mutex.cpp
+    src/common/Lgi/Stream.cpp
+    src/common/Lgi/ThreadCommon.cpp
+    src/common/Lgi/Variant.cpp
+    src/common/Lgi/LMsg.cpp
+    src/common/Lgi/Rand.cpp
+    src/common/Text/String.cpp
+    src/common/Text/Token.cpp
+    src/common/Text/Unicode.cpp)
+
+target_compile_definitions(lgi-stub
+	PRIVATE
+		LGI_LIBRARY
+		LGI_STATIC)
+
+target_include_directories(lgi-stub
+	PUBLIC
+		include)
+
+if (WIN32)
+	target_sources(lgi-stub
+		PRIVATE
+		    src/win/General/File.cpp
+			src/win/General/Mem.cpp
+			src/win/Lgi/General.cpp
+			src/win/Lgi/Thread.cpp)
+	target_include_directories(lgi-stub
+		PUBLIC
+			include/lgi/win)
+	target_compile_definitions(lgi-stub
+		PUBLIC
+			WINDOWS
+			_UNICODE
+			UNICODE)
+endif()
+
 if (DEFINED LGI_LIB_POSTFIX)
 	set_target_properties(lgi
 		PROPERTIES 
@@ -462,7 +505,7 @@ elseif (MSVC)
 	target_compile_definitions(lgi
 		PUBLIC
 			WINDOWS
-			WIN32
+			WIN64
 			_WINDLL
 			_UNICODE
 			UNICODE
@@ -518,6 +561,7 @@ add_subdirectory(HtmlTest)
 add_subdirectory(ScriptingUnitTests)
 add_subdirectory(SlogViewer)
 add_subdirectory(Updater)
+add_subdirectory(src/common/Net/libntlm-0.4.2)
 if(WIN32)
 	add_subdirectory(VsLaunch)
 endif()
