@@ -8,7 +8,6 @@ add_library(ntlm SHARED
 	lib/malloc.c
 	lib/md4.c
 	lib/random.c
-	lib/strdup.c
 	lib/strverscmp.c
 	smbencrypt.c
 	smbutil.c
@@ -47,4 +46,10 @@ if (WIN32)
 		PUBLIC
 			WINDOWS)
 
+else()
+
+	target_sources(ntlm
+		PRIVATE
+			lib/strdup.c)
+			
 endif()

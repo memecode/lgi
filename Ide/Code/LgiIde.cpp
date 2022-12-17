@@ -1916,42 +1916,42 @@ public:
 		LString Args;
 		LStringPipe p;
 
+		/*
 		if (IsLib)
 			Args.Printf("/symbols \"%s\"", InFile.Get());
 		else
-			Args.Printf("/exports \"%s\"", InFile.Get());
+		*/
+		Args.Printf("/exports \"%s\"", InFile.Get());
 		DumpBin(Args, &p);
 	
 		LString Exp;
 
-		auto Sect = p.NewGStr().Replace("\r", "").Split("\n\n");
+		auto Raw = p.NewGStr().Replace("\r", "");
+		auto Sect = Raw.Split("\n\n");
+
+		#if 0
+
+		// Debug output
+		Exp = Raw;
+
+		#else
 
 		if (IsLib)
 		{
-			LString::Array Lines, Funcs;
 			for (auto &s : Sect)
 			{
-				if (s.Find("COFF", 0, 100) == 0)
-				{
-					Lines = s.Split("\n");
-					break;
-				}
-			}
+				if (s.Find("COFF/PE Dumper") >= 0)
+					continue;
+				auto ln = s.Split("\n");
+				if (ln.Length() == 1)
+					continue;
+				
+				for (auto &l: ln)
+					l = l.LStrip();
 
-			Funcs.SetFixedLength(false);
-			for (auto &l : Lines)
-			{
-				if (l.Length() < 34) continue;
-				const char *Type = l.Get() + 33;
-				if (!Strnicmp(Type, "External", 8))
-				{
-					auto Nm = l.RSplit("|",1).Last().Strip();
-					if (!strchr("@$.?", Nm(0)))
-						Funcs.New() = Nm;
-				}
+				Exp = LString("\n").Join(ln);
+				break;
 			}
-
-			Exp = LString("\n").Join(Funcs);
 		}
 		else
 		{
@@ -1968,6 +1968,8 @@ public:
 				else Ord = false;
 			}
 		}
+
+		#endif
 
 		return Exp;
 	}
