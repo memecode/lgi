@@ -20,9 +20,9 @@
 		3457FE522081CC4800014BE4 /* Lvc.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 3457FE512081CC4800014BE4 /* Lvc.lr8 */; };
 		347D1484252D450500422DA9 /* libssh.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 347D147E252D44EE00422DA9 /* libssh.dylib */; };
 		347D1489252D453300422DA9 /* DeEscape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 347D1488252D453300422DA9 /* DeEscape.cpp */; };
-		3485E7F2294F13A10020C14D /* libpng16.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3485E7E1294F13990020C14D /* libpng16.dylib */; };
 		3485E7F3294F13A10020C14D /* libpng16.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3485E7E1294F13990020C14D /* libpng16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		3485E7F5294F13F70020C14D /* PatchViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3485E7F4294F13F70020C14D /* PatchViewer.cpp */; };
+		3485E7F7294F16AD0020C14D /* libz_local.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34CE072A2327B3F900807DCB /* libz_local.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34BD35B120C5484A0001838A /* ControlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B020C5484A0001838A /* ControlTree.cpp */; };
 		34BD35B320C548710001838A /* XmlTreeUi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B220C548710001838A /* XmlTreeUi.cpp */; };
 		34C032B32319CDE900470DF2 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C032B22319CDE900470DF2 /* Cocoa.framework */; };
@@ -185,6 +185,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				3485E7F7294F16AD0020C14D /* libz_local.dylib in CopyFiles */,
 				34F591A328CDE742000CABAB /* libssh.dylib in CopyFiles */,
 				3485E7F3294F13A10020C14D /* libpng16.dylib in CopyFiles */,
 				34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */,
@@ -235,7 +236,6 @@
 				347D1484252D450500422DA9 /* libssh.dylib in Frameworks */,
 				34C032BB2319CE8C00470DF2 /* LgiCocoa.framework in Frameworks */,
 				34C032B32319CDE900470DF2 /* Cocoa.framework in Frameworks */,
-				3485E7F2294F13A10020C14D /* libpng16.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -265,20 +265,17 @@
 		20286C2AFDCF999611CA2CEA /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				3485E7F4294F13F70020C14D /* PatchViewer.cpp */,
-				3449AB3D28B96C7800F8AAD4 /* Ssh */,
-				3457FE3E2081CB3D00014BE4 /* BlameUi.cpp */,
-				3457FE3F2081CB3D00014BE4 /* DropDownBtn.cpp */,
-				3457FE402081CB3D00014BE4 /* Lvc.h */,
 				3457FE412081CB3D00014BE4 /* Main.cpp */,
-				3457FE422081CB3D00014BE4 /* resdefs.h */,
 				3457FE432081CB3D00014BE4 /* VcCommit.cpp */,
-				3457FE442081CB3D00014BE4 /* VcCommit.h */,
 				3457FE452081CB3D00014BE4 /* VcFile.cpp */,
-				3457FE462081CB3D00014BE4 /* VcFile.h */,
 				3457FE472081CB3D00014BE4 /* VcFolder.cpp */,
+				3457FE402081CB3D00014BE4 /* Lvc.h */,
+				3457FE442081CB3D00014BE4 /* VcCommit.h */,
+				3457FE462081CB3D00014BE4 /* VcFile.h */,
 				3457FE482081CB3D00014BE4 /* VcFolder.h */,
 				342D52A30F0CBA07002A1C7C /* Lgi */,
+				3449AB3D28B96C7800F8AAD4 /* Ssh */,
+				3485E7F6294F15EE0020C14D /* UI */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -286,6 +283,7 @@
 		20286C2CFDCF999611CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				3457FE422081CB3D00014BE4 /* resdefs.h */,
 				34E1910B20B1898E00005243 /* image-list.png */,
 				3448F8C52081D2500038AE76 /* mac-icon.icns */,
 				3457FE512081CC4800014BE4 /* Lvc.lr8 */,
@@ -351,6 +349,16 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		3485E7F6294F15EE0020C14D /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				3457FE3E2081CB3D00014BE4 /* BlameUi.cpp */,
+				3485E7F4294F13F70020C14D /* PatchViewer.cpp */,
+				3457FE3F2081CB3D00014BE4 /* DropDownBtn.cpp */,
+			);
+			name = UI;
 			sourceTree = "<group>";
 		};
 		34C032B52319CDFE00470DF2 /* Products */ = {
@@ -680,6 +688,10 @@
 					"$(inherited)",
 					/opt/local/lib,
 				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-Wno-nullability-completeness",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.Lvc;
 				PRODUCT_NAME = Lvc;
 				WRAPPER_EXTENSION = app;
@@ -709,6 +721,10 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/opt/local/lib,
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-Wno-nullability-completeness",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.Lvc;
 				PRODUCT_NAME = Lvc;

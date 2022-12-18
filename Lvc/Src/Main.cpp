@@ -1247,14 +1247,14 @@ public:
 						}
 						break;
 					}
-					case LvcCommandStart:
+					case (LNotifyType)LvcCommandStart:
 					{
 						SetCtrlEnabled(IDC_PUSH, false);
 						SetCtrlEnabled(IDC_PULL, false);
 						SetCtrlEnabled(IDC_PULL_ALL, false);
 						break;
 					}
-					case LvcCommandEnd:
+					case (LNotifyType)LvcCommandEnd:
 					{
 						SetCtrlEnabled(IDC_PUSH, true);
 						SetCtrlEnabled(IDC_PULL, true);

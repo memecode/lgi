@@ -701,7 +701,7 @@ void VcFolder::FilterCurrentFiles()
 		bool vis = !d->FileFilter || Stristr(fn, d->FileFilter.Get());
 		i->GetCss(true)->Display(vis ? LCss::DispBlock : LCss::DispNone);
 
-		LgiTrace("Filter '%s' by '%s' = %i\n", fn, d->FileFilter.Get(), vis);
+		// LgiTrace("Filter '%s' by '%s' = %i\n", fn, d->FileFilter.Get(), vis);
 	}
 
 	d->Files->Sort(0);

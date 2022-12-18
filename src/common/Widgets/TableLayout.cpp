@@ -1826,7 +1826,6 @@ void LTableLayoutPrivate::LayoutVertical(const LRect Client, int Depth, int *Min
 					int &Max = MaxRow[Cy];
 					CellFlag &Flags = RowFlags[Cy];
 					c->LayoutHeight(Depth, x, Min, Max, Flags);
-					int asd=0;
 				}
 
 				Cx += c->Cell.X();
@@ -2319,10 +2318,6 @@ void LTableLayout::OnPaint(LSurface *pDC)
 	d->Dpi = GetWindow()->GetDpi();
 	LCssTools Tools(this);
 	LRect Client = GetClient();
-	if (GetId() == 260)
-	{
-		int asd=0;
-	}
 
 	Client = Tools.PaintBorder(pDC, Client);
 	Tools.PaintContent(pDC, Client);

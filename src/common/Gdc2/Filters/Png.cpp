@@ -69,11 +69,7 @@ const char *LinuxLibName()
 #define LIBPNG Lib->
 const char *sLibrary =
 	#if defined(MAC)
-		#ifdef __GTK_H__
-		"libpng16.16"
-		#else
-		"libpng15.15.4.0"
-		#endif
+		"libpng16"
 	#elif defined(HAIKU)
 		"libpng16.so.16"
 	#elif defined(LINUX)

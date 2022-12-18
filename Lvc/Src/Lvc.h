@@ -36,7 +36,7 @@ enum LvcIcon
 
 enum LvcNotify
 {
-	 LvcBase = GNotifyUserApp,
+	 LvcBase = LNotifyUserApp,
 	 LvcCommandStart,
 	 LvcCommandEnd
 };

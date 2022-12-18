@@ -96,7 +96,7 @@ public:
 		for (size_t i=0; i<Line.Length(); i++)
 		{
 			auto l = Line[i];
-			auto s = Text + l->Start;
+			// auto s = Text + l->Start;
 
 			if (Fore.IdxCheck(i))
 			{
@@ -372,10 +372,10 @@ public:
 				auto beforeLine = -before[0].Int();
 				if (beforeLine < 1)
 					return error("hunk: expecting negative beforeLine.");
-				auto beforeLines = before[1].Int();
+				// auto beforeLines = before[1].Int();
 
 				auto afterLine = after[0].Int();
-				auto afterLines = after[1].Int();
+				// auto afterLines = after[1].Int();
 
 				auto inputLine = 1;
 				auto inputTxt = lines[hunk.Start + inputLine];

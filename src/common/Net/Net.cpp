@@ -1582,7 +1582,7 @@ uint32_t LHostnameToIp(const char *Host)
 	if (!Host)
 		return 0;
 		
-	struct addrinfo hints = {};
+	// struct addrinfo hints = {};
 	struct addrinfo *res = NULL;
 	auto result = getaddrinfo(Host, NULL, NULL, &res);
 	if (!res)
