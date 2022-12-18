@@ -39,12 +39,16 @@ VcFile::FileStatus VcFile::GetStatus()
 		else STATE("!", 1, SMissing);
 		else STATE("D", 1, SDeleted);
 		else STATE("R", 1, SDeleted); // "Removed"
+		else STATE("U", 1, SConflicted);
 		else STATE("Locally Modified", 1, SModified);
 		else
 		{
 			//LAssert(!"Impl state");
 			d->Log->Print("%s:%i - Unknown status '%s'\n", _FL, s);
 		}
+		
+		if (Status == SConflicted)
+			GetCss(true)->Color("orange");
 	}
 
 	return Status;
@@ -144,12 +148,23 @@ void VcFile::OnMouseClick(LMouse &m)
 				case SModified:
 				case SAdded:
 				case SDeleted:
+				{
 					s.AppendItem("Revert Changes", IDM_REVERT);
 					break;
+				}
 				case SConflicted:
-					s.AppendItem("Mark Resolved", IDM_RESOLVE);
+				{
+					auto menu = s.AppendSub("Resolve");
+					menu->AppendItem("Mark", IDM_RESOLVE_MARK);
+					menu->AppendItem("Unmark", IDM_RESOLVE_UNMARK);
+					menu->AppendSeparator();
+					menu->AppendItem("Local", IDM_RESOLVE_LOCAL);
+					menu->AppendItem("Incoming", IDM_RESOLVE_INCOMING);
+					menu->AppendItem("Tool", IDM_RESOLVE_TOOL);
 					break;
+				}
 				case SUntracked:
+				{
 					if (Owner->GetType() == VcCvs)
 					{
 						s.AppendItem("Add Text File", IDM_ADD_FILE);
@@ -160,6 +175,7 @@ void VcFile::OnMouseClick(LMouse &m)
 						s.AppendItem("Add File", IDM_ADD_FILE);
 					}
 					break;
+				}
 				default:
 					break;
 			}					
@@ -194,9 +210,29 @@ void VcFile::OnMouseClick(LMouse &m)
 				Owner->Revert(Uris);
 				break;
 			}
-			case IDM_RESOLVE:
+			case IDM_RESOLVE_MARK:
 			{
-				Owner->Resolve(Uris[0]);
+				Owner->Resolve(Uris[0], ResolveMark);
+				break;
+			}
+			case IDM_RESOLVE_UNMARK:
+			{
+				Owner->Resolve(Uris[0], ResolveUnmark);
+				break;
+			}
+			case IDM_RESOLVE_LOCAL:
+			{
+				Owner->Resolve(Uris[0], ResolveLocal);
+				break;
+			}
+			case IDM_RESOLVE_INCOMING:
+			{
+				Owner->Resolve(Uris[0], ResolveIncoming);
+				break;
+			}
+			case IDM_RESOLVE_TOOL:
+			{
+				Owner->Resolve(Uris[0], ResolveTool);
 				break;
 			}
 			case IDM_ADD_FILE:

@@ -777,6 +777,12 @@ void VcFolder::Select(bool b)
 					IsLogging = StartCmd(s, &VcFolder::ParseLog);
 					break;
 				}
+				case VcHg:
+				{
+					IsLogging = StartCmd("log", &VcFolder::ParseLog);
+					StartCmd("resolve -l", &VcFolder::ParseResolveList);
+					break;
+				}
 				case VcPending:
 				{
 					break;
@@ -3944,17 +3950,30 @@ bool VcFolder::Revert(LString::Array &Uris, const char *Revision)
 	return false;
 }
 
-bool VcFolder::ParseResolve(int Result, LString s, ParseParams *Params)
+bool VcFolder::ParseResolveList(int Result, LString s, ParseParams *Params)
 {
 	switch (GetType())
 	{
-		case VcGit:
+		case VcHg:
 		{
+			auto lines = s.Replace("\r").Split("\n");
+			for (auto &ln: lines)
+			{
+				auto p = ln.Split(" ", 1);
+				if (p.Length() == 2)
+				{
+					if (p[0].Equals("U"))
+					{
+						auto f = new VcFile(d, this, NULL, true);
+						f->SetText(p[0], COL_STATE);
+						f->SetText(p[1], COL_FILENAME);
+						f->GetStatus();
+						d->Files->Insert(f);
+					}
+				}
+			}
 			break;
 		}
-		case VcSvn:
-		case VcHg:
-		case VcCvs:
 		default:
 		{
 			LAssert(!"Impl me.");
@@ -3965,7 +3984,30 @@ bool VcFolder::ParseResolve(int Result, LString s, ParseParams *Params)
 	return true;
 }
 
-bool VcFolder::Resolve(const char *Path)
+bool VcFolder::ParseResolve(int Result, LString s, ParseParams *Params)
+{
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			break;
+		}
+		case VcHg:
+		{
+			d->Log->Print("Resolve: %s\n", s.Get());
+			break;
+		}
+		default:
+		{
+			LAssert(!"Impl me.");
+			break;
+		}
+	}
+
+	return true;
+}
+
+bool VcFolder::Resolve(const char *Path, LvcResolve Type)
 {
 	if (!Path)
 		return false;
@@ -3978,8 +4020,32 @@ bool VcFolder::Resolve(const char *Path)
 			a.Printf("add \"%s\"", Path);
 			return StartCmd(a, &VcFolder::ParseResolve, new ParseParams(Path));
 		}
-		case VcSvn:
 		case VcHg:
+		{
+			LString a;
+			auto local = GetFilePart(Path);
+			switch (Type)
+			{
+				case ResolveMark:
+					a.Printf("resolve -m \"%s\"", local.Get());
+					break;
+				case ResolveUnmark:
+					a.Printf("resolve -u \"%s\"", local.Get());
+					break;
+				case ResolveLocal:
+					a.Printf("resolve -t internal:local \"%s\"", local.Get());
+					break;
+				case ResolveIncoming:
+					a.Printf("resolve -t internal:other \"%s\"", local.Get());
+					break;
+				default:
+					break;
+			}
+			if (a)
+				return StartCmd(a, &VcFolder::ParseResolve, new ParseParams(Path));
+			break;
+		}
+		case VcSvn:
 		case VcCvs:
 		default:
 		{
