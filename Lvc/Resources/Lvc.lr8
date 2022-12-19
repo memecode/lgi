@@ -289,12 +289,13 @@
 			<String Ref="59" Cid="528" Define="IDM_OPEN_REMOTE" en="Open Remote" />
 			<String Ref="60" Cid="529" Define="IDM_MENU_529" />
 			<String Ref="83" Cid="530" Define="IDM_OPEN_DIFF" en="Open Diff File" />
-			<String Ref="8" Cid="505" Define="IDM_PATCH_VIEWER" en="View Patch File" />
+			<String Ref="8" Cid="505" Define="IDM_PATCH_VIEWER" en="Patch File" />
+			<String Ref="7" Cid="506" Define="IDM_MENU_506" />
+			<String Ref="17" Cid="530" Define="IDM_OPEN_DIFF" en="Diff File" />
 		</string-group>
 		<submenu Ref="4">
 			<menuitem Ref="58" Shortcut="CtrlCmd+O" />
 			<menuitem Ref="59" Shortcut="CtrlCmd+Shift+O" />
-			<menuitem Ref="83" />
 			<menuitem Sep="1" />
 			<menuitem Ref="46" Shortcut="F5" />
 			<menuitem Ref="19" />
@@ -313,7 +314,9 @@
 		</submenu>
 		<submenu Ref="41">
 			<menuitem Ref="49" />
+			<menuitem Sep="1" />
 			<menuitem Ref="8" />
+			<menuitem Ref="17" />
 		</submenu>
 		<submenu Ref="20">
 			<menuitem Ref="21" />

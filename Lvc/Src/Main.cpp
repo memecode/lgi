@@ -617,6 +617,11 @@ public:
 		return i ? NULL : File;
 	}
 	
+	LString StripFirst(LString s)
+	{
+		return s.Replace("\\","/").SplitDelimit("/", 1).Last();
+	}
+
 	void Select(bool s) override
 	{
 		LTreeItem::Select(s);
@@ -631,34 +636,75 @@ public:
 				return;
 			
 			LString::Array a = s.Replace("\r").Split("\n");
-			LString Diff;
+			LArray<LString> index;
+			LString Diff, oldName, newName;
 			VcFile *f = NULL;
 			bool InPreamble = false;
 			bool InDiff = false;
 			for (unsigned i=0; i<a.Length(); i++)
 			{
 				const char *Ln = a[i];
-				if (!_strnicmp(Ln, "Index:", 6))
+				if (!Strnicmp(Ln, "diff ", 5))
 				{
 					if (f)
 					{
 						f->SetDiff(Diff);
 						f->Select(false);
 					}
+
 					Diff.Empty();
+					oldName.Empty();
+					newName.Empty();
 					InDiff = false;
-					InPreamble = false;
+					InPreamble = true;
+				}
+				else if (!Strnicmp(Ln, "Index", 5))
+				{
+					if (InPreamble)
+						index = a[i].SplitDelimit(": ", 1).Slice(1);
+				}
+				else if (!strncmp(Ln, "--- ", 4))
+				{
+					auto p = a[i].SplitDelimit(" \t", 1);
+					if (p.Length() > 1)
+						oldName = p[1];
+				}
+				else if (!strncmp(Ln, "+++ ", 4))
+				{
+					auto p = a[i].SplitDelimit(" \t", 1);
+					if (p.Length() > 1)
+						newName = p[1];
 
-					LString Fn = a[i].Split(":", 1).Last().Strip();
+					if (oldName && newName)
+					{
+						InDiff = true;
+						InPreamble = false;
 
-					f = d->FindFile(Fn);
-					if (!f)
-						f = new VcFile(d, NULL, NULL, false);
+						f = d->FindFile(newName);
+						if (!f)
+							f = new VcFile(d, NULL, NULL, false);
 
-					f->SetText(Fn.Replace("\\","/"), COL_FILENAME);
-					f->SetText("M", COL_STATE);
-					f->GetStatus();
-					d->Files->Insert(f);
+						const char *nullFn = "dev/null";
+						if (newName.Find(nullFn) >= 0)
+						{
+							// Delete
+							f->SetText(StripFirst(oldName), COL_FILENAME);
+							f->SetText("D", COL_STATE);
+						}
+						else
+						{
+							f->SetText(StripFirst(newName), COL_FILENAME);
+							if (oldName.Find(nullFn) >= 0)
+								// Add
+								f->SetText("A", COL_STATE);
+							else
+								// Modify
+								f->SetText("M", COL_STATE);
+						}
+
+						f->GetStatus();
+						d->Files->Insert(f);
+					}
 				}
 				else if (!_strnicmp(Ln, "------", 6))
 				{
@@ -671,15 +717,8 @@ public:
 				}
 				else if (InDiff)
 				{
-					if (!strncmp(Ln, "--- ", 4) ||
-						!strncmp(Ln, "+++ ", 4))
-					{
-					}
-					else
-					{
-						if (Diff) Diff += "\n";
-						Diff += a[i];
-					}
+					if (Diff) Diff += "\n";
+					Diff += a[i];
 				}
 			}
 			if (f && Diff)
