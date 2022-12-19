@@ -21,7 +21,6 @@ ifeq ($(Build),Debug)
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
-		-L../../../../codelib/libssh/build/src \
 		-lssh \
 		-lmagic \
 		-static-libgcc  \
@@ -40,7 +39,6 @@ else
 	Flags += -s -Os -std=c++14
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
-		-L../../../../codelib/libssh/build/src \
 		-lssh \
 		-lmagic \
 		-static-libgcc  \
@@ -62,6 +60,7 @@ Source =	Src/VcFolder.cpp \
 			Src/VcFile.cpp \
 			Src/VcCommit.cpp \
 			Src/SshConnection.cpp \
+			Src/PatchViewer.cpp \
 			Src/Main.cpp \
 			Src/DropDownBtn.cpp \
 			Src/BlameUi.cpp \
@@ -151,6 +150,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/List.h \
 	../include/lgi/common/ListItemCheckBox.h \
 	../include/lgi/common/ListItemRadioBtn.h \
+	../include/lgi/common/LMallocArray.h \
 	../include/lgi/common/Mail.h \
 	../include/lgi/common/Matrix.h \
 	../include/lgi/common/Mem.h \
@@ -380,7 +380,6 @@ cleanall :
 	+make -C "../" -f "Makefile.linux" clean
 
 VPATH=%.cpp \
-	../../../../codelib/libssh/include \
 	./Src \
 	./Resources \
 	../include/lgi/linux/Gtk \
