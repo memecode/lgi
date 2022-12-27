@@ -54,7 +54,7 @@ class SvRecordset : public LDbRecordset
 	
 	SvDb *Parent;
 
-	LAutoString FileName;
+	LString FileName;
 	LArray<SvField*> F;
 	LArray<SvRecord*> R;
 	unsigned Cur;
@@ -75,7 +75,7 @@ public:
 	char *Name();
 	LDbField &operator [](unsigned Index);
 	LDbField &operator [](const char *Name);
-	LDbField *InsertField(const char *Name, int Type, int Len, int Index);
+	LDbField *InsertField(const char *Name, LVariantType Type, int Len, int Index);
 	bool DeleteField(LDbField *Fld);
 	int Fields();
 	bool End();
@@ -292,33 +292,34 @@ public:
 class SvField : public LDbField
 {
 	int Index;
-	LAutoString FldName;
+	LString FldName;
 	SvRecordset *Rs;
 
 public:
-	SvField(SvRecordset *rs, int i, LAutoString n)
+	SvField(SvRecordset *rs, int i, LString n)
 	{
 		Index = i;
 		Rs = rs;
 		FldName = n;
 	}
 
-	char *Name()
+	const char *Name()
 	{
 		return FldName;
 	}
 
-	bool Name(char *Str)
+	bool Name(const char *Str)
 	{
-		return FldName.Reset(NewStr(Str));
+		FldName = Str;
+		return FldName != NULL;
 	}
 
-	int Type()
+	LVariantType Type()
 	{
 		return GV_STRING;
 	}
 
-	bool Type(int NewType)
+	bool Type(LVariantType NewType)
 	{
 		return false;
 	}
@@ -333,12 +334,12 @@ public:
 		return false;
 	}
 
-	char *Description()
+	const char *Description()
 	{
-		return 0;
+		return NULL;
 	}
 
-	bool Description(char *NewDesc)
+	bool Description(const char *NewDesc)
 	{
 		return false;
 	}
@@ -346,15 +347,17 @@ public:
 	bool Set(LVariant &v)
 	{
 		SvRecord *r = Rs->Record();
-		if (r && v.Str())
+		if (!r)
+			return false;
+
+		auto s = v.CastString();
+
+		if (Index < r->Fields ||
+			r->SetFields(Index + 1))
 		{
-			if (Index < r->Fields ||
-				r->SetFields(Index + 1))
-			{
-				r->EmptyField(Index);
-				r->Data[Index] = NewStr(v.Str());
-				return true;
-			}
+			r->EmptyField(Index);
+			r->Data[Index] = NewStr(s);
+			return true;
 		}
 
 		return false;
@@ -413,7 +416,7 @@ SvRecordset::SvRecordset(SvDb *parent, const char *file, bool Headers)
 	Temp = 0;
 	New = 0;
 	Dirty = false;
-	FileName.Reset(NewStr(file));
+	FileName = file;
 	Read();
 }
 
@@ -461,10 +464,10 @@ void SvRecordset::Read()
 					// Headers...
 					for (int i=0; i<r->Fields; i++)
 					{
-						char *Name = r->Data[i];
-						LAutoString Field(TrimStr(Name, " \r\t\n\""));
+						auto Name = r->Data[i];
+						LString Field = Name;
 						if (Field)
-							F.Add(new SvField(this, i, Field));
+							F.Add(new SvField(this, i, Field.Strip()));
 					}
 					
 					DeleteObj(r);
@@ -475,8 +478,7 @@ void SvRecordset::Read()
 					{
 						char Name[32];
 						sprintf_s(Name, sizeof(Name), "Field%i", n);
-						LAutoString a(NewStr(Name));
-						F.Add(new SvField(this, n, a));
+						F.Add(new SvField(this, n, Name));
 					}
 					
 					R.Add(r);
@@ -503,7 +505,7 @@ void SvRecordset::Write()
 		for (unsigned Idx = 0; Idx < F.Length(); Idx++)
 		{
 			SvField *Fld = F[Idx];
-			char *Name = Fld->Name();
+			auto Name = Fld->Name();
 			f.Write(s, sprintf_s(s, sizeof(s), "%s\"%s\"", Idx ? "," : "", Name));
 		}
 		f.Write((void*)EOL_SEQUENCE, NewLine);
@@ -582,19 +584,15 @@ LDbField &SvRecordset::operator [](const char *Name)
 	return Null;
 }
 
-LDbField *SvRecordset::InsertField(const char *Name, int Type, int Length, int Index)
+LDbField *SvRecordset::InsertField(const char *Name, LVariantType Type, int Length, int Index)
 {
 	if (Index < 0)
-	{
 		Index = (int)F.Length();
-	}
 
-    LAutoString n(NewStr(Name));
-	SvField *f = new SvField(this, Index, n);
+	SvField *f = new SvField(this, Index, Name);
 	if (f)
-	{
 		F.AddAt(Index, f);
-	}
+
 	return f;
 }
 

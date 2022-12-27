@@ -26,14 +26,14 @@ public:
 	virtual LDbField &operator =(char*) { LAssert(0); return *this; }
 
 	// Properties
-	virtual char *Name() { return 0; }
-	virtual bool Name(char *Str) { return 0; }
-	virtual int Type() { return 0; }
-	virtual bool Type(int NewType) { return 0; }
+	virtual const char *Name() { return 0; }
+	virtual bool Name(const char *Str) { return 0; }
+	virtual LVariantType Type() { return GV_NULL; }
+	virtual bool Type(LVariantType NewType) { return 0; }
 	virtual int Length() { return 0; }
 	virtual bool Length(int NewLength) { return 0; }
-	virtual char *Description() { return 0; }
-	virtual bool Description(char *NewDesc) { return 0; }
+	virtual const char *Description() { return 0; }
+	virtual bool Description(const char *NewDesc) { return 0; }
 
 	// Set/Get
 	virtual bool Set(LVariant &v) { return 0; }
@@ -50,9 +50,9 @@ public:
 
 	// Fields
 	virtual LDbField &operator [](unsigned Index) = 0;
-	virtual LDbField &operator [](const char *Name) = 0;
+	virtual LDbField &	operator [](const char *Name) = 0;
 	virtual LDbField *InsertField(	const char *Name,
-									int Type,
+									LVariantType Type = GV_STRING,
 									int Length = 0,
 									int Index = -1) = 0; // default: append to the end
 	virtual bool DeleteField(LDbField *Fld) = 0;
@@ -99,18 +99,18 @@ public:
 };
 
 // Actual implementations
-extern LDb *OpenDbfDatabase(const char *s);		// add 'LDb-Dbf.cpp' to your project
-extern LDb *OpenAdoDatabase(const char *s);		// add 'LDb-Ado.cpp' to your project
-extern LDb *OpenCsvDatabase(const char *s, bool HasHeader = true);		// add 'LDb-Csv.cpp' to your project
-extern LDb *OpenTsvDatabase(const char *s, bool HasHeader = true);		// add 'LDb-Csv.cpp' to your project
-extern LDb *OpenMetakitDatabase(const char *s);	// add 'LDb-Metakit.cpp' to your project
-extern LDb *OpenBfsDatabase(const char *s);		// add 'LDb-Bfs.cpp' and 'Bfs.cpp' to your project
+extern LDb *OpenDbfDatabase(const char *s);			// add 'Db-Dbf.cpp' to your project
+extern LDb *OpenAdoDatabase(const char *s);			// add 'Db-Ado.cpp' to your project
+extern LDb *OpenCsvDatabase(const char *s, bool HasHeader = true);		// add 'Db-Csv.cpp' to your project
+extern LDb *OpenTsvDatabase(const char *s, bool HasHeader = true);		// add 'Db-Csv.cpp' to your project
+extern LDb *OpenMetakitDatabase(const char *s);		// add 'Db-Metakit.cpp' to your project
+extern LDb *OpenBfsDatabase(const char *s);			// add 'Db-Bfs.cpp' and 'Bfs.cpp' to your project
 extern LDb *OpenLibmysqlDatabase(const char *s);	// add 'LDb-Libmysql.cpp'
-											// pass 'mysql://username:password@host/database'
-											// (will cause your app to become GPL)
-extern LDb *OpenMysqlDirectDatabase(char *s); // add 'LDb-Mysql-direct.cpp'
-											// pass 'mysql://username:password@host/database'
-											// (will _NOT_ cause your app to become GPL)
+													// pass 'mysql://username:password@host/database'
+													// (will cause your app to become GPL)
+extern LDb *OpenMysqlDirectDatabase(char *s);		// add 'Db-Mysql-direct.cpp'
+													// pass 'mysql://username:password@host/database'
+													// (will _NOT_ cause your app to become GPL)
 
 // Util
 extern char *LgiTsvTok(char *&s);

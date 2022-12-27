@@ -2303,14 +2303,14 @@ bool LIsVolumeRoot(const char *Path)
 	return false;
 }
 
-LString LFormatSize(uint64 Size)
+LString LFormatSize(int64_t Size)
 {
 	char Buf[64];
 	LFormatSize(Buf, sizeof(Buf), Size);
 	return Buf;
 }
 
-void LFormatSize(char *Str, int SLen, uint64 Size)
+void LFormatSize(char *Str, int SLen, int64_t Size)
 {
 	uint64 K = 1024;
 	uint64 M = K * K;
@@ -2327,7 +2327,7 @@ void LFormatSize(char *Str, int SLen, uint64 Size)
 	}
 	else if (Size < 10 * K)
 	{
-		double d = (double)(int64)Size;
+		double d = (double)Size;
 		sprintf_s(Str, SLen, "%.2f KiB", d / K);
 	}
 	else if (Size < M)
@@ -2336,17 +2336,17 @@ void LFormatSize(char *Str, int SLen, uint64 Size)
 	}
 	else if (Size < G)
 	{
-		double d = (double)(int64)Size;
+		double d = (double)Size;
 		sprintf_s(Str, SLen, "%.2f MiB", d / M);
 	}
 	else if (Size < T)
 	{
-		double d = (double)(int64)Size;
+		double d = (double)Size;
 		sprintf_s(Str, SLen, "%.2f GiB", d / G);
 	}
 	else
 	{
-		double d = (double)(int64)Size;
+		double d = (double)Size;
 		sprintf_s(Str, SLen, "%.2f TiB", d / T);
 	}
 }

@@ -994,7 +994,7 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 								if (Upload)
 								{
 									// upload loop
-									d->Data->SetTimeout(1000);
+									d->Data->SetTimeout(15 * 1000);
 									do
 									{
 										Len = d->F->Read(Temp, TempLen);
@@ -1156,8 +1156,8 @@ bool IFtp::SetupData(bool Binary)
 
 		if (!d->Data)
 		{
-			LAssert(!"No data socket");
-			LgiTrace("%s:%i - No data socket, Socket=%p.\n", _FL, Socket.Get());
+			d->ErrBuf.Printf("No data socket, Socket=%p.", Socket.Get());
+			LgiTrace("%s:%i - %s\n", _FL, d->ErrBuf.Get());
 		}
 		else
 		{

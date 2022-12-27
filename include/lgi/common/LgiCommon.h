@@ -66,7 +66,7 @@ LgiExtern LString LGetAppForMimeType
 );
 
 /// \return a formatted file size
-LgiExtern LString LFormatSize(uint64 Size);
+LgiExtern LString LFormatSize(int64_t Size);
 
 /// URL encode a string
 LgiExtern LString LUrlEncode(const char *s, const char *delim);
@@ -183,7 +183,7 @@ LgiFunc void LFormatSize
 	/// Output string buffer length
 	int SLen,
 	/// Input size in bytes
-	uint64 Size
+	int64_t Size
 );
 
 /// \returns true if the path is a volume root.
