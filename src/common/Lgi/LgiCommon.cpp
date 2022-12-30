@@ -355,32 +355,25 @@ bool LRecursiveFileSearch(const char *Root,
 							LArray<char*> *Files,
 							uint64 *Size,
 							uint64 *Count,
-							RecursiveFileSearch_Callback Callback,
-							void *UserData)
+							std::function<bool(const char *Path, class LDirectory *Dir)> Callback,
+							LCancel *Cancel)
 {
-	bool Status = false;
-
 	// validate args
-	if (!Root) return 0;
+	if (!Root) return false;
 
 	// get directory enumerator
 	LDirectory Dir;
-	Status = true;
+	bool Status = true;
 
 	// enumerate the directory contents
-	for (auto Found = Dir.First(Root); Found; Found = Dir.Next())
+	for (auto Found = Dir.First(Root); Found && (!Cancel || !Cancel->IsCancelled()); Found = Dir.Next())
 	{
 		char Name[300];
 		if (!Dir.Path(Name, sizeof(Name)))
 			continue;
 
-		if (Callback)
-		{
-			if (!Callback(UserData, Name, &Dir))
-			{
-				continue;
-			}
-		}
+		if (Callback && !Callback(Name, &Dir))
+			continue;
 
 		if (Dir.IsDir())
 		{
@@ -391,7 +384,7 @@ bool LRecursiveFileSearch(const char *Root,
 									Size,
 									Count,
 									Callback,
-									UserData);
+									Cancel);
 
 		}
 		else
@@ -416,19 +409,13 @@ bool LRecursiveFileSearch(const char *Root,
 			{
 				// file matched... process:
 				if (Files)
-				{
 					Files->Add(NewStr(Name));
-				}
 
 				if (Size)
-				{
 					*Size += Dir.GetSize();
-				}
 
 				if (Count)
-				{
 					(*Count)++;
-				}
 
 				Status = true;
 			}

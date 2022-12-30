@@ -333,27 +333,6 @@ void FindInFilesThread::SearchFile(char *File)
 	}
 }
 
-bool FindInFilesCallback(void *UserData, char *Path, LDirectory *Dir)
-{
-	if (Dir->IsDir())
-	{
-		char *p = Dir->GetName();
-		if
-		(
-			p
-			&&
-			(
-				stricmp(p, ".svn") == 0
-				||
-				stricmp(p, ".git") == 0
-			)
-		)
-			return false;
-	}
-	
-	return true;
-}
-
 void FindInFilesThread::Stop()
 {
 	d->Loop = false;
@@ -417,7 +396,26 @@ LMessage::Result FindInFilesThread::OnEvent(LMessage *Msg)
 			else
 			{
 				// Find the files recursively...
-				LRecursiveFileSearch(d->Params->Dir, &Ext, &Files, 0, 0, FindInFilesCallback);
+				LRecursiveFileSearch(d->Params->Dir, &Ext, &Files, NULL, NULL, [](auto Path, auto Dir)
+				{
+					if (Dir->IsDir())
+					{
+						char *p = Dir->GetName();
+						if
+						(
+							p
+							&&
+							(
+								stricmp(p, ".svn") == 0
+								||
+								stricmp(p, ".git") == 0
+							)
+						)
+							return false;
+					}
+	
+					return true;
+				});
 			}
 
 			if (Files.Length() > 0)

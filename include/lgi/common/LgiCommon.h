@@ -228,10 +228,6 @@ LgiFunc bool LGetSystemPath
 	ssize_t DstSize
 );
 
-/// Returns 0 to end search
-/// \ingroup Base
-typedef bool (*RecursiveFileSearch_Callback)(void *UserData, char *Path, class LDirectory *Dir);
-
 /// \brief Recursively search for files
 /// \return Non zero if something was found
 /// \ingroup Base
@@ -248,9 +244,9 @@ LgiFunc bool LRecursiveFileSearch
 	/// [optional] File count
 	uint64 *Count = NULL,
 	/// [optional] Callback for match
-	RecursiveFileSearch_Callback Callback = NULL,
-	/// [options] Callback user data
-	void *UserData = NULL
+	std::function<bool(const char *Path, class LDirectory *Dir)> Callback = NULL,
+	/// [optional] Cancel object
+	LCancel *Cancel = NULL
 );
 
 // Resources
