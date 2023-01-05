@@ -46,6 +46,11 @@ public:
 			FFMS_CancelIndexing(indexer);
 			indexer = NULL;
 		}
+		else if (index)
+		{
+			FFMS_DestroyIndex(index);
+			index = NULL;
+		}
 	
 		index = NULL;
 		videosource = NULL;
@@ -64,6 +69,7 @@ public:
 		else Log->Print("Open(%s) ok.\n", InputFile);
 
 		index = FFMS_DoIndexing2(indexer, FFMS_IEH_ABORT, &errinfo);
+		indexer = NULL; // FFMS_DoIndexing2 will delete the indexer...
 		if (index == NULL)
 		{
 			Log->Print("%s:%i - FFMS_DoIndexing2 failed.\n", _FL);
