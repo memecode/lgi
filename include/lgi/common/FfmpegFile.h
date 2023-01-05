@@ -41,18 +41,13 @@ public:
 
 	~FfmpegFile()
 	{
-		if (index)
-		{
-			FFMS_DestroyIndex(index);
-			index = NULL;
-		}
-
 		if (indexer)
 		{
 			FFMS_CancelIndexing(indexer);
 			indexer = NULL;
 		}
 	
+		index = NULL;
 		videosource = NULL;
 		track = NULL;
 		videoprops = NULL;

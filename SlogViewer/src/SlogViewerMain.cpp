@@ -109,6 +109,9 @@ public:
 						break;
 					}
 				}
+
+				if (p.GetSize() > 64)
+					break;
 			}
 
 			cache = p.NewGStr();

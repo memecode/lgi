@@ -177,6 +177,9 @@ public:
 
 	bool Decode(std::function<void(LVariantType, size_t, void*, const char*)> callback, Progress *prog = NULL)
 	{
+		if (Length() == 0)
+			return false;
+
 		LPointer p;
 		auto end = AddressOf()+Length();
 		p.u8 = AddressOf(Pos);
