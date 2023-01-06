@@ -382,10 +382,10 @@ bool LMenuItem::ScanForAccel()
 	}
 	else
 	{
-		char *n = LBase::Name();
+		auto n = LBase::Name();
 		if (n)
 		{
-			char *Tab = strchr(n, '\t');
+			auto Tab = strchr(n, '\t');
 			if (Tab)
 				Accel = Tab + 1;
 		}
@@ -759,17 +759,75 @@ struct LMenuFont
 class LMenuPrivate
 {
 public:
+	void MessageReceived(BMessage *message)
+	{
+		LMessage *m = (LMessage*)message;
+		switch (message->what)
+		{
+			case M_LMENUITEM_ENABLE:
+			{
+				auto id = m->A();
+				auto en = m->B();
+				auto item = Menu->FindItem(id);
+				if (item)
+				{
+					if (item->Info)
+						item->Info->SetEnabled(en);
+					else
+						printf("%s:%i - M_LMENUITEM_ENABLE: no hnd to set.\n", _FL);
+				}
+				else printf("%s:%i - M_LMENUITEM_ENABLE: Couldn't find %i\n", _FL, (int)id);
+				break;
+			}
+			case M_LSUBMENU_APPENDITEM:
+			{
+				LSubMenu *sub = NULL;
+				LMenuItem *item = NULL;
+				if (message->FindPointer("sub", (void**)&sub) == B_OK &&
+					message->FindPointer("item", (void**)&item) == B_OK)
+				{
+					if (sub->Handle())
+					{
+						printf("M_LSUBMENU_APPENDITEM done.\n");
+						sub->Handle()->AddItem(item->Handle());
+					}
+					else printf("%s:%i - Error: No handle.\n", _FL);
+				}
+				else printf("%s:%i - Error: missing pointers.\n", _FL);
+				break;
+			}
+			default:
+				BMenuBar::MessageReceived(message);
+				break;
+		}
+	}
 };
 
-LMenu::LMenu(const char *AppName) : LSubMenu("", false)
+LMenu::LMenu(const char *AppName) : 
+	d(new LMenuPrivate(this, AppName)),
+	LSubMenu(d)
 {
 	Menu = this;
-	d = NULL;
+	Info = d;
 }
 
 LMenu::~LMenu()
 {
 	Accel.DeleteObjects();
+	DeleteObj(d);
+}
+
+bool LMenu::PostMessage(BMessage *m)
+{
+	auto view = WindowHandle();
+	auto hnd = view ? view->WindowHandle() : NULL;
+	
+	if (hnd && hnd->PostMessage(m) == B_OK)
+		return true;
+
+	// printf("%s:%i - PostMessage failed. %p,%p,%p\n", _FL, menu, view, hnd);
+	delete m;
+	return false;
 }
 
 LFont *LMenu::GetFont()
@@ -868,7 +926,7 @@ bool LMenu::OnKey(LView *v, LKey &k)
 					}
 					else
 					{
-						char *n = s->Name();
+						auto n = s->Name();
 						if (ValidStr(n))
 						{
 							char *Amp = strchr(n, '&');

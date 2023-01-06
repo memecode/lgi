@@ -23,7 +23,7 @@ LString LgiArgsAppPath;
 ////////////////////////////////////////////////////////////////
 struct OsAppArgumentsPriv
 {
-	::LArray<char*> Ptr;
+	::LArray<const char*> Ptr;
 	
 	~OsAppArgumentsPriv()
 	{
@@ -495,7 +495,7 @@ bool LApp::GetOption(const char *Option, ::LString &Buf)
 		int OptLen = strlen(Option);
 		for (int i=1; i<d->Args.Args; i++)
 		{
-			char *a = d->Args.Arg[i];
+			auto *a = d->Args.Arg[i];
 			if (!a)
 				continue;
 
@@ -503,7 +503,7 @@ bool LApp::GetOption(const char *Option, ::LString &Buf)
 			{
 				if (strnicmp(a+1, Option, OptLen) == 0)
 				{
-					char *Arg = 0;
+					const char *Arg = NULL;
 					if (strlen(a+1+OptLen) > 0)
 					{
 						Arg = a + 1 + OptLen;
@@ -550,7 +550,7 @@ void LApp::OnCommandLine()
 
 	for (int i=1; i<GetAppArgs()->Args; i++)
 	{
-		char *a = GetAppArgs()->Arg[i];
+		auto a = GetAppArgs()->Arg[i];
 		if (LFileExists(a))
 		{
 			Files.Add(NewStr(a));
@@ -955,7 +955,7 @@ public:
 	}
 };
 
-OsApplication::OsApplication(int Args, char **Arg)
+OsApplication::OsApplication(int Args, const char **Arg)
 {
     Inst = this;
     d = new OsApplicationPriv;	

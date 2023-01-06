@@ -1099,7 +1099,7 @@ public:
 	static LString UnEscape(const T *In, ssize_t Len = -1)
 	{
 		if (!In)
-			return NULL;
+			return LString();
 
 		LString s;
 		if (Len < 0)
@@ -1109,7 +1109,7 @@ public:
 			Len = Strlen(In);
 
 		if (!s.Length(Len))
-			return NULL;
+			return LString();
 
 		auto *Out = s.Get();
 		auto *End = In + Len;

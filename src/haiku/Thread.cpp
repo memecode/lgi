@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <OS.h>
+#include <pthread.h>
 
 OsThreadId GetCurrentThreadId()
 {

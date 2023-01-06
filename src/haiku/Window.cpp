@@ -98,8 +98,18 @@ public:
 
 	void MessageReceived(BMessage *message)
 	{
-		Wnd->OnEvent(message);
-		BWindow::MessageReceived(message);
+		if (message->what == M_LWINDOW_DELETE)
+		{
+			// printf("Processing M_LWINDOW_DELETE th=%u\n", GetCurrentThreadId());
+			Wnd->Handle()->RemoveSelf();			
+			Quit();
+			// printf("Processed M_LWINDOW_DELETE\n");
+		}
+		else
+		{
+			BWindow::MessageReceived(message);
+			Wnd->OnEvent((LMessage*)message);
+		}
 	}
 };
 

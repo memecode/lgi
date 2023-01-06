@@ -618,7 +618,7 @@ int LSocket::Open(const char *HostAddr, int Port)
 
 			#if !defined(MAC)
 			option_t i;
-			int sz = sizeof(i);
+			socklen_t sz = sizeof(i);
 			int r = getsockopt(d->Socket, IPPROTO_TCP, TCP_NODELAY, (char*)&i, &sz);
 			if (d->NoDelay ^ i)
 			{

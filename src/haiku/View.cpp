@@ -129,7 +129,7 @@ public:
 			B_FRAME_EVENTS
 		)
 	{
-		SetName(d->View->GetClass());
+		Parent::SetName(d->View->GetClass());
 	}
 	
 	~LBView()
@@ -144,13 +144,13 @@ public:
 
 	void FrameMoved(BPoint newPosition)
 	{
-		d->View->Pos = Frame();
+		d->View->Pos = Parent::Frame();
 		d->View->OnPosChange();
 	}
 
 	void FrameResized(float newWidth, float newHeight)
 	{
-		d->View->Pos = Frame();
+		d->View->Pos = Parent::Frame();
 		d->View->OnPosChange();
 	}
 
@@ -177,7 +177,7 @@ public:
 		m.x = where.x;
 		m.y = where.y;
 
-		GetMouse(&loc, &buttons, false);
+		Parent::GetMouse(&loc, &buttons, false);
 		if (buttons & B_PRIMARY_MOUSE_BUTTON) m.Left(true);
 		if (buttons & B_TERTIARY_MOUSE_BUTTON) m.Middle(true);
 		if (buttons & B_SECONDARY_MOUSE_BUTTON) m.Right(true);
@@ -506,6 +506,17 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 	int Id;
 	switch (Id = Msg->Msg())
 	{
+		case M_HANDLE_IN_THREAD:
+		{
+			LMessage::InThreadCb *Cb = NULL;
+			if (Msg->FindPointer(LMessage::PropCallback, (void**)&Cb) == B_OK)
+			{
+				(*Cb)();
+				delete Cb;
+			}
+			else printf("%s:%i - No Callback.\n", _FL);
+			break;
+		}
 		case M_INVALIDATE:
 		{
 			if ((LView*)this == (LView*)Msg->B())
@@ -522,9 +533,12 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 		}
 		case M_CHANGE:
 		{
-			LViewI *Ctrl;
+			LViewI *Ctrl = NULL;
 			if (GetViewById(Msg->A(), Ctrl))
-				return OnNotify(Ctrl, Msg->B());
+			{
+				LNotification n((LNotifyType)Msg->B());
+				return OnNotify(Ctrl, n);
+			}
 			break;
 		}
 		case M_COMMAND:

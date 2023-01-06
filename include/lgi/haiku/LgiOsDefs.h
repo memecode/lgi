@@ -14,6 +14,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <wchar.h>
+#include <pthread.h>
 
 #include <View.h>
 #include <Window.h>
@@ -58,7 +59,7 @@ typedef BWindow		*OsWindow;
 typedef char		OsChar;
 typedef BView		*OsPainter;
 typedef BFont		*OsFont;
-typedef void		*OsBitmap;
+typedef BBitmap		*OsBitmap;
 
 #define LGetCurrentProcess				getpid
 
@@ -70,7 +71,7 @@ protected:
 	static OsApplication *Inst;
 	
 public:
-	OsApplication(int Args, char **Arg);
+	OsApplication(int Args, const char **Arg);
 	~OsApplication();
 	
 	static OsApplication *GetInst() { LAssert(Inst != NULL); return Inst; }

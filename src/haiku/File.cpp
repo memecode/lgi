@@ -679,7 +679,7 @@ struct LVolumePriv
 	}
 };
 
-LVolume::LVolume(const char *Path = NULL)
+LVolume::LVolume(const char *Path)
 {
 	d = new LVolumePriv(Path);
 }

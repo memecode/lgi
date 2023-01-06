@@ -54,6 +54,7 @@ Source =	Code/WebFldDlg.cpp \
 			Code/ProjectNode.cpp \
 			Code/NewProjectFromTemplate.cpp \
 			Code/MissingFiles.cpp \
+			Code/History.cpp \
 			Code/MemDumpViewer.cpp \
 			Code/LgiUtils.cpp \
 			Code/LgiIde.cpp \

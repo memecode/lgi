@@ -5,10 +5,6 @@ set(CMAKE_CXX_STANDARD 14)
 
 project (LgiIde)
 
-if (UNIX AND NOT APPLE)
-	set(LINUX TRUE)
-endif()
-
 if (NOT TARGET libpng16)
 	message(FATAL_ERROR "Find the libpng target (see parent folder cmake)")
 endif()

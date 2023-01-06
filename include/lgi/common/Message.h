@@ -229,7 +229,11 @@ public:
 	#endif
 
 	#if defined(HAIKU)
-	static constexpr char *PropNames[2] = {"lgi_a", "lgi_b"};
+	static constexpr char *PropA = "lgiA";
+	static constexpr char *PropB = "lgiB";
+	static constexpr char *PropView = "lgiView";
+	static constexpr char *PropCallback = "lgiCallback";
+	typedef std::function<void()> InThreadCb;
 	#endif
 
 	LMessage()

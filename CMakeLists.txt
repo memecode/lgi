@@ -6,6 +6,12 @@ endif()
 
 project (Lgi)
 
+#get_cmake_property(_variableNames VARIABLES)
+#list (SORT _variableNames)
+#foreach (_variableName ${_variableNames})
+#    message(STATUS "${_variableName}=${${_variableName}}")
+#endforeach()
+
 include(build.cmake)
 
 set(CMAKE_OSX_ARCHITECTURES "x86_64")
@@ -13,7 +19,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(LGI_VERSION_MAJOR 1)
 set(LGI_VERSION_MINOR 0)
 
-if (UNIX AND NOT APPLE)
+if (UNIX AND NOT APPLE AND NOT HAIKU)
 	set(LINUX TRUE)
 endif()
 
@@ -60,7 +66,7 @@ if (NOT EXISTS "${ICONV_PATH}/include")
 		else()
 			find_package(Iconv REQUIRED)
 		endif()
-	elseif (LINUX)
+	elseif (LINUX OR HAIKU)
 		find_package(Iconv REQUIRED)
 	else()
 		message(FATAL_ERROR "Missing iconv at: ${ICONV_PATH}")
@@ -355,6 +361,30 @@ elseif (MSVC)
 		src/win/Widgets/Slider_Win.cpp
 		src/win/Widgets/Progress_Win.cpp)
 
+elseif (HAIKU)
+
+	set(Source
+		${CommonSource}
+		src/haiku/
+		src/haiku/App.cpp
+		src/haiku/ClipBoard.cpp
+		src/haiku/DragAndDrop.cpp
+		src/haiku/File.cpp
+		src/haiku/Gdc2.cpp
+		src/haiku/General.cpp
+		src/haiku/Layout.cpp
+		src/haiku/Mem.cpp
+		src/haiku/MemDC.cpp
+		src/haiku/Menu.cpp
+		src/haiku/PrintDC.cpp
+		src/haiku/Printer.cpp
+		src/haiku/ScreenDC.cpp
+		src/haiku/ShowFileProp_Haiku.cpp
+		src/haiku/Thread.cpp
+		src/haiku/View.cpp
+		src/haiku/Widgets.cpp
+		src/haiku/Window.cpp)
+
 endif ()
 
 add_library(lgi SHARED ${Source})
@@ -384,23 +414,6 @@ target_compile_definitions(lgi-stub
 target_include_directories(lgi-stub
 	PUBLIC
 		include)
-
-if (WIN32)
-	target_sources(lgi-stub
-		PRIVATE
-		    src/win/General/File.cpp
-			src/win/General/Mem.cpp
-			src/win/Lgi/General.cpp
-			src/win/Lgi/Thread.cpp)
-	target_include_directories(lgi-stub
-		PUBLIC
-			include/lgi/win)
-	target_compile_definitions(lgi-stub
-		PUBLIC
-			WINDOWS
-			_UNICODE
-			UNICODE)
-endif()
 
 if (DEFINED LGI_LIB_POSTFIX)
 	set_target_properties(lgi
@@ -528,6 +541,44 @@ elseif (MSVC)
 			Ws2_32.lib
 			UxTheme.lib
 			imm32.lib)
+
+	target_sources(lgi-stub
+		PRIVATE
+		    src/win/General/File.cpp
+			src/win/General/Mem.cpp
+			src/win/Lgi/General.cpp
+			src/win/Lgi/Thread.cpp)
+	target_include_directories(lgi-stub
+		PUBLIC
+			include/lgi/win)
+
+	target_compile_definitions(lgi-stub
+		PUBLIC
+			WINDOWS
+			_UNICODE
+			UNICODE)
+
+elseif (HAIKU)
+
+	target_include_directories(lgi-stub
+		PUBLIC
+			include/lgi/haiku
+		PRIVATE
+			private/haiku)
+	target_compile_definitions(lgi-stub
+		PUBLIC
+			HAIKU
+			_GNU_SOURCE)
+
+	target_include_directories(lgi
+		PUBLIC
+			include/lgi/haiku
+		PRIVATE
+			private/haiku)
+	target_compile_definitions(lgi
+		PUBLIC
+			HAIKU
+			_GNU_SOURCE)
 
 endif()
 

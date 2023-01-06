@@ -348,13 +348,39 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 
 void LView::Unlock()
 {
-	if (_Window &&
-		_Window->_Lock)
-	{
-		_Window->_Lock->Unlock();
-	}
-	_InLock--;
-	// LgiTrace("%s::%p Unlock._InLock=%i\n", GetClass(), this, _InLock);
+	#ifdef HAIKU
+		if (!d || !d->Hnd)
+		{
+			printf("%s:%i - Unlock() error, no hnd.\n", _FL);
+			return;
+		}
+	
+		if (!d->Hnd->Parent())
+		{
+			// printf("%s:%p - Unlock() no parent.\n", GetClass(), this);
+			return;
+		}
+	
+		if (_InLock > 0)
+		{
+			// printf("%s:%p - Calling UnlockLooper: %i.\n", GetClass(), this, _InLock);
+			d->Hnd->UnlockLooper();
+			_InLock--;
+			// printf("%s:%p - UnlockLooper done: %i.\n", GetClass(), this, _InLock);
+		}
+		else
+		{
+			printf("%s:%i - Unlock() without lock.\n", _FL);
+		}
+	#else
+		if (_Window &&
+			_Window->_Lock)
+		{
+			_Window->_Lock->Unlock();
+		}
+		_InLock--;
+		// LgiTrace("%s::%p Unlock._InLock=%i\n", GetClass(), this, _InLock);
+	#endif
 }
 
 void LView::OnMouseClick(LMouse &m)
@@ -432,6 +458,7 @@ void LView::OnDestroy()
 
 void LView::OnFocus(bool f)
 {
+	// printf("%s::OnFocus(%i)\n", GetClass(), f);
 }
 
 void LView::OnPulse()
