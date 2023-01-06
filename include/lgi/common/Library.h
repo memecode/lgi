@@ -24,11 +24,7 @@ public:
 	const char *GetFileName() { return FileName; }
 	virtual bool IsLoaded()
 	{
-		#ifdef HAIKU
-		return hLib >= 0;
-		#else
 		return hLib != 0;
-		#endif
 	}
 
 	bool Load(const char *File, bool Quiet = false);

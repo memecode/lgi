@@ -19,15 +19,17 @@
 		
 */ 
 
-#if defined(MAC) || defined(POSIX)
+#if defined(MAC) || defined(POSIX) || defined(HAIKU)
 
-	#define _GNU_SOURCE
+	#ifndef _GNU_SOURCE
+		#define _GNU_SOURCE
+	#endif
 	#include <errno.h>
 	#include <signal.h>
 	#include <sys/wait.h>
 	#include <sys/ioctl.h>
 	#include <sys/types.h>
-
+	
 #elif defined(WINDOWS)
 
 	#define NTDDI_VERSION 0x0A000006
@@ -62,8 +64,10 @@
 #if defined(POSIX)
 
 	#include <pwd.h>
-	#if !defined(MAC)
+	#if defined(LINUX) // !mac and !haiku
 		#include <crypt.h>
+	#endif
+	#if !defined(MAC)
 		#include <shadow.h>
 	#endif
 

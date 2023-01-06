@@ -245,10 +245,10 @@ public:
 	#endif
 
 	#if defined(HAIKU)
-	static constexpr char *PropA = "lgiA";
-	static constexpr char *PropB = "lgiB";
-	static constexpr char *PropView = "lgiView";
-	static constexpr char *PropCallback = "lgiCallback";
+	static constexpr const char *PropA = "lgiA";
+	static constexpr const char *PropB = "lgiB";
+	static constexpr const char *PropView = "lgiView";
+	static constexpr const char *PropCallback = "lgiCallback";
 	typedef std::function<void()> InThreadCb;
 	#endif
 

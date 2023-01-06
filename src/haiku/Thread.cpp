@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <OS.h>
+#include <pthread.h>
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/EventTargetThread.h"

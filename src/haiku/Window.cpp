@@ -127,7 +127,7 @@ public:
 		else
 		{
 			BWindow::MessageReceived(message);
-			Wnd->OnEvent(message);
+			Wnd->OnEvent((LMessage*)message);
 		}
 	}
 };

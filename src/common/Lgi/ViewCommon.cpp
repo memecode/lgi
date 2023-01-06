@@ -387,7 +387,7 @@ void LView::Unlock()
 		if (!d || !d->Hnd)
 		{
 			printf("%s:%i - Unlock() error, no hnd.\n", _FL);
-			return false;
+			return;
 		}
 	
 		if (!d->Hnd->Parent())

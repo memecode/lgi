@@ -421,10 +421,10 @@ bool LMenuItem::ScanForAccel()
 	}
 	else
 	{
-		char *n = LBase::Name();
+		auto n = LBase::Name();
 		if (n)
 		{
-			char *Tab = strchr(n, '\t');
+			auto Tab = strchr(n, '\t');
 			if (Tab)
 				Accel = Tab + 1;
 		}
@@ -866,8 +866,8 @@ public:
 			{
 				LSubMenu *sub = NULL;
 				LMenuItem *item = NULL;
-				if (message->FindPointer("sub", &sub) == B_OK &&
-					message->FindPointer("item", &item) == B_OK)
+				if (message->FindPointer("sub", (void**)&sub) == B_OK &&
+					message->FindPointer("item", (void**)&item) == B_OK)
 				{
 					if (sub->Handle())
 					{
@@ -1022,7 +1022,7 @@ bool LMenu::OnKey(LView *v, LKey &k)
 					}
 					else
 					{
-						char *n = s->Name();
+						auto n = s->Name();
 						if (ValidStr(n))
 						{
 							char *Amp = strchr(n, '&');

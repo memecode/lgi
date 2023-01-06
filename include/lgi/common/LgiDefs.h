@@ -417,7 +417,7 @@ enum LCursor
 // Emit compiler warnings
 #define __STR2__(x) #x
 #define __STR1__(x) __STR2__(x)
-#define __LOC__ __FILE__ "("__STR1__(__LINE__)") : Warning: "
+#define __LOC__ __FILE__ "(" __STR1__(__LINE__) ") : Warning: "
 // To use just do #pragma message(__LOC__"My warning message")
 
 // Simple definition of breakable unicode characters

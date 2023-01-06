@@ -132,7 +132,7 @@ struct LBView : public Parent
 			B_FRAME_EVENTS
 		)
 	{
-		SetName(d->View->GetClass());
+		Parent::SetName(d->View->GetClass());
 	}
 	
 	~LBView()
@@ -166,7 +166,7 @@ struct LBView : public Parent
 		{
 			if (w == B_FUNCTION_KEY)
 			{
-				auto bmsg = Window()->CurrentMessage();
+				auto bmsg = Parent::Window()->CurrentMessage();
 				if (bmsg)
 				{
 					int32 key = 0;
@@ -247,14 +247,14 @@ struct LBView : public Parent
 	void FrameMoved(BPoint newPosition)
 	{
 		if (!d) return;
-		d->View->Pos = Frame();
+		d->View->Pos = Parent::Frame();
 		d->View->OnPosChange();
 	}
 
 	void FrameResized(float newWidth, float newHeight)
 	{
 		if (!d) return;
-		d->View->Pos = Frame();
+		d->View->Pos = Parent::Frame();
 		d->View->OnPosChange();
 	}
 
@@ -307,7 +307,7 @@ struct LBView : public Parent
 		if (down)
 		{
 			m.Down(true);
-			GetMouse(&loc, &buttons, false);
+			Parent::GetMouse(&loc, &buttons, false);
 			MouseButtons = buttons; // save for up click
 		}
 		else
@@ -742,7 +742,7 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 		case M_HANDLE_IN_THREAD:
 		{
 			LMessage::InThreadCb *Cb = NULL;
-			if (Msg->FindPointer(LMessage::PropCallback, &Cb) == B_OK)
+			if (Msg->FindPointer(LMessage::PropCallback, (void**)&Cb) == B_OK)
 			{
 				(*Cb)();
 				delete Cb;
@@ -766,9 +766,12 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 		}
 		case M_CHANGE:
 		{
-			LViewI *Ctrl;
+			LViewI *Ctrl = NULL;
 			if (GetViewById(Msg->A(), Ctrl))
-				return OnNotify(Ctrl, Msg->B());
+			{
+				LNotification n((LNotifyType)Msg->B());
+				return OnNotify(Ctrl, n);
+			}
 			break;
 		}
 		case M_COMMAND:

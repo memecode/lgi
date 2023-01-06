@@ -810,10 +810,10 @@ void LDisplayString::Layout(bool Debug)
 			else if (!ch || IsTabChar(ch) ^ isTab)
 			{		
 				auto &l = Info.New();
-				l.Str = start.GetPtr();
+				l.Str = (OsChar*)start.GetPtr(); // FIXME: get rid of this cast!
 				l.Len = p.GetPtr() - start.GetPtr();
 
-				const char *strArr[] = { l.Str };
+				const OsChar *strArr[] = { l.Str };
 				const int32 strLen[] = { l.Len };
 				float width[1] = { 0 };
 				fnt->GetStringWidths(strArr, strLen, 1, width);

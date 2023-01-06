@@ -160,7 +160,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 	pMem->y = d->Bmp->Bounds().Height();
 	ColourSpace = pMem->Cs = System32BitColourSpace;
 	pMem->Line = d->Bmp->BytesPerRow();
-	pMem->Base = d->Bmp->Bits();
+	pMem->Base = (uchar*)d->Bmp->Bits();
 
 	int NewOp = (pApp) ? Op() : GDC_SET;
 	if ((Flags & GDC_OWN_APPLICATOR) && !(Flags & GDC_CACHED_APPLICATOR))

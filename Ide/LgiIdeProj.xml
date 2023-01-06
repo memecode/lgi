@@ -57,13 +57,13 @@
 			<Node File="../src/common/Coding/ParseCpp.cpp" Type="2" Platforms="15" />
 			<Node File=".\Code\SysCharSupport.cpp" Type="2" Platforms="15" />
 		</Node>
-		<Node File="./Code/IdeCommon.cpp" Type="2" Platforms="15" />
-		<Node File="./Code/LgiIde.cpp" Type="2" Platforms="15" />
-		<Node File="./Code/LgiIde.h" Type="3" Platforms="15" />
-		<Node File="./Code/LgiUtils.cpp" Type="2" Platforms="15" />
-		<Node File="./Code/MemDumpViewer.cpp" Type="2" Platforms="15" />
-		<Node File="./Code/SpaceTabConv.h" Type="3" Platforms="15" />
-		<Node File="./Code/SpaceTabConv.cpp" Type="2" Platforms="15" />
+		<Node File=".\Code\IdeCommon.cpp" Type="2" Platforms="15" />
+		<Node File=".\Code\LgiIde.cpp" Type="2" Platforms="15" />
+		<Node File=".\Code\LgiIde.h" Type="3" Platforms="15" />
+		<Node File=".\Code\LgiUtils.cpp" Type="2" Platforms="15" />
+		<Node File=".\Code\MemDumpViewer.cpp" Type="2" Platforms="15" />
+		<Node File=".\Code\SpaceTabConv.h" Type="3" Platforms="15" />
+		<Node File=".\Code\SpaceTabConv.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Lgi" Type="1" Platforms="15" Open="1" Id="7">
 		<Node Name="Html" Type="1" Platforms="15" Id="1">
@@ -93,7 +93,7 @@
 		<Node File=".\Makefile.linux" Type="9" Platforms="15" />
 		<Node File=".\Resources\resource.h" Type="3" Platforms="15" />
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
+	<Node File="..\Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>
 		<General>
 			<Makefile>
@@ -200,7 +200,6 @@ pthread
 					<Release>..\Release</Release>
 				</All>
 				<Windows />
-				<Linux />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -236,7 +235,7 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			</ApplicationIcon>
 			<Defines>
 				<All />
-				<Linux />
+				<Windows />
 			</Defines>
 		</Build>
 		<Editor>
@@ -270,7 +269,7 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 		<Advanced>
 			<OtherMakefileRules />
 			<PostBuildCommands>
-				<Linux />
+				<Windows />
 			</PostBuildCommands>
 		</Advanced>
 		<Remote>

@@ -1,6 +1,8 @@
 #ifndef _LGI_CLASS_H_
 #define _LGI_CLASS_H_
 
+#include <ctype.h>
+
 #include "lgi/common/LgiInc.h"
 #include "lgi/common/LgiDefs.h"
 #include "lgi/common/AutoPtr.h"
