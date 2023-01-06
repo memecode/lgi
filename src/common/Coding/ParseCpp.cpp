@@ -242,8 +242,8 @@ struct LSymbol
 
 struct LCppStringPool
 {
-	int Size;
-	int Used;
+	ssize_t Size;
+	ssize_t Used;
 	LArray<char16*> Mem;
 	
 	LCppStringPool(int sz)
@@ -261,7 +261,7 @@ struct LCppStringPool
 		if (len < 0)
 			len = StrlenW(s);
 		
-		int remaining = Size - Used;
+		auto remaining = Size - Used;
 		char16 *n;
 		if (len + 1 > remaining)
 		{

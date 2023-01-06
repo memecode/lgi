@@ -11,16 +11,15 @@ class LgiClass LSlider :
 	public ResObject
 {
 	#if WINNATIVE
-	uint32_t Style();
-	// int SysOnNotify(int Msg, int Code);
+		uint32_t Style();
+	#else
+		LRect Thumb;
+		int Tx = 0, Ty = 0;
 	#endif
 
-	bool Vertical;
-	int64 Min, Max;
-	int64 Val;
-
-	LRect Thumb;
-	int Tx, Ty;
+	int64 Min = 0, Max = 100;
+	int64 Val = 0;
+	bool Vertical = false;
 
 public:
 	LSlider(int id,

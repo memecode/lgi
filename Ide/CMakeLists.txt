@@ -9,7 +9,7 @@ if (UNIX AND NOT APPLE)
 	set(LINUX TRUE)
 endif()
 
-if (NOT TARGET libpng15)
+if (NOT TARGET libpng16)
 	message(FATAL_ERROR "Find the libpng target (see parent folder cmake)")
 endif()
 
@@ -106,7 +106,7 @@ elseif (MSVC)
 endif ()
 
 add_executable(LgiIde ${APP_TYPE} ${CommonSource} ${ResourceFiles})
-target_link_libraries(LgiIde lgi libpng15)
+target_link_libraries(LgiIde lgi libpng16)
 target_include_directories(LgiIde PRIVATE Code Resources)
 
 if (APPLE)

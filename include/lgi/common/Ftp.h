@@ -148,6 +148,7 @@ public:
 	virtual Progress *GetMeter() = 0;
 	virtual void SetMeter(Progress *m) = 0;
 	virtual bool GetAuthed() = 0;
+	virtual const char *GetError() = 0;
 
 	// Data
 	virtual LSocketI *Handle() = 0;

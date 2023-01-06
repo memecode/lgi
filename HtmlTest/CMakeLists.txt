@@ -64,7 +64,7 @@ target_include_directories(HtmlTest
 target_link_libraries(HtmlTest
 	PRIVATE
 		lgi
-		libpng15
+		libpng16
 		libjpeg9a)
 
 if (APPLE)

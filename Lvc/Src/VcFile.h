@@ -20,14 +20,14 @@ public:
 	};
 
 private:
-	AppPriv *d;
-	VcFolder *Owner;
+	AppPriv *d = NULL;
+	VcFolder *Owner = NULL;
 	bool LoadDiff;
 	LString Diff;
 	LString Revision;
 	LUri Uri;
-	LListItemCheckBox *Chk;
-	FileStatus Status;
+	LListItemCheckBox *Chk = NULL;
+	FileStatus Status = SUnknown;
 
 public:
 	VcFile(AppPriv *priv, VcFolder *owner, LString revision, bool working = false);

@@ -18,6 +18,13 @@ class LgiClass LCheckBox :
 	class LCheckBoxPrivate *d;
 
 public:
+	enum State
+	{
+		CheckOff,
+		CheckOn,
+		CheckPartial,
+	};
+
 	/// Constructor
 	LCheckBox
 	(
@@ -45,14 +52,9 @@ public:
 	bool ThreeState();
 	/// Sets whether the control is 3 state.
 	///
-	/// In the case that the control is 3 state, the 3 states are:
-	/// <ul>
-	/// 	<li> Fully off: 0
-	/// 	<li> Fully on: 1
-	/// 	<li> Partially on/Undefined: 2
-	/// </ul>
+	/// In the case that the control is 3 state use the 'State' enum.
 	void ThreeState(bool t);
-	/// Returns the current value, 0 or 1. Or possibly 2 if ThreeState() is set.
+	/// Returns the current value, 0 or 1. Or possibly 2 if ThreeState() is set (see also the 'State' enum)
 	int64 Value() override;
 	/// Sets the current value.
 	void Value(int64 b) override;

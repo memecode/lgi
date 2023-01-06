@@ -51,6 +51,8 @@ int LStatusBar::OnNotify(LViewI *Ctrl, LNotification n)
 			Invalidate();
 			return true;
 		}
+		default:
+			break;
 	}
 
 	return LLayout::OnNotify(Ctrl, n);

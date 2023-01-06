@@ -22,6 +22,7 @@
 		<Node File="./Src/DropDownBtn.cpp" Type="2" Platforms="15" />
 		<Node File="./Src/Lvc.h" Type="3" Platforms="15" />
 		<Node File="./Src/Main.cpp" Type="2" Platforms="15" />
+		<Node File="./Src/PatchViewer.cpp" Type="2" Platforms="15" />
 		<Node File="./Src/VcCommit.cpp" Type="2" Platforms="15" />
 		<Node File="./Src/VcCommit.h" Type="3" Platforms="15" />
 		<Node File="./Src/VcFile.cpp" Type="2" Platforms="15" />
@@ -56,18 +57,14 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
 				<All>
 					<Debug>Src
-../include
-../../../../codelib/libssh/include</Debug>
+../include</Debug>
 					<Release>Src
-../include
-../../../../codelib/libssh/include</Release>
+../include</Release>
 				</All>
 				<Linux>
 					<Debug>../include/lgi/linux
@@ -110,20 +107,8 @@
 				<All>Executable</All>
 			</TargetType>
 			<LibraryPaths>
-				<All>
-					<Debug>../../../../codelib/libssh/build/src</Debug>
-					<Release>../../../../codelib/libssh/build/src</Release>
-				</All>
-				<Linux />
-			</LibraryPaths>
-			<Defines>
 				<All />
-				<Linux />
-			</Defines>
-			<TargetName>
-				<Linux />
-			</TargetName>
-			<ApplicationIcon />
+			</LibraryPaths>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -135,27 +120,8 @@
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<ShowWhiteSpace />
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
-		<Debug>
-			<Environment />
-			<Arguments>
-				<All />
-			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
-		</Debug>
-		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-		</Advanced>
+		<Advanced />
+		<Debug />
 	</Settings>
 </Project>

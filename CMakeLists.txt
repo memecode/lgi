@@ -46,9 +46,12 @@ get_filename_component(CODE ../.. ABSOLUTE)
 get_filename_component(CODELIB ${CODE}/../codelib ABSOLUTE)
 if (NOT EXISTS "${CODELIB}")
 	message(FATAL_ERROR "Expecting external libraries in: ${CODELIB}")
-else()
-	message("CODELIB=${CODELIB}")
 endif()
+message("CODELIB=${CODELIB}")
+if(hasParent)
+	set(CODELIB "${CODELIB}" PARENT_SCOPE)
+endif()
+
 set(ICONV_PATH "${CODELIB}/libiconv")
 if (NOT EXISTS "${ICONV_PATH}/include")
 	if (APPLE)
@@ -65,7 +68,7 @@ if (NOT EXISTS "${ICONV_PATH}/include")
 endif()
 
 get_filename_component(PNG_LIBRARY "${CODELIB}/libpng" ABSOLUTE)
-if (EXISTS ${PNG_LIBRARY} AND NOT TARGET libpng15)
+if (EXISTS ${PNG_LIBRARY} AND NOT TARGET libpng16)
 	add_subdirectory(${PNG_LIBRARY} libpng)
 endif()
 
@@ -99,92 +102,156 @@ set (CommonSource
 	src/common/Gdc2/64Bit.cpp
 	src/common/Gdc2/8Bit.cpp
 	src/common/Gdc2/Alpha.cpp
+	include/lgi/common/Filter.h
 	src/common/Gdc2/Filters/Filter.cpp
+	include/lgi/common/DisplayString.h
 	src/common/Gdc2/Font/DisplayString.cpp
+	include/lgi/common/StringLayout.h
 	src/common/Gdc2/Font/StringLayout.cpp
+	include/lgi/common/Font.h
 	src/common/Gdc2/Font/Font.cpp
 	src/common/Gdc2/Font/FontSystem.cpp
 	src/common/Gdc2/Font/FontType.cpp
 	src/common/Gdc2/Font/TypeFace.cpp
+	include/lgi/common/Charset.h
 	src/common/Gdc2/Font/Charset.cpp
+	include/lgi/common/Colour.h
 	src/common/Gdc2/Colour.cpp
+	include/lgi/common/Gdc2.h
 	src/common/Gdc2/GdcCommon.cpp
+	include/lgi/common/Rect.h
 	src/common/Gdc2/Rect.cpp
 	src/common/Gdc2/Surface.cpp
+	include/lgi/common/Path.h
 	src/common/Gdc2/Path/Path.cpp
 	src/common/Gdc2/Tools/ColourReduce.cpp
+	include/lgi/common/Containers.h
 	src/common/General/Containers.cpp
+	include/lgi/common/DateTime.h
 	src/common/General/DateTime.cpp
 	src/common/General/ExeCheck.cpp
+	include/lgi/common/File.h
 	src/common/General/FileCommon.cpp
+	include/lgi/common/Growl.h
 	src/common/General/Growl.cpp
 	src/common/General/Password.cpp
 	src/common/Hash/md5/md5.c
 	src/common/Hash/sha1/sha1.c
 	src/common/Net/Base64.cpp
 	src/common/Net/Uri.cpp
+	include/lgi/common/Net.h
 	src/common/Net/Net.cpp
 	src/common/Net/NetTools.cpp
 	src/common/Net/MDStringToDigest.cpp
 	src/common/Lgi/Alert.cpp
+	include/lgi/common/Css.h
 	src/common/Lgi/Css.cpp
+	include/lgi/common/CssTools.h
 	src/common/Lgi/CssTools.cpp
+	include/lgi/common/FindReplaceDlg.h
 	src/common/Lgi/FindReplace.cpp
+	include/lgi/common/FontSelect.h
 	src/common/Lgi/FontSelect.cpp
 	src/common/Lgi/GuiUtils.cpp
 	src/common/Lgi/Input.cpp
+	include/lgi/common/Library.h
 	src/common/Lgi/Library.cpp
-	src/common/Lgi/MemStream.cpp
+	include/lgi/common/Mru.h
 	src/common/Lgi/Mru.cpp
+	include/lgi/common/Mutex.h
 	src/common/Lgi/Mutex.cpp
 	src/common/Lgi/Object.cpp
+	include/lgi/common/OptionsFile.h
 	src/common/Lgi/OptionsFile.cpp
+	include/lgi/common/SubProcess.h
 	src/common/Lgi/SubProcess.cpp
+	include/lgi/common/Stream.h
 	src/common/Lgi/Stream.cpp
+	src/common/Lgi/MemStream.cpp
+	include/lgi/common/Thread.h
 	src/common/Lgi/ThreadCommon.cpp
 	src/common/Lgi/ThreadEvent.cpp
+	include/lgi/common/ToolTip.h
 	src/common/Lgi/ToolTip.cpp
+	include/lgi/common/TrayIcon.h
 	src/common/Lgi/TrayIcon.cpp
+	include/lgi/common/Variant.h
 	src/common/Lgi/Variant.cpp
+	include/lgi/common/App.h
 	src/common/Lgi/AppCommon.cpp
+	include/lgi/common/View.h
 	src/common/Lgi/ViewCommon.cpp
+	include/lgi/common/Window.h
 	src/common/Lgi/WindowCommon.cpp
+	include/lgi/common/DragAndDrop.h
 	src/common/Lgi/DragAndDropCommon.cpp
+	include/lgi/common/Lgi.h
 	src/common/Lgi/LgiCommon.cpp
 	src/common/Lgi/LMsg.cpp
 	src/common/Lgi/Rand.cpp
+	include/lgi/common/DropFiles.h
 	src/common/Lgi/DropFiles.cpp
+	include/lgi/common/Menu.h
 	src/common/Lgi/MenuCommon.cpp
+	include/lgi/common/LgiRes.h
 	src/common/Resource/LgiRes.cpp
 	src/common/Resource/Res.cpp
 	src/common/Skins/Gel/Gel.cpp
+	include/lgi/common/DocView.h
 	src/common/Text/DocView.cpp
+	include/lgi/common/StringClass.h
+	include/lgi/common/LgiString.h
 	src/common/Text/String.cpp
+	include/lgi/common/TextView3.h
 	src/common/Text/TextView3.cpp
+	include/lgi/common/TextView4.h
 	src/common/Text/TextView4.cpp
+	include/lgi/common/Token.h
 	src/common/Text/Token.cpp
+	include/lgi/common/Unicode.h
 	src/common/Text/Unicode.cpp
+	include/lgi/common/Unicode.h
 	src/common/Text/Utf8.cpp
+	include/lgi/common/XmlTree.h
 	src/common/Text/XmlTree.cpp
+	include/lgi/common/Button.h
 	src/common/Widgets/Button.cpp
+	include/lgi/common/Bitmap.h
 	src/common/Widgets/Bitmap.cpp
+	include/lgi/common/Box.h
 	src/common/Widgets/Box.cpp
 	src/common/Widgets/ItemContainer.cpp
+	include/lgi/common/List.h
 	src/common/Widgets/List.cpp
+	include/lgi/common/Panel.h
 	src/common/Widgets/Panel.cpp
+	include/lgi/common/Popup.h
 	src/common/Widgets/Popup.cpp
+	include/lgi/common/ProgressDlg.h
 	src/common/Widgets/ProgressDlg.cpp
+	include/lgi/common/RadioGroup.h
 	src/common/Widgets/RadioGroup.cpp
+	include/lgi/common/Splitter.h
 	src/common/Widgets/Splitter.cpp
+	include/lgi/common/StatusBar.h
 	src/common/Widgets/StatusBar.cpp
+	include/lgi/common/TableLayout.h
 	src/common/Widgets/TableLayout.cpp
+	include/lgi/common/TabView.h
 	src/common/Widgets/TabView.cpp
+	include/lgi/common/TextLabel.h
 	src/common/Widgets/TextLabel.cpp
+	include/lgi/common/ToolBar.h
 	src/common/Widgets/ToolBar.cpp	
+	include/lgi/common/Tree.h
 	src/common/Widgets/Tree.cpp	
-	include/lgi/common/App.h
-	include/lgi/common/View.h
-	include/lgi/common/Thread.h
+	include/lgi/common/CheckBox.h
+	include/lgi/common/Combo.h
+	include/lgi/common/Edit.h
+	include/lgi/common/Layout.h
+	include/lgi/common/Slider.h
+	include/lgi/common/Progress.h
+	include/lgi/common/ClipBoard.h
 	)
 
 if (APPLE)
@@ -292,6 +359,49 @@ endif ()
 
 add_library(lgi SHARED ${Source})
 
+add_library(lgi-stub STATIC
+    src/common/Gdc2/Font/Charset.cpp
+    src/common/General/Containers.cpp
+    src/common/General/DateTime.cpp
+    src/common/General/FileCommon.cpp
+    src/common/Lgi/Library.cpp
+    src/common/Lgi/LgiCommon.cpp
+    src/common/Lgi/Mutex.cpp
+    src/common/Lgi/Stream.cpp
+    src/common/Lgi/ThreadCommon.cpp
+    src/common/Lgi/Variant.cpp
+    src/common/Lgi/LMsg.cpp
+    src/common/Lgi/Rand.cpp
+    src/common/Text/String.cpp
+    src/common/Text/Token.cpp
+    src/common/Text/Unicode.cpp)
+
+target_compile_definitions(lgi-stub
+	PRIVATE
+		LGI_LIBRARY
+		LGI_STATIC)
+
+target_include_directories(lgi-stub
+	PUBLIC
+		include)
+
+if (WIN32)
+	target_sources(lgi-stub
+		PRIVATE
+		    src/win/General/File.cpp
+			src/win/General/Mem.cpp
+			src/win/Lgi/General.cpp
+			src/win/Lgi/Thread.cpp)
+	target_include_directories(lgi-stub
+		PUBLIC
+			include/lgi/win)
+	target_compile_definitions(lgi-stub
+		PUBLIC
+			WINDOWS
+			_UNICODE
+			UNICODE)
+endif()
+
 if (DEFINED LGI_LIB_POSTFIX)
 	set_target_properties(lgi
 		PROPERTIES 
@@ -395,7 +505,7 @@ elseif (MSVC)
 	target_compile_definitions(lgi
 		PUBLIC
 			WINDOWS
-			WIN32
+			WIN64
 			_WINDLL
 			_UNICODE
 			UNICODE
@@ -451,6 +561,7 @@ add_subdirectory(HtmlTest)
 add_subdirectory(ScriptingUnitTests)
 add_subdirectory(SlogViewer)
 add_subdirectory(Updater)
+add_subdirectory(src/common/Net/libntlm-0.4.2)
 if(WIN32)
 	add_subdirectory(VsLaunch)
 endif()

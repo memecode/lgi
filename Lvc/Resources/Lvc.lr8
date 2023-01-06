@@ -6,7 +6,6 @@
 		<String Ref="3" Cid="501" Define="IDC_COMMIT" en="Commit" />
 		<String Ref="5" Cid="502" Define="IDC_PULL" en="Pull" />
 		<String Ref="6" Cid="503" Define="IDC_PUSH" en="Push" />
-		<String Ref="7" Cid="-1" Define="IDC_STATIC" en="Filter:" />
 		<String Ref="9" Cid="507" Define="IDD_COMMIT" en="Commit" />
 		<String Ref="10" Cid="504" Define="IDC_COMMIT_TABLE" />
 		<String Ref="11" Cid="11" Define="IDC_BRANCH" />
@@ -15,7 +14,6 @@
 		<String Ref="14" Cid="14" Define="IDC_BRANCH_DROPDOWN" />
 		<String Ref="15" Cid="-1" Define="IDC_STATIC" en="Commit message:" />
 		<String Ref="16" Cid="16" Define="IDC_MSG" />
-		<String Ref="17" Cid="506" Define="IDC_CLEAR_FILTER" en="X" />
 		<String Ref="18" Cid="509" Define="IDC_OPEN" en="Open Folder" />
 		<String Ref="22" Cid="22" Define="IDD_OPTIONS" en="Options" />
 		<String Ref="23" Cid="23" Define="IDC_OPTIONS_TABLE" />
@@ -291,11 +289,13 @@
 			<String Ref="59" Cid="528" Define="IDM_OPEN_REMOTE" en="Open Remote" />
 			<String Ref="60" Cid="529" Define="IDM_MENU_529" />
 			<String Ref="83" Cid="530" Define="IDM_OPEN_DIFF" en="Open Diff File" />
+			<String Ref="8" Cid="505" Define="IDM_PATCH_VIEWER" en="Patch File" />
+			<String Ref="7" Cid="506" Define="IDM_MENU_506" />
+			<String Ref="17" Cid="530" Define="IDM_OPEN_DIFF" en="Diff File" />
 		</string-group>
 		<submenu Ref="4">
 			<menuitem Ref="58" Shortcut="CtrlCmd+O" />
 			<menuitem Ref="59" Shortcut="CtrlCmd+Shift+O" />
-			<menuitem Ref="83" />
 			<menuitem Sep="1" />
 			<menuitem Ref="46" Shortcut="F5" />
 			<menuitem Ref="19" />
@@ -314,6 +314,9 @@
 		</submenu>
 		<submenu Ref="41">
 			<menuitem Ref="49" />
+			<menuitem Sep="1" />
+			<menuitem Ref="8" />
+			<menuitem Ref="17" />
 		</submenu>
 		<submenu Ref="20">
 			<menuitem Ref="21" />

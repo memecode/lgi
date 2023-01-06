@@ -1877,6 +1877,15 @@ const char16 *LTextView3::NameW()
 	return Text;
 }
 
+const char16 *LTextView3::TextAtLine(size_t Index)
+{
+	if (Index >= Line.Length())
+		return NULL;
+
+	auto ln = Line[Index];
+	return Text + ln->Start;	
+}
+
 bool LTextView3::NameW(const char16 *s)
 {
 	DeleteArray(Text);
@@ -2709,13 +2718,13 @@ ssize_t LTextView3::GetLine()
 	return Idx + 1;
 }
 
-void LTextView3::SetLine(int64_t i)
+void LTextView3::SetLine(int64_t i, bool select)
 {
 	LTextLine *l = Line.ItemAt(i - 1);
 	if (l)
 	{
 		d->CenterCursor = true;
-		SetCaret(l->Start, false);
+		SetCaret(l->Start, select);
 		d->CenterCursor = false;
 	}
 }

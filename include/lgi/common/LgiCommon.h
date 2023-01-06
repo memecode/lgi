@@ -66,7 +66,7 @@ LgiExtern LString LGetAppForMimeType
 );
 
 /// \return a formatted file size
-LgiExtern LString LFormatSize(uint64 Size);
+LgiExtern LString LFormatSize(int64_t Size);
 
 /// URL encode a string
 LgiExtern LString LUrlEncode(const char *s, const char *delim);
@@ -183,7 +183,7 @@ LgiFunc void LFormatSize
 	/// Output string buffer length
 	int SLen,
 	/// Input size in bytes
-	uint64 Size
+	int64_t Size
 );
 
 /// \returns true if the path is a volume root.
@@ -228,10 +228,6 @@ LgiFunc bool LGetSystemPath
 	ssize_t DstSize
 );
 
-/// Returns 0 to end search
-/// \ingroup Base
-typedef bool (*RecursiveFileSearch_Callback)(void *UserData, char *Path, class LDirectory *Dir);
-
 /// \brief Recursively search for files
 /// \return Non zero if something was found
 /// \ingroup Base
@@ -248,9 +244,9 @@ LgiFunc bool LRecursiveFileSearch
 	/// [optional] File count
 	uint64 *Count = NULL,
 	/// [optional] Callback for match
-	RecursiveFileSearch_Callback Callback = NULL,
-	/// [options] Callback user data
-	void *UserData = NULL
+	std::function<bool(const char *Path, class LDirectory *Dir)> Callback = NULL,
+	/// [optional] Cancel object
+	LCancel *Cancel = NULL
 );
 
 // Resources

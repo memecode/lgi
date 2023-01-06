@@ -234,9 +234,9 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	OsApplication(AppArgs.Args, AppArgs.Arg)
 {
 	TheApp = this;
+	LgiArgsAppPath = AppArgs.Arg[0];
 	Name(name);
 	d = new LAppPrivate(this);
-	LgiArgsAppPath = AppArgs.Arg[0];
 	if (LIsRelativePath(LgiArgsAppPath))
 	{
 		char Cwd[MAX_PATH_LEN];

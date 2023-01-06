@@ -119,12 +119,12 @@ public:
 	int nCmdShow;
 
 	OsAppArguments();
-	OsAppArguments(int Args, char **Arg);
+	OsAppArguments(int Args, const char **Arg);
 
 	OsAppArguments &operator =(OsAppArguments &p);
 
 	void Set(char *Utf);
-	void Set(int Args, char **Arg);
+	void Set(int Args, const char **Arg);
 };
 
 //////////////////////////////////////////////////////////////////

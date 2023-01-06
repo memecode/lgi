@@ -26,6 +26,18 @@ enum LvcStatus
 	StatusError,
 };
 
+enum LvcResolve
+{
+	ResolveNone,
+	//---
+	ResolveMark,
+	ResolveUnmark,
+	//---
+	ResolveLocal,
+	ResolveIncoming,
+	ResolveTool,
+};
+
 class ReaderThread : public LThread
 {
 	VersionCtrl Vcs;
@@ -255,6 +267,7 @@ class VcFolder : public LTreeItem
 	bool ParsePull(int Result, LString s, ParseParams *Params);
 	bool ParseCounts(int Result, LString s, ParseParams *Params);
 	bool ParseRevert(int Result, LString s, ParseParams *Params);
+	bool ParseResolveList(int Result, LString s, ParseParams *Params);
 	bool ParseResolve(int Result, LString s, ParseParams *Params);
 	bool ParseBlame(int Result, LString s, ParseParams *Params);
 	bool ParseSaveAs(int Result, LString s, ParseParams *Params);
@@ -297,7 +310,7 @@ public:
 	void Pull(int AndUpdate = -1, LoggingType Logging = LogNormal);
 	void Clean();
 	bool Revert(LString::Array &uris, const char *Revision = NULL);
-	bool Resolve(const char *Path);
+	bool Resolve(const char *Path, LvcResolve Type);
 	bool AddFile(const char *Path, bool AsBinary = true);
 	bool Blame(const char *Path);
 	bool SaveFileAs(const char *Path, const char *Revision);

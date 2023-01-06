@@ -425,7 +425,7 @@ LString LStringPipe::NewGStr()
 
 ssize_t LStringPipe::LineChars()
 {
-	ssize_t Len = 0;
+	ssize_t Len = -1;
 
 	for (auto m: Mem)
 	{
@@ -433,13 +433,13 @@ ssize_t LStringPipe::LineChars()
 
 		for (int i = m->Next; i < m->Used; i++)
 		{
+			Len++;
 			if (p[i] == '\n')
 				return Len;
-			Len++;
 		}
 	}
 
-	return -1;
+	return Len;
 }
 
 ssize_t LStringPipe::SaveToBuffer(char *Start, ssize_t BufSize, ssize_t Chars)
@@ -482,15 +482,14 @@ ssize_t LStringPipe::SaveToBuffer(char *Start, ssize_t BufSize, ssize_t Chars)
 ssize_t LStringPipe::Pop(LArray<char> &Buf)
 {
 	ssize_t Chars = LineChars();
-	if (Chars > 0)
-	{
-		Chars++; // For the '\n'
-		if ((ssize_t)Buf.Length() < Chars + 1)
-			if (!Buf.Length(Chars + 1))
-				return -1;
-		SaveToBuffer(Buf.AddressOf(), Chars, Chars);
-	}
-	else return 0;
+	if (Chars < 0)
+		return 0;
+
+	Chars++; // For the '\n'
+	if ((ssize_t)Buf.Length() < Chars + 1)
+		if (!Buf.Length(Chars + 1))
+			return -1;
+	SaveToBuffer(Buf.AddressOf(), Chars, Chars);
 
 	return Chars;
 }
@@ -499,12 +498,16 @@ LString LStringPipe::Pop()
 {
 	LString s;
 	ssize_t Chars = LineChars();
-	if (Chars > 0 &&
-		s.Length(Chars))
+	if (Chars < 0)
+		return s;
+
+	if (Chars == 0)
 	{
-		SaveToBuffer(s.Get(), Chars, Chars);
+		int asd=0;
 	}
 
+	s.Length(Chars);
+	SaveToBuffer(s.Get(), Chars, Chars);
 	return s;
 }
 

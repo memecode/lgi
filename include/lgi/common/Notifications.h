@@ -100,12 +100,12 @@ enum LNotifyType
 	LNotifyLKey,
 	
 	/// User app notification IDs should start with this value:
-	GNotifyUserApp = 0x10000
+	LNotifyUserApp = 0x10000
 	/*
 	e.g.
 	enum MyAppNotifications
 	{
-		NotifyStart = GNotifyUserApp,
+		NotifyStart = LNotifyUserApp,
 		NotifyEnd,
 		NotifyThreadDone,
 	};

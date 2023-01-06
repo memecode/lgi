@@ -66,8 +66,9 @@ typedef int SOCKET;
 // Functions
 LgiNetFunc bool HaveNetConnection();
 LgiNetFunc bool WhatsMyIp(LAutoString &Ip);
-LgiExtern LString LIpStr(uint32_t ip);
-LgiExtern uint32_t LIpHostInt(LString str);
+LgiExtern LString LIpToStr(uint32_t ip);
+LgiExtern uint32_t LIpToInt(LString str); // Convert IP as string to host order int
+LgiExtern uint32_t LHostnameToIp(const char *HostName); // Hostname lookup (DNS), returns IP in host order or 0 on error
 
 /// Make md5 hash
 LgiNetFunc void MDStringToDigest
@@ -426,6 +427,8 @@ class LUdpListener : public LSocket
 	LString Context;
 
 public:
+	bool Status = false;
+
 	/*
 	
 	If this isn't working on Linux, most likely it's a firewall issue.
@@ -444,36 +447,32 @@ public:
 		addr.sin_family = AF_INET;
 		addr.sin_port = htons(port);
 		#ifdef WINDOWS
-		addr.sin_addr.S_un.S_addr = INADDR_ANY;
+			addr.sin_addr.S_un.S_addr = INADDR_ANY;
 		#elif defined(MAC)
-		addr.sin_addr.s_addr = htonl(mc_ip);
+			addr.sin_addr.s_addr = htonl(mc_ip);
 		#else
-		addr.sin_addr.s_addr = INADDR_ANY;
+			addr.sin_addr.s_addr = INADDR_ANY;
 		#endif
 
-		int r = bind(Handle(), (struct sockaddr*)&addr, sizeof(addr));
-		if (r)
+		Context = "LUdpListener.bind";
+		Status = bind(Handle(), (struct sockaddr*)&addr, sizeof(addr)) == 0;
+		if (!Status)
 		{
 			#ifdef WIN32
 			int err = WSAGetLastError();
-			OnError(err, NULL);
+			#else
+			int err = errno;
 			#endif
+			OnError(err, GetErrorName(err));
 
-			LgiTrace("Error: Bind on %s:%i = %i\n", LIpStr(ntohl(addr.sin_addr.s_addr)).Get(), port, r);
-		}
-		else
-		{
-			LgiTrace("Ok: Bind on %s:%i\n", LIpStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
+			LgiTrace("Error: Bind on %s:%i\n", LIpToStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
 		}
 
 		if (mc_ip)
 		{
-			#if 0
-			AddMulticastMember(mc_ip, INADDR_ANY);
-			#else
+			Context = "LUdpListener.AddMulticastMember";
 			for (auto ip: interface_ips)
 				AddMulticastMember(mc_ip, ip);
-			#endif
 		}
 	}
 
@@ -493,14 +492,21 @@ public:
 
 	void OnError(int ErrorCode, const char *ErrorDescription)
 	{
+		LString s;
+		if (Context)
+			s.Printf("Error: %s - %i, %s\n", Context.Get(), ErrorCode, ErrorDescription);
+		else
+			s.Printf("Error: %i, %s\n", ErrorCode, ErrorDescription);
 		if (Log)
-			Log->Print("Error: %s - %i, %s\n", Context.Get(), ErrorCode, ErrorDescription);
+			Log->Print("%s", s.Get());
+		else
+			LgiTrace("%s", s.Get());
 	}
 };
 
 class LUdpBroadcast : public LSocket
 {
-	LArray<Interface> Intf;
+	// LArray<Interface> Intf;
 	uint32_t SelectIf;
 
 public:
@@ -508,7 +514,7 @@ public:
 	{
         SetBroadcast();
 		SetUdp(true);
-		EnumInterfaces(Intf);
+		// EnumInterfaces(Intf);
 	}
 
 	bool BroadcastPacket(LString Data, uint32_t Ip, uint16_t Port)
@@ -527,23 +533,9 @@ public:
 			addr.s_addr = htonl(SelectIf);
 			auto r = setsockopt(Handle(), IPPROTO_IP, IP_MULTICAST_IF, (char*)&addr, sizeof(addr));
 			if (r)
-				LgiTrace("%s:%i - set IP_MULTICAST_IF for '%s' failed: %i\n", _FL, LIpStr(SelectIf).Get(), r);
+				LgiTrace("%s:%i - set IP_MULTICAST_IF for '%s' failed: %i\n", _FL, LIpToStr(SelectIf).Get(), r);
 			SelectIf = 0;
 		}
-		
-		/*
-		uint32 Netmask = 0xffffff00;
-		Interface *Cur = NULL;
-		for (auto &i : Intf)
-		{
-			if (i.Ip4 == Ip)
-			{
-				Netmask = i.Netmask4;
-				Cur = &i;
-				break;
-			}
-		}
-		*/
 		
 		uint32_t BroadcastIp = Ip;
 		#if 0

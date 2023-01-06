@@ -52,15 +52,12 @@ LgiFunc void LExitApp();
 struct LAppArguments
 {
 	/// Don't initialize the skinning engine.
-	bool NoSkin;
+	bool NoSkin = false;
 	/// Don't do crash handling
-	bool NoCrashHandler;
+	bool NoCrashHandler = false;
 
 	LAppArguments(const char *init = NULL)
 	{
-		NoSkin = false;
-		NoCrashHandler = false;
-
 		auto a = LString(init).SplitDelimit(",");
 		for (auto o: a)
 			if (o.Equals("NoCrashHandler"))

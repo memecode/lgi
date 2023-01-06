@@ -49,12 +49,13 @@ add_executable(Lvc ${APP_TYPE}
     Src/VcCommit.cpp
     Src/VcFile.cpp
     Src/VcFolder.cpp
+    Src/PatchViewer.cpp
 	${APP_ICON}
     ${APP_RESOURCES}
 	${APP_MANIFEST}
 	)
 
-target_link_libraries(Lvc lgi libpng15 ssh_shared)
+target_link_libraries(Lvc lgi libpng16 ssh_shared)
 
 if (APPLE)
     macBundlePostBuild(Lvc)

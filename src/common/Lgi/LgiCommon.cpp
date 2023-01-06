@@ -261,7 +261,6 @@ int LGetOs
 		IsWow64Process(GetCurrentProcess(), &IsWow64);
 		#endif
 
-		#if 1
 		SERVER_INFO_101 *v = NULL;
 		auto r = NetServerGetInfo(NULL, 101, (LPBYTE*)&v);
 		if (r == NERR_Success)
@@ -280,31 +279,7 @@ int LGetOs
 
 			NetApiBufferFree(v);
 		}
-		else
-		{
-			LAssert(0);
-		}
-		#else
-		OSVERSIONINFO v;
-		v.dwOSVersionInfoSize = sizeof(v);
-		GetVersionEx(&v);
-
-		Version = v.dwMajorVersion;
-		Revision = v.dwMinorVersion;
-		#ifdef WIN32
-		BOOL IsWow64 = FALSE;
-		IsWow64Process(GetCurrentProcess(), &IsWow64);
-		#endif
-		Os = (v.dwPlatformId == VER_PLATFORM_WIN32_NT)
-			?
-			#ifdef WIN32
-			(IsWow64 ? LGI_OS_WIN64 : LGI_OS_WIN32)
-			#else
-			LGI_OS_WIN64
-			#endif
-			:
-			LGI_OS_WIN9X;
-		#endif
+		else LAssert(0);
 	}
 
 	if (Ver)
@@ -380,32 +355,25 @@ bool LRecursiveFileSearch(const char *Root,
 							LArray<char*> *Files,
 							uint64 *Size,
 							uint64 *Count,
-							RecursiveFileSearch_Callback Callback,
-							void *UserData)
+							std::function<bool(const char *Path, class LDirectory *Dir)> Callback,
+							LCancel *Cancel)
 {
-	bool Status = false;
-
 	// validate args
-	if (!Root) return 0;
+	if (!Root) return false;
 
 	// get directory enumerator
 	LDirectory Dir;
-	Status = true;
+	bool Status = true;
 
 	// enumerate the directory contents
-	for (auto Found = Dir.First(Root); Found; Found = Dir.Next())
+	for (auto Found = Dir.First(Root); Found && (!Cancel || !Cancel->IsCancelled()); Found = Dir.Next())
 	{
 		char Name[300];
 		if (!Dir.Path(Name, sizeof(Name)))
 			continue;
 
-		if (Callback)
-		{
-			if (!Callback(UserData, Name, &Dir))
-			{
-				continue;
-			}
-		}
+		if (Callback && !Callback(Name, &Dir))
+			continue;
 
 		if (Dir.IsDir())
 		{
@@ -416,7 +384,7 @@ bool LRecursiveFileSearch(const char *Root,
 									Size,
 									Count,
 									Callback,
-									UserData);
+									Cancel);
 
 		}
 		else
@@ -441,19 +409,13 @@ bool LRecursiveFileSearch(const char *Root,
 			{
 				// file matched... process:
 				if (Files)
-				{
 					Files->Add(NewStr(Name));
-				}
 
 				if (Size)
-				{
 					*Size += Dir.GetSize();
-				}
 
 				if (Count)
-				{
 					(*Count)++;
-				}
 
 				Status = true;
 			}
@@ -2028,7 +1990,7 @@ LString LGetExeFile()
 			LMakePath(Dest, sizeof(Dest), LgiArgsAppPath, "../../..");
 			return Dest;
 		}
-		else printf("%s:%i - No executable path.", _FL);
+		else printf("%s:%i - No executable path: %s\n", _FL, LgiArgsAppPath.Get());
 	
 		#else
 	
@@ -2332,14 +2294,14 @@ bool LIsVolumeRoot(const char *Path)
 	return false;
 }
 
-LString LFormatSize(uint64 Size)
+LString LFormatSize(int64_t Size)
 {
 	char Buf[64];
 	LFormatSize(Buf, sizeof(Buf), Size);
 	return Buf;
 }
 
-void LFormatSize(char *Str, int SLen, uint64 Size)
+void LFormatSize(char *Str, int SLen, int64_t Size)
 {
 	uint64 K = 1024;
 	uint64 M = K * K;
@@ -2356,7 +2318,7 @@ void LFormatSize(char *Str, int SLen, uint64 Size)
 	}
 	else if (Size < 10 * K)
 	{
-		double d = (double)(int64)Size;
+		double d = (double)Size;
 		sprintf_s(Str, SLen, "%.2f KiB", d / K);
 	}
 	else if (Size < M)
@@ -2365,17 +2327,17 @@ void LFormatSize(char *Str, int SLen, uint64 Size)
 	}
 	else if (Size < G)
 	{
-		double d = (double)(int64)Size;
+		double d = (double)Size;
 		sprintf_s(Str, SLen, "%.2f MiB", d / M);
 	}
 	else if (Size < T)
 	{
-		double d = (double)(int64)Size;
+		double d = (double)Size;
 		sprintf_s(Str, SLen, "%.2f GiB", d / G);
 	}
 	else
 	{
-		double d = (double)(int64)Size;
+		double d = (double)Size;
 		sprintf_s(Str, SLen, "%.2f TiB", d / T);
 	}
 }

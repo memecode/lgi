@@ -403,7 +403,7 @@ bool LFontType::GetSystemFont(const char *Which)
 	if (Offset)
 	{
 		auto i = Offset.Int();
-		if (i != 0 && std::abs(i < 20))
+		if (i != 0 && std::abs(i) < 20)
 			PtSizeOffset = (int)i;
 	}
 

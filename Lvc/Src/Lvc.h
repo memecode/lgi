@@ -22,6 +22,7 @@
 
 #define APP_VERSION			"0.8"
 extern const char *AppName;
+extern void OpenPatchViewer(LViewI *Parent, LOptionsFile *Opts);
 
 enum LvcIcon
 {
@@ -35,7 +36,7 @@ enum LvcIcon
 
 enum LvcNotify
 {
-	 LvcBase = GNotifyUserApp,
+	 LvcBase = LNotifyUserApp,
 	 LvcCommandStart,
 	 LvcCommandEnd
 };
@@ -91,7 +92,11 @@ enum AppIds
 	IDM_ADD_BINARY_FILE,
 	IDM_BROWSE_FOLDER,
 	IDM_TERMINAL,
-	IDM_RESOLVE,
+	IDM_RESOLVE_MARK,
+	IDM_RESOLVE_UNMARK,
+	IDM_RESOLVE_LOCAL,
+	IDM_RESOLVE_INCOMING,
+	IDM_RESOLVE_TOOL,
 	IDM_MERGE,
 	IDM_LOG_FILE,
 	IDM_COPY_PATH,

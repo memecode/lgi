@@ -45,7 +45,7 @@ add_executable(LgiRes ${APP_TYPE}
 	${APP_ICON})
 
 target_include_directories(LgiRes PRIVATE Code Resources)
-target_link_libraries(LgiRes lgi libpng15)
+target_link_libraries(LgiRes lgi libpng16)
 
 if (APPLE)
     macBundlePostBuild(LgiRes)

@@ -127,10 +127,10 @@ int MibII::GetInterfaces(MibInterface *In, int Max)
 	UINT IfDescr[] = { 1, 3, 6, 1, 2, 1, 2, 2, 1, 2 };
 	UINT IfName[]  = { 1, 3, 6, 1, 2, 1, 31, 1, 1 };
 	
-	AsnObjectIdentifier IpAddrId = { sizeof(IpAddr)/sizeof(UINT), IpAddr };
+	AsnObjectIdentifier IpAddrId =  { sizeof(IpAddr)/sizeof(UINT),  IpAddr };
 	AsnObjectIdentifier NetMaskId = { sizeof(NetMask)/sizeof(UINT), NetMask };
 	AsnObjectIdentifier IfDescrId = { sizeof(IfDescr)/sizeof(UINT), IfDescr };
-	AsnObjectIdentifier IfNameId = { sizeof(IfName)/sizeof(UINT), IfName };
+	AsnObjectIdentifier IfNameId =  { sizeof(IfName)/sizeof(UINT),  IfName };
 	
 	RFC1157VarBindList  varBindList = {0};
 	RFC1157VarBind      varBind[3] = {0};

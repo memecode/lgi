@@ -258,7 +258,7 @@ const char *VcCommit::GetText(int Col)
 
 bool VcCommit::GitParse(LString s, bool RevList)
 {
-	LString::Array lines = s.Split(EOL_SEQUENCE);
+	LString::Array lines = s.Replace("\r","").Split("\n");
 	if (lines.Length() < 3)
 		return false;
 

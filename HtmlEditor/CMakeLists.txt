@@ -52,7 +52,7 @@ target_include_directories(HtmlEdit
 target_link_libraries(HtmlEdit
 	PRIVATE
 		lgi
-		libpng15
+		libpng16
 		libjpeg9a)
 
 if (APPLE)

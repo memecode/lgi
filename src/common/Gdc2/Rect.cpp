@@ -135,7 +135,7 @@ int LRect::Near(LRect &r)
 	}
 }
 
-bool LRect::Valid()
+bool LRect::Valid() const
 {
 	return (x1 <= x2 && y1 <= y2);
 }
@@ -201,17 +201,17 @@ void LRect::Bound(LRect *b)
 	y2 = MIN(y2,b->y2);
 }
 
-bool LRect::Overlap(LPoint &pt)
+bool LRect::Overlap(const LPoint &pt) const
 {
 	return (pt.x >= x1) && (pt.x <= x2) && (pt.y >= y1) && (pt.y <= y2);
 }
 
-bool LRect::Overlap(int x, int y)
+bool LRect::Overlap(int x, int y) const
 {
 	return (x >= x1) && (x <= x2) && (y >= y1) && (y <= y2);
 }
 
-bool LRect::Overlap(LRect *b)
+bool LRect::Overlap(const LRect *b) const
 {
 	if (Valid() &&
 		b->Valid() &&

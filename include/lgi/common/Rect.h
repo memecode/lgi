@@ -105,7 +105,7 @@ public:
 	void Normal();
 	
 	/// Returns true if the rectangle is valid
-	bool Valid();
+	bool Valid() const;
 	
 	/// Moves the rectangle by an offset
 	void Offset(int x, int y);
@@ -137,13 +137,13 @@ public:
 	void Bound(LRect *b);
 
 	/// Returns true if the point 'x,y' is in this rectangle
-	bool Overlap(int x, int y);
+	bool Overlap(int x, int y) const;
 
 	/// Returns true if the point 'pt' is in this rectangle
-	bool Overlap(LPoint &pt);
+	bool Overlap(const LPoint &pt) const;
 
 	/// Returns true if the rectangle 'b' overlaps this rectangle
-	bool Overlap(LRect *b);
+	bool Overlap(const LRect *b) const;
 	
 	/// Enlarges this rectangle to include the point 'x,y'
 	void Union(int x, int y);

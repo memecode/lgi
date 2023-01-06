@@ -93,12 +93,25 @@ public:
 							p.Print("%.*s", (int)v.data.Length(), v.data.AddressOf());
 						break;
 					}
+					case GV_CUSTOM:
+					{
+						p.Print("Object: %s", v.name.Get());
+						break;
+					}
+					case GV_VOID_PTR:
+					{
+						p.Print("/Object");
+						break;
+					}
 					default:
 					{
 						LAssert(!"Unknown type.");
 						break;
 					}
 				}
+
+				if (p.GetSize() > 64)
+					break;
 			}
 
 			cache = p.NewGStr();
@@ -117,11 +130,75 @@ public:
 		if (b)
 		{
 			LStringPipe p;
+			LString Obj;
+			int Idx = 0;
+
+			auto PrintEscaped = [&](char *s, char *e)
+			{
+				for (auto c = s; c < e; c++)
+				{
+					switch (*c)
+					{
+						case '\\': p.Print("\\\\");  break;
+						case '\t': p.Print("\\t");   break;
+						case '\r': p.Print("\\r");   break;
+						case '\n': p.Print("\\n\n"); break;
+						case 0x07: p.Print("\\b");   break;
+						case 0x1b: p.Print("\\e");   break;
+						default:
+							if (*c < ' ' || *c >= 128)
+							{
+								LString hex;
+								hex.Printf("\\x%x", (uint8_t)*c);
+								p.Write(hex);
+							}
+							else p.Write(c, 1);
+							break;
+
+					}
+				}
+			};
 
 			for (auto &v: values)
 			{
 				auto sType = LVariant::TypeToString(v.type);
-				p.Print("%s, %i bytes:\n", sType, (int)v.data.Length());
+				
+				switch (v.type)
+				{
+					case GV_CUSTOM:
+					{
+						p.Print("object %s {\n\n", v.name.Get());
+						Obj = v.name;
+						Idx = 0;
+						continue;
+					}
+					case GV_VOID_PTR:
+					{
+						p.Print("}\n");
+						Obj.Empty();
+						continue;
+					}
+					case GV_STRING:
+					{
+						if (Obj == "LConsole")
+						{
+							auto s = (char*)v.data.AddressOf();
+							auto e = s + v.data.Length();
+							p.Print("[%i]=", Idx++);
+							PrintEscaped(s, e);
+							p.Print("\n");
+							continue;
+						}
+						break;
+					}
+				}				
+				
+				p.Print("%s, %i bytes%s%s:\n",
+					sType,
+					(int)v.data.Length(),
+					v.name ? ", " : "",
+					v.name ? v.name.Get() : "");
+
 				switch (v.type)
 				{
 					case GV_INT32:
@@ -175,28 +252,9 @@ public:
 						}
 						else if (mode == DisplayEscaped)
 						{
-							auto s = v.data.AddressOf();
+							auto s = (char*)v.data.AddressOf();
 							auto e = s + v.data.Length();
-
-							for (auto c = s; c < e; c++)
-							{
-								switch (*c)
-								{
-									case '\\': p.Print("\\\\"); break;
-									case '\t': p.Print("\\t"); break;
-									case '\r': p.Print("\\r"); break;
-									case '\n': p.Print("\\n\n"); break;
-									case 0x07: p.Print("\\b"); break;
-									case 0x1b: p.Print("\\e"); break;
-									default:
-										if (*c < ' ' || *c >= 128)
-											p.Write("\\x%x", (uint8_t)*c);
-										else
-											p.Write(c, 1);
-										break;
-
-								}
-							}
+							PrintEscaped(s, e);
 							if (e > s && e[-1] != '\n')
 								p.Write("\n");
 						}
