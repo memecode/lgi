@@ -36,6 +36,7 @@ public:
 	void Value(int64 v) override;
 	LFont *GetFont() override;
 	void UpdateUI();
+	void SetStartTs();
 
 	LProgressPane &operator++(int);
 	LProgressPane &operator--(int);

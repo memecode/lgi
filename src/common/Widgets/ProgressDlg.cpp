@@ -168,6 +168,11 @@ bool LProgressPane::SetRange(const LRange &r)
 	return true;
 }
 
+void LProgressPane::SetStartTs()
+{
+	Start = LCurrentTime();
+}
+
 void LProgressPane::UpdateUI()
 {
 	if (!UiDirty)
