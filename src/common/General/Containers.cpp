@@ -501,11 +501,6 @@ LString LStringPipe::Pop()
 	if (Chars < 0)
 		return s;
 
-	if (Chars == 0)
-	{
-		int asd=0;
-	}
-
 	s.Length(Chars);
 	SaveToBuffer(s.Get(), Chars, Chars);
 	return s;

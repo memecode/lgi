@@ -17,6 +17,7 @@
 
 #ifdef __OBJC__
 #import <Cocoa/Cocoa.h>
+#import <AppKit/NSEvent.h>
 #endif
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreText/CoreText.h>
@@ -217,6 +218,10 @@ enum LDialogIds
 /// \sa LMouse
 #define LGI_VMOUSE_DOUBLE			0x400
 
+#ifndef __OBJC__
+#define NSDeleteFunctionKey			0xF728
+#endif
+
 #define MacKeyDef() \
 	_(A, 0) _(B, 11) _(C, 8) _(D, 2) _(E, 14) _(F, 3) \
 	_(G, 5) _(H, 4) _(I, 34) _(J, 38) _(K, 40) _(L, 37) \
@@ -260,7 +265,7 @@ enum LDialogIds
 	_(INSERT, 114) \
 	_(HOME, 115) \
 	_(PAGEUP, 116) \
-	_(DELETE, 117) \
+	_(DELETE, 117) _(DELETEFORWARD, NSDeleteFunctionKey) \
 	_(END, 119) \
 	_(PAGEDOWN, 121) \
 	_(LEFT, 123) _(RIGHT, 124) _(DOWN, 125) _(UP, 126)

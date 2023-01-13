@@ -1511,7 +1511,6 @@ bool LZoomView::OnMouseWheel(double Lines)
 			LSurface *Src = d->pDC;
 			if (Src)
 			{
-				LRect c = GetClient();
 				int Factor = d->Factor();
 
 				int NewSx, NewSy;
@@ -1654,17 +1653,16 @@ int LZoomView::OnNotify(LViewI *v, LNotification n)
 			#endif
 			SendNotify(LNotifyViewportChanged);
 
+			#if 0
 			if (HScroll)
 			{
 				auto r = HScroll->GetRange();
 				auto p = HScroll->Page();
 				auto v = HScroll->Value();
-
-				#if 0
 				LgiTrace("Notify v=%i p=%i r=%i,%i exp=%i\n",
 					(int)v, (int)p, (int)r.Start, (int)r.End(), (int)(r.End()-p));
-				#endif
 			}
+			#endif
 			break;
 		}
 	}
