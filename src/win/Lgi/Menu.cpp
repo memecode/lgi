@@ -671,7 +671,8 @@ bool LMenuItem::ScanForAccel()
 		if (Keys.Length() > 0)
 		{
 			int Flags = 0;
-			uchar Key = 0;
+			int Vkey = 0;
+			int Chr = 0;
 			bool AccelDirty = false;
 			
 			for (int i=0; i<Keys.Length(); i++)
@@ -704,85 +705,85 @@ bool LMenuItem::ScanForAccel()
 				else if (stricmp(k, "Del") == 0 ||
 						 stricmp(k, "Delete") == 0)
 				{
-					Key = VK_DELETE;
+					Vkey = VK_DELETE;
 					Flags |= LGI_EF_IS_NOT_CHAR;
 				}
 				else if (stricmp(k, "Ins") == 0 ||
 						 stricmp(k, "Insert") == 0)
 				{
-					Key = VK_INSERT;
+					Vkey = VK_INSERT;
 					Flags |= LGI_EF_IS_NOT_CHAR;
 				}
 				else if (stricmp(k, "Home") == 0)
 				{
-					Key = VK_HOME;
+					Vkey = VK_HOME;
 					Flags |= LGI_EF_IS_NOT_CHAR;
 				}
 				else if (stricmp(k, "End") == 0)
 				{
-					Key = VK_END;
+					Vkey = VK_END;
 					Flags |= LGI_EF_IS_NOT_CHAR;
 				}
 				else if (stricmp(k, "PageUp") == 0 ||
 						 stricmp(k, "Page Up") == 0 ||
 						 stricmp(k, "Page-Up") == 0)
 				{
-					Key = VK_PRIOR;
+					Vkey = VK_PRIOR;
 					Flags |= LGI_EF_IS_NOT_CHAR;
 				}
 				else if (stricmp(k, "PageDown") == 0 ||
 						 stricmp(k, "Page Down") == 0 ||
 						 stricmp(k, "Page-Down") == 0)
 				{
-					Key = VK_NEXT;
+					Vkey = VK_NEXT;
 					Flags |= LGI_EF_IS_NOT_CHAR;
 				}
 				else if (stricmp(k, "Backspace") == 0)
 				{
-					Key = VK_BACK;
+					Vkey = VK_BACK;
 					Flags |= LGI_EF_IS_NOT_CHAR;
 				}
 				else if (stricmp(k, "Up") == 0)
 				{
-					Key = VK_UP;
+					Vkey = VK_UP;
 					Flags |= LGI_EF_IS_NOT_CHAR;
 				}
 				else if (stricmp(k, "Down") == 0)
 				{
-					Key = VK_DOWN;
+					Vkey = VK_DOWN;
 					Flags |= LGI_EF_IS_NOT_CHAR;
 				}
 				else if (stricmp(k, "Left") == 0)
 				{
-					Key = VK_LEFT;
+					Vkey = VK_LEFT;
 					Flags |= LGI_EF_IS_NOT_CHAR;
 				}
 				else if (stricmp(k, "Right") == 0)
 				{
-					Key = VK_RIGHT;
+					Vkey = VK_RIGHT;
 					Flags |= LGI_EF_IS_NOT_CHAR;
 				}
 				else if (stricmp(k, "Esc") == 0)
 				{
-					Key = VK_ESCAPE;
+					Vkey = VK_ESCAPE;
 					Flags |= LGI_EF_IS_NOT_CHAR;
 				}
 				else if (stricmp(k, "Space") == 0)
 				{
-					Key = ' ';
+					Chr = ' ';
 				}
 				else if (k[0] == 'F' && IsDigit(k[1]))
 				{
-					Key = VK_F1 + (int)k.LStrip("F").Int() - 1;
+					Vkey = VK_F1 + (int)k.LStrip("F").Int() - 1;
 					Flags |= LGI_EF_IS_NOT_CHAR;
 				}
 				else if (IsAlpha(k[0]))
 				{
-					Key = toupper(k[0]);
+					Chr = toupper(k[0]);
 				}
 				else if (IsDigit(k[0]))
 				{
-					Key = k[0];
+					Chr = k[0];
 				}
 				else if (strchr(",./\\[]`;\'", k[0]))
 				{
@@ -790,23 +791,23 @@ bool LMenuItem::ScanForAccel()
 					{
 						switch (k[0])
 						{
-							case ';': Key = 186; break;
-							case '=': Key = 187; break;
-							case ',': Key = 188; break;
-							case '_': Key = 189; break;
-							case '.': Key = 190; break;
-							case '/': Key = 191; break;
-							case '`': Key = 192; break;
-							case '[': Key = 219; break;
-							case '\\': Key = 220; break;
-							case ']': Key = 221; break;
-							case '\'': Key = 222; break;
+							case ';': Chr = 186; break;
+							case '=': Chr = 187; break;
+							case ',': Chr = 188; break;
+							case '_': Chr = 189; break;
+							case '.': Chr = 190; break;
+							case '/': Chr = 191; break;
+							case '`': Chr = 192; break;
+							case '[': Chr = 219; break;
+							case '\\': Chr = 220; break;
+							case ']': Chr = 221; break;
+							case '\'': Chr = 222; break;
 							default: LAssert(!"Unknown key."); break;
 						}
 					}
 					else
 					{
-						Key = k[0];
+						Chr = k[0];
 					}
 				}
 				else
@@ -823,9 +824,9 @@ bool LMenuItem::ScanForAccel()
 				d->UpdateStrings(Font, n);
 			}
 			
-			if (Key && Menu)
+			if ((Vkey || Chr) && Menu)
 			{
-				Menu->Accel.Insert( new LAccelerator(Flags, Key, Id()) );
+				Menu->Accel.Insert( new LAccelerator(Flags, Vkey, Chr, Id()) );
 			}
 		}
 	}
@@ -1222,17 +1223,26 @@ bool LMenu::SetPrefAndAboutItems(int PrefId, int AboutId)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-LAccelerator::LAccelerator(int flags, int key, int id)
+LAccelerator::LAccelerator(int flags, int vkey, int chr, int id)
 {
 	Flags = flags;
-	Key = key;
+	Vkey = vkey;
+	Chr = chr;
 	Id = id;
 }
 
 bool LAccelerator::Match(LKey &k)
 {
-	if (!k.IsChar &&
-		tolower(k.vkey) == tolower(Key))
+	if
+	(
+		!k.IsChar
+		&&
+		(
+			(Chr != 0 && tolower(k.c16) == tolower(Chr))
+			||
+			(Vkey != 0 && k.vkey == Vkey)
+		)
+	)
 	{
 		if
 		(
