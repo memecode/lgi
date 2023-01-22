@@ -4275,6 +4275,7 @@ void LHtmlTableLayout::AllocatePx(int StartCol, int Cols, int MinPx, bool HasToF
 								
 			LAssert(AddPx >= 0);
 			MinCol[x] += AddPx;
+			LAssert(MinCol[x] >= 0);
 			Added += AddPx;
 		}
 
@@ -4305,13 +4306,14 @@ void LHtmlTableLayout::AllocatePx(int StartCol, int Cols, int MinPx, bool HasToF
 				if (i == Growable.Length() - 1)
 				{
 					MinCol[x] += RemainingPx - Added;
+					LAssert(MinCol[x] >= 0);
 				}
 				else
 				{
 					MinCol[x] += AddPx;
+					LAssert(MinCol[x] >= 0);
 					Added += AddPx;
 				}
-				LAssert(MinCol[x] >= 0);
 			}
 		}
 	}
@@ -4361,15 +4363,21 @@ void LHtmlTableLayout::DeallocatePx(int StartCol, int Cols, int MaxPx)
 	
 	Inf.Sort(ColInfoCmp);
 	
-	for (unsigned i=0; i<Interesting; i++)
+	if (InterestingPx > 0)
 	{
-		ColInfo &ci = Inf[i];
-		double r = (double)ci.Px / InterestingPx;
-		int DropPx = (int) (r * TrimPx);
-		if (DropPx < MinCol[ci.Idx])
-			MinCol[ci.Idx] -= DropPx;
-		else
-			break;
+		for (unsigned i=0; i<Interesting; i++)
+		{
+			ColInfo &ci = Inf[i];
+			double r = (double)ci.Px / InterestingPx;
+			int DropPx = (int) (r * TrimPx);
+			if (DropPx < MinCol[ci.Idx])
+			{
+				MinCol[ci.Idx] -= DropPx;
+				LAssert(MinCol[ci.Idx] >= 0);
+			}
+			else
+				break;
+		}
 	}
 }
 
@@ -4495,6 +4503,7 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 									t->Cell->PaddingPx.x2;
 
 						MinCol[x] = MAX(MinCol[x], t->Cell->MinContent + BoxPx);
+						LAssert(MinCol[x] >= 0);
 						MaxCol[x] = MAX(MaxCol[x], t->Cell->MaxContent + BoxPx);
 					}
 				}
@@ -4627,6 +4636,7 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 					
 					TotalX += AddPx;
 					MinCol[x] += AddPx;
+					LAssert(MinCol[x] >= 0);
 				}
 			}
 		}
@@ -4652,6 +4662,7 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 		if (Take < MinCol[Largest])
 		{
 			MinCol[Largest] = MinCol[Largest] - Take;
+			LAssert(MinCol[Largest] >= 0);
 			TotalX -= Take;
 		}
 
@@ -4673,54 +4684,56 @@ void LHtmlTableLayout::LayoutTable(LFlowRegion *f, uint16 Depth)
 		int XPos = CellSpacing;
 		for (int x=0; x<s.x; )
 		{
-			LTag *t = Get(x, y);
-			if (t)
+			auto t = Get(x, y);
+			if (!t)
 			{
-				if (t->Cell->Pos.x == x && t->Cell->Pos.y == y)
+				x++;
+				continue;
+			}
+
+			if (t->Cell->Pos.x == x && t->Cell->Pos.y == y)
+			{
+				t->Pos.x = XPos;
+				t->Size.x = -CellSpacing;
+				XPos -= CellSpacing;
+					
+				RowPad[y].y1 = MAX(RowPad[y].y1, t->Cell->BorderPx.y1 + t->Cell->PaddingPx.y1);
+				RowPad[y].y2 = MAX(RowPad[y].y2, t->Cell->BorderPx.y2 + t->Cell->PaddingPx.y2);
+					
+				LRect Box(0, 0, -CellSpacing, 0);
+				for (int i=0; i<t->Cell->Span.x; i++)
 				{
-					t->Pos.x = XPos;
-					t->Size.x = -CellSpacing;
-					XPos -= CellSpacing;
+					int ColSize = MinCol[x + i] + CellSpacing;
+					LAssert(ColSize >= 0);
+					if (ColSize < 0)
+						break;
+					t->Size.x += ColSize;
+					XPos += ColSize;
+					Box.x2 += ColSize;
+				}
 					
-					RowPad[y].y1 = MAX(RowPad[y].y1, t->Cell->BorderPx.y1 + t->Cell->PaddingPx.y1);
-					RowPad[y].y2 = MAX(RowPad[y].y2, t->Cell->BorderPx.y2 + t->Cell->PaddingPx.y2);
-					
-					LRect Box(0, 0, -CellSpacing, 0);
-					for (int i=0; i<t->Cell->Span.x; i++)
-					{
-						int ColSize = MinCol[x + i] + CellSpacing;
-						LAssert(ColSize >= 0);
-						if (ColSize < 0)
-							break;
-						t->Size.x += ColSize;
-						XPos += ColSize;
-						Box.x2 += ColSize;
-					}
-					
-					LCss::Len Ht = t->Height();
-					LFlowRegion r(Table->Html, Box, true);
+				LCss::Len Ht = t->Height();
+				LFlowRegion r(Table->Html, Box, true);
 
-					t->OnFlow(&r, Depth+1);
+				t->OnFlow(&r, Depth+1);
 
-					if (r.MAX.y > r.y2)
-					{
-						t->Size.y = MAX(r.MAX.y, t->Size.y);
-					}
-
-					
-					if (Ht.IsValid() &&
-						Ht.Type != LCss::LenPercent)
-					{
-						int h = f->ResolveY(Ht, t, false);
-						t->Size.y = MAX(h, t->Size.y);
-
-						DistributeSize(MaxRow, y, t->Cell->Span.y, t->Size.y, CellSpacing);
-					}
+				if (r.MAX.y > r.y2)
+				{
+					t->Size.y = MAX(r.MAX.y, t->Size.y);
 				}
 
-				x += t->Cell->Span.x;
+					
+				if (Ht.IsValid() &&
+					Ht.Type != LCss::LenPercent)
+				{
+					int h = f->ResolveY(Ht, t, false);
+					t->Size.y = MAX(h, t->Size.y);
+
+					DistributeSize(MaxRow, y, t->Cell->Span.y, t->Size.y, CellSpacing);
+				}
 			}
-			else break;
+
+			x += t->Cell->Span.x;
 		}
 	}
 
