@@ -768,7 +768,8 @@ bool LMenuItem::ScanForAccel()
 	if (Keys.Length() > 0)
 	{
 		int Flags = 0;
-		char16 Key = 0;
+		int Vkey = 0;
+		int Chr = 0;
 		
 		for (int i=0; i<Keys.Length(); i++)
 		{
@@ -806,69 +807,69 @@ bool LMenuItem::ScanForAccel()
 			else if (stricmp(k, "Del") == 0 ||
 					 stricmp(k, "Delete") == 0)
 			{
-				Key = LK_DELETE;
+				Vkey = LK_DELETE;
 			}
 			else if (stricmp(k, "Ins") == 0 ||
 					 stricmp(k, "Insert") == 0)
 			{
-				Key = LK_INSERT;
+				Vkey = LK_INSERT;
 			}
 			else if (stricmp(k, "Home") == 0)
 			{
-				Key = LK_HOME;
+				Vkey = LK_HOME;
 			}
 			else if (stricmp(k, "End") == 0)
 			{
-				Key = LK_END;
+				Vkey = LK_END;
 			}
 			else if (stricmp(k, "PageUp") == 0)
 			{
-				Key = LK_PAGEUP;
+				Vkey = LK_PAGEUP;
 			}
 			else if (stricmp(k, "PageDown") == 0)
 			{
-				Key = LK_PAGEDOWN;
+				Vkey = LK_PAGEDOWN;
 			}
 			else if (stricmp(k, "Backspace") == 0)
 			{
-				Key = LK_BACKSPACE;
+				Vkey = LK_BACKSPACE;
 			}
 			else if (stricmp(k, "Left") == 0)
 			{
-				Key = LK_LEFT;
+				Vkey = LK_LEFT;
 			}
 			else if (stricmp(k, "Up") == 0)
 			{
-				Key = LK_UP;
+				Vkey = LK_UP;
 			}
 			else if (stricmp(k, "Right") == 0)
 			{
-				Key = LK_RIGHT;
+				Vkey = LK_RIGHT;
 			}
 			else if (stricmp(k, "Down") == 0)
 			{
-				Key = LK_DOWN;
+				Vkey = LK_DOWN;
 			}
 			else if (!stricmp(k, "Esc") || !stricmp(k, "Escape"))
 			{
-				Key = LK_ESCAPE;
+				Vkey = LK_ESCAPE;
 			}
 			else if (stricmp(k, "Space") == 0)
 			{
-				Key = ' ';
+				Chr = ' ';
 			}
 			else if (k[0] == 'F' && isdigit(k[1]))
 			{
 				int Idx = atoi(k+1);
-				Key = LK_F1 + Idx - 1;
+				Vkey = LK_F1 + Idx - 1;
 			}
 			else if (isalpha(k[0]))
 			{
-				Key = toupper(k[0]);
+				Chr = toupper(k[0]);
 			}
 			else if (isdigit(k[0]) || strchr(",", k[0]))
 			{
-				Key = k[0];
+				Chr = k[0];
 			}
 			else
 			{
@@ -876,9 +877,9 @@ bool LMenuItem::ScanForAccel()
 			}
 		}
 		
-		if (Key)
+		if (Vkey || Chr)
 		{
-			Gtk::gint GtkKey = LgiKeyToGtkKey(Key, Sc);
+			Gtk::gint GtkKey = LgiKeyToGtkKey(Vkey ? Vkey : Chr, Sc);
 			if (GtkKey)
 			{
 				GtkWidget *w = GtkCast(Info.obj, gtk_widget, GtkWidget);
@@ -908,7 +909,7 @@ bool LMenuItem::ScanForAccel()
 			
 			auto Ident = Id();
 			LAssert(Ident > 0);
-			Menu->Accel.Insert( new LAccelerator(Flags, Key, Ident) );
+			Menu->Accel.Insert( new LAccelerator(Flags, Vkey, Chr, Ident) );
 		}
 		else
 		{
@@ -1665,10 +1666,11 @@ bool LMenu::OnKey(LView *v, LKey &k)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-LAccelerator::LAccelerator(int flags, int key, int id)
+LAccelerator::LAccelerator(int flags, int vkey, int chr, int id)
 {
 	Flags = flags;
-	Key = key;
+	Vkey = vkey;
+	Chr = chr;
 	Id = id;
 }
 
@@ -1686,7 +1688,7 @@ bool LAccelerator::Match(LKey &k)
 		return false;
 	}
 	
-	#if 1
+	#if 0
 	LOG("LAccelerator::Match %i(%c)%s%s%s = %i(%c)%s%s%s%s\n",
 		Press,
 		Press>=' '?Press:'.',
@@ -1702,7 +1704,12 @@ bool LAccelerator::Match(LKey &k)
 		);
 	#endif
 
-	if (toupper(Press) == (uint)Key)
+	if
+	(
+		(Chr != 0 && toupper(k.c16) == toupper(Chr))
+		||
+		(Vkey != 0 || k.vkey == Vkey)
+	)
 	{
 		if
 		(
