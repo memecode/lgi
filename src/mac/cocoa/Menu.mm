@@ -48,6 +48,7 @@
 
 - (void)activate
 {
+	printf("activate\n");
 	self.item->OnActivate(self.item);
 }
 
@@ -799,7 +800,8 @@ bool LMenuItem::ScanForAccel()
 	if (Keys.Length() > 0)
 	{
 		int Flags = 0;
-		char16 Key = 0;
+		int Vkey = 0;
+		int Chr = 0;
 		
 		for (int i=0; i<Keys.Length(); i++)
 		{
@@ -817,53 +819,60 @@ bool LMenuItem::ScanForAccel()
 				Flags |= LGI_EF_SHIFT;
 			else if (stricmp(k, "Del") == 0 ||
 					 stricmp(k, "Delete") == 0)
-				Key = LK_DELETE;
+				Vkey = LK_DELETE;
 			else if (stricmp(k, "Ins") == 0 ||
 					 stricmp(k, "Insert") == 0)
-				Key = LK_INSERT;
+				Vkey = LK_INSERT;
 			else if (stricmp(k, "Home") == 0)
-				Key = LK_HOME;
+				Vkey = LK_HOME;
 			else if (stricmp(k, "End") == 0)
-				Key = LK_END;
+				Vkey = LK_END;
 			else if (stricmp(k, "PageUp") == 0)
-				Key = LK_PAGEUP;
+				Vkey = LK_PAGEUP;
 			else if (stricmp(k, "PageDown") == 0)
-				Key = LK_PAGEDOWN;
+				Vkey = LK_PAGEDOWN;
 			else if (stricmp(k, "Backspace") == 0)
-				Key = LK_BACKSPACE;
+				Vkey = LK_BACKSPACE;
 			else if (stricmp(k, "Left") == 0)
-				Key = LK_LEFT;
+				Vkey = LK_LEFT;
 			else if (stricmp(k, "Up") == 0)
-				Key = LK_UP;
+				Vkey = LK_UP;
 			else if (stricmp(k, "Right") == 0)
-				Key = LK_RIGHT;
+				Vkey = LK_RIGHT;
 			else if (stricmp(k, "Down") == 0)
-				Key = LK_DOWN;
+				Vkey = LK_DOWN;
 			else if (!stricmp(k, "Esc") || !stricmp(k, "Escape"))
-				Key = LK_ESCAPE;
+				Vkey = LK_ESCAPE;
 			else if (stricmp(k, "Space") == 0)
-				Key = ' ';
+				Chr = ' ';
 			else if (k[0] == 'F' && isdigit(k[1]))
 			{
 				int Idx = atoi(k+1);
-				Key = LK_F1 + Idx - 1;
+				Vkey = LK_F1 + Idx - 1;
 			}
 			else if (isalpha(k[0]))
-				Key = toupper(k[0]);
+				Chr = toupper(k[0]);
 			else if (isdigit(k[0]) || strchr(",", k[0]))
-				Key = k[0];
+				Chr = k[0];
 			else
 				LgiTrace("%s:%i - Unknown part '%s' in shortcut '%s'\n", _FL, k, d->Shortcut.Get());
 		}
 		
-		if (Key)
+		if (Vkey || Chr)
 		{
-			if ((Flags & LGI_EF_ALT) != 0 &&
-				(Flags & LGI_EF_SYSTEM) == 0)
+			if
+			(
+				(
+					(Flags & LGI_EF_ALT) != 0 &&
+					(Flags & LGI_EF_SYSTEM) == 0
+				)
+				||
+				Vkey == LK_BACKSPACE
+			)
 			{
 				auto Ident = Id();
 				LAssert(Ident > 0);
-				Menu->Accel.Insert( new LAccelerator(Flags, Key, Ident) );
+				Menu->Accel.Insert( new LAccelerator(Flags, Vkey, Chr, Ident) );
 			}
 		}
 		else
@@ -1122,7 +1131,10 @@ void LMenu::OnActivate(LMenuItem *item)
 			break;
 		default:
 			if (Window)
+			{
+				printf("%s:%i - post M_COMMAND\n", _FL);
 				Window->PostEvent(M_COMMAND, item->Id());
+			}
 			break;
 	}
 }
@@ -1225,6 +1237,8 @@ bool LMenu::OnKey(LView *v, LKey &k)
 	if (k.Down())
 	{
 		k.Trace("MenuKey");
+		
+		printf("Accel.len=%i\n", (int)Accel.Length());
 		for (auto a: Accel)
 		{
 			if (a->Match(k))
@@ -1293,10 +1307,11 @@ bool LMenu::OnKey(LView *v, LKey &k)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-LAccelerator::LAccelerator(int flags, int key, int id)
+LAccelerator::LAccelerator(int flags, int vkey, int chr, int id)
 {
 	Flags = flags;
-	Key = key;
+	Vkey = vkey;
+	Chr = chr;
 	Id = id;
 }
 
@@ -1313,8 +1328,8 @@ bool LAccelerator::Match(LKey &k)
 		   k.Ctrl()?" ctrl":"",
 		   k.Alt()?" alt":"",
 		   k.Shift()?" shift":"",
-		   Key,
-		   Key>=' '?Key:'.',
+		   Chr,
+		   Chr>=' '?Chr:'.',
 		   TestFlag(Flags, LGI_EF_CTRL)?" ctrl":"",
 		   TestFlag(Flags, LGI_EF_ALT)?" alt":"",
 		   TestFlag(Flags, LGI_EF_SHIFT)?" shift":""
@@ -1326,7 +1341,7 @@ bool LAccelerator::Match(LKey &k)
 		switch (k.vkey)
 		{
 			#define _(k) case LK_##k: \
-				Match = Key == #k[0]; break;
+				Match = Vkey == #k[0]; break;
 			_(A) _(B) _(C) _(D) _(E) _(F) _(G) _(H) _(I) _(J) _(K) _(L) _(M)
 			_(N) _(O) _(P) _(Q) _(R) _(S) _(T) _(U) _(V) _(W) _(X) _(Y) _(Z)
 			default:
@@ -1334,9 +1349,13 @@ bool LAccelerator::Match(LKey &k)
 				break;
 		}
 	}
-	else
+	else if (Vkey)
 	{
-		Match = Up == (uint)Key;
+		Match = k.vkey == Vkey;
+	}
+	else if (Chr)
+	{
+		Match = Up == (uint)Chr;
 	}
 	
 	

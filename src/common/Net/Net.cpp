@@ -70,9 +70,8 @@
 	#include <netdb.h>
 	#include <errno.h>
 	#include <netinet/tcp.h>
-    #include "lgi/common/LgiCommon.h"
 	#include <ifaddrs.h>
-	
+
 	#define SOCKET_ERROR -1
 	#define LPrintSock "%x"
 	typedef hostent HostEnt;
@@ -1584,7 +1583,7 @@ uint32_t LHostnameToIp(const char *Host)
 		
 	// struct addrinfo hints = {};
 	struct addrinfo *res = NULL;
-	auto result = getaddrinfo(Host, NULL, NULL, &res);
+	getaddrinfo(Host, NULL, NULL, &res);
 	if (!res)
 		return 0;
 

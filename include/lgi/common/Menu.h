@@ -424,11 +424,12 @@ public:
 /// Encapsulates a keyboard shortcut
 class LgiClass LAccelerator : public LUiEvent
 {
-	int Key;
-	int Id;
+	int Vkey = 0;
+	int Chr = 0;
+	int Id = 0;
 
 public:
-	LAccelerator(int flags, int key, int id);
+	LAccelerator(int flags, int vkey, int chr, int id);
 	
 	int GetId() { return Id; }
 
