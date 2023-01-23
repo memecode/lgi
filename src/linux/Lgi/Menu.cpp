@@ -419,7 +419,7 @@ public:
 	bool HasAccel;				// The last display string should be right aligned
 	List<LDisplayString> Strs;	// Draw each alternate display string with underline
 								// except the last in the case of HasAccel==true.
-	::LString Shortcut;
+	LString Shortcut;
 
 	LMenuItemPrivate()
 	{
@@ -742,8 +742,6 @@ Gtk::gint LgiKeyToGtkKey(int Key, const char *ShortCut)
 	return 0;
 }
 
-#if 1
-
 bool LMenuItem::ScanForAccel()
 {
 	if (!Menu)
@@ -764,343 +762,128 @@ bool LMenuItem::ScanForAccel()
 	if (!Sc)
 		return false;
 
-	LToken Keys(Sc, "+-");
-	if (Keys.Length() > 0)
-	{
-		int Flags = 0;
-		int Vkey = 0;
-		int Chr = 0;
-		
-		for (int i=0; i<Keys.Length(); i++)
-		{
-			char *k = Keys[i];
-
-			if (!stricmp(k, "CtrlCmd"))
-			{
-				k = LUiEvent::CtrlCmdName();
-			}
-			else if (!stricmp(k, "AltCmd"))
-			{
-				k = LUiEvent::AltCmdName();
-			}			
-		
-			if (stricmp(k, "Ctrl") == 0)
-			{
-				#ifdef MAC
-				Flags |= LGI_EF_SYSTEM;
-				#else
-				Flags |= LGI_EF_CTRL;
-				#endif
-			}
-			else if (stricmp(k, "Alt") == 0)
-			{
-				#ifdef MAC
-				Flags |= LGI_EF_SYSTEM;
-				#else
-				Flags |= LGI_EF_ALT;
-				#endif
-			}
-			else if (stricmp(k, "Shift") == 0)
-			{
-				Flags |= LGI_EF_SHIFT;
-			}
-			else if (stricmp(k, "Del") == 0 ||
-					 stricmp(k, "Delete") == 0)
-			{
-				Vkey = LK_DELETE;
-			}
-			else if (stricmp(k, "Ins") == 0 ||
-					 stricmp(k, "Insert") == 0)
-			{
-				Vkey = LK_INSERT;
-			}
-			else if (stricmp(k, "Home") == 0)
-			{
-				Vkey = LK_HOME;
-			}
-			else if (stricmp(k, "End") == 0)
-			{
-				Vkey = LK_END;
-			}
-			else if (stricmp(k, "PageUp") == 0)
-			{
-				Vkey = LK_PAGEUP;
-			}
-			else if (stricmp(k, "PageDown") == 0)
-			{
-				Vkey = LK_PAGEDOWN;
-			}
-			else if (stricmp(k, "Backspace") == 0)
-			{
-				Vkey = LK_BACKSPACE;
-			}
-			else if (stricmp(k, "Left") == 0)
-			{
-				Vkey = LK_LEFT;
-			}
-			else if (stricmp(k, "Up") == 0)
-			{
-				Vkey = LK_UP;
-			}
-			else if (stricmp(k, "Right") == 0)
-			{
-				Vkey = LK_RIGHT;
-			}
-			else if (stricmp(k, "Down") == 0)
-			{
-				Vkey = LK_DOWN;
-			}
-			else if (!stricmp(k, "Esc") || !stricmp(k, "Escape"))
-			{
-				Vkey = LK_ESCAPE;
-			}
-			else if (stricmp(k, "Space") == 0)
-			{
-				Chr = ' ';
-			}
-			else if (k[0] == 'F' && isdigit(k[1]))
-			{
-				int Idx = atoi(k+1);
-				Vkey = LK_F1 + Idx - 1;
-			}
-			else if (isalpha(k[0]))
-			{
-				Chr = toupper(k[0]);
-			}
-			else if (isdigit(k[0]) || strchr(",", k[0]))
-			{
-				Chr = k[0];
-			}
-			else
-			{
-				LgiTrace("%s:%i - Unknown part '%s' in shortcut '%s'\n", _FL, k, Sc);
-			}
-		}
-		
-		if (Vkey || Chr)
-		{
-			Gtk::gint GtkKey = LgiKeyToGtkKey(Vkey ? Vkey : Chr, Sc);
-			if (GtkKey)
-			{
-				GtkWidget *w = GtkCast(Info.obj, gtk_widget, GtkWidget);
-				Gtk::GdkModifierType mod = (Gtk::GdkModifierType)
-					(
-						(TestFlag(Flags, LGI_EF_CTRL)   ? Gtk::GDK_CONTROL_MASK : 0) |
-						(TestFlag(Flags, LGI_EF_SHIFT)  ? Gtk::GDK_SHIFT_MASK : 0)   |
-						(TestFlag(Flags, LGI_EF_ALT)    ? Gtk::GDK_MOD1_MASK : 0)    |
-						(TestFlag(Flags, LGI_EF_SYSTEM) ? Gtk::GDK_META_MASK : 0)
-					);
-
-				const char *Signal = "activate";
-	
-				gtk_widget_add_accelerator(	w,
-											Signal,
-											Menu->AccelGrp,
-											GtkKey,
-											mod,
-											Gtk::GTK_ACCEL_VISIBLE
-										);
-				gtk_widget_show_all(w);
-			}
-			else
-			{
-				LOG("%s:%i - No gtk key for '%s'\n", _FL, Sc);
-			}
-			
-			auto Ident = Id();
-			LAssert(Ident > 0);
-			Menu->Accel.Insert( new LAccelerator(Flags, Vkey, Chr, Ident) );
-		}
-		else
-		{
-			LOG("%s:%i - Accel scan failed, str='%s'\n", _FL, Sc);
-			return false;
-		}
-	}
-
-	return true;
-}
-
-#else
-
-bool LMenuItem::ScanForAccel()
-{
-	::LString Accel;
-
-	if (d->Shortcut)
-	{
-		Accel = d->Shortcut;
-	}
-	else
-	{
-		char *n = LBase::Name();
-		if (n)
-		{
-			char *Tab = strchr(n, '\t');
-			if (Tab)
-				Accel = Tab + 1;
-		}
-	}
-
-	if (!Accel)
-		return false;
-
-	auto Keys = Accel.SplitDelimit("-+");
-	if (Keys.Length() == 0)
+	auto Keys = LString(Sc).SplitDelimit("+-");
+	if (Keys.Length() <= 0)
 		return false;
 
 	int Flags = 0;
-	uchar Key = 0;
-	bool AccelDirty = false;
+	int Vkey = 0;
+	int Chr = 0;
 	
 	for (int i=0; i<Keys.Length(); i++)
 	{
-		auto &k = Keys[i];
+		const char *k = Keys[i];
 
-		if (k.Equals("CtrlCmd"))
+		if (!stricmp(k, "CtrlCmd"))
 		{
 			k = LUiEvent::CtrlCmdName();
-			AccelDirty = true;
 		}
-		else if (k.Equals("AltCmd"))
+		else if (!stricmp(k, "AltCmd"))
 		{
 			k = LUiEvent::AltCmdName();
-			AccelDirty = true;
-		}
-
-		if (k.Equals("Ctrl") || k.Equals("Control"))
+		}			
+	
+		if (stricmp(k, "Ctrl") == 0)
 		{
+			#ifdef MAC
+			Flags |= LGI_EF_SYSTEM;
+			#else
 			Flags |= LGI_EF_CTRL;
+			#endif
 		}
-		else if (k.Equals("Alt") || k.Equals("Option"))
+		else if (stricmp(k, "Alt") == 0)
 		{
+			#ifdef MAC
+			Flags |= LGI_EF_SYSTEM;
+			#else
 			Flags |= LGI_EF_ALT;
+			#endif
 		}
-		else if (k.Equals("Shift"))
+		else if (stricmp(k, "Shift") == 0)
 		{
 			Flags |= LGI_EF_SHIFT;
 		}
-		else if (k.Equals("System"))
-		{
-			Flags |= LGI_EF_SYSTEM;
-		}
 		else if (stricmp(k, "Del") == 0 ||
-				 stricmp(k, "Delete") == 0)
+					stricmp(k, "Delete") == 0)
 		{
-			Key = LK_DELETE;
-			Flags |= LGI_EF_IS_NOT_CHAR;
+			Vkey = LK_DELETE;
 		}
 		else if (stricmp(k, "Ins") == 0 ||
-				 stricmp(k, "Insert") == 0)
+					stricmp(k, "Insert") == 0)
 		{
-			Key = LK_INSERT;
-			Flags |= LGI_EF_IS_NOT_CHAR;
+			Vkey = LK_INSERT;
 		}
 		else if (stricmp(k, "Home") == 0)
 		{
-			Key = LK_HOME;
-			Flags |= LGI_EF_IS_NOT_CHAR;
+			Vkey = LK_HOME;
 		}
 		else if (stricmp(k, "End") == 0)
 		{
-			Key = LK_END;
-			Flags |= LGI_EF_IS_NOT_CHAR;
+			Vkey = LK_END;
 		}
-		else if (stricmp(k, "PageUp") == 0 ||
-				 stricmp(k, "Page Up") == 0 ||
-				 stricmp(k, "Page-Up") == 0)
+		else if (stricmp(k, "PageUp") == 0)
 		{
-			Key = LK_PAGEUP;
-			Flags |= LGI_EF_IS_NOT_CHAR;
+			Vkey = LK_PAGEUP;
 		}
-		else if (stricmp(k, "PageDown") == 0 ||
-				 stricmp(k, "Page Down") == 0 ||
-				 stricmp(k, "Page-Down") == 0)
+		else if (stricmp(k, "PageDown") == 0)
 		{
-			Key = LK_PAGEDOWN;
-			Flags |= LGI_EF_IS_NOT_CHAR;
+			Vkey = LK_PAGEDOWN;
 		}
 		else if (stricmp(k, "Backspace") == 0)
 		{
-			Key = LK_BACKSPACE;
-			Flags |= LGI_EF_IS_NOT_CHAR;
-		}
-		else if (stricmp(k, "Up") == 0)
-		{
-			Key = LK_UP;
-			Flags |= LGI_EF_IS_NOT_CHAR;
-		}
-		else if (stricmp(k, "Down") == 0)
-		{
-			Key = LK_DOWN;
-			Flags |= LGI_EF_IS_NOT_CHAR;
+			Vkey = LK_BACKSPACE;
 		}
 		else if (stricmp(k, "Left") == 0)
 		{
-			Key = LK_LEFT;
-			Flags |= LGI_EF_IS_NOT_CHAR;
+			Vkey = LK_LEFT;
+		}
+		else if (stricmp(k, "Up") == 0)
+		{
+			Vkey = LK_UP;
 		}
 		else if (stricmp(k, "Right") == 0)
 		{
-			Key = LK_RIGHT;
-			Flags |= LGI_EF_IS_NOT_CHAR;
+			Vkey = LK_RIGHT;
 		}
-		else if (stricmp(k, "Esc") == 0)
+		else if (stricmp(k, "Down") == 0)
 		{
-			Key = LK_ESCAPE;
-			Flags |= LGI_EF_IS_NOT_CHAR;
+			Vkey = LK_DOWN;
+		}
+		else if (!stricmp(k, "Esc") || !stricmp(k, "Escape"))
+		{
+			Vkey = LK_ESCAPE;
 		}
 		else if (stricmp(k, "Space") == 0)
 		{
-			Key = ' ';
+			Chr = ' ';
 		}
-		else if (k[0] == 'F' && IsDigit(k[1]))
+		else if (k[0] == 'F' && isdigit(k[1]))
 		{
-			Key = LK_F1 + (int)k.LStrip("F").Int() - 1;
-			Flags |= LGI_EF_IS_NOT_CHAR;
+			int Idx = atoi(k+1);
+			Vkey = LK_F1 + Idx - 1;
 		}
-		else if (IsAlpha(k[0]))
+		else if (isalpha(k[0]))
 		{
-			Key = toupper(k[0]);
+			Chr = toupper(k[0]);
 		}
-		else if (IsDigit(k[0]))
+		else if (isdigit(k[0]) || strchr(",", k[0]))
 		{
-			Key = k[0];
-		}
-		else if (strchr(",./\\[]`;\'", k[0]))
-		{
-			if (Flags & LGI_EF_CTRL)
-			{
-				switch (k[0])
-				{
-					case ';': Key = 186; break;
-					case '=': Key = 187; break;
-					case ',': Key = 188; break;
-					case '_': Key = 189; break;
-					case '.': Key = 190; break;
-					case '/': Key = 191; break;
-					case '`': Key = 192; break;
-					case '[': Key = 219; break;
-					case '\\': Key = 220; break;
-					case ']': Key = 221; break;
-					case '\'': Key = 222; break;
-					default: LAssert(!"Unknown key."); break;
-				}
-			}
-			else
-			{
-				Key = k[0];
-			}
+			Chr = k[0];
 		}
 		else
 		{
-			LAssert(!"Unknown Accel Part");
+			LgiTrace("%s:%i - Unknown part '%s' in shortcut '%s'\n", _FL, k, Sc);
 		}
 	}
-
-	if (Key)
+	
+	if (Vkey || Chr)
 	{
-		Gtk::gint GtkKey = LgiKeyToGtkKey(Key, Accel);
+		auto Ident = Id();
+		LAssert(Ident > 0);
+		Gtk::gint GtkKey = LgiKeyToGtkKey(Vkey ? Vkey : Chr, Sc);
+		
+		LOG("scan(%s) vkey=%i, chr=%i, gtk=%i, id=%i\n", Sc, Vkey, Chr, GtkKey, Ident);
+		
 		if (GtkKey)
 		{
 			GtkWidget *w = GtkCast(Info.obj, gtk_widget, GtkWidget);
@@ -1112,10 +895,8 @@ bool LMenuItem::ScanForAccel()
 					(TestFlag(Flags, LGI_EF_SYSTEM) ? Gtk::GDK_META_MASK : 0)
 				);
 
-			const char *Signal = "activate";
-
 			gtk_widget_add_accelerator(	w,
-										Signal,
+										"activate",
 										Menu->AccelGrp,
 										GtkKey,
 										mod,
@@ -1125,23 +906,19 @@ bool LMenuItem::ScanForAccel()
 		}
 		else
 		{
-			LOG("%s:%i - No gtk key for '%s'\n", _FL, Accel.Get());
+			LOG("%s:%i - No gtk key for '%s'\n", _FL, Sc);
 		}
 		
-		auto Ident = Id();
-		LAssert(Ident > 0);
-		Menu->Accel.Insert( new LAccelerator(Flags, Key, Ident) );
-		
-		return true;
+		Menu->Accel.Insert( new LAccelerator(Flags, Vkey, Chr, Ident) );
 	}
 	else
 	{
-		LOG("%s:%i - Accel scan failed, str='%s'\n", _FL, Accel.Get());
+		LOG("%s:%i - Accel scan failed, str='%s'\n", _FL, Sc);
 		return false;
 	}
-}
 
-#endif
+	return true;
+}
 
 LSubMenu *LMenuItem::GetParent()
 {
@@ -1676,8 +1453,6 @@ LAccelerator::LAccelerator(int flags, int vkey, int chr, int id)
 
 bool LAccelerator::Match(LKey &k)
 {
-	int Press = (uint) k.vkey;
-	
 	if (k.vkey == LK_RSHIFT ||
 		k.vkey == LK_LSHIFT ||
 		k.vkey == LK_RCTRL ||
@@ -1688,15 +1463,17 @@ bool LAccelerator::Match(LKey &k)
 		return false;
 	}
 	
-	#if 0
-	LOG("LAccelerator::Match %i(%c)%s%s%s = %i(%c)%s%s%s%s\n",
-		Press,
-		Press>=' '?Press:'.',
+	#if 1
+	LOG("LAccelerator::Match %i(%i)%s%s%s = %i(%i)%s%s%s%s\n",
+		
+		k.vkey,
+		k.c16,
 		k.Ctrl()?" ctrl":"",
 		k.Alt()?" alt":"",
 		k.Shift()?" shift":"",
-		Key,
-		Key>=' '?Key:'.',
+		
+		Vkey,
+		Chr,
 		TestFlag(Flags, LGI_EF_CTRL)?" ctrl":"",
 		TestFlag(Flags, LGI_EF_ALT)?" alt":"",
 		TestFlag(Flags, LGI_EF_SHIFT)?" shift":"",
@@ -1708,9 +1485,10 @@ bool LAccelerator::Match(LKey &k)
 	(
 		(Chr != 0 && toupper(k.c16) == toupper(Chr))
 		||
-		(Vkey != 0 || k.vkey == Vkey)
+		(Vkey != 0 && k.vkey == Vkey)
 	)
 	{
+		LOG("...key match.\n");
 		if
 		(
 			((TestFlag(Flags, LGI_EF_CTRL) ^ k.Ctrl()) == 0) &&
@@ -1719,6 +1497,7 @@ bool LAccelerator::Match(LKey &k)
 			((TestFlag(Flags, LGI_EF_SYSTEM) ^ k.System()) == 0)
 		)
 		{
+			LOG("...mod match: Id=%i\n", Id);
 			return true;
 		}
 	}
