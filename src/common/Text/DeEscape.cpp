@@ -78,13 +78,8 @@ void DeEscape(LString &s)
 		}
 		else if (*c == 7)
 		{
-			/*
-			// Delete last line?
-			auto start = s.Get();
-			while (out > start && out[-1] != '\n')
-				out--;
-			*/
 			c++; // skip BEL char
+			echo = true;
 		}
 		else if (echo)
 			*out++ = *c++;

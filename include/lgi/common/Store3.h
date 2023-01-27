@@ -204,7 +204,19 @@ public:
 	virtual ~LDataUserI();
 
 	LDataI *GetObject();
-	virtual bool SetObject(LDataI *o, const char *File, int Line);
+	virtual bool SetObject
+	(
+		/// The client side object to link with this object.
+		LDataI *o,
+		/// In the special case that 'Object' is being deleted, and is an
+		/// orphaned objects, SetObject must not attempt to delete 'Object' 
+		/// a second time. This flag allows for that case.
+		bool InDestuctor,
+		/// The file name of the caller
+		const char *File,
+		/// The line number of the caller
+		int Line
+	);
 };
 
 /// This class is an interface between the UI and the backend for things
