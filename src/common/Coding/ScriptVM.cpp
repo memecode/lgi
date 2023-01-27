@@ -1031,13 +1031,13 @@ bool LVirtualMachine::BreakOnWarning = false;
 LVirtualMachine::LVirtualMachine(LVmDebuggerCallback *callback)
 {
 	d = new LVirtualMachinePriv(this, callback);
-	d->AddRef();
+	d->IncRef();
 }
 
 LVirtualMachine::LVirtualMachine(LVirtualMachine *vm)
 {
 	d = vm->d;
-	d->AddRef();
+	d->IncRef();
 }
 
 LVirtualMachine::~LVirtualMachine()

@@ -642,7 +642,7 @@ bool SystemFunctions::New(LScriptArguments &Args)
 			Ret->Type = GV_LSURFACE;
 			if ((Ret->Value.Surface.Ptr = new LMemDC))
 			{
-				Ret->Value.Surface.Ptr->AddRef();
+				Ret->Value.Surface.Ptr->IncRef();
 				Ret->Value.Surface.Own = true;
 			}
 			break;
@@ -933,7 +933,7 @@ bool SystemFunctions::CreateSurface(LScriptArguments &Args)
 	{
 		Args.GetReturn()->Type = GV_LSURFACE;
 		Args.GetReturn()->Value.Surface.Own = true;
-		Args.GetReturn()->Value.Surface.Ptr->AddRef();
+		Args.GetReturn()->Value.Surface.Ptr->IncRef();
 	}
 
 	return true;
