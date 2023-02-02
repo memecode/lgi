@@ -247,6 +247,10 @@ public:
 	/// Returns the 64bit timestamp.
 	uint64 Ts() const;
 
+	/// Get the timestamp in a format compatible with the current operating system APIs.
+	/// \returns the timestamp or zero on error.
+	uint64_t OsTime() const;
+
 	/// Get the current time...
 	static LDateTime Now();
 	/// Sets the date and time to the system clock

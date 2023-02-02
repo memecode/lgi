@@ -913,7 +913,7 @@ bool LDateTime::Set(time_t tt)
 	return false;
 }
 
-bool LDateTime::Get(uint64 &s) const
+uint64_t LDateTime::OsTime() const
 {
 	#ifdef WINDOWS
 	
@@ -929,28 +929,65 @@ bool LDateTime::Get(uint64 &s) const
 		System.wMilliseconds	= limit(_Thousands, 0, 999);
 		System.wDayOfWeek		= DayOfWeek();
 
-		BOOL b1;
-		if (b1 = SystemTimeToFileTime(&System, &Utc))
+		if (SystemTimeToFileTime(&System, &Utc))
+			return ((uint64_t)Utc.dwHighDateTime << 32) | Utc.dwLowDateTime;
+		else
 		{
-			// Convert to 64bit
-			s = ((uint64)Utc.dwHighDateTime << 32) | Utc.dwLowDateTime;
+			DWORD Err = GetLastError();
+			LAssert(!"SystemTimeToFileTime failed.");
+		}
+	
+	#else
+	
+		if (_Year < MIN_YEAR)
+			return 0;
 
-			// Adjust for timezone
-			s -= (int64)_Tz * 60 * Second64Bit;
+		struct tm t;
+		ZeroObj(t);
+		t.tm_year	= _Year - 1900;
+		t.tm_mon	= _Month - 1;
+		t.tm_mday	= _Day;
 
-			return true;
+		t.tm_hour	= _Hours;
+		t.tm_min	= _Minutes;
+		t.tm_sec	= _Seconds;
+		t.tm_isdst	= -1;
+		
+		time_t sec = timegm(&t);
+		if (sec == -1)
+			return 0;
+		
+		return sec;
+	
+	#endif
+
+	return 0;
+}
+
+bool LDateTime::Get(uint64 &s) const
+{
+	#ifdef WINDOWS
+	
+		if (!IsValid())
+		{
+			LAssert(!"Needs a valid date.");
+			return false;
 		}
 
-		DWORD Err = GetLastError();
-		s = 0;
-		LAssert(!"SystemTimeToFileTime failed.");
-		return false;
+		s = OsTime();
+		if (!s)
+			return false;
+
+		// Adjust for timezone
+		s -= (int64)_Tz * 60 * Second64Bit;
+
+		return true;
 	
 	#else
 	
 		if (_Year < MIN_YEAR)
 			return false;
-	
+
 		struct tm t;
 		ZeroObj(t);
 		t.tm_year	= _Year - 1900;

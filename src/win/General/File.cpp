@@ -1509,6 +1509,29 @@ void LFile::ChangeThread()
 	d->UseId = GetCurrentThreadId();
 }
 
+uint64_t LFile::GetModifiedTime()
+{
+    FILETIME create, access, write;
+	if (!GetFileTime(Handle(), &create, &access, &write))
+		return 0;
+
+	return (((uint64_t)write.dwHighDateTime) << 32) | write.dwLowDateTime;
+}
+
+bool LFile::SetModifiedTime(uint64_t dt)
+{
+    FILETIME create, access, write;
+	if (!GetFileTime(Handle(), &create, &access, &write))
+		return false;
+
+	auto result = SetFileTime(Handle(),
+		&create,
+		&access,
+		&write);
+
+	return result != 0;
+}
+
 const char *LFile::GetName()
 {
 	return d->Name;
