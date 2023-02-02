@@ -756,7 +756,7 @@ bool LFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, boo
 			Name.Length(Len + Chars + 1);
 			StrcpyW(Name.AddressOf(Len), w.Get());
 		}
-		Name.Add(0);
+		Name.Add(NULL);
 
 		SHFILEOPSTRUCTW s;
 		ZeroObj(s);
@@ -767,12 +767,16 @@ bool LFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, boo
 
 		int e = SHFileOperationW(&s);
 		Ret = e == 0;
-		if (Status && e)
+		if (Status)
 		{
+			int val = ERROR_SUCCESS;
+			if (s.fAnyOperationsAborted)
+				val = ERROR_CANCELLED;
+			else if (e)
+				val = ERROR_CANT_DELETE_LAST_ITEM; // There isn't a better option here...				
+
 			for (int i=0; i<Files.Length(); i++)
-			{
-				(*Status)[i].Set(e);
-			}
+				(*Status)[i].Set(val);
 		}
 	}
 	else

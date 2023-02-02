@@ -271,6 +271,7 @@ public:
 	/// ##d ##h ##m ##s
 	/// Order of the dates isn't important.
 	LString DescribePeriod(LDateTime to);
+	static LString DescribePeriod(double seconds);
 
 	/// \returns true if 'd' is on the same day as this object
 	bool IsSameDay(LDateTime &d) const;
