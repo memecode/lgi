@@ -726,33 +726,35 @@ LDateTime LDateTime::Now()
 	return dt;
 }
 
-void LDateTime::SetNow()
+LDateTime &LDateTime::SetNow()
 {
     #ifdef WIN32
 
-    SYSTEMTIME stNow;
-    FILETIME ftNow;
+		SYSTEMTIME stNow;
+		FILETIME ftNow;
 
-    GetSystemTime(&stNow);
-    SystemTimeToFileTime(&stNow, &ftNow);
-    uint64 i64 = ((uint64)ftNow.dwHighDateTime << 32) | ftNow.dwLowDateTime;
-    Set(i64);
+		GetSystemTime(&stNow);
+		SystemTimeToFileTime(&stNow, &ftNow);
+		uint64 i64 = ((uint64)ftNow.dwHighDateTime << 32) | ftNow.dwLowDateTime;
+		Set(i64);
     
     #else
 
-	time_t now;
-	time(&now);
-	struct tm *time = localtime(&now);
-	if (time)
-		*this = time;
-	#ifndef LGI_STATIC
-    else
-    {
-    	LgiTrace("%s:%i - Error: localtime failed, now=%u\n", _FL, now);
-    }
-	#endif
+		time_t now;
+		time(&now);
+		struct tm *time = localtime(&now);
+		if (time)
+			*this = time;
+		#ifndef LGI_STATIC
+		else
+		{
+    		LgiTrace("%s:%i - Error: localtime failed, now=%u\n", _FL, now);
+		}
+		#endif
 	
 	#endif
+
+	return *this;
 }
 
 #define Convert24HrTo12Hr(h)			( (h) == 0 ? 12 : (h) > 12 ? (h) % 12 : (h) )
@@ -930,7 +932,15 @@ uint64_t LDateTime::OsTime() const
 		System.wDayOfWeek		= DayOfWeek();
 
 		if (SystemTimeToFileTime(&System, &Utc))
-			return ((uint64_t)Utc.dwHighDateTime << 32) | Utc.dwLowDateTime;
+		{
+			uint64_t s = ((uint64_t)Utc.dwHighDateTime << 32) | Utc.dwLowDateTime;
+
+			if (_Tz)
+				// Adjust for timezone
+				s -= (int64)_Tz * 60 * Second64Bit;
+
+			return s;
+		}
 		else
 		{
 			DWORD Err = GetLastError();
@@ -977,9 +987,6 @@ bool LDateTime::Get(uint64 &s) const
 		s = OsTime();
 		if (!s)
 			return false;
-
-		// Adjust for timezone
-		s -= (int64)_Tz * 60 * Second64Bit;
 
 		return true;
 	

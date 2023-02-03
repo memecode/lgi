@@ -254,7 +254,7 @@ public:
 	/// Get the current time...
 	static LDateTime Now();
 	/// Sets the date and time to the system clock
-	void SetNow();
+	LDateTime &SetNow();
 	/// Parses a date time from a string
 	/// \sa LDateTime::GetFormat()
 	bool Set(const char *Str);
