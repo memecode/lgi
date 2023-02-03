@@ -1524,6 +1524,9 @@ bool LFile::SetModifiedTime(uint64_t dt)
 	if (!GetFileTime(Handle(), &create, &access, &write))
 		return false;
 
+	write.dwHighDateTime = dt >> 32;
+	write.dwLowDateTime = dt & 0xffffffff;
+
 	auto result = SetFileTime(Handle(),
 		&create,
 		&access,
