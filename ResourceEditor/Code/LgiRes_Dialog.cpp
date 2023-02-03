@@ -270,16 +270,8 @@ ResDialogCtrl::ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, LXmlTag *load) 
 	ResObject(CtrlTypeName)
 {
 	Dlg = dlg;
-	_Str = NULL;
-	DragCtrl = -1;
-	AcceptChildren = false;
-	Movable = true;
-	MoveCtrl = false;
-	Vis = true;
 	Client.ZOff(-1, -1);
-	SelectMode = SelNone;
 	SelectStart.ZOff(-1, -1);
-	OverGoober = -1;
 	
 	if (load)
 	{

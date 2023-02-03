@@ -68,7 +68,7 @@ class ResDialogCtrl : public FieldSource, public ResObject
 {
 	friend class ResDialog;
 
-	ResString *_Str;
+	ResString *_Str = NULL;
 
 protected:
 	static int TabDepth;
@@ -78,21 +78,21 @@ protected:
 	char *GetRefText();
 
 	LRect Goobers[8];
-	int OverGoober;
+	int OverGoober = -1;
 
 	ResDialog *Dlg;
 	LRect Title;
 	LRect Client;
-	int DragCtrl;
+	int DragCtrl = -1;
 	LRect DragRgn;
 	LPoint DragStart;
-	bool MoveCtrl;
-	DlgSelectMode SelectMode;
+	bool MoveCtrl = false;
+	DlgSelectMode SelectMode = SelNone;
 	LRect SelectStart;
 
-	bool AcceptChildren;
-	bool Movable;
-	bool Vis;
+	bool AcceptChildren = false;
+	bool Movable = true;
+	bool Vis = true;
 	LAutoString CssClass;
 	LAutoString CssStyle;
 
