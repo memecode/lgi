@@ -1729,11 +1729,17 @@ const char *LView::GetCtrlName(int Id)
 
 void LView::SetCtrlName(int Id, const char *s)
 {
-	ThreadCheck();
-	
-	LViewI *w = FindControl(Id);
-	// if (!w) printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
-	if (w) w->Name(s);
+	if (!IsAttached() || InThread())
+	{
+		if (auto w = FindControl(Id))
+			w->Name(s);
+	}
+	else
+	{
+		PostEvent(	M_SET_CTRL_NAME,
+					(LMessage::Param)Id,
+					(LMessage::Param)new LString(s));
+	}
 }
 
 bool LView::GetCtrlEnabled(int Id)
@@ -1747,11 +1753,17 @@ bool LView::GetCtrlEnabled(int Id)
 
 void LView::SetCtrlEnabled(int Id, bool Enabled)
 {
-	ThreadCheck();
-
-	LViewI *w = FindControl(Id);
-	// if (!w) printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
-	if (w) w->Enabled(Enabled);
+	if (!IsAttached() || InThread())
+	{
+		if (auto w = FindControl(Id))
+			w->Enabled(Enabled);
+	}
+	else
+	{
+		PostEvent(	M_SET_CTRL_ENABLE,
+					(LMessage::Param)Id,
+					(LMessage::Param)Enabled);
+	}
 }
 
 bool LView::GetCtrlVisible(int Id)
@@ -1766,13 +1778,17 @@ bool LView::GetCtrlVisible(int Id)
 
 void LView::SetCtrlVisible(int Id, bool v)
 {
-	ThreadCheck();
-
-	LViewI *w = FindControl(Id);
-	if (!w)
-		LgiTrace("%s:%i - Ctrl %i not found.\n", _FL, Id);
+	if (!IsAttached() || InThread())
+	{
+		if (auto w = FindControl(Id))
+			w->Visible(v);
+	}
 	else
-		w->Visible(v);
+	{
+		PostEvent(	M_SET_CTRL_VISIBLE,
+					(LMessage::Param)Id,
+					(LMessage::Param)v);
+	}
 }
 
 bool LView::AttachChildren()

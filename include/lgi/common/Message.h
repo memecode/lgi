@@ -44,6 +44,9 @@ enum LgiMessages
 		
 		/// Sent from a worker thread when calling LTextLabel::Name
 		M_TEXT_UPDATE_NAME,
+		M_SET_CTRL_NAME,
+		M_SET_CTRL_ENABLE,
+		M_SET_CTRL_VISIBLE,
 		
 	#elif defined(WINNATIVE)
 

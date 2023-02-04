@@ -698,6 +698,22 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 	int Id;
 	switch (Id = Msg->Msg())
 	{
+		case M_SET_CTRL_NAME:
+		{
+			LAutoPtr<LString> s((LString*)Msg->B());
+			SetCtrlName(Msg->A(), s ? *s : NULL);
+			break;
+		}
+		case M_SET_CTRL_ENABLE:
+		{
+			SetCtrlEnabled(Msg->A(), Msg->B());
+			break;
+		}
+		case M_SET_CTRL_VISIBLE:
+		{
+			SetCtrlVisible(Msg->A(), Msg->B());
+			break;
+		}
 		case M_INVALIDATE:
 		{
 			if ((LView*)this == (LView*)Msg->B())
