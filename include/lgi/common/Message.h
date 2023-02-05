@@ -44,9 +44,6 @@ enum LgiMessages
 		
 		/// Sent from a worker thread when calling LTextLabel::Name
 		M_TEXT_UPDATE_NAME,
-		M_SET_CTRL_NAME,
-		M_SET_CTRL_ENABLE,
-		M_SET_CTRL_VISIBLE,
 		
 	#elif defined(WINNATIVE)
 
@@ -158,9 +155,6 @@ enum LgiMessages
 		M_HIDE,
 		M_DESTROY,
 
-	#else
-	
-	
 	#endif
 	
 	M_DESCRIBE,
@@ -170,11 +164,14 @@ enum LgiMessages
 	M_URL,
 	M_LOG_TEXT,
 	M_ASSERT_UI,
-	M_INVALIDATE, // A=(LRect*)Rectangle, B=(LView*)this
-	M_RESIZE_TO_CONTENT, // LItemContainer
-	M_SCROLL_TO, // LTreeItem->LTree
-	M_JOBS_LOADED, // LHtml
-	M_THREAD_COMPLETED, // A=(LThread*)Thread
+	M_INVALIDATE,			// A=(LRect*)Rectangle, B=(LView*)this
+	M_RESIZE_TO_CONTENT,	// A=(int)Border (used by LItemContainer)
+	M_SCROLL_TO,			// Sent from LTreeItem to LTree
+	M_JOBS_LOADED,			// LHtml
+	M_THREAD_COMPLETED,		// A=(LThread*)Thread
+	M_SET_CTRL_NAME,		// A=(int)CtrlId, B=(LString*)Name
+	M_SET_CTRL_ENABLE,		// A=(int)CtrlId, B=(bool)Enabled
+	M_SET_CTRL_VISIBLE,		// A=(int)CtrlId, B=(bool)Visible
 
 	#ifdef WINDOWS
 	M_USER = WM_APP + 200

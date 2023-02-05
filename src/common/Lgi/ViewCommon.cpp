@@ -1679,23 +1679,12 @@ void LView::SetTabStop(bool b)
 	ThreadCheck();
 
 	#if WINNATIVE
-	if (b)
-		SetFlag(d->WndStyle, WS_TABSTOP);
-	else
-		ClearFlag(d->WndStyle, WS_TABSTOP);
+		if (b)
+			SetFlag(d->WndStyle, WS_TABSTOP);
+		else
+			ClearFlag(d->WndStyle, WS_TABSTOP);
 	#else
-	d->TabStop = b;
-	#endif
-	#if 0 // def __GTK_H__
-	if (_View)
-	{
-		#if GtkVer(2, 18)
-		ThreadCheck();
-        gtk_widget_set_can_focus(_View, b);
-		#else
-		LgiTrace("Error: no api to set tab stop.\n");
-		#endif
-    }
+		d->TabStop = b;
 	#endif
 }
 
@@ -1704,8 +1693,6 @@ int64 LView::GetCtrlValue(int Id)
 	ThreadCheck();
 
 	LViewI *w = FindControl(Id);
-	if (!w)
-		printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
 	return (w) ? w->Value() : 0;
 }
 
@@ -1714,7 +1701,6 @@ void LView::SetCtrlValue(int Id, int64 i)
 	ThreadCheck();
 
 	LViewI *w = FindControl(Id);
-	// if (!w) printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
 	if (w) w->Value(i);
 }
 
@@ -1723,7 +1709,6 @@ const char *LView::GetCtrlName(int Id)
 	ThreadCheck();
 
 	LViewI *w = FindControl(Id);
-	// if (!w) printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
 	return (w) ? w->Name() : 0;
 }
 
@@ -1747,7 +1732,6 @@ bool LView::GetCtrlEnabled(int Id)
 	ThreadCheck();
 
 	LViewI *w = FindControl(Id);
-	// if (!w) printf("%s:%i - Ctrl %i not found.\n", _FL, Id);
 	return (w) ? w->Enabled() : 0;
 }
 

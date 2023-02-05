@@ -658,9 +658,6 @@
     <ClInclude Include="include\common\Menu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\common\Message.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\common\Mru.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -773,6 +770,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\lgi\common\LgiInc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Message.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
