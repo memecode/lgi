@@ -967,6 +967,12 @@ uint64_t LDateTime::OsTime() const
 		if (sec == -1)
 			return 0;
 		
+		if (_Tz)
+		{
+			// Adjust the output to UTC from the current timezone.
+			sec -= _Tz * 60;
+		}
+		
 		return sec;
 	
 	#endif

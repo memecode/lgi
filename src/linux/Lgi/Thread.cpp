@@ -95,6 +95,8 @@ bool LThread::IsExited()
 
 void LThread::Run()
 {
+	Terminate();
+	
 	if (!hThread)
 	{
 		State = LThread::THREAD_INIT;
@@ -129,6 +131,7 @@ void LThread::Terminate()
 		pthread_cancel(hThread) == 0)
 	{
 		State = LThread::THREAD_EXITED;
+		hThread = NULL;
 	}
 }
 

@@ -151,6 +151,7 @@ void LThread::Terminate()
 		pthread_cancel(hThread) == 0)
 	{
 		State = THREAD_EXITED;
+		hThread = NULL;
 	}
 }
 
