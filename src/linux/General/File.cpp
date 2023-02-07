@@ -560,7 +560,7 @@ struct LVolumePriv
 		if (Path)
 			Type = sys == LSP_DESKTOP ? VT_DESKTOP : VT_FOLDER;
 			
-		if (sys == LSP_DESKTOP)
+		if (sys == LSP_ROOT)
 		{
 			struct statvfs s = {0};
 			int r = statvfs(Path, &s);
