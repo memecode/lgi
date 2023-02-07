@@ -45,7 +45,7 @@ bool LMouse::IsContextMenu() const
 	if (Right())
 		return true;
 	
-	#if defined(MAC) || defined(LINUX)
+	#if defined(MAC)
 	if (Left() && Ctrl())
 		return true;
 	#endif

@@ -289,6 +289,7 @@ public:
 		LViewI *WindowFromPoint(int x, int y, bool Debug = false);
 		void _SetDynamic(bool b);
 		void _OnViewDelete();
+		void SetParent(LViewI *p) override;
 	
 	#elif defined(MAC)
 	
