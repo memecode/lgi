@@ -429,8 +429,10 @@ public:
 			{
 				LFileSelect s;
 				s.Parent(this);
-				if (s.OpenFolder())
+				s.InitialDir(GetCtrlName(IDC_PATCH_FILE));
+				if (s.Open())
 				{
+					SetCtrlName(IDC_PATCH_FILE, s.Name());
 					Open(s.Name());
 				}
 				break;
@@ -457,8 +459,10 @@ public:
 					break;
 
 				auto car = out->GetCaret();
-				LgiTrace("CursorChanged: %i\n", (int)car);
 				auto txt = out->NameW();
+				if (!txt)
+					break;
+				
 				ssize_t caratLine = -1;
 				LArray<const char16 *> lines;
 				lines.Add(txt);
