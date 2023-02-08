@@ -14,10 +14,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
-
 #include <ctype.h>
 #include <stdarg.h>
 #include <dirent.h>
+#include <sys/time.h>
 
 #include "lgi/common/File.h"
 #include "lgi/common/Containers.h"
@@ -1583,6 +1583,27 @@ OsFile LFile::Handle()
 bool LFile::IsOpen()
 {
 	return ValidHandle(d->hFile);
+}
+
+uint64_t LFile::GetModifiedTime()
+{
+	struct stat s;
+    stat(d->Name, &s);
+    return s.st_mtime;
+}
+
+bool LFile::SetModifiedTime(uint64_t dt)
+{
+	struct stat s;
+    stat(d->Name, &s);
+    
+    struct timeval times[2] = {};
+    times[0].tv_sec = s.st_atime;
+    times[1].tv_sec = dt;
+    
+	int r = utimes(d->Name, times);
+	
+	return r == 0;
 }
 
 void LFile::ChangeThread()

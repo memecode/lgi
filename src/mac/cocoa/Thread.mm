@@ -92,6 +92,13 @@ bool LThread::IsExited()
 
 void LThread::Run()
 {
+	if (State == THREAD_EXITED &&
+		hThread)
+	{
+		pthread_join(hThread, NULL);
+		hThread = NULL;
+	}
+
 	if (!hThread)
 	{
 		State = THREAD_INIT;
