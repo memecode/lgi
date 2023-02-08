@@ -459,18 +459,6 @@ struct MailCallbacks
 	/// Called after mail received
 	MailReceivedCallback OnReceive;
 };
-
-/*
-/// Enable STARTTLS support (requires an SSL capable socket)
-#define MAIL_SOURCE_STARTTLS			0x01
-/// Use authentication
-#define MAIL_SOURCE_AUTH				0x02
-/// Force the use of PLAIN type authentication
-#define MAIL_SOURCE_USE_PLAIN			0x04
-/// Force the use of LOGIN type authentication
-#define MAIL_SOURCE_USE_LOGIN			0x08
-*/
-
 /// A generic mail source object
 class MailSource : public MailProtocol
 {
