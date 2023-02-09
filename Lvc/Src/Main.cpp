@@ -733,7 +733,7 @@ public:
 class App : public LWindow, public AppPriv
 {
 	LAutoPtr<LImageList> ImgLst;
-	LBox *FoldersBox;
+	LBox *FoldersBox = NULL;
 
 	bool CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args)
 	{
@@ -749,8 +749,6 @@ class App : public LWindow, public AppPriv
 public:
 	App()
 	{
-		FoldersBox = NULL;
-		
 		LString AppRev;
 		AppRev.Printf("%s v%s", AppName, APP_VERSION);
 		Name(AppRev);
@@ -1162,6 +1160,28 @@ public:
 
 	void OnFilterCommits()
 	{
+		if (!Commits)
+			return;
+			
+		LArray<LListItem*> a;
+		if (!Commits->GetAll(a))
+			return;
+		
+		auto cols = Commits->GetColumns();	
+		for (auto i: a)
+		{
+			bool vis = !CommitFilter;
+			for (int c=1; !vis && c<cols; c++)
+			{
+				auto txt = i->GetText(c);
+				if (Stristr(txt, CommitFilter.Get()))
+					vis = true;
+			}
+			i->GetCss(true)->Display(vis ? LCss::DispBlock : LCss::DispNone);
+		}
+
+		Commits->UpdateAllItems();
+		Commits->Invalidate();
 	}
 
 	void OnFilterFiles()
@@ -1178,11 +1198,14 @@ public:
 			case IDC_CLEAR_FILTER_FOLDERS:
 			{
 				SetCtrlName(IDC_FILTER_FOLDERS, NULL);
-				break;
+				// Fall through
 			}
 			case IDC_FILTER_FOLDERS:
 			{
-				LString n = c->Name();
+				if (n.Type == LNotifyEscapeKey)
+					SetCtrlName(IDC_FILTER_FOLDERS, NULL);
+					
+				LString n = GetCtrlName(IDC_FILTER_FOLDERS);
 				if (n != FolderFilter)
 				{
 					FolderFilter = n;
@@ -1193,11 +1216,14 @@ public:
 			case IDC_CLEAR_FILTER_COMMITS:
 			{
 				SetCtrlName(IDC_FILTER_COMMITS, NULL);
-				break;
+				// Fall through
 			}
 			case IDC_FILTER_COMMITS:
 			{
-				LString n = c->Name();
+				if (n.Type == LNotifyEscapeKey)
+					SetCtrlName(IDC_FILTER_COMMITS, NULL);
+
+				LString n = GetCtrlName(IDC_FILTER_COMMITS);
 				if (n != CommitFilter)
 				{
 					CommitFilter = n;
@@ -1208,11 +1234,14 @@ public:
 			case IDC_CLEAR_FILTER_FILES:
 			{
 				SetCtrlName(IDC_FILTER_FILES, NULL);
-				break;
+				// Fall through
 			}
 			case IDC_FILTER_FILES:
 			{
-				LString n = c->Name();
+				if (n.Type == LNotifyEscapeKey)
+					SetCtrlName(IDC_FILTER_FILES, NULL);
+
+				LString n = GetCtrlName(IDC_FILTER_FILES);
 				if (n != FileFilter)
 				{
 					FileFilter = n;
