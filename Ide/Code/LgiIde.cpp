@@ -4139,23 +4139,33 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		default:
 		{
-			char *r = d->RecentFiles[Cmd - IDM_RECENT_FILE];
+			LString r = d->RecentFiles[Cmd - IDM_RECENT_FILE];
 			if (r)
 			{
+				auto idx = Cmd - IDM_RECENT_FILE;
+				if (idx > 0)
+				{
+					d->RecentFiles.DeleteAt(idx, true);
+					d->RecentFiles.AddAt(0, r);
+				}
+
 				IdeDoc *f = d->IsFileOpen(r);
 				if (f)
-				{
 					f->Raise();
-				}
 				else
-				{
 					OpenFile(r);
-				}
 			}
 
-			auto p = d->RecentProjects[Cmd - IDM_RECENT_PROJECT];
+			LString p = d->RecentProjects[Cmd - IDM_RECENT_PROJECT];
 			if (p)
 			{
+				auto idx = Cmd - IDM_RECENT_PROJECT;
+				if (idx > 0)
+				{
+					d->RecentProjects.DeleteAt(idx, true);
+					d->RecentProjects.AddAt(0, p);
+				}
+			
 				CloseAll();
 				OpenProject(p, NULL, false);
 				if (d->Tree)
