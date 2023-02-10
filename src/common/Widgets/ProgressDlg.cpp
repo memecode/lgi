@@ -301,9 +301,7 @@ int LProgressPane::OnNotify(LViewI *Ctrl, LNotification n)
 			Cancel(true);
 
 			if (But)
-			{
 				But->Name("Waiting...");
-			}
 			break;
 		}
 	}

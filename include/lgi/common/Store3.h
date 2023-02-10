@@ -469,12 +469,14 @@ public:
 	) = 0;
 	
 	/// Compact the mail store
-	virtual bool Compact
+	virtual void Compact
 	(
 		/// The parent window of the UI
 		LViewI *Parent,
 		/// The store should pass information up to the UI via setting various parameters from Store3UiFields
-		LDataPropI *Props
+		LDataPropI *Props,
+		/// The callback to get status, could be called by a worker thread...
+		std::function<void(bool)> OnStatus
 	) = 0;
 	
 	/// Upgrades the mail store to the current version for this build. You should call this in response
