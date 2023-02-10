@@ -481,22 +481,26 @@ public:
 	
 	/// Upgrades the mail store to the current version for this build. You should call this in response
 	/// to getting Store3UpgradeRequired back from this->GetInt(FIELD_STATUS).
-	virtual bool Upgrade
+	virtual void Upgrade
 	(
 		/// The parent window of the UI
 		LViewI *Parent,
 		/// The store should pass information up to the UI via setting various parameters from Store3UiFields
-		LDataPropI *Props
-	) { return false; }
+		LDataPropI *Props,
+		/// The callback to get status, could be called by a worker thread...
+		std::function<void(bool)> OnStatus
+	) { if (OnStatus) OnStatus(false); }
 
 	/// Tries to repair the database.
-	virtual bool Repair
+	virtual void Repair
 	(
 		/// The parent window of the UI
 		LViewI *Parent,
 		/// The store should pass information up to the UI via setting various parameters from Store3UiFields
-		LDataPropI *Props
-	) { return false; }
+		LDataPropI *Props,
+		/// The callback to get status, could be called by a worker thread...
+		std::function<void(bool)> OnStatus
+	) { if (OnStatus) OnStatus(false); }
 	
 	/// Set the sub-format
 	virtual bool SetFormat
