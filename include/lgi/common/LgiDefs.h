@@ -247,7 +247,7 @@ LgiFunc void							_lgi_assert(bool b, const char *test, const char *file, int l
 #ifdef _DEBUG
 #define LAssert(b)					_lgi_assert(b, #b, __FILE__, __LINE__)
 #else
-#define LAssert(b)					while (0)
+#define LAssert(b)					((void)0)
 #endif
 
 
