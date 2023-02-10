@@ -170,9 +170,6 @@ enum LgiMessages
 		M_HIDE,
 		M_DESTROY,
 
-	#else
-	
-	
 	#endif
 	
 	M_DESCRIBE,
@@ -182,12 +179,15 @@ enum LgiMessages
 	M_URL,
 	M_LOG_TEXT,
 	M_ASSERT_UI, // A=(LString*)Msg
-	M_INVALIDATE, // A=(LRect*)Rectangle, B=(LView*)this
-	M_RESIZE_TO_CONTENT, // LItemContainer
-	M_SCROLL_TO, // LTreeItem->LTree
+	M_INVALIDATE,			// A=(LRect*)Rectangle, B=(LView*)this
+	M_RESIZE_TO_CONTENT,	// A=(int)Border (used by LItemContainer)
+	M_SCROLL_TO,			// Sent from LTreeItem to LTree
 	M_SET_SCROLL, // LScrollBar
-	M_JOBS_LOADED, // LHtml
-	M_THREAD_COMPLETED, // A=(LThread*)Thread
+	M_JOBS_LOADED,			// LHtml
+	M_THREAD_COMPLETED,		// A=(LThread*)Thread
+	M_SET_CTRL_NAME,		// A=(int)CtrlId, B=(LString*)Name
+	M_SET_CTRL_ENABLE,		// A=(int)CtrlId, B=(bool)Enabled
+	M_SET_CTRL_VISIBLE,		// A=(int)CtrlId, B=(bool)Visible
 
 	#ifdef WINDOWS
 	M_USER = WM_APP + 200
@@ -245,10 +245,11 @@ public:
 	#endif
 
 	#if defined(HAIKU)
-	static constexpr const char *PropA = "lgiA";
-	static constexpr const char *PropB = "lgiB";
-	static constexpr const char *PropView = "lgiView";
-	static constexpr const char *PropCallback = "lgiCallback";
+	static constexpr char *PropA = "lgiA";
+	static constexpr char *PropB = "lgiB";
+	static constexpr char *PropView = "lgiView";
+	static constexpr char *PropCallback = "lgiCallback";
+	static constexpr char *PropNames[2] = {"lgi_a", "lgi_b"};
 	typedef std::function<void()> InThreadCb;
 	#endif
 

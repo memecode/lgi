@@ -68,13 +68,11 @@ public:
 				{
 					LListItemColumn *c = GetItemCol(i, GetColumn());
 					if (c)
-					{
 						c->Value(v);
-					}
 				}
 
 				Value(v);
-				GetItem()->Update();
+				GetItem()->OnColumnNotify(GetColumn(), v);
 			}
 		}
 	}

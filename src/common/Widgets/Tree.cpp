@@ -372,8 +372,6 @@ LTreeItem *LTreeNode::GetNext()
 LTreeItem::LTreeItem()
 {
 	d = new LTreeItemPrivate(this);
-	Str = 0;
-	Sys_Image = -1;
 }
 
 LTreeItem::~LTreeItem()
@@ -381,14 +379,10 @@ LTreeItem::~LTreeItem()
 	if (Tree)
 	{
 		if (Tree->d->DropTarget == this)
-		{
 			Tree->d->DropTarget = 0;
-		}
 
 		if (Tree->d->LastHit == this)
-		{
 			Tree->d->LastHit = 0;
-		}
 		
 		if (Tree->IsCapturing())
 			Tree->Capture(false);
@@ -406,13 +400,9 @@ LTreeItem::~LTreeItem()
 		t = Tree;
 		LTreeItem *p = GetPrev();
 		if (p)
-		{
 			y = p->d->Pos.y1;
-		}
 		else
-		{
 			y = d->Pos.y1;
-		}
 	}
 
 	_Remove();
@@ -424,9 +414,7 @@ LTreeItem::~LTreeItem()
 	DeleteObj(d);
 
 	if (t)
-	{
 		t->_UpdateBelow(y);
-	}
 }
 
 int LTreeItem::GetColumnSize(int Col)
@@ -717,8 +705,12 @@ const char *LTreeItem::GetText(int i)
 
 bool LTreeItem::SetText(const char *s, int i)
 {
-	if (!Str[i].Reset(NewStr(s)))
-		return false;
+	LAutoPtr<LMutex::Auto> Lck;
+	
+	if (Tree)
+		Lck.Reset(new LMutex::Auto(Tree->d, -1, _FL));	
+
+	Str[i] = s;
 
 	if (Tree)
 		Update();

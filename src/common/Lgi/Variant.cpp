@@ -593,7 +593,7 @@ LVariant &LVariant::operator =(LVariant const &i)
 			Value.Surface = i.Value.Surface;
 			if (Value.Surface.Own &&
 				Value.Surface.Ptr)
-				Value.Surface.Ptr->AddRef();
+				Value.Surface.Ptr->IncRef();
 			break;
 		}
 		/*
@@ -720,7 +720,7 @@ bool LVariant::SetSurface(class LSurface *Ptr, bool Own)
     Type = GV_LSURFACE;
     Value.Surface.Ptr = Ptr;
     if ((Value.Surface.Own = Own))
-        Value.Surface.Ptr->AddRef();
+        Value.Surface.Ptr->IncRef();
     
     return true;
 }

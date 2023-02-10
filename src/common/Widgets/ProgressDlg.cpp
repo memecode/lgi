@@ -168,6 +168,12 @@ bool LProgressPane::SetRange(const LRange &r)
 	return true;
 }
 
+void LProgressPane::SetStartTs()
+{
+	Start = LCurrentTime();
+	StartDt.SetNow();
+}
+
 void LProgressPane::UpdateUI()
 {
 	if (!UiDirty)
@@ -197,7 +203,7 @@ void LProgressPane::UpdateUI()
 		sprintf_s(Str, sizeof(Str), LLoadString(L_PROGRESSDLG_RATE_FMT, "@ %.2f %s / sec"), PerSec * Scale, (Type) ? Type.Get() : "");
 		Update |= Rate->Name(Str);
 
-		if (Remaining && PerSec > 0.0)
+		if (Remaining && PerSec > 0.0 && StartDt.IsValid())
 		{
 			auto TotalSeconds = (High - Low + 1) / PerSec;
 			// auto RemainingSeconds = TotalSeconds - ElapsedSeconds;
@@ -295,9 +301,7 @@ int LProgressPane::OnNotify(LViewI *Ctrl, LNotification n)
 			Cancel(true);
 
 			if (But)
-			{
 				But->Name("Waiting...");
-			}
 			break;
 		}
 	}

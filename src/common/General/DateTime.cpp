@@ -726,33 +726,35 @@ LDateTime LDateTime::Now()
 	return dt;
 }
 
-void LDateTime::SetNow()
+LDateTime &LDateTime::SetNow()
 {
     #ifdef WIN32
 
-    SYSTEMTIME stNow;
-    FILETIME ftNow;
+		SYSTEMTIME stNow;
+		FILETIME ftNow;
 
-    GetSystemTime(&stNow);
-    SystemTimeToFileTime(&stNow, &ftNow);
-    uint64 i64 = ((uint64)ftNow.dwHighDateTime << 32) | ftNow.dwLowDateTime;
-    Set(i64);
+		GetSystemTime(&stNow);
+		SystemTimeToFileTime(&stNow, &ftNow);
+		uint64 i64 = ((uint64)ftNow.dwHighDateTime << 32) | ftNow.dwLowDateTime;
+		Set(i64);
     
     #else
 
-	time_t now;
-	time(&now);
-	struct tm *time = localtime(&now);
-	if (time)
-		*this = time;
-	#ifndef LGI_STATIC
-    else
-    {
-    	LgiTrace("%s:%i - Error: localtime failed, now=%u\n", _FL, now);
-    }
-	#endif
+		time_t now;
+		time(&now);
+		struct tm *time = localtime(&now);
+		if (time)
+			*this = time;
+		#ifndef LGI_STATIC
+		else
+		{
+    		LgiTrace("%s:%i - Error: localtime failed, now=%u\n", _FL, now);
+		}
+		#endif
 	
 	#endif
+
+	return *this;
 }
 
 #define Convert24HrTo12Hr(h)			( (h) == 0 ? 12 : (h) > 12 ? (h) % 12 : (h) )
@@ -913,7 +915,7 @@ bool LDateTime::Set(time_t tt)
 	return false;
 }
 
-bool LDateTime::Get(uint64 &s) const
+uint64_t LDateTime::OsTime() const
 {
 	#ifdef WINDOWS
 	
@@ -929,28 +931,76 @@ bool LDateTime::Get(uint64 &s) const
 		System.wMilliseconds	= limit(_Thousands, 0, 999);
 		System.wDayOfWeek		= DayOfWeek();
 
-		BOOL b1;
-		if (b1 = SystemTimeToFileTime(&System, &Utc))
+		if (SystemTimeToFileTime(&System, &Utc))
 		{
-			// Convert to 64bit
-			s = ((uint64)Utc.dwHighDateTime << 32) | Utc.dwLowDateTime;
+			uint64_t s = ((uint64_t)Utc.dwHighDateTime << 32) | Utc.dwLowDateTime;
 
-			// Adjust for timezone
-			s -= (int64)_Tz * 60 * Second64Bit;
+			if (_Tz)
+				// Adjust for timezone
+				s -= (int64)_Tz * 60 * Second64Bit;
 
-			return true;
+			return s;
+		}
+		else
+		{
+			DWORD Err = GetLastError();
+			LAssert(!"SystemTimeToFileTime failed.");
+		}
+	
+	#else
+	
+		if (_Year < MIN_YEAR)
+			return 0;
+
+		struct tm t;
+		ZeroObj(t);
+		t.tm_year	= _Year - 1900;
+		t.tm_mon	= _Month - 1;
+		t.tm_mday	= _Day;
+
+		t.tm_hour	= _Hours;
+		t.tm_min	= _Minutes;
+		t.tm_sec	= _Seconds;
+		t.tm_isdst	= -1;
+		
+		time_t sec = timegm(&t);
+		if (sec == -1)
+			return 0;
+		
+		if (_Tz)
+		{
+			// Adjust the output to UTC from the current timezone.
+			sec -= _Tz * 60;
+		}
+		
+		return sec;
+	
+	#endif
+
+	return 0;
+}
+
+bool LDateTime::Get(uint64 &s) const
+{
+	#ifdef WINDOWS
+	
+		if (!IsValid())
+		{
+			LAssert(!"Needs a valid date.");
+			return false;
 		}
 
-		DWORD Err = GetLastError();
-		s = 0;
-		LAssert(!"SystemTimeToFileTime failed.");
-		return false;
+		s = OsTime();
+		if (!s)
+			return false;
+
+		return true;
 	
 	#else
 	
 		if (_Year < MIN_YEAR)
 			return false;
-	
+
 		struct tm t;
 		ZeroObj(t);
 		t.tm_year	= _Year - 1900;
@@ -1683,13 +1733,8 @@ void LDateTime::AddMonths(int64 Months)
 		_Day = DaysInMonth();
 }
 
-LString LDateTime::DescribePeriod(LDateTime to)
+LString LDateTime::DescribePeriod(double seconds)
 {
-	auto ThisTs = Ts();
-	auto ToTs = to.Ts();
-	auto diff = ThisTs < ToTs ? ToTs - ThisTs : ThisTs - ToTs;
-
-	auto seconds = diff / LDateTime::Second64Bit;
 	int mins = (int) (seconds / 60);
 	seconds -= mins * 60;
 	int hrs = mins / 60;
@@ -1707,6 +1752,16 @@ LString LDateTime::DescribePeriod(LDateTime to)
 	else
 		s.Printf("%is", (int)seconds);
 	return s;
+}
+
+LString LDateTime::DescribePeriod(LDateTime to)
+{
+	auto ThisTs = Ts();
+	auto ToTs = to.Ts();
+	auto diff = ThisTs < ToTs ? ToTs - ThisTs : ThisTs - ToTs;
+
+	auto seconds = (double)diff / LDateTime::Second64Bit;
+	return DescribePeriod(seconds);
 }
 
 int LDateTime::MonthFromName(const char *Name)

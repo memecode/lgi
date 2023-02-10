@@ -6,11 +6,11 @@
 class LRefCount
 {
 	#if defined(_WIN32)
-	LONG _Count;
+		LONG _Count;
 	#else
-	int _Count;
+		int _Count;
 	#endif
-	bool _DebugTrace;
+	bool	_DebugTrace;
 
 public:
     #ifdef _DEBUG
@@ -37,7 +37,9 @@ public:
 		LAssert(_Count == 0);
 	}
 
-	virtual void AddRef()
+	// Can't be 'AddRef' because it would conflict with 
+	// LDragDropSource::AddRef/IEnumFORMATETC::AddRef
+	virtual void IncRef()
 	{
 		#if defined(_WIN32)
 			InterlockedIncrement(&_Count);
@@ -47,6 +49,7 @@ public:
 			#error "Impl me."
 			_Count++;
 		#endif
+
 		if (_DebugTrace)
 			LgiTrace("%s:%i - LRefCount.AddRef=%i\n", _FL, _Count);
 	}
@@ -55,8 +58,9 @@ public:
 	{
 		if (_DebugTrace)
 			LgiTrace("%s:%i - LRefCount.DecRef=%i\n", _FL, _Count);
-		LAssert(_Count > 0)
-			;
+		
+		LAssert(_Count > 0);
+		
 		#if defined(_WIN32)
 			if (InterlockedDecrement(&_Count) == 0)
 		#elif defined(__GNUC__)
@@ -69,6 +73,7 @@ public:
 			delete this;
 			return true;
 		}
+
 		return false;
 	}
 };
@@ -80,12 +85,12 @@ class LAutoRefPtr
 	bool Debug;
 
 public:
-	LAutoRefPtr(T *ptr = 0, bool debug = false)
+	LAutoRefPtr(T *ptr = NULL, bool debug = false)
 	{
 		Ptr = ptr;
 		Debug = debug;
 		if (Ptr)
-			Ptr->AddRef();
+			Ptr->IncRef();
 	}
 
 	~LAutoRefPtr()
@@ -130,7 +135,7 @@ public:
 		    #ifdef _DEBUG
 			if (Debug) printf("LAutoRefPtr.Assign %p %i->%i\n", Ptr, Ptr->_GetCount(), Ptr->_GetCount()+1);
 			#endif
-			Ptr->AddRef();
+			Ptr->IncRef();
 		}
 		return *this;
 	}
@@ -145,7 +150,7 @@ public:
 		    #ifdef _DEBUG
 			if (Debug) printf("LAutoRefPtr.ObjAssign %p %i->%i\n", Ptr, Ptr->_GetCount(), Ptr->_GetCount()+1);
 			#endif
-			Ptr->AddRef();
+			Ptr->IncRef();
 		}
 		return *this;
 	}

@@ -33,10 +33,10 @@ enum CellFlag
 };
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		20
+// #define DEBUG_LAYOUT		105
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
-// #define DEBUG_CTRL_ID		506
+// #define DEBUG_CTRL_ID		105
 
 #ifdef DEBUG_CTRL_ID
 static LString Indent(int Depth)
@@ -52,7 +52,13 @@ public:
 	{
 		if (!Ptr)
 			return 0;
+	
+		#ifdef WINNATIVE
+		LgiTrace("%.*s", (int)Size, (const char*)Ptr);
+		return Size;
+		#else
 		return printf("%.*s", (int)Size, (const char*)Ptr);
+		#endif	
 	}
 }	PrintfLogger;
 
@@ -1342,8 +1348,7 @@ void TableCell::LayoutPost(int Depth)
 			else
 				c->r.y2 = c->r.y1 + c->Inf.Height.Max - 1;
 		}
-		else 
-		// if (!Izza(LButton) && !Tbl)
+		else
 		{
 			if (c->Inf.Width.Max <= 0 ||
 				c->Inf.Width.Max >= WidthPx)
@@ -1552,7 +1557,7 @@ void LTableLayoutPrivate::LayoutHorizontal(const LRect Client, int Depth, int *M
 	#if DEBUG_LAYOUT
 	if (DebugLayout)
 	{
-		// int asd=0;
+		int asd=0;
 	}
 	#endif
 		

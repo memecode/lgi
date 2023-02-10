@@ -1064,6 +1064,7 @@ void VcFolder::LogFile(const char *uri)
 	{
 		case VcSvn:
 		case VcHg:
+		case VcGit:
 		{
 			LString File = GetFilePart(uri);
 			ParseParams *Params = new ParseParams(uri);
@@ -1071,12 +1072,6 @@ void VcFolder::LogFile(const char *uri)
 			IsLogging = StartCmd(Args, &VcFolder::ParseLog, Params, LogNormal);
 			break;
 		}
-		/*
-		case VcGit:
-			break;
-		case VcCvs:
-			break;
-		*/
 		default:
 			LAssert(!"Impl me.");
 			break;

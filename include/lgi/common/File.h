@@ -419,6 +419,10 @@ public:
 	/// \return The number of bytes written or <= 0.
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0) override;
 
+	/// Modified time functions
+	uint64_t GetModifiedTime();
+	bool SetModifiedTime(uint64_t dt);
+
 	/// Gets the path used to open the file
 	virtual const char *GetName();
 	

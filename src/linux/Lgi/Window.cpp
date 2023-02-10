@@ -959,6 +959,16 @@ bool LWindow::Attach(LViewI *p)
 			SetIcon(d->Icon);
 			d->Icon.Empty();
 		}
+
+		auto p = GetParent();
+		if (p)
+		{
+			auto pHnd = p->WindowHandle();
+			if (!pHnd)
+				LgiTrace("%s:%i - SetParent() - no pHnd from %s.\n", _FL, p->GetClass());
+			else
+				gtk_window_set_transient_for(GTK_WINDOW(Wnd), pHnd);
+		}
 		
 		Status = true;
 	}
@@ -1807,6 +1817,21 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 
 void LWindow::SetDragHandlers(bool On)
 {
+}
+
+void LWindow::SetParent(LViewI *p)
+{
+	LView::SetParent(p);
+	if (p && Wnd)
+	{
+		auto pHnd = p->WindowHandle();
+		if (!pHnd)
+			LgiTrace("%s:%i - SetParent() - no pHnd from %s.\n", _FL, p->GetClass());
+		else if (!GTK_IS_WINDOW(Wnd))
+			LgiTrace("%s:%i - SetParent() - GTK_IS_WINDOW failed.\n", _FL);
+		else
+			gtk_window_set_transient_for(GTK_WINDOW(Wnd), pHnd);
+	}
 }
 
 bool LWindow::IsAttached()

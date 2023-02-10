@@ -200,6 +200,7 @@ pthread
 					<Release>..\Release</Release>
 				</All>
 				<Windows />
+				<Linux />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>

@@ -23,7 +23,7 @@ protected:
 	virtual bool _OpenFile(const char *File, bool ReadOnly);
 	virtual bool _SaveFile(const char *File);
 
-	virtual char *_GetCurFile();
+	virtual const char *_GetCurFile();
 	virtual void GetFileTypes(LFileSelect *Dlg, bool Write);
 	virtual LFileType *GetSelectedType();
 	void DoFileDlg(LFileSelect &Select, bool Open, std::function<void(bool)> OnSelect);

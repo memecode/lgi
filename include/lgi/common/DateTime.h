@@ -247,10 +247,14 @@ public:
 	/// Returns the 64bit timestamp.
 	uint64 Ts() const;
 
+	/// Get the timestamp in a format compatible with the current operating system APIs.
+	/// \returns the timestamp or zero on error.
+	uint64_t OsTime() const;
+
 	/// Get the current time...
 	static LDateTime Now();
 	/// Sets the date and time to the system clock
-	void SetNow();
+	LDateTime &SetNow();
 	/// Parses a date time from a string
 	/// \sa LDateTime::GetFormat()
 	bool Set(const char *Str);
@@ -271,6 +275,7 @@ public:
 	/// ##d ##h ##m ##s
 	/// Order of the dates isn't important.
 	LString DescribePeriod(LDateTime to);
+	static LString DescribePeriod(double seconds);
 
 	/// \returns true if 'd' is on the same day as this object
 	bool IsSameDay(LDateTime &d) const;

@@ -118,8 +118,8 @@ protected:
 	int GetColumnSize(int Col);
 
 protected:
-	LArray<LAutoString> Str;
-	int Sys_Image;
+	LString::Array Str;
+	int Sys_Image = -1;
 
 public:
 	LTreeItem();

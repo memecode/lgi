@@ -339,7 +339,10 @@ void LItemContainer::OnColumnClick(int Col, LMouse &m)
 {
 	ColClick = Col;
 	ColMouse = m;
-	SendNotify(LNotifyItemColumnClicked);
+
+	LNotification n(LNotifyItemColumnClicked);
+	n.Int[0] = Col;
+	SendNotify(n);
 }
 
 bool LItemContainer::GetColumnClickInfo(int &Col, LMouse &m)

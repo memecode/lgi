@@ -9,32 +9,22 @@
 #define DEBUG_LOG				0
 #define M_MRU_BASE				(M_USER+0x3500)
 
-struct GMruEntry
+struct LMruEntry
 {
 	LString Display;
 	LString Raw;
-	
-	GMruEntry &operator =(const GMruEntry &e)
-	{
-		Display = e.Display;
-		Raw = e.Raw;
-		return *this;
-	}
 };
 
 class LMruPrivate
 {
 public:
-	int Size;
-	LArray<GMruEntry*> Items;
-	LSubMenu *Parent;
-	LFileType *SelectedType;
+	int Size = 10;
+	LArray<LMruEntry*> Items;
+	LSubMenu *Parent = NULL;
+	LFileType *SelectedType = NULL;
 
 	LMruPrivate()	
 	{
-		Parent = 0;
-		Size = 10;
-		SelectedType = 0;
 	}
 
 	~LMruPrivate()	
@@ -87,7 +77,7 @@ void LMru::GetFileTypes(LFileSelect *Dlg, bool Write)
 	Dlg->Type("All Files", LGI_ALL_FILES);
 }
 
-char *LMru::_GetCurFile()
+const char *LMru::_GetCurFile()
 {
 	if (d->Items.Length())
 		return d->Items[0]->Raw;
@@ -104,69 +94,59 @@ bool LMru::_OpenFile(const char *File, bool ReadOnly)
 	bool Status = OpenFile(File, ReadOnly);
 
 	if (Status)
-	{
 		AddFile(File, true);
-	}
 	else
-	{
 		RemoveFile(File);
-	}
 
 	return Status;
 }
 
 bool LMru::_SaveFile(const char *FileName)
 {
-	bool Status = false;
+	if (!FileName)
+		return false;
 
-	if (FileName)
+	char File[MAX_PATH_LEN];
+	strcpy_s(File, sizeof(File), FileName);
+	
+	LFileType *st;
+	if (!LFileExists(File) &&
+		(st = GetSelectedType()) &&
+		st->Extension())
 	{
-		char File[MAX_PATH_LEN];
-		strcpy_s(File, sizeof(File), FileName);
-		
-		LFileType *st;
-		if (!LFileExists(File) &&
-			(st = GetSelectedType()) &&
-			st->Extension())
+		char *Cur = LGetExtension(File);
+		if (!Cur)
 		{
-			char *Cur = LGetExtension(File);
-			if (!Cur)
+			// extract extension
+			LString::Array a = LString(st->Extension()).Split(LGI_PATH_SEPARATOR);
+			for (auto e: a)
 			{
-				// extract extension
-				LString::Array a = LString(st->Extension()).Split(LGI_PATH_SEPARATOR);
-				for (auto e: a)
+				LString::Array p = e.RSplit(".", 1);
+				if (!p.Last().Equals("*"))
 				{
-					LString::Array p = e.RSplit(".", 1);
-					if (!p.Last().Equals("*"))
+					// bung the extension from the file type if not there
+					char *Dot = strrchr(File, '.');
+					if (Dot)
+						Dot++;
+					else
 					{
-						// bung the extension from the file type if not there
-						char *Dot = strrchr(File, '.');
-						if (Dot)
-							Dot++;
-						else
-						{
-							Dot = File + strlen(File);
-							*Dot++ = '.';
-						}
-
-						strcpy_s(Dot, File+sizeof(File)-Dot, p.Last());
-						break;
+						Dot = File + strlen(File);
+						*Dot++ = '.';
 					}
+
+					strcpy_s(Dot, File+sizeof(File)-Dot, p.Last());
+					break;
 				}
 			}
 		}
-		
-		Status = SaveFile(File);
-
-		if (Status)
-		{
-			AddFile(File);
-		}
-		else
-		{
-			RemoveFile(File);
-		}
 	}
+	
+	auto Status = SaveFile(File);
+
+	if (Status)
+		AddFile(File);
+	else
+		RemoveFile(File);
 
 	return Status;
 }
@@ -174,9 +154,7 @@ bool LMru::_SaveFile(const char *FileName)
 void LMru::_Update()
 {
 	if (d->Items.Length() > d->Size)
-	{
 		d->Items.Length(d->Size);
-	}
 
 	if (d->Parent)
 	{
@@ -188,7 +166,7 @@ void LMru::_Update()
 		{
 			for (int i=0; i<d->Items.Length(); i++)
 			{
-				GMruEntry *c = d->Items[i];
+				LMruEntry *c = d->Items[i];
 				d->Parent->AppendItem(c->Display ? c->Display : c->Raw, M_MRU_BASE + i, true);
 			}
 		}
@@ -203,10 +181,7 @@ bool LMru::Set(LSubMenu *parent, int size)
 {
 	d->Parent = parent;
 	if (size > 0)
-	{
 		d->Size = size;
-	}
-
 	_Update();
 
 	return true;
@@ -221,10 +196,10 @@ const char *LMru::AddFile(const char *FileName, bool Update)
 		return NULL;
 
 	auto Status = FileName;
-	GMruEntry *c = NULL;
+	LMruEntry *c = NULL;
 	for (int i=0; i<d->Items.Length(); i++)
 	{
-		GMruEntry *e = d->Items[i];
+		LMruEntry *e = d->Items[i];
 		#if DEBUG_LOG
 		LgiTrace("[%i] cmp '%s' '%s'\n", i, e->Raw.Get(), FileName);
 		#endif
@@ -257,7 +232,7 @@ const char *LMru::AddFile(const char *FileName, bool Update)
 
 	if (!c)
 	{
-		c = new GMruEntry;
+		c = new LMruEntry;
 		c->Raw = FileName;
 		if (SerializeEntry(&c->Display, &c->Raw, NULL))
 		{
@@ -286,7 +261,7 @@ void LMru::RemoveFile(const char *FileName, bool Update)
 	// remove from list if there
 	for (int i=0; i<d->Items.Length(); i++)
 	{
-		GMruEntry *e = d->Items[i];
+		LMruEntry *e = d->Items[i];
 		if (stricmp(e->Raw, FileName) == 0)
 		{
 			d->Items.DeleteAt(i);
@@ -413,7 +388,7 @@ bool LMru::Serialize(LDom *Store, const char *Prefix, bool Write)
 
 			for (int i=0; i<d->Items.Length(); i++)
 			{
-				GMruEntry *e = d->Items[i];
+				LMruEntry *e = d->Items[i];
 				LAssert(e->Raw.Get() != NULL);
 				if (!Saved.Find(e->Raw))
 				{
@@ -453,7 +428,7 @@ bool LMru::Serialize(LDom *Store, const char *Prefix, bool Write)
 						LString Stored = File.Str();
 						LAssert(Stored.Get() != NULL);
 						
-						LAutoPtr<GMruEntry> e(new GMruEntry);
+						LAutoPtr<LMruEntry> e(new LMruEntry);
 						if (SerializeEntry(&e->Display, &e->Raw, &Stored)) // Convert Stored -> Raw
 						{
 							d->Items.Add(e.Release());

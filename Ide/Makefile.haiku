@@ -51,6 +51,7 @@ Sources =	Code/DebugContext.cpp \
 			Code/WebFldDlg.cpp \
 			Code/DocEdit.cpp \
 			Code/DocEditStyling.cpp \
+			Code/History.cpp \
 			Code/IdeDoc.cpp \
 			Code/FtpThread.cpp \
 			Code/IdeProject.cpp \

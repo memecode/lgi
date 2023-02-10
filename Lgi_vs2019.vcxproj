@@ -408,7 +408,6 @@
     <ClInclude Include="include\common\Slider.h" />
     <ClInclude Include="include\common\View.h" />
     <ClInclude Include="include\common\Menu.h" />
-    <ClInclude Include="include\common\Message.h" />
     <ClInclude Include="include\common\Mru.h" />
     <ClInclude Include="include\common\Notifications.h" />
     <ClInclude Include="include\common\Palette.h" />
@@ -456,6 +455,7 @@
     <ClInclude Include="include\common\Res.h" />
     <ClInclude Include="include\lgi\common\LgiInc.h" />
     <ClInclude Include="include\lgi\common\RefCount.h" />
+    <ClInclude Include="include\lgi\common\Message.h" />
     <ClInclude Include="include\win\GCom.h" />
     <ClInclude Include="include\win\LgiOsClasses.h" />
     <ClInclude Include="include\win\LgiOsDefs.h" />

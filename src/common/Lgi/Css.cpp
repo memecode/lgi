@@ -2011,6 +2011,8 @@ bool LCss::Len::Parse(const char *&s, PropType Prop, ParsingStyle ParseType)
 	SkipWhite(s);
 	if (ParseWord(s, "inherit")) Type = LenInherit;
 	else if (ParseWord(s, "auto")) Type = LenAuto;
+	else if (ParseWord(s, "min-content")) Type = LenMinContent;
+	else if (ParseWord(s, "max-context")) Type = LenMaxContent;
 	else if (ParseWord(s, "normal")) Type = LenNormal;
 
 	else if (ParseWord(s, "center")) Type = AlignCenter;

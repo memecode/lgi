@@ -756,7 +756,7 @@ bool LFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, boo
 			Name.Length(Len + Chars + 1);
 			StrcpyW(Name.AddressOf(Len), w.Get());
 		}
-		Name.Add(0);
+		Name.Add(NULL);
 
 		SHFILEOPSTRUCTW s;
 		ZeroObj(s);
@@ -767,12 +767,16 @@ bool LFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, boo
 
 		int e = SHFileOperationW(&s);
 		Ret = e == 0;
-		if (Status && e)
+		if (Status)
 		{
+			int val = ERROR_SUCCESS;
+			if (s.fAnyOperationsAborted)
+				val = ERROR_CANCELLED;
+			else if (e)
+				val = ERROR_CANT_DELETE_LAST_ITEM; // There isn't a better option here...				
+
 			for (int i=0; i<Files.Length(); i++)
-			{
-				(*Status)[i].Set(e);
-			}
+				(*Status)[i].Set(val);
 		}
 	}
 	else
@@ -1503,6 +1507,32 @@ OsFile LFile::Handle()
 void LFile::ChangeThread()
 {
 	d->UseId = GetCurrentThreadId();
+}
+
+uint64_t LFile::GetModifiedTime()
+{
+    FILETIME create, access, write;
+	if (!GetFileTime(Handle(), &create, &access, &write))
+		return 0;
+
+	return (((uint64_t)write.dwHighDateTime) << 32) | write.dwLowDateTime;
+}
+
+bool LFile::SetModifiedTime(uint64_t dt)
+{
+    FILETIME create, access, write;
+	if (!GetFileTime(Handle(), &create, &access, &write))
+		return false;
+
+	write.dwHighDateTime = dt >> 32;
+	write.dwLowDateTime = dt & 0xffffffff;
+
+	auto result = SetFileTime(Handle(),
+		&create,
+		&access,
+		&write);
+
+	return result != 0;
 }
 
 const char *LFile::GetName()

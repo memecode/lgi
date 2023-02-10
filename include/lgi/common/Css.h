@@ -180,6 +180,8 @@ public:
 		LenCm,
 		LenPercent,
 		LenNormal,
+		LenMinContent,
+		LenMaxContent,
 
 		// Horizontal alignment types
 		AlignLeft,

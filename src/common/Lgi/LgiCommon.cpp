@@ -2303,10 +2303,10 @@ LString LFormatSize(int64_t Size)
 
 void LFormatSize(char *Str, int SLen, int64_t Size)
 {
-	uint64 K = 1024;
-	uint64 M = K * K;
-	uint64 G = K * M;
-	uint64 T = K * G;
+	int64_t K = 1024;
+	int64_t M = K * K;
+	int64_t G = K * M;
+	int64_t T = K * G;
 
 	if (Size == 1)
 	{

@@ -204,7 +204,19 @@ public:
 	virtual ~LDataUserI();
 
 	LDataI *GetObject();
-	virtual bool SetObject(LDataI *o, const char *File, int Line);
+	virtual bool SetObject
+	(
+		/// The client side object to link with this object.
+		LDataI *o,
+		/// In the special case that 'Object' is being deleted, and is an
+		/// orphaned objects, SetObject must not attempt to delete 'Object' 
+		/// a second time. This flag allows for that case.
+		bool InDestuctor,
+		/// The file name of the caller
+		const char *File,
+		/// The line number of the caller
+		int Line
+	);
 };
 
 /// This class is an interface between the UI and the backend for things
@@ -457,32 +469,38 @@ public:
 	) = 0;
 	
 	/// Compact the mail store
-	virtual bool Compact
+	virtual void Compact
 	(
 		/// The parent window of the UI
 		LViewI *Parent,
 		/// The store should pass information up to the UI via setting various parameters from Store3UiFields
-		LDataPropI *Props
+		LDataPropI *Props,
+		/// The callback to get status, could be called by a worker thread...
+		std::function<void(bool)> OnStatus
 	) = 0;
 	
 	/// Upgrades the mail store to the current version for this build. You should call this in response
 	/// to getting Store3UpgradeRequired back from this->GetInt(FIELD_STATUS).
-	virtual bool Upgrade
+	virtual void Upgrade
 	(
 		/// The parent window of the UI
 		LViewI *Parent,
 		/// The store should pass information up to the UI via setting various parameters from Store3UiFields
-		LDataPropI *Props
-	) { return false; }
+		LDataPropI *Props,
+		/// The callback to get status, could be called by a worker thread...
+		std::function<void(bool)> OnStatus
+	) { if (OnStatus) OnStatus(false); }
 
 	/// Tries to repair the database.
-	virtual bool Repair
+	virtual void Repair
 	(
 		/// The parent window of the UI
 		LViewI *Parent,
 		/// The store should pass information up to the UI via setting various parameters from Store3UiFields
-		LDataPropI *Props
-	) { return false; }
+		LDataPropI *Props,
+		/// The callback to get status, could be called by a worker thread...
+		std::function<void(bool)> OnStatus
+	) { if (OnStatus) OnStatus(false); }
 	
 	/// Set the sub-format
 	virtual bool SetFormat
