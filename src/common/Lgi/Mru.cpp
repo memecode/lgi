@@ -326,17 +326,15 @@ void LMru::OnCommand(int Cmd, std::function<void(bool)> OnStatus)
 				Select.InitialDir(Path);
 		}
 
-		auto Process = [&](bool ok)
+		auto Process = [Cmd, OnStatus, this](bool ok)
 		{
 			if (Cmd >= M_MRU_BASE &&
 				Cmd < M_MRU_BASE + d->Items.Length())
 			{
 				int Index = Cmd - M_MRU_BASE;
-				GMruEntry *c = d->Items[Index];
+				auto c = d->Items[Index];
 				if (c)
-				{
-					Status &= _OpenFile(c->Raw, false);
-				}
+					ok &= _OpenFile(c->Raw, false);
 			}
 			
 			if (OnStatus)
