@@ -1917,7 +1917,7 @@ int BuildThread::Main()
 						}
 						else
 						{
-							LSubProcess PostCmd(p[0], p.Length() > 1 ? p[1] : NULL);
+							LSubProcess PostCmd(p[0], p.Length() > 1 ? p[1] : LString());
 							if (PostCmd.Start(true, false))
 							{
 								char Buf[256];
@@ -3675,14 +3675,14 @@ LString IdeProject::GetTargetFile(IdePlatform Platform)
 	if (!Target)
 	{
 		LAssert(!"No target?");
-		return NULL;
+		return LString();
 	}
 
 	const char *TargetType = d->Settings.GetStr(ProjTargetType);
 	if (!TargetType)
 	{
 		LAssert(!"Needs a target type.");
-		return NULL;
+		return LString();
 	}
 
 	if (!stricmp(TargetType, "Executable"))
@@ -3708,7 +3708,7 @@ LString IdeProject::GetTargetFile(IdePlatform Platform)
 		return Ret;
 	}
 	
-	return NULL;
+	return LString();
 }
 
 struct ProjDependency
@@ -4067,7 +4067,6 @@ void AddFilesProgress::Value(int64 val)
 				Msg->Value(v);
 				Msg->SendNotify(LNotifyTableLayoutRefresh);
 			}
-			LYield();
 			Ts = Now;
 		}
 	}

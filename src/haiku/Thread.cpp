@@ -56,6 +56,9 @@ void *ThreadEntryPoint(void *i)
 	return 0;
 }
 
+const OsThread LThread::InvalidHandle = NULL;
+const OsThreadId LThread::InvalidId = 0;
+
 LThread::LThread(const char *ThreadName, int viewHandle)
 {
 	Name = ThreadName;

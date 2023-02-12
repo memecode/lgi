@@ -62,7 +62,6 @@ Sources =	Code/DebugContext.cpp \
 			Code/ProjectNode.cpp \
 			Code/FindInFiles.cpp \
 			Code/FindSymbol.cpp \
-			Code/History.cpp \
 			Code/JavascriptParser.cpp \
 			Code/PythonParser.cpp \
 			Code/SimpleCppParser.cpp \
