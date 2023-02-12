@@ -4293,7 +4293,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		default:
 		{
 			int index = Cmd - IDM_RECENT_FILE;
-			auto r = d->RecentFiles.IdxCheck(index)? d->RecentFiles[index] : NULL;
+			auto r = d->RecentFiles.IdxCheck(index)? d->RecentFiles[index] : LString();
 			if (r)
 			{
 				auto idx = Cmd - IDM_RECENT_FILE;
@@ -4311,7 +4311,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			}
 
 			index = Cmd - IDM_RECENT_PROJECT;
-			auto p = d->RecentProjects.IdxCheck(index) ? d->RecentProjects[index] : NULL;
+			auto p = d->RecentProjects.IdxCheck(index) ? d->RecentProjects[index] : LString();
 			if (p)
 			{
 				auto idx = Cmd - IDM_RECENT_PROJECT;
@@ -4652,6 +4652,7 @@ public:
 	}
 };
 
+#include <dlfcn.h>
 int LgiMain(OsAppArguments &AppArgs)
 {
 	printf("LgiIde v%s\n", APP_VER);

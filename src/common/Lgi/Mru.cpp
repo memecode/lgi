@@ -332,11 +332,9 @@ void LMru::OnCommand(int Cmd, std::function<void(bool)> OnStatus)
 				Cmd < M_MRU_BASE + d->Items.Length())
 			{
 				int Index = Cmd - M_MRU_BASE;
-				GMruEntry *c = d->Items[Index];
+				auto c = d->Items[Index];
 				if (c)
-				{
 					Status &= _OpenFile(c->Raw, false);
-				}
 			}
 			
 			if (OnStatus)
