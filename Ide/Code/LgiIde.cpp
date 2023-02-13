@@ -4652,7 +4652,6 @@ public:
 	}
 };
 
-#include <dlfcn.h>
 int LgiMain(OsAppArguments &AppArgs)
 {
 	printf("LgiIde v%s\n", APP_VER);

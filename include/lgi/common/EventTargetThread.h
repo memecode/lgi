@@ -90,18 +90,41 @@ public:
 	{
 		if (!Hnd)
 			return false;
-		if (!Lock(_FL))
-			return false;
 
-		auto *s = ToPtr.Find(Hnd);
-		bool Status = s ? s->PostEvent(Cmd, a, b) : false;
-		#if 0 // _DEBUG
-		else
-			// This is not fatal, but we might want to know about it in DEBUG builds:
-			LgiTrace("%s:%i - Sink associated with handle '%i' doesn't exist.\n", _FL, Hnd);
-		#endif
+		/*
 
-		Unlock();
+		This can deadlock on Haiku:
+		
+		- If the target LEventSinkI is a view processing a message, and therefor locked.
+		- And it's also locking this LEventSinkMap to try and send a message to it.
+		- And the LEventTargetThread thread is trying to send a message back to the view.
+		
+		Fix is to not keep this locked, but to periodically try to lock and then send.
+		If it fails, wait and then try again. While waiting, release the lock.
+
+		*/
+
+		bool Done = false, Status = false;
+		while (!Done)
+		{
+			if (LockWithTimeout(10, _FL))
+			{
+				auto *s = ToPtr.Find(Hnd);
+				Status = s ? s->PostEvent(Cmd, a, b) : false;
+				#if 0 // _DEBUG
+				else
+					// This is not fatal, but we might want to know about it in DEBUG builds:
+					LgiTrace("%s:%i - Sink associated with handle '%i' doesn't exist.\n", _FL, Hnd);
+				#endif
+				Done = true;
+
+				Unlock();
+				break;
+			}
+			
+			LSleep(10);
+		}
+
 		return Status;
 	}
 	
