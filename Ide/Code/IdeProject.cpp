@@ -2766,6 +2766,8 @@ void IdeProject::CreateProject()
 
 ProjectStatus IdeProject::OpenFile(const char *FileName)
 {
+	auto Log = d->App->GetBuildLog();
+
 	LProfile Prof("IdeProject::OpenFile");
 	Prof.HideResultsIfBelow(1000);
 
@@ -2789,7 +2791,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 
 	if (!d->FileName)
 	{
-		LgiTrace("%s:%i - No filename.\n", _FL);
+		Log->Print("%s:%i - No filename.\n", _FL);
 		return OpenError;
 	}
 	
@@ -2797,10 +2799,10 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 
 	LFile f;
 	LString FullPath = d->FileName.Get();
-	if (CheckExists(FullPath) &&
+	if (!CheckExists(FullPath) ||
 		!f.Open(FullPath, O_READWRITE))
 	{
-		LgiTrace("%s:%i - Error: Can't open '%s'.\n", _FL, FullPath.Get());
+		Log->Print("%s:%i - Error: Can't open '%s'.\n", _FL, FullPath.Get());
 		return OpenError;
 	}
 
@@ -2810,8 +2812,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 	LXmlTag r;
 	if (!x.Read(&r, &f))
 	{
-		LgiTrace("%s:%i - Error: Can't read XML: %s\n", _FL, x.GetErrorMsg());
-		LgiMsg(Tree, x.GetErrorMsg(), AppName);
+		Log->Print("%s:%i - Error: Can't read XML: %s\n", _FL, x.GetErrorMsg());
 		return OpenError;
 	}
 
@@ -2844,7 +2845,10 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 	}
 	
 	if (!r.IsTag("Project"))
+	{
+		Log->Print("%s:%i - No 'Project' tag.\n", _FL);
 		return OpenError;
+	}
 
 	Prof.Add("OnOpen");
 

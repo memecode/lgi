@@ -37,8 +37,8 @@ FindInFiles::FindInFiles(AppWnd *app, FindParams *params)
 	{
 		auto r = GetPos();
 		auto Scale = (float)LScreenDpi().x / 96.0;
-		r.x2 *= Scale;
-		r.y2 *= Scale;
+		r.x2 = (int)(r.x2 * Scale);
+		r.y2 = (int)(r.y2 * Scale);
 		SetPos(r);
 
 		MoveToCenter();

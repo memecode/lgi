@@ -1505,11 +1505,8 @@ public:
 				auto &a = *Recent[i];
 				for (size_t n=0; n<a.Length(); n++)
 				{
-					if (stricmp(a[n], File) == 0)
-					{
+					if (!a[n] || stricmp(a[n], File) == 0)
 						a.DeleteAt(n--);
-						break;
-					}
 				}
 			}
 
@@ -4279,6 +4276,11 @@ BuildConfig AppWnd::GetBuildMode()
 LList *AppWnd::GetFtpLog()
 {
 	return d->Output->FtpLog;
+}
+
+LStream *AppWnd::GetOutputLog()
+{
+	return d->Output->Txt[AppWnd::OutputTab];
 }
 
 LStream *AppWnd::GetBuildLog()

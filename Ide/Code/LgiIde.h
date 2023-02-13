@@ -286,6 +286,7 @@ public:
 	LTree *GetTree();
 	LOptionsFile *GetOptions();
 	LList *GetFtpLog();
+	LStream *GetOutputLog();
 	LStream *GetBuildLog();
 	LStream *GetDebugLog();
 	IdeDoc *FindOpenFile(char *FileName);
