@@ -1,7 +1,7 @@
 #define __USE_GNU
 #include <stdio.h>
 
-#define DEBUG_LIB_MSGS		1
+#define DEBUG_LIB_MSGS		0
 #define ALLOW_FALLBACK_PATH	0
 
 #include "lgi/common/Lgi.h"

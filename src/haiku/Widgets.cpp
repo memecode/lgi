@@ -168,41 +168,54 @@ void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 
 void LDialog::EndModal(int Code)
 {
-	if (d->IsModal)
+	if (!d->IsModal)
 	{
-		d->IsModal = false;
-		if (d->ModalCb)
-		{
-			BLooper *looper = BLooper::LooperForThread(d->CallingThread);
-			if (looper)
-			{
-				BMessage *m = new BMessage(M_HANDLE_IN_THREAD);
-				m->AddPointer
-				(
-					LMessage::PropCallback,
-					new LMessage::InThreadCb
-					(
-						[dlg=this,cb=d->ModalCb,code=Code]()
-						{
-							// printf("%s:%i - Calling LDialog callback.. in original thread?\n", _FL);
-							cb(dlg, code);
-							// printf("%s:%i - Calling LDialog callback.. done\n", _FL);
-						}
-					)
-				);
-					
-				// printf("%s:%i - Posting M_HANDLE_IN_THREAD.\n", _FL);
-				looper->PostMessage(m);
-			}
-			else printf("%s:%i - Failed to get looper for %p\n", _FL, d->CallingThread);
-		}
+		LgiTrace("%s:%i - EndModal error: LDialog is not model.\n", _FL);
+		return;
 	}
+	
+	d->IsModal = false;
+	if (!d->ModalCb)
+	{
+		// If no callback is supplied, the default option is to just delete the
+		// dialog, closing it.
+		delete this;
+		return;
+	}
+	
+	BLooper *looper = BLooper::LooperForThread(d->CallingThread);
+	if (!looper)
+	{
+		LgiTrace("%s:%i - Failed to get looper for %p\n", _FL, d->CallingThread);
+		delete this;
+		return;
+	}
+	
+	BMessage *m = new BMessage(M_HANDLE_IN_THREAD);
+	m->AddPointer
+	(
+		LMessage::PropCallback,
+		new LMessage::InThreadCb
+		(
+			[dlg=this,cb=d->ModalCb,code=Code]()
+			{
+				// printf("%s:%i - Calling LDialog callback.. in original thread?\n", _FL);
+				cb(dlg, code);
+				// printf("%s:%i - Calling LDialog callback.. done\n", _FL);
+			}
+		)
+	);
+		
+	// printf("%s:%i - Posting M_HANDLE_IN_THREAD.\n", _FL);
+	looper->PostMessage(m);
 }
 
 int LDialog::DoModeless()
 {
 	d->IsModal = false;
 	d->IsModeless = true;
+	
+	Visible(true);
 	return 0;
 }
 

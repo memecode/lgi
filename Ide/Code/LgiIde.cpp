@@ -3181,6 +3181,7 @@ public:
 				LVariant v;
 				Font.Serialize(App->GetOptions(), OPT_EditorFont, true);
 				App->GetOptions()->SetValue(OPT_Jobs, v = GetCtrlValue(IDC_JOBS));
+				// Fall through..
 			}
 			case IDCANCEL:
 			{
