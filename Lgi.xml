@@ -450,8 +450,8 @@
 		<Node File="./include/lgi/common/Token.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
-		<Node File=".\Makefile.haiku" Type="9" Platforms="15" />
-		<Node File=".\Makefile.linux" Type="9" Platforms="15" />
+		<Node File="./Makefile.haiku" Type="9" Platforms="15" />
+		<Node File="./Makefile.linux" Type="9" Platforms="15" />
 	</Node>
 	<Settings>
 		<General>
@@ -459,6 +459,7 @@
 				<Linux>Makefile.linux</Linux>
 				<Windows>Makefile.win64</Windows>
 				<Mac>Makefile.macosx</Mac>
+				<Haiku>Makefile.unknown</Haiku>
 			</Makefile>
 			<Compiler>
 				<Linux>gcc</Linux>
@@ -466,6 +467,11 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
+			<Executable>
+				<Haiku />
+			</Executable>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -485,9 +491,17 @@
 </Release>
 				</Linux>
 				<Windows>
-					<Debug>include/lgi/win</Debug>
-					<Release>include/lgi/win</Release>
+					<Debug>./include/lgi/win
+./private/win</Debug>
+					<Release>./include/lgi/win
+./private/win</Release>
 				</Windows>
+				<Haiku>
+					<Debug>./include/lgi/haiku
+./private/haiku</Debug>
+					<Release>./include/lgi/haiku
+./private/haiku</Release>
+				</Haiku>
 			</IncludePaths>
 			<SystemIncludes>
 				<Linux>
@@ -498,6 +512,7 @@
 `pkg-config --cflags gtk+-3.0`
 `pkg-config --cflags gstreamer-1.0`</Release>
 				</Linux>
+				<Haiku />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -512,18 +527,71 @@ crypt
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
+				<All />
+				<Haiku>
+					<Debug>-static-gcc
+gnu
+network
+be</Debug>
+					<Release>-static-gcc
+gnu
+network
+be</Release>
+				</Haiku>
 			</Libraries>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-gtk3</Debug>
 					<Release>lgi-gtk3</Release>
 				</Linux>
+				<Haiku />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
 			</TargetType>
+			<Defines>
+				<All>
+					<Debug>LGI_LIBRARY</Debug>
+					<Release>LGI_LIBRARY</Release>
+				</All>
+				<Haiku>
+					<Debug>POSIX
+_GNU_SOURCE</Debug>
+					<Release>POSIX
+_GNU_SOURCE</Release>
+				</Haiku>
+			</Defines>
+			<LibraryPaths>
+				<All />
+				<Haiku />
+			</LibraryPaths>
+			<ApplicationIcon />
 		</Build>
-		<Advanced />
-		<Debug />
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Haiku />
+			</PostBuildCommands>
+		</Advanced>
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Editor>
+			<TabSize />
+			<IndentSize />
+			<ShowWhiteSpace />
+			<UseHardTabs />
+			<CommentFile />
+			<CommentFunction />
+		</Editor>
 	</Settings>
 </Project>

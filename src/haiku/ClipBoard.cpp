@@ -81,7 +81,7 @@ bool LClipBoard::Text(const char *Str, bool AutoEmpty)
 
     clip->AddData("text/plain", B_MIME_TYPE, Str, strlen(Str));
  
-    Status = be_clipboard->Commit() == B_OK;
+    Status = d->Commit() == B_OK;
     if (!Status)
         LgiTrace("%s:%i - Could not commit data to clipboard.\n", _FL);
  
