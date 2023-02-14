@@ -2157,11 +2157,12 @@ LString IdeProject::GetMakefile(IdePlatform Platform)
 {
 	LString Path;
 	const char *PMakefile = d->Settings.GetStr(ProjMakefile, NULL, Platform);
+	printf("PMakefile=%s\n", PMakefile);
 	if (PMakefile)
 	{
 		if (LIsRelativePath(PMakefile))
 		{
-			LAutoString Base = GetBasePath();
+			auto Base = GetBasePath();
 			if (Base)
 			{
 				char p[MAX_PATH_LEN];

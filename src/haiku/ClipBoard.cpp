@@ -3,24 +3,20 @@
 #include "lgi/common/Variant.h"
 #include "lgi/common/ClipBoard.h"
 
+#include <Clipboard.h>
+
 #define DEBUG_CLIPBOARD					0
-#define VAR_COUNT						16
 #define LGI_CLIP_BINARY					"lgi.binary"
-#define LGI_RECEIVE_CLIPBOARD_TIMEOUT	4000
 
-struct ClipData : public LMutex
-{
-	::LVariant v[VAR_COUNT];
-	
-	ClipData() : LMutex("ClipData")
-	{
-	}
-	
-}	Data;
-
-class LClipBoardPriv
+class LClipBoardPriv : public BClipboard
 {
 public:
+	LString Txt;
+	LAutoWString WTxt;
+	
+	LClipBoardPriv() : BClipboard(NULL)
+	{
+	}
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -39,7 +35,16 @@ LClipBoard::~LClipBoard()
 
 bool LClipBoard::Empty()
 {
-	return false;
+	if (!d->Lock())
+	{
+		LgiTrace("%s:%i - Can't lock BClipboard.\n", _FL);
+		return false;
+	}
+
+    d->Clear();
+    d->Unlock();
+
+	return true;
 }
 
 bool LClipBoard::EnumFormats(::LArray<FormatType> &Formats)
@@ -65,17 +70,47 @@ bool LClipBoard::Text(const char *Str, bool AutoEmpty)
 	{
 		Empty();
 	}
-	
+
+	if (!d->Lock())
+	{
+		LgiTrace("%s:%i - Can't lock BClipboard.\n", _FL);
+		return false;
+	}
+ 
+    auto clip = d->Data();
+
+    clip->AddData("text/plain", B_MIME_TYPE, Str, strlen(Str));
+ 
+    Status = be_clipboard->Commit() == B_OK;
+    if (!Status)
+        LgiTrace("%s:%i - Could not commit data to clipboard.\n", _FL);
+ 
+    d->Unlock();
+
 	return Status;
 }
 
 char *LClipBoard::Text()
 {
-	char *t = 0;
+	if (!d->Lock())
+	{
+		LgiTrace("%s:%i - Can't lock BClipboard.\n", _FL);
+		return NULL;
+	}
 	
-	return t;
+    auto clip = d->Data();
+ 
+	const char *string = NULL;
+	ssize_t stringLen = 0;
+    clip->FindData("text/plain", B_MIME_TYPE, (const void **)&string, &stringLen);
+    d->Txt.Set(string, stringLen);
+ 
+    d->Unlock();
+		
+	return d->Txt;
 }
 
+// Wide char versions for plain text
 bool LClipBoard::TextW(const char16 *Str, bool AutoEmpty)
 {
 	LAutoString u(WideToUtf8(Str));
@@ -84,8 +119,9 @@ bool LClipBoard::TextW(const char16 *Str, bool AutoEmpty)
 
 char16 *LClipBoard::TextW()
 {
-	LAutoString u(Text());
-	return Utf8ToWide(u);
+	auto u = Text();
+	d->WTxt.Reset(Utf8ToWide(u));
+	return d->WTxt;
 }
 
 bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
@@ -106,29 +142,6 @@ bool LClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	if (!Ptr || Len <= 0)
 		return false;
 
-	::LVariant *p = NULL;
-	if (Data.Lock(_FL))
-	{
-		for (int i=0; i<VAR_COUNT; i++)
-		{
-			if (Data.v[i].Type == GV_NULL)
-			{
-				p = Data.v + i;
-				p->SetBinary(Len, Ptr);
-				break;
-			}
-		}
-		Data.Unlock();
-	}
-	
-	if (!p)
-	{
-		#if DEBUG_CLIPBOARD
-		printf("%s:%i - no slots to store data\n", _FL);
-		#endif
-		return false;
-	}
-	
 	return false;
 }
 

@@ -8,6 +8,8 @@ Win32*
 x64*
 Debug*
 Release*
+*.o
+*.d
 */.DS_Store
 *.xcuserstate
 *.xcbkptlist
