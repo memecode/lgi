@@ -23,6 +23,7 @@
 	struct LCaptureThread : public LThread, public LCancel
 	{
 		int view = -1;
+		LString name;
 		
 	public:
 		constexpr static int EventMs = 150;
@@ -58,10 +59,10 @@ extern LRect GtkGetPos(Gtk::GtkWidget *w);
 #if !WINNATIVE
 #include "lgi/common/ThreadEvent.h"
 
-class LPulseThread : public LThread
+class LPulseThread : public LThread, public LCancel
 {
-	LView *View;
-	int Length;
+	LView *View = NULL;
+	int Length = 0;
 	LThreadEvent Event;
 
 	LString MakeName(LView *v, const char *Type)
@@ -72,7 +73,7 @@ class LPulseThread : public LThread
 	}
 
 public:
-	bool Loop;
+	static int PulseThreadCount;
 
 	LPulseThread(LView *view, int len) :
 		View(view),
@@ -80,36 +81,33 @@ public:
 		Event(MakeName(view, "Event"))
 	{
 		LAssert(View);
-		
-		Loop = true;
 		Length = len;
+		PulseThreadCount++;
+		
+		printf("PulseThread=%i, %s, %i\n", PulseThreadCount, View->GetClass(), Length);
 		
 		Run();
 	}
 	
 	~LPulseThread()
 	{
-		Loop = false;
 		View = NULL;
+		Cancel();
 		Event.Signal();
-
-		while (!IsExited())
-			LSleep(0);
+		WaitForExit();
+		PulseThreadCount--;
 	}
 	
 	int Main()
 	{
-		while (Loop && LAppInst)
+		while (!IsCancelled() && LAppInst)
 		{
 			auto s = Event.Wait(Length);
-			if (!Loop || s == LThreadEvent::WaitError)
+			if (IsCancelled() || s == LThreadEvent::WaitError)
 				break;
 			
-			if (View)
-			{
-				if (!View->PostEvent(M_PULSE))
-					Loop = false;
-			}
+			if (View && !View->PostEvent(M_PULSE))
+				Cancel();
 		}
 		
 		return 0;
@@ -193,7 +191,7 @@ public:
 
 	#if defined(__GTK_H__)
 
-		LCaptureThread *CaptureThread = NULL;
+		static LCaptureThread *CaptureThread;
 		LMouse PrevMouse;
 	
 	#elif defined(MAC)

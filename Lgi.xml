@@ -369,6 +369,10 @@
 				<Node File=".\src\common\Lgi\CssTools.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\CssTools.h" Type="3" Platforms="15" />
 			</Node>
+			<Node Name="Haiku" Type="1" Platforms="15" Id="7">
+				<Node File=".\src\haiku\Layout.cpp" Type="2" Platforms="8" />
+				<Node File=".\src\haiku\Widgets.cpp" Type="2" Platforms="8" />
+			</Node>
 			<Node Name="Layout" Type="1" Platforms="15" Open="0" Id="68">
 				<Node File=".\src\common\Widgets\Box.cpp" Type="2" Platforms="15" />
 				<Node File=".\include\lgi\common\Box.h" Type="3" Platforms="15" />
@@ -389,10 +393,7 @@
 				<Node File=".\src\win\Lgi\Layout.cpp" Type="2" Platforms="1" />
 				<Node File=".\src\common\Widgets\Progress.cpp" Type="2" Platforms="1" />
 			</Node>
-			<Node Name="Haiku" Type="1" Platforms="15" Id="7">
-				<Node File=".\src\haiku\Layout.cpp" Type="2" Platforms="8" />
-				<Node File=".\src\haiku\Widgets.cpp" Type="2" Platforms="8" />
-			</Node>
+			<Node File="./include/lgi/common/DocView.h" Type="3" Platforms="15" />
 		</Node>
 	</Node>
 	<Node Name="LgiNet" Type="1" Platforms="15" Open="0" Id="69">

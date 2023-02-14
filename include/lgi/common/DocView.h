@@ -239,7 +239,7 @@ class LgiClass LDocView :
 	friend class LDocumentEnv;
 
 protected:
-	LDocumentEnv *Environment;
+	LDocumentEnv *Environment = NULL;
 	LString Charset;
 
 public:
@@ -250,33 +250,33 @@ public:
 
 	///////////////////////////////////////////////////////////////////////
 	// Properties
-	#define _TvMenuProp(Type, Name)						\
+	#define _TvMenuProp(Type, Name, Default)			\
 	protected:											\
-		Type Name;										\
+		Type Name = Default;							\
 	public:												\
 		virtual void Set##Name(Type i) { Name=i; }		\
 		Type Get##Name() { return Name; }
 
-	_TvMenuProp(uint16, WrapAtCol)
-	_TvMenuProp(bool, UrlDetect)
-	_TvMenuProp(bool, ReadOnly)
-	_TvMenuProp(LDocWrapType, WrapType)
-	_TvMenuProp(uint8_t, TabSize)
-	_TvMenuProp(uint8_t, IndentSize)
-	_TvMenuProp(bool, HardTabs)
-	_TvMenuProp(bool, ShowWhiteSpace)
-	_TvMenuProp(bool, ObscurePassword)
-	_TvMenuProp(bool, CrLf)
-	_TvMenuProp(bool, AutoIndent)
-	_TvMenuProp(bool, FixedWidthFont)
-	_TvMenuProp(bool, LoadImages)
-	_TvMenuProp(bool, OverideDocCharset)
+	_TvMenuProp(uint16, WrapAtCol, 0)
+	_TvMenuProp(bool, UrlDetect, true)
+	_TvMenuProp(bool, ReadOnly, false)
+	_TvMenuProp(LDocWrapType, WrapType, TEXTED_WRAP_REFLOW)
+	_TvMenuProp(uint8_t, TabSize, 4)
+	_TvMenuProp(uint8_t, IndentSize, 4)
+	_TvMenuProp(bool, HardTabs, true)
+	_TvMenuProp(bool, ShowWhiteSpace, false)
+	_TvMenuProp(bool, ObscurePassword, false)
+	_TvMenuProp(bool, CrLf, false)
+	_TvMenuProp(bool, AutoIndent, true)
+	_TvMenuProp(bool, FixedWidthFont, false)
+	_TvMenuProp(bool, LoadImages, false)
+	_TvMenuProp(bool, OverideDocCharset, false)
 
 	// This UID is used to match data load events with their source document.
 	// Sometimes data will arrive after the document that asked for it has
 	// already been unloaded. So by assigned each document an UID we can check
 	// the job UID against it and discard old data.
-	_TvMenuProp(int, DocumentUid)
+	_TvMenuProp(int, DocumentUid, 0)
 	#undef _TvMenuProp
 
 	virtual const char *GetCharset()
@@ -293,25 +293,8 @@ public:
 
 	///////////////////////////////////////////////////////////////////////
 	// Object
-	LDocView(LDocumentEnv *e = 0)
+	LDocView(LDocumentEnv *e = NULL)
 	{
-		WrapAtCol = 0;
-		UrlDetect = true;
-		ReadOnly = false;
-		WrapType = TEXTED_WRAP_REFLOW;
-		TabSize = 4;
-		IndentSize = 4;
-		HardTabs = true;
-		ShowWhiteSpace = false;
-		ObscurePassword = false;
-		CrLf = false;
-		AutoIndent = true;
-		FixedWidthFont = false;
-		LoadImages = false;
-		OverideDocCharset = false;
-
-		Environment = 0;
-
 		SetEnv(e);
 	}
 

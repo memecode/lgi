@@ -234,7 +234,7 @@ struct Msg
 class LMessageQue : public LMutex
 {
 public:
-	typedef ::LArray<Msg> MsgArray;
+	typedef LArray<Msg> MsgArray;
 
 	LMessageQue() : LMutex("LMessageQue")
 	{
@@ -634,7 +634,7 @@ void LApp::Exit(int Code)
 
 bool LApp::PostEvent(LViewI *View, int Msg, LMessage::Param a, LMessage::Param b)
 {
-	LMessageQue::MsgArray *q = MsgQue.Lock(_FL);
+	auto q = MsgQue.Lock(_FL);
 	if (!q)
 	{
 		printf("%s:%i - Couldn't lock app.\n", _FL);
@@ -648,7 +648,7 @@ bool LApp::PostEvent(LViewI *View, int Msg, LMessage::Param a, LMessage::Param b
 	{
 		static uint64 prev = 0;
 		auto now = LCurrentTime();
-		if (now - prev >= 500)
+		if (now - prev >= 1000)
 		{
 			prev = now;
 			#if defined(WIN32)
@@ -660,6 +660,20 @@ bool LApp::PostEvent(LViewI *View, int Msg, LMessage::Param a, LMessage::Param b
 				"PostEvent Que=" LPrintfSizeT " (msg=%i)\n", q->Length(), Msg);
 			#if defined(WIN32)
 				OutputDebugStringA(s);
+			#endif
+			
+			#ifdef LINUX
+			LHashTbl<IntKey<int>, size_t> MsgCounts;
+			for (auto &msg: *q)
+				MsgCounts.Add(msg.m, MsgCounts.Find(msg.m) + 1);
+
+			for (auto c: MsgCounts)
+				printf("    %i->%i\n", c.key, c.value);
+				
+			if (Msg == 916)
+			{
+				int asd=0;
+			}
 			#endif
 		}
 	}

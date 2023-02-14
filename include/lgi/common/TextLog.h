@@ -58,7 +58,6 @@ public:
 	{
 		TView::OnCreate();
 		// ProcessTxt();
-		TView::SetPulse(250);
 	}
 
 	void OnPulse()

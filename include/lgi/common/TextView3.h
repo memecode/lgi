@@ -219,39 +219,39 @@ protected:
 	friend class LTextView3Private;
 
 	// Options
-	bool Dirty;
-	bool CanScrollX;
+	bool Dirty = false;
+	bool CanScrollX = false;
 
 	// Display
-	LFont *Font;
-	LFont *Bold;		// Bold variant of 'Font'
-	LFont *Underline;	// Underline variant of 'Font'
+	LFont *Font = NULL;
+	LFont *Bold = NULL;			// Bold variant of 'Font'
+	LFont *Underline = NULL;	// Underline variant of 'Font'
 
-	LFont *FixedFont;
-	int LineY;
-	ssize_t SelStart, SelEnd;
-	int DocOffset;
-	int MaxX;
-	bool Blink;
-	uint64 BlinkTs;
-	int ScrollX;
+	LFont *FixedFont = NULL;
+	int LineY = 1;
+	ssize_t SelStart = -1, SelEnd = -1;
+	int DocOffset = 0;
+	int MaxX = 0;
+	bool Blink = true;
+	uint64 BlinkTs = 0;
+	int ScrollX = 0;
 	LRect CursorPos;
 
 	/// true if the text pour process is still ongoing
-	bool PourEnabled;			// True if pouring the text happens on edit. Turn off if doing lots
+	bool PourEnabled = true;	// True if pouring the text happens on edit. Turn off if doing lots
 								// of related edits at the same time. And then manually pour once 
 								// finished.
-	bool PartialPour;			// True if the pour is happening in the background. It's not threaded
+	bool PartialPour = false;	// True if the pour is happening in the background. It's not threaded
 								// but taking place in the GUI thread via timer.
-	size_t PartialPourLines;	// Partial pour max lines, if we restart this tracks the max we saw...
-	bool AdjustStylePos;		// Insert/Delete moved styles automatically to match (default: true)
+	size_t PartialPourLines = 0;// Partial pour max lines, if we restart this tracks the max we saw...
+	bool AdjustStylePos = true;	// Insert/Delete moved styles automatically to match (default: true)
 
 	List<LTextLine> Line;
 	LUnrolledList<LStyle> Style;		// sorted in 'Start' order
 	typedef LUnrolledList<LStyle>::Iter StyleIter;
 
 	// For ::Name(...)
-	char *TextCache;
+	char *TextCache = NULL;
 
 	// Data
 	char16 *Text;
@@ -260,9 +260,9 @@ protected:
 	ssize_t Alloc;
 
 	// Undo stuff
-	bool UndoOn;
+	bool UndoOn = true;
 	LUndo UndoQue;
-	struct LTextView3Undo *UndoCur;
+	struct LTextView3Undo *UndoCur = NULL;
 
 	// private methods
 	List<LTextLine>::I GetTextLineIt(ssize_t Offset, ssize_t *Index = 0);

@@ -36,7 +36,7 @@
 #define PROFILE_PAINT				0
 #define DRAW_LINE_BOXES				0
 #define WRAP_POUR_TIMEOUT			90 // ms
-#define PULSE_TIMEOUT				250 // ms
+#define PULSE_TIMEOUT				500 // ms
 #define CURSOR_BLINK				1000 // ms
 
 #define ALLOC_BLOCK					64
@@ -349,40 +349,18 @@ LTextView3::LTextView3(	int Id,
 	// init vars
 	LView::d->Css.Reset(d = new LTextView3Private(this));
 	
-	PourEnabled = true;
-	PartialPour = false;
-	PartialPourLines = 0;
-	AdjustStylePos = true;
-	BlinkTs = 0;
-	LineY = 1;
-	MaxX = 0;
-	TextCache = 0;
-	UndoOn = true;
-	UndoCur = NULL;
-	Font = 0;
-	FixedWidthFont = false;
-	FixedFont = 0;
-	ShowWhiteSpace = false;
-	ObscurePassword = false;
 	TabSize = TAB_SIZE;
 	IndentSize = TAB_SIZE;
-	HardTabs = true;
-	CanScrollX = false;
-	Blink = true;
-
+	
 	// setup window
 	SetId(Id);
 
 	// default options
-	Dirty = false;
 	#if WINNATIVE
 	CrLf = true;
 	SetDlgCode(DLGC_WANTALLKEYS);
 	#else
-	CrLf = false;
 	#endif
-	Underline = NULL;
-	Bold = NULL;
 	d->Padding(LCss::Len(LCss::LenPx, 2));
 
 	#ifdef _DEBUG
@@ -400,14 +378,8 @@ LTextView3::LTextView3(	int Id,
 	Size = 0;
 
 	// Display
-	SelStart = SelEnd = -1;
-	DocOffset = 0;
-	ScrollX = 0;
-
 	if (FontType)
-	{
 		Font = FontType->Create();
-	}
 	else
 	{
 		LFontType Type;
@@ -2151,8 +2123,8 @@ void LTextView3::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 		}
 		else return;
 
-		LTextLine *SLine = GetTextLine(Start);
-		LTextLine *ELine = GetTextLine(End);
+		auto SLine = GetTextLine(Start);
+		auto ELine = GetTextLine(End);
 		LRect u;
 		if (SLine && ELine)
 		{
@@ -3396,11 +3368,11 @@ void LTextView3::OnCreate()
 	DropTarget(true);
 
 	#ifndef WINDOWS
-	if (Ctrls.Length() == 0)
-	#endif
+		if (Ctrls.Length() == 0)
+			SetPulse(PULSE_TIMEOUT);
+		Ctrls.Add(this);
+	#else
 		SetPulse(PULSE_TIMEOUT);
-	#ifndef WINDOWS
-	Ctrls.Add(this);
 	#endif
 }
 
@@ -5406,10 +5378,10 @@ void LTextView3::InternalPulse()
 void LTextView3::OnPulse()
 {
 	#ifdef WINDOWS
-	InternalPulse();
+		InternalPulse();
 	#else
-	for (auto c: Ctrls)
-		c->InternalPulse();
+		for (auto c: Ctrls)
+			c->InternalPulse();
 	#endif
 }
 

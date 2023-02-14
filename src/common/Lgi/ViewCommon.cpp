@@ -21,6 +21,10 @@
 #define DEBUG_CAPTURE(...)
 #endif
 
+#if !WINNATIVE
+int LPulseThread::PulseThreadCount = 0;
+#endif
+
 //////////////////////////////////////////////////////////////////////////////////////
 // Helper
 LPoint lgi_view_offset(LViewI *v, bool Debug = false)

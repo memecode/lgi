@@ -66,7 +66,7 @@ public:
 		if (!PulseRunning)
 		{
 			PulseRunning = this;
-			SetPulse(300);
+			SetPulse(1000);
 		}
 	}
 	
