@@ -249,81 +249,86 @@ int LGetOs
 {
 	#if defined(WIN32) || defined(WIN64)
 
-	static int Os = LGI_OS_UNKNOWN;
-	static int Version = 0, Revision = 0;
+		static int Os = LGI_OS_UNKNOWN;
+		static int Version = 0, Revision = 0;
 
-	if (Os == LGI_OS_UNKNOWN)
-	{
-		#if defined(WIN64)
-		BOOL IsWow64 = TRUE;
-		#elif defined(WIN32)
-		BOOL IsWow64 = FALSE;
-		IsWow64Process(GetCurrentProcess(), &IsWow64);
-		#endif
-
-		SERVER_INFO_101 *v = NULL;
-		auto r = NetServerGetInfo(NULL, 101, (LPBYTE*)&v);
-		if (r == NERR_Success)
+		if (Os == LGI_OS_UNKNOWN)
 		{
-			Version = v->sv101_version_major;
-			Revision = v->sv101_version_minor;
-			Os = (v->sv101_version_major >= 6)
-				?
-				#ifdef WIN32
-				(IsWow64 ? LGI_OS_WIN64 : LGI_OS_WIN32)
-				#else
-				LGI_OS_WIN64
-				#endif
-				:
-				LGI_OS_WIN9X;
+			#if defined(WIN64)
+			BOOL IsWow64 = TRUE;
+			#elif defined(WIN32)
+			BOOL IsWow64 = FALSE;
+			IsWow64Process(GetCurrentProcess(), &IsWow64);
+			#endif
 
-			NetApiBufferFree(v);
+			SERVER_INFO_101 *v = NULL;
+			auto r = NetServerGetInfo(NULL, 101, (LPBYTE*)&v);
+			if (r == NERR_Success)
+			{
+				Version = v->sv101_version_major;
+				Revision = v->sv101_version_minor;
+				Os = (v->sv101_version_major >= 6)
+					?
+					#ifdef WIN32
+					(IsWow64 ? LGI_OS_WIN64 : LGI_OS_WIN32)
+					#else
+					LGI_OS_WIN64
+					#endif
+					:
+					LGI_OS_WIN9X;
+
+				NetApiBufferFree(v);
+			}
+			else LAssert(0);
 		}
-		else LAssert(0);
-	}
 
-	if (Ver)
-	{
-		Ver->Add(Version);
-		Ver->Add(Revision);
-	}
+		if (Ver)
+		{
+			Ver->Add(Version);
+			Ver->Add(Revision);
+		}
 
-	return Os;
+		return Os;
 
 	#elif defined LINUX
 
-	if (Ver)
-	{
-		utsname Buf;
-		if (!uname(&Buf))
+		if (Ver)
 		{
-			auto t = LString(Buf.release).SplitDelimit(".");
-			for (int i=0; i<t.Length(); i++)
+			utsname Buf;
+			if (!uname(&Buf))
 			{
-				Ver->Add(atoi(t[i]));
+				auto t = LString(Buf.release).SplitDelimit(".");
+				for (int i=0; i<t.Length(); i++)
+				{
+					Ver->Add(atoi(t[i]));
+				}
 			}
 		}
-	}
 
-	return LGI_OS_LINUX;
+		return LGI_OS_LINUX;
 
 	#elif defined MAC
 
-	#if !defined(__GTK_H__)
-	if (Ver)
-	{
-		NSOperatingSystemVersion v = [[NSProcessInfo processInfo] operatingSystemVersion];
-		Ver->Add((int)v.majorVersion);
-		Ver->Add((int)v.minorVersion);
-		Ver->Add((int)v.patchVersion);
-	}
-	#endif
+		#if !defined(__GTK_H__)
+		if (Ver)
+		{
+			NSOperatingSystemVersion v = [[NSProcessInfo processInfo] operatingSystemVersion];
+			Ver->Add((int)v.majorVersion);
+			Ver->Add((int)v.minorVersion);
+			Ver->Add((int)v.patchVersion);
+		}
+		#endif
+		
+		return LGI_OS_MAC_OS_X;
+
+	#elif defined HAIKU
 	
-	return LGI_OS_MAC_OS_X;
+		return LGI_OS_HAIKU;
 
 	#else
 
-	return LGI_OS_UNKNOWN;
+		#error "Impl Me"
+		return LGI_OS_UNKNOWN;
 
 	#endif
 }
@@ -341,7 +346,12 @@ const char *LGetOsName()
 		"MacOSX",
 	};
 
-	return Str[LGetOs()];
+	auto Os = LGetOs();
+	if (Os > 0 && Os < CountOf(Str))
+		return Str[Os];
+		
+	LAssert(!"Invalid OS index.");
+	return "error";
 }
 
 #ifdef WIN32

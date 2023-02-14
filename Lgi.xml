@@ -459,7 +459,6 @@
 				<Linux>Makefile.linux</Linux>
 				<Windows>Makefile.win64</Windows>
 				<Mac>Makefile.macosx</Mac>
-				<Haiku>Makefile.unknown</Haiku>
 			</Makefile>
 			<Compiler>
 				<Linux>gcc</Linux>
@@ -529,11 +528,11 @@ crypt
 				</Linux>
 				<All />
 				<Haiku>
-					<Debug>-static-gcc
+					<Debug>-static-libgcc
 gnu
 network
 be</Debug>
-					<Release>-static-gcc
+					<Release>-static-libgcc
 gnu
 network
 be</Release>

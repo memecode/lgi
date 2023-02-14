@@ -41,7 +41,13 @@ bool LClipBoard::Empty()
 		return false;
 	}
 
-    d->Clear();
+    auto result = d->Clear();
+	if (result)
+		printf("%s:%i - clear=%i %s\n", _FL, result, strerror(result));
+    result = d->Commit();
+	if (result)
+		printf("%s:%i - commit=%i %s\n", _FL, result, strerror(result));
+		
     d->Unlock();
 
 	return true;
@@ -64,8 +70,6 @@ bool LClipBoard::Html(const char *doc, bool AutoEmpty)
 
 bool LClipBoard::Text(const char *Str, bool AutoEmpty)
 {
-	bool Status = false;
-
 	if (AutoEmpty)
 	{
 		Empty();
@@ -78,16 +82,24 @@ bool LClipBoard::Text(const char *Str, bool AutoEmpty)
 	}
  
     auto clip = d->Data();
+    if (!clip)
+    {
+	    d->Unlock();
+		LgiTrace("%s:%i - No clipboard data.\n", _FL);
+		return false;
+    }
 
-    clip->AddData("text/plain", B_MIME_TYPE, Str, strlen(Str));
+    auto result = clip->AddString("text/plain", BString(Str));
+    if (result)
+		printf("%s:%i - AddString=%i %s\n", _FL, result, strerror(result));
  
-    Status = d->Commit() == B_OK;
-    if (!Status)
-        LgiTrace("%s:%i - Could not commit data to clipboard.\n", _FL);
- 
+    result = d->Commit();
+    if (result)
+		printf("%s:%i - Commit=%i %s\n", _FL, result, strerror(result));
+
     d->Unlock();
 
-	return Status;
+	return result == B_OK;
 }
 
 char *LClipBoard::Text()
@@ -100,10 +112,12 @@ char *LClipBoard::Text()
 	
     auto clip = d->Data();
  
-	const char *string = NULL;
-	ssize_t stringLen = 0;
-    clip->FindData("text/plain", B_MIME_TYPE, (const void **)&string, &stringLen);
-    d->Txt.Set(string, stringLen);
+	BString s;
+	auto result = clip->FindString("text/plain", &s);
+    if (result)
+		printf("%s:%i - FindString=%i %s\n", _FL, result, strerror(result));
+	
+	d->Txt = s;
  
     d->Unlock();
 		

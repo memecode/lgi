@@ -20,7 +20,8 @@ ifeq ($(Build),Debug)
 	Flags += -g -std=c++14
 	Tag = d
 	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -DLGI_LIBRARY -DPOSIX -D_GNU_SOURCE
-	Libs = -static-libgcc \
+	Libs =  \
+		-static-libgcc \
 		-lgnu \
 		-lnetwork \
 		-lbe
@@ -32,7 +33,8 @@ ifeq ($(Build),Debug)
 else
 	Flags += -s -Os -std=c++14
 	Defs = -DHAIKU -D_REENTRANT -DLGI_LIBRARY -DPOSIX -D_GNU_SOURCE
-	Libs = -static-libgcc \
+	Libs =  \
+		-static-libgcc \
 		-lgnu \
 		-lnetwork \
 		-lbe
@@ -48,6 +50,7 @@ Source =	src/haiku/Window.cpp \
 			src/haiku/Widgets.cpp \
 			src/haiku/View.cpp \
 			src/haiku/Thread.cpp \
+			src/haiku/ShowFileProp_Haiku.cpp \
 			src/haiku/ScreenDC.cpp \
 			src/haiku/Printer.cpp \
 			src/haiku/PrintDC.cpp \
@@ -61,7 +64,6 @@ Source =	src/haiku/Window.cpp \
 			src/haiku/DragAndDrop.cpp \
 			src/haiku/ClipBoard.cpp \
 			src/haiku/App.cpp \
-			src/haiku/ShowFileProp_Haiku.cpp \
 			src/common/Widgets/Tree.cpp \
 			src/common/Widgets/ToolBar.cpp \
 			src/common/Widgets/TextLabel.cpp \
@@ -165,11 +167,11 @@ Objects := $(addprefix $(BuildDir)/,$(SourceLst))
 
 # Target
 TargetFile = lib$(Target)$(Tag).so
-
 $(TargetFile) : $(Objects)
 	mkdir -p $(BuildDir)
 	@echo Linking $(TargetFile) [$(Build)]...
 	$(CPP)$s -shared \
+		 \
 		-o $(BuildDir)/$(TargetFile) \
 		$(Objects) \
 		$(Libs)
@@ -195,8 +197,11 @@ clean :
 VPATH=%.cpp \
 	./src/common/Hash/sha1 \
 	./src/common/Hash/md5 \
+	./private/linux \
 	./private/haiku \
 	./private/common \
+	./include/lgi/mac/cocoa \
+	./include/lgi/linux/Gtk \
 	./include/lgi/haiku \
 	./include/lgi/common \
 	./include \
