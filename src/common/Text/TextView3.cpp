@@ -42,6 +42,10 @@
 #define ALLOC_BLOCK					64
 #define IDC_VS						1000
 
+#ifdef WINDOWS
+#define	DOUBLE_BUFFER_PAINT			1
+#endif
+
 enum Cmds
 {
 	IDM_COPY_URL = 100,
@@ -4785,6 +4789,10 @@ void LTextView3::OnPaint(LSurface *pDC)
 	{
 	#endif
 
+	#if DOUBLE_BUFFER_PAINT
+	LDoubleBuffer MemBuf(pDC);
+	#endif
+
 	#if PROFILE_PAINT
 	char s[256];
 	sprintf_s(s, sizeof(s), "%p::OnPaint Lines=%i Sz=%i", this, (int)Line.Length(), (int)Size);
@@ -4854,18 +4862,8 @@ void LTextView3::OnPaint(LSurface *pDC)
 			Back = LColour(L_MED);
 		}
 
-		#ifdef DOUBLE_BUFFER_PAINT
-		LMemDC *pMem = new LMemDC;
-		pOut = pMem;
-		#endif
 		if (Text &&
-			Font
-			#ifdef DOUBLE_BUFFER_PAINT
-			&&
-			pMem &&
-			pMem->Create(r.X()-d->rPadding.x1, LineY, GdcD->GetBits())
-			#endif
-			)
+			Font)
 		{
 			ssize_t SelMin = MIN(SelStart, SelEnd);
 			ssize_t SelMax = MAX(SelStart, SelEnd);
@@ -4920,11 +4918,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 					l->r.y1+Dy < r.Y())
 			{
 				LRect Tr = l->r;
-				#ifdef DOUBLE_BUFFER_PAINT
-				Tr.Offset(-Tr.x1, -Tr.y1);
-				#else
 				Tr.Offset(0, y - Tr.y1);
-				#endif
 				//LRect OldTr = Tr;
 
 				// deal with selection change on beginning of line
@@ -5147,9 +5141,6 @@ void LTextView3::OnPaint(LSurface *pDC)
 						if (Blink)
 						{
 							LRect c = CursorPos;
-							#ifdef DOUBLE_BUFFER_PAINT
-							c.Offset(-d->rPadding.x1, -y);
-							#endif
 
 							pOut->Colour(!ReadOnly ? Fore : LColour(192, 192, 192));
 							pOut->Rectangle(&c);
@@ -5186,10 +5177,6 @@ void LTextView3::OnPaint(LSurface *pDC)
 				}
 				#endif
 
-				#ifdef DOUBLE_BUFFER_PAINT
-				// dump to screen
-				pDC->Blt(d->rPadding.x1, y, pOut);
-				#endif
 				y += LineY;
 
 				It++;
@@ -5203,10 +5190,6 @@ void LTextView3::OnPaint(LSurface *pDC)
 				// pDC->Colour(LColour(255, 0, 255));
 				pDC->Rectangle(d->rPadding.x1, y, r.x2, r.y2);
 			}
-
-			#ifdef DOUBLE_BUFFER_PAINT
-			DeleteObj(pMem);
-			#endif
 		}
 		else
 		{
