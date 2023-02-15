@@ -193,8 +193,8 @@ public:
 		bool AltCmd() const { return System(); }
 		static const char *AltCmdName()	{ return "\xE2\x8C\x98"; }
 	#elif defined(HAIKU)
-		bool CtrlCmd() const { return Alt(); }
-		static const char *CtrlCmdName() { return "Alt"; }	
+		bool CtrlCmd() const { return System(); }
+		static const char *CtrlCmdName() { return "System"; }	
 		bool AltCmd() const { return Ctrl(); }
 		static const char *AltCmdName() { return "Ctrl"; }
 	#else // win32 and linux
@@ -243,30 +243,23 @@ class LgiClass LKey : public LUiEvent
 public:
 	/// The virtual code for key
 	/// Rule: Only compare with LK_??? symbols
-	char16 vkey;
+	char16 vkey = 0;
 	/// The unicode character for the key
 	/// Rule: Never compare with LK_??? symbols
-	char16 c16;
+	char16 c16 = 0;
 	/// OS Specific
 	#ifdef WINDOWS
 	union {
 	#endif
-		uint32_t Data;
+		uint32_t Data = 0;
 	#ifdef WINDOWS
 		LKeyWinBits WinBits;
 	};
 	#endif
 	/// True if this is a standard character (ie not a control key)
-	bool IsChar;
+	bool IsChar = false;
 
-	LKey()
-	{
-		vkey = 0;
-		c16 = 0;
-		Data = 0;
-		IsChar = 0;
-	}
-
+	LKey() {}
 	LKey(int vkey, uint32_t flags);
 
 	void Trace(const char *Msg) const

@@ -2167,8 +2167,11 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 						return false;
 
 					printf("%s waiting on lock for %gs (r=%x, me=%i, locker=%i)\n",
-						GetClass(), (double)(LCurrentTime()-start)/1000.0,
-						r, GetCurrentThreadId(), lockWindow->LockingThread());
+						GetClass(),
+						(double)(LCurrentTime()-start)/1000.0,
+						r,
+						GetCurrentThreadId(),
+						lockWindow ? lockWindow->LockingThread() : 0);
 				}
 			}
 			while (true);					
@@ -2197,6 +2200,8 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 				#endif
 				return false;
 			}
+
+			lockWindow = lockView->Window();
 			
 			do
 			{
@@ -2220,8 +2225,11 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 						return false;
 
 					printf("%s waiting on lock for %gs (r=%x, me=%i, locker=%i)\n",
-						GetClass(), (double)(LCurrentTime()-start)/1000.0,
-						r, GetCurrentThreadId(), lockWindow->LockingThread());
+						GetClass(),
+						(double)(LCurrentTime()-start)/1000.0,
+						r,
+						GetCurrentThreadId(),
+						lockWindow ? lockWindow->LockingThread() : 0);
 				}
 			}
 			while (true);

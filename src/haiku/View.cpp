@@ -155,12 +155,35 @@ struct LBView : public Parent
 		ssize_t len = numBytes;
 		auto w = LgiUtf8To32(utf, len);
 
-		#if 1
+		key_info KeyInfo;
+		if (get_key_info(&KeyInfo) == B_OK)
+		{
+			k.Ctrl(TestFlag(KeyInfo.modifiers, B_CONTROL_KEY));
+			k.Alt(TestFlag(KeyInfo.modifiers, B_MENU_KEY));
+			k.Shift(TestFlag(KeyInfo.modifiers, B_SHIFT_KEY));
+			k.System(TestFlag(KeyInfo.modifiers, B_COMMAND_KEY));
+		}
+
+		#if 0
 		LString::Array a;
 		for (int i=0; i<numBytes; i++)
-			a.New().Printf("%i(%x)", (uint8_t)bytes[i], (uint8_t)bytes[i]);		
+			a.New().Printf("%i(%x)", (uint8_t)bytes[i], (uint8_t)bytes[i]);
+		if (KeyInfo.modifiers & B_CONTROL_KEY)
+			a.New() = "B_CONTROL_KEY";
+		if (KeyInfo.modifiers & B_MENU_KEY)
+			a.New() = "B_MENU_KEY";
+		if (KeyInfo.modifiers & B_SHIFT_KEY)
+			a.New() = "B_SHIFT_KEY";
+		if (KeyInfo.modifiers & B_COMMAND_KEY)
+			a.New() = "B_COMMAND_KEY";
 		printf("ConvertKey(%s)=%i\n", LString(",").Join(a).Get(), w);
 		#endif
+		
+		if (KeyInfo.modifiers & B_COMMAND_KEY)
+			// Currently Alt+Key issues a command key, but only the "up" down.
+			// Most of the Lgi apps are expecting at least a "down" key first.
+			// So just set the "up" event to "down" here.
+			k.Down(true);		
 		
 		if (w)
 		{
@@ -199,21 +222,24 @@ struct LBView : public Parent
 
 			k.c16 = k.vkey = w;
 			
-			key_info KeyInfo;
-			int flags = 0;
-			if (get_key_info(&KeyInfo) == B_OK)
-			{
-				k.Ctrl(TestFlag(KeyInfo.modifiers, B_CONTROL_KEY));
-				k.Alt(TestFlag(KeyInfo.modifiers, B_MENU_KEY));
-				k.Shift(TestFlag(KeyInfo.modifiers, B_SHIFT_KEY));
-				k.System(TestFlag(KeyInfo.modifiers, B_COMMAND_KEY));
-			}
 		}
 
-		k.IsChar = (k.c16 >= ' ' && k.c16 < LK_DELETE) ||
-			k.c16 == LK_BACKSPACE ||
-			k.c16 == LK_TAB ||
-			k.c16 == LK_RETURN;
+		k.IsChar =
+			!(
+				k.System()
+				||
+				k.Alt()
+			)
+			&&
+			(
+				(k.c16 >= ' ' && k.c16 < LK_DELETE)
+				||
+				k.c16 == LK_BACKSPACE
+				||
+				k.c16 == LK_TAB
+				||
+				k.c16 == LK_RETURN
+			);
 
 		return k;
 	}
