@@ -1499,7 +1499,7 @@ void ProjectNode::OnProperties()
 			sprintf(Msg, "Source Code:\n\n\t%s\n\nSize: %s (%i bytes)", Path.Get(), Size, (int32)FSize);
 		
 			FileProps *Dlg = new FileProps(Tree, Msg, Type, Platforms, Charset);
-			Dlg->DoModal([&](auto dlg, auto code)
+			Dlg->DoModal([this, Dlg, Path](auto dlg, auto code)
 			{
 				switch (code)
 				{

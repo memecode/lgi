@@ -770,8 +770,11 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 			LMessage::InThreadCb *Cb = NULL;
 			if (Msg->FindPointer(LMessage::PropCallback, (void**)&Cb) == B_OK)
 			{
+				// printf("M_HANDLE_IN_THREAD before call..\n");
 				(*Cb)();
+				// printf("M_HANDLE_IN_THREAD after call..\n");
 				delete Cb;
+				// printf("M_HANDLE_IN_THREAD after delete..\n");
 			}
 			else printf("%s:%i - No Callback.\n", _FL);
 			break;

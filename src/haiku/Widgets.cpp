@@ -199,14 +199,13 @@ void LDialog::EndModal(int Code)
 		(
 			[dlg=this,cb=d->ModalCb,code=Code]()
 			{
-				// printf("%s:%i - Calling LDialog callback.. in original thread?\n", _FL);
+				// printf("%s:%i - Calling LDialog callback.. in original thread\n", _FL);
 				cb(dlg, code);
 				// printf("%s:%i - Calling LDialog callback.. done\n", _FL);
 			}
 		)
 	);
 		
-	// printf("%s:%i - Posting M_HANDLE_IN_THREAD.\n", _FL);
 	looper->PostMessage(m);
 }
 

@@ -205,19 +205,7 @@ int DocEditStyling::Main()
 				StyleDefault(p);
 				break;
 		}
-		if (ParentState != KCancel && ParentState != KExiting)
-		{
-			#if LOG_STYLE
-			LgiTrace("DocEdit.Worker finished style... Items=%i ParentState=%i\n", (int)p.Styles.Length(), ParentState);
-			#endif
-			auto r = View->PostEvent(M_STYLING_DONE);
-		}
-		else
-		{
-			#if LOG_STYLE
-			LgiTrace("DocEdit.Worker canceled style...\n");
-			#endif
-		}
+
 		if (LMutex::Lock(_FL))
 		{
 			Params.Dirty = p.Dirty;
@@ -225,6 +213,14 @@ int DocEditStyling::Main()
 			LMutex::Unlock();
 		}
 		WorkerState = KWaiting;
+		
+		if (ParentState != KCancel && ParentState != KExiting)
+		{
+			#if LOG_STYLE
+			LgiTrace("DocEdit.Worker finished style... Items=%i ParentState=%i\n", (int)p.Styles.Length(), ParentState);
+			#endif
+			auto r = View->PostEvent(M_STYLING_DONE);
+		}
 	}
 	return 0;
 }

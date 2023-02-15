@@ -33,7 +33,7 @@ public:
 
 protected:
 	SourceType FileType;
-	DocEdit *View;
+	DocEdit *View = NULL;
 
 	enum WordType
 	{
@@ -130,23 +130,27 @@ protected:
 	// Lock before access:
 		StylingParams Params;
 	// EndLock
-	// Thread only
-		Node Root;
-		LUnrolledList<LTextView3::LStyle> PrevStyle;
-	// End Thread only
-
-	// Styling functions..
-	int Main();
-	void StyleCpp(StylingParams &p);
-	void StylePython(StylingParams &p);
-	void StyleDefault(StylingParams &p);
-	void StyleXml(StylingParams &p);
-	void StyleHtml(StylingParams &p);
-	void AddKeywords(const char **keys, bool IsType);
 
 	// Full refresh triggers
 	int RefreshSize;
 	const char **RefreshEdges;
+
+	void AddKeywords(const char **keys, bool IsType);
+
+private:
+	// Thread only
+
+		// Styling functions..
+		int Main();
+		void StyleCpp(StylingParams &p);
+		void StylePython(StylingParams &p);
+		void StyleDefault(StylingParams &p);
+		void StyleXml(StylingParams &p);
+		void StyleHtml(StylingParams &p);
+
+		Node Root;
+		LUnrolledList<LTextView3::LStyle> PrevStyle;
+	// End Thread only
 
 public:
 	DocEditStyling(DocEdit *view);
