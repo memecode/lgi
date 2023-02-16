@@ -2219,8 +2219,8 @@ bool LTableLayout::SizeChanged()
 void LTableLayout::OnPosChange()
 {
 	LRect r = GetClient();
-	bool Up = SizeChanged() || d->LayoutDirty;
-	// LgiTrace("%s:%i - Up=%i for Id=%i\n", _FL, Up, GetId());
+	bool Up = SizeChanged() || d->LayoutDirty;	
+	// LgiTrace("%s:%i - Up=%i for Id=%i\n", _FL, Up, GetId());	
 	if (Up)
 	{
 		d->PrevSize.x = r.X();

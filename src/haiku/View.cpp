@@ -950,6 +950,7 @@ const char *LView::GetClass()
 bool LView::Attach(LViewI *parent)
 {
 	bool Status = false;
+	bool Debug = false; // !Stricmp(GetClass(), "LScrollBar");
 
 	LView *Parent = d->GetParent();
 	LAssert(Parent == NULL || Parent == parent);
@@ -976,10 +977,9 @@ bool LView::Attach(LViewI *parent)
 			LLocker lck(bview, _FL);
 			if (lck.Lock())
 			{
-				#if 0
-				LgiTrace("%s:%i - Attaching %s to view %s\n",
-					_FL, GetClass(), parent->GetClass());
-				#endif
+				if (Debug)
+					LgiTrace("%s:%i - Attaching %s to view %s\n",
+						_FL, GetClass(), parent->GetClass());
 
 				d->Hnd->SetName(GetClass());
 				if (::IsAttached(d->Hnd))
@@ -988,24 +988,26 @@ bool LView::Attach(LViewI *parent)
 
 				d->Hnd->ResizeTo(Pos.X(), Pos.Y());
 				d->Hnd->MoveTo(Pos.x1, Pos.y1);
-				if (TestFlag(GViewFlags, GWF_VISIBLE) && d->Hnd->IsHidden())
+				
+				bool ShowView = TestFlag(GViewFlags, GWF_VISIBLE) && d->Hnd->IsHidden();
+				if (Debug)
+					LgiTrace("%s:%i - IsHidden=%i ShowView=%i\n", _FL, d->Hnd->IsHidden(), ShowView);
+				if (ShowView)
 					d->Hnd->Show();
 
 				Status = true;
 
-				#if 0
-				LgiTrace("%s:%i - Attached %s/%p to view %s/%p, success\n",
-					_FL,
-					GetClass(), d->Hnd,
-					parent->GetClass(), bview);
-				#endif
+				if (Debug)
+					LgiTrace("%s:%i - Attached %s/%p to view %s/%p, success\n",
+						_FL,
+						GetClass(), d->Hnd,
+						parent->GetClass(), bview);
 			}
 			else
 			{
-				#if 0
-				LgiTrace("%s:%i - Error attaching %s to view %s, can't lock.\n",
-					_FL, GetClass(), parent->GetClass());
-				#endif
+				if (Debug)
+					LgiTrace("%s:%i - Error attaching %s to view %s, can't lock.\n",
+						_FL, GetClass(), parent->GetClass());
 			}
 		}
 

@@ -113,14 +113,14 @@ void LLayout::AttachScrollBars()
 {
 	if (HScroll && !HScroll->IsAttached())
 	{
-		// LRect r = HScroll->GetPos();
+		HScroll->Visible(true);
 		HScroll->Attach(this);
 		HScroll->SetNotify(this);
 	}
 
 	if (VScroll && !VScroll->IsAttached())
 	{
-		// LRect r = VScroll->GetPos();
+		VScroll->Visible(true);
 		VScroll->Attach(this);
 		VScroll->SetNotify(this);
 	}
@@ -137,8 +137,8 @@ bool LLayout::SetScrollBars(bool x, bool y)
 			_SetScrollBars(x, y);
 		}
 		else if (_SetScroll.x != x ||
-			_SetScroll.y != y ||
-			!_SetScroll.SentMsg)
+				 _SetScroll.y != y ||
+				!_SetScroll.SentMsg)
 		{
 			// This is to filter out masses of duplicate messages
 			// before they have a chance to be processed. Esp important on
@@ -219,8 +219,9 @@ int LLayout::OnNotify(LViewI *c, LNotification n)
 void LLayout::OnPosChange()
 {
 	LRect r = LView::GetClient();
-	LRect v(r.x2-LScrollBar::SCROLL_BAR_SIZE+1, r.y1, r.x2, r.y2);
-	LRect h(r.x1, r.y2-LScrollBar::SCROLL_BAR_SIZE+1, r.x2, r.y2);
+	auto Px = LScrollBar::GetScrollSize();
+	LRect v(r.x2-Px+1, r.y1, r.x2, r.y2);
+	LRect h(r.x1, r.y2-Px+1, r.x2, r.y2);
 	if (VScroll && HScroll)
 	{
 		h.x2 = v.x1 - 1;
@@ -229,11 +230,6 @@ void LLayout::OnPosChange()
 
 	if (VScroll)
 	{
-		// printf("%s.OnPos %s\n", GetClass(), v.GetStr());
-		/*
-		v.Offset(-4, 0);
-		v.y2 -= 2;
-		*/
 		VScroll->Visible(true);
 		VScroll->SetPos(v, true);
 	}

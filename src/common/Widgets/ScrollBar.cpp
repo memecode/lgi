@@ -508,9 +508,7 @@ int LScrollBar::SCROLL_BAR_SIZE = 0;
 int LScrollBar::GetScrollSize()
 {
 	if (!SCROLL_BAR_SIZE)
-	{
-		SCROLL_BAR_SIZE = std::max(15, LScreenDpi().x / 5);
-	}
+		SCROLL_BAR_SIZE = std::max(15, LScreenDpi().x / 6);
 	
 	return SCROLL_BAR_SIZE;
 }
@@ -520,10 +518,9 @@ bool LScrollBar::Attach(LViewI *p)
 	bool Status = LControl::Attach(p);
 	
 	#if 0
-	printf("%p::Attach scroll bar to %s, Status=%i, _View=%p, Vis=%i\n",
+	printf("%p::Attach scroll bar to %s, Status=%i, Vis=%i\n",
 		this, p->GetClass(),
 		Status,
-		_View,
 		Visible());
 	#endif
 	
