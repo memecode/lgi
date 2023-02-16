@@ -122,7 +122,6 @@ LKey::LKey(int vkey, uint32_t flags)
 LCaptureThread::LCaptureThread(LView *v) : LThread("CaptureThread")
 {
 	name = v->GetClass();
-	printf("Capture thread for %s\n", name.Get());
 	view = v->AddDispatch();
 	DeleteOnExit = true;
 	Run();
@@ -130,7 +129,6 @@ LCaptureThread::LCaptureThread(LView *v) : LThread("CaptureThread")
 
 LCaptureThread::~LCaptureThread()
 {
-	printf("~Capture thread for %s\n", name.Get());
 	Cancel();
 	// Don't wait.. the thread will exit and delete itself asnyronously.
 }

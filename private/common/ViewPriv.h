@@ -84,7 +84,7 @@ public:
 		Length = len;
 		PulseThreadCount++;
 		
-		printf("PulseThread=%i, %s, %i\n", PulseThreadCount, View->GetClass(), Length);
+		// printf("PulseThread=%i, %s, %i\n", PulseThreadCount, View->GetClass(), Length);
 		
 		Run();
 	}

@@ -131,10 +131,9 @@ public:
 		if (!w)
 			return 0;
 
-		size_t OldLen = 0;
+		size_t OldLen = Txt.Length();
 		if (Sem.Lock(_FL))
 		{
-			OldLen = Txt.Length();
 			Txt.Add(w.Get(), Strlen(w.Get()));
 			Sem.Unlock();
 		}
@@ -155,7 +154,7 @@ public:
 	{
 		if (m->Msg() == M_LOG_TEXT)
 		{
-			// ProcessTxt();
+			ProcessTxt();
 		}
 
 		return TView::OnEvent(m);

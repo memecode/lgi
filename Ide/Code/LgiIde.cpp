@@ -1769,6 +1769,9 @@ void AppWnd::OnPulse()
 		if (--d->RebuildWait == 0)
 			Build();
 	}
+	
+	for (auto n: NeedsPulse)
+		n->OnPulse();
 }
 
 LDebugContext *AppWnd::GetDebugContext()

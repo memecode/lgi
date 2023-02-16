@@ -263,6 +263,8 @@ public:
 		CallStackTab,
 		RegistersTab
 	};
+	
+	LArray<class ProjectNode*> NeedsPulse;
 
 	AppWnd();
 	~AppWnd();

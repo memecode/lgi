@@ -22,7 +22,11 @@ enum NodeType
 
 extern int NodeSort(LTreeItem *a, LTreeItem *b, NativeInt d = 0);
 
-class ProjectNode : public IdeCommon, public LDragDropSource, public FtpCallback, public NodeSource
+class ProjectNode :
+	public IdeCommon,
+	public LDragDropSource,
+	public FtpCallback,
+	public NodeSource
 {
 	NodeType Type;
 	int NodeId;
@@ -38,9 +42,15 @@ class ProjectNode : public IdeCommon, public LDragDropSource, public FtpCallback
 	IdeProject *Dep;
 	int LinkAgainst = true;
 
+	// Import process
+	LArray<char*> ImportFiles;
+	LString ImportPath;
+	LAutoPtr<LProgressDlg> ImportProg;
+
 	void OpenLocalCache(IdeDoc *&Doc);
 	void OnCmdComplete(FtpCmd *Cmd) override;
 	int64 CountNodes();
+	void NeedsPulse(bool yes);
 
 public:
 	ProjectNode(IdeProject *p);
@@ -86,6 +96,7 @@ public:
 	void OnExpand(bool b) override;
 	void OnMouseClick(LMouse &m) override;
 	void OnProperties();
+	void OnPulse();
 
 	// Serialization
 	bool Load(LDocView *Edit, NodeView *Callback) override;

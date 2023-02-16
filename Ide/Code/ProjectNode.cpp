@@ -148,11 +148,31 @@ ProjectNode::ProjectNode(IdeProject *p) : IdeCommon(p)
 
 ProjectNode::~ProjectNode()
 {
+	NeedsPulse(false);
+	
 	if (sFile && Project)
 		Project->OnNode(sFile, this, false);
 
 	if (Dep)
 		DeleteObj(Dep);
+}
+
+void ProjectNode::NeedsPulse(bool yes)
+{
+	if (!Project)
+	{
+		LAssert(!"No project.");
+		return;
+	}
+	auto app = Project->GetApp();
+	if (!app)
+	{
+		LAssert(!"No app.");
+		return;
+	}
+	app->NeedsPulse.Delete(this);
+	if (yes)
+		app->NeedsPulse.Add(this);
 }
 
 void ProjectNode::OpenLocalCache(IdeDoc *&Doc)
@@ -960,6 +980,74 @@ bool ProjectNode::OnKey(LKey &k)
 	return false;
 }
 
+void ProjectNode::OnPulse()
+{
+	auto StartTs = LCurrentTime();
+	int TimeSlice = 700; //ms
+
+	auto Start = strlen(ImportPath) + 1;
+	while (ImportFiles.Length())
+	{
+		LAutoString f(ImportFiles[0]); // Take ownership of the string
+		ImportFiles.DeleteAt(0);
+		if (ImportProg)
+			(*ImportProg)++;
+		
+		LToken p(f + Start, DIR_STR);
+		ProjectNode *Insert = this;
+		
+		// Find sub nodes, and drill into directory heirarchy,
+		// creating the nodes if needed.
+		for (int i=0; Insert && i<p.Length()-1; i++)
+		{
+			// Find existing node...
+			bool Found = false;
+
+			for (auto it:*Insert)
+			{
+				ProjectNode *c = dynamic_cast<ProjectNode *>(it);
+				if (!c) break;
+
+				if (c->GetType() == NodeDir &&
+					c->GetName() &&
+					stricmp(c->GetName(), p[i]) == 0)
+				{
+					Insert = c;
+					Found = true;
+					break;
+				}
+			}
+			
+			if (!Found)
+			{
+				// Create the node
+				IdeCommon *Com = Insert->GetSubFolder(Project, p[i], true);												
+				Insert = dynamic_cast<ProjectNode*>(Com);
+				LAssert(Insert);
+			}
+		}
+		
+		// Insert the file into the tree...
+		if (Insert)
+		{
+			ProjectNode *New = new ProjectNode(Project);
+			if (New)
+			{
+				New->SetFileName(f);
+				Insert->InsertTag(New);
+				Insert->SortChildren();
+				Project->SetDirty();
+			}
+		}
+		
+		if (LCurrentTime() - StartTs >= TimeSlice)
+			break; // Yeild to the message loop
+	}
+
+	if (ImportFiles.Length() == 0)
+		NeedsPulse(false);
+}
+
 void ProjectNode::OnMouseClick(LMouse &m)
 {
 	LTreeItem::OnMouseClick(m);
@@ -1065,79 +1153,29 @@ void ProjectNode::OnMouseClick(LMouse &m)
 				LFileSelect s;
 				s.Parent(Tree);
 
-				LAutoString Dir = Project->GetBasePath();
+				auto Dir = Project->GetBasePath();
 				if (Dir)
-				{
 					s.InitialDir(Dir);
-				}
 
-				if (s.OpenFolder())
+				if (!s.OpenFolder())
+					break;
+
+				ImportPath = s.Name();
+				
+				LArray<const char*> Ext;
+				LToken e(SourcePatterns, ";");
+				for (auto i: e)
 				{
-					LArray<char*> Files;
-					LArray<const char*> Ext;
-					LToken e(SourcePatterns, ";");
-					for (int i=0; i<e.Length(); i++)
-					{
-						Ext.Add(e[i]);
-					}
-					
-					if (LRecursiveFileSearch(s.Name(), &Ext, &Files))
-					{
-						auto Start = strlen(s.Name()) + 1;
-						for (int i=0; i<Files.Length(); i++)
-						{
-							char *f = Files[i];
-							LToken p(f + Start, DIR_STR);
-							ProjectNode *Insert = this;
-							
-							// Find sub nodes, and drill into directory heirarchy,
-							// creating the nodes if needed.
-							for (int i=0; Insert && i<p.Length()-1; i++)
-							{
-								// Find existing node...
-								bool Found = false;
-
-								for (auto it:*Insert)
-								{
-									ProjectNode *c = dynamic_cast<ProjectNode *>(it);
-									if (!c) break;
-
-									if (c->GetType() == NodeDir &&
-										c->GetName() &&
-										stricmp(c->GetName(), p[i]) == 0)
-									{
-										Insert = c;
-										Found = true;
-										break;
-									}
-								}
-								
-								if (!Found)
-								{
-									// Create the node
-									IdeCommon *Com = Insert->GetSubFolder(Project, p[i], true);												
-									Insert = dynamic_cast<ProjectNode*>(Com);
-									LAssert(Insert);
-								}
-							}
-							
-							// Insert the file into the tree...
-							if (Insert)
-							{
-								ProjectNode *New = new ProjectNode(Project);
-								if (New)
-								{
-									New->SetFileName(f);
-									Insert->InsertTag(New);
-									Insert->SortChildren();
-									Project->SetDirty();
-								}
-							}
-						}
-						
-						Files.DeleteArrays();
-					}														
+					Ext.Add(i);
 				}
+				
+				if (!LRecursiveFileSearch(s.Name(), &Ext, &ImportFiles))
+					break;
+
+				ImportProg.Reset(new LProgressDlg(GetTree(), 300));
+				ImportProg->SetDescription("Importing...");
+				ImportProg->SetRange(ImportFiles.Length());
+				NeedsPulse(true);
 				break;
 			}
 			case IDM_SORT_CHILDREN:
