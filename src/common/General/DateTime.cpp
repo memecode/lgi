@@ -884,19 +884,16 @@ bool LDateTime::Set(uint64 s)
 bool LDateTime::Set(time_t tt)
 {
 	struct tm *t;
-	#if !defined(_MSC_VER) || _MSC_VER < _MSC_VER_VS2005
-	
+
+#if !defined(_MSC_VER) || _MSC_VER < _MSC_VER_VS2005
 	if (_Tz)
-	{
 		tt += _Tz * 60;
-	}
-	
 	t = gmtime(&tt);
 	if (t)
-	#else
+#else
 	struct tm tmp;
 	if (_localtime64_s(t = &tmp, &tt) == 0)
-	#endif
+#endif
 	{
 		_Year = t->tm_year + 1900;
 		_Month = t->tm_mon + 1;
@@ -980,6 +977,11 @@ uint64_t LDateTime::OsTime() const
 	return 0;
 }
 
+bool LDateTime::OsTime(uint64_t ts)
+{
+	return Set((time_t)ts);
+}
+
 bool LDateTime::Get(uint64 &s) const
 {
 	#ifdef WINDOWS
@@ -1001,36 +1003,9 @@ bool LDateTime::Get(uint64 &s) const
 		if (_Year < MIN_YEAR)
 			return false;
 
-		struct tm t;
-		ZeroObj(t);
-		t.tm_year	= _Year - 1900;
-		t.tm_mon	= _Month - 1;
-		t.tm_mday	= _Day;
-
-		t.tm_hour	= _Hours;
-		t.tm_min	= _Minutes;
-		t.tm_sec	= _Seconds;
-		t.tm_isdst	= -1;
+		auto sec = OsTime();				
+		s = (uint64)(sec + Offset1800) * Second64Bit + _Thousands;
 		
-		time_t sec = timegm(&t);
-		
-		#if 0
-		printf("timegm(y=%i m=%i d=%i h=%i m=%i s=%i)=%lli\n",
-			t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec,
-			sec);
-		#endif
-		
-		if (sec == -1)
-			return false;
-		
-		if (_Tz)
-		{
-			// Adjust the output to UTC from the current timezone.
-			sec -= _Tz * 60;
-			// printf("Adjusting -= %i (%i)\n", _Tz * 60, _Tz);
-		}
-		
-		s = (uint64)(sec + Offset1800) * Second64Bit + _Thousands;		
 		return true;
 	
 	#endif

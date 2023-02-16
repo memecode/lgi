@@ -250,6 +250,7 @@ public:
 	/// Get the timestamp in a format compatible with the current operating system APIs.
 	/// \returns the timestamp or zero on error.
 	uint64_t OsTime() const;
+	bool OsTime(uint64_t ts);
 
 	/// Get the current time...
 	static LDateTime Now();
