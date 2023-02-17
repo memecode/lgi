@@ -102,8 +102,8 @@ Source =	Code/WebFldDlg.cpp \
 			../src/common/Coding/LexCpp.cpp
 
 SourceLst := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(Source)))
-
 Objects := $(addprefix $(BuildDir)/,$(SourceLst))
+Deps := $(patsubst %.o,%.d,$(Objects))
 
 # Target
 # Executable target
@@ -400,12 +400,12 @@ endif
 
 # Clean just this target
 clean :
-	rm -rf $(BuildDir)/* $(Target)
+	rm $(Objects) $(Deps) $(Target)
 	@echo Cleaned $(BuildDir)
 
 # Clean all targets
 cleanall :
-	rm -rf $(BuildDir)/* $(Target)
+	rm $(Objects) $(Deps) $(Target)
 	@echo Cleaned $(BuildDir)
 	+make -C "../" -f "Makefile.linux" clean
 

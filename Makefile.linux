@@ -173,8 +173,8 @@ Source =	src/linux/Lgi/Window.cpp \
 			src/common/Gdc2/15Bit.cpp
 
 SourceLst := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(Source)))
-
 Objects := $(addprefix $(BuildDir)/,$(SourceLst))
+Deps := $(patsubst %.o,%.d,$(Objects))
 
 # Target
 TargetFile = lib$(Target)$(Tag).so
@@ -202,7 +202,7 @@ endif
 
 # Clean out targets
 clean :
-	rm -rf $(BuildDir)/* $(BuildDir)/$(TargetFile)
+	rm $(Objects) $(Deps) $(BuildDir)/$(TargetFile)
 	@echo Cleaned $(BuildDir)
 
 VPATH=%.cpp \
