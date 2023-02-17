@@ -137,6 +137,9 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>..\src\win\General\Lgi.manifest</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -182,6 +185,9 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>..\src\win\General\Lgi.manifest</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\include\common\GEventTargetThread.h" />

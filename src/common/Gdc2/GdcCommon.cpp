@@ -1158,7 +1158,9 @@ LPoint LScreenDpi()
 
 		if (!Dpi.x)
 		{
-			auto dpi = GetDpiForWindow(GetDesktopWindow());
+
+			SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
+			auto dpi = GetDpiForSystem();
 			Dpi.Set(dpi, dpi);
 		}
 
