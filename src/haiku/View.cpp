@@ -410,6 +410,8 @@ LViewPrivate::~LViewPrivate()
 {
 	View->d = NULL;
 
+	MsgQue.DeleteObjects();
+
 	if (Font && FontOwnType == GV_FontOwned)
 		DeleteObj(Font);
 
@@ -996,6 +998,14 @@ bool LView::Attach(LViewI *parent)
 					d->Hnd->Show();
 
 				Status = true;
+				
+				if (d->MsgQue.Length())
+				{
+					printf("%s:%i - %s.Attach msgQue=%i\n", _FL, GetClass(), (int)d->MsgQue.Length());
+					for (auto bmsg: d->MsgQue)
+						d->Hnd->Window()->PostMessage(bmsg);
+					d->MsgQue.DeleteObjects();
+				}
 
 				if (Debug)
 					LgiTrace("%s:%i - Attached %s/%p to view %s/%p, success\n",

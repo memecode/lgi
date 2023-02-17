@@ -341,8 +341,6 @@ bool DocEdit::Pour(LRegion &r)
 	LRect c = r.Bound();
 	
 	c.y2 -= EDIT_TRAY_HEIGHT;
-	printf("%s\n", c.GetStr());
-	
 	SetPos(c);
 		
 	return true;

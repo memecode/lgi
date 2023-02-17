@@ -77,17 +77,13 @@ public:
 			{
 				// down
 				for (int i=0; i<IconSize; i++, y--)
-				{
 					pDC->Line(x-i, y, x+i, y);
-				}
 			}
 			else
 			{
 				// right
 				for (int i=0; i<IconSize; i++, x--)
-				{
 					pDC->Line(x, y-i, x, y+i);
-				}
 			}
 		}
 		else
@@ -101,17 +97,13 @@ public:
 			{
 				// up
 				for (int i=0; i<IconSize; i++, y++)
-				{
 					pDC->Line(x-i, y, x+i, y);
-				}
 			}
 			else
 			{
 				// left
 				for (int i=0; i<IconSize; i++, x++)
-				{
 					pDC->Line(x, y-i, x, y+i);
-				}
 			}
 		}
 	}

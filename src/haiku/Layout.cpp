@@ -64,23 +64,10 @@ bool LLayout::Pour(LRegion &r)
 
 void LLayout::GetScrollPos(int64 &x, int64 &y)
 {
-	if (HScroll)
-	{
-		x = HScroll->Value();
-	}
-	else
-	{
-		x = 0;
-	}
-
-	if (VScroll)
-	{
-		y = VScroll->Value();
-	}
-	else
-	{
-		y = 0;
-	}
+	x = HScroll ? HScroll->Value() : 0;
+	y = VScroll ? VScroll->Value() : 0;
+	
+	printf("GetScrollPos=%i,%i\n", (int)x, (int)y);
 }
 
 void LLayout::SetScrollPos(int64 x, int64 y)
@@ -132,6 +119,8 @@ bool LLayout::SetScrollBars(bool x, bool y)
 		||
 		y ^ (VScroll != NULL))
 	{
+		// printf("%s:%i - setScroll %i,%i attached=%i\n", _FL, x, y, IsAttached());
+
 		if (!IsAttached())
 		{
 			_SetScrollBars(x, y);
@@ -163,6 +152,8 @@ bool LLayout::SetScrollBars(bool x, bool y)
 bool LLayout::_SetScrollBars(bool x, bool y)
 {
 	static bool Processing = false;
+
+	// printf("%s:%i - _setScroll %i,%i %i\n", _FL, x, y, Processing);
 
 	if (!Processing &&
 		(((HScroll!=0) ^ x ) || ((VScroll!=0) ^ y )) )

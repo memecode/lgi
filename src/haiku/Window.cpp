@@ -127,14 +127,18 @@ public:
 		else
 		{
 			BWindow::MessageReceived(message);
-			Wnd->OnEvent((LMessage*)message);
+
+			LView *view = NULL;
+			auto r = message->FindPointer(LMessage::PropView, &view);
+			if (r == B_OK)
+				view->OnEvent((LMessage*)message);
+			else
+				Wnd->OnEvent((LMessage*)message);
 		}
 	}
 };
 
 ///////////////////////////////////////////////////////////////////////
-#define GWND_CREATE		0x0010000
-
 LWindow::LWindow() : LView(0)
 {
 	d = new LWindowPrivate(this);
@@ -143,7 +147,6 @@ LWindow::LWindow() : LView(0)
 	
 	_Default = 0;
 	_Window = this;
-	WndFlags |= GWND_CREATE;
 	ClearFlag(WndFlags, GWF_VISIBLE);
 }
 
@@ -980,150 +983,8 @@ LViewI *LWindow::GetFocus()
 	return NULL;
 }
 
-#if DEBUG_SETFOCUS
-static LAutoString DescribeView(LViewI *v)
-{
-	if (!v)
-		return LAutoString(NewStr("NULL"));
-
-	char s[512];
-	int ch = 0;
-	LArray<LViewI*> p;
-	for (LViewI *i = v; i; i = i->GetParent())
-	{
-		p.Add(i);
-	}
-	for (int n=MIN(3, p.Length()-1); n>=0; n--)
-	{
-		char Buf[256] = "";
-		if (!stricmp(v->GetClass(), "LMdiChild"))
-			sprintf(Buf, "'%s'", v->Name());
-		v = p[n];
-		
-		ch += sprintf_s(s + ch, sizeof(s) - ch, "%s>%s", Buf, v->GetClass());
-	}
-	return LAutoString(NewStr(s));
-}
-#endif
-
 void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 {
-	/*
-	#if DEBUG_SETFOCUS
-	const char *TypeName = NULL;
-	switch (type)
-	{
-		case GainFocus: TypeName = "Gain"; break;
-		case LoseFocus: TypeName = "Lose"; break;
-		case ViewDelete: TypeName = "Delete"; break;
-	}
-	#endif
-
-	switch (type)
-	{
-		case GainFocus:
-		{
-			if (d->Focus == ctrl)
-			{
-				#if DEBUG_SETFOCUS
-				LAutoString _ctrl = DescribeView(ctrl);
-				LgiTrace("SetFocus(%s, %s) already has focus.\n", _ctrl.Get(), TypeName);
-				#endif
-				return;
-			}
-
-			if (d->Focus)
-			{
-				LView *gv = d->Focus->GetGView();
-				if (gv)
-				{
-					#if DEBUG_SETFOCUS
-					LAutoString _foc = DescribeView(d->Focus);
-					LgiTrace(".....defocus LView: %s\n", _foc.Get());
-					#endif
-					gv->_Focus(false);
-				}
-				else if (IsActive())
-				{
-					#if DEBUG_SETFOCUS
-					LAutoString _foc = DescribeView(d->Focus);
-					LgiTrace(".....defocus view: %s (active=%i)\n", _foc.Get(), IsActive());
-					#endif
-					d->Focus->OnFocus(false);
-					d->Focus->Invalidate();
-				}
-			}
-
-			d->Focus = ctrl;
-
-			if (d->Focus)
-			{
-				#if DEBUG_SETFOCUS
-				static int Count = 0;
-				#endif
-				
-				LView *gv = d->Focus->GetGView();
-				if (gv)
-				{
-					#if DEBUG_SETFOCUS
-					LAutoString _set = DescribeView(d->Focus);
-					LgiTrace("LWindow::SetFocus(%s, %s) %i focusing LView\n",
-						_set.Get(),
-						TypeName,
-						Count++);
-					#endif
-
-					gv->_Focus(true);
-				}
-				else if (IsActive())
-				{			
-					#if DEBUG_SETFOCUS
-					LAutoString _set = DescribeView(d->Focus);
-					LgiTrace("LWindow::SetFocus(%s, %s) %i focusing nonGView (active=%i)\n",
-						_set.Get(),
-						TypeName,
-						Count++,
-						IsActive());
-					#endif
-
-					d->Focus->OnFocus(true);
-					d->Focus->Invalidate();
-				}
-			}
-			break;
-		}
-		case LoseFocus:
-		{
-			#if DEBUG_SETFOCUS
-			LAutoString _Ctrl = DescribeView(d->Focus);
-			LAutoString _Focus = DescribeView(d->Focus);
-			LgiTrace("LWindow::SetFocus(%s, %s) d->Focus=%s\n",
-				_Ctrl.Get(),
-				TypeName,
-				_Focus.Get());
-			#endif
-			if (ctrl == d->Focus)
-			{
-				d->Focus = NULL;
-			}
-			break;
-		}
-		case ViewDelete:
-		{
-			if (ctrl == d->Focus)
-			{
-				#if DEBUG_SETFOCUS
-				LAutoString _Ctrl = DescribeView(d->Focus);
-				LgiTrace("LWindow::SetFocus(%s, %s) on delete\n",
-					_Ctrl.Get(),
-					TypeName);
-				#endif
-				d->Focus = NULL;
-			}
-			break;
-		}
-	}
-	*/
 }
 
 void LWindow::SetDragHandlers(bool On)
@@ -1138,13 +999,7 @@ void LWindow::OnTrayClick(LMouse &m)
 		OnTrayMenu(RClick);
 		if (GetMouse(m, true))
 		{
-			#if WINNATIVE
-			SetForegroundWindow(Handle());
-			#endif
 			int Result = RClick.Float(this, m.x, m.y);
-			#if WINNATIVE
-			PostMessage(Handle(), WM_NULL, 0, 0);
-			#endif
 			OnTrayMenuResult(Result);
 		}
 	}

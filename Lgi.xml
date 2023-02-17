@@ -421,37 +421,38 @@
 			<Node File=".\include\lgi\linux\Gtk\LgiOsDefs.h" Type="3" Platforms="2" />
 		</Node>
 		<Node Name="Mac" Type="1" Platforms="15" Id="1">
-			<Node File="./include/lgi/mac/cocoa/LCocoaView.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/mac/cocoa/LgiMac.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/mac/cocoa/LgiOs.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/mac/cocoa/LgiOsClasses.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/mac/cocoa/LgiOsDefs.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/mac/cocoa/ObjCWrapper.h" Type="3" Platforms="15" />
-			<Node File="./include/lgi/mac/cocoa/SymLookup.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\mac\cocoa\LCocoaView.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\mac\cocoa\LgiMac.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\mac\cocoa\LgiOs.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\mac\cocoa\LgiOsClasses.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\mac\cocoa\LgiOsDefs.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\mac\cocoa\ObjCWrapper.h" Type="3" Platforms="15" />
+			<Node File=".\include\lgi\mac\cocoa\SymLookup.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Win" Type="1" Platforms="15" Open="0" Id="76">
 			<Node File=".\include\lgi\win\LgiOsDefs.h" Type="3" Platforms="1" />
 		</Node>
-		<Node File="./include/lgi/common/AutoPtr.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Cancel.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Error.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Json.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Lgi.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiClasses.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiCommon.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiDefs.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiInc.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiInterfaces.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiMsgs.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiUiBase.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Notifications.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/RefCount.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/TextLog.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Token.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\AutoPtr.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Cancel.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Error.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Json.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Lgi.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiClasses.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiCommon.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiDefs.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiInc.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiInterfaces.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiMsgs.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiUiBase.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Notifications.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Point.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\RefCount.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\TextLog.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Token.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
-		<Node File="./Makefile.haiku" Type="9" Platforms="15" />
-		<Node File="./Makefile.linux" Type="9" Platforms="15" />
+		<Node File=".\Makefile.haiku" Type="9" Platforms="15" />
+		<Node File=".\Makefile.linux" Type="9" Platforms="15" />
 	</Node>
 	<Settings>
 		<General>
@@ -467,7 +468,7 @@
 				<All>0</All>
 			</DebugAdmin>
 			<Executable>
-				<Haiku />
+				<Windows />
 			</Executable>
 			<CCrossCompiler />
 			<CppCrossCompiler />
@@ -511,7 +512,7 @@
 `pkg-config --cflags gtk+-3.0`
 `pkg-config --cflags gstreamer-1.0`</Release>
 				</Linux>
-				<Haiku />
+				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -537,13 +538,14 @@ gnu
 network
 be</Release>
 				</Haiku>
+				<Windows />
 			</Libraries>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-gtk3</Debug>
 					<Release>lgi-gtk3</Release>
 				</Linux>
-				<Haiku />
+				<Windows />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
@@ -559,17 +561,18 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
+				<Windows />
 			</Defines>
 			<LibraryPaths>
 				<All />
-				<Haiku />
+				<Windows />
 			</LibraryPaths>
 			<ApplicationIcon />
 		</Build>
 		<Advanced>
 			<OtherMakefileRules />
 			<PostBuildCommands>
-				<Haiku />
+				<Windows />
 			</PostBuildCommands>
 		</Advanced>
 		<Debug>

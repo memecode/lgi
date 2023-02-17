@@ -2123,58 +2123,22 @@ bool LView::InThread()
 bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t timeoutMs)
 {
 	#ifdef LGI_SDL
+
 		return LPostEvent(this, Cmd, a, b);
+
 	#elif defined(HAIKU)
+
 		if (!d || !d->Hnd)
 		{
 			// printf("%s:%i - Bad pointers %p %p\n", _FL, d, d ? d->Hnd : NULL);
 			return false;
 		}
 		
-		auto start = LCurrentTime();
-		bool locked = false;
-		BView *lockView = NULL;
-		BWindow *lockWindow = NULL;
+		BWindow *bWnd = NULL;
 		LWindow *wnd = dynamic_cast<LWindow*>(this);
 		if (wnd)
 		{
-			lockWindow = wnd->WindowHandle();
-			if (!lockWindow)
-			{
-				printf("%s:%i - No window to lock (%s)\n", _FL, GetClass());
-				return false;
-			}
-
-			do
-			{
-				int64_t elapsedMs = LCurrentTime() - start;
-				int64_t remainingMs = timeoutMs >= 0 ? timeoutMs - elapsedMs : 2000;
-				
-				auto r = lockWindow->LockWithTimeout(remainingMs * 1000);
-				if (r == B_OK)
-				{
-					locked = true;
-					break;
-				}
-				else if (r == B_BAD_VALUE)
-				{
-					printf("%s:%i - Lock destroyed.\n", _FL);
-					return false;
-				}
-				else
-				{
-					if (timeoutMs >= 0)
-						return false;
-
-					printf("%s waiting on lock for %gs (r=%x, me=%i, locker=%i)\n",
-						GetClass(),
-						(double)(LCurrentTime()-start)/1000.0,
-						r,
-						GetCurrentThreadId(),
-						lockWindow ? lockWindow->LockingThread() : 0);
-				}
-			}
-			while (true);					
+			bWnd = wnd->WindowHandle();
 		}
 		else
 		{
@@ -2184,116 +2148,65 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 				auto vhnd = v->Handle();
 				if (vhnd && ::IsAttached(vhnd))
 				{
-					lockView = vhnd;
+					bWnd = vhnd->Window();
 					break;
 				}
 			}
-			
-			// Try and lock the looper...
-			if (!lockView)
-			{
-				#if 0
-				auto wnd = lockView ? lockView->Window() : NULL;
-				auto par = lockView ? lockView->Parent() : NULL;
-				printf("%s:%i - Failed to locklooper: %p %i %p %p cls=%s\n",
-					_FL, lockView, locked, wnd, par, GetClass());
-				#endif
-				return false;
-			}
-
-			lockWindow = lockView->Window();
-			
-			do
-			{
-				int64_t elapsedMs = LCurrentTime() - start;
-				int64_t remainingMs = timeoutMs >= 0 ? timeoutMs - elapsedMs : 2000;
-
-				auto r = lockView->LockLooperWithTimeout(remainingMs * 1000);
-				if (r == B_OK)
-				{
-					locked = true;
-					break;
-				}
-				else if (r == B_BAD_VALUE)
-				{
-					printf("%s:%i - Lock destroyed.\n", _FL);
-					return false;
-				}
-				else
-				{
-					if (timeoutMs >= 0)
-						return false;
-
-					printf("%s waiting on lock for %gs (r=%x, me=%i, locker=%i)\n",
-						GetClass(),
-						(double)(LCurrentTime()-start)/1000.0,
-						r,
-						GetCurrentThreadId(),
-						lockWindow ? lockWindow->LockingThread() : 0);
-				}
-			}
-			while (true);
  		}
 
-		BMessage *m = new BMessage(Cmd);
-		if (!m)
-		{
-			printf("%s:%i - alloc failed.\n", _FL);
-			return false;
-		}
+		BMessage m(Cmd);
 		
-		auto r = m->AddInt64(LMessage::PropA, a);
-		if (r != B_OK) printf("%s:%i - AddUInt64 failed.\n", _FL);
-		r = m->AddInt64(LMessage::PropB, b);
-		if (r != B_OK) printf("%s:%i - AddUInt64 failed.\n", _FL);
-		if (lockView != d->Hnd)
+		auto r = m.AddInt64(LMessage::PropA, a);
+		if (r != B_OK)
+			printf("%s:%i - AddUInt64 failed.\n", _FL);
+		r = m.AddInt64(LMessage::PropB, b);
+		if (r != B_OK)
+			printf("%s:%i - AddUInt64 failed.\n", _FL);
+		r = m.AddPointer(LMessage::PropView, this);
+		if (r != B_OK)
+			printf("%s:%i - AddPointer failed.\n", _FL);
+
+		if (bWnd)
 		{
-			r = m->AddPointer(LMessage::PropView, this);
+			r = bWnd->PostMessage(&m);
 			if (r != B_OK)
-				printf("%s:%i - AddPointer failed.\n", _FL);
+				printf("%s:%i - PostMessage failed.\n", _FL);				
+
+			return r == B_OK;
 		}
 
-		if (lockView)
-		{		
-			r = d->Hnd->Window()->PostMessage(m, lockView);
-			if (r != B_OK)
-				printf("%s:%i - PostMessage failed.\n", _FL);
-		}
-		else if (lockWindow)
-		{
-			r = lockWindow->PostMessage(m);
-			if (r != B_OK)
-				printf("%s:%i - PostMessage failed.\n", _FL);
-		}
-		else
-		{
-			r = B_ERROR;
-			printf("%s:%i - No window?\n", _FL);
-		}
+		// Not attached yet...
+		d->MsgQue.Add(new BMessage(m));
+		// printf("%s:%i - PostEvent.MsgQue=%i\n", _FL, (int)d->MsgQue.Length());
+		
+		return true;
 
-		if (lockView)
-			lockView->UnlockLooper();
-		else if (lockWindow)
-			lockWindow->UnlockLooper();
-
-		return r == B_OK;
 	#elif WINNATIVE
+
 		if (!_View)
 			return false;
+
 		BOOL Res = ::PostMessage(_View, Cmd, a, b);
 		if (!Res)
 		{
 			auto Err = GetLastError();
 			int asd=0;
 		}
+
 		return Res != 0;
+
 	#elif !LGI_VIEW_HANDLE
+
 		return LAppInst->PostEvent(this, Cmd, a, b);
+
 	#else
+
 		if (_View)
 			return LPostEvent(_View, Cmd, a, b);
+
 		LAssert(0);
 		return false;
+
 	#endif
 }
 

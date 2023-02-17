@@ -13,6 +13,7 @@
 
 #include "lgi/common/Lgi.h"
 #include <Bitmap.h>
+#include <Region.h>
 
 #define VIEW_CHECK(...)		if (!d->v) return __VA_ARGS__;
 
@@ -55,10 +56,12 @@ LScreenDC::LScreenDC(LView *view, void *param)
 
 	d->Bits = GdcD->GetBits();
 
+	/*
 	if (d->v)
 		d->Client = d->v->Frame();
 	else
 		LgiTrace("%s:%i - LScreenDC::LScreenDC - No view?\n", _FL);
+	*/
 }
 
 LScreenDC::~LScreenDC()
@@ -80,8 +83,7 @@ OsPainter LScreenDC::Handle()
 
 bool LScreenDC::SupportsAlphaCompositing()
 {
-	// GTK/X11 doesn't seem to support alpha compositing.
-	return false;
+	return true;
 }
 
 LPoint LScreenDC::GetDpi()
@@ -112,6 +114,14 @@ void LScreenDC::GetOrigin(int &x, int &y)
 	}
 }
 
+LString GetClip(BView *v)
+{
+	BRegion r;
+	v->GetClippingRegion(&r);
+	LRect lr = r.Frame();
+	return lr.GetStr();
+}
+
 void LScreenDC::SetOrigin(int x, int y)
 {
 	VIEW_CHECK()
@@ -120,6 +130,10 @@ void LScreenDC::SetOrigin(int x, int y)
 	{
 		OriginX = x - d->Client.x1;
 		OriginY = y - d->Client.y1;
+		
+		// The clipping region is relative to the offset.
+		// Remove it here and reinstate it after setting the origin.
+		d->v->ConstrainClippingRegion(NULL);
 	}
 	else
 	{
@@ -127,8 +141,15 @@ void LScreenDC::SetOrigin(int x, int y)
 		OriginY = y;
 	}
 
-	// printf("setori %i,%i\n", OriginX, OriginY);
-	d->v->SetOrigin(OriginX, OriginX);
+	d->v->SetOrigin(-OriginX, -OriginY);
+	
+	if (d->Client.Valid())
+	{
+		// Reset the clipping region related to the origin.
+		auto clp = d->Client.ZeroTranslate();
+		clp.Offset(OriginX, OriginY);
+		d->v->ClipToRect(clp);
+	}
 }
 
 void LScreenDC::SetClient(LRect *c)
@@ -142,17 +163,24 @@ void LScreenDC::SetClient(LRect *c)
 		OriginX = c->x1;
 		OriginY = c->y1;
 
-		LRect clp(0, 0, c->X()-2, c->Y()-2);
-		// printf("clp=%s ori=%i,%i\n", clp.GetStr(), OriginX, OriginY);
-		d->v->SetOrigin(OriginX, OriginY);
+		d->v->SetOrigin(-OriginX, -OriginY);
+
+		auto clp = d->Client.ZeroTranslate();
+		clp.Offset(OriginX, OriginY);
 		d->v->ClipToRect(clp);
+		
+		/*
+		BRegion r;
+		d->v->GetClippingRegion(&r);
+		LRect lr = r.Frame();
+		printf("SetClient %s = %s (%i,%i)\n", c->GetStr(), lr.GetStr(), OriginX, OriginY);
+		*/
 	}
 	else
 	{
-		if (Clip.Valid())
-			ClipRgn(NULL);
-		
+	    d->v->ConstrainClippingRegion(NULL);
 		d->v->SetOrigin(OriginX = 0, OriginX = 0);
+
 		d->Client.ZOff(-1, -1);
 	}
 }

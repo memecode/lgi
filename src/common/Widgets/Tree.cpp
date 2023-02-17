@@ -7,6 +7,7 @@
 #include "lgi/common/Palette.h"
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/CssTools.h"
+#include <Region.h>
 
 #define TREE_BLOCK          16
 #define DRAG_THRESHOLD		4
@@ -1907,7 +1908,7 @@ int LTree::OnNotify(LViewI *Ctrl, LNotification n)
 		case IDC_VSCROLL:
 		{
 			TREELOCK
-			if (Flags == LNotifyScrollBarCreate)
+			if (n.Type == LNotifyScrollBarCreate)
 			{
 				_UpdateScrollBars();
 				if (VScroll)

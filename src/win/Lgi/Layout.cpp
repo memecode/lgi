@@ -46,35 +46,23 @@ LViewI *LLayout::FindControl(int Id)
 void LLayout::GetScrollPos(int64 &x, int64 &y)
 {
 	if (HScroll)
-	{
 		x = (int)HScroll->Value();
-	}
 	else
-	{
 		x = 0;
-	}
 
 	if (VScroll)
-	{
 		y = (int)VScroll->Value();
-	}
 	else
-	{
 		y = 0;
-	}
 }
 
 void LLayout::SetScrollPos(int64 x, int64 y)
 {
 	if (HScroll)
-	{
 		HScroll->Value(x);
-	}
 
 	if (VScroll)
-	{
 		VScroll->Value(y);
-	}
 }
 
 bool LLayout::SetScrollBars(bool x, bool y)
