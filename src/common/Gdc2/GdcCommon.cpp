@@ -1117,9 +1117,10 @@ bool LRopUniversal(LBmpMem *Dst, LBmpMem *Src, bool Composite)
 
 LPoint LScreenDpi()
 {
+	static LPoint Dpi;
+
 	#if LGI_COCOA
 	
-		static LPoint Dpi;
 		if (!Dpi.x)
 		{
 			NSScreen *screen = [NSScreen mainScreen];
@@ -1133,21 +1134,38 @@ LPoint LScreenDpi()
 
 	#elif defined(__GTK_H__)
 
-		static LPoint Dpi;
 		if (!Dpi.x)
 		{
 			auto dpi = Gtk::gdk_screen_get_resolution(Gtk::gdk_screen_get_default());
 			if (dpi > 0)
 				Dpi.Set((int)dpi, (int)dpi);
-			if (Dpi.x <= 0)
-				Dpi.Set(96, 96);
 		}
 
-	#else
+	#elif defined(HAIKU)
 
-		static LPoint Dpi(96, 96); // A reasonable default.
-	
+		if (!Dpi.x)
+		{
+			BScreen screen(Window());
+			monitor_info info;
+			if (screen.GetMonitorInfo(&info) == B_OK)
+			{
+				Dpi.x = info.width / 2.54;
+				Dpi.y = info.height / 2.54;
+			}
+		}
+
+	#elif defined(WINDOWS)
+
+		if (!Dpi.x)
+		{
+			auto dpi = GetDpiForWindow(GetDesktopWindow());
+			Dpi.Set(dpi, dpi);
+		}
+
 	#endif
+
+	if (Dpi.x <= 0)
+		Dpi.Set(96, 96);
 
 	return Dpi;
 }
