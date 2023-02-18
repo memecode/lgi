@@ -1,6 +1,8 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Palette.h"
 
+#include "ControlLook.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // Mem ops
 void Add64(ulong *DestH, ulong *DestL, ulong SrcH, ulong SrcL)
@@ -1145,13 +1147,10 @@ LPoint LScreenDpi()
 
 		if (!Dpi.x)
 		{
-			BScreen screen(Window());
-			monitor_info info;
-			if (screen.GetMonitorInfo(&info) == B_OK)
-			{
-				Dpi.x = info.width / 2.54;
-				Dpi.y = info.height / 2.54;
-			}
+			double scaling = std::max(1.0f, be_plain_font->Size() / 12.0f);
+			Dpi.x = (int)(96.0 * scaling);
+			Dpi.y = Dpi.x;
+			printf("scaling=%g dpi=%i\n", scaling, Dpi.x);
 		}
 
 	#elif defined(WINDOWS)
