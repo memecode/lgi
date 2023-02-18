@@ -1722,7 +1722,7 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 		
 		if (!Info.Length())
 		{
-			LgiTrace("%s:%i - No layout.\n", _FL);
+			LgiTrace("%s:%i - No layout for '%s'.\n", _FL, Str);
 			return;
 		}
 		

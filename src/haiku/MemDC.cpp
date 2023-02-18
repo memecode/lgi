@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <math.h>
+#include "Screen.h"
 
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/LgiString.h"
@@ -206,16 +207,34 @@ void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 	LScreenDC *Screen;
 	if ((Screen = Src->IsScreen()))
 	{
-		if (pMem->Base)
+		BScreen scr;
+		BBitmap *bitmap = NULL;
+		BRect src = br.SrcClip;
+		auto r = scr.GetBitmap(&bitmap, TestFlag(Flags, GDC_CAPTURE_CURSOR), &src);
+		if (r == B_OK)
 		{
-
+			bitmap->LockBits();
+			
+			int dstPx = GetBits() / 8;
+			size_t srcPx = 4, row = 0, chunk = 0;			
+			get_pixel_size_for(bitmap->ColorSpace(), &srcPx, &row, &chunk);
+			
+			for (int y=0; y<br.SrcClip.Y(); y++)
+			{
+				auto *dst = (*this)[br.DstClip.y1 + y] + (br.DstClip.x1 * dstPx);
+				auto *src = ((uchar*)bitmap->Bits()) + (bitmap->BytesPerRow() * (br.SrcClip.y1 + y)) + (br.SrcClip.x1 * srcPx);
+				LAssert(!"Impl pixel converter.");
+			}
+			
+			bitmap->UnlockBits();
 		}
-		
-		if (!Status)
+		else
 		{
 			Colour(Rgb24(255, 0, 255), 24);
-			Rectangle();
+			Rectangle(a);
 		}
+
+		delete bitmap;
 	}
 	else if ((*Src)[0])
 	{

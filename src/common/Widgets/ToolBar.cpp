@@ -248,10 +248,19 @@ LImageList::LImageList(int x, int y, LSurface *pDC)
 			HasPad(pDC->GetColourSpace()));
 		#endif
 				
+		#if 1
+		static int Idx = 0;
+		char s[256];
+
+		sprintf_s(s, sizeof(s), "imglst_%i.bmp", Idx++);
+		GdcD->Save(s, this);
+
+		// sprintf_s(s, sizeof(s), "src_%i.bmp", Idx++);
+		// GdcD->Save(s, pDC);
+		#endif
+						
 		if (pDC->GetBits() < 32 || HasPad(pDC->GetColourSpace()))
 		{
-			// auto InCs = pDC->GetColourSpace();
-			
 			if (!pDC->HasAlpha())
 			{
 				// No source alpha, do colour keying to create the alpha channel
@@ -298,12 +307,7 @@ LImageList::LImageList(int x, int y, LSurface *pDC)
 			}
 		}
 		
-		#if 0
-		static int Idx = 0;
-		char s[256];
-		sprintf_s(s, sizeof(s), "imglst_%i.bmp", Idx++);
-		WriteDC(s, this);
-		#endif
+
 	}
 }
 
@@ -1458,16 +1462,8 @@ void LToolBar::OnMouseMove(LMouse &m)
 
 bool LToolBar::SetBitmap(char *File, int bx, int by)
 {
-	bool Status = false;
-
-	LSurface *pDC = GdcD->Load(File);
-	if (pDC)
-	{
-		Status = SetDC(pDC, bx, by);
-		DeleteObj(pDC);
-	}
-
-	return Status;
+	LAutoPtr<LSurface> pDC(GdcD->Load(File));
+	return pDC ? SetDC(pDC, bx, by) : false;
 }
 
 bool LToolBar::SetDC(LSurface *pNewDC, int bx, int by)

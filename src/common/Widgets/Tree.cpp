@@ -110,14 +110,18 @@ public:
 	{
 		if (!Ds[Col])
 		{
-			LFont *f = Item->GetTree() ? Item->GetTree()->GetFont() : LSysFont;		
-			Ds[Col] = new LDisplayString(f, Item->GetText(Col));
-			if (Ds[Col])
-			{
-				ColPx[Col] = Ds[Col]->X();
-				if (FixPx > 0)
+			LFont *f = Item->GetTree() ? Item->GetTree()->GetFont() : LSysFont;
+			auto txt = Item->GetText(Col);
+			if (txt)
+			{			
+				Ds[Col] = new LDisplayString(f, Item->GetText(Col));
+				if (Ds[Col])
 				{
-					Ds[Col]->TruncateWithDots(FixPx);
+					ColPx[Col] = Ds[Col]->X();
+					if (FixPx > 0)
+					{
+						Ds[Col]->TruncateWithDots(FixPx);
+					}
 				}
 			}
 		}
@@ -1075,9 +1079,16 @@ void LTreeItem::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 	LDisplayString *ds = d->GetDs(i, Ctx.ColPx[i]);
 	if (ds)
 	{
+		// Draw the text in the context area:
 		LFont *f = ds->GetFont();
 		f->Colour(Ctx.Fore, Ctx.TxtBack);
 		ds->Draw(Ctx.pDC, Ctx.x1 + 2, Ctx.y1 + 1, &Ctx);
+	}
+	else
+	{
+		// No string, fill the space with background
+		Ctx.pDC->Colour(Ctx.Back);
+		Ctx.pDC->Rectangle(&Ctx);
 	}
 }		
 

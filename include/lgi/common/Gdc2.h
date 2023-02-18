@@ -202,6 +202,24 @@ public:
 	LBmpMem();
 	~LBmpMem();
 	
+	int GetBits()
+	{
+		return LColourSpaceToBits(Cs);
+	}
+
+	int BytesPerPx()
+	{
+		return LColourSpaceToBits(Cs) >> 3;
+	}
+	
+	uchar *AddressOf(int ox, int oy)
+	{
+		LAssert(ox >= 0 && ox < x &&
+				oy >= 0 && oy < y);
+				
+		return Base + (oy * Line) + (ox * BytesPerPx());
+	}
+	
 	bool PreMul()
 	{
 		return (Flags & BmpPreMulAlpha) != 0;
@@ -226,11 +244,6 @@ public:
 		return OwnMem();
 	}
 
-	int GetBits()
-	{
-		return LColourSpaceToBits(Cs);
-	}
-	
 	void GetMemoryExtents(uchar *&Start, uchar *&End)
 	{
 		if (Line < 0)
