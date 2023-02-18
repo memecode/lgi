@@ -3719,10 +3719,11 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			else
 			{
 				LInput *Inp = new LInput(this, NULL, LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
-				Inp->DoModal([&](auto dlg, auto code)
+				Inp->DoModal([Inp,this](auto dlg, auto code)
 				{
 					LString s = Inp->GetStr();
 					LString::Array p = s.SplitDelimit(":,");
+					
 					if (p.Length() == 2)
 					{
 						LString file = p[0];
@@ -3730,7 +3731,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 						GotoReference(file, line, false, true);
 					}
 					else LgiMsg(this, "Error: Needs a file name as well.", AppName);
-					delete Inp;
+					
+					delete dlg;
 				});
 			}
 			break;

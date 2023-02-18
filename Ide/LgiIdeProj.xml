@@ -2,10 +2,10 @@
 <Project TabSize="4" IndentSize="4" UseTabs="1" Makefile="./Makefile.linux" Exe="./lgiide" ShowWhitespace="0" BuildType="0" TargetType="0" TargetName="lgiide" Compiler="0">
 	<Node Name="Source Files" Type="1" Platforms="15" Open="1" Id="1">
 		<Node Name="Debugger" Type="1" Platforms="15" Open="0" Id="2">
-			<Node File="./Code/DebugContext.cpp" Type="2" Platforms="15" />
-			<Node File="./Code/DebugContext.h" Type="3" Platforms="15" />
-			<Node File="./Code/Debugger.cpp" Type="2" Platforms="15" />
-			<Node File="./Code/Debugger.h" Type="3" Platforms="15" />
+			<Node File=".\Code\DebugContext.cpp" Type="2" Platforms="15" />
+			<Node File=".\Code\DebugContext.h" Type="3" Platforms="15" />
+			<Node File=".\Code\Debugger.cpp" Type="2" Platforms="7" />
+			<Node File=".\Code\Debugger.h" Type="3" Platforms="7" />
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="3">
 			<Node File="./Code/AddFtpFile.cpp" Type="2" Platforms="15" />
@@ -15,12 +15,12 @@
 			<Node File="./Code/WebFldDlg.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Docs" Type="1" Platforms="15" Id="1">
-			<Node File="./Code/DocEdit.cpp" Type="2" Platforms="15" />
-			<Node File="./Code/DocEdit.h" Type="3" Platforms="15" />
-			<Node File="./Code/DocEditStyling.cpp" Type="2" Platforms="15" />
-			<Node File="./Code/IdeDoc.cpp" Type="2" Platforms="15" />
-			<Node File="./Code/IdeDoc.h" Type="3" Platforms="15" />
-			<Node File="./Code/IdeDocPrivate.h" Type="3" Platforms="15" />
+			<Node File=".\Code\DocEdit.cpp" Type="2" Platforms="15" />
+			<Node File=".\Code\DocEdit.h" Type="3" Platforms="15" />
+			<Node File=".\Code\DocEditStyling.cpp" Type="2" Platforms="15" />
+			<Node File=".\Code\IdeDoc.cpp" Type="2" Platforms="15" />
+			<Node File=".\Code\IdeDoc.h" Type="3" Platforms="15" />
+			<Node File=".\Code\IdeDocPrivate.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Ftp" Type="1" Platforms="15" Open="0" Id="4">
 			<Node File="./Code/FtpThread.cpp" Type="2" Platforms="15" />
@@ -29,16 +29,16 @@
 			<Node File="..\include\lgi\common\Ftp.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Projects" Type="1" Platforms="15" Id="1">
-			<Node File="./Code/IdeProject.cpp" Type="2" Platforms="15" />
-			<Node File="./Code/IdeProject.h" Type="3" Platforms="15" />
-			<Node File="./Code/IdeProjectSettings.cpp" Type="2" Platforms="15" />
-			<Node File="./Code/IdeProjectSettings.h" Type="3" Platforms="15" />
-			<Node File="./Code/levenshtein.c" Type="2" Platforms="15" />
-			<Node File="./Code/levenshtein.h" Type="3" Platforms="15" />
-			<Node File="./Code/MissingFiles.cpp" Type="2" Platforms="15" />
-			<Node File="./Code/NewProjectFromTemplate.cpp" Type="2" Platforms="15" />
-			<Node File="./Code/ProjectNode.cpp" Type="2" Platforms="15" />
-			<Node File="./Code/ProjectNode.h" Type="3" Platforms="15" />
+			<Node File=".\Code\IdeProject.cpp" Type="2" Platforms="15" />
+			<Node File=".\Code\IdeProject.h" Type="3" Platforms="15" />
+			<Node File=".\Code\IdeProjectSettings.cpp" Type="2" Platforms="15" />
+			<Node File=".\Code\IdeProjectSettings.h" Type="3" Platforms="15" />
+			<Node File=".\Code\levenshtein.c" Type="2" Platforms="15" />
+			<Node File=".\Code\levenshtein.h" Type="3" Platforms="15" />
+			<Node File=".\Code\MissingFiles.cpp" Type="2" Platforms="15" />
+			<Node File=".\Code\NewProjectFromTemplate.cpp" Type="2" Platforms="15" />
+			<Node File=".\Code\ProjectNode.cpp" Type="2" Platforms="15" />
+			<Node File=".\Code\ProjectNode.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Search" Type="1" Platforms="15" Open="1" Id="5">
 			<Node File="./Code/FindInFiles.cpp" Type="2" Platforms="15" />
@@ -136,8 +136,6 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -192,15 +190,12 @@ pthread
 					<Debug>be</Debug>
 					<Release>be</Release>
 				</Haiku>
-				<All />
 			</Libraries>
 			<LibraryPaths>
 				<All>
 					<Debug>..\Debug</Debug>
 					<Release>..\Release</Release>
 				</All>
-				<Windows />
-				<Linux />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -234,10 +229,7 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<ApplicationIcon>
 				<Haiku>./Code/icon-haiku</Haiku>
 			</ApplicationIcon>
-			<Defines>
-				<All />
-				<Windows />
-			</Defines>
+			<Defines />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -252,8 +244,6 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Environment>
@@ -264,18 +254,10 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 					<Debug>/home/matthew/code/scribe/trunk_os/Linux/ScribeProj.xml</Debug>
 				</All>
 			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
 		</Debug>
 		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Windows />
-			</PostBuildCommands>
+			<PostBuildCommands />
 		</Advanced>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
+		<Remote />
 	</Settings>
 </Project>

@@ -8,7 +8,7 @@
 
 CC = gcc
 CPP = g++
-Target = lgi-dev
+Target = lgi-gtk3
 ifndef Build
 	Build = Debug
 endif
@@ -19,7 +19,7 @@ Flags = -fPIC -w -fno-inline -fpermissive
 ifeq ($(Build),Debug)
 	Flags += -g -std=c++14
 	Tag = d
-	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
+	Defs = -D_DEBUG -DLINUX -D_REENTRANT -DLGI_LIBRARY
 	Libs =  \
 		-lmagic \
 		-lappindicator3 \
@@ -29,7 +29,6 @@ ifeq ($(Build),Debug)
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
 		`pkg-config --cflags gstreamer-1.0` \
-		-I/usr/include/libappindicator3-0.1 \
 		-I./private/linux \
 		-I./private/common \
 		-I./include/lgi/linux/Gtk \
@@ -37,7 +36,7 @@ ifeq ($(Build),Debug)
 		-I./include
 else
 	Flags += -s -Os -std=c++14
-	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
+	Defs = -DLINUX -D_REENTRANT -DLGI_LIBRARY
 	Libs =  \
 		-lmagic \
 		-lappindicator3 \
@@ -47,7 +46,6 @@ else
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
 		`pkg-config --cflags gstreamer-1.0` \
-		-I/usr/include/libappindicator3-0.1 \
 		-I./private/linux \
 		-I./private/common \
 		-I./include/lgi/linux/Gtk \
@@ -75,7 +73,6 @@ Source =	src/linux/Lgi/Window.cpp \
 			src/linux/General/ShowFileProp_Linux.cpp \
 			src/linux/General/Mem.cpp \
 			src/linux/General/File.cpp \
-			src/haiku/ShowFileProp_Haiku.cpp \
 			src/common/Widgets/Tree.cpp \
 			src/common/Widgets/ToolBar.cpp \
 			src/common/Widgets/TextLabel.cpp \
@@ -116,12 +113,15 @@ Source =	src/linux/Lgi/Window.cpp \
 			src/common/Lgi/WindowCommon.cpp \
 			src/common/Lgi/ViewCommon.cpp \
 			src/common/Lgi/Variant.cpp \
+			src/common/Lgi/TrayIcon.cpp \
+			src/common/Lgi/ToolTip.cpp \
 			src/common/Lgi/ThreadEvent.cpp \
 			src/common/Lgi/ThreadCommon.cpp \
 			src/common/Lgi/SubProcess.cpp \
 			src/common/Lgi/Stream.cpp \
 			src/common/Lgi/Rand.cpp \
 			src/common/Lgi/OptionsFile.cpp \
+			src/common/Lgi/Object.cpp \
 			src/common/Lgi/Mutex.cpp \
 			src/common/Lgi/Mru.cpp \
 			src/common/Lgi/MenuCommon.cpp \

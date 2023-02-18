@@ -154,6 +154,16 @@ void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 	d->ModalCb = Cb;
 	d->CallingThread = find_thread(NULL);
 
+	if (WindowHandle() &&
+		Parent &&
+		Parent->WindowHandle())
+	{
+		// Keep this dialog above the parent window...
+		WindowHandle()->SetFeel(B_MODAL_SUBSET_WINDOW_FEEL);
+		WindowHandle()->AddToSubset(Parent->WindowHandle());
+	}
+	else LgiTrace("%s:%i - Can't set parent for modal.\n", _FL);
+
 	BLooper *looper = BLooper::LooperForThread(d->CallingThread);
 	if (!looper)
 		printf("%s:%i - no looper for domodal thread.\n",_FL);

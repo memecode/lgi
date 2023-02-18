@@ -2155,25 +2155,24 @@ bool IdeProject::GetExePath(char *Path, int Len)
 
 LString IdeProject::GetMakefile(IdePlatform Platform)
 {
-	LString Path;
 	const char *PMakefile = d->Settings.GetStr(ProjMakefile, NULL, Platform);
-	printf("PMakefile=%s\n", PMakefile);
-	if (PMakefile)
+	if (!PMakefile)
+		return LString();
+	
+	LString Path;
+	if (LIsRelativePath(PMakefile))
 	{
-		if (LIsRelativePath(PMakefile))
+		auto Base = GetBasePath();
+		if (Base)
 		{
-			auto Base = GetBasePath();
-			if (Base)
-			{
-				char p[MAX_PATH_LEN];
-				LMakePath(p, sizeof(p), Base, PMakefile);
-				Path = p;
-			}
+			char p[MAX_PATH_LEN];
+			LMakePath(p, sizeof(p), Base, PMakefile);
+			Path = p;
 		}
-		else
-		{
-			Path = PMakefile;
-		}
+	}
+	else
+	{
+		Path = PMakefile;
 	}
 	
 	return Path;
@@ -2364,8 +2363,16 @@ LDebugContext *IdeProject::Execute(ExeAction Act, LString *ErrMsg)
 		return new LDebugContext(d->App, this, e, Args, RunAsAdmin != 0, Env, InitDir);
 	}
 
-	// Run without debugging...
-	new ExecuteThread(this, e, Args, Base, Act);
+	new ExecuteThread(	this,
+						e,
+						Args,
+						Base,
+						#if defined(HAIKU) || defined(WINDOWS)
+							ExeRun // No gdb or valgrind
+						#else
+							Act
+						#endif
+						);
 	return NULL;
 }
 
