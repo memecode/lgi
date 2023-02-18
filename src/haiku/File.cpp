@@ -32,278 +32,8 @@
 #include "lgi/common/LgiString.h"
 #include "lgi/common/DateTime.h"
 
-/****************************** Defines ***********************************/
-
-// #define FILEDEBUG
-
-#define FLOPPY_360K				0x0001
-#define FLOPPY_720K				0x0002
-#define FLOPPY_1_2M				0x0004
-#define FLOPPY_1_4M				0x0008
-#define FLOPPY_5_25				(FLOPPY_360K | FLOPPY_1_2M)
-#define FLOPPY_3_5				(FLOPPY_720K | FLOPPY_1_4M)
-
 /****************************** Globals ***********************************/
-
 LString LFile::Path::Sep(DIR_STR);
-
-struct ErrorCodeType
-{
-	const char *Name;
-	int Code;
-	const char *Desc;
-}
-ErrorCodes[] =
-{
-	#if defined(WIN32)
-
-	{"EPERM", 1, "Not owner"},
-	{"ENOENT", 2, "No such file"},
-	{"ESRCH", 3, "No such process"},
-	{"EINTR", 4, "Interrupted system"},
-	{"EIO", 5, "I/O error"},
-	{"ENXIO", 6, "No such device"},
-	{"E2BIG", 7, "Argument list too long"},
-	{"ENOEXEC", 8, "Exec format error"},
-	{"EBADF", 9, "Bad file number"},
-	{"ECHILD", 10, "No children"},
-	{"EAGAIN", 11, "No more processes"},
-	{"ENOMEM", 12, "Not enough core"},
-	{"EACCES", 13, "Permission denied"},
-	{"EFAULT", 14, "Bad address"},
-	{"ENOTBLK", 15, "Block device required"},
-	{"EBUSY", 16, "Mount device busy"},
-	{"EEXIST", 17, "File exists"},
-	{"EXDEV", 18, "Cross-device link"},
-	{"ENODEV", 19, "No such device"},
-	{"ENOTDIR", 20, "Not a directory"},
-	{"EISDIR", 21, "Is a directory"},
-	{"EINVAL", 22, "Invalid argument"},
-	{"ENFILE", 23, "File table overflow"},
-	{"EMFILE", 24, "Too many open file"},
-	{"ENOTTY", 25, "Not a typewriter"},
-	{"ETXTBSY", 26, "Text file busy"},
-	{"EFBIG", 27, "File too large"},
-	{"ENOSPC", 28, "No space left on"},
-	{"ESPIPE", 29, "Illegal seek"},
-	{"EROFS", 30, "Read-only file system"},
-	{"EMLINK", 31, "Too many links"},
-	{"EPIPE", 32, "Broken pipe"},
-	{"EWOULDBLOCK", 35, "Operation would block"},
-	{"EINPROGRESS", 36, "Operation now in progress"},
-	{"EALREADY", 37, "Operation already in progress"},
-	{"ENOTSOCK", 38, "Socket operation on"},
-	{"EDESTADDRREQ", 39, "Destination address required"},
-	{"EMSGSIZE", 40, "Message too long"},
-	{"EPROTOTYPE", 41, "Protocol wrong type"},
-	{"ENOPROTOOPT", 42, "Protocol not available"},
-	{"EPROTONOSUPPORT", 43, "Protocol not supported"},
-	{"ESOCKTNOSUPPORT", 44, "Socket type not supported"},
-	{"EOPNOTSUPP", 45, "Operation not supported"},
-	{"EPFNOSUPPORT", 46, "Protocol family not supported"},
-	{"EAFNOSUPPORT", 47, "Address family not supported"},
-	{"EADDRINUSE", 48, "Address already in use"},
-	{"EADDRNOTAVAIL", 49, "Can't assign requested address"},
-	{"ENETDOWN", 50, "Network is down"},
-	{"ENETUNREACH", 51, "Network is unreachable"},
-	{"ENETRESET", 52, "Network dropped connection"},
-	{"ECONNABORTED", 53, "Software caused connection"},
-	{"ECONNRESET", 54, "Connection reset by peer"},
-	{"ENOBUFS", 55, "No buffer space available"},
-	{"EISCONN", 56, "Socket is already connected"},
-	{"ENOTCONN", 57, "Socket is not connected"	},
-	{"ESHUTDOWN", 58, "Can't send after shutdown"},
-	{"ETOOMANYREFS", 59, "Too many references"},
-	{"ETIMEDOUT", 60, "Connection timed out"},
-	{"ECONNREFUSED", 61, "Connection refused"},
-	{"ELOOP", 62, "Too many levels of nesting"},
-	{"ENAMETOOLONG", 63, "File name too long"	},
-	{"EHOSTDOWN", 64, "Host is down"},
-	{"EHOSTUNREACH", 65, "No route to host"},
-	{"ENOTEMPTY", 66, "Directory not empty"},
-	{"EPROCLIM", 67, "Too many processes"},
-	{"EUSERS", 68, "Too many users"},
-	{"EDQUOT", 69, "Disc quota exceeded"},
-	{"ESTALE", 70, "Stale NFS file handle"},
-	{"EREMOTE", 71, "Too many levels of remote in the path"},
-	{"ENOSTR", 72, "Device is not a stream"},
-	{"ETIME", 73, "Timer expired"},
-	{"ENOSR", 74, "Out of streams resources"},
-	{"ENOMSG", 75, "No message"},
-	{"EBADMSG", 76, "Trying to read unreadable message"},
-	{"EIDRM", 77, "Identifier removed"},
-	{"EDEADLK", 78, "Deadlock condition"},
-	{"ENOLCK", 79, "No record locks available"},
-	{"ENONET", 80, "Machine is not on network"},
-	{"ERREMOTE", 81, "Object is remote"},
-	{"ENOLINK", 82, "The link has been severed"},
-	{"EADV", 83, "ADVERTISE error"},
-	{"ESRMNT", 84, "SRMOUNT error"},
-	{"ECOMM", 85, "Communication error"},
-	{"EPROTO", 86, "Protocol error"},
-	{"EMULTIHOP", 87, "Multihop attempted"},
-	{"EDOTDOT", 88, "Cross mount point"},
-	{"EREMCHG", 89, "Remote address change"},
-
-	#elif defined(LINUX) || defined(__GTK_H__)
-
-	{"EPERM",			EPERM, "Operation not permitted"},
-	{"ENOENT",			ENOENT, "No such file or directory"},
-	{"ESRCH",			ESRCH, "No such process"},
-	{"EINTR",			EINTR, "Interrupted system call"},
-	{"EIO",				EIO, "I/O error"},
-	{"ENXIO",			ENXIO, "No such device or address"},
-	{"E2BIG",			E2BIG, "Argument list too long"},
-	{"ENOEXEC",			ENOEXEC, "Exec format error"},
-	{"EBADF",			EBADF, "Bad file number"},
-	{"ECHILD",			ECHILD, "No child processes"},
-	{"EAGAIN",			EAGAIN, "Try again"},
-	{"ENOMEM",			ENOMEM, "Out of memory"},
-	{"EACCES",			EACCES, "Permission denied"},
-	{"EFAULT",			EFAULT, "Bad address"},
-	{"ENOTBLK",			ENOTBLK, "Block device required"},
-	{"EBUSY",			EBUSY, "Device or resource busy"},
-	{"EEXIST",			EEXIST, "File exists"},
-	{"EXDEV",			EXDEV, "Cross-device link"},
-	{"ENODEV",			ENODEV, "No such device"},
-	{"ENOTDIR",			ENOTDIR, "Not a directory"},
-	{"EISDIR",			EISDIR, "Is a directory"},
-	{"EINVAL",			EINVAL, "Invalid argument"},
-	{"ENFILE",			ENFILE, "File table overflow"},
-	{"EMFILE",			EMFILE, "Too many open files"},
-	{"ENOTTY",			ENOTTY, "Not a typewriter"},
-	{"ETXTBSY",			ETXTBSY, "Text file busy"},
-	{"EFBIG",			EFBIG, "File too large"},
-	{"ENOSPC",			ENOSPC, "No space left on device"},
-	{"ESPIPE",			ESPIPE, "Illegal seek"},
-	{"EROFS",			EROFS, "Read-only file system"},
-	{"EMLINK",			EMLINK, "Too many links"},
-	{"EPIPE",			EPIPE, "Broken pipe"},
-	{"EDOM",			EDOM, "Math argument out of domain of func"},
-	{"ERANGE",			ERANGE, "Math result not representable"},
-	{"EDEADLK",			EDEADLK, "Resource deadlock would occur"},
-	{"ENAMETOOLONG",	ENAMETOOLONG, "File name too long"},
-	{"ENOLCK",			ENOLCK, "No record locks available"},
-	{"ENOSYS",			ENOSYS, "Function not implemented"},
-	{"ENOTEMPTY",		ENOTEMPTY, "Directory not empty"},
-	{"ELOOP",			ELOOP, "Too many symbolic links encountered"},
-	{"EWOULDBLOCK",		EWOULDBLOCK, "Operation would block"},
-	{"ENOMSG",			ENOMSG, "No message of desired type"},
-	{"EIDRM",			EIDRM, "Identifier removed"},
-	{"EREMOTE",			EREMOTE, "Object is remote"},
-	{"ENOLINK",			ENOLINK, "Link has been severed"},
-	{"ENOSTR",			ENOSTR, "Device not a stream"},
-	{"ENODATA",			ENODATA, "No data available"},
-	{"ETIME",			ETIME, "Timer expired"},
-	{"ENOSR",			ENOSR, "Out of streams resources"},
-	{"EPROTO",			EPROTO, "Protocol error"},
-	{"EMULTIHOP",		EMULTIHOP, "Multihop attempted"},
-	{"EBADMSG",			EBADMSG, "Not a data message"},
-	{"EOVERFLOW",		EOVERFLOW, "Value too large for defined data type"},
-	{"EILSEQ",			EILSEQ, "Illegal byte sequence"},
-	{"EUSERS",			EUSERS, "Too many users"},
-	{"ENOTSOCK",		ENOTSOCK, "Socket operation on non-socket"},
-	{"EDESTADDRREQ",	EDESTADDRREQ, "Destination address required"},
-	{"EMSGSIZE",		EMSGSIZE, "Message too long"},
-	{"EPROTOTYPE",		EPROTOTYPE, "Protocol wrong type for socket"},
-	{"ENOPROTOOPT",		ENOPROTOOPT, "Protocol not available"},
-	{"EPROTONOSUPPORT",	EPROTONOSUPPORT, "Protocol not supported"},
-	{"ESOCKTNOSUPPORT",	ESOCKTNOSUPPORT, "Socket type not supported"},
-	{"EOPNOTSUPP",		EOPNOTSUPP, "Operation not supported on transport endpoint"},
-	{"EPFNOSUPPORT",	EPFNOSUPPORT, "Protocol family not supported"},
-	{"EAFNOSUPPORT",	EAFNOSUPPORT, "Address family not supported by protocol"},
-	{"EADDRINUSE",		EADDRINUSE, "Address already in use"},
-	{"EADDRNOTAVAIL",	EADDRNOTAVAIL, "Cannot assign requested address"},
-	{"ENETDOWN",		ENETDOWN, "Network is down"},
-	{"ENETUNREACH",		ENETUNREACH, "Network is unreachable"},
-	{"ENETRESET",		ENETRESET, "Network dropped connection because of reset"},
-	{"ECONNABORTED",	ECONNABORTED, "Software caused connection abort"},
-	{"ECONNRESET",		ECONNRESET, "Connection reset by peer"},
-	{"ENOBUFS",			ENOBUFS, "No buffer space available"},
-	{"EISCONN",			EISCONN, "Transport endpoint is already connected"},
-	{"ENOTCONN",		ENOTCONN, "Transport endpoint is not connected"},
-	{"ESHUTDOWN",		ESHUTDOWN, "Cannot send after transport endpoint shutdown"},
-	{"ETOOMANYREFS",	ETOOMANYREFS, "Too many references: cannot splice"},
-	{"ETIMEDOUT",		ETIMEDOUT, "Connection timed out"},
-	{"ECONNREFUSED",	ECONNREFUSED, "Connection refused"},
-	{"EHOSTDOWN",		EHOSTDOWN, "Host is down"},
-	{"EHOSTUNREACH",	EHOSTUNREACH, "No route to host"},
-	{"EALREADY",		EALREADY, "Operation already in progress"},
-	{"EINPROGRESS",		EINPROGRESS, "Operation now in progress"},
-	{"ESTALE",			ESTALE, "Stale NFS file handle"},
-
-	#ifndef __GTK_H__
-	{"EDQUOT",			EDQUOT, "Quota exceeded"},
-	{"ENOMEDIUM",		ENOMEDIUM, "No medium found"},
-	{"EMEDIUMTYPE",		EMEDIUMTYPE, "Wrong medium type"},
-	{"EUCLEAN",			EUCLEAN, "Structure needs cleaning"},
-	{"ENOTNAM",			ENOTNAM, "Not a XENIX named type file"},
-	{"ENAVAIL",			ENAVAIL, "No XENIX semaphores available"},
-	{"EISNAM",			EISNAM, "Is a named type file"},
-	{"EREMOTEIO",		EREMOTEIO, "Remote I/O error"},
-	{"ERESTART",		ERESTART, "Interrupted system call should be restarted"},
-	{"ESTRPIPE",		ESTRPIPE, "Streams pipe error"},
-	{"ECOMM",			ECOMM, "Communication error on send"},
-	{"EDOTDOT",			EDOTDOT, "RFS specific error"},
-	{"ENOTUNIQ",		ENOTUNIQ, "Name not unique on network"},
-	{"EBADFD",			EBADFD, "File descriptor in bad state"},
-	{"EREMCHG",			EREMCHG, "Remote address changed"},
-	{"ELIBACC",			ELIBACC, "Can not access a needed shared library"},
-	{"ELIBBAD",			ELIBBAD, "Accessing a corrupted shared library"},
-	{"ELIBSCN",			ELIBSCN, ".lib section in a.out corrupted"},
-	{"ELIBMAX",			ELIBMAX, "Attempting to link in too many shared libraries"},
-	{"ELIBEXEC",		ELIBEXEC, "Cannot exec a shared library directly"},
-	{"ECHRNG",			ECHRNG, "Channel number out of range"},
-	{"EL2NSYNC",		EL2NSYNC, "Level 2 not synchronized"},
-	{"EL3HLT",			EL3HLT, "Level 3 halted"},
-	{"EL3RST",			EL3RST, "Level 3 reset"},
-	{"ELNRNG",			ELNRNG, "Link number out of range"},
-	{"EUNATCH",			EUNATCH, "Protocol driver not attached"},
-	{"ENOCSI",			ENOCSI, "No CSI structure available"},
-	{"EL2HLT",			EL2HLT, "Level 2 halted"},
-	{"EBADE",			EBADE, "Invalid exchange"},
-	{"EBADR",			EBADR, "Invalid request descriptor"},
-	{"EXFULL",			EXFULL, "Exchange full"},
-	{"ENOANO",			ENOANO, "No anode"},
-	{"EBADRQC",			EBADRQC, "Invalid request code"},
-	{"EBADSLT",			EBADSLT, "Invalid slot"},
-	{"EBFONT",			EBFONT, "Bad font file format"},
-	{"EADV",			EADV, "Advertise error"},
-	{"ESRMNT",			ESRMNT, "Srmount error"},
-	{"ENONET",			ENONET, "Machine is not on the network"},
-	{"ENOPKG",			ENOPKG, "Package not installed"},
-	#endif
-
-	#endif
-
-	{"NONE", 0, "No error"},
-};
-
-const char *GetErrorName(int e)
-{
-	for (ErrorCodeType *c=ErrorCodes; c->Code; c++)
-	{
-		if (e == c->Code)
-		{
-			return c->Name;
-		}
-	}
-
-	static char s[32];
-	sprintf(s, "Unknown(%i)", e);
-	return s;
-}
-
-const char *GetErrorDesc(int e)
-{
-	for (ErrorCodeType *c=ErrorCodes; c->Code; c++)
-	{
-		if (e == c->Code)
-			return c->Desc;
-	}
-
-	return 0;
-}
 
 /****************************** Helper Functions **************************/
 char *LReadTextFile(const char *File)
@@ -1006,7 +736,7 @@ bool LFileSystem::Move(const char *OldName, const char *NewName, LError *Err)
 	if (rename(OldName, NewName))
 	{
 		printf("%s:%i - rename failed, error: %s(%i)\n",
-			_FL, GetErrorName(errno), errno);
+			_FL, LErrorCodeToString(errno), errno);
 		return false;
 	}
 	
@@ -1096,15 +826,14 @@ bool LDirectory::ConvertToDate(char *Str, int SLen, uint64 Time) const
 struct LDirectoryPriv
 {
 	char			BasePath[MAX_PATH_LEN];
-	DIR				*Dir;
-	struct dirent	*De;
+	char			*BaseEnd = NULL;
+	DIR				*Dir = NULL;
+	struct dirent	*De = NULL;
 	struct stat		Stat;
 	LString			Pattern;
 
 	LDirectoryPriv()
 	{	
-		Dir = 0;
-		De = 0;
 		BasePath[0] = 0;
 	}
 	
@@ -1149,7 +878,7 @@ int LDirectory::First(const char *Name, const char *Pattern)
 	if (!Name)
 		return 0;
 
-	strcpy(d->BasePath, Name);
+	strcpy_s(d->BasePath, sizeof(d->BasePath), Name);
 	if (!Pattern || stricmp(Pattern, LGI_ALL_FILES) == 0)
 	{
 		struct stat S;
@@ -1217,19 +946,36 @@ int LDirectory::Close()
 	if (d->Dir)
 	{
 		closedir(d->Dir);
-		d->Dir = 0;
+		d->Dir = NULL;
 	}
-	d->De = 0;
+	d->De = NULL;
+	d->BaseEnd = NULL;
+	d->BasePath[0] = 0;
 
 	return true;
 }
 
 const char *LDirectory::FullPath()
 {
-	static char s[MAX_PATH_LEN];
-	#warning this should really be optimized, and thread safe...
-	Path(s, sizeof(s));
-	return s;
+	auto nm = GetName();
+	if (!nm)
+		return NULL;
+
+	if (!d->BaseEnd)
+	{
+		d->BaseEnd = d->BasePath + strlen(d->BasePath);
+		if (d->BaseEnd > d->BasePath &&
+			d->BaseEnd[-1] != DIR_CHAR)
+		{
+			*d->BaseEnd++ = DIR_CHAR;
+		}
+	}
+	
+	auto used = d->BaseEnd - d->BasePath;
+	auto remaining = sizeof(d->BasePath) - used;
+
+	strcpy_s(d->BaseEnd, remaining, nm);
+	return d->BasePath;
 }
 
 LString LDirectory::FileName() const
@@ -1325,16 +1071,14 @@ uint64 LDirectory::GetLastWriteTime() const
 
 uint64 LDirectory::GetSize() const
 {
-	return (uint32_t)d->Stat.st_size;
+	return d->Stat.st_size;
 }
 
 int64 LDirectory::GetSizeOnDisk()
 {
-	return (uint32_t)d->Stat.st_size;
+	return d->Stat.st_size;
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// File ///////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 class LFilePrivate
 {
@@ -1451,12 +1195,11 @@ int LFile::Open(const char *File, int Mode)
 			}
 			#endif
 
-			printf("LFile::Open failed\n\topen(%s,%08.8x) = %i\n\terrno=%s (%s)\n",
+			printf("LFile::Open failed\n\topen(%s,%08.8x) = %i\n\terrno=%s\n",
 				File, 
 				Mode, 
 				d->hFile,
-				GetErrorName(d->ErrorCode),
-				GetErrorDesc(d->ErrorCode));
+				LErrorCodeToString(d->ErrorCode));
 		}
 	}
 

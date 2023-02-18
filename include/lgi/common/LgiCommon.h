@@ -109,9 +109,6 @@ LgiExtern LString LStrConvertCp
 	ssize_t InLen = -1
 );
 
-/// Converts an OS error code into a text string
-LgiExtern LString LErrorCodeToString(uint32_t ErrorCode);
-
 #ifdef __cplusplus
 extern "C"
 {
