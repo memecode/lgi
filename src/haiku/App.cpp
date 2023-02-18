@@ -14,6 +14,8 @@
 #include "lgi/common/FontCache.h"
 #include "AppPriv.h"
 
+#include "MimeType.h"
+
 #define DEBUG_MSG_TYPES				0
 #define DEBUG_HND_WARNINGS			0
 #define IDLE_ALWAYS					0
@@ -566,62 +568,17 @@ void LApp::OnCommandLine()
 	Files.DeleteArrays();
 }
 
-::LString LApp::GetFileMimeType(const char *File)
+LString LApp::GetFileMimeType(const char *File)
 {
-	::LString Status;
-	char Full[MAX_PATH_LEN] = "";
-
-	if (!LFileExists(File))
+	BMimeType mt;
+	auto r = BMimeType::GuessMimeType(File, &mt);
+	if (r != B_OK)
 	{
-		// Look in the path
-		LToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
-		for (int i=0; i<p.Length(); i++)
-		{
-			LMakePath(Full, sizeof(Full), p[i], File);
-			if (LFileExists(Full))
-			{
-				File = Full;
-				break;
-			}
-		}		
-	}
-
-	#ifdef __GTK_H__
-	
-	gboolean result_uncertain;
-	gchar *gt = g_content_type_guess(File, NULL, 0, &result_uncertain);
-	if (gt)
-	{
-		gchar *mt = g_content_type_get_mime_type(gt);
-		g_free(gt);
-		if (mt)
-		{
-			Status = mt;
-			g_free(mt);
-			
-			if (!Status.Equals("application/octet-stream"))
-				return Status;
-				
-			// So gnome has no clue... lets try 'file'
-			::LString args;
-			args.Printf("--mime-type \"%s\"", File);
-			LSubProcess sub("file", args);
-			if (sub.Start())
-			{
-				LStringPipe p;
-				sub.Communicate(&p);
-				auto s = p.NewGStr();
-				if (s && s.Find(":") > 0)
-					Status = s.SplitDelimit(":").Last().Strip();
-			}
-
-			return Status;
-		}
+		LgiTrace("%s:%i - GuessMimeType(%s) failed: %i\n", _FL, File, r);
+		return LString();
 	}
 	
-	#endif
-
-	return Status;
+	return mt.Type();
 }
 
 bool LApp::GetAppsForMimeType(char *Mime, LArray<::LAppInfo> &Apps)
