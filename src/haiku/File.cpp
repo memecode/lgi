@@ -19,9 +19,9 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <dirent.h>
-#ifndef _MSC_VER
 #include <unistd.h>
-#endif
+
+#include "Path.h"
 
 #include "lgi/common/LgiDefs.h"
 #include "lgi/common/File.h"
@@ -31,9 +31,6 @@
 #include "lgi/common/LgiCommon.h"
 #include "lgi/common/LgiString.h"
 #include "lgi/common/DateTime.h"
-#if defined(WIN32)
-#include "errno.h"
-#endif
 
 /****************************** Defines ***********************************/
 
@@ -439,9 +436,39 @@ bool LFileExists(const char *FileName, char *CorrectCase)
 
 bool LResolveShortcut(const char *LinkFile, char *Path, ssize_t Len)
 {
-	bool Status = false;
+	if (!LinkFile || !Path || Len < 1)
+		return false;
 
-	return Status;
+	BEntry e(LinkFile);
+	auto r = e.InitCheck();
+	if (r != B_OK)
+	{
+		printf("%s:%i - LResolveShortcut: %i\n", _FL, r);
+		return false;
+	}
+	
+	if (!e.IsSymLink())
+	{
+		return false;
+	}
+	
+	r = e.SetTo(LinkFile, true);
+	if (r != B_OK)
+	{
+		printf("%s:%i - LResolveShortcut: %i\n", _FL, r);
+		return false;
+	}
+	
+	BPath p;
+	r = e.GetPath(&p);
+	if (r != B_OK)
+	{
+		printf("%s:%i - LResolveShortcut: %i\n", _FL, r);
+		return false;
+	}
+	
+	strcpy_s(Path, Len, p.Path());	
+	return true;
 }
 
 void WriteStr(LFile &f, const char *s)

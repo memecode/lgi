@@ -239,6 +239,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	LgiArgsAppPath = AppArgs.Arg[0];
 	Name(name);
 	d = new LAppPrivate(this);
+	
 	if (LIsRelativePath(LgiArgsAppPath))
 	{
 		char Cwd[MAX_PATH_LEN];
@@ -246,6 +247,10 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 		LMakePath(Cwd, sizeof(Cwd), Cwd, LgiArgsAppPath);
 		LgiArgsAppPath = Cwd;
 	}
+	
+	char AppPathLnk[MAX_PATH_LEN];
+	if (LResolveShortcut(LgiArgsAppPath, AppPathLnk, sizeof(AppPathLnk)))
+		LgiArgsAppPath = AppPathLnk;
 
 	int WCharSz = sizeof(wchar_t);
 	#if defined(_MSC_VER)
