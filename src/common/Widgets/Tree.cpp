@@ -7,7 +7,6 @@
 #include "lgi/common/Palette.h"
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/CssTools.h"
-#include <Region.h>
 
 #define TREE_BLOCK          16
 #define DRAG_THRESHOLD		4

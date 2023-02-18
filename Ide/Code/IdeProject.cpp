@@ -752,8 +752,8 @@ public:
 				m.Print("\n"
 						"\n"
 						"SourceLst := $(patsubst %%.c,%%.o,$(patsubst %%.cpp,%%.o,$(Source)))\n"
-						"\n"
 						"Objects := $(addprefix $(BuildDir)/,$(SourceLst))\n"
+						"Deps := $(patsubst %%.o,%%.d,$(Objects))\n"
 						"\n");
 
 				// Write out the target stuff
@@ -900,14 +900,14 @@ public:
 								"\n"						
 								"# Clean just this target\n"
 								"clean :\n"
-								"	rm -rf $(BuildDir)/* $(Target)%s\n"
+								"	rm $(Objects) $(Deps) $(Target)%s\n"
 								"	@echo Cleaned $(BuildDir)\n"
 								"\n",
 								PlatformExecutableExt(Platform));
 						
 						m.Print("# Clean all targets\n"
 								"cleanall :\n"
-								"	rm -rf $(BuildDir)/* $(Target)%s\n"
+								"	rm $(Objects) $(Deps) $(Target)%s\n"
 								"	@echo Cleaned $(BuildDir)\n",
 								PlatformExecutableExt(Platform));
 						
@@ -973,7 +973,7 @@ public:
 								"\n"
 								"# Clean out targets\n"
 								"clean :\n"
-								"	rm -rf $(BuildDir)/* $(BuildDir)/$(TargetFile)\n"
+								"	rm $(Objects) $(Deps) $(BuildDir)/$(TargetFile)\n"
 								"	@echo Cleaned $(BuildDir)\n"
 								"\n",
 								PlatformLibraryExt);
@@ -1014,7 +1014,7 @@ public:
 								"\n"
 								"# Clean out targets\n"
 								"clean :\n"
-								"	rm -rf $(BuildDir)/* $(BuildDir)/$(TargetFile)\n"
+								"	rm $(Objects) $(Deps) $(BuildDir)/$(TargetFile)\n"
 								"	@echo Cleaned $(BuildDir)\n"
 								"\n",
 								PlatformStaticLibExt);
