@@ -114,13 +114,6 @@ LString LGetFileMimeType(const char *File)
 	return LAppInst->GetFileMimeType(File);
 }
 
-bool _GetSystemFont(char *FontType, char *Font, int FontBufSize, int &PointSize)
-{
-	bool Status = false;
-	
-	return Status;
-}
-
 static bool MimeTypeToAppInfo(LAppInfo &app, LString MimeType)
 {
 	BMimeType appType;

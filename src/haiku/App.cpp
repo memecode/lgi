@@ -581,7 +581,7 @@ LString LApp::GetFileMimeType(const char *File)
 	return mt.Type();
 }
 
-bool LApp::GetAppsForMimeType(char *Mime, LArray<::LAppInfo> &Apps)
+bool LApp::GetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps)
 {
 	// Find alternative version of the MIME type (e.g. x-type and type).
 	char AltMime[256];

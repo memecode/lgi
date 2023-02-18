@@ -290,7 +290,7 @@ public:
 	);
 
     /// Gets the applications that can handle a file of a certain mime type
-	bool GetAppsForMimeType(char *Mime, LArray<LAppInfo> &Apps);
+	bool GetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps);
 		
 	/// Get a system metric
 	int32 GetMetric

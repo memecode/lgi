@@ -44,7 +44,7 @@
 	
 #endif
 
-#define PAINT_VIRTUAL_CHILDREN	1
+#define PAINT_VIRTUAL_CHILDREN	0
 
 extern bool In_SetWindowPos;
 extern LMouse &lgi_adjust_click(LMouse &Info,

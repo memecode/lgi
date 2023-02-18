@@ -15,6 +15,7 @@
 #include <Bitmap.h>
 #include <Region.h>
 
+#define LOGGING				0
 #define VIEW_CHECK(...)		if (!d->v) return __VA_ARGS__;
 
 class LScreenPrivate
@@ -100,20 +101,6 @@ bool LScreenDC::GetClient(LRect *c)
 	return true;
 }
 
-void LScreenDC::GetOrigin(int &x, int &y)
-{
-	if (d->Client.Valid())
-	{
-		x = OriginX + d->Client.x1;
-		y = OriginY + d->Client.y1;
-	}
-	else
-	{
-		x = OriginX;
-		y = OriginY;
-	}
-}
-
 LString GetClip(BView *v)
 {
 	BRegion r;
@@ -122,26 +109,44 @@ LString GetClip(BView *v)
 	return lr.GetStr();
 }
 
+void LScreenDC::GetOrigin(int &x, int &y)
+{
+	x = OriginX;
+	y = OriginY;
+
+	#if LOGGING
+	printf("%p.GetOrigin=%i+%i=%i, %i+%i=%i\n",
+		this,
+		OriginX, d->Client.x1, x,
+		OriginY, d->Client.y1, y);
+	#endif
+}
+
 void LScreenDC::SetOrigin(int x, int y)
 {
 	VIEW_CHECK()
 
 	if (d->Client.Valid())
 	{
-		OriginX = x - d->Client.x1;
-		OriginY = y - d->Client.y1;
-		
 		// The clipping region is relative to the offset.
 		// Remove it here and reinstate it after setting the origin.
 		d->v->ConstrainClippingRegion(NULL);
 	}
-	else
-	{
-		OriginX = x;
-		OriginY = y;
-	}
+	
+	OriginX = x;
+	OriginY = y;
 
-	d->v->SetOrigin(-OriginX, -OriginY);
+	#if LOGGING
+	printf("%p.SetOrigin=%i,%i (%i,%i) = %i,%i\n",
+		this,
+		x, y,
+		d->Client.x1, d->Client.y1,
+		d->Client.x1 - OriginX,
+		d->Client.y1 - OriginY);
+	#endif
+	
+	d->v->SetOrigin( d->Client.x1 - OriginX,
+					 d->Client.y1 - OriginY);
 	
 	if (d->Client.Valid())
 	{
@@ -160,15 +165,15 @@ void LScreenDC::SetClient(LRect *c)
 	{
 		d->Client = *c;
 
-		OriginX = c->x1;
-		OriginY = c->y1;
-
-		d->v->SetOrigin(-OriginX, -OriginY);
+		#if LOGGING
+		printf("SetClient(%s)\n", d->Client.GetStr());
+		#endif
+		d->v->SetOrigin(OriginX, OriginY);
 
 		auto clp = d->Client.ZeroTranslate();
 		clp.Offset(OriginX, OriginY);
 		d->v->ClipToRect(clp);
-		
+
 		/*
 		BRegion r;
 		d->v->GetClippingRegion(&r);
@@ -180,8 +185,11 @@ void LScreenDC::SetClient(LRect *c)
 	{
 	    d->v->ConstrainClippingRegion(NULL);
 		d->v->SetOrigin(OriginX = 0, OriginX = 0);
-
 		d->Client.ZOff(-1, -1);
+
+	    #if LOGGING
+		printf("SetClient()\n");
+		#endif
 	}
 }
 

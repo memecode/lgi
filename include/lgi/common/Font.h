@@ -394,7 +394,7 @@ public:
 #endif
 
 #ifdef LINUX
-extern bool _GetSystemFont(char *FontType, char *Font, int FontBufSize, int &PointSize);
+extern bool _GetSystemFont(const char *FontType, char *Font, int FontBufSize, int &PointSize);
 #endif
 
 

@@ -578,197 +578,200 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 
 #if LGI_COCOA || defined(__GTK_H__)
 
-/*
-uint64 nPaint = 0;
-uint64 PaintTime = 0;
-*/
-
-void LView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
-{
 	/*
-	uint64 StartTs = Update ? LCurrentTime() : 0;
-	d->InPaint = true;
+	uint64 nPaint = 0;
+	uint64 PaintTime = 0;
 	*/
 
-	// Create temp DC if needed...
-	LAutoPtr<LSurface> Local;
-	if (!pDC)
+	void LView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 	{
-		if (!Local.Reset(new LScreenDC(this)))
-			return;
-		pDC = Local;
-	}
+		/*
+		uint64 StartTs = Update ? LCurrentTime() : 0;
+		d->InPaint = true;
+		*/
 
-	#if 0
-	// This is useful for coverage checking
-	pDC->Colour(LColour(255, 0, 255));
-	pDC->Rectangle();
-	#endif
+		// Create temp DC if needed...
+		LAutoPtr<LSurface> Local;
+		if (!pDC)
+		{
+			if (!Local.Reset(new LScreenDC(this)))
+				return;
+			pDC = Local;
+		}
 
-	// Non-Client drawing
-	LRect r;
-	if (Offset)
-	{
-		r = Pos;
-		r.Offset(Offset);
-	}
-	else
-	{
-		r = GetClient().ZeroTranslate();
-	}
-
-	pDC->SetClient(&r);
-	LRect zr1 = r.ZeroTranslate(), zr2 = zr1;
-	OnNcPaint(pDC, zr1);
-	pDC->SetClient(NULL);
-	if (zr2 != zr1)
-	{
-		r.x1 -= zr2.x1 - zr1.x1;
-		r.y1 -= zr2.y1 - zr1.y1;
-		r.x2 -= zr2.x2 - zr1.x2;
-		r.y2 -= zr2.y2 - zr1.y2;
-	}
-	LPoint o(r.x1, r.y1); // Origin of client
-
-	// Paint this view's contents...
-	pDC->SetClient(&r);
-
-	#if 0
-	if (_Debug)
-	{
-		#if defined(__GTK_H__)
-			Gtk::cairo_matrix_t matrix;
-			cairo_get_matrix(pDC->Handle(), &matrix);
-
-			double ex[4];
-			cairo_clip_extents(pDC->Handle(), ex+0, ex+1, ex+2, ex+3);
-			ex[0] += matrix.x0; ex[1] += matrix.y0; ex[2] += matrix.x0; ex[3] += matrix.y0;
-			LgiTrace("%s::_Paint, r=%s, clip=%g,%g,%g,%g - %g,%g\n",
-					GetClass(), r.GetStr(),
-					ex[0], ex[1], ex[2], ex[3],
-					matrix.x0, matrix.y0);
-		#elif LGI_COCOA
-			auto Ctx = pDC->Handle();
-			CGAffineTransform t = CGContextGetCTM(Ctx);
-			LRect cr = CGContextGetClipBoundingBox(Ctx);
-			printf("%s::_Paint() pos=%s transform=%g,%g,%g,%g-%g,%g clip=%s r=%s\n",
-					GetClass(),
-					GetPos().GetStr(),
-  					t.a, t.b, t.c, t.d, t.tx, t.ty,
-					cr.GetStr(),
-					r.GetStr());
+		#if 0
+		// This is useful for coverage checking
+		pDC->Colour(LColour(255, 0, 255));
+		pDC->Rectangle();
 		#endif
-	}
-	#endif
 
-	OnPaint(pDC);
-
-	pDC->SetClient(NULL);
-
-	// Paint all the children...
-	for (auto i : Children)
-	{
-		LView *w = i->GetGView();
-		if (w && w->Visible())
-		{
-			if (!w->Pos.Valid())
-				continue;
-
-			#if 0
-			if (w->_Debug)
-				LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), o.x, o.y);
-			#endif
-			w->_Paint(pDC, &o);
-		}
-	}
-}
-#else
-void LView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
-{
-	// Create temp DC if needed...
-	LAutoPtr<LSurface> Local;
-	if (!pDC)
-	{
-		Local.Reset(new LScreenDC(this));
-		pDC = Local;
-	}
-	if (!pDC)
-	{
-		printf("%s:%i - No context to draw in.\n", _FL);
-		return;
-	}
-
-	#if 0
-	// This is useful for coverage checking
-	pDC->Colour(LColour(255, 0, 255));
-	pDC->Rectangle();
-	#endif
-
-	bool HasClient = false;
-	LRect r(0, 0, Pos.X()-1, Pos.Y()-1), Client;
-	LPoint o;
-	if (Offset)
-		o = *Offset;
-
-	#if WINNATIVE
-	if (!_View)
-	#endif
-	{
 		// Non-Client drawing
-		Client = r;
-		OnNcPaint(pDC, Client);
-		HasClient = GetParent() && (Client != r);
-		if (HasClient)
+		LRect r;
+		if (Offset)
 		{
-			Client.Offset(o.x, o.y);
-			pDC->SetClient(&Client);
+			r = Pos;
+			r.Offset(Offset);
 		}
-	}
-
-	r.Offset(o.x, o.y);
-
-	// Paint this view's contents
-	if (Update)
-	{
-		LRect OldClip = pDC->ClipRgn();
-		pDC->ClipRgn(Update);
-		OnPaint(pDC);
-		pDC->ClipRgn(OldClip.Valid() ? &OldClip : NULL);
-	}
-	else
-	{
-		OnPaint(pDC);
-	}
-
-	#if PAINT_VIRTUAL_CHILDREN
-	// Paint any virtual children
-	for (auto i : Children)
-	{
-		LView *w = i->GetGView();
-		if (w && w->Visible())
+		else
 		{
-			#if LGI_VIEW_HANDLE
-			if (!w->Handle())
+			r = GetClient().ZeroTranslate();
+		}
+
+		pDC->SetClient(&r);
+		LRect zr1 = r.ZeroTranslate(), zr2 = zr1;
+		OnNcPaint(pDC, zr1);
+		pDC->SetClient(NULL);
+		if (zr2 != zr1)
+		{
+			r.x1 -= zr2.x1 - zr1.x1;
+			r.y1 -= zr2.y1 - zr1.y1;
+			r.x2 -= zr2.x2 - zr1.x2;
+			r.y2 -= zr2.y2 - zr1.y2;
+		}
+		LPoint o(r.x1, r.y1); // Origin of client
+
+		// Paint this view's contents...
+		pDC->SetClient(&r);
+
+		#if 0
+		if (_Debug)
+		{
+			#if defined(__GTK_H__)
+				Gtk::cairo_matrix_t matrix;
+				cairo_get_matrix(pDC->Handle(), &matrix);
+
+				double ex[4];
+				cairo_clip_extents(pDC->Handle(), ex+0, ex+1, ex+2, ex+3);
+				ex[0] += matrix.x0; ex[1] += matrix.y0; ex[2] += matrix.x0; ex[3] += matrix.y0;
+				LgiTrace("%s::_Paint, r=%s, clip=%g,%g,%g,%g - %g,%g\n",
+						GetClass(), r.GetStr(),
+						ex[0], ex[1], ex[2], ex[3],
+						matrix.x0, matrix.y0);
+			#elif LGI_COCOA
+				auto Ctx = pDC->Handle();
+				CGAffineTransform t = CGContextGetCTM(Ctx);
+				LRect cr = CGContextGetClipBoundingBox(Ctx);
+				printf("%s::_Paint() pos=%s transform=%g,%g,%g,%g-%g,%g clip=%s r=%s\n",
+						GetClass(),
+						GetPos().GetStr(),
+	  					t.a, t.b, t.c, t.d, t.tx, t.ty,
+						cr.GetStr(),
+						r.GetStr());
 			#endif
+		}
+		#endif
+
+		OnPaint(pDC);
+
+		pDC->SetClient(NULL);
+
+		// Paint all the children...
+		for (auto i : Children)
+		{
+			LView *w = i->GetGView();
+			if (w && w->Visible())
 			{
-				LRect p = w->GetPos();
-				p.Offset(o.x, o.y);
-				if (HasClient)
-					p.Offset(Client.x1 - r.x1, Client.y1 - r.y1);
-				
-				LPoint co(p.x1, p.y1);
-				// LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), p.x1, p.y1);
-				pDC->SetClient(&p);
-				w->_Paint(pDC, &co);
-				pDC->SetClient(NULL);
+				if (!w->Pos.Valid())
+					continue;
+
+				#if 0
+				if (w->_Debug)
+					LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), o.x, o.y);
+				#endif
+				w->_Paint(pDC, &o);
 			}
 		}
 	}
-	#endif
 
-	if (HasClient)
-		pDC->SetClient(0);
-}
+#else
+
+	void LView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
+	{
+		// Create temp DC if needed...
+		LAutoPtr<LSurface> Local;
+		if (!pDC)
+		{
+			Local.Reset(new LScreenDC(this));
+			pDC = Local;
+		}
+		if (!pDC)
+		{
+			printf("%s:%i - No context to draw in.\n", _FL);
+			return;
+		}
+
+		#if 0
+		// This is useful for coverage checking
+		pDC->Colour(LColour(255, 0, 255));
+		pDC->Rectangle();
+		#endif
+
+		bool HasClient = false;
+		LRect r(0, 0, Pos.X()-1, Pos.Y()-1), Client;
+		LPoint o;
+		if (Offset)
+			o = *Offset;
+
+		#if WINNATIVE
+		if (!_View)
+		#endif
+		{
+			// Non-Client drawing
+			Client = r;
+			OnNcPaint(pDC, Client);
+			HasClient = GetParent() && (Client != r);
+			if (HasClient)
+			{
+				Client.Offset(o.x, o.y);
+				pDC->SetClient(&Client);
+			}
+		}
+
+		r.Offset(o.x, o.y);
+
+		// Paint this view's contents
+		if (Update)
+		{
+			LRect OldClip = pDC->ClipRgn();
+			pDC->ClipRgn(Update);
+			OnPaint(pDC);
+			pDC->ClipRgn(OldClip.Valid() ? &OldClip : NULL);
+		}
+		else
+		{
+			OnPaint(pDC);
+		}
+
+		#if PAINT_VIRTUAL_CHILDREN
+		// Paint any virtual children
+		for (auto i : Children)
+		{
+			LView *w = i->GetGView();
+			if (w && w->Visible())
+			{
+				#if LGI_VIEW_HANDLE
+				if (!w->Handle())
+				#endif
+				{
+					LRect p = w->GetPos();
+					p.Offset(o.x, o.y);
+					if (HasClient)
+						p.Offset(Client.x1 - r.x1, Client.y1 - r.y1);
+					
+					LPoint co(p.x1, p.y1);
+					// LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), p.x1, p.y1);
+					pDC->SetClient(&p);
+					w->_Paint(pDC, &co);
+					pDC->SetClient(NULL);
+				}
+			}
+		}
+		#endif
+
+		if (HasClient)
+			pDC->SetClient(0);
+	}
+
 #endif
 
 LViewI *LView::GetParent()
