@@ -403,6 +403,11 @@ void LButton::OnPaint(LSurface *pDC)
 			pt.y = r.y1 + ((r.Y()-d->TxtSz.Y())/2) + (d->Pressed != 0);
 			d->Paint(pDC, pt, LColour(), r, Enabled(), Info.state == kThemeStatePressed);
 		}
+
+	// #elif defined(HAIKU)
+	
+		// FIXME:
+		// Use BControlLook to do the drawing...
 	
 	#else
 

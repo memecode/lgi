@@ -5,6 +5,10 @@
 #include <ctype.h>
 #include <unistd.h>
 
+#include "MimeType.h"
+#include "StringList.h"
+#include "Path.h"
+
 #define _POSIX_TIMERS
 #include <time.h>
 
@@ -21,68 +25,27 @@
 #define DEBUG_GET_APPS_FOR_MIMETYPE			0
 
 ////////////////////////////////////////////////////////////////
-// Local helper functions
-bool _lgi_check_file(char *Path)
-{
-	if (Path)
-	{
-		if (LFileExists(Path))
-		{
-			// file is there
-			return true;
-		}
-		else
-		{
-			// shortcut?
-			char *e = Path + strlen(Path);
-			strcpy(e, ".lnk");
-			if (LFileExists(Path))
-			{
-				// resolve shortcut
-				char Link[256];
-				if (LResolveShortcut(Path, Link, sizeof(Link)))
-				{
-					// check destination of link
-					if (LFileExists(Link))
-					{
-						strcpy(Path, Link);
-						return true;
-					}
-				}
-			}
-			*e = 0;
-		}
-	}
-
-	return false;
-}
-
 LString LCurrentUserName()
 {
 	struct passwd *pw = getpwuid(geteuid());
 	if (pw)
 		return pw->pw_name;
 
-  	return "";
+  	return LString();
 }
 
-
-void LSleep(uint32_t i)
+void LSleep(uint32_t ms)
 {
 	struct timespec request, remain;
 
 	ZeroObj(request);
 	ZeroObj(remain);
 	
-	request.tv_sec = i / 1000;
-	request.tv_nsec = (i % 1000) * 1000000;
+	request.tv_sec = ms / 1000;
+	request.tv_nsec = (ms % 1000) * 1000000;
 
-	//printf("%i LSleep(%i)\n", LGetCurrentThread(), i);
 	while (nanosleep(&request, &remain) == -1)
-	{
 	    request = remain;
-		//printf("\t%i Resleeping=%i\n", LGetCurrentThread(), request.tv_sec*1000 + request.tv_nsec/1000);
-	}
 }
 
 void _lgi_assert(bool b, const char *test, const char *file, int line)
@@ -155,129 +118,89 @@ bool _GetSystemFont(char *FontType, char *Font, int FontBufSize, int &PointSize)
 {
 	bool Status = false;
 	
-	LAssert(!"Impl me.");
-	
 	return Status;
 }
 
-bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
+static bool MimeTypeToAppInfo(LAppInfo &app, LString MimeType)
 {
-	bool Status = false;
-
-	char Args[MAX_PATH_LEN];
-	sprintf(Args, "query default %s", Mime);
-	LStringPipe Output;
-
-	LLanguage *CurLang = LGetLanguageId();	
-	char LangName[64];
-	sprintf_s(LangName, sizeof(LangName), "Name[%s]", CurLang ? CurLang->Id : "en");
-
-	#if DEBUG_GET_APPS_FOR_MIMETYPE
-	printf("LGetAppsForMimeType('%s', ..., %i)\nRunning 'xdg-mime %s'\n",
-		Mime, Limit, Args);
-	#endif
-
-	LSubProcess p("xdg-mime", Args);
-	if (p.Start())
+	BMimeType appType;
+	auto r = appType.SetTo(MimeType);
+	if (r != B_OK)
 	{
-		p.Communicate(&Output);
-		LAutoString o(Output.NewStr());
-
-		#if DEBUG_GET_APPS_FOR_MIMETYPE
-		printf("Output:\n%s\n", o.Get());
-		#endif
-		if (o)
-		{
-			char *e = o + strlen(o);
-			while (e > o && strchr(" \t\r\n", e[-1]))
-				*(--e) = 0;
-			
-			char p[MAX_PATH_LEN];
-			if (LMakePath(p, sizeof(p), "/usr/share/applications", o))
-			{
-				if (LFileExists(p))
-				{
-					LAutoString txt(LReadTextFile(p));
-					LAutoString Section;
-
-					#if DEBUG_GET_APPS_FOR_MIMETYPE
-					printf("Reading '%s', got %i bytes\n", p, strlen(txt));
-					#endif
-
-					if (txt)
-					{
-						LAppInfo *ai = new LAppInfo;
-						Apps.Add(ai);
-						
-						LToken t(txt, "\n");
-						for (int i=0; i<t.Length(); i++)
-						{
-							char *Var = t[i];
-
-							#if DEBUG_GET_APPS_FOR_MIMETYPE
-							printf("    '%s'\n", Var);
-							#endif
-							
-							if (*Var == '[')
-							{
-								Var++;
-								char *End = strchr(Var, ']');
-								if (End)
-								{
-									Section.Reset(NewStr(Var, End - Var));
-								}							
-							}
-							else if (!Section || !stricmp(Section, "Desktop Entry"))
-							{
-								char *Value = strchr(Var, '=');
-								if (Value)
-								{
-									*Value++ = 0;
-									if (!stricmp(Var, "Exec"))
-									{
-										LAutoString exe(TrimStr(Value));
-										char *sp = strchr(exe, ' ');
-										if (sp)
-											ai->Path.Set(exe, sp-exe);
-										else
-											ai->Path = exe;
-										
-										Status = true;
-									}
-									else if (!stricmp(Var, "Name") ||
-											!stricmp(Var, LangName))
-									{
-										ai->Name = Value;
-									}
-								}
-							}
-						}
-
-						#if DEBUG_GET_APPS_FOR_MIMETYPE
-						printf("    ai='%s' '%s'\n", ai->Name.Get(), ai->Path.Get());
-						#endif
-					}
-					else LgiTrace("%s:%i - Can't read from '%s'\n", _FL, p);
-				}
-				else LgiTrace("%s:%i - '%s' doesn't exist.", _FL, p);
-			}
-			else LgiTrace("%s:%i - Failed to create path.\n", _FL);
-		}
-		else LgiTrace("%s:%i - No output from xdg-mime\n", _FL);
+		LgiTrace("%s:%i - appType.SetTo(%s) failed: %i.\n", _FL, MimeType.Get(), r);
+		return false;
 	}
-	else LgiTrace("%s:%i - Failed to execute xdg-mime\n", _FL);
 
-	return Status;
+	entry_ref ref;
+	r = appType.GetAppHint(&ref);
+	if (r != B_OK)
+	{			
+		LgiTrace("%s:%i - GetAppHint failed: %i\n", _FL, r);
+		return false;
+	}
+
+	app.MimeType = MimeType;
+	app.Name = ref.name;
+	
+	BEntry entry(&ref);
+	BPath path;
+	if (entry.GetPath(&path) == B_OK)
+		app.Path = path.Path();
+
+	return true;
+}
+
+bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
+{
+	BMimeType mt(Mime);
+	
+	BMessage msg;
+	auto r = mt.GetSupportingApps(&msg);
+	if (r != B_OK)
+	{
+		printf("%s:%i - GetSupportingApps for %s failed: %i.\n", _FL, Mime, r);
+		return false;
+	}
+	
+	BStringList lst;
+	r = msg.FindStrings("applications", &lst);
+	if (r != B_OK)
+	{
+		printf("%s:%i - No apps string list: %i.\n", _FL, r);
+		return false;
+	}
+	
+	for (int i=0; i<lst.CountStrings(); i++)
+	{
+		auto s = lst.StringAt(i);
+		// printf("[%i]=%s\n", i, s.String());
+
+		auto &app = Apps.New();
+		if (!MimeTypeToAppInfo(app, s.String()))
+			Apps.PopLast();
+	}
+
+	return true;
 }
 
 LString LGetAppForMimeType(const char *Mime)
 {
-	LString App;
-	LArray<LAppInfo*> Apps;
-	if (LGetAppsForMimeType(Mime, Apps, 1))
-		App = Apps[0]->Path.Get();
-	Apps.DeleteObjects();
-	return App;
+	BMimeType mt(Mime);
+	
+	char app[B_MIME_TYPE_LENGTH+1] = {};
+	auto r = mt.GetPreferredApp(app);
+	if (r != B_OK)
+	{
+		printf("%s:%i - GetPreferredApp for %s failed: %i.\n", _FL, Mime, r);
+		return false;
+	}
+	
+	LAppInfo info;
+	if (!MimeTypeToAppInfo(info, app))
+		return false;
+	
+	// printf("LGetAppForMimeType(%s)=%s\n", Mime, info.Path.Get());
+	return info.Path;
 }
 
 int LRand(int Limit)

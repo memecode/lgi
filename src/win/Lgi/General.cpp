@@ -230,7 +230,7 @@ bool _GetApps_Add(LArray<LAppInfo*> &Apps, char *In)
 	return false;
 }
 
-bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
+bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 {
 	bool Status = false;
 

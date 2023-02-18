@@ -390,6 +390,8 @@ public:
 class LAppInfo
 {
 public:
+	/// Mime type for the app
+	LString MimeType;
 	/// The path to the executable for the app
 	LString Path;
 	/// Plain text name for the app

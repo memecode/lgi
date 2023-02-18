@@ -624,7 +624,7 @@ void LApp::OnCommandLine()
 	return Status;
 }
 
-bool LApp::GetAppsForMimeType(char *Mime, ::LArray<::LAppInfo*> &Apps)
+bool LApp::GetAppsForMimeType(char *Mime, LArray<::LAppInfo> &Apps)
 {
 	// Find alternative version of the MIME type (e.g. x-type and type).
 	char AltMime[256];

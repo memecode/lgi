@@ -1150,7 +1150,7 @@ LPoint LScreenDpi()
 			double scaling = std::max(1.0f, be_plain_font->Size() / 12.0f);
 			Dpi.x = (int)(96.0 * scaling);
 			Dpi.y = Dpi.x;
-			printf("scaling=%g dpi=%i\n", scaling, Dpi.x);
+			// printf("scaling=%g dpi=%i\n", scaling, Dpi.x);
 		}
 
 	#elif defined(WINDOWS)

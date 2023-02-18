@@ -4659,6 +4659,11 @@ int LgiMain(OsAppArguments &AppArgs)
 	LApp a(AppArgs, "LgiIde");
 	if (a.IsOk())
 	{
+		LArray<LAppInfo> Apps;
+		LGetAppsForMimeType("text/html", Apps);
+		
+		auto app = LGetAppForMimeType("text/html");
+	
 		a.AppWnd = new AppWnd;
 		// a.AppWnd->_Dump();
 		a.Run();
