@@ -87,13 +87,13 @@
 	</Node>
 	<Node Name="Resources" Type="1" Platforms="15" Open="1" Id="8">
 		<Node Name="Test" Type="1" Platforms="15" Id="1" />
-		<Node File=".\buildHaiku.py" Type="8" Platforms="15" />
-		<Node File=".\CMakeLists.txt" Type="8" Platforms="15" />
-		<Node File=".\Makefile.haiku" Type="9" Platforms="15" />
-		<Node File=".\Makefile.linux" Type="9" Platforms="15" />
-		<Node File=".\Resources\resource.h" Type="3" Platforms="15" />
+		<Node File="./buildHaiku.py" Type="8" Platforms="15" />
+		<Node File="./CMakeLists.txt" Type="8" Platforms="15" />
+		<Node File="./Makefile.haiku" Type="9" Platforms="15" />
+		<Node File="./Makefile.linux" Type="9" Platforms="15" />
+		<Node File="./Resources/resource.h" Type="3" Platforms="15" />
 	</Node>
-	<Node File="..\Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
+	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>
 		<General>
 			<Makefile>
@@ -187,8 +187,14 @@ pthread
 -static-libgcc</Release>
 				</Linux>
 				<Haiku>
-					<Debug>be</Debug>
-					<Release>be</Release>
+					<Debug>-static-libgcc
+gnu
+network
+be</Debug>
+					<Release>-static-libgcc
+gnu
+network
+be</Release>
 				</Haiku>
 			</Libraries>
 			<LibraryPaths>
@@ -226,10 +232,15 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
 			</SystemIncludes>
-			<ApplicationIcon>
-				<Haiku>./Code/icon-haiku</Haiku>
-			</ApplicationIcon>
-			<Defines />
+			<Defines>
+				<All />
+				<Haiku>
+					<Debug>POSIX
+_GNU_SOURCE</Debug>
+					<Release>POSIX
+_GNU_SOURCE</Release>
+				</Haiku>
+			</Defines>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -255,9 +266,9 @@ C:\Data\CodeLib\Gtk\include\gtk-2.0\gdk</Release>
 				</All>
 			</Arguments>
 		</Debug>
+		<Remote />
 		<Advanced>
 			<PostBuildCommands />
 		</Advanced>
-		<Remote />
 	</Settings>
 </Project>

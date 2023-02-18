@@ -108,6 +108,8 @@ public:
 	virtual bool UserCommand(const char *Cmd) = 0;
 };
 
+#ifndef HAIKU
 extern LDebugger *CreateGdbDebugger(LStream *Log);
+#endif
 
 #endif

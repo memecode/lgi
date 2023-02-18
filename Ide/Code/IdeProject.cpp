@@ -2351,6 +2351,8 @@ LDebugContext *IdeProject::Execute(ExeAction Act, LString *ErrMsg)
 	const char *Env = d->Settings.GetStr(ProjEnv);
 	LString InitDir = d->Settings.GetStr(ProjInitDir);
 	int RunAsAdmin = d->Settings.GetInt(ProjDebugAdmin);
+	
+	#ifndef HAIKU
 	if (Act == ExeDebug)
 	{
 		if (InitDir && LIsRelativePath(InitDir))
@@ -2362,6 +2364,7 @@ LDebugContext *IdeProject::Execute(ExeAction Act, LString *ErrMsg)
 			
 		return new LDebugContext(d->App, this, e, Args, RunAsAdmin != 0, Env, InitDir);
 	}
+	#endif
 
 	new ExecuteThread(	this,
 						e,
