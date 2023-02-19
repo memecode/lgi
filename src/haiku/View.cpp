@@ -423,16 +423,17 @@ LViewPrivate::~LViewPrivate()
 			bv->d = NULL;
 
 		auto Wnd = Hnd->Window();
+		bool locked = false;
 
 		if (Wnd)
-			Wnd->LockLooper();
+			locked = Wnd->LockLooper();
 			
 		if (Hnd->Parent())
 			Hnd->RemoveSelf();
 		
 		DeleteObj(Hnd);
 
-		if (Wnd)
+		if (Wnd && locked)
 			Wnd->UnlockLooper();
 	}
 }

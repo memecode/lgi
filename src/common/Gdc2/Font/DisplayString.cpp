@@ -1720,12 +1720,6 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 			return;
 		}
 		
-		if (!Info.Length())
-		{
-			LgiTrace("%s:%i - No layout for '%s'.\n", _FL, Str);
-			return;
-		}
-		
 		font_height height = {0};
 		fnt->GetHeight(&height);
 

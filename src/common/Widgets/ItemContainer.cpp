@@ -965,12 +965,12 @@ void LItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
 			{
 				LSkinState State;
 				
-				State.pScreen = pDC;
-				State.ptrText = &d->Txt;
-				State.Rect = Rgn;
-				State.Value = Value();
-				State.Enabled = GetList()->Enabled();
-				State.View = d->Parent;
+				State.pScreen	= pDC;
+				State.ptrText	= &d->Txt;
+				State.Rect		= Rgn;
+				State.Value		= Value();
+				State.Enabled	= GetList()->Enabled();
+				State.View		= d->Parent;
 
 				LApp::SkinEngine->OnPaint_ListColumn(ColumnPaint, this, &State);
 			}

@@ -248,7 +248,7 @@ LImageList::LImageList(int x, int y, LSurface *pDC)
 			HasPad(pDC->GetColourSpace()));
 		#endif
 				
-		#if 1
+		#if 0
 		static int Idx = 0;
 		char s[256];
 

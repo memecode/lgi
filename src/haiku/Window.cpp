@@ -13,6 +13,13 @@
 
 #define DEBUG_SETFOCUS			0
 #define DEBUG_HANDLEVIEWKEY		0
+#define DEBUG_WAIT_THREAD		1
+
+#if DEBUG_WAIT_THREAD
+	#define WAIT_LOG(...)		LgiTrace(__VA_ARGS__)
+#else
+	#define WAIT_LOG(...)
+#endif
 
 LString ToString(BRect &r)
 {
@@ -167,7 +174,7 @@ int LWindow::WaitThread()
 	thread_id id = d->Thread();
 	bool thisThread = id == GetCurrentThreadId();
 
-	// printf("%s::~LWindow thread=%u lock=%u\n", Name(), GetCurrentThreadId(), d->LockingThread());
+	WAIT_LOG("%s::~LWindow thread=%u lock=%u\n", Name(), GetCurrentThreadId(), d->LockingThread());
 	if (thisThread)
 	{
 		// We are in thread... can delete easily.
@@ -184,13 +191,13 @@ int LWindow::WaitThread()
 	}
 
 	// Post event to the window's thread to delete itself...
-	// printf("%s::~LWindow posting M_LWINDOW_DELETE from th=%u\n", Name(), GetCurrentThreadId());
+	WAIT_LOG("%s::~LWindow posting M_LWINDOW_DELETE from th=%u\n", Name(), GetCurrentThreadId());
 	d->PostMessage(new BMessage(M_LWINDOW_DELETE));
 
 	status_t value = 0;
-	// printf("wait_for_thread(%u) start..\n", id);
+	WAIT_LOG("wait_for_thread(%u) start..\n", id);
 	wait_for_thread(id, &value);
-	// printf("wait_for_thread(%u) end=%i\n", id, value);
+	WAIT_LOG("wait_for_thread(%u) end=%i\n", id, value);
 	d = NULL;
 
 	return value;

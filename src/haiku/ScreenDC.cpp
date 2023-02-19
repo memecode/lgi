@@ -165,13 +165,15 @@ void LScreenDC::SetClient(LRect *c)
 	{
 		d->Client = *c;
 
+		OriginX += d->Client.x1;
+		OriginY += d->Client.y1;
 		#if LOGGING
 		printf("SetClient(%s)\n", d->Client.GetStr());
 		#endif
 		d->v->SetOrigin(OriginX, OriginY);
 
 		auto clp = d->Client.ZeroTranslate();
-		clp.Offset(OriginX, OriginY);
+		// clp.Offset(OriginX, OriginY);
 		d->v->ClipToRect(clp);
 
 		/*

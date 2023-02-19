@@ -1138,16 +1138,17 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 		}
 		case LSP_USER_DOCUMENTS:
 		{
+			char path[MAX_PATH_LEN];
+			
 			#if defined(__GTK_H__)
 			
 				auto p = Gtk::g_get_user_special_dir(Gtk::G_USER_DIRECTORY_DOCUMENTS);
-				Path = p;
+				if (p)
+					Path = p;
 			
 			#elif defined(WIN32) && defined(_MSC_VER)
 			
 				Path = WinGetSpecialFolderPath(CSIDL_MYDOCUMENTS);
-				if (Path)
-					return Path;
 			
 			#elif defined LGI_COCOA
 
@@ -1157,18 +1158,32 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 					if ([paths count])
 						Path = [paths objectAtIndex:0];
 				}
+				
+			#elif defined(HAIKU)
+			
+				if(	find_directory
+					(
+						B_SYSTEM_DOCUMENTATION_DIRECTORY,
+						dev_for_path("/boot"),
+						true,
+						path, sizeof(path)
+					) == B_OK)
+					Path = path;
 
 			#endif
 
-			// Default to ~/Documents
-			char hm[MAX_PATH_LEN];
-			LString Home = LGetSystemPath(LSP_HOME);
-			if (LMakePath(hm, sizeof(hm), Home, "Documents"))
-				Path = hm;
+			if (!Path)
+			{
+				// Default to ~/Documents
+				if (LMakePath(path, sizeof(path), LGetSystemPath(LSP_HOME), "Documents"))
+					Path = path;
+			}
 			break;
 		}
 		case LSP_USER_MUSIC:
 		{
+			char path[MAX_PATH_LEN];
+
 			#if defined WIN32
 
 				Path = WinGetSpecialFolderPath(CSIDL_MYMUSIC);
@@ -1176,7 +1191,8 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#elif defined(__GTK_H__)
 			
 				auto p = Gtk::g_get_user_special_dir(Gtk::G_USER_DIRECTORY_MUSIC);
-				Path = p;
+				if (p)
+					Path = p;
 			
 			#elif defined LGI_CARBON
 			
@@ -1199,20 +1215,31 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 						Path = [paths objectAtIndex:0];
 				}
 
+			#elif defined(HAIKU)
+			
+				if(	find_directory
+					(
+						B_USER_SOUNDS_DIRECTORY,
+						dev_for_path("/boot"),
+						true,
+						path, sizeof(path)
+					) == B_OK)
+					Path = path;
+
 			#endif
 			
 			if (!Path)
 			{
 				// Default to ~/Music
-				char p[MAX_PATH_LEN];
-				LString Home = LGetSystemPath(LSP_HOME);
-				if (LMakePath(p, sizeof(p), Home, "Music"))
-					Path = p;
+				if (LMakePath(path, sizeof(path), LGetSystemPath(LSP_HOME), "Music"))
+					Path = path;
 			}
 			break;
 		}
 		case LSP_USER_VIDEO:
 		{
+			char path[MAX_PATH_LEN];
+
 			#if defined WIN32
 
 				Path = WinGetSpecialFolderPath(CSIDL_MYVIDEO);
@@ -1220,7 +1247,8 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#elif defined(__GTK_H__)
 			
 				auto p = Gtk::g_get_user_special_dir(Gtk::G_USER_DIRECTORY_VIDEOS);
-				Path = p;
+				if (p)
+					Path = p;
 			
 			#elif defined LGI_CARBON
 
@@ -1248,10 +1276,8 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			if (!Path)
 			{
 				// Default to ~/Video
-				char p[MAX_PATH_LEN];
-				LString Home = LGetSystemPath(LSP_HOME);
-				if (LMakePath(p, sizeof(p), Home, "Video"))
-					Path = p;
+				if (LMakePath(path, sizeof(path), LGetSystemPath(LSP_HOME), "Video"))
+					Path = path;
 			}
 			break;
 		}
@@ -1276,9 +1302,8 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 
 			#elif defined(HAIKU)
 
-				dev_t volume = dev_for_path("/boot");
 				char path[MAX_PATH_LEN] = "";
-				if (find_directory(B_SYSTEM_APPS_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+				if (find_directory(B_USER_APPS_DIRECTORY, dev_for_path("/boot"), true, path, sizeof(path)) == B_OK)
 					Path = path;
 			
 			#elif LGI_COCOA

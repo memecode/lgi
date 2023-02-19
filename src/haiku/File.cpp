@@ -2,40 +2,54 @@
 **	FILE:			File.cpp
 **	AUTHOR:			Matthew Allen
 **	DATE:			8/10/2000
-**	DESCRIPTION:	The new file subsystem
+**	DESCRIPTION:	The file subsystem
 **
 **	Copyright (C) 2000, Matthew Allen
 **		fret@memecode.com
 */
 
 /****************************** Includes **********************************/
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <stdio.h>
-
-#include <ctype.h>
-#include <stdarg.h>
-#include <dirent.h>
-#include <unistd.h>
+#include <pwd.h>
 
 #include "Path.h"
+#include "VolumeRoster.h"
+#include "Directory.h"
 
 #include "lgi/common/LgiDefs.h"
 #include "lgi/common/File.h"
 #include "lgi/common/Containers.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/LgiCommon.h"
-#include "lgi/common/LgiString.h"
 #include "lgi/common/DateTime.h"
 
-/****************************** Globals ***********************************/
-LString LFile::Path::Sep(DIR_STR);
-
 /****************************** Helper Functions **************************/
+LString BGetFullPath(BEntry &entry)
+{
+	BPath path;
+	auto r = entry.GetPath(&path);
+	if (r != B_OK)
+		return LString();
+	return path.Path();
+}
+
+LString BGetFullPath(BDirectory &dir)
+{
+	BEntry entry;
+	auto r = dir.GetEntry(&entry);
+	if (r != B_OK)
+		return LString();
+	return BGetFullPath(entry);
+}					
+
+LString BGetFullPath(BVolume &volume)
+{				
+	BDirectory directory;
+	auto r = volume.GetRootDirectory(&directory);
+	if (r != B_OK)
+		return LString();
+	return BGetFullPath(directory);
+}					
+
 char *LReadTextFile(const char *File)
 {
 	char *s = 0;
@@ -55,49 +69,40 @@ char *LReadTextFile(const char *File)
 
 int64 LFileSize(const char *FileName)
 {
-	struct stat s;
-	if (FileName &&
-		stat(FileName, &s) == 0)
-	{
-		return s.st_size;
-	}
-
-	return 0;
+	BEntry e(FileName);
+	if (e.InitCheck() != B_OK)
+		return 0;
+		
+	off_t size = 0;
+	if (e.GetSize(&size) != B_OK)
+		return 0;
+		
+	return size;
 }
 
 bool LDirExists(const char *FileName, char *CorrectCase)
 {
-	bool Status = false;
-	
-	if (FileName)
+	if (!FileName)
+		return false;
+
+	struct stat s;
+	auto r = lstat(FileName, &s);
+	if (r == 0)
 	{
-		struct stat s;
-		
-		// Check for exact match...
-		int r = lstat(FileName, &s);
+		return	S_ISDIR(s.st_mode) ||
+				S_ISLNK(s.st_mode);
+	}
+	else
+	{
+		r = stat(FileName, &s);
 		if (r == 0)
 		{
-			Status = S_ISDIR(s.st_mode) ||
-					 S_ISLNK(s.st_mode);
-			// printf("DirStatus(%s) lstat = %i, %i\n", FileName, Status, s.st_mode);
-		}
-		else
-		{
-			r = stat(FileName, &s);
-			if (r == 0)
-			{
-				Status = S_ISDIR(s.st_mode) ||
-					 	S_ISLNK(s.st_mode);
-				// printf("DirStatus(%s) stat ok = %i, %i\n", FileName, Status, s.st_mode);
-			}
-			else
-			{
-				// printf("DirStatus(%s) lstat and stat failed, r=%i, errno=%i\n", FileName, r, errno);
-			}
+			return	S_ISDIR(s.st_mode) ||
+					S_ISLNK(s.st_mode);
 		}
 	}
 
-	return Status;
+	return false;
 }
 
 bool LFileExists(const char *FileName, char *CorrectCase)
@@ -189,15 +194,8 @@ bool LResolveShortcut(const char *LinkFile, char *Path, ssize_t Len)
 		return false;
 	}
 	
-	BPath p;
-	r = e.GetPath(&p);
-	if (r != B_OK)
-	{
-		printf("%s:%i - LResolveShortcut: %i\n", _FL, r);
-		return false;
-	}
-	
-	strcpy_s(Path, Len, p.Path());	
+	auto p = BGetFullPath(e);
+	strcpy_s(Path, Len, p);
 	return true;
 }
 
@@ -281,170 +279,171 @@ bool LGetDriveInfo
 }
 
 /////////////////////////////////////////////////////////////////////////
-#include <sys/types.h>
-#include <pwd.h>
-
 struct LVolumePriv
 {
-	int64 _Size, _Free;
-	int _Type, _Flags;
-	LSystemPath SysPath;
-	LString _Name, _Path;
-	List<LVolume> _Sub;
-	List<LVolume>::I _It;
+	LVolume *Owner = NULL;
+	int64 Size = 0, Free = 0;
+	int Type = VT_NONE, Flags = 0;
+	LSystemPath SysPath = LSP_ROOT;
+	LString Name, Path;
+	LVolume *NextVol = NULL, *ChildVol = NULL;
 
-	void Init()
+	LVolumePriv(LVolume *owner, const char *path) : Owner(owner)
 	{
-		SysPath = LSP_ROOT;
-		_Type = VT_NONE;
-		_Flags = 0;
-		_Size = 0;
-		_Free = 0;
+		Path = path;
+		Name = LGetLeaf(path);
+		Type = VT_FOLDER;
 	}
 
-	LVolumePriv(const char *path) : _It(_Sub.end())
+	LVolumePriv(LVolume *owner, LSystemPath sys, const char *name) : Owner(owner)
 	{
-		Init();
-		
-		_Path = path;
-		_Name = LGetLeaf(path);
-		_Type = VT_FOLDER;
-	}
-
-	LVolumePriv(LSystemPath sys, const char *name) : _It(_Sub.end())
-	{
-		Init();
 		SysPath = sys;
 
+		Name = name;
 		if (SysPath == LSP_ROOT)
-			_Path = "/";
+			Path = "/";
 		else
-			_Path = LGetSystemPath(SysPath);
-		if (_Path)
-		{
-			_Name = name;
-			_Type = sys == LSP_DESKTOP ? VT_DESKTOP : VT_FOLDER;
-		}
+			Path = LGetSystemPath(SysPath);
+		
+		if (Path)
+			Type = sys == LSP_DESKTOP ? VT_DESKTOP : VT_FOLDER;
 	}
 	
 	~LVolumePriv()
 	{
-		_Sub.DeleteObjects();
+		DeleteObj(NextVol);
+		DeleteObj(ChildVol);
 	}
+
+	void Insert(LVolume *vol, LVolume *newVol)
+	{
+		if (!vol || !newVol)
+			return;
+			
+		if (vol->d->ChildVol)
+		{
+			for (auto v = vol->d->ChildVol; v; v = v->d->NextVol)
+			{
+				if (!v->d->NextVol)
+				{
+					LAssert(newVol != v->d->Owner);
+					v->d->NextVol = newVol;
+					// printf("Insert %p:%s into %p:%s\n", newVol, newVol->Name(), vol, vol->Name());
+					break;
+				}
+			}
+		}
+		else
+		{
+			LAssert(newVol != vol->d->Owner);
+			vol->d->ChildVol = newVol;
+			// printf("Insert %p:%s into %p:%s\n", newVol, newVol->Name(), vol, vol->Name());
+		}
+	}	
 
 	LVolume *First()
 	{
-		if (SysPath == LSP_DESKTOP && !_Sub.Length())
+		if (SysPath == LSP_DESKTOP && !ChildVol)
 		{
 			// Get various shortcuts to points of interest
-			LVolume *v = new LVolume(LSP_ROOT, "Root");
-			if (v)
-				_Sub.Insert(v);
-
+			Insert(Owner, new LVolume(LSP_ROOT, "Root"));
+			
 			struct passwd *pw = getpwuid(getuid());
 			if (pw)
-			{
-				v = new LVolume(LSP_HOME, "Home");
-				if (v)
-					_Sub.Insert(v);
-			}
+				Insert(Owner, new LVolume(LSP_HOME, "Home"));
 
-			// Get mount list
-			// this is just a hack at this stage to establish some base
-			// functionality. I would appreciate someone telling me how
-			// to do this properly. Till then...
-			LFile f;
-			auto fstab = "/etc/fstab";
-			if (LFileExists(fstab) && f.Open(fstab, O_READ))
-			{
-				auto Buf= f.Read();
-				f.Close();
-
-				auto Lines = Buf.SplitDelimit("\r\n");
-				for (auto ln : Lines)
-				{
-					auto M = ln.Strip().SplitDelimit(" \t");
-					if (M[0](0) != '#' && M.Length() > 2)
-					{
-						auto &Device = M[0];
-						auto &Mount = M[1];
-						auto &FileSys = M[2];
-						
-						if
-						(
-							(Device.Find("/dev/") == 0 || Mount.Find("/mnt/") == 0)
-							&&
-							Device.Lower().Find("/by-uuid/") < 0
-							&& 
-							Mount.Length() > 1
-							&&
-							!FileSys.Equals("swap")
-						)
-						{
-							v = new LVolume(0);
-							if (v)
-							{
-								char *MountName = strrchr(Mount, '/');
-								v->d->_Name = (MountName ? MountName + 1 : Mount.Get());
-								v->d->_Path = Mount;
-								v->d->_Type = VT_HARDDISK;
-
-								char *Device = M[0];
-								// char *FileSys = M[2];
-								if (stristr(Device, "fd"))
-								{
-									v->d->_Type = VT_FLOPPY;
-								}
-								else if (stristr(Device, "cdrom"))
-								{
-									v->d->_Type = VT_CDROM;
-								}
-
-								_Sub.Insert(v);
-							}
-						}
-					}
-				}
-			}
-			
-			LSystemPath p[] = {LSP_USER_DOCUMENTS,
+			LSystemPath p[] = {	LSP_USER_DOCUMENTS,
 								LSP_USER_MUSIC,
 								LSP_USER_VIDEO,
 								LSP_USER_DOWNLOADS,
-								LSP_USER_PICTURES};
+								LSP_USER_PICTURES };
 			for (int i=0; i<CountOf(p); i++)
 			{
 				LString Path = LGetSystemPath(p[i]);
-				if (Path &&
-					(v = new LVolume(0)))
+				if (Path && LDirExists(Path))
 				{
-					auto Parts = Path.Split("/");
-					v->d->_Path = Path;
-					v->d->_Name = *Parts.rbegin();
-					v->d->_Type = VT_FOLDER;
-					_Sub.Insert(v);
+					auto v = new LVolume(0);
+					if (Path && v)
+					{
+						auto Parts = Path.Split("/");
+						v->d->Path = Path;
+						v->d->Name = *Parts.rbegin();
+						v->d->Type = VT_FOLDER;
+						Insert(Owner, v);
+					}
 				}
 			}
 		}
 
-		_It = _Sub.begin();
-		return *_It;
+		return ChildVol;
 	}
 
 	LVolume *Next()
 	{
-		return *(++_It);
+		if (SysPath == LSP_DESKTOP && !NextVol)
+		{
+			NextVol = new LVolume(LSP_MOUNT_POINT, "Mounts");
+
+			LHashTbl<StrKey<char,false>, bool> Map;
+			
+			BVolumeRoster roster;
+			BVolume volume;
+			for (auto r = roster.GetBootVolume(&volume);
+					  r == B_OK;
+					  r = roster.GetNextVolume(&volume))
+			{
+				auto Path = BGetFullPath(volume);
+				if (!Path)
+					continue;
+				
+				if (Stricmp(Path.Get(), "/") == 0 ||
+					Stricmp(Path.Get(), "/dev") == 0 ||
+					Stricmp(Path.Get(), "/boot/system/var/shared_memory") == 0)
+					continue;
+				
+				if (volume.Capacity() == (4 << 10))
+					continue;
+
+				if (!volume.IsPersistent())
+					continue;
+				
+				char Name[B_FILE_NAME_LENGTH];
+				if (volume.GetName(Name) != B_OK)
+					continue;
+
+				auto Done = Map.Find(Name);
+				if (Done)
+					continue;
+				Map.Add(Name, true);
+
+				auto v = new LVolume(0);
+				if (v)
+				{
+					v->d->Name = Name;
+					v->d->Path = Path;
+					v->d->Type = VT_HARDDISK;
+					v->d->Size = volume.Capacity();
+					v->d->Free = volume.FreeBytes();
+					
+					// printf("%s, %s\n", Name, v->d->Path.Get());
+
+					Insert(NextVol, v);
+				}
+			}
+		}
+		
+		return NextVol;
 	}
 };
 
-LVolume::LVolume(const char *Path)
+LVolume::LVolume(const char *Path = NULL)
 {
-	d = new LVolumePriv(Path);
+	d = new LVolumePriv(this, Path);
 }
 
 LVolume::LVolume(LSystemPath SysPath, const char *Name)
 {
-	d = new LVolumePriv(SysPath, Name);
+	d = new LVolumePriv(this, SysPath, Name);
 }
 
 LVolume::~LVolume()
@@ -454,32 +453,32 @@ LVolume::~LVolume()
 
 const char *LVolume::Name() const
 {
-    return d->_Name;
+    return d->Name;
 }
 
 const char *LVolume::Path() const
 {
-    return d->_Path;
+    return d->Path;
 }
 
 int LVolume::Type() const
 {
-    return d->_Type;
+    return d->Type;
 }
 
 int LVolume::Flags() const
 {
-    return d->_Flags;
+    return d->Flags;
 }
 
 uint64 LVolume::Size() const
 {
-    return d->_Size;
+    return d->Size;
 }
 
 uint64 LVolume::Free() const
 {
-    return d->_Free;
+    return d->Free;
 }
 
 LSurface *LVolume::Icon() const
@@ -509,16 +508,16 @@ LVolume *LVolume::Next()
 
 void LVolume::Insert(LAutoPtr<LVolume> v)
 {
-    d->_Sub.Insert(v.Release());
+    d->Insert(this, v.Release());
 }
 
 LDirectory *LVolume::GetContents()
 {
 	LDirectory *Dir = 0;
-	if (d->_Path)
+	if (d->Path)
 	{
 		Dir = new LDirectory;
-		if (Dir && !Dir->First(d->_Path))
+		if (Dir && !Dir->First(d->Path))
 			DeleteObj(Dir);
 	}
 	return Dir;
@@ -620,9 +619,7 @@ bool LFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, boo
 				if (!Move(Files[i], p))
 				{
 					if (Status)
-					{
 						(*Status)[i] = errno;
-					}
 					
 					LgiTrace("%s:%i - MoveFile(%s,%s) failed.\n", _FL, Files[i], p);
 					Error = true;
@@ -641,9 +638,7 @@ bool LFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, boo
 			if (unlink(Files[i]))
 			{
 				if (Status)
-				{
 					(*Status)[i] = errno;
-				}
 				
 				Error = true;
 			}			
@@ -706,26 +701,21 @@ bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse)
 {
 	if (Recurse)
 	{
-		LDirectory *Dir = new LDirectory;
-		if (Dir && Dir->First(PathName))
+		LDirectory Dir;
+		if (Dir.First(PathName))
 		{
 			do
 			{
-				char Str[256];
-				Dir->Path(Str, sizeof(Str));
+				char Str[MAX_PATH_LEN];
+				Dir.Path(Str, sizeof(Str));
 
-				if (Dir->IsDir())
-				{
+				if (Dir.IsDir())
 					RemoveFolder(Str, Recurse);
-				}
 				else
-				{
 					Delete(Str, false);
-				}
 			}
-			while (Dir->Next());
+			while (Dir.Next());
 		}
-		DeleteObj(Dir);
 	}
 
 	return rmdir(PathName) == 0;
@@ -743,85 +733,6 @@ bool LFileSystem::Move(const char *OldName, const char *NewName, LError *Err)
 	return true;
 }
 
-
-/*
-bool Match(char *Name, char *Mask)
-{
-	strupr(Name);
-	strupr(Mask);
-
-	while (*Name && *Mask)
-	{
-		if (*Mask == '*')
-		{
-			if (*Name == *(Mask+1))
-			{
-				Mask++;
-			}
-			else
-			{
-				Name++;
-			}
-		}
-		else if (*Mask == '?' || *Mask == *Name)
-		{
-			Mask++;
-			Name++;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	while (*Mask && ((*Mask == '*') || (*Mask == '.'))) Mask++;
-
-	return (*Name == 0 && *Mask == 0);
-}
-*/
-
-short DaysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-int LeapYear(int year)
-{
-	if (year & 3)
-	{
-		return 0;
-	}
-	if ((year % 100 == 0) && !(year % 400 == 0))
-	{
-		return 0;
-	}
-	
-	return 1;
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-bool LDirectory::ConvertToTime(char *Str, int SLen, uint64 Time) const
-{
-	time_t k = Time;
-	struct tm *t = localtime(&k);
-	if (t)
-	{
-		strftime(Str, SLen, "%I:%M:%S", t);
-		return true;
-	}
-	return false;
-}
-
-bool LDirectory::ConvertToDate(char *Str, int SLen, uint64 Time) const
-{
-	time_t k = Time;
-	struct tm *t = localtime(&k);
-	if (t)
-	{
-		strftime(Str, SLen, "%d/%m/%y", t);
-		return true;
-	}
-	return false;
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// Directory //////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 struct LDirectoryPriv
 {
@@ -879,6 +790,8 @@ int LDirectory::First(const char *Name, const char *Pattern)
 		return 0;
 
 	strcpy_s(d->BasePath, sizeof(d->BasePath), Name);
+	d->BaseEnd = NULL;
+	
 	if (!Pattern || stricmp(Pattern, LGI_ALL_FILES) == 0)
 	{
 		struct stat S;
@@ -1077,6 +990,30 @@ uint64 LDirectory::GetSize() const
 int64 LDirectory::GetSizeOnDisk()
 {
 	return d->Stat.st_size;
+}
+
+bool LDirectory::ConvertToTime(char *Str, int SLen, uint64 Time) const
+{
+	time_t k = Time;
+	struct tm *t = localtime(&k);
+	if (t)
+	{
+		strftime(Str, SLen, "%I:%M:%S", t);
+		return true;
+	}
+	return false;
+}
+
+bool LDirectory::ConvertToDate(char *Str, int SLen, uint64 Time) const
+{
+	time_t k = Time;
+	struct tm *t = localtime(&k);
+	if (t)
+	{
+		strftime(Str, SLen, "%d/%m/%y", t);
+		return true;
+	}
+	return false;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -1475,6 +1412,8 @@ GFileOps();
 #undef GFileOp
 
 //////////////////////////////////////////////////////////////////////////////
+LString LFile::Path::Sep(DIR_STR);
+
 bool LFile::Path::FixCase()
 {
 	LString Prev;

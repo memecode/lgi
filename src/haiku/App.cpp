@@ -1018,8 +1018,13 @@ bool LLocker::Lock()
         else if (result == B_TIMED_OUT)
         {
             // Warn about failure to lock...
-            thread_id Thread = hnd->Looper()->LockingThread();
-            printf("%s:%i - Warning: can't lock. Myself=%i\n", _FL, LGetCurrentThread(), Thread);
+            auto cur = GetCurrentThreadId();
+            auto locking = hnd->Looper()->LockingThread();
+            
+            printf("%s:%i - Warning: can't lock. cur=%i locking=%i\n",
+            	_FL,
+            	cur,
+            	locking);
         }
         else if (result == B_BAD_VALUE)
         {
