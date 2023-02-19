@@ -5,6 +5,10 @@
 #include <string.h>
 #include <math.h>
 
+#ifdef HAIKU
+#include <Region.h>
+#endif
+
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Variant.h"
 #include "lgi/common/FontSelect.h"
@@ -1723,6 +1727,13 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 		font_height height = {0};
 		fnt->GetHeight(&height);
 
+		/*
+		if (_debug)
+			printf("	trans=%i height=%g,%g,%g\n",
+				Font->Transparent(),
+				height.ascent, height.descent, height.leading);
+		*/
+
 		if (!Font->Transparent())
 		{			
 			view->SetHighColor(Font->Back());
@@ -1732,15 +1743,28 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 				view->FillRect(BRect(px, py, px+x, py+y));
 		}
 
+		auto locked = view->LockLooper();
 		view->SetFont(fnt);
 		view->SetHighColor(Font->Fore());
 
 		int cx = px;
 		for (auto &i: Info)
 		{
+			/*
+			if (_debug)
+				printf("	info=%.*s c=%i,%i\n", i.Len, i.Str, cx, py);
+			*/
+				
 			view->DrawString(i.Str, i.Len, BPoint(cx, py + height.ascent));
+			
 			cx += i.X;
 		}
+
+		BRegion region;
+		view->GetClippingRegion(&region);
+
+		if (locked)		
+			view->UnlockLooper();
 	
 	#elif defined(LGI_SDL)
 	

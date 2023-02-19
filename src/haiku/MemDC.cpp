@@ -10,7 +10,9 @@
 
 #include <stdio.h>
 #include <math.h>
+
 #include "Screen.h"
+#include "Region.h"
 
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/LgiString.h"
@@ -144,24 +146,24 @@ bool LMemDC::Unlock()
 
 bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 {
-	BRect b(0, 0, x, y);
-	d->Bmp = new BBitmap(b, B_RGB32, false, true);
+	BRect b(0, 0, x-1, y-1);
+	d->Bmp = new BBitmap(b, B_RGB32, true, true);
 	if (!d->Bmp || d->Bmp->InitCheck() != B_OK)
 	{
 		DeleteObj(d->Bmp);
 		LgiTrace("%s:%i - Failed to create memDC(%i,%i)\n", _FL, x, y);
 		return false;
 	}
-
+	
 	pMem = new LBmpMem;
 	if (!pMem)
 		return false;
 
-	pMem->x = d->Bmp->Bounds().Width();
-	pMem->y = d->Bmp->Bounds().Height();
-	ColourSpace = pMem->Cs = System32BitColourSpace;
-	pMem->Line = d->Bmp->BytesPerRow();
-	pMem->Base = (uchar*)d->Bmp->Bits();
+	pMem->x		= x;
+	pMem->y		= y;
+	pMem->Cs	= ColourSpace = System32BitColourSpace;
+	pMem->Line	= d->Bmp->BytesPerRow();
+	pMem->Base	= (uchar*)d->Bmp->Bits();
 
 	int NewOp = (pApp) ? Op() : GDC_SET;
 	if ((Flags & GDC_OWN_APPLICATOR) && !(Flags & GDC_CACHED_APPLICATOR))

@@ -133,8 +133,8 @@ void LScreenDC::SetOrigin(int x, int y)
 		d->v->ConstrainClippingRegion(NULL);
 	}
 	
-	OriginX = x;
-	OriginY = y;
+	OriginX = x - d->Client.x1;
+	OriginY = y - d->Client.y1;
 
 	#if LOGGING
 	printf("%p.SetOrigin=%i,%i (%i,%i) = %i,%i\n",
