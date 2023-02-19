@@ -29,47 +29,22 @@ enum TabViewStyle
 #define MAC_DBL_BUF				1
 
 #if defined(__GTK_H__)
-	#define TAB_TXT_PAD				2
+	#define TAB_TXT_PAD			2
 #else
-	#define TAB_TXT_PAD				3
+	#define TAB_TXT_PAD			3
 #endif
 
 #if defined(MAC) && !LGI_COCOA && !defined(LGI_SDL)
-#define MAC_PAINT	1
+	#define MAC_PAINT			1
 #else
-#define MAC_PAINT	0
+	#define MAC_PAINT			0
 #endif
 
-#ifdef WIN32
-
-#ifdef TOOL_VLOW
-#undef TOOL_VLOW
-#endif
-
-#ifdef TOOL_LOW
-#undef TOOL_LOW
-#endif
-
-#ifdef TOOL_HIGH
-#undef TOOL_HIGH
-#endif
-
-#ifdef TOOL_VHIGH
-#undef TOOL_VHIGH
-#endif
-
-#define TOOL_VLOW	GetSysColor(COLOR_3DDKSHADOW)
-#define TOOL_LOW	GetSysColor(COLOR_3DSHADOW)
-#define TOOL_HIGH	GetSysColor(COLOR_3DLIGHT)
-#define TOOL_VHIGH	GetSysColor(COLOR_3DHILIGHT)
-
-#endif
-
-#define TAB_MARGIN_X		10 // Px each side of the text label on the tab
-#define CLOSE_BTN_SIZE		8
-#define CLOSE_BTN_GAP		8
-#define cFocusFore			LColour(L_FOCUS_SEL_FORE)
-#define cFocusBack			LColour(L_FOCUS_SEL_BACK)
+#define TAB_MARGIN_X			10 // Px each side of the text label on the tab
+#define CLOSE_BTN_SIZE			8
+#define CLOSE_BTN_GAP			8
+#define cFocusFore				LColour(L_FOCUS_SEL_FORE)
+#define cFocusBack				LColour(L_FOCUS_SEL_BACK)
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 class LTabViewPrivate
@@ -166,7 +141,8 @@ public:
 		LLinearBlendBrush s2(a, b, CountOf(Stops), Stops);
 		p.Fill(Dc, s2);
 
-		Dc->ConvertPreMulAlpha(true);
+		if (Dc->IsPreMultipliedAlpha())
+			Dc->ConvertPreMulAlpha(true);
 		return true;
 	}
 
@@ -1025,6 +1001,7 @@ void LTabView::OnPaint(LSurface *pDC)
 			LSkinState State;
 			State.pScreen = pDC;
 			State.MouseOver = false;
+			
 			LApp::SkinEngine->OnPaint_LTabView(this, &State);
 		}
 		else
