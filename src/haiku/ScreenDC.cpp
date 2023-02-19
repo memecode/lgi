@@ -25,6 +25,8 @@ public:
 	bool Own = false;
 	LColour Col;
 	LRect Client;
+	int Rop = GDC_SET;
+	NativeInt Alpha = -1;
 
 	LView *View = NULL;
 	OsView v = NULL;
@@ -267,12 +269,15 @@ LColour LScreenDC::Colour(LColour c)
 
 int LScreenDC::Op(int ROP, NativeInt Param)
 {
-	return GDC_SET; // not supported..
+	auto prev = d->Rop;
+	d->Alpha = Param;
+	d->Rop = ROP;
+	return prev;
 }
 
 int LScreenDC::Op()
 {
-	return GDC_SET; // not supported..
+	return d->Rop;
 }
 
 int LScreenDC::X()
@@ -428,8 +433,26 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 		return;
 	}
 	
-	d->v->SetDrawingMode(B_OP_ALPHA);
-	d->v->SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_COMPOSITE);
+	switch (d->Rop)
+	{
+		case GDC_SET:
+			d->v->SetDrawingMode(B_OP_COPY);
+			break;
+		case GDC_OR:
+			d->v->SetDrawingMode(B_OP_ADD);
+			break;
+		case GDC_XOR:
+			d->v->SetDrawingMode(B_OP_INVERT);
+			break;
+		default:
+		case GDC_ALPHA:
+			d->v->SetDrawingMode(B_OP_ALPHA);
+			d->v->SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_COMPOSITE);
+			
+			if (d->Alpha >= 0)
+				LgiTrace("%s:%i - WARNING: Haiku doesn't support constant alpha Blt to screen!!!\n", _FL);
+			break;
+	}		
 		
 	if (a)
 	{
