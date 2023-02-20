@@ -79,8 +79,8 @@ public:
 	OsView hMouseOver;
 	List<LPopup> Popups;
 	#ifdef MAC
-	OsView ViewHandle;
-	LThreadEvent Event;
+		OsView ViewHandle;
+		LThreadEvent Event;
 	#endif
 
 	LMouseHookPrivate() : LMutex("MouseHookLock"), LThread("MouseHook")
@@ -539,9 +539,9 @@ public:
 
 LPopup::LPopup(LView *owner)
 	#if LGI_CARBON
-	: LWindow(CreateBorderlessWindow())
+		: LWindow(CreateBorderlessWindow())
 	#elif defined(__GTK_H__)
-	: LWindow(gtk_window_new(GTK_WINDOW_POPUP))
+		: LWindow(gtk_window_new(GTK_WINDOW_POPUP))
 	#endif
 {
 	d = new LPopupPrivate;
@@ -550,29 +550,45 @@ LPopup::LPopup(LView *owner)
     CurrentPopups.Add(this);
 
 	#if LGI_COCOA
-	Panel = [[NSPanel alloc] init];
-	if (Panel)
-	{
-		Panel.p.floatingPanel = TRUE;
-		Panel.p.worksWhenModal = TRUE;
-		Panel.p.styleMask = NSWindowStyleMaskBorderless;
-		
-		Panel.p.contentView = [[LCocoaView alloc] init:this];
-	}
+		Panel = [[NSPanel alloc] init];
+		if (Panel)
+		{
+			Panel.p.floatingPanel = TRUE;
+			Panel.p.worksWhenModal = TRUE;
+			Panel.p.styleMask = NSWindowStyleMaskBorderless;
+			
+			Panel.p.contentView = [[LCocoaView alloc] init:this];
+		}
+	#elif defined(HAIKU)
+		auto w = WindowHandle();
+		if (w)
+		{
+			auto r = w->SetLook(B_NO_BORDER_WINDOW_LOOK);
+			if (r != B_OK)
+				printf("%s:%i - SetLook failed.\n", _FL);
+				
+			r = w->SetFeel(B_FLOATING_SUBSET_WINDOW_FEEL);
+			if (r != B_OK)
+				printf("%s:%i - SetFeel failed.\n", _FL);
+				
+			printf("popup thread=%i\n", w->Thread());
+		}
+		else printf("%s:%i - No WindowHandle()?\n", _FL);
 	#endif
 
 	if ((Owner = owner))
 	{
 		#ifndef WIN32
-		Owner->PopupChild() = this;
+			Owner->PopupChild() = this;
 		#endif
 		
 		#if !defined(MAC) && !defined(__GTK_H__)
-		_Window = Owner->GetWindow();
+			_Window = Owner->GetWindow();
 		#endif
 		SetNotify(Owner);
 	}
 	
+	Name("Popup");
 	LView::Visible(false);
 }
 
@@ -682,45 +698,47 @@ void LPopup::TakeFocus(bool Take)
 
 bool LPopup::Attach(LViewI *p)
 {
-	#if defined(LGI_CARBON)
+	#if defined(LGI_CARBON) || defined(HAIKU)
 	
-	return LWindow::Attach(NULL);
+		auto status = LWindow::Attach(NULL);
+		printf("Popup thread=%i\n", WindowHandle()->Thread());
+		return status;
 	
 	#else
 	
-	if (p) SetParent(p);
-	else p = GetParent();
+		if (p) SetParent(p);
+		else p = GetParent();
 
-	#if WINNATIVE
+		#if WINNATIVE
 
-	SetStyle(WS_POPUP);
-	LView::Attach(p);
-	AttachChildren();
+			SetStyle(WS_POPUP);
+			LView::Attach(p);
+			AttachChildren();
 
-	#elif defined __GTK_H__
+		#elif defined __GTK_H__
 
-	if (p)
-	{
-		auto w = p->GetWindow();
-		if (w)
-		{
-			auto h = w->WindowHandle();
-			if (h)
-				gtk_window_set_transient_for(WindowHandle(), h);
-		}
-	}
-	gtk_window_set_decorated(WindowHandle(), FALSE);
-	return LWindow::Attach(p);
+			if (p)
+			{
+				auto w = p->GetWindow();
+				if (w)
+				{
+					auto h = w->WindowHandle();
+					if (h)
+						gtk_window_set_transient_for(WindowHandle(), h);
+				}
+			}
+			gtk_window_set_decorated(WindowHandle(), FALSE);
+			return LWindow::Attach(p);
 
-	#endif
+		#endif
 
-	GetWindow();
+		GetWindow();
 
-	#if !LGI_VIEW_HANDLE
-	return true;
-	#else
-	return Handle() != 0;
-	#endif
+		#if !LGI_VIEW_HANDLE
+		return true;
+		#else
+		return Handle() != 0;
+		#endif
 
 	#endif
 }
@@ -872,6 +890,10 @@ void LPopup::Visible(bool i)
 			}
 			LView::Visible(i);
 	
+		#elif LGI_POPUP_LWINDOW
+
+			LWindow::Visible(i);
+
 		#else
 		
 			LView::Visible(i);

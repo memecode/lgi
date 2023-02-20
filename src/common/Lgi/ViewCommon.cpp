@@ -323,15 +323,19 @@ LWindow *LView::GetWindow()
 bool LView::Lock(const char *file, int line, int TimeOut)
 {
 	#ifdef HAIKU
+
+		bool Debug = !Stricmp("LList", GetClass());
 		if (!d || !d->Hnd)
 		{
-			// printf("%s:%i - no handle %p %p\n", _FL, d, d ? d->Hnd : NULL);
+			if (Debug)
+				printf("%s:%i - no handle %p %p\n", _FL, d, d ? d->Hnd : NULL);
 			return false;
 		}
 	
 		if (d->Hnd->Parent() == NULL)
 		{
-			// printf("%s:%p - Lock() no parent.\n", GetClass(), this);
+			if (Debug)
+				printf("%s:%p - Lock() no parent.\n", GetClass(), this);
 			return true;
 		}
 		
@@ -341,7 +345,8 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 			if (r == B_OK)
 			{
 				_InLock++;
-				// printf("%s:%p - Lock() cnt=%i par=%p.\n", GetClass(), this, _InLock, d->Hnd->Parent());
+				if (Debug)
+					printf("%s:%p - Lock() cnt=%i par=%p.\n", GetClass(), this, _InLock, d->Hnd->Parent());
 				return true;
 			}
 		
@@ -353,11 +358,22 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 		if (r)
 		{
 			_InLock++;
-			// printf("%s:%p - Lock() cnt=%i par=%p.\n", GetClass(), this, _InLock, d->Hnd->Parent());
+			
+			if (Debug)
+			{
+				auto w = WindowHandle();
+				printf("%s:%p - Lock() cnt=%i myThread=%i wndThread=%i.\n",
+					GetClass(),
+					this,
+					_InLock,
+					GetCurrentThreadId(),
+					w ? w->Thread() : -1);
+			}
 			return true;
 		}
 	
-		// printf("%s:%i - Lock(%s:%i) failed.\n", _FL, file, line);
+		if (Debug)
+			printf("%s:%i - Lock(%s:%i) failed.\n", _FL, file, line);
 		return false;
 	#else
 		if (!_Window)

@@ -267,7 +267,14 @@ void LWindow::Visible(bool i)
 	if (i)
 	{
 		if (d->IsHidden())
+		{
+			printf("%s show\n", GetClass());
 			d->Show();
+		}
+		else
+		{
+			printf("%s already shown\n", GetClass());
+		}
 	}
 	else
 	{
@@ -624,6 +631,7 @@ bool LWindow::Name(const char *n)
 	LLocker lck(d, _FL);
 	if (lck.Lock())
 		d->SetTitle(n);
+
 	return LBase::Name(n);
 }
 
@@ -736,7 +744,9 @@ bool LWindow::SetPos(LRect &p, bool Repaint)
 	{
 		d->MoveTo(Pos.x1, Pos.y1);
 		d->ResizeTo(Pos.X(), Pos.Y());
+		printf("%s move/resize\n", GetClass());
 	}
+	else printf("%s:%i - Failed to lock.\n", _FL);
 
 	return true;
 }

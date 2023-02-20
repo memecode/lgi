@@ -975,7 +975,11 @@ bool LView::Attach(LViewI *parent)
 			w->SetFocus(this, LWindow::GainFocus);
 
 		auto bview = parent->Handle();
-		if (bview)
+		if (!bview)
+		{
+			LgiTrace("%s:%i - No bview for %s\n", _FL, GetClass());
+		}
+		else
 		{
 			LLocker lck(bview, _FL);
 			if (lck.Lock())
@@ -1019,9 +1023,8 @@ bool LView::Attach(LViewI *parent)
 			}
 			else
 			{
-				if (Debug)
-					LgiTrace("%s:%i - Error attaching %s to view %s, can't lock.\n",
-						_FL, GetClass(), parent->GetClass());
+				LgiTrace("%s:%i - Error attaching %s to view %s, can't lock.\n",
+					_FL, GetClass(), parent->GetClass());
 			}
 		}
 
