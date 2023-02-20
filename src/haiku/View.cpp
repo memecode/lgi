@@ -998,6 +998,9 @@ bool LView::Attach(LViewI *parent)
 				if (ShowView)
 					d->Hnd->Show();
 
+				if (TestFlag(WndFlags, GWF_FOCUS))
+					d->Hnd->MakeFocus();
+
 				Status = true;
 				
 				if (d->MsgQue.Length())

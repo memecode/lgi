@@ -357,7 +357,7 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 			return true;
 		}
 	
-		printf("%s:%i - Lock(%s:%i) failed.\n", _FL, file, line);
+		// printf("%s:%i - Lock(%s:%i) failed.\n", _FL, file, line);
 		return false;
 	#else
 		if (!_Window)
