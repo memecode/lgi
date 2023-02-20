@@ -587,68 +587,74 @@ bool LMenuItem::ScanForAccel()
 		}
 	}
 
-	if (Vkey || Chr)
+	if (!Vkey && !Chr)
 	{
-		if (Info)
-		{
-			uint32 modifiers = 
-				((Flags & LGI_EF_CTRL) ? B_CONTROL_KEY : 0) |
-				((Flags & LGI_EF_ALT) ? B_MENU_KEY : 0) |
-				((Flags & LGI_EF_SHIFT) ? B_SHIFT_KEY : 0) |
-				((Flags & LGI_EF_SYSTEM) ? B_COMMAND_KEY : 0);
-			
-			if (Vkey >= LK_F1 && Vkey <= LK_F12)
-			{
-				#if 1
-				
-					if (Menu)
-					{
-						LAssert(Id() > 0);
-						Menu->Accel.Insert(new LAccelerator(Flags, Vkey, Chr, Id()));
-					}
-				
-				#else
-				
-					// This is not supported yet...
-					auto bwnd = Menu && Menu->WindowHandle() ? Menu->WindowHandle()->WindowHandle() : NULL;
-					if (bwnd)
-					{
-						BMessage *msg = new BMessage(M_COMMAND);
-						if (msg)
-						{
-							msg->AddInt32("key", Key-LK_F1+B_F1_KEY);
-							bwnd->AddShortcut(B_FUNCTION_KEY, modifiers, msg);
-						}
-						else printf("%s:%i - Alloc err.\n", _FL);
-					}
-					else printf("%s:%i - No bwnd to add function key shortcut to.\n", _FL);
-				
-				#endif				
-			}
-			else
-			{
-				#if 0
-				printf("Scan '%s' / Key=%i(%i) / Flags: %x ctrl=%i alt=%i shift=%i sys=%i / Mods: ctrl=%i alt=%i sh=%i sys=%i\n",
-					Accel.Get(),
-					Key, LK_F1,
-					Flags,
-					(Flags & LGI_EF_CTRL) != 0,
-					(Flags & LGI_EF_ALT) != 0,
-					(Flags & LGI_EF_SHIFT) != 0,
-					(Flags & LGI_EF_SYSTEM) != 0,
-					(modifiers & B_CONTROL_KEY) != 0,
-					(modifiers & B_MENU_KEY) != 0,
-					(modifiers & B_SHIFT_KEY) != 0,
-					(modifiers & B_COMMAND_KEY) != 0);
-				#endif
-				Info->SetShortcut(Vkey, modifiers);
-			}
-		}
-		else LOG("%s:%i - No item handle.\n", _FL);
+		LOG("%s:%i - Accel scan failed, str='%s'\n", _FL, Accel.Get());
+		return false;
 	}
-	else LOG("%s:%i - Accel scan failed, str='%s'\n", _FL, Accel.Get());
 
-	return false;
+	if (!Info)
+	{
+		LOG("%s:%i - No item handle.\n", _FL);
+		return false;
+	}
+
+	uint32 modifiers = 
+		((Flags & LGI_EF_CTRL)	 ? B_CONTROL_KEY : 0) |
+		((Flags & LGI_EF_ALT)	 ? B_MENU_KEY    : 0) |
+		((Flags & LGI_EF_SHIFT)  ? B_SHIFT_KEY   : 0);
+		
+	// ((Flags & LGI_EF_SYSTEM) ? B_COMMAND_KEY : 0);
+	
+	if (Vkey >= LK_F1 && Vkey <= LK_F12)
+	{
+		#if 1
+		
+			if (Menu)
+			{
+				LAssert(Id() > 0);
+				Menu->Accel.Insert(new LAccelerator(Flags, Vkey, Chr, Id()));
+			}
+		
+		#else
+		
+			// This is not supported yet...
+			auto bwnd = Menu && Menu->WindowHandle() ? Menu->WindowHandle()->WindowHandle() : NULL;
+			if (bwnd)
+			{
+				BMessage *msg = new BMessage(M_COMMAND);
+				if (msg)
+				{
+					msg->AddInt32("key", Key-LK_F1+B_F1_KEY);
+					bwnd->AddShortcut(B_FUNCTION_KEY, modifiers, msg);
+				}
+				else printf("%s:%i - Alloc err.\n", _FL);
+			}
+			else printf("%s:%i - No bwnd to add function key shortcut to.\n", _FL);
+		
+		#endif				
+	}
+	else
+	{
+		#if 0
+		printf("ScanForAccel: %s, %s, Vkey=%i, Chr=%i(%c), Flags: %x ctrl=%i alt=%i shift=%i sys=%i, Mods: ctrl=%i alt=%i sh=%i sys=%i\n",
+			Name(), Accel.Get(),
+			Vkey, Chr, Chr >= ' ' ? Chr : '.',
+			Flags,
+			(Flags & LGI_EF_CTRL) != 0,
+			(Flags & LGI_EF_ALT) != 0,
+			(Flags & LGI_EF_SHIFT) != 0,
+			(Flags & LGI_EF_SYSTEM) != 0,
+			(modifiers & B_CONTROL_KEY) != 0,
+			(modifiers & B_MENU_KEY) != 0,
+			(modifiers & B_SHIFT_KEY) != 0,
+			(modifiers & B_COMMAND_KEY) != 0);
+		#endif
+
+		Info->SetShortcut(Chr, modifiers);
+	}
+
+	return true;
 }
 
 LSubMenu *LMenuItem::GetParent()

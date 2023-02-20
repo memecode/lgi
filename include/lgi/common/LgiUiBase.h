@@ -195,8 +195,8 @@ public:
 	#elif defined(HAIKU)
 		bool CtrlCmd() const { return System(); }
 		static const char *CtrlCmdName() { return "System"; }	
-		bool AltCmd() const { return Ctrl(); }
-		static const char *AltCmdName() { return "Ctrl"; }
+		bool AltCmd() const { return System(); }
+		static const char *AltCmdName() { return "System"; }
 	#else // win32 and linux
 		bool CtrlCmd() const { return Ctrl(); }
 		static const char *CtrlCmdName() { return "Ctrl"; }	

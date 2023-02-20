@@ -3571,12 +3571,13 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_ABOUT:
 		{
-			LAbout a(this,
-					AppName, APP_VER,
-					"\nLGI Integrated Development Environment",
-					"icon128.png",
-					APP_URL,
-					"fret@memecode.com");
+			auto dlg = new LAbout(	this,
+									AppName, APP_VER,
+									"\nLGI Integrated Development Environment",
+									"icon128.png",
+									APP_URL,
+									"fret@memecode.com");
+			dlg->DoModal(NULL);
 			break;
 		}
 		case IDM_NEW:

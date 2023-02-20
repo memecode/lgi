@@ -23,7 +23,7 @@
 #endif
 
 #define APP_VER					"1.0"
-#define APP_URL					"http://www.memecode.com/lgi/ide"
+#define APP_URL					"http://www.memecode.com/lgi/ide/"
 
 #define DEBUG_FIND_DEFN			0
 
