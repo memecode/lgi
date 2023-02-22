@@ -23,15 +23,22 @@ struct LDialogPriv
 	int ModalStatus = -1;
 	int BtnId = -1;
     int ModalResult = -1;
+	// Modal state
+	OsView ParentHnd = NULL;
+	LWindow *ParentWnd = NULL;
+	LDialog::OnClose Callback;
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-LDialog::LDialog()
+LDialog::LDialog(LViewI *parent)
 	: ResObject(Res_Dialog)
 {
 	d = new LDialogPriv;
 	_Window = this;
 	Name("Dialog");
+	if (parent)
+		SetParent(parent);
 
 	SetStyle(GetStyle() & ~(WS_MINIMIZEBOX | WS_MAXIMIZEBOX));
 	SetStyle(GetStyle() | WS_DLGFRAME);
@@ -39,6 +46,7 @@ LDialog::LDialog()
 
 LDialog::~LDialog()
 {
+	LAssert(!d->IsModal && !d->IsModeless); // Can't delete while still active...
     DeleteObj(d);
 }
 
@@ -91,11 +99,10 @@ bool LDialog::IsModal()
 	return d->IsModal;
 }
 
-int LDialog::DoModal(OsView ParentHnd)
+void LDialog::DoModal(OnClose Callback, OsView ParentHnd)
 {
-	int Status = -1;
-
 	d->IsModal = true;
+	d->Callback = Callback;
 	
     LViewI *p = GetParent();
     if (p && p->GetWindow() != p)
@@ -105,9 +112,9 @@ int LDialog::DoModal(OsView ParentHnd)
 	{
 	    AttachChildren();
 	    
-	    LWindow *ParentWnd = dynamic_cast<LWindow*>(p);
-	    if (ParentWnd)
-	        ParentWnd->_Dialog = this;
+	    d->ParentWnd = dynamic_cast<LWindow*>(p);
+	    if (d->ParentWnd)
+	        d->ParentWnd->_Dialog = this;
 
 	    if (p)
 	    {
@@ -128,31 +135,27 @@ int LDialog::DoModal(OsView ParentHnd)
 	    
 	    Visible(true);
 	    
-	    OsView pwnd = ParentHnd ? ParentHnd : (p ? p->Handle() : NULL);
-	    if (pwnd)
-			EnableWindow(pwnd, false);
-	    
-		while (d->ModalResult < 0)
-	    {
-	        LYield(); // This is fixed by the haiku branch
-	        LSleep(20);
-	    }
-	    
-		if (pwnd)
-			EnableWindow(pwnd, true);
-	    
-		if (ParentWnd)
-	        ParentWnd->_Dialog = NULL;
-	    
-	    Visible(false);
-	    Status = d->ModalResult;
+	    d->ParentHnd = d->ParentHnd ? d->ParentHnd : (p ? p->Handle() : NULL);
+	    if (d->ParentHnd)
+			EnableWindow(d->ParentHnd, false);
 	}
 	else
 	{
 	    LAssert(!"Attach failed.");
 	}
-	
-	return Status;
+}
+
+void LDialog::EndModal(int Code)
+{
+	if (!d->IsModal)
+	{
+		LAssert(!"Not a modal dialog.");
+		return;
+	}
+
+	// This is so the calling code can unwind all it's stack frames without
+	// worrying about accessing things that have been deleted.
+	PostEvent(M_DIALOG_END_MODAL, (LMessage::Param)Code);
 }
 
 static char *BaseStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -239,6 +242,26 @@ LMessage::Result LDialog::OnEvent(LMessage *Msg)
 			// WM_CREATE will call OnCreate again.
 			return true;
 		}
+		case M_DIALOG_END_MODAL:
+		{
+			// See ::EndModal for comment on why this is here.
+			d->ModalResult = max((int)Msg->A(), 0);
+
+			if (d->ParentHnd)
+				EnableWindow(d->ParentHnd, true);
+			if (d->ParentWnd)
+				d->ParentWnd->_Dialog = NULL;
+	    
+			Visible(false);
+
+			d->IsModal = false;
+
+			if (d->Callback)
+				d->Callback(this, d->ModalResult);
+			else
+				delete this; // default action is to delete the dialog
+			return 1;
+		}
 	}
 
     return LWindow::OnEvent(Msg);
@@ -286,12 +309,6 @@ void LDialog::OnPosChange()
             t->SetPos(r);
         }
     }
-}
-
-void LDialog::EndModal(int Code)
-{
-	if (d->IsModal)
-		d->ModalResult = max(Code, 0);
 }
 
 void LDialog::EndModeless(int Code)

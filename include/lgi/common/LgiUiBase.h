@@ -146,7 +146,7 @@ void LSort(T *v, ssize_t left, ssize_t right, std::function<ssize_t(T, T)> comp)
 #elif LGI_CARBON
 	typedef EventRef OsEvent;
 #elif LGI_HAIKU
-	typedef BMessage OsEvent;
+	typedef BMessage *OsEvent;
 #else
 	#error "Impl me."
 #endif
@@ -192,6 +192,11 @@ public:
 		static const char *CtrlCmdName() { return "\xE2\x8C\x98"; }	
 		bool AltCmd() const { return System(); }
 		static const char *AltCmdName()	{ return "\xE2\x8C\x98"; }
+	#elif defined(HAIKU)
+		bool CtrlCmd() const { return System(); }
+		static const char *CtrlCmdName() { return "System"; }	
+		bool AltCmd() const { return System(); }
+		static const char *AltCmdName() { return "System"; }
 	#else // win32 and linux
 		bool CtrlCmd() const { return Ctrl(); }
 		static const char *CtrlCmdName() { return "Ctrl"; }	
@@ -238,30 +243,23 @@ class LgiClass LKey : public LUiEvent
 public:
 	/// The virtual code for key
 	/// Rule: Only compare with LK_??? symbols
-	char16 vkey;
+	char16 vkey = 0;
 	/// The unicode character for the key
 	/// Rule: Never compare with LK_??? symbols
-	char16 c16;
+	char16 c16 = 0;
 	/// OS Specific
 	#ifdef WINDOWS
 	union {
 	#endif
-		uint32_t Data;
+		uint32_t Data = 0;
 	#ifdef WINDOWS
 		LKeyWinBits WinBits;
 	};
 	#endif
 	/// True if this is a standard character (ie not a control key)
-	bool IsChar;
+	bool IsChar = false;
 
-	LKey()
-	{
-		vkey = 0;
-		c16 = 0;
-		Data = 0;
-		IsChar = 0;
-	}
-
+	LKey() {}
 	LKey(int vkey, uint32_t flags);
 
 	void Trace(const char *Msg) const
@@ -392,6 +390,8 @@ public:
 class LAppInfo
 {
 public:
+	/// Mime type for the app
+	LString MimeType;
 	/// The path to the executable for the app
 	LString Path;
 	/// Plain text name for the app

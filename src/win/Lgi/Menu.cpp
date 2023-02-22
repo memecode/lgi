@@ -173,7 +173,7 @@ LMenuItem *LSubMenu::AppendSeparator(int Where)
 LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 {
 	int Pos = (int) (Where < 0 ? Items.Length() : min(Where, Items.Length()));
-	LMenuItem *Item = new LMenuItem(Menu, this, Str, -1, Pos);
+	LMenuItem *Item = new LMenuItem(Menu, this, Str, ItemId_Submenu, Pos);
 	LSubMenu *Sub = new LSubMenu;
 
 	if (Item && Sub)
@@ -1263,19 +1263,10 @@ bool LAccelerator::Match(LKey &k)
 ////////////////////////////////////////////////////////////////////////////
 LCommand::LCommand()
 {
-	Flags = GWF_VISIBLE;
-	Id = 0;
-	ToolButton = 0;
-	MenuItem = 0;
-	Accelerator = 0;
-	TipHelp = 0;
-	PrevValue = false;
 }
 
 LCommand::~LCommand()
 {
-	DeleteArray(Accelerator);
-	DeleteArray(TipHelp);
 }
 
 bool LCommand::Enabled()

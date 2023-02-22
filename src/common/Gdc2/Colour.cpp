@@ -696,171 +696,177 @@ void LColour::OnChange()
 	// Variable colours
 	#if defined _XP_CTRLS
 
-	_LgiColours[L_SHADOW] = Rgb24(0x42, 0x27, 0x63); // LC_SHADOW
-	_LgiColours[L_LOW] = Rgb24(0x7a, 0x54, 0xa9); // LC_LOW
-	_LgiColours[L_MED] = Rgb24(0xbc, 0xa9, 0xd4); // LC_MED
-	_LgiColours[L_HIGH] = Rgb24(0xdd, 0xd4, 0xe9); // LC_HIGH
-	_LgiColours[L_LIGHT] = Rgb24(0xff, 0xff, 0xff); // LC_LIGHT
-	_LgiColours[L_DIALOG] = Rgb24(0xbc, 0xa9, 0xd4); // LC_DIALOG
-	_LgiColours[L_WORKSPACE] = Rgb24(0xeb, 0xe6, 0xf2); // LC_WORKSPACE
-	_LgiColours[L_TEXT] = Rgb24(0x35, 0x1f, 0x4f); // LC_TEXT
-	_LgiColours[L_FOCUS_SEL_BACK] = Rgb24(0xbf, 0x67, 0x93); // LC_FOCUS_SEL_BACK
-	_LgiColours[L_FOCUS_SEL_FORE] = Rgb24(0xff, 0xff, 0xff); // LC_FOCUS_SEL_FORE
-	_LgiColours[L_ACTIVE_TITLE] = Rgb24(0x70, 0x3a, 0xec); // LC_ACTIVE_TITLE
-	_LgiColours[L_ACTIVE_TITLE_TEXT] = Rgb24(0xff, 0xff, 0xff); // LC_ACTIVE_TITLE_TEXT
-	_LgiColours[L_INACTIVE_TITLE] = Rgb24(0x80, 0x80, 0x80); // LC_INACTIVE_TITLE
-	_LgiColours[L_INACTIVE_TITLE_TEXT] = Rgb24(0x40, 0x40, 0x40); // LC_INACTIVE_TITLE_TEXT
-	_LgiColours[L_MENU_BACKGROUND] = Rgb24(0xbc, 0xa9, 0xd4); // LC_MENU_BACKGROUND
-	_LgiColours[L_MENU_TEXT] = Rgb24(0x35, 0x1f, 0x4f); // LC_MENU_TEXT
-	_LgiColours[L_NON_FOCUS_SEL_BACK] = Rgb24(0xbc, 0xa9, 0xd4); // LC_NON_FOCUS_SEL_BACK
-	_LgiColours[L_NON_FOCUS_SEL_FORE] = Rgb24(0x35, 0x1f, 0x4f); // LC_NON_FOCUS_SEL_FORE
-	LAssert(i == LC_MAXIMUM);
+		_LgiColours[L_SHADOW] = Rgb24(0x42, 0x27, 0x63); // LC_SHADOW
+		_LgiColours[L_LOW] = Rgb24(0x7a, 0x54, 0xa9); // LC_LOW
+		_LgiColours[L_MED] = Rgb24(0xbc, 0xa9, 0xd4); // LC_MED
+		_LgiColours[L_HIGH] = Rgb24(0xdd, 0xd4, 0xe9); // LC_HIGH
+		_LgiColours[L_LIGHT] = Rgb24(0xff, 0xff, 0xff); // LC_LIGHT
+		_LgiColours[L_DIALOG] = Rgb24(0xbc, 0xa9, 0xd4); // LC_DIALOG
+		_LgiColours[L_WORKSPACE] = Rgb24(0xeb, 0xe6, 0xf2); // LC_WORKSPACE
+		_LgiColours[L_TEXT] = Rgb24(0x35, 0x1f, 0x4f); // LC_TEXT
+		_LgiColours[L_FOCUS_SEL_BACK] = Rgb24(0xbf, 0x67, 0x93); // LC_FOCUS_SEL_BACK
+		_LgiColours[L_FOCUS_SEL_FORE] = Rgb24(0xff, 0xff, 0xff); // LC_FOCUS_SEL_FORE
+		_LgiColours[L_ACTIVE_TITLE] = Rgb24(0x70, 0x3a, 0xec); // LC_ACTIVE_TITLE
+		_LgiColours[L_ACTIVE_TITLE_TEXT] = Rgb24(0xff, 0xff, 0xff); // LC_ACTIVE_TITLE_TEXT
+		_LgiColours[L_INACTIVE_TITLE] = Rgb24(0x80, 0x80, 0x80); // LC_INACTIVE_TITLE
+		_LgiColours[L_INACTIVE_TITLE_TEXT] = Rgb24(0x40, 0x40, 0x40); // LC_INACTIVE_TITLE_TEXT
+		_LgiColours[L_MENU_BACKGROUND] = Rgb24(0xbc, 0xa9, 0xd4); // LC_MENU_BACKGROUND
+		_LgiColours[L_MENU_TEXT] = Rgb24(0x35, 0x1f, 0x4f); // LC_MENU_TEXT
+		_LgiColours[L_NON_FOCUS_SEL_BACK] = Rgb24(0xbc, 0xa9, 0xd4); // LC_NON_FOCUS_SEL_BACK
+		_LgiColours[L_NON_FOCUS_SEL_FORE] = Rgb24(0x35, 0x1f, 0x4f); // LC_NON_FOCUS_SEL_FORE
+		LAssert(i == LC_MAXIMUM);
 	
 	#elif defined __GTK_H__
 
-	Gtk::GtkSettings *set = Gtk::gtk_settings_get_default();
-	if (!set)
-	{
-		printf("%s:%i - gtk_settings_get_for_screen failed.\n", _FL);
-		return;
-	}
-	
-	char PropName[] = "gtk-color-scheme";
-	Gtk::gchararray Value = 0;
-	Gtk::g_object_get(set, PropName, &Value, NULL);
-	LString::Array Lines = LString(Value).SplitDelimit("\n");
-	Gtk::g_free(Value);
-	g_object_unref(set);
-
-	LHashTbl<ConstStrKey<char,false>, int> Colours(0, -1);
-	auto ScreenBits = GdcD->GetBits();
-	for (int i=0; i<Lines.Length(); i++)
-	{
-		char *var = Lines[i];
-		char *col = strchr(var, ':');
-		if (col)
+		Gtk::GtkSettings *set = Gtk::gtk_settings_get_default();
+		if (!set)
 		{
-			*col++ = 0;
-			
-			char *val = col;
-			if (*val == ' ') val++;
-			if (*val == '#') val++;
-			uint64 c = htoi64(val);
-			COLOUR c24 = c;
-			if (ScreenBits == 32)			
-			{
-				c24 = ((c >> 8) & 0xff) |
-						((c >> 16) & 0xff00) |
-						((c >> 24) & 0xff0000);
-			}
-
-			Colours.Add(var, c24);
-			// printf("Color %s = %x\n", var, c24);
+			printf("%s:%i - gtk_settings_get_for_screen failed.\n", _FL);
+			return;
 		}
-	}
-	#define LookupColour(name, default) ((Colours.Find(name) >= 0) ? LColour(Colours.Find(name),24) : default)
+		
+		char PropName[] = "gtk-color-scheme";
+		Gtk::gchararray Value = 0;
+		Gtk::g_object_get(set, PropName, &Value, NULL);
+		LString::Array Lines = LString(Value).SplitDelimit("\n");
+		Gtk::g_free(Value);
+		g_object_unref(set);
 
-	LColour Med = LookupColour("bg_color", LColour(0xe8, 0xe8, 0xe8));
-	LColour White(255, 255, 255);
-	LColour Black(0, 0, 0);
-	LColour Sel(0x33, 0x99, 0xff);
-	_LgiColours[L_SHADOW] = GdcMixColour(Med, Black, 0.25); // LC_SHADOW
-	_LgiColours[L_LOW] = GdcMixColour(Med, Black, 0.5); // LC_LOW
-	_LgiColours[L_MED] = Med; // LC_MED
-	_LgiColours[L_HIGH] = GdcMixColour(Med, White, 0.5); // LC_HIGH
-	_LgiColours[L_LIGHT] = GdcMixColour(Med, White, 0.25); // LC_LIGHT
-	_LgiColours[L_DIALOG] = Med; // LC_DIALOG
-	_LgiColours[L_WORKSPACE] = LookupColour("base_color", White); // LC_WORKSPACE
-	_LgiColours[L_TEXT] = LookupColour("text_color", Black); // LC_TEXT
-	_LgiColours[L_FOCUS_SEL_BACK] = LookupColour("selected_bg_color", Sel); // LC_FOCUS_SEL_BACK
-	_LgiColours[L_FOCUS_SEL_FORE] = LookupColour("selected_fg_color", White); // LC_FOCUS_SEL_FORE
-	_LgiColours[L_ACTIVE_TITLE] = LookupColour("selected_bg_color", Sel); // LC_ACTIVE_TITLE
-	_LgiColours[L_ACTIVE_TITLE_TEXT] = LookupColour("selected_fg_color", White); // LC_ACTIVE_TITLE_TEXT
-	_LgiColours[L_INACTIVE_TITLE].Rgb(0xc0, 0xc0, 0xc0); // LC_INACTIVE_TITLE
-	_LgiColours[L_INACTIVE_TITLE_TEXT].Rgb(0x80, 0x80, 0x80); // LC_INACTIVE_TITLE_TEXT
-	_LgiColours[L_MENU_BACKGROUND] = LookupColour("bg_color", White); // LC_MENU_BACKGROUND
-	_LgiColours[L_MENU_TEXT] = _LgiColours[L_TEXT]; // LC_MENU_TEXT
-	_LgiColours[L_NON_FOCUS_SEL_BACK] = _LgiColours[L_FOCUS_SEL_BACK].Mix(_LgiColours[L_WORKSPACE]); // LC_NON_FOCUS_SEL_BACK
-	_LgiColours[L_NON_FOCUS_SEL_FORE] = _LgiColours[L_TEXT]; // LC_NON_FOCUS_SEL_FORE
-	
-	// printf("_LgiColours[L_FOCUS_SEL_BACK]=%s\n", _LgiColours[L_FOCUS_SEL_BACK].GetStr());
-	// printf("_LgiColours[L_NON_FOCUS_SEL_BACK]=%s\n", _LgiColours[L_NON_FOCUS_SEL_BACK].GetStr());
+		LHashTbl<ConstStrKey<char,false>, int> Colours(0, -1);
+		auto ScreenBits = GdcD->GetBits();
+		for (int i=0; i<Lines.Length(); i++)
+		{
+			char *var = Lines[i];
+			char *col = strchr(var, ':');
+			if (col)
+			{
+				*col++ = 0;
+				
+				char *val = col;
+				if (*val == ' ') val++;
+				if (*val == '#') val++;
+				uint64 c = htoi64(val);
+				COLOUR c24 = c;
+				if (ScreenBits == 32)			
+				{
+					c24 = ((c >> 8) & 0xff) |
+							((c >> 16) & 0xff00) |
+							((c >> 24) & 0xff0000);
+				}
+
+				Colours.Add(var, c24);
+				// printf("Color %s = %x\n", var, c24);
+			}
+		}
+		#define LookupColour(name, default) ((Colours.Find(name) >= 0) ? LColour(Colours.Find(name),24) : default)
+
+		LColour Med = LookupColour("bg_color", LColour(0xe8, 0xe8, 0xe8));
+		LColour White(255, 255, 255);
+		LColour Black(0, 0, 0);
+		LColour Sel(0x33, 0x99, 0xff);
+		_LgiColours[L_SHADOW] = GdcMixColour(Med, Black, 0.25); // LC_SHADOW
+		_LgiColours[L_LOW] = GdcMixColour(Med, Black, 0.5); // LC_LOW
+		_LgiColours[L_MED] = Med; // LC_MED
+		_LgiColours[L_HIGH] = GdcMixColour(Med, White, 0.5); // LC_HIGH
+		_LgiColours[L_LIGHT] = GdcMixColour(Med, White, 0.25); // LC_LIGHT
+		_LgiColours[L_DIALOG] = Med; // LC_DIALOG
+		_LgiColours[L_WORKSPACE] = LookupColour("base_color", White); // LC_WORKSPACE
+		_LgiColours[L_TEXT] = LookupColour("text_color", Black); // LC_TEXT
+		_LgiColours[L_FOCUS_SEL_BACK] = LookupColour("selected_bg_color", Sel); // LC_FOCUS_SEL_BACK
+		_LgiColours[L_FOCUS_SEL_FORE] = LookupColour("selected_fg_color", White); // LC_FOCUS_SEL_FORE
+		_LgiColours[L_ACTIVE_TITLE] = LookupColour("selected_bg_color", Sel); // LC_ACTIVE_TITLE
+		_LgiColours[L_ACTIVE_TITLE_TEXT] = LookupColour("selected_fg_color", White); // LC_ACTIVE_TITLE_TEXT
+		_LgiColours[L_INACTIVE_TITLE].Rgb(0xc0, 0xc0, 0xc0); // LC_INACTIVE_TITLE
+		_LgiColours[L_INACTIVE_TITLE_TEXT].Rgb(0x80, 0x80, 0x80); // LC_INACTIVE_TITLE_TEXT
+		_LgiColours[L_MENU_BACKGROUND] = LookupColour("bg_color", White); // LC_MENU_BACKGROUND
+		_LgiColours[L_MENU_TEXT] = _LgiColours[L_TEXT]; // LC_MENU_TEXT
+		_LgiColours[L_NON_FOCUS_SEL_BACK] = _LgiColours[L_FOCUS_SEL_BACK].Mix(_LgiColours[L_WORKSPACE]); // LC_NON_FOCUS_SEL_BACK
+		_LgiColours[L_NON_FOCUS_SEL_FORE] = _LgiColours[L_TEXT]; // LC_NON_FOCUS_SEL_FORE
+		
+		// printf("_LgiColours[L_FOCUS_SEL_BACK]=%s\n", _LgiColours[L_FOCUS_SEL_BACK].GetStr());
+		// printf("_LgiColours[L_NON_FOCUS_SEL_BACK]=%s\n", _LgiColours[L_NON_FOCUS_SEL_BACK].GetStr());
 	
 
 	#elif defined(WINDOWS)
 
-	/*
-	for (int i=0; i<30; i++)
-	{
-		auto c = GetSysColor(i);
-		auto r = GetRValue(c);
-		auto g = GetGValue(c);
-		auto b = GetBValue(c);
-		LgiTrace("[%i]=%i,%i,%i %x,%x,%x\n", i, r, g, b, r, g, b);
-	}
-	*/
+		/*
+		for (int i=0; i<30; i++)
+		{
+			auto c = GetSysColor(i);
+			auto r = GetRValue(c);
+			auto g = GetGValue(c);
+			auto b = GetBValue(c);
+			LgiTrace("[%i]=%i,%i,%i %x,%x,%x\n", i, r, g, b, r, g, b);
+		}
+		*/
 
-	_LgiColours[L_SHADOW] = ConvertWinColour(GetSysColor(COLOR_3DDKSHADOW)); // LC_SHADOW
-	_LgiColours[L_LOW] = ConvertWinColour(GetSysColor(COLOR_3DSHADOW)); // LC_LOW
-	_LgiColours[L_MED] = ConvertWinColour(GetSysColor(COLOR_3DFACE)); // LC_MED
-	_LgiColours[L_HIGH] = ConvertWinColour(GetSysColor(COLOR_3DLIGHT)); // LC_HIGH
-	_LgiColours[L_LIGHT] = ConvertWinColour(GetSysColor(COLOR_3DHIGHLIGHT)); // LC_LIGHT
-	_LgiColours[L_DIALOG] = ConvertWinColour(GetSysColor(COLOR_3DFACE)); // LC_DIALOG
-	_LgiColours[L_WORKSPACE] = ConvertWinColour(GetSysColor(COLOR_WINDOW)); // LC_WORKSPACE
-	_LgiColours[L_TEXT] = ConvertWinColour(GetSysColor(COLOR_WINDOWTEXT)); // LC_TEXT
-	_LgiColours[L_FOCUS_SEL_BACK] = ConvertWinColour(GetSysColor(COLOR_HIGHLIGHT)); // LC_FOCUS_SEL_BACK
-	_LgiColours[L_FOCUS_SEL_FORE] = ConvertWinColour(GetSysColor(COLOR_HIGHLIGHTTEXT)); // LC_FOCUS_SEL_FORE
-	_LgiColours[L_ACTIVE_TITLE] = ConvertWinColour(GetSysColor(COLOR_ACTIVECAPTION)); // LC_ACTIVE_TITLE
-	_LgiColours[L_ACTIVE_TITLE_TEXT] = ConvertWinColour(GetSysColor(COLOR_CAPTIONTEXT)); // LC_ACTIVE_TITLE_TEXT
-	_LgiColours[L_INACTIVE_TITLE] = ConvertWinColour(GetSysColor(COLOR_INACTIVECAPTION)); // LC_INACTIVE_TITLE
-	_LgiColours[L_INACTIVE_TITLE_TEXT] = ConvertWinColour(GetSysColor(COLOR_INACTIVECAPTIONTEXT)); // LC_INACTIVE_TITLE_TEXT
-	_LgiColours[L_MENU_BACKGROUND] = ConvertWinColour(GetSysColor(COLOR_MENU)); // LC_MENU_BACKGROUND
-	_LgiColours[L_MENU_TEXT] = ConvertWinColour(GetSysColor(COLOR_MENUTEXT)); // LC_MENU_TEXT
-	_LgiColours[L_NON_FOCUS_SEL_BACK] = ConvertWinColour(GetSysColor(COLOR_3DLIGHT)); // LC_NON_FOCUS_SEL_BACK
-	_LgiColours[L_NON_FOCUS_SEL_FORE] = ConvertWinColour(GetSysColor(COLOR_BTNTEXT)); // LC_NON_FOCUS_SEL_FORE
+		_LgiColours[L_SHADOW] = ConvertWinColour(GetSysColor(COLOR_3DDKSHADOW)); // LC_SHADOW
+		_LgiColours[L_LOW] = ConvertWinColour(GetSysColor(COLOR_3DSHADOW)); // LC_LOW
+		_LgiColours[L_MED] = ConvertWinColour(GetSysColor(COLOR_3DFACE)); // LC_MED
+		_LgiColours[L_HIGH] = ConvertWinColour(GetSysColor(COLOR_3DLIGHT)); // LC_HIGH
+		_LgiColours[L_LIGHT] = ConvertWinColour(GetSysColor(COLOR_3DHIGHLIGHT)); // LC_LIGHT
+		_LgiColours[L_DIALOG] = ConvertWinColour(GetSysColor(COLOR_3DFACE)); // LC_DIALOG
+		_LgiColours[L_WORKSPACE] = ConvertWinColour(GetSysColor(COLOR_WINDOW)); // LC_WORKSPACE
+		_LgiColours[L_TEXT] = ConvertWinColour(GetSysColor(COLOR_WINDOWTEXT)); // LC_TEXT
+		_LgiColours[L_FOCUS_SEL_BACK] = ConvertWinColour(GetSysColor(COLOR_HIGHLIGHT)); // LC_FOCUS_SEL_BACK
+		_LgiColours[L_FOCUS_SEL_FORE] = ConvertWinColour(GetSysColor(COLOR_HIGHLIGHTTEXT)); // LC_FOCUS_SEL_FORE
+		_LgiColours[L_ACTIVE_TITLE] = ConvertWinColour(GetSysColor(COLOR_ACTIVECAPTION)); // LC_ACTIVE_TITLE
+		_LgiColours[L_ACTIVE_TITLE_TEXT] = ConvertWinColour(GetSysColor(COLOR_CAPTIONTEXT)); // LC_ACTIVE_TITLE_TEXT
+		_LgiColours[L_INACTIVE_TITLE] = ConvertWinColour(GetSysColor(COLOR_INACTIVECAPTION)); // LC_INACTIVE_TITLE
+		_LgiColours[L_INACTIVE_TITLE_TEXT] = ConvertWinColour(GetSysColor(COLOR_INACTIVECAPTIONTEXT)); // LC_INACTIVE_TITLE_TEXT
+		_LgiColours[L_MENU_BACKGROUND] = ConvertWinColour(GetSysColor(COLOR_MENU)); // LC_MENU_BACKGROUND
+		_LgiColours[L_MENU_TEXT] = ConvertWinColour(GetSysColor(COLOR_MENUTEXT)); // LC_MENU_TEXT
+		_LgiColours[L_NON_FOCUS_SEL_BACK] = ConvertWinColour(GetSysColor(COLOR_3DLIGHT)); // LC_NON_FOCUS_SEL_BACK
+		_LgiColours[L_NON_FOCUS_SEL_FORE] = ConvertWinColour(GetSysColor(COLOR_BTNTEXT)); // LC_NON_FOCUS_SEL_FORE
 
 	#else // defaults for non-windows, plain grays
 
-	#if defined(LINUX) && !defined(LGI_SDL)
-	WmColour c;
-	Proc_LgiWmGetColour WmGetColour = 0;
-	LLibrary *WmLib = LAppInst->GetWindowManagerLib();
-	if (WmLib)
-	{
-		WmGetColour = (Proc_LgiWmGetColour) WmLib->GetAddress("LgiWmGetColour");
-	}
+		#if defined(LINUX) && !defined(LGI_SDL)
 
-	#define SetCol(def) \
-		if (WmGetColour && WmGetColour(i, &c)) \
-			_LgiColours[i++] = Rgb24(c.r, c.g, c.b); \
-		else \
-			_LgiColours[i++] = def;
+			WmColour c;
+			Proc_LgiWmGetColour WmGetColour = 0;
+			LLibrary *WmLib = LAppInst->GetWindowManagerLib();
+			if (WmLib)
+			{
+				WmGetColour = (Proc_LgiWmGetColour) WmLib->GetAddress("LgiWmGetColour");
+			}
 
-	#else // MAC
+			#define SetCol(def) \
+				if (WmGetColour && WmGetColour(i, &c)) \
+					_LgiColours[i++] = Rgb24(c.r, c.g, c.b); \
+				else \
+					_LgiColours[i++] = def;
 
-	#define SetCol(def) \
-		_LgiColours[i++] = def;
+		#else // MAC
 
-	#endif
+			#define SetCol(def) \
+				_LgiColours[i++] = def;
 
-	_LgiColours[L_SHADOW].Rgb(96, 96, 96); // LC_SHADOW
-	_LgiColours[L_LOW].Rgb(150, 150, 150); // LC_LOW
-	_LgiColours[L_MED].Rgb(230, 230, 230); // LC_MED
-	_LgiColours[L_HIGH].Rgb(240, 240, 240); // LC_HIGH
-	_LgiColours[L_LIGHT].Rgb(255, 255, 255); // LC_LIGHT
-	_LgiColours[L_DIALOG].Rgb(216, 216, 216); // LC_DIALOG
-	_LgiColours[L_WORKSPACE].Rgb(0xff, 0xff, 0xff); // LC_WORKSPACE
-	_LgiColours[L_TEXT].Rgb(0, 0, 0); // LC_TEXT
-	_LgiColours[L_FOCUS_SEL_BACK].Rgb(0x4a, 0x59, 0xa5); // LC_FOCUS_SEL_BACK
-	_LgiColours[L_FOCUS_SEL_FORE].Rgb(0xff, 0xff, 0xff); // LC_FOCUS_SEL_FORE
-	_LgiColours[L_ACTIVE_TITLE].Rgb(0, 0, 0x80); // LC_ACTIVE_TITLE
-	_LgiColours[L_ACTIVE_TITLE_TEXT].Rgb(0xff, 0xff, 0xff); // LC_ACTIVE_TITLE_TEXT
-	_LgiColours[L_INACTIVE_TITLE].Rgb(0x80, 0x80, 0x80); // LC_INACTIVE_TITLE
-	_LgiColours[L_INACTIVE_TITLE_TEXT].Rgb(0x40, 0x40, 0x40); // LC_INACTIVE_TITLE_TEXT
-	_LgiColours[L_MENU_BACKGROUND].Rgb(222, 222, 222); // LC_MENU_BACKGROUND
-	_LgiColours[L_MENU_TEXT].Rgb(0, 0, 0); // LC_MENU_TEXT
-	_LgiColours[L_NON_FOCUS_SEL_BACK].Rgb(222, 222, 222); // LC_NON_FOCUS_SEL_BACK
-	_LgiColours[L_NON_FOCUS_SEL_FORE].Rgb(0, 0, 0); // LC_NON_FOCUS_SEL_FORE
+		#endif
+
+		_LgiColours[L_SHADOW].Rgb(96, 96, 96); // LC_SHADOW
+		_LgiColours[L_LOW].Rgb(150, 150, 150); // LC_LOW
+		#ifdef HAIKU
+			_LgiColours[L_MED].Rgb(216, 216, 216); // LC_MED
+		#else
+			_LgiColours[L_MED].Rgb(230, 230, 230); // LC_MED
+		#endif
+		_LgiColours[L_HIGH].Rgb(240, 240, 240); // LC_HIGH
+		_LgiColours[L_LIGHT].Rgb(255, 255, 255); // LC_LIGHT
+		_LgiColours[L_DIALOG].Rgb(216, 216, 216); // LC_DIALOG
+		_LgiColours[L_WORKSPACE].Rgb(0xff, 0xff, 0xff); // LC_WORKSPACE
+		_LgiColours[L_TEXT].Rgb(0, 0, 0); // LC_TEXT
+		_LgiColours[L_FOCUS_SEL_BACK].Rgb(0x4a, 0x59, 0xa5); // LC_FOCUS_SEL_BACK
+		_LgiColours[L_FOCUS_SEL_FORE].Rgb(0xff, 0xff, 0xff); // LC_FOCUS_SEL_FORE
+		_LgiColours[L_ACTIVE_TITLE].Rgb(0, 0, 0x80); // LC_ACTIVE_TITLE
+		_LgiColours[L_ACTIVE_TITLE_TEXT].Rgb(0xff, 0xff, 0xff); // LC_ACTIVE_TITLE_TEXT
+		_LgiColours[L_INACTIVE_TITLE].Rgb(0x80, 0x80, 0x80); // LC_INACTIVE_TITLE
+		_LgiColours[L_INACTIVE_TITLE_TEXT].Rgb(0x40, 0x40, 0x40); // LC_INACTIVE_TITLE_TEXT
+		_LgiColours[L_MENU_BACKGROUND].Rgb(222, 222, 222); // LC_MENU_BACKGROUND
+		_LgiColours[L_MENU_TEXT].Rgb(0, 0, 0); // LC_MENU_TEXT
+		_LgiColours[L_NON_FOCUS_SEL_BACK].Rgb(222, 222, 222); // LC_NON_FOCUS_SEL_BACK
+		_LgiColours[L_NON_FOCUS_SEL_FORE].Rgb(0, 0, 0); // LC_NON_FOCUS_SEL_FORE
+
 	#endif
 
 	// Tweak

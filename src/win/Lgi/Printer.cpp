@@ -34,10 +34,13 @@ LString LPrinter::GetErrorMsg()
 	return d->Err;
 }
 
-int LPrinter::Print(LPrintEvents *Events, const char *PrintJobName, int Pages, LView *Parent)
+#define PrintStatus(val) \
+	{ if (callback) callback(val); return; }
+
+void LPrinter::Print(LPrintEvents *Events, std::function<void(int)> callback, const char *PrintJobName, int Pages, LView *Parent)
 {
 	if (!Events)
-		return false;
+		PrintStatus(LPrintEvents::OnBeginPrintError);
 		
 	if
 	(
@@ -54,30 +57,19 @@ int LPrinter::Print(LPrintEvents *Events, const char *PrintJobName, int Pages, L
 		bool r = Browse(Parent);
 		d->NeedsDC = false;
 		if (!r)
-			return false;
+			PrintStatus(LPrintEvents::OnBeginPrintError);
 	}
 	else
 	{
 		d->Info.hwndOwner = (Parent) ? Parent->Handle() : 0;
 		d->Info.Flags = PD_RETURNDC;
 		d->Info.hDC = 0;
-		/*
-		if (Pages >= 0)
-		{
-			d->Info.nMinPage = 1;
-			d->Info.nMaxPage = Pages;
-		}
-		*/
 		if (!PrintDlg(&d->Info))
-		{
-			return false;
-		}
+			PrintStatus(LPrintEvents::OnBeginPrintError);
 	}
 
 	if (!d->Info.hDC)
-	{
-		return false;
-	}
+		PrintStatus(LPrintEvents::OnBeginPrintError);
 	
 	LString PrinterName;
 	if (d->Info.hDevNames)
@@ -98,50 +90,50 @@ int LPrinter::Print(LPrintEvents *Events, const char *PrintJobName, int Pages, L
 	if (!dc.Handle())
 	{
 		d->Err.Printf("%s:%i - StartDoc failed.\n", _FL);
-		return false;
+		PrintStatus(LPrintEvents::OnBeginPrintError);
 	}	
 	
-	auto JobPages = Events->OnBeginPrint(&dc);
-	if (JobPages <= 0)
-		return JobPages;
-
-	bool Status = false;
-	DOCINFO Info;
-	LAutoWString DocName(Utf8ToWide(PrintJobName ? PrintJobName : "Lgi Print Job"));
-
-	ZeroObj(Info);
-	Info.cbSize = sizeof(DOCINFO); 
-	Info.lpszDocName = DocName; 
-
-	if (Pages > 0)
-		JobPages = min(JobPages, Pages);
-		
-	auto PageRanges = Events->GetPageRanges();
-	for (int i=0; i<JobPages; i++)
+	Events->OnBeginPrint(&dc, [&](auto JobPages)
 	{
-		if (!PageRanges || PageRanges->InRanges(i + 1))
+		if (JobPages <= LPrintEvents::OnBeginPrintCancel)
+			PrintStatus(JobPages);
+
+		bool Status = false;
+		DOCINFO Info;
+		LAutoWString DocName(Utf8ToWide(PrintJobName ? PrintJobName : "Lgi Print Job"));
+
+		ZeroObj(Info);
+		Info.cbSize = sizeof(DOCINFO); 
+		Info.lpszDocName = DocName; 
+
+		if (Pages > 0)
+			JobPages = min(JobPages, Pages);
+		
+		auto PageRanges = Events->GetPageRanges();
+		for (int i=0; i<JobPages; i++)
 		{
-			if (StartPage(dc.Handle()) > 0)
+			if (!PageRanges || PageRanges->InRanges(i + 1))
 			{
-				Status |= Events->OnPrintPage(&dc, i);
-				EndPage(dc.Handle());
-			}
-			else
-			{
-				d->Err.Printf("%s:%i - StartPage failed.", _FL);
-				Status = false;
-				break;
+				if (StartPage(dc.Handle()) > 0)
+				{
+					Status |= Events->OnPrintPage(&dc, i);
+					EndPage(dc.Handle());
+				}
+				else
+				{
+					d->Err.Printf("%s:%i - StartPage failed.", _FL);
+					JobPages = LPrintEvents::OnBeginPrintError;
+					break;
+				}
 			}
 		}
-	}
 	
-	LString OutputFile = dc.GetOutputFileName();
-	if (LFileExists(OutputFile))
-	{
-		LBrowseToFile(OutputFile);
-	}
-	
-	return Status;
+		LString OutputFile = dc.GetOutputFileName();
+		if (LFileExists(OutputFile))
+			LBrowseToFile(OutputFile);
+
+		PrintStatus(JobPages);
+	});	
 }
 
 bool LPrinter::Browse(LView *Parent)

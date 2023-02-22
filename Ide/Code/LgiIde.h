@@ -23,7 +23,7 @@
 #endif
 
 #define APP_VER					"1.0"
-#define APP_URL					"http://www.memecode.com/lgi/ide"
+#define APP_URL					"http://www.memecode.com/lgi/ide/"
 
 #define DEBUG_FIND_DEFN			0
 
@@ -268,8 +268,11 @@ public:
 
 	AppWnd();
 	~AppWnd();
+	
+	const char *GetClass() override { return "AppWnd"; }
 
-	void SaveAll();
+	bool IsClean();
+	void SaveAll(std::function<void(bool)> Callback, bool CloseDirty = false);
 	void CloseAll();
 	IdeDoc *OpenFile(const char *FileName, NodeSource *Src = 0);
 	IdeDoc *NewDocWnd(const char *FileName, NodeSource *Src);

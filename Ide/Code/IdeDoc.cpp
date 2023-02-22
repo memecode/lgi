@@ -799,7 +799,8 @@ public:
 		}
 		
 		return 0;
-	}	
+	}
+	
 }	StyleThread;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -1222,7 +1223,7 @@ void IdeDoc::OnTitleClick(LMouse &m)
 		{
 			case IDM_SAVE:
 			{
-				SetClean();
+				SetClean(NULL);
 				break;
 			}
 			case IDM_CLOSE:
@@ -1469,8 +1470,9 @@ void IdeDoc::EscapeSelection(bool ToEscaped)
 		if (m.Ctrl())
 		{
 			LInput Inp(this, LString::Escape(Delim, -1, "\\"), "Delimiter chars:", "Escape");
-			if (Inp.DoModal())
+			Inp.DoModal([&](auto d, auto code) {
 				Delim = LString::UnEscape(Inp.GetStr().Get(), -1);
+			});
 		}
 		s = LString::Escape(s, -1, Delim);
 	}
@@ -1808,56 +1810,86 @@ void IdeDoc::SetDirty()
 	d->UpdateName();
 }
 
-bool IdeDoc::SetClean()
+bool IdeDoc::GetClean()
+{
+	return !d->Edit->IsDirty();
+}
+
+LString IdeDoc::GetFullPath()
+{
+	LAutoString Base;
+	if (GetProject())
+		Base = GetProject()->GetBasePath();
+	
+	LString LocalPath;
+	if (d->GetLocalFile() &&
+		LIsRelativePath(LocalPath) &&
+		Base)
+	{
+		char p[MAX_PATH_LEN];
+		LMakePath(p, sizeof(p), Base, d->GetLocalFile());
+		LocalPath = p;
+	}
+	else
+	{
+		LocalPath = d->GetLocalFile();
+	}
+	
+	if (d->Project)
+		d->Project->CheckExists(LocalPath);
+
+	return LocalPath;
+}
+
+void IdeDoc::SetClean(std::function<void(bool)> Callback)
 {
 	static bool Processing = false;
 	bool Status = false;
 
 	if (!Processing)
 	{
-		Status = Processing = true;
+		Processing = true;
 
 		LAutoString Base;
 		if (GetProject())
 			Base = GetProject()->GetBasePath();
-		
-		LString LocalPath;
-		if (d->GetLocalFile() &&
-			LIsRelativePath(LocalPath) &&
-			Base)
-		{
-			char p[MAX_PATH_LEN];
-			LMakePath(p, sizeof(p), Base, d->GetLocalFile());
-			LocalPath = p;
-		}
-		else
-		{
-			LocalPath = d->GetLocalFile();
-		}
-		
-		if (d->Project)
-			d->Project->CheckExists(LocalPath);
+		LString LocalPath = GetFullPath();
 
+		// printf("OnSave setup d=%p\n", d);
+		auto OnSave = [this, Callback](bool ok)
+		{
+			// printf("OnSave %i d=%p\n", ok, d);
+			if (ok)
+				d->Save();
+			// printf("OnSave cb\n");
+			if (Callback)
+				Callback(ok);
+			// printf("OnSave done\n");
+		};		
+		
 		if (d->Edit->IsDirty() &&
 			!LFileExists(LocalPath))
 		{
 			// We need a valid filename to save to...			
-			LFileSelect s;
-			s.Parent(this);
+			auto s = new LFileSelect;
+			s->Parent(this);
 			if (Base)
-				s.InitialDir(Base);
-			
-			if (s.Save())
-				d->SetFileName(s.Name());
+				s->InitialDir(Base);			
+			s->Save([this, OnSave](auto fileSel, auto ok)
+			{
+				// printf("Doc.Save.Cb ok=%i d=%p\n", ok, d);
+				if (ok)
+					d->SetFileName(fileSel->Name());
+				// printf("Doc.Save.Cb onsave\n", ok);
+				OnSave(ok);
+				// printf("Doc.Save.Cb del\n", ok);
+				delete fileSel;
+			});
 		}
-		
-		if (d->Edit->IsDirty())
-			d->Save();
+		else OnSave(true);
 		
 		Processing = false;
 	}
-	
-	return Status;
 }
 
 void IdeDoc::OnPaint(LSurface *pDC)
@@ -1885,11 +1917,16 @@ bool IdeDoc::OnRequestClose(bool OsShuttingDown)
 		{
 			case IDYES:
 			{
-				if (!SetClean())
-				{				
-					return false;
-				}
-				break;
+				SetClean([](bool ok)
+				{
+					if (ok)
+					{
+						LAssert(!"Impl close doc.");
+					}
+				});
+
+				// This is returned immediately... before the user has decided to save or not
+				return false;
 			}
 			case IDNO:
 			{

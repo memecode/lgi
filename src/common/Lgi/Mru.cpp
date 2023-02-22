@@ -276,24 +276,33 @@ void LMru::RemoveFile(const char *FileName, bool Update)
 	}
 }
 
-bool LMru::DoFileDlg(LFileSelect &Select, bool Open)
+void LMru::DoFileDlg(LFileSelect &Select, bool Open, std::function<void(bool)> OnSelect)
 {
 	GetFileTypes(&Select, false);
 	Select.ShowReadOnly(Open);
-	if (Open ? Select.Open() : Select.Save())
-	{
-		d->SelectedType = Select.TypeAt(Select.SelectedType());
-		if (Open)
-			_OpenFile(Select.Name(), Select.ReadOnly());
-		else
-			_SaveFile(Select.Name());
-	}
-	else return false;
 
-	return true;
+	auto Cb = [&](auto s, bool ok)
+	{
+		if (ok)
+		{
+			d->SelectedType = s->TypeAt(s->SelectedType());
+			if (Open)
+				_OpenFile(s->Name(), s->ReadOnly());
+			else
+				_SaveFile(s->Name());
+		}
+			
+		if (OnSelect)
+			OnSelect(ok);
+	};
+
+	if (Open)
+		Select.Open(Cb);
+	else
+		Select.Save(Cb);
 }
 
-bool LMru::OnCommand(int Cmd)
+void LMru::OnCommand(int Cmd, std::function<void(bool)> OnStatus)
 {
 	bool Status = false;
 
@@ -317,26 +326,26 @@ bool LMru::OnCommand(int Cmd)
 				Select.InitialDir(Path);
 		}
 
+		auto Process = [Cmd, OnStatus, this](bool ok)
+		{
+			if (Cmd >= M_MRU_BASE &&
+				Cmd < M_MRU_BASE + d->Items.Length())
+			{
+				int Index = Cmd - M_MRU_BASE;
+				auto c = d->Items[Index];
+				if (c)
+					ok &= _OpenFile(c->Raw, false);
+			}
+			
+			if (OnStatus)
+				OnStatus(ok);
+		};
+
 		if (Cmd == IDM_OPEN)
-		{
-			Status = DoFileDlg(Select, true);
-		}
+			DoFileDlg(Select, true, Process);
 		else if (Cmd == IDM_SAVEAS)
-		{
-			Status = DoFileDlg(Select, false);
-		}
+			DoFileDlg(Select, false, Process);
 	}
-
-	if (Cmd >= M_MRU_BASE &&
-		Cmd < M_MRU_BASE + d->Items.Length())
-	{
-		auto Index = Cmd - M_MRU_BASE;
-		auto c = d->Items[Index];
-		if (c)
-			Status &= _OpenFile(c->Raw, false);
-	}
-
-	return Status;
 }
 
 LMessage::Result LMru::OnEvent(LMessage *Msg)

@@ -42,7 +42,7 @@ struct LDialogPriv
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-LDialog::LDialog()
+LDialog::LDialog(LViewI *parent)
 	:
 	#ifdef __GTK_H__
 	// , LWindow(gtk_dialog_new())
@@ -53,6 +53,9 @@ LDialog::LDialog()
 	d = new LDialogPriv();
 	Name("Dialog");
 	_SetDynamic(false);
+	
+	if (parent)
+		SetParent(parent);
 }
 
 LDialog::~LDialog()
@@ -172,7 +175,7 @@ bool LDialog::SetupDialog(bool Modal)
 	return true;
 }
 
-int LDialog::DoModal(OsView OverrideParent)
+void LDialog::DoModal(OnClose Callback, OsView OverrideParent)
 {
 	d->ModalStatus = -1;
 	
@@ -188,7 +191,8 @@ int LDialog::DoModal(OsView OverrideParent)
 	SetupDialog(true);
 	LAppInst->Run();
 	
-	return d->ModalStatus;
+	if (Callback)
+		Callback(this, d->ModalStatus);
 }
 
 void LDialog::EndModal(int Code)

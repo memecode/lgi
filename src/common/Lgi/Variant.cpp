@@ -1119,7 +1119,7 @@ LVariant &LVariant::Cast(LVariantType NewType)
 	return *this;
 }
 
-void *LVariant::CastVoidPtr()
+void *LVariant::CastVoidPtr() const
 {
 	switch (Type)
 	{
@@ -1158,7 +1158,7 @@ void *LVariant::CastVoidPtr()
 	return 0;
 }
 
-LDom *LVariant::CastDom()
+LDom *LVariant::CastDom() const
 {
 	switch (Type)
 	{
@@ -1179,7 +1179,7 @@ LDom *LVariant::CastDom()
 	return NULL;
 }
 
-bool LVariant::CastBool()
+bool LVariant::CastBool() const
 {
 	switch (Type)
 	{
@@ -1243,7 +1243,7 @@ bool LVariant::CastBool()
 	return false;
 }
 
-double LVariant::CastDouble()
+double LVariant::CastDouble() const
 {
 	switch (Type)
 	{
@@ -1276,7 +1276,7 @@ double LVariant::CastDouble()
 	return 0;
 }
 
-int32 LVariant::CastInt32()
+int32 LVariant::CastInt32() const
 {
 	switch (Type)
 	{
@@ -1333,7 +1333,7 @@ int32 LVariant::CastInt32()
 	return 0;
 }
 
-int64 LVariant::CastInt64()
+int64 LVariant::CastInt64() const
 {
 	switch (Type)
 	{

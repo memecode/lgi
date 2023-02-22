@@ -101,7 +101,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	};
 
 	int hApp;
-	int MissingFiles;
+	int MissingFiles = 0;
 	LArray<LString::Array*> IncPaths;
 	
 	#if USE_HASH
@@ -110,18 +110,14 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	LArray<FileSyms*> Files;
 	#endif	
 	
-	uint32_t Tasks;
-	uint64 MsgTs;
-	bool DoingProgress;
+	int Tasks = 0;
+	uint64 MsgTs = 0;
+	bool DoingProgress = false;
 	
 	FindSymbolSystemPriv(int appSinkHnd) :
 		LEventTargetThread("FindSymbolSystemPriv"),
 		hApp(appSinkHnd)	
 	{
-		Tasks = 0;
-		MsgTs = 0;
-		MissingFiles = 0;
-		DoingProgress = false;
 	}
 
 	~FindSymbolSystemPriv()
@@ -429,7 +425,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		{
 			MsgTs = Now;
 			DoingProgress = true;
-			uint32_t Remaining = (uint32_t) (Tasks - GetQueueSize());
+			int Remaining = (int)(Tasks - GetQueueSize());
 			if (Remaining > 0)
 				Log("FindSym: %i of %i (%.1f%%)\n", Remaining, Tasks, (double)Remaining * 100.0 / MAX(Tasks, 1));
 		}
@@ -636,11 +632,15 @@ FindSymbolSystem::~FindSymbolSystem()
 	delete d;
 }
 
-FindSymResult FindSymbolSystem::OpenSearchDlg(LViewI *Parent)
+void FindSymbolSystem::OpenSearchDlg(LViewI *Parent, std::function<void(FindSymResult&)> Callback)
 {
-	FindSymbolDlg Dlg(Parent, this);
-	Dlg.DoModal();
-	return Dlg.Result;	
+	FindSymbolDlg *Dlg = new FindSymbolDlg(Parent, this);
+	Dlg->DoModal([Dlg, Callback](auto d, auto code)
+	{
+		if (Callback)
+			Callback(Dlg->Result);
+		delete Dlg;
+	});
 }
 
 bool FindSymbolSystem::SetIncludePaths(LString::Array &Paths)

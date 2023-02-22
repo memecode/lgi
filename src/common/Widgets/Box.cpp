@@ -609,14 +609,15 @@ void LBox::OnMouseClick(LMouse &m)
 	}
 	#endif
 
+	// m.Trace("Lbox click.");
 	if (m.Down())
 	{
 		d->Dragging = d->HitTest(m.x, m.y);
+		Capture(d->Dragging != NULL);
 		if (d->Dragging)
 		{
 			d->DragOffset.x = m.x - d->Dragging->Pos.x1;
 			d->DragOffset.y = m.y - d->Dragging->Pos.y1;
-			Capture(d->Dragging != NULL);
 		}
 	}
 	else if (IsCapturing())
@@ -636,8 +637,11 @@ bool IsValidLen(LCss *c, LCss::PropType p)
 
 void LBox::OnMouseMove(LMouse &m)
 {
+	// m.Trace("Lbox move");
 	if (!d->Dragging || !IsCapturing())
+	{
 		return;
+	}
 
 	#if 0
 	{
@@ -651,6 +655,7 @@ void LBox::OnMouseMove(LMouse &m)
 	if (!m.Down())
 	{
 		// Something else got the up click?
+		printf("No button down... so uncapturing..\n");
 		Capture(false);
 		return;
 	}

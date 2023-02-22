@@ -463,7 +463,7 @@ public:
 			#else
 			int err = errno;
 			#endif
-			OnError(err, GetErrorName(err));
+			OnError(err, LErrorCodeToString(err));
 
 			LgiTrace("Error: Bind on %s:%i\n", LIpToStr(ntohl(addr.sin_addr.s_addr)).Get(), port);
 		}

@@ -1,16 +1,16 @@
 cmake_minimum_required (VERSION 3.18)
 
-set(CMAKE_OSX_ARCHITECTURES "x86_64")
 set(CMAKE_CXX_STANDARD 14)
 
 project (LgiIde)
 
-if (NOT TARGET libpng16)
+if (NOT DEFINED LIBPNG_TARGET OR NOT TARGET ${LIBPNG_TARGET})
 	message(FATAL_ERROR "Find the libpng target (see parent folder cmake)")
 endif()
 
 if (APPLE)
 
+	set(CMAKE_OSX_ARCHITECTURES "x86_64")
 	set(GUI_TYPE MACOSX_BUNDLE)
 	find_library(COCOA_LIBRARY Cocoa)
 	mark_as_advanced(COCOA_LIBRARY)
@@ -19,7 +19,6 @@ if (APPLE)
 elseif (LINUX)
 
 	add_definitions("-fPIC -w -fno-inline -fpermissive")
-	find_package(PNG REQUIRED)
 
 elseif (MSVC)
 
@@ -42,6 +41,13 @@ elseif (MSVC)
 	endif()
 
 endif ()
+
+if (NOT MSVC)
+	find_package(ZLIB REQUIRED)
+	set(ZLIB_TARGET ZLIB::ZLIB)
+else()
+	set(ZLIB_TARGET zlib)
+endif()
 
 set (CommonSource
 	Code/SimpleCppParser.cpp
@@ -91,18 +97,22 @@ list(APPEND ResourceFiles
 	)
 
 if (APPLE)
+
 	set(MacResourceFiles
 		MacCocoa/Info.plist
 		Resources/mac-icon.icns)
 	set(APP_TYPE MACOSX_BUNDLE)
 	set_source_files_properties(${MacResourceFiles} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 	list(APPEND ResourceFiles ${MacResourceFiles})
+
 elseif (MSVC)
+
 	set(APP_TYPE WIN32)
+
 endif ()
 
 add_executable(LgiIde ${APP_TYPE} ${CommonSource} ${ResourceFiles})
-target_link_libraries(LgiIde lgi libpng16)
+target_link_libraries(LgiIde lgi ${LIBPNG_TARGET} ${ZLIB_TARGET})
 target_include_directories(LgiIde PRIVATE Code Resources)
 
 if (APPLE)
@@ -133,6 +143,10 @@ elseif (MSVC)
 	endif()
 
 endif ()
+
+if (NOT MSVC)
+	target_compile_definitions(LgiIde PRIVATE LIBPNG_SHARED=0)
+endif()
 
 # Create a resources sub-folder and copy over the resource files (images and lr8)
 file(COPY ${CMAKE_CURRENT_LIST_DIR}/Resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

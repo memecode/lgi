@@ -753,27 +753,36 @@ public:
 					LEdit *e;
 					if (GetViewById(IDC_EDIT_BASE + BrowseIdx, e))
 					{
-						LFileSelect s;
-						s.Parent(this);
+						LFileSelect *s = new LFileSelect;
+						s->Parent(this);
 
 						LFile::Path Path(d->Project->GetBasePath());
 						LFile::Path Cur(e->Name());
 						Path.Join(Cur.GetFull());
 						Path--;
 						if (Path.Exists())
-							s.InitialDir(Path);
+							s->InitialDir(Path);
 
-						if (BrowseFolder ? s.OpenFolder() : s.Open())
+						auto Process = [&](LFileSelect *s, bool ok)
 						{
+							if (!ok)
+								return;
 							const char *Base = GetCtrlName(IDC_PATH);
 							LString Rel;
 							if (Base)
 							{
 								LFile::Path p = Base;
-								Rel = LMakeRelativePath(--p, s.Name());
+								Rel = LMakeRelativePath(--p, s->Name());
 							}
-							e->Name(Rel ? Rel.Get() : s.Name());
-						}
+							e->Name(Rel ? Rel.Get() : s->Name());
+
+							delete s;
+						};
+						
+						if (BrowseFolder)
+							s->OpenFolder(Process);
+						else
+							s->Open(Process);
 
 						return 0; // no default btn handling.
 					}
@@ -956,23 +965,28 @@ void IdeProjectSettings::InitAllSettings(bool ClearCurrent)
 	}
 }
 
-bool IdeProjectSettings::Edit(LViewI *parent)
+void IdeProjectSettings::Edit(LViewI *parent, std::function<void()> OnChanged)
 {
 	// Copy all the settings to the edit tag...
 	d->Editing.Copy(d->Active, true);
 	
 	// Show the dialog...
-	ProjectSettingsDlg Dlg(parent, d);
-	bool Changed = Dlg.DoModal();
-	if (Changed)
+	auto *Dlg = new ProjectSettingsDlg(parent, d);
+	Dlg->DoModal([this,OnChanged](auto dlg, auto code)
 	{
-		// User elected to save settings... so copy all the values
-		// back over to the active settings...
-		d->Active.Copy(d->Editing, true);
-		d->Editing.Empty(true);
-	}
-	
-	return Changed;
+		if (code)
+		{
+			// User elected to save settings... so copy all the values
+			// back over to the active settings...
+			d->Active.Copy(d->Editing, true);
+			d->Editing.Empty(true);
+			
+			if (OnChanged)
+				OnChanged();
+		}
+		
+		delete dlg;
+	});
 }
 
 bool IdeProjectSettings::Serialize(LXmlTag *Parent, bool Write)

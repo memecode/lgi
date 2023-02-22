@@ -148,109 +148,108 @@ class GelSkin : public LSkinEngine
 
 		#if LGI_SDL
 		
-		pDC->Colour(Base);
-		pDC->Rectangle(&r);
-		pDC->Colour(LColour(96, 96, 96));
-		if (Down)
-		{
-			pDC->Line(r.x1, r.y1, r.x2, r.y1);
-			pDC->Line(r.x1, r.y1, r.x1, r.y2);
-		}
-		else
-		{
-			pDC->Line(r.x1, r.y2, r.x2, r.y2);
-			pDC->Line(r.x2, r.y1, r.x2, r.y2);
-		}
-		
-		#else
-			
-		LRect Client = r;
-		{
-			// Edge
-			LPath e;
-			LRectF r(Client);
-			// r.y2++;
-			e.RoundRect(r, 6);
-		
-			COLOUR EdgeColour = Default ? Rgba32(40, 40, 40, 255) : Rgba32(114, 114, 114, 255);
-			LSolidBrush b(EdgeColour);
-			e.Fill(pDC, b);
-		}
-
-		{
-			// Border
-			LPath e;
-			LRectF r(Client);
-			// r.y2++;
-			int Resize = Default ? 2 : 1;
-			r.Size(Resize, Resize);
+			pDC->Colour(Base);
+			pDC->Rectangle(&r);
+			pDC->Colour(LColour(96, 96, 96));
 			if (Down)
 			{
-				r.x1 = r.x1 + 1;
-				r.y1 = r.y1 + 1;
-			}
-			e.RoundRect(r, 6 - Resize);
-
-			// Fill
-			LColour Top = Tint(Back, 253.0 / 240.0);
-			LColour Mid = Tint(Back, 232.0 / 240.0);
-			LColour Mid2 = Tint(Back, 222.0 / 240.0);
-			LColour Bot = Tint(Back, 255.0 / 240.0);
-			
-			if (!Enabled)
-			{
-				auto Amt = 230.0 / 240.0;
-				Top = Tint(Top, Amt);
-				Mid = Tint(Mid, Amt);
-				Mid2 = Tint(Mid2, Amt);
-				Bot = Tint(Bot, Amt);
-			}
-		
-			LPointF c1(r.x1, r.y1);
-			LPointF d1(r.x1, r.y2);
-			if (Down)
-			{
-				LBlendStop s1[] =
-				{
-					{0.0, Rgba32(192, 192, 192, 255)},
-					{0.1, Top.c32()},
-					{0.6, Tint(Mid, 230.0/240.0).c32()},
-					{0.601, Tint(Mid2, 230.0/240.0).c32()},
-					{1.0, Tint(Bot, 230.0/240.0).c32()},
-				};					
-				LLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
-				e.Fill(pDC, b1);
+				pDC->Line(r.x1, r.y1, r.x2, r.y1);
+				pDC->Line(r.x1, r.y1, r.x1, r.y2);
 			}
 			else
 			{
-				LBlendStop s1[] =
-				{
-					{0.0, Top.c32()},
-					{0.5, Mid.c32()},
-					{0.501, Mid2.c32()},
-					{1.0, Bot.c32()},
-				};					
-				LLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
-				e.Fill(pDC, b1);
+				pDC->Line(r.x1, r.y2, r.x2, r.y2);
+				pDC->Line(r.x2, r.y1, r.x2, r.y2);
+			}
+		
+		#else
+
+			LRect Client = r;
+			{
+				// Edge
+				LPath e;
+				LRectF r(Client);
+				e.RoundRect(r, 6);
+			
+				COLOUR EdgeColour = Default ? Rgba32(40, 40, 40, 255) : Rgba32(114, 114, 114, 255);
+				LSolidBrush b(EdgeColour);
+				e.Fill(pDC, b);
 			}
 
-			double Round = (r.X()-13)/r.X();
-			if (Round < 0.6)
-				Round = 0.6;
-				
-			int Sa = Down ? 128 : 50;
-			LBlendStop s3[] =
 			{
-				{Round, GREY32(0)},
-				{1.0, GREY32(Sa)},
-			};					
+				// Border
+				LPath e;
+				LRectF r(Client);
+				// r.y2++;
+				int Resize = Default ? 2 : 1;
+				r.Size(Resize, Resize);
+				if (Down)
+				{
+					r.x1 = r.x1 + 1;
+					r.y1 = r.y1 + 1;
+				}
+				e.RoundRect(r, 6 - Resize);
+
+				// Fill
+				LColour Top = Tint(Back, 253.0 / 240.0);
+				LColour Mid = Tint(Back, 232.0 / 240.0);
+				LColour Mid2 = Tint(Back, 222.0 / 240.0);
+				LColour Bot = Tint(Back, 255.0 / 240.0);
+				
+				if (!Enabled)
+				{
+					auto Amt = 230.0 / 240.0;
+					Top = Tint(Top, Amt);
+					Mid = Tint(Mid, Amt);
+					Mid2 = Tint(Mid2, Amt);
+					Bot = Tint(Bot, Amt);
+				}
 			
-			// Rounded corners
-			LPointF c3(r.x1 + (r.X()/2), r.y1 + (r.Y()/2));
-			LPointF d3(r.x1, r.y1);
-			LRadialBlendBrush b3(c3, d3, CountOf(s3), s3);
-			e.Fill(pDC, b3);
-		}
+				LPointF c1(r.x1, r.y1);
+				LPointF d1(r.x1, r.y2);
+				if (Down)
+				{
+					LBlendStop s1[] =
+					{
+						{0.0, Rgba32(192, 192, 192, 255)},
+						{0.1, Top.c32()},
+						{0.6, Tint(Mid, 230.0/240.0).c32()},
+						{0.601, Tint(Mid2, 230.0/240.0).c32()},
+						{1.0, Tint(Bot, 230.0/240.0).c32()},
+					};
+					LLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
+					e.Fill(pDC, b1);
+				}
+				else
+				{
+					LBlendStop s1[] =
+					{
+						{0.0, Top.c32()},
+						{0.5, Mid.c32()},
+						{0.501, Mid2.c32()},
+						{1.0, Bot.c32()},
+					};
+					LLinearBlendBrush b1(c1, d1, CountOf(s1), s1);
+					e.Fill(pDC, b1);
+				}
+
+				double Round = (r.X()-13)/r.X();
+				if (Round < 0.6)
+					Round = 0.6;
+					
+				int Sa = Down ? 128 : 50;
+				LBlendStop s3[] =
+				{
+					{Round, GREY32(0)},
+					{1.0, GREY32(Sa)},
+				};					
+				
+				// Rounded corners
+				LPointF c3(r.x1 + (r.X()/2), r.y1 + (r.Y()/2));
+				LPointF d3(r.x1, r.y1);
+				LRadialBlendBrush b3(c3, d3, CountOf(s3), s3);
+				e.Fill(pDC, b3);
+			}
 		
 		#endif
 	}
@@ -609,7 +608,7 @@ public:
 			else
 				NoPaint.Empty();
 		}
-		#if defined(WINDOWS)
+		#if defined(WINDOWS) || defined(HAIKU)
 		if (!NoPaint.IsValid())
 		{
 			// We have to paint something otherwise we'll get garbage

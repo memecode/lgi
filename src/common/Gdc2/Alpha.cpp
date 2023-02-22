@@ -108,6 +108,8 @@ public:
 				int Old = alpha;
 				alpha = (uchar)Value;
 				oma = 0xFF - alpha;
+				
+				printf("GAPP_ALPHA_A=%i\n", alpha);
 				return Old;
 			}
 			case GAPP_ALPHA_PAL:

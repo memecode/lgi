@@ -1,6 +1,8 @@
 #ifndef __GMRU_H
 #define __GMRU_H
 
+#include <functional>
+
 #ifdef HAS_PROPERTIES
 #include "GProperties.h"
 #endif
@@ -24,7 +26,7 @@ protected:
 	virtual const char *_GetCurFile();
 	virtual void GetFileTypes(LFileSelect *Dlg, bool Write);
 	virtual LFileType *GetSelectedType();
-	bool DoFileDlg(LFileSelect &Select, bool Open);
+	void DoFileDlg(LFileSelect &Select, bool Open, std::function<void(bool)> OnSelect);
 
 	/// This method converts the storage reference (which can contain user/pass credentials) 
 	/// between the display, raw and stored forms. Display and Raw are used at runtime and
@@ -52,7 +54,7 @@ public:
 	const char *AddFile(const char *FileName, bool Update = true);
 	void RemoveFile(const char *FileName, bool Update = true);
 	LMessage::Result OnEvent(LMessage *Msg);
-	bool OnCommand(int Cmd);
+	void OnCommand(int Cmd, std::function<void(bool)> OnStatus);
 
 	// Serialization
 	bool Serialize(LDom *Store, const char *Prefix, bool Write);

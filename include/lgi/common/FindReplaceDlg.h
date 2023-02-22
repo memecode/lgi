@@ -2,12 +2,16 @@
 /// \author Matthew Allen (fret@memecode.com)
 #pragma once
 
+#include <functional>
+
 /// Common find/replace window parameters
 class LgiClass LFindReplaceCommon : public LDialog
 {
 	// bool OnViewKey(LView *v, LKey &k);
 
 public:
+	typedef std::function<void(LFindReplaceCommon *Dlg, int CtrlCode)> Callback;
+
 	/// The string to find
 	LString Find;
 	/// Whether to match a whole word
@@ -22,8 +26,6 @@ public:
 	LFindReplaceCommon();
 };
 
-typedef bool (*LFindReplaceCallback)(LFindReplaceCommon *Dlg, bool Replace, void *User);
-
 /// Find dialog
 class LgiClass LFindDlg : public LFindReplaceCommon
 {
@@ -35,12 +37,10 @@ public:
 	(
 		/// The parent window
 		LView *Parent,
-		/// The initial string for the find argument
-		char *Init = 0,
 		/// Callback
-		LFindReplaceCallback Callback = 0,
-		/// User defined data for callback
-		void *UserData = 0
+		Callback Cb,
+		/// The initial string for the find argument
+		const char *Init = NULL
 	);
 	~LFindDlg();
 
@@ -67,14 +67,12 @@ public:
 	(
 		/// The parent window
 		LView *Parent,
-		/// The initial value to find
-		char *InitFind = 0,
-		/// The initial value to replace with
-		char *InitReplace = 0,
 		/// Callback
-		LFindReplaceCallback Callback = 0,
-		/// User defined data for callback
-		void *UserData = 0
+		Callback Cb,
+		/// The initial value to find
+		char *InitFind = NULL,
+		/// The initial value to replace with
+		char *InitReplace = NULL
 	);
 	~LReplaceDlg();
 

@@ -29,6 +29,9 @@ class GdcGif : public LFilter
 	LStream *s;
 	int ProcessedScanlines;
 
+	uint8_t BackgroundColour = 0;
+	bool Transparent = false;
+
 	// Old GIF coder stuff
 	short linewidth;
 	int lines;
@@ -143,11 +146,24 @@ int GdcGif::get_byte()
 
 int GdcGif::out_line(uchar *pixels, int linewidth, int interlaced, int BitDepth)
 {
-	// static int p;
-	// if (lines == 0) p = 0;
-
     if (lines >= pDC->Y())
         return -1;
+
+	auto pal = pDC->Palette();
+
+	/*
+	static bool first = true;
+	if (first)
+	{
+		first = false;
+		printf("cs=%s BackgroundColour=%i\n", LColourSpaceToString(pDC->GetColourSpace()), BackgroundColour);
+		for (int i=0; pal && i<3; i++)
+		{
+			auto *p = (*pal)[pixels[i]];
+			printf("px=%i, %i,%i,%i\n", pixels[i], p->r, p->g, p->b);
+		}
+	}
+	*/
 
 	switch (pDC->GetColourSpace())
 	{
@@ -161,7 +177,6 @@ int GdcGif::out_line(uchar *pixels, int linewidth, int interlaced, int BitDepth)
 	    {
 	        LBgr16 *s = (LBgr16*) (*pDC)[lines];
 	        LBgr16 *e = s + pDC->X();
-	        LPalette *pal = pDC->Palette();
         	GdcRGB *p = (*pal)[0], *pix;
         	
 	        while (s < e)
@@ -178,7 +193,6 @@ int GdcGif::out_line(uchar *pixels, int linewidth, int interlaced, int BitDepth)
 	    {
 	        LRgb16 *s = (LRgb16*) (*pDC)[lines];
 	        LRgb16 *e = s + pDC->X();
-	        LPalette *pal = pDC->Palette();
         	GdcRGB *p = (*pal)[0], *pix;
         	
 	        while (s < e)
@@ -195,18 +209,44 @@ int GdcGif::out_line(uchar *pixels, int linewidth, int interlaced, int BitDepth)
 	    {
 	        System32BitPixel *s = (System32BitPixel*) (*pDC)[lines];
 	        System32BitPixel *e = s + pDC->X();
-	        LPalette *pal = pDC->Palette();
         	GdcRGB *p = (*pal)[0], *pix;
         	
-	        while (s < e)
-	        {
-	            pix = p + *pixels++;
-	            s->r = pix->r;
-	            s->g = pix->g;
-	            s->b = pix->b;
-	            s->a = 255;
-	            s++;
-	        }
+			if (Transparent)
+			{
+				while (s < e)
+				{
+					if (*pixels != BackgroundColour)
+					{
+						pix = p + *pixels;
+						s->r = pix->r;
+						s->g = pix->g;
+						s->b = pix->b;
+						s->a = 255;
+					}
+					else
+					{
+						s->r = 0;
+						s->g = 0;
+						s->b = 0;
+						s->a = 0;
+					}
+					
+					pixels++;
+					s++;
+				}
+			}
+			else // no transparent colour
+			{
+		        while (s < e)
+		        {
+		            pix = p + *pixels++;
+		            s->r = pix->r;
+		            s->g = pix->g;
+		            s->b = pix->b;
+		            s->a = 255;
+		            s++;
+		        }
+			}
 	        break;
 	    }
 	    default:
@@ -649,12 +689,12 @@ LFilter::IoStatus GdcGif::ReadImage(LSurface *pdc, LStream *in)
 		}
 		else
 		{
-			bool Transparent = false;
+			Transparent = false;
 			LogicalScreenBits LogBits;
 			uchar interlace = false;
 			uint16 LogicalX = 0;
 			uint16 LogicalY = 0;
-			uint8_t BackgroundColour = 0;
+			BackgroundColour = 0;
 			uint8_t PixelAspectRatio = 0;
 
 
@@ -726,7 +766,7 @@ LFilter::IoStatus GdcGif::ReadImage(LSurface *pdc, LStream *in)
 							if (ProcessedScanlines == pDC->Y())
 							    Status = IoSuccess;
 							
-							if (Transparent)
+							if (Transparent && !LColourSpaceHasAlpha(pDC->GetColourSpace()))
 							{
 								// Setup alpha channel
 								pDC->HasAlpha(true);
@@ -739,9 +779,7 @@ LFilter::IoStatus GdcGif::ReadImage(LSurface *pdc, LStream *in)
 										uchar *A = (*Alpha)[y];
 
 										for (int x=0; x<pDC->X(); x++)
-										{
 											A[x] = C[x] == BackgroundColour ? 0x00 : 0xff;
-										}
 									}
 								}
 							}

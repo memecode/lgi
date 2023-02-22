@@ -249,81 +249,86 @@ int LGetOs
 {
 	#if defined(WIN32) || defined(WIN64)
 
-	static int Os = LGI_OS_UNKNOWN;
-	static int Version = 0, Revision = 0;
+		static int Os = LGI_OS_UNKNOWN;
+		static int Version = 0, Revision = 0;
 
-	if (Os == LGI_OS_UNKNOWN)
-	{
-		#if defined(WIN64)
-		BOOL IsWow64 = TRUE;
-		#elif defined(WIN32)
-		BOOL IsWow64 = FALSE;
-		IsWow64Process(GetCurrentProcess(), &IsWow64);
-		#endif
-
-		SERVER_INFO_101 *v = NULL;
-		auto r = NetServerGetInfo(NULL, 101, (LPBYTE*)&v);
-		if (r == NERR_Success)
+		if (Os == LGI_OS_UNKNOWN)
 		{
-			Version = v->sv101_version_major;
-			Revision = v->sv101_version_minor;
-			Os = (v->sv101_version_major >= 6)
-				?
-				#ifdef WIN32
-				(IsWow64 ? LGI_OS_WIN64 : LGI_OS_WIN32)
-				#else
-				LGI_OS_WIN64
-				#endif
-				:
-				LGI_OS_WIN9X;
+			#if defined(WIN64)
+			BOOL IsWow64 = TRUE;
+			#elif defined(WIN32)
+			BOOL IsWow64 = FALSE;
+			IsWow64Process(GetCurrentProcess(), &IsWow64);
+			#endif
 
-			NetApiBufferFree(v);
+			SERVER_INFO_101 *v = NULL;
+			auto r = NetServerGetInfo(NULL, 101, (LPBYTE*)&v);
+			if (r == NERR_Success)
+			{
+				Version = v->sv101_version_major;
+				Revision = v->sv101_version_minor;
+				Os = (v->sv101_version_major >= 6)
+					?
+					#ifdef WIN32
+					(IsWow64 ? LGI_OS_WIN64 : LGI_OS_WIN32)
+					#else
+					LGI_OS_WIN64
+					#endif
+					:
+					LGI_OS_WIN9X;
+
+				NetApiBufferFree(v);
+			}
+			else LAssert(0);
 		}
-		else LAssert(0);
-	}
 
-	if (Ver)
-	{
-		Ver->Add(Version);
-		Ver->Add(Revision);
-	}
+		if (Ver)
+		{
+			Ver->Add(Version);
+			Ver->Add(Revision);
+		}
 
-	return Os;
+		return Os;
 
 	#elif defined LINUX
 
-	if (Ver)
-	{
-		utsname Buf;
-		if (!uname(&Buf))
+		if (Ver)
 		{
-			auto t = LString(Buf.release).SplitDelimit(".");
-			for (int i=0; i<t.Length(); i++)
+			utsname Buf;
+			if (!uname(&Buf))
 			{
-				Ver->Add(atoi(t[i]));
+				auto t = LString(Buf.release).SplitDelimit(".");
+				for (int i=0; i<t.Length(); i++)
+				{
+					Ver->Add(atoi(t[i]));
+				}
 			}
 		}
-	}
 
-	return LGI_OS_LINUX;
+		return LGI_OS_LINUX;
 
 	#elif defined MAC
 
-	#if !defined(__GTK_H__)
-	if (Ver)
-	{
-		NSOperatingSystemVersion v = [[NSProcessInfo processInfo] operatingSystemVersion];
-		Ver->Add((int)v.majorVersion);
-		Ver->Add((int)v.minorVersion);
-		Ver->Add((int)v.patchVersion);
-	}
-	#endif
+		#if !defined(__GTK_H__)
+		if (Ver)
+		{
+			NSOperatingSystemVersion v = [[NSProcessInfo processInfo] operatingSystemVersion];
+			Ver->Add((int)v.majorVersion);
+			Ver->Add((int)v.minorVersion);
+			Ver->Add((int)v.patchVersion);
+		}
+		#endif
+		
+		return LGI_OS_MAC_OS_X;
+
+	#elif defined HAIKU
 	
-	return LGI_OS_MAC_OS_X;
+		return LGI_OS_HAIKU;
 
 	#else
 
-	return LGI_OS_UNKNOWN;
+		#error "Impl Me"
+		return LGI_OS_UNKNOWN;
 
 	#endif
 }
@@ -341,7 +346,12 @@ const char *LGetOsName()
 		"MacOSX",
 	};
 
-	return Str[LGetOs()];
+	auto Os = LGetOs();
+	if (Os > 0 && Os < CountOf(Str))
+		return Str[Os];
+		
+	LAssert(!"Invalid OS index.");
+	return "error";
 }
 
 #ifdef WIN32
@@ -1064,6 +1074,10 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 					if ([paths count])
 						Path = [paths objectAtIndex:0];
 				}
+				
+			#elif defined(HAIKU)
+			
+				
 
 			#else
 
@@ -1124,16 +1138,17 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 		}
 		case LSP_USER_DOCUMENTS:
 		{
+			char path[MAX_PATH_LEN];
+			
 			#if defined(__GTK_H__)
 			
 				auto p = Gtk::g_get_user_special_dir(Gtk::G_USER_DIRECTORY_DOCUMENTS);
-				Path = p;
+				if (p)
+					Path = p;
 			
 			#elif defined(WIN32) && defined(_MSC_VER)
 			
 				Path = WinGetSpecialFolderPath(CSIDL_MYDOCUMENTS);
-				if (Path)
-					return Path;
 			
 			#elif defined LGI_COCOA
 
@@ -1143,18 +1158,32 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 					if ([paths count])
 						Path = [paths objectAtIndex:0];
 				}
+				
+			#elif defined(HAIKU)
+			
+				if(	find_directory
+					(
+						B_SYSTEM_DOCUMENTATION_DIRECTORY,
+						dev_for_path("/boot"),
+						true,
+						path, sizeof(path)
+					) == B_OK)
+					Path = path;
 
 			#endif
 
-			// Default to ~/Documents
-			char hm[MAX_PATH_LEN];
-			LString Home = LGetSystemPath(LSP_HOME);
-			if (LMakePath(hm, sizeof(hm), Home, "Documents"))
-				Path = hm;
+			if (!Path)
+			{
+				// Default to ~/Documents
+				if (LMakePath(path, sizeof(path), LGetSystemPath(LSP_HOME), "Documents"))
+					Path = path;
+			}
 			break;
 		}
 		case LSP_USER_MUSIC:
 		{
+			char path[MAX_PATH_LEN];
+
 			#if defined WIN32
 
 				Path = WinGetSpecialFolderPath(CSIDL_MYMUSIC);
@@ -1162,7 +1191,8 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#elif defined(__GTK_H__)
 			
 				auto p = Gtk::g_get_user_special_dir(Gtk::G_USER_DIRECTORY_MUSIC);
-				Path = p;
+				if (p)
+					Path = p;
 			
 			#elif defined LGI_CARBON
 			
@@ -1185,20 +1215,31 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 						Path = [paths objectAtIndex:0];
 				}
 
+			#elif defined(HAIKU)
+			
+				if(	find_directory
+					(
+						B_USER_SOUNDS_DIRECTORY,
+						dev_for_path("/boot"),
+						true,
+						path, sizeof(path)
+					) == B_OK)
+					Path = path;
+
 			#endif
 			
 			if (!Path)
 			{
 				// Default to ~/Music
-				char p[MAX_PATH_LEN];
-				LString Home = LGetSystemPath(LSP_HOME);
-				if (LMakePath(p, sizeof(p), Home, "Music"))
-					Path = p;
+				if (LMakePath(path, sizeof(path), LGetSystemPath(LSP_HOME), "Music"))
+					Path = path;
 			}
 			break;
 		}
 		case LSP_USER_VIDEO:
 		{
+			char path[MAX_PATH_LEN];
+
 			#if defined WIN32
 
 				Path = WinGetSpecialFolderPath(CSIDL_MYVIDEO);
@@ -1206,7 +1247,8 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#elif defined(__GTK_H__)
 			
 				auto p = Gtk::g_get_user_special_dir(Gtk::G_USER_DIRECTORY_VIDEOS);
-				Path = p;
+				if (p)
+					Path = p;
 			
 			#elif defined LGI_CARBON
 
@@ -1234,10 +1276,8 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			if (!Path)
 			{
 				// Default to ~/Video
-				char p[MAX_PATH_LEN];
-				LString Home = LGetSystemPath(LSP_HOME);
-				if (LMakePath(p, sizeof(p), Home, "Video"))
-					Path = p;
+				if (LMakePath(path, sizeof(path), LGetSystemPath(LSP_HOME), "Video"))
+					Path = path;
 			}
 			break;
 		}
@@ -1262,9 +1302,8 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 
 			#elif defined(HAIKU)
 
-				dev_t volume = dev_for_path("/boot");
 				char path[MAX_PATH_LEN] = "";
-				if (find_directory(B_SYSTEM_APPS_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+				if (find_directory(B_USER_APPS_DIRECTORY, dev_for_path("/boot"), true, path, sizeof(path)) == B_OK)
 					Path = path;
 			
 			#elif LGI_COCOA

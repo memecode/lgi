@@ -811,15 +811,19 @@ bool LRichTextEdit::ClearDirty(bool Ask, const char *FileName)
 									MB_YESNOCANCEL) : IDYES;
 		if (Answer == IDYES)
 		{
-			LFileSelect Select;
-			Select.Parent(this);
-			if (!FileName &&
-				Select.Save())
+			if (FileName)
+				Save(FileName);
+			else				
 			{
-				FileName = Select.Name();
+				LFileSelect *Select = new LFileSelect;
+				Select->Parent(this);
+				Select->Save([&](auto dlg, auto status)
+				{
+					if (status)
+						FileName = dlg->Name();
+					delete dlg;
+				});
 			}
-
-			Save(FileName);
 		}
 		else if (Answer == IDCANCEL)
 		{
@@ -900,10 +904,14 @@ void LRichTextEdit::UpdateScrollBars(bool Reset)
 	}
 }
 
-bool LRichTextEdit::DoCase(bool Upper)
+void LRichTextEdit::DoCase(std::function<void(bool)> Callback, bool Upper)
 {
 	if (!HasSelection())
-		return false;
+	{
+		if (Callback)
+			Callback(false);
+		return;
+	}
 
 	bool Cf = d->CursorFirst();
 	LRichTextPriv::BlockCursor *Start = Cf ? d->Cursor : d->Selection;
@@ -936,7 +944,9 @@ bool LRichTextEdit::DoCase(bool Upper)
 		else
 		{
 			LAssert(0);
-			return false;
+			if (Callback)
+				Callback(false);
+			return;
 		}
 
 		// 3) Delete any text up to the Cursor in the 'End' block
@@ -947,21 +957,33 @@ bool LRichTextEdit::DoCase(bool Upper)
 	d->Dirty = true;
 	Invalidate();
 	
-	return true;
+	if (Callback)
+		Callback(true);
 }
 
-bool LRichTextEdit::DoGoto()
+void LRichTextEdit::DoGoto(std::function<void(bool)> Callback)
 {
-	LInput Dlg(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto line:"), "Text");
-	if (Dlg.DoModal() == IDOK)
+	auto input = new LInput(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto line:"), "Text");
+	input->DoModal([this, input, Callback](auto dlg, auto ctrlId)
 	{
-		LString s = Dlg.GetStr();
-		int64 i = s.Int();
-		if (i >= 0)
-			SetLine((int)i);
-	}
+		if (ctrlId == IDOK)
+		{
+			LString s = input->GetStr();
+			int64 i = s.Int();
+			if (i >= 0)
+			{
+				SetLine((int)i);
+				if (Callback)
+					Callback(true);
+				return;
+			}
+		}
 
-	return true;
+		if (Callback)
+			Callback(false);
+
+		delete dlg;
+	});
 }
 
 LDocFindReplaceParams *LRichTextEdit::CreateFindReplaceParams()
@@ -976,28 +998,35 @@ void LRichTextEdit::SetFindReplaceParams(LDocFindReplaceParams *Params)
 	}
 }
 
-bool LRichTextEdit::DoFindNext()
+void LRichTextEdit::DoFindNext(std::function<void(bool)> Callback)
 {
-	return false;
-}
-
-bool
-RichText_FindCallback(LFindReplaceCommon *Dlg, bool Replace, void *User)
-{
-	return ((LRichTextEdit*)User)->OnFind(Dlg);
+	if (Callback)
+		Callback(false);
 }
 
 ////////////////////////////////////////////////////////////////////////////////// FIND
-bool LRichTextEdit::DoFind()
+void LRichTextEdit::DoFind(std::function<void(bool)> Callback)
 {
 	LArray<char16> Sel;
 	if (HasSelection())
 		d->GetSelection(&Sel, NULL);
 	LAutoString u(Sel.Length() ? WideToUtf8(&Sel.First()) : NULL);
-	LFindDlg Dlg(this, u, RichText_FindCallback, this);
-	Dlg.DoModal();	
-	Focus(true);
-	return false;
+	
+	auto Dlg = new LFindDlg(this,
+							[&](auto dlg, auto ctrlId)
+							{
+								return OnFind(dlg);
+							},
+							u);
+	Dlg->DoModal([this, Dlg, Callback](auto dlg, auto ctrlId)
+	{
+		if (Callback)
+			Callback(ctrlId != IDCANCEL);
+		
+		Focus(true);
+
+		delete dlg;
+	});
 }
 
 bool LRichTextEdit::OnFind(LFindReplaceCommon *Params)
@@ -1037,9 +1066,10 @@ bool LRichTextEdit::OnFind(LFindReplaceCommon *Params)
 }
 
 ////////////////////////////////////////////////////////////////////////////////// REPLACE
-bool LRichTextEdit::DoReplace()
+void LRichTextEdit::DoReplace(std::function<void(bool)> Callback)
 {
-	return false;
+	if (Callback)
+		Callback(false);
 }
 
 bool LRichTextEdit::OnReplace(LFindReplaceCommon *Params)
@@ -1391,22 +1421,32 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 		{
 			char s[32];
 			sprintf_s(s, sizeof(s), "%i", IndentSize);
-			LInput i(this, s, "Indent Size:", "Text");
-			if (i.DoModal())
+			auto i = new LInput(this, s, "Indent Size:", "Text");
+			i->DoModal([this, i](auto dlg, auto ctrlId)
 			{
-				IndentSize = (uint8_t)i.GetStr().Int();
-			}
+				if (ctrlId == IDOK)
+				{
+					IndentSize = (uint8_t)i->GetStr().Int();
+					Invalidate();
+				}
+				delete dlg;
+			});
 			break;
 		}
 		case IDM_TAB_SIZE:
 		{
 			char s[32];
 			sprintf_s(s, sizeof(s), "%i", TabSize);
-			LInput i(this, s, "Tab Size:", "Text");
-			if (i.DoModal())
+			auto i = new LInput(this, s, "Tab Size:", "Text");
+			i->DoModal([this, i](auto dlg, auto ctrlId)
 			{
-				SetTabSize((uint8_t)i.GetStr().Int());
-			}
+				if (ctrlId == IDOK)
+				{
+					SetTabSize((uint8_t)i->GetStr().Int());
+					Invalidate();
+				}
+				delete dlg;
+			});
 			break;
 		}
 		case IDM_COPY_ORIGINAL:
@@ -1876,7 +1916,7 @@ bool LRichTextEdit::OnKey(LKey &k)
 			case LK_F3:
 			{
 				if (k.Down())
-					DoFindNext();
+					DoFindNext(NULL);
 				return true;
 			}
 			case LK_LEFT:
@@ -2323,16 +2363,14 @@ bool LRichTextEdit::OnKey(LKey &k)
 						case 'f':
 						{
 							if (k.Down())
-								DoFind();
+								DoFind(NULL);
 							return true;
 						}
 						case 'g':
 						case 'G':
 						{
 							if (k.Down())
-							{
-								DoGoto();
-							}
+								DoGoto(NULL);
 							return true;
 							break;
 						}
@@ -2340,9 +2378,7 @@ bool LRichTextEdit::OnKey(LKey &k)
 						case 'H':
 						{
 							if (k.Down())
-							{
-								DoReplace();
-							}
+								DoReplace(NULL);
 							return true;
 							break;
 						}
@@ -2352,9 +2388,7 @@ bool LRichTextEdit::OnKey(LKey &k)
 							if (!GetReadOnly())
 							{
 								if (k.Down())
-								{
-									DoCase(k.Shift());
-								}
+									DoCase(NULL, k.Shift());
 								return true;
 							}
 							break;

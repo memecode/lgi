@@ -60,50 +60,27 @@ public:
 	#endif
 
 	// Data
-	OsFont			hFont;
-	int				Height;
-	bool			Dirty;
-	char			*Cp;
-	LSurface		*pSurface;
-	bool			OwnerUnderline;
-	bool			WarnOnDelete;
+	OsFont			hFont = NULL;
+	int				Height = 0;
+	bool			Dirty = true;
+	char			*Cp = NULL;
+	LSurface		*pSurface = NULL;
+	bool			OwnerUnderline = false;
+	bool			WarnOnDelete = false;
 
 	// Glyph substitution
-	uchar			*GlyphMap;
+	uchar			*GlyphMap = NULL;
 	static class GlyphCache *Cache;
 
-	#ifdef BEOS
-	// Beos glyph sizes
-	uint16			CharX[128]; // Widths of ascii
-	LHashTbl<IntKey<int>,int> UnicodeX; // Widths of any other characters
-	#endif
-
 	#ifdef USE_CORETEXT
-	CFDictionaryRef Attributes;
+	CFDictionaryRef Attributes = NULL;
 	#endif
-
 	#ifdef __GTK_H__
-	Gtk::PangoContext *PangoCtx;
+	Gtk::PangoContext *PangoCtx = NULL;
 	#endif
 
 	LFontPrivate()
 	{
-		hFont = 0;
-		pSurface = NULL;
-		#if defined WIN32
-		OwnerUnderline = false;
-		#endif
-		#ifdef __GTK_H__
-		PangoCtx = NULL;
-		#elif defined(MAC)
-		Attributes = NULL;
-		#endif
-
-		GlyphMap = 0;
-		Dirty = true;
-		Height = 0;
-		Cp = 0;
-		WarnOnDelete = false;
 	}
 	
 	~LFontPrivate()

@@ -2249,13 +2249,17 @@ void VcFolder::OnMouseClick(LMouse &m)
 			}
 			case IDM_EDIT:
 			{
-				LInput Dlg(GetTree(), Uri.ToString(), "URI:", "Remote Folder Location");
-				if (Dlg.DoModal())
+				auto Dlg = new LInput(GetTree(), Uri.ToString(), "URI:", "Remote Folder Location");
+				Dlg->DoModal([this, Dlg](auto dlg, auto ctrlId)
 				{
-					Uri.Set(Dlg.GetStr());
-					Empty();
-					Select(true);
-				}
+					if (ctrlId)
+					{
+						Uri.Set(Dlg->GetStr());
+						Empty();
+						Select(true);
+					}
+					delete dlg;
+				});
 				break;
 			}
 			default:
@@ -3006,24 +3010,30 @@ bool VcFolder::ParseCommit(int Result, LString s, ParseParams *Params)
 			{
 				if (s.Find("Please tell me who you are") >= 0)
 				{
+					auto i = new LInput(GetTree(), "", "Git user name:", AppName);
+					i->DoModal([this, i](auto dlg, auto ctrlId)
 					{
-						LInput i(GetTree(), "", "Git user name:", AppName);
-						if (i.DoModal())
+						if (ctrlId)
 						{
 							LString Args;
-							Args.Printf("config --global user.name \"%s\"", i.GetStr().Get());
+							Args.Printf("config --global user.name \"%s\"", i->GetStr().Get());
 							StartCmd(Args);
+
+							auto inp = new LInput(GetTree(), "", "Git user email:", AppName);
+							i->DoModal([this, inp](auto dlg, auto ctrlId)
+							{
+								if (ctrlId)
+								{
+									LString Args;
+									Args.Printf("config --global user.email \"%s\"", inp->GetStr().Get());
+									StartCmd(Args);
+								}
+								delete dlg;
+							});
 						}
-					}
-					{
-						LInput i(GetTree(), "", "Git user email:", AppName);
-						if (i.DoModal())
-						{
-							LString Args;
-							Args.Printf("config --global user.email \"%s\"", i.GetStr().Get());
-							StartCmd(Args);
-						}
-					}
+
+						delete dlg;
+					});
 				}
 				break;
 			}
@@ -3639,7 +3649,7 @@ bool VcFolder::RenameBranch(LString NewName, LArray<VcCommit*> &Revs)
 		{
 			// Update to the ancestor of the commits
 			LHashTbl<StrKey<char>,int> Refs(0, -1);
-			for (auto c:Revs)
+			for (auto c: Revs)
 			{
 				for (auto p:*c->GetParents())
 					if (Refs.Find(p) < 0)

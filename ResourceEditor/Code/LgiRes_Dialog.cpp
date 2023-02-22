@@ -144,8 +144,6 @@ public:
 			char s[256];
 			sprintf(s, "Set Tab Order: %s", Top->GetStr()->GetDefine());
 			Name(s);
-
-			DoModal();
 		}
 	}
 
@@ -1710,12 +1708,14 @@ void CtrlTabs::OnMouseClick(LMouse &m)
 								if (!t->GetStr())
 									t->SetStr(Dlg->CreateSymbol());
 
-								LInput Input(this, t->GetStr()->Get(), "Enter tab name:", "Rename");
-								Input.SetParent(Dlg);
-								if (Input.DoModal() && Input.GetStr())
+								auto Input = new LInput(this, t->GetStr()->Get(), "Enter tab name:", "Rename");
+								Input->SetParent(Dlg);
+								Input->DoModal([t, Input](auto dlg, auto id)
 								{
-									t->GetStr()->Set(Input.GetStr());
-								}
+									if (id)
+										t->GetStr()->Set(Input->GetStr());
+									delete dlg;
+								});
 							}
 							break;
 						}
@@ -1920,12 +1920,14 @@ void CtrlList::OnMouseClick(LMouse &m)
 							{
 								if (c)
 								{
-									LInput Input(this, c->GetStr()->Get(), "Enter column name:", "Rename");
-									Input.SetParent(Dlg);
-									if (Input.DoModal())
+									auto Input = new LInput(this, c->GetStr()->Get(), "Enter column name:", "Rename");
+									Input->SetParent(Dlg);
+									Input->DoModal([Input, c](auto dlg, auto id)
 									{
-										c->GetStr()->Set(Input.GetStr());
-									}
+										if (id)
+											c->GetStr()->Set(Input->GetStr());
+										delete dlg;
+									});
 								}
 								break;
 							}
@@ -4104,22 +4106,25 @@ void ResDialog::OnCommand(int Cmd)
 		}
 		case IDM_EXPORT:
 		{
-			LFileSelect Select;
-			Select.Parent(AppWindow);
-			Select.Type("Text", "*.txt");
-			if (Select.Save())
+			auto Select = new LFileSelect(AppWindow);
+			Select->Type("Text", "*.txt");
+			Select->Save([&](auto dlg, auto status)
 			{
-				LFile F;
-				if (F.Open(Select.Name(), O_WRITE))
+				if (status)
 				{
-					F.SetSize(0);
-					// Serialize(F, true);
+					LFile F;
+					if (F.Open(Select->Name(), O_WRITE))
+					{
+						F.SetSize(0);
+						// Serialize(F, true);
+					}
+					else
+					{
+						LgiMsg(AppWindow, "Couldn't open file for writing.");
+					}
 				}
-				else
-				{
-					LgiMsg(AppWindow, "Couldn't open file for writing.");
-				}
-			}
+				delete dlg;
+			});
 			break;
 		}
 		case IDM_EXPORT_WIN32:
@@ -4158,7 +4163,11 @@ int ResDialog::OnCommand(int Cmd, int Event, OsView hWnd)
 			}
 			if (Top)
 			{
-				TabOrder Dlg(this, Top);
+				auto Dlg = new TabOrder(this, Top);
+				Dlg->DoModal([](auto dlg, auto id)
+				{
+					delete dlg;
+				});
 			}
 			break;
 		}

@@ -199,7 +199,6 @@ public:
 			(n.Type == LNotifyValueChanged || n.Type == LNotifyDocChanged))
 		{
 			auto Str = Edit->Name();
-			Name(Str);
 
 			bool Has = ValidStr(Str) && Lst->Length();
 			bool Vis = Visible();

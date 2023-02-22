@@ -14,6 +14,8 @@
 #include "lgi/common/FontCache.h"
 #include "AppPriv.h"
 
+#include "MimeType.h"
+
 #define DEBUG_MSG_TYPES				0
 #define DEBUG_HND_WARNINGS			0
 #define IDLE_ALWAYS					0
@@ -237,6 +239,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	LgiArgsAppPath = AppArgs.Arg[0];
 	Name(name);
 	d = new LAppPrivate(this);
+	
 	if (LIsRelativePath(LgiArgsAppPath))
 	{
 		char Cwd[MAX_PATH_LEN];
@@ -244,6 +247,10 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 		LMakePath(Cwd, sizeof(Cwd), Cwd, LgiArgsAppPath);
 		LgiArgsAppPath = Cwd;
 	}
+	
+	char AppPathLnk[MAX_PATH_LEN];
+	if (LResolveShortcut(LgiArgsAppPath, AppPathLnk, sizeof(AppPathLnk)))
+		LgiArgsAppPath = AppPathLnk;
 
 	int WCharSz = sizeof(wchar_t);
 	#if defined(_MSC_VER)
@@ -411,7 +418,7 @@ bool LApp::InThread()
 	return Gui == Me;
 }
 
-bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
+bool LApp::Run(OnIdleProc IdleCallback, void *IdleParam)
 {
 	if (!InThread())
 	{
@@ -419,17 +426,16 @@ bool LApp::Run(bool Loop, OnIdleProc IdleCallback, void *IdleParam)
 		return false;
 	}
 
-	if (Loop)
-	{
-		printf("Running main loop...\n");
-		d->Run();
-		printf("Main loop finished.\n");
-	}
-	else
-	{
-	}
+	printf("Running main loop...\n");
+	d->Run();
+	printf("Main loop finished.\n");
 
 	return true;
+}
+
+bool LApp::Yield()
+{
+	return false;
 }
 
 void LApp::Exit(int Code)
@@ -567,65 +573,20 @@ void LApp::OnCommandLine()
 	Files.DeleteArrays();
 }
 
-::LString LApp::GetFileMimeType(const char *File)
+LString LApp::GetFileMimeType(const char *File)
 {
-	::LString Status;
-	char Full[MAX_PATH_LEN] = "";
-
-	if (!LFileExists(File))
+	BMimeType mt;
+	auto r = BMimeType::GuessMimeType(File, &mt);
+	if (r != B_OK)
 	{
-		// Look in the path
-		LToken p(getenv("PATH"), LGI_PATH_SEPARATOR);
-		for (int i=0; i<p.Length(); i++)
-		{
-			LMakePath(Full, sizeof(Full), p[i], File);
-			if (LFileExists(Full))
-			{
-				File = Full;
-				break;
-			}
-		}		
-	}
-
-	#ifdef __GTK_H__
-	
-	gboolean result_uncertain;
-	gchar *gt = g_content_type_guess(File, NULL, 0, &result_uncertain);
-	if (gt)
-	{
-		gchar *mt = g_content_type_get_mime_type(gt);
-		g_free(gt);
-		if (mt)
-		{
-			Status = mt;
-			g_free(mt);
-			
-			if (!Status.Equals("application/octet-stream"))
-				return Status;
-				
-			// So gnome has no clue... lets try 'file'
-			::LString args;
-			args.Printf("--mime-type \"%s\"", File);
-			LSubProcess sub("file", args);
-			if (sub.Start())
-			{
-				LStringPipe p;
-				sub.Communicate(&p);
-				auto s = p.NewGStr();
-				if (s && s.Find(":") > 0)
-					Status = s.SplitDelimit(":").Last().Strip();
-			}
-
-			return Status;
-		}
+		LgiTrace("%s:%i - GuessMimeType(%s) failed: %i\n", _FL, File, r);
+		return LString();
 	}
 	
-	#endif
-
-	return Status;
+	return mt.Type();
 }
 
-bool LApp::GetAppsForMimeType(char *Mime, ::LArray<::LAppInfo*> &Apps)
+bool LApp::GetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps)
 {
 	// Find alternative version of the MIME type (e.g. x-type and type).
 	char AltMime[256];
@@ -975,23 +936,37 @@ int LMessage::Msg()
 
 LMessage::Param LMessage::A()
 {
-	LMessage::Param a = 0;
-	FindInt64(PropNames[0], &a);
+	int64 a = 0;
+	if (FindInt64(PropA, &a) != B_OK)
+	{
+		int32 c = CountNames(B_ANY_TYPE);
+		printf("%s:%i - Failed to find PropA (%i names)\n", _FL, c);
+		for (int32 i=0; i<c; i++)
+		{
+			char *name = NULL;
+			type_code type;
+			int32 count = 0;
+			status_t r = GetInfo(B_ANY_TYPE, i, &name, &type, &count);
+			if (r == B_OK)
+				printf("\t%x %s[%i]\n", type, name, count);
+		}
+	}
 	return a;
 }
 
 LMessage::Param LMessage::B()
 {
-	LMessage::Param b = 0;
-	FindInt64(PropNames[1], &b);
+	int64 b = 0;
+	if (FindInt64(PropB, &b) != B_OK)
+		printf("%s:%i - Failed to find PropB.\n", _FL);
 	return b;
 }
 
 void LMessage::Set(int Msg, Param a, Param b)
 {
 	what = Msg;
-	AddInt64(PropNames[0], a);
-	AddInt64(PropNames[1], b);
+	AddInt64(PropA, a);
+	AddInt64(PropA, b);
 }
 
 bool LMessage::Send(LViewI *View)
@@ -1005,3 +980,83 @@ bool LMessage::Send(LViewI *View)
 	return View->PostEvent(what, A(), B());
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+LLocker::LLocker(BHandler *h, const char *File, int Line)
+{
+    hnd = h;
+    file = File;
+    line = Line;
+}
+
+LLocker::~LLocker()
+{
+    Unlock();
+}
+
+bool LLocker::Lock()
+{
+	if (locked)
+	{
+		printf("%s:%i - Locker already locked.\n", file, line);
+    	LAssert(!"Locker already locked.");
+    	return false;
+    }
+    if (!hnd)
+    {
+    	// printf("%s:%i - Locker hnd is NULL.\n", file, line);
+    	return false;
+    }        
+
+    while (!locked)
+    {
+        status_t result = hnd->LockLooperWithTimeout(1000 * 1000);
+        if (result == B_OK)
+        {
+            locked = true;
+            break;
+        }
+        else if (result == B_TIMED_OUT)
+        {
+            // Warn about failure to lock...
+            auto cur = GetCurrentThreadId();
+            auto locking = hnd->Looper()->LockingThread();
+            
+            printf("%s:%i - Warning: can't lock. cur=%i locking=%i\n",
+            	_FL,
+            	cur,
+            	locking);
+        }
+        else if (result == B_BAD_VALUE)
+        {
+            break;
+        }
+        else
+        {
+            // Warn about error
+            printf("%s:%i - Error from LockLooperWithTimeout = 0x%x\n", _FL, result);
+        }
+    }
+
+    return locked;
+}
+
+status_t LLocker::LockWithTimeout(int64 time)
+{
+    LAssert(!locked);
+    LAssert(hnd != NULL);
+    
+    status_t result = hnd->LockLooperWithTimeout(time);
+    if (result == B_OK)
+        locked = true;
+    
+    return result;
+}
+
+void LLocker::Unlock()
+{
+    if (locked)
+    {
+        hnd->UnlockLooper();
+        locked = false;
+    }
+}

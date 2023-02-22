@@ -1166,66 +1166,64 @@ void LSurface::Blt(int x, int y, LSurface *Src, LRect *a)
 {
 	OrgXy(x, y);
 
-	if (Src && Src->pMem && Src->pMem->Base)
+	if (!Src || !Src->pMem || !Src->pMem->Base)
+		return;
+
+	LRect S;
+	if (a)	S = *a;
+	else	S.ZOff(Src->X()-1, Src->Y()-1);
+	S.Offset(Src->OriginX, Src->OriginY);
+
+	LRect SClip = S;
+	SClip.Bound(&Src->Clip);
+
+	if (!SClip.Valid())
+		return;
+
+	LRect D = SClip;
+	D.Offset(x-S.x1, y-S.y1);
+
+	LRect DClip = D;
+	DClip.Bound(&Clip);
+
+	LRect Re = DClip;
+	Re.Offset(S.x1-x, S.y1-y);
+	SClip.Bound(&Re);
+
+	if (!DClip.Valid() || !SClip.Valid())
+		return;
+
+	LBmpMem Bits, Alpha;
+
+	Bits.Base =	Src->pMem->AddressOf(SClip.x1, SClip.y1);
+	Bits.x = 	MIN(SClip.X(), DClip.X());
+	Bits.y = 	MIN(SClip.Y(), DClip.Y());
+	Bits.Line = Src->pMem->Line;
+	Bits.Cs = 	Src->GetColourSpace();
+	Bits.PreMul(Src->pMem->PreMul());
+
+	if (Src->pAlphaDC && !Src->DrawOnAlpha())
 	{
-		LRect S;
-		if (a)	S = *a;
-		else	S.ZOff(Src->X()-1, Src->Y()-1);
-		S.Offset(Src->OriginX, Src->OriginY);
+		auto ASurface = Src->pAlphaDC->pMem;
+		Alpha = 		Bits;
+		Alpha.Cs = 		CsIndex8;
+		Alpha.Line = 	ASurface->Line;
+		Alpha.Base =	ASurface->Base +
+						(SClip.y1 * ASurface->Line) +
+						(SClip.x1);
+	}
 
-		LRect SClip = S;
-		SClip.Bound(&Src->Clip);
+	pApp->SetPtr(DClip.x1, DClip.y1);
+	LPalette *SrcPal = Src->DrawOnAlpha() ? NULL : Src->Palette();
+	
+	// printf("\t%p::Blt pApp=%p, %s\n", this, pApp, pApp->GetClass());
+	
+	pApp->Blt(&Bits, SrcPal, Alpha.Base ? &Alpha : NULL);
+	Update(GDC_BITS_CHANGE);
 
-		if (SClip.Valid())
-		{
-			LRect D = SClip;
-			D.Offset(x-S.x1, y-S.y1);
-
-			LRect DClip = D;
-			DClip.Bound(&Clip);
-
-			LRect Re = DClip;
-			Re.Offset(S.x1-x, S.y1-y);
-			SClip.Bound(&Re);
-
-			if (DClip.Valid() && SClip.Valid())
-			{
-				LBmpMem Bits, Alpha;
-
-				int PixelBytes = LColourSpaceToBits(Src->pMem->Cs) >> 3;
-				
-				Bits.Base =	Src->pMem->Base +
-						(SClip.y1 * Src->pMem->Line) +
-						(SClip.x1 * PixelBytes);
-				Bits.x = MIN(SClip.X(), DClip.X());
-				Bits.y = MIN(SClip.Y(), DClip.Y());
-				Bits.Line = Src->pMem->Line;
-				Bits.Cs = Src->GetColourSpace();
-				Bits.PreMul(Src->pMem->PreMul());
-
-				if (Src->pAlphaDC && !Src->DrawOnAlpha())
-				{
-					LBmpMem *ASurface = Src->pAlphaDC->pMem;
-					Alpha = Bits;
-					Alpha.Cs = CsIndex8;
-					Alpha.Line = ASurface->Line;
-					Alpha.Base =	ASurface->Base +
-							(SClip.y1 * ASurface->Line) +
-							(SClip.x1);
-				}
-
-				pApp->SetPtr(DClip.x1, DClip.y1);
-				LPalette *SrcPal = Src->DrawOnAlpha() ? NULL : Src->Palette();
-				// printf("\t%p::Blt pApp=%p, %s\n", this, pApp, pApp->GetClass());
-				pApp->Blt(&Bits, SrcPal, Alpha.Base ? &Alpha : NULL);
-				Update(GDC_BITS_CHANGE);
-
-				if (pApp->GetFlags() & GDC_UPDATED_PALETTE)
-				{
-					Palette(new LPalette(pApp->GetPal()));
-				}
-			}
-		}
+	if (pApp->GetFlags() & GDC_UPDATED_PALETTE)
+	{
+		Palette(new LPalette(pApp->GetPal()));
 	}
 }
 

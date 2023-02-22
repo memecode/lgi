@@ -358,7 +358,7 @@ class LEventSinkI
 {
 public:
 	virtual ~LEventSinkI() {}
-	virtual bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0) = 0;
+	virtual bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0, int64_t TimeoutMs = -1) = 0;
 };
 
 class LEventTargetI
@@ -425,7 +425,7 @@ public:
 	virtual OsView Handle() const = 0;
 	#endif
 	virtual int AddDispatch() = 0;
-	virtual OsWindow WindowHandle() = 0;
+	virtual OsWindow WindowHandle() { printf("LViewI::WindowHandle()\n"); return NULL; }
 	virtual LView *GetGView() { return NULL; }
 
 	// Heirarchy

@@ -54,7 +54,7 @@ bool GPassword::operator ==(GPassword &p)
 	return false;
 }
 
-void GPassword::Process(char *Out, const char *In, ssize_t Len)
+void GPassword::Process(char *Out, const char *In, ssize_t Len) const
 {
 	if (Out && In && Len > 0)
 	{
@@ -68,7 +68,7 @@ void GPassword::Process(char *Out, const char *In, ssize_t Len)
 	}
 }
 
-LString GPassword::Get()
+LString GPassword::Get() const
 {
 	LString p;
 	
@@ -79,7 +79,7 @@ LString GPassword::Get()
 	return p;
 }
 
-void GPassword::Get(char *Buf)
+void GPassword::Get(char *Buf) const
 {
 	if (Buf)
 	{

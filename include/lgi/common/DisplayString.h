@@ -50,6 +50,7 @@ protected:
 	 	MacCarbon:	utf-16		utf-32
 	 	MacCocoa:	utf-16		utf-32
 	 	Gtk3:		utf-8		utf-32
+	 	Haiku:		utf-8		utf-32
 	*/
 	OsChar *Str;
 	ssize_t StrWords;
@@ -114,6 +115,9 @@ protected:
 	void DrawWhiteSpace(LSurface *pDC, char Ch, LRect &r);
 
 public:
+	// Turn on debug logging...
+	bool _debug = false;
+
 	/// Constructor
 	LDisplayString
 	(

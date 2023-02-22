@@ -552,8 +552,15 @@ bool LDocApp<OptionsFmt>::SetDirty(bool Dirty)
 			{
 				if (!ValidStr(d->CurFile))
 				{
-					if (!LMru::OnCommand(IDM_SAVEAS))
-						return false;
+					LMru::OnCommand(IDM_SAVEAS, [&](auto status)
+					{
+						if (status)
+						{
+							d->Dirty = false;
+							SetCurFile(d->CurFile);
+						}
+					});
+					return false;
 				}
 				else
 				{
@@ -617,7 +624,7 @@ int LDocApp<OptionsFmt>::OnCommand(int Cmd, int Event, OsView Window)
 		{
 			if (!GetCurFile())
 			{
-				LMru::OnCommand(IDM_SAVEAS);
+				LMru::OnCommand(IDM_SAVEAS, NULL);
 				return 0;
 			}
 			else
@@ -640,7 +647,7 @@ int LDocApp<OptionsFmt>::OnCommand(int Cmd, int Event, OsView Window)
 		}
 	}
 
-	LMru::OnCommand(Cmd);
+	LMru::OnCommand(Cmd, NULL);
 	return 0;
 }
 

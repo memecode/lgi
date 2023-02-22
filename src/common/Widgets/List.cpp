@@ -2179,30 +2179,6 @@ void LList::ScrollToSelection()
 	}
 }
 
-/*
-int ListStringCompare(LListItem *a, LListItem *b, NativeInt data)
-{
-	char *ATxt = (a)->GetText(data);
-	char *BTxt = (b)->GetText(data);
-	if (ATxt && BTxt)
-		return stricmp(ATxt, BTxt);
-	return 0;
-}
-
-void LList::Sort(LListCompareFunc Compare, NativeInt Data)
-{
-	if (Lock(_FL))
-	{
-		LListItem *Kb = Items[Keyboard];
-		Items.Sort(Compare ? Compare : ListStringCompare, Data);
-		Keyboard = Kb ? Items.IndexOf(Kb) : -1;
-		Invalidate(&ItemsPos);
-
-		Unlock();
-	}
-}
-*/
-
 void LList::Empty()
 {
 	if (Lock(_FL))

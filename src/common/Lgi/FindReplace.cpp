@@ -41,17 +41,16 @@ class LFindDlgPrivate
 {
 public:
 	LEdit *Edit;
-	LFindReplaceCallback Callback;
+	LFindReplaceCommon::Callback Callback;
 	void *CallbackData;
 };
 
-LFindDlg::LFindDlg(LView *Parent, char *Init, LFindReplaceCallback Callback, void *UserData)
+LFindDlg::LFindDlg(LView *Parent, Callback Cb, const char *Init)
 {
 	d = new LFindDlgPrivate;
 	if (Init)
 		Find = Init;
-	d->Callback = Callback;
-	d->CallbackData = UserData;
+	d->Callback = Cb;
 
 	SetParent(Parent);
 	Name(LLoadString(L_FR_FIND, "Find"));
@@ -154,7 +153,7 @@ int LFindDlg::OnNotify(LViewI *Ctrl, LNotification n)
 
 			if (d->Callback)
 			{
-				d->Callback(this, false, d->CallbackData);
+				d->Callback(this, Ctrl->GetId());
 				break;
 			}
 			// else fall thru
@@ -182,15 +181,14 @@ int LFindDlg::OnNotify(LViewI *Ctrl, LNotification n)
 class LReplaceDlgPrivate
 {
 public:
-	LFindReplaceCallback Callback;
+	LFindReplaceCommon::Callback Callback;
 	void *CallbackData;
 };
 
-LReplaceDlg::LReplaceDlg(LView *Parent, char *InitFind, char *InitReplace, LFindReplaceCallback Callback, void *UserData)
+LReplaceDlg::LReplaceDlg(LView *Parent, Callback Cb, char *InitFind, char *InitReplace)
 {
 	d = new LReplaceDlgPrivate;
-	d->Callback = Callback;
-	d->CallbackData = UserData;
+	d->Callback = Cb;
 	if (InitFind)
 		Find = InitFind;
 	Replace = NewStr(InitReplace);
@@ -293,7 +291,7 @@ int LReplaceDlg::OnNotify(LViewI *Ctrl, LNotification n)
 
 			if (d->Callback)
 			{
-				d->Callback(this, Ctrl->GetId() == IDC_FR_REPLACE, d->CallbackData);
+				d->Callback(this, Ctrl->GetId());
 				break;
 			}
 			// else fall thru

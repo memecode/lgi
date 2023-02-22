@@ -19,9 +19,12 @@ Flags = -fPIC -w -fno-inline -fpermissive
 ifeq ($(Build),Debug)
 	Flags += -g -std=c++14
 	Tag = d
-	Defs = -D_DEBUG -DHAIKU -D_REENTRANT
+	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -DPOSIX -D_GNU_SOURCE
 	Libs =  \
 		-L../Debug \
+		-static-libgcc \
+		-lgnu \
+		-lnetwork \
 		-lbe \
 		-llgi$(Tag) \
 		-L../$(BuildDir)
@@ -32,9 +35,12 @@ ifeq ($(Build),Debug)
 		-I../include
 else
 	Flags += -s -Os -std=c++14
-	Defs = -DHAIKU -D_REENTRANT
+	Defs = -DHAIKU -D_REENTRANT -DPOSIX -D_GNU_SOURCE
 	Libs =  \
 		-L../Release \
+		-static-libgcc \
+		-lgnu \
+		-lnetwork \
 		-lbe \
 		-llgi$(Tag) \
 		-L../$(BuildDir)
@@ -54,7 +60,6 @@ Source =	Code/WebFldDlg.cpp \
 			Code/ProjectNode.cpp \
 			Code/NewProjectFromTemplate.cpp \
 			Code/MissingFiles.cpp \
-			Code/History.cpp \
 			Code/MemDumpViewer.cpp \
 			Code/LgiUtils.cpp \
 			Code/LgiIde.cpp \
@@ -64,14 +69,13 @@ Source =	Code/WebFldDlg.cpp \
 			Code/IdeProject.cpp \
 			Code/IdeDoc.cpp \
 			Code/IdeCommon.cpp \
-			Code/GHistory.cpp \
-			Code/GDebugger.cpp \
-			Code/GDebugContext.cpp \
+			Code/History.cpp \
 			Code/FtpThread.cpp \
 			Code/FindSymbol.cpp \
 			Code/FindInFiles.cpp \
 			Code/DocEditStyling.cpp \
 			Code/DocEdit.cpp \
+			Code/DebugContext.cpp \
 			Code/AddFtpFile.cpp \
 			../src/common/Text/TextConvert.cpp \
 			../src/common/Text/HtmlParser.cpp \
@@ -83,7 +87,6 @@ Source =	Code/WebFldDlg.cpp \
 			../src/common/Net/OpenSSLSocket.cpp \
 			../src/common/Net/Http.cpp \
 			../src/common/Net/Ftp.cpp \
-			../src/common/Lgi/SubProcess.cpp \
 			../src/common/Lgi/Mdi.cpp \
 			../src/common/Lgi/LgiMain.cpp \
 			../src/common/Lgi/About.cpp \
@@ -91,17 +94,17 @@ Source =	Code/WebFldDlg.cpp \
 			../src/common/Coding/ParseCpp.cpp \
 			../src/common/Coding/LexCpp.cpp
 
-SourceLst := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(Sources)))
-
+SourceLst := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(Source)))
 Objects := $(addprefix $(BuildDir)/,$(SourceLst))
+Deps := $(patsubst %.o,%.d,$(Objects))
 
 # Target
 # Executable target
-$(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Depends)
+$(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
+	mkdir -p $(BuildDir)
 	@echo Linking $(Target) [$(Build)]...
 	$(CPP) -Wl,-export-dynamic,-R. -o \
-		$(Target) $(addprefix $(BuildDir)/,$(Depends)) $(Libs)
-	addattr -f ./Code/icon-haiku -t "'VICN'" "BEOS:ICON" $(Target)
+		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
 ../$(BuildDir)/liblgi$(Tag).so : ../include/lgi/common/App.h \
@@ -114,6 +117,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Depends)
 	../include/lgi/common/CairoSurface.h \
 	../include/lgi/common/Cancel.h \
 	../include/lgi/common/Capabilities.h \
+	../include/lgi/common/Charset.h \
 	../include/lgi/common/CheckBox.h \
 	../include/lgi/common/ClipBoard.h \
 	../include/lgi/common/Colour.h \
@@ -169,6 +173,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Depends)
 	../include/lgi/common/List.h \
 	../include/lgi/common/ListItemCheckBox.h \
 	../include/lgi/common/ListItemRadioBtn.h \
+	../include/lgi/common/LMallocArray.h \
 	../include/lgi/common/Mail.h \
 	../include/lgi/common/Matrix.h \
 	../include/lgi/common/Mem.h \
@@ -213,6 +218,8 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Depends)
 	../include/lgi/common/Stream.h \
 	../include/lgi/common/StringClass.h \
 	../include/lgi/common/StringLayout.h \
+	../include/lgi/common/StructuredIo.h \
+	../include/lgi/common/StructuredLog.h \
 	../include/lgi/common/SubProcess.h \
 	../include/lgi/common/TableLayout.h \
 	../include/lgi/common/TabView.h \
@@ -238,9 +245,19 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Depends)
 	../include/lgi/common/XmlTree.h \
 	../include/lgi/haiku/LgiOsClasses.h \
 	../include/lgi/haiku/LgiOsDefs.h \
+	../include/lgi/linux/Gtk/LgiWidget.h \
+	../include/lgi/linux/Gtk/LgiWinManGlue.h \
+	../include/lgi/mac/cocoa/LCocoaView.h \
+	../include/lgi/mac/cocoa/LgiMac.h \
+	../include/lgi/mac/cocoa/LgiOs.h \
+	../include/lgi/mac/cocoa/LgiOsClasses.h \
+	../include/lgi/mac/cocoa/LgiOsDefs.h \
+	../include/lgi/mac/cocoa/ObjCWrapper.h \
+	../include/lgi/mac/cocoa/SymLookup.h \
 	../private/common/FontPriv.h \
 	../private/common/ViewPriv.h \
 	../private/haiku/AppPriv.h \
+	../private/linux/AppPriv.h \
 	../src/common/Gdc2/15Bit.cpp \
 	../src/common/Gdc2/16Bit.cpp \
 	../src/common/Gdc2/24Bit.cpp \
@@ -249,9 +266,9 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Depends)
 	../src/common/Gdc2/Alpha.cpp \
 	../src/common/Gdc2/Colour.cpp \
 	../src/common/Gdc2/Filters/Filter.cpp \
+	../src/common/Gdc2/Font/Charset.cpp \
 	../src/common/Gdc2/Font/DisplayString.cpp \
 	../src/common/Gdc2/Font/Font.cpp \
-	../src/common/Gdc2/Font/FontCodePages.cpp \
 	../src/common/Gdc2/Font/FontSystem.cpp \
 	../src/common/Gdc2/Font/FontType.cpp \
 	../src/common/Gdc2/Font/StringLayout.cpp \
@@ -353,6 +370,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Depends)
 	../src/haiku/PrintDC.cpp \
 	../src/haiku/Printer.cpp \
 	../src/haiku/ScreenDC.cpp \
+	../src/haiku/ShowFileProp_Haiku.cpp \
 	../src/haiku/Thread.cpp \
 	../src/haiku/View.cpp \
 	../src/haiku/Widgets.cpp \
@@ -374,12 +392,12 @@ endif
 
 # Clean just this target
 clean :
-	rm -rf $(BuildDir)/* $(Target)
+	rm $(Objects) $(Deps) $(Target)
 	@echo Cleaned $(BuildDir)
 
 # Clean all targets
 cleanall :
-	rm -rf $(BuildDir)/* $(Target)
+	rm $(Objects) $(Deps) $(Target)
 	@echo Cleaned $(BuildDir)
 	+make -C "../" -f "Makefile.haiku" clean
 

@@ -19,7 +19,7 @@ Flags = -fPIC -w -fno-inline -fpermissive
 ifeq ($(Build),Debug)
 	Flags += -g -std=c++14
 	Tag = d
-	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -DLGI_LIBRARY -DPOSIX -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64
+	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -DLGI_LIBRARY -DPOSIX -D_GNU_SOURCE
 	Libs =  \
 		-static-libgcc \
 		-lgnu \
@@ -32,7 +32,7 @@ ifeq ($(Build),Debug)
 		-I./include
 else
 	Flags += -s -Os -std=c++14
-	Defs = -DHAIKU -D_REENTRANT -DLGI_LIBRARY -DPOSIX -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64
+	Defs = -DHAIKU -D_REENTRANT -DLGI_LIBRARY -DPOSIX -D_GNU_SOURCE
 	Libs =  \
 		-static-libgcc \
 		-lgnu \
@@ -50,6 +50,7 @@ Source =	src/haiku/Window.cpp \
 			src/haiku/Widgets.cpp \
 			src/haiku/View.cpp \
 			src/haiku/Thread.cpp \
+			src/haiku/ShowFileProp_Haiku.cpp \
 			src/haiku/ScreenDC.cpp \
 			src/haiku/Printer.cpp \
 			src/haiku/PrintDC.cpp \
@@ -148,9 +149,9 @@ Source =	src/haiku/Window.cpp \
 			src/common/Gdc2/Font/StringLayout.cpp \
 			src/common/Gdc2/Font/FontType.cpp \
 			src/common/Gdc2/Font/FontSystem.cpp \
-			src/common/Gdc2/Font/FontCodePages.cpp \
 			src/common/Gdc2/Font/Font.cpp \
 			src/common/Gdc2/Font/DisplayString.cpp \
+			src/common/Gdc2/Font/Charset.cpp \
 			src/common/Gdc2/Filters/Filter.cpp \
 			src/common/Gdc2/Colour.cpp \
 			src/common/Gdc2/Alpha.cpp \
@@ -160,13 +161,14 @@ Source =	src/haiku/Window.cpp \
 			src/common/Gdc2/16Bit.cpp \
 			src/common/Gdc2/15Bit.cpp
 
-SourceLst := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(Sources)))
-
+SourceLst := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(Source)))
 Objects := $(addprefix $(BuildDir)/,$(SourceLst))
+Deps := $(patsubst %.o,%.d,$(Objects))
 
 # Target
 TargetFile = lib$(Target)$(Tag).so
 $(TargetFile) : $(Objects)
+	mkdir -p $(BuildDir)
 	@echo Linking $(TargetFile) [$(Build)]...
 	$(CPP)$s -shared \
 		 \
@@ -189,14 +191,17 @@ endif
 
 # Clean out targets
 clean :
-	rm -rf $(BuildDir)/* $(BuildDir)/$(TargetFile)
+	rm $(Objects) $(Deps) $(BuildDir)/$(TargetFile)
 	@echo Cleaned $(BuildDir)
 
 VPATH=%.cpp \
 	./src/common/Hash/sha1 \
 	./src/common/Hash/md5 \
+	./private/linux \
 	./private/haiku \
 	./private/common \
+	./include/lgi/mac/cocoa \
+	./include/lgi/linux/Gtk \
 	./include/lgi/haiku \
 	./include/lgi/common \
 	./include \

@@ -175,9 +175,11 @@ class LFileSelectPrivate
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-LFileSelect::LFileSelect()
+LFileSelect::LFileSelect(LViewI *Window)
 {
 	d = new LFileSelectPrivate;
+	if (Window)
+		Parent(Window);
 }
 
 LFileSelect::~LFileSelect()
@@ -301,7 +303,7 @@ void LFileSelect::DefaultExtension(const char *DefExt)
 	d->DefExt = DefExt;
 }
 
-bool LFileSelect::Open()
+void LFileSelect::Open(SelectCb Cb)
 {
 	bool Status = FALSE;
 
@@ -312,7 +314,8 @@ bool LFileSelect::Open()
 		Status = GetOpenFileNameW(&Info) != 0;
 	d->AfterDlg(Info, Status);
 
-	return Status && Length() > 0;
+	if (Cb)
+		Cb(this, Status && Length() > 0);
 }
 
 #include "shlobj.h"
@@ -328,7 +331,7 @@ int CALLBACK GFileSelectBrowseCallback(HWND hwnd, UINT uMsg, LPARAM lParam, LPAR
 	return 0;
 }
 
-bool LFileSelect::OpenFolder()
+void LFileSelect::OpenFolder(SelectCb Cb)
 {
 	bool Status = FALSE;
 
@@ -358,10 +361,11 @@ bool LFileSelect::OpenFolder()
 		}
 	}
 
-	return Status && Length() > 0;
+	if (Cb)
+		Cb(this, Status && Length() > 0);
 }
 
-bool LFileSelect::Save()
+void LFileSelect::Save(SelectCb Cb)
 {
 	bool Status = FALSE;
 
@@ -372,5 +376,6 @@ bool LFileSelect::Save()
 		Status = GetSaveFileNameW(&Info) != 0;		
 	d->AfterDlg(Info, Status);
 
-	return Status && Length() > 0;
+	if (Cb)
+		Cb(this, Status && Length() > 0);
 }

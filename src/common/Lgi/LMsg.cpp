@@ -416,7 +416,7 @@ void LDialogTextMsg(LViewI *Parent, const char *Title, LString Txt)
 		c->TextAlign(LCss::AlignCenter);
 		
 		d->AddView(t);
-		d->DoModal();
+		d->DoModal(NULL);
 	}
 }
 

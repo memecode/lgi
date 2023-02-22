@@ -16,7 +16,7 @@
 #define DEBUG_WINDOW_PLACEMENT				0
 #define DEBUG_HANDLE_VIEW_KEY				0
 #define DEBUG_HANDLE_VIEW_MOUSE				0
-#define DEBUG_SERIALIZE_STATE				0
+#define DEBUG_SERIALIZE_STATE				1
 #define DEBUG_SETFOCUS						0
 
 extern bool In_SetWindowPos;
@@ -142,6 +142,12 @@ LWindow::~LWindow()
 
 	DeleteObj(_Lock);
 	DeleteObj(d);
+}
+
+int LWindow::WaitThread()
+{
+	// No thread to wait on...
+	return 0;
 }
 
 bool LWindow::SetIcon(const char *Icon)
@@ -467,7 +473,7 @@ bool LWindow::HandleViewMouse(LView *v, LMouse &m)
 			if (!t->OnViewMouse(v, m))
 			{
 				#if DEBUG_HANDLE_VIEW_MOUSE
-				if (!m.IsMove())
+				if (m.IsMove())
 					LgiTrace("   Hook %i of %i ate mouse event: '%s'\n", i, d->Hooks.Length(), d->Hooks[i].Target->GetClass());
 				#endif
 				return false;
@@ -866,14 +872,10 @@ LMessage::Result LWindow::OnEvent(LMessage *Msg)
 		}
 		case M_ASSERT_UI:
 		{
-			int *Result = (int*)Msg->A();
-			LString *Str = (LString*)Msg->B();
-			if (Result)
-			{
-				extern int LAssertDlg(LString Msg);
-				*Result = LAssertDlg(Str ? *Str : "Error: no msg.");
-			}
-			else assert(!"Invalid param");
+			LAutoPtr<LString> Str((LString*)Msg->A());
+			extern void LAssertDlg(LString Msg, std::function<void(int)> Callback);
+			if (Str)
+				LAssertDlg(Str ? *Str : "Error: no msg.", NULL);
 			break;
 		}
 		case M_SET_WINDOW_PLACEMENT:

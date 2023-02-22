@@ -1,5 +1,10 @@
+
 #ifndef _GMESSAGE_H_
 #define _GMESSAGE_H_
+
+#ifdef HAIKU
+#include <functional>
+#endif
 
 enum LgiMessages
 {
@@ -94,6 +99,9 @@ enum LgiMessages
 		/// Send when a window is losing it's mouse capture. Usually
 		// because something else has requested it.
 		M_LOSING_CAPTURE,
+
+		// A: code
+		M_DIALOG_END_MODAL,
 	
 	#elif defined(LGI_SDL) || defined(HAIKU)
 
@@ -110,6 +118,13 @@ enum LgiMessages
 		M_TEXT_UPDATE_NAME,
 		M_ASSERT_DLG,
 		M_CLOSE,
+
+		#if defined(HAIKU)
+		M_HANDLE_IN_THREAD, // A = (LMessage::InThreadCb*)Cb;
+		M_LWINDOW_DELETE,
+		M_LMENUITEM_ENABLE,
+		M_LSUBMENU_APPENDITEM,
+		#endif
 	
 	#elif defined(MAC)
 
@@ -163,10 +178,11 @@ enum LgiMessages
 	M_TABLE_LAYOUT,
 	M_URL,
 	M_LOG_TEXT,
-	M_ASSERT_UI,
+	M_ASSERT_UI, // A=(LString*)Msg
 	M_INVALIDATE,			// A=(LRect*)Rectangle, B=(LView*)this
 	M_RESIZE_TO_CONTENT,	// A=(int)Border (used by LItemContainer)
 	M_SCROLL_TO,			// Sent from LTreeItem to LTree
+	M_SET_SCROLL, // LScrollBar
 	M_JOBS_LOADED,			// LHtml
 	M_THREAD_COMPLETED,		// A=(LThread*)Thread
 	M_SET_CTRL_NAME,		// A=(int)CtrlId, B=(LString*)Name
@@ -233,6 +249,7 @@ public:
 	static constexpr char *PropB = "lgiB";
 	static constexpr char *PropView = "lgiView";
 	static constexpr char *PropCallback = "lgiCallback";
+	static constexpr char *PropNames[2] = {"lgi_a", "lgi_b"};
 	typedef std::function<void()> InThreadCb;
 	#endif
 

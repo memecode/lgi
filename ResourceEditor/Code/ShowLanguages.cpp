@@ -75,8 +75,6 @@ ShowLanguagesDlg::ShowLanguagesDlg(AppWnd *app)
 		d->Lst->Sort(Cmp);
 		d->Lst->Select(*d->Lst->begin());
 	}
-	
-	DoModal();
 }
 
 ShowLanguagesDlg::~ShowLanguagesDlg()

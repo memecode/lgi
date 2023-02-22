@@ -13,8 +13,10 @@
 
 #include "lgi/common/Lgi.h"
 #include <Bitmap.h>
+#include <Region.h>
 
-#define VIEW_CHECK		if (!d->v) return;
+#define LOGGING				0
+#define VIEW_CHECK(...)		if (!d->v) return __VA_ARGS__;
 
 class LScreenPrivate
 {
@@ -23,6 +25,8 @@ public:
 	bool Own = false;
 	LColour Col;
 	LRect Client;
+	int Rop = GDC_SET;
+	NativeInt Alpha = -1;
 
 	LView *View = NULL;
 	OsView v = NULL;
@@ -55,10 +59,12 @@ LScreenDC::LScreenDC(LView *view, void *param)
 
 	d->Bits = GdcD->GetBits();
 
+	/*
 	if (d->v)
 		d->Client = d->v->Frame();
 	else
 		LgiTrace("%s:%i - LScreenDC::LScreenDC - No view?\n", _FL);
+	*/
 }
 
 LScreenDC::~LScreenDC()
@@ -80,8 +86,12 @@ OsPainter LScreenDC::Handle()
 
 bool LScreenDC::SupportsAlphaCompositing()
 {
-	// GTK/X11 doesn't seem to support alpha compositing.
-	return false;
+	return true;
+}
+
+LPoint LScreenDC::GetDpi()
+{
+	return LScreenDpi();
 }
 
 bool LScreenDC::GetClient(LRect *c)
@@ -93,55 +103,97 @@ bool LScreenDC::GetClient(LRect *c)
 	return true;
 }
 
+LString GetClip(BView *v)
+{
+	BRegion r;
+	v->GetClippingRegion(&r);
+	LRect lr = r.Frame();
+	return lr.GetStr();
+}
+
 void LScreenDC::GetOrigin(int &x, int &y)
 {
-	if (d->Client.Valid())
-	{
-		x = OriginX + d->Client.x1;
-		y = OriginY + d->Client.y1;
-	}
-	else
-	{
-		x = OriginX;
-		y = OriginY;
-	}
+	x = OriginX;
+	y = OriginY;
+
+	#if LOGGING
+	printf("%p.GetOrigin=%i+%i=%i, %i+%i=%i\n",
+		this,
+		OriginX, d->Client.x1, x,
+		OriginY, d->Client.y1, y);
+	#endif
 }
 
 void LScreenDC::SetOrigin(int x, int y)
 {
+	VIEW_CHECK()
+
 	if (d->Client.Valid())
 	{
-		OriginX = x - d->Client.x1;
-		OriginY = y - d->Client.y1;
+		// The clipping region is relative to the offset.
+		// Remove it here and reinstate it after setting the origin.
+		d->v->ConstrainClippingRegion(NULL);
 	}
-	else
-	{
-		OriginX = x;
-		OriginY = y;
-	}
+	
+	OriginX = x - d->Client.x1;
+	OriginY = y - d->Client.y1;
 
+	#if LOGGING
+	printf("%p.SetOrigin=%i,%i (%i,%i) = %i,%i\n",
+		this,
+		x, y,
+		d->Client.x1, d->Client.y1,
+		d->Client.x1 - OriginX,
+		d->Client.y1 - OriginY);
+	#endif
+	
+	d->v->SetOrigin( d->Client.x1 - OriginX,
+					 d->Client.y1 - OriginY);
+	
+	if (d->Client.Valid())
+	{
+		// Reset the clipping region related to the origin.
+		auto clp = d->Client.ZeroTranslate();
+		clp.Offset(OriginX, OriginY);
+		d->v->ClipToRect(clp);
+	}
 }
 
 void LScreenDC::SetClient(LRect *c)
 {
+	VIEW_CHECK()
+
 	if (c)
 	{
 		d->Client = *c;
 
+		OriginX += d->Client.x1;
+		OriginY += d->Client.y1;
+		#if LOGGING
+		printf("SetClient(%s)\n", d->Client.GetStr());
+		#endif
+		d->v->SetOrigin(OriginX, OriginY);
 
-		OriginX = -c->x1;
-		OriginY = -c->y1;
+		auto clp = d->Client.ZeroTranslate();
+		// clp.Offset(OriginX, OriginY);
+		d->v->ClipToRect(clp);
+
+		/*
+		BRegion r;
+		d->v->GetClippingRegion(&r);
+		LRect lr = r.Frame();
+		printf("SetClient %s = %s (%i,%i)\n", c->GetStr(), lr.GetStr(), OriginX, OriginY);
+		*/
 	}
 	else
 	{
-		if (Clip.Valid())
-			ClipRgn(NULL);
-		
-		OriginX = 0;
-		OriginY = 0;	
-
-
+	    d->v->ConstrainClippingRegion(NULL);
+		d->v->SetOrigin(OriginX = 0, OriginX = 0);
 		d->Client.ZOff(-1, -1);
+
+	    #if LOGGING
+		printf("SetClient()\n");
+		#endif
 	}
 }
 
@@ -177,11 +229,12 @@ LRect LScreenDC::ClipRgn(LRect *c)
 	if (c)
 	{
 		Clip = *c;
-
+		d->v->ClipToRect(Clip);
 	}
 	else
 	{
 	    Clip.ZOff(-1, -1);
+	    d->v->ConstrainClippingRegion(NULL);
 	}
 
 	return Prev;
@@ -206,76 +259,25 @@ LColour LScreenDC::Colour(LColour c)
 	d->Col = c;
 	if (d->v)
 	{
-		// LgiTrace("SetViewColor %s\n", c.GetStr());
 		d->v->SetLowColor(c);
 		d->v->SetHighColor(c);
 	}
-	else
-		LgiTrace("%s:%i - No view.\n", _FL);
+	else LgiTrace("%s:%i - No view.\n", _FL);
 
 	return Prev;
 }
 
 int LScreenDC::Op(int ROP, NativeInt Param)
 {
-	int Prev = Op();
-
-	switch (ROP)
-	{
-		case GDC_SET:
-		{
-			//d->p.setRasterOp(XPainter::CopyROP);
-			break;
-		}
-		case GDC_OR:
-		{
-			//d->p.setRasterOp(XPainter::OrROP);
-			break;
-		}
-		case GDC_AND:
-		{
-			//d->p.setRasterOp(XPainter::AndROP);
-			break;
-		}
-		case GDC_XOR:
-		{
-			//d->p.setRasterOp(XPainter::XorROP);
-			break;
-		}
-	}
-
-	return Prev;
+	auto prev = d->Rop;
+	d->Alpha = Param;
+	d->Rop = ROP;
+	return prev;
 }
 
 int LScreenDC::Op()
 {
-	/*
-	switch (d->p.rasterOp())
-	{
-		case XPainter::CopyROP:
-		{
-			return GDC_SET;
-			break;
-		}
-		case XPainter::OrROP:
-		{
-			return GDC_OR;
-			break;
-		}
-		case XPainter::AndROP:
-		{
-			return GDC_AND;
-			break;
-		}
-		case XPainter::XorROP:
-		{
-			return GDC_XOR;
-			break;
-		}
-	}
-	*/
-
-	return GDC_SET;
+	return d->Rop;
 }
 
 int LScreenDC::X()
@@ -295,17 +297,16 @@ int LScreenDC::GetBits()
 
 LPalette *LScreenDC::Palette()
 {
-	return 0;
+	return NULL; // not supported.
 }
 
 void LScreenDC::Palette(LPalette *pPal, bool bOwnIt)
 {
-	VIEW_CHECK
 }
 
 void LScreenDC::Set(int x, int y)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->StrokeLine(BPoint(x, y), BPoint(x, y));
 }
 
@@ -316,67 +317,67 @@ COLOUR LScreenDC::Get(int x, int y)
 
 void LScreenDC::HLine(int x1, int x2, int y)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->StrokeLine(BPoint(x1, y), BPoint(x2, y));
 }
 
 void LScreenDC::VLine(int x, int y1, int y2)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->StrokeLine(BPoint(x, y1), BPoint(x, y2));
 }
 
 void LScreenDC::Line(int x1, int y1, int x2, int y2)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->StrokeLine(BPoint(x1, y1), BPoint(x2, y2));
 }
 
 void LScreenDC::Circle(double cx, double cy, double radius)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->StrokeArc(BPoint(cx, cy), radius, radius, 0, 360);
 }
 
 void LScreenDC::FilledCircle(double cx, double cy, double radius)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->FillArc(BPoint(cx, cy), radius, radius, 0, 360);
 }
 
 void LScreenDC::Arc(double cx, double cy, double radius, double start, double end)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->StrokeArc(BPoint(cx, cy), radius, radius, start, end);
 }
 
 void LScreenDC::FilledArc(double cx, double cy, double radius, double start, double end)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->FillArc(BPoint(cx, cy), radius, radius, start, end);
 }
 
 void LScreenDC::Ellipse(double cx, double cy, double x, double y)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->StrokeArc(BPoint(cx, cy), x, y, 0, 360);
 }
 
 void LScreenDC::FilledEllipse(double cx, double cy, double x, double y)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->FillArc(BPoint(cx, cy), x, y, 0, 360);
 }
 
 void LScreenDC::Box(int x1, int y1, int x2, int y2)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	d->v->StrokeRect(LRect(x1, y1, x2, y2));
 }
 
 void LScreenDC::Box(LRect *a)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	if (a)
 		d->v->StrokeRect(*a);
 	else
@@ -385,28 +386,33 @@ void LScreenDC::Box(LRect *a)
 
 void LScreenDC::Rectangle(int x1, int y1, int x2, int y2)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	if (x2 >= x1 && y2 >= y1)
+	{
+		// auto o = d->v->Origin();
+		// printf("Rect %i,%i,%i,%i %g,%g\n", x1, y1, x2, y2, o.x, o.y);
 		d->v->FillRect(LRect(x1, y1, x2, y2));
+	}
 }
 
 void LScreenDC::Rectangle(LRect *a)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	LRect r = a ? *a : Bounds();
-	d->v->FillRect(BRect(r.x1, r.y1, r.x2, r.y2));
+	BRect br(r.x1, r.y1, r.x2, r.y2);
+	d->v->FillRect(br);
 }
 
 void LScreenDC::Polygon(int Points, LPoint *Data)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	if (!Data || Points <= 0)
 		return;
 }
 
 void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	if (!Src)
 	{
 		LgiTrace("%s:%i - No source.\n", _FL);
@@ -426,11 +432,32 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 		LgiTrace("%s:%i - No bitmap.\n", _FL);
 		return;
 	}
+	
+	switch (d->Rop)
+	{
+		case GDC_SET:
+			d->v->SetDrawingMode(B_OP_COPY);
+			break;
+		case GDC_OR:
+			d->v->SetDrawingMode(B_OP_ADD);
+			break;
+		case GDC_XOR:
+			d->v->SetDrawingMode(B_OP_INVERT);
+			break;
+		default:
+		case GDC_ALPHA:
+			d->v->SetDrawingMode(B_OP_ALPHA);
+			d->v->SetBlendingMode(B_PIXEL_ALPHA, B_ALPHA_COMPOSITE);
+			
+			if (d->Alpha >= 0)
+				LgiTrace("%s:%i - WARNING: Haiku doesn't support constant alpha Blt to screen!!!\n", _FL);
+			break;
+	}		
 		
 	if (a)
 	{
 		BRect bitmapRect = *a;
-		BRect viewRect(x, y, x + a->X(), y + a->Y());
+		BRect viewRect(x, y, x + a->X() - 1, y + a->Y() - 1);
 		d->v->DrawBitmap(bmp, bitmapRect, viewRect);
 		
 		#if 0
@@ -443,7 +470,7 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 	else
 	{
 		BRect bitmapRect = bmp->Bounds();
-		BRect viewRect(x, y, x + Src->X() - 1, y + Src->Y() - 1); // This seems like a Haiku bug... shouldn't need the -1 offset here.
+		BRect viewRect(x, y, x + Src->X() - 1, y + Src->Y() - 1);
 		d->v->DrawBitmap(bmp, bitmapRect, viewRect);
 
 		#if 0
@@ -453,23 +480,25 @@ void LScreenDC::Blt(int x, int y, LSurface *Src, LRect *a)
 			x, y);
 		#endif
 	}
+
+	d->v->SetDrawingMode(B_OP_COPY);
 }
 
 void LScreenDC::StretchBlt(LRect *Dest, LSurface *Src, LRect *s)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	LAssert(0);
 }
 
 void LScreenDC::Bezier(int Threshold, LPoint *Pt)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	LAssert(0);
 }
 
 void LScreenDC::FloodFill(int x, int y, int Mode, COLOUR Border, LRect *Bounds)
 {
-	VIEW_CHECK
+	VIEW_CHECK()
 	LAssert(0);
 }
 

@@ -2,8 +2,10 @@
 #include "lgi/common/Mdi.h"
 #include <stdio.h>
 #include "lgi/common/DisplayString.h"
+
 #define DEBUG_MDI			0
-enum GMdiDrag
+
+enum LMdiDrag
 {
 	DragNone	= 0,
 	DragMove	= 1 << 1,
@@ -14,6 +16,7 @@ enum GMdiDrag
 	DragClose	= 1 << 6,
 	DragSystem	= 1 << 7
 };
+
 class LMdiChildPrivate
 {
 public:
@@ -28,7 +31,7 @@ public:
 	#endif
 	
 	int Fy;	
-	GMdiDrag Drag;	
+	LMdiDrag Drag;	
 	int Ox, Oy;
 	bool CloseDown;
 	bool CloseOnUp;
@@ -50,9 +53,9 @@ public:
 		#endif
 	}
 	#if !MDI_TAB_STYLE
-	GMdiDrag HitTest(int x, int y)
+	LMdiDrag HitTest(int x, int y)
 	{
-		GMdiDrag Hit = DragNone;
+		LMdiDrag Hit = DragNone;
 		
 		if (Child->WindowFromPoint(x, y) == Child)
 		{
@@ -97,6 +100,7 @@ public:
 	}
 	#endif
 };
+
 class LMdiParentPrivate
 {
 public:
@@ -114,6 +118,7 @@ public:
 		Content.ZOff(-1, -1);
 	}
 };
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 LMdiChild::LMdiChild()
 {
@@ -124,11 +129,13 @@ LMdiChild::LMdiChild()
 	SetStyle(GetStyle() | WS_CLIPSIBLINGS);
 	#endif
 }
+
 LMdiChild::~LMdiChild()
 {
 	Detach();
 	DeleteObj(d);
 }
+
 bool LMdiChild::Attach(LViewI *p)
 {
 	#if MDI_TAB_STYLE
@@ -158,6 +165,7 @@ bool LMdiChild::Attach(LViewI *p)
 		AttachChildren();
 	return s;
 }
+
 bool LMdiChild::Detach()
 {
 	#if MDI_TAB_STYLE
@@ -170,10 +178,12 @@ bool LMdiChild::Detach()
 	#endif
 	return LLayout::Detach();
 }
+
 const char *LMdiChild::Name()
 {
 	return LView::Name();
 }
+
 bool LMdiChild::Name(const char *n)
 {
 	bool s = LView::Name(n);
@@ -187,6 +197,7 @@ bool LMdiChild::Name(const char *n)
 	
 	return s;
 }
+
 bool LMdiChild::PourAll()
 {
 	LRect c = GetClient();
@@ -229,6 +240,7 @@ bool LMdiChild::PourAll()
 	}
 	return true;
 }
+
 void LMdiChild::OnTitleClick(LMouse &m)
 {
 	if (!m.IsContextMenu() && m.Down())
@@ -236,6 +248,7 @@ void LMdiChild::OnTitleClick(LMouse &m)
 		Raise();
 	}
 }
+
 void LMdiChild::OnButtonClick(LMouse &m)
 {
 	if (m.Down())
@@ -246,6 +259,7 @@ void LMdiChild::OnButtonClick(LMouse &m)
 		}
 	}
 }
+
 void LMdiChild::OnPaintButton(LSurface *pDC, LRect &rc)
 {
 	// Default: Draw little 'x' for closing the MDI child
@@ -260,12 +274,16 @@ void LMdiChild::OnPaintButton(LSurface *pDC, LRect &rc)
 	pDC->Line(r.x2-1, r.y1, r.x1, r.y2-1);
 	pDC->Line(r.x2, r.y1+1, r.x1+1, r.y2);
 }
+
 #if MDI_TAB_STYLE
+
 int LMdiChild::GetOrder()
 {
 	return d->Order;
 }
+
 #else
+
 LRect &LMdiChild::GetClient(bool ClientSpace)
 {
 	static LRect r;
@@ -277,6 +295,7 @@ LRect &LMdiChild::GetClient(bool ClientSpace)
 	
 	return r;
 }
+
 void LMdiChild::OnPaint(LSurface *pDC)
 {
 	LRect p = LLayout::GetClient();
@@ -353,6 +372,7 @@ void LMdiChild::OnPaint(LSurface *pDC)
 	
 	Pour();
 }
+
 void LMdiChild::OnMouseClick(LMouse &m)
 {
 	if (m.Left())
@@ -458,9 +478,10 @@ void LMdiChild::OnMouseClick(LMouse &m)
 		}
 	}
 }
+
 LCursor LMdiChild::GetCursor(int x, int y)
 {
-	GMdiDrag Hit = d->HitTest(x, y);
+	LMdiDrag Hit = d->HitTest(x, y);
 	if (Hit & DragLeft)
 	{
 		if (Hit & DragTop)
@@ -498,6 +519,7 @@ LCursor LMdiChild::GetCursor(int x, int y)
 	
 	return LCUR_Normal;
 }
+
 void LMdiChild::OnMouseMove(LMouse &m)
 {
 	if (IsCapturing())
@@ -553,6 +575,7 @@ void LMdiChild::OnMouseMove(LMouse &m)
 	}
 }
 #endif
+
 #if defined __GTK_H__
 using namespace Gtk;
 #endif
@@ -598,6 +621,7 @@ void LMdiChild::Raise()
 		#endif
 	}
 }
+
 void LMdiChild::Lower()
 {
 	LMdiParent *p = dynamic_cast<LMdiParent*>(GetParent());
@@ -631,12 +655,14 @@ void LMdiChild::Lower()
 		#endif
 	}
 }
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 LMdiParent::LMdiParent()
 {
 	d = new LMdiParentPrivate;
 	SetPourLargest(true);
 }
+
 LMdiParent::~LMdiParent()
 {
 	if (GetWindow())
@@ -646,28 +672,24 @@ LMdiParent::~LMdiParent()
 	
 	DeleteObj(d);
 }
+
 bool LMdiParent::HasButton()
 {
 	return d->Btn;
 }
+
 void LMdiParent::HasButton(bool b)
 {
 	d->Btn = b;
 	if (IsAttached())
 		Invalidate();
 }
+
 ::LArray<LMdiChild*> &LMdiParent::PrivChildren()
 {
 	return d->Children;
 }
-/*
-#if MDI_TAB_STYLE
-int ViewCmp(LMdiChild **a, LMdiChild **b)
-{
-	return (*a)->GetOrder() - (*b)->GetOrder();
-}
-#endif
-*/
+
 void LMdiParent::OnPaint(LSurface *pDC)
 {
 	#if MDI_TAB_STYLE
@@ -757,6 +779,7 @@ void LMdiParent::OnPaint(LSurface *pDC)
 	pDC->Rectangle(d->Tabs.x1 + Cx, d->Tabs.y1, d->Tabs.x2, d->Tabs.y2 - 1);
 	#endif
 }
+
 bool LMdiParent::Attach(LViewI *p)
 {
 	bool s = LLayout::Attach(p);
@@ -767,6 +790,7 @@ bool LMdiParent::Attach(LViewI *p)
 	}
 	return s;
 }
+
 LMdiChild *LMdiParent::IsChild(LViewI *View)
 {
 	for (LViewI *v=View; v; v=v->GetParent())
@@ -775,19 +799,19 @@ LMdiChild *LMdiParent::IsChild(LViewI *View)
 		{
 			LMdiChild *c = dynamic_cast<LMdiChild*>(v);
 			if (c)
-			{
 				return c;
-			}
-			LAssert(0);
+
+			printf("%s:%i - Unexpected view '%s' in IsChild.\n", _FL, v->GetClass());			
 			break;
 		}
 	}
 	
-	return 0;
+	return NULL;
 }
+
 bool LMdiParent::OnViewMouse(LView *View, LMouse &m)
 {
-	if (m.Down())
+	if (m.Down() && Children.Length() > 0)
 	{
 		LMdiChild *v = IsChild(View);
 		LMdiChild *l = IsChild(*Children.rbegin());
@@ -799,6 +823,7 @@ bool LMdiParent::OnViewMouse(LView *View, LMouse &m)
 	
 	return true;
 }
+
 bool LMdiParent::OnViewKey(LView *View, LKey &Key)
 {
 	if (Key.Down() && Key.Ctrl() && Key.c16 == '\t')
@@ -824,7 +849,9 @@ bool LMdiParent::OnViewKey(LView *View, LKey &Key)
 	}
 	return false;
 }
+
 #if MDI_TAB_STYLE
+
 void LMdiParent::OnMouseClick(LMouse &m)
 {
 	::LArray<LMdiChild*> Views;
@@ -846,6 +873,7 @@ void LMdiParent::OnMouseClick(LMouse &m)
 		}
 	}	
 }
+
 void LMdiParent::OnPosChange()
 {
 	if (!IsAttached())
@@ -914,7 +942,9 @@ void LMdiParent::OnPosChange()
 	}
 	d->InOnPosChange = false;
 }
+
 #endif
+
 LRect LMdiParent::NewPos()
 {
 	LRect Status(0, 0, (int)(X()*0.75), (int)(Y()*0.75));
@@ -945,14 +975,27 @@ LRect LMdiParent::NewPos()
 	
 	return Status;
 }
+
 bool LMdiParent::Detach()
 {
 	d->InOnPosChange = true;
 	return LLayout::Detach();
 }
+
+bool LMdiParent::SetScrollBars(bool x, bool y)
+{
+	LAssert(!"Attempt to set scroll bars on LMdiParent.\n");
+	return false;
+}
+
 void LMdiParent::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	#if MDI_TAB_STYLE
+	if (Attaching && Stricmp(Wnd->GetClass(), "LMdiChild"))
+	{
+		LAssert(0);
+	}
+	
 	if (!d->InOnPosChange /*&& Attaching*/)
 	{
 		d->Tabs.ZOff(-1, -1);
@@ -980,10 +1023,12 @@ void LMdiParent::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 	}
 	#endif
 }
+
 LViewI *LMdiParent::GetTop()
 {
 	return d->Children.Length() > 0 ? d->Children.Last() : NULL;
 }
+
 #if MDI_TAB_STYLE
 int LMdiParent::GetNextOrder()
 {

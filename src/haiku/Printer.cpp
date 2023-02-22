@@ -11,7 +11,7 @@ public:
 	::LString Printer;
 	::LString Err;
 	::LString PrinterName;
-	GPrintEvents *Events;
+	LPrintEvents *Events;
 	
 	LAutoPtr<LPrintDC> PrintDC;
 	
@@ -26,22 +26,22 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////
-GPrinter::GPrinter()
+LPrinter::LPrinter()
 {
 	d = new LPrinterPrivate;
 }
 
-GPrinter::~GPrinter()
+LPrinter::~LPrinter()
 {
 	DeleteObj(d);
 }
 
-bool GPrinter::Browse(LView *Parent)
+bool LPrinter::Browse(LView *Parent)
 {
 	return false;
 }
 
-bool GPrinter::Serialize(::LString &Str, bool Write)
+bool LPrinter::Serialize(::LString &Str, bool Write)
 {
 	if (Write)
 		Str = d->Printer;
@@ -52,18 +52,19 @@ bool GPrinter::Serialize(::LString &Str, bool Write)
 }
 
 	
-::LString GPrinter::GetErrorMsg()
+LString LPrinter::GetErrorMsg()
 {
 	return d->Err;
 }
 	
-bool GPrinter::Print(GPrintEvents *Events, const char *PrintJobName, int Pages /* = -1 */, LView *Parent /* = 0 */)
+void LPrinter::Print(LPrintEvents *Events,
+					std::function<void(int)> callback,
+					const char *PrintJobName,
+					int Pages,
+					LView *Parent)
 {
 	if (!Events)
-	{
 		LgiTrace("%s:%i - Error: missing param.\n", _FL);
-		return false;
-	}
-	
-    return false;
+
+	LAssert(!"Impl me.");
 }

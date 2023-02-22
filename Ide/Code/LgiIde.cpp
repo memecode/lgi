@@ -375,8 +375,7 @@ public:
 			Children.Insert(new LButton(IDOK, 80, t->LView::GetPos().y2 + 10, 60, 20, "Ok"));
 		}
 		
-		
-		DoModal();
+		DoModal(NULL);
 	}
 	
 	int OnNotify(LViewI *c, LNotification n)
@@ -1069,9 +1068,9 @@ public:
 	
 	// Mru
 	LString::Array RecentFiles;
-	LSubMenu *RecentFilesMenu;
+	LSubMenu *RecentFilesMenu = NULL;
 	LString::Array RecentProjects;
-	LSubMenu *RecentProjectsMenu;
+	LSubMenu *RecentProjectsMenu = NULL;
 
 	// Object
 	AppWndPrivate(AppWnd *a) :
@@ -1091,8 +1090,6 @@ public:
 		Debugging = false;
 		Running = false;
 		Building = false;
-		RecentFilesMenu = 0;
-		RecentProjectsMenu = 0;
 
 		Icons = LLoadImageList("icons.png", 16, 16);
 
@@ -1105,11 +1102,6 @@ public:
 	
 	~AppWndPrivate()
 	{
-		if (RecentFilesMenu)
-			RecentFilesMenu->Empty();
-		if (RecentProjectsMenu)
-			RecentProjectsMenu->Empty();
-
 		FindSym.Reset();
 		Finder.Reset();
 		if (Output)
@@ -1119,8 +1111,21 @@ public:
 		SerializeStringList("RecentProjects", &RecentProjects, true);
 		Options.SerializeFile(true);
 		
-		Docs.DeleteObjects();
-		Projects.DeleteObjects();
+		while (Docs.Length())
+		{
+			auto len = Docs.Length();
+			delete Docs[0];
+			LAssert(Docs.Length() != len); // doc must delete itself...
+		}
+
+		auto root = App->RootProject();
+		if (root)
+		{
+			// printf("Deleting proj %s\n", root->GetFileName());
+			delete root;
+		}
+		LAssert(!Projects.Length());
+			
 		DeleteObj(Icons);
 	}
 
@@ -1584,7 +1589,7 @@ AppWnd::AppWnd()
 	LgiGetResObj(true, AppName);
 	#endif
 	
-	LRect r(0, 0, 1300, 900);
+	LRect r(0, 0, 1000, 760);
 	SetPos(r);
 	MoveToCenter();
 
@@ -1629,10 +1634,9 @@ AppWnd::AppWnd()
 
 			LMenuItem *Debug = GetMenu()->FindItem(IDM_DEBUG_MODE);
 			if (Debug)
-			{
 				Debug->Checked(true);
-			}
-			else LgiTrace("%s:%i - FindSubMenu failed.\n", _FL);
+			else
+				LgiTrace("%s:%i - FindSubMenu failed.\n", _FL);
 			
 			d->UpdateMenus();
 		}
@@ -1729,10 +1733,15 @@ AppWnd::AppWnd()
 	if (d->Output)
 		d->Output->SetPulse(1000);
 	#endif
+
+	OnCommand(IDM_NEW, 0, NULL);
 }
 
 AppWnd::~AppWnd()
 {
+	LAssert(IsClean());
+	WaitThread();
+
 	if (d->HBox)
 	{
 		LVariant v = d->HBox->Value();
@@ -1746,9 +1755,7 @@ AppWnd::~AppWnd()
 
 	ShutdownFtpThread();
 
-	CloseAll();
-	
-	LAppInst->AppWnd = 0;
+	LAppInst->AppWnd = NULL;
 	DeleteObj(d);
 }
 
@@ -2445,43 +2452,142 @@ void AppWnd::AppendOutput(char *Txt, AppWnd::Channels Channel)
 	}
 }
 
-void AppWnd::SaveAll()
+bool AppWnd::IsClean()
 {
-	List<IdeDoc>::I Docs = d->Docs.begin();
-	for (IdeDoc *Doc = *Docs; Doc; Doc = *++Docs)
+	for (auto Doc: d->Docs)
 	{
-		Doc->SetClean();
-		d->OnFile(Doc->GetFileName());
+		if (!Doc->GetClean())
+			return false;
+	}
+
+	for (auto Proj: d->Projects)
+	{
+		if (!Proj->GetClean())
+			return false;
 	}
 	
-	List<IdeProject>::I Projs = d->Projects.begin();
-	for (IdeProject *Proj = *Projs; Proj; Proj = *++Projs)
+	return true;
+}
+
+struct SaveState
+{
+	AppWndPrivate *d = NULL;
+	LArray<IdeDoc*> Docs;
+	LArray<IdeProject*> Projects;
+	std::function<void(bool)> Callback;
+	bool Status = true;
+	bool CloseDirty = false;
+
+	void Iterate()
 	{
-		Proj->SetClean();
-		d->OnFile(Proj->GetFileName(), true);
+		if (Docs.Length())
+		{
+			auto doc = Docs[0];
+			Docs.DeleteAt(0);
+			// printf("Saving doc...\n");
+			doc->SetClean([this, doc](bool ok)
+			{
+				// printf("SetClean cb ok=%i\n", ok);
+				if (ok)
+					d->OnFile(doc->GetFileName());
+				else
+				{
+					if (CloseDirty)
+						delete doc;
+					Status = false;
+				}
+				// printf("SetClean cb iter\n", ok);
+				Iterate();
+			});
+		}
+		else if (Projects.Length())
+		{
+			auto proj = Projects[0];
+			Projects.DeleteAt(0);
+			// printf("Saving proj...\n");
+			proj->SetClean([this, proj](bool ok)
+			{
+				if (ok)
+					d->OnFile(proj->GetFileName(), true);
+				else
+				{
+					if (CloseDirty)
+						delete proj;
+					Status = false;
+				}
+				Iterate();
+			});
+		}
+		else
+		{
+			// printf("Doing callback...\n");
+			if (Callback)
+				Callback(Status);
+
+			// printf("Deleting...\n");
+			delete this;
+		}
 	}
+};
+
+void AppWnd::SaveAll(std::function<void(bool)> Callback, bool CloseDirty)
+{
+	auto ss = new SaveState;	
+	ss->d = d;
+	ss->Callback = Callback;
+	ss->CloseDirty = CloseDirty;
+	for (auto Doc: d->Docs)
+	{
+		if (!Doc->GetClean())
+			ss->Docs.Add(Doc);
+	}	
+	for (auto Proj: d->Projects)
+	{
+		if (!Proj->GetClean())
+			ss->Projects.Add(Proj);
+	}	
+	ss->Iterate();
 }
 
 void AppWnd::CloseAll()
 {
-	SaveAll();
-	while (d->Docs[0])
-		delete d->Docs[0];
-	
-	IdeProject *p = RootProject();
-	if (p)
-		DeleteObj(p);
-	
-	while (d->Projects[0])
-		delete d->Projects[0];	
+	SaveAll([&](auto status)
+	{	
+		if (!status)
+		{
+			LgiTrace("%s:%i - status=%i\n", _FL, status);
+			return;
+		}
+			
+		while (d->Docs[0])
+			delete d->Docs[0];
+		
+		IdeProject *p = RootProject();
+		if (p)
+			DeleteObj(p);
+		
+		while (d->Projects[0])
+			delete d->Projects[0];	
 
-	DeleteObj(d->DbgContext);
+		DeleteObj(d->DbgContext);
+	});
 }
 
-bool AppWnd::OnRequestClose(bool IsClose)
+bool AppWnd::OnRequestClose(bool IsOsQuit)
 {
-	SaveAll();
-	return LWindow::OnRequestClose(IsClose);
+	if (!IsClean())
+	{
+		SaveAll([](bool status)
+		{
+			LCloseApp();
+		},	true);	
+	
+		return false;
+	}
+	else
+	{
+		return LWindow::OnRequestClose(IsOsQuit);
+	}
 }
 
 bool AppWnd::OnBreakPoint(LDebugger::BreakPoint &b, bool Add)
@@ -2833,18 +2939,11 @@ IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 
 IdeProject *AppWnd::RootProject()
 {
-	IdeProject *Root = 0;
-	
 	for (auto p: d->Projects)
-	{
 		if (!p->GetParentProject())
-		{
-			LAssert(Root == 0);
-			Root = p;
-		}
-	}
+			return p;
 	
-	return Root;
+	return NULL;
 }
 
 IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bool Create, bool Dep)
@@ -3031,7 +3130,8 @@ bool AppWnd::OnNode(const char *Path, ProjectNode *Node, FindSymbolSystem::SymAc
 	if (!Path || !Node)
 		return false;
 
-	d->FindSym->OnFile(Path, Action, Node->GetPlatforms());
+	if (d->FindSym)
+		d->FindSym->OnFile(Path, Action, Node->GetPlatforms());
 	return true;
 }
 
@@ -3069,8 +3169,6 @@ public:
 				SetCtrlValue(IDC_JOBS, v.CastInt32());
 			else
 				SetCtrlValue(IDC_JOBS, 2);
-			
-			DoModal();
 		}
 	}
 	
@@ -3083,6 +3181,7 @@ public:
 				LVariant v;
 				Font.Serialize(App->GetOptions(), OPT_EditorFont, true);
 				App->GetOptions()->SetValue(OPT_Jobs, v = GetCtrlValue(IDC_JOBS));
+				// Fall through..
 			}
 			case IDCANCEL:
 			{
@@ -3091,14 +3190,14 @@ public:
 			}
 			case IDC_SET_FONT:
 			{
-				if (Font.DoUI(this))
+				Font.DoUI(this, [&](auto ui)
 				{
 					char s[256];
 					if (Font.GetDescription(s, sizeof(s)))
 					{
 						SetCtrlName(IDC_FONT, s);
 					}
-				}
+				});
 				break;
 			}
 		}
@@ -3342,22 +3441,27 @@ int AppWnd::OnNotify(LViewI *Ctrl, LNotification n)
 
 bool AppWnd::Build()
 {
-	SaveAll();
-	
-	IdeDoc *Top;
-	IdeProject *p = RootProject();
-	if (p)
-	{		
-		UpdateState(-1, true);
+	SaveAll([&](bool status)
+	{	
+		if (!status)
+		{
+			LgiTrace("%s:%i - status=%i\n", _FL);
+			return;
+		}
+		
+		IdeDoc *Top;
+		IdeProject *p = RootProject();
+		if (p)
+		{		
+			UpdateState(-1, true);
 
-		p->Build(false, GetBuildMode());
-
-		return true;
-	}
-	else if ((Top = TopDoc()))
-	{
-		return Top->Build();
-	}
+			p->Build(false, GetBuildMode());
+		}
+		else if ((Top = TopDoc()))
+		{
+			Top->Build();
+		}
+	});
 
 	return false;
 }
@@ -3456,7 +3560,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_OPTIONS:
 		{
-			Options Dlg(this);
+			auto dlg = new Options(this);
+			dlg->DoModal(NULL);
 			break;
 		}
 		case IDM_HELP:
@@ -3466,12 +3571,13 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_ABOUT:
 		{
-			LAbout a(this,
-					AppName, APP_VER,
-					"\nLGI Integrated Development Environment",
-					"icon128.png",
-					APP_URL,
-					"fret@memecode.com");
+			auto dlg = new LAbout(	this,
+									AppName, APP_VER,
+									"\nLGI Integrated Development Environment",
+									"icon128.png",
+									APP_URL,
+									"fret@memecode.com");
+			dlg->DoModal(NULL);
 			break;
 		}
 		case IDM_NEW:
@@ -3489,24 +3595,31 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_OPEN:
 		{
-			LFileSelect s;
-			s.Parent(this);
-			if (s.Open())
+			LFileSelect *s = new LFileSelect;
+			s->Parent(this);
+			
+			// printf("File open dlg from thread=%u\n", GetCurrentThreadId());
+			s->Open([&](auto s, auto ok)
 			{
-				OpenFile(s.Name());
-			}
+				// printf("open handler start... ok=%i thread=%u\n", ok, GetCurrentThreadId());
+				if (ok)
+					OpenFile(s->Name());
+				// printf("open handler deleting...\n");
+				delete s;
+				// printf("open handler deleted...\n");
+			});
 			break;
 		}
 		case IDM_SAVE_ALL:
 		{
-			SaveAll();
+			SaveAll(NULL);
 			break;
 		}
 		case IDM_SAVE:
 		{
 			IdeDoc *Top = TopDoc();
 			if (Top)
-				Top->SetClean();
+				Top->SetClean(NULL);
 			break;
 		}
 		case IDM_SAVEAS:
@@ -3514,13 +3627,14 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			IdeDoc *Top = TopDoc();
 			if (Top)
 			{
-				LFileSelect s;
-				s.Parent(this);
-				if (s.Save())
+				LFileSelect *s = new LFileSelect;
+				s->Parent(this);
+				s->Save([&](auto s, auto ok)
 				{
-					Top->SetFileName(s.Name(), true);
-					d->OnFile(s.Name());
-				}
+					Top->SetFileName(s->Name(), true);
+					d->OnFile(s->Name());
+					delete s;
+				});
 			}
 			break;
 		}
@@ -3573,7 +3687,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 			{
-				Doc->DoFind();
+				Doc->DoFind(NULL);
 			}
 			else LgiTrace("%s:%i - No focus doc.\n", _FL);
 			break;
@@ -3583,7 +3697,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 			{
-				Doc->DoFindNext();
+				Doc->DoFindNext(NULL);
 			}
 			else LgiTrace("%s:%i - No focus doc.\n", _FL);
 			break;
@@ -3593,7 +3707,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 			{
-				Doc->DoReplace();
+				Doc->DoReplace(NULL);
 			}
 			else LgiTrace("%s:%i - No focus doc.\n", _FL);
 			break;
@@ -3602,14 +3716,15 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		{
 			LTextView3 *Doc = FocusEdit();
 			if (Doc)
-				Doc->DoGoto();
+				Doc->DoGoto(NULL);
 			else
 			{
-				LInput Inp(this, NULL, LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
-				if (Inp.DoModal())
+				LInput *Inp = new LInput(this, NULL, LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
+				Inp->DoModal([Inp,this](auto dlg, auto code)
 				{
-					LString s = Inp.GetStr();
+					LString s = Inp->GetStr();
 					LString::Array p = s.SplitDelimit(":,");
+					
 					if (p.Length() == 2)
 					{
 						LString file = p[0];
@@ -3617,7 +3732,9 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 						GotoReference(file, line, false, true);
 					}
 					else LgiMsg(this, "Error: Needs a file name as well.", AppName);
-				}
+					
+					delete dlg;
+				});
 			}
 			break;
 		}
@@ -3679,7 +3796,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 						Dlg.Params->Dir = Base;
 				}
 
-				if (Dlg.DoModal())
+				Dlg.DoModal([&](auto dlg, auto code)
 				{
 					if (p && Dlg.Params->Type == FifSearchSolution)
 					{
@@ -3707,7 +3824,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 
 					d->Finder->Stop();
 					d->Finder->PostEvent(FindInFilesThread::M_START_SEARCH, (LMessage::Param) new FindParams(d->FindParameters));
-				}
+				});
 			}
 			break;
 		}
@@ -3720,11 +3837,11 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			}
 			else
 			{
-				FindSymResult r = d->FindSym->OpenSearchDlg(this);
-				if (r.File)
+				d->FindSym->OpenSearchDlg(this, [&](auto r)
 				{
-					GotoReference(r.File, r.Line, false);
-				}
+					if (r.File)
+						GotoReference(r.File, r.Line, false);
+				});
 			}
 			break;
 		}
@@ -3746,8 +3863,10 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			}
 			else
 			{
-				FindInProject Dlg(this);
-				Dlg.DoModal();
+				auto d = new FindInProject(this);
+				d->DoModal([](auto dlg, auto ctrlId){
+					delete dlg;
+				});
 			}
 			break;
 		}
@@ -3838,18 +3957,22 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_OPEN_PROJECT:
 		{
-			LFileSelect s;
-			s.Parent(this);
-			s.Type("Projects", "*.xml");
-			if (s.Open())
+			LFileSelect *s = new LFileSelect;
+			s->Parent(this);
+			s->Type("Projects", "*.xml");
+			s->Open([&](auto s, auto ok)
 			{
-				CloseAll();
-				OpenProject(s.Name(), NULL, Cmd == IDM_NEW_PROJECT);
-				if (d->Tree)
+				if (ok)
 				{
-					d->Tree->Focus(true);
+					CloseAll();
+					OpenProject(s->Name(), NULL, Cmd == IDM_NEW_PROJECT);
+					if (d->Tree)
+					{
+						d->Tree->Focus(true);
+					}
 				}
-			}
+				delete s;
+			});
 			break;
 		}
 		case IDM_IMPORT_DSP:
@@ -3857,34 +3980,48 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			IdeProject *p = RootProject();
 			if (p)
 			{
-				LFileSelect s;
-				s.Parent(this);
-				s.Type("Developer Studio Project", "*.dsp");
-				if (s.Open())
+				LFileSelect *s = new LFileSelect;
+				s->Parent(this);
+				s->Type("Developer Studio Project", "*.dsp");
+				s->Open([&](auto s, auto ok)
 				{
-					p->ImportDsp(s.Name());
-				}
+					if (ok)
+						p->ImportDsp(s->Name());
+					delete s;
+				});
 			}
 			break;
 		}
 		case IDM_RUN:
 		{
-			SaveAll();
-			IdeProject *p = RootProject();
-			if (p)
+			SaveAll([&](bool status)
 			{
-				p->Execute();
-			}
+				if (!status)
+				{
+					LgiTrace("%s:%i - status=%i\n", _FL, status);
+					return;
+				}
+				
+				IdeProject *p = RootProject();
+				if (p)
+					p->Execute();
+			});
 			break;
 		}
 		case IDM_VALGRIND:
 		{
-			SaveAll();
-			IdeProject *p = RootProject();
-			if (p)
+			SaveAll([&](bool status)
 			{
-				p->Execute(ExeValgrind);
-			}
+				if (!status)
+				{
+					LgiTrace("%s:%i - status=%i\n", _FL, status);
+					return;
+				}
+				
+				IdeProject *p = RootProject();
+				if (p)
+					p->Execute(ExeValgrind);
+			});
 			break;
 		}
 		case IDM_FIX_MISSING_FILES:
@@ -3913,39 +4050,47 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_START_DEBUG:
 		{
-			SaveAll();
-			IdeProject *p = RootProject();
-			if (!p)
+			SaveAll([&](bool status)
 			{
-				LgiMsg(this, "No project loaded.", "Error");
-				break;
-			}
+				if (!status)
+				{
+					LgiTrace("%s:%i - status=%i\n", _FL, status);
+					return;
+				}
+				
+				IdeProject *p = RootProject();
+				if (!p)
+				{
+					LgiMsg(this, "No project loaded.", "Error");
+					return;
+				}
 
-			LString ErrMsg;
-			if (d->DbgContext)
-			{
-				d->DbgContext->OnCommand(IDM_CONTINUE);
-			}
-			else if ((d->DbgContext = p->Execute(ExeDebug, &ErrMsg)))
-			{
-				d->DbgContext->DebuggerLog = d->Output->DebuggerLog;
-				d->DbgContext->Watch = d->Output->Watch;
-				d->DbgContext->Locals = d->Output->Locals;
-				d->DbgContext->CallStack = d->Output->CallStack;
-				d->DbgContext->Threads = d->Output->Threads;
-				d->DbgContext->ObjectDump = d->Output->ObjectDump;
-				d->DbgContext->Registers = d->Output->Registers;
-				d->DbgContext->MemoryDump = d->Output->MemoryDump;
+				LString ErrMsg;
+				if (d->DbgContext)
+				{
+					d->DbgContext->OnCommand(IDM_CONTINUE);
+				}
+				else if ((d->DbgContext = p->Execute(ExeDebug, &ErrMsg)))
+				{
+					d->DbgContext->DebuggerLog = d->Output->DebuggerLog;
+					d->DbgContext->Watch = d->Output->Watch;
+					d->DbgContext->Locals = d->Output->Locals;
+					d->DbgContext->CallStack = d->Output->CallStack;
+					d->DbgContext->Threads = d->Output->Threads;
+					d->DbgContext->ObjectDump = d->Output->ObjectDump;
+					d->DbgContext->Registers = d->Output->Registers;
+					d->DbgContext->MemoryDump = d->Output->MemoryDump;
 				
-				d->DbgContext->OnCommand(IDM_START_DEBUG);
+					d->DbgContext->OnCommand(IDM_START_DEBUG);
 				
-				d->Output->Value(AppWnd::DebugTab);
-				d->Output->DebugEdit->Focus(true);
-			}
-			else if (ErrMsg)
-			{
-				LgiMsg(this, "Error: %s", AppName, MB_OK, ErrMsg.Get());
-			}
+					d->Output->Value(AppWnd::DebugTab);
+					d->Output->DebugEdit->Focus(true);
+				}
+				else if (ErrMsg)
+				{
+					LgiMsg(this, "Error: %s", AppName, MB_OK, ErrMsg.Get());
+				}
+			});
 			break;
 		}
 		case IDM_TOGGLE_BREAKPOINT:
@@ -3989,10 +4134,18 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_CLEAN:
 		{
-			SaveAll();
-			IdeProject *p = RootProject();
-			if (p)
-				p->Clean(true, GetBuildMode());
+			SaveAll([&](bool status)
+			{
+				if (!status)
+				{
+					LgiTrace("%s:%i - status=%i\n", _FL, status);
+					return;
+				}
+				
+				IdeProject *p = RootProject();
+				if (p)
+					p->Clean(true, GetBuildMode());
+			});
 			break;
 		}
 		case IDM_NEXT_MSG:
@@ -4091,11 +4244,13 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			if (!Doc)
 				break;
 
-			LInput i(this, "", "Separator:", AppName);
-			if (!i.DoModal())
-				break;
-				
-			Doc->SplitSelection(i.GetStr());
+			LInput *i = new LInput(this, "", "Separator:", AppName);
+			i->DoModal([&](auto dlg, auto ok)
+			{
+				if (ok)
+					Doc->SplitSelection(i->GetStr());
+				delete i;
+			});
 			break;
 		}
 		case IDM_JOIN:
@@ -4104,11 +4259,13 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			if (!Doc)
 				break;
 
-			LInput i(this, "", "Separator:", AppName);
-			if (!i.DoModal())
-				break;
-				
-			Doc->JoinSelection(i.GetStr());
+			LInput *i = new LInput(this, "", "Separator:", AppName);
+			i->DoModal([&](auto dlg, auto ok)
+			{
+				if (ok)
+					Doc->JoinSelection(i->GetStr());
+				delete i;
+			});
 			break;
 		}
 		case IDM_EOL_LF:
@@ -4139,7 +4296,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		default:
 		{
-			LString r = d->RecentFiles[Cmd - IDM_RECENT_FILE];
+			int index = Cmd - IDM_RECENT_FILE;
+			auto r = d->RecentFiles.IdxCheck(index)? d->RecentFiles[index] : LString();
 			if (r)
 			{
 				auto idx = Cmd - IDM_RECENT_FILE;
@@ -4156,7 +4314,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 					OpenFile(r);
 			}
 
-			LString p = d->RecentProjects[Cmd - IDM_RECENT_PROJECT];
+			index = Cmd - IDM_RECENT_PROJECT;
+			auto p = d->RecentProjects.IdxCheck(index) ? d->RecentProjects[index] : LString();
 			if (p)
 			{
 				auto idx = Cmd - IDM_RECENT_PROJECT;
@@ -4239,7 +4398,14 @@ IdeDoc *AppWnd::FocusDoc()
 
 void AppWnd::OnProjectDestroy(IdeProject *Proj)
 {
-	d->Projects.Delete(Proj);
+	if (d)
+	{
+		auto locked = Lock(_FL);
+		// printf("OnProjectDestroy(%s) %i\n", Proj->GetFileName(), locked);
+		d->Projects.Delete(Proj);
+		if (locked) Unlock();
+	}
+	else LAssert(!"No priv");
 }
 
 void AppWnd::OnProjectChange()
@@ -4260,8 +4426,14 @@ void AppWnd::OnDocDestroy(IdeDoc *Doc)
 {
 	if (d)
 	{
+		auto locked = Lock(_FL);
 		d->Docs.Delete(Doc);
 		d->UpdateMenus();
+		if (locked) Unlock();
+	}
+	else
+	{
+		LAssert(!"OnDocDestroy no priv...\n");
 	}
 }
 
@@ -4446,19 +4618,24 @@ class TestView : public LView
 public:
 	TestView()
 	{
-		LRect r(10, 10, 110, 110);
+		LRect r(10, 10, 110, 210);
 		SetPos(r);
+		Sunken(true);
+		printf("_BorderSize=%i\n", _BorderSize);
 	}
 
 	void OnPaint(LSurface *pdc)
 	{
+		auto c = GetClient();
+		
 		pdc->Colour(LColour::Red);
-
-		// pdc->Rectangle();
-		pdc->Line(0, 0, X()-1, Y()-1);
-		pdc->Circle(50, 50, 50);
+		pdc->Line(c.x1, c.y1, c.x2, c.y2);		
+		pdc->Ellipse(c.x1+(c.X()/2)+10, c.y1+(c.Y()/2), c.X()/2, c.Y()/2);
 	}
 };
+
+#include "lgi/common/Tree.h"
+#include "lgi/common/List.h"
 
 class Test : public LWindow
 {
@@ -4472,7 +4649,12 @@ public:
 
 		if (Attach(0))
 		{
-			AddView(new TestView);
+			// AddView(new TestView);
+			
+			// auto t = new LTree(10, 10, 10, 100, 200);
+			auto t = new LTextLabel(10, 10, 10, 100, 35, "Text");
+			AddView(t);			
+			
 			AttachChildren();
 			Visible(true);
 		}
@@ -4487,6 +4669,7 @@ int LgiMain(OsAppArguments &AppArgs)
 	{
 		LPoint dpi = LScreenDpi();
 		a.AppWnd = new AppWnd;
+		// a.AppWnd->_Dump();
 		a.Run();
 	}
 

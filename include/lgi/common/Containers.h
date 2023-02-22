@@ -59,7 +59,7 @@ public:
 	class Iter
 	{
 	public:
-		List<T> *Lst;
+		const List<T> *Lst;
 		LstBlk *i;
 		int Cur, Ver;
 		OsThreadId Thread;
@@ -81,7 +81,7 @@ public:
 		#define CHECK_THREAD
 		#endif
 
-		Iter(List<T> *lst)
+		Iter(const List<T> *lst)
 		{
 			Lst = lst;
 			i = 0;
@@ -90,7 +90,7 @@ public:
 			Thread = GetCurrentThreadId();
 		}
 
-		Iter(List<T> *lst, LstBlk *item, int c)
+		Iter(const List<T> *lst, LstBlk *item, int c)
 		{
 			Lst = lst;
 			i = item;
@@ -274,7 +274,7 @@ protected:
 	int Ver;
 	LstBlk *FirstObj, *LastObj;
 
-	bool ValidBlock(LstBlk *b)
+	bool ValidBlock(LstBlk *b) const
 	{
 		for (LstBlk *i = FirstObj; i; i = i->Next)
 			if (i == b)
@@ -398,7 +398,7 @@ protected:
 		return true;
 	}
 
-	Iter GetIndex(size_t Index, size_t *Base = NULL)
+	Iter GetIndex(size_t Index, size_t *Base = NULL) const
 	{
 		size_t n = 0;
 		for (LstBlk *i = FirstObj; i; i = i->Next)
@@ -615,7 +615,7 @@ public:
 		return Insert(p);
 	}
 	
-	T *operator [](size_t Index)
+	T *operator [](size_t Index) const
 	{
 		VALIDATE();
 		auto it = GetIndex(Index);

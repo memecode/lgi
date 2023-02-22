@@ -31,24 +31,22 @@ bool LLibrary::Load(const char *File, bool Quiet)
 		char f[MAX_PATH_LEN];
 		int ch = sprintf_s(f, sizeof(f), "%s", File);
 		
-        #ifndef HAIKU
-			// check for default extension..
-			// if you specify no extension in the application this will correctly set
-			// it for the OS your running thus removing the need for #ifdef's in your
-			// app. sweet!
-			auto Parts = LString(LGetLeaf(File)).SplitDelimit(".");
-			if (Parts.Length() >= 3 &&
-				Parts.Last().Int() >= 0 &&
-				Parts[Parts.Length()-2].Equals(LGI_LIBRARY_EXT))
-			{
-				// Is normal linux "library.so.version" form.
-			}
-			else if (Parts.Length() == 1 ||
-				!Parts.Last().Equals(LGI_LIBRARY_EXT))
-			{
-				ch += sprintf_s(f+ch, sizeof(f)-ch, ".%s", LGI_LIBRARY_EXT);
-			}
-		#endif
+		// check for default extension..
+		// if you specify no extension in the application this will correctly set
+		// it for the OS your running thus removing the need for #ifdef's in your
+		// app. sweet!
+		auto Parts = LString(LGetLeaf(File)).SplitDelimit(".");
+		if (Parts.Length() >= 3 &&
+			Parts.Last().Int() >= 0 &&
+			Parts[Parts.Length()-2].Equals(LGI_LIBRARY_EXT))
+		{
+			// Is normal linux "library.so.version" form.
+		}
+		else if (Parts.Length() == 1 ||
+			!Parts.Last().Equals(LGI_LIBRARY_EXT))
+		{
+			ch += sprintf_s(f+ch, sizeof(f)-ch, ".%s", LGI_LIBRARY_EXT);
+		}
 
 		size_t Len = strlen(f) + 32;
 		FileName = new char[Len];

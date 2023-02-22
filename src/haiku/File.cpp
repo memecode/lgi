@@ -2,313 +2,54 @@
 **	FILE:			File.cpp
 **	AUTHOR:			Matthew Allen
 **	DATE:			8/10/2000
-**	DESCRIPTION:	The new file subsystem
+**	DESCRIPTION:	The file subsystem
 **
 **	Copyright (C) 2000, Matthew Allen
 **		fret@memecode.com
 */
 
 /****************************** Includes **********************************/
+#include <pwd.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <stdio.h>
-
-#include <ctype.h>
-#include <stdarg.h>
-#include <dirent.h>
-#ifndef _MSC_VER
-#include <unistd.h>
-#endif
+#include "Path.h"
+#include "VolumeRoster.h"
+#include "Directory.h"
 
 #include "lgi/common/LgiDefs.h"
 #include "lgi/common/File.h"
 #include "lgi/common/Containers.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/LgiCommon.h"
-#include "lgi/common/LgiString.h"
 #include "lgi/common/DateTime.h"
-#if defined(WIN32)
-#include "errno.h"
-#endif
-
-/****************************** Defines ***********************************/
-
-// #define FILEDEBUG
-
-#define FLOPPY_360K				0x0001
-#define FLOPPY_720K				0x0002
-#define FLOPPY_1_2M				0x0004
-#define FLOPPY_1_4M				0x0008
-#define FLOPPY_5_25				(FLOPPY_360K | FLOPPY_1_2M)
-#define FLOPPY_3_5				(FLOPPY_720K | FLOPPY_1_4M)
-
-/****************************** Globals ***********************************/
-
-LString LFile::Path::Sep(DIR_STR);
-
-struct ErrorCodeType
-{
-	const char *Name;
-	int Code;
-	const char *Desc;
-}
-ErrorCodes[] =
-{
-	#if defined(WIN32)
-
-	{"EPERM", 1, "Not owner"},
-	{"ENOENT", 2, "No such file"},
-	{"ESRCH", 3, "No such process"},
-	{"EINTR", 4, "Interrupted system"},
-	{"EIO", 5, "I/O error"},
-	{"ENXIO", 6, "No such device"},
-	{"E2BIG", 7, "Argument list too long"},
-	{"ENOEXEC", 8, "Exec format error"},
-	{"EBADF", 9, "Bad file number"},
-	{"ECHILD", 10, "No children"},
-	{"EAGAIN", 11, "No more processes"},
-	{"ENOMEM", 12, "Not enough core"},
-	{"EACCES", 13, "Permission denied"},
-	{"EFAULT", 14, "Bad address"},
-	{"ENOTBLK", 15, "Block device required"},
-	{"EBUSY", 16, "Mount device busy"},
-	{"EEXIST", 17, "File exists"},
-	{"EXDEV", 18, "Cross-device link"},
-	{"ENODEV", 19, "No such device"},
-	{"ENOTDIR", 20, "Not a directory"},
-	{"EISDIR", 21, "Is a directory"},
-	{"EINVAL", 22, "Invalid argument"},
-	{"ENFILE", 23, "File table overflow"},
-	{"EMFILE", 24, "Too many open file"},
-	{"ENOTTY", 25, "Not a typewriter"},
-	{"ETXTBSY", 26, "Text file busy"},
-	{"EFBIG", 27, "File too large"},
-	{"ENOSPC", 28, "No space left on"},
-	{"ESPIPE", 29, "Illegal seek"},
-	{"EROFS", 30, "Read-only file system"},
-	{"EMLINK", 31, "Too many links"},
-	{"EPIPE", 32, "Broken pipe"},
-	{"EWOULDBLOCK", 35, "Operation would block"},
-	{"EINPROGRESS", 36, "Operation now in progress"},
-	{"EALREADY", 37, "Operation already in progress"},
-	{"ENOTSOCK", 38, "Socket operation on"},
-	{"EDESTADDRREQ", 39, "Destination address required"},
-	{"EMSGSIZE", 40, "Message too long"},
-	{"EPROTOTYPE", 41, "Protocol wrong type"},
-	{"ENOPROTOOPT", 42, "Protocol not available"},
-	{"EPROTONOSUPPORT", 43, "Protocol not supported"},
-	{"ESOCKTNOSUPPORT", 44, "Socket type not supported"},
-	{"EOPNOTSUPP", 45, "Operation not supported"},
-	{"EPFNOSUPPORT", 46, "Protocol family not supported"},
-	{"EAFNOSUPPORT", 47, "Address family not supported"},
-	{"EADDRINUSE", 48, "Address already in use"},
-	{"EADDRNOTAVAIL", 49, "Can't assign requested address"},
-	{"ENETDOWN", 50, "Network is down"},
-	{"ENETUNREACH", 51, "Network is unreachable"},
-	{"ENETRESET", 52, "Network dropped connection"},
-	{"ECONNABORTED", 53, "Software caused connection"},
-	{"ECONNRESET", 54, "Connection reset by peer"},
-	{"ENOBUFS", 55, "No buffer space available"},
-	{"EISCONN", 56, "Socket is already connected"},
-	{"ENOTCONN", 57, "Socket is not connected"	},
-	{"ESHUTDOWN", 58, "Can't send after shutdown"},
-	{"ETOOMANYREFS", 59, "Too many references"},
-	{"ETIMEDOUT", 60, "Connection timed out"},
-	{"ECONNREFUSED", 61, "Connection refused"},
-	{"ELOOP", 62, "Too many levels of nesting"},
-	{"ENAMETOOLONG", 63, "File name too long"	},
-	{"EHOSTDOWN", 64, "Host is down"},
-	{"EHOSTUNREACH", 65, "No route to host"},
-	{"ENOTEMPTY", 66, "Directory not empty"},
-	{"EPROCLIM", 67, "Too many processes"},
-	{"EUSERS", 68, "Too many users"},
-	{"EDQUOT", 69, "Disc quota exceeded"},
-	{"ESTALE", 70, "Stale NFS file handle"},
-	{"EREMOTE", 71, "Too many levels of remote in the path"},
-	{"ENOSTR", 72, "Device is not a stream"},
-	{"ETIME", 73, "Timer expired"},
-	{"ENOSR", 74, "Out of streams resources"},
-	{"ENOMSG", 75, "No message"},
-	{"EBADMSG", 76, "Trying to read unreadable message"},
-	{"EIDRM", 77, "Identifier removed"},
-	{"EDEADLK", 78, "Deadlock condition"},
-	{"ENOLCK", 79, "No record locks available"},
-	{"ENONET", 80, "Machine is not on network"},
-	{"ERREMOTE", 81, "Object is remote"},
-	{"ENOLINK", 82, "The link has been severed"},
-	{"EADV", 83, "ADVERTISE error"},
-	{"ESRMNT", 84, "SRMOUNT error"},
-	{"ECOMM", 85, "Communication error"},
-	{"EPROTO", 86, "Protocol error"},
-	{"EMULTIHOP", 87, "Multihop attempted"},
-	{"EDOTDOT", 88, "Cross mount point"},
-	{"EREMCHG", 89, "Remote address change"},
-
-	#elif defined(LINUX) || defined(__GTK_H__)
-
-	{"EPERM",			EPERM, "Operation not permitted"},
-	{"ENOENT",			ENOENT, "No such file or directory"},
-	{"ESRCH",			ESRCH, "No such process"},
-	{"EINTR",			EINTR, "Interrupted system call"},
-	{"EIO",				EIO, "I/O error"},
-	{"ENXIO",			ENXIO, "No such device or address"},
-	{"E2BIG",			E2BIG, "Argument list too long"},
-	{"ENOEXEC",			ENOEXEC, "Exec format error"},
-	{"EBADF",			EBADF, "Bad file number"},
-	{"ECHILD",			ECHILD, "No child processes"},
-	{"EAGAIN",			EAGAIN, "Try again"},
-	{"ENOMEM",			ENOMEM, "Out of memory"},
-	{"EACCES",			EACCES, "Permission denied"},
-	{"EFAULT",			EFAULT, "Bad address"},
-	{"ENOTBLK",			ENOTBLK, "Block device required"},
-	{"EBUSY",			EBUSY, "Device or resource busy"},
-	{"EEXIST",			EEXIST, "File exists"},
-	{"EXDEV",			EXDEV, "Cross-device link"},
-	{"ENODEV",			ENODEV, "No such device"},
-	{"ENOTDIR",			ENOTDIR, "Not a directory"},
-	{"EISDIR",			EISDIR, "Is a directory"},
-	{"EINVAL",			EINVAL, "Invalid argument"},
-	{"ENFILE",			ENFILE, "File table overflow"},
-	{"EMFILE",			EMFILE, "Too many open files"},
-	{"ENOTTY",			ENOTTY, "Not a typewriter"},
-	{"ETXTBSY",			ETXTBSY, "Text file busy"},
-	{"EFBIG",			EFBIG, "File too large"},
-	{"ENOSPC",			ENOSPC, "No space left on device"},
-	{"ESPIPE",			ESPIPE, "Illegal seek"},
-	{"EROFS",			EROFS, "Read-only file system"},
-	{"EMLINK",			EMLINK, "Too many links"},
-	{"EPIPE",			EPIPE, "Broken pipe"},
-	{"EDOM",			EDOM, "Math argument out of domain of func"},
-	{"ERANGE",			ERANGE, "Math result not representable"},
-	{"EDEADLK",			EDEADLK, "Resource deadlock would occur"},
-	{"ENAMETOOLONG",	ENAMETOOLONG, "File name too long"},
-	{"ENOLCK",			ENOLCK, "No record locks available"},
-	{"ENOSYS",			ENOSYS, "Function not implemented"},
-	{"ENOTEMPTY",		ENOTEMPTY, "Directory not empty"},
-	{"ELOOP",			ELOOP, "Too many symbolic links encountered"},
-	{"EWOULDBLOCK",		EWOULDBLOCK, "Operation would block"},
-	{"ENOMSG",			ENOMSG, "No message of desired type"},
-	{"EIDRM",			EIDRM, "Identifier removed"},
-	{"EREMOTE",			EREMOTE, "Object is remote"},
-	{"ENOLINK",			ENOLINK, "Link has been severed"},
-	{"ENOSTR",			ENOSTR, "Device not a stream"},
-	{"ENODATA",			ENODATA, "No data available"},
-	{"ETIME",			ETIME, "Timer expired"},
-	{"ENOSR",			ENOSR, "Out of streams resources"},
-	{"EPROTO",			EPROTO, "Protocol error"},
-	{"EMULTIHOP",		EMULTIHOP, "Multihop attempted"},
-	{"EBADMSG",			EBADMSG, "Not a data message"},
-	{"EOVERFLOW",		EOVERFLOW, "Value too large for defined data type"},
-	{"EILSEQ",			EILSEQ, "Illegal byte sequence"},
-	{"EUSERS",			EUSERS, "Too many users"},
-	{"ENOTSOCK",		ENOTSOCK, "Socket operation on non-socket"},
-	{"EDESTADDRREQ",	EDESTADDRREQ, "Destination address required"},
-	{"EMSGSIZE",		EMSGSIZE, "Message too long"},
-	{"EPROTOTYPE",		EPROTOTYPE, "Protocol wrong type for socket"},
-	{"ENOPROTOOPT",		ENOPROTOOPT, "Protocol not available"},
-	{"EPROTONOSUPPORT",	EPROTONOSUPPORT, "Protocol not supported"},
-	{"ESOCKTNOSUPPORT",	ESOCKTNOSUPPORT, "Socket type not supported"},
-	{"EOPNOTSUPP",		EOPNOTSUPP, "Operation not supported on transport endpoint"},
-	{"EPFNOSUPPORT",	EPFNOSUPPORT, "Protocol family not supported"},
-	{"EAFNOSUPPORT",	EAFNOSUPPORT, "Address family not supported by protocol"},
-	{"EADDRINUSE",		EADDRINUSE, "Address already in use"},
-	{"EADDRNOTAVAIL",	EADDRNOTAVAIL, "Cannot assign requested address"},
-	{"ENETDOWN",		ENETDOWN, "Network is down"},
-	{"ENETUNREACH",		ENETUNREACH, "Network is unreachable"},
-	{"ENETRESET",		ENETRESET, "Network dropped connection because of reset"},
-	{"ECONNABORTED",	ECONNABORTED, "Software caused connection abort"},
-	{"ECONNRESET",		ECONNRESET, "Connection reset by peer"},
-	{"ENOBUFS",			ENOBUFS, "No buffer space available"},
-	{"EISCONN",			EISCONN, "Transport endpoint is already connected"},
-	{"ENOTCONN",		ENOTCONN, "Transport endpoint is not connected"},
-	{"ESHUTDOWN",		ESHUTDOWN, "Cannot send after transport endpoint shutdown"},
-	{"ETOOMANYREFS",	ETOOMANYREFS, "Too many references: cannot splice"},
-	{"ETIMEDOUT",		ETIMEDOUT, "Connection timed out"},
-	{"ECONNREFUSED",	ECONNREFUSED, "Connection refused"},
-	{"EHOSTDOWN",		EHOSTDOWN, "Host is down"},
-	{"EHOSTUNREACH",	EHOSTUNREACH, "No route to host"},
-	{"EALREADY",		EALREADY, "Operation already in progress"},
-	{"EINPROGRESS",		EINPROGRESS, "Operation now in progress"},
-	{"ESTALE",			ESTALE, "Stale NFS file handle"},
-
-	#ifndef __GTK_H__
-	{"EDQUOT",			EDQUOT, "Quota exceeded"},
-	{"ENOMEDIUM",		ENOMEDIUM, "No medium found"},
-	{"EMEDIUMTYPE",		EMEDIUMTYPE, "Wrong medium type"},
-	{"EUCLEAN",			EUCLEAN, "Structure needs cleaning"},
-	{"ENOTNAM",			ENOTNAM, "Not a XENIX named type file"},
-	{"ENAVAIL",			ENAVAIL, "No XENIX semaphores available"},
-	{"EISNAM",			EISNAM, "Is a named type file"},
-	{"EREMOTEIO",		EREMOTEIO, "Remote I/O error"},
-	{"ERESTART",		ERESTART, "Interrupted system call should be restarted"},
-	{"ESTRPIPE",		ESTRPIPE, "Streams pipe error"},
-	{"ECOMM",			ECOMM, "Communication error on send"},
-	{"EDOTDOT",			EDOTDOT, "RFS specific error"},
-	{"ENOTUNIQ",		ENOTUNIQ, "Name not unique on network"},
-	{"EBADFD",			EBADFD, "File descriptor in bad state"},
-	{"EREMCHG",			EREMCHG, "Remote address changed"},
-	{"ELIBACC",			ELIBACC, "Can not access a needed shared library"},
-	{"ELIBBAD",			ELIBBAD, "Accessing a corrupted shared library"},
-	{"ELIBSCN",			ELIBSCN, ".lib section in a.out corrupted"},
-	{"ELIBMAX",			ELIBMAX, "Attempting to link in too many shared libraries"},
-	{"ELIBEXEC",		ELIBEXEC, "Cannot exec a shared library directly"},
-	{"ECHRNG",			ECHRNG, "Channel number out of range"},
-	{"EL2NSYNC",		EL2NSYNC, "Level 2 not synchronized"},
-	{"EL3HLT",			EL3HLT, "Level 3 halted"},
-	{"EL3RST",			EL3RST, "Level 3 reset"},
-	{"ELNRNG",			ELNRNG, "Link number out of range"},
-	{"EUNATCH",			EUNATCH, "Protocol driver not attached"},
-	{"ENOCSI",			ENOCSI, "No CSI structure available"},
-	{"EL2HLT",			EL2HLT, "Level 2 halted"},
-	{"EBADE",			EBADE, "Invalid exchange"},
-	{"EBADR",			EBADR, "Invalid request descriptor"},
-	{"EXFULL",			EXFULL, "Exchange full"},
-	{"ENOANO",			ENOANO, "No anode"},
-	{"EBADRQC",			EBADRQC, "Invalid request code"},
-	{"EBADSLT",			EBADSLT, "Invalid slot"},
-	{"EBFONT",			EBFONT, "Bad font file format"},
-	{"EADV",			EADV, "Advertise error"},
-	{"ESRMNT",			ESRMNT, "Srmount error"},
-	{"ENONET",			ENONET, "Machine is not on the network"},
-	{"ENOPKG",			ENOPKG, "Package not installed"},
-	#endif
-
-	#endif
-
-	{"NONE", 0, "No error"},
-};
-
-const char *GetErrorName(int e)
-{
-	for (ErrorCodeType *c=ErrorCodes; c->Code; c++)
-	{
-		if (e == c->Code)
-		{
-			return c->Name;
-		}
-	}
-
-	static char s[32];
-	sprintf(s, "Unknown(%i)", e);
-	return s;
-}
-
-const char *GetErrorDesc(int e)
-{
-	for (ErrorCodeType *c=ErrorCodes; c->Code; c++)
-	{
-		if (e == c->Code)
-			return c->Desc;
-	}
-
-	return 0;
-}
 
 /****************************** Helper Functions **************************/
+LString BGetFullPath(BEntry &entry)
+{
+	BPath path;
+	auto r = entry.GetPath(&path);
+	if (r != B_OK)
+		return LString();
+	return path.Path();
+}
+
+LString BGetFullPath(BDirectory &dir)
+{
+	BEntry entry;
+	auto r = dir.GetEntry(&entry);
+	if (r != B_OK)
+		return LString();
+	return BGetFullPath(entry);
+}					
+
+LString BGetFullPath(BVolume &volume)
+{				
+	BDirectory directory;
+	auto r = volume.GetRootDirectory(&directory);
+	if (r != B_OK)
+		return LString();
+	return BGetFullPath(directory);
+}					
+
 char *LReadTextFile(const char *File)
 {
 	char *s = 0;
@@ -328,49 +69,40 @@ char *LReadTextFile(const char *File)
 
 int64 LFileSize(const char *FileName)
 {
-	struct stat s;
-	if (FileName &&
-		stat(FileName, &s) == 0)
-	{
-		return s.st_size;
-	}
-
-	return 0;
+	BEntry e(FileName);
+	if (e.InitCheck() != B_OK)
+		return 0;
+		
+	off_t size = 0;
+	if (e.GetSize(&size) != B_OK)
+		return 0;
+		
+	return size;
 }
 
 bool LDirExists(const char *FileName, char *CorrectCase)
 {
-	bool Status = false;
-	
-	if (FileName)
+	if (!FileName)
+		return false;
+
+	struct stat s;
+	auto r = lstat(FileName, &s);
+	if (r == 0)
 	{
-		struct stat s;
-		
-		// Check for exact match...
-		int r = lstat(FileName, &s);
+		return	S_ISDIR(s.st_mode) ||
+				S_ISLNK(s.st_mode);
+	}
+	else
+	{
+		r = stat(FileName, &s);
 		if (r == 0)
 		{
-			Status = S_ISDIR(s.st_mode) ||
-					 S_ISLNK(s.st_mode);
-			// printf("DirStatus(%s) lstat = %i, %i\n", FileName, Status, s.st_mode);
-		}
-		else
-		{
-			r = stat(FileName, &s);
-			if (r == 0)
-			{
-				Status = S_ISDIR(s.st_mode) ||
-					 	S_ISLNK(s.st_mode);
-				// printf("DirStatus(%s) stat ok = %i, %i\n", FileName, Status, s.st_mode);
-			}
-			else
-			{
-				// printf("DirStatus(%s) lstat and stat failed, r=%i, errno=%i\n", FileName, r, errno);
-			}
+			return	S_ISDIR(s.st_mode) ||
+					S_ISLNK(s.st_mode);
 		}
 	}
 
-	return Status;
+	return false;
 }
 
 bool LFileExists(const char *FileName, char *CorrectCase)
@@ -439,9 +171,32 @@ bool LFileExists(const char *FileName, char *CorrectCase)
 
 bool LResolveShortcut(const char *LinkFile, char *Path, ssize_t Len)
 {
-	bool Status = false;
+	if (!LinkFile || !Path || Len < 1)
+		return false;
 
-	return Status;
+	BEntry e(LinkFile);
+	auto r = e.InitCheck();
+	if (r != B_OK)
+	{
+		printf("%s:%i - LResolveShortcut: %i\n", _FL, r);
+		return false;
+	}
+	
+	if (!e.IsSymLink())
+	{
+		return false;
+	}
+	
+	r = e.SetTo(LinkFile, true);
+	if (r != B_OK)
+	{
+		printf("%s:%i - LResolveShortcut: %i\n", _FL, r);
+		return false;
+	}
+	
+	auto p = BGetFullPath(e);
+	strcpy_s(Path, Len, p);
+	return true;
 }
 
 void WriteStr(LFile &f, const char *s)
@@ -524,169 +279,171 @@ bool LGetDriveInfo
 }
 
 /////////////////////////////////////////////////////////////////////////
-#include <sys/types.h>
-#include <pwd.h>
-
 struct LVolumePriv
 {
-	int64 _Size, _Free;
-	int _Type, _Flags;
-	LSystemPath SysPath;
-	LString _Name, _Path;
-	List<LVolume> _Sub;
-	List<LVolume>::I _It;
+	LVolume *Owner = NULL;
+	int64 Size = 0, Free = 0;
+	int Type = VT_NONE, Flags = 0;
+	LSystemPath SysPath = LSP_ROOT;
+	LString Name, Path;
+	LVolume *NextVol = NULL, *ChildVol = NULL;
 
-	void Init()
+	LVolumePriv(LVolume *owner, const char *path) : Owner(owner)
 	{
-		SysPath = LSP_ROOT;
-		_Type = VT_NONE;
-		_Flags = 0;
-		_Size = 0;
-		_Free = 0;
+		Path = path;
+		Name = LGetLeaf(path);
+		Type = VT_FOLDER;
 	}
 
-	LVolumePriv(const char *path) : _It(_Sub.end())
+	LVolumePriv(LVolume *owner, LSystemPath sys, const char *name) : Owner(owner)
 	{
-		Init();
-		
-		_Path = path;
-		_Name = LGetLeaf(path);
-		_Type = VT_FOLDER;
-	}
-
-	LVolumePriv(LSystemPath sys, const char *name) : _It(_Sub.end())
-	{
-		Init();
 		SysPath = sys;
 
+		Name = name;
 		if (SysPath == LSP_ROOT)
-			_Path = "/";
+			Path = "/";
 		else
-			_Path = LGetSystemPath(SysPath);
-		if (_Path)
-		{
-			_Name = name;
-			_Type = sys == LSP_DESKTOP ? VT_DESKTOP : VT_FOLDER;
-		}
+			Path = LGetSystemPath(SysPath);
+		
+		if (Path)
+			Type = sys == LSP_DESKTOP ? VT_DESKTOP : VT_FOLDER;
 	}
 	
 	~LVolumePriv()
 	{
-		_Sub.DeleteObjects();
+		DeleteObj(NextVol);
+		DeleteObj(ChildVol);
 	}
+
+	void Insert(LVolume *vol, LVolume *newVol)
+	{
+		if (!vol || !newVol)
+			return;
+			
+		if (vol->d->ChildVol)
+		{
+			for (auto v = vol->d->ChildVol; v; v = v->d->NextVol)
+			{
+				if (!v->d->NextVol)
+				{
+					LAssert(newVol != v->d->Owner);
+					v->d->NextVol = newVol;
+					// printf("Insert %p:%s into %p:%s\n", newVol, newVol->Name(), vol, vol->Name());
+					break;
+				}
+			}
+		}
+		else
+		{
+			LAssert(newVol != vol->d->Owner);
+			vol->d->ChildVol = newVol;
+			// printf("Insert %p:%s into %p:%s\n", newVol, newVol->Name(), vol, vol->Name());
+		}
+	}	
 
 	LVolume *First()
 	{
-		if (SysPath == LSP_DESKTOP && !_Sub.Length())
+		if (SysPath == LSP_DESKTOP && !ChildVol)
 		{
 			// Get various shortcuts to points of interest
-			LVolume *v = new LVolume(LSP_ROOT, "Root");
-			if (v)
-				_Sub.Insert(v);
-
+			Insert(Owner, new LVolume(LSP_ROOT, "Root"));
+			
 			struct passwd *pw = getpwuid(getuid());
 			if (pw)
-			{
-				v = new LVolume(LSP_HOME, "Home");
-				if (v)
-					_Sub.Insert(v);
-			}
+				Insert(Owner, new LVolume(LSP_HOME, "Home"));
 
-			// Get mount list
-			// this is just a hack at this stage to establish some base
-			// functionality. I would appreciate someone telling me how
-			// to do this properly. Till then...
-			LFile f;
-			if (f.Open("/etc/fstab", O_READ))
-			{
-				auto Buf= f.Read();
-				f.Close();
-
-				auto Lines = Buf.SplitDelimit("\r\n");
-				for (auto ln : Lines)
-				{
-					auto M = ln.Strip().SplitDelimit(" \t");
-					if (M[0](0) != '#' && M.Length() > 2)
-					{
-						auto &Device = M[0];
-						auto &Mount = M[1];
-						auto &FileSys = M[2];
-						
-						if
-						(
-							(Device.Find("/dev/") == 0 || Mount.Find("/mnt/") == 0)
-							&&
-							Device.Lower().Find("/by-uuid/") < 0
-							&& 
-							Mount.Length() > 1
-							&&
-							!FileSys.Equals("swap")
-						)
-						{
-							v = new LVolume(0);
-							if (v)
-							{
-								char *MountName = strrchr(Mount, '/');
-								v->d->_Name = (MountName ? MountName + 1 : Mount.Get());
-								v->d->_Path = Mount;
-								v->d->_Type = VT_HARDDISK;
-
-								char *Device = M[0];
-								// char *FileSys = M[2];
-								if (stristr(Device, "fd"))
-								{
-									v->d->_Type = VT_FLOPPY;
-								}
-								else if (stristr(Device, "cdrom"))
-								{
-									v->d->_Type = VT_CDROM;
-								}
-
-								_Sub.Insert(v);
-							}
-						}
-					}
-				}
-			}
-			
-			LSystemPath p[] = {LSP_USER_DOCUMENTS,
+			LSystemPath p[] = {	LSP_USER_DOCUMENTS,
 								LSP_USER_MUSIC,
 								LSP_USER_VIDEO,
 								LSP_USER_DOWNLOADS,
-								LSP_USER_PICTURES};
+								LSP_USER_PICTURES };
 			for (int i=0; i<CountOf(p); i++)
 			{
 				LString Path = LGetSystemPath(p[i]);
-				if (Path &&
-					(v = new LVolume(0)))
+				if (Path && LDirExists(Path))
 				{
-					auto Parts = Path.Split("/");
-					v->d->_Path = Path;
-					v->d->_Name = *Parts.rbegin();
-					v->d->_Type = VT_FOLDER;
-					_Sub.Insert(v);
+					auto v = new LVolume(0);
+					if (Path && v)
+					{
+						auto Parts = Path.Split("/");
+						v->d->Path = Path;
+						v->d->Name = *Parts.rbegin();
+						v->d->Type = VT_FOLDER;
+						Insert(Owner, v);
+					}
 				}
 			}
 		}
 
-		_It = _Sub.begin();
-		return *_It;
+		return ChildVol;
 	}
 
 	LVolume *Next()
 	{
-		return *(++_It);
+		if (SysPath == LSP_DESKTOP && !NextVol)
+		{
+			NextVol = new LVolume(LSP_MOUNT_POINT, "Mounts");
+
+			LHashTbl<StrKey<char,false>, bool> Map;
+			
+			BVolumeRoster roster;
+			BVolume volume;
+			for (auto r = roster.GetBootVolume(&volume);
+					  r == B_OK;
+					  r = roster.GetNextVolume(&volume))
+			{
+				auto Path = BGetFullPath(volume);
+				if (!Path)
+					continue;
+				
+				if (Stricmp(Path.Get(), "/") == 0 ||
+					Stricmp(Path.Get(), "/dev") == 0 ||
+					Stricmp(Path.Get(), "/boot/system/var/shared_memory") == 0)
+					continue;
+				
+				if (volume.Capacity() == (4 << 10))
+					continue;
+
+				if (!volume.IsPersistent())
+					continue;
+				
+				char Name[B_FILE_NAME_LENGTH];
+				if (volume.GetName(Name) != B_OK)
+					continue;
+
+				auto Done = Map.Find(Name);
+				if (Done)
+					continue;
+				Map.Add(Name, true);
+
+				auto v = new LVolume(0);
+				if (v)
+				{
+					v->d->Name = Name;
+					v->d->Path = Path;
+					v->d->Type = VT_HARDDISK;
+					v->d->Size = volume.Capacity();
+					v->d->Free = volume.FreeBytes();
+					
+					// printf("%s, %s\n", Name, v->d->Path.Get());
+
+					Insert(NextVol, v);
+				}
+			}
+		}
+		
+		return NextVol;
 	}
 };
 
-LVolume::LVolume(const char *Path)
+LVolume::LVolume(const char *Path = NULL)
 {
-	d = new LVolumePriv(Path);
+	d = new LVolumePriv(this, Path);
 }
 
 LVolume::LVolume(LSystemPath SysPath, const char *Name)
 {
-	d = new LVolumePriv(SysPath, Name);
+	d = new LVolumePriv(this, SysPath, Name);
 }
 
 LVolume::~LVolume()
@@ -694,42 +451,42 @@ LVolume::~LVolume()
 	DeleteObj(d);
 }
 
-const char *LVolume::Name()
+const char *LVolume::Name() const
 {
-    return d->_Name;
+    return d->Name;
 }
 
-const char *LVolume::Path()
+const char *LVolume::Path() const
 {
-    return d->_Path;
+    return d->Path;
 }
 
-int LVolume::Type()
+int LVolume::Type() const
 {
-    return d->_Type;
+    return d->Type;
 }
 
-int LVolume::Flags()
+int LVolume::Flags() const
 {
-    return d->_Flags;
+    return d->Flags;
 }
 
-uint64 LVolume::Size()
+uint64 LVolume::Size() const
 {
-    return d->_Size;
+    return d->Size;
 }
 
-uint64 LVolume::Free()
+uint64 LVolume::Free() const
 {
-    return d->_Free;
+    return d->Free;
 }
 
-LSurface *LVolume::Icon()
+LSurface *LVolume::Icon() const
 {
     return NULL;
 }
 
-bool LVolume::IsMounted()
+bool LVolume::IsMounted() const
 {
     return true;
 }
@@ -751,16 +508,16 @@ LVolume *LVolume::Next()
 
 void LVolume::Insert(LAutoPtr<LVolume> v)
 {
-    d->_Sub.Insert(v.Release());
+    d->Insert(this, v.Release());
 }
 
 LDirectory *LVolume::GetContents()
 {
 	LDirectory *Dir = 0;
-	if (d->_Path)
+	if (d->Path)
 	{
 		Dir = new LDirectory;
-		if (Dir && !Dir->First(d->_Path))
+		if (Dir && !Dir->First(d->Path))
 			DeleteObj(Dir);
 	}
 	return Dir;
@@ -862,9 +619,7 @@ bool LFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, boo
 				if (!Move(Files[i], p))
 				{
 					if (Status)
-					{
 						(*Status)[i] = errno;
-					}
 					
 					LgiTrace("%s:%i - MoveFile(%s,%s) failed.\n", _FL, Files[i], p);
 					Error = true;
@@ -883,9 +638,7 @@ bool LFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, boo
 			if (unlink(Files[i]))
 			{
 				if (Status)
-				{
 					(*Status)[i] = errno;
-				}
 				
 				Error = true;
 			}			
@@ -948,26 +701,21 @@ bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse)
 {
 	if (Recurse)
 	{
-		LDirectory *Dir = new LDirectory;
-		if (Dir && Dir->First(PathName))
+		LDirectory Dir;
+		if (Dir.First(PathName))
 		{
 			do
 			{
-				char Str[256];
-				Dir->Path(Str, sizeof(Str));
+				char Str[MAX_PATH_LEN];
+				Dir.Path(Str, sizeof(Str));
 
-				if (Dir->IsDir())
-				{
+				if (Dir.IsDir())
 					RemoveFolder(Str, Recurse);
-				}
 				else
-				{
 					Delete(Str, false);
-				}
 			}
-			while (Dir->Next());
+			while (Dir.Next());
 		}
-		DeleteObj(Dir);
 	}
 
 	return rmdir(PathName) == 0;
@@ -978,105 +726,25 @@ bool LFileSystem::Move(const char *OldName, const char *NewName, LError *Err)
 	if (rename(OldName, NewName))
 	{
 		printf("%s:%i - rename failed, error: %s(%i)\n",
-			_FL, GetErrorName(errno), errno);
+			_FL, LErrorCodeToString(errno), errno);
 		return false;
 	}
 	
 	return true;
 }
 
-
-/*
-bool Match(char *Name, char *Mask)
-{
-	strupr(Name);
-	strupr(Mask);
-
-	while (*Name && *Mask)
-	{
-		if (*Mask == '*')
-		{
-			if (*Name == *(Mask+1))
-			{
-				Mask++;
-			}
-			else
-			{
-				Name++;
-			}
-		}
-		else if (*Mask == '?' || *Mask == *Name)
-		{
-			Mask++;
-			Name++;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	while (*Mask && ((*Mask == '*') || (*Mask == '.'))) Mask++;
-
-	return (*Name == 0 && *Mask == 0);
-}
-*/
-
-short DaysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-int LeapYear(int year)
-{
-	if (year & 3)
-	{
-		return 0;
-	}
-	if ((year % 100 == 0) && !(year % 400 == 0))
-	{
-		return 0;
-	}
-	
-	return 1;
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-bool LDirectory::ConvertToTime(char *Str, int SLen, uint64 Time) const
-{
-	time_t k = Time;
-	struct tm *t = localtime(&k);
-	if (t)
-	{
-		strftime(Str, SLen, "%I:%M:%S", t);
-		return true;
-	}
-	return false;
-}
-
-bool LDirectory::ConvertToDate(char *Str, int SLen, uint64 Time) const
-{
-	time_t k = Time;
-	struct tm *t = localtime(&k);
-	if (t)
-	{
-		strftime(Str, SLen, "%d/%m/%y", t);
-		return true;
-	}
-	return false;
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// Directory //////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
 struct LDirectoryPriv
 {
 	char			BasePath[MAX_PATH_LEN];
-	DIR				*Dir;
-	struct dirent	*De;
+	char			*BaseEnd = NULL;
+	DIR				*Dir = NULL;
+	struct dirent	*De = NULL;
 	struct stat		Stat;
 	LString			Pattern;
 
 	LDirectoryPriv()
 	{	
-		Dir = 0;
-		De = 0;
 		BasePath[0] = 0;
 	}
 	
@@ -1121,7 +789,9 @@ int LDirectory::First(const char *Name, const char *Pattern)
 	if (!Name)
 		return 0;
 
-	strcpy(d->BasePath, Name);
+	strcpy_s(d->BasePath, sizeof(d->BasePath), Name);
+	d->BaseEnd = NULL;
+	
 	if (!Pattern || stricmp(Pattern, LGI_ALL_FILES) == 0)
 	{
 		struct stat S;
@@ -1189,19 +859,36 @@ int LDirectory::Close()
 	if (d->Dir)
 	{
 		closedir(d->Dir);
-		d->Dir = 0;
+		d->Dir = NULL;
 	}
-	d->De = 0;
+	d->De = NULL;
+	d->BaseEnd = NULL;
+	d->BasePath[0] = 0;
 
 	return true;
 }
 
 const char *LDirectory::FullPath()
 {
-	static char s[MAX_PATH_LEN];
-	#warning this should really be optimized, and thread safe...
-	Path(s, sizeof(s));
-	return s;
+	auto nm = GetName();
+	if (!nm)
+		return NULL;
+
+	if (!d->BaseEnd)
+	{
+		d->BaseEnd = d->BasePath + strlen(d->BasePath);
+		if (d->BaseEnd > d->BasePath &&
+			d->BaseEnd[-1] != DIR_CHAR)
+		{
+			*d->BaseEnd++ = DIR_CHAR;
+		}
+	}
+	
+	auto used = d->BaseEnd - d->BasePath;
+	auto remaining = sizeof(d->BasePath) - used;
+
+	strcpy_s(d->BaseEnd, remaining, nm);
+	return d->BasePath;
 }
 
 LString LDirectory::FileName() const
@@ -1297,16 +984,38 @@ uint64 LDirectory::GetLastWriteTime() const
 
 uint64 LDirectory::GetSize() const
 {
-	return (uint32_t)d->Stat.st_size;
+	return d->Stat.st_size;
 }
 
 int64 LDirectory::GetSizeOnDisk()
 {
-	return (uint32_t)d->Stat.st_size;
+	return d->Stat.st_size;
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// File ///////////////////////////////////////////////
+bool LDirectory::ConvertToTime(char *Str, int SLen, uint64 Time) const
+{
+	time_t k = Time;
+	struct tm *t = localtime(&k);
+	if (t)
+	{
+		strftime(Str, SLen, "%I:%M:%S", t);
+		return true;
+	}
+	return false;
+}
+
+bool LDirectory::ConvertToDate(char *Str, int SLen, uint64 Time) const
+{
+	time_t k = Time;
+	struct tm *t = localtime(&k);
+	if (t)
+	{
+		strftime(Str, SLen, "%d/%m/%y", t);
+		return true;
+	}
+	return false;
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 class LFilePrivate
 {
@@ -1423,12 +1132,11 @@ int LFile::Open(const char *File, int Mode)
 			}
 			#endif
 
-			printf("LFile::Open failed\n\topen(%s,%08.8x) = %i\n\terrno=%s (%s)\n",
+			printf("LFile::Open failed\n\topen(%s,%08.8x) = %i\n\terrno=%s\n",
 				File, 
 				Mode, 
 				d->hFile,
-				GetErrorName(d->ErrorCode),
-				GetErrorDesc(d->ErrorCode));
+				LErrorCodeToString(d->ErrorCode));
 		}
 	}
 
@@ -1453,6 +1161,27 @@ int LFile::Close()
 	}
 
 	return true;
+}
+
+uint64_t LFile::GetModifiedTime()
+{
+	struct stat s;
+    stat(d->Name, &s);
+    return s.st_mtime;
+}
+
+bool LFile::SetModifiedTime(uint64_t dt)
+{
+	struct stat s;
+    stat(d->Name, &s);
+    
+    struct timeval times[2] = {};
+    times[0].tv_sec = s.st_atime;
+    times[1].tv_sec = dt;
+    
+	int r = utimes(d->Name, times);
+	
+	return r == 0;
 }
 
 void LFile::ChangeThread()
@@ -1683,6 +1412,8 @@ GFileOps();
 #undef GFileOp
 
 //////////////////////////////////////////////////////////////////////////////
+LString LFile::Path::Sep(DIR_STR);
+
 bool LFile::Path::FixCase()
 {
 	LString Prev;

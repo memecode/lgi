@@ -44,6 +44,9 @@ struct LPrintPageRanges : public LArray<LRange>
 class LPrintEvents
 {
 public:
+	constexpr static int OnBeginPrintError = -1;
+	constexpr static int OnBeginPrintCancel = 0;
+
 	virtual ~LPrintEvents() {}
 
 	/*
@@ -59,7 +62,18 @@ public:
 	);
 	*/
 
-	virtual int OnBeginPrint(LPrintDC *pDC) { return 1; }
+	virtual void OnBeginPrint(
+		/// The print device context to print with
+		LPrintDC *pDC,
+		/// Callback for the status of the operation. Will return one of:
+		/// - OnBeginPrintError
+		/// - OnBeginPrintCancel
+		/// - A positive number of pages
+		std::function<void(int)> callback
+	)
+	{
+		if (callback) callback(OnBeginPrintError);
+	}
 	virtual bool OnPrintPage(LPrintDC *pDC, int PageIndex) = 0;
 	virtual LPrintPageRanges *GetPageRanges() { return NULL; }
 };
@@ -77,10 +91,12 @@ public:
 	bool Browse(LView *Parent);
 
 	/// Start a print job
-	int Print
+	void Print
 	(
 		/// The event callback for pagination and printing of pages
 		LPrintEvents *Events,
+		/// The status callback
+		std::function<void(int)> callback,
 		/// [Optional] The name of the print job
 		const char *PrintJobName = NULL,
 		/// [Optional] The maximum number of pages to print

@@ -63,21 +63,21 @@
     <IntDir>$(Platform)$(Configuration)19\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\CodeLib\libiconv-1.14\include</IncludePath>
-    <TargetName>Lgi19x64</TargetName>
+    <TargetName>LgiHaiku19x64</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>.\Lib\</OutDir>
     <IntDir>$(Platform)$(Configuration)19\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\CodeLib\libiconv-1.14\include</IncludePath>
-    <TargetName>Lgi19x64d</TargetName>
+    <TargetName>LgiHaiku19x64d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseNoOptimize|x64'">
     <OutDir>.\Lib\</OutDir>
     <IntDir>$(Platform)$(Configuration)19\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\CodeLib\libiconv-1.14\include</IncludePath>
-    <TargetName>Lgi19x64nop</TargetName>
+    <TargetName>LgiHaiku19x64nop</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -454,6 +454,7 @@
     <ClInclude Include="include\common\ThreadEvent.h" />
     <ClInclude Include="include\common\Res.h" />
     <ClInclude Include="include\lgi\common\LgiInc.h" />
+    <ClInclude Include="include\lgi\common\RefCount.h" />
     <ClInclude Include="include\lgi\common\Message.h" />
     <ClInclude Include="include\win\GCom.h" />
     <ClInclude Include="include\win\LgiOsClasses.h" />

@@ -176,11 +176,11 @@ public:
 	void SetUndoOn(bool b);
 
 	// Action UI
-	virtual bool DoGoto();
-	virtual bool DoCase(bool Upper);
-	virtual bool DoFind();
-	virtual bool DoFindNext();
-	virtual bool DoReplace();
+	virtual void DoGoto(std::function<void(bool)> Callback);
+	virtual void DoCase(std::function<void(bool)> Callback, bool Upper);
+	virtual void DoFind(std::function<void(bool)> Callback);
+	virtual void DoFindNext(std::function<void(bool)> Callback);
+	virtual void DoReplace(std::function<void(bool)> Callback);
 
 	// Action Processing	
 	bool ClearDirty(bool Ask, const char *FileName = 0);

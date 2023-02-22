@@ -775,5 +775,8 @@
     <ClInclude Include="include\lgi\common\Message.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\lgi\common\RefCount.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

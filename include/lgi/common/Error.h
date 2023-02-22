@@ -14,8 +14,6 @@
 #include "errno.h"
 #endif
 
-LgiFunc const char *GetErrorName(int e);
-
 // Some cross platform error symbols (by no means a complete list)
 enum LErrorCodes
 {
@@ -39,6 +37,9 @@ enum LErrorCodes
 	#warning "Impl me."
 #endif
 };
+
+/// Converts an OS error code into a text string
+LgiExtern LString LErrorCodeToString(uint32_t ErrorCode);
 
 class LgiClass LError
 {
@@ -71,7 +72,7 @@ public:
 	LString GetMsg()
 	{
 		if (!Msg)
-			Msg = GetErrorName(Code);
+			Msg = LErrorCodeToString(Code);
 		return Msg;
 	}
 	

@@ -230,8 +230,6 @@ public:
 	void OnPulse() override;
 	int GetContentSize(int ColumnIdx) override;
 	LCursor GetCursor(int x, int y) override;
-	bool Lock(const char *file, int line, int TimeOut = -1) override;
-	void Unlock() override;
 
 	/// Add a item to the tree
 	LTreeItem *Insert(LTreeItem *Obj = 0, ssize_t Pos = -1);

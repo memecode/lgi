@@ -19,7 +19,7 @@
 
 #elif defined HAIKU
 
-	#define CornerOffset 1
+	#define CornerOffset 0
 	typedef BRect OsRect;
 
 #elif defined MAC
@@ -322,8 +322,8 @@ public:
 
 			r.left = x1;
 			r.top = y1;
-			r.right = x2+CornerOffset;
-			r.bottom = y2+CornerOffset;
+			r.right = x2 + CornerOffset;
+			r.bottom = y2 + CornerOffset;
 
 			return r;
 		}

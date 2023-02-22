@@ -419,6 +419,15 @@
     <ClCompile Include="src\common\Text\TextView4.cpp">
       <Filter>Source Files\Widgets\TextViews</Filter>
     </ClCompile>
+    <ClCompile Include="src\win\Gdc2\MemDC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Gdc2\PrintDC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win\Gdc2\ScreenDC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\common\Gdc2\Font\Charset.cpp">
       <Filter>Source Files\Graphics\Font</Filter>
     </ClCompile>

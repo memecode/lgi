@@ -27,6 +27,8 @@ struct LDialogPriv
 	int BtnId;
 	bool IsModal, IsModeless;
 	bool Resizable;
+	LDialog::OnClose ModalCb;
+	thread_id CallingThread = NULL;
 	
 	LDialogPriv()
 	{
@@ -39,7 +41,7 @@ struct LDialogPriv
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-LDialog::LDialog()
+LDialog::LDialog(LViewI *parent)
 	:
 	#ifdef __GTK_H__
 	// , LWindow(gtk_dialog_new())
@@ -49,6 +51,8 @@ LDialog::LDialog()
 {
 	d = new LDialogPriv();
 	Name("Dialog");
+	if (parent)
+		SetParent(parent);
 }
 
 LDialog::~LDialog()
@@ -101,7 +105,7 @@ void LDialog::OnPosChange()
         if (t)
         {
             LRect r = GetClient();
-            r.Size(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
+            r.Inset(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
             t->SetPos(r);
 
 			// _Dump();
@@ -137,42 +141,90 @@ bool LDialog::OnRequestClose(bool OsClose)
 	return true;
 }
 
-int LDialog::DoModal(OsView OverrideParent)
+void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 {
 	d->ModalStatus = -1;
 	
 	auto Parent = GetParent();
 	if (Parent)
-	{
 		MoveSameScreen(Parent);
-	}
 
 	d->IsModal = true;
 	d->IsModeless = false;
-	// LAppInst->Run();
-	printf("%s:%i - DoModal not supported.\n", _FL);
-	
-	return d->ModalStatus;
+	d->ModalCb = Cb;
+	d->CallingThread = find_thread(NULL);
+
+	if (WindowHandle() &&
+		Parent &&
+		Parent->WindowHandle())
+	{
+		// Keep this dialog above the parent window...
+		WindowHandle()->SetFeel(B_MODAL_SUBSET_WINDOW_FEEL);
+		WindowHandle()->AddToSubset(Parent->WindowHandle());
+	}
+	else LgiTrace("%s:%i - Can't set parent for modal.\n", _FL);
+
+	BLooper *looper = BLooper::LooperForThread(d->CallingThread);
+	if (!looper)
+		printf("%s:%i - no looper for domodal thread.\n",_FL);
+
+	if (Attach(0))
+	{
+		AttachChildren();
+		Visible(true);
+	}
+	else printf("%s:%i - attach failed..\n", _FL);
 }
 
 void LDialog::EndModal(int Code)
 {
-	if (d->IsModal)
+	if (!d->IsModal)
 	{
-		d->IsModal = false;
-		d->ModalStatus = Code;
-		LAppInst->Exit();
+		LgiTrace("%s:%i - EndModal error: LDialog is not model.\n", _FL);
+		return;
 	}
-	else
+	
+	d->IsModal = false;
+	if (!d->ModalCb)
 	{
-		// LAssert(0);
+		// If no callback is supplied, the default option is to just delete the
+		// dialog, closing it.
+		delete this;
+		return;
 	}
+	
+	BLooper *looper = BLooper::LooperForThread(d->CallingThread);
+	if (!looper)
+	{
+		LgiTrace("%s:%i - Failed to get looper for %p\n", _FL, d->CallingThread);
+		delete this;
+		return;
+	}
+	
+	BMessage *m = new BMessage(M_HANDLE_IN_THREAD);
+	m->AddPointer
+	(
+		LMessage::PropCallback,
+		new LMessage::InThreadCb
+		(
+			[dlg=this,cb=d->ModalCb,code=Code]()
+			{
+				// printf("%s:%i - Calling LDialog callback.. in original thread\n", _FL);
+				cb(dlg, code);
+				// printf("%s:%i - Calling LDialog callback.. done\n", _FL);
+			}
+		)
+	);
+		
+	looper->PostMessage(m);
 }
 
 int LDialog::DoModeless()
 {
 	d->IsModal = false;
 	d->IsModeless = true;
+	
+	Visible(true);
 	return 0;
 }
 

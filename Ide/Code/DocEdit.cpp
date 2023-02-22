@@ -78,30 +78,38 @@ bool DocEdit::AppendItems(LSubMenu *Menu, const char *Param, int Base)
 	return true;
 }
 	
-bool DocEdit::DoGoto()
+void DocEdit::DoGoto(std::function<void(bool)> Callback)
 {
-	LInput Dlg(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
-	if (Dlg.DoModal() != IDOK || !ValidStr(Dlg.GetStr()))
-		return false;
-	LString s = Dlg.GetStr();
-	LString::Array p = s.SplitDelimit(":,");
-	if (p.Length() == 2)
+	LInput *Dlg = new LInput(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");	
+	Dlg->DoModal([&, App=Doc->GetApp()](auto d, auto code)
 	{
-		LString file = p[0];
-		int line = (int)p[1].Int();
-		Doc->GetApp()->GotoReference(file, line, false, true);
-	}
-	else if (p.Length() == 1)
-	{
-		int line = (int)p[0].Int();
-		if (line > 0)
-			SetLine(line);
-		else
-			// Probably a filename with no line number..
-			Doc->GetApp()->GotoReference(p[0], 1, false, true);				
-	}
-		
-	return true;
+		bool status = code && ValidStr(Dlg->GetStr());
+		if (status)
+		{	
+			auto s = Dlg->GetStr();
+			LString::Array p = s.SplitDelimit(":,");
+			if (p.Length() == 2)
+			{
+				LString file = p[0];
+				int line = (int)p[1].Int();
+				App->GotoReference(file, line, false, true);
+			}
+			else if (p.Length() == 1)
+			{
+				int line = (int)p[0].Int();
+				if (line > 0)
+					SetLine(line);
+				else
+					// Probably a filename with no line number..
+					App->GotoReference(p[0], 1, false, true);				
+			}
+		}
+
+		if (Callback)
+			Callback(status);
+
+		delete Dlg;
+	});
 }
 
 bool DocEdit::SetPourEnabled(bool b)
@@ -133,7 +141,28 @@ void DocEdit::InvalidateLine(int Idx)
 		Invalidate(&r);
 	}
 }
+
+void DocEdit::OnPaint(LSurface *pDC)
+{
+	LTextView3::OnPaint(pDC);
 	
+	#if 0
+	LRect cli = GetClient();
+	pDC->Colour(LColour::Red);
+	pDC->Box(&cli);
+	
+	for (LViewI *p = GetParent(); p; p = p->GetParent())
+	{
+		if (p == (LViewI*)GetWindow())
+			break;
+		auto pos = p->GetPos();
+		cli.Offset(pos.x1, pos.y1);
+	}
+	
+	LgiTrace("cli=%s\n", cli.GetStr());
+	#endif
+}
+
 void DocEdit::OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour)
 {
 	LColour GutterColour(0xfa, 0xfa, 0xfa);
@@ -310,6 +339,7 @@ bool DocEdit::GetVisible(LStyle &s)
 bool DocEdit::Pour(LRegion &r)
 {
 	LRect c = r.Bound();
+	
 	c.y2 -= EDIT_TRAY_HEIGHT;
 	SetPos(c);
 		
@@ -482,27 +512,15 @@ bool DocEdit::OnMenu(LDocView *View, int Id, void *Context)
 								DeleteArray(FuncName);
 								Params.DeleteArrays();
 							}
-							else
-							{
-								LgiTrace("%s:%i - No function name.\n", _FL);
-							}
+							else LgiTrace("%s:%i - No function name.\n", _FL);
 						}
-						else
-						{
-							LgiTrace("%s:%i - OpenBracketIndex not found.\n", _FL);
-						}
+						else LgiTrace("%s:%i - OpenBracketIndex not found.\n", _FL);
 						
 						Tokens.DeleteArrays();
 					}
-					else
-					{
-						LgiTrace("%s:%i - No input text.\n", _FL);
-					}
+					else LgiTrace("%s:%i - No input text.\n", _FL);
 				}
-				else
-				{
-					LgiTrace("%s:%i - No template.\n", _FL);
-				}
+				else LgiTrace("%s:%i - No template.\n", _FL);
 				break;
 			}
 		}

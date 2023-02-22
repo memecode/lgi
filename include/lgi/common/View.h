@@ -73,7 +73,7 @@ private:
 	
 	#elif defined HAIKU
 	
-		friend class LBView;
+		template<typename Parent> friend class LBView;
 
 	#endif
 
@@ -86,7 +86,7 @@ private:
 
 
 	LRect				Pos;
-	int					_InLock;
+	int					_InLock = 0;
 
 protected:
 	class LViewPrivate	*d = NULL;
@@ -95,11 +95,13 @@ protected:
 	OsView				_View; // OS specific handle to view object
 	#endif
 
-	LView				*_Window;
-	LMutex				*_Lock;
-	uint16				_BorderSize;
-	uint16				_IsToolBar;
-	int					WndFlags;
+	LView				*_Window = NULL;
+	#ifndef HAIKU
+	LMutex				*_Lock = NULL;
+	#endif
+	uint16				_BorderSize = 0;
+	uint16				_IsToolBar = 0;
+	int					WndFlags = 0;
 
 	static LViewI		*_Capturing;
 	static LViewI		*_Over;
@@ -405,7 +407,9 @@ public:
 		/// The first 32-bits of data. Equivalent to wParam on Win32.
 		LMessage::Param a = 0,
 		/// The second 32-bits of data. Equivalent to lParam on Win32.
-		LMessage::Param b = 0
+		LMessage::Param b = 0,
+		/// Optional timeout in milliseconds
+		int64_t TimeoutMs = -1
 	) override;
 
 	template<typename T>

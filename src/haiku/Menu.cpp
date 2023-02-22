@@ -15,24 +15,89 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/ToolBar.h"
 
-#define DEBUG_MENUS		0
+#include <Menu.h>
+#include <MenuBar.h>
+#include <MenuItem.h>
+#include <PopUpMenu.h>
+
+#define DEBUG_MENUS		1
 
 #if DEBUG_MENUS
 	#define LOG(...)	printf(__VA_ARGS__)
 #else
-	#define LOG(...)
+	#define LOG(...)	;
 #endif
+
+struct MenuLock : public LLocker
+{
+	LMenu *menu;
+	LViewI *lwnd;
+	BWindow *bwnd;
+	bool unattached;
+	
+	template<typename T>
+	BHandler *Init(T *s)
+	{
+		menu = NULL;
+		lwnd = NULL;
+		bwnd = NULL;
+		unattached = false;
+		
+		if (s)
+			menu = s->GetMenu();
+		if (menu)
+			lwnd = menu->WindowHandle();
+		if (lwnd)
+			bwnd = lwnd->WindowHandle();
+		// printf("%s:%i - %p,%p,%p\n", _FL, menu, lwnd, bwnd);
+		return bwnd;
+	}
+	
+	template<typename T>
+	MenuLock(T *s, const char *file, int line) :
+		LLocker(Init(s), file, line)
+	{
+		/*
+		printf("%s:%i - MenuLock %p %p, %p %p %p\n", file, line,
+			bwnd, hnd,
+			dynamic_cast<BHandler*>(bwnd), static_cast<BHandler*>(bwnd), (BHandler*)bwnd);
+		*/
+	
+		if (!bwnd)
+		{
+			unattached = true;
+		}
+		else if (!Lock())
+		{
+			if (bwnd)
+				unattached = bwnd->Thread() < 0;
+			if (!unattached)
+				printf("%s:%i - Failed to lock (%p,%p,%p,%i).\n", file, line, menu, lwnd, bwnd, bwnd ? bwnd->Thread() : 0);
+		}
+	}
+	
+	operator bool() const
+	{
+		return locked || unattached;
+	}
+};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 static ::LArray<LSubMenu*> Active;
 
+LSubMenu::LSubMenu(OsSubMenu Hnd)
+{
+	Active.Add(this);
+	Info = Hnd;
+}
+
 LSubMenu::LSubMenu(const char *name, bool Popup)
 {
-	Menu = NULL;
-	Parent = NULL;
-	Info = NULL;
-
 	Active.Add(this);
+	Info = new BPopUpMenu(name);
+	printf("Info=%p\n", Info);
+	if (name)
+		Name(name);
 }
 
 LSubMenu::~LSubMenu()
@@ -50,8 +115,6 @@ LSubMenu::~LSubMenu()
 // This is not called in the GUI thread..
 void LSubMenu::SysMouseClick(LMouse &m)
 {
-	LMouse *ms = new LMouse;
-	*ms = m;
 }
 
 size_t LSubMenu::Length()
@@ -67,57 +130,82 @@ LMenuItem *LSubMenu::ItemAt(int Id)
 LMenuItem *LSubMenu::AppendItem(const char *Str, int Id, bool Enabled, int Where, const char *Shortcut)
 {
 	LMenuItem *i = new LMenuItem(Menu, this, Str, Id, Where < 0 ? Items.Length() : Where, Shortcut);
-	if (i)
+	if (!i)
+		return NULL;
+
+	i->Enabled(Enabled);
+	Items.Insert(i, Where);
+
+	MenuLock lck(this, _FL);
+	if (lck)
 	{
-		i->Enabled(Enabled);
-
-		Items.Insert(i, Where);
-
-		return i;
+		Info->AddItem(i->Info);
 	}
+	else if (Menu)
+	{
+		BMessage *m = new BMessage(M_LSUBMENU_APPENDITEM);
+		m->AddPointer("sub", this);
+		m->AddPointer("item", i);
+		if (!Menu->PostMessage(m))
+			DeleteObj(i);
+	}
+	else printf("%s:%i - error.\n", _FL);
 
-	return 0;
+	return i;
 }
 
 LMenuItem *LSubMenu::AppendSeparator(int Where)
 {
-	LMenuItem *i = new LMenuItem;
-	if (i)
+	LMenuItem *i = new LMenuItem(Menu, NULL, NULL, ItemId_Separator, -1);
+	if (!i)
+		return NULL;
+
+	i->Parent = this;
+	Items.Insert(i, Where);
+
+	MenuLock lck(this, _FL);
+	if (lck)
 	{
-		i->Parent = this;
-		i->Menu = Menu;
-		i->Id(-2);
-
-		Items.Insert(i, Where);
-
-		return i;
+		Info->AddItem(i->Info);
+	}
+	else
+	{
+		DeleteObj(i);
+		return NULL;
 	}
 
-	return 0;
+	return i;
 }
 
 LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 {
 	LBase::Name(Str);
-	LMenuItem *i = new LMenuItem(Menu, this, Str, Where < 0 ? Items.Length() : Where, NULL);
-	if (i)
+	
+	LMenuItem *i = new LMenuItem(Menu, this, Str, ItemId_Submenu, Where < 0 ? Items.Length() : Where, NULL);
+	if (!i)
+		return NULL;
+
+	Items.Insert(i, Where);
+
+	MenuLock lck(this, _FL);
+	if (lck)
 	{
-		i->Id(-1);
-		Items.Insert(i, Where);
-
-		return i->Child;
+		Info->AddItem(i->Info);
 	}
-
-	return 0;
+	else
+	{
+		DeleteObj(i);
+		return NULL;
+	}
+	
+	return i->Child;
 }
 
 void LSubMenu::ClearHandle()
 {
 	Info = NULL;
 	for (auto i: Items)
-	{
 		i->ClearHandle();
-	}
 }
 
 void LSubMenu::Empty()
@@ -147,7 +235,32 @@ bool LSubMenu::RemoveItem(LMenuItem *Item)
 
 int LSubMenu::Float(LView *From, int x, int y, int Button)
 {
-	return 0;
+	BPopUpMenu *popup = dynamic_cast<BPopUpMenu*>(Info);
+	if (!popup)
+	{
+		LAssert(!"Not a popup.");
+		return 0;
+	}
+	
+	if (!From)
+	{
+		LAssert(!"No from view.");
+		return 0;
+	}
+	
+	auto item = popup->Go(BPoint(x, y));
+	// printf("item=%p\n", item);
+	if (!item)
+		return 0;
+
+	auto *msg = item->Message();
+	if (!msg)
+	{
+		printf("%s:%i - No message in item.\n", _FL);
+		return 0;
+	}
+	
+	return ((LMessage*)msg)->A();
 }
 
 LSubMenu *LSubMenu::FindSubMenu(int Id)
@@ -201,142 +314,81 @@ LMenuItem *LSubMenu::FindItem(int Id)
 class LMenuItemPrivate
 {
 public:
-	bool StartUnderline;		// Underline the first display string
-	bool HasAccel;				// The last display string should be right aligned
-	List<LDisplayString> Strs;	// Draw each alternate display string with underline
-								// except the last in the case of HasAccel==true.
-	::LString Shortcut;
-
-	LMenuItemPrivate()
+	LMenuItem *Item;
+	LString Shortcut;
+	
+	LMenuItemPrivate(LMenuItem *it) : Item(it)
 	{
-		HasAccel = false;
-		StartUnderline = false;
-	}
-
-	~LMenuItemPrivate()
-	{
-		Strs.DeleteObjects();
-	}
-
-	void UpdateStrings(LFont *Font, char *n)
-	{
-		// Build up our display strings, 
-		Strs.DeleteObjects();
-		StartUnderline = false;
-
-		char *Tab = strrchr(n, '\t');
-		if (Tab)
-		{
-			*Tab = 0;
-		}
-
-		char *Amp = 0, *a = n;
-		while (a = strchr(a, '&'))
-		{
-			if (a[1] != '&')
-			{
-				Amp = a;
-				break;
-			}
-
-			a++;
-		}
-
-		if (Amp)
-		{
-			// Before amp
-			Strs.Insert(new LDisplayString(Font, n, Amp - n ));
-
-			// Amp'd letter
-			char *e = LSeekUtf8(++Amp, 1);
-			Strs.Insert(new LDisplayString(Font, Amp, e - Amp ));
-
-			// After Amp
-			if (*e)
-			{
-				Strs.Insert(new LDisplayString(Font, e));
-			}
-		}
-		else
-		{
-			Strs.Insert(new LDisplayString(Font, n));
-		}
-
-		if (HasAccel = (Tab != 0))
-		{
-			Strs.Insert(new LDisplayString(Font, Tab + 1));
-			*Tab = '\t';
-		}
-		else if (HasAccel = (Shortcut.Get() != 0))
-		{
-			Strs.Insert(new LDisplayString(Font, Shortcut));
-		}
 	}
 };
 
-static LAutoString MenuItemParse(const char *s)
+static LString MenuItemParse(const char *s, char &trigger)
 {
 	char buf[256], *out = buf;
 	const char *in = s;
+	
+	trigger = 0;
+	
 	while (in && *in && out < buf + sizeof(buf) - 1)
 	{
-		if (*in == '_')
-		{
-			*out++ = '_';
-			*out++ = '_';
-		}
-		else if (*in != '&' || in[1] == '&')
-		{
-			*out++ = *in;
-		}
+		if (*in == '\t')
+			break;
+		else if (*in == '&' && in[1] == '&')
+			*out++ = *in++;			
+		else if (*in == '&' && in[1] != '&')
+			trigger = in[1];
 		else
-		{
-			*out++ = '_';
-		}
+			*out++ = *in;
 		
 		in++;
 	}
 	*out++ = 0;
 	
-	char *tab = strrchr(buf, '\t');
-	if (tab)
-	{
-		*tab++ = 0;
-	}
-	
-	return LAutoString(NewStr(buf));
+	return buf;
 }
 
 LMenuItem::LMenuItem()
 {
-	d = new LMenuItemPrivate();
+	d = new LMenuItemPrivate(this);
 	Info = NULL;
-	Child = NULL;
-	Menu = NULL;
-	Parent = NULL;
-
-	Position = -1;
-	
-	_Flags = 0;	
-	_Icon = -1;
-	_Id = 0;
 }
 
 LMenuItem::LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int id, int Pos, const char *shortcut)
 {
-	d = NULL;
-	LAutoString Txt = MenuItemParse(txt);
+	d = new LMenuItemPrivate(this);
+	char trigger;
+	auto Txt = MenuItemParse(txt, trigger);
 	LBase::Name(txt);
-	Info = NULL;
 
-	Child = NULL;
 	Menu = m;
 	Parent = p;
 	Position = Pos;
-
-	_Flags = 0;	
-	_Icon = -1;
 	_Id = id;
+	d->Shortcut = shortcut;
+
+	if (id == LSubMenu::ItemId_Submenu)
+	{
+		Child = new LSubMenu(new BMenu(Txt));
+		if (Child)
+		{
+			Child->Menu = Menu;
+			Child->Parent = this;
+			
+			Info = new BMenuItem(Child->Info);
+			if (Info && trigger)
+				Info->SetTrigger(ToLower(trigger));
+		}
+	}
+	else if (id == LSubMenu::ItemId_Separator)
+	{
+		Info = new BSeparatorItem();
+	}
+	else // Normal item...
+	{
+		Info = new BMenuItem(Txt, new LMessage(M_COMMAND, id));
+		if (Info && trigger)
+			Info->SetTrigger(ToLower(trigger));
+	}
 
 	ScanForAccel();
 }
@@ -360,22 +412,9 @@ void LMenuItem::_PaintText(LSurface *pDC, int x, int y, int Width)
 {
 }
 
-#if 1
-
 bool LMenuItem::ScanForAccel()
 {
-	if (!Menu)
-		return false;
-
-	return true;
-}
-
-#else
-
-bool LMenuItem::ScanForAccel()
-{
-	::LString Accel;
-
+	LString Accel;
 	if (d->Shortcut)
 	{
 		Accel = d->Shortcut;
@@ -399,7 +438,8 @@ bool LMenuItem::ScanForAccel()
 		return false;
 
 	int Flags = 0;
-	uchar Key = 0;
+	int Vkey = 0;
+	int Chr = 0;
 	bool AccelDirty = false;
 	
 	for (int i=0; i<Keys.Length(); i++)
@@ -436,85 +476,85 @@ bool LMenuItem::ScanForAccel()
 		else if (stricmp(k, "Del") == 0 ||
 				 stricmp(k, "Delete") == 0)
 		{
-			Key = LK_DELETE;
+			Vkey = LK_DELETE;
 			Flags |= LGI_EF_IS_NOT_CHAR;
 		}
 		else if (stricmp(k, "Ins") == 0 ||
 				 stricmp(k, "Insert") == 0)
 		{
-			Key = LK_INSERT;
+			Vkey = LK_INSERT;
 			Flags |= LGI_EF_IS_NOT_CHAR;
 		}
 		else if (stricmp(k, "Home") == 0)
 		{
-			Key = LK_HOME;
+			Vkey = LK_HOME;
 			Flags |= LGI_EF_IS_NOT_CHAR;
 		}
 		else if (stricmp(k, "End") == 0)
 		{
-			Key = LK_END;
+			Vkey = LK_END;
 			Flags |= LGI_EF_IS_NOT_CHAR;
 		}
 		else if (stricmp(k, "PageUp") == 0 ||
 				 stricmp(k, "Page Up") == 0 ||
 				 stricmp(k, "Page-Up") == 0)
 		{
-			Key = LK_PAGEUP;
+			Vkey = LK_PAGEUP;
 			Flags |= LGI_EF_IS_NOT_CHAR;
 		}
 		else if (stricmp(k, "PageDown") == 0 ||
 				 stricmp(k, "Page Down") == 0 ||
 				 stricmp(k, "Page-Down") == 0)
 		{
-			Key = LK_PAGEDOWN;
+			Vkey = LK_PAGEDOWN;
 			Flags |= LGI_EF_IS_NOT_CHAR;
 		}
 		else if (stricmp(k, "Backspace") == 0)
 		{
-			Key = LK_BACKSPACE;
+			Vkey = LK_BACKSPACE;
 			Flags |= LGI_EF_IS_NOT_CHAR;
 		}
 		else if (stricmp(k, "Up") == 0)
 		{
-			Key = LK_UP;
+			Vkey = LK_UP;
 			Flags |= LGI_EF_IS_NOT_CHAR;
 		}
 		else if (stricmp(k, "Down") == 0)
 		{
-			Key = LK_DOWN;
+			Vkey = LK_DOWN;
 			Flags |= LGI_EF_IS_NOT_CHAR;
 		}
 		else if (stricmp(k, "Left") == 0)
 		{
-			Key = LK_LEFT;
+			Vkey = LK_LEFT;
 			Flags |= LGI_EF_IS_NOT_CHAR;
 		}
 		else if (stricmp(k, "Right") == 0)
 		{
-			Key = LK_RIGHT;
+			Vkey = LK_RIGHT;
 			Flags |= LGI_EF_IS_NOT_CHAR;
 		}
 		else if (stricmp(k, "Esc") == 0)
 		{
-			Key = LK_ESCAPE;
+			Vkey = LK_ESCAPE;
 			Flags |= LGI_EF_IS_NOT_CHAR;
 		}
 		else if (stricmp(k, "Space") == 0)
 		{
-			Key = ' ';
+			Chr = ' ';
 		}
 		else if (k[0] == 'F' && IsDigit(k[1]))
 		{
-			Key = LK_F1 + (int)k.LStrip("F").Int() - 1;
+			Vkey = LK_F1 + (int)k.LStrip("F").Int() - 1;
 			Flags |= LGI_EF_IS_NOT_CHAR;
 		}
 		else if (IsAlpha(k[0]))
 		{
-			Key = toupper(k[0]);
+			Chr = toupper(k[0]);
 		}
 		else if (IsDigit(k[0]))
 		{
-			Key = k[0];
+			Chr = k[0];
 		}
 		else if (strchr(",./\\[]`;\'", k[0]))
 		{
@@ -522,23 +562,23 @@ bool LMenuItem::ScanForAccel()
 			{
 				switch (k[0])
 				{
-					case ';': Key = 186; break;
-					case '=': Key = 187; break;
-					case ',': Key = 188; break;
-					case '_': Key = 189; break;
-					case '.': Key = 190; break;
-					case '/': Key = 191; break;
-					case '`': Key = 192; break;
-					case '[': Key = 219; break;
-					case '\\': Key = 220; break;
-					case ']': Key = 221; break;
-					case '\'': Key = 222; break;
-					default: LAssert(!"Unknown key."); break;
+					case ';':  Vkey = 186; break;
+					case '=':  Vkey = 187; break;
+					case ',':  Vkey = 188; break;
+					case '_':  Vkey = 189; break;
+					case '.':  Vkey = 190; break;
+					case '/':  Vkey = 191; break;
+					case '`':  Vkey = 192; break;
+					case '[':  Vkey = 219; break;
+					case '\\': Vkey = 220; break;
+					case ']':  Vkey = 221; break;
+					case '\'': Vkey = 222; break;
+					default:   LAssert(!"Unknown key."); break;
 				}
 			}
 			else
 			{
-				Key = k[0];
+				Chr = k[0];
 			}
 		}
 		else
@@ -547,50 +587,75 @@ bool LMenuItem::ScanForAccel()
 		}
 	}
 
-	if (Key)
-	{
-		Gtk::gint GtkKey = LgiKeyToGtkKey(Key, Accel);
-		if (GtkKey)
-		{
-			GtkWidget *w = GtkCast(Info.obj, gtk_widget, GtkWidget);
-			Gtk::GdkModifierType mod = (Gtk::GdkModifierType)
-				(
-					(TestFlag(Flags, LGI_EF_CTRL)   ? Gtk::GDK_CONTROL_MASK : 0) |
-					(TestFlag(Flags, LGI_EF_SHIFT)  ? Gtk::GDK_SHIFT_MASK : 0)   |
-					(TestFlag(Flags, LGI_EF_ALT)    ? Gtk::GDK_MOD1_MASK : 0)    |
-					(TestFlag(Flags, LGI_EF_SYSTEM) ? Gtk::GDK_META_MASK : 0)
-				);
-
-			const char *Signal = "activate";
-
-			gtk_widget_add_accelerator(	w,
-										Signal,
-										Menu->AccelGrp,
-										GtkKey,
-										mod,
-										Gtk::GTK_ACCEL_VISIBLE
-									);
-			gtk_widget_show_all(w);
-		}
-		else
-		{
-			LOG("%s:%i - No gtk key for '%s'\n", _FL, Accel.Get());
-		}
-		
-		auto Ident = Id();
-		LAssert(Ident > 0);
-		Menu->Accel.Insert( new LAccelerator(Flags, Key, Ident) );
-		
-		return true;
-	}
-	else
+	if (!Vkey && !Chr)
 	{
 		LOG("%s:%i - Accel scan failed, str='%s'\n", _FL, Accel.Get());
 		return false;
 	}
-}
 
-#endif
+	if (!Info)
+	{
+		LOG("%s:%i - No item handle.\n", _FL);
+		return false;
+	}
+
+	uint32 modifiers = 
+		((Flags & LGI_EF_CTRL)	 ? B_CONTROL_KEY : 0) |
+		((Flags & LGI_EF_ALT)	 ? B_MENU_KEY    : 0) |
+		((Flags & LGI_EF_SHIFT)  ? B_SHIFT_KEY   : 0);
+		
+	// ((Flags & LGI_EF_SYSTEM) ? B_COMMAND_KEY : 0);
+	
+	if (Vkey >= LK_F1 && Vkey <= LK_F12)
+	{
+		#if 1
+		
+			if (Menu)
+			{
+				LAssert(Id() > 0);
+				Menu->Accel.Insert(new LAccelerator(Flags, Vkey, Chr, Id()));
+			}
+		
+		#else
+		
+			// This is not supported yet...
+			auto bwnd = Menu && Menu->WindowHandle() ? Menu->WindowHandle()->WindowHandle() : NULL;
+			if (bwnd)
+			{
+				BMessage *msg = new BMessage(M_COMMAND);
+				if (msg)
+				{
+					msg->AddInt32("key", Key-LK_F1+B_F1_KEY);
+					bwnd->AddShortcut(B_FUNCTION_KEY, modifiers, msg);
+				}
+				else printf("%s:%i - Alloc err.\n", _FL);
+			}
+			else printf("%s:%i - No bwnd to add function key shortcut to.\n", _FL);
+		
+		#endif				
+	}
+	else
+	{
+		#if 0
+		printf("ScanForAccel: %s, %s, Vkey=%i, Chr=%i(%c), Flags: %x ctrl=%i alt=%i shift=%i sys=%i, Mods: ctrl=%i alt=%i sh=%i sys=%i\n",
+			Name(), Accel.Get(),
+			Vkey, Chr, Chr >= ' ' ? Chr : '.',
+			Flags,
+			(Flags & LGI_EF_CTRL) != 0,
+			(Flags & LGI_EF_ALT) != 0,
+			(Flags & LGI_EF_SHIFT) != 0,
+			(Flags & LGI_EF_SYSTEM) != 0,
+			(modifiers & B_CONTROL_KEY) != 0,
+			(modifiers & B_MENU_KEY) != 0,
+			(modifiers & B_SHIFT_KEY) != 0,
+			(modifiers & B_COMMAND_KEY) != 0);
+		#endif
+
+		Info->SetShortcut(Chr, modifiers);
+	}
+
+	return true;
+}
 
 LSubMenu *LMenuItem::GetParent()
 {
@@ -607,13 +672,24 @@ void LMenuItem::ClearHandle()
 bool LMenuItem::Remove()
 {
 	if (!Parent)
-	{
 		return false;
-	}
 
+	if (Info)
+	{
+		MenuLock lck(this, _FL);
+		if (lck)
+		{
+			auto m = Info->Menu();
+			if (m)
+				m->RemoveItem(Info);
+		}
+		else printf("%s:%i - Can't lock to Remove item.\n", _FL);
+	}
+	
 	LAssert(Parent->Items.HasItem(this));
 	Parent->Items.Delete(this);
 	Parent = NULL;
+	
 	return true;
 }
 
@@ -625,9 +701,7 @@ void LMenuItem::Id(int i)
 void LMenuItem::Separator(bool s)
 {
 	if (s)
-	{
-		_Id = -2;
-	}
+		_Id = LSubMenu::ItemId_Separator;
 }
 
 LImageList *LMenuItem::GetImageList()
@@ -679,7 +753,11 @@ void LMenuItem::Enabled(bool e)
 		ClearFlag(_Flags, ODS_DISABLED);
 	else
 		SetFlag(_Flags, ODS_DISABLED);
-	
+
+	if (Menu)
+		Menu->PostMessage(new LMessage(M_LMENUITEM_ENABLE, Id(), e));
+	else
+		Info->SetEnabled(e);
 }
 
 void LMenuItem::Focus(bool f)
@@ -707,7 +785,7 @@ const char *LMenuItem::Name()
 
 bool LMenuItem::Separator()
 {
-	return _Id == -2;
+	return _Id == LSubMenu::ItemId_Separator;
 }
 
 bool LMenuItem::Checked()
@@ -743,22 +821,34 @@ int LMenuItem::Icon()
 ///////////////////////////////////////////////////////////////////////////////////////////////
 struct LMenuFont
 {
-	LFont *f;
+	LAutoPtr<LFont> f;
 
-	LMenuFont()
-	{
-		f = NULL;
-	}
-
-	~LMenuFont()
-	{
-		DeleteObj(f);
-	}
 }	MenuFont;
 
-class LMenuPrivate
+class LMenuPrivate : public BMenuBar
 {
+	LMenu *Menu;
+
 public:
+	LMenuPrivate(LMenu *menu, const char *name) :
+		Menu(menu),
+		BMenuBar(name)
+	{
+	}
+	
+	~LMenuPrivate()
+	{
+		Menu->d = NULL;
+
+		auto bwnd = Window();
+		bool locked = bwnd && bwnd->LockLooper();
+		if (locked)
+		{
+			RemoveSelf();
+			bwnd->UnlockLooper();
+		}		
+	}
+
 	void MessageReceived(BMessage *message)
 	{
 		LMessage *m = (LMessage*)message;
@@ -837,28 +927,18 @@ LFont *LMenu::GetFont()
 		LFontType Type;
 		if (Type.GetSystemFont("Menu"))
 		{
-			MenuFont.f = Type.Create();
-			if (MenuFont.f)
+			if (MenuFont.f.Reset(Type.Create()))
 			{
 				// MenuFont.f->CodePage(LSysFont->CodePage());
 			}
-			else
-			{
-				LOG("LMenu::GetFont Couldn't create menu font.\n");
-			}
+			else LOG("LMenu::GetFont Couldn't create menu font.\n");
 		}
-		else
-		{
-			LOG("LMenu::GetFont Couldn't get menu typeface.\n");
-		}
+		else LOG("LMenu::GetFont Couldn't get menu typeface.\n");
 
-		if (!MenuFont.f)
+		if (!MenuFont.f &&
+			MenuFont.f.Reset(new LFont))
 		{
-			MenuFont.f = new LFont;
-			if (MenuFont.f)
-			{
-				*MenuFont.f = *LSysFont;
-			}
+			*MenuFont.f = *LSysFont;
 		}
 	}
 
@@ -867,28 +947,48 @@ LFont *LMenu::GetFont()
 
 bool LMenu::Attach(LViewI *p)
 {
-	if (!p)
+	if (!p || !p->GetWindow())
 	{
 		LAssert(0);
 		return false;
 	}
 		
-	LWindow *Wnd = p->GetWindow();
-	if (!Wnd)
+	Window = p->GetWindow();	
+	auto bwnd = Window->WindowHandle();
+	LLocker lck(bwnd, _FL);
+	if (!lck.Lock())
 	{
-		LAssert(0);
+		LAssert(!"Can't lock.");
 		return false;
 	}
-		
-	Window = Wnd;
+
+	// printf("Attaching menubar...\n");	
+	auto menubar = dynamic_cast<BMenuBar*>(Info);
+	bwnd->AddChild(menubar);
 	
+	lck.Unlock();
+	
+	Window->OnPosChange(); // Force update of root view position	
 	return true;
 }
 
 bool LMenu::Detach()
 {
-	bool Status = false;
-	return Status;
+	if (!Window)
+		return false;
+	
+	auto bwnd = Window->WindowHandle();
+	LLocker lck(bwnd, _FL);
+	if (!lck.Lock())
+	{
+		LAssert(!"Can't lock.");
+		return false;
+	}
+	
+	bwnd->SetKeyMenuBar(NULL);
+		
+	lck.Unlock();	
+	return true;
 }
 
 bool LMenu::SetPrefAndAboutItems(int a, int b)
@@ -898,6 +998,9 @@ bool LMenu::SetPrefAndAboutItems(int a, int b)
 
 bool LMenu::OnKey(LView *v, LKey &k)
 {
+	LOG("LMenu::OnKey(%s):\n", v ? v->GetClass() : NULL);
+	k.Trace("   ");
+	
 	if (k.Down())
 	{
 		for (auto a: Accel)
@@ -965,10 +1068,11 @@ bool LMenu::OnKey(LView *v, LKey &k)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-LAccelerator::LAccelerator(int flags, int key, int id)
+LAccelerator::LAccelerator(int flags, int vkey, int chr, int id)
 {
 	Flags = flags;
-	Key = key;
+	Vkey = vkey;
+	Chr = chr;
 	Id = id;
 }
 
@@ -986,30 +1090,24 @@ bool LAccelerator::Match(LKey &k)
 		return false;
 	}
 	
-	#if 1
-	LOG("LAccelerator::Match %i(%c)%s%s%s = %i(%c)%s%s%s%s\n",
-		Press,
-		Press>=' '?Press:'.',
-		k.Ctrl()?" ctrl":"",
-		k.Alt()?" alt":"",
-		k.Shift()?" shift":"",
-		Key,
-		Key>=' '?Key:'.',
-		TestFlag(Flags, LGI_EF_CTRL)?" ctrl":"",
-		TestFlag(Flags, LGI_EF_ALT)?" alt":"",
-		TestFlag(Flags, LGI_EF_SHIFT)?" shift":"",
-		TestFlag(Flags, LGI_EF_SYSTEM)?" system":""
-		);
-	#endif
-
-	if (toupper(Press) == (uint)Key)
+	if
+	(
+		!k.IsChar
+		&&
+		(
+			(Chr != 0 && tolower(k.c16) == tolower(Chr))
+			||
+			(Vkey != 0 && k.vkey == Vkey)
+		)
+	)
 	{
 		if
 		(
-			((TestFlag(Flags, LGI_EF_CTRL) ^ k.Ctrl()) == 0) &&
-			((TestFlag(Flags, LGI_EF_ALT) ^ k.Alt()) == 0) &&
-			((TestFlag(Flags, LGI_EF_SHIFT) ^ k.Shift()) == 0) &&
-			((TestFlag(Flags, LGI_EF_SYSTEM) ^ k.System()) == 0)
+			(Ctrl() ^ k.Ctrl()) == 0 &&
+			(Alt() ^ k.Alt()) == 0 &&
+			(Shift() ^ k.Shift()) == 0 &&
+			(!TestFlag(Flags, LGI_EF_IS_CHAR) || k.IsChar) &&
+			(!TestFlag(Flags, LGI_EF_IS_NOT_CHAR) || !k.IsChar)
 		)
 		{
 			return true;
@@ -1022,19 +1120,10 @@ bool LAccelerator::Match(LKey &k)
 ////////////////////////////////////////////////////////////////////////////
 LCommand::LCommand()
 {
-	Flags = GWF_VISIBLE;
-	Id = 0;
-	ToolButton = 0;
-	MenuItem = 0;
-	Accelerator = 0;
-	TipHelp = 0;
-	PrevValue = false;
 }
 
 LCommand::~LCommand()
 {
-	DeleteArray(Accelerator);
-	DeleteArray(TipHelp);
 }
 
 bool LCommand::Enabled()
@@ -1049,13 +1138,9 @@ bool LCommand::Enabled()
 void LCommand::Enabled(bool e)
 {
 	if (ToolButton)
-	{
 		ToolButton->Enabled(e);
-	}
 	if (MenuItem)
-	{
 		MenuItem->Enabled(e);
-	}
 }
 
 bool LCommand::Value()
@@ -1063,18 +1148,12 @@ bool LCommand::Value()
 	bool HasChanged = false;
 
 	if (ToolButton)
-	{
 		HasChanged |= (ToolButton->Value() != 0) ^ PrevValue;
-	}
 	if (MenuItem)
-	{
 		HasChanged |= (MenuItem->Checked() != 0) ^ PrevValue;
-	}
 
 	if (HasChanged)
-	{
 		Value(!PrevValue);
-	}
 
 	return PrevValue;
 }
@@ -1082,12 +1161,8 @@ bool LCommand::Value()
 void LCommand::Value(bool v)
 {
 	if (ToolButton)
-	{
 		ToolButton->Value(v);
-	}
 	if (MenuItem)
-	{
 		MenuItem->Checked(v);
-	}
 	PrevValue = v;
 }

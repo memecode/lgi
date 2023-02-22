@@ -1,7 +1,7 @@
 /** \file
 	\author Matthew Allen
  */
- 
+
 #ifndef _LMENU_H_
 #define _LMENU_H_
 
@@ -109,29 +109,32 @@ class LgiClass LSubMenu :
 		friend Gtk::gboolean LSubMenuClick(LMouse *m);
 		friend void SubMenuDestroy(LSubMenu *Item);
 
-		int *_ContextMenuId;
-		bool InLoop;
-		uint64 ActiveTs;
+		int *_ContextMenuId = NULL;
+		bool InLoop = false;
+		uint64 ActiveTs = 0;
 		bool IsContext(LMenuItem *Item);
 		void OnActivate(bool a);
 	#elif defined(WINNATIVE)
-		HWND TrackHandle;
+		HWND TrackHandle = NULL;
 	#else
 		bool OnKey(LKey &k);
 	#endif
 
 protected:
 	/// The parent menu item or NULL if the root menu
-	LMenuItem		*Parent;
+	LMenuItem		*Parent = NULL;
 	/// The top level window this sub menu belongs to or NULL
-	LMenu			*Menu;
+	LMenu			*Menu = NULL;
 	/// The window that the menu belongs to or NULL.
-	LViewI			*Window;
+	LViewI			*Window = NULL;
 	
 	void OnAttach(bool Attach);
 	void ClearHandle();
 
 public:
+	constexpr static int ItemId_Submenu = -1;
+	constexpr static int ItemId_Separator = -2;
+
 	LSubMenu(OsSubMenu Hnd);
 	/// Constructor
 	LSubMenu
@@ -309,6 +312,7 @@ class LgiClass LMenuItem :
 	friend class MenuItemImpl;
 	friend class MenuImpl;
 	friend class SubMenuImplPrivate;
+	friend class LMenuPrivate;
 
 private:
 	#ifdef WIN32
@@ -320,24 +324,24 @@ private:
 	#endif
 
 protected:
-	LMenu			*Menu;
-	LSubMenu		*Parent;
-	LSubMenu		*Child;
-	int				Position;
-	int				_Icon;
+	LMenu			*Menu = NULL;
+	LSubMenu		*Parent = NULL;
+	LSubMenu		*Child = NULL;
+	int				Position = -1;
+	int				_Icon = -1;
 
 	#ifdef __GTK_H__
 	GlibWrapper<Gtk::GtkMenuItem> Info;
 	#else
 	OsMenuItem		Info;
 	#endif
-	class LMenuItemPrivate *d;
+	class LMenuItemPrivate *d = NULL;
 
-	int				_Id;
-	int				_Flags;
+	int				_Id = 0;
+	int				_Flags = 0;
 
 	#if defined(__GTK_H__)
-		bool InSetCheck;
+		bool InSetCheck = false;
 		LAutoPtr<LMemDC> IconImg;
 		bool Replace(Gtk::GtkWidget *newWid);
 	public:
@@ -356,7 +360,7 @@ protected:
 
 public:
 	LMenuItem();
-	LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int Id, int Pos, const char *Shortcut = 0);
+	LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int Id, int Pos, const char *Shortcut = NULL);
 	virtual ~LMenuItem();
 
 	LMenuItem &operator =(const LMenuItem &m)
@@ -486,23 +490,28 @@ class LgiClass LMenu :
 	friend class LSubMenu;
 	friend class LMenuItem;
 	friend class LWindow;
+	friend class LMenuPrivate;
 
 	class LMenuPrivate *d;
 
 	#if defined WIN32
-	void OnChange();
+		void OnChange();
 	#else
-	void OnChange() {}
+		void OnChange() {}
 	#endif
 
 protected:
 	/// List of keyboard shortcuts in the menu items attached
 	List<LAccelerator> Accel;
 	#ifdef __GTK_H__
-	Gtk::GtkAccelGroup *AccelGrp;
+		Gtk::GtkAccelGroup *AccelGrp;
 	#endif
 	#if LGI_COCOA
-	void OnActivate(LMenuItem *item);
+		void OnActivate(LMenuItem *item);
+	#endif
+
+	#ifdef HAIKU
+	bool PostMessage(BMessage *m);
 	#endif
 
 public:
@@ -550,9 +559,9 @@ public:
 	bool SetPrefAndAboutItems(int PrefId, int AboutId);
 
 	#if defined(WIN32)
-	static int _OnEvent(LMessage *Msg);
+		static int _OnEvent(LMessage *Msg);
 	#elif defined(MAC)
-	int GetIdForCommand(uint32_t Cmd);
+		int GetIdForCommand(uint32_t Cmd);
 	#endif
 };
 

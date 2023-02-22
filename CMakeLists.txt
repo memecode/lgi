@@ -1,16 +1,19 @@
 cmake_minimum_required (VERSION 3.18)
 
-if(WIN32)
+project(Lgi)
+
+if (WIN32)
 	set(CMAKE_SYSTEM_VERSION 10.0.19041.0)
 endif()
 
-project (Lgi)
-
-#get_cmake_property(_variableNames VARIABLES)
-#list (SORT _variableNames)
-#foreach (_variableName ${_variableNames})
-#    message(STATUS "${_variableName}=${${_variableName}}")
-#endforeach()
+if (FALSE)
+	# dump all vars for debugging.
+	get_cmake_property(_variableNames VARIABLES)
+	list (SORT _variableNames)
+	foreach (_variableName ${_variableNames})
+		message(STATUS "${_variableName}=${${_variableName}}")
+	endforeach()
+endif()
 
 include(build.cmake)
 
@@ -23,7 +26,7 @@ if (UNIX AND NOT APPLE AND NOT HAIKU)
 	set(LINUX TRUE)
 endif()
 
-if(WIN32)
+if (WIN32)
 	message("CMAKE_GENERATOR=${CMAKE_GENERATOR}")
 	message("CMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}")
 	if (CMAKE_GENERATOR MATCHES "Win64" OR
@@ -73,14 +76,24 @@ if (NOT EXISTS "${ICONV_PATH}/include")
 	endif()
 endif()
 
-get_filename_component(PNG_LIBRARY "${CODELIB}/libpng" ABSOLUTE)
-if (EXISTS ${PNG_LIBRARY} AND NOT TARGET libpng16)
-	add_subdirectory(${PNG_LIBRARY} libpng)
+if (HAIKU)
+	find_package(PNG REQUIRED)
+	set(LIBPNG_TARGET PNG::PNG)
+else()
+	get_filename_component(PNG_LIBRARY "${CODELIB}/libpng" ABSOLUTE)
+	if (EXISTS ${PNG_LIBRARY} AND NOT TARGET libpng16)
+		add_subdirectory(${PNG_LIBRARY} libpng)
+		set(LIBPNG_TARGET libpng16)
+	endif()
 endif()
 
-get_filename_component(JPEG_LIBRARY "${CODELIB}/libjpeg-9a" ABSOLUTE)
-if (NOT TARGET libjpeg9a)
-	add_subdirectory(${CODELIB}/libjpeg-9a libjpeg)
+if (HAIKU)
+	find_package(JPEG REQUIRED)
+else()
+	get_filename_component(JPEG_LIBRARY "${CODELIB}/libjpeg-9a" ABSOLUTE)
+	if (NOT TARGET libjpeg9a)
+		add_subdirectory(${CODELIB}/libjpeg-9a libjpeg)
+	endif()
 endif()
 
 if (APPLE)
@@ -365,7 +378,13 @@ elseif (HAIKU)
 
 	set(Source
 		${CommonSource}
-		src/haiku/
+		src/common/Lgi/FileSelect.cpp
+		src/common/Widgets/Combo.cpp
+		src/common/Widgets/Edit.cpp
+		src/common/Widgets/CheckBox.cpp
+		src/common/Widgets/ScrollBar.cpp
+		src/common/Widgets/Progress.cpp
+		src/common/Widgets/Slider.cpp
 		src/haiku/App.cpp
 		src/haiku/ClipBoard.cpp
 		src/haiku/DragAndDrop.cpp
@@ -579,6 +598,11 @@ elseif (HAIKU)
 		PUBLIC
 			HAIKU
 			_GNU_SOURCE)
+	target_link_libraries(lgi
+		PUBLIC
+			gnu
+			network
+			be)
 
 endif()
 

@@ -195,11 +195,6 @@ LView::LView(OsView view)
 	#elif LGI_VIEW_HANDLE && !defined(HAIKU)
 	_View = view;
 	#endif
-	_Window = 0;
-	_Lock = 0;
-	_InLock = 0;
-	_BorderSize = 0;
-	_IsToolBar = false;
 	Pos.ZOff(-1, -1);
 	WndFlags = GWF_VISIBLE;
 
@@ -227,14 +222,14 @@ LView::~LView()
 	{
 		LPopup *pu = LPopup::CurrentPopups[i];
 		if (pu->Owner == this)
-		{
-			// printf("%s:%i - ~%s setting %s->Owner to NULL\n", _FL, GetClass(), pu->GetClass());
 			pu->Owner = NULL;
-		}
 	}
 
 	_Delete();
-	DeleteObj(d);
+
+	// printf("%p::~LView delete %p th=%u\n", this, d, GetCurrentThreadId());
+	DeleteObj(d);	
+	// printf("%p::~LView\n", this);
 }
 
 int LView::AddDispatch()
@@ -304,8 +299,9 @@ bool LView::HasView(LViewI *v)
 
 OsWindow LView::WindowHandle()
 {
-	auto *w = GetWindow();
-	return (w) ? w->WindowHandle() : (OsWindow)NULL;
+	auto w = GetWindow();
+	auto h = w ? w->WindowHandle() : NULL;
+	return h;
 }
 
 LWindow *LView::GetWindow()
@@ -330,24 +326,79 @@ LWindow *LView::GetWindow()
 
 bool LView::Lock(const char *file, int line, int TimeOut)
 {
-	if (!_Window)
-		GetWindow();
+	#ifdef HAIKU
 
-	_InLock++;
-	// LgiTrace("%s::%p Lock._InLock=%i %s:%i\n", GetClass(), this, _InLock, file, line);
-	if (_Window && _Window->_Lock)
-	{
-		if (TimeOut < 0)
+		bool Debug = !Stricmp("LList", GetClass());
+		if (!d || !d->Hnd)
 		{
-			return _Window->_Lock->Lock(file, line);
+			if (Debug)
+				printf("%s:%i - no handle %p %p\n", _FL, d, d ? d->Hnd : NULL);
+			return false;
 		}
-		else
+	
+		if (d->Hnd->Parent() == NULL)
 		{
-			return _Window->_Lock->LockWithTimeout(TimeOut, file, line);
+			if (Debug)
+				printf("%s:%p - Lock() no parent.\n", GetClass(), this);
+			return true;
 		}
-	}
+		
+		if (TimeOut >= 0)
+		{
+			auto r = d->Hnd->LockLooperWithTimeout(TimeOut * 1000);
+			if (r == B_OK)
+			{
+				_InLock++;
+				if (Debug)
+					printf("%s:%p - Lock() cnt=%i par=%p.\n", GetClass(), this, _InLock, d->Hnd->Parent());
+				return true;
+			}
+		
+			printf("%s:%i - Lock(%i) failed with %x.\n", _FL, TimeOut, r);
+			return false;
+		}
+	
+		auto r = d->Hnd->LockLooper();
+		if (r)
+		{
+			_InLock++;
+			
+			if (Debug)
+			{
+				auto w = WindowHandle();
+				printf("%s:%p - Lock() cnt=%i myThread=%i wndThread=%i.\n",
+					GetClass(),
+					this,
+					_InLock,
+					GetCurrentThreadId(),
+					w ? w->Thread() : -1);
+			}
+			return true;
+		}
+	
+		if (Debug)
+			printf("%s:%i - Lock(%s:%i) failed.\n", _FL, file, line);
+		return false;
+	#else
+		if (!_Window)
+			GetWindow();
 
-	return true;
+		_InLock++;
+		// LgiTrace("%s::%p Lock._InLock=%i %s:%i\n", GetClass(), this, _InLock, file, line);
+		if (_Window && _Window->_Lock)
+		{
+			if (TimeOut < 0)
+			{
+				return _Window->_Lock->Lock(file, line);
+			}
+			else
+			{
+				return _Window->_Lock->LockWithTimeout(TimeOut, file, line);
+			}
+		}
+
+		return true;
+	#endif
 }
 
 void LView::Unlock()
@@ -547,197 +598,200 @@ void LView::OnNcPaint(LSurface *pDC, LRect &r)
 
 #if LGI_COCOA || defined(__GTK_H__)
 
-/*
-uint64 nPaint = 0;
-uint64 PaintTime = 0;
-*/
-
-void LView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
-{
 	/*
-	uint64 StartTs = Update ? LCurrentTime() : 0;
-	d->InPaint = true;
+	uint64 nPaint = 0;
+	uint64 PaintTime = 0;
 	*/
 
-	// Create temp DC if needed...
-	LAutoPtr<LSurface> Local;
-	if (!pDC)
+	void LView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
 	{
-		if (!Local.Reset(new LScreenDC(this)))
-			return;
-		pDC = Local;
-	}
+		/*
+		uint64 StartTs = Update ? LCurrentTime() : 0;
+		d->InPaint = true;
+		*/
 
-	#if 0
-	// This is useful for coverage checking
-	pDC->Colour(LColour(255, 0, 255));
-	pDC->Rectangle();
-	#endif
+		// Create temp DC if needed...
+		LAutoPtr<LSurface> Local;
+		if (!pDC)
+		{
+			if (!Local.Reset(new LScreenDC(this)))
+				return;
+			pDC = Local;
+		}
 
-	// Non-Client drawing
-	LRect r;
-	if (Offset)
-	{
-		r = Pos;
-		r.Offset(Offset);
-	}
-	else
-	{
-		r = GetClient().ZeroTranslate();
-	}
-
-	pDC->SetClient(&r);
-	LRect zr1 = r.ZeroTranslate(), zr2 = zr1;
-	OnNcPaint(pDC, zr1);
-	pDC->SetClient(NULL);
-	if (zr2 != zr1)
-	{
-		r.x1 -= zr2.x1 - zr1.x1;
-		r.y1 -= zr2.y1 - zr1.y1;
-		r.x2 -= zr2.x2 - zr1.x2;
-		r.y2 -= zr2.y2 - zr1.y2;
-	}
-	LPoint o(r.x1, r.y1); // Origin of client
-
-	// Paint this view's contents...
-	pDC->SetClient(&r);
-
-	#if 0
-	if (_Debug)
-	{
-		#if defined(__GTK_H__)
-			Gtk::cairo_matrix_t matrix;
-			cairo_get_matrix(pDC->Handle(), &matrix);
-
-			double ex[4];
-			cairo_clip_extents(pDC->Handle(), ex+0, ex+1, ex+2, ex+3);
-			ex[0] += matrix.x0; ex[1] += matrix.y0; ex[2] += matrix.x0; ex[3] += matrix.y0;
-			LgiTrace("%s::_Paint, r=%s, clip=%g,%g,%g,%g - %g,%g\n",
-					GetClass(), r.GetStr(),
-					ex[0], ex[1], ex[2], ex[3],
-					matrix.x0, matrix.y0);
-		#elif LGI_COCOA
-			auto Ctx = pDC->Handle();
-			CGAffineTransform t = CGContextGetCTM(Ctx);
-			LRect cr = CGContextGetClipBoundingBox(Ctx);
-			printf("%s::_Paint() pos=%s transform=%g,%g,%g,%g-%g,%g clip=%s r=%s\n",
-					GetClass(),
-					GetPos().GetStr(),
-  					t.a, t.b, t.c, t.d, t.tx, t.ty,
-					cr.GetStr(),
-					r.GetStr());
+		#if 0
+		// This is useful for coverage checking
+		pDC->Colour(LColour(255, 0, 255));
+		pDC->Rectangle();
 		#endif
-	}
-	#endif
 
-	OnPaint(pDC);
-
-	pDC->SetClient(NULL);
-
-	// Paint all the children...
-	for (auto i : Children)
-	{
-		LView *w = i->GetGView();
-		if (w && w->Visible())
-		{
-			if (!w->Pos.Valid())
-				continue;
-
-			#if 0
-			if (w->_Debug)
-				LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), o.x, o.y);
-			#endif
-			w->_Paint(pDC, &o);
-		}
-	}
-}
-#else
-void LView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
-{
-	// Create temp DC if needed...
-	LAutoPtr<LSurface> Local;
-	if (!pDC)
-	{
-		Local.Reset(new LScreenDC(this));
-		pDC = Local;
-	}
-	if (!pDC)
-	{
-		printf("%s:%i - No context to draw in.\n", _FL);
-		return;
-	}
-
-	#if 0
-	// This is useful for coverage checking
-	pDC->Colour(LColour(255, 0, 255));
-	pDC->Rectangle();
-	#endif
-
-	bool HasClient = false;
-	LRect r(0, 0, Pos.X()-1, Pos.Y()-1), Client;
-	LPoint o;
-	if (Offset)
-		o = *Offset;
-
-	#if WINNATIVE
-	if (!_View)
-	#endif
-	{
 		// Non-Client drawing
-		Client = r;
-		OnNcPaint(pDC, Client);
-		HasClient = GetParent() && (Client != r);
-		if (HasClient)
+		LRect r;
+		if (Offset)
 		{
-			Client.Offset(o.x, o.y);
-			pDC->SetClient(&Client);
+			r = Pos;
+			r.Offset(Offset);
 		}
-	}
-
-	r.Offset(o.x, o.y);
-
-	// Paint this view's contents
-	if (Update)
-	{
-		LRect OldClip = pDC->ClipRgn();
-		pDC->ClipRgn(Update);
-		OnPaint(pDC);
-		pDC->ClipRgn(OldClip.Valid() ? &OldClip : NULL);
-	}
-	else
-	{
-		OnPaint(pDC);
-	}
-
-	#if PAINT_VIRTUAL_CHILDREN
-	// Paint any virtual children
-	for (auto i : Children)
-	{
-		LView *w = i->GetGView();
-		if (w && w->Visible())
+		else
 		{
-			#if LGI_VIEW_HANDLE
-			if (!w->Handle())
+			r = GetClient().ZeroTranslate();
+		}
+
+		pDC->SetClient(&r);
+		LRect zr1 = r.ZeroTranslate(), zr2 = zr1;
+		OnNcPaint(pDC, zr1);
+		pDC->SetClient(NULL);
+		if (zr2 != zr1)
+		{
+			r.x1 -= zr2.x1 - zr1.x1;
+			r.y1 -= zr2.y1 - zr1.y1;
+			r.x2 -= zr2.x2 - zr1.x2;
+			r.y2 -= zr2.y2 - zr1.y2;
+		}
+		LPoint o(r.x1, r.y1); // Origin of client
+
+		// Paint this view's contents...
+		pDC->SetClient(&r);
+
+		#if 0
+		if (_Debug)
+		{
+			#if defined(__GTK_H__)
+				Gtk::cairo_matrix_t matrix;
+				cairo_get_matrix(pDC->Handle(), &matrix);
+
+				double ex[4];
+				cairo_clip_extents(pDC->Handle(), ex+0, ex+1, ex+2, ex+3);
+				ex[0] += matrix.x0; ex[1] += matrix.y0; ex[2] += matrix.x0; ex[3] += matrix.y0;
+				LgiTrace("%s::_Paint, r=%s, clip=%g,%g,%g,%g - %g,%g\n",
+						GetClass(), r.GetStr(),
+						ex[0], ex[1], ex[2], ex[3],
+						matrix.x0, matrix.y0);
+			#elif LGI_COCOA
+				auto Ctx = pDC->Handle();
+				CGAffineTransform t = CGContextGetCTM(Ctx);
+				LRect cr = CGContextGetClipBoundingBox(Ctx);
+				printf("%s::_Paint() pos=%s transform=%g,%g,%g,%g-%g,%g clip=%s r=%s\n",
+						GetClass(),
+						GetPos().GetStr(),
+	  					t.a, t.b, t.c, t.d, t.tx, t.ty,
+						cr.GetStr(),
+						r.GetStr());
 			#endif
+		}
+		#endif
+
+		OnPaint(pDC);
+
+		pDC->SetClient(NULL);
+
+		// Paint all the children...
+		for (auto i : Children)
+		{
+			LView *w = i->GetGView();
+			if (w && w->Visible())
 			{
-				LRect p = w->GetPos();
-				p.Offset(o.x, o.y);
-				if (HasClient)
-					p.Offset(Client.x1 - r.x1, Client.y1 - r.y1);
-				
-				LPoint co(p.x1, p.y1);
-				// LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), p.x1, p.y1);
-				pDC->SetClient(&p);
-				w->_Paint(pDC, &co);
-				pDC->SetClient(NULL);
+				if (!w->Pos.Valid())
+					continue;
+
+				#if 0
+				if (w->_Debug)
+					LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), o.x, o.y);
+				#endif
+				w->_Paint(pDC, &o);
 			}
 		}
 	}
-	#endif
 
-	if (HasClient)
-		pDC->SetClient(0);
-}
+#else
+
+	void LView::_Paint(LSurface *pDC, LPoint *Offset, LRect *Update)
+	{
+		// Create temp DC if needed...
+		LAutoPtr<LSurface> Local;
+		if (!pDC)
+		{
+			Local.Reset(new LScreenDC(this));
+			pDC = Local;
+		}
+		if (!pDC)
+		{
+			printf("%s:%i - No context to draw in.\n", _FL);
+			return;
+		}
+
+		#if 0
+		// This is useful for coverage checking
+		pDC->Colour(LColour(255, 0, 255));
+		pDC->Rectangle();
+		#endif
+
+		bool HasClient = false;
+		LRect r(0, 0, Pos.X()-1, Pos.Y()-1), Client;
+		LPoint o;
+		if (Offset)
+			o = *Offset;
+
+		#if WINNATIVE
+		if (!_View)
+		#endif
+		{
+			// Non-Client drawing
+			Client = r;
+			OnNcPaint(pDC, Client);
+			HasClient = GetParent() && (Client != r);
+			if (HasClient)
+			{
+				Client.Offset(o.x, o.y);
+				pDC->SetClient(&Client);
+			}
+		}
+
+		r.Offset(o.x, o.y);
+
+		// Paint this view's contents
+		if (Update)
+		{
+			LRect OldClip = pDC->ClipRgn();
+			pDC->ClipRgn(Update);
+			OnPaint(pDC);
+			pDC->ClipRgn(OldClip.Valid() ? &OldClip : NULL);
+		}
+		else
+		{
+			OnPaint(pDC);
+		}
+
+		#if PAINT_VIRTUAL_CHILDREN
+		// Paint any virtual children
+		for (auto i : Children)
+		{
+			LView *w = i->GetGView();
+			if (w && w->Visible())
+			{
+				#if LGI_VIEW_HANDLE
+				if (!w->Handle())
+				#endif
+				{
+					LRect p = w->GetPos();
+					p.Offset(o.x, o.y);
+					if (HasClient)
+						p.Offset(Client.x1 - r.x1, Client.y1 - r.y1);
+					
+					LPoint co(p.x1, p.y1);
+					// LgiTrace("%s::_Paint %i,%i\n", w->GetClass(), p.x1, p.y1);
+					pDC->SetClient(&p);
+					w->_Paint(pDC, &co);
+					pDC->SetClient(NULL);
+				}
+			}
+		}
+		#endif
+
+		if (HasClient)
+			pDC->SetClient(0);
+	}
+
 #endif
 
 LViewI *LView::GetParent()
@@ -1165,7 +1219,7 @@ bool LView::HandleCapture(LView *Wnd, bool c)
 
 bool LView::IsCapturing()
 {
-	DEBUG_CAPTURE("%s::IsCapturing()=%i\n", GetClass(), (int)(_Capturing == this));
+	// DEBUG_CAPTURE("%s::IsCapturing()=%p==%p==%i\n", GetClass(), _Capturing, this, (int)(_Capturing == this));
 	return _Capturing == this;
 }
 
@@ -1173,7 +1227,7 @@ bool LView::Capture(bool c)
 {
 	ThreadCheck();
 
-	DEBUG_CAPTURE("%s::Capture(%i)\n", GetClass());
+	DEBUG_CAPTURE("%s::Capture(%i)\n", GetClass(), c);
 	return HandleCapture(this, c);
 }
 
@@ -1252,10 +1306,49 @@ void LView::Visible(bool v)
 	LLocker lck(d->Hnd, _FL);
 	if (!IsAttached() || lck.Lock())
 	{
+		const int attempts = 3;
+		// printf("%s/%p:Visible(%i) hidden=%i\n", GetClass(), this, v, d->Hnd->IsHidden());
 		if (v)
-			d->Hnd->Show();
+		{
+			bool parentHidden = false;
+			for (auto p = d->Hnd->Parent(); p; p = p->Parent())
+			{
+				if (p->IsHidden())
+				{
+					parentHidden = true;
+					break;
+				}
+			}
+			if (!parentHidden) // Don't try and show if one of the parent's is hidden.
+			{
+				for (int i=0; i<attempts && d->Hnd->IsHidden(); i++)
+				{
+					// printf("\t%p Show\n", this);
+					d->Hnd->Show();
+				}
+				if (d->Hnd->IsHidden())
+				{
+					printf("%s:%i - Failed to show %s.\n", _FL, GetClass());
+					for (auto p = d->Hnd->Parent(); p; p = p->Parent())
+						printf("\tparent: %s/%p ishidden=%i\n", p->Name(), p, p->IsHidden());
+				}
+			}
+		}
 		else
-			d->Hnd->Hide();
+		{
+			for (int i=0; i<attempts && !d->Hnd->IsHidden(); i++)
+			{
+				// printf("\t%p Hide\n", this);
+				d->Hnd->Hide();
+			}
+			if (!d->Hnd->IsHidden())
+			{
+				printf("%s:%i - Failed to hide %s.\n", _FL, GetClass());
+				for (auto p = d->Hnd->Parent(); p; p = p->Parent())
+					printf("\tparent: %s/%p ishidden=%i\n", p->Name(), p, p->IsHidden());
+			}
+		}
+		// printf("\t%s/%p:Visible(%i) hidden=%i\n", GetClass(), this, v, d->Hnd->IsHidden());
 	}
 	else LgiTrace("%s:%i - Can't lock.\n", _FL);
  	#elif LGI_VIEW_HANDLE	
@@ -1303,6 +1396,13 @@ bool LView::Focus()
 		if (Active)
 			Has = w->GetFocus() == static_cast<LViewI*>(this);
 	}
+	#elif defined(HAIKU)
+	LLocker lck(d->Hnd, _FL);
+	if (lck.Lock())
+	{
+		Has = d->Hnd->IsFocus();
+		lck.Unlock();
+	}	
 	#elif defined(WINNATIVE)
 	if (_View)
 	{
@@ -1345,13 +1445,19 @@ void LView::Focus(bool i)
 
 	auto *Wnd = GetWindow();
 	if (Wnd)
+	{
 		Wnd->SetFocus(this, i ? LWindow::GainFocus : LWindow::LoseFocus);
+	}
 
 	#if LGI_VIEW_HANDLE && !defined(HAIKU)
 	if (_View)
 	#endif
 	{
-		#if defined(LGI_SDL) || defined(__GTK_H__)
+		#if defined(HAIKU)
+		
+			_Focus(i);
+		
+		#elif defined(LGI_SDL) || defined(__GTK_H__)
 		
 			// Nop: Focus is all handled by Lgi's LWindow class.
 		
@@ -2039,42 +2145,93 @@ bool LView::InThread()
 	#endif
 }
 
-bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b)
+bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t timeoutMs)
 {
 	#ifdef LGI_SDL
+
 		return LPostEvent(this, Cmd, a, b);
+
 	#elif defined(HAIKU)
-		if (!d || !d->Hnd || !d->Hnd->LockLooper())
+
+		if (!d || !d->Hnd)
+		{
+			// printf("%s:%i - Bad pointers %p %p\n", _FL, d, d ? d->Hnd : NULL);
 			return false;
+		}
+		
+		BWindow *bWnd = NULL;
+		LWindow *wnd = dynamic_cast<LWindow*>(this);
+		if (wnd)
+		{
+			bWnd = wnd->WindowHandle();
+		}
+		else
+		{
+			// Look for an attached view to lock...
+			for (LViewI *v = this; v; v = v->GetParent())
+			{
+				auto vhnd = v->Handle();
+				if (vhnd && ::IsAttached(vhnd))
+				{
+					bWnd = vhnd->Window();
+					break;
+				}
+			}
+ 		}
 
-		BMessage *m = new BMessage(Cmd);
-		if (!m)
-			return false;
-		m->AddUInt64(LMessage::PropNames[0], a);
-		m->AddUInt64(LMessage::PropNames[1], b);
+		BMessage m(Cmd);
+		
+		auto r = m.AddInt64(LMessage::PropA, a);
+		if (r != B_OK)
+			printf("%s:%i - AddUInt64 failed.\n", _FL);
+		r = m.AddInt64(LMessage::PropB, b);
+		if (r != B_OK)
+			printf("%s:%i - AddUInt64 failed.\n", _FL);
+		r = m.AddPointer(LMessage::PropView, this);
+		if (r != B_OK)
+			printf("%s:%i - AddPointer failed.\n", _FL);
 
-		auto w = d && d->Hnd ? d->Hnd->Window() : NULL;
-		status_t r = w->PostMessage(m);
-		d->Hnd->UnlockLooper();
+		if (bWnd)
+		{
+			r = bWnd->PostMessage(&m);
+			if (r != B_OK)
+				printf("%s:%i - PostMessage failed.\n", _FL);				
 
-		return r == B_OK;
+			return r == B_OK;
+		}
+
+		// Not attached yet...
+		d->MsgQue.Add(new BMessage(m));
+		// printf("%s:%i - PostEvent.MsgQue=%i\n", _FL, (int)d->MsgQue.Length());
+		
+		return true;
+
 	#elif WINNATIVE
+
 		if (!_View)
 			return false;
+
 		BOOL Res = ::PostMessage(_View, Cmd, a, b);
 		if (!Res)
 		{
 			auto Err = GetLastError();
 			int asd=0;
 		}
+
 		return Res != 0;
+
 	#elif !LGI_VIEW_HANDLE
+
 		return LAppInst->PostEvent(this, Cmd, a, b);
+
 	#else
+
 		if (_View)
 			return LPostEvent(_View, Cmd, a, b);
+
 		LAssert(0);
 		return false;
+
 	#endif
 }
 
@@ -2392,26 +2549,39 @@ LPoint &LView::GetWindowBorderSize()
 		}
 	}
 
-#elif defined(HAIKU)
+#elif defined(HAIKU) || defined(WINDOWS)
 
 	template<typename T>
-	void _Dump(int Depth, T *v)
+	void _Dump(int Depth, T v)
 	{
 		LString Sp, Name;
 		Sp.Length(Depth<<1);
 		memset(Sp.Get(), ' ', Depth<<1);
+		Sp.Get()[Depth<<1] = 0;
 		
-		LRect Frame = v->Frame();
-		LViewPrivate *Priv = dynamic_cast<LViewPrivate*>(v);
-		if (Priv)
-			Name = Priv->View->GetClass();
-		
-		printf("%s### %p::%s frame=%s vis=%i\n",
-			Sp.Get(), v, Name.Get(), Frame.GetStr(), !v->IsHidden());
+		#if defined(HAIKU)
+			LRect Frame = v->Frame();
+			Name = v->Name();
+			bool IsHidden = v->IsHidden();
+		#else
+			RECT rc; GetWindowRect(v, &rc);
+			LRect Frame = rc;
+			wchar_t txt[256];
+			GetWindowTextW(v, txt, CountOf(txt));
+			Name = txt;
+			bool IsHidden = !(GetWindowLong(v, GWL_STYLE) & WS_VISIBLE);
+		#endif
+
+		LgiTrace("%s%p::%s frame=%s vis=%i\n",
+			Sp.Get(), v, Name.Get(), Frame.GetStr(), !IsHidden);
+
+		#if defined(HAIKU)
 		for (int32 i=0; i<v->CountChildren(); i++)
-		{
 			_Dump(Depth + 1, v->ChildAt(i));
-		}
+		#else
+		for (auto h = GetWindow(v, GW_CHILD); h; h = GetWindow(h, GW_HWNDNEXT))
+			_Dump(Depth + 1, h);
+		#endif
 	}
 
 #endif
@@ -2442,10 +2612,12 @@ void LView::_Dump(int Depth)
 
 		// DumpGtk(_View);
 	
-	#elif defined(HAIKU)
+	#else
 	
+		#if defined(HAIKU)
 		LLocker lck(WindowHandle(), _FL);
 		if (lck.Lock())
+		#endif
 			::_Dump(0, WindowHandle());
 	
 	#endif

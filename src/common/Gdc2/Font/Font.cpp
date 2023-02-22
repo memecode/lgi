@@ -1067,6 +1067,9 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 			font_height height;
 			d->hFont->GetHeight(&height);
 			d->Height = height.ascent + height.descent + height.leading;
+			LTypeFace::d->_Ascent = height.ascent;
+			LTypeFace::d->_Descent = height.descent;
+			LTypeFace::d->_Leading = height.leading;
 			return true;
 		}
 
@@ -1360,6 +1363,28 @@ void LFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, L
 	}
 	pDC->EndDC();
 
+}
+
+#elif defined(HAIKU)
+
+void LFont::_Measure(int &x, int &y, OsChar *Str, int Len)
+{
+	printf("%s:%i - _Measure not impl.\n", _FL);
+}
+
+int LFont::_CharAt(int x, OsChar *Str, int Len, LPxToIndexType Type)
+{
+	if (!d->hFont)
+		return -1;
+	
+	BString s(Str, Len);
+	d->hFont->TruncateString(&s, B_TRUNCATE_BEGINNING, x);
+	return s.CountChars();
+}
+
+void LFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, LColour &fore)
+{
+	printf("%s:%i - _Draw not impl.\n", _FL);
 }
 
 #else

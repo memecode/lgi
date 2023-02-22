@@ -230,7 +230,7 @@ bool _GetApps_Add(LArray<LAppInfo*> &Apps, char *In)
 	return false;
 }
 
-bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
+bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 {
 	bool Status = false;
 
@@ -848,11 +848,15 @@ LString WinGetSpecialFolderPath(int Id)
 
 //////////////////////////////////////////////////////////////////////
 #ifndef LGI_STATIC
-int LAssertDlg(LString Msg)
+void LAssertDlg(LString Msg, std::function<void(int)> Callback)
 {
 	LAlert a(LAppInst ? LAppInst->AppWnd : NULL, "Assert Failed", Msg, "Abort", "Debug", "Ignore");
-	a.SetAppModal();
-	return a.DoModal();
+	a.SetAppModal();	
+	a.DoModal([Callback](auto d, auto code)
+	{
+		if (Callback)
+			Callback(code);
+	});
 }
 #endif
 
@@ -885,36 +889,37 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 			if (LAppInst->InThread())
 			{
 				// We are in the GUI thread, show the dialog inline
-				Result = LAssertDlg(Msg);
+				LAssertDlg(Msg, [](auto Result)
+				{
+					switch (Result)
+					{
+						case 1:
+						{
+							exit(-1);
+							break;
+						}
+						case 2:
+						{
+							// Bring up the debugger...
+							#if defined(_WIN64) || !defined(_MSC_VER)
+							assert(0);
+							#else
+							_asm int 3
+							#endif
+							break;
+						}
+						default:
+						case 3:
+						{
+							break;
+						}
+					}			
+				});
 			}
 			else
 			{
 				// Fall back to windows UI
 				assert(0);
-			}
-
-			switch (Result)
-			{
-				case 1:
-				{
-					exit(-1);
-					break;
-				}
-				case 2:
-				{
-					// Bring up the debugger...
-					#if defined(_WIN64) || !defined(_MSC_VER)
-					assert(0);
-					#else
-					_asm int 3
-					#endif
-					break;
-				}
-				default:
-				case 3:
-				{
-					break;
-				}
 			}
 
 			#endif

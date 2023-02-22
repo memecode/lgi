@@ -77,6 +77,11 @@ void LAlert::SetAppModal()
     #endif
 }
 
+void LAlert::SetButtonCallback(int ButtonIdx, std::function<void(int)> Callback)
+{
+	Callbacks[ButtonIdx] = Callback;
+}
+
 int LAlert::OnNotify(LViewI *Ctrl, LNotification n)
 {
 	switch (Ctrl->GetId())
@@ -87,7 +92,16 @@ int LAlert::OnNotify(LViewI *Ctrl, LNotification n)
 		{
 			if (n.Type != LNotifyTableLayoutChanged)
 			{
-				EndModal(Ctrl->GetId() - CMD_BASE + 1);
+				auto Index = Ctrl->GetId() - CMD_BASE + 1;
+				if (Callbacks.IdxCheck(Index) &&
+					Callbacks[Index] != NULL)
+				{
+					Callbacks[Index](Index);
+				}
+				else
+				{
+					EndModal(Index);
+				}
 			}
 			break;
 		}

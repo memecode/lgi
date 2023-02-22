@@ -41,10 +41,11 @@
 #elif defined(HAIKU)
 
 	#include <View.h>
-
+	extern void *IsAttached(BView *v);
+	
 #endif
 
-#define PAINT_VIRTUAL_CHILDREN	1
+#define PAINT_VIRTUAL_CHILDREN	0
 
 extern bool In_SetWindowPos;
 extern LMouse &lgi_adjust_click(LMouse &Info,
@@ -62,8 +63,10 @@ extern LRect GtkGetPos(Gtk::GtkWidget *w);
 class LPulseThread : public LThread, public LCancel
 {
 	LView *View = NULL;
+	LString ViewClass;
 	int Length = 0;
 	LThreadEvent Event;
+	uint64_t WarnTs = 0;
 
 	LString MakeName(LView *v, const char *Type)
 	{
@@ -73,8 +76,6 @@ class LPulseThread : public LThread, public LCancel
 	}
 
 public:
-	static int PulseThreadCount;
-
 	LPulseThread(LView *view, int len) :
 		View(view),
 		LThread(MakeName(view, "Thread")),
@@ -82,7 +83,7 @@ public:
 	{
 		LAssert(View);
 		Length = len;
-		PulseThreadCount++;
+		ViewClass = View->GetClass();
 		
 		// printf("PulseThread=%i, %s, %i\n", PulseThreadCount, View->GetClass(), Length);
 		
@@ -91,11 +92,13 @@ public:
 	
 	~LPulseThread()
 	{
+		Cancel();
 		View = NULL;
 		Cancel();
 		Event.Signal();
 		WaitForExit();
 		PulseThreadCount--;
+			LSleep(1);
 	}
 	
 	int Main()
@@ -108,6 +111,18 @@ public:
 			
 			if (View && !View->PostEvent(M_PULSE))
 				Cancel();
+				auto r = View->PostEvent(M_PULSE, 0, 0, 50/*milliseconds*/);
+				#if 0
+				if (!r)
+				{
+					auto now = LCurrentTime();
+					if (now - WarnTs >= 5000)
+					{
+						WarnTs = now;
+						printf("%s:%i - PulseThread::PostEvent failed for %p/%s.\n", _FL, View, ViewClass.Get());
+					}
+				}
+				#endif
 		}
 		
 		return 0;
@@ -212,6 +227,7 @@ public:
 	#elif defined(HAIKU)
 	
 		BView *Hnd = NULL;
+		LArray<BMessage*> MsgQue; // For before the window is attached...
 	
 	#endif
 	
@@ -229,4 +245,5 @@ public:
 		return 0;
 	}
 };
+
 

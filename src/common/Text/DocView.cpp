@@ -175,10 +175,10 @@ bool LDefaultDocumentEnv::OnNavigate(LDocView *Parent, const char *Uri)
 		)
 		{
 			// email
-			LArray<LAppInfo*> Apps;
+			LArray<LAppInfo> Apps;
 			if (LGetAppsForMimeType("application/email", Apps))
 			{
-				LAppInfo *First = Apps[0];
+				LAppInfo *First = &Apps[0];
 				LStringPipe a;
 
 				char *Arg = First->Params ? strstr(First->Params, "%1") : 0;

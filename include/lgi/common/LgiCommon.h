@@ -109,9 +109,6 @@ LgiExtern LString LStrConvertCp
 	ssize_t InLen = -1
 );
 
-/// Converts an OS error code into a text string
-LgiExtern LString LErrorCodeToString(uint32_t ErrorCode);
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -346,7 +343,7 @@ LgiFunc bool LGetAppsForMimeType
 	/// - application/browser get the default web browser
 	const char *Mime,
 	/// The applications that can handle the 
-	LArray<LAppInfo*> &Apps,
+	LArray<LAppInfo> &Apps,
 	/// Limit the length of the results, i.e. stop looking after 'Limit' matches.
 	/// -1 means return all matches.
 	int Limit = -1

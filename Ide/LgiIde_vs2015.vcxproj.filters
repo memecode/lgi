@@ -149,6 +149,8 @@
     <ClCompile Include="Code\SimpleCppParser.cpp">
       <Filter>Source Files\Search\Simple Cpp Parser</Filter>
     </ClCompile>
+    <ClCompile Include="Code\DebugContext.cpp">
+    <ClCompile Include="Code\Debugger.cpp">
     <ClCompile Include="Code\AddFtpFile.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>

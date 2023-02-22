@@ -163,7 +163,10 @@ LDebugContext::LDebugContext(AppWnd *App, IdeProject *Proj, const char *Exe, con
 	d->App = App;
 	d->Proj = Proj;
 	d->Exe = Exe;
-	
+
+	#ifdef HAIKU
+	LAssert(!"No GDB");
+	#else	
 	if (d->Db.Reset(CreateGdbDebugger(App->GetDebugLog())))
 	{
 		LFile::Path p;
@@ -183,6 +186,7 @@ LDebugContext::LDebugContext(AppWnd *App, IdeProject *Proj, const char *Exe, con
 			d->Db.Reset();
 		}
 	}
+	#endif
 }
 
 LDebugContext::~LDebugContext()

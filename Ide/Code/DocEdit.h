@@ -33,7 +33,7 @@ public:
 
 protected:
 	SourceType FileType;
-	DocEdit *View;
+	DocEdit *View = NULL;
 
 	enum WordType
 	{
@@ -130,23 +130,27 @@ protected:
 	// Lock before access:
 		StylingParams Params;
 	// EndLock
-	// Thread only
-		Node Root;
-		LUnrolledList<LTextView3::LStyle> PrevStyle;
-	// End Thread only
-
-	// Styling functions..
-	int Main();
-	void StyleCpp(StylingParams &p);
-	void StylePython(StylingParams &p);
-	void StyleDefault(StylingParams &p);
-	void StyleXml(StylingParams &p);
-	void StyleHtml(StylingParams &p);
-	void AddKeywords(const char **keys, bool IsType);
 
 	// Full refresh triggers
 	int RefreshSize;
 	const char **RefreshEdges;
+
+	void AddKeywords(const char **keys, bool IsType);
+
+private:
+	// Thread only
+
+		// Styling functions..
+		int Main();
+		void StyleCpp(StylingParams &p);
+		void StylePython(StylingParams &p);
+		void StyleDefault(StylingParams &p);
+		void StyleXml(StylingParams &p);
+		void StyleHtml(StylingParams &p);
+
+		Node Root;
+		LUnrolledList<LTextView3::LStyle> PrevStyle;
+	// End Thread only
 
 public:
 	DocEditStyling(DocEdit *view);
@@ -182,7 +186,7 @@ public:
 
 	// Overrides
 	bool AppendItems(LSubMenu *Menu, const char *Param, int Base) override;
-	bool DoGoto() override;
+	void DoGoto(std::function<void(bool)> Callback) override;
 	void OnPaintLeftMargin(LSurface *pDC, LRect &r, LColour &colour) override;
 	void OnMouseClick(LMouse &m) override;
 	bool OnKey(LKey &k) override;	
@@ -193,6 +197,8 @@ public:
 	bool Pour(LRegion &r) override;
 	bool Insert(size_t At, const char16 *Data, ssize_t Len) override;
 	bool Delete(size_t At, ssize_t Len) override;
+	
+	void OnPaint(LSurface *pDC);
 };
 
 #endif

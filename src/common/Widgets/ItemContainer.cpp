@@ -799,129 +799,131 @@ void LItemColumn::Value(bool i)
 
 void LItemColumn::OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground)
 {
-	if (!d->Drag)
+	if (d->Drag)
+		return;
+		
+	LCssTools Tools(d->Parent);
+	auto Fore = Tools.GetFore();
+	auto cMed = LColour(L_MED);
+	int Off = d->Down ? 1 : 0;
+	int Mx = r.x1 + 8, My = r.y1 + ((r.Y() - 8) / 2);
+	if (d->cIcon)
 	{
-		LCssTools Tools(d->Parent);
-		auto Fore = Tools.GetFore();
-		auto cMed = LColour(L_MED);
-		int Off = d->Down ? 1 : 0;
-		int Mx = r.x1 + 8, My = r.y1 + ((r.Y() - 8) / 2);
-		if (d->cIcon)
+		if (FillBackground)
 		{
-			if (FillBackground)
-			{
-				pDC->Colour(cMed);
-				pDC->Rectangle(&r);
-			}
+			pDC->Colour(cMed);
+			pDC->Rectangle(&r);
+		}
 
-			int x = (r.X()-d->cIcon->X()) / 2;
+		int x = (r.X()-d->cIcon->X()) / 2;
+		
+		pDC->Blt(	r.x1 + x + Off,
+					r.y1 + ((r.Y()-d->cIcon->Y())/2) + Off,
+					d->cIcon);
+
+		if (d->cMark)
+		{
+			Mx += x + d->cIcon->X() + 4;
+		}
+	}
+	else if (d->cImage >= 0 && d->Parent)
+	{
+		LColour Background = cMed;
+		if (FillBackground)
+		{
+			pDC->Colour(Background);
+			pDC->Rectangle(&r);
+		}
+		
+		if (d->Parent->GetImageList())
+		{
+			LRect *b = d->Parent->GetImageList()->GetBounds();
+			int x = r.x1;
+			int y = r.y1;
+			if (b)
+			{
+				b += d->cImage;
+				x = r.x1 + ((r.X()-b->X()) / 2) - b->x1;
+				y = r.y1 + ((r.Y()-b->Y()) / 2) - b->y1;
+			}				
 			
-			pDC->Blt(	r.x1 + x + Off,
-						r.y1 + ((r.Y()-d->cIcon->Y())/2) + Off,
-						d->cIcon);
-
-			if (d->cMark)
-			{
-				Mx += x + d->cIcon->X() + 4;
-			}
-		}
-		else if (d->cImage >= 0 && d->Parent)
-		{
-			LColour Background = cMed;
-			if (FillBackground)
-			{
-				pDC->Colour(Background);
-				pDC->Rectangle(&r);
-			}
-			
-			if (d->Parent->GetImageList())
-			{
-				LRect *b = d->Parent->GetImageList()->GetBounds();
-				int x = r.x1;
-				int y = r.y1;
-				if (b)
-				{
-					b += d->cImage;
-					x = r.x1 + ((r.X()-b->X()) / 2) - b->x1;
-					y = r.y1 + ((r.Y()-b->Y()) / 2) - b->y1;
-				}				
-				
-				d->Parent->GetImageList()->Draw(pDC,
-												x + Off,
-												y + Off,
-												d->cImage,
-												Background);
-			}
-
-			if (d->cMark)
-			{
-				Mx += d->Parent->GetImageList()->TileX() + 4;
-			}
-		}
-		else if (ValidStr(d->cName) && d->Txt)
-		{
-			LFont *f = d->Txt->GetFont();
-			if (!f)
-			{
-				LAssert(0);
-				return;
-			}
-
-			LColour cText = Fore;
-			#ifdef MAC
-			// Contrast check
-			if (d->cMark && (cText - cActiveCol) < 64)
-				cText = cText.Invert();
-			#endif
-
-			f->Transparent(!FillBackground);
-			f->Colour(cText, cMed);
-			int ty = d->Txt->Y();
-			int ry = r.Y();
-			int y = r.y1 + ((ry - ty) >> 1);
-			d->Txt->Draw(pDC, r.x1 + Off + 3, y + Off, &r);
-
-			if (d->cMark)
-			{
-				Mx += d->Txt->X();
-			}
-		}
-		else
-		{
-			if (FillBackground)
-			{
-				pDC->Colour(cMed);
-				pDC->Rectangle(&r);
-			}
+			d->Parent->GetImageList()->Draw(pDC,
+											x + Off,
+											y + Off,
+											d->cImage,
+											Background);
 		}
 
-		#define ARROW_SIZE	9
-		pDC->Colour(Fore);
-		Mx += Off;
-		My += Off - 1;
-
-		switch (d->cMark)
+		if (d->cMark)
 		{
-			case GLI_MARK_UP_ARROW:
-			{
-				pDC->Line(Mx + 2, My, Mx + 2, My + ARROW_SIZE - 1);
-				pDC->Line(Mx, My + 2, Mx + 2, My);
-				pDC->Line(Mx + 2, My, Mx + 4, My + 2);
-				break;
-			}
-			case GLI_MARK_DOWN_ARROW:
-			{
-				pDC->Line(Mx + 2, My, Mx + 2, My + ARROW_SIZE - 1);
-				pDC->Line(	Mx,
-							My + ARROW_SIZE - 3,
-							Mx + 2,
-							My + ARROW_SIZE - 1);
-				pDC->Line(	Mx + 2,
-							My + ARROW_SIZE - 1,
-							Mx + 4,
-							My + ARROW_SIZE - 3);
-				break;
-			}
+			Mx += d->Parent->GetImageList()->TileX() + 4;
+		}
+	}
+	else if (ValidStr(d->cName) && d->Txt)
+	{
+		LFont *f = d->Txt->GetFont();
+		if (!f)
+		{
+			LAssert(0);
+			return;
+		}
+
+		LColour cText = Fore;
+		#ifdef MAC
+		// Contrast check
+		if (d->cMark && (cText - cActiveCol) < 64)
+			cText = cText.Invert();
+		#endif
+
+		f->Transparent(!FillBackground);
+		f->Colour(cText, cMed);
+		int ty = d->Txt->Y();
+		int ry = r.Y();
+		int y = r.y1 + ((ry - ty) >> 1);
+		
+		// d->Txt->_debug = true;
+		d->Txt->Draw(pDC, r.x1 + Off + 3, y + Off, &r);
+
+		if (d->cMark)
+		{
+			Mx += d->Txt->X();
+		}
+	}
+	else
+	{
+		if (FillBackground)
+		{
+			pDC->Colour(cMed);
+			pDC->Rectangle(&r);
+		}
+	}
+
+	#define ARROW_SIZE	9
+	pDC->Colour(Fore);
+	Mx += Off;
+	My += Off - 1;
+
+	switch (d->cMark)
+	{
+		case GLI_MARK_UP_ARROW:
+		{
+			pDC->Line(Mx + 2, My, Mx + 2, My + ARROW_SIZE - 1);
+			pDC->Line(Mx, My + 2, Mx + 2, My);
+			pDC->Line(Mx + 2, My, Mx + 4, My + 2);
+			break;
+		}
+		case GLI_MARK_DOWN_ARROW:
+		{
+			pDC->Line(Mx + 2, My, Mx + 2, My + ARROW_SIZE - 1);
+			pDC->Line(	Mx,
+						My + ARROW_SIZE - 3,
+						Mx + 2,
+						My + ARROW_SIZE - 1);
+			pDC->Line(	Mx + 2,
+						My + ARROW_SIZE - 1,
+						Mx + 4,
+						My + ARROW_SIZE - 3);
+			break;
 		}
 	}
 }
@@ -965,12 +967,12 @@ void LItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
 			{
 				LSkinState State;
 				
-				State.pScreen = pDC;
-				State.ptrText = &d->Txt;
-				State.Rect = Rgn;
-				State.Value = Value();
-				State.Enabled = GetList()->Enabled();
-				State.View = d->Parent;
+				State.pScreen	= pDC;
+				State.ptrText	= &d->Txt;
+				State.Rect		= Rgn;
+				State.Value		= Value();
+				State.Enabled	= GetList()->Enabled();
+				State.View		= d->Parent;
 
 				LApp::SkinEngine->OnPaint_ListColumn(ColumnPaint, this, &State);
 			}

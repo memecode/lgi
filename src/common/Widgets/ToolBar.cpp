@@ -25,16 +25,16 @@
 
 #ifdef WIN32
 
-HPALETTE GetSystemPalette();
-bool BltBmpToBmp(HBITMAP hDest, int xDst, int yDst, int cx, int cy, HBITMAP hSrc, int xSrc, int ySrc, DWORD dwRop);
-bool BltBmpToDc(HDC DestDC, int xDst, int yDst, int cx, int cy, HBITMAP hSrc, int xSrc, int ySrc,  DWORD dwRop);
-bool BltDcToBmp(HBITMAP hDest, int xDst, int yDst, int cx, int cy, HDC SrcDC, int xSrc, int ySrc, DWORD dwRop);
+	HPALETTE GetSystemPalette();
+	bool BltBmpToBmp(HBITMAP hDest, int xDst, int yDst, int cx, int cy, HBITMAP hSrc, int xSrc, int ySrc, DWORD dwRop);
+	bool BltBmpToDc(HDC DestDC, int xDst, int yDst, int cx, int cy, HBITMAP hSrc, int xSrc, int ySrc,  DWORD dwRop);
+	bool BltDcToBmp(HBITMAP hDest, int xDst, int yDst, int cx, int cy, HDC SrcDC, int xSrc, int ySrc, DWORD dwRop);
 
-#define AttachButton(b)	AddView(b);
+	#define AttachButton(b)	AddView(b);
 
 #else
 
-#define AttachButton(b) b->Attach(this);
+	#define AttachButton(b) b->Attach(this);
 
 #endif
 
@@ -248,10 +248,19 @@ LImageList::LImageList(int x, int y, LSurface *pDC)
 			HasPad(pDC->GetColourSpace()));
 		#endif
 				
+		#if 0
+		static int Idx = 0;
+		char s[256];
+
+		sprintf_s(s, sizeof(s), "imglst_%i.bmp", Idx++);
+		GdcD->Save(s, this);
+
+		// sprintf_s(s, sizeof(s), "src_%i.bmp", Idx++);
+		// GdcD->Save(s, pDC);
+		#endif
+						
 		if (pDC->GetBits() < 32 || HasPad(pDC->GetColourSpace()))
 		{
-			// auto InCs = pDC->GetColourSpace();
-			
 			if (!pDC->HasAlpha())
 			{
 				// No source alpha, do colour keying to create the alpha channel
@@ -298,12 +307,7 @@ LImageList::LImageList(int x, int y, LSurface *pDC)
 			}
 		}
 		
-		#if 0
-		static int Idx = 0;
-		char s[256];
-		sprintf_s(s, sizeof(s), "imglst_%i.bmp", Idx++);
-		WriteDC(s, this);
-		#endif
+
 	}
 }
 
@@ -336,7 +340,11 @@ void LImageList::Draw(LSurface *pDC, int Dx, int Dy, int Image, LColour Backgrou
 		return;
 	}
 
-	if (pDC->SupportsAlphaCompositing())
+	if (pDC->SupportsAlphaCompositing()
+		#if HAIKU
+		&& !Disabled // Constant alpha blt not supported (yet??!)
+		#endif
+		)
 	{
 		int Old = pDC->Op(GDC_ALPHA, Disabled ? d->DisabledAlpha : -1);
 		pDC->Blt(Dx, Dy, this, &rSrc);
@@ -613,174 +621,173 @@ void LToolButton::OnPaint(LSurface *pDC)
 	LToolBar *Par = dynamic_cast<LToolBar*>(GetParent());
 	bool e = Enabled();
 
-	if (Par)
+	if (!Par)
 	{
-		LRect p = GetClient();
-		
-		#if 0 // def _DEBUG
 		pDC->Colour(LColour(255, 0, 255));
-		pDC->Rectangle();
-		#endif
+		pDC->Box();
+		return;
+	}
 
-		LCssTools Tools(this);
-		LColour cBack = Tools.GetBack();
-		auto BackImg = Tools.GetBackImage();
-		bool Hilight = e && Over;
-		if (Hilight)
-			cBack = cBack.Mix(LColour::White);
+	LRect p = GetClient();
+	
+	#if 0 // def _DEBUG
+	pDC->Colour(LColour(255, 0, 255));
+	pDC->Rectangle();
+	#endif
 
-		// Draw Background
-		if (GetId() >= 0)
+	LCssTools Tools(this);
+	LColour cBack = Tools.GetBack();
+	auto BackImg = Tools.GetBackImage();
+	bool Hilight = e && Over;
+	if (Hilight)
+		cBack = cBack.Mix(LColour::White);
+
+	// Draw Background
+	if (GetId() >= 0)
+	{
+		// Draw border
+		LColour Background;
+		if (Down) // Sunken if the button is pressed
+			LThinBorder(pDC, p, DefaultSunkenEdge);
+
+		if (BackImg)
 		{
-			// Draw border
-			LColour Background;
-			if (Down) // Sunken if the button is pressed
-				LThinBorder(pDC, p, DefaultSunkenEdge);
-
-			if (BackImg)
+			LDoubleBuffer Buf(pDC);
+			Tools.PaintContent(pDC, p);
+			if (Hilight)
 			{
-				LDoubleBuffer Buf(pDC);
-				Tools.PaintContent(pDC, p);
-				if (Hilight)
-				{
-					// Draw translucent white over image...
-					pDC->Op(GDC_ALPHA);
-					pDC->Colour(LColour(255, 255, 255, 128));
-					pDC->Rectangle(&p);
-				}
-			}
-			else
-			{
-				Background = cBack;
-				pDC->Colour(Background);
-				pDC->Box(&p);
-				p.Inset(1, 1);
-			}
-
-			LRect IconPos;
-			if (Par->d->ImgList)
-				IconPos.Set(0, 0, Par->d->ImgList->TileX()-1, Par->d->ImgList->TileY()-1);
-			else
-				IconPos.ZOff(Par->d->Bx-1, Par->d->By-1);
-			LRegion Unpainted(p);
-			
-			// Center the icon
-			if (IconPos.X() < p.X() - 1)
-				IconPos.Offset((p.X() - IconPos.X()) >> 1, 0);
-			// Offset it if the button is pressed
-			if (Down)
-				IconPos.Offset(2, 2);
-
-			// Draw any icon.
-			if (ImgIndex >= 0)
-			{
-				if (Par->d->ImgList)
-				{
-					// Draw cached
-					if (BackImg)
-					{
-						Par->d->ImgList->SetDisabledAlpha(0x60);
-					}
-					else if (pDC->SupportsAlphaCompositing())
-					{
-						pDC->Colour(Background);
-						pDC->Rectangle(&IconPos);
-					}
-					
-					Par->d->ImgList->Draw(pDC, IconPos.x1, IconPos.y1, ImgIndex, Background, !e);
-
-					Unpainted.Subtract(&IconPos);
-
-					if (!BackImg)
-					{
-						// Fill in the rest of the area
-						pDC->Colour(Background);
-						for (LRect *r = Unpainted.First(); r; r = Unpainted.Next())
-							pDC->Rectangle(r);
-					}
-				}
-				else
-				{
-					// Draw a red cross indicating no icons.
-					pDC->Colour(Background);
-					pDC->Rectangle(&p);
-					pDC->Colour(LColour::Red);
-					pDC->Line(IconPos.x1, IconPos.y1, IconPos.x2, IconPos.y2);
-					pDC->Line(IconPos.x2, IconPos.y1, IconPos.x1, IconPos.y2);
-				}
-			}
-			else if (!BackImg)
-			{
-				Tools.PaintContent(pDC, p);
-			}
-
-			// Text
-			if (Par->d->ShowTextLabels())
-			{
-				if (Name() && !d->Text.Length())
-				{
-					Layout();
-				}
-
-				if (d->Text.Length())
-				{
-					// Write each word centered on a different line
-					int Ty = Down + Par->d->By + 2;
-					LColour a = Tools.GetFore();
-					LColour b = Tools.GetBack();
-					if (!e)
-						a = b.Mix(a);
-
-					Par->d->Font->Colour(a, b);
-					for (int i=0; i<d->Text.Length(); i++)
-					{
-						LDisplayString *Ds = d->Text[i];
-						Ds->Draw(pDC, Down + ((X()-Ds->X())/2), Ty);
-						Ty += Ds->Y();
-					}
-				}
+				// Draw translucent white over image...
+				pDC->Op(GDC_ALPHA);
+				pDC->Colour(LColour(255, 255, 255, 128));
+				pDC->Rectangle(&p);
 			}
 		}
 		else
 		{
-			// Separator
-			int Px = X()-1;
-			int Py = Y()-1;
+			Background = cBack;
+			pDC->Colour(Background);
+			pDC->Box(&p);
+			p.Inset(1, 1);
+		}
 
-			if (BackImg)
-				Tools.PaintContent(pDC, p);
+		LRect IconPos;
+		if (Par->d->ImgList)
+			IconPos.Set(0, 0, Par->d->ImgList->TileX()-1, Par->d->ImgList->TileY()-1);
+		else
+			IconPos.ZOff(Par->d->Bx-1, Par->d->By-1);
+		LRegion Unpainted(p);
+		
+		// Center the icon
+		if (IconPos.X() < p.X() - 1)
+			IconPos.Offset((p.X() - IconPos.X()) >> 1, 0);
+		// Offset it if the button is pressed
+		if (Down)
+			IconPos.Offset(2, 2);
+
+		// Draw any icon.
+		if (ImgIndex >= 0)
+		{
+			if (Par->d->ImgList)
+			{
+				// Draw cached
+				if (BackImg)
+				{
+					Par->d->ImgList->SetDisabledAlpha(0x60);
+				}
+				else if (pDC->SupportsAlphaCompositing())
+				{
+					pDC->Colour(Background);
+					pDC->Rectangle(&IconPos);
+				}
+				
+				Par->d->ImgList->Draw(pDC, IconPos.x1, IconPos.y1, ImgIndex, Background, !e);
+
+				Unpainted.Subtract(&IconPos);
+
+				if (!BackImg)
+				{
+					// Fill in the rest of the area
+					pDC->Colour(Background);
+					for (LRect *r = Unpainted.First(); r; r = Unpainted.Next())
+						pDC->Rectangle(r);
+				}
+			}
 			else
 			{
-				pDC->Colour(cBack);
-				pDC->Rectangle();
+				// Draw a red cross indicating no icons.
+				pDC->Colour(Background);
+				pDC->Rectangle(&p);
+				pDC->Colour(LColour::Red);
+				pDC->Line(IconPos.x1, IconPos.y1, IconPos.x2, IconPos.y2);
+				pDC->Line(IconPos.x2, IconPos.y1, IconPos.x1, IconPos.y2);
+			}
+		}
+		else if (!BackImg)
+		{
+			Tools.PaintContent(pDC, p);
+		}
+
+		// Text
+		if (Par->d->ShowTextLabels())
+		{
+			if (Name() && !d->Text.Length())
+			{
+				Layout();
 			}
 
-			LColour cLow = cBack.Mix(LColour::Black);
-			LColour cHigh = cBack.Mix(LColour::White, 0.8f);
+			if (d->Text.Length())
+			{
+				// Write each word centered on a different line
+				int Ty = Down + Par->d->By + 2;
+				LColour a = Tools.GetFore();
+				LColour b = Tools.GetBack();
+				if (!e)
+					a = b.Mix(a);
 
-			if (X() > Y())
-			{
-				int c = Y()/2-1;
-				pDC->Colour(cLow);
-				pDC->Line(2, c, Px-2, c);
-				pDC->Colour(cHigh);
-				pDC->Line(2, c+1, Px-2, c+1);
-			}
-			else
-			{
-				int c = X()/2-1;
-				pDC->Colour(cLow);
-				pDC->Line(c, 2, c, Py-2);
-				pDC->Colour(cHigh);
-				pDC->Line(c+1, 2, c+1, Py-2);
+				Par->d->Font->Colour(a, b);
+				for (int i=0; i<d->Text.Length(); i++)
+				{
+					LDisplayString *Ds = d->Text[i];
+					Ds->Draw(pDC, Down + ((X()-Ds->X())/2), Ty);
+					Ty += Ds->Y();
+				}
 			}
 		}
 	}
+	else
+	{
+		// Separator
+		int Px = X()-1;
+		int Py = Y()-1;
 
-	#if 0 // def _DEBUG
-	pDC->Colour(LColour(255, 0, 255));
-	pDC->Box();
-	#endif
+		if (BackImg)
+			Tools.PaintContent(pDC, p);
+		else
+		{
+			pDC->Colour(cBack);
+			pDC->Rectangle();
+		}
+
+		LColour cLow = cBack.Mix(LColour::Black);
+		LColour cHigh = cBack.Mix(LColour::White, 0.8f);
+
+		if (X() > Y())
+		{
+			int c = Y()/2-1;
+			pDC->Colour(cLow);
+			pDC->Line(2, c, Px-2, c);
+			pDC->Colour(cHigh);
+			pDC->Line(2, c+1, Px-2, c+1);
+		}
+		else
+		{
+			int c = X()/2-1;
+			pDC->Colour(cLow);
+			pDC->Line(c, 2, c, Py-2);
+			pDC->Colour(cHigh);
+			pDC->Line(c+1, 2, c+1, Py-2);
+		}
+	}
 }
 
 void LToolButton::Image(int i)
@@ -856,7 +863,10 @@ void LToolButton::Value(int64 b)
 void LToolButton::SendCommand()
 {
 	LToolBar *t = dynamic_cast<LToolBar*>(GetParent());
-	if (t) t->OnButtonClick(this);
+	if (t)
+		t->OnButtonClick(this);
+	else
+		printf("%s:%i - Error: parent not toolbar.\n", _FL);
 }
 
 void LToolButton::OnMouseClick(LMouse &m)
@@ -900,12 +910,7 @@ void LToolButton::OnMouseClick(LMouse &m)
 					
 					if (Old && IsOver(m))
 					{
-						// char *n = Name();
-						if (m.Left())
-						{
-							SendCommand();
-						}
-						
+						SendCommand();
 						SendNotify(LNotifyActivate);
 					}
 
@@ -1388,12 +1393,16 @@ void LToolBar::OnButtonClick(LToolButton *Btn)
 	if (v && Btn)
 	{
 		int Id = Btn->GetId();
-        v->PostEvent(M_COMMAND, (LMessage::Param) Id
+		if (v->PostEvent(M_COMMAND, (LMessage::Param) Id
 			#if LGI_VIEW_HANDLE
         	, (LMessage::Param) Handle()
         	#endif
-        	);
+        	))
+        	; //printf("Send M_COMMAND(%i)\n", Id);
+        else
+        	printf("%s:%i - Failed to send M_COMMAND.\n", _FL);
 	}
+	else printf("%s:%i - Ptr error: %p %p\n", _FL, v, Btn);
 }
 
 int LToolBar::PostDescription(LView *Ctrl, const char *Text)
@@ -1456,16 +1465,8 @@ void LToolBar::OnMouseMove(LMouse &m)
 
 bool LToolBar::SetBitmap(char *File, int bx, int by)
 {
-	bool Status = false;
-
-	LSurface *pDC = GdcD->Load(File);
-	if (pDC)
-	{
-		Status = SetDC(pDC, bx, by);
-		DeleteObj(pDC);
-	}
-
-	return Status;
+	LAutoPtr<LSurface> pDC(GdcD->Load(File));
+	return pDC ? SetDC(pDC, bx, by) : false;
 }
 
 bool LToolBar::SetDC(LSurface *pNewDC, int bx, int by)

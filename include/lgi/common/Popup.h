@@ -5,22 +5,22 @@
 
 #include "lgi/common/Layout.h"
 
-#if defined(LGI_CARBON) || defined(__GTK_H__)
-#define LGI_POPUP_LWINDOW	1
+#if defined(LGI_CARBON) || defined(__GTK_H__) || defined(HAIKU)
+	#define LGI_POPUP_LWINDOW	1
 #else
-#define LGI_POPUP_LWINDOW	0
+	#define LGI_POPUP_LWINDOW	0
 #endif
 
 #if LGI_COCOA
-ObjCWrapper(NSPanel, OsPanel)
+	ObjCWrapper(NSPanel, OsPanel)
 #endif
 
 /// A popup window: closes when the user clicks off-window.
 class LgiClass LPopup :
 	#if LGI_POPUP_LWINDOW
-	public LWindow
+		public LWindow
 	#else
-	public LView
+		public LView
 	#endif
 {
 	friend class _QPopup;
@@ -48,9 +48,9 @@ public:
 	~LPopup();
 
 	#if LGI_COCOA
-	OsPanel Handle() { return Panel; }
-	LRect &GetPos() override;
-	bool SetPos(LRect &r, bool repaint = false) override;
+		OsPanel Handle() { return Panel; }
+		LRect &GetPos() override;
+		bool SetPos(LRect &r, bool repaint = false) override;
 	#endif
 
 	/// Sets whether the popup should take the focus when it's shown.

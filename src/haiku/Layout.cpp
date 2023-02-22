@@ -13,8 +13,6 @@
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Notifications.h"
 
-#define M_SET_SCROLL		(M_USER + 0x2000)
-
 //////////////////////////////////////////////////////////////////////////////
 LLayout::LLayout()
 {
@@ -66,36 +64,18 @@ bool LLayout::Pour(LRegion &r)
 
 void LLayout::GetScrollPos(int64 &x, int64 &y)
 {
-	if (HScroll)
-	{
-		x = HScroll->Value();
-	}
-	else
-	{
-		x = 0;
-	}
-
-	if (VScroll)
-	{
-		y = VScroll->Value();
-	}
-	else
-	{
-		y = 0;
-	}
+	x = HScroll ? HScroll->Value() : 0;
+	y = VScroll ? VScroll->Value() : 0;
+	
+	printf("GetScrollPos=%i,%i\n", (int)x, (int)y);
 }
 
 void LLayout::SetScrollPos(int64 x, int64 y)
 {
 	if (HScroll)
-	{
 		HScroll->Value(x);
-	}
-
 	if (VScroll)
-	{
 		VScroll->Value(y);
-	}
 }
 
 bool LLayout::Attach(LViewI *p)
@@ -120,14 +100,14 @@ void LLayout::AttachScrollBars()
 {
 	if (HScroll && !HScroll->IsAttached())
 	{
-		// LRect r = HScroll->GetPos();
+		HScroll->Visible(true);
 		HScroll->Attach(this);
 		HScroll->SetNotify(this);
 	}
 
 	if (VScroll && !VScroll->IsAttached())
 	{
-		// LRect r = VScroll->GetPos();
+		VScroll->Visible(true);
 		VScroll->Attach(this);
 		VScroll->SetNotify(this);
 	}
@@ -135,14 +115,19 @@ void LLayout::AttachScrollBars()
 
 bool LLayout::SetScrollBars(bool x, bool y)
 {
-	#ifdef M_SET_SCROLL
 	if (x ^ (HScroll != NULL)
 		||
 		y ^ (VScroll != NULL))
 	{
-		if (_SetScroll.x != x ||
-			_SetScroll.y != y ||
-			!_SetScroll.SentMsg)
+		// printf("%s:%i - setScroll %i,%i attached=%i\n", _FL, x, y, IsAttached());
+
+		if (!IsAttached())
+		{
+			_SetScrollBars(x, y);
+		}
+		else if (_SetScroll.x != x ||
+				 _SetScroll.y != y ||
+				!_SetScroll.SentMsg)
 		{
 			// This is to filter out masses of duplicate messages
 			// before they have a chance to be processed. Esp important on
@@ -150,15 +135,16 @@ bool LLayout::SetScrollBars(bool x, bool y)
 			_SetScroll.x = x;
 			_SetScroll.y = y;
 			_SetScroll.SentMsg = true;
-			return PostEvent(M_SET_SCROLL, x, y);
+			
+			auto r = PostEvent(M_SET_SCROLL, x, y);
+			if (!r)
+				printf("%s:%i - sending M_SET_SCROLL(%i,%i) to myself=%s, r=%i, attached=%i.\n", _FL, x, y, GetClass(), r, IsAttached());
+			return r;
 		}
 		
 		// Duplicate... ignore...
 		return true;
 	}
-	#else
-	_SetScrollBars(x, y);
-	#endif
 
 	return true;
 }
@@ -166,6 +152,8 @@ bool LLayout::SetScrollBars(bool x, bool y)
 bool LLayout::_SetScrollBars(bool x, bool y)
 {
 	static bool Processing = false;
+
+	// printf("%s:%i - _setScroll %i,%i %i\n", _FL, x, y, Processing);
 
 	if (!Processing &&
 		(((HScroll!=0) ^ x ) || ((VScroll!=0) ^ y )) )
@@ -222,14 +210,15 @@ int LLayout::OnNotify(LViewI *c, LNotification n)
 void LLayout::OnPosChange()
 {
 	LRect r = LView::GetClient();
-	LRect v(r.x2-LScrollBar::SCROLL_BAR_SIZE+1, r.y1, r.x2, r.y2);
-	LRect h(r.x1, r.y2-LScrollBar::SCROLL_BAR_SIZE+1, r.x2, r.y2);
+	auto Px = LScrollBar::GetScrollSize();
+	LRect v(r.x2-Px+1, r.y1, r.x2, r.y2);
+	LRect h(r.x1, r.y2-Px+1, r.x2, r.y2);
 	if (VScroll && HScroll)
 	{
 		h.x2 = v.x1 - 1;
 		v.y2 = h.y1 - 1;
 	}
-	
+
 	if (VScroll)
 	{
 		VScroll->Visible(true);
@@ -274,35 +263,33 @@ LRect &LLayout::GetClient(bool ClientSpace)
 
 	if (VScroll && VScroll->Visible())
 	{
+		// printf("\tLayout.GetCli r=%s -> ", r.GetStr());
 		r.x2 = VScroll->GetPos().x1 - 1;
+		// printf("%s\n", r.GetStr());
 	}
 
 	if (HScroll && HScroll->Visible())
-	{
 		r.y2 = HScroll->GetPos().y1 - 1;
-	}
 	
 	return r;
 }
 
 LMessage::Param LLayout::OnEvent(LMessage *Msg)
 {
-	#ifdef M_SET_SCROLL
 	if (Msg->Msg() == M_SET_SCROLL)
 	{
 		_SetScroll.SentMsg = false;
+		// printf("%s:%i - receiving M_SET_SCROLL myself=%s.\n", _FL, GetClass());
 		_SetScrollBars(Msg->A(), Msg->B());
 		
 		if (HScroll)
 			HScroll->SendNotify(LNotifyScrollBarCreate);
 		if (VScroll)
 			VScroll->SendNotify(LNotifyScrollBarCreate);
+		
 		return 0;
 	}
-	#endif
 
-	// if (VScroll) VScroll->OnEvent(Msg);
-	// if (HScroll) HScroll->OnEvent(Msg);
 	int Status = LView::OnEvent(Msg);
 	if (Msg->Msg() == M_CHANGE &&
 		Status == -1 &&

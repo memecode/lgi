@@ -5,6 +5,10 @@
 #include <string.h>
 #include <math.h>
 
+#ifdef HAIKU
+#include <Region.h>
+#endif
+
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Variant.h"
 #include "lgi/common/FontSelect.h"
@@ -486,39 +490,7 @@ void LDisplayString::Layout(bool Debug)
 
 	LaidOut = 1;
 
-	#if defined(HAIKU)
-
-		if (!Font)
-		{
-			LgiTrace("%s:%i - Missing pointer: %p\n", _FL, Font);
-			return;
-		}
-
-		BFont *fnt = Font->Handle();
-		if (!fnt)
-		{
-			LgiTrace("%s:%i - Missing handle. %p/%p\n", _FL, fnt);
-			return;
-		}
-		
-		auto &l = Info[0];
-		l.Str = Str;
-		l.Len = Str ? strlen(Str) : 0;
-
-		const char *strArr[] = { Str };
-		const int32 strLen[] = { l.Len };
-		float width[1] = { 0 };
-		fnt->GetStringWidths(strArr, strLen, 1, width);
-		
-		x = l.X = (int)(width[0] + 0.5);
-		
-		font_height height = {0};
-		fnt->GetHeight(&height);
-		y = height.ascent + height.descent + height.leading;
-
-		// printf("Layout str=%s sz=%i,%i\n", Str, x, y);
-	
-	#elif defined(LGI_SDL)
+	#if defined(LGI_SDL)
 	
 		FT_Face Fnt = Font->Handle();
 		FT_Error error;
@@ -1172,7 +1144,7 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 
 	int Status = -1;
 
-	#if defined __GTK_H__
+	#if defined(__GTK_H__)
 	
 		int Fx = 0;
 		int Fpos = Px << FShift;
@@ -1210,7 +1182,11 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 			Fx += b.X();
 		}
 	
-	#elif defined MAC && !defined(LGI_SDL)
+	#elif defined(LGI_SDL)
+	
+		LAssert(!"Impl me");
+	
+	#elif defined(MAC)
 
 		if (Hnd && Str)
 		{
@@ -1249,10 +1225,6 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 
 			#endif
 		}
-	
-	#elif defined(LGI_SDL)
-	
-		LAssert(!"Impl me");
 	
 	#else // This case is for Win32 and Haiku.
 	
@@ -1317,6 +1289,7 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 								f->Create();
 							}
 						}
+						#endif
 
 						int Fit = f->_CharAt(Px - Cx, Info[i].Str, Info[i].Len, Type);
 						#if DEBUG_CHAR_AT
@@ -1324,15 +1297,10 @@ ssize_t LDisplayString::CharAt(int Px, LPxToIndexType Type)
 							i, Fit, Px, Cx, Px-Cx, Info[i].Str);
 						#endif
 						if (Fit >= 0)
-						{
 							Status = Char + Fit;
-						}
 						else
-						{
 							Status = -1;
-						}
 						break;
-						#endif
 					}
 				}
 				else
@@ -1358,70 +1326,6 @@ ssize_t LDisplayString::Length()
 {
 	return StrWords;
 }
-
-/* If this is only impl for windows either, impl for everything or don't use.
-void LDisplayString::Length(int New)
-{
-	Layout();
-
-	#if WINNATIVE
-	
-	if (New < len)
-	{
-		LFontSystem *Sys = LFontSystem::Inst();
-		
-		int CurX = 0;
-		int CurLen = 0;
-		for (int i=0; i<Info.Length(); i++)
-		{
-			// Is the cut point in this block?
-			if (New >= CurLen && New < CurLen + Info[i].Len )
-			{
-				// In this block
-				int Offset = New - CurLen;
-				Info[i].Len = Offset;
-				Info[i].Str[Info[i].Len] = 0;
-
-				// Get the font for this block of characters
-				LFont *f = 0;
-				if (Info[i].FontId)
-				{
-					f = Sys->Font[Info[i].FontId];
-					f->PointSize(Font->PointSize());
-					f->Transparent(Font->Transparent());
-					if (!f->Handle())
-					{
-						f->Create();
-					}
-				}
-				else
-				{
-					f = Font;
-				}
-
-				// Chop the current block and re-measure
-				int ChoppedX, Unused;
-				f->_Measure(ChoppedX, Unused, Info[i].Str, Info[i].Len);
-				Info[i].X = ChoppedX;
-				x = CurX + Info[i].X;
-				Info.Length(i + 1);
-				
-				// Leave the loop
-				break;
-			}
-			
-			CurX += Info[i].X;
-			CurLen += Info[i].Len;
-		}
-	}
-	else
-	{
-		printf("%s:%i - New>=Len (%i>=" LPrintfSSizeT" )\n", _FL, New, len);
-	}
-
-	#endif
-}
-*/
 
 int LDisplayString::X()
 {
@@ -1786,250 +1690,277 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 
 	#if DISPLAY_STRING_FRACTIONAL_NATIVE
 
-	// GTK / Mac use fractional pixels, so call the fractional version:
-	LRect rc;
-	if (r)
-	{
-		rc = *r;
-		rc.x1 <<= FShift;
-		rc.y1 <<= FShift;
-		#if defined(MAC) && !defined(__GTK_H__)
-		rc.x2 <<= FShift;
-		rc.y2 <<= FShift;
-		#else
-		rc.x2 = (rc.x2 + 1) << FShift;
-		rc.y2 = (rc.y2 + 1) << FShift;
-		#endif
-	}
-	
-	FDraw(pDC, px << FShift, py << FShift, r ? &rc : NULL, Debug);
+		// GTK / Mac use fractional pixels, so call the fractional version:
+		LRect rc;
+		if (r)
+		{
+			rc = *r;
+			rc.x1 <<= FShift;
+			rc.y1 <<= FShift;
+			#if defined(MAC) && !defined(__GTK_H__)
+			rc.x2 <<= FShift;
+			rc.y2 <<= FShift;
+			#else
+			rc.x2 = (rc.x2 + 1) << FShift;
+			rc.y2 = (rc.y2 + 1) << FShift;
+			#endif
+		}
+		
+		FDraw(pDC, px << FShift, py << FShift, r ? &rc : NULL, Debug);
 	
 	#elif defined(HAIKU)
 	
-	if (!Font || !pDC)
-	{
-		LgiTrace("%s:%i - No ptr: %p/%p.\n", _FL, Font, pDC);
-		return;
-	}
-	
-	BFont *fnt = Font->Handle();
-	BView *view = pDC->Handle();
-	if (!fnt || !view)
-	{
-		LgiTrace("%s:%i - No handle: %p/%p(%s).\n", _FL, fnt, view, pDC->GetClass());
-		return;
-	}
-	
-	if (!Info.Length())
-	{
-		LgiTrace("%s:%i - No layout.\n", _FL);
-		return;
-	}
-	
-	view->SetHighColor(Font->Fore());
-	
-	font_height height = {0};
-	fnt->GetHeight(&height);
+		if (!Font || !pDC)
+		{
+			LgiTrace("%s:%i - No ptr: %p/%p.\n", _FL, Font, pDC);
+			return;
+		}
+		
+		BFont *fnt = Font->Handle();
+		BView *view = pDC->Handle();
+		if (!fnt || !view)
+		{
+			LgiTrace("%s:%i - No handle: %p/%p(%s).\n", _FL, fnt, view, pDC->GetClass());
+			return;
+		}
+		
+		font_height height = {0};
+		fnt->GetHeight(&height);
 
-	auto &i = Info[0];
-	view->SetFont(fnt);
-	view->DrawString(i.Str, i.Len, BPoint(px, py + height.ascent));	
+		/*
+		if (_debug)
+			printf("	trans=%i height=%g,%g,%g\n",
+				Font->Transparent(),
+				height.ascent, height.descent, height.leading);
+		*/
+
+		if (!Font->Transparent())
+		{			
+			view->SetHighColor(Font->Back());
+			if (r)
+				view->FillRect(*r);
+			else
+				view->FillRect(BRect(px, py, px+x, py+y));
+		}
+
+		auto locked = view->LockLooper();
+		view->SetFont(fnt);
+		view->SetHighColor(Font->Fore());
+
+		int cx = px;
+		for (auto &i: Info)
+		{
+			/*
+			if (_debug)
+				printf("	info=%.*s c=%i,%i\n", i.Len, i.Str, cx, py);
+			*/
+				
+			view->DrawString(i.Str, i.Len, BPoint(cx, py + height.ascent));
+			
+			cx += i.X;
+		}
+
+		BRegion region;
+		view->GetClippingRegion(&region);
+
+		if (locked)		
+			view->UnlockLooper();
 	
 	#elif defined(LGI_SDL)
 	
-	if (Img && pDC && pDC->Y() > 0 && (*pDC)[0])
-	{
-		int Ox = 0, Oy = 0;
-		pDC->GetOrigin(Ox, Oy);
-		LBlitRegions Clip(pDC, px-Ox, py-Oy, Img, r);
-		LColourSpace DstCs = pDC->GetColourSpace();
-		switch (DstCs)
+		if (Img && pDC && pDC->Y() > 0 && (*pDC)[0])
 		{
-			#define DspStrCase(px_fmt, comp)											\
-				case Cs##px_fmt:														\
-					CompositeText##comp<G##px_fmt>(pDC, Img, Font, px-Ox, py-Oy, Clip);	\
-					break;
-			
-			DspStrCase(Rgb16, 5NoAlpha)
-			DspStrCase(Bgr16, 5NoAlpha)
+			int Ox = 0, Oy = 0;
+			pDC->GetOrigin(Ox, Oy);
+			LBlitRegions Clip(pDC, px-Ox, py-Oy, Img, r);
+			LColourSpace DstCs = pDC->GetColourSpace();
+			switch (DstCs)
+			{
+				#define DspStrCase(px_fmt, comp)											\
+					case Cs##px_fmt:														\
+						CompositeText##comp<G##px_fmt>(pDC, Img, Font, px-Ox, py-Oy, Clip);	\
+						break;
+				
+				DspStrCase(Rgb16, 5NoAlpha)
+				DspStrCase(Bgr16, 5NoAlpha)
 
-			DspStrCase(Rgb24, 8NoAlpha)
-			DspStrCase(Bgr24, 8NoAlpha)
-			DspStrCase(Rgbx32, 8NoAlpha)
-			DspStrCase(Bgrx32, 8NoAlpha)
-			DspStrCase(Xrgb32, 8NoAlpha)
-			DspStrCase(Xbgr32, 8NoAlpha)
-			DspStrCase(Rgba32, 8Alpha)
-			DspStrCase(Bgra32, 8Alpha)
-			DspStrCase(Argb32, 8Alpha)
-			DspStrCase(Abgr32, 8Alpha)
-			default:
-				LgiTrace("%s:%i - LDisplayString::Draw Unsupported colour space.\n", _FL);
-				// LAssert(!"Unsupported colour space.");
-				break;
-			
-			#undef DspStrCase
+				DspStrCase(Rgb24, 8NoAlpha)
+				DspStrCase(Bgr24, 8NoAlpha)
+				DspStrCase(Rgbx32, 8NoAlpha)
+				DspStrCase(Bgrx32, 8NoAlpha)
+				DspStrCase(Xrgb32, 8NoAlpha)
+				DspStrCase(Xbgr32, 8NoAlpha)
+				DspStrCase(Rgba32, 8Alpha)
+				DspStrCase(Bgra32, 8Alpha)
+				DspStrCase(Argb32, 8Alpha)
+				DspStrCase(Abgr32, 8Alpha)
+				default:
+					LgiTrace("%s:%i - LDisplayString::Draw Unsupported colour space.\n", _FL);
+					// LAssert(!"Unsupported colour space.");
+					break;
+				
+				#undef DspStrCase
+			}
 		}
-	}
-	else
-		LgiTrace("::Draw argument error.\n");
+		else
+			LgiTrace("::Draw argument error.\n");
 
 	#elif defined WINNATIVE
 	
-	if (Info.Length() && pDC && Font)
-	{
-		LFontSystem *Sys = LFontSystem::Inst();
-		COLOUR Old = pDC->Colour();
-		int TabSize = Font->TabSize() ? Font->TabSize() : 32;
-		int Ox = px;
-		LColour cFore = Font->Fore();
-		LColour cBack = Font->Back();
-		LColour cWhitespace;
-
-		if (VisibleTab)
+		if (Info.Length() && pDC && Font)
 		{
-			cWhitespace = Font->WhitespaceColour();
-			LAssert(cWhitespace.IsValid());
-		}
+			LFontSystem *Sys = LFontSystem::Inst();
+			COLOUR Old = pDC->Colour();
+			int TabSize = Font->TabSize() ? Font->TabSize() : 32;
+			int Ox = px;
+			LColour cFore = Font->Fore();
+			LColour cBack = Font->Back();
+			LColour cWhitespace;
 
-		for (int i=0; i<Info.Length(); i++)
-		{
-			LFont *f = 0;
-
-			// Get the font for this block of characters
-			if (Info[i].FontId)
+			if (VisibleTab)
 			{
-				f = Sys->Font[Info[i].FontId];
+				cWhitespace = Font->WhitespaceColour();
+				LAssert(cWhitespace.IsValid());
+			}
 
-				f->Colour(cFore, cBack);
+			for (int i=0; i<Info.Length(); i++)
+			{
+				LFont *f = 0;
 
-				auto Sz = Font->Size();
-				Sz.Value += Info[i].SizeDelta;
-				f->Size(Sz);
-				f->Transparent(Font->Transparent());
-				f->Underline(Font->Underline());
-				if (!f->Handle())
+				// Get the font for this block of characters
+				if (Info[i].FontId)
 				{
-					f->Create();
-				}
-			}
-			else
-			{
-				f = Font;
-			}
+					f = Sys->Font[Info[i].FontId];
 
-			if (f)
+					f->Colour(cFore, cBack);
+
+					auto Sz = Font->Size();
+					Sz.Value += Info[i].SizeDelta;
+					f->Size(Sz);
+					f->Transparent(Font->Transparent());
+					f->Underline(Font->Underline());
+					if (!f->Handle())
+					{
+						f->Create();
+					}
+				}
+				else
+				{
+					f = Font;
+				}
+
+				if (f)
+				{
+					LRect b;
+					if (r)
+					{
+						b.x1 = i ? px : r->x1;
+						b.y1 = r->y1;
+						b.x2 = i < Info.Length() - 1 ? px + Info[i].X - 1 : r->x2;
+						b.y2 = r->y2;
+					}
+					else
+					{
+						b.x1 = px;
+						b.y1 = py;
+						b.x2 = px + Info[i].X - 1;
+						b.y2 = py + Y() - 1;
+					}
+					
+					if (b.Valid())
+					{
+						if (IsTabChar(*Info[i].Str))
+						{
+							// Invisible tab... draw blank space
+							if (!Font->Transparent())
+							{
+								pDC->Colour(cBack);
+								pDC->Rectangle(&b);
+							}
+
+							if (VisibleTab)
+							{
+								int X = px;
+								for (int n=0; n<Info[i].Len; n++)
+								{
+									int Dx = TabSize - ((X - Ox + GetDrawOffset()) % TabSize);
+									LRect r(X, b.y1, X + Dx - 1, b.y2);
+									pDC->Colour(cWhitespace);
+									DrawWhiteSpace(pDC, '\t', r);
+									X += Dx;
+								}
+							}
+						}
+						else
+						{
+							// Draw the character(s)
+							LColour Fg = f->Fore();
+							LAssert(Fg.IsValid());
+							f->_Draw(pDC, px, py, Info[i].Str, Info[i].Len, &b, Fg);
+							
+							if (VisibleTab)
+							{
+								OsChar *start = Info[i].Str;
+								OsChar *s = start;
+								OsChar *e = s + Info[i].Len;
+								int Sp = -1;
+								while (s < e)
+								{
+									if (*s == ' ')
+									{
+										int Sx, Sy;
+										if (Sp < 0) f->_Measure(Sp, Sy, s, 1);
+										f->_Measure(Sx, Sy, start, (int)(s - start));
+										LRect r(0, 0, Sp-1, Sy-1);
+										r.Offset(px + Sx, py);
+										pDC->Colour(cWhitespace);
+										DrawWhiteSpace(pDC, ' ', r);
+									}
+									s++;
+								}
+							}
+						}
+					}
+				}
+
+				// Inc my position
+				px += Info[i].X;
+			}
+			
+			if (AppendDots)
 			{
+				int Sx, Sy;
+				Font->_Measure(Sx, Sy, GDisplayStringDots, 3);
+
 				LRect b;
 				if (r)
 				{
-					b.x1 = i ? px : r->x1;
+					b.x1 = px;
 					b.y1 = r->y1;
-					b.x2 = i < Info.Length() - 1 ? px + Info[i].X - 1 : r->x2;
+					b.x2 = min(px + Sx - 1, r->x2);
 					b.y2 = r->y2;
 				}
 				else
 				{
 					b.x1 = px;
 					b.y1 = py;
-					b.x2 = px + Info[i].X - 1;
+					b.x2 = px + Sx - 1;
 					b.y2 = py + Y() - 1;
 				}
-				
-				if (b.Valid())
-				{
-					if (IsTabChar(*Info[i].Str))
-					{
-						// Invisible tab... draw blank space
-						if (!Font->Transparent())
-						{
-							pDC->Colour(cBack);
-							pDC->Rectangle(&b);
-						}
 
-						if (VisibleTab)
-						{
-							int X = px;
-							for (int n=0; n<Info[i].Len; n++)
-							{
-								int Dx = TabSize - ((X - Ox + GetDrawOffset()) % TabSize);
-								LRect r(X, b.y1, X + Dx - 1, b.y2);
-								pDC->Colour(cWhitespace);
-								DrawWhiteSpace(pDC, '\t', r);
-								X += Dx;
-							}
-						}
-					}
-					else
-					{
-						// Draw the character(s)
-						LColour Fg = f->Fore();
-						LAssert(Fg.IsValid());
-						f->_Draw(pDC, px, py, Info[i].Str, Info[i].Len, &b, Fg);
-						
-						if (VisibleTab)
-						{
-							OsChar *start = Info[i].Str;
-							OsChar *s = start;
-							OsChar *e = s + Info[i].Len;
-							int Sp = -1;
-							while (s < e)
-							{
-								if (*s == ' ')
-								{
-									int Sx, Sy;
-									if (Sp < 0) f->_Measure(Sp, Sy, s, 1);
-									f->_Measure(Sx, Sy, start, (int)(s - start));
-									LRect r(0, 0, Sp-1, Sy-1);
-									r.Offset(px + Sx, py);
-									pDC->Colour(cWhitespace);
-									DrawWhiteSpace(pDC, ' ', r);
-								}
-								s++;
-							}
-						}
-					}
-				}
+				LColour Fg = Font->Fore();
+				Font->_Draw(pDC, px, py, GDisplayStringDots, 3, &b, Fg);
 			}
 
-			// Inc my position
-			px += Info[i].X;
+			pDC->Colour(Old);
 		}
-		
-		if (AppendDots)
+		else if (r &&
+				Font &&
+				!Font->Transparent())
 		{
-			int Sx, Sy;
-			Font->_Measure(Sx, Sy, GDisplayStringDots, 3);
-
-			LRect b;
-			if (r)
-			{
-				b.x1 = px;
-				b.y1 = r->y1;
-				b.x2 = min(px + Sx - 1, r->x2);
-				b.y2 = r->y2;
-			}
-			else
-			{
-				b.x1 = px;
-				b.y1 = py;
-				b.x2 = px + Sx - 1;
-				b.y2 = py + Y() - 1;
-			}
-
-			LColour Fg = Font->Fore();
-			Font->_Draw(pDC, px, py, GDisplayStringDots, 3, &b, Fg);
+			pDC->Colour(Font->Back());
+			pDC->Rectangle(r);
 		}
-
-		pDC->Colour(Old);
-	}
-	else if (r &&
-			Font &&
-			!Font->Transparent())
-	{
-		pDC->Colour(Font->Back());
-		pDC->Rectangle(r);
-	}
 	
 	#endif
 }
@@ -2055,7 +1986,7 @@ int LDisplayString::FX()
 int LDisplayString::FY()
 {
 	Layout();
-	return y;
+	return yf;
 }
 
 LPoint LDisplayString::FSize()

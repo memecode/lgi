@@ -15,12 +15,29 @@
 #define DRAG_SCROLL_Y		1
 
 #define TreeUpdateNow		false
-#define TREELOCK			LMutex::Auto Lck(d, _FL);
 #define ForAll(Items)		for (auto c : Items)
+
+struct LTreeLocker
+{
+	LTree *t = NULL;
+	bool status = false;
+	LTreeLocker(LTree *tree, const char *file, int line) : t(tree)
+	{
+		if (t)
+			status = t->Lock(file, line);
+	}
+	~LTreeLocker()
+	{
+		if (status && t)
+			t->Unlock();
+	}
+};
+
+#define TREELOCK(ptr) LTreeLocker _lock(ptr, _FL);
 
 //////////////////////////////////////////////////////////////////////////////
 // Private class definitions for binary compatibility
-class LTreePrivate : public LMutex
+class LTreePrivate
 {
 public:
 	// Private data
@@ -47,7 +64,7 @@ public:
 	List<LTreeItem>	Selection;
 	LTreeItem		*DropTarget;
 
-	LTreePrivate() : LMutex("LTreePrivate")
+	LTreePrivate()
 	{
 		CurrentClick = NULL;
 		LastLayoutPx = -1;
@@ -110,14 +127,18 @@ public:
 	{
 		if (!Ds[Col])
 		{
-			LFont *f = Item->GetTree() ? Item->GetTree()->GetFont() : LSysFont;		
-			Ds[Col] = new LDisplayString(f, Item->GetText(Col));
-			if (Ds[Col])
-			{
-				ColPx[Col] = Ds[Col]->X();
-				if (FixPx > 0)
+			LFont *f = Item->GetTree() ? Item->GetTree()->GetFont() : LSysFont;
+			auto txt = Item->GetText(Col);
+			if (txt)
+			{			
+				Ds[Col] = new LDisplayString(f, Item->GetText(Col));
+				if (Ds[Col])
 				{
-					Ds[Col]->TruncateWithDots(FixPx);
+					ColPx[Col] = Ds[Col]->X();
+					if (FixPx > 0)
+					{
+						Ds[Col]->TruncateWithDots(FixPx);
+					}
 				}
 			}
 		}
@@ -705,13 +726,9 @@ const char *LTreeItem::GetText(int i)
 
 bool LTreeItem::SetText(const char *s, int i)
 {
-	LAutoPtr<LMutex::Auto> Lck;
-	
-	if (Tree)
-		Lck.Reset(new LMutex::Auto(Tree->d, -1, _FL));	
+	TREELOCK(Tree);
 
 	Str[i] = s;
-
 	if (Tree)
 		Update();
 
@@ -1075,9 +1092,16 @@ void LTreeItem::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 	LDisplayString *ds = d->GetDs(i, Ctx.ColPx[i]);
 	if (ds)
 	{
+		// Draw the text in the context area:
 		LFont *f = ds->GetFont();
 		f->Colour(Ctx.Fore, Ctx.TxtBack);
 		ds->Draw(Ctx.pDC, Ctx.x1 + 2, Ctx.y1 + 1, &Ctx);
+	}
+	else
+	{
+		// No string, fill the space with background
+		Ctx.pDC->Colour(Ctx.Back);
+		Ctx.pDC->Rectangle(&Ctx);
 	}
 }		
 
@@ -1114,19 +1138,6 @@ LTree::~LTree()
 	DeleteObj(d);
 }
 
-bool LTree::Lock(const char *file, int line, int TimeOut)
-{
-	if (TimeOut > 0)
-		return d->LockWithTimeout(TimeOut, file, line);
-
-	return d->Lock(file, line);
-}
-
-void LTree::Unlock()
-{
-	return d->Unlock();
-}
-
 // Internal tree methods
 List<LTreeItem>	*LTree::GetSelLst()
 {
@@ -1135,7 +1146,7 @@ List<LTreeItem>	*LTree::GetSelLst()
 
 void LTree::_Update(LRect *r, bool Now)
 {
-	TREELOCK
+	TREELOCK(this)
 
 	if (r)
 	{
@@ -1153,7 +1164,7 @@ void LTree::_Update(LRect *r, bool Now)
 
 void LTree::_UpdateBelow(int y, bool Now)
 {
-	TREELOCK
+	TREELOCK(this)
 
 	LPoint s = _ScrollPos();
 	LRect c = GetClient();
@@ -1163,7 +1174,7 @@ void LTree::_UpdateBelow(int y, bool Now)
 
 void LTree::ClearDs(int Col)
 {
-	TREELOCK
+	TREELOCK(this)
 
 	List<LTreeItem>::I it = Items.begin();
 	for (LTreeItem *i=*it; i; i=*++it)
@@ -1172,7 +1183,7 @@ void LTree::ClearDs(int Col)
 
 LPoint LTree::_ScrollPos()
 {
-	TREELOCK
+	TREELOCK(this)
 
 	LPoint Status;
 	Status.x = (HScroll) ? (int)HScroll->Value() : 0;
@@ -1189,7 +1200,7 @@ void LTree::_UpdateScrollBars()
 		Processing = true;
 		
 		{
-			TREELOCK
+			TREELOCK(this)
 			LPoint Old = _ScrollPos();
 			
 			LRect Client = GetClient();
@@ -1241,7 +1252,7 @@ void LTree::_UpdateScrollBars()
 
 void LTree::_OnSelect(LTreeItem *Item)
 {
-	TREELOCK
+	TREELOCK(this)
 
 	if
 	(
@@ -1274,7 +1285,7 @@ void LTree::_OnSelect(LTreeItem *Item)
 
 void LTree::_Pour()
 {
-	TREELOCK
+	TREELOCK(this)
 
 	d->InPour = true;
 	d->Limit.x = rItems.x1;
@@ -1316,7 +1327,7 @@ void LTree::OnItemSelect(LTreeItem *Item)
 	if (!Item)
 		return;
 
-	TREELOCK
+	TREELOCK(this)
 
 	Item->OnSelect();
 	SendNotify(LNotifyItemSelect);
@@ -1324,7 +1335,7 @@ void LTree::OnItemSelect(LTreeItem *Item)
 
 void LTree::OnItemExpand(LTreeItem *Item, bool Expand)
 {
-	TREELOCK
+	TREELOCK(this)
 
 	if (Item)
 		Item->OnExpand(Expand);
@@ -1332,7 +1343,7 @@ void LTree::OnItemExpand(LTreeItem *Item, bool Expand)
 
 LTreeItem *LTree::GetAdjacent(LTreeItem *i, bool Down)
 {
-	TREELOCK
+	TREELOCK(this)
 
 	LTreeItem *Ret = NULL;
 	if (i)
@@ -1598,7 +1609,7 @@ bool LTree::OnKey(LKey &k)
 
 LTreeItem *LTree::ItemAtPoint(int x, int y, bool Debug)
 {
-	TREELOCK
+	TREELOCK(this)
 
 	LPoint s = _ScrollPos();
 
@@ -1616,7 +1627,7 @@ LTreeItem *LTree::ItemAtPoint(int x, int y, bool Debug)
 
 bool LTree::OnMouseWheel(double Lines)
 {
-	TREELOCK
+	TREELOCK(this)
 
 	if (VScroll)
 		VScroll->Value(VScroll->Value() + (int)Lines);
@@ -1626,7 +1637,7 @@ bool LTree::OnMouseWheel(double Lines)
 
 void LTree::OnMouseClick(LMouse &m)
 {
-	TREELOCK
+	TREELOCK(this)
 
 	d->CurrentClick = &m;
 
@@ -1723,7 +1734,7 @@ void LTree::OnMouseMove(LMouse &m)
 	if (!IsCapturing())
 		return;
 
-	TREELOCK
+	TREELOCK(this)
 
 	switch (DragMode)
 	{
@@ -1781,7 +1792,7 @@ void LTree::OnMouseMove(LMouse &m)
 
 void LTree::OnPosChange()
 {
-	TREELOCK
+	TREELOCK(this)
 		
 	if (Columns.Length() == 0 &&
 		d->LastLayoutPx != GetClient().X())
@@ -1792,7 +1803,7 @@ void LTree::OnPosChange()
 
 void LTree::OnPaint(LSurface *pDC)
 {
-	TREELOCK
+	TREELOCK(this)
 	LCssTools Tools(this);
 
 	#if 0 // coverage testing...
@@ -1906,8 +1917,8 @@ int LTree::OnNotify(LViewI *Ctrl, LNotification n)
 		case IDC_HSCROLL:
 		case IDC_VSCROLL:
 		{
-			TREELOCK
-			if (Flags == LNotifyScrollBarCreate)
+			TREELOCK(this)
+			if (n.Type == LNotifyScrollBarCreate)
 			{
 				_UpdateScrollBars();
 				if (VScroll)
@@ -1947,7 +1958,7 @@ LMessage::Result LTree::OnEvent(LMessage *Msg)
 
 LTreeItem *LTree::Insert(LTreeItem *Obj, ssize_t Pos)
 {
-	TREELOCK
+	TREELOCK(this)
 		
 	LTreeItem *NewObj = LTreeNode::Insert(Obj, Pos);
 	if (NewObj)
@@ -1958,7 +1969,7 @@ LTreeItem *LTree::Insert(LTreeItem *Obj, ssize_t Pos)
 
 bool LTree::HasItem(LTreeItem *Obj, bool Recurse)
 {
-	TREELOCK
+	TREELOCK(this)
 	if (!Obj)
 		return false;
 	return LTreeNode::HasItem(Obj, Recurse);
@@ -1966,7 +1977,7 @@ bool LTree::HasItem(LTreeItem *Obj, bool Recurse)
 
 bool LTree::Remove(LTreeItem *Obj)
 {
-	TREELOCK
+	TREELOCK(this)
 		
 	bool Status = false;
 	if (Obj && Obj->Tree == this)
@@ -1980,7 +1991,7 @@ bool LTree::Remove(LTreeItem *Obj)
 
 void LTree::RemoveAll()
 {
-	TREELOCK
+	TREELOCK(this)
 		
 	List<LTreeItem>::I it = Items.begin();
 	for (LTreeItem *i=*it; i; i=*++it)
@@ -1991,7 +2002,7 @@ void LTree::RemoveAll()
 
 void LTree::Empty()
 {
-	TREELOCK
+	TREELOCK(this)
 		
 	LTreeItem *i;
 	while ((i = Items[0]))
@@ -2002,7 +2013,7 @@ bool LTree::Delete(LTreeItem *Obj)
 {
 	bool Status = false;
 	
-	TREELOCK
+	TREELOCK(this)
 		
 	if (Obj)
 	{
@@ -2022,7 +2033,7 @@ bool LTree::Delete(LTreeItem *Obj)
 
 void LTree::OnPulse()
 {
-	TREELOCK
+	TREELOCK(this)
 		
 	if (d->DropTarget)
 	{
@@ -2086,7 +2097,7 @@ void LTree::OnPulse()
 
 int LTree::GetContentSize(int ColumnIdx)
 {
-	TREELOCK
+	TREELOCK(this)
 		
 	int MaxPx = 0;
 	
@@ -2102,7 +2113,7 @@ int LTree::GetContentSize(int ColumnIdx)
 
 LCursor LTree::GetCursor(int x, int y)
 {
-	TREELOCK
+	TREELOCK(this)
 		
 	LItemColumn *Resize = NULL, *Over = NULL;
 	HitColumn(x, y, Resize, Over);
@@ -2112,7 +2123,7 @@ LCursor LTree::GetCursor(int x, int y)
 
 void LTree::OnDragEnter()
 {
-	TREELOCK
+	TREELOCK(this)
 		
 	InsideDragOp(true);
 	SetPulse(120);
@@ -2120,7 +2131,7 @@ void LTree::OnDragEnter()
 
 void LTree::OnDragExit()
 {
-	TREELOCK
+	TREELOCK(this)
 		
 	InsideDragOp(false);
 	SetPulse();
@@ -2129,7 +2140,7 @@ void LTree::OnDragExit()
 
 void LTree::SelectDropTarget(LTreeItem *Item)
 {
-	TREELOCK
+	TREELOCK(this)
 		
 	if (Item != d->DropTarget)
 	{
@@ -2157,7 +2168,7 @@ void LTree::SelectDropTarget(LTreeItem *Item)
 
 bool LTree::Select(LTreeItem *Obj)
 {
-	TREELOCK
+	TREELOCK(this)
 		
 	bool Status = false;
 	if (Obj && IsAttached())
@@ -2177,13 +2188,13 @@ bool LTree::Select(LTreeItem *Obj)
 
 LTreeItem *LTree::Selection()
 {
-	TREELOCK
+	TREELOCK(this)
 	return d->Selection[0];
 }
 
 bool LTree::ForAllItems(std::function<void(LTreeItem*)> Callback)
 {
-	TREELOCK
+	TREELOCK(this)
 	return ForEach(Callback) > 0;
 }
 
@@ -2192,7 +2203,7 @@ void LTree::OnItemClick(LTreeItem *Item, LMouse &m)
 	if (!Item)
 		return;
 
-	TREELOCK
+	TREELOCK(this)
 
 	Item->OnMouseClick(m);
 	if (!m.Ctrl() && !m.Shift())
@@ -2204,13 +2215,13 @@ void LTree::OnItemBeginDrag(LTreeItem *Item, LMouse &m)
 	if (!Item)
 		return;
 
-	TREELOCK
+	TREELOCK(this)
 	Item->OnBeginDrag(m);
 }
 
 void LTree::OnFocus(bool b)
 {
-	TREELOCK
+	TREELOCK(this)
 
 	// errors during deletion of the control can cause 
 	// this to be called after the destructor
@@ -2233,7 +2244,7 @@ static void LTreeItemUpdateAll(LTreeNode *n)
 
 void LTree::UpdateAllItems()
 {
-	TREELOCK
+	TREELOCK(this)
 
 	d->LayoutDirty = true;
 	LTreeItemUpdateAll(this);
@@ -2241,7 +2252,7 @@ void LTree::UpdateAllItems()
 
 void LTree::SetVisualStyle(ThumbStyle Btns, bool JoiningLines)
 {
-	TREELOCK
+	TREELOCK(this)
 
 	d->Btns = Btns;
 	d->JoiningLines = JoiningLines;

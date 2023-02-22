@@ -1917,7 +1917,7 @@ int BuildThread::Main()
 						}
 						else
 						{
-							LSubProcess PostCmd(p[0], p.Length() > 1 ? p[1] : NULL);
+							LSubProcess PostCmd(p[0], p.Length() > 1 ? p[1] : LString());
 							if (PostCmd.Start(true, false))
 							{
 								char Buf[256];
@@ -2155,24 +2155,24 @@ bool IdeProject::GetExePath(char *Path, int Len)
 
 LString IdeProject::GetMakefile(IdePlatform Platform)
 {
-	LString Path;
 	const char *PMakefile = d->Settings.GetStr(ProjMakefile, NULL, Platform);
-	if (PMakefile)
+	if (!PMakefile)
+		return LString();
+	
+	LString Path;
+	if (LIsRelativePath(PMakefile))
 	{
-		if (LIsRelativePath(PMakefile))
+		auto Base = GetBasePath();
+		if (Base)
 		{
-			LAutoString Base = GetBasePath();
-			if (Base)
-			{
-				char p[MAX_PATH_LEN];
-				LMakePath(p, sizeof(p), Base, PMakefile);
-				Path = p;
-			}
+			char p[MAX_PATH_LEN];
+			LMakePath(p, sizeof(p), Base, PMakefile);
+			Path = p;
 		}
-		else
-		{
-			Path = PMakefile;
-		}
+	}
+	else
+	{
+		Path = PMakefile;
 	}
 	
 	return Path;
@@ -2351,6 +2351,8 @@ LDebugContext *IdeProject::Execute(ExeAction Act, LString *ErrMsg)
 	const char *Env = d->Settings.GetStr(ProjEnv);
 	LString InitDir = d->Settings.GetStr(ProjInitDir);
 	int RunAsAdmin = d->Settings.GetInt(ProjDebugAdmin);
+	
+	#ifndef HAIKU
 	if (Act == ExeDebug)
 	{
 		if (InitDir && LIsRelativePath(InitDir))
@@ -2362,9 +2364,18 @@ LDebugContext *IdeProject::Execute(ExeAction Act, LString *ErrMsg)
 			
 		return new LDebugContext(d->App, this, e, Args, RunAsAdmin != 0, Env, InitDir);
 	}
+	#endif
 
-	// Run without debugging...
-	new ExecuteThread(this, e, Args, Base, Act);
+	new ExecuteThread(	this,
+						e,
+						Args,
+						Base,
+						#if defined(HAIKU) || defined(WINDOWS)
+							ExeRun // No gdb or valgrind
+						#else
+							Act
+						#endif
+						);
 	return NULL;
 }
 
@@ -2541,24 +2552,28 @@ void IdeProject::Build(bool All, BuildConfig Config)
 	if (GetApp())
 		GetApp()->PostEvent(M_APPEND_TEXT, 0, 0);
 
-	SetClean();
+	SetClean([&](bool ok)
+	{
+		if (!ok)
+			return;
 
-	if (!IsMakefileUpToDate())
-		CreateMakefile(GetCurrentPlatform(), true);
-	else
-		// Start the build thread...
-		d->Thread.Reset
-		(
-			new BuildThread
+		if (!IsMakefileUpToDate())
+			CreateMakefile(GetCurrentPlatform(), true);
+		else
+			// Start the build thread...
+			d->Thread.Reset
 			(
-				this,
-				m,
-				false,
-				Config,
-				All,
-				sizeof(size_t)*8
-			)
-		);
+				new BuildThread
+				(
+					this,
+					m,
+					false,
+					Config,
+					All,
+					sizeof(size_t)*8
+				)
+			);
+	});
 }
 
 void IdeProject::StopBuild()
@@ -3041,39 +3056,65 @@ bool IdeProject::CheckExists(LAutoString &p, bool Debug)
 		}, Debug);
 }
 
-bool IdeProject::SetClean()
+bool IdeProject::GetClean()
 {
-	// printf("IdeProject::SetClean %i %i\n", d->Dirty, d->UserFileDirty);
+	for (auto i: *this)
+	{
+		ProjectNode *p = dynamic_cast<ProjectNode*>(i);
+		if (p && !p->GetClean())
+			return false;
+	}
+	
+	return !d->Dirty && !d->UserFileDirty;
+}
+
+void IdeProject::SetClean(std::function<void(bool)> OnDone)
+{
+	auto CleanNodes = [&]()
+	{
+		for (auto i: *this)
+		{
+			ProjectNode *p = dynamic_cast<ProjectNode*>(i);
+			if (!p) break;
+			p->SetClean();
+		}
+
+		if (OnDone)
+			OnDone(true);
+	};
+
 	if (d->Dirty || d->UserFileDirty)
 	{
-		if (!ValidStr(d->FileName))
+		if (ValidStr(d->FileName))
+			SaveFile();
+		else
 		{
 			LFileSelect s;
 			s.Parent(Tree);
 			s.Name("Project.xml");
-			if (s.Save())
+			s.Save([&](auto s, auto ok)
 			{
-				d->FileName = s.Name();
+				if (!ok)
+				{
+					if (OnDone)
+						OnDone(false);
+					return;
+				}
+
+				d->FileName = s->Name();
 				d->UserFile = d->FileName + "." + LCurrentUserName();
 				d->App->OnFile(d->FileName, true);
 				Update();
-			}
-			else return false;
+
+				CleanNodes();
+			});
+			return;
 		}
-
-		SaveFile();
 	}
-
-	for (auto i:*this)
-	{
-		ProjectNode *p = dynamic_cast<ProjectNode*>(i);
-		if (!p) break;
-
-		p->SetClean();
-	}
-
-	return true;
+	
+	CleanNodes();
 }
+
 
 const char *IdeProject::GetText(int Col)
 {
@@ -3142,27 +3183,28 @@ void IdeProject::OnMouseClick(LMouse &m)
 			case IDM_NEW_FOLDER:
 			{
 				LInput Name(Tree, "", "Name:", AppName);
-				if (Name.DoModal())
+				Name.DoModal([&](auto d, auto code)
 				{
 					GetSubFolder(this, Name.GetStr(), true);
-				}
+				});
 				break;
 			}
 			case IDM_WEB_FOLDER:
 			{
-				WebFldDlg Dlg(Tree, 0, 0, 0);
-				if (Dlg.DoModal())
+				WebFldDlg *Dlg = new WebFldDlg(Tree, 0, 0, 0);
+				Dlg->DoModal([&](auto d, auto code)
 				{
-					if (Dlg.Ftp && Dlg.Www)
+					if (Dlg->Ftp && Dlg->Www)
 					{
-						IdeCommon *f = GetSubFolder(this, Dlg.Name, true);
+						IdeCommon *f = GetSubFolder(this, Dlg->Name, true);
 						if (f)
 						{
-							f->SetAttr(OPT_Ftp, Dlg.Ftp);
-							f->SetAttr(OPT_Www, Dlg.Www);
+							f->SetAttr(OPT_Ftp, Dlg->Ftp);
+							f->SetAttr(OPT_Www, Dlg->Www);
 						}
 					}
-				}
+					delete Dlg;
+				});
 				break;
 			}
 			case IDM_BUILD:
@@ -3203,28 +3245,31 @@ void IdeProject::OnMouseClick(LMouse &m)
 			}
 			case IDM_SETTINGS:
 			{
-				if (d->Settings.Edit(Tree))
+				d->Settings.Edit(Tree, [&]()
 				{
 					SetDirty();
-				}
+				});
 				break;
 			}
 			case IDM_INSERT_DEP:
 			{
-				LFileSelect s;
-				s.Parent(Tree);
-				s.Type("Project", "*.xml");
-				if (s.Open())
+				LFileSelect *s = new LFileSelect;
+				s->Parent(Tree);
+				s->Type("Project", "*.xml");
+				s->Open([&](auto s, bool ok)
 				{
+					if (!ok)
+						return;
 					ProjectNode *New = new ProjectNode(this);
 					if (New)
 					{
-						New->SetFileName(s.Name());
+						New->SetFileName(s->Name());
 						New->SetType(NodeDependancy);
 						InsertTag(New);
 						SetDirty();
 					}
-				}
+					delete s;
+				});
 				break;
 			}
 		}
@@ -3645,14 +3690,14 @@ LString IdeProject::GetTargetFile(IdePlatform Platform)
 	if (!Target)
 	{
 		LAssert(!"No target?");
-		return NULL;
+		return LString();
 	}
 
 	const char *TargetType = d->Settings.GetStr(ProjTargetType);
 	if (!TargetType)
 	{
 		LAssert(!"Needs a target type.");
-		return NULL;
+		return LString();
 	}
 
 	if (!stricmp(TargetType, "Executable"))
@@ -3678,7 +3723,7 @@ LString IdeProject::GetTargetFile(IdePlatform Platform)
 		return Ret;
 	}
 	
-	return NULL;
+	return LString();
 }
 
 struct ProjDependency
@@ -4037,7 +4082,6 @@ void AddFilesProgress::Value(int64 val)
 				Msg->Value(v);
 				Msg->SendNotify(LNotifyTableLayoutRefresh);
 			}
-			LYield();
 			Ts = Now;
 		}
 	}

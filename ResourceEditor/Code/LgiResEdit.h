@@ -765,7 +765,7 @@ public:
 	bool TestLgi(bool Quite = true);
 	bool LoadLgi(const char *FileName = 0);
 	bool SaveLgi(const char *FileName = 0);
-	bool LoadWin32(const char *FileName = 0);
+	void LoadWin32(const char *FileName = 0);
 	bool SaveWin32();
 	void ImportLang();
 	void Compare();

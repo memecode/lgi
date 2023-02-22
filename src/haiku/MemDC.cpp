@@ -11,6 +11,9 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "Screen.h"
+#include "Region.h"
+
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/LgiString.h"
 
@@ -25,6 +28,7 @@ public:
 	::LArray<LRect> Client;
 	LColourSpace CreateCs = CsNone;
 	BBitmap *Bmp = NULL;
+	BView *View = NULL;
 
     LMemDCPrivate()
     {
@@ -71,7 +75,14 @@ OsBitmap LMemDC::GetBitmap()
 
 OsPainter LMemDC::Handle()
 {
-	return NULL;
+	if (!d->View && d->Bmp)
+	{
+		d->View = new BView(d->Bmp->Bounds(), "BBitmapView", B_FOLLOW_NONE, B_WILL_DRAW);
+		if (d->View)
+			d->Bmp->AddChild(d->View);
+	}
+	
+	return d->View;
 }
 
 void LMemDC::SetClient(LRect *c)
@@ -135,24 +146,24 @@ bool LMemDC::Unlock()
 
 bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 {
-	BRect b(0, 0, x, y);
-	d->Bmp = new BBitmap(b, B_RGB32, false, true);
+	BRect b(0, 0, x-1, y-1);
+	d->Bmp = new BBitmap(b, B_RGB32, true, true);
 	if (!d->Bmp || d->Bmp->InitCheck() != B_OK)
 	{
 		DeleteObj(d->Bmp);
 		LgiTrace("%s:%i - Failed to create memDC(%i,%i)\n", _FL, x, y);
 		return false;
 	}
-
+	
 	pMem = new LBmpMem;
 	if (!pMem)
 		return false;
 
-	pMem->x = d->Bmp->Bounds().Width();
-	pMem->y = d->Bmp->Bounds().Height();
-	ColourSpace = pMem->Cs = System32BitColourSpace;
-	pMem->Line = d->Bmp->BytesPerRow();
-	pMem->Base = (uchar*)d->Bmp->Bits();
+	pMem->x		= x;
+	pMem->y		= y;
+	pMem->Cs	= ColourSpace = System32BitColourSpace;
+	pMem->Line	= d->Bmp->BytesPerRow();
+	pMem->Base	= (uchar*)d->Bmp->Bits();
 
 	int NewOp = (pApp) ? Op() : GDC_SET;
 	if ((Flags & GDC_OWN_APPLICATOR) && !(Flags & GDC_CACHED_APPLICATOR))
@@ -198,16 +209,34 @@ void LMemDC::Blt(int x, int y, LSurface *Src, LRect *a)
 	LScreenDC *Screen;
 	if ((Screen = Src->IsScreen()))
 	{
-		if (pMem->Base)
+		BScreen scr;
+		BBitmap *bitmap = NULL;
+		BRect src = br.SrcClip;
+		auto r = scr.GetBitmap(&bitmap, TestFlag(Flags, GDC_CAPTURE_CURSOR), &src);
+		if (r == B_OK)
 		{
-
+			bitmap->LockBits();
+			
+			int dstPx = GetBits() / 8;
+			size_t srcPx = 4, row = 0, chunk = 0;			
+			get_pixel_size_for(bitmap->ColorSpace(), &srcPx, &row, &chunk);
+			
+			for (int y=0; y<br.SrcClip.Y(); y++)
+			{
+				auto *dst = (*this)[br.DstClip.y1 + y] + (br.DstClip.x1 * dstPx);
+				auto *src = ((uchar*)bitmap->Bits()) + (bitmap->BytesPerRow() * (br.SrcClip.y1 + y)) + (br.SrcClip.x1 * srcPx);
+				LAssert(!"Impl pixel converter.");
+			}
+			
+			bitmap->UnlockBits();
 		}
-		
-		if (!Status)
+		else
 		{
 			Colour(Rgb24(255, 0, 255), 24);
-			Rectangle();
+			Rectangle(a);
 		}
+
+		delete bitmap;
 	}
 	else if ((*Src)[0])
 	{

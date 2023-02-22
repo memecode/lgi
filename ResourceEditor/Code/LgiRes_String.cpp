@@ -1163,17 +1163,18 @@ int ResStringGroup::OnCommand(int Cmd, int Event, OsView hWnd)
 			}
 
 			// Display the list
-			LangDlg Dlg(this, l);
-			if (Dlg.DoModal())
+			auto Dlg = new LangDlg(this, l);
+			Dlg->DoModal([&](auto dlg, auto id)
 			{
-				if (Dlg.Lang)
+				if (id && Dlg->Lang)
 				{
-					AppendLanguage(Dlg.Lang->Id);
+					AppendLanguage(Dlg->Lang->Id);
 
 					// Update the global language list
-					AppWindow->ShowLang(Dlg.Lang->Id, true);
+					AppWindow->ShowLang(Dlg->Lang->Id, true);
 				}
-			}
+				delete dlg;
+			});
 			break;
 		}
 		case IDM_DELETE_LANG:
@@ -1186,15 +1187,16 @@ int ResStringGroup::OnCommand(int Cmd, int Event, OsView hWnd)
 			}
 
 			// Display the list
-			LangDlg Dlg(this, l);
-			if (Dlg.DoModal() && Dlg.Lang)
+			auto Dlg = new LangDlg(this, l);
+			Dlg->DoModal([&](auto dlg, auto id)
 			{
-				if (Dlg.Lang)
+				if (id && Dlg->Lang)
 				{
-					DeleteLanguage(Dlg.Lang->Id);
+					DeleteLanguage(Dlg->Lang->Id);
 					// CurrentLang = limit(CurrentLang, 0, Lang.Length()-1);
 				}
-			}
+				delete dlg;
+			});
 			break;
 		}
 	}
@@ -1488,47 +1490,53 @@ void ResStringGroup::OnCommand(int Cmd)
 	{
 		case IDM_IMPORT:
 		{
-			LFileSelect Select;
-			Select.Parent(AppWindow);
-			Select.Type("Text", "*.txt");
-			if (Select.Open())
+			auto Select = new LFileSelect(AppWindow);
+			Select->Type("Text", "*.txt");
+			Select->Open([&](auto dlg, auto status)
 			{
-				LFile F;
-				if (F.Open(Select.Name(), O_READ))
+				if (status)
 				{
-					SerialiseContext Ctx;
-					Resource *Res = AppWindow->NewObject(Ctx, 0, -Type());
-					if (Res)
+					LFile F;
+					if (F.Open(dlg->Name(), O_READ))
 					{
-						// TODO
-						// Res->Read();
+						SerialiseContext Ctx;
+						Resource *Res = AppWindow->NewObject(Ctx, 0, -Type());
+						if (Res)
+						{
+							// TODO
+							// Res->Read();
+						}
+					}
+					else
+					{
+						LgiMsg(AppWindow, "Couldn't open file for reading.");
 					}
 				}
-				else
-				{
-					LgiMsg(AppWindow, "Couldn't open file for reading.");
-				}
-			}
+				delete dlg;
+			});
 			break;
 		}
 		case IDM_EXPORT:
 		{
-			LFileSelect Select;
-			Select.Parent(AppWindow);
-			Select.Type("Text", "*.txt");
-			if (Select.Save())
+			auto Select = new LFileSelect(AppWindow);
+			Select->Type("Text", "*.txt");
+			Select->Save([&](auto dlg, auto status)
 			{
-				LFile F;
-				if (F.Open(Select.Name(), O_WRITE))
+				if (status)
 				{
-					F.SetSize(0);
-					// Serialize(F, true);
+					LFile F;
+					if (F.Open(dlg->Name(), O_WRITE))
+					{
+						F.SetSize(0);
+						// Serialize(F, true);
+					}
+					else
+					{
+						LgiMsg(AppWindow, "Couldn't open file for writing.");
+					}
 				}
-				else
-				{
-					LgiMsg(AppWindow, "Couldn't open file for writing.");
-				}
-			}
+				delete dlg;
+			});
 			break;
 		}
 	}

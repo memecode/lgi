@@ -59,6 +59,7 @@ public:
 	// Actions
 	IdeDoc *Open();
 	void Delete();
+	bool GetClean();
 	void SetClean();
 	void AddNodes(LArray<ProjectNode*> &Nodes);
 	bool HasNode(ProjectNode *Node);

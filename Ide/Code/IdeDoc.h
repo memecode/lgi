@@ -1,6 +1,8 @@
 #ifndef _IDE_DOC_H_
 #define _IDE_DOC_H_
 
+#include <functional>
+
 #include "lgi/common/Mdi.h"
 #include "lgi/common/TextView3.h"
 #include "ParserCommon.h"
@@ -24,9 +26,11 @@ public:
 	void SetProject(IdeProject *p);	
 	IdeProject *GetProject();
 	const char *GetFileName();
+	LString GetFullPath();
 	void SetFileName(const char *f, bool Write);
 	void Focus(bool f) override;
-	bool SetClean();
+	bool GetClean();
+	void SetClean(std::function<void(bool)> Callback);
 	void SetDirty();
 	bool OnRequestClose(bool OsShuttingDown) override;
 	void OnPosChange() override;

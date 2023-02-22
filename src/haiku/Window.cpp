@@ -7,10 +7,27 @@
 #include "lgi/common/Panel.h"
 #include "lgi/common/Notifications.h"
 #include "lgi/common/Menu.h"
+
 #include "ViewPriv.h"
+#include "MenuBar.h"
 
 #define DEBUG_SETFOCUS			0
 #define DEBUG_HANDLEVIEWKEY		0
+#define DEBUG_WAIT_THREAD		1
+#define DEBUG_SERIALIZE_STATE	0
+
+#if DEBUG_WAIT_THREAD
+	#define WAIT_LOG(...)		LgiTrace(__VA_ARGS__)
+#else
+	#define WAIT_LOG(...)
+#endif
+
+LString ToString(BRect &r)
+{
+	LString s;
+	s.Printf("%g,%g,%g,%g", r.left, r.top, r.right, r.bottom);
+	return s;
+}
 
 ///////////////////////////////////////////////////////////////////////
 class HookInfo
@@ -47,14 +64,18 @@ public:
 
 	~LWindowPrivate()
 	{
-		Wnd->d = NULL;		
+		DeleteObj(Wnd->Menu);
+		if (IsMinimized())
+			Wnd->_PrevZoom = LZoomMin;
+		Wnd->d = NULL;
 	}
 	
 	int GetHookIndex(LView *Target, bool Create = false)
 	{
 		for (int i=0; i<Hooks.Length(); i++)
 		{
-			if (Hooks[i].Target == Target) return i;
+			if (Hooks[i].Target == Target)
+				return i;
 		}
 		
 		if (Create)
@@ -74,11 +95,14 @@ public:
 	void FrameMoved(BPoint newPosition)
 	{
 		auto Pos = Frame();
+
 		if (Pos != Wnd->Pos)
 		{
 			Wnd->Pos = Pos;
 			Wnd->OnPosChange();
 		}
+
+		BWindow::FrameMoved(newPosition);
 	}
 
 	void FrameResized(float newWidth, float newHeight)
@@ -86,14 +110,18 @@ public:
 		auto Pos = Frame();
 		if (Pos != Wnd->Pos)
 		{
-			Wnd->Pos = Pos;
+			Wnd->Pos.SetSize(newWidth, newHeight);
 			Wnd->OnPosChange();
 		}
+		BWindow::FrameResized(newWidth, newHeight);
 	}
 
 	bool QuitRequested()
 	{
-		return Wnd->OnRequestClose(false);
+		printf("%s::QuitRequested() starting.. %s\n", Wnd->GetClass(), Wnd->Pos.GetStr());
+		auto r = Wnd->OnRequestClose(false);
+		// printf("%s::QuitRequested()=%i\n", Wnd->GetClass(), r);
+		return r;
 	}
 
 	void MessageReceived(BMessage *message)
@@ -108,14 +136,18 @@ public:
 		else
 		{
 			BWindow::MessageReceived(message);
-			Wnd->OnEvent((LMessage*)message);
+
+			LView *view = NULL;
+			auto r = message->FindPointer(LMessage::PropView, &view);
+			if (r == B_OK)
+				view->OnEvent((LMessage*)message);
+			else
+				Wnd->OnEvent((LMessage*)message);
 		}
 	}
 };
 
 ///////////////////////////////////////////////////////////////////////
-#define GWND_CREATE		0x0010000
-
 LWindow::LWindow() : LView(0)
 {
 	d = new LWindowPrivate(this);
@@ -124,10 +156,7 @@ LWindow::LWindow() : LView(0)
 	
 	_Default = 0;
 	_Window = this;
-	WndFlags |= GWND_CREATE;
 	ClearFlag(WndFlags, GWF_VISIBLE);
-
-    _Lock = new ::LMutex;
 }
 
 LWindow::~LWindow()
@@ -135,14 +164,45 @@ LWindow::~LWindow()
 	if (LAppInst->AppWnd == this)
 		LAppInst->AppWnd = NULL;
 
-	DeleteObj(Menu);
-	DeleteObj(_Lock);
+	LAssert(!Menu);
+	WaitThread();
+}
 
-	if (d)
+int LWindow::WaitThread()
+{
+	if (!d)
+		return -1;
+
+	thread_id id = d->Thread();
+	bool thisThread = id == GetCurrentThreadId();
+
+	WAIT_LOG("%s::~LWindow thread=%u lock=%u\n", Name(), GetCurrentThreadId(), d->LockingThread());
+	if (thisThread)
 	{
-		d->Quit();
+		// We are in thread... can delete easily.
+		if (d->Lock())
+		{
+			// printf("%s::~LWindow Quiting\n", Name());
+			Handle()->RemoveSelf();
+			d->Quit();
+			// printf("%s::~LWindow Quit finished\n", Name());
+		}
+
 		d = NULL;
+		return 0; // If we're in thread... no need to wait.
 	}
+
+	// Post event to the window's thread to delete itself...
+	WAIT_LOG("%s::~LWindow posting M_LWINDOW_DELETE from th=%u\n", Name(), GetCurrentThreadId());
+	d->PostMessage(new BMessage(M_LWINDOW_DELETE));
+
+	status_t value = 0;
+	WAIT_LOG("wait_for_thread(%u) start..\n", id);
+	wait_for_thread(id, &value);
+	WAIT_LOG("wait_for_thread(%u) end=%i\n", id, value);
+	d = NULL;
+
+	return value;
 }
 
 OsWindow LWindow::WindowHandle()
@@ -207,9 +267,22 @@ void LWindow::Visible(bool i)
 	}
 	
 	if (i)
-		d->Show();
+	{
+		if (d->IsHidden())
+		{
+			printf("%s show %s\n", GetClass(), GetPos().GetStr());
+			d->MoveTo(Pos.x1, Pos.y1);
+			d->ResizeTo(Pos.X(), Pos.Y());
+			d->Show();
+		}
+		else
+			printf("%s already shown\n", GetClass());
+	}
 	else
-		d->Hide();
+	{
+		if (!d->IsHidden())
+			d->Hide();
+	}
 }
 
 bool LWindow::Obscured()
@@ -246,6 +319,25 @@ bool LWindow::Attach(LViewI *p)
 	LLocker lck(d, _FL);
 	if (!lck.Lock())
 		return false;
+
+	auto rootView = Handle();
+	auto wnd = WindowHandle();
+	// printf("%s:%i attach %p to %p\n", _FL, Handle(), WindowHandle());
+	if (rootView && wnd)
+	{
+		wnd->AddChild(rootView);
+		if (rootView->IsHidden())
+			rootView->Show();
+		
+		auto menu = wnd->KeyMenuBar();
+		BRect menuPos = menu ? menu->Frame() : BRect(0, 0, 0, 0);
+		
+		auto f = wnd->Frame();
+		rootView->ResizeTo(f.Width(), f.Height() - menuPos.Height());
+		if (menu)
+			rootView->MoveTo(0, menuPos.Height());
+		rootView->SetResizingMode(B_FOLLOW_ALL_SIDES);
+	}
 	
 	// Setup default button...
 	if (!_Default)
@@ -314,15 +406,14 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	
 	// if (Debug)
 	{
-		LgiTrace("%s/%p::HandleViewKey=%i ischar=%i %s%s%s%s (d->Focus=%s/%p)\n",
+		LgiTrace("%s/%p::HandleViewKey=%i ischar=%i %s%s%s%s\n",
 			v->GetClass(), v,
 			k.c16,
 			k.IsChar,
 			(char*)(k.Down()?" Down":" Up"),
 			(char*)(k.Shift()?" Shift":""),
 			(char*)(k.Alt()?" Alt":""),
-			(char*)(k.Ctrl()?" Ctrl":""),
-			d->Focus?d->Focus->GetClass():0, d->Focus);
+			(char*)(k.Ctrl()?" Ctrl":""));
 	}
 	#endif
 
@@ -491,10 +582,7 @@ void LWindow::Raise()
 LWindowZoom LWindow::GetZoom()
 {
 	if (!d)
-	{
-		LgiTrace("%s:%i - No priv ptr?\n", _FL);
-		return LZoomNormal;
-	}
+		return _PrevZoom;
 
 	LLocker lck(d, _FL);
 	if (!IsAttached() || lck.Lock())
@@ -545,6 +633,7 @@ bool LWindow::Name(const char *n)
 	LLocker lck(d, _FL);
 	if (lck.Lock())
 		d->SetTitle(n);
+
 	return LBase::Name(n);
 }
 
@@ -567,9 +656,30 @@ LPointF LWindow::GetDpiScale()
 LRect &LWindow::GetClient(bool ClientSpace)
 {
 	static LRect r;
-	r = LView::GetClient(ClientSpace);
+	
+	r = Pos.ZeroTranslate();
+
+	LLocker lck(WindowHandle(), _FL);
+	if (lck.Lock())
+	{
+		auto br = Handle()->Bounds();
+		r = br;
+		
+		auto frm = d->Frame();
+		frm.OffsetBy(-frm.left, -frm.top);
+		// printf("Frame=%s Bounds=%s r=%s\n", ToString(frm).Get(), ToString(br).Get(), r.GetStr());
+		
+		lck.Unlock();
+	}
+	
 	return r;
 }
+
+#if DEBUG_SERIALIZE_STATE
+#define SERIALIZE_LOG(...) printf(__VA_ARGS__)
+#else
+#define SERIALIZE_LOG(...)
+#endif
 
 bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 {
@@ -584,45 +694,54 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 			LRect Position(0, 0, -1, -1);
 			LWindowZoom State = LZoomNormal;
 
-// printf("SerializeState load %s\n", v.Str());
-
-
-			LToken t(v.Str(), ";");
-			for (int i=0; i<t.Length(); i++)
+			auto vars = LString(v.Str()).SplitDelimit(";");
+			SERIALIZE_LOG("SerializeState: %s=%s, vars=%i\n", FieldName, v.Str(), (int)vars.Length());
+			for (auto var: vars)
 			{
-				char *Var = t[i];
-				char *Value = strchr(Var, '=');
-				if (Value)
+				auto parts = var.SplitDelimit("=", 1);
+				SERIALIZE_LOG("SerializeState: parts=%i\n", (int)parts.Length());
+				if (parts.Length() == 2)
 				{
-					*Value++ = 0;
-
-					if (stricmp(Var, "State") == 0)
-						State = (LWindowZoom) atoi(Value);
-					else if (stricmp(Var, "Pos") == 0)
-						Position.SetStr(Value);
+					if (parts[0].Equals("State"))
+					{
+						State = (LWindowZoom) parts[1].Int();
+						SERIALIZE_LOG("SerializeState: part=%s state=%i\n", parts[0].Get(), State);
+					}
+					else if (parts[0].Equals("Pos"))
+					{
+						Position.SetStr(parts[1]);
+						SERIALIZE_LOG("SerializeState: part=%s pos=%s\n", parts[0].Get(), Position.GetStr());
+					}
 				}
-				else return false;
 			}
 			
 			if (Position.Valid())
 			{
-// printf("SerializeState setpos %s\n", Position.GetStr());
+				SERIALIZE_LOG("SerializeState setpos %s\n", Position.GetStr());
 				SetPos(Position);
 			}
 			
 			SetZoom(State);
 		}
-		else return false;
+		else
+		{
+			SERIALIZE_LOG("SerializeState: no '%s' var\n", FieldName);
+			return false;
+		}
 	}
 	else
 	{
 		char s[256];
 		LWindowZoom State = GetZoom();
-		sprintf(s, "State=%i;Pos=%s", State, GetPos().GetStr());
+		sprintf_s(s, sizeof(s), "State=%i;Pos=%s", State, GetPos().GetStr());
 
-		::LVariant v = s;
+		LVariant v = s;
+		SERIALIZE_LOG("SerializeState: saving '%s' = '%s'\n", FieldName, s);
 		if (!Store->SetValue(FieldName, v))
+		{
+			SERIALIZE_LOG("SerializeState: SetValue failed\n");
 			return false;
+		}
 	}
 
 	return true;
@@ -635,6 +754,7 @@ LRect &LWindow::GetPos()
 
 bool LWindow::SetPos(LRect &p, bool Repaint)
 {
+	printf("SetPos %s -> %s\n", Pos.GetStr(), p.GetStr());
 	Pos = p;
 
 	LLocker lck(d, _FL);
@@ -643,6 +763,7 @@ bool LWindow::SetPos(LRect &p, bool Repaint)
 		d->MoveTo(Pos.x1, Pos.y1);
 		d->ResizeTo(Pos.X(), Pos.Y());
 	}
+	else printf("%s:%i - Failed to lock.\n", _FL);
 
 	return true;
 }
@@ -665,6 +786,48 @@ void LWindow::OnPaint(LSurface *pDC)
 
 void LWindow::OnPosChange()
 {
+	LLocker lck(WindowHandle(), _FL);
+	if (lck.Lock())
+	{
+		auto frame = WindowHandle()->Bounds();
+		auto menu = WindowHandle()->KeyMenuBar();
+		auto menuPos = menu ? menu->Frame() : BRect(0, 0, 0, 0);
+		auto rootPos = Handle()->Frame();
+		if (menu)
+		{
+			if (menu->IsHidden()) // Why?
+			{
+				menu->Show();
+				if (menu->IsHidden())
+				{
+					// printf("Can't show menu?\n");
+					for (auto p = menu->Parent(); p; p = p->Parent())
+						printf("   par=%s %i\n", p->Name(), p->IsHidden());
+				}
+			}			
+			if (menuPos.Width() < 1) // Again... WHHHHY? FFS
+			{
+				float x = 0.0f, y = 0.0f;
+				menu->GetPreferredSize(&x, &y);
+				// printf("Pref=%g,%g\n", x, y);
+				if (y > 0.0f)
+					menu->ResizeTo(frame.Width(), y);
+			}
+		}	
+		#if 0
+		printf("frame=%s menu=%p,%i,%s rootpos=%s\n",
+			ToString(frame).Get(), menu, menu?menu->IsHidden():0, ToString(menuPos).Get(), ToString(rootPos).Get());
+		#endif
+		int rootTop = menu ? menuPos.bottom + 1 : 0;
+		if (rootPos.top != rootTop)
+		{
+			Handle()->MoveTo(0, rootTop);
+			Handle()->ResizeTo(rootPos.Width(), frame.Height() - menuPos.Height());
+		}
+	
+		lck.Unlock();		
+	}
+
 	LView::OnPosChange();
 	PourAll();
 }
@@ -854,150 +1017,8 @@ LViewI *LWindow::GetFocus()
 	return NULL;
 }
 
-#if DEBUG_SETFOCUS
-static LAutoString DescribeView(LViewI *v)
-{
-	if (!v)
-		return LAutoString(NewStr("NULL"));
-
-	char s[512];
-	int ch = 0;
-	LArray<LViewI*> p;
-	for (LViewI *i = v; i; i = i->GetParent())
-	{
-		p.Add(i);
-	}
-	for (int n=MIN(3, p.Length()-1); n>=0; n--)
-	{
-		char Buf[256] = "";
-		if (!stricmp(v->GetClass(), "LMdiChild"))
-			sprintf(Buf, "'%s'", v->Name());
-		v = p[n];
-		
-		ch += sprintf_s(s + ch, sizeof(s) - ch, "%s>%s", Buf, v->GetClass());
-	}
-	return LAutoString(NewStr(s));
-}
-#endif
-
 void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 {
-	/*
-	#if DEBUG_SETFOCUS
-	const char *TypeName = NULL;
-	switch (type)
-	{
-		case GainFocus: TypeName = "Gain"; break;
-		case LoseFocus: TypeName = "Lose"; break;
-		case ViewDelete: TypeName = "Delete"; break;
-	}
-	#endif
-
-	switch (type)
-	{
-		case GainFocus:
-		{
-			if (d->Focus == ctrl)
-			{
-				#if DEBUG_SETFOCUS
-				LAutoString _ctrl = DescribeView(ctrl);
-				LgiTrace("SetFocus(%s, %s) already has focus.\n", _ctrl.Get(), TypeName);
-				#endif
-				return;
-			}
-
-			if (d->Focus)
-			{
-				LView *gv = d->Focus->GetGView();
-				if (gv)
-				{
-					#if DEBUG_SETFOCUS
-					LAutoString _foc = DescribeView(d->Focus);
-					LgiTrace(".....defocus LView: %s\n", _foc.Get());
-					#endif
-					gv->_Focus(false);
-				}
-				else if (IsActive())
-				{
-					#if DEBUG_SETFOCUS
-					LAutoString _foc = DescribeView(d->Focus);
-					LgiTrace(".....defocus view: %s (active=%i)\n", _foc.Get(), IsActive());
-					#endif
-					d->Focus->OnFocus(false);
-					d->Focus->Invalidate();
-				}
-			}
-
-			d->Focus = ctrl;
-
-			if (d->Focus)
-			{
-				#if DEBUG_SETFOCUS
-				static int Count = 0;
-				#endif
-				
-				LView *gv = d->Focus->GetGView();
-				if (gv)
-				{
-					#if DEBUG_SETFOCUS
-					LAutoString _set = DescribeView(d->Focus);
-					LgiTrace("LWindow::SetFocus(%s, %s) %i focusing LView\n",
-						_set.Get(),
-						TypeName,
-						Count++);
-					#endif
-
-					gv->_Focus(true);
-				}
-				else if (IsActive())
-				{			
-					#if DEBUG_SETFOCUS
-					LAutoString _set = DescribeView(d->Focus);
-					LgiTrace("LWindow::SetFocus(%s, %s) %i focusing nonGView (active=%i)\n",
-						_set.Get(),
-						TypeName,
-						Count++,
-						IsActive());
-					#endif
-
-					d->Focus->OnFocus(true);
-					d->Focus->Invalidate();
-				}
-			}
-			break;
-		}
-		case LoseFocus:
-		{
-			#if DEBUG_SETFOCUS
-			LAutoString _Ctrl = DescribeView(d->Focus);
-			LAutoString _Focus = DescribeView(d->Focus);
-			LgiTrace("LWindow::SetFocus(%s, %s) d->Focus=%s\n",
-				_Ctrl.Get(),
-				TypeName,
-				_Focus.Get());
-			#endif
-			if (ctrl == d->Focus)
-			{
-				d->Focus = NULL;
-			}
-			break;
-		}
-		case ViewDelete:
-		{
-			if (ctrl == d->Focus)
-			{
-				#if DEBUG_SETFOCUS
-				LAutoString _Ctrl = DescribeView(d->Focus);
-				LgiTrace("LWindow::SetFocus(%s, %s) on delete\n",
-					_Ctrl.Get(),
-					TypeName);
-				#endif
-				d->Focus = NULL;
-			}
-			break;
-		}
-	}
-	*/
 }
 
 void LWindow::SetDragHandlers(bool On)
@@ -1012,13 +1033,7 @@ void LWindow::OnTrayClick(LMouse &m)
 		OnTrayMenu(RClick);
 		if (GetMouse(m, true))
 		{
-			#if WINNATIVE
-			SetForegroundWindow(Handle());
-			#endif
 			int Result = RClick.Float(this, m.x, m.y);
-			#if WINNATIVE
-			PostMessage(Handle(), WM_NULL, 0, 0);
-			#endif
 			OnTrayMenuResult(Result);
 		}
 	}
