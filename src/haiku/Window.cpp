@@ -14,6 +14,7 @@
 #define DEBUG_SETFOCUS			0
 #define DEBUG_HANDLEVIEWKEY		0
 #define DEBUG_WAIT_THREAD		1
+#define DEBUG_SERIALIZE_STATE	0
 
 #if DEBUG_WAIT_THREAD
 	#define WAIT_LOG(...)		LgiTrace(__VA_ARGS__)
@@ -94,11 +95,13 @@ public:
 	void FrameMoved(BPoint newPosition)
 	{
 		auto Pos = Frame();
+
 		if (Pos != Wnd->Pos)
 		{
 			Wnd->Pos = Pos;
 			Wnd->OnPosChange();
 		}
+
 		BWindow::FrameMoved(newPosition);
 	}
 
@@ -108,7 +111,6 @@ public:
 		if (Pos != Wnd->Pos)
 		{
 			Wnd->Pos.SetSize(newWidth, newHeight);
-			// printf("Wnd->Pos=%s %i,%i %g,%g\n", Wnd->Pos.GetStr(), Wnd->Pos.X(), Wnd->Pos.Y(), newWidth, newHeight);
 			Wnd->OnPosChange();
 		}
 		BWindow::FrameResized(newWidth, newHeight);
@@ -116,7 +118,7 @@ public:
 
 	bool QuitRequested()
 	{
-		// printf("%s::QuitRequested() starting..\n", Wnd->GetClass());
+		printf("%s::QuitRequested() starting.. %s\n", Wnd->GetClass(), Wnd->Pos.GetStr());
 		auto r = Wnd->OnRequestClose(false);
 		// printf("%s::QuitRequested()=%i\n", Wnd->GetClass(), r);
 		return r;
@@ -268,13 +270,13 @@ void LWindow::Visible(bool i)
 	{
 		if (d->IsHidden())
 		{
-			printf("%s show\n", GetClass());
+			printf("%s show %s\n", GetClass(), GetPos().GetStr());
+			d->MoveTo(Pos.x1, Pos.y1);
+			d->ResizeTo(Pos.X(), Pos.Y());
 			d->Show();
 		}
 		else
-		{
 			printf("%s already shown\n", GetClass());
-		}
 	}
 	else
 	{
@@ -673,6 +675,12 @@ LRect &LWindow::GetClient(bool ClientSpace)
 	return r;
 }
 
+#if DEBUG_SERIALIZE_STATE
+#define SERIALIZE_LOG(...) printf(__VA_ARGS__)
+#else
+#define SERIALIZE_LOG(...)
+#endif
+
 bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 {
 	if (!Store || !FieldName)
@@ -686,45 +694,54 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 			LRect Position(0, 0, -1, -1);
 			LWindowZoom State = LZoomNormal;
 
-// printf("SerializeState load %s\n", v.Str());
-
-
-			LToken t(v.Str(), ";");
-			for (int i=0; i<t.Length(); i++)
+			auto vars = LString(v.Str()).SplitDelimit(";");
+			SERIALIZE_LOG("SerializeState: %s=%s, vars=%i\n", FieldName, v.Str(), (int)vars.Length());
+			for (auto var: vars)
 			{
-				char *Var = t[i];
-				char *Value = strchr(Var, '=');
-				if (Value)
+				auto parts = var.SplitDelimit("=", 1);
+				SERIALIZE_LOG("SerializeState: parts=%i\n", (int)parts.Length());
+				if (parts.Length() == 2)
 				{
-					*Value++ = 0;
-
-					if (stricmp(Var, "State") == 0)
-						State = (LWindowZoom) atoi(Value);
-					else if (stricmp(Var, "Pos") == 0)
-						Position.SetStr(Value);
+					if (parts[0].Equals("State"))
+					{
+						State = (LWindowZoom) parts[1].Int();
+						SERIALIZE_LOG("SerializeState: part=%s state=%i\n", parts[0].Get(), State);
+					}
+					else if (parts[0].Equals("Pos"))
+					{
+						Position.SetStr(parts[1]);
+						SERIALIZE_LOG("SerializeState: part=%s pos=%s\n", parts[0].Get(), Position.GetStr());
+					}
 				}
-				else return false;
 			}
 			
 			if (Position.Valid())
 			{
-// printf("SerializeState setpos %s\n", Position.GetStr());
+				SERIALIZE_LOG("SerializeState setpos %s\n", Position.GetStr());
 				SetPos(Position);
 			}
 			
 			SetZoom(State);
 		}
-		else return false;
+		else
+		{
+			SERIALIZE_LOG("SerializeState: no '%s' var\n", FieldName);
+			return false;
+		}
 	}
 	else
 	{
 		char s[256];
 		LWindowZoom State = GetZoom();
-		sprintf(s, "State=%i;Pos=%s", State, GetPos().GetStr());
+		sprintf_s(s, sizeof(s), "State=%i;Pos=%s", State, GetPos().GetStr());
 
-		::LVariant v = s;
+		LVariant v = s;
+		SERIALIZE_LOG("SerializeState: saving '%s' = '%s'\n", FieldName, s);
 		if (!Store->SetValue(FieldName, v))
+		{
+			SERIALIZE_LOG("SerializeState: SetValue failed\n");
 			return false;
+		}
 	}
 
 	return true;
@@ -737,6 +754,7 @@ LRect &LWindow::GetPos()
 
 bool LWindow::SetPos(LRect &p, bool Repaint)
 {
+	printf("SetPos %s -> %s\n", Pos.GetStr(), p.GetStr());
 	Pos = p;
 
 	LLocker lck(d, _FL);
@@ -744,7 +762,6 @@ bool LWindow::SetPos(LRect &p, bool Repaint)
 	{
 		d->MoveTo(Pos.x1, Pos.y1);
 		d->ResizeTo(Pos.X(), Pos.Y());
-		printf("%s move/resize\n", GetClass());
 	}
 	else printf("%s:%i - Failed to lock.\n", _FL);
 

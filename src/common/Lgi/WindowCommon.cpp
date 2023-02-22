@@ -105,7 +105,7 @@ void LWindow::MoveOnScreen()
 void LWindow::MoveToCenter()
 {
 	LRect Screen(0, 0, GdcD->X()-1, GdcD->Y()-1);
-	::LArray<GDisplayInfo*> Displays;
+	LArray<GDisplayInfo*> Displays;
 	LRect p = GetPos();
 
 	p.Offset(-p.x1, -p.y1);
@@ -131,6 +131,8 @@ void LWindow::MoveToCenter()
 		ScreenPos:
 		p.Offset((Screen.X() - p.X()) / 2, (Screen.Y() - p.Y()) / 2);
 	}
+
+	printf("center %s %s\n", p.GetStr(), Screen.GetStr());
 
 	SetPos(p, true);
 	Displays.DeleteObjects();

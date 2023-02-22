@@ -2166,10 +2166,12 @@ void LFileSelect::OpenFolder(SelectCb Cb)
 	Dlg->Name("Open Folder");
 	Dlg->SaveBtn->Name("Open");
 
-	Dlg->DoModal([FileSelect=this,Cb](auto d, auto code)
+	printf("LFileSelect::OpenFolder domodal...\n");
+	Dlg->DoModal([this,Cb](auto d, auto code)
 	{
+		printf("LFileSelect::OpenFolder cb, code=%i\n", code);
 		if (Cb)
-			Cb(FileSelect, code != IDOK);
+			Cb(this, code != IDOK);
 		delete d;
 	});
 }

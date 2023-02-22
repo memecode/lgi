@@ -270,17 +270,20 @@ struct LBView : public Parent
 			d->View->OnKey(k);
 	}
 
-	void FrameMoved(BPoint newPosition)
+	// LWindow's get their events from their LWindowPrivate
+	#define IsLWindow	dynamic_cast<LWindow*>(d->View)
+
+	void FrameMoved(BPoint p)
 	{
-		if (!d) return;
-		d->View->Pos = Parent::Frame();
+		if (!d || IsLWindow) return;
+		d->View->Pos.Offset(p.x - d->View->Pos.x1, p.y - d->View->Pos.y1);
 		d->View->OnPosChange();
 	}
 
 	void FrameResized(float newWidth, float newHeight)
 	{
-		if (!d) return;
-		d->View->Pos = Parent::Frame();
+		if (!d || IsLWindow) return;
+		d->View->Pos.SetSize(newWidth, newHeight);
 		d->View->OnPosChange();
 	}
 

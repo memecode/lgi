@@ -16,7 +16,7 @@
 #define DEBUG_WINDOW_PLACEMENT				0
 #define DEBUG_HANDLE_VIEW_KEY				0
 #define DEBUG_HANDLE_VIEW_MOUSE				0
-#define DEBUG_SERIALIZE_STATE				0
+#define DEBUG_SERIALIZE_STATE				1
 #define DEBUG_SETFOCUS						0
 
 extern bool In_SetWindowPos;
