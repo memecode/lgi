@@ -19,7 +19,7 @@ public:
 	GdcDevice *GdcSystem;
 	OsAppArguments Args;
 	LLibrary *SkinLib;
-	LHashTbl<StrKey<char,false>,AppArray*> MimeToApp;
+	LHashTbl<ConstStrKey<char,false>,AppArray*> MimeToApp;
 	OsThread GuiThread;
 	OsThreadId GuiThreadId;
 	LSymLookup SymLookup;

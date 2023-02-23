@@ -877,7 +877,7 @@ LString LApp::GetFileMimeType(const char *File)
 	return Ret;
 }
 
-bool LApp::GetAppsForMimeType(char *Mime, LArray<LAppInfo*> &Apps)
+bool LApp::GetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps)
 {
 	// Use LSCopyApplicationForMIMEType?
 	
@@ -913,7 +913,7 @@ bool LApp::GetAppsForMimeType(char *Mime, LArray<LAppInfo*> &Apps)
 	{
 		for (int i=0; i<p->Length(); i++)
 		{
-			Apps[i] = (*p)[i];
+			Apps[i] = *(*p)[i];
 		}
 		
 		return true;

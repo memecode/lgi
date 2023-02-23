@@ -300,7 +300,7 @@ public:
 	
 	#elif defined(MAC)
 	
-		bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0) override;
+		bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0, int64_t TimeoutMs = -1) override;
 		void Quit(bool DontDelete = false) override;
 		int OnCommand(int Cmd, int Event, OsView Wnd) override;
 		LViewI *WindowFromPoint(int x, int y, int DebugDebug = 0) override;

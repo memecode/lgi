@@ -20,6 +20,49 @@
 
 ////////////////////////////////////////////////////////////////
 // Local helper functions
+CFStringRef Utf8ToCFString(const char *s, ssize_t len = -1)
+{
+	if (s && len < 0)
+		len = strlen(s);
+	return CFStringCreateWithBytes(kCFAllocatorDefault, (const UInt8*)s, len, kCFStringEncodingUTF8, false);
+}
+
+char *CFStringToUtf8(CFStringRef r)
+{
+	if (r == NULL)
+		return 0;
+	
+	char *Buffer = 0;
+	CFRange g = { 0, CFStringGetLength(r) };
+	CFIndex Used;
+	
+	if (CFStringGetBytes(r,
+						 g,
+						 kCFStringEncodingUTF8,
+						 0,
+						 false,
+						 0,
+						 0,
+						 &Used))
+	{
+		if ((Buffer = new char[Used+1]))
+		{
+			CFStringGetBytes(r,
+							 g,
+							 kCFStringEncodingUTF8,
+							 0,
+							 false,
+							 (UInt8*)Buffer,
+							 Used,
+							 &Used);
+			
+			Buffer[Used] = 0;
+		}
+	}
+	
+	return Buffer;
+}
+
 bool _lgi_check_file(char *Path)
 {
 	if (Path)
@@ -243,22 +286,43 @@ bool _GetIniField(char *Grp, char *Field, char *In, char *Out, int OutSize)
 	return false;
 }
 
-bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
+bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 {
-	bool Status = false;
-	
-	if (Mime)
+	auto mt = Utf8ToCFString(Mime);
+	if (mt)
 	{
+		auto uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mt, NULL);
+		if (uti)
+		{
+			CFURLRef appUrl = LSCopyDefaultApplicationURLForContentType(uti, kLSRolesAll, nil);
+			if (appUrl)
+			{
+				NSString *path = [(__bridge NSURL *)appUrl path];
+				NSString *name = [[NSFileManager defaultManager] displayNameAtPath:path];
+				if (path && name)
+				{
+					auto &a = Apps.New();
+					a.Path = path;
+					a.Name = name;
+				}
+				
+				CFRelease(appUrl);
+				if (path) [path release];
+				if (name) [name release];
+			}
+			CFRelease(uti);
+		}
+		CFRelease(mt);
 	}
 	
-	return Status;
+	return Apps.Length() > 0;
 }
 
 LString LGetAppForMimeType(const char *Mime)
 {
-	LArray<LAppInfo*> Apps;
+	LArray<LAppInfo> Apps;
 	if (LGetAppsForMimeType(Mime, Apps, 1))
-		return Apps[0]->Path.Get();
+		return Apps[0].Path.Get();
 	return LString();
 }
 
@@ -507,49 +571,6 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LString *Erro
 	}
 	
 	return Status;
-}
-
-CFStringRef Utf8ToCFString(char *s, ssize_t len)
-{
-	if (s && len < 0)
-		len = strlen(s);
-	return CFStringCreateWithBytes(kCFAllocatorDefault, (UInt8*)s, len, kCFStringEncodingUTF8, false);
-}
-
-char *CFStringToUtf8(CFStringRef r)
-{
-	if (r == NULL)
-		return 0;
-	
-	char *Buffer = 0;
-	CFRange g = { 0, CFStringGetLength(r) };
-	CFIndex Used;
-	
-	if (CFStringGetBytes(r,
-						 g,
-						 kCFStringEncodingUTF8,
-						 0,
-						 false,
-						 0,
-						 0,
-						 &Used))
-	{
-		if ((Buffer = new char[Used+1]))
-		{
-			CFStringGetBytes(r,
-							 g,
-							 kCFStringEncodingUTF8,
-							 0,
-							 false,
-							 (UInt8*)Buffer,
-							 Used,
-							 &Used);
-			
-			Buffer[Used] = 0;
-		}
-	}
-	
-	return Buffer;
 }
 
 bool LGetMimeTypeExtensions(const char *Mime, LArray<LString> &Ext)

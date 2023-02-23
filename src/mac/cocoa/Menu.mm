@@ -1380,19 +1380,10 @@ bool LAccelerator::Match(LKey &k)
 ////////////////////////////////////////////////////////////////////////////
 LCommand::LCommand()
 {
-	Flags = GWF_VISIBLE;
-	Id = 0;
-	ToolButton = 0;
-	MenuItem = 0;
-	Accelerator = 0;
-	TipHelp = 0;
-	PrevValue = false;
 }
 
 LCommand::~LCommand()
 {
-	DeleteArray(Accelerator);
-	DeleteArray(TipHelp);
 }
 
 bool LCommand::Enabled()
