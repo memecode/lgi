@@ -469,7 +469,7 @@
 				<All>0</All>
 			</DebugAdmin>
 			<Executable>
-				<Windows />
+				<Linux />
 			</Executable>
 			<CCrossCompiler />
 			<CppCrossCompiler />
@@ -513,7 +513,6 @@
 `pkg-config --cflags gtk+-3.0`
 `pkg-config --cflags gstreamer-1.0`</Release>
 				</Linux>
-				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -539,14 +538,12 @@ gnu
 network
 be</Release>
 				</Haiku>
-				<Windows />
 			</Libraries>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-gtk3</Debug>
 					<Release>lgi-gtk3</Release>
 				</Linux>
-				<Windows />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
@@ -562,18 +559,18 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
-				<Windows />
+				<Linux />
 			</Defines>
 			<LibraryPaths>
 				<All />
-				<Windows />
+				<Linux />
 			</LibraryPaths>
 			<ApplicationIcon />
 		</Build>
 		<Advanced>
 			<OtherMakefileRules />
 			<PostBuildCommands>
-				<Windows />
+				<Linux />
 			</PostBuildCommands>
 		</Advanced>
 		<Debug>

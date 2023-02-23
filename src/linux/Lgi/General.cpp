@@ -218,7 +218,7 @@ bool _GetSystemFont(char *FontType, char *Font, int FontBufSize, int &PointSize)
 	return Status;
 }
 
-bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
+bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 {
 	bool Status = false;
 
@@ -235,95 +235,104 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 		Mime, Limit, Args);
 	#endif
 
-	LSubProcess p("xdg-mime", Args);
-	if (p.Start())
+	LSubProcess proc("xdg-mime", Args);
+	if (proc.Start())
 	{
-		p.Communicate(&Output);
-		LAutoString o(Output.NewStr());
+		LgiTrace("%s:%i - Failed to execute xdg-mime\n", _FL);
+		return Status;
+	}
+
+	proc.Communicate(&Output);
+	LAutoString o(Output.NewStr());
+
+	#if DEBUG_GET_APPS_FOR_MIMETYPE
+	printf("Output:\n%s\n", o.Get());
+	#endif
+	if (o)
+	{
+		LgiTrace("%s:%i - No output from xdg-mime\n", _FL);
+		return Status;
+	}
+
+	char *e = o + strlen(o);
+	while (e > o && strchr(" \t\r\n", e[-1]))
+		*(--e) = 0;
+	
+	char p[MAX_PATH_LEN];
+	if (LMakePath(p, sizeof(p), "/usr/share/applications", o))
+	{
+		LgiTrace("%s:%i - Failed to create path.\n", _FL);
+		return Status;
+	}
+	
+	if (LFileExists(p))
+	{
+		LgiTrace("%s:%i - '%s' doesn't exist.", _FL, p);
+		return Status;
+	}
+
+	LAutoString txt(LReadTextFile(p));
+	LAutoString Section;
+
+	#if DEBUG_GET_APPS_FOR_MIMETYPE
+	printf("Reading '%s', got %i bytes\n", p, strlen(txt));
+	#endif
+
+	if (txt)
+	{
+		LgiTrace("%s:%i - Can't read from '%s'\n", _FL, p);
+		return Status;
+	}
+
+	auto &ai = Apps.New();
+	
+	LToken t(txt, "\n");
+	for (int i=0; i<t.Length(); i++)
+	{
+		char *Var = t[i];
 
 		#if DEBUG_GET_APPS_FOR_MIMETYPE
-		printf("Output:\n%s\n", o.Get());
+		printf("    '%s'\n", Var);
 		#endif
-		if (o)
+		
+		if (*Var == '[')
 		{
-			char *e = o + strlen(o);
-			while (e > o && strchr(" \t\r\n", e[-1]))
-				*(--e) = 0;
-			
-			char p[MAX_PATH_LEN];
-			if (LMakePath(p, sizeof(p), "/usr/share/applications", o))
+			Var++;
+			char *End = strchr(Var, ']');
+			if (End)
 			{
-				if (LFileExists(p))
-				{
-					LAutoString txt(LReadTextFile(p));
-					LAutoString Section;
-
-					#if DEBUG_GET_APPS_FOR_MIMETYPE
-					printf("Reading '%s', got %i bytes\n", p, strlen(txt));
-					#endif
-
-					if (txt)
-					{
-						LAppInfo *ai = new LAppInfo;
-						Apps.Add(ai);
-						
-						LToken t(txt, "\n");
-						for (int i=0; i<t.Length(); i++)
-						{
-							char *Var = t[i];
-
-							#if DEBUG_GET_APPS_FOR_MIMETYPE
-							printf("    '%s'\n", Var);
-							#endif
-							
-							if (*Var == '[')
-							{
-								Var++;
-								char *End = strchr(Var, ']');
-								if (End)
-								{
-									Section.Reset(NewStr(Var, End - Var));
-								}							
-							}
-							else if (!Section || !stricmp(Section, "Desktop Entry"))
-							{
-								char *Value = strchr(Var, '=');
-								if (Value)
-								{
-									*Value++ = 0;
-									if (!stricmp(Var, "Exec"))
-									{
-										LAutoString exe(TrimStr(Value));
-										char *sp = strchr(exe, ' ');
-										if (sp)
-											ai->Path.Set(exe, sp-exe);
-										else
-											ai->Path = exe;
-										
-										Status = true;
-									}
-									else if (!stricmp(Var, "Name") ||
-											!stricmp(Var, LangName))
-									{
-										ai->Name = Value;
-									}
-								}
-							}
-						}
-
-						#if DEBUG_GET_APPS_FOR_MIMETYPE
-						printf("    ai='%s' '%s'\n", ai->Name.Get(), ai->Path.Get());
-						#endif
-					}
-					else LgiTrace("%s:%i - Can't read from '%s'\n", _FL, p);
-				}
-				else LgiTrace("%s:%i - '%s' doesn't exist.", _FL, p);
-			}
-			else LgiTrace("%s:%i - Failed to create path.\n", _FL);
+				Section.Reset(NewStr(Var, End - Var));
+			}							
 		}
-		else LgiTrace("%s:%i - No output from xdg-mime\n", _FL);
+		else if (!Section || !stricmp(Section, "Desktop Entry"))
+		{
+			char *Value = strchr(Var, '=');
+			if (Value)
+			{
+				*Value++ = 0;
+				if (!stricmp(Var, "Exec"))
+				{
+					LAutoString exe(TrimStr(Value));
+					char *sp = strchr(exe, ' ');
+					if (sp)
+						ai.Path.Set(exe, sp-exe);
+					else
+						ai.Path = exe;
+					
+					Status = true;
+				}
+				else if (!stricmp(Var, "Name") ||
+						!stricmp(Var, LangName))
+				{
+					ai.Name = Value;
+				}
+			}
+		}
 	}
-	else LgiTrace("%s:%i - Failed to execute xdg-mime\n", _FL);
+
+	#if DEBUG_GET_APPS_FOR_MIMETYPE
+	printf("    ai='%s' '%s'\n", ai.Name.Get(), ai.Path.Get());
+	#endif
 
 	return Status;
 }
@@ -331,10 +340,9 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo*> &Apps, int Limit)
 LString LGetAppForMimeType(const char *Mime)
 {
 	LString App;
-	LArray<LAppInfo*> Apps;
+	LArray<LAppInfo> Apps;
 	if (LGetAppsForMimeType(Mime, Apps, 1))
-		App = Apps[0]->Path.Get();
-	Apps.DeleteObjects();
+		App = Apps[0].Path.Get();
 	return App;
 }
 

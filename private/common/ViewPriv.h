@@ -85,20 +85,15 @@ public:
 		Length = len;
 		ViewClass = View->GetClass();
 		
-		// printf("PulseThread=%i, %s, %i\n", PulseThreadCount, View->GetClass(), Length);
-		
 		Run();
 	}
 	
 	~LPulseThread()
 	{
-		Cancel();
 		View = NULL;
 		Cancel();
 		Event.Signal();
 		WaitForExit();
-		PulseThreadCount--;
-			LSleep(1);
 	}
 	
 	int Main()
@@ -106,28 +101,24 @@ public:
 		while (!IsCancelled() && LAppInst)
 		{
 			auto s = Event.Wait(Length);
-			if (IsCancelled() || s == LThreadEvent::WaitError)
+			if (!View || IsCancelled() || s == LThreadEvent::WaitError)
 				break;
 			
-			if (View && !View->PostEvent(M_PULSE))
-				Cancel();
-				auto r = View->PostEvent(M_PULSE, 0, 0, 50/*milliseconds*/);
-				#if 0
-				if (!r)
+			if (!View->PostEvent(M_PULSE, 0, 0, 50/*milliseconds*/))
+			{
+				auto now = LCurrentTime();
+				if (now - WarnTs >= 5000)
 				{
-					auto now = LCurrentTime();
-					if (now - WarnTs >= 5000)
-					{
-						WarnTs = now;
-						printf("%s:%i - PulseThread::PostEvent failed for %p/%s.\n", _FL, View, ViewClass.Get());
-					}
+					WarnTs = now;
+					printf("%s:%i - PulseThread::PostEvent failed for %p/%s.\n", _FL, View, ViewClass.Get());
 				}
-				#endif
+			}
 		}
 		
 		return 0;
 	}
 };
+
 #endif
 
 enum LViewFontType

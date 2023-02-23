@@ -427,24 +427,30 @@ public:
 		{
 			case IDC_BROWSE_PATCH:
 			{
-				LFileSelect s;
-				s.Parent(this);
-				s.InitialDir(GetCtrlName(IDC_PATCH_FILE));
-				if (s.Open())
+				auto s = new LFileSelect;
+				s->Parent(this);
+				s->InitialDir(GetCtrlName(IDC_PATCH_FILE));
+				s->Open([this](auto s, auto status)
 				{
-					SetCtrlName(IDC_PATCH_FILE, s.Name());
-					Open(s.Name());
-				}
+					if (status)
+					{
+						SetCtrlName(IDC_PATCH_FILE, s->Name());
+						Open(s->Name());
+					}
+					delete s;
+				});
 				break;
 			}
 			case IDC_BROWSE_BASE:
 			{
-				LFileSelect s;
-				s.Parent(this);
-				if (s.OpenFolder())
+				auto s = new LFileSelect;
+				s->Parent(this);
+				s->OpenFolder([this](auto s, auto status)
 				{
-					SetCtrlName(IDC_BASE_DIR, s.Name());
-				}
+					if (status)
+						SetCtrlName(IDC_BASE_DIR, s->Name());
+					delete s;
+				});
 				break;
 			}
 			case IDC_SAVE_PATCH:

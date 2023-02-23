@@ -19,7 +19,7 @@ Flags = -fPIC -w -fno-inline -fpermissive
 ifeq ($(Build),Debug)
 	Flags += -g -std=c++14
 	Tag = d
-	Defs = -D_DEBUG -DLINUX -D_REENTRANT -DLGI_LIBRARY
+	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLGI_LIBRARY
 	Libs =  \
 		-lmagic \
 		-lappindicator3 \
@@ -29,6 +29,7 @@ ifeq ($(Build),Debug)
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
 		`pkg-config --cflags gstreamer-1.0` \
+		-I/usr/include/libappindicator3-0.1 \
 		-I./private/linux \
 		-I./private/common \
 		-I./include/lgi/linux/Gtk \
@@ -36,7 +37,7 @@ ifeq ($(Build),Debug)
 		-I./include
 else
 	Flags += -s -Os -std=c++14
-	Defs = -DLINUX -D_REENTRANT -DLGI_LIBRARY
+	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLGI_LIBRARY
 	Libs =  \
 		-lmagic \
 		-lappindicator3 \
@@ -46,6 +47,7 @@ else
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
 		`pkg-config --cflags gstreamer-1.0` \
+		-I/usr/include/libappindicator3-0.1 \
 		-I./private/linux \
 		-I./private/common \
 		-I./include/lgi/linux/Gtk \

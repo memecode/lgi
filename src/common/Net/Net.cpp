@@ -697,9 +697,9 @@ int LSocket::Open(const char *HostAddr, int Port)
 					}
 					if (Ret)
 					{
-						char *ErrStr = GetErrorName(Err);
+						auto ErrStr = LErrorCodeToString(Err);
 						printf("%s:%i - gethostbyname_r('%s') returned %i, %i, %s\n",
-							_FL, HostAddr, Ret, Err, ErrStr);
+							_FL, HostAddr, Ret, Err, ErrStr.Get());
 						DeleteObj(Host);
 					}
 				}
