@@ -122,7 +122,7 @@ LString LGetFileMimeType(const char *File)
 	return LString();
 }
 
-bool _GetApps_Add(LArray<LAppInfo*> &Apps, char *In)
+bool _GetApps_Add(LArray<LAppInfo> &Apps, char *In)
 {
 	LAutoString Path;
 
@@ -188,43 +188,38 @@ bool _GetApps_Add(LArray<LAppInfo*> &Apps, char *In)
 			p.Push(Path);
 		}
 
-		LAppInfo *a = new LAppInfo;
-		if (a)
+		auto &a = Apps.New();
+		a.Params = LString(In).Strip();
+		a.Path = p.NewGStr();
+		if (a.Path)
 		{
-			Apps[Apps.Length()] = a;
-			
-			a->Params = LString(In).Strip();
-			a->Path = p.NewGStr();
-			if (a->Path)
+			char e[MAX_PATH_LEN];
+			char *d = strrchr(a.Path, DIR_CHAR);
+			if (d) strcpy_s(e, sizeof(e), d + 1);
+			else strcpy_s(e, sizeof(e), a.Path);
+			d = strchr(e, '.');
+			if (d) *d = 0;
+			e[0] = toupper(e[0]);
+			a.Name = e;
+			if (ValidStr(a.Name))
 			{
-				char e[MAX_PATH_LEN];
-				char *d = strrchr(a->Path, DIR_CHAR);
-				if (d) strcpy_s(e, sizeof(e), d + 1);
-				else strcpy_s(e, sizeof(e), a->Path);
-				d = strchr(e, '.');
-				if (d) *d = 0;
-				e[0] = toupper(e[0]);
-				a->Name = e;
-				if (ValidStr(a->Name))
+				bool AllCaps = true;
+				for (char *s=a.Name; *s; s++)
 				{
-					bool AllCaps = true;
-					for (char *s=a->Name; *s; s++)
+					if (islower(*s))
 					{
-						if (islower(*s))
-						{
-							AllCaps = false;
-							break;
-						}
-					}
-					if (AllCaps)
-					{
-						Strlwr(a->Name.Get() + 1);
+						AllCaps = false;
+						break;
 					}
 				}
+				if (AllCaps)
+				{
+					Strlwr(a.Name.Get() + 1);
+				}
 			}
-
-			return true;
 		}
+
+		return true;
 	}
 
 	return false;
@@ -404,10 +399,9 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 LString LGetAppForMimeType(const char *Mime)
 {
 	LString App;
-	LArray<LAppInfo*> Apps;
+	LArray<LAppInfo> Apps;
 	if (LGetAppsForMimeType(Mime, Apps, 1))
-		App = Apps[0]->Path.Get();
-	Apps.DeleteObjects();
+		App = Apps[0].Path.Get();
 	return App;
 }
 

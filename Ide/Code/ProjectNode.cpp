@@ -1180,25 +1180,28 @@ void ProjectNode::OnMouseClick(LMouse &m)
 				if (Dir)
 					s->InitialDir(Dir);
 
-				s->OpenFolder([&](auto s, auto ok)
+				s->OpenFolder([this](auto s, auto ok)
 				{
 					if (ok)
-				ImportPath = s.Name();
+					{
+						ImportPath = s->Name();
 				
-				LArray<const char*> Ext;
-				LToken e(SourcePatterns, ";");
-				for (auto i: e)
-				{
-					Ext.Add(i);
-				}
+						LArray<const char*> Ext;
+						LToken e(SourcePatterns, ";");
+						for (auto i: e)
+						{
+							Ext.Add(i);
+						}
 				
-				if (!LRecursiveFileSearch(s.Name(), &Ext, &ImportFiles))
-					break;
+						if (LRecursiveFileSearch(ImportPath, &Ext, &ImportFiles))
+						{
+							ImportProg.Reset(new LProgressDlg(GetTree(), 300));
+							ImportProg->SetDescription("Importing...");
+							ImportProg->SetRange(ImportFiles.Length());
+							NeedsPulse(true);
+						}
+					}
 
-				ImportProg.Reset(new LProgressDlg(GetTree(), 300));
-				ImportProg->SetDescription("Importing...");
-				ImportProg->SetRange(ImportFiles.Length());
-				NeedsPulse(true);
 					delete s;
 				});
 				break;

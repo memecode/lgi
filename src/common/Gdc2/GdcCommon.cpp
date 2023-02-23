@@ -1,7 +1,9 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Palette.h"
 
+#ifdef HAIKU
 #include "ControlLook.h"
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // Mem ops
@@ -1157,10 +1159,6 @@ LPoint LScreenDpi()
 
 		if (!Dpi.x)
 		{
-			auto dpi = GetDpiForWindow(GetDesktopWindow());
-			Dpi.Set(dpi, dpi);
-		}
-
 			SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
 			auto dpi = GetDpiForSystem();
 			Dpi.Set(dpi, dpi);

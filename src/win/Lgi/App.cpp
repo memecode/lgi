@@ -859,10 +859,9 @@ LString LApp::GetFileMimeType(const char *File)
 	return LGetFileMimeType(File);
 }
 
-bool LApp::GetAppsForMimeType(char *Mime, LArray<LAppInfo*> &Apps)
+bool LApp::GetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps)
 {
-	LAssert(!"Not impl.");
-	return false;
+	return LGetAppsForMimeType(Mime, Apps);
 }
 
 LSymLookup *LApp::GetSymLookup()
