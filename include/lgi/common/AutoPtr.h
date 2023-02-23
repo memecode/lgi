@@ -35,6 +35,11 @@ public:
 		Ptr = ap.Release();
 	}
 
+	LAutoPtr(LAutoPtr &&from)
+	{
+		Ptr = from.Release();
+	}
+
 	LAutoPtr(LAutoPtrRef<X> apr)
 	{
 		Ptr = apr.Ptr;
