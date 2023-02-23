@@ -2690,6 +2690,32 @@ LView *LViewFactory::Create(const char *Class, LRect *Pos, const char *Text)
 	return 0;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+LView::ViewEventTarget::ViewEventTarget(LView *View, int Msg)
+{
+	LAssert(View != NULL);
+	view = View;
+	if (Msg)
+		Msgs.Add(Msg, true);
+	if (view)
+		view->d->EventTargets.Add(this);
+}
+
+LView::ViewEventTarget::~ViewEventTarget()
+{
+	if (view)
+		view->d->EventTargets.Delete(this);
+}
+
+bool LView::ViewEventTarget::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t TimeoutMs)
+{
+	if (view)
+		return view->PostEvent(Cmd, a, b, TimeoutMs);
+
+	return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
 #ifdef _DEBUG
 
 #if defined(__GTK_H__)

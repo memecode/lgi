@@ -35,13 +35,14 @@ HWND LViewPrivate::hPrevCapture = 0;
 LViewPrivate::LViewPrivate(LView *view) : View(view)
 {
 	WndStyle = WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN;
-	WndExStyle = 0;
-	WndDlgCode = 0;
 	IsThemed = LResources::DefaultColours;
 }
 
 LViewPrivate::~LViewPrivate()
 {
+	while (EventTargets.Length())
+		delete EventTargets[0];
+
 	if (hTheme)
 	{
 		CloseThemeData(hTheme);
@@ -1253,6 +1254,13 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 			PostMessage(hFocus, WM_MOUSEWHEEL, MAKELONG(Flags, (short)Msg->a), Msg->b);
 		}
 		return 0;
+	}
+
+	for (auto target: d->EventTargets)
+	{
+		if (target->Msgs.Length() == 0 ||
+			target->Msgs.Find(Msg->Msg()))
+			target->OnEvent(Msg);
 	}
 
 	if (_View)

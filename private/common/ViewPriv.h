@@ -164,8 +164,9 @@ public:
 							// this view until runtime, where the view heirarchy is known.
 	LString::Array	Classes;
 
-	// Event dispatch handle
+	// Event handling
 	int				SinkHnd = -1;
+	LArray<LView::ViewEventTarget*> EventTargets;
 
 	// OS Specific
 	#if WINNATIVE

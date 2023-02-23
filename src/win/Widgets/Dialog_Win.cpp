@@ -318,10 +318,8 @@ void LDialog::EndModeless(int Code)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-LControl::LControl(char *SubClassName) : LView(0)
+LControl::LControl(const char *SubClassName) : LView(0)
 {
-	SubClass = 0;
-	SetOnDelete = NULL;
 	if (SubClassName)
 	{
 		SetClassW32(SubClassName);

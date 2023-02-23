@@ -657,7 +657,6 @@
     <ClInclude Include="include\lgi\common\Tree.h" />
     <ClInclude Include="include\lgi\common\Unicode.h" />
     <ClInclude Include="include\lgi\common\Variant.h" />
-    <ClInclude Include="include\lgi\common\ViewPriv.h" />
     <ClInclude Include="include\lgi\common\Net.h" />
     <ClInclude Include="include\lgi\common\NetTools.h" />
     <ClInclude Include="include\lgi\common\Cancel.h" />
@@ -682,7 +681,7 @@
     <ClInclude Include="include\lgi\common\Res.h" />
     <ClInclude Include="include\lgi\win\LgiOsClasses.h" />
     <ClInclude Include="include\lgi\win\LgiOsDefs.h" />
-    <ClInclude Include="private\win\GAppPriv.h" />
+    <ClInclude Include="private\common\ViewPriv.h" />
     <ClInclude Include="src\common\Gdc2\Font\LFontPriv.h" />
     <ClInclude Include="src\common\Hash\md5\md5.h" />
     <ClInclude Include="src\common\Hash\sha1\sha1.h" />

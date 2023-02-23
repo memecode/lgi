@@ -701,6 +701,35 @@ public:
 	///		Not called.
 	bool OnLayout(LViewLayoutInfo &Inf) override { return false; }
 
+	/// This class allows some task to tap into the events the view receives.
+	class LgiClass ViewEventTarget :
+		public LEventSinkI,
+		public LEventTargetI
+	{
+		friend class LView;
+
+	protected:
+		LView *view = NULL;
+		LHashTbl<IntKey<int>,bool> Msgs;
+
+	public:
+		ViewEventTarget
+		(
+			/// The view to attach to.
+			LView *View,
+			/// The message to handle... more can be added to 'Msgs'.
+			/// Pass 0 to get all messages, at the cost of slowing the
+			/// App down a bunch. Not recommended.
+			int Msg
+		);
+		~ViewEventTarget();
+
+		// Post events to the view, which will return to the OnEvent handler..
+		bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0, int64_t TimeoutMs = -1);
+
+		// Impl LMessage::Result OnEvent(LMessage *Msg) in your subclass
+	};
+
 	#if defined(_DEBUG)
 	bool _Debug;
 	void Debug();
@@ -772,19 +801,16 @@ class LgiClass LControl :
 	friend class LDialog;
 
 protected:
-	#if defined BEOS
-	bigtime_t Sys_LastClick;
-	void MouseClickEvent(bool Down);
-	#elif WINNATIVE
-	bool *SetOnDelete;
-	LWindowsClass *SubClass;
+	#if WINNATIVE
+	bool *SetOnDelete = NULL;
+	LWindowsClass *SubClass = NULL;
 	#endif
 
 	LPoint SizeOfStr(const char *Str);
 
 public:
 	#if WINNATIVE
-	LControl(char *SubClassName = 0);
+	LControl(const char *SubClassName = NULL);
 	#else
 	LControl(OsView view = NULL);
 	#endif
