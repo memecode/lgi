@@ -3823,7 +3823,9 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 					GetOptions()->SetValue(OPT_ENTIRE_SOLUTION, var);
 
 					d->Finder->Stop();
-					d->Finder->PostEvent(FindInFilesThread::M_START_SEARCH, (LMessage::Param) new FindParams(d->FindParameters));
+					
+					if (d->FindParameters->Text)
+						d->Finder->PostEvent(FindInFilesThread::M_START_SEARCH, (LMessage::Param) new FindParams(d->FindParameters));
 				});
 			}
 			break;

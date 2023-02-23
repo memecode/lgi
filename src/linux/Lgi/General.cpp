@@ -218,9 +218,11 @@ bool _GetSystemFont(char *FontType, char *Font, int FontBufSize, int &PointSize)
 	return Status;
 }
 
-bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
+static bool XdgMimeLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 {
-	bool Status = false;
+	static bool NoXdgMime = false;
+	if (NoXdgMime)
+		return false;
 
 	char Args[MAX_PATH_LEN];
 	sprintf(Args, "query default %s", Mime);
@@ -238,8 +240,9 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 	LSubProcess proc("xdg-mime", Args);
 	if (proc.Start())
 	{
+		NoXdgMime = true;
 		LgiTrace("%s:%i - Failed to execute xdg-mime\n", _FL);
-		return Status;
+		return false;
 	}
 
 	proc.Communicate(&Output);
@@ -251,7 +254,7 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 	if (o)
 	{
 		LgiTrace("%s:%i - No output from xdg-mime\n", _FL);
-		return Status;
+		return false;
 	}
 
 	char *e = o + strlen(o);
@@ -262,13 +265,13 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 	if (LMakePath(p, sizeof(p), "/usr/share/applications", o))
 	{
 		LgiTrace("%s:%i - Failed to create path.\n", _FL);
-		return Status;
+		return false;
 	}
 	
 	if (LFileExists(p))
 	{
 		LgiTrace("%s:%i - '%s' doesn't exist.", _FL, p);
-		return Status;
+		return false;
 	}
 
 	LAutoString txt(LReadTextFile(p));
@@ -281,10 +284,11 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 	if (txt)
 	{
 		LgiTrace("%s:%i - Can't read from '%s'\n", _FL, p);
-		return Status;
+		return false;
 	}
 
 	auto &ai = Apps.New();
+	bool Status = false;
 	
 	LToken t(txt, "\n");
 	for (int i=0; i<t.Length(); i++)
@@ -333,7 +337,94 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 	#if DEBUG_GET_APPS_FOR_MIMETYPE
 	printf("    ai='%s' '%s'\n", ai.Name.Get(), ai.Path.Get());
 	#endif
+	
+	return Status;
+}
 
+static bool DesktopToAppInfo(const char *desktop, LAppInfo &info)
+{
+	LFile::Path path("/usr/share/applications");
+	path += desktop;
+	if (!path.Exists())
+		return false;
+		
+	LFile f(path);
+	if (!f)
+		return false;
+	
+	auto lines = f.Read().SplitDelimit("\n");
+	for (auto line: lines)
+	{
+		auto p = line.SplitDelimit("=", 1);
+		if (p.Length() == 2)
+		{
+			if (p[0].Equals("Name"))
+			{
+				info.Name = p[1];
+			}
+			else if (p[0].Equals("Exec"))
+			{
+				auto e = p[1].SplitDelimit(" ", 1);
+				info.Path = e[0];
+				if (e.Length() > 1)
+					info.Params = e[1];
+			}
+				
+			// info.Path
+			// info.Params
+			// info.Icon
+		}
+	}
+	
+	return info.Name != NULL && info.Path != NULL;
+}
+
+static bool MimeAppsLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
+{
+	LString::Array files, desktops;
+	
+	LFile::Path p(LSP_HOME, ".config/mimeapps.list");
+	if (p.Exists())
+		files.Add(p.GetFull());
+	
+	auto GnomeDefs = "/etc/gnome/defaults.list";
+	if (LFileExists(GnomeDefs))
+		files.Add(GnomeDefs);
+	
+	for (auto file: files)
+	{
+		LFile f(file);
+		auto lines = f.Read().Split("\n");
+		for (auto ln: lines)
+		{
+			if (ln(0) == '[')
+				continue;
+				
+			auto p = ln.SplitDelimit("=", 1);
+			if (p.Length() == 2)
+			{
+				if (p[0].Equals(Mime))
+					desktops.Add(p[1]);
+			}
+		}
+	}
+	
+	for (auto desktop: desktops)
+	{
+		if (!DesktopToAppInfo(desktop, Apps.New()))
+			Apps.PopLast();
+		if (Limit >= 0 && Apps.Length() >= Limit)
+			break;
+	}
+	
+	return Apps.Length() > 0;
+}
+
+bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
+{
+	bool Status = XdgMimeLookup(Mime, Apps, Limit);
+	if (!Status)
+		Status = MimeAppsLookup(Mime, Apps, Limit);
 	return Status;
 }
 
@@ -445,7 +536,12 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LString *Erro
 				Error->Printf("'%s' doesn't exist.\n", File);
 		}
 
-		if (App[0])
+		if (!App[0])
+		{
+			if (Error)
+				*Error = "No app registered to open HTML.";
+		}
+		else
 		{
 			bool FileAdded = false;
 			LString AppPath;
