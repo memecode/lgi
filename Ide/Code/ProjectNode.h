@@ -97,7 +97,7 @@ public:
 	void OnExpand(bool b) override;
 	void OnMouseClick(LMouse &m) override;
 	void OnProperties();
-	void OnPulse();
+	void OnPulse() override;
 
 	// Serialization
 	bool Load(LDocView *Edit, NodeView *Callback) override;

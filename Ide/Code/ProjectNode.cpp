@@ -1144,7 +1144,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 					s->InitialDir(Dir);
 				}
 
-				s->Open([&](auto s, auto ok)
+				s->Open([this](auto s, auto ok)
 				{
 					if (ok)
 					{
@@ -1163,7 +1163,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 							}
 							else
 							{
-								LgiMsg(Tree, "'%s' is already in the project.\n", AppName, MB_OK, s[i]);
+								LgiMsg(Tree, "'%s' is already in the project.\n", AppName, MB_OK, (*s)[i]);
 							}
 						}
 					}

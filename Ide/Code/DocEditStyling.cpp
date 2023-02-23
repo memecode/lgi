@@ -219,7 +219,7 @@ int DocEditStyling::Main()
 			#if LOG_STYLE
 			LgiTrace("DocEdit.Worker finished style... Items=%i ParentState=%i\n", (int)p.Styles.Length(), ParentState);
 			#endif
-			auto r = View->PostEvent(M_STYLING_DONE);
+			View->PostEvent(M_STYLING_DONE);
 		}
 	}
 	return 0;

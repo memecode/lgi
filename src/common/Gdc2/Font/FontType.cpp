@@ -73,8 +73,6 @@ void LFontType::SetPointSize(int PointSize)
 
 void LFontType::DoUI(LView *Parent, std::function<void(LFontType*)> Callback)
 {
-	bool Status = false;
-
 	#if WINNATIVE
 	int bytes = sizeof(Info);
 	#else
