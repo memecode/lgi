@@ -181,7 +181,7 @@ extern const char SourcePatterns[];
 class IdeDoc;
 class IdeProject;
 
-extern char AppName[];
+extern const char *AppName;
 extern char *FindHeader(char *Short, LArray<LString> &Paths);
 extern bool BuildHeaderList(char *Cpp, LArray<char*> &Headers, LArray<LString> &IncPaths, bool Recurse);
 

@@ -208,15 +208,15 @@ public:
 	/// End a modeless window. Typically calling in the OnNotify event of the LDialog.
 	virtual void EndModeless(int Code = 0);
 
-	LMessage::Result OnEvent(LMessage *Msg);
-	bool OnRequestClose(bool OsClose);
-	void OnPosChange();
-    void PourAll() {}
-	void Quit(bool DontDelete = false);
+	LMessage::Result OnEvent(LMessage *Msg) override;
+	bool OnRequestClose(bool OsClose) override;
+	void OnPosChange() override;
+    void PourAll() override {}
+	void Quit(bool DontDelete = false) override;
 
 	/// By default the dialog will finish when a button is pressed. To override this
 	/// behavior you'll have to subclass LDialog and handle the OnNotify yourself.
-	int OnNotify(LViewI *Ctrl, LNotification n);
+	int OnNotify(LViewI *Ctrl, LNotification n) override;
 
 	/// This returns the ID of the button pressed to close the dialog.
 	int GetButtonId();

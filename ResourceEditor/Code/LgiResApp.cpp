@@ -1209,7 +1209,6 @@ LMessage::Result AppWnd::OnEvent(LMessage *m)
 	return LWindow::OnEvent(m);
 }
 
-#include "lgi/common/Token.h"
 void _CountGroup(ResStringGroup *Grp, int &Words, int &Multi)
 {
 	for (auto s: *Grp->GetStrs())
@@ -4593,6 +4592,8 @@ int ShortCutView::OnNotify(LViewI *Ctrl, LNotification n)
 				}
 				break;
 			}
+			default:
+				break;
 		}
 	}
 

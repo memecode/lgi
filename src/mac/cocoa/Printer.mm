@@ -63,113 +63,125 @@ if (e != noErr) \
 	goto OnError; \
 }
 
-
-int LPrinter::Print(LPrintEvents *Events, const char *PrintJobName, int MaxPages, LView *Parent)
+void LPrinter::Print(LPrintEvents *Events,
+					std::function<void(int)> callback,
+					const char *PrintJobName,
+					int MaxPages,
+					LView *Parent)
 {
+	int Status = LPrintEvents::OnBeginPrintError;
+
 	if (!Events)
 	{
 		LAssert(0);
-		return false;
+		if (callback)
+			callback(Status);
+		return;
 	}
-	
-	
-	bool Status = false;
+
+	#if LGI_COCOA
+
+		#warning "No Cocoa Printing Impl."
+
+	#elif LGI_CARBON // Carbon printing code?
+
+		PMPrintSession ps = NULL;
+		PMPageFormat PageFmt = NULL;
+		PMPrintSettings PrintSettings = NULL;
+		auto Wnd = Parent ? Parent->GetWindow() : NULL;
+		Boolean Accepted = false;
+		Boolean Changed = false;
+		LAutoPtr<LPrintDC> dc;
+		int Pages;
+		LPrintDcParams Params;
+		double paperWidth, paperHeight;
+		PMPaper Paper = NULL;
+		UInt32 ResCount;
+		PMPrinter CurrentPrinter = NULL;
+		
+		OSStatus e = PMCreateSession(&ps);
+		ErrCheck("PMCreateSession");
+		
+		e = PMCreatePageFormat(&PageFmt);
+		ErrCheck("PMCreatePageFormat");
+		
+		e = PMSessionDefaultPageFormat(ps, PageFmt);
+		ErrCheck("PMSessionDefaultPageFormat");
+		
+		e = PMCreatePrintSettings(&PrintSettings);
+		ErrCheck("PMCreatePrintSettings");
+		
 	#if 0
-	PMPrintSession ps = NULL;
-	PMPageFormat PageFmt = NULL;
-	PMPrintSettings PrintSettings = NULL;
-	GWindow *Wnd = Parent ? Parent->GetWindow() : NULL;
-	Boolean Accepted = false;
-	Boolean Changed = false;
-	GAutoPtr<GPrintDC> dc;
-	int Pages;
-	GPrintDcParams Params;
-	double paperWidth, paperHeight;
-	PMPaper Paper = NULL;
-	UInt32 ResCount;
-	PMPrinter CurrentPrinter = NULL;
-	
-	OSStatus e = PMCreateSession(&ps);
-	ErrCheck("PMCreateSession");
-	
-	e = PMCreatePageFormat(&PageFmt);
-	ErrCheck("PMCreatePageFormat");
-	
-	e = PMSessionDefaultPageFormat(ps, PageFmt);
-	ErrCheck("PMSessionDefaultPageFormat");
-	
-	e = PMCreatePrintSettings(&PrintSettings);
-	ErrCheck("PMCreatePrintSettings");
-	
-#if 0
-	e = PMSessionUseSheets(ps, Wnd ? Wnd->WindowHandle() : NULL, NULL /*PMSheetDoneUPP sheetDoneProc*/);
-	ErrCheck("PMSessionUseSheets");
-#endif
-	
-	e = PMSessionPrintDialog(ps, PrintSettings, PageFmt, &Accepted);
-	ErrCheck("PMSessionPrintDialog");
-	
-	e = PMSessionValidatePrintSettings(ps, PrintSettings, &Changed);
-	e = PMSessionValidatePageFormat(ps, PageFmt, &Changed);
-	
-	e = PMSessionBeginCGDocumentNoDialog(ps, PrintSettings, PageFmt);
-	ErrCheck("PMSessionBeginCGDocumentNoDialog");
-	
-	e = PMSessionBeginPageNoDialog(ps, PageFmt, NULL);
-	ErrCheck("PMSessionBeginPageNoDialog");
-	
-	e = PMGetAdjustedPaperRect(PageFmt, &Params.Page); //PMGetUnadjustedPageRect
-	ErrCheck("PMGetAdjustedPaperRect");
-	
-	e = PMSessionGetCGGraphicsContext(ps, &Params.Ctx);
-	ErrCheck("PMSessionGetCGGraphicsContext");
-	
-	e = PMSessionGetCurrentPrinter(ps, &CurrentPrinter);
-	ErrCheck("PMSessionGetCurrentPrinter");
-	
-	e = PMGetPageFormatPaper(PageFmt, &Paper);
-	e = PMPaperGetWidth(Paper, &paperWidth);
-	e = PMPaperGetHeight(Paper, &paperHeight);
-	
-	e = PMPrinterGetPrinterResolutionCount(CurrentPrinter, &ResCount);
-	ErrCheck("PMPrinterGetPrinterResolutionCount");
-	
-	for (unsigned i=0; i<ResCount; i++)
-	{
-		e = PMPrinterGetIndexedPrinterResolution(CurrentPrinter, i, &Params.Dpi);
-	}
-	
-	e = PMPrinterSetOutputResolution(CurrentPrinter, PrintSettings, &Params.Dpi);
-	ErrCheck("PMPrinterSetOutputResolution");
-	
-	dc.Reset(new GPrintDC(&Params, PrintJobName));
-	Pages = Events->OnBeginPrint(dc);
-	for (int Page = 0; Page < Pages; Page++)
-	{
-		if (Page > 0)
+		e = PMSessionUseSheets(ps, Wnd ? Wnd->WindowHandle() : NULL, NULL /*PMSheetDoneUPP sheetDoneProc*/);
+		ErrCheck("PMSessionUseSheets");
+	#endif
+		
+		e = PMSessionPrintDialog(ps, PrintSettings, PageFmt, &Accepted);
+		ErrCheck("PMSessionPrintDialog");
+		
+		e = PMSessionValidatePrintSettings(ps, PrintSettings, &Changed);
+		e = PMSessionValidatePageFormat(ps, PageFmt, &Changed);
+		
+		e = PMSessionBeginCGDocumentNoDialog(ps, PrintSettings, PageFmt);
+		ErrCheck("PMSessionBeginCGDocumentNoDialog");
+		
+		e = PMSessionBeginPageNoDialog(ps, PageFmt, NULL);
+		ErrCheck("PMSessionBeginPageNoDialog");
+		
+		e = PMGetAdjustedPaperRect(PageFmt, &Params.Page); //PMGetUnadjustedPageRect
+		ErrCheck("PMGetAdjustedPaperRect");
+		
+		e = PMSessionGetCGGraphicsContext(ps, &Params.Ctx);
+		ErrCheck("PMSessionGetCGGraphicsContext");
+		
+		e = PMSessionGetCurrentPrinter(ps, &CurrentPrinter);
+		ErrCheck("PMSessionGetCurrentPrinter");
+		
+		e = PMGetPageFormatPaper(PageFmt, &Paper);
+		e = PMPaperGetWidth(Paper, &paperWidth);
+		e = PMPaperGetHeight(Paper, &paperHeight);
+		
+		e = PMPrinterGetPrinterResolutionCount(CurrentPrinter, &ResCount);
+		ErrCheck("PMPrinterGetPrinterResolutionCount");
+		
+		for (unsigned i=0; i<ResCount; i++)
 		{
-			e = PMSessionBeginPage(ps, PageFmt, NULL);
-			ErrCheck("PMSessionBeginPage");
-			
-			e = PMSessionGetCGGraphicsContext(ps, &Params.Ctx);
-			ErrCheck("PMSessionGetCGGraphicsContext");
-			
-			dc.Reset(new GPrintDC(&Params, PrintJobName));
+			e = PMPrinterGetIndexedPrinterResolution(CurrentPrinter, i, &Params.Dpi);
 		}
 		
-		Status |= Events->OnPrintPage(dc, Page);
-		PMSessionEndPage(ps);
-	}
-	
-	e = PMSessionEndDocumentNoDialog(ps);
-	ErrCheck("PMSessionEndDocumentNoDialog");
-	
-	return Status;
-	
-OnError:
-	PMRelease(PrintSettings);
-	PMRelease(ps);
+		e = PMPrinterSetOutputResolution(CurrentPrinter, PrintSettings, &Params.Dpi);
+		ErrCheck("PMPrinterSetOutputResolution");
+		
+		dc.Reset(new GPrintDC(&Params, PrintJobName));
+		Pages = Events->OnBeginPrint(dc);
+		for (int Page = 0; Page < Pages; Page++)
+		{
+			if (Page > 0)
+			{
+				e = PMSessionBeginPage(ps, PageFmt, NULL);
+				ErrCheck("PMSessionBeginPage");
+				
+				e = PMSessionGetCGGraphicsContext(ps, &Params.Ctx);
+				ErrCheck("PMSessionGetCGGraphicsContext");
+				
+				dc.Reset(new GPrintDC(&Params, PrintJobName));
+			}
+			
+			Status |= Events->OnPrintPage(dc, Page);
+			PMSessionEndPage(ps);
+		}
+		
+		e = PMSessionEndDocumentNoDialog(ps);
+		ErrCheck("PMSessionEndDocumentNoDialog");
+		
+		return Status;
+		
+	OnError:
+		PMRelease(PrintSettings);
+		PMRelease(ps);
+		
 	#endif
 	
-	return Status;
+	if (callback)
+		callback(Status);
 }

@@ -23,17 +23,18 @@
 		345B210B217969700079E3C9 /* SimpleCppParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20E52179696C0079E3C9 /* SimpleCppParser.cpp */; };
 		345B210C217969700079E3C9 /* DocEdit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20E72179696C0079E3C9 /* DocEdit.cpp */; };
 		345B210D217969700079E3C9 /* AddFtpFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20EA2179696D0079E3C9 /* AddFtpFile.cpp */; };
-		345B210E217969700079E3C9 /* GHistory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20EE2179696D0079E3C9 /* GHistory.cpp */; };
+		345B210E217969700079E3C9 /* History.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20EE2179696D0079E3C9 /* History.cpp */; };
 		345B210F217969700079E3C9 /* IdeProject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20EF2179696E0079E3C9 /* IdeProject.cpp */; };
 		345B2110217969700079E3C9 /* levenshtein.c in Sources */ = {isa = PBXBuildFile; fileRef = 345B20F12179696E0079E3C9 /* levenshtein.c */; };
 		345B2112217969700079E3C9 /* LgiUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20F52179696E0079E3C9 /* LgiUtils.cpp */; };
 		345B2113217969700079E3C9 /* LgiIde.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20F62179696E0079E3C9 /* LgiIde.cpp */; };
 		345B2114217969700079E3C9 /* IdeCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20F72179696F0079E3C9 /* IdeCommon.cpp */; };
 		345B2115217969700079E3C9 /* FtpThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FB2179696F0079E3C9 /* FtpThread.cpp */; };
-		345B2116217969700079E3C9 /* GDebugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FC2179696F0079E3C9 /* GDebugger.cpp */; };
-		345B2117217969700079E3C9 /* GDebugContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FD2179696F0079E3C9 /* GDebugContext.cpp */; };
+		345B2116217969700079E3C9 /* Debugger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FC2179696F0079E3C9 /* Debugger.cpp */; };
+		345B2117217969700079E3C9 /* DebugContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FD2179696F0079E3C9 /* DebugContext.cpp */; };
 		345B2118217969700079E3C9 /* IdeProjectSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FE217969700079E3C9 /* IdeProjectSettings.cpp */; };
 		345B2119217969700079E3C9 /* MissingFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FF217969700079E3C9 /* MissingFiles.cpp */; };
+		348C6BA329A814A4002E235F /* libpng16.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 348C6BA029A8149E002E235F /* libpng16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34C4FD2A22FD7EB800C4BECB /* icons.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211D217969D30079E3C9 /* icons.png */; };
 		34C4FD2B22FD7EC100C4BECB /* LgiIde.lr8 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211C217969D30079E3C9 /* LgiIde.lr8 */; };
 		34C4FD2C22FD7EC700C4BECB /* mac-icon.icns in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211B217969D30079E3C9 /* mac-icon.icns */; };
@@ -50,7 +51,6 @@
 		34D21CE8217978C4003D1EA6 /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CE7217978C4003D1EA6 /* LgiMain.cpp */; };
 		34D21CEA217978DA003D1EA6 /* Base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CE9217978DA003D1EA6 /* Base64.cpp */; };
 		34D21CEE21798240003D1EA6 /* Png.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34D21CED21798240003D1EA6 /* Png.cpp */; };
-		34E44DE0279FBBEF00855194 /* libpng15.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34E44DCF279FB65600855194 /* libpng15.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34F566AB237BD55F0027133A /* JavascriptParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34F566A0237BD55F0027133A /* JavascriptParser.cpp */; };
 /* End PBXBuildFile section */
 
@@ -69,26 +69,26 @@
 			remoteGlobalIDString = 3477C2671CBF020F0028B84B;
 			remoteInfo = LgiCocoa;
 		};
+		348C6B9F29A8149E002E235F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 9D1B005B4C804977BD5DC316;
+			remoteInfo = libpng16;
+		};
+		348C6BA129A8149E002E235F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5BBB106F0CF040E99654EA52;
+			remoteInfo = libpng16_static;
+		};
 		34E44DCC279FB65600855194 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 228A010349D347BEADC408F8;
 			remoteInfo = example;
-		};
-		34E44DCE279FB65600855194 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = A86AA39F3CD14012BB654B02;
-			remoteInfo = libpng15;
-		};
-		34E44DD0279FB65600855194 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 1286F870F6A24F77B02F0866;
-			remoteInfo = libpng15_static;
 		};
 		34E44DD2279FB65600855194 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -118,18 +118,11 @@
 			remoteGlobalIDString = 308342A9F1B047B0917875BB;
 			remoteInfo = zlib_static;
 		};
-		34E44DDB279FB72800855194 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 6E0E6C089FA643D996341259;
-			remoteInfo = libpng15;
-		};
 		34E44DEE279FBD2700855194 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 5DB72C35B3F241A8BBD29DC8;
+			remoteGlobalIDString = D84CFE826B9D4F5BA52AE2A5;
 			remoteInfo = zlib;
 		};
 /* End PBXContainerItemProxy section */
@@ -141,7 +134,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				34E44DE0279FBBEF00855194 /* libpng15.dylib in CopyFiles */,
+				348C6BA329A814A4002E235F /* libpng16.dylib in CopyFiles */,
 				34148AFC2349ECA200D5E495 /* LgiCocoa.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -192,12 +185,12 @@
 		345B20EA2179696D0079E3C9 /* AddFtpFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AddFtpFile.cpp; path = ../Code/AddFtpFile.cpp; sourceTree = "<group>"; };
 		345B20EB2179696D0079E3C9 /* AddFtpFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AddFtpFile.h; path = ../Code/AddFtpFile.h; sourceTree = "<group>"; };
 		345B20EC2179696D0079E3C9 /* FtpFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FtpFile.h; path = ../Code/FtpFile.h; sourceTree = "<group>"; };
-		345B20ED2179696D0079E3C9 /* GDebugger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GDebugger.h; path = ../Code/GDebugger.h; sourceTree = "<group>"; };
-		345B20EE2179696D0079E3C9 /* GHistory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GHistory.cpp; path = ../Code/GHistory.cpp; sourceTree = "<group>"; };
+		345B20ED2179696D0079E3C9 /* Debugger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Debugger.h; path = ../Code/Debugger.h; sourceTree = "<group>"; };
+		345B20EE2179696D0079E3C9 /* History.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = History.cpp; path = ../Code/History.cpp; sourceTree = "<group>"; };
 		345B20EF2179696E0079E3C9 /* IdeProject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdeProject.cpp; path = ../Code/IdeProject.cpp; sourceTree = "<group>"; };
-		345B20F02179696E0079E3C9 /* GDebugContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GDebugContext.h; path = ../Code/GDebugContext.h; sourceTree = "<group>"; };
+		345B20F02179696E0079E3C9 /* DebugContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DebugContext.h; path = ../Code/DebugContext.h; sourceTree = "<group>"; };
 		345B20F12179696E0079E3C9 /* levenshtein.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = levenshtein.c; path = ../Code/levenshtein.c; sourceTree = "<group>"; };
-		345B20F22179696E0079E3C9 /* GHistory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GHistory.h; path = ../Code/GHistory.h; sourceTree = "<group>"; };
+		345B20F22179696E0079E3C9 /* History.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = History.h; path = ../Code/History.h; sourceTree = "<group>"; };
 		345B20F32179696E0079E3C9 /* levenshtein.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = levenshtein.h; path = ../Code/levenshtein.h; sourceTree = "<group>"; };
 		345B20F52179696E0079E3C9 /* LgiUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiUtils.cpp; path = ../Code/LgiUtils.cpp; sourceTree = "<group>"; };
 		345B20F62179696E0079E3C9 /* LgiIde.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = LgiIde.cpp; path = ../Code/LgiIde.cpp; sourceTree = "<group>"; };
@@ -206,8 +199,8 @@
 		345B20F92179696F0079E3C9 /* LgiIde.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiIde.h; path = ../Code/LgiIde.h; sourceTree = "<group>"; };
 		345B20FA2179696F0079E3C9 /* ProjectNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProjectNode.h; path = ../Code/ProjectNode.h; sourceTree = "<group>"; };
 		345B20FB2179696F0079E3C9 /* FtpThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FtpThread.cpp; path = ../Code/FtpThread.cpp; sourceTree = "<group>"; };
-		345B20FC2179696F0079E3C9 /* GDebugger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GDebugger.cpp; path = ../Code/GDebugger.cpp; sourceTree = "<group>"; };
-		345B20FD2179696F0079E3C9 /* GDebugContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GDebugContext.cpp; path = ../Code/GDebugContext.cpp; sourceTree = "<group>"; };
+		345B20FC2179696F0079E3C9 /* Debugger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Debugger.cpp; path = ../Code/Debugger.cpp; sourceTree = "<group>"; };
+		345B20FD2179696F0079E3C9 /* DebugContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DebugContext.cpp; path = ../Code/DebugContext.cpp; sourceTree = "<group>"; };
 		345B20FE217969700079E3C9 /* IdeProjectSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdeProjectSettings.cpp; path = ../Code/IdeProjectSettings.cpp; sourceTree = "<group>"; };
 		345B20FF217969700079E3C9 /* MissingFiles.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MissingFiles.cpp; path = ../Code/MissingFiles.cpp; sourceTree = "<group>"; };
 		345B2100217969700079E3C9 /* ParserCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ParserCommon.h; path = ../Code/ParserCommon.h; sourceTree = "<group>"; };
@@ -347,8 +340,8 @@
 				345B20EC2179696D0079E3C9 /* FtpFile.h */,
 				345B20FB2179696F0079E3C9 /* FtpThread.cpp */,
 				345B20D82179696B0079E3C9 /* FtpThread.h */,
-				345B20EE2179696D0079E3C9 /* GHistory.cpp */,
-				345B20F22179696E0079E3C9 /* GHistory.h */,
+				345B20EE2179696D0079E3C9 /* History.cpp */,
+				345B20F22179696E0079E3C9 /* History.h */,
 				345B20F72179696F0079E3C9 /* IdeCommon.cpp */,
 				345B20DA2179696B0079E3C9 /* MemDumpViewer.cpp */,
 				345B20FF217969700079E3C9 /* MissingFiles.cpp */,
@@ -361,10 +354,10 @@
 		345B212421796A1E0079E3C9 /* Debugging */ = {
 			isa = PBXGroup;
 			children = (
-				345B20FD2179696F0079E3C9 /* GDebugContext.cpp */,
-				345B20F02179696E0079E3C9 /* GDebugContext.h */,
-				345B20FC2179696F0079E3C9 /* GDebugger.cpp */,
-				345B20ED2179696D0079E3C9 /* GDebugger.h */,
+				345B20FD2179696F0079E3C9 /* DebugContext.cpp */,
+				345B20F02179696E0079E3C9 /* DebugContext.h */,
+				345B20FC2179696F0079E3C9 /* Debugger.cpp */,
+				345B20ED2179696D0079E3C9 /* Debugger.h */,
 			);
 			name = Debugging;
 			sourceTree = "<group>";
@@ -408,8 +401,8 @@
 			isa = PBXGroup;
 			children = (
 				34E44DCD279FB65600855194 /* example */,
-				34E44DCF279FB65600855194 /* libpng15.dylib */,
-				34E44DD1279FB65600855194 /* libpng15_static.a */,
+				348C6BA029A8149E002E235F /* libpng16.dylib */,
+				348C6BA229A8149E002E235F /* libpng16_static.a */,
 				34E44DD3279FB65600855194 /* minigzip */,
 				34E44DD5279FB65600855194 /* pngtest */,
 				34E44DD7279FB65600855194 /* libz_local.dylib */,
@@ -434,7 +427,6 @@
 			);
 			dependencies = (
 				34E44DEF279FBD2700855194 /* PBXTargetDependency */,
-				34E44DDC279FB72800855194 /* PBXTargetDependency */,
 				345B20D3217968890079E3C9 /* PBXTargetDependency */,
 			);
 			name = LgiIde;
@@ -498,26 +490,26 @@
 			remoteRef = 345B20D0217968820079E3C9 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		348C6BA029A8149E002E235F /* libpng16.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			name = libpng16.dylib;
+			path = libpng16.15.29.0.dylib;
+			remoteRef = 348C6B9F29A8149E002E235F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		348C6BA229A8149E002E235F /* libpng16_static.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libpng16_static.a;
+			remoteRef = 348C6BA129A8149E002E235F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		34E44DCD279FB65600855194 /* example */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
 			path = example;
 			remoteRef = 34E44DCC279FB65600855194 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		34E44DCF279FB65600855194 /* libpng15.dylib */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.dylib";
-			name = libpng15.dylib;
-			path = libpng15.15.4.0.dylib;
-			remoteRef = 34E44DCE279FB65600855194 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		34E44DD1279FB65600855194 /* libpng15_static.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libpng15_static.a;
-			remoteRef = 34E44DD0279FB65600855194 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		34E44DD3279FB65600855194 /* minigzip */ = {
@@ -571,9 +563,9 @@
 				345B2104217969700079E3C9 /* DocEditStyling.cpp in Sources */,
 				345B210B217969700079E3C9 /* SimpleCppParser.cpp in Sources */,
 				34D21CE8217978C4003D1EA6 /* LgiMain.cpp in Sources */,
-				345B2116217969700079E3C9 /* GDebugger.cpp in Sources */,
+				345B2116217969700079E3C9 /* Debugger.cpp in Sources */,
 				341C7AC821A752DC0083C9CE /* About.cpp in Sources */,
-				345B210E217969700079E3C9 /* GHistory.cpp in Sources */,
+				345B210E217969700079E3C9 /* History.cpp in Sources */,
 				345B2113217969700079E3C9 /* LgiIde.cpp in Sources */,
 				345B2112217969700079E3C9 /* LgiUtils.cpp in Sources */,
 				345B2103217969700079E3C9 /* FindInFiles.cpp in Sources */,
@@ -592,7 +584,7 @@
 				34D21CE52179788B003D1EA6 /* OpenSSLSocket.cpp in Sources */,
 				345B210D217969700079E3C9 /* AddFtpFile.cpp in Sources */,
 				345B210A217969700079E3C9 /* WebFldDlg.cpp in Sources */,
-				345B2117217969700079E3C9 /* GDebugContext.cpp in Sources */,
+				345B2117217969700079E3C9 /* DebugContext.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -603,11 +595,6 @@
 			isa = PBXTargetDependency;
 			name = LgiCocoa;
 			targetProxy = 345B20D2217968890079E3C9 /* PBXContainerItemProxy */;
-		};
-		34E44DDC279FB72800855194 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = libpng15;
-			targetProxy = 34E44DDB279FB72800855194 /* PBXContainerItemProxy */;
 		};
 		34E44DEF279FBD2700855194 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -738,13 +725,13 @@
 				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = c11;
 				HEADER_SEARCH_PATHS = (
-					../../include,
-					../../include/lgi/mac/cocoa,
 					../Code,
 					../Resources,
-					/opt/local/include,
-					../../../../../CodeLib/libpng,
-					../../../../../CodeLib/libpng/build,
+					../../include,
+					../../include/lgi/mac/cocoa,
+					../../../../../codelib/libpng,
+					../../../../../codelib/libpng/build,
+					../../../../../codelib/openssl/include,
 				);
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -775,13 +762,13 @@
 				DEVELOPMENT_TEAM = "";
 				GCC_C_LANGUAGE_STANDARD = c11;
 				HEADER_SEARCH_PATHS = (
-					../../include,
-					../../include/lgi/mac/cocoa,
 					../Code,
 					../Resources,
-					/opt/local/include,
-					../../../../../CodeLib/libpng,
-					../../../../../CodeLib/libpng/build,
+					../../include,
+					../../include/lgi/mac/cocoa,
+					../../../../../codelib/libpng,
+					../../../../../codelib/libpng/build,
+					../../../../../codelib/openssl/include,
 				);
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";

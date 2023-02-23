@@ -804,14 +804,14 @@ public:
 
 	const char *GetClass() override { return "LFileSelectDlg"; }
 
-	int OnNotify(LViewI *Ctrl, LNotification n);
+	int OnNotify(LViewI *Ctrl, LNotification n) override;
 	void OnUpFolder();
 	void SetFolder(char *f);
 	void OnFolder();
 	void OnFile(char *f);
 	void OnFilter(const char *Key);
 
-	bool OnViewKey(LView *v, LKey &k)
+	bool OnViewKey(LView *v, LKey &k) override
 	{
 		if (k.vkey == LK_UP && k.Alt())
 		{

@@ -296,7 +296,9 @@ bool LView::HasView(LViewI *v)
 OsWindow LView::WindowHandle()
 {
 	auto w = GetWindow();
-	auto h = w ? w->WindowHandle() : NULL;
+	OsWindow h;
+	if (w)
+		h = w->WindowHandle();
 	return h;
 }
 
@@ -2608,7 +2610,7 @@ void LView::_Dump(int Depth)
 
 		// DumpGtk(_View);
 	
-	#else
+	#elif !defined(MAC)
 	
 		#if defined(HAIKU)
 		LLocker lck(WindowHandle(), _FL);

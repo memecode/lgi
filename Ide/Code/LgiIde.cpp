@@ -178,7 +178,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////
-char AppName[] = "LgiIde";
+const char *AppName = "LgiIde";
 
 char *dirchar(char *s, bool rev = false)
 {
@@ -1740,7 +1740,9 @@ AppWnd::AppWnd()
 AppWnd::~AppWnd()
 {
 	LAssert(IsClean());
+	#ifdef HAIKU
 	WaitThread();
+	#endif
 
 	if (d->HBox)
 	{

@@ -36,12 +36,15 @@ struct LDialogPriv
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-LDialog::LDialog()
+LDialog::LDialog(LViewI *Parent)
 	: ResObject(Res_Dialog)
 {
 	d = new LDialogPriv;
 	Name("Dialog");
 	SetDeleteOnClose(false);
+	
+	if (Parent)
+		SetParent(Parent);
 }
 
 LDialog::~LDialog()
@@ -123,7 +126,7 @@ bool LDialog::OnRequestClose(bool OsClose)
 	return true;
 }
 
-int LDialog::DoModal(OsView OverideParent)
+void LDialog::DoModal(OnClose Callback, OsView OverideParent)
 {
 	d->ModalStatus = 0;
 	
@@ -154,7 +157,14 @@ int LDialog::DoModal(OsView OverideParent)
 		LWindow::Visible(false);
 	}
 	
-	return d->ModalStatus;
+	if (Callback)
+	{
+		Callback(this, d->ModalStatus);
+	}
+	else
+	{
+		delete this;
+	}
 }
 
 void LDialog::EndModal(int Code)

@@ -118,13 +118,10 @@ public:
 	// Methods
 	
 	/// Shows the open file dialog
-	/// \returns true if the user selected a file, otherwise false
 	void Open(SelectCb Cb);
 	/// Shows the save file dialog
-	/// \returns true if the user selected a file, otherwise false
 	void Save(SelectCb Cb);
 	/// Shows the open folder dialog
-	/// \returns true if the user selected a folder, otherwise false
 	void OpenFolder(SelectCb Cb);
 };
 
