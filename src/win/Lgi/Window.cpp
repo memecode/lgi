@@ -108,17 +108,13 @@ LWindow::LWindow() : LView(0)
 {
 	_Window = this;
 	d = new LWindowPrivate;
-	Menu = 0;
-	_Dialog = NULL;
 	SetStyle(GetStyle() | WS_TILEDWINDOW | WS_CLIPCHILDREN);
 	SetStyle(GetStyle() & ~WS_CHILD);
 	SetExStyle(GetExStyle() | WS_EX_CONTROLPARENT);
 	
 	LWindowsClass *c = LWindowsClass::Create(GetClass());
 	if (c)
-	{
 		c->Register();
-	}	
 	
 	Visible(false);
 
@@ -130,9 +126,7 @@ LWindow::LWindow() : LView(0)
 LWindow::~LWindow()
 {
 	if (LAppInst && LAppInst->AppWnd == this)
-	{
-		LAppInst->AppWnd = 0;
-	}
+		LAppInst->AppWnd = NULL;
 
 	if (Menu)
 	{

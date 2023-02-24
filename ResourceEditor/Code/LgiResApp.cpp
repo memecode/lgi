@@ -25,17 +25,17 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/StatusBar.h"
 
-char AppName[]				= "Lgi Resource Editor";
-char HelpFile[]				= "Help.html";
-char OptionsFileName[]		= "Options.r";
-char TranslationStrMagic[] = "LgiRes.String";
-#define VIEW_PULSE_RATE		100
+char AppName[]					= "Lgi Resource Editor";
+char HelpFile[]					= "Help.html";
+char OptionsFileName[]			= "Options.r";
+char TranslationStrMagic[]		= "LgiRes.String";
+#define VIEW_PULSE_RATE			100
 
 #ifndef DIALOG_X
-#define DIALOG_X					1.56
-#define DIALOG_Y					1.85
-#define CTRL_X						1.50
-#define CTRL_Y						1.64
+#define DIALOG_X				1.56
+#define DIALOG_Y				1.85
+#define CTRL_X					1.50
+#define CTRL_Y					1.64
 #endif
 
 enum Ctrls
@@ -2618,143 +2618,139 @@ bool AppWnd::TestLgi(bool Quite)
 	return Status;
 }
 
+#define PROFILE_LOAD	0
+#if PROFILE_LOAD
+#define PROF(s) prof.Add(s)
+#else
+#define PROF(s)
+#endif
+
 bool AppWnd::LoadLgi(const char *FileName)
 {
-	bool Status = false;
+#if PROFILE_LOAD
+LProfile prof("LoadLgi");
+#endif
 
 	Empty();
-	if (FileName)
+
+	if (!FileName)
+		return false;
+
+PROF("fOpen");
+	LFile f;
+	if (!f.Open(FileName, O_READ))
+		return false;
+
+PROF("prog");
+	LAutoPtr<LProgressDlg> Progress(new LProgressDlg(this));
+
+	Progress->SetDescription("Initializing...");
+	Progress->SetType("Tags");
+
+	LAutoPtr<LXmlTag> Root(new LXmlTag);
+	if (!Root)
+		return false;
+
+	// convert file to Xml objects
+	LXmlTree Xml(0);
+		
+	Progress->SetDescription("Lexing...");
+		
+PROF("xml.read");
+	if (!Xml.Read(Root, &f, 0))
 	{
-		// ResFileFormat Format = GetFormat(FileName);
+		LgiMsg(this, "Xml read failed: %s", AppName, MB_OK, Xml.GetErrorMsg());
+		return false;
+	}
 
-		LFile f;
-		if (f.Open(FileName, O_READ))
-		{
-			LProgressDlg Progress(this);
+	Progress->SetRange(Root->Children.Length());
 
-			Progress.SetDescription("Initializing...");
-			Progress.SetType("Tags");
+PROF("xml to objs");
+	// convert Xml list into objects
+	SerialiseContext Ctx;
+	for (auto t: Root->Children)
+	{
+		Progress->Value(Root->Children.IndexOf(t));
 
-			LXmlTag *Root = new LXmlTag;
-			if (Root)
-			{				
-				// convert file to Xml objects
-				LXmlTree Xml(0);
-				Progress.SetDescription("Lexing...");
-				if (Xml.Read(Root, &f, 0))
-				{
-					Progress.SetRange(Root->Children.Length());
+		int RType = 0;
+		if (t->IsTag("dialog"))
+			RType = TYPE_DIALOG;
+		else if (t->IsTag("string-group"))
+			RType = TYPE_STRING;
+		else if (t->IsTag("menu"))
+			RType = TYPE_MENU;
+		else if (t->IsTag("style"))
+			RType = TYPE_CSS;
+		else
+			LAssert(!"Unexpected tag");
 
-					// convert Xml list into objects
-					int i=0;
-					DoEvery Timer(500);
-					SerialiseContext Ctx;
-					for (auto t: Root->Children)
-					{
-						if (Timer.DoNow())
-						{
-							Progress.Value(Root->Children.IndexOf(t));
-							LYield();
-						}
-
-						int RType = 0;
-						if (t->IsTag("dialog"))
-						{
-							RType = TYPE_DIALOG;
-						}
-						else if (t->IsTag("string-group"))
-						{
-							RType = TYPE_STRING;
-						}
-						else if (t->IsTag("menu"))
-						{
-							RType = TYPE_MENU;
-						}
-						else if (t->IsTag("style"))
-						{
-						    RType = TYPE_CSS;
-						}
-						else
-						{
-							LAssert(!"Unexpected tag");
-						}
-
-						if (RType > 0)
-						{
-							NewObject(Ctx, t, RType, false);
-						}
-
-						i++;
-					}
+		if (RType > 0)
+			NewObject(Ctx, t, RType, false);
+	}
 					
-					Ctx.PostLoad(this);
+PROF("postload");
+	Ctx.PostLoad(this);
 
-					SortDialogs();
-					TestLgi();
+PROF("sort");
+	SortDialogs();
 
-					// Scan for languages and update the view lang menu
-					Languages.Length(0);
-					LHashTbl<ConstStrKey<char,false>, LLanguage*> Langs;
-					if (ViewMenu)
-					{
-						// Remove existing language menu items
-						while (ViewMenu->RemoveItem(1));
-						ViewMenu->AppendSeparator();
+PROF("test");
+	TestLgi();
 
-						// Enumerate all languages
-						List<Resource> res;
-						if (ListObjects(res))
-						{
-							for (auto r: res)
-							{
-								ResStringGroup *Sg = r->IsStringGroup();
-								if (Sg)
-								{
-									for (int i=0; i<Sg->GetLanguages(); i++)
-									{
-										LLanguage *Lang = Sg->GetLanguage(i);
-										if (Lang)
-										{
-											Langs.Add(Lang->Id, Lang);
-										}
-									}									
-								}
-							}
-						}
+PROF("scan langs");
+	// Scan for languages and update the view lang menu
+	Languages.Length(0);
+	LHashTbl<ConstStrKey<char,false>, LLanguage*> Langs;
+	if (!ViewMenu)
+		return false;
 
-						// Update languages array
-						int n = 0;
-						for (auto i : Langs)
-						{
-							Languages.Add(i.value);
-							auto Item = ViewMenu->AppendItem(i.value->Name, IDM_LANG_BASE + n, true);
-							if (Item && i.value->IsEnglish())
-							{
-								Item->Checked(true);
-								CurLang = n;
-							}
-							n++;
-						}
+PROF("remove menu items");
+	// Remove existing language menu items
+	while (ViewMenu->RemoveItem(1));
+	ViewMenu->AppendSeparator();
 
-						if (Languages.Length() == 0)
-						{
-							ViewMenu->AppendItem("(none)", -1, false);
-						}
-					}
-
-					Status = true;
-				}
-				else
+PROF("enum objs");
+	// Enumerate all languages
+	List<Resource> res;
+	if (ListObjects(res))
+	{
+		for (auto r: res)
+		{
+			ResStringGroup *Sg = r->IsStringGroup();
+			if (Sg)
+			{
+				for (int i=0; i<Sg->GetLanguages(); i++)
 				{
-					LgiMsg(this, "Xml read failed: %s", AppName, MB_OK, Xml.GetErrorMsg());
-				}
-
-				DeleteObj(Root);
+					LLanguage *Lang = Sg->GetLanguage(i);
+					if (Lang)
+					{
+						Langs.Add(Lang->Id, Lang);
+					}
+				}									
 			}
 		}
 	}
 
-	return Status;
+PROF("update langs");
+	// Update languages array
+	int n = 0;
+	for (auto i : Langs)
+	{
+		Languages.Add(i.value);
+		auto Item = ViewMenu->AppendItem(i.value->Name, IDM_LANG_BASE + n, true);
+		if (Item && i.value->IsEnglish())
+		{
+			Item->Checked(true);
+			CurLang = n;
+		}
+		n++;
+	}
+
+PROF("none menu");
+	if (Languages.Length() == 0)
+		ViewMenu->AppendItem("(none)", -1, false);
+
+	return true;
 }
 
 void SerialiseContext::PostLoad(AppWnd *App)

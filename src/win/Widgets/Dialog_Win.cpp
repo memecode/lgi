@@ -248,9 +248,10 @@ LMessage::Result LDialog::OnEvent(LMessage *Msg)
 			d->ModalResult = max((int)Msg->A(), 0);
 
 			if (d->ParentHnd)
-				EnableWindow(d->ParentHnd, true);
-			if (d->ParentWnd)
+			{
 				d->ParentWnd->_Dialog = NULL;
+				EnableWindow(d->ParentHnd, true);
+			}
 	    
 			Visible(false);
 
@@ -314,7 +315,10 @@ void LDialog::OnPosChange()
 void LDialog::EndModeless(int Code)
 {
 	if (d->IsModeless)
+	{
+		d->IsModeless = false;
 		Quit(Code != 0);
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

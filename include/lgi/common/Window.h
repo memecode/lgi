@@ -50,7 +50,7 @@ protected:
 	#if WINNATIVE
 
 		LRect OldPos;
-		LWindow *_Dialog;
+		LWindow *_Dialog = NULL;
 
 	#elif defined(HAIKU)
 		
@@ -88,10 +88,10 @@ protected:
 	#endif
 
 	/// The default button
-	LViewI *_Default;
+	LViewI *_Default = NULL;
 
 	/// The menu on the window
-	LMenu *Menu;
+	LMenu *Menu = NULL;
 
 	void SetChildDialog(LDialog *Dlg);
 	void SetDragHandlers(bool On);

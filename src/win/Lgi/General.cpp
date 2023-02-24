@@ -844,12 +844,13 @@ LString WinGetSpecialFolderPath(int Id)
 #ifndef LGI_STATIC
 void LAssertDlg(LString Msg, std::function<void(int)> Callback)
 {
-	LAlert a(LAppInst ? LAppInst->AppWnd : NULL, "Assert Failed", Msg, "Abort", "Debug", "Ignore");
-	a.SetAppModal();	
-	a.DoModal([Callback](auto d, auto code)
+	auto a = new LAlert(LAppInst ? LAppInst->AppWnd : NULL, "Assert Failed", Msg, "Abort", "Debug", "Ignore");
+	a->SetAppModal();
+	a->DoModal([Callback](auto d, auto code)
 	{
 		if (Callback)
 			Callback(code);
+		delete d;
 	});
 }
 #endif

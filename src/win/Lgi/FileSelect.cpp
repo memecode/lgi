@@ -90,6 +90,10 @@ class LFileSelectPrivate
 		Info.lpstrFile = new char16[Info.nMaxFile];
 		Info.hwndOwner = ParentWnd ? ParentWnd->Handle() : 0;
 		
+		Info.hInstance = LAppInst->GetInstance();
+		if (ParentWnd)
+			Info.hwndOwner = ParentWnd->Handle();
+
 		if (Info.lpstrFile)
 		{
 			memset(Info.lpstrFile, 0, sizeof(*Info.lpstrFile) * Info.nMaxFile);
@@ -303,19 +307,38 @@ void LFileSelect::DefaultExtension(const char *DefExt)
 	d->DefExt = DefExt;
 }
 
+#define PROFILE_OPEN	0
+#if PROFILE_OPEN
+#define PROF(s) prof.Add(s)
+#else
+#define PROF(s)
+#endif
+
 void LFileSelect::Open(SelectCb Cb)
 {
 	bool Status = FALSE;
+#if PROFILE_OPEN
+LProfile prof("file select open");
+#endif
 
 	OPENFILENAMEW	Info;
+PROF("BeforeDlg");
 	d->BeforeDlg(Info);
+PROF("GetOpenFileNameW");
 	Status = GetOpenFileNameW(&Info) != 0;
 	if (!Status && d->DoFallback(Info))
+	{
+PROF("GetOpenFileNameW 2");
 		Status = GetOpenFileNameW(&Info) != 0;
+	}
+PROF("AfterDlg");
 	d->AfterDlg(Info, Status);
 
 	if (Cb)
+	{
+PROF("Cb");
 		Cb(this, Status && Length() > 0);
+	}
 }
 
 #include "shlobj.h"

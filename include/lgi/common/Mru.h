@@ -26,7 +26,7 @@ protected:
 	virtual const char *_GetCurFile();
 	virtual void GetFileTypes(LFileSelect *Dlg, bool Write);
 	virtual LFileType *GetSelectedType();
-	void DoFileDlg(LFileSelect &Select, bool Open, std::function<void(bool)> OnSelect);
+	void DoFileDlg(LAutoPtr<LFileSelect> Select, bool Open, std::function<void(bool)> OnSelect);
 
 	/// This method converts the storage reference (which can contain user/pass credentials) 
 	/// between the display, raw and stored forms. Display and Raw are used at runtime and

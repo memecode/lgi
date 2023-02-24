@@ -276,12 +276,19 @@ void LMru::RemoveFile(const char *FileName, bool Update)
 	}
 }
 
-void LMru::DoFileDlg(LFileSelect &Select, bool Open, std::function<void(bool)> OnSelect)
+void LMru::DoFileDlg(LAutoPtr<LFileSelect> FileSelect, bool Open, std::function<void(bool)> OnSelect)
 {
-	GetFileTypes(&Select, false);
-	Select.ShowReadOnly(Open);
+	if (!FileSelect)
+	{
+		LAssert(!"No select dialog.");
+		return;
+	}
 
-	auto Cb = [&](auto s, bool ok)
+	auto Select = FileSelect.Release();
+	GetFileTypes(Select, false);
+	Select->ShowReadOnly(Open);
+
+	auto Cb = [this, Open, OnSelect](auto s, bool ok)
 	{
 		if (ok)
 		{
@@ -294,57 +301,62 @@ void LMru::DoFileDlg(LFileSelect &Select, bool Open, std::function<void(bool)> O
 			
 		if (OnSelect)
 			OnSelect(ok);
+		delete s;
 	};
 
 	if (Open)
-		Select.Open(Cb);
+		Select->Open(Cb);
 	else
-		Select.Save(Cb);
+		Select->Save(Cb);
 }
 
 void LMru::OnCommand(int Cmd, std::function<void(bool)> OnStatus)
 {
-	bool Status = false;
-
 	LViewI *Wnd = d->Parent->GetMenu() ? d->Parent->GetMenu()->WindowHandle() : 0;
-	if (Wnd)
+	if (!Wnd)
+		return;
+
+	if (Cmd >= M_MRU_BASE &&
+		Cmd < M_MRU_BASE + d->Items.Length())
 	{
-		LFileSelect Select;
-		Select.Parent(Wnd);
-		Select.ClearTypes();
+		bool status = false;
+		int Index = Cmd - M_MRU_BASE;
+		auto c = d->Items[Index];
+		if (c)
+			status = _OpenFile(c->Raw, false);
+
+		if (OnStatus)
+			OnStatus(status);
+	}
+	else if (Cmd == IDM_OPEN || Cmd == IDM_SAVEAS)
+	{
+		LAutoPtr<LFileSelect> Select(new LFileSelect);
+		Select->Parent(Wnd);
+		Select->ClearTypes();
 		d->SelectedType = 0;
 		
 		if (_GetCurFile())
 		{
 			if (LFileExists(_GetCurFile()))
-				Select.Name(_GetCurFile());
+				Select->Name(_GetCurFile());
 			
 			char Path[256];
 			strcpy_s(Path, sizeof(Path), _GetCurFile());
 			LTrimDir(Path);
 			if (LDirExists(Path))
-				Select.InitialDir(Path);
+				Select->InitialDir(Path);
 		}
 
-		auto Process = [Cmd, OnStatus, this](bool ok)
+		auto ForwardStatus = [OnStatus](bool ok)
 		{
-			if (Cmd >= M_MRU_BASE &&
-				Cmd < M_MRU_BASE + d->Items.Length())
-			{
-				int Index = Cmd - M_MRU_BASE;
-				auto c = d->Items[Index];
-				if (c)
-					ok &= _OpenFile(c->Raw, false);
-			}
-			
 			if (OnStatus)
 				OnStatus(ok);
 		};
 
 		if (Cmd == IDM_OPEN)
-			DoFileDlg(Select, true, Process);
+			DoFileDlg(Select, true, ForwardStatus);
 		else if (Cmd == IDM_SAVEAS)
-			DoFileDlg(Select, false, Process);
+			DoFileDlg(Select, false, ForwardStatus);
 	}
 }
 
