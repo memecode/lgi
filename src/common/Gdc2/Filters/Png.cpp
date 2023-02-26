@@ -1189,15 +1189,20 @@ LFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 	#ifdef FILTER_UI
 	if (Parent && Transparent.IsNull())
 	{
+		LAssert(!"Move this to the parent app.");
+
 		// put up a dialog to ask about transparent colour
-		LTransparentDlg Dlg(Parent, &Transparent);
-		if (!Dlg.DoModal())
+		auto Dlg = new LTransparentDlg(Parent, &Transparent);
+		Dlg->DoModal([this, Dlg](auto dlg, auto code)
 		{
-			if (Props)
+			LVariant v;
+
+			if (!code && Props)
 				Props->SetValue("Cancel", v = 1);
 			
+			delete Dlg;
 			return IoCancel;
-		}
+		});
 	}
 	#endif
 
