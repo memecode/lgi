@@ -16,20 +16,20 @@ class LXmlTreeUi
 	class LXmlTreeUiPriv *d;
 
 public:
+	typedef LHashTbl<ConstStrKey<char,false>,int> EnumMap;
+
 	LXmlTreeUi();
 	virtual ~LXmlTreeUi();
 
-	typedef LListItem *(*CreateListItem)(void *User);
-	typedef LTreeItem *(*CreateTreeItem)(void *User);
-
 	/// Create attribute <-> UI element mapping for generic control
 	void Map(const char *Attr, int UiIdent, int Type = GV_NULL);
-	/// Create attribute <-> UI element mapping for GList control
-	void Map(const char *Element, int UiIdent, CreateListItem Factory, const char *ChildElements, void *User = 0);
-	/// Create attribute <-> UI element mapping for LTree control
-	void Map(const char *Element, int UiIdent, CreateTreeItem Factory, const char *ChildElements, void *User = 0);
+	/// Create attribute <-> UI element mapping for LItemContainer control
+	void Map(const char *Attr, int UiIdent, const char *ChildElementName, std::function<LItem*()> Callback);
+	/// Create attribute <-> UI element mapping for a enum and group of radio buttons.
+	void Map(const char *Attr, EnumMap &Mapping);
 	/// Clear all mappings
 	void EmptyMaps();
+	
 	/// Convert data to/from an XML tag
 	virtual bool Convert(LDom *Tag, LViewI *ui, bool ToUI);
 	/// Disable/enable all control

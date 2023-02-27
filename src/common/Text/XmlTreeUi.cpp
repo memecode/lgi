@@ -15,27 +15,17 @@
 
 struct Mapping
 {
-	int Id;
-	int Hint;
-	LXmlTreeUi::CreateListItem ListItemFactory;
-	LXmlTreeUi::CreateTreeItem TreeItemFactory;
-	LVariant ChildElements;
-	void *User;
-
-	Mapping()
-	{
-		Id = 0;
-		Hint = GV_NULL;
-		ListItemFactory = 0;
-		TreeItemFactory = 0;
-		User = 0;
-	}
+	int Id = 0;
+	int Hint = GV_NULL;
+	std::function<LItem*()> Callback;
+	LString ChildElementName;
+	LXmlTreeUi::EnumMap EnumMap;
 
 	void LoadTree(LTreeNode *n, LXmlTag *t)
 	{
 		for (auto c: t->Children)
 		{
-			LTreeItem *i = TreeItemFactory(User);
+			auto i = dynamic_cast<LTreeItem*>(Callback());
 			if (i)
 			{
 				i->XmlIo(c, false);
@@ -50,7 +40,7 @@ struct Mapping
 	{
 		for (LTreeItem *i = n->GetChild(); i; i = i->GetNext())
 		{
-			LXmlTag *n = new LXmlTag(ChildElements.Str());
+			LXmlTag *n = new LXmlTag(ChildElementName);
 			if (n)
 			{
 				i->XmlIo(n, true);
@@ -133,18 +123,17 @@ void LXmlTreeUi::Map(const char *Attr, int UiIdent, int Type)
 	else LAssert(!"Invalid params");
 }
 
-void LXmlTreeUi::Map(const char *Attr, int UiIdent, CreateListItem Factory, const char *ChildElements, void *User)
+void LXmlTreeUi::Map(const char *Attr, int UiIdent, const char *ChildElementName, std::function<LItem*()> Callback)
 {
-	if (Attr && UiIdent > 0 && Factory && ChildElements)
+	if (Attr && UiIdent > 0 && Callback && ChildElementName)
 	{
 		Mapping *m = new Mapping;
 		if (m)
 		{
 			m->Id = UiIdent;
-			m->ListItemFactory = Factory;
+			m->Callback = Callback;
 			m->Hint = GV_LIST;
-			m->ChildElements = ChildElements;
-			m->User = User;
+			m->ChildElementName = ChildElementName;
 			
 			LAssert(!d->Maps.Find(Attr));
 			d->Maps.Add(Attr, m);
@@ -153,19 +142,16 @@ void LXmlTreeUi::Map(const char *Attr, int UiIdent, CreateListItem Factory, cons
 	else LAssert(!"Invalid params");
 }
 
-void LXmlTreeUi::Map(const char *Attr, int UiIdent, CreateTreeItem Factory, const char *ChildElements, void *User)
+void LXmlTreeUi::Map(const char *Attr, LHashTbl<ConstStrKey<char,false>,int> &Map)
 {
-	if (Attr && UiIdent > 0 && Factory && ChildElements)
+	if (Attr && Map.Length() > 0)
 	{
-		Mapping *m = new Mapping;
+		auto m = new Mapping;
 		if (m)
 		{
-			m->Id = UiIdent;
-			m->TreeItemFactory = Factory;
-			m->Hint = GV_CUSTOM;
-			m->ChildElements = ChildElements;
-			m->User = User;
-
+			m->Hint = GV_HASHTABLE;
+			m->EnumMap = Map;
+			
 			LAssert(!d->Maps.Find(Attr));
 			d->Maps.Add(Attr, m);
 		}
@@ -183,14 +169,14 @@ int GetCtrlType(LViewI *v)
 	if (v)
 	{
 		if (dynamic_cast<LCheckBox*>(v) ||
-				dynamic_cast<LButton*>(v) ||
-				dynamic_cast<LRadioButton*>(v))
+			dynamic_cast<LButton*>(v) ||
+			dynamic_cast<LRadioButton*>(v))
 		{
 			return GV_BOOL;
 		}
 		else if (dynamic_cast<LSlider*>(v) ||
-				dynamic_cast<LCombo*>(v) ||
-				dynamic_cast<LRadioGroup*>(v))
+				 dynamic_cast<LCombo*>(v) ||
+				 dynamic_cast<LRadioGroup*>(v))
 		{
 			return GV_INT32;
 		}
@@ -253,49 +239,73 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 		if (ToUI)
 		{
 			// Xml -> UI
-			// const char *Attr;
-			// for (Mapping *Map = d->Maps.First(&Attr); Map; Map = d->Maps.Next(&Attr))
 			for (auto Map : d->Maps)
 			{
-				if (Map.value->Hint == GV_LIST)
+				Mapping *m = Map.value;
+				switch (m->Hint)
 				{
-					if (Xml)
+					case GV_HASHTABLE:
 					{
+						Tag->GetValue(Map.key, v);
+						if (v.Str())
+						{
+							for (auto e: m->EnumMap)
+							{
+								auto name = e.key;
+								if (!Stricmp(name, v.Str()))
+									Ui->SetCtrlValue(e.value, true);
+							}
+						}
+						break;
+					}
+					case GV_LIST:
+					{
+						if (!Xml)
+						{
+							LAssert(!"Needs an xml tag.");
+							break;
+						}
+
 						LXmlTag *t = Xml->GetChildTag(Map.key);
 						if (!t) continue;
 						LList *Lst;
-						if (!Ui->GetViewById(Map.value->Id, Lst)) continue;
+						if (!Ui->GetViewById(m->Id, Lst)) continue;
 						Lst->Empty();
 						for (auto c: t->Children)
 						{
-							LListItem *i = Map.value->ListItemFactory(Map.value->User);
+							auto i = dynamic_cast<LListItem*>(m->Callback());
 							if (i)
 							{
 								i->XmlIo(c, false);
 								Lst->Insert(i);
 							}
 						}
+						break;
 					}
-				}
-				else if (Map.value->Hint == GV_CUSTOM)
-				{
-					if (Xml)
+					case GV_CUSTOM:
 					{
+						if (!Xml)
+						{
+							LAssert(!"Needs an xml tag.");
+							break;
+						}
+
 						LXmlTag *t = Xml->GetChildTag(Map.key);
 						if (!t) continue;
 
 						LTree *Tree;
-						if (!Ui->GetViewById(Map.value->Id, Tree)) continue;
+						if (!Ui->GetViewById(m->Id, Tree)) continue;
 						Tree->Empty();
 
-						Map.value->LoadTree(Tree, t);
+						m->LoadTree(Tree, t);
+						break;
 					}
-				}
-				else if (Map.value->Hint == GV_DOM)
-				{
-					LView *ct;
-					if (Ui->GetViewById(Map.value->Id, ct))
+					case GV_DOM:
 					{
+						LView *ct;
+						if (!Ui->GetViewById(m->Id, ct))
+							break;
+
 						LVariant Ret;
 						LArray<LVariant*> Args;
 						Args[0] = new LVariant(Xml);
@@ -303,124 +313,142 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 						auto Param = LDomPropToString(ControlSerialize);
 						ct->CallMethod(Param, &Ret, Args);
 						Args.DeleteObjects();
+						break;
 					}
-				}
-				else if (Tag->GetValue(Map.key, v))
-				{
-					int Type = Map.value->Hint ? Map.value->Hint : GetDataType(v.Str());
+					default:
+					{
+						if (Tag->GetValue(Map.key, v))
+						{
+							int Type = m->Hint ? m->Hint : GetDataType(v.Str());
 
-					if (Type == GV_BOOL ||
-						Type == GV_INT32 ||
-						Type == GV_INT64)
-					{
-						Ui->SetCtrlValue(Map.value->Id, v.CastInt32());
+							if (Type == GV_BOOL ||
+								Type == GV_INT32 ||
+								Type == GV_INT64)
+							{
+								Ui->SetCtrlValue(m->Id, v.CastInt32());
+							}
+							else
+							{
+								Ui->SetCtrlName(m->Id, v.Str());
+							}
+							Status = true;
+						}
+						else
+						{
+							LEdit *c;
+							if (Ui->GetViewById(m->Id, c))
+								c->Name("");
+						}
+						break;
 					}
-					else
-					{
-						Ui->SetCtrlName(Map.value->Id, v.Str());
-					}
-					Status = true;
-				}
-				else
-				{
-					LEdit *c;
-					if (Ui->GetViewById(Map.value->Id, c))
-						c->Name("");
 				}
 			}
 		}
 		else
 		{
 			// UI -> Xml
-			// const char *Attr;
-			// for (Mapping *Map = d->Maps.First(&Attr); Map; Map = d->Maps.Next(&Attr))
 			for (auto Map : d->Maps)
 			{
-				LViewI *c = Ui->FindControl(Map.value->Id);
-				if (c)
+				Mapping *m = Map.value;
+				if (m->Hint == GV_HASHTABLE)
 				{
-					int Type = Map.value->Hint ? Map.value->Hint : GetCtrlType(c);
-
-					switch (Type)
+					for (auto e: m->EnumMap)
 					{
-						case GV_LIST:
+						if (Ui->GetCtrlValue(e.value))
 						{
-							if (!Xml) break;
-							LXmlTag *Child = Xml->GetChildTag(Map.key, true);
-							if (!Child) break;
-							LList *Lst = dynamic_cast<LList*>(c);
-							if (!Lst) break;
-							Child->Empty(true);
-							Child->SetTag(Map.key);
-
-							List<LListItem> All;
-							Lst->GetAll(All);
-							for (auto i: All)
-							{
-								LXmlTag *n = new LXmlTag(Map.value->ChildElements.Str());
-								if (n)
-								{
-									i->XmlIo(n, true);
-									Child->InsertTag(n);
-								}
-							}
-							break;
-						}
-						case GV_CUSTOM: // LTree
-						{
-							if (!Xml) break;
-							LXmlTag *Child = Xml->GetChildTag(Map.key, true);
-							
-							if (!Child) break;
-							LTree *Tree = dynamic_cast<LTree*>(c);
-							
-							if (!Tree) break;
-							Child->Empty(true);
-							Child->SetTag(Map.key);
-							
-							Map.value->SaveTree(Tree, Child);
-							break;
-						}
-						case GV_INT32:
-						case GV_BOOL:
-						{
-							Tag->SetValue(Map.key, v = c->Value());
+							Tag->SetValue(Map.key, v = e.key);
 							Status = true;
-							break;
-						}
-						case GV_DOM:
-						{
-							LView *ct;
-							if (Ui->GetViewById(Map.value->Id, ct))
-							{
-								LVariant Ret;
-								LArray<LVariant*> Args;
-								Args[0] = new LVariant(Xml);
-								Args[1] = new LVariant(true);
-								ct->CallMethod(LDomPropToString(ControlSerialize), &Ret, Args);
-								Args.DeleteObjects();
-							}
-							break;
-						}
-						default:
-						{
-							auto Str = c->Name();
-							
-							if (ValidStr(Str))
-								v = Str;
-							else
-								v.Empty();
-
-							Tag->SetValue(Map.key, v);
-							Status = true;
-							break;
 						}
 					}
 				}
 				else
 				{
-					v.Empty();
-					Tag->SetValue(Map.key, v);
+					LViewI *c = Ui->FindControl(m->Id);
+					if (c)
+					{
+						int Type = m->Hint ? m->Hint : GetCtrlType(c);
+
+						switch (Type)
+						{
+							case GV_LIST:
+							{
+								if (!Xml) break;
+								LXmlTag *Child = Xml->GetChildTag(Map.key, true);
+								if (!Child) break;
+								LList *Lst = dynamic_cast<LList*>(c);
+								if (!Lst) break;
+								Child->Empty(true);
+								Child->SetTag(Map.key);
+
+								List<LListItem> All;
+								Lst->GetAll(All);
+								for (auto i: All)
+								{
+									LXmlTag *n = new LXmlTag(m->ChildElementName);
+									if (n)
+									{
+										i->XmlIo(n, true);
+										Child->InsertTag(n);
+									}
+								}
+								break;
+							}
+							case GV_CUSTOM: // LTree
+							{
+								if (!Xml) break;
+								LXmlTag *Child = Xml->GetChildTag(Map.key, true);
+							
+								if (!Child) break;
+								LTree *Tree = dynamic_cast<LTree*>(c);
+							
+								if (!Tree) break;
+								Child->Empty(true);
+								Child->SetTag(Map.key);
+							
+								m->SaveTree(Tree, Child);
+								break;
+							}
+							case GV_INT32:
+							case GV_BOOL:
+							{
+								Tag->SetValue(Map.key, v = c->Value());
+								Status = true;
+								break;
+							}
+							case GV_DOM:
+							{
+								LView *ct;
+								if (Ui->GetViewById(m->Id, ct))
+								{
+									LVariant Ret;
+									LArray<LVariant*> Args;
+									Args[0] = new LVariant(Xml);
+									Args[1] = new LVariant(true);
+									ct->CallMethod(LDomPropToString(ControlSerialize), &Ret, Args);
+									Args.DeleteObjects();
+								}
+								break;
+							}
+							default:
+							{
+								auto Str = c->Name();
+							
+								if (ValidStr(Str))
+									v = Str;
+								else
+									v.Empty();
+
+								Tag->SetValue(Map.key, v);
+								Status = true;
+								break;
+							}
+						}
+					}
+					else
+					{
+						v.Empty();
+						Tag->SetValue(Map.key, v);
+					}
 				}
 			}
 		}
