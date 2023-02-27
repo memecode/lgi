@@ -540,11 +540,16 @@ public:
 		return Str ? Str->Len : 0;
 	}
 
-	size_t Length(size_t NewLen)
+	size_t Length(ssize_t NewLen)
 	{
-		if (Str)
+		if (NewLen < 0)
 		{
-			if (NewLen <= Str->Len)
+			LAssert(!"No negative string len.");
+			Empty();
+		}
+		else if (Str)
+		{
+			if (NewLen <= (ssize_t)Str->Len)
 			{
 				Str->Len = NewLen;
 				Str->Str[NewLen] = 0;
@@ -578,7 +583,7 @@ public:
 			else return 0;
 		}
 		
-		return Str->Len;
+		return Str ? Str->Len : 0;
 	}
 
 	/// Splits the string into parts using a separator

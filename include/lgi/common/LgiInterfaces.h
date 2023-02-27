@@ -109,7 +109,9 @@ public:
 		LString s;
 		s.Length(bufLen);
 		auto rd = Read(s.Get(), s.Length());
-		if (rd < (ssize_t) s.Length())
+		if (rd < 0)
+			s.Empty();
+		else if (rd < (ssize_t) s.Length())
 			s.Length(rd);
 		return s;
 	}
