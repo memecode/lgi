@@ -1809,10 +1809,10 @@ case IDomCall:
 						break;
 					}
 
-					ssize_t sLen = strlen(s);
-					const char *sub = Arg[0]->Str();
-					int start = Arg.Length() > 1 ? Arg[1]->CastInt32() : 0;
-					int end = Arg.Length() > 2 ? Arg[2]->CastInt32() : -1;								
+					ssize_t sLen = Strlen(s);
+					auto sub = Arg[0]->Str();
+					auto start = Arg.Length() > 1 ? Arg[1]->CastInt32() : 0;
+					auto end = Arg.Length() > 2   ? Arg[2]->CastInt32() : -1;								
 
 					if (start >= sLen)
 					{
@@ -1824,7 +1824,7 @@ case IDomCall:
 					if (end >= 0)
 						pos = Strnstr(sStart, sub, end);
 					else
-						pos = strstr(sStart, sub);
+						pos = Strstr(sStart, sub);
 
 					if (pos)
 						*Dst = (int64) (pos - s);
@@ -1842,26 +1842,26 @@ case IDomCall:
 					}
 
 					ssize_t sLen = strlen(s);
-					const char *sub = Arg[0]->Str();
-					int start_idx = Arg.Length() > 1 ? Arg[1]->CastInt32() : 0;
-					int end_idx = Arg.Length() > 2 ? Arg[2]->CastInt32() : -1;								
+					auto sub = Arg[0]->Str();
+					auto start_idx = Arg.Length() > 1 ? Arg[1]->CastInt32() : 0;
+					auto end_idx = Arg.Length()   > 2 ? Arg[2]->CastInt32() : -1;								
 
 					if (start_idx >= sLen)
 					{
 						*Dst = -1;
 						break;
 					}
-					size_t sublen = strlen(sub);
-					char *cur = (char*)s + start_idx;
-					char *end = end_idx >= 0 ? cur + end_idx : NULL;
-					char *pos = NULL;
+					auto sublen = Strlen(sub);
+					auto cur = s + start_idx;
+					auto end = end_idx >= 0 ? cur + end_idx : NULL;
+					const char *pos = NULL;
 					while (true)
 					{
 						cur =	(end)
 								?
 								Strnstr(cur, sub, end - cur)
 								:
-								strstr(cur, sub);
+								Strstr(cur, sub);
 						if (cur)
 						{
 							pos = cur;
@@ -1894,15 +1894,15 @@ case IDomCall:
 				}
 				case StrStrip:
 				{
-					char *s = Dom->Str();
+					auto s = Dom->Str();
 					if (s)
 					{
 						const char *Delimit = Arg.Length() > 0 ? Arg[0]->Str() : NULL;
 						if (!Delimit)
 							Delimit = WhiteSpace;
 
-						char *start = s;
-						char *end = s + strlen(s);
+						auto start = s;
+						auto end = s + Strlen(s);
 						while (start < end && strchr(Delimit, *start))
 							start++;
 
@@ -1916,7 +1916,7 @@ case IDomCall:
 				}
 				case StrSub:
 				{
-					char *s = Dom->Str();
+					auto s = Dom->Str();
 					if (s)
 					{
 						ssize_t Start = Arg.Length() > 0 ? Arg[0]->CastInt32() : 0;

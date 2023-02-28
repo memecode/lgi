@@ -344,21 +344,25 @@ public:
 				}
 				case IDC_SAVE_RAW:
 				{
-					LFileSelect s;
-					s.Parent(this);
-					if (!s.Save())
-						break;
-
-					LFile out(s.Name(), O_WRITE);
-					if (out)
+					auto s = new LFileSelect;
+					s->Parent(this);
+					s->Save([this](auto s, auto ok)
 					{
-						out.SetSize(0);
+						if (ok)
+						{
+							LFile out(s->Name(), O_WRITE);
+							if (out)
+							{
+								out.SetSize(0);
 
-						auto ptr = Audio.AddressOf(DataStart);
-						out.Write(ptr, Audio.Length() - DataStart);
-					}
-					else
-						LgiMsg(this, "Can't open '%s' for writing.", "Error", MB_OK, s.Name());
+								auto ptr = Audio.AddressOf(DataStart);
+								out.Write(ptr, Audio.Length() - DataStart);
+							}
+							else
+								LgiMsg(this, "Can't open '%s' for writing.", "Error", MB_OK, s->Name());
+						}
+						delete s;
+					});
 					break;
 				}
 				case IDC_DRAW_AUTO:

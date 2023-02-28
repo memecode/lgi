@@ -2286,9 +2286,10 @@ CleanUp:
 	return Status;
 }
 
-bool MailPop3::MailIsEnd(char *Ptr, ssize_t Len)
+bool MailPop3::MailIsEnd(LString &s)
 {
-	for (char *c = Ptr; Len-- > 0; c++)
+	ssize_t Len = s.Length();
+	for (auto c = s.Get(); c && Len-- > 0; c++)
 	{
 		if (*c != *Marker)
 		{
@@ -2670,15 +2671,15 @@ LString MailPop3::ReadMultiLineReply()
 
 	do
 	{
-		LString s = Socket->Read();
+		auto s = Socket->Read();
 		if (!s)
 			break;
 
 		a += s;
-		if (a[0] != '+')
+		if (!a || a[0] != '+')
 			return NULL;
 	}
-	while (!MailIsEnd(a.Get(), a.Length()));
+	while (!MailIsEnd(a));
 
 	// Strip off the first line...
 	auto FirstNewLen = a.Find("\n");

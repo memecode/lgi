@@ -35,11 +35,12 @@ public:
 		Ptr = ap.Release();
 	}
 
-	LAutoPtr(LAutoPtr &&from)
+	// Move constructor
+	LAutoPtr(LAutoPtr &&from) noexcept
 	{
 		Ptr = from.Release();
 	}
-
+	
 	LAutoPtr(LAutoPtrRef<X> apr)
 	{
 		Ptr = apr.Ptr;
@@ -68,7 +69,7 @@ public:
 			delete Ptr;
 		
 		// This is needed to be able to use LAutoPtr inside LArray's.
-		Ptr = 0;
+		Ptr = NULL;
 	}
 
 	void Swap(LAutoPtr<X,Arr> &p)
@@ -83,7 +84,7 @@ public:
 
 	X* operator->() const
 	{
-		LAssert(Ptr != 0); 
+		LAssert(Ptr != NULL);
 		return Ptr;
 	}
 
@@ -95,21 +96,22 @@ public:
 	X* Release()
 	{
 		X *p = Ptr;
-		Ptr = 0;
+		Ptr = NULL;
 		return p;
 	}
 
 	bool Reset(X* p=NULL)
 	{
 		if (Ptr == p)
-			return Ptr != 0;
+			return Ptr != NULL;
 
 		if (Arr)
 			delete [] Ptr;
 		else
 			delete Ptr;
 		Ptr = p;
-		return Ptr != 0;
+		
+		return Ptr != NULL;
 	}
 
 	template<class Y>

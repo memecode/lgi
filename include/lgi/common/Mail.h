@@ -557,7 +557,7 @@ protected:
 	bool ReadReply();
 	LString ReadMultiLineReply();
 	int GetInt();
-	bool MailIsEnd(char *Ptr, ssize_t Len);
+	bool MailIsEnd(LString &s);
 	bool ListCmd(const char *Cmd, LHashTbl<ConstStrKey<char,false>, bool> &Results);
 
 	const char *End;

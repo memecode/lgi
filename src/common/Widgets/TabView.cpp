@@ -141,8 +141,10 @@ public:
 		LLinearBlendBrush s2(a, b, CountOf(Stops), Stops);
 		p.Fill(Dc, s2);
 
+		#ifndef WINDOWS
 		if (Dc->IsPreMultipliedAlpha())
 			Dc->ConvertPreMulAlpha(true);
+		#endif
 		return true;
 	}
 
