@@ -23,11 +23,12 @@ struct LDialogPriv
 	int ModalStatus = -1;
 	int BtnId = -1;
     int ModalResult = -1;
+
 	// Modal state
 	OsView ParentHnd = NULL;
 	LWindow *ParentWnd = NULL;
+	bool ParentWndHasThis = false;
 	LDialog::OnClose Callback;
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -46,6 +47,7 @@ LDialog::LDialog(LViewI *parent)
 
 LDialog::~LDialog()
 {
+	LAssert(!d->ParentWndHasThis);
 	LAssert(!d->IsModal && !d->IsModeless); // Can't delete while still active...
     DeleteObj(d);
 }
@@ -114,7 +116,10 @@ void LDialog::DoModal(OnClose Callback, OsView ParentHnd)
 	    
 	    d->ParentWnd = dynamic_cast<LWindow*>(p);
 	    if (d->ParentWnd)
+		{
+			d->ParentWndHasThis = true;
 	        d->ParentWnd->_Dialog = this;
+		}
 
 	    if (p)
 	    {
@@ -247,9 +252,10 @@ LMessage::Result LDialog::OnEvent(LMessage *Msg)
 			// See ::EndModal for comment on why this is here.
 			d->ModalResult = max((int)Msg->A(), 0);
 
-			if (d->ParentHnd)
+			if (d->ParentWnd)
 			{
 				d->ParentWnd->_Dialog = NULL;
+				d->ParentWndHasThis = false;
 				EnableWindow(d->ParentHnd, true);
 			}
 	    

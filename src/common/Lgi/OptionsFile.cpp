@@ -32,7 +32,8 @@ LOptionsFile::LOptionsFile(PortableType Mode, const char *BaseName) : LMutex("LO
 {
 	_Init();
 
-	SetMode(Mode, BaseName);
+	if (Mode != UnknownMode)
+		SetMode(Mode, BaseName);
 }
 
 LOptionsFile::~LOptionsFile()
@@ -46,13 +47,13 @@ LOptionsFile::PortableType LOptionsFile::GuessMode()
 		return UnknownMode;
 
 	#if defined(MAC)
-	if (a[0].Equals("Applications"))
-		return DesktopMode;
+		if (a[0].Equals("Applications"))
+			return DesktopMode;
 	#elif defined(WINDOWS)
-	if (a.Length() > 1 && (a[1].Equals("Program Files") || a[1].Equals("Program Files (x86)")))
-		return DesktopMode;
+		if (a.Length() > 1 && (a[1].Equals("Program Files") || a[1].Equals("Program Files (x86)")))
+			return DesktopMode;
 	#else
-	#warning "Impl me.""
+		#warning "Impl me.""
 	#endif
 
 	return PortableMode;
