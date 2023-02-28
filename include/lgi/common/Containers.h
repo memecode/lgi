@@ -969,25 +969,37 @@ protected:
 	{
 		/// Number of bytes in this block that have been read
 		/// Type 1 or 'read' bytes are in [0,Next-1].
-		int Next;
+		int Next = 0;
+
 		/// Number of bytes that are used in this block include read bytes.
 		/// Type 2 or 'used' bytes are in [Next,Used-1].
-		int Used;
+		int Used = 0;
+
 		/// Total size of the memory block
 		/// Type 3 or 'unused' bytes are in [Used,Size-1].
-		int Size;
-		uint8_t *Ptr() { return (uint8_t*) (this + 1); }
+		int Size = 0;
 
-		Block()
+		uint8_t *Ptr()
 		{
-			Next = 0;
-			Size = 0;
-			Used = 0;
+			return (uint8_t*) (this + 1);
 		}
+
+		uint8_t *Start()
+		{
+			return Ptr() + Next;
+		}
+
+		ssize_t Length()
+		{
+			return Used - Next;
+		}
+
+		void Free();
 	};
 
 	ssize_t PreAlloc;
 	List<Block> Mem;
+	bool _debug = false;
 
 public:
 	/// Constructor
@@ -1012,7 +1024,7 @@ public:
 		/// If this is > 0 then the function add's the specified number of bytes containing
 		/// the value 0 on the end of the block. This is useful for NULL terminating strings
 		/// or adding buffer space on the end of the block returned.
-		int AddBytes = 0
+		ssize_t AddBytes = 0
 	);
 	
 	/// Reads data from the start of the container without removing it from
@@ -1022,7 +1034,7 @@ public:
 		/// Buffer for output
 		uchar *Ptr,
 		/// Bytes to look at
-		int Size
+		ssize_t Size
 	);
 
 	/// Gets the total bytes in the container
@@ -1100,8 +1112,8 @@ public:
 	#endif
 };
 
-#define GMEMFILE_BLOCKS		8
-class LgiClass GMemFile : public LStream
+#define LMEMFILE_BLOCKS		8
+class LgiClass LMemFile : public LStream
 {
 	struct Block
 	{
@@ -1111,8 +1123,7 @@ class LgiClass GMemFile : public LStream
 	};
 
 	// The current file pointer
-	uint64 CurPos;
-	
+	uint64 CurPos;	
 	
 	/// Number of blocks in use
 	int Blocks;
@@ -1121,7 +1132,7 @@ class LgiClass GMemFile : public LStream
 	int BlockSize;
 
 	/// Some blocks are built into the struct, no memory alloc needed.
-	Block *Local[GMEMFILE_BLOCKS];
+	Block *Local[LMEMFILE_BLOCKS];
 	
 	// Buf if they run out we can alloc some more.
 	LArray<Block*> Extra;
@@ -1133,8 +1144,8 @@ class LgiClass GMemFile : public LStream
 	int CurBlock() { return (int) (CurPos / BlockSize); }
 
 public:
-	GMemFile(int BlkSize = 256);
-	~GMemFile();
+	LMemFile(int BlkSize = 256);
+	~LMemFile();
 	
 	void Empty();
 	int64 GetSize() override;

@@ -143,18 +143,6 @@ bool LIsUtf8(const char *s, ssize_t len)
 	if (!s || *s == 0)
 		return true;
 
-	/*
-	{
-		ssize_t Len = len >= 0 ?  len : Strlen(s);
-		printf("Utf: %p %i\n", s, (int)Len);
-		for (int i=0; i<Len; i++)
-		{
-			printf("%02x ", (uint8_t)s[i]);
-		}
-		printf("\n");
-	}
-	*/	
-
 	const char *Start = s;
 	while
 	(
@@ -197,11 +185,19 @@ bool LIsUtf8(const char *s, ssize_t len)
 	return true;
 
 Utf8Error:
-	#if 0
-	LgiTrace("%s:%i - Invalid utf, len=%i, bytes=", _FL, len);
-	for (int i=0; len < 0 ? s[i] : i<MIN(16, len); i++)
+	#if 1
+	LgiTrace("%s:%i - Invalid utf @ offset=%i, bytes=", _FL, (int) (s - Start));
+	auto end = len < 0 ? NULL : Start + len;
+	for (auto i = 0; i < 16; i++)
 	{
-		LgiTrace("%02.2x,", (uint8_t)s[i]);
+		if
+		(
+			(end && s >= end)
+			||
+			*s == 0
+		)
+			break;
+		LgiTrace("%02.2x,", (uint8_t)*s++);
 	}
 	LgiTrace("\n");
 	#endif

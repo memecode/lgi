@@ -14,6 +14,7 @@
 #include <stdlib.h>
 
 #include "lgi/common/Mem.h"
+#include "lgi/common/LgiUiBase.h"
 #include <malloc.h>
 
 #ifdef LGI_MEM_DEBUG

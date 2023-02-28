@@ -8,8 +8,7 @@
 //              fret@memecode.com
 //
 
-#ifndef __LGI_OS_DEFS_H
-#define __LGI_OS_DEFS_H
+#pragma once
 
 #pragma warning(disable : 4251 4275)
 
@@ -104,7 +103,6 @@ typedef int (__stdcall *pSHFileOperationW)(LPSHFILEOPSTRUCTW lpFileOp);
 typedef int (__stdcall *p_vscprintf)(const char *format, va_list argptr);
 
 #include "lgi/common/Message.h"
-#include "lgi/common/LgiUiBase.h"
 
 class LgiClass OsAppArguments
 {
@@ -187,14 +185,14 @@ LgiFunc void LSleep(DWORD i);
 // Process
 typedef DWORD							OsProcessId;
 LgiExtern HINSTANCE						_lgi_app_instance;
-#define LProcessInst()				_lgi_app_instance
+#define LProcessInst()					_lgi_app_instance
 extern p_vscprintf						lgi_vscprintf;
 #define LGetCurrentProcess()			GetCurrentProcessId()
 
 // Threads
 typedef DWORD							OsThreadId;
 typedef CRITICAL_SECTION				OsSemaphore;
-#define LGetCurrentThread()			GetCurrentThread()
+#define LGetCurrentThread()				GetCurrentThread()
 // #define GetCurrentThreadId()			GetCurrentThreadId()
 
 // Socket/Network
@@ -207,6 +205,7 @@ typedef SOCKET							OsSocket;
 #define LGI_WideCharset					"ucs-2"
 #define LPrintfInt64					"%I64i"
 #define LPrintfHex64					"%I64x"
+
 #if LGI_64BIT
 	#define LPrintfSizeT				"%I64u"
 	#define LPrintfSSizeT				"%I64d"
@@ -306,4 +305,3 @@ extern bool LgiToWindowsCursor(OsView Hnd, LCursor Cursor);
 #endif
 #endif
 
-#endif

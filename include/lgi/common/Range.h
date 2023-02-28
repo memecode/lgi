@@ -100,6 +100,20 @@ struct LRange
 		this->Len = r.Len;
 		return *this;
 	}
+
+	#ifdef LPrintfSSizeT
+	const char *GetStr()
+	{
+		static const int strs = 4;
+		static char s[strs][32];
+		static int idx = 0;
+
+		char *buf = s[idx++];
+		sprintf_s(buf, 32, LPrintfSSizeT "," LPrintfSSizeT, Start, Len);
+		if (idx >= strs) idx = 0;
+		return buf;
+	}
+	#endif
 };
 
 #endif

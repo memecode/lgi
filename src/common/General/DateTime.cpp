@@ -150,7 +150,7 @@ bool LDateTime::IsValid() const
 			InRange(_Seconds, 0, 59) &&
 			InRange(_Minutes, 0, 59) &&
 			InRange(_Hours, 0, 23) &&
-			InRange(_Tz, -720, 720);
+			InRange(_Tz, -780, 780);
 }
 
 void LDateTime::SetTimeZone(int NewTz, bool ConvertTime)

@@ -103,6 +103,8 @@ bool UnitTest_ListClass()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
+#define Q_TRACE(...)  if (_debug) LgiTrace(__VA_ARGS__)
+
 LMemQueue::LMemQueue(size_t prealloc)
 {
 	PreAlloc = prealloc;
@@ -111,6 +113,11 @@ LMemQueue::LMemQueue(size_t prealloc)
 LMemQueue::~LMemQueue()
 {
 	Empty();
+}
+
+void LMemQueue::Block::Free()
+{
+	free(this);
 }
 
 LMemQueue &LMemQueue::operator=(LMemQueue &p)
@@ -137,7 +144,10 @@ LMemQueue &LMemQueue::operator=(LMemQueue &p)
 void LMemQueue::Empty()
 {
 	for (auto b: Mem)
-		free(b);
+	{
+		Q_TRACE("Empty() b=%p\n", b);
+		b->Free();
+	}
 	Mem.Empty();
 }
 
@@ -145,11 +155,11 @@ int64 LMemQueue::GetSize()
 {
 	int64 Size = 0;
 	for (auto b: Mem)
-		Size += b->Used - b->Next;
+		Size += b->Length();
 	return Size;
 }
 
-int64 LMemQueue::Peek(uchar *Ptr, int Size)
+int64 LMemQueue::Peek(uchar *Ptr, ssize_t Size)
 {
 	int64 Status = 0;
 
@@ -159,10 +169,11 @@ int64 LMemQueue::Peek(uchar *Ptr, int Size)
 		{
 			if (Size <= 0)
 				break;
-			int Copy = MIN(Size, b->Size - b->Next);
+			auto Copy = MIN(Size, b->Length());
 			if (Copy > 0)
 			{
-				memcpy(Ptr, b->Ptr() + b->Next, Copy);
+				memcpy(Ptr, b->Start(), Copy);
+
 				Ptr += Copy;
 				Size -= Copy;
 				Status += Copy;
@@ -173,16 +184,16 @@ int64 LMemQueue::Peek(uchar *Ptr, int Size)
 	return Status;
 }
 
-void *LMemQueue::New(int AddBytes)
+void *LMemQueue::New(ssize_t AddBytes)
 {
-	int64 Len = GetSize();
-	uchar *Data = Len > 0 ? new uchar[Len+AddBytes] : 0;
+	auto Len = GetSize();
+	uchar *Data = Len > 0 ? new uchar[Len + AddBytes] : NULL;
 	if (Data)
 	{
 		ssize_t Rd = Read(Data, Len);
 		if (Rd >= 0 && AddBytes)
 		{
-			memset(Data+Len, 0, AddBytes);
+			memset(Data + Len, 0, AddBytes);
 		}
 	}
 
@@ -191,7 +202,7 @@ void *LMemQueue::New(int AddBytes)
 
 ssize_t LMemQueue::Read(void *Ptr, ssize_t Size, int Flags)
 {
-	int Status = 0;
+	ssize_t Status = 0;
 
 	if (Ptr && Size > 0)
 	{
@@ -200,13 +211,14 @@ ssize_t LMemQueue::Read(void *Ptr, ssize_t Size, int Flags)
 			if (Size <= 0)
 				break;
 
-			int Copy = (int) MIN(Size, b->Used - b->Next);
+			auto Copy = MIN(Size, b->Length());
+			// Q_TRACE("Read, copy=%i\n", (int)Copy);
 			if (Copy > 0)
 			{
-				memcpy(Ptr, b->Ptr() + b->Next, Copy);
+				memcpy(Ptr, b->Start(), Copy);
 				((uchar*&)Ptr) += Copy;
 				Size -= Copy;
-				b->Next += Copy;
+				b->Next += (int)Copy;
 				Status += Copy;
 			}
 		}
@@ -218,53 +230,55 @@ ssize_t LMemQueue::Read(void *Ptr, ssize_t Size, int Flags)
 			if (b->Next < b->Used)
 				break;
 			Mem.Delete(b);
-			free(b);
+			// Q_TRACE("Read, free=%p\n", b);
+			b->Free();
 		}
 	}
 
 	return Status;
 }
 
-ssize_t LMemQueue::Write(const void *Ptr, ssize_t Size, int Flags)
+ssize_t LMemQueue::Write(const void *_Ptr, ssize_t Size, int Flags)
 {
 	ssize_t Status = 0;
+	auto Ptr = (const uint8_t *)_Ptr;
 
-	if (Ptr && Size > 0)
+	if (!Ptr || Size <= 0)
+		return Status;
+
+	// Is there any space in the last block?
+	auto it = Mem.rbegin();
+	Block *Last = *it;
+	if (Last)
 	{
-		if (PreAlloc > 0)
+		auto Len = MIN(Size, Last->Size - Last->Used);
+		Q_TRACE("Write, last.len=%i\n", (int)Len);
+		if (Len > 0)
 		{
-			auto it = Mem.rbegin();
-			Block *Last = *it;
-			if (Last)
-			{
-				int Len = (int) MIN(Size, Last->Size - Last->Used);
-				if (Len > 0)
-				{
-					memcpy(Last->Ptr() + Last->Used, Ptr, Len);
-					Last->Used += Len;
-					Size -= Len;
-					((uchar*&)Ptr) += Len;
-					Status += Len;
-				}
-			}
+			memcpy(Last->Ptr() + Last->Used, Ptr, Len);
+			Last->Used += (int)Len;
+			LAssert(Last->Used <= Last->Size);
+			Size -= Len;
+			Ptr += Len;
+			Status += Len;
 		}
+	}
 
-		if (Size > 0)
+	if (Size > 0)
+	{
+		ssize_t Bytes = MAX(PreAlloc, Size);
+		ssize_t Alloc = sizeof(Block) + Bytes;
+		Alloc = LGI_ALLOC_ALIGN(Alloc);
+		Block *b = (Block*) malloc(Alloc);
+		if (b)
 		{
-			ssize_t Bytes = MAX(PreAlloc, Size);
-			ssize_t Alloc = sizeof(Block) + Bytes;
-			Alloc = LGI_ALLOC_ALIGN(Alloc);
-			Block *b = (Block*) malloc(Alloc);
-			if (b)
-			{
-				void *p = b->Ptr();
-				memcpy(p, Ptr, Size);
-				b->Size = (int)Bytes;
-				b->Used = (int)Size;
-				b->Next = 0;
-				Mem.Insert(b);
-				Status += Size;
-			}
+			b->Size = (int)Bytes;
+			b->Used = (int)Size;
+			b->Next = 0;
+			Q_TRACE("Write, ptr=%p size=%i\n", b, (int)Size);
+			memcpy(b->Ptr(), Ptr, Size);
+			Mem.Insert(b);
+			Status += Size;
 		}
 	}
 
@@ -321,8 +335,8 @@ void LMemQueue::Iterate(std::function<bool(uint8_t*, size_t)> callback, bool rev
 	{
 		for (auto it = Mem.rbegin(); it >= Mem.begin(); --it)
 		{
-			auto p = (*it)->Ptr();
-			if (!callback(p, (*it)->Used))
+			auto b = (*it);
+			if (!callback(b->Start(), b->Length()))
 				break;
 		}
 	}
@@ -330,8 +344,10 @@ void LMemQueue::Iterate(std::function<bool(uint8_t*, size_t)> callback, bool rev
 	{
 		for (auto b: Mem)
 		{
-			auto p = b->Ptr();
-			if (!callback(p, b->Used))
+			Q_TRACE("Iter b=%p, blk:%p,%i,%i,%i, start=%p, len=%i\n",
+				b, b->Ptr(), b->Next, b->Used, b->Size,
+				b->Start(), b->Length());
+			if (!callback(b->Start(), b->Length()))
 				break;
 		}
 	}
@@ -467,7 +483,8 @@ ssize_t LStringPipe::SaveToBuffer(char *Start, ssize_t BufSize, ssize_t Chars)
 		if (m->Next >= m->Used)
 		{
 			Mem.Delete(it);
-			free(m);
+			Q_TRACE("SaveToBuffer, free=%p\n", m);
+			m->Free();
 			it = Mem.begin();
 			m = *it;
 		}
@@ -572,7 +589,7 @@ bool LStringPipe::UnitTest()
 #endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-GMemFile::GMemFile(int BlkSize)
+LMemFile::LMemFile(int BlkSize)
 {
 	CurPos = 0;
 	Blocks = 0;
@@ -580,29 +597,29 @@ GMemFile::GMemFile(int BlkSize)
 	ZeroObj(Local);
 }
 
-GMemFile::~GMemFile()
+LMemFile::~LMemFile()
 {
 	Empty();
 }
 
-GMemFile::Block *GMemFile::Get(int Index)
+LMemFile::Block *LMemFile::Get(int Index)
 {
 	if (Blocks == 0 || Index < 0)
 		return NULL;
 
-	if (Index < GMEMFILE_BLOCKS)
+	if (Index < LMEMFILE_BLOCKS)
 		return Local[Index];
 	
-	if (Index - GMEMFILE_BLOCKS >= Extra.Length())
+	if (Index - LMEMFILE_BLOCKS >= Extra.Length())
 	{
 		LAssert(!"Index beyond last block");
 		return NULL;
 	}
 
-	return Extra[Index - GMEMFILE_BLOCKS];
+	return Extra[Index - LMEMFILE_BLOCKS];
 }
 
-GMemFile::Block *GMemFile::Create()
+LMemFile::Block *LMemFile::Create()
 {
 	int Alloc = sizeof(Block) + BlockSize - 1;
 	Alloc = LGI_ALLOC_ALIGN(Alloc);
@@ -613,7 +630,7 @@ GMemFile::Block *GMemFile::Create()
 	b->Used = 0;
 	b->Offset = Blocks * BlockSize;
 	
-	if (Blocks < GMEMFILE_BLOCKS)
+	if (Blocks < LMEMFILE_BLOCKS)
 		Local[Blocks] = b;
 	else
 		Extra.Add(b);
@@ -622,16 +639,16 @@ GMemFile::Block *GMemFile::Create()
 	return b;
 }
 
-void GMemFile::Empty()
+void LMemFile::Empty()
 {
 	CurPos = 0;
-	for (int i=0; i<GMEMFILE_BLOCKS; i++)
+	for (int i=0; i<LMEMFILE_BLOCKS; i++)
 		free(Local[i]);
 	for (int i=0; i<Extra.Length(); i++)
 		free(Extra[i]);
 }
 
-int64 GMemFile::GetSize()
+int64 LMemFile::GetSize()
 {
 	#ifndef __llvm__
 	if (this == NULL)
@@ -645,13 +662,13 @@ int64 GMemFile::GetSize()
 	return Sz + b->Used;	
 }
 
-bool GMemFile::FreeBlock(Block *b)
+bool LMemFile::FreeBlock(Block *b)
 {
 	if (!b)
 		return false;
 	
 	ssize_t Idx = b->Offset / BlockSize;
-	if (Idx < GMEMFILE_BLOCKS)
+	if (Idx < LMEMFILE_BLOCKS)
 	{
 		// Local block
 		if (Local[Idx] != b ||
@@ -668,7 +685,7 @@ bool GMemFile::FreeBlock(Block *b)
 	}
 
 	// Extra block
-	ssize_t Off = Idx - GMEMFILE_BLOCKS;
+	ssize_t Off = Idx - LMEMFILE_BLOCKS;
 	if (Off != Extra.Length() - 1)
 	{
 		LAssert(!"Block index error.");
@@ -681,7 +698,7 @@ bool GMemFile::FreeBlock(Block *b)
 	return true;
 }
 
-int64 GMemFile::SetSize(int64 Size)
+int64 LMemFile::SetSize(int64 Size)
 {
 	if (Size <= 0)
 	{
@@ -734,12 +751,12 @@ int64 GMemFile::SetSize(int64 Size)
 	return GetSize();
 }
 
-int64 GMemFile::GetPos()
+int64 LMemFile::GetPos()
 {
 	return CurPos;
 }
 
-int64 GMemFile::SetPos(int64 Pos)
+int64 LMemFile::SetPos(int64 Pos)
 {
 	if (Pos <= 0)
 		return CurPos = 0; // Off the start of the structure
@@ -759,7 +776,7 @@ int64 GMemFile::SetPos(int64 Pos)
 	return CurPos = Pos; // Inside the last block
 }
 
-ssize_t GMemFile::Read(void *Ptr, ssize_t Size, int Flags)
+ssize_t LMemFile::Read(void *Ptr, ssize_t Size, int Flags)
 {
 	if (!Ptr || Size < 1)
 		return 0;
@@ -794,7 +811,7 @@ ssize_t GMemFile::Read(void *Ptr, ssize_t Size, int Flags)
 	return p - (uint8_t*) Ptr;
 }
 
-ssize_t GMemFile::Write(const void *Ptr, ssize_t Size, int Flags)
+ssize_t LMemFile::Write(const void *Ptr, ssize_t Size, int Flags)
 {
 	if (!Ptr || Size < 1)
 		return 0;

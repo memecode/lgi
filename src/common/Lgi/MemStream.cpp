@@ -28,24 +28,49 @@ LMemStream::LMemStream(LStreamI *Src, int64 Start, int64 len)
 		bool Error = false;
 		if (Start >= 0)
 		{
-			int64 Result = Src->SetPos(Start);
-			if (Result >= 0 && Result != Start)
+			auto Result = Src->SetPos(Start);
+			if (Result < 0)
+			{
+				// Stream doesn't support streaming...
+				// Read enough bytes to find the start...
+				char buf[1024];
+				for (ssize_t i = 0; i < Start; )
+				{
+					auto remain = Start - i;
+					auto len = MIN(remain, sizeof(buf));
+					auto rd = Src->Read(buf, len);
+					if (rd != len)
+					{
+						Error = true;
+						break;
+					}
+					i += rd;
+				}
+			}
+			else if (Result != Start)
+			{
 				Error = true;
+			}
 		}
+
 		if (Error)
 		{
 			LAssert(!"Failed to set stream position");
 		}
 		else
 		{
-			if (len < 0 && Src->GetSize() > 0)
+			if (len >= 0)
+			{
+				Len = len;
+			}
+			else if (Src->GetSize() > 0)
 			{
 				Len = Src->GetSize();
 				if (Start > 0)
 					Len -= Start;
 			}
 
-			if (Len >= 0)
+			if (Len > 0)
 			{
 				if ((Mem = new char[Alloc = Len]))
 				{
