@@ -464,7 +464,7 @@ bool LWindow::HandleViewMouse(LView *v, LMouse &m)
 	#if DEBUG_HANDLE_VIEW_MOUSE
 	m.Trace("HandleViewMouse");
 	#endif
-	
+
 	for (int i=0; i<d->Hooks.Length(); i++)
 	{
 		if (d->Hooks[i].Flags & LMouseEvents)
@@ -485,6 +485,7 @@ bool LWindow::HandleViewMouse(LView *v, LMouse &m)
 	if (!m.IsMove())
 		LgiTrace("   Passing mouse event to '%s'\n", v->GetClass());
 	#endif
+
 	return true;
 }
 

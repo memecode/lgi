@@ -236,10 +236,18 @@ public:
 	void OnPosChange() override;
 	LMessage::Result OnEvent(LMessage *Msg) override;
 	void OnPaint(LSurface *pDC) override;
+	
+	/// Allow the window to filter mouse events:
+	/// \returns false if the Window consumed the event.
 	bool HandleViewMouse(LView *v, LMouse &m);
+
+	/// Allow the window to filter key events:
+	/// \returns false if the Window consumed the event.
 	bool HandleViewKey(LView *v, LKey &k);
+	
 	/// Return true to accept application quit
 	bool OnRequestClose(bool OsShuttingDown) override;
+	
 	bool Obscured();
 	bool Visible() override;
 	void Visible(bool i) override;
@@ -281,7 +289,11 @@ public:
 
 	#endif
 
-	#if defined(LGI_SDL)
+	#if HAIKU
+	
+		void SetModalDialog(LWindow *dlg);
+	
+	#elif defined(LGI_SDL)
 
 		virtual bool PushWindow(LWindow *v);
 		virtual LWindow *PopWindow();

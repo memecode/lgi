@@ -6,12 +6,9 @@
 
 #include "lgi/common/Json.h"
 
-typedef LArray<LAppInfo*> AppArray;
+typedef LArray<LAppInfo> AppArray;
 
-class LAppPrivate
-	#ifdef HAIKU
-	: public BApplication
-	#endif
+class LAppPrivate : public BApplication
 {
 public:
 	// Common
@@ -69,11 +66,7 @@ public:
 
 	~LAppPrivate()
 	{
-		for (auto p : MimeToApp)
-		{
-			p.value->DeleteObjects();
-			DeleteObj(p.value);
-		}
+		MimeToApp.DeleteObjects();
 	}
 
 	LJson *GetConfig();
