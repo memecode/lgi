@@ -3777,7 +3777,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 						d->FindParameters->Type = var.CastInt32() ? FifSearchSolution : FifSearchDirectory;
 				}		
 
-				FindInFiles Dlg(this, d->FindParameters);
+				auto Dlg = new FindInFiles(this, d->FindParameters);
 
 				LViewI *Focus = GetFocus();
 				if (Focus)
@@ -3786,7 +3786,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 					if (Edit && Edit->HasSelection())
 					{
 						LAutoString a(Edit->GetSelection());
-						Dlg.Params->Text = a;
+						Dlg->Params->Text = a;
 					}
 				}
 				
@@ -3795,15 +3795,14 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				{
 					LAutoString Base = p->GetBasePath();
 					if (Base)
-						Dlg.Params->Dir = Base;
+						Dlg->Params->Dir = Base;
 				}
 
-				Dlg.DoModal([&](auto dlg, auto code)
+				Dlg->DoModal([this, Dlg, p](auto dlg, auto code)
 				{
-					if (p && Dlg.Params->Type == FifSearchSolution)
+					if (p && Dlg->Params->Type == FifSearchSolution)
 					{
-						Dlg.Params->ProjectFiles.Length(0);
-
+						Dlg->Params->ProjectFiles.Length(0);
 						
 						List<IdeProject> Projects;
 						Projects.Insert(p);
@@ -3817,7 +3816,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 						{
 							LString s = Nodes[i]->GetFullPath();
 							if (s)
-								Dlg.Params->ProjectFiles.Add(s);
+								Dlg->Params->ProjectFiles.Add(s);
 						}
 					}
 
@@ -3828,6 +3827,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 					
 					if (d->FindParameters->Text)
 						d->Finder->PostEvent(FindInFilesThread::M_START_SEARCH, (LMessage::Param) new FindParams(d->FindParameters));
+					
+					delete Dlg;
 				});
 			}
 			break;
