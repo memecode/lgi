@@ -3182,10 +3182,12 @@ void IdeProject::OnMouseClick(LMouse &m)
 		{
 			case IDM_NEW_FOLDER:
 			{
-				LInput Name(Tree, "", "Name:", AppName);
-				Name.DoModal([&](auto d, auto code)
+				auto Name = new LInput(Tree, "", "Name:", AppName);
+				Name->DoModal([this, Name](auto d, auto code)
 				{
-					GetSubFolder(this, Name.GetStr(), true);
+					if (code)
+						GetSubFolder(this, Name->GetStr(), true);
+					delete d;
 				});
 				break;
 			}

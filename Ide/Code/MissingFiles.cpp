@@ -397,6 +397,6 @@ public:
 
 void FixMissingFilesDlg(IdeProject *Proj)
 {
-	MissingFiles Dlg(Proj);
-	Dlg.DoModal(NULL);
+	auto Dlg = new MissingFiles(Proj);
+	Dlg->DoModal(NULL);
 }

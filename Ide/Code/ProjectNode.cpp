@@ -712,35 +712,37 @@ bool ProjectNode::Serialize(bool Write)
 											"\t%s",
 											p.Get(),
 											Files[0]);
-								char *Msg = Buf.NewStr();
+								auto Msg = Buf.NewGStr();
 								if (Msg)
 								{
-									LAlert a(Project->GetApp(), "Missing File", Msg, "Yes", "No", "Browse...");
-									switch (a.DoModal())
+									auto a = new LAlert(Project->GetApp(), "Missing File", Msg, "Yes", "No", "Browse...");
+									a->DoModal([this](auto dlg, auto code)
 									{
-										case 1: // Yes
+										switch (code)
 										{
-											SetFileName(Files[0]);
-											break;
-										}
-										case 2: // No
-										{
-											break;
-										}
-										case 3: // Browse
-										{
-											LFileSelect s;
-											s.Parent(Project->GetApp());
-											s.Type("Code", SourcePatterns);
-											if (s.Open())
+											case 1: // Yes
 											{
-												SetFileName(s.Name());
+												SetFileName(Files[0]);
+												break;
 											}
-											break;
+											case 2: // No
+											{
+												break;
+											}
+											case 3: // Browse
+											{
+												LFileSelect s;
+												s.Parent(Project->GetApp());
+												s.Type("Code", SourcePatterns);
+												if (s.Open())
+												{
+													SetFileName(s.Name());
+												}
+												break;
+											}
 										}
-									}
-									
-									DeleteArray(Msg);
+										delete dlg;
+									});
 								}
 							}
 							else
@@ -752,37 +754,41 @@ bool ProjectNode::Serialize(bool Write)
 											"\n"
 											"doesn't exist.",
 											p.Get());
-								char *Msg = Buf.NewStr();
+								auto Msg = Buf.NewGStr();
 								if (Msg)
 								{
-									LAlert a(Project->GetApp(), "Missing File", Msg, "Skip", "Delete", "Browse...");
-									switch (a.DoModal())
+									auto a = new LAlert(Project->GetApp(), "Missing File", Msg, "Skip", "Delete", "Browse...");
+									a->DoModal([this](auto dlg, auto code)
 									{
-										case 1: // Skip
+										switch (code)
 										{
-											break;
-										}
-										case 2: // Delete
-										{
-											Project->SetDirty();
-											delete this;
-											return false;
-											break;
-										}
-										case 3: // Browse
-										{
-											LFileSelect s;
-											s.Parent(Project->GetApp());
-											s.Type("Code", SourcePatterns);
-											if (s.Open())
+											case 1: // Skip
 											{
-												SetFileName(s.Name());
+												break;
 											}
-											break;
+											case 2: // Delete
+											{
+												Project->SetDirty();
+												delete this;
+												return false;
+												break;
+											}
+											case 3: // Browse
+											{
+												auto s = new LFileSelect;
+												s->Parent(Project->GetApp());
+												s->Type("Code", SourcePatterns);
+												s->Open([this](auto s, auto ok)
+												{
+													if (ok)
+														SetFileName(s->Name());
+													delete s;
+												});
+												break;
+											}
 										}
-									}
-									
-									DeleteArray(Msg);
+										delete dlg;
+									});
 								}
 							}
 						}
@@ -1523,8 +1529,8 @@ void ProjectNode::OnProperties()
 	}
 	else if (Type == NodeDependancy)
 	{
-		DepDlg dlg(this);
-		dlg.DoModal(NULL);
+		auto dlg = new DepDlg(this);
+		dlg->DoModal(NULL);
 	}
 	else
 	{

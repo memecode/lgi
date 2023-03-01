@@ -1462,6 +1462,14 @@ void IdeDoc::EscapeSelection(bool ToEscaped)
 	if (!s)
 		return;
 
+	auto ReplaceSelection = [this](LString s)
+	{
+		auto r = d->Edit->GetSelectionRange();
+		LAutoWString w(Utf8ToWide(s));
+		d->Edit->DeleteSelection();
+		d->Edit->Insert(r.Start, w, StrlenW(w));
+	};
+
 	if (ToEscaped)
 	{
 		LMouse m;
@@ -1469,11 +1477,20 @@ void IdeDoc::EscapeSelection(bool ToEscaped)
 		LString Delim = "\r\n\\";
 		if (m.Ctrl())
 		{
-			LInput Inp(this, LString::Escape(Delim, -1, "\\"), "Delimiter chars:", "Escape");
-			Inp.DoModal([&](auto d, auto code) {
-				Delim = LString::UnEscape(Inp.GetStr().Get(), -1);
+			auto Inp = new LInput(this, LString::Escape(Delim, -1, "\\"), "Delimiter chars:", "Escape");
+			Inp->DoModal([this, ReplaceSelection, s, Inp](auto d, auto code)
+			{
+				if (code)
+				{
+					auto Delim = LString::UnEscape(Inp->GetStr().Get(), -1);
+					auto str = LString::Escape(s, -1, Delim);
+					ReplaceSelection(str);
+				}
+				delete d;
 			});
+			return;
 		}
+
 		s = LString::Escape(s, -1, Delim);
 	}
 	else
@@ -1481,11 +1498,7 @@ void IdeDoc::EscapeSelection(bool ToEscaped)
 		s = LString::UnEscape(s.Get(), -1);
 	}
 
-	auto r = d->Edit->GetSelectionRange();
-
-	LAutoWString w(Utf8ToWide(s));
-	d->Edit->DeleteSelection();
-	d->Edit->Insert(r.Start, w, StrlenW(w));
+	ReplaceSelection(s);
 }
 
 void IdeDoc::ConvertWhiteSpace(bool ToTabs)

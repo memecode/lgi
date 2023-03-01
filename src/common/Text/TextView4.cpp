@@ -2843,29 +2843,30 @@ void LTextView4::DoFind(std::function<void(bool)> Callback)
 		u = d->FindReplaceParams->LastFind.Get();
 	}
 
-	LFindDlg Dlg(this, [View=this, Params=d->FindReplaceParams, Callback](LFindReplaceCommon *Dlg, int Action)
-	{
-		if (Params &&
-			Params->Lock(_FL))
+	auto Dlg = new LFindDlg(this, [this, Params=d->FindReplaceParams, Callback](auto Dlg, auto Action)
 		{
-			Params->MatchWord = Dlg->MatchWord;
-			Params->MatchCase = Dlg->MatchCase;
-			Params->SelectionOnly = Dlg->SelectionOnly;
-			Params->SearchUpwards = Dlg->SearchUpwards;
-			Params->LastFind.Reset(Utf8ToWide(Dlg->Find));
+			if (Params &&
+				Params->Lock(_FL))
+			{
+				Params->MatchWord = Dlg->MatchWord;
+				Params->MatchCase = Dlg->MatchCase;
+				Params->SelectionOnly = Dlg->SelectionOnly;
+				Params->SearchUpwards = Dlg->SearchUpwards;
+				Params->LastFind.Reset(Utf8ToWide(Dlg->Find));
 		
-			Params->Unlock();
-		}
+				Params->Unlock();
+			}
 
-		View->DoFindNext([View, Callback](bool ok)
-		{
-			View->Focus(true);
-			if (Callback)
-				Callback(ok);
-		});
-	}, u);
+			DoFindNext([this, Callback](bool ok)
+			{
+				Focus(true);
+				if (Callback)
+					Callback(ok);
+			});
+		},
+		u);
 
-	Dlg.DoModal(NULL);
+	Dlg->DoModal(NULL);
 }
 
 void LTextView4::DoReplace(std::function<void(bool)> Callback)
@@ -2885,17 +2886,14 @@ void LTextView4::DoReplace(std::function<void(bool)> Callback)
 		}
 	}
 
-	char *LastFind8 = SingleLineSelection ? GetSelection() : WideToUtf8(d->FindReplaceParams->LastFind);
-	char *LastReplace8 = WideToUtf8(d->FindReplaceParams->LastReplace);
+	LAutoString LastFind8(SingleLineSelection ? GetSelection() : WideToUtf8(d->FindReplaceParams->LastFind));
+	LAutoString LastReplace8(WideToUtf8(d->FindReplaceParams->LastReplace));
 	
-	LReplaceDlg Dlg(this,
-		[&](LFindReplaceCommon *Dlg, int Action)
+	auto Dlg = new LReplaceDlg(this,
+		[this](auto Dlg, auto Action)
 		{
 			LReplaceDlg *Replace = dynamic_cast<LReplaceDlg*>(Dlg);
 			LAssert(Replace != NULL);
-
-			DeleteArray(LastFind8);
-			DeleteArray(LastReplace8);
 
 			if (Action == IDCANCEL)
 				return;
@@ -2939,11 +2937,11 @@ void LTextView4::DoReplace(std::function<void(bool)> Callback)
 		LastFind8,
 		LastReplace8);
 
-	Dlg.MatchWord = d->FindReplaceParams->MatchWord;
-	Dlg.MatchCase = d->FindReplaceParams->MatchCase;
-	Dlg.SelectionOnly = HasSelection();
+	Dlg->MatchWord = d->FindReplaceParams->MatchWord;
+	Dlg->MatchCase = d->FindReplaceParams->MatchCase;
+	Dlg->SelectionOnly = HasSelection();
 
-	Dlg.DoModal(NULL);
+	Dlg->DoModal(NULL);
 }
 
 void LTextView4::SelectWord(size_t From)
