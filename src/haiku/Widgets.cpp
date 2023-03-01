@@ -23,21 +23,20 @@
 
 struct LDialogPriv
 {
-	int ModalStatus;
-	int BtnId;
-	bool IsModal, IsModeless;
-	bool Resizable;
-	LDialog::OnClose ModalCb;
+	int ModalStatus = 0;
+	int BtnId = -1;
+	bool IsModal = false;
+	bool IsModeless = false;
+	bool Resizable = true;
 	thread_id CallingThread = NULL;
-	
-	LDialogPriv()
-	{
-		IsModal = false;
-		IsModeless = false;
-		Resizable = true;
-		ModalStatus = 0;
-		BtnId = -1;
-	}
+
+	/// The callback for the modal dialog:
+	LDialog::OnClose ModalCb;
+
+	/// This is set when the parent window has a pointer
+	/// to this dialog. We mustn't delete or change parent
+	/// while they have that.
+	bool ParentModal = false;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -57,6 +56,7 @@ LDialog::LDialog(LViewI *parent)
 
 LDialog::~LDialog()
 {
+	LAssert(!d->ParentModal);
 	DeleteObj(d);
 }
 
@@ -158,9 +158,23 @@ void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 		Parent &&
 		Parent->WindowHandle())
 	{
+		#if 0
+		
 		// Keep this dialog above the parent window...
 		WindowHandle()->SetFeel(B_MODAL_SUBSET_WINDOW_FEEL);
 		WindowHandle()->AddToSubset(Parent->WindowHandle());
+		
+		#else
+		
+		auto Wnd = dynamic_cast<LWindow*>(Parent);
+		LAssert(Wnd);
+		if (Wnd)
+		{
+			d->ParentModal = true;
+			Wnd->SetModalDialog(this);
+		}
+		
+		#endif
 	}
 	else LgiTrace("%s:%i - Can't set parent for modal.\n", _FL);
 
@@ -184,6 +198,17 @@ void LDialog::EndModal(int Code)
 		return;
 	}
 	
+	if (d->ParentModal)
+	{
+		auto Wnd = dynamic_cast<LWindow*>(GetParent());
+		LAssert(Wnd);
+		if (Wnd)
+		{
+			Wnd->SetModalDialog(NULL);
+			d->ParentModal = false;
+		}
+	}
+
 	d->IsModal = false;
 	if (!d->ModalCb)
 	{

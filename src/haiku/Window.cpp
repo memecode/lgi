@@ -51,6 +51,7 @@ public:
 	LWindow *Wnd;
 	bool SnapToEdge = false;
 	LArray<HookInfo> Hooks;
+	LWindow *ModalDlg = NULL;
 	
 	LWindowPrivate(LWindow *wnd) :
 		Wnd(wnd),
@@ -64,6 +65,7 @@ public:
 
 	~LWindowPrivate()
 	{
+		LAssert(ModalDlg == NULL);
 		DeleteObj(Wnd->Menu);
 		if (IsMinimized())
 			Wnd->_PrevZoom = LZoomMin;
@@ -166,6 +168,11 @@ LWindow::~LWindow()
 
 	LAssert(!Menu);
 	WaitThread();
+}
+
+void LWindow::SetModalDialog(LWindow *dlg)
+{
+	d->ModalDlg = dlg;
 }
 
 int LWindow::WaitThread()
@@ -359,6 +366,15 @@ bool LWindow::OnRequestClose(bool OsShuttingDown)
 
 bool LWindow::HandleViewMouse(LView *v, LMouse &m)
 {
+	if (d->ModalDlg)
+	{
+		printf("%s:%i - %s ignoring mouse event while %s is shown.\n",
+			_FL,
+			GetClass(),
+			d->ModalDlg->GetClass());
+		return false;
+	}
+
 	if (m.Down() && !m.IsMove())
 	{
 		bool InPopup = false;
@@ -416,6 +432,15 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 			(char*)(k.Ctrl()?" Ctrl":""));
 	}
 	#endif
+
+	if (d->ModalDlg)
+	{
+		printf("%s:%i - %s ignoring key event while %s is shown.\n",
+			_FL,
+			GetClass(),
+			d->ModalDlg->GetClass());
+		return false;
+	}
 
 	// Any window in a popup always gets the key...
 	LViewI *p;
@@ -754,7 +779,6 @@ LRect &LWindow::GetPos()
 
 bool LWindow::SetPos(LRect &p, bool Repaint)
 {
-	printf("SetPos %s -> %s\n", Pos.GetStr(), p.GetStr());
 	Pos = p;
 
 	LLocker lck(d, _FL);

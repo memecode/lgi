@@ -8,6 +8,7 @@ protected:
     const char *file = NULL;
     int line = 0;
     bool locked = false;
+    bool noThread = false;
 
 public:
     LLocker(BHandler *h, const char *File, int Line);

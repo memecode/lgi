@@ -176,13 +176,13 @@ void LgiCrashHandler(int Sig)
 
 /////////////////////////////////////////////////////////////////////////////
 #ifndef XK_Num_Lock
-#define XK_Num_Lock                      0xff7f
+#define XK_Num_Lock						 0xff7f
 #endif
 #ifndef XK_Shift_Lock
-#define XK_Shift_Lock                    0xffe6
+#define XK_Shift_Lock					 0xffe6
 #endif
 #ifndef XK_Caps_Lock
-#define XK_Caps_Lock                     0xffe5
+#define XK_Caps_Lock					 0xffe5
 #endif
 
 struct Msg
@@ -390,9 +390,9 @@ OsThreadId LApp::GetGuiThreadId()
 
 OsProcessId LApp::GetProcessId()
 {
-    #ifdef WIN32
+	#ifdef WIN32
 	return GetCurrentProcessId();
-    #else
+	#else
 	return getpid();
 	#endif
 }
@@ -529,15 +529,15 @@ bool LApp::GetOption(const char *Option, ::LString &Buf)
 							{
 								auto Len = End-Arg;
 								if (Len > 0)
-								    Buf.Set(Arg, Len);
+									Buf.Set(Arg, Len);
 								else
-								    return false;
+									return false;
 							}
 							else return false;
 						}
 						else
 						{
-						    Buf = Arg;
+							Buf = Arg;
 						}
 					}
 
@@ -918,8 +918,8 @@ public:
 
 OsApplication::OsApplication(int Args, const char **Arg)
 {
-    Inst = this;
-    d = new OsApplicationPriv;	
+	Inst = this;
+	d = new OsApplicationPriv;	
 }
 
 OsApplication::~OsApplication()
@@ -983,14 +983,14 @@ bool LMessage::Send(LViewI *View)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 LLocker::LLocker(BHandler *h, const char *File, int Line)
 {
-    hnd = h;
-    file = File;
-    line = Line;
+	hnd = h;
+	file = File;
+	line = Line;
 }
 
 LLocker::~LLocker()
 {
-    Unlock();
+	Unlock();
 }
 
 bool LLocker::Lock()
@@ -998,65 +998,106 @@ bool LLocker::Lock()
 	if (locked)
 	{
 		printf("%s:%i - Locker already locked.\n", file, line);
-    	LAssert(!"Locker already locked.");
-    	return false;
-    }
-    if (!hnd)
-    {
-    	// printf("%s:%i - Locker hnd is NULL.\n", file, line);
-    	return false;
-    }        
+		LAssert(!"Locker already locked.");
+		return false;
+	}
+	if (!hnd)
+	{
+		// printf("%s:%i - Locker hnd is NULL.\n", file, line);
+		return false;
+	}
+	
+	auto looper = hnd->Looper();
+	if (!looper)
+	{
+		// printf("%s:%i - Locker looper is NULL %i.\n", file, line, count);
+		return false;
+	}
+	
+	thread_id threadId = looper->Thread();
+	if (threadId <= 0)
+	{
+		// printf("%s:%i - Looper has no thread?!?!\n", file, line);
+		noThread = true;
+		return locked = true;
+	}
 
-    while (!locked)
-    {
-        status_t result = hnd->LockLooperWithTimeout(1000 * 1000);
-        if (result == B_OK)
-        {
-            locked = true;
-            break;
-        }
-        else if (result == B_TIMED_OUT)
-        {
-            // Warn about failure to lock...
-            auto cur = GetCurrentThreadId();
-            auto locking = hnd->Looper()->LockingThread();
-            
-            printf("%s:%i - Warning: can't lock. cur=%i locking=%i\n",
-            	_FL,
-            	cur,
-            	locking);
-        }
-        else if (result == B_BAD_VALUE)
-        {
-            break;
-        }
-        else
-        {
-            // Warn about error
-            printf("%s:%i - Error from LockLooperWithTimeout = 0x%x\n", _FL, result);
-        }
-    }
+	while (!locked)
+	{
+		status_t result = hnd->LockLooperWithTimeout(1000 * 1000);
+		if (result == B_OK)
+		{
+			locked = true;
+			break;
+		}
+		else if (result == B_TIMED_OUT)
+		{
+			// Warn about failure to lock...
+			auto cur = GetCurrentThreadId();
+			auto locking = hnd->Looper()->LockingThread();
+			
+			printf("%s:%i - Warning: can't lock. cur=%i locking=%i\n",
+				_FL,
+				cur,
+				locking);
+		}
+		else if (result == B_BAD_VALUE)
+		{
+			break;
+		}
+		else
+		{
+			// Warn about error
+			printf("%s:%i - Error from LockLooperWithTimeout = 0x%x\n", _FL, result);
+		}
+	}
 
-    return locked;
+	return locked;
 }
 
 status_t LLocker::LockWithTimeout(int64 time)
 {
-    LAssert(!locked);
-    LAssert(hnd != NULL);
-    
-    status_t result = hnd->LockLooperWithTimeout(time);
-    if (result == B_OK)
-        locked = true;
-    
-    return result;
+	LAssert(!locked);
+	
+	if (!hnd)
+	{
+		// printf("%s:%i - Locker hnd is NULL.\n", file, line);
+		return false;
+	}
+
+	auto looper = hnd->Looper();
+	if (!looper)
+	{
+		// printf("%s:%i - Locker looper is NULL %i.\n", file, line, count);
+		return false;
+	}
+	
+	thread_id threadId = looper->Thread();
+	if (threadId <= 0)
+	{
+		// printf("%s:%i - Looper has no thread?!?!\n", file, line);
+		noThread = true;
+		return locked = true;
+	}
+
+	status_t result = hnd->LockLooperWithTimeout(time);
+	if (result == B_OK)
+		locked = true;
+	
+	return result;
 }
 
 void LLocker::Unlock()
 {
-    if (locked)
-    {
-        hnd->UnlockLooper();
-        locked = false;
-    }
+	if (noThread)
+	{
+		locked = false;
+		return;
+	}
+
+	if (locked)
+	{
+		hnd->UnlockLooper();
+		locked = false;
+	}
 }
