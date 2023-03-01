@@ -616,6 +616,34 @@ LRect GtkGetPos(GtkWidget *w)
 
 bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 {
+	#if 0 // Debug where lots of invalidate calls are from
+		static uint64_t StartTs = 0;
+		static int Count = 0;
+		static LHashTbl<ConstStrKey<char,false>,int> Classes;
+		
+		Count++;
+		int count = Classes.Find(GetClass());
+		Classes.Add(GetClass(), count + 1);
+		
+		auto Now = LCurrentTime();
+		if (Now - StartTs >= 1000)
+		{
+			printf("Inval=%i:", Count);
+			for (auto p: Classes)
+				printf(" %s=%i", p.key, p.value);
+			printf("\n");
+				
+			StartTs = Now;
+			Count = 0;
+			Classes.Empty();
+			
+			if (!Stricmp(GetClass(), "LMdiChild"))
+			{
+				int asd=0;
+			}
+		}
+	#endif
+
 	auto *ParWnd = GetWindow();
 	if (!ParWnd)
 		return false; // Nothing we can do till we attach

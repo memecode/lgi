@@ -1297,86 +1297,88 @@ void LView::Visible(bool v)
 {
 	ThreadCheck();
 	
+	bool HasChanged = TestFlag(GViewFlags, GWF_VISIBLE) ^ v;
 	if (v) SetFlag(GViewFlags, GWF_VISIBLE);
 	else ClearFlag(GViewFlags, GWF_VISIBLE);
 
  	#if defined(HAIKU)
-	LLocker lck(d->Hnd, _FL);
-	if (!IsAttached() || lck.Lock())
-	{
-		const int attempts = 3;
-		// printf("%s/%p:Visible(%i) hidden=%i\n", GetClass(), this, v, d->Hnd->IsHidden());
-		if (v)
+		LLocker lck(d->Hnd, _FL);
+		if (!IsAttached() || lck.Lock())
 		{
-			bool parentHidden = false;
-			for (auto p = d->Hnd->Parent(); p; p = p->Parent())
+			const int attempts = 3;
+			// printf("%s/%p:Visible(%i) hidden=%i\n", GetClass(), this, v, d->Hnd->IsHidden());
+			if (v)
 			{
-				if (p->IsHidden())
+				bool parentHidden = false;
+				for (auto p = d->Hnd->Parent(); p; p = p->Parent())
 				{
-					parentHidden = true;
-					break;
+					if (p->IsHidden())
+					{
+						parentHidden = true;
+						break;
+					}
+				}
+				if (!parentHidden) // Don't try and show if one of the parent's is hidden.
+				{
+					for (int i=0; i<attempts && d->Hnd->IsHidden(); i++)
+					{
+						// printf("\t%p Show\n", this);
+						d->Hnd->Show();
+					}
+					if (d->Hnd->IsHidden())
+					{
+						printf("%s:%i - Failed to show %s.\n", _FL, GetClass());
+						for (auto p = d->Hnd->Parent(); p; p = p->Parent())
+							printf("\tparent: %s/%p ishidden=%i\n", p->Name(), p, p->IsHidden());
+					}
 				}
 			}
-			if (!parentHidden) // Don't try and show if one of the parent's is hidden.
+			else
 			{
-				for (int i=0; i<attempts && d->Hnd->IsHidden(); i++)
+				for (int i=0; i<attempts && !d->Hnd->IsHidden(); i++)
 				{
-					// printf("\t%p Show\n", this);
-					d->Hnd->Show();
+					// printf("\t%p Hide\n", this);
+					d->Hnd->Hide();
 				}
-				if (d->Hnd->IsHidden())
+				if (!d->Hnd->IsHidden())
 				{
-					printf("%s:%i - Failed to show %s.\n", _FL, GetClass());
+					printf("%s:%i - Failed to hide %s.\n", _FL, GetClass());
 					for (auto p = d->Hnd->Parent(); p; p = p->Parent())
 						printf("\tparent: %s/%p ishidden=%i\n", p->Name(), p, p->IsHidden());
 				}
 			}
+			// printf("\t%s/%p:Visible(%i) hidden=%i\n", GetClass(), this, v, d->Hnd->IsHidden());
+		}
+		else LgiTrace("%s:%i - Can't lock.\n", _FL);
+ 	#elif LGI_VIEW_HANDLE	
+		if (_View)
+		{
+			#if WINNATIVE
+
+				ShowWindow(_View, (v) ? SW_SHOWNORMAL : SW_HIDE);
+
+			#elif LGI_COCOA
+
+				LAutoPool Pool;
+				[_View.p setHidden:!v];
+
+			#elif LGI_CARBON
+			
+				Boolean is = HIViewIsVisible(_View);
+				if (v != is)
+				{
+					OSErr e = HIViewSetVisible(_View, v);
+					if (e) printf("%s:%i - HIViewSetVisible(%p,%i) failed with %i (class=%s)\n",
+									_FL, _View, v, e, GetClass());
+				}
+			
+			#endif
 		}
 		else
-		{
-			for (int i=0; i<attempts && !d->Hnd->IsHidden(); i++)
-			{
-				// printf("\t%p Hide\n", this);
-				d->Hnd->Hide();
-			}
-			if (!d->Hnd->IsHidden())
-			{
-				printf("%s:%i - Failed to hide %s.\n", _FL, GetClass());
-				for (auto p = d->Hnd->Parent(); p; p = p->Parent())
-					printf("\tparent: %s/%p ishidden=%i\n", p->Name(), p, p->IsHidden());
-			}
-		}
-		// printf("\t%s/%p:Visible(%i) hidden=%i\n", GetClass(), this, v, d->Hnd->IsHidden());
-	}
-	else LgiTrace("%s:%i - Can't lock.\n", _FL);
- 	#elif LGI_VIEW_HANDLE	
-	if (_View)
-	{
-		#if WINNATIVE
-
-			ShowWindow(_View, (v) ? SW_SHOWNORMAL : SW_HIDE);
-
-		#elif LGI_COCOA
-
-			LAutoPool Pool;
-			[_View.p setHidden:!v];
-
-		#elif LGI_CARBON
-		
-			Boolean is = HIViewIsVisible(_View);
-			if (v != is)
-			{
-				OSErr e = HIViewSetVisible(_View, v);
-				if (e) printf("%s:%i - HIViewSetVisible(%p,%i) failed with %i (class=%s)\n",
-								_FL, _View, v, e, GetClass());
-			}
-		
-		#endif
-	}
-	else
 	#endif
 	{
-		Invalidate();
+		if (HasChanged)
+			Invalidate();
 	}
 }
 
