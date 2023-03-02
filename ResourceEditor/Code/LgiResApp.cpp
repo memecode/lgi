@@ -9,21 +9,24 @@
 */
 
 #include <stdlib.h>
+
 #include "LgiResEdit.h"
 #include "LgiRes_Dialog.h"
 #include "LgiRes_Menu.h"
+
 #include "lgi/common/About.h"
 #include "lgi/common/TextLabel.h"
 #include "lgi/common/Edit.h"
 #include "lgi/common/CheckBox.h"
 #include "lgi/common/ProgressDlg.h"
 #include "lgi/common/TextView3.h"
-#include "resdefs.h"
 #include "lgi/common/Token.h"
 #include "lgi/common/DataDlg.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/StatusBar.h"
+
+#include "resdefs.h"
 
 char AppName[]					= "Lgi Resource Editor";
 char HelpFile[]					= "Help.html";
@@ -961,6 +964,10 @@ AppWnd::AppWnd() :
 				ShowLanguages.Add(L[i], true);
 			}
 		}
+		
+		auto scale = GetDpiScale();
+		GOOBER_SIZE *= scale.x;
+		GOOBER_BORDER *= scale.y;
 	}
 	else printf("%s:%i - _Create failed.\n", _FL);
 }

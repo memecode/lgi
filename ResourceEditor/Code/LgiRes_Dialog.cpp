@@ -31,6 +31,9 @@
 
 #define DEBUG_OVERLAY				0
 
+int GOOBER_SIZE						= 6;
+int GOOBER_BORDER					= 8;
+
 // Name mapping table
 class LgiObjectName
 {

@@ -39,8 +39,8 @@ class ResDialogUi;
 #define UI_CONTROL_TREE			18
 #define UI_DIALOG				100
 
-#define GOOBER_SIZE				5
-#define GOOBER_BORDER			7
+extern int GOOBER_SIZE;
+extern int GOOBER_BORDER;
 
 #define GRID_X					7
 #define GRID_Y					7
