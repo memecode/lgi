@@ -117,7 +117,6 @@ enum IdeControls
 	IDC_METHOD_SEARCH,
 	IDC_SYMBOL_SEARCH,
 	IDC_PROJECT_TREE,
-	IDC_ALL_PLATFORMS,
 };
 
 enum IdeMenuCmds
@@ -271,6 +270,8 @@ public:
 	
 	const char *GetClass() override { return "AppWnd"; }
 
+	int GetPlatform();
+	bool SetPlatform(int p);
 	bool IsClean();
 	void SaveAll(std::function<void(bool)> Callback, bool CloseDirty = false);
 	void CloseAll();
@@ -296,7 +297,7 @@ public:
 	LStream *GetDebugLog();
 	IdeDoc *FindOpenFile(char *FileName);
 	IdeDoc *GotoReference(const char *File, int Line, bool CurIp, bool WithHistory = true);
-	void FindSymbol(int ResultsSinkHnd, const char *Sym, bool AllPlatforms);
+	void FindSymbol(int ResultsSinkHnd, const char *Sym);
 	bool GetSystemIncludePaths(LArray<LString> &Paths);
 	bool ShowInProject(const char *Fn);
 	bool Build();

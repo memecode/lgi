@@ -44,6 +44,7 @@
 #define OPT_OUTPUT_PX			"OutputPx"
 #define OPT_FIX_RENAMED			"FixRenamed"
 #define OPT_RENAMED_SYM			"RenamedSym"
+#define OPT_PLATFORM			"Platform"
 
 #define IsSymbolChar(c)			( IsDigit(c) || IsAlpha(c) || strchr("-_", c) )
 
@@ -129,7 +130,7 @@ public:
 			p->GetAllNodes(Nodes);
 		}
 
-		FilterFiles(Matches, Nodes, s);
+		FilterFiles(Matches, Nodes, s, App->GetPlatform());
 
 		Lst->Empty();
 		for (auto m: Matches)
@@ -1018,6 +1019,7 @@ class AppWndPrivate
 {
 public:
 	AppWnd *App;
+	int Platform = 0;
 	LMdiParent *Mdi;
 	LOptionsFile Options;
 	LBox *HBox, *VBox;
@@ -1682,9 +1684,14 @@ AppWnd::AppWnd()
 	}
 	else LgiTrace("%s:%i - No tools obj?", _FL);
 
-	LVariant v = 270, OutPx = 250;
-	d->Options.GetValue(OPT_SPLIT_PX, v);
+	LVariant SplitPx = 270, OutPx = 250, v;
+	d->Options.GetValue(OPT_SPLIT_PX, SplitPx);
 	d->Options.GetValue(OPT_OUTPUT_PX, OutPx);
+
+	if (d->Options.GetValue(OPT_PLATFORM, v))
+		SetPlatform(v.CastInt32());
+	else
+		SetPlatform(PLATFORM_CURRENT);
 
 	AddView(d->VBox = new LBox);
 	d->VBox->SetVertical(true);
@@ -1705,7 +1712,7 @@ AppWnd::AppWnd()
 		d->Mdi->HasButton(true);
 	}
 
-	d->HBox->Value(MAX(v.CastInt32(), 20));
+	d->HBox->Value(MAX(SplitPx.CastInt32(), 20));
 
 	LRect c = GetClient();
 	if (c.Y() > OutPx.CastInt32())
@@ -1744,16 +1751,12 @@ AppWnd::~AppWnd()
 	WaitThread();
 	#endif
 
+	LVariant v;
 	if (d->HBox)
-	{
-		LVariant v = d->HBox->Value();
-		d->Options.SetValue(OPT_SPLIT_PX, v);
-	}
+		d->Options.SetValue(OPT_SPLIT_PX, v = d->HBox->Value());
 	if (d->Output)
-	{
-		LVariant v = d->Output->Y();
-		d->Options.SetValue(OPT_OUTPUT_PX, v);
-	}
+		d->Options.SetValue(OPT_OUTPUT_PX, v = d->Output->Y());
+	d->Options.SetValue(OPT_PLATFORM, v = d->Platform);
 
 	ShutdownFtpThread();
 
@@ -2452,6 +2455,39 @@ void AppWnd::AppendOutput(char *Txt, AppWnd::Channels Channel)
 		Ctrl->UnSelectAll();
 		Ctrl->Name("");
 	}
+}
+
+int AppWnd::GetPlatform()
+{
+	return d->Platform;
+}
+
+bool AppWnd::SetPlatform(int p)
+{
+	if (p == 0)
+		p = PLATFORM_CURRENT;
+
+	if (d->Platform == p)
+		return false;
+
+	d->Platform = p;
+
+	if (auto m = GetMenu())
+	{
+		bool all = d->Platform == PLATFORM_ALL;
+		#define SET_CHK(id, flag) \
+			{ auto mi = m->FindItem(id); \
+			if (mi) mi->Checked((d->Platform & flag) && !all); }
+
+		SET_CHK(IDM_WIN, PLATFORM_WIN32);
+		SET_CHK(IDM_LINUX, PLATFORM_LINUX);
+		SET_CHK(IDM_MAC, PLATFORM_MAC);
+		SET_CHK(IDM_HAIKU, PLATFORM_HAIKU);
+		auto mi = m->FindItem(IDM_ALL_OS);
+		if (mi) mi->Checked(all);
+	}
+	
+	return true;
 }
 
 bool AppWnd::IsClean()
@@ -4185,6 +4221,29 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			}
 			break;
 		}
+
+		//
+		// OS Platform
+		//
+		#define HANDLE_PLATFORM_ITEM(id, flag) \
+		case id: \
+		{ \
+			auto mi = GetMenu()->FindItem(id); \
+			if (!mi) break; \
+			if (d->Platform == PLATFORM_ALL) d->Platform = 0; \
+			if (mi->Checked()) SetPlatform(d->Platform & ~flag); \
+			else               SetPlatform(d->Platform | flag); \
+			break; \
+		}
+		HANDLE_PLATFORM_ITEM(IDM_WIN, PLATFORM_WIN32)
+		HANDLE_PLATFORM_ITEM(IDM_LINUX, PLATFORM_LINUX)
+		HANDLE_PLATFORM_ITEM(IDM_MAC, PLATFORM_MAC)
+		HANDLE_PLATFORM_ITEM(IDM_HAIKU, PLATFORM_HAIKU)
+		case IDM_ALL_OS:
+		{
+			SetPlatform(PLATFORM_ALL);
+			break;
+		}
 		
 		//
 		// Other
@@ -4473,9 +4532,9 @@ LStream *AppWnd::GetDebugLog()
 	return d->Output->Txt[AppWnd::DebugTab];
 }
 
-void AppWnd::FindSymbol(int ResultsSinkHnd, const char *Sym, bool AllPlatforms)
+void AppWnd::FindSymbol(int ResultsSinkHnd, const char *Sym)
 {
-	d->FindSym->Search(ResultsSinkHnd, Sym, AllPlatforms);
+	d->FindSym->Search(ResultsSinkHnd, Sym, d->Platform);
 }
 
 bool AppWnd::GetSystemIncludePaths(::LArray<LString> &Paths)

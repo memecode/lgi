@@ -479,7 +479,8 @@ public:
 
 	void Layout(LRect c)
 	{
-		auto scale = Table->GetWindow()->GetDpiScale();
+		LAssert(LAppInst->AppWnd);
+		auto scale = LAppInst->AppWnd->GetDpiScale();
 		int ADD_BORDER = (int) (10.0 * scale.x + 0.5);
 		#define CELL_SPACING	1
 

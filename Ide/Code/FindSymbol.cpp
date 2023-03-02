@@ -275,7 +275,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			case M_FIND_SYM_REQUEST:
 			{
 				LAutoPtr<FindSymRequest> Req((FindSymRequest*)Msg->A());
-				bool AllPlatforms = (bool)Msg->B();
+				int Platforms = Msg->B();
 				if (Req && Req->SinkHnd >= 0)
 				{
 					LString::Array p = Req->Str.SplitDelimit(" \t");
@@ -306,8 +306,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 							#endif
 
 							// Check platforms...
-							if (!AllPlatforms &&
-								(fs->Platforms & PLATFORM_CURRENT) == 0)
+							if ((fs->Platforms & Platforms) == 0)
 							{
 								continue;
 							}
@@ -670,12 +669,12 @@ bool FindSymbolSystem::OnFile(const char *Path, SymAction Action, int Platforms)
 	return false;
 }
 
-void FindSymbolSystem::Search(int ResultsSinkHnd, const char *SearchStr, bool AllPlat)
+void FindSymbolSystem::Search(int ResultsSinkHnd, const char *SearchStr, int Platforms)
 {
 	FindSymRequest *Req = new FindSymRequest(ResultsSinkHnd);
 	if (Req)
 	{
 		Req->Str = SearchStr;
-		d->PostEvent(M_FIND_SYM_REQUEST, (LMessage::Param)Req, (LMessage::Param)AllPlat);
+		d->PostEvent(M_FIND_SYM_REQUEST, (LMessage::Param)Req, (LMessage::Param)Platforms);
 	}
 }

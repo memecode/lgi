@@ -712,6 +712,12 @@
 			<String Ref="51" Cid="587" Define="IDM_SPLIT" en="Split Selection" />
 			<String Ref="52" Cid="588" Define="IDM_JOIN" en="Join Selection" />
 			<String Ref="55" Cid="589" Define="IDM_NEW_PROJECT_TEMPLATE" en="New from &Template" />
+			<String Ref="191" Cid="590" Define="IDM_MENU_OS" en="&Os" />
+			<String Ref="205" Cid="591" Define="IDM_WIN" en="Windows" />
+			<String Ref="210" Cid="592" Define="IDM_LINUX" en="Linux" />
+			<String Ref="246" Cid="593" Define="IDM_MAC" en="MacOSX" />
+			<String Ref="247" Cid="594" Define="IDM_HAIKU" en="Haiku" />
+			<String Ref="248" Cid="595" Define="IDM_ALL_OS" en="All OS" />
 		</string-group>
 		<submenu Ref="175">
 			<menuitem Ref="174" Shortcut="CtrlCmd+N" />
@@ -799,6 +805,13 @@
 			<menuitem Ref="225" Shortcut="Shift+F11" />
 			<menuitem Sep="1" />
 			<menuitem Ref="227" Shortcut="F9" />
+		</submenu>
+		<submenu Ref="191">
+			<menuitem Ref="205" />
+			<menuitem Ref="210" />
+			<menuitem Ref="246" />
+			<menuitem Ref="247" />
+			<menuitem Ref="248" />
 		</submenu>
 		<submenu Ref="133">
 			<menuitem Ref="132" />

@@ -116,7 +116,7 @@ public:
 	
 	/// This function searches the database for symbols and returns
 	/// the results as a M_FIND_SYM_REQUEST message.
-	void Search(int ResultsSinkHnd, const char *SearchStr, bool AllPlat);
+	void Search(int ResultsSinkHnd, const char *SearchStr, int Platforms);
 };
 
 #endif

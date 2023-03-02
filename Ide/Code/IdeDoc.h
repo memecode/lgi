@@ -7,7 +7,7 @@
 #include "lgi/common/TextView3.h"
 #include "ParserCommon.h"
 
-extern void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LString InputStr);
+extern void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LString InputStr, int Platforms);
 
 class IdeDoc : public LMdiChild, public LStream
 {

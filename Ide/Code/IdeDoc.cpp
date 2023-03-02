@@ -56,7 +56,6 @@ EditTray::EditTray(LTextView3 *ctrl, IdeDoc *doc)
 	AddView(FileSearch   = new LEdit(IDC_FILE_SEARCH,   0, 0, EDIT_CTRL_WIDTH, Ht));
 	AddView(FuncSearch   = new LEdit(IDC_METHOD_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
 	AddView(SymSearch    = new LEdit(IDC_SYMBOL_SEARCH, 0, 0, EDIT_CTRL_WIDTH, Ht));
-	AddView(AllPlatforms = new LCheckBox(IDC_ALL_PLATFORMS, 0, 0, 20, Ht, "All Platforms"));
 }
 	
 EditTray::~EditTray()
@@ -124,13 +123,6 @@ void EditTray::OnPosChange()
 		c.Left(SymSearch, EDIT_CTRL_WIDTH);
 	c.x1 += 8;
 
-	if (AllPlatforms)
-	{
-		LViewLayoutInfo Inf;
-		AllPlatforms->OnLayout(Inf);
-		c.Left(AllPlatforms, Inf.Width.Max);
-	}
-		
 	c.Remaining(TextMsg);
 }
 	
@@ -656,17 +648,16 @@ public:
 		{
 			// Kick off search...
 			LString s = Ctrl->Name();
-			int64 AllPlatforms = Ctrl->GetParent()->GetCtrlValue(IDC_ALL_PLATFORMS);
 			s = s.Strip();
 			if (s.Length() > 2)
-				App->FindSymbol(Doc->AddDispatch(), s, AllPlatforms != 0);
+				App->FindSymbol(Doc->AddDispatch(), s);
 		}
 		
 		return LPopupList<FindSymResult>::OnNotify(Ctrl, n);
 	}
 };
 
-void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LString InputStr)
+void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LString InputStr, int Platforms)
 {
 	LString::Array p = InputStr.SplitDelimit(" \t");
 		
@@ -682,7 +673,11 @@ void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LSt
 		{
 			break;
 		}
+
 		ProjectNode *Pn = Nodes[i];
+		if (! (Pn->GetPlatforms() & Platforms) )
+			continue;
+
 		auto Fn = Pn->GetFileName();
 		if (Fn)
 		{
@@ -766,7 +761,7 @@ public:
 	void Update(LString InputStr)
 	{
 		LArray<ProjectNode*> Matches;
-		FilterFiles(Matches, Nodes, InputStr);
+		FilterFiles(Matches, Nodes, InputStr, App->GetPlatform());
 		SetItems(Matches);
 	}
 	

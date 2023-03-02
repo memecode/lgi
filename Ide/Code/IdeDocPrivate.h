@@ -16,8 +16,6 @@ class EditTray : public LLayout
 	LRect SymBtn;
 	LEdit *SymSearch;
 
-	LCheckBox *AllPlatforms;
-
 	LRect TextMsg;
 
 	LTextView3 *Ctrl;
