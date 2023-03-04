@@ -86,15 +86,19 @@ void LPrinter::Print(LPrintEvents *Events, std::function<void(int)> callback, co
 		}
 	}
 
-	LPrintDC dc(d->Info.hDC, PrintJobName, PrinterName);
-	if (!dc.Handle())
+	auto dc = new LPrintDC(d->Info.hDC, PrintJobName, PrinterName);
+	if (!dc || !dc->Handle())
 	{
+		if (dc)
+			delete dc;
 		d->Err.Printf("%s:%i - StartDoc failed.\n", _FL);
 		PrintStatus(LPrintEvents::OnBeginPrintError);
 	}	
 	
-	Events->OnBeginPrint(&dc, [&](auto JobPages)
+	Events->OnBeginPrint(dc, [this, dc, Events, callback, PrintJobName=LString(PrintJobName), Pages](auto JobPages)
 	{
+		LAutoPtr<LPrintDC> ownDc(dc); // Make sure we free the dc
+
 		if (JobPages <= LPrintEvents::OnBeginPrintCancel)
 			PrintStatus(JobPages);
 
@@ -114,10 +118,10 @@ void LPrinter::Print(LPrintEvents *Events, std::function<void(int)> callback, co
 		{
 			if (!PageRanges || PageRanges->InRanges(i + 1))
 			{
-				if (StartPage(dc.Handle()) > 0)
+				if (StartPage(dc->Handle()) > 0)
 				{
-					Status |= Events->OnPrintPage(&dc, i);
-					EndPage(dc.Handle());
+					Status |= Events->OnPrintPage(dc, i);
+					EndPage(dc->Handle());
 				}
 				else
 				{
@@ -128,7 +132,7 @@ void LPrinter::Print(LPrintEvents *Events, std::function<void(int)> callback, co
 			}
 		}
 	
-		LString OutputFile = dc.GetOutputFileName();
+		LString OutputFile = dc->GetOutputFileName();
 		if (LFileExists(OutputFile))
 			LBrowseToFile(OutputFile);
 

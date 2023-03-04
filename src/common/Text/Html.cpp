@@ -8063,7 +8063,7 @@ bool LHtml::OnFind(LFindReplaceCommon *Params)
 void LHtml::DoFind(std::function<void(bool)> Callback)
 {
 	LFindDlg *Dlg = new LFindDlg(this,
-		[&](auto dlg, auto action)
+		[this](auto dlg, auto action)
 		{
 			OnFind(dlg);
 			delete dlg;

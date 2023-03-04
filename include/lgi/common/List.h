@@ -79,9 +79,9 @@ class LgiClass LListItem : public LItem, public LListItemPainter
 
 protected:
 	// Data
-	class LListItemPrivate *d;
+	class LListItemPrivate *d = NULL;
 	LRect Pos;
-	LList *Parent;
+	LList *Parent = NULL;
 
 	// Methods
 	bool GridLines();
@@ -96,7 +96,7 @@ public:
 	};
 
 	// Object
-	LListItem();
+	LListItem(const char *initStr = NULL);
 	virtual ~LListItem();
 
 	LItemContainer *GetContainer() override;

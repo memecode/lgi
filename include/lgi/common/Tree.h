@@ -122,7 +122,7 @@ protected:
 	int Sys_Image = -1;
 
 public:
-	LTreeItem();
+	LTreeItem(const char *initStr = NULL);
 	virtual ~LTreeItem();
 
 	LItemContainer *GetContainer() override;

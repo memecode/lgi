@@ -672,16 +672,18 @@ bool LRichTextEdit::Copy()
 
 bool LRichTextEdit::Paste()
 {
-	LString Html;
-	LAutoWString Text;
-	LAutoPtr<LSurface> Img;
 	LClipBoard Cb(this);
 		
-	return Cb.Bitmap([&](auto bmp, auto str)
+	return Cb.Bitmap([this](auto bmp, auto str)
 	{
+		LString Html;
+		LAutoWString Text;
+		LAutoPtr<LSurface> Img;
+
 		Img = bmp;
 		if (!Img)
-		{	
+		{
+			LClipBoard Cb(this);
 			Html = Cb.Html();
 			if (!Html)
 				Text.Reset(NewStrW(Cb.TextW()));
@@ -817,10 +819,10 @@ bool LRichTextEdit::ClearDirty(bool Ask, const char *FileName)
 			{
 				LFileSelect *Select = new LFileSelect;
 				Select->Parent(this);
-				Select->Save([&](auto dlg, auto status)
+				Select->Save([this](auto dlg, auto status)
 				{
 					if (status)
-						FileName = dlg->Name();
+						Save(dlg->Name());
 					delete dlg;
 				});
 			}
@@ -1013,7 +1015,7 @@ void LRichTextEdit::DoFind(std::function<void(bool)> Callback)
 	LAutoString u(Sel.Length() ? WideToUtf8(&Sel.First()) : NULL);
 	
 	auto Dlg = new LFindDlg(this,
-							[&](auto dlg, auto ctrlId)
+							[this](auto dlg, auto ctrlId)
 							{
 								return OnFind(dlg);
 							},

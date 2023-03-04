@@ -2375,7 +2375,7 @@ void LTextView4::ClearDirty(std::function<void(bool)> OnStatus, bool Ask, const 
 									MB_YESNOCANCEL) : IDYES;
 		if (Answer == IDYES)
 		{
-			auto DoSave = [&](bool ok)
+			auto DoSave = [this, OnStatus, FileName=LString(FileName)](bool ok)
 			{
 				Save(FileName);				
 				if (OnStatus)

@@ -717,7 +717,7 @@ void LGraph::OnMouseClick(LMouse &m)
 				char Desktop[MAX_PATH_LEN];
 				LGetSystemPath(LSP_DESKTOP, Desktop, sizeof(Desktop));
 				s->InitialDir(Desktop);
-				s->Save([&](auto dlg, auto status)
+				s->Save([this](auto dlg, auto status)
 				{
 					if (status)
 					{

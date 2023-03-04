@@ -41,50 +41,28 @@ class LTreePrivate
 {
 public:
 	// Private data
-	int				LineFlags[4];
-	bool			LayoutDirty;
+	int				LineFlags[4] = {};
+	bool			LayoutDirty = true;
 	LPoint			Limit;
 	LPoint			LastClick;
 	LPoint			DragStart;
-	int				DragData;
-	LMemDC			*IconCache;
-	bool			InPour;
-	int64			DropSelectTime;
-    int8            IconTextGap;
-    int				LastLayoutPx;
-	LMouse			*CurrentClick;
-	LTreeItem		*ScrollTo;
+	int				DragData = 0;
+	LAutoPtr<LMemDC> IconCache;
+	bool			InPour = false;
+	int64			DropSelectTime = 0;
+    int8            IconTextGap = 0;
+    int				LastLayoutPx = -1;
+	LMouse			*CurrentClick = NULL;
+	LTreeItem		*ScrollTo = NULL;
     
     // Visual style
-	LTree::ThumbStyle Btns;
-	bool			JoiningLines;
+	LTree::ThumbStyle Btns = LTree::TreeTriangle;
+	bool			JoiningLines = false;
 
 	// Pointers into items... be careful to clear when deleting items...
-	LTreeItem		*LastHit;
+	LTreeItem		*LastHit = NULL;
 	List<LTreeItem>	Selection;
-	LTreeItem		*DropTarget;
-
-	LTreePrivate()
-	{
-		CurrentClick = NULL;
-		LastLayoutPx = -1;
-		DropSelectTime = 0;
-		InPour = false;
-		LastHit = 0;
-		DropTarget = 0;
-		IconCache = 0;
-		LayoutDirty = true;
-		IconTextGap = 0;
-		ScrollTo = NULL;
-		
-		Btns = LTree::TreeTriangle;
-		JoiningLines = false;
-	}
-	
-	~LTreePrivate()
-	{
-		DeleteObj(IconCache);
-	}
+	LTreeItem		*DropTarget = NULL;
 };
 
 class LTreeItemPrivate
@@ -390,9 +368,11 @@ LTreeItem *LTreeNode::GetNext()
 }
 
 //////////////////////////////////////////////////////////////////////////////
-LTreeItem::LTreeItem()
+LTreeItem::LTreeItem(const char *initStr)
 {
 	d = new LTreeItemPrivate(this);
+	if (initStr)
+		SetText(initStr);
 }
 
 LTreeItem::~LTreeItem()
@@ -400,17 +380,17 @@ LTreeItem::~LTreeItem()
 	if (Tree)
 	{
 		if (Tree->d->DropTarget == this)
-			Tree->d->DropTarget = 0;
+			Tree->d->DropTarget = NULL;
 
 		if (Tree->d->LastHit == this)
-			Tree->d->LastHit = 0;
+			Tree->d->LastHit = NULL;
 		
 		if (Tree->IsCapturing())
 			Tree->Capture(false);
 	}
 
 	int y = 0;
-	LTree *t = 0;
+	LTree *t = NULL;
 	if (Parent && (LTreeNode*)Parent != (LTreeNode*)Tree)
 	{
 		t = Tree;
@@ -468,13 +448,13 @@ LRect *LTreeItem::_GetRect(LTreeItemRect Which)
 {
 	switch (Which)
 	{
-		case TreeItemPos: return &d->Pos;
+		case TreeItemPos:   return &d->Pos;
 		case TreeItemThumb: return &d->Thumb;
-		case TreeItemText: return &d->Text;
-		case TreeItemIcon: return &d->Icon;
+		case TreeItemText:  return &d->Text;
+		case TreeItemIcon:  return &d->Icon;
 	}
 	
-	return 0;
+	return NULL;
 }
 
 bool LTreeItem::IsDropTarget()
@@ -692,7 +672,7 @@ void LTreeItem::_Pour(LPoint *Limit, int ColumnPx, int Depth, bool Visible)
 		d->Pos.Offset(0, Limit->y);
 		if (!d->Pos.Valid())
 		{
-			printf("Invalid pos: %s, ColumnPx=%i\n", d->Pos.GetStr(), ColumnPx);
+			LgiTrace("%s:%i - Invalid pos: %s, ColumnPx=%i\n", _FL, d->Pos.GetStr(), ColumnPx);
 		}
 
 		Limit->x = MAX(Limit->x, d->Pos.x2 + 1);
@@ -1476,7 +1456,7 @@ bool LTree::OnKey(LKey &k)
 			}
 			case LK_END:
 			{
-				LTreeItem *n = i, *p = 0;
+				LTreeItem *n = i, *p = NULL;
 				while ((n = GetAdjacent(n, true)))
 				{
 					p = n;
@@ -1836,8 +1816,7 @@ void LTree::OnPaint(LSurface *pDC)
 	{
 		int CacheHeight = MAX(LSysFont->GetHeight(), GetImageList()->Y());
 		
-		d->IconCache = new LMemDC;
-		if (d->IconCache &&
+		if (d->IconCache.Reset(new LMemDC) &&
 			d->IconCache->Create(GetImageList()->X(), CacheHeight, GdcD->GetColourSpace()))
 		{
 			if (d->IconCache->GetColourSpace() == CsIndex8)

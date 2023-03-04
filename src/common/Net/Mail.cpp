@@ -432,7 +432,7 @@ void DecodeAddrName(const char *Str, std::function<void(LString,LString)> Cb, co
 
 void DecodeAddrName(const char *Start, LAutoString &Name, LAutoString &Addr, const char *DefaultDomain)
 {
-	DecodeAddrName(Start, [&](LString n, LString a){
+	DecodeAddrName(Start, [&Name, &Addr](LString n, LString a){
 		Name.Reset(NewStr(n));
 		Addr.Reset(NewStr(a));
 	}, DefaultDomain);
@@ -440,7 +440,7 @@ void DecodeAddrName(const char *Start, LAutoString &Name, LAutoString &Addr, con
 
 void DecodeAddrName(const char *Start, LString &Name, LString &Addr, const char *DefaultDomain)
 {
-	DecodeAddrName(Start, [&](LString n, LString a){
+	DecodeAddrName(Start, [&Name, &Addr](LString n, LString a){
 		Name = n;
 		Addr = a;
 	}, DefaultDomain);

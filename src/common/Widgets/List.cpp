@@ -169,20 +169,18 @@ LListItemColumn *LListItemColumn::GetItemCol(LListItem *i, int Col)
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // List item
-LListItem::LListItem()
+LListItem::LListItem(const char *initStr)
 {
 	d = new LListItemPrivate;
 	Pos.ZOff(-1, -1);
-	Parent = 0;
+	if (initStr)
+		SetText(initStr);
 }
 
 LListItem::~LListItem()
 {
 	if (Parent)
-	{
 		Parent->Remove(this);
-	}
-
 	DeleteObj(d);
 }
 
