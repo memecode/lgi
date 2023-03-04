@@ -111,6 +111,14 @@ public:
 			SetFixedLength(true);
 			return *this;
 		}
+
+		Array &operator +=(const LArray<LString> &a)
+		{
+			SetFixedLength(false);
+			Add(a);
+			SetFixedLength(true);
+			return *this;
+		}
 	};
 
 	/// Empty constructor
