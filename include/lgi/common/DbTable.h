@@ -92,7 +92,7 @@ public:
 	Store3Status SetVar(int id, LVariant *i);
 	LDataPropI *GetObj(int id);
 	Store3Status SetObj(int id, LDataPropI *i);
-	GDataIt GetList(int id);
+	LDataIt GetList(int id);
 	Store3Status SetRfc822(LStreamI *Rfc822Msg);
 };
 

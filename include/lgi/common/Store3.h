@@ -22,8 +22,8 @@
 
 	Query a seg for it's children:
 
-		GDataIt Children = Seg->GetList(FIELD_MIME_SEG);
-		LDataI *FirstChild = Children->First();
+		auto Children = Seg->GetList(FIELD_MIME_SEG);
+		auto FirstChild = Children->First();
 
 	Access segment's charset and mimetype:
 
@@ -137,7 +137,7 @@ public:
 };
 
 
-typedef LDataIterator<LDataPropI*> *GDataIt;
+typedef LDataIterator<LDataPropI*> *LDataIt;
 
 #define EmptyVirtual(t)		LAssert(0); return t
 #define Store3CopyDecl		bool CopyProps(LDataPropI &p) override
@@ -181,12 +181,12 @@ public:
 	virtual Store3Status SetObj(int id, LDataPropI *i) { EmptyVirtual(Store3Error); }
 	
 	/// Gets an iterator interface to a list of sub-objects.
-	virtual GDataIt GetList(int id) { EmptyVirtual(NULL); }
+	virtual LDataIt GetList(int id) { EmptyVirtual(NULL); }
 	/// Set the mime segments
 	virtual Store3Status SetRfc822(LStreamI *Rfc822Msg)
 	{
-		LAssert(!"Pretty sure you should be implementing this")
-			; return Store3Error;
+		LAssert(!"Pretty sure you should be implementing this");
+		return Store3Error;
 	}
 };
 
@@ -219,7 +219,7 @@ public:
 	);
 };
 
-/// This class is an interface between the UI and the backend for things
+/// This class is an interface between the UI and the back end for things
 /// like email, contacts, calendar events, groups and filters
 class LDataI : virtual public LDataPropI
 {

@@ -44,18 +44,18 @@ Example valid mime trees:
 template <typename TStore, typename TMail, typename TAttachment>
 class Store3MimeTree
 {
-	bool InRelated;
-	TMail *Mail;
-	TStore *Store;
+	bool InRelated = false;
+	TMail *Mail = NULL;
+	TStore *Store = NULL;
 
 public:
 	TAttachment *&Root;
-	TAttachment *MsgText;
-	TAttachment *MsgHtml;
+	TAttachment *MsgText = NULL;
+	TAttachment *MsgHtml = NULL;
 	LArray<TAttachment*> MsgHtmlRelated;
-	TAttachment *Related;
-	TAttachment *Alternative;
-	TAttachment *Mixed;
+	TAttachment *Related = NULL;
+	TAttachment *Alternative = NULL;
+	TAttachment *Mixed = NULL;
 	LArray<TAttachment*> Attachments;
 	LArray<TAttachment*> Unknown;
 	
@@ -63,13 +63,6 @@ public:
 	{
 		Mail = mail;
 		Store = dynamic_cast<TStore*>(Mail->GetStore());
-		MsgText = NULL;
-		MsgHtml = NULL;
-		Related = NULL;
-		Alternative = NULL;
-		Mixed = NULL;
-		InRelated = false;
-
 		if (Root)
 			Scan(Root);
 	}
@@ -82,13 +75,14 @@ public:
 		bool PrevInRelated = InRelated;
 		Add(Seg);
 		
-		GDataIt It = Seg->GetList(FIELD_MIME_SEG);
+		auto It = Seg->GetList(FIELD_MIME_SEG);
 		if (It)
 		{
-			for (LDataPropI *i=It->First(); i; i=It->Next())
+			for (auto i = It->First(); i; i=It->Next())
 			{
-				TAttachment *a = dynamic_cast<TAttachment*>(i);
-				if (!a) continue;
+				auto a = dynamic_cast<TAttachment*>(i);
+				if (!a)
+					continue;
 				Scan(a);
 			}
 		}

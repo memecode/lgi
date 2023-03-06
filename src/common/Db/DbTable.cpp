@@ -760,7 +760,7 @@ Store3Status LDbRow::SetObj(int id, LDataPropI *i)
 	return Store3Error;
 }
 
-GDataIt LDbRow::GetList(int id)
+LDataIt LDbRow::GetList(int id)
 {
 	LAssert(0);
 	return NULL;

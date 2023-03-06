@@ -414,7 +414,7 @@ enum Store3Fields
 	FIELD_STORE_PASSWORD = 144,			// (char*)
 	FIELD_LOADED = 145,					// (Store3State)
 	FIELD_DEBUG = 146,					// (char*)
-	FIELD_MIME_SEG = 147,				// (GDataIt)
+	FIELD_MIME_SEG = 147,				// (LDataIt)
 	FIELD_STORE_TYPE = 148,				// (Store3Backend)
 	FIELD_BOUNCE_MSG_ID = 149,			// (char*)
 	FIELD_FOLDER_INDEX = 150,			// (int64)
