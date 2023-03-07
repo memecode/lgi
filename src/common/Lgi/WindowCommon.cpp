@@ -132,8 +132,6 @@ void LWindow::MoveToCenter()
 		p.Offset((Screen.X() - p.X()) / 2, (Screen.Y() - p.Y()) / 2);
 	}
 
-	printf("center %s %s\n", p.GetStr(), Screen.GetStr());
-
 	SetPos(p, true);
 	Displays.DeleteObjects();
 }

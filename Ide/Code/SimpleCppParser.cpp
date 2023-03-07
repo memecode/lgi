@@ -37,10 +37,8 @@ Known bugs:
 #include "lgi/common/DocView.h"
 #include "ParserCommon.h"
 
-#if 0
-#define DEBUG_FILE		"FileSelect.cpp"
-#endif
-#define DEBUG_LINE		400
+// #define DEBUG_FILE		"Gdc2.h"
+// #define DEBUG_LINE		65
 
 const char *TypeToStr(DefnType t)
 {
@@ -126,10 +124,12 @@ bool ParseFunction(LRange &Return, LRange &Name, LRange &Args, const char *Defn)
 	if (Name.Len == 0 ||
 		Args.Len == 0)
 	{
+		/*
 		LgiTrace("%s:%i - Fn parse empty section '%s' (%i,%i,%i)\n", _FL, Defn,
 			(int)Return.Len,
 			(int)Name.Len,
 			(int)Args.Len);
+		*/
 		return false;
 	}
 
@@ -205,6 +205,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 	static char16 StrExtern[]		= {'e', 'x', 't', 'e', 'r', 'n', 0};
 	static char16 StrTypedef[]		= {'t', 'y', 'p', 'e', 'd', 'e', 'f', 0};
 	static char16 StrC[]			= {'\"', 'C', '\"', 0};
+	static char16 StrHash[]			= {'#', 0};
 
 	char WhiteSpace[] = " \t\r\n";
 	
@@ -313,7 +314,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 					ConditionalDepth++;
 					ConditionalFirst = IsFirst(ConditionalIndex, ConditionalDepth);
 					if (Debug)
-						LgiTrace("%s:%i - ConditionalDepth++=%i Line=%i\n%.*S\n", _FL, ConditionalDepth, Line+1, Eol - s + 1, s - 1);
+						LgiTrace("%s:%i - ConditionalDepth++=%i Line=%i: %.*S\n", _FL, ConditionalDepth, Line+1, Eol - s + 1, s - 1);
 				}
 				else if
 				(
@@ -334,7 +335,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 						ConditionalIndex[ConditionalDepth-1]++;
 						ConditionalFirst = IsFirst(ConditionalIndex, ConditionalDepth);
 						if (Debug)
-							LgiTrace("%s:%i - ConditionalDepth=%i Idx++ Line=%i\n%.*S\n", _FL, ConditionalDepth, Line+1, Eol - s + 1, s - 1);
+							LgiTrace("%s:%i - ConditionalDepth=%i Idx++ Line=%i: %.*S\n", _FL, ConditionalDepth, Line+1, Eol - s + 1, s - 1);
 					}
 				}
 				else if
@@ -353,7 +354,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 						ConditionalDepth--;
 					ConditionalFirst = IsFirst(ConditionalIndex, ConditionalDepth);
 					if (Debug)
-						LgiTrace("%s:%i - ConditionalDepth--=%i Line=%i\n%.*S\n", _FL, ConditionalDepth, Line+1, Eol - s + 1, s - 1);
+						LgiTrace("%s:%i - ConditionalDepth--=%i Line=%i: %.*S\n", _FL, ConditionalDepth, Line+1, Eol - s + 1, s - 1);
 				}
 
 				while (*s)
@@ -391,7 +392,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 				if (ConditionalFirst)
 					Depth++;
 				FnEmit = false;
-				#if 0 // def DEBUG_FILE
+				#ifdef DEBUG_FILE
 				if (Debug)
 					LgiTrace("%s:%i - FnEmit=%i Depth=%i @ line %i\n", _FL, FnEmit, Depth, Line+1);
 				#endif				
@@ -406,14 +407,14 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 					if (Depth > 0)
 					{
 						Depth--;
-						#if 0 // def DEBUG_FILE
+						#ifdef DEBUG_FILE
 						if (Debug)
 							LgiTrace("%s:%i - CaptureLevel=%i Depth=%i @ line %i\n", _FL, CaptureLevel, Depth, Line+1);
 						#endif
 					}
 					else
 					{
-						#if 0 // def DEBUG_FILE
+						#ifdef DEBUG_FILE
 						if (Debug)
 							LgiTrace("%s:%i - ERROR Depth already=%i @ line %i\n", _FL, Depth, Line+1);
 						#endif
@@ -459,7 +460,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 					// End the class def
 					InClass = false;
 					CaptureLevel = 0;
-					#if 0 // def DEBUG_FILE
+					#ifdef DEBUG_FILE
 					if (Debug)
 						LgiTrace("%s:%i - CaptureLevel=%i Depth=%i @ line %i\n", _FL, CaptureLevel, Depth, Line+1);
 					#endif
@@ -641,6 +642,15 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 						}
 					}
 				}
+				else
+				{
+					#ifdef DEBUG_FILE
+					if (Debug)
+						LgiTrace("%s:%i - Not attempting fn parse: depth=%i, capture=%i, fnEmit=%i, CondFirst=%i, %s:%i:%.20S\n",
+							_FL, Depth, CaptureLevel, FnEmit, ConditionalFirst,
+							LGetLeaf(FileName), Line, s-1);
+					#endif
+				}
 				break;
 			}
 			default:
@@ -786,21 +796,40 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 					)
 					{
 						DefineStructClass:
-						
+
 						// Class / Struct
 						if (Depth == 0)
 						{
 							// Check if this is really a class/struct definition or just a reference
 							char16 *next = s;
-							while (*next && !strchr(";(){", *next))
+							while (*next)
+							{
+								// If we seek to the next line, check it's not a preprocessor directive.
+								if (*next == '\n')
+								{
+									next++;
+									while (*next && strchr(WhiteSpace, *next))
+										next++;
+									if (*next == '#')
+									{
+										// Skip the processor line...
+										while (*next && *next != '\n')
+											next++;
+									}
+									continue;
+								}
+								else if (strchr(";(){", *next))
+									break;
+									
 								next++;
-							
+							}
+
 							if (*next == '{')
 							{
 								// Full definition
 								InClass = true;
 								CaptureLevel = 1;
-								#if 0 // def DEBUG_FILE
+								#ifdef DEBUG_FILE
 								if (Debug)
 									LgiTrace("%s:%i - CaptureLevel=%i Depth=%i @ line %i\n", _FL, CaptureLevel, Depth, Line+1);
 								#endif
@@ -818,7 +847,8 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 											DeleteArray(t);
 											break;
 										}
-										else if (StrcmpW(t, StrOpenBracket) == 0 ||
+										else if (StrcmpW(t, StrHash) ||
+												 StrcmpW(t, StrOpenBracket) == 0 ||
 												 StrcmpW(t, StrColon) == 0)
 										{
 											DeleteArray(CurClassDecl);

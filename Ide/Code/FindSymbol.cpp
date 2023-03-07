@@ -20,7 +20,7 @@
 
 #define DEBUG_FIND_SYMBOL		0
 #define DEBUG_NO_THREAD			1
-// #define DEBUG_FILE				"FileSelect.cpp"
+// #define DEBUG_FILE				"RichTextEdit.h"
 
 int SYM_FILE_SENT = 0;
 
@@ -235,11 +235,11 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	bool ReparseFile(LString Path)
 	{
 		#if USE_HASH
-		FileSyms *f = Files.Find(Path);
-		int Platform = f ? f->Platforms : 0;
+			FileSyms *f = Files.Find(Path);
+			int Platform = f ? f->Platforms : 0;
 		#else
-		int Idx = GetFileIndex(Path);
-		int Platform = Idx >= 0 ? Files[Idx]->Platforms : 0;
+			int Idx = GetFileIndex(Path);
+			int Platform = Idx >= 0 ? Files[Idx]->Platforms : 0;
 		#endif
 		
 		if (!RemoveFile(Path))
@@ -251,15 +251,15 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	bool RemoveFile(LString Path)
 	{
 		#if USE_HASH
-		FileSyms *f = Files.Find(Path);
-		if (!f) return false;
-		Files.Delete(Path);
-		delete f;
+			FileSyms *f = Files.Find(Path);
+			if (!f) return false;
+			Files.Delete(Path);
+			delete f;
 		#else
-		int Idx = GetFileIndex(Path);
-		if (Idx < 0) return false;
-		delete Files[Idx];
-		Files.DeleteAt(Idx);
+			int Idx = GetFileIndex(Path);
+			if (Idx < 0) return false;
+			delete Files[Idx];
+			Files.DeleteAt(Idx);
 		#endif
 
 		return true;
@@ -308,6 +308,9 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 							// Check platforms...
 							if ((fs->Platforms & Platforms) == 0)
 							{
+								#ifdef DEBUG_FILE
+								printf("%s:%i - '%s' doesn't match platform: %x %x\n", _FL, fs->Path.Get(), fs->Platforms, Platforms);
+								#endif
 								continue;
 							}
 
@@ -348,7 +351,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 
 								#ifdef DEBUG_FILE
 								if (Debug)
-									printf("%s:%i - '%s' = %i\n", _FL, Def.Name.Get(), Match);
+									printf("	'%s' = %i\n", _FL, Def.Name.Get(), Match);
 								#endif
 								
 								if (Match)
