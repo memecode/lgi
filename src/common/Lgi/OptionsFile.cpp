@@ -2,14 +2,14 @@
 #include "lgi/common/OptionsFile.h"
 
 #define DEBUG_OPTS_FILE		0
-
+#define OptOptions			"Options"
 
 void LOptionsFile::_Init()
 {
 	Dirty = false;
 	LockFile = NULL;
 	LockLine = -1;
-	Tag = Allocator->Alloc("Options");
+	Tag = Allocator->Alloc(OptOptions);
 	
 	if (Lock(_FL))
 	{
@@ -18,7 +18,8 @@ void LOptionsFile::_Init()
 	}
 }
 
-LOptionsFile::LOptionsFile(const char *FileName) : LMutex("LOptionsFile")
+LOptionsFile::LOptionsFile(const char *FileName) :
+	LMutex("LOptionsFile")
 {
 	_Init();
 
@@ -28,7 +29,8 @@ LOptionsFile::LOptionsFile(const char *FileName) : LMutex("LOptionsFile")
 		SetMode(GuessMode(), FileName);
 }
 
-LOptionsFile::LOptionsFile(PortableType Mode, const char *BaseName) : LMutex("LOptionsFile")
+LOptionsFile::LOptionsFile(PortableType Mode, const char *BaseName) :
+	LMutex("LOptionsFile")
 {
 	_Init();
 
@@ -141,6 +143,8 @@ bool LOptionsFile::SerializeFile(bool Write)
 	LXmlTree Tree(GXT_PRETTY_WHITESPACE);
 	if (Write)
 	{
+		LAssert(Tag != NULL);
+
 		if (f.Open(File, O_WRITE))
 		{
 			f.SetSize(0);
@@ -186,8 +190,6 @@ bool LOptionsFile::SerializeFile(bool Write)
 		{
 			if (f.Open(File, O_READ))
 			{
-				Empty(true);
-
 				auto Status = Tree.Read(this, &f, 0);
 				if (!Status)
 				{

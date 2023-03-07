@@ -143,8 +143,8 @@ public:
 
 		#ifndef WINDOWS
 		if (Dc->IsPreMultipliedAlpha())
-			Dc->ConvertPreMulAlpha(true);
 		#endif
+			Dc->ConvertPreMulAlpha(true);
 		return true;
 	}
 

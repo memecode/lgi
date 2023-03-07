@@ -1380,7 +1380,7 @@ bool LXmlTree::Read(LXmlTag *Root, LStreamI *File, LXmlFactory *Factory)
 	}
 	
 	LString t = Root->Tag;
-	Root->SetTag(NULL);	
+	Root->Empty(true);
 	LAutoRefPtr<LXmlAlloc> Allocator(new XmlPoolAlloc);
 	Root->Allocator = Allocator;
 	Root->SetTag(t);

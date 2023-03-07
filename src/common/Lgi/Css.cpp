@@ -418,6 +418,15 @@ bool LCss::Len::ToString(LStream &p) const
 		case VerticalMiddle:	Unit = "middle"; break;
 		case VerticalBottom:	Unit = "bottom"; break;
 		case VerticalTextBottom: Unit = "text-bottom"; break;
+
+		case SizeXXSmall:		Unit = "xx-small"; break;
+		case SizeXSmall:		Unit = "x-small"; break;
+		case SizeSmall:			Unit = "small"; break;
+		case SizeMedium:		Unit = "medium"; break;
+		case SizeLarge:			Unit = "large"; break;
+		case SizeXLarge:		Unit = "x-large"; break;
+		case SizeXXLarge:		Unit = "x-large"; break;
+
 		default: break;
 	}
 	if (!Unit)

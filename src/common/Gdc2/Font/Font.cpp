@@ -632,6 +632,41 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 		else if (Sz.Type == LCss::LenPx)
 			Win32Height = (int)(Sz.Value * 1.2);
 		else
+		{
+			LFontType def;
+			if (def.GetSystemFont("System"))
+			{
+				switch (Sz.Type)
+				{
+					case LCss::SizeXXSmall:
+						Win32Height = WinPointToHeight(def.GetPointSize() - 3, hDC);
+						break;
+					case LCss::SizeXSmall:
+						Win32Height = WinPointToHeight(def.GetPointSize() - 2, hDC);
+						break;
+					case LCss::SizeSmall:
+						Win32Height = WinPointToHeight(def.GetPointSize() - 1, hDC);
+						break;
+					case LCss::SizeMedium:
+						Win32Height = WinPointToHeight(def.GetPointSize(), hDC);
+						break;
+					case LCss::SizeLarge:
+						Win32Height = WinPointToHeight(def.GetPointSize() + 1, hDC);
+						break;
+					case LCss::SizeXLarge:
+						Win32Height = WinPointToHeight(def.GetPointSize() + 2, hDC);
+						break;
+					case LCss::SizeXXLarge:
+						Win32Height = WinPointToHeight(def.GetPointSize() + 3, hDC);
+						break;
+					default:
+						LAssert(!"Impl me.");
+						break;
+				}
+			}
+		}
+			
+		if (Win32Height == 0)			
 			LAssert(!"What now?");
 	
 		LTypeFace::d->IsSymbol = LTypeFace::d->_Face &&

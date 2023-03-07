@@ -1,8 +1,10 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/RichTextEdit.h"
-#include "RichTextEditPriv.h"
 #include "lgi/common/GdcTools.h"
 #include "lgi/common/Menu.h"
+#include "lgi/common/Net.h"
+
+#include "RichTextEditPriv.h"
 
 #define LOADER_THREAD_LOGGING		1
 #define TIMEOUT_LOAD_PROGRESS		100 // ms
@@ -12,20 +14,16 @@ int ImgScales[] = { 15, 25, 50, 75, 100 };
 class ImageLoader : public LEventTargetThread, public Progress
 {
 	LString File;
-	LEventSinkI *Sink;
-	LSurface *Img;
+	LEventSinkI *Sink = NULL;
+	LSurface *Img = NULL;
 	LAutoPtr<LFilter> Filter;
-	bool SurfaceSent;
-	int64 Ts;
+	bool SurfaceSent = false;
+	int64 Ts = 0;
 	LAutoPtr<LStream> In;
 
 public:
 	ImageLoader(LEventSinkI *s) : LEventTargetThread("ImageLoader")
 	{
-		Sink = s;
-		Img = NULL;
-		SurfaceSent = false;
-		Ts = 0;
 	}
 
 	~ImageLoader()
@@ -591,7 +589,14 @@ ssize_t LRichTextPriv::ImageBlock::Length()
 
 bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia> *Media, LRange *Rng)
 {
-	if (Media)
+	LUri uri(Source);
+	if (uri.IsProtocol("http") ||
+		uri.IsProtocol("https") ||
+		uri.IsProtocol("ftp"))
+	{
+		// Nothing to do...?
+	}
+	else if (Media)
 	{
 		bool ValidSourceFile = LFileExists(Source);
 		LDocView::ContentMedia &Cm = Media->New();
@@ -650,8 +655,7 @@ bool LRichTextPriv::ImageBlock::ToHtml(LStream &s, LArray<LDocView::ContentMedia
 		}
 		else
 		{
-			LgiTrace("%s:%i - No source or JPEG for saving image to HTML.\n", _FL);
-			LAssert(!"No source file or compressed image.");
+			LAssert(!"No valid source.");
 			return false;
 		}
 

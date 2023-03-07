@@ -178,16 +178,48 @@ LCss::Len LTypeFace::Size() const
 	return d->_Size;
 }
 
+static int DefaultPointSize()
+{
+	static int Pt = 0;
+	if (!Pt)
+	{
+		LFontType def;
+		Pt = def.GetSystemFont("System");
+	}
+	return Pt;
+}
+
 int LTypeFace::PointSize() const
 {
-	if (d->_Size.Type == LCss::LenPt)
-		return (int)d->_Size.Value;
-	
-	if (d->_Size.Type == LCss::LenPx)
-		return (int) (d->_Size.Value * 72 / LScreenDpi().x);
+	switch (d->_Size.Type)
+	{
+		case LCss::LenPt:
+			return (int)d->_Size.Value;
 
-	LAssert(!"What now?");
-	return 0;
+		case LCss::LenPx:
+			return (int) (d->_Size.Value * 72 / LScreenDpi().x);
+
+		case LCss::SizeXXSmall:
+			return DefaultPointSize() - 3;
+		case LCss::SizeXSmall:
+			return DefaultPointSize() - 2;
+		case LCss::SizeSmall:
+			return DefaultPointSize() - 1;
+		case LCss::SizeMedium:
+			return DefaultPointSize();
+		case LCss::SizeLarge:
+			return DefaultPointSize() + 1;
+		case LCss::SizeXLarge:
+			return DefaultPointSize() + 2;
+		case LCss::SizeXXLarge:
+			return DefaultPointSize() + 3;
+
+		default:
+			LAssert(!"Impl me");
+			break;
+	}
+
+	return (int) d->_Size.Value;
 }
 
 int LTypeFace::TabSize() const

@@ -656,9 +656,10 @@ bool LRichTextEdit::Copy()
 	if (HasHomoglyphs(PlainUtf8, PlainUtf8.Length()))
 	{
 		if (LgiMsg(	this,
-					"Text contains homoglyph characters that maybe a phishing attack.\n"
-					"Do you really want to copy it?",
-					"Warning",
+					LLoadString(L_TEXTCTRL_HOMOGLYPH_WARNING,
+								"Text contains homoglyph characters that maybe a phishing attack.\n"
+								"Do you really want to copy it?"),
+					LLoadString(L_TEXTCTRL_WARNING, "Warning"),
 					MB_YESNO) == IDNO)
 			return false;
 	}
