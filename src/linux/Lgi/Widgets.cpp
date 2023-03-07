@@ -193,6 +193,8 @@ void LDialog::DoModal(OnClose Callback, OsView OverrideParent)
 	
 	if (Callback)
 		Callback(this, d->ModalStatus);
+	else
+		delete this;
 }
 
 void LDialog::EndModal(int Code)
