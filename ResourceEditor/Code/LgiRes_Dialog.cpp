@@ -13,8 +13,8 @@
 
 ////////////////////////////////////////////////////////////////////
 #include <stdlib.h>
-#include "LgiResEdit.h"
-#include "LgiRes_Dialog.h"
+
+#include "lgi/common/Lgi.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/Variant.h"
 #include "lgi/common/Token.h"
@@ -23,6 +23,9 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/StatusBar.h"
 #include "lgi/common/ToolBar.h"
+
+#include "LgiResEdit.h"
+#include "LgiRes_Dialog.h"
 #include "resdefs.h"
 
 ////////////////////////////////////////////////////////////////////
@@ -40,7 +43,7 @@ class LgiObjectName
 public:
 	int Type;
 	const char *ObjectName;
-	char *ResourceName;
+	const char *ResourceName;
 	bool ToolbarBtn;
 }
 NameMap[] =
@@ -267,7 +270,7 @@ void DrawGoobers(LSurface *pDC, LRect &r, LRect *Goobers, LColour c, int OverIdx
 ////////////////////////////////////////////////////////////////////
 int ResDialogCtrl::TabDepth = 0;
 
-ResDialogCtrl::ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, LXmlTag *load) :
+ResDialogCtrl::ResDialogCtrl(ResDialog *dlg, const char *CtrlTypeName, LXmlTag *load) :
 	ResObject(CtrlTypeName)
 {
 	Dlg = dlg;
@@ -4194,23 +4197,13 @@ ResDialogUi::ResDialogUi(ResDialog *Res)
 	Name("ResDialogUi");
 
 	if (Res)
-	{
 		Res->OnSelect(Res->Selection[0]);
-		ShortCutView *scv = Res->App()->GetShortCutView();
-		if (scv)
-			scv->OnDialogChange(Res);
-	}
 }
 
 ResDialogUi::~ResDialogUi()
 {
 	if (Dialog)
-	{
-		ShortCutView *scv = Dialog->App()->GetShortCutView();
-		if (scv)
-			scv->OnDialogChange(NULL);
-		Dialog->Ui = 0;
-	}
+		Dialog->Ui = NULL;
 }
 
 void ResDialogUi::OnPaint(LSurface *pDC)

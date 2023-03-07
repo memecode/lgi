@@ -260,7 +260,7 @@ LMessage::Result SearchThread::OnEvent(LMessage *Msg)
 		}
 		else if (r->IsMenu())
 		{
-			List<ResMenuItem> Items;
+			LArray<ResMenuItem*> Items;
 			r->IsMenu()->EnumItems(Items);
 			for (auto c: Items)
 			{
@@ -716,7 +716,7 @@ Results::Results(AppWnd *app, Search *params)
 				}
 				else if (r->IsMenu())
 				{
-					List<ResMenuItem> Items;
+					LArray<ResMenuItem*> Items;
 					r->IsMenu()->EnumItems(Items);
 					for (auto c: Items)
 					{

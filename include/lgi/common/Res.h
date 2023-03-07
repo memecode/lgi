@@ -84,26 +84,26 @@ LgiExtern LLanguage *LFindLang
 
 ////////////////////////////////////////////////////////////////////
 // All the names of the controls as strings
-LgiExtern char Res_Dialog[];
-LgiExtern char Res_Table[];
-LgiExtern char Res_ControlTree[];
-LgiExtern char Res_StaticText[];
-LgiExtern char Res_EditBox[];
-LgiExtern char Res_CheckBox[];
-LgiExtern char Res_Button[];
-LgiExtern char Res_Group[];
-LgiExtern char Res_RadioBox[];
-LgiExtern char Res_Tab[];
-LgiExtern char Res_TabView[];
-LgiExtern char Res_ListView[];
-LgiExtern char Res_Column[];
-LgiExtern char Res_TreeView[];
-LgiExtern char Res_Bitmap[];
-LgiExtern char Res_Progress[];
-LgiExtern char Res_Slider[];
-LgiExtern char Res_ComboBox[];
-LgiExtern char Res_ScrollBar[];
-LgiExtern char Res_Custom[];
+LgiExtern const char Res_Dialog[];
+LgiExtern const char Res_Table[];
+LgiExtern const char Res_ControlTree[];
+LgiExtern const char Res_StaticText[];
+LgiExtern const char Res_EditBox[];
+LgiExtern const char Res_CheckBox[];
+LgiExtern const char Res_Button[];
+LgiExtern const char Res_Group[];
+LgiExtern const char Res_RadioBox[];
+LgiExtern const char Res_Tab[];
+LgiExtern const char Res_TabView[];
+LgiExtern const char Res_ListView[];
+LgiExtern const char Res_Column[];
+LgiExtern const char Res_TreeView[];
+LgiExtern const char Res_Bitmap[];
+LgiExtern const char Res_Progress[];
+LgiExtern const char Res_Slider[];
+LgiExtern const char Res_ComboBox[];
+LgiExtern const char Res_ScrollBar[];
+LgiExtern const char Res_Custom[];
 
 // Classes
 class ResObjectImpl;
@@ -124,17 +124,17 @@ struct LgiClass ResReadCtx
 class LgiClass ResObject
 {
 private:
-	ResObjectImpl *_ObjImpl;
+	ResObjectImpl *_ObjImpl = NULL;
+	LString _ObjName;
 
 protected:
-	char *_ObjName;
-	void SetObjectName(char *on) { _ObjName = on; }
+	void SetObjectName(const char *on) { _ObjName = on; }
 
 public:
-	ResObject(char *Name);
+	ResObject(const char *Name);
 	virtual ~ResObject();
 
-	char *GetObjectName() { return _ObjName; }
+	const char *GetObjectName() { return _ObjName; }
 	virtual ResObjectImpl *GetObjectImpl(ResFactory *f);
 };
 

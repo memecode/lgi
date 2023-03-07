@@ -684,7 +684,7 @@ public:
 	ShortCutView(AppWnd *app);
 	~ShortCutView();
 
-	void OnDialogChange(ResDialog *Dlg);
+	void OnResource(Resource *r);
 	int OnNotify(LViewI *Ctrl, LNotification n);
 };
 

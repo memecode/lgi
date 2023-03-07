@@ -1982,6 +1982,9 @@ void AppWnd::OnObjDelete(FieldSource *r)
 
 void AppWnd::OnResourceDelete(Resource *r)
 {
+	auto v = GetShortCutView();
+	if (v)
+		v->OnResource(NULL);
 }
 
 void AppWnd::OnResourceSelect(Resource *r)
@@ -2006,6 +2009,10 @@ void AppWnd::OnResourceSelect(Resource *r)
 				ContentView->Attach(HBox);
 			LastRes = r;
 		}
+
+		auto v = GetShortCutView();
+		if (v)
+			v->OnResource(r);
 	}
 }
 
@@ -4536,7 +4543,8 @@ ShortCutView::ShortCutView(AppWnd *app)
 		Lst->SetPourLargest(true);
 		Lst->AddColumn("Key", 50);
 		Lst->AddColumn("Ref", 80);
-		Lst->AddColumn("Control", 150);
+		Lst->AddColumn("CtrlId", 80);
+		Lst->AddColumn("Name", 150);
 
 		Visible(true);
 	}
@@ -4547,28 +4555,71 @@ ShortCutView::~ShortCutView()
 	App->OnCloseView(this);
 }
 
+enum ShortCutCol
+{
+	ColKey,
+	ColRefId,
+	ColCtrlId,
+	ColName
+};
+
+void FindMenuKeys(LList *out, ResMenu *menu)
+{
+	if (!out || !menu)
+		return;
+
+	LArray<ResMenuItem*> items;
+	menu->EnumItems(items);
+	for (auto i: items)
+	{
+		auto sc = i->Shortcut();
+		if (sc)
+		{
+			auto item = new LListItem(sc);
+
+			LString ref, ctrl;
+			ref.Printf("%i", i->GetStr()->GetRef());
+			ctrl.Printf("%i", i->GetStr()->GetId());
+			
+			item->SetText(ref, ColRefId);
+			item->SetText(ctrl, ColCtrlId);
+			item->SetText(i->GetStr()->Get(), ColName);
+			item->_UserPtr = i;
+
+			out->Insert(item);
+		}
+	}
+}
+
 void FindShortCuts(LList *Out, LViewI *In)
 {
-	for (LViewI *c: In->IterateViews())
+	for (auto c: In->IterateViews())
 	{
-		ResDialogCtrl *rdc = dynamic_cast<ResDialogCtrl*>(c);
+		auto rdc = dynamic_cast<ResDialogCtrl*>(c);
 		if (!rdc || !rdc->GetStr())
 			continue;
 
-		char *n = rdc->GetStr()->Get();
+		auto n = rdc->GetStr()->Get();
 		if (n)
 		{
 			char *a = strchr(n, '&');
 			if (a && a[1] != '&')
 			{
 				LListItem *li = new LListItem;
+
 				LString s(++a, 1);
-				LString id;
-				id.Printf("%i", rdc->GetStr()->GetRef());
-				li->SetText(s.Upper(), 0);
-				li->SetText(id, 1);
-				li->SetText(rdc->GetClass(), 2);
+
+				LString ref, ctrl;
+				ref.Printf("%i", rdc->GetStr()->GetRef());
+				ctrl.Printf("%i", rdc->GetStr()->GetId());
+				
+				li->SetText(s.Upper(), ColKey);
+				li->SetText(ref, ColRefId);
+				li->SetText(ctrl, ColCtrlId);
+				li->SetText(rdc->GetClass(), ColName);
+				
 				li->_UserPtr = rdc;
+				
 				Out->Insert(li);
 			}
 		}
@@ -4585,14 +4636,22 @@ int ShortCutView::OnNotify(LViewI *Ctrl, LNotification n)
 		{
 			case LNotifyItemClick:
 			{
-				LListItem *li = Lst->GetSelected();
-				if (li)
-				{
-					LString s = li->GetText(1);
-					ResDialogCtrl *c = (ResDialogCtrl*) li->_UserPtr;
-					if (c)
-						App->GotoObject(c->GetStr(), NULL, c->GetDlg(), NULL, c);
-				}
+				auto li = Lst->GetSelected();
+				if (!li)
+					break;
+
+				LString s = li->GetText(1);
+
+				ResObject *c = (ResObject*) li->_UserPtr;
+				if (!c)
+					break;
+
+				if (auto ctrl = dynamic_cast<ResDialogCtrl*>(c))
+					App->GotoObject(ctrl->GetStr(), NULL, ctrl->GetDlg(), NULL, ctrl);
+				else if (auto mi = dynamic_cast<ResMenuItem*>(c))
+					App->GotoObject(mi->GetStr(), NULL, NULL, mi, NULL);
+				else
+					LAssert(!"Impl me.");
 				break;
 			}
 			default:
@@ -4603,13 +4662,20 @@ int ShortCutView::OnNotify(LViewI *Ctrl, LNotification n)
 	return LWindow::OnNotify(Ctrl, n);
 }
 
-void ShortCutView::OnDialogChange(ResDialog *Dlg)
+void ShortCutView::OnResource(Resource *r)
 {
 	Lst->Empty();
-	if (!Dlg)
+	
+	if (!r)
 		return;
-	FindShortCuts(Lst, Dlg);
-	Lst->Sort<int>(NULL);
+
+	if (auto dlg = dynamic_cast<ResDialog*>(r))
+		FindShortCuts(Lst, dlg);
+	else if (auto menu = dynamic_cast<ResMenu*>(r))
+		FindMenuKeys(Lst, menu);
+	
+	Lst->Sort(0);
+	Lst->ResizeColumnsToContent();
 }
 
 ShortCutView *AppWnd::GetShortCutView()

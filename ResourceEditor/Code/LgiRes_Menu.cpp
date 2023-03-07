@@ -302,33 +302,19 @@ void ResMenu::OnShowLanguages()
 	}
 }
 
-void AddChildren(LTreeItem *i, List<ResMenuItem> &Items)
+template<typename T>
+void AddChildren(T *i, LArray<ResMenuItem*> &Items)
 {
-	for (LTreeItem *c = i->GetChild(); c; c = c->GetNext())
+	for (auto c = i->GetChild(); c; c = c->GetNext())
 	{
-		ResMenuItem *m = dynamic_cast<ResMenuItem*>(c);
+		auto m = dynamic_cast<ResMenuItem*>(c);
 		if (m)
-		{
-			Items.Insert(m);
-		}
+			Items.Add(m);
 		AddChildren(c, Items);
 	}
 }
 
-void AddChildren(LTree *i, List<ResMenuItem> &Items)
-{
-	for (LTreeItem *c = i->GetChild(); c; c = c->GetNext())
-	{
-		ResMenuItem *m = dynamic_cast<ResMenuItem*>(c);
-		if (m)
-		{
-			Items.Insert(m);
-		}
-		AddChildren(c, Items);
-	}
-}
-
-void ResMenu::EnumItems(List<ResMenuItem> &Items)
+void ResMenu::EnumItems(LArray<ResMenuItem*> &Items)
 {
 	AddChildren(this, Items);
 }

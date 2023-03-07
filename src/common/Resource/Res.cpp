@@ -909,26 +909,26 @@ LgiFunc char *_LgiGenLangLookup()
 #endif
 
 ////////////////////////////////////////////////////////////////////
-char Res_Dialog[]		= "Dialog";
-char Res_Table[]		= "TableLayout";
-char Res_ControlTree[]	= "ControlTree";
-char Res_StaticText[]	= "StaticText";
-char Res_EditBox[]		= "EditBox";
-char Res_CheckBox[]		= "CheckBox";
-char Res_Button[]		= "Button";
-char Res_Group[]		= "Group";
-char Res_RadioBox[]		= "RadioBox";
-char Res_TabView[]		= "TabView";
-char Res_Tab[]			= "Tab";
-char Res_ListView[]		= "ListView";
-char Res_Column[]		= "Column";
-char Res_ComboBox[]		= "ComboBox";
-char Res_TreeView[]		= "TreeView";
-char Res_Bitmap[]		= "Bitmap";
-char Res_Progress[]		= "Progress";
-char Res_Slider[]		= "Slider";
-char Res_ScrollBar[]	= "ScrollBar";
-char Res_Custom[]		= "Custom";
+const char Res_Dialog[]		= "Dialog";
+const char Res_Table[]		= "TableLayout";
+const char Res_ControlTree[]	= "ControlTree";
+const char Res_StaticText[]	= "StaticText";
+const char Res_EditBox[]		= "EditBox";
+const char Res_CheckBox[]		= "CheckBox";
+const char Res_Button[]		= "Button";
+const char Res_Group[]		= "Group";
+const char Res_RadioBox[]		= "RadioBox";
+const char Res_TabView[]		= "TabView";
+const char Res_Tab[]			= "Tab";
+const char Res_ListView[]		= "ListView";
+const char Res_Column[]		= "Column";
+const char Res_ComboBox[]		= "ComboBox";
+const char Res_TreeView[]		= "TreeView";
+const char Res_Bitmap[]		= "Bitmap";
+const char Res_Progress[]		= "Progress";
+const char Res_Slider[]		= "Slider";
+const char Res_ScrollBar[]	= "ScrollBar";
+const char Res_Custom[]		= "Custom";
 
 ////////////////////////////////////////////////////////////////////
 class ResObjectImpl
@@ -1128,10 +1128,10 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////
-ResObject::ResObject(char *Name)
+ResObject::ResObject(const char *Name)
 {
-	_ObjName = Name;
-	_ObjImpl = 0;
+	if (Name)
+		_ObjName = Name;
 }
 
 ResObject::~ResObject()
@@ -1234,9 +1234,9 @@ ResObjectImpl::SStatus ResObjectImpl::Res_Read(LXmlTag *Tag, ResReadCtx &Ctx)
 		return SError;
 	}
 
-	char *ObjName = Object->GetObjectName();
-	if (!stricmp(ObjName, "Slider") ||
-		!stricmp(Tag->GetTag(), ObjName))
+	auto ObjName = Object->GetObjectName();
+	if (!Stricmp(ObjName, "Slider") ||
+		!Stricmp(Tag->GetTag(), ObjName))
 	{
 		Res_SetPos(Tag);
 		if (!Res_SetStrRef(Tag, &Ctx))

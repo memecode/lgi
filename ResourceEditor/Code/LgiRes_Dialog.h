@@ -80,7 +80,7 @@ protected:
 	LRect Goobers[8];
 	int OverGoober = -1;
 
-	ResDialog *Dlg;
+	ResDialog *Dlg = NULL;
 	LRect Title;
 	LRect Client;
 	int DragCtrl = -1;
@@ -99,7 +99,7 @@ protected:
 	LMouse MapToDialog(LMouse m);
 
 public:
-	ResDialogCtrl(ResDialog *dlg, char *CtrlTypeName, LXmlTag *load);
+	ResDialogCtrl(ResDialog *dlg, const char *CtrlTypeName, LXmlTag *load);
 	~ResDialogCtrl();
 
 	const char *GetClass() { return "ResDialogCtrl"; }

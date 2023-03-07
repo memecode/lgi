@@ -72,7 +72,7 @@ public:
 	List<ResString> *GetStrs() { return (Group)?Group->GetStrs():0; }
 	ResString *GetStringByRef(int Ref);
 	ResMenuItem *GetItemByRef(int Ref);
-	void EnumItems(List<ResMenuItem> &Items);
+	void EnumItems(LArray<ResMenuItem*> &Items);
 	ResMenu *IsMenu() { return this; }
 	void OnShowLanguages();
 	ResStringGroup *GetStringGroup() { return Group; }

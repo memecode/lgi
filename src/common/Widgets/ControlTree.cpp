@@ -381,7 +381,7 @@ void LControlTree::Item::OnPaint(ItemPaintCtx &Ctx)
 ///////////////////////////////////////////////////////////////////////
 LControlTree::LControlTree() : LTree(-1, 0, 0, 100, 100)
 {
-	_ObjName = Res_ControlTree;
+	SetObjectName(Res_ControlTree);
 	d = new LControlTreePriv;
 }
 
