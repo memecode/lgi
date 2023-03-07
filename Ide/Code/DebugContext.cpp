@@ -660,7 +660,7 @@ void LDebugContext::FormatMemoryDump(int WordSize, int Width, bool InHex)
 		p.Print("    \"%s\"\n", Char);
 	}
 	
-	MemoryDump->Name(p.NewGStr());
+	MemoryDump->Name(p.NewLStr());
 }
 
 void LDebugContext::OnMemoryDump(const char *Addr, int WordSize, int Width, bool IsHex)

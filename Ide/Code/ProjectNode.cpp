@@ -712,7 +712,7 @@ bool ProjectNode::Serialize(bool Write)
 											"\t%s",
 											p.Get(),
 											Files[0]);
-								auto Msg = Buf.NewGStr();
+								auto Msg = Buf.NewLStr();
 								if (Msg)
 								{
 									auto a = new LAlert(Project->GetApp(), "Missing File", Msg, "Yes", "No", "Browse...");
@@ -754,7 +754,7 @@ bool ProjectNode::Serialize(bool Write)
 											"\n"
 											"doesn't exist.",
 											p.Get());
-								auto Msg = Buf.NewGStr();
+								auto Msg = Buf.NewLStr();
 								if (Msg)
 								{
 									auto a = new LAlert(Project->GetApp(), "Missing File", Msg, "Skip", "Delete", "Browse...");

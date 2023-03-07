@@ -253,7 +253,7 @@ bool LHttp::Request
 	}
 	Cmd.Push("\r\n");
 	
-	auto c = Cmd.NewGStr();
+	auto c = Cmd.NewLStr();
 	#if DEBUG_LOGGING
 	Log.Print("HTTP req.hdrs=%s\n-------------------------------------\nHTTP req.body=", c.Get());
 	#endif
@@ -462,7 +462,7 @@ bool LHttp::Request
 						if (Used < 2 || s[0] != '\r' || s[1] != '\n')
 						{
 							#ifdef _DEBUG
-							LgiTrace("Log: %s\n", Log.NewGStr().Get());
+							LgiTrace("Log: %s\n", Log.NewLStr().Get());
 							#endif
 							LAssert(!"Post fix missing.");
 							break;
@@ -548,7 +548,7 @@ bool LHttp::Request
 	#if DEBUG_LOGGING
 	// if (ProtocolStatus && *ProtocolStatus >= 300)
 	{
-		auto LogData = Log.NewGStr();
+		auto LogData = Log.NewLStr();
 		if (LogData)
 		{
 			LgiTrace("%.*s\n", (int)LogData.Length(), LogData.Get());
@@ -815,7 +815,7 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *In
 		int StatusCatagory = Status / 100;
 		if (StatusCatagory == 3)
 		{
-			LString Headers = OutHeaders.NewGStr();
+			LString Headers = OutHeaders.NewLStr();
 			LgiTrace("Header=%s\n", Headers.Get());
 			LAutoString Loc(InetGetHeaderField(Headers, "Location", -1));
 			if (!Loc)
@@ -850,7 +850,7 @@ bool LgiGetUri(LCancel *Cancel, LStreamI *Out, LString *OutError, const char *In
 		}		
 		else if (StatusCatagory != 2)
 		{
-			// auto Hdr = OutHeaders.NewGStr();
+			// auto Hdr = OutHeaders.NewLStr();
 			Enc = LHttp::EncodeRaw;
 
 			if (OutError)

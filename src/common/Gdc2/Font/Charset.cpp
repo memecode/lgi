@@ -1126,7 +1126,7 @@ LString LStrConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 			auto InCs = InInfo->GetIconvName();
 			auto OutCs = OutInfo->GetIconvName();
 			if (Fs->IconvConvert(OutCs, &b, InCs, (const char*&)In, InLen))
-				return b.NewGStr();
+				return b.NewLStr();
 
 			InCp = "iso-8859-1";
 		}
@@ -1145,7 +1145,7 @@ LString LStrConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 			break;
 	}
 
-	return b.NewGStr();
+	return b.NewLStr();
 }
 
 void *LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t InLen)

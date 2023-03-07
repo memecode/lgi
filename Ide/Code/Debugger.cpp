@@ -878,7 +878,7 @@ public:
 					// Get process info
 					if (Cmd("info inferiors", &p))
 					{
-						auto s = p.NewGStr();
+						auto s = p.NewLStr();
 						// LogMsg("%s\n", s.Get());
 						
 						auto Ln = s.SplitDelimit("\r\n");
@@ -1149,12 +1149,12 @@ public:
 					// Get the type...
 					c.Printf("whatis %s", v.Name.Get());
 					Cmd(c, &typePipe);
-					auto type = typePipe.NewGStr();
+					auto type = typePipe.NewLStr();
 					printf("Type='%s'\n", type.Get());
 
 					c.Printf("p %s", v.Name.Get());
 					Cmd(c, &valPipe);
-					auto val = valPipe.NewGStr();					
+					auto val = valPipe.NewLStr();					
 					if (val)
 					{
 						for (char *s = val; s && *s; )
@@ -1204,7 +1204,7 @@ public:
 				c.Printf("whatis %s", v.Name.Get());
 				if (Cmd(c, &p))
 				{
-					auto a = p.NewGStr();
+					auto a = p.NewLStr();
 					if (a.Find("=") >= 0)
 					{
 						auto tmp = a.Split("=", 1);
@@ -1220,7 +1220,7 @@ public:
 				c.Printf("p %s", v.Name.Get());
 				if (Cmd(c, &p))
 				{
-					LString a = p.NewGStr();
+					LString a = p.NewLStr();
 					LString Val;
 					if (a.Find("=") >= 0)
 					{
@@ -1255,13 +1255,13 @@ public:
 			if (!Cmd("info args", &p))
 				return false;
 			
-			auto a = p.NewGStr();
+			auto a = p.NewLStr();
 			ParseVariables(a, vars, Variable::Arg, Detailed);
 
 			if (!Cmd("info locals", &p))
 				return false;
 
-			a = p.NewGStr();
+			a = p.NewLStr();
 			ParseVariables(a, vars, Variable::Local, Detailed);
 		}
 		
@@ -1288,7 +1288,7 @@ public:
 		sprintf_s(c, sizeof(c), "whatis %s", Var);
 		if (!Cmd(c, &q))
 			return false;
-		auto Type = q.NewGStr().SplitDelimit("=").Last().Strip();
+		auto Type = q.NewLStr().SplitDelimit("=").Last().Strip();
 		bool IsPtr = Type.Find("*") >= 0;
 		bool IsChar = Type.Find("const char") == 0 || Type.Find("char") == 0;
 		bool IsGString = Type.Find("LString") == 0;
@@ -1313,7 +1313,7 @@ public:
 			return false;
 		}
 		
-		auto val = q.NewGStr();
+		auto val = q.NewLStr();
 		if (!val)
 		{
 			Output->Print("%s:%i - No value.\n", _FL);
@@ -1554,7 +1554,7 @@ public:
 		LString r;
 		LStringPipe p;
 		if (Cmd(c, &p))
-			r = p.NewGStr();
+			r = p.NewLStr();
 		return r;
 	}
 };

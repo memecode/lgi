@@ -8929,7 +8929,7 @@ bool LHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocV
 			LTag::TextConvertState State(&p);
 			Tag->ConvertToText(State);
 		}
-		Out = p.NewGStr();
+		Out = p.NewLStr();
 	}
 
 	return false;

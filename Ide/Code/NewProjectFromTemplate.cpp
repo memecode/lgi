@@ -88,7 +88,7 @@ LString GetPython3()
 			{
 				LStringPipe out;
 				sp.Communicate(&out);
-				auto s = out.NewGStr();
+				auto s = out.NewLStr();
 				// printf("out=%s\n", s.Get());
 				if (s.Find(" 3.") >= 0)
 					return p.GetFull();
@@ -139,7 +139,7 @@ bool CreateProject(const char *Name, const char *Template, const char *Folder)
 	
 	LStringPipe Out;
 	p.Communicate(&Out);
-	LgiTrace("Out=%s\n", Out.NewGStr().Get());
+	LgiTrace("Out=%s\n", Out.NewLStr().Get());
 	
 	FileDev->Delete(ScriptOut);
 	return true;

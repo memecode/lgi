@@ -1318,7 +1318,7 @@ LString BuildThread::FindExe()
 							LStringPipe o;
 							if (p.Start())
 								p.Communicate(&o);
-							auto Out = o.NewGStr();
+							auto Out = o.NewLStr();
 							auto Ver = Out.SplitDelimit().Last();
 							printf("Ver=%s\n", Ver.Get());
 
@@ -1784,7 +1784,7 @@ int BuildThread::Main()
 				LStringPipe o;
 				Ls.Communicate(&o);
 				auto key = "Build Configurations:";
-				auto lines = o.NewGStr().SplitDelimit("\n");
+				auto lines = o.NewLStr().SplitDelimit("\n");
 				int inKey = -1;
 				for (auto l: lines)
 				{
@@ -2476,7 +2476,7 @@ bool IdeProject::FindDuplicateSymbols()
 				LStringPipe q;
 				for (ssize_t Rd = 0; (Rd = Nm.Read(Buf, sizeof(Buf))); )
 					q.Write(Buf, Rd);
-				LString::Array a = q.NewGStr().SplitDelimit("\r\n");
+				LString::Array a = q.NewLStr().SplitDelimit("\r\n");
 				LHashTbl<StrKey<char,false>,bool> Local(200000);
 				for (auto &Ln: a)
 				{
@@ -3528,7 +3528,7 @@ bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool In
 				{
 					Proc.Communicate(&Buf);
 
-					LString result = Buf.NewGStr();
+					LString result = Buf.NewLStr();
 					a = result.Split(" \t\r\n");
 					for (int i=0; i<a.Length(); i++)
 					{

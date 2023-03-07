@@ -910,7 +910,7 @@ void LApp::OnCommandLine()
 			{
 				LStringPipe p;
 				sub.Communicate(&p);
-				auto s = p.NewGStr();
+				auto s = p.NewLStr();
 				if (s && s.Find(":") > 0)
 					Status = s.SplitDelimit(":").Last().Strip();
 			}

@@ -2568,7 +2568,7 @@ void LRichTextPriv::TextBlock::DumpNodes(LTreeItem *Ti)
 					}
 				}
 				p.Write("\'", 1);
-				u = p.NewGStr();
+				u = p.NewLStr();
 			}
 			else u = "(Empty)";
 

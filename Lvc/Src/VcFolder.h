@@ -154,7 +154,7 @@ class VcFolder : public LTreeItem
 
 		LString GetBuf()
 		{
-			LString s = Buf.NewGStr();
+			LString s = Buf.NewLStr();
 			if (Log && Logging == LogSilo)
 			{
 				LString m;

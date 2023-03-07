@@ -596,7 +596,7 @@ bool LRichTextPriv::Error(const char *file, int line, const char *fmt, ...)
 	Err.Printf("%s:%i - Error: %s\n", file, line, s.Get());
 	Log->Write(Err, Err.Length());
 
-	Err = LogBuffer.NewGStr();
+	Err = LogBuffer.NewLStr();
 	LgiTrace("%.*s", Err.Length(), Err.Get());
 		
 	LAssert(0);

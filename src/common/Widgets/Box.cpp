@@ -316,7 +316,7 @@ struct BoxRange
 
 		LStringPipe p;
 		l.ToString(p);
-		return LString(", ") + label + "=" + p.NewGStr();
+		return LString(", ") + label + "=" + p.NewLStr();
 	}
 
 	LString toString()

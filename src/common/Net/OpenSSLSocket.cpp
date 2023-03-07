@@ -394,7 +394,7 @@ public:
 		return true;
 
 	OnError:
-		ErrorMsg = Err.NewGStr();
+		ErrorMsg = Err.NewLStr();
 		if (sock)
 			sock->DebugTrace("%s", ErrorMsg.Get());
 		return false;
@@ -443,7 +443,7 @@ public:
 				char *Msg = ERR_error_string(e, 0);
 				LStringPipe p;
 				p.Print("%s:%i - SSL_CTX_new(server) failed with '%s' (%i)\n", _FL, Msg, e);
-				ErrorMsg = p.NewGStr();
+				ErrorMsg = p.NewLStr();
 				sock->DebugTrace("%s", ErrorMsg.Get());
 			}
 		}

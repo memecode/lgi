@@ -582,7 +582,7 @@ public:
         {
             LStringPipe s;
             p.Communicate(&s);
-            printf("Test: %s\n", s.NewGStr().Get());
+            printf("Test: %s\n", s.NewLStr().Get());
         }
         return 0;
     }

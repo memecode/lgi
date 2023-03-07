@@ -501,7 +501,7 @@ bool LSubProcess::SetEnvironment(const char *Var, const char *Value)
 		}
 	}
 	
-	v->Val = a.NewGStr();
+	v->Val = a.NewLStr();
 	if (IsPath)
 	{
 		// Remove missing paths from the list
@@ -514,7 +514,7 @@ bool LSubProcess::SetEnvironment(const char *Var, const char *Value)
 				p.Print("%s%s", p.GetSize() ? LGI_PATH_SEPARATOR : "", Dir);
 			// else LgiTrace("%s:%i - Removing missing path '%s'\n", _FL, Dir);
 		}
-		v->Val = p.NewGStr();
+		v->Val = p.NewLStr();
 	}
 	
 	d->EnvironmentChanged = true;
@@ -927,7 +927,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 			else
 				Args.Print("%s%s", sp, a);
 		}
-		LAutoWString WArg(Utf8ToWide(Args.NewGStr()));
+		LAutoWString WArg(Utf8ToWide(Args.NewLStr()));
 
 		#if DEBUG_SUBPROCESS || DEBUG_ARGS
 		LgiTrace("%s:%i - Args='%S'\n", _FL, WArg.Get());
@@ -1283,7 +1283,7 @@ LString LSubProcess::Read()
 			break;
 	}
 
-	return p.NewGStr();
+	return p.NewLStr();
 }
 
 ssize_t LSubProcess::Read(void *Buf, ssize_t Size, int TimeoutMs)

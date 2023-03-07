@@ -135,7 +135,7 @@ class LJson
 				r += " ]";
 			}
 
-			return r.NewGStr();
+			return r.NewLStr();
 		}
 
 		Key *Deref(LString Addr, bool Create)

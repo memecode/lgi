@@ -3923,7 +3923,7 @@ bool VcFolder::Revert(LString::Array &Uris, const char *Revision)
 				p.Print(" \"%s\"", Path.Get());
 			}
 			
-			auto a = p.NewGStr();			
+			auto a = p.NewLStr();			
 			return StartCmd(a, &VcFolder::ParseRevert);
 			break;
 		}
@@ -3941,7 +3941,7 @@ bool VcFolder::Revert(LString::Array &Uris, const char *Revision)
 				p.Print(" \"%s\"", Path.Get());
 			}
 
-			auto a = p.NewGStr();			
+			auto a = p.NewLStr();			
 			return StartCmd(a, &VcFolder::ParseRevert);
 			break;
 		}

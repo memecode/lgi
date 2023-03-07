@@ -3056,7 +3056,7 @@ bool MailIMap::SetFlagsByUid(LArray<uint32_t> &Uids, const char *Flags)
 			p.Print("1:*");
 		p.Print(" FLAGS (%s)\r\n", Flags?Flags:"");
 
-		auto Buffer = p.NewGStr();
+		auto Buffer = p.NewLStr();
 		if (Buffer && WriteBuf(false, Buffer))
 		{
 			ClearDialog();

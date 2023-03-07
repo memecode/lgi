@@ -157,7 +157,7 @@ static LString FormEncode(const char *s, bool InValue = true)
 			p.Print("%%%02.2X", *c);
 		}
 	}
-	return p.NewGStr();
+	return p.NewLStr();
 }
 
 struct LOAuth2Priv

@@ -715,7 +715,7 @@ void LTextView4::LogLines()
 		p.Print("  [%i]=%p, %i+%i, %s\n", Idx, i, (int)i->Start, (int)i->Len, i->r.GetStr());
 		Idx++;
 	}
-	LgiTrace(p.NewGStr());
+	LgiTrace(p.NewLStr());
 
 	#ifdef _DEBUG
 	if (d->PourLog)
@@ -990,7 +990,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 		}
 
 		#ifdef _DEGBUG
-		d->PourLog = Log.NewGStr();
+		d->PourLog = Log.NewLStr();
 		#endif
 		PartialPour = false;
 	}

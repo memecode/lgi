@@ -1026,7 +1026,7 @@ bool MailSmtp::Open(LSocketI *S,
 				LArray<LString> AuthTypes;
 
 				// Look through the response for the auth line
-				LString Response = Str.NewGStr();
+				LString Response = Str.NewLStr();
 				if (Response)
 				{
 					auto Lines = Response.SplitDelimit("\n");
@@ -1979,7 +1979,7 @@ LString MailReceiveFolder::GetHeaders(int Message)
 	if (!c.Copy(&i, &o, &e))
 		return NULL;
 
-	return o.NewGStr();
+	return o.NewLStr();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////

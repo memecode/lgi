@@ -480,7 +480,7 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start,
 				}		
 				fclose(f);
 				
-				LString ps = p.NewGStr();
+				LString ps = p.NewLStr();
 				Zdump = ps.Split("\n");
 			}
 		}

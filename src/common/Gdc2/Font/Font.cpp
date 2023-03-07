@@ -1022,7 +1022,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 					Sz.ToString(p);
 					LgiTrace("%s:%i - LFont::Create(%s,%s) = %f,%f,%f (%i)\n",
 							_FL,
-							Face(), p.NewGStr().Get(),
+							Face(), p.NewLStr().Get(),
 							LTypeFace::d->_Ascent,
 							LTypeFace::d->_Descent,
 							LTypeFace::d->_Leading,

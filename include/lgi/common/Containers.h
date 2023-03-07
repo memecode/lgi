@@ -1103,7 +1103,7 @@ public:
 	virtual ssize_t Push(const char *Str, ssize_t Chars = -1);
 	virtual ssize_t Push(const char16 *Str, ssize_t Chars = -1);
 	char *NewStr() { return (char*)New(sizeof(char)); }
-	LString NewGStr();
+	LString NewLStr();
 	char16 *NewStrW() { return (char16*)New(sizeof(char16)); }
 	LStringPipe &operator +=(const LString &s) { Write(s.Get(), s.Length()); return *this; }
 

@@ -238,7 +238,7 @@ SSH_LOG("waitPrompt result:", result, Prompt, last);
 			{
 				PROFILE("data process");
 
-				auto response = out.NewGStr();
+				auto response = out.NewLStr();
 				if (response)
 				{
 					DeEscape(response);

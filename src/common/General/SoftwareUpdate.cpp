@@ -102,7 +102,7 @@ struct LSoftwareUpdatePriv
 					LHttp::ContentEncoding Enc;
 					if (Http.Get(GetUri, NULL, &ProtocolStatus, &RawXml, &Enc))
 					{
-						auto Xml = RawXml.NewGStr();
+						auto Xml = RawXml.NewLStr();
 						LMemStream XmlStream(Xml.Get(), Xml.Length(), false);
 						LXmlTree Tree;
 						LXmlTag Root;
@@ -135,7 +135,7 @@ struct LSoftwareUpdatePriv
 									LXmlTag *Msg = Root.GetChildTag("msg");
 									LStringPipe p;
 									p.Print(LLoadString(L_ERROR_UPDATE, sUpdateError), Msg?Msg->GetContent():(char*)"Unknown");
-									d->Error = p.NewGStr();
+									d->Error = p.NewLStr();
 									LgiTrace("UpdateURI=%s\n", GetUri.Get());
 								}
 							}

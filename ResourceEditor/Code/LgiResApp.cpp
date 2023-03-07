@@ -3189,7 +3189,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 				if (Status)
 				{
 					// Also write the header... but only if it's changed...
-					auto DefsContent = Defs.NewGStr();
+					auto DefsContent = Defs.NewLStr();
 					LAutoString OldDefsContent(LReadTextFile(DefsName));
 					if (Strcmp(DefsContent.Get(), OldDefsContent.Get()))
 					{

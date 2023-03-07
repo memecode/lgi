@@ -773,7 +773,7 @@ bool IFtp::ListDir(LArray<IFtpEntry*> &Dir)
 			d->Listen.Reset();
 			
 			// Parse the results
-			LString Text = Buf.NewGStr();
+			LString Text = Buf.NewLStr();
 			if (Status)
 			{
 				if (Text)

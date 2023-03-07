@@ -706,7 +706,7 @@ LString LMakeRelativePath(const char *Base, const char *Path)
 		}
 	}
 
-	return Status.NewGStr();
+	return Status.NewLStr();
 }
 
 bool LIsRelativePath(const char *Path)
@@ -949,7 +949,7 @@ LString LFile::Path::PrintAll()
 
 	#endif
 
-	return p.NewGStr();
+	return p.NewLStr();
 }
 
 LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)

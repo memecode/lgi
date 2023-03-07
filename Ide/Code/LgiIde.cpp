@@ -1842,7 +1842,7 @@ public:
 		Spaces[Len] = 0;
 
 		LString::Array Files;
-		auto Parts = p.NewGStr().Replace("\r", "").Split("\n\n");
+		auto Parts = p.NewLStr().Replace("\r", "").Split("\n\n");
 		if (Parts.Length() > 0)
 		{
 			Files = Parts[4].Strip().Split("\n");
@@ -1898,7 +1898,7 @@ public:
 	
 		const char *Key = " machine ";
 		LString Arch;
-		auto Lines = p.NewGStr().SplitDelimit("\r\n");
+		auto Lines = p.NewLStr().SplitDelimit("\r\n");
 		int64 Machine = 0;
 		for (auto &Ln : Lines)
 		{
@@ -1938,7 +1938,7 @@ public:
 	
 		LString Exp;
 
-		auto Raw = p.NewGStr().Replace("\r", "");
+		auto Raw = p.NewLStr().Replace("\r", "");
 		auto Sect = Raw.Split("\n\n");
 
 		#if 0

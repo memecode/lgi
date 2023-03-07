@@ -30,7 +30,7 @@ void LWebdav::PrettyPrint(LXmlTag &x)
 	LStringPipe p;
 	LXmlTree t;
 	t.Write(&x, &p);
-	auto s = p.NewGStr();
+	auto s = p.NewLStr();
 	LgiTrace("Pretty: %s\n", s.Get());
 }
 
@@ -57,8 +57,8 @@ bool LWebdav::Request(Req &r, const char *Name, LString Resource)
 
 		http.SetAuth(User, Pass);
 		r.Status = http.Request(Name, Full, &r.ProtocolStatus, r.InHdrs, r.InBody ? &In : NULL, &OutPipe, &OutHdrsPipe, &r.Encoding);
-		r.OutHdrs = OutHdrsPipe.NewGStr();
-		r.OutBody = OutPipe.NewGStr();
+		r.OutHdrs = OutHdrsPipe.NewLStr();
+		r.OutBody = OutPipe.NewLStr();
 			
 		// LgiTrace("%s\n%s\n", r.OutHdrs.Get(), r.OutBody.Get());
 	}

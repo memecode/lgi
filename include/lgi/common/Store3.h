@@ -58,7 +58,7 @@ class LDataFolderI;
 class LDataStoreI;
 class LDataPropI;
 typedef LAutoPtr<LStreamI> LAutoStreamI;
-void ParseIdList(char *In, List<char> &Out);
+LString::Array ParseIdList(const char *In);
 extern const char *Store3ItemTypeToMime(Store3ItemTypes type);
 
 /// A storage event

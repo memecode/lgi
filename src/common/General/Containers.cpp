@@ -418,7 +418,7 @@ bool LMemQueue::Buffer::Commit(size_t bytes)
 }
 
 //////////////////////////////////////////////////////////////////////////
-LString LStringPipe::NewGStr()
+LString LStringPipe::NewLStr()
 {
 	LString s;
 	

@@ -113,7 +113,7 @@ LString LUri::ToString()
 	if (sAnchor)
 		p.Print("#%s", sAnchor.Get());
 		
-	return p.NewGStr();
+	return p.NewLStr();
 }
 
 bool LUri::Set(const char *uri)
@@ -260,7 +260,7 @@ LString LUri::EncodeStr(const char *s, const char *ExtraCharsToEncode)
 		}
 	}
 	
-	return p.NewGStr();
+	return p.NewLStr();
 }
 
 LUri::StrMap LUri::Params()
@@ -306,7 +306,7 @@ LString LUri::DecodeStr(const char *s)
 		}
 	}
 
-	return p.NewGStr();
+	return p.NewLStr();
 }
 
 #if defined LGI_CARBON

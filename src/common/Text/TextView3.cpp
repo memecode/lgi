@@ -960,7 +960,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 		}
 
 		#ifdef _DEGBUG
-		d->PourLog = Log.NewGStr();
+		d->PourLog = Log.NewLStr();
 		#endif
 		PartialPour = false;
 		PartialPourLines = 0;

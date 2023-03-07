@@ -83,7 +83,7 @@ LAbout::LAbout(	LView *parent,
 		c->Add(Ctrl);
 
 		Ctrl->SetId(IDC_MESSAGE);
-		Ctrl->Name(p.NewGStr());
+		Ctrl->Name(p.NewLStr());
 		Ctrl->GetCss(true)->BackgroundColor(cBack);
 		Ctrl->SetFont(LSysFont);
 	}

@@ -106,7 +106,7 @@ public:
 		LStringPipe p;
 		for (auto r : *this)
 			p.Print(LPrintfSSizeT "-" LPrintfSSizeT ",", r.Start, r.End());
-		return p.NewGStr();
+		return p.NewLStr();
 	}
 
 	bool FromString(LString s)

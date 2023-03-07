@@ -14,7 +14,7 @@ LString LDragFormats::ToString()
 	for (auto &f: Formats)
 		p.Print("%s,", f.Get());
 	p.Print("}");
-	return p.NewGStr();
+	return p.NewLStr();
 }
 
 void LDragFormats::SupportsFileDrops()

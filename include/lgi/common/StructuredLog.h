@@ -199,7 +199,7 @@ public:
 				}
 			}));
 
-		callback(p.NewGStr());
+		callback(p.NewLStr());
 	}
 
 	static void UnitTest()

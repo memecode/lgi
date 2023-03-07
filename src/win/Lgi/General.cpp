@@ -190,7 +190,7 @@ bool _GetApps_Add(LArray<LAppInfo> &Apps, char *In)
 
 		auto &a = Apps.New();
 		a.Params = LString(In).Strip();
-		a.Path = p.NewGStr();
+		a.Path = p.NewLStr();
 		if (a.Path)
 		{
 			char e[MAX_PATH_LEN];

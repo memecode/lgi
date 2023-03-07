@@ -114,7 +114,7 @@ public:
 					break;
 			}
 
-			cache = p.NewGStr();
+			cache = p.NewLStr();
 		}
 
 		return cache;
@@ -270,7 +270,7 @@ public:
 				p.Print("\n");
 			}
 
-			ctrl->Name(p.NewGStr());
+			ctrl->Name(p.NewLStr());
 		}
 	}
 };
