@@ -242,6 +242,8 @@ enum Store3ItemTypes
 	MAGIC_MAX						= (MAGIC_BASE+14)	// One past the end
 };
 
+extern const char *Store3ItemTypeName(Store3ItemTypes t);
+
 // When setting this via LDataI::SetInt the return value is:
 // - true if you need to mark the object dirty so that it gets saved
 // - false if the flags is stored elsewhere and you don't have to save.

@@ -4532,7 +4532,7 @@ public:
 ShortCutView::ShortCutView(AppWnd *app)
 {
 	App = app;
-	LRect r(0, 0, 300, 600);
+	LRect r(0, 0, 500, 600);
 	SetPos(r);
 	MoveSameScreen(App);
 	Name("Dialog Shortcuts");

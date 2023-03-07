@@ -369,7 +369,7 @@ void LDataGridPriv::Create(int NewCol)
 LDataGrid::LDataGrid(int CtrlId, ItemFactory Func, void *userdata) :
 	LList(CtrlId, 0, 0, 1000, 1000)
 {
-	_ObjName = Res_Custom;
+	SetObjectName(Res_Custom);
 
 	DrawGridLines(true);
 	SetPourLargest(true);
