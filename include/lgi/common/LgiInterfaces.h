@@ -399,6 +399,8 @@ public:
 class LViewLayoutInfo
 {
 public:
+	constexpr static int FILL = -1;
+
 	struct Range
 	{
 		// 0 if unknown, -1 for "all available"

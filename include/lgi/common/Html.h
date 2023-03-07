@@ -96,6 +96,7 @@ public:
 						bool DebugLog = false);
 	/// Layout content and return size.
 	LPoint Layout(bool ForceLayout = false);
+	bool OnLayout(LViewLayoutInfo &Inf);
 
 	// Options
 	bool GetLinkDoubleClick();

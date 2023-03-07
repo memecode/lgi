@@ -7491,6 +7491,22 @@ void LHtml::OnPosChange()
 	}
 }
 
+bool LHtml::OnLayout(LViewLayoutInfo &Inf)
+{
+	if (!Inf.Width.Min)
+	{
+		Inf.Width.Min = Inf.FILL;
+		Inf.Width.Max = Inf.FILL;
+	}
+	else
+	{
+		Inf.Height.Min = Inf.FILL;
+		Inf.Height.Max = Inf.FILL;
+	}
+
+	return true;
+}
+
 LPoint LHtml::Layout(bool ForceLayout)
 {
 	LRect Client = GetClient();
