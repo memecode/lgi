@@ -1038,6 +1038,8 @@ bool LDateTime::Set(const char *Str)
 {
 	if (!Str)
 		return false;
+	if (Strlen(Str) > 100)
+		return false;
 
 	char Local[256];
 	strcpy_s(Local, sizeof(Local), Str);

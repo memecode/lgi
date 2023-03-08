@@ -629,6 +629,8 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 		int Win32Height = 0;
 		if (Sz.Type == LCss::LenPt)
 		{
+			if (Sz.Value == 0)
+				return false;
 			Win32Height = WinPointToHeight((int)Sz.Value, hDC);
 		}
 		else if (Sz.Type == LCss::LenPx)
@@ -672,8 +674,13 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 			}
 		}
 			
-		if (Win32Height == 0)			
+		if (Win32Height == 0)
+		{
+			LStringPipe p;
+			Sz.ToString(p);
+			LgiTrace("%s:%i - Couldn't resolve css='%s' to a valid height.\n", _FL, p.NewLStr().Get());
 			LAssert(!"What now?");
+		}
 	
 		LTypeFace::d->IsSymbol = LTypeFace::d->_Face &&
 									(
