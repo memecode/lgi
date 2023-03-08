@@ -842,8 +842,11 @@ LString WinGetSpecialFolderPath(int Id)
 
 //////////////////////////////////////////////////////////////////////
 #ifndef LGI_STATIC
+static bool AssertUiOpen = false;
+
 void LAssertDlg(LString Msg, std::function<void(int)> Callback)
 {
+	AssertUiOpen = true;
 	auto a = new LAlert(LAppInst ? LAppInst->AppWnd : NULL, "Assert Failed", Msg, "Abort", "Debug", "Ignore");
 	a->SetAppModal();
 	a->DoModal([Callback](auto d, auto code)
@@ -851,76 +854,75 @@ void LAssertDlg(LString Msg, std::function<void(int)> Callback)
 		if (Callback)
 			Callback(code);
 		delete d;
+		AssertUiOpen = false;
 	});
 }
 #endif
 
 void _lgi_assert(bool b, const char *test, const char *file, int line)
 {
-	static bool Asserting = false;
-
 	if (!b)
 	{
 		#ifdef LGI_STATIC
-		assert(b);
+
+			assert(b);
+
 		#else
-		if (Asserting || !LAppInst || !LSysFont)
-		{
-			// Woah boy...
-			LgiTrace("%s:%i - Assert: %s failed.\n", file, line, test);
-		}
-		else
-		{
-			Asserting = true;
-			
-			printf("%s:%i - Assert failed:\n%s\n", file, line, test);
 
-			#ifdef _DEBUG
-
-			LString Msg;
-			Msg.Printf("Assert failed, file: %s, line: %i\n%s", file, line, test);
-
-			int Result = 0;
-			if (LAppInst->InThread())
+			if (AssertUiOpen || !LAppInst || !LSysFont)
 			{
-				// We are in the GUI thread, show the dialog inline
-				LAssertDlg(Msg, [](auto Result)
-				{
-					switch (Result)
-					{
-						case 1:
-						{
-							exit(-1);
-							break;
-						}
-						case 2:
-						{
-							// Bring up the debugger...
-							#if defined(_WIN64) || !defined(_MSC_VER)
-							assert(0);
-							#else
-							_asm int 3
-							#endif
-							break;
-						}
-						default:
-						case 3:
-						{
-							break;
-						}
-					}			
-				});
+				// Woah boy...
+				LgiTrace("%s:%i - Assert: %s failed.\n", file, line, test);
 			}
 			else
 			{
-				// Fall back to windows UI
-				assert(0);
+				LgiTrace("%s:%i - Assert failed:\n%s\n", file, line, test);
+
+				#ifdef _DEBUG
+
+					LString Msg;
+					Msg.Printf("Assert failed, file: %s, line: %i\n%s", file, line, test);
+
+					int Result = 0;
+					if (LAppInst->InThread())
+					{
+						// We are in the GUI thread, show the dialog inline
+						LAssertDlg(Msg, [](auto Result)
+						{
+							switch (Result)
+							{
+								case 1:
+								{
+									exit(-1);
+									break;
+								}
+								case 2:
+								{
+									// Bring up the debugger...
+									#if defined(_WIN64) || !defined(_MSC_VER)
+									assert(0);
+									#else
+									_asm int 3
+									#endif
+									break;
+								}
+								default:
+								case 3:
+								{
+									break;
+								}
+							}			
+						});
+					}
+					else
+					{
+						// Fall back to windows UI
+						assert(0);
+					}
+
+				#endif
 			}
 
-			#endif
-
-			Asserting = false;
-		}
 		#endif
 	}
 }

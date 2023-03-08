@@ -620,7 +620,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 		if (d->hFont)
 		{
 			DeleteObject(d->hFont);
-			d->hFont = 0;
+			d->hFont = NULL;
 		}
 	
 		d->pSurface = pSurface;
@@ -628,9 +628,15 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 		auto Sz = Size();
 		int Win32Height = 0;
 		if (Sz.Type == LCss::LenPt)
+		{
 			Win32Height = WinPointToHeight((int)Sz.Value, hDC);
+		}
 		else if (Sz.Type == LCss::LenPx)
+		{
+			if (Sz.Value == 0)
+				return false;
 			Win32Height = (int)(Sz.Value * 1.2);
+		}
 		else
 		{
 			LFontType def;
