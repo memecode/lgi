@@ -4731,9 +4731,7 @@ int LgiMain(OsAppArguments &AppArgs)
 	LApp a(AppArgs, "LgiIde");
 	if (a.IsOk())
 	{
-		LPoint dpi = LScreenDpi();
 		a.AppWnd = new AppWnd;
-		// a.AppWnd->_Dump();
 		a.Run();
 	}
 

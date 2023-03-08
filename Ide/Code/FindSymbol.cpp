@@ -275,7 +275,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			case M_FIND_SYM_REQUEST:
 			{
 				LAutoPtr<FindSymRequest> Req((FindSymRequest*)Msg->A());
-				int Platforms = Msg->B();
+				auto Platforms = Msg->B();
 				if (Req && Req->SinkHnd >= 0)
 				{
 					LString::Array p = Req->Str.SplitDelimit(" \t");

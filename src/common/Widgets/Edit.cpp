@@ -50,7 +50,7 @@ LEdit::LEdit(int id, int x, int y, int cx, int cy, const char *name) :
 	#endif
 {
 	#if !WINNATIVE
-	_ObjName = Res_EditBox;
+	SetObjectName(Res_EditBox);
 	SetUrlDetect(false);
 	SetWrapType(TEXTED_WRAP_NONE);
 	#endif

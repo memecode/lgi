@@ -154,7 +154,7 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
 #if LGI_COCOA
         if (LAppInst)
         {
-            LCocoaAssert *ca = [[LCocoaAssert alloc] init:p.NewGStr()];
+            LCocoaAssert *ca = [[LCocoaAssert alloc] init:p.NewLStr()];
             auto hnd = LAppInst->Handle();
             [hnd.p performSelectorOnMainThread:@selector(assert:) withObject:ca waitUntilDone:true];
             switch (ca.result)
