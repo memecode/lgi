@@ -269,9 +269,7 @@ _GNU_SOURCE</Release>
 				<All>SOME_TEST=testing</All>
 			</Environment>
 			<Arguments>
-				<All>
-					<Debug>/home/matthew/code/scribe/trunk_os/Linux/ScribeProj.xml</Debug>
-				</All>
+				<All />
 			</Arguments>
 			<DebugAdmin />
 			<InitialDir />

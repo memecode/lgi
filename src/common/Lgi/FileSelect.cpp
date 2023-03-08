@@ -2171,7 +2171,7 @@ void LFileSelect::OpenFolder(SelectCb Cb)
 	{
 		printf("LFileSelect::OpenFolder cb, code=%i\n", code);
 		if (Cb)
-			Cb(this, code != IDOK);
+			Cb(this, code == IDOK);
 		delete d;
 	});
 }
@@ -2185,11 +2185,11 @@ void LFileSelect::Save(SelectCb Cb)
 	Dlg->SaveBtn->Name("Save As");
 
 	// printf("LFileSelect domodal.. thread=%u\n", GetCurrentThreadId());
-	Dlg->DoModal([FileSelect=this,Cb](auto dlg, auto code)
+	Dlg->DoModal([this, Cb](auto dlg, auto code)
 	{
-		// printf("LFileSelect cb.. thread=%u lock=%u\n", GetCurrentThreadId(), dlg->WindowHandle()->LockingThread());
+		// printf("LFileSelect cb.. thread=%u, code=%i\n", GetCurrentThreadId(), code); // dlg->WindowHandle()->LockingThread());
 		if (Cb)
-			Cb(FileSelect, code != IDOK);
+			Cb(this, code == IDOK);
 		// printf("LFileSelect deleting.. lock=%u\n", dlg->WindowHandle()->LockingThread());
 		delete dlg;
 		// printf("LFileSelect deleted..\n");

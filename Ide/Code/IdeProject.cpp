@@ -3070,8 +3070,9 @@ bool IdeProject::GetClean()
 
 void IdeProject::SetClean(std::function<void(bool)> OnDone)
 {
-	auto CleanNodes = [&]()
+	auto CleanNodes = [this, OnDone]()
 	{
+		printf("IdeProject.SetClean.CleanNodes\n");
 		for (auto i: *this)
 		{
 			ProjectNode *p = dynamic_cast<ProjectNode*>(i);
@@ -3083,30 +3084,35 @@ void IdeProject::SetClean(std::function<void(bool)> OnDone)
 			OnDone(true);
 	};
 
+	printf("IdeProject.SetClean dirty=%i,%i validfile=%i\n", d->Dirty, d->UserFileDirty, ValidStr(d->FileName));
 	if (d->Dirty || d->UserFileDirty)
 	{
 		if (ValidStr(d->FileName))
 			SaveFile();
 		else
 		{
-			LFileSelect s;
-			s.Parent(Tree);
-			s.Name("Project.xml");
-			s.Save([&](auto s, auto ok)
+			auto s = new LFileSelect;
+			s->Parent(Tree);
+			s->Name("Project.xml");
+			s->Save([this, OnDone, CleanNodes](auto s, auto ok)
 			{
-				if (!ok)
+				printf("IdeProject.SetClean.FileSelect ok=%i\n", ok);
+				if (ok)
+				{
+					d->FileName = s->Name();
+					d->UserFile = d->FileName + "." + LCurrentUserName();
+					d->App->OnFile(d->FileName, true);
+					Update();
+
+					CleanNodes();
+				}
+				else
 				{
 					if (OnDone)
 						OnDone(false);
-					return;
 				}
-
-				d->FileName = s->Name();
-				d->UserFile = d->FileName + "." + LCurrentUserName();
-				d->App->OnFile(d->FileName, true);
-				Update();
-
-				CleanNodes();
+				
+				delete s;
 			});
 			return;
 		}

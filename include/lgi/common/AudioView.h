@@ -819,7 +819,10 @@ public:
 		pDC->Rectangle();
 
 		if (!Data.Valid())
-			SetData(DefaultPos());
+		{
+			auto r = DefaultPos();
+			SetData(r);
+		}
 
 		auto Fnt = GetFont();
 		LDisplayString ds(Fnt, ErrorMsg ? ErrorMsg : Msg);

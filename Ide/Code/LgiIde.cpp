@@ -2542,9 +2542,12 @@ struct SaveState
 		{
 			auto proj = Projects[0];
 			Projects.DeleteAt(0);
-			// printf("Saving proj...\n");
+			
+			printf("Saving proj...\n");
 			proj->SetClean([this, proj](bool ok)
 			{
+				printf("save.proj.cb ok=%i\n", ok);
+				
 				if (ok)
 					d->OnFile(proj->GetFileName(), true);
 				else
