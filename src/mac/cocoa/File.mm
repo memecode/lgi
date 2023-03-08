@@ -1319,7 +1319,7 @@ int LDirectory::First(const char *Name, const char *Pattern)
 				d->BaseEnd = d->BasePath + strlen(d->BasePath);
 				
 				d->Cache.SetFixedLength(false);
-				auto Lines = o.NewGStr().Split("\n");
+				auto Lines = o.NewLStr().Split("\n");
 				for (auto Ln: Lines)
 				{
 					auto p = Ln.SplitDelimit(" \t", 8);
