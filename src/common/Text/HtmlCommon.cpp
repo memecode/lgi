@@ -607,7 +607,6 @@ LHtmlElement::LHtmlElement(LHtmlElement *parent)
 {
 	StyleDom.Css = this;
 	TagId = CONTENT;
-	Info = NULL;
 	WasClosed = false;
 	Parent = parent;
 	if (Parent)

@@ -170,12 +170,12 @@ protected:
 	LCssStyle StyleDom;
 
 public:
-	HtmlTag TagId;
+	HtmlTag TagId = CONTENT;
 	LAutoString Tag;
-	LHtmlElemInfo *Info;
+	LHtmlElemInfo *Info = NULL;
 	LAutoString Condition;
 	
-	LHtmlElement *Parent;
+	LHtmlElement *Parent = NULL;
 	LArray<LHtmlElement*> Children;
 	
 	LHtmlElement(LHtmlElement *parent);

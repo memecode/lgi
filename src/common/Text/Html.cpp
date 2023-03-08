@@ -1295,27 +1295,8 @@ LTag::LTag(LHtml *h, LHtmlElement *p) :
 	LHtmlElement(p),
 	Attr(8)
 {
-	Ctrl = 0;
-	CtrlType = CtrlNone;
-	TipId = 0;
 	Display(DispInline);
 	Html = h;
-	
-	ImageResized = false;
-	Cursor = -1;
-	Selection = -1;
-	Font = 0;
-	LineHeightCache = -1;
-	HtmlId = NULL;
-	// TableBorder = 0;
-	Cell = NULL;
-	TagId = CONTENT;
-	Info = 0;
-	Pos.x = Pos.y = 0;
-
-	#ifdef _DEBUG
-	Debug = false;
-	#endif
 }
 
 LTag::~LTag()
@@ -1751,6 +1732,7 @@ void LTag::CopyClipboard(LMemQueue &p, bool &InSelection)
 	ssize_t Off = -1;
 	ssize_t Chars = 0;
 	auto Start = GetTextStart();
+	auto t = Text() + Start;
 	if (Min >= 0 && Max >= 0)
 	{
 		Off = Min + Start;
@@ -1759,7 +1741,7 @@ void LTag::CopyClipboard(LMemQueue &p, bool &InSelection)
 	else if (Min >= 0)
 	{
 		Off = Min + Start;
-		Chars = StrlenW(Text()) - Min;
+		Chars = StrlenW(t) - Min;
 		InSelection = true;
 	}
 	else if (Max >= 0)
@@ -1771,12 +1753,17 @@ void LTag::CopyClipboard(LMemQueue &p, bool &InSelection)
 	else if (InSelection)
 	{
 		Off = Start;
-		Chars = StrlenW(Text());
+		Chars = StrlenW(t);
 	}
 
 	if (Off >= 0 && Chars > 0)
 	{
-		p.Write((uchar*) (Text() + Off), Chars * sizeof(char16));
+		#ifdef _DEBUG
+		for (int i=0; i<Chars; i++)
+			LAssert(t[i] != 0);
+		#endif
+
+		p.Write(t, Chars * sizeof(char16));
 	}
 
 	if (InSelection)
@@ -7892,10 +7879,12 @@ bool LHtml::Copy()
 		if (HasHomoglyphs(s, -1))
 		{
 			if (LgiMsg(	this,
-						"Text contains homoglyph characters that maybe a phishing attack.\n"
-						"Do you really want to copy it?",
-						"Warning",
-						MB_YESNO) == IDNO)
+						LLoadString(L_TEXTCTRL_HOMOGLYPH_WARNING,
+									"Text contains homoglyph characters that maybe a phishing attack.\n"
+									"Do you really want to copy it?"),
+						LLoadString(L_TEXTCTRL_WARNING, "Warning"),
+						MB_YESNO)
+				== IDNO)
 				return false;
 		}
 	

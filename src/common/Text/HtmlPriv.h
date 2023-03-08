@@ -295,9 +295,9 @@ protected:
 	LArray<AlignGroup> PostFlowAlign;
 
 	// Forms
-	LViewI *Ctrl;
+	LViewI *Ctrl = NULL;
 	LVariant CtrlValue;
-	HtmlControlType CtrlType;
+	HtmlControlType CtrlType = CtrlNone;
 
 	// Text
 	LAutoWString PreTxt;
@@ -327,13 +327,13 @@ protected:
 public:
 	// Object
 	LString::Array Class;
-	const char *HtmlId;
+	const char *HtmlId = NULL;
 
 	LAutoString Condition;
-	int TipId;
+	int TipId = 0;
 
-	// Heirarchy
-	LHtml *Html;
+	// Hierarchy
+	LHtml *Html = NULL;
 	bool IsBlock() { return Display() == LCss::DispBlock; }
 	LTag *GetBlockParent(ssize_t *Idx = 0);
 	LFont *GetFont();
@@ -341,12 +341,12 @@ public:
 	// Style
 	LPoint Pos;
 	LPoint Size;
-	LFont *Font;
-	int LineHeightCache;
+	LFont *Font = NULL;
+	int LineHeightCache = -1;
 	LRect PadPx;
 	
 	// Images
-	bool ImageResized;
+	bool ImageResized = false;
 	LAutoPtr<LSurface> Image;
 	void SetImage(const char *uri, LSurface *i);
 	void LoadImage(const char *Uri); // Load just this URI
@@ -380,15 +380,15 @@ public:
 			DeleteObj(Cells);
 		}
 		
-	}	*Cell;
+	}	*Cell = NULL;
 
 	#ifdef _DEBUG
-	int Debug;
+	int Debug = false;
 	#endif
 
 	// Text
-	ssize_t Cursor; // index into text of the cursor
-	ssize_t Selection; // index into the text of the selection edge
+	ssize_t Cursor = -1; // index into text of the cursor
+	ssize_t Selection = -1; // index into the text of the selection edge
 	LHtmlArea TextPos;
 
 	LTag(LHtml *h, LHtmlElement *p);
