@@ -241,7 +241,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 		{
 			if (Line >= DEBUG_LINE - 1)
 			{
-				int asd=0;
+				// int asd=0;
 			}
 			else if (PrevLine != Line)
 			{

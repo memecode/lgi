@@ -1852,7 +1852,6 @@ LString IdeDoc::GetFullPath()
 void IdeDoc::SetClean(std::function<void(bool)> Callback)
 {
 	static bool Processing = false;
-	bool Status = false;
 
 	if (!Processing)
 	{
