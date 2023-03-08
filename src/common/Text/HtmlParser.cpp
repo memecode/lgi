@@ -242,9 +242,9 @@ char *LHtmlParser::ParsePropValue(char *s, char16 *&Value)
 				if (!End)
 					break;
 
-				LString Code = LString(Start + 2, End - Start - 2).Strip();
-				LString Result = View->GetEnv()->OnDynamicContent(View, Code);
-				LString NewValue = LString(Value, Start - Value) +
+				auto Code = LString(Start + 2, End - Start - 2).Strip();
+				auto Result = View->GetEnv()->OnDynamicContent(View, Code);
+				auto NewValue = LString(Value, Start - Value) +
 					Result +
 					LString(End + 2);
 				DeleteArray(Value);
@@ -481,11 +481,11 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 							LString Code(Start, e - Start);
 							if (Code)
 							{
-								LString Result = View->GetEnv()->OnDynamicContent(View, Code);
+								auto Result = View->GetEnv()->OnDynamicContent(View, Code);
 								if (Result)
 								{
 									// Save the dynamic code to the source pipe
-									SourceData.Write(Result, Result.Length());
+									SourceData.Write(Result);
 									
 									// Create some new elements based on the dynamically generated string
 									char *p = Result;

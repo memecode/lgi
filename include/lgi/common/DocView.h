@@ -203,7 +203,7 @@ public:
 	/// Process dynamic content, returning a dynamically allocated string
 	/// for the result of the executed script. Dynamic content is enclosed
 	/// between &lt;? and ?&gt;.
-	virtual char *OnDynamicContent(LDocView *Parent, const char *Code) { return 0; }
+	virtual LString OnDynamicContent(LDocView *Parent, const char *Code) { return NULL; }
 
 	/// Some script was received, the owner should compile it
 	virtual bool OnCompileScript(LDocView *Parent, char *Script, const char *Language, const char *MimeType) { return false; }
