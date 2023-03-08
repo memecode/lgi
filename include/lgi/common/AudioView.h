@@ -9,6 +9,33 @@
 
 #define CC(code) LgiSwap32(code)
 
+struct int24_t
+{
+	int32_t s : 24;
+};
+
+union sample_t
+{
+	int8_t *i8;
+	int16_t *i16;
+	int24_t *i24;
+	int32_t *i32;
+	float *f;
+
+	sample_t(void *ptr = NULL)
+	{
+		*this = ptr;
+	}
+
+	sample_t &operator=(void *ptr)
+	{
+		i8 = (int8_t*)ptr;
+		return *this;
+	}
+};
+
+typedef int32_t (*ConvertFn)(sample_t &ptr);
+
 class LAudioView : public LLayout
 {
 public:
@@ -20,8 +47,11 @@ public:
 	};
 	enum LSampleType
 	{
+		AudioS8,
 		AudioS16LE,
 		AudioS16BE,
+		AudioS24LE,
+		AudioS24BE,
 		AudioS32LE,
 		AudioS32BE,
 		AudioFloat32,
@@ -60,7 +90,7 @@ protected:
 		ScanGroups,
 	};
 
-	LArray<uint8_t> Audio;
+	LArray<int8_t> Audio;
 	LFileType Type = AudioUnknown;
 	LSampleType SampleType = AudioS16LE;
 	int SampleBits = 0;
@@ -80,8 +110,7 @@ protected:
 		T Min = 0, Max = 0;
 	};
 
-	LArray<LArray<Grp<int16_t>>> Int16Grps;
-	LArray<LArray<Grp<int32_t>>> Int32Grps;
+	LArray<LArray<Grp<int32_t>>> IntGrps;
 	LArray<LArray<Grp<float>>> FloatGrps;
 
 	LArray<LArray<void*>> PixelAddr;
@@ -195,15 +224,15 @@ public:
 		{
 			// Parse the wave file...
 			LPointer p;
-			p.u8 = Audio.AddressOf();
-			auto end = p.u8 + Audio.Length();
+			p.s8 = Audio.AddressOf();
+			auto end = p.s8 + Audio.Length();
 
 			if (*p.u32++ != CC('RIFF'))
 				return Empty();
 			auto ChunkSz = *p.u32++;
 			auto Fmt = *p.u32++;
 			
-			while (p.u8 < end)
+			while (p.s8 < end)
 			{
 				auto SubChunkId = *p.u32++;
 				auto SubChunkSz = *p.u32++;
@@ -220,12 +249,14 @@ public:
 
 					if (SampleBits == 16)
 						SampleType = AudioS16LE;
+					else if (SampleBits == 24)
+						SampleType = AudioS24LE;
 					else if (SampleBits == 32)
-						SampleType = AudioS32LE;						
+						SampleType = AudioS32LE;
 				}
 				else if (SubChunkId == CC('data'))
 				{
-					DataStart = p.u8 - Audio.AddressOf();
+					DataStart = p.s8 - Audio.AddressOf();
 					break;
 				}
 				
@@ -419,8 +450,7 @@ public:
 
 			if (Update)
 			{
-				Int16Grps.Length(0);
-				Int32Grps.Length(0);
+				IntGrps.Length(0);
 				FloatGrps.Length(0);
 				SetData(Data);
 				Invalidate();
@@ -443,38 +473,20 @@ public:
 	{
 		LPointer p;
 		int SampleBytes = SampleBits >> 3;
-		p.u8 = Audio.AddressOf(DataStart + (Sample * Channels * SampleBytes));
+		p.s8 = Audio.AddressOf(DataStart + (Sample * Channels * SampleBytes));
 		return p;
-	}
-
-	int16_t Native(int16_t &i)
-	{
-		if (SampleType == AudioS16BE)
-			return LgiSwap16(i);
-		return i;
-	}
-
-	int32_t Native(int32_t &i)
-	{
-		if (SampleType == AudioS32BE)
-			return LgiSwap32(i);
-		return i;
-	}
-
-	float Native(float &i)
-	{
-		return i;
 	}
 
 	void UpdateMsg()
 	{
 		ssize_t Samples = GetSamples();
 		auto Addr = AddressOf(CursorSample);
-		size_t AddrOffset = Addr.u8 - Audio.AddressOf();
+		size_t AddrOffset = Addr.s8 - Audio.AddressOf();
 		LString::Array Val;
 		size_t GraphLen = 0;
 		for (int ch=0; ch<Channels; ch++)
 		{
+			/*
 			switch (SampleType)
 			{
 				case AudioS16LE:
@@ -488,6 +500,7 @@ public:
 					GraphLen = Int32Grps.Length() ? Int32Grps[0].Length() : 0;
 					break;
 			}
+			*/
 		}
 
 		Msg.Printf("Channels=%i SampleRate=%i BitDepth=%i XZoom=%g Samples=" LPrintfSSizeT " Cursor=" LPrintfSizeT " @ " LPrintfSizeT " (%s) Graph=" LPrintfSizeT "\n",
@@ -540,24 +553,83 @@ public:
 		#define PROF(name)
 	#endif
 
-	template<typename T, typename M /* Intermediate type for doing sample math, needs to be larger than 'T' */>
-	void PaintSamples(LSurface *pDC, int ChannelIdx, LArray<LArray<Grp<T>>> *Grps)
+	ConvertFn GetConvert()
+	{
+		switch (SampleType)
+		{
+			case AudioS8:
+				return [](sample_t &s) -> int32_t
+				{
+					return *s.i8++;
+				};
+			case AudioS16LE:
+				return [](sample_t &s) -> int32_t
+				{					
+					return *s.i16++;
+				};
+			case AudioS16BE:
+				return [](sample_t &s) -> int32_t
+				{
+					int16_t i = LgiSwap16(*s.i16);
+					s.i16++;
+					return i;
+				};
+			case AudioS24LE:
+				return [](sample_t &s) -> int32_t
+				{
+					int32_t i = s.i24->s;
+					s.i8 += 3;
+					return i;
+				};
+			case AudioS24BE:
+				return [](sample_t &s) -> int32_t
+				{
+					int24_t i;
+					int8_t *p = (int8_t*)&i;
+					p[0] = s.i8[2];
+					p[1] = s.i8[1];
+					p[2] = s.i8[0];
+					s.i8 += 3;
+					return i.s;
+				};
+			case AudioS32LE:
+				return [](sample_t &s) -> int32_t
+				{
+					return *s.i32++;
+				};
+			case AudioS32BE:
+				return [](sample_t &s) -> int32_t
+				{
+					int32_t i = *s.i32++;
+					return LgiSwap32(i);
+				};
+		}
+
+		return NULL;
+	}
+
+	void PaintSamples(LSurface *pDC, int ChannelIdx, LArray<LArray<Grp<int32_t>>> *Grps)
 	{
 		#if PROFILE_PAINT_SAMPLES
 		LProfile Prof("PaintSamples", 10);
 		#endif
 
-		T MaxT = 0;
-		if (sizeof(T) == 1)
-			MaxT = 0x7f;
-		else if (sizeof(T) == 2)
-			MaxT = 0x7fff;
-		else
-			MaxT = (T)0x7fffffff;
+		int32_t MaxT = 0;
+		ConvertFn Convert = GetConvert();
 
+		if (SampleBits == 8)
+			MaxT = 0x7f;
+		else if (SampleBits == 16)
+			MaxT = 0x7fff;
+		else if (SampleBits == 24)
+			MaxT = 0x7fffff;
+		else
+			MaxT = 0x7fffffff;
+
+		auto sampleBytes = SampleBits / 8;
 		auto Client = GetClient();
 		auto &c = ChData[ChannelIdx];
-		auto start = (T*)Audio.AddressOf(DataStart);
+		auto start = Audio.AddressOf(DataStart);
 		size_t samples = GetSamples();
 		auto end = start + (samples * Channels);
 		int cy = c.y1 + (c.Y() / 2);
@@ -579,14 +651,22 @@ public:
 
 				int BlkChannels = blk * Channels;
 				size_t BlkIndex = 0;
-				for (auto p = start; p < end; p += BlkChannels)
+				int byteOffsetToSample = ch * (SampleRate >> 3);
+				sample_t s;
+				s.i8 = start+byteOffsetToSample;
+
+				// For each block...
+				for (; s.i8 < end; s.i8 += BlkChannels)
 				{
-					int remain = MIN( (int)(end - p), BlkChannels );
+					int remain = MIN( (int)(end - s.i8), BlkChannels );
 					auto &b = GraphArr[BlkIndex++];
-					b.Min = b.Max = Native(p[ch]);
-					for (int i = Channels + ch; i < remain; i += Channels)
+
+					// For all samples in the block...
+					int8_t *blkEnd = s.i8 + (remain * sampleBytes);
+					b.Min = b.Max = Convert(s); // init min/max with first sample
+					while (s.i8 < blkEnd)
 					{
-						auto n = Native(p[i]);
+						auto n = Convert(s);
 						if (n < b.Min)
 							b.Min = n;
 						if (n > b.Max)
@@ -621,7 +701,8 @@ public:
 		// LgiTrace("DrawRange: " LPrintfSizeT "->" LPrintfSizeT " (" LPrintfSizeT ") mode=%i\n", StartSample, EndSample, SampleRange, (int)EffectiveMode);
 		if (EffectiveMode == DrawSamples)
 		{
-			auto pSample = start + (StartSample * Channels) + ChannelIdx;
+			sample_t pSample;
+			pSample.i8 = start + (StartSample * Channels) + ChannelIdx;
 
 			if (CursorX >= Client.x1 && CursorX <= Client.x2)
 			{
@@ -636,11 +717,11 @@ public:
 			// For all samples in the view space...
 			pDC->Colour(cMax);
 			LPoint Prev(-1, -1);
-			for (auto idx = StartSample; idx <= EndSample + 1; idx++, pSample += Channels)
+			for (auto idx = StartSample; idx <= EndSample + 1; idx++, pSample.i8 += Channels)
 			{
-				auto n = Native(*pSample);
+				auto n = Convert(pSample);
 				auto x = SampleToView(idx);
-				auto y = (T) (cy - ((M)n * YScale / MaxT));
+				auto y = (uint32_t) (cy - ((uint64_t)n * YScale / MaxT));
 				if (idx != StartSample)
 					pDC->Line(Prev.x, Prev.y, (int)x, (int)y);
 				Prev.Set((int)x, (int)y);
@@ -666,13 +747,14 @@ public:
 					pDC->VLine(Vx, c.y1, c.y2);
 				}
 
-				Grp<T> Min, Max;
+				Grp<int32_t> Min, Max;
 				StartSample = ViewToSample(Vx);
 				EndSample = ViewToSample(Vx+1);
 				if (EffectiveMode == ScanSamples)
 				{
 					// Scan individual samples
-					auto pStart = start + (StartSample * Channels) + ChannelIdx;
+					sample_t pStart;
+					pStart.i8 = start + (StartSample * Channels) + ChannelIdx;
 					auto pEnd = start + (EndSample * Channels) + ChannelIdx;
 
 					#if 0
@@ -683,9 +765,9 @@ public:
 					}
 					#endif
 					
-					for (auto i = pStart; i < pEnd; i += Channels)
+					for (auto i = pStart; i.i8 < pEnd; i.i8 += Channels)
 					{
-						auto n = Native(*i);
+						auto n = Convert(i);
 						Min.Min = MIN(Min.Min, n);
 						Max.Max = MAX(Max.Max, n);
 					}
@@ -712,15 +794,15 @@ public:
 					}
 				}
 			
-				auto y1 = (T) (cy - ((M)Min.Min * YScale / MaxT));
-				auto y2 = (T) (cy - ((M)Max.Max * YScale / MaxT));
+				auto y1 = (cy - (Min.Min * YScale / MaxT));
+				auto y2 = (cy - (Max.Max * YScale / MaxT));
 				pDC->Colour(isCursor ? cCursorMax : cMax);
 				pDC->VLine(Vx, (int)y1, (int)y2);
 
 				if (EffectiveMode == ScanGroups)
 				{
-					y1 = (T) (cy - ((M)Min.Max * YScale / MaxT));
-					y2 = (T) (cy - ((M)Max.Min * YScale / MaxT));
+					y1 = (cy - (Min.Max * YScale / MaxT));
+					y2 = (cy - (Max.Min * YScale / MaxT));
 					pDC->Colour(isCursor ? cCursorMin : cMin);
 					pDC->VLine(Vx, (int)y1, (int)y2);
 				}
@@ -753,23 +835,103 @@ public:
 			case AudioS16BE:
 			{
 				for (int ch = 0; ch < Channels; ch++)
-					PaintSamples<int16_t,int32_t>(pDC, ch, &Int16Grps);
+					PaintSamples(pDC, ch, &IntGrps);
+				break;
+			}
+			case AudioS24LE:
+			case AudioS24BE:
+			{
+				for (int ch = 0; ch < Channels; ch++)
+					PaintSamples(pDC, ch, &IntGrps);
 				break;
 			}
 			case AudioS32LE:
 			case AudioS32BE:
 			{
 				for (int ch = 0; ch < Channels; ch++)
-					PaintSamples<int32_t,int64_t>(pDC, ch, &Int32Grps);
+					PaintSamples(pDC, ch, &IntGrps);
 				break;
 			}
 			case AudioFloat32:
 			{
+				/*
 				for (int ch = 0; ch < Channels; ch++)
-					PaintSamples<float,double>(pDC, ch, &FloatGrps);
+					PaintSamples(pDC, ch, &FloatGrps);
+				*/
 				break;
 			}
 		}
+	}
+
+	bool UnitTests()
+	{		
+		SampleType = AudioS16LE;
+		auto c = GetConvert();
+		int16_t le16 = (2 << 8) | (1);
+		sample_t ptr(&le16);
+		auto out = c(ptr);
+		if (out != 0x201)
+		{
+			LAssert(0);
+			return false;
+		}
+
+		SampleType = AudioS16BE;
+		c = GetConvert();
+		int16_t be16 = (1 << 8) | (2);
+		ptr = &be16;
+		out = c(ptr);
+		if (out != 0x201)
+		{
+			LAssert(0);
+			return false;
+		}
+
+		SampleType = AudioS24LE;
+		c = GetConvert();
+		uint8_t le24[] = {1, 2, 3};
+		ptr = &le24;
+		out = c(ptr);
+		if (out != 0x30201)
+		{
+			LAssert(0);
+			return false;
+		}
+
+		SampleType = AudioS24BE;
+		c = GetConvert();
+		uint8_t be24[] = {3, 2, 1};
+		ptr = &be24;
+		out = c(ptr);
+		if (out != 0x30201)
+		{
+			LAssert(0);
+			return false;
+		}
+
+		SampleType = AudioS32LE;
+		c = GetConvert();
+		uint8_t le32[] = {1, 2, 3, 4};
+		ptr = &le32;
+		out = c(ptr);
+		if (out != 0x4030201)
+		{
+			LAssert(0);
+			return false;
+		}
+
+		SampleType = AudioS32BE;
+		c = GetConvert();
+		uint8_t be32[] = {4, 3, 2, 1};
+		ptr = &be32;
+		out = c(ptr);
+		if (out != 0x4030201)
+		{
+			LAssert(0);
+			return false;
+		}
+
+		return true;
 	}
 };
 
