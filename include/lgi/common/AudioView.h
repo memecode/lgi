@@ -34,6 +34,51 @@ union sample_t
 	}
 };
 
+template<typename T>
+struct Rect
+{
+	T x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+	
+	Rect<T> &operator =(const LRect &r)
+	{
+		x1 = r.x1;
+		y1 = r.y1;
+		x2 = r.x2;
+		y2 = r.y2;
+		return *this;
+	}
+	
+	T X() { x2 - x1 + 1; }
+	T Y() { y2 - y1 + 1; }
+
+	bool Valid()
+	{
+		return x2 >= x1 && y2 >= y1;
+	}
+	
+	operator LRect()
+	{
+		LRect r(x1, y1, x2, y2);
+		return r;
+	}
+	
+	void ZOff(T sx, T sy)
+	{
+		x1 = y1 = 0;
+		x2 = sx;
+		y2 = sy;
+	}
+	
+	const char *GetStr()
+	{
+		static char s[96];
+		sprintf_s(s, sizeof(s),
+			LPrintfInt64 "," LPrintfInt64 "," LPrintfInt64 "," LPrintfInt64,
+			x1, y1, x2, y2);
+		return s;
+	}
+};
+
 typedef int32_t (*ConvertFn)(sample_t &ptr);
 
 class LAudioView : public LLayout
@@ -98,7 +143,7 @@ protected:
 	int Channels = 0;
 	size_t DataStart = 0;
 	size_t CursorSample = 0;
-	LRect Data;
+	Rect<int64_t> Data;
 	LArray<LRect> ChData;
 	double XZoom = 1.0;
 	LString Msg, ErrorMsg;
@@ -124,7 +169,8 @@ protected:
 		}
 	}
 
-	void SetData(LRect &r)
+	template<typename T>
+	void SetData(T &r)
 	{
 		Data = r;
 		ChData.Length(Channels);
@@ -294,7 +340,8 @@ public:
 	LRect DefaultPos()
 	{
 		auto c = GetClient();
-		c.Inset(20, 20);
+		c.y1 += LSysFont->GetHeight();
+		c.Inset(10, 10);
 		return c;
 	}
 
@@ -310,9 +357,15 @@ public:
 
 	size_t ViewToSample(int x /*px*/)
 	{
-		int offset = x - Data.x1;
-		ssize_t samples = GetSamples();
-		ssize_t idx = offset * samples / Data.X();
+		int64_t offset = (int64_t)x - (int64_t)Data.x1;
+		int64_t samples = GetSamples();
+		int64_t dx = (int64_t)Data.x2 - (int64_t)Data.x1 + 1;
+		double pos = (double) offset / dx;
+		int64_t idx = samples * pos;
+		
+		printf("ViewToSample(%i) data=%s offset=" LPrintfInt64 " samples=" LPrintfInt64 " idx=" LPrintfInt64 " pos=%f\n",
+			x, Data.GetStr(), offset, samples, idx, pos);
+		
 		if (idx < 0)
 			idx = 0;
 		else if (idx >= samples)
@@ -731,6 +784,7 @@ public:
 		if (EffectiveMode == DrawSamples)
 		{
 			sample_t pSample(start + (((StartSample * Channels) + ChannelIdx) * SampleBytes));
+			bool DrawDots = SampleRange < (Client.X() >> 2);
 
 			if (CursorX >= Client.x1 && CursorX <= Client.x2)
 			{
@@ -749,6 +803,8 @@ public:
 				if (idx != StartSample)
 					pDC->Line(Prev.x, Prev.y, (int)x, (int)y);
 				Prev.Set((int)x, (int)y);
+				if (DrawDots)
+					pDC->Rectangle(x-1, y-1, x+1, y+1);
 			}
 		}
 		else
