@@ -115,7 +115,19 @@ public:
 	~LArray()
 	{
 		Length(0);
-	}	
+	}
+	
+	/// This frees the memory without calling the destructor of the elements.
+	/// Useful if you're storing large amounts of plain data types, like char or int.
+	void Free()
+	{
+		if (p)
+		{
+			free(p);
+			p = NULL;
+		}
+		len = alloc = 0;
+	}
 
 	/// Does a range check on a pointer...
 	/// \returns true if the pointer is pointing to a valid object
@@ -215,11 +227,8 @@ public:
 				size_t Length = len;
 				for (size_t i=0; i<Length; i++)
 					p[i].~Type();
-
-				free(p);
-				p = NULL;
 			}
-			len = alloc = 0;
+			Free();
 		}
 
 		return true;
