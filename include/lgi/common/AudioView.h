@@ -113,8 +113,6 @@ protected:
 	LArray<LArray<Grp<int32_t>>> IntGrps;
 	LArray<LArray<Grp<float>>> FloatGrps;
 
-	LArray<LArray<void*>> PixelAddr;
-
 	void MouseToCursor(LMouse &m)
 	{
 		auto idx = ViewToSample(m.x);
@@ -159,11 +157,13 @@ public:
 
 	~LAudioView()
 	{
+		Empty();
 	}
 
 	bool Empty()
 	{
-		Audio.Length(0);
+		Audio.Free();
+		
 		Type = AudioUnknown;
 		SampleType = AudioS16LE;
 		SampleRate = 0;
@@ -253,10 +253,16 @@ public:
 						SampleType = AudioS24LE;
 					else if (SampleBits == 32)
 						SampleType = AudioS32LE;
+
+					printf("Channels=%i\n", Channels);
+					printf("SampleRate=%i\n", SampleRate);
+					printf("SampleBits=%i\n", SampleBits);
 				}
 				else if (SubChunkId == CC('data'))
 				{
 					DataStart = p.s8 - Audio.AddressOf();
+					
+					printf("DataStart=" LPrintfSizeT "\n", DataStart);
 					break;
 				}
 				
@@ -626,18 +632,19 @@ public:
 		else
 			MaxT = 0x7fffffff;
 
-		auto sampleBytes = SampleBits / 8;
+		auto SampleBytes = SampleBits / 8;
 		auto Client = GetClient();
 		auto &c = ChData[ChannelIdx];
 		auto start = Audio.AddressOf(DataStart);
 		size_t samples = GetSamples();
+		printf("samples=" LPrintfSizeT "\n", samples);
 		auto end = start + (samples * Channels);
 		int cy = c.y1 + (c.Y() / 2);
 
 		pDC->Colour(cGrid);
 		pDC->Box(&c);
 
-		int blk = 64;
+		int blk = 256;
 		if (Grps->Length() == 0)
 		{
 			// Initialize the graph
@@ -649,29 +656,41 @@ public:
 				GraphArr.SetFixedLength(false);
 				GraphArr.Length(0);
 
-				int BlkChannels = blk * Channels;
+				int BlkBytes = blk * Channels * SampleBytes;
+				printf("BlkBytes=%i\n", BlkBytes);
+				
 				size_t BlkIndex = 0;
-				int byteOffsetToSample = ch * (SampleRate >> 3);
+				int byteOffsetToSample = ch * SampleBytes;
+				printf("byteOffsetToSample=%i\n", byteOffsetToSample);
+				printf("SampleBytes=%i\n", SampleBytes);
+
 				sample_t s;
 				s.i8 = start+byteOffsetToSample;
 
 				// For each block...
-				for (; s.i8 < end; s.i8 += BlkChannels)
+				for (; s.i8 < end; s.i8 += BlkBytes)
 				{
-					int remain = MIN( (int)(end - s.i8), BlkChannels );
+					int remain = MIN( (int)(end - s.i8), BlkBytes );
 					auto &b = GraphArr[BlkIndex++];
 
 					// For all samples in the block...
-					int8_t *blkEnd = s.i8 + (remain * sampleBytes);
-					b.Min = b.Max = Convert(s); // init min/max with first sample
-					while (s.i8 < blkEnd)
+					int8_t *blkEnd = s.i8 + (remain * SampleBytes);
+					auto smp = s;
+					b.Min = b.Max = Convert(smp); // init min/max with first sample
+					while (smp.i8 < blkEnd)
 					{
-						auto n = Convert(s);
+						auto n = Convert(smp);
 						if (n < b.Min)
 							b.Min = n;
 						if (n > b.Max)
 							b.Max = n;
 					}
+					
+					/*
+					printf("bucket=%i %i-%i\n", (int)BlkIndex-1, b.Min, b.Max);
+					if (BlkIndex > 100)
+						return;
+					*/
 				}
 
 				GraphArr.SetFixedLength(true);
@@ -683,6 +702,7 @@ public:
 		int YScale = c.Y() / 2;
 		int CursorX = SampleToView(CursorSample);
 		double blkScale = Grps->Length() > 0 ? (double) (*Grps)[0].Length() / c.X() : 1.0;
+		printf("blkScale=%f blks/px\n", blkScale);
 		LDrawMode EffectiveMode = DrawMode;
 		auto StartSample = ViewToSample(Client.x1);
 		auto EndSample = ViewToSample(Client.x2);
@@ -749,7 +769,9 @@ public:
 
 				Grp<int32_t> Min, Max;
 				StartSample = ViewToSample(Vx);
-				EndSample = ViewToSample(Vx+1);
+				EndSample = ViewToSample(Vx+1);				
+				// printf("SampleIdx: " LPrintfSizeT "-" LPrintfSizeT "\n", StartSample, EndSample);
+				
 				if (EffectiveMode == ScanSamples)
 				{
 					// Scan individual samples
@@ -778,31 +800,46 @@ public:
 					auto &Graph = (*Grps)[ChannelIdx];
 					double blkStart = (double)StartSample * Graph.Length() / samples;
 					double blkEnd = (double)EndSample * Graph.Length() / samples;
+					if (Vx % 10 == 0)
+						printf("BlkRange[%i]: %g-%g of:%i\n", Vx, blkStart, blkEnd, (int)Graph.Length());
 				
 					#if 0
 					if (isCursor)
 						LgiTrace("Blk %g-%g of " LPrintfSizeT "\n", blkStart, blkEnd, Graph.Length());
 					#endif
 
-					for (int i=(int)floor(blkStart); i<(int)ceil(blkEnd); i++)
+					auto iEnd = (int)ceil(blkEnd);
+					int count = 0;
+					for (int i=(int)floor(blkStart); i<iEnd; i++, count++)
 					{
 						auto &b = Graph[i];
-						Min.Min = MIN(Min.Min, b.Min);
-						Min.Max = MAX(Min.Max, b.Min);
-						Max.Min = MIN(Max.Min, b.Max);
+						Min.Min += b.Min;
+						Min.Max += b.Max;
+						Max.Min = MIN(Max.Min, b.Min);
 						Max.Max = MAX(Max.Max, b.Max);
+					}
+					if (count)
+					{
+						Min.Min /= count;
+						Min.Max /= count;
 					}
 				}
 			
-				auto y1 = (cy - (Min.Min * YScale / MaxT));
+				auto y1 = (cy - (Max.Min * YScale / MaxT));
 				auto y2 = (cy - (Max.Max * YScale / MaxT));
+				/*
+				printf("y=%i,%i r=%i,%i scale=%i max=%i\n",
+					(int)y1, (int)y2,
+					Min.Min, Min.Max,
+					YScale, MaxT);
+				*/
 				pDC->Colour(isCursor ? cCursorMax : cMax);
 				pDC->VLine(Vx, (int)y1, (int)y2);
 
 				if (EffectiveMode == ScanGroups)
 				{
 					y1 = (cy - (Min.Max * YScale / MaxT));
-					y2 = (cy - (Max.Min * YScale / MaxT));
+					y2 = (cy - (Min.Min * YScale / MaxT));
 					pDC->Colour(isCursor ? cCursorMin : cMin);
 					pDC->VLine(Vx, (int)y1, (int)y2);
 				}
