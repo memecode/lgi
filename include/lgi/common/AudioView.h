@@ -14,6 +14,7 @@
 #include "ao.h"
 
 #define CC(code) LgiSwap32(code)
+#define ERROR_ZERO_SAMPLE_COUNT 10
 
 struct int24_t
 {
@@ -99,7 +100,7 @@ typedef int32_t (*ConvertFn)(sample_t &ptr);
 class LPopupNotification : public LWindow
 {
 	constexpr static int Border = 10; // px
-	constexpr static int ShowMs = 3000; // milliseconds
+	constexpr static int ShowMs = 2300; // milliseconds
 
 	LColour Back = LColour(0xf7, 0xf0, 0xd5);
 	LColour Fore = LColour(0xd4, 0xb8, 0x62);
@@ -159,6 +160,7 @@ public:
 		pos.Offset(r.x2 - pos.X(), r.y2 - pos.Y());
 		SetPos(pos);
 
+		SetAlwaysOnTop(true);
 		SetPulse(500);		
 		if (!IsAttached())
 			Attach(0);
@@ -245,6 +247,7 @@ public:
 	enum Messages
 	{
 		M_WAVE_FORMS_FINISHED = M_USER + 100,
+		M_SAVE_FINISHED,
 	};
 	
 	struct LBookmark
@@ -297,8 +300,6 @@ protected:
 		CtrlSaving,
 	}	State = CtrlNormal;
 
-	LAutoPtr<LThread> Worker;
-
 	LArray<int8_t> Audio;
 	LFileType Type = AudioUnknown;
 	LSampleType SampleType = AudioS16LE;
@@ -312,7 +313,7 @@ protected:
 	double XZoom = 1.0;
 	LString Msg, ErrorMsg;
 	LDrawMode DrawMode = DrawAutoSelect;
-	LArray<LBookmark> Bookmarks;
+	LArray<LArray<LBookmark>> Bookmarks;
 	LString FilePath;
 
 	template<typename T>
@@ -457,6 +458,19 @@ public:
 		ChData.Empty();
 		Msg.Empty();
 		FilePath.Empty();
+		IntGrps.Empty();
+		Bookmarks.Empty();
+
+		if (AoPlaying)
+		{
+			AoPlaying = false;
+			LSleep(50);
+		}
+		if (AoDev)
+		{
+			ao_close(AoDev);
+			AoDev = NULL;
+		}
 
 		Invalidate();
 
@@ -472,9 +486,9 @@ public:
 			return false;
 		}
 
+		Empty();
 		Msg.Printf("Loading '%s'...", FileName);
 		LPopupNotification::Inst()->Add(GetWindow(), Msg);
-
 
 		FilePath = FileName;
 		if (!Audio.Length(f.GetSize()))
@@ -586,35 +600,73 @@ public:
 		return true;
 	}
 
-	bool Save(const char *FileName = NULL)
+private:
+	struct SaveThread : public LThread
+	{
+		LAudioView *view;
+		LString ErrorMsg;
+		LString FileName;
+
+		SaveThread(LAudioView *v, const char *filename) : LThread("SaveThread", v->AddDispatch())
+		{
+			view = v;
+			FileName = filename;
+
+			LString Msg;
+			Msg.Printf("Saving '%s'...", FileName.Get());
+			LPopupNotification::Inst()->Add(view->GetWindow(), Msg);
+
+			Run();
+		}
+
+		~SaveThread()
+		{
+			WaitForExit();
+		}
+
+		void OnComplete()
+		{
+			if (ErrorMsg)
+				LPopupNotification::Inst()->Add(view->GetWindow(), ErrorMsg);
+			else
+				LPopupNotification::Inst()->Add(view->GetWindow(), "Saved ok.");
+
+			view->State = CtrlNormal;
+			view->Saving.Release(); // it doesn't own the ptr anymore
+			DeleteOnExit = true;
+		}
+
+		int Main()
+		{
+			LFile f;
+			if (!f.Open(FileName, O_WRITE))
+			{
+				ErrorMsg.Printf("Can't open '%s' for writing.", FileName);
+				return -1;
+			}
+
+			f.SetSize(0);
+			auto wr = f.Write(view->Audio.AddressOf(0), view->Audio.Length());
+			if (wr != view->Audio.Length())
+			{
+				ErrorMsg.Printf("Write error: only wrote " LPrintfSizeT " of " LPrintfSizeT " bytes", wr, view->Audio.Length());
+				return -1;
+			}
+
+			return 0;
+		}
+	};
+
+	LAutoPtr<SaveThread> Saving;
+
+	void Save(const char *FileName = NULL)
 	{
 		if (!FileName)
 			FileName = FilePath;
 		if (!FileName)
-			return false;
+			return;
 
-		LFile f;
-		if (!f.Open(FileName, O_WRITE))
-		{
-			ErrorMsg.Printf("Can't open '%s' for writing.", FileName);
-			LPopupNotification::Inst()->Add(GetWindow(), ErrorMsg);
-			return false;
-		}
-
-		LString Msg;
-		Msg.Printf("Saving '%s'...", FileName);
-		LPopupNotification::Inst()->Add(GetWindow(), Msg);
-		f.SetSize(0);
-		auto wr = f.Write(Audio.AddressOf(0), Audio.Length());
-		if (wr != Audio.Length())
-		{
-			ErrorMsg.Printf("Write error: only wrote " LPrintfSizeT " of " LPrintfSizeT " bytes", wr, Audio.Length());
-			LPopupNotification::Inst()->Add(GetWindow(), ErrorMsg);
-			return false;
-		}
-
-		LPopupNotification::Inst()->Add(GetWindow(), "Saved ok.");
-		return true;
+		Saving.Reset(new SaveThread(this, FileName));
 	}
 
 	LRect DefaultPos()
@@ -810,7 +862,7 @@ public:
 
 	bool OnKey(LKey &k)
 	{
-		k.Trace("key");
+		// k.Trace("key");
 
 		if (k.IsChar)
 		{
@@ -866,25 +918,32 @@ public:
 
 	sample_t AddressOf(size_t Sample)
 	{
-		int SampleBytes = SampleBits >> 3;
-		return sample_t(Audio.AddressOf(DataStart + (Sample * Channels * SampleBytes)));
+		int SampleBytes = Channels * (SampleBits >> 3);
+		return sample_t(Audio.AddressOf(DataStart + (Sample * SampleBytes)));
 	}
 
-	void RepairBookmark(LBookmark &bm)
+	void RepairBookmark(int Channel, LBookmark &bm)
 	{
 		auto Convert = GetConvert();
 		auto end = Audio.AddressOf(Audio.Length()-1) + 1;
+		int sampleBytes = SampleBits / 8;
+		int skipBytes = (Channels - 1) * sampleBytes;
+		int channelOffset = Channel * sampleBytes;
 
 		// Look at previous sample...
 		auto repairSample = bm.sample;
 		auto p = AddressOf(repairSample - 1);
+		p.i8 += channelOffset;
 		auto lastGood = Convert(p);
+		p.i8 += skipBytes;
 
 		// Seek over and find the end...
 		auto nextGood = Convert(p);
+		p.i8 += skipBytes;
 		while (nextGood)
 		{
 			nextGood = Convert(p);
+			p.i8 += skipBytes;
 			repairSample++;
 		}
 
@@ -892,6 +951,7 @@ public:
 		while (nextGood == 0)
 		{
 			nextGood = Convert(p);
+			p.i8 += skipBytes;
 			endRepair++;
 		}
 
@@ -902,6 +962,7 @@ public:
 		for (int64_t i = repairSample; i < endRepair; i++)
 		{
 			p = AddressOf(i);
+			p.i8 += channelOffset;
 			if (p.i8 >= end)
 				break;
 
@@ -927,30 +988,33 @@ public:
 
 	void RepairNext()
 	{
-		int64_t prev = 0;
-		LBookmark *Bookmark = NULL;
-		for (auto &bm: Bookmarks)
+		for (int ch = 0; ch < Channels; ch++)
 		{
-			if (bm.sample >= CursorSample &&
-				prev < CursorSample &&
-				bm.error)
+			int64_t prev = 0;
+			LBookmark *Bookmark = NULL;
+			for (auto &bm: Bookmarks[ch])
 			{
-				Bookmark = &bm;
-				break;
+				if (bm.sample >= CursorSample &&
+					prev < CursorSample &&
+					bm.error)
+				{
+					Bookmark = &bm;
+					break;
+				}
 			}
+
+			if (Bookmark)
+				RepairBookmark(ch, *Bookmark);
 		}
 
-		if (!Bookmark)
-			return;
-
-		RepairBookmark(*Bookmark);
 		Invalidate();
 	}
 
 	void RepairAll()
 	{
-		for (auto &bm: Bookmarks)
-			RepairBookmark(bm);
+		for (int ch = 0; ch < Bookmarks.Length(); ch++)
+			for (auto &bm: Bookmarks[ch])
+				RepairBookmark(ch, bm);
 		Invalidate();
 	}
 
@@ -961,70 +1025,124 @@ public:
 		return (ptr.i8 - start) / (sampleBytes * Channels);
 	}
 
-	void FindErrors()
+private:
+	struct ErrorThread : public LThread
 	{
-		auto Convert = GetConvert();
-		auto ptr = AddressOf(0);
-		auto start = ptr.i8;
-		auto end = Audio.AddressOf(Audio.Length()-1) + 1;
-		int32_t prev = 0;
-		int sampleBytes = SampleBits / 8;
-		int byteInc = (Channels - 1) * sampleBytes;
-		int threshold = 180 * 1000;
-		int maxDiff = 0;
-		int64_t zeroRunStart = -1;
+		LAudioView *view;
+		int64_t start, end;
+		int channel;
+		LArray<LBookmark> bookmarks;
 
-		while (ptr.i8 < end)
+		ErrorThread(LAudioView *v, int64_t startSample, int64_t endSample, int ch) :
+			LThread("ErrorThread", v->AddDispatch())
 		{
-			auto s = Convert(ptr);
-			auto diff = s - prev;
-			if (diff < 0)
-				diff = -diff;
+			view = v;
+			start = startSample;
+			end = endSample;
+			channel = ch;
 
-			if (s == 0)
-			{
-				if (zeroRunStart < 0)
-					zeroRunStart = PtrToSample(ptr) - 1;
-			}
-			else if (zeroRunStart >= 0)
-			{
-				auto cur = PtrToSample(ptr) - 1;
-				auto len = cur - zeroRunStart;
-				if (len >= 12)
-				{
-					// emit book mark
-					auto &bm = Bookmarks.New();
-					bm.sample = zeroRunStart;
-					bm.colour = LColour::Red;
-					bm.error = true;
-
-					if (Bookmarks.Length() >= 10000)
-						break;
-				}
-
-				zeroRunStart = -1;
-			}			
-
-			/*
-			if (diff > threshold && s == 0)
-			{
-				// emit book mark
-				auto &bm = Bookmarks.New();
-				bm.sample = PtrToSample(ptr) - 1;
-				bm.colour = LColour::Red;
-				bm.error = true;
-
-				if (Bookmarks.Length() >= 5000)
-					break;
-			}
-			*/
-
-			maxDiff = MAX(diff, maxDiff);
-			prev = s;
-			ptr.i8 += byteInc;
+			Run();
 		}
 
-		Invalidate();
+		void OnComplete()
+		{
+			view->Bookmarks[channel].Add(bookmarks);
+			view->Bookmarks[channel].Sort([](auto a, auto b)
+				{
+					return (int)(a->sample - b->sample);
+				});
+
+			view->Invalidate();
+
+			LAssert(view->ErrorThreads.HasItem(this));
+			view->ErrorThreads.Delete(this);
+			if (view->ErrorThreads.Length() == 0)
+				LPopupNotification::Inst()->Add(view->GetWindow(), "Done.");
+			DeleteOnExit = true;
+		}
+
+		int Main()
+		{
+			auto Convert = view->GetConvert();
+			int32_t prev = 0;
+			int sampleBytes = view->SampleBits / 8;
+			int byteInc = (view->Channels - 1) * sampleBytes;
+			int64_t zeroRunStart = -1;
+
+			auto ptr = view->AddressOf(0);
+			auto pStart = ptr.i8 + (start * view->Channels * sampleBytes) + (channel * sampleBytes);
+			auto pEnd   = ptr.i8 + (end   * view->Channels * sampleBytes) + (channel * sampleBytes);
+			ptr.i8 = pStart;
+
+			while (ptr.i8 < pEnd)
+			{
+				auto s = Convert(ptr);
+				ptr.i8 += byteInc;
+
+				auto diff = s - prev;
+				if (diff < 0)
+					diff = -diff;
+
+				if (s == 0)
+				{
+					if (zeroRunStart < 0)
+						zeroRunStart = view->PtrToSample(ptr) - 1;
+				}
+				else if (zeroRunStart >= 0)
+				{
+					auto cur = view->PtrToSample(ptr) - 1;
+					auto len = cur - zeroRunStart;
+					if (len >= ERROR_ZERO_SAMPLE_COUNT)
+					{
+						// emit book mark
+						auto &bm = bookmarks.New();
+						bm.sample = zeroRunStart;
+						bm.colour = LColour::Red;
+						bm.error = true;
+
+						#if 0
+						if (Bookmarks.Length() >= 10000)
+							break;
+						#endif
+					}
+
+					zeroRunStart = -1;
+				}
+
+				prev = s;
+			}
+
+			return 0;
+		}
+	};
+
+	LArray<ErrorThread*> ErrorThreads;
+
+public:
+	void FindErrors()
+	{
+		if (ErrorThreads.Length() > 0)
+		{
+			LPopupNotification::Inst()->Add(GetWindow(), "Already finding errors.");
+			return;
+		}
+
+		LPopupNotification::Inst()->Add(GetWindow(), "Finding errors...");
+		Bookmarks.Length(Channels);
+
+		auto samples = GetSamples();
+		auto threads = LAppInst->GetCpuCount();
+		auto threadsPerCh = threads / Channels;
+		for (int ch=0; ch<Channels; ch++)
+		{
+			for (int t=0; t<threadsPerCh; t++)
+			{
+				int64_t start = t       * samples / threadsPerCh;
+				int64_t end   = (t + 1) * samples / threadsPerCh;
+
+				ErrorThreads.Add(new ErrorThread(this, start, end, ch));
+			}
+		}
 	}
 
 	void UpdateMsg()
@@ -1375,10 +1493,11 @@ public:
 		pDC->HLine((int)MAX(0,c.x1), (int)MIN(pDC->X(),c.x2), (int)cy);
 
 		// Setup for drawing bookmarks..
-		for (auto &bm: Bookmarks)
+		auto &BookmarkArr = Bookmarks[ChannelIdx];
+		for (auto &bm: BookmarkArr)
 			bm.x = SampleToView(bm.sample);
-		auto nextBookmark = Bookmarks.Length() ? Bookmarks.AddressOf(0) : NULL;
-		auto endBookmark = Bookmarks.Length() ? nextBookmark + Bookmarks.Length() : NULL;
+		auto nextBookmark = BookmarkArr.Length() ? BookmarkArr.AddressOf(0) : NULL;
+		auto endBookmark = BookmarkArr.Length() ? nextBookmark + BookmarkArr.Length() : NULL;
 
 		if (EffectiveMode == DrawSamples)
 		{
@@ -1594,6 +1713,7 @@ public:
 	{
 		if (AoPlaying)
 		{
+			LgiTrace("stopping...\n");
 			AoPlaying = false;
 		}
 		else // Start playback
@@ -1627,9 +1747,11 @@ public:
 	int Main()
 	{
 		int TimeSlice = 50; // ms
-		int sampleBytes = SampleBits / 8;
-		int sliceSamples = SampleRate * TimeSlice / 1000;
-		int sliceBytes = sliceSamples * Channels * sampleBytes;
+		int sliceBytes = 0;
+		int sliceSamples = 0;
+		int64_t playStart = 0;
+		int64_t playSample = 0;
+		bool playedSamples = false;
 
 		while (!IsCancelled())
 		{
@@ -1637,12 +1759,49 @@ public:
 			{
 				// Play one timeslice of audio
 				auto addr = AddressOf(CursorSample);
+
+				/*				
+				auto startTs = LMicroTime();
+				auto elapsedSamples = CursorSample - playSample;
+				while ((LMicroTime() - playStart) < elapsedSamples)
+					;
+				auto waitTs = LMicroTime() - startTs;
+				*/
+
 				ao_play(AoDev, (char*)addr.i8, sliceBytes);
 				CursorSample += sliceSamples;
+				playedSamples = true;
+
+				/*
+				#if 1
+				LgiTrace("wait %.3fms\n", (double)waitTs / 1000.0);
+				#else
+				auto now = LMicroTime();
+				auto elapsedTime = now - playStart;
+				double ms = (double)elapsedTime/1000.0;
+				elapsedSamples = CursorSample - playSample;
+				double sms = (double)elapsedSamples * 1000.0 / SampleRate;
+				LgiTrace("play ms=%.3f sms=%.3f\n", ms, sms);
+				#endif
+				*/
 			}
 			else
 			{
+				if (playedSamples)
+				{
+					playedSamples = false;
+					LgiTrace("stopped.\n");
+				}
+
 				AoEvent.Wait(100);
+				if (AoPlaying)
+				{
+					sliceSamples = SampleRate * TimeSlice / 1000;
+ 					sliceBytes = Channels * sliceSamples * (SampleBits / 8);
+					
+					playStart = LMicroTime();
+					playSample = CursorSample;
+				}
 			}
 		}				
 

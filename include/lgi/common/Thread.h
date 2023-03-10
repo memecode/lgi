@@ -83,7 +83,7 @@ public:
 	virtual void WaitForExit(int WarnAfterMs = 2000);
 
 	// Override to do something
-	virtual int Main();
+	virtual int Main() = 0;
 
 	// Events
 	virtual void OnBeforeMain() {}

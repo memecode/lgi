@@ -2245,7 +2245,7 @@ uint64_t LCurrentTime()
 	#endif
 }
 
-uint64_t LgiMicroTime()
+uint64_t LMicroTime()
 {
 	#if defined WIN32
 
@@ -2616,7 +2616,7 @@ void LProfile::Add(const char *Name)
 {
 	s.Add(Sample(
 		#if PROFILE_MICRO
-		LgiMicroTime(),
+		LMicroTime(),
 		#else
 		LCurrentTime(),
 		#endif
@@ -2637,7 +2637,7 @@ void LProfile::Add(const char *File, int Line)
 	Used += sprintf_s(Name, BUF_SIZE - Used, "%s:%i", File, Line) + 1;
 	s.Add(Sample(
 		#if PROFILE_MICRO
-		LgiMicroTime(),
+		LMicroTime(),
 		#else
 		LCurrentTime(),
 		#endif

@@ -242,9 +242,3 @@ int LThread::ExitCode()
 	return ReturnValue;
 }
 
-int LThread::Main()
-{
-	return 0;
-}
-
-
