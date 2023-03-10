@@ -679,6 +679,7 @@
     <ClInclude Include="include\lgi\common\Thread.h" />
     <ClInclude Include="include\lgi\common\ThreadEvent.h" />
     <ClInclude Include="include\lgi\common\Res.h" />
+    <ClInclude Include="include\lgi\common\Window.h" />
     <ClInclude Include="include\lgi\win\LgiOsClasses.h" />
     <ClInclude Include="include\lgi\win\LgiOsDefs.h" />
     <ClInclude Include="private\common\ViewPriv.h" />

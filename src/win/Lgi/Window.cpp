@@ -13,6 +13,8 @@
 #include "lgi/common/CssTools.h"
 #include "lgi/common/Menu.h"
 
+#include "ViewPriv.h"
+
 #define DEBUG_WINDOW_PLACEMENT				0
 #define DEBUG_HANDLE_VIEW_KEY				0
 #define DEBUG_HANDLE_VIEW_MOUSE				0
@@ -142,6 +144,21 @@ int LWindow::WaitThread()
 {
 	// No thread to wait on...
 	return 0;
+}
+
+bool LWindow::SetTitleBar(bool ShowTitleBar)
+{
+	if (ShowTitleBar)
+	{
+		SetStyle(GetStyle() | WS_TILEDWINDOW);
+	}
+	else
+	{
+		SetStyle(GetStyle() & ~WS_TILEDWINDOW);
+		SetStyle(GetStyle() | WS_POPUP);
+	}
+
+	return true;
 }
 
 bool LWindow::SetIcon(const char *Icon)
@@ -433,7 +450,14 @@ void LWindow::SetZoom(LWindowZoom i)
 				if (r.left != Pos.x1 ||
 					r.top != Pos.y1)
 				{
-					SetWindowPos(Handle(), 0, Pos.x1, Pos.y1, Pos.X(), Pos.Y(), SWP_NOZORDER);
+					int Shadow = WINDOWS_SHADOW_AMOUNT;
+					SetWindowPos(Handle(),
+								0,
+								Pos.x1,
+								Pos.y1,
+								Pos.X() + Shadow,
+								Pos.Y() + Shadow,
+								SWP_NOZORDER);
 				}
 				break;
 			}

@@ -22,6 +22,7 @@
 #include "lgi/common/LgiRes.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/Thread.h"
+
 #include "ViewPriv.h"
 
 #define DEBUG_MOUSE_CLICKS		0
@@ -659,13 +660,25 @@ bool LView::Attach(LViewI *p)
 							
 		auto Text = LBase::NameW();
 		LAutoWString WCls(Utf8ToWide(ClsName));
+		bool hasCaption = (GetStyle() & WS_CAPTION) != 0;
+		int Shadow = WINDOWS_SHADOW_AMOUNT;
+
+		LgiTrace("%p/%s::Attach %s\n", this, Name(), Pos.GetStr());
+		LRect r = Pos;
+		r.x2 += Shadow;
+		r.y2 += Shadow;
+		LgiTrace("    %s\n", r.GetStr());
 
 		_View = CreateWindowExW(ExStyle,
 								WCls,
 								Text,
 								Style,
-								Pos.x1, Pos.y1,
-								Pos.X(), Pos.Y(),
+								
+								Pos.x1,
+								Pos.y1,
+								Pos.X(),
+								Pos.Y(),
+								
 								Parent ? Parent->Handle() : 0,
 								NULL,
 								LProcessInst(),
@@ -960,14 +973,15 @@ bool LView::SetPos(LRect &p, bool Repaint)
 		{
 			HWND hOld = GetFocus();
 			bool WasVis = IsWindowVisible(_View) != 0;
+			int Shadow = WINDOWS_SHADOW_AMOUNT;
 
 			In_SetWindowPos = true;
 			Status = SetWindowPos(	_View,
 									NULL,
 									Pos.x1,
 									Pos.y1,
-									Pos.X(),
-									Pos.Y(),
+									Pos.X() + Shadow,
+									Pos.Y() + Shadow,
 									// ((Repaint) ? 0 : SWP_NOREDRAW) |
 									SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER) != 0;
 			In_SetWindowPos = false;
@@ -1597,12 +1611,18 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 						}
 						else
 						{
+							int Shadow = WINDOWS_SHADOW_AMOUNT;
+	
 							LRect r;
 							r.ZOff(Info->cx-1, Info->cy-1);
 							r.Offset(Info->x, Info->y);
 							if (r.Valid() && r != Pos)
 							{
 								Pos = r;
+								LgiTrace("%p/%s::PosChange %s\n", this, Name(), Pos.GetStr());
+								Pos.x2 -= Shadow;
+								Pos.y2 -= Shadow;
+								LgiTrace("    %s\n", Pos.GetStr());
 							}
 						}
 					}

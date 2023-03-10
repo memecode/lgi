@@ -47,6 +47,7 @@
 
 #define PAINT_VIRTUAL_CHILDREN	1
 
+#define WINDOWS_SHADOW_AMOUNT	(dynamic_cast<LWindow*>(this) && (GetStyle() & WS_CAPTION) != 0 ? 7 : 0)
 extern bool In_SetWindowPos;
 extern LMouse &lgi_adjust_click(LMouse &Info,
 								LViewI *Wnd,

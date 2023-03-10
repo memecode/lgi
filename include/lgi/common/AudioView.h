@@ -6,6 +6,12 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/FileSelect.h"
+#include "lgi/common/Thread.h"
+#include "lgi/common/ThreadEvent.h"
+#include "lgi/common/DragAndDrop.h"
+#include "lgi/common/DropFiles.h"
+
+#include "ao.h"
 
 #define CC(code) LgiSwap32(code)
 
@@ -48,8 +54,8 @@ struct Rect
 		return *this;
 	}
 	
-	T X() { x2 - x1 + 1; }
-	T Y() { y2 - y1 + 1; }
+	T X() { return x2 - x1 + 1; }
+	T Y() { return y2 - y1 + 1; }
 
 	bool Valid()
 	{
@@ -58,7 +64,7 @@ struct Rect
 	
 	operator LRect()
 	{
-		LRect r(x1, y1, x2, y2);
+		LRect r((int)x1, (int)y1, (int)x2, (int)y2);
 		return r;
 	}
 	
@@ -77,11 +83,144 @@ struct Rect
 			x1, y1, x2, y2);
 		return s;
 	}
+
+	Rect &Offset(T x, T y)
+	{
+		x1 += x;
+		x2 += x;
+		y1 += y;
+		y2 += y;
+		return *this;
+	}
 };
 
 typedef int32_t (*ConvertFn)(sample_t &ptr);
 
-class LAudioView : public LLayout
+class LPopupNotification : public LWindow
+{
+	constexpr static int Border = 10; // px
+	constexpr static int ShowMs = 3000; // milliseconds
+
+	LColour Back = LColour(0xf7, 0xf0, 0xd5);
+	LColour Fore = LColour(0xd4, 0xb8, 0x62);
+	LWindow *RefWnd = NULL;
+	LArray<LDisplayString*> Msgs;
+	LPoint Decor = LPoint(2, 2);
+	uint64_t HideTs = 0;
+
+	LPoint CalcSize()
+	{
+		LPoint p;
+		for (auto ds: Msgs)
+		{
+			p.x = MAX(p.x, ds->X());
+			p.y += ds->Y();
+		}
+
+		p.x += Border * 2 + Decor.x;
+		p.y += Border * 2 + Decor.y;
+
+		return p;
+	}
+
+public:
+	static LPopupNotification *Inst()
+	{
+		static LAutoPtr<LPopupNotification> inst;
+		if (!inst)
+			inst.Reset(new LPopupNotification(NULL, NULL));
+		return inst;
+	}
+
+	LPopupNotification(LWindow *ref, LString msg)
+	{
+		SetTitleBar(false);
+		Name("Notification");
+
+		if (ref)
+			RefWnd = ref;
+		if (ref && msg)
+			Add(ref, msg);
+	}
+
+	void Init()
+	{
+		if (!RefWnd)
+		{
+			LAssert(!"No reference window.");
+			return;
+		}
+
+		auto r = RefWnd->GetPos();
+		auto Sz = CalcSize();
+
+		LRect pos;
+		pos.ZOff(Sz.x - 1, Sz.y - 1);
+		pos.Offset(r.x2 - pos.X(), r.y2 - pos.Y());
+		SetPos(pos);
+
+		SetPulse(500);		
+		if (!IsAttached())
+			Attach(0);
+		Visible(true);
+	}
+
+	void Add(LWindow *ref, LString msg)
+	{
+		if (msg)
+		{
+			HideTs = LCurrentTime();
+			Msgs.Add(new LDisplayString(GetFont(), msg));
+		}
+			
+		if (ref && RefWnd != ref)
+			RefWnd = ref;
+
+		if (RefWnd && Msgs.Length() > 0)
+			Init();
+	}
+
+	void OnPaint(LSurface *pDC)
+	{
+		pDC->Colour(Fore);
+		auto c = GetClient();
+		pDC->Box(&c);
+		c.Inset(1, 1);
+		pDC->Colour(Back);
+		pDC->Rectangle(&c);
+
+		auto f = GetFont();
+		f->Fore(Fore);
+		f->Back(Back);
+		f->Transparent(true);
+		
+		int x = c.x1 + Border;
+		int y = c.y1 + Border;
+		for (auto ds: Msgs)
+		{
+			ds->Draw(pDC, x, y);
+			y += ds->Y();
+		}
+	}
+
+	void OnPulse()
+	{
+		if (HideTs &&
+			LCurrentTime() >= HideTs + ShowMs)
+		{
+			HideTs = 0;
+			Visible(false);
+			SetPulse();
+			Msgs.DeleteObjects();
+		}
+	}
+};
+
+class LAudioView :
+	public LLayout,
+	public LThread,
+	public LCancel,
+	public LDragDropTarget
 {
 public:
 	enum LFileType
@@ -90,6 +229,7 @@ public:
 		AudioRaw,
 		AudioWav,
 	};
+
 	enum LSampleType
 	{
 		AudioS8,
@@ -100,6 +240,19 @@ public:
 		AudioS32LE,
 		AudioS32BE,
 		AudioFloat32,
+	};
+
+	enum Messages
+	{
+		M_WAVE_FORMS_FINISHED = M_USER + 100,
+	};
+	
+	struct LBookmark
+	{
+		int x = 0;
+		bool error = false;
+		int64_t sample;
+		LColour colour;
 	};
 
 protected:
@@ -127,6 +280,7 @@ protected:
 		IDC_2pt1_CHANNELS,
 		IDC_5pt1_CHANNELS,
 	};
+
 	enum LDrawMode
 	{
 		DrawAutoSelect,
@@ -135,6 +289,16 @@ protected:
 		ScanGroups,
 	};
 
+	enum CtrlState
+	{
+		CtrlNormal,
+		CtrlLoading,
+		CtrlBuildingWaveforms,
+		CtrlSaving,
+	}	State = CtrlNormal;
+
+	LAutoPtr<LThread> Worker;
+
 	LArray<int8_t> Audio;
 	LFileType Type = AudioUnknown;
 	LSampleType SampleType = AudioS16LE;
@@ -142,12 +306,14 @@ protected:
 	int SampleRate = 0;
 	int Channels = 0;
 	size_t DataStart = 0;
-	size_t CursorSample = 0;
+	int64_t CursorSample = 0;
 	Rect<int64_t> Data;
-	LArray<LRect> ChData;
+	LArray<Rect<int64_t>> ChData;
 	double XZoom = 1.0;
 	LString Msg, ErrorMsg;
 	LDrawMode DrawMode = DrawAutoSelect;
+	LArray<LBookmark> Bookmarks;
+	LString FilePath;
 
 	template<typename T>
 	struct Grp
@@ -157,6 +323,12 @@ protected:
 
 	LArray<LArray<Grp<int32_t>>> IntGrps;
 	LArray<LArray<Grp<float>>> FloatGrps;
+
+	// Libao stuff
+	int AoDriver = -1;
+	bool AoPlaying = false;
+	ao_device *AoDev = NULL;
+	LThreadEvent AoEvent;
 
 	void MouseToCursor(LMouse &m)
 	{
@@ -175,21 +347,23 @@ protected:
 		Data = r;
 		ChData.Length(Channels);
 
-		int Dy = Data.Y() - 1;
+		auto Dy = (int)Data.Y() - 1;
 		for (int i=0; i<Channels; i++)
 		{
 			auto &r = ChData[i];
 			r = Data;
-			r.y1 = Data.y1 + (i * Dy / Channels);
-			r.y2 = Data.y1 + ((i + 1) * Dy / Channels) - 1;
+			r.y1 = (int)Data.y1 + (i * Dy / Channels);
+			r.y2 = (int)Data.y1 + ((i + 1) * Dy / Channels) - 1;
 		}
 	}
 
 public:
 	LColour cGrid, cMax, cMin, cCursorMin, cCursorMax;
 
-	LAudioView(const char *file = NULL)
+	LAudioView(const char *file = NULL) :
+		LThread("LAudioView.Thread")
 	{
+		ao_initialize();
 		cGrid.Rgb(200, 200, 200);
 		cMax = LColour::Blue;
 		cMin = cMax.Mix(cGrid);
@@ -197,13 +371,75 @@ public:
 		cCursorMin = cCursorMax.Mix(cGrid);
 
 		Empty();
+		Msg = "No file loaded.";
+
 		if (file)
 			Load(file);
+
+		SetPourLargest(true);
+		Focus(true);
+		Run();
+		SetPulse(100);
 	}
 
 	~LAudioView()
 	{
+		Cancel();
 		Empty();
+
+		WaitForExit();
+
+		ao_shutdown();
+	}
+
+	const char *GetClass() override { return "LAudioView"; }
+
+	void OnCreate()
+	{
+		SetWindow(this);
+	}
+
+	void OnPulse()
+	{
+		if (AoPlaying)
+			Invalidate();
+	}
+
+	LMessage::Result OnEvent(LMessage *m)
+	{
+		switch (m->Msg())
+		{
+			case M_WAVE_FORMS_FINISHED:
+				OnWaveFormsFinished();
+				break;
+		}
+
+		return LView::OnEvent(m);
+	}
+
+	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
+	{
+		Formats.SupportsFileDrops();
+		return DROPEFFECT_COPY;
+	}
+
+	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
+	{
+		for (auto &d : Data)
+		{
+			if (d.IsFileDrop())
+			{
+				LDropFiles df(d);
+				auto w = GetWindow();
+				if (w)
+				{
+					w->OnReceiveFiles(df);
+					return DROPEFFECT_COPY;
+				}
+			}
+		}
+		
+		return DROPEFFECT_NONE;
 	}
 
 	bool Empty()
@@ -218,6 +454,11 @@ public:
 		Channels = 0;
 		CursorSample = 0;
 		Data.ZOff(-1, -1);
+		ChData.Empty();
+		Msg.Empty();
+		FilePath.Empty();
+
+		Invalidate();
 
 		return false;
 	}
@@ -230,7 +471,12 @@ public:
 			ErrorMsg.Printf("Can't open '%s' for reading.", FileName);
 			return false;
 		}
-		
+
+		Msg.Printf("Loading '%s'...", FileName);
+		LPopupNotification::Inst()->Add(GetWindow(), Msg);
+
+
+		FilePath = FileName;
 		if (!Audio.Length(f.GetSize()))
 		{
 			ErrorMsg.Printf("Can't allocate %s.", LFormatSize(f.GetSize()).Get());
@@ -249,6 +495,7 @@ public:
 		else
 		{
 			ErrorMsg.Printf("Unknown format: %s", Ext);
+			LPopupNotification::Inst()->Add(GetWindow(), ErrorMsg);
 			return Empty();
 		}
 			
@@ -318,6 +565,7 @@ public:
 			if (!DataStart)
 			{
 				ErrorMsg = "No 'data' element found.";
+				LPopupNotification::Inst()->Add(GetWindow(), ErrorMsg);
 				return Empty();
 			}
 		}
@@ -334,6 +582,38 @@ public:
 			Channels = 2;
 
 		Invalidate();
+		LPopupNotification::Inst()->Add(GetWindow(), "Loaded ok...");
+		return true;
+	}
+
+	bool Save(const char *FileName = NULL)
+	{
+		if (!FileName)
+			FileName = FilePath;
+		if (!FileName)
+			return false;
+
+		LFile f;
+		if (!f.Open(FileName, O_WRITE))
+		{
+			ErrorMsg.Printf("Can't open '%s' for writing.", FileName);
+			LPopupNotification::Inst()->Add(GetWindow(), ErrorMsg);
+			return false;
+		}
+
+		LString Msg;
+		Msg.Printf("Saving '%s'...", FileName);
+		LPopupNotification::Inst()->Add(GetWindow(), Msg);
+		f.SetSize(0);
+		auto wr = f.Write(Audio.AddressOf(0), Audio.Length());
+		if (wr != Audio.Length())
+		{
+			ErrorMsg.Printf("Write error: only wrote " LPrintfSizeT " of " LPrintfSizeT " bytes", wr, Audio.Length());
+			LPopupNotification::Inst()->Add(GetWindow(), ErrorMsg);
+			return false;
+		}
+
+		LPopupNotification::Inst()->Add(GetWindow(), "Saved ok.");
 		return true;
 	}
 
@@ -352,7 +632,7 @@ public:
 
 	int SampleToView(size_t idx)
 	{
-		return Data.x1 + (int)((idx * Data.X()) / GetSamples());
+		return (int) (Data.x1 + ((idx * Data.X()) / GetSamples()));
 	}
 
 	size_t ViewToSample(int x /*px*/)
@@ -361,7 +641,7 @@ public:
 		int64_t samples = GetSamples();
 		int64_t dx = (int64_t)Data.x2 - (int64_t)Data.x1 + 1;
 		double pos = (double) offset / dx;
-		int64_t idx = samples * pos;
+		int64_t idx = (int64_t)(samples * pos);
 		
 		printf("ViewToSample(%i) data=%s offset=" LPrintfInt64 " samples=" LPrintfInt64 " idx=" LPrintfInt64 " pos=%f\n",
 			x, Data.GetStr(), offset, samples, idx, pos);
@@ -528,43 +808,249 @@ public:
 			MouseToCursor(m);
 	}
 
-	LPointer AddressOf(size_t Sample)
+	bool OnKey(LKey &k)
 	{
-		LPointer p;
+		k.Trace("key");
+
+		if (k.IsChar)
+		{
+			switch (k.c16)
+			{
+				case 'f':
+				case 'F':
+				{
+					if (k.Down())
+						FindErrors();
+					return true;
+				}
+				case 'r':
+				case 'R':
+				{
+					if (k.Down())
+						RepairNext();
+					return true;
+				}
+				case 'a':
+				case 'A':
+				{
+					if (k.Down())
+						RepairAll();
+					return true;
+				}
+				case ' ':
+				{
+					if (k.Down())
+						TogglePlay();
+					return true;
+				}
+			}
+		}
+		else if (k.Ctrl())
+		{
+			if (k.c16 == 'S')
+			{
+				if (k.Down())
+					Save();
+				return true;
+			}
+			else if (k.c16 == 'W')
+			{
+				if (k.Down())
+					Empty();
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	sample_t AddressOf(size_t Sample)
+	{
 		int SampleBytes = SampleBits >> 3;
-		p.s8 = Audio.AddressOf(DataStart + (Sample * Channels * SampleBytes));
-		return p;
+		return sample_t(Audio.AddressOf(DataStart + (Sample * Channels * SampleBytes)));
+	}
+
+	void RepairBookmark(LBookmark &bm)
+	{
+		auto Convert = GetConvert();
+		auto end = Audio.AddressOf(Audio.Length()-1) + 1;
+
+		// Look at previous sample...
+		auto repairSample = bm.sample;
+		auto p = AddressOf(repairSample - 1);
+		auto lastGood = Convert(p);
+
+		// Seek over and find the end...
+		auto nextGood = Convert(p);
+		while (nextGood)
+		{
+			nextGood = Convert(p);
+			repairSample++;
+		}
+
+		auto endRepair = repairSample;
+		while (nextGood == 0)
+		{
+			nextGood = Convert(p);
+			endRepair++;
+		}
+
+		int64_t sampleDiff = nextGood - lastGood;
+		int64_t repairSamples = endRepair - repairSample + 1;
+
+		// Write the new interpolated samples
+		for (int64_t i = repairSample; i < endRepair; i++)
+		{
+			p = AddressOf(i);
+			if (p.i8 >= end)
+				break;
+
+			switch (SampleType)
+			{
+				case AudioS24LE:
+				{
+					auto off = i - repairSample + 1;
+					p.i24->s = lastGood + (off * sampleDiff / repairSamples);
+					break;
+				}
+				default:
+				{
+					LAssert(!"Impl me.");
+					break;
+				}
+			}
+		}
+
+		bm.colour = LColour::Green;
+		bm.error = false;
+	}
+
+	void RepairNext()
+	{
+		int64_t prev = 0;
+		LBookmark *Bookmark = NULL;
+		for (auto &bm: Bookmarks)
+		{
+			if (bm.sample >= CursorSample &&
+				prev < CursorSample &&
+				bm.error)
+			{
+				Bookmark = &bm;
+				break;
+			}
+		}
+
+		if (!Bookmark)
+			return;
+
+		RepairBookmark(*Bookmark);
+		Invalidate();
+	}
+
+	void RepairAll()
+	{
+		for (auto &bm: Bookmarks)
+			RepairBookmark(bm);
+		Invalidate();
+	}
+
+	int64_t PtrToSample(sample_t &ptr)
+	{
+		int sampleBytes = SampleBits >> 3;
+		auto start = Audio.AddressOf(DataStart);
+		return (ptr.i8 - start) / (sampleBytes * Channels);
+	}
+
+	void FindErrors()
+	{
+		auto Convert = GetConvert();
+		auto ptr = AddressOf(0);
+		auto start = ptr.i8;
+		auto end = Audio.AddressOf(Audio.Length()-1) + 1;
+		int32_t prev = 0;
+		int sampleBytes = SampleBits / 8;
+		int byteInc = (Channels - 1) * sampleBytes;
+		int threshold = 180 * 1000;
+		int maxDiff = 0;
+		int64_t zeroRunStart = -1;
+
+		while (ptr.i8 < end)
+		{
+			auto s = Convert(ptr);
+			auto diff = s - prev;
+			if (diff < 0)
+				diff = -diff;
+
+			if (s == 0)
+			{
+				if (zeroRunStart < 0)
+					zeroRunStart = PtrToSample(ptr) - 1;
+			}
+			else if (zeroRunStart >= 0)
+			{
+				auto cur = PtrToSample(ptr) - 1;
+				auto len = cur - zeroRunStart;
+				if (len >= 12)
+				{
+					// emit book mark
+					auto &bm = Bookmarks.New();
+					bm.sample = zeroRunStart;
+					bm.colour = LColour::Red;
+					bm.error = true;
+
+					if (Bookmarks.Length() >= 10000)
+						break;
+				}
+
+				zeroRunStart = -1;
+			}			
+
+			/*
+			if (diff > threshold && s == 0)
+			{
+				// emit book mark
+				auto &bm = Bookmarks.New();
+				bm.sample = PtrToSample(ptr) - 1;
+				bm.colour = LColour::Red;
+				bm.error = true;
+
+				if (Bookmarks.Length() >= 5000)
+					break;
+			}
+			*/
+
+			maxDiff = MAX(diff, maxDiff);
+			prev = s;
+			ptr.i8 += byteInc;
+		}
+
+		Invalidate();
 	}
 
 	void UpdateMsg()
 	{
 		ssize_t Samples = GetSamples();
 		auto Addr = AddressOf(CursorSample);
-		size_t AddrOffset = Addr.s8 - Audio.AddressOf();
 		LString::Array Val;
-		size_t GraphLen = 0;
-		for (int ch=0; ch<Channels; ch++)
-		{
-			/*
-			switch (SampleType)
-			{
-				case AudioS16LE:
-				case AudioS16BE:
-					Val.New().Printf("%i", Native(Addr.s16[ch]));
-					GraphLen = Int16Grps.Length() ? Int16Grps[0].Length() : 0;
-					break;
-				case AudioS32LE:
-				case AudioS32BE:
-					Val.New().Printf("%i", Native(Addr.s32[ch]));
-					GraphLen = Int32Grps.Length() ? Int32Grps[0].Length() : 0;
-					break;
-			}
-			*/
-		}
+		size_t GraphLen = IntGrps.Length() ? IntGrps[0].Length() : 0;
+		auto Convert = GetConvert();
 
-		Msg.Printf("Channels=%i SampleRate=%i BitDepth=%i XZoom=%g Samples=" LPrintfSSizeT " Cursor=" LPrintfSizeT " @ " LPrintfSizeT " (%s) Graph=" LPrintfSizeT "\n",
+		// Work out the time stamp of the cursor:
+		auto Seconds = CursorSample / SampleRate;
+		auto Hours = Seconds / 3600;
+		Seconds -= Hours * 3600;
+		auto Minutes = Seconds / 60;
+		Seconds -= Minutes * 60;
+		auto Ms = (CursorSample % SampleRate) * 1000 / SampleRate;
+		LString Time;
+		Time.Printf("%i:%02.2i:%02.2i.%i", (int)Hours, (int)Minutes, (int)Seconds, (int)Ms);
+
+		for (int ch=0; ch<Channels; ch++)
+			Val.New().Printf("%i", Convert(Addr));
+
+		Msg.Printf("Channels=%i SampleRate=%i BitDepth=%i XZoom=%g Samples=" LPrintfSSizeT " Cursor=" LPrintfSizeT " @ %s (%s) Graph=" LPrintfSizeT "\n",
 			Channels, SampleRate, SampleBits,
-			XZoom, Samples, CursorSample, AddrOffset, LString(",").Join(Val).Get(), GraphLen);
+			XZoom, Samples, CursorSample, Time.Get(), LString(",").Join(Val).Get(), GraphLen);
 	}
 
 	bool OnMouseWheel(double Lines)
@@ -578,12 +1064,14 @@ public:
 			auto DefPos = DefaultPos();
 			auto change = (double)Lines / 2;
 			XZoom *= 1.0 + (-change / 4);
+			if (XZoom < 1.0)
+				XZoom = 1.0;
 
-			int OldX = Data.X();
-			int x = (int)(DefPos.X() * XZoom);
-			int CursorX = SampleToView(CursorSample);
-			LRect d = Data;
-			d.x1 = (int) (CursorX - (CursorSample * x / Samples));
+			auto OldX = Data.X();
+			int64_t x = (int64_t)(DefPos.X() * XZoom);
+			auto CursorX = SampleToView(CursorSample);
+			auto d = Data;
+			d.x1 = CursorX - (CursorSample * x / Samples);
 			d.x2 = d.x1 + x - 1;
 			SetData(d);
 
@@ -591,10 +1079,15 @@ public:
 		}
 		else
 		{
+			auto Client = GetClient();
 			int change = (int)(Lines * -6);
-			LRect d = Data;
+			auto d = Data;
 			d.x1 += change;
 			d.x2 += change;
+			if (d.x2 < Client.x1)
+				d.Offset(-d.x2, 0);
+			else if (d.x1 >= Client.x2)
+				d.Offset(-(d.x2 - Client.x2), 0);
 			SetData(d);
 
 			Invalidate();
@@ -667,6 +1160,153 @@ public:
 		return NULL;
 	}
 
+private:
+	constexpr static int WaveformBlockSize = 256;
+
+	struct WaveFormWork
+	{
+		ConvertFn convert;
+		sample_t start;
+		int8_t *end = NULL;
+		int stepBytes = 0;
+		int blkBytes = 0;
+		size_t blocks = 0;
+		Grp<int32_t> *out = NULL;
+	};
+	LArray<WaveFormWork*> WaveFormTodo;
+	LArray<LThread*> WaveFormThreads;
+
+	struct WaveFormThread : public LThread, public LCancel
+	{
+		LAudioView *view;
+
+		WaveFormThread(LAudioView *v) : LThread("WaveFormThread", v->AddDispatch())
+		{
+			view = v;
+			Run();
+		}
+
+		~WaveFormThread()
+		{
+			Cancel();
+		}
+
+		void OnComplete()
+		{
+			// Clean up thread array...
+			LThread *t = this;
+			LAssert(view->WaveFormThreads.HasItem(t));
+			view->WaveFormThreads.Delete(t);
+			DeleteOnExit = true;
+
+			// Last one finished?
+			if (view->WaveFormThreads.Length() == 0)
+				view->PostEvent(M_WAVE_FORMS_FINISHED);
+		}
+
+		int Main()
+		{
+			while (!IsCancelled())
+			{
+				WaveFormWork *w = NULL;
+
+				if (view->Lock(_FL, 500))
+				{
+					// Is there work?
+					if (view->WaveFormTodo.Length() > 0)
+					{
+						w = view->WaveFormTodo[0];
+						view->WaveFormTodo.DeleteAt(0);
+					}
+
+					view->Unlock();
+
+					if (!w)
+						return 0;
+				}
+				
+				auto s = w->start;
+				auto block = w->out;
+				auto convert = w->convert;
+
+				// For all blocks we're assigned...
+				for (int b = 0;
+					b < w->blocks && !IsCancelled();
+					b++, s.i8 += w->blkBytes, block++)
+				{
+					auto ptr = s;
+					auto blkEnd = s.i8 + w->blkBytes;
+					auto stepBytes = w->stepBytes;
+
+					// For all samples in the block...
+					block->Min = block->Max = convert(ptr); // init min/max with first sample
+					while (ptr.i8 < blkEnd)
+					{
+						auto n = convert(ptr);
+						if (n < block->Min)
+							block->Min = n;
+						if (n > block->Max)
+							block->Max = n;
+						
+						ptr.i8 += stepBytes;
+					}
+				}
+			}
+
+			return 0;
+		}
+	};
+
+public:
+	void BuildWaveForms(LArray<LArray<Grp<int32_t>>> *Grps)
+	{
+		LPopupNotification::Inst()->Add(GetWindow(), "Building waveform data...");
+		State = CtrlBuildingWaveforms;
+
+		auto SampleBytes = SampleBits / 8;
+		auto start = Audio.AddressOf(DataStart);
+		size_t samples = GetSamples();
+		auto end = start + (SampleBytes * samples * Channels);
+		auto BlkBytes = WaveformBlockSize * Channels * SampleBytes;
+		auto Blocks = ((Audio.Length() - DataStart) + BlkBytes - 1) / BlkBytes;
+		int Threads = LAppInst->GetCpuCount();
+
+		// Initialize the graph
+		Grps->Length(Channels);
+		for (int ch = 0; ch < Channels; ch++)
+		{
+			auto &GraphArr = (*Grps)[ch];
+			GraphArr.Length(Blocks);
+
+			for (int Thread = 0; Thread < Threads; Thread++)
+			{
+				auto from = Thread       * Blocks / Threads;
+				auto to   = (Thread + 1) * Blocks / Threads;
+
+				WaveFormWork *work = new WaveFormWork;
+				work->convert   = GetConvert();
+				work->start.i8  = start + (from * BlkBytes) + (ch * SampleBytes);
+				work->end       = start + (to   * BlkBytes) + (ch * SampleBytes);
+				work->stepBytes = (Channels - 1) * SampleBytes;
+				work->blkBytes  = BlkBytes;
+				work->blocks    = to - from;
+				work->out       = GraphArr.AddressOf(from);
+				
+				WaveFormTodo.Add(work);
+			}
+		}
+
+		for (int Thread = 0; Thread < Threads; Thread++)
+			WaveFormThreads.Add(new WaveFormThread(this));
+	}
+
+	void OnWaveFormsFinished()
+	{
+		State = CtrlNormal;
+		LPopupNotification::Inst()->Add(GetWindow(), "Done.");
+		Invalidate();
+	}
+
 	void PaintSamples(LSurface *pDC, int ChannelIdx, LArray<LArray<Grp<int32_t>>> *Grps)
 	{
 		#if PROFILE_PAINT_SAMPLES
@@ -692,70 +1332,24 @@ public:
 		size_t samples = GetSamples();
 		// printf("samples=" LPrintfSizeT "\n", samples);
 		auto end = start + (SampleBytes * samples * Channels);
-		int cy = c.y1 + (c.Y() / 2);
+		auto cy = c.y1 + (c.Y() / 2);
 
 		pDC->Colour(cGrid);
-		pDC->Box(&c);
+		pDC->Box(&(LRect)c);
 
-		int blk = 256;
 		if (Grps->Length() == 0)
 		{
-			// Initialize the graph
-			PROF("GraphGen");
-			Grps->Length(Channels);
-			for (int ch = 0; ch < Channels; ch++)
-			{
-				auto &GraphArr = (*Grps)[ch];
-				GraphArr.SetFixedLength(false);
-				GraphArr.Length(0);
-
-				int BlkBytes = blk * Channels * SampleBytes;
-				printf("BlkBytes=%i\n", BlkBytes);
-				
-				size_t BlkIndex = 0;
-				int byteOffsetToSample = ch * SampleBytes;
-				printf("byteOffsetToSample=%i\n", byteOffsetToSample);
-				printf("SampleBytes=%i\n", SampleBytes);
-
-				sample_t s;
-				s.i8 = start+byteOffsetToSample;
-
-				// For each block...
-				for (; s.i8 < end; s.i8 += BlkBytes)
-				{
-					int remain = MIN( (int)(end - s.i8), BlkBytes );
-					auto &b = GraphArr[BlkIndex++];
-
-					// For all samples in the block...
-					int8_t *blkStart = s.i8;
-					int8_t *blkEnd = s.i8 + remain;
-					auto smp = s;
-					b.Min = b.Max = Convert(smp); // init min/max with first sample
-					while (smp.i8 < blkEnd)
-					{
-						auto n = Convert(smp);
-						if (n < b.Min)
-							b.Min = n;
-						if (n > b.Max)
-							b.Max = n;
-					}
-					
-					/*					
-					if (BlkIndex % 1000 == 0)
-						printf("bucket=%i %i-%i\n", (int)BlkIndex-1, b.Min, b.Max);
-						*/
-				}
-				
-				printf("end diff=%i\n", (int) (end - s.i8));
-				printf("GraphArr.len=" LPrintfSizeT "\n", GraphArr.Length());
-
-				GraphArr.SetFixedLength(true);
-			}
+			BuildWaveForms(Grps);
+			return;
+		}
+		else if (State != CtrlNormal)
+		{
+			return;
 		}
 
 		PROF("PrePaint");
 
-		int YScale = c.Y() / 2;
+		auto YScale = c.Y() / 2;
 		int CursorX = SampleToView(CursorSample);
 		double blkScale = Grps->Length() > 0 ? (double) (*Grps)[0].Length() / c.X() : 1.0;
 		// printf("blkScale=%f blks/px\n", blkScale);
@@ -778,9 +1372,14 @@ public:
 		int byteInc = (Channels - 1) * SampleBytes;
 
 		pDC->Colour(cGrid);
-		pDC->HLine(c.x1, c.x2, cy);
+		pDC->HLine((int)MAX(0,c.x1), (int)MIN(pDC->X(),c.x2), (int)cy);
 
-		// LgiTrace("DrawRange: " LPrintfSizeT "->" LPrintfSizeT " (" LPrintfSizeT ") mode=%i\n", StartSample, EndSample, SampleRange, (int)EffectiveMode);
+		// Setup for drawing bookmarks..
+		for (auto &bm: Bookmarks)
+			bm.x = SampleToView(bm.sample);
+		auto nextBookmark = Bookmarks.Length() ? Bookmarks.AddressOf(0) : NULL;
+		auto endBookmark = Bookmarks.Length() ? nextBookmark + Bookmarks.Length() : NULL;
+
 		if (EffectiveMode == DrawSamples)
 		{
 			sample_t pSample(start + (((StartSample * Channels) + ChannelIdx) * SampleBytes));
@@ -789,7 +1388,14 @@ public:
 			if (CursorX >= Client.x1 && CursorX <= Client.x2)
 			{
 				pDC->Colour(L_BLACK);
-				pDC->VLine(CursorX, c.y1, c.y2);
+				pDC->VLine(CursorX, (int)c.y1, (int)c.y2);
+			}
+
+			while (	nextBookmark && nextBookmark < endBookmark)
+			{
+				pDC->Colour(nextBookmark->colour);
+				pDC->VLine(nextBookmark->x, (int)c.y1, (int)c.y2);
+				nextBookmark++;
 			}
 
 			// For all samples in the view space...
@@ -804,7 +1410,7 @@ public:
 					pDC->Line(Prev.x, Prev.y, (int)x, (int)y);
 				Prev.Set((int)x, (int)y);
 				if (DrawDots)
-					pDC->Rectangle(x-1, y-1, x+1, y+1);
+					pDC->Rectangle((int)x-1, (int)y-1, (int)x+1, (int)y+1);
 			}
 		}
 		else
@@ -820,13 +1426,24 @@ public:
 				if (Vx < c.x1 || Vx > c.x2)
 					continue;
 
+				if (nextBookmark && nextBookmark->x <= Vx)
+				{
+					while (	nextBookmark < endBookmark &&
+							nextBookmark->x <= Vx)
+					{
+						pDC->Colour(nextBookmark->colour);
+						pDC->VLine(nextBookmark->x, (int)c.y1, (int)c.y2);
+						nextBookmark++;
+					}
+				}
+
 				auto isCursor = CursorX == Vx;
 				if (isCursor)
 				{
 					pDC->Colour(L_BLACK);
-					pDC->VLine(Vx, c.y1, c.y2);
+					pDC->VLine(Vx, (int)c.y1, (int)c.y2);
 				}
-
+				
 				Grp<int32_t> Min, Max;
 				StartSample = ViewToSample(Vx);
 				EndSample = ViewToSample(Vx+1);				
@@ -835,8 +1452,8 @@ public:
 				if (EffectiveMode == ScanSamples)
 				{
 					// Scan individual samples
-					sample_t pStart(start + (StartSample * Channels * SampleBytes) + ChannelIdx);
-					auto pEnd = start + (EndSample * Channels * SampleBytes) + ChannelIdx;
+					sample_t pStart(start + ((StartSample * Channels + ChannelIdx) * SampleBytes));
+					auto pEnd = start + ((EndSample * Channels + ChannelIdx) * SampleBytes);
 					
 					#if 0
 					if (Vx==Client.x1)
@@ -916,15 +1533,24 @@ public:
 		pDC->Colour(L_WORKSPACE);
 		pDC->Rectangle();
 
+		auto Fnt = GetFont();
+		Fnt->Transparent(true);
+		if (!FilePath)
+		{
+			LDisplayString ds(Fnt, Msg);
+			Fnt->Fore(L_LOW);
+			auto c = GetClient().Center();
+			ds.Draw(pDC, c.x - (ds.X()/2), c.y - (ds.Y()/2));
+			return;
+		}
+
 		if (!Data.Valid())
 		{
 			auto r = DefaultPos();
 			SetData(r);
 		}
 
-		auto Fnt = GetFont();
 		LDisplayString ds(Fnt, ErrorMsg ? ErrorMsg : Msg);
-		Fnt->Transparent(true);
 		Fnt->Fore(ErrorMsg ? LColour::Red : LColour(L_LOW));
 		ds.Draw(pDC, 4, 4);
 		if (ErrorMsg)
@@ -962,6 +1588,65 @@ public:
 				break;
 			}
 		}
+	}
+
+	void TogglePlay()
+	{
+		if (AoPlaying)
+		{
+			AoPlaying = false;
+		}
+		else // Start playback
+		{
+			if (AoDriver < 0)
+			{
+				AoDriver = ao_default_driver_id();
+			}
+
+			if (!AoDev)
+			{
+				ao_sample_format fmt;
+
+				fmt.bits = SampleBits;
+				fmt.rate = SampleRate;
+				fmt.channels = Channels;
+				fmt.byte_format = AO_FMT_LITTLE;
+				fmt.matrix = NULL;
+
+				AoDev = ao_open_live(AoDriver, &fmt, NULL);
+			}
+
+			if (AoDev)
+			{
+				AoPlaying = true;
+				AoEvent.Signal();
+			}
+		}
+	}
+
+	int Main()
+	{
+		int TimeSlice = 50; // ms
+		int sampleBytes = SampleBits / 8;
+		int sliceSamples = SampleRate * TimeSlice / 1000;
+		int sliceBytes = sliceSamples * Channels * sampleBytes;
+
+		while (!IsCancelled())
+		{
+			if (AoPlaying)
+			{
+				// Play one timeslice of audio
+				auto addr = AddressOf(CursorSample);
+				ao_play(AoDev, (char*)addr.i8, sliceBytes);
+				CursorSample += sliceSamples;
+			}
+			else
+			{
+				AoEvent.Wait(100);
+			}
+		}				
+
+		return 0;
 	}
 
 	bool UnitTests()

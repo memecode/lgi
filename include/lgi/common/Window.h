@@ -128,6 +128,9 @@ public:
 	
 	/// Set the window's icon
 	bool SetIcon(const char *FileName);
+
+	/// Don't show title bar
+	bool SetTitleBar(bool ShowTitleBar);
 	
 	/// Gets the "quit on close" setting.
 	bool GetQuitOnClose() { return _QuitOnClose; }

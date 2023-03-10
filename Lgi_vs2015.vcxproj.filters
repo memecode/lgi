@@ -799,5 +799,8 @@
     <ClInclude Include="private\common\ViewPriv.h">
       <Filter>Source Files\Interface</Filter>
     </ClInclude>
+    <ClInclude Include="include\lgi\common\Window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

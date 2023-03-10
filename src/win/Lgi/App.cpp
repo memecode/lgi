@@ -693,6 +693,11 @@ int32 LApp::GetMetric(LSystemMetric Metric)
 			Status = d->ThemeAware;
 			break;
 		}
+		case LGI_MET_WINDOW_SHADOW:
+		{
+			Status = 7; // px;
+			break;
+		}
 	}
 
 	return Status;

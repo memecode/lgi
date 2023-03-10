@@ -446,7 +446,9 @@ enum LSystemMetric
 	/// \sa LApp::GetMetric()
 	LGI_MET_MENU,
 	/// This is non-zero if the system is theme aware
-	LGI_MET_THEME_AWARE
+	LGI_MET_THEME_AWARE,
+	/// Size of a window's shadow
+	LGI_MET_WINDOW_SHADOW,
 };
 
 /// \brief Types of system paths available for querying
