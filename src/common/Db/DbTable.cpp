@@ -1099,12 +1099,12 @@ bool LDbTable::UnitTests()
 	LDbRow *Nine = NULL;
 	for (LDbRow *r = NULL; in.Iterate(r); )
 	{
-		int64 Start = LgiMicroTime();
-		int64 Id = r->GetInt(TestUid);
-		int64 Int = r->GetInt(TestInt32);
+		auto Start = LMicroTime();
+		auto Id = r->GetInt(TestUid);
+		auto Int = r->GetInt(TestInt32);
 		auto s = r->GetStr(TestString);
 		auto s2 = r->GetStr(TestString2);
-		int64 Time = LgiMicroTime()-Start;
+		auto Time = LMicroTime() - Start;
 		LgiTrace("\t%i: %i, %s, %s (%.4fms)\n", (int)Id, (int)Int, s, s2, (double)Time/1000.0);
 
 		if (Int == 9)
