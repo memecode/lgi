@@ -42,11 +42,11 @@ union sample_t
 };
 
 template<typename T>
-struct Rect
+struct AvRect
 {
 	T x1 = 0, y1 = 0, x2 = 0, y2 = 0;
 	
-	Rect<T> &operator =(const LRect &r)
+	AvRect<T> &operator =(const LRect &r)
 	{
 		x1 = r.x1;
 		y1 = r.y1;
@@ -85,7 +85,7 @@ struct Rect
 		return s;
 	}
 
-	Rect &Offset(T x, T y)
+	AvRect &Offset(T x, T y)
 	{
 		x1 += x;
 		x2 += x;
@@ -127,9 +127,10 @@ class LPopupNotification : public LWindow
 public:
 	static LPopupNotification *Inst()
 	{
-		static LAutoPtr<LPopupNotification> inst;
+		#warning "Fix LPopupNotification leak."
+		static LPopupNotification *inst = NULL;
 		if (!inst)
-			inst.Reset(new LPopupNotification(NULL, NULL));
+			inst = new LPopupNotification(NULL, NULL);
 		return inst;
 	}
 
@@ -225,11 +226,13 @@ class LAudioView :
 	public LDragDropTarget
 {
 public:
+	constexpr static int DefaultBorder = 10; // px
 	enum LFileType
 	{
 		AudioUnknown,
 		AudioRaw,
 		AudioWav,
+		AudioAif,
 	};
 
 	enum LSampleType
@@ -303,13 +306,13 @@ protected:
 	LArray<int8_t> Audio;
 	LFileType Type = AudioUnknown;
 	LSampleType SampleType = AudioS16LE;
-	int SampleBits = 0;
-	int SampleRate = 0;
-	int Channels = 0;
+	uint32_t SampleBits = 0;
+	uint32_t SampleRate = 0;
+	uint32_t Channels = 0;
 	size_t DataStart = 0;
 	int64_t CursorSample = 0;
-	Rect<int64_t> Data;
-	LArray<Rect<int64_t>> ChData;
+	AvRect<int64_t> Data;
+	LArray<AvRect<int64_t>> ChData;
 	double XZoom = 1.0;
 	LString Msg, ErrorMsg;
 	LDrawMode DrawMode = DrawAutoSelect;
@@ -395,18 +398,18 @@ public:
 
 	const char *GetClass() override { return "LAudioView"; }
 
-	void OnCreate()
+	void OnCreate() override
 	{
 		SetWindow(this);
 	}
 
-	void OnPulse()
+	void OnPulse() override
 	{
 		if (AoPlaying)
 			Invalidate();
 	}
 
-	LMessage::Result OnEvent(LMessage *m)
+	LMessage::Result OnEvent(LMessage *m) override
 	{
 		switch (m->Msg())
 		{
@@ -418,13 +421,13 @@ public:
 		return LView::OnEvent(m);
 	}
 
-	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState)
+	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState) override
 	{
 		Formats.SupportsFileDrops();
 		return DROPEFFECT_COPY;
 	}
 
-	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
+	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState) override
 	{
 		for (auto &d : Data)
 		{
@@ -476,6 +479,137 @@ public:
 
 		return false;
 	}
+	
+	bool ParseAif()
+	{
+		LPointer p;
+		p.s8 = Audio.AddressOf();
+		auto end = p.s8 + Audio.Length();
+
+		#define IsAtom(atom) (LgiSwap32(Id) == atom)
+		
+		while (p.s8 < end)
+		{
+			auto Id = *p.u32++;
+			auto Sz = *p.u32++; Sz = LgiSwap32(Sz);
+			
+			// printf("Id='%4.4s' Sz=%i\n", &Id, Sz);
+
+			if (IsAtom('FORM'))
+			{
+				Id = *p.u32++;
+				if (!IsAtom('AIFF'))
+					return false;
+			}
+			else if (IsAtom('COMT'))
+			{
+				p.u8 += Sz + (Sz % 2);
+			}
+			else if (IsAtom('CHAN'))
+			{
+				p.u8 += Sz + (Sz % 2);
+			}
+			else if (IsAtom('COMM'))
+			{
+				auto channels = *p.u16++; Channels = LgiSwap16(channels);
+				p.u32++; // long numSampleFrames
+				uint16_t bits = *p.u16++; SampleBits = LgiSwap16(bits);
+				
+				uint32_t exp = ((int)p.u8[0]<<8) + p.u8[1]; //first 16 bits
+				exp = exp - 0x3fff;
+				uint32_t man = ((int)p.u8[2] << 24) +
+							   ((int)p.u8[3] << 16) +
+							   ((int)p.u8[4] << 8) +
+							   p.u8[5]; //bits 16..47
+				SampleRate = (uint32_t) (man >> (0x1f - exp));
+				p.s8 += 10;
+
+				if (SampleBits == 16)
+					SampleType = AudioS16BE;
+				else if (SampleBits == 24)
+					SampleType = AudioS24BE;
+				else if (SampleBits == 32)
+					SampleType = AudioS32BE;
+
+				printf("Channels=%i, Bits=%i, Rate=%i\n",
+					Channels, SampleBits, SampleRate);
+			}
+			else if (IsAtom('SSND'))
+			{
+				p.u32 += 2;
+				DataStart = p.s8 - Audio.AddressOf();
+				// printf("DataStart=%i\n", (int)DataStart);
+				
+				return true;
+			}
+			else
+			{
+				printf("%s:%i - Unexpected atom '%4.4s'\n", _FL, &Id);
+				return false;
+			}
+		}
+		
+		return false;
+	}
+	
+	bool ParseWav()
+	{
+		// Parse the wave file...
+		LPointer p;
+		p.s8 = Audio.AddressOf();
+		auto end = p.s8 + Audio.Length();
+
+		if (*p.u32++ != CC('RIFF'))
+			return Empty();
+		auto ChunkSz = *p.u32++;
+		auto Fmt = *p.u32++;
+		
+		while (p.s8 < end)
+		{
+			auto SubChunkId = *p.u32++;
+			auto SubChunkSz = *p.u32++;
+			auto NextChunk = p.u8 + SubChunkSz;
+
+			if (SubChunkId == CC('fmt '))
+			{
+				auto AudioFmt = *p.u16++;
+				Channels = *p.u16++;
+				SampleRate = *p.u32++;
+				auto ByteRate = *p.u32++;
+				auto BlockAlign = *p.u16++;
+				SampleBits = *p.u16++;
+
+				if (SampleBits == 16)
+					SampleType = AudioS16LE;
+				else if (SampleBits == 24)
+					SampleType = AudioS24LE;
+				else if (SampleBits == 32)
+					SampleType = AudioS32LE;
+
+				printf("Channels=%i\n", Channels);
+				printf("SampleRate=%i\n", SampleRate);
+				printf("SampleBits=%i\n", SampleBits);
+			}
+			else if (SubChunkId == CC('data'))
+			{
+				DataStart = p.s8 - Audio.AddressOf();
+				
+				printf("DataStart=" LPrintfSizeT "\n", DataStart);
+				break;
+			}
+			
+			p.u8 = NextChunk;
+		}
+
+		if (!DataStart)
+		{
+			ErrorMsg = "No 'data' element found.";
+			LPopupNotification::Inst()->Add(GetWindow(), ErrorMsg);
+			return Empty();
+		}
+		
+		return true;
+	}
 
 	bool Load(const char *FileName, int rate = 0, int bitDepth = 0, int channels = 0)
 	{
@@ -504,6 +638,8 @@ public:
 		auto Ext = LGetExtension(FileName);
 		if (!Stricmp(Ext, "wav"))
 			Type = AudioWav;
+		else if (!Stricmp(Ext, "aif"))
+			Type = AudioAif;
 		else if (!Stricmp(Ext, "raw"))
 			Type = AudioRaw;
 		else
@@ -529,59 +665,13 @@ public:
 		}
 		else if (Type == AudioWav)
 		{
-			// Parse the wave file...
-			LPointer p;
-			p.s8 = Audio.AddressOf();
-			auto end = p.s8 + Audio.Length();
-
-			if (*p.u32++ != CC('RIFF'))
-				return Empty();
-			auto ChunkSz = *p.u32++;
-			auto Fmt = *p.u32++;
-			
-			while (p.s8 < end)
-			{
-				auto SubChunkId = *p.u32++;
-				auto SubChunkSz = *p.u32++;
-				auto NextChunk = p.u8 + SubChunkSz;
-
-				if (SubChunkId == CC('fmt '))
-				{
-					auto AudioFmt = *p.u16++;
-					Channels = *p.u16++;
-					SampleRate = *p.u32++;
-					auto ByteRate = *p.u32++;
-					auto BlockAlign = *p.u16++;
-					SampleBits = *p.u16++;
-
-					if (SampleBits == 16)
-						SampleType = AudioS16LE;
-					else if (SampleBits == 24)
-						SampleType = AudioS24LE;
-					else if (SampleBits == 32)
-						SampleType = AudioS32LE;
-
-					printf("Channels=%i\n", Channels);
-					printf("SampleRate=%i\n", SampleRate);
-					printf("SampleBits=%i\n", SampleBits);
-				}
-				else if (SubChunkId == CC('data'))
-				{
-					DataStart = p.s8 - Audio.AddressOf();
-					
-					printf("DataStart=" LPrintfSizeT "\n", DataStart);
-					break;
-				}
-				
-				p.u8 = NextChunk;
-			}
-
-			if (!DataStart)
-			{
-				ErrorMsg = "No 'data' element found.";
-				LPopupNotification::Inst()->Add(GetWindow(), ErrorMsg);
-				return Empty();
-			}
+			if (!ParseWav())
+				return false;
+		}
+		else if (Type == AudioAif)
+		{
+			if (!ParseAif())
+				return false;
 		}
 		else if (Type == AudioRaw)
 		{
@@ -641,7 +731,7 @@ private:
 			LFile f;
 			if (!f.Open(FileName, O_WRITE))
 			{
-				ErrorMsg.Printf("Can't open '%s' for writing.", FileName);
+				ErrorMsg.Printf("Can't open '%s' for writing.", FileName.Get());
 				return -1;
 			}
 
@@ -673,7 +763,7 @@ private:
 	{
 		auto c = GetClient();
 		c.y1 += LSysFont->GetHeight();
-		c.Inset(10, 10);
+		c.Inset(DefaultBorder, DefaultBorder);
 		return c;
 	}
 
@@ -695,8 +785,10 @@ private:
 		double pos = (double) offset / dx;
 		int64_t idx = (int64_t)(samples * pos);
 		
+		#if 0
 		printf("ViewToSample(%i) data=%s offset=" LPrintfInt64 " samples=" LPrintfInt64 " idx=" LPrintfInt64 " pos=%f\n",
 			x, Data.GetStr(), offset, samples, idx, pos);
+		#endif
 		
 		if (idx < 0)
 			idx = 0;
@@ -705,7 +797,7 @@ private:
 		return idx;
 	}
 
-	void OnPosChange()
+	void OnPosChange() override
 	{
 		auto def = DefaultPos();
 		LRect d = Data;
@@ -720,7 +812,7 @@ private:
 		if (item && Chk) item->Checked(true); \
 	}
 
-	void OnMouseClick(LMouse &m)
+	void OnMouseClick(LMouse &m) override
 	{
 		if (m.IsContextMenu())
 		{
@@ -854,13 +946,13 @@ private:
 		}
 	}
 
-	void OnMouseMove(LMouse &m)
+	void OnMouseMove(LMouse &m) override
 	{
 		if (m.Down())
 			MouseToCursor(m);
 	}
 
-	bool OnKey(LKey &k)
+	bool OnKey(LKey &k) override
 	{
 		// k.Trace("key");
 
@@ -1171,7 +1263,7 @@ public:
 			XZoom, Samples, CursorSample, Time.Get(), LString(",").Join(Val).Get(), GraphLen);
 	}
 
-	bool OnMouseWheel(double Lines)
+	bool OnMouseWheel(double Lines) override
 	{
 		LMouse m;
 		GetMouse(m);
@@ -1185,12 +1277,20 @@ public:
 			if (XZoom < 1.0)
 				XZoom = 1.0;
 
-			auto OldX = Data.X();
+			auto cli = GetClient();
+			cli.Inset(DefaultBorder, DefaultBorder);
+			
 			int64_t x = (int64_t)(DefPos.X() * XZoom);
 			auto CursorX = SampleToView(CursorSample);
 			auto d = Data;
 			d.x1 = CursorX - (CursorSample * x / Samples);
 			d.x2 = d.x1 + x - 1;
+			
+			if (d.x1 > cli.x1)
+				d.Offset(cli.x1 - d.x1, 0);
+			else if (d.x2 < cli.x2)
+				d.Offset(cli.x2 - d.x2, 0);
+			
 			SetData(d);
 
 			Invalidate();
@@ -1273,6 +1373,9 @@ public:
 					int32_t i = *s.i32++;
 					return LgiSwap32(i);
 				};
+			default:
+				LAssert(!"Not impl.");
+				break;
 		}
 
 		return NULL;
@@ -1384,7 +1487,7 @@ public:
 		auto SampleBytes = SampleBits / 8;
 		auto start = Audio.AddressOf(DataStart);
 		size_t samples = GetSamples();
-		auto end = start + (SampleBytes * samples * Channels);
+		// auto end = start + (SampleBytes * samples * Channels);
 		auto BlkBytes = WaveformBlockSize * Channels * SampleBytes;
 		auto Blocks = ((Audio.Length() - DataStart) + BlkBytes - 1) / BlkBytes;
 		int Threads = LAppInst->GetCpuCount();
@@ -1449,11 +1552,12 @@ public:
 		auto start = Audio.AddressOf(DataStart);
 		size_t samples = GetSamples();
 		// printf("samples=" LPrintfSizeT "\n", samples);
-		auto end = start + (SampleBytes * samples * Channels);
+		// auto end = start + (SampleBytes * samples * Channels);
 		auto cy = c.y1 + (c.Y() / 2);
 
 		pDC->Colour(cGrid);
-		pDC->Box(&(LRect)c);
+		LRect cr = c;
+		pDC->Box(&cr);
 
 		if (Grps->Length() == 0)
 		{
@@ -1644,7 +1748,7 @@ public:
 		}
 	}
 
-	void OnPaint(LSurface *pDC)
+	void OnPaint(LSurface *pDC) override
 	{
 		#ifdef WINDOWS
 		LDoubleBuffer DblBuf(pDC);
@@ -1698,12 +1802,9 @@ public:
 					PaintSamples(pDC, ch, &IntGrps);
 				break;
 			}
-			case AudioFloat32:
+			default:
 			{
-				/*
-				for (int ch = 0; ch < Channels; ch++)
-					PaintSamples(pDC, ch, &FloatGrps);
-				*/
+				LAssert(!"Not impl.");
 				break;
 			}
 		}
@@ -1744,7 +1845,7 @@ public:
 		}
 	}
 
-	int Main()
+	int Main() override
 	{
 		int TimeSlice = 50; // ms
 		int sliceBytes = 0;

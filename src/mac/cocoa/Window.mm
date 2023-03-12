@@ -445,6 +445,12 @@ NSView *LWindow::Handle()
 	return NULL;
 }
 
+bool LWindow::SetTitleBar(bool ShowTitleBar)
+{
+	#warning "Impl LWindow::SetTitleBar"
+	return false;
+}
+
 bool LWindow::SetIcon(const char *FileName)
 {
 	return false;

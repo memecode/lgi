@@ -166,6 +166,7 @@
 		34D28929275B3DB0005961A8 /* Variant.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D28928275B3DB0005961A8 /* Variant.h */; };
 		34D6AA1722D3749A005D739E /* Gdc2.h in Headers */ = {isa = PBXBuildFile; fileRef = 34D6AA1622D3749A005D739E /* Gdc2.h */; };
 		34EE8BB12748A55600F12915 /* TextFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 34EE8BB02748A55600F12915 /* TextFile.h */; };
+		34F3EC4329BD374E00BB9B58 /* Rect.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F3EC4229BD374E00BB9B58 /* Rect.h */; };
 		34F6151F27E55C5D00FE5B0C /* Thread.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6151D27E55C5D00FE5B0C /* Thread.h */; };
 		34F6152027E55C5D00FE5B0C /* ThreadEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6151E27E55C5D00FE5B0C /* ThreadEvent.h */; };
 		34F6153E27E5628600FE5B0C /* Token.h in Headers */ = {isa = PBXBuildFile; fileRef = 34F6153D27E5628600FE5B0C /* Token.h */; };
@@ -334,6 +335,7 @@
 		34D28928275B3DB0005961A8 /* Variant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Variant.h; path = ../../../include/lgi/common/Variant.h; sourceTree = SOURCE_ROOT; };
 		34D6AA1622D3749A005D739E /* Gdc2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Gdc2.h; path = ../../../include/lgi/common/Gdc2.h; sourceTree = SOURCE_ROOT; };
 		34EE8BB02748A55600F12915 /* TextFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TextFile.h; path = ../../../include/lgi/common/TextFile.h; sourceTree = "<group>"; };
+		34F3EC4229BD374E00BB9B58 /* Rect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Rect.h; path = ../../../include/lgi/common/Rect.h; sourceTree = SOURCE_ROOT; };
 		34F6151D27E55C5D00FE5B0C /* Thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Thread.h; path = ../../../../../lgi/trunk/include/lgi/common/Thread.h; sourceTree = "<group>"; };
 		34F6151E27E55C5D00FE5B0C /* ThreadEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadEvent.h; path = ../../../../../lgi/trunk/include/lgi/common/ThreadEvent.h; sourceTree = "<group>"; };
 		34F6153D27E5628600FE5B0C /* Token.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Token.h; path = ../../../../../lgi/trunk/include/lgi/common/Token.h; sourceTree = "<group>"; };
@@ -441,6 +443,7 @@
 		3477C28A1CBF08760028B84B /* Graphics */ = {
 			isa = PBXGroup;
 			children = (
+				34F3EC4229BD374E00BB9B58 /* Rect.h */,
 				3413170F230694D1008CE982 /* Gel.cpp */,
 				34D6AA1622D3749A005D739E /* Gdc2.h */,
 				34D1B3C021748A2800BC6B58 /* Path.cpp */,
@@ -742,6 +745,7 @@
 				34EE8BB12748A55600F12915 /* TextFile.h in Headers */,
 				34CD9F7223D5768B0039F259 /* Unicode.h in Headers */,
 				34837C4925C677ED00D103B4 /* AppPriv.h in Headers */,
+				34F3EC4329BD374E00BB9B58 /* Rect.h in Headers */,
 				3409C0D0275812CB0050302A /* Profile.h in Headers */,
 				3477C2A11CBF0A920028B84B /* Mem.h in Headers */,
 				3477C2D51CC0481B0028B84B /* Array.h in Headers */,

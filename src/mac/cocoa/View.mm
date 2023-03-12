@@ -648,10 +648,17 @@ bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 	m.x = p.x;
 	m.y = p.y;
 	m.Target = this;
+	
 	auto Btns = [NSEvent pressedMouseButtons];
 	m.Left(Btns & 0x1);
 	m.Right(Btns & 0x2);
 	m.Middle(Btns & 0x4);
+	
+	auto Mods = [NSEvent modifierFlags];
+	m.Ctrl  (Mods & NSEventModifierFlagControl);
+	m.Alt   (Mods & NSEventModifierFlagOption);
+	m.System(Mods & NSEventModifierFlagCommand);
+	m.Shift (Mods & NSEventModifierFlagShift);
 
 	// Find offset to window
 	for (LViewI *c = this; c && c != c->GetWindow(); c = c->GetParent())
