@@ -1016,6 +1016,9 @@ private:
 
 	void RepairBookmark(int Channel, LBookmark &bm)
 	{
+		if (!bm.error)
+			return;
+
 		auto Convert = GetConvert();
 		auto end = Audio.AddressOf(Audio.Length()-1) + 1;
 		int sampleBytes = SampleBits / 8;
