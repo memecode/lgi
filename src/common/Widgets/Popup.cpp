@@ -1261,6 +1261,7 @@ LPopupNotification *LPopupNotification::Message(LWindow *ref, LString msg)
 LPopupNotification::LPopupNotification(LWindow *ref, LString msg)
 {
 	SetTitleBar(false);
+	SetWillFocus(false); // Don't take focus
 	Name("Notification");
 
 	if (ref)

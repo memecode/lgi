@@ -49,7 +49,6 @@ protected:
 
 	#if WINNATIVE
 
-		LRect OldPos;
 		LWindow *_Dialog = NULL;
 
 	#elif defined(HAIKU)
@@ -176,6 +175,10 @@ public:
 		ViewDelete
 	};
 	void SetFocus(LViewI *ctrl, FocusType type);
+	/// This setting can turn of taking focus when the window is shown. Useful for popups that
+	/// don't want to steal focus from an underlying window.
+	/// The default value is 'true'
+	void SetWillFocus(bool f);
 	
 	/// Registers a watcher to receive OnView... messages before they
 	/// are passed through to the intended recipient.

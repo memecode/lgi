@@ -66,6 +66,7 @@ public:
 	bool InCreate;
 	LAutoPtr<WINDOWPLACEMENT> Wp;
 	LPoint Dpi;
+	int ShowCmd = SW_NORMAL;
 
 	// Focus stuff
 	LViewI *Focus;
@@ -199,6 +200,11 @@ static bool HasParentPopup(LViewI *v)
 			return true;
 	}
 	return false;
+}
+
+void LWindow::SetWillFocus(bool f)
+{
+	d->ShowCmd = f ? SW_NORMAL : SW_SHOWNOACTIVATE;
 }
 
 void LWindow::SetFocus(LViewI *ctrl, FocusType type)
@@ -439,7 +445,7 @@ void LWindow::SetZoom(LWindowZoom i)
 
 				if (IsIconic(Handle()) || IsZoomed(Handle()))
 				{
-					ShowWindow(Handle(), SW_NORMAL);
+					ShowWindow(Handle(), d->ShowCmd);
 				}
 
 				LYield();
@@ -691,7 +697,7 @@ void LWindow::Visible(bool v)
 				}
 				else
 				{
-					Wp->showCmd = SW_NORMAL;
+					Wp->showCmd = d->ShowCmd;
 					Cmd = "SW_NORMAL";
 				}
 
@@ -1308,7 +1314,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 					}
 					else
 					{
-						Wp->showCmd = SW_NORMAL;
+						Wp->showCmd = d->ShowCmd;
 					}
 				}
 				else
