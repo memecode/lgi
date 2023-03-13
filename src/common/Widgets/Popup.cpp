@@ -6,6 +6,8 @@
 #include "lgi/common/Thread.h"
 #include "lgi/common/ThreadEvent.h"
 #include "lgi/common/Menu.h"
+#include "lgi/common/PopupNotification.h"
+
 #if LGI_COCOA
 	#include <Cocoa/Cocoa.h>
 #endif
@@ -1214,4 +1216,149 @@ int LDropDown::OnNotify(LViewI *c, LNotification n)
 	}
 
 	return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+class LPopupNotificationFactory
+{
+public:
+	LHashTbl<PtrKey<LWindow*>, LPopupNotification*> map;
+
+	~LPopupNotificationFactory()
+	{
+		while (map.Length())
+		{
+			auto p = map.begin();
+			if (p != map.end())
+			{
+				delete (*p).value;
+			}
+		}
+	}
+
+}	PopupNotificationFactory;
+
+LPopupNotification *LPopupNotification::Message(LWindow *ref, LString msg)
+{
+	if (!ref)
+		return NULL;
+
+	auto w = PopupNotificationFactory.map.Find(ref);
+	if (w)
+	{
+		w->Add(ref, msg);
+	}
+	else
+	{
+		w = new LPopupNotification(ref, msg);
+		if (w)
+			PopupNotificationFactory.map.Add(ref, w);
+	}
+
+	return w;
+}
+
+LPopupNotification::LPopupNotification(LWindow *ref, LString msg)
+{
+	SetTitleBar(false);
+	Name("Notification");
+
+	if (ref)
+		RefWnd = ref;
+	if (ref && msg)
+		Add(ref, msg);
+}
+
+LPopupNotification::~LPopupNotification()
+{
+	LAssert(PopupNotificationFactory.map.Find(RefWnd) == this);
+	PopupNotificationFactory.map.Delete(RefWnd);
+}
+
+LPoint LPopupNotification::CalcSize()
+{
+	LPoint p;
+	for (auto ds: Msgs)
+	{
+		p.x = MAX(p.x, ds->X());
+		p.y += ds->Y();
+	}
+
+	p.x += Border * 2 + Decor.x;
+	p.y += Border * 2 + Decor.y;
+
+	return p;
+}
+
+void LPopupNotification::Init()
+{
+	if (!RefWnd)
+	{
+		LAssert(!"No reference window.");
+		return;
+	}
+
+	auto r = RefWnd->GetPos();
+	auto Sz = CalcSize();
+
+	LRect pos;
+	pos.ZOff(Sz.x - 1, Sz.y - 1);
+	pos.Offset(r.x2 - pos.X(), r.y2 - pos.Y());
+	SetPos(pos);
+
+	SetAlwaysOnTop(true);
+	SetPulse(500);		
+	if (!IsAttached())
+		Attach(0);
+	Visible(true);
+}
+
+void LPopupNotification::Add(LWindow *ref, LString msg)
+{
+	if (msg)
+	{
+		HideTs = LCurrentTime();
+		Msgs.Add(new LDisplayString(GetFont(), msg));
+	}
+			
+	if (ref && RefWnd != ref)
+		RefWnd = ref;
+
+	if (RefWnd && Msgs.Length() > 0)
+		Init();
+}
+
+void LPopupNotification::OnPaint(LSurface *pDC)
+{
+	pDC->Colour(Fore);
+	auto c = GetClient();
+	pDC->Box(&c);
+	c.Inset(1, 1);
+	pDC->Colour(Back);
+	pDC->Rectangle(&c);
+
+	auto f = GetFont();
+	f->Fore(Fore);
+	f->Back(Back);
+	f->Transparent(true);
+		
+	int x = c.x1 + Border;
+	int y = c.y1 + Border;
+	for (auto ds: Msgs)
+	{
+		ds->Draw(pDC, x, y);
+		y += ds->Y();
+	}
+}
+
+void LPopupNotification::OnPulse()
+{
+	if (HideTs &&
+		LCurrentTime() >= HideTs + ShowMs)
+	{
+		HideTs = 0;
+		Visible(false);
+		SetPulse();
+		Msgs.DeleteObjects();
+	}
 }

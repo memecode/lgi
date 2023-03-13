@@ -10,6 +10,7 @@
 #include "lgi/common/ThreadEvent.h"
 #include "lgi/common/DragAndDrop.h"
 #include "lgi/common/DropFiles.h"
+#include "lgi/common/PopupNotification.h"
 
 #include "ao.h"
 
@@ -96,128 +97,6 @@ struct AvRect
 };
 
 typedef int32_t (*ConvertFn)(sample_t &ptr);
-
-class LPopupNotification : public LWindow
-{
-	constexpr static int Border = 10; // px
-	constexpr static int ShowMs = 2300; // milliseconds
-
-	LColour Back = LColour(0xf7, 0xf0, 0xd5);
-	LColour Fore = LColour(0xd4, 0xb8, 0x62);
-	LWindow *RefWnd = NULL;
-	LArray<LDisplayString*> Msgs;
-	LPoint Decor = LPoint(2, 2);
-	uint64_t HideTs = 0;
-
-	LPoint CalcSize()
-	{
-		LPoint p;
-		for (auto ds: Msgs)
-		{
-			p.x = MAX(p.x, ds->X());
-			p.y += ds->Y();
-		}
-
-		p.x += Border * 2 + Decor.x;
-		p.y += Border * 2 + Decor.y;
-
-		return p;
-	}
-
-public:
-	static LPopupNotification *Inst()
-	{
-		#warning "Fix LPopupNotification leak."
-		static LPopupNotification *inst = NULL;
-		if (!inst)
-			inst = new LPopupNotification(NULL, NULL);
-		return inst;
-	}
-
-	LPopupNotification(LWindow *ref, LString msg)
-	{
-		SetTitleBar(false);
-		Name("Notification");
-
-		if (ref)
-			RefWnd = ref;
-		if (ref && msg)
-			Add(ref, msg);
-	}
-
-	void Init()
-	{
-		if (!RefWnd)
-		{
-			LAssert(!"No reference window.");
-			return;
-		}
-
-		auto r = RefWnd->GetPos();
-		auto Sz = CalcSize();
-
-		LRect pos;
-		pos.ZOff(Sz.x - 1, Sz.y - 1);
-		pos.Offset(r.x2 - pos.X(), r.y2 - pos.Y());
-		SetPos(pos);
-
-		SetAlwaysOnTop(true);
-		SetPulse(500);		
-		if (!IsAttached())
-			Attach(0);
-		Visible(true);
-	}
-
-	void Add(LWindow *ref, LString msg)
-	{
-		if (msg)
-		{
-			HideTs = LCurrentTime();
-			Msgs.Add(new LDisplayString(GetFont(), msg));
-		}
-			
-		if (ref && RefWnd != ref)
-			RefWnd = ref;
-
-		if (RefWnd && Msgs.Length() > 0)
-			Init();
-	}
-
-	void OnPaint(LSurface *pDC)
-	{
-		pDC->Colour(Fore);
-		auto c = GetClient();
-		pDC->Box(&c);
-		c.Inset(1, 1);
-		pDC->Colour(Back);
-		pDC->Rectangle(&c);
-
-		auto f = GetFont();
-		f->Fore(Fore);
-		f->Back(Back);
-		f->Transparent(true);
-		
-		int x = c.x1 + Border;
-		int y = c.y1 + Border;
-		for (auto ds: Msgs)
-		{
-			ds->Draw(pDC, x, y);
-			y += ds->Y();
-		}
-	}
-
-	void OnPulse()
-	{
-		if (HideTs &&
-			LCurrentTime() >= HideTs + ShowMs)
-		{
-			HideTs = 0;
-			Visible(false);
-			SetPulse();
-			Msgs.DeleteObjects();
-		}
-	}
-};
 
 class LAudioView :
 	public LLayout,
@@ -352,7 +231,7 @@ protected:
 		ChData.Length(Channels);
 
 		auto Dy = (int)Data.Y() - 1;
-		for (int i=0; i<Channels; i++)
+		for (uint32_t i=0; i<Channels; i++)
 		{
 			auto &r = ChData[i];
 			r = Data;
@@ -480,36 +359,50 @@ public:
 		return false;
 	}
 	
+	union AifType
+	{
+		uint32_t id;
+		char str[4];
+
+		AifType(uint32_t init)
+		{
+			id = init;
+		}
+
+		bool Is(uint32_t atom)
+		{
+			return LgiSwap32(id) == atom;
+		}
+	};
+
 	bool ParseAif()
 	{
 		LPointer p;
 		p.s8 = Audio.AddressOf();
 		auto end = p.s8 + Audio.Length();
 
-		#define IsAtom(atom) (LgiSwap32(Id) == atom)
-		
 		while (p.s8 < end)
 		{
-			auto Id = *p.u32++;
+			AifType Id = *p.u32++;
 			auto Sz = *p.u32++; Sz = LgiSwap32(Sz);
 			
 			// printf("Id='%4.4s' Sz=%i\n", &Id, Sz);
 
-			if (IsAtom('FORM'))
+			if (Id.Is('FORM'))
 			{
 				Id = *p.u32++;
-				if (!IsAtom('AIFF'))
+				if (!Id.Is('AIFF'))
 					return false;
 			}
-			else if (IsAtom('COMT'))
+			else if (Id.Is('COMT'))
 			{
 				p.u8 += Sz + (Sz % 2);
 			}
-			else if (IsAtom('CHAN'))
+			else if (Id.Is('CHAN'))
 			{
 				p.u8 += Sz + (Sz % 2);
 			}
-			else if (IsAtom('COMM'))
+			else if (Id.Is('COMM'))
 			{
 				auto channels = *p.u16++; Channels = LgiSwap16(channels);
 				p.u32++; // long numSampleFrames
@@ -534,17 +427,16 @@ public:
 				printf("Channels=%i, Bits=%i, Rate=%i\n",
 					Channels, SampleBits, SampleRate);
 			}
-			else if (IsAtom('SSND'))
+			else if (Id.Is('SSND'))
 			{
 				p.u32 += 2;
 				DataStart = p.s8 - Audio.AddressOf();
-				// printf("DataStart=%i\n", (int)DataStart);
 				
 				return true;
 			}
 			else
 			{
-				printf("%s:%i - Unexpected atom '%4.4s'\n", _FL, &Id);
+				printf("%s:%i - Unexpected atom '%4.4s'\n", _FL, Id.str);
 				return false;
 			}
 		}
@@ -604,7 +496,7 @@ public:
 		if (!DataStart)
 		{
 			ErrorMsg = "No 'data' element found.";
-			LPopupNotification::Inst()->Add(GetWindow(), ErrorMsg);
+			LPopupNotification::Message(GetWindow(), ErrorMsg);
 			return Empty();
 		}
 		
@@ -622,7 +514,7 @@ public:
 
 		Empty();
 		Msg.Printf("Loading '%s'...", FileName);
-		LPopupNotification::Inst()->Add(GetWindow(), Msg);
+		LPopupNotification::Message(GetWindow(), Msg);
 
 		FilePath = FileName;
 		if (!Audio.Length(f.GetSize()))
@@ -645,7 +537,7 @@ public:
 		else
 		{
 			ErrorMsg.Printf("Unknown format: %s", Ext);
-			LPopupNotification::Inst()->Add(GetWindow(), ErrorMsg);
+			LPopupNotification::Message(GetWindow(), ErrorMsg);
 			return Empty();
 		}
 			
@@ -686,11 +578,11 @@ public:
 			Channels = 2;
 
 		Invalidate();
-		LPopupNotification::Inst()->Add(GetWindow(), "Loaded ok...");
+		LPopupNotification::Message(GetWindow(), "Loaded ok...");
 		return true;
 	}
 
-private:
+protected:
 	struct SaveThread : public LThread
 	{
 		LAudioView *view;
@@ -704,7 +596,7 @@ private:
 
 			LString Msg;
 			Msg.Printf("Saving '%s'...", FileName.Get());
-			LPopupNotification::Inst()->Add(view->GetWindow(), Msg);
+			LPopupNotification::Message(view->GetWindow(), Msg);
 
 			Run();
 		}
@@ -717,9 +609,9 @@ private:
 		void OnComplete()
 		{
 			if (ErrorMsg)
-				LPopupNotification::Inst()->Add(view->GetWindow(), ErrorMsg);
+				LPopupNotification::Message(view->GetWindow(), ErrorMsg);
 			else
-				LPopupNotification::Inst()->Add(view->GetWindow(), "Saved ok.");
+				LPopupNotification::Message(view->GetWindow(), "Saved ok.");
 
 			view->State = CtrlNormal;
 			view->Saving.Release(); // it doesn't own the ptr anymore
@@ -960,27 +852,6 @@ private:
 		{
 			switch (k.c16)
 			{
-				case 'f':
-				case 'F':
-				{
-					if (k.Down())
-						FindErrors();
-					return true;
-				}
-				case 'r':
-				case 'R':
-				{
-					if (k.Down())
-						RepairNext();
-					return true;
-				}
-				case 'a':
-				case 'A':
-				{
-					if (k.Down())
-						RepairAll();
-					return true;
-				}
 				case ' ':
 				{
 					if (k.Down())
@@ -1014,230 +885,11 @@ private:
 		return sample_t(Audio.AddressOf(DataStart + (Sample * SampleBytes)));
 	}
 
-	void RepairBookmark(int Channel, LBookmark &bm)
-	{
-		if (!bm.error)
-			return;
-
-		auto Convert = GetConvert();
-		auto end = Audio.AddressOf(Audio.Length()-1) + 1;
-		int sampleBytes = SampleBits / 8;
-		int skipBytes = (Channels - 1) * sampleBytes;
-		int channelOffset = Channel * sampleBytes;
-
-		// Look at previous sample...
-		auto repairSample = bm.sample;
-		auto p = AddressOf(repairSample - 1);
-		p.i8 += channelOffset;
-		auto lastGood = Convert(p);
-		p.i8 += skipBytes;
-
-		// Seek over and find the end...
-		auto nextGood = Convert(p);
-		p.i8 += skipBytes;
-		while (nextGood)
-		{
-			nextGood = Convert(p);
-			p.i8 += skipBytes;
-			repairSample++;
-		}
-
-		auto endRepair = repairSample;
-		while (nextGood == 0)
-		{
-			nextGood = Convert(p);
-			p.i8 += skipBytes;
-			endRepair++;
-		}
-
-		int64_t sampleDiff = nextGood - lastGood;
-		int64_t repairSamples = endRepair - repairSample + 1;
-
-		// Write the new interpolated samples
-		for (int64_t i = repairSample; i < endRepair; i++)
-		{
-			p = AddressOf(i);
-			p.i8 += channelOffset;
-			if (p.i8 >= end)
-				break;
-
-			switch (SampleType)
-			{
-				case AudioS24LE:
-				{
-					auto off = i - repairSample + 1;
-					p.i24->s = lastGood + (off * sampleDiff / repairSamples);
-					break;
-				}
-				default:
-				{
-					LAssert(!"Impl me.");
-					break;
-				}
-			}
-		}
-
-		bm.colour = LColour::Green;
-		bm.error = false;
-	}
-
-	void RepairNext()
-	{
-		for (int ch = 0; ch < Channels; ch++)
-		{
-			int64_t prev = 0;
-			LBookmark *Bookmark = NULL;
-			for (auto &bm: Bookmarks[ch])
-			{
-				if (bm.sample >= CursorSample &&
-					prev < CursorSample &&
-					bm.error)
-				{
-					Bookmark = &bm;
-					break;
-				}
-			}
-
-			if (Bookmark)
-				RepairBookmark(ch, *Bookmark);
-		}
-
-		Invalidate();
-	}
-
-	void RepairAll()
-	{
-		for (int ch = 0; ch < Bookmarks.Length(); ch++)
-			for (auto &bm: Bookmarks[ch])
-				RepairBookmark(ch, bm);
-		Invalidate();
-	}
-
 	int64_t PtrToSample(sample_t &ptr)
 	{
 		int sampleBytes = SampleBits >> 3;
 		auto start = Audio.AddressOf(DataStart);
 		return (ptr.i8 - start) / (sampleBytes * Channels);
-	}
-
-private:
-	struct ErrorThread : public LThread
-	{
-		LAudioView *view;
-		int64_t start, end;
-		int channel;
-		LArray<LBookmark> bookmarks;
-
-		ErrorThread(LAudioView *v, int64_t startSample, int64_t endSample, int ch) :
-			LThread("ErrorThread", v->AddDispatch())
-		{
-			view = v;
-			start = startSample;
-			end = endSample;
-			channel = ch;
-
-			Run();
-		}
-
-		void OnComplete()
-		{
-			view->Bookmarks[channel].Add(bookmarks);
-			view->Bookmarks[channel].Sort([](auto a, auto b)
-				{
-					return (int)(a->sample - b->sample);
-				});
-
-			view->Invalidate();
-
-			LAssert(view->ErrorThreads.HasItem(this));
-			view->ErrorThreads.Delete(this);
-			if (view->ErrorThreads.Length() == 0)
-				LPopupNotification::Inst()->Add(view->GetWindow(), "Done.");
-			DeleteOnExit = true;
-		}
-
-		int Main()
-		{
-			auto Convert = view->GetConvert();
-			int32_t prev = 0;
-			int sampleBytes = view->SampleBits / 8;
-			int byteInc = (view->Channels - 1) * sampleBytes;
-			int64_t zeroRunStart = -1;
-
-			auto ptr = view->AddressOf(0);
-			auto pStart = ptr.i8 + (start * view->Channels * sampleBytes) + (channel * sampleBytes);
-			auto pEnd   = ptr.i8 + (end   * view->Channels * sampleBytes) + (channel * sampleBytes);
-			ptr.i8 = pStart;
-
-			while (ptr.i8 < pEnd)
-			{
-				auto s = Convert(ptr);
-				ptr.i8 += byteInc;
-
-				auto diff = s - prev;
-				if (diff < 0)
-					diff = -diff;
-
-				if (s == 0)
-				{
-					if (zeroRunStart < 0)
-						zeroRunStart = view->PtrToSample(ptr) - 1;
-				}
-				else if (zeroRunStart >= 0)
-				{
-					auto cur = view->PtrToSample(ptr) - 1;
-					auto len = cur - zeroRunStart;
-					if (len >= ERROR_ZERO_SAMPLE_COUNT)
-					{
-						// emit book mark
-						auto &bm = bookmarks.New();
-						bm.sample = zeroRunStart;
-						bm.colour = LColour::Red;
-						bm.error = true;
-
-						#if 0
-						if (Bookmarks.Length() >= 10000)
-							break;
-						#endif
-					}
-
-					zeroRunStart = -1;
-				}
-
-				prev = s;
-			}
-
-			return 0;
-		}
-	};
-
-	LArray<ErrorThread*> ErrorThreads;
-
-public:
-	void FindErrors()
-	{
-		if (ErrorThreads.Length() > 0)
-		{
-			LPopupNotification::Inst()->Add(GetWindow(), "Already finding errors.");
-			return;
-		}
-
-		LPopupNotification::Inst()->Add(GetWindow(), "Finding errors...");
-		Bookmarks.Length(Channels);
-
-		auto samples = GetSamples();
-		auto threads = LAppInst->GetCpuCount();
-		auto threadsPerCh = threads / Channels;
-		for (int ch=0; ch<Channels; ch++)
-		{
-			for (int t=0; t<threadsPerCh; t++)
-			{
-				int64_t start = t       * samples / threadsPerCh;
-				int64_t end   = (t + 1) * samples / threadsPerCh;
-
-				ErrorThreads.Add(new ErrorThread(this, start, end, ch));
-			}
-		}
 	}
 
 	void UpdateMsg()
@@ -1258,7 +910,7 @@ public:
 		LString Time;
 		Time.Printf("%i:%02.2i:%02.2i.%i", (int)Hours, (int)Minutes, (int)Seconds, (int)Ms);
 
-		for (int ch=0; ch<Channels; ch++)
+		for (uint32_t ch=0; ch<Channels; ch++)
 			Val.New().Printf("%i", Convert(Addr));
 
 		Msg.Printf("Channels=%i SampleRate=%i BitDepth=%i XZoom=%g Samples=" LPrintfSSizeT " Cursor=" LPrintfSizeT " @ %s (%s) Graph=" LPrintfSizeT "\n",
@@ -1484,7 +1136,7 @@ private:
 public:
 	void BuildWaveForms(LArray<LArray<Grp<int32_t>>> *Grps)
 	{
-		LPopupNotification::Inst()->Add(GetWindow(), "Building waveform data...");
+		LPopupNotification::Message(GetWindow(), "Building waveform data...");
 		State = CtrlBuildingWaveforms;
 
 		auto SampleBytes = SampleBits / 8;
@@ -1497,7 +1149,7 @@ public:
 
 		// Initialize the graph
 		Grps->Length(Channels);
-		for (int ch = 0; ch < Channels; ch++)
+		for (uint32_t ch = 0; ch < Channels; ch++)
 		{
 			auto &GraphArr = (*Grps)[ch];
 			GraphArr.Length(Blocks);
@@ -1527,7 +1179,7 @@ public:
 	void OnWaveFormsFinished()
 	{
 		State = CtrlNormal;
-		LPopupNotification::Inst()->Add(GetWindow(), "Done.");
+		LPopupNotification::Message(GetWindow(), "Done.");
 		Invalidate();
 	}
 
@@ -1787,21 +1439,21 @@ public:
 			case AudioS16LE:
 			case AudioS16BE:
 			{
-				for (int ch = 0; ch < Channels; ch++)
+				for (uint32_t ch = 0; ch < Channels; ch++)
 					PaintSamples(pDC, ch, &IntGrps);
 				break;
 			}
 			case AudioS24LE:
 			case AudioS24BE:
 			{
-				for (int ch = 0; ch < Channels; ch++)
+				for (uint32_t ch = 0; ch < Channels; ch++)
 					PaintSamples(pDC, ch, &IntGrps);
 				break;
 			}
 			case AudioS32LE:
 			case AudioS32BE:
 			{
-				for (int ch = 0; ch < Channels; ch++)
+				for (uint32_t ch = 0; ch < Channels; ch++)
 					PaintSamples(pDC, ch, &IntGrps);
 				break;
 			}
@@ -1984,3 +1636,259 @@ public:
 	}
 };
 
+class LAudioRepairView : public LAudioView
+{
+	LArray<LArray<LBookmark>> &GetBookMarks() { return Bookmarks; }
+
+	void RepairAll()
+	{
+		for (int ch = 0; ch < Bookmarks.Length(); ch++)
+			for (auto &bm: Bookmarks[ch])
+				RepairBookmark(ch, bm);
+		Invalidate();
+	}
+
+	void RepairBookmark(int Channel, LBookmark &bm)
+	{
+		if (!bm.error)
+			return;
+
+		auto Convert = GetConvert();
+		auto end = Audio.AddressOf(Audio.Length()-1) + 1;
+		int sampleBytes = SampleBits / 8;
+		int skipBytes = (Channels - 1) * sampleBytes;
+		int channelOffset = Channel * sampleBytes;
+
+		// Look at previous sample...
+		auto repairSample = bm.sample;
+		auto p = AddressOf(repairSample - 1);
+		p.i8 += channelOffset;
+		auto lastGood = Convert(p);
+		p.i8 += skipBytes;
+
+		// Seek over and find the end...
+		auto nextGood = Convert(p);
+		p.i8 += skipBytes;
+		while (nextGood)
+		{
+			nextGood = Convert(p);
+			p.i8 += skipBytes;
+			repairSample++;
+		}
+
+		auto endRepair = repairSample;
+		while (nextGood == 0)
+		{
+			nextGood = Convert(p);
+			p.i8 += skipBytes;
+			endRepair++;
+		}
+
+		int64_t sampleDiff = nextGood - lastGood;
+		int64_t repairSamples = endRepair - repairSample + 1;
+
+		// Write the new interpolated samples
+		for (int64_t i = repairSample; i < endRepair; i++)
+		{
+			p = AddressOf(i);
+			p.i8 += channelOffset;
+			if (p.i8 >= end)
+				break;
+
+			switch (SampleType)
+			{
+				case AudioS24LE:
+				{
+					auto off = i - repairSample + 1;
+					p.i24->s = lastGood + (off * sampleDiff / repairSamples);
+					break;
+				}
+				default:
+				{
+					LAssert(!"Impl me.");
+					break;
+				}
+			}
+		}
+
+		bm.colour = LColour::Green;
+		bm.error = false;
+	}
+
+	void RepairNext()
+	{
+		for (uint32_t ch = 0; ch < Channels; ch++)
+		{
+			int64_t prev = 0;
+			LBookmark *Bookmark = NULL;
+			for (auto &bm: Bookmarks[ch])
+			{
+				if (bm.sample >= CursorSample &&
+					prev < CursorSample &&
+					bm.error)
+				{
+					Bookmark = &bm;
+					break;
+				}
+			}
+
+			if (Bookmark)
+				RepairBookmark(ch, *Bookmark);
+		}
+
+		Invalidate();
+	}
+
+	struct ErrorThread : public LThread
+	{
+		LAudioRepairView *view;
+		int64_t start, end;
+		int channel;
+		LArray<LBookmark> bookmarks;
+
+		ErrorThread(LAudioRepairView *v, int64_t startSample, int64_t endSample, int ch) :
+			LThread("ErrorThread", v->AddDispatch())
+		{
+			view = v;
+			start = startSample;
+			end = endSample;
+			channel = ch;
+
+			Run();
+		}
+
+		void OnComplete()
+		{
+			auto BookMarks = view->GetBookMarks();
+			BookMarks[channel].Add(bookmarks);
+			BookMarks[channel].Sort([](auto a, auto b)
+				{
+					return (int)(a->sample - b->sample);
+				});
+
+			view->Invalidate();
+
+			LAssert(view->ErrorThreads.HasItem(this));
+			view->ErrorThreads.Delete(this);
+			if (view->ErrorThreads.Length() == 0)
+				LPopupNotification::Message(view->GetWindow(), "Done.");
+			DeleteOnExit = true;
+		}
+
+		int Main()
+		{
+			auto Convert = view->GetConvert();
+			int32_t prev = 0;
+			int sampleBytes = view->SampleBits / 8;
+			int byteInc = (view->Channels - 1) * sampleBytes;
+			int64_t zeroRunStart = -1;
+
+			auto ptr = view->AddressOf(0);
+			auto pStart = ptr.i8 + (start * view->Channels * sampleBytes) + (channel * sampleBytes);
+			auto pEnd   = ptr.i8 + (end   * view->Channels * sampleBytes) + (channel * sampleBytes);
+			ptr.i8 = pStart;
+
+			while (ptr.i8 < pEnd)
+			{
+				auto s = Convert(ptr);
+				ptr.i8 += byteInc;
+
+				auto diff = s - prev;
+				if (diff < 0)
+					diff = -diff;
+
+				if (s == 0)
+				{
+					if (zeroRunStart < 0)
+						zeroRunStart = view->PtrToSample(ptr) - 1;
+				}
+				else if (zeroRunStart >= 0)
+				{
+					auto cur = view->PtrToSample(ptr) - 1;
+					auto len = cur - zeroRunStart;
+					if (len >= ERROR_ZERO_SAMPLE_COUNT)
+					{
+						// emit book mark
+						auto &bm = bookmarks.New();
+						bm.sample = zeroRunStart;
+						bm.colour = LColour::Red;
+						bm.error = true;
+
+						#if 0
+						if (Bookmarks.Length() >= 10000)
+							break;
+						#endif
+					}
+
+					zeroRunStart = -1;
+				}
+
+				prev = s;
+			}
+
+			return 0;
+		}
+	};
+
+	LArray<ErrorThread*> ErrorThreads;
+
+public:
+	void FindErrors()
+	{
+		if (ErrorThreads.Length() > 0)
+		{
+			LPopupNotification::Message(GetWindow(), "Already finding errors.");
+			return;
+		}
+
+		LPopupNotification::Message(GetWindow(), "Finding errors...");
+		Bookmarks.Length(Channels);
+
+		auto samples = GetSamples();
+		auto threads = LAppInst->GetCpuCount();
+		auto threadsPerCh = threads / Channels;
+		for (uint32_t ch=0; ch<Channels; ch++)
+		{
+			for (uint32_t t=0; t<threadsPerCh; t++)
+			{
+				int64_t start = t       * samples / threadsPerCh;
+				int64_t end   = (t + 1) * samples / threadsPerCh;
+
+				ErrorThreads.Add(new ErrorThread(this, start, end, ch));
+			}
+		}
+	}
+
+	bool OnKey(LKey &k) override
+	{
+		if (k.IsChar)
+		{
+			switch (k.c16)
+			{
+				case 'f':
+				case 'F':
+				{
+					if (k.Down())
+						FindErrors();
+					return true;
+				}
+				case 'r':
+				case 'R':
+				{
+					if (k.Down())
+						RepairNext();
+					return true;
+				}
+				case 'a':
+				case 'A':
+				{
+					if (k.Down())
+						RepairAll();
+					return true;
+				}
+			}
+		}
+
+		return LAudioView::OnKey(k);
+	}
+};
