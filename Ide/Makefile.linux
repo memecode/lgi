@@ -202,6 +202,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/Point.h \
 	../include/lgi/common/Popup.h \
 	../include/lgi/common/PopupList.h \
+	../include/lgi/common/PopupNotification.h \
 	../include/lgi/common/Printer.h \
 	../include/lgi/common/Profile.h \
 	../include/lgi/common/Progress.h \

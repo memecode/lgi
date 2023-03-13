@@ -1185,13 +1185,13 @@ void DocEdit::PourStyle(size_t Start, ssize_t EditSize)
 	if (WorkerState == KStyling)
 	{
 		#ifdef _DEBUG
-		uint64 Start = LgiMicroTime();
+		auto Start = LMicroTime();
 		#endif
 		ParentState = KCancel;
 		while (WorkerState != KWaiting)
 			LSleep(1);
 		#ifdef _DEBUG
-		uint64 Tm = LgiMicroTime() - Start;
+		auto Tm = LMicroTime() - Start;
 		if (Tm >= 10000)
 			LgiTrace("DocEdit: Styling->Waiting time: %.1g ms\n", (double) Tm / 1000.0);
 		#endif

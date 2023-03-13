@@ -1292,6 +1292,11 @@ void LWindow::SetDefault(LViewI *v)
 	}
 }
 
+bool LWindow::SetTitleBar(bool ShowTitleBar)
+{
+	return false;
+}
+
 bool LWindow::Name(const char *n)
 {
 	if (Wnd)
@@ -1813,6 +1818,10 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 			break;
 		}
 	}
+}
+
+void LWindow::SetWillFocus(bool f)
+{
 }
 
 void LWindow::SetDragHandlers(bool On)
