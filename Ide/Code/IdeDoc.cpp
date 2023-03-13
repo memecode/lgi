@@ -17,6 +17,8 @@
 #include "lgi/common/Http.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/FileSelect.h"
+#include "lgi/common/PopupNotification.h"
+
 #include "LgiIde.h"
 #include "ProjectNode.h"
 #include "SpaceTabConv.h"
@@ -993,6 +995,10 @@ bool IdeDocPrivate::Save()
 	if (Status)
 		ModTs = GetModTime();
 
+
+	LString msg;
+	msg.Printf("save=%i", Status);
+	LPopupNotification::Message(Doc->GetWindow(), msg);
 	return Status;
 }
 

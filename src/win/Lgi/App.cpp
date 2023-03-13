@@ -416,13 +416,15 @@ DumpTime("skin");
 
 LApp::~LApp()
 {
+	CommonCleanup();
+
 	DeleteObj(AppWnd);
 	SystemNormal->WarnOnDelete(false);
 	DeleteObj(SystemNormal);
 	DeleteObj(SystemBold);
 	DeleteObj(MouseHook);
 
-	TheApp = 0;
+	TheApp = NULL;
 	DeleteObj(SkinEngine);
 
 	DeleteObj(LFontSystem::Me);

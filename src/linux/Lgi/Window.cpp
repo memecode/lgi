@@ -47,6 +47,8 @@ public:
 	gulong DestroySig;
 	LAutoPtr<LSurface> IconImg;
 	LAttachState AttachState;
+	bool ShowTitleBar = true;
+	bool WillFocus = true;
 	
 	// State
 	GdkWindowState State;
@@ -110,7 +112,11 @@ LWindow::LWindow(GtkWidget *w) : LView(0)
 	Menu = NULL;
 	Wnd = GTK_WINDOW(w);
 	if (Wnd)
+	{
+		printf("gtk_window_set_decorated %i\n", d->ShowTitleBar);
+		gtk_window_set_decorated(Wnd, d->ShowTitleBar);
 		g_object_set_data(G_OBJECT(Wnd), "LViewI", (LViewI*)this);
+	}
 	
 	_Root = NULL;
 	_MenuBar = NULL;
@@ -133,7 +139,8 @@ LWindow::~LWindow()
 		g_signal_handler_disconnect(Wnd, d->DestroySig);
 	}
 
-	if (LAppInst->AppWnd == this)
+	if (LAppInst &&
+		LAppInst->AppWnd == this)
 		LAppInst->AppWnd = NULL;
 
     if (_Root)
@@ -861,6 +868,9 @@ bool LWindow::Attach(LViewI *p)
 
 	if (Wnd)
 	{
+		SetTitleBar(d->ShowTitleBar);
+		SetWillFocus(d->WillFocus);
+	
 		auto Widget = GTK_WIDGET(Wnd);
 		LView *i = this;
 		if (Pos.X() > 0 && Pos.Y() > 0)
@@ -1294,7 +1304,14 @@ void LWindow::SetDefault(LViewI *v)
 
 bool LWindow::SetTitleBar(bool ShowTitleBar)
 {
-	return false;
+	d->ShowTitleBar = ShowTitleBar;
+	if (Wnd)
+	{
+		ThreadCheck();
+		gtk_window_set_decorated(Wnd, ShowTitleBar);
+	}
+	
+	return true;
 }
 
 bool LWindow::Name(const char *n)
@@ -1822,6 +1839,18 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 
 void LWindow::SetWillFocus(bool f)
 {
+	d->WillFocus = f;
+	if (Wnd)
+	{
+		if (f)
+		{
+		}
+		else
+		{
+			gtk_window_set_type_hint(Wnd, GDK_WINDOW_TYPE_HINT_POPUP_MENU);
+			// printf("%s:%i - gtk_window_set_type_hint=GDK_WINDOW_TYPE_HINT_POPUP_MENU.\n", _FL);
+		}
+	}
 }
 
 void LWindow::SetDragHandlers(bool On)

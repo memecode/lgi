@@ -1,5 +1,7 @@
 #pragma once
 
+#include "lgi/common/DisplayString.h"
+
 class LgiClass LPopupNotification : public LWindow
 {
 	constexpr static int Border = 10; // px

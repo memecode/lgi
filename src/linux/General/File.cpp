@@ -1403,7 +1403,7 @@ int LFile::GetError()
 
 bool LFile::IsOpen()
 {
-	return ValidHandle(d->hFile);
+	return d && ValidHandle(d->hFile);
 }
 
 #define DEBUG_OPEN_FILES 	0

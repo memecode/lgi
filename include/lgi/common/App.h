@@ -138,6 +138,8 @@ protected:
 	
 	#endif
 
+	void CommonCleanup();
+
 	friend class LMouseHook;
 	static LMouseHook *MouseHook;
 

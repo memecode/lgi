@@ -320,6 +320,8 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 
 LApp::~LApp()
 {
+	CommonCleanup();
+
 	DeleteObj(AppWnd);
 	DeleteObj(SystemNormal);
 	DeleteObj(SystemBold);
@@ -330,7 +332,8 @@ LApp::~LApp()
 	DeleteObj(d->GdcSystem);
 	DeleteObj(LFontSystem::Me);
 	DeleteObj(d);
-	TheApp = 0;
+	
+	TheApp = NULL;
 }
 
 LApp *LApp::ObjInstance()
