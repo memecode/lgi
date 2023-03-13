@@ -26,12 +26,12 @@
 #include "lgi/common/DateTime.h"
 #include "lgi/common/DocView.h"
 
-#if !defined(WINDOWS)
-constexpr const char *LDateTime::WeekdaysShort[];
-constexpr const char *LDateTime::WeekdaysLong[];
-constexpr const char *LDateTime::MonthsShort[];
-constexpr const char *LDateTime::MonthsLong[];
+constexpr const char *LDateTime::WeekdaysShort[7];
+constexpr const char *LDateTime::WeekdaysLong[7];
+constexpr const char *LDateTime::MonthsShort[12];
+constexpr const char *LDateTime::MonthsLong[12];
 
+#if !defined(WINDOWS)
 #define MIN_YEAR		1800
 #endif
 

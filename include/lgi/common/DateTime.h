@@ -107,10 +107,10 @@ public:
 	static constexpr int64_t MinuteLength	= 60; // seconds
     static constexpr int64_t HourLength		= MinuteLength * 60; // seconds
     static constexpr int64_t DayLength		= HourLength   * 24; // seconds
-	static constexpr const char *WeekdaysShort[]	= {"Sun",    "Mon",    "Tue",     "Wed",       "Thu",      "Fri",     "Sat"};
-	static constexpr const char *WeekdaysLong[]	= {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-	static constexpr const char *MonthsShort[]	= {"Jan",     "Feb",      "Mar",   "Apr",   "May", "Jun",  "Jul",  "Aug",    "Sep",       "Oct",     "Nov",      "Dec"};
-	static constexpr const char *MonthsLong[]		= {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+	static constexpr const char *WeekdaysShort[7]	= {"Sun",    "Mon",    "Tue",     "Wed",       "Thu",      "Fri",     "Sat"};
+	static constexpr const char *WeekdaysLong[7]	= {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+	static constexpr const char *MonthsShort[12]	= {"Jan",     "Feb",      "Mar",   "Apr",   "May", "Jun",  "Jul",  "Aug",    "Sep",       "Oct",     "Nov",      "Dec"};
+	static constexpr const char *MonthsLong[12]		= {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 	
 	// On Posix systems this allows representation of times before 1/1/1970.
 	// The Lgi epoch is considered to be 1/1/1800 instead and this offset converts
