@@ -351,10 +351,10 @@ bool DbTesting()
 	// Read XML
 	LXmlTag r;
 	LXmlTree t;
-	uint64 Start = LgiMicroTime();
+	uint64 Start = LMicroTime();
 	if (!t.Read(&r, &In))
 		return false;
-	uint64 XmlReadTime = LgiMicroTime() - Start;
+	uint64 XmlReadTime = LMicroTime() - Start;
 
 
 	// Convert XML to DB
@@ -367,7 +367,7 @@ bool DbTesting()
 	Tbl.AddField(M_SIZE, GV_INT64);
 	Tbl.AddField(M_FILENAME, GV_STRING);
 
-	Start = LgiMicroTime();
+	Start = LMicroTime();
 	LXmlTag *Emails = r.GetChildTag("Emails");
 	if (!Emails)
 		return false;
@@ -403,22 +403,22 @@ bool DbTesting()
 		m->SetInt(M_SIZE, Atoi(c->GetAttr("Size")));
 		m->SetStr(M_FILENAME, LString(c->GetContent()).Strip());
 	}
-	uint64 ConvertTime = LgiMicroTime() - Start;
+	uint64 ConvertTime = LMicroTime() - Start;
 
-	Start = LgiMicroTime();
+	Start = LMicroTime();
 	if (!Tbl.Serialize(FileDb, true))
 		return false;
-	uint64 WriteTime = LgiMicroTime() - Start;
+	uint64 WriteTime = LMicroTime() - Start;
 
 	LDbTable Test;
-	Start = LgiMicroTime();
+	Start = LMicroTime();
 	if (!Test.Serialize(FileDb, false))
 		return false;
-	uint64 ReadTime = LgiMicroTime() - Start;
+	uint64 ReadTime = LMicroTime() - Start;
 
-	Start = LgiMicroTime();
+	Start = LMicroTime();
 	LAutoPtr<DbArrayIndex> Idx(Test.Sort(M_FILENAME));
-	uint64 SortTime = LgiMicroTime() - Start;
+	uint64 SortTime = LMicroTime() - Start;
 	if (Idx)
 	{
 		LFile Out;
