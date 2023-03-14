@@ -184,6 +184,13 @@ LPopupNotification *LPopupNotification::Message(LWindow *ref, LString msg)
 
 LPopupNotification::LPopupNotification(LWindow *ref, LString msg)
 {
+	Fore = Back = L_TOOL_TIP;
+	Fore.ToHLS();
+	Fore.SetHLS(Fore.GetH(), Fore.GetL() * 0.4, Fore.GetS());
+
+	// Fore = LColour(0xd4, 0xb8, 0x62);
+	// Back = LColour(0xf7, 0xf0, 0xd5);
+
 	SetTitleBar(false);
 	SetWillFocus(false); // Don't take focus
 	Name("Notification");
