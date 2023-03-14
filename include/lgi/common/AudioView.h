@@ -661,6 +661,9 @@ protected:
 
 	size_t GetSamples()
 	{
+		if (Audio.Length() == 0 || SampleBits == 0 || Channels == 0)
+			return 0;
+	
 		return (Audio.Length() - DataStart) / (SampleBits >> 3) / Channels;
 	}
 

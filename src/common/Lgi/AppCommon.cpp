@@ -184,9 +184,17 @@ LPopupNotification *LPopupNotification::Message(LWindow *ref, LString msg)
 
 LPopupNotification::LPopupNotification(LWindow *ref, LString msg)
 {
-	Fore = Back = L_TOOL_TIP;
-	Fore.ToHLS();
-	Fore.SetHLS(Fore.GetH(), Fore.GetL() * 0.4, Fore.GetS());
+	cFore = cBack = cBorder = L_TOOL_TIP;
+	if (cFore.ToHLS())
+	{
+		cBorder.SetHLS(cBorder.GetH(), cBorder.GetL() * 0.6, cBorder.GetS());
+		cFore.SetHLS(cFore.GetH(), cFore.GetL() * 0.4, cFore.GetS());
+	}
+	else
+	{
+		cBorder = cBorder.Mix(LColour::Black, 0.05f);
+		cFore = cFore.Mix(LColour::Black, 0.5f);
+	}
 
 	// Fore = LColour(0xd4, 0xb8, 0x62);
 	// Back = LColour(0xf7, 0xf0, 0xd5);
@@ -262,16 +270,16 @@ void LPopupNotification::Add(LWindow *ref, LString msg)
 
 void LPopupNotification::OnPaint(LSurface *pDC)
 {
-	pDC->Colour(Fore);
+	pDC->Colour(cBorder);
 	auto c = GetClient();
 	pDC->Box(&c);
 	c.Inset(1, 1);
-	pDC->Colour(Back);
+	pDC->Colour(cBack);
 	pDC->Rectangle(&c);
 
 	auto f = GetFont();
-	f->Fore(Fore);
-	f->Back(Back);
+	f->Fore(cFore);
+	f->Back(cBack);
 	f->Transparent(true);
 		
 	int x = c.x1 + Border;

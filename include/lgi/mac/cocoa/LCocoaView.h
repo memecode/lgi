@@ -107,6 +107,7 @@ LgiExtern LRect LScreenFlip(LRect r);
 }
 
 @property LWindowPrivate *d;
+@property bool canFocus;
 
 - (id)init:(LWindowPrivate*)priv Frame:(NSRect)rc;
 - (void)dealloc;

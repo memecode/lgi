@@ -178,7 +178,7 @@ public:
 	/// This setting can turn of taking focus when the window is shown. Useful for popups that
 	/// don't want to steal focus from an underlying window.
 	/// The default value is 'true'
-	void SetWillFocus(bool f);
+	bool SetWillFocus(bool f);
 	
 	/// Registers a watcher to receive OnView... messages before they
 	/// are passed through to the intended recipient.

@@ -7,8 +7,7 @@ class LgiClass LPopupNotification : public LWindow
 	constexpr static int Border = 10; // px
 	constexpr static int ShowMs = 2300; // milliseconds
 
-	LColour Back;
-	LColour Fore;
+	LColour cBack, cBorder, cFore;
 	LWindow *RefWnd = NULL;
 	LArray<LDisplayString*> Msgs;
 	LPoint Decor = LPoint(2, 2);

@@ -47,22 +47,22 @@ Deleting a LWindow senarios:
 */
 
 #if DEBUG_SETFOCUS || DEBUG_KEYS
-static GString DescribeView(GViewI *v)
+static LString DescribeView(LViewI *v)
 {
 	if (!v)
 		return GString();
 
 	char s[512];
 	int ch = 0;
-	GArray<GViewI*> p;
-	for (GViewI *i = v; i; i = i->GetParent())
+	LArray<LViewI*> p;
+	for (LViewI *i = v; i; i = i->GetParent())
 	{
 		p.Add(i);
 	}
 	for (int n=MIN(3, (int)p.Length()-1); n>=0; n--)
 	{
 		char Buf[256] = "";
-		if (!stricmp(v->GetClass(), "GMdiChild"))
+		if (!stricmp(v->GetClass(), "LMdiChild"))
 			sprintf(Buf, "'%s'", v->Name());
 		v = p[n];
 		
@@ -129,37 +129,27 @@ LWindowDelegate *Delegate = nil;
 class LWindowPrivate
 {
 public:
-	LWindow *Wnd;
-	LDialog *ChildDlg;
-	LMenu *EmptyMenu;
-	LViewI *Focus;
-	NSView *ContentCache;
+	LWindow *Wnd = NULL;
+	LDialog *ChildDlg = NULL;
+	LMenu *EmptyMenu = NULL;
+	LViewI *Focus = NULL;
+	NSView *ContentCache = NULL;
 
-	int Sx, Sy;
+	int Sx = -1, Sy = -1;
 
 	LKey LastKey;
 	LArray<HookInfo> Hooks;
 
-	uint64 LastMinimize;
-	uint64 LastDragDrop;
+	uint64 LastMinimize = 0;
+	uint64 LastDragDrop = 0;
 
-	bool DeleteOnClose;
-	bool SnapToEdge;
-	bool InitVisible;
+	bool DeleteOnClose = true;
+	bool SnapToEdge = false;
+	bool InitVisible = false;
 	
 	LWindowPrivate(LWindow *wnd)
 	{
-        ContentCache = NULL;
-		Focus = NULL;
-		InitVisible = false;
-		LastMinimize = 0;
 		Wnd = wnd;
-		LastDragDrop = 0;
-		DeleteOnClose = true;
-		ChildDlg = 0;
-		Sx = Sy = -1;
-		SnapToEdge = false;
-		EmptyMenu = 0;
 	}
 	
 	~LWindowPrivate()
@@ -169,7 +159,7 @@ public:
 	
 	void OnClose(LCloseContext Ctx)
 	{
-		LOG("GWindowPrivate::OnClose %p/%s\n", Wnd, Wnd?Wnd->GetClass():NULL);
+		LOG("LWindowPrivate::OnClose %p/%s\n", Wnd, Wnd?Wnd->GetClass():NULL);
 		auto &osw = Wnd->Wnd;
 
 		if (!osw)
@@ -223,12 +213,16 @@ public:
 	}
 };
 
+#define DefaultStyleMask	NSWindowStyleMaskTitled | \
+							NSWindowStyleMaskResizable | \
+							NSWindowStyleMaskClosable | \
+							NSWindowStyleMaskMiniaturizable
+
 @implementation LNsWindow
 
 - (id)init:(LWindowPrivate*)priv Frame:(NSRect)rc
 {
-	NSUInteger windowStyleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskResizable |
-								 NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable;
+	NSUInteger windowStyleMask = DefaultStyleMask;
 	if ((self = [super initWithContentRect:rc
 					styleMask:windowStyleMask
 					backing:NSBackingStoreBuffered
@@ -241,6 +235,7 @@ public:
 		[self makeFirstResponder:self.contentView];
 		self.acceptsMouseMovedEvents = true;
 		self.ignoresMouseEvents = false;
+		self.canFocus = true;
 		
 		// printf("LNsWindow.init\n");
 	}
@@ -256,6 +251,7 @@ public:
 	cv.w = NULL;
 	[cv release];
 	self.contentView = NULL;
+	self.canFocus = true;
 	
 	[super dealloc];
 	// printf("LNsWindow.dealloc.\n");
@@ -268,7 +264,7 @@ public:
 
 - (BOOL)canBecomeKeyWindow
 {
-	return YES;
+	return self.canFocus;
 }
 
 - (void)onQuit
@@ -447,8 +443,23 @@ NSView *LWindow::Handle()
 
 bool LWindow::SetTitleBar(bool ShowTitleBar)
 {
-	#warning "Impl LWindow::SetTitleBar"
-	return false;
+	if (!Wnd.p)
+		return false;
+	
+	if (ShowTitleBar)
+	{
+		Wnd.p.titlebarAppearsTransparent = false;
+		Wnd.p.titleVisibility            = NSWindowTitleVisible;
+		Wnd.p.styleMask					 = DefaultStyleMask;
+	}
+	else
+	{
+		Wnd.p.titlebarAppearsTransparent = true;
+		Wnd.p.titleVisibility            = NSWindowTitleHidden;
+		Wnd.p.styleMask					 = 0;
+	}
+		
+	return true;
 }
 
 bool LWindow::SetIcon(const char *FileName)
@@ -457,9 +468,17 @@ bool LWindow::SetIcon(const char *FileName)
 	return false;
 }
 
-void LWindow::SetWillFocus(bool f)
+bool LWindow::SetWillFocus(bool f)
 {
-	#warning "Impl LWindow::SetWillFocus"
+	if (!Wnd.p)
+		return false;
+	
+	LNsWindow *w = objc_dynamic_cast(LNsWindow, Wnd.p);
+	if (!w)
+		return false;
+		
+	w.canFocus = f;
+	return true;
 }
 
 LViewI *LWindow::GetFocus()
