@@ -52,6 +52,7 @@ public:
 	bool SnapToEdge = false;
 	LArray<HookInfo> Hooks;
 	LWindow *ModalDlg = NULL;
+	bool ShowTitleBar = true;
 	
 	LWindowPrivate(LWindow *wnd) :
 		Wnd(wnd),
@@ -72,6 +73,14 @@ public:
 		Wnd->d = NULL;
 	}
 	
+	window_feel DefaultFeel()
+	{
+		if (ShowTitleBar)
+			return B_DOCUMENT_WINDOW_LOOK;
+		else
+			return B_NO_BORDER_WINDOW_LOOK
+	}
+
 	int GetHookIndex(LView *Target, bool Create = false)
 	{
 		for (int i=0; i<Hooks.Length(); i++)
@@ -215,6 +224,21 @@ int LWindow::WaitThread()
 OsWindow LWindow::WindowHandle()
 {
 	return d;
+}
+
+bool LWindow::SetTitleBar(bool ShowTitleBar)
+{
+	if (!d)
+		return false;
+
+	d->ShowTitleBar = ShowTitleBar;
+
+	LLocker lck(d, _FL);
+	auto r = d->SetFeel(d->DefaultFeel());
+	if (r)
+		printf("%s:%i - SetFeel failed: %i\n", _FL, r);
+	
+	return r == B_OK;
 }
 
 bool LWindow::SetIcon(const char *FileName)
@@ -1036,13 +1060,39 @@ void LWindow::OnFrontSwitch(bool b)
 {
 }
 
+void LWindow::SetWillFocus(bool f)
+{
+	if (!d)
+		return;
+		
+	LLocker lck(d, _FL);
+	auto flags = d->Flags();
+	if (f)
+		flags &= ~B_AVOID_FOCUS; // clear flag
+	else
+		flags |= B_AVOID_FOCUS; // set flag
+	auto r = d->SetFlags(flags);
+	if (r)
+		printf("%s:%i - SetFlags failed: %i\n", _FL, r);
+}
+
 LViewI *LWindow::GetFocus()
 {
-	return NULL;
+	if (!d)
+		return NULL;
+		
+	LLocker lck(d, _FL);
+	auto f = d->CurrentFocus();
+	
+	return LViewFromHandle(f);
 }
 
 void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 {
+	if (!ctrl)
+		return;
+		
+	ctrl->Focus(true);
 }
 
 void LWindow::SetDragHandlers(bool On)
@@ -1065,4 +1115,16 @@ void LWindow::OnTrayClick(LMouse &m)
 
 void LWindow::SetAlwaysOnTop(bool b)
 {
+	if (!d)
+		return;
+
+	LLocker lck(d, _FL);
+	status_t r;
+	
+	if (b)
+		r = d->SetFeel(B_FLOATING_APP_WINDOW_FEEL);
+	else
+		r = d->SetFeel(d->DefaultFeel());
+	if (r)
+		printf("%s:%i - SetFeel failed: %i\n", _FL, r);
 }

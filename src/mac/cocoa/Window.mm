@@ -453,7 +453,13 @@ bool LWindow::SetTitleBar(bool ShowTitleBar)
 
 bool LWindow::SetIcon(const char *FileName)
 {
+	#warning "Impl LWindow::SetIcon"
 	return false;
+}
+
+void LWindow::SetWillFocus(bool f)
+{
+	#warning "Impl LWindow::SetWillFocus"
 }
 
 LViewI *LWindow::GetFocus()

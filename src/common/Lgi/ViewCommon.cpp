@@ -1389,46 +1389,46 @@ bool LView::Focus()
 	bool Has = false;
 	
 	#if defined(__GTK_H__)
-	LWindow *w = GetWindow();
-	if (w)
-	{
-		bool Active = w->IsActive();
-		if (Active)
-			Has = w->GetFocus() == static_cast<LViewI*>(this);
-	}
+		LWindow *w = GetWindow();
+		if (w)
+		{
+			bool Active = w->IsActive();
+			if (Active)
+				Has = w->GetFocus() == static_cast<LViewI*>(this);
+		}
 	#elif defined(HAIKU)
-	LLocker lck(d->Hnd, _FL);
-	if (lck.Lock())
-	{
-		Has = d->Hnd->IsFocus();
-		lck.Unlock();
-	}	
+		LLocker lck(d->Hnd, _FL);
+		if (lck.Lock())
+		{
+			Has = d->Hnd->IsFocus();
+			lck.Unlock();
+		}	
 	#elif defined(WINNATIVE)
-	if (_View)
-	{
-		HWND hFocus = GetFocus();
-		Has = hFocus == _View;
-	}
+		if (_View)
+		{
+			HWND hFocus = GetFocus();
+			Has = hFocus == _View;
+		}
 	#elif LGI_COCOA
-	Has = TestFlag(WndFlags, GWF_FOCUS);
+		Has = TestFlag(WndFlags, GWF_FOCUS);
 	#elif LGI_CARBON
-	LWindow *w = GetWindow();
-	if (w)
-	{
-		ControlRef Cur;
-		OSErr e = GetKeyboardFocus(w->WindowHandle(), &Cur);
-		if (e)
-			LgiTrace("%s:%i - GetKeyboardFocus failed with %i\n", _FL, e);
-		else
-			Has = (Cur == _View);
-	}
+		LWindow *w = GetWindow();
+		if (w)
+		{
+			ControlRef Cur;
+			OSErr e = GetKeyboardFocus(w->WindowHandle(), &Cur);
+			if (e)
+				LgiTrace("%s:%i - GetKeyboardFocus failed with %i\n", _FL, e);
+			else
+				Has = (Cur == _View);
+		}
   	#endif
 
 	#if !LGI_CARBON
-	if (Has)
-		SetFlag(WndFlags, GWF_FOCUS);
-	else
-		ClearFlag(WndFlags, GWF_FOCUS);
+		if (Has)
+			SetFlag(WndFlags, GWF_FOCUS);
+		else
+			ClearFlag(WndFlags, GWF_FOCUS);
 	#endif
 	
 	return Has;

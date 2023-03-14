@@ -995,10 +995,6 @@ bool IdeDocPrivate::Save()
 	if (Status)
 		ModTs = GetModTime();
 
-
-	LString msg;
-	msg.Printf("save=%i", Status);
-	LPopupNotification::Message(Doc->GetWindow(), msg);
 	return Status;
 }
 

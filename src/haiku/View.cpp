@@ -402,6 +402,18 @@ struct LBView : public Parent
 template<typename Parent>
 uint32 LBView<Parent>::MouseButtons = 0;
 
+LView *LViewFromHandle(OsView hWnd)
+{
+	if (!hWnd)
+		return NULL;
+		
+	auto bv = dynamic_cast<LBView<BView>>(hWnd);
+	if (!bv || !bv->d)
+		return NULL;
+		
+	return bv->d->View;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 LViewPrivate::LViewPrivate(LView *view) :
 	View(view),
