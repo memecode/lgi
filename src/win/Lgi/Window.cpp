@@ -202,9 +202,10 @@ static bool HasParentPopup(LViewI *v)
 	return false;
 }
 
-void LWindow::SetWillFocus(bool f)
+bool LWindow::SetWillFocus(bool f)
 {
 	d->ShowCmd = f ? SW_NORMAL : SW_SHOWNOACTIVATE;
+	return true;
 }
 
 void LWindow::SetFocus(LViewI *ctrl, FocusType type)

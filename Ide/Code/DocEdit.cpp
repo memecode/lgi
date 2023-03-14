@@ -81,7 +81,7 @@ bool DocEdit::AppendItems(LSubMenu *Menu, const char *Param, int Base)
 void DocEdit::DoGoto(std::function<void(bool)> Callback)
 {
 	LInput *Dlg = new LInput(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");	
-	Dlg->DoModal([&, App=Doc->GetApp()](auto d, auto code)
+	Dlg->DoModal([this, Dlg, App=Doc->GetApp(), Callback](auto d, auto code)
 	{
 		bool status = code && ValidStr(Dlg->GetStr());
 		if (status)
