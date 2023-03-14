@@ -14,7 +14,7 @@ public:
     LLocker(BHandler *h, const char *File, int Line);
     ~LLocker();
 
-    bool Lock();
+    bool Lock(bool debug = false);
     status_t LockWithTimeout(int64 time);
     void Unlock();
 };

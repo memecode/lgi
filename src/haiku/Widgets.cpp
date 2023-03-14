@@ -158,11 +158,12 @@ void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 		Parent &&
 		Parent->WindowHandle())
 	{
-		#if 0
+		#if 1
 		
 		// Keep this dialog above the parent window...
 		WindowHandle()->SetFeel(B_MODAL_SUBSET_WINDOW_FEEL);
-		WindowHandle()->AddToSubset(Parent->WindowHandle());
+		auto result = WindowHandle()->AddToSubset(Parent->WindowHandle());
+		printf("%s:%i - %s::AddToSubset=%i\n", _FL, GetClass(), result);
 		
 		#else
 		

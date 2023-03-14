@@ -407,7 +407,7 @@ LView *LViewFromHandle(OsView hWnd)
 	if (!hWnd)
 		return NULL;
 		
-	auto bv = dynamic_cast<LBView<BView>>(hWnd);
+	auto bv = dynamic_cast<LBView<BView>*>(hWnd);
 	if (!bv || !bv->d)
 		return NULL;
 		
@@ -985,10 +985,6 @@ bool LView::Attach(LViewI *parent)
 	}
 	else
 	{
-		auto w = GetWindow();
-		if (w && TestFlag(WndFlags, GWF_FOCUS))
-			w->SetFocus(this, LWindow::GainFocus);
-
 		auto bview = parent->Handle();
 		if (!bview)
 		{
@@ -997,7 +993,11 @@ bool LView::Attach(LViewI *parent)
 		else
 		{
 			LLocker lck(bview, _FL);
-			if (lck.Lock())
+			
+			auto looper = bview->Looper();
+			auto thread = looper ? looper->Thread() : 0;
+			
+			if (thread <= 0 || lck.Lock())
 			{
 				if (Debug)
 					LgiTrace("%s:%i - Attaching %s to view %s\n",
@@ -1035,6 +1035,10 @@ bool LView::Attach(LViewI *parent)
 						_FL,
 						GetClass(), d->Hnd,
 						parent->GetClass(), bview);
+
+				auto w = GetWindow();
+				if (w && TestFlag(WndFlags, GWF_FOCUS))
+					w->SetFocus(this, LWindow::GainFocus);
 			}
 			else
 			{

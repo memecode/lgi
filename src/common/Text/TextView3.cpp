@@ -2824,13 +2824,16 @@ void LTextView3::DoReplace(std::function<void(bool)> Callback)
 		}
 	}
 
-	LAutoString LastFind8(SingleLineSelection ? GetSelection() : WideToUtf8(d->FindReplaceParams->LastFind));
-	LAutoString LastReplace8(WideToUtf8(d->FindReplaceParams->LastReplace));
+	auto LastFind8 = SingleLineSelection ? GetSelection() : WideToUtf8(d->FindReplaceParams->LastFind);
+	auto LastReplace8 = WideToUtf8(d->FindReplaceParams->LastReplace);
 	
-	auto Dlg = new LReplaceDlg(this, [this, LastFind8=LString(LastFind8), LastReplace8=LString(LastReplace8)](auto Dlg, auto Action)
+	auto Dlg = new LReplaceDlg(this, [this, LastFind8, LastReplace8](auto Dlg, auto Action)
 		{
 			LReplaceDlg *Replace = dynamic_cast<LReplaceDlg*>(Dlg);
 			LAssert(Replace != NULL);
+			
+			LAutoString FindMem(LastFind8);
+			LAutoString ReplaceMem(LastReplace8);
 
 			if (Action == IDCANCEL)
 				return;

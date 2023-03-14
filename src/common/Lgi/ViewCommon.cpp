@@ -326,7 +326,7 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 {
 	#ifdef HAIKU
 
-		bool Debug = !Stricmp("LList", GetClass());
+		bool Debug = false;
 		if (!d || !d->Hnd)
 		{
 			if (Debug)

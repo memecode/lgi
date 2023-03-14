@@ -73,12 +73,12 @@ public:
 		Wnd->d = NULL;
 	}
 	
-	window_feel DefaultFeel()
+	window_look DefaultLook()
 	{
 		if (ShowTitleBar)
 			return B_DOCUMENT_WINDOW_LOOK;
 		else
-			return B_NO_BORDER_WINDOW_LOOK
+			return B_NO_BORDER_WINDOW_LOOK;
 	}
 
 	int GetHookIndex(LView *Target, bool Create = false)
@@ -234,7 +234,7 @@ bool LWindow::SetTitleBar(bool ShowTitleBar)
 	d->ShowTitleBar = ShowTitleBar;
 
 	LLocker lck(d, _FL);
-	auto r = d->SetFeel(d->DefaultFeel());
+	auto r = d->SetLook(d->DefaultLook());
 	if (r)
 		printf("%s:%i - SetFeel failed: %i\n", _FL, r);
 	
@@ -1060,10 +1060,10 @@ void LWindow::OnFrontSwitch(bool b)
 {
 }
 
-void LWindow::SetWillFocus(bool f)
+bool LWindow::SetWillFocus(bool f)
 {
 	if (!d)
-		return;
+		return false;
 		
 	LLocker lck(d, _FL);
 	auto flags = d->Flags();
@@ -1074,6 +1074,8 @@ void LWindow::SetWillFocus(bool f)
 	auto r = d->SetFlags(flags);
 	if (r)
 		printf("%s:%i - SetFlags failed: %i\n", _FL, r);
+
+	return true;
 }
 
 LViewI *LWindow::GetFocus()
@@ -1082,8 +1084,10 @@ LViewI *LWindow::GetFocus()
 		return NULL;
 		
 	LLocker lck(d, _FL);
-	auto f = d->CurrentFocus();
-	
+	if (!lck.Lock())
+		return NULL;
+
+	auto f = d->CurrentFocus();	
 	return LViewFromHandle(f);
 }
 
@@ -1092,7 +1096,12 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 	if (!ctrl)
 		return;
 		
-	ctrl->Focus(true);
+	LLocker lck(d, _FL);
+	if (lck.Lock())
+	{
+		auto h = ctrl->Handle();
+		h->MakeFocus(type == GainFocus ? true : false);
+	}
 }
 
 void LWindow::SetDragHandlers(bool On)
@@ -1124,7 +1133,7 @@ void LWindow::SetAlwaysOnTop(bool b)
 	if (b)
 		r = d->SetFeel(B_FLOATING_APP_WINDOW_FEEL);
 	else
-		r = d->SetFeel(d->DefaultFeel());
+		r = d->SetFeel(B_NORMAL_WINDOW_FEEL);
 	if (r)
 		printf("%s:%i - SetFeel failed: %i\n", _FL, r);
 }
