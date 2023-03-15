@@ -1837,7 +1837,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 	}
 }
 
-void LWindow::SetWillFocus(bool f)
+bool LWindow::SetWillFocus(bool f)
 {
 	d->WillFocus = f;
 	if (Wnd)
@@ -1851,6 +1851,8 @@ void LWindow::SetWillFocus(bool f)
 			// printf("%s:%i - gtk_window_set_type_hint=GDK_WINDOW_TYPE_HINT_POPUP_MENU.\n", _FL);
 		}
 	}
+
+	return true;
 }
 
 void LWindow::SetDragHandlers(bool On)

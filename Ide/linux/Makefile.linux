@@ -30,8 +30,8 @@ ifeq ($(Build),Debug)
 		-L../$(BuildDir)
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
-		-I./Resources \
-		-I./Code \
+		-I./src \
+		-I./resources \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
 		-I../include \
@@ -49,8 +49,8 @@ else
 		-L../$(BuildDir)
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
-		-I./Resources \
-		-I./Code \
+		-I./src \
+		-I./resources \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
 		-I../include \
@@ -58,32 +58,32 @@ else
 endif
 
 # Dependencies
-Source =	Code/WebFldDlg.cpp \
-			Code/SysCharSupport.cpp \
-			Code/SpaceTabConv.cpp \
-			Code/SimpleCppParser.cpp \
-			Code/PythonParser.cpp \
-			Code/ProjectNode.cpp \
-			Code/NewProjectFromTemplate.cpp \
-			Code/MissingFiles.cpp \
-			Code/MemDumpViewer.cpp \
-			Code/LgiUtils.cpp \
-			Code/LgiIde.cpp \
-			Code/levenshtein.c \
-			Code/JavascriptParser.cpp \
-			Code/IdeProjectSettings.cpp \
-			Code/IdeProject.cpp \
-			Code/IdeDoc.cpp \
-			Code/IdeCommon.cpp \
-			Code/History.cpp \
-			Code/FtpThread.cpp \
-			Code/FindSymbol.cpp \
-			Code/FindInFiles.cpp \
-			Code/DocEditStyling.cpp \
-			Code/DocEdit.cpp \
-			Code/Debugger.cpp \
-			Code/DebugContext.cpp \
-			Code/AddFtpFile.cpp \
+Source =	src/WebFldDlg.cpp \
+			src/SysCharSupport.cpp \
+			src/SpaceTabConv.cpp \
+			src/SimpleCppParser.cpp \
+			src/PythonParser.cpp \
+			src/ProjectNode.cpp \
+			src/NewProjectFromTemplate.cpp \
+			src/MissingFiles.cpp \
+			src/MemDumpViewer.cpp \
+			src/LgiUtils.cpp \
+			src/LgiIde.cpp \
+			src/levenshtein.c \
+			src/JavascriptParser.cpp \
+			src/IdeProjectSettings.cpp \
+			src/IdeProject.cpp \
+			src/IdeDoc.cpp \
+			src/IdeCommon.cpp \
+			src/History.cpp \
+			src/FtpThread.cpp \
+			src/FindSymbol.cpp \
+			src/FindInFiles.cpp \
+			src/DocEditStyling.cpp \
+			src/DocEdit.cpp \
+			src/Debugger.cpp \
+			src/DebugContext.cpp \
+			src/AddFtpFile.cpp \
 			../src/common/Text/TextConvert.cpp \
 			../src/common/Text/HtmlParser.cpp \
 			../src/common/Text/HtmlCommon.cpp \
@@ -416,7 +416,7 @@ VPATH=%.cpp \
 	../include/lgi/linux \
 	../include/lgi/common \
 	../include \
-	./Resources \
-	./Code \
+	./src \
+	./resources \
 	$(BuildDir)
 
