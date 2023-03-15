@@ -23,29 +23,29 @@
     <ProjectGuid>{967AF7EF-7C17-4FCC-997E-BED17F886F07}</ProjectGuid>
     <RootNamespace>LgiIde_vc8</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -72,30 +72,30 @@
     <OutDir>$(Platform)$(Configuration)14\</OutDir>
     <IntDir>$(Platform)$(Configuration)14\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\..\CodeLib\libpng-1.6.26</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\..\..\CodeLib\libpng-1.6.26</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(Platform)$(Configuration)14\</OutDir>
     <IntDir>$(Platform)$(Configuration)14\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\..\CodeLib\libpng-1.6.26</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\..\..\CodeLib\libpng-1.6.26</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(Platform)$(Configuration)14\</OutDir>
     <IntDir>$(Platform)$(Configuration)14\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\..\CodeLib\libpng-1.6.26</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\..\..\CodeLib\libpng-1.6.26</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(Platform)$(Configuration)14\</OutDir>
     <IntDir>$(Platform)$(Configuration)14\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\..\CodeLib\libpng-1.6.26</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);..\..\..\..\..\CodeLib\libpng-1.6.26</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\win32;..\..\..\..\CodeLib\zlib\win32;.\Resources;C:\Program Files (x86)\OpenSSL-Win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\libpng\win32;..\..\..\..\..\CodeLib\zlib\win32;..\resources;C:\Program Files (x86)\OpenSSL-Win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -118,7 +118,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\win32;..\..\..\..\CodeLib\zlib\win32;.\Resources;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\libpng\win32;..\..\..\..\..\CodeLib\zlib\win32;..\resources;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -138,12 +138,12 @@
       </DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>..\src\win\General\Lgi.manifest</AdditionalManifestFiles>
+      <AdditionalManifestFiles>..\..\src\win\General\Lgi.manifest</AdditionalManifestFiles>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\win32;..\..\..\..\CodeLib\zlib\win32;.\Resources;C:\Program Files (x86)\OpenSSL-Win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\libpng\win32;..\..\..\..\..\CodeLib\zlib\win32;.\Resources;C:\Program Files (x86)\OpenSSL-Win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader />
@@ -165,7 +165,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\win32;..\..\..\..\CodeLib\zlib\win32;.\Resources;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\libpng\win32;..\..\..\..\..\CodeLib\zlib\win32;.\Resources;C:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -186,90 +186,88 @@
       </DataExecutionPrevention>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>..\src\win\General\Lgi.manifest</AdditionalManifestFiles>
+      <AdditionalManifestFiles>..\..\src\win\General\Lgi.manifest</AdditionalManifestFiles>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\common\GEventTargetThread.h" />
-    <ClInclude Include="..\include\common\GParseCpp.h" />
-    <ClInclude Include="..\include\common\GProcess.h" />
-    <ClInclude Include="..\include\common\GScripting.h" />
-    <ClInclude Include="..\include\common\GSubProcess.h" />
-    <ClInclude Include="..\src\common\Coding\GScriptingPriv.h" />
-    <ClInclude Include="Code\AddFtpFile.h" />
-    <ClInclude Include="Code\FindInFiles.h" />
-    <ClInclude Include="Code\FindSymbol.h" />
-    <ClInclude Include="Code\FtpFile.h" />
-    <ClInclude Include="Code\FtpThread.h" />
-    <ClInclude Include="Code\Debugger.h" />
-    <ClInclude Include="Code\GHistory.h" />
-    <ClInclude Include="Code\IdeDoc.h" />
-    <ClInclude Include="Code\IdeDocPrivate.h" />
-    <ClInclude Include="Code\IdeProject.h" />
-    <ClInclude Include="Code\levenshtein.h" />
-    <ClInclude Include="Code\LgiIde.h" />
-    <ClInclude Include="Code\ProjectNode.h" />
-    <ClInclude Include="Code\PythonParser.h" />
-    <ClInclude Include="Code\resdefs.h" />
-    <ClInclude Include="Code\resource.h" />
-    <ClInclude Include="Code\SimpleCppParser.h" />
-    <ClInclude Include="Code\SpaceTabConv.h" />
-    <ClInclude Include="Code\WebFldDlg.h" />
+    <ClInclude Include="..\..\..\include\common\EventTargetThread.h" />
+    <ClInclude Include="..\..\..\include\common\ParseCpp.h" />
+    <ClInclude Include="..\..\..\include\common\Scripting.h" />
+    <ClInclude Include="..\..\..\include\common\SubProcess.h" />
+    <ClInclude Include="..\..\src\common\Coding\ScriptingPriv.h" />
+    <ClInclude Include="..\Code\AddFtpFile.h" />
+    <ClInclude Include="..\Code\FindInFiles.h" />
+    <ClInclude Include="..\Code\FindSymbol.h" />
+    <ClInclude Include="..\Code\FtpFile.h" />
+    <ClInclude Include="..\Code\FtpThread.h" />
+    <ClInclude Include="..\Code\Debugger.h" />
+    <ClInclude Include="..\Code\IdeDoc.h" />
+    <ClInclude Include="..\Code\IdeDocPrivate.h" />
+    <ClInclude Include="..\Code\IdeProject.h" />
+    <ClInclude Include="..\Code\levenshtein.h" />
+    <ClInclude Include="..\Code\LgiIde.h" />
+    <ClInclude Include="..\Code\ProjectNode.h" />
+    <ClInclude Include="..\Code\PythonParser.h" />
+    <ClInclude Include="..\Code\resdefs.h" />
+    <ClInclude Include="..\Code\resource.h" />
+    <ClInclude Include="..\Code\SimpleCppParser.h" />
+    <ClInclude Include="..\Code\SpaceTabConv.h" />
+    <ClInclude Include="..\Code\WebFldDlg.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\common\Coding\LexCpp.cpp" />
-    <ClCompile Include="..\src\common\Coding\ParseCpp.cpp" />
-    <ClCompile Include="..\src\common\Coding\ScriptCompiler.cpp" />
-    <ClCompile Include="..\src\common\Coding\ScriptLibrary.cpp" />
-    <ClCompile Include="..\src\common\Coding\ScriptVM.cpp" />
-    <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp" />
-    <ClCompile Include="..\src\common\Net\Ftp.cpp" />
-    <ClCompile Include="..\src\common\Net\Http.cpp" />
-    <ClCompile Include="..\src\common\Net\OpenSSLSocket.cpp" />
-    <ClCompile Include="..\src\common\Lgi\About.cpp" />
-    <ClCompile Include="..\src\common\Lgi\Mdi.cpp" />
-    <ClCompile Include="..\src\common\Lgi\LgiMain.cpp" />
-    <ClCompile Include="Code\AddFtpFile.cpp" />
-    <ClCompile Include="Code\DocEdit.cpp" />
-    <ClCompile Include="Code\DocEditStyling.cpp" />
-    <ClCompile Include="Code\FindInFiles.cpp" />
-    <ClCompile Include="Code\FindSymbol.cpp" />
-    <ClCompile Include="Code\FtpThread.cpp" />
-    <ClCompile Include="Code\DebugContext.cpp" />
-    <ClCompile Include="Code\Debugger.cpp" />
-    <ClCompile Include="Code\History.cpp" />
-    <ClCompile Include="Code\IdeCommon.cpp" />
-    <ClCompile Include="Code\IdeDoc.cpp" />
-    <ClCompile Include="Code\IdeProject.cpp" />
-    <ClCompile Include="Code\IdeProjectSettings.cpp" />
-    <ClCompile Include="Code\JavascriptParser.cpp" />
-    <ClCompile Include="Code\levenshtein.c" />
-    <ClCompile Include="Code\LgiIde.cpp" />
-    <ClCompile Include="Code\LgiUtils.cpp" />
-    <ClCompile Include="Code\MemDumpViewer.cpp" />
-    <ClCompile Include="Code\MissingFiles.cpp" />
-    <ClCompile Include="Code\NewProjectFromTemplate.cpp" />
-    <ClCompile Include="Code\ProjectNode.cpp" />
-    <ClCompile Include="Code\PythonParser.cpp" />
-    <ClCompile Include="Code\SimpleCppParser.cpp" />
-    <ClCompile Include="Code\SpaceTabConv.cpp" />
-    <ClCompile Include="Code\SysCharSupport.cpp" />
-    <ClCompile Include="Code\WebFldDlg.cpp" />
+    <ClCompile Include="..\..\src\common\Coding\LexCpp.cpp" />
+    <ClCompile Include="..\..\src\common\Coding\ParseCpp.cpp" />
+    <ClCompile Include="..\..\src\common\Coding\ScriptCompiler.cpp" />
+    <ClCompile Include="..\..\src\common\Coding\ScriptLibrary.cpp" />
+    <ClCompile Include="..\..\src\common\Coding\ScriptVM.cpp" />
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Png.cpp" />
+    <ClCompile Include="..\..\src\common\Net\Ftp.cpp" />
+    <ClCompile Include="..\..\src\common\Net\Http.cpp" />
+    <ClCompile Include="..\..\src\common\Net\OpenSSLSocket.cpp" />
+    <ClCompile Include="..\..\src\common\Lgi\About.cpp" />
+    <ClCompile Include="..\..\src\common\Lgi\Mdi.cpp" />
+    <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp" />
+    <ClCompile Include="..\src\AddFtpFile.cpp" />
+    <ClCompile Include="..\src\DocEdit.cpp" />
+    <ClCompile Include="..\src\DocEditStyling.cpp" />
+    <ClCompile Include="..\src\FindInFiles.cpp" />
+    <ClCompile Include="..\src\FindSymbol.cpp" />
+    <ClCompile Include="..\src\FtpThread.cpp" />
+    <ClCompile Include="..\src\DebugContext.cpp" />
+    <ClCompile Include="..\src\Debugger.cpp" />
+    <ClCompile Include="..\src\History.cpp" />
+    <ClCompile Include="..\src\IdeCommon.cpp" />
+    <ClCompile Include="..\src\IdeDoc.cpp" />
+    <ClCompile Include="..\src\IdeProject.cpp" />
+    <ClCompile Include="..\src\IdeProjectSettings.cpp" />
+    <ClCompile Include="..\src\JavascriptParser.cpp" />
+    <ClCompile Include="..\src\levenshtein.c" />
+    <ClCompile Include="..\src\LgiIde.cpp" />
+    <ClCompile Include="..\src\LgiUtils.cpp" />
+    <ClCompile Include="..\src\MemDumpViewer.cpp" />
+    <ClCompile Include="..\src\MissingFiles.cpp" />
+    <ClCompile Include="..\src\NewProjectFromTemplate.cpp" />
+    <ClCompile Include="..\src\ProjectNode.cpp" />
+    <ClCompile Include="..\src\PythonParser.cpp" />
+    <ClCompile Include="..\src\SimpleCppParser.cpp" />
+    <ClCompile Include="..\src\SpaceTabConv.cpp" />
+    <ClCompile Include="..\src\SysCharSupport.cpp" />
+    <ClCompile Include="..\src\WebFldDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\src\win\General\Lgi.manifest" />
+    <Manifest Include="..\..\src\win\General\Lgi.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Resources\Script1.rc" />
+    <ResourceCompile Include="..\resources\Script1.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Lgi_vs2015.vcxproj">
+    <ProjectReference Include="..\..\Lgi_vs2019.vcxproj">
       <Project>{95df9ca4-6d37-4a85-a648-80c2712e0da1}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="..\src\common\Coding\ExternCall.asm">
+    <MASM Include="..\..\src\common\Coding\ExternCall.asm">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
