@@ -320,6 +320,8 @@ public:
 			LinkerFlags += ",-export-dynamic,-R.";
 		}
 
+		Log->Print("Log %s:%i\n", _FL);
+
 		auto Base = Proj->GetBasePath();
 		auto MakeFile = Proj->GetMakefile(Platform);
 		LString MakeFilePath;
@@ -345,6 +347,8 @@ public:
 			MakeFilePath = p.GetFull();
 		}
 		
+		Log->Print("Log %s:%i\n", _FL);
+
 		// LGI_LIBRARY_EXT
 		switch (Platform)
 		{
@@ -366,6 +370,8 @@ public:
 				LAssert(0);
 				break;
 		}
+
+		Log->Print("Log %s:%i\n", _FL);
 
 		if (CompilerName)
 		{
@@ -396,6 +402,8 @@ public:
 			return false;
 		}
 		
+		Log->Print("Log %s:%i\n", _FL);
+
 		m.SetSize(0);
 		
 		m.Print("#!/usr/bin/make\n"
@@ -421,6 +429,8 @@ public:
 			1 << Platform
 		);
 		
+		Log->Print("Log %s:%i\n", _FL);
+
 		if (IsExecutableTarget)
 		{
 			LString Exe = Proj->GetExecutable(Platform);
@@ -430,7 +440,7 @@ public:
 					m.Print("Target = %s\n", ToPlatformPath(Exe, Platform).Get());
 				else
 				{
-					auto RelExe = LMakeRelativePath(Base, Exe);
+					auto RelExe = LMakeRelativePath(MakeFilePath, Exe);
 					if (Base && RelExe)
 					{
 						m.Print("Target = %s\n", ToPlatformPath(RelExe, Platform).Get());
@@ -460,6 +470,8 @@ public:
 			}
 		}
 
+		Log->Print("Log %s:%i\n", _FL);
+
 		// Output the build mode, flags and some paths
 		auto BuildMode = d->App->GetBuildMode();
 		auto BuildModeName = toString(BuildMode);
@@ -467,6 +479,7 @@ public:
 				"	Build = %s\n"
 				"endif\n",
 				BuildModeName);
+		m.Print("MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))\n");
 		
 		LString sDefines[BuildMax];
 		LString sLibs[BuildMax];
@@ -503,9 +516,12 @@ public:
 			sDefines[BuildRelease] = sDefines[BuildDebug];
 		}
 
+		Log->Print("Log %s:%i\n", _FL);
+
 		List<IdeProject> Deps;
 		Proj->GetChildProjects(Deps);
 
+		Log->Print("Log %s:%i\n", _FL);
 		for (int Cfg = BuildDebug; Cfg < BuildMax; Cfg++)
 		{
 			// Set the config
@@ -544,7 +560,9 @@ public:
 					{
 						LString Rel;
 						if (!LIsRelativePath(in))
-							Rel = LMakeRelativePath(Base, in);
+							Rel = LMakeRelativePath(MakeFilePath, in);
+							
+						printf("Rel='%s' ('%s' + '%s')\n", Rel.Get(), MakeFilePath.Get(), in.Get());
 
 						LString Final = Rel ? Rel.Get() : in.Get();
 						if (!Proj->CheckExists(Final))
@@ -602,7 +620,8 @@ public:
 					{
 						LString DepPath = DepBase.Get();
 						
-						auto Rel = LMakeRelativePath(Base, DepPath);
+						auto Rel = LMakeRelativePath(MakeFilePath, DepPath);
+						printf("Rel=%s  (%s + %s)\n", Rel.Get(), MakeFilePath.Get(), DepPath.Get());
 
 						LString Final = Rel ? Rel.Get() : DepPath.Get();
 						Proj->CheckExists(Final);
@@ -680,8 +699,8 @@ public:
 
 						LTrimDir(Path);
 					
-						LString Rel;
-						if (!Proj->RelativePath(Rel, Path))
+						LString Rel = LMakeRelativePath(MakeFilePath, Path);
+						if (!Rel)
 							Rel = Path;
 						
 						if (stricmp(Rel, ".") != 0)
@@ -799,12 +818,11 @@ public:
 						
 							// Build a rule to make the dependency if any of the source changes...
 							auto DepBase = Dep->GetBasePath();
-							auto Base = MakeFilePath;
 							auto TargetFile = Dep->GetTargetFile(Platform);
 							
 							if (DepBase && Base && TargetFile)
 							{
-								LString Rel = LMakeRelativePath(Base, DepBase);
+								LString Rel = LMakeRelativePath(MakeFilePath, DepBase);
 								ToNativePath(Rel);
 								
 								// Add tag to target name
@@ -828,7 +846,7 @@ public:
 									if (i)
 										Rules.Print(" \\\n\t");
 									
-									LString DepRel = LMakeRelativePath(Base, AllDeps[i]);
+									LString DepRel = LMakeRelativePath(MakeFilePath, AllDeps[i]);
 									auto f = DepRel ? DepRel.Get() : AllDeps[i];
 									ToNativePath(f);
 									Rules.Print("%s", f);
@@ -934,11 +952,10 @@ public:
 							auto mk = d->GetMakefile(Platform);
 							if (mk)
 							{
-								LAutoString my_base = Proj->GetBasePath();
 								LAutoString dep_base = d->GetBasePath();
 								d->CheckExists(dep_base);
 
-								auto rel_dir = LMakeRelativePath(my_base, dep_base);
+								auto rel_dir = LMakeRelativePath(MakeFilePath, dep_base);
 								d->CheckExists(rel_dir);
 								
 								char *mk_leaf = strrchr(mk, DIR_CHAR);
@@ -1050,7 +1067,7 @@ public:
 					{
 						if (!LIsRelativePath(p))
 						{
-							auto a = LMakeRelativePath(Base, p);
+							auto a = LMakeRelativePath(MakeFilePath, p);
 							m.Print("\t%s \\\n", ToPlatformPath(a ? a.Get() : p.Get(), Platform).Get());
 						}
 						else

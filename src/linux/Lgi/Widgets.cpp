@@ -120,12 +120,12 @@ bool LDialog::LoadFromResource(int Resource, char *TagList)
 {
 	LAutoString n;
 	LRect p;
-	LProfile Prof("LDialog::LoadFromResource");
+	// LProfile Prof("LDialog::LoadFromResource");
 
 	bool Status = LResourceLoad::LoadFromResource(Resource, this, &p, &n, TagList);
 	if (Status)
 	{
-		Prof.Add("Name.");
+		// Prof.Add("Name.");
 		Name(n);
 		SetPos(p);
 	}

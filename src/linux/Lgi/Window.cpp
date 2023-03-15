@@ -113,7 +113,6 @@ LWindow::LWindow(GtkWidget *w) : LView(0)
 	Wnd = GTK_WINDOW(w);
 	if (Wnd)
 	{
-		printf("gtk_window_set_decorated %i\n", d->ShowTitleBar);
 		gtk_window_set_decorated(Wnd, d->ShowTitleBar);
 		g_object_set_data(G_OBJECT(Wnd), "LViewI", (LViewI*)this);
 	}

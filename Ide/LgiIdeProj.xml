@@ -87,14 +87,14 @@
 	</Node>
 	<Node Name="Resources" Type="1" Platforms="15" Open="1" Id="8">
 		<Node Name="Test" Type="1" Platforms="15" Id="1" />
-		<Node File=".\haiku\buildHaiku.py" Type="8" Platforms="15" />
-		<Node File=".\CMakeLists.txt" Type="8" Platforms="15" />
-		<Node File=".\haiku\Makefile.haiku" Type="9" Platforms="15" />
-		<Node File=".\linux\Makefile.linux" Type="9" Platforms="15" />
-		<Node File=".\win\Makefile.windows" Type="9" Platforms="15" />
-		<Node File=".\resources\resource.h" Type="3" Platforms="15" />
+		<Node File="./haiku/buildHaiku.py" Type="8" Platforms="15" />
+		<Node File="./CMakeLists.txt" Type="8" Platforms="15" />
+		<Node File="./haiku/Makefile.haiku" Type="9" Platforms="15" />
+		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
+		<Node File="./win/Makefile.windows" Type="9" Platforms="15" />
+		<Node File="./resources/resource.h" Type="3" Platforms="15" />
 	</Node>
-	<Node File="..\Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
+	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>
 		<General>
 			<Makefile>
@@ -202,11 +202,8 @@ be</Release>
 				<All />
 			</Libraries>
 			<LibraryPaths>
-				<All>
-					<Debug>..\x64Debug19</Debug>
-					<Release>..\x64Release19</Release>
-				</All>
-				<Windows />
+				<All />
+				<Linux />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -226,7 +223,6 @@ be</Release>
 				</Linux>
 			</TargetName>
 			<SystemIncludes>
-				<Windows />
 				<Linux>
 					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
@@ -240,7 +236,7 @@ _GNU_SOURCE</Debug>
 _GNU_SOURCE</Release>
 				</Haiku>
 				<All />
-				<Windows />
+				<Linux />
 			</Defines>
 			<ApplicationIcon />
 		</Build>
@@ -276,7 +272,7 @@ _GNU_SOURCE</Release>
 		</Remote>
 		<Advanced>
 			<PostBuildCommands>
-				<Windows />
+				<Linux />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>
