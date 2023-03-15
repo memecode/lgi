@@ -22,29 +22,29 @@
     <ProjectGuid>{28000ACC-67F6-4A82-B779-A24F065FACF4}</ProjectGuid>
     <RootNamespace>Lvc</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -89,7 +89,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\include\common;..\include\win32;Src;..\..\..\..\CodeLib\libpng\build32;..\..\..\..\CodeLib\libpng;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\common;..\..\include\win32;Src;..\..\..\..\..\CodeLib\libpng\build32;..\..\..\..\..\CodeLib\libpng;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -110,7 +110,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\..\..\CodeLib\libssh\include;..\include;..\include\lgi\win;Src;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\build64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\CodeLib\libssh\include;..\..\include;..\..\include\lgi\win;Src;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\libpng\build64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -126,12 +126,12 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <AdditionalLibraryDirectories>..\..\..\..\CodeLib\libssh\build64\src\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\..\CodeLib\libssh\build64\src\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\include\common;..\include\win32;Src;..\..\..\..\CodeLib\libpng\build32;..\..\..\..\CodeLib\libpng;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\common;..\..\include\win32;Src;..\..\..\..\..\CodeLib\libpng\build32;..\..\..\..\..\CodeLib\libpng;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader />
@@ -151,7 +151,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\CodeLib\libssh\include;..\include;..\include\lgi\win;Src;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\libpng\build64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\CodeLib\libssh\include;..\..\include;..\..\include\lgi\win;Src;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\libpng\build64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -168,50 +168,49 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <AdditionalLibraryDirectories>..\..\..\..\CodeLib\libssh\build64\src\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\..\CodeLib\libssh\build64\src\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp" />
-    <ClCompile Include="..\src\common\Lgi\LgiMain.cpp" />
-    <ClCompile Include="..\src\common\Text\DeEscape.cpp" />
-    <ClCompile Include="..\src\common\Text\XmlTreeUi.cpp" />
-    <ClCompile Include="..\src\common\Widgets\ControlTree.cpp" />
-    <ClCompile Include="Src\BlameUi.cpp" />
-    <ClCompile Include="Src\DropDownBtn.cpp" />
-    <ClCompile Include="Src\Main.cpp" />
-    <ClCompile Include="Src\PatchViewer.cpp" />
-    <ClCompile Include="Src\SshConnection.cpp" />
-    <ClCompile Include="Src\VcCommit.cpp" />
-    <ClCompile Include="Src\VcFile.cpp" />
-    <ClCompile Include="Src\VcFolder.cpp" />
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Png.cpp" />
+    <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp" />
+    <ClCompile Include="..\..\src\common\Text\DeEscape.cpp" />
+    <ClCompile Include="..\..\src\common\Text\XmlTreeUi.cpp" />
+    <ClCompile Include="..\..\src\common\Widgets\ControlTree.cpp" />
+    <ClCompile Include="..\Src\BlameUi.cpp" />
+    <ClCompile Include="..\Src\DropDownBtn.cpp" />
+    <ClCompile Include="..\Src\Main.cpp" />
+    <ClCompile Include="..\Src\PatchViewer.cpp" />
+    <ClCompile Include="..\Src\SshConnection.cpp" />
+    <ClCompile Include="..\Src\VcCommit.cpp" />
+    <ClCompile Include="..\Src\VcFile.cpp" />
+    <ClCompile Include="..\Src\VcFolder.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\src\win\General\Lgi.manifest" />
+    <Manifest Include="..\..\src\win\General\Lgi.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Lgi_vs2015.vcxproj">
+    <ClInclude Include="..\..\include\lgi\common\StructuredIo.h" />
+    <ClInclude Include="..\..\include\lgi\common\StructuredLog.h" />
+    <ClInclude Include="..\Src\Lvc.h" />
+    <ClInclude Include="..\Src\SshConnection.h" />
+    <ClInclude Include="..\Src\VcCommit.h" />
+    <ClInclude Include="..\Src\VcFile.h" />
+    <ClInclude Include="..\Src\VcFolder.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\resources\icon32.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\resources\Lvc.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\installer-zip.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Lgi_vs2019.vcxproj">
       <Project>{95df9ca4-6d37-4a85-a648-80c2712e0da1}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\include\lgi\common\StructuredIo.h" />
-    <ClInclude Include="..\include\lgi\common\StructuredLog.h" />
-    <ClInclude Include="Src\Lvc.h" />
-    <ClInclude Include="Src\SshConnection.h" />
-    <ClInclude Include="Src\VcCommit.h" />
-    <ClInclude Include="Src\VcFile.h" />
-    <ClInclude Include="Src\VcFolder.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Resources\icon32.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Resources\Lvc.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="installer-zip.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
