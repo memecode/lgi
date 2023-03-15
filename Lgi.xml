@@ -471,7 +471,7 @@
 		<General>
 			<Makefile>
 				<Linux>Makefile.linux</Linux>
-				<Windows>Makefile.win64</Windows>
+				<Windows>Makefile.windows</Windows>
 				<Mac>Makefile.macosx</Mac>
 			</Makefile>
 			<Compiler>

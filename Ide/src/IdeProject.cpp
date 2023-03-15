@@ -320,11 +320,30 @@ public:
 			LinkerFlags += ",-export-dynamic,-R.";
 		}
 
-		char Buf[256];
+		auto Base = Proj->GetBasePath();
 		auto MakeFile = Proj->GetMakefile(Platform);
+		LString MakeFilePath;
 		Proj->CheckExists(MakeFile);
 		if (!MakeFile)
-			MakeFile = "../Makefile";
+		{
+			MakeFilePath = Base.Get();
+			LFile::Path p(MakeFilePath, "makefile");
+			MakeFile = p.GetFull();
+		}
+		else if (LIsRelativePath(MakeFile))
+		{
+			LFile::Path p(Base);
+			p += MakeFile;
+			MakeFile = p.GetFull();
+			p--;
+			MakeFilePath = p.GetFull();
+		}
+		else
+		{
+			LFile::Path p(MakeFile);
+			p--;
+			MakeFilePath = p.GetFull();
+		}
 		
 		// LGI_LIBRARY_EXT
 		switch (Platform)
@@ -402,7 +421,6 @@ public:
 			1 << Platform
 		);
 		
-		auto Base = Proj->GetBasePath();
 		if (IsExecutableTarget)
 		{
 			LString Exe = Proj->GetExecutable(Platform);
@@ -781,38 +799,38 @@ public:
 						
 							// Build a rule to make the dependency if any of the source changes...
 							auto DepBase = Dep->GetBasePath();
-							auto Base = Proj->GetBasePath();
+							auto Base = MakeFilePath;
 							auto TargetFile = Dep->GetTargetFile(Platform);
 							
 							if (DepBase && Base && TargetFile)
 							{
-								LString Rel;
-								if (!Proj->RelativePath(Rel, DepBase))
-									Rel = DepBase;
-								ToUnixPath(Rel);
+								LString Rel = LMakeRelativePath(Base, DepBase);
+								ToNativePath(Rel);
 								
 								// Add tag to target name
 								auto Parts = TargetFile.SplitDelimit(".");
 								if (Parts.Length() == 2)
 									TargetFile.Printf("lib%s$(Tag).%s", Parts[0].Get(), Parts[1].Get());
 
-								sprintf(Buf, "%s/$(BuildDir)/%s", Rel.Get(), TargetFile.Get());
-								m.Print(" %s", Buf);
+								LFile::Path Buf(Rel);
+								Buf += "$(BuildDir)";
+								Buf += TargetFile;
+								m.Print(" %s", Buf.GetFull().Get());
 								
 								LArray<char*> AllDeps;
 								Dep->GetAllDependencies(AllDeps, Platform);
 								LAssert(AllDeps.Length() > 0);
 								AllDeps.Sort(StrSort);
 
-								Rules.Print("%s : ", Buf);
+								Rules.Print("%s : ", Buf.GetFull().Get());
 								for (int i=0; i<AllDeps.Length(); i++)
 								{
 									if (i)
 										Rules.Print(" \\\n\t");
 									
-									LString DepRel;
-									char *f = Proj->RelativePath(DepRel, AllDeps[i]) ? DepRel.Get() : AllDeps[i];
-									ToUnixPath(f);
+									LString DepRel = LMakeRelativePath(Base, AllDeps[i]);
+									auto f = DepRel ? DepRel.Get() : AllDeps[i];
+									ToNativePath(f);
 									Rules.Print("%s", f);
 									
 									// Add these dependencies to this makefiles dep list
