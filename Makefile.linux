@@ -191,7 +191,7 @@ $(TargetFile) : $(Objects)
 .SECONDEXPANSION:
 $(Objects): $(BuildDir)/%.o: $$(wildcard %.c*)
 	mkdir -p $(@D)
-	@echo $(<F) [$(Build)]
+	@echo $< [$(Build)]
 ifeq "$(suffix $<)" ".cpp"
 	$(CPP) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
 else
@@ -201,8 +201,12 @@ endif
 -include $(Objects:.o=.d)
 
 # Clean out targets
+define rmIfExists
+	$(eval depAbs := $(abspath $(dep)))
+	@rm $(depAbs) 2> /dev/null || true
+endef
 clean :
-	rm $(Objects) $(Deps) $(BuildDir)/$(TargetFile)
+	$(foreach dep, $(Objects) $(Deps) $(BuildDir)/$(TargetFile), $(rmIfExists))
 	@echo Cleaned $(BuildDir)
 
 VPATH=%.cpp \

@@ -923,7 +923,7 @@ public:
 
 						// Various fairly global rules
 						m.Print(".SECONDEXPANSION:\n"
-								"$(Objects): $(BuildDir)/%%.o: $$(wildcard %%.c*)\n"
+								"$(Objects): $(BuildDir)/%%.o: $$(Source)\n"
 								"	mkdir -p $(@D)\n"
 								"	@echo $(<F) [$(Build)]\n"
 								"ifeq \"$(suffix $<)\" \".cpp\"\n"
@@ -995,7 +995,7 @@ public:
 
 						// Other rules
 						m.Print(".SECONDEXPANSION:\n"
-								"$(Objects): $(BuildDir)/%%.o: $$(wildcard %%.c*)\n"
+								"$(Objects): $(BuildDir)/%%.o: $$(Source)\n"
 								"	mkdir -p $(@D)\n"
 								"	@echo $(<F) [$(Build)]\n"
 								"ifeq \"$(suffix $<)\" \".cpp\"\n"
@@ -1036,7 +1036,7 @@ public:
 
 						// Other rules
 						m.Print(".SECONDEXPANSION:\n"
-								"$(Objects): $(BuildDir)/%%.o: $$(wildcard %%.c*)\n"
+								"$(Objects): $(BuildDir)/%%.o: $$(Source)\n"
 								"	mkdir -p $(@D)\n"
 								"	@echo $(<F) [$(Build)]\n"
 								"ifeq \"$(suffix $<)\" \".cpp\"\n"

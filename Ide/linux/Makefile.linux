@@ -4,7 +4,7 @@
 # http://www.memecode.com/lgi.php
 #
 
-# .SILENT :
+.SILENT :
 
 CC = gcc
 CPP = g++
@@ -100,9 +100,36 @@ Source =	../src/WebFldDlg.cpp \
 			../../src/common/Coding/ParseCpp.cpp \
 			../../src/common/Coding/LexCpp.cpp
 
-SourceLst := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(Source)))
-Objects := $(addprefix $(BuildDir)/,$(SourceLst))
+# https://stackoverflow.com/questions/49667011/compiling-both-c-and-cpp-source-in-a-single-makefile-target
+SourceC := $(filter %.c,$(Source))
+ObjectsC := $(SourceC:.c=.o)
+SourceCpp := $(filter %.cpp,$(Source))
+ObjectsCpp := $(SourceCpp:.cpp=.o)
+Objects := $(subst ../,,$(ObjectsC) $(ObjectsCpp))
+# Objects := $(addprefix $(BuildDir)/,$(Objects))
 Deps := $(patsubst %.o,%.d,$(Objects))
+
+EXT := c cpp
+
+Compilec = $(CC) -MMD -MP $(Inc) $(Flags) $(Defs)
+Compilecpp = $(CPP) -MMD -MP $(Inc) $(Flags) $(Defs)
+
+define rule =
+$(BuildDir)/%.o: %.$(1)
+    $$(Compile$(1)) $$< -o $$@
+endef
+
+$(foreach ext, $(EXT), $(eval $(call rule,$(ext))) )
+
+# $(ObjectsC): $(SourceC)
+# 	@mkdir -p $(@D)
+# 	@echo $< [$(Build)]
+# 	@$(CC) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
+# 
+# $(ObjectsCpp): $(SourceCpp)
+# 	mkdir -p $(@D)
+# 	@echo $< [$(Build)]
+# 	$(CPP) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
 
 # Target
 # Executable target
@@ -357,39 +384,22 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	export Build=$(Build); \
 	$(MAKE) -C ../../ -f Makefile.linux
 
-.SECONDEXPANSION:
-$(Objects): $(BuildDir)/%.o: $$(Source)
-	mkdir -p $(@D)
-	@echo MAKEFILE_LIST=$(MAKEFILE_LIST)
-	@echo MakeDir=$(MakeDir)
-	@echo @=$@
-	@echo %=$%
-	@echo *=$*
-	@echo atD=$(@D)
-	@echo atF=$(@F)
-	@echo starD=$(*D)
-	@echo starF=$(*F)
-	@echo lessD=$(<D)
-	@echo lessF=$(<F)
-	@echo $< [$(Build)]
-ifeq "$(suffix $<)" ".cpp"
-	$(CPP) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
-else
-	$(CC) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
-endif
-
 -include $(Objects:.o=.d)
 
 # Clean just this target
+define rmIfExists
+	$(eval depAbs := $(abspath $(dep)))
+	@rm $(depAbs) 2> /dev/null || true
+endef
 clean :
-	rm $(Objects) $(Deps) $(Target)
+	$(foreach dep, $(Objects) $(Deps) $(Target), $(rmIfExists))
 	@echo Cleaned $(BuildDir)
 
 # Clean all targets
 cleanall :
-	rm $(Objects) $(Deps) $(Target)
+	$(foreach dep, $(Objects) $(Deps) $(Target), $(rmIfExists))
 	@echo Cleaned $(BuildDir)
-	+make -C "../" -f "Makefile.linux" clean
+	-make -C "../.." -f "Makefile.linux" clean
 
 VPATH=%.cpp \
 	../../../../../codelib/openssl/include \
