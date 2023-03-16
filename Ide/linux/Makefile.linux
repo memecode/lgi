@@ -18,7 +18,7 @@ MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 Flags = -fPIC -w -fno-inline -fpermissive
 
 ifeq ($(Build),Debug)
-	Flags += -g -std=c++14
+	Flags += -MMD -MP -g -std=c++14
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
@@ -37,7 +37,7 @@ ifeq ($(Build),Debug)
 		-I$(MakeDir)/../../include \
 		-I$(MakeDir)/../../../../../codelib/openssl/include
 else
-	Flags += -s -Os -std=c++14
+	Flags += -MMD -MP -s -Os -std=c++14
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
 		-lmagic \
@@ -101,35 +101,13 @@ Source =	../src/WebFldDlg.cpp \
 			../../src/common/Coding/LexCpp.cpp
 
 # https://stackoverflow.com/questions/49667011/compiling-both-c-and-cpp-source-in-a-single-makefile-target
-SourceC := $(filter %.c,$(Source))
-ObjectsC := $(SourceC:.c=.o)
-SourceCpp := $(filter %.cpp,$(Source))
+SourceC    := $(filter %.c,$(Source))
+ObjectsC   := $(SourceC:.c=.o)
+SourceCpp  := $(filter %.cpp,$(Source))
 ObjectsCpp := $(SourceCpp:.cpp=.o)
-Objects := $(subst ../,,$(ObjectsC) $(ObjectsCpp))
-# Objects := $(addprefix $(BuildDir)/,$(Objects))
-Deps := $(patsubst %.o,%.d,$(Objects))
-
-EXT := c cpp
-
-Compilec = $(CC) -MMD -MP $(Inc) $(Flags) $(Defs)
-Compilecpp = $(CPP) -MMD -MP $(Inc) $(Flags) $(Defs)
-
-define rule =
-$(BuildDir)/%.o: %.$(1)
-    $$(Compile$(1)) $$< -o $$@
-endef
-
-$(foreach ext, $(EXT), $(eval $(call rule,$(ext))) )
-
-# $(ObjectsC): $(SourceC)
-# 	@mkdir -p $(@D)
-# 	@echo $< [$(Build)]
-# 	@$(CC) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
-# 
-# $(ObjectsCpp): $(SourceCpp)
-# 	mkdir -p $(@D)
-# 	@echo $< [$(Build)]
-# 	$(CPP) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
+Objects    := $(notdir $(ObjectsC) $(ObjectsCpp))
+Objects    := $(addprefix $(BuildDir)/,$(Objects))
+Deps       := $(patsubst %.o,%.d,$(Objects))
 
 # Target
 # Executable target
@@ -139,6 +117,25 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	$(CPP) -Wl,-export-dynamic,-R. -o \
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
+
+$(BuildDir)/%.o: %.c
+	mkdir -p $(@D)
+	echo $(notdir $<) [$(Build)]
+	$(CC) $(Inc) $(Flags) $(Defs) -c $< -o $@
+
+$(BuildDir)/%.o: %.cpp
+	mkdir -p $(@D)
+	echo $(notdir $<) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $@
+
+VPATH=$(BuildDir) \
+	../src \
+	../../src/common/Text \
+	../../src/common/Text/Homoglyphs \
+	../../src/common/Net \
+	../../src/common/Lgi \
+	../../src/common/Gdc2/Filters \
+	../../src/common/Coding
 
 ../../$(BuildDir)/liblgi-gtk3$(Tag).so : ../../include/lgi/common/App.h \
 	../../include/lgi/common/Array.h \
@@ -387,27 +384,13 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 -include $(Objects:.o=.d)
 
 # Clean just this target
-define rmIfExists
-	$(eval depAbs := $(abspath $(dep)))
-	@rm $(depAbs) 2> /dev/null || true
-endef
 clean :
-	$(foreach dep, $(Objects) $(Deps) $(Target), $(rmIfExists))
-	@echo Cleaned $(BuildDir)
+	rm -rf $(BuildDir) $(Target)
+	@echo Cleaned $(BuildDir) $(Target)
 
 # Clean all targets
 cleanall :
-	$(foreach dep, $(Objects) $(Deps) $(Target), $(rmIfExists))
-	@echo Cleaned $(BuildDir)
+	rm -rf $(BuildDir) $(Target)
+	@echo Cleaned $(BuildDir) $(Target)
 	-make -C "../.." -f "Makefile.linux" clean
-
-VPATH=%.cpp \
-	../../../../../codelib/openssl/include \
-	../../include/lgi/linux/Gtk \
-	../../include/lgi/linux \
-	../../include/lgi/common \
-	../../include \
-	../src \
-	../resources \
-	$(BuildDir)
 
