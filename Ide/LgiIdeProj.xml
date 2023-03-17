@@ -33,8 +33,6 @@
 			<Node File="./src/IdeProject.h" Type="3" Platforms="15" />
 			<Node File="./src/IdeProjectSettings.cpp" Type="2" Platforms="15" />
 			<Node File="./src/IdeProjectSettings.h" Type="3" Platforms="15" />
-			<Node File="./src/levenshtein.c" Type="2" Platforms="15" />
-			<Node File="./src/levenshtein.h" Type="3" Platforms="15" />
 			<Node File="./src/MissingFiles.cpp" Type="2" Platforms="15" />
 			<Node File="./src/NewProjectFromTemplate.cpp" Type="2" Platforms="15" />
 			<Node File="./src/ProjectNode.cpp" Type="2" Platforms="15" />

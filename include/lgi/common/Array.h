@@ -153,9 +153,10 @@ public:
 	}
 	
 	/// Makes the length fixed..
-	void SetFixedLength(bool fix = true)
+	void SetFixedLength(bool fix = true, bool warn = true)
 	{
 		fixed = fix;
+		warnResize = warn;
 	}
 
 	/// Emtpies the array of all objects.

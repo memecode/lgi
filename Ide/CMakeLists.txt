@@ -50,32 +50,31 @@ else()
 endif()
 
 set (CommonSource
-	Code/SimpleCppParser.cpp
-	Code/WebFldDlg.cpp
-	Code/IdeCommon.cpp
-	Code/AddFtpFile.cpp
-	Code/ProjectNode.cpp
-	Code/IdeDoc.cpp
-	Code/IdeProject.cpp
-	Code/IdeProjectSettings.cpp
-	Code/LgiIde.cpp
-	Code/LgiUtils.cpp
-	Code/MemDumpViewer.cpp
-	Code/SpaceTabConv.cpp
-	Code/SysCharSupport.cpp
-	Code/DebugContext.cpp
-	Code/Debugger.cpp
-	Code/History.cpp
-	Code/FindInFiles.cpp
-	Code/FindSymbol.cpp
-	Code/FtpThread.cpp
-	Code/DocEdit.cpp
-	Code/PythonParser.cpp
-	Code/MissingFiles.cpp
-	Code/DocEditStyling.cpp
-	Code/levenshtein.c
-	Code/JavascriptParser.cpp
-	Code/NewProjectFromTemplate.cpp
+	src/SimpleCppParser.cpp
+	src/WebFldDlg.cpp
+	src/IdeCommon.cpp
+	src/AddFtpFile.cpp
+	src/ProjectNode.cpp
+	src/IdeDoc.cpp
+	src/IdeProject.cpp
+	src/IdeProjectSettings.cpp
+	src/LgiIde.cpp
+	src/LgiUtils.cpp
+	src/MemDumpViewer.cpp
+	src/SpaceTabConv.cpp
+	src/SysCharSupport.cpp
+	src/DebugContext.cpp
+	src/Debugger.cpp
+	src/History.cpp
+	src/FindInFiles.cpp
+	src/FindSymbol.cpp
+	src/FtpThread.cpp
+	src/DocEdit.cpp
+	src/PythonParser.cpp
+	src/MissingFiles.cpp
+	src/DocEditStyling.cpp
+	src/JavascriptParser.cpp
+	src/NewProjectFromTemplate.cpp
 	../src/common/Net/OpenSSLSocket.cpp
 	../src/common/Net/Http.cpp
 	../src/common/Net/Ftp.cpp

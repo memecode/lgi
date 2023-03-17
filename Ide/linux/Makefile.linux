@@ -68,7 +68,6 @@ Source =	../src/WebFldDlg.cpp \
 			../src/MemDumpViewer.cpp \
 			../src/LgiUtils.cpp \
 			../src/LgiIde.cpp \
-			../src/levenshtein.c \
 			../src/JavascriptParser.cpp \
 			../src/IdeProjectSettings.cpp \
 			../src/IdeProject.cpp \

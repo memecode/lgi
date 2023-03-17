@@ -674,7 +674,7 @@ public:
 			a.AddAt(0, p);
 		}
 
-		a.SetFixedLength();
+		a.SetFixedLength(true, false);
 		return a;
 	}
 
@@ -723,7 +723,7 @@ public:
 				a.New().Set(s);
 		}
 
-		a.SetFixedLength();
+		a.SetFixedLength(true, false);
 		return a;
 	}
 	
