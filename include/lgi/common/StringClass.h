@@ -90,12 +90,19 @@ public:
 	class Array : public LArray<LString>
 	{
 	public:
-		Array(size_t PreAlloc = 0) : LArray<LString>(PreAlloc) {}
+		Array(size_t PreAlloc = 0) : LArray<LString>(PreAlloc)
+		{
+			// This allows the parent array to return an empty
+			// string without asserting if the caller requests an 
+			// out of range index
+			warnResize = false;
+		}
+		
 		Array(const Array &a)
 		{
 			*this = (Array&)a;
 		}
-		
+
 		Array &operator =(const Array &a)
 		{
 			SetFixedLength(false);

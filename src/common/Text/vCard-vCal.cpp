@@ -135,18 +135,17 @@ bool VIo::ParseDate(LDateTime &Out, char *In)
 	{
 		Out.SetTimeZone(0, false);
 
-		LToken v(In, "T");
+		auto v = LString(In).SplitDelimit("T");
 		if (v.Length() > 0)
 		{
-			char *d = v[0];
-			if (d && strlen(d) == 8)
+			if (v[0].Length() == 8)
 			{
-				char Year[5] = {d[0], d[1], d[2], d[3], 0};
-				char Month[3] = {d[4], d[5], 0};
-				char Day[3] = {d[6], d[7], 0};
-				Out.Year(atoi(Year));
-				Out.Month(atoi(Month));
-				Out.Day(atoi(Day));
+				auto Year = v[0](0, 4);
+				auto Month = v[0](4, 6);
+				auto Day = v[0](6, 8);
+				Out.Year ((int)Year.Int());
+				Out.Month((int)Month.Int());
+				Out.Day  ((int)Day.Int());
 				Status = true;
 			}
 
@@ -355,7 +354,7 @@ bool VCard::Import(LDataPropI *c, LStreamI *s)
 
 				if (IsVar(Field, "n"))
 				{
-					LToken Name(Data, ";", false);
+					auto Name = Data.SplitDelimit(";", -1, false);
 					char *First = Name[1];
 					char *Last = Name[0];
 					char *Title = Name[3];
@@ -384,7 +383,7 @@ bool VCard::Import(LDataPropI *c, LStreamI *s)
 				}
 				else if (IsVar(Field, "tel"))
 				{
-					LToken Phone(Data, ";", false);
+					auto Phone = Data.SplitDelimit(";", -1, false);
 					for (uint32_t p=0; p<Phone.Length(); p++)
 					{
 						if (IsType("cell"))
@@ -432,17 +431,17 @@ bool VCard::Import(LDataPropI *c, LStreamI *s)
 				}
 				else if (IsVar(Field, "org"))
 				{
-					LToken Org(Data, ";", false);
+					auto Org = Data.SplitDelimit(";", -1, false);
 					if (Org[0]) c->SetStr(FIELD_COMPANY, Org[0]);
 				}
 				else if (IsVar(Field, "adr"))
 				{
 					bool IsWork = IsType("work");
 					// bool IsHome = IsType("home");
-					LToken Addr(Data, ";", false);
+					auto Addr = Data.SplitDelimit(";", -1, false);
 					if (Addr[2])
 					{
-						LToken A(Addr[2], "\r\n");
+						auto A = Addr[2].SplitDelimit("\r\n");
 						if (A.Length() > 1)
 						{
 							c->SetStr(IsWork ? FIELD_WORK_STREET : FIELD_HOME_STREET, A[0]);
@@ -466,7 +465,7 @@ bool VCard::Import(LDataPropI *c, LStreamI *s)
 				}
 				else if (IsVar(Field, "uid"))
 				{
-					LToken n(Data, ";", false);
+					auto n = Data.SplitDelimit(";", -1, false);
 					c->SetStr(FIELD_UID, n[0]);
 				}
 				else if (IsVar(Field, "x-perm"))
@@ -646,7 +645,7 @@ bool VIo::ReadField(LStreamI &s, LString &Name, ParamArray *Params, LString &Dat
 		if (e)
 		{
 			*e++ = 0;
-			LToken t(f, ";");
+			auto t = LString(f).SplitDelimit(";");
 			if (t.Length() > 0)
 			{
 				Name = t[0];
@@ -793,7 +792,7 @@ bool VCard::Export(LDataPropI *c, LStreamI *o)
 	const char *Alt;
 	if ((Alt = c->GetStr(FIELD_ALT_EMAIL)))
 	{
-		LToken t(Alt, ",");
+		auto t = LString(Alt).SplitDelimit(",");
 		for (unsigned i=0; i<t.Length(); i++)
 		{
 			WriteField(*o, "email", &Inet, t[i]);

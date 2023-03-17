@@ -64,7 +64,8 @@ public:
 #endif
 
 protected:
-	bool fixed;
+	bool fixed = false;
+	bool warnResize = true;
 
 public:
 	typedef Type ItemType;
@@ -316,11 +317,8 @@ public:
 			(fixed && (uint32_t)i >= len)
 		)
 		{
-			memset(&t, 0, sizeof(t));
-			if (fixed && (uint32_t)i >= len)
-			{
+			if (warnResize)
 				assert(!"Attempt to enlarged fixed array.");
-			}
 			return t;
 		}
 		

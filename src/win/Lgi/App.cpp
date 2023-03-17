@@ -10,7 +10,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/SkinEngine.h"
 #include "lgi/common/DocView.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Css.h"
 #include "lgi/common/SpellCheck.h"
 #include "lgi/common/Json.h"
@@ -130,7 +129,7 @@ static LAutoString ParseStr(LPointer &p, bool Pad = true)
 
 static LAutoString ParseVer(void *Resource, char *Part)
 {
-	LToken Parts(Part, ".");
+	auto Parts = LString(Part).SplitDelimit(".");
 	if (Parts.Length() == 3)
 	{
 		LPointer p;

@@ -7,7 +7,6 @@
 #include "lgi/common/ToolBar.h"
 #include "lgi/common/Panel.h"
 #include "lgi/common/Variant.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/Notifications.h"
 #include "lgi/common/CssTools.h"
@@ -1258,21 +1257,17 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 			LgiTrace("\t::SerializeState:%i v=%s\n", __LINE__, v.Str());
 			#endif
 
-			LToken t(v.Str(), ";");
-			for (int i=0; i<t.Length(); i++)
+			for (auto Var: v.LStr().SplitDelimit(";"))
 			{
-				char *Var = t[i];
-				char *Value = strchr(Var, '=');
-				if (Value)
+				auto v = Var.SplitDelimit("=", 1);
+				if (v.Length() == 2)
 				{
-					*Value++ = 0;
-
-					if (stricmp(Var, "State") == 0)
-						State = (LWindowZoom)atoi(Value);
-					else if (stricmp(Var, "Pos") == 0)
+					if (v[0].Equals("State"))
+						State = (LWindowZoom)v[1].Int();
+					else if (v[0].Equals("Pos"))
 					{
 					    LRect r;
-					    r.SetStr(Value);
+					    r.SetStr(v[1]);
 					    if (r.Valid())
 						    Position = r;
 					}

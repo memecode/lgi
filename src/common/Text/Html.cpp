@@ -1033,7 +1033,7 @@ LHtmlLine &LHtmlLine::operator =(int i)
 
 void LHtmlLine::Set(char *s)
 {
-	LToken t(s, " \t");
+	auto t = LString(s).SplitDelimit(" \t");
 	LineReset = 0x80000000;
 	LineStyle = -1;
 	char *Style = 0;
@@ -2094,7 +2094,8 @@ bool LTag::OnMouseClick(LMouse &m)
 			}
 			p.Print("Pos: %i,%i   Size: %i,%i\n\n", Pos.x, Pos.y, Size.x, Size.y);
 			p.Print("Style:\n", Style.Get());
-			LToken s(Style, "\n");
+			
+			auto s = LString(Style).SplitDelimit("\n");
 			for (unsigned i=0; i<s.Length(); i++)
 				p.Print("    %s\n", s[i]);
 			
@@ -3285,21 +3286,15 @@ void LTag::SetStyle()
 			const char *s = 0;
 			if (Get("Face", s))
 			{
-				char16 *cw = CleanText(s, strlen(s), "utf-8", true);
-				char *c8 = WideToUtf8(cw);
-				DeleteArray(cw);
-				LToken Faces(c8, ",");
-				DeleteArray(c8);
-				char *face = TrimStr(Faces[0]);
-				if (ValidStr(face))
-				{
-					FontFamily(face);
-					DeleteArray(face);
-				}
+				LAutoWString cw(CleanText(s, strlen(s), "utf-8", true));
+				LAutoString c8(WideToUtf8(cw));
+				
+				auto Faces = LString(c8).SplitDelimit(",");
+				auto Face = Faces[0].Strip();
+				if (ValidStr(Face))
+					FontFamily(c8.Get());
 				else
-				{
-					LgiTrace("%s:%i - No face for font tag.\n", __FILE__, __LINE__);
-				}
+					LgiTrace("%s:%i - No face for font tag.\n", _FL);
 			}
 
 			if (Get("Size", s))
