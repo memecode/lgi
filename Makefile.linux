@@ -191,7 +191,7 @@ $(TargetFile) : $(Objects)
 .SECONDEXPANSION:
 $(Objects): $(BuildDir)/%.o: $$(wildcard %.c*)
 	mkdir -p $(@D)
-	@echo $< [$(Build)]
+	@echo $(notdir $<) [$(Build)]
 ifeq "$(suffix $<)" ".cpp"
 	$(CPP) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
 else
