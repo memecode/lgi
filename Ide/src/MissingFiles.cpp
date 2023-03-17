@@ -1,8 +1,9 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/FileSelect.h"
+#include "lgi/common/Levenshtein.h"
+
 #include "LgiIde.h"
 #include "ProjectNode.h"
-#include "levenshtein.h"
 
 enum Msgs
 {
@@ -137,7 +138,7 @@ public:
 				for (unsigned i=0; i<Files.Length(); i++)
 				{
 					char *leaf2 = LGetLeaf(Files[i]);
-					size_t Dist = levenshtein(leaf1, leaf2);
+					size_t Dist = LLevenshtein(leaf1, leaf2);
 					if (Dist < 4)
 					{
 						Sr->Matches.New() = Files[i];

@@ -54,9 +54,9 @@ _CRTIMP void __cdecl qsort_s(void *_Base,
 template <class Type>
 class LArray
 {
-	Type *p;
-	size_t len;
-	size_t alloc;
+	Type *p = NULL;
+	size_t len = 0;
+	size_t alloc = 0;
 
 #ifdef _DEBUG
 public:
@@ -64,8 +64,8 @@ public:
 #endif
 
 protected:
-	bool fixed = false;
-	bool warnResize = true;
+	uint8_t fixed : 1;
+	uint8_t warnResize : 1;
 
 public:
 	typedef Type ItemType;
@@ -73,9 +73,10 @@ public:
 	/// Constructor
 	LArray(size_t PreAlloc = 0)
 	{
-		p = 0;
 		alloc = len = PreAlloc;
 		fixed = false;
+		warnResize = true;
+
 		if (alloc)
 		{
 			size_t Bytes = sizeof(Type) * alloc;
@@ -93,9 +94,9 @@ public:
 
 	LArray(std::initializer_list<Type> il)
 	{
-		p = NULL;
-		alloc = len = 0;
 		fixed = false;
+		warnResize = true;
+
 		if (Length(il.size()))
 		{
 			size_t n = 0;
@@ -106,9 +107,9 @@ public:
 
 	LArray(const LArray<Type> &c)
 	{
-		p = 0;
-		alloc = len = 0;
 		fixed = false;
+		warnResize = true;
+
 		*this = c;
 	}
 
@@ -256,11 +257,14 @@ public:
 	LArray<Type> &operator =(const LArray<Type> &a)
 	{
 		Length(a.Length());
+		fixed = a.fixed;
+		warnResize = a.warnResize;
 		if (p && a.p)
 		{
 			for (size_t i=0; i<len; i++)
 				p[i] = a.p[i];
 		}
+		
 		return *this;
 	}
 

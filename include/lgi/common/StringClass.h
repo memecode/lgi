@@ -105,9 +105,8 @@ public:
 
 		Array &operator =(const Array &a)
 		{
-			SetFixedLength(false);
 			*((LArray<LString>*)this) = a;
-			SetFixedLength(true);
+			SetFixedLength(true, false);
 			return *this;
 		}
 

@@ -204,7 +204,6 @@
     <ClInclude Include="..\Code\IdeDoc.h" />
     <ClInclude Include="..\Code\IdeDocPrivate.h" />
     <ClInclude Include="..\Code\IdeProject.h" />
-    <ClInclude Include="..\Code\levenshtein.h" />
     <ClInclude Include="..\Code\LgiIde.h" />
     <ClInclude Include="..\Code\ProjectNode.h" />
     <ClInclude Include="..\Code\PythonParser.h" />
@@ -241,7 +240,6 @@
     <ClCompile Include="..\src\IdeProject.cpp" />
     <ClCompile Include="..\src\IdeProjectSettings.cpp" />
     <ClCompile Include="..\src\JavascriptParser.cpp" />
-    <ClCompile Include="..\src\levenshtein.c" />
     <ClCompile Include="..\src\LgiIde.cpp" />
     <ClCompile Include="..\src\LgiUtils.cpp" />
     <ClCompile Include="..\src\MemDumpViewer.cpp" />

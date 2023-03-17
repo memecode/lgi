@@ -43,9 +43,6 @@
     <Filter Include="Source Files\Utils">
       <UniqueIdentifier>{29793244-2c02-4203-b755-49237ba42e24}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\levenshtein">
-      <UniqueIdentifier>{f793da4b-cf25-40f4-a90c-4a549d33d87e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Search\Python Parser">
       <UniqueIdentifier>{a789d0ae-552d-4e98-902b-7ffb0d018bbc}</UniqueIdentifier>
     </Filter>
@@ -83,9 +80,6 @@
     </ClInclude>
     <ClInclude Include="..\Code\IdeProject.h">
       <Filter>Source Files\Projects</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Code\levenshtein.h">
-      <Filter>Source Files\levenshtein</Filter>
     </ClInclude>
     <ClInclude Include="..\Code\LgiIde.h">
       <Filter>Source Files</Filter>
@@ -128,12 +122,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Code\DebugContext.cpp">
-      <Filter>Source Files\Debugger</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\Debugger.cpp">
-      <Filter>Source Files\Debugger</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\common\Lgi\About.cpp">
       <Filter>Lgi</Filter>
     </ClCompile>
@@ -181,9 +169,6 @@
     </ClCompile>
     <ClCompile Include="..\src\JavascriptParser.cpp">
       <Filter>Source Files\Search\Javascript</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\levenshtein.c">
-      <Filter>Source Files\levenshtein</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\common\Coding\LexCpp.cpp">
       <Filter>Source Files\Scripting</Filter>
@@ -250,9 +235,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\src\win\General\Lgi.manifest">
-      <Filter>Resource Files</Filter>
-    </Manifest>
+    <Manifest Include="..\..\src\win\General\Lgi.manifest" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\Script1.rc">
@@ -260,8 +243,8 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="..\src\common\Coding\ExternCall.asm">
-      <Filter>Source Files\Scripting</Filter>
+    <MASM Include="..\..\src\common\Coding\ExternCall.asm">
+      <Filter>Source Files</Filter>
     </MASM>
   </ItemGroup>
 </Project>
