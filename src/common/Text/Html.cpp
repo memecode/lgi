@@ -2097,7 +2097,7 @@ bool LTag::OnMouseClick(LMouse &m)
 			
 			auto s = LString(Style).SplitDelimit("\n");
 			for (unsigned i=0; i<s.Length(); i++)
-				p.Print("    %s\n", s[i]);
+				p.Print("    %s\n", s[i].Get());
 			
 			p.Print("\nParent tags:\n");
 			LDisplayString Sp(LSysFont, " ");
