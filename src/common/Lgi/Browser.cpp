@@ -56,29 +56,24 @@ private:
 	Collection Files; // requires locking to access
 
 public:
-	LBrowser *Wnd;
-	Html1::LHtml *Html;
+	LBrowser *Wnd = NULL;
+	Html1::LHtml *Html = NULL;
 	LAutoPtr<LBrowserThread> Thread;
-	LEdit *UriEdit;
-	LEdit *SearchEdit;
-	LButton *Back;
-	LButton *Forward;
-	LButton *Stop;
-	LButton *Search;
+	LEdit *UriEdit = NULL;
+	LEdit *SearchEdit = NULL;
+	LButton *Back = NULL;
+	LButton *Forward = NULL;
+	LButton *Stop = NULL;
+	LButton *Search = NULL;
 	LArray<LString> History;
-	ssize_t CurHistory;
-	bool Loading;
-	LBrowser::LBrowserEvents *Events;
+	ssize_t CurHistory = 0;
+	bool Loading = false;
+	LBrowser::LBrowserEvents *Events = NULL;
 	LHttp Http;
 
 	LBrowserPriv(LBrowser *wnd)
 	{
 		Wnd = wnd;
-		Html = 0;
-		Events = 0;
-		Back = Forward = 0;
-		CurHistory = 0;
-		Loading = false;
 	}
 
 	FilePtr Lock()
@@ -390,51 +385,57 @@ int LBrowserThread::Main()
 LBrowser::LBrowser(LViewI *owner, const char *Title, char *Uri)
 {
 	d = new LBrowserPriv(this);
-	d->Back = 0;
-	d->Forward = 0;
-	d->UriEdit = 0;
-	d->SearchEdit = 0;
-	d->Search = 0;
-	d->Html = 0;
-	d->Stop = 0;
 	Name(Title?Title:(char*)"Browser");
 
 	LRect r(0, 0, 1000, 800);
 	SetPos(r);
 	MoveSameScreen(owner);
 
-	if (Attach(0))
-	{
-		#ifdef MAC
-		#define BTN_X 50
-		#else
-		#define BTN_X 30
-		#endif
+	if (!Attach(0))
+		return;
+
+	#ifdef MAC
+	#define BTN_X 50
+	#else
+	#define BTN_X 30
+	#endif
 		
-		AddView(d->Back = new LButton(IDC_BACK, 0, 0, BTN_X, 20, "<-"));
-		AddView(d->Forward = new LButton(IDC_FORWARD, 0, 0, BTN_X, 20, "->"));
-		AddView(d->Stop = new LButton(IDC_REFRESH_STOP, 0, 0, -1, 20, "Refresh"));
-		AddView(d->UriEdit = new LEdit(IDC_URI, 0, 0, 100, 20, 0));
-		AddView(d->SearchEdit = new LEdit(IDC_SEARCH_TXT, 0, 0, 100, 20, ""));
-		AddView(d->Search = new LButton(IDC_SEARCH, 0, 0, -1, 20, "Search"));
-		AddView(d->Html = new Html1::LHtml(IDC_HTML, 0, 0, 100, 100));
+	AddView(d->Back = new LButton(IDC_BACK, 0, 0, BTN_X, 20, "<-"));
+	AddView(d->Forward = new LButton(IDC_FORWARD, 0, 0, BTN_X, 20, "->"));
+	AddView(d->Stop = new LButton(IDC_REFRESH_STOP, 0, 0, -1, 20, "Refresh"));
+	AddView(d->UriEdit = new LEdit(IDC_URI, 0, 0, 100, 20, 0));
+	AddView(d->SearchEdit = new LEdit(IDC_SEARCH_TXT, 0, 0, 100, 20, ""));
+	AddView(d->Search = new LButton(IDC_SEARCH, 0, 0, -1, 20, "Search"));
+	AddView(d->Html = new Html1::LHtml(IDC_HTML, 0, 0, 100, 100));
 
-		AttachChildren();
-		OnPosChange();
-		Visible(true);
+	AttachChildren();
+	OnPosChange();
+	Visible(true);
 
-		d->Html->SetEnv(d);
-		d->Html->SetLinkDoubleClick(false);
-		d->Back->Enabled(false);
-		d->Forward->Enabled(false);
-		if (Uri)
-			SetUri(Uri);
-	}
+	d->Html->SetEnv(d);
+	d->Html->SetLinkDoubleClick(false);
+	d->Back->Enabled(false);
+	d->Forward->Enabled(false);
+	if (Uri)
+		SetUri(Uri);
+
+	RegisterHook(this, LKeyEvents);
 }
 
 LBrowser::~LBrowser()
 {
 	DeleteObj(d);
+}
+
+bool LBrowser::OnViewKey(LView *v, LKey &k)
+{
+	if (k.Ctrl() && ToUpper(k.c16) == 'W')
+	{
+		Quit();
+		return true;
+	}
+
+	return false;
 }
 
 bool LBrowser::SetUri(const char *Uri)

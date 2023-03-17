@@ -11,6 +11,8 @@ class LBrowser : public LWindow
 {
 	class LBrowserPriv *d;
 
+	bool OnViewKey(LView *v, LKey &k);
+
 public:
 	class LBrowserEvents
 	{
