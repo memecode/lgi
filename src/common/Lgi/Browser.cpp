@@ -70,10 +70,12 @@ public:
 	bool Loading = false;
 	LBrowser::LBrowserEvents *Events = NULL;
 	LHttp Http;
+	LString::Array ResourcePaths;
 
 	LBrowserPriv(LBrowser *wnd)
 	{
 		Wnd = wnd;
+		ResourcePaths.SetFixedLength(false);
 	}
 
 	FilePtr Lock()
@@ -237,7 +239,7 @@ public:
 		LUri BaseUri(Uri);
 		
 		LUri u(j->Uri);
-		char *LoadFileName = 0;
+		const char *LoadFileName = NULL;
 		if (u.sProtocol)
 		{
 			
@@ -246,44 +248,43 @@ public:
 		
 		if (LoadFileName)
 		{
-			char p[MAX_PATH_LEN];
-			LMakePath(p, sizeof(p), !BaseUri.sPath.IsEmpty() ? BaseUri.sPath : Uri, "..");
-			LMakePath(p, sizeof(p), p, LoadFileName);
-			if (LFileExists(p))
+			auto SearchPaths = ResourcePaths;
+			if (!BaseUri.sPath.IsEmpty())
 			{
-				char *Ext = LGetExtension(p);
-				if
-				(
-					Ext &&
-					(
-						!_stricmp(Ext, "jpg") ||
-						!_stricmp(Ext, "jpeg") ||
-						!_stricmp(Ext, "gif") ||
-						!_stricmp(Ext, "png") ||
-						!_stricmp(Ext, "tif") ||
-						!_stricmp(Ext, "tiff") ||
-						!_stricmp(Ext, "bmp") ||
-						!_stricmp(Ext, "ico")
-					)
-				)
-				{
-					j->pDC.Reset(GdcD->Load(p));
-					return LoadImmediate;
-				}
-				else
-				{
-					LFile *f;
-					if (j->Stream.Reset(f = new LFile))
-					{
-						if (!f->Open(p, O_READ))
-						{
-							j->Stream.Reset();
-							j->Error.Printf("Can't open file '%s' for reading", p);
-							return LoadError;
-						}
+				LFile::Path p(BaseUri.sPath);
+				p--;
+				SearchPaths.AddAt(0, p.GetFull());
+			}
 
+			LFile::Path p;
+			for (auto Path: SearchPaths)
+			{
+				p = Path;
+				p += LoadFileName;
+				if (p.Exists())
+				{
+					auto mt = LGetFileMimeType(p).SplitDelimit("/");
+					if (mt[0].Equals("image"))
+					{
+						j->pDC.Reset(GdcD->Load(p));
 						return LoadImmediate;
 					}
+					else
+					{
+						LFile *f;
+						if (j->Stream.Reset(f = new LFile))
+						{
+							if (!f->Open(p, O_READ))
+							{
+								j->Stream.Reset();
+								j->Error.Printf("Can't open file '%s' for reading", p);
+								return LoadError;
+							}
+
+							return LoadImmediate;
+						}
+					}
+					break;
 				}
 			}
 		}
@@ -520,7 +521,12 @@ void LBrowser::SetEvents(LBrowserEvents *Events)
 	d->Events = Events;
 }
 
-bool LBrowser::SetHtml(char *Html)
+void LBrowser::AddPath(const char *Path)
+{
+	d->ResourcePaths.Add(Path);
+}
+
+bool LBrowser::SetHtml(const char *Html)
 {
 	d->History.Length(++d->CurHistory);
 	d->Html->Name(Html);

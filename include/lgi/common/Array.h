@@ -256,6 +256,7 @@ public:
 
 	LArray<Type> &operator =(const LArray<Type> &a)
 	{
+		fixed = false;
 		Length(a.Length());
 		fixed = a.fixed;
 		warnResize = a.warnResize;

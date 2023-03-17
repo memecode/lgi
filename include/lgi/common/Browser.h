@@ -26,8 +26,11 @@ public:
 	~LBrowser();
 
 	void SetEvents(LBrowserEvents *Events);
-	bool SetUri(const char *Uri = 0);
-	bool SetHtml(char *Html);
+	bool SetUri(const char *Uri = NULL);
+	bool SetHtml(const char *Html);
+
+	/// Adds optional local file system paths to search for resources.
+	void AddPath(const char *Path);
 
 	void OnPosChange();
 	int OnNotify(LViewI *c, LNotification n);
