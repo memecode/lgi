@@ -421,9 +421,9 @@ public:
 	struct StackFrame
 	{
 		uint32_t CurrentFrameSize;
-		ssize_t PrevFrameStart;
-		size_t ReturnIp;
-		LVarRef ReturnValue;
+		ssize_t  PrevFrameStart;
+		size_t   ReturnIp;
+		LVarRef  ReturnValue;
 	};
 
 	enum RunType
@@ -434,34 +434,28 @@ public:
 		RunStepOut
 	};
 
-	LStream *Log;
-	LCompiledCode *Code;
-	LExecutionStatus Status;
-	GPtr c;
+	LVirtualMachine *Vm;
+	LStream *Log = NULL;
+	LCompiledCode *Code = NULL;
+	LExecutionStatus Status = ScriptNotStarted;
+	LScriptPtr c;
 	LVariant Reg[MAX_REGISTER];
 	LArray<LVariant> Locals;
 	LVariant *Scope[SCOPE_MAX];
 	LArray<StackFrame> Frames;
 	RunType StepType;
-	LVmDebuggerCallback *DbgCallback;
-	bool DebuggerEnabled;
-	LVmDebugger *Debugger;
-	LVirtualMachine *Vm;
-	LScriptArguments *ArgsOutput;
-	bool BreakCpp;
+	LVmCallback *Callback = NULL;
+	LVmDebugger *Debugger = NULL;
+	LScriptArguments *ArgsOutput = NULL;
 	LArray<ssize_t> BreakPts;
 	LString TempPath;
+	bool DebuggerEnabled = false;
+	bool BreakCpp = false;
 
-	LVirtualMachinePriv(LVirtualMachine *vm, LVmDebuggerCallback *Callback)
+	LVirtualMachinePriv(LVirtualMachine *vm, LVmCallback *callback)
 	{
 		Vm = vm;
-		DebuggerEnabled = true;
-		BreakCpp = false;
-		ArgsOutput = NULL;
-		Log = NULL;
-		Code = NULL;
-		Debugger = NULL;
-		DbgCallback = Callback;
+		Callback = callback;
 		ZeroObj(Scope);
 	}
 	
@@ -641,7 +635,7 @@ public:
 		LExecutionStatus Status = ScriptSuccess;
 		LAssert(sizeof(LVarRef) == 4);
 
-		GPtr c;
+		LScriptPtr c;
 		uint8_t *Base = &Code->ByteCode[0];
 		c.u8 = Base;
 		uint8_t *e = c.u8 + Code->ByteCode.Length();
@@ -1028,7 +1022,7 @@ public:
 
 bool LVirtualMachine::BreakOnWarning = false;
 
-LVirtualMachine::LVirtualMachine(LVmDebuggerCallback *callback)
+LVirtualMachine::LVirtualMachine(LVmCallback *callback)
 {
 	d = new LVirtualMachinePriv(this, callback);
 	d->IncRef();
@@ -1086,10 +1080,10 @@ LVmDebugger *LVirtualMachine::OpenDebugger(LCompiledCode *Code, const char *Asse
 {
 	if (d->DebuggerEnabled && !d->Debugger)
 	{
-		if (!d->DbgCallback)
+		if (!d->Callback)
 			return NULL;
 		
-		d->Debugger = d->DbgCallback->AttachVm(this, Code, Assembly);
+		d->Debugger = d->Callback->AttachVm(this, Code, Assembly);
 	}
 	
 	return d->Debugger;
@@ -1141,6 +1135,11 @@ bool LVirtualMachine::BreakPoint(int Addr, bool Add)
 void LVirtualMachine::SetBreakCpp(bool Brk)
 {
 	d->BreakCpp = Brk;
+}
+
+LVmCallback *LVirtualMachine::GetCallback()
+{
+	return d->Callback;
 }
 
 void LVirtualMachine::SetTempPath(const char *Path)
@@ -1332,7 +1331,7 @@ struct LScriptVmDebuggerPriv
 	// Current script
 	bool OwnVm;
 	LAutoPtr<LVirtualMachine> Vm;
-	LVmDebuggerCallback *Callback;
+	LVmCallback *Callback;
 	LString Script, Assembly;
 	LArray<CodeBlock> Blocks;
 	size_t CurrentAddr;
@@ -1546,7 +1545,7 @@ void LDebugView::PourText(size_t Start, ssize_t Len)
 	}
 }
 
-LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmDebuggerCallback *Callback, LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly)
+LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmCallback *Callback, LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly)
 {
 	d = new LScriptVmDebuggerPriv;
 	d->Parent = Parent;

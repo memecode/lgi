@@ -352,7 +352,7 @@ public:
 	/// Sets the value to a copy of	block of binary data
 	bool SetBinary(ssize_t Len, void *Data, bool Own = false);
 	/// Sets the value to a copy of the list
-	bool SetList(List<LVariant> *Lst = NULL);
+	List<LVariant> *SetList(List<LVariant> *Lst = NULL);
 	/// Sets the value to a hashtable
 	bool SetHashTable(LHash *Table = NULL, bool Copy = true);
 	/// Set the value to a surface

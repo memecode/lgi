@@ -7,7 +7,7 @@
 
 class LScriptContext;
 class LScriptEnginePrivate;
-class LVmDebuggerCallback;
+class LVmCallback;
 class LVirtualMachine;
 
 class LScriptArguments : public LArray<LVariant*>
@@ -55,6 +55,7 @@ typedef bool (LScriptContext::*ScriptCmd)(LScriptArguments &Args);
 /// Execution status
 enum LExecutionStatus
 {
+	ScriptNotStarted,
 	ScriptError,
 	ScriptWarning,
 	ScriptSuccess,
@@ -96,13 +97,13 @@ struct LFunc
 	virtual LExecutionStatus Call(LScriptContext *Ctx, LScriptArguments &Args) = 0;
 };
 
-struct GHostFunc : public LFunc
+struct LHostFunc : public LFunc
 {
 	LScriptContext *Context;
 	LString Args;
 	ScriptCmd Func;
 	
-	GHostFunc(const GHostFunc &f)
+	LHostFunc(const LHostFunc &f)
 	{
 		Context = f.Context;
 		Args = f.Args;
@@ -110,7 +111,7 @@ struct GHostFunc : public LFunc
 		Func = f.Func;
 	}
 	
-	GHostFunc(const char *method, const char *args, ScriptCmd proc) : LFunc(method, HostFunc)
+	LHostFunc(const char *method, const char *args, ScriptCmd proc) : LFunc(method, HostFunc)
 	{
 		Args = args;
 		Func = proc;
@@ -256,13 +257,13 @@ class LScriptContext : public LScriptUtils
 public:
 	virtual ~LScriptContext() {}
 	
-	virtual GHostFunc *GetCommands() = 0;
-	virtual char *GetIncludeFile(char *FileName) = 0;
+	virtual LHostFunc *GetCommands() = 0;
+	virtual LString GetIncludeFile(const char *FileName) = 0;
 	virtual LAutoString GetDataFolder() { return LAutoString(); }
 	virtual LStream *GetLog() { return NULL; }
 	virtual bool SetLog(LStream *Log) { return false; }
 
-	// AddPrimitive: Add your primitive's functions in a derived class using the format:
+	// AddPrimitive: Add your primitives functions in a derived class using the format:
 	//
 	//		bool MyPrim(LVariant *Ret, ArgumentArray &Args) { ... }
 	//
@@ -398,7 +399,7 @@ class LScriptEngine
 	class LScriptEnginePrivate *d;
 
 public:
-	LScriptEngine(LViewI *parent, LScriptContext *UserContext, LVmDebuggerCallback *Callback);
+	LScriptEngine(LViewI *parent, LScriptContext *UserContext, LVmCallback *Callback);
 	~LScriptEngine();
 
 	LStream *GetConsole();
@@ -442,11 +443,15 @@ public:
 		virtual void OnRun(bool Running) = 0;
 };
 
-class LVmDebuggerCallback : public LDom
+class LVmCallback : public LDom
 {
 public:
+	/// Call a callback by name.
+	virtual bool CallCallback(LString CallbackName, LScriptArguments &Args) = 0;
+
 	/// Start a debugger instance to handle the execution in 'Vm'
 	virtual LVmDebugger *AttachVm(LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly) = 0;
+	
 	/// Compile a new script
 	virtual bool CompileScript(LAutoPtr<LCompiledCode> &Output, const char *FileName, const char *Source) = 0;
 };
@@ -459,7 +464,7 @@ class LVmDebuggerWnd : public LWindow, public LVmDebugger
 	void UpdateVariables(LList *Lst, LVariant *Arr, ssize_t Len, char Prefix);
 
 public:
-	LVmDebuggerWnd(LView *Parent, LVmDebuggerCallback *Callback, LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly);
+	LVmDebuggerWnd(LView *Parent, LVmCallback *Callback, LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly);
 	~LVmDebuggerWnd();
 
 	void OwnVm(bool Own);

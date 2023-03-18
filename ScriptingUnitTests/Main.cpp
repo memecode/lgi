@@ -42,7 +42,7 @@ public:
 		Status = 0;
 	}
 
-	GHostFunc *GetCommands() { return NULL; }
+	LHostFunc *GetCommands() { return NULL; }
 	void SetEngine(LScriptEngine *Eng) { Engine = Eng; }
 
 	void OnReceiveFiles(LArray<const char*> &Files)

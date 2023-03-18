@@ -12,7 +12,7 @@
 #include "GScriptingPriv.h"
 #include "GUtf8.h"
 
-extern GHostFunc SystemLibrary[];
+extern LHostFunc SystemLibrary[];
 
 #define ThisToken()		(Cur < Tokens.Length() ? Tokens[Cur] : 0)
 #define NextToken()		(Cur < Tokens.Length() - 1 ? Tokens[Cur + 1] : 0)
@@ -944,7 +944,7 @@ GScriptEngine1::GScriptEngine1(LViewI *parent, LScriptContext *context)
 	d->Script = 0;
 
 	int i = 0;
-	for (GHostFunc *cmd = SystemLibrary + i; cmd->Method; cmd++)
+	for (LHostFunc *cmd = SystemLibrary + i; cmd->Method; cmd++)
 	{
 		d->Methods.Add(cmd->Method, cmd);
 	}
@@ -952,10 +952,10 @@ GScriptEngine1::GScriptEngine1(LViewI *parent, LScriptContext *context)
 	if (d->Context)
 	{
 		d->Context->SetEngine(this);
-		GHostFunc *CmdTable = d->Context->GetCommands();
+		LHostFunc *CmdTable = d->Context->GetCommands();
 		if (CmdTable)
 		{
-			for (GHostFunc *cmd = CmdTable; cmd->Method; cmd++)
+			for (LHostFunc *cmd = CmdTable; cmd->Method; cmd++)
 			{
 				d->Methods.Add(cmd->Method, (LFunc*)cmd);
 			}

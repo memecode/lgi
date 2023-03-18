@@ -665,7 +665,7 @@ bool LVariant::SetBinary(ssize_t Len, void *Data, bool Own)
 	return Status;
 }
 
-bool LVariant::SetList(List<LVariant> *Lst)
+List<LVariant> *LVariant::SetList(List<LVariant> *Lst)
 {
 	Empty();
 	Type = GV_LIST;
@@ -683,7 +683,7 @@ bool LVariant::SetList(List<LVariant> *Lst)
 		}
 	}
 
-	return Value.Lst != 0;
+	return Value.Lst;
 }
 
 bool LVariant::SetHashTable(LHash *Table, bool Copy)

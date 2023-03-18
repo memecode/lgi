@@ -61,6 +61,7 @@
 				<td>
 					<a href="#New">New</a><br>
 					<a href="#Delete">Delete</a><br>
+					<a href="#Len">Len</a><br>
 				<td>
 					<a href="#ReadTextFile">ReadTextFile</a><br>
 					<a href="#WriteTextFile">WriteTextFile</a><br>
@@ -90,6 +91,7 @@
 					<a href="#System">System</a><br>
 					<a href="#OsName">OsName</a><br>
 					<a href="#OsVersion">OsVersion</a><br>
+					<br>
 					<a href="#CurrentScript">CurrentScript</a><br>
 					<a href="#Assert">Assert</a><br>
 					<a href="#Throw">Throw</a><br>
@@ -442,6 +444,24 @@ Print(c.Type(), ": ", c, "\n");</pre>
 				</ul>
 			</div>
 
+		<h4>int <a name="Len">Len</a>(object[, object2]);</h4>
+			<div>
+				Returns the length of an array or hashtable. If more than one
+                object is passed it'll sum the length of all of them. Non collection
+                objects count as 1 thing. For instance a integer or floating point value
+                are "1" item.
+				<br><br>
+				Arguments:
+				<ul>
+					<li> object - some object collection.
+				</ul>
+				<br>
+				Returns:
+				<ul>
+					<li> Count of items in collections.
+				</ul>
+			</div>
+
 		<h4>void <a name="add">obj.Add</a>(object[, key]);</h4>
 			<div>
 				Adds 'object1' to a container. Depending on the object type:
@@ -586,52 +606,54 @@ c.Sort();
 				</ul>
 			</div>
 
-		<h4>list <a name="SelectFiles">SelectFiles</a>(parent_wnd[, file_types[, initial_dir[, multi_select[, save_as]]]]);</h4>
+		<h4>void <a name="SelectFiles">SelectFiles</a>(ParentWnd, Callback[, FileTypes[, InitialDir[, MultiSelect[, SaveAs]]]]);</h4>
 			<div>
 				Shows a file select dialog.
 				<br><br>
 				Arguments:
 				<ul>
-					<li> parent_wnd - the handle of the parent window.
-					<li> [optional] file_types - the types of files to select, e.g. "*.gif;*.png;*.jpg".
-					<li> [optional] initial_dir - the initial folder to select from.
-					<li> [optional] multi_select - TRUE if multiple file can be selected.
-					<li> [optional] save_as - TRUE if dialog should be for saving a file.
+					<li> ParentWnd - the handle of the parent window.
+					<li> Callback - The name of the callback function as a string.
+					<li> [optional] FileTypes - the types of files to select, e.g. "*.gif;*.png;*.jpg".
+					<li> [optional] InitialDir - the initial folder to select from.
+					<li> [optional] MultiSelect - TRUE if multiple file can be selected.
+					<li> [optional] SaveAs - TRUE if dialog should be for saving a file.
 				</ul>
 				<br>
-				Returns:
-				<ul>
-					<li> list of filenames.
-				</ul>
+				Returns: Nothing.<br>
 				<br>
 				Example:
-				<pre>files = SelectFiles(Parent, "*.png", "C:\\Users\\matthew\\Desktop", 1);
-if (files)
+				<pre>function OnFiles(files)
 {
-    for (i=0; i&lt;files.Length; i++)
-    {
-        Print(files[i], "\n");
-    }
-}</pre>
-				<pre class=output>C:\Users\matthew\Desktop\2channel.png
-C:\Users\matthew\Desktop\19.Poster_1.png
-C:\Users\matthew\Desktop\payment.png</pre>
+    Print("Files:", files, "\n");
+}
+				
+SelectFiles(Parent, "OnFiles", "*.png", "C:\\Users\\myUserName\\Desktop", 1);</pre>
+				<pre class=output>C:\Users\myUserName\Desktop\2channel.png
+C:\Users\myUserName\Desktop\19.Poster_1.png
+C:\Users\myUserName\Desktop\payment.png</pre>
 			</div>
 
-		<h4>list <a name="SelectFolder">SelectFolder</a>(parent_wnd[, initial_dir]);</h4>
+		<h4>void <a name="SelectFolder">SelectFolder</a>(ParentWnd, Callback[, InitialDir]);</h4>
 			<div>
 				Shows a folder select dialog.
 				<br><br>
 				Arguments:
 				<ul>
-					<li> parent_wnd - the handle of the parent window.
-					<li> [optional] initial_dir - the initial folder to select from.
+					<li> ParentWnd - the handle of the parent window.
+					<li> Callback - the name of the callback function as a string.
+					<li> [optional] InitialDir - the initial folder to select from.
 				</ul>
 				<br>
-				Returns:
-				<ul>
-					<li> String FolderPath.
-				</ul>
+				Returns: nothing.<br>
+				<br>
+				Example:
+				<pre>function OnFolder(folder)
+{
+    Print("Folder:", folder, "\n");
+}
+				
+SelectFolder(Parent, "OnFolder", "C:\\Users\\myUserName\\Desktop");</pre>
 			</div>
 
 		<h4>list <a name="ListFiles">ListFiles</a>(folder_path[, pattern]);</h4>
@@ -1169,7 +1191,7 @@ Print(c.Type(), ": ", c.x, ", ", c.y, ", ", c.Bits, ", ", c.ColourSpace, "\n");<
 				</ul>
 			</div>
 
-		<h4>string <a name="GetInputDlg">GetInputDlg</a>(parent_wnd, initial_value, msg, title, is_password);</h4>
+		<h4>void <a name="GetInputDlg">GetInputDlg</a>(parent_wnd, initial_value, msg, title, is_password, callback);</h4>
 			<div>
 				Asks the user for input using a dialog.
 				<br><br>
@@ -1180,12 +1202,17 @@ Print(c.Type(), ": ", c.x, ", ", c.y, ", ", c.Bits, ", ", c.ColourSpace, "\n");<
 					<li> msg - A message above the editbox.
 					<li> title - The title of the dialog.
 					<li> is_password - True if you want the editbox content obsured by dot characters.
+					<li> callback - The function name to call with the dialog result code.
 				</ul>
 				<br>
-				Returns:
-				<ul>
-					<li> A string containing what the user entered.
-				</ul>
+				Returns: Nothing.<br>
+				<br>
+				<pre>function MyCallback(str)
+{
+    Print("String entered is: '" + str + "'\n");
+}
+
+GetInputDlg(app, "SomeText", "Enter some text:", "InputTest", false, "MyCallback");</pre>
 			</div>
 
 		<h4>object <a name="GetViewById">GetViewById</a>(parent, id);</h4>

@@ -92,7 +92,7 @@ class HtmlScriptContext :
 	LScriptEngine *Eng;
 	
 public:
-	static GHostFunc Methods[];
+	static LHostFunc Methods[];
 
 	HtmlScriptContext(int Id, LDocumentEnv *Env) :
 		#ifdef _GHTML2_H
@@ -113,7 +113,7 @@ public:
 		}
 	}
 
-	GHostFunc *GetCommands()
+	LHostFunc *GetCommands()
 	{
 		return Methods;
 	}
@@ -133,9 +133,9 @@ public:
 	}
 };
 
-GHostFunc HtmlScriptContext::Methods[] =
+LHostFunc HtmlScriptContext::Methods[] =
 {
-	GHostFunc(0, 0, 0),
+	LHostFunc(0, 0, 0),
 };
 
 class HtmlImageLoader : public LThread, public LMutex, public LCancel

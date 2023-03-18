@@ -46,7 +46,7 @@ char16 sStartCurlyBracket[]	= { '{', 0 };
 char16 sEndCurlyBracket[]	= { '}', 0 };
 
 //////////////////////////////////////////////////////////////////////////////////////
-LExecutionStatus GHostFunc::Call(LScriptContext *Ctx, LScriptArguments &Args)
+LExecutionStatus LHostFunc::Call(LScriptContext *Ctx, LScriptArguments &Args)
 {
 	return (Ctx->*(Func))(Args) ? ScriptSuccess : ScriptError;
 }
@@ -426,28 +426,30 @@ LView *SystemFunctions::CastLView(LVariant &v)
 	return 0;
 }
 
-bool SystemFunctions::WaitForReturn(LScriptArguments &Args)
-{
-	while (Args.GetReturn()->Type != GV_NULL)
-	{
-		// This should only ever loop on Haiku...
-		LYield();
-		LSleep(10);
-	}
-
-	return true;
-}
-
 bool SystemFunctions::SelectFiles(LScriptArguments &Args)
 {
-	LFileSelect *s = new LFileSelect;
-	
 	Args.GetReturn()->Empty();
-	if (Args.Length() > 0)
-		s->Parent(CastLView(*Args[0]));
+	if (Args.Length() < 2)
+	{
+		Args.Throw(_FL, "SelectFiles(Parent, Callback[, FileTypes[, InitialDir[, MultiSelect[, SaveAs]]]]) expects at least 2 arguments.");
+		return false;
+	}
+
+	auto Ctx = Args.GetVm()->GetCallback();
+	if (!Ctx)
+	{
+		Args.Throw(_FL, "SelectFiles(...) requires a valid callback context.");
+		return false;
+	}
+
+	LFileSelect *s = new LFileSelect;
+	if (!s)
+		return false;
 	
-	auto t = LString(Args.Length() > 1 ? Args[1]->CastString() : NULL).SplitDelimit(",;:");
-	for (auto c: t)
+	s->Parent(CastLView(*Args[0]));
+	auto Callback = Args[1]->Str();	
+	auto Types = LString(Args.IdxCheck(2) ? Args[2]->CastString() : NULL).SplitDelimit(",;:");
+	for (auto c: Types)
 	{
 		char *sp = strrchr(c, ' ');
 		if (sp)
@@ -468,20 +470,32 @@ bool SystemFunctions::SelectFiles(LScriptArguments &Args)
 	}
 	s->Type("All Files", LGI_ALL_FILES);
 
-	s->InitialDir(Args.Length() > 2 ? Args[2]->CastString() : 0);
-	s->MultiSelect(Args.Length() > 3 ? Args[3]->CastInt32() != 0 : true);
-	bool SaveAs = Args.Length() > 4 ? Args[4]->CastInt32() != 0 : false;
+	s->InitialDir (Args.IdxCheck(3) ? Args[3]->CastString() : 0);
+	s->MultiSelect(Args.IdxCheck(4) ? Args[4]->CastInt32() != 0 : true);
+	bool SaveAs =  Args.IdxCheck(5) ? Args[5]->CastInt32() != 0 : false;
 
-	auto Process = [&Args](LFileSelect *s, bool ok)
+	auto Process = [Callback=LString(Callback),Ctx](LFileSelect *s, bool ok)
 	{
 		if (ok)
 		{
-			Args.GetReturn()->SetList();
-			auto Lst = Args.GetReturn()->Value.Lst;
-			for (unsigned i=0; i<s->Length(); i++)
-				Lst->Insert(new LVariant((*s)[i]));
+			LVirtualMachine Vm;
+			LScriptArguments Args(&Vm);
+
+			LVariant *v = new LVariant;
+			if (auto Lst = v->SetList())
+			{
+				for (unsigned i=0; i<s->Length(); i++)
+				{
+					auto path = (*s)[i];
+					Lst->Insert(new LVariant(path));
+				}
+			}
+			Args.Add(v);
+
+			Ctx->CallCallback(Callback, Args);
+			Args.DeleteObjects();
 		}
-		else *Args.GetReturn() = false;
+
 		delete s;
 	};
 
@@ -490,29 +504,49 @@ bool SystemFunctions::SelectFiles(LScriptArguments &Args)
 	else
 		s->Open(Process);
 
-	return WaitForReturn(Args);
+	return true;
 }
 
 bool SystemFunctions::SelectFolder(LScriptArguments &Args)
 {
-	LFileSelect *s = new LFileSelect;
-	
-	if (Args.Length() > 0)
-		s->Parent(CastLView(*Args[0]));
-	s->InitialDir(Args.Length() > 1 ? Args[1]->CastString() : 0);
-
 	Args.GetReturn()->Empty();
+	if (Args.Length() < 2)
+	{
+		Args.Throw(_FL, "SelectFolder(Parent, Callback[, InitialDir]) expects at least 2 arguments.");
+		return false;
+	}
 
-	s->OpenFolder([&Args](LFileSelect *s, bool ok)
+	auto Ctx = Args.GetVm()->GetCallback();
+	if (!Ctx)
+	{
+		Args.Throw(_FL, "SelectFiles(...) requires a valid callback context.");
+		return false;
+	}
+
+	LFileSelect *s = new LFileSelect;
+	if (!s)
+		return false;
+	
+	s->Parent(CastLView(*Args[0]));
+	auto Callback = Args[1]->Str();
+	if (Args.IdxCheck(2))
+		s->InitialDir(Args[2]->CastString());
+
+	s->OpenFolder([Ctx, Callback=LString(Callback)](auto s, bool ok)
 	{
 		if (ok)
-			*Args.GetReturn() = s->Name();
-		else
-			*Args.GetReturn() = false;
+		{
+			LVirtualMachine Vm;
+			LScriptArguments Args(&Vm);
+			Args.Add(new LVariant(s->Name()));
+			Ctx->CallCallback(Callback, Args);
+			Args.DeleteObjects();
+		}
+
 		delete s;
 	});
 
-	return WaitForReturn(Args);
+	return true;
 }
 
 bool SystemFunctions::Sleep(LScriptArguments &Args)
@@ -904,21 +938,21 @@ bool SystemFunctions::ListFiles(LScriptArguments &Args)
 {
 	if (Args.Length() < 1)
 	{
-		LAssert(!"Wrong args.");
+		Args.GetReturn()->Empty();
+		Args.Throw(_FL, "ListFiles(FolderPath[, FilterPattern]) expects at least one argument.");
 		return false;
 	}
 
 	Args.GetReturn()->SetList();
+
+	auto Folder  = Args[0]->CastString();
+	auto Pattern = Args.Length() > 1 ? Args[1]->CastString() : NULL;
+
 	LDirectory d;
-	char *Pattern = Args.Length() > 1 ? Args[1]->CastString() : 0;
-	
-	char *Folder = Args[0]->CastString();
-	for (int b=d.First(Folder); b; b=d.Next())
+	for (auto b=d.First(Folder); b; b=d.Next())
 	{
 		if (!Pattern || MatchStr(Pattern, d.GetName()))
-		{
 			Args.GetReturn()->Value.Lst->Insert(new LVariant(new LFileListEntry(&d)));
-		}
 	}
 
 	return true;
@@ -927,15 +961,14 @@ bool SystemFunctions::ListFiles(LScriptArguments &Args)
 bool SystemFunctions::CreateSurface(LScriptArguments &Args)
 {
 	Args.GetReturn()->Empty();
-
 	if (Args.Length() < 2)
 	{
-		LAssert(!"Wrong args.");
+		Args.Throw(_FL, "CreateSurface(x, y[, Bits|ColourSpace]) expects at least two arguments.");
 		return false;
 	}
 
-	int x = Args[0]->CastInt32();
-	int y = Args[1]->CastInt32();
+	auto x = Args[0]->CastInt32();
+	auto y = Args[1]->CastInt32();
 	LColourSpace Cs = CsNone;
 
 	if (Args.Length() > 2)
@@ -957,11 +990,12 @@ bool SystemFunctions::CreateSurface(LScriptArguments &Args)
 	if (!Cs) // Catch all error cases and make it the default screen depth.
 		Cs = GdcD->GetColourSpace();
 
-	if ((Args.GetReturn()->Value.Surface.Ptr = new LMemDC(x, y, Cs)))
+	auto r = Args.GetReturn();
+	if ((r->Value.Surface.Ptr = new LMemDC(x, y, Cs)))
 	{
-		Args.GetReturn()->Type = GV_LSURFACE;
-		Args.GetReturn()->Value.Surface.Own = true;
-		Args.GetReturn()->Value.Surface.Ptr->IncRef();
+		r->Type = GV_LSURFACE;
+		r->Value.Surface.Own = true;
+		r->Value.Surface.Ptr->IncRef();
 	}
 
 	return true;
@@ -972,7 +1006,7 @@ bool SystemFunctions::ColourSpaceToString(LScriptArguments &Args)
 	Args.GetReturn()->Empty();
 	if (Args.Length() != 1)
 	{
-		LAssert(!"Wrong args.");
+		Args.Throw(_FL, "ColourSpaceToString(ColourSpaceInt) expects at least one argument.");
 		return false;
 	}
 
@@ -985,7 +1019,7 @@ bool SystemFunctions::StringToColourSpace(LScriptArguments &Args)
 	Args.GetReturn()->Empty();
 	if (Args.Length() != 1)
 	{
-		LAssert(!"Wrong args.");
+		Args.Throw(_FL, "StringToColourSpace(ColourSpaceStr) expects at least one argument.");
 		return false;
 	}
 
@@ -997,14 +1031,14 @@ bool SystemFunctions::MessageDlg(LScriptArguments &Args)
 {
 	if (Args.Length() < 2)
 	{
-		LAssert(!"Wrong args.");
+		Args.Throw(_FL, "MessageDlg(Parent, Message[, Title[, Buttons]]) expects at least 2 arguments.");
 		return false;
 	}
 
-	LViewI *Parent = CastLView(*Args[0]);
-	auto *Msg = Args[1]->Str();
-	auto *Title = Args.IdxCheck(2) ? Args[2]->Str() : LAppInst->Name();
-	uint32_t Btns = Args.IdxCheck(3) ? Args[3]->CastInt32() : MB_OK;
+	auto Parent = CastLView(*Args[0]);
+	auto Msg    = Args[1]->Str();
+	auto Title  = Args.IdxCheck(2) ? Args[2]->Str() : LAppInst->Name();
+	auto Btns   = Args.IdxCheck(3) ? Args[3]->CastInt32() : MB_OK;
 
 	auto Btn = LgiMsg(Parent, Msg, Title, Btns);
 	*Args.GetReturn() = Btn;
@@ -1014,26 +1048,44 @@ bool SystemFunctions::MessageDlg(LScriptArguments &Args)
 
 bool SystemFunctions::GetInputDlg(LScriptArguments &Args)
 {
-	if (Args.Length() < 4)
+	if (Args.Length() < 5)
 	{
-		LAssert(!"Wrong args.");
+		Args.Throw(_FL, "GetInputDlg(Parent, DefaultInput, Message, Title, IsPassword, Callback) expects 5 arguments.");
 		return false;
 	}
 
-	LViewI *Parent = CastLView(*Args[0]);
-	char *InitVal = Args[1]->Str();
-	char *Msg = Args[2]->Str();
-	char *Title = Args[3]->Str();
-	bool Pass = Args.Length() > 4 ? Args[4]->CastInt32() != 0 : false;
-
-	LInput *Dlg = new LInput(Parent, InitVal, Msg, Title, Pass);
-	Dlg->DoModal([Dlg, &Args](auto d, auto code)
+	auto Ctx = Args.GetVm()->GetCallback();
+	if (!Ctx)
 	{
-		*Args.GetReturn() = code ? Dlg->GetStr() : -1;
+		Args.Throw(_FL, "GetInputDlg requires a valid VM context.");
+		return false;
+	}
+
+	auto Parent   = CastLView(*Args[0]);
+	auto InitVal  = Args[1]->Str();
+	auto Msg      = Args[2]->Str();
+	auto Title    = Args[3]->Str();
+	auto Pass     = Args[4]->CastInt32() != 0;
+	auto Callback = Args[5]->Str();
+
+	Args.GetReturn()->Empty();
+
+	auto Dlg = new LInput(Parent, InitVal, Msg, Title, Pass);
+	Dlg->DoModal([this, Dlg, Ctx, Callback=LString(Callback)](auto d, auto ok)
+	{
+		if (ok)
+		{
+			LVirtualMachine Vm;
+			LScriptArguments Args(&Vm);
+			Args.Add(new LVariant(Dlg->GetStr()));
+			Ctx->CallCallback(Callback, Args);
+			Args.DeleteObjects();
+		}
 		delete Dlg;
 	});
 
-	return WaitForReturn(Args);
+	// Don't wait here...
+	return true;
 }
 
 bool SystemFunctions::GetViewById(LScriptArguments &Args)
@@ -1123,9 +1175,9 @@ bool SystemFunctions::OsVersion(LScriptArguments &Args)
 }
 
 #define DefFn(Name) \
-	GHostFunc(#Name, 0, (ScriptCmd)&SystemFunctions::Name)
+	LHostFunc(#Name, 0, (ScriptCmd)&SystemFunctions::Name)
 
-GHostFunc SystemLibrary[] =
+LHostFunc SystemLibrary[] =
 {
 	// Debug
 	DefFn(Assert),
@@ -1179,10 +1231,10 @@ GHostFunc SystemLibrary[] =
 	DefFn(OsVersion),
 
 	// End of list marker
-	GHostFunc(0, 0, 0),
+	LHostFunc(0, 0, 0),
 };
 
-GHostFunc *SystemFunctions::GetCommands()
+LHostFunc *SystemFunctions::GetCommands()
 {
 	return SystemLibrary;
 }

@@ -582,7 +582,7 @@ case ICallMethod:
 	#endif
 	
 	#if VM_EXECUTE
-	GHostFunc *Hf = dynamic_cast<GHostFunc*>(Meth);
+	LHostFunc *Hf = dynamic_cast<LHostFunc*>(Meth);
 	if (Hf)
 	{
 		if (!(Hf->Context->*(Hf->Func))(Arg))

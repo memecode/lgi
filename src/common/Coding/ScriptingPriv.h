@@ -183,7 +183,7 @@ struct LVarRef
 	}
 };
 
-union GPtr
+union LScriptPtr
 {
 	uint8_t *u8;
 	uint16 *u16;
@@ -391,7 +391,7 @@ class LVirtualMachine : public LScriptUtils
 public:
 	static bool BreakOnWarning;
 
-	LVirtualMachine(LVmDebuggerCallback *callback = NULL);
+	LVirtualMachine(LVmCallback *callback = NULL);
 	LVirtualMachine(LVirtualMachine *vm);
 	~LVirtualMachine();
 
@@ -439,6 +439,7 @@ public:
 	
 	// Properties
 	void SetTempPath(const char *Path);
+	LVmCallback *GetCallback();
 };
 
 /// Scripting engine system functions
@@ -451,7 +452,6 @@ class SystemFunctions : public LScriptContext
 	#endif
 
 	LView *CastLView(LVariant &v);
-	bool WaitForReturn(LScriptArguments &Args);
 
 public:
 	SystemFunctions();
@@ -461,12 +461,12 @@ public:
 	bool SetLog(LStream *log);
 	void SetEngine(LScriptEngine *Eng);	
 	
-	char *GetIncludeFile(char *FileName)
+	LString GetIncludeFile(const char *FileName) override
 	{
 		return NULL;
 	}
 	
-	GHostFunc *GetCommands();
+	LHostFunc *GetCommands();
 
 	// Debug
 		bool Assert(LScriptArguments &Args);
@@ -541,7 +541,7 @@ public:
 		/// Standard alert message box
 		bool MessageDlg(LScriptArguments &Args);
 		/// Gets an input string from the user
-		/// String GetInputDlg(Window Parent, String InitialValue, String Question, String Title[, bool IsPassword]);
+		/// String GetInputDlg(Window Parent, String InitialValue, String Question, String Title, bool IsPassword, String Callback.
 		bool GetInputDlg(LScriptArguments &Args);
 		/// Gets a view by id
 		bool GetViewById(LScriptArguments &Args);

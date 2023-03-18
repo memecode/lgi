@@ -520,7 +520,7 @@ public:
 		ssize_t Len = Code->ByteCode.Length();
 		if (Code->ByteCode.Length(Len + 1))
 		{
-			GPtr p;
+			LScriptPtr p;
 			p.u8 = &Code->ByteCode[Len];
 			*p.u8++ = Op;
 		}
@@ -537,7 +537,7 @@ public:
 		ssize_t Len = Code->ByteCode.Length();
 		if (Code->ByteCode.Length(Len + 5))
 		{
-			GPtr p;
+			LScriptPtr p;
 			p.u8 = &Code->ByteCode[Len];
 			*p.u8++ = Op;
 			*p.r++ = a;
@@ -555,7 +555,7 @@ public:
 		ssize_t Len = Code->ByteCode.Length();
 		if (Code->ByteCode.Length(Len + 9))
 		{
-			GPtr p;
+			LScriptPtr p;
 			p.u8 = &Code->ByteCode[Len];
 			*p.u8++ = Op;
 			*p.r++ = a;
@@ -574,7 +574,7 @@ public:
 		ssize_t Len = Code->ByteCode.Length();
 		if (Code->ByteCode.Length(Len + 1 + (sizeof(LVarRef) * 3) ))
 		{
-			GPtr p;
+			LScriptPtr p;
 			p.u8 = &Code->ByteCode[Len];
 			*p.u8++ = Op;
 			*p.r++ = a;
@@ -594,7 +594,7 @@ public:
 		ssize_t Len = Code->ByteCode.Length();
 		if (Code->ByteCode.Length(Len + 1 + (sizeof(LVarRef) * 4) ))
 		{
-			GPtr p;
+			LScriptPtr p;
 			p.u8 = &Code->ByteCode[Len];
 			*p.u8++ = Op;
 
@@ -620,7 +620,7 @@ public:
 		ssize_t Len = Code->ByteCode.Length();
 		if (Code->ByteCode.Length(Len + 1 + (sizeof(LVarRef) * Args.Length()) ))
 		{
-			GPtr p;
+			LScriptPtr p;
 			p.u8 = &Code->ByteCode[Len];
 			*p.u8++ = Op;
 
@@ -728,12 +728,12 @@ public:
 					if (File)
 					{
 						LVariant v;
-						LAutoString IncCode;
+						LString IncCode;
 						v.OwnStr(File.Release());
 
 						if (UserCtx)
 						{
-							IncCode.Reset(UserCtx->GetIncludeFile(v.Str()));
+							IncCode = UserCtx->GetIncludeFile(v.Str());
 							if (IncCode)
 							{
 								Lex(IncCode, v.Str());
@@ -756,9 +756,12 @@ public:
 							
 							if (LFileExists(v.Str()))
 							{
-								IncCode.Reset(LReadTextFile(v.Str()));
-								if (IncCode)
+								LFile f(v.Str());
+								if (f &&
+									(IncCode = f.Read()))
+								{
 									Lex(IncCode, v.Str());
+								}
 								else
 								{
 									DeleteArray(t);
@@ -1594,7 +1597,7 @@ public:
 				ssize_t Len = Code->ByteCode.Length();
 				ssize_t Size = 1 + sizeof(LFunc*) + sizeof(LVarRef) + 2 + (a.Length() * sizeof(LVarRef));
 				Code->ByteCode.Length(Len + Size);
-				GPtr p;
+				LScriptPtr p;
 				uint8_t *Start = &Code->ByteCode[Len];
 				p.u8 = Start;
 				*p.u8++ = ICallMethod;
@@ -1685,7 +1688,7 @@ public:
 								(a.Length() * sizeof(LVarRef)); // args
 
 				Code->ByteCode.Length(Len + Size);
-				GPtr p;
+				LScriptPtr p;
 				uint8_t *Start = &Code->ByteCode[Len];
 				p.u8 = Start;
 				*p.u8++ = ICallScript;
@@ -2947,7 +2950,7 @@ public:
 			size_t Len = Code->ByteCode.Length();
 			if (Code->ByteCode.Length(Len + 5))
 			{
-				GPtr p;
+				LScriptPtr p;
 				p.u8 = &Code->ByteCode[Len];
 				*p.u8++ = IJump;
 				*p.i32++ = 0;
@@ -3527,7 +3530,7 @@ public:
 			{
 				if (JumpLoc)
 				{
-					GPtr p;
+					LScriptPtr p;
 					p.u8 = &Code->ByteCode[JumpLoc];
 					*p.u32 = (uint32_t) (Code->ByteCode.Length() - (JumpLoc + 4));
 					JumpLoc = 0;
@@ -3542,7 +3545,7 @@ public:
 
 		if (JumpLoc)
 		{
-			GPtr p;
+			LScriptPtr p;
 			p.u8 = &Code->ByteCode[JumpLoc];
 			*p.u32 = (uint32_t) (Code->ByteCode.Length() - (JumpLoc + 4));
 			JumpLoc = 0;
@@ -3568,7 +3571,7 @@ public:
 				}
 				else
 				{
-					GPtr p;
+					LScriptPtr p;
 					p.u8 = &Code->ByteCode[f.Offset];
 					LAssert(*p.u32 == 0);
 					*p.u32++ = f.Func->GetStartAddr();
@@ -3625,7 +3628,7 @@ bool LCompiler::Compile
 	d->Methods.Empty();
 	if (SysContext)
 	{
-		GHostFunc *f = SysContext->GetCommands();
+		LHostFunc *f = SysContext->GetCommands();
 		for (int i=0; f[i].Method; i++)
 		{
 			f[i].Context = SysContext;
@@ -3637,7 +3640,7 @@ bool LCompiler::Compile
 	d->UserCtx = UserContext;
 	if (d->UserCtx)
 	{
-		GHostFunc *f = d->UserCtx->GetCommands();
+		LHostFunc *f = d->UserCtx->GetCommands();
 		for (int i=0; f[i].Method; i++)
 		{
 			f[i].Context = d->UserCtx;
@@ -3691,7 +3694,7 @@ public:
 	SystemFunctions SysContext;
 	LScriptContext *UserContext;
 	LCompiledCode *Code;
-	LVmDebuggerCallback *Callback;
+	LVmCallback *Callback;
 	LVariant ReturnValue;
 
 	LScriptEnginePrivate()
@@ -3703,7 +3706,7 @@ public:
 	}
 };
 
-LScriptEngine::LScriptEngine(LViewI *parent, LScriptContext *UserContext, LVmDebuggerCallback *Callback)
+LScriptEngine::LScriptEngine(LViewI *parent, LScriptContext *UserContext, LVmCallback *Callback)
 {
 	d = new LScriptEnginePrivate;
 	d->Parent = parent;
