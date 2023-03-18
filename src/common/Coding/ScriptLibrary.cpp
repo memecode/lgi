@@ -435,7 +435,7 @@ bool SystemFunctions::SelectFiles(LScriptArguments &Args)
 		return false;
 	}
 
-	auto Ctx = Args.GetVm()->GetCallback();
+	auto Ctx = Args.GetVm()->SaveContext();
 	if (!Ctx)
 	{
 		Args.Throw(_FL, "SelectFiles(...) requires a valid callback context.");
@@ -478,8 +478,7 @@ bool SystemFunctions::SelectFiles(LScriptArguments &Args)
 	{
 		if (ok)
 		{
-			LVirtualMachine Vm;
-			LScriptArguments Args(&Vm);
+			LScriptArguments Args(NULL);
 
 			LVariant *v = new LVariant;
 			if (auto Lst = v->SetList())
@@ -492,7 +491,7 @@ bool SystemFunctions::SelectFiles(LScriptArguments &Args)
 			}
 			Args.Add(v);
 
-			Ctx->CallCallback(Callback, Args);
+			Ctx.Call(Callback, Args);
 			Args.DeleteObjects();
 		}
 
@@ -516,7 +515,7 @@ bool SystemFunctions::SelectFolder(LScriptArguments &Args)
 		return false;
 	}
 
-	auto Ctx = Args.GetVm()->GetCallback();
+	auto Ctx = Args.GetVm()->SaveContext();
 	if (!Ctx)
 	{
 		Args.Throw(_FL, "SelectFiles(...) requires a valid callback context.");
@@ -532,14 +531,13 @@ bool SystemFunctions::SelectFolder(LScriptArguments &Args)
 	if (Args.IdxCheck(2))
 		s->InitialDir(Args[2]->CastString());
 
-	s->OpenFolder([Ctx, Callback=LString(Callback)](auto s, bool ok)
+	s->OpenFolder([Ctx, Callback = LString(Callback)](auto s, bool ok)
 	{
 		if (ok)
 		{
-			LVirtualMachine Vm;
-			LScriptArguments Args(&Vm);
+			LScriptArguments Args(NULL);
 			Args.Add(new LVariant(s->Name()));
-			Ctx->CallCallback(Callback, Args);
+			Ctx.Call(Callback, Args);
 			Args.DeleteObjects();
 		}
 
@@ -1054,7 +1052,7 @@ bool SystemFunctions::GetInputDlg(LScriptArguments &Args)
 		return false;
 	}
 
-	auto Ctx = Args.GetVm()->GetCallback();
+	auto Ctx = Args.GetVm()->SaveContext();
 	if (!Ctx)
 	{
 		Args.Throw(_FL, "GetInputDlg requires a valid VM context.");
@@ -1075,10 +1073,9 @@ bool SystemFunctions::GetInputDlg(LScriptArguments &Args)
 	{
 		if (ok)
 		{
-			LVirtualMachine Vm;
-			LScriptArguments Args(&Vm);
+			LScriptArguments Args(NULL);
 			Args.Add(new LVariant(Dlg->GetStr()));
-			Ctx->CallCallback(Callback, Args);
+			Ctx.Call(Callback, Args);
 			Args.DeleteObjects();
 		}
 		delete Dlg;

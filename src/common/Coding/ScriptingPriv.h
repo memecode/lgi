@@ -391,7 +391,35 @@ class LVirtualMachine : public LScriptUtils
 public:
 	static bool BreakOnWarning;
 
+	class Context
+	{
+		friend class LVirtualMachine;
+		LCompiledCode *Code = NULL;
+		LVmCallback *Callback = NULL;
+		ssize_t Addr = -1;
+
+	public:
+		operator bool()
+		{
+			return Code != NULL && Callback != NULL;
+		}
+
+		bool Call(LString CallbackName, LScriptArguments &Args) const
+		{
+			if (!Callback)
+				return false;
+
+			LVirtualMachine Vm(*this);
+			auto Prev = Args.GetVm();
+			Args.SetVm(&Vm);
+			auto result = Callback->CallCallback(Vm, CallbackName, Args);
+			Args.SetVm(Prev);
+			return result;
+		}
+	};
+
 	LVirtualMachine(LVmCallback *callback = NULL);
+	LVirtualMachine(Context ctx);
 	LVirtualMachine(LVirtualMachine *vm);
 	~LVirtualMachine();
 
@@ -437,9 +465,10 @@ public:
 	void SetBreakCpp(bool Brk);
 	void SetDebuggerEnabled(bool b);
 	
-	// Properties
+	// Other methods
 	void SetTempPath(const char *Path);
 	LVmCallback *GetCallback();
+	Context SaveContext();
 };
 
 /// Scripting engine system functions

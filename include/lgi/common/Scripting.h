@@ -38,6 +38,7 @@ public:
 	}
 
 	LVirtualMachine *GetVm() { return Vm; }
+	void SetVm(LVirtualMachine *vm) { Vm = vm; }
 	LVariant *GetReturn() { return PtrRet; }
 	LStream *GetConsole() { return Console; }
 	bool Throw(const char *File, int Line, const char *Msg, ...);
@@ -328,6 +329,7 @@ public:
 class LCompiledCode
 {
 	friend class LCompilerPriv;
+	friend class LVirtualMachine;
 	friend class LVirtualMachinePriv;
 	friend class LCompiler;
 	friend class LVmDebuggerWnd;
@@ -447,7 +449,7 @@ class LVmCallback : public LDom
 {
 public:
 	/// Call a callback by name.
-	virtual bool CallCallback(LString CallbackName, LScriptArguments &Args) = 0;
+	virtual bool CallCallback(LVirtualMachine &Vm, LString CallbackName, LScriptArguments &Args) = 0;
 
 	/// Start a debugger instance to handle the execution in 'Vm'
 	virtual LVmDebugger *AttachVm(LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly) = 0;

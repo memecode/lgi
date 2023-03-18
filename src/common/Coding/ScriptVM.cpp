@@ -567,6 +567,15 @@ public:
 
 	void OnException(const char *File, int Line, ssize_t Address, const char *Msg)
 	{
+		if (!Code)
+		{
+			LgiTrace("%s:%i - Exception without Code object: %s:%i, %s\n",
+				_FL,
+				File, Line,
+				Msg);
+			return;
+		}
+
 		if (Address < 0)
 		{
 			uint8_t *Base = &Code->ByteCode[0];
@@ -963,7 +972,6 @@ public:
 		else
 		{
 			// Stepping through code
-			// LHashTbl<IntKey<int>, int> &Debug = Code->Debug;
 			int Param = 0;
 			switch (Type)
 			{
@@ -997,6 +1005,9 @@ public:
 					#undef VM_EXECUTE
 				}
 
+				if (Type == RunContinue)
+					continue;
+
 				if (Type == RunStepLine)
 				{
 					int CurLine = NearestLine(CurrentScriptAddress);
@@ -1009,7 +1020,10 @@ public:
 						break;
 				}
 				else if (Type == RunStepInstruction)
+				{
 					break;
+				}
+				else LAssert(!"Invalid Type.");
 			}
 		}
 
@@ -1026,6 +1040,20 @@ LVirtualMachine::LVirtualMachine(LVmCallback *callback)
 {
 	d = new LVirtualMachinePriv(this, callback);
 	d->IncRef();
+}
+
+LVirtualMachine::LVirtualMachine(Context ctx)
+{
+	d = new LVirtualMachinePriv(this, ctx.Callback);
+	d->IncRef();
+
+	if (d->Code = ctx.Code)
+	{
+		if (d->Code->ByteCode.IdxCheck(ctx.Addr))
+			d->c.u8 = d->Code->ByteCode.AddressOf() + ctx.Addr;
+	}
+	else
+		d->c.u8 = NULL;
 }
 
 LVirtualMachine::LVirtualMachine(LVirtualMachine *vm)
@@ -1065,9 +1093,11 @@ LExecutionStatus LVirtualMachine::ExecuteFunction(LCompiledCode *Code, LFunction
 		return s;
 
 	d->ArgsOutput = ArgsOut;
+	auto Prev = Args.Vm;
 	Args.Vm = this;
 	LExecutionStatus r = d->Run(LVirtualMachinePriv::RunContinue);
-	Args.Vm = NULL;
+	Args.Vm = Prev;
+
 	return r;
 }
 
@@ -1135,6 +1165,20 @@ bool LVirtualMachine::BreakPoint(int Addr, bool Add)
 void LVirtualMachine::SetBreakCpp(bool Brk)
 {
 	d->BreakCpp = Brk;
+}
+
+LVirtualMachine::Context LVirtualMachine::SaveContext()
+{
+	LVirtualMachine::Context ctx;
+	
+	ctx.Callback = d->Callback;
+	if ((ctx.Code = d->Code) &&
+		ctx.Code->ByteCode.PtrCheck(d->c.u8))
+	{
+		ctx.Addr = d->c.u8 - ctx.Code->ByteCode.AddressOf();
+	}
+
+	return ctx;
 }
 
 LVmCallback *LVirtualMachine::GetCallback()
