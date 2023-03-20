@@ -12,6 +12,7 @@ Target = lgi-gtk3
 ifndef Build
 	Build = Debug
 endif
+MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
 
 Flags = -fPIC -w -fno-inline -fpermissive
@@ -172,9 +173,13 @@ Source =	src/linux/Lgi/Window.cpp \
 			src/common/Gdc2/16Bit.cpp \
 			src/common/Gdc2/15Bit.cpp
 
-SourceLst := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(Source)))
-Objects := $(addprefix $(BuildDir)/,$(SourceLst))
-Deps := $(patsubst %.o,%.d,$(Objects))
+SourceC    := $(filter %.c,$(Source))
+ObjectsC   := $(SourceC:.c=.o)
+SourceCpp  := $(filter %.cpp,$(Source))
+ObjectsCpp := $(SourceCpp:.cpp=.o)
+Objects    := $(notdir $(ObjectsC) $(ObjectsCpp))
+Objects    := $(addprefix $(BuildDir)/,$(Objects))
+Deps       := $(patsubst %.o,%.d,$(Objects))
 
 # Target
 TargetFile = lib$(Target)$(Tag).so
@@ -188,36 +193,46 @@ $(TargetFile) : $(Objects)
 		$(Libs)
 	@echo Done.
 
-.SECONDEXPANSION:
-$(Objects): $(BuildDir)/%.o: $$(wildcard %.c*)
+$(BuildDir)/%.o: %.c
 	mkdir -p $(@D)
-	@echo $(notdir $<) [$(Build)]
-ifeq "$(suffix $<)" ".cpp"
-	$(CPP) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
-else
-	$(CC) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
-endif
+	echo $(notdir $<) [$(Build)]
+	$(CC) $(Inc) $(Flags) $(Defs) -c $< -o $@
+
+$(BuildDir)/%.o: %.cpp
+	mkdir -p $(@D)
+	echo $(notdir $<) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $@
 
 -include $(Objects:.o=.d)
 
 # Clean out targets
-define rmIfExists
-	$(eval depAbs := $(abspath $(dep)))
-	@rm $(depAbs) 2> /dev/null || true
-endef
 clean :
-	$(foreach dep, $(Objects) $(Deps) $(BuildDir)/$(TargetFile), $(rmIfExists))
+	rm $(Objects) $(Deps) $(BuildDir)/$(TargetFile)
 	@echo Cleaned $(BuildDir)
 
-VPATH=%.cpp \
+VPATH=$(BuildDir) \
 	./src/common/Hash/sha1 \
 	./src/common/Hash/md5 \
+	./src/linux/Lgi \
+	./src/linux/Gtk \
+	./src/linux/General \
+	./src/common/Widgets \
+	./src/common/Text \
+	./src/common/Skins/Gel \
+	./src/common/Resource \
+	./src/common/Net \
+	./src/common/Lgi \
+	./src/common/General \
+	./src/common/Gdc2 \
+	./src/common/Gdc2/Tools \
+	./src/common/Gdc2/Font \
+	./src/common/Gdc2/Filters \
+	./src/common/Gdc2/Path \
 	./private/linux \
 	./private/common \
 	./include/lgi/mac/cocoa \
 	./include/lgi/linux/Gtk \
 	./include/lgi/linux \
 	./include/lgi/common \
-	./include \
-	$(BuildDir)
+	./include
 
