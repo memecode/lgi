@@ -666,7 +666,7 @@ LFont *LFontSystem::GetGlyph(uint32_t u, LFont *UserFont)
 					}
 
 					// Prefer these fonts...
-					SubFonts.Sort([&Pref](auto a, auto b)
+					SubFonts.Sort([Pref](auto a, auto b)
 					{
 						int ap = Pref.Find(*a);
 						int bp = Pref.Find(*b);

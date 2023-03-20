@@ -259,11 +259,11 @@ public:
 	{
 		auto s = new LFileSelect;
 		s->Parent(this);
-		s->Open([&](auto dlg, auto status)
+		s->Open([this, EditId](auto s, auto status)
 		{
 			if (status)
 				SetCtrlName(EditId, s->Name());
-			delete dlg;
+			delete s;
 		});
 	}
 
@@ -991,7 +991,7 @@ public:
 			{
 				auto s = new LFileSelect;
 				s->Parent(this);
-				s->Open([&](auto dlg, auto status)
+				s->Open([this](auto dlg, auto status)
 				{
 					if (status)
 						OpenDiff(dlg->Name());
@@ -1105,7 +1105,7 @@ public:
 
 	void OpenLocalFolder(const char *Fld = NULL)
 	{
-		auto Load = [&](const char *Fld)
+		auto Load = [this](const char *Fld)
 		{
 			// Check the folder isn't already loaded...
 			bool Has = false;
@@ -1133,11 +1133,11 @@ public:
 		{
 			auto s = new LFileSelect;
 			s->Parent(this);
-			s->OpenFolder([&](auto dlg, auto status)
+			s->OpenFolder([this, Load](auto s, auto status)
 			{
 				if (status)
-					Load(dlg->Name());
-				delete dlg;
+					Load(s->Name());
+				delete s;
 			});
 		}
 		else Load(Fld);

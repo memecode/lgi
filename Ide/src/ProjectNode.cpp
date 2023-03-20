@@ -371,7 +371,7 @@ bool ProjectNode::GetClean()
 
 void ProjectNode::SetClean()
 {
-	auto CleanProj = [&]()
+	auto CleanProj = [this]()
 	{
 		for (auto i: *this)
 		{
@@ -382,7 +382,7 @@ void ProjectNode::SetClean()
 	};
 
 	if (Dep)
-		Dep->SetClean([&](bool ok)
+		Dep->SetClean([this, CleanProj](bool ok)
 		{
 			if (ok)
 				CleanProj();
@@ -1115,7 +1115,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 			case IDM_INSERT_FTP:
 			{
 				AddFtpFile *Add = new AddFtpFile(Tree, GetAttr(OPT_Ftp));
-				Add->DoModal([&](auto dlg, auto code)
+				Add->DoModal([this, Add](auto dlg, auto code)
 				{
 					if (code)
 					{
@@ -1221,7 +1221,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 			case IDM_NEW_FOLDER:
 			{
 				LInput *Name = new LInput(Tree, "", "Name:", AppName);
-				Name->DoModal([&](auto dlg, auto ok)
+				Name->DoModal([this, Name](auto dlg, auto ok)
 				{
 					if (ok)
 						GetSubFolder(Project, Name->GetStr(), true);
@@ -1232,7 +1232,7 @@ void ProjectNode::OnMouseClick(LMouse &m)
 			case IDM_RENAME:
 			{
 				LInput *Name = new LInput(Tree, GetName(), "Name:", AppName);
-				Name->DoModal([&](auto dlg, auto ok)
+				Name->DoModal([this, Name](auto dlg, auto ok)
 				{
 					if (ok)
 					{
@@ -1503,7 +1503,7 @@ void ProjectNode::OnProperties()
 		bool IsFolder = sFile.IsEmpty();
 
 		WebFldDlg *Dlg = new WebFldDlg(Tree, sName, IsFolder ? GetAttr(OPT_Ftp) : sFile.Get(), GetAttr(OPT_Www));
-		Dlg->DoModal([&](auto dlg, auto ok)
+		Dlg->DoModal([this, IsFolder, Dlg](auto dlg, auto ok)
 		{
 			if (ok)
 			{

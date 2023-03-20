@@ -168,16 +168,20 @@ int FindInFiles::OnNotify(LViewI *v, LNotification n)
 	{
 		case IDC_SET_DIR:
 		{
-			LFileSelect s;
-			s.Parent(this);
-			s.InitialDir(GetCtrlName(IDC_DIR));
-			s.OpenFolder([&](auto fs, auto ok)
+			auto s = new LFileSelect;
+			s->Parent(this);
+			s->InitialDir(GetCtrlName(IDC_DIR));
+			s->OpenFolder([this](auto s, auto ok)
 			{
-				int Idx = FolderHistory->Add(s.Name());
-				if (Idx >= 0)
-					FolderHistory->Value(Idx);
-				else
-					SetCtrlName(IDC_DIR, s.Name());
+				if (ok)
+				{
+					int Idx = FolderHistory->Add(s->Name());
+					if (Idx >= 0)
+						FolderHistory->Value(Idx);
+					else
+						SetCtrlName(IDC_DIR, s->Name());
+				}
+				delete s;
 			});
 			break;
 		}

@@ -2587,7 +2587,7 @@ void IdeProject::Build(bool All, BuildConfig Config)
 	if (GetApp())
 		GetApp()->PostEvent(M_APPEND_TEXT, 0, 0);
 
-	SetClean([&](bool ok)
+	SetClean([this, m, All, Config](bool ok)
 	{
 		if (!ok)
 			return;
@@ -3235,7 +3235,7 @@ void IdeProject::OnMouseClick(LMouse &m)
 			case IDM_WEB_FOLDER:
 			{
 				WebFldDlg *Dlg = new WebFldDlg(Tree, 0, 0, 0);
-				Dlg->DoModal([&](auto d, auto code)
+				Dlg->DoModal([Dlg, this](auto d, auto code)
 				{
 					if (Dlg->Ftp && Dlg->Www)
 					{
@@ -3288,7 +3288,7 @@ void IdeProject::OnMouseClick(LMouse &m)
 			}
 			case IDM_SETTINGS:
 			{
-				d->Settings.Edit(Tree, [&]()
+				d->Settings.Edit(Tree, [this]()
 				{
 					SetDirty();
 				});
@@ -3299,17 +3299,18 @@ void IdeProject::OnMouseClick(LMouse &m)
 				LFileSelect *s = new LFileSelect;
 				s->Parent(Tree);
 				s->Type("Project", "*.xml");
-				s->Open([&](auto s, bool ok)
+				s->Open([this](auto s, bool ok)
 				{
-					if (!ok)
-						return;
-					ProjectNode *New = new ProjectNode(this);
-					if (New)
+					if (ok)
 					{
-						New->SetFileName(s->Name());
-						New->SetType(NodeDependancy);
-						InsertTag(New);
-						SetDirty();
+						ProjectNode *New = new ProjectNode(this);
+						if (New)
+						{
+							New->SetFileName(s->Name());
+							New->SetType(NodeDependancy);
+							InsertTag(New);
+							SetDirty();
+						}
 					}
 					delete s;
 				});

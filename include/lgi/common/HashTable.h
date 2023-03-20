@@ -32,11 +32,11 @@ public:
 	}
 
 	void EmptyKeys() {}
-	uint32_t Hash(T k) { return (uint32_t)k; }
+	uint32_t Hash(T k) const { return (uint32_t)k; }
 	T CopyKey(T a) { return a; }
 	size_t SizeKey(T a) { return sizeof(a); }
 	void FreeKey(T &a) { a = NullKey; }
-	bool CmpKey(T a, T b)
+	bool CmpKey(T a, T b) const
 	{
 		return a == b;
 	}
@@ -57,11 +57,11 @@ public:
 	}
 
 	void EmptyKeys() {}
-	uint32_t Hash(T k) { return (uint32_t)(((size_t)k)/31); }
+	uint32_t Hash(T k) const  { return (uint32_t)(((size_t)k)/31); }
 	T CopyKey(T a) { return a; }
 	size_t SizeKey(T a) { return sizeof(a); }
 	void FreeKey(T &a) { a = NullKey; }
-	bool CmpKey(T a, T b)
+	bool CmpKey(T a, T b) const
 	{
 		return a == b;
 	}
@@ -82,11 +82,11 @@ public:
 	}
 
 	void EmptyKeys() {}
-	uint32_t Hash(T *k) { return LHash<uint32_t,T>(k, Strlen(k), CaseSen); }
+	uint32_t Hash(T *k) const { return LHash<uint32_t,T>(k, Strlen(k), CaseSen); }
 	T *CopyKey(T *a) { return Strdup(a); }
 	size_t SizeKey(T *a) { return (Strlen(a)+1)*sizeof(*a); }
 	void FreeKey(T *&a) { if (a) delete [] a; a = NullKey; }
-	bool CmpKey(T *a, T *b) { return !(CaseSen ? Strcmp(a, b) : Stricmp(a, b)); }
+	bool CmpKey(T *a, T *b) const { return !(CaseSen ? Strcmp(a, b) : Stricmp(a, b)); }
 	size_t TotalSize() { return 0; }
 };
 
@@ -146,11 +146,11 @@ public:
 	}
 
 	void EmptyKeys() {}
-	uint32_t Hash(const T *k) { return LHash<uint32_t,T>(k, Strlen(k), CaseSen); }
+	uint32_t Hash(const T *k) const { return LHash<uint32_t,T>(k, Strlen(k), CaseSen); }
 	T *CopyKey(const T *a) { return Strdup(a); }
 	size_t SizeKey(const T *a) { return (Strlen(a)+1)*sizeof(*a); }
 	void FreeKey(const T *&a) { if (a) delete [] a; a = NullKey; }
-	bool CmpKey(const T *a, const T *b) { return !(CaseSen ? Strcmp(a, b) : Stricmp(a, b)); }
+	bool CmpKey(const T *a, const T *b) const { return !(CaseSen ? Strcmp(a, b) : Stricmp(a, b)); }
 	size_t TotalSize() { return 0; }
 };
 
@@ -170,7 +170,7 @@ public:
 
 	uint32_t Hash(T *k) { return LHash<uint32_t,T>(k, Strlen(k), CaseSen); }
 	size_t SizeKey(T *a) { return (Strlen(a)+1)*sizeof(*a); }
-	bool CmpKey(T *a, T *b) { return !(CaseSen ? Strcmp(a, b) : Stricmp(a, b)); }
+	bool CmpKey(T *a, T *b) const { return !(CaseSen ? Strcmp(a, b) : Stricmp(a, b)); }
 
 	T *CopyKey(T *a)
 	{
@@ -204,9 +204,9 @@ public:
 		NullKey = DefaultNull;
 	}
 
-	uint32_t Hash(const T *k) { return LHash<uint32_t,T>(k, Strlen(k), CaseSen); }
+	uint32_t Hash(const T *k) const { return LHash<uint32_t,T>(k, Strlen(k), CaseSen); }
 	size_t SizeKey(const T *a) { return (Strlen(a)+1)*sizeof(*a); }
-	bool CmpKey(const T *a, const T *b) { return !(CaseSen ? Strcmp(a, b) : Stricmp(a, b)); }
+	bool CmpKey(const T *a, const T *b) const { return !(CaseSen ? Strcmp(a, b) : Stricmp(a, b)); }
 
 	const T *CopyKey(const T *a)
 	{
@@ -256,7 +256,7 @@ protected:
 		return (int) (Used * 100 / Size);
 	}
 
-	bool GetEntry(const Key k, ssize_t &Index, bool Debug = false)
+	bool GetEntry(const Key k, ssize_t &Index, bool Debug = false) const
 	{
 		if (k != this->NullKey && Table)
 		{
@@ -596,7 +596,7 @@ public:
 	}
 
 	/// Returns the value at 'key'
-	Value Find(const Key k)
+	Value Find(const Key k) const
 	{
 		ssize_t Index = -1;
 		if (IsOk() && GetEntry(k, Index))

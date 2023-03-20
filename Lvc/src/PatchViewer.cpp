@@ -233,21 +233,21 @@ public:
 			return false;
 		};
 
-		auto scanLines = [&lines](const char16 *key, size_t from) -> ssize_t
+		auto scanLines = [lines](const char16 *key, size_t from) -> ssize_t
 		{
 			auto len = Strlen(key);
 			for (size_t i = from; i<lines.Length(); i++)
 			{
-				auto ln = lines[i];
+				auto ln = lines.ItemAt(i);
 				if (!Strnicmp(ln, key, len))
 					return i;
 			}
 			return -1;
 		};
 
-		auto lineAt = [&lines](size_t idx) -> LString
+		auto lineAt = [lines](size_t idx) -> LString
 		{
-			auto ptr = lines[idx];
+			auto ptr = lines.ItemAt(idx);
 			LString s(ptr, lineLen(ptr));
 			return s;
 		};

@@ -48,7 +48,7 @@ public:
 			{
 				LFileSelect *s = new LFileSelect;
 				s->Parent(this);
-				s->OpenFolder([&](auto s, auto ok)
+				s->OpenFolder([this](auto s, auto ok)
 				{
 					if (ok)
 						SetCtrlName(IDC_FOLDER, s->Name());
@@ -155,7 +155,7 @@ void NewProjectFromTemplate(LViewI *parent)
 		"../templates";
 	TemplatesPath = p;
 	NewProjFromTemplate *Dlg = new NewProjFromTemplate(parent);
-	Dlg->DoModal([&](auto dlg, auto code)
+	Dlg->DoModal([Dlg](auto dlg, auto code)
 	{
 		LTree *t;
 		if (!Dlg->GetViewById(IDC_TEMPLATES, t))

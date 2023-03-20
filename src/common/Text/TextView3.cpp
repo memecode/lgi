@@ -2313,9 +2313,9 @@ void LTextView3::ClearDirty(std::function<void(bool)> OnStatus, bool Ask, const 
 									MB_YESNOCANCEL) : IDYES;
 		if (Answer == IDYES)
 		{
-			auto DoSave = [this, OnStatus, FileName=LString(FileName)](bool ok)
+			auto DoSave = [this, OnStatus](bool ok, const char *FileName)
 			{
-				Save(FileName);				
+				Save(FileName);
 				if (OnStatus)
 					OnStatus(ok);
 			};
@@ -2324,15 +2324,16 @@ void LTextView3::ClearDirty(std::function<void(bool)> OnStatus, bool Ask, const 
 			{
 				LFileSelect *Select = new LFileSelect;
 				Select->Parent(this);
-				Select->Save([&FileName, &DoSave](auto Select, auto ok)
+				Select->Save([FileName=LString(FileName), DoSave](auto s, auto ok)
 				{
 					if (ok)
-						FileName = Select->Name();					
-					DoSave(ok);
-					delete Select;
+						DoSave(ok, s->Name());
+					else
+						DoSave(ok, FileName);
+					delete s;
 				});
 			}
-			else DoSave(true);
+			else DoSave(true, FileName);
 		}
 		else if (Answer == IDCANCEL)
 		{

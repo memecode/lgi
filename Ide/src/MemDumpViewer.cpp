@@ -158,7 +158,7 @@ public:
 				s->Parent(this);
 				s->Type("Dump", "*.mem");
 				s->Type("All Files", LGI_ALL_FILES);
-				s->Open([&](auto s, auto ok)
+				s->Open([this](auto s, auto ok)
 				{
 					if (ok)
 						Load(s->Name());

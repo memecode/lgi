@@ -314,7 +314,7 @@ public:
 				LAutoString Dir = Proj->GetBasePath();
 				s->Parent(this);
 				s->InitialDir(Dir);
-				s->Open([&](auto s, auto ok)
+				s->Open([this](auto s, auto ok)
 				{
 					if (ok)
 						OnReplace(s->Name());

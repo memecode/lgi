@@ -2592,7 +2592,7 @@ void AppWnd::SaveAll(std::function<void(bool)> Callback, bool CloseDirty)
 
 void AppWnd::CloseAll()
 {
-	SaveAll([&](auto status)
+	SaveAll([this](auto status)
 	{	
 		if (!status)
 		{
@@ -3231,7 +3231,7 @@ public:
 			}
 			case IDC_SET_FONT:
 			{
-				Font.DoUI(this, [&](auto ui)
+				Font.DoUI(this, [this](auto ui)
 				{
 					char s[256];
 					if (Font.GetDescription(s, sizeof(s)))
@@ -3482,7 +3482,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, LNotification n)
 
 bool AppWnd::Build()
 {
-	SaveAll([&](bool status)
+	SaveAll([this](bool status)
 	{	
 		if (!status)
 		{
@@ -3638,16 +3638,11 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		{
 			LFileSelect *s = new LFileSelect;
 			s->Parent(this);
-			
-			// printf("File open dlg from thread=%u\n", GetCurrentThreadId());
-			s->Open([&](auto s, auto ok)
+			s->Open([this](auto s, auto ok)
 			{
-				// printf("open handler start... ok=%i thread=%u\n", ok, GetCurrentThreadId());
 				if (ok)
 					OpenFile(s->Name());
-				// printf("open handler deleting...\n");
 				delete s;
-				// printf("open handler deleted...\n");
 			});
 			break;
 		}
@@ -3670,10 +3665,13 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			{
 				LFileSelect *s = new LFileSelect;
 				s->Parent(this);
-				s->Save([&](auto s, auto ok)
+				s->Save([this, Top](auto s, auto ok)
 				{
-					Top->SetFileName(s->Name(), true);
-					d->OnFile(s->Name());
+					if (ok)
+					{
+						Top->SetFileName(s->Name(), true);
+						d->OnFile(s->Name());
+					}
 					delete s;
 				});
 			}
@@ -3881,7 +3879,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			}
 			else
 			{
-				d->FindSym->OpenSearchDlg(this, [&](auto r)
+				d->FindSym->OpenSearchDlg(this, [this](auto r)
 				{
 					if (r.File)
 						GotoReference(r.File, r.Line, false);
@@ -4004,7 +4002,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			LFileSelect *s = new LFileSelect;
 			s->Parent(this);
 			s->Type("Projects", "*.xml");
-			s->Open([&](auto s, auto ok)
+			s->Open([this, Cmd](auto s, auto ok)
 			{
 				if (ok)
 				{
@@ -4027,7 +4025,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				LFileSelect *s = new LFileSelect;
 				s->Parent(this);
 				s->Type("Developer Studio Project", "*.dsp");
-				s->Open([&](auto s, auto ok)
+				s->Open([this, p](auto s, auto ok)
 				{
 					if (ok)
 						p->ImportDsp(s->Name());
@@ -4038,7 +4036,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_RUN:
 		{
-			SaveAll([&](bool status)
+			SaveAll([this](bool status)
 			{
 				if (!status)
 				{
@@ -4054,7 +4052,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_VALGRIND:
 		{
-			SaveAll([&](bool status)
+			SaveAll([this](bool status)
 			{
 				if (!status)
 				{
@@ -4094,7 +4092,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_START_DEBUG:
 		{
-			SaveAll([&](bool status)
+			SaveAll([this](bool status)
 			{
 				if (!status)
 				{
@@ -4178,7 +4176,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDM_CLEAN:
 		{
-			SaveAll([&](bool status)
+			SaveAll([this](bool status)
 			{
 				if (!status)
 				{
@@ -4312,7 +4310,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				break;
 
 			LInput *i = new LInput(this, "", "Separator:", AppName);
-			i->DoModal([&](auto dlg, auto ok)
+			i->DoModal([i, Doc](auto dlg, auto ok)
 			{
 				if (ok)
 					Doc->SplitSelection(i->GetStr());
@@ -4327,7 +4325,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				break;
 
 			LInput *i = new LInput(this, "", "Separator:", AppName);
-			i->DoModal([&](auto dlg, auto ok)
+			i->DoModal([i, Doc](auto dlg, auto ok)
 			{
 				if (ok)
 					Doc->JoinSelection(i->GetStr());

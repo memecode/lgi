@@ -763,7 +763,7 @@ public:
 						if (Path.Exists())
 							s->InitialDir(Path);
 
-						auto Process = [&](LFileSelect *s, bool ok)
+						auto Process = [this, e](LFileSelect *s, bool ok)
 						{
 							if (!ok)
 								return;
