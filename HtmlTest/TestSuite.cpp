@@ -122,7 +122,7 @@ public:
 	{		
 	}
 	
-	char *GetIncludeFile(char *FileName)
+	LString GetIncludeFile(const char *FileName)
 	{
 		return NULL;
 	}

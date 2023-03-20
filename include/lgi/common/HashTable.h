@@ -168,7 +168,7 @@ public:
 		NullKey = DefaultNull;
 	}
 
-	uint32_t Hash(T *k) { return LHash<uint32_t,T>(k, Strlen(k), CaseSen); }
+	uint32_t Hash(T *k) const { return LHash<uint32_t,T>(k, Strlen(k), CaseSen); }
 	size_t SizeKey(T *a) { return (Strlen(a)+1)*sizeof(*a); }
 	bool CmpKey(T *a, T *b) const { return !(CaseSen ? Strcmp(a, b) : Stricmp(a, b)); }
 
