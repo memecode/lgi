@@ -148,8 +148,8 @@ namespace Storage1
 		int GetVersion() { return Version; }
 		void SetVersion(int i);
 		uint64 GetFileSize();
-		bool GetPassword(GPassword *p) { return false; }
-		bool SetPassword(GPassword *p) { return false; }
+		bool GetPassword(LPassword *p) { return false; }
+		bool SetPassword(LPassword *p) { return false; }
 		LMutex *GetLock() { return &Lock; }
 		char *GetFileName() { return FileName; }
 		

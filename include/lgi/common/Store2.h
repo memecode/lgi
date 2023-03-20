@@ -153,7 +153,7 @@ namespace Storage2
 		int StoreLoc;
 		int Version;
 		bool ReadOnly;
-		GPassword Password;
+		LPassword Password;
 
 		class LSubFile *File;
 		class LSubFilePtr *CreateFilePtr(const char *file, int line);
@@ -174,8 +174,8 @@ namespace Storage2
 		bool GetReadOnly() { return ReadOnly; }
 		int GetVersion() { return Version; }
 		uint64 GetFileSize();
-		bool GetPassword(GPassword *p);
-		bool SetPassword(GPassword *p);
+		bool GetPassword(LPassword *p);
+		bool SetPassword(LPassword *p);
 		LMutex *GetLock();
 		char *GetFileName() { return FileName; }
 		

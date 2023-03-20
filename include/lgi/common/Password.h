@@ -5,7 +5,7 @@
 #ifndef __GPASSWORD_H
 #define __GPASSWORD_H
 
-class LgiClass GPassword
+class LgiClass LPassword
 {
 	char *Data; // this is binary data... may contain NULL's
 	ssize_t Len;
@@ -13,8 +13,8 @@ class LgiClass GPassword
 	void Process(char *Out, const char *In, ssize_t Len) const;
 
 public:
-	GPassword(GPassword *p = 0);
-	virtual ~GPassword();
+	LPassword(LPassword *p = 0);
+	virtual ~LPassword();
 
 	bool IsValid() { return Data && Len > 0; }
 	void Get(char *Buf) const;
@@ -27,8 +27,8 @@ public:
 	
 	void Delete(LDom *Options, char *Option);
 
-	GPassword &operator =(GPassword &p);
-	bool operator ==(GPassword &p);
+	LPassword &operator =(LPassword &p);
+	bool operator ==(LPassword &p);
 };
 
 #endif

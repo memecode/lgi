@@ -1,7 +1,7 @@
 #ifndef __STORE_COMMON_H
 #define __STORE_COMMON_H
 
-#include "GPassword.h"
+#include "LPassword.h"
 
 class StorageItem;
 class StorageObj;
@@ -204,8 +204,8 @@ public:
 	virtual bool GetReadOnly() = 0;
 	virtual int GetVersion() = 0;
 	virtual uint64 GetFileSize() = 0;
-	virtual bool GetPassword(GPassword *p) = 0;
-	virtual bool SetPassword(GPassword *p) = 0;
+	virtual bool GetPassword(LPassword *p) = 0;
+	virtual bool SetPassword(LPassword *p) = 0;
 	virtual LMutex *GetLock() = 0;
 	virtual char *GetFileName() = 0;
 	

@@ -60,7 +60,7 @@ bool DataDlgTools::ProcessField(DataDlgField *f, bool Write, char *OptionOverrid
 		{
 			case DATA_PASSWORD:
 			{
-				GPassword g;
+				LPassword g;
 				if (Write) // Ctrl -> Opts
 				{
 					if (Dlg->GetCtrlEnabled(f->GetCtrl()))

@@ -12,11 +12,17 @@ struct ConsoleLog : public LStream
 	}
 };
 
-class App : public LApp, public LScriptContext, public LVmDebuggerCallback
+class App : public LApp, public LScriptContext, public LVmCallback
 {
 	LScriptEngine *Engine;
 	LAutoString SrcFile;
 	ConsoleLog Log;
+
+	bool CallCallback(LVirtualMachine &Vm, LString CallbackName, LScriptArguments &Args)
+	{
+		Args.Throw(_FL, "Not implemented.");
+		return false;
+	}
 
 	LVmDebugger *AttachVm(LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly)
 	{
@@ -56,14 +62,16 @@ public:
 		}
 	}
 	
-	char *GetIncludeFile(char *FileName)
+	LString GetIncludeFile(const char *FileName) override
 	{
 		char p[MAX_PATH_LEN];
 		LMakePath(p, sizeof(p), SrcFile, "..");
 		LMakePath(p, sizeof(p), p, FileName);
 		if (LFileExists(p))
 		{
-			return ::LReadTextFile(p);
+			LFile f(p);
+			if (f)
+				return f.Read();
 		}
 		
 		return NULL;

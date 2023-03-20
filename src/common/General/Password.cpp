@@ -9,7 +9,7 @@
 // password to hide it from casual observers.
 char HashString[] = "KLWEHGF)AS^*_GPYIOShakl;sjfhas0w89725l3jkhL:KHASFQ_DF_AS+_F";
 
-GPassword::GPassword(GPassword *p)
+LPassword::LPassword(LPassword *p)
 {
 	Data = 0;
 	Len = 0;
@@ -20,12 +20,12 @@ GPassword::GPassword(GPassword *p)
 	}
 }
 
-GPassword::~GPassword()
+LPassword::~LPassword()
 {
 	DeleteArray(Data);
 }
 
-GPassword &GPassword::operator =(GPassword &p)
+LPassword &LPassword::operator =(LPassword &p)
 {
 	if (p.Data)
 	{
@@ -40,7 +40,7 @@ GPassword &GPassword::operator =(GPassword &p)
 	return *this;
 }
 
-bool GPassword::operator ==(GPassword &p)
+bool LPassword::operator ==(LPassword &p)
 {
 	if (Data && p.Data && Len == p.Len)
 	{
@@ -54,7 +54,7 @@ bool GPassword::operator ==(GPassword &p)
 	return false;
 }
 
-void GPassword::Process(char *Out, const char *In, ssize_t Len) const
+void LPassword::Process(char *Out, const char *In, ssize_t Len) const
 {
 	if (Out && In && Len > 0)
 	{
@@ -68,7 +68,7 @@ void GPassword::Process(char *Out, const char *In, ssize_t Len) const
 	}
 }
 
-LString GPassword::Get() const
+LString LPassword::Get() const
 {
 	LString p;
 	
@@ -79,7 +79,7 @@ LString GPassword::Get() const
 	return p;
 }
 
-void GPassword::Get(char *Buf) const
+void LPassword::Get(char *Buf) const
 {
 	if (Buf)
 	{
@@ -88,7 +88,7 @@ void GPassword::Get(char *Buf) const
 	}
 }
 
-void GPassword::Set(const char *Buf)
+void LPassword::Set(const char *Buf)
 {
 	DeleteArray(Data);
 	Len = 0;
@@ -104,7 +104,7 @@ void GPassword::Set(const char *Buf)
 	}
 }
 
-void GPassword::Serialize(char *Password, int Write)
+void LPassword::Serialize(char *Password, int Write)
 {
 	int *p = (int*)Password;
 
@@ -133,7 +133,7 @@ void GPassword::Serialize(char *Password, int Write)
 	}
 }
 
-bool GPassword::Serialize(LDom *Options, const char *Prop, int Write)
+bool LPassword::Serialize(LDom *Options, const char *Prop, int Write)
 {
 	bool Status = false;
 	if (Options && Prop)
@@ -163,7 +163,7 @@ bool GPassword::Serialize(LDom *Options, const char *Prop, int Write)
 	return Status;
 }
 
-void GPassword::Delete(LDom *Options, char *Option)
+void LPassword::Delete(LDom *Options, char *Option)
 {
 	if (Options && Option)
 	{

@@ -1643,7 +1643,7 @@ bool StorageKitImpl::IsOk()
 	return Status;
 }
 
-bool StorageKitImpl::GetPassword(GPassword *p)
+bool StorageKitImpl::GetPassword(LPassword *p)
 {
 	bool Status = false;
 
@@ -1656,7 +1656,7 @@ bool StorageKitImpl::GetPassword(GPassword *p)
 	return Status;
 }
 
-bool StorageKitImpl::SetPassword(GPassword *p)
+bool StorageKitImpl::SetPassword(LPassword *p)
 {
 	bool Status = false;
 
