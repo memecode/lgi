@@ -1,8 +1,8 @@
 #include "Lvc.h"
 #include "lgi/common/ClipBoard.h"
-#include "../Resources/resdefs.h"
 #include "lgi/common/Path.h"
 #include "lgi/common/HashTable.h"
+#include "resdefs.h"
 
 const char *sPalette[] = { "9696ff", "ff8787", "ff934b", "a8d200", "00f0c0", "87e7ff", "a5a5ff", "f3c3ff", "b40090", "00b400" };
 

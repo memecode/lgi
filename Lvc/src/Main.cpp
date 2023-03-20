@@ -8,9 +8,9 @@
 #include "lgi/common/StructuredLog.h"
 
 #include "Lvc.h"
-#include "../Resources/resdefs.h"
+#include "resdefs.h"
 #ifdef WINDOWS
-#include "../Resources/resource.h"
+#include "resource.h"
 #endif
 
 //////////////////////////////////////////////////////////////////
