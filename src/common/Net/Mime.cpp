@@ -465,13 +465,31 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////
-LMimeBuf::LMimeBuf(LStreamI *src, LStreamEnd *end)
+LMimeBuf::LMimeBuf(LStreamI *src, LStreamEnd *end) : LStringPipe(BlockSz)
 {
-	Total = 0;
 	Src = src;
 	End = end;
+	if (Src)
+		Src->SetPos(0);
+}
 
-	Src->SetPos(0);
+// Read some data from 'src'
+// \returns true if some data was received.
+bool LMimeBuf::ReadSrc()
+{
+	if (!Src)
+		return false;
+
+	auto b = GetBuffer();
+	if (!b)
+		return false;
+
+	auto rd = Src->Read(b.ptr, b.len);
+	if (rd <= 0)
+		return false;
+
+	b.Commit(rd);
+	return true;
 }
 
 ssize_t LMimeBuf::Pop(LArray<char> &Out)
@@ -595,7 +613,6 @@ LMime::LMime(const char *tmp)
 	Parent = 0;
 	TmpPath = NewStr(tmp);
 
-	Headers = 0;
 	DataPos = 0;
 	DataSize = 0;
 	DataLock = 0;
@@ -696,8 +713,7 @@ char *LMime::GetTmpPath()
 
 bool LMime::SetHeaders(const char *h)
 {
-	DeleteArray(Headers);
-	Headers = NewStr(h);
+	Headers = h;
 	return Headers != 0;
 }
 
@@ -812,7 +828,7 @@ void LMime::Empty()
 
 	while (Children.Length())
 		delete Children[0];
-	DeleteArray(Headers);
+	Headers.Empty();
 
 	DataPos = 0;
 	DataSize = 0;
@@ -1000,9 +1016,7 @@ bool LMime::Set(const char *Name, const char *Value)
 		p.Push(h);
 	}
 
-	DeleteArray(Headers);
-	Headers = (char*)p.New(sizeof(char));
-
+	Headers = p.NewLStr();
 	return Headers != NULL;
 }
 
@@ -1144,19 +1158,18 @@ ssize_t LMime::LMimeText::LMimeDecode::Pull(LStreamI *Source, LStreamEnd *End)
 class ParentState
 {
 public:
-	char *Boundary;
+	char *Boundary = NULL;
 	MimeBoundary Type;
 
 	ParentState()
 	{
-		Boundary = 0;
 		Type = MimeData;
 	}
 };
 
-int LMime::LMimeText::LMimeDecode::Parse(LStringPipe *Source, ParentState *State)
+ssize_t LMime::LMimeText::LMimeDecode::Parse(LMimeBuf *Source, ParentState *State)
 {
-	int Status = 0;
+	ssize_t Status = 0;
 
 	if (!Mime || !Source)
 	{
@@ -1175,41 +1188,29 @@ int LMime::LMimeText::LMimeDecode::Parse(LStringPipe *Source, ParentState *State
 	LAssert(Mime->DataStore != NULL);
 
 	// Read the headers..
-	LStringPipe HeaderBuf;
-	ssize_t r;
 
 	if (Buffer.Length() == 0)
 		Buffer.Length(1 << 10);
 
 	LOG("%s:%i - Reading headers...\n", _FL);
-	while ((r = Source->Pop(Buffer)) > 0)
+	ssize_t r;
+	while ((r = Source->Find("\r\n\r\n")) < 0)
 	{
-		if
-		(
-			(r == 1 && Buffer[0] == '\n')
-			||
-			(r == 2 && Buffer[0] == '\r' && Buffer[1] == '\n')
-		)
-		{
+		if (!Source->ReadSrc())
 			break;
-		}
-		else
-		{
-			// Store part of the headers
-			HeaderBuf.Push(Buffer.AddressOf(), r);
-		}
 	}
 
 	if (r < 0)
-		return 0;
+		// No break between headers and body found.
+		return Status;
 
 	// Not an error
-	Mime->Headers = HeaderBuf.NewStr();
-	LOG("%s:%i - Mime->Headers=%i\n", _FL, Mime->Headers?(int)strlen(Mime->Headers):-1);
+	Mime->Headers = Source->ReadStr(r + 4);
+	LOG("%s:%i - Mime->Headers=%i\n", _FL, Mime->Headers?(int)Mime->Headers.Length():-1);
 
 	// Get various bits out of the header
-	char *Encoding = Mime->GetEncoding();
-	char *Boundary = Mime->GetBoundary();
+	LAutoString Encoding(Mime->GetEncoding());
+	LAutoString Boundary(Mime->GetBoundary());
 	LAutoString MimeType(Mime->GetMimeType());
 	LOG("%s:%i - Encoding=%s, MimeType=%s, Boundary=%s\n", _FL, Encoding, MimeType.Get(), Boundary);
 
@@ -1231,7 +1232,7 @@ int LMime::LMimeText::LMimeDecode::Parse(LStringPipe *Source, ParentState *State
 			LOG("%s:%i - Unknown encoding '%s'\n", _FL, Encoding);
 		}
 	}
-	DeleteArray(Encoding);
+	Encoding.Reset();
 
 	// Read in the rest of the MIME segment
 	bool Done = false;
@@ -1338,9 +1339,6 @@ int LMime::LMimeText::LMimeDecode::Parse(LStringPipe *Source, ParentState *State
 			Done = true;
 		}
 	}
-
-	DeleteObj(Decoder);
-	DeleteArray(Boundary);
 
 	LOG("%s:%i - Finished\n", _FL);
 	return Status;
@@ -1449,7 +1447,7 @@ ssize_t LMime::LMimeText::LMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 		}
 
 		// Write the headers
-		auto h = LString(Mime->Headers).SplitDelimit(MimeEol);
+		auto h = Mime->Headers.SplitDelimit(MimeEol);
 		for (unsigned i=0; i<h.Length(); i++)
 		{
 			Dest->Write(h[i], CastInt(strlen(h[i])));
@@ -1558,12 +1556,12 @@ ssize_t LMime::LMimeBinary::LMimeRead::Pull(LStreamI *Source, LStreamEnd *End)
 			Header[0] == MimeMagic)
 		{
 			// Read header data
-			Mime->Headers = new char[Header[1]+1];
+			Mime->Headers.Length(Header[1]+1);
 			if (Mime->Headers &&
 				Source->Read(Mime->Headers, Header[1]) == Header[1])
 			{
 				// NUL terminate
-				Mime->Headers[Header[1]] = 0;
+				Mime->Headers.Get()[Mime->Headers.Length()] = 0;
 
 				// Skip body data
 				if (Source->SetPos(Source->GetPos() + Header[2]) > 0)
@@ -1601,7 +1599,7 @@ int64 LMime::LMimeBinary::LMimeWrite::GetSize()
 	if (Mime)
 	{
 		Size =	(sizeof(int32) * 4) + // Header magic + block sizes
-				(Mime->Headers ? strlen(Mime->Headers) : 0) + // Headers
+				(Mime->Headers ? Mime->Headers.Length() : 0) + // Headers
 				(Mime->DataStore ? Mime->DataSize : 0); // Data
 
 		// Children
@@ -1621,7 +1619,7 @@ ssize_t LMime::LMimeBinary::LMimeWrite::Push(LStreamI *Dest, LStreamEnd *End)
 		int32 Header[4] =
 		{
 			MimeMagic,
-			Mime->Headers ? (int32)strlen(Mime->Headers) : 0,
+			Mime->Headers ? (int32)Mime->Headers.Length() : 0,
 			Mime->DataStore ? (int32)Mime->DataSize : 0,
 			(int32) Mime->Children.Length()
 		};

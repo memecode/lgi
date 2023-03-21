@@ -104,10 +104,24 @@ public:
 	virtual void ChangeThread() {}
 
 	/// Utility: Read as LString.
-	LString Read(size_t bufLen = 256)
+	LString Read(ssize_t bufLen = -1)
 	{
 		LString s;
-		s.Length(bufLen);
+
+		if (bufLen >= 0)
+		{
+			s.Length(bufLen);
+		}
+		else
+		{
+			auto sz = GetSize();
+			if (sz > 0)
+				s.Length(sz);
+			else
+				s.Length(256);
+		}
+		LAssert(s.Length() > 0);
+
 		auto rd = Read(s.Get(), s.Length());
 		if (rd < 0)
 			s.Empty();

@@ -1042,7 +1042,7 @@ public:
 	
 	/// Reads bytes off the start of the container
 	ssize_t Read(void *Buffer, ssize_t Size, int Flags = 0) override;
-	
+
 	/// Writes bytes to the end of the container
 	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0) override;
 
@@ -1071,6 +1071,11 @@ public:
 		size_t len = 0;	
 	
 		Buffer(LMemQueue *memq) : mq(memq) {}
+
+		operator bool() const
+		{
+			return ptr != NULL && len > 0;
+		}
 
 		// Call this after writing data into the 'ptr' buffer.
 		bool Commit(size_t bytes);

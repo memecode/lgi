@@ -24,25 +24,42 @@ class LMimeAction
 
 protected:
 	// Parent ptr
-	LMime *Mime;
+	LMime *Mime = NULL;
 
 public:
-	LMimeAction()
-	{
-		Mime = 0;
-	}
-
 	virtual void Empty() {} // reset to initial state
 };
 
 class LMimeBuf : public LStringPipe
 {
-	ssize_t Total;
-	LStreamI *Src;
-	LStreamEnd *End;
+	ssize_t Total = 0;
+	LStreamI *Src = NULL;
+	LStreamEnd *End = NULL;
 
 public:
+	constexpr static int BlockSz = 4 << 10;
+
 	LMimeBuf(LStreamI *src, LStreamEnd *end);
+
+	// Read some data from 'src'
+	// \returns true if some data was received.
+	bool ReadSrc();
+
+	/// Reads 'Len' bytes into a LString
+	LString ReadStr(ssize_t Len = -1)
+	{
+		if (Len < 0)
+			Len = GetSize();
+		LString s;
+		if (!s.Length(Len))
+			return s;
+		auto rd = Read(s.Get(), s.Length());
+		if (rd < 0)
+			s.Empty();
+		else if (rd < (ssize_t)s.Length())
+			s.Length(rd);
+		return s;
+	}
 
 	ssize_t Pop(LArray<char> &Buf) override;
 	ssize_t Pop(char *Str, ssize_t BufSize) override;
@@ -51,7 +68,7 @@ public:
 class LMime
 {
 	// Header info
-	char *Headers;
+	LString Headers;
 
 	// Data info
 	ssize_t DataPos;
@@ -90,7 +107,7 @@ public:
 
 	void Empty();
 	bool SetHeaders(const char *h);
-	char *GetHeaders() { return Headers; }
+	const char *GetHeaders() { return Headers; }
 	ssize_t GetLength() { return DataSize; }
 	LStreamI *GetData(bool Detach = false);
 	bool SetData(bool OwnStream, LStreamI *Input, int RdPos = 0, int RdSize = -1, LMutex *Lock = 0);
@@ -121,17 +138,17 @@ public:
 		class LMimeDecode : public LPullStreamer, public LMimeAction
 		{
 		public:
-			ssize_t Pull(LStreamI *Source, LStreamEnd *End = 0);
-			int Parse(LStringPipe *Source, class ParentState *State = 0);
+			ssize_t Pull(LStreamI *Source, LStreamEnd *End = NULL);
+			ssize_t Parse(LMimeBuf *Source, class ParentState *State = NULL);
 			void Empty();
-		} Decode;
+		}	Decode;
 
 		class LMimeEncode : public LPushStreamer, public LMimeAction
 		{
 		public:
-			ssize_t Push(LStreamI *Dest, LStreamEnd *End = 0);
+			ssize_t Push(LStreamI *Dest, LStreamEnd *End = NULL);
 			void Empty();
-		} Encode;
+		}	Encode;
 
 	} Text;
 

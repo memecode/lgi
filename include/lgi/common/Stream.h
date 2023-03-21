@@ -113,14 +113,14 @@ public:
 class LgiClass LPullStreamer : public LStreamOp
 {
 public:
-	virtual ssize_t Pull(LStreamI *Source, LStreamEnd *End = 0) = 0;
+	virtual ssize_t Pull(LStreamI *Source, LStreamEnd *End = NULL) = 0;
 };
 
 /// API to writes to a destination
 class LgiClass LPushStreamer : public LStreamOp
 {
 public:
-	virtual ssize_t Push(LStreamI *Dest, LStreamEnd *End = 0) = 0;
+	virtual ssize_t Push(LStreamI *Dest, LStreamEnd *End = NULL) = 0;
 };
 
 /// API to read from source and then write to a destination
