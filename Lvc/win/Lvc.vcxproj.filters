@@ -22,83 +22,65 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\common\Lgi\LgiMain.cpp">
-      <Filter>Source Files\Lgi</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\VcCommit.cpp">
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Png.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\VcFolder.cpp">
+    <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Main.cpp">
+    <ClCompile Include="..\..\src\common\Text\DeEscape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\VcFile.cpp">
+    <ClCompile Include="..\..\src\common\Text\XmlTreeUi.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\BlameUi.cpp">
+    <ClCompile Include="..\..\src\common\Widgets\ControlTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp">
-      <Filter>Source Files\Lgi</Filter>
+    <ClCompile Include="..\Src\BlameUi.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Text\DeEscape.cpp">
-      <Filter>Source Files\Lgi</Filter>
+    <ClCompile Include="..\Src\DropDownBtn.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Widgets\ControlTree.cpp">
-      <Filter>Source Files\Lgi</Filter>
+    <ClCompile Include="..\Src\Main.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\DropDownBtn.cpp">
-      <Filter>Source Files\Lgi</Filter>
+    <ClCompile Include="..\Src\PatchViewer.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Text\XmlTreeUi.cpp">
-      <Filter>Source Files\Lgi</Filter>
+    <ClCompile Include="..\Src\SshConnection.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\SshConnection.cpp">
-      <Filter>Source Files\Ssh</Filter>
+    <ClCompile Include="..\Src\VcCommit.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\PatchViewer.cpp">
-      <Filter>Source Files\PatchViewer</Filter>
+    <ClCompile Include="..\Src\VcFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Src\VcFolder.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\src\win\General\Lgi.manifest" />
+    <Manifest Include="..\..\src\win\General\Lgi.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\VcCommit.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Lvc.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\VcFolder.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\VcFile.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\StructuredLog.h">
-      <Filter>Source Files\StructuredLog</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\StructuredIo.h">
-      <Filter>Source Files\StructuredLog</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\SshConnection.h">
-      <Filter>Source Files\Ssh</Filter>
-    </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\StructuredIo.h" />
+    <ClInclude Include="..\..\include\lgi\common\StructuredLog.h" />
+    <ClInclude Include="..\Src\Lvc.h" />
+    <ClInclude Include="..\Src\SshConnection.h" />
+    <ClInclude Include="..\Src\VcCommit.h" />
+    <ClInclude Include="..\Src\VcFile.h" />
+    <ClInclude Include="..\Src\VcFolder.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resources\icon32.ico" />
+    <Image Include="..\resources\icon32.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Resources\Lvc.rc">
-      <Filter>Resources</Filter>
-    </ResourceCompile>
+    <ResourceCompile Include="..\resources\Lvc.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="installer-zip.py">
-      <Filter>Resources</Filter>
-    </None>
+    <None Include="..\installer-zip.py" />
   </ItemGroup>
 </Project>
