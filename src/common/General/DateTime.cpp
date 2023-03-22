@@ -1214,18 +1214,17 @@ bool LDateTime::SetTime(const char *Str)
 	if (T.Length() < 2 || T.Length() > 4)
 		return false;
 
-	_Hours = (int)T[0].Int();
-	_Minutes = (int)T[1].Int();
+	#define SetClamp(out, in, minVal, maxVal) \
+		out = (int)Atoi(in.Get(), 10, 0); \
+		if (out > maxVal) out = maxVal; \
+		else if (out < minVal) out = minVal
 
-	if (_Hours < 0 || _Minutes < 0)
-		return false;
-			
-	char *s = T[2];
-	if (s) _Seconds = atoi(s);
-	else _Seconds = 0;
+	SetClamp(_Hours, T[0], 0, 23);
+	SetClamp(_Minutes, T[1], 0, 59);
+	SetClamp(_Seconds, T[2], 0, 59);
 	_Thousands = 0;
-			
-	s = T.Last();
+
+	const char *s = T.Last();
 	if (s)
 	{
 		if (strchr(s, 'p') || strchr(s, 'P'))

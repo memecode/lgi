@@ -206,9 +206,10 @@ void LProgressPane::UpdateUI()
 		if (Remaining && PerSec > 0.0 && StartDt.IsValid())
 		{
 			auto TotalSeconds = (High - Low + 1) / PerSec;
-			// auto RemainingSeconds = TotalSeconds - ElapsedSeconds;
+
 			LDateTime End;
 			End.Set(StartDt.Ts() + (uint64_t)(TotalSeconds * LDateTime::Second64Bit));
+
 			if (auto Dur = LDateTime::Now().DescribePeriod(End))
 				Update |= Remaining->Name(Dur);
 		}
@@ -216,7 +217,7 @@ void LProgressPane::UpdateUI()
 
 	if (ValText)
 	{
-		auto ValFmt = LLoadString(L_PROGRESSDLG_VALUE_FMT, "%g of %g %s");
+		auto ValFmt = LLoadString(L_PROGRESSDLG_VALUE_FMT, "%.1f of %.1f %s");
 		sprintf_s(Str, sizeof(Str), ValFmt,
 			(double)Val * Scale,
 			(double)(High - Low) * Scale,
@@ -336,6 +337,7 @@ LFont *LProgressPane::GetFont()
 
 void LProgressPane::SetDescription(const char *d)
 {
+	SetStartTs();
 	Progress::SetDescription(d);
 	if (Desc)
 	{
