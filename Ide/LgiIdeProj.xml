@@ -39,8 +39,8 @@
 			<Node File="./src/ProjectNode.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Search" Type="1" Platforms="15" Open="1" Id="5">
-			<Node File="./src/FindInFiles.cpp" Type="2" Platforms="15" />
-			<Node File="./src/FindInFiles.h" Type="3" Platforms="15" />
+			<Node File="./src/IdeFindInFiles.cpp" Type="2" Platforms="15" />
+			<Node File="./src/IdeFindInFiles.h" Type="3" Platforms="15" />
 			<Node File="./src/FindSymbol.cpp" Type="2" Platforms="15" />
 			<Node File="./src/FindSymbol.h" Type="3" Platforms="15" />
 			<Node File="./src/History.cpp" Type="2" Platforms="15" />

@@ -10,6 +10,7 @@
 #include "lgi/common/FileSelect.h"
 
 #include "LgiIde.h"
+#include "IdeFindInFiles.h"
 
 #define DEBUG_HIST		0
 #define DEBUG_SEARCH	0

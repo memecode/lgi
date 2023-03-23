@@ -320,8 +320,6 @@ public:
 			LinkerFlags += ",-export-dynamic,-R.";
 		}
 
-		Log->Print("Log %s:%i\n", _FL);
-
 		auto Base = Proj->GetBasePath();
 		auto MakeFile = Proj->GetMakefile(Platform);
 		LString MakeFilePath;
@@ -347,8 +345,6 @@ public:
 			MakeFilePath = p.GetFull();
 		}
 		
-		Log->Print("Log %s:%i\n", _FL);
-
 		// LGI_LIBRARY_EXT
 		switch (Platform)
 		{
@@ -370,8 +366,6 @@ public:
 				LAssert(0);
 				break;
 		}
-
-		Log->Print("Log %s:%i\n", _FL);
 
 		if (CompilerName)
 		{
@@ -402,8 +396,6 @@ public:
 			return false;
 		}
 		
-		Log->Print("Log %s:%i\n", _FL);
-
 		m.SetSize(0);
 		
 		m.Print("#!/usr/bin/make\n"
@@ -429,8 +421,6 @@ public:
 			1 << Platform
 		);
 		
-		Log->Print("Log %s:%i\n", _FL);
-
 		if (IsExecutableTarget)
 		{
 			LString Exe = Proj->GetExecutable(Platform);
@@ -469,8 +459,6 @@ public:
 				return false;
 			}
 		}
-
-		Log->Print("Log %s:%i\n", _FL);
 
 		// Output the build mode, flags and some paths
 		auto BuildMode = d->App->GetBuildMode();
@@ -516,12 +504,9 @@ public:
 			sDefines[BuildRelease] = sDefines[BuildDebug];
 		}
 
-		Log->Print("Log %s:%i\n", _FL);
-
 		List<IdeProject> Deps;
 		Proj->GetChildProjects(Deps);
 
-		Log->Print("Log %s:%i\n", _FL);
 		for (int Cfg = BuildDebug; Cfg < BuildMax; Cfg++)
 		{
 			// Set the config
@@ -562,8 +547,6 @@ public:
 						if (!LIsRelativePath(in))
 							Rel = LMakeRelativePath(MakeFilePath, in);
 							
-						printf("Rel='%s' ('%s' + '%s')\n", Rel.Get(), MakeFilePath.Get(), in.Get());
-
 						LString Final = Rel ? Rel.Get() : in.Get();
 						if (!Proj->CheckExists(Final))
 							OnError("%s:%i - Library path '%s' doesn't exist (from %s).\n",
@@ -621,7 +604,6 @@ public:
 						LString DepPath = DepBase.Get();
 						
 						auto Rel = LMakeRelativePath(MakeFilePath, DepPath);
-						printf("Rel=%s  (%s + %s)\n", Rel.Get(), MakeFilePath.Get(), DepPath.Get());
 
 						LString Final = Rel ? Rel.Get() : DepPath.Get();
 						Proj->CheckExists(Final);
@@ -642,8 +624,8 @@ public:
 				LToken Paths(ProjIncludes, "\r\n");
 				for (int i=0; i<Paths.Length(); i++)
 				{
-					char *p = Paths[i];
-					LAutoString pn = ToNativePath(p);					
+					auto p = Paths[i];
+					auto pn = ToNativePath(p);					
 					if (pn.Get()[0] != '`' && !Proj->CheckExists(pn))
 						OnError("%s:%i - Include path '%s' doesn't exist.\n", _FL, pn.Get());
 					else if (!Inc.Find(pn))
@@ -657,8 +639,8 @@ public:
 				LToken Paths(SysIncludes, "\r\n");
 				for (int i=0; i<Paths.Length(); i++)
 				{
-					char *p = Paths[i];
-					LAutoString pn = ToNativePath(p);
+					auto p = Paths[i];
+					auto pn = ToNativePath(p);
 					if (pn.Get()[0] != '`' && !Proj->CheckExists(pn))
 						OnError("%s:%i - System include path '%s' doesn't exist (from %s).\n",
 							_FL, pn.Get(),
@@ -667,54 +649,6 @@ public:
 						Inc.Add(pn, true);
 				}
 			}
-
-			#if 0
-			/*
-			Currently this code is adding extra paths that are covered by the official 'IncludePaths'
-			in addition to relative paths in the actual #include parameter. e.g.
-				#include "lgi/common/SomeHeader.h"
-			Hence disabling it for the time being.
-			*/
-			// Add paths of headers
-			for (int i=0; i<Files.Length(); i++)
-			{
-				ProjectNode *n = Files[i];
-				
-				if (n->GetFileName())
-				{
-					char *e = LGetExtension(n->GetFileName());
-					if (e && stricmp(e, "h") == 0)
-					{
-						LString Fn = n->GetFileName();
-						for (char *Dir = Fn; *Dir; Dir++)
-						{
-							if (*Dir == '/' || *Dir == '\\')
-							{
-								*Dir = DIR_CHAR;
-							}
-						}						
-
-						char Path[MAX_PATH_LEN];
-						strcpy_s(Path, sizeof(Path), Fn);
-
-						LTrimDir(Path);
-					
-						LString Rel = LMakeRelativePath(MakeFilePath, Path);
-						if (!Rel)
-							Rel = Path;
-						
-						if (stricmp(Rel, ".") != 0)
-						{
-							LAutoString RelN = ToNativePath(Rel);
-							if (!Proj->CheckExists(RelN))
-								OnError("Header include path '%s' doesn't exist.\n", RelN.Get());
-							else if (!Inc.Find(RelN))
-								Inc.Add(RelN, true);
-						}
-					}
-				}
-			}
-			#endif
 
 			LString::Array Incs;
 			for (auto i: Inc)
@@ -725,9 +659,23 @@ public:
 			{
 				LString s;
 				if (*i == '`')
+				{
+					// Pass though shell cmd
 					s.Printf(" \\\n\t\t%s", i.Get());
+				}
 				else
-					s.Printf(" \\\n\t\t-I%s", ToUnixPath(i));
+				{
+					LFile::Path p;
+					if (LIsRelativePath(i))
+					{
+						p = Base.Get();
+						p += i;
+					}
+					else p = i;
+					auto rel = LMakeRelativePath(MakeFilePath, p.GetFull());
+					s.Printf(" \\\n\t\t-I%s", ToUnixPath(rel ? rel : i));
+				}
+
 				sIncludes[Cfg] += s;
 			}
 		}
@@ -737,346 +685,359 @@ public:
 		// Debug specific
 		m.Print("\n"
 				"ifeq ($(Build),Debug)\n"
-				"	Flags += -g -std=c++14\n"
+				"	Flags += -MMD -MP -g -std=c++14\n"
 				"	Tag = d\n"
 				"	Defs = -D_DEBUG %s\n"
 				"	Libs = %s\n"
 				"	Inc = %s\n",
-					CastEmpty(sDefines[0].Get()),
-					CastEmpty(sLibs[0].Get()),
-					CastEmpty(sIncludes[0].Get()));
+					CastEmpty(sDefines [BuildDebug].Get()),
+					CastEmpty(sLibs    [BuildDebug].Get()),
+					CastEmpty(sIncludes[BuildDebug].Get()));
 		
 		// Release specific
 		m.Print("else\n"
-				"	Flags += -s -Os -std=c++14\n"
+				"	Flags += -MMD -MP -s -Os -std=c++14\n"
 				"	Defs = %s\n"
 				"	Libs = %s\n"
 				"	Inc = %s\n"
 				"endif\n"
 				"\n",
-					CastEmpty(sDefines[1].Get()),
-					CastEmpty(sLibs[1].Get()),
-					CastEmpty(sIncludes[1].Get()));
+					CastEmpty(sDefines [BuildRelease].Get()),
+					CastEmpty(sLibs    [BuildRelease].Get()),
+					CastEmpty(sIncludes[BuildRelease].Get()));
 		
 		if (Files.Length())
 		{
-			LArray<LString> IncPaths;
-			if (Proj->BuildIncludePaths(IncPaths, false, false, Platform))
+			LArray<LString> VPath;
+			// Proj->BuildIncludePaths(VPath, false, false, Platform);
+
+			auto AddVPath = [&VPath](LString p)
 			{
-				// Do source code list...
-				m.Print("# Dependencies\n"
-						"Source =\t");
+				for (auto s: VPath)
+					if (p == s)
+						return;
+				VPath.Add(p);
+			};
+
+			// Do source code list...
+			m.Print("# Dependencies\n"
+					"Source =\t");
+				
+			LString::Array SourceFiles;
+			for (auto &n: Files)
+			{
+				if (n->GetType() == NodeSrc)
+				{
+					auto f = n->GetFileName();
+					auto path = ToPlatformPath(f, Platform);
+
+					LFile::Path p;
+					if (LIsRelativePath(path))
+					{
+						p = Base.Get();
+						p += path;
+					}
+					else
+					{
+						p = path;
+					}
+
+					auto rel = LMakeRelativePath(MakeFilePath, p.GetFull());
+					if (rel && rel.Find("./") == 0)
+						rel = rel(2,-1);
+
+					SourceFiles.Add(rel ? rel : path);
+
+					if (true)
+					{
+						// Also add path of file to VPath.
+						p--;
+						AddVPath(p.GetFull());
+					}
+				}
+			}
+			SourceFiles.Sort();
+			int c = 0;
+			for (auto &src: SourceFiles)
+			{
+				if (c++) m.Print(" \\\n\t\t\t");
+				m.Print("%s", src.Get());
+			}
+
+			m.Print("\n"
+					"\n"
+					"SourceC    := $(filter %%.c,$(Source))\n"
+					"ObjectsC   := $(SourceC:.c=.o)\n"
+					"SourceCpp  := $(filter %%.cpp,$(Source))\n"
+					"ObjectsCpp := $(SourceCpp:.cpp=.o)\n"
+					"Objects    := $(notdir $(ObjectsC) $(ObjectsCpp))\n"
+					"Objects    := $(addprefix $(BuildDir)/,$(Objects))\n"
+					"Deps       := $(patsubst %%.o,%%.d,$(Objects))\n"
+					"\n"
+					"$(BuildDir)/%%.o: %%.c\n"
+					"	mkdir -p $(@D)\n"
+					"	echo $(notdir $<) [$(Build)]\n"
+					"	$(CC) $(Inc) $(Flags) $(Defs) -c $< -o $@\n"
+					"\n"
+					"$(BuildDir)/%%.o: %%.cpp\n"
+					"	mkdir -p $(@D)\n"
+					"	echo $(notdir $<) [$(Build)]\n"
+					"	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $@\n"
+					"\n");
+
+			// Write out the target stuff
+			m.Print("# Target\n");
+
+			LHashTbl<StrKey<char,false>,bool> DepFiles;
+
+			if (TargetType)
+			{
+				if (IsExecutableTarget)
+				{
+					m.Print("# Executable target\n"
+							"$(Target) :");
+							
+					LStringPipe Rules;
+					IdeProject *Dep;
 					
-				LString::Array SourceFiles;
-				for (auto &n: Files)
-				{
-					if (n->GetType() == NodeSrc)
+					uint64 Last = LCurrentTime();
+					int Count = 0;
+					auto It = Deps.begin();
+					for (Dep=*It; Dep && !IsCancelled(); Dep=*(++It), Count++)
 					{
-						auto f = n->GetFileName();
-						auto path = ToPlatformPath(f, Platform);
-						if (path.Find("./") == 0)
-							path = path(2,-1);
-						SourceFiles.Add(path);
-					}
-				}
-				SourceFiles.Sort();
-				int c = 0;
-				for (auto &src: SourceFiles)
-				{
-					if (c++) m.Print(" \\\n\t\t\t");
-					m.Print("%s", src.Get());
-				}
-				m.Print("\n"
-						"\n"
-						"SourceLst := $(patsubst %%.c,%%.o,$(patsubst %%.cpp,%%.o,$(Source)))\n"
-						"Objects := $(addprefix $(BuildDir)/,$(SourceLst))\n"
-						"Deps := $(patsubst %%.o,%%.d,$(Objects))\n"
-						"\n");
-
-				// Write out the target stuff
-				m.Print("# Target\n");
-
-				LHashTbl<StrKey<char,false>,bool> DepFiles;
-
-				if (TargetType)
-				{
-					if (IsExecutableTarget)
-					{
-						m.Print("# Executable target\n"
-								"$(Target) :");
-								
-						LStringPipe Rules;
-						IdeProject *Dep;
+						// Get dependency to create it's own makefile...
+						Dep->CreateMakefile(Platform, false);
+					
+						// Build a rule to make the dependency if any of the source changes...
+						auto DepBase = Dep->GetBasePath();
+						auto TargetFile = Dep->GetTargetFile(Platform);
 						
-						uint64 Last = LCurrentTime();
-						int Count = 0;
-						auto It = Deps.begin();
-						for (Dep=*It; Dep && !IsCancelled(); Dep=*(++It), Count++)
+						if (DepBase && Base && TargetFile)
 						{
-							// Get dependency to create it's own makefile...
-							Dep->CreateMakefile(Platform, false);
-						
-							// Build a rule to make the dependency if any of the source changes...
-							auto DepBase = Dep->GetBasePath();
-							auto TargetFile = Dep->GetTargetFile(Platform);
+							LString Rel = LMakeRelativePath(MakeFilePath, DepBase);
+							ToNativePath(Rel);
 							
-							if (DepBase && Base && TargetFile)
-							{
-								LString Rel = LMakeRelativePath(MakeFilePath, DepBase);
-								ToNativePath(Rel);
-								
-								// Add tag to target name
-								auto Parts = TargetFile.SplitDelimit(".");
-								if (Parts.Length() == 2)
-									TargetFile.Printf("lib%s$(Tag).%s", Parts[0].Get(), Parts[1].Get());
+							// Add tag to target name
+							auto Parts = TargetFile.SplitDelimit(".");
+							if (Parts.Length() == 2)
+								TargetFile.Printf("lib%s$(Tag).%s", Parts[0].Get(), Parts[1].Get());
 
-								LFile::Path Buf(Rel);
-								Buf += "$(BuildDir)";
-								Buf += TargetFile;
-								m.Print(" %s", Buf.GetFull().Get());
-								
-								LArray<char*> AllDeps;
-								Dep->GetAllDependencies(AllDeps, Platform);
-								LAssert(AllDeps.Length() > 0);
-								AllDeps.Sort(StrSort);
-
-								Rules.Print("%s : ", Buf.GetFull().Get());
-								for (int i=0; i<AllDeps.Length(); i++)
-								{
-									if (i)
-										Rules.Print(" \\\n\t");
-									
-									LString DepRel = LMakeRelativePath(MakeFilePath, AllDeps[i]);
-									auto f = DepRel ? DepRel.Get() : AllDeps[i];
-									ToNativePath(f);
-									Rules.Print("%s", f);
-									
-									// Add these dependencies to this makefiles dep list
-									if (!DepFiles.Find(f))
-										DepFiles.Add(f, true);
-								}
-
-								AllDeps.DeleteArrays();
-
-								Rules.Print("\n\texport Build=$(Build); \\\n"
-											"\t$(MAKE) -C %s",
-											Rel.Get());
-
-								auto Mk = Dep->GetMakefile(Platform);
-								// RenameMakefileForPlatform(Mk, Platform);
-								if (Mk)
-								{
-									char *DepMakefile = strrchr(Mk, DIR_CHAR);
-									if (DepMakefile)
-										Rules.Print(" -f %s", DepMakefile + 1);
-								}
-								else
-								{
-									Mk = Dep->GetMakefile(Platform);
-									OnError("%s:%i - No makefile for '%s'\n", _FL, Dep->GetFullPath().Get());
-								}
-
-								Rules.Print("\n\n");
-							}
+							LFile::Path Buf(Rel);
+							Buf += "$(BuildDir)";
+							Buf += TargetFile;
+							m.Print(" %s", Buf.GetFull().Get());
 							
-							uint64 Now = LCurrentTime();
-							if (Now - Last > 1000)
+							LArray<char*> AllDeps;
+							Dep->GetAllDependencies(AllDeps, Platform);
+							LAssert(AllDeps.Length() > 0);
+							AllDeps.Sort(StrSort);
+
+							Rules.Print("%s : ", Buf.GetFull().Get());
+							for (int i=0; i<AllDeps.Length(); i++)
 							{
-								Last = Now;
-								Log->Print("Building deps %i%%...\n", (int) (((int64)Count+1)*100/Deps.Length()));
-							}
-						}
-
-						m.Print(" $(Objects)\n"
-								"	mkdir -p $(BuildDir)\n"
-								"	@echo Linking $(Target) [$(Build)]...\n"
-								"	$(CPP)%s%s %s%s -o \\\n"
-								"		$(Target) $(Objects) $(Libs)\n",
-								ExtraLinkFlags,
-								ExeFlags,
-								ValidStr(LinkerFlags) ? "-Wl" : "", LinkerFlags.Get());
-
-						if (Platform == PlatformHaiku)
-						{
-							// Is there an application icon configured?
-							const char *AppIcon = d->Settings.GetStr(ProjApplicationIcon, NULL, Platform);
-							if (AppIcon)
-							{
-								m.Print("	addattr -f %s -t \"'VICN'\" \"BEOS:ICON\" $(Target)\n", AppIcon);
-							}							
-						}
-						
-						LString PostBuildCmds = d->Settings.GetStr(ProjPostBuildCommands, NULL, Platform);
-						if (ValidStr(PostBuildCmds))
-						{
-							LString::Array a = PostBuildCmds.Split("\n");
-							for (unsigned i=0; i<a.Length(); i++)
-								m.Print("\t%s\n", a[i].Strip().Get());
-						}
-
-						m.Print("	@echo Done.\n"
-								"\n");
-
-						LAutoString r(Rules.NewStr());
-						if (r)
-							m.Write(r, strlen(r));
-
-						// Various fairly global rules
-						m.Print(".SECONDEXPANSION:\n"
-								"$(Objects): $(BuildDir)/%%.o: $$(Source)\n"
-								"	mkdir -p $(@D)\n"
-								"	@echo $(<F) [$(Build)]\n"
-								"ifeq \"$(suffix $<)\" \".cpp\"\n"
-								"	$(CPP) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@\n"
-								"else\n"
-								"	$(CC) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@\n"
-								"endif\n"
-								"\n"
-								"-include $(Objects:.o=.d)\n"
-								"\n"						
-								"# Clean just this target\n"
-								"clean :\n"
-								"	rm $(Objects) $(Deps) $(Target)%s\n"
-								"	@echo Cleaned $(BuildDir)\n"
-								"\n",
-								PlatformExecutableExt(Platform));
-						
-						m.Print("# Clean all targets\n"
-								"cleanall :\n"
-								"	rm $(Objects) $(Deps) $(Target)%s\n"
-								"	@echo Cleaned $(BuildDir)\n",
-								PlatformExecutableExt(Platform));
-						
-						for (auto d: Deps)
-						{
-							auto mk = d->GetMakefile(Platform);
-							if (mk)
-							{
-								LAutoString dep_base = d->GetBasePath();
-								d->CheckExists(dep_base);
-
-								auto rel_dir = LMakeRelativePath(MakeFilePath, dep_base);
-								d->CheckExists(rel_dir);
+								if (i)
+									Rules.Print(" \\\n\t");
 								
-								char *mk_leaf = strrchr(mk, DIR_CHAR);
-								m.Print("	+make -C \"%s\" -f \"%s\" clean\n",
-									ToUnixPath(rel_dir ? rel_dir.Get() : dep_base.Get()),
-									ToUnixPath(mk_leaf ? mk_leaf + 1 : mk.Get()));
+								LString DepRel = LMakeRelativePath(MakeFilePath, AllDeps[i]);
+								auto f = DepRel ? DepRel.Get() : AllDeps[i];
+								ToNativePath(f);
+								Rules.Print("%s", f);
+								
+								// Add these dependencies to this makefiles dep list
+								if (!DepFiles.Find(f))
+									DepFiles.Add(f, true);
 							}
-						}
-						m.Print("\n");
-					}
-					// Shared library
-					else if (!stricmp(TargetType, "DynamicLibrary"))
-					{
-						m.Print("TargetFile = lib$(Target)$(Tag).%s\n"
-								"$(TargetFile) : $(Objects)\n"
-								"	mkdir -p $(BuildDir)\n"
-								"	@echo Linking $(TargetFile) [$(Build)]...\n"
-								"	$(CPP)$s -shared \\\n"
-								"		%s%s \\\n"
-								"		-o $(BuildDir)/$(TargetFile) \\\n"
-								"		$(Objects) \\\n"
-								"		$(Libs)\n",
-								PlatformLibraryExt,
-								ValidStr(ExtraLinkFlags) ? "-Wl" : "", ExtraLinkFlags,
-								LinkerFlags.Get());
 
-						LString PostBuildCmds = d->Settings.GetStr(ProjPostBuildCommands, NULL, Platform);
-						if (ValidStr(PostBuildCmds))
+							AllDeps.DeleteArrays();
+
+							Rules.Print("\n\texport Build=$(Build); \\\n"
+										"\t$(MAKE) -C %s",
+										Rel.Get());
+
+							auto Mk = Dep->GetMakefile(Platform);
+							// RenameMakefileForPlatform(Mk, Platform);
+							if (Mk)
+							{
+								char *DepMakefile = strrchr(Mk, DIR_CHAR);
+								if (DepMakefile)
+									Rules.Print(" -f %s", DepMakefile + 1);
+							}
+							else
+							{
+								Mk = Dep->GetMakefile(Platform);
+								OnError("%s:%i - No makefile for '%s'\n", _FL, Dep->GetFullPath().Get());
+							}
+
+							Rules.Print("\n\n");
+						}
+						
+						uint64 Now = LCurrentTime();
+						if (Now - Last > 1000)
 						{
-							LString::Array a = PostBuildCmds.Split("\n");
-							for (unsigned i=0; i<a.Length(); i++)
-								m.Print("\t%s\n", a[i].Strip().Get());
+							Last = Now;
+							Log->Print("Building deps %i%%...\n", (int) (((int64)Count+1)*100/Deps.Length()));
 						}
-
-						m.Print("	@echo Done.\n"
-								"\n");
-
-						// Other rules
-						m.Print(".SECONDEXPANSION:\n"
-								"$(Objects): $(BuildDir)/%%.o: $$(Source)\n"
-								"	mkdir -p $(@D)\n"
-								"	@echo $(<F) [$(Build)]\n"
-								"ifeq \"$(suffix $<)\" \".cpp\"\n"
-								"	$(CPP) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@\n"
-								"else\n"
-								"	$(CC) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@\n"
-								"endif\n"
-								"\n"
-								"-include $(Objects:.o=.d)\n"
-								"\n"
-								"# Clean out targets\n"
-								"clean :\n"
-								"	rm $(Objects) $(Deps) $(BuildDir)/$(TargetFile)\n"
-								"	@echo Cleaned $(BuildDir)\n"
-								"\n",
-								PlatformLibraryExt);
 					}
-					// Static library
-					else if (!stricmp(TargetType, "StaticLibrary"))
+
+					m.Print(" $(Objects)\n"
+							"	mkdir -p $(BuildDir)\n"
+							"	@echo Linking $(Target) [$(Build)]...\n"
+							"	$(CPP)%s%s %s%s -o \\\n"
+							"		$(Target) $(Objects) $(Libs)\n",
+							ExtraLinkFlags,
+							ExeFlags,
+							ValidStr(LinkerFlags) ? "-Wl" : "", LinkerFlags.Get());
+
+					if (Platform == PlatformHaiku)
 					{
-						m.Print("TargetFile = lib$(Target)$(Tag).%s\n"
-								"$(TargetFile) : $(Objects)\n"
-								"	mkdir -p $(BuildDir)\n"
-								"	@echo Linking $(TargetFile) [$(Build)]...\n"
-								"	ar rcs $(BuildDir)/$(TargetFile) $(Objects)\n",
-								PlatformStaticLibExt);
-
-						LString PostBuildCmds = d->Settings.GetStr(ProjPostBuildCommands, NULL, Platform);
-						if (ValidStr(PostBuildCmds))
+						// Is there an application icon configured?
+						const char *AppIcon = d->Settings.GetStr(ProjApplicationIcon, NULL, Platform);
+						if (AppIcon)
 						{
-							LString::Array a = PostBuildCmds.Split("\n");
-							for (unsigned i=0; i<a.Length(); i++)
-								m.Print("\t%s\n", a[i].Strip().Get());
-						}
-
-						m.Print("	@echo Done.\n"
-								"\n");
-
-						// Other rules
-						m.Print(".SECONDEXPANSION:\n"
-								"$(Objects): $(BuildDir)/%%.o: $$(Source)\n"
-								"	mkdir -p $(@D)\n"
-								"	@echo $(<F) [$(Build)]\n"
-								"ifeq \"$(suffix $<)\" \".cpp\"\n"
-								"	$(CPP) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@\n"
-								"else\n"
-								"	$(CC) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@\n"
-								"endif\n"
-								"\n"
-								"-include $(Objects:.o=.d)\n"
-								"\n"
-								"# Clean out targets\n"
-								"clean :\n"
-								"	rm $(Objects) $(Deps) $(BuildDir)/$(TargetFile)\n"
-								"	@echo Cleaned $(BuildDir)\n"
-								"\n",
-								PlatformStaticLibExt);
+							m.Print("	addattr -f %s -t \"'VICN'\" \"BEOS:ICON\" $(Target)\n", AppIcon);
+						}							
 					}
+					
+					LString PostBuildCmds = d->Settings.GetStr(ProjPostBuildCommands, NULL, Platform);
+					if (ValidStr(PostBuildCmds))
+					{
+						LString::Array a = PostBuildCmds.Split("\n");
+						for (unsigned i=0; i<a.Length(); i++)
+							m.Print("\t%s\n", a[i].Strip().Get());
+					}
+
+					m.Print("	@echo Done.\n"
+							"\n");
+
+					auto r = Rules.NewLStr();
+					if (r)
+						m.Write(r);
+
+					// Various fairly global rules
+					m.Print("-include $(Objects:.o=.d)\n"
+							"\n"						
+							"# Clean just this target\n"
+							"clean :\n"
+							"	rm -rf $(BuildDir) $(Target)%s\n"
+							"	@echo Cleaned $(BuildDir) $(Target)\n"
+							"\n",
+							PlatformExecutableExt(Platform));
+					
+					m.Print("# Clean all targets\n"
+							"cleanall :\n"
+							"	rm -rf $(BuildDir) $(Target)%s\n"
+							"	@echo Cleaned $(BuildDir) $(Target)\n",
+							PlatformExecutableExt(Platform));					
+					for (auto d: Deps)
+					{
+						auto mk = d->GetMakefile(Platform);
+						if (mk)
+						{
+							LAutoString dep_base = d->GetBasePath();
+							d->CheckExists(dep_base);
+
+							auto rel_dir = LMakeRelativePath(MakeFilePath, dep_base);
+							d->CheckExists(rel_dir);
+							
+							char *mk_leaf = strrchr(mk, DIR_CHAR);
+							m.Print("	+make -C \"%s\" -f \"%s\" clean\n",
+								ToUnixPath(rel_dir ? rel_dir.Get() : dep_base.Get()),
+								ToUnixPath(mk_leaf ? mk_leaf + 1 : mk.Get()));
+						}
+					}
+					
+					m.Print("\n");
+				}
+				// Shared library
+				else if (!stricmp(TargetType, "DynamicLibrary"))
+				{
+					m.Print("TargetFile = lib$(Target)$(Tag).%s\n"
+							"$(TargetFile) : $(Objects)\n"
+							"	mkdir -p $(BuildDir)\n"
+							"	@echo Linking $(TargetFile) [$(Build)]...\n"
+							"	$(CPP)$s -shared \\\n"
+							"		%s%s \\\n"
+							"		-o $(BuildDir)/$(TargetFile) \\\n"
+							"		$(Objects) \\\n"
+							"		$(Libs)\n",
+							PlatformLibraryExt,
+							ValidStr(ExtraLinkFlags) ? "-Wl" : "", ExtraLinkFlags,
+							LinkerFlags.Get());
+
+					LString PostBuildCmds = d->Settings.GetStr(ProjPostBuildCommands, NULL, Platform);
+					if (ValidStr(PostBuildCmds))
+					{
+						LString::Array a = PostBuildCmds.Split("\n");
+						for (unsigned i=0; i<a.Length(); i++)
+							m.Print("\t%s\n", a[i].Strip().Get());
+					}
+
+					m.Print("	@echo Done.\n"
+							"\n");
+
+					// Other rules
+					m.Print("-include $(Objects:.o=.d)\n"
+							"\n"
+							"# Clean out targets\n"
+							"clean :\n"
+							"	rm -rf $(BuildDir)\n"
+							"	@echo Cleaned $(BuildDir)\n"
+							"\n",
+							PlatformLibraryExt);
+				}
+				// Static library
+				else if (!stricmp(TargetType, "StaticLibrary"))
+				{
+					m.Print("TargetFile = lib$(Target)$(Tag).%s\n"
+							"$(TargetFile) : $(Objects)\n"
+							"	mkdir -p $(BuildDir)\n"
+							"	@echo Linking $(TargetFile) [$(Build)]...\n"
+							"	ar rcs $(BuildDir)/$(TargetFile) $(Objects)\n",
+							PlatformStaticLibExt);
+
+					LString PostBuildCmds = d->Settings.GetStr(ProjPostBuildCommands, NULL, Platform);
+					if (ValidStr(PostBuildCmds))
+					{
+						LString::Array a = PostBuildCmds.Split("\n");
+						for (unsigned i=0; i<a.Length(); i++)
+							m.Print("\t%s\n", a[i].Strip().Get());
+					}
+
+					m.Print("	@echo Done.\n"
+							"\n");
+
+					// Other rules
+					m.Print("-include $(Objects:.o=.d)\n"
+							"\n"
+							"# Clean out targets\n"
+							"clean :\n"
+							"	rm -rf $(BuildDir)\n"
+							"	@echo Cleaned $(BuildDir)\n"
+							"\n",
+							PlatformStaticLibExt);
 				}
 
 				// Output VPATH
-				m.Print("VPATH=%%.cpp \\\n");
-				IncPaths.Sort();
-				for (int i=0; i<IncPaths.Length() && !IsCancelled(); i++)
+				m.Print("VPATH=$(BuildDir)");
+				VPath.Sort();
+				for (int i=0; i<VPath.Length() && !IsCancelled(); i++)
 				{
-					LString p = IncPaths[i];
+					LString p = VPath[i];
 					Proj->CheckExists(p);
 					if (p && !strchr(p, '`'))
 					{
 						if (!LIsRelativePath(p))
 						{
 							auto a = LMakeRelativePath(MakeFilePath, p);
-							m.Print("\t%s \\\n", ToPlatformPath(a ? a.Get() : p.Get(), Platform).Get());
+							m.Print(" \\\n\t%s", ToPlatformPath(a ? a.Get() : p.Get(), Platform).Get());
 						}
 						else
 						{
-							m.Print("\t%s \\\n", ToPlatformPath(p, Platform).Get());
+							m.Print(" \\\n\t%s", ToPlatformPath(p, Platform).Get());
 						}
 					}
 				}
-				m.Print("\t$(BuildDir)\n\n");
+				m.Print("\n");
 
 				const char *OtherMakefileRules = d->Settings.GetStr(ProjMakefileRules, NULL, Platform);
 				if (ValidStr(OtherMakefileRules))

@@ -327,7 +327,6 @@ public:
 
 #include "IdeDoc.h"
 #include "IdeProject.h"
-#include "FindInFiles.h"
 
 extern void NewMemDumpViewer(AppWnd *App, const char *file = 0);
 extern void NewProjectFromTemplate(LViewI *parent);

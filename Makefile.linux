@@ -18,7 +18,7 @@ BuildDir = $(Build)
 Flags = -fPIC -w -fno-inline -fpermissive
 
 ifeq ($(Build),Debug)
-	Flags += -g -std=c++14
+	Flags += -MMD -MP -g -std=c++14
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLGI_LIBRARY
 	Libs =  \
@@ -30,14 +30,14 @@ ifeq ($(Build),Debug)
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
 		`pkg-config --cflags gstreamer-1.0` \
-		-I/usr/include/libappindicator3-0.1 \
+		-I../../../../../usr/include/libappindicator3-0.1 \
 		-I./private/linux \
 		-I./private/common \
 		-I./include/lgi/linux/Gtk \
 		-I./include/lgi/linux \
 		-I./include
 else
-	Flags += -s -Os -std=c++14
+	Flags += -MMD -MP -s -Os -std=c++14
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLGI_LIBRARY
 	Libs =  \
 		-lmagic \
@@ -48,7 +48,7 @@ else
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
 		`pkg-config --cflags gstreamer-1.0` \
-		-I/usr/include/libappindicator3-0.1 \
+		-I../../../../../usr/include/libappindicator3-0.1 \
 		-I./private/linux \
 		-I./private/common \
 		-I./include/lgi/linux/Gtk \
@@ -181,6 +181,16 @@ Objects    := $(notdir $(ObjectsC) $(ObjectsCpp))
 Objects    := $(addprefix $(BuildDir)/,$(Objects))
 Deps       := $(patsubst %.o,%.d,$(Objects))
 
+$(BuildDir)/%.o: %.c
+	mkdir -p $(@D)
+	echo $(notdir $<) [$(Build)]
+	$(CC) $(Inc) $(Flags) $(Defs) -c $< -o $@
+
+$(BuildDir)/%.o: %.cpp
+	mkdir -p $(@D)
+	echo $(notdir $<) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $@
+
 # Target
 TargetFile = lib$(Target)$(Tag).so
 $(TargetFile) : $(Objects)
@@ -193,26 +203,14 @@ $(TargetFile) : $(Objects)
 		$(Libs)
 	@echo Done.
 
-$(BuildDir)/%.o: %.c
-	mkdir -p $(@D)
-	echo $(notdir $<) [$(Build)]
-	$(CC) $(Inc) $(Flags) $(Defs) -c $< -o $@
-
-$(BuildDir)/%.o: %.cpp
-	mkdir -p $(@D)
-	echo $(notdir $<) [$(Build)]
-	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $@
-
 -include $(Objects:.o=.d)
 
 # Clean out targets
 clean :
-	rm $(Objects) $(Deps) $(BuildDir)/$(TargetFile)
+	rm -rf $(BuildDir)
 	@echo Cleaned $(BuildDir)
 
 VPATH=$(BuildDir) \
-	./src/common/Hash/sha1 \
-	./src/common/Hash/md5 \
 	./src/linux/Lgi \
 	./src/linux/Gtk \
 	./src/linux/General \
@@ -222,17 +220,11 @@ VPATH=$(BuildDir) \
 	./src/common/Resource \
 	./src/common/Net \
 	./src/common/Lgi \
+	./src/common/Hash/sha1 \
+	./src/common/Hash/md5 \
 	./src/common/General \
-	./src/common/Gdc2 \
 	./src/common/Gdc2/Tools \
+	./src/common/Gdc2/Path \
 	./src/common/Gdc2/Font \
 	./src/common/Gdc2/Filters \
-	./src/common/Gdc2/Path \
-	./private/linux \
-	./private/common \
-	./include/lgi/mac/cocoa \
-	./include/lgi/linux/Gtk \
-	./include/lgi/linux \
-	./include/lgi/common \
-	./include
-
+	./src/common/Gdc2

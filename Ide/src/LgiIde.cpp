@@ -31,6 +31,7 @@
 #include "FindSymbol.h"
 #include "Debugger.h"
 #include "ProjectNode.h"
+#include "IdeFindInFiles.h"
 
 #define IDM_RECENT_FILE			1000
 #define IDM_RECENT_PROJECT		1100
