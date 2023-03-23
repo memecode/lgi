@@ -1,7 +1,7 @@
 /// \file
 /// \author Matthew Allen <fret@memecode.com>
-#ifndef _GCAPABILITIES_H
-#define _GCAPABILITIES_H
+#pragma once
+
 #ifdef __cplusplus
 
 #include "lgi/common/HashTable.h"
@@ -48,5 +48,4 @@ public:
 	virtual void OnCloseInstaller() = 0;
 };
 
-#endif
 #endif

@@ -2522,15 +2522,15 @@ bool DoEvery::DoNow()
 //////////////////////////////////////////////////////////////////////
 bool LCapabilityClient::NeedsCapability(const char *Name, const char *Param)
 {
-    for (int i=0; i<Targets.Length(); i++)
-        Targets[i]->NeedsCapability(Name, Param);
+    for (auto t: Targets)
+        t->NeedsCapability(Name, Param);
     return Targets.Length() > 0;
 }
 
 LCapabilityClient::~LCapabilityClient()
 {
-    for (int i=0; i<Targets.Length(); i++)
-        Targets[i]->Clients.Delete(this);
+    for (auto t: Targets)
+        t->Clients.Delete(this);
 }
 
 void LCapabilityClient::Register(LCapabilityTarget *t)
@@ -2544,8 +2544,8 @@ void LCapabilityClient::Register(LCapabilityTarget *t)
 
 LCapabilityTarget::~LCapabilityTarget()
 {
-    for (int i=0; i<Clients.Length(); i++)
-        Clients[i]->Targets.Delete(this);
+    for (auto c: Clients)
+        c->Targets.Delete(this);
 }
 
 /////////////////////////////////////////////////////////////////////

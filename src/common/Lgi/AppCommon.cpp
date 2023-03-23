@@ -187,8 +187,8 @@ LPopupNotification::LPopupNotification(LWindow *ref, LString msg)
 	cFore = cBack = cBorder = L_TOOL_TIP;
 	if (cFore.ToHLS())
 	{
-		cBorder.SetHLS(cBorder.GetH(), cBorder.GetL() * 0.6, cBorder.GetS());
-		cFore.SetHLS(cFore.GetH(), cFore.GetL() * 0.4, cFore.GetS());
+		cBorder.SetHLS(cBorder.GetH(), (int)(cBorder.GetL()*0.6), cBorder.GetS());
+		cFore.SetHLS  (cFore.GetH(),   (int)(cFore.GetL()*0.4),   cFore.GetS());
 	}
 	else
 	{
