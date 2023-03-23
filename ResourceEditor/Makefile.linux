@@ -12,12 +12,13 @@ Target = ./lgires
 ifndef Build
 	Build = Debug
 endif
+MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
 
 Flags = -fPIC -w -fno-inline -fpermissive
 
 ifeq ($(Build),Debug)
-	Flags += -g -std=c++14
+	Flags += -MMD -MP -g -std=c++14
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
@@ -28,13 +29,13 @@ ifeq ($(Build),Debug)
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-IResources \
+		-I./Resources \
 		`pkg-config --cflags gtk+-3.0` \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
 		-I../include
 else
-	Flags += -s -Os -std=c++14
+	Flags += -MMD -MP -s -Os -std=c++14
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
 		-lmagic \
@@ -44,7 +45,7 @@ else
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
-		-IResources \
+		-I./Resources \
 		`pkg-config --cflags gtk+-3.0` \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
@@ -68,9 +69,23 @@ Source =	Code/ShowLanguages.cpp \
 			../src/common/Gdc2/Filters/Lzw.cpp \
 			../src/common/Gdc2/Filters/Gif.cpp
 
-SourceLst := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(Source)))
-Objects := $(addprefix $(BuildDir)/,$(SourceLst))
-Deps := $(patsubst %.o,%.d,$(Objects))
+SourceC    := $(filter %.c,$(Source))
+ObjectsC   := $(SourceC:.c=.o)
+SourceCpp  := $(filter %.cpp,$(Source))
+ObjectsCpp := $(SourceCpp:.cpp=.o)
+Objects    := $(notdir $(ObjectsC) $(ObjectsCpp))
+Objects    := $(addprefix $(BuildDir)/,$(Objects))
+Deps       := $(patsubst %.o,%.d,$(Objects))
+
+$(BuildDir)/%.o: %.c
+	mkdir -p $(@D)
+	echo $(notdir $<) [$(Build)]
+	$(CC) $(Inc) $(Flags) $(Defs) -c $< -o $@
+
+$(BuildDir)/%.o: %.cpp
+	mkdir -p $(@D)
+	echo $(notdir $<) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $@
 
 # Target
 # Executable target
@@ -169,6 +184,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/Point.h \
 	../include/lgi/common/Popup.h \
 	../include/lgi/common/PopupList.h \
+	../include/lgi/common/PopupNotification.h \
 	../include/lgi/common/Printer.h \
 	../include/lgi/common/Profile.h \
 	../include/lgi/common/Progress.h \
@@ -351,36 +367,22 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/linux/Lgi/Widgets.cpp \
 	../src/linux/Lgi/Window.cpp
 	export Build=$(Build); \
-	$(MAKE) -C .. -f Makefile.linux
-
-.SECONDEXPANSION:
-$(Objects): $(BuildDir)/%.o: $$(wildcard %.c*)
-	mkdir -p $(@D)
-	@echo $(<F) [$(Build)]
-ifeq "$(suffix $<)" ".cpp"
-	$(CPP) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
-else
-	$(CC) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
-endif
+	$(MAKE) -C ../ -f Makefile.linux
 
 -include $(Objects:.o=.d)
 
 # Clean just this target
 clean :
-	rm $(Objects) $(Deps) $(Target)
-	@echo Cleaned $(BuildDir)
+	rm -rf $(BuildDir) $(Target)
+	@echo Cleaned $(BuildDir) $(Target)
 
 # Clean all targets
 cleanall :
-	rm $(Objects) $(Deps) $(Target)
-	@echo Cleaned $(BuildDir)
+	rm -rf $(BuildDir) $(Target)
+	@echo Cleaned $(BuildDir) $(Target)
 	+make -C "../" -f "Makefile.linux" clean
 
-VPATH=%.cpp \
-	./Resources \
-	./Code \
-	../include/lgi/linux/Gtk \
-	../include/lgi/linux \
-	../include \
-	$(BuildDir)
-
+VPATH=$(BuildDir) \
+	../src/common/Lgi \
+	../src/common/Gdc2/Filters \
+	./Code

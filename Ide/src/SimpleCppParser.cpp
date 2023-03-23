@@ -37,7 +37,7 @@ Known bugs:
 #include "lgi/common/DocView.h"
 #include "ParserCommon.h"
 
-// #define DEBUG_FILE		"Gdc2.h"
+// #define DEBUG_FILE		"IdeProject.cpp"
 // #define DEBUG_LINE		65
 
 const char *TypeToStr(DefnType t)
@@ -831,7 +831,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 								CaptureLevel = 1;
 								#ifdef DEBUG_FILE
 								if (Debug)
-									LgiTrace("%s:%i - CaptureLevel=%i Depth=%i @ line %i\n", _FL, CaptureLevel, Depth, Line+1);
+									LgiTrace("%s:%i - CLASS/STRUCT defn: CaptureLevel=%i Depth=%i @ line %i\n", _FL, CaptureLevel, Depth, Line+1);
 								#endif
 								
 								char16 *n = Start + (IsClass ? StrlenW(StrClass) : StrlenW(StrStruct)), *t;
@@ -842,6 +842,11 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 									char16 *Last = n;
 									if ((t = LexCpp(n, LexStrdup)))
 									{
+										#ifdef DEBUG_FILE
+										if (Debug)
+											LgiTrace("	t='%S' @ line %i\n", t, Line+1);
+										#endif
+
 										if (StrcmpW(t, StrSemiColon) == 0)
 										{
 											DeleteArray(t);
@@ -852,8 +857,16 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 												 StrcmpW(t, StrColon) == 0)
 										{
 											DeleteArray(CurClassDecl);
-											CurClassDecl = *Tok.rbegin();
-											Tok.Delete(CurClassDecl);
+											if (Tok.Length() > 0)
+											{
+												CurClassDecl = *Tok.rbegin();
+												Tok.Delete(CurClassDecl);
+											}
+											else
+											{
+												CurClassDecl = t;
+												t = NULL;
+											}
 											
 											if (LimitTo == DefnNone || (LimitTo & DefnClass) != 0)
 											{
@@ -863,6 +876,12 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 												*Last = r;
 												SeekPtr(s, next, Line);
 											}
+
+											#ifdef DEBUG_FILE
+											if (Debug)
+												LgiTrace("	class='%S' @ line %i\n", CurClassDecl, Line+1);
+											#endif
+
 											DeleteArray(t);
 											break;
 										}

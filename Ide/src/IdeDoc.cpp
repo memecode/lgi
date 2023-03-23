@@ -1345,10 +1345,12 @@ void IdeDoc::SearchSymbol()
 		while (	Start > 0 &&
 				IsVariableChar(Txt[Start-1]))
 			Start--;
+
 		ssize_t End = Cur;
 		while (	Txt[End] &&
 				IsVariableChar(Txt[End]))
 			End++;
+
 		LString Word(Txt + Start, End - Start);
 		GotoSearch(IDC_SYMBOL_SEARCH, Word);
 	}
