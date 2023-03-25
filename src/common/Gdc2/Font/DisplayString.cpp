@@ -880,11 +880,11 @@ void LDisplayString::Layout(bool Debug)
 			for (LUnicodeString<wchar_t> u(Str, StrWords); true; u++)
 			{
 				u32 = *u;
-				LFont *n = GlyphSub ? Sys->GetGlyph(u32, Font) : Font;
-				bool Change =	n != f ||						// The font changed
-								(IsTabChar(u32) ^ WasTab) ||	// Entering/leaving a run of tabs
-								!u32 ||							// Hit a NULL character
-								(u.Get() - Info[i].Str) >= 1000;		// This is to stop very long segments not rendering
+				LFont *n = u32 > ' ' && GlyphSub ? Sys->GetGlyph(u32, Font) : Font;
+				bool Change =	n != f ||							// The font changed
+								(IsTabChar(u32) ^ WasTab) ||		// Entering/leaving a run of tabs
+								!u32 ||								// Hit a NULL character
+								(u.Get() - Info[i].Str) >= 1000;	// This is to stop very long segments not rendering
 				if (Change)
 				{
 					// End last segment
@@ -896,18 +896,19 @@ void LDisplayString::Layout(bool Debug)
 							n->Create();
 					}
 
-					Info[i].Len = (int) (u.Get() - Info[i].Str);
-					if (Info[i].Len)
+					auto &CurInfo = Info[i];
+					CurInfo.Len = (int) (u.Get() - CurInfo.Str);
+					if (CurInfo.Len)
 					{
 						if (WasTab)
 						{
 							// Handle tab(s)
-							for (int t=0; t<Info[i].Len; t++)
+							for (int t=0; t<CurInfo.Len; t++)
 							{
-								int Dx = TabSize - ((Info[i].X + x + GetDrawOffset()) % TabSize);
-								Info[i].X += Dx;
+								int Dx = TabSize - ((CurInfo.X + x + GetDrawOffset()) % TabSize);
+								CurInfo.X += Dx;
 							}
-							x += Info[i].X;
+							x += CurInfo.X;
 						}
 						else
 						{
@@ -919,28 +920,31 @@ void LDisplayString::Layout(bool Debug)
 							// better aware of point size differences.
 							if (f && (f->GetHeight() > Font->GetHeight()))
 							{
-								Info[i].SizeDelta = -1;
-								f->PointSize(Font->PointSize() + Info[i].SizeDelta);
+								CurInfo.SizeDelta = -1;
+								f->PointSize(Font->PointSize() + CurInfo.SizeDelta);
 								f->Create();
 							}
 							#endif
 
-							if (!f)
+							if (u32 && !f)
 							{
 								// no font, so ? out the chars... as they aren't available anyway
-								// printf("Font Cache Miss, Len=%i\n\t", Info[i].Len);
-								m = Font;
-								for (int n=0; n<Info[i].Len; n++)
-								{
-									Info[i].Str[n] = '?';
-								}
+								LgiTrace("MissingGlyph: %i 0x%x\n", u32, u32);
+								CurInfo.Missing = true;
+								#if 0
+								for (int n=0; n<CurInfo.Len; n++)
+									CurInfo.Str[n] = 0x25a1; // '?';
+								#endif
 							}
-							m->_Measure(sx, sy, Info[i].Str, Info[i].Len);
-							x += Info[i].X = sx > 0xffff ? 0xffff : sx;
+							if (!m)
+								m = Font;
+
+							m->_Measure(sx, sy, CurInfo.Str, CurInfo.Len);
+							x += CurInfo.X = sx > 0xffff ? 0xffff : sx;
 						}
 
-						auto Ch = Info[i].First();
-						Info[i].FontId = !f || Font == f ? 0 : Sys->Lut[Ch];
+						auto Ch = CurInfo.First();
+						CurInfo.FontId = !f || Font == f ? 0 : Sys->Lut[Ch];
 
 						i++;
 					}
@@ -1847,6 +1851,8 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 				else
 				{
 					f = Font;
+					if (Info[i].Missing)
+						f->Colour(LColour::Red.Mix(cFore), cBack);
 				}
 
 				if (f)

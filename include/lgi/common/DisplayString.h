@@ -85,20 +85,12 @@ protected:
 	class CharInfo
 	{
 	public:
-		OsChar *Str;
-		int Len;
-		int X;
-		uint8_t FontId;
-		int8 SizeDelta;
-
-		CharInfo()
-		{
-			Str = 0;
-			Len = 0;
-			X = 0;
-			FontId = 0;
-			SizeDelta = 0;
-		}
+		OsChar *Str = NULL;
+		int Len = 0;
+		int X = 0;
+		uint8_t FontId = 0;
+		int8_t SizeDelta = 0;
+		uint8_t Missing = false;
 
 		uint32_t First()
 		{

@@ -229,7 +229,7 @@
     <ClCompile Include="..\src\AddFtpFile.cpp" />
     <ClCompile Include="..\src\DocEdit.cpp" />
     <ClCompile Include="..\src\DocEditStyling.cpp" />
-    <ClCompile Include="..\src\FindInFiles.cpp" />
+    <ClCompile Include="..\src\IdeFindInFiles.cpp" />
     <ClCompile Include="..\src\FindSymbol.cpp" />
     <ClCompile Include="..\src\FtpThread.cpp" />
     <ClCompile Include="..\src\DebugContext.cpp" />
