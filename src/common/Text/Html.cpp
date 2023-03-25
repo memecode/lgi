@@ -7900,14 +7900,6 @@ bool LHtml::Copy()
 	return false;
 }
 
-/*
-static bool FindCallback(LFindReplaceCommon *Dlg, bool Replace, void *User)
-{
-	LHtml *h = (LHtml*)User;
-	return h->OnFind(Dlg);
-}
-*/
-
 void BuildTagList(LArray<LTag*> &t, LTag *Tag)
 {
 	t.Add(Tag);

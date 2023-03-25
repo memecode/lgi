@@ -838,7 +838,7 @@
     <ClInclude Include="include\lgi\common\LgiNetInc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\lgi\common\LgiQuickSort.h">
+    <ClInclude Include="include\lgi\common\QuickSort.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\lgi\common\LgiRes.h">
@@ -1235,6 +1235,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\lgi\common\ZoomView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lgi\common\Levenshtein.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -10,16 +10,21 @@ under the LGPL v2.1
 The 'Inclusion' section specifies whether the source is include in the
 default binary distribution of Lgi or not.
 
+include/lgi/common/Levenshtein.h
+	Author: Titus Wormer <tituswormer@gmail.com>
+	License: MIT
+	Inclusion: Yes
+
 src/common/Hash/md5/*
 	Author: Aladdin Enterprises
 	License: Origin not be misrepresented, Altered versions plainly marked,
-			 Notice may not be removed from source.
-	Inclusion: Yes.
+			 Notice may not be removed from source
+	Inclusion: Yes
 
 src/common/Hash/sha1/*
 	Source: http://www.packetizer.com/security/sha1
-	License: Freeware Public License.
-	Inclusion: Yes.
+	License: Freeware Public License
+	Inclusion: Yes
 
 src/common/Lgi/LgiRand.cpp
 	Author:	Takuji Nishimura and Makoto Matsumoto
@@ -33,11 +38,11 @@ include/win32/StackWalker.h
 	License: BSD
 	Inclusion: Yes
 
-include/common/LgiQuickSort.h
+include/common/QuickSort.h
 	Author: Darel Rex Finley
 	Source: http://alienryderflex.com/quicksort/
 	License: Public Domain
-	Inclusion: Yes (svn from 27/7/2012)
+	Inclusion: Yes (hg from 27/7/2012)
 	
 src/common/INet/FtpListParser.cpp
 	Source: D. J. Bernstein, djb@cr.yp.to, https://cr.yp.to/ftpparse/ftpparse.c
@@ -49,7 +54,7 @@ src/win32/INet/MibAccess.*
 	License: "Free software: no warranty; use anywhere is ok;"
 	Inclusion: Win32 releases only.
 
-src/win32/Lgi/GGeneral.cpp (SetHardwareBreakpoint/RemoveHardwareBreakpoint functions)
+src/win32/Lgi/General.cpp (SetHardwareBreakpoint/RemoveHardwareBreakpoint functions)
 	Author: Michael Chourdakis
 	License: Code Project Open License (CPOL) 1.02
 	Inclusion: Win32 releases only.
@@ -62,12 +67,12 @@ src/common/INet/libntlm-0.4.2/*
 src/common/INet/AuthNtlm/*
 	Author: Andrew Tridgell, Jeremy Allison
 	License: GPL v2
-	Inclusion: No longer in SVN, incorrectly included in releases prior to v3.3.0
+	Inclusion: No longer in hg, incorrectly included in releases prior to v3.3.0
 
 src/common/Db/bfs/*
 	Author: "Axel Dofler" <axeld@pinc-software.de>
 	License: OpenBeOS License / MIT
-	Inclusion: No longer in SVN
+	Inclusion: No longer in hg
 
 
 	

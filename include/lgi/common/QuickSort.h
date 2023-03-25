@@ -1,5 +1,4 @@
-#ifndef _LGI_QUICK_SORT_H_
-#define _LGI_QUICK_SORT_H_
+#pragma  once
 
 //////////////////////////////////////////////////////////////////////////////////
 //  quickSort from http://alienryderflex.com/quicksort/
@@ -8,7 +7,7 @@
 //  Matthew Allen to use a callback comparison function with user data in C++.
 //
 template<typename T, typename U>
-void LgiQuickSort(T *arr, ssize_t elements, int (*comp)(T&, T&, U), U user)
+void LQuickSort(T *arr, ssize_t elements, int (*comp)(T&, T&, U), U user)
 {
 	#define  MAX_LEVELS  300
 
@@ -64,5 +63,3 @@ void LgiQuickSort(T *arr, ssize_t elements, int (*comp)(T&, T&, U), U user)
 		}
 	}
 }
-
-#endif

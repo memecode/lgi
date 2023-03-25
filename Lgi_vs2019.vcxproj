@@ -471,6 +471,7 @@
     <ClInclude Include="include\lgi\common\Layout.h" />
     <ClInclude Include="include\lgi\common\Ldap.h" />
     <ClInclude Include="include\lgi\common\LdapServer.h" />
+    <ClInclude Include="include\lgi\common\Levenshtein.h" />
     <ClInclude Include="include\lgi\common\LexCpp.h" />
     <ClInclude Include="include\lgi\common\Lgi.h" />
     <ClInclude Include="include\lgi\common\LgiClasses.h" />
@@ -481,7 +482,7 @@
     <ClInclude Include="include\lgi\common\LgiInterfaces.h" />
     <ClInclude Include="include\lgi\common\LgiMsgs.h" />
     <ClInclude Include="include\lgi\common\LgiNetInc.h" />
-    <ClInclude Include="include\lgi\common\LgiQuickSort.h" />
+    <ClInclude Include="include\lgi\common\QuickSort.h" />
     <ClInclude Include="include\lgi\common\LgiRes.h" />
     <ClInclude Include="include\lgi\common\LgiString.h" />
     <ClInclude Include="include\lgi\common\LgiUiBase.h" />
