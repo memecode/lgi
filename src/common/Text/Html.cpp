@@ -1763,7 +1763,7 @@ void LTag::CopyClipboard(LMemQueue &p, bool &InSelection)
 			LAssert(t[i] != 0);
 		#endif
 
-		p.Write(t, Chars * sizeof(char16));
+		p.Write(t + Off, Chars * sizeof(char16));
 	}
 
 	if (InSelection)
