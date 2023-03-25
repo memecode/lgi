@@ -1452,7 +1452,15 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Handle)
 		case IDM_SHOW_SHORTCUTS:
 		{
 			if (!ShortCuts)
+			{
 				ShortCuts = new ShortCutView(this);
+			}
+			if (ShortCuts)
+			{
+				auto res = Objs->CurrentResource();
+				if (res)
+					ShortCuts->OnResource(res);
+			}
 			break;
 		}
 		case IDM_ABOUT:

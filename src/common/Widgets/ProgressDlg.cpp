@@ -584,7 +584,7 @@ void LProgressDlg::TimeCheck()
 	if (!InThread())
 		return;
 	uint64 Now = LCurrentTime();
-	if (Timeout)
+	if (Timeout > 0)
 	{
 		if (Now - Ts >= Timeout)
 		{

@@ -103,6 +103,7 @@ bool LDialog::IsModal()
 
 void LDialog::DoModal(OnClose Callback, OsView ParentHnd)
 {
+	LAssert(!d->IsModeless);
 	d->IsModal = true;
 	d->Callback = Callback;
 	
@@ -110,7 +111,7 @@ void LDialog::DoModal(OnClose Callback, OsView ParentHnd)
     if (p && p->GetWindow() != p)
         p = p->GetWindow();
     
-	if (Attach(0))
+	if (Attach(p))
 	{
 	    AttachChildren();
 	    
@@ -140,7 +141,7 @@ void LDialog::DoModal(OnClose Callback, OsView ParentHnd)
 	    
 	    Visible(true);
 	    
-	    d->ParentHnd = d->ParentHnd ? d->ParentHnd : (p ? p->Handle() : NULL);
+	    d->ParentHnd = ParentHnd ? ParentHnd : (p ? p->Handle() : NULL);
 	    if (d->ParentHnd)
 			EnableWindow(d->ParentHnd, false);
 	}
@@ -173,8 +174,8 @@ int LDialog::DoModeless()
 	if (_View)
 		return Status;
 
+	LAssert(!d->IsModal);
 	d->IsModeless = true;
-	d->IsModal = false;
 
     LViewI *p = GetParent();
     if (p && p->GetWindow() != p)

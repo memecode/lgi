@@ -520,12 +520,6 @@
     <ClInclude Include="include\common\GdiLeak.h">
       <Filter>Source Files\Graphics\Gdi Leak</Filter>
     </ClInclude>
-    <ClInclude Include="src\common\Gdc2\Font\GFontPriv.h">
-      <Filter>Source Files\Graphics\Font</Filter>
-    </ClInclude>
-    <ClInclude Include="private\win\GAppPriv.h">
-      <Filter>Source Files\Interface</Filter>
-    </ClInclude>
     <ClInclude Include="src\win\INet\MibAccess.h">
       <Filter>Header Files</Filter>
     </ClInclude>
