@@ -66,7 +66,7 @@ set (CommonSource
 	src/DebugContext.cpp
 	src/Debugger.cpp
 	src/History.cpp
-	src/FindInFiles.cpp
+	src/IdeFindInFiles.cpp
 	src/FindSymbol.cpp
 	src/FtpThread.cpp
 	src/DocEdit.cpp

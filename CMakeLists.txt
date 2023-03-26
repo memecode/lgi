@@ -628,18 +628,16 @@ target_include_directories(lgi
 
 set_target_properties(lgi PROPERTIES LINKER_LANGUAGE CXX)
 
-add_subdirectory(Ide)
-add_subdirectory(Lvc)
-add_subdirectory(ResourceEditor)
-add_subdirectory(HtmlEditor)
-add_subdirectory(HtmlTest)
-add_subdirectory(ScriptingUnitTests)
-add_subdirectory(SlogViewer)
-add_subdirectory(Updater)
 add_subdirectory(src/common/Net/libntlm-0.4.2)
-if(WIN32)
-	add_subdirectory(VsLaunch)
-endif()
 if(LINUX)
 	add_subdirectory(src/linux/CrashHandler)
 endif()
+
+# main apps
+add_subdirectory(Ide)
+add_subdirectory(Lvc)
+add_subdirectory(ResourceEditor)
+
+# other subfolders of smaller utils and tests
+add_subdirectory(utils)
+add_subdirectory(test)
