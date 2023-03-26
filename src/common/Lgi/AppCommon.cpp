@@ -184,6 +184,7 @@ LPopupNotification *LPopupNotification::Message(LWindow *ref, LString msg)
 
 LPopupNotification::LPopupNotification(LWindow *ref, LString msg)
 {
+	#if 1
 	cFore = cBack = cBorder = L_TOOL_TIP;
 	if (cFore.ToHLS())
 	{
@@ -195,9 +196,10 @@ LPopupNotification::LPopupNotification(LWindow *ref, LString msg)
 		cBorder = cBorder.Mix(LColour::Black, 0.05f);
 		cFore = cFore.Mix(LColour::Black, 0.5f);
 	}
-
-	// Fore = LColour(0xd4, 0xb8, 0x62);
-	// Back = LColour(0xf7, 0xf0, 0xd5);
+	#else
+	cBorder = cFore = LColour(0xd4, 0xb8, 0x62);
+	cBack = LColour(0xf7, 0xf0, 0xd5);
+	#endif
 
 	SetTitleBar(false);
 	SetWillFocus(false); // Don't take focus

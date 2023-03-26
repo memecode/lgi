@@ -882,7 +882,7 @@ void LColour::OnChange()
 	#ifdef MAC
 	_LgiColours[L_TOOL_TIP].Rgb(0xef, 0xef, 0xef);
 	#else
-	_LgiColours[L_TOOL_TIP].Rgb(255, 255, 231);
+	_LgiColours[L_TOOL_TIP].Rgb(0xf7, 0xf0, 0xd5);
 	#endif
 }
 

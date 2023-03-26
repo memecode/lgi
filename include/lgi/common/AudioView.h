@@ -15,7 +15,7 @@
 #include "ao.h"
 
 #define CC(code) LgiSwap32(code)
-#define ERROR_ZERO_SAMPLE_COUNT 10
+#define ERROR_ZERO_SAMPLE_COUNT 5
 
 struct int24_t
 {
@@ -1781,7 +1781,7 @@ class LAudioRepairView : public LAudioView
 
 		void OnComplete()
 		{
-			auto BookMarks = view->GetBookMarks();
+			auto &BookMarks = view->GetBookMarks();
 			BookMarks[channel].Add(bookmarks);
 			BookMarks[channel].Sort([](auto a, auto b)
 				{
