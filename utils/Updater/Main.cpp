@@ -11,8 +11,8 @@ typedef char TCHAR;
 #endif
 #include <string.h>
 #include <stdio.h>
-#include "../include/lgi/common/LgiDefs.h"
-#include "../include/lgi/common/Array.h"
+#include "lgi/common/LgiDefs.h"
+#include "lgi/common/Array.h"
 
 const TCHAR *AppName = _T("Updater");
 
