@@ -498,14 +498,14 @@ bool LApp::PostEvent(LViewI *View, int Msg, LMessage::Param A, LMessage::Param B
 	LWindow *w = View->GetWindow();
 	if (!w)
 	{
-		// printf("%s:%i - No window.\n", _FL);
+		printf("%s:%i - No window.\n", _FL);
 		return false;
 	}
 	
 	auto v = w->Handle();
 	if (!v)
 	{
-		// printf("%s:%i - No handle.\n", _FL);
+		printf("%s:%i - No handle.\n", _FL);
 		return false;
 	}
 

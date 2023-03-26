@@ -1480,6 +1480,19 @@ public:
 			if (AoDriver < 0)
 			{
 				AoDriver = ao_default_driver_id();
+				
+				if (AoDriver < 0)
+				{
+					int count = 0;
+					auto info = ao_driver_info_list(&count);
+					for (int i=0; i<count; i++)
+					{
+						auto drv = info[i];
+						LString s;
+						s.Printf("driver[%i]=%s", i, drv->name);
+						LPopupNotification::Message(GetWindow(), s);
+					}
+				}
 			}
 
 			if (!AoDev)
@@ -1499,6 +1512,12 @@ public:
 			{
 				AoPlaying = true;
 				AoEvent.Signal();
+			}
+			else
+			{
+				LString s;
+				s.Printf("Couldn't open audio device: %i", AoDriver);
+				LPopupNotification::Message(GetWindow(), s);
 			}
 		}
 	}
