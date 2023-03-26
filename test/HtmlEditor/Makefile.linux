@@ -8,7 +8,7 @@
 
 CC = gcc
 CPP = g++
-Target = ./slogviewer
+Target = ./htmleditor
 ifndef Build
 	Build = Debug
 endif
@@ -24,36 +24,59 @@ ifeq ($(Build),Debug)
 	Libs =  \
 		-lpthread \
 		`pkg-config --libs gtk+-3.0` \
-		-static-libgcc \
 		-llgi-gtk3$(Tag) \
 		-L../../$(BuildDir)
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
-		-I./resources \
+		-I../../../../../../../usr/include/libappindicator3-0.1 \
+		-I../../../../../../../usr/include/gstreamer-1.0 \
+		-I../../private/common \
 		-I../../include/lgi/linux/Gtk \
 		-I../../include/lgi/linux \
-		-I../../include
+		-I../../include \
+		-I../../../../../codelib/openssl/include
 else
 	Flags += -MMD -MP -s -Os -std=c++14
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
 		-lpthread \
 		`pkg-config --libs gtk+-3.0` \
-		-static-libgcc \
 		-llgi-gtk3$(Tag) \
 		-L../../$(BuildDir)
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
-		-I./resources \
+		-I../../../../../../../usr/include/libappindicator3-0.1 \
+		-I../../../../../../../usr/include/gstreamer-1.0 \
+		-I../../private/common \
 		-I../../include/lgi/linux/Gtk \
 		-I../../include/lgi/linux \
-		-I../../include
+		-I../../include \
+		-I../../../../../codelib/openssl/include
 endif
 
 # Dependencies
-Source =	src/SlogViewerMain.cpp \
+Source =	Rich.cpp \
+			../../src/common/Widgets/Editor/TextBlock.cpp \
+			../../src/common/Widgets/Editor/RichTextEditPriv.cpp \
+			../../src/common/Widgets/Editor/RichTextEdit.cpp \
+			../../src/common/Widgets/Editor/ImageBlock.cpp \
+			../../src/common/Widgets/Editor/HorzRuleBlock.cpp \
+			../../src/common/Widgets/Editor/BlockCursor.cpp \
+			../../src/common/Text/HtmlParser.cpp \
+			../../src/common/Text/HtmlCommon.cpp \
+			../../src/common/Text/Html.cpp \
+			../../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
+			../../src/common/Text/Homoglyphs/Homoglyphs.cpp \
+			../../src/common/Text/Emoji/EmojiTools.cpp \
+			../../src/common/Text/Emoji/EmojiMap.cpp \
+			../../src/common/Net/OpenSSLSocket.cpp \
+			../../src/common/Net/Http.cpp \
 			../../src/common/Lgi/LgiMain.cpp \
-			../../src/common/Lgi/DocApp.cpp
+			../../src/common/Gdc2/Tools/GdcTools.cpp \
+			../../src/common/Gdc2/Filters/Png.cpp \
+			../../src/common/Gdc2/Filters/Lzw.cpp \
+			../../src/common/Gdc2/Filters/Jpeg.cpp \
+			../../src/common/Gdc2/Filters/Gif.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -369,5 +392,12 @@ cleanall :
 	+make -C "../../" -f "Makefile.linux" clean
 
 VPATH=$(BuildDir) \
-	./src \
-	../../src/common/Lgi
+	./ \
+	../../src/common/Widgets/Editor \
+	../../src/common/Text/Homoglyphs \
+	../../src/common/Text/Emoji \
+	../../src/common/Text \
+	../../src/common/Net \
+	../../src/common/Lgi \
+	../../src/common/Gdc2/Tools \
+	../../src/common/Gdc2/Filters

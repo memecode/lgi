@@ -2,29 +2,29 @@
 <Project TargetType="0" TabSize="4" IndentSize="4" UseTabs="1" ShowWhitespace="0" Makefile="./Makefile" TargetName="test-suite" IncludePaths="../../../../Lgi/include/common&#10;../../../../Lgi/include/linux/Xcb&#10;" Exe="./test-suite" Compiler="0">
 	<Node Name="Lgi" Type="1" Open="1" Platforms="7" Id="4">
 		<Node Name="Html" Type="1" Platforms="7" Open="1" Id="2">
-			<Node File="../src/common/Text/Html.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Text/HtmlCommon.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Text/HtmlParser.cpp" Type="2" Platforms="15" />
-			<Node File="../include/lgi/common/HtmlPriv.h" Type="3" Platforms="7" />
-			<Node File="../include/lgi/common/Http.h" Type="3" Platforms="7" />
+			<Node File="../../src/common/Text/Html.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Text/HtmlCommon.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Text/HtmlParser.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Text/HtmlPriv.h" Type="3" Platforms="7" />
+			<Node File="../../include/lgi/common/Http.h" Type="3" Platforms="7" />
 		</Node>
 		<Node Name="Scripting" Type="1" Platforms="15" Id="1">
-			<Node File="../src/common/Coding/ScriptLibrary.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Coding/ScriptVM.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Coding/ScriptCompiler.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Coding/LexCpp.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Coding/ScriptLibrary.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Coding/ScriptVM.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Coding/ScriptCompiler.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Coding/LexCpp.cpp" Type="2" Platforms="15" />
 		</Node>
-		<Node File="../src/common/Gdc2/Font/EmojiFont.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Text/Emoji/EmojiMap.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Text/Emoji/EmojiTools.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Text/Homoglyphs/Homoglyphs.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Text/Homoglyphs/HomoglyphsTable.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Net/Http.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Images/Compare/ImageComparison.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="7" />
-		<Node File="../src/common/Net/OpenSSLSocket.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Widgets/ZoomView.cpp" Type="2" Platforms="15" />
+		<Node File="../../src/common/Gdc2/Font/EmojiFont.cpp" Type="2" Platforms="15" />
+		<Node File="../../src/common/Text/Emoji/EmojiMap.cpp" Type="2" Platforms="15" />
+		<Node File="../../src/common/Text/Emoji/EmojiTools.cpp" Type="2" Platforms="15" />
+		<Node File="../../src/common/Text/Homoglyphs/Homoglyphs.cpp" Type="2" Platforms="15" />
+		<Node File="../../src/common/Text/Homoglyphs/HomoglyphsTable.cpp" Type="2" Platforms="15" />
+		<Node File="../../src/common/Net/Http.cpp" Type="2" Platforms="15" />
+		<Node File="../../src/common/Images/Compare/ImageComparison.cpp" Type="2" Platforms="15" />
+		<Node File="../../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="7" />
+		<Node File="../../src/common/Net/OpenSSLSocket.cpp" Type="2" Platforms="15" />
+		<Node File="../../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
+		<Node File="../../src/common/Widgets/ZoomView.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Resources" Type="1" Platforms="15" Id="1">
 		<Node File="./HtmlTestSuite.lr8" Type="5" Platforms="15" />
@@ -33,27 +33,27 @@
 		<Node File="./TestSuite.cpp" Type="2" Platforms="7" />
 	</Node>
 	<Node Name="Tests" Type="1" Platforms="15" Id="1" />
-	<Node File="../Lgi.xml" Type="4" Platforms="15" />
+	<Node File="../../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>
 		<Build>
 			<IncludePaths>
 				<All>
-					<Debug>../include
-../private/common</Debug>
-					<Release>../include
-../private/common</Release>
+					<Debug>../../include
+../../private/common</Debug>
+					<Release>../../include
+../../private/common</Release>
 				</All>
 				<Linux>
-					<Debug>../include/lgi/linux
-../include/lgi/linux/Gtk
-../../../../codelib/openssl/include</Debug>
-					<Release>../include/lgi/linux
-../include/lgi/linux/Gtk
-../../../../codelib/openssl/include</Release>
+					<Debug>../../include/lgi/linux
+../../include/lgi/linux/Gtk
+../../../../../codelib/openssl/include</Debug>
+					<Release>../../include/lgi/linux
+../../include/lgi/linux/Gtk
+../../../../../codelib/openssl/include</Release>
 				</Linux>
 				<Windows>
-					<Debug>../include/lgi/win</Debug>
-					<Release>../include/lgi/win</Release>
+					<Debug>../../include/lgi/win</Debug>
+					<Release>../../include/lgi/win</Release>
 				</Windows>
 			</IncludePaths>
 			<SystemIncludes>

@@ -4,39 +4,39 @@
 		<Node File="./Rich.cpp" Type="2" Platforms="7" />
 		<Node Name="Rich Text Editor" Type="1" Platforms="15" Open="1" Id="2">
 			<Node Name="Emoji" Type="1" Platforms="15" Open="0" Id="3">
-				<Node File="../src/common/Text/Emoji/EmojiMap.cpp" Type="2" Platforms="15" />
-				<Node File="../src/common/Text/Emoji/EmojiTools.cpp" Type="2" Platforms="15" />
+				<Node File="../../src/common/Text/Emoji/EmojiMap.cpp" Type="2" Platforms="15" />
+				<Node File="../../src/common/Text/Emoji/EmojiTools.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Spelling" Type="1" Platforms="15" Open="1" Id="4">
-				<Node File="../include/lgi/common/SpellCheck.h" Type="3" Platforms="15" />
+				<Node File="../../include/lgi/common/SpellCheck.h" Type="3" Platforms="15" />
 			</Node>
-			<Node File="../src/common/Widgets/Editor/BlockCursor.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Widgets/Editor/RichTextEdit.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Widgets/Editor/RichTextEditPriv.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Widgets/Editor/RichTextEditPriv.h" Type="3" Platforms="15" />
-			<Node File="../src/common/Widgets/Editor/HorzRuleBlock.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Widgets/Editor/ImageBlock.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Widgets/Editor/TextBlock.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Widgets/Editor/BlockCursor.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Widgets/Editor/RichTextEdit.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Widgets/Editor/RichTextEditPriv.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Widgets/Editor/RichTextEditPriv.h" Type="3" Platforms="15" />
+			<Node File="../../src/common/Widgets/Editor/HorzRuleBlock.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Widgets/Editor/ImageBlock.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Widgets/Editor/TextBlock.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Html" Type="1" Platforms="15" Open="1" Id="5">
-			<Node File="../src/common/Text/Html.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Text/HtmlCommon.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Text/HtmlParser.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Text/Html.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Text/HtmlCommon.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Text/HtmlParser.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Lgi" Type="1" Platforms="15" Id="1">
-			<Node File="../src/common/Gdc2/Tools/GdcTools.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Gdc2/Filters/Gif.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Text/Homoglyphs/Homoglyphs.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Text/Homoglyphs/HomoglyphsTable.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Net/Http.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Gdc2/Filters/Jpeg.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="7" />
-			<Node File="../src/common/Gdc2/Filters/Lzw.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Net/OpenSSLSocket.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Gdc2/Tools/GdcTools.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Gdc2/Filters/Gif.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Text/Homoglyphs/Homoglyphs.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Text/Homoglyphs/HomoglyphsTable.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Net/Http.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Gdc2/Filters/Jpeg.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="7" />
+			<Node File="../../src/common/Gdc2/Filters/Lzw.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Net/OpenSSLSocket.cpp" Type="2" Platforms="15" />
+			<Node File="../../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
 		</Node>
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" />
+	<Node File="../../Lgi.xml" Type="4" Platforms="15" />
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
 		<Node File="./Makefile.linux" Type="9" Platforms="15" />
 	</Node>
@@ -67,22 +67,22 @@
 		<Build>
 			<IncludePaths>
 				<All>
-					<Debug>../include
-../private/common</Debug>
-					<Release>../include
-../private/common</Release>
+					<Debug>../../include
+../../private/common</Debug>
+					<Release>../../include
+../../private/common</Release>
 				</All>
 				<Linux>
-					<Debug>../include/lgi/linux
-../include/lgi/linux/Gtk
-../../../../codelib/openssl/include</Debug>
-					<Release>../include/lgi/linux
-../include/lgi/linux/Gtk
-../../../../codelib/openssl/include</Release>
+					<Debug>../../include/lgi/linux
+../../include/lgi/linux/Gtk
+../../../../../codelib/openssl/include</Debug>
+					<Release>../../include/lgi/linux
+../../include/lgi/linux/Gtk
+../../../../../codelib/openssl/include</Release>
 				</Linux>
 				<Windows>
-					<Debug>../include/lgi/win</Debug>
-					<Release>../include/lgi/win</Release>
+					<Debug>../../include/lgi/win</Debug>
+					<Release>../../include/lgi/win</Release>
 				</Windows>
 			</IncludePaths>
 			<TargetType>
