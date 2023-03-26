@@ -12,7 +12,7 @@
 		345B20D42179688E0079E3C9 /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 345B20D1217968820079E3C9 /* LgiCocoa.framework */; };
 		345B2101217969700079E3C9 /* PythonParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20D52179696B0079E3C9 /* PythonParser.cpp */; };
 		345B2102217969700079E3C9 /* MemDumpViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20DA2179696B0079E3C9 /* MemDumpViewer.cpp */; };
-		345B2103217969700079E3C9 /* FindInFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20DB2179696B0079E3C9 /* FindInFiles.cpp */; };
+		345B2103217969700079E3C9 /* IdeFindInFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20DB2179696B0079E3C9 /* IdeFindInFiles.cpp */; };
 		345B2104217969700079E3C9 /* DocEditStyling.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20DC2179696B0079E3C9 /* DocEditStyling.cpp */; };
 		345B2105217969700079E3C9 /* ProjectNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20DD2179696B0079E3C9 /* ProjectNode.cpp */; };
 		345B2106217969700079E3C9 /* SysCharSupport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20DE2179696B0079E3C9 /* SysCharSupport.cpp */; };
@@ -25,7 +25,6 @@
 		345B210D217969700079E3C9 /* AddFtpFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20EA2179696D0079E3C9 /* AddFtpFile.cpp */; };
 		345B210E217969700079E3C9 /* History.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20EE2179696D0079E3C9 /* History.cpp */; };
 		345B210F217969700079E3C9 /* IdeProject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20EF2179696E0079E3C9 /* IdeProject.cpp */; };
-		345B2110217969700079E3C9 /* levenshtein.c in Sources */ = {isa = PBXBuildFile; fileRef = 345B20F12179696E0079E3C9 /* levenshtein.c */; };
 		345B2112217969700079E3C9 /* LgiUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20F52179696E0079E3C9 /* LgiUtils.cpp */; };
 		345B2113217969700079E3C9 /* LgiIde.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20F62179696E0079E3C9 /* LgiIde.cpp */; };
 		345B2114217969700079E3C9 /* IdeCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20F72179696F0079E3C9 /* IdeCommon.cpp */; };
@@ -161,56 +160,54 @@
 		345B2077217965EA0079E3C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		345B207A217965EA0079E3C9 /* LgiIde.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LgiIde.entitlements; sourceTree = "<group>"; };
 		345B20C3217967760079E3C9 /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = ../../src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
-		345B20D52179696B0079E3C9 /* PythonParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PythonParser.cpp; path = ../Code/PythonParser.cpp; sourceTree = "<group>"; };
-		345B20D62179696B0079E3C9 /* SpaceTabConv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SpaceTabConv.h; path = ../Code/SpaceTabConv.h; sourceTree = "<group>"; };
-		345B20D72179696B0079E3C9 /* IdeDocPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IdeDocPrivate.h; path = ../Code/IdeDocPrivate.h; sourceTree = "<group>"; };
-		345B20D82179696B0079E3C9 /* FtpThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FtpThread.h; path = ../Code/FtpThread.h; sourceTree = "<group>"; };
-		345B20D92179696B0079E3C9 /* WebFldDlg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WebFldDlg.h; path = ../Code/WebFldDlg.h; sourceTree = "<group>"; };
-		345B20DA2179696B0079E3C9 /* MemDumpViewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MemDumpViewer.cpp; path = ../Code/MemDumpViewer.cpp; sourceTree = "<group>"; };
-		345B20DB2179696B0079E3C9 /* FindInFiles.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FindInFiles.cpp; path = ../Code/FindInFiles.cpp; sourceTree = "<group>"; };
-		345B20DC2179696B0079E3C9 /* DocEditStyling.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DocEditStyling.cpp; path = ../Code/DocEditStyling.cpp; sourceTree = "<group>"; };
-		345B20DD2179696B0079E3C9 /* ProjectNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProjectNode.cpp; path = ../Code/ProjectNode.cpp; sourceTree = "<group>"; };
-		345B20DE2179696B0079E3C9 /* SysCharSupport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SysCharSupport.cpp; path = ../Code/SysCharSupport.cpp; sourceTree = "<group>"; };
-		345B20DF2179696C0079E3C9 /* IdeProjectSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IdeProjectSettings.h; path = ../Code/IdeProjectSettings.h; sourceTree = "<group>"; };
-		345B20E02179696C0079E3C9 /* FindSymbol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FindSymbol.h; path = ../Code/FindSymbol.h; sourceTree = "<group>"; };
-		345B20E12179696C0079E3C9 /* IdeDoc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdeDoc.cpp; path = ../Code/IdeDoc.cpp; sourceTree = "<group>"; };
-		345B20E22179696C0079E3C9 /* SpaceTabConv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpaceTabConv.cpp; path = ../Code/SpaceTabConv.cpp; sourceTree = "<group>"; };
-		345B20E32179696C0079E3C9 /* FindSymbol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FindSymbol.cpp; path = ../Code/FindSymbol.cpp; sourceTree = "<group>"; };
-		345B20E42179696C0079E3C9 /* WebFldDlg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WebFldDlg.cpp; path = ../Code/WebFldDlg.cpp; sourceTree = "<group>"; };
-		345B20E52179696C0079E3C9 /* SimpleCppParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SimpleCppParser.cpp; path = ../Code/SimpleCppParser.cpp; sourceTree = "<group>"; };
-		345B20E62179696C0079E3C9 /* IdeDoc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IdeDoc.h; path = ../Code/IdeDoc.h; sourceTree = "<group>"; };
-		345B20E72179696C0079E3C9 /* DocEdit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DocEdit.cpp; path = ../Code/DocEdit.cpp; sourceTree = "<group>"; };
-		345B20E82179696C0079E3C9 /* DocEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DocEdit.h; path = ../Code/DocEdit.h; sourceTree = "<group>"; };
-		345B20E92179696D0079E3C9 /* FindInFiles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FindInFiles.h; path = ../Code/FindInFiles.h; sourceTree = "<group>"; };
-		345B20EA2179696D0079E3C9 /* AddFtpFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AddFtpFile.cpp; path = ../Code/AddFtpFile.cpp; sourceTree = "<group>"; };
-		345B20EB2179696D0079E3C9 /* AddFtpFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AddFtpFile.h; path = ../Code/AddFtpFile.h; sourceTree = "<group>"; };
-		345B20EC2179696D0079E3C9 /* FtpFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FtpFile.h; path = ../Code/FtpFile.h; sourceTree = "<group>"; };
-		345B20ED2179696D0079E3C9 /* Debugger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Debugger.h; path = ../Code/Debugger.h; sourceTree = "<group>"; };
-		345B20EE2179696D0079E3C9 /* History.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = History.cpp; path = ../Code/History.cpp; sourceTree = "<group>"; };
-		345B20EF2179696E0079E3C9 /* IdeProject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdeProject.cpp; path = ../Code/IdeProject.cpp; sourceTree = "<group>"; };
-		345B20F02179696E0079E3C9 /* DebugContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DebugContext.h; path = ../Code/DebugContext.h; sourceTree = "<group>"; };
-		345B20F12179696E0079E3C9 /* levenshtein.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = levenshtein.c; path = ../Code/levenshtein.c; sourceTree = "<group>"; };
-		345B20F22179696E0079E3C9 /* History.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = History.h; path = ../Code/History.h; sourceTree = "<group>"; };
-		345B20F32179696E0079E3C9 /* levenshtein.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = levenshtein.h; path = ../Code/levenshtein.h; sourceTree = "<group>"; };
-		345B20F52179696E0079E3C9 /* LgiUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiUtils.cpp; path = ../Code/LgiUtils.cpp; sourceTree = "<group>"; };
-		345B20F62179696E0079E3C9 /* LgiIde.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = LgiIde.cpp; path = ../Code/LgiIde.cpp; sourceTree = "<group>"; };
-		345B20F72179696F0079E3C9 /* IdeCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdeCommon.cpp; path = ../Code/IdeCommon.cpp; sourceTree = "<group>"; };
-		345B20F82179696F0079E3C9 /* IdeProject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IdeProject.h; path = ../Code/IdeProject.h; sourceTree = "<group>"; };
-		345B20F92179696F0079E3C9 /* LgiIde.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiIde.h; path = ../Code/LgiIde.h; sourceTree = "<group>"; };
-		345B20FA2179696F0079E3C9 /* ProjectNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProjectNode.h; path = ../Code/ProjectNode.h; sourceTree = "<group>"; };
-		345B20FB2179696F0079E3C9 /* FtpThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FtpThread.cpp; path = ../Code/FtpThread.cpp; sourceTree = "<group>"; };
-		345B20FC2179696F0079E3C9 /* Debugger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Debugger.cpp; path = ../Code/Debugger.cpp; sourceTree = "<group>"; };
-		345B20FD2179696F0079E3C9 /* DebugContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DebugContext.cpp; path = ../Code/DebugContext.cpp; sourceTree = "<group>"; };
-		345B20FE217969700079E3C9 /* IdeProjectSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdeProjectSettings.cpp; path = ../Code/IdeProjectSettings.cpp; sourceTree = "<group>"; };
-		345B20FF217969700079E3C9 /* MissingFiles.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MissingFiles.cpp; path = ../Code/MissingFiles.cpp; sourceTree = "<group>"; };
-		345B2100217969700079E3C9 /* ParserCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ParserCommon.h; path = ../Code/ParserCommon.h; sourceTree = "<group>"; };
+		345B20D52179696B0079E3C9 /* PythonParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PythonParser.cpp; path = ../src/PythonParser.cpp; sourceTree = "<group>"; };
+		345B20D62179696B0079E3C9 /* SpaceTabConv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SpaceTabConv.h; path = ../src/SpaceTabConv.h; sourceTree = "<group>"; };
+		345B20D72179696B0079E3C9 /* IdeDocPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IdeDocPrivate.h; path = ../src/IdeDocPrivate.h; sourceTree = "<group>"; };
+		345B20D82179696B0079E3C9 /* FtpThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FtpThread.h; path = ../src/FtpThread.h; sourceTree = "<group>"; };
+		345B20D92179696B0079E3C9 /* WebFldDlg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WebFldDlg.h; path = ../src/WebFldDlg.h; sourceTree = "<group>"; };
+		345B20DA2179696B0079E3C9 /* MemDumpViewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MemDumpViewer.cpp; path = ../src/MemDumpViewer.cpp; sourceTree = "<group>"; };
+		345B20DB2179696B0079E3C9 /* IdeFindInFiles.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdeFindInFiles.cpp; path = ../src/IdeFindInFiles.cpp; sourceTree = "<group>"; };
+		345B20DC2179696B0079E3C9 /* DocEditStyling.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DocEditStyling.cpp; path = ../src/DocEditStyling.cpp; sourceTree = "<group>"; };
+		345B20DD2179696B0079E3C9 /* ProjectNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ProjectNode.cpp; path = ../src/ProjectNode.cpp; sourceTree = "<group>"; };
+		345B20DE2179696B0079E3C9 /* SysCharSupport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SysCharSupport.cpp; path = ../src/SysCharSupport.cpp; sourceTree = "<group>"; };
+		345B20DF2179696C0079E3C9 /* IdeProjectSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IdeProjectSettings.h; path = ../src/IdeProjectSettings.h; sourceTree = "<group>"; };
+		345B20E02179696C0079E3C9 /* FindSymbol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FindSymbol.h; path = ../src/FindSymbol.h; sourceTree = "<group>"; };
+		345B20E12179696C0079E3C9 /* IdeDoc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdeDoc.cpp; path = ../src/IdeDoc.cpp; sourceTree = "<group>"; };
+		345B20E22179696C0079E3C9 /* SpaceTabConv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpaceTabConv.cpp; path = ../src/SpaceTabConv.cpp; sourceTree = "<group>"; };
+		345B20E32179696C0079E3C9 /* FindSymbol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FindSymbol.cpp; path = ../src/FindSymbol.cpp; sourceTree = "<group>"; };
+		345B20E42179696C0079E3C9 /* WebFldDlg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WebFldDlg.cpp; path = ../src/WebFldDlg.cpp; sourceTree = "<group>"; };
+		345B20E52179696C0079E3C9 /* SimpleCppParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SimpleCppParser.cpp; path = ../src/SimpleCppParser.cpp; sourceTree = "<group>"; };
+		345B20E62179696C0079E3C9 /* IdeDoc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IdeDoc.h; path = ../src/IdeDoc.h; sourceTree = "<group>"; };
+		345B20E72179696C0079E3C9 /* DocEdit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DocEdit.cpp; path = ../src/DocEdit.cpp; sourceTree = "<group>"; };
+		345B20E82179696C0079E3C9 /* DocEdit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DocEdit.h; path = ../src/DocEdit.h; sourceTree = "<group>"; };
+		345B20E92179696D0079E3C9 /* IdeFindInFiles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IdeFindInFiles.h; path = ../src/IdeFindInFiles.h; sourceTree = "<group>"; };
+		345B20EA2179696D0079E3C9 /* AddFtpFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AddFtpFile.cpp; path = ../src/AddFtpFile.cpp; sourceTree = "<group>"; };
+		345B20EB2179696D0079E3C9 /* AddFtpFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AddFtpFile.h; path = ../src/AddFtpFile.h; sourceTree = "<group>"; };
+		345B20EC2179696D0079E3C9 /* FtpFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FtpFile.h; path = ../src/FtpFile.h; sourceTree = "<group>"; };
+		345B20ED2179696D0079E3C9 /* Debugger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Debugger.h; path = ../src/Debugger.h; sourceTree = "<group>"; };
+		345B20EE2179696D0079E3C9 /* History.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = History.cpp; path = ../src/History.cpp; sourceTree = "<group>"; };
+		345B20EF2179696E0079E3C9 /* IdeProject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdeProject.cpp; path = ../src/IdeProject.cpp; sourceTree = "<group>"; };
+		345B20F02179696E0079E3C9 /* DebugContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DebugContext.h; path = ../src/DebugContext.h; sourceTree = "<group>"; };
+		345B20F22179696E0079E3C9 /* History.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = History.h; path = ../src/History.h; sourceTree = "<group>"; };
+		345B20F52179696E0079E3C9 /* LgiUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiUtils.cpp; path = ../src/LgiUtils.cpp; sourceTree = "<group>"; };
+		345B20F62179696E0079E3C9 /* LgiIde.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = LgiIde.cpp; path = ../src/LgiIde.cpp; sourceTree = "<group>"; };
+		345B20F72179696F0079E3C9 /* IdeCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdeCommon.cpp; path = ../src/IdeCommon.cpp; sourceTree = "<group>"; };
+		345B20F82179696F0079E3C9 /* IdeProject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IdeProject.h; path = ../src/IdeProject.h; sourceTree = "<group>"; };
+		345B20F92179696F0079E3C9 /* LgiIde.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LgiIde.h; path = ../src/LgiIde.h; sourceTree = "<group>"; };
+		345B20FA2179696F0079E3C9 /* ProjectNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProjectNode.h; path = ../src/ProjectNode.h; sourceTree = "<group>"; };
+		345B20FB2179696F0079E3C9 /* FtpThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FtpThread.cpp; path = ../src/FtpThread.cpp; sourceTree = "<group>"; };
+		345B20FC2179696F0079E3C9 /* Debugger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Debugger.cpp; path = ../src/Debugger.cpp; sourceTree = "<group>"; };
+		345B20FD2179696F0079E3C9 /* DebugContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DebugContext.cpp; path = ../src/DebugContext.cpp; sourceTree = "<group>"; };
+		345B20FE217969700079E3C9 /* IdeProjectSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IdeProjectSettings.cpp; path = ../src/IdeProjectSettings.cpp; sourceTree = "<group>"; };
+		345B20FF217969700079E3C9 /* MissingFiles.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MissingFiles.cpp; path = ../src/MissingFiles.cpp; sourceTree = "<group>"; };
+		345B2100217969700079E3C9 /* ParserCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ParserCommon.h; path = ../src/ParserCommon.h; sourceTree = "<group>"; };
 		345B211B217969D30079E3C9 /* mac-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "mac-icon.icns"; path = "../Resources/mac-icon.icns"; sourceTree = "<group>"; };
 		345B211C217969D30079E3C9 /* LgiIde.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = LgiIde.lr8; path = ../Resources/LgiIde.lr8; sourceTree = "<group>"; };
 		345B211D217969D30079E3C9 /* icons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icons.png; path = ../Resources/icons.png; sourceTree = "<group>"; };
 		346A86722325CBA000FBC545 /* libpng.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libpng.xcodeproj; path = ../../../../../codelib/libpng/build/libpng.xcodeproj; sourceTree = "<group>"; };
 		34C4FD3222FDB50D00C4BECB /* cmds-16px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cmds-16px.png"; sourceTree = "<group>"; };
 		34C4FD3322FDB50D00C4BECB /* cmds-32px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cmds-32px.png"; sourceTree = "<group>"; };
-		34C75D9223A0D89A006DE6D1 /* NewProjectFromTemplate.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = NewProjectFromTemplate.cpp; path = ../Code/NewProjectFromTemplate.cpp; sourceTree = "<group>"; };
+		34C75D9223A0D89A006DE6D1 /* NewProjectFromTemplate.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = NewProjectFromTemplate.cpp; path = ../src/NewProjectFromTemplate.cpp; sourceTree = "<group>"; };
 		34D21CD721797815003D1EA6 /* ExeCheck.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ExeCheck.cpp; path = ../../src/common/General/ExeCheck.cpp; sourceTree = "<group>"; };
 		34D21CD921797833003D1EA6 /* LexCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCpp.cpp; path = ../../src/common/Coding/LexCpp.cpp; sourceTree = "<group>"; };
 		34D21CDB21797856003D1EA6 /* OptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsFile.cpp; path = ../../src/common/Lgi/OptionsFile.cpp; sourceTree = "<group>"; };
@@ -221,7 +218,7 @@
 		34D21CE7217978C4003D1EA6 /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../src/common/Lgi/LgiMain.cpp; sourceTree = "<group>"; };
 		34D21CE9217978DA003D1EA6 /* Base64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Base64.cpp; path = ../../src/common/Net/Base64.cpp; sourceTree = "<group>"; };
 		34D21CED21798240003D1EA6 /* Png.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Png.cpp; path = ../../src/common/Gdc2/Filters/Png.cpp; sourceTree = "<group>"; };
-		34F566A0237BD55F0027133A /* JavascriptParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JavascriptParser.cpp; path = ../Code/JavascriptParser.cpp; sourceTree = "<group>"; };
+		34F566A0237BD55F0027133A /* JavascriptParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JavascriptParser.cpp; path = ../src/JavascriptParser.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -370,10 +367,8 @@
 				345B2100217969700079E3C9 /* ParserCommon.h */,
 				345B20D52179696B0079E3C9 /* PythonParser.cpp */,
 				345B20E52179696C0079E3C9 /* SimpleCppParser.cpp */,
-				345B20F12179696E0079E3C9 /* levenshtein.c */,
-				345B20F32179696E0079E3C9 /* levenshtein.h */,
-				345B20DB2179696B0079E3C9 /* FindInFiles.cpp */,
-				345B20E92179696D0079E3C9 /* FindInFiles.h */,
+				345B20DB2179696B0079E3C9 /* IdeFindInFiles.cpp */,
+				345B20E92179696D0079E3C9 /* IdeFindInFiles.h */,
 				345B20E32179696C0079E3C9 /* FindSymbol.cpp */,
 				345B20E02179696C0079E3C9 /* FindSymbol.h */,
 			);
@@ -554,7 +549,6 @@
 				34D21CE62179788B003D1EA6 /* Http.cpp in Sources */,
 				345B210C217969700079E3C9 /* DocEdit.cpp in Sources */,
 				345B2107217969700079E3C9 /* IdeDoc.cpp in Sources */,
-				345B2110217969700079E3C9 /* levenshtein.c in Sources */,
 				34D21CEE21798240003D1EA6 /* Png.cpp in Sources */,
 				345B2101217969700079E3C9 /* PythonParser.cpp in Sources */,
 				345B2119217969700079E3C9 /* MissingFiles.cpp in Sources */,
@@ -568,7 +562,7 @@
 				345B210E217969700079E3C9 /* History.cpp in Sources */,
 				345B2113217969700079E3C9 /* LgiIde.cpp in Sources */,
 				345B2112217969700079E3C9 /* LgiUtils.cpp in Sources */,
-				345B2103217969700079E3C9 /* FindInFiles.cpp in Sources */,
+				345B2103217969700079E3C9 /* IdeFindInFiles.cpp in Sources */,
 				34D21CEA217978DA003D1EA6 /* Base64.cpp in Sources */,
 				34D21CE021797856003D1EA6 /* Mdi.cpp in Sources */,
 				34D21CDA21797833003D1EA6 /* LexCpp.cpp in Sources */,

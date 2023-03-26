@@ -486,8 +486,8 @@ public:
 	SystemFunctions();
 	~SystemFunctions();
 
-	LStream *GetLog();
-	bool SetLog(LStream *log);
+	LStream *GetLog() override;
+	bool SetLog(LStream *log) override;
 	void SetEngine(LScriptEngine *Eng);	
 	
 	LString GetIncludeFile(const char *FileName) override
@@ -495,7 +495,7 @@ public:
 		return NULL;
 	}
 	
-	LHostFunc *GetCommands();
+	LHostFunc *GetCommands() override;
 
 	// Debug
 		bool Assert(LScriptArguments &Args);

@@ -17,6 +17,9 @@ LLevenshtein(const char *a, const char *b)
 	size_t aLen = Strlen(a);
 	auto cache = (size_t*)calloc(aLen, sizeof(size_t));
 	size_t result = 10000;
+	size_t aIndex = 0;
+	size_t bIndex = 0;
+	size_t distance;
 
 	/* Shortcut optimizations / degenerate cases. */
 	if (a == b || cache == NULL)
@@ -34,10 +37,6 @@ LLevenshtein(const char *a, const char *b)
 		goto onComplete;
 	}
 
-	size_t aIndex = 0;
-	size_t bIndex = 0;
-	size_t distance;
-	
 	/* initialize the vector. */
 	while (aIndex < aLen)
 	{

@@ -1047,7 +1047,7 @@ LVirtualMachine::LVirtualMachine(Context ctx)
 	d = new LVirtualMachinePriv(this, ctx.Callback);
 	d->IncRef();
 
-	if (d->Code = ctx.Code)
+	if ((d->Code = ctx.Code))
 	{
 		if (d->Code->ByteCode.IdxCheck(ctx.Addr))
 			d->c.u8 = d->Code->ByteCode.AddressOf() + ctx.Addr;

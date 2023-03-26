@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		3416FADB2748AA070062D3B8 /* HomoglyphsTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3416FAD92748AA070062D3B8 /* HomoglyphsTable.cpp */; };
 		3416FADC2748AA070062D3B8 /* Homoglyphs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3416FADA2748AA070062D3B8 /* Homoglyphs.cpp */; };
+		342BE8DB29D047F8004B3AF2 /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 342BE8D629D04666004B3AF2 /* LgiCocoa.framework */; };
+		342BE8DC29D04804004B3AF2 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 342BE8D629D04666004B3AF2 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		34319029238DF4A700DDE1F5 /* TestSuite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319027238DF4A700DDE1F5 /* TestSuite.cpp */; };
 		3431902A238DF4A700DDE1F5 /* HtmlTestSuite.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 34319028238DF4A700DDE1F5 /* HtmlTestSuite.lr8 */; };
 		3431902C238DF51B00DDE1F5 /* OpenSSLSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3431902B238DF51B00DDE1F5 /* OpenSSLSocket.cpp */; };
@@ -28,21 +30,19 @@
 		3431904A238DFAB000DDE1F5 /* EmojiMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34319049238DFAB000DDE1F5 /* EmojiMap.cpp */; };
 		343FB8952386621600797ABC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 343FB8942386621600797ABC /* Assets.xcassets */; };
 		343FB8AB238662C500797ABC /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8AA238662C500797ABC /* LgiMain.cpp */; };
-		343FB8C62386638C00797ABC /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 343FB8A92386627A00797ABC /* LgiCocoa.framework */; };
-		343FB8C82386639C00797ABC /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 343FB8A92386627A00797ABC /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		343FB8DC2386642A00797ABC /* OptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8DB2386642A00797ABC /* OptionsFile.cpp */; };
 		34C81A5825DA09770053F93A /* Http.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34C81A5725DA09770053F93A /* Http.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		343FB8A82386627A00797ABC /* PBXContainerItemProxy */ = {
+		342BE8D529D04666004B3AF2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 3477C2681CBF020F0028B84B;
 			remoteInfo = LgiCocoa;
 		};
-		343FB8C32386638800797ABC /* PBXContainerItemProxy */ = {
+		342BE8D929D047F1004B3AF2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */;
 			proxyType = 1;
@@ -58,40 +58,40 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				343FB8C82386639C00797ABC /* LgiCocoa.framework in CopyFiles */,
+				342BE8DC29D04804004B3AF2 /* LgiCocoa.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		3416FAD92748AA070062D3B8 /* HomoglyphsTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HomoglyphsTable.cpp; path = ../../src/common/Text/Homoglyphs/HomoglyphsTable.cpp; sourceTree = "<group>"; };
-		3416FADA2748AA070062D3B8 /* Homoglyphs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Homoglyphs.cpp; path = ../../src/common/Text/Homoglyphs/Homoglyphs.cpp; sourceTree = "<group>"; };
+		3416FAD92748AA070062D3B8 /* HomoglyphsTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HomoglyphsTable.cpp; path = ../../../src/common/Text/Homoglyphs/HomoglyphsTable.cpp; sourceTree = "<group>"; };
+		3416FADA2748AA070062D3B8 /* Homoglyphs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Homoglyphs.cpp; path = ../../../src/common/Text/Homoglyphs/Homoglyphs.cpp; sourceTree = "<group>"; };
 		34319027238DF4A700DDE1F5 /* TestSuite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TestSuite.cpp; path = ../TestSuite.cpp; sourceTree = "<group>"; };
 		34319028238DF4A700DDE1F5 /* HtmlTestSuite.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = HtmlTestSuite.lr8; path = ../HtmlTestSuite.lr8; sourceTree = "<group>"; };
-		3431902B238DF51B00DDE1F5 /* OpenSSLSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenSSLSocket.cpp; path = ../../src/common/Net/OpenSSLSocket.cpp; sourceTree = "<group>"; };
-		3431902D238DF57C00DDE1F5 /* HtmlCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HtmlCommon.cpp; path = ../../src/common/Text/HtmlCommon.cpp; sourceTree = "<group>"; };
-		3431902E238DF57C00DDE1F5 /* HtmlParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HtmlParser.cpp; path = ../../src/common/Text/HtmlParser.cpp; sourceTree = "<group>"; };
-		3431902F238DF57C00DDE1F5 /* Html.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Html.cpp; path = ../../src/common/Text/Html.cpp; sourceTree = "<group>"; };
-		34319033238DF97200DDE1F5 /* EmojiFont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EmojiFont.cpp; path = ../../src/common/Gdc2/Font/EmojiFont.cpp; sourceTree = "<group>"; };
-		34319035238DF9C600DDE1F5 /* ParseCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseCpp.cpp; path = ../../src/common/Coding/ParseCpp.cpp; sourceTree = "<group>"; };
-		34319036238DF9C600DDE1F5 /* ScriptCompiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScriptCompiler.cpp; path = ../../src/common/Coding/ScriptCompiler.cpp; sourceTree = "<group>"; };
-		34319037238DF9C600DDE1F5 /* ScriptLibrary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScriptLibrary.cpp; path = ../../src/common/Coding/ScriptLibrary.cpp; sourceTree = "<group>"; };
-		34319038238DF9C600DDE1F5 /* ScriptVM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScriptVM.cpp; path = ../../src/common/Coding/ScriptVM.cpp; sourceTree = "<group>"; };
-		3431903D238DF9FB00DDE1F5 /* ImageComparison.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImageComparison.cpp; path = ../../src/common/Images/Compare/ImageComparison.cpp; sourceTree = "<group>"; };
-		3431903F238DFA4B00DDE1F5 /* ZoomView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ZoomView.cpp; path = ../../src/common/Widgets/ZoomView.cpp; sourceTree = "<group>"; };
-		34319043238DFA7200DDE1F5 /* StatusBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StatusBar.cpp; path = ../../src/common/Widgets/StatusBar.cpp; sourceTree = "<group>"; };
-		34319045238DFA8400DDE1F5 /* LexCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCpp.cpp; path = ../../src/common/Coding/LexCpp.cpp; sourceTree = "<group>"; };
-		34319047238DFA9100DDE1F5 /* GdcTools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GdcTools.cpp; path = ../../src/common/Gdc2/Tools/GdcTools.cpp; sourceTree = "<group>"; };
-		34319049238DFAB000DDE1F5 /* EmojiMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EmojiMap.cpp; path = ../../src/common/Text/Emoji/EmojiMap.cpp; sourceTree = "<group>"; };
+		3431902B238DF51B00DDE1F5 /* OpenSSLSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OpenSSLSocket.cpp; path = ../../../src/common/Net/OpenSSLSocket.cpp; sourceTree = "<group>"; };
+		3431902D238DF57C00DDE1F5 /* HtmlCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HtmlCommon.cpp; path = ../../../src/common/Text/HtmlCommon.cpp; sourceTree = "<group>"; };
+		3431902E238DF57C00DDE1F5 /* HtmlParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HtmlParser.cpp; path = ../../../src/common/Text/HtmlParser.cpp; sourceTree = "<group>"; };
+		3431902F238DF57C00DDE1F5 /* Html.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Html.cpp; path = ../../../src/common/Text/Html.cpp; sourceTree = "<group>"; };
+		34319033238DF97200DDE1F5 /* EmojiFont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EmojiFont.cpp; path = ../../../src/common/Gdc2/Font/EmojiFont.cpp; sourceTree = "<group>"; };
+		34319035238DF9C600DDE1F5 /* ParseCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseCpp.cpp; path = ../../../src/common/Coding/ParseCpp.cpp; sourceTree = "<group>"; };
+		34319036238DF9C600DDE1F5 /* ScriptCompiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScriptCompiler.cpp; path = ../../../src/common/Coding/ScriptCompiler.cpp; sourceTree = "<group>"; };
+		34319037238DF9C600DDE1F5 /* ScriptLibrary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScriptLibrary.cpp; path = ../../../src/common/Coding/ScriptLibrary.cpp; sourceTree = "<group>"; };
+		34319038238DF9C600DDE1F5 /* ScriptVM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScriptVM.cpp; path = ../../../src/common/Coding/ScriptVM.cpp; sourceTree = "<group>"; };
+		3431903D238DF9FB00DDE1F5 /* ImageComparison.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ImageComparison.cpp; path = ../../../src/common/Images/Compare/ImageComparison.cpp; sourceTree = "<group>"; };
+		3431903F238DFA4B00DDE1F5 /* ZoomView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ZoomView.cpp; path = ../../../src/common/Widgets/ZoomView.cpp; sourceTree = "<group>"; };
+		34319043238DFA7200DDE1F5 /* StatusBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StatusBar.cpp; path = ../../../src/common/Widgets/StatusBar.cpp; sourceTree = "<group>"; };
+		34319045238DFA8400DDE1F5 /* LexCpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexCpp.cpp; path = ../../../src/common/Coding/LexCpp.cpp; sourceTree = "<group>"; };
+		34319047238DFA9100DDE1F5 /* GdcTools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GdcTools.cpp; path = ../../../src/common/Gdc2/Tools/GdcTools.cpp; sourceTree = "<group>"; };
+		34319049238DFAB000DDE1F5 /* EmojiMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = EmojiMap.cpp; path = ../../../src/common/Text/Emoji/EmojiMap.cpp; sourceTree = "<group>"; };
 		343FB88E2386621400797ABC /* HtmlTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HtmlTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		343FB8942386621600797ABC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		343FB8992386621600797ABC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		343FB89C2386621600797ABC /* HtmlTest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HtmlTest.entitlements; sourceTree = "<group>"; };
-		343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = ../../src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
-		343FB8AA238662C500797ABC /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../src/common/Lgi/LgiMain.cpp; sourceTree = "<group>"; };
-		343FB8DB2386642A00797ABC /* OptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsFile.cpp; path = ../../src/common/Lgi/OptionsFile.cpp; sourceTree = "<group>"; };
-		34C81A5725DA09770053F93A /* Http.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Http.cpp; path = ../../src/common/Net/Http.cpp; sourceTree = "<group>"; };
+		343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LgiCocoa.xcodeproj; path = ../../../src/mac/cocoa/LgiCocoa.xcodeproj; sourceTree = "<group>"; };
+		343FB8AA238662C500797ABC /* LgiMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LgiMain.cpp; path = ../../../src/common/Lgi/LgiMain.cpp; sourceTree = "<group>"; };
+		343FB8DB2386642A00797ABC /* OptionsFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsFile.cpp; path = ../../../src/common/Lgi/OptionsFile.cpp; sourceTree = "<group>"; };
+		34C81A5725DA09770053F93A /* Http.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Http.cpp; path = ../../../src/common/Net/Http.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,13 +99,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				343FB8C62386638C00797ABC /* LgiCocoa.framework in Frameworks */,
+				342BE8DB29D047F8004B3AF2 /* LgiCocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		342BE8D229D04666004B3AF2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				342BE8D629D04666004B3AF2 /* LgiCocoa.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		343FB8852386621400797ABC = {
 			isa = PBXGroup;
 			children = (
@@ -163,14 +171,6 @@
 			name = Lgi;
 			sourceTree = "<group>";
 		};
-		343FB8A52386627A00797ABC /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				343FB8A92386627A00797ABC /* LgiCocoa.framework */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		343FB8B9238662DB00797ABC /* Code */ = {
 			isa = PBXGroup;
 			children = (
@@ -202,7 +202,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				343FB8C42386638800797ABC /* PBXTargetDependency */,
+				342BE8DA29D047F1004B3AF2 /* PBXTargetDependency */,
 			);
 			name = HtmlTest;
 			productName = HtmlTest;
@@ -236,7 +236,7 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 343FB8A52386627A00797ABC /* Products */;
+					ProductGroup = 342BE8D229D04666004B3AF2 /* Products */;
 					ProjectRef = 343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */;
 				},
 			);
@@ -248,11 +248,11 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		343FB8A92386627A00797ABC /* LgiCocoa.framework */ = {
+		342BE8D629D04666004B3AF2 /* LgiCocoa.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = LgiCocoa.framework;
-			remoteRef = 343FB8A82386627A00797ABC /* PBXContainerItemProxy */;
+			remoteRef = 342BE8D529D04666004B3AF2 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -301,10 +301,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		343FB8C42386638800797ABC /* PBXTargetDependency */ = {
+		342BE8DA29D047F1004B3AF2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = LgiCocoa;
-			targetProxy = 343FB8C32386638800797ABC /* PBXContainerItemProxy */;
+			targetProxy = 342BE8D929D047F1004B3AF2 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -429,12 +429,12 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = "";
 				HEADER_SEARCH_PATHS = (
-					../../include,
-					../../include/lgi/mac/cocoa,
-					../../private/common,
+					../../../include,
+					../../../include/lgi/mac/cocoa,
+					../../../private/common,
 					../Code,
 					../Resources,
-					/opt/local/include,
+					../../../../../../codelib/openssl/include,
 				);
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -445,6 +445,10 @@
 					"-DMAC",
 					"-DLGI_COCOA",
 					"-D_DEBUG",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-Wno-nullability-completeness",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.htmltest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -462,12 +466,12 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = "";
 				HEADER_SEARCH_PATHS = (
-					../../include,
-					../../include/lgi/mac/cocoa,
-					../../private/common,
+					../../../include,
+					../../../include/lgi/mac/cocoa,
+					../../../private/common,
 					../Code,
 					../Resources,
-					/opt/local/include,
+					../../../../../../codelib/openssl/include,
 				);
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -477,6 +481,10 @@
 				OTHER_CFLAGS = (
 					"-DMAC",
 					"-DLGI_COCOA",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-Wno-nullability-completeness",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.htmltest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
