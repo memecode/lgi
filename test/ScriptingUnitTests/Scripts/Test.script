@@ -1,0 +1,30 @@
+function fun1(a){ return (a < 1);}
+function fun1(a){ return (a < 1);}
+function fun1(a){ return (a < 1);}
+
+function fun1(a){ return (a < 1);}
+function fun1(a){ return (a < 1);}
+function fun1(a){ return (a < 1);}
+
+function fun1(a){ return (a < 1);}
+
+// -------------------------------------------------------------------------
+function Main(){
+  
+  k= "aa";
+  h= "xx";
+  p= k + h;
+  
+  /* print_test.script:20 - Error: Can't alloc register, Regs=0xff */
+  Print( k + h, "\n");
+  
+
+  /* works
+  */
+  Print( p, "\n");
+  
+  return 1;
+  
+}
+
+Main();
