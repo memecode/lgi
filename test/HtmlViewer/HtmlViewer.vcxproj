@@ -90,7 +90,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\private\common;..\include\lgi\win;..\include;..\..\..\..\CodeLib\libjpeg-9a;..\..\..\..\CodeLib\libpng\build32\zlib_dir;..\..\..\..\CodeLib\libpng\build32;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng;c:\Program Files (x86)\OpenSSL\include;c:\Program Files (x86)\OpenSSL-Win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\private\common;..\..\include\lgi\win;..\..\include;..\..\..\..\..\CodeLib\libjpeg-9a;..\..\..\..\..\CodeLib\libpng\build32\zlib_dir;..\..\..\..\..\CodeLib\libpng\build32;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng;c:\Program Files (x86)\OpenSSL\include;c:\Program Files (x86)\OpenSSL-Win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -112,7 +112,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\private\common;..\include\lgi\win;..\include;..\..\..\..\CodeLib\libjpeg-9a;..\..\..\..\CodeLib\libpng\build64\zlib_dir;..\..\..\..\CodeLib\libpng\build64;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng;c:\Program Files\OpenSSL\include;c:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\private\common;..\..\include\lgi\win;..\..\include;..\..\..\..\..\CodeLib\libjpeg-9a;..\..\..\..\..\CodeLib\libpng\build64\zlib_dir;..\..\..\..\..\CodeLib\libpng\build64;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng;c:\Program Files\OpenSSL\include;c:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -133,7 +133,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\private\common;..\include\lgi\win;..\include;..\..\..\..\CodeLib\libjpeg-9a;..\..\..\..\CodeLib\libpng\build32\zlib_dir;..\..\..\..\CodeLib\libpng\build32;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng;c:\Program Files (x86)\OpenSSL\include;c:\Program Files (x86)\OpenSSL-Win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\private\common;..\..\include\lgi\win;..\..\include;..\..\..\..\..\CodeLib\libjpeg-9a;..\..\..\..\..\CodeLib\libpng\build32\zlib_dir;..\..\..\..\..\CodeLib\libpng\build32;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng;c:\Program Files (x86)\OpenSSL\include;c:\Program Files (x86)\OpenSSL-Win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader />
@@ -154,7 +154,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\private\common;..\include\lgi\win;..\include;..\..\..\..\CodeLib\libjpeg-9a;..\..\..\..\CodeLib\libpng\build64\zlib_dir;..\..\..\..\CodeLib\libpng\build64;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng;c:\Program Files\OpenSSL\include;c:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\private\common;..\..\include\lgi\win;..\..\include;..\..\..\..\..\CodeLib\libjpeg-9a;..\..\..\..\..\CodeLib\libpng\build64\zlib_dir;..\..\..\..\..\CodeLib\libpng\build64;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng;c:\Program Files\OpenSSL\include;c:\Program Files\OpenSSL-Win64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -175,51 +175,45 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\common\Coding\LexCpp.cpp" />
-    <ClCompile Include="..\src\common\Coding\ScriptCompiler.cpp" />
-    <ClCompile Include="..\src\common\Coding\ScriptLibrary.cpp" />
-    <ClCompile Include="..\src\common\Coding\ScriptVM.cpp" />
-    <ClCompile Include="..\src\common\Gdc2\Filters\Gif.cpp" />
-    <ClCompile Include="..\src\common\Gdc2\Filters\Jpeg.cpp" />
-    <ClCompile Include="..\src\common\Gdc2\Filters\Lzw.cpp" />
-    <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp" />
-    <ClCompile Include="..\src\common\Gdc2\Font\EmojiFont.cpp" />
-    <ClCompile Include="..\src\common\Gdc2\Tools\GdcTools.cpp" />
-    <ClCompile Include="..\src\common\Images\Compare\ImageComparison.cpp" />
-    <ClCompile Include="..\src\common\Net\Http.cpp" />
-    <ClCompile Include="..\src\common\Net\OpenSSLSocket.cpp" />
-    <ClCompile Include="..\src\common\Lgi\LgiMain.cpp" />
-    <ClCompile Include="..\src\common\Text\Emoji\EmojiMap.cpp" />
-    <ClCompile Include="..\src\common\Text\Homoglyphs\Homoglyphs.cpp" />
-    <ClCompile Include="..\src\common\Text\Homoglyphs\HomoglyphsTable.cpp" />
-    <ClCompile Include="..\src\common\Text\Html.cpp" />
-    <ClCompile Include="..\src\common\Text\HtmlCommon.cpp" />
-    <ClCompile Include="..\src\common\Text\HtmlParser.cpp" />
-    <ClCompile Include="..\src\common\Widgets\ZoomView.cpp" />
+    <ClCompile Include="..\..\src\common\Coding\LexCpp.cpp" />
+    <ClCompile Include="..\..\src\common\Coding\ScriptCompiler.cpp" />
+    <ClCompile Include="..\..\src\common\Coding\ScriptLibrary.cpp" />
+    <ClCompile Include="..\..\src\common\Coding\ScriptVM.cpp" />
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Gif.cpp" />
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Jpeg.cpp" />
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Lzw.cpp" />
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Png.cpp" />
+    <ClCompile Include="..\..\src\common\Gdc2\Font\EmojiFont.cpp" />
+    <ClCompile Include="..\..\src\common\Gdc2\Tools\GdcTools.cpp" />
+    <ClCompile Include="..\..\src\common\Images\Compare\ImageComparison.cpp" />
+    <ClCompile Include="..\..\src\common\Net\Http.cpp" />
+    <ClCompile Include="..\..\src\common\Net\OpenSSLSocket.cpp" />
+    <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp" />
+    <ClCompile Include="..\..\src\common\Text\Emoji\EmojiMap.cpp" />
+    <ClCompile Include="..\..\src\common\Text\Homoglyphs\Homoglyphs.cpp" />
+    <ClCompile Include="..\..\src\common\Text\Homoglyphs\HomoglyphsTable.cpp" />
+    <ClCompile Include="..\..\src\common\Text\Html.cpp" />
+    <ClCompile Include="..\..\src\common\Text\HtmlCommon.cpp" />
+    <ClCompile Include="..\..\src\common\Text\HtmlParser.cpp" />
+    <ClCompile Include="..\..\src\common\Widgets\ZoomView.cpp" />
     <ClCompile Include="TestSuite.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\common\Html.h" />
-    <ClInclude Include="..\include\common\HtmlCommon.h" />
-    <ClInclude Include="..\include\common\HtmlParser.h" />
-    <ClInclude Include="..\include\common\HtmlPriv.h" />
-    <ClInclude Include="..\include\common\GScripting.h" />
-    <ClInclude Include="..\include\common\ImageComparison.h" />
-    <ClInclude Include="..\include\lgi\common\Html.h" />
-    <ClInclude Include="..\include\lgi\common\HtmlCommon.h" />
-    <ClInclude Include="..\include\lgi\common\HtmlParser.h" />
-    <ClInclude Include="..\src\common\Coding\ScriptingPriv.h" />
-    <ClInclude Include="..\src\common\Text\HtmlPriv.h" />
+    <ClInclude Include="..\..\include\lgi\common\Html.h" />
+    <ClInclude Include="..\..\include\lgi\common\HtmlCommon.h" />
+    <ClInclude Include="..\..\include\lgi\common\HtmlParser.h" />
+    <ClInclude Include="..\..\src\common\Coding\ScriptingPriv.h" />
+    <ClInclude Include="..\..\src\common\Text\HtmlPriv.h" />
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="..\src\common\Coding\ExternCall.asm">
+    <MASM Include="..\..\src\common\Coding\ExternCall.asm">
       <FileType>Document</FileType>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </MASM>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\src\win\General\Lgi.manifest" />
+    <Manifest Include="..\..\src\win\General\Lgi.manifest" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Files\amp-super.html" />
@@ -230,7 +224,7 @@
     <None Include="Files\steam4.html" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Lgi_vs2015.vcxproj">
+    <ProjectReference Include="..\..\Lgi_vs2015.vcxproj">
       <Project>{95df9ca4-6d37-4a85-a648-80c2712e0da1}</Project>
     </ProjectReference>
   </ItemGroup>

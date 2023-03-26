@@ -90,7 +90,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -112,7 +112,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN64;_DEBUG;_CONSOLE;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -132,7 +132,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -156,7 +156,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\include;..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN64;NDEBUG;_CONSOLE;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -174,19 +174,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\common\Coding\LexCpp.cpp" />
-    <ClCompile Include="..\src\common\Coding\ScriptCompiler.cpp" />
-    <ClCompile Include="..\src\common\Coding\ScriptLibrary.cpp" />
-    <ClCompile Include="..\src\common\Coding\ScriptVM.cpp" />
-    <ClCompile Include="..\src\common\Lgi\LgiMain.cpp" />
+    <ClCompile Include="..\..\src\common\Coding\LexCpp.cpp" />
+    <ClCompile Include="..\..\src\common\Coding\ScriptCompiler.cpp" />
+    <ClCompile Include="..\..\src\common\Coding\ScriptLibrary.cpp" />
+    <ClCompile Include="..\..\src\common\Coding\ScriptVM.cpp" />
+    <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\docs\scripting\index.html" />
-    <None Include="..\docs\scripting\library.html" />
-    <None Include="..\docs\scripting\scripting.css" />
-    <None Include="..\docs\scripting\syntax.html" />
-    <CustomBuild Include="..\src\common\Coding\ExternCall.asm">
+    <None Include="..\..\docs\scripting\index.html" />
+    <None Include="..\..\docs\scripting\library.html" />
+    <None Include="..\..\docs\scripting\scripting.css" />
+    <None Include="..\..\docs\scripting\syntax.html" />
+    <CustomBuild Include="..\..\src\common\Coding\ExternCall.asm">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">cd $(IntDir)
 "c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64\ml64.exe" %(FullPath) /c
 </Command>
@@ -209,13 +209,13 @@
     <None Include="Scripts\System.script" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\common\GScripting.h" />
-    <ClInclude Include="..\src\common\Coding\GScriptingPriv.h" />
-    <ClInclude Include="..\src\common\Coding\GTokenType.h" />
-    <ClInclude Include="..\src\common\Coding\Instructions.h" />
+    <ClInclude Include="..\..\include\common\Scripting.h" />
+    <ClInclude Include="..\..\src\common\Coding\ScriptingPriv.h" />
+    <ClInclude Include="..\..\src\common\Coding\TokenType.h" />
+    <ClInclude Include="..\..\src\common\Coding\Instructions.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Lgi_vs2015.vcxproj">
+    <ProjectReference Include="..\..\Lgi_vs2015.vcxproj">
       <Project>{95df9ca4-6d37-4a85-a648-80c2712e0da1}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>

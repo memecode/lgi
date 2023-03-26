@@ -31,97 +31,86 @@
     <ClCompile Include="TestSuite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Gdc2\Tools\GdcTools.cpp">
+    <ClCompile Include="..\..\src\common\Gdc2\Tools\GdcTools.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Gdc2\Filters\Gif.cpp">
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Gif.cpp">
       <Filter>Source Files\Filters</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Images\Compare\ImageComparison.cpp">
+    <ClCompile Include="..\..\src\common\Images\Compare\ImageComparison.cpp">
       <Filter>Source Files\Image Comparison</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Gdc2\Filters\Jpeg.cpp">
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Jpeg.cpp">
       <Filter>Source Files\Filters</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Lgi\LgiMain.cpp">
+    <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Gdc2\Filters\Lzw.cpp">
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Lzw.cpp">
       <Filter>Source Files\Filters</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp">
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Png.cpp">
       <Filter>Source Files\Filters</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Text\Emoji\EmojiMap.cpp">
+    <ClCompile Include="..\..\src\common\Text\Emoji\EmojiMap.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Text\Homoglyphs\Homoglyphs.cpp">
+    <ClCompile Include="..\..\src\common\Text\Homoglyphs\Homoglyphs.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Text\Homoglyphs\HomoglyphsTable.cpp">
+    <ClCompile Include="..\..\src\common\Text\Homoglyphs\HomoglyphsTable.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Text\HtmlParser.cpp">
+    <ClCompile Include="..\..\src\common\Text\HtmlParser.cpp">
       <Filter>Source Files\Html</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Text\HtmlCommon.cpp">
+    <ClCompile Include="..\..\src\common\Text\HtmlCommon.cpp">
       <Filter>Source Files\Html</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Text\Html.cpp">
+    <ClCompile Include="..\..\src\common\Text\Html.cpp">
       <Filter>Source Files\Html</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Coding\LexCpp.cpp">
+    <ClCompile Include="..\..\src\common\Coding\LexCpp.cpp">
       <Filter>Source Files\Scripting</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Coding\ScriptCompiler.cpp">
+    <ClCompile Include="..\..\src\common\Coding\ScriptCompiler.cpp">
       <Filter>Source Files\Scripting</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Coding\ScriptLibrary.cpp">
+    <ClCompile Include="..\..\src\common\Coding\ScriptLibrary.cpp">
       <Filter>Source Files\Scripting</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Coding\ScriptVM.cpp">
+    <ClCompile Include="..\..\src\common\Coding\ScriptVM.cpp">
       <Filter>Source Files\Scripting</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Widgets\ZoomView.cpp">
+    <ClCompile Include="..\..\src\common\Widgets\ZoomView.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Net\OpenSSLSocket.cpp">
+    <ClCompile Include="..\..\src\common\Net\OpenSSLSocket.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Net\Http.cpp">
+    <ClCompile Include="..\..\src\common\Net\Http.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Gdc2\Font\EmojiFont.cpp">
+    <ClCompile Include="..\..\src\common\Gdc2\Font\EmojiFont.cpp">
       <Filter>Source Files\Html</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\common\GScripting.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\common\ImageComparison.h">
-      <Filter>Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\common\Html.h" />
-    <ClInclude Include="..\include\common\HtmlCommon.h" />
-    <ClInclude Include="..\include\common\HtmlParser.h" />
-    <ClInclude Include="..\include\common\HtmlPriv.h" />
-    <ClInclude Include="..\src\common\Coding\ScriptingPriv.h" />
-    <ClInclude Include="..\include\lgi\common\Html.h">
+    <ClInclude Include="..\..\src\common\Text\HtmlPriv.h">
       <Filter>Source Files\Html</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\HtmlCommon.h">
+    <ClInclude Include="..\..\include\lgi\common\Html.h">
       <Filter>Source Files\Html</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\HtmlParser.h">
+    <ClInclude Include="..\..\include\lgi\common\HtmlCommon.h">
       <Filter>Source Files\Html</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\common\Text\HtmlPriv.h">
+    <ClInclude Include="..\..\include\lgi\common\HtmlParser.h">
       <Filter>Source Files\Html</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Manifest Include="..\src\win\General\Lgi.manifest" />
+    <ClInclude Include="..\..\src\common\Coding\ScriptingPriv.h">
+      <Filter>Source Files\Html</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Files\cisra_new_building.html">
@@ -145,7 +134,12 @@
   </ItemGroup>
   <ItemGroup>
     <MASM Include="..\src\common\Coding\ExternCall.asm">
-      <Filter>Source Files\Scripting</Filter>
+      <Filter>Source Files</Filter>
     </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="..\src\win\General\Lgi.manifest">
+      <Filter>Source Files\Lgi</Filter>
+    </Manifest>
   </ItemGroup>
 </Project>
