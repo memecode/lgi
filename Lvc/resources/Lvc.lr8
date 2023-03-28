@@ -300,7 +300,7 @@
 			<menuitem Ref="46" Shortcut="F5" />
 			<menuitem Ref="19" />
 			<menuitem Sep="1" />
-			<menuitem Ref="51" />
+			<menuitem Ref="51" Shortcut="CtrlCmd+W" />
 		</submenu>
 		<submenu Ref="42">
 			<menuitem Ref="43" Shortcut="Ctrl+F" />
