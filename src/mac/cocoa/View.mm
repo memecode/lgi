@@ -139,6 +139,9 @@ LViewPrivate::~LViewPrivate()
 {
 	DeleteObj(Popup);
 	LAssert(PulseThread == NULL);
+
+	while (EventTargets.Length())
+		delete EventTargets[0];
 }
 
 const char *LView::GetClass()
@@ -450,6 +453,13 @@ LCursor LView::GetCursor(int x, int y)
 
 LMessage::Result LView::OnEvent(LMessage *Msg)
 {
+	for (auto target: d->EventTargets)
+	{
+		if (target->Msgs.Length() == 0 ||
+			target->Msgs.Find(Msg->Msg()))
+			target->OnEvent(Msg);
+	}
+
 	switch (Msg->m)
 	{
 		case M_PULSE:

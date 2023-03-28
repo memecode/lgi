@@ -155,6 +155,9 @@ LViewPrivate::~LViewPrivate()
 {
 	LAssert(PulseThread == 0);
 
+	while (EventTargets.Length())
+		delete EventTargets[0];
+
 	if (Font && FontOwnType == GV_FontOwned)
 		DeleteObj(Font);
 }
@@ -725,6 +728,13 @@ void LView::SetPulse(int Length)
 LMessage::Param LView::OnEvent(LMessage *Msg)
 {
 	ThreadCheck();
+
+	for (auto target: d->EventTargets)
+	{
+		if (target->Msgs.Length() == 0 ||
+			target->Msgs.Find(Msg->Msg()))
+			target->OnEvent(Msg);
+	}
 	
 	int Id;
 	switch (Id = Msg->Msg())
