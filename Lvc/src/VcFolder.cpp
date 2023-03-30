@@ -569,6 +569,21 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 	return false;
 }
 
+void VcFolder::GetRemoteUrl(std::function<void(LString)> Callback)
+{
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			auto *p = new ParseParams;
+			p->Callback = Callback;
+			StartCmd("config --get remote.origin.url", NULL, p);
+			break;
+		}
+	}
+}
+
+
 void VcFolder::OnBranchesChange()
 {
 	auto *w = d->Tree->GetWindow();
@@ -2024,6 +2039,12 @@ void VcFolder::OnSshCmd(SshParams *p)
 				Select(true);
 		}
 	}
+	
+	if (p->Params &&
+		p->Params->Callback)
+	{
+		p->Params->Callback(s);
+	}
 }
 
 void VcFolder::OnPulse()
@@ -2081,6 +2102,12 @@ void VcFolder::OnPulse()
 					{
 						Reselect |= CALL_MEMBER_FN(*this, c->PostOp)(Result, s, c->Params);
 					}
+				}
+				
+				if (c->Params &&
+					c->Params->Callback)
+				{
+					c->Params->Callback(s);
 				}
 					
 				Cmds.DeleteAt(i--, true);
@@ -2198,11 +2225,13 @@ void VcFolder::OnMouseClick(LMouse &m)
 		s.AppendItem("Update Subs", IDM_UPDATE_SUBS, GetType() == VcGit);
 		s.AppendSeparator();
 		s.AppendItem("Remove", IDM_REMOVE);
+		s.AppendItem("Remote URL", IDM_REMOTE_URL);
 		if (!Uri.IsFile())
 		{
 			s.AppendSeparator();
 			s.AppendItem("Edit Location", IDM_EDIT);
 		}
+		
 		int Cmd = s.Float(GetTree(), m);
 		switch (Cmd)
 		{
@@ -2259,6 +2288,38 @@ void VcFolder::OnMouseClick(LMouse &m)
 						Select(true);
 					}
 					delete dlg;
+				});
+				break;
+			}
+			case IDM_REMOTE_URL:
+			{
+				GetRemoteUrl([this](auto str)
+				{
+					LString Url;
+					switch (GetType())
+					{
+						case VcGit:
+							Url = str.Strip();
+							break;
+						default:
+							LAssert(!"Impl me.");
+							break;
+					}
+					
+					if (Url)
+					{
+						auto a = new LAlert(GetTree(), "Remote Url", Url, "Copy", "Ok");
+						a->DoModal([this, Url](auto dlg, auto code)
+						{
+							if (code == 1)
+							{
+								LClipBoard c(GetTree());
+								c.Text(Url);
+							}
+							
+							delete dlg;
+						});
+					}
 				});
 				break;
 			}

@@ -74,9 +74,9 @@ public:
 		/// The first button text
 		const char *Btn1,
 		/// The [optional] 2nd buttons text
-		const char *Btn2 = 0,
+		const char *Btn2 = NULL,
 		/// The [optional] 3rd buttons text
-		const char *Btn3 = 0
+		const char *Btn3 = NULL
 	);
 
     void SetAppModal();

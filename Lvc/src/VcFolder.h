@@ -207,7 +207,7 @@ class VcFolder : public LTreeItem
 	LHashTbl<ConstStrKey<char>,VcBranch*> Branches;
 	LAutoPtr<UncommitedItem> Uncommit;
 	LString Cache, NewRev;
-	bool CommitListDirty = 0;
+	bool CommitListDirty = false;
 	int Unpushed = 0, Unpulled = 0;
 	LString CountCache;
 	LTreeItem *Tmp = NULL;
@@ -329,6 +329,7 @@ public:
 	void LogFile(const char *Path);
 	LString GetFilePart(const char *uri);
 	void FilterCurrentFiles();
+	void GetRemoteUrl(std::function<void(LString)> Callback);
 
 	void OnPulse();
 	void OnUpdate(const char *Rev);

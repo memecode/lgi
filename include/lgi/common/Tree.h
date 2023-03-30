@@ -50,7 +50,7 @@ public:
 	/// Gets the parent of this node.
 	LTreeItem *GetParent() { return Parent; }
 	/// Gets the owning tree. May be NULL if not attached to a tree.
-	LTree *GetTree() { return Tree; }
+	LTree *GetTree() const { return Tree; }
 	/// Returns true if this is the root node.
 	bool IsRoot();
 	/// Returns the index of this node in the list of item owned by it's parent.
