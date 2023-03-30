@@ -571,13 +571,24 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 
 void VcFolder::GetRemoteUrl(std::function<void(LString)> Callback)
 {
+	LAutoPtr<ParseParams> p(new ParseParams);
+	p->Callback = Callback;
+
 	switch (GetType())
 	{
 		case VcGit:
 		{
-			auto *p = new ParseParams;
-			p->Callback = Callback;
-			StartCmd("config --get remote.origin.url", NULL, p);
+			StartCmd("config --get remote.origin.url", NULL, p.Release());
+			break;
+		}
+		case VcSvn:
+		{
+			StartCmd("info --show-item=url", NULL, p.Release());
+			break;
+		}
+		case VcHg:
+		{
+			StartCmd("paths default", NULL, p.Release());
 			break;
 		}
 	}
@@ -2295,17 +2306,7 @@ void VcFolder::OnMouseClick(LMouse &m)
 			{
 				GetRemoteUrl([this](auto str)
 				{
-					LString Url;
-					switch (GetType())
-					{
-						case VcGit:
-							Url = str.Strip();
-							break;
-						default:
-							LAssert(!"Impl me.");
-							break;
-					}
-					
+					LString Url = str.Strip();
 					if (Url)
 					{
 						auto a = new LAlert(GetTree(), "Remote Url", Url, "Copy", "Ok");
