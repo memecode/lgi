@@ -2165,10 +2165,13 @@ void VcFolder::OnRemove()
 		auto u = Uri.ToString();
 		for (auto c: t->Children)
 		{
-			if (c->IsTag(OPT_Folder) &&
-				c->GetContent())
+			if (!c->IsTag(OPT_Folder))
+				printf("%s:%i - Wrong tag: %s, %s\n", _FL, c->GetTag(), OPT_Folder);
+			else if (!c->GetContent())
+				printf("%s:%i - No content.\n", _FL);
+			else
 			{
-				auto Content = c->GetContent();				
+				auto Content = c->GetContent();
 				if (!_stricmp(Content, u))
 				{
 					c->RemoveTag();

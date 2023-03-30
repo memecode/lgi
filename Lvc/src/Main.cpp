@@ -921,20 +921,25 @@ public:
 	~App()
 	{
 		SerializeState(&Opts, "WndPos", false);
-
+		SaveFolders();
+	}
+	
+	void SaveFolders()
+	{
 		LXmlTag *f = Opts.LockTag(OPT_Folders, _FL);
-		if (f)
-		{
-			f->EmptyChildren();
+		if (!f)
+			return;
 
-			for (auto i:*Tree)
-			{
-				VcFolder *vcf = dynamic_cast<VcFolder*>(i);
-				if (vcf)
-					f->InsertTag(vcf->Save());
-			}
-			Opts.Unlock();
+		f->EmptyChildren();
+
+		for (auto i: *Tree)
+		{
+			VcFolder *vcf = dynamic_cast<VcFolder*>(i);
+			if (vcf)
+				f->InsertTag(vcf->Save());
 		}
+
+		Opts.Unlock();
 		Opts.SerializeFile(true);
 	}
 
@@ -1125,7 +1130,13 @@ public:
 			{
 				LUri u;
 				u.SetFile(Fld);
-				Tree->Insert(new VcFolder(this, u.ToString()));
+				
+				auto f = new VcFolder(this, u.ToString());
+				if (f)
+				{
+					Tree->Insert(f);
+					SaveFolders();
+				}
 			}
 		};
 
@@ -1149,7 +1160,10 @@ public:
 		Dlg->DoModal([this, Dlg](auto dlg, auto status)
 		{
 			if (status)
+			{
 				Tree->Insert(new VcFolder(this, Dlg->Uri));
+				SaveFolders();
+			}
 			delete dlg;
 		});
 	}
