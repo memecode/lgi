@@ -555,6 +555,21 @@ int LView::OnNotify(LViewI *Ctrl, LNotification Data)
 	}
 	else if (d && d->Parent)
 	{
+		#ifdef HAIKU
+		// Don't let notifications blindly pass into other threads.
+		auto bCur = Handle();
+		auto bParent = d->Parent->Handle();
+		if (bCur && bParent)
+		{
+			if (bCur->Looper() !=
+				bParent->Looper())
+			{
+				printf("OnNotify can't cross thread boundary!!!!!\n");
+				return 0;
+			}
+		}
+		#endif
+
 		// default behaviour is just to pass the 
 		// notification up to the parent
 

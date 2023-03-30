@@ -158,6 +158,7 @@ public:
 	{
 		fixed = fix;
 		warnResize = warn;
+		printf("%p::SetFixed %i,%i\n", this, fixed, warnResize);
 	}
 
 	/// Emtpies the array of all objects.
@@ -173,7 +174,9 @@ public:
 		{
 			if (i > len && fixed)
 			{
-				assert(!"Attempt to enlarged fixed array.");
+				printf("%s:%i - %p::SetLength %i,%i\n", _FL, this, fixed, warnResize);
+				if (warnResize)
+					printf("Attempt to enlarged fixed array.\n");
 				return false;
 			}
 
@@ -320,11 +323,13 @@ public:
 
 		if
 		(
-			(fixed && (uint32_t)i >= len)
+			fixed && ((uint32_t)i >= len)
 		)
 		{
+			printf("%s:%i - %p::SetLength %i,%i\n", _FL, this, fixed, warnResize);
 			if (warnResize)
-				assert(!"Attempt to enlarged fixed array.");
+				// assert(!"Attempt to enlarged fixed array.");
+				printf("%s:%i - Attempt to enlarged fixed array.\n", _FL);
 			return t;
 		}
 		

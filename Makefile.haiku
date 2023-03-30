@@ -161,10 +161,24 @@ Source =	src/haiku/Window.cpp \
 			src/common/Gdc2/16Bit.cpp \
 			src/common/Gdc2/15Bit.cpp
 
-SourceLst := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(Source)))
-Objects := $(addprefix $(BuildDir)/,$(SourceLst))
-Deps := $(patsubst %.o,%.d,$(Objects))
+SourceC    := $(filter %.c,$(Source))
+ObjectsC   := $(SourceC:.c=.o)
+SourceCpp  := $(filter %.cpp,$(Source))
+ObjectsCpp := $(SourceCpp:.cpp=.o)
+Objects    := $(notdir $(ObjectsC) $(ObjectsCpp))
+Objects    := $(addprefix $(BuildDir)/,$(Objects))
+Deps       := $(patsubst %.o,%.d,$(Objects))
 
+$(BuildDir)/%.o: %.c
+	mkdir -p $(@D)
+	echo $(notdir $<) [$(Build)]
+	$(CC) $(Inc) $(Flags) $(Defs) -c $< -o $@
+
+$(BuildDir)/%.o: %.cpp
+	mkdir -p $(@D)
+	echo $(notdir $<) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $@
+	
 # Target
 TargetFile = lib$(Target)$(Tag).so
 $(TargetFile) : $(Objects)
@@ -177,16 +191,6 @@ $(TargetFile) : $(Objects)
 		$(Libs)
 	@echo Done.
 
-.SECONDEXPANSION:
-$(Objects): $(BuildDir)/%.o: $$(wildcard %.c*)
-	mkdir -p $(@D)
-	@echo $(<F) [$(Build)]
-ifeq "$(suffix $<)" ".cpp"
-	$(CPP) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
-else
-	$(CC) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
-endif
-
 -include $(Objects:.o=.d)
 
 # Clean out targets
@@ -194,16 +198,17 @@ clean :
 	rm $(Objects) $(Deps) $(BuildDir)/$(TargetFile)
 	@echo Cleaned $(BuildDir)
 
-VPATH=%.cpp \
-	./src/common/Hash/sha1 \
-	./src/common/Hash/md5 \
-	./private/linux \
-	./private/haiku \
-	./private/common \
-	./include/lgi/mac/cocoa \
-	./include/lgi/linux/Gtk \
-	./include/lgi/haiku \
-	./include/lgi/common \
-	./include \
-	$(BuildDir)
-
+VPATH=$(BuildDir) \
+    src/haiku \
+    src/common/Widgets \
+    src/common/Text \
+    src/common/Skins/Gel \
+    src/common/Resource \
+    src/common/Net \
+    src/common/Lgi \
+    src/common/General \
+    src/common/Gdc2/Tools \
+    src/common/Gdc2 \
+    src/common/Gdc2/Path \
+    src/common/Gdc2/Font \
+    src/common/Gdc2/Filters
