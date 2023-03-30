@@ -1741,8 +1741,6 @@ AppWnd::AppWnd()
 	if (d->Output)
 		d->Output->SetPulse(1000);
 	#endif
-
-	OnCommand(IDM_NEW, 0, NULL);
 }
 
 AppWnd::~AppWnd()

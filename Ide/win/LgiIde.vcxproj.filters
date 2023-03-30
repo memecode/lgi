@@ -54,71 +54,74 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Code\Debugger.h">
+    <ClInclude Include="..\src\Debugger.h">
       <Filter>Source Files\Debugger</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\common\EventTargetThread.h">
+    <ClInclude Include="..\..\include\lgi\common\EventTargetThread.h">
       <Filter>Lgi</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\FindInFiles.h">
+    <ClInclude Include="..\src\IdeFindInFiles.h">
       <Filter>Source Files\Search</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\FindSymbol.h">
+    <ClInclude Include="..\src\FindSymbol.h">
       <Filter>Source Files\Search</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\FtpFile.h">
+    <ClInclude Include="..\src\FtpFile.h">
       <Filter>Source Files\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\FtpThread.h">
+    <ClInclude Include="..\src\FtpThread.h">
       <Filter>Source Files\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\IdeDoc.h">
+    <ClInclude Include="..\src\IdeDoc.h">
       <Filter>Source Files\Docs</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\IdeDocPrivate.h">
+    <ClInclude Include="..\src\IdeDocPrivate.h">
       <Filter>Source Files\Docs</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\IdeProject.h">
+    <ClInclude Include="..\src\IdeProject.h">
       <Filter>Source Files\Projects</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\LgiIde.h">
+    <ClInclude Include="..\src\LgiIde.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\common\ParseCpp.h">
+    <ClInclude Include="..\..\include\lgi\common\ParseCpp.h">
       <Filter>Source Files\Search\Cpp Parser</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\ProjectNode.h">
+    <ClInclude Include="..\src\ProjectNode.h">
       <Filter>Source Files\Projects</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\PythonParser.h">
+    <ClInclude Include="..\src\PythonParser.h">
       <Filter>Source Files\Search\Python Parser</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\resource.h">
+    <ClInclude Include="..\src\resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\resdefs.h">
+    <ClInclude Include="..\src\resdefs.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\common\Scripting.h">
+    <ClInclude Include="..\..\include\lgi\common\Scripting.h">
       <Filter>Source Files\Scripting</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\common\Coding\ScriptingPriv.h">
       <Filter>Source Files\Scripting</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\SimpleCppParser.h">
+    <ClInclude Include="..\src\SimpleCppParser.h">
       <Filter>Source Files\Search\Simple Cpp Parser</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\SpaceTabConv.h">
+    <ClInclude Include="..\src\SpaceTabConv.h">
       <Filter>Source Files\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\common\SubProcess.h">
+    <ClInclude Include="..\..\include\lgi\common\SubProcess.h">
       <Filter>Source Files\Process</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\WebFldDlg.h">
+    <ClInclude Include="..\src\WebFldDlg.h">
       <Filter>Source Files\Dialogs</Filter>
     </ClInclude>
-    <ClInclude Include="..\Code\AddFtpFile.h">
+    <ClInclude Include="..\src\AddFtpFile.h">
       <Filter>Source Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\DebugContext.h">
+      <Filter>Source Files\Debugger</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -137,7 +140,7 @@
     <ClCompile Include="..\src\DocEditStyling.cpp">
       <Filter>Source Files\Docs</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\FindInFiles.cpp">
+    <ClCompile Include="..\src\IdeFindInFiles.cpp">
       <Filter>Source Files\Search</Filter>
     </ClCompile>
     <ClCompile Include="..\src\FindSymbol.cpp">

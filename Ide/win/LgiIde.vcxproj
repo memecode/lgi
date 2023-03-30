@@ -190,28 +190,29 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\include\common\EventTargetThread.h" />
-    <ClInclude Include="..\..\..\include\common\ParseCpp.h" />
-    <ClInclude Include="..\..\..\include\common\Scripting.h" />
-    <ClInclude Include="..\..\..\include\common\SubProcess.h" />
+    <ClInclude Include="..\..\include\lgi\common\EventTargetThread.h" />
+    <ClInclude Include="..\..\include\lgi\common\ParseCpp.h" />
+    <ClInclude Include="..\..\include\lgi\common\Scripting.h" />
+    <ClInclude Include="..\..\include\lgi\common\SubProcess.h" />
     <ClInclude Include="..\..\src\common\Coding\ScriptingPriv.h" />
-    <ClInclude Include="..\Code\AddFtpFile.h" />
-    <ClInclude Include="..\Code\FindInFiles.h" />
-    <ClInclude Include="..\Code\FindSymbol.h" />
-    <ClInclude Include="..\Code\FtpFile.h" />
-    <ClInclude Include="..\Code\FtpThread.h" />
-    <ClInclude Include="..\Code\Debugger.h" />
-    <ClInclude Include="..\Code\IdeDoc.h" />
-    <ClInclude Include="..\Code\IdeDocPrivate.h" />
-    <ClInclude Include="..\Code\IdeProject.h" />
-    <ClInclude Include="..\Code\LgiIde.h" />
-    <ClInclude Include="..\Code\ProjectNode.h" />
-    <ClInclude Include="..\Code\PythonParser.h" />
-    <ClInclude Include="..\Code\resdefs.h" />
-    <ClInclude Include="..\Code\resource.h" />
-    <ClInclude Include="..\Code\SimpleCppParser.h" />
-    <ClInclude Include="..\Code\SpaceTabConv.h" />
-    <ClInclude Include="..\Code\WebFldDlg.h" />
+    <ClInclude Include="..\src\AddFtpFile.h" />
+    <ClInclude Include="..\src\DebugContext.h" />
+    <ClInclude Include="..\src\IdeFindInFiles.h" />
+    <ClInclude Include="..\src\FindSymbol.h" />
+    <ClInclude Include="..\src\FtpFile.h" />
+    <ClInclude Include="..\src\FtpThread.h" />
+    <ClInclude Include="..\src\Debugger.h" />
+    <ClInclude Include="..\src\IdeDoc.h" />
+    <ClInclude Include="..\src\IdeDocPrivate.h" />
+    <ClInclude Include="..\src\IdeProject.h" />
+    <ClInclude Include="..\src\LgiIde.h" />
+    <ClInclude Include="..\src\ProjectNode.h" />
+    <ClInclude Include="..\src\PythonParser.h" />
+    <ClInclude Include="..\src\resdefs.h" />
+    <ClInclude Include="..\src\resource.h" />
+    <ClInclude Include="..\src\SimpleCppParser.h" />
+    <ClInclude Include="..\src\SpaceTabConv.h" />
+    <ClInclude Include="..\src\WebFldDlg.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\common\Coding\LexCpp.cpp" />

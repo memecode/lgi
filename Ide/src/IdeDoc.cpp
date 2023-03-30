@@ -1048,11 +1048,6 @@ IdeDoc::IdeDoc(AppWnd *a, NodeSource *src, const char *file)
 {
 	d = new IdeDocPrivate(this, a, src, file);
 	d->UpdateName();
-
-	/*
-	if (src || file)
-		d->Load();
-	*/
 }
 
 IdeDoc::~IdeDoc()
