@@ -16,6 +16,7 @@
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/PixelRops.h"
 #include "lgi/common/UnicodeString.h"
+#include "lgi/common/Emoji.h"
 
 #ifdef FontChange
 #undef FontChange
@@ -880,8 +881,13 @@ void LDisplayString::Layout(bool Debug)
 			for (LUnicodeString<wchar_t> u(Str, StrWords); true; u++)
 			{
 				u32 = *u;
+
+				bool variation = u32 == EMOJI_SELECT_TEXT ||
+								 u32 == EMOJI_SELECT_IMAGE;
+
 				LFont *n = u32 > ' ' && GlyphSub ? Sys->GetGlyph(u32, Font) : Font;
-				bool Change =	n != f ||							// The font changed
+				bool Change =	variation ||
+								n != f ||							// The font changed
 								(IsTabChar(u32) ^ WasTab) ||		// Entering/leaving a run of tabs
 								!u32 ||								// Hit a NULL character
 								(u.Get() - Info[i].Str) >= 1000;	// This is to stop very long segments not rendering
@@ -929,7 +935,6 @@ void LDisplayString::Layout(bool Debug)
 							if (u32 && !f)
 							{
 								// no font, so ? out the chars... as they aren't available anyway
-								LgiTrace("MissingGlyph: %i 0x%x\n", u32, u32);
 								CurInfo.Missing = true;
 								#if 0
 								for (int n=0; n<CurInfo.Len; n++)
@@ -953,6 +958,11 @@ void LDisplayString::Layout(bool Debug)
 
 					// Start next segment
 					WasTab = IsTabChar(u32);
+					if (variation)
+					{
+						u++;
+						u32 = *u;
+					}
 					Info[i].Str = u.Get();
 				}
 
@@ -1853,6 +1863,8 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 					f = Font;
 					if (Info[i].Missing)
 						f->Colour(LColour::Red.Mix(cFore), cBack);
+					else
+						f->Colour(cFore, cBack);
 				}
 
 				if (f)

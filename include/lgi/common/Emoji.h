@@ -14,6 +14,9 @@
 /// The height of each group in cells
 #define EMOJI_GROUP_Y			6
 
+#define EMOJI_SELECT_TEXT		0xFE0E
+#define EMOJI_SELECT_IMAGE		0xFE0F
+
 struct EmojiChar
 {
 	int16_t Index; // Icon index
