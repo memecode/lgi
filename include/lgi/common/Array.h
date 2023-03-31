@@ -158,7 +158,6 @@ public:
 	{
 		fixed = fix;
 		warnResize = warn;
-		printf("%p::SetFixed %i,%i\n", this, fixed, warnResize);
 	}
 
 	/// Emtpies the array of all objects.

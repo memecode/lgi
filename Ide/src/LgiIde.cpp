@@ -1588,9 +1588,7 @@ public:
 
 AppWnd::AppWnd()
 {
-	#ifdef __GTK_H__
 	LgiGetResObj(true, AppName);
-	#endif
 	
 	LRect r(0, 0, 1000, 760);
 	SetPos(r);

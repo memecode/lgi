@@ -17,6 +17,7 @@ public:
     bool Lock(bool debug = false);
     status_t LockWithTimeout(int64 time);
     void Unlock();
+    operator bool() { return locked; }
 };
 
 #endif

@@ -2075,12 +2075,15 @@ char *LGetExtension(const char *File)
 }
 
 #define DEBUG_FIND_FILE		0
+#if DEBUG_FIND_FILE
+#define LOG_DEBUG(...)		LgiTrace(__VA_ARGS__)
+#else
+#define LOG_DEBUG(...)
+#endif
 
 static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 {
-	#if DEBUG_FIND_FILE
-	printf("%s:%i - Name='%s'\n", __FILE__, __LINE__, Name);
-	#endif
+	LOG_DEBUG("%s:%i - Name='%s'\n", _FL, Name);
 	
 	if (!Name)
 		return;
@@ -2091,9 +2094,7 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 	LString Exe = LGetExeFile();
 	#endif
 
-	#if DEBUG_FIND_FILE
-	printf("%s:%i - Exe='%s'\n", _FL, Exe.Get());
-	#endif
+	LOG_DEBUG("%s:%i - Exe='%s'\n", _FL, Exe.Get());
 
 	char CurWorking[MAX_PATH_LEN];
 	_getcwd(CurWorking, sizeof(CurWorking));
@@ -2144,9 +2145,7 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 		LAssert(PathLen < sizeof(Path));
 
 		bool Exists = LFileExists(Path);
-		#if DEBUG_FIND_FILE
-		printf("\t%s = %i\n", Path, Exists);
-		#endif
+		LOG_DEBUG("\t%s = %i\n", Path, Exists);
 		if (Exists)
 		{
 			if (GStr)

@@ -17,7 +17,7 @@ BuildDir = $(Build)
 Flags = -fPIC -w -fno-inline -fpermissive
 
 ifeq ($(Build),Debug)
-	Flags += -g -std=c++14
+	Flags += -g -std=c++14 -O0
 	Tag = d
 	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -DLGI_LIBRARY -DPOSIX -D_GNU_SOURCE
 	Libs =  \
@@ -195,7 +195,7 @@ $(TargetFile) : $(Objects)
 
 # Clean out targets
 clean :
-	rm $(Objects) $(Deps) $(BuildDir)/$(TargetFile)
+	rm -rf $(BuildDir)
 	@echo Cleaned $(BuildDir)
 
 VPATH=$(BuildDir) \
@@ -211,4 +211,6 @@ VPATH=$(BuildDir) \
     src/common/Gdc2 \
     src/common/Gdc2/Path \
     src/common/Gdc2/Font \
-    src/common/Gdc2/Filters
+    src/common/Gdc2/Filters \
+	src/common/Hash/sha1 \
+	src/common/Hash/md5

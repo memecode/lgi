@@ -28,8 +28,8 @@
 // If it is defined it will use the cross platform 
 // "res" library distributed with the LGI library.
 
-#define DEBUG_RES_FILE						0
-#define CastToGWnd(RObj)					((RObj != 0) ? dynamic_cast<LView*>(RObj) : 0)
+#define DEBUG_RES_FILE						1
+#define CastToLView(RObj)					((RObj != 0) ? dynamic_cast<LView*>(RObj) : 0)
 
 class TagHash : public LHashTbl<StrKey<char>,bool>, public ResReadCtx
 {
@@ -868,7 +868,7 @@ void LResources::Res_SetPos(ResObject *Obj, int x1, int y1, int x2, int y2)
 	}
 	else
 	{
-		LView *w = CastToGWnd(Obj);
+		LView *w = CastToLView(Obj);
 		if (w)
 		{
 			LRect n(x1, y1, x2, y2);
@@ -988,7 +988,7 @@ bool LResources::Res_SetProperties(ResObject *Obj, LDom *Props)
 
 LRect LResources::Res_GetPos(ResObject *Obj)
 {
-	LView *w = CastToGWnd(Obj);
+	LView *w = CastToLView(Obj);
 	if (w)
 	{
 		return w->GetPos();
@@ -1011,7 +1011,7 @@ bool LResources::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
 	if (Ctx && !Ctx->Check(s->Tag))
 		return false;
 
-	LView *w = CastToGWnd(Obj);
+	LView *w = CastToLView(Obj);
 	if (w)
 	{
 		w->SetId(s->Id);
@@ -1042,8 +1042,8 @@ bool LResources::Res_SetStrRef(ResObject *Obj, int Ref, ResReadCtx *Ctx)
 
 void LResources::Res_Attach(ResObject *Obj, ResObject *Parent)
 {
-	LView *o = CastToGWnd(Obj);
-	LView *p = CastToGWnd(Parent);
+	LView *o = CastToLView(Obj);
+	LView *p = CastToLView(Parent);
 	LTabPage *Tab = dynamic_cast<LTabPage*>(Parent);
 	if (o)
 	{
@@ -1076,7 +1076,7 @@ void LResources::Res_Attach(ResObject *Obj, ResObject *Parent)
 
 bool LResources::Res_GetChildren(ResObject *Obj, List<ResObject> *l, bool Deep)
 {
-	LView *o = CastToGWnd(Obj);
+	LView *o = CastToLView(Obj);
 	if (o && l)
 	{
 		for (LViewI *w: o->IterateViews())

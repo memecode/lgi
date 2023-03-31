@@ -17,7 +17,7 @@ BuildDir = $(Build)
 Flags = -fPIC -w -fno-inline -fpermissive
 
 ifeq ($(Build),Debug)
-	Flags += -g -std=c++14
+	Flags += -g -std=c++14 -O0
 	Tag = d
 	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -DPOSIX -D_GNU_SOURCE
 	Libs =  \

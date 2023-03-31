@@ -684,9 +684,7 @@ void LXmlTag::InsertTag(LXmlTag *t)
 		t->RemoveTag();
 		t->Parent = this;		
 
-		printf("%p::SetFixedLength\n", &Children);
 		Children.SetFixedLength(false);
-		printf("%p::Add\n", &Children);
 		Children.Add(t);
 		Children.SetFixedLength(true);
 	}

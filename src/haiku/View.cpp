@@ -394,8 +394,14 @@ struct LBView : public Parent
 	void MakeFocus(bool focus=true)
 	{
 		if (!d) return;
-		Parent::MakeFocus(focus);
-		d->View->OnFocus(focus);
+
+		LLocker lck(this, _FL);
+		if (lck)
+		{
+			Parent::MakeFocus(focus);
+			d->View->OnFocus(focus);
+		}
+		else printf("%s:%i - Failed to lock.\n", _FL);
 	}
 };
 
