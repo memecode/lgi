@@ -59,7 +59,7 @@ target_include_directories(HtmlTest
 		Code
 		Resources
 		${OPENSSL_INCLUDE_DIR}
-		../private/common)
+		../../private/common)
 
 target_link_libraries(HtmlTest
 	PRIVATE

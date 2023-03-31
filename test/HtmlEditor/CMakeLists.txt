@@ -47,7 +47,7 @@ target_include_directories(HtmlEdit
 		Code
 		Resources
 		${OPENSSL_INCLUDE_DIR}
-		../private/common)
+		../../private/common)
 
 target_link_libraries(HtmlEdit
 	PRIVATE

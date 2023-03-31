@@ -285,6 +285,11 @@ public:
 	/// \returns true if 'd' is on the same year as this object
 	bool IsSameYear(LDateTime &d) const;
 
+	/// \returns the start of day, same date but time: 00:00:00
+	LDateTime StartOfDay() const;
+	/// \returns the end of day, same date but time: 23:59:59
+	LDateTime EndOfDay() const;
+
 	/// \returns whether a year is a leap year or not
 	bool IsLeapYear
 	(

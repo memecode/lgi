@@ -995,7 +995,7 @@ bool IdeDocPrivate::Save()
 	if (Status)
 		ModTs = GetModTime();
 
-	LPopupNotification::Message(Doc->GetWindow(), "Saved");
+	// LPopupNotification::Message(Doc->GetWindow(), "Saved");
 
 	return Status;
 }

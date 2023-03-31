@@ -1593,24 +1593,39 @@ bool LDateTime::IsSameYear(LDateTime &d) const
 	return Year() == d.Year();
 }
 
+LDateTime LDateTime::StartOfDay() const
+{
+	LDateTime dt = *this;
+	dt.Hours(0);
+	dt.Minutes(0);
+	dt.Seconds(0);
+	dt.Thousands(0);
+	return dt;
+}
+
+LDateTime LDateTime::EndOfDay() const
+{
+	LDateTime dt = *this;
+	dt.Hours(23);
+	dt.Minutes(59);
+	dt.Seconds(59);
+	dt.Thousands(999);
+	return dt;
+}
+
 bool LDateTime::IsLeapYear(int Year) const
 {
-	if (Year < 0) Year = _Year;
+	if (Year < 0)
+		Year = _Year;
 
 	if (Year % 4 != 0)
-	{
 		return false;
-	}
 
 	if (Year % 400 == 0)
-	{
 		return true;
-	}
 
 	if (Year % 100 == 0)
-	{
 		return false;
-	}
 
 	return true;
 }
@@ -1626,8 +1641,6 @@ int LDateTime::DaysInMonth() const
 	short DaysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 	return _Month >= 1 && _Month <= 12 ? DaysInMonth[_Month-1] : 0;
 }
-
-#define MinutesInDay (60*24)
 
 void LDateTime::AddSeconds(int64 Seconds)
 {
