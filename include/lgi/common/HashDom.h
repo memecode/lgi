@@ -12,7 +12,12 @@ public:
 	
 	~LHashDom()
 	{
-	    DeleteObjects();
+	    Empty();
+	}
+
+	void Empty()
+	{
+		DeleteObjects();
 	}
 
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array = 0)

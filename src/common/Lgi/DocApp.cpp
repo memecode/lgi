@@ -439,32 +439,39 @@ bool LDocApp<OptionsFmt>::_LoadMenu(const char *Resource, const char *Tags, int 
 }
 
 template <typename OptionsFmt>
-bool LDocApp<OptionsFmt>::_OpenFile(const char *File, bool ReadOnly)
+void LDocApp<OptionsFmt>::_OpenFile(const char *File, bool ReadOnly, std::function<void(bool)> Callback)
 {
-	bool Status = false;
-	if (SetDirty(false))
+	SetDirty(false, [this, Callback, ReadOnly, Fn = LString(File)](auto status) mutable
 	{
-		char RealPath[256];
-		if (LResolveShortcut(File, RealPath, sizeof(RealPath)))
+		if (!status)
 		{
-			File = RealPath;
+			if (Callback)
+				Callback(false);
+			return;
 		}
 
-		Status = LMru::_OpenFile(File, ReadOnly);
-		if (Status)
-		{
-			d->Dirty = false;
-			SetCurFile(File);
-		}
-	}
+		char RealPath[MAX_PATH_LEN];
+		if (LResolveShortcut(Fn, RealPath, sizeof(RealPath)))
+			Fn = RealPath;
 
-	return Status;
+		LMru::_OpenFile(Fn, ReadOnly, [this, Callback, Fn](auto ok)
+		{
+			if (ok)
+			{
+				d->Dirty = false;
+				SetCurFile(Fn);
+			}
+
+			if (Callback)
+				Callback(ok);
+		});
+	});
 }
 
 template <typename OptionsFmt>
-bool LDocApp<OptionsFmt>::_SaveFile(const char *File)
+void LDocApp<OptionsFmt>::_SaveFile(const char *File, std::function<void(LString, bool)> Callback)
 {
-	char RealPath[256];
+	char RealPath[MAX_PATH_LEN];
 	if (LResolveShortcut(File, RealPath, sizeof(RealPath)))
 	{
 		File = RealPath;
@@ -474,15 +481,18 @@ bool LDocApp<OptionsFmt>::_SaveFile(const char *File)
 		strcpy_s(RealPath, sizeof(RealPath), File);
 	}
 
-	bool Status = LMru::_SaveFile(RealPath);
-	if (Status)
+	LMru::_SaveFile(RealPath, [this, Callback](auto FileName, auto Status)
 	{
-		d->Dirty = false;
-		SetCurFile(RealPath);
-		OnDirty(d->Dirty);
-	}
+		if (Status)
+		{
+			d->Dirty = false;
+			SetCurFile(FileName);
+			OnDirty(d->Dirty);
+		}
 
-	return Status;
+		if (Callback)
+			Callback(FileName, Status);
+	});
 }
 
 template <typename OptionsFmt>
@@ -530,7 +540,7 @@ const char *LDocApp<OptionsFmt>::GetCurFile()
 }
 
 template <typename OptionsFmt>
-bool LDocApp<OptionsFmt>::SetDirty(bool Dirty)
+void LDocApp<OptionsFmt>::SetDirty(bool Dirty, std::function<void(bool)> Callback)
 {
 	if (IsAttached() && (d->Dirty ^ Dirty))
 	{
@@ -552,7 +562,7 @@ bool LDocApp<OptionsFmt>::SetDirty(bool Dirty)
 			{
 				if (!ValidStr(d->CurFile))
 				{
-					LMru::OnCommand(IDM_SAVEAS, [&](auto status)
+					LMru::OnCommand(IDM_SAVEAS, [this](auto status)
 					{
 						if (status)
 						{
@@ -560,16 +570,33 @@ bool LDocApp<OptionsFmt>::SetDirty(bool Dirty)
 							SetCurFile(d->CurFile);
 						}
 					});
-					return false;
+
+					if (Callback)
+						Callback(false);
+					return;
 				}
 				else
 				{
-					_SaveFile(d->CurFile);
+					_SaveFile(d->CurFile, [this, Callback](auto fn, auto status)
+					{
+						if (status)
+						{
+							d->Dirty = false;
+							SetCurFile(fn);
+							OnDirty(d->Dirty);
+						}
+
+						if (Callback)
+							Callback(status);
+					});
+					return;
 				}
 			}
 			else if (Result == IDCANCEL)
 			{
-				return false;
+				if (Callback)
+					Callback(false);
+				return;
 			}
 
 			d->Dirty = false;
@@ -579,7 +606,8 @@ bool LDocApp<OptionsFmt>::SetDirty(bool Dirty)
 		OnDirty(d->Dirty);
 	}
 
-	return true;
+	if (Callback)
+		Callback(true);
 }
 
 template <typename OptionsFmt>
@@ -597,22 +625,36 @@ OptionsFmt *LDocApp<OptionsFmt>::GetOptions()
 template <typename OptionsFmt>
 void LDocApp<OptionsFmt>::OnReceiveFiles(LArray<const char*> &Files)
 {
-	const char *f = Files.Length() ? Files[0] : 0;
-	if (f && _OpenFile(f, false))
+	if (Files.Length() == 0)
+		return;
+
+	LString f = Files[0];
+	if (!f)
+		return;
+
+	_OpenFile(f, false, [this, f](auto ok)
 	{
-		LMru::AddFile(f);
-	}
+		if (ok)
+			LMru::AddFile(f);
+	});
 }
 
 template <typename OptionsFmt>
 bool LDocApp<OptionsFmt>::OnRequestClose(bool OsShuttingDown)
 {
-	if (SetDirty(false))
+	if (GetDirty())
 	{
-		return LWindow::OnRequestClose(OsShuttingDown);
+		SetDirty(false, [this](auto ok)
+		{
+			if (ok)
+				LCloseApp();
+		});
+
+		// Wait for the SetDirty callback to exit...
+		return false;
 	}
 
-	return false;
+	return true;
 }
 
 template <typename OptionsFmt>
@@ -629,16 +671,19 @@ int LDocApp<OptionsFmt>::OnCommand(int Cmd, int Event, OsView Window)
 			}
 			else
 			{
-				_SaveFile(GetCurFile());
+				_SaveFile(GetCurFile(), NULL);
 				return 0;
 			}
 			break;
 		}
 		case IDM_CLOSE:
 		{
-			if (SetDirty(false))
-				_Close();
-			break;
+			SetDirty(false, [this](auto ok)
+			{
+				if (ok)
+					_Close();
+			});
+			return 0;;
 		}
 		case IDM_EXIT:
 		{

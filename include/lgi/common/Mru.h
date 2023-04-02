@@ -20,8 +20,8 @@ private:
 	void _Update();
 
 protected:
-	virtual bool _OpenFile(const char *File, bool ReadOnly);
-	virtual bool _SaveFile(const char *File);
+	virtual void _OpenFile(const char *File, bool ReadOnly, std::function<void(bool)> Callback);
+	virtual void _SaveFile(const char *File, std::function<void(LString, bool)> Callback);
 
 	virtual const char *_GetCurFile();
 	virtual void GetFileTypes(LFileSelect *Dlg, bool Write);
@@ -64,7 +64,7 @@ public:
 
 	// Events
 	virtual bool OpenFile(const char *FileName, bool ReadOnly) = 0;
-	virtual bool SaveFile(const char *FileName) = 0;
+	virtual void SaveFile(const char *FileName, std::function<void(LString fileName, bool status)> Callback) = 0;
 };
 
 #endif

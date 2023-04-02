@@ -130,11 +130,15 @@
 ///
 /// Now to actually call either of these dialogs you would use code like this:
 /// \code
-/// Example Dlg(MyWindow);
-/// if (Dlg.DoModal() == IDOK)
+/// auto Dlg = new Example(MyWindow);
+/// Dlg->DoModal([this, Dlg](auto dlg, auto code)
 /// {
-/// 	// Do something with Dlg.Str
-/// }
+///		if (code) == IDOK
+///		{
+/// 		// Do something with Dlg->Str
+///		}
+///		delete dlg;
+/// });
 /// \endcode
 ///
 /// The built in controls that you can use are:

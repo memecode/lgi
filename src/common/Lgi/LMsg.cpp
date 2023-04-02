@@ -124,16 +124,14 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 			}
 			else
 			{
-				char16 *t = Utf8ToWide(Title ? Title : (char*)"Message");
-				char16 *m = Utf8ToWide(Msg);
+				LAutoWString t(Utf8ToWide(Title ? Title : (char*)"Message"));
+				LAutoWString m(Utf8ToWide(Msg));
 				Res = MessageBoxW(Parent ? Parent->Handle() : 0, m?m:L"", t?t:L"", Type);
 				if (Res == 0)
 				{
 					auto Err = GetLastError();
 					LAssert(!"MessageBoxW failed.");
 				}
-				DeleteArray(t);
-				DeleteArray(m);
 			}
 		}
 
@@ -321,74 +319,10 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 			}
 		}
 	
-	#else // Lgi only controls (used for Linux + Mac)
+	#else
 
-		if (Str && LAppInst)
-		{
-			LMsgDlg Dlg;
-			Dlg.SetParent(Parent);
-			Dlg.Name((char*)(Title ? Title : "Message"));
+		#error "Impl native dialog here."
 
-			LTextLabel *Text = new LTextLabel(-1, 10, 10, -1, -1, Msg);
-			Dlg.AddView(Text);
-
-			List<LButton> Btns;
-			#ifdef LGI_TOUCHSCREEN
-			float Scale = 1.6f;
-			#else
-			float Scale = 1.0f;
-			#endif		
-			int BtnY = (int) (Scale * 20.0f);
-			int BtnX = (int) (Scale * 70.0f);
-
-			switch (Type & ~MB_SYSTEMMODAL)
-			{
-				default:
-				case MB_OK:
-				{
-					Btns.Insert(new LButton(IDOK, 10, 40, BtnX, BtnY, "Ok"));
-					break;
-				}
-				case MB_OKCANCEL:
-				{
-					Btns.Insert(new LButton(IDOK, 10, 40, BtnX, BtnY, "Ok"));
-					Btns.Insert(new LButton(IDCANCEL, 10, 40, BtnX, BtnY, "Cancel"));
-					break;
-				}
-				case MB_YESNO:
-				{
-					Btns.Insert(new LButton(IDYES, 10, 40, BtnX, BtnY, "Yes"));
-					Btns.Insert(new LButton(IDNO, 10, 40, BtnX, BtnY, "No"));
-					break;
-				}
-				case MB_YESNOCANCEL:
-				{
-					Btns.Insert(new LButton(IDYES, 10, 40, BtnX, BtnY, "Yes"));
-					Btns.Insert(new LButton(IDNO, 10, 40, BtnX, BtnY, "No"));
-					Btns.Insert(new LButton(IDCANCEL, 10, 40, BtnX, BtnY, "Cancel"));
-					break;
-				}
-			}
-
-			int BtnsX = (int) ((Btns.Length() * BtnX) + ((Btns.Length()-1) * 10));
-			int MaxX = MAX(BtnsX, Text->X());
-			LRect p(0, 0, MaxX + 30, Text->Y() + 30 + BtnY + LAppInst->GetMetric(LGI_MET_DECOR_Y) );
-			Dlg.SetPos(p);
-			Dlg.MoveToCenter();
-
-			int x = (p.X() - BtnsX) / 2;
-			int y = Text->Y() + 20;
-			for (auto b: Btns)
-			{
-				LRect r(x, y, x+BtnX-1, y+BtnY-1);
-				b->SetPos(r);
-				Dlg.AddView(b);
-				x += r.X() + 10;
-			}
-			
-			return Dlg.DoModal();
-		}
-	
 	#endif
 
 	return Res;

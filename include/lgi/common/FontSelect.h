@@ -14,10 +14,12 @@
 /// #endif
 /// ZeroObj(Info);
 /// 
-/// LFontSelect Dlg(MyWindow, Info);
-/// if (Dlg.DoModal() == IDOK)
+/// auto select = new LFontSelect(MyWindow, Info);
+/// select->DoModal([this, select](auto s, auto code)
 /// {
-/// 	Dlg.Serialize(Info, true);
+///		if (code == IDOK)
+/// 		select->Serialize(Info, true);
+///		delete s;
 /// }
 /// \endcode
 class LFontSelect : public LDialog

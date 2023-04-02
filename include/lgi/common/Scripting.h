@@ -42,6 +42,12 @@ public:
 	LVariant *GetReturn() { return PtrRet; }
 	LStream *GetConsole() { return Console; }
 	bool Throw(const char *File, int Line, const char *Msg, ...);
+
+	// Accessor shortcuts
+	const char *StringAt(size_t i) { return IdxCheck(i) ? (*this)[i]->Str() : NULL; }
+	int32_t Int32At(size_t i, int32_t Default = 0) { return IdxCheck(i) ? (*this)[i]->CastInt32() : Default; }
+	int64_t Int64At(size_t i, int64_t Default = 0) { return IdxCheck(i) ? (*this)[i]->CastInt64() : Default; }
+	double DoubleAt(size_t i, double Default = 0) { return IdxCheck(i) ? (*this)[i]->CastDouble() : Default; }
 };
 
 typedef bool (LScriptContext::*ScriptCmd)(LScriptArguments &Args);

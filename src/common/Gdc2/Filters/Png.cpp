@@ -344,7 +344,6 @@ class GdcPng : public LFilter
 	LSurface *pDC;
 	LMemQueue DataPipe;
 
-	LView *Parent;
 	jmp_buf Here;
 
 public:
@@ -420,7 +419,6 @@ GdcPng::GdcPng(
 	#if LIBPNG_SHARED
 	Lib = lib;
 	#endif
-	Parent = 0;
 	Pos = 0;
 	PrevScanLine = 0;
 }
@@ -696,13 +694,6 @@ LFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 	}
 
 	LVariant v;
-	if (Props &&
-		Props->GetValue(LGI_FILTER_PARENT_WND, v) &&
-		v.Type == GV_GVIEW)
-	{
-		Parent = (LView*)v.Value.Ptr;
-	}
-
 	#if LIBPNG_SHARED
 	if (!Lib->IsLoaded() && !Lib->Load(sLibrary))
 	{
@@ -1172,21 +1163,13 @@ LFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 
 	if (Props)
 	{
-		if (Props->GetValue(LGI_FILTER_PARENT_WND, v) &&
-			v.Type == GV_GVIEW)
-		{
-			Parent = (LView*)v.Value.Ptr;
-		}
-		
 		if (Props->GetValue(LGI_FILTER_BACKGROUND, v))
-		{
 			Back = v.CastInt32();
-		}
 
 		Props->GetValue(LGI_FILTER_TRANSPARENT, Transparent);
 	}
 
-	#ifdef FILTER_UI
+	/* FIXME:
 	if (Parent && Transparent.IsNull())
 	{
 		LAssert(!"Move this to the parent app.");
@@ -1204,7 +1187,7 @@ LFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 			return IoCancel;
 		});
 	}
-	#endif
+	*/
 
 	if (setjmp(Here) == 0 && pDC && Out)
 	{

@@ -89,32 +89,33 @@ LFileType *LMru::GetSelectedType()
 	return d->SelectedType;
 }
 
-bool LMru::_OpenFile(const char *File, bool ReadOnly)
+void LMru::_OpenFile(const char *File, bool ReadOnly, std::function<void(bool)> Callback)
 {
 	bool Status = OpenFile(File, ReadOnly);
-
 	if (Status)
 		AddFile(File, true);
 	else
 		RemoveFile(File);
-
-	return Status;
+	if (Callback)
+		Callback(Status);
 }
 
-bool LMru::_SaveFile(const char *FileName)
+void LMru::_SaveFile(const char *FileName, std::function<void(LString, bool)> Callback)
 {
 	if (!FileName)
-		return false;
+	{
+		if (Callback) Callback(NULL, false);
+		return;
+	}
 
-	char File[MAX_PATH_LEN];
-	strcpy_s(File, sizeof(File), FileName);
+	LString File = FileName;
 	
 	LFileType *st;
 	if (!LFileExists(File) &&
 		(st = GetSelectedType()) &&
 		st->Extension())
 	{
-		char *Cur = LGetExtension(File);
+		auto Cur = LGetExtension(File);
 		if (!Cur)
 		{
 			// extract extension
@@ -125,30 +126,23 @@ bool LMru::_SaveFile(const char *FileName)
 				if (!p.Last().Equals("*"))
 				{
 					// bung the extension from the file type if not there
-					char *Dot = strrchr(File, '.');
-					if (Dot)
-						Dot++;
-					else
-					{
-						Dot = File + strlen(File);
-						*Dot++ = '.';
-					}
-
-					strcpy_s(Dot, File+sizeof(File)-Dot, p.Last());
+					File += ".";
+					File += p.Last();
 					break;
 				}
 			}
 		}
 	}
 	
-	auto Status = SaveFile(File);
-
-	if (Status)
-		AddFile(File);
-	else
-		RemoveFile(File);
-
-	return Status;
+	SaveFile(File, [this, Callback](auto fileName, auto Status)
+	{
+		if (Status)
+			AddFile(fileName);
+		else
+			RemoveFile(fileName);
+		if (Callback)
+			Callback(fileName, Status);
+	});
 }
 
 void LMru::_Update()
@@ -294,13 +288,27 @@ void LMru::DoFileDlg(LAutoPtr<LFileSelect> FileSelect, bool Open, std::function<
 		{
 			d->SelectedType = s->TypeAt(s->SelectedType());
 			if (Open)
-				_OpenFile(s->Name(), s->ReadOnly());
+			{
+				_OpenFile(s->Name(), s->ReadOnly(), [OnSelect](auto ok)
+				{
+					if (OnSelect)
+						OnSelect(ok);
+				});
+			}
 			else
-				_SaveFile(s->Name());
+			{
+				_SaveFile(s->Name(), [OnSelect](auto fn, auto ok)
+				{
+					if (OnSelect)
+						OnSelect(ok);
+				});
+			}
 		}
-			
-		if (OnSelect)
-			OnSelect(ok);
+		else if (OnSelect)
+		{
+			OnSelect(false);
+		}
+
 		delete s;
 	};
 
@@ -319,14 +327,20 @@ void LMru::OnCommand(int Cmd, std::function<void(bool)> OnStatus)
 	if (Cmd >= M_MRU_BASE &&
 		Cmd < M_MRU_BASE + d->Items.Length())
 	{
-		bool status = false;
 		int Index = Cmd - M_MRU_BASE;
 		auto c = d->Items[Index];
-		if (c)
-			status = _OpenFile(c->Raw, false);
-
-		if (OnStatus)
-			OnStatus(status);
+		if (!c)
+		{
+			if (OnStatus)
+				OnStatus(false);
+		}
+		else
+		{
+			_OpenFile(c->Raw, false, [OnStatus](auto ok)
+			{
+				OnStatus(ok);
+			});
+		}
 	}
 	else if (Cmd == IDM_OPEN || Cmd == IDM_SAVEAS)
 	{

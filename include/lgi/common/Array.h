@@ -173,9 +173,8 @@ public:
 		{
 			if (i > len && fixed)
 			{
-				printf("%s:%i - %p::SetLength %i,%i\n", _FL, this, fixed, warnResize);
 				if (warnResize)
-					printf("Attempt to enlarged fixed array.\n");
+					LAssert(!"Attempt to enlarged fixed array.\n");
 				return false;
 			}
 
@@ -325,10 +324,8 @@ public:
 			fixed && ((uint32_t)i >= len)
 		)
 		{
-			printf("%s:%i - %p::SetLength %i,%i\n", _FL, this, fixed, warnResize);
 			if (warnResize)
-				// assert(!"Attempt to enlarged fixed array.");
-				printf("%s:%i - Attempt to enlarged fixed array.\n", _FL);
+				assert(!"Attempt to enlarged fixed array.");
 			return t;
 		}
 		

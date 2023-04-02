@@ -54,9 +54,9 @@ protected:
 	/// Call this to destroy the window, usually in the destructor of your main window class.
 	bool			_Destroy();
 	/// Use the open file dialog to select a document to open.
-	bool			_OpenFile(const char *File, bool ReadOnly);
+	void			_OpenFile(const char *File, bool ReadOnly, std::function<void(bool)> Callback) override;
 	/// Save the current document.
-	bool			_SaveFile(const char *File);
+	void			_SaveFile(const char *File, std::function<void(LString, bool)> Callback) override;
 
 	bool			_DoSerialize(bool Write);
 	bool			_SerializeFile(bool Write);
@@ -87,7 +87,7 @@ public:
 	/// Gets the current file name.
 	const char *GetCurFile();
 	/// Sets the dirty state. If the doc is clean you are not asked to save it when you close the window.
-	bool SetDirty(bool Dirty = true);
+	void SetDirty(bool Dirty, std::function<void(bool)> Callback);
 	/// Gets the dirty state.
 	bool GetDirty();
 	/// Gets the options list.
