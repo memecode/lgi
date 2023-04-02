@@ -757,7 +757,7 @@ void ResString::OnMouseClick(LMouse &m)
 							
 							if (Dirty)
 							{
-								Group->App()->SetDirty();
+								Group->App()->SetDirty(true, NULL);
 							}
 						}
 						break;
@@ -785,7 +785,7 @@ void ResString::OnMouseClick(LMouse &m)
 							
 							if (Dirty)
 							{
-								Group->App()->SetDirty();
+								Group->App()->SetDirty(true, NULL);
 							}
 						}
 						break;

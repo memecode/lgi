@@ -404,8 +404,11 @@ void ObjTreeItem::OnMouseClick(LMouse &m)
 				}
 				case IDM_DELETE:
 				{
-					Obj->App()->SetDirty(true);
-					Obj->App()->DelObject(Obj);
+					Obj->App()->SetDirty(true, [this](auto ok)
+					{
+						if (ok)
+							Obj->App()->DelObject(Obj);
+					});
 					break;
 				}
 				case IDM_RENAME:
@@ -417,7 +420,7 @@ void ObjTreeItem::OnMouseClick(LMouse &m)
 						{
 							Obj->Wnd()->Name(Dlg->GetStr());
 							Update();
-							Obj->App()->SetDirty(true);
+							Obj->App()->SetDirty(true, NULL);
 						}
 						delete dlg;
 					});
@@ -1662,7 +1665,7 @@ int AppWnd::GetUniqueStrRef(int	Start)
 				Dupes.DeleteAt(0);
 				s->SetRef(i);
 
-				SetDirty(true);
+				SetDirty(true, NULL);
 			}
 			else
 			{
@@ -1728,7 +1731,7 @@ void AppWnd::OnReceiveFiles(LArray<const char*> &Files)
 	auto f = Files.Length() ? Files[0] : 0;
 	if (f)
 	{
-		_OpenFile(f, false);
+		_OpenFile(f, false, NULL);
 	}
 }
 
@@ -1795,7 +1798,7 @@ Resource *AppWnd::NewObject(SerialiseContext ctx, LXmlTag *load, int Type, bool 
 			Item->Update();
 		}
 
-		SetDirty(true);
+		SetDirty(true, NULL);
 	}
 
 	return r;
@@ -1970,7 +1973,7 @@ void AppWnd::OnObjChange(FieldSource *r)
 	if (Fields)
 	{
 		Fields->Serialize(false);
-		SetDirty(true);
+		SetDirty(true, NULL);
 	}
 }
 
@@ -2579,18 +2582,19 @@ bool AppWnd::OpenFile(const char *FileName, bool Ro)
 	return false;
 }
 
-bool AppWnd::SaveFile(const char *FileName)
+void AppWnd::SaveFile(const char *FileName, std::function<void(LString fileName, bool status)> Callback)
 {
 	if (stristr(FileName, ".lr8") ||
 		stristr(FileName, ".xml"))
 	{
-		return SaveLgi(FileName);
-	}
-	else if (stristr(FileName, ".rc"))
-	{
+		auto r = SaveLgi(FileName);
+		if (Callback)
+			Callback(FileName, r);
+		return;
 	}
 
-	return false;
+	if (Callback)
+		Callback(FileName, false);
 }
 
 void AppWnd::GetFileTypes(LFileSelect *Dlg, bool Write)

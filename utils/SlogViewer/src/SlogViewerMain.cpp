@@ -396,9 +396,10 @@ public:
 		return Reader.Reset(new ReaderThread(this, FileName, log, Prog));
 	}
 
-	bool SaveFile(const char *FileName)
+	void SaveFile(const char *FileName, std::function<void(LString fileName, bool status)> Callback)
 	{
-		return false;
+		if (Callback)
+			Callback(FileName, false);
 	}
 
 	int OnNotify(LViewI *Ctrl, LNotification n)

@@ -401,7 +401,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 			if (New)
 			{
 				Select(New);
-				AppWindow->SetDirty(true);
+				AppWindow->SetDirty(true, NULL);
 			}
 			break;
 		}
@@ -435,7 +435,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 				if (New)
 				{
 					Select(New);
-					AppWindow->SetDirty(true);
+					AppWindow->SetDirty(true, NULL);
 				}
 			}
 			break;
@@ -447,7 +447,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 			{
 				Remove(Item);
 				DeleteObj(Item);
-				AppWindow->SetDirty(true);
+				AppWindow->SetDirty(true, NULL);
 			}
 			break;
 		}
@@ -470,7 +470,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 						Item->Remove();
 						Parent->Insert(Item, n - 1);
 						Item->Select(true);
-						AppWindow->SetDirty(true);
+						AppWindow->SetDirty(true, NULL);
 					}
 				}
 			}
@@ -495,7 +495,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 						Item->Remove();
 						Parent->Insert(Item, n + 1);
 						Item->Select(true);
-						AppWindow->SetDirty(true);
+						AppWindow->SetDirty(true, NULL);
 					}
 				}
 			}
@@ -507,7 +507,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 			{
 				Group->OnCommand(IDM_NEW_LANG, 0, Null);
 				Invalidate();
-				AppWindow->SetDirty(true);
+				AppWindow->SetDirty(true, NULL);
 			}
 			break;
 		}
@@ -517,7 +517,7 @@ int ResMenu::OnCommand(int Cmd, int Event, OsView hWnd)
 			{
 				Group->OnCommand(IDM_DELETE_LANG, 0, Null);
 				Invalidate();
-				AppWindow->SetDirty(true);
+				AppWindow->SetDirty(true, NULL);
 			}
 			break;
 		}

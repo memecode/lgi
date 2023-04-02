@@ -772,7 +772,7 @@ public:
 	bool WriteDefines(LStream &Defs);
 
 	bool OpenFile(const char *FileName, bool Ro);
-	bool SaveFile(const char *FileName);
+	void SaveFile(const char *FileName, std::function<void(LString fileName, bool status)> Callback);
 
 	// ---------------------------------------------------------------------
 	// Window
