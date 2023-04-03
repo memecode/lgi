@@ -18,22 +18,22 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\common\GStringClass.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="..\..\include\common\StringClass.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\common\LDbTable.h">
-      <Filter>Source Files\Db</Filter>
+    <ClInclude Include="..\..\include\common\DbTable.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\common\Lgi\LgiMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Db\LDbTable.cpp">
-      <Filter>Source Files\Db</Filter>
+    <ClCompile Include="..\..\src\common\Db\DbTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

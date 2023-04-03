@@ -133,13 +133,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="..\src\common\Coding\ExternCall.asm">
+    <MASM Include="..\..\src\common\Coding\ExternCall.asm">
       <Filter>Source Files</Filter>
     </MASM>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\src\win\General\Lgi.manifest">
-      <Filter>Source Files\Lgi</Filter>
-    </Manifest>
+    <Manifest Include="..\..\src\win\General\Lgi.manifest" />
   </ItemGroup>
 </Project>

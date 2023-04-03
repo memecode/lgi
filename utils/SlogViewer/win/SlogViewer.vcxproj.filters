@@ -13,22 +13,18 @@
     <ClCompile Include="..\src\SlogViewerMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp">
-      <Filter>Source Files\Lgi</Filter>
+    <ClCompile Include="..\..\..\src\common\Lgi\DocApp.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\common\Lgi\DocApp.cpp">
-      <Filter>Source Files\Lgi</Filter>
+    <ClCompile Include="..\..\..\src\common\Lgi\LgiMain.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\..\src\win\General\Lgi.manifest" />
+    <Manifest Include="..\..\..\src\win\General\Lgi.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\lgi\common\StructuredIo.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\lgi\common\StructuredLog.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
+    <ClInclude Include="..\..\..\include\lgi\common\StructuredIo.h" />
+    <ClInclude Include="..\..\..\include\lgi\common\StructuredLog.h" />
   </ItemGroup>
 </Project>

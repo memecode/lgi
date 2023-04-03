@@ -20,9 +20,6 @@
     <ClCompile Include="src\UnitTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\General\New.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\AutoPtrTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -50,18 +47,21 @@
     <ClCompile Include="src\JsonTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\common\General\New.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\common\GStringClass.h">
-      <Filter>Source Files\Strings</Filter>
-    </ClInclude>
     <ClInclude Include="src\UnitTests.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\common\LUnrolledList.h">
+    <ClInclude Include="..\..\include\common\GStringClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\common\LHashTable.h">
+    <ClInclude Include="..\..\include\common\LHashTable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\common\LUnrolledList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
