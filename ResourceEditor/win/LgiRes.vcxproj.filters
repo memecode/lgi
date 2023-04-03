@@ -21,90 +21,88 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Code\LgiRes_ControlTree.cpp">
+    <ClCompile Include="..\src\LgiRes_ControlTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\LgiRes_Css.cpp">
+    <ClCompile Include="..\src\LgiRes_Css.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\LgiRes_Dialog.cpp">
+    <ClCompile Include="..\src\LgiRes_Dialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\LgiRes_Menu.cpp">
+    <ClCompile Include="..\src\LgiRes_Menu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\LgiRes_String.cpp">
+    <ClCompile Include="..\src\LgiRes_String.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\LgiRes_TableLayout.cpp">
+    <ClCompile Include="..\src\LgiRes_TableLayout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\LgiResApp.cpp">
+    <ClCompile Include="..\src\LgiResApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\Search.cpp">
+    <ClCompile Include="..\src\Search.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Code\ShowLanguages.cpp">
+    <ClCompile Include="..\src\ShowLanguages.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Lgi\GAbout.cpp">
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Gif.cpp">
       <Filter>Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Widgets\GControlTree.cpp">
+    <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp">
       <Filter>Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Lgi\GDocApp.cpp">
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Lzw.cpp">
       <Filter>Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Gdc2\Filters\Gif.cpp">
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Png.cpp">
       <Filter>Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Lgi\LgiMain.cpp">
-      <Filter>Lgi</Filter>
+    <ClCompile Include="..\..\src\common\Lgi\About.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Gdc2\Filters\Lzw.cpp">
-      <Filter>Lgi</Filter>
+    <ClCompile Include="..\..\src\common\Lgi\DocApp.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp">
-      <Filter>Lgi</Filter>
+    <ClCompile Include="..\..\src\common\Widgets\ControlTree.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Code\LgiRes_Dialog.h">
+    <ClInclude Include="..\src\LgiRes_Dialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Code\LgiRes_Menu.h">
+    <ClInclude Include="..\src\LgiRes_Menu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Code\LgiRes_String.h">
+    <ClInclude Include="..\src\LgiRes_String.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Code\LgiResEdit.h">
+    <ClInclude Include="..\src\LgiResEdit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Code\resdefs.h">
+    <ClInclude Include="..\src\resdefs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Code\resource.h">
+    <ClInclude Include="..\src\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Resources\resource.h">
+    <ClInclude Include="..\Resources\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\src\win32\General\Lgi.manifest">
-      <Filter>Resource Files</Filter>
-    </Manifest>
+    <Manifest Include="..\..\src\win\General\Lgi.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Resources\Script1.rc">
+    <ResourceCompile Include="..\Resources\Script1.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resources\icon-win.ico">
+    <Image Include="..\Resources\icon-win.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

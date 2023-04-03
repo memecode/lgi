@@ -23,29 +23,29 @@
     <ProjectGuid>{C73D636D-514E-4D14-9495-6DF6F19A3B49}</ProjectGuid>
     <RootNamespace>LgiRes_vc8</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -90,7 +90,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\include\lgi\win;..\include;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng\build32;Resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\lgi\win;..\..\include;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng\build32;..\Resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -115,9 +115,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\include\lgi\win;..\include;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng\build64;Resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\lgi\win;..\..\include;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng\build64;..\Resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader />
@@ -137,7 +136,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\include\lgi\win;..\include;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng\build32;Resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\lgi\win;..\..\include;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng\build32;..\Resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader />
@@ -162,7 +161,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\include\lgi\win;..\include;..\..\..\..\CodeLib\libpng;..\..\..\..\CodeLib\zlib;..\..\..\..\CodeLib\libpng\build64;Resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include\lgi\win;..\..\include;..\..\..\..\..\CodeLib\libpng;..\..\..\..\..\CodeLib\zlib;..\..\..\..\..\CodeLib\libpng\build64;..\Resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader />
@@ -183,46 +182,46 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\common\Gdc2\Filters\Gif.cpp" />
-    <ClCompile Include="..\src\common\Gdc2\Filters\Lzw.cpp" />
-    <ClCompile Include="..\src\common\Gdc2\Filters\Png.cpp" />
-    <ClCompile Include="..\src\common\Lgi\About.cpp" />
-    <ClCompile Include="..\src\common\Lgi\DocApp.cpp" />
-    <ClCompile Include="..\src\common\Lgi\LgiMain.cpp" />
-    <ClCompile Include="..\src\common\Widgets\ControlTree.cpp" />
-    <ClCompile Include="Code\LgiResApp.cpp" />
-    <ClCompile Include="Code\LgiRes_ControlTree.cpp" />
-    <ClCompile Include="Code\LgiRes_Css.cpp" />
-    <ClCompile Include="Code\LgiRes_Dialog.cpp" />
-    <ClCompile Include="Code\LgiRes_Menu.cpp" />
-    <ClCompile Include="Code\LgiRes_String.cpp" />
-    <ClCompile Include="Code\LgiRes_TableLayout.cpp" />
-    <ClCompile Include="Code\Search.cpp" />
-    <ClCompile Include="Code\ShowLanguages.cpp" />
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Gif.cpp" />
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Lzw.cpp" />
+    <ClCompile Include="..\..\src\common\Gdc2\Filters\Png.cpp" />
+    <ClCompile Include="..\..\src\common\Lgi\About.cpp" />
+    <ClCompile Include="..\..\src\common\Lgi\DocApp.cpp" />
+    <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp" />
+    <ClCompile Include="..\..\src\common\Widgets\ControlTree.cpp" />
+    <ClCompile Include="..\src\LgiResApp.cpp" />
+    <ClCompile Include="..\src\LgiRes_ControlTree.cpp" />
+    <ClCompile Include="..\src\LgiRes_Css.cpp" />
+    <ClCompile Include="..\src\LgiRes_Dialog.cpp" />
+    <ClCompile Include="..\src\LgiRes_Menu.cpp" />
+    <ClCompile Include="..\src\LgiRes_String.cpp" />
+    <ClCompile Include="..\src\LgiRes_TableLayout.cpp" />
+    <ClCompile Include="..\src\Search.cpp" />
+    <ClCompile Include="..\src\ShowLanguages.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Code\LgiResEdit.h" />
-    <ClInclude Include="Code\LgiRes_Dialog.h" />
-    <ClInclude Include="Code\LgiRes_Menu.h" />
-    <ClInclude Include="Code\LgiRes_String.h" />
-    <ClInclude Include="Code\resdefs.h" />
-    <ClInclude Include="Code\resource.h" />
-    <ClInclude Include="Resources\resource.h" />
+    <ClInclude Include="..\src\LgiResEdit.h" />
+    <ClInclude Include="..\src\LgiRes_Dialog.h" />
+    <ClInclude Include="..\src\LgiRes_Menu.h" />
+    <ClInclude Include="..\src\LgiRes_String.h" />
+    <ClInclude Include="..\src\resdefs.h" />
+    <ClInclude Include="..\src\resource.h" />
+    <ClInclude Include="..\Resources\resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\src\win\General\Lgi.manifest" />
+    <Manifest Include="..\..\src\win\General\Lgi.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Resources\Script1.rc" />
+    <ResourceCompile Include="..\Resources\Script1.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Lgi_vs2015.vcxproj">
+    <ProjectReference Include="..\..\Lgi_vs2019.vcxproj">
       <Project>{95df9ca4-6d37-4a85-a648-80c2712e0da1}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resources\icon-win.ico" />
+    <Image Include="..\Resources\icon-win.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Installer.nsi" />
