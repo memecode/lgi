@@ -2114,6 +2114,7 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 		#endif
 		"../Code",
 		"../../Resources",
+		"../../resources",
 		#if defined(LINUX)
 			// AppDir support:
 			"../..",

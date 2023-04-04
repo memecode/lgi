@@ -28,7 +28,7 @@
 // If it is defined it will use the cross platform 
 // "res" library distributed with the LGI library.
 
-#define DEBUG_RES_FILE						1
+#define DEBUG_RES_FILE						0
 #define CastToLView(RObj)					((RObj != 0) ? dynamic_cast<LView*>(RObj) : 0)
 
 class TagHash : public LHashTbl<StrKey<char>,bool>, public ResReadCtx
@@ -357,8 +357,10 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 
 	LString BaseFile = File;
 	LString AltFile = File.Replace(".");
-	BaseFile += ".lr8";
-	AltFile += ".lr8";
+	if (Stricmp(LGetExtension(BaseFile), "lr8"))
+		BaseFile += ".lr8";
+	if (Stricmp(LGetExtension(AltFile), "lr8"))
+		AltFile += ".lr8";
 
 	#if DEBUG_RES_FILE
 	LgiTrace("%s:%i - File='%s'\n", _FL, BaseFile.Get());
@@ -399,7 +401,7 @@ LgiTrace("%s:%i - File='%s'\n", _FL, File.Get());
 		// Prepare data
 		sprintf_s(Msg, sizeof(Msg),
 				LLoadString(L_ERROR_RES_NO_LR8_FILE,
-								"Couldn't find the file '%s' required to run this application\n(Exe='%s')"),
+							"Couldn't find the file '%s' required to run this application\n(Exe='%s')"),
 				BaseFile.Get(),
 				Exe.Get());
 
