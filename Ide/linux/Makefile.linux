@@ -158,6 +158,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/DragAndDrop.h \
 	../../include/lgi/common/DropFiles.h \
 	../../include/lgi/common/Edit.h \
+	../../include/lgi/common/Emoji.h \
 	../../include/lgi/common/Error.h \
 	../../include/lgi/common/EventTargetThread.h \
 	../../include/lgi/common/File.h \
