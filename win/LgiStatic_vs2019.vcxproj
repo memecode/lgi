@@ -77,22 +77,24 @@
     <IntDir>Static_$(Platform)$(Configuration)19\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>Static_$(Platform)$(Configuration)19\</OutDir>
+    <OutDir>..\Lib\</OutDir>
     <IntDir>Static_$(Platform)$(Configuration)19\</IntDir>
+    <TargetName>$(ProjectName)19</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>Static_$(Platform)$(Configuration)19\</OutDir>
     <IntDir>Static_$(Platform)$(Configuration)19\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>Static_$(Platform)$(Configuration)19\</OutDir>
+    <OutDir>..\Lib\</OutDir>
     <IntDir>Static_$(Platform)$(Configuration)19\</IntDir>
+    <TargetName>$(ProjectName)19d</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>include/lgi/win;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../include/lgi/win;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_LIB;LGI_STATIC;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -124,7 +126,7 @@
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>include/lgi/win;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../include/lgi/win;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_LIB;LGI_STATIC;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -141,7 +143,7 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+      <OutputFile>$(OutDir)$(TargetName).lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
     <Bscmake>
@@ -152,7 +154,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>include/lgi/win;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../include/lgi/win;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;WIN32;_LIB;LGI_STATIC;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -183,7 +185,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>include/lgi/win;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../include/lgi/win;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;WIN32;_LIB;LGI_STATIC;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -200,7 +202,7 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+      <OutputFile>$(OutDir)$(TargetName).lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
     <Bscmake>
@@ -209,32 +211,32 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\common\Gdc2\Font\Charset.cpp" />
-    <ClCompile Include="src\common\General\Containers.cpp" />
-    <ClCompile Include="src\common\General\DateTime.cpp" />
-    <ClCompile Include="src\common\General\FileCommon.cpp" />
-    <ClCompile Include="src\common\Lgi\Library.cpp" />
-    <ClCompile Include="src\common\Lgi\LgiCommon.cpp" />
-    <ClCompile Include="src\common\Lgi\Mutex.cpp" />
-    <ClCompile Include="src\common\Lgi\Stream.cpp" />
-    <ClCompile Include="src\common\Lgi\ThreadCommon.cpp" />
-    <ClCompile Include="src\common\Lgi\Variant.cpp" />
-    <ClCompile Include="src\common\Lgi\LMsg.cpp" />
-    <ClCompile Include="src\common\Lgi\Rand.cpp" />
-    <ClCompile Include="src\common\Text\String.cpp" />
-    <ClCompile Include="src\common\Text\Token.cpp" />
-    <ClCompile Include="src\common\Text\Unicode.cpp" />
-    <ClCompile Include="src\win\General\File.cpp" />
-    <ClCompile Include="src\win\General\Mem.cpp" />
-    <ClCompile Include="src\win\Lgi\General.cpp" />
-    <ClCompile Include="src\win\Lgi\Thread.cpp" />
+    <ClCompile Include="..\src\common\Gdc2\Font\Charset.cpp" />
+    <ClCompile Include="..\src\common\General\Containers.cpp" />
+    <ClCompile Include="..\src\common\General\DateTime.cpp" />
+    <ClCompile Include="..\src\common\General\FileCommon.cpp" />
+    <ClCompile Include="..\src\common\Lgi\Library.cpp" />
+    <ClCompile Include="..\src\common\Lgi\LgiCommon.cpp" />
+    <ClCompile Include="..\src\common\Lgi\Mutex.cpp" />
+    <ClCompile Include="..\src\common\Lgi\Stream.cpp" />
+    <ClCompile Include="..\src\common\Lgi\ThreadCommon.cpp" />
+    <ClCompile Include="..\src\common\Lgi\Variant.cpp" />
+    <ClCompile Include="..\src\common\Lgi\LMsg.cpp" />
+    <ClCompile Include="..\src\common\Lgi\Rand.cpp" />
+    <ClCompile Include="..\src\common\Text\String.cpp" />
+    <ClCompile Include="..\src\common\Text\Token.cpp" />
+    <ClCompile Include="..\src\common\Text\Unicode.cpp" />
+    <ClCompile Include="..\src\win\General\File.cpp" />
+    <ClCompile Include="..\src\win\General\Mem.cpp" />
+    <ClCompile Include="..\src\win\Lgi\General.cpp" />
+    <ClCompile Include="..\src\win\Lgi\Thread.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\common\Containers.h" />
-    <ClInclude Include="include\common\Font.h" />
-    <ClInclude Include="include\common\LgiClasses.h" />
-    <ClInclude Include="include\common\LgiCommon.h" />
-    <ClInclude Include="include\common\LgiInc.h" />
+    <ClInclude Include="..\include\common\Containers.h" />
+    <ClInclude Include="..\include\common\Font.h" />
+    <ClInclude Include="..\include\common\LgiClasses.h" />
+    <ClInclude Include="..\include\common\LgiCommon.h" />
+    <ClInclude Include="..\include\common\LgiInc.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
