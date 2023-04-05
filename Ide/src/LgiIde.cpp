@@ -230,7 +230,7 @@ public:
 		else
 		{
 			char s[256];
-			sprintf(s, "%s (missing)", d?d+1:File);
+			snprintf(s, sizeof(s), "%s (missing)", d?d+1:File);
 			SetText(s);
 		}
 	}
@@ -250,8 +250,9 @@ public:
 		{
 			char s[1024];
 			ZeroObj(s);
-			memset(s, ' ', Depth * 4);
-			sprintf(s+(Depth*4), "[%c] %s\n", Expanded() ? '-' : '+', GetText(0));
+			int ch = Depth * 4;
+			memset(s, ' ', ch);
+			snprintf(s+ch, sizeof(s)-ch, "[%c] %s\n", Expanded() ? '-' : '+', GetText(0));
 			p.Push(s);
 		}
 		
@@ -304,7 +305,7 @@ public:
 			
 			LStringPipe Out;
 			char Args[256];
-			sprintf(Args, "-d %s", File);
+			snprintf(Args, sizeof(Args), "-d %s", File);
 			
 			LSubProcess p("readelf", Args);
 			if (p.Start())
@@ -3024,7 +3025,7 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 			if (d++)
 			{
 				char n[256];
-				sprintf(n, "%s [%s]", AppName, d);
+				snprintf(n, sizeof(n), "%s [%s]", AppName, d);
 				Name(n);						
 			}
 		}

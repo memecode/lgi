@@ -1120,7 +1120,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 	{
 		char s[256];
 		LWindowZoom State = GetZoom();
-		sprintf(s, "State=%i;Pos=%s", State, GetPos().GetStr());
+		snprintf(s, sizeof(s), "State=%i;Pos=%s", State, GetPos().GetStr());
 		
 		LVariant v = s;
 		if (!Store->SetValue(FieldName, v))

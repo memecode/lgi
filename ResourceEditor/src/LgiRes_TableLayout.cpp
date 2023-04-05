@@ -576,7 +576,6 @@ public:
 									j.a = Cell;
 									j.b = c;
 									j.Offset(Cell->Pos.x2 - (j.X()>>1), Cell->Pos.y1 + ((Cell->Pos.Y()-j.Y()) >> 1));
-									int asd=0;
 								}
 
 								c = GetCellAt(x, y + Cell->Cell.Y());
@@ -587,7 +586,6 @@ public:
 									j.a = Cell;
 									j.b = c;
 									j.Offset(Cell->Pos.x1 + ((Cell->Pos.X()-j.X()) >> 1), Cell->Pos.y2 - (j.Y()>>1));
-									int asd=0;
 								}
 							}
 						}
@@ -608,7 +606,7 @@ public:
 	bool DeleteCol(int x)
 	{
 		bool Status = false;
-		int OldCellX = CellX;
+		auto OldCellX = CellX;
 
 		// Delete column 'x'
 		for (int y=0; y<CellY; )
@@ -664,7 +662,7 @@ public:
 	{
 		bool Status = false;
 		int x;
-		int OldCellY = CellY;
+		auto OldCellY = CellY;
 
 		// Delete row 'y'
 		for (x=0; x<CellX; )
@@ -820,7 +818,7 @@ bool CtrlTable::GetVariant(const char *Name, LVariant &Value, const char *Array)
 			if (Coords.Length() != 2)
 				return false;
 
-			Value = d->GetCellAt(Coords[0].Int(), Coords[1].Int());
+			Value = d->GetCellAt((int)Coords[0].Int(), (int)Coords[1].Int());
 			break;
 		}
 		default:
@@ -1242,8 +1240,6 @@ void CtrlTable::InsertRow(int y)
 
 void CtrlTable::InsertCol(int x)
 {
-	auto Par = GetParent();
-
 	// Shift existing cells down
 	int i;
 	for (i=0; i<d->Cells.Length(); i++)

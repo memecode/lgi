@@ -129,7 +129,7 @@ void LEdit::SetCaret(size_t Pos, bool Select, bool ForceFullUpdate)
 void LEdit::Value(int64 i)
 {
 	char Str[32];
-	sprintf(Str, LPrintfInt64, i);
+	snprintf(Str, sizeof(Str), LPrintfInt64, i);
 	Name(Str);
 }
 

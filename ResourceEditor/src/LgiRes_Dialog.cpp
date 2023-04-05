@@ -148,7 +148,7 @@ public:
 			}
 
 			char s[256];
-			sprintf(s, "Set Tab Order: %s", Top->GetStr()->GetDefine());
+			snprintf(s, sizeof(s), "Set Tab Order: %s", Top->GetStr()->GetDefine());
 			Name(s);
 		}
 	}
@@ -299,7 +299,7 @@ ResDialogCtrl::ResDialogCtrl(ResDialog *dlg, const char *CtrlTypeName, LXmlTag *
 		if (GetStr())
 		{
 			char Def[256];
-			sprintf(Def, "IDC_%i", GetStr()->GetRef());
+			snprintf(Def, sizeof(Def), "IDC_%i", GetStr()->GetRef());
 			GetStr()->SetDefine(Def);
 		}
 	}
@@ -331,7 +331,7 @@ char *ResDialogCtrl::GetRefText()
 	static char Buf[64];
 	if (GetStr())
 	{
-		sprintf(Buf, "Ref=%i", GetStr()->GetRef());
+		snprintf(Buf, sizeof(Buf), "Ref=%i", GetStr()->GetRef());
 	}
 	else
 	{
@@ -1423,7 +1423,7 @@ CtrlTabs::CtrlTabs(ResDialog *dlg, LXmlTag *load) :
 			if (t)
 			{
 				char Text[256];
-				sprintf(Text, "Tab %i", i+1);
+				snprintf(Text, sizeof(Text), "Tab %i", i+1);
 				if (t->GetStr())
 				{
 					t->GetStr()->Set(Text);
@@ -1686,7 +1686,7 @@ void CtrlTabs::OnMouseClick(LMouse &m)
 							if (t)
 							{
 								char Text[256];
-								sprintf(Text, "Tab " LPrintfSizeT, Tabs.Length()+1);
+								snprintf(Text, sizeof(Text), "Tab " LPrintfSizeT, Tabs.Length()+1);
 								t->GetStr()->Set(Text);
 								t->SetParent(this);
 
@@ -1910,7 +1910,7 @@ void CtrlList::OnMouseClick(LMouse &m)
 								if (c)
 								{
 									char Text[256];
-									sprintf(Text, "Col " LPrintfSizeT, Cols.Length()+1);
+									snprintf(Text, sizeof(Text), "Col " LPrintfSizeT, Cols.Length()+1);
 									c->GetStr()->Set(Text);
 									Cols.Insert(c);
 								}
@@ -2882,7 +2882,7 @@ void RemapAllRefs(LXmlTag *t, List<StringId> &Strs)
 			{
 				// this string ref is to be remapped
 				char Buf[32];
-				sprintf(Buf, "%i", i->NewRef);
+				snprintf(Buf, sizeof(Buf), "%i", i->NewRef);
 				t->SetAttr("Ref", Buf);
 
 				// delete the string ref map
@@ -3393,7 +3393,7 @@ ResDialogCtrl *ResDialog::CreateCtrl(int Tool, LXmlTag *load)
 			{
 				static int i = 1;
 				char Text[256];
-				sprintf(Text, "Button %i", i++);
+				snprintf(Text, sizeof(Text), "Button %i", i++);
 				Ctrl->GetStr()->Set(Text);
 			}
 			break;
@@ -3567,7 +3567,7 @@ void ResDialog::OnLanguageChange()
 		if (l)
 		{
 			char Str[256];
-			sprintf(Str, "Current Language: %s (Id: %s)", l->Name, l->Id);
+			snprintf(Str, sizeof(Str), "Current Language: %s (Id: %s)", l->Name, l->Id);
 			Ui->StatusInfo->Name(Str);
 		}
 	}
@@ -3901,7 +3901,7 @@ const char *TextOfCtrl(ResDialogCtrl *Ctrl)
 		case UI_COMBO:
 		{
 			char *s = Ctrl->GetStr()->Get();
-			sprintf(Buf, ", \"%s\"", s?s:"");
+			snprintf(Buf, sizeof(Buf), ", \"%s\"", s?s:"");
 			return Buf;
 		}
 
@@ -3959,17 +3959,17 @@ void OutputCtrl(LStringPipe &Def,
 			memset(Tab, '\t', Tabs);
 			Tab[Tabs] = 0;
 
-			sprintf(Str, "#define %s%s%i\n", Ctrl->GetStr()->GetDefine(), Tab, 1000 + Index);
+			snprintf(Str, sizeof(Str), "#define %s%s%i\n", Ctrl->GetStr()->GetDefine(), Tab, 1000 + Index);
 			Def.Push(Str);
 		}
 
-		sprintf(Str,
+		snprintf(Str, sizeof(Str),
 				"\t%s *Ctrl%i;\n",
 				Type,
 				Index);
 		Var.Push(Str);
 
-		sprintf(Str,
+		snprintf(Str, sizeof(Str),
 				"\tChildren.Insert(Ctrl%i = new %s(%s, %i, %i, %i, %i%s));\n",
 				Index,
 				Type,
@@ -3987,7 +3987,7 @@ void OutputCtrl(LStringPipe &Def,
 			// output columns
 			for (auto c: List->Cols)
 			{
-				sprintf(Str, "\tCtrl%i->AddColumn(\"%s\", %i);\n", Index, c->GetStr()->Get(), c->X());
+				snprintf(Str, sizeof(Str), "\tCtrl%i->AddColumn(\"%s\", %i);\n", Index, c->GetStr()->Get(), c->X());
 				Inst.Push(Str);
 			}
 		}
@@ -4051,7 +4051,7 @@ void ResDialog::OnCommand(int Cmd)
 							"{\n"
 							"\tSetParent(Parent);\n");
 
-				sprintf(Str,
+				snprintf(Str, sizeof(Str),
 						"\tName(\"%s\");\n"
 						"\tGRegion r(0, 0, %i, %i);\n"
 						"\tSetPos(r);\n",

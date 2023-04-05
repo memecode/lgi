@@ -20,7 +20,7 @@
 		3457FE522081CC4800014BE4 /* Lvc.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 3457FE512081CC4800014BE4 /* Lvc.lr8 */; };
 		347D1484252D450500422DA9 /* libssh.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 347D147E252D44EE00422DA9 /* libssh.dylib */; };
 		347D1489252D453300422DA9 /* DeEscape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 347D1488252D453300422DA9 /* DeEscape.cpp */; };
-		3485E7F3294F13A10020C14D /* libpng16.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3485E7E1294F13990020C14D /* libpng16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		3485E7F3294F13A10020C14D /* libpng16.15.29.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3485E7E1294F13990020C14D /* libpng16.15.29.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		3485E7F5294F13F70020C14D /* PatchViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3485E7F4294F13F70020C14D /* PatchViewer.cpp */; };
 		3485E7F7294F16AD0020C14D /* libz_local.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34CE072A2327B3F900807DCB /* libz_local.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34BD35B120C5484A0001838A /* ControlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B020C5484A0001838A /* ControlTree.cpp */; };
@@ -40,7 +40,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 39DCB7760A7F4F0D81BD2D76;
+			remoteGlobalIDString = 322BE00F147D476AA77220B2;
 			remoteInfo = libpng16;
 		};
 		347D146D252D44EE00422DA9 /* PBXContainerItemProxy */ = {
@@ -117,7 +117,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 347D145B252D44EE00422DA9 /* libssh.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 28E768FB52DB40D988486502;
+			remoteGlobalIDString = 0CD1E6804BFC4F099D37C21E;
 			remoteInfo = ssh_shared;
 		};
 		3485E7E0294F13990020C14D /* PBXContainerItemProxy */ = {
@@ -194,7 +194,7 @@
 			files = (
 				3485E7F7294F16AD0020C14D /* libz_local.dylib in CopyFiles */,
 				34F591A328CDE742000CABAB /* libssh.dylib in CopyFiles */,
-				3485E7F3294F13A10020C14D /* libpng16.dylib in CopyFiles */,
+				3485E7F3294F13A10020C14D /* libpng16.15.29.0.dylib in CopyFiles */,
 				34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -380,7 +380,7 @@
 			isa = PBXGroup;
 			children = (
 				34CE07202327B3F900807DCB /* example */,
-				3485E7E1294F13990020C14D /* libpng16.dylib */,
+				3485E7E1294F13990020C14D /* libpng16.15.29.0.dylib */,
 				3485E7E3294F13990020C14D /* libpng16_static.a */,
 				34CE07262327B3F900807DCB /* minigzip */,
 				34CE07282327B3F900807DCB /* pngtest */,
@@ -527,10 +527,9 @@
 			remoteRef = 347D147F252D44EE00422DA9 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		3485E7E1294F13990020C14D /* libpng16.dylib */ = {
+		3485E7E1294F13990020C14D /* libpng16.15.29.0.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
-			name = libpng16.dylib;
 			path = libpng16.15.29.0.dylib;
 			remoteRef = 3485E7E0294F13990020C14D /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;

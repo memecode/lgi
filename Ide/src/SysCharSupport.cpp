@@ -59,7 +59,7 @@ public:
 			uint32_t c = Utf;
 
 			char msg[256];
-			sprintf(msg, "%i 0x%x", c, c);
+			snprintf(msg, sizeof(msg), "%i 0x%x", c, c);
 			Match->GetWindow()->SetCtrlName(IDC_VALUE, msg);
 
 			LFontSystem *s = LFontSystem::Inst();

@@ -419,7 +419,7 @@ void EditTray::OnSymbolList(LMouse &m)
 				{
 					char m[512];
 					char *d = strrchr(Def->File, DIR_CHAR);
-					sprintf(m, "%s (%s:%i)", Def->Name.Get(), d ? d + 1 : Def->File.Get(), Def->Line);
+					snprintf(m, sizeof(m), "%s (%s:%i)", Def->Name.Get(), d ? d + 1 : Def->File.Get(), Def->Line);
 					s->AppendItem(m, n++, true);
 				}
 				#else

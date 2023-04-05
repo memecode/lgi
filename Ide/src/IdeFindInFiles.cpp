@@ -425,7 +425,7 @@ LMessage::Result FindInFilesThread::OnEvent(LMessage *Msg)
 
 			if (Files.Length() > 0)
 			{			
-				sprintf(Msg, "in %i files...\n", (int)Files.Length());
+				snprintf(Msg, sizeof(Msg), "in %i files...\n", (int)Files.Length());
 				Log(NewStr(Msg));
 
 				for (auto f: Files)

@@ -253,7 +253,7 @@ void OnCrash(int i)
 		
 		// setup read & write handles
 		char sPid[32];
-		sprintf(sPid, "--pid=%i", getpid());
+		snprintf(sPid, sizeof(sPid), "--pid=%i", getpid());
 		char *Args[] = {sPid, Exe, 0};
 		// printf("Calling: execv('gdb', '%s', '%s');\n", Exe, sPid);
 		execv("/usr/bin/gdb", Args);

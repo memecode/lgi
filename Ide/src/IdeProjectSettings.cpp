@@ -602,7 +602,7 @@ public:
 
 	bool InsertPath(ProjSetting setting, IdePlatform platform, bool PlatformSpecific, LString newPath)
 	{
-		for (size_t Cfg = 0; Cfg < 2; Cfg++)
+		for (int Cfg = 0; Cfg < 2; Cfg++)
 		{
 			LString path = d->BuildPath(setting, PlatformSpecific ? SF_PLATFORM_SPECIFC : 0, platform, Cfg);
 			auto t = d->Editing.GetChildTag(path);

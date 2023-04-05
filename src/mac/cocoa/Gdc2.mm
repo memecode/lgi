@@ -332,7 +332,7 @@ bool LPalette::Save(LFile &F, int Format)
 		{
 			char Buf[256];
 			
-			int ch = sprintf(Buf, "JASC-PAL\r\n%4.4X\r\n%i\r\n", GetSize(), GetSize());
+			int ch = snprintf(Buf, sizeof(Buf), "JASC-PAL\r\n%4.4X\r\n%i\r\n", GetSize(), GetSize());
 			F.Write(Buf, ch);
 			
 			for (int i=0; i<GetSize(); i++)
@@ -340,8 +340,8 @@ bool LPalette::Save(LFile &F, int Format)
 				GdcRGB *p = (*this)[i];
 				if (p)
 				{
-					sprintf(Buf, "%i %i %i\r\n", p->r, p->g, p->b);
-					F.Write(Buf, (int)strlen(Buf));
+					auto ch = snprintf(Buf, sizeof(Buf), "%i %i %i\r\n", p->r, p->g, p->b);
+					F.Write(Buf, ch);
 				}
 			}
 			

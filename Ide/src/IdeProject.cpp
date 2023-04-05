@@ -2060,6 +2060,7 @@ if (Debug) LgiTrace("XmlBase='%s'\n		In='%s'\n", Base.Get(), In);
 	LToken b(Base, DIR_STR);
 	LToken i(In, DIR_STR);
 	char out[MAX_PATH_LEN] = "";
+	int outCh = 0;
 	
 if (Debug) LgiTrace("Len %i-%i\n", b.Length(), i.Length());
 	
@@ -2101,7 +2102,7 @@ if (Debug) LgiTrace("Back=%i\n", (int)Back);
 		}
 		for (int n=Common; n<i.Length(); n++)
 		{
-			sprintf(out+strlen(out), "%s%s", DIR_STR, i[n]);
+			outCh += snprintf(out+outCh, sizeof(out)-outCh, "%s%s", DIR_STR, i[n]);
 		}
 		
 		Out = out;
@@ -3714,9 +3715,11 @@ LString IdeProject::GetTargetFile(IdePlatform Platform)
 		char t[MAX_PATH_LEN];
 		auto DefExt = PlatformDynamicLibraryExt(Platform);
 		strcpy_s(t, sizeof(t), Target);
+
+		auto tCh = strlen(t);
 		char *ext = LGetExtension(t);
 		if (!ext)
-			sprintf(t + strlen(t), ".%s", DefExt);
+			snprintf(t+tCh, sizeof(t)-tCh, ".%s", DefExt);
 		else if (stricmp(ext, DefExt))
 			strcpy(ext, DefExt);
 		return t;

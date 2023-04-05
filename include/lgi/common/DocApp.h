@@ -113,10 +113,10 @@ public:
 	bool SetLanguage(char *LangId);
 
 	// Impl
-	void OnReceiveFiles(LArray<const char*> &Files);
-	bool OnRequestClose(bool OsShuttingDown);
-	int OnCommand(int Cmd, int Event, OsView Window);
-	LMessage::Result OnEvent(LMessage *m);
+	void OnReceiveFiles(LArray<const char*> &Files) override;
+	bool OnRequestClose(bool OsShuttingDown) override;
+	int OnCommand(int Cmd, int Event, OsView Window) override;
+	LMessage::Result OnEvent(LMessage *m) override;
 };
 
 #endif

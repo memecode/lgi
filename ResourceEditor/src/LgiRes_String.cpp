@@ -368,7 +368,7 @@ bool ResString::Test(ErrorCollection *e)
 			ErrorInfo *Err = &e->StrErr.New();
 			Err->Str = this;
 			char m[256];
-			sprintf(m, "Utf-8 error in translation '%s'", s->GetLang());
+			snprintf(m, sizeof(m), "Utf-8 error in translation '%s'", s->GetLang());
 			Err->Msg.Reset(NewStr(m));
 			Status = false;
 		}
@@ -645,12 +645,12 @@ const char *ResString::GetText(int i)
 		}
 		case 1:
 		{
-			sprintf(RefStr, "%i", Ref);
+			snprintf(RefStr, sizeof(RefStr), "%i", Ref);
 			return RefStr;
 		}
 		case 2:
 		{
-			sprintf(IdStr, "%i", Id);
+			snprintf(IdStr, sizeof(IdStr), "%i", Id);
 			return IdStr;
 		}
 		default:
@@ -810,7 +810,7 @@ void ResString::CopyText()
 		for (auto s: Items)
 		{
 			char Str[256];
-			sprintf(Str, "%s,%s", s->GetLang(), s->GetStr());
+			snprintf(Str, sizeof(Str), "%s,%s", s->GetLang(), s->GetStr());
 			p.Push(Str);
 			p.Push(EOL_SEQUENCE);
 		}
@@ -1214,7 +1214,7 @@ ResString *ResStringGroup::CreateStr(bool User)
 		if (User)
 		{
 			char Str[256];
-			sprintf(Str, "IDS_%i", s->Ref);
+			snprintf(Str, sizeof(Str), "IDS_%i", s->Ref);
 			s->SetDefine(Str);
 
 			s->GetList()->Select(NULL);

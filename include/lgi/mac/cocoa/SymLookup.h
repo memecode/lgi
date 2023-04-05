@@ -307,7 +307,7 @@ public:
 						case 3:
 						{
 							char Args[256];
-							sprintf(Args, "-n %.*s", (int) (c-Start), Start);
+							snprintf(Args, sizeof(Args), "-n %.*s", (int) (c-Start), Start);
 							LStringPipe Out;
 							LSubProcess p("c++filt", Args);
 							if (p.Start())

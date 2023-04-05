@@ -242,7 +242,7 @@ const char *GetErrorName(int e)
 	}
 	
 	static char s[32];
-	sprintf(s, "Unknown(%i)", e);
+	snprintf(s, sizeof(s), "Unknown(%i)", e);
 	return s;
 }
 

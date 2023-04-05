@@ -47,9 +47,9 @@ void AddFtpFile::OnCmdComplete(FtpCmd *Cmd)
 				LUri fu(Cmd->Uri);
 				char path[256];
 				if (Base->sPath)
-					sprintf(path, "%s/%s", Base->sPath.Get(), e->Name.Get());
+					snprintf(path, sizeof(path), "%s/%s", Base->sPath.Get(), e->Name.Get());
 				else
-					sprintf(path, "/%s", e->Name.Get());
+					snprintf(path, sizeof(path), "/%s", e->Name.Get());
 				fu.sPath = path;
 				Files->Insert(new FtpFile(e, fu.ToString()));
 			}

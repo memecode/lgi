@@ -72,7 +72,7 @@ public:
 	void OnError(int ErrorCode, const char *ErrorDescription)
 	{
 		char s[256];
-		sprintf(s, "Error(%i): %s", ErrorCode, ErrorDescription);
+		snprintf(s, sizeof(s), "Error(%i): %s", ErrorCode, ErrorDescription);
 		Log->Insert(new Line(s, Rgb24(255, 0, 0)));
 	}
 };

@@ -56,7 +56,7 @@ bool ResMenuItem::OnNew()
 	{
 		int Uid = Menu->App()->GetUniqueCtrlId();
 		char Def[256];
-		sprintf(Def, "IDM_MENU_%i", Uid);
+		snprintf(Def, sizeof(Def), "IDM_MENU_%i", Uid);
 		_Str->SetDefine(Def);
 		_Str->SetId(Uid);
 	}

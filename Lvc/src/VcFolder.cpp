@@ -591,6 +591,8 @@ void VcFolder::GetRemoteUrl(std::function<void(LString)> Callback)
 			StartCmd("paths default", NULL, p.Release());
 			break;
 		}
+		default:
+			break;
 	}
 }
 

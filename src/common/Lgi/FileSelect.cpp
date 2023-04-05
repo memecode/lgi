@@ -964,7 +964,7 @@ LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 	for (auto t: d->Types)
 	{
 		char s[256];
-		sprintf(s, "%s (%s)", t->Description(), t->Extension());
+		snprintf(s, sizeof(s), "%s (%s)", t->Description(), t->Extension());
 		if (FileTypeCbo)
 			FileTypeCbo->Insert(s);
 	}

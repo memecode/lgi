@@ -123,7 +123,7 @@ char *EncodeXml(const char *Str, int Len)
 					p.Push(s, e-s);
 					
 					char b[32];
-					sprintf(b, "&#%i;", *e);
+					snprintf(b, sizeof(b), "&#%i;", *e);
 					p.Push(b);
 
 					s = ++e;
@@ -2121,7 +2121,7 @@ public:
 
 		if (stricmp(t1->GetTag(), t2->GetTag()) != 0)
 		{
-			sprintf(s, "Different Tag: '%s' <-> '%s'", t1->GetTag(), t2->GetTag());
+			snprintf(s, sizeof(s), "Different Tag: '%s' <-> '%s'", t1->GetTag(), t2->GetTag());
 			LListItem *i = new LListItem;
 			if (i)
 			{
@@ -2146,12 +2146,12 @@ public:
 			{
 				if (strcmp(a1->GetValue(), a2->GetValue()) != 0)
 				{
-					sprintf(s, "Different Attr Value: '%s' <-> '%s'", a1->GetValue(), a2->GetValue());
+					snprintf(s, sizeof(s), "Different Attr Value: '%s' <-> '%s'", a1->GetValue(), a2->GetValue());
 					LListItem *i = new LListItem;
 					if (i)
 					{
 						i->SetText(s);
-						sprintf(s, "%s.%s", TagName(t1), a1->GetName());
+						snprintf(s, sizeof(s), "%s.%s", TagName(t1), a1->GetName());
 						i->SetText(s, 1);
 						Lst->Insert(i);
 					}
@@ -2161,7 +2161,7 @@ public:
 			}
 			else
 			{
-				sprintf(s, "[Right] Missing Attr: '%s' = '%s'", a2->GetName(), a2->GetValue());
+				snprintf(s, sizeof(s), "[Right] Missing Attr: '%s' = '%s'", a2->GetName(), a2->GetValue());
 				LListItem *i = new LListItem;
 				if (i)
 				{
@@ -2177,7 +2177,7 @@ public:
 		for (auto v : a)
 		{
 			LXmlAttr *a1 = v.value;
-			sprintf(s, "[Left] Missing Attr: '%s' = '%s'", a1->GetName(), a1->GetValue());
+			snprintf(s, sizeof(s), "[Left] Missing Attr: '%s' = '%s'", a1->GetName(), a1->GetValue());
 			LListItem *i = new LListItem;
 			if (i)
 			{
@@ -2224,7 +2224,7 @@ public:
 				}
 				else if (r1[i])
 				{
-					sprintf(s, "[Right] Missing String: Ref=%s, Def=%s", r1[i]->GetAttr("ref"), r1[i]->GetAttr("Define"));
+					snprintf(s, sizeof(s), "[Right] Missing String: Ref=%s, Def=%s", r1[i]->GetAttr("ref"), r1[i]->GetAttr("Define"));
 					LListItem *n = new LListItem;
 					if (n)
 					{
@@ -2235,7 +2235,7 @@ public:
 				}
 				else if (r2[i])
 				{
-					sprintf(s, "[Left] Missing String: Ref=%s, Def=%s", r2[i]->GetAttr("ref"), r2[i]->GetAttr("Define"));
+					snprintf(s, sizeof(s), "[Left] Missing String: Ref=%s, Def=%s", r2[i]->GetAttr("ref"), r2[i]->GetAttr("Define"));
 					LListItem *n = new LListItem;
 					if (n)
 					{
@@ -2419,7 +2419,7 @@ void AppWnd::ImportLang()
 												NotFound++;
 										
 												char e[256];
-												sprintf(e, "String ref=%i (%s)\n", s->GetRef(), s->GetDefine());
+												snprintf(e, sizeof(e), "String ref=%i (%s)\n", s->GetRef(), s->GetDefine());
 												Errors.Push(e);
 											}
 										}
@@ -2477,7 +2477,7 @@ void AppWnd::ImportLang()
 														NotFound++;
 
 														char e[256];
-														sprintf(e, "MenuString ref=%i (%s)\n", s->GetRef(), s->GetDefine());
+														snprintf(e, sizeof(e), "MenuString ref=%i (%s)\n", s->GetRef(), s->GetDefine());
 														Errors.Push(e);
 													}
 												}
@@ -3001,7 +3001,7 @@ bool AppWnd::WriteDefines(LStream &Defs)
 						{
 							// Remove dupe ID's
 							char IdStr[32];
-							sprintf(IdStr, "%i", s->GetId());
+							snprintf(IdStr, sizeof(IdStr), "%i", s->GetId());
 							char *Define;
 							if ((Define = Ident.Find(IdStr)))
 							{
@@ -3243,8 +3243,6 @@ bool AppWnd::SaveLgi(const char *FileName)
 #define IMP_MODE_DLG_CTRLS			2
 #define IMP_MODE_STRINGS			3
 #define IMP_MODE_MENU				4
-
-#include "lgi/common/Token.h"
 
 class ImportDefine
 {

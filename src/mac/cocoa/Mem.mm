@@ -25,34 +25,6 @@ bool LDumpMemoryStats(char *filename)
 	return false;
 }
 
-void MemorySizeToStr(char *Str, uint64 Size)
-{
-	#define K				1024.0
-	#define M				(K*K)
-	#define G				(M*K)
-
-	if (Size >= G)
-	{
-		sprintf(Str, "%.2f G", (double) Size / G);
-	}
-	else if (Size >= M)
-	{
-		sprintf(Str, "%.2f M", (double) Size / M);
-	}
-	else if (Size >= (10 * K))
-	{
-		sprintf(Str, "%.2f K", (double) Size / K);
-	}
-	else
-	{
-		sprintf(Str, LPrintfInt64" bytes", Size);
-	}
-
-	#undef K
-	#undef M
-	#undef G
-}
-
 bool LgiCanReadMemory(void *p, int Len)
 {
 	try

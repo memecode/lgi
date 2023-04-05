@@ -48,7 +48,7 @@ public:
 			}
 			case 2:
 			{
-				sprintf(s, "%i", Count);
+				snprintf(s, sizeof(s), "%i", Count);
 				return s;
 				break;
 			}
@@ -256,7 +256,7 @@ public:
 						{
 							char *c = strchr(Blocks, ':');
 							if (c) *c = 0;
-							sprintf(s, "%s (%s)", File, t[0]);
+							snprintf(s, sizeof(s), "%s (%s)", File, t[0]);
 							Name(s);
 						}
 						else break;

@@ -1541,7 +1541,7 @@ void ProjectNode::OnProperties()
 			int64 FSize = LFileSize(Path);
 			LFormatSize(Size, sizeof(Size), FSize);
 			char Msg[512];
-			sprintf(Msg, "Source Code:\n\n\t%s\n\nSize: %s (%i bytes)", Path.Get(), Size, (int32)FSize);
+			snprintf(Msg, sizeof(Msg), "Source Code:\n\n\t%s\n\nSize: %s (%i bytes)", Path.Get(), Size, (int32)FSize);
 		
 			FileProps *Dlg = new FileProps(Tree, Msg, Type, Platforms, Charset);
 			Dlg->DoModal([this, Dlg, Path](auto dlg, auto code)
