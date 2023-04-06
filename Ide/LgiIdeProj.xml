@@ -84,13 +84,12 @@
 		<Node File="../include/lgi/common/TrayIcon.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Resources" Type="1" Platforms="15" Open="1" Id="8">
-		<Node Name="Test" Type="1" Platforms="15" Id="1" />
+		<Node File="./resources/resource.h" Type="3" Platforms="15" />
 		<Node File="./haiku/buildHaiku.py" Type="8" Platforms="15" />
 		<Node File="./CMakeLists.txt" Type="8" Platforms="15" />
 		<Node File="./haiku/Makefile.haiku" Type="9" Platforms="15" />
 		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
 		<Node File="./win/Makefile.windows" Type="9" Platforms="15" />
-		<Node File="./resources/resource.h" Type="3" Platforms="15" />
 	</Node>
 	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>
@@ -259,7 +258,9 @@ _GNU_SOURCE</Release>
 				<All>SOME_TEST=testing</All>
 			</Environment>
 			<Arguments>
-				<All />
+				<All>
+					<Debug>/home/matthew/code/scribe/trunk_os/linux/ScribeProj.xml</Debug>
+				</All>
 			</Arguments>
 			<DebugAdmin />
 			<InitialDir />

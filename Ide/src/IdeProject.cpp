@@ -430,7 +430,7 @@ public:
 					m.Print("Target = %s\n", ToPlatformPath(Exe, Platform).Get());
 				else
 				{
-					auto RelExe = LMakeRelativePath(MakeFilePath, Exe);
+					auto RelExe = LMakeRelativePath(Base, Exe);
 					if (Base && RelExe)
 					{
 						m.Print("Target = %s\n", ToPlatformPath(RelExe, Platform).Get());
@@ -545,7 +545,7 @@ public:
 					{
 						LString Rel;
 						if (!LIsRelativePath(in))
-							Rel = LMakeRelativePath(MakeFilePath, in);
+							Rel = LMakeRelativePath(Base, in);
 							
 						LString Final = Rel ? Rel.Get() : in.Get();
 						if (!Proj->CheckExists(Final))
@@ -603,7 +603,7 @@ public:
 					{
 						LString DepPath = DepBase.Get();
 						
-						auto Rel = LMakeRelativePath(MakeFilePath, DepPath);
+						auto Rel = LMakeRelativePath(Base, DepPath);
 
 						LString Final = Rel ? Rel.Get() : DepPath.Get();
 						Proj->CheckExists(Final);
@@ -672,7 +672,7 @@ public:
 						p += i;
 					}
 					else p = i;
-					auto rel = LMakeRelativePath(MakeFilePath, p.GetFull());
+					auto rel = LMakeRelativePath(Base, p.GetFull());
 					s.Printf(" \\\n\t\t-I%s", ToUnixPath(rel ? rel : i));
 				}
 
@@ -742,7 +742,7 @@ public:
 						p = path;
 					}
 
-					auto rel = LMakeRelativePath(MakeFilePath, p.GetFull());
+					auto rel = LMakeRelativePath(Base, p.GetFull());
 					if (rel && rel.Find("./") == 0)
 						rel = rel(2,-1);
 
@@ -814,7 +814,7 @@ public:
 						
 						if (DepBase && Base && TargetFile)
 						{
-							LString Rel = LMakeRelativePath(MakeFilePath, DepBase);
+							LString Rel = LMakeRelativePath(Base, DepBase);
 							ToNativePath(Rel);
 							
 							// Add tag to target name
@@ -838,7 +838,8 @@ public:
 								if (i)
 									Rules.Print(" \\\n\t");
 								
-								LString DepRel = LMakeRelativePath(MakeFilePath, AllDeps[i]);
+								LString DepRel = LMakeRelativePath(Base, AllDeps[i]);
+								// printf("MakeRel(%s, %s) = %s\n", Base.Get(), AllDeps[i], DepRel.Get());
 								auto f = DepRel ? DepRel.Get() : AllDeps[i];
 								ToNativePath(f);
 								Rules.Print("%s", f);
@@ -936,7 +937,7 @@ public:
 							LAutoString dep_base = d->GetBasePath();
 							d->CheckExists(dep_base);
 
-							auto rel_dir = LMakeRelativePath(MakeFilePath, dep_base);
+							auto rel_dir = LMakeRelativePath(Base, dep_base);
 							d->CheckExists(rel_dir);
 							
 							char *mk_leaf = strrchr(mk, DIR_CHAR);
@@ -1028,7 +1029,7 @@ public:
 					{
 						if (!LIsRelativePath(p))
 						{
-							auto a = LMakeRelativePath(MakeFilePath, p);
+							auto a = LMakeRelativePath(Base, p);
 							m.Print(" \\\n\t%s", ToPlatformPath(a ? a.Get() : p.Get(), Platform).Get());
 						}
 						else
@@ -1644,14 +1645,11 @@ int BuildThread::Main()
 	{
 		bool Status = false;
 		LString MakePath = Makefile.Get();
-		LString InitDir = Makefile.Get();
+		auto InitFolder = Proj->GetBasePath();
+		LString InitDir = InitFolder.Get();
 		LVariant Jobs;
 		if (!Proj->GetApp()->GetOptions()->GetValue(OPT_Jobs, Jobs) || Jobs.CastInt32() < 1)
 			Jobs = 2;
-
-		auto Pos = InitDir.RFind(DIR_STR);
-		if (Pos)
-			InitDir.Length(Pos);
 
 		LString TmpArgs, Include, Lib, LibPath, Path;
 		
@@ -1859,6 +1857,7 @@ int BuildThread::Main()
 
 		LString Msg;
 		Msg.Printf("Making: %s\n", MakePath.Get());
+		// Msg.Printf("InitDir: %s\n", InitDir.Get());
 		Proj->GetApp()->PostEvent(M_APPEND_TEXT, (LMessage::Param)NewStr(Msg), AppWnd::BuildTab);
 
 		LgiTrace("%s %s\n", Exe.Get(), TmpArgs.Get());
@@ -2087,18 +2086,18 @@ if (Debug) LgiTrace("Common=%i\n", Common);
 	{
 		if (Common < b.Length())
 		{
-			out[0] = 0;
+			out[outCh = 0] = 0;
 			auto Back = b.Length() - Common;
 if (Debug) LgiTrace("Back=%i\n", (int)Back);
 			for (int n=0; n<Back; n++)
 			{
-				strcat(out, "..");
+				outCh += snprintf(out+outCh, sizeof(out)-outCh, "..");
 				if (n < Back - 1) strcat(out, DIR_STR);
 			}
 		}
 		else
 		{
-			strcpy(out, ".");
+			outCh += snprintf(out+outCh, sizeof(out)-outCh, ".");
 		}
 		for (int n=Common; n<i.Length(); n++)
 		{
@@ -3069,7 +3068,7 @@ void IdeProject::SetClean(std::function<void(bool)> OnDone)
 {
 	auto CleanNodes = [this, OnDone]()
 	{
-		printf("IdeProject.SetClean.CleanNodes\n");
+		// printf("IdeProject.SetClean.CleanNodes\n");
 		for (auto i: *this)
 		{
 			ProjectNode *p = dynamic_cast<ProjectNode*>(i);
@@ -3081,7 +3080,7 @@ void IdeProject::SetClean(std::function<void(bool)> OnDone)
 			OnDone(true);
 	};
 
-	printf("IdeProject.SetClean dirty=%i,%i validfile=%i\n", d->Dirty, d->UserFileDirty, ValidStr(d->FileName));
+	// printf("IdeProject.SetClean dirty=%i,%i validfile=%i\n", d->Dirty, d->UserFileDirty, ValidStr(d->FileName));
 	if (d->Dirty || d->UserFileDirty)
 	{
 		if (ValidStr(d->FileName))
@@ -3093,7 +3092,7 @@ void IdeProject::SetClean(std::function<void(bool)> OnDone)
 			s->Name("Project.xml");
 			s->Save([this, OnDone, CleanNodes](auto s, auto ok)
 			{
-				printf("IdeProject.SetClean.FileSelect ok=%i\n", ok);
+				// printf("IdeProject.SetClean.FileSelect ok=%i\n", ok);
 				if (ok)
 				{
 					d->FileName = s->Name();
@@ -3752,7 +3751,7 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, IdePlatform Platform)
 		return false;
 		
 	LHashTbl<StrKey<char>, ProjDependency*> Deps;
-	LAutoString Base = GetBasePath();
+	auto Base = GetBasePath();
 	
 	// Build list of all the source files...
 	LArray<LString> Src;
@@ -3777,7 +3776,7 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, IdePlatform Platform)
 	{
 		// Find all the unscanned dependencies
 		Unscanned.Length(0);
-		// for (ProjDependency *d = Deps.First(); d; d = Deps.Next())
+
 		for (auto d : Deps)
 		{
 			if (!d.value->Scanned)
@@ -3801,11 +3800,9 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, IdePlatform Platform)
 			LArray<char*> SrcDeps;
 			if (GetDependencies(Src, IncPaths, SrcDeps, Platform))
 			{
-				for (int n=0; n<SrcDeps.Length(); n++)
+				for (auto File: SrcDeps)
 				{
 					// Add include to dependencies...
-					char *File = SrcDeps[n];
-
 					if (LIsRelativePath(File))
 					{
 						LMakePath(Full, sizeof(Full), Base, File);
@@ -3823,7 +3820,6 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, IdePlatform Platform)
 	}
 	while (Unscanned.Length() > 0);
 	
-	// for (ProjDependency *d = Deps.First(); d; d = Deps.Next())
 	for (auto d : Deps)
 	{
 		Files.Add(d.value->File.Release());

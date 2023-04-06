@@ -37,8 +37,8 @@ Known bugs:
 #include "lgi/common/DocView.h"
 #include "ParserCommon.h"
 
-// #define DEBUG_FILE		"IdeProject.cpp"
-// #define DEBUG_LINE		65
+// #define DEBUG_FILE		"Scribe.h"
+// #define DEBUG_LINE		336
 
 const char *TypeToStr(DefnType t)
 {
@@ -241,7 +241,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 		{
 			if (Line >= DEBUG_LINE - 1)
 			{
-				// int asd=0;
+				int asd=0;
 			}
 			else if (PrevLine != Line)
 			{
@@ -851,6 +851,12 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 										{
 											DeleteArray(t);
 											break;
+										}
+										else if (StrcmpW(t, L"LgiClass") == 0  ||
+												 StrcmpW(t, L"ScribeClass") == 0)
+										{
+											// Ignore these...
+											DeleteArray(t);
 										}
 										else if (StrcmpW(t, StrHash) ||
 												 StrcmpW(t, StrOpenBracket) == 0 ||

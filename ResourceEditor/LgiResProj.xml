@@ -1,29 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Project TabSize="4" IndentSize="4" UseTabs="1" ShowWhitespace="0" Makefile="./Makefile" Exe="./lgires" TargetType="0" TargetName="lgires" IncludePaths="../include/common&#10;../include/linux/X&#10;./Code&#10;" Compiler="0">
-	<Node Name="Resources" Type="1" Open="0" Platforms="7" Id="1">
-		<Node File="./Resources/lgires.lr8" Type="5" Platforms="7" />
-	</Node>
-	<Node Name="Objects" Type="1" Open="1" Platforms="7" Id="2">
-		<Node Name="Dialog" Type="1" Open="0" Platforms="7" Id="3">
-			<Node File="./Code/LgiRes_ControlTree.cpp" Type="2" Platforms="15" />
-			<Node File="./Code/LgiRes_Dialog.cpp" Type="2" Platforms="7" />
-			<Node File="./Code/LgiRes_Dialog.h" Type="3" Platforms="7" />
-			<Node File="./Code/LgiRes_TableLayout.cpp" Type="2" Platforms="7" />
-		</Node>
-		<Node Name="Menu" Type="1" Open="0" Platforms="7" Id="4">
-			<Node File="./Code/LgiRes_Menu.cpp" Type="2" Platforms="7" />
-			<Node File="./Code/LgiRes_Menu.h" Type="3" Platforms="7" />
-		</Node>
-		<Node Name="String" Type="1" Open="0" Platforms="7" Id="5">
-			<Node File="./Code/LgiRes_String.cpp" Type="2" Platforms="7" />
-			<Node File="./Code/LgiRes_String.h" Type="3" Platforms="7" />
-		</Node>
-		<Node File="./Code/LgiRes_Css.cpp" Type="2" Platforms="15" />
-		<Node File="./Code/LgiResApp.cpp" Type="2" Platforms="7" />
-		<Node File="./Code/LgiResEdit.h" Type="3" Platforms="7" />
-		<Node File="./Code/Search.cpp" Type="2" Platforms="7" />
-		<Node File="./Code/ShowLanguages.cpp" Type="2" Platforms="7" />
-	</Node>
 	<Node Name="Lgi" Type="1" Open="1" Platforms="7" Id="6">
 		<Node File="../src/common/Lgi/About.cpp" Type="2" Platforms="7" />
 		<Node File="../src/common/Lgi/DocApp.cpp" Type="2" Platforms="15" />
@@ -32,11 +8,38 @@
 		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Gdc2/Filters/Lzw.cpp" Type="2" Platforms="15" />
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" />
+	<Node Name="Objects" Type="1" Open="1" Platforms="7" Id="2">
+		<Node Name="Dialog" Type="1" Open="0" Platforms="7" Id="3">
+			<Node File="/src/LgiRes_ControlTree.cpp" Type="2" Platforms="15" />
+			<Node File="/src/LgiRes_Dialog.cpp" Type="2" Platforms="7" />
+			<Node File="/src/LgiRes_Dialog.h" Type="3" Platforms="7" />
+			<Node File="/src/LgiRes_TableLayout.cpp" Type="2" Platforms="7" />
+		</Node>
+		<Node Name="Menu" Type="1" Open="0" Platforms="7" Id="4">
+			<Node File="/src/LgiRes_Menu.cpp" Type="2" Platforms="7" />
+			<Node File="/src/LgiRes_Menu.h" Type="3" Platforms="7" />
+		</Node>
+		<Node Name="String" Type="1" Open="0" Platforms="7" Id="5">
+			<Node File="/src/LgiRes_String.cpp" Type="2" Platforms="7" />
+			<Node File="/src/LgiRes_String.h" Type="3" Platforms="7" />
+		</Node>
+		<Node File="/src/LgiRes_Css.cpp" Type="2" Platforms="15" />
+		<Node File="/src/LgiResApp.cpp" Type="2" Platforms="7" />
+		<Node File="/src/LgiResEdit.h" Type="3" Platforms="7" />
+		<Node File="/src/Search.cpp" Type="2" Platforms="7" />
+		<Node File="/src/ShowLanguages.cpp" Type="2" Platforms="7" />
+	</Node>
+	<Node Name="Resources" Type="1" Open="0" Platforms="7" Id="1">
+		<Node File="/resources/lgires.lr8" Type="5" Platforms="7" />
+	</Node>
+	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
+	<Node Name="Build" Type="1" Platforms="15" Id="1">
+		<Node File="/linux/Makefile.linux" Type="9" Platforms="15" />
+	</Node>
 	<Settings>
 		<General>
 			<Makefile>
-				<Linux>Makefile.linux</Linux>
+				<Linux>linux/Makefile.linux</Linux>
 				<Windows>.\LgiRes_vs2015.sln</Windows>
 			</Makefile>
 			<Executable>
@@ -54,16 +57,16 @@
 					<Release>/home/matthew/Code/MidiHw/mc4/resources/mc4.lr8</Release>
 				</All>
 			</Arguments>
-			<CppCrossCompiler />
 			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
 				<All>
 					<Debug>../include
-Resources</Debug>
+resources</Debug>
 					<Release>../include
-Resources</Release>
+resources</Release>
 				</All>
 				<Linux>
 					<Debug>../include/lgi/linux
@@ -95,26 +98,26 @@ pthread
 				</Linux>
 				<All />
 			</Libraries>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<TargetName>
-				<Linux>
-					<Debug>lgires</Debug>
-					<Release>lgires</Release>
-				</Linux>
-			</TargetName>
 			<SystemIncludes>
 				<Linux>
 					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
 			</SystemIncludes>
+			<TargetName>
+				<Linux>
+					<Debug>lgires</Debug>
+					<Release>lgires</Release>
+				</Linux>
+			</TargetName>
 			<Defines>
 				<All />
 				<Linux />
 			</Defines>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
 			<ApplicationIcon />
 		</Build>
 		<Editor>
@@ -134,15 +137,11 @@ pthread
 			<CommentFunction />
 		</Editor>
 		<Advanced>
+			<OtherMakefileRules />
 			<PostBuildCommands>
 				<Linux />
 			</PostBuildCommands>
-			<OtherMakefileRules />
 		</Advanced>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
 		<Debug>
 			<Environment />
 			<Arguments>
@@ -151,5 +150,9 @@ pthread
 			<DebugAdmin />
 			<InitialDir />
 		</Debug>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>
