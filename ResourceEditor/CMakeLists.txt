@@ -18,20 +18,20 @@ endif()
 
 add_executable(LgiRes ${APP_TYPE}
 
-	Code/LgiResEdit.h
-	Code/LgiRes_Dialog.h
-	Code/LgiRes_Menu.h
-	Code/LgiRes_String.h
+	src/LgiResEdit.h
+	src/LgiRes_Dialog.h
+	src/LgiRes_Menu.h
+	src/LgiRes_String.h
 
-	Code/LgiResApp.cpp
-	Code/LgiRes_ControlTree.cpp
-	Code/LgiRes_Css.cpp
-	Code/LgiRes_Dialog.cpp
-	Code/LgiRes_Menu.cpp
-	Code/LgiRes_String.cpp
-	Code/LgiRes_TableLayout.cpp
-	Code/Search.cpp
-	Code/ShowLanguages.cpp
+	src/LgiResApp.cpp
+	src/LgiRes_ControlTree.cpp
+	src/LgiRes_Css.cpp
+	src/LgiRes_Dialog.cpp
+	src/LgiRes_Menu.cpp
+	src/LgiRes_String.cpp
+	src/LgiRes_TableLayout.cpp
+	src/Search.cpp
+	src/ShowLanguages.cpp
 
 	${LGI_DIR}/src/common/Gdc2/Filters/Gif.cpp
 	${LGI_DIR}/src/common/Gdc2/Filters/Lzw.cpp

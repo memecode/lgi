@@ -268,16 +268,36 @@ char *LHtmlParser::ParseName(char *s, char **Name)
 char *LHtmlParser::ParseName(char *s, LAutoString &Name)
 {
 	SkipWhiteSpace(s);
-	char *Start = s;
-	while (*s && (IsAlpha(*s) || strchr("!-:\"\'", *s) || IsDigit(*s)))
-	{
-		s++;
-	}
 
-	ssize_t Len = s - Start;
-	if (Len > 0)
+	if (*s == '\"' || *s == '\'')
 	{
-		Name.Reset(NewStr(Start, Len));
+		char delim = *s++;
+		char* Start = s;
+		while (*s && *s != delim)
+		{
+			if (s[0] == '\\' && s[1] == delim)
+				s += 2; // Is that ok?
+			else
+				s++;
+		}
+
+		ssize_t Len = s - Start;
+		if(Len > 0)
+			Name.Reset(NewStr(Start, Len));
+
+		if (*s == delim)
+			s++;
+	}
+	else
+	{
+		char* Start = s;
+		auto Inc = "!-:"; // I'm removing these \"\' because they really aren't appropriate for a name string...
+		while (*s && (IsAlpha(*s) || strchr(Inc, *s) || IsDigit(*s)))
+			s++;
+
+		ssize_t Len = s - Start;
+		if(Len > 0)
+			Name.Reset(NewStr(Start, Len));
 	}
 	
 	return s;
