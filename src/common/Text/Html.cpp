@@ -3709,7 +3709,9 @@ bool LTag::ConvertToText(TextConvertState &State)
 			break;
 	}
 
-	if (ValidStrW(Txt))
+	if (TagId != TAG_SCRIPT &&
+		TagId != TAG_STYLE &&
+		ValidStrW(Txt))
 	{
 		for (int i=0; i<State.Depth; i++)
 			State.Write("  ", 2);
