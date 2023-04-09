@@ -332,26 +332,26 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 void LDialogTextMsg(LViewI *Parent, const char *Title, LString Txt)
 {
 	LAutoPtr<LDialog> d(new LDialog);
-	if (d)
-	{
-		LTextLog *Log = NULL;
-		d->SetParent(Parent);
-		d->Name(Title);
-		LRect r(0, 0, 600, 500);
-		d->SetPos(r);
-		d->MoveSameScreen(Parent);
+	if (!d)
+		return;
 
-		LTableLayout *t = new LTableLayout(100);
-		auto c = t->GetCell(0, 0);
-		c->Add(Log = new LTextLog(101));
-		Log->Name(Txt);
-		c = t->GetCell(0, 1);
-		c->Add(new LButton(IDOK, 0, 0, -1, -1, "Ok"));
-		c->TextAlign(LCss::AlignCenter);
+	LTextLog *Log = NULL;
+	d->SetParent(Parent);
+	d->Name(Title);
+	LRect r(0, 0, 600, 500);
+	d->SetPos(r);
+	d->MoveSameScreen(Parent);
+
+	LTableLayout *t = new LTableLayout(100);
+	auto c = t->GetCell(0, 0);
+	c->Add(Log = new LTextLog(101));
+	Log->Name(Txt);
+	c = t->GetCell(0, 1);
+	c->Add(new LButton(IDOK, 0, 0, -1, -1, "Ok"));
+	c->TextAlign(LCss::AlignCenter);
 		
-		d->AddView(t);
-		d->DoModal(NULL);
-	}
+	d->AddView(t);
+	d->DoModal(NULL);
 }
 
 #endif

@@ -40,13 +40,15 @@ public:
 /// 
 /// A simple example of this class in action:
 /// \code
-/// LFileSelect s;
-/// s.Parent(MyWindow);
-/// s.Type("PNG Files", "*.png");
-/// if (s.Open())
+/// auto s = new LFileSelect;
+/// s->Parent(MyWindow);
+/// s->Type("PNG Files", "*.png");
+/// s.Open([](auto s, auto ok)
 /// {
-/// 	LgiMsg(MyWindow, "The file selected is '%s'", "Example", MB_OK, s.Name());
-/// }
+///		if (ok)
+/// 		LgiMsg(MyWindow, "The file selected is '%s'", "Example", MB_OK, s.Name());
+///		delete s;
+/// });
 /// \endcode
 class LgiClass LFileSelect :
 	public LBase

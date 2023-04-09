@@ -166,12 +166,9 @@ bool LThread::IsExited()
 	#endif
 
 	if (!Alive1)
-	{
 		State = THREAD_EXITED;
-		return true;
-	}
 
-	return false;
+	return State == THREAD_EXITED;
 }
 
 void LThread::Run()

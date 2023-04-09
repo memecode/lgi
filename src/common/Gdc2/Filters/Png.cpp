@@ -1169,25 +1169,12 @@ LFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 		Props->GetValue(LGI_FILTER_TRANSPARENT, Transparent);
 	}
 
-	/* FIXME:
-	if (Parent && Transparent.IsNull())
+	if (Transparent.IsNull())
 	{
+		// LTransparentDlg needs to set this in the caller
 		LAssert(!"Move this to the parent app.");
-
-		// put up a dialog to ask about transparent colour
-		auto Dlg = new LTransparentDlg(Parent, &Transparent);
-		Dlg->DoModal([this, Dlg](auto dlg, auto code)
-		{
-			LVariant v;
-
-			if (!code && Props)
-				Props->SetValue("Cancel", v = 1);
-			
-			delete Dlg;
-			return IoCancel;
-		});
+		return IoError;
 	}
-	*/
 
 	if (setjmp(Here) == 0 && pDC && Out)
 	{

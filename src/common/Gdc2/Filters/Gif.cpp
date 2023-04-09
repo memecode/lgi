@@ -927,18 +927,8 @@ LFilter::IoStatus GdcGif::WriteImage(LStream *Out, LSurface *pDC)
 		    }
 		    else
 		    {
+				// Need input from the user about transparency. ie LTransparentDlg
 				LAssert(!"Move this to the parent app.");
-
-				/*
-			    // put up a dialog to ask about transparent colour
-			    LTransparentDlg Dlg((LView*)Parent.Value.Ptr, &Transparent);
-			    if (!Dlg.DoModal())
-			    {
-				    Props->SetValue("Cancel", v = 1);
-				    return IoCancel;
-			    }
-				*/
-
 			    return IoCancel;
 			}
 			

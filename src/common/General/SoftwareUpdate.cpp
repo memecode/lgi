@@ -23,30 +23,35 @@ struct LSoftwareUpdatePriv
 	LString Error;
 	LString TempPath;
 
-	void SetError(int Id, const char *Def = 0)
+	bool SetError(int Id, const char *Def = 0)
 	{
 		Error = LLoadString(Id, Def);
+		return false;
 	}
 
-	class UpdateThread : public LThread
+	class UpdateThread :
+		public LThread
 	{
-		LSoftwareUpdatePriv *d;
-		LSocket *s;
-		LSoftwareUpdate::UpdateInfo *Info;
-		LHttp Http;
-		bool IncBetas;
+		LSoftwareUpdate *update = NULL;
+		LSoftwareUpdatePriv *d = NULL;
+		LSocket *s = NULL;
+		LHttp http;
+		bool incBetas = false;
 
 	public:
-		bool Status;
+		LSoftwareUpdate::UpdateInfo info;
+		LSoftwareUpdate::UpdateCb callback;
+		bool Status = false;
 
-		UpdateThread(LSoftwareUpdatePriv *priv, LSoftwareUpdate::UpdateInfo *info, bool betas) :
+		UpdateThread(LSoftwareUpdate *softwareUpdate,
+					bool betas,
+					LSoftwareUpdate::UpdateCb cb) :
 		    LThread("SoftwareUpdateThread")
 		{
-			Info = info;
-			d = priv;
-			s = 0;
-			IncBetas = betas;
-			Status = false;
+			update = softwareUpdate;
+			d = update->d;
+			incBetas = betas;
+			callback = cb;
 
 			Run();
 		}
@@ -58,114 +63,126 @@ struct LSoftwareUpdatePriv
 
 		void Cancel()
 		{
-			Http.Close();
-			Info->Cancel = true;
+			http.Close();
+			info.Cancel = true;
+		}
+
+		int Complete(int Ret)
+		{
+			info.HasUpdate = Status;
+
+			if (callback)
+			{
+				callback(Ret == 0 ? &info : NULL, update->GetErrorMessage());
+				DeleteOnExit = true;
+				delete update;
+			}
+			
+			return Ret;
 		}
 
 		int Main()
 		{
-			if (d->UpdateUri)
+			if (!d->UpdateUri)
 			{
-				LUri Uri(d->UpdateUri);
-				char Dir[256];
-				int WordSize = sizeof(size_t) << 3;
-				LString OsName = LGetOsName();
-				int Os = LGetOs();
-				if (Os == LGI_OS_WIN32 ||
-					Os == LGI_OS_WIN64 ||
-					Os == LGI_OS_WIN9X)
-				{
-					OsName.Printf("Win%i", WordSize);
-				}
-
-				sprintf_s(Dir, sizeof(Dir), "%s?name=%s&os=%s&betas=%i", Uri.sPath.Get(), (char*)d->Name, OsName.Get(), IncBetas);
-				Uri.sPath = Dir;
-
-				LString GetUri = Uri.ToString();
-				
-				#ifdef _DEBUG
-				LgiTrace("UpdateURI=%s\n", GetUri.Get());
-				#endif
-				
-				if (d->Proxy)
-				{
-				    LUri Proxy(d->Proxy);
-				    if (Proxy.sHost)
-					    Http.SetProxy(Proxy.sHost, Proxy.Port?Proxy.Port:HTTP_PORT);
-				}
-				
-				LStringPipe RawXml;
-				int ProtocolStatus = 0;
-				LAutoPtr<LSocketI> s(new LSocket);
-				if (Http.Open(s, Uri.sHost, Uri.Port))
-				{
-					LHttp::ContentEncoding Enc;
-					if (Http.Get(GetUri, NULL, &ProtocolStatus, &RawXml, &Enc))
-					{
-						auto Xml = RawXml.NewLStr();
-						LMemStream XmlStream(Xml.Get(), Xml.Length(), false);
-						LXmlTree Tree;
-						LXmlTag Root;
-						if (Tree.Read(&Root, &XmlStream))
-						{
-							LXmlTag *StatusCode;
-							if (Root.IsTag("software") &&
-								(StatusCode = Root.GetChildTag("status")))
-							{
-								if (StatusCode->GetContent() &&
-									atoi(StatusCode->GetContent()) > 0)
-								{
-									LXmlTag *t;
-									if ((t = Root.GetChildTag("version")))
-										Info->Version = t->GetContent();
-									if ((t = Root.GetChildTag("revision")))
-										Info->Build = t->GetContent();
-									if ((t = Root.GetChildTag("uri")))
-										Info->Uri = t->GetContent();
-									if ((t = Root.GetChildTag("date")))
-									{
-										Info->Date.SetFormat(GDTF_YEAR_MONTH_DAY);
-										Info->Date.Set(t->GetContent());
-									}
-
-									Status = true;
-								}
-								else
-								{
-									LXmlTag *Msg = Root.GetChildTag("msg");
-									LStringPipe p;
-									p.Print(LLoadString(L_ERROR_UPDATE, sUpdateError), Msg?Msg->GetContent():(char*)"Unknown");
-									d->Error = p.NewLStr();
-									LgiTrace("UpdateURI=%s\n", GetUri.Get());
-								}
-							}
-							else
-							{
-								d->SetError(L_ERROR_UNEXPECTED_XML, sUnexpectedXml);
-								LgiTrace("%s:%i - Bad XML: %s\n", _FL, Xml.Get());
-							}
-						}
-						else
-						{
-							d->SetError(L_ERROR_XML_PARSE, sXmlParsingFailed);
-							LgiTrace("%s:%i - Bad XML: %s\n", _FL, Xml.Get());
-						}
-					}
-					else
-					{
-						d->SetError(L_ERROR_HTTP_FAILED, sHttpDownloadFailed);
-						LgiTrace("%s:%i - Bad URI: %s\n", _FL, GetUri.Get());
-					}
-				}
-				else
-				{
-					d->SetError(L_ERROR_CONNECT_FAILED, sSocketConnectFailed);
-					LgiTrace("%s:%i - Bad connect: %s:%i\n", _FL, Uri.sHost.Get(), Uri.Port);
-				}
+				d->SetError(L_ERROR_NO_URI, sNoUpdateUri);
+				return Complete(-1);
 			}
-			else d->SetError(L_ERROR_NO_URI, sNoUpdateUri);
 
-			return 0;
+			LUri Uri(d->UpdateUri);
+			char Dir[256];
+			int WordSize = sizeof(size_t) << 3;
+			LString OsName = LGetOsName();
+			int Os = LGetOs();
+			if (Os == LGI_OS_WIN32 ||
+				Os == LGI_OS_WIN64 ||
+				Os == LGI_OS_WIN9X)
+			{
+				OsName.Printf("Win%i", WordSize);
+			}
+
+			sprintf_s(Dir, sizeof(Dir), "%s?name=%s&os=%s&betas=%i", Uri.sPath.Get(), (char*)d->Name, OsName.Get(), incBetas);
+			Uri.sPath = Dir;
+
+			LString GetUri = Uri.ToString();
+				
+			#ifdef _DEBUG
+			LgiTrace("UpdateURI=%s\n", GetUri.Get());
+			#endif
+				
+			if (d->Proxy)
+			{
+				LUri Proxy(d->Proxy);
+				if (Proxy.sHost)
+					http.SetProxy(Proxy.sHost, Proxy.Port?Proxy.Port:HTTP_PORT);
+			}
+				
+			LStringPipe RawXml;
+			int ProtocolStatus = 0;
+			LAutoPtr<LSocketI> s(new LSocket);
+			if (!http.Open(s, Uri.sHost, Uri.Port))
+			{
+				d->SetError(L_ERROR_CONNECT_FAILED, sSocketConnectFailed);
+				LgiTrace("%s:%i - Bad connect: %s:%i\n", _FL, Uri.sHost.Get(), Uri.Port);
+				return Complete(-2);
+			}
+
+			LHttp::ContentEncoding Enc;
+			if (!http.Get(GetUri, NULL, &ProtocolStatus, &RawXml, &Enc))
+			{
+				d->SetError(L_ERROR_HTTP_FAILED, sHttpDownloadFailed);
+				LgiTrace("%s:%i - Bad URI: %s\n", _FL, GetUri.Get());
+				return Complete(-3);
+			}
+
+			auto Xml = RawXml.NewLStr();
+			LMemStream XmlStream(Xml.Get(), Xml.Length(), false);
+			LXmlTree Tree;
+			LXmlTag Root;
+			if (!Tree.Read(&Root, &XmlStream))
+			{
+				d->SetError(L_ERROR_XML_PARSE, sXmlParsingFailed);
+				LgiTrace("%s:%i - Bad XML: %s\n", _FL, Xml.Get());
+				return Complete(-4);
+			}
+
+			LXmlTag *StatusCode;
+			if (!Root.IsTag("software") ||
+				!(StatusCode = Root.GetChildTag("status")))
+			{
+				d->SetError(L_ERROR_UNEXPECTED_XML, sUnexpectedXml);
+				LgiTrace("%s:%i - Bad XML: %s\n", _FL, Xml.Get());
+				return Complete(-5);
+			}
+
+			if (StatusCode->GetContent() &&
+				atoi(StatusCode->GetContent()) > 0)
+			{
+				LXmlTag *t;
+				if ((t = Root.GetChildTag("version")))
+					info.Version = t->GetContent();
+				if ((t = Root.GetChildTag("revision")))
+					info.Build = t->GetContent();
+				if ((t = Root.GetChildTag("uri")))
+					info.Uri = t->GetContent();
+				if ((t = Root.GetChildTag("date")))
+				{
+					info.Date.SetFormat(GDTF_YEAR_MONTH_DAY);
+					info.Date.Set(t->GetContent());
+				}
+
+				Status = true;
+			}
+			else
+			{
+				LXmlTag *Msg = Root.GetChildTag("msg");
+				LStringPipe p;
+				p.Print(LLoadString(L_ERROR_UPDATE, sUpdateError), Msg?Msg->GetContent():(char*)"Unknown");
+				d->Error = p.NewLStr();
+				LgiTrace("UpdateURI=%s\n", GetUri.Get());
+			}
+
+			return Complete(0);
 		}
 	};
 
@@ -216,6 +233,7 @@ struct LSoftwareUpdatePriv
 		{
 			if (Watch->IsExited())
 			{
+				SetPulse();
 				EndModal(0);
 			}
 		}
@@ -317,42 +335,34 @@ LSoftwareUpdate::~LSoftwareUpdate()
 	DeleteObj(d);
 }
 
-void LSoftwareUpdate::CheckForUpdate(UpdateInfo &Info, LViewI *WithUi, bool IncBetas, std::function<void(bool, const char*)> callback)
+void LSoftwareUpdate::CheckForUpdate(UpdateCb callback,
+									LViewI *WithUi,
+									bool IncBetas)
 {
-	LSoftwareUpdatePriv::UpdateThread Update(d, &Info, IncBetas);
-	
+	auto thread = new LSoftwareUpdatePriv::UpdateThread(this, IncBetas, WithUi ? NULL/* UI will call the callback */ : callback);	
 	if (WithUi)
 	{
-		auto s = new LSoftwareUpdatePriv::Spinner(WithUi, &Update);
-		s->DoModal(NULL);		
-	}
-	else
-	{
-		while (!Update.IsExited())
+		auto s = new LSoftwareUpdatePriv::Spinner(WithUi, thread);
+		s->DoModal([callback, thread, this](auto dlg, auto code)
 		{
-			LYield();
-			LSleep(10);
-		}
-	}
+			if (callback)
+				callback(&thread->info, d->Error);
 
-	if (callback)
-		callback(Update.Status, GetErrorMessage());
+			delete thread;
+			delete this;
+			delete dlg;
+		});
+	}
 }
 
-bool LSoftwareUpdate::ApplyUpdate(const UpdateInfo &Info, bool DownloadOnly, LViewI *WithUi)
+bool LSoftwareUpdate::ApplyUpdate(const UpdateInfo *Info, bool DownloadOnly, LViewI *WithUi)
 {
-	if (!Info.Uri)
-	{
-		d->SetError(L_ERROR_NO_URI, sNoUpdateUri);
-		return false;
-	}
+	if (!Info || !Info->Uri)
+		return d->SetError(L_ERROR_NO_URI, sNoUpdateUri);
 
-	LUri Uri(Info.Uri);
+	LUri Uri(Info->Uri);
 	if (!Uri.sPath)
-	{
-		d->SetError(L_ERROR_URI_ERROR, "No path in URI.");
-		return false;
-	}
+		return d->SetError(L_ERROR_URI_ERROR, "No path in URI.");
 
 	char *File = strrchr(Uri.sPath, '/');
 	if (!File) File = Uri.sPath;
@@ -380,7 +390,7 @@ bool LSoftwareUpdate::ApplyUpdate(const UpdateInfo &Info, bool DownloadOnly, LVi
 	int HttpStatus = 0;
 	int64 Size = 0;
 	LUri Proxy(d->Proxy);
-	LSoftwareUpdatePriv::UpdateDownload Thread(&Info, &Uri, &Proxy, &Local, &d->Error, &HttpStatus);
+	LSoftwareUpdatePriv::UpdateDownload Thread(Info, &Uri, &Proxy, &Local, &d->Error, &HttpStatus);
 	while (!Thread.IsExited())
 	{
 		LYield();
