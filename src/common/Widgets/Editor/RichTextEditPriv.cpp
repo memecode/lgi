@@ -1675,9 +1675,9 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 			{
 				// Edit the existing link...
 				auto i = new LInput(View, a->Param, "Edit link:", "Link");
-				i->DoModal([this, i, a](auto dlg, auto ctrlId)
+				i->DoModal([this, i, a](auto dlg, auto ok)
 				{
-					if (ctrlId == IDOK)
+					if (ok)
 						a->Param = i->GetStr();
 					delete dlg;
 				});
@@ -1686,9 +1686,9 @@ bool LRichTextPriv::ClickBtn(LMouse &m, LRichTextEdit::RectType t)
 			{
 				// Turn current selection into link
 				auto i = new LInput(View, NULL, "Edit link:", "Link");
-				i->DoModal([this, i, tb](auto dlg, auto ctrlId)
+				i->DoModal([this, i, tb](auto dlg, auto ok)
 				{
-					if (ctrlId == IDOK)
+					if (ok)
 					{
 						BlockCursor *Start = CursorFirst() ? Cursor : Selection;
 						BlockCursor *End = CursorFirst() ? Selection : Cursor;

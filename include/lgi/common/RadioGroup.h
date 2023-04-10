@@ -69,6 +69,11 @@ public:
 
 	const char *GetClass() override { return "LRadioButton"; }
 
+	// If the heirarchy of ctrls doesn't allow the radio buttons to find each other automatically,
+	// this will set the group up so that the only one is "on" at any given time.
+	// \return true if the group is setup correctly (Ie all ctrl IDs are present)
+	bool SetGroup(LArray<int> CtrlIds);
+
 	// Impl
 	const char *Name() override { return LView::Name(); }
 	const char16 *NameW() override { return LView::NameW(); }
@@ -85,15 +90,15 @@ public:
 	bool OnKey(LKey &k) override;
 	
 	#if WINNATIVE && !XP_BUTTON
-	int SysOnNotify(int Msg, int Code);
-	LMessage::Result OnEvent(LMessage *m) override;
+		int SysOnNotify(int Msg, int Code);
+		LMessage::Result OnEvent(LMessage *m) override;
 	#else
-	void OnMouseClick(LMouse &m) override;
-	void OnMouseEnter(LMouse &m) override;
-	void OnMouseExit(LMouse &m) override;
-	void OnFocus(bool f) override;
-	void OnPaint(LSurface *pDC) override;
-	void SetFont(LFont *Fnt, bool OwnIt = false) override;
+		void OnMouseClick(LMouse &m) override;
+		void OnMouseEnter(LMouse &m) override;
+		void OnMouseExit(LMouse &m) override;
+		void OnFocus(bool f) override;
+		void OnPaint(LSurface *pDC) override;
+		void SetFont(LFont *Fnt, bool OwnIt = false) override;
 	#endif
 };
 

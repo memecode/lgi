@@ -620,10 +620,6 @@
     <ClInclude Include="..\src\common\Hash\sha1\sha1.h" />
     <ClInclude Include="..\src\win\INet\MibAccess.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\include\lgi\common\Message.h.orig" />
-    <None Include="..\include\lgi\common\OptionsFile.h.orig" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -287,18 +287,10 @@ bool LRadioGroup::OnLayout(LViewLayoutInfo &Inf)
 class LRadioButtonPrivate
 {
 public:
-	DWORD ParentProc;
-	int64 InitVal;
-
-	LRadioButtonPrivate()
-	{
-		ParentProc = 0;
-		InitVal = 0;
-	}
-
-	~LRadioButtonPrivate()
-	{
-	}
+	DWORD ParentProc = 0;
+	int64 InitVal = 0;
+	LArray<int> GroupIDs;
+	bool InValue = false;
 };
 
 LRadioButton::LRadioButton(int id, int x, int y, int cx, int cy, const char *name)
@@ -330,6 +322,29 @@ LRadioButton::LRadioButton(int id, int x, int y, int cx, int cy, const char *nam
 LRadioButton::~LRadioButton()
 {
 	DeleteObj(d);
+}
+
+bool LRadioButton::SetGroup(LArray<int> CtrlIds)
+{
+	auto w = GetWindow();
+	if (!w)
+		return false;
+
+	// This ctrl should be in the ID list.
+	auto id = GetId();
+	if (!CtrlIds.HasItem(id))
+		CtrlIds.Add(id);
+
+	for (auto i: CtrlIds)
+	{
+		LRadioButton *button;
+		if (!w->GetViewById(i, button))
+			return false;
+
+		button->d->GroupIDs = CtrlIds;
+	}
+
+	return true;
 }
 
 void LRadioButton::OnAttach()
@@ -393,23 +408,43 @@ int64 LRadioButton::Value()
 
 void LRadioButton::Value(int64 i)
 {
-	static bool InValue = false;
-	if (!InValue)
+	if (!d->InValue)
 	{
-		InValue = true;
+		d->InValue = true;
 		if (Handle())
 		{
 			if (i)
 			{
 				// Turn off any other radio buttons in the current group
-				for (LViewI *c: GetParent()->IterateViews())
+				if (d->GroupIDs.Length())
 				{
-					LRadioButton *b = dynamic_cast<LRadioButton*>(c);
-					if (b &&
-						b != this &&
-						b-Value())
+					if (auto w = GetWindow())
 					{
-						b->Value(false);
+						for (auto id: d->GroupIDs)
+						{
+							if (id == GetId())
+								continue;
+
+							LRadioButton *button;
+							if (w->GetViewById(id, button))
+							{
+								if (button->Value())
+									button->Value(false);
+							}
+						}
+					}
+				}
+				else
+				{
+					for (LViewI *c: GetParent()->IterateViews())
+					{
+						LRadioButton *b = dynamic_cast<LRadioButton*>(c);
+						if (b &&
+							b != this &&
+							b-Value())
+						{
+							b->Value(false);
+						}
 					}
 				}
 			}
@@ -427,7 +462,8 @@ void LRadioButton::Value(int64 i)
 		{
 			d->InitVal = i;
 		}
-		InValue = false;
+
+		d->InValue = false;
 	}
 }
 

@@ -26,6 +26,7 @@ public:
 	int Val;
 	int MaxLayoutWidth;
 	LHashTbl<PtrKey<LViewI*>,LViewLayoutInfo*> Info;
+	LArray<int> GroupIDs;
 
 	LRadioGroupPrivate(LRadioGroup *g) :
 		LMutex("LRadioGroupPrivate"),
@@ -461,6 +462,29 @@ LRadioButton::~LRadioButton()
 	DeleteObj(d);
 }
 
+bool LRadioButton::SetGroup(LArray<int> CtrlIds)
+{
+	auto w = GetWindow();
+	if (!w)
+		return false;
+
+	// This ctrl should be in the ID list.
+	auto id = GetId();
+	if (!CtrlIds.HasItem(id))
+		CtrlIds.Add(id);
+
+	for (auto i: CtrlIds)
+	{
+		LRadioButton *button;
+		if (!w->GetViewById(i, button))
+			return false;
+
+		button->d->GroupIDs = CtrlIds;
+	}
+
+	return true;
+}
+
 void LRadioButton::OnAttach()
 {
 	LResources::StyleElement(this);
@@ -574,16 +598,38 @@ void LRadioButton::Value(int64 i)
 	{
 		if (i)
 		{
-			// remove the value from the currenly selected radio value
-			if (auto p = GetParent())
+			// remove the value from the currently selected radio value
+			if (d->GroupIDs.Length())
 			{
-				for (auto c: p->IterateViews())
+				if (auto w = GetWindow())
 				{
-					LRadioButton *b = dynamic_cast<LRadioButton*>(c);
-					if (b && b != this && b->d->Val)
+					for (auto id: d->GroupIDs)
 					{
-						b->d->Val = false;
-						b->Invalidate();
+						if (id == GetId())
+							continue;
+
+						LRadioButton *button;
+						if (w->GetViewById(id, button))
+						{
+							if (button->Value())
+								button->Value(false);
+						}
+					}
+				}
+			}
+			else
+			{
+				// Use the automatic mode... iterate through sibling views.
+				if (auto p = GetParent())
+				{
+					for (auto c: p->IterateViews())
+					{
+						LRadioButton *b = dynamic_cast<LRadioButton*>(c);
+						if (b && b != this && b->d->Val)
+						{
+							b->d->Val = false;
+							b->Invalidate();
+						}
 					}
 				}
 			}
