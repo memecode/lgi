@@ -3688,7 +3688,8 @@ void LTextView4::DoContextMenu(LMouse &m)
 			LInput *i = new LInput(this, s, "Tab Size:", "Text");
 			i->DoModal([this, i](auto dlg, auto code)
 			{
-				SetTabSize(atoi(i->GetStr()));
+				if (code)
+					SetTabSize((uint8_t)Atoi(i->GetStr().Get()));
 				delete i;
 			});
 			break;

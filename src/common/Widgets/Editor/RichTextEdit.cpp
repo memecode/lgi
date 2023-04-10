@@ -526,7 +526,7 @@ int LRichTextEdit::GetLine()
 	return Count;
 }
 
-void LRichTextEdit::SetLine(int i)
+void LRichTextEdit::SetLine(int Line)
 {
 	int Count = 0;
 	
@@ -535,9 +535,9 @@ void LRichTextEdit::SetLine(int i)
 	{
 		LRichTextPriv::Block *b = d->Blocks[i];
 		int Lines = b->GetLines();
-		if (i >= Count && i < Count + Lines)
+		if (Line >= Count && Line < Count + Lines)
 		{
-			auto BlockLine = i - Count;
+			auto BlockLine = Line - Count;
 			auto Offset = b->LineToOffset(BlockLine);
 			if (Offset >= 0)
 			{
@@ -967,12 +967,11 @@ void LRichTextEdit::DoCase(std::function<void(bool)> Callback, bool Upper)
 void LRichTextEdit::DoGoto(std::function<void(bool)> Callback)
 {
 	auto input = new LInput(this, "", LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto line:"), "Text");
-	input->DoModal([this, input, Callback](auto dlg, auto ctrlId)
+	input->DoModal([this, input, Callback](auto dlg, auto ok)
 	{
-		if (ctrlId == IDOK)
+		if (ok)
 		{
-			LString s = input->GetStr();
-			int64 i = s.Int();
+			auto i = input->GetStr().Int();
 			if (i >= 0)
 			{
 				SetLine((int)i);
@@ -1441,13 +1440,10 @@ void LRichTextEdit::DoContextMenu(LMouse &m)
 			char s[32];
 			sprintf_s(s, sizeof(s), "%i", TabSize);
 			auto i = new LInput(this, s, "Tab Size:", "Text");
-			i->DoModal([this, i](auto dlg, auto ctrlId)
+			i->DoModal([this, i](auto dlg, auto ok)
 			{
-				if (ctrlId == IDOK)
-				{
+				if (ok)
 					SetTabSize((uint8_t)i->GetStr().Int());
-					Invalidate();
-				}
 				delete dlg;
 			});
 			break;

@@ -1017,6 +1017,17 @@ void LRichTextPriv::TextBlock::OnPaint(PaintContext &Ctx)
 		d->View->Focus())
 	{
 		Ctx.pDC->Colour(CursorColour);
+		
+		if (!Ctx.Cursor->Pos.Valid())
+		{
+			// Try and recover a valid position for the cursor...
+			if (!GetPosFromIndex(Ctx.Cursor))
+			{
+				Ctx.Cursor->LineHint = -1;
+				GetPosFromIndex(Ctx.Cursor);
+			}
+		}
+
 		if (Ctx.Cursor->Pos.Valid())
 			Ctx.pDC->Rectangle(&Ctx.Cursor->Pos);
 		else
@@ -1389,7 +1400,7 @@ ssize_t LRichTextPriv::TextBlock::LineToOffset(ssize_t Line)
 		auto Len = tl->Length();
 		if (i == Line)
 			return Pos;
-		Pos = Len;
+		Pos += Len;
 	}
 
 	return (int)Length();
