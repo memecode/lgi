@@ -15,7 +15,7 @@
 #define GXT_PRETTY_WHITESPACE				0x0004
 /// Runtime option: Keep input whitespace
 #define GXT_KEEP_WHITESPACE					0x0008
-/// Runtime option: Don't create DOM heirarchy, just a list of tags
+/// Runtime option: Don't create DOM hierarchy, just a list of tags
 #define GXT_NO_DOM							0x0010
 /// Don't print <?xml ... ?> header
 #define GXT_NO_HEADER						0x0020
@@ -174,6 +174,7 @@ public:
 
 	/// Copy operator, doesn't effect children.
 	LXmlTag &operator =(LXmlTag &t);
+	
 	/// Copy method, deep option copies all child elements as well.
 	bool Copy(LXmlTag &t, bool Deep = false);
 	
@@ -199,7 +200,16 @@ class LgiClass LXmlTree
 	LXmlTreePrivate *d;
 
 protected:
-	LXmlTag *Parse(LXmlTag *Tag, LXmlAlloc *Alloc, char *&t, bool &NoChildren, bool InTypeDef);
+	LAutoPtr<LXmlTag> Parse(
+		/// The allocator to assign to the new tag.
+		LXmlAlloc *Alloc,
+		/// The current pointer into the document. Will be advanced to the next element after the call.
+		char *&t,
+		/// Returns if true if there was no child elements.
+		bool &NoChildren,
+		/// Inside a type definition? I don't remember
+		bool InTypeDef);
+
 	virtual void OnParseComment(LXmlTag *Ref, const char *Comment, ssize_t Bytes) {}
 
 	bool Output(LXmlTag *t, int Depth);
@@ -224,6 +234,7 @@ public:
 		/// vanilla LXmlTag objects will be created.
 		LXmlFactory *Factory = 0
 	);
+
 	/// Write an XML file from a DOM tree of LXmlTag objects into a stream.
 	bool Write
 	(
@@ -234,23 +245,30 @@ public:
 		/// [Optional] Progress reporting.
 		Progress *Prog = NULL
 	);
+	
 	/// Gets the last error message.
-	char *GetErrorMsg();
+	const char *GetErrorMsg();
+	
 	/// A hash of tags that can't have children.
 	LHashTbl<ConstStrKey<char,false>,bool> *NoChildTags();
+	
 	/// Gets the associated style file
-	char *GetStyleFile(char **StyleType = 0);
+	const char *GetStyleFile(const char **StyleType = NULL);
+	
 	/// Sets the associated css file
-	void SetStyleFile(char *stylefile, const char *styletype = "text/css");
+	void SetStyleFile(const char *stylefile, const char *styletype = "text/css");
 
 	/// Add entities
 	LHashTbl<ConstStrKey<char,false>,char16> *GetEntityTable();
+	
 	/// Decode a string with entities
 	char *DecodeEntities(LXmlAlloc *Alloc, char *s, ssize_t len = -1);
+	
 	/// Encode a string to use entities
-	char *EncodeEntities(const char *s, ssize_t len = -1, const char *extra_characters = 0);
+	char *EncodeEntities(const char *s, ssize_t len = -1, const char *extra_characters = NULL);
+	
 	/// Encode a string to use entities
-	bool EncodeEntities(LStreamI *out, const char *s, ssize_t len, const char *extra_characters = 0);
+	bool EncodeEntities(LStreamI *out, const char *s, ssize_t len, const char *extra_characters = NULL);
 };
 
 #endif

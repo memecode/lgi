@@ -8060,7 +8060,6 @@ void LHtml::DoFind(std::function<void(bool)> Callback)
 		[this](auto dlg, auto action)
 		{
 			OnFind(dlg);
-			delete dlg;
 		});
 	
 	Dlg->DoModal(NULL);

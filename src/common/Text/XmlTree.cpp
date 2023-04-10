@@ -127,18 +127,18 @@ public:
 class LXmlTreePrivate
 {
 public:
-	LXmlFactory *Factory;
-	LXmlTag *Current;
-	LStreamI *File;
+	LXmlFactory *Factory = NULL;
+	LXmlTag *Current = NULL;
+	LStreamI *File = NULL;
 	LString Error;
-	int Flags;
+	int Flags = 0;
 	LHashTbl<ConstStrKey<char,false>,char16> Entities;
 	LHashTbl<ConstStrKey<char,false>,bool> NoChildTags;
 	LArray<char> Buf;
-	Progress *Prog;
+	Progress *Prog = NULL;
 	
-	char *StyleFile;
-	char *StyleType;
+	LString StyleFile;
+	LString StyleType;
 
 	bool NoDom()
 	{
@@ -147,25 +147,11 @@ public:
 
 	LXmlTreePrivate()
 	{
-		Factory = 0;
-		File = 0;
-		Flags = 0;
-		StyleFile = 0;
-		StyleType = 0;
-		Current = NULL;
-		Prog = NULL;
-
 		Entities.Add("lt", '<');
 		Entities.Add("gt", '>');
 		Entities.Add("amp", '&');
 		Entities.Add("quot", '\"');
 		Entities.Add("apos", '\'');
-	}
-	
-	~LXmlTreePrivate()
-	{
-		DeleteArray(StyleType);
-		DeleteArray(StyleFile);
 	}
 };
 
@@ -1031,12 +1017,11 @@ void LXmlTag::ParseAttribute(LXmlTree *Tree, LXmlAlloc *Alloc, char *&t, bool &N
 				while (*t && *t != ']')
 				{
 					bool NoChildren = false;
-					LXmlTag *c = Tree->Parse(0, Alloc, t, NoChildren, true);
+					auto c = Tree->Parse(Alloc, t, NoChildren, true);
 					if (c)
-					{
-						InsertTag(c);
-					}
-					else break;							
+						InsertTag(c.Release());
+					else
+						break;
 				}
 
 				if (*t == ']')
@@ -1137,11 +1122,12 @@ void LXmlTag::ParseAttribute(LXmlTree *Tree, LXmlAlloc *Alloc, char *&t, bool &N
 	}
 }
 
-LXmlTag *LXmlTree::Parse(LXmlTag *Tag, LXmlAlloc *Alloc, char *&t, bool &NoChildren, bool InTypeDef)
+LAutoPtr<LXmlTag> LXmlTree::Parse(LXmlAlloc *Alloc, char *&t, bool &NoChildren, bool InTypeDef)
 {
 	bool KeepWs = TestFlag(d->Flags, GXT_KEEP_WHITESPACE);
 	char *Start = t;
 	LStringPipe Before;
+	LAutoPtr<LXmlTag> Tag;
 		
 	// Skip white
 ParsingStart:
@@ -1201,7 +1187,7 @@ ParsingStart:
 
 		if (Before.GetSize() > 0)
 		{
-			LXmlTag *PreContent = d->Factory ? d->Factory->Create(0) : new LXmlTag;
+			LAutoPtr<LXmlTag> PreContent(d->Factory ? d->Factory->Create(NULL) : new LXmlTag);
 			if (PreContent)
 			{
 				PreContent->Allocator = Alloc;
@@ -1295,17 +1281,9 @@ ParsingStart:
 			else
 			{
 				// Create the tag object
-				char Old = *t;
-				*t = 0;
-				if (!Tag)
-				{
-					Tag = d->Factory ? d->Factory->Create(TagName) : new LXmlTag;
-					if (!Tag)
-						return 0;
-						
+				LString Name(TagName, t - TagName);
+				if (Tag.Reset(d->Factory ? d->Factory->Create(Name) : new LXmlTag))
 					Tag->Allocator = Alloc;
-				}
-				*t = Old;
 				
 				// Parse attributes into tag
 				if (Tag)
@@ -1392,132 +1370,117 @@ bool LXmlTree::Read(LXmlTag *Root, LStreamI *File, LXmlFactory *Factory)
 		return false;
 	}
 
-	char *Str = new char[Len+1];
-	if (!Str)
-	{
-		d->Error = "Alloc error.";
-		return false;
-	}
-
-	ssize_t r = File->Read(Str, Len);
-	if (r <= 0)
-	{
-		d->Error.Printf("Failed to read from input stream: %zd\n", r);
-		return false;
-	}
-	Str[r] = 0;
-					
+	LString Str = File->Read();					
 	char *Ptr = Str;
 	d->Factory = Factory;
 	d->Current = Root;
 					
 	bool First = true;
+	bool NoDom = TestFlag(d->Flags, GXT_NO_DOM);
 	while (d->Current && Ptr && *Ptr)
 	{
 		bool NoChildren = true;
 		
-		LAutoPtr<LXmlTag> t
-		(
-		    Parse(  First && !TestFlag(d->Flags, GXT_NO_DOM) ? Root : 0,
-					Allocator,
-					Ptr,
-					NoChildren,
-					false)
-		);
-					
-		First = false;
-		if (t)
-		{
-			if (t->Tag &&
-				t->Tag[0] == '!' &&
-				strcmp(t->Tag, "!DOCTYPE") == 0)
-			{
-				for (auto c: t->Children)
-				{
-					if (c->Tag &&
-						strcmp(c->Tag, "!ENTITY") == 0)
-					{
-						if (c->Attr.Length() == 2)
-						{
-							LXmlAttr &Ent = c->Attr[0];
-							LXmlAttr &Value = c->Attr[1];
-							if (Ent.Name &&
-								Value.Name &&
-								!d->Entities.Find(Ent.Name))
-							{
-								LVariant v(Value.Name);
-								char16 *w = v.WStr();
-								if (w)
-									d->Entities.Add(Ent.Name, *w);
+		auto t = Parse(	Allocator,
+						Ptr,
+						NoChildren,
+						false);
+		if (!t)
+			break;
 
-							}
-						}
-					}
+		// Doc type handling...
+		if (t->Tag && t->Tag[0] == '!' && strcmp(t->Tag, "!DOCTYPE") == 0)
+		{
+			for (auto c: t->Children)
+			{
+				if (Strcmp(c->Tag, "!ENTITY") || c->Attr.Length() != 2)
+					continue;
+
+				auto &Ent   = c->Attr[0];
+				auto &Value = c->Attr[1];
+				if (Ent.Name &&
+					Value.Name &&
+					!d->Entities.Find(Ent.Name))
+				{
+					LVariant v(Value.Name);
+					auto w = v.WStr();
+					if (w)
+						d->Entities.Add(Ent.Name, *w);
+
 				}
 			}
+		}
 
-			if (t->Tag && t->Tag[0] == '/' && d->Current->Tag)
+		if (t->Tag && t->Tag[0] == '/' &&
+			d->Current && d->Current->Tag)
+		{
+			// End tag
+			if (!Stricmp(t->Tag + 1, d->Current->Tag))
 			{
-				// End tag
-				if (stricmp(t->Tag + 1, d->Current->Tag) == 0)
-				{
-					d->Current = d->Current->Parent;
-				}
-				else
-				{
-					int Lines = 1;
-					for (char *k = Ptr; k >= Str; k--)
-					{
-						if (*k == '\n') Lines++;
-					}
-
-					d->Error.Printf("Mismatched '%s' tag, got '%s' instead (Line %i).\n", t->Tag, d->Current->Tag, Lines);
-
-					#ifdef _DEBUG
-					LXmlTree Dbg;
-					LFile Out;
-					if (Out.Open("c:\\temp\\out.xml", O_WRITE))
-					{
-						Dbg.Write(Root, &Out);
-					}
-					#endif
-					break;
-				}
-
-				t.Reset();
+				d->Current = d->Current->Parent;
 			}
 			else
 			{
-				t->Serialize(t->Write = false);
+				int Lines = 1;
+				for (char *k = Ptr; k >= Str; k--)
+				{
+					if (*k == '\n') Lines++;
+				}
 
-			    LXmlTag *NewTag = t;
-			    if (t != Root)
-				    d->Current->InsertTag(t.Release());
-			    else
-			        t.Release();
+				d->Error.Printf("Mismatched '%s' tag, got '%s' instead (Line %i).\n", t->Tag, d->Current->Tag, Lines);
 
-				if (!TestFlag(d->Flags, GXT_NO_DOM) &&
+				#ifdef _DEBUG
+				LXmlTree Dbg;
+				LFile Out;
+				if (Out.Open("c:\\temp\\out.xml", O_WRITE))
+				{
+					Dbg.Write(Root, &Out);
+				}
+				#endif
+				break;
+			}
+		}
+		else
+		{
+			t->Serialize(t->Write = false);
+
+			if (First && !NoDom)
+			{
+				Root->Swap(*t);
+			}
+			else if (d->Current)
+			{
+				auto NewTag = t.Release();
+				d->Current->InsertTag(NewTag);
+				
+				if (!NoDom &&
 					!NoChildren &&
 					!d->NoChildTags.Find(NewTag->Tag))
 				{
 					d->Current = NewTag;
 				}
 			}
+			else
+			{
+				LAssert(!"Invalid state");
+			}
 		}
-		else
-		{
-		    break;
-		}
+
+		First = false;
 	}
 	
-	d->Factory = 0;
-	DeleteArray(Str);
+	d->Factory = NULL;
 	
 	return true;
 }
 
 bool LXmlTree::Output(LXmlTag *t, int Depth)
 {
+	if (!t)
+		return false;
+
+	LString endTag;
+
 	#define OutputWrite(buf, size) \
 		if (d->File->Write(buf, size) != size) \
 			goto WriteError;
@@ -1525,73 +1488,82 @@ bool LXmlTree::Output(LXmlTag *t, int Depth)
 	#define Tabs if (!TestFlag(d->Flags, GXT_NO_PRETTY_WHITESPACE)) \
 		{ for (int i=0; i<Depth; i++) OutputWrite((void*)"\t", 1); }
 
-	bool HasContent = false;
-	bool ValidTag = false;
 	if (d->Prog)
-		d->Prog->Value(d->Prog->Value()+1);
+		*d->Prog++;
 	t->Serialize(t->Write = true);
 	Tabs
 
+	bool HasContent = ValidStr(t->Content);
+	bool HasChildren = t->Children.Length() > 0;
+	bool ValidTag = ValidStr(t->Tag) && !IsDigit(t->Tag[0]);
+
 	// Test to see if the tag is valid
-	ValidTag = ValidStr(t->Tag) && !IsDigit(t->Tag[0]);
 	if (ValidTag)
 	{
 		if (LStreamPrint(d->File, "<%s", t->Tag) <= 0)
 			goto StreamPrintError;
-	}
-	else
-	{
-		LAssert(!"Invalid tag.");
-		d->Error = "Invalid or missing tag.";
-		return false;
-	}
 
-	for (int i=0; i<t->Attr.Length(); i++)
-	{
-		LXmlAttr &a = t->Attr[i];
-
-		// Write the attribute name
-		if (LStreamPrint(d->File, " %s=\"", a.Name) <= 0)
-			goto StreamPrintError;
-		
-		// Encode the value
-		if (a.Value &&
-			!EncodeEntities(d->File, a.Value, -1, EncodeEntitiesAttr))
-			goto EncoderEntitiesError;
-
-		// Write the delimiter
-		OutputWrite("\"", 1);
-
-		if (i < t->Attr.Length() - 1 &&
-			TestFlag(d->Flags, GXT_PRETTY_WHITESPACE))
+		for (int i = 0; i < t->Attr.Length(); i++)
 		{
-			OutputWrite("\n", 1);
-			for (int n=0; n<=Depth; n++)
-				OutputWrite("\t", 1);
-		}
-	}
-	
-	// Write the child tags
-	HasContent = ValidStr(t->Content);
-	if (t->Children.Length() || HasContent)
-	{
-		auto It = t->Children.begin();
-		LXmlTag *c = t->Children.Length() ? *It : NULL;
-		if (ValidTag)
-			OutputWrite(">", 1);
-		
-		if (HasContent)
-		{
-			if (!EncodeEntities(d->File, t->Content, -1, EncodeEntitiesContent))
+			LXmlAttr& a = t->Attr[i];
+
+			// Write the attribute name
+			if(LStreamPrint(d->File, " %s=\"", a.Name) <= 0)
+				goto StreamPrintError;
+
+			// Encode the value
+			if(a.Value &&
+				!EncodeEntities(d->File, a.Value, -1, EncodeEntitiesAttr))
 				goto EncoderEntitiesError;
-			
-			if (c)
+
+			// Write the delimiter
+			OutputWrite("\"", 1);
+
+			if (i < t->Attr.Length() - 1 &&
+				TestFlag(d->Flags, GXT_PRETTY_WHITESPACE))
 			{
-				OutputWrite((char*)"\n", 1);
-				Tabs
+				OutputWrite("\n", 1);
+				for (int n = 0; n <= Depth; n++)
+					OutputWrite("\t", 1);
 			}
 		}
 
+		if (HasContent || HasChildren)
+		{
+			OutputWrite(">", 1);
+			endTag.Printf("</%s>\n", t->Tag);
+		}
+		else if (d->NoDom())
+			endTag = ">\n";
+		else
+			endTag = " />\n";
+	}
+	else
+	{
+		// we skip over the tag and content and process the children.
+
+		// It's an error to have attributes and no tag.
+		LAssert(t->Attr.Length() == 0);
+	}
+
+	if (HasContent)
+	{
+		if (!EncodeEntities(d->File, t->Content, -1, EncodeEntitiesContent))
+			goto EncoderEntitiesError;
+
+		if (HasChildren)
+		{
+			OutputWrite((char*)"\n", 1);
+			Tabs
+		}
+	}
+
+	// Write the child tags
+	if (HasChildren)
+	{
+		auto It = t->Children.begin();
+		LXmlTag *c = t->Children.Length() ? *It : NULL;
+		
 		if (c)
 		{
 			if (!HasContent)
@@ -1608,24 +1580,10 @@ bool LXmlTree::Output(LXmlTag *t, int Depth)
 
 			Tabs
 		}
+	}
 	
-		if (!d->NoDom())
-		{
-			if (LStreamPrint(d->File, "</%s>\n", t->Tag) <= 0)
-				goto StreamPrintError;
-		}
-	}
-	else if (ValidTag)
-	{
-		if (d->NoDom())
-		{
-			OutputWrite(">\n", 2);
-		}
-		else
-		{
-			OutputWrite(" />\n", 4);
-		}
-	}
+	if (endTag)
+		OutputWrite(endTag.Get(), endTag.Length());
 	
 	#undef Tabs
 
@@ -1662,7 +1620,7 @@ bool LXmlTree::Write(LXmlTag *Root, LStreamI *File, Progress *Prog)
 	if (!TestFlag(d->Flags, GXT_NO_HEADER))
 		File->Write(LXmlHeader, strlen(LXmlHeader));
 	if (d->StyleFile && d->StyleType)
-		LStreamPrint(d->File, "<?xml-stylesheet href=\"%s\" type=\"%s\"?>\n", d->StyleFile, d->StyleType);
+		LStreamPrint(d->File, "<?xml-stylesheet href=\"%s\" type=\"%s\"?>\n", d->StyleFile.Get(), d->StyleType.Get());
 
 	auto Status = Output(Root, 0);
 
@@ -1672,7 +1630,7 @@ bool LXmlTree::Write(LXmlTag *Root, LStreamI *File, Progress *Prog)
 	return Status;
 }
 
-char *LXmlTree::GetErrorMsg()
+const char *LXmlTree::GetErrorMsg()
 {
 	return d->Error;
 }
@@ -1687,19 +1645,16 @@ LHashTbl<ConstStrKey<char,false>,char16> *LXmlTree::GetEntityTable()
 	return &d->Entities;
 }
 
-char *LXmlTree::GetStyleFile(char **StyleType)
+const char *LXmlTree::GetStyleFile(const char **StyleType)
 {
 	if (StyleType)
 		*StyleType = d->StyleType;
 	return d->StyleFile;
 }
 
-void LXmlTree::SetStyleFile(char *file, const char *type)
+void LXmlTree::SetStyleFile(const char *file, const char *type)
 {
-	DeleteArray(d->StyleFile);
-	DeleteArray(d->StyleType);
-
-	d->StyleFile = NewStr(file);
-	d->StyleType = NewStr(type);
+	d->StyleFile = file;
+	d->StyleType = type;
 }
 
