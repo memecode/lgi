@@ -338,7 +338,8 @@ void LMru::OnCommand(int Cmd, std::function<void(bool)> OnStatus)
 		{
 			_OpenFile(c->Raw, false, [OnStatus](auto ok)
 			{
-				OnStatus(ok);
+				if (OnStatus)
+					OnStatus(ok);
 			});
 		}
 	}

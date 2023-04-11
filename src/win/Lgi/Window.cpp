@@ -120,9 +120,7 @@ LWindow::LWindow() : LView(0)
 	
 	Visible(false);
 
-	_Default = 0;
 	_Lock = new LMutex("LWindow");
-	_QuitOnClose = false;
 }
 
 LWindow::~LWindow()

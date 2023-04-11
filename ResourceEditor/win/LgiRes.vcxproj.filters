@@ -61,13 +61,13 @@
       <Filter>Lgi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\common\Lgi\About.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\common\Lgi\DocApp.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Lgi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\common\Widgets\ControlTree.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Lgi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Lgi\DocApp.cpp">
+      <Filter>Lgi</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -94,9 +94,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\..\src\win\General\Lgi.manifest" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="..\Resources\Script1.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
@@ -110,5 +107,10 @@
     <None Include="Installer.nsi">
       <Filter>Scripts</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="..\..\src\win\General\Lgi.manifest">
+      <Filter>Lgi</Filter>
+    </Manifest>
   </ItemGroup>
 </Project>

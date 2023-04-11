@@ -945,15 +945,8 @@ const char *Icon = "icon64.png";
 AppWnd::AppWnd() :
 	LDocApp<LOptionsFile>(AppName, Icon)
 {
-	LastRes = 0;
-	Fields = 0;
-	ViewMenu = 0;
-	ContentView = NULL;
-	VBox = NULL;
-	HBox = NULL;
-	ShortCuts = 0;
-	CurLang = -1;
 	ShowLanguages.Add("en", true);
+	SetQuitOnClose(true);
 
 	if (_Create())
 	{
@@ -1197,8 +1190,6 @@ public:
 
 LMessage::Result AppWnd::OnEvent(LMessage *m)
 {
-	LMru::OnEvent(m);
-
 	switch (m->Msg())
 	{
 		case M_CHANGE:
@@ -1216,7 +1207,8 @@ LMessage::Result AppWnd::OnEvent(LMessage *m)
 			break;
 		}
 	}
-	return LWindow::OnEvent(m);
+
+	return LDocApp<LOptionsFile>::OnEvent(m);
 }
 
 void _CountGroup(ResStringGroup *Grp, int &Words, int &Multi)

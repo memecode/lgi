@@ -654,7 +654,7 @@ bool LDocApp<OptionsFmt>::OnRequestClose(bool OsShuttingDown)
 		return false;
 	}
 
-	return true;
+	return LWindow::OnRequestClose(OsShuttingDown);
 }
 
 template <typename OptionsFmt>

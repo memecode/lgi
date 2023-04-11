@@ -8,40 +8,34 @@ class LAppPrivate
 {
 public:
 	// Common
-	LApp *Owner;
+	LApp *Owner = NULL;
 	LAutoPtr<LJson> Config;
-	LFileSystem *FileSystem;
-	GdcDevice *GdcSystem;
+	LFileSystem *FileSystem = NULL;
+	GdcDevice *GdcSystem = NULL;
 	OsAppArguments Args;
-	LLibrary *SkinLib;
-	OsThread GuiThread;
-	int LinuxWine;
+	LLibrary *SkinLib = NULL;
+	OsThread GuiThread = NULL;
+	int LinuxWine = -1;
 	LAutoString Mime, ProductId;
-	bool ThemeAware;
+	bool ThemeAware = true;
 
 	/// Any fonts needed for styling the elements
 	LAutoPtr<LFontCache> FontCache;
 
 	// Win32
-	bool QuitReceived;
+	bool QuitReceived = false;
 	LApp::ClassContainer Classes;
-	LSymLookup *SymLookup;
+	LSymLookup *SymLookup = NULL;
 
 	LAppPrivate(LApp *owner) : Owner(owner)
 	{
-		LinuxWine = -1;
-		SymLookup = 0;
-		QuitReceived = false;
-		SkinLib = 0;
-		GuiThread = NULL;
-		auto b = DuplicateHandle(GetCurrentProcess(),
+		auto b = DuplicateHandle(	GetCurrentProcess(),
 									GetCurrentThread(),
 									GetCurrentProcess(),
 									&GuiThread,
 									0,
 									false,
 									DUPLICATE_SAME_ACCESS);
-		ThemeAware = true;
 	}
 
 	~LAppPrivate()

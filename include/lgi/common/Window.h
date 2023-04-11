@@ -42,7 +42,7 @@ class LgiClass LWindow :
 	friend class LWindowPrivate;
 	friend struct LDialogPriv;
 
-	bool _QuitOnClose;
+	bool _QuitOnClose = false;
 
 protected:
 	class LWindowPrivate *d;

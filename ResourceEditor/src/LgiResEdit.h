@@ -268,13 +268,13 @@ class ObjContainer : public LTree
 {
 	friend class AppWnd;
 
-	ObjTreeItem *Style;
-	ObjTreeItem *Dialogs;
-	ObjTreeItem *Strings;
-	ObjTreeItem *Menus;
+	ObjTreeItem *Style = NULL;
+	ObjTreeItem *Dialogs = NULL;
+	ObjTreeItem *Strings = NULL;
+	ObjTreeItem *Menus = NULL;
 
-	LImageList *Images;
-	AppWnd *Window;
+	LImageList *Images = NULL;
+	AppWnd *Window = NULL;
 
 	bool AppendChildren(ObjTreeItem *Item, List<Resource> &Lst);
 
@@ -694,26 +694,26 @@ class AppWnd : public LDocApp<LOptionsFile>
 {
 protected:
 	// UI
-	LBox			*HBox;
-	LBox			*VBox;
-	LView			*ContentView;
+	LBox			*HBox = NULL;
+	LBox			*VBox = NULL;
+	LView			*ContentView = NULL;
 
-	LSubMenu		*Edit;
-	LSubMenu		*Help;
-	LSubMenu		*ViewMenu;
+	LSubMenu		*Edit = NULL;
+	LSubMenu		*Help = NULL;
+	LSubMenu		*ViewMenu = NULL;
 
-	LStatusBar		*Status;
+	LStatusBar		*Status = NULL;
 	LStatusPane		*StatusInfo[STATUS_MAX];
 
-	ShortCutView	*ShortCuts;
+	ShortCutView	*ShortCuts = NULL;
 
 	// App
-	ObjContainer	*Objs;
-	Resource		*LastRes;
-	FieldView		*Fields;
+	ObjContainer	*Objs = NULL;
+	Resource		*LastRes = NULL;
+	FieldView		*Fields = NULL;
 	
 	// Languages
-	int				CurLang;
+	int				CurLang = -1;
 	LArray<LLanguage*> Languages;
 	LHashTbl<ConstStrKey<char,false>, bool> ShowLanguages;
 
