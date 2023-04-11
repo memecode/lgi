@@ -885,9 +885,11 @@ ObjContainer::ObjContainer(AppWnd *w) :
 
 	const char *IconFile = "_icons.gif";
 	auto f = LFindFile(IconFile);
+	LAssert(f);
 	if (f)
 	{
 		Images = LLoadImageList(f, 16, 16);
+		LAssert(Images);
 		if (Images)
 			SetImageList(Images, false);
 		else
