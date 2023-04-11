@@ -18,7 +18,7 @@
 #define LGI_FILTER_PARENT_WND	"Parent"
 #define LGI_FILTER_FOREGROUND	"Fore"
 #define LGI_FILTER_BACKGROUND	"Back"
-#define LGI_FILTER_TRANSPARENT	"Transparent"
+#define LGI_FILTER_TRANSPARENT	"Transparent" // Non-zero if the background should be transparent
 #define LGI_FILTER_QUALITY		"Quality"
 #define LGI_FILTER_SUBSAMPLE	"SubSample"
 #define LGI_FILTER_INFO			"Info"

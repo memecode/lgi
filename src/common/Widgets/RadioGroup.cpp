@@ -26,7 +26,6 @@ public:
 	int Val;
 	int MaxLayoutWidth;
 	LHashTbl<PtrKey<LViewI*>,LViewLayoutInfo*> Info;
-	LArray<int> GroupIDs;
 
 	LRadioGroupPrivate(LRadioGroup *g) :
 		LMutex("LRadioGroupPrivate"),
@@ -371,6 +370,7 @@ public:
 	bool Over;
 	LRect Btn;
 	LColour BackCol;
+	LArray<int> GroupIDs;
 
 	LRadioButtonPrivate(LRadioButton *c) :
 		LMutex("LRadioButtonPrivate"),

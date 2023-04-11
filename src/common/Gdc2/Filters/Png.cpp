@@ -1165,17 +1165,9 @@ LFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 	{
 		if (Props->GetValue(LGI_FILTER_BACKGROUND, v))
 			Back = v.CastInt32();
-
 		Props->GetValue(LGI_FILTER_TRANSPARENT, Transparent);
 	}
-
-	if (Transparent.IsNull())
-	{
-		// LTransparentDlg needs to set this in the caller
-		LAssert(!"Move this to the parent app.");
-		return IoError;
-	}
-
+	
 	if (setjmp(Here) == 0 && pDC && Out)
 	{
 		LVariant ColProfile;

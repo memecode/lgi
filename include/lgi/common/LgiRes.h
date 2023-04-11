@@ -314,7 +314,7 @@ public:
 
 /// Loads a string from the resource file
 /// \ingroup Resources
-LgiFunc const char *LLoadString(int Res, const char *Default = 0);
+LgiFunc const char *LLoadString(int Res, const char *Default = NULL);
 
 
 #endif

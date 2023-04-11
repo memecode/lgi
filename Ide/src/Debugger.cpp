@@ -235,6 +235,8 @@ class Gdb : public LDebugger, public LThread, public Callback
 	
 	void OnBreakPoint(LString f)
 	{
+		Ungrab();
+		
 		if (!f.Get() || ProcessId < 0)
 		{
 			// printf("Error: Param error: %s, %i (%s:%i)\n", f.Get(), ProcessId, _FL);
@@ -354,12 +356,14 @@ class Gdb : public LDebugger, public LThread, public Callback
 		{
 			if (stristr(Start, "received signal SIGSEGV"))
 			{
+				Ungrab();
 				Events->OnCrash(0);
 			}
 			else if (*Start == '[')
 			{
 				if (stristr(Start, "Inferior") && stristr(Start, "exited"))
 				{
+					Ungrab();
 					OnExit();
 				}
 				else if (stristr(Start, "New Thread"))
@@ -405,6 +409,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 			else
 			{
 				// Untagged file/line?
+				Ungrab();
 				if (ParseLocation(Untagged))
 				{
 					Untagged.Length(0);
@@ -644,6 +649,16 @@ class Gdb : public LDebugger, public LThread, public Callback
 		}
 		
 		return true;
+	}
+	
+	void Ungrab()
+	{
+		#if defined(LINUX)
+		printf("%s:%i - XF86Ungrab...\n", _FL);
+		system("xdotool key XF86Ungrab");
+		#else
+		printf("%s:%i - Impl some ungrab functionality here.\n", _FL);
+		#endif
 	}
 	
 public:
