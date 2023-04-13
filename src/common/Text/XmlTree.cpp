@@ -1480,7 +1480,10 @@ bool LXmlTree::Output(LXmlTag *t, int Depth)
 		return false;
 
 	LString endTag;
-
+	bool HasContent = false;
+	bool HasChildren = false;
+	bool ValidTag = false;
+	
 	#define OutputWrite(buf, size) \
 		if (d->File->Write(buf, size) != size) \
 			goto WriteError;
@@ -1493,9 +1496,9 @@ bool LXmlTree::Output(LXmlTag *t, int Depth)
 	t->Serialize(t->Write = true);
 	Tabs
 
-	bool HasContent = ValidStr(t->Content);
-	bool HasChildren = t->Children.Length() > 0;
-	bool ValidTag = ValidStr(t->Tag) && !IsDigit(t->Tag[0]);
+	HasContent = ValidStr(t->Content);
+	HasChildren = t->Children.Length() > 0;
+	ValidTag = ValidStr(t->Tag) && !IsDigit(t->Tag[0]);
 
 	// Test to see if the tag is valid
 	if (ValidTag)

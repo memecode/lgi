@@ -94,7 +94,7 @@
 		</Build>
 		<General>
 			<Makefile>
-				<Linux>Makefile.linux</Linux>
+				<Linux>linux/Makefile.linux</Linux>
 				<Windows>.\HtmlTest.sln</Windows>
 			</Makefile>
 			<Executable>

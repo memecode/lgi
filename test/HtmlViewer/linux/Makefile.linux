@@ -8,7 +8,7 @@
 
 CC = gcc
 CPP = g++
-Target = ./htmleditor
+Target = ./HtmlTestSuite
 ifndef Build
 	Build = Debug
 endif
@@ -22,13 +22,12 @@ ifeq ($(Build),Debug)
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
-		-lpthread \
+		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
 		-llgi-gtk3$(Tag) \
 		-L../../$(BuildDir)
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
-		-I../../../../../../../usr/include/libappindicator3-0.1 \
 		-I../../../../../../../usr/include/gstreamer-1.0 \
 		-I../../private/common \
 		-I../../include/lgi/linux/Gtk \
@@ -39,13 +38,12 @@ else
 	Flags += -MMD -MP -s -Os -std=c++14
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
-		-lpthread \
+		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
 		-llgi-gtk3$(Tag) \
 		-L../../$(BuildDir)
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
-		-I../../../../../../../usr/include/libappindicator3-0.1 \
 		-I../../../../../../../usr/include/gstreamer-1.0 \
 		-I../../private/common \
 		-I../../include/lgi/linux/Gtk \
@@ -55,13 +53,8 @@ else
 endif
 
 # Dependencies
-Source =	Rich.cpp \
-			../../src/common/Widgets/Editor/TextBlock.cpp \
-			../../src/common/Widgets/Editor/RichTextEditPriv.cpp \
-			../../src/common/Widgets/Editor/RichTextEdit.cpp \
-			../../src/common/Widgets/Editor/ImageBlock.cpp \
-			../../src/common/Widgets/Editor/HorzRuleBlock.cpp \
-			../../src/common/Widgets/Editor/BlockCursor.cpp \
+Source =	TestSuite.cpp \
+			../../src/common/Widgets/ZoomView.cpp \
 			../../src/common/Text/HtmlParser.cpp \
 			../../src/common/Text/HtmlCommon.cpp \
 			../../src/common/Text/Html.cpp \
@@ -72,11 +65,13 @@ Source =	Rich.cpp \
 			../../src/common/Net/OpenSSLSocket.cpp \
 			../../src/common/Net/Http.cpp \
 			../../src/common/Lgi/LgiMain.cpp \
-			../../src/common/Gdc2/Tools/GdcTools.cpp \
+			../../src/common/Images/Compare/ImageComparison.cpp \
+			../../src/common/Gdc2/Font/EmojiFont.cpp \
 			../../src/common/Gdc2/Filters/Png.cpp \
-			../../src/common/Gdc2/Filters/Lzw.cpp \
-			../../src/common/Gdc2/Filters/Jpeg.cpp \
-			../../src/common/Gdc2/Filters/Gif.cpp
+			../../src/common/Coding/ScriptVM.cpp \
+			../../src/common/Coding/ScriptLibrary.cpp \
+			../../src/common/Coding/ScriptCompiler.cpp \
+			../../src/common/Coding/LexCpp.cpp
 
 SourceC    := $(filter %.c,$(Source))
 ObjectsC   := $(SourceC:.c=.o)
@@ -137,6 +132,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/DragAndDrop.h \
 	../../include/lgi/common/DropFiles.h \
 	../../include/lgi/common/Edit.h \
+	../../include/lgi/common/Emoji.h \
 	../../include/lgi/common/Error.h \
 	../../include/lgi/common/EventTargetThread.h \
 	../../include/lgi/common/File.h \
@@ -393,11 +389,13 @@ cleanall :
 
 VPATH=$(BuildDir) \
 	./ \
-	../../src/common/Widgets/Editor \
+	../../src/common/Widgets \
 	../../src/common/Text/Homoglyphs \
 	../../src/common/Text/Emoji \
 	../../src/common/Text \
 	../../src/common/Net \
 	../../src/common/Lgi \
-	../../src/common/Gdc2/Tools \
-	../../src/common/Gdc2/Filters
+	../../src/common/Images/Compare \
+	../../src/common/Gdc2/Font \
+	../../src/common/Gdc2/Filters \
+	../../src/common/Coding

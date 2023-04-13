@@ -19,18 +19,23 @@ contents.xcworkspacedata
 x64ReleaseNoOptimize*
 x64Debug*
 x64Release*
+Debug
+Release
 
 Ide/HtmlTest*.sdf
 Ide/HtmlTest*.suo
 Ide/LgiIde.xml.*
 Ide/Gtk3/build*
+Ide/lgiide
 Ide/MacCocoa/build
 Ide/haiku/haikuPassword.txt
 
 Lvc/Lvc.xml
-Lvc/MacCocoa/build/*
+Lvc/lvc
+Lvc/mac/build/*
 
 ResourceEditor/mac/build
+ResourceEditor/lgires
 
 ScriptingUnitTests/Win32*
 ScriptingUnitTests/x64*
@@ -52,7 +57,11 @@ tests/Release
 tests/x64
 test/HtmlViewer/Files
 test/HtmlViewer/Output
-test/HtmlEditor/TestCases
+test/HtmlViewer/HtmlTestSuite
+test/HtmlEditor/testcases
+test/HtmlEditor/htmleditor
+
+utils/SlogViewer/slogviewer
 
 Updater/Win32*
 Updater/x64*

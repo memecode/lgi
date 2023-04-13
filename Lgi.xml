@@ -469,7 +469,7 @@
 	<Settings>
 		<General>
 			<Makefile>
-				<Linux>Makefile.linux</Linux>
+				<Linux>linux/Makefile.linux</Linux>
 				<Windows>Makefile.windows</Windows>
 				<Mac>Makefile.macosx</Mac>
 			</Makefile>
