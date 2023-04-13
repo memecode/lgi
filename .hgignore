@@ -1,64 +1,36 @@
 syntax: glob
 
+.vs
 .DS_Store
-Lgi*.sdf
-Lgi*.suo
 Lib
-Win32*
-x64*
-Debug*
-Release*
 *.o
+*.obj
 *.d
+*.VC.db
+*.Matthew
+*.matthew
+*.user
 */.DS_Store
 *.xcuserstate
 *.xcbkptlist
 xcschememanagement.plist
 contents.xcworkspacedata
 
-HtmlEditor/HtmlEdit*.sdf
-HtmlEditor/HtmlEdit*.suo
-HtmlEditor/x64Debug
-HtmlEditor/x64Release
-HtmlEditor/build
-HtmlEditor/Gtk3/build
-
-HtmlTest/Files/*
-HtmlTest/HtmlTest*.sdf
-HtmlTest/HtmlTest*.suo
-HtmlTest/x64Debug
-HtmlTest/x64Release
-HtmlTest/MacCarbon/build
-HtmlTest/MacCocoa/build
+x64ReleaseNoOptimize*
+x64Debug*
+x64Release*
 
 Ide/HtmlTest*.sdf
 Ide/HtmlTest*.suo
-Ide/x64Debug*
-Ide/Debug*
-Ide/x64Release*
-Ide/Release*
 Ide/LgiIde.xml.*
-Ide/LgiIde*.sdf
-Ide/LgiIde*.suo
 Ide/Gtk3/build*
-Ide/MacCarbon/build
 Ide/MacCocoa/build
-
-LgiTest/Test*.sdf
-LgiTest/Test*.suo
-LgiTest/x64
-LgiTest/Mac/build
+Ide/haiku/haikuPassword.txt
 
 Lvc/Lvc.xml
-Lvc/Lvc*.sdf
-Lvc/Lvc*.suo
-Lvc/x64*
-Lvc/MacCarbon/build/*
 Lvc/MacCocoa/build/*
 
-ResourceEditor/x64*
-ResourceEditor/MacCarbon/build
-ResourceEditor/MacCocoa/build
+ResourceEditor/mac/build
 
 ScriptingUnitTests/Win32*
 ScriptingUnitTests/x64*
@@ -78,8 +50,10 @@ Static_x64*
 tests/Debug
 tests/Release
 tests/x64
+test/HtmlViewer/Files
+test/HtmlViewer/Output
+test/HtmlEditor/TestCases
 
-Updater/Updater*.user
 Updater/Win32*
 Updater/x64*
 

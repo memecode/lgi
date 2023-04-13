@@ -726,11 +726,13 @@ bool LView::Attach(LViewI *p)
 
 	if (Status && d->Parent)
 	{
-		if (!d->Parent->HasView(this))
+		auto isWnd = dynamic_cast<LWindow*>(this);
+		if (!isWnd)
 		{
-			d->Parent->AddView(this);
+			if (!d->Parent->HasView(this))
+				d->Parent->AddView(this);
+			d->Parent->OnChildrenChanged(this, true);
 		}
-		d->Parent->OnChildrenChanged(this, true);
 	}
 
 	return Status;
