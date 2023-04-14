@@ -425,6 +425,12 @@ public:
 			Type = ColorRgb;
 			Rgb32 = Rgb24To32(col);
 		}
+
+		ColorDef(LSystemColour sys)
+		{
+			Type = ColorRgb;
+			Rgb32 = LColour(sys).c32();
+		}
 		
 		operator LColour()
 		{
