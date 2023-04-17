@@ -499,10 +499,12 @@ void ProjectNode::SetFileName(const char *f)
 	if (sFile && Project)
 		Project->OnNode(sFile, this, false);
 
-	if (Project->RelativePath(Rel, f, true))
+	if (Project->RelativePath(Rel, f))
 		sFile = Rel;
 	else
 		sFile = f;
+
+	printf("sFile='%s'\n", sFile.Get());
 	
 	if (sFile)
 	{
@@ -1144,11 +1146,9 @@ void ProjectNode::OnMouseClick(LMouse &m)
 				s->Type("All Files", LGI_ALL_FILES);
 				s->MultiSelect(true);
 
-				LAutoString Dir = Project->GetBasePath();
+				auto Dir = Project->GetBasePath();
 				if (Dir)
-				{
 					s->InitialDir(Dir);
-				}
 
 				s->Open([this](auto s, auto ok)
 				{
@@ -1156,12 +1156,14 @@ void ProjectNode::OnMouseClick(LMouse &m)
 					{
 						for (int i=0; i<s->Length(); i++)
 						{
-							if (!Project->InProject(false, (*s)[i], false))
+							auto path = (*s)[i];
+							
+							if (!Project->InProject(false, path, false))
 							{
-								ProjectNode *New = new ProjectNode(Project);
+								auto New = new ProjectNode(Project);
 								if (New)
 								{
-									New->SetFileName((*s)[i]);
+									New->SetFileName(path);
 									InsertTag(New);
 									SortChildren();
 									Project->SetDirty();

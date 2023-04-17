@@ -2091,8 +2091,9 @@ if (Debug) LgiTrace("Common=%i\n", Common);
 if (Debug) LgiTrace("Back=%i\n", (int)Back);
 			for (int n=0; n<Back; n++)
 			{
+				if (outCh)
+					outCh += snprintf(out+outCh, sizeof(out)-outCh, DIR_STR);
 				outCh += snprintf(out+outCh, sizeof(out)-outCh, "..");
-				if (n < Back - 1) strcat(out, DIR_STR);
 			}
 		}
 		else

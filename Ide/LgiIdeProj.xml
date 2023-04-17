@@ -259,7 +259,7 @@ _GNU_SOURCE</Release>
 			</Environment>
 			<Arguments>
 				<All>
-					<Debug>/home/matthew/code/scribe/trunk_os/linux/ScribeProj.xml</Debug>
+					<Debug>/home/matthew/code/i.Hex/trunk/iHexProject.xml</Debug>
 				</All>
 			</Arguments>
 			<DebugAdmin />
