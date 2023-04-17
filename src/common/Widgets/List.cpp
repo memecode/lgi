@@ -368,22 +368,22 @@ void LListItem::Update()
 
 void LListItem::OnMeasure(LPoint *Info)
 {
-	if (Info)
+	if (!Info)
+		return;
+
+	if (Parent &&
+		Parent->GetMode() == LListDetails)
 	{
-		if (Parent &&
-			Parent->GetMode() == LListDetails)
-		{
-			Info->x = 1024;
-		}
-		else
-		{
-			LDisplayString *s = GetDs(0);
-			Info->x = 22 + (s ? s->X() : 0);
-		}
-		
-		LFont *f = Parent ? Parent->GetFont() : LSysFont;
-		Info->y = MAX(16, f->GetHeight() + 2); // the default height
+		Info->x = 4 << 10;
 	}
+	else
+	{
+		auto s = GetDs(0);
+		Info->x = 22 + (s ? s->X() : 0);
+	}
+		
+	LFont *f = Parent ? Parent->GetFont() : LSysFont;
+	Info->y = MAX(16, f->GetHeight() + 2); // the default height
 }
 
 bool LListItem::GridLines()
@@ -438,85 +438,85 @@ void LListItem::ClearDs(int Col)
 void LListItem::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 {
 	LSurface *&pDC = Ctx.pDC;
-	if (pDC && c)
+	if (!pDC)
+		return;
+
+	LRect ng = Ctx; // non-grid area
+
+	if (c && c->InDrag())
 	{
-		LRect ng = Ctx; // non-grid area
+		pDC->Colour(DragColumnColour);
+		pDC->Rectangle(&ng);
+	}
+	else
+	{
+		LColour Background = Ctx.Back;
 
-		if (c->InDrag())
+		if (Parent->GetMode() == LListDetails &&
+			(c && c->Mark()) &&
+			!d->Selected)
 		{
-			pDC->Colour(DragColumnColour);
-			pDC->Rectangle(&ng);
+			Background = GdcMixColour(LColour(0, 24), Background, (double)1/32);
 		}
-		else
+
+		if (GridLines())
 		{
-			LColour Background = Ctx.Back;
+			ng.x2--;
+			ng.y2--;
+		}
 
-			if (Parent->GetMode() == LListDetails &&
-				c->Mark() &&
-				!d->Selected)
+		if (!c || c->Type() == GIC_ASK_TEXT)
+		{
+			LDisplayString *Ds = GetDs(i, Ctx.X());
+			if (Ds)
 			{
-				Background = GdcMixColour(LColour(0, 24), Background, (double)1/32);
-			}
-
-			if (GridLines())
-			{
-				ng.x2--;
-				ng.y2--;
-			}
-
-			if (c->Type() == GIC_ASK_TEXT)
-			{
-				LDisplayString *Ds = GetDs(i, Ctx.X());
-				if (Ds)
-				{
-					Ds->GetFont()->TabSize(0);
-					Ds->GetFont()->Transparent(false);
-					Ds->GetFont()->Colour(Ctx.Fore, Background);
+				Ds->GetFont()->TabSize(0);
+				Ds->GetFont()->Transparent(false);
+				Ds->GetFont()->Colour(Ctx.Fore, Background);
 					
-					switch (Ctx.Align.Type)
-					{
-						case LCss::AlignCenter:
-							Ds->Draw(pDC, ng.x1+((ng.X()-Ds->X())/2), ng.y1+1, &ng);
-							break;
-						case LCss::AlignRight:
-							Ds->Draw(pDC, ng.x2-Ds->X()-1, ng.y1+1, &ng);
-							break;
-						default: // Left or inherit
-							Ds->Draw(pDC, ng.x1+1, ng.y1+1, &ng);
-							break;
-					}
-				}
-				else
+				switch (Ctx.Align.Type)
 				{
-					pDC->Colour(Background);
-					pDC->Rectangle(&ng);
+					case LCss::AlignCenter:
+						Ds->Draw(pDC, ng.x1+((ng.X()-Ds->X())/2), ng.y1+1, &ng);
+						break;
+					case LCss::AlignRight:
+						Ds->Draw(pDC, ng.x2-Ds->X()-1, ng.y1+1, &ng);
+						break;
+					default: // Left or inherit
+						Ds->Draw(pDC, ng.x1+1, ng.y1+1, &ng);
+						break;
 				}
 			}
 			else
 			{
 				pDC->Colour(Background);
 				pDC->Rectangle(&ng);
+			}
+		}
+		else
+		{
+			pDC->Colour(Background);
+			pDC->Rectangle(&ng);
 
-				if (c->Type() == GIC_ASK_IMAGE &&
-					Parent->GetImageList())
+			if ((c && c->Type() == GIC_ASK_IMAGE) &&
+				Parent->GetImageList())
+			{
+				int Img = GetImage();
+				if (Img >= 0)
 				{
-					int Img = GetImage();
-					if (Img >= 0)
-					{
-					    int CenterY = Ctx.y1 + ((Ctx.Y() - Parent->GetImageList()->TileY()) >> 1);
-					    LAssert(CenterY >= 0);
+					int CenterY = Ctx.y1 + ((Ctx.Y() - Parent->GetImageList()->TileY()) >> 1);
+					LAssert(CenterY >= 0);
 					    
-						Parent->GetImageList()->Draw(pDC, Ctx.x1+1, CenterY, Img, Background);
-					}
+					Parent->GetImageList()->Draw(pDC, Ctx.x1+1, CenterY, Img, Background);
 				}
 			}
+		}
 
-			if (GridLines())
-			{
-				pDC->Colour(L_LOW);
-				pDC->Line(Ctx.x1, Ctx.y2, Ctx.x2, Ctx.y2);
-				pDC->Line(Ctx.x2, Ctx.y1, Ctx.x2, Ctx.y2);
-			}
+		if (GridLines())
+		{
+			pDC->Colour(L_LOW);
+			pDC->Line(Ctx.x1, Ctx.y2, Ctx.x2, Ctx.y2);
+			pDC->Line(Ctx.x2, Ctx.y1, Ctx.x2, Ctx.y2);
 		}
 	}
 }
@@ -527,6 +527,7 @@ void LListItem::OnPaint(LItem::ItemPaintCtx &Ctx)
 	    return;
 
 	int x = Ctx.x1;
+	auto CtxX = Ctx.X();
 	LAutoPtr<ItemPaintCtx> Prev;
 	if (GetCss())
 	{
@@ -559,25 +560,36 @@ void LListItem::OnPaint(LItem::ItemPaintCtx &Ctx)
 	LListItemColumn *h = *It;
 	LItem::ItemPaintCtx ColCtx = Ctx;
 	
-	for (int i=0; i<Parent->Columns.Length(); i++)
+	if (Parent->Columns.Length())
 	{
-		LItemColumn *c = Parent->Columns[i];
-		if (Parent->GetMode() == LListColumns)
-			ColCtx.Set(x, Ctx.y1, Ctx.x2, Ctx.y2);
-		else
-			ColCtx.Set(x, Ctx.y1, x + c->Width()-1, Ctx.y2);
-		ColCtx.Align = c->TextAlign();
-		
-		OnPaintColumn(ColCtx, i, c);
-		if (h && i == h->GetColumn())
+		for (int i=0; i<Parent->Columns.Length(); i++)
 		{
-			h->OnPaintColumn(ColCtx, i, c);
-			h = *(++It);
-		}
-		x = ColCtx.x2 + 1;
+			LItemColumn *c = Parent->Columns[i];
+			if (Parent->GetMode() == LListColumns)
+				ColCtx.Set(x, Ctx.y1, Ctx.x2, Ctx.y2);
+			else
+				ColCtx.Set(x, Ctx.y1, x + c->Width()-1, Ctx.y2);
+			ColCtx.Align = c->TextAlign();
 		
-		if (Parent->GetMode() == LListColumns)
-			break;
+			OnPaintColumn(ColCtx, i, c);
+			if (h && i == h->GetColumn())
+			{
+				h->OnPaintColumn(ColCtx, i, c);
+				h = *(++It);
+			}
+			x = ColCtx.x2 + 1;
+		
+			if (Parent->GetMode() == LListColumns)
+				break;
+		}
+	}
+	else
+	{
+		// One fake column for the whole control:
+		ColCtx.Set(x, Ctx.y1, x+CtxX-1, Ctx.y2);
+		ColCtx.Align = LCss::AlignLeft;
+		OnPaintColumn(ColCtx, 0, NULL);
+		x = ColCtx.x2 + 1;
 	}
 	
 	// after columns
@@ -2286,6 +2298,11 @@ void LList::PourAll()
 	LRect Client = GetClient();
 	LFont *Font = GetFont();
 
+	if (Columns.Length() == 0)
+	{
+		int asd=0;
+	}
+	
 	if (d->Mode == LListDetails)
 	{
 		if (ColumnHeaders)
@@ -2565,19 +2582,19 @@ void LList::OnPaint(LSurface *pDC)
 
 				// tell the item what colour to use
 				#if DOUBLE_BUFFER_PAINT
-				if (Buf->X() < i->Pos.X() ||
-					Buf->Y() < i->Pos.Y())
-				{
-					Buf->Create(i->Pos.X(), i->Pos.Y(), GdcD->GetBits());
-				}
+					if (Buf->X() < i->Pos.X() ||
+						Buf->Y() < i->Pos.Y())
+					{
+						Buf->Create(i->Pos.X(), i->Pos.Y(), GdcD->GetBits());
+					}
 
-				Ctx = i->Pos;
-				Ctx.r.Offset(-Ctx.r.x1, -Ctx.r.y1);
-				i->OnPaint(Ctx);
-				pDC->Blt(i->Pos.x1, i->Pos.y1, Buf, &Ctx.r);
+					Ctx = i->Pos;
+					Ctx.r.Offset(-Ctx.r.x1, -Ctx.r.y1);
+					i->OnPaint(Ctx);
+					pDC->Blt(i->Pos.x1, i->Pos.y1, Buf, &Ctx.r);
 				#else
-				(LRect&)Ctx = i->Pos;
-				i->OnPaint(Ctx);
+					(LRect&)Ctx = i->Pos;
+					i->OnPaint(Ctx);
 				#endif
 				Rgn.Subtract(&i->Pos);
 
