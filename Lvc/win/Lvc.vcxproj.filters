@@ -63,24 +63,46 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="..\..\src\win\General\Lgi.manifest" />
+    <ClInclude Include="..\Src\SshConnection.h">
+      <Filter>Source Files\Ssh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\StructuredIo.h">
+      <Filter>Source Files\StructuredLog</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\StructuredLog.h">
+      <Filter>Source Files\StructuredLog</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Src\Lvc.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Src\VcCommit.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Src\VcFile.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Src\VcFolder.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\lgi\common\StructuredIo.h" />
-    <ClInclude Include="..\..\include\lgi\common\StructuredLog.h" />
-    <ClInclude Include="..\Src\Lvc.h" />
-    <ClInclude Include="..\Src\SshConnection.h" />
-    <ClInclude Include="..\Src\VcCommit.h" />
-    <ClInclude Include="..\Src\VcFile.h" />
-    <ClInclude Include="..\Src\VcFolder.h" />
+    <ResourceCompile Include="..\resources\Lvc.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\resources\icon32.ico" />
+    <Manifest Include="..\..\src\win\General\Lgi.manifest">
+      <Filter>Resources</Filter>
+    </Manifest>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\resources\Lvc.rc" />
+    <None Include="..\installer-zip.py">
+      <Filter>Resources</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\installer-zip.py" />
+    <Image Include="..\resources\icon32.ico">
+      <Filter>Resources</Filter>
+    </Image>
   </ItemGroup>
 </Project>

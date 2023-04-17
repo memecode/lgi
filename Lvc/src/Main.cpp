@@ -637,9 +637,11 @@ public:
 			if (!s)
 				return;
 			
+			LString NewLine("\n");
 			LString::Array a = s.Replace("\r").Split("\n");
 			LArray<LString> index;
-			LString Diff, oldName, newName;
+			LString oldName, newName;
+			LString::Array Diff;
 			VcFile *f = NULL;
 			bool InPreamble = false;
 			bool InDiff = false;
@@ -650,7 +652,7 @@ public:
 				{
 					if (f)
 					{
-						f->SetDiff(Diff);
+						f->SetDiff(NewLine.Join(Diff));
 						f->Select(false);
 					}
 
@@ -719,13 +721,12 @@ public:
 				}
 				else if (InDiff)
 				{
-					if (Diff) Diff += "\n";
-					Diff += a[i];
+					Diff.Add(a[i]);
 				}
 			}
-			if (f && Diff)
+			if (f && Diff.Length())
 			{
-				f->SetDiff(Diff);
+				f->SetDiff(NewLine.Join(Diff));
 				Diff.Empty();
 			}
 		}
