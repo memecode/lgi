@@ -64,26 +64,33 @@ enum MimeBoundary
 
 MimeBoundary IsMimeBoundary(char *Boundary, char *Line)
 {
-	if (Boundary)
+	if (!Boundary || !Line)
+		return MimeData;
+
+	auto BoundaryLen = strlen(Boundary);
+	if (Line[0] != '-' ||
+		Line[1] != '-')
+		return MimeData;
+
+	if (strncmp(Line + 2, Boundary, BoundaryLen) == 0)
 	{
-		size_t BoundaryLen = strlen(Boundary);
-		if (Line &&
-			*Line++ == '-' &&
-			*Line++ == '-' &&
-			strncmp(Line, Boundary, strlen(Boundary)) == 0)
+		printf("matched prefix: %s\n", Line);
+
+		// MIME segment boundary
+		Line += 2 + BoundaryLen;
+		if (Line[0] == '-' &&
+			Line[1] == '-')
 		{
-			// MIME segment boundary
-			Line += BoundaryLen;
-			if (Line[0] == '-' &&
-				Line[1] == '-')
-			{
-				return MimeEndSeg;
-			}
-			else
-			{
-				return MimeNextSeg;
-			}
+			return MimeEndSeg;
 		}
+		else
+		{
+			return MimeNextSeg;
+		}
+	}
+	else
+	{
+		printf("no match: line='%s' doesn't match boundry='%s'\n", Line + 2, Boundary);
 	}
 
 	return MimeData;
@@ -1022,40 +1029,49 @@ bool LMime::Set(const char *Name, const char *Value)
 
 char *LMime::GetSub(const char *Field, const char *Sub)
 {
-	char *Status = 0;
+	if (!Field || !Sub)
+		return NULL;
 
-	if (Field && Sub)
+	auto v = Get(Field, false);
+	if (!v)
+		return NULL;
+
+	auto SubLen = strlen(Sub);
+	char *Status = NULL;
+
+	// Move past the field value into the sub fields
+	char *s = v;
+	
+	SkipWs(s);
+	while (*s && *s != ';' && !strchr(MimeWs, *s))
+		s++;
+	
+	SkipWs(s);
+		
+	while (s && *s++ == ';')
 	{
-		int SubLen = CastInt(strlen(Sub));
-		char *v = Get(Field, false);
-		if (v)
-		{
-			// Move past the field value into the sub fields
-			char *s = v;
-			SkipWs(s);
-			while (*s && *s != ';' && !strchr(MimeWs, *s)) s++;
-			SkipWs(s);
-			while (s && *s++ == ';')
-			{
-				// Parse each name=value pair
-				SkipWs(s);
-				char *Name = s;
-				while (*s && *s != '=' && !strchr(MimeWs, *s)) s++;
-				int NameLen = CastInt(s - Name);
-				SkipWs(s);
-				if (*s++ == '=')
-				{
-					bool Found = SubLen == NameLen && _strnicmp(Name, Sub, NameLen) == 0;
-					SkipWs(s);
-					Status = NewValue(s, Found);
-					if (Found) break;
-				}
-				else break;
-			}
+		// Parse each name=value pair
+		SkipWs(s);
+		auto Name = s;		
+		while (*s && *s != '=' && !strchr(MimeWs, *s))
+			s++;
 
-			DeleteArray(v);
+		auto NameLen = s - Name;
+		SkipWs(s);
+		
+		// printf("found field '%.*s'\n", (int)NameLen, Name);
+		if (*s++ == '=')
+		{
+			bool Found = SubLen == NameLen && _strnicmp(Name, Sub, NameLen) == 0;
+			SkipWs(s);
+			Status = NewValue(s, Found);
+			if (Found)
+				break;
 		}
+		else break;
 	}
+
+	DeleteArray(v);
 
 	return Status;
 }
@@ -1212,7 +1228,8 @@ ssize_t LMime::LMimeText::LMimeDecode::Parse(LMimeBuf *Source, ParentState *Stat
 	LAutoString Encoding(Mime->GetEncoding());
 	LAutoString Boundary(Mime->GetBoundary());
 	LAutoString MimeType(Mime->GetMimeType());
-	LOG("%s:%i - Encoding=%s, MimeType=%s, Boundary=%s\n", _FL, Encoding, MimeType.Get(), Boundary);
+	LOG("%s:%i - Encoding=%s, MimeType=%s, Boundary=%s\n",
+		_FL, Encoding.Get(), MimeType.Get(), Boundary.Get());
 
 	LStream *Decoder = 0;
 	if (Encoding)
@@ -1254,7 +1271,7 @@ ssize_t LMime::LMimeText::LMimeDecode::Parse(LMimeBuf *Source, ParentState *Stat
 			{
 				bool CouldBe = Buffer.Length() > 2 && b[0] == '-' && b[1] == '-';
 				Type = IsMimeBoundary(Boundary, b);
-				
+
 				if (Type)
 				{
 					LOG("%s:%i - IsMimeBoundary=%i\n", _FL, Type);
