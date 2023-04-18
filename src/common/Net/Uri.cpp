@@ -1,6 +1,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Net.h"
 #include "lgi/common/RegKey.h"
+#include "lgi/common/Uri.h"
 
 /////////////////////////////////////////////////////////////////////////////////
 static const char *Ws = " \t\r\n";

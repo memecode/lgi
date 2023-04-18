@@ -16,7 +16,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Mail.h"
 #include "lgi/common/Base64.h"
-#include "lgi/common/NetTools.h"
 #include "lgi/common/DateTime.h"
 #include "lgi/common/DocView.h"
 #include "lgi/common/Store3Defs.h"

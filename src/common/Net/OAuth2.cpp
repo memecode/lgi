@@ -2,7 +2,6 @@
 #include "lgi/common/TextLog.h"
 #include "lgi/common/OpenSSLSocket.h"
 #include "lgi/common/Base64.h"
-#include "lgi/common/NetTools.h"
 #include "lgi/common/OAuth2.h"
 #include "lgi/common/Json.h"
 

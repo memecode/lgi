@@ -3,6 +3,7 @@
 
 //////////////////////////////////////////////////////////////////
 #include "lgi/common/Net.h"
+#include "lgi/common/Uri.h"
 
 /* Do this somewhere?
 LAutoString ErrorMsg;

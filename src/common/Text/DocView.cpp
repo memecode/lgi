@@ -2,6 +2,7 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DocView.h"
+#include "lgi/common/Uri.h"
 
 #define SubtractPtr(a, b)		((a)-(b))
 

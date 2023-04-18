@@ -2,6 +2,7 @@
 #define __IHTTP_H
 
 #include "lgi/common/Net.h"
+#include "lgi/common/Uri.h"
 
 class LHttp
 {

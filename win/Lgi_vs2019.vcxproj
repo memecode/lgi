@@ -254,7 +254,6 @@
     <ClCompile Include="..\src\common\Net\Base64.cpp" />
     <ClCompile Include="..\src\common\Net\Uri.cpp" />
     <ClCompile Include="..\src\common\Net\Net.cpp" />
-    <ClCompile Include="..\src\common\Net\NetTools.cpp" />
     <ClCompile Include="..\src\common\Net\MDStringToDigest.cpp" />
     <ClCompile Include="..\src\common\Lgi\Alert.cpp" />
     <ClCompile Include="..\src\common\Lgi\AppCommon.cpp" />

@@ -184,9 +184,9 @@ typedef union
 
 // Basic macros
 #define limit(i,l,u)					(((i)<(l)) ? (l) : (((i)>(u)) ? (u) : (i)))
-#define makelong(a, b)					((a)<<16 | (b&0xFFFF))
-#define loword(a)						(a&0xFFFF)
-#define hiword(a)						(a>>16)
+// #define makelong(a, b)				((a)<<16 | (b&0xFFFF))
+// #define loword(a)					(a&0xFFFF)
+// #define hiword(a)					(a>>16)
 
 #undef ABS
 #ifdef __cplusplus
@@ -245,9 +245,9 @@ inline T ABS(T v)
 // Asserts
 LgiFunc void							_lgi_assert(bool b, const char *test, const char *file, int line);
 #ifdef _DEBUG
-#define LAssert(b)					_lgi_assert(b, #b, __FILE__, __LINE__)
+	#define LAssert(b)					_lgi_assert(b, #b, __FILE__, __LINE__)
 #else
-#define LAssert(b)					((void)0)
+	#define LAssert(b)					((void)0)
 #endif
 
 
@@ -301,11 +301,11 @@ enum LgiOs
 	/// \sa LGetOs
 	LGI_OS_WIN9X,
 
-	/// \brief 32bit NT, 2k, XP, Vista, 7, 8 or later. (XP and later supported)
+	/// \brief Windows 10+ 32bit. (Not supported)
 	/// \sa LGetOs
 	LGI_OS_WIN32,
 
-	/// \brief 64bit NT, 2k, XP, Vista, 7, 8 or later. (XP and later supported)
+	/// \brief Windows 10+ 64bit. (Supported)
 	/// \sa LGetOs
 	LGI_OS_WIN64,
 
@@ -317,7 +317,7 @@ enum LgiOs
 	/// \sa LGetOs
 	LGI_OS_LINUX,
 
-	/// \brief There was an Atheos port at one point. (Not supported)
+	/// \brief Mac OS X 10.15 or later. (Supported)
 	/// \sa LGetOs
 	LGI_OS_MAC_OS_X,
 
@@ -430,7 +430,6 @@ enum LCursor
 										)
 
 // Os metrics
-
 enum LSystemMetric
 {
 	/// Get the standard window horizontal border size
@@ -573,9 +572,9 @@ enum LSystemPath
 	#define PassDebugArgs
 #endif
 
-#define _FL							__FILE__, __LINE__
+#define _FL								__FILE__, __LINE__
 
-#define CALL_MEMBER_FN(obj, memFn)	((obj).*(memFn)) 
+#define CALL_MEMBER_FN(obj, memFn)		((obj).*(memFn)) 
 
 #include "lgi/common/AutoPtr.h"
 

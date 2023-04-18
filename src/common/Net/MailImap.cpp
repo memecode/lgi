@@ -6,7 +6,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Mail.h"
 #include "lgi/common/Base64.h"
-#include "lgi/common/NetTools.h"
 #include "lgi/common/DocView.h"
 #include "lgi/common/Http.h"
 #include "lgi/common/HttpTools.h"

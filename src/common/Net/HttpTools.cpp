@@ -3,7 +3,6 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/HttpTools.h"
 #include "lgi/common/Net.h"
-#include "lgi/common/NetTools.h"
 #include "lgi/common/Http.h"
 
 #ifdef _DEBUG

@@ -1,9 +1,6 @@
-#ifndef _GMIME_H_
-#define _GMIME_H_
+#pragma once
 
-#include "LgiNetInc.h"
 #include "lgi/common/Stream.h"
-#include "lgi/common/NetTools.h"
 
 extern void CreateMimeBoundary(char *Buf, int BufLen);
 
@@ -179,4 +176,3 @@ public:
 	friend class LMime::LMimeBinary::LMimeWrite;
 };
 
-#endif

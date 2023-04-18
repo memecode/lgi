@@ -3,7 +3,7 @@
 set(APP_MANIFEST)
 if (WIN32)
 	set(APP_TYPE WIN32)
-	set(APP_ICON Rich.rc)
+	set(APP_ICON resources/Rich.rc)
 	set(APP_MANIFEST ${LGI_DIR}/src/win/General/Lgi.manifest)
     set(SPELL_CHECK ${LGI_DIR}/src/win/Lgi/SpellCheckWindows.cpp)
 elseif (APPLE)
@@ -16,7 +16,7 @@ endif()
 
 add_executable(HtmlEdit ${APP_TYPE}
 
-    Rich.cpp
+    src/Rich.cpp
     ${LGI_DIR}/src/common/Gdc2/Filters/Jpeg.cpp
     ${LGI_DIR}/src/common/Gdc2/Filters/Png.cpp
     ${LGI_DIR}/src/common/Gdc2/Tools/GdcTools.cpp
@@ -37,7 +37,7 @@ add_executable(HtmlEdit ${APP_TYPE}
     ${LGI_DIR}/src/common/Widgets/Editor/ImageBlock.cpp
     ${LGI_DIR}/src/common/Widgets/Editor/TextBlock.cpp
     ${SPELL_CHECK}
-    resource.h
+    resources/resource.h
 
 	${APP_ICON}
 	${APP_MANIFEST})

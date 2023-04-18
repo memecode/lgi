@@ -341,9 +341,6 @@
     <ClCompile Include="..\src\common\Net\Net.cpp">
       <Filter>Source Files\Network</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Net\NetTools.cpp">
-      <Filter>Source Files\Network</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\common\Lgi\Object.cpp">
       <Filter>Source Files\General</Filter>
     </ClCompile>

@@ -9,7 +9,6 @@
 #ifndef __INET_H
 #define __INET_H
 
-#include "lgi/common/LgiNetInc.h"
 #include "lgi/common/LgiInterfaces.h"
 #include "lgi/common/Mem.h"
 #include "lgi/common/Containers.h"
@@ -64,14 +63,22 @@ typedef int SOCKET;
 #define LSocket_SetDelete		"SetDelete"
 
 // Functions
-LgiNetFunc bool HaveNetConnection();
-LgiNetFunc bool WhatsMyIp(LAutoString &Ip);
+LgiFunc bool HaveNetConnection();
+LgiFunc bool WhatsMyIp(LAutoString &Ip);
 LgiExtern LString LIpToStr(uint32_t ip);
 LgiExtern uint32_t LIpToInt(LString str); // Convert IP as string to host order int
 LgiExtern uint32_t LHostnameToIp(const char *HostName); // Hostname lookup (DNS), returns IP in host order or 0 on error
 
+/// Get a specific value from a list of headers (as a dynamic string)
+LgiFunc char *InetGetHeaderField(const char *Headers, const char *Field, ssize_t Len = -1);
+LgiExtern LString LGetHeaderField(LString Headers, const char *Field);
+
+/// Gets a sub field of a header value
+LgiFunc char *InetGetSubField(const char *s, const char *Field);
+LgiExtern LString LGetSubField(LString HeaderValue, const char *Field);
+
 /// Make md5 hash
-LgiNetFunc void MDStringToDigest
+LgiFunc void MDStringToDigest
 (
 	/// Buffer to receive md5 hash
 	unsigned char digest[16],
@@ -83,7 +90,7 @@ LgiNetFunc void MDStringToDigest
 
 
 /// Implementation of a network socket
-class LgiNetClass LSocket :
+class LgiClass LSocket :
 	public LSocketI,
 	public LStream
 {
@@ -324,7 +331,7 @@ public:
 	static bool EnumInterfaces(LArray<Interface> &Out);
 };
 
-class LgiNetClass LSocks5Socket : public LSocket
+class LgiClass LSocks5Socket : public LSocket
 {
 	LAutoString Proxy;
 	int Port;
@@ -353,70 +360,6 @@ public:
 
 	// Server
 	bool Listen(int Port) { return false; }
-};
-
-/// Uri parser
-class LgiNetClass LUri
-{
-public:
-	LString sProtocol;
-	LString sUser;
-	LString sPass;
-	LString sHost;
-	int Port;
-	LString sPath;
-	LString sAnchor;
-
-	/// Parser for URI's.
-	LUri
-	(
-		/// Optional URI to start parsing
-		const char *uri = 0
-	);
-	~LUri();
-
-	bool IsProtocol(const char *p) { return sProtocol.Equals(p); }
-	bool IsHttp() { return sProtocol.Equals("http") || sProtocol.Equals("https"); }
-	bool IsFile() { return sProtocol.Equals("file"); }
-	void SetFile(LString Path) { Empty(); sProtocol = "file"; sPath = Path; }
-	const char *LocalPath();
-	operator bool();
-
-	/// Parse a URI into it's sub fields...
-	bool Set(const char *uri);
-
-	/// Re-constructs the URI
-	LString ToString();
-
-	/// Empty this object...
-	void Empty();
-
-	/// URL encode
-	LString EncodeStr
-	(
-		/// The string to encode
-		const char *s,
-		/// [Optional] Any extra characters you want encoded
-		const char *ExtraCharsToEncode = 0
-	);
-
-	/// URL decode
-	LString DecodeStr(const char *s);
-
-	/// Separate args into map
-	typedef LHashTbl<StrKey<char,false>,LString> StrMap;
-	StrMap Params();
-
-	LUri &operator =(const LUri &u);
-	LUri &operator =(const char *s) { Set(s); return *this; }
-	LUri &operator +=(const char *s);
-};
-
-/// Proxy settings lookup
-class LgiNetClass LProxyUri : public LUri
-{
-public:
-	LProxyUri();
 };
 
 #define MAX_UDP_SIZE		512
