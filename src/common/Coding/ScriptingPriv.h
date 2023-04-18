@@ -492,7 +492,7 @@ public:
 	
 	LString GetIncludeFile(const char *FileName) override
 	{
-		return NULL;
+		return LString();
 	}
 	
 	LHostFunc *GetCommands() override;

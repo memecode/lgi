@@ -31,7 +31,7 @@ struct WmInitParams
 	#endif
 	// xcb_connection_t *Dsp;
 	int Args;
-	char **Arg;
+	const char **Arg;
 };
 
 typedef bool (*Proc_LgiWmInit)(WmInitParams *Params);

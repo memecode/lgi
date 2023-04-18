@@ -104,7 +104,7 @@ void LMru::_SaveFile(const char *FileName, std::function<void(LString, bool)> Ca
 {
 	if (!FileName)
 	{
-		if (Callback) Callback(NULL, false);
+		if (Callback) Callback(LString(), false);
 		return;
 	}
 

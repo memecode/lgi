@@ -327,7 +327,7 @@ bool LFontSelect::Serialize(void *Data, int DataLen, bool Write)
 		}
 
 		Bold = Underline = Italic = false;
-		auto t = T.IdxCheck(2) ? T[2] : NULL;
+		auto t = T.IdxCheck(2) ? T[2] : LString();
 		if (t)
 		{
 			if (strchr(t, 'b')) Bold = true;

@@ -193,7 +193,7 @@ char *DecodeRfc2047(char *Str)
 						else
 						{
 							auto Inst = LCharsetSystem::Inst();
-							LString Detect = Inst && Inst->DetectCharset ? Inst->DetectCharset(LString(Block, Len)) : NULL;
+							LString Detect = Inst && Inst->DetectCharset ? Inst->DetectCharset(LString(Block, Len)) : LString();
 
 							LAutoString Utf8((char*)LNewConvertCp("utf-8", Block, Detect ? Detect : Cp, Len));
 							if (Utf8)

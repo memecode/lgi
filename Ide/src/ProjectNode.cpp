@@ -1273,8 +1273,8 @@ void ProjectNode::OnMouseClick(LMouse &m)
 						
 						#if defined LINUX
 						
-						char *Term = 0;
-						char *Format = 0;
+						const char *Term = NULL;
+						const char *Format = NULL;
 						switch (LGetWindowManager())
 						{
 							case WM_Kde:

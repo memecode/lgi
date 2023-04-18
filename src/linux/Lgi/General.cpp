@@ -744,7 +744,8 @@ using namespace Gtk;
 bool LPlaySound(const char *FileName, int ASync)
 {
 	#if HAS_GSTREAMER
-	
+	#warning "Impl me."
+	return false;
 	#else
 	return LExecute(FileName);
 	#endif

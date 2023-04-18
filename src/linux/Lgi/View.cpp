@@ -653,7 +653,7 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 	if (!InThread())
 	{
 		DEBUG_INVALIDATE("%s::Invalidate out of thread\n", GetClass());
-		return PostEvent(M_INVALIDATE, NULL, (LMessage::Param)this);
+		return PostEvent(M_INVALIDATE, (LMessage::Param)NULL, (LMessage::Param)this);
 	}
 
 	LRect r;
@@ -742,7 +742,7 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 		case M_SET_CTRL_NAME:
 		{
 			LAutoPtr<LString> s((LString*)Msg->B());
-			SetCtrlName(Msg->A(), s ? *s : NULL);
+			SetCtrlName(Msg->A(), s ? s->Get() : NULL);
 			break;
 		}
 		case M_SET_CTRL_ENABLE:
@@ -837,7 +837,7 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 		{
 			LViewI *Ctrl;
 			if (GetViewById(Msg->A(), Ctrl))
-				return OnNotify(Ctrl, Msg->B());
+				return OnNotify(Ctrl, (LNotifyType)Msg->B());
 			break;
 		}
 		case M_COMMAND:

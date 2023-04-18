@@ -65,7 +65,7 @@ bool DataDlgTools::ProcessField(DataDlgField *f, bool Write, char *OptionOverrid
 				{
 					if (Dlg->GetCtrlEnabled(f->GetCtrl()))
 					{
-						char *Pass = v->Name();
+						auto Pass = v->Name();
 						if (Pass)
 						{
 							g.Set(Pass);
@@ -97,7 +97,7 @@ bool DataDlgTools::ProcessField(DataDlgField *f, bool Write, char *OptionOverrid
 			{
 				if (Write) // Ctrl -> Opts
 				{
-					char *s = v->Name();
+					auto s = v->Name();
 					if (DeleteEmptyStrings && !ValidStr(s))
 					{
 						Options->DeleteKey(Opt);

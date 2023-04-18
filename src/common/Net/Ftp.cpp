@@ -166,7 +166,7 @@ IFtpEntry::IFtpEntry(char *Entry, const char *Cs)
 			{
 				// Unix format
 				int SizeElement = T.Length() > 4 && isdigit(*T[4]) ? 4 : 3;
-				_Size = T.Length() > SizeElement ? T[SizeElement] : NULL;
+				_Size = T.Length() > SizeElement ? T[SizeElement].Get() : NULL;
 				_Name = (int)T.Length() - 1;
 				_Perm = T[0];
 				if (T.Length() > SizeElement-2)
@@ -174,8 +174,8 @@ IFtpEntry::IFtpEntry(char *Entry, const char *Cs)
 				if (T.Length() > SizeElement-1)
 					Group = T[SizeElement-1];
 
-				char *MonthStr = T.Length() > SizeElement + 1 ? T[SizeElement+1] : NULL;
-				char *YearOrTime = T.Length() > SizeElement + 3 ? T[SizeElement+3] : NULL;
+				char *MonthStr = T.Length() > SizeElement + 1 ? T[SizeElement+1].Get() : NULL;
+				char *YearOrTime = T.Length() > SizeElement + 3 ? T[SizeElement+3].Get() : NULL;
 				if (MonthStr && YearOrTime)
 				{
 					int Day = T.Length() > SizeElement+2 ? atoi(T[SizeElement+2]) : -1;

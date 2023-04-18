@@ -618,7 +618,7 @@ void LProgressDlg::SetScale(double s)
 
 LString LProgressDlg::GetType()
 {
-	return Panes.Length() ? Panes.First()->GetType() : NULL;
+	return Panes.Length() ? Panes.First()->GetType() : LString();
 }
 
 void LProgressDlg::SetType(const char *t)

@@ -157,7 +157,7 @@ protected:
 	static OsApplication *Inst;
 	
 public:
-	OsApplication(int Args, char **Arg);
+	OsApplication(int Args, const char **Arg);
 	~OsApplication();
 	
 	static OsApplication *GetInst() { LAssert(Inst != NULL); return Inst; }

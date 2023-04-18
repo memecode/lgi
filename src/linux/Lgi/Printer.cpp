@@ -113,14 +113,14 @@ void LPrinter::Print(	LPrintEvents *Events,
 	if (!Events)
 	{
 		LgiTrace("%s:%i - Error: missing param.\n", _FL);
-		return false;
+		return;
 	}
 	
 	d->Op = gtk_print_operation_new();
 	if (!d->Op)
 	{
 		LgiTrace("%s:%i - Error: gtk_print_operation_new failed.\n", _FL);
-		return false;
+		return;
 	}
 		
 	GError *Error = NULL;
@@ -168,5 +168,5 @@ void LPrinter::Print(	LPrintEvents *Events,
 		d->Op = NULL;
 	}
     
-    return Status;
+    return;
 }

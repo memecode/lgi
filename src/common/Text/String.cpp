@@ -77,7 +77,7 @@ char *strcat_s(char *dest, size_t dest_size, const char *src)
 	// NULL terminate...
 	if (dest_size > 0)
 	{
-		*dest++ = NULL;
+		*dest++ = 0;
 		dest_size--;
 	}
 	
@@ -942,7 +942,7 @@ LString LUrlEncode(const char *s, const char *delim)
 	while (*s)
 	{
 		if (*s == '%' || strchr(delim, *s))
-			ch += sprintf_s(buf+ch, sizeof(buf)-ch, "%%%02.2x", (uint8_t)*s);
+			ch += sprintf_s(buf+ch, sizeof(buf)-ch, "%%%2.2x", (uint8_t)*s);
 		else
 			buf[ch++] = *s;
 		s++;
@@ -962,11 +962,11 @@ LString LUrlEncode(const char *s, const char *delim)
 LString LUrlDecode(const char *in)
 {
 	if (!in || !*in)
-		return NULL;
+		return LString();
 
 	LString s;
 	if (!s.Length(strlen(in)))
-		return NULL;
+		return LString();
 
 	char *out = s.Get();
 	while (*in)

@@ -15,7 +15,7 @@ endif
 MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
 
-Flags = -fPIC -w -fno-inline -fpermissive
+Flags = -fPIC -fno-inline -fpermissive -Wno-format-truncation
 
 ifeq ($(Build),Debug)
 	Flags += -MMD -MP -g -std=c++14
@@ -398,7 +398,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/linux/Lgi/Widgets.cpp \
 	../src/linux/Lgi/Window.cpp
 	export Build=$(Build); \
-	$(MAKE) -C ../ -f Makefile.linux
+	$(MAKE) -C ../ -f linux/Makefile.linux
 
 -include $(Objects:.o=.d)
 
@@ -411,7 +411,7 @@ clean :
 cleanall :
 	rm -rf $(BuildDir) $(Target)
 	@echo Cleaned $(BuildDir) $(Target)
-	+make -C "../" -f "Makefile.linux" clean
+	+make -C "../" -f "linux/Makefile.linux" clean
 
 VPATH=$(BuildDir) \
 	../src/common/Text/Homoglyphs \

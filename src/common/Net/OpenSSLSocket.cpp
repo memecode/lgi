@@ -1477,5 +1477,5 @@ LString SslSocket::Random(int Len)
 	LString s;
 	s.Length(Len);
 	auto r = Library ? Library->RAND_bytes((uint8_t*) s.Get(), Len) : 0;
-	return r ? s : NULL;
+	return r ? s : LString();
 }

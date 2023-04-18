@@ -292,6 +292,7 @@ public:
 		const char *PlatformLibraryExt = NULL;
 		const char *PlatformStaticLibExt = NULL;
 		const char *PlatformExeExt = "";
+		const char *CompilerFlags = "-fPIC -fno-inline -fpermissive -Wno-format-truncation";
 		LString LinkerFlags;
 		const char *TargetType = d->Settings.GetStr(ProjTargetType, NULL, Platform);
 		const char *CompilerName = d->Settings.GetStr(ProjCompiler);
@@ -480,7 +481,8 @@ public:
 			ExeFlags = " -mwindows";
 			m.Print("BuildDir = $(Build)\n"
 					"\n"
-					"Flags = -fPIC -fno-inline -fpermissive\n");
+					"Flags = %s\n",
+					CompilerFlags);
 			
 			const char *DefDefs = "-DWIN32 -D_REENTRANT";
 			sDefines[BuildDebug] = DefDefs;
@@ -494,8 +496,8 @@ public:
 			ExeFlags = "";
 			m.Print("BuildDir = $(Build)\n"
 					"\n"
-					"Flags = -fPIC -fno-inline -fpermissive\n" // -fexceptions
-					);
+					"Flags = %s\n",
+					CompilerFlags);
 			sDefines[0].Printf("-D%s -D_REENTRANT", PlatformCap.Upper().Get());
 			#ifdef LINUX
 			sDefines[BuildDebug] += " -D_FILE_OFFSET_BITS=64"; // >:-(
@@ -2260,9 +2262,9 @@ public:
 					strcpy_s(Path, sizeof(Path), ExeLeaf ? ExeLeaf : Exe.Get());
 					LTrimDir(Path);
 									
-					char *Term = 0;
-					char *WorkDir = 0;
-					char *Execute = 0;
+					const char *Term = NULL;
+					const char *WorkDir = NULL;
+					const char *Execute = NULL;
 					switch (LGetWindowManager())
 					{
 						case WM_Kde:
@@ -2281,7 +2283,7 @@ public:
 					{					
 						char *e = QuoteStr(ExePath);
 						char *p = QuoteStr(Path);
-						char *a = Proj->GetExeArgs() ? Proj->GetExeArgs() : (char*)"";
+						const char *a = Proj->GetExeArgs() ? Proj->GetExeArgs() : "";
 						char Args[512];
 						sprintf(Args,
 								"%s%s "

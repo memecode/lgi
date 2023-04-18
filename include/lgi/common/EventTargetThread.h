@@ -293,7 +293,7 @@ public:
 				int val = 1111;
 				int r = sem_getvalue(Event.Handle(), &val);
 
-				printf("%s:%i - EndThread() hung waiting for %s to exit (caller.thread=%i, worker.thread=%i, event=%i, r=%i, val=%i).\n",
+				printf("%s:%i - EndThread() hung waiting for %s to exit (caller.thread=%i, worker.thread=%i, event=%p, r=%i, val=%i).\n",
 					_FL, LThread::GetName(),
 					GetCurrentThreadId(),
 					GetId(),

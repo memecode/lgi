@@ -61,7 +61,7 @@ void *ThreadEntryPoint(void *i)
 	return 0;
 }
 
-const OsThread LThread::InvalidHandle = NULL;
+const OsThread LThread::InvalidHandle = 0;
 const OsThreadId LThread::InvalidId = 0;
 
 LThread::LThread(const char *ThreadName, int viewHandle)
@@ -131,7 +131,7 @@ void LThread::Terminate()
 		pthread_cancel(hThread) == 0)
 	{
 		State = LThread::THREAD_EXITED;
-		hThread = NULL;
+		hThread = 0;
 	}
 }
 

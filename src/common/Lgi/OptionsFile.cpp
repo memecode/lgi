@@ -55,7 +55,7 @@ LOptionsFile::PortableType LOptionsFile::GuessMode()
 		if (a.Length() > 1 && (a[1].Equals("Program Files") || a[1].Equals("Program Files (x86)")))
 			return DesktopMode;
 	#else
-		#warning "Impl me.""
+		#warning "Impl me."
 	#endif
 
 	return PortableMode;

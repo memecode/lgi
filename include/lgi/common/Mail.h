@@ -326,7 +326,7 @@ struct ImapMailFlags
 		if (ImapSeen)     ch += sprintf_s(s+ch, sizeof(s)-ch, "\\seen ");
 
 		if (ch == 0)
-			return NULL;
+			return LString();
 
 		LAssert(ch < sizeof(s));
 		s[--ch] = 0;

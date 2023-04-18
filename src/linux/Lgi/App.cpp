@@ -32,7 +32,7 @@ bool GlibWidgetSearch(GtkWidget *p, GtkWidget *w, bool Debug, int depth = 0);
 ////////////////////////////////////////////////////////////////
 struct OsAppArgumentsPriv
 {
-	::LArray<char*> Ptr;
+	LArray<const char*> Ptr;
 	
 	~OsAppArgumentsPriv()
 	{
@@ -325,7 +325,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 		{
 			// Check alternate location for development builds
 			Dl_info dlInfo;
-    		dladdr(LgiCrashHandler, &dlInfo);
+    		dladdr((const void*)LgiCrashHandler, &dlInfo);
     		if (dlInfo.dli_sname != NULL && dlInfo.dli_saddr != NULL)
     		{
     			p = dlInfo.dli_fname;
@@ -1370,7 +1370,7 @@ public:
 	}
 };
 
-OsApplication::OsApplication(int Args, char **Arg)
+OsApplication::OsApplication(int Args, const char **Arg)
 {
     Inst = this;
     d = new OsApplicationPriv;	
