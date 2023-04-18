@@ -565,17 +565,6 @@ enum LSystemPath
 	LSP_MOUNT_POINT,
 };
 
-// Deprecated method defines
-#ifdef __GNUC__
-#define DEPRECATED(func) func __attribute__ ((deprecated))
-#elif defined(_MSC_VER)
-#define DEPRECATED(func) __declspec(deprecated) func
-#else
-#pragma message("WARNING: You need to implement DEPRECATED for this compiler")
-#define DEPRECATED(func) func
-#endif
-
-//
 #ifdef _DEBUG
 	#define DeclDebugArgs				, const char *_file, int _line
 	#define PassDebugArgs				, __FILE__, __LINE__

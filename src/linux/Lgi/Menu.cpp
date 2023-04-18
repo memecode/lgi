@@ -204,7 +204,7 @@ LMenuItem *LSubMenu::AppendSeparator(int Where)
 LSubMenu *LSubMenu::AppendSub(const char *Str, int Where)
 {
 	LBase::Name(Str);
-	LMenuItem *i = new LMenuItem(Menu, this, Str, Where < 0 ? Items.Length() : Where, NULL);
+	auto i = new LMenuItem(Menu, this, Str, -1 /*ID*/, Where < 0 ? Items.Length() : Where);
 	if (i)
 	{
 		i->Id(-1);
@@ -750,10 +750,10 @@ bool LMenuItem::ScanForAccel()
 	const char *Sc = ShortCut;
 	if (!Sc)
 	{
-		char *n = LBase::Name();
+		auto n = LBase::Name();
 		if (n)
 		{
-			char *Tab = strchr(n, '\t');
+			auto Tab = strchr(n, '\t');
 			if (Tab)
 				Sc = Tab + 1;
 		}
@@ -1404,7 +1404,7 @@ bool LMenu::OnKey(LView *v, LKey &k)
 					}
 					else
 					{
-						char *n = s->Name();
+						auto n = s->Name();
 						if (ValidStr(n))
 						{
 							char *Amp = strchr(n, '&');

@@ -6,7 +6,9 @@
 #include <ctype.h>
 #include <unistd.h>
 
+#ifndef _POSIX_TIMERS
 #define _POSIX_TIMERS
+#endif
 #include <time.h>
 
 #include "lgi/common/Lgi.h"
@@ -383,7 +385,8 @@ static bool MimeAppsLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 {
 	LString::Array files, desktops;
 	
-	LFile::Path p(LSP_HOME, ".config/mimeapps.list");
+	LFile::Path p(LSP_HOME);
+	p += ".config/mimeapps.list";
 	if (p.Exists())
 		files.Add(p.GetFull());
 	

@@ -335,7 +335,7 @@ bool LPalette::Save(LFile &F, int Format)
 		{
 			char Buf[256];
 
-			sprintf(Buf, "JASC-PAL\r\n%04.4X\r\n%i\r\n", GetSize(), GetSize());
+			snprintf(Buf, sizeof(Buf), "JASC-PAL\r\n%4.4X\r\n%i\r\n", GetSize(), GetSize());
 			F.Write(Buf, strlen(Buf));
 
 			for (int i=0; i<GetSize(); i++)

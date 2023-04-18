@@ -480,7 +480,7 @@ public:
 			ExeFlags = " -mwindows";
 			m.Print("BuildDir = $(Build)\n"
 					"\n"
-					"Flags = -fPIC -w -fno-inline -fpermissive\n");
+					"Flags = -fPIC -fno-inline -fpermissive\n");
 			
 			const char *DefDefs = "-DWIN32 -D_REENTRANT";
 			sDefines[BuildDebug] = DefDefs;
@@ -494,7 +494,7 @@ public:
 			ExeFlags = "";
 			m.Print("BuildDir = $(Build)\n"
 					"\n"
-					"Flags = -fPIC -w -fno-inline -fpermissive\n" // -fexceptions
+					"Flags = -fPIC -fno-inline -fpermissive\n" // -fexceptions
 					);
 			sDefines[0].Printf("-D%s -D_REENTRANT", PlatformCap.Upper().Get());
 			#ifdef LINUX

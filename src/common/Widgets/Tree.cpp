@@ -76,22 +76,16 @@ public:
 	LRect Thumb;
 	LRect Text;
 	LRect Icon;
-	bool Open;
-	bool Selected;
-	bool Visible;
-	bool Last;
-	int Depth;
+	bool Open = false;
+	bool Selected = false;
+	bool Visible = false;
+	bool Last = false;
+	int Depth = 0;
 	
 	LTreeItemPrivate(LTreeItem *it)
 	{
 		Item = it;
-		Ds = NULL;
 		Pos.ZOff(-1, -1);
-		Open = false;
-		Selected = false;
-		Visible = false;
-		Last = false;
-		Depth = 0;
 		Text.ZOff(-1, -1);
 		Icon.ZOff(-1, -1);
 	}

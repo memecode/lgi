@@ -1610,7 +1610,7 @@ bool LHtmlParser::ParseColour(const char *s, LCss::ColorDef &c)
 	return false;
 }
 
-bool LHtmlParser::Is8Bit(char *s)
+bool LHtmlParser::Is8Bit(const char *s)
 {
 	while (*s)
 	{

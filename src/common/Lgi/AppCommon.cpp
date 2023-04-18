@@ -57,10 +57,10 @@ LString LApp::GetConfigPath()
 	return p.GetFull();
 }
 
-::LString LApp::GetConfig(const char *Variable)
+LString LApp::GetConfig(const char *Variable)
 {
 	auto c = d->GetConfig();
-	return c ? c->Get(Variable) : NULL;
+	return c ? c->Get(Variable) : LString();
 }
 
 void LApp::SetConfig(const char *Variable, const char *Value)

@@ -5,7 +5,7 @@
 #include "lgi/common/Charset.h"
 
 // return true if there are any characters with the 0x80 bit set
-bool Is8Bit(char *Text)
+bool Is8Bit(const char *Text)
 {
 	if (!Text)
 		return false;
@@ -47,6 +47,21 @@ char *DecodeBase64Str(char *Str, ssize_t Len)
 		}
 	}
 	return Str;
+}
+
+LString LDecodeBase64Str(LString Str)
+{
+	LString r;
+	ssize_t BinLen = BufferLen_64ToBin(Str.Length());
+	if (Str && r.Length(BinLen))
+	{
+		ssize_t Converted = ConvertBase64ToBinary((uchar*)r.Get(), r.Length(), Str.Get(), Str.Length());
+		if (Converted >= 0)
+			r.Get()[Converted] = 0;
+		else
+			r.Empty();
+	}
+	return r;
 }
 
 char *DecodeQuotedPrintableStr(char *Str, ssize_t Len)

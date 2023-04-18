@@ -715,7 +715,7 @@ struct LVolumePriv
 	}
 };
 
-LVolume::LVolume(const char *Path = NULL)
+LVolume::LVolume(const char *Path)
 {
 	d = new LVolumePriv(this, Path);
 }
@@ -1464,7 +1464,7 @@ int LFile::Open(const char *File, int Mode)
 			}
 			#endif
 
-			printf("LFile::Open failed\n\topen(%s,%08.8x) = %i\n\terrno=%s (%s)\n",
+			printf("LFile::Open failed\n\topen(%s,%8.8x) = %i\n\terrno=%s (%s)\n",
 				File, 
 				Mode, 
 				d->hFile,

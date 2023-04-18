@@ -8,7 +8,9 @@
 #endif
 #include <ctype.h>
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <dlfcn.h>
 
 #include "lgi/common/Lgi.h"
@@ -671,7 +673,7 @@ bool LApp::PostEvent(LViewI *View, int Msg, LMessage::Param a, LMessage::Param b
 				MsgCounts.Add(msg.m, MsgCounts.Find(msg.m) + 1);
 
 			for (auto c: MsgCounts)
-				printf("    %i->%i\n", c.key, c.value);
+				printf("    %i->%i\n", c.key, (int)c.value);
 				
 			if (Msg == 916)
 			{
@@ -790,14 +792,14 @@ bool LApp::GetOption(const char *Option, char *Dest, int DestLen)
 	return false;
 }
 
-bool LApp::GetOption(const char *Option, ::LString &Buf)
+bool LApp::GetOption(const char *Option, LString &Buf)
 {
 	if (IsOk() && Option)
 	{
-		int OptLen = strlen(Option);
+		auto OptLen = strlen(Option);
 		for (int i=1; i<d->Args.Args; i++)
 		{
-			char *a = d->Args.Arg[i];
+			auto a = d->Args.Arg[i];
 			if (!a)
 				continue;
 
@@ -805,7 +807,7 @@ bool LApp::GetOption(const char *Option, ::LString &Buf)
 			{
 				if (strnicmp(a+1, Option, OptLen) == 0)
 				{
-					char *Arg = 0;
+					const char *Arg = 0;
 					if (strlen(a+1+OptLen) > 0)
 					{
 						Arg = a + 1 + OptLen;
@@ -852,18 +854,14 @@ void LApp::OnCommandLine()
 
 	for (int i=1; i<GetAppArgs()->Args; i++)
 	{
-		char *a = GetAppArgs()->Arg[i];
+		auto a = GetAppArgs()->Arg[i];
 		if (LFileExists(a))
-		{
 			Files.Add(NewStr(a));
-		}
 	}
 
 	// call app
 	if (Files.Length() > 0)
-	{
 		OnReceiveFiles(Files);
-	}
 
 	// clear up
 	Files.DeleteArrays();

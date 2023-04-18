@@ -44,7 +44,7 @@ public:
 	// Tool methods
 	LHtmlElemInfo *GetTagInfo(const char *Tag);
 	static bool ParseColour(const char *s, LCss::ColorDef &c);
-	static bool Is8Bit(char *s);
+	static bool Is8Bit(const char *s);
 	char *ParsePropValue(char *s, char16 *&Value);
 	char *ParseName(char *s, LAutoString &Name);
 	char *ParseName(char *s, char **Name);
