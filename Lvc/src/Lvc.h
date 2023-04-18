@@ -169,9 +169,9 @@ struct AppPriv
 	AppPriv() :
 		Opts(LOptionsFile::DesktopMode, AppName),
 		sLog("Lvc.slog")
-	{
-		
-	}
+	{		
+	}	
+	~AppPriv();
 
 	SshConnection *GetConnection(const char *Uri, bool Create = true);
 	auto Wnd() { return Commits ? Commits->GetWindow() : LAppInst->AppWnd; }

@@ -251,7 +251,6 @@ class VcFolder : public LTreeItem
 	void LinkParents();
 	void CurrentRev(std::function<void(LString)> Callback);
 	LColour BranchColour(const char *Name);
-	void Empty();
 
 	bool ParseDiffs(LString s, LString Rev, bool IsWorking);
 	
@@ -300,6 +299,7 @@ public:
 	LArray<CommitField> &GetFields() { return Fields; }
 	bool Serialize(LXmlTag *t, bool Write);
 	LXmlTag *Save();
+	void Empty();
 	void Select(bool b);
 	void ListCommit(VcCommit *c);
 	void ListWorkingFolder();

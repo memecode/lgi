@@ -147,14 +147,18 @@ LWindow::~LWindow()
 		lgi_widget_detach(_Root);
         _Root = NULL;
 	}
+	
+	// This needs to be before the 'gtk_widget_destroy' because that will delete the menu's widgets.
+	DeleteObj(Menu);
+	
 	if (Wnd)
  	{
 		gtk_widget_destroy(GTK_WIDGET(Wnd));
 		Wnd = NULL;
  	}
+ 	
 	d->AttachState = LUnattached;
 
-	DeleteObj(Menu);
 	DeleteObj(d);
 	DeleteObj(_Lock);
 }

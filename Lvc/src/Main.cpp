@@ -19,6 +19,12 @@ const char *AppName =			"Lvc";
 #define OPT_Hosts				"Hosts"
 #define OPT_Host				"Host"
 
+AppPriv::~AppPriv()
+{
+	if (CurFolder)
+		CurFolder->Empty();
+}
+	
 SshConnection *AppPriv::GetConnection(const char *Uri, bool Create)
 {
 	LUri u(Uri);
@@ -1702,6 +1708,8 @@ int LgiMain(OsAppArguments &AppArgs)
 
 		a.AppWnd = new App;
 		a.Run();
+		
+		DeleteObj(a.AppWnd);
 	}
 
 	LAssert(VcCommit::Instances == 0);
