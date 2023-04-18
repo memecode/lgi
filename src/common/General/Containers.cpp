@@ -455,7 +455,7 @@ ssize_t LStringPipe::LineChars()
 		}
 	}
 
-	return Len;
+	return -1;
 }
 
 ssize_t LStringPipe::SaveToBuffer(char *Start, ssize_t BufSize, ssize_t Chars)
