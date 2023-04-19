@@ -170,7 +170,7 @@ public:
 			Serialize(false);
 
 			// Set controls enabled flag correctly
-			for (auto f: Fields)
+			for (auto f: *Fields)
 			{
 				LView *Ctrl = dynamic_cast<LView*>(Dlg->FindControl(f->GetCtrl()));
 				if (Ctrl)

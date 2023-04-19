@@ -913,9 +913,9 @@ bool MailProtocol::Write(const char *Buf, bool LogWrite)
 {												\
 	if (!Arg)									\
 	{											\
-		LMutex::Auto Lck(&SocketLock, _FL);	\
-		Socket.Reset(0);						\
-		return NULL;							\
+		LMutex::Auto Lck(&SocketLock, _FL);		\
+		Socket.Reset();							\
+		return 0;								\
 	}											\
 }
 
@@ -923,8 +923,8 @@ bool MailProtocol::Write(const char *Buf, bool LogWrite)
 {												\
 	if (!Arg)									\
 	{											\
-		LMutex::Auto Lck(&SocketLock, _FL);	\
-		Socket.Reset(0);						\
+		LMutex::Auto Lck(&SocketLock, _FL);		\
+		Socket.Reset()	;						\
 		goto CleanUp;							\
 	}											\
 }
@@ -1952,17 +1952,17 @@ LString MailReceiveFolder::GetHeaders(int Message)
 {
 	MailItem *m = d->Mail[Message];
 	if (!m)
-		return NULL;
+		return LString();
 	
 	LFile i;
 	if (!i.Open(m->File, O_READ))
-		return NULL;
+		return LString();
 
 	LStringPipe o;
 	LCopyStreamer c;
 	LHtmlLinePrefix e("", false);
 	if (!c.Copy(&i, &o, &e))
-		return NULL;
+		return LString();
 
 	return o.NewLStr();
 }
@@ -2544,7 +2544,7 @@ int MailPop3::Sizeof(int Message)
 	if (Socket)
 	{
 		sprintf_s(Buffer, sizeof(Buffer), "LIST %i\r\n", Message + 1);
-		VERIFY_RET_VAL(Write(0, true));
+		VERIFY_RET_VAL(Write(NULL, true));
 		VERIFY_RET_VAL(ReadReply());
 
 		char *s = strchr(Buffer, ' ');
@@ -2635,11 +2635,11 @@ bool MailPop3::GetUidList(LString::Array &Id)
 LString MailPop3::GetHeaders(int Message)
 {
 	if (!Socket)
-		return NULL;
+		return LString();
 
 	sprintf_s(Buffer, sizeof(Buffer), "TOP %i 0\r\n", Message + 1);
 	if (!Write(NULL, true))
-		return NULL;
+		return LString();
 
 	return ReadMultiLineReply();
 }
@@ -2662,13 +2662,13 @@ LString MailPop3::ReadMultiLineReply()
 
 		a += s;
 		if (!a || a[0] != '+')
-			return NULL;
+			return LString();
 	}
 	while (!MailIsEnd(a));
 
 	// Strip off the first line...
 	auto FirstNewLen = a.Find("\n");
-	return FirstNewLen >= 0 ? a(FirstNewLen, -1) : NULL;
+	return FirstNewLen >= 0 ? a(FirstNewLen, -1) : LString();
 }
 
 bool MailPop3::Close()

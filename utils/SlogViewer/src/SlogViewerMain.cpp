@@ -233,13 +233,13 @@ public:
 							for (size_t addr = 0; addr < v.data.Length() ; addr += rowSize)
 							{
 								ZeroObj(line);
-								sprintf(line, "%08.8x", (int)addr);
+								sprintf(line, "%8.8x", (int)addr);
 								auto rowBytes = MIN(v.data.Length() - addr, rowSize);
 								LAssert(rowBytes <= rowSize);
 								auto rowPtr = v.data.AddressOf(addr);
 								for (int i=0; i<rowBytes; i++)
 								{
-									sprintf(line + colHex + (i * 3), "%02.2x", rowPtr[i]);
+									sprintf(line + colHex + (i * 3), "%2.2x", rowPtr[i]);
 									line[colAscii + i] = rowPtr[i] >= ' ' && rowPtr[i] < 128 ? rowPtr[i] : '.';
 								}
 								for (int i=0; i<colEnd; i++)

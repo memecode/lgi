@@ -1,14 +1,15 @@
 // https://tools.ietf.org/html/rfc6455
 #include "lgi/common/Lgi.h"
 #include "lgi/common/WebSocket.h"
-#include "lgi/common/NetTools.h"
 #include "../Hash/sha1/sha1.h"
 #include "lgi/common/Base64.h"
 #ifdef LINUX
 	#include <netinet/tcp.h>
 	#include <unistd.h>
 	#include <poll.h>
+	#ifndef htonll
 	#define htonll LgiSwap64
+	#endif
 #endif
 
 #define LOG_ALL 0
