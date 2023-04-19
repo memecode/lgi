@@ -1,5 +1,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Net.h"
+#include "lgi/common/Uri.h"
+
 #include "WebFldDlg.h"
 #include "resdefs.h"
 

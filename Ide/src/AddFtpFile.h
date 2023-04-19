@@ -1,6 +1,7 @@
 #ifndef _ADD_FTP_FILE_H_
 #define _ADD_FTP_FILE_H_
 
+#include "lgi/common/Uri.h"
 #include "FtpThread.h"
 
 class AddFtpFile : public LDialog, public FtpCallback

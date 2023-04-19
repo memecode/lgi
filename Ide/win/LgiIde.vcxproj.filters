@@ -52,6 +52,9 @@
     <Filter Include="Source Files\Scripting">
       <UniqueIdentifier>{abcd6327-e6b7-4c09-8f78-c42a306904fe}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Build">
+      <UniqueIdentifier>{a785385b-f482-4978-8bff-26a6863d03bd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Debugger.h">
@@ -249,5 +252,10 @@
     <MASM Include="..\..\src\common\Coding\ExternCall.asm">
       <Filter>Source Files</Filter>
     </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Makefile.windows">
+      <Filter>Build</Filter>
+    </None>
   </ItemGroup>
 </Project>

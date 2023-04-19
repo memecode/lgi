@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "lgi/common/Lgi.h"
+#include "lgi/common/Uri.h"
 #include "FtpThread.h"
 
 static FtpThread *Ftp = 0;

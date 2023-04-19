@@ -12,12 +12,13 @@ Target = lgi
 ifndef Build
 	Build = Debug
 endif
+MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
 
-Flags = -fPIC -w -fno-inline -fpermissive
+Flags = -fPIC -fno-inline -fpermissive -Wno-format-truncation
 
 ifeq ($(Build),Debug)
-	Flags += -g -std=c++14
+	Flags += -MMD -MP -g -std=c++14
 	Tag = d
 	Defs = -D_DEBUG -DWIN32 -D_REENTRANT -DLGI_LIBRARY
 	Libs = 
@@ -27,7 +28,7 @@ ifeq ($(Build),Debug)
 		-I./include/lgi/win \
 		-I./include
 else
-	Flags += -s -Os -std=c++14
+	Flags += -MMD -MP -s -Os -std=c++14
 	Defs = -DWIN32 -D_REENTRANT -DLGI_LIBRARY
 	Libs = 
 	Inc =  \
@@ -91,7 +92,6 @@ Source =	.\src\win\Widgets\Edit_Win.cpp \
 			.\src\common\Resource\Res.cpp \
 			.\src\common\Resource\LgiRes.cpp \
 			.\src\common\Net\Uri.cpp \
-			.\src\common\Net\NetTools.cpp \
 			.\src\common\Net\Net.cpp \
 			.\src\common\Net\MDStringToDigest.cpp \
 			.\src\common\Net\Base64.cpp \
@@ -155,9 +155,23 @@ Source =	.\src\win\Widgets\Edit_Win.cpp \
 			.\src\common\Gdc2\16Bit.cpp \
 			.\src\common\Gdc2\15Bit.cpp
 
-SourceLst := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(Source)))
-Objects := $(addprefix $(BuildDir)/,$(SourceLst))
-Deps := $(patsubst %.o,%.d,$(Objects))
+SourceC    := $(filter %.c,$(Source))
+ObjectsC   := $(SourceC:.c=.o)
+SourceCpp  := $(filter %.cpp,$(Source))
+ObjectsCpp := $(SourceCpp:.cpp=.o)
+Objects    := $(notdir $(ObjectsC) $(ObjectsCpp))
+Objects    := $(addprefix $(BuildDir)/,$(Objects))
+Deps       := $(patsubst %.o,%.d,$(Objects))
+
+$(BuildDir)/%.o: %.c
+	mkdir -p $(@D)
+	echo $(notdir $<) [$(Build)]
+	$(CC) $(Inc) $(Flags) $(Defs) -c $< -o $@
+
+$(BuildDir)/%.o: %.cpp
+	mkdir -p $(@D)
+	echo $(notdir $<) [$(Build)]
+	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $@
 
 # Target
 TargetFile = lib$(Target)$(Tag).dll
@@ -171,33 +185,30 @@ $(TargetFile) : $(Objects)
 		$(Libs)
 	@echo Done.
 
-.SECONDEXPANSION:
-$(Objects): $(BuildDir)/%.o: $$(wildcard %.c*)
-	mkdir -p $(@D)
-	@echo $(<F) [$(Build)]
-ifeq "$(suffix $<)" ".cpp"
-	$(CPP) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
-else
-	$(CC) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
-endif
-
 -include $(Objects:.o=.d)
 
 # Clean out targets
 clean :
-	rm $(Objects) $(Deps) $(BuildDir)/$(TargetFile)
+	rm -rf $(BuildDir)
 	@echo Cleaned $(BuildDir)
 
-VPATH=%.cpp \
+VPATH=$(BuildDir) \
+	.\src\win\Widgets \
+	.\src\win\Lgi \
+	.\src\win\INet \
+	.\src\win\General \
+	.\src\win\Gdc2 \
+	.\src\common\Widgets \
+	.\src\common\Text \
+	.\src\common\Skins\Gel \
+	.\src\common\Resource \
+	.\src\common\Net \
+	.\src\common\Lgi \
 	.\src\common\Hash\sha1 \
 	.\src\common\Hash\md5 \
-	.\private\win \
-	.\private\linux \
-	.\private\common \
-	.\include\lgi\win \
-	.\include\lgi\mac\cocoa \
-	.\include\lgi\linux\Gtk \
-	.\include\lgi\common \
-	.\include \
-	$(BuildDir)
-
+	.\src\common\General \
+	.\src\common\Gdc2\Tools \
+	.\src\common\Gdc2\Path \
+	.\src\common\Gdc2\Font \
+	.\src\common\Gdc2\Filters \
+	.\src\common\Gdc2

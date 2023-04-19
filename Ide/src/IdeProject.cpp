@@ -293,9 +293,9 @@ public:
 		const char *PlatformStaticLibExt = NULL;
 		const char *PlatformExeExt = "";
 		const char *CompilerFlags = "-fPIC -fno-inline -fpermissive -Wno-format-truncation";
-		LString LinkerFlags;
 		const char *TargetType = d->Settings.GetStr(ProjTargetType, NULL, Platform);
 		const char *CompilerName = d->Settings.GetStr(ProjCompiler);
+		LString LinkerFlags;
 		LString CCompilerBinary = "gcc";
 		LString CppCompilerBinary = "g++";
 		LStream *Log = d->App->GetBuildLog();
@@ -841,7 +841,6 @@ public:
 									Rules.Print(" \\\n\t");
 								
 								LString DepRel = LMakeRelativePath(Base, AllDeps[i]);
-								// printf("MakeRel(%s, %s) = %s\n", Base.Get(), AllDeps[i], DepRel.Get());
 								auto f = DepRel ? DepRel.Get() : AllDeps[i];
 								ToNativePath(f);
 								Rules.Print("%s", f);
@@ -858,12 +857,18 @@ public:
 										Rel.Get());
 
 							auto Mk = Dep->GetMakefile(Platform);
-							// RenameMakefileForPlatform(Mk, Platform);
 							if (Mk)
 							{
-								char *DepMakefile = strrchr(Mk, DIR_CHAR);
-								if (DepMakefile)
+								LString MakefileRel = LMakeRelativePath(DepBase, Mk);
+								if (MakefileRel)
+								{
+									ToNativePath(MakefileRel);	
+									Rules.Print(" -f %s", MakefileRel.Get());
+								}
+								else if (auto DepMakefile = strrchr(Mk, DIR_CHAR))
+								{
 									Rules.Print(" -f %s", DepMakefile + 1);
+								}
 							}
 							else
 							{
