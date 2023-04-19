@@ -70,5 +70,8 @@
     <ClInclude Include="src\UnitTests.h">
       <Filter>Source Files\Testing</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\TextConvert.h">
+      <Filter>Lgi</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

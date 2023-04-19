@@ -1447,7 +1447,7 @@ bool LMatchCharset(short *Map, char16 *Utf, bool &Has8Bit)
 	return false;
 }
 
-const char *LUnicodeToCharset(const char *Utf8, ssize_t Len, List<char> *Prefs)
+const char *LUnicodeToCharset(const char *Utf8, ssize_t Len, LString::Array *Prefs)
 {
 	const char *Status = "utf-8"; // The default..
 

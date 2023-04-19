@@ -8,7 +8,7 @@ class PrivLStringTests
 public:
 };
 
-LStringTests::LStringTests() : UnitTest("LStringPipeTest")
+LStringTests::LStringTests() : UnitTest("LStringTests")
 {
 	d = new PrivLStringTests;
 }
@@ -37,26 +37,37 @@ bool LStringTests::Run()
 
 	*/
 
-	const char *EncodeResult1 = "=?utf-8?B?QmV5dHVsbGFoIEdlbsOn?=";
+	const char *EncodeResult1 = "=?iso-8859-1?Q?Beytullah_Gen=E7?=";
 	const char *EncodeResult2 = "=?iso-8859-9?Q?Beytullah_Gen=E7?=";
 
-	List<char> CharsetPrefs;
+	LString::Array CharsetPrefs;
 	const char *Rfc2047Input = "Beytullah Genç";
+	const char *UtfInput = "Beytullah GenÃ§";
 	const char *Charset = "windows-1252";
 
-	#if 0
-	LAutoString result1( EncodeRfc2047(NewStr(Rfc2047Input), Charset, &CharsetPrefs));
+	// No prefered charset testing:
+	LAutoString result1( EncodeRfc2047(NewStr(Rfc2047Input), Charset) );
 	if (Stricmp(result1.Get(), EncodeResult1))
 		return FAIL(_FL, "EncodeRfc2047");
-	LString   result2 = LEncodeRfc2047(Rfc2047Input, Charset, &CharsetPrefs);
+	LAutoString decode1( DecodeRfc2047(NewStr(result1)) );
+	if (Strcmp(UtfInput, decode1.Get()))
+		return FAIL(_FL, "DecodeRfc2047");
+
+	LString   result2 = LEncodeRfc2047(Rfc2047Input, Charset);
 	if (Stricmp(result2.Get(), EncodeResult1))
 		return FAIL(_FL, "LEncodeRfc2047");
-	#endif
+	LAutoString decode2( DecodeRfc2047(NewStr(result2)) );
+	if (Strcmp(UtfInput, decode2.Get()))
+		return FAIL(_FL, "DecodeRfc2047");
 
+	// Redo tests with a charset preference set:
 	CharsetPrefs.Add("iso-8859-9");
-
 	LAutoString result3( EncodeRfc2047(NewStr(Rfc2047Input), Charset, &CharsetPrefs));
-	LString   result4 = LEncodeRfc2047(Rfc2047Input, Charset, &CharsetPrefs);
+	if (Stricmp(result3.Get(), EncodeResult2))
+		return FAIL(_FL, "EncodeRfc2047");
+	LString     result4 = LEncodeRfc2047(Rfc2047Input, Charset, &CharsetPrefs);
+	if (Stricmp(result4.Get(), EncodeResult2))
+		return FAIL(_FL, "EncodeRfc2047");
 
 
 	return true;

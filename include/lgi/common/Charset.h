@@ -76,6 +76,6 @@ LgiFunc const char *LUnicodeToCharset
 	/// The byte length of the input text
 	ssize_t Len = -1,
 	/// An optional list of preferred charsets to look through first
-	List<char> *Prefs = 0
+	LString::Array *Prefs = NULL
 );
 

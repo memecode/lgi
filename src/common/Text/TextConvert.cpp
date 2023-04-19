@@ -296,52 +296,90 @@ char *DecodeRfc2047(char *Str)
 
 #define MIME_MAX_LINE		76
 
-static void EncodeRfc2047_Impl(	char *Str, size_t Length,
-								const char *Charset,
-								List<char> *CharsetPrefs,
+static void EncodeRfc2047_Impl(	char *Input, size_t Length,
+								const char *InCharset,
+								LString::Array *OutCharsets,
 								ssize_t LineLength,
 								std::function<void(char*, LStringPipe&)> Process)
 {
-	if (!Str)
+	if (!Input)
 		return;
 
-	if (!Charset)
-		Charset = "utf-8";
+	if (!InCharset)
+		InCharset = "utf-8";
 
 	LStringPipe p(256);
-	if (Is8Bit(Str))
+	if (Is8Bit(Input))
 	{
 		// pick an encoding
 		bool Base64 = false;
-		const char *DestCp = "utf-8";
-		if (Stricmp(Charset, "utf-8") == 0)
-			DestCp = LUnicodeToCharset(Str, Length, CharsetPrefs);
+		const char *DestCs = "utf-8";
+		char *Buf = NULL;
+		if (!OutCharsets ||
+			(OutCharsets && OutCharsets->Length() == 0) ||
+			Stristr(InCharset, "utf") != NULL)
+		{
+			if (!Stricmp(InCharset, "utf-8"))
+			{
+				auto DetectedCs = LUnicodeToCharset(Input, Length, OutCharsets);
+				if (DetectedCs)
+					Buf = (char*)LNewConvertCp(DestCs = DetectedCs, Input, InCharset, Length);
+			}
+			else
+			{
+				// Not utf-8 so convert to that first...
+				LAutoString utf8((char*)LNewConvertCp("utf-8", Input, InCharset));
+				if (utf8)
+				{
+					auto DetectCs = LUnicodeToCharset(utf8, Strlen(utf8.Get()), OutCharsets);
+					if (DetectCs)
+						Buf = (char*)LNewConvertCp(DestCs = DetectCs, Input, InCharset, Length);
+				}
+			}
+		}
+		else
+		{
+			for (auto Cs: *OutCharsets)
+			{
+				if (Buf = (char*)LNewConvertCp(DestCs = Cs, Input, InCharset, Length))
+					break;
+			}
+			if (!Buf || !DestCs)
+			{
+				// Fall back to utf-8
+				Buf = (char*)LNewConvertCp(DestCs = "utf-8", Input, InCharset, Length);
+			}
+		}
+
+		if (!Buf)
+		{
+			// Fall back to copy...
+			Buf = NewStr(Input, Length);
+			if (InCharset)
+				DestCs = InCharset;
+		}
 
 		int Chars = 0;
-		for (unsigned i=0; i<Length; i++)
+		for (unsigned i=0; Buf && Buf[i]; i++)
 		{
-			if (Str[i] & 0x80)
+			if (Buf[i] & 0x80)
 				Chars++;
 		}
 		
 		if
 		(
-			stristr(DestCp, "utf") ||
-			(
-				Length > 0 &&
-				((double)Chars/Length) > 0.4
-			)
+			Length > 0 &&
+			((double)Chars/Length) > 0.4
 		)
 		{
 			Base64 = true;
 		}
 
-		char *Buf = (char*)LNewConvertCp(DestCp, Str, Charset, Length);
 		if (Buf)
 		{
 			// encode the word
 			char Prefix[64];
-			int Ch = sprintf_s(Prefix, sizeof(Prefix), "=?%s?%c?", DestCp, Base64 ? 'B' : 'Q');
+			int Ch = sprintf_s(Prefix, sizeof(Prefix), "=?%s?%c?", DestCs, Base64 ? 'B' : 'Q');
 			p.Write(Prefix, Ch);
 			LineLength += Ch;
 
@@ -405,14 +443,14 @@ static void EncodeRfc2047_Impl(	char *Str, size_t Length,
 			DeleteArray(Buf);
 		}
 
-		Process(Str, p);
+		Process(Input, p);
 	}
 	else
 	{
 		bool RecodeNewLines = false;
-		for (char *s = Str; *s; s++)
+		for (char *s = Input; *s; s++)
 		{
-			if (*s == '\n' && (s == Str || s[-1] != '\r'))
+			if (*s == '\n' && (s == Input || s[-1] != '\r'))
 			{
 				RecodeNewLines = true;
 				break;
@@ -421,7 +459,7 @@ static void EncodeRfc2047_Impl(	char *Str, size_t Length,
 		
 		if (RecodeNewLines)
 		{
-			for (char *s = Str; *s; s++)
+			for (char *s = Input; *s; s++)
 			{
 				if (*s == '\r')
 					;
@@ -431,7 +469,7 @@ static void EncodeRfc2047_Impl(	char *Str, size_t Length,
 					p.Write(s, 1);
 			}
 			
-			Process(Str, p);
+			Process(Input, p);
 		}
 	}
 
@@ -440,7 +478,7 @@ static void EncodeRfc2047_Impl(	char *Str, size_t Length,
 }
 
 // Old heap string encode method (will eventually remove this...)
-char *EncodeRfc2047(char *Str, const char *Charset, List<char> *CharsetPrefs, ssize_t LineLength)
+char *EncodeRfc2047(char *Str, const char *Charset, LString::Array *CharsetPrefs, ssize_t LineLength)
 {
 	char *Out = Str;
 
@@ -458,7 +496,7 @@ char *EncodeRfc2047(char *Str, const char *Charset, List<char> *CharsetPrefs, ss
 }
 
 // New LString encode method
-LString LEncodeRfc2047(LString Str, const char *Charset, List<char> *CharsetPrefs, ssize_t LineLength)
+LString LEncodeRfc2047(LString Str, const char *Charset, LString::Array *CharsetPrefs, ssize_t LineLength)
 {
 	EncodeRfc2047_Impl(	Str.Get(), Str.Length(),
 						Charset,
