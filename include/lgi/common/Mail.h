@@ -176,11 +176,11 @@ public:
 class MailProtocol
 {
 protected:
-	char Buffer[4<<10];
+	char Buffer[4<<10] = "";
 	LMutex SocketLock;
 	LAutoPtr<LSocketI> Socket;
 	LOAuth2::Params OAuth2;
-	LDom *SettingStore;
+	LDom *SettingStore = NULL;
 
 	bool Error(const char *file, int line, const char *msg, ...);
 	bool Read();
@@ -190,21 +190,21 @@ protected:
 
 public:
 	// Logging
-	LStreamI *Logger;
+	LStreamI *Logger = NULL;
 	void Log(const char *Str, LSocketI::SocketMsgType type);
 
 	// Task Progress
-	MailProtocolProgress *Items;
-	MailProtocolProgress *Transfer;
+	MailProtocolProgress *Items = NULL;
+	MailProtocolProgress *Transfer = NULL;
 
 	// Settings
-	int ErrMsgId; /// \sa #L_ERROR_ESMTP_NO_AUTHS, #L_ERROR_ESMTP_UNSUPPORTED_AUTHS
+	int ErrMsgId = 0; /// \sa #L_ERROR_ESMTP_NO_AUTHS, #L_ERROR_ESMTP_UNSUPPORTED_AUTHS
 	LString ErrMsgFmt; /// The format for the printf
 	LString ErrMsgParam; /// The arguments for the printf
 	
 	LString ProgramName;
 	LString ExtraOutgoingHeaders;
-	List<char> CharsetPrefs;
+	LString::Array CharsetPrefs;
 
 	// Object
 	MailProtocol();

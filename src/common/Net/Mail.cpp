@@ -842,18 +842,10 @@ LString AddressDescriptor::Print()
 MailProtocol::MailProtocol() :
 	SocketLock("MailProtocol")
 {
-	Buffer[0] = 0;
-	Logger = 0;
-	ErrMsgId = 0;
-	SettingStore = NULL;
-
-	Items = 0;
-	Transfer = 0;
 }
 
 MailProtocol::~MailProtocol()
 {
-	CharsetPrefs.DeleteArrays();
 }
 
 void MailProtocol::Log(const char *Str, LSocketI::SocketMsgType type)
@@ -1307,7 +1299,7 @@ void StripChars(LString &s)
 	s = s.Strip("\r\n");
 }
 
-char *CreateAddressTag(List<AddressDescriptor> &l, int Type, List<char> *CharsetPrefs)
+char *CreateAddressTag(List<AddressDescriptor> &l, int Type, LString::Array *CharsetPrefs)
 {
 	char *Result = 0;
 	List<AddressDescriptor> Addr;
