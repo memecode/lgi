@@ -24,6 +24,7 @@
 #include "lgi/common/Box.h"
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/Menu.h"
+#include "lgi/common/Uri.h"
 
 #define FSI_FILE			0
 #define FSI_DIRECTORY		1

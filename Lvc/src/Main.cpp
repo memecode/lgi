@@ -622,7 +622,7 @@ public:
 	
 	const char *GetText(int i = 0) override
 	{
-		return i ? NULL : File;
+		return i ? NULL : File.Get();
 	}
 	
 	LString StripFirst(LString s)
@@ -692,7 +692,7 @@ public:
 
 						f = d->FindFile(newName);
 						if (!f)
-							f = new VcFile(d, NULL, NULL, false);
+							f = new VcFile(d, NULL, LString(), false);
 
 						const char *nullFn = "dev/null";
 						if (newName.Find(nullFn) >= 0)
@@ -1593,9 +1593,9 @@ int RemoteFolderDlg::OnNotify(LViewI *Ctrl, LNotification n)
 					SetCtrlEnabled(IDC_PASS, !isRoot);
 					SetCtrlEnabled(IDC_DELETE, !isRoot && !(cur == newhost));
 					
-					SetCtrlName(IDC_HOSTNAME, cur ? cur->Host : NULL);
-					SetCtrlName(IDC_USER, cur ? cur->User : NULL);
-					SetCtrlName(IDC_PASS, cur ? cur->Pass : NULL);
+					SetCtrlName(IDC_HOSTNAME, cur ? cur->Host.Get() : NULL);
+					SetCtrlName(IDC_USER, cur ? cur->User.Get() : NULL);
+					SetCtrlName(IDC_PASS, cur ? cur->Pass.Get() : NULL);
 					break;
 				}
 				default:

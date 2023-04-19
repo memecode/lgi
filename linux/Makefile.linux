@@ -15,7 +15,7 @@ endif
 MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
 
-Flags = -fPIC -fno-inline -fpermissive
+Flags = -fPIC -fno-inline -fpermissive -Wno-format-truncation
 
 ifeq ($(Build),Debug)
 	Flags += -MMD -MP -g -std=c++14
@@ -109,7 +109,6 @@ Source =	src/linux/Lgi/Window.cpp \
 			src/common/Resource/Res.cpp \
 			src/common/Resource/LgiRes.cpp \
 			src/common/Net/Uri.cpp \
-			src/common/Net/NetTools.cpp \
 			src/common/Net/Net.cpp \
 			src/common/Net/MDStringToDigest.cpp \
 			src/common/Net/Base64.cpp \

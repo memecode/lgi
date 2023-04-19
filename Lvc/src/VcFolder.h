@@ -2,6 +2,8 @@
 #define _VcFolder_h_
 
 #include "lgi/common/SubProcess.h"
+#include "lgi/common/Uri.h"
+
 #include <functional>
 
 class VcLeaf;
@@ -91,7 +93,7 @@ struct VcBranch : public LString
 	LColour Colour;
 	LString Hash;
 
-	VcBranch(LString name, LString hash = NULL)
+	VcBranch(LString name, LString hash = LString())
 	{
 		Default =	name.Equals("default") ||
 					name.Equals("trunk") ||

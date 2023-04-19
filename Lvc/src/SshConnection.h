@@ -2,6 +2,7 @@
 
 #include "lgi/common/Ssh.h"
 #include "lgi/common/EventTargetThread.h"
+#include "lgi/common/Uri.h"
 
 class SshConnection : public LSsh, public LEventTargetThread
 {

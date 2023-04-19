@@ -184,7 +184,6 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/LgiInc.h \
 	../include/lgi/common/LgiInterfaces.h \
 	../include/lgi/common/LgiMsgs.h \
-	../include/lgi/common/LgiNetInc.h \
 	../include/lgi/common/LgiRes.h \
 	../include/lgi/common/LgiString.h \
 	../include/lgi/common/LgiUiBase.h \
@@ -203,7 +202,6 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/Mru.h \
 	../include/lgi/common/Mutex.h \
 	../include/lgi/common/Net.h \
-	../include/lgi/common/NetTools.h \
 	../include/lgi/common/Notifications.h \
 	../include/lgi/common/OAuth2.h \
 	../include/lgi/common/OptionsFile.h \
@@ -259,6 +257,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/Unicode.h \
 	../include/lgi/common/UnicodeString.h \
 	../include/lgi/common/UnrolledList.h \
+	../include/lgi/common/Uri.h \
 	../include/lgi/common/Variant.h \
 	../include/lgi/common/View.h \
 	../include/lgi/common/Widgets.h \
@@ -344,7 +343,6 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/common/Net/Base64.cpp \
 	../src/common/Net/MDStringToDigest.cpp \
 	../src/common/Net/Net.cpp \
-	../src/common/Net/NetTools.cpp \
 	../src/common/Net/Uri.cpp \
 	../src/common/Resource/LgiRes.cpp \
 	../src/common/Resource/Res.cpp \
@@ -398,7 +396,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/linux/Lgi/Widgets.cpp \
 	../src/linux/Lgi/Window.cpp
 	export Build=$(Build); \
-	$(MAKE) -C ../ -f linux/Makefile.linux
+	$(MAKE) -C ../ -f ./linux/Makefile.linux
 
 -include $(Objects:.o=.d)
 
@@ -411,7 +409,7 @@ clean :
 cleanall :
 	rm -rf $(BuildDir) $(Target)
 	@echo Cleaned $(BuildDir) $(Target)
-	+make -C "../" -f "linux/Makefile.linux" clean
+	+make -C "../" -f "Makefile.linux" clean
 
 VPATH=$(BuildDir) \
 	../src/common/Text/Homoglyphs \

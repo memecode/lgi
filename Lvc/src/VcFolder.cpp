@@ -1,8 +1,10 @@
 #include "Lvc.h"
+
 #include "lgi/common/Combo.h"
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/Json.h"
 #include "lgi/common/ProgressDlg.h"
+
 #include "resdefs.h"
 
 #ifndef CALL_MEMBER_FN
@@ -1694,7 +1696,7 @@ bool VcFolder::ParseWorking(int Result, LString s, ParseParams *Params)
 					auto p = Ln.SplitDelimit(" \t", 1);
 					if (p.Length() > 1)
 					{
-						auto f = new VcFile(d, this, NULL, true);
+						auto f = new VcFile(d, this, LString(), true);
 						f->SetText(p[0], COL_STATE);
 						f->SetText(p[1], COL_FILENAME);
 						f->GetStatus();
@@ -1706,7 +1708,7 @@ bool VcFolder::ParseWorking(int Result, LString s, ParseParams *Params)
 		}
 		default:
 		{
-			ParseDiffs(s, NULL, true);
+			ParseDiffs(s, LString(), true);
 			break;
 		}
 	}
@@ -1766,7 +1768,7 @@ bool VcFolder::ParseDiff(int Result, LString s, ParseParams *Params)
 	if (Params)
 		ParseDiffs(s, Params->Str, Params->IsWorking);
 	else
-		ParseDiffs(s, NULL, true);
+		ParseDiffs(s, LString(), true);
 	return false;
 }
 
@@ -2507,7 +2509,7 @@ void VcFolder::OnVcsType(LString errorMsg)
 		{
 			if (NewType == VcError)
 			{
-				OnCmdError(NULL, errorMsg);
+				OnCmdError(LString(), errorMsg);
 			}
 			else
 			{
@@ -2687,7 +2689,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 					VcFile *f = Map.Find(File);
 					if (!f)
 					{
-						if ((f = new VcFile(d, this, NULL, IsWorking)))
+						if ((f = new VcFile(d, this, LString(), IsWorking)))
 							Ins.Insert(f);
 					}
 					if (f)
@@ -2744,7 +2746,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 					else if (Fmt == 1)
 					{
 						LString::Array p = Ln.SplitDelimit(" ");
-						f = new VcFile(d, this, NULL, IsWorking);
+						f = new VcFile(d, this, LString(), IsWorking);
 						f->SetText(p[0], COL_STATE);
 						f->SetText(p.Last(), COL_FILENAME);
 					}
@@ -2754,7 +2756,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 				}
 				else if (ShowUntracked)
 				{
-					VcFile *f = new VcFile(d, this, NULL, IsWorking);
+					VcFile *f = new VcFile(d, this, LString(), IsWorking);
 					f->SetText("?", COL_STATE);
 					f->SetText(Ln(2,-1), COL_FILENAME);
 					Ins.Insert(f);
@@ -2805,7 +2807,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 							File = File(5, -1);
 						}
 
-						VcFile *f = new VcFile(d, this, NULL, IsWorking);
+						VcFile *f = new VcFile(d, this, LString(), IsWorking);
 						f->SetText(p[0], COL_STATE);
 						f->SetText(File.Replace("\\","/"), COL_FILENAME);
 						f->GetStatus();
@@ -2815,7 +2817,7 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 				}
 				else if (ShowUntracked)
 				{
-					VcFile *f = new VcFile(d, this, NULL, IsWorking);
+					VcFile *f = new VcFile(d, this, LString(), IsWorking);
 					f->SetText("?", COL_STATE);
 					f->SetText(Ln(2,-1), COL_FILENAME);
 					Ins.Insert(f);
@@ -3321,7 +3323,7 @@ void VcFolder::Commit(const char *Msg, const char *Branch, bool AndPush)
 			}
 			default:
 			{
-				OnCmdError(NULL, "No commit impl for type.");
+				OnCmdError(LString(), "No commit impl for type.");
 				break;
 			}
 		}
@@ -3352,7 +3354,7 @@ bool VcFolder::ParseStartBranch(int Result, LString s, ParseParams *Params)
 		}
 		default:
 		{
-			OnCmdError(NULL, "No commit impl for type.");
+			OnCmdError(LString(), "No commit impl for type.");
 			break;
 		}
 	}
@@ -3377,7 +3379,7 @@ void VcFolder::StartBranch(const char *BranchName, const char *OnCreated)
 		}
 		default:
 		{
-			OnCmdError(NULL, "No commit impl for type.");
+			OnCmdError(LString(), "No commit impl for type.");
 			break;
 		}
 	}	
@@ -3407,7 +3409,7 @@ void VcFolder::Push(bool NewBranchOk)
 		}
 		default:
 		{
-			OnCmdError(NULL, "No push impl for type.");
+			OnCmdError(LString(), "No push impl for type.");
 			break;
 		}
 	}
@@ -3482,7 +3484,7 @@ void VcFolder::Pull(int AndUpdate, LoggingType Logging)
 			Status = StartCmd("up", &VcFolder::ParsePull, NULL, Logging);
 			break;
 		default:
-			OnCmdError(NULL, "No pull impl for type.");
+			OnCmdError(LString(), "No pull impl for type.");
 			break;
 	}
 
@@ -3835,7 +3837,7 @@ void VcFolder::GetVersion()
 		case VcPending:
 			break;
 		default:
-			OnCmdError(NULL, "No version control found.");
+			OnCmdError(LString(), "No version control found.");
 			break;
 	}
 }
@@ -4036,7 +4038,7 @@ bool VcFolder::ParseResolveList(int Result, LString s, ParseParams *Params)
 				{
 					if (p[0].Equals("U"))
 					{
-						auto f = new VcFile(d, this, NULL, true);
+						auto f = new VcFile(d, this, LString(), true);
 						f->SetText(p[0], COL_STATE);
 						f->SetText(p[1], COL_FILENAME);
 						f->GetStatus();
@@ -4338,7 +4340,7 @@ void VcLeaf::OnBrowse()
 		if (Dir.IsDir())
 			continue;
 
-		VcFile *f = new VcFile(d, Parent, NULL, true);
+		VcFile *f = new VcFile(d, Parent, LString(), true);
 		if (f)
 		{
 			f->SetUri(LString("file://") + full);
