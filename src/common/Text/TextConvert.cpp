@@ -53,7 +53,7 @@ LString LDecodeBase64Str(LString Str)
 {
 	LString r;
 	ssize_t BinLen = BufferLen_64ToBin(Str.Length());
-	if (Str && r.Length(BinLen))
+	if (Str && r.Length(BinLen) > 0)
 	{
 		ssize_t Converted = ConvertBase64ToBinary((uchar*)r.Get(), r.Length(), Str.Get(), Str.Length());
 		if (Converted >= 0)
@@ -61,6 +61,7 @@ LString LDecodeBase64Str(LString Str)
 		else
 			r.Empty();
 	}
+
 	return r;
 }
 
@@ -106,6 +107,48 @@ char *DecodeQuotedPrintableStr(char *Str, ssize_t Len)
 		}
 	}
 	return Str;
+}
+
+LString LDecodeQuotedPrintableStr(LString InStr)
+{
+	if (!InStr.Get())
+		return InStr;
+
+	LString OutStr = InStr.Get();
+	if (OutStr)
+	{
+		auto Out = OutStr.Get();
+		auto In = InStr.Get();
+		auto End = In + InStr.Length();
+
+		while (In < End)
+		{
+			if (*In == '=')
+			{
+				In++;
+				if (*In == '\r' || *In == '\n')
+				{
+					if (*In == '\r') In++;
+					if (*In == '\n') In++;
+				}
+				else
+				{
+					char c = ConvHexToBin(*In++) << 4;
+					c     |= ConvHexToBin(*In++) & 0xF;
+					*Out++ = c;
+				}
+			}
+			else
+			{
+				*Out++ = *In++;
+			}
+		}
+
+		// Correct the size and NULL terminate.
+		OutStr.Length(Out - OutStr.Get());
+	}
+
+	return OutStr;
 }
 
 char *DecodeRfc2047(char *Str)
@@ -162,21 +205,21 @@ char *DecodeRfc2047(char *Str)
 
 				if (Type != CONTENT_NONE)
 				{
-					Second++;					
-					char *Block = NewStr(Second, End-Second);
+					Second++;
+
+					LString Block(Second, End - Second);
 					if (Block)
 					{
 						switch (Type)
 						{
 							case CONTENT_BASE64:
-								Block = DecodeBase64Str(Block);
+								Block = LDecodeBase64Str(Block);
 								break;
 							case CONTENT_QUOTED_PRINTABLE:
-								Block = DecodeQuotedPrintableStr(Block);
+								Block = LDecodeQuotedPrintableStr(Block);
 								break;
 						}
 
-						size_t Len = strlen(Block);
 						if (StripUnderscores)
 						{
 							for (char *i=Block; *i; i++)
@@ -188,14 +231,14 @@ char *DecodeRfc2047(char *Str)
 
 						if (Cp && !_stricmp(Cp, "utf-8"))
 						{
-							p.Write((uchar*)Block, Len);
+							p.Write(Block);
 						}
 						else
 						{
 							auto Inst = LCharsetSystem::Inst();
-							LString Detect = Inst && Inst->DetectCharset ? Inst->DetectCharset(LString(Block, Len)) : LString();
+							LString Detect = Inst && Inst->DetectCharset ? Inst->DetectCharset(Block) : LString();
 
-							LAutoString Utf8((char*)LNewConvertCp("utf-8", Block, Detect ? Detect : Cp, Len));
+							LAutoString Utf8((char*)LNewConvertCp("utf-8", Block, Detect ? Detect : Cp, Block.Length()));
 							if (Utf8)
 							{
 								if (LIsUtf8(Utf8))
@@ -203,11 +246,9 @@ char *DecodeRfc2047(char *Str)
 							}
 							else
 							{
-								p.Write((uchar*)Block, Len);
+								p.Write(Block);
 							}
 						}
-
-						DeleteArray(Block);
 					}
 					
 					s = End + 2;
@@ -255,48 +296,47 @@ char *DecodeRfc2047(char *Str)
 
 #define MIME_MAX_LINE		76
 
-char *EncodeRfc2047(char *Str, const char *CodePage, List<char> *CharsetPrefs, ssize_t LineLength)
+static void EncodeRfc2047_Impl(	char *Str, size_t Length,
+								const char *Charset,
+								List<char> *CharsetPrefs,
+								ssize_t LineLength,
+								std::function<void(char*, LStringPipe&)> Process)
 {
-	if (!CodePage)
-	{
-		CodePage = "utf-8";
-	}
+	if (!Str)
+		return;
+
+	if (!Charset)
+		Charset = "utf-8";
 
 	LStringPipe p(256);
-
-	if (!Str)
-		return NULL;
-
 	if (Is8Bit(Str))
 	{
 		// pick an encoding
 		bool Base64 = false;
 		const char *DestCp = "utf-8";
-		size_t Len = strlen(Str);;
-		if (_stricmp(CodePage, "utf-8") == 0)
-		{
-			DestCp = LUnicodeToCharset(Str, Len, CharsetPrefs);
-		}
+		if (Stricmp(Charset, "utf-8") == 0)
+			DestCp = LUnicodeToCharset(Str, Length, CharsetPrefs);
 
 		int Chars = 0;
-		for (unsigned i=0; i<Len; i++)
+		for (unsigned i=0; i<Length; i++)
 		{
 			if (Str[i] & 0x80)
 				Chars++;
 		}
+		
 		if
 		(
 			stristr(DestCp, "utf") ||
 			(
-				Len > 0 &&
-				((double)Chars/Len) > 0.4
+				Length > 0 &&
+				((double)Chars/Length) > 0.4
 			)
 		)
 		{
 			Base64 = true;
 		}
 
-		char *Buf = (char*)LNewConvertCp(DestCp, Str, CodePage, Len);
+		char *Buf = (char*)LNewConvertCp(DestCp, Str, Charset, Length);
 		if (Buf)
 		{
 			// encode the word
@@ -365,8 +405,7 @@ char *EncodeRfc2047(char *Str, const char *CodePage, List<char> *CharsetPrefs, s
 			DeleteArray(Buf);
 		}
 
-		DeleteArray(Str);
-		Str = p.NewStr();
+		Process(Str, p);
 	}
 	else
 	{
@@ -392,10 +431,43 @@ char *EncodeRfc2047(char *Str, const char *CodePage, List<char> *CharsetPrefs, s
 					p.Write(s, 1);
 			}
 			
-			DeleteArray(Str);
-			Str = p.NewStr();
+			Process(Str, p);
 		}
 	}
+
+	// It's not an error to not call 'OutputStr', in that case 
+	// the input is passed through to the output unchanged.
+}
+
+// Old heap string encode method (will eventually remove this...)
+char *EncodeRfc2047(char *Str, const char *Charset, List<char> *CharsetPrefs, ssize_t LineLength)
+{
+	char *Out = Str;
+
+	EncodeRfc2047_Impl(	Str, Strlen(Str),
+						Charset,
+						CharsetPrefs,
+						LineLength,
+						[&Out](auto s, auto &pipe)
+						{
+							DeleteArray(s);
+							Out = pipe.NewStr();
+						});
+
+	return Out;
+}
+
+// New LString encode method
+LString LEncodeRfc2047(LString Str, const char *Charset, List<char> *CharsetPrefs, ssize_t LineLength)
+{
+	EncodeRfc2047_Impl(	Str.Get(), Str.Length(),
+						Charset,
+						CharsetPrefs,
+						LineLength,
+						[&Str](auto s, auto &pipe)
+						{
+							Str = pipe.NewLStr();
+						});
 
 	return Str;
 }

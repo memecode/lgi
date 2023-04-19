@@ -130,11 +130,11 @@ LgiFunc ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, cons
 LgiFunc void *LNewConvertCp
 (
 	/// Output charset
-	const char *OutCp,
+	const char *OutCharset,
 	/// Input buffer
 	const void *In,
 	/// The input data's charset
-	const char *InCp,
+	const char *InCharset,
 	/// Bytes of valid data in the input
 	ssize_t InLen = -1
 );

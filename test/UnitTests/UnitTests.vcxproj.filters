@@ -5,9 +5,6 @@
       <UniqueIdentifier>{1b5d1f69-ef66-4844-baa5-25ec23d2151c}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
-    <Filter Include="Source Files\Strings">
-      <UniqueIdentifier>{c4556f63-9655-4afe-ba0f-66090ce60a11}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{a734023f-ceb2-4882-9efc-5719c6bf4c8d}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
@@ -15,11 +12,11 @@
     <Filter Include="Lgi">
       <UniqueIdentifier>{134d3911-e459-4919-8af8-82198f95a179}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Testing">
+      <UniqueIdentifier>{8b34f4e6-17d2-42af-8c12-1386ba1acae0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\UnitTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\AutoPtrTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -35,9 +32,6 @@
     <ClCompile Include="src\StringClassTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\StringPipeTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\BitsTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -48,13 +42,22 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\common\General\New.cpp">
+      <Filter>Lgi</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UnitTests.cpp">
+      <Filter>Source Files\Testing</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NetworkTests.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\StringTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\Text\TextConvert.cpp">
+      <Filter>Lgi</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\UnitTests.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\common\GStringClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -63,6 +66,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\common\LUnrolledList.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UnitTests.h">
+      <Filter>Source Files\Testing</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

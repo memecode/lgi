@@ -6,14 +6,14 @@
 int32 LString::RefStrCount = 0;
 #endif
 
-class LStringClassTestPriv
+class PrivLStringClassTest
 {
 public:
 };
 
 LStringClassTest::LStringClassTest() : UnitTest("LStringClassTest")
 {
-	d = new LStringClassTestPriv;
+	d = new PrivLStringClassTest;
 }
 
 LStringClassTest::~LStringClassTest()

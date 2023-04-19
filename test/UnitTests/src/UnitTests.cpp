@@ -12,9 +12,10 @@ void UnitTests()
 	Tests.Add(new LMatrixTest);
 	Tests.Add(new LStringClassTest);
 	Tests.Add(new LDateTimeTest);
-	Tests.Add(new LStringPipeTest);
+	Tests.Add(new LStringTests);
 	Tests.Add(new LBitsTest);
 	Tests.Add(new JsonTest);
+	Tests.Add(new NetworkTests);
 
 	for (int i=0; i<Tests.Length(); i++)
 	{

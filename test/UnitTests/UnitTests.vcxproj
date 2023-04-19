@@ -247,15 +247,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\common\General\New.cpp" />
+    <ClCompile Include="..\..\src\common\Text\TextConvert.cpp" />
     <ClCompile Include="src\AutoPtrTest.cpp" />
     <ClCompile Include="src\ContainerTests.cpp" />
     <ClCompile Include="src\CssTest.cpp" />
     <ClCompile Include="src\JsonTest.cpp" />
     <ClCompile Include="src\MatrixTest.cpp" />
+    <ClCompile Include="src\NetworkTests.cpp" />
     <ClCompile Include="src\StringClassTests.cpp" />
-    <ClCompile Include="src\StringPipeTests.cpp" />
     <ClCompile Include="src\BitsTest.cpp" />
     <ClCompile Include="src\RangeTest.cpp" />
+    <ClCompile Include="src\StringTests.cpp" />
     <ClCompile Include="src\UnitTests.cpp" />
   </ItemGroup>
   <ItemGroup>

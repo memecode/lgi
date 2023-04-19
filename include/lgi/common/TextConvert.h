@@ -11,5 +11,5 @@ LString LDecodeQuotedPrintableStr(LString Str);
 [[deprecated]] char *DecodeRfc2047(char *Str);
 LString LDecodeRfc2047(LString Str);
 
-[[deprecated]] char *EncodeRfc2047(char *Str, const char *CodePage, List<char> *CharsetPrefs, ssize_t LineLength = 0);
-LString LEncodeRfc2047(LString Str, const char *CodePage, List<char> *CharsetPrefs, ssize_t LineLength = 0);
+[[deprecated]] char *EncodeRfc2047(char *Str, const char *Charset, List<char> *CharsetPrefs, ssize_t LineLength = 0);
+LString LEncodeRfc2047(LString Str, const char *Charset, List<char> *CharsetPrefs, ssize_t LineLength = 0);

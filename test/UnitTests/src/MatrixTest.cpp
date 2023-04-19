@@ -2,7 +2,7 @@
 #include "UnitTests.h"
 #include "lgi/common/Matrix.h"
 
-class LMatrixTestPriv
+class PrivLMatrixTest
 {
 public:
 	bool Error(char *Fmt, ...)
@@ -63,7 +63,7 @@ public:
 
 LMatrixTest::LMatrixTest() : UnitTest("LMatrixTest")
 {
-	d = new LMatrixTestPriv;
+	d = new PrivLMatrixTest;
 }
 
 LMatrixTest::~LMatrixTest()

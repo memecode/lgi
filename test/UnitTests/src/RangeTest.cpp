@@ -3,6 +3,14 @@
 #include "lgi/common/UnrolledList.h"
 #include "lgi/common/HashTable.h"
 
+LRangeTest::LRangeTest() : UnitTest("LRangeTest")
+{
+}
+
+LRangeTest::~LRangeTest()
+{
+}
+
 bool LRangeTest::Run()
 {
 	LRange a, b, c;

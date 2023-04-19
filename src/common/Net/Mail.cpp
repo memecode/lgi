@@ -1348,20 +1348,14 @@ char *CreateAddressTag(List<AddressDescriptor> &l, int Type, List<char> *Charset
 			else if (a->sName)
 			{
 				// Name and addr
-				char *Mem = 0;
-				char *Name = a->sName.Get();
-
+				auto Name = a->sName;
 				if (Is8Bit(Name))
-				{
-					Name = Mem = EncodeRfc2047(NewStr(Name), 0, CharsetPrefs);
-				}
+					Name = LEncodeRfc2047(Name, NULL/*charset*/, CharsetPrefs);
 
 				if (strchr(Name, '\"'))
-				    sprintf_s(Buffer, sizeof(Buffer), "'%s' <%s>", Name, a->sAddr.Get());
+				    sprintf_s(Buffer, sizeof(Buffer), "'%s' <%s>", Name.Get(), a->sAddr.Get());
 				else
-				    sprintf_s(Buffer, sizeof(Buffer), "\"%s\" <%s>", Name, a->sAddr.Get());
-
-				DeleteArray(Mem);
+				    sprintf_s(Buffer, sizeof(Buffer), "\"%s\" <%s>", Name.Get(), a->sAddr.Get());
 			}
 			else if (a->sAddr)
 			{

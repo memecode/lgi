@@ -1,5 +1,4 @@
-#ifndef _UNIT_TESTS_H_
-#define _UNIT_TESTS_H_
+#pragma once
 
 class UnitTest : public LBase
 {
@@ -20,78 +19,33 @@ public:
 	}
 };
 
-class LAutoPtrTest : public UnitTest
-{
-	class LAutoPtrTestPriv *d;
+#define DECL_TEST(name) \
+	class name : public UnitTest \
+	{ \
+		class Priv##name *d; \
+	public: \
+		name(); \
+		~name(); \
+		bool Run(); \
+	}
 
-public:
-	LAutoPtrTest();
-	~LAutoPtrTest();
 
-	bool Run();
-};
-
-class LCssTest : public UnitTest
-{
-	class LCssTestPriv *d;
-
-public:
-	LCssTest();
-	~LCssTest();
-
-	bool Run();
-};
-
-class LMatrixTest : public UnitTest
-{
-	class LMatrixTestPriv *d;
-
-public:
-	LMatrixTest();
-	~LMatrixTest();
-
-	bool Run();
-};
-
-class LContainers : public UnitTest
-{
-	class LContainersPriv *d;
-
-public:
-	LContainers();
-	~LContainers();
-
-	bool Run();
-};
-
-class LStringClassTest : public UnitTest
-{
-	class LStringClassTestPriv *d;
-
-public:
-	LStringClassTest();
-	~LStringClassTest();
-
-	bool Run();
-};
-
-class LStringPipeTest : public UnitTest
-{
-	class LStringPipeTestPriv *d;
-
-public:
-	LStringPipeTest();
-	~LStringPipeTest();
-
-	bool Run();
-};
+DECL_TEST(LAutoPtrTest);
+DECL_TEST(LCssTest);
+DECL_TEST(LMatrixTest);
+DECL_TEST(LContainers);
+DECL_TEST(LStringClassTest);
+DECL_TEST(LStringTests);
+DECL_TEST(LRangeTest);
+DECL_TEST(JsonTest);
+DECL_TEST(LBitsTest);
+DECL_TEST(NetworkTests);
 
 class LDateTimeTest : public UnitTest
 {
 public:
 	LDateTimeTest() : UnitTest("LDateTimeTest") {}
-	~LDateTimeTest() {}
-
+	
 	bool Run()
 	{
 		#ifdef _DEBUG
@@ -101,32 +55,3 @@ public:
 		#endif
 	}
 };
-
-class LRangeTest : public UnitTest
-{
-public:
-	LRangeTest() : UnitTest("LRangeTest") {}
-	~LRangeTest() {}
-
-	bool Run();
-};
-
-class JsonTest : public UnitTest
-{
-public:
-	JsonTest();
-	~JsonTest();
-
-	bool Run();
-};
-
-class LBitsTest : public UnitTest
-{
-public:
-	LBitsTest() : UnitTest("LBitsTest") {}
-	~LBitsTest() {}
-
-	bool Run();
-};
-
-#endif

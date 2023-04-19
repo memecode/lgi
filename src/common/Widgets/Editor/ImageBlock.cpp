@@ -3,6 +3,7 @@
 #include "lgi/common/GdcTools.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/Net.h"
+#include "lgi/common/Uri.h"
 
 #include "RichTextEditPriv.h"
 

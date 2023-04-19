@@ -1,6 +1,5 @@
 #include <stdio.h>
 
-#include "lgi/common/LgiNetInc.h"
 #include "lgi/common/Lgi.h"
 #include "lgi/common/Mime.h"
 #include "lgi/common/Base64.h"

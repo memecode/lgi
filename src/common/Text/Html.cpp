@@ -27,6 +27,7 @@
 #include "lgi/common/FindReplaceDlg.h"
 #include "lgi/common/Homoglyphs.h"
 #include "lgi/common/Charset.h"
+#include "lgi/common/Uri.h"
 
 #include "HtmlPriv.h"
 

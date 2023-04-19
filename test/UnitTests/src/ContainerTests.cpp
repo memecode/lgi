@@ -3,7 +3,7 @@
 #include "lgi/common/UnrolledList.h"
 #include "lgi/common/HashTable.h"
 
-class LContainersPriv
+class PrivLContainers
 {
 public:
 	bool ListDeleteOne(int pos, int sz)

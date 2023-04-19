@@ -2,7 +2,7 @@
 #include "UnitTests.h"
 #include "lgi/common/Css.h"
 
-class LCssTestPriv
+class PrivLCssTest
 {
 public:
 	LCss c;
@@ -155,7 +155,7 @@ public:
 
 LCssTest::LCssTest() : UnitTest("LCssTest")
 {
-	d = new LCssTestPriv;
+	d = new PrivLCssTest;
 }
 
 LCssTest::~LCssTest()

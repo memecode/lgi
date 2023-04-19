@@ -2,6 +2,14 @@
 #include "UnitTests.h"
 #include "lgi/common/Bits.h"
 
+LBitsTest::LBitsTest() : UnitTest("LBitsTest")
+{
+}
+
+LBitsTest::~LBitsTest()
+{
+}
+
 bool LBitsTest::Run()
 {
 	uint8_t Data[] = {0xf8, 0xcc, 0x1d, 0x00};

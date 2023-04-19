@@ -778,7 +778,7 @@ LCharsetSystem *LCharsetSystem::Inst()
 	return &CharsetSystem;
 }
 
-LCharset *LGetCpInfo(const char *Cs)
+LCharset *LGetCharsetInfo(const char *Cs)
 {
 	return CharsetSystem.GetCsInfo(Cs);
 }
@@ -804,8 +804,8 @@ ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *
 
 	if (Out && OutCp && In && InCp)
 	{
-		LCharset *InInfo = LGetCpInfo(InCp);
-		LCharset *OutInfo = LGetCpInfo(OutCp);
+		LCharset *InInfo = LGetCharsetInfo(InCp);
+		LCharset *OutInfo = LGetCharsetInfo(OutCp);
 
 		if (InInfo && OutInfo)
 		{
@@ -1072,8 +1072,8 @@ LString LStrConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 	if (!OutCp || !In || !InCp)
 		return LString();
 
-	LCharset *InInfo = LGetCpInfo(InCp);
-	LCharset *OutInfo = LGetCpInfo(OutCp);
+	LCharset *InInfo = LGetCharsetInfo(InCp);
+	LCharset *OutInfo = LGetCharsetInfo(OutCp);
 	if (!InInfo || !OutInfo)
 		return LString();
 
@@ -1148,13 +1148,13 @@ LString LStrConvertCp(const char *OutCp, const void *In, const char *InCp, ssize
 	return b.NewLStr();
 }
 
-void *LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t InLen)
+void *LNewConvertCp(const char *OutCharset, const void *In, const char *InCharset, ssize_t InLen)
 {
-	if (!OutCp || !In || !InCp)
+	if (!OutCharset || !In || !InCharset)
 		return NULL;
 
-	LCharset *InInfo = LGetCpInfo(InCp);
-	LCharset *OutInfo = LGetCpInfo(OutCp);
+	auto InInfo = LGetCharsetInfo(InCharset);
+	auto OutInfo = LGetCharsetInfo(OutCharset);
 	if (!InInfo || !OutInfo)
 		return NULL;
 
@@ -1201,7 +1201,7 @@ void *LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t
 			return NULL;
 	}
 
-	if (!stricmp(InCp, OutCp))
+	if (!stricmp(InCharset, OutCharset))
 	{
 		if (InInfo->Type == CpUtf16)
 			return DupeString((uint16*)In, InLen/sizeof(uint16));
@@ -1222,7 +1222,7 @@ void *LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t
 			const char *OutCs = OutInfo->GetIconvName();
 			if (!Fs->IconvConvert(OutCs, &b, InCs, (const char*&)In, InLen))
 			{
-				InCp = "iso-8859-1";
+				InCharset = "iso-8859-1";
 				goto BufConvert;
 			}
 		}
@@ -1236,7 +1236,7 @@ void *LNewConvertCp(const char *OutCp, const void *In, const char *InCp, ssize_t
 		char Buf[2 << 10];
 		while (InLen > 0)
 		{
-			ssize_t Bytes = LBufConvertCp(Buf, OutCp, sizeof(Buf), In, InCp, InLen);
+			ssize_t Bytes = LBufConvertCp(Buf, OutCharset, sizeof(Buf), In, InCharset, InLen);
 			if (Bytes > 0)
 			{
 				b.Write((uchar*)Buf, (int)Bytes);
@@ -1255,7 +1255,7 @@ int LCharLen(const void *Str, const char *Cp, int Bytes)
 {
 	if (Str && Cp)
 	{
-		LCharset *InInfo = LGetCpInfo(Cp);
+		LCharset *InInfo = LGetCharsetInfo(Cp);
 		if (InInfo)
 		{
 			switch (InInfo->Type)
@@ -1305,7 +1305,7 @@ int LCharLen(const void *Str, const char *Cp, int Bytes)
 
 bool LIsCpImplemented(char *Cp)
 {
-	return LGetCpInfo(Cp) != 0;
+	return LGetCharsetInfo(Cp) != 0;
 }
 
 const char *LAnsiToLgiCp(int AnsiCodePage)
@@ -1503,7 +1503,7 @@ LString LToNativeCp(const char *In, ssize_t InLen)
 	LString s;
 
 	#ifdef WIN32
-	LCharset *CpInfo = LGetCpInfo(Cp);
+	LCharset *CpInfo = LGetCharsetInfo(Cp);
 	if (!CpInfo || CpInfo->Type == CpWindowsDb)
 	{
 		if (In)
@@ -1542,7 +1542,7 @@ LString LFromNativeCp(const char *In, ssize_t InLen)
 	LString s;
 
 	#ifdef WIN32
-	LCharset *CpInfo = LGetCpInfo(Cp);
+	LCharset *CpInfo = LGetCharsetInfo(Cp);
 	if (!CpInfo || CpInfo->Type == CpWindowsDb)
 	{
 		if (In)
