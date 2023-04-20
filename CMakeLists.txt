@@ -160,7 +160,6 @@ set (CommonSource
 	src/common/Net/Uri.cpp
 	include/lgi/common/Net.h
 	src/common/Net/Net.cpp
-	src/common/Net/NetTools.cpp
 	src/common/Net/MDStringToDigest.cpp
 	src/common/Lgi/Alert.cpp
 	include/lgi/common/Css.h

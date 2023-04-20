@@ -3793,11 +3793,11 @@ bool LScriptEngine::EvaluateExpression(LVariant *Result, LDom *VariableSource, c
 	// Create trivial script to evaluate the expression
 	LString a;
 	a.Printf("return %s;", Expression);
-	
+
 	// Compile the script
 	LCompiler Comp;
 	LAutoPtr<LCompiledCode> Obj;
-	if (!Comp.Compile(Obj, NULL, NULL, NULL, a, VariableSource))
+	if (!Comp.Compile(Obj, &d->SysContext, d->UserContext, NULL, a, VariableSource))
 	{
 		LAssert(0);
 		return false;

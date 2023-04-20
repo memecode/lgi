@@ -512,6 +512,8 @@ public:
 		bool Print(LScriptArguments &Args);
 		/// Converts args to string
 		bool ToString(LScriptArguments &Args);
+		/// Turn a 4 char string into an int
+		bool Lgi4CC(LScriptArguments &Args);
 
 	// Object creation/deletion
 		bool New(LScriptArguments &Args);

@@ -574,6 +574,17 @@ bool SystemFunctions::ToString(LScriptArguments &Args)
 	return true;
 }
 
+bool SystemFunctions::Lgi4CC(LScriptArguments &Args)
+{
+	auto s = Args.StringAt(0);
+	if (!s)
+		return false;
+
+	auto i = ::Lgi4CC(s);
+	*Args.GetReturn() = i;
+	return true;
+}
+
 bool SystemFunctions::Print(LScriptArguments &Args)
 {
 	LStream *Out = Log ? Log : (Engine ? Engine->GetConsole() : NULL);
@@ -1187,6 +1198,7 @@ LHostFunc SystemLibrary[] =
 	DefFn(Sprintf),
 	DefFn(Print),
 	DefFn(ToString),
+	DefFn(Lgi4CC),
 	
 	// Containers/objects
 	DefFn(New),
