@@ -68,15 +68,15 @@ class LMime
 	LString Headers;
 
 	// Data info
-	ssize_t DataPos;
-	ssize_t DataSize;
-	LMutex *DataLock;
-	LStreamI *DataStore;
-	bool OwnDataStore;
+	ssize_t DataPos = 0;
+	ssize_t DataSize = 0;
+	LMutex *DataLock = NULL;
+	LStreamI *DataStore = NULL;
+	bool OwnDataStore = false;
 
 	// Other info
-	char *TmpPath;
-	LMime *Parent;
+	char *TmpPath = NULL;
+	LMime *Parent = NULL;
 	LArray<LMime*> Children;
 
 	// Private methods

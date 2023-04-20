@@ -242,6 +242,14 @@ inline T ABS(T v)
 										  (((a) & 0x00000000000000ff) << 56) )
 #endif
 
+#ifdef __cplusplus
+// Define a way of creating a 4 character code string literal as an int.
+constexpr uint32_t Lgi4CC( char const p[5] )
+{
+    return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
+}
+#endif
+		
 // Asserts
 LgiFunc void							_lgi_assert(bool b, const char *test, const char *file, int line);
 #ifdef _DEBUG

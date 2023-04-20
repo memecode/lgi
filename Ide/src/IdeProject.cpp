@@ -292,7 +292,8 @@ public:
 		const char *PlatformLibraryExt = NULL;
 		const char *PlatformStaticLibExt = NULL;
 		const char *PlatformExeExt = "";
-		const char *CompilerFlags = "-fPIC -fno-inline -fpermissive -Wno-format-truncation";
+		const char *CCompilerFlags = "-MMD -MP -g -fPIC -fno-inline";
+		const char *CppCompilerFlags = "$CFlags -fpermissive -std=c++14";
 		const char *TargetType = d->Settings.GetStr(ProjTargetType, NULL, Platform);
 		const char *CompilerName = d->Settings.GetStr(ProjCompiler);
 		LString LinkerFlags;
@@ -481,8 +482,10 @@ public:
 			ExeFlags = " -mwindows";
 			m.Print("BuildDir = $(Build)\n"
 					"\n"
-					"Flags = %s\n",
-					CompilerFlags);
+					"CFlags = %s\n"
+					"CppFlags = %s\n",
+					CCompilerFlags,
+					CppCompilerFlags);
 			
 			const char *DefDefs = "-DWIN32 -D_REENTRANT";
 			sDefines[BuildDebug] = DefDefs;
@@ -496,8 +499,10 @@ public:
 			ExeFlags = "";
 			m.Print("BuildDir = $(Build)\n"
 					"\n"
-					"Flags = %s\n",
-					CompilerFlags);
+					"CFlags = %s\n"
+					"CppFlags = %s\n",
+					CCompilerFlags,
+					CppCompilerFlags);
 			sDefines[0].Printf("-D%s -D_REENTRANT", PlatformCap.Upper().Get());
 			#ifdef LINUX
 			sDefines[BuildDebug] += " -D_FILE_OFFSET_BITS=64"; // >:-(
@@ -687,7 +692,8 @@ public:
 		// Debug specific
 		m.Print("\n"
 				"ifeq ($(Build),Debug)\n"
-				"	Flags += -MMD -MP -g -std=c++14\n"
+				"	CFlags += -g\n"
+				"	CppFlags += -g\n"
 				"	Tag = d\n"
 				"	Defs = -D_DEBUG %s\n"
 				"	Libs = %s\n"
@@ -698,7 +704,8 @@ public:
 		
 		// Release specific
 		m.Print("else\n"
-				"	Flags += -MMD -MP -s -Os -std=c++14\n"
+				"	CFlags += -s -Os\n"
+				"	CppFlags += -s -Os\n"
 				"	Defs = %s\n"
 				"	Libs = %s\n"
 				"	Inc = %s\n"
@@ -779,12 +786,12 @@ public:
 					"$(BuildDir)/%%.o: %%.c\n"
 					"	mkdir -p $(@D)\n"
 					"	echo $(notdir $<) [$(Build)]\n"
-					"	$(CC) $(Inc) $(Flags) $(Defs) -c $< -o $@\n"
+					"	$(CC) $(Inc) $(CFlags) $(Defs) -c $< -o $@\n"
 					"\n"
 					"$(BuildDir)/%%.o: %%.cpp\n"
 					"	mkdir -p $(@D)\n"
 					"	echo $(notdir $<) [$(Build)]\n"
-					"	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $@\n"
+					"	$(CPP) $(Inc) $(CppFlags) $(Defs) -c $< -o $@\n"
 					"\n");
 
 			// Write out the target stuff

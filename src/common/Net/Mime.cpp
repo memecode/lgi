@@ -616,15 +616,7 @@ ssize_t LMimeBuf::Pop(char *Str, ssize_t BufSize)
 // Mime Object
 LMime::LMime(const char *tmp)
 {
-	Parent = 0;
 	TmpPath = NewStr(tmp);
-
-	DataPos = 0;
-	DataSize = 0;
-	DataLock = 0;
-	DataStore = 0;
-	OwnDataStore = 0;
-
 	Text.Decode.Mime = this;
 	Text.Encode.Mime = this;
 	Binary.Read.Mime = this;

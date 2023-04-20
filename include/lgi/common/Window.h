@@ -57,7 +57,7 @@ protected:
 	
 	#else
 
-		OsWindow Wnd;
+		OsWindow Wnd = NULL;
 		void SetDeleteOnClose(bool i);
 
 	#endif
