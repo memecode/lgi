@@ -10,22 +10,27 @@ struct VsInfo
 	int Year;
 	int MscVer;
 	double Ver;
+	bool x64;
 }
 Versions[] =
 {
-	{2019, _MSC_VER_VS2019, 16.0},
-	{2017, _MSC_VER_VS2017, 15.0},
-	{2015, _MSC_VER_VS2015, 14.0},
-	{2013, _MSC_VER_VS2013,	12.0},
-	{2012, _MSC_VER_VS2012, 11.0},
-	{2010, _MSC_VER_VS2010, 10.0},
-	{2008, _MSC_VER_VS2008, 9.0},
-	{2005, _MSC_VER_VS2005, 8.0},
-	{2003, _MSC_VER_VS2003, 7.1},
-	{7, _MSC_VER_VC7, 7.0},
-	{6, _MSC_VER_VC6, 6.0},
-	{5, _MSC_VER_VC5, 5.0},
+	{2022, _MSC_VER_VS2022, 17.0, true},
+	{2019, _MSC_VER_VS2019, 16.0, false},
+	{2017, _MSC_VER_VS2017, 15.0, false},
+	{2015, _MSC_VER_VS2015, 14.0, false},
+	{2013, _MSC_VER_VS2013,	12.0, false}
 };
+
+VsInfo *GetVsInfo(int VsYear)
+{
+	for (int i=0; i<CountOf(Versions); i++)
+	{
+		if (Versions[i].Year == VsYear)
+			return Versions + i;
+	}
+	
+	return NULL;
+}
 
 double YearToVer(int64 y)
 {
@@ -80,16 +85,16 @@ public:
 		Log->Print("Got %i files...\n", Files.Length());
 		for (unsigned i=0; i<Files.Length(); i++)
 		{
-			const char *File = Files[i];
+			auto File = Files[i];
 			Log->Print("\t%s...\n", File);
 	
-			const char *Ext = LGetExtension(File);
+			auto Ext = LGetExtension(File);
 			if (Ext && !_stricmp(Ext, "sln"))
 			{
 				LFile f;
 				if (f.Open(File, O_READ))
 				{
-					LString::Array a = f.Read().Split("\n");
+					auto a = f.Read().Split("\n");
 					f.Close();
 					
 					double FileVersion = 0.0;
@@ -99,7 +104,7 @@ public:
 					{
 						if (a[i].Find("File, Format Version") >= 0)
 						{
-							LString::Array p = a[i].Split(" ");
+							auto p = a[i].Split(" ");
 							FileVersion = p.Last().Float();
 						}
 						else if (a[i](0) == '#')
@@ -125,8 +130,8 @@ public:
 					
 					if (VsVersion > 0.0)
 					{
-						// C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE\devenv.exe
-						LFile::Path p(LSP_USER_APPS, 32);
+						auto Info = GetVsInfo(VsYear);
+						LFile::Path p(LSP_USER_APPS, Info && Info->x64 ? 64 : 32);
 						LString v;
 
 						if (VsVersion >= 16.0)

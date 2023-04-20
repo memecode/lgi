@@ -11,7 +11,6 @@
 #include "lgi/common/Net.h"
 #include "lgi/common/Http.h"
 #include "lgi/common/Filter.h"
-#include "lgi/common/NetTools.h"
 #include "lgi/common/ImageComparison.h"
 #include "lgi/common/OpenSSLSocket.h"
 #include "lgi/common/Net.h"

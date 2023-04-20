@@ -254,7 +254,6 @@
     <ClCompile Include="..\src\common\Net\Base64.cpp" />
     <ClCompile Include="..\src\common\Net\Uri.cpp" />
     <ClCompile Include="..\src\common\Net\Net.cpp" />
-    <ClCompile Include="..\src\common\Net\NetTools.cpp" />
     <ClCompile Include="..\src\common\Net\MDStringToDigest.cpp" />
     <ClCompile Include="..\src\common\Lgi\Alert.cpp" />
     <ClCompile Include="..\src\common\Lgi\AppCommon.cpp" />
@@ -292,7 +291,6 @@
     <ClCompile Include="..\src\common\Text\String.cpp" />
     <ClCompile Include="..\src\common\Text\TextView3.cpp" />
     <ClCompile Include="..\src\common\Text\TextView4.cpp" />
-    <ClCompile Include="..\src\common\Text\Token.cpp" />
     <ClCompile Include="..\src\common\Text\Unicode.cpp" />
     <ClCompile Include="..\src\common\Text\Utf8.cpp" />
     <ClCompile Include="..\src\common\Text\XmlTree.cpp" />
@@ -619,10 +617,6 @@
     <ClInclude Include="..\src\common\Hash\md5\md5.h" />
     <ClInclude Include="..\src\common\Hash\sha1\sha1.h" />
     <ClInclude Include="..\src\win\INet\MibAccess.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\include\lgi\common\Message.h.orig" />
-    <None Include="..\include\lgi\common\OptionsFile.h.orig" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
