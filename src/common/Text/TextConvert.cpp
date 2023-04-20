@@ -151,16 +151,17 @@ LString LDecodeQuotedPrintableStr(LString InStr)
 	return OutStr;
 }
 
-char *DecodeRfc2047(char *Str)
+static void DecodeRfc2047_Impl(char *Str, std::function<void(LStringPipe&)> Output)
 {
 	if (!Str)
-		return NULL;
+		return;
 	
 	LStringPipe p(256);
+	bool prevWasEncoded = false;
 	for (char *s = Str; *s; )
 	{
 		char *e = s;
-		bool Decode = 0, Descape = 0;
+		bool Decode = 0, Descape = 0, nonWhitespace = false;
 		while (*e)
 		{
 			if
@@ -170,14 +171,26 @@ char *DecodeRfc2047(char *Str)
 				(Descape = (e[0] == '\\'))
 			)
 			{
-				// Emit characters between 's' and 'e'
-				if (e > s)
+				// Emit characters between 's' and 'e'?
+				if (e > s && !(!nonWhitespace && prevWasEncoded))
 					p.Write(s, e - s);
+				
+				/*
+				nonWhitespace=0, prevWasEncoded=0 = emit
+				nonWhitespace=1, prevWasEncoded=0 = emit
+				nonWhitespace=0, prevWasEncoded=1 = skip
+				nonWhitespace=1, prevWasEncoded=1 = emit
+				*/
 				break;
 			}
+
+			if (!strchr(WhiteSpace, *e))
+				nonWhitespace = true;
+
 			e++;
 		}
 
+		prevWasEncoded = false;
 		if (Decode)
 		{
 			// is there a word remaining
@@ -262,7 +275,11 @@ char *DecodeRfc2047(char *Str)
 				}
 			}
 
-			if (!Encoded)
+			if (Encoded)
+			{
+				prevWasEncoded = true;
+			}
+			else
 			{
 				// Encoding error, just emit the raw string and exit.
 				size_t Len = strlen(s);
@@ -290,9 +307,32 @@ char *DecodeRfc2047(char *Str)
 		}
 	}
 
-	DeleteArray(Str);
-	return p.NewStr();
+	Output(p);
 }
+
+char *DecodeRfc2047(char *Str)
+{
+	DecodeRfc2047_Impl(	Str,
+						[&Str](LStringPipe &p)
+						{
+							DeleteArray(Str);
+							Str = p.NewStr();
+						});
+
+	return Str;
+}
+
+LString LDecodeRfc2047(LString Str)
+{
+	DecodeRfc2047_Impl(	Str,
+						[&Str](LStringPipe &p)
+						{
+							Str = p.NewLStr();
+						});
+
+	return Str;
+}
+
 
 #define MIME_MAX_LINE		76
 

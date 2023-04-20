@@ -1,4 +1,4 @@
-#include "lgi/common/Lgi.h"
+﻿#include "lgi/common/Lgi.h"
 #include "lgi/common/TextConvert.h"
 
 #include "UnitTests.h"
@@ -41,8 +41,8 @@ bool LStringTests::Run()
 	const char *EncodeResult2 = "=?iso-8859-9?Q?Beytullah_Gen=E7?=";
 
 	LString::Array CharsetPrefs;
-	const char *Rfc2047Input = "Beytullah Gen�";
-	const char *UtfInput = "Beytullah Genç";
+	const char *Rfc2047Input = "Beytullah Genç";
+	const char *UtfInput = "Beytullah GenÃ§";
 	const char *Charset = "windows-1252";
 
 	// No prefered charset testing:
@@ -69,6 +69,21 @@ bool LStringTests::Run()
 	if (Stricmp(result4.Get(), EncodeResult2))
 		return FAIL(_FL, "EncodeRfc2047");
 
+	// Quoted printable decode test:
+	auto input5 = "=?UTF-8?q?=D0=92=D0=B0=D0=BC_=D0=BF=D1=80=D0=B8=D1=88=D0=BB=D0=BE_=D0=BD?= =?UTF-8?q?=D0=BE=D0=B2=D0=BE=D0=B5_=D1=81=D0=BE=D0=BE=D0=B1=D1=89=D0=B5?= =?UTF-8?q?=D0=BD=D0=B8=D0=B5?=";
+	auto result5 = LDecodeRfc2047(input5);
+	auto encodeResult5 = L"Вам пришло новое сообщение";
+	LAutoWString decode5( Utf8ToWide(result5) );
+	if (Stricmp(encodeResult5, decode5.Get()))
+		return FAIL(_FL, "LDecodeRfc2047");
+
+	// Mixing encoded and plain words:
+	auto input6 = "test =?UTF-8?q?=D0=BE=D0=B2=D0=BE=D0=B5?= of words =?UTF-8?q?=D0=BE=D0=B2=D0=BE=D0=B5?=";
+	auto result6 = LDecodeRfc2047(input6);
+	auto encodeResult6 = L"test овое of words овое";
+	LAutoWString decode6( Utf8ToWide(result6) );
+	if (Stricmp(encodeResult6, decode6.Get()))
+		return FAIL(_FL, "LDecodeRfc2047");
 
 	return true;
 }
