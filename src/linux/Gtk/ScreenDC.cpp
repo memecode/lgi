@@ -401,8 +401,10 @@ void LScreenDC::HLine(int x1, int x2, int y)
 {
 	// cairo_rectangle is not reliable if the x1 and x2 are a 
 	// long way off the edge of the screen.
-	if (x1 < 0) x1 = 0;
-	if (x2 >= d->x) x2 = d->x;
+	if (x1 < OriginX)
+		x1 = OriginX;
+	if (x2 >= d->x + OriginX)
+		x2 = d->x + OriginX;
 		
 	cairo_rectangle(d->cr, x1, y, x2-x1+1, 1);
 	cairo_fill(d->cr);
@@ -411,8 +413,10 @@ void LScreenDC::HLine(int x1, int x2, int y)
 void LScreenDC::VLine(int x, int y1, int y2)
 {
 	// stupid cairo_rectangle
-	if (y1 < 0) y1 = 0;
-	if (y2 >= d->y) y2 = d->y;
+	if (y1 < OriginY)
+		y1 = OriginY;
+	if (y2 >= d->y + OriginY)
+		y2 = d->y + OriginY;
 
 	cairo_rectangle(d->cr, x, y1, 1, y2-y1+1);
 	cairo_fill(d->cr);
