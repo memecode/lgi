@@ -47,7 +47,7 @@ class LDialog;
 LgiFunc void LgiTraceSetStream(class LStreamI *stream);
 
 /// Gets the log file path
-LgiFunc bool LgiTraceGetFilePath(char *LogPath, int BufLen);
+LgiExtern LString LgiTraceGetFilePath();
 
 /// Writes a debug statement to a output stream, or if not defined with LgiTraceSetStream
 /// then to a log file (see LgiTraceSetStream for details)

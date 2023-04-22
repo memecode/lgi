@@ -449,71 +449,52 @@ void LgiTraceSetStream(LStreamI *stream)
 	_LgiTraceStream = stream;
 }
 
-bool LgiTraceGetFilePath(char *LogPath, int BufLen)
+LString LgiTraceGetFilePath()
 {
-	if (!LogPath)
-		return false;
-
 	auto Exe = LGetExeFile();
-	if (Exe)
-	{
-		#ifdef MAC
-		char *Dir = strrchr(Exe, DIR_CHAR);
-		if (Dir)
-		{
-			char Part[256];
-			strcpy_s(Part, sizeof(Part), Dir+1);
-			LMakePath(LogPath, BufLen, "~/Library/Logs", Dir+1);
-			strcat_s(LogPath, BufLen, ".txt");
-		}
-		else
-		#endif
-		{
-			char *Dot = strrchr(Exe, '.');
-			if (Dot && !strchr(Dot, DIR_CHAR))
-				sprintf_s(LogPath, BufLen, "%.*s.txt", (int)(Dot - Exe.Get()), Exe.Get());
-			else
-				sprintf_s(LogPath, BufLen, "%s.txt", Exe.Get());
-		}
+	if (!Exe)
+		// Well what to do now? I give up
+		return LString("trace.txt");
 
-		LFile f;		
-		if (f.Open(LogPath, O_WRITE))
-		{
-			f.Close();
-		}
+	LString LogPath;
+	#ifdef MAC
+	auto Dir = strrchr(Exe, DIR_CHAR);
+	if (Dir)
+	{
+		char path[MAX_PATH_LEN];
+		LMakePath(path, sizeof(path), "~/Library/Logs", Dir+1);
+		LogPath.Printf("%s.txt", path);
+	}
+	else
+	#endif
+	{
+		auto Dot = strrchr(Exe, '.');
+		if (Dot && !strchr(Dot, DIR_CHAR))
+			LogPath.Printf("%.*s.txt", (int)(Dot - Exe.Get()), Exe.Get());
 		else
-		{
-			char Leaf[64];
-			char *Dir = strrchr(LogPath, DIR_CHAR);
-			if (Dir)
-			{
-				strcpy_s(Leaf, sizeof(Leaf), Dir + 1);
-				LGetSystemPath(LSP_APP_ROOT, LogPath, BufLen);
-				if (!LDirExists(LogPath))
-					FileDev->CreateFolder(LogPath);
-				LMakePath(LogPath, BufLen, LogPath, Leaf);
-			}
-			else goto OnError;
-		}
-		
-		#if 0
-		LFile tmp;
-		if (tmp.Open("c:\\temp\\log.txt", O_WRITE))
-		{
-			tmp.SetSize(0);
-			tmp.Write(LogPath, strlen(LogPath));
-		}
-		#endif
+			LogPath.Printf("%s.txt", Exe.Get());
+	}
+
+	LFile f;		
+	if (f.Open(LogPath, O_WRITE))
+	{
+		f.Close();
+	}
+	else if (auto Dir = strrchr(LogPath, DIR_CHAR))
+	{
+		LString Leaf = Dir + 1;
+		LFile::Path p(LSP_APP_ROOT);
+		if (!p.Exists())
+			FileDev->CreateFolder(p);
+		p += Leaf;
+		LogPath = p.GetFull();
 	}
 	else
 	{
-		// Well what to do now? I give up
-		OnError:
-		strcpy_s(LogPath, BufLen, "trace.txt");
-		return false;
-	}
-	
-	return true;
+		return LString("trace.txt");
+	}	
+		
+	return LogPath;
 }
 
 void LgiTrace(const char *Msg, ...)
@@ -537,7 +518,11 @@ void LgiTrace(const char *Msg, ...)
 		static char LogPath[MAX_PATH_LEN] = "";
 	
 		if (!_LgiTraceStream && LogPath[0] == 0)
-			LgiTraceGetFilePath(LogPath, sizeof(LogPath));
+		{
+			auto p = LgiTraceGetFilePath();
+			if (p)
+				strcpy_s(LogPath, sizeof(LogPath), p);
+		}
 	#endif
 
 	va_list Arg;
@@ -613,8 +598,13 @@ void LStackTrace(const char *Msg, ...)
 			if (!_LgiTraceStream)
 			{
 			 	if (LogPath[0] == 0)
-					LgiTraceGetFilePath(LogPath, sizeof(LogPath));
-				f.Open(LogPath, O_WRITE);
+				{
+					auto p = LgiTraceGetFilePath();
+					if (p)
+						strcpy_s(LogPath, sizeof(LogPath), p);
+				}
+				if (LogPath[0])
+					f.Open(LogPath, O_WRITE);
 			}
 		#endif
 
