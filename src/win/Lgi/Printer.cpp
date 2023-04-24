@@ -57,7 +57,7 @@ void LPrinter::Print(LPrintEvents *Events, std::function<void(int)> callback, co
 		bool r = Browse(Parent);
 		d->NeedsDC = false;
 		if (!r)
-			PrintStatus(LPrintEvents::OnBeginPrintError);
+			PrintStatus(LPrintEvents::OnBeginPrintCancel);
 	}
 	else
 	{
