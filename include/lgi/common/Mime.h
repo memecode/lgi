@@ -53,7 +53,7 @@ public:
 		auto rd = Read(s.Get(), s.Length());
 		if (rd < 0)
 			s.Empty();
-		else if (rd < (ssize_t)s.Length())
+		else
 			s.Length(rd);
 		return s;
 	}

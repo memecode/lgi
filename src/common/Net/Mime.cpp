@@ -23,14 +23,6 @@ static const char *MimeBase64			= "base64";
 
 const char *LMime::DefaultCharset =		"text/plain";
 
-template<typename T>
-int CastInt(T in)
-{
-	int out = (int)in;
-	LAssert(out == in);
-	return out;
-}
-
 int AltScore(char *Mt)
 {
 	int Score = 0;
@@ -207,7 +199,7 @@ public:
 			*d++ = '\n';
 
 			ptrdiff_t Len = d - Buf;
-			Out->Write(Buf, CastInt(Len));
+			Out->Write(Buf, Len);
 		}
 	}
 
@@ -223,7 +215,7 @@ public:
 				*d++ = '\n';
 
 				ptrdiff_t Len = d - Buf;
-				if (Out->Write(Buf, CastInt(Len)) < Len)
+				if (Out->Write(Buf, Len) < Len)
 				{
 					LAssert(!"write error");
 					break;
@@ -266,8 +258,8 @@ public:
 				*d++ = '\r';
 				*d++ = '\n';
 
-				ptrdiff_t Len = d-Buf;
-				if (Out->Write(Buf, CastInt(Len)) < Len)
+				ptrdiff_t Len = d - Buf;
+				if (Out->Write(Buf, Len) < Len)
 				{
 					LAssert(!"write error");
 					break;
@@ -277,7 +269,7 @@ public:
 			}
 		}
 
-		return CastInt(s - (const char*)p);
+		return s - (const char*)p;
 	}
 };
 
@@ -373,9 +365,9 @@ public:
 	{
 		uchar b[100];
 
-		int64 Len = Buf.GetSize();
+		auto Len = Buf.GetSize();
 		LAssert(Len < sizeof(b));
-		ssize_t r = Buf.Read(b, CastInt(Len));
+		ssize_t r = Buf.Read(b, Len);
 		if (r > 0)
 		{
 			char t[256];
@@ -443,15 +435,15 @@ public:
 			char *Start = s;
 			while (*s && s < e && Lut[(int)*s]) s++;
 			if (s-Start > 0)
-				Buf.Push(Start, CastInt(s-Start));
+				Buf.Push(Start, s - Start);
 			else
 				break;
 		}
 
 		// While there is at least one run of base64 (4 bytes) convert it to text
 		// and write it to the output stream
-		int Size;
-		while ((Size = CastInt(Buf.GetSize())) > 3)
+		int64_t Size;
+		while ((Size = Buf.GetSize()) > 3)
 		{
 			Size &= ~3;
 
@@ -872,38 +864,40 @@ char *LMime::NewValue(char *&s, bool Alloc)
 
 char *LMime::StartOfField(char *s, const char *Field)
 {
-	if (s && Field)
+	if (!s || !Field)
+		return NULL;
+
+	auto FieldLen = strlen(Field);
+	while (s && *s)
 	{
-		size_t FieldLen = strlen(Field);
-		while (s && *s)
+		if (strchr(MimeWs, *s))
 		{
-			if (strchr(MimeWs, *s))
+			s = strchr(s, '\n');
+			if (s) s++;
+		}
+		else
+		{
+			char *f = s;
+			while (*s && *s != ':' && !strchr(MimeWs, *s))
+				s++;
+				
+			auto fLen = s - f;				
+			if (*s++ == ':' &&
+				fLen == FieldLen &&
+				_strnicmp(f, Field, FieldLen) == 0)
 			{
-				s = strchr(s, '\n');
-				if (s) s++;
+				return f;
 			}
 			else
 			{
-				char *f = s;
-				while (*s && *s != ':' && !strchr(MimeWs, *s)) s++;
-				int fLen = CastInt(s - f);
-				if (*s++ == ':' &&
-					fLen == FieldLen &&
-					_strnicmp(f, Field, FieldLen) == 0)
-				{
-					return f;
-					break;
-				}
-				else
-				{
-					s = strchr(s, '\n');
-					if (s) s++;
-				}
+				s = strchr(s, '\n');
+				if (s)
+					s++;
 			}
 		}
 	}
 
-	return 0;
+	return NULL; // not found
 }
 
 char *LMime::NextField(char *s)
@@ -974,11 +968,11 @@ bool LMime::Set(const char *Name, const char *Value)
 	char *h = Headers;
 	if (h)
 	{
-		char *f = StartOfField(h, Name);
+		auto f = StartOfField(h, Name);
 		if (f)
 		{
 			// 'Name' exists, push out pre 'Name' header text
-			p.Push(h, CastInt(f - Headers));
+			p.Push(h, f - h);
 			h = NextField(f);
 		}
 		else
@@ -991,22 +985,23 @@ bool LMime::Set(const char *Name, const char *Value)
 
 			// 'Name' doesn't exist, push out all the headers
 			p.Push(Headers);
-			h = 0;
+			h = NULL;
 		}
 	}
 
 	if (Value)
 	{
 		// Push new field
-		int Vlen = CastInt(strlen(Value));
-		while (Vlen > 0 && strchr(MimeWs, Value[Vlen-1])) Vlen--;
+		auto Vlen = strlen(Value);
 
-		p.Push(Name);
-		p.Push(": ");
-		p.Push(Value, Vlen);
-		p.Push(MimeEol);
+		// Trim whitespace at the end
+		while (	Vlen > 0 &&
+				strchr(MimeWs, Value[Vlen-1]))
+			Vlen--;
+
+		p.Print("%s: %.*s%s", Name, (int)Vlen, Value, MimeEol);
 	}
-	// else we're deleting the feild
+	// else we're deleting the field
 
 	if (h)
 	{
@@ -1087,7 +1082,7 @@ bool LMime::SetSub(const char *Field, const char *Sub, const char *Value, const 
 				// Push the field data
 				char *e = s;
 				while (*e && !strchr("; \t\r\n", *e)) e++;
-				p.Push(s, CastInt(e-s));
+				p.Push(s, e - s);
 				SkipWs(e);
 
 				// Loop through the subfields and push all those that are not 'Sub'
@@ -1455,12 +1450,9 @@ ssize_t LMime::LMimeText::LMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 		}
 
 		// Write the headers
-		auto h = Mime->Headers.SplitDelimit(MimeEol);
-		for (unsigned i=0; i<h.Length(); i++)
-		{
-			Dest->Write(h[i], CastInt(strlen(h[i])));
-			Dest->Write(MimeEol, 2);
-		}
+		LgiTrace("Mime->Headers='%s'\n", Mime->Headers.Get());
+		Dest->Write(Mime->Headers.Strip());
+		Dest->Write(MimeEol, 2);
 		Dest->Write(MimeEol, 2);
 
 		// Write data
