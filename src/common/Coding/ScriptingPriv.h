@@ -381,7 +381,9 @@ public:
 };
 
 /// This class is the VM for the byte language
-class LVirtualMachine : public LScriptUtils
+class LVirtualMachine :
+	public LVirtualMachineI,
+	public LScriptUtils
 {
 	friend class LVmDebuggerWnd;
 	friend class LScriptArguments;
@@ -422,6 +424,8 @@ public:
 	LVirtualMachine(Context ctx);
 	LVirtualMachine(LVirtualMachine *vm);
 	~LVirtualMachine();
+
+	void OnException(const char *File, int Line, ssize_t Address, const char *Msg);
 
 	/// Executes the whole script starting at the top
 	LExecutionStatus Execute

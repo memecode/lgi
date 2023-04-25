@@ -10,46 +10,6 @@ class LScriptEnginePrivate;
 class LVmCallback;
 class LVirtualMachine;
 
-class LScriptArguments : public LArray<LVariant*>
-{
-	friend class LScriptEngine;
-	friend class LVirtualMachine;
-
-	LVirtualMachine *Vm;
-	LStream *Console;
-	LVariant _Return;
-	LVariant *PtrRet;
-
-public:
-	static LStream NullConsole;
-
-	LScriptArguments(LVirtualMachine *vm, LVariant *ret = NULL, LStream *console = NULL)
-	{
-		Vm = vm;
-		if (ret)
-			PtrRet = ret;
-		else
-			PtrRet = &_Return;
-		
-		if (console)
-			Console = console;
-		else
-			Console = &NullConsole;
-	}
-
-	LVirtualMachine *GetVm() { return Vm; }
-	void SetVm(LVirtualMachine *vm) { Vm = vm; }
-	LVariant *GetReturn() { return PtrRet; }
-	LStream *GetConsole() { return Console; }
-	bool Throw(const char *File, int Line, const char *Msg, ...);
-
-	// Accessor shortcuts
-	const char *StringAt(size_t i) { return IdxCheck(i) ? (*this)[i]->Str() : NULL; }
-	int32_t Int32At(size_t i, int32_t Default = 0) { return IdxCheck(i) ? (*this)[i]->CastInt32() : Default; }
-	int64_t Int64At(size_t i, int64_t Default = 0) { return IdxCheck(i) ? (*this)[i]->CastInt64() : Default; }
-	double DoubleAt(size_t i, double Default = 0) { return IdxCheck(i) ? (*this)[i]->CastDouble() : Default; }
-};
-
 typedef bool (LScriptContext::*ScriptCmd)(LScriptArguments &Args);
 
 #define SCOPE_REGISTER		0

@@ -744,11 +744,11 @@ class App : public LWindow, public AppPriv
 	LAutoPtr<LImageList> ImgLst;
 	LBox *FoldersBox = NULL;
 
-	bool CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args)
+	bool CallMethod(const char *MethodName, LScriptArguments &Args)
 	{
 		if (!Stricmp(MethodName, METHOD_GetContext))
 		{
-			*ReturnValue = (AppPriv*)this;
+			*Args.GetReturn() = (AppPriv*)this;
 			return true;
 		}
 

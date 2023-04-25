@@ -1069,6 +1069,11 @@ LVirtualMachine::~LVirtualMachine()
 	d->DecRef();
 }
 
+void LVirtualMachine::OnException(const char *File, int Line, ssize_t Address, const char *Msg)
+{
+	d->OnException(File, Line, Address, Msg);
+}
+
 LExecutionStatus LVirtualMachine::Execute(LCompiledCode *Code, uint32_t StartOffset, LStream *Log, bool StartImmediately, LVariant *Return)
 {
 	if (!Code)
@@ -2193,20 +2198,3 @@ LMessage::Param LVmDebuggerWnd::OnEvent(LMessage *Msg)
 	return LWindow::OnEvent(Msg);
 }
 
-/////////////////////////////////////////////////////////////////////////////
-bool LScriptArguments::Throw(const char *File, int Line, const char *Msg, ...)
-{
-	if (!Vm || !Vm->d)
-		return false;
-
-	va_list Arg;
-	va_start(Arg, Msg);
-
-	LString s;
-	s.Printf(Arg, Msg);
-
-	va_end(Arg);
-	
-	Vm->d->OnException(File, Line, -1, s);
-	return true;
-}

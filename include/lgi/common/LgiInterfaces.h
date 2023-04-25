@@ -27,12 +27,14 @@ class LVariant;
 class LCss;
 class LViewI;
 class LView;
+class LScriptArguments;
 
 #ifdef Yield
 #undef Yield
 #endif
 
 // Classes
+
 class LDomI
 {
 public:
@@ -40,7 +42,16 @@ public:
 
 	virtual bool GetValue(const char *Var, LVariant &Value) { return false; }
 	virtual bool SetValue(const char *Var, LVariant &Value) { return false; }
-	virtual bool CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args) { return false; }
+	virtual bool CallMethod(const char *MethodName, LScriptArguments &Args) { return false; }
+};
+
+class LVirtualMachineI
+{
+public:
+	virtual ~LVirtualMachineI() {}
+
+	virtual void SetDebuggerEnabled(bool b) {}
+	virtual void OnException(const char *File, int Line, ssize_t Address, const char *Msg) {}
 };
 
 /// Stream interface class

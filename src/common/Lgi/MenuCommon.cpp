@@ -36,25 +36,25 @@ bool LSubMenu::SetVariant(const char *Name, LVariant &Value, const char *Array)
 	return false;
 }
 
-bool LSubMenu::CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args)
+bool LSubMenu::CallMethod(const char *MethodName, LScriptArguments &Args)
 {
 	LDomProperty Method = LStringToDomProp(MethodName);	
 	switch (Method)
 	{
 		case ::AppendSeparator:
 		{
-			*ReturnValue = AppendSeparator();
+			*Args.GetReturn() = AppendSeparator();
 			break;
 		}
 		case ::AppendItem:
 		{
-			char *Str		= Args.Length() > 0 ? Args[0]->CastString() : NULL;
-			int Id			= Args.Length() > 1 ? Args[1]->CastInt32() : -1;
-			bool Enabled	= Args.Length() > 2 ? Args[2]->CastBool() : true;
-			int Where		= Args.Length() > 3 ? Args[3]->CastInt32() : -1;
-			char *ShortCut	= Args.Length() > 4 ? Args[4]->CastString() : NULL;
+			auto Str		= Args.StringAt(0);
+			auto Id			= Args.Int32At(1, -1);
+			auto Enabled	= Args.Int32At(2, true);
+			auto Where		= Args.Int32At(3, -1);
+			auto ShortCut	= Args.StringAt(4);
 
-			*ReturnValue = AppendItem(Str, Id, Enabled, Where, ShortCut);
+			*Args.GetReturn() = AppendItem(Str, Id, Enabled, Where, ShortCut);
 			break;
 		}
 		default:

@@ -606,6 +606,8 @@ case ICallMethod:
 			SetScriptError;
 		}
 	}
+
+	Arg.Length(0); // It doesn't own the variants, so don't delete them.
 	#endif
 	break;
 }
@@ -1463,7 +1465,7 @@ case IDomCall:
 		break;
 	}	
 
-	LArray<LVariant*> Arg;
+	LScriptArguments Arg(Vm, Dst);
 	Arg.Length(ArgCount);
 	for (int i=0; i<ArgCount; i++)
 	{
@@ -1483,7 +1485,7 @@ case IDomCall:
 		{
 			auto *dom = Dom->CastDom();
 			CheckParam(dom);
-			bool Ret = dom->CallMethod(sName, Dst, Arg);
+			bool Ret = dom->CallMethod(sName, Arg);
 			if (!Ret)
 			{
 				Dst->Empty();
@@ -1971,6 +1973,8 @@ case IDomCall:
 			break;
 		}
 	}
+
+	Arg.Length(0); // It doesn't own the variants, so don't delete them.
 
 	#else
 

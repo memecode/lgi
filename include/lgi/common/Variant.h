@@ -8,7 +8,6 @@
 #ifndef __LVariant_H__
 #define __LVariant_H__
 
-#include "lgi/common/Dom.h"
 #undef Bool
 #include "lgi/common/DateTime.h"
 #include "lgi/common/Containers.h"
@@ -178,7 +177,7 @@ public:
 	// Which doesn't need a 'This' pointer.
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
 	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
-	bool CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args);
+	bool CallMethod(const char *MethodName, LScriptArguments &Args);
 };
 
 /// A class that can be different types
@@ -432,6 +431,37 @@ public:
 	static const char *OperatorToString(LOperator op);
 	/// Converts the value to a string description include type.
 	LString ToString();
+};
+
+// General collection of arguments and a return value
+class LgiClass LScriptArguments : public LArray<LVariant*>
+{
+	friend class LScriptEngine;
+	friend class LVirtualMachine;
+	friend class LVirtualMachinePriv;
+
+	LVirtualMachineI *Vm = NULL;
+	class LStream *Console = NULL;
+	LVariant *LocalReturn = NULL; // Owned by this instance
+	LVariant *Return = NULL;
+
+public:
+	static LStream NullConsole;
+
+	LScriptArguments(LVirtualMachineI *vm, LVariant *ret = NULL, LStream *console = NULL);
+	~LScriptArguments();
+
+	LVirtualMachineI *GetVm() { return Vm; }
+	void SetVm(LVirtualMachineI *vm) { Vm = vm; }
+	LVariant *GetReturn() { return Return; } // Must never be NULL.
+	LStream *GetConsole() { return Console; }
+	bool Throw(const char *File, int Line, const char *Msg, ...);
+
+	// Accessor shortcuts
+	const char *StringAt(size_t i);
+	int32_t Int32At(size_t i, int32_t Default = 0);
+	int64_t Int64At(size_t i, int64_t Default = 0);
+	double DoubleAt(size_t i, double Default = 0);
 };
 
 #endif

@@ -306,13 +306,11 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 						if (!Ui->GetViewById(m->Id, ct))
 							break;
 
-						LVariant Ret;
-						LArray<LVariant*> Args;
+						LScriptArguments Args(NULL);
 						Args[0] = new LVariant(Xml);
 						Args[1] = new LVariant(false);
 						auto Param = LDomPropToString(ControlSerialize);
-						ct->CallMethod(Param, &Ret, Args);
-						Args.DeleteObjects();
+						ct->CallMethod(Param, Args);
 						break;
 					}
 					default:
@@ -420,12 +418,10 @@ bool LXmlTreeUi::Convert(LDom *Tag, LViewI *Ui, bool ToUI)
 								LView *ct;
 								if (Ui->GetViewById(m->Id, ct))
 								{
-									LVariant Ret;
-									LArray<LVariant*> Args;
+									LScriptArguments Args(NULL);
 									Args[0] = new LVariant(Xml);
 									Args[1] = new LVariant(true);
-									ct->CallMethod(LDomPropToString(ControlSerialize), &Ret, Args);
-									Args.DeleteObjects();
+									ct->CallMethod(LDomPropToString(ControlSerialize), Args);
 								}
 								break;
 							}

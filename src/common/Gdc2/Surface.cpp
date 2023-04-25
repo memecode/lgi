@@ -2040,7 +2040,7 @@ bool LSurface::SetVariant(const char *Name, LVariant &Value, const char *Array)
 	return false;
 }
 
-bool LSurface::CallMethod(const char *Name, LVariant *ReturnValue, LArray<LVariant*> &Args)
+bool LSurface::CallMethod(const char *Name, LScriptArguments &Args)
 {
 	return false;
 }

@@ -406,7 +406,7 @@ LControlTree::Item *LControlTree::Find(const char *opt)
 	return 0;
 }
 
-bool LControlTree::CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args)
+bool LControlTree::CallMethod(const char *MethodName, LScriptArguments &Args)
 {
 	switch (LStringToDomProp(MethodName))
 	{
@@ -426,7 +426,7 @@ bool LControlTree::CallMethod(const char *MethodName, LVariant *ReturnValue, LAr
 			}
 
 			auto Write = Args[1]->CastInt32() != 0;
-			*ReturnValue = Serialize(Store, Write);
+			*Args.GetReturn() = Serialize(Store, Write);
 			return true;
 		}
 		default:

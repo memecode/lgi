@@ -625,6 +625,7 @@ bool LView::Attach(LViewI *p)
 
 	SetParent(p);
 	LView *Parent = d->GetParent();
+	auto IsWnd = dynamic_cast<LWindow*>(this);
 	if (Parent && !_Window)
 		_Window = Parent->_Window;
 
@@ -651,7 +652,8 @@ bool LView::Attach(LViewI *p)
         else if (!IsSystemClass)
             return false;
 
-		LAssert(!Parent || Parent->Handle() != 0);
+		if (!IsWnd)
+			LAssert(!Parent || Parent->Handle() != 0);
 
 		DWORD Style	  = GetStyle();
 		DWORD ExStyle = GetExStyle() & ~WS_EX_CONTROLPARENT;

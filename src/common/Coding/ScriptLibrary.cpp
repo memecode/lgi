@@ -65,8 +65,6 @@ const char *InstToString(GInstruction i)
 	return "#err";
 }
 
-LStream LScriptArguments::NullConsole;
-
 //////////////////////////////////////////////////////////////////////////////////////
 int LScriptUtils::atoi(char16 *s)
 {
@@ -435,7 +433,11 @@ bool SystemFunctions::SelectFiles(LScriptArguments &Args)
 		return false;
 	}
 
-	auto Ctx = Args.GetVm()->SaveContext();
+	auto Vm = dynamic_cast<LVirtualMachine*>(Args.GetVm());
+	if (!Vm)
+		return false;
+
+	auto Ctx = Vm->SaveContext();
 	if (!Ctx)
 	{
 		Args.Throw(_FL, "SelectFiles(...) requires a valid callback context.");
@@ -515,7 +517,11 @@ bool SystemFunctions::SelectFolder(LScriptArguments &Args)
 		return false;
 	}
 
-	auto Ctx = Args.GetVm()->SaveContext();
+	auto Vm = dynamic_cast<LVirtualMachine*>(Args.GetVm());
+	if (!Vm)
+		return false;
+
+	auto Ctx = Vm->SaveContext();
 	if (!Ctx)
 	{
 		Args.Throw(_FL, "SelectFiles(...) requires a valid callback context.");
@@ -1063,7 +1069,11 @@ bool SystemFunctions::GetInputDlg(LScriptArguments &Args)
 		return false;
 	}
 
-	auto Ctx = Args.GetVm()->SaveContext();
+	auto Vm = dynamic_cast<LVirtualMachine*>(Args.GetVm());
+	if (!Vm)
+		return false;
+
+	auto Ctx = Vm->SaveContext();
 	if (!Ctx)
 	{
 		Args.Throw(_FL, "GetInputDlg requires a valid VM context.");

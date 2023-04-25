@@ -2312,17 +2312,17 @@ bool LCustomType::SetVariant(const char *Name, LVariant &Value, const char *Arra
 	return false;
 }
 
-bool LCustomType::CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args)
+bool LCustomType::CallMethod(const char *MethodName, LScriptArguments &Args)
 {
-	if (!MethodName || !ReturnValue)
+	if (!MethodName)
 		return false;
 	
 	if (!_stricmp(MethodName, "New"))
 	{
-		ReturnValue->Empty();
-		ReturnValue->Type = GV_CUSTOM;
-		ReturnValue->Value.Custom.Dom = this;
-		ReturnValue->Value.Custom.Data = new uint8_t[Sizeof()];
+		Args.GetReturn()->Empty();
+		Args.GetReturn()->Type = GV_CUSTOM;
+		Args.GetReturn()->Value.Custom.Dom = this;
+		Args.GetReturn()->Value.Custom.Data = new uint8_t[Sizeof()];
 		return true;
 	}
 	
@@ -2342,4 +2342,64 @@ bool LCustomType::CallMethod(const char *MethodName, LVariant *ReturnValue, LArr
 
 	LAssert(0);
 	return false;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+LStream LScriptArguments::NullConsole;
+
+LScriptArguments::LScriptArguments(LVirtualMachineI *vm, LVariant *ret, LStream *console)
+{
+	Vm = vm;
+	if (ret)
+		Return = ret;
+	else
+		Return = LocalReturn = new LVariant;
+		
+	if (console)
+		Console = console;
+	else
+		Console = &NullConsole;
+}
+
+LScriptArguments::~LScriptArguments()
+{
+	DeleteObjects();
+	DeleteObj(LocalReturn);
+}
+
+const char *LScriptArguments::StringAt(size_t i)
+{
+	return IdxCheck(i) ? (*this)[i]->Str() : NULL;
+}
+
+int32_t LScriptArguments::Int32At(size_t i, int32_t Default)
+{
+	return IdxCheck(i) ? (*this)[i]->CastInt32() : Default;
+}
+
+int64_t LScriptArguments::Int64At(size_t i, int64_t Default)
+{
+	return IdxCheck(i) ? (*this)[i]->CastInt64() : Default;
+}
+
+double LScriptArguments::DoubleAt(size_t i, double Default)
+{
+	return IdxCheck(i) ? (*this)[i]->CastDouble() : Default;
+}
+
+bool LScriptArguments::Throw(const char *File, int Line, const char *Msg, ...)
+{
+	if (!Vm)
+		return false;
+
+	va_list Arg;
+	va_start(Arg, Msg);
+
+	LString s;
+	s.Printf(Arg, Msg);
+
+	va_end(Arg);
+	
+	Vm->OnException(File, Line, -1, s);
+	return true;
 }

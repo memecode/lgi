@@ -297,7 +297,7 @@ public:
 	// Dom impl
 	bool GetVariant(const char *Name, LVariant &Value, const char *Arr = NULL);
 	bool SetVariant(const char *Name, LVariant &Value, const char *Arr = NULL);
-	bool CallMethod(const char *MethodName, LVariant *ReturnValue, LArray<LVariant*> &Args);
+	bool CallMethod(const char *MethodName, LScriptArguments &Args);
 };
 
 /// An item an a menu

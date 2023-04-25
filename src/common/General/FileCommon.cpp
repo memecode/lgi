@@ -82,23 +82,24 @@ bool LFile::SetVariant(const char *Name, LVariant &Value, const char *Array)
 	return true;
 }
 
-bool LFile::CallMethod(const char *Name, LVariant *Dst, LArray<LVariant*> &Arg)
+bool LFile::CallMethod(const char *Name, LScriptArguments &Args)
 {
+	auto Dst = Args.GetReturn();
 	LDomProperty p = LStringToDomProp(Name);
 	switch (p)
 	{
 		case ObjLength: // Type: ([NewLength])
 		{
-			if (Arg.Length() == 1)
-				*Dst = SetSize(Arg[0]->CastInt64());
+			if (Args.Length() == 1)
+				*Dst = SetSize(Args[0]->CastInt64());
 			else
 				*Dst = GetSize();
 			break;
 		}
 		case FilePos: // Type: ([NewPosition])
 		{
-			if (Arg.Length() == 1)
-				*Dst = SetPos(Arg[0]->CastInt64());
+			if (Args.Length() == 1)
+				*Dst = SetPos(Args[0]->CastInt64());
 			else
 				*Dst = GetPos();
 			break;
@@ -110,12 +111,12 @@ bool LFile::CallMethod(const char *Name, LVariant *Dst, LArray<LVariant*> &Arg)
 		}
 		case FileOpen: // Type: (Path[, Mode])
 		{
-			if (Arg.Length() >= 1)
+			if (Args.Length() >= 1)
 			{
 				int Mode = O_READ;
-				if (Arg.Length() == 2)
+				if (Args.Length() == 2)
 				{
-					char *m = Arg[1]->CastString();
+					char *m = Args[1]->CastString();
 					if (m)
 					{
 						bool Rd = strchr(m, 'r') != NULL;
@@ -129,7 +130,7 @@ bool LFile::CallMethod(const char *Name, LVariant *Dst, LArray<LVariant*> &Arg)
 					}
 				}
 				
-				*Dst = Open(Arg[0]->CastString(), Mode);
+				*Dst = Open(Args[0]->CastString(), Mode);
 			}
 			break;
 		}
@@ -145,17 +146,17 @@ bool LFile::CallMethod(const char *Name, LVariant *Dst, LArray<LVariant*> &Arg)
 			
 			Dst->Empty();
 			
-			switch (Arg.Length())
+			switch (Args.Length())
 			{
 				default:
 				case 0:
 					RdLen = GetSize() - GetPos();
 					break;
 				case 2:
-					RdType = Arg[1]->CastInt32();
+					RdType = Args[1]->CastInt32();
 					// fall thru
 				case 1:
-					RdLen = Arg[0]->CastInt64();
+					RdLen = Args[0]->CastInt64();
 					break;
 			}
 			
@@ -217,15 +218,15 @@ bool LFile::CallMethod(const char *Name, LVariant *Dst, LArray<LVariant*> &Arg)
 		case FileWrite: // Type: (Data[, WriteLength])
 		{
 			LVariant *v;
-			if (Arg.Length() < 1 ||
-				Arg.Length() > 2 ||
-				!(v = Arg[0]))
+			if (Args.Length() < 1 ||
+				Args.Length() > 2 ||
+				!(v = Args[0]))
 			{
 				*Dst = 0;
 				return true;
 			}
 
-			switch (Arg.Length())
+			switch (Args.Length())
 			{
 				case 1:
 				{
@@ -252,7 +253,7 @@ bool LFile::CallMethod(const char *Name, LVariant *Dst, LArray<LVariant*> &Arg)
 				}
 				case 2:
 				{
-					int64 WrLen = Arg[1]->CastInt64();
+					int64 WrLen = Args[1]->CastInt64();
 					switch (v->Type)
 					{
 						case GV_INT32:

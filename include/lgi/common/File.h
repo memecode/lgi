@@ -462,7 +462,7 @@ public:
 	// LDom impl
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
-	bool CallMethod(const char *Name, LVariant *ReturnValue, LArray<LVariant*> &Args) override;
+	bool CallMethod(const char *Name, LScriptArguments &Args) override;
 
 	// Path handling
 	class LgiClass Path : public LString::Array

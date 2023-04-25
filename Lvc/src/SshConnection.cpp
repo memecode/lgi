@@ -23,12 +23,11 @@ SshConnection::SshConnection(LTextLog *log, const char *uri, const char *prompt)
 	Host.Set(Uri = uri);
 	d = NULL;
 
-	LVariant Ret;
-	LArray<LVariant*> Args;
-	if (Wnd->CallMethod(METHOD_GetContext, &Ret, Args))
+	LScriptArguments Args(NULL);
+	if (Wnd->CallMethod(METHOD_GetContext, Args))
 	{
-		if (Ret.Type == GV_VOID_PTR)
-			d = (AppPriv*) Ret.Value.Ptr;
+		if (Args.GetReturn()->Type == GV_VOID_PTR)
+			d = (AppPriv*) Args.GetReturn()->Value.Ptr;
 	}
 }
 

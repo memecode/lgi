@@ -12,6 +12,8 @@ class LVariant;
 #include "lgi/common/Mem.h"
 #include "lgi/common/Array.h"
 
+
+
 /// API for reading and writing properties in objects.
 class LgiClass LDom : virtual public LDomI
 {

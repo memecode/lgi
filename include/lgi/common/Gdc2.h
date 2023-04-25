@@ -699,7 +699,7 @@ public:
 	// LDom interface
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
 	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
-	bool CallMethod(const char *Name, LVariant *ReturnValue, LArray<LVariant*> &Args);
+	bool CallMethod(const char *Name, LScriptArguments &Args);
 };
 
 #if defined(MAC) && !defined(__GTK_H__)
