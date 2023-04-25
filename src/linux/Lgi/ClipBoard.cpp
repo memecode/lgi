@@ -297,7 +297,7 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LClipBoard:
 	}
 
 	Out.Reset(m.Release());
-	(*Cb)(Out, NULL);
+	(*Cb)(Out, LString());
 	delete Cb;
 }
 
