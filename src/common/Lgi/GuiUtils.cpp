@@ -7,10 +7,13 @@
 
 //////////////////////////////////////////////////////////////////////////////////
 #if !defined(LK_CONTEXTKEY)
+	// LK_CONTEXTKEY is the key that brings up the context menu
 	#if defined(WINDOWS)
 		#define LK_CONTEXTKEY 0x5d
 	#elif defined(MAC)
 		#define LK_CONTEXTKEY VK_APPS
+	#elif defined(__GTK_H__)
+		#define LK_CONTEXTKEY GDK_KEY_Menu
 	#else
 		#define LK_CONTEXTKEY 0x5d
 		#warning "Check local platform def for app menu key."
@@ -19,11 +22,7 @@
 
 bool LKey::IsContextMenu() const
 {
-	#if WINNATIVE || defined(LINUX)
 	return !IsChar && vkey == LK_CONTEXTKEY;
-	#else
-	return false;
-	#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////

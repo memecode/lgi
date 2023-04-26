@@ -943,21 +943,31 @@ public:
 							"	rm -rf $(BuildDir) $(Target)%s\n"
 							"	@echo Cleaned $(BuildDir) $(Target)\n",
 							PlatformExecutableExt(Platform));					
-					for (auto d: Deps)
+					for (auto Dep: Deps)
 					{
-						auto mk = d->GetMakefile(Platform);
-						if (mk)
+						auto Mk = Dep->GetMakefile(Platform);
+						if (Mk)
 						{
-							LAutoString dep_base = d->GetBasePath();
-							d->CheckExists(dep_base);
-
-							auto rel_dir = LMakeRelativePath(Base, dep_base);
-							d->CheckExists(rel_dir);
+							auto DepBase = Dep->GetBasePath();
+							Dep->CheckExists(DepBase);
 							
-							char *mk_leaf = strrchr(mk, DIR_CHAR);
-							m.Print("	+make -C \"%s\" -f \"%s\" clean\n",
-								ToUnixPath(rel_dir ? rel_dir.Get() : dep_base.Get()),
-								ToUnixPath(mk_leaf ? mk_leaf + 1 : mk.Get()));
+							LString DepFolderPath = LMakeRelativePath(Base, DepBase);
+							if (!DepFolderPath)
+								DepFolderPath = DepBase;
+							ToNativePath(DepFolderPath);
+							
+							m.Print("	+make -C \"%s\"", DepFolderPath.Get());
+							
+							LString MakefileRel = LMakeRelativePath(DepBase, Mk);
+							if (MakefileRel)
+							{
+								ToNativePath(MakefileRel);	
+								m.Print(" -f %s clean\n", MakefileRel.Get());
+							}
+							else if (auto DepMakefile = strrchr(Mk, DIR_CHAR))
+							{
+								m.Print(" -f %s clean\n", DepMakefile + 1);
+							}
 						}
 					}
 					

@@ -103,19 +103,10 @@ LInlineBmp Cursors =
 LCaptureThread *LViewPrivate::CaptureThread = NULL;
 
 ////////////////////////////////////////////////////////////////////////////
-void _lgi_yield()
-{
-	LAppInst->Yield();
-}
-
 bool LgiIsKeyDown(int Key)
 {
 	LAssert(0);
 	return false;
-}
-
-LKey::LKey(int vkey, uint32_t flags)
-{
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -370,43 +361,13 @@ bool LView::_Mouse(LMouse &m, bool Move)
 {
 	ThreadCheck();
 	
-	#if 0
-	if (!Move)
-	{
-		m.Trace("_Mouse");
-		::LArray<LViewI*> _m;
-		for (LViewI *i=this; i; i=i->GetParent())
-		{
-			_m.Add(i);
-		}
-		for (int n=0; n<_m.Length(); n++)
-		{
-			LViewI *i=_m[_m.Length()-1-n];
-			char s[256];
-			ZeroObj(s);
-			memset(s, ' ', (n+1)*2);
-			LgiTrace("%s%s %s\n", s, i->GetClass(), i->GetPos().GetStr());
-		}
-	}
-	#endif
-
 	#if DEBUG_MOUSE_EVENTS
 	if (!Move)
 		LgiTrace("%s:%i - _Mouse([%i,%i], %i) View=%p/%s\n", _FL, m.x, m.y, Move, _Over, _Over ? _Over->GetClass() : NULL);
 	#endif
 
-	if
-	(
-		/*
-		!_View
-		||
-		*/
-		(
-			GetWindow()
-			&&
-			!GetWindow()->HandleViewMouse(this, m)
-		)
-	)
+	if (GetWindow() &&
+		!GetWindow()->HandleViewMouse(this, m))
 	{
 		#if DEBUG_MOUSE_EVENTS
 		LgiTrace("%s:%i - HandleViewMouse consumed event, cls=%s\n", _FL, GetClass());
@@ -949,8 +910,11 @@ bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 	auto *w = GetWindow();
 	GdkModifierType mask = (GdkModifierType)0;
 	auto display = gdk_display_get_default();
-	auto deviceManager = gdk_display_get_device_manager(display);
-	auto device = gdk_device_manager_get_client_pointer(deviceManager);
+	auto seat = gdk_display_get_default_seat(display);
+	auto device = gdk_seat_get_pointer(seat);
+	// auto deviceManager = gdk_display_get_device_manager(display);
+	// auto device = gdk_device_manager_get_client_pointer(deviceManager);
+	
 	gdouble axes[2] = {0};
 	
 	if (gdk_device_get_axis_use(device, 0) != GDK_AXIS_X)

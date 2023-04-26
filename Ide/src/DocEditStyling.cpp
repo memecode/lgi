@@ -52,8 +52,9 @@ const char *CppTypes[] = {	"int", "char", "short", "long", "signed", "unsigned",
 							"int8", "int16", "int32", "int64",
 							"uint8", "uint16", "uint32", "uint64",
 							"char16", "wchar_t",
-							"LArray", "GHashTbl", "List", "LString", "LAutoString", "LAutoWString",
+							"LArray", "LHashTbl", "List", "LString", "LAutoString", "LAutoWString", "LStream",
 							"LAutoPtr", "LHashTbl",
+							"auto",
 							NULL};
 const char *CppEdges[] = {	"/*", "*/", "\"", NULL };
 

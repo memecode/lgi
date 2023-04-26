@@ -439,22 +439,27 @@ public:
 		GammaCorrection = 1.0;
 
 		// Get mode stuff
-		Gtk::GdkDisplay *Dsp = Gtk::gdk_display_get_default();
-		Gtk::gint Screens = Gtk::gdk_display_get_n_screens(Dsp);
-		for (Gtk::gint i=0; i<Screens; i++)
+		auto Dsp = Gtk::gdk_display_get_default();
+		for (Gtk::gint i=0; i<gdk_display_get_n_monitors(Dsp); i++)
 		{
-			Gtk::GdkScreen *Scr = Gtk::gdk_display_get_screen(Dsp, i);
-			if (Scr)
-			{
-				ScrX = Gtk::gdk_screen_get_width(Scr);
-				ScrY = Gtk::gdk_screen_get_height(Scr);
+			auto Monitor = gdk_display_get_monitor(Dsp, i);
+			if (!Monitor)
+				continue;
+				
+			Gtk::GdkRectangle workarea = {0};
+			gdk_monitor_get_workarea(Monitor, &workarea);
+			ScrX = workarea.width;
+			ScrY = workarea.height;
+		}
 
-				Gtk::GdkVisual *Vis = Gtk::gdk_screen_get_system_visual(Scr);
-				if (Vis)
-				{
-					ScrBits = gdk_visual_get_depth(Vis);
-					ScrColourSpace = GdkVisualToColourSpace(Vis, ScrBits);
-				}
+		auto Scr = Gtk::gdk_display_get_default_screen(Dsp);
+		if (Scr)
+		{
+			Gtk::GdkVisual *Vis = Gtk::gdk_screen_get_system_visual(Scr);
+			if (Vis)
+			{
+				ScrBits = gdk_visual_get_depth(Vis);
+				ScrColourSpace = GdkVisualToColourSpace(Vis, ScrBits);
 			}
 		}
 		
