@@ -9,6 +9,7 @@
 #include <Shlobj.h>
 #elif defined MAC
 #include "lgi/common/Net.h"
+#include "lgi/common/Uri.h"
 LgiFunc bool LMacFileToPath(LString &a);
 #endif
 

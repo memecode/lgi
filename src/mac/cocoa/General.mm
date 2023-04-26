@@ -13,6 +13,7 @@
 #include "lgi/common/TextLabel.h"
 #include "lgi/common/Button.h"
 #include "lgi/common/Net.h"
+#include "lgi/common/Uri.h"
 
 #include <sys/types.h>
 #include <pwd.h>

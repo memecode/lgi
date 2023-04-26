@@ -115,7 +115,6 @@
 		3477C3161CC04CCB0028B84B /* Library.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3151CC04CCB0028B84B /* Library.cpp */; };
 		3477C3191CC04CF10028B84B /* ThreadCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3181CC04CF10028B84B /* ThreadCommon.cpp */; };
 		3477C31D1CC04D3F0028B84B /* Net.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C31B1CC04D3F0028B84B /* Net.cpp */; };
-		3477C31E1CC04D3F0028B84B /* NetTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C31C1CC04D3F0028B84B /* NetTools.cpp */; };
 		3477C3201CC04D630028B84B /* ThreadEvent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C31F1CC04D630028B84B /* ThreadEvent.cpp */; };
 		3477C3221CC04DA00028B84B /* Colour.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3211CC04DA00028B84B /* Colour.cpp */; };
 		3477C3241CC04DD70028B84B /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3477C3231CC04DD70028B84B /* Object.cpp */; };
@@ -284,7 +283,6 @@
 		3477C3151CC04CCB0028B84B /* Library.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Library.cpp; path = ../../common/Lgi/Library.cpp; sourceTree = SOURCE_ROOT; };
 		3477C3181CC04CF10028B84B /* ThreadCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadCommon.cpp; path = ../../common/Lgi/ThreadCommon.cpp; sourceTree = SOURCE_ROOT; };
 		3477C31B1CC04D3F0028B84B /* Net.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Net.cpp; path = ../../common/Net/Net.cpp; sourceTree = SOURCE_ROOT; };
-		3477C31C1CC04D3F0028B84B /* NetTools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = NetTools.cpp; path = ../../common/Net/NetTools.cpp; sourceTree = SOURCE_ROOT; };
 		3477C31F1CC04D630028B84B /* ThreadEvent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadEvent.cpp; path = ../../common/Lgi/ThreadEvent.cpp; sourceTree = SOURCE_ROOT; };
 		3477C3211CC04DA00028B84B /* Colour.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Colour.cpp; path = ../../common/Gdc2/Colour.cpp; sourceTree = SOURCE_ROOT; };
 		3477C3231CC04DD70028B84B /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Object.cpp; path = ../../common/Lgi/Object.cpp; sourceTree = SOURCE_ROOT; };
@@ -681,7 +679,6 @@
 				346FACE91D3C75AE00FFEBCE /* Uri.cpp */,
 				346FACEA1D3C75AE00FFEBCE /* MDStringToDigest.cpp */,
 				3477C31B1CC04D3F0028B84B /* Net.cpp */,
-				3477C31C1CC04D3F0028B84B /* NetTools.cpp */,
 			);
 			name = Network;
 			sourceTree = "<group>";
@@ -932,7 +929,6 @@
 				34A3ACEA20568D9700B1D62A /* MenuCommon.cpp in Sources */,
 				3477C3341CC04E120028B84B /* 24Bit.cpp in Sources */,
 				3477C3351CC04E120028B84B /* 32Bit.cpp in Sources */,
-				3477C31E1CC04D3F0028B84B /* NetTools.cpp in Sources */,
 				3477C2881CBF086A0028B84B /* Widgets.mm in Sources */,
 				340833172698F8FF0028012F /* TypeFace.cpp in Sources */,
 				3477C2891CBF086A0028B84B /* Window.mm in Sources */,

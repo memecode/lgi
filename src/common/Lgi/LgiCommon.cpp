@@ -61,6 +61,7 @@ namespace Gtk {
 #endif
 #if defined MAC
 	#import <foundation/foundation.h>
+	#include "lgi/common/Uri.h"
 	#if defined LGI_CARBON
 		bool _get_path_FSRef(FSRef &fs, LStringPipe &a)
 		{

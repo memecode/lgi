@@ -11,7 +11,7 @@
 	#if defined(WINDOWS)
 		#define LK_CONTEXTKEY 0x5d
 	#elif defined(MAC)
-		#define LK_CONTEXTKEY VK_APPS
+		#define LK_CONTEXTKEY 0x6e
 	#elif defined(__GTK_H__)
 		#define LK_CONTEXTKEY GDK_KEY_Menu
 	#else
@@ -20,10 +20,12 @@
 	#endif
 #endif
 
-LKey::LKey(int key, uint32_t flags)
+LKey::LKey(int Vkey, uint32_t flags)
 {
-	vkey = key;
-	LAssert(flags == 0); // Or impl if you pass something in.
+	c16 = vkey = Vkey;
+	Flags = flags;
+	Data = 0;
+	IsChar = false;
 }
 
 bool LKey::IsContextMenu() const
