@@ -446,7 +446,14 @@ void LWindow::SetZoom(LWindowZoom i)
 					ShowWindow(Handle(), d->ShowCmd);
 				}
 
-				LYield();
+				// Process some messages: is this needed still?
+				MSG Msg = {0};
+				while (	PeekMessage(&Msg, NULL, 0, 0, PM_REMOVE) &&
+						Msg.message != WM_QUIT)
+				{
+					TranslateMessage(&Msg);
+					DispatchMessage(&Msg);
+				}
 
 				RECT r;
 				GetWindowRect(Handle(), &r);

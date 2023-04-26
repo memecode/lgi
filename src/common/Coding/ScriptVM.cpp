@@ -598,9 +598,16 @@ public:
 		{
 			LgiTrace("%s:%i - Exception @ %i: %s\n", File, Line, Address, Msg);
 		}
+
+		LStringPipe AsmBuf;
+		Decompile(Code->UserContext, Code, &AsmBuf);
+		auto Asm = AsmBuf.NewLStr();
 		
-		if (Vm && Vm->OpenDebugger(Code))
+		if (Vm && Vm->OpenDebugger(Code, Asm))
 		{
+			LAssert(Debugger->GetCode()); // It should have taken a copy of the Code we passed in
+			
+			/*
 			if (!Debugger->GetCode())
 			{
 				LAutoPtr<LCompiledCode> Cp(new LCompiledCode(*Code));
@@ -611,6 +618,7 @@ public:
 				LAutoString Asm(AsmBuf.NewStr());
 				Debugger->SetSource(Asm);
 			}
+			*/
 			
 			Debugger->OnAddress(Address);
 			
@@ -799,7 +807,7 @@ public:
 
 					if (Debugger)
 					{
-						LAutoString a(p.NewStr());
+						auto a = p.NewLStr();
 						Debugger->OnAddress(CurrentScriptAddress);
 						Debugger->SetSource(a);
 					}
@@ -1113,7 +1121,7 @@ void LVirtualMachine::SetDebuggerEnabled(bool b)
 
 LVmDebugger *LVirtualMachine::OpenDebugger(LCompiledCode *Code, const char *Assembly)
 {
-	if (d->DebuggerEnabled && !d->Debugger)
+	if (d->DebuggerEnabled)
 	{
 		if (!d->Callback)
 			return NULL;
@@ -1378,48 +1386,28 @@ public:
 struct LScriptVmDebuggerPriv
 {
 	// Current script
-	bool OwnVm;
 	LAutoPtr<LVirtualMachine> Vm;
-	LVmCallback *Callback;
+	LAutoPtr<LCompiledCode> Obj;
+
+	LVmCallback *Callback = NULL;
 	LString Script, Assembly;
 	LArray<CodeBlock> Blocks;
-	size_t CurrentAddr;
+	size_t CurrentAddr = -1;
 	LArray<bool> LineIsAsm;
-	LAutoPtr<LCompiledCode> Obj;
 	LVariant Return;
-	bool AcceptNotify;
+	bool AcceptNotify = false;
 
 	// Ui
-	bool RunLoop;
-	LView *Parent;
-	LBox *Main;
-	LBox *Sub;
-	LList *SourceLst;
-	LTabView *Tabs;
-	LDebugView *Text;
-	LList *Locals, *Globals, *Registers, *Stack;
-	LTextLog *Log;
-	LToolBar *Tools;
-	LTableLayout *VarsTbl;
-
-	LScriptVmDebuggerPriv()
-	{
-		RunLoop = false;
-		OwnVm = false;
-		CurrentAddr = -1;
-		Main = NULL;
-		Tabs = NULL;
-		Log = NULL;
-		Text = NULL;
-		Locals = NULL;
-		Globals = NULL;
-		Registers = NULL;
-		Stack = NULL;
-		Tools = NULL;
-		SourceLst = NULL;
-		Callback = NULL;
-		VarsTbl = NULL;
-	}
+	LView *Parent = NULL;
+	LBox *Main = NULL;
+	LBox *Sub = NULL;
+	LList *SourceLst = NULL;
+	LTabView *Tabs = NULL;
+	LDebugView *Text = NULL;
+	LList *Locals = NULL, *Globals = NULL, *Registers = NULL, *Stack = NULL;
+	LTextLog *Log = NULL;
+	LToolBar *Tools = NULL;
+	LTableLayout *VarsTbl = NULL;
 };
 
 LDebugView::LDebugView(LScriptVmDebuggerPriv *priv) : LTextView3(IDC_TEXT, 0, 0, 100, 100)
@@ -1594,16 +1582,15 @@ void LDebugView::PourText(size_t Start, ssize_t Len)
 	}
 }
 
-LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmCallback *Callback, LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly)
+LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmCallback *Callback, LAutoPtr<LVirtualMachine> Vm, LAutoPtr<LCompiledCode> Code, const char *Assembly)
 {
 	d = new LScriptVmDebuggerPriv;
 	d->Parent = Parent;
-	d->AcceptNotify = false;
-	if (Vm)
-		d->Vm.Reset(new LVirtualMachine(Vm));
+	d->Vm = Vm;
 	d->Callback = Callback;
-	if (Code)
-		d->Script = Code->GetSource();
+	d->Obj = Code;
+	if (d->Obj)
+		d->Script = d->Obj->GetSource();
 	d->Assembly = Assembly;
 	
 	LRect r(0, 0, 1000, 900);
@@ -1722,9 +1709,9 @@ LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmCallback *Callback, LVirtualMac
 						it->SetText(dir.GetName(), 0);
 						it->SetText(p, 1);
 
-						if (Code && Code->GetFileName())
+						if (d->Obj && d->Obj->GetFileName())
 						{
-							if (_stricmp(p, Code->GetFileName()) == 0)
+							if (_stricmp(p, d->Obj->GetFileName()) == 0)
 								Match = it;
 						}
 
@@ -1733,13 +1720,13 @@ LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmCallback *Callback, LVirtualMac
 				}
 			}
 
-			if (!Match && Code)
+			if (!Match && d->Obj)
 			{
 				LListItem *it = new LListItem;
 				if (it)
 				{
-					it->SetText(LGetLeaf(Code->GetFileName()), 0);
-					it->SetText(Code->GetFileName(), 1);
+					it->SetText(LGetLeaf(d->Obj->GetFileName()), 0);
+					it->SetText(d->Obj->GetFileName(), 1);
 					d->SourceLst->Insert(it);
 					it->Select(true);
 				}
@@ -1748,33 +1735,23 @@ LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmCallback *Callback, LVirtualMac
 	}
 
 	d->AcceptNotify = true;
+
+	if (d->Assembly)
+		SetSource(d->Assembly);
 }
 
 LVmDebuggerWnd::~LVmDebuggerWnd()
 {
-	LAssert(d->RunLoop == false);
 }
 
 bool LVmDebuggerWnd::OnRequestClose(bool OsShuttingDown)
 {
-	if (!d->RunLoop)
-		return LWindow::OnRequestClose(OsShuttingDown);
-
-	d->RunLoop = false;
-	return false; // Wait for Run() to exit in it's own time.
+	return LWindow::OnRequestClose(OsShuttingDown);
 }
 
 void LVmDebuggerWnd::Run()
 {
-	// This is to allow objects on the application's stack to 
-	// still be valid while the debugger UI is shown.
-	d->RunLoop = true;
-	while (d->RunLoop && Visible())
-	{
-		LYield();
-		LSleep(20);
-	}
-	Quit();
+	Visible(true);
 }
 
 LStream *LVmDebuggerWnd::GetLog()
@@ -1782,12 +1759,7 @@ LStream *LVmDebuggerWnd::GetLog()
 	return d->Log;
 }
 
-void LVmDebuggerWnd::OwnVm(bool Own)
-{
-	d->OwnVm = Own;
-}
-
-void LVmDebuggerWnd::OwnCompiledCode(LAutoPtr<LCompiledCode> Cc)
+void LVmDebuggerWnd::SetCode(LAutoPtr<LCompiledCode> Cc)
 {
 	d->Obj = Cc;
 }
@@ -2038,11 +2010,7 @@ int LVmDebuggerWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDC_STOP:
 		{
-			d->Vm.Reset();
-			if (d->RunLoop)
-				d->RunLoop = false;
-			else
-				Quit();
+			LAssert(!"Impl me.");
 			break;
 		}
 		case IDC_RESTART:

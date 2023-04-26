@@ -2387,19 +2387,19 @@ double LScriptArguments::DoubleAt(size_t i, double Default)
 	return IdxCheck(i) ? (*this)[i]->CastDouble() : Default;
 }
 
-bool LScriptArguments::Throw(const char *File, int Line, const char *Msg, ...)
+bool LScriptArguments::Throw(const char *file, int line, const char *Msg, ...)
 {
 	if (!Vm)
 		return false;
 
+	File = file;
+	Line = line;
+
 	va_list Arg;
 	va_start(Arg, Msg);
-
-	LString s;
-	s.Printf(Arg, Msg);
-
+	ExceptionMsg.Printf(Arg, Msg);
 	va_end(Arg);
 	
-	Vm->OnException(File, Line, -1, s);
+	Vm->OnException(File, Line, -1, ExceptionMsg);
 	return true;
 }

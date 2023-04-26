@@ -391,10 +391,8 @@ class LVirtualMachine;
 class LVmDebugger : public LDom
 {
 public:
-	/// Set the VM ownership flag.
-	virtual void OwnVm(bool Own) = 0;
 	/// Makes the debugger the owner of the compiled code
-	virtual void OwnCompiledCode(LAutoPtr<LCompiledCode> Cc) = 0;
+	virtual void SetCode(LAutoPtr<LCompiledCode> Cc) = 0;
 	/// Gets the code owned by the debugger
 	virtual LCompiledCode *GetCode() = 0;
 	/// Set the source and asm
@@ -417,7 +415,9 @@ public:
 	/// Call a callback by name.
 	virtual bool CallCallback(LVirtualMachine &Vm, LString CallbackName, LScriptArguments &Args) = 0;
 
-	/// Start a debugger instance to handle the execution in 'Vm'
+	/// Start a debugger instance to handle the execution in the Vm.
+	/// Implementors should COPY the Vm and Code objects to give to the debugger, because their state
+	/// will go away when the stack unwinds. The copy will maintain the state for the debugger to inspect.
 	virtual LVmDebugger *AttachVm(LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly) = 0;
 	
 	/// Compile a new script
@@ -432,10 +432,9 @@ class LVmDebuggerWnd : public LWindow, public LVmDebugger
 	void UpdateVariables(LList *Lst, LVariant *Arr, ssize_t Len, char Prefix);
 
 public:
-	LVmDebuggerWnd(LView *Parent, LVmCallback *Callback, LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly);
+	LVmDebuggerWnd(LView *Parent, LVmCallback *Callback, LAutoPtr<LVirtualMachine> Vm, LAutoPtr<LCompiledCode> Code, const char *Assembly);
 	~LVmDebuggerWnd();
 
-	void OwnVm(bool Own);
 	void OnAddress(size_t Addr);
 	void OnError(const char *Msg);
 	void OnRun(bool Running);
@@ -446,7 +445,7 @@ public:
 	LMessage::Param OnEvent(LMessage *Msg);
 	void LoadFile(const char *File);
 	LStream *GetLog();
-	void OwnCompiledCode(LAutoPtr<LCompiledCode> Cc);
+	void SetCode(LAutoPtr<LCompiledCode> Cc);
 	LCompiledCode *GetCode();
 	
 	void Run();

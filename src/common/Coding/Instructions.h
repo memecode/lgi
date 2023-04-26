@@ -10,10 +10,10 @@
 
 #ifdef VM_EXECUTE
 #define Resolve()			&Scope[c.r->Scope][c.r->Index]; c.r++
-#define GResolveRef(nm)		LVariant *nm =
+#define LResolveRef(nm)		LVariant *nm =
 #else
 #define Resolve()			c.r++
-#define GResolveRef(nm)		
+#define LResolveRef(nm)		
 // LVarRef *
 #endif
 
@@ -45,7 +45,7 @@ case ICast:
 					CurrentScriptAddress - 1,
 					c.r[0].GetStr());
 	#endif
-	GResolveRef(Var) Resolve();
+	LResolveRef(Var) Resolve();
 	uint8_t Type = *c.u8++;
 	#if VM_DECOMP
 	if (Log)
@@ -112,8 +112,8 @@ case IAssign:
 				c.r[1].GetStr());
 	#endif
 
-	GResolveRef(Dst) Resolve();
-	GResolveRef(Src) Resolve();
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
 	
 	#ifdef VM_EXECUTE
 	CheckParam(Dst != Src);
@@ -149,7 +149,7 @@ case IJumpZero:
 			c.r[0].GetStr(),
 			c.i32[1]);
 	#endif
-	GResolveRef(Exp) Resolve();
+	LResolveRef(Exp) Resolve();
 	#ifdef VM_EXECUTE
 	int32 Jmp = *
 	#endif
@@ -171,7 +171,7 @@ case IUnaryMinus:
 			c.r[0].GetStr());
 	#endif
 	
-	GResolveRef(Var) Resolve();
+	LResolveRef(Var) Resolve();
 	
 	#ifdef VM_EXECUTE
 	switch (Var->Type)
@@ -200,8 +200,8 @@ case IPlusEquals:
 			c.r[1].GetStr());
 	#endif
 	
-	GResolveRef(Dst) Resolve();
-	GResolveRef(Src) Resolve();
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
 	
 	#ifdef VM_EXECUTE
 	if (Dst->Str())
@@ -264,8 +264,8 @@ case IMinusEquals:
 			c.r[1].GetStr());
 	#endif
 
-	GResolveRef(Dst) Resolve();
-	GResolveRef(Src) Resolve();
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
 	
 	#ifdef VM_EXECUTE
 	switch (DecidePrecision(Dst->Type, Src->Type))
@@ -294,8 +294,8 @@ case IMulEquals:
 			c.r[1].GetStr());
 	#endif
 
-	GResolveRef(Dst) Resolve();
-	GResolveRef(Src) Resolve();
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
 
 	#ifdef VM_EXECUTE
 	switch (DecidePrecision(Dst->Type, Src->Type))
@@ -324,8 +324,8 @@ case IDivEquals:
 			c.r[1].GetStr());
 	#endif
 
-	GResolveRef(Dst) Resolve();
-	GResolveRef(Src) Resolve();
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
 	
 	#ifdef VM_EXECUTE
 	switch (DecidePrecision(Dst->Type, Src->Type))
@@ -353,8 +353,8 @@ case IMod:
 			c.r[1].GetStr());
 	#endif
 
-	GResolveRef(Dst) Resolve();
-	GResolveRef(Src) Resolve();
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
 	#ifdef VM_EXECUTE
 	switch (DecidePrecision(Dst->Type, Src->Type))
 	{
@@ -381,7 +381,7 @@ case IPreInc:
 			c.r[0].GetStr());
 	#endif
 
-	GResolveRef(v) Resolve();
+	LResolveRef(v) Resolve();
 	#ifdef VM_EXECUTE
 	switch (v->Type)
 	{
@@ -408,7 +408,7 @@ case IPreDec:
 			c.r[0].GetStr());
 	#endif
 
-	GResolveRef(v) Resolve();
+	LResolveRef(v) Resolve();
 	#ifdef VM_EXECUTE
 	switch (v->Type)
 	{
@@ -435,8 +435,8 @@ case IEquals:
 					c.r[1].GetStr());
 	#endif
 
-	GResolveRef(Dst) Resolve();
-	GResolveRef(Src) Resolve();
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
 
 	#ifdef VM_EXECUTE
 	*Dst = CompareVariants(Dst, Src) == 0;
@@ -453,8 +453,8 @@ case INotEquals:
 					c.r[1].GetStr());
 	#endif
 
-	GResolveRef(Dst) Resolve();
-	GResolveRef(Src) Resolve();
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
 
 	#ifdef VM_EXECUTE
 	*Dst = CompareVariants(Dst, Src) != 0;
@@ -471,8 +471,8 @@ case ILessThan:
 					c.r[1].GetStr());
 	#endif
 
-	GResolveRef(Dst) Resolve();
-	GResolveRef(Src) Resolve();
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
 	
 	#ifdef VM_EXECUTE
 	*Dst = CompareVariants(Dst, Src) < 0;
@@ -489,8 +489,8 @@ case ILessThanEqual:
 					c.r[1].GetStr());
 	#endif
 
-	GResolveRef(Dst) Resolve();
-	GResolveRef(Src) Resolve();
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
 	
 	#ifdef VM_EXECUTE
 	*Dst = CompareVariants(Dst, Src) <= 0;
@@ -507,8 +507,8 @@ case IGreaterThan:
 					c.r[1].GetStr());
 	#endif
 
-	GResolveRef(Dst) Resolve();
-	GResolveRef(Src) Resolve();
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
 	
 	#ifdef VM_EXECUTE
 	*Dst = CompareVariants(Dst, Src) > 0;
@@ -525,8 +525,8 @@ case IGreaterThanEqual:
 					c.r[1].GetStr());
 	#endif
 
-	GResolveRef(Dst) Resolve();
-	GResolveRef(Src) Resolve();
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
 	
 	#ifdef VM_EXECUTE
 	*Dst = CompareVariants(Dst, Src) >= 0;
@@ -554,7 +554,7 @@ case ICallMethod:
 	}
 	#endif
 	
-	GResolveRef(Ret) Resolve();
+	LResolveRef(Ret) Resolve();
 	uint16 Args = *c.u16++;
 
 	#ifdef VM_EXECUTE			
@@ -582,32 +582,32 @@ case ICallMethod:
 	#endif
 	
 	#if VM_EXECUTE
-	LHostFunc *Hf = dynamic_cast<LHostFunc*>(Meth);
-	if (Hf)
-	{
-		if (!(Hf->Context->*(Hf->Func))(Arg))
+		LHostFunc *Hf = dynamic_cast<LHostFunc*>(Meth);
+		if (Hf)
 		{
-			if (Log)
-				Log->Print(	"%s ICallMethod error: Method '%s' failed.\n",
-							Code->AddrToSourceRef(CurrentScriptAddress),
-							Meth->Method.Get());
-			SetScriptError;
-		}		
-	}
-	else
-	{
-		// Fixme
-		if (!Meth->Call(NULL, Arg))
-		{
-			if (Log)
-				Log->Print(	"%s ICallMethod error: Method '%s' failed.\n",
-							Code->AddrToSourceRef(CurrentScriptAddress),
-							Meth->Method.Get());
-			SetScriptError;
+			if (!(Hf->Context->*(Hf->Func))(Arg))
+			{
+				if (Log)
+					Log->Print(	"%s ICallMethod error: Method '%s' failed.\n",
+								Code->AddrToSourceRef(CurrentScriptAddress),
+								Meth->Method.Get());
+				SetScriptError;
+			}		
 		}
-	}
+		else
+		{
+			// Fixme
+			if (!Meth->Call(NULL, Arg))
+			{
+				if (Log)
+					Log->Print(	"%s ICallMethod error: Method '%s' failed.\n",
+								Code->AddrToSourceRef(CurrentScriptAddress),
+								Meth->Method.Get());
+				SetScriptError;
+			}
+		}
 
-	Arg.Length(0); // It doesn't own the variants, so don't delete them.
+		Arg.Length(0); // It doesn't own the variants, so don't delete them.
 	#endif
 	break;
 }
@@ -616,9 +616,10 @@ case ICallScript:
 	int32 FuncAddr = *c.i32++;
 	if (FuncAddr < 0 || (uint32_t)FuncAddr >= Code->ByteCode.Length())
 	{
-		Log->Print(	"%s ICallScript error: Script function call invalid addr '%p'.\n",
-					Code->AddrToSourceRef(CurrentScriptAddress - sizeof(FuncAddr)),
-					FuncAddr);
+		if (Log)
+			Log->Print(	"%s ICallScript error: Script function call invalid addr '%p'.\n",
+						Code->AddrToSourceRef(CurrentScriptAddress - sizeof(FuncAddr)),
+						FuncAddr);
 		SetScriptError;
 		break;
 	}
@@ -659,7 +660,7 @@ case ICallScript:
 	
 	#else
 	
-	GResolveRef(Ret) Resolve();
+	LResolveRef(Ret) Resolve();
 	int Args = *c.u16++;
 	
 	#endif
@@ -698,7 +699,7 @@ case IRet:
 		Log->Print("%p Ret %s\n", CurrentScriptAddress - 1, c.r[0].GetStr());
 	#endif
 
-	GResolveRef(ReturnValue) Resolve();
+	LResolveRef(ReturnValue) Resolve();
 
 	#ifdef VM_EXECUTE
 	if (Frames.Length() > 0)
@@ -718,6 +719,7 @@ case IRet:
 		if (Locals.Length() >= Sf.CurrentFrameSize)
 		{
 			ssize_t Base = Locals.Length() - Sf.CurrentFrameSize;
+			/*
 			if (ArgsOutput)
 			{
 				if (Frames.Length() == 0)
@@ -728,6 +730,8 @@ case IRet:
 					}
 				}
 			}
+			*/
+
 			// LgiTrace("%s:%i Locals %i -> %i\n", _FL, Locals.Length(), Base);
 			Locals.Length(Base);
 			Scope[SCOPE_LOCAL] = &Locals[Sf.PrevFrameStart];
@@ -760,9 +764,9 @@ case IArrayGet:
 					c.r[2].GetStr());
 	#endif
 
-	GResolveRef(Dst) Resolve();
-	GResolveRef(Var) Resolve();
-	GResolveRef(Idx) Resolve();
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Var) Resolve();
+	LResolveRef(Idx) Resolve();
 
 	#ifdef VM_EXECUTE
 	switch (Var->Type)
@@ -856,9 +860,9 @@ case IArraySet:
 					c.r[2].GetStr());
 	#endif
 
-	GResolveRef(Var) Resolve();
-	GResolveRef(Idx) Resolve();
-	GResolveRef(Val) Resolve();
+	LResolveRef(Var) Resolve();
+	LResolveRef(Idx) Resolve();
+	LResolveRef(Val) Resolve();
 	#ifdef VM_EXECUTE
 	switch (Var->Type)
 	{
@@ -903,8 +907,8 @@ case IAnd:
 					c.r[1].GetStr());
 	#endif
 
-	GResolveRef(Dst) Resolve();
-	GResolveRef(Src) Resolve();
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
 	#ifdef VM_EXECUTE
 	*Dst = (Dst->CastInt32() != 0) && (Src->CastInt32() != 0);
 	#endif
@@ -920,8 +924,8 @@ case IOr:
 					c.r[1].GetStr());
 	#endif
 
-	GResolveRef(Dst) Resolve();
-	GResolveRef(Src) Resolve();
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Src) Resolve();
 	#ifdef VM_EXECUTE
 	*Dst = (Dst->CastInt32() != 0) || (Src->CastInt32() != 0);
 	#endif
@@ -937,7 +941,7 @@ case INot:
 					c.r[0].GetStr());
 	#endif
 
-	GResolveRef(Dst) Resolve();
+	LResolveRef(Dst) Resolve();
 	#ifdef VM_EXECUTE
 	*Dst = !Dst->CastBool();
 	#endif
@@ -955,10 +959,10 @@ case IDomGet:
 					c.r[3].GetStr());
 	#endif
 
-	GResolveRef(Dst) Resolve();
-	GResolveRef(Dom) Resolve();
-	GResolveRef(Name) Resolve();
-	GResolveRef(Arr) Resolve();
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Dom) Resolve();
+	LResolveRef(Name) Resolve();
+	LResolveRef(Arr) Resolve();
 
 	#ifdef VM_EXECUTE
 
@@ -1252,10 +1256,10 @@ case IDomSet:
 					c.r[3].GetStr());
 	#endif
 
-	GResolveRef(Dom) Resolve();
-	GResolveRef(Name) Resolve();
-	GResolveRef(Arr) Resolve();
-	GResolveRef(Value) Resolve();
+	LResolveRef(Dom) Resolve();
+	LResolveRef(Name) Resolve();
+	LResolveRef(Arr) Resolve();
+	LResolveRef(Value) Resolve();
 	
 	#ifdef VM_EXECUTE
 
@@ -1401,608 +1405,608 @@ case IDomCall:
 	LVarRef DstRef = *c.r;
 	#endif
 
-	GResolveRef(Dst) Resolve();
-	GResolveRef(Dom) Resolve();
-	GResolveRef(Name) Resolve();
+	LResolveRef(Dst) Resolve();
+	LResolveRef(Dom) Resolve();
+	LResolveRef(Name) Resolve();
 
 	#ifdef VM_EXECUTE
 
-	GResolveRef(Args) Resolve();
-	int ArgCount = Args->CastInt32();
-	char *sName = Name->Str();
-	CheckParam(sName)
+		LResolveRef(Args) Resolve();
+		int ArgCount = Args->CastInt32();
+		char *sName = Name->Str();
+		CheckParam(sName)
 
-	if (Dom->Type == GV_CUSTOM)
-	{
-		#define DEBUG_CUSTOM_METHOD_CALL	1
-		
-		LCustomType *t = Dom->Value.Custom.Dom;
-		CheckParam(t);
-		LCustomType::Method *m = t->GetMethod(sName);
-		CheckParam(m);
-		CheckParam(m->Params.Length() == ArgCount);
-		
-		// Set up new stack frame...
-		StackFrame &Sf = Frames.New();
-		Sf.CurrentFrameSize = m->FrameSize;
-		Sf.PrevFrameStart = Locals.Length() ? Scope[1] - &Locals[0] : 0;
-		Sf.ReturnValue = DstRef;
-
-		// Increase the local stack size
-		AddLocalSize(m->FrameSize + 1);
-		
-		#if DEBUG_CUSTOM_METHOD_CALL
-		LgiTrace("CustomType.Call(%s) Args=%i, Frame=%i, Addr=%i, LocalsBase=%i ",
-				sName, ArgCount, m->FrameSize, m->Address, LocalsBase);
-		#endif
-		
-		size_t i = LocalsBase;
-		Locals[i++] = *Dom; // this pointer...
-		#if DEBUG_CUSTOM_METHOD_CALL
-		LString s = Locals[i-1].ToString();
-		LgiTrace("This=%s, ", s.Get());
-		#endif
-		size_t end = i + ArgCount;
-		while (i < end)
+		if (Dom->Type == GV_CUSTOM)
 		{
-			Locals[i++] = *Resolve();
+			#define DEBUG_CUSTOM_METHOD_CALL	1
+		
+			auto t = Dom->Value.Custom.Dom;
+			CheckParam(t);
+			auto m = t->GetMethod(sName);
+			CheckParam(m);
+			CheckParam(m->Params.Length() == ArgCount);
+		
+			// Set up new stack frame...
+			StackFrame &Sf = Frames.New();
+			Sf.CurrentFrameSize = m->FrameSize;
+			Sf.PrevFrameStart = Locals.Length() ? Scope[1] - &Locals[0] : 0;
+			Sf.ReturnValue = DstRef;
+
+			// Increase the local stack size
+			AddLocalSize(m->FrameSize + 1);
+		
 			#if DEBUG_CUSTOM_METHOD_CALL
-			s = Locals[i-1].ToString();
-			LgiTrace("[%i]=%s, ", i-1, s.Get());
+			LgiTrace("CustomType.Call(%s) Args=%i, Frame=%i, Addr=%i, LocalsBase=%i ",
+					sName, ArgCount, m->FrameSize, m->Address, LocalsBase);
 			#endif
+		
+			size_t i = LocalsBase;
+			Locals[i++] = *Dom; // this pointer...
+			#if DEBUG_CUSTOM_METHOD_CALL
+			LString s = Locals[i-1].ToString();
+			LgiTrace("This=%s, ", s.Get());
+			#endif
+			size_t end = i + ArgCount;
+			while (i < end)
+			{
+				Locals[i++] = *Resolve();
+				#if DEBUG_CUSTOM_METHOD_CALL
+				s = Locals[i-1].ToString();
+				LgiTrace("[%i]=%s, ", i-1, s.Get());
+				#endif
+			}
+
+			// Now adjust the local stack to point to the locals for the function
+			Scope[1] = Locals.Length() ? &Locals[LocalsBase] : NULL;
+
+			// Set IP to start of function
+			Sf.ReturnIp = CurrentScriptAddress;
+			c.u8 = Base + m->Address;
+
+			#if DEBUG_CUSTOM_METHOD_CALL
+			LgiTrace("\n");
+			#endif
+			break;
+		}	
+
+		LScriptArguments Arg(Vm, Dst);
+		Arg.Length(ArgCount);
+		for (int i=0; i<ArgCount; i++)
+		{
+			Arg[i] = Resolve();
 		}
-
-		// Now adjust the local stack to point to the locals for the function
-		Scope[1] = Locals.Length() ? &Locals[LocalsBase] : NULL;
-
-		// Set IP to start of function
-		Sf.ReturnIp = CurrentScriptAddress;
-		c.u8 = Base + m->Address;
-
-		#if DEBUG_CUSTOM_METHOD_CALL
-		LgiTrace("\n");
-		#endif
-		break;
-	}	
-
-	LScriptArguments Arg(Vm, Dst);
-	Arg.Length(ArgCount);
-	for (int i=0; i<ArgCount; i++)
-	{
-		Arg[i] = Resolve();
-	}
 	
-	LDomProperty p = LStringToDomProp(sName);
-	if (p == ObjType)
-	{
-		*Dst = LVariant::TypeToString(Dom->Type);
-	}
-	else switch (Dom->Type)
-	{
-		case GV_DOM:
-		case GV_STREAM:
-		case GV_LSURFACE:
+		LDomProperty p = LStringToDomProp(sName);
+		if (p == ObjType)
 		{
-			auto *dom = Dom->CastDom();
-			CheckParam(dom);
-			bool Ret = dom->CallMethod(sName, Arg);
-			if (!Ret)
-			{
-				Dst->Empty();
-				if (Log)
-					Log->Print("%s IDomCall warning: %s(...) failed.\n",
-								Code->AddrToSourceRef(CurrentScriptAddress),
-								sName);
-				Status = ScriptWarning;
-			}
-			break;
+			*Dst = LVariant::TypeToString(Dom->Type);
 		}
-		case GV_DATETIME:
+		else switch (Dom->Type)
 		{
-			CheckParam(Dom->Value.Date);
-			bool Ret = Dom->Value.Date->CallMethod(sName, Dst, Arg);
-			if (!Ret)
+			case GV_DOM:
+			case GV_STREAM:
+			case GV_LSURFACE:
 			{
-				Dst->Empty();
-				if (Log)
-					Log->Print("%s IDomCall warning: %s(...) failed.\n",
-								Code->AddrToSourceRef(CurrentScriptAddress),
-								sName);
-				Status = ScriptWarning;
-			}
-			break;
-		}
-		case GV_LIST:
-		{
-			CheckParam(Dom->Value.Lst);
-			switch (p)
-			{
-				case ObjLength:
-				{
-					*Dst = (int64)Dom->Value.Lst->Length();
-					break;
-				}
-				case ContainerAdd:
-				{
-					if (Arg.Length() > 0 &&
-						Arg[0])
-					{
-						int Index = Arg.Length() > 1 ? Arg[1]->CastInt32() : -1;
-
-						LVariant *v = new LVariant;
-						*v = *Arg[0];
-						Dom->Value.Lst->Insert(v, Index);
-					}
-					break;
-				}
-				case ContainerDelete:
-				{
-					for (unsigned i=0; i<Arg.Length(); i++)
-					{
-						LVariant *Idx = Arg[i];
-						if (Idx)
-						{
-							int32 n = Arg[i]->CastInt32();
-							LVariant *Elem = Dom->Value.Lst->ItemAt(n);
-							if (Elem)
-							{
-								Dom->Value.Lst->Delete(Elem);
-								DeleteObj(Elem);
-							}
-						}
-					}
-					break;
-				}
-				case ContainerHasKey:
-				{
-					if (Arg.Length() > 0 && Arg[0])
-					{
-						int Index = Arg[0]->CastInt32();
-						*Dst = (bool) (Index >= 0 && Index < (int)Dom->Value.Lst->Length());
-					}
-					else
-					{
-						*Dst = false;
-					}
-					break;
-				}
-				case ContainerSort:
-				{
-					LVariant *Param = Arg.Length() > 0 ? Arg[0] : NULL;
-					Dom->Value.Lst->Sort(LVariantCmp, (NativeInt)Param);
-					break;
-				}
-				default:
+				auto *dom = Dom->CastDom();
+				CheckParam(dom);
+				bool Ret = dom->CallMethod(sName, Arg);
+				if (!Ret)
 				{
 					Dst->Empty();
 					if (Log)
-						Log->Print(	"%s IDomCall warning: Unexpected list member '%s'.\n",
+						Log->Print("%s IDomCall warning: %s(...) failed.\n",
 									Code->AddrToSourceRef(CurrentScriptAddress),
 									sName);
 					Status = ScriptWarning;
-					break;
 				}
-			}
-			break;
-		}
-		case GV_HASHTABLE:
-		{
-			CheckParam(Dom->Value.Hash);
-			switch (p)
-			{
-				case ObjLength:
-				{
-					*Dst = Dom->Value.Hash->Length();
-					break;
-				}
-				case ContainerAdd:
-				{
-					if (Arg.Length() == 2 &&
-						Arg[0] &&
-						Arg[1])
-					{
-						char *Key = Arg[1]->Str();
-						if (Key)
-						{
-							LVariant *v = new LVariant;
-							*v = *Arg[0];
-							Dom->Value.Hash->Add(Key, v);
-						}
-					}
-					break;
-				}
-				case ContainerDelete:
-				{
-					if (Arg.Length() == 1 &&
-						Arg[0])
-					{
-						char *Key = Arg[0]->Str();
-						if (Key)
-						{
-							LVariant *v = (LVariant*) Dom->Value.Hash->Find(Key);
-							if (v)
-							{
-								Dom->Value.Hash->Delete(Key);
-								delete v;
-							}
-						}
-					}
-					break;
-				}
-				case ContainerHasKey:
-				{
-					if (Arg.Length() > 0 && Arg[0])
-					{
-						char *Key = Arg[0]->Str();
-						*Dst = (bool) (Dom->Value.Hash->Find(Key) != NULL);
-					}
-					else
-					{
-						*Dst = false;
-					}
-					break;
-				}
-				default:
-				{
-					Dst->Empty();
-					if (Log)
-						Log->Print("%s IDomCall warning: Unexpected hashtable member '%s'.\n",
-									Code->AddrToSourceRef(CurrentScriptAddress),
-									sName);
-					Status = ScriptWarning;
-					break;
-				}
-			}
-			break;
-		}
-		case GV_BINARY:
-		{
-			switch (p)
-			{
-				default:
-					break;
-				case ObjLength:
-					*Dst = Dom->Value.Binary.Length;
-					break;
-			}
-			break;
-		}
-		case GV_STRING:
-		{
-			if (Arg.Length() > 0 && !Arg[0])
-			{
-				Dst->Empty();
 				break;
 			}
-
-			switch (p)
+			case GV_DATETIME:
 			{
-				case ObjLength:
-				{
-					char *s = Dom->Str();
-					*Dst = (int) (s ? strlen(s) : 0);
-					break;
-				}
-				case StrJoin:
-				{
-					switch (Arg[0]->Type)
-					{
-						case GV_LIST:
-						{
-							LStringPipe p(256);
-							List<LVariant> *Lst = Arg[0]->Value.Lst;
-							const char *Sep = Dom->CastString();
-							auto It = Lst->begin();
-							LVariant *v = *It;
-							if (v)
-							{
-								LVariant Tmp = *v;
-								p.Print("%s", Tmp.CastString());
-								while ((v = *(++It)))
-								{
-									Tmp = *v;
-									p.Print("%s%s", Sep, Tmp.CastString());
-								}
-							}
-							Dst->OwnStr(p.NewStr());
-							break;
-						}
-						default:
-						{
-							*Dst = *Arg[0];
-							Dst->CastString();
-							break;
-						}
-					}
-					break;
-				}
-				case StrSplit:
-				{
-					const char *Sep = Arg[0]->Str();
-					if (!Sep)
-					{
-						Dst->Empty();
-						break;
-					}
-					
-					LVariant Tmp;
-					if (Dst == Dom)
-					{
-						Tmp = *Dom;
-						Dom = &Tmp;
-					}
-
-					Dst->SetList();
-					
-					size_t SepLen = strlen(Sep);
-					int MaxSplit = Arg.Length() > 1 ? Arg[1]->CastInt32() : -1;
-					const char *c = Dom->CastString();
-					while (c && *c)
-					{
-						if (MaxSplit > 0 && (int)Dst->Value.Lst->Length() >= MaxSplit)
-							break;
-
-						const char *next = strstr(c, Sep);
-						if (!next)
-							break;
-						
-						LVariant *v = new LVariant;
-						v->OwnStr(NewStr(c, next - c));
-						Dst->Value.Lst->Insert(v);
-						
-						c = next + SepLen;
-					}
-
-					if (c && *c)
-					{
-						LVariant *v = new LVariant;
-						v->OwnStr(NewStr(c));
-						Dst->Value.Lst->Insert(v);
-					}
-					break;
-				}
-				case StrSplitDelimit:
-				{
-					const char *Sep = Arg[0]->Str();
-					if (!Sep)
-					{
-						Dst->Empty();
-						break;
-					}
-					
-					LVariant Tmp;
-					if (Dst == Dom)
-					{
-						Tmp = *Dom;
-						Dom = &Tmp;
-					}
-
-					Dst->SetList();
-					
-					int MaxSplit = Arg.Length() > 1 ? Arg[1]->CastInt32() : -1;
-					const char *c = Dom->CastString();
-					while (c && *c)
-					{
-						if (MaxSplit > 0 && (int)Dst->Value.Lst->Length() >= MaxSplit)
-							break;
-
-						const char *next = c;
-						while (*next && !strchr(Sep, *next))
-							next++;
-						
-						LVariant *v = new LVariant;
-						v->OwnStr(NewStr(c, next - c));
-						Dst->Add(v);
-						
-						for (c = next; *c && strchr(Sep, *c); c++)
-							;
-					}
-
-					if (c && *c)
-						Dst->Add(new LVariant(c));
-					break;
-				}								
-				case StrFind:
-				{
-					const char *s = Dom->Str();
-					if (!s)
-					{
-						*Dst = -1;
-						break;
-					}
-
-					ssize_t sLen = Strlen(s);
-					auto sub = Arg[0]->Str();
-					auto start = Arg.Length() > 1 ? Arg[1]->CastInt32() : 0;
-					auto end = Arg.Length() > 2   ? Arg[2]->CastInt32() : -1;								
-
-					if (start >= sLen)
-					{
-						*Dst = -1;
-						break;
-					}
-					char *sStart = (char*)s + start;
-					char *pos;
-					if (end >= 0)
-						pos = Strnstr(sStart, sub, end);
-					else
-						pos = Strstr(sStart, sub);
-
-					if (pos)
-						*Dst = (int64) (pos - s);
-					else
-						*Dst = -1;
-					break;
-				}
-				case StrRfind:
-				{
-					const char *s = Dom->Str();
-					if (!s)
-					{
-						*Dst = -1;
-						break;
-					}
-
-					ssize_t sLen = strlen(s);
-					auto sub = Arg[0]->Str();
-					auto start_idx = Arg.Length() > 1 ? Arg[1]->CastInt32() : 0;
-					auto end_idx = Arg.Length()   > 2 ? Arg[2]->CastInt32() : -1;								
-
-					if (start_idx >= sLen)
-					{
-						*Dst = -1;
-						break;
-					}
-					auto sublen = Strlen(sub);
-					auto cur = s + start_idx;
-					auto end = end_idx >= 0 ? cur + end_idx : NULL;
-					const char *pos = NULL;
-					while (true)
-					{
-						cur =	(end)
-								?
-								Strnstr(cur, sub, end - cur)
-								:
-								Strstr(cur, sub);
-						if (cur)
-						{
-							pos = cur;
-							cur += sublen;
-						}
-						else break;
-					}
-					
-					if (pos)
-						*Dst = (int64) (pos - s);
-					else
-						*Dst = -1;
-					break;
-				}
-				case StrLower:
-				{
-					if (Dst != Dom)
-						*Dst = Dom->CastString();
-					
-					StrLwr(Dst->Str());
-					break;
-				}
-				case StrUpper:
-				{
-					if (Dst != Dom)
-						*Dst = Dom->CastString();
-
-					StrUpr(Dst->Str());
-					break;
-				}
-				case StrStrip:
-				{
-					auto s = Dom->Str();
-					if (s)
-					{
-						const char *Delimit = Arg.Length() > 0 ? Arg[0]->Str() : NULL;
-						if (!Delimit)
-							Delimit = WhiteSpace;
-
-						auto start = s;
-						auto end = s + Strlen(s);
-						while (start < end && strchr(Delimit, *start))
-							start++;
-
-						while (end > start && strchr(Delimit, end[-1]))
-							end--;
-						
-						Dst->OwnStr(NewStr(start, end - start));
-					}
-					else Dst->Empty();
-					break;
-				}
-				case StrSub:
-				{
-					auto s = Dom->Str();
-					if (s)
-					{
-						ssize_t Start = Arg.Length() > 0 ? Arg[0]->CastInt32() : 0;
-						ssize_t End = Arg.Length() > 1 ? Arg[1]->CastInt32() : -1;
-						ssize_t Len = strlen(s);
-						if (End < 0 || End > Len)
-							End = Len;
-						if (Start < 0)
-							Start = 0;
-						if (Start <= End)
-							Dst->OwnStr(NewStr(s + Start, End - Start));
-						else
-							Dst->Empty();
-					}
-					else Dst->Empty();
-					break;
-				}
-				default:
+				CheckParam(Dom->Value.Date);
+				bool Ret = Dom->Value.Date->CallMethod(sName, Dst, Arg);
+				if (!Ret)
 				{
 					Dst->Empty();
 					if (Log)
-						Log->Print("%p IDomCall warning: Unexpected string member %s (%s:%i).\n",
-									CurrentScriptAddress,
-									sName,
-									_FL);
+						Log->Print("%s IDomCall warning: %s(...) failed.\n",
+									Code->AddrToSourceRef(CurrentScriptAddress),
+									sName);
 					Status = ScriptWarning;
+				}
+				break;
+			}
+			case GV_LIST:
+			{
+				CheckParam(Dom->Value.Lst);
+				switch (p)
+				{
+					case ObjLength:
+					{
+						*Dst = (int64)Dom->Value.Lst->Length();
+						break;
+					}
+					case ContainerAdd:
+					{
+						if (Arg.Length() > 0 &&
+							Arg[0])
+						{
+							int Index = Arg.Length() > 1 ? Arg[1]->CastInt32() : -1;
+
+							LVariant *v = new LVariant;
+							*v = *Arg[0];
+							Dom->Value.Lst->Insert(v, Index);
+						}
+						break;
+					}
+					case ContainerDelete:
+					{
+						for (unsigned i=0; i<Arg.Length(); i++)
+						{
+							LVariant *Idx = Arg[i];
+							if (Idx)
+							{
+								int32 n = Arg[i]->CastInt32();
+								LVariant *Elem = Dom->Value.Lst->ItemAt(n);
+								if (Elem)
+								{
+									Dom->Value.Lst->Delete(Elem);
+									DeleteObj(Elem);
+								}
+							}
+						}
+						break;
+					}
+					case ContainerHasKey:
+					{
+						if (Arg.Length() > 0 && Arg[0])
+						{
+							int Index = Arg[0]->CastInt32();
+							*Dst = (bool) (Index >= 0 && Index < (int)Dom->Value.Lst->Length());
+						}
+						else
+						{
+							*Dst = false;
+						}
+						break;
+					}
+					case ContainerSort:
+					{
+						LVariant *Param = Arg.Length() > 0 ? Arg[0] : NULL;
+						Dom->Value.Lst->Sort(LVariantCmp, (NativeInt)Param);
+						break;
+					}
+					default:
+					{
+						Dst->Empty();
+						if (Log)
+							Log->Print(	"%s IDomCall warning: Unexpected list member '%s'.\n",
+										Code->AddrToSourceRef(CurrentScriptAddress),
+										sName);
+						Status = ScriptWarning;
+						break;
+					}
+				}
+				break;
+			}
+			case GV_HASHTABLE:
+			{
+				CheckParam(Dom->Value.Hash);
+				switch (p)
+				{
+					case ObjLength:
+					{
+						*Dst = Dom->Value.Hash->Length();
+						break;
+					}
+					case ContainerAdd:
+					{
+						if (Arg.Length() == 2 &&
+							Arg[0] &&
+							Arg[1])
+						{
+							char *Key = Arg[1]->Str();
+							if (Key)
+							{
+								LVariant *v = new LVariant;
+								*v = *Arg[0];
+								Dom->Value.Hash->Add(Key, v);
+							}
+						}
+						break;
+					}
+					case ContainerDelete:
+					{
+						if (Arg.Length() == 1 &&
+							Arg[0])
+						{
+							char *Key = Arg[0]->Str();
+							if (Key)
+							{
+								LVariant *v = (LVariant*) Dom->Value.Hash->Find(Key);
+								if (v)
+								{
+									Dom->Value.Hash->Delete(Key);
+									delete v;
+								}
+							}
+						}
+						break;
+					}
+					case ContainerHasKey:
+					{
+						if (Arg.Length() > 0 && Arg[0])
+						{
+							char *Key = Arg[0]->Str();
+							*Dst = (bool) (Dom->Value.Hash->Find(Key) != NULL);
+						}
+						else
+						{
+							*Dst = false;
+						}
+						break;
+					}
+					default:
+					{
+						Dst->Empty();
+						if (Log)
+							Log->Print("%s IDomCall warning: Unexpected hashtable member '%s'.\n",
+										Code->AddrToSourceRef(CurrentScriptAddress),
+										sName);
+						Status = ScriptWarning;
+						break;
+					}
+				}
+				break;
+			}
+			case GV_BINARY:
+			{
+				switch (p)
+				{
+					default:
+						break;
+					case ObjLength:
+						*Dst = Dom->Value.Binary.Length;
+						break;
+				}
+				break;
+			}
+			case GV_STRING:
+			{
+				if (Arg.Length() > 0 && !Arg[0])
+				{
+					Dst->Empty();
 					break;
 				}
-			}
-			break;
-		}
-		default:
-		{
-			const char *Type = LVariant::TypeToString(Dom->Type);
-			char t[32];
-			if (!Type)
-			{
-				sprintf_s(t, sizeof(t), "UnknownType(%i)", Dom->Type);
-				Type = t;
-			}
-			
-			Dst->Empty();
-			if (Log)
-			{
-				Log->Print("%s IDomCall warning: Unexpected type %s (Src=%s:%i IP=0x%x).\n",
-							Code->AddrToSourceRef(CurrentScriptAddress),
-							Type,
-							_FL,
-							CurrentScriptAddress);
-			}
-			Status = ScriptWarning;
-			break;
-		}
-	}
 
-	Arg.Length(0); // It doesn't own the variants, so don't delete them.
+				switch (p)
+				{
+					case ObjLength:
+					{
+						char *s = Dom->Str();
+						*Dst = (int) (s ? strlen(s) : 0);
+						break;
+					}
+					case StrJoin:
+					{
+						switch (Arg[0]->Type)
+						{
+							case GV_LIST:
+							{
+								LStringPipe p(256);
+								List<LVariant> *Lst = Arg[0]->Value.Lst;
+								const char *Sep = Dom->CastString();
+								auto It = Lst->begin();
+								LVariant *v = *It;
+								if (v)
+								{
+									LVariant Tmp = *v;
+									p.Print("%s", Tmp.CastString());
+									while ((v = *(++It)))
+									{
+										Tmp = *v;
+										p.Print("%s%s", Sep, Tmp.CastString());
+									}
+								}
+								Dst->OwnStr(p.NewStr());
+								break;
+							}
+							default:
+							{
+								*Dst = *Arg[0];
+								Dst->CastString();
+								break;
+							}
+						}
+						break;
+					}
+					case StrSplit:
+					{
+						const char *Sep = Arg[0]->Str();
+						if (!Sep)
+						{
+							Dst->Empty();
+							break;
+						}
+					
+						LVariant Tmp;
+						if (Dst == Dom)
+						{
+							Tmp = *Dom;
+							Dom = &Tmp;
+						}
+
+						Dst->SetList();
+					
+						size_t SepLen = strlen(Sep);
+						int MaxSplit = Arg.Length() > 1 ? Arg[1]->CastInt32() : -1;
+						const char *c = Dom->CastString();
+						while (c && *c)
+						{
+							if (MaxSplit > 0 && (int)Dst->Value.Lst->Length() >= MaxSplit)
+								break;
+
+							const char *next = strstr(c, Sep);
+							if (!next)
+								break;
+						
+							LVariant *v = new LVariant;
+							v->OwnStr(NewStr(c, next - c));
+							Dst->Value.Lst->Insert(v);
+						
+							c = next + SepLen;
+						}
+
+						if (c && *c)
+						{
+							LVariant *v = new LVariant;
+							v->OwnStr(NewStr(c));
+							Dst->Value.Lst->Insert(v);
+						}
+						break;
+					}
+					case StrSplitDelimit:
+					{
+						const char *Sep = Arg[0]->Str();
+						if (!Sep)
+						{
+							Dst->Empty();
+							break;
+						}
+					
+						LVariant Tmp;
+						if (Dst == Dom)
+						{
+							Tmp = *Dom;
+							Dom = &Tmp;
+						}
+
+						Dst->SetList();
+					
+						int MaxSplit = Arg.Length() > 1 ? Arg[1]->CastInt32() : -1;
+						const char *c = Dom->CastString();
+						while (c && *c)
+						{
+							if (MaxSplit > 0 && (int)Dst->Value.Lst->Length() >= MaxSplit)
+								break;
+
+							const char *next = c;
+							while (*next && !strchr(Sep, *next))
+								next++;
+						
+							LVariant *v = new LVariant;
+							v->OwnStr(NewStr(c, next - c));
+							Dst->Add(v);
+						
+							for (c = next; *c && strchr(Sep, *c); c++)
+								;
+						}
+
+						if (c && *c)
+							Dst->Add(new LVariant(c));
+						break;
+					}								
+					case StrFind:
+					{
+						const char *s = Dom->Str();
+						if (!s)
+						{
+							*Dst = -1;
+							break;
+						}
+
+						ssize_t sLen = Strlen(s);
+						auto sub = Arg[0]->Str();
+						auto start = Arg.Length() > 1 ? Arg[1]->CastInt32() : 0;
+						auto end = Arg.Length() > 2   ? Arg[2]->CastInt32() : -1;								
+
+						if (start >= sLen)
+						{
+							*Dst = -1;
+							break;
+						}
+						char *sStart = (char*)s + start;
+						char *pos;
+						if (end >= 0)
+							pos = Strnstr(sStart, sub, end);
+						else
+							pos = Strstr(sStart, sub);
+
+						if (pos)
+							*Dst = (int64) (pos - s);
+						else
+							*Dst = -1;
+						break;
+					}
+					case StrRfind:
+					{
+						const char *s = Dom->Str();
+						if (!s)
+						{
+							*Dst = -1;
+							break;
+						}
+
+						ssize_t sLen = strlen(s);
+						auto sub = Arg[0]->Str();
+						auto start_idx = Arg.Length() > 1 ? Arg[1]->CastInt32() : 0;
+						auto end_idx = Arg.Length()   > 2 ? Arg[2]->CastInt32() : -1;								
+
+						if (start_idx >= sLen)
+						{
+							*Dst = -1;
+							break;
+						}
+						auto sublen = Strlen(sub);
+						auto cur = s + start_idx;
+						auto end = end_idx >= 0 ? cur + end_idx : NULL;
+						const char *pos = NULL;
+						while (true)
+						{
+							cur =	(end)
+									?
+									Strnstr(cur, sub, end - cur)
+									:
+									Strstr(cur, sub);
+							if (cur)
+							{
+								pos = cur;
+								cur += sublen;
+							}
+							else break;
+						}
+					
+						if (pos)
+							*Dst = (int64) (pos - s);
+						else
+							*Dst = -1;
+						break;
+					}
+					case StrLower:
+					{
+						if (Dst != Dom)
+							*Dst = Dom->CastString();
+					
+						StrLwr(Dst->Str());
+						break;
+					}
+					case StrUpper:
+					{
+						if (Dst != Dom)
+							*Dst = Dom->CastString();
+
+						StrUpr(Dst->Str());
+						break;
+					}
+					case StrStrip:
+					{
+						auto s = Dom->Str();
+						if (s)
+						{
+							const char *Delimit = Arg.Length() > 0 ? Arg[0]->Str() : NULL;
+							if (!Delimit)
+								Delimit = WhiteSpace;
+
+							auto start = s;
+							auto end = s + Strlen(s);
+							while (start < end && strchr(Delimit, *start))
+								start++;
+
+							while (end > start && strchr(Delimit, end[-1]))
+								end--;
+						
+							Dst->OwnStr(NewStr(start, end - start));
+						}
+						else Dst->Empty();
+						break;
+					}
+					case StrSub:
+					{
+						auto s = Dom->Str();
+						if (s)
+						{
+							ssize_t Start = Arg.Length() > 0 ? Arg[0]->CastInt32() : 0;
+							ssize_t End = Arg.Length() > 1 ? Arg[1]->CastInt32() : -1;
+							ssize_t Len = strlen(s);
+							if (End < 0 || End > Len)
+								End = Len;
+							if (Start < 0)
+								Start = 0;
+							if (Start <= End)
+								Dst->OwnStr(NewStr(s + Start, End - Start));
+							else
+								Dst->Empty();
+						}
+						else Dst->Empty();
+						break;
+					}
+					default:
+					{
+						Dst->Empty();
+						if (Log)
+							Log->Print("%p IDomCall warning: Unexpected string member %s (%s:%i).\n",
+										CurrentScriptAddress,
+										sName,
+										_FL);
+						Status = ScriptWarning;
+						break;
+					}
+				}
+				break;
+			}
+			default:
+			{
+				const char *Type = LVariant::TypeToString(Dom->Type);
+				char t[32];
+				if (!Type)
+				{
+					sprintf_s(t, sizeof(t), "UnknownType(%i)", Dom->Type);
+					Type = t;
+				}
+			
+				Dst->Empty();
+				if (Log)
+				{
+					Log->Print("%s IDomCall warning: Unexpected type %s (Src=%s:%i IP=0x%x).\n",
+								Code->AddrToSourceRef(CurrentScriptAddress),
+								Type,
+								_FL,
+								CurrentScriptAddress);
+				}
+				Status = ScriptWarning;
+				break;
+			}
+		}
+
+		Arg.Length(0); // It doesn't own the variants, so don't delete them.
 
 	#else
 
-	LVariant *Count = NULL;
-	switch (c.r->Scope)
-	{
-		case SCOPE_GLOBAL:
-			Count = &Code->Globals[c.r->Index];
-			c.r++;
-			break;
-		default:
-			OnException(_FL, CurrentScriptAddress, "Unsupported scope.");
-			return ScriptError;
-	}
+		LVariant *Count = NULL;
+		switch (c.r->Scope)
+		{
+			case SCOPE_GLOBAL:
+				Count = &Code->Globals[c.r->Index];
+				c.r++;
+				break;
+			default:
+				OnException(_FL, CurrentScriptAddress, "Unsupported scope.");
+				return ScriptError;
+		}
 	
-	int Args = Count->CastInt32();
-	for (int i=0; i<Args; i++)
-	{
+		int Args = Count->CastInt32();
+		for (int i=0; i<Args; i++)
+		{
+			#if VM_DECOMP
+			if (Log)
+				Log->Print("%s%s", i ? ", " : "", c.r->GetStr());
+			#endif
+			c.r++;
+		}
 		#if VM_DECOMP
-		if (Log)
-			Log->Print("%s%s", i ? ", " : "", c.r->GetStr());
+			if (Log)
+				Log->Print(")\n");
 		#endif
-		c.r++;
-	}
-	#if VM_DECOMP
-	if (Log)
-		Log->Print(")\n");
-	#endif
 
 	#endif
 	break;
@@ -2038,4 +2042,4 @@ case IDebug:
 }
 
 #undef Resolve
-#undef GResolveRef
+#undef LResolveRef

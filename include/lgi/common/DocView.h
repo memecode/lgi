@@ -251,34 +251,34 @@ public:
 
 	///////////////////////////////////////////////////////////////////////
 	// Properties
-	#define _TvMenuProp(Type, Name, Default)			\
+	#define DocViewProp(Type, Name, Default)			\
 	protected:											\
 		Type Name = Default;							\
 	public:												\
 		virtual void Set##Name(Type i) { Name=i; }		\
 		Type Get##Name() { return Name; }
 
-	_TvMenuProp(uint16, WrapAtCol, 0)
-	_TvMenuProp(bool, UrlDetect, true)
-	_TvMenuProp(bool, ReadOnly, false)
-	_TvMenuProp(LDocWrapType, WrapType, TEXTED_WRAP_REFLOW)
-	_TvMenuProp(uint8_t, TabSize, 4)
-	_TvMenuProp(uint8_t, IndentSize, 4)
-	_TvMenuProp(bool, HardTabs, true)
-	_TvMenuProp(bool, ShowWhiteSpace, false)
-	_TvMenuProp(bool, ObscurePassword, false)
-	_TvMenuProp(bool, CrLf, false)
-	_TvMenuProp(bool, AutoIndent, true)
-	_TvMenuProp(bool, FixedWidthFont, false)
-	_TvMenuProp(bool, LoadImages, false)
-	_TvMenuProp(bool, OverideDocCharset, false)
+	DocViewProp(uint16, WrapAtCol, 0)
+	DocViewProp(bool, UrlDetect, true)
+	DocViewProp(bool, ReadOnly, false)
+	DocViewProp(LDocWrapType, WrapType, TEXTED_WRAP_REFLOW)
+	DocViewProp(uint8_t, TabSize, 4)
+	DocViewProp(uint8_t, IndentSize, 4)
+	DocViewProp(bool, HardTabs, true)
+	DocViewProp(bool, ShowWhiteSpace, false)
+	DocViewProp(bool, ObscurePassword, false)
+	DocViewProp(bool, CrLf, false)
+	DocViewProp(bool, AutoIndent, true)
+	DocViewProp(bool, FixedWidthFont, false)
+	DocViewProp(bool, LoadImages, false)
+	DocViewProp(bool, OverideDocCharset, false)
 
 	// This UID is used to match data load events with their source document.
 	// Sometimes data will arrive after the document that asked for it has
 	// already been unloaded. So by assigned each document an UID we can check
 	// the job UID against it and discard old data.
-	_TvMenuProp(int, DocumentUid, 0)
-	#undef _TvMenuProp
+	DocViewProp(int, DocumentUid, 0)
+	#undef DocViewProp
 
 	virtual const char *GetCharset()
 	{

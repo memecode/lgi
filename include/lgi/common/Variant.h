@@ -439,11 +439,16 @@ class LgiClass LScriptArguments : public LArray<LVariant*>
 	friend class LScriptEngine;
 	friend class LVirtualMachine;
 	friend class LVirtualMachinePriv;
+	friend struct ExecuteFunctionState;
 
 	LVirtualMachineI *Vm = NULL;
 	class LStream *Console = NULL;
 	LVariant *LocalReturn = NULL; // Owned by this instance
 	LVariant *Return = NULL;
+
+	const char *File = NULL;
+	int Line = 0;
+	LString ExceptionMsg;
 
 public:
 	static LStream NullConsole;
@@ -455,6 +460,7 @@ public:
 	void SetVm(LVirtualMachineI *vm) { Vm = vm; }
 	LVariant *GetReturn() { return Return; } // Must never be NULL.
 	LStream *GetConsole() { return Console; }
+	bool HasException() { return File != NULL || ExceptionMsg.Get() || Line != 0; }
 	bool Throw(const char *File, int Line, const char *Msg, ...);
 
 	// Accessor shortcuts
