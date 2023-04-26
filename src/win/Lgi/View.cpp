@@ -116,46 +116,6 @@ int GetInputACP()
 	return _wtoi(Str);
 }
 
-LKey::LKey(int v, uint32_t flags)
-{
-	const char *Cp = 0;
-
-	vkey = v;
-	Data = flags;
-	c16 = 0;
-
-	#if OLD_WM_CHAR_MODE
-	
-	c16 = vkey;
-	
-	#else
-
-	typedef int (WINAPI *p_ToUnicode)(UINT, UINT, PBYTE, LPWSTR, int, UINT);
-
-	static bool First = true;
-	static p_ToUnicode ToUnicode = 0;
-
-	if (First)
-	{
-		ToUnicode = (p_ToUnicode) GetProcAddress(LoadLibrary("User32.dll"), "ToUnicode");
-		First = false;
-	}
-
-	if (ToUnicode)
-	{
-		BYTE state[256];
-		GetKeyboardState(state);
-		char16 w[4];
-		int r = ToUnicode(vkey, flags & 0x7f, state, w, CountOf(w), 0);
-		if (r == 1)
-		{
-			c16 = w[0];
-		}
-	}
-
-	#endif
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename T>
 bool CastHwnd(T *&Ptr, HWND hWnd)

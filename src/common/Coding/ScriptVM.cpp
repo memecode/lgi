@@ -606,20 +606,6 @@ public:
 		if (Vm && Vm->OpenDebugger(Code, Asm))
 		{
 			LAssert(Debugger->GetCode()); // It should have taken a copy of the Code we passed in
-			
-			/*
-			if (!Debugger->GetCode())
-			{
-				LAutoPtr<LCompiledCode> Cp(new LCompiledCode(*Code));
-				Debugger->OwnCompiledCode(Cp);
-				
-				LStringPipe AsmBuf;
-				Decompile(Code->UserContext, Code, &AsmBuf);
-				LAutoString Asm(AsmBuf.NewStr());
-				Debugger->SetSource(Asm);
-			}
-			*/
-			
 			Debugger->OnAddress(Address);
 			
 			LString m;
@@ -910,6 +896,16 @@ public:
 		uint8_t *Base = &Code->ByteCode[0];
 		uint8_t *e = Base + Code->ByteCode.Length();
 		
+		#define ON_EXCEPTION(args) \
+			args.Length(0); \
+			args.Address = -1; \
+			if (args.HasException()) \
+			{ \
+				Status = ScriptError; \
+				goto ExitExecutionLoop; \
+			}
+
+
 		if (Type == RunContinue && BreakPts.Length() == 0)
 		{
 			// Unconstrained execution
@@ -918,13 +914,6 @@ public:
 				#if TIME_INSTRUCTIONS
 				uint8 TimedOpCode = *c.u8;
 				QueryPerformanceCounter(&start);
-				#endif
-				
-				#ifdef BREAK_POINT
-				if (c.u8 - Base == BREAK_POINT)
-				{
-					int asd=0;
-				}
 				#endif
 
 				switch (*c.u8++)
@@ -1035,6 +1024,7 @@ public:
 			}
 		}
 
+		ExitExecutionLoop:
 		if (Debugger && Status != ScriptError)
 			Debugger->OnAddress(CurrentScriptAddress);
 		
@@ -1392,7 +1382,7 @@ struct LScriptVmDebuggerPriv
 	LVmCallback *Callback = NULL;
 	LString Script, Assembly;
 	LArray<CodeBlock> Blocks;
-	size_t CurrentAddr = -1;
+	ssize_t CurrentAddr = -1;
 	LArray<bool> LineIsAsm;
 	LVariant Return;
 	bool AcceptNotify = false;
@@ -1552,8 +1542,10 @@ void LDebugView::PourText(size_t Start, ssize_t Len)
 		CodeBlock &b = d->Blocks[i];
 		for (unsigned n=0; n<b.AsmAddr.Length(); n++)
 		{
+			LgiTrace("d->CurrentAddr=%i b.AsmAddr[%i,%i]=%u\n", (int)d->CurrentAddr, i, n, b.AsmAddr[n]);
 			if (d->CurrentAddr >= b.AsmAddr[n])
 			{
+				LgiTrace("b.ViewLine=%i b.SrcLines=%i n=%i\n", b.ViewLine, b.SrcLines, n);
 				CurLine = b.ViewLine + b.SrcLines + n - 1;
 			}
 		}
@@ -2010,7 +2002,7 @@ int LVmDebuggerWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		}
 		case IDC_STOP:
 		{
-			LAssert(!"Impl me.");
+			Quit();
 			break;
 		}
 		case IDC_RESTART:

@@ -558,7 +558,7 @@ case ICallMethod:
 	uint16 Args = *c.u16++;
 
 	#ifdef VM_EXECUTE			
-	LScriptArguments Arg(Vm, Ret);
+	LScriptArguments Arg(Vm, Ret, NULL, CurrentScriptAddress);
 	#endif
 	
 	for (int i=0; i<Args; i++)
@@ -607,7 +607,7 @@ case ICallMethod:
 			}
 		}
 
-		Arg.Length(0); // It doesn't own the variants, so don't delete them.
+		ON_EXCEPTION(Arg);
 	#endif
 	break;
 }
@@ -1469,7 +1469,7 @@ case IDomCall:
 			break;
 		}	
 
-		LScriptArguments Arg(Vm, Dst);
+		LScriptArguments Arg(Vm, Dst, NULL, CurrentScriptAddress);
 		Arg.Length(ArgCount);
 		for (int i=0; i<ArgCount; i++)
 		{
@@ -1978,7 +1978,7 @@ case IDomCall:
 			}
 		}
 
-		Arg.Length(0); // It doesn't own the variants, so don't delete them.
+		ON_EXCEPTION(Arg);
 
 	#else
 

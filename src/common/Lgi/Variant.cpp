@@ -2347,9 +2347,10 @@ bool LCustomType::CallMethod(const char *MethodName, LScriptArguments &Args)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 LStream LScriptArguments::NullConsole;
 
-LScriptArguments::LScriptArguments(LVirtualMachineI *vm, LVariant *ret, LStream *console)
+LScriptArguments::LScriptArguments(LVirtualMachineI *vm, LVariant *ret, LStream *console, ssize_t address)
 {
 	Vm = vm;
+	Address = address;
 	if (ret)
 		Return = ret;
 	else
@@ -2400,6 +2401,6 @@ bool LScriptArguments::Throw(const char *file, int line, const char *Msg, ...)
 	ExceptionMsg.Printf(Arg, Msg);
 	va_end(Arg);
 	
-	Vm->OnException(File, Line, -1, ExceptionMsg);
+	Vm->OnException(File, Line, Address, ExceptionMsg);
 	return true;
 }

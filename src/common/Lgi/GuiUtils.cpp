@@ -23,9 +23,12 @@
 LKey::LKey(int Vkey, uint32_t flags)
 {
 	c16 = vkey = Vkey;
-	Flags = flags;
-	Data = 0;
-	IsChar = false;
+	
+	#ifdef WINDOWS
+		Data = flags;
+	#else
+		Flags = flags;
+	#endif
 }
 
 bool LKey::IsContextMenu() const

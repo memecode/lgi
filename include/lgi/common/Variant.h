@@ -449,11 +449,12 @@ class LgiClass LScriptArguments : public LArray<LVariant*>
 	const char *File = NULL;
 	int Line = 0;
 	LString ExceptionMsg;
+	ssize_t Address;
 
 public:
 	static LStream NullConsole;
 
-	LScriptArguments(LVirtualMachineI *vm, LVariant *ret = NULL, LStream *console = NULL);
+	LScriptArguments(LVirtualMachineI *vm, LVariant *ret = NULL, LStream *console = NULL, ssize_t address = -1);
 	~LScriptArguments();
 
 	LVirtualMachineI *GetVm() { return Vm; }
