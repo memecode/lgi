@@ -1001,7 +1001,7 @@ struct LAlarm
 		if (Action.Equals("DISPLAY")) Type = CalPopup;
 		else if (Action.Equals("EMAIL")) Type = CalEmail;
 		else if (Action.Equals("X-SCRIPT")) Type = CalScriptCallback;
-		else return NULL;
+		else return LString();
 
 		CalendarReminderUnits Units = CalMaxUnit;
 		char Last = Trigger.Strip()(-1);
@@ -1019,7 +1019,7 @@ struct LAlarm
 		Buf[ch] = 0;
 
 		if (!Trigger)
-			return NULL;
+			return LString();
 
 		LString s;
 		s.Printf(LPrintfInt64 ",%i,%i,%s", -Atoi(Buf), (int)Units, (int)Type, Param?Param.Get():"");
@@ -1496,7 +1496,7 @@ bool VCal::Export(LDataPropI *c, LStreamI *o)
 		}
 
 		LJson j(c->GetStr(FIELD_ATTENDEE_JSON));
-		for (auto g: j.GetArray(NULL))
+		for (auto g: j.GetArray(LString()))
 		{
 			// e.g.: ATTENDEE;CN="Matthew Allen";ROLE=REQ-PARTICIPANT;RSVP=TRUE:MAILTO:matthew@company.com.au
 			auto Email = g.Get("email");

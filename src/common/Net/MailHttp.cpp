@@ -596,7 +596,7 @@ LString MailPhp::GetHeaders(int Message)
 {
 	Msg *TheMsg = d->Msgs[Message];
 	if (!TheMsg)
-		return NULL;
+		return LString();
 
 	if (!d->HeadersRetreived)
 	{

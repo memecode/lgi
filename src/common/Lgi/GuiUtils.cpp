@@ -20,6 +20,12 @@
 	#endif
 #endif
 
+LKey::LKey(int key, uint32_t flags)
+{
+	vkey = key;
+	LAssert(flags == 0); // Or impl if you pass something in.
+}
+
 bool LKey::IsContextMenu() const
 {
 	return !IsChar && vkey == LK_CONTEXTKEY;

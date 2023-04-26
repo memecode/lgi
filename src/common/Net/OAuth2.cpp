@@ -23,7 +23,7 @@ static LString GetHeaders(LSocketI *s)
 	}
 	
 	s->Close();
-	return NULL;
+	return LString();
 }
 
 ssize_t ChunkSize(ssize_t &Pos, LString &Buf, LString &Body)
@@ -120,7 +120,7 @@ static LString UrlFromHeaders(LString Hdrs)
 	auto p = Lines[0].SplitDelimit();
 	if (p.Length() < 3)
 	{
-		return NULL;
+		return LString();
 	}
 
 	return p[1];
