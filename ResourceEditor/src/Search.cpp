@@ -690,8 +690,6 @@ Results::Results(AppWnd *app, Search *params)
 							Res->Grp = r->IsStringGroup();
 							d->Lst->Insert(Res);
 						}
-						
-						LYield();
 					}
 				}
 				else if (r->IsDialog())
@@ -710,8 +708,6 @@ Results::Results(AppWnd *app, Search *params)
 							Res->Dialog = r->IsDialog();
 							d->Lst->Insert(Res);
 						}
-						
-						LYield();
 					}
 				}
 				else if (r->IsMenu())
@@ -729,8 +725,6 @@ Results::Results(AppWnd *app, Search *params)
 							Res->Menu = c;
 							d->Lst->Insert(Res);
 						}
-						
-						LYield();
 					}
 				}
 			}

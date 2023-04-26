@@ -1492,7 +1492,7 @@ bool LXmlTree::Output(LXmlTag *t, int Depth)
 		{ for (int i=0; i<Depth; i++) OutputWrite((void*)"\t", 1); }
 
 	if (d->Prog)
-		*d->Prog++;
+		d->Prog->Value(d->Prog->Value()+1);
 	t->Serialize(t->Write = true);
 	Tabs
 

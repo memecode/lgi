@@ -1926,12 +1926,10 @@ void AppWnd::GotoObject(ResString *s,
 				{
 					s->GetList()->Select(0);
 					s->ScrollTo();
-					LYield();
 					s->Select(true);
 				}
 				else if (d)
 				{
-					LYield();
 					d->SelectCtrl(c);
 				}
 				else if (m)
@@ -2251,8 +2249,6 @@ public:
 				c2 = t2->Children[0];
 			}
 		}
-
-		LYield();
 	}
 
 	void OnPosChange()
@@ -3558,7 +3554,6 @@ void AppWnd::LoadWin32(const char *FileName)
 				if (Ticker.DoNow())
 				{
 					Progress.Value(CurLine);
-					LYield();
 				}
 				
 				// Skip white space

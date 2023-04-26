@@ -148,10 +148,10 @@
 		34CC003E23AAD34600CCAAEA /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		34CC004123AAD54200CCAAEA /* Png.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Png.cpp; path = ../../src/common/Gdc2/Filters/Png.cpp; sourceTree = "<group>"; };
 		34CC004323AAD57F00CCAAEA /* libpng.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libpng.xcodeproj; path = ../../../../../CodeLib/libpng/build/libpng.xcodeproj; sourceTree = "<group>"; };
-		34CC006223AAD5DB00CCAAEA /* _StringIcons.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = _StringIcons.gif; path = ../src/_StringIcons.gif; sourceTree = "<group>"; };
-		34CC006323AAD5DB00CCAAEA /* _DialogIcons.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = _DialogIcons.gif; path = ../src/_DialogIcons.gif; sourceTree = "<group>"; };
-		34CC006423AAD5DB00CCAAEA /* _MenuIcons.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = _MenuIcons.gif; path = ../src/_MenuIcons.gif; sourceTree = "<group>"; };
-		34CC006523AAD5DB00CCAAEA /* _Icons.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = _Icons.gif; path = ../src/_Icons.gif; sourceTree = "<group>"; };
+		34CC006223AAD5DB00CCAAEA /* _StringIcons.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = _StringIcons.gif; path = ../resources/_StringIcons.gif; sourceTree = "<group>"; };
+		34CC006323AAD5DB00CCAAEA /* _DialogIcons.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = _DialogIcons.gif; path = ../resources/_DialogIcons.gif; sourceTree = "<group>"; };
+		34CC006423AAD5DB00CCAAEA /* _MenuIcons.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = _MenuIcons.gif; path = ../resources/_MenuIcons.gif; sourceTree = "<group>"; };
+		34CC006523AAD5DB00CCAAEA /* _Icons.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = _Icons.gif; path = ../resources/_Icons.gif; sourceTree = "<group>"; };
 		34CC006A23AAD5FC00CCAAEA /* Gif.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Gif.cpp; path = ../../src/common/Gdc2/Filters/Gif.cpp; sourceTree = "<group>"; };
 		34CC006B23AAD5FC00CCAAEA /* Lzw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Lzw.cpp; path = ../../src/common/Gdc2/Filters/Lzw.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -587,8 +587,8 @@
 				HEADER_SEARCH_PATHS = (
 					../../include,
 					../../include/lgi/mac/cocoa,
-					../Code,
-					../Resources,
+					../src,
+					../resources,
 					../../../../../CodeLib/libpng/build,
 					../../../../../CodeLib/libpng,
 				);
@@ -619,8 +619,8 @@
 				HEADER_SEARCH_PATHS = (
 					../../include,
 					../../include/lgi/mac/cocoa,
-					../Code,
-					../Resources,
+					../src,
+					../resources,
 					../../../../../CodeLib/libpng/build,
 					../../../../../CodeLib/libpng,
 				);

@@ -2297,11 +2297,6 @@ void LList::PourAll()
 	// Layout all the elements
 	LRect Client = GetClient();
 	LFont *Font = GetFont();
-
-	if (Columns.Length() == 0)
-	{
-		int asd=0;
-	}
 	
 	if (d->Mode == LListDetails)
 	{
