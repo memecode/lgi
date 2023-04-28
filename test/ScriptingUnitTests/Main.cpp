@@ -26,7 +26,9 @@ class App : public LApp, public LScriptContext, public LVmCallback
 
 	LVmDebugger *AttachVm(LVirtualMachine *Vm, LCompiledCode *Code, const char *Assembly)
 	{
-		return new LVmDebuggerWnd(NULL, this, Vm, Code, Assembly);
+		LAutoPtr<LVirtualMachine> vm(new LVirtualMachine(Vm));
+		LAutoPtr<LCompiledCode> code(new LCompiledCode(*Code));
+		return new LVmDebuggerWnd(NULL, this, vm, code, Assembly);
 	}
 
 	bool CompileScript(LAutoPtr<LCompiledCode> &Output, const char *FileName, const char *Source)

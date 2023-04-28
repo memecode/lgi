@@ -630,111 +630,113 @@ public:
 		return s.Replace("\\","/").SplitDelimit("/", 1).Last();
 	}
 
-	void Select(bool s) override
+	void Select(bool selected) override
 	{
-		LTreeItem::Select(s);
-		if (s)
+		LTreeItem::Select(selected);
+		if (!selected)
+			return;
+
+		d->Files->Empty();
+		d->Diff->Name(NULL);
+			
+		LFile in(File, O_READ);
+		LString s = in.Read();
+		if (!s)
+			return;
+			
+		LString NewLine("\n");
+		LString::Array a = s.Replace("\r").Split("\n");
+		LArray<LString> index;
+		LString oldName, newName;
+		LString::Array Diff;
+		VcFile *f = NULL;
+		bool InPreamble = false;
+		bool InDiff = false;
+		for (unsigned i=0; i<a.Length(); i++)
 		{
-			d->Files->Empty();
-			d->Diff->Name(NULL);
-			
-			LFile in(File, O_READ);
-			LString s = in.Read();
-			if (!s)
-				return;
-			
-			LString NewLine("\n");
-			LString::Array a = s.Replace("\r").Split("\n");
-			LArray<LString> index;
-			LString oldName, newName;
-			LString::Array Diff;
-			VcFile *f = NULL;
-			bool InPreamble = false;
-			bool InDiff = false;
-			for (unsigned i=0; i<a.Length(); i++)
+			const char *Ln = a[i];
+			if (!Strnicmp(Ln, "diff ", 5))
 			{
-				const char *Ln = a[i];
-				if (!Strnicmp(Ln, "diff ", 5))
+				if (f)
 				{
-					if (f)
-					{
-						f->SetDiff(NewLine.Join(Diff));
-						f->Select(false);
-					}
+					f->SetDiff(NewLine.Join(Diff));
+					f->Select(false);
+				}
 
-					Diff.Empty();
-					oldName.Empty();
-					newName.Empty();
-					InDiff = false;
-					InPreamble = true;
-				}
-				else if (!Strnicmp(Ln, "Index", 5))
-				{
-					if (InPreamble)
-						index = a[i].SplitDelimit(": ", 1).Slice(1);
-				}
-				else if (!strncmp(Ln, "--- ", 4))
-				{
-					auto p = a[i].SplitDelimit(" \t", 1);
-					if (p.Length() > 1)
-						oldName = p[1];
-				}
-				else if (!strncmp(Ln, "+++ ", 4))
-				{
-					auto p = a[i].SplitDelimit(" \t", 1);
-					if (p.Length() > 1)
-						newName = p[1];
-
-					if (oldName && newName)
-					{
-						InDiff = true;
-						InPreamble = false;
-
-						f = d->FindFile(newName);
-						if (!f)
-							f = new VcFile(d, NULL, LString(), false);
-
-						const char *nullFn = "dev/null";
-						if (newName.Find(nullFn) >= 0)
-						{
-							// Delete
-							f->SetText(StripFirst(oldName), COL_FILENAME);
-							f->SetText("D", COL_STATE);
-						}
-						else
-						{
-							f->SetText(StripFirst(newName), COL_FILENAME);
-							if (oldName.Find(nullFn) >= 0)
-								// Add
-								f->SetText("A", COL_STATE);
-							else
-								// Modify
-								f->SetText("M", COL_STATE);
-						}
-
-						f->GetStatus();
-						d->Files->Insert(f);
-					}
-				}
-				else if (!_strnicmp(Ln, "------", 6))
-				{
-					InPreamble = !InPreamble;
-				}
-				else if (!_strnicmp(Ln, "======", 6))
-				{
-					InPreamble = false;
-					InDiff = true;
-				}
-				else if (InDiff)
-				{
-					Diff.Add(a[i]);
-				}
-			}
-			if (f && Diff.Length())
-			{
-				f->SetDiff(NewLine.Join(Diff));
 				Diff.Empty();
+				oldName.Empty();
+				newName.Empty();
+				InDiff = false;
+				InPreamble = true;
 			}
+			else if (!Strnicmp(Ln, "Index", 5))
+			{
+				if (InPreamble)
+					index = a[i].SplitDelimit(": ", 1).Slice(1);
+			}
+			else if (!strncmp(Ln, "--- ", 4))
+			{
+				auto p = a[i].SplitDelimit(" \t", 1);
+				if (p.Length() > 1)
+					oldName = p[1];
+			}
+			else if (!strncmp(Ln, "+++ ", 4))
+			{
+				auto p = a[i].SplitDelimit(" \t", 1);
+				if (p.Length() > 1)
+					newName = p[1];
+
+				if (oldName && newName)
+				{
+					InDiff = true;
+					InPreamble = false;
+
+					f = d->FindFile(newName);
+					if (!f)
+						f = new VcFile(d, NULL, LString(), false);
+
+					const char *nullFn = "dev/null";
+					auto Path = StripFirst(oldName);
+					f->SetUri(LString("file:///") + Path);
+					if (newName.Find(nullFn) >= 0)
+					{
+						// Delete
+						f->SetText(Path, COL_FILENAME);
+						f->SetText("D", COL_STATE);
+					}
+					else
+					{
+						f->SetText(Path, COL_FILENAME);
+						if (oldName.Find(nullFn) >= 0)
+							// Add
+							f->SetText("A", COL_STATE);
+						else
+							// Modify
+							f->SetText("M", COL_STATE);
+					}
+
+					f->GetStatus();
+					d->Files->Insert(f);
+				}
+			}
+			else if (!_strnicmp(Ln, "------", 6))
+			{
+				InPreamble = !InPreamble;
+			}
+			else if (!_strnicmp(Ln, "======", 6))
+			{
+				InPreamble = false;
+				InDiff = true;
+			}
+			else if (InDiff)
+			{
+				Diff.Add(a[i]);
+			}
+		}
+		if (f && Diff.Length())
+		{
+			f->SetDiff(NewLine.Join(Diff));
+			Diff.Empty();
 		}
 	}
 };
@@ -1336,6 +1338,7 @@ public:
 							LSubMenu s;
 							s.AppendItem("Add Local", IDM_ADD_LOCAL);
 							s.AppendItem("Add Remote", IDM_ADD_REMOTE);
+							s.AppendItem("Add Diff File", IDM_ADD_DIFF_FILE);
 							int Cmd = s.Float(c->GetGView(), m);
 							switch (Cmd)
 							{
@@ -1347,6 +1350,18 @@ public:
 								case IDM_ADD_REMOTE:
 								{
 									OpenRemoteFolder();
+									break;
+								}
+								case IDM_ADD_DIFF_FILE:
+								{
+									auto s = new LFileSelect;
+									s->Parent(this);
+									s->Open([this](auto dlg, auto status)
+									{
+										if (status)
+											OpenDiff(dlg->Name());
+										delete dlg;
+									});
 									break;
 								}
 							}

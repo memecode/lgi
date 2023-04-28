@@ -1542,7 +1542,9 @@ bool HaveNetConnection()
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Gets a field value
-char *InetGetField(const char *s)
+void InetGetField(	const char *s,
+					std::function<char*(size_t)> alloc,
+					std::function<void(size_t)> setLength)
 {
 	const char *e = s;
 	static const char *WhiteSpace = " \r\t\n";
@@ -1568,12 +1570,11 @@ char *InetGetField(const char *s)
 		e--;
 
 	// Calc the length
-	size_t Size = e - s;
-	char *Str = new char[Size+1];
+	auto Str = alloc(e - s);
 	if (Str)
 	{
-		const char *In = s;
-		char *Out = Str;
+		auto In = s;
+		auto Out = Str;
 
 		while (In < e)
 		{
@@ -1592,19 +1593,20 @@ char *InetGetField(const char *s)
 			In++;
 		}
 
-		*Out++ = 0;
+		setLength(Out - Str);
 	}
-
-	return Str;
 }
 
-const char *SeekNextLine(const char *s, const char *End)
+template<typename T>
+T *SeekNextLine(T *s, T *End)
 {
-	if (s)
-	{
-		for (; *s && *s != '\n' && (!End || s < End); s++);
-		if (*s == '\n' && (!End || s < End)) s++;
-	}
+	if (!s)
+		return s;
+
+	for (; *s && *s != '\n' && (!End || s < End); s++)
+		;
+	if (*s == '\n' && (!End || s < End))
+		s++;
 
 	return s;
 }
@@ -1649,84 +1651,167 @@ char *InetGetHeaderField(	// Returns an allocated string or NULL on failure
 						else break;						    
 					}
 					
-					return InetGetField(s);
+					char *value = NULL;
+					InetGetField(s,
+						[&value](auto sz)
+						{
+							return value = new char[sz + 1];
+						},
+						[&value](auto sz)
+						{
+							value[sz] = 0;
+						});
+					return value;
 				}
 			}
 		}
 	}
 
-	return 0;
+	return NULL;
 }
 
-char *InetGetSubField(const char *s, const char *Field)
+LString LGetHeaderField(LString Headers, const char *Field)
 {
-	char *Status = 0;
+	if (!Headers || !Field)
+		return LString();
 
-	if (s && Field)
+	// for all lines
+	auto End = Headers.Get() + Headers.Length();
+	auto FldLen = Strlen(Field);
+	for (auto s = Headers.Get();
+		s < End;
+		s = SeekNextLine(s, End))
 	{
-		s = strchr(s, ';');
-		if (s)
+		if (*s != '\t' &&
+			Strnicmp(s, Field, FldLen) == 0 &&
+			s[FldLen] == ':')
 		{
-			s++;
+			// found a match
+			s += FldLen + 1;
 
-			size_t FieldLen = strlen(Field);
-			char White[] = " \t\r\n";
-			while (*s)
+			while (*s && s < End)
 			{
-				// Skip leading whitespace
-				while (*s && (strchr(White, *s) || *s == ';')) s++;
-
-				// Parse field name
-				if (IsAlpha((uint8_t)*s))
+				if (strchr(" \t\r", *s))
 				{
-					const char *f = s;
-					while (*s && (IsAlpha(*s) || *s == '-')) s++;
-					bool HasField = ((s-f) == FieldLen) && (_strnicmp(Field, f, FieldLen) == 0);
-					while (*s && strchr(White, *s)) s++;
-					if (*s == '=')
+					s++;
+				}
+				else if (*s == '\n')
+				{
+					if (strchr(" \r\n\t", s[1]))
+						s += 2;
+					else
+						break;
+				}
+				else break;						    
+			}
+					
+			LString value;
+			InetGetField(s,
+				[&value](auto sz)
+				{
+					value.Length(sz);
+					return value.Get();
+				},
+				[&value](auto sz)
+				{
+					value.Length(sz);
+				});
+			return value;
+		}
+	}
+
+	return LString();
+}
+
+void InetGetSubField_Impl(	const char *s,
+							const char *Field,
+							std::function<void(const char*, size_t)> output)
+{
+	if (!s || !Field)
+		return;
+
+	s = strchr(s, ';');
+	if (!s)
+		return;
+	s++;
+
+	char *Status = NULL;
+	auto FieldLen = strlen(Field);
+	auto White = " \t\r\n";
+	while (*s)
+	{
+		// Skip leading whitespace
+		while (*s && (strchr(White, *s) || *s == ';')) s++;
+
+		// Parse field name
+		if (IsAlpha((uint8_t)*s))
+		{
+			const char *f = s;
+			while (*s && (IsAlpha(*s) || *s == '-')) s++;
+			bool HasField = ((s-f) == FieldLen) && (_strnicmp(Field, f, FieldLen) == 0);
+			while (*s && strchr(White, *s)) s++;
+			if (*s == '=')
+			{
+				s++;
+				while (*s && strchr(White, *s)) s++;
+				if (*s && strchr("\'\"", *s))
+				{
+					// Quote Delimited Field
+					char d = *s++;
+					char *e = strchr((char*)s, d);
+					if (e)
 					{
-						s++;
-						while (*s && strchr(White, *s)) s++;
-						if (*s && strchr("\'\"", *s))
+						if (HasField)
 						{
-							// Quote Delimited Field
-							char d = *s++;
-							char *e = strchr((char*)s, d);
-							if (e)
-							{
-								if (HasField)
-								{
-									Status = NewStr(s, e-s);
-									break;
-								}
-
-								s = e + 1;
-							}
-							else break;
+							output(s, e - s);
+							break;
 						}
-						else
-						{
-							// Space Delimited Field
-							const char *e = s;
-							while (*e && !strchr(White, *e) && *e != ';') e++;
 
-							if (HasField)
-							{
-								Status = NewStr(s, e-s);
-								break;
-							}
-
-							s = e;
-						}
+						s = e + 1;
 					}
 					else break;
 				}
-				else break;
-			}
-		}
-	}
+				else
+				{
+					// Space Delimited Field
+					const char *e = s;
+					while (*e && !strchr(White, *e) && *e != ';') e++;
 
-	return Status;
+					if (HasField)
+					{
+						output(s, e - s);
+						break;
+					}
+
+					s = e;
+				}
+			}
+			else break;
+		}
+		else break;
+	}
+}
+
+char *InetGetSubField(const char *HeaderValue, const char *Field)
+{
+	char *result = NULL;
+	InetGetSubField_Impl(HeaderValue, Field,
+						[&result](auto str, auto sz)
+						{
+							result = NewStr(str, sz);
+						});
+	return result;
+}
+
+LString LGetSubField(LString HeaderValue, const char *Field)
+{
+	LString result;
+	InetGetSubField_Impl(HeaderValue, Field,
+						[&result](auto str, auto sz)
+						{
+							result.Set(str, sz);
+						});
+	return result;
 }
 
 LString LIpToStr(uint32_t ip)
