@@ -239,7 +239,7 @@ class VcFolder : public LTreeItem
 	void GitAdd();
 
 	LArray<Cmd*> Cmds;
-	bool IsLogging, IsUpdate, IsFilesCmd, IsWorkingFld, IsCommit, IsUpdatingCounts;
+	bool IsLogging, IsUpdate, IsFilesCmd, IsCommit, IsUpdatingCounts;
 	LvcStatus IsBranches, IsIdent;
 
 	void Init(AppPriv *priv);

@@ -262,7 +262,6 @@ void VcFolder::Init(AppPriv *priv)
 	IsLogging = false;
 	IsUpdate = false;
 	IsFilesCmd = false;
-	IsWorkingFld = false;
 	CommitListDirty = false;
 	IsUpdatingCounts = false;
 	IsBranches = StatusNone;
@@ -1713,7 +1712,6 @@ bool VcFolder::ParseWorking(int Result, LString s, ParseParams *Params)
 		}
 	}
 	
-	IsWorkingFld = false;
 	FilterCurrentFiles();
 	d->Files->ResizeColumnsToContent();
 
@@ -2199,7 +2197,6 @@ void VcFolder::Empty()
 	IsLogging = false;
 	IsUpdate = false;
 	IsFilesCmd = false;
-	IsWorkingFld = false;
 	CommitListDirty = false;
 	IsUpdatingCounts = false;
 	IsBranches = StatusNone;
@@ -3001,9 +2998,6 @@ bool VcFolder::ParseCountToTip(int Result, LString s, ParseParams *Params)
 
 void VcFolder::ListWorkingFolder()
 {
-	if (IsWorkingFld)
-		return;
-
 	d->ClearFiles();
 		
 	bool Untracked = d->IsMenuChecked(IDM_UNTRACKED);
@@ -3021,7 +3015,9 @@ void VcFolder::ListWorkingFolder()
 			Arg = "status";
 			break;
 		case VcGit:
-			Arg = "-P diff --diff-filter=ACDMRTU";
+			// Fucking git won't honour their own docs.
+			StartCmd("-P diff --diff-filter=A --cached", &VcFolder::ParseWorking);
+			Arg = "-P diff --diff-filter=CDMRTU";
 			break;
 		case VcHg:
 			Arg = "status -mard";
@@ -3030,7 +3026,7 @@ void VcFolder::ListWorkingFolder()
 			return;
 	}
 
-	IsWorkingFld = StartCmd(Arg, &VcFolder::ParseWorking);
+	StartCmd(Arg, &VcFolder::ParseWorking);
 }
 
 void VcFolder::GitAdd()

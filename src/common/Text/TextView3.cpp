@@ -2230,8 +2230,6 @@ bool LTextView3::Copy()
 {
 	bool Status = true;
 
-printf("txt copy\n");
-
 	if (SelStart >= 0)
 	{
 		ssize_t Min = MIN(SelStart, SelEnd);
