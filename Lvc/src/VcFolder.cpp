@@ -1861,6 +1861,11 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 					if (f)
 						f->SetText("A", COL_STATE);
 				}
+				else if (!_strnicmp(Ln, "deleted file", 12))
+				{
+					if (f)
+						f->SetText("D", COL_STATE);
+				}
 				else if (!_strnicmp(Ln, "index", 5) ||
 						 !_strnicmp(Ln, "commit", 6)   ||
 						 !_strnicmp(Ln, "Author:", 7)   ||
@@ -3016,8 +3021,8 @@ void VcFolder::ListWorkingFolder()
 			break;
 		case VcGit:
 			// Fucking git won't honour their own docs.
-			StartCmd("-P diff --diff-filter=A --cached", &VcFolder::ParseWorking);
-			Arg = "-P diff --diff-filter=CDMRTU";
+			StartCmd("-P diff --diff-filter=AD --cached", &VcFolder::ParseWorking);
+			Arg = "-P diff --diff-filter=CMRTU";
 			break;
 		case VcHg:
 			Arg = "status -mard";
