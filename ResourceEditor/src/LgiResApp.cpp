@@ -414,7 +414,7 @@ void ObjTreeItem::OnMouseClick(LMouse &m)
 				case IDM_RENAME:
 				{
 					auto Dlg = new LInput(Tree, GetText(), "Enter the name for the object", "Object Name");
-					Dlg->DoModal([&](auto dlg, auto id)
+					Dlg->DoModal([this, Dlg](auto dlg, auto id)
 					{
 						if (id)
 						{

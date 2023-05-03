@@ -35,6 +35,12 @@
 #define IDC_GIT_LIMIT							80
 #define IDC_HG_LIMIT							81
 #define IDC_CVS_LIMIT							82
+#define IDS_CREATE_NEW_BRANCH					84
+#define IDS_ERR_NO_IMPL_FOR_TYPE				85
+#define IDS_ERR_MERGE_FAILED					86
+#define IDS_ERR_NO_VCS_FOUND					87
+#define IDS_ERR_ADD_FAILED						88
+#define IDS_ERR_REVERT_FAILED					89
 #define IDC_TABLE								500
 #define IDC_COMMIT								501
 #define IDC_PULL								502

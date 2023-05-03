@@ -61,6 +61,14 @@
 		<String Ref="81" Cid="81" Define="IDC_HG_LIMIT" />
 		<String Ref="82" Cid="82" Define="IDC_CVS_LIMIT" />
 	</string-group>
+	<string-group Name="General">
+		<String Ref="84" Cid="84" Define="IDS_CREATE_NEW_BRANCH" en="Push will create a new remote branch. Is that ok?" />
+		<String Ref="85" Cid="85" Define="IDS_ERR_NO_IMPL_FOR_TYPE" en="No implementation for VCS type." />
+		<String Ref="86" Cid="86" Define="IDS_ERR_MERGE_FAILED" en="Merge failed." />
+		<String Ref="87" Cid="87" Define="IDS_ERR_NO_VCS_FOUND" en="No version control found." />
+		<String Ref="88" Cid="88" Define="IDS_ERR_ADD_FAILED" en="Add file failed." />
+		<String Ref="89" Cid="89" Define="IDS_ERR_REVERT_FAILED" en="Error reverting changes." />
+	</string-group>
 	<Dialog pos="7,7,464,203" ref="9">
 		<TableLayout pos="7,7,447,167" ref="10" cols="0.200,0.200,0.200,0.200,0.200" rows="0.311,0.454,0.236">
 			<tr>

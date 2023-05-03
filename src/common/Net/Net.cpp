@@ -1682,6 +1682,8 @@ LString LGetHeaderField(LString Headers, const char *Field)
 		s < End;
 		s = SeekNextLine(s, End))
 	{
+		if (!*s)
+			break;
 		if (*s != '\t' &&
 			Strnicmp(s, Field, FldLen) == 0 &&
 			s[FldLen] == ':')

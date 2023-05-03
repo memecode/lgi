@@ -3380,7 +3380,7 @@ void VcFolder::StartBranch(const char *BranchName, const char *OnCreated)
 		}
 		default:
 		{
-			OnCmdError(LString(), "No commit impl for type.");
+			OnCmdError(LString(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE));
 			break;
 		}
 	}	
@@ -3400,7 +3400,25 @@ void VcFolder::Push(bool NewBranchOk)
 		}
 		case VcGit:
 		{
-			Working = StartCmd("push", &VcFolder::ParsePush, NULL, LogNormal);
+			LString args;
+			if (NewBranchOk)
+			{
+				if (CurrentBranch)
+				{
+					args.Printf("push --set-upstream origin %s", CurrentBranch.Get());
+				}
+				else
+				{
+					OnCmdError(LString(), "Don't have the current branch?");
+					return;
+				}
+			}
+			else
+			{
+				args = "push";
+			}
+
+			Working = StartCmd(args, &VcFolder::ParsePush, NULL, LogNormal);
 			break;
 		}
 		case VcSvn:
@@ -3428,16 +3446,28 @@ bool VcFolder::ParsePush(int Result, LString s, ParseParams *Params)
 	
 	if (Result)
 	{
-		if (GetType() == VcHg)
+		bool needsNewBranchPerm = false;
+
+		switch (GetType())
 		{
-			if (s.Find("push creates new remote branches") > 0)
+			case VcHg:
 			{
-				if (LgiMsg(GetTree(), "Push will create a new remote branch. Is that ok?", AppName, MB_YESNO) == IDYES)
-				{
-					Push(true);
-					return false;
-				}
+				needsNewBranchPerm = s.Find("push creates new remote branches") >= 0;
+				break;
 			}
+			case VcGit:
+			{
+				needsNewBranchPerm = s.Find("The current branch") >= 0 &&
+									 s.Find("has no upstream branch") >= 0;
+				break;
+			}
+		}
+
+		if (needsNewBranchPerm &&
+			LgiMsg(GetTree(), LLoadString(IDS_CREATE_NEW_BRANCH), AppName, MB_YESNO) == IDYES)
+		{
+			Push(true);
+			return false;
 		}
 		
 		OnCmdError(s, "Push failed.");
@@ -3485,7 +3515,7 @@ void VcFolder::Pull(int AndUpdate, LoggingType Logging)
 			Status = StartCmd("up", &VcFolder::ParsePull, NULL, Logging);
 			break;
 		default:
-			OnCmdError(LString(), "No pull impl for type.");
+			OnCmdError(LString(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE));
 			break;
 	}
 
@@ -3606,7 +3636,7 @@ void VcFolder::MergeToLocal(LString Rev)
 			break;
 		}
 		default:
-			LgiMsg(GetTree(), "Not implemented.", AppName);
+			LgiMsg(GetTree(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE), AppName);
 			break;
 	}
 }
@@ -3620,7 +3650,7 @@ bool VcFolder::ParseMerge(int Result, LString s, ParseParams *Params)
 			if (Result == 0)
 				CommitListDirty = true;
 			else
-				OnCmdError(s, "Merge failed.");
+				OnCmdError(s, LLoadString(IDS_ERR_MERGE_FAILED));
 			break;
 		default:
 			LAssert(!"Impl me.");
@@ -3651,7 +3681,7 @@ void VcFolder::Clean()
 			StartCmd("cleanup", &VcFolder::ParseClean, NULL, LogNormal);
 			break;
 		default:
-			LgiMsg(GetTree(), "Not implemented.", AppName);
+			LgiMsg(GetTree(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE), AppName);
 			break;
 	}
 }
@@ -3816,7 +3846,7 @@ bool VcFolder::RenameBranch(LString NewName, LArray<VcCommit*> &Revs)
 		}
 		default:
 		{
-			LgiMsg(GetTree(), "Not impl for this VCS.", AppName);
+			LgiMsg(GetTree(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE), AppName);
 			break;
 		}
 	}
@@ -3838,7 +3868,7 @@ void VcFolder::GetVersion()
 		case VcPending:
 			break;
 		default:
-			OnCmdError(LString(), "No version control found.");
+			OnCmdError(LString(), LLoadString(IDS_ERR_NO_VCS_FOUND));
 			break;
 	}
 }
@@ -3914,7 +3944,7 @@ bool VcFolder::ParseAddFile(int Result, LString s, ParseParams *Params)
 			if (Result)
 			{
 				d->Tabs->Value(1);
-				OnCmdError(s, "Add file failed");
+				OnCmdError(s, LLoadString(IDS_ERR_ADD_FAILED));
 			}
 			else ClearError();
 
@@ -3951,7 +3981,7 @@ bool VcFolder::AddFile(const char *Path, bool AsBinary)
 		}
 		default:
 		{
-			LAssert(!"Impl me.");
+			OnCmdError(LString(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE));
 			break;
 		}
 	}
@@ -3969,7 +3999,7 @@ bool VcFolder::ParseRevert(int Result, LString s, ParseParams *Params)
 
 	if (Result)
 	{
-		OnCmdError(s, "Error reverting changes.");
+		OnCmdError(s, LLoadString(IDS_ERR_REVERT_FAILED));
 	}
 
 	ListWorkingFolder();
@@ -4017,7 +4047,7 @@ bool VcFolder::Revert(LString::Array &Uris, const char *Revision)
 		}
 		default:
 		{
-			LAssert(!"Impl me.");
+			OnCmdError(LString(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE));
 			break;
 		}
 	}
@@ -4051,7 +4081,7 @@ bool VcFolder::ParseResolveList(int Result, LString s, ParseParams *Params)
 		}
 		default:
 		{
-			LAssert(!"Impl me.");
+			OnCmdError(LString(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE));
 			break;
 		}
 	}
@@ -4074,7 +4104,7 @@ bool VcFolder::ParseResolve(int Result, LString s, ParseParams *Params)
 		}
 		default:
 		{
-			LAssert(!"Impl me.");
+			OnCmdError(LString(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE));
 			break;
 		}
 	}
@@ -4124,7 +4154,7 @@ bool VcFolder::Resolve(const char *Path, LvcResolve Type)
 		case VcCvs:
 		default:
 		{
-			LAssert(!"Impl me.");
+			OnCmdError(LString(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE));
 			break;
 		}
 	}
@@ -4169,7 +4199,7 @@ bool VcFolder::Blame(const char *Path)
 		}
 		default:
 		{
-			LAssert(!"Impl me.");
+			OnCmdError(LString(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE));
 			break;
 		}
 	}
