@@ -1151,7 +1151,7 @@ bool LApp::IsElevated()
 
 int LApp::GetCpuCount()
 {
-	return 1;
+	return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
 LFontCache *LApp::GetFontCache()

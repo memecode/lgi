@@ -37,8 +37,8 @@ Known bugs:
 #include "lgi/common/DocView.h"
 #include "ParserCommon.h"
 
-// #define DEBUG_FILE		"Scribe.h"
-// #define DEBUG_LINE		336
+// #define DEBUG_FILE		"Lvc.h"
+// #define DEBUG_LINE		150
 
 const char *TypeToStr(DefnType t)
 {
@@ -834,9 +834,12 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 									LgiTrace("%s:%i - CLASS/STRUCT defn: CaptureLevel=%i Depth=%i @ line %i\n", _FL, CaptureLevel, Depth, Line+1);
 								#endif
 								
-								char16 *n = Start + (IsClass ? StrlenW(StrClass) : StrlenW(StrStruct)), *t;
+								char16 *n = Start, *t;
 								List<char16> Tok;
 								
+								while (IsAlpha(*n))
+									n++;
+							
 								while (n && *n)
 								{
 									char16 *Last = n;

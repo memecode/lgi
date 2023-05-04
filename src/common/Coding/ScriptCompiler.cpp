@@ -3641,16 +3641,19 @@ bool LCompiler::Compile
 	if (d->UserCtx)
 	{
 		LHostFunc *f = d->UserCtx->GetCommands();
-		for (int i=0; f[i].Method; i++)
+		if (f)
 		{
-			f[i].Context = d->UserCtx;
-			
-			if (!d->Methods.Find(f[i].Method))
-				d->Methods.Add(f[i].Method, f+i);
-			else
+			for (int i=0; f[i].Method; i++)
 			{
-				LgiTrace("%s:%i - Conflicting name of method in application's context: '%s'\n", _FL, f[i].Method.Get());
-				LAssert(!"Conflicting name of method in application's context.");
+				f[i].Context = d->UserCtx;
+				
+				if (!d->Methods.Find(f[i].Method))
+					d->Methods.Add(f[i].Method, f+i);
+				else
+				{
+					LgiTrace("%s:%i - Conflicting name of method in application's context: '%s'\n", _FL, f[i].Method.Get());
+					LAssert(!"Conflicting name of method in application's context.");
+				}
 			}
 		}
 	}

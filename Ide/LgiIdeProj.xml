@@ -10,7 +10,7 @@
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="3">
 			<Node File="./src/AddFtpFile.cpp" Type="2" Platforms="15" />
 			<Node File="./src/AddFtpFile.h" Type="3" Platforms="15" />
-			<Node File="..\src\common\Lgi\About.cpp" Type="2" Platforms="15" />
+			<Node File="../src/common/Lgi/About.cpp" Type="2" Platforms="15" />
 			<Node File="./src/WebFldDlg.cpp" Type="2" Platforms="15" />
 			<Node File="./src/WebFldDlg.h" Type="3" Platforms="15" />
 		</Node>
@@ -26,7 +26,7 @@
 			<Node File="./src/FtpThread.cpp" Type="2" Platforms="15" />
 			<Node File="./src/FtpThread.h" Type="3" Platforms="15" />
 			<Node File="../src/common/Net/Ftp.cpp" Type="2" Platforms="15" />
-			<Node File="..\include\lgi\common\Ftp.h" Type="3" Platforms="15" />
+			<Node File="../include/lgi/common/Ftp.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Projects" Type="1" Platforms="15" Id="1">
 			<Node File="./src/IdeProject.cpp" Type="2" Platforms="15" />
@@ -69,29 +69,29 @@
 			<Node File="../src/common/Text/HtmlCommon.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Text/HtmlParser.cpp" Type="2" Platforms="15" />
 		</Node>
-		<Node File="..\src\common\Text\DocView.cpp" Type="2" Platforms="15" />
-		<Node File="..\src\common\Text\Homoglyphs\Homoglyphs.cpp" Type="2" Platforms="15" />
-		<Node File="..\src\common\Text\Homoglyphs\HomoglyphsTable.cpp" Type="2" Platforms="15" />
-		<Node File="..\src\common\Net\Http.cpp" Type="2" Platforms="15" />
-		<Node File="..\src\common\Lgi\LgiMain.cpp" Type="2" Platforms="15" />
-		<Node File="..\src\common\Lgi\Mdi.cpp" Type="2" Platforms="15" />
-		<Node File="..\include\lgi\common\Mdi.h" Type="3" Platforms="15" />
-		<Node File="..\src\common\Net\OpenSSLSocket.cpp" Type="2" Platforms="15" />
-		<Node File="..\src\common\Gdc2\Filters\Png.cpp" Type="2" Platforms="15" />
-		<Node File="..\include\lgi\common\PopupList.h" Type="3" Platforms="15" />
-		<Node File="..\src\common\Text\TextConvert.cpp" Type="2" Platforms="15" />
-		<Node File="..\include\lgi\common\TextLog.h" Type="3" Platforms="15" />
-		<Node File="..\include\lgi\common\TrayIcon.h" Type="3" Platforms="15" />
+		<Node File="../src/common/Text/DocView.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Text/Homoglyphs/Homoglyphs.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Text/Homoglyphs/HomoglyphsTable.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Net/Http.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Lgi/Mdi.cpp" Type="2" Platforms="15" />
+		<Node File="../include/lgi/common/Mdi.h" Type="3" Platforms="15" />
+		<Node File="../src/common/Net/OpenSSLSocket.cpp" Type="2" Platforms="15" />
+		<Node File="../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
+		<Node File="../include/lgi/common/PopupList.h" Type="3" Platforms="15" />
+		<Node File="../src/common/Text/TextConvert.cpp" Type="2" Platforms="15" />
+		<Node File="../include/lgi/common/TextLog.h" Type="3" Platforms="15" />
+		<Node File="../include/lgi/common/TrayIcon.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Resources" Type="1" Platforms="15" Open="1" Id="8">
-		<Node File=".\resources\resource.h" Type="3" Platforms="15" />
-		<Node File=".\haiku\buildHaiku.py" Type="8" Platforms="15" />
-		<Node File=".\CMakeLists.txt" Type="8" Platforms="15" />
-		<Node File=".\haiku\Makefile.haiku" Type="9" Platforms="15" />
-		<Node File=".\linux\Makefile.linux" Type="9" Platforms="15" />
-		<Node File=".\win\Makefile.windows" Type="9" Platforms="15" />
+		<Node File="./resources/resource.h" Type="3" Platforms="15" />
+		<Node File="./haiku/buildHaiku.py" Type="8" Platforms="15" />
+		<Node File="./CMakeLists.txt" Type="8" Platforms="15" />
+		<Node File="./haiku/Makefile.haiku" Type="9" Platforms="15" />
+		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
+		<Node File="./win/Makefile.windows" Type="9" Platforms="15" />
 	</Node>
-	<Node File="..\Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
+	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>
 		<General>
 			<Makefile>
@@ -200,7 +200,7 @@ be</Release>
 			</Libraries>
 			<LibraryPaths>
 				<All />
-				<Windows />
+				<Linux />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -224,7 +224,6 @@ be</Release>
 					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
-				<Windows />
 			</SystemIncludes>
 			<Defines>
 				<Haiku>
@@ -234,7 +233,7 @@ _GNU_SOURCE</Debug>
 _GNU_SOURCE</Release>
 				</Haiku>
 				<All />
-				<Windows />
+				<Linux />
 			</Defines>
 			<ApplicationIcon />
 		</Build>
@@ -260,7 +259,7 @@ _GNU_SOURCE</Release>
 			</Environment>
 			<Arguments>
 				<All>
-					<Debug>/home/matthew/code/i.Hex/trunk/iHexProject.xml</Debug>
+					<Debug>/home/matthew/code/lgi/trunk/Lvc/LvcProject.xml</Debug>
 				</All>
 			</Arguments>
 			<DebugAdmin />
@@ -272,7 +271,7 @@ _GNU_SOURCE</Release>
 		</Remote>
 		<Advanced>
 			<PostBuildCommands>
-				<Windows />
+				<Linux />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>
