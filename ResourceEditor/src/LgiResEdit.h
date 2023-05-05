@@ -771,7 +771,7 @@ public:
 	void Compare();
 	bool WriteDefines(LStream &Defs);
 
-	bool OpenFile(const char *FileName, bool Ro);
+	void OpenFile(const char *FileName, bool Ro, std::function<void(bool status)> Callback);
 	void SaveFile(const char *FileName, std::function<void(LString fileName, bool status)> Callback);
 
 	// ---------------------------------------------------------------------
