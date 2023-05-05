@@ -91,13 +91,17 @@ LFileType *LMru::GetSelectedType()
 
 void LMru::_OpenFile(const char *File, bool ReadOnly, std::function<void(bool)> Callback)
 {
-	bool Status = OpenFile(File, ReadOnly);
-	if (Status)
-		AddFile(File, true);
-	else
-		RemoveFile(File);
-	if (Callback)
-		Callback(Status);
+	OpenFile(File,
+			ReadOnly,
+			[this, File=LString(File), Callback](auto status)
+			{
+				if (status)
+					AddFile(File, true);
+				else
+					RemoveFile(File);
+				if (Callback)
+					Callback(status);
+			});
 }
 
 void LMru::_SaveFile(const char *FileName, std::function<void(LString, bool)> Callback)

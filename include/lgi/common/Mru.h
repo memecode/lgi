@@ -63,7 +63,7 @@ public:
 	#endif
 
 	// Events
-	virtual bool OpenFile(const char *FileName, bool ReadOnly) = 0;
+	virtual void OpenFile(const char *FileName, bool ReadOnly, std::function<void(bool status)> Callback) = 0;
 	virtual void SaveFile(const char *FileName, std::function<void(LString fileName, bool status)> Callback) = 0;
 };
 
