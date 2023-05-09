@@ -981,7 +981,10 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 			Line.Add(l);
 
 			if (*e == '\n')
+			{
 				e++;
+				l->Len++;
+			}
 
 			MaxX = MAX(MaxX, l->r.X());
 			Cy = l->r.y2 + 1;
@@ -1022,7 +1025,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 
 		int Cx = 0;
 		ssize_t i;
-		for (i=Start; i<Size; i = e)
+		for (i = Start; i < Size; i = e)
 		{
 			// seek till next char of interest
 			e = i;
@@ -1162,7 +1165,10 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 				Cy += LineY;
 					
 				if (e < Size)
+				{
 					e++;
+					l->Len++;
+				}
 			}
 		}
 
@@ -1787,6 +1793,7 @@ LArray<LTextView4::LTextLine*>::I LTextView4::GetTextLineIt(ssize_t Offset, ssiz
 	}
 
 	size_t mid = 0, s = 0, e = Line.Length() - 1;
+	LTextView4::LTextLine *l = NULL;
 	while (s < e)
 	{
 		if (e - s <= 1)
@@ -1796,14 +1803,11 @@ LArray<LTextView4::LTextLine*>::I LTextView4::GetTextLineIt(ssize_t Offset, ssiz
 			else if (Line[e]->Overlap(Offset))
 				mid = e;
 			else
-			{
-				LAssert(!"Needs to match Line s or e...");
-				break;
-			}
+				goto OnError;
 		}
 		else mid = s + ((e - s) >> 1);
 		
-		auto l = Line[mid];
+		l = Line[mid];
 		auto end = l->End();
 
 		if (Offset < l->Start)
@@ -1812,17 +1816,31 @@ LArray<LTextView4::LTextLine*>::I LTextView4::GetTextLineIt(ssize_t Offset, ssiz
 			s = mid + 1;
 		else
 		{
-			LAssert(Line[mid]->Overlap(Offset));
+			if (!Line[mid]->Overlap(Offset))
+				goto OnError;
+			
 			if (Index)
 				*Index = mid;
 			return Line.begin(mid);
 		}
 	}
 
-	LAssert(Line[s]->Overlap(Offset));
+	l = Line[s];
+	if (!l->Overlap(Offset))
+		goto OnError;
+		
 	if (Index)
 		*Index = s;
 	return Line.begin(s);
+	
+OnError:
+	LgiTrace("GetTextLineIt.Error: s=%i, e=%i, off=%i, start=%i, end=%i\n",
+		s, e,
+		Offset, l?(int)l->Start:-1, l?(int)l->End():-1);
+	for (int n=0; n<Line.Length(); n++)
+		LgiTrace("[%i]=%i,%i\n", n, (int)Line[n]->Start, (int)Line[n]->End());
+
+	return Line.end();
 }
 
 int64 LTextView4::Value()
