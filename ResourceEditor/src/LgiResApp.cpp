@@ -2556,20 +2556,23 @@ bool AppWnd::Empty()
 	return true;
 }
 
-bool AppWnd::OpenFile(const char *FileName, bool Ro)
+void AppWnd::OpenFile(const char *FileName, bool Ro, std::function<void(bool status)> Callback)
 {
+	bool Status = false;
+
 	if (stristr(FileName, ".lr8") ||
 		stristr(FileName, ".xml"))
 	{
-		return LoadLgi(FileName);
+		Status = LoadLgi(FileName);
 	}
 	else if (stristr(FileName, ".rc"))
 	{
 		LoadWin32(FileName);
-		return true;
+		Status = true;
 	}
 
-	return false;
+	if (Callback)
+		Callback(Status);
 }
 
 void AppWnd::SaveFile(const char *FileName, std::function<void(LString fileName, bool status)> Callback)

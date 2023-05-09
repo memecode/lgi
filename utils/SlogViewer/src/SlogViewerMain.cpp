@@ -388,12 +388,14 @@ public:
 	void OnReceiveFiles(LArray<const char*> &Files)
 	{
 		if (Files.Length())
-			OpenFile(Files[0]);
+			OpenFile(Files[0], false, NULL);
 	}	
 
-	bool OpenFile(const char *FileName, bool ReadOnly = false)
+	void OpenFile(const char *FileName, bool ReadOnly, std::function<void(bool status)> Callback)
 	{
-		return Reader.Reset(new ReaderThread(this, FileName, log, Prog));
+		auto ok = Reader.Reset(new ReaderThread(this, FileName, log, Prog));
+		if (Callback)
+			Callback(ok);
 	}
 
 	void SaveFile(const char *FileName, std::function<void(LString fileName, bool status)> Callback)

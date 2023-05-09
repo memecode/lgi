@@ -1925,12 +1925,10 @@ bool IdeDoc::OnRequestClose(bool OsShuttingDown)
 		{
 			case IDYES:
 			{
-				SetClean([](bool ok)
+				SetClean([this](bool ok)
 				{
 					if (ok)
-					{
-						LAssert(!"Impl close doc.");
-					}
+						delete this;
 				});
 
 				// This is returned immediately... before the user has decided to save or not
