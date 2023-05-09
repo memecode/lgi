@@ -51,7 +51,7 @@ void *ThreadEntryPoint(void *i)
 			// However if PostThreadEvent fails... do honour DeleteOnExit.
 		}
 		
-		if (Thread->DeleteOnExit)
+		if (!DelayDelete && Thread->DeleteOnExit)
 		{
 			DeleteObj(Thread);
 		}
@@ -68,11 +68,6 @@ LThread::LThread(const char *ThreadName, int viewHandle)
 {
 	Name = ThreadName;
 	ViewHandle = viewHandle;
-	ThreadId = InvalidId;
-	State = LThread::THREAD_INIT;
-	ReturnValue = -1;
-	hThread = InvalidHandle;
-	DeleteOnExit = false;
 }
 
 LThread::~LThread()

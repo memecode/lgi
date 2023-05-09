@@ -25,13 +25,17 @@ public:
 		ThreadPriorityRealtime,
     };
 
+	static const OsThread InvalidHandle;
+	static const OsThreadId InvalidId;
+
 protected:
-	ThreadState State;
-	int ReturnValue;
-	OsThread hThread;
+	ThreadState State = THREAD_INIT;
+	ThreadPriority Priority = ThreadPriorityNormal;
+	OsThread hThread = InvalidHandle;
+	OsThreadId ThreadId = InvalidId;
+
+	int ReturnValue = -1;
 	LString Name;
-	ThreadPriority Priority;
-	OsThreadId ThreadId;
 
 	#if defined WIN32
 
@@ -50,14 +54,11 @@ protected:
 
 protected:
 	/// Auto deletes the thread after ::Main has finished.
-	bool DeleteOnExit;
+	bool DeleteOnExit = false;
 	/// Aka from LView::AddDispatch().
-	int ViewHandle;
+	int ViewHandle = -1;
 
 public:
-	static const OsThread InvalidHandle;
-	static const OsThreadId InvalidId;
-
 	LThread(
 		/// Name for the thread.
 		const char *Name,
