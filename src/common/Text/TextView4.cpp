@@ -959,6 +959,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 			while (*e && *e != '\n')
 				e++;
 			l->Len = e - c;
+			l->NewLine = *e == '\n';
 
 			#ifdef _DEGBUG
 			Log.Printf("	[%i] new: start=" LPrintfSSizeT ", len=" LPrintfSSizeT "\n", Idx, l->Start, l->Len);
@@ -981,10 +982,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 			Line.Add(l);
 
 			if (*e == '\n')
-			{
 				e++;
-				l->Len++;
-			}
 
 			MaxX = MAX(MaxX, l->r.X());
 			Cy = l->r.y2 + 1;
@@ -1025,7 +1023,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 
 		int Cx = 0;
 		ssize_t i;
-		for (i = Start; i < Size; i = e)
+		for (i=Start; i<Size; i = e)
 		{
 			// seek till next char of interest
 			e = i;
@@ -1128,6 +1126,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 			{
 				l->Start = i;
 				l->Len = e - i;
+				l->NewLine = Text[e] == '\n';
 				l->r.x1 = d->rPadding.x1;
 				l->r.x2 = l->r.x1 + Width - 1;
 
@@ -1165,10 +1164,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 				Cy += LineY;
 					
 				if (e < Size)
-				{
 					e++;
-					l->Len++;
-				}
 			}
 		}
 
@@ -1556,12 +1552,15 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 							// Set the size of the current line...
 							size_t Pos = c - Text;
 							Cur->Len = Pos - Cur->Start;
+							Cur->NewLine = Text[Cur->End()] == '\n';
 
 							// Create a new line...
 							Cur = new LTextLine();
 							if (!Cur)
 								return false;
 							Cur->Start = Pos + 1;
+							Cur->CalcLen(Text);
+							Cur->NewLine = Text[Cur->End()] == '\n';
 							Line.AddAt(++Idx, Cur);
 						}
 					}
@@ -1602,8 +1601,8 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 			}
 
 			#ifdef _DEBUG
-			// Prof.Add("Validate");
-			// ValidateLines();
+			Prof.Add("Validate");
+			ValidateLines();
 			#endif
 
 			if (AdjustStylePos)
@@ -1793,7 +1792,6 @@ LArray<LTextView4::LTextLine*>::I LTextView4::GetTextLineIt(ssize_t Offset, ssiz
 	}
 
 	size_t mid = 0, s = 0, e = Line.Length() - 1;
-	LTextView4::LTextLine *l = NULL;
 	while (s < e)
 	{
 		if (e - s <= 1)
@@ -1807,8 +1805,8 @@ LArray<LTextView4::LTextLine*>::I LTextView4::GetTextLineIt(ssize_t Offset, ssiz
 		}
 		else mid = s + ((e - s) >> 1);
 		
-		l = Line[mid];
-		auto end = l->End();
+		auto l = Line[mid];
+		auto end = l->EndNewLine();
 
 		if (Offset < l->Start)
 			e = mid - 1;
@@ -1818,28 +1816,20 @@ LArray<LTextView4::LTextLine*>::I LTextView4::GetTextLineIt(ssize_t Offset, ssiz
 		{
 			if (!Line[mid]->Overlap(Offset))
 				goto OnError;
-			
+
 			if (Index)
 				*Index = mid;
 			return Line.begin(mid);
 		}
 	}
 
-	l = Line[s];
-	if (!l->Overlap(Offset))
+	if (!Line[s]->Overlap(Offset))
 		goto OnError;
-		
 	if (Index)
 		*Index = s;
 	return Line.begin(s);
-	
-OnError:
-	LgiTrace("GetTextLineIt.Error: s=%i, e=%i, off=%i, start=%i, end=%i\n",
-		s, e,
-		Offset, l?(int)l->Start:-1, l?(int)l->End():-1);
-	for (int n=0; n<Line.Length(); n++)
-		LgiTrace("[%i]=%i,%i\n", n, (int)Line[n]->Start, (int)Line[n]->End());
 
+OnError:
 	return Line.end();
 }
 

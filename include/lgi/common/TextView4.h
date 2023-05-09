@@ -192,11 +192,11 @@ protected:
 		LRect r;		// Screen location
 		LColour c;		// Colour of line... transparent = default colour
 		LColour Back;	// Background colour or transparent
+		bool NewLine = false;
 
 		LTextLine()
 		{
 			Start = -1;
-			Len = 0;
 			r.ZOff(-1, -1);
 		}
 		virtual ~LTextLine() {}
@@ -207,6 +207,16 @@ protected:
 			while (*e && *e != '\n')
 				e++;
 			return Len = e - c;
+		}
+
+		bool Overlap(ssize_t Val)
+		{
+			return (Val == Start) || (Val >= Start && Val < (End() + NewLine));
+		}
+
+		ssize_t EndNewLine()
+		{
+			return End() + NewLine;
 		}
 	};
 	
