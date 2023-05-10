@@ -311,7 +311,8 @@ bool LCheckBox::OnLayout(LViewLayoutInfo &Inf)
 		}
 		else
 		{
-			Inf.Width.Min = Inf.Width.Max = BoxSize();
+			auto Fnt = GetFont();			
+			Inf.Width.Min = Inf.Width.Max = Fnt->Ascent() + 2;
 		}
 	}
 	else
@@ -327,8 +328,12 @@ int LCheckBox::BoxSize()
 {
 	auto Fnt = GetFont();
 	int Px = (int) Fnt->Ascent() + 2;
+
+	printf("BoxSize Px=%i Y()=%i\n", Px, Y());
+
 	if (Px > Y())
 		Px = Y();
+	
 	return Px;
 }
 

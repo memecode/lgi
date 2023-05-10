@@ -222,7 +222,7 @@ struct IccDescTag
 	uint32_t Size;
 	char String[1];
 
-	bool IsOk() { return Swap32(Sig) == 'desc'; }
+	bool IsOk() { return Swap32(Sig) == Lgi4CC("desc"); }
 };
 
 struct NamedColour
@@ -248,7 +248,7 @@ struct IccNameColourTag
 	char Suffix[32];
 	NamedColour Colours[1];
 
-	bool IsOk() { return Swap32(Sig) == 'ncl2'; }
+	bool IsOk() { return Swap32(Sig) == Lgi4CC("ncl2"); }
 };
 
 struct IccTextTag
@@ -257,7 +257,7 @@ struct IccTextTag
 	uint32_t Reserved;
 	char String[1];
 
-	bool IsOk() { return Swap32(Sig) == 'text'; }
+	bool IsOk() { return Swap32(Sig) == Lgi4CC("text"); }
 };
 
 struct IccCurve
@@ -267,7 +267,7 @@ struct IccCurve
 	uint32_t Count;
 	uint16 Values[1];
 
-	bool IsOk() { return Swap32(Sig) == 'curv'; }
+	bool IsOk() { return Swap32(Sig) == Lgi4CC("curv"); }
 };
 
 struct IccXYZTag
@@ -276,7 +276,7 @@ struct IccXYZTag
 	uint32_t Reserved;
 	IccXYZ Values[1];
 
-	bool IsOk() { return Swap32(Sig) == 'XYZ '; }
+	bool IsOk() { return Swap32(Sig) == Lgi4CC("XYZ "); }
 };
 
 class ValueDom : public LDom
@@ -413,7 +413,7 @@ public:
 	LocalUnicodeDom(IccMultiLocalUnicode *header)
 	{
 		h = header;
-		if (Swap32(h->Sig) == 'mluc')
+		if (Swap32(h->Sig) == Lgi4CC("mluc"))
 		{
 			for (int i=0; i<Swap32(h->Count); i++)
 			{
@@ -701,20 +701,20 @@ TagDom::TagDom(IccTag *tag, char *header)
 	uint32_t *Ptr = (uint32_t*) (header + Off);
 	switch (Swap32(h->Sig))
 	{
-		case 'desc':
+		case Lgi4CC("desc"):
 		{
-			if (Swap32(*Ptr) == 'mluc')
+			if (Swap32(*Ptr) == Lgi4CC("mluc"))
 			{
 				Dom.Add(new LocalUnicodeDom((IccMultiLocalUnicode*)(header + Off )));
 			}
-			else if (Swap32(*Ptr) == 'desc')
+			else if (Swap32(*Ptr) == Lgi4CC("desc"))
 			{
 				IccDescTag *Tag = (IccDescTag*) Ptr;
 				Dom.Add(new ValueDom(Txt = Tag->String, "Description"));
 			}
 			break;
 		}
-		case 'cprt':
+		case Lgi4CC("cprt"):
 		{
 			IccTextTag *Tag = (IccTextTag*)Ptr;
 			if (Tag->IsOk())
@@ -723,9 +723,9 @@ TagDom::TagDom(IccTag *tag, char *header)
 			}
 			break;
 		}
-		case 'rTRC':
-		case 'gTRC':
-		case 'bTRC':
+		case Lgi4CC("rTRC"):
+		case Lgi4CC("gTRC"):
+		case Lgi4CC("bTRC"):
 		{
 			IccCurve *c = (IccCurve*) Ptr;
 			if (c->IsOk())
@@ -734,9 +734,9 @@ TagDom::TagDom(IccTag *tag, char *header)
 			}
 			break;
 		}
-		case 'rXYZ':
-		case 'gXYZ':
-		case 'bXYZ':
+		case Lgi4CC("rXYZ"):
+		case Lgi4CC("gXYZ"):
+		case Lgi4CC("bXYZ"):
 		{
 			IccXYZTag *Xyz = (IccXYZTag*) Ptr;
 			if (Xyz->IsOk())
@@ -745,7 +745,7 @@ TagDom::TagDom(IccTag *tag, char *header)
 			}
 			break;
 		}
-		case 'ncl2':
+		case Lgi4CC("ncl2"):
 		{
 			IccNameColourTag *Ncl = (IccNameColourTag*) Ptr;
 			if (Ncl->IsOk())
@@ -835,7 +835,7 @@ public:
 		{
 			for (int i=0; i<t->Tags; i++)
 			{
-				if (Swap32(t->Tag[i].Sig) == 'desc')
+				if (Swap32(t->Tag[i].Sig) == Lgi4CC("desc"))
 				{
 					Value = Dom[i];
 					break;
@@ -987,7 +987,7 @@ bool LIccProfile::Open(LStream *Stream)
 			if (Stream->Read(d->Data, d->Len) == d->Len)
 			{
 				IccProfileHeader *h = d->Header();
-				if (Swap32(h->Magic) == 'acsp')
+				if (Swap32(h->Magic) == Lgi4CC("acsp"))
 				{
 					#if USE_LCMS
 					d->Profile = cmsOpenProfileFromMem(d->Data, d->Len);

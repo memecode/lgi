@@ -2,8 +2,8 @@
 /// \author Matthew Allen
 /// \brief A unicode text editor
 
-#ifndef _GTEXTVIEW4_H
-#define _GTEXTVIEW4_H
+#ifndef _LTEXTVIEW4_H
+#define _LTEXTVIEW4_H
 
 #include "lgi/common/DocView.h"
 #include "lgi/common/Undo.h"
@@ -33,6 +33,8 @@ class LgiClass LTextView4 :
 	friend bool Text4_FindCallback(LFindReplaceCommon *Dlg, bool Replace, void *User);
 
 public:
+	constexpr static int ALLOC_BLOCK = 64;
+
 	enum Messages
 	{
 		M_TEXTVIEW_DEBUG_TEXT = M_USER + 0x3421,
@@ -51,25 +53,21 @@ public:
 		STYLE_URL,
 	};
 
-	class LStyle
+	class LStyle : public LRange
 	{
 	protected:
 		void RefreshLayout(size_t Start, ssize_t Len);
 
 	public:
 		/// The view the style is for
-		LTextView4 *View;
+		LTextView4 *View = NULL;
 		/// When you write several bits of code to do styling assign them
 		/// different owner id's so that they can manage the lifespan of their
 		/// own styles. LTextView4::PourStyle is owner '0', anything else it
 		/// will leave alone.
 		StyleOwners Owner;
-		/// The start index into the text buffer of the region to style.
-		ssize_t Start;
-		/// The length of the styled region
-		ssize_t Len;
 		/// The font to draw the styled text in
-		LFont *Font;
+		LFont *Font = NULL;
 		/// The colour to draw with. If transparent, then the default 
 		/// line colour is used.
 		LColour Fore, Back;
@@ -178,7 +176,7 @@ public:
 
 protected:
 	// Internal classes
-	enum GTextViewSeek
+	enum LTextViewSeek
 	{
 		PrevLine,
 		NextLine,
@@ -193,9 +191,13 @@ protected:
 		LColour c;		// Colour of line... transparent = default colour
 		LColour Back;	// Background colour or transparent
 		bool NewLine = false;
+		const char *File = NULL;
+		int Line = -1;
 
-		LTextLine()
+		LTextLine(const char *file, int line)
 		{
+			File = file;
+			Line = line;
 			Start = -1;
 			r.ZOff(-1, -1);
 		}
@@ -203,9 +205,11 @@ protected:
 
 		size_t CalcLen(char16 *Text)
 		{
-			char16 *c = Text + Start, *e = c;
+			char16 *c = Text + Start, *e = c;			
 			while (*e && *e != '\n')
 				e++;
+			NewLine = *e == '\n';
+			
 			return Len = e - c;
 		}
 
@@ -224,49 +228,49 @@ protected:
 	friend class LTextView4Private;
 
 	// Options
-	bool Dirty;
-	bool CanScrollX;
+	bool Dirty = false;
+	bool CanScrollX = false;
 
 	// Display
-	LFont *Font;
-	LFont *Bold;		// Bold variant of 'Font'
-	LFont *Underline;	// Underline variant of 'Font'
+	LFont *Font = NULL;
+	LFont *Bold = NULL;			// Bold variant of 'Font'
+	LFont *Underline = NULL;	// Underline variant of 'Font'
 
-	LFont *FixedFont;
-	int LineY;
-	ssize_t SelStart, SelEnd;
-	int DocOffset;
-	int MaxX;
-	bool Blink;
-	uint64 BlinkTs;
-	int ScrollX;
+	LFont *FixedFont = NULL;
+	int LineY = -1;
+	ssize_t SelStart = -1, SelEnd = -1;
+	int DocOffset = 0;
+	int MaxX = 0;
+	bool Blink = true;
+	uint64 BlinkTs = 0;
+	int ScrollX = 0;
 	LRect CursorPos;
 
 	/// true if the text pour process is still ongoing
-	bool PourEnabled;		// True if pouring the text happens on edit. Turn off if doing lots
-							// of related edits at the same time. And then manually pour once 
-							// finished.
-	bool PartialPour;		// True if the pour is happening in the background. It's not threaded
-							// but taking place in the GUI thread via timer.
-	bool AdjustStylePos;	// Insert/Delete moved styles automatically to match (default: true)
+	bool PourEnabled = true;	// True if pouring the text happens on edit. Turn off if doing lots
+								// of related edits at the same time. And then manually pour once 
+								// finished.
+	bool PartialPour = false;	// True if the pour is happening in the background. It's not threaded
+								// but taking place in the GUI thread via timer.
+	bool AdjustStylePos = true;	// Insert/Delete moved styles automatically to match (default: true)
 
 	LArray<LTextLine*> Line;
 	LUnrolledList<LStyle> Style;		// sorted in 'Start' order
 	typedef LUnrolledList<LStyle>::Iter StyleIter;
 
 	// For ::Name(...)
-	char *TextCache;
+	char *TextCache = NULL;
 
 	// Data
-	char16 *Text;
-	ssize_t Cursor;
-	ssize_t Size;
-	ssize_t Alloc;
+	char16 *Text = NULL;
+	ssize_t Cursor = 0;
+	ssize_t Size = 0;
+	ssize_t Alloc = ALLOC_BLOCK;
 
 	// Undo stuff
-	bool UndoOn;
+	bool UndoOn = true;
 	LUndo UndoQue;
-	struct LTextView4Undo *UndoCur;
+	struct LTextView4Undo *UndoCur = NULL;
 
 	// private methods
 	LArray<LTextLine*>::I GetTextLineIt(ssize_t Offset, ssize_t *Index = 0);
@@ -275,7 +279,7 @@ protected:
 		auto it = GetTextLineIt(Offset, Index);
 		return it != Line.end() ? *it : NULL;
 	}
-	ssize_t SeekLine(ssize_t Offset, GTextViewSeek Where);
+	ssize_t SeekLine(ssize_t Offset, LTextViewSeek Where);
 	int TextWidth(LFont *f, char16 *s, int Len, int x, int Origin);
 	bool ScrollToOffset(size_t Off);
 	int ScrollYLine();
@@ -301,9 +305,9 @@ protected:
 
 	#ifdef _DEBUG
 	// debug
-	uint64 _PourTime;
-	uint64 _StyleTime;
-	uint64 _PaintTime;
+	uint64 _PourTime = 0;
+	uint64 _StyleTime = 0;
+	uint64 _PaintTime = 0;
 	#endif
 
 	void LogLines();

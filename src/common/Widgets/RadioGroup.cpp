@@ -387,16 +387,16 @@ public:
 	{
 	}
 
-	LRect GetBtn()
+	LRect GetBtn(int BoxPx)
 	{
-		auto CtrlHt = Ctrl->Y();
 		auto Fnt = Ctrl->GetFont();
 		int Px = (int) (Fnt->Ascent() + 0.5);
-		if (Px > CtrlHt)
-			Px = CtrlHt;
+		if (BoxPx > 0 && Px > BoxPx)
+			Px = BoxPx;
 
 		Btn.ZOff(Px-1, Px-1);
-		Btn.Offset(0, (CtrlHt-Btn.Y())>>1);
+		if (BoxPx > 0)
+			Btn.Offset(0, (BoxPx-Btn.Y())>>1);
 
 		return Btn;
 	}
@@ -555,7 +555,7 @@ void LRadioButton::SetFont(LFont *Fnt, bool OwnIt)
 
 bool LRadioButton::OnLayout(LViewLayoutInfo &Inf)
 {
-	auto Btn = d->GetBtn();
+	auto Btn = d->GetBtn(-1);
 	int Pad = Btn.X() + 4;
 
 	if (!Inf.Width.Max)
@@ -762,7 +762,7 @@ void LRadioButton::OnPaint(LSurface *pDC)
 		State.MouseOver = d->Over;
 		State.aText = d->GetStrs();
 		State.View = this;
-		State.Rect = d->GetBtn();
+		State.Rect = d->GetBtn(Y());
 
 		LColour Back = StyleColour(LCss::PropBackgroundColor, LColour(L_MED));
 		State.ForceUpdate = d->BackCol != Back;

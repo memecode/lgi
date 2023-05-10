@@ -38,7 +38,6 @@
 #define PULSE_TIMEOUT				250 // ms
 #define CURSOR_BLINK				1000 // ms
 
-#define ALLOC_BLOCK					64
 #define IDC_VS						1000
 
 enum Cmds
@@ -81,9 +80,9 @@ enum Cmds
 
 #define PAINT_BORDER				Back
 #if DRAW_LINE_BOXES
-	#define PAINT_AFTER_LINE			LColour(240, 240, 240)
+	#define PAINT_AFTER_LINE		LColour(240, 240, 240)
 #else
-	#define PAINT_AFTER_LINE			Back
+	#define PAINT_AFTER_LINE		Back
 #endif
 
 #define CODEPAGE_BASE				100
@@ -106,7 +105,7 @@ static LArray<LTextView4*> Ctrls;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-class GDocFindReplaceParams4 :
+class LDocFindReplaceParams4 :
 	public LDocFindReplaceParams,
 	public LMutex
 {
@@ -114,45 +113,41 @@ public:
 	// Find/Replace History
 	LAutoWString LastFind;
 	LAutoWString LastReplace;
-	bool MatchCase;
-	bool MatchWord;
-	bool SelectionOnly;
-	bool SearchUpwards;
+	bool MatchCase = false;
+	bool MatchWord = false;
+	bool SelectionOnly = false;
+	bool SearchUpwards = false;
 	
-	GDocFindReplaceParams4() : LMutex("GDocFindReplaceParams4")
+	LDocFindReplaceParams4() : LMutex("LDocFindReplaceParams4")
 	{
-		MatchCase = false;
-		MatchWord = false;
-		SelectionOnly = false;
-		SearchUpwards = false;
 	}
 };
 
 class LTextView4Private : public LCss, public LMutex
 {
 public:
-	LTextView4 *View;
+	LTextView4 *View = NULL;
 	LRect rPadding;
-	int PourX;
-	bool LayoutDirty;
-	ssize_t DirtyStart, DirtyLen;
+	int PourX = -1;
+	bool LayoutDirty = true;
+	ssize_t DirtyStart = 0, DirtyLen = 0;
 	LColour UrlColour;
-	bool CenterCursor;
-	ssize_t WordSelectMode;
+	bool CenterCursor = false;
+	ssize_t WordSelectMode = -1;
 	LString Eol;
 	LString LastError;
 	
 	// If the scroll position is set before we get a scroll bar, store the index
 	// here and set it when the LNotifyScrollBarCreate arrives.
-	ssize_t VScrollCache;
+	ssize_t VScrollCache = -1;
 
 	// Find/Replace Params
-	bool OwnFindReplaceParams;
-	GDocFindReplaceParams4 *FindReplaceParams;
+	bool OwnFindReplaceParams = true;
+	LDocFindReplaceParams4 *FindReplaceParams = NULL;
 
 	// Map buffer
-	ssize_t MapLen;
-	char16 *MapBuf;
+	ssize_t MapLen = 0;
+	char16 *MapBuf = NULL;
 
 	// <RequiresLocking>
 		// Thread safe Name(char*) impl
@@ -166,22 +161,10 @@ public:
 	LTextView4Private(LTextView4 *view) : LMutex("LTextView4Private")
 	{
 		View = view;
-		WordSelectMode = -1;
-		PourX = -1;
-		VScrollCache = -1;
-		DirtyStart = DirtyLen = 0;
 		UrlColour.Rgb(0, 0, 255);		
 		LColour::GetConfigColour("colour.L_URL", UrlColour);
-
-		CenterCursor = false;
-		
-		LayoutDirty = true;
 		rPadding.ZOff(0, 0);
-		MapBuf = 0;
-		MapLen = 0;
-		
-		OwnFindReplaceParams = true;
-		FindReplaceParams = new GDocFindReplaceParams4;
+		FindReplaceParams = new LDocFindReplaceParams4;
 	}
 	
 	~LTextView4Private()
@@ -348,60 +331,25 @@ LTextView4::LTextView4(	int Id,
 	// init vars
 	LView::d->Css.Reset(d = new LTextView4Private(this));
 	
-	PourEnabled = true;
-	PartialPour = false;
-	AdjustStylePos = true;
-	BlinkTs = 0;
-	LineY = 1;
-	MaxX = 0;
-	TextCache = 0;
-	UndoOn = true;
-	UndoCur = NULL;
-	Font = 0;
-	FixedWidthFont = false;
-	FixedFont = 0;
-	ShowWhiteSpace = false;
-	ObscurePassword = false;
 	TabSize = TAB_SIZE;
 	IndentSize = TAB_SIZE;
-	HardTabs = true;
-	CanScrollX = false;
-	Blink = true;
 
 	// setup window
 	SetId(Id);
 
 	// default options
-	Dirty = false;
 	#if WINNATIVE
 	CrLf = true;
 	SetDlgCode(DLGC_WANTALLKEYS);
-	#else
-	CrLf = false;
 	#endif
-	Underline = NULL;
-	Bold = NULL;
 	d->Padding(LCss::Len(LCss::LenPx, 2));
 
-	#ifdef _DEBUG
-	// debug times
-	_PourTime = 0;
-	_StyleTime = 0;
-	_PaintTime = 0;
-	#endif
-
 	// Data
-	Alloc = ALLOC_BLOCK;
 	Text = new char16[Alloc];
-	if (Text) *Text = 0;
-	Cursor = 0;
-	Size = 0;
+	if (Text)
+		*Text = 0;
 
 	// Display
-	SelStart = SelEnd = -1;
-	DocOffset = 0;
-	ScrollX = 0;
-
 	if (FontType)
 	{
 		Font = FontType->Create();
@@ -712,7 +660,10 @@ void LTextView4::LogLines()
 	p.Print("DocSize: %i\n", (int)Size);
 	for (auto i : Line)
 	{
-		p.Print("  [%i]=%p, %i+%i, %s\n", Idx, i, (int)i->Start, (int)i->Len, i->r.GetStr());
+		p.Print("  [%i] alloc.ln=%i, %i+%i+%i=%i, %s\n",
+				Idx, i->Line,
+				(int)i->Start, (int)i->Len, i->NewLine, (int)(i->Start + i->Len + i->NewLine),
+				i->r.GetStr());
 		Idx++;
 	}
 	LgiTrace(p.NewLStr());
@@ -760,7 +711,6 @@ bool LTextView4::ValidateLines(bool CheckBox)
 			return false;
 		}
 
-
 		if (CheckBox &&
 			Prev &&
 			Prev->r.y2 != l->r.y1 - 1)
@@ -769,13 +719,19 @@ bool LTextView4::ValidateLines(bool CheckBox)
 			LAssert(!"Lines not joined vertically");
 		}
 
-		if (*e)
+		if (l->NewLine)
 		{
 			if (*e == '\n')
+			{
 				e++;
-			else if (WrapType == TEXTED_WRAP_REFLOW)
-				e++;
+			}
+			else
+			{
+				LAssert(!"Expecting new line.");
+				return false;
+			}
 		}
+
 		Pos = e - Text;
 		c = e;
 		Idx++;
@@ -952,7 +908,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 		#endif
 		while (Pos < Size)
 		{
-			LTextLine *l = new LTextLine;
+			LTextLine *l = new LTextLine(_FL);
 			l->Start = Pos;
 			char16 *c = Text + Pos;
 			char16 *e = c;
@@ -1121,7 +1077,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 			}
 
 			// Create layout line
-			LTextLine *l = new LTextLine;
+			LTextLine *l = new LTextLine(_FL);
 			if (l)
 			{
 				l->Start = i;
@@ -1188,7 +1144,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 			Last->Start + Last->Len < Size)
 		{
 			auto LastEnd = Last ? Last->End() : 0;
-			LTextLine *l = new LTextLine;
+			LTextLine *l = new LTextLine(_FL);
 			if (l)
 			{
 				l->Start = LastEnd;
@@ -1491,7 +1447,9 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 			// Insert the data
 
 			// Move the section after the insert to make space...
-			memmove(Text+(At+Len), Text+At, (Size-At) * sizeof(char16));
+			auto After = Size - At;
+			if (After > 0)
+				memmove(Text+(At+Len), Text+At, After * sizeof(char16));
 
 			Prof.Add("Cpy");
 
@@ -1524,7 +1482,7 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 			if (Line.Length() == 0)
 			{
 				// Empty doc... set up the first line
-				Line.Add(Cur = new LTextLine);
+				Line.Add(Cur = new LTextLine(_FL));
 				Idx = 0;
 				Cur->Start = 0;
 			}
@@ -1555,12 +1513,10 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 							Cur->NewLine = Text[Cur->End()] == '\n';
 
 							// Create a new line...
-							Cur = new LTextLine();
+							Cur = new LTextLine(_FL);
 							if (!Cur)
 								return false;
 							Cur->Start = Pos + 1;
-							Cur->CalcLen(Text);
-							Cur->NewLine = Text[Cur->End()] == '\n';
 							Line.AddAt(++Idx, Cur);
 						}
 					}
@@ -1569,6 +1525,8 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 
 					// Make sure the last Line's length is set..
 					Cur->CalcLen(Text);
+					printf("CalcLen, size=%i, start=%i, len=%i\n",
+						(int)Size, (int)Cur->Start, (int)Cur->Len);
 
 					Prof.Add("UpdatePos");
 	
@@ -2794,7 +2752,7 @@ void LTextView4::DoGoto(std::function<void(bool)> Callback)
 
 LDocFindReplaceParams *LTextView4::CreateFindReplaceParams()
 {
-	return new GDocFindReplaceParams4;
+	return new LDocFindReplaceParams4;
 }
 
 void LTextView4::SetFindReplaceParams(LDocFindReplaceParams *Params)
@@ -2807,7 +2765,7 @@ void LTextView4::SetFindReplaceParams(LDocFindReplaceParams *Params)
 		}
 		
 		d->OwnFindReplaceParams = false;
-		d->FindReplaceParams = (GDocFindReplaceParams4*) Params;
+		d->FindReplaceParams = (LDocFindReplaceParams4*) Params;
 	}
 }
 
@@ -3177,7 +3135,7 @@ bool LTextView4::OnReplace(const char16 *Find, const char16 *Replace, bool All, 
 	return false;
 }
 
-ssize_t LTextView4::SeekLine(ssize_t Offset, GTextViewSeek Where)
+ssize_t LTextView4::SeekLine(ssize_t Offset, LTextViewSeek Where)
 {
 	THREAD_CHECK();
 

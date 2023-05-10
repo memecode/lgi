@@ -181,7 +181,7 @@ public:
 
 protected:
 	// Internal classes
-	enum GTextViewSeek
+	enum LTextViewSeek
 	{
 		PrevLine,
 		NextLine,
@@ -269,7 +269,7 @@ protected:
 	// private methods
 	List<LTextLine>::I GetTextLineIt(ssize_t Offset, ssize_t *Index = 0);
 	LTextLine *GetTextLine(ssize_t Offset, ssize_t *Index = 0) { return *GetTextLineIt(Offset, Index); }
-	ssize_t SeekLine(ssize_t Offset, GTextViewSeek Where);
+	ssize_t SeekLine(ssize_t Offset, LTextViewSeek Where);
 	int TextWidth(LFont *f, char16 *s, int Len, int x, int Origin);
 	bool ScrollToOffset(size_t Off);
 	int ScrollYLine();

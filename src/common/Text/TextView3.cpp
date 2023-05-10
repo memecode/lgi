@@ -3109,7 +3109,7 @@ bool LTextView3::OnReplace(const char16 *Find, const char16 *Replace, bool All, 
 	return false;
 }
 
-ssize_t LTextView3::SeekLine(ssize_t Offset, GTextViewSeek Where)
+ssize_t LTextView3::SeekLine(ssize_t Offset, LTextViewSeek Where)
 {
 	THREAD_CHECK();
 

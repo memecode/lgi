@@ -47,7 +47,7 @@ class
 	friend bool RichText_FindCallback(LFindReplaceCommon *Dlg, bool Replace, void *User);
 
 public:
-	enum GTextViewSeek
+	enum LTextViewSeek
 	{
 		PrevLine,
 		NextLine,

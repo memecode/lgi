@@ -10,31 +10,31 @@
 	</Node>
 	<Node Name="Objects" Type="1" Open="1" Platforms="7" Id="2">
 		<Node Name="Dialog" Type="1" Open="0" Platforms="7" Id="3">
-			<Node File="/src/LgiRes_ControlTree.cpp" Type="2" Platforms="15" />
-			<Node File="/src/LgiRes_Dialog.cpp" Type="2" Platforms="7" />
-			<Node File="/src/LgiRes_Dialog.h" Type="3" Platforms="7" />
-			<Node File="/src/LgiRes_TableLayout.cpp" Type="2" Platforms="7" />
+			<Node File="./src/LgiRes_ControlTree.cpp" Type="2" Platforms="15" />
+			<Node File="./src/LgiRes_Dialog.cpp" Type="2" Platforms="7" />
+			<Node File="./src/LgiRes_Dialog.h" Type="3" Platforms="7" />
+			<Node File="./src/LgiRes_TableLayout.cpp" Type="2" Platforms="7" />
 		</Node>
 		<Node Name="Menu" Type="1" Open="0" Platforms="7" Id="4">
-			<Node File="/src/LgiRes_Menu.cpp" Type="2" Platforms="7" />
-			<Node File="/src/LgiRes_Menu.h" Type="3" Platforms="7" />
+			<Node File="./src/LgiRes_Menu.cpp" Type="2" Platforms="7" />
+			<Node File="./src/LgiRes_Menu.h" Type="3" Platforms="7" />
 		</Node>
 		<Node Name="String" Type="1" Open="0" Platforms="7" Id="5">
-			<Node File="/src/LgiRes_String.cpp" Type="2" Platforms="7" />
-			<Node File="/src/LgiRes_String.h" Type="3" Platforms="7" />
+			<Node File="./src/LgiRes_String.cpp" Type="2" Platforms="7" />
+			<Node File="./src/LgiRes_String.h" Type="3" Platforms="7" />
 		</Node>
-		<Node File="/src/LgiRes_Css.cpp" Type="2" Platforms="15" />
-		<Node File="/src/LgiResApp.cpp" Type="2" Platforms="7" />
-		<Node File="/src/LgiResEdit.h" Type="3" Platforms="7" />
-		<Node File="/src/Search.cpp" Type="2" Platforms="7" />
-		<Node File="/src/ShowLanguages.cpp" Type="2" Platforms="7" />
+		<Node File="./src/LgiRes_Css.cpp" Type="2" Platforms="15" />
+		<Node File="./src/LgiResApp.cpp" Type="2" Platforms="7" />
+		<Node File="./src/LgiResEdit.h" Type="3" Platforms="7" />
+		<Node File="./src/Search.cpp" Type="2" Platforms="7" />
+		<Node File="./src/ShowLanguages.cpp" Type="2" Platforms="7" />
 	</Node>
 	<Node Name="Resources" Type="1" Open="0" Platforms="7" Id="1">
-		<Node File="/resources/lgires.lr8" Type="5" Platforms="7" />
+		<Node File="./resources/lgires.lr8" Type="5" Platforms="7" />
 	</Node>
 	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
-		<Node File="/linux/Makefile.linux" Type="9" Platforms="15" />
+		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
 	</Node>
 	<Settings>
 		<General>

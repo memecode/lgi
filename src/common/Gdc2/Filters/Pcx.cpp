@@ -128,7 +128,7 @@ LFilter::IoStatus GdcPcx::ReadImage(LSurface *pDC, LStream *In)
 
 			In->SetPos(128);
 
-			if (pDC->Create(Sx, Sy, MAX(8, Bits)))
+			if (pDC->Create(Sx, Sy, CsIndex8))
 			{
 				int Line = GetLineLength(pDC);
 				uchar *buf = new uchar[Line];
