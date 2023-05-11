@@ -107,13 +107,6 @@ bool LgiIsKeyDown(int Key)
 	return false;
 }
 
-LKey::LKey(int Vkey, uint32_t flags)
-{
-	vkey = Vkey;
-	Flags = flags;
-	IsChar = false;
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<typename Parent = BView>
 struct LBView : public Parent

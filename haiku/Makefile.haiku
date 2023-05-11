@@ -97,7 +97,6 @@ Source =	src/haiku/Window.cpp \
 			src/common/Resource/Res.cpp \
 			src/common/Resource/LgiRes.cpp \
 			src/common/Net/Uri.cpp \
-			src/common/Net/NetTools.cpp \
 			src/common/Net/Net.cpp \
 			src/common/Net/MDStringToDigest.cpp \
 			src/common/Net/Base64.cpp \

@@ -178,7 +178,6 @@ $(Target) : ../../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../../include/lgi/common/LgiInc.h \
 	../../include/lgi/common/LgiInterfaces.h \
 	../../include/lgi/common/LgiMsgs.h \
-	../../include/lgi/common/LgiNetInc.h \
 	../../include/lgi/common/LgiRes.h \
 	../../include/lgi/common/LgiString.h \
 	../../include/lgi/common/LgiUiBase.h \
@@ -197,7 +196,6 @@ $(Target) : ../../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../../include/lgi/common/Mru.h \
 	../../include/lgi/common/Mutex.h \
 	../../include/lgi/common/Net.h \
-	../../include/lgi/common/NetTools.h \
 	../../include/lgi/common/Notifications.h \
 	../../include/lgi/common/OAuth2.h \
 	../../include/lgi/common/OptionsFile.h \
@@ -337,7 +335,6 @@ $(Target) : ../../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../../src/common/Net/Base64.cpp \
 	../../src/common/Net/MDStringToDigest.cpp \
 	../../src/common/Net/Net.cpp \
-	../../src/common/Net/NetTools.cpp \
 	../../src/common/Net/Uri.cpp \
 	../../src/common/Resource/LgiRes.cpp \
 	../../src/common/Resource/Res.cpp \
