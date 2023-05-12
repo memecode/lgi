@@ -244,6 +244,7 @@ class VcFolder : public LTreeItem
 
 	void Init(AppPriv *priv);
 	const char *GetVcName();
+	char GetPathSep();
 	bool StartCmd(const char *Args, ParseFn Parser = NULL, ParseParams *Params = NULL, LoggingType Logging = LogNone);
 	bool RunCmd(const char *Args, LoggingType Logging, std::function<void(Result)> Callback);
 	void OnBranchesChange();

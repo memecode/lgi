@@ -95,16 +95,20 @@
 	<Settings>
 		<General>
 			<Makefile>
-				<Windows>win\Makefile.windows</Windows>
+				<Windows>.\win\Makefile.windows</Windows>
 				<Linux>./linux/Makefile.linux</Linux>
-				<Mac>./MacCocoa/LgiIde.xcodeproj</Mac>
-				<Haiku>Makefile.haiku</Haiku>
+				<Mac>./mac/LgiIde.xcodeproj</Mac>
+				<Haiku>./haiku/Makefile.haiku</Haiku>
 			</Makefile>
 			<Executable>
 				<Linux>
 					<Debug>./lgiide</Debug>
 					<Release>./lgiide</Release>
 				</Linux>
+				<Haiku>
+					<Debug>./lgiide</Debug>
+					<Release>./lgiide</Release>
+				</Haiku>
 				<Windows>
 					<Debug>LgiIde.exe</Debug>
 					<Release>LgiIde.exe</Release>

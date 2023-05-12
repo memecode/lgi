@@ -466,7 +466,8 @@
 			<Makefile>
 				<Linux>linux/Makefile.linux</Linux>
 				<Windows>win\Makefile.windows</Windows>
-				<Mac>Makefile.macosx</Mac>
+				<Mac>mac/Makefile.mac</Mac>
+				<Haiku>haiku/Makefile.haiku</Haiku>
 			</Makefile>
 			<Compiler>
 				<Linux>gcc</Linux>

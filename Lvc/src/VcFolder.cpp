@@ -406,6 +406,13 @@ const char *VcFolder::GetVcName()
 	return VcCmd;
 }
 
+char VcFolder::GetPathSep()
+{
+	if (Uri.IsFile())
+		return DIR_CHAR;
+
+	return '/'; // FIXME: Assumption is that the remote system is unix based.
+}
 
 bool VcFolder::RunCmd(const char *Args, LoggingType Logging, std::function<void(Result)> Callback)
 {
@@ -1606,6 +1613,7 @@ void VcFolder::OnCmdError(LString Output, const char *Msg)
 	CmdErrors++;
 	d->Tabs->Value(1);
 	GetCss(true)->Color(LColour::Red);
+	Update();
 }
 
 void VcFolder::ClearError()
@@ -3050,8 +3058,9 @@ void VcFolder::GitAdd()
 	}
 	else
 	{
+		char NativeSep[] = {GetPathSep(), 0};
 		LString Last = PostAdd->Files.Last();
-		Args.Printf("add \"%s\"", Last.Replace("\"", "\\\"").Replace("/", DIR_STR).Get());
+		Args.Printf("add \"%s\"", Last.Replace("\"", "\\\"").Replace("/", NativeSep).Get());
 		PostAdd->Files.PopLast();	
 		StartCmd(Args, &VcFolder::ParseGitAdd, NULL, LogNormal);
 	}
@@ -3059,7 +3068,15 @@ void VcFolder::GitAdd()
 
 bool VcFolder::ParseGitAdd(int Result, LString s, ParseParams *Params)
 {
-	GitAdd();
+	if (Result)
+	{
+		OnCmdError(s, "add failed.");
+	}
+	else
+	{
+		GitAdd();
+	}
+
 	return false;
 }
 

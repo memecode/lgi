@@ -223,7 +223,7 @@ SSH_LOG("waitPrompt out:", sz, out);
 		PROFILE("LastLine");
 		CheckLast = false;
 		auto last = LastLine(out);
-		LgiTrace("last='%s'\n", last.Get());
+		// LgiTrace("last='%s'\n", last.Get());
 		PROFILE("matchstr");
 		auto result = MatchStr(Prompt, last);
 SSH_LOG("waitPrompt result:", result, Prompt, last);
@@ -411,15 +411,15 @@ SSH_LOG("detectVcs:", ls);
 		}
 		case M_RUN_CMD:
 		{
-			#if PROFILE_OnEvent
-			LProfile prof("OnEvent");
-			#endif
+#if PROFILE_OnEvent
+LProfile prof("OnEvent");
+#endif
 
 			LAutoPtr<SshParams> p;
 			if (!ReceiveA(p, Msg))
 				break;
 
-			PROF("get console");
+PROF("get console");
 			LString path = PathFilter(p->Path);
 			LStream *con = GetConsole();
 			if (!con)
@@ -427,29 +427,29 @@ SSH_LOG("detectVcs:", ls);
 
 			auto Debug = p->Params && p->Params->Debug;
 
-			PROF("cd");
+PROF("cd");
 			LString cmd;
 			cmd.Printf("cd %s\n", path.Get());
 SSH_LOG(">>>> cd:", path);
 			auto wr = con->Write(cmd, cmd.Length());
-			PROF("cd wait");
+PROF("cd wait");
 			auto pr = WaitPrompt(con, NULL, Debug?"Cd":NULL);
 
-			PROF("cmd");
+PROF("cmd");
 			cmd.Printf("%s %s\n", p->Exe.Get(), p->Args.Get());
 SSH_LOG(">>>> cmd:", cmd);
 			if (Log)
 				Log->Print("%s", cmd.Get());
 			wr = con->Write(cmd, cmd.Length());
-			PROF("cmd wait");
+PROF("cmd wait");
 			pr = WaitPrompt(con, &p->Output, Debug?"Cmd":NULL);
 			
-			PROF("result");
+PROF("result");
 			LString result;
 			cmd = "echo $?\n";
 SSH_LOG(">>>> result:", cmd);
 			wr = con->Write(cmd, cmd.Length());
-			PROF("result wait");
+PROF("result wait");
 			pr = WaitPrompt(con, &result, Debug?"Echo":NULL);
 			if (pr)
 			{
