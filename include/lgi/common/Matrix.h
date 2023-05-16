@@ -5,11 +5,11 @@
 #define Abs(x) ((x) < 0 ? -(x) : (x))
 
 template<typename T, int Xs, int Ys>
-struct GMatrix
+struct LMatrix
 {
 	T m[Ys][Xs];
 
-	GMatrix()
+	LMatrix()
 	{
 		ZeroObj(m);
 	}
@@ -31,10 +31,10 @@ struct GMatrix
 	}
 	
 	template<int C>
-	GMatrix<T, C, Ys> operator *(const GMatrix<T, C, Xs> &b)
+	LMatrix<T, C, Ys> operator *(const LMatrix<T, C, Xs> &b)
 	{
 		// a<ay, ax> * b<by, bx> where ax == by, and the output matrix is <ay, bx>
-		GMatrix<T, C, Ys> r;
+		LMatrix<T, C, Ys> r;
 		
 		for (int y=0; y<Ys; y++)
 		{
@@ -51,7 +51,7 @@ struct GMatrix
 		return r;
 	}
 	
-	GMatrix<T, Xs, Ys> &operator *(T scalar)
+	LMatrix<T, Xs, Ys> &operator *(T scalar)
 	{
 		for (int y=0; y<Ys; y++)
 		{
@@ -63,7 +63,7 @@ struct GMatrix
 		return *this;
 	}
 	
-	bool operator ==(const GMatrix<T, Xs, Ys> &mat)
+	bool operator ==(const LMatrix<T, Xs, Ys> &mat)
 	{
 		for (int y=0; y<Ys; y++)
 		{
@@ -76,7 +76,7 @@ struct GMatrix
 		return true;
 	}
 
-	bool operator !=(const GMatrix<T, Xs, Ys> &mat)
+	bool operator !=(const LMatrix<T, Xs, Ys> &mat)
 	{
 		bool eq = *this == mat;
 		return !eq;
@@ -191,7 +191,7 @@ struct GMatrix
 		if (Xs != Ys)
 			return false;
 
-		GMatrix<T, Xs * 2, Ys> b;
+		LMatrix<T, Xs * 2, Ys> b;
 		for (y=0; y<Ys; y++)
 		{
 			for (x=0; x<Xs; x++)

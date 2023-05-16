@@ -16,9 +16,9 @@
 enum LDocWrapType
 {
 	/// No word wrapping
-	TEXTED_WRAP_NONE = 0,
+	L_WRAP_NONE = 0,
 	/// Dynamically wrap line to editor width
-	TEXTED_WRAP_REFLOW = 1,
+	L_WRAP_REFLOW = 1,
 };
 
 // Util macros
@@ -261,7 +261,7 @@ public:
 	DocViewProp(uint16, WrapAtCol, 0)
 	DocViewProp(bool, UrlDetect, true)
 	DocViewProp(bool, ReadOnly, false)
-	DocViewProp(LDocWrapType, WrapType, TEXTED_WRAP_REFLOW)
+	DocViewProp(LDocWrapType, WrapType, L_WRAP_REFLOW)
 	DocViewProp(uint8_t, TabSize, 4)
 	DocViewProp(uint8_t, IndentSize, 4)
 	DocViewProp(bool, HardTabs, true)

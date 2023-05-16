@@ -6,65 +6,6 @@
 #include "lgi/common/StructuredIo.h"
 #endif
 
-#define IntIo(type) inline void StructIo(LStructuredIo &io, type i) { io.Int(i); }
-#define StrIo(type) inline void StructIo(LStructuredIo &io, type i) { io.String(i); }
-
-IntIo(char)
-IntIo(unsigned char)
-IntIo(short)
-IntIo(unsigned short)
-IntIo(int)
-IntIo(unsigned int)
-IntIo(int64_t)
-IntIo(uint64_t)
-
-StrIo(char*);
-StrIo(const char*);
-StrIo(wchar_t*);
-StrIo(const wchar_t*);
-
-inline void StructIo(LStructuredIo &io, LString &s)
-{
-	if (io.GetWrite())
-		io.String(s.Get(), s.Length());
-	else
-		io.Decode([&s](auto type, auto sz, auto ptr, auto name)
-		{
-			if (type == GV_STRING && ptr && sz > 0)
-				s.Set((char*)ptr, sz);
-		});
-}
-
-inline void StructIo(LStructuredIo &io, LStringPipe &p)
-{
-	// auto obj = io.StartObj("LStringPipe");
-	if (io.GetWrite())
-	{
-		p.Iterate([&io](auto ptr, auto bytes)
-		{
-			io.String(ptr, bytes);
-			return true;
-		});
-	}
-	else
-	{
-		io.Decode([&p](auto type, auto sz, auto ptr, auto name)
-		{
-			if (type == GV_STRING && ptr && sz > 0)
-				p.Write(ptr, sz);
-		});
-	}
-}
-
-inline void StructIo(LStructuredIo &io, LRect &r)
-{
-	auto obj = io.StartObj("LRect");
-	io.Int(r.x1, "x1");
-	io.Int(r.y1, "y1");
-	io.Int(r.x2, "x2");
-	io.Int(r.y2, "y2");
-}
-
 class LStructuredLog
 {
 	LFile f;
@@ -94,7 +35,10 @@ public:
 
 	virtual ~LStructuredLog()
 	{
+		io.Flush(&f);
 	}
+
+	LStructuredIo &GetIo() { return io; }
 
 	// Write objects to the log. Custom types will need to have a StructIo implementation
 	template<typename... Args>

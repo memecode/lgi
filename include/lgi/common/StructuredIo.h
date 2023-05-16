@@ -145,7 +145,20 @@ public:
 	{
 		if (sz < 0)
 			sz = Strlen(str);
-		Encode(GV_STRING, str, sz * sizeof(T), name);
+		Encode(sizeof(*str) > 1 ? GV_WSTRING : GV_STRING, str, sz * sizeof(T), name);
+	}
+
+	void String(LString &str, const char *name = NULL)
+	{
+		Encode(GV_STRING, str.Get(), str.Length(), name);
+	}
+
+	template<typename T>
+	void Binary(T *data, size_t elements, const char *name = NULL)
+	{
+		if (!data || elements == 0)
+			return;
+		Encode(GV_BINARY, data, sizeof(*data)*elements, name);
 	}
 
 	struct ObjRef
@@ -223,7 +236,7 @@ LgiTrace("Decode(%i @ %i,%i sz=%i) after=%i\n", type, (int)type_addr, (int)data_
 
 	bool Flush(LStream *s)
 	{
-		if (!s)
+		if (!s || !Write)
 			return false;
 
 		(*this)[Pos++] = EndRow;
@@ -234,5 +247,89 @@ LgiTrace("Decode(%i @ %i,%i sz=%i) after=%i\n", type, (int)type_addr, (int)data_
 		return Status;
 	}
 };
+
+#define IntIo(type) inline void StructIo(LStructuredIo &io, type i) { io.Int(i); }
+#define StrIo(type) inline void StructIo(LStructuredIo &io, type i) { io.String(i); }
+
+IntIo(char)
+IntIo(unsigned char)
+IntIo(short)
+IntIo(unsigned short)
+IntIo(int)
+IntIo(unsigned int)
+IntIo(int64_t)
+IntIo(uint64_t)
+
+StrIo(char*);
+StrIo(const char*);
+StrIo(wchar_t*);
+StrIo(const wchar_t*);
+
+inline void StructIo(LStructuredIo &io, LString &s)
+{
+	if (io.GetWrite())
+		io.String(s.Get(), s.Length());
+	else
+		io.Decode([&s](auto type, auto sz, auto ptr, auto name)
+		{
+			if (type == GV_STRING && ptr && sz > 0)
+				s.Set((char*)ptr, sz);
+		});
+}
+
+inline void StructIo(LStructuredIo &io, LStringPipe &p)
+{
+	// auto obj = io.StartObj("LStringPipe");
+	if (io.GetWrite())
+	{
+		p.Iterate([&io](auto ptr, auto bytes)
+		{
+			io.String(ptr, bytes);
+			return true;
+		});
+	}
+	else
+	{
+		io.Decode([&p](auto type, auto sz, auto ptr, auto name)
+		{
+			if (type == GV_STRING && ptr && sz > 0)
+				p.Write(ptr, sz);
+		});
+	}
+}
+
+inline void StructIo(LStructuredIo &io, LRect &r)
+{
+	auto obj = io.StartObj("LRect");
+	io.Int(r.x1, "x1");
+	io.Int(r.y1, "y1");
+	io.Int(r.x2, "x2");
+	io.Int(r.y2, "y2");
+}
+
+inline void StructIo(LStructuredIo &io, LColour &c)
+{
+	auto obj = io.StartObj("LColour");
+	LString cs;
+	uint8_t r, g, b, a;
+
+	if (io.GetWrite())
+	{
+		cs = LColourSpaceToString(c.GetColourSpace());
+		r = c.r(); g = c.g(); b = c.b(); a = c.a();
+	}
+
+	io.String(cs, "colourSpace");
+	io.Int(r, "r");
+	io.Int(g, "g");
+	io.Int(b, "b");
+	io.Int(a, "a");
+
+	if (!io.GetWrite())
+	{
+		c.SetColourSpace(LStringToColourSpace(cs));
+		c.r(r); c.g(g); c.b(b); c.a(a);
+	}
+}
 
 #endif

@@ -7,7 +7,7 @@
 
 class LFilterViewPrivate;
 
-enum GFilterNode
+enum LFilterNode
 {
 	LNODE_NULL,
 	LNODE_AND,
@@ -16,7 +16,7 @@ enum GFilterNode
 	LNODE_NEW
 };
 
-enum GFilterMenu
+enum LFilterMenu
 {
 	FMENU_FIELD,
 	FMENU_OP,
@@ -28,7 +28,7 @@ class LFilterItem;
 
 typedef int (*FilterUi_Menu)(LFilterView *View,
 							 LFilterItem *Item,
-							 GFilterMenu Menu,
+							 LFilterMenu Menu,
 							 LRect &r,
 							 LArray<char*> *GetList,
 							 void *UserData);
@@ -43,7 +43,7 @@ protected:
 	void ShowControls(bool s);
 
 public:
-	LFilterItem(LFilterViewPrivate *Data, GFilterNode Node = LNODE_NEW);
+	LFilterItem(LFilterViewPrivate *Data, LFilterNode Node = LNODE_NEW);
 	~LFilterItem();
 
 	bool GetNot();
@@ -56,8 +56,8 @@ public:
 	void SetOp(int i);
 	void SetValue(char *s);
 
-	GFilterNode GetNode();
-	void SetNode(GFilterNode n);
+	LFilterNode GetNode();
+	void SetNode(LFilterNode n);
 	bool OnKey(LKey &k);
 	void OnMouseClick(LMouse &m);
 	void OnExpand(bool b);
@@ -82,7 +82,7 @@ public:
 	bool ShowLegend();
 	void ShowLegend(bool b);
 	void Empty();
-	LFilterItem *Create(GFilterNode Node = LNODE_NEW);
+	LFilterItem *Create(LFilterNode Node = LNODE_NEW);
 	LTreeNode *GetRootNode();
 
 	void OnPaint(LSurface *pDC);

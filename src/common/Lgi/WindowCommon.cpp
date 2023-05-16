@@ -44,7 +44,7 @@ void LWindow::BuildShortcuts(ShortcutMap &Map, LViewI *v)
 void LWindow::MoveOnScreen()
 {
 	LRect p = GetPos();
-	LArray<GDisplayInfo*> Displays;
+	LArray<LDisplayInfo*> Displays;
 	LRect Screen(0, 0, -1, -1);
 
 	if (
@@ -105,13 +105,13 @@ void LWindow::MoveOnScreen()
 void LWindow::MoveToCenter()
 {
 	LRect Screen(0, 0, GdcD->X()-1, GdcD->Y()-1);
-	LArray<GDisplayInfo*> Displays;
+	LArray<LDisplayInfo*> Displays;
 	LRect p = GetPos();
 
 	p.Offset(-p.x1, -p.y1);
 	if (LGetDisplays(Displays, &Screen) && Displays.Length() > 0)
 	{
-		GDisplayInfo *Dsp = NULL;
+		LDisplayInfo *Dsp = NULL;
 		for (auto d: Displays)
 		{
 			if (d->r.Overlap(&p))

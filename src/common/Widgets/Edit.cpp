@@ -52,7 +52,7 @@ LEdit::LEdit(int id, int x, int y, int cx, int cy, const char *name) :
 	#if !WINNATIVE
 	SetObjectName(Res_EditBox);
 	SetUrlDetect(false);
-	SetWrapType(TEXTED_WRAP_NONE);
+	SetWrapType(L_WRAP_NONE);
 	#endif
 	_OsFontType Type;
 	d = new LEditPrivate;

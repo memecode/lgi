@@ -572,7 +572,7 @@ void LTextView3::SetTabSize(uint8_t i)
 void LTextView3::SetWrapType(LDocWrapType i)
 {
 	LDocView::SetWrapType(i);
-	CanScrollX = i != TEXTED_WRAP_REFLOW;
+	CanScrollX = i != L_WRAP_REFLOW;
 
 	OnPosChange();
 	Invalidate();
@@ -717,7 +717,7 @@ bool LTextView3::ValidateLines(bool CheckBox)
 		}
 
 		char16 *e = c;
-		if (WrapType == TEXTED_WRAP_NONE)
+		if (WrapType == L_WRAP_NONE)
 		{
 			while (*e && *e != '\n')
 				e++;
@@ -750,7 +750,7 @@ bool LTextView3::ValidateLines(bool CheckBox)
 		{
 			if (*e == '\n')
 				e++;
-			else if (WrapType == TEXTED_WRAP_REFLOW)
+			else if (WrapType == L_WRAP_REFLOW)
 				e++;
 		}
 		Pos = e - Text;
@@ -759,7 +759,7 @@ bool LTextView3::ValidateLines(bool CheckBox)
 		Prev = l;
 	}
 
-	if (WrapType == TEXTED_WRAP_NONE &&
+	if (WrapType == L_WRAP_NONE &&
 		Pos != Size)
 	{
 		LogLines();
@@ -878,7 +878,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 
 	// Alright... lets pour!
 	uint64 StartTs = LCurrentTime();
-	if (WrapType == TEXTED_WRAP_NONE)
+	if (WrapType == L_WRAP_NONE)
 	{
 		// Find the dimensions of each line that is missing a rect
 		#if PROFILE_POUR
@@ -1178,7 +1178,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 
 	bool ScrollYNeeded = Client.Y() < (std::max(PartialPourLines, Line.Length()) * LineY);
 	bool ScrollChange = ScrollYNeeded ^ (VScroll != NULL);
-	d->LayoutDirty = WrapType != TEXTED_WRAP_NONE && ScrollChange;
+	d->LayoutDirty = WrapType != L_WRAP_NONE && ScrollChange;
 	#if PROFILE_POUR
 	static LString _s;
 	_s.Printf("ScrollBars dirty=%i", d->LayoutDirty);
@@ -1503,7 +1503,7 @@ bool LTextView3::Insert(size_t At, const char16 *Data, ssize_t Len)
 
 			if (Cur)
 			{
-				if (WrapType == TEXTED_WRAP_NONE)
+				if (WrapType == L_WRAP_NONE)
 				{
 					// Clear layout for current line...
 					Cur->r.ZOff(-1, -1);
@@ -1554,7 +1554,7 @@ bool LTextView3::Insert(size_t At, const char16 *Data, ssize_t Len)
 				// If wrap is on then this can happen when an Insert happens before the 
 				// OnPulse event has laid out the new text. Probably not a good thing in
 				// non-wrap mode			
-				if (WrapType == TEXTED_WRAP_NONE)
+				if (WrapType == L_WRAP_NONE)
 				{
 					LTextLine *l = *Line.rbegin();
 					printf("%s:%i - Insert error: no cur, At=%i, Size=%i, Lines=%i, WrapType=%i\n",
@@ -1633,7 +1633,7 @@ bool LTextView3::Delete(size_t At, ssize_t Len)
 			Size -= Len;
 			Text[Size] = 0;
 
-			if (WrapType == TEXTED_WRAP_NONE)
+			if (WrapType == L_WRAP_NONE)
 			{
 				ssize_t Idx = -1;
 				LTextLine *Cur = GetTextLine(At, &Idx);
@@ -1692,7 +1692,7 @@ bool LTextView3::Delete(size_t At, ssize_t Len)
 			}
 
 			// Handle repainting in flowed mode, when the line starts change
-			if (WrapType == TEXTED_WRAP_REFLOW)
+			if (WrapType == L_WRAP_REFLOW)
 			{
 				ssize_t Index;
 				LTextLine *Cur = GetTextLine(At, &Index);

@@ -1404,7 +1404,7 @@ LDebugView::LDebugView(LScriptVmDebuggerPriv *priv) : LTextView3(IDC_TEXT, 0, 0,
 {
 	d = priv;
 	ErrorLine = -1;
-	SetWrapType(TEXTED_WRAP_NONE);
+	SetWrapType(L_WRAP_NONE);
 	GetCss(true)->PaddingLeft(LCss::Len(LCss::LenPx, 18));
 }
 

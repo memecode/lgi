@@ -78,29 +78,40 @@ public:
 					case GV_INT64:
 					{
 						if (v.data.Length() == 4)
-							p.Print("%i", *(int*)v.data.AddressOf());
+							p.Print(" %i", *(int*)v.data.AddressOf());
 						else if (v.data.Length() == 8)
-							p.Print(LPrintfInt64, *(int64_t*)v.data.AddressOf());
+							p.Print(" " LPrintfInt64, *(int64_t*)v.data.AddressOf());
 						else
 							LAssert(!"Unknown int size.");
 						break;
 					}
 					case GV_STRING:
 					{
+						p.Print(" %.*s", (int)MIN(32,v.data.Length()), v.data.AddressOf());
 						if (v.data.Length() >= 32)
-							p.Print(" (...)");
-						else
-							p.Print("%.*s", (int)v.data.Length(), v.data.AddressOf());
+							p.Print("...");
+						break;
+					}
+					case GV_WSTRING:
+					{
+						p.Print(" %.*S", (int)MIN(32,v.data.Length()), v.data.AddressOf());
+						if (v.data.Length() >= 32)
+							p.Print("...");
 						break;
 					}
 					case GV_CUSTOM:
 					{
-						p.Print("Object: %s", v.name.Get());
+						p.Print(" Object:%s", v.name.Get());
 						break;
 					}
 					case GV_VOID_PTR:
 					{
-						p.Print("/Object");
+						// p.Print("/Obj");
+						break;
+					}
+					case GV_BINARY:
+					{
+						p.Print(" (Bin)");
 						break;
 					}
 					default:
@@ -120,6 +131,79 @@ public:
 		return cache;
 	}
 
+	template<typename T>
+	void PrintEscaped(LStringPipe &p, T *s, T *e)
+	{
+		for (auto c = s; c < e; c++)
+		{
+			switch (*c)
+			{
+				case '\\': p.Print("\\\\");  break;
+				case '\t': p.Print("\\t");   break;
+				case '\r': p.Print("\\r");   break;
+				case '\n': p.Print("\\n\n"); break;
+				case 0x07: p.Print("\\b");   break;
+				case 0x1b: p.Print("\\e");   break;
+				default:
+					if (*c < ' ' || *c >= 128)
+					{
+						LString hex;
+						hex.Printf("\\x%x", typename std::make_unsigned<T>::type(*c));
+						p.Write(hex);
+					}
+					else
+					{
+						char ch = (char)*c;
+						p.Write(&ch, 1);
+					}
+					break;
+
+			}
+		}
+	}
+
+	LString IntToString(Value &v, bool showHex)
+	{
+		LString s;
+
+		if (v.data.Length() == 1)
+		{
+			auto i = (uint8_t*) v.data.AddressOf();
+			if (showHex)
+				s.Printf("%i 0x%x", *i, *i);
+			else
+				s.Printf("%i", *i);
+		}
+		else if (v.data.Length() == 2)
+		{
+			auto i = (uint16_t*) v.data.AddressOf();
+			if (showHex)
+				s.Printf("%i 0x%x", *i, *i);
+			else
+				s.Printf("%i", *i);
+		}
+		else if (v.data.Length() == 4)
+		{
+			auto i = (uint32_t*) v.data.AddressOf();
+			if (showHex)
+				s.Printf("%i 0x%x", *i, *i);
+			else
+				s.Printf("%i", *i);
+		}
+		else if (v.data.Length() == 8)
+		{
+			auto i = (int64_t*) v.data.AddressOf();
+			if (showHex)
+				s.Printf(LPrintfInt64 " 0x" LPrintfHex64, *i, *i);
+			else
+				s.Printf(LPrintfInt64, *i);
+		}
+		else
+			LAssert(!"Impl me.");
+
+		return s;
+	}
+
 	void Select(bool b) override
 	{
 		LListItem::Select(b);
@@ -127,73 +211,79 @@ public:
 		auto mode = (DisplayMode)c->tabs->Value();
 		auto ctrl = mode ? c->escaped : c->hex;
 
-		if (b)
+		if (!b)
+			return;
+
+		LStringPipe p;
+		LString Obj;
+		int Idx = 0;
+		bool shorthand = false;
+
+		for (auto &v: values)
 		{
-			LStringPipe p;
-			LString Obj;
-			int Idx = 0;
-
-			auto PrintEscaped = [&](char *s, char *e)
-			{
-				for (auto c = s; c < e; c++)
-				{
-					switch (*c)
-					{
-						case '\\': p.Print("\\\\");  break;
-						case '\t': p.Print("\\t");   break;
-						case '\r': p.Print("\\r");   break;
-						case '\n': p.Print("\\n\n"); break;
-						case 0x07: p.Print("\\b");   break;
-						case 0x1b: p.Print("\\e");   break;
-						default:
-							if (*c < ' ' || *c >= 128)
-							{
-								LString hex;
-								hex.Printf("\\x%x", (uint8_t)*c);
-								p.Write(hex);
-							}
-							else p.Write(c, 1);
-							break;
-
-					}
-				}
-			};
-
-			for (auto &v: values)
-			{
-				auto sType = LVariant::TypeToString(v.type);
+			auto sType = LVariant::TypeToString(v.type);
 				
+			switch (v.type)
+			{
+				case GV_CUSTOM:
+				{
+					shorthand = v.name.Equals("LRect") ||
+								v.name.Equals("LColour");
+
+					if (shorthand)
+						p.Print("object %s {", v.name.Get());
+					else
+						p.Print("object %s {\n\n", v.name.Get());
+					Obj = v.name;
+					Idx = 0;
+
+					continue;
+				}
+				case GV_VOID_PTR:
+				{
+					if (shorthand)
+						p.Print(" }\n");
+					else
+						p.Print("}\n");
+					Obj.Empty();
+
+					shorthand = false;
+					continue;
+				}
+				case GV_STRING:
+				{
+					if (Obj == "LConsole")
+					{
+						auto s = (char*)v.data.AddressOf();
+						auto e = s + v.data.Length();
+						p.Print("[%i]=", Idx++);
+						PrintEscaped(p, s, e);
+						p.Print("\n");
+						continue;
+					}
+					break;
+				}
+			}				
+			
+			if (shorthand)
+			{
 				switch (v.type)
 				{
-					case GV_CUSTOM:
-					{
-						p.Print("object %s {\n\n", v.name.Get());
-						Obj = v.name;
-						Idx = 0;
-						continue;
-					}
-					case GV_VOID_PTR:
-					{
-						p.Print("}\n");
-						Obj.Empty();
-						continue;
-					}
-					case GV_STRING:
-					{
-						if (Obj == "LConsole")
-						{
-							auto s = (char*)v.data.AddressOf();
-							auto e = s + v.data.Length();
-							p.Print("[%i]=", Idx++);
-							PrintEscaped(s, e);
-							p.Print("\n");
-							continue;
-						}
+					case GV_INT32:
+					case GV_INT64:
+						p.Print(" %s=%s", v.name.Get(), IntToString(v, false).Get());
 						break;
-					}
-				}				
-				
-				p.Print("%s, %i bytes%s%s:\n",
+					case GV_STRING:
+						p.Print(" %s=%.*s", v.name.Get(), (int)v.data.Length(), v.data.AddressOf());
+						break;
+					default:
+						p.Print(" %s=#impl(%s)", v.name.Get(), LVariant::TypeToString(v.type));
+						break;
+				}
+			}
+			else
+			{
+				p.Print("%s, %i bytes%s%s: ",
 					sType,
 					(int)v.data.Length(),
 					v.name ? ", " : "",
@@ -204,22 +294,13 @@ public:
 					case GV_INT32:
 					case GV_INT64:
 					{
-						if (v.data.Length() == 4)
-						{
-							auto i = (int*) v.data.AddressOf();
-							p.Print("%i 0x%x\n", *i, *i);
-						}
-						else if (v.data.Length() == 8)
-						{
-							auto i = (int64_t*) v.data.AddressOf();
-							p.Print(LPrintfInt64 " 0x" LPrintfHex64 "\n", *i, *i);
-						}
-						else
-							LAssert(!"Impl me.");
+						p.Print("%s\n", IntToString(v, true).Get());
 						break;
 					}
+					case GV_BINARY:
 					case GV_STRING:
 					{
+						p.Print("\n");
 						if (mode == DisplayHex)
 						{
 							char line[300];
@@ -247,14 +328,57 @@ public:
 									if (line[i] == 0)
 										line[i] = ' ';
 								}
-								p.Print("%.*s\n", colEnd, line);
+								p.Print("\t%.*s\n", colEnd, line);
 							}
 						}
 						else if (mode == DisplayEscaped)
 						{
 							auto s = (char*)v.data.AddressOf();
 							auto e = s + v.data.Length();
-							PrintEscaped(s, e);
+							PrintEscaped(p, s, e);
+							if (e > s && e[-1] != '\n')
+								p.Write("\n");
+						}
+						break;
+					}
+					case GV_WSTRING:
+					{
+						p.Print("\n");
+						if (mode == DisplayHex)
+						{
+							char line[300];
+						
+							const int rowSize = 16;
+							const int colHex = 10;
+							const int colAscii = colHex + (rowSize / 2 * 5) + 2;
+							const int colEnd = colAscii + rowSize;
+
+							for (size_t addr = 0; addr < v.data.Length() ; addr += rowSize)
+							{
+								ZeroObj(line);
+								sprintf(line, "%8.8x", (int)addr);
+								auto rowBytes = MIN(v.data.Length() - addr, rowSize);
+								auto rowWords = rowBytes / sizeof(char16);
+								LAssert(rowBytes <= rowSize);
+								auto rowPtr = (char16*) v.data.AddressOf(addr);
+								for (int i=0; i<rowWords; i++)
+								{
+									sprintf(line + colHex + (i * 5), "%4.4x", rowPtr[i]);
+									line[colAscii + i] = rowPtr[i] >= ' ' && rowPtr[i] < 128 ? rowPtr[i] : '.';
+								}
+								for (int i=0; i<colEnd; i++)
+								{
+									if (line[i] == 0)
+										line[i] = ' ';
+								}
+								p.Print("\t%.*s\n", (int)colEnd, line);
+							}
+						}
+						else if (mode == DisplayEscaped)
+						{
+							auto s = (char16*)v.data.AddressOf();
+							auto e = (char16*)(v.data.AddressOf()+v.data.Length());
+							PrintEscaped(p, s, e);
 							if (e > s && e[-1] != '\n')
 								p.Write("\n");
 						}
@@ -269,9 +393,9 @@ public:
 
 				p.Print("\n");
 			}
-
-			ctrl->Name(p.NewLStr());
 		}
+
+		ctrl->Name(p.NewLStr());
 	}
 };
 
@@ -347,7 +471,7 @@ public:
     App() : LDocApp<LOptionsFile>(AppName)
     {
         Name(AppName);
-        LRect r(0, 0, 1000, 800);
+        LRect r(0, 0, 1100, 800);
         SetPos(r);
         MoveToCenter();
         SetQuitOnClose(true);

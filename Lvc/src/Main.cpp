@@ -854,7 +854,7 @@ public:
 				if (Tv)
 				{
 					Tv->Sunken(true);
-					Tv->SetWrapType(TEXTED_WRAP_NONE);
+					Tv->SetWrapType(L_WRAP_NONE);
 				}
 			}
 			else LAssert(!"No ctrl?");
@@ -867,12 +867,12 @@ public:
 			LTabPage *p = Tabs->Append("Diff");
 			p->Append(Diff = new DiffView(IDC_TXT));
 			// Diff->Sunken(true);
-			Diff->SetWrapType(TEXTED_WRAP_NONE);
+			Diff->SetWrapType(L_WRAP_NONE);
 
 			p = Tabs->Append("Log");
 			p->Append(Log = new LTextLog(IDC_LOG));
 			// Log->Sunken(true);
-			Log->SetWrapType(TEXTED_WRAP_NONE);
+			Log->SetWrapType(L_WRAP_NONE);
 			
 			SetCtrlValue(IDC_UPDATE, true);
 

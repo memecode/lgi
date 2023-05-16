@@ -404,6 +404,9 @@ LTextView4::LTextView4(	int Id,
 
 LTextView4::~LTextView4()
 {
+	#if DEBUG_EDIT_LOG
+	Edits.DeleteObjects();
+	#endif	
 	#ifndef WINDOWS
 	Ctrls.Delete(this);
 	#endif
@@ -542,7 +545,7 @@ void LTextView4::SetTabSize(uint8_t i)
 void LTextView4::SetWrapType(LDocWrapType i)
 {
 	LDocView::SetWrapType(i);
-	CanScrollX = i != TEXTED_WRAP_REFLOW;
+	CanScrollX = i != L_WRAP_REFLOW;
 
 	OnPosChange();
 	Invalidate();
@@ -653,7 +656,7 @@ void LTextView4::OnFontChange()
 	}
 }
 
-void LTextView4::LogLines()
+LString LTextView4::LogLines()
 {
 	int Idx = 0;
 	LStringPipe p;
@@ -666,12 +669,16 @@ void LTextView4::LogLines()
 				i->r.GetStr());
 		Idx++;
 	}
-	LgiTrace(p.NewLStr());
+
+	auto r = p.NewLStr();
+	LgiTrace(r);
 
 	#ifdef _DEBUG
 	if (d->PourLog)
 		LgiTrace("%s", d->PourLog.Get());
 	#endif
+
+	return r;
 }
 
 bool LTextView4::ValidateLines(bool CheckBox)
@@ -685,13 +692,12 @@ bool LTextView4::ValidateLines(bool CheckBox)
 	{
 		if (l->Start != Pos)
 		{
-			LogLines();
-			LAssert(!"Incorrect start.");
-			return false;
+			d->LastError.Printf("%s:%i - Incorrect start.", _FL);
+			goto OnError;
 		}
 
 		char16 *e = c;
-		if (WrapType == TEXTED_WRAP_NONE)
+		if (WrapType == L_WRAP_NONE)
 		{
 			while (*e && *e != '\n')
 				e++;
@@ -706,17 +712,19 @@ bool LTextView4::ValidateLines(bool CheckBox)
 		ssize_t Len = e - c;
 		if (l->Len != Len)
 		{
-			LogLines();
-			LAssert(!"Incorrect length.");
-			return false;
+			d->LastError.Printf("%s:%i - Incorrect length: " 
+				LPrintfSSizeT " != " LPrintfSSizeT ", Idx=" LPrintfSizeT,
+				_FL, l->Len, Len,
+				Idx);
+			goto OnError;
 		}
 
 		if (CheckBox &&
 			Prev &&
 			Prev->r.y2 != l->r.y1 - 1)
 		{
-			LogLines();
-			LAssert(!"Lines not joined vertically");
+			d->LastError.Printf("%s:%i - Lines not joined vertically", _FL);
+			goto OnError;
 		}
 
 		if (l->NewLine)
@@ -727,8 +735,8 @@ bool LTextView4::ValidateLines(bool CheckBox)
 			}
 			else
 			{
-				LAssert(!"Expecting new line.");
-				return false;
+				d->LastError.Printf("%s:%i - Expecting new line.", _FL);
+				goto OnError;
 			}
 		}
 
@@ -738,15 +746,20 @@ bool LTextView4::ValidateLines(bool CheckBox)
 		Prev = l;
 	}
 
-	if (WrapType == TEXTED_WRAP_NONE &&
+	if (WrapType == L_WRAP_NONE &&
 		Pos != Size)
 	{
-		LogLines();
-		LAssert(!"Last line != end of doc");
-		return false;
+		d->LastError.Printf("%s:%i - Last line != end of doc", _FL);
+		goto OnError;
 	}
 
 	return true;
+
+OnError:
+	#if DEBUG_EDIT_LOG
+	SaveLog("C:\\Code\\TextView4.slog");
+	#endif
+	return false;
 }
 
 int LTextView4::AdjustStyles(ssize_t Start, ssize_t Diff, bool ExtendStyle)
@@ -863,7 +876,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 
 	// Alright... lets pour!
 	uint64 StartTs = LCurrentTime();
-	if (WrapType == TEXTED_WRAP_NONE)
+	if (WrapType == L_WRAP_NONE)
 	{
 		// Find the dimensions of each line that is missing a rect
 		#if PROFILE_POUR
@@ -1141,7 +1154,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 		auto It = Line.rbegin();
 		LTextLine *Last = It != Line.end() ? *It : NULL;
 		if (!Last ||
-			Last->Start + Last->Len < Size)
+			Last->EndNewLine() < Size)
 		{
 			auto LastEnd = Last ? Last->End() : 0;
 			LTextLine *l = new LTextLine(_FL);
@@ -1163,7 +1176,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 
 	bool ScrollYNeeded = Client.Y() < (Line.Length() * LineY);
 	bool ScrollChange = ScrollYNeeded ^ (VScroll != NULL);
-	d->LayoutDirty = WrapType != TEXTED_WRAP_NONE && ScrollChange;
+	d->LayoutDirty = WrapType != L_WRAP_NONE && ScrollChange;
 	#if PROFILE_POUR
 	static LString _s;
 	_s.Printf("ScrollBars dirty=%i", d->LayoutDirty);
@@ -1402,8 +1415,23 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 	static int count = -1;
 	count++;
 
+	#if DEBUG_EDIT_LOG
+	{
+		EditLog *e = new EditLog;
+		e->Length = Len;
+		e->Type = EditInsert;
+		e->Str.Add(Data, Len);
+		Edits.Add(e);
+	}
+	#endif
+
+	#if 0
 	LProfile Prof("LTextView4::Insert");
 	Prof.HideResultsIfBelow(1000);
+	#define PROF(s) Prof.Add(s)
+	#else
+	#define PROF(s)
+	#endif
 
 	LAssert(InThread());
 	
@@ -1440,7 +1468,7 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 			}
 		}
 		
-		Prof.Add("MemChk");
+		PROF("MemChk");
 
 		if (Text)
 		{
@@ -1451,14 +1479,14 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 			if (After > 0)
 				memmove(Text+(At+Len), Text+At, After * sizeof(char16));
 
-			Prof.Add("Cpy");
+			PROF("Cpy");
 
 			// Copy new data in...
 			memcpy(Text+At, Data, Len * sizeof(char16));
 			Size += Len;
 			Text[Size] = 0; // NULL terminate
 
-			Prof.Add("Undo");
+			PROF("Undo");
 			
 			// Add the undo object...
 			if (UndoOn)
@@ -1493,13 +1521,15 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 
 			if (Cur)
 			{
-				if (WrapType == TEXTED_WRAP_NONE)
+				if (WrapType == L_WRAP_NONE)
 				{
 					// Clear layout for current line...
 					Cur->r.ZOff(-1, -1);
 
-					Prof.Add("NoWrap add lines");
+					PROF("NoWrap add lines");
 					
+					LgiTrace("Insert '%S' at %i, size=%i\n", Data, (int)At, (int)Size);
+
 					// Add any new lines that we need...
 					char16 *e = Text + At + Len;
 					char16 *c;
@@ -1510,25 +1540,36 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 							// Set the size of the current line...
 							size_t Pos = c - Text;
 							Cur->Len = Pos - Cur->Start;
-							Cur->NewLine = Text[Cur->End()] == '\n';
+							Cur->NewLine = true;
+							LgiTrace("	LF at %i, Idx=%i\n", (int)Pos, (int)Idx);
+
+							if (!*++c)
+							{
+								Cur = NULL;
+								break;
+							}
 
 							// Create a new line...
 							Cur = new LTextLine(_FL);
 							if (!Cur)
 								return false;
-							Cur->Start = Pos + 1;
+							Cur->Start = c - Text;
 							Line.AddAt(++Idx, Cur);
+							LgiTrace("	newLine at %i, Idx=%i\n", (int)Cur->Start, Idx);
 						}
 					}
 
-					Prof.Add("CalcLen");
+					PROF("CalcLen");
 
-					// Make sure the last Line's length is set..
-					Cur->CalcLen(Text);
-					printf("CalcLen, size=%i, start=%i, len=%i\n",
-						(int)Size, (int)Cur->Start, (int)Cur->Len);
+					if (Cur)
+					{
+						// Make sure the last Line's length is set..
+						Cur->CalcLen(Text);
+						LgiTrace("	CalcLen, size=%i, start=%i, len=%i\n",
+							(int)Size, (int)Cur->Start, (int)Cur->Len);
+					}
 
-					Prof.Add("UpdatePos");
+					PROF("UpdatePos");
 	
 					// Now update all the positions of the following lines...
 					for (size_t i = ++Idx; i < Line.Length(); i++)
@@ -1548,7 +1589,7 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 				// If wrap is on then this can happen when an Insert happens before the 
 				// OnPulse event has laid out the new text. Probably not a good thing in
 				// non-wrap mode			
-				if (WrapType == TEXTED_WRAP_NONE)
+				if (WrapType == L_WRAP_NONE)
 				{
 					LTextLine *l = *Line.rbegin();
 					printf("%s:%i - Insert error: no cur, At=%i, Size=%i, Lines=%i, WrapType=%i\n",
@@ -1559,7 +1600,7 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 			}
 
 			#ifdef _DEBUG
-			Prof.Add("Validate");
+			PROF("Validate");
 			ValidateLines();
 			#endif
 
@@ -1569,9 +1610,9 @@ bool LTextView4::Insert(size_t At, const char16 *Data, ssize_t Len)
 			Dirty = true;
 			if (PourEnabled)
 			{
-				Prof.Add("PourText");
+				PROF("PourText");
 				PourText(At, Len);
-				Prof.Add("PourStyle");
+				PROF("PourStyle");
 				auto Start = LCurrentTime();
 				PourStyle(At, Len);
 				auto End = LCurrentTime();
@@ -1627,7 +1668,7 @@ bool LTextView4::Delete(size_t At, ssize_t Len)
 			Size -= Len;
 			Text[Size] = 0;
 
-			if (WrapType == TEXTED_WRAP_NONE)
+			if (WrapType == L_WRAP_NONE)
 			{
 				ssize_t Idx = -1;
 				LTextLine *Cur = GetTextLine(At, &Idx);
@@ -1686,7 +1727,7 @@ bool LTextView4::Delete(size_t At, ssize_t Len)
 			}
 
 			// Handle repainting in flowed mode, when the line starts change
-			if (WrapType == TEXTED_WRAP_REFLOW)
+			if (WrapType == L_WRAP_REFLOW)
 			{
 				ssize_t Index;
 				LTextLine *Cur = GetTextLine(At, &Index);
@@ -5462,6 +5503,75 @@ bool LTextView4::OnLayout(LViewLayoutInfo &Inf)
 
 	return true;
 }
+
+#if DEBUG_EDIT_LOG
+#include "lgi/common/StructuredIo.h"
+
+inline void StructIo(LStructuredIo &io, LTextView4::EditLog &s)
+{
+	auto obj = io.StartObj("LTextView4::EditLog");
+
+	io.Int(s.Type, "type");
+	io.Int(s.Length, "len");
+	if (io.GetWrite())
+	{
+		io.String(s.Str.AddressOf(), s.Str.Length(), "str");
+	}
+	else
+	{
+		io.Decode([&s](auto type, auto sz, auto ptr, auto name)
+		{
+			if (type == GV_WSTRING && ptr && sz > 0)
+				s.Str.Add((char16*)ptr, sz/sizeof(char16));
+		});
+	}
+}
+
+inline void StructIo(LStructuredIo &io, LTextView4::LTextLine &s)
+{
+	auto obj = io.StartObj("LTextView4::LTextLine");
+
+	io.Int(s.Start, "start");
+	io.Int(s.Len, "len");
+	StructIo(io, s.r);
+	StructIo(io, s.c);
+	StructIo(io, s.Back);
+	io.Int(s.NewLine, "newLine");
+}
+
+#include "lgi/common/StructuredLog.h"
+
+void LTextView4::SaveLog(const char *File)
+{
+	if (!FirstErrorLog)
+		return;
+
+	LStructuredLog log(File, true);
+	auto &io = log.GetIo();
+
+	for (auto e: Edits)
+		log.Log(*e);
+
+	for (auto ln: Line)
+		log.Log(*ln);		
+
+	log.Log("Size:", Size);
+	io.String(Text, Size, "Text");
+	io.String(d->LastError, "LastError");
+	io.String(LogLines(), "Lines");
+	FirstErrorLog = false;
+}
+
+void LTextView4::LoadLog(const char *File)
+{
+	LStructuredLog log(File, false);
+	Edits.DeleteObjects();
+	log.Read([this](auto type, auto size, auto ptr, auto msg)
+		{
+			int asd=0;
+		});
+}
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 class LTextView4_Factory : public LViewFactory

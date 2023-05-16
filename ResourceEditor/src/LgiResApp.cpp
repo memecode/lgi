@@ -732,7 +732,7 @@ void FieldView::OnSelect(FieldSource *s)
 							{
 								Tv->Multiline = c->Multiline;
 								Tv->GetCss(true)->Height(LCss::Len(LCss::LenPx, c->Multiline ? LSysFont->GetHeight() * 8 : LSysFont->GetHeight() + 8));
-								Tv->SetWrapType(TEXTED_WRAP_NONE);
+								Tv->SetWrapType(L_WRAP_NONE);
 								Tv->Sunken(true);
 							}
 

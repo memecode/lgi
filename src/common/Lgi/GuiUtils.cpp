@@ -120,13 +120,13 @@ bool LMouse::ToView()
 
 #endif
 
-LPointF GDisplayInfo::Scale()
+LPointF LDisplayInfo::Scale()
 {
 	LPointF p((double)Dpi.x / 96.0, (double)Dpi.y / 96.0);
 	return p;
 }
 
-bool LGetDisplays(::LArray<GDisplayInfo*> &Displays, LRect *AllDisplays)
+bool LGetDisplays(::LArray<LDisplayInfo*> &Displays, LRect *AllDisplays)
 {
 	#if WINNATIVE
 	
@@ -151,7 +151,7 @@ bool LGetDisplays(::LArray<GDisplayInfo*> &Displays, LRect *AllDisplays)
 
 			if (EnumDisplaySettingsW(disp.DeviceName, ENUM_CURRENT_SETTINGS, &mode))
 			{
-				GDisplayInfo *Dsp = new GDisplayInfo;
+				LDisplayInfo *Dsp = new LDisplayInfo;
 				if (Dsp)
 				{
 					Dsp->r.ZOff(mode.dmPelsWidth-1, mode.dmPelsHeight-1);
@@ -199,7 +199,7 @@ bool LGetDisplays(::LArray<GDisplayInfo*> &Displays, LRect *AllDisplays)
 				if (!m)
 					continue;
 
-				GDisplayInfo *di = new GDisplayInfo;
+				LDisplayInfo *di = new LDisplayInfo;
 				if (!di)
 					continue;
 
@@ -219,7 +219,7 @@ bool LGetDisplays(::LArray<GDisplayInfo*> &Displays, LRect *AllDisplays)
 	
 		for (NSScreen *s in [NSScreen screens])
 		{
-			GDisplayInfo *di = new GDisplayInfo;
+			LDisplayInfo *di = new LDisplayInfo;
 			di->r = s.frame;
 			Displays.Add(di);
 		}

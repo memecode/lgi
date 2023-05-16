@@ -140,7 +140,7 @@ public:
 	};
 	LRect GetArea(RectType Type);
 
-	/// Sets the wrapping on the control, use #TEXTED_WRAP_NONE or #TEXTED_WRAP_REFLOW
+	/// Sets the wrapping on the control, use #L_WRAP_NONE or #L_WRAP_REFLOW
 	void SetWrapType(LDocWrapType i);
 	
 	// State / Selection

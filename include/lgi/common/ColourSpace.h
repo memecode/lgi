@@ -451,7 +451,7 @@ typedef union
 	System24BitPixel *s24;
 	System32BitPixel *s32;
 
-}	GPixelPtr;
+}	LPixelPtr;
 
 
 /** \brief 32bit colour of varing bit depth. If no associated depth is given, 32 bits is assumed.

@@ -406,7 +406,7 @@ public:
 };
 
 /// Time zone information
-struct GTimeZone
+struct LTimeZone
 {
 public:
 	/// The offset from UTC
@@ -416,7 +416,7 @@ public:
 };
 
 /// A list of all known timezones.
-extern GTimeZone GTimeZones[];
+extern LTimeZone GTimeZones[];
 
 #ifdef _DEBUG
 LgiFunc bool LDateTime_Test();

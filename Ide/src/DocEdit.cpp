@@ -48,7 +48,7 @@ DocEdit::DocEdit(IdeDoc *d, LFontType *f) :
 		}
 	}
 		
-	SetWrapType(TEXTED_WRAP_NONE);
+	SetWrapType(L_WRAP_NONE);
 	SetEnv(this);
 }
 	

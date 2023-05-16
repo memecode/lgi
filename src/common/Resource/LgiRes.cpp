@@ -1418,7 +1418,7 @@ bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, LAutoStrin
 						Dpi = Wnd->GetDpi();
 					else
 					{
-						LArray<GDisplayInfo*> Displays;
+						LArray<LDisplayInfo*> Displays;
 						if (LGetDisplays(Displays))
 						{
 							for (auto d: Displays)

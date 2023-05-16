@@ -1327,7 +1327,7 @@ bool LWindow::SerializeState(LDom *Store, const char *FieldName, bool Load)
 				LRect DefaultPos(100, 100, 900, 700);
 				if (Position.Valid())
 				{
-					LArray<GDisplayInfo*> Displays;
+					LArray<LDisplayInfo*> Displays;
 					LRect AllDisplays;
 					bool PosOk = true;
 					if (LGetDisplays(Displays, &AllDisplays))

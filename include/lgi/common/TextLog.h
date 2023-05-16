@@ -51,7 +51,7 @@ public:
 		TView::Sunken(true);
 		TView::SetPourLargest(true);
 		TView::SetUndoOn(false);
-		TView::SetWrapType(TEXTED_WRAP_NONE);
+		TView::SetWrapType(L_WRAP_NONE);
 	}
 	
 	void OnCreate()

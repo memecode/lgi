@@ -14,9 +14,9 @@
 #include "Lgi.h"
 
 // word wrap
-#define TEXTED_WRAP_NONE			0	// no word wrap
+#define L_WRAP_NONE			0	// no word wrap
 #define TEXTED_WRAP_NONREFLOW		1	// insert LF when you hit the end
-#define TEXTED_WRAP_REFLOW			2	// dynamically wrap line to editor width
+#define L_WRAP_REFLOW			2	// dynamically wrap line to editor width
 
 // Code pages
 #define TVCP_US_ASCII				0

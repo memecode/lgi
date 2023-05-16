@@ -149,7 +149,7 @@ LgiFunc void LDialogTextMsg(LViewI *Parent, const char *Title, LString Txt);
 
 /// Contains all the information about a display/monitor attached to the system.
 /// \sa LGetDisplays
-struct GDisplayInfo
+struct LDisplayInfo
 {
 	/// The position and dimensions of the display. On windows the left/upper 
 	/// most display will be positioned at 0,0 and each further display will have 
@@ -168,7 +168,7 @@ struct GDisplayInfo
 	/// The dots per inch of the display
 	LPoint Dpi;
 
-	GDisplayInfo()
+	LDisplayInfo()
 	{
 		r.ZOff(-1, -1);
 		BitDepth = 0;
@@ -184,7 +184,7 @@ LgiFunc bool LGetDisplays
 (
 	/// [out] The array of display info structures. The caller should free these
 	/// objects using Displays.DeleteObjects().
-	LArray<GDisplayInfo*> &Displays,
+	LArray<LDisplayInfo*> &Displays,
 	/// [out] Optional bounding rectangle of all displays. Can be NULL if your don't
 	/// need that information.
 	LRect *AllDisplays = 0

@@ -893,7 +893,7 @@ TextView::TextView()
 	DisplayLines = 1;
 	ClipData = NULL;
 	StatusMsg = NULL;
-	WrapType = TEXTED_WRAP_NONE;
+	WrapType = L_WRAP_NONE;
 	CodePage = TVCP_US_ASCII;
 
 	Doc.CursorCreate(&User, 0, 0);

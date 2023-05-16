@@ -11,6 +11,7 @@
 #include "lgi/common/Css.h"
 #include "lgi/common/UnrolledList.h"
 #include "lgi/common/FindReplaceDlg.h"
+#include "lgi/common/StructuredIo.h"
 
 // use CRLF as opposed to just LF
 // internally it uses LF only... this is just to remember what to
@@ -18,6 +19,7 @@
 #define TEXTED_USES_CR				0x00000001
 #define TAB_SIZE					4
 #define DEBUG_TIMES_MSG				8000 // a=0 b=(char*)Str
+#define DEBUG_EDIT_LOG				1
 
 extern char Delimiters[];
 
@@ -175,6 +177,28 @@ public:
 	friend class LTextView4::LStyle;
 
 protected:
+
+	#if DEBUG_EDIT_LOG
+	enum EditType
+	{
+		EditInsert,
+		EditDelete
+	};
+
+	struct EditLog
+	{
+		EditType Type;
+		LArray<char16> Str;
+		size_t Length;
+	};
+
+	friend inline void StructIo(LStructuredIo &io, LTextView4::EditLog &s);
+	LArray<EditLog*> Edits;
+	bool FirstErrorLog = true;
+	void SaveLog(const char *File);
+	void LoadLog(const char *File);
+	#endif
+
 	// Internal classes
 	enum LTextViewSeek
 	{
@@ -226,6 +250,7 @@ protected:
 	
 	class LTextView4Private *d;
 	friend class LTextView4Private;
+	friend inline void StructIo(LStructuredIo &io, LTextView4::LTextLine &s);
 
 	// Options
 	bool Dirty = false;
@@ -310,7 +335,7 @@ protected:
 	uint64 _PaintTime = 0;
 	#endif
 
-	void LogLines();
+	LString LogLines();
 	bool ValidateLines(bool CheckBox = false);
 
 public:
@@ -349,7 +374,7 @@ public:
 	void SetReadOnly(bool i) override;
 	void SetCrLf(bool crlf) override;
 
-	/// Sets the wrapping on the control, use #TEXTED_WRAP_NONE or #TEXTED_WRAP_REFLOW
+	/// Sets the wrapping on the control, use #L_WRAP_NONE or #L_WRAP_REFLOW
 	void SetWrapType(LDocWrapType i) override;
 	
 	// State / Selection

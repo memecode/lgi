@@ -459,7 +459,7 @@ public:
 class LFilterItemPrivate
 {
 public:
-	GFilterNode Node;
+	LFilterNode Node;
 	LFilterViewPrivate *Data;
 	LRect Btns[IconMax];
 	LRect NotBtn;
@@ -507,7 +507,7 @@ public:
 	}
 };
 
-LFilterItem::LFilterItem(LFilterViewPrivate *Data, GFilterNode Node)
+LFilterItem::LFilterItem(LFilterViewPrivate *Data, LFilterNode Node)
 {
 	d = new LFilterItemPrivate;
 	d->Data = Data;
@@ -1122,12 +1122,12 @@ void LFilterItem::OptionsMenu()
 	Update();
 }
 
-GFilterNode LFilterItem::GetNode()
+LFilterNode LFilterItem::GetNode()
 {
 	return d->Node;
 }
 
-void LFilterItem::SetNode(GFilterNode n)
+void LFilterItem::SetNode(LFilterNode n)
 {
 	if (d->Node != n)
 	{
@@ -1194,7 +1194,7 @@ void LFilterView::SetDefault()
 	d->Tree->Insert(new LFilterItem(d));
 }
 
-LFilterItem *LFilterView::Create(GFilterNode Node)
+LFilterItem *LFilterView::Create(LFilterNode Node)
 {
 	return new LFilterItem(d, Node);
 }

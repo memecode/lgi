@@ -646,6 +646,9 @@ const char *LColourSpaceToString(LColourSpace cs)
 		"?",
 	};
 
+	if (cs == CsNone)
+		return "CsNone";
+
 	char *start = Buf[Cur++], *s = start;
 	int total = 0;
 	bool first = true;

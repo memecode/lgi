@@ -751,7 +751,7 @@ public:
 class LgiClass LPath
 {
 public:
-	class Matrix : public GMatrix<double, 3, 3>
+	class Matrix : public LMatrix<double, 3, 3>
 	{
 	public:
 		Matrix()
