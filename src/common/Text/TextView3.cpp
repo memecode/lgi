@@ -3804,38 +3804,38 @@ void LTextView3::OnMouseMove(LMouse &m)
 {
 	m.x += ScrollX;
 
+	if (!IsCapturing())
+		return;
+
 	ssize_t Hit = HitText(m.x, m.y, true);
-	if (IsCapturing())
+	if (d->WordSelectMode < 0)
 	{
-		if (d->WordSelectMode < 0)
+		SetCaret(Hit, m.Left());
+	}
+	else
+	{
+		ssize_t Min = Hit < d->WordSelectMode ? Hit : d->WordSelectMode;
+		ssize_t Max = Hit > d->WordSelectMode ? Hit : d->WordSelectMode;
+
+		for (SelStart = Min; SelStart > 0; SelStart--)
 		{
-			SetCaret(Hit, m.Left());
+			if (strchr(SelectWordDelim, Text[SelStart]))
+			{
+				SelStart++;
+				break;
+			}
 		}
-		else
+
+		for (SelEnd = Max; SelEnd < Size; SelEnd++)
 		{
-			ssize_t Min = Hit < d->WordSelectMode ? Hit : d->WordSelectMode;
-			ssize_t Max = Hit > d->WordSelectMode ? Hit : d->WordSelectMode;
-
-			for (SelStart = Min; SelStart > 0; SelStart--)
+			if (strchr(SelectWordDelim, Text[SelEnd]))
 			{
-				if (strchr(SelectWordDelim, Text[SelStart]))
-				{
-					SelStart++;
-					break;
-				}
+				break;
 			}
-
-			for (SelEnd = Max; SelEnd < Size; SelEnd++)
-			{
-				if (strchr(SelectWordDelim, Text[SelEnd]))
-				{
-					break;
-				}
-			}
-
-			Cursor = SelEnd;
-			Invalidate();
 		}
+
+		Cursor = SelEnd;
+		Invalidate();
 	}
 }
 
