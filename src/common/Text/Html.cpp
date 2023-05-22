@@ -160,6 +160,8 @@ public:
 	int NextCtrlId;
 	uint64 SetScrollTime;
 	int DeferredLoads;
+	int FlowedTags = 0;
+	LHashTbl<StrKey<char,false>, uint64_t> FlowTimes;
 
 	bool IsParsing;
 	bool IsLoaded;
@@ -5294,6 +5296,10 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 	if (Disp == DispNone)
 		return;
 
+	Html->d->FlowedTags++;
+	auto FlowStart = LMicroTime();
+	uint64_t FlowTime = 0;
+
 	LFont *f = GetFont();
 	LFlowRegion Local(*Flow);
 	bool Restart = true;
@@ -5715,6 +5721,8 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 	// Flow children
 	PostFlowAlign.Length(0);
 
+	FlowTime += LMicroTime() - FlowStart;
+
 	for (unsigned i=0; i<Children.Length(); i++)
 	{
 		LTag *t = ToTag(Children[i]);
@@ -5750,6 +5758,8 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 			Flow->x2 -= MIN(t->Size.x, Flow->X());
 		}
 	}
+
+	FlowStart = LMicroTime();
 
 	LCss::LengthType XAlign = GetAlign(true);
 	int FlowSz = Flow->Width();
@@ -5991,6 +6001,10 @@ void LTag::OnFlow(LFlowRegion *Flow, uint16 Depth)
 	{
 		Flow->InBody--;
 	}
+
+	FlowTime += LMicroTime() - FlowStart;
+	auto CurFlowTotal = Html->d->FlowTimes.Find(Tag);
+	Html->d->FlowTimes.Add(Tag ? Tag : "NONE", CurFlowTotal + FlowTime);
 }
 
 bool LTag::PeekTag(char *s, char *tag)
@@ -7500,7 +7514,14 @@ LPoint LHtml::Layout(bool ForceLayout)
 		LFlowRegion f(this, Client, false);
 
 		// Flow text, width is different
+		d->FlowedTags = 0;
 		Tag->OnFlow(&f, 0);
+
+		for (auto p: d->FlowTimes)
+		{
+			LgiTrace("%s=" LPrintfInt64 "\n", p.key, p.value);
+		}
+
 		ViewWidth = Client.X();
 		d->Content.x = f.MAX.x + 1;
 		d->Content.y = f.MAX.y + 1;
@@ -7544,7 +7565,8 @@ LPointF LHtml::GetDpiScale()
 
 void LHtml::OnPaint(LSurface *ScreenDC)
 {
-	// LProfile Prof("LHtml::OnPaint");
+	LProfile Prof("LHtml::OnPaint");
+	Prof.HideResultsIfBelow(200);
 
 	#if HTML_USE_DOUBLE_BUFFER
 	LRect Client = GetClient();
@@ -7557,6 +7579,7 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 			{
 				int Sx = Client.X() + 10;
 				int Sy = Client.Y() + 10;
+				Prof.Add("CreateMemDC");
 				if (!MemDC->Create(Sx, Sy, System32BitColourSpace))
 				{
 					MemDC.Reset();
@@ -7586,6 +7609,7 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 		Offset.x, Offset.y);
 	#endif
 
+	Prof.Add("Background");
 	LColour cBack;
 	if (GetCss())
 	{
@@ -7600,10 +7624,12 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 
 	if (Tag)
 	{
+		Prof.Add("Layout");
 		Layout();
 
 		if (VScroll)
 		{
+			Prof.Add("VScroll");
 			int LineY = GetFont()->GetHeight();
 			int Vs = (int)VScroll->Value();
 			pDC->SetOrigin(0, Vs * LineY);
@@ -7613,8 +7639,10 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 		PaintStart = LCurrentTime();
 		d->MaxPaintTimeout = false;
 
+		Prof.Add("TagPaint.Before");
 		Tag->OnPaint(pDC, InSelection, 0);
 
+		Prof.Add("TagPaint.After");
 		if (d->MaxPaintTimeout)
 		{
 			LgiTrace("%s:%i - Html max paint time reached: %i ms.\n", _FL, LCurrentTime() - PaintStart);
@@ -7625,6 +7653,7 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 	if (MemDC)
 	{
 		pDC->SetOrigin(0, 0);
+		Prof.Add("Blt");
 		ScreenDC->Blt(0, 0, MemDC);
 	}
 	#endif
@@ -7632,6 +7661,7 @@ void LHtml::OnPaint(LSurface *ScreenDC)
 	if (d->OnLoadAnchor && VScroll)
 	{
 		LAutoString a = d->OnLoadAnchor;
+		Prof.Add("GotoAnchor");
 		GotoAnchor(a);
 		LAssert(d->OnLoadAnchor == 0);
 	}

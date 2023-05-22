@@ -291,6 +291,9 @@ public:
 
 		bool IsLoopBack()
 		{
+			if (Name.Find("Loopback") >= 0)
+				return true;
+
 			return Ip4 == 0x7f000001;
 		}
 		

@@ -25,7 +25,7 @@ public:
 		LgiTrace("%s:%i - SocketInfo: %s\n", _FL, Str);
 	}
 
-	void OnError(int ErrorCode, char *ErrorDescription)
+	void OnError(int ErrorCode, const char *ErrorDescription)
 	{
 		LgiTrace("%s:%i - SocketError %i: %s\n", _FL, ErrorCode, ErrorDescription);
 	}
@@ -223,9 +223,9 @@ LHttpServer::~LHttpServer()
 	DeleteObj(d);
 }
 
-char *LHttpCallback::FormDecode(char *s)
+char *LHttpCallback::FormDecode(const char *s)
 {
-	char *i = s, *o = s;
+	const char *i = s, *o = s;
 	while (*i)
 	{
 		if (*i == '+')
@@ -248,10 +248,10 @@ char *LHttpCallback::FormDecode(char *s)
 	return s;
 }
 
-char *LHttpCallback::HtmlEncode(char *s)
+char *LHttpCallback::HtmlEncode(const char *s)
 {
 	LStringPipe p;
-	char *e = "<>";
+	const char *e = "<>";
 
 	while (s && *s)
 	{
@@ -272,7 +272,7 @@ char *LHttpCallback::HtmlEncode(char *s)
 	return p.NewStr();
 }
 
-bool LHttpCallback::ParseHtmlWithDom(LVariant &Out, GDom *Dom, char *Html)
+bool LHttpCallback::ParseHtmlWithDom(LVariant &Out, LDom *Dom, const char *Html)
 {
 	if (!Dom || !Html)
 		return false;

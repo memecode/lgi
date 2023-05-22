@@ -8,11 +8,11 @@ class LHttpCallback
 public:
 	virtual ~LHttpCallback() {}
 
-	char *FormDecode(char *s);
-	char *HtmlEncode(char *s);
-	bool ParseHtmlWithDom(LVariant &Out, GDom *Dom, char *Html);
+	char *FormDecode(const char *s);
+	char *HtmlEncode(const char *s);
+	bool ParseHtmlWithDom(LVariant &Out, LDom *Dom, const char *Html);
 
-	virtual int OnRequest(char *Action, char *Uri, char *Headers, char *Body, LVariant &Out) = 0;
+	virtual int OnRequest(const char *Action, constchar *Uri, constchar *Headers, constchar *Body, LVariant &Out) = 0;
 };
 
 class LHttpServer

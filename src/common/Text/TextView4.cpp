@@ -5535,6 +5535,8 @@ inline void StructIo(LStructuredIo &io, LTextView4::LTextLine &s)
 
 	io.Int(s.Start, "start");
 	io.Int(s.Len, "len");
+	io.String(s.File, Strlen(s.File), "file");
+	io.Int(s.Line, "line");
 	StructIo(io, s.r);
 	StructIo(io, s.c);
 	StructIo(io, s.Back);
