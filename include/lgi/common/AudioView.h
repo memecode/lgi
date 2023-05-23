@@ -14,7 +14,7 @@
 
 #include "ao.h"
 
-#define CC(code) LgiSwap32(code)
+#define CC(code) Lgi4CC(code)
 #define ERROR_ZERO_SAMPLE_COUNT 5
 
 struct int24_t
@@ -369,9 +369,10 @@ public:
 			id = init;
 		}
 
-		bool Is(uint32_t atom)
+		bool Is(const char *cc)
 		{
-			return LgiSwap32(id) == atom;
+			if (!cc) return false;
+			return memcmp(cc, str, 4) == 0;
 		}
 	};
 
@@ -388,21 +389,21 @@ public:
 			
 			// printf("Id='%4.4s' Sz=%i\n", &Id, Sz);
 
-			if (Id.Is('FORM'))
+			if (Id.Is("FORM"))
 			{
 				Id = *p.u32++;
-				if (!Id.Is('AIFF'))
+				if (!Id.Is("AIFF"))
 					return false;
 			}
-			else if (Id.Is('COMT'))
+			else if (Id.Is("COMT"))
 			{
 				p.u8 += Sz + (Sz % 2);
 			}
-			else if (Id.Is('CHAN'))
+			else if (Id.Is("CHAN"))
 			{
 				p.u8 += Sz + (Sz % 2);
 			}
-			else if (Id.Is('COMM'))
+			else if (Id.Is("COMM"))
 			{
 				auto channels = *p.u16++; Channels = LgiSwap16(channels);
 				p.u32++; // long numSampleFrames
@@ -427,7 +428,7 @@ public:
 				printf("Channels=%i, Bits=%i, Rate=%i\n",
 					Channels, SampleBits, SampleRate);
 			}
-			else if (Id.Is('SSND'))
+			else if (Id.Is("SSND"))
 			{
 				p.u32 += 2;
 				DataStart = p.s8 - Audio.AddressOf();
@@ -451,7 +452,7 @@ public:
 		p.s8 = Audio.AddressOf();
 		auto end = p.s8 + Audio.Length();
 
-		if (*p.u32++ != CC('RIFF'))
+		if (*p.u32++ != CC("RIFF"))
 			return Empty();
 		auto ChunkSz = *p.u32++;
 		auto Fmt = *p.u32++;
@@ -462,7 +463,7 @@ public:
 			auto SubChunkSz = *p.u32++;
 			auto NextChunk = p.u8 + SubChunkSz;
 
-			if (SubChunkId == CC('fmt '))
+			if (SubChunkId == CC("fmt "))
 			{
 				auto AudioFmt = *p.u16++;
 				Channels = *p.u16++;
@@ -482,7 +483,7 @@ public:
 				printf("SampleRate=%i\n", SampleRate);
 				printf("SampleBits=%i\n", SampleBits);
 			}
-			else if (SubChunkId == CC('data'))
+			else if (SubChunkId == CC("data"))
 			{
 				DataStart = p.s8 - Audio.AddressOf();
 				

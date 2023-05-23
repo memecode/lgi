@@ -5552,6 +5552,7 @@ void LTextView4::SaveLog(const char *File)
 
 	LStructuredLog log(File, true);
 	auto &io = log.GetIo();
+	auto lines = LogLines();
 
 	for (auto e: Edits)
 		log.Log(*e);
@@ -5562,7 +5563,7 @@ void LTextView4::SaveLog(const char *File)
 	log.Log("Size:", Size);
 	io.String(Text, Size, "Text");
 	io.String(d->LastError, "LastError");
-	io.String(LogLines(), "Lines");
+	io.String(lines, "Lines");
 	FirstErrorLog = false;
 }
 
