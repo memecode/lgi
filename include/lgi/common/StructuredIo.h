@@ -236,7 +236,7 @@ LgiTrace("Decode(%i @ %i,%i sz=%i) after=%i\n", type, (int)type_addr, (int)data_
 
 	bool Flush(LStream *s)
 	{
-		if (!s || !Write)
+		if (!s || !Write || Length() == 0)
 			return false;
 
 		(*this)[Pos++] = EndRow;

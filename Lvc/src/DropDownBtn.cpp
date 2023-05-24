@@ -126,8 +126,9 @@ bool DropDownBtn::SetList(int EditCtrl, LString::Array a)
 	{
 		LListItem *i = new LListItem;
 		i->SetText(s);
-		Pu->Lst->Insert(i);
+		Pu->Lst->Insert(i, -1, false);
 	}
+	Pu->Lst->UpdateAllItems();
 
 	return true;
 }

@@ -79,6 +79,11 @@ public:
 		v = 0;
 	}
 
+	~ProgressListItem()
+	{
+		int asd=0;
+	}
+
 	int64_t Value() { return v; }
 	void Value(int64_t val) { v = val; Update(); }
 	void OnPaint(LItem::ItemPaintCtx &Ctx)
@@ -280,7 +285,8 @@ SSH_LOG("waitPrompt data:", *Data);
 		}
 	}
 
-	DeleteObj(Prog);
+	if (d->Commits->HasItem(Prog))
+		DeleteObj(Prog); // Something else may delete it before we have a chance to.
 	return true;
 }
 
