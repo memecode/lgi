@@ -223,15 +223,18 @@ int LFindInFiles::OnNotify(LViewI *Ctrl, LNotification n)
 	{
 		case IDC_WHERE_BROWSE:
 		{
-			LFileSelect s;
-			s.Parent(this);
-			if (s.Open())
+			auto s = new LFileSelect(this);
+			s->Open([this](auto s, auto ok)
 			{
-				LFile::Path p = s.Name();
-				if (p.IsFile())
-					p--;
-				SetCtrlName(IDC_WHERE, p.GetFull());
-			}
+				if (ok)
+				{
+					LFile::Path p = s->Name();
+					if (p.IsFile())
+						p--;
+					SetCtrlName(IDC_WHERE, p.GetFull());
+				}
+				delete s;
+			});
 			break;
 		}
 		case IDOK:

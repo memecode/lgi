@@ -947,7 +947,7 @@ void LTextView4::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 				l->r.x2 = l->r.x1;
 			}
 
-			LAssert(l->Len > 0);
+			LAssert(l->Len + l->NewLine > 0);
 			Line.Add(l);
 
 			if (*e == '\n')

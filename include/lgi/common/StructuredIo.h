@@ -207,7 +207,8 @@ auto type_addr = p.u8 - AddressOf();
 
 		if (type == EndRow)
 		{
-			callback(type, 0, NULL, NULL);
+			if (callback)
+				callback(type, 0, NULL, NULL);
 			Pos = p.u8 - AddressOf();
 			return true;
 		}
@@ -224,7 +225,8 @@ auto type_addr = p.u8 - AddressOf();
 #if DEBUG_STRUCT_IO
 auto data_addr = p.u8 - AddressOf();
 #endif
-		callback(type, data_size, p.u8, name);
+		if (callback)
+			callback(type, data_size, p.u8, name);
 		p.u8 += data_size;
 
 		Pos = p.u8 - AddressOf();

@@ -399,7 +399,6 @@
     <ClInclude Include="..\include\lgi\common\CheckBox.h" />
     <ClInclude Include="..\include\lgi\common\ClipBoard.h" />
     <ClInclude Include="..\include\lgi\common\Colour.h" />
-    <ClInclude Include="..\include\lgi\common\ColourSelect.h" />
     <ClInclude Include="..\include\lgi\common\ColourSpace.h" />
     <ClInclude Include="..\include\lgi\common\Com.h" />
     <ClInclude Include="..\include\lgi\common\Combo.h" />
@@ -507,7 +506,6 @@
     <ClInclude Include="..\include\lgi\common\Mru.h" />
     <ClInclude Include="..\include\lgi\common\Mutex.h" />
     <ClInclude Include="..\include\lgi\common\Net.h" />
-    <ClInclude Include="..\include\lgi\common\NetTools.h" />
     <ClInclude Include="..\include\lgi\common\Notifications.h" />
     <ClInclude Include="..\include\lgi\common\OAuth2.h" />
     <ClInclude Include="..\include\lgi\common\OpenGL.h" />
@@ -600,6 +598,7 @@
     <ClInclude Include="..\include\lgi\common\Unicode.h" />
     <ClInclude Include="..\include\lgi\common\UnicodeString.h" />
     <ClInclude Include="..\include\lgi\common\UnrolledList.h" />
+    <ClInclude Include="..\include\lgi\common\Uri.h" />
     <ClInclude Include="..\include\lgi\common\Variant.h" />
     <ClInclude Include="..\include\lgi\common\vCard-vCal.h" />
     <ClInclude Include="..\include\lgi\common\View.h" />

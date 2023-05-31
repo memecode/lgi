@@ -113,9 +113,6 @@
     <Filter Include="Source Files\Network">
       <UniqueIdentifier>{258aef64-8cd0-4838-8131-147196656a99}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Interface">
-      <UniqueIdentifier>{814a5d81-3fd5-461b-a4a3-cda593ea404b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{5fe450b8-5fa9-440e-9fb0-03860b3548d0}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
@@ -137,9 +134,6 @@
     <ClCompile Include="..\src\common\Widgets\Bitmap.cpp">
       <Filter>Source Files\Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Widgets\Box.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\common\Widgets\Button.cpp">
       <Filter>Source Files\Widgets</Filter>
     </ClCompile>
@@ -150,12 +144,6 @@
       <Filter>Source Files\Widgets\Native Windows</Filter>
     </ClCompile>
     <ClCompile Include="..\src\common\Widgets\CheckBox.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\Gdc2\Tools\ColourReduce.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\Widgets\Combo.cpp">
       <Filter>Source Files\Widgets</Filter>
     </ClCompile>
     <ClCompile Include="..\src\common\Gdc2\Font\Charset.cpp">
@@ -199,9 +187,6 @@
     </ClCompile>
     <ClCompile Include="..\src\common\Lgi\DropFiles.cpp">
       <Filter>Source Files\Core\Drag and Drop</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\Widgets\Edit.cpp">
-      <Filter>Source Files\Widgets</Filter>
     </ClCompile>
     <ClCompile Include="..\src\win\Widgets\Edit_Win.cpp">
       <Filter>Source Files\Widgets\Native Windows</Filter>
@@ -260,9 +245,6 @@
     <ClCompile Include="..\src\common\Lgi\Input.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Widgets\ItemContainer.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\win\Lgi\Layout.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
@@ -277,9 +259,6 @@
     </ClCompile>
     <ClCompile Include="..\src\common\Lgi\Library.cpp">
       <Filter>Source Files\Core\Libraries</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\Widgets\List.cpp">
-      <Filter>Source Files\Widgets</Filter>
     </ClCompile>
     <ClCompile Include="..\src\common\Lgi\LMsg.cpp">
       <Filter>Source Files\Dialogs</Filter>
@@ -332,12 +311,6 @@
     <ClCompile Include="..\src\win\INet\MibAccess.cpp">
       <Filter>Source Files\Network</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Lgi\Mru.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\Lgi\Mutex.cpp">
-      <Filter>Source Files\Core\Threads</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\common\Net\Net.cpp">
       <Filter>Source Files\Network</Filter>
     </ClCompile>
@@ -380,9 +353,6 @@
     <ClCompile Include="..\src\common\Lgi\Rand.cpp">
       <Filter>Source Files\General</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Gdc2\Rect.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\common\Resource\Res.cpp">
       <Filter>Source Files\Core\Resources</Filter>
     </ClCompile>
@@ -398,20 +368,11 @@
     <ClCompile Include="..\src\win\General\ShowFileProp_Win.cpp">
       <Filter>Source Files\Widgets\Native Windows</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Widgets\Slider.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\win\Widgets\Slider_Win.cpp">
       <Filter>Source Files\Widgets\Native Windows</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Widgets\Splitter.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\common\Widgets\StatusBar.cpp">
       <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\Lgi\Stream.cpp">
-      <Filter>Source Files\Core\Memory Subsystem</Filter>
     </ClCompile>
     <ClCompile Include="..\src\common\Text\String.cpp">
       <Filter>Source Files\Text</Filter>
@@ -424,12 +385,6 @@
     </ClCompile>
     <ClCompile Include="..\src\common\Gdc2\Surface.cpp">
       <Filter>Source Files\Graphics\Surfaces</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\Widgets\TableLayout.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\Widgets\TabView.cpp">
-      <Filter>Source Files\Widgets</Filter>
     </ClCompile>
     <ClCompile Include="..\src\common\Widgets\TextLabel.cpp">
       <Filter>Source Files\Widgets</Filter>
@@ -461,9 +416,6 @@
     <ClCompile Include="..\src\common\Lgi\TrayIcon.cpp">
       <Filter>Source Files\Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Widgets\Tree.cpp">
-      <Filter>Source Files\Widgets</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\common\Gdc2\Font\TypeFace.cpp">
       <Filter>Source Files\Graphics\Font</Filter>
     </ClCompile>
@@ -478,9 +430,6 @@
     </ClCompile>
     <ClCompile Include="..\src\common\Text\Utf8.cpp">
       <Filter>Source Files\Text</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\Lgi\Variant.cpp">
-      <Filter>Source Files\General</Filter>
     </ClCompile>
     <ClCompile Include="..\src\win\Lgi\View.cpp">
       <Filter>Source Files\Core</Filter>
@@ -497,30 +446,60 @@
     <ClCompile Include="..\src\common\Text\XmlTree.cpp">
       <Filter>Source Files\Text</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\common\Widgets\Tree.cpp">
+      <Filter>Source Files\Widgets\Container</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Widgets\List.cpp">
+      <Filter>Source Files\Widgets\Container</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Widgets\Box.cpp">
+      <Filter>Source Files\Widgets\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Widgets\TableLayout.cpp">
+      <Filter>Source Files\Widgets\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Widgets\Splitter.cpp">
+      <Filter>Source Files\Widgets\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Widgets\Slider.cpp">
+      <Filter>Source Files\Widgets\Xp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Widgets\Edit.cpp">
+      <Filter>Source Files\Widgets\Xp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Widgets\Combo.cpp">
+      <Filter>Source Files\Widgets\Xp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Widgets\TabView.cpp">
+      <Filter>Source Files\Widgets\Layout</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Widgets\ItemContainer.cpp">
+      <Filter>Source Files\Widgets\Container</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Lgi\Mutex.cpp">
+      <Filter>Source Files\Core\Mutex</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Lgi\Stream.cpp">
+      <Filter>Source Files\Core\Stream</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Lgi\Variant.cpp">
+      <Filter>Source Files\Core\Variant</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Lgi\Mru.cpp">
+      <Filter>Source Files\General\Mru</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Tools\ColourReduce.cpp">
+      <Filter>Source Files\Graphics\Colour Reduction</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\common\Gdc2\Rect.cpp">
+      <Filter>Source Files\Graphics\Rect/Region</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\lgi\common\Gdc2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\GdiLeak.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\LgiRes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Res.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\About.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\AnonPipe.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\App.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Array.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\AudioView.h">
@@ -529,22 +508,10 @@
     <ClInclude Include="..\include\lgi\common\AutoPtr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Base64.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Bitmap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\Bits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Box.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\Browser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Button.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\CairoSurface.h">
@@ -556,34 +523,10 @@
     <ClInclude Include="..\include\lgi\common\Capabilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Charset.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\CheckBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\ClipBoard.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Colour.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\ColourSelect.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\ColourSpace.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\Com.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Combo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\Console.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Containers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\ControlTree.h">
@@ -607,9 +550,6 @@
     <ClInclude Include="..\include\lgi\common\DataGrid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\DateTime.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\DateTimeCtrls.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -628,16 +568,10 @@
     <ClInclude Include="..\include\lgi\common\DiskBTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\DisplayString.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\Dns.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\DocApp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\DocView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\Dom.h">
@@ -646,16 +580,7 @@
     <ClInclude Include="..\include\lgi\common\DomFields.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\DragAndDrop.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\DrawListSurface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\DropFiles.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Edit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\Emoji.h">
@@ -673,19 +598,10 @@
     <ClInclude Include="..\include\lgi\common\FfmpegFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\File.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\FileAssoc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\FileSelect.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\FileTransferProgress.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Filter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\FilterUi.h">
@@ -694,28 +610,10 @@
     <ClInclude Include="..\include\lgi\common\FindInFiles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\FindReplaceDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Font.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\FontCache.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\FontSelect.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\Ftp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\GdcTools.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\Graph.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Growl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\HashDom.h">
@@ -763,19 +661,10 @@
     <ClInclude Include="..\include\lgi\common\ImageList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Input.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\ItemContainer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\Jpeg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\Json.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Layout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\Ldap.h">
@@ -791,9 +680,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\Lgi.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\LgiClasses.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\LgiCommon.h">
@@ -820,25 +706,7 @@
     <ClInclude Include="..\include\lgi\common\QuickSort.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\LgiString.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\LgiUiBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Library.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\LibraryUtils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\List.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\ListItemCheckBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\ListItemRadioBtn.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\LMallocArray.h">
@@ -862,16 +730,7 @@
     <ClInclude Include="..\include\lgi\common\Mdi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Mem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\MemoryPool.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Menu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\MenuImpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\Midi.h">
@@ -881,18 +740,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\MonthView.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Mru.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Mutex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Net.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\NetTools.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\Notifications.h">
@@ -907,25 +754,13 @@
     <ClInclude Include="..\include\lgi\common\OpenSSLSocket.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\OptionsFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\Palette.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Panel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\ParseCpp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\ParsePart.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Password.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Path.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\Permissions.h">
@@ -937,15 +772,6 @@
     <ClInclude Include="..\include\lgi\common\Point.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Popup.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\PopupList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Printer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\Process.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -953,9 +779,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\Progress.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\ProgressDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\ProgressStatusPane.h">
@@ -967,19 +790,10 @@
     <ClInclude Include="..\include\lgi\common\Properties.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\RadioGroup.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\Range.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\Ranges.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Rect.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\RectF.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\RefCount.h">
@@ -1009,9 +823,6 @@
     <ClInclude Include="..\include\lgi\common\Scripting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\ScrollBar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\SegmentTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1019,15 +830,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\SharedMemory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\SkinEngine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\SkinGel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Slider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\Smb.h">
@@ -1039,16 +841,10 @@
     <ClInclude Include="..\include\lgi\common\SpellCheck.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Splitter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\Ssh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\Stat.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\StatusBar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\Store.h">
@@ -1072,16 +868,10 @@
     <ClInclude Include="..\include\lgi\common\StoreConvert1To2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Stream.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\StreamConcat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\StringClass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\StringLayout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\StructuredIo.h">
@@ -1090,16 +880,7 @@
     <ClInclude Include="..\include\lgi\common\StructuredLog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\SubProcess.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\TableDb.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\TableLayout.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\TabView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\Tag.h">
@@ -1120,64 +901,22 @@
     <ClInclude Include="..\include\lgi\common\TextFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\TextLabel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\TextLog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\TextView3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\TextView4.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Thread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\ThreadEvent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\Tnef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Token.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\ToolBar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\ToolTabBar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\ToolTip.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\TrayIcon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Tree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\Undo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Unicode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\UnicodeString.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\UnrolledList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Variant.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\vCard-vCal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\View.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\WebDav.h">
@@ -1189,16 +928,7 @@
     <ClInclude Include="..\include\lgi\common\Widgets.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\lgi\common\Window.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\lgi\common\WordStore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\XmlTree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\lgi\common\XmlTreeUi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\include\lgi\common\YearView.h">
@@ -1216,14 +946,278 @@
     <ClInclude Include="..\include\lgi\common\ZoomView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\common\Hash\md5\md5.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\include\lgi\common\TextView4.h">
+      <Filter>Source Files\Widgets</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\common\Hash\sha1\sha1.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\include\lgi\common\TextView3.h">
+      <Filter>Source Files\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Bitmap.h">
+      <Filter>Source Files\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Button.h">
+      <Filter>Source Files\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\CheckBox.h">
+      <Filter>Source Files\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Panel.h">
+      <Filter>Source Files\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Popup.h">
+      <Filter>Source Files\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\PopupList.h">
+      <Filter>Source Files\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\ProgressDlg.h">
+      <Filter>Source Files\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\RadioGroup.h">
+      <Filter>Source Files\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\ScrollBar.h">
+      <Filter>Source Files\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\StatusBar.h">
+      <Filter>Source Files\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\TextLabel.h">
+      <Filter>Source Files\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\ToolBar.h">
+      <Filter>Source Files\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\ToolTip.h">
+      <Filter>Source Files\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\TrayIcon.h">
+      <Filter>Source Files\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Tree.h">
+      <Filter>Source Files\Widgets\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\ListItemRadioBtn.h">
+      <Filter>Source Files\Widgets\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\ListItemCheckBox.h">
+      <Filter>Source Files\Widgets\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\List.h">
+      <Filter>Source Files\Widgets\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Box.h">
+      <Filter>Source Files\Widgets\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\TableLayout.h">
+      <Filter>Source Files\Widgets\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Splitter.h">
+      <Filter>Source Files\Widgets\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Slider.h">
+      <Filter>Source Files\Widgets\Xp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Edit.h">
+      <Filter>Source Files\Widgets\Xp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Combo.h">
+      <Filter>Source Files\Widgets\Xp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\TabView.h">
+      <Filter>Source Files\Widgets\Layout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Charset.h">
+      <Filter>Source Files\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\LgiString.h">
+      <Filter>Source Files\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Token.h">
+      <Filter>Source Files\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Unicode.h">
+      <Filter>Source Files\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\UnicodeString.h">
+      <Filter>Source Files\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\XmlTree.h">
+      <Filter>Source Files\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\XmlTreeUi.h">
+      <Filter>Source Files\Text</Filter>
     </ClInclude>
     <ClInclude Include="..\src\win\INet\MibAccess.h">
-      <Filter>Header Files</Filter>
+      <Filter>Source Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Net.h">
+      <Filter>Source Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Uri.h">
+      <Filter>Source Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\App.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\DocView.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\ItemContainer.h">
+      <Filter>Source Files\Widgets\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Layout.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Printer.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\View.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Window.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\DateTime.h">
+      <Filter>Source Files\Core\DateTime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\DragAndDrop.h">
+      <Filter>Source Files\Core\Drag and Drop</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\DropFiles.h">
+      <Filter>Source Files\Core\Drag and Drop</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\File.h">
+      <Filter>Source Files\Core\File</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Library.h">
+      <Filter>Source Files\Core\Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\LibraryUtils.h">
+      <Filter>Source Files\Core\Libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Containers.h">
+      <Filter>Source Files\Core\Memory Subsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Mem.h">
+      <Filter>Source Files\Core\Memory Subsystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Menu.h">
+      <Filter>Source Files\Core\Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\MenuImpl.h">
+      <Filter>Source Files\Core\Menus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Mutex.h">
+      <Filter>Source Files\Core\Mutex</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\SubProcess.h">
+      <Filter>Source Files\Core\Process</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\LgiRes.h">
+      <Filter>Source Files\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Res.h">
+      <Filter>Source Files\Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\SkinEngine.h">
+      <Filter>Source Files\Core\Skin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\SkinGel.h">
+      <Filter>Source Files\Core\Skin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Stream.h">
+      <Filter>Source Files\Core\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Thread.h">
+      <Filter>Source Files\Core\Threads</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\ThreadEvent.h">
+      <Filter>Source Files\Core\Threads</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Variant.h">
+      <Filter>Source Files\Core\Variant</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\LgiClasses.h">
+      <Filter>Source Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\FileSelect.h">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\FindReplaceDlg.h">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Input.h">
+      <Filter>Source Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\ClipBoard.h">
+      <Filter>Source Files\General\Clipboard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Growl.h">
+      <Filter>Source Files\General\Growl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\common\Hash\md5\md5.h">
+      <Filter>Source Files\General\Hash</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\common\Hash\sha1\sha1.h">
+      <Filter>Source Files\General\Hash</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Mru.h">
+      <Filter>Source Files\General\Mru</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Base64.h">
+      <Filter>Source Files\General</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\OptionsFile.h">
+      <Filter>Source Files\General</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Password.h">
+      <Filter>Source Files\General</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Filter.h">
+      <Filter>Source Files\Graphics\Filters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\DisplayString.h">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Font.h">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\FontCache.h">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\FontSelect.h">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\StringLayout.h">
+      <Filter>Source Files\Graphics\Font</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Rect.h">
+      <Filter>Source Files\Graphics\Rect/Region</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\RectF.h">
+      <Filter>Source Files\Graphics\Rect/Region</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Colour.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\ColourSpace.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Gdc2.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\GdcTools.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\GdiLeak.h">
+      <Filter>Source Files\Graphics\Gdi Leak</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Path.h">
+      <Filter>Source Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\lgi\common\Array.h">
+      <Filter>Source Files\Core\Memory Subsystem</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
