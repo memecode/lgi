@@ -675,7 +675,7 @@ bool LRichTextEdit::Paste()
 {
 	LClipBoard Cb(this);
 		
-	return Cb.Bitmap([this](auto bmp, auto str)
+	Cb.Bitmap([this](auto bmp, auto str)
 	{
 		LString Html;
 		LAutoWString Text;
@@ -802,6 +802,8 @@ bool LRichTextEdit::Paste()
 
 		return d->AddTrans(Trans);
 	});
+
+	return true;
 }
 
 bool LRichTextEdit::ClearDirty(bool Ask, const char *FileName)
