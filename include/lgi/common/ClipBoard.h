@@ -24,6 +24,7 @@ public:
 	typedef uint32_t FormatType;
 	typedef std::function<void(LAutoPtr<LSurface> Img, LString Err)> BitmapCb;
 	typedef std::function<void(LString Data, LString Err)> BinaryCb;
+	typedef std::function<void(LString::Array Files, LString Err)> FilesCb;
 	static LString FmtToStr(FormatType Fmt);
 	static FormatType StrToFmt(LString Fmt);
 
@@ -54,7 +55,7 @@ public:
 	void Bitmap(BitmapCb Callback);
 
 	// Files
-	LString::Array Files();
+	void Files(FilesCb Callback);
 	bool Files(LString::Array &Paths, bool AutoEmpty = true);
 
 	// Binary
