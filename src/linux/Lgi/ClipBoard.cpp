@@ -203,7 +203,7 @@ bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 	return true; // have to assume it worked...
 }
 
-void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LClipBoard::BitmapCb *Cb)
+static void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LClipBoard::BitmapCb *Cb)
 {
 	auto chan = gdk_pixbuf_get_n_channels(Img);
 	auto alpha = gdk_pixbuf_get_has_alpha(Img);
@@ -301,35 +301,14 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LClipBoard:
 	delete Cb;
 }
 
-bool LClipBoard::Bitmap(LClipBoard::BitmapCb Callback)
+void LClipBoard::Bitmap(LClipBoard::BitmapCb Callback)
 {
 	if (!Callback)
-		return false;
+		return;
 		
 	gtk_clipboard_request_image(d->c, (GtkClipboardImageReceivedFunc) ClipboardImageReceived, new LClipBoard::BitmapCb(Callback));
-	return true;
 }
 		
-LAutoPtr<LSurface> LClipBoard::Bitmap()
-{
-	auto Ts = LCurrentTime();
-	LString Error;
-	LAutoPtr<LSurface> Img;
-	
-	LClipBoard::BitmapCb Callback = [&](auto img, auto err)
-	{
-		Img = img;
-		Error = err;
-	};
-
-	gtk_clipboard_request_image(d->c, (GtkClipboardImageReceivedFunc) ClipboardImageReceived, new LClipBoard::BitmapCb(Callback));
-
-	while (!Error && !Img && (LCurrentTime() - Ts) < LGI_RECEIVE_CLIPBOARD_TIMEOUT)
-		LYield();
-				
-	return Img;
-}
-
 void LgiClipboardGetFunc(GtkClipboard *clipboard,
                         GtkSelectionData *data,
                         guint info,
@@ -444,9 +423,9 @@ struct ReceiveData
 	ssize_t *Len;
 };
 
-void LgiClipboardReceivedFunc(GtkClipboard *clipboard,
-                             GtkSelectionData *data,
-                             gpointer user_data)
+static void ClipboardBinaryReceived(GtkClipboard *clipboard,
+            	                 	GtkSelectionData *data,
+                	             	gpointer user_data)
 {
 	ReceiveData *r = (ReceiveData*)	user_data;
 	if (!data || !r)
@@ -479,30 +458,39 @@ void LgiClipboardReceivedFunc(GtkClipboard *clipboard,
 	#endif
 }
 
-bool LClipBoard::Binary(FormatType Format, LAutoPtr<uint8_t,true> &Ptr, ssize_t *Len)
+void LClipBoard::Binary(FormatType Format, BinaryCb Callback)
 {
-	ReceiveData r = {&Ptr, Len};
+	if (!Callback)
+		return;
+		
+	gtk_clipboard_request_contents(
+		// The clipboard
+		d->c,
+		// The atom to return
+        gdk_atom_intern(LGI_CLIP_BINARY, false),
+        // Lambda callback to receive the data
+        [](auto clipboard, auto data, auto ptr)
+        {
+        	LAutoPtr<BinaryCb> cb((BinaryCb*)ptr);
+        	
+			auto Bytes = gtk_selection_data_get_length(data);
+			if (Bytes < 0)
+			{
+				LgiTrace("%s:%i - No data? (%i)\n", _FL, Bytes);
+				return;
+			}
 
-	gtk_clipboard_request_contents(	d->c,
-	                                gdk_atom_intern(LGI_CLIP_BINARY, false),
-	                                LgiClipboardReceivedFunc,
-	                                &r);
-                                
+			LString s;
+			if (!s.Length(Bytes))
+			{
+				LgiTrace("%s:%i - Alloc failed %i\n", _FL, Bytes);
+				return;
+			}
 
-	uint64 Start = LCurrentTime();
-	do
-	{
-		if (r.Ptr->Get())
-			break;
-		LYield();
-		LSleep(1);
-	}
-	while (LCurrentTime() - Start > LGI_RECEIVE_CLIPBOARD_TIMEOUT);
-
-	#if DEBUG_CLIPBOARD
-	printf("%s:%i - LClipBoard::Binary %p, %i\n", _FL, r.Ptr->Get(), Len ? *Len : -1);
-	#endif
-
-	return r.Ptr->Get() != NULL;
+			memcpy(s.Get(), gtk_selection_data_get_data(data), Bytes);
+			(*cb)(s, LString());
+        },
+        // Copy of the user's callback
+        new BinaryCb(Callback));
 }
 

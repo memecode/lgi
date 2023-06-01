@@ -22,7 +22,8 @@ class LgiClass LClipBoard
 public:
 	/// On windows, this equates to a CF_TEXT, CF_BITMAP, CF_DIB type #define
 	typedef uint32_t FormatType;
-	typedef std::function<void(LAutoPtr<LSurface>, LString)> BitmapCb;
+	typedef std::function<void(LAutoPtr<LSurface> Img, LString Err)> BitmapCb;
+	typedef std::function<void(LString Data, LString Err)> BinaryCb;
 	static LString FmtToStr(FormatType Fmt);
 	static FormatType StrToFmt(LString Fmt);
 
@@ -50,7 +51,7 @@ public:
 
 	// Bitmap
 	bool Bitmap(LSurface *pDC, bool AutoEmpty = true);
-	bool Bitmap(BitmapCb Callback);
+	void Bitmap(BitmapCb Callback);
 
 	// Files
 	LString::Array Files();
@@ -58,14 +59,12 @@ public:
 
 	// Binary
 	bool Binary(FormatType Format, uint8_t *Ptr, ssize_t Len, bool AutoEmpty);	// Set
-	bool Binary(FormatType Format, LAutoPtr<uint8_t,true> &Ptr, ssize_t *Len);	// Get
+	void Binary(FormatType Format, BinaryCb Callback);	// Get
 
-
-	[[deprecated]] LAutoPtr<LSurface> Bitmap();
 	#if WINNATIVE
-	LAutoPtr<LSurface> ConvertFromPtr(void *Ptr);
+		LAutoPtr<LSurface> ConvertFromPtr(void *Ptr);
 	#elif defined(LINUX)
-	void FreeImage(unsigned char *pixels);
+		void FreeImage(unsigned char *pixels);
 	#endif
 };
 
