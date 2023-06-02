@@ -251,13 +251,14 @@ constexpr uint32_t Lgi4CC( char const p[5] )
 #endif
 		
 // Asserts
+#ifndef LAssert
 LgiFunc void							_lgi_assert(bool b, const char *test, const char *file, int line);
 #ifdef _DEBUG
 	#define LAssert(b)					_lgi_assert(b, #b, __FILE__, __LINE__)
 #else
 	#define LAssert(b)					((void)0)
 #endif
-
+#endif
 
 // Good ol NULLy
 #ifndef NULL

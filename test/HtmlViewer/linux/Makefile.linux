@@ -15,10 +15,12 @@ endif
 MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
 
-Flags = -fPIC -w -fno-inline -fpermissive
+CFlags = -MMD -MP -g -fPIC -fno-inline
+CppFlags = $(CFlags) -fpermissive -std=c++14
 
 ifeq ($(Build),Debug)
-	Flags += -MMD -MP -g -std=c++14
+	CFlags += -g
+	CppFlags += -g
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
@@ -35,7 +37,8 @@ ifeq ($(Build),Debug)
 		-I../../include \
 		-I../../../../../codelib/openssl/include
 else
-	Flags += -MMD -MP -s -Os -std=c++14
+	CFlags += -s -Os
+	CppFlags += -s -Os
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
 		-static-libgcc  \
@@ -84,12 +87,12 @@ Deps       := $(patsubst %.o,%.d,$(Objects))
 $(BuildDir)/%.o: %.c
 	mkdir -p $(@D)
 	echo $(notdir $<) [$(Build)]
-	$(CC) $(Inc) $(Flags) $(Defs) -c $< -o $@
+	$(CC) $(Inc) $(CFlags) $(Defs) -c $< -o $@
 
 $(BuildDir)/%.o: %.cpp
 	mkdir -p $(@D)
 	echo $(notdir $<) [$(Build)]
-	$(CPP) $(Inc) $(Flags) $(Defs) -c $< -o $@
+	$(CPP) $(Inc) $(CppFlags) $(Defs) -c $< -o $@
 
 # Target
 # Executable target
@@ -158,7 +161,6 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/LgiInc.h \
 	../../include/lgi/common/LgiInterfaces.h \
 	../../include/lgi/common/LgiMsgs.h \
-	../../include/lgi/common/LgiNetInc.h \
 	../../include/lgi/common/LgiRes.h \
 	../../include/lgi/common/LgiString.h \
 	../../include/lgi/common/LgiUiBase.h \
@@ -177,7 +179,6 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/Mru.h \
 	../../include/lgi/common/Mutex.h \
 	../../include/lgi/common/Net.h \
-	../../include/lgi/common/NetTools.h \
 	../../include/lgi/common/Notifications.h \
 	../../include/lgi/common/OAuth2.h \
 	../../include/lgi/common/OptionsFile.h \
@@ -233,6 +234,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../include/lgi/common/Unicode.h \
 	../../include/lgi/common/UnicodeString.h \
 	../../include/lgi/common/UnrolledList.h \
+	../../include/lgi/common/Uri.h \
 	../../include/lgi/common/Variant.h \
 	../../include/lgi/common/View.h \
 	../../include/lgi/common/Widgets.h \
@@ -318,7 +320,6 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/common/Net/Base64.cpp \
 	../../src/common/Net/MDStringToDigest.cpp \
 	../../src/common/Net/Net.cpp \
-	../../src/common/Net/NetTools.cpp \
 	../../src/common/Net/Uri.cpp \
 	../../src/common/Resource/LgiRes.cpp \
 	../../src/common/Resource/Res.cpp \
@@ -372,7 +373,7 @@ $(Target) : ../../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../../src/linux/Lgi/Widgets.cpp \
 	../../src/linux/Lgi/Window.cpp
 	export Build=$(Build); \
-	$(MAKE) -C ../../ -f Makefile.linux
+	$(MAKE) -C ../../ -f ./linux/Makefile.linux
 
 -include $(Objects:.o=.d)
 
@@ -385,7 +386,7 @@ clean :
 cleanall :
 	rm -rf $(BuildDir) $(Target)
 	@echo Cleaned $(BuildDir) $(Target)
-	+make -C "../../" -f "Makefile.linux" clean
+	+make -C "../../" -f ./linux/Makefile.linux clean
 
 VPATH=$(BuildDir) \
 	./ \
