@@ -122,22 +122,14 @@ bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 	return false;
 }
 
-bool LClipBoard::Bitmap(BitmapCb Callback)
+void LClipBoard::Bitmap(BitmapCb Callback)
 {
 	LAssert(!"Not impl.");
-	return false;
 }
 
-LAutoPtr<LSurface> LClipBoard::Bitmap()
+void LClipBoard::Files(FilesCb Callback)
 {
 	LAssert(!"Not impl.");
-	return LAutoPtr<LSurface>(NULL);
-}
-
-LString::Array LClipBoard::Files()
-{
-	LAssert(!"Not impl.");
-	return LString::Array();
 }
 
 bool LClipBoard::Files(LString::Array &Paths, bool AutoEmpty)
@@ -211,7 +203,7 @@ struct LBinaryData_Hdr
 }
 
 // Any of these parameters can be non-NULL if the caller doesn't care about them
-- (bool)getData:(LString*)Format data:(LAutoPtr<uint8,true>*)Ptr len:(ssize_t*)Len var:(LVariant*)Var
+- (bool)getData:(LString*)Format data:(LString*)Str var:(LVariant*)Var
 {
 	if (!self.data)
 	{
@@ -233,14 +225,13 @@ struct LBinaryData_Hdr
 		return false;
 	}
 
-	if (Len)
-		*Len = h->DataLen;
+	// h->DataLen;
 	if (Format)
 		*Format = h->Format;
 	
-	if (Ptr)
+	if (Str)
 	{
-		if (!Ptr->Reset(new uint8_t[h->DataLen]))
+		if (!Str->Length(h->DataLen))
 		{
 			LgiTrace("%s:%i - Failed to alloc " LPrintfInt64 " bytes.\n", _FL, h->DataLen);
 			return false;
@@ -249,7 +240,7 @@ struct LBinaryData_Hdr
 		NSRange r;
 		r.location = sizeof(LBinaryData_Hdr) + h->FormatLen;
 		r.length = h->DataLen;
-		[self.data getBytes:Ptr->Get() range:r];
+		[self.data getBytes:Str->Get() range:r];
 
 		// _dump("Receiving", Ptr.Get(), h->DataLen);
 	}
@@ -312,26 +303,27 @@ bool LClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	return r;
 }
 
-bool LClipBoard::Binary(FormatType Format, LAutoPtr<uint8,true> &Ptr, ssize_t *Len)
+void LClipBoard::Binary(FormatType Format, BinaryCb Callback)
 {
 	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
 	auto d = [pasteboard dataForType:LBinaryDataPBoardType];
 	if (!d)
 	{
-		LgiTrace("%s:%i - No LBinaryDataPBoardType data.\n", _FL);
-		return false;
+		if (Callback) Callback(LString(), "No LBinaryDataPBoardType data.");
+		return;
 	}
 
 	auto data = [[LBinaryData alloc] init:d];
 	if (!data)
 	{
-		LgiTrace("%s:%i - LBinaryData alloc failed.\n", _FL);
-		return false;
+		if (Callback) Callback(LString(), "LBinaryData alloc failed.");
+		return;
 	}
 	
-	auto Status = [data getData:NULL data:&Ptr len:Len var:NULL];
+	LString str;
+	[data getData:NULL data:&str var:NULL];
 	[data release];
 
-	return Status;
+	if (Callback) Callback(str, LString());
 }
 

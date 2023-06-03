@@ -261,6 +261,8 @@ IntIo(int)
 IntIo(unsigned int)
 IntIo(int64_t)
 IntIo(uint64_t)
+IntIo(size_t)
+IntIo(ssize_t)
 
 StrIo(char*);
 StrIo(const char*);
