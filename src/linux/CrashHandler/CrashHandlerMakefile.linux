@@ -12,12 +12,15 @@ Target = ./crash-handler
 ifndef Build
 	Build = Debug
 endif
+MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
 
-Flags = -fPIC -w -fno-inline -fpermissive
+CFlags = -MMD -MP -g -fPIC -fno-inline
+CppFlags = $(CFlags) -fpermissive -std=c++14
 
 ifeq ($(Build),Debug)
-	Flags += -g -std=c++14
+	CFlags += -g
+	CppFlags += -g
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs = 
@@ -26,7 +29,8 @@ ifeq ($(Build),Debug)
 		-I../../../include/lgi/linux/Gtk \
 		-I../../../include
 else
-	Flags += -s -Os -std=c++14
+	CFlags += -s -Os
+	CppFlags += -s -Os
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs = 
 	Inc =  \
@@ -38,9 +42,23 @@ endif
 # Dependencies
 Source =	CrashHandler.cpp
 
-SourceLst := $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(Source)))
+SourceC    := $(filter %.c,$(Source))
+ObjectsC   := $(SourceC:.c=.o)
+SourceCpp  := $(filter %.cpp,$(Source))
+ObjectsCpp := $(SourceCpp:.cpp=.o)
+Objects    := $(notdir $(ObjectsC) $(ObjectsCpp))
+Objects    := $(addprefix $(BuildDir)/,$(Objects))
+Deps       := $(patsubst %.o,%.d,$(Objects))
 
-Objects := $(addprefix $(BuildDir)/,$(SourceLst))
+$(BuildDir)/%.o: %.c
+	mkdir -p $(@D)
+	echo $(notdir $<) [$(Build)]
+	$(CC) $(Inc) $(CFlags) $(Defs) -c $< -o $@
+
+$(BuildDir)/%.o: %.cpp
+	mkdir -p $(@D)
+	echo $(notdir $<) [$(Build)]
+	$(CPP) $(Inc) $(CppFlags) $(Defs) -c $< -o $@
 
 # Target
 # Executable target
@@ -51,30 +69,17 @@ $(Target) : $(Objects)
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-.SECONDEXPANSION:
-$(Objects): $(BuildDir)/%.o: $$(wildcard %.c*)
-	mkdir -p $(@D)
-	@echo $(<F) [$(Build)]
-ifeq "$(suffix $<)" ".cpp"
-	$(CPP) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
-else
-	$(CC) -MMD -MP $(Inc) $(Flags) $(Defs) -c $< -o $@
-endif
-
 -include $(Objects:.o=.d)
 
 # Clean just this target
 clean :
-	rm -rf $(BuildDir)/* $(Target)
-	@echo Cleaned $(BuildDir)
+	rm -rf $(BuildDir) $(Target)
+	@echo Cleaned $(BuildDir) $(Target)
 
 # Clean all targets
 cleanall :
-	rm -rf $(BuildDir)/* $(Target)
-	@echo Cleaned $(BuildDir)
+	rm -rf $(BuildDir) $(Target)
+	@echo Cleaned $(BuildDir) $(Target)
 
-VPATH=%.cpp \
-	../../../include/lgi/linux/Gtk \
-	../../../include \
-	$(BuildDir)
-
+VPATH=$(BuildDir) \
+	./

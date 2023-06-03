@@ -261,9 +261,10 @@ public:
 };
 #endif
 
-LString::Array LClipBoard::Files()
+void LClipBoard::Files(FilesCb Callback)
 {
 	LString::Array f;
+	LString errMsg;
 
 	if (Open)
 	{
@@ -273,12 +274,30 @@ LString::Array LClipBoard::Files()
 
 	LPDATAOBJECT pObj = NULL;
 	auto r = OleGetClipboard(&pObj);
-	if (SUCCEEDED(r))
+	if (FAILED(r))
+	{
+		errMsg = "OleGetClipboard failed.";
+
+		LArray<FormatType> Fmts;
+		if (EnumFormats(Fmts))
+		{
+			for (auto f : Fmts)
+			{
+				auto s = FmtToStr(f);
+				LgiTrace("ClipFmt: %s\n", s.Get());
+			}
+		}
+	}
+	else
 	{
 		LArray<CLIPFORMAT> Fmts;
 		IEnumFORMATETC *pEnum = NULL;
 		r = pObj->EnumFormatEtc(DATADIR_GET, &pEnum);
-		if (SUCCEEDED(r))
+		if (FAILED(r))
+		{
+			errMsg = "EnumFormatEtc failed.";
+		}
+		else
 		{
 			FORMATETC Fmt;
 			r = pEnum->Next(1, &Fmt, NULL);
@@ -352,20 +371,9 @@ LString::Array LClipBoard::Files()
 
 		pObj->Release();
 	}
-	else
-	{
-		LArray<FormatType> Fmts;
-		if (EnumFormats(Fmts))
-		{
-			for (auto f : Fmts)
-			{
-				auto s = FmtToStr(f);
-				LgiTrace("ClipFmt: %s\n", s.Get());
-			}
-		}
-	}
 
-	return f;
+	if (Callback)
+		Callback(f, errMsg);
 }
 
 bool LClipBoard::Files(LString::Array &Paths, bool AutoEmpty)
@@ -495,15 +503,12 @@ bool LClipBoard::Text(const char *Str, bool AutoEmpty)
 
 char *LClipBoard::Text()
 {
-	ssize_t Len = 0;
-	LAutoPtr<uint8_t,true> Str;
-	if (Binary(CF_TEXT, Str, &Len))
+	Binary(CF_TEXT, [this](auto str, auto err)
 	{
-		d->Utf8 = LFromNativeCp((char*)Str.Get());
-		return d->Utf8;
-	}
+		d->Utf8 = LFromNativeCp(str);
+	});
 
-	return NULL;
+	return d->Utf8;
 }
 
 bool LClipBoard::TextW(const char16 *Str, bool AutoEmpty)
@@ -519,15 +524,12 @@ bool LClipBoard::TextW(const char16 *Str, bool AutoEmpty)
 
 char16 *LClipBoard::TextW()
 {
-	ssize_t Len = 0;
-	LAutoPtr<uint8_t,true> Str;
-	if (Binary(CF_UNICODETEXT, Str, &Len))
+	Binary(CF_UNICODETEXT, [this](auto str, auto err)
 	{
-		d->Wide.Reset(NewStrW((char16*) Str.Get(), Len / 2));
-		return d->Wide;
-	}
+		d->Wide.Reset(NewStrW((char16*) str.Get(), str.Length() / 2));
+	});
 
-	return NULL;
+	return d->Wide;
 }
 
 #ifndef CF_HTML
@@ -563,12 +565,15 @@ bool LClipBoard::Html(const char *Doc, bool AutoEmpty)
 
 LString LClipBoard::Html()
 {
-	LAutoPtr<uint8_t,true> Buf;
-	ssize_t Len;
-	if (!Binary(CF_HTML, Buf, &Len))
+	LString Txt;
+	Binary(CF_HTML, [&Txt](auto str, auto err)
+	{
+		Txt = str;
+	});
+
+	if (!Txt)
 		return NULL;
 
-	LString Txt((char*)Buf.Get(), Len);
 	auto Ln = Txt.Split("\n", 20);
 	ssize_t Start = -1, End = -1;
 	for (auto l : Ln)
@@ -783,10 +788,10 @@ LAutoPtr<LSurface> LClipBoard::ConvertFromPtr(void *Ptr)
 	return pDC;
 }
 
-bool LClipBoard::Bitmap(BitmapCb Callback)
+void LClipBoard::Bitmap(BitmapCb Callback)
 {
 	if (!Callback)
-		return false;
+		return;
 
 	HGLOBAL hMem = GetClipboardData(CF_DIB);
 	LAutoPtr<LSurface> pDC;
@@ -797,31 +802,6 @@ bool LClipBoard::Bitmap(BitmapCb Callback)
 	}
 
 	Callback(pDC, pDC ? NULL : "No bitmap on clipboard.");
-	return true;
-}
-
-LAutoPtr<LSurface> LClipBoard::Bitmap()
-{
-	HGLOBAL hMem = GetClipboardData(CF_DIB);
-	LAutoPtr<LSurface> pDC;
-	if (void *Ptr = GlobalLock(hMem))
-	{
-		#if 0
-		SIZE_T TotalSize = GlobalSize(hMem);
-		LFile f;
-		if (f.Open("c:\\tmp\\in.bmp", O_WRITE))
-		{
-			f.SetSize(0);
-			f.Write(Ptr, TotalSize);
-			f.Close();
-		}
-		#endif
-
-		pDC = ConvertFromPtr(Ptr);
-		GlobalUnlock(hMem);
-	}
-
-	return pDC;
 }
 
 bool LClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmpty)
@@ -859,34 +839,35 @@ bool LClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	return Status;
 }
 
-bool LClipBoard::Binary(FormatType Format, LAutoPtr<uint8_t,true> &Ptr, ssize_t *Length)
+void LClipBoard::Binary(FormatType Format, BinaryCb Callback)
 {
-	bool Status = false;
+	if (!Callback)
+		return;
 
 	HGLOBAL hMem = GetClipboardData(Format);
-	if (hMem)
+	if (!hMem)
 	{
-		auto Len = GlobalSize(hMem);
-		if (Length)
-			*Length = Len;
-			
-		uchar *Data = (uchar*) GlobalLock(hMem);
-		if (Data)
-		{
-			if (Ptr.Reset(new uchar[Len+sizeof(char16)]))
-			{
-				memcpy(Ptr, Data, Len);
-				
-				// String termination
-				memset(Ptr + Len, 0, sizeof(char16));
-				
-				Status = true;
-			}
-		}
-
-		GlobalUnlock(hMem);
+		Callback(LString(), "GetClipboardData failed.");
+		return;
 	}
 
-	return Status;
+	auto Len = GlobalSize(hMem);
+	uchar *Data = (uchar*) GlobalLock(hMem);
+	if (Data)
+	{
+		LString Ptr;
+		if (Ptr.Length(Len + sizeof(char16)))
+		{
+			memcpy(Ptr.Get(), Data, Len);
+			memset(Ptr.Get() + Len, 0, sizeof(char16)); // terminate with zeros
+			Ptr.Length(Len);
+			
+			Callback(Ptr, LString());
+		}
+		else Callback(LString(), "Alloc failed.");
+	}
+	else Callback(LString(), "GlobalLock failed.");
+
+	GlobalUnlock(hMem);
 }
 

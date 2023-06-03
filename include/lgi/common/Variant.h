@@ -27,49 +27,49 @@ enum LVariantType
 {
 	// Main types
 	
-	/// Null type
+	/// Null type (0)
 	GV_NULL,
-	/// 32-bit integer
+	/// 32-bit integer (1)
 	GV_INT32,
-	/// 64-bit integer
+	/// 64-bit integer (2)
 	GV_INT64,
-	/// true or false boolean.
+	/// true or false boolean. (3)
 	GV_BOOL,
-	/// C++ double
+	/// C++ double (4)
 	GV_DOUBLE,
-	/// Null terminated string value
+	/// Null terminated string value (5)
 	GV_STRING,
-	/// Block of binary data
+	/// Block of binary data (6)
 	GV_BINARY,
-	/// List of LVariant
+	/// List of LVariant (7)
 	GV_LIST,
-	/// Pointer to LDom object
+	/// Pointer to LDom object (8)
 	GV_DOM,
-	/// DOM reference, ie. a variable in a DOM object
+	/// DOM reference, ie. a variable in a DOM object (9)
 	GV_DOMREF,
-	/// Untyped pointer
+	/// Untyped pointer (10)
 	GV_VOID_PTR,
-	/// LDateTime class.
+	/// LDateTime class. (11)
 	GV_DATETIME,
-	/// Hash table class, containing pointers to LVariants
+	/// Hash table class, containing pointers to LVariants (12)
 	GV_HASHTABLE,
-	// Scripting language operator
+	// Scripting language operator (13)
 	GV_OPERATOR,
-	// Custom scripting lang type
+	// Custom scripting lang type (14)
 	GV_CUSTOM,
-	// Wide string
+	// Wide string (15)
 	GV_WSTRING,
-	// LSurface ptr
+	// LSurface ptr (16)
 	GV_LSURFACE,
-	/// Pointer to LView
+	/// Pointer to LView (17)
 	GV_GVIEW,
-	/// Pointer to LMouse
+	/// Pointer to LMouse (18)
 	GV_LMOUSE,
-	/// Pointer to LKey
+	/// Pointer to LKey (19)
 	GV_LKEY,
-	/// Pointer to LStream
+	/// Pointer to LStream (20)
 	GV_STREAM,
-	/// The maximum value for the variant type.
+	/// The maximum value for the variant type. (21)
 	/// (This is used by the scripting engine to refer to a LVariant itself)
 	GV_MAX,
 };

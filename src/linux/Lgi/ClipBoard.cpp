@@ -189,7 +189,7 @@ bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 	{
 		if (Img)
 		{
-			LgiTrace("%s:%i - gdk_pixbuf_new_from_data  failed for %s, params:\n"
+			LgiTrace("%s:%i - gdk_pixbuf_new_from_data	failed for %s, params:\n"
 					"ptr: %p, alpha: %i, bits: %i, size: %ix%i, row: %i\n",
 					LColourSpaceToString(Img->GetColourSpace()),
 					(*Img)[0], LColourSpaceHasAlpha(Img->GetColourSpace()),
@@ -203,7 +203,7 @@ bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 	return true; // have to assume it worked...
 }
 
-void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LClipBoard::BitmapCb *Cb)
+static void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LClipBoard::BitmapCb *Cb)
 {
 	auto chan = gdk_pixbuf_get_n_channels(Img);
 	auto alpha = gdk_pixbuf_get_has_alpha(Img);
@@ -301,39 +301,18 @@ void ClipboardImageReceived(GtkClipboard *Clipboard, GdkPixbuf *Img, LClipBoard:
 	delete Cb;
 }
 
-bool LClipBoard::Bitmap(LClipBoard::BitmapCb Callback)
+void LClipBoard::Bitmap(LClipBoard::BitmapCb Callback)
 {
 	if (!Callback)
-		return false;
+		return;
 		
 	gtk_clipboard_request_image(d->c, (GtkClipboardImageReceivedFunc) ClipboardImageReceived, new LClipBoard::BitmapCb(Callback));
-	return true;
 }
 		
-LAutoPtr<LSurface> LClipBoard::Bitmap()
-{
-	auto Ts = LCurrentTime();
-	LString Error;
-	LAutoPtr<LSurface> Img;
-	
-	LClipBoard::BitmapCb Callback = [&](auto img, auto err)
-	{
-		Img = img;
-		Error = err;
-	};
-
-	gtk_clipboard_request_image(d->c, (GtkClipboardImageReceivedFunc) ClipboardImageReceived, new LClipBoard::BitmapCb(Callback));
-
-	while (!Error && !Img && (LCurrentTime() - Ts) < LGI_RECEIVE_CLIPBOARD_TIMEOUT)
-		LYield();
-				
-	return Img;
-}
-
 void LgiClipboardGetFunc(GtkClipboard *clipboard,
-                        GtkSelectionData *data,
-                        guint info,
-                        gpointer user_data)
+						GtkSelectionData *data,
+						guint info,
+						gpointer user_data)
 {
 	if (Data.Lock(_FL))
 	{
@@ -367,7 +346,7 @@ void LgiClipboardGetFunc(GtkClipboard *clipboard,
 }
 
 void LgiClipboardClearFunc(GtkClipboard *clipboard,
-                          gpointer user_data)
+						  gpointer user_data)
 {
 	if (Data.Lock(_FL))
 	{
@@ -385,7 +364,7 @@ bool LClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	if (!Ptr || Len <= 0)
 		return false;
 
-	::LVariant *p = NULL;
+	LVariant *p = NULL;
 	if (Data.Lock(_FL))
 	{
 		for (int i=0; i<VAR_COUNT; i++)
@@ -413,11 +392,11 @@ bool LClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	te.flags = 0; // GTK_TARGET_SAME_APP?
 	te.info = GV_BINARY; // App defined data type ID
 	Gtk::gboolean r = gtk_clipboard_set_with_data(d->c,
-					                             &te,
-					                             1,
-					                             LgiClipboardGetFunc,
-					                             LgiClipboardClearFunc,
-					                             p);
+												 &te,
+												 1,
+												 LgiClipboardGetFunc,
+												 LgiClipboardClearFunc,
+												 p);
 
 
 	#if DEBUG_CLIPBOARD
@@ -427,82 +406,107 @@ bool LClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	return r;
 }
 
-::LString::Array LClipBoard::Files()
+void LClipBoard::Files(FilesCb Callback)
 {
-	::LString::Array a;
-	return a;
+	if (!Callback)
+		return;
+		
+	gtk_clipboard_request_uris (d->c,
+							[](auto clipboard, auto uris, auto data)
+							{
+								LAutoPtr<FilesCb> cb((FilesCb*)data);
+								
+								LString::Array files;
+								for (int i=0; uris[i]; i++)
+									files.Add(uris[i]);
+								
+								(*cb)(files, LString());
+							},
+							new FilesCb(Callback));
 }
 
-bool LClipBoard::Files(::LString::Array &a, bool AutoEmpty)
+enum FilesDataType
 {
-	return false;
-}
-
-struct ReceiveData
-{
-	LAutoPtr<uint8_t,true> *Ptr;
-	ssize_t *Len;
+	UriList,
+	GnomeCopiedFiles,
+	Utf8String,
 };
 
-void LgiClipboardReceivedFunc(GtkClipboard *clipboard,
-                             GtkSelectionData *data,
-                             gpointer user_data)
+bool LClipBoard::Files(LString::Array &a, bool AutoEmpty)
 {
-	ReceiveData *r = (ReceiveData*)	user_data;
-	if (!data || !r)
+	GtkTargetEntry targets[3] =
 	{
-		LgiTrace("%s:%i - Missing ptr: %p %p\n", _FL, data, r);
-		return;
-	}
+		{ "text/uri-list",					0, UriList },
+		{ "x-special/gnome-copied-files",	0, GnomeCopiedFiles },
+		{ "UTF8_STRING", 					0, Utf8String },
+	};
 
-	auto Bytes = gtk_selection_data_get_length(data);
-	if (Bytes < 0)
-	{
-		LgiTrace("%s:%i - No data? (%i)\n", _FL, Bytes);
-		return;
-	}
-
-	uint8_t *d = new uint8_t[Bytes];
-	if (!d)
-	{
-		LgiTrace("%s:%i - Alloc failed %i\n", _FL, Bytes);
-		return;
-	}
-
-	memcpy(d, gtk_selection_data_get_data(data), Bytes);
-	if (r->Len)
-		*r->Len = Bytes;
-	r->Ptr->Reset(d);
-
-	#if DEBUG_CLIPBOARD
-	printf("%s:%i - LgiClipboardReceivedFunc\n", _FL);
-	#endif
+	return gtk_clipboard_set_with_data(
+		d->c,
+		targets,
+		CountOf(targets),
+		[](	GtkClipboard *clipboard,
+			GtkSelectionData *selection_data,
+			guint info,
+			gpointer user_data_or_owner)
+	   	{
+	   		auto type = (FilesDataType)info;
+	   		switch (type)
+	   		{
+	   			case UriList:
+	   			{
+	   				break;
+	   			}
+	   			case GnomeCopiedFiles:
+	   			{
+	   				break;
+	   			}
+	   			case Utf8String:
+	   			{
+	   				break;
+	   			}
+	   		}
+	   	},
+	   	[](	GtkClipboard *clipboard,
+		   	gpointer user_data_or_owner)
+		{
+		},
+		NULL);		
 }
 
-bool LClipBoard::Binary(FormatType Format, LAutoPtr<uint8_t,true> &Ptr, ssize_t *Len)
+void LClipBoard::Binary(FormatType Format, BinaryCb Callback)
 {
-	ReceiveData r = {&Ptr, Len};
+	if (!Callback)
+		return;
+		
+	gtk_clipboard_request_contents(
+		// The clipboard
+		d->c,
+		// The atom to return
+		gdk_atom_intern(LGI_CLIP_BINARY, false),
+		// Lambda callback to receive the data
+		[](auto clipboard, auto data, auto ptr)
+		{
+			LAutoPtr<BinaryCb> cb((BinaryCb*)ptr);
+			
+			auto Bytes = gtk_selection_data_get_length(data);
+			if (Bytes < 0)
+			{
+				LgiTrace("%s:%i - No data? (%i)\n", _FL, Bytes);
+				return;
+			}
 
-	gtk_clipboard_request_contents(	d->c,
-	                                gdk_atom_intern(LGI_CLIP_BINARY, false),
-	                                LgiClipboardReceivedFunc,
-	                                &r);
-                                
+			LString s;
+			if (!s.Length(Bytes))
+			{
+				LgiTrace("%s:%i - Alloc failed %i\n", _FL, Bytes);
+				return;
+			}
 
-	uint64 Start = LCurrentTime();
-	do
-	{
-		if (r.Ptr->Get())
-			break;
-		LYield();
-		LSleep(1);
-	}
-	while (LCurrentTime() - Start > LGI_RECEIVE_CLIPBOARD_TIMEOUT);
-
-	#if DEBUG_CLIPBOARD
-	printf("%s:%i - LClipBoard::Binary %p, %i\n", _FL, r.Ptr->Get(), Len ? *Len : -1);
-	#endif
-
-	return r.Ptr->Get() != NULL;
+			memcpy(s.Get(), gtk_selection_data_get_data(data), Bytes);
+			(*cb)(s, LString());
+		},
+		// Copy of the user's callback
+		new BinaryCb(Callback));
 }
 

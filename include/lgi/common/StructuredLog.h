@@ -91,8 +91,42 @@ public:
 		return io.Decode(callback, prog);
 	}
 
+	bool Read(int64_t &i)
+	{
+		bool typeErr = false;
+		Read([&](auto type, auto sz, auto ptr, auto name)
+		{
+			switch (type)
+			{
+				case GV_INT32:
+				{
+					LAssert(sz == 4);
+					i = *(int32_t*)ptr;
+					break;
+				}
+				case GV_INT64:
+				{
+					if (sz == 4)
+						i = *(int32_t*)ptr;
+					else if (sz == 8)
+						i = *(int64_t*)ptr;
+					else
+						LAssert(!"Unknown size");
+					break;
+				}
+				default:
+				{
+					typeErr = true;
+					break;
+				}
+			}
+		});
+
+		return !typeErr;
+	}
+
 	// Read and convert to a string.
-	void Read(std::function<void(LString)> callback)
+	bool Read(LString &s)
 	{
 		LStringPipe p;
 		while (Read([&p](auto type, auto sz, auto ptr, auto name)
@@ -143,7 +177,8 @@ public:
 				}
 			}));
 
-		callback(p.NewLStr());
+		s = p.NewLStr();
+		return s != NULL;
 	}
 
 	static void UnitTest()
@@ -158,10 +193,9 @@ public:
 		}
 		{
 			LStructuredLog Rd(fn, false);
-			Rd.Read([](LString s)
-			{
+			LString s;
+			if (Rd.Read(s))
 				LgiTrace("%s\n", s.Get());
-			});
 		}
 	}
 };

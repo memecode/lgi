@@ -96,7 +96,7 @@ void OpenCrashLog()
 
 	if (cur)	
 		snprintf(file, sizeof(file),
-			"crash-%i%02.2i%02.2i-%02.2i%02.2i%02.2i.log",
+			"crash-%i%2.2i%2.2i-%2.2i%2.2i%2.2i.log",
 			cur->tm_year + 1900,
 			cur->tm_mon + 1,
 			cur->tm_mday,

@@ -205,6 +205,7 @@ typedef SOCKET							OsSocket;
 #define LGI_StreamDropFormat			CFSTR_FILEDESCRIPTORW
 #define LGI_WideCharset					"ucs-2"
 #define LPrintfInt64					"%I64i"
+#define LPrintfUInt64					"%I64u"
 #define LPrintfHex64					"%I64x"
 
 #if LGI_64BIT
