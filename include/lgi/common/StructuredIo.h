@@ -261,8 +261,10 @@ IntIo(int)
 IntIo(unsigned int)
 IntIo(int64_t)
 IntIo(uint64_t)
+#ifndef WINDOWS
 IntIo(size_t)
 IntIo(ssize_t)
+#endif
 
 StrIo(char*);
 StrIo(const char*);
