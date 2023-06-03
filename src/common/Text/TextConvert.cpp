@@ -381,7 +381,7 @@ static void EncodeRfc2047_Impl(	char *Input, size_t Length,
 		{
 			for (auto Cs: *OutCharsets)
 			{
-				if (Buf = (char*)LNewConvertCp(DestCs = Cs, Input, InCharset, Length))
+				if ((Buf = (char*)LNewConvertCp(DestCs = Cs, Input, InCharset, Length)))
 					break;
 			}
 			if (!Buf || !DestCs)

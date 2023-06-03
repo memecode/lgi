@@ -161,7 +161,7 @@ public:
 	uint64 SetScrollTime;
 	int DeferredLoads;
 	int FlowedTags = 0;
-	LHashTbl<StrKey<char,false>, uint64_t> FlowTimes;
+	LHashTbl<ConstStrKey<char,false>, uint64_t> FlowTimes;
 
 	bool IsParsing;
 	bool IsLoaded;
