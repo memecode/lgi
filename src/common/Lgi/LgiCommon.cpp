@@ -47,6 +47,9 @@
 #endif
 #include "lgi/common/Library.h"
 #include "lgi/common/Net.h"
+#ifdef MAC
+	#include "lgi/common/Uri.h"
+#endif
 
 #if defined(__GTK_H__)
 namespace Gtk {
@@ -58,54 +61,6 @@ namespace Gtk {
 // Misc stuff
 #if LGI_COCOA || defined(__GTK_H__)
 	LString LgiArgsAppPath;
-#endif
-#if defined MAC
-	#import <foundation/foundation.h>
-	#include "lgi/common/Uri.h"
-	#if defined LGI_CARBON
-		bool _get_path_FSRef(FSRef &fs, LStringPipe &a)
-		{
-			HFSUniStr255 Name;
-			ZeroObj(Name);
-			FSRef Parent;
-			FSCatalogInfo Cat;
-			ZeroObj(Cat);
-			OSErr e = FSGetCatalogInfo(&fs,
-										kFSCatInfoVolume|kFSCatInfoNodeID,
-										&Cat,
-										&Name,
-										NULL,
-										&Parent);
-			if (!e)
-			{
-				if (_get_path_FSRef(Parent, a))
-				{
-					LAutoString u((char*)LNewConvertCp("utf-8", Name.unicode, "utf-16", Name.length * sizeof(Name.unicode[0]) ));
-
-					// printf("CatInfo = '%s' %x %x\n", u.Get(), Cat.nodeID, Cat.volume);
-					if (u && Cat.nodeID > 2)
-					{
-						a.Print("%s%s", DIR_STR, u.Get());
-					}
-				}
-				
-				return true;
-			}
-
-			return false;
-		}
-
-		LAutoString FSRefPath(FSRef &fs)
-		{
-			LStringPipe a;
-			if (_get_path_FSRef(fs, a))
-			{
-				return LAutoString(a.NewStr());
-			}
-			
-			return LAutoString();
-		}
-	#endif
 #endif
 
 bool LPostEvent(OsView Wnd, int Event, LMessage::Param a, LMessage::Param b)
@@ -2133,8 +2088,8 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 		{
 			LMakePath(Path, sizeof(Path), *Pref, Name);
 		}
-		size_t PathLen = strlen(Path);
-		LAssert(PathLen < sizeof(Path));
+
+		LAssert(Strlen(Path) < sizeof(Path));
 
 		bool Exists = LFileExists(Path);
 		LOG_DEBUG("\t%s = %i\n", Path, Exists);

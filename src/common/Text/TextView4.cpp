@@ -5573,7 +5573,6 @@ void LTextView4::LoadLog(const char *File)
 	Edits.DeleteObjects();
 	log.Read([this](auto type, auto size, auto ptr, auto msg)
 		{
-			int asd=0;
 		});
 }
 #endif

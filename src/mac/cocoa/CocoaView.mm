@@ -467,7 +467,7 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 			if (bin)
 			{
 				LString realFmt;
-				[bin getData:&realFmt data:NULL len:NULL var:NULL];
+				[bin getData:&realFmt data:NULL var:NULL];
 				[bin release];
 				
 				if (realFmt)
@@ -577,11 +577,11 @@ void UpdateAccepted(DndEvent &e, id <NSDraggingInfo> sender)
 					if (bin)
 					{
 						LString realFmt;
-						if ([bin getData:&realFmt data:NULL len:NULL var:NULL])
+						if ([bin getData:&realFmt data:NULL var:NULL])
 						{
 							if (realFmt == dd.Format)
 							{
-								[bin getData:NULL data:NULL len:NULL var:&dd.Data[0]];
+								[bin getData:NULL data:NULL var:&dd.Data[0]];
 								break;
 							}
 						}

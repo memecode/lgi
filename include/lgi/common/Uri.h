@@ -51,7 +51,7 @@ public:
 	LString DecodeStr(const char *s);
 
 	/// Separate args into map
-	typedef LHashTbl<StrKey<char,false>,LString> StrMap;
+	typedef LHashTbl<ConstStrKey<char,false>,LString> StrMap;
 	StrMap Params();
 
 	LUri &operator =(const LUri &u);

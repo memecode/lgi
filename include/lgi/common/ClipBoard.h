@@ -80,7 +80,7 @@ public:
 
 	- (id)init:(LString)format ptr:(uchar*)ptr len:(ssize_t)Len;
 	- (id)init:(NSData*)data;
-	- (bool)getData:(LString*)format data:(LAutoPtr<uint8,true>*)Ptr len:(ssize_t*)Len var:(LVariant*)var;
+	- (bool)getData:(LString*)format data:(LString*)Str var:(LVariant*)var;
 
 	// Writer
 	- (nullable id)pasteboardPropertyListForType:(NSString *)type;
