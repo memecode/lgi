@@ -2103,7 +2103,7 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 		}
 
 		#ifdef WIN32
-		if (PathLen < sizeof(Path) - 4)
+		if (Strlen(Path) < sizeof(Path) - 4)
 		{
 			strcat(Path, ".lnk");
 			if (LResolveShortcut(Path, Path, sizeof(Path)))
