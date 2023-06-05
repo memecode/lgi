@@ -1880,11 +1880,10 @@ int BuildThread::Main()
 		PostThreadEvent(AppHnd, M_SELECT_TAB, AppWnd::BuildTab);
 
 		LString Msg;
-		Msg.Printf("Making: %s\n", MakePath.Get());
 		// Msg.Printf("InitDir: %s\n", InitDir.Get());
 		Proj->GetApp()->PostEvent(M_APPEND_TEXT, (LMessage::Param)NewStr(Msg), AppWnd::BuildTab);
 
-		LgiTrace("%s %s\n", Exe.Get(), TmpArgs.Get());
+		Print("Making: %s (%s)\n", MakePath.Get(), TmpArgs.Get());
 		if (SubProc.Reset(new LSubProcess(Exe, TmpArgs)))
 		{
 			SubProc->SetNewGroup(false);

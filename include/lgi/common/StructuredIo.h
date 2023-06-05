@@ -261,7 +261,7 @@ IntIo(int)
 IntIo(unsigned int)
 IntIo(int64_t)
 IntIo(uint64_t)
-#ifndef WINDOWS
+#ifdef MAC
 IntIo(size_t)
 IntIo(ssize_t)
 #endif
