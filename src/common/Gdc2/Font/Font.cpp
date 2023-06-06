@@ -968,11 +968,17 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 						{
 							memset(d->GlyphMap, 0, Bytes);
 
-							int Bits = Bytes << 3;
-							for (int i=0; i<Bits; i++)
+							try
 							{
-								if (pango_coverage_get(c, i))
-									d->GlyphMap[i>>3] |= 1 << (i & 0x7);
+								for (int i=0; i<MAX_UNICODE; i++)
+								{
+									if (pango_coverage_get(c, i))
+										d->GlyphMap[i>>3] |= 1 << (i & 0x7);
+								}
+							}
+							catch (...)
+							{
+								LgiTrace("%s:%i - Glyphmap creation crashed.\n", _FL);
 							}
 						}
 						Gtk::pango_coverage_unref(c);
