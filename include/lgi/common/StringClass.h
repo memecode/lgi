@@ -171,6 +171,57 @@ public:
 		SetW(str, wchars);
 	}
 
+	/// Utf32 constructor
+	LString(const uint32_t *utf32, ptrdiff_t wchars = -1)
+	{
+		Str = NULL;
+		if (sizeof(*utf32) == sizeof(char16))
+		{
+			// 1:1 mapping
+			SetW((char16*)utf32, wchars);
+		}
+		else if (sizeof(char16) == 2) // Ie windows:
+		{
+			// Convert UTF32 to utf-8
+			if (!utf32)
+				return;
+			
+			// Measure size:
+			int bytes = 0;
+			uint8_t utf8[6];
+			for (size_t i=0;
+				(wchars >= 0 && i < wchars) ||
+				(wchars < 0 && utf32[i]);
+				i++)
+			{
+				uint8_t *p = utf8;
+				ssize_t in = 1;
+				if (!LgiUtf32To8(utf32[i], p, in))
+					break;
+				bytes += p - utf8;
+			}
+			
+			// Create memory buffer:
+			if (!Length(bytes))
+				return;
+				
+			// Convert string:
+			uint8_t *p = (uint8_t*) Str->Str;
+			for (size_t i=0;
+				(wchars >= 0 && i < wchars) ||
+				(wchars < 0 && utf32[i]);
+				i++)
+			{
+				ssize_t in = 1;
+				if (!LgiUtf32To8(utf32[i], p, in))
+					break;
+			}
+			assert((char*)p == Str->Str + Str->Len);
+			*p = 0; // NULL terminate string
+		}
+		else assert(!"No valid mapping for UTF32 to char16?");
+	}
+
 	#if defined(_WIN32) || defined(MAC)
 	/// const uint32* constructor
 	LString(const uint32_t *str, ptrdiff_t chars = -1)
