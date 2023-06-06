@@ -2958,127 +2958,127 @@ bool AppWnd::WriteDefines(LStream &Defs)
 
 	// make a unique list of #define's
 	List<Resource> Lst;
-	if (ListObjects(Lst))
-	{
-		LHashTbl<StrKey<char>,int> Def;
-		LHashTbl<StrKey<char>,char*> Ident;
+	if (!ListObjects(Lst))
+		return false;
 
-		for (auto r: Lst)
+	LHashTbl<StrKey<char>,int> Def;
+	LHashTbl<StrKey<char>,char*> Ident;
+
+	for (auto r: Lst)
+	{
+		List<ResString> *StrList = r->GetStrs();
+		if (StrList)
 		{
-			List<ResString> *StrList = r->GetStrs();
-			if (StrList)
+			Status = true;
+			List<ResString>::I sl = StrList->begin();
+			for (ResString *s = *sl; s; s = *++sl)
 			{
-				Status = true;
-				List<ResString>::I sl = StrList->begin();
-				for (ResString *s = *sl; s; s = *++sl)
+				if (ValidStr(s->GetDefine()))
 				{
-					if (ValidStr(s->GetDefine()))
+					if (stricmp(s->GetDefine(), "IDOK") == 0)
 					{
-						if (stricmp(s->GetDefine(), "IDOK") == 0)
+						s->SetId(IDOK);
+					}
+					else if (stricmp(s->GetDefine(), "IDCANCEL") == 0)
+					{
+						s->SetId(IDCANCEL);
+					}
+					else if (stricmp(s->GetDefine(), "IDC_STATIC") == 0)
+					{
+						s->SetId(-1);
+					}
+					else if (stricmp(s->GetDefine(), "-1") == 0)
+					{
+						s->SetDefine(0);
+					}
+					else
+					{
+						// Remove dupe ID's
+						char IdStr[32];
+						snprintf(IdStr, sizeof(IdStr), "%i", s->GetId());
+						char *Define;
+						if ((Define = Ident.Find(IdStr)))
 						{
-							s->SetId(IDOK);
-						}
-						else if (stricmp(s->GetDefine(), "IDCANCEL") == 0)
-						{
-							s->SetId(IDCANCEL);
-						}
-						else if (stricmp(s->GetDefine(), "IDC_STATIC") == 0)
-						{
-							s->SetId(-1);
-						}
-						else if (stricmp(s->GetDefine(), "-1") == 0)
-						{
-							s->SetDefine(0);
+							if (strcmp(Define, s->GetDefine()))
+							{
+								List<ResString> n;
+								FindStrings(n, s->GetDefine());
+								int NewId = GetUniqueCtrlId();
+								for (auto Ns: n)
+								{
+									Ns->SetId(NewId);
+								}
+							}
 						}
 						else
 						{
-							// Remove dupe ID's
-							char IdStr[32];
-							snprintf(IdStr, sizeof(IdStr), "%i", s->GetId());
-							char *Define;
-							if ((Define = Ident.Find(IdStr)))
-							{
-								if (strcmp(Define, s->GetDefine()))
-								{
-									List<ResString> n;
-									FindStrings(n, s->GetDefine());
-									int NewId = GetUniqueCtrlId();
-									for (auto Ns: n)
-									{
-										Ns->SetId(NewId);
-									}
-								}
-							}
-							else
-							{
-								Ident.Add(IdStr, s->GetDefine());
-							}
+							Ident.Add(IdStr, s->GetDefine());
+						}
 
-							// Make all define's the same
-							int CtrlId;
-							if ((CtrlId = Def.Find(s->GetDefine())))
-							{
-								// Already there...
-								s->SetId(CtrlId);
-							}
-							else
-							{
-								// Add...
-								LAssert(s->GetId());
-								if (s->GetId())
-									Def.Add(s->GetDefine(), s->GetId());
-							}
+						// Make all define's the same
+						int CtrlId;
+						if ((CtrlId = Def.Find(s->GetDefine())))
+						{
+							// Already there...
+							s->SetId(CtrlId);
+						}
+						else
+						{
+							// Add...
+							LAssert(s->GetId());
+							if (s->GetId())
+								Def.Add(s->GetDefine(), s->GetId());
 						}
 					}
 				}
 			}
 		}
+	}
 
-		// write the list out
-		LArray<DefinePair> Pairs;
-		// char *s = 0;
-		// for (int i = Def.First(&s); i; i = Def.Next(&s))
-		for (auto i : Def)
+	// write the list out
+	LArray<DefinePair> Pairs;
+	// char *s = 0;
+	// for (int i = Def.First(&s); i; i = Def.Next(&s))
+	for (auto i : Def)
+	{
+		if (ValidStr(i.key) &&
+			stricmp(i.key, "IDOK") != 0 &&
+			stricmp(i.key, "IDCANCEL") != 0 &&
+			stricmp(i.key, "IDC_STATIC") != 0 &&
+			stricmp(i.key, "-1") != 0)
 		{
-			if (ValidStr(i.key) &&
-				stricmp(i.key, "IDOK") != 0 &&
-				stricmp(i.key, "IDCANCEL") != 0 &&
-				stricmp(i.key, "IDC_STATIC") != 0 &&
-				stricmp(i.key, "-1") != 0)
-			{
-				DefinePair &p = Pairs.New();
-				p.Name = i.key;
-				p.Value = i.value;
-			}
+			DefinePair &p = Pairs.New();
+			p.Name = i.key;
+			p.Value = i.value;
 		}
+	}
 
-		Pairs.Sort(PairCmp);
+	Pairs.Sort(PairCmp);
 
-		for (int n=0; n<Pairs.Length(); n++)
+	for (int n=0; n<Pairs.Length(); n++)
+	{
+		DefinePair &p = Pairs[n];
+		auto Tabs = (43 - strlen(p.Name)) / 4;
+		char Tab[32];
+		ZeroObj(Tab);
+		for (size_t n=0; n<Tabs; n++) Tab[n] = '\t';
+
+		char s[4];
+		memcpy(s, &p.Value, 4);
+		#define IsPrintable(c) ((uint8_t)(c)>=' ' && (uint8_t)(c) <= 127)
+		if (IsPrintable(s[0]) &&
+			IsPrintable(s[1]) &&
+			IsPrintable(s[2]) &&
+			IsPrintable(s[3]))
 		{
-			DefinePair &p = Pairs[n];
-			auto Tabs = (43 - strlen(p.Name)) / 4;
-			char Tab[32];
-			ZeroObj(Tab);
-			for (size_t n=0; n<Tabs; n++) Tab[n] = '\t';
-
-			char s[4];
-			memcpy(s, &p.Value, 4);
-			#define IsPrintable(c) ((uint8_t)(c)>=' ' && (uint8_t)(c) <= 127)
-			if (IsPrintable(s[0]) &&
-				IsPrintable(s[1]) &&
-				IsPrintable(s[2]) &&
-				IsPrintable(s[3]))
-			{
-				#ifndef __BIG_ENDIAN__
-				int32 i = LgiSwap32(p.Value);
-				memcpy(s, &i, 4);
-				#endif
-				Defs.Print("#define %s%s'%04.4s'\r\n", p.Name, Tab, s);
-			}
-			else
-				Defs.Print("#define %s%s%i\r\n", p.Name, Tab, p.Value);
+			#ifndef __BIG_ENDIAN__
+			int32 i = LgiSwap32(p.Value);
+			memcpy(s, &i, 4);
+			#endif
+			Defs.Print("#define %s%sLgi4CC(\"%04.4s\")\r\n", p.Name, Tab, s);
 		}
+		else
+			Defs.Print("#define %s%s%i\r\n", p.Name, Tab, p.Value);
 	}
 
 	return Status;
