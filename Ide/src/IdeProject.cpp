@@ -772,7 +772,7 @@ public:
 							rel = rel(2, -1);
 					}
 
-					LString path = rel ? rel : f;
+					LString path = rel ? rel.Get() : f;
 					ToNativePath(path);
 					SourceFiles.Add(path);
 
