@@ -897,7 +897,7 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 								// d->UseSSLrw = true;
 								
 								char m[256];
-								sprintf_s(m, sizeof(m), "Connected to '%s' using SSL", h);
+								sprintf_s(m, sizeof(m), "Connected to '%.220s' using SSL", h);
 								OnInformation(m);
 							}
 							else if (!d->Cancel->IsCancelled())
@@ -958,7 +958,7 @@ DebugTrace("%s:%i - open loop finished=%i\n", _FL, r);
 					Status = true;
 
 					char m[256];
-					sprintf_s(m, sizeof(m), "Connected to '%s'", h);
+					sprintf_s(m, sizeof(m), "Connected to '%.220s'", h);
 					OnInformation(m);
 				}
 				else

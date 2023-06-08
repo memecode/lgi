@@ -335,9 +335,9 @@ int main(int argCount, char **arg)
 	if (child)
 	{
 		// child process..
-		char pidArg[64];
+		char pidArg[64], gdb[] = "gdb";
 		snprintf(pidArg, sizeof(pidArg), "--pid=%i", pid);
-		char *const args[] = { "gdb", pidArg, NULL };
+		char * const args[] = { gdb, pidArg, NULL };
 
 		// Child shouldn't write to its stdin.
 		if (close(in[hWrite]))

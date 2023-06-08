@@ -1189,7 +1189,7 @@ void IdeDoc::OnTitleClick(LMouse &m)
 			Dir = strrchr(Full, DIR_CHAR);
 			if (Dir)
 				sprintf_s(sFile, sizeof(sFile), "Copy '%s'", Dir + 1);
-			sprintf_s(sFull, sizeof(sFull), "Copy '%s'", Full);
+			sprintf_s(sFull, sizeof(sFull), "Copy '%.500s'", Full);
 			sprintf_s(sBrowse, sizeof(sBrowse), "Browse to '%s'", Dir ? Dir + 1 : Full);			
 		}
 		

@@ -15,7 +15,13 @@
 #endif
 
 //////////////////////////////////////////////////////////////////
-SshConnection::SshConnection(LTextLog *log, const char *uri, const char *prompt) : LSsh(log), LEventTargetThread("SshConnection")
+SshConnection::SshConnection(LTextLog *log, const char *uri, const char *prompt) :
+	LSsh(	[this](auto msg, auto type)
+			{
+				LAssert(!"Impl me.");
+			},
+			log),
+	LEventTargetThread("SshConnection")
 {
 	auto Wnd = log->GetWindow();
 	GuiHnd = Wnd->AddDispatch();

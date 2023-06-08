@@ -18,15 +18,30 @@ class LSsh
 
 	LCancel LocalCancel;
 
+public:
+	enum HostType
+	{
+		SshKnownHost,
+		SshHostChanged,
+		SshHostOther,
+		SshUnknown,
+		SshNotFound,
+		SshError,
+	};
+	
+	typedef std::function<void(const char *Msg, HostType Type)> KnownHostCallback;
+
 protected:
 	LCancel *Cancel = NULL;
 
 protected:
-	LTextLog *Log;
-	ssh_session Ssh;
-	LViewI *TxtLabel;
-	LProgressView *Prog;
-	bool Connected;
+	LTextLog *Log = NULL;
+	ssh_session Ssh = NULL;
+	LViewI *TxtLabel = NULL;
+	LProgressView *Prog = NULL;
+	bool Connected = false;
+	bool OverideUnknownHost = false;
+	KnownHostCallback HostCb;
 
 	struct IoProgress
 	{
@@ -147,14 +162,13 @@ protected:
 	};
 
 public:
-	LSsh(LTextLog *log, LCancel *cancel = NULL)
+	LSsh(	KnownHostCallback hostCb,
+			LTextLog *log,
+			LCancel *cancel = NULL)
 	{
 		Cancel = cancel ? cancel : &LocalCancel;
 		Log = log;
-		Ssh = NULL;
-		Prog = NULL;
-		TxtLabel = NULL;
-		Connected = false;
+		HostCb = hostCb;
 	}
 
 	~LSsh()
@@ -216,6 +230,11 @@ public:
 		
 		return c;
 	}
+	
+	void SetOverideUnknownHost(bool b)
+	{
+		OverideUnknownHost = b;
+	}
 
 	bool Open(const char *Host, const char *Username, const char *Password, bool PublicKey)
 	{
@@ -251,8 +270,48 @@ public:
 		}
 		// Log->Print("%s:%i - ssh_connect ok.\n", _FL);
 
-		/*auto State =*/ ssh_is_server_known /*ssh_session_is_known_server*/(Ssh);
-		// Log->Print("%s:%i - ssh_session_is_known_server=%i.\n", _FL, State);
+		auto State = ssh_session_is_known_server(Ssh);
+		if (State != SSH_KNOWN_HOSTS_OK &&
+			!OverideUnknownHost)
+		{
+			// We don't know of the host... ask the user to confirm.
+			if (HostCb)
+			{
+				switch (State)
+				{
+					case SSH_KNOWN_HOSTS_CHANGED:
+						HostCb(	"The server key has changed. Either you are under attack or the administrator changed the key. You HAVE to warn the user about a possible attack.",
+								SshHostChanged);
+						break;
+					case SSH_KNOWN_HOSTS_OTHER:
+						HostCb(	"The server gave use a key of a type while we had an other type recorded. It is a possible attack.",
+								SshHostOther);
+						break;
+					case SSH_KNOWN_HOSTS_UNKNOWN:
+						HostCb(	"The server is unknown. You should confirm the public key hash is correct.",
+								SshUnknown);
+						break;
+					case SSH_KNOWN_HOSTS_NOT_FOUND:
+						HostCb(	"This host is unknown.",
+								SshNotFound);
+						break;
+					default:
+					case SSH_KNOWN_HOSTS_ERROR:
+						HostCb(	"There had been an error checking the host.",
+								SshError);
+						break;
+				}
+			}
+			else
+			{
+				LgiTrace("%s:%i - ssh_session_is_known_server(%s@%s) returned %i\n",
+						_FL,
+						Username, Host,
+						State);						
+			}
+			
+			return false;
+		}
 
 		if (PublicKey)
 		{
