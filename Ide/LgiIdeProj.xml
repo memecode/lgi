@@ -69,33 +69,33 @@
 			<Node File="../src/common/Text/HtmlCommon.cpp" Type="2" Platforms="15" />
 			<Node File="../src/common/Text/HtmlParser.cpp" Type="2" Platforms="15" />
 		</Node>
-		<Node File="../src/common/Text/DocView.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Text/Homoglyphs/Homoglyphs.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Text/Homoglyphs/HomoglyphsTable.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Net/Http.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Lgi/Mdi.cpp" Type="2" Platforms="15" />
-		<Node File="../include/lgi/common/Mdi.h" Type="3" Platforms="15" />
-		<Node File="../src/common/Net/OpenSSLSocket.cpp" Type="2" Platforms="15" />
-		<Node File="../src/common/Gdc2/Filters/Png.cpp" Type="2" Platforms="15" />
-		<Node File="../include/lgi/common/PopupList.h" Type="3" Platforms="15" />
-		<Node File="../src/common/Text/TextConvert.cpp" Type="2" Platforms="15" />
-		<Node File="../include/lgi/common/TextLog.h" Type="3" Platforms="15" />
-		<Node File="../include/lgi/common/TrayIcon.h" Type="3" Platforms="15" />
+		<Node File="..\src\common\Text\DocView.cpp" Type="2" Platforms="15" />
+		<Node File="..\src\common\Text\Homoglyphs\Homoglyphs.cpp" Type="2" Platforms="15" />
+		<Node File="..\src\common\Text\Homoglyphs\HomoglyphsTable.cpp" Type="2" Platforms="15" />
+		<Node File="..\src\common\Net\Http.cpp" Type="2" Platforms="15" />
+		<Node File="..\src\common\Lgi\LgiMain.cpp" Type="2" Platforms="15" />
+		<Node File="..\src\common\Lgi\Mdi.cpp" Type="2" Platforms="15" />
+		<Node File="..\include\lgi\common\Mdi.h" Type="3" Platforms="15" />
+		<Node File="..\src\common\Net\OpenSSLSocket.cpp" Type="2" Platforms="15" />
+		<Node File="..\src\common\Gdc2\Filters\Png.cpp" Type="2" Platforms="15" />
+		<Node File="..\include\lgi\common\PopupList.h" Type="3" Platforms="15" />
+		<Node File="..\src\common\Text\TextConvert.cpp" Type="2" Platforms="15" />
+		<Node File="..\include\lgi\common\TextLog.h" Type="3" Platforms="15" />
+		<Node File="..\include\lgi\common\TrayIcon.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Resources" Type="1" Platforms="15" Open="1" Id="8">
-		<Node File="./resources/resource.h" Type="3" Platforms="15" />
-		<Node File="./haiku/buildHaiku.py" Type="8" Platforms="15" />
-		<Node File="./CMakeLists.txt" Type="8" Platforms="15" />
-		<Node File="./haiku/Makefile.haiku" Type="9" Platforms="15" />
-		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
-		<Node File="./win/Makefile.windows" Type="9" Platforms="15" />
+		<Node File=".\resources\resource.h" Type="3" Platforms="15" />
+		<Node File=".\haiku\buildHaiku.py" Type="8" Platforms="15" />
+		<Node File=".\CMakeLists.txt" Type="8" Platforms="15" />
+		<Node File=".\haiku\Makefile.haiku" Type="9" Platforms="15" />
+		<Node File=".\linux\Makefile.linux" Type="9" Platforms="15" />
+		<Node File=".\win\Makefile.windows" Type="9" Platforms="15" />
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
+	<Node File="..\Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>
 		<General>
 			<Makefile>
-				<Windows>.\win\Makefile.windows</Windows>
+				<Windows>.\haiku\buildHaiku.py</Windows>
 				<Linux>./linux/Makefile.linux</Linux>
 				<Mac>./mac/LgiIde.xcodeproj</Mac>
 				<Haiku>./haiku/Makefile.haiku</Haiku>
@@ -204,7 +204,7 @@ be</Release>
 			</Libraries>
 			<LibraryPaths>
 				<All />
-				<Linux />
+				<Windows />
 			</LibraryPaths>
 			<TargetType>
 				<All>Executable</All>
@@ -228,6 +228,7 @@ be</Release>
 					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Windows />
 			</SystemIncludes>
 			<Defines>
 				<Haiku>
@@ -237,7 +238,7 @@ _GNU_SOURCE</Debug>
 _GNU_SOURCE</Release>
 				</Haiku>
 				<All />
-				<Linux />
+				<Windows />
 			</Defines>
 			<ApplicationIcon />
 		</Build>
@@ -275,7 +276,7 @@ _GNU_SOURCE</Release>
 		</Remote>
 		<Advanced>
 			<PostBuildCommands>
-				<Linux />
+				<Windows />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>

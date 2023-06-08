@@ -377,7 +377,6 @@ int LApp::GetMetric(LSystemMetric Metric)
 
 LViewI *LApp::GetFocus()
 {
-	// GtkWidget *w = gtk_window_get_focus(GtkWindow *window);
 	return NULL;
 }
 

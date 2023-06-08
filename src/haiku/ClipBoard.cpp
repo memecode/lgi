@@ -144,11 +144,8 @@ bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 	return Status;
 }
 
-LAutoPtr<LSurface> LClipBoard::Bitmap()
+void LClipBoard::Bitmap(BitmapCb Callback)
 {
-	LAutoPtr<LSurface> img;
-
-	return img;
 }
 
 bool LClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmpty)
@@ -159,10 +156,8 @@ bool LClipBoard::Binary(FormatType Format, uchar *Ptr, ssize_t Len, bool AutoEmp
 	return false;
 }
 
-::LString::Array LClipBoard::Files()
+void LClipBoard::Files(FilesCb Callback)
 {
-	::LString::Array a;
-	return a;
 }
 
 bool LClipBoard::Files(::LString::Array &a, bool AutoEmpty)
@@ -170,14 +165,7 @@ bool LClipBoard::Files(::LString::Array &a, bool AutoEmpty)
 	return false;
 }
 
-struct ReceiveData
+void LClipBoard::Binary(FormatType Format, BinaryCb Callback)
 {
-	LAutoPtr<uint8_t,true> *Ptr;
-	ssize_t *Len;
-};
-
-bool LClipBoard::Binary(FormatType Format, LAutoPtr<uint8_t,true> &Ptr, ssize_t *Len)
-{
-	return false;
 }
 
