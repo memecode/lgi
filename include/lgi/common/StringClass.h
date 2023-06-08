@@ -187,9 +187,9 @@ public:
 				return;
 			
 			// Measure size:
-			int bytes = 0;
+			ptrdiff_t bytes = 0;
 			uint8_t utf8[6];
-			for (size_t i=0;
+			for (ptrdiff_t i=0;
 				(wchars >= 0 && i < wchars) ||
 				(wchars < 0 && utf32[i]);
 				i++)
@@ -207,7 +207,7 @@ public:
 				
 			// Convert string:
 			uint8_t *p = (uint8_t*) Str->Str;
-			for (size_t i=0;
+			for (ptrdiff_t i=0;
 				(wchars >= 0 && i < wchars) ||
 				(wchars < 0 && utf32[i]);
 				i++)
@@ -222,6 +222,7 @@ public:
 		else assert(!"No valid mapping for UTF32 to char16?");
 	}
 
+	/*
 	#if defined(_WIN32) || defined(MAC)
 	/// const uint32* constructor
 	LString(const uint32_t *str, ptrdiff_t chars = -1)
@@ -257,6 +258,7 @@ public:
 		}
 	}
 	#endif
+	*/
 
 	/// LString constructor
 	LString(const LString &s)

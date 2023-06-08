@@ -118,7 +118,7 @@ bool FindInPath(LString &Exe)
 	return false;
 }
 
-LAutoString ToNativePath(const char *s)
+LAutoString ToNativeStr(const char *s)
 {
 	LAutoString a(NewStr(s));
 	if (a)
@@ -252,6 +252,21 @@ class MakefileThread : public LThread, public LCancel
 	bool BuildAfterwards;
 	bool HasError;
 	
+	void ToNativePath(char *in)
+	{
+		for (auto s = in; *s; s++)
+		{
+			if (Platform == PlatformWin)
+			{
+				if (*s == '/') *s = '\\';
+			}
+			else
+			{
+				if (*s == '\\') *s = '/';
+			}
+		}
+	}
+
 public:
 	static int Instances;
 
@@ -632,7 +647,7 @@ public:
 				for (int i=0; i<Paths.Length(); i++)
 				{
 					auto p = Paths[i];
-					auto pn = ToNativePath(p);					
+					auto pn = ToNativeStr(p);					
 					if (pn.Get()[0] != '`' && !Proj->CheckExists(pn))
 						OnError("%s:%i - Include path '%s' doesn't exist.\n", _FL, pn.Get());
 					else if (!Inc.Find(pn))
@@ -647,7 +662,7 @@ public:
 				for (int i=0; i<Paths.Length(); i++)
 				{
 					auto p = Paths[i];
-					auto pn = ToNativePath(p);
+					auto pn = ToNativeStr(p);
 					if (pn.Get()[0] != '`' && !Proj->CheckExists(pn))
 						OnError("%s:%i - System include path '%s' doesn't exist (from %s).\n",
 							_FL, pn.Get(),
@@ -738,24 +753,28 @@ public:
 				if (n->GetType() == NodeSrc)
 				{
 					auto f = n->GetFileName();
-					auto path = ToPlatformPath(f, Platform);
 
 					LFile::Path p;
-					if (LIsRelativePath(path))
+					if (LIsRelativePath(f))
 					{
 						p = Base.Get();
-						p += path;
+						p += f;
 					}
 					else
 					{
-						p = path;
+						p = f;
 					}
 
 					auto rel = LMakeRelativePath(Base, p.GetFull());
-					if (rel && rel.Find("./") == 0)
-						rel = rel(2,-1);
+					if (rel)
+					{
+						if (rel.Find("./") == 0)
+							rel = rel(2, -1);
+					}
 
-					SourceFiles.Add(rel ? rel : path);
+					LString path = rel ? rel : f;
+					ToNativePath(path);
+					SourceFiles.Add(path);
 
 					if (true)
 					{
@@ -824,7 +843,6 @@ public:
 						if (DepBase && Base && TargetFile)
 						{
 							LString Rel = LMakeRelativePath(Base, DepBase);
-							ToNativePath(Rel);
 							
 							// Add tag to target name
 							auto Parts = TargetFile.SplitDelimit(".");
@@ -834,14 +852,16 @@ public:
 							LFile::Path Buf(Rel);
 							Buf += "$(BuildDir)";
 							Buf += TargetFile;
-							m.Print(" %s", Buf.GetFull().Get());
+							auto FullBuf = Buf.GetFull();
+							ToNativePath(FullBuf);
+							m.Print(" %s", FullBuf.Get());
 							
 							LArray<char*> AllDeps;
 							Dep->GetAllDependencies(AllDeps, Platform);
 							LAssert(AllDeps.Length() > 0);
 							AllDeps.Sort(StrSort);
 
-							Rules.Print("%s : ", Buf.GetFull().Get());
+							Rules.Print("%s : ", FullBuf.Get());
 							for (int i=0; i<AllDeps.Length(); i++)
 							{
 								if (i)
@@ -859,6 +879,7 @@ public:
 
 							AllDeps.DeleteArrays();
 
+							ToNativePath(Rel);
 							Rules.Print("\n\texport Build=$(Build); \\\n"
 										"\t$(MAKE) -C %s",
 										Rel.Get());
