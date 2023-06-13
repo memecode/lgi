@@ -320,26 +320,14 @@ void LSubMenu::OnActivate(bool a)
 
 int LSubMenu::Float(LView *From, int x, int y, int Button)
 {
-	#ifdef __GTK_H__
+	if (!From)
+		return -1;
+		
 	LWindow *Wnd = From->GetWindow();
 	if (!Wnd)
 		return -1;
+
 	Wnd->Capture(false);
-	#else
-	while (From && !From->Handle())
-	{
-		From = dynamic_cast<LView*>(From->GetParent());
-	}		
-	
-	if (!From || !From->Handle())
-	{
-		LOG("%s:%i - No menu handle\n", _FL);
-		return -1;
-	}
-	
-	if (From->IsCapturing())
-		From->Capture(false);
-	#endif
 
 	ActiveTs = LCurrentTime();
 
@@ -352,11 +340,24 @@ int LSubMenu::Float(LView *From, int x, int y, int Button)
 	int MenuId = 0;
 	_ContextMenuId = &MenuId;
 
-	LPoint Pos(x, y);
-	gtk_menu_popup(GTK_MENU(Info.obj),
-					NULL, NULL, NULL, NULL,
-					Button,
-					gtk_get_current_event_time());
+	#if 1
+		LPoint ori(x, y);
+		Wnd->PointToView(ori);
+		GdkRectangle rect = {ori.x, ori.y, 1, 1};
+
+		gtk_menu_popup_at_rect(	GTK_MENU(Info.obj),
+								gtk_widget_get_window(GTK_WIDGET(Wnd->WindowHandle())),
+								&rect,
+								GDK_GRAVITY_CENTER,
+								GDK_GRAVITY_CENTER,
+								NULL);
+	#else
+		LPoint Pos(x, y);
+		gtk_menu_popup(	GTK_MENU(Info.obj),
+						NULL, NULL, NULL, NULL,
+						Button,
+						gtk_get_current_event_time());
+	#endif
 
 	InLoop = true;
 	gtk_main();
