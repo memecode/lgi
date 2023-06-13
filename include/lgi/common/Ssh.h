@@ -11,6 +11,10 @@
 
 #define DEFAULT_PROMPT		"# "
 
+#define IS_SSH_VER(maj, min)	((LIBSSH_VERSION_MAJOR < maj) \
+								 || \
+								 ((LIBSSH_VERSION_MAJOR == maj) && (LIBSSH_VERSION_MINOR >= min)))
+
 class LSsh
 {
 	friend struct IoProgress;
@@ -270,33 +274,64 @@ public:
 		}
 		// Log->Print("%s:%i - ssh_connect ok.\n", _FL);
 
+		#if IS_SSH_VER(0, 8)
+		
 		auto State = ssh_session_is_known_server(Ssh);
 		if (State != SSH_KNOWN_HOSTS_OK &&
 			!OverideUnknownHost)
+		
+		#else
+
+		auto State = ssh_is_server_known(Ssh);
+		if (State != SSH_SERVER_KNOWN_OK &&
+			!OverideUnknownHost)
+		
+		#endif
+		
 		{
 			// We don't know of the host... ask the user to confirm.
 			if (HostCb)
 			{
 				switch (State)
 				{
+					#if IS_SSH_VER(0, 8)
 					case SSH_KNOWN_HOSTS_CHANGED:
+					#else
+					case SSH_SERVER_KNOWN_CHANGED:
+					#endif
 						HostCb(	"The server key has changed. Either you are under attack or the administrator changed the key. You HAVE to warn the user about a possible attack.",
 								SshHostChanged);
 						break;
+					#if IS_SSH_VER(0, 8)
 					case SSH_KNOWN_HOSTS_OTHER:
+					#else
+					case SSH_SERVER_FOUND_OTHER:
+					#endif
 						HostCb(	"The server gave use a key of a type while we had an other type recorded. It is a possible attack.",
 								SshHostOther);
 						break;
+					#if IS_SSH_VER(0, 8)
 					case SSH_KNOWN_HOSTS_UNKNOWN:
+					#else
+					case SSH_SERVER_NOT_KNOWN:
+					#endif
 						HostCb(	"The server is unknown. You should confirm the public key hash is correct.",
 								SshUnknown);
 						break;
+					#if IS_SSH_VER(0, 8)
 					case SSH_KNOWN_HOSTS_NOT_FOUND:
-						HostCb(	"This host is unknown.",
+					#else
+					case SSH_SERVER_FILE_NOT_FOUND:
+					#endif
+						HostCb(	"Host list not found.",
 								SshNotFound);
 						break;
 					default:
+					#if IS_SSH_VER(0, 8)
 					case SSH_KNOWN_HOSTS_ERROR:
+					#else
+					case SSH_SERVER_ERROR:
+					#endif
 						HostCb(	"There had been an error checking the host.",
 								SshError);
 						break;
