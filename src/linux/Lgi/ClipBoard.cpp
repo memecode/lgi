@@ -48,6 +48,16 @@ LClipBoard::~LClipBoard()
 	DeleteObj(d);
 }
 
+LString LClipBoard::FmtToStr(FormatType Fmt)
+{
+	return gdk_atom_name(Fmt);
+}
+
+LClipBoard::FormatType LClipBoard::StrToFmt(LString Str)
+{
+	return gdk_atom_intern(Str, false);
+}
+
 bool LClipBoard::Empty()
 {
 	if (d->c)
@@ -62,9 +72,20 @@ bool LClipBoard::Empty()
 	return false;
 }
 
-bool LClipBoard::EnumFormats(::LArray<FormatType> &Formats)
+bool LClipBoard::EnumFormats(LArray<FormatType> &Formats)
 {
-	return false;
+	GdkAtom *targets = NULL;
+	gint n_targets = 0;
+	if (!gtk_clipboard_wait_for_targets(d->c,
+								&targets,
+								&n_targets))
+		return false;
+
+	for (auto i = 0; i < n_targets; i++)
+		Formats.Add(targets[i]);
+	
+	g_free(targets);
+	return Formats.Length() > 0;
 }
 
 bool LClipBoard::Html(const char *doc, bool AutoEmpty)
@@ -72,9 +93,25 @@ bool LClipBoard::Html(const char *doc, bool AutoEmpty)
 	return false;
 }
 
-::LString LClipBoard::Html()
+LString LClipBoard::Html()
 {
-	return ::LString();
+	GdkAtom format = NULL;
+	gsize length = 0;
+	auto buffer = gtk_text_buffer_new(NULL);
+	auto richText = gtk_clipboard_wait_for_rich_text(d->c,
+													buffer,
+													&format,
+													&length);
+
+	LString r;
+	if (richText)
+	{
+		r.Set((char*)richText, length);
+		g_free(richText);
+	}
+	g_object_unref(buffer);
+	
+	return r;
 }
 
 bool LClipBoard::Text(const char *Str, bool AutoEmpty)
@@ -436,9 +473,9 @@ bool LClipBoard::Files(LString::Array &a, bool AutoEmpty)
 {
 	GtkTargetEntry targets[3] =
 	{
-		{ "text/uri-list",					0, UriList },
-		{ "x-special/gnome-copied-files",	0, GnomeCopiedFiles },
-		{ "UTF8_STRING", 					0, Utf8String },
+		{ (Gtk::gchar*)"text/uri-list",					0, UriList },
+		{ (Gtk::gchar*)"x-special/gnome-copied-files",	0, GnomeCopiedFiles },
+		{ (Gtk::gchar*)"UTF8_STRING", 					0, Utf8String },
 	};
 
 	return gtk_clipboard_set_with_data(

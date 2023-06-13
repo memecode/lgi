@@ -3793,7 +3793,27 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		{
 			LTextView3 *Doc = FocusEdit();
 			if (Doc)
-				Doc->PostEvent(M_PASTE);
+			{
+				#if 1
+				
+					LClipBoard c(this);
+					LArray<LClipBoard::FormatType> Formats;
+					auto r = c.EnumFormats(Formats);
+					GetBuildLog()->Print("r=%i\n", r);
+					for (auto f: Formats)
+					{
+						GetBuildLog()->Print("f=%s\n", LClipBoard::FmtToStr(f).Get());
+					}
+					
+					auto html = c.Html();
+					GetBuildLog()->Print("html='%s'\n", html.Get());
+				
+				#else
+				
+					Doc->PostEvent(M_PASTE);
+				
+				#endif
+			}
 			break;
 		}
 		case IDM_FIND_IN_FILES:

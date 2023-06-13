@@ -1,6 +1,6 @@
 /// \file
-#ifndef _GCLIPBOARD_H
-#define _GCLIPBOARD_H
+#ifndef _CLIPBOARD_H
+#define _CLIPBOARD_H
 
 #include <functional>
 
@@ -21,12 +21,16 @@ class LgiClass LClipBoard
 
 public:
 	/// On windows, this equates to a CF_TEXT, CF_BITMAP, CF_DIB type #define
+	#ifdef __GTK_H__
+	typedef Gtk::GdkAtom FormatType;
+	#else
 	typedef uint32_t FormatType;
+	#endif
 	typedef std::function<void(LAutoPtr<LSurface> Img, LString Err)> BitmapCb;
 	typedef std::function<void(LString Data, LString Err)> BinaryCb;
 	typedef std::function<void(LString::Array Files, LString Err)> FilesCb;
 	static LString FmtToStr(FormatType Fmt);
-	static FormatType StrToFmt(LString Fmt);
+	static FormatType StrToFmt(LString Str);
 
 	/// Creates the clipboard access object.
 	LClipBoard(LView *o);
