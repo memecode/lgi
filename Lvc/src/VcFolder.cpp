@@ -1133,13 +1133,13 @@ VcLeaf *VcFolder::FindLeaf(const char *Path, bool OpenTree)
 
 bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 {
-	LHashTbl<StrKey<char>, VcCommit*> Map;
-	for (auto pc: Log)
-		Map.Add(pc->GetRev(), pc);
-
 	int Skipped = 0, Errors = 0;
 	VcLeaf *File = Params ? FindLeaf(Params->Str, true) : NULL;
 	LArray<VcCommit*> *Out = File ? &File->Log : &Log;
+
+	LHashTbl<StrKey<char>, VcCommit*> Map;
+	for (auto pc: *Out)
+		Map.Add(pc->GetRev(), pc);
 
 	if (File)
 	{
@@ -1156,9 +1156,15 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 			LString::Array c;
 			c.SetFixedLength(false);
 			char *prev = s.Get();
+			
+			#if 0
+			LFile::Path outPath("~/code/dump.txt");
+			LFile out(outPath.Absolute(), O_WRITE);
+			out.Write(s);
+			#endif
 
 			for (char *i = s.Get(); *i; )
-			{
+			{				
 				if (!strnicmp(i, "commit ", 7))
 				{
 					if (i > prev)
