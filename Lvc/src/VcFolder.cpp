@@ -1065,7 +1065,7 @@ bool VcFolder::ParseRevList(int Result, LString s, ParseParams *Params)
 				}
 				else
 				{
-					LAssert(!"Parse failed.");
+					// LAssert(!"Parse failed.");
 					LgiTrace("%s:%i - Failed:\n%s\n\n", _FL, Commit.Get());
 					Errors++;
 				}

@@ -948,6 +948,7 @@ bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 		}
 	}
 
+	m.Target = this;
 	m.SetModifer(mask);
 	m.Left((mask & GDK_BUTTON1_MASK) != 0);
 	m.Middle((mask & GDK_BUTTON2_MASK) != 0);
