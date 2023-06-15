@@ -372,37 +372,8 @@ LXmlTag *VcFolder::Save()
 
 const char *VcFolder::GetVcName()
 {
-	const char *Def = NULL;
-	switch (GetType())
-	{
-		case VcGit:
-			Def = "git";
-			break;
-		case VcSvn:
-			Def = "svn";
-			break;
-		case VcHg:
-			Def = "hg";
-			break;
-		case VcCvs:
-			Def = "cvs";
-			break;
-		default:
-			break;
-	}
-	
 	if (!VcCmd)
-	{
-		LString Opt;
-		Opt.Printf("%s-path", Def);
-		LVariant v;
-		if (d->Opts.GetValue(Opt, v))
-			VcCmd = v.Str();
-	}
-	
-	if (!VcCmd)
-		VcCmd = Def;
-	
+		VcCmd = d->GetVcName(GetType());
 	return VcCmd;
 }
 
@@ -3875,87 +3846,6 @@ bool VcFolder::RenameBranch(LString NewName, LArray<VcCommit*> &Revs)
 	}
 
 	return true;
-}
-
-void VcFolder::GetVersion()
-{
-	auto t = GetType();
-	switch (t)
-	{
-		case VcGit:
-		case VcSvn:
-		case VcHg:
-		case VcCvs:
-			StartCmd("--version", &VcFolder::ParseVersion, NULL, LogNormal);
-			break;
-		case VcPending:
-			break;
-		default:
-			OnCmdError(LString(), LLoadString(IDS_ERR_NO_VCS_FOUND));
-			break;
-	}
-}
-
-bool VcFolder::ParseVersion(int Result, LString s, ParseParams *Params)
-{
-	if (Result)
-		return false;
-	
-	auto p = s.SplitDelimit();
-	switch (GetType())
-	{
-		case VcGit:
-		{
-			if (p.Length() > 2)
-			{
-				ToolVersion[GetType()] = Ver2Int(p[2]);
-				printf("Git version: %s\n", p[2].Get());
-			}
-			else
-				LAssert(0);
-			break;
-		}
-		case VcSvn:
-		{
-			if (p.Length() > 2)
-			{
-				ToolVersion[GetType()] = Ver2Int(p[2]);
-				printf("Svn version: %s\n", p[2].Get());
-			}
-			else
-				LAssert(0);
-			break;
-		}
-		case VcHg:
-		{
-			if (p.Length() >= 5)
-			{
-				auto Ver = p[4].Strip("()");
-				ToolVersion[GetType()] = Ver2Int(Ver);
-				printf("Hg version: %s\n", Ver.Get());
-			}
-			break;
-		}
-		case VcCvs:
-		{
-			#ifdef _DEBUG
-			for (auto i : p)
-				printf("i='%s'\n", i.Get());
-			#endif
-
-			if (p.Length() > 1)
-			{
-				auto Ver = p[2];
-				ToolVersion[GetType()] = Ver2Int(Ver);
-				printf("Cvs version: %s\n", Ver.Get());
-			}
-			break;
-		}
-		default:
-			break;
-	}
-
-	return false;
 }
 
 bool VcFolder::ParseAddFile(int Result, LString s, ParseParams *Params)

@@ -741,6 +741,100 @@ public:
 	}
 };
 
+class GetVcsVersions : public LThread
+{
+	AppPriv *d = NULL;
+
+public:
+	GetVcsVersions(AppPriv *priv) : LThread("GetVcsVersions")
+	{
+		d = priv;
+		Run();
+	}
+
+	bool ParseVersion(int Result, VersionCtrl type, LString s)
+	{
+		if (Result)
+			return false;
+
+		auto p = s.SplitDelimit();
+		switch (type)
+		{
+		case VcGit:
+		{
+			if (p.Length() > 2)
+			{
+				ToolVersion[type] = Ver2Int(p[2]);
+				printf("Git version: %s\n", p[2].Get());
+			}
+			else
+				LAssert(0);
+			break;
+		}
+		case VcSvn:
+		{
+			if (p.Length() > 2)
+			{
+				ToolVersion[type] = Ver2Int(p[2]);
+				printf("Svn version: %s\n", p[2].Get());
+			}
+			else
+				LAssert(0);
+			break;
+		}
+		case VcHg:
+		{
+			if (p.Length() >= 5)
+			{
+				auto Ver = p[4].Strip("()");
+				ToolVersion[type] = Ver2Int(Ver);
+				printf("Hg version: %s\n", Ver.Get());
+			}
+			break;
+		}
+		case VcCvs:
+		{
+			if (p.Length() > 1)
+			{
+				auto Ver = p[2];
+				ToolVersion[type] = Ver2Int(Ver);
+				printf("Cvs version: %s\n", Ver.Get());
+			}
+			break;
+		}
+		default:
+			break;
+		}
+
+		return false;
+	}
+
+
+	int Main()
+	{
+		VersionCtrl types[] = {
+			VcCvs,
+			VcSvn,
+			VcHg,
+			VcGit
+		};
+
+		for (int i=0; i<CountOf(types); i++)
+		{
+			auto Exe = d->GetVcName(types[i]);
+			LSubProcess sub(Exe, "--version");
+			if (sub.Start())
+			{
+				LStringPipe p;
+				auto result = sub.Communicate(&p);
+				ParseVersion(result, types[i], p.NewLStr());
+			}
+		}
+
+		return 0;
+	}
+};
+
 class App : public LWindow, public AppPriv
 {
 	LAutoPtr<LImageList> ImgLst;
@@ -888,21 +982,14 @@ public:
 		}
 		if (f)
 		{
-			bool Req[VcMax] = {0};
-			
+			new GetVcsVersions(this);
+
 			for (auto c: f->Children)
 			{
 				if (c->IsTag(OPT_Folder))
 				{
 					auto f = new VcFolder(this, c);
-				
 					Tree->Insert(f);
-					
-					if (!Req[f->GetType()])
-					{
-						Req[f->GetType()] = true;
-						f->GetVersion();
-					}
 				}
 			}
 			Opts.Unlock();

@@ -62,6 +62,7 @@ public:
 extern int Ver2Int(LString v);
 extern int ToolVersion[VcMax];
 extern int LstCmp(LListItem *a, LListItem *b, int Col);
+const char *GetVcName(VersionCtrl type);
 
 struct Result
 {

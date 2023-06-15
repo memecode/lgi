@@ -197,6 +197,40 @@ struct AppPriv
 
 	VersionCtrl DetectVcs(VcFolder *Fld);
 	class VcFile *FindFile(const char *Path);
+
+	LString GetVcName(VersionCtrl type)
+	{
+		const char* Def = NULL;
+		switch (type)
+		{
+			case VcGit:
+				Def = "git";
+				break;
+			case VcSvn:
+				Def = "svn";
+				break;
+			case VcHg:
+				Def = "hg";
+				break;
+			case VcCvs:
+				Def = "cvs";
+				break;
+			default:
+				break;
+		}
+
+		LString VcCmd;
+		LString Opt;
+		Opt.Printf("%s-path", Def);
+		LVariant v;
+		if (Opts.GetValue(Opt, v))
+			VcCmd = v.Str();
+
+		if (!VcCmd)
+			VcCmd = Def;
+
+		return VcCmd;
+	}
 };
 
 #include "SshConnection.h"
