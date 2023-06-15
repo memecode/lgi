@@ -507,18 +507,34 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 			LString::Array a = s.SplitDelimit("\r\n");
 			for (auto &l: a)
 			{
-				LString::Array c = l.SplitDelimit(" \t");
-				if (c[0].Equals("*"))
+				LString::Array c;
+				char *s = l.Get();
+				while (*s && IsWhiteSpace(*s)) s++;
+				bool IsCur = *s == '*';
+				if (IsCur)
+					s++;
+				while (*s && IsWhiteSpace(*s)) s++;
+				if (*s == '(')
 				{
-					CurrentBranch = c[1];					
-					AddGitName(c[2], CurrentBranch);
-					Branches.Add(CurrentBranch, new VcBranch(CurrentBranch, c[2]));
+					s++;
+					auto e = strchr(s, ')');
+					if (e)
+					{
+						c.New().Set(s, e - s);
+						e++;
+						c += LString(e).SplitDelimit(" \t");
+					}
 				}
 				else
 				{
-					AddGitName(c[1], c[0]);
-					Branches.Add(c[0], new VcBranch(c[0], c[1]));
+					c = LString(s).SplitDelimit(" \t");
 				}
+
+				if (IsCur)
+					CurrentBranch = c[0];
+
+				AddGitName(c[1], c[0]);
+				Branches.Add(c[0], new VcBranch(c[0], c[1]));
 			}
 			break;
 		}

@@ -46,8 +46,12 @@ bool SshConnection::DetectVcs(VcFolder *Fld)
 
 bool SshConnection::Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Parser, ParseParams *Params)
 {
-	if (!Fld || !Exe || !Parser)
+	bool HasCallback = Params && Params->Callback;
+	if (!Fld || !Exe || (!Parser && !HasCallback))
+	{
+		LAssert(!"Param error.");
 		return false;
+	}
 
 	LAutoPtr<SshParams> p(new SshParams(this));
 	p->f = Fld;
