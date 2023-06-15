@@ -341,9 +341,11 @@ int LSubMenu::Float(LView *From, int x, int y, int Button)
 	_ContextMenuId = &MenuId;
 
 	#if 1
+
 		LPoint ori(x, y);
 		Wnd->PointToView(ori);
 		GdkRectangle rect = {ori.x, ori.y, 1, 1};
+		// printf("ori=%i,%i\n", ori.x, ori.y);
 
 		gtk_menu_popup_at_rect(	GTK_MENU(Info.obj),
 								gtk_widget_get_window(GTK_WIDGET(Wnd->WindowHandle())),
@@ -351,12 +353,15 @@ int LSubMenu::Float(LView *From, int x, int y, int Button)
 								GDK_GRAVITY_CENTER,
 								GDK_GRAVITY_CENTER,
 								NULL);
-	#else
+								
+	#else // Old deprecated call to gtk_menu_popup
+		
 		LPoint Pos(x, y);
 		gtk_menu_popup(	GTK_MENU(Info.obj),
 						NULL, NULL, NULL, NULL,
 						Button,
 						gtk_get_current_event_time());
+	
 	#endif
 
 	InLoop = true;
@@ -1090,13 +1095,33 @@ void LMenuItem::PaintIcon(Gtk::cairo_t *cr)
 	GtkAllocation a;
 	gtk_widget_get_allocation(wid, &a);
 
-	GdkRGBA bk = {0};
-	gtk_style_context_get_background_color(	gtk_widget_get_style_context(wid),
-											gtk_widget_get_state_flags(wid),
-											&bk);
-
 	LScreenDC Dc(cr, a.width, a.height);
-	il->Draw(&Dc, 7, 5, _Icon, bk.alpha ? LColour(bk) : LColour::White);
+
+	#if 1
+
+		LMemDC Buf(a.width, a.height, System32BitColourSpace);
+
+		if (auto StyleCtx = gtk_widget_get_style_context(wid))
+			gtk_render_background(	StyleCtx,
+									Buf.Handle(),
+									a.x,
+									a.y,
+									a.width,
+									a.height);
+		
+		il->Draw(&Buf, 4, 5, _Icon, LColour(), !Enabled());
+		Dc.Blt(a.x, a.y, &Buf);
+	
+	#else // old deprecated gtk_style_context_get_background_color call.
+
+		GdkRGBA bk = {0};
+		gtk_style_context_get_background_color(	gtk_widget_get_style_context(wid),
+												gtk_widget_get_state_flags(wid),
+												&bk);
+
+		il->Draw(&Dc, 7, 5, _Icon, bk.alpha ? LColour(bk) : LColour::White);
+	
+	#endif
 }
 
 void LMenuItem::Icon(int i)
