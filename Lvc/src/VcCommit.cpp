@@ -57,6 +57,24 @@ VcCommit::VcCommit(AppPriv *priv, VcFolder *folder) : Pos(32, -1)
 	Parents.SetFixedLength(false);
 }
 
+VcCommit::VcCommit(const VcCommit &c)
+{
+	VcCommit::Instances++;
+	d = c.d;
+	Folder = c.Folder;
+	Vcs = c.Vcs;
+
+	Rev = c.Rev;
+	Index = c.Index;
+	Parents = c.Parents;
+	Branch = c.Branch;	
+	Author = c.Author;
+	Ts = c.Ts;
+	Msg = c.Msg;
+	
+	Files = c.Files;
+}
+
 VcCommit::~VcCommit()
 {
 	for (auto e: Edges)

@@ -4354,7 +4354,6 @@ VcLeaf::VcLeaf(VcFolder *parent, LTreeItem *Item, LString uri, LString leaf, boo
 	LAssert(Uri);
 	Leaf = leaf;
 	Folder = folder;
-	Tmp = NULL;
 	Item->Insert(this);
 
 	if (Folder)
@@ -4366,7 +4365,11 @@ VcLeaf::VcLeaf(VcFolder *parent, LTreeItem *Item, LString uri, LString leaf, boo
 
 VcLeaf::~VcLeaf()
 {
-	Log.DeleteObjects();
+	for (auto l: Log)
+	{
+		if (!l->GetList())
+			delete l;
+	}
 }
 
 LString VcLeaf::Full()
@@ -4481,14 +4484,20 @@ void VcLeaf::Select(bool b)
 
 void VcLeaf::ShowLog()
 {
-	if (Log.Length())
-	{	
-		d->Commits->RemoveAll();
-		Parent->DefaultFields();
-		Parent->UpdateColumns();
-		for (auto i: Log)
-			d->Commits->Insert(i);
-	}
+	if (!Log.Length())
+		return;
+
+	d->Commits->RemoveAll();
+
+	Parent->DefaultFields();
+	Parent->UpdateColumns();
+
+	for (auto i: Log)
+		// We make a copy of the commit here so that the LList owns the copied object,
+		// and this object still owns 'i'.
+		d->Commits->Insert(new VcCommit(*i), -1, false);
+	d->Commits->UpdateAllItems();
+	d->Commits->ResizeColumnsToContent();
 }
 
 void VcLeaf::OnMouseClick(LMouse &m)

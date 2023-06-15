@@ -345,12 +345,12 @@ public:
 
 class VcLeaf : public LTreeItem
 {
-	AppPriv *d;
-	VcFolder *Parent;
-	bool Folder;
+	AppPriv *d = NULL;
+	VcFolder *Parent = NULL;
+	bool Folder = false;
 	LUri Uri;
 	LString Leaf;
-	LTreeItem *Tmp;
+	LTreeItem *Tmp = NULL;
 
 	void DoExpand();
 

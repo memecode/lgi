@@ -156,8 +156,6 @@ public:
 	virtual void OnColumnNotify(int Col, int64 Data) { Update(); }
 };
 
-// typedef int (*LListCompareFunc)(LListItem *a, LListItem *b, NativeInt Data);
-
 class LListItems
 {
 protected:
@@ -231,21 +229,6 @@ public:
 	{
 		return Items.end();
 	}
-
-	/*
-	template<typename T>
-	bool Iterate(T *&Ptr)
-	{
-		if (Ptr)
-			// Next
-			Ptr = dynamic_cast<T*>(Items.Next());
-		else
-			// First
-			Ptr = dynamic_cast<T*>(Items.First());
-
-		return Ptr != NULL;
-	}
-	*/
 };
 
 /// List widget

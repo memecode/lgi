@@ -350,8 +350,8 @@ int LSubMenu::Float(LView *From, int x, int y, int Button)
 		gtk_menu_popup_at_rect(	GTK_MENU(Info.obj),
 								gtk_widget_get_window(GTK_WIDGET(Wnd->WindowHandle())),
 								&rect,
-								GDK_GRAVITY_CENTER,
-								GDK_GRAVITY_CENTER,
+								GDK_GRAVITY_NORTH_WEST,
+								GDK_GRAVITY_NORTH_WEST,
 								NULL);
 								
 	#else // Old deprecated call to gtk_menu_popup
@@ -1102,12 +1102,19 @@ void LMenuItem::PaintIcon(Gtk::cairo_t *cr)
 		LMemDC Buf(a.width, a.height, System32BitColourSpace);
 
 		if (auto StyleCtx = gtk_widget_get_style_context(wid))
+		{
 			gtk_render_background(	StyleCtx,
 									Buf.Handle(),
-									a.x,
-									a.y,
-									a.width,
-									a.height);
+									0,
+									0,
+									Buf.X(),
+									Buf.Y());
+		}
+		else
+		{
+			Buf.Colour(LColour::Black);
+			Buf.Rectangle();
+		}
 		
 		il->Draw(&Buf, 4, 5, _Icon, LColour(), !Enabled());
 		Dc.Blt(a.x, a.y, &Buf);

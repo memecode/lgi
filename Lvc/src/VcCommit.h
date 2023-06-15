@@ -39,13 +39,13 @@ class VcCommit : public LListItem
 	bool Current;
 
 protected:
-	AppPriv *d;
-	VcFolder *Folder;
-	VersionCtrl Vcs;
+	AppPriv *d = NULL;
+	VcFolder *Folder = NULL;
+	VersionCtrl Vcs = VcNone;
 
 	// Commit Meta
 	LString Rev;
-	int64_t Index;
+	int64_t Index = -1; // Revision index (svn/hg)
 	LString::Array Parents;
 	LString Branch;
 	LString Author;
@@ -59,12 +59,13 @@ public:
 
 	LString::Array Files;
 	LArray<VcEdge*> Edges;
-	int NodeIdx;
-	int Idx;
+	int NodeIdx = -1; // Used by LinkParents
+	int Idx = -1; // Used by LinkParents
 	LColour NodeColour;
 	LHashTbl<PtrKey<VcEdge*>, int> Pos;
 
 	VcCommit(AppPriv *priv, VcFolder *folder);
+	VcCommit(const VcCommit &c);
 	~VcCommit();
 
 	char *GetRev();
