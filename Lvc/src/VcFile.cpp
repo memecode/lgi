@@ -185,9 +185,11 @@ void VcFile::OnMouseClick(LMouse &m)
 			int CurEol = LocalPath ? GetEol(LocalPath) : 0;
 			auto Ln = s.AppendSub("Line Endings");
 			auto Item = Ln->AppendItem("LF", IDM_EOL_LF);
-			if (Item && CurEol == IDM_EOL_LF) Item->Checked(true);
+			if (Item && CurEol == IDM_EOL_LF)
+				Item->Checked(true);
 			Ln->AppendItem("CRLF", IDM_EOL_CRLF);
-			if (Item && CurEol == IDM_EOL_CRLF) Item->Checked(true);
+			if (Item && CurEol == IDM_EOL_CRLF)
+				Item->Checked(true);
 			Ln->AppendItem("Auto", IDM_EOL_AUTO);
 		}
 

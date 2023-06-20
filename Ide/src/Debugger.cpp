@@ -6,10 +6,10 @@
 #endif
 #include "lgi/common/Lgi.h"
 #include "lgi/common/SubProcess.h"
-#include "lgi/common/Token.h"
 #include "lgi/common/DocView.h"
 #include "lgi/common/StringClass.h"
 #include "lgi/common/LgiString.h"
+#include "lgi/common/Token.h"
 #include "Debugger.h"
 
 #define DEBUG_STOP_ON_GTK_ERROR	0
@@ -24,6 +24,7 @@ public:
 	virtual LString GetResponse(const char *c) = 0;
 };
 
+/*
 class Visualizer
 {
 public:
@@ -68,6 +69,7 @@ public:
 		return true;
 	}
 };
+*/
 
 class Gdb : public LDebugger, public LThread, public Callback
 {
@@ -75,6 +77,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 	LAutoPtr<LSubProcess> Sp;
 	LString Exe, Args, InitDir;
 	LString ChildEnv;
+	LString PrettyPrintPy;
 	bool RunAsAdmin = false;
 	bool AtPrompt = false;
 	char Line[256], *LinePtr = NULL;
@@ -85,7 +88,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 	int BreakPointIdx = -1;
 	int ProcessId = -1;
 	bool SuppressNextFileLine = false;
-	LArray<Visualizer*> Vis;
+	// LArray<Visualizer*> Vis;
 	LStream *Log = NULL;
 
 	LMutex StateMutex;
@@ -654,7 +657,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 	void Ungrab()
 	{
 		#if defined(LINUX)
-		printf("%s:%i - XF86Ungrab...\n", _FL);
+		// printf("%s:%i - XF86Ungrab...\n", _FL);
 		system("xdotool key XF86Ungrab");
 		#else
 		printf("%s:%i - Impl some ungrab functionality here.\n", _FL);
@@ -667,7 +670,19 @@ public:
 		State = Init;
 		LinePtr = Line;
 		
-		Vis.Add(new LStringVis);
+		LFile::Path pp(LSP_APP_INSTALL);
+		pp += "../utils/gdb-pretty-print.py";
+		if (pp.Exists())
+		{
+			PrettyPrintPy = pp.GetFull();		
+			LgiTrace("%s:%i - Gdb.Print='%s'\n", _FL, PrettyPrintPy.Get());
+		}
+		else
+		{
+			LgiTrace("%s:%i - Didn't find Gdb.Print='%s'\n", _FL, pp.GetFull().Get());
+		}
+		
+		// Vis.Add(new LStringVis);
 	}
 	
 	~Gdb()
@@ -863,6 +878,12 @@ public:
 				Cmd("handle SIGTTOU ignore nostop");
 				Cmd("handle SIG34 ignore nostop");
 				Cmd("handle SIGPIPE nostop");
+				if (PrettyPrintPy)
+				{
+					LString c;
+					c.Printf("python exec(open(\"%s\").read())", PrettyPrintPy.Get());
+					Cmd(c);
+				}
 			}
 			
 			LString a;
@@ -1106,7 +1127,7 @@ public:
 	
 	void ParseVariables(const char *a, LArray<Variable> &vars, LDebugger::Variable::ScopeType scope, bool Detailed)
 	{
-		LToken t(a, "\r\n");
+		auto t = LString(a).SplitDelimit("\r\n");
 		LString CurLine;
 		for (unsigned i=0; i<t.Length(); i++)
 		{
@@ -1121,6 +1142,7 @@ public:
 			auto EqPos = CurLine.Find("=");
 			if (EqPos > 0)
 			{
+				char *end = NULL;
 				char *val = CurLine.Get() + EqPos + 1;
 				while (*val && strchr(WhiteSpace, *val)) val++;
 				
@@ -1150,6 +1172,12 @@ public:
 						else
 							v.Value = (int)tmp;
 					}
+				}
+				else if (*val == '(' && (end = strchr(val + 1, ')')))
+				{
+					val++;
+					v.Type.Set(val, end - val);
+					v.Value.OwnStr(TrimStr(end + 1));
 				}
 				else
 				{
@@ -1247,6 +1275,7 @@ public:
 						Val = a.Get();
 					}
 					
+					/*
 					unsigned i;
 					for (i=0; i<Vis.Length(); i++)
 					{
@@ -1258,7 +1287,9 @@ public:
 						}
 					}
 					if (i >= Vis.Length())
-						v.Value = Val.Get();
+					*/
+					
+					v.Value = Val.Get();
 				}
 				else printf("%s:%i - Cmd failed '%s'\n", _FL, c.Get());
 			}
@@ -1306,7 +1337,6 @@ public:
 		auto Type = q.NewLStr().SplitDelimit("=").Last().Strip();
 		bool IsPtr = Type.Find("*") >= 0;
 		bool IsChar = Type.Find("const char") == 0 || Type.Find("char") == 0;
-		bool IsGString = Type.Find("LString") == 0;
 
 		#if 1		
 		Output->Print("Type: %s\n", Type.Get());
@@ -1315,13 +1345,7 @@ public:
 		#endif
 
 		// Get value...
-		if (IsGString)
-		{
-			if (IsPtr) sprintf_s(c, sizeof(c), "p (char*)%s->Str.Str", Var);
-			else       sprintf_s(c, sizeof(c), "p (char*)%s.Str.Str", Var);
-		}
-		else
-			sprintf_s(c, sizeof(c), "p %s%s", IsPtr && !IsChar ? "*" : "", Var);
+		sprintf_s(c, sizeof(c), "p %s%s", IsPtr && !IsChar ? "*" : "", Var);
 		if (!Cmd(c, &q))
 		{
 			Output->Print("%s:%i - Can't get value.\n", _FL);
