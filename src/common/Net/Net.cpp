@@ -142,32 +142,60 @@ bool LSocket::EnumInterfaces(LArray<Interface> &Out)
 
 	#ifdef WIN32
 
-		#if 0
+		#if 1
 
-			PMIB_IF_TABLE2 Tbl;
-			SecureZeroMemory(&Tbl, sizeof(Tbl));
-			auto r = GetIfTable2(&Tbl);
+			ULONG outBufLen = 0;
+			DWORD dwRetVal = 0;
+			IP_ADAPTER_INFO* pAdapterInfos = (IP_ADAPTER_INFO*)malloc(sizeof(IP_ADAPTER_INFO));
 
-			for (size_t i=0; i<Tbl->NumEntries; i++)
+			// retry up to 5 times, to get the adapter infos needed
+			for (int i = 0; i < 5 && (dwRetVal == ERROR_BUFFER_OVERFLOW || dwRetVal == NO_ERROR); ++i)
 			{
-				auto &e = Tbl->Table[i];
-
-				WCHAR w[256] = {0};
-				r = ConvertInterfaceLuidToNameW(&e.InterfaceLuid, w, 256);
-
-				MIB_UNICASTIPADDRESS_ROW Addr;
-				InitializeUnicastIpAddressEntry(&Addr);
-				Addr.Address.si_family = AF_INET;
-				Addr.InterfaceLuid = e.InterfaceLuid;
-				Addr.InterfaceIndex = e.InterfaceIndex;
-				r = GetUnicastIpAddressEntry(&Addr);
-				if (r == NO_ERROR)
+				dwRetVal = GetAdaptersInfo(pAdapterInfos, &outBufLen);
+				if (dwRetVal == NO_ERROR)
 				{
-					int asd=0;
+					break;
+				}
+				else if (dwRetVal == ERROR_BUFFER_OVERFLOW)
+				{
+					free(pAdapterInfos);
+					pAdapterInfos = (IP_ADAPTER_INFO*)malloc(outBufLen);
+				}
+				else
+				{
+					pAdapterInfos = 0;
+					break;
 				}
 			}
+			if (dwRetVal == NO_ERROR)
+			{
+				auto pAdapterInfo = pAdapterInfos;
+				while (pAdapterInfo)
+				{
+					auto pIpAddress = &(pAdapterInfo->IpAddressList);
+					while (pIpAddress != 0)
+					{
+						auto &out = Out.New();
+						out.Ip4 = LIpToInt(pIpAddress->IpAddress.String);
+						out.Netmask4 = LIpToInt(pIpAddress->IpMask.String);
 
-			FreeMibTable(Tbl);
+						LString keyName;
+						keyName.Printf(	"HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Network\\{4D36E972-E325-11CE-BFC1-08002BE10318}\\%s\\Connection",
+										pAdapterInfo->AdapterName);
+						LRegKey key(false, keyName);
+						if (key.IsOk())
+							out.Name = key.GetStr("Name");
+						else
+							LgiTrace("%s:%i - Error getting '%s'\n", _FL, keyName.Get());
+
+						pIpAddress = pIpAddress->Next;
+					}
+					pAdapterInfo = pAdapterInfo->Next;
+				}
+
+				Status = true;
+			}
+			free(pAdapterInfos);
 
 		#else
 
