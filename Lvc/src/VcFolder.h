@@ -216,6 +216,7 @@ class VcFolder : public LTreeItem
 	LTreeItem *Tmp = NULL;
 	int CmdErrors = 0;
 	LArray<CommitField> Fields;
+	LArray<std::function<void()>> OnVcsTypeEvents;
 
 	// Git specific
 	LHashTbl<ConstStrKey<char>,LString> GitNames;
@@ -249,6 +250,7 @@ class VcFolder : public LTreeItem
 	bool StartCmd(const char *Args, ParseFn Parser = NULL, ParseParams *Params = NULL, LoggingType Logging = LogNone);
 	bool RunCmd(const char *Args, LoggingType Logging, std::function<void(Result)> Callback);
 	void OnBranchesChange();
+	void NoImplementation(const char *file, int line);
 	void OnCmdError(LString Output, const char *Msg);
 	void ClearError();
 	VcFile *FindFile(const char *Path);

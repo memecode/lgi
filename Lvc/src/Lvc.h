@@ -127,6 +127,7 @@ enum VersionCtrl
 	VcError,
 	VcMax,
 };
+extern const char *toString(VersionCtrl v);
 
 class VcFolder;
 struct ParseParams

@@ -45,7 +45,7 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 	{
 		auto c = GetConnection(u.ToString());
 		if (!c)
-			return VcNone;
+			return VcError;
 		
 		auto type = c->Types.Find(u.sPath);
 		if (type)
@@ -1798,6 +1798,22 @@ int RemoteFolderDlg::OnNotify(LViewI *Ctrl, LNotification n)
 	}
 
 	return 0;
+}
+
+const char* toString(VersionCtrl v)
+{
+	switch (v)
+	{
+		case VcCvs: return "VcCvs";
+		case VcSvn: return "VcSvn";
+		case VcGit: return "VcGit";
+		case VcHg: return "VcHg";
+
+		case VcPending: return "VcPending";
+		case VcError: return "VcError";
+	}
+
+	return "VcNone";
 }
 
 //////////////////////////////////////////////////////////////////

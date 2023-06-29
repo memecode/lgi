@@ -406,7 +406,6 @@ SSH_LOG("detectVcs:", ls);
 
 			r->Path = *p;
 
-			printf("r->Output=%s\n", r->Output.Get());
 			if (Vcs == VcError)
 				;
 			else if (Vcs != VcNone)

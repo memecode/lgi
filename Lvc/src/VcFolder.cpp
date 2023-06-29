@@ -1582,6 +1582,17 @@ VcFile *VcFolder::FindFile(const char *Path)
 	return d->FindFile(Path);
 }
 
+void VcFolder::NoImplementation(const char* file, int line)
+{
+	LString s;
+	s.Printf("%s, uri=%s, type=%s (%s:%i)",
+		LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE),
+		Uri.ToString().Get(),
+		toString(GetType()),
+		file, line);
+	OnCmdError(LString(), s);
+}
+
 void VcFolder::OnCmdError(LString Output, const char *Msg)
 {
 	if (!CmdErrors)
@@ -2504,6 +2515,7 @@ void VcFolder::OnVcsType(LString errorMsg)
 		LAssert(!"No priv instance");
 		return;
 	}
+
 	auto c = d->GetConnection(Uri.ToString(), false);
 	if (c)
 	{
@@ -2522,6 +2534,10 @@ void VcFolder::OnVcsType(LString errorMsg)
 
 				if (LTreeItem::Select())
 					Select(true);
+
+				for (auto &e: OnVcsTypeEvents)
+					e();
+				OnVcsTypeEvents.Empty();
 			}
 		}
 	}
@@ -3390,7 +3406,7 @@ void VcFolder::StartBranch(const char *BranchName, const char *OnCreated)
 		}
 		default:
 		{
-			OnCmdError(LString(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE));
+			NoImplementation(_FL);
 			break;
 		}
 	}	
@@ -3524,8 +3540,14 @@ void VcFolder::Pull(int AndUpdate, LoggingType Logging)
 		case VcSvn:
 			Status = StartCmd("up", &VcFolder::ParsePull, NULL, Logging);
 			break;
+		case VcPending:
+			OnVcsTypeEvents.New() = [this, AndUpdate, Logging]()
+			{
+				Pull(AndUpdate, Logging);
+			};
+			break;
 		default:
-			OnCmdError(LString(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE));
+			NoImplementation(_FL);
 			break;
 	}
 
@@ -3910,7 +3932,7 @@ bool VcFolder::AddFile(const char *Path, bool AsBinary)
 		}
 		default:
 		{
-			OnCmdError(LString(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE));
+			NoImplementation(_FL);
 			break;
 		}
 	}
@@ -3976,7 +3998,7 @@ bool VcFolder::Revert(LString::Array &Uris, const char *Revision)
 		}
 		default:
 		{
-			OnCmdError(LString(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE));
+			NoImplementation(_FL);
 			break;
 		}
 	}
@@ -4010,7 +4032,7 @@ bool VcFolder::ParseResolveList(int Result, LString s, ParseParams *Params)
 		}
 		default:
 		{
-			OnCmdError(LString(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE));
+			NoImplementation(_FL);
 			break;
 		}
 	}
@@ -4033,7 +4055,7 @@ bool VcFolder::ParseResolve(int Result, LString s, ParseParams *Params)
 		}
 		default:
 		{
-			OnCmdError(LString(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE));
+			NoImplementation(_FL);
 			break;
 		}
 	}
@@ -4083,7 +4105,7 @@ bool VcFolder::Resolve(const char *Path, LvcResolve Type)
 		case VcCvs:
 		default:
 		{
-			OnCmdError(LString(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE));
+			NoImplementation(_FL);
 			break;
 		}
 	}
@@ -4128,7 +4150,7 @@ bool VcFolder::Blame(const char *Path)
 		}
 		default:
 		{
-			OnCmdError(LString(), LLoadString(IDS_ERR_NO_IMPL_FOR_TYPE));
+			NoImplementation(_FL);
 			break;
 		}
 	}
