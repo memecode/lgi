@@ -33,9 +33,7 @@ LOptionsFile::LOptionsFile(PortableType Mode, const char *BaseName) :
 	LMutex("LOptionsFile")
 {
 	_Init();
-
-	if (Mode != UnknownMode)
-		SetMode(Mode, BaseName);
+	SetMode(Mode, BaseName);
 }
 
 LOptionsFile::~LOptionsFile()
