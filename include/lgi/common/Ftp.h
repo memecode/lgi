@@ -211,8 +211,8 @@ protected:
 	
 	bool SetupData(bool Binary);
 	bool ConnectData();
-	char *ToFtpCs(const char *s);
-	char *FromFtpCs(const char *s);
+	LAutoString ToFtpCs(const char *s);
+	LAutoString FromFtpCs(const char *s);
 
 public:
 	/// Construct an FTP protocol handler.
@@ -235,6 +235,8 @@ public:
 	void SetMeter(Progress *m) { Meter = m; }
 	bool GetAuthed() { return Authenticated; }
 	const char *GetError();
+	bool GetUseTLS();
+	void SetUseTLS(bool b);
 
 	/// Returns the socket used for the command connection.
 	LSocketI *Handle() { return Socket; }

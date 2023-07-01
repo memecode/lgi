@@ -24,8 +24,8 @@ class SslSocket :
 	struct SslSocketPriv *d;
 	
 	LMutex Lock;
-	BIO *Bio;
-	SSL *Ssl;
+	BIO *Bio = NULL;
+	SSL *Ssl = NULL;
 	LString ErrMsg;
 
 	// Local stuff
@@ -38,7 +38,7 @@ public:
 	static bool DebugLogging;
 	static LString Random(int Len);
 
-	SslSocket(LStreamI *logger = NULL, LCapabilityClient *caps = NULL, bool SslOnConnect = false, bool RawLFCheck = false);
+	SslSocket(LStreamI *logger = NULL, LCapabilityClient *caps = NULL, bool SslOnConnect = false, bool RawLFCheck = false, bool banner = true);
 	~SslSocket();
 
 	void SetLogger(LStreamI *logger);

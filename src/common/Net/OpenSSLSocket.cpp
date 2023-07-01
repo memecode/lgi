@@ -548,58 +548,50 @@ void EndSSL()
 
 struct SslSocketPriv : public LCancel
 {
-	LCapabilityClient *Caps;
-	bool SslOnConnect;
-	bool IsSSL;
-	bool UseSSLrw;
-	int Timeout;
-	bool RawLFCheck;
+	LCapabilityClient *Caps = NULL;
+	bool SslOnConnect = false;
+	bool IsSSL = false;
+	bool UseSSLrw = false;
+	int Timeout = 20 * 1000;
+	bool RawLFCheck = false;
 	#ifdef _DEBUG
-	bool LastWasCR;
+	bool LastWasCR = false;
 	#endif
-	bool IsBlocking;
-	LCancel *Cancel;
+	bool IsBlocking = true;
+	bool Banner = true;
+	LCancel *Cancel = NULL;
 
 	// This is just for the UI.
-	LStreamI *Logger;
+	LStreamI *Logger = NULL;
 
 	// This is for the connection logging.
-	LAutoString LogFile;
+	LString LogFile;
 	bool LogFileError = false;
 	LAutoPtr<LStream> LogStream;
-	int LogFormat;
+	int LogFormat = 0;
 
 	SslSocketPriv()
 	{
-		#ifdef _DEBUG
-		LastWasCR = false;
-		#endif
 		Cancel = this;
-		Timeout = 20 * 1000;
-		IsSSL = false;
-		UseSSLrw = false;
-		LogFormat = 0;
 	}
 };
 
 bool SslSocket::DebugLogging = false;
 
-SslSocket::SslSocket(LStreamI *logger, LCapabilityClient *caps, bool sslonconnect, bool RawLFCheck) :
+SslSocket::SslSocket(LStreamI *logger, LCapabilityClient *caps, bool sslonconnect, bool RawLFCheck, bool banner) :
 	Lock("SslSocket")
 {
 	d = new SslSocketPriv;
-	Bio = 0;
-	Ssl = 0;
 	d->RawLFCheck = RawLFCheck;
 	d->SslOnConnect = sslonconnect;
 	d->Caps = caps;
 	d->Logger = logger;
-	d->IsBlocking = true;
+	d->Banner = banner;
 	
 	LString ErrMsg;
 	if (StartSSL(ErrMsg, this))
 	{
-		if (Library->IsOk(this))
+		if (Library->IsOk(this) && banner)
 		{
 			char s[MAX_PATH_LEN];
 			#ifdef WIN32
@@ -642,7 +634,7 @@ SslSocket::~SslSocket()
 
 LStreamI *SslSocket::Clone()
 {
-	return new SslSocket(d->Logger, d->Caps, true);
+	return new SslSocket(d->Logger, d->Caps, true, false, false);
 }
 
 LCancel *SslSocket::GetCancel()
@@ -896,9 +888,12 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 								Status = true;
 								// d->UseSSLrw = true;
 								
-								char m[256];
-								sprintf_s(m, sizeof(m), "Connected to '%.220s' using SSL", h);
-								OnInformation(m);
+								if (d->Banner)
+								{
+									char m[256];
+									sprintf_s(m, sizeof(m), "Connected to '%.220s' using SSL", h);
+									OnInformation(m);
+								}
 							}
 							else if (!d->Cancel->IsCancelled())
 							{
@@ -987,7 +982,7 @@ bool SslSocket::SetVariant(const char *Name, LVariant &Value, const char *Arr)
 
 	if (!_stricmp(Name, SslSocket_LogFile))
 	{
-		d->LogFile.Reset(Value.ReleaseStr());
+		d->LogFile = Value.Str();
 	}
 	else if (!_stricmp(Name, SslSocket_LogFormat))
 	{

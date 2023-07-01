@@ -259,10 +259,6 @@ IFtpEntry &IFtpEntry::operator =(const IFtpEntry &e)
 }
 
 ///////////////////////////////////////////////////////////////////
-
-// #define VERIFY(i, ret) if (i != ret) { Close(); return 0; }
-// #define VERIFY_RANGE(i, range) if (((i)/100) != range) { Close(); return 0; }
-
 #define Verify(i, ret) { ssize_t Code = i; if (Code != (ret)) throw Code; }
 #define VerifyRange(i, range) { ssize_t Code = i; if ((Code/100) != range) throw Code; }
 
@@ -282,14 +278,24 @@ const char *IFtp::GetError()
 	return d->ErrBuf;
 }
 
-char *IFtp::ToFtpCs(const char *s)
+LAutoString IFtp::ToFtpCs(const char *s)
 {
-	return (char*) LNewConvertCp(GetCharset(), s, "utf-8");
+	return LAutoString((char*)LNewConvertCp(GetCharset(), s, "utf-8"));
 }
 
-char *IFtp::FromFtpCs(const char *s)
+LAutoString IFtp::FromFtpCs(const char *s)
 {
-	return (char*) LNewConvertCp("utf-8", s, GetCharset());
+	return LAutoString((char*)LNewConvertCp("utf-8", s, GetCharset()));
+}
+
+bool IFtp::GetUseTLS()
+{
+	return d->UseTLS;
+}
+
+void IFtp::SetUseTLS(bool b)
+{
+	d->UseTLS = b;
 }
 
 const char *IFtp::GetCharset()
@@ -416,12 +422,14 @@ void IFtp::GetHost(LString *Host, int *Port)
 
 FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, char *Password)
 {
+	const char *CurCmd = NULL;
 	try
 	{
 		SslSocket *SslSock = dynamic_cast<SslSocket*>(S);
 		if (d->UseTLS && !SslSock)
 		{
 			LAssert(!"Must use SslSocket for TLS based connections.");
+			d->ErrBuf = "Must use SslSocket for TLS based connections.";
 			return FO_Error;
 		}
 
@@ -437,7 +445,10 @@ FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, ch
 		d->Port = Port;
 
 		if (!Socket || !Socket->Open(RemoteHost, Port))
+		{
+			d->ErrBuf = "Socket failed to connect.";
 			return FO_ConnectFailed;
+		}
 
 		if (d->Callback)
 			d->Callback->OnSocketConnect();
@@ -449,45 +460,68 @@ FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, ch
 			// https://datatracker.ietf.org/doc/html/rfc4217
 			// https://datatracker.ietf.org/doc/html/rfc2228
 
-			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "AUTH TLS\r\n");
+			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "%s\r\n", CurCmd = "AUTH TLS");
 			if (!WriteLine())
+			{
+				d->ErrBuf = "Failed to write AUTH cmd.";
 				return FO_Error;
+			}
 
 			auto Result = ReadLine();
 			if (Result != 234)
+			{
+				d->ErrBuf.Printf("AUTH cmd responded with %i", Result);
 				return FO_Error;
+			}
 
 			// Switch on TLS
 			LVariant v = "ssl";
 			auto IsSsl = SslSock->SetValue(LSocket_Protocol, v);
 			if (!IsSsl)
+			{
+				d->ErrBuf.Printf("Couldn't set socket to SSL");
 				return FO_Error;
+			}
 
 			// Protection buffer size...
-			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "PBSZ 0\r\n");
+			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "%s 0\r\n", CurCmd = "PBSZ");
 			if (!WriteLine())
+			{
+				d->ErrBuf.Printf("Couldn't write PBSZ command");
 				return FO_Error;
+			}
 			Verify(ReadLine(), 200);
 
 			// Protected data transfers...
-			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "PROT P\r\n");
+			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "%s\r\n", CurCmd = "PROT P");
 			if (!WriteLine())
+			{
+				d->ErrBuf.Printf("Couldn't write PROT command");
 				return FO_Error;
+			}
 			Verify(ReadLine(), 200);
 		}
 
 		if (User)
 		{
 			// User/pass
-			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "USER %s\r\n", User);
+			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "%s %s\r\n", CurCmd = "USER", User);
 			if (!WriteLine())
+			{
+				d->ErrBuf.Printf("Couldn't write USER command");
 				return FO_Error;
+			}
 
 			Verify(ReadLine(), 331);
 
-			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "PASS %s\r\n", ValidStr(Password) ? Password : (char*)"");
+			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "%s %s\r\n",
+					CurCmd = "PASS",
+					ValidStr(Password) ? Password : (char*)"");
 			if (!WriteLine())
+			{
+				d->ErrBuf.Printf("Couldn't write PASS command");
 				return FO_Error;
+			}
 
 			Verify(ReadLine(), 230);
 			Authenticated = true;
@@ -495,7 +529,7 @@ FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, ch
 		else
 		{
 			// Anonymous
-			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "USER anonymous\r\n");
+			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "%s anonymous\r\n", CurCmd = "USER");
 			if (WriteLine())
 			{
 				ssize_t Code = ReadLine();
@@ -509,6 +543,11 @@ FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, ch
 					Verify(ReadLine(), 230);
 					Authenticated = true;
 				}
+			}
+			else
+			{
+				d->ErrBuf.Printf("Couldn't write USER command");
+				return FO_Error;
 			}
 		}
 
@@ -526,13 +565,17 @@ FtpOpenStatus IFtp::Open(LSocketI *S, char *RemoteHost, int Port, char *User, ch
 		#endif
 
 		if (!Authenticated)
+		{
+			d->ErrBuf = "Authentication failed.";
 			return FO_LoginFailed;
+		}
 
 		return FO_Connected;
 	}
 	catch (ssize_t Error)
 	{
-		LgiTrace("%s:%i - Error: " LPrintfSSizeT "\n", _FL, Error);
+		d->ErrBuf.Printf("Got error code " LPrintfSSizeT " from cmd %s", Error, CurCmd);
+		LgiTrace("%s:%i - %s\n", _FL, d->ErrBuf.Get());
 		return FO_Error;
 	}
 }
@@ -609,15 +652,13 @@ bool IFtp::SetDir(const char *Dir)
 	{
 		if (Dir && IsOpen())
 		{
-			char *f = ToFtpCs(Dir);
+			auto f = ToFtpCs(Dir);
 			if (f)
 			{
-				sprintf_s(d->OutBuf, sizeof(d->OutBuf), "CWD %s\r\n", f);
+				sprintf_s(d->OutBuf, sizeof(d->OutBuf), "CWD %s\r\n", f.Get());
 				WriteLine();
 				Verify(ReadLine(), 250);
-
 				Status = true;
-				DeleteArray(f);
 			}
 		}
 	}
@@ -637,15 +678,13 @@ bool IFtp::CreateDir(const char *Dir)
 	{
 		if (IsOpen() && Dir)
 		{
-			char *f = ToFtpCs(Dir);
+			auto f = ToFtpCs(Dir);
 			if (f)
 			{
-				sprintf_s(d->OutBuf, sizeof(d->OutBuf), "MKD %s\r\n", f);
+				sprintf_s(d->OutBuf, sizeof(d->OutBuf), "MKD %s\r\n", f.Get());
 				WriteLine();
 				VerifyRange(ReadLine(), 2);
-
 				Status = true;
-				DeleteArray(f);
 			}
 		}
 	}
@@ -667,15 +706,13 @@ bool IFtp::DeleteDir(const char *Dir)
 
 	if (IsOpen() && Dir)
 	{
-		char *f = ToFtpCs(Dir);
+		auto f = ToFtpCs(Dir);
 		if (f)
 		{
-			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "RMD %s\r\n", f);
+			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "RMD %s\r\n", f.Get());
 			WriteLine();
 			VerifyRange(ReadLine(), 2);
-
 			Status = true;
-			DeleteArray(f);
 		}
 	}
 
@@ -846,24 +883,22 @@ bool IFtp::RenameFile(const char *From, const char *To)
 	{
 		if (IsOpen() && From && To)
 		{
-			char *f = ToFtpCs(From);
-			char *t = ToFtpCs(To);
+			auto f = ToFtpCs(From);
+			auto t = ToFtpCs(To);
 			if (f && t)
 			{
 				// From
-				sprintf_s(d->OutBuf, sizeof(d->OutBuf), "RNFR %s\r\n", f);
+				sprintf_s(d->OutBuf, sizeof(d->OutBuf), "RNFR %s\r\n", f.Get());
 				WriteLine();
 				VerifyRange(ReadLine(), 3);
 
 				// To
-				sprintf_s(d->OutBuf, sizeof(d->OutBuf), "RNTO %s\r\n", t);
+				sprintf_s(d->OutBuf, sizeof(d->OutBuf), "RNTO %s\r\n", t.Get());
 				WriteLine();
 				VerifyRange(ReadLine(), 2);
 
 				Status = true;
 			}
-			DeleteArray(f);
-			DeleteArray(t);
 		}
 	}
 	catch (ssize_t Error)
@@ -884,15 +919,13 @@ bool IFtp::DeleteFile(const char *Remote)
 
 	if (IsOpen() && Remote)
 	{
-		char *f = ToFtpCs(Remote);
+		auto f = ToFtpCs(Remote);
 		if (f)
 		{
-			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "DELE %s\r\n", f);
+			sprintf_s(d->OutBuf, sizeof(d->OutBuf), "DELE %s\r\n", f.Get());
 			WriteLine();
 			VerifyRange(ReadLine(), 2);
-
 			Status = true;
-			DeleteArray(f);
 		}
 	}
 
@@ -941,10 +974,9 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 			if (SetupData(Binary))
 			{
 				// Data command
-				char *f = ToFtpCs(Remote);
-				sprintf_s(d->OutBuf, sizeof(d->OutBuf), "%s %s\r\n", (Upload)?"STOR":"RETR", f ? f : Remote);
+				auto f = ToFtpCs(Remote);
+				sprintf_s(d->OutBuf, sizeof(d->OutBuf), "%s %s\r\n", (Upload)?"STOR":"RETR", f ? f.Get() : Remote);
 				WriteLine();
-				DeleteArray(f);
 
 				// Build data connection
 				if (ConnectData())
@@ -1293,15 +1325,13 @@ bool IFtp::SetPerms(const char *File, LPermissions Perms)
 	{
 		if (IsOpen() && File)
 		{
-			char *f = ToFtpCs(File);
+			auto f = ToFtpCs(File);
 			if (f)
 			{
-				sprintf_s(d->OutBuf, sizeof(d->OutBuf), "SITE CHMOD %03X %s\r\n", Perms.u32 & 0x777, File);
+				sprintf_s(d->OutBuf, sizeof(d->OutBuf), "SITE CHMOD %03X %s\r\n", Perms.u32 & 0x777, f.Get());
 				WriteLine();
 				VerifyRange(ReadLine(), 2);
-
 				Status = true;
-				DeleteArray(f);
 			}
 		}
 	}
