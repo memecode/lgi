@@ -1765,7 +1765,6 @@ void InetGetSubField_Impl(	const char *s,
 		return;
 	s++;
 
-	char *Status = NULL;
 	auto FieldLen = strlen(Field);
 	auto White = " \t\r\n";
 	while (*s)

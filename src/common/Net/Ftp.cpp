@@ -635,10 +635,6 @@ LString IFtp::GetDir()
 	catch (ssize_t Error)
 	{
 		LgiTrace("%s:%i - error: " LPrintfSSizeT "\n", _FL, Error);
-		if (IsOpen())
-		{
-			LAssert(0);
-		}
 	}
 
 	return p;

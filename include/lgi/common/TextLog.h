@@ -15,6 +15,8 @@ protected:
 	
 	LMutex Sem;
 	LArray<char16> Txt;
+	
+	size_t SizeLimit = 0;
 
 	void ProcessTxt()
 	{
@@ -54,15 +56,26 @@ public:
 		TView::SetWrapType(L_WRAP_NONE);
 	}
 	
+	void SetSizeLimit(size_t limit)
+	{
+		SizeLimit = limit;
+	}
+	
 	void OnCreate()
 	{
 		TView::OnCreate();
-		// ProcessTxt();
+		TView::SetPulse(1000);
 	}
 
 	void OnPulse()
 	{
 		ProcessTxt();
+		
+		if (SizeLimit > 0 &&
+			TView::Length() >= SizeLimit)
+			TView::Name("");
+		
+		// LgiTrace("Size=%s\n", LFormatSize(TView::Length()).Get());
 	}
 
 	virtual void Add(char16 *w, ssize_t chars = -1)
