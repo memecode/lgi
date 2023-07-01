@@ -21,8 +21,10 @@ class LgiClass LClipBoard
 
 public:
 	/// On windows, this equates to a CF_TEXT, CF_BITMAP, CF_DIB type #define
-	#ifdef __GTK_H__
+	#if defined(__GTK_H__)
 	typedef Gtk::GdkAtom FormatType;
+	#elif defined(MAC)
+	typedef LString FormatType;
 	#else
 	typedef uint32_t FormatType;
 	#endif

@@ -30,6 +30,34 @@ LClipBoard::~LClipBoard()
 	DeleteObj(d);
 }
 
+LString LClipBoard::FmtToStr(LClipBoard::FormatType Fmt)
+{
+	return Fmt;
+}
+
+LClipBoard::FormatType LClipBoard::StrToFmt(LString Str)
+{
+	return Str;
+}
+
+bool LClipBoard::EnumFormats(LArray<FormatType> &Formats)
+{
+	LAutoPool Ap;
+
+	LHashTbl<StrKey<char,false>, bool> map;
+	auto pb = [NSPasteboard generalPasteboard];
+	for (NSPasteboardItem *item in [pb pasteboardItems])
+	{
+		auto types = [item types];
+		for (NSPasteboardType type in types)
+			map.Add(LString(type), true);
+	}
+	for (auto p: map)
+		Formats.Add(p.key);
+	
+	return Formats.Length() > 0;
+}
+
 bool LClipBoard::Empty()
 {
 	LAutoPool Ap;
@@ -38,8 +66,8 @@ bool LClipBoard::Empty()
 	Txt.Empty();
 	wTxt.Reset();
 
-	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
-	[pasteboard clearContents];
+	auto *pb = [NSPasteboard generalPasteboard];
+	[pb clearContents];
 
 	return Status;
 }
