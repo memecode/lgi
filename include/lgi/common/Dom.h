@@ -12,15 +12,35 @@ class LVariant;
 #include "lgi/common/Mem.h"
 #include "lgi/common/Array.h"
 
-
+#define DOM_GET_VAR(name) \
+	case name:
+#define DOM_SET_VAR(name) \
+	case name:
+#define DOM_METHOD(name, args) \
+	case name:
 
 /// API for reading and writing properties in objects.
 class LgiClass LDom : virtual public LDomI
 {
-	friend class LScriptEnginePrivate;
 	friend struct LDomRef;
+	friend class LScriptEnginePrivate;
 	friend class LVirtualMachinePriv;
 
+public:
+	enum DomMemberType
+	{
+		DomVariable,
+		DomMethod,
+	};
+	struct DomMember
+	{
+		LDom::DomMemberType Type; // Variable or method
+		LString Name; // Name of member in Object.Name format.
+		LString Args; // comma separated list of args
+	};
+	bool _AddMember(DomMemberType type, const char *name, const char *args = NULL);
+	static bool _EnumMembers(const char *object, LArray<DomMember> &members);
+	
 protected:
 	LDom *ResolveObject(const char *Var, LString &Name, LString &Array);
 

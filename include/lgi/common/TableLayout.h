@@ -17,6 +17,8 @@ public:
 	LLayoutCell() { Debug = false; }
 	virtual ~LLayoutCell() {}
 
+	const char *GetClass() override { return "LLayoutCell"; }
+
 	virtual class LTableLayout *GetTable() = 0;
 	virtual bool Add(LView *v) = 0;
 	virtual bool Remove(LView *v) = 0;

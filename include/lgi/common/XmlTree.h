@@ -108,6 +108,8 @@ public:
 	LXmlTag(const LXmlTag &t);	
 	virtual ~LXmlTag();
 
+	const char *GetClass() { return "LXmlTag"; }
+
 	/// For debugging.
 	bool Dump(int Depth = 0);
 	/// Free any memory owned by this object

@@ -1671,6 +1671,44 @@ const char *LDomPropToString(LDomProperty Prop)
 	return DomPropMap.ToString.Find(Prop);
 }
 
+struct DomObjectMap
+{
+	typedef LArray<LDom::DomMember> Members;	
+	LHashTbl<ConstStrKey<char,false>, Members*> maps;
+};
+static DomObjectMap ObjMap;
+
+bool LDom::_AddMember(DomMemberType type, const char *name, const char *args)
+{
+	auto *members = ObjMap.maps.Find(GetClass());
+	if (!members)
+		ObjMap.maps.Add(GetClass(), members = new DomObjectMap::Members);
+
+	auto &m = members->New();
+	m.Type = type;
+	m.Name.Printf("%s", GetClass(), name);
+	if (m.Type == DomMethod)
+	{
+		if (!args)
+		{
+			LAssert(!"no args specified");
+			return false;
+		}
+		m.Args = args;
+	}
+	return true;
+}
+
+bool LDom::_EnumMembers(const char *object, LArray<DomMember> &members)
+{
+	auto *m = ObjMap.maps.Find(object);
+	if (!m)
+		return false;
+	
+	members = *m;
+	return true;
+}
+
 bool LDom::GetValue(const char *Var, LVariant &Value)
 {
 	if (!Var)

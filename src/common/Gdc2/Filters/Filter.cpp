@@ -70,6 +70,7 @@ class GdcBmp : public LFilter
 	int ScanSize;
 
 public:
+	const char *GetClass() override { return "GdcBmp"; }
 	int GetCapabilites() override { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
 	Format GetFormat() override { return FmtBmp; }
 
@@ -854,6 +855,8 @@ class GdcIco : public LFilter
 
 public:
 	GdcIco();
+
+	const char *GetClass() override { return "GdcIco"; }
 
 	Format GetFormat() override { return FmtIco; }
 	int GetCapabilites() override { return FILTER_CAP_READ | FILTER_CAP_WRITE; }

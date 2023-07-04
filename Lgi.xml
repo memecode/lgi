@@ -172,18 +172,19 @@
 				<Node File="./include/lgi/common/ThreadEvent.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Variant" Type="1" Platforms="15" Open="0" Id="35">
-				<Node File=".\src\common\Lgi\Variant.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\Variant.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/DomFields.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Lgi/Variant.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/Variant.h" Type="3" Platforms="15" />
 			</Node>
-			<Node File=".\src\common\Lgi\GuiUtils.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Lgi\LgiCommon.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Lgi\LMsg.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Lgi\Object.cpp" Type="2" Platforms="15" />
-			<Node File=".\include\lgi\common\StructuredIo.h" Type="3" Platforms="15" />
-			<Node File=".\include\lgi\common\StructuredLog.h" Type="3" Platforms="15" />
-			<Node File=".\src\common\Lgi\ToolTip.cpp" Type="2" Platforms="15" />
-			<Node File=".\include\lgi\common\ToolTip.h" Type="3" Platforms="15" />
-			<Node File=".\src\common\Lgi\TrayIcon.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/GuiUtils.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/LgiCommon.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/LMsg.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/Object.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/StructuredIo.h" Type="3" Platforms="15" />
+			<Node File="./include/lgi/common/StructuredLog.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Lgi/ToolTip.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/ToolTip.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Lgi/TrayIcon.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="36">
 			<Node Name="File Select Win" Type="1" Platforms="15" Open="0" Id="38">
@@ -475,7 +476,11 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Executable />
+			<Executable>
+				<Linux />
+			</Executable>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -540,6 +545,7 @@ gnu
 network
 be</Release>
 				</Haiku>
+				<All />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -561,16 +567,39 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
+				<Linux />
 			</Defines>
-			<LibraryPaths />
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<ApplicationIcon />
 		</Build>
 		<Advanced>
-			<PostBuildCommands />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+			<OtherMakefileRules />
 		</Advanced>
 		<Debug>
-			<Arguments />
+			<Arguments>
+				<All />
+			</Arguments>
+			<Environment />
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
-		<Remote />
-		<Editor />
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Editor>
+			<TabSize />
+			<IndentSize />
+			<ShowWhiteSpace />
+			<UseHardTabs />
+			<CommentFile />
+			<CommentFunction />
+		</Editor>
 	</Settings>
 </Project>

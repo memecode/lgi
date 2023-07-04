@@ -41,6 +41,8 @@ public:
 	SslSocket(LStreamI *logger = NULL, LCapabilityClient *caps = NULL, bool SslOnConnect = false, bool RawLFCheck = false, bool banner = true);
 	~SslSocket();
 
+	const char *GetClass() override { return "SslSocket"; }
+
 	void SetLogger(LStreamI *logger);
 	LStreamI *GetLog() override;
 	void SetSslOnConnect(bool b);

@@ -146,6 +146,8 @@ public:
 	);
 	virtual ~LSubMenu();
 
+	const char *GetClass() { return "LSubMenu"; }
+
 	/// Returns the OS handle
 	OsSubMenu Handle() { return Info; }
 
@@ -362,6 +364,8 @@ public:
 	LMenuItem();
 	LMenuItem(LMenu *m, LSubMenu *p, const char *txt, int Id, int Pos, const char *Shortcut = NULL);
 	virtual ~LMenuItem();
+
+	const char *GetClass() override { return "LMenuItem"; }
 
 	LMenuItem &operator =(const LMenuItem &m)
 	{

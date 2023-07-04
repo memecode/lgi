@@ -56,6 +56,8 @@ public:
 		TView::SetWrapType(L_WRAP_NONE);
 	}
 	
+	const char *GetClass() override { return "LThreadSafeTextView"; }
+	
 	void SetSizeLimit(size_t limit)
 	{
 		SizeLimit = limit;

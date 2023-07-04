@@ -26,6 +26,8 @@ class LgiClass LStream : virtual public LStreamI, virtual public LDom
 public:
 	virtual ~LStream() {}
 
+	const char *GetClass() { return "LStream"; }
+	
 	ssize_t Read(void *Ptr, ssize_t Size, int Flags = 0) override { return 0; }
 	ssize_t Write(const void *Ptr, ssize_t Size, int Flags = 0) override { return 0; }
 	
@@ -206,6 +208,13 @@ public:
 		s = p;
 	}
 
+	// LDomI interface:
+	const char *GetClass() { return "LProxyStream"; }
+	bool GetValue(const char *Var, LVariant &Value) { return s->GetValue(Var, Value); }
+	bool SetValue(const char *Var, LVariant &Value) { return s->SetValue(Var, Value); }
+	bool CallMethod(const char *MethodName, LScriptArguments &Args) { return s->CallMethod(MethodName, Args); }
+		
+	// LSsreamI interface:
 	int Open(const char *Str, int Int) override	{ return s->Open(Str, Int); }
 	bool IsOpen() override { return s->IsOpen(); }
 	int Close() override { return s->Close(); }
@@ -215,8 +224,6 @@ public:
 	int64 SetPos(int64 Pos) override { return s->SetPos(Pos); }
 	ssize_t Read(void *b, ssize_t l, int f = 0) override { return s->Read(b, l, f); }
 	ssize_t Write(const void *b, ssize_t l, int f = 0) override { return s->Write(b, l, f); }
-	bool GetValue(const char *n, LVariant &v) override { return s->GetValue(n, v); }
-	bool SetValue(const char *n, LVariant &v) override { return s->SetValue(n, v); }
 
 	LStreamI *Clone() override { return new LProxyStream(s); }
 };

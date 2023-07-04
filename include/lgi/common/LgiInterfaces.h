@@ -40,6 +40,7 @@ class LDomI
 public:
 	virtual ~LDomI() {}
 
+	virtual const char *GetClass() = 0;
 	virtual bool GetValue(const char *Var, LVariant &Value) { return false; }
 	virtual bool SetValue(const char *Var, LVariant &Value) { return false; }
 	virtual bool CallMethod(const char *MethodName, LScriptArguments &Args) { return false; }
@@ -517,7 +518,7 @@ public:
 	virtual const char16 *NameW() = 0;
 	virtual int64 Value() = 0;
 	virtual void Value(int64 i) = 0;
-	virtual const char *GetClass() { return "LViewI"; } // mainly for debugging
+	const char *GetClass() { return "LViewI"; } // mainly for debugging
 
 	// Size and position	
 	virtual LRect &GetPos() = 0;

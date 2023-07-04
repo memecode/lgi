@@ -116,7 +116,8 @@ protected:
 		LVariantType Type;
 		LString Name;
 		LCustomType *Nested;
-
+    
+        const char *GetClass() override { return "LCustomType.CustomField"; }
 		ssize_t Sizeof();
 		bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
 	};
@@ -126,14 +127,10 @@ public:
 	{
 		LString Name;
 		LArray<LString> Params;
-		size_t Address;
-		int FrameSize;
+		size_t Address = -1;
+		int FrameSize = -1;
 		
-		Method()
-		{
-			Address = -1;
-			FrameSize = -1;
-		}
+		const char *GetClass() override { return "LCustomType.Method"; }
 	};
 
 protected:

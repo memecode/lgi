@@ -355,7 +355,9 @@ public:
 	);
 	~GdcPng();
 
+	const char *GetClass() override { return "GdcPng"; }
     const char *GetComponentName() override { return "libpng"; }
+    
 	Format GetFormat() override { return FmtPng; }
 	void SetMeter(int i) { if (Meter) Meter->Value(i); }
 	int GetCapabilites() override { return FILTER_CAP_READ | FILTER_CAP_WRITE; }

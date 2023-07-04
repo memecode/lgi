@@ -4750,9 +4750,6 @@ int LgiMain(OsAppArguments &AppArgs)
 	LApp a(AppArgs, "LgiIde");
 	if (a.IsOk())
 	{
-		LString var = "asd";
-		LRect rc(1, 2, 3, 4);
-		
 		a.AppWnd = new AppWnd;
 		a.Run();
 	}

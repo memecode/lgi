@@ -154,6 +154,8 @@ public:
 		Css = NULL;
 	}
 
+	const char *GetClass() override { return "LCssStyle"; }
+
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 };
@@ -180,6 +182,8 @@ public:
 	
 	LHtmlElement(LHtmlElement *parent);
 	~LHtmlElement();
+
+	const char *GetClass() override { return "LHtmlElement"; }
 	
 	// Methods
 	char16 *GetText() { return Txt; }
