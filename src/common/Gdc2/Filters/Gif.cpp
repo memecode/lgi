@@ -61,6 +61,8 @@ class GdcGif : public LFilter
 public:
 	GdcGif();
 
+	const char *GetClass() override { return "GdcGif"; }
+
 	Format GetFormat() { return FmtGif; }
 	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
 	IoStatus ReadImage(LSurface *pDC, LStream *In);

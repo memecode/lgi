@@ -659,7 +659,8 @@ public:
 	struct CompilerDefineSource : public LDom
 	{
 		LCompilerPriv *d;
-		CompilerDefineSource(LCompilerPriv *priv) : d(priv) {}
+		CompilerDefineSource(LCompilerPriv *priv) : d(priv) {}		
+		const char *GetClass() override { return "CompilerDefineSource"; }
 		bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override
 		{
 			LAutoWString wName(Utf8ToWide(Name));

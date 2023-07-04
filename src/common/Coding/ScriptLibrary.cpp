@@ -847,6 +847,8 @@ public:
 		Size = d->GetSize();
 		Modified.Set(d->GetLastWriteTime());
 	}
+	
+	const char *GetClass() override { return "LFileListEntry"; }
 
 	bool GetVariant(const char *Var, LVariant &Value, const char *Arr = NULL) override
 	{

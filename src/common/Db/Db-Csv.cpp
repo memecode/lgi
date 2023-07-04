@@ -108,8 +108,9 @@ public:
 		Separator = sep;
 		HasHeaders = headers;
 	}
-
 	~SvDb();
+	
+	const char *GetClass() override { return "SvDb"; }
 	bool Connect(const char *Init);
 	bool Disconnect();
 	LDbRecordset *Open(char *Name);

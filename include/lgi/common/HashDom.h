@@ -14,6 +14,8 @@ public:
 	{
 	    Empty();
 	}
+	
+	const char *GetClass() override { return "LHashDom"; }
 
 	void Empty()
 	{

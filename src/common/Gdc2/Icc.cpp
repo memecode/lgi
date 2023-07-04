@@ -344,6 +344,8 @@ public:
 	{
 		DeleteArray(Txt);
 	}
+	
+	const char *GetClass() override { return "ValueDom"; }
 
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
 	{
@@ -374,6 +376,8 @@ public:
 		Base = b;
 		Str = s;
 	}
+	
+	const char *GetClass() override { return "LocalStringDom"; }
 
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
 	{
@@ -430,6 +434,8 @@ public:
 	{
 		Dom.DeleteObjects();
 	}
+	
+	const char *GetClass() override { return "LocalUnicodeDom"; }
 
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
 	{
@@ -463,6 +469,7 @@ class TagDom : public LDom
 public:
 	TagDom(IccTag *tag, char *header);
 	~TagDom();
+	const char *GetClass() override { return "TagDom"; }
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array);
 };
 
@@ -496,6 +503,8 @@ public:
 	{
 		Dom.DeleteObjects();
 	}
+	
+	const char *GetClass() override { return "HeaderDom"; }
 
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
 	{
@@ -529,6 +538,8 @@ public:
 	{
 		c = curve;
 	}
+	
+	const char *GetClass() override { return "CurveDom"; }
 
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
 	{
@@ -572,6 +583,8 @@ public:
 		x = xyz;
 		Len = Swap32(len);
 	}
+	
+	const char *GetClass() override { return "XyzDom"; }
 
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
 	{
@@ -615,6 +628,8 @@ public:
 	{
 		DeleteArray(Txt);
 	}
+	
+	const char *GetClass() override { return "ChidlDom"; }
 
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
 	{
@@ -813,6 +828,8 @@ public:
 	{
 		Dom.DeleteObjects();
 	}
+	
+	const char *GetClass() override { return "TagTableDom"; }
 
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
 	{

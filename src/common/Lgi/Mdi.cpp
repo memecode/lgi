@@ -991,9 +991,10 @@ bool LMdiParent::SetScrollBars(bool x, bool y)
 void LMdiParent::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	#if MDI_TAB_STYLE
-	if (Attaching && Stricmp(Wnd->GetClass(), "LMdiChild"))
+	if (Attaching && !dynamic_cast<LMdiChild*>(Wnd))
 	{
 		LAssert(0);
+		return;
 	}
 	
 	if (!d->InOnPosChange /*&& Attaching*/)

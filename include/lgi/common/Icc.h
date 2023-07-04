@@ -12,6 +12,8 @@ public:
 	LIccProfile(char *file = 0);
 	~LIccProfile();
 
+	const char *GetClass() override { return "LIccProfile"; }
+
 	// I/O
 	bool CreateNamed(const char *name);
 	bool Open(const char *file);

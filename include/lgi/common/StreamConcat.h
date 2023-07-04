@@ -44,6 +44,8 @@ public:
 		}
 	}
 	
+	const char *GetClass() override { return "LStreamConcat"; }
+	
 	bool Add(LStreamI *s, bool Own = true)
 	{
 		if (!s)

@@ -110,6 +110,8 @@ public:
 	{
 		Ctrls.DeleteObjects();
 	}
+	
+	const char *GetClass() override { return "ResTableCell"; }
 
 	void MoveCtrls()
 	{

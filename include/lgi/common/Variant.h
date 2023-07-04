@@ -155,6 +155,7 @@ public:
 	LCustomType(const char16 *name, int pack = 1);
 	~LCustomType();
 	
+	const char *GetClass() override { return "LCustomType"; }
 	size_t Sizeof();
 	const char *GetName() { return Name; }
 	ssize_t Members() { return Flds.Length(); }

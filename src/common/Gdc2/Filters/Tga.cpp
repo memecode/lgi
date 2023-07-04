@@ -34,6 +34,8 @@ public:
 
 		return true;
 	}
+	
+	const char *GetClass() override { return "GdcTga"; }
 
 	IoStatus WriteImage(LStream *Out, LSurface *pDC)
 	{

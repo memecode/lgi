@@ -34,6 +34,8 @@ public:
 		LgiTrace("%s:%i - ~ImageLoader\n", _FL);
 		#endif
 	}
+	
+	const char *GetClass() override { return "ImageLoader"; }
 
 	void Value(int64 v)
 	{

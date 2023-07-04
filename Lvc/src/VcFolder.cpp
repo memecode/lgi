@@ -1149,6 +1149,12 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 			LFile out(outPath.Absolute(), O_WRITE);
 			out.Write(s);
 			#endif
+			
+			if (!s)
+			{
+				OnCmdError(s, "No output from command.");
+				return false;
+			}
 
 			for (char *i = s.Get(); *i; )
 			{				

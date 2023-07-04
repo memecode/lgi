@@ -24,6 +24,8 @@ public:
 	IoStatus ReadImage(LSurface *Out, LStream *In);
 	IoStatus WriteImage(LStream *Out, LSurface *In);
 	
+	const char *GetClass() override { return "GdcPcx"; }
+	
 	bool GetVariant(const char *n, LVariant &v, char *a)
 	{
 		if (!stricmp(n, LGI_FILTER_TYPE))

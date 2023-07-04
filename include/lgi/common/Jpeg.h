@@ -23,6 +23,7 @@ private:
 public:
 	GdcJpeg();
 	
+	const char *GetClass() override { return "GdcJpeg"; }
     const char *GetComponentName() { return "libjpeg"; }
 	Format GetFormat() { return FmtJpeg; }
 	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }

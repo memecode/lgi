@@ -94,6 +94,8 @@ public:
 
 	GdcTiff();
 	~GdcTiff();
+	
+	const char *GetClass() override { return "GdcTiff"; }
 
 	int GetCapabilites() { return FILTER_CAP_READ; }
 	IoStatus ReadImage(LSurface *pDC, LStream *In);
