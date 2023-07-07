@@ -3678,14 +3678,8 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 		case IDM_CLOSE:
 		{
 			IdeDoc *Top = TopDoc();
-			if (Top)
-			{
-				if (Top->OnRequestClose(false))
-				{
-					Top->Quit();
-				}
-			}
-			DeleteObj(d->DbgContext);
+			if (Top && Top->OnRequestClose(false))
+				Top->Quit();
 			break;
 		}
 		case IDM_CLOSE_ALL:
