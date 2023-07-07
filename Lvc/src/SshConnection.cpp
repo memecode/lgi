@@ -19,6 +19,7 @@ SshConnection::SshConnection(LTextLog *log, const char *uri, const char *prompt)
 	LSsh(	[this](auto msg, auto type)
 			{
 				LAssert(!"Impl me.");
+				return SshConnect;
 			},
 			log),
 	LEventTargetThread("SshConnection")

@@ -33,7 +33,13 @@ public:
 		SshError,
 	};
 	
-	typedef std::function<void(const char *Msg, HostType Type)> KnownHostCallback;
+	enum CallbackResponse
+	{
+		SshDisconnect,
+		SshConnect
+	};
+	
+	typedef std::function<CallbackResponse(const char *Msg, HostType Type)> KnownHostCallback;
 
 protected:
 	LCancel *Cancel = NULL;
@@ -290,6 +296,7 @@ public:
 		
 		{
 			// We don't know of the host... ask the user to confirm.
+			CallbackResponse response = SshDisconnect;			
 			if (HostCb)
 			{
 				switch (State)
@@ -299,32 +306,32 @@ public:
 					#else
 					case SSH_SERVER_KNOWN_CHANGED:
 					#endif
-						HostCb(	"The server key has changed. Either you are under attack or the administrator changed the key. You HAVE to warn the user about a possible attack.",
-								SshHostChanged);
+						response = HostCb(	"The server key has changed. Either you are under attack or the administrator changed the key. You HAVE to warn the user about a possible attack.",
+											SshHostChanged);
 						break;
 					#if IS_SSH_VER(0, 8)
 					case SSH_KNOWN_HOSTS_OTHER:
 					#else
 					case SSH_SERVER_FOUND_OTHER:
 					#endif
-						HostCb(	"The server gave use a key of a type while we had an other type recorded. It is a possible attack.",
-								SshHostOther);
+						response = HostCb(	"The server gave use a key of a type while we had an other type recorded. It is a possible attack.",
+											SshHostOther);
 						break;
 					#if IS_SSH_VER(0, 8)
 					case SSH_KNOWN_HOSTS_UNKNOWN:
 					#else
 					case SSH_SERVER_NOT_KNOWN:
 					#endif
-						HostCb(	"The server is unknown. You should confirm the public key hash is correct.",
-								SshUnknown);
+						response = HostCb(	"The server is unknown. You should confirm the public key hash is correct.",
+											SshUnknown);
 						break;
 					#if IS_SSH_VER(0, 8)
 					case SSH_KNOWN_HOSTS_NOT_FOUND:
 					#else
 					case SSH_SERVER_FILE_NOT_FOUND:
 					#endif
-						HostCb(	"Host list not found.",
-								SshNotFound);
+						response = HostCb(	"Host list not found.",
+											SshNotFound);
 						break;
 					default:
 					#if IS_SSH_VER(0, 8)
@@ -332,8 +339,8 @@ public:
 					#else
 					case SSH_SERVER_ERROR:
 					#endif
-						HostCb(	"There had been an error checking the host.",
-								SshError);
+						response = HostCb(	"There had been an error checking the host.",
+											SshError);
 						break;
 				}
 			}
@@ -345,7 +352,8 @@ public:
 						State);						
 			}
 			
-			return false;
+			if (response != SshConnect)
+				return false;
 		}
 
 		if (PublicKey)
