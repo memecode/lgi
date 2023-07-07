@@ -97,6 +97,7 @@ public:
 	GdcLibTiff();
 	~GdcLibTiff();
 
+	const char *GetClass() override { return "GdcLibTiff"; }
 	int GetCapabilites() { return FILTER_CAP_READ|FILTER_CAP_WRITE; }
 	Format GetFormat() { return FmtTiff; }
 	bool IsOk() { return Lib ? Lib->IsLoaded() : false; }

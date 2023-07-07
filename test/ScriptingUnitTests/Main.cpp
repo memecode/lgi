@@ -39,6 +39,8 @@ class App : public LApp, public LScriptContext, public LVmCallback
 public:
 	int Status;
 
+	const char* GetClass() override { return "App"; }
+
 	App(OsAppArguments &AppArgs) : LApp(AppArgs, "LgiScript")
 	{
 		LFile::Path p(LSP_APP_INSTALL);
