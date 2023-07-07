@@ -263,7 +263,7 @@ int main(int Args, char **Arg)
 		if (e) LgiTrace("%s:%i - AEInstallEventHandler error %i\n", _FL, e);
 		#endif
 	
-	#elif 1 && defined(__GTK_H__) && defined(_DEBUG)
+	#elif 0 && defined(__GTK_H__) && defined(_DEBUG)
 	
 		// This turns on fatal GKT warnings all the time... 
 		// Useful for debugging.
