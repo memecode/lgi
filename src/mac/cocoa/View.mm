@@ -456,11 +456,6 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 
 	switch (Msg->m)
 	{
-		case M_PULSE:
-		{
-			OnPulse();
-			break;
-		}
 		case M_CHANGE:
 		{
 			LViewI *Ctrl;
@@ -484,23 +479,15 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 			Invalidate(rc.Get());
 			break;
 		}
-		case M_THREAD_COMPLETED:
-		{
-			auto Th = (LThread*)Msg->A();
-			if (!Th)
-				break;
-
-			Th->OnComplete();
-			if (Th->GetDeleteOnExit())
-				delete Th;
-
-			return true;
-		}
 		default:
 		{
 			break;
 		}
 	}
+
+	LMessage::Result result;
+	if (CommonEvents(result, Msg))
+		return result;
 
 	return 0;
 }

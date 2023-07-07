@@ -262,6 +262,12 @@ int LgiMsg(LViewI *Parent, const char *Str, const char *Title, int Type, ...)
 	#elif defined(__GTK_H__)
 
 		using namespace Gtk;
+		
+		if (!LAppInst->InThread())
+		{
+			LAssert(!"Not in the GUI thread!!!");
+			return IDCANCEL;
+		}
 	
 		GtkButtonsType GtkType;
 		switch (Type & ~MB_SYSTEMMODAL)

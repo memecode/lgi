@@ -725,11 +725,6 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 			}
 			break;
 		}
-		case M_PULSE:
-		{
-			OnPulse();
-			break;
-		}
 		case M_CAPTURE_PULSE:
 		{
 			auto wnd = GetWindow();
@@ -805,19 +800,11 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 		{
 			return OnCommand(Msg->A(), 0, (OsView) Msg->B());
 		}
-		case M_THREAD_COMPLETED:
-		{
-			auto Th = (LThread*)Msg->A();
-			if (!Th)
-				break;
-
-			Th->OnComplete();
-			if (Th->GetDeleteOnExit())
-				delete Th;
-
-			return true;
-		}
 	}
+
+	LMessage::Result result;
+	if (CommonEvents(result, Msg))
+		return result;
 
 	return 0;
 }

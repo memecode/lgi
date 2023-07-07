@@ -263,15 +263,15 @@ int main(int Args, char **Arg)
 		if (e) LgiTrace("%s:%i - AEInstallEventHandler error %i\n", _FL, e);
 		#endif
 	
-	#elif 0 && defined(__GTK_H__) && defined(_DEBUG)
+	#elif 1 && defined(__GTK_H__) && defined(_DEBUG)
 	
 		// This turns on fatal GKT warnings all the time... 
 		// Useful for debugging.
-		LArray<char*> a;
+		LArray<const char*> a;
 		for (int i=0; i<AppArgs.Args; i++)
 			a[i] = AppArgs.Arg[i];
 		a.Add("--g-fatal-warnings");
-		if (0)
+		if (1)
 			a.Add("--sync");
 		AppArgs.Arg = &a[0];
 		AppArgs.Args = a.Length();

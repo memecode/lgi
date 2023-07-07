@@ -188,6 +188,7 @@ enum LgiMessages
 	M_SET_CTRL_NAME,		// A=(int)CtrlId, B=(LString*)Name
 	M_SET_CTRL_ENABLE,		// A=(int)CtrlId, B=(bool)Enabled
 	M_SET_CTRL_VISIBLE,		// A=(int)CtrlId, B=(bool)Visible
+	M_VIEW_RUN_CALLBACK,	// A=(std::function<int64()>*)CallbackHeapObj, B=(LAutoPtr<int64>*)result
 
 	#ifdef WINDOWS
 	M_USER = WM_APP + 200

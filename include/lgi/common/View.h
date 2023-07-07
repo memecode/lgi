@@ -328,7 +328,12 @@ public:
 	int AddDispatch() override;
 
 	/// Called to process every message received by this window.
+	/// This also calls CommonEvents which is for events common to all 
+	/// platforms.
 	LMessage::Result OnEvent(LMessage *Msg) override;
+
+	/// Implements handlers for events common to all platforms.
+	bool CommonEvents(LMessage::Result &result, LMessage *Msg);
 
 	/// true if the view is enabled
 	bool Enabled() override;
@@ -397,6 +402,12 @@ public:
 	/// to time. On Win32 it stays the same. In any case if this function returns
 	/// true it's safe to do just about anything.
 	bool InThread() override;
+	
+	/// Run some code in the UI thread...
+	/// This will block while waiting for the UI event loop to respond or a timeout
+	/// to occur. Negative timeoutMs is "wait forever".
+	/// -1 return value is generally an error.
+	int64 RunCallback(std::function<int64()> Callback, int timeoutMs = -1);
 	
 	/// \brief Asyncronously posts an event to be received by this view
 	virtual bool PostEvent
