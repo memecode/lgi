@@ -43,7 +43,6 @@ enum LgiMessages
 		M_GTHREADWORK_COMPELTE,
 		
 		/// Implemented to handle timer events in the GUI thread.
-		M_PULSE,
 		M_SET_VISIBLE,
 		M_CAPTURE_PULSE,
 		
@@ -112,7 +111,6 @@ enum LgiMessages
 		M_CUT,
 		M_COPY,
 		M_PASTE,
-		M_PULSE,
 		M_SET_VISIBLE,
 		M_MOUSE_CAPTURE_POLL,
 		M_TEXT_UPDATE_NAME,
@@ -157,7 +155,6 @@ enum LgiMessages
 		M_CUT,
 		M_COPY,
 		M_PASTE,
-		M_PULSE,
 		M_MOUSE_TRACK_UP,
 		M_GTHREADWORK_COMPELTE,
 		M_TEXT_UPDATE_NAME,
@@ -189,6 +186,7 @@ enum LgiMessages
 	M_SET_CTRL_ENABLE,		// A=(int)CtrlId, B=(bool)Enabled
 	M_SET_CTRL_VISIBLE,		// A=(int)CtrlId, B=(bool)Visible
 	M_VIEW_RUN_CALLBACK,	// A=(std::function<int64()>*)CallbackHeapObj, B=(LAutoPtr<int64>*)result
+	M_PULSE,
 
 	#ifdef WINDOWS
 	M_USER = WM_APP + 200

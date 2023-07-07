@@ -71,6 +71,8 @@ public:
 
 	~LDbRow();
 
+	const char* GetClass() override { return "LDbRow"; }
+
 	// Fields
 	size_t GetFields();
 	LDbField &GetField(size_t Idx);
