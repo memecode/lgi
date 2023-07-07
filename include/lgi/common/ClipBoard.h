@@ -1,6 +1,6 @@
 /// \file
-#ifndef _CLIPBOARD_H
-#define _CLIPBOARD_H
+#ifndef _LCLIPBOARD_H
+#define _LCLIPBOARD_H
 
 #include <functional>
 
@@ -23,7 +23,7 @@ public:
 	/// On windows, this equates to a CF_TEXT, CF_BITMAP, CF_DIB type #define
 	#if defined(__GTK_H__)
 	typedef Gtk::GdkAtom FormatType;
-	#elif defined(MAC)
+	#elif defined(MAC) || defined(HAIKU)
 	typedef LString FormatType;
 	#else
 	typedef uint32_t FormatType;
