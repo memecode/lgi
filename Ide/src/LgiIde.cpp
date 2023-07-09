@@ -52,8 +52,33 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 class FindInProject : public LDialog
 {
-	AppWnd *App;
-	LList *Lst;
+	AppWnd *App = NULL;
+	LList *Lst = NULL;
+	bool SearchSysInc = false;
+
+	void SearchSystemIncludes(LString path, const char *key)
+	{
+		LDirectory dir;
+		for (int i=dir.First(path); i; i=dir.Next())
+		{
+			if (dir.IsDir())
+			{
+				SearchSystemIncludes(dir.FullPath(), key);
+			}
+			else if (Stristr(dir.GetName(), key))
+			{
+				LListItem* li = new LListItem;
+				LString Fn = dir.FullPath();
+				#ifdef WINDOWS
+				Fn = Fn.Replace("/", "\\");
+				#else
+				Fn = Fn.Replace("\\", "/");
+				#endif
+				li->SetText(Fn);
+				Lst->Insert(li);
+			}
+		}
+	}
 
 public:
 	FindInProject(AppWnd *app)
@@ -69,6 +94,11 @@ public:
 				v->Focus(true);
 			if (!GetViewById(IDC_FILES, Lst))
 				return;
+
+			LVariant s = false;
+			App->GetOptions()->GetValue(OPT_SearchSysInc, s);
+			SearchSysInc = s.CastInt32() != 0;
+			SetCtrlValue(IDC_SEARCH_SYS_INCLUDES, SearchSysInc);
 
 			RegisterHook(this, LKeyEvents, 0);
 		}
@@ -123,15 +153,36 @@ public:
 		
 		LArray<ProjectNode*> Matches, Nodes;
 
+		auto Platform = PlatformFlagsToEnum(App->GetPlatform());
+		LString::Array SysPaths;
 		List<IdeProject> All;
 		p->GetChildProjects(All);
-		All.Insert(p);							
+		All.Insert(p);
 		for (auto p: All)
 		{
 			p->GetAllNodes(Nodes);
+
+			if (SearchSysInc)
+			{
+				LString Lst = p->GetSettings()->GetStr(ProjSystemIncludes, NULL, Platform);
+				if (!Lst)
+					continue;
+				LString::Array Paths = Lst.SplitDelimit("\r\n");
+				for (auto path: Paths)
+				{
+					if (LIsRelativePath(path))
+					{
+						char full[MAX_PATH_LEN];
+						LMakePath(full, sizeof(full), p->GetFileName(), "..");
+						LMakePath(full, sizeof(full), full, path);
+						SysPaths.Add(full);
+					}
+					else SysPaths.Add(path);
+				}
+			}
 		}
 
-		FilterFiles(Matches, Nodes, s, App->GetPlatform());
+		FilterFiles(Matches, Nodes, s, Platform);
 
 		Lst->Empty();
 		for (auto m: Matches)
@@ -146,6 +197,12 @@ public:
 			m->GetProject()->CheckExists(Fn);
 			li->SetText(Fn);
 			Lst->Insert(li);
+		}
+
+		if (SysPaths.Length())
+		{
+			for (auto path: SysPaths)
+				SearchSystemIncludes(path, s);
 		}
 
 		Lst->ResizeColumnsToContent();
@@ -173,6 +230,18 @@ public:
 			case IDCANCEL:
 				EndModal(0);
 				break;
+
+			case IDC_SEARCH_SYS_INCLUDES:
+			{
+				bool s = c->Value() != 0;
+				if (s != SearchSysInc)
+				{
+					LVariant v = SearchSysInc = s;
+					App->GetOptions()->SetValue(OPT_SearchSysInc, v);
+					Search(GetCtrlName(IDC_TEXT));
+				}
+				break;
+			}
 		}
 
 		return 0;
@@ -3020,11 +3089,6 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 		return NULL;
 	}
 	
-	LString::Array Inc;
-	auto plat = PlatformFlagsToEnum(d->Platform);
-	p->BuildIncludePaths(Inc, false, true, plat);
-	d->FindSym->SetIncludePaths(Inc);
-
 	p->SetParentProject(ParentProj);
 	
 	auto Status = p->OpenFile(FileName);
@@ -3032,7 +3096,12 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 	{
 		d->Projects.Insert(p);
 		d->OnFile(FileName, true);
-		
+
+		LString::Array Inc;
+		auto plat = PlatformFlagsToEnum(d->Platform);
+		p->BuildIncludePaths(Inc, false, true, plat);
+		d->FindSym->SetIncludePaths(Inc);
+
 		if (!Dep)
 		{
 			auto d = strrchr(FileName, DIR_CHAR);

@@ -1023,27 +1023,37 @@ bool IdeProjectSettings::Serialize(LXmlTag *Parent, bool Write)
 
 const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default, IdePlatform Platform)
 {
-	SettingInfo *s = d->Map.Find(Setting);
+	auto s = d->Map.Find(Setting);
 	LAssert(s);
 	LArray<char*> Strs;
 	int Bytes = 0;
 	if (!s->Flag.PlatformSpecific)
 	{
-		LXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, 0, Platform));
-		if (t && t->GetContent())
+		auto path = d->BuildPath(Setting, 0, Platform);
+		auto t = d->Active.GetChildTag(path);
+		if (t)
 		{
-			Strs.Add(t->GetContent());
-			Bytes += strlen(t->GetContent()) + 1;
+			if (t->GetContent())
+			{
+				Strs.Add(t->GetContent());
+				Bytes += strlen(t->GetContent()) + 1;
+			}
 		}
+		else LgiTrace("%s:%i - no key '%s' in '%s'\n", _FL, path, d->Project->GetFileName());
 	}
 	if (!s->Flag.CrossPlatform)
 	{
-		LXmlTag *t = d->Active.GetChildTag(d->BuildPath(Setting, SF_PLATFORM_SPECIFC, Platform));
-		if (t && t->GetContent())
+		auto path = d->BuildPath(Setting, SF_PLATFORM_SPECIFC, Platform);
+		auto t = d->Active.GetChildTag(path);
+		if (t)
 		{
-			Strs.Add(t->GetContent());
-			Bytes += strlen(t->GetContent()) + 1;
+			if (t->GetContent())
+			{
+				Strs.Add(t->GetContent());
+				Bytes += strlen(t->GetContent()) + 1;
+			}
 		}
+		else LgiTrace("%s:%i - no key '%s' in '%s'\n", _FL, path, d->Project->GetFileName());
 	}
 	
 	if (Strs.Length() == 0)
@@ -1055,7 +1065,6 @@ const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default,
 	if (!d->StrBuf.Reset(new char[Bytes]))
 		return Default;
 
-	// char *c = d->StrBuf;
 	int ch = 0;
 	for (int i=0; i<Strs.Length(); i++)
 	{

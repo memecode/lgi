@@ -143,6 +143,7 @@ inline const char *toString(BuildConfig c)
 
 #define OPT_EditorFont			"EdFont"
 #define OPT_Jobs				"Jobs"
+#define OPT_SearchSysInc		"SearchSysInc"
 
 //////////////////////////////////////////////////////////////////////
 // Platform stuff

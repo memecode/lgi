@@ -3529,6 +3529,17 @@ IdeProjectSettings *IdeProject::GetSettings()
 	return &d->Settings;
 }
 
+void AddAllFolders(LString::Array &out, const char *in)
+{
+	out.Add(in);
+	LDirectory dir;
+	for (int b=dir.First(in); b; b=dir.Next())
+	{
+		if (dir.IsDir())
+			AddAllFolders(out, dir.FullPath());
+	}
+}
+
 bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool IncludeSystem, IdePlatform Platform)
 {
 	List<IdeProject> Projects;
@@ -3553,7 +3564,17 @@ bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool In
 			LString SysInclude = d->Settings.GetStr(ProjSystemIncludes, NULL, Platform);
 			a = SysInclude.SplitDelimit(Delim);
 			In.SetFixedLength(false);
-			In.Add(a);
+
+			bool recurseSystem = true;
+			if (recurseSystem)
+			{
+				for (auto folder: a)
+					AddAllFolders(In, folder);
+			}
+			else
+			{
+				In.Add(a);
+			}
 		}
 		
 		for (unsigned i=0; i<In.Length(); i++)

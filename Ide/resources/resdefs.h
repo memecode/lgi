@@ -81,7 +81,7 @@
 #define IDC_FIND_PROJECT_FILE					239
 #define IDC_240									240
 #define IDC_242									242
-#define IDC_TEXT								243
+#define IDC_SEARCH_SYS_INCLUDES					243
 #define IDM_EOL_LF								500
 #define IDM_MENU_501							501
 #define IDM_OPEN								502
@@ -178,3 +178,4 @@
 #define IDM_MAC									593
 #define IDM_HAIKU								594
 #define IDM_ALL_OS								595
+#define IDC_TEXT								596

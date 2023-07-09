@@ -148,9 +148,11 @@
 		<String Ref="240" Cid="240" Define="IDC_240" />
 		<String Ref="241" Cid="113" Define="IDC_FILES" />
 		<String Ref="242" Cid="242" Define="IDC_242" en="File" />
-		<String Ref="243" Cid="243" Define="IDC_TEXT" />
+		<String Ref="243" Cid="243" Define="IDC_SEARCH_SYS_INCLUDES" en="Search system includes as well." />
 		<String Ref="244" Cid="202" Define="IDC_SEARCH" en="Search" />
 		<String Ref="245" Cid="2" Define="IDCANCEL" en="Cancel" />
+		<String Ref="249" Cid="596" Define="IDC_TEXT" />
+		<String Ref="250" Cid="202" Define="IDC_SEARCH" en="Search" />
 	</string-group>
 	<style name="General">.fixed {
 	width: 18px;
@@ -161,21 +163,28 @@
 }
 </style>
 	<Dialog pos="7,7,765,406" ref="239">
-		<TableLayout pos="7,7,748,356" ref="240" cols="0.500,0.500" rows="0.500,0.500">
+		<TableLayout pos="7,7,748,356" ref="240" cols="0.500,0.500" rows="0.333,0.333,0.333">
 			<tr>
 				<td addr="0,0" colspan="2">
-					<ListView pos="14,14,447,94" ref="241">
+					<ListView pos="14,0,706,90" ref="241">
 						<Column ref="242" width="383" />
 					</ListView>
 				</td>
 			</tr>
 			<tr>
 				<td addr="0,1">
-					<EditBox Pos="7,184,209,211" ref="243" />
+					<EditBox Pos="21,126,223,153" ref="249" />
 				</td>
 				<td addr="1,1">
-					<Button pos="396,192,458,212" ref="244" toggle="0" />
-					<Button pos="396,227,465,247" ref="245" toggle="0" />
+					<Button pos="399,126,461,146" ref="250" toggle="0" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,2">
+					<CheckBox pos="21,245,244,265" ref="243" />
+				</td>
+				<td addr="1,2">
+					<Button pos="396,282,465,302" ref="245" toggle="0" />
 				</td>
 			</tr>
 		</TableLayout>
@@ -353,10 +362,10 @@
 		</TableLayout>
 	</Dialog>
 	<Dialog pos="7,7,680,502" ref="179">
-		<TableLayout pos="7,7,657,454" ref="180" cols="0.333,0.333,0.333" rows="0.250,0.250,0.250,0.250">
+		<TableLayout pos="7,7,657,454" ref="180" cols="0.434,0.232,0.333" rows="0.250,0.250,0.250,0.250">
 			<tr>
 				<td addr="0,0" colspan="3">
-					<ListView pos="7,7,454,104" ref="181">
+					<ListView pos="7,7,594,83" ref="181">
 						<Column ref="182" width="199" />
 						<Column ref="183" width="50" />
 						<Column ref="233" width="156" />
@@ -368,7 +377,7 @@
 					<EditBox Pos="21,127,265,154" ref="192" />
 				</td>
 				<td addr="2,1">
-					<Button pos="473,141,528,161" ref="193" toggle="0" />
+					<Button pos="474,141,529,161" ref="193" toggle="0" />
 				</td>
 			</tr>
 			<tr>
@@ -377,7 +386,7 @@
 				</td>
 				<td addr="1,2" />
 				<td addr="2,2">
-					<Button pos="452,247,514,267" ref="194" toggle="0" />
+					<Button pos="453,247,515,267" ref="194" toggle="0" />
 				</td>
 			</tr>
 			<tr>
