@@ -2985,6 +2985,19 @@ IdeProject *AppWnd::RootProject()
 	return NULL;
 }
 
+IdePlatform PlatformFlagsToEnum(int flags)
+{
+	if (flags == PLATFORM_WIN32)
+		return PlatformWin;
+	if (flags == PLATFORM_LINUX)
+		return PlatformLinux;
+	if (flags == PLATFORM_MAC)
+		return PlatformMac;
+	if (flags == PLATFORM_HAIKU)
+		return PlatformHaiku;
+	return PlatformCurrent;
+}
+
 IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bool Create, bool Dep)
 {	
 	if (!FileName)
@@ -3008,12 +3021,13 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 	}
 	
 	LString::Array Inc;
-	p->BuildIncludePaths(Inc, false, false, PlatformCurrent);
+	auto plat = PlatformFlagsToEnum(d->Platform);
+	p->BuildIncludePaths(Inc, false, true, plat);
 	d->FindSym->SetIncludePaths(Inc);
 
 	p->SetParentProject(ParentProj);
 	
-	ProjectStatus Status = p->OpenFile(FileName);
+	auto Status = p->OpenFile(FileName);
 	if (Status == OpenOk)
 	{
 		d->Projects.Insert(p);
@@ -3024,8 +3038,8 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 			auto d = strrchr(FileName, DIR_CHAR);
 			if (d++)
 			{
-				char n[256];
-				snprintf(n, sizeof(n), "%s [%s]", AppName, d);
+				LString n;
+				n.Printf("%s [%s]", AppName, d);
 				Name(n);						
 			}
 		}

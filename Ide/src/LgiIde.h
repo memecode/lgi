@@ -160,6 +160,7 @@ enum IdePlatform
 #define PLATFORM_MAC			(1 << PlatformMac)
 #define PLATFORM_HAIKU			(1 << PlatformHaiku)
 #define PLATFORM_ALL			(PLATFORM_WIN32|PLATFORM_LINUX|PLATFORM_MAC|PLATFORM_HAIKU)
+extern IdePlatform PlatformFlagsToEnum(int flags);
 
 #if defined(_WIN32)
 #define PLATFORM_CURRENT		PLATFORM_WIN32

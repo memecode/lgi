@@ -2965,12 +2965,8 @@ bool IdeProject::SaveFile()
 			f.SetSize(0);
 
 			// Save user file details..
-			// int Id;
-			// for (int Flags = d->UserNodeFlags.First(&Id); Flags >= 0; Flags = d->UserNodeFlags.Next(&Id))
 			for (auto i : d->UserNodeFlags)
-			{
 				f.Print("%i,%x\n", i.key, i.value);
-			}
 
 			d->UserFileDirty = false;
 		}

@@ -109,7 +109,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\lgi\common\EventTargetThread.h" />
-    <ClInclude Include="..\..\include\lgi\common\ParseCpp.h" />
     <ClInclude Include="..\..\include\lgi\common\Scripting.h" />
     <ClInclude Include="..\..\include\lgi\common\SubProcess.h" />
     <ClInclude Include="..\..\src\common\Coding\ScriptingPriv.h" />
@@ -128,13 +127,11 @@
     <ClInclude Include="..\src\PythonParser.h" />
     <ClInclude Include="..\src\resdefs.h" />
     <ClInclude Include="..\src\resource.h" />
-    <ClInclude Include="..\src\SimpleCppParser.h" />
     <ClInclude Include="..\src\SpaceTabConv.h" />
     <ClInclude Include="..\src\WebFldDlg.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\common\Coding\LexCpp.cpp" />
-    <ClCompile Include="..\..\src\common\Coding\ParseCpp.cpp" />
     <ClCompile Include="..\..\src\common\Coding\ScriptCompiler.cpp" />
     <ClCompile Include="..\..\src\common\Coding\ScriptLibrary.cpp" />
     <ClCompile Include="..\..\src\common\Coding\ScriptVM.cpp" />
@@ -189,6 +186,7 @@
     </MASM>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\haiku\buildHaiku.py" />
     <None Include="Makefile.windows" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -8,9 +8,6 @@
     <Filter Include="Source Files\Search">
       <UniqueIdentifier>{6b83273a-b199-4420-ae65-9663c7c7e75b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Search\Cpp Parser">
-      <UniqueIdentifier>{e809cc3d-4694-4e36-b2d4-60e9f9450e56}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Search\Simple Cpp Parser">
       <UniqueIdentifier>{b327086f-7d0e-4840-ac95-7dc18a89fe19}</UniqueIdentifier>
     </Filter>
@@ -55,6 +52,9 @@
     <Filter Include="Build">
       <UniqueIdentifier>{a785385b-f482-4978-8bff-26a6863d03bd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Search\SymbolSearch">
+      <UniqueIdentifier>{0cab67ca-75a0-425c-b4ad-375006afd28d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Debugger.h">
@@ -64,9 +64,6 @@
       <Filter>Lgi</Filter>
     </ClInclude>
     <ClInclude Include="..\src\IdeFindInFiles.h">
-      <Filter>Source Files\Search</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\FindSymbol.h">
       <Filter>Source Files\Search</Filter>
     </ClInclude>
     <ClInclude Include="..\src\FtpFile.h">
@@ -87,9 +84,6 @@
     <ClInclude Include="..\src\LgiIde.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\lgi\common\ParseCpp.h">
-      <Filter>Source Files\Search\Cpp Parser</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\ProjectNode.h">
       <Filter>Source Files\Projects</Filter>
     </ClInclude>
@@ -108,9 +102,6 @@
     <ClInclude Include="..\..\src\common\Coding\ScriptingPriv.h">
       <Filter>Source Files\Scripting</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\SimpleCppParser.h">
-      <Filter>Source Files\Search\Simple Cpp Parser</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\SpaceTabConv.h">
       <Filter>Source Files\Utils</Filter>
     </ClInclude>
@@ -125,6 +116,9 @@
     </ClInclude>
     <ClInclude Include="..\src\DebugContext.h">
       <Filter>Source Files\Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\FindSymbol.h">
+      <Filter>Source Files\Search\SymbolSearch</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -144,9 +138,6 @@
       <Filter>Source Files\Docs</Filter>
     </ClCompile>
     <ClCompile Include="..\src\IdeFindInFiles.cpp">
-      <Filter>Source Files\Search</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\FindSymbol.cpp">
       <Filter>Source Files\Search</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\common\Net\Ftp.cpp">
@@ -203,9 +194,6 @@
     <ClCompile Include="..\..\src\common\Net\OpenSSLSocket.cpp">
       <Filter>Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\common\Coding\ParseCpp.cpp">
-      <Filter>Source Files\Search\Cpp Parser</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\common\Gdc2\Filters\Png.cpp">
       <Filter>Lgi</Filter>
     </ClCompile>
@@ -239,6 +227,9 @@
     <ClCompile Include="..\src\AddFtpFile.cpp">
       <Filter>Source Files\Dialogs</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\FindSymbol.cpp">
+      <Filter>Source Files\Search\SymbolSearch</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\..\src\win\General\Lgi.manifest" />
@@ -255,6 +246,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Makefile.windows">
+      <Filter>Build</Filter>
+    </None>
+    <None Include="..\haiku\buildHaiku.py">
       <Filter>Build</Filter>
     </None>
   </ItemGroup>
