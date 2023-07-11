@@ -919,6 +919,24 @@ int LSocket::Open(const char *HostAddr, int Port)
 	return Status == 0;
 }
 
+bool LSocket::SetReuseAddress(bool reuse)
+{
+	if (!ValidSocket(d->Socket))
+		d->Socket = socket(AF_INET, SOCK_STREAM, 0);
+	if (!ValidSocket(d->Socket))
+		return false;
+
+	int so_reuseaddr = reuse;
+	if (setsockopt(Handle(), SOL_SOCKET, SO_REUSEADDR, (const char *)&so_reuseaddr, sizeof so_reuseaddr))
+	{
+		OnError(0, "Attempt to set SO_REUSEADDR failed.");
+		// This might not be fatal... so continue on.
+		return false;
+	}
+	
+	return true;
+}
+
 bool LSocket::Bind(int Port, bool reuseAddr)
 {
 	if (!ValidSocket(d->Socket))
@@ -928,12 +946,7 @@ bool LSocket::Bind(int Port, bool reuseAddr)
 	}
 
 	if (reuseAddr)
-	{
-		int so_reuseaddr = 1;
-		if (setsockopt(Handle(), SOL_SOCKET, SO_REUSEADDR, (const char *)&so_reuseaddr, sizeof so_reuseaddr))
-			OnError(0, "Attempt to set SO_REUSEADDR failed.");
-			// This might not be fatal... so continue on.
-	}
+		SetReuseAddress(true);
 
 	sockaddr_in add;
 	add.sin_family = AF_INET;
@@ -950,43 +963,37 @@ bool LSocket::Bind(int Port, bool reuseAddr)
 
 bool LSocket::Listen(int Port)
 {
-	Close();
-
-	d->Socket = socket(AF_INET, SOCK_STREAM, 0);
-	if (d->Socket >= 0)
-	{
-		BytesWritten = 0;
-		BytesRead = 0;
-
-		sockaddr Addr;
-		sockaddr_in *a = (sockaddr_in*) &Addr;
-		ZeroObj(Addr);
-		a->sin_family = AF_INET;
-		a->sin_port = htons(Port);
-		a->sin_addr.OsAddr = INADDR_ANY;
-
-		if (bind(d->Socket, &Addr, sizeof(Addr)) >= 0)
-		{
-			if (listen(d->Socket, SOMAXCONN) != SOCKET_ERROR)
-			{
-				return true;
-			}
-			else
-			{
-				Error();
-			}
-		}
-		else
-		{
-			Error();
-		}
-	}
-	else
+	if (!ValidSocket(d->Socket))
+		d->Socket = socket(AF_INET, SOCK_STREAM, 0);
+	if (!ValidSocket(d->Socket))
 	{
 		Error();
+		return false;
 	}
 
-	return false;
+	BytesWritten = 0;
+	BytesRead = 0;
+
+	sockaddr Addr;
+	sockaddr_in *a = (sockaddr_in*) &Addr;
+	ZeroObj(Addr);
+	a->sin_family = AF_INET;
+	a->sin_port = htons(Port);
+	a->sin_addr.OsAddr = INADDR_ANY;
+
+	if (bind(d->Socket, &Addr, sizeof(Addr)) < 0)
+	{
+		Error();
+		return false;
+	}
+		
+	if (listen(d->Socket, SOMAXCONN) == SOCKET_ERROR)
+	{
+		Error();
+		return false;
+	}
+
+	return true;
 }
 
 bool LSocket::Accept(LSocketI *c)

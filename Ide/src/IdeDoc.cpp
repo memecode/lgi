@@ -18,6 +18,7 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/PopupNotification.h"
+#include "lgi/common/SubProcess.h"
 
 #include "LgiIde.h"
 #include "ProjectNode.h"
@@ -729,6 +730,98 @@ void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LSt
 class ProjFilePopup : public LPopupList<ProjectNode>
 {
 	AppWnd *App;
+	LString::Array SysInc;
+	LString::Array SysHeaders;
+
+	struct SysIncThread : public LThread, public LCancel
+	{
+		ProjFilePopup *Parent;
+		LString::Array Paths;
+		LString::Array Headers;
+		LHashTbl<ConstStrKey<char,true>, bool> Map;
+		
+		SysIncThread(ProjFilePopup *parent) : LThread("SysIncThread")
+		{
+			Parent = parent;
+			for (auto p: Parent->SysInc)
+				Paths.Add(p.Get());
+			
+			Run();
+		}
+		
+		~SysIncThread()
+		{
+			Cancel();
+			WaitForExit();
+		}
+		
+		void Scan(LString p)
+		{
+			if (Map.Find(p))
+				return;
+			Map.Add(p, true);
+		
+			LDirectory d;
+			for (auto b=d.First(p); b; b=d.Next())
+			{
+				if (d.IsDir())
+				{
+					Scan(d.FullPath());
+				}
+				else
+				{
+					Headers.New() = d.FullPath();
+				}
+			}
+		}
+		
+		int Main()
+		{
+			for (unsigned i=0; i<Paths.Length(); i++)
+			{
+				LString p = Paths[i];
+				if (p[0] == '`')
+				{
+					Paths.DeleteAt(i--, true);					
+					auto a = p.Strip("`").SplitDelimit(" \t\r\n", 1);
+					LSubProcess sub(a[0], a[1]);
+					if (sub.Start())
+					{
+						LStringPipe out;
+						sub.Communicate(&out);
+						auto parts = out.NewLStr().SplitDelimit();
+						for (auto part: parts)
+						{
+							if (part.Find("-I") == 0)
+								Paths.Add(part(2,-1));
+						}
+					}
+					else printf("%s:%i - Error starting %s\n", _FL, p.Get());
+					continue;
+				}
+				
+				printf("%s:%i SysIncThread: '%s'\n", _FL, p.Get());
+			}
+			
+			for (auto &p: Paths)
+				Scan(p);
+
+			Parent->RunCallback([this]()
+			{
+				Parent->SysHeaders.Swap(Headers);
+
+				auto s = Parent->Name();
+				if (ValidStr(s))
+					Parent->Update(s);
+
+				return 0;
+			});
+
+			return 0;
+		}
+	};
+	LAutoPtr<SysIncThread> Thread;
+
 
 public:
 	LArray<ProjectNode*> Nodes;
@@ -743,13 +836,20 @@ public:
 		return LString(Obj->GetFileName());
 	}
 	
+	void SetSysInc(LString::Array sysInc)
+	{
+		SysInc = sysInc;
+		if (SysHeaders.Length() == 0)
+			Thread.Reset(new SysIncThread(this));
+	}
+	
 	void OnSelect(ProjectNode *Obj)
 	{
 		auto Fn = Obj->GetFileName();
 		if (LIsRelativePath(Fn))
 		{
-			IdeProject *Proj = Obj->GetProject();
-			LAutoString Base = Proj->GetBasePath();
+			auto Proj = Obj->GetProject();
+			auto Base = Proj->GetBasePath();
 			LFile::Path p(Base);
 			p += Fn;
 			App->GotoReference(p, 1, false);			
@@ -760,11 +860,22 @@ public:
 		}
 	}
 	
+	void OnSelect(LListItem *Item)
+	{
+		App->GotoReference(Item->GetText(), 1, false);
+	}
+	
 	void Update(LString InputStr)
 	{
 		LArray<ProjectNode*> Matches;
 		FilterFiles(Matches, Nodes, InputStr, App->GetPlatform());
 		SetItems(Matches);
+		
+		for (auto &hdr: SysHeaders)
+		{
+			if (Lst && hdr.Find(InputStr) >= 0)
+				Lst->Insert(new LListItem(hdr));
+		}		
 	}
 	
 	int OnNotify(LViewI *Ctrl, LNotification n)
@@ -1719,6 +1830,11 @@ int IdeDoc::OnNotify(LViewI *v, LNotification n)
 			auto SearchStr = v->Name();
 			if (ValidStr(SearchStr))
 			{
+				auto Platform = PlatformFlagsToEnum(d->App->GetPlatform());
+				LVariant searchSysInc = false;
+				d->App->GetOptions()->GetValue(OPT_SearchSysInc, searchSysInc);
+				LString::Array SysInc;
+			
 				if (!d->FilePopup)
 				{
 					if ((d->FilePopup = new ProjFilePopup(d->App, v)))
@@ -1735,16 +1851,26 @@ int IdeDoc::OnNotify(LViewI *v, LNotification n)
 							// Get all the nodes
 							List<IdeProject> All;
 							p->GetChildProjects(All);
-							All.Insert(p);							
+							All.Insert(p);
+													
 							for (auto p: All)
 							{
 								p->GetAllNodes(d->FilePopup->Nodes);
+								
+								if (searchSysInc.CastInt32())
+								{
+									if (LString s = p->GetSettings()->GetStr(ProjSystemIncludes, NULL, Platform))
+										SysInc += s.Strip().SplitDelimit("\r\n");
+								}
 							}
 						}
 					}
 				}
 				if (d->FilePopup)
 				{
+					if (SysInc.Length())
+						d->FilePopup->SetSysInc(SysInc);
+					
 					// Update list elements...
 					d->FilePopup->OnNotify(v, n);
 				}

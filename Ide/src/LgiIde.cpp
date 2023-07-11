@@ -85,7 +85,7 @@ public:
 	{
 		Lst = NULL;
 		App = app;
-		if (LoadFromResource(IDC_FIND_PROJECT_FILE))
+		if (LoadFromResource(IDD_FIND_PROJECT_FILE))
 		{
 			MoveSameScreen(App);
 
@@ -213,6 +213,7 @@ public:
 		switch (c->GetId())
 		{
 			case IDC_FILES:
+			{
 				if (n.Type == LNotifyItemDoubleClick)
 				{
 					LListItem *i = Lst->GetSelected();
@@ -223,14 +224,18 @@ public:
 					}
 				}
 				break;
+			}
 			case IDC_TEXT:
+			{
 				if (n.Type != LNotifyReturnKey)
 					Search(c->Name());
 				break;
+			}
 			case IDCANCEL:
+			{
 				EndModal(0);
 				break;
-
+			}
 			case IDC_SEARCH_SYS_INCLUDES:
 			{
 				bool s = c->Value() != 0;
@@ -3601,7 +3606,7 @@ public:
 		SetParent(App = a);
 		MoveSameScreen(a);
 
-		if (LoadFromResource(IDC_RENAME))
+		if (LoadFromResource(IDD_RENAME))
 		{
 			LVariant v;
 			if (App->GetOptions()->GetValue(OPT_FIX_RENAMED, v))

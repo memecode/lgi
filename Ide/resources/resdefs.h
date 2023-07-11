@@ -21,7 +21,7 @@
 #define IDC_COPY_PATH							34
 #define IDC_MSG									36
 #define IDC_TYPE								37
-#define IDC_RENAME								43
+#define IDD_RENAME								43
 #define IDC_44									44
 #define IDC_SYM									45
 #define IDC_FIX_RENAMED							48
@@ -78,7 +78,7 @@
 #define IDC_JOBS								213
 #define IDC_233									233
 #define IDC_ENTIRE_SOLUTION						234
-#define IDC_FIND_PROJECT_FILE					239
+#define IDD_FIND_PROJECT_FILE					239
 #define IDC_240									240
 #define IDC_242									242
 #define IDC_SEARCH_SYS_INCLUDES					243

@@ -95,6 +95,7 @@ public:
 	
 	/// Override this to handle the selection of an object
 	virtual void OnSelect(T *Obj) = 0;
+	virtual void OnSelect(LListItem *Item) {}
 	
 	// Implementation:
 	// ------------------------------------------------------------------------	
@@ -213,9 +214,12 @@ public:
 			if (n.Type == LNotifyReturnKey ||
 				n.Type == LNotifyItemClick)
 			{
-				Item *Sel = dynamic_cast<Item*>(Lst->GetSelected());
+				auto s = Lst->GetSelected();
+				Item *Sel = dynamic_cast<Item*>(s);
 				if (Sel)
 					OnSelect(Sel->Value);
+				else
+					OnSelect(s);
 				
 				Visible(false);
 			}

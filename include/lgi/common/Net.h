@@ -178,6 +178,9 @@ public:
 	/// Closes the connection to the remote host.
 	int Close() override;
 
+	/// Sets the SO_REUSEADDR option.
+	bool SetReuseAddress(bool reuse);
+
 	/// Binds on a given port.
 	bool Bind(int Port, bool reuseAddr = true);
 
