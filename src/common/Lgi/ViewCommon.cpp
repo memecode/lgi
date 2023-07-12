@@ -607,7 +607,8 @@ int LView::OnNotify(LViewI *Ctrl, LNotification Data)
 			if (bCur->Looper() !=
 				bParent->Looper())
 			{
-				printf("OnNotify can't cross thread boundary!!!!!\n");
+				printf("OnNotify can't cross thread boundary!\n");
+				printf("\tthis=%s, parent=%s\n", GetClass(), d->Parent->GetClass());
 				return 0;
 			}
 		}

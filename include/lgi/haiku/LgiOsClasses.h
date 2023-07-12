@@ -9,6 +9,7 @@ protected:
     int line = 0;
     bool locked = false;
     bool noThread = false;
+    bool attempted = false;
 
 public:
     LLocker(BHandler *h, const char *File, int Line);
@@ -17,7 +18,7 @@ public:
     bool Lock(bool debug = false);
     status_t LockWithTimeout(int64 time);
     void Unlock();
-    operator bool() { return locked; }
+    operator bool();
 };
 
 #endif

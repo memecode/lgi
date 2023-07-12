@@ -28,7 +28,7 @@ struct LDialogPriv
 	bool IsModal = false;
 	bool IsModeless = false;
 	bool Resizable = true;
-	thread_id CallingThread = NULL;
+	thread_id CallingThread = 0;
 
 	/// The callback for the modal dialog:
 	LDialog::OnClose ModalCb;

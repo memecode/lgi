@@ -995,6 +995,14 @@ LLocker::~LLocker()
 	Unlock();
 }
 
+LLocker::operator bool()
+{
+	if (!locked && !attempted)
+		printf("%s:%i - No attempt to call LLocker::Lock() before checking state?\n", _FL);
+
+	return locked;
+}
+
 bool LLocker::Lock(bool debug)
 {
 	if (locked)
@@ -1003,7 +1011,8 @@ bool LLocker::Lock(bool debug)
 		LAssert(!"Locker already locked.");
 		return false;
 	}
-	
+
+	attempted = true;	
 	if (!hnd)
 	{
 		if (debug)

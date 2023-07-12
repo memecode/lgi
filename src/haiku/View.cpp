@@ -389,12 +389,12 @@ struct LBView : public Parent
 		if (!d) return;
 
 		LLocker lck(this, _FL);
-		if (lck)
+		if (lck.Lock())
 		{
 			Parent::MakeFocus(focus);
 			d->View->OnFocus(focus);
 		}
-		else printf("%s:%i - Failed to lock.\n", _FL);
+		else printf("%s:%i - Failed to lock: cls=%s.\n", _FL, d->View->GetClass());
 	}
 };
 
@@ -719,7 +719,7 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 	if (!InThread())
 	{
 		DEBUG_INVALIDATE("%s::Invalidate out of thread\n", GetClass());
-		return PostEvent(M_INVALIDATE, NULL, (LMessage::Param)this);
+		return PostEvent(M_INVALIDATE, (LMessage::Param)NULL, (LMessage::Param)this);
 	}
 
 	LRect r;
@@ -1020,7 +1020,7 @@ bool LView::Attach(LViewI *parent)
 				
 				if (d->MsgQue.Length())
 				{
-					printf("%s:%i - %s.Attach msgQue=%i\n", _FL, GetClass(), (int)d->MsgQue.Length());
+					// printf("%s:%i - %s.Attach msgQue=%i\n", _FL, GetClass(), (int)d->MsgQue.Length());
 					for (auto bmsg: d->MsgQue)
 						d->Hnd->Window()->PostMessage(bmsg);
 					d->MsgQue.DeleteObjects();

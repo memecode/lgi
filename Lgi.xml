@@ -521,6 +521,10 @@
 `pkg-config --cflags gtk+-3.0`
 `pkg-config --cflags gstreamer-1.0`</Release>
 				</Linux>
+				<Haiku>
+					<Debug>../../../../../boot/system/develop/headers</Debug>
+					<Release>../../../../../boot/system/develop/headers</Release>
+				</Haiku>
 			</SystemIncludes>
 			<Libraries>
 				<Linux>

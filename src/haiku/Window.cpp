@@ -149,7 +149,7 @@ public:
 			BWindow::MessageReceived(message);
 
 			LView *view = NULL;
-			auto r = message->FindPointer(LMessage::PropView, &view);
+			auto r = message->FindPointer(LMessage::PropView, (void**)&view);
 			if (r == B_OK)
 				view->OnEvent((LMessage*)message);
 			else

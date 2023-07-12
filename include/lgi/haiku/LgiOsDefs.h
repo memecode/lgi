@@ -84,7 +84,7 @@ public:
 typedef pthread_t					OsThread;
 typedef pid_t						OsThreadId;
 typedef pthread_mutex_t				OsSemaphore;
-#define LGetCurrentThread()			find_thread(NULL)
+#define LGetCurrentThread()			pthread_self()
 LgiFunc OsThreadId					GetCurrentThreadId();
 
 #include "lgi/common/Message.h"
