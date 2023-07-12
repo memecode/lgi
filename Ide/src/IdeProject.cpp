@@ -3390,8 +3390,9 @@ bool IdeProject::InProject(bool FuzzyMatch, const char *Path, bool Open, IdeDoc 
 {
 	if (!Path)
 		return false;
-		
+
 	// Search complete path first...
+	auto PlatformFlags = d->App->GetPlatform();
 	ProjectNode *n = d->Nodes.Find(Path);	
 	if (!n && FuzzyMatch)
 	{
@@ -3402,11 +3403,9 @@ bool IdeProject::InProject(bool FuzzyMatch, const char *Path, bool Open, IdeDoc 
 		uint32_t MatchingScore = 0;
 
 		// Traverse all nodes and try and find the best fit.
-		// const char *p;
-		// for (ProjectNode *Cur = d->Nodes.First(&p); Cur; Cur = d->Nodes.Next(&p))
-		for (auto Cur : d->Nodes)
+		for (auto Cur: d->Nodes)
 		{
-			int CurPlatform = Cur.value->GetPlatforms();
+			int NodePlatforms = Cur.value->GetPlatforms();
 			uint32_t Score = 0;
 
 			if (stristr(Cur.key, Path))
@@ -3423,7 +3422,7 @@ bool IdeProject::InProject(bool FuzzyMatch, const char *Path, bool Open, IdeDoc 
 			{
 				Score |= 0x40000000;
 			}
-			if (Score && (CurPlatform & PLATFORM_CURRENT) != 0)
+			if (Score && (NodePlatforms & PlatformFlags) != 0)
 			{
 				Score |= 0x80000000;
 			}
