@@ -349,8 +349,12 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 						if (fs->Platforms != 0 &&
 							(fs->Platforms & Platforms) == 0)
 						{
-							#ifdef DEBUG_FILE
-							LgiTrace("%s:%i - '%s' doesn't match platform: %x %x\n", _FL, fs->Path.Get(), fs->Platforms, (int)Platforms);
+							#if 1 // def DEBUG_FILE
+							LgiTrace("%s:%i - '%s' doesn't match platform: %s %s\n",
+									_FL,
+									fs->Path.Get(),
+									PlatformFlagsToStr(fs->Platforms).Get(),
+									PlatformFlagsToStr(Platforms).Get());
 							#endif
 							continue;
 						}

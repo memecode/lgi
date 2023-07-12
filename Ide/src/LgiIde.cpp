@@ -3175,6 +3175,16 @@ IdePlatform PlatformFlagsToEnum(int flags)
 	return PlatformCurrent;
 }
 
+LString PlatformFlagsToStr(int flags)
+{
+	LString::Array a;
+	if (flags & PLATFORM_WIN32) a.New() = PlatformNames[PlatformWin];
+	if (flags & PLATFORM_LINUX) a.New() = PlatformNames[PlatformLinux];
+	if (flags & PLATFORM_MAC)   a.New() = PlatformNames[PlatformMac];
+	if (flags & PLATFORM_HAIKU) a.New() = PlatformNames[PlatformHaiku];
+	return LString(",").Join(a);
+}
+
 IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bool Create, bool Dep)
 {	
 	if (!FileName)

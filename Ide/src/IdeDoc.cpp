@@ -41,9 +41,9 @@ enum
 
 int FileNameSorter(LString *a, LString *b)
 {
-	char *A = strrchr(*a, DIR_CHAR);
-	char *B = strrchr(*b, DIR_CHAR);
-	return stricmp(A?A:*a, B?B:*b);
+	char *A = strrchr(a->Get(), DIR_CHAR);
+	char *B = strrchr(b->Get(), DIR_CHAR);
+	return stricmp(A?A:a->Get(), B?B:b->Get());
 }
 
 EditTray::EditTray(LTextView3 *ctrl, IdeDoc *doc)
