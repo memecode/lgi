@@ -152,11 +152,13 @@ int SysIncThread::Main()
 		Scan(p);
 
 	App->RunCallback([this]()
-	{
-		if (Callback)
-			Callback(&Headers);
-		return 0;
-	});
+		{
+			if (Callback)
+				Callback(&Headers);
+			return 0;
+		},
+		-1,
+		this);
 
 	return 0;
 }
@@ -171,6 +173,8 @@ class FindInProject : public LDialog
 	LAutoPtr<SysIncThread> Thread;
 
 public:
+	constexpr static int SYS_HEADER_SEARCH_TIME = 500; //ms
+
 	FindInProject(AppWnd *app)
 	{
 		Lst = NULL;
@@ -242,7 +246,7 @@ public:
 
 	void Search(const char *s)
 	{
-		IdeProject *p = App->RootProject();
+		auto p = App->RootProject();
 		if (!p || !s)
 			return;
 		
@@ -292,7 +296,7 @@ public:
 			{
 				if (Stristr(h.Get(), s))
 					Lst->Insert(new LListItem(h));
-				if (LCurrentTime() - start >= 500)
+				if (LCurrentTime() - start >= SYS_HEADER_SEARCH_TIME)
 					break;
 			}
 		}
@@ -3153,6 +3157,11 @@ IdeProject *AppWnd::RootProject()
 	return NULL;
 }
 
+FindSymbolSystem *AppWnd::GetFindSym()
+{
+	return d->FindSym;
+}
+
 IdePlatform PlatformFlagsToEnum(int flags)
 {
 	if (flags == PLATFORM_WIN32)
@@ -3195,11 +3204,6 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 	{
 		d->Projects.Insert(p);
 		d->OnFile(FileName, true);
-
-		LString::Array Inc, Sys;
-		auto plat = PlatformFlagsToEnum(d->Platform);
-		p->BuildIncludePaths(Inc, &Sys, false, true, plat);
-		d->FindSym->SetIncludePaths(Inc, Sys);
 
 		if (!Dep)
 		{

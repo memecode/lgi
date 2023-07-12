@@ -20,7 +20,7 @@
 
 #define DEBUG_FIND_SYMBOL		0
 #define DEBUG_NO_THREAD			1
-// #define DEBUG_FILE				"RichTextEdit.h"
+#define DEBUG_FILE				"Clipboard.h"
 
 int SYM_FILE_SENT = 0;
 
@@ -56,7 +56,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	{
 		LString Path;
 		int Platforms;
-		LString::Array *Inc = NULL, *SysInc = NULL;
+		LHashTbl<ConstStrKey<char, false>, LString> *HdrMap = NULL;
 		LArray<DefnInfo> Defs;
 		bool IsSource;
 		bool IsHeader;
@@ -102,6 +102,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 
 	int hApp = 0;
 	int MissingFiles = 0;
+	LHashTbl<ConstStrKey<char, false>, LString> HdrMap;
 	LString::Array IncPaths, SysIncPaths;
 	
 	#if USE_HASH
@@ -155,10 +156,11 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	
 	bool AddFile(LString Path, int Platforms)
 	{
+		LProfile prof("AddFile");
 		bool Debug = false;
 		#ifdef DEBUG_FILE
 		if ((Debug = Path.Find(DEBUG_FILE) >= 0))
-			printf("%s:%i - AddFile(%s)\n", _FL, Path.Get());
+			LgiTrace("%s:%i - AddFile(%s)\n", _FL, Path.Get());
 		#endif
 		
 		// Already added?
@@ -183,6 +185,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		FileSyms *f;
 		#endif
 
+		prof.Add("exists");
 		if (!LFileExists(Path))
 		{
 			Log("Missing '%s'\n", Path.Get());
@@ -197,8 +200,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		if (!f) return false;	
 		f->Path = Path;
 		f->Platforms = Platforms;
-		f->Inc = IncPaths.Length() ? &IncPaths : NULL;
-		f->SysInc = SysIncPaths.Length() ? &SysIncPaths : NULL;
+		f->HdrMap = &HdrMap;
 
 		#if USE_HASH
 		Files.Add(Path, f);
@@ -206,6 +208,8 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		Files.Add(f);
 		#endif
 		
+		prof.Add("open");
+
 		// Parse for headers...
 		LTextFile Tf;
 		if (!Tf.Open(Path, O_READ)  ||
@@ -215,22 +219,28 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			return false;
 		}
 
+		prof.Add("build hdr");
+
 		LAutoString Source = Tf.Read();
-		LArray<LString::Array*> AllIncludes;
 		LString::Array Headers;
-		if (f->Inc) AllIncludes.Add(f->Inc);
-		if (f->SysInc) AllIncludes.Add(f->SysInc);
-		if (BuildHeaderList(Source, Headers, AllIncludes, false))
+		auto *Map = &HdrMap;
+		if (BuildHeaderList(Source,
+							Headers,
+							false,
+							[Map](auto Name)
+							{
+								return Map->Find(Name);
+							}))
 		{
 			for (auto h: Headers)
 				AddFile(h, 0);
 		}
-		Headers.DeleteArrays();
 		
 		// Parse for symbols...
+		prof.Add("parse");
 		#ifdef DEBUG_FILE
 		if (Debug)
-			printf("%s:%i - About to parse '%s'.\n", _FL, f->Path.Get());
+			LgiTrace("%s:%i - About to parse '%s'.\n", _FL, f->Path.Get());
 		#endif
 		return f->Parse(LAutoWString(Utf8ToWide(Source)), Debug);
 	}
@@ -253,15 +263,28 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 
 	void AddPaths(LString::Array &out, LString::Array &in)
 	{
-		LHashTbl<StrKey<char>, bool> map;
+		LHashTbl<StrKey<char>, bool> map; // of existing scanned folders
 		for (auto p: out)
 			map.Add(p, true);
+
 		for (auto p: in)
+		{
 			if (!map.Find(p))
 			{
 				out.Add(p);
 				map.Add(p, true);
+
+				LDirectory dir;
+				for (auto b=dir.First(p); b; b=dir.Next())
+				{
+					if (!dir.IsDir() &&
+						MatchStr("*.h", dir.GetName()))
+					{
+						HdrMap.Add(dir.GetName(), dir.FullPath());
+					}
+				}
 			}
+		}
 	}
 	
 	bool RemoveFile(LString Path)
@@ -312,82 +335,83 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 					{
 						FileSyms *fs = Files[f];
 					#endif
-						if (fs)
+						if (!fs)
+							continue;
+
+						#ifdef DEBUG_FILE
+						bool Debug = false;
+						Debug = fs->Path.Find(DEBUG_FILE) >= 0;
+						if (Debug)
+							LgiTrace("%s:%i - Searching '%s' with %i syms...\n", _FL, fs->Path.Get(), (int)fs->Defs.Length());
+						#endif
+
+						// Check platforms...
+						if (fs->Platforms != 0 &&
+							(fs->Platforms & Platforms) == 0)
 						{
 							#ifdef DEBUG_FILE
-							bool Debug = false;
-							Debug = fs->Path.Find(DEBUG_FILE) >= 0;
-							if (Debug)
-								printf("%s:%i - Searching '%s' with %i syms...\n", _FL, fs->Path.Get(), (int)fs->Defs.Length());
+							LgiTrace("%s:%i - '%s' doesn't match platform: %x %x\n", _FL, fs->Path.Get(), fs->Platforms, (int)Platforms);
 							#endif
+							continue;
+						}
 
-							// Check platforms...
-							if ((fs->Platforms & Platforms) == 0)
+						// For each symbol...
+						for (unsigned i=0; i<fs->Defs.Length(); i++)
+						{
+							DefnInfo &Def = fs->Defs[i];
+								
+							#ifdef DEBUG_FILE
+							if (Debug)
+								LgiTrace("%s:%i - '%s'\n", _FL, Def.Name.Get());
+							#endif
+								
+							// For each search term...
+							bool Match = true;
+							int ScoreSum = 0;
+							for (unsigned n=0; n<p.Length(); n++)
 							{
-								#ifdef DEBUG_FILE
-								printf("%s:%i - '%s' doesn't match platform: %x %x\n", _FL, fs->Path.Get(), fs->Platforms, Platforms);
-								#endif
-								continue;
-							}
+								const char *Part = p[n];
+								bool Not = *Part == '-';
+								if (Not)
+									Part++;
 
-							// For each symbol...
-							for (unsigned i=0; i<fs->Defs.Length(); i++)
-							{
-								DefnInfo &Def = fs->Defs[i];
-								
-								#ifdef DEBUG_FILE
-								if (Debug)
-									printf("%s:%i - '%s'\n", _FL, Def.Name.Get());
-								#endif
-								
-								// For each search term...
-								bool Match = true;
-								int ScoreSum = 0;
-								for (unsigned n=0; n<p.Length(); n++)
+								int Score = Def.Find(Part);
+								if
+								(
+									(Not && Score != 0)
+									||
+									(!Not && Score == 0)
+								)
 								{
-									const char *Part = p[n];
-									bool Not = *Part == '-';
-									if (Not)
-										Part++;
-
-									int Score = Def.Find(Part);
-									if
-									(
-										(Not && Score != 0)
-										||
-										(!Not && Score == 0)
-									)
-									{
-										Match = false;
-										break;
-									}
-
-									ScoreSum += Score;
+									Match = false;
+									break;
 								}
 
-								#ifdef DEBUG_FILE
-								if (Debug)
-									printf("	'%s' = %i\n", _FL, Def.Name.Get(), Match);
-								#endif
-								
-								if (Match)
-								{
-									// Create a result for this match...
-									FindSymResult *r = new FindSymResult();
-									if (r)
-									{
-										r->Score = ScoreSum;
-										r->File = Def.File.Get();
-										r->Symbol = Def.Name.Get();
-										r->Line = Def.Line;
+								ScoreSum += Score;
+							}
 
-										if (Def.Type == DefnClass)
-											ClassMatches.Add(r);
-										else if (fs->IsHeader)
-											HdrMatches.Add(r);
-										else
-											SrcMatches.Add(r);
-									}
+							#ifdef DEBUG_FILE
+							if (Debug)
+								LgiTrace("	'%s' = %i\n", _FL, Def.Name.Get(), Match);
+							#endif
+								
+							if (Match)
+							{
+								// Create a result for this match...
+								FindSymResult *r = new FindSymResult();
+								if (r)
+								{
+									r->Score = ScoreSum;
+									r->File = Def.File.Get();
+									r->Symbol = Def.Name.Get();
+									r->Line = Def.Line;
+
+									if (Def.Type == DefnClass)
+										ClassMatches.Add(r);
+									else if (fs->IsHeader)
+										HdrMatches.Add(r);
+									else
+										SrcMatches.Add(r);
 								}
 							}
 						}
@@ -442,7 +466,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		}
 		
 		auto Now = LCurrentTime();
-		// printf("Msg->Msg()=%i " LPrintfInt64 " %i\n", Msg->Msg(), MsgTs, (int)GetQueueSize());
+		// LgiTrace("Msg->Msg()=%i " LPrintfInt64 " %i\n", Msg->Msg(), MsgTs, (int)GetQueueSize());
 		if (Now - MsgTs > MSG_TIME_MS)
 		{
 			MsgTs = Now;
@@ -525,67 +549,67 @@ LMessage::Result FindSymbolDlg::OnEvent(LMessage *m)
 		case M_FIND_SYM_REQUEST:
 		{
 			LAutoPtr<FindSymRequest> Req((FindSymRequest*)m->A());
-			if (Req)
+			if (!Req)
+				break;
+
+			LString Str = GetCtrlName(IDC_STR);
+			if (Str != Req->Str)
+				break;
+
+			Lst->Empty();
+			List<LListItem> Ls;
+
+			LString s;
+			int CommonPathLen = 0;					
+			for (unsigned i=0; i<Req->Results.Length(); i++)
 			{
-				LString Str = GetCtrlName(IDC_STR);
-				if (Str == Req->Str)
+				FindSymResult *r = Req->Results[i];
+
+				if (i)
 				{
-					Lst->Empty();
-					List<LListItem> Ls;
+					char *a = s.Get();
+					char *a_end = strrchr(a, DIR_CHAR);
 
-					LString s;
-					int CommonPathLen = 0;					
-					for (unsigned i=0; i<Req->Results.Length(); i++)
+					char *b = r->File.Get();
+					char *b_end = strrchr(b, DIR_CHAR);
+
+					int Common = 0;
+					while (	*a && a <= a_end
+							&& 
+							*b && b <= b_end
+							&&
+							ToLower(*a) == ToLower(*b))
 					{
-						FindSymResult *r = Req->Results[i];
-
-						if (i)
-						{
-							char *a = s.Get();
-							char *a_end = strrchr(a, DIR_CHAR);
-
-							char *b = r->File.Get();
-							char *b_end = strrchr(b, DIR_CHAR);
-
-							int Common = 0;
-							while (	*a && a <= a_end
-									&& 
-									*b && b <= b_end
-									&&
-									ToLower(*a) == ToLower(*b))
-							{
-								Common++;
-								a++;
-								b++;
-							}
-							if (i == 1)
-								CommonPathLen = Common;
-							else
-								CommonPathLen = MIN(CommonPathLen, Common);
-						}
-						else s = r->File;
+						Common++;
+						a++;
+						b++;
 					}
+					if (i == 1)
+						CommonPathLen = Common;
+					else
+						CommonPathLen = MIN(CommonPathLen, Common);
+				}
+				else s = r->File;
+			}
 
-					for (unsigned i=0; i<Req->Results.Length(); i++)
-					{
-						FindSymResult *r = Req->Results[i];
-						LListItem *it = new LListItem;
-						if (it)
-						{
-							LString Ln;
-							Ln.Printf("%i", r->Line);
+			for (unsigned i=0; i<Req->Results.Length(); i++)
+			{
+				FindSymResult *r = Req->Results[i];
+				LListItem *it = new LListItem;
+				if (it)
+				{
+					LString Ln;
+					Ln.Printf("%i", r->Line);
 							
-							it->SetText(r->File.Get() + CommonPathLen, 0);
-							it->SetText(Ln, 1);
-							it->SetText(r->Symbol, 2);
-							Ls.Insert(it);
-						}
-					}
-
-					Lst->Insert(Ls);
-					Lst->ResizeColumnsToContent();
+					it->SetText(r->File.Get() + CommonPathLen, 0);
+					it->SetText(Ln, 1);
+					it->SetText(r->Symbol, 2);
+					Ls.Insert(it);
 				}
 			}
+
+			Lst->Insert(Ls);
+			Lst->ResizeColumnsToContent();
 			break;
 		}
 	}

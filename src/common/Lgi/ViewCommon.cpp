@@ -2163,7 +2163,7 @@ LColour LView::StyleColour(int CssPropType, LColour Default, int Depth)
 	return c;
 }
 
-int64 LView::RunCallback(std::function<int64()> Callback, int timeoutMs)
+int64 LView::RunCallback(std::function<int64()> Callback, int timeoutMs, LCancel *cancel)
 {
 	if (!Callback)
 	{
@@ -2183,8 +2183,12 @@ int64 LView::RunCallback(std::function<int64()> Callback, int timeoutMs)
 	auto StartTs = LCurrentTime();
 	while (!result)
 	{
-		if (timeoutMs >= 0 && 
-			(LCurrentTime()-StartTs) > timeoutMs)
+		if
+		(
+			(timeoutMs >= 0 && (LCurrentTime()-StartTs) > timeoutMs)
+			||
+			(cancel && cancel->IsCancelled())
+		)
 		{
 			return -1;
 		}

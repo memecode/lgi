@@ -681,13 +681,13 @@ bool LMakePath(char *Str, int StrSize, const char *Path, const char *File)
 {
 	if (!Str || StrSize <= 0 || !Path || !File)
 	{
-		printf("%s:%i - Invalid LMakePath(%p,%i,%s,%s) param\n", _FL, Str, StrSize, Path, File);
+		LgiTrace("%s:%i - Invalid LMakePath(%p,%i,%s,%s) param\n", _FL, Str, StrSize, Path, File);
 		return false;
 	}
 
 	if (StrSize <= 4)
 	{
-		printf("%s:%i - LgiMakeFile buf size=%i?\n", _FL, StrSize);
+		LgiTrace("%s:%i - LgiMakeFile buf size=%i?\n", _FL, StrSize);
 	}
 
 	if (Str && Path && File)

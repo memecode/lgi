@@ -2031,7 +2031,13 @@ bool IdeDoc::BuildHeaderList(const char16 *Cpp, LString::Array &Headers, LString
 
 	LArray<LString::Array*> All;
 	All.Add(&IncPaths);
-	return ::BuildHeaderList(c8, Headers, All, true);
+	return ::BuildHeaderList(c8,
+							Headers,
+							true,
+							[&All](auto Name)
+							{
+								return FindHeader(Name, All);
+							});
 }
 
 bool MatchSymbol(DefnInfo *Def, char16 *Symbol)

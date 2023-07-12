@@ -407,7 +407,7 @@ public:
 	/// This will block while waiting for the UI event loop to respond or a timeout
 	/// to occur. Negative timeoutMs is "wait forever".
 	/// -1 return value is generally an error.
-	int64 RunCallback(std::function<int64()> Callback, int timeoutMs = -1);
+	int64 RunCallback(std::function<int64()> Callback, int timeoutMs = -1, LCancel *cancel = NULL);
 	
 	/// \brief Asyncronously posts an event to be received by this view
 	virtual bool PostEvent

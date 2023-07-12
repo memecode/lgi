@@ -160,6 +160,9 @@ public:
 		warnResize = warn;
 	}
 
+	/// Gets the fixed length setting
+	bool GetFixedLength() { return fixed; }
+
 	/// Emtpies the array of all objects.
 	bool Empty()
 	{

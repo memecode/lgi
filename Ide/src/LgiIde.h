@@ -184,7 +184,9 @@ class IdeProject;
 
 extern const char *AppName;
 extern LString FindHeader(char *Short, LArray<LString::Array*> &Paths);
-extern bool BuildHeaderList(const char *Cpp, LString::Array &Headers, LArray<LString::Array*> &IncPaths, bool Recurse);
+
+// LArray<LString::Array*> &IncPaths
+extern bool BuildHeaderList(const char *Cpp, LString::Array &Headers, bool Recurse, std::function<LString(LString)> LookupHdr);
 
 class NodeView;
 class NodeSource
@@ -282,6 +284,7 @@ public:
 	IdeDoc *GetCurrentDoc();
 	IdeProject *OpenProject(const char *FileName, IdeProject *ParentProj, bool Create = false, bool Dep = false);
 	IdeProject *RootProject();
+	FindSymbolSystem *GetFindSym();
 	IdeDoc *TopDoc();
 	IdeDoc *FocusDoc();
 	LTextView3 *FocusEdit();

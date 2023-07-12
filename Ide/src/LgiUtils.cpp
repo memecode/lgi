@@ -11,7 +11,15 @@ LString FindHeader(char *Short, LArray<LString::Array*> &Paths)
 		for (auto Path: *Arr)
 		{
 			char f[MAX_PATH_LEN];
-			LMakePath(f, sizeof(f), Path, Short);
+			if (!LMakePath(f, sizeof(f), Path, Short))
+				continue;
+
+			// Convert slashes to native:
+			char Opposite = DIR_CHAR == '/' ? '\\' : '/';
+			for (char *s = f; *s; s++)
+				if (*s == Opposite)
+					*s = DIR_CHAR;
+
 			if (LFileExists(f))
 				return f;
 		}
@@ -20,7 +28,7 @@ LString FindHeader(char *Short, LArray<LString::Array*> &Paths)
 	return LString();
 }
 
-bool BuildHeaderList(const char *Cpp, LString::Array &Headers, LArray<LString::Array*> &IncPaths, bool Recurse)
+bool BuildHeaderList(const char *Cpp, LString::Array &Headers, bool Recurse, std::function<LString(LString)> LookupHdr)
 {
 	char Include[] = "include";
 	
@@ -41,7 +49,7 @@ bool BuildHeaderList(const char *Cpp, LString::Array &Headers, LArray<LString::A
 					LString Short(s, e - s);					
 					if (Short)
 					{
-						auto File = FindHeader(Short, IncPaths);
+						auto File = LookupHdr(Short);
 						if (File)
 						{
 							bool Has = false;
@@ -61,7 +69,7 @@ bool BuildHeaderList(const char *Cpp, LString::Array &Headers, LArray<LString::A
 									// Recursively add includes...
 									LAutoString c8(LReadTextFile(File));
 									if (c8)
-										BuildHeaderList(c8, Headers, IncPaths, Recurse);
+										BuildHeaderList(c8, Headers, Recurse, LookupHdr);
 								}
 							}
 						}

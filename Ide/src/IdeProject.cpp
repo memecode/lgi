@@ -2916,6 +2916,17 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 		return OpenError;
 	}
 
+	Prof.Add("Serialize");
+
+	d->Settings.Serialize(&r, false /* read */);
+
+	Prof.Add("IncludePathProcessing");
+
+	LString::Array Inc, Sys;
+	auto plat = PlatformFlagsToEnum(d->App->GetPlatform());
+	BuildIncludePaths(Inc, &Sys, true, true, plat);
+	d->App->GetFindSym()->SetIncludePaths(Inc, Sys);
+
 	Prof.Add("OnOpen");
 
 	bool Ok = OnOpen(
@@ -2938,9 +2949,6 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 	d->App->GetTree()->Insert(this);
 	Expanded(true);
 
-	Prof.Add("Serialize");
-	
-	d->Settings.Serialize(&r, false /* read */);
 	return OpenOk;
 }
 
@@ -3539,14 +3547,20 @@ IdeProjectSettings *IdeProject::GetSettings()
 	return &d->Settings;
 }
 
-void AddAllFolders(LString::Array &out, const char *in)
+void AddAllSubFolders(LString::Array &out, LString in)
 {
-	out.Add(in);
+	out.SetFixedLength(false);
+	
 	LDirectory dir;
 	for (int b=dir.First(in); b; b=dir.Next())
 	{
-		if (dir.IsDir())
-			AddAllFolders(out, dir.FullPath());
+		if (dir.IsDir() &&
+			Strncmp(dir.GetName(), "Qt", 2) &&
+			Strcmp(dir.GetName(), "private"))
+		{
+			out.Add(dir.FullPath());
+			AddAllSubFolders(out, dir.FullPath());
+		}
 	}
 }
 
@@ -3561,25 +3575,39 @@ bool IdeProject::BuildIncludePaths(LString::Array &Paths, LString::Array *SysPat
 	
 	for (auto p: Projects)
 	{
-		LString ProjInclude = d->Settings.GetStr(ProjIncludePaths, NULL, Platform);
-		auto Base = p->GetBasePath();
+		const auto Base = p->GetBasePath();
+		LAssert(Base);
 		
 		const char *Delim = ",;\r\n";
 		LString::Array InProj, InSys, OutProj, OutSys;
-		InProj = ProjInclude.SplitDelimit(Delim);
 		InProj.SetFixedLength(false);
 		OutProj.SetFixedLength(false);
+		InSys.SetFixedLength(false);
+		OutSys.SetFixedLength(false);
+
+		LString PlatformInc = d->Settings.GetStr(ProjIncludePaths, NULL, Platform);
+		InProj += PlatformInc.SplitDelimit(Delim);
 
 		if (IncludeSystem)
 		{
-			InSys = LString(d->Settings.GetStr(ProjSystemIncludes, NULL, Platform)).SplitDelimit(Delim);
+			InSys += LString(d->Settings.GetStr(ProjSystemIncludes, NULL, Platform)).SplitDelimit(Delim);
 
 			bool recurseSystem = true;
 			if (recurseSystem)
 			{
 				auto sz = InSys.Length();
 				for (unsigned i=0; i<sz; i++)
-					AddAllFolders(InSys, InSys[i]);
+				{
+					auto &path = InSys[i];
+					if (LIsRelativePath(path))
+					{
+						LFile::Path full(Base.Get());
+						full += path;
+						InSys[i] = full.GetFull();
+					}
+
+					AddAllSubFolders(InSys, InSys[i]);
+				}
 			}
 		}
 
@@ -3628,8 +3656,15 @@ bool IdeProject::BuildIncludePaths(LString::Array &Paths, LString::Array *SysPat
 					)
 				)
 			{
-				LMakePath(Buf, sizeof(Buf), Base, Path);
-				Full = Buf;
+				if (LMakePath(Buf, sizeof(Buf), Base, Path))
+				{
+					Full = Buf;
+				}
+				else
+				{
+					LAssert(!"Make path err.");
+					return;
+				}
 			}
 			else
 			{
@@ -3655,10 +3690,10 @@ bool IdeProject::BuildIncludePaths(LString::Array &Paths, LString::Array *SysPat
 		LArray<ProjectNode*> Nodes;
 		if (p->GetAllNodes(Nodes))
 		{
-			auto Base = p->GetFullPath();
-			if (Base)
+			auto NodeBase = p->GetFullPath();
+			if (NodeBase)
 			{
-				LTrimDir(Base);
+				LTrimDir(NodeBase);
 
 				for (auto &n: Nodes)
 				{
@@ -3668,7 +3703,7 @@ bool IdeProject::BuildIncludePaths(LString::Array &Paths, LString::Array *SysPat
 						auto f = n->GetFileName();
 						char p[MAX_PATH_LEN];
 						if (f &&
-							LMakePath(p, sizeof(p), Base, f))
+							LMakePath(p, sizeof(p), NodeBase, f))
 						{
 							char *l = strrchr(p, DIR_CHAR);
 							if (l)
@@ -3683,17 +3718,24 @@ bool IdeProject::BuildIncludePaths(LString::Array &Paths, LString::Array *SysPat
 	}
 
 	for (auto p: MapProj)
+	{
 		Paths.Add(p.key);
+		// LgiTrace("Proj: %s\n", p.key);
+	}
+
 	auto SysTarget = SysPaths ? SysPaths : &Paths;
 	for (auto p: MapSys)
+	{
 		SysTarget->Add(p.key);
+		// LgiTrace("Sys: %s\n", p.key);
+	}
 
 	return true;
 }
 
 void IdeProjectPrivate::CollectAllFiles(LTreeNode *Base, LArray<ProjectNode*> &Files, bool SubProjects, int Platform)
 {
-	for (auto i:*Base)
+	for (auto i: *Base)
 	{
 		IdeProject *Proj = dynamic_cast<IdeProject*>(i);
 		if (Proj)
@@ -3917,7 +3959,13 @@ bool IdeProject::GetDependencies(const char *InSourceFile, LString::Array &IncPa
 	LString::Array Headers;
 	LArray<LString::Array*> AllInc;
 	AllInc.Add(&IncPaths);
-	if (!BuildHeaderList(c8, Headers, AllInc, false))
+	if (!BuildHeaderList(c8,
+						Headers,
+						false,
+						[&AllInc](auto Name)
+						{
+							return FindHeader(Name, AllInc);
+						}))
 		return false;
 	
 	for (int n=0; n<Headers.Length(); n++)
