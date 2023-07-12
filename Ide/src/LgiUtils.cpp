@@ -3,31 +3,28 @@
 #include "lgi/common/Lgi.h"
 #include "LgiIde.h"
 
-char *FindHeader(char *Short, LArray<LString> &Paths)
+LString FindHeader(char *Short, LArray<LString::Array*> &Paths)
 {
-	char *Status = 0;
-	
 	// Search through the paths
-	for (int i=0; i<Paths.Length(); i++)
+	for (auto Arr: Paths)
 	{
-		char *Path = Paths[i];
-		
-		char f[MAX_PATH_LEN];
-		LMakePath(f, sizeof(f), Path, Short);
-		if (LFileExists(f))
+		for (auto Path: *Arr)
 		{
-			Status = NewStr(f);
+			char f[MAX_PATH_LEN];
+			LMakePath(f, sizeof(f), Path, Short);
+			if (LFileExists(f))
+				return f;
 		}
 	}
 	
-	return Status;
+	return LString();
 }
 
-bool BuildHeaderList(char *Cpp, LArray<char*> &Headers, LArray<LString> &IncPaths, bool Recurse)
+bool BuildHeaderList(const char *Cpp, LString::Array &Headers, LArray<LString::Array*> &IncPaths, bool Recurse)
 {
 	char Include[] = "include";
 	
-	for (char *c = Cpp; c && *c; )
+	for (auto c = Cpp; c && *c; )
 	{
 		skipws(c);
 		if (*c == '#')
@@ -35,46 +32,36 @@ bool BuildHeaderList(char *Cpp, LArray<char*> &Headers, LArray<LString> &IncPath
 			// preprocessor instruction
 			if (strncmp(++c, Include, 7) == 0)
 			{
-				char *s = c + 7;
+				auto s = c + 7;
 				skipws(s);
 				if (*s == '\"' || *s == '<')
 				{
 					char d = (*s == '\"') ? '\"' : '>';					
 					char *e = strchr(++s, d);
-					char *Short = NewStr(s, e - s);
-					
+					LString Short(s, e - s);					
 					if (Short)
 					{
-						char *File = FindHeader(Short, IncPaths);
+						auto File = FindHeader(Short, IncPaths);
 						if (File)
 						{
 							bool Has = false;
-							for (int i=0; i<Headers.Length(); i++)
+							for (auto h: Headers)
 							{
-								char *s = Headers[i];
-								if (stricmp(s, File) == 0)
+								if (h == File)
 								{
 									Has = true;
 									break;
 								}
 							}
-							if (Has)
-							{
-								DeleteArray(File);
-							}
-							else
+							if (!Has)
 							{
 								Headers.Add(File);
-								
 								if (Recurse)
 								{
 									// Recursively add includes...
-									char *c8 = LReadTextFile(File);
+									LAutoString c8(LReadTextFile(File));
 									if (c8)
-									{
 										BuildHeaderList(c8, Headers, IncPaths, Recurse);
-										DeleteArray(c8);
-									}
 								}
 							}
 						}
@@ -93,7 +80,6 @@ bool BuildHeaderList(char *Cpp, LArray<char*> &Headers, LArray<LString> &IncPath
 							}
 							#endif
 						}
-						DeleteArray(Short);
 					}
 				}
 			}

@@ -2855,8 +2855,18 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 
 	LFile f;
 	LString FullPath = d->FileName.Get();
-	if (!CheckExists(FullPath) ||
-		!f.Open(FullPath, O_READWRITE))
+	for (unsigned attempt = 0; attempt < 5; attempt++)
+	{
+		if (!CheckExists(FullPath) ||
+			!f.Open(FullPath, O_READWRITE))
+		{
+			Log->Print("%s:%i - Retrying '%s', attempt %i.\n", _FL, FullPath.Get(), attempt+1);
+			LSleep(10);
+			continue;
+		}
+		else break;
+	}
+	if (!f.IsOpen())
 	{
 		Log->Print("%s:%i - Error: Can't open '%s'.\n", _FL, FullPath.Get());
 		return OpenError;
@@ -3540,69 +3550,58 @@ void AddAllFolders(LString::Array &out, const char *in)
 	}
 }
 
-bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool IncludeSystem, IdePlatform Platform)
+bool IdeProject::BuildIncludePaths(LString::Array &Paths, LString::Array *SysPaths, bool Recurse, bool IncludeSystem, IdePlatform Platform)
 {
 	List<IdeProject> Projects;
 	if (Recurse)
 		GetChildProjects(Projects);
 	Projects.Insert(this, 0);
 
-	LHashTbl<StrKey<char>, bool> Map;
+	LHashTbl<StrKey<char>, bool> MapProj, MapSys;
 	
 	for (auto p: Projects)
 	{
 		LString ProjInclude = d->Settings.GetStr(ProjIncludePaths, NULL, Platform);
-		LAutoString Base = p->GetBasePath();
+		auto Base = p->GetBasePath();
 		
 		const char *Delim = ",;\r\n";
-		LString::Array In, Out;
-		LString::Array a = ProjInclude.SplitDelimit(Delim);
-		In = a;
-		
+		LString::Array InProj, InSys, OutProj, OutSys;
+		InProj = ProjInclude.SplitDelimit(Delim);
+		InProj.SetFixedLength(false);
+		OutProj.SetFixedLength(false);
+
 		if (IncludeSystem)
 		{
-			LString SysInclude = d->Settings.GetStr(ProjSystemIncludes, NULL, Platform);
-			a = SysInclude.SplitDelimit(Delim);
-			In.SetFixedLength(false);
+			InSys = LString(d->Settings.GetStr(ProjSystemIncludes, NULL, Platform)).SplitDelimit(Delim);
 
 			bool recurseSystem = true;
 			if (recurseSystem)
 			{
-				for (auto folder: a)
-					AddAllFolders(In, folder);
-			}
-			else
-			{
-				In.Add(a);
+				auto sz = InSys.Length();
+				for (unsigned i=0; i<sz; i++)
+					AddAllFolders(InSys, InSys[i]);
 			}
 		}
-		
-		for (unsigned i=0; i<In.Length(); i++)
-		{
-			auto p = ToPlatformPath(In[i], Platform);
 
-			char *Path = p;
-			if (*Path == '`')
+		auto PreProcessPath = [Platform](LString::Array &out, LString in)
+		{
+			auto p = ToPlatformPath(in, Platform);
+			if (p(0) == '`')
 			{
 				// Run config app to get the full path list...
 				p = p.Strip("`");
-				LString::Array a = p.Split(" ", 1);
+				auto a = p.Split(" ", 1);
 				LSubProcess Proc(a[0], a.Length() > 1 ? a[1].Get() : NULL);
-				LStringPipe Buf;
 				if (Proc.Start())
 				{
+					LStringPipe Buf;
 					Proc.Communicate(&Buf);
-
-					LString result = Buf.NewLStr();
-					a = result.Split(" \t\r\n");
-					for (int i=0; i<a.Length(); i++)
+					auto lines = Buf.NewLStr().Split(" \t\r\n");
+					for (auto line: lines)
 					{
-						char *inc = a[i];
-						if (inc[0] == '-' &&
-							inc[1] == 'I')
-						{
-							Out.New() = a[i](2,-1);
-						}
+						char *inc = line;
+						if (inc[0] == '-' && inc[1] == 'I')
+							out.New() = line(2,-1);
 					}
 				}
 				else LgiTrace("%s:%i - Error: failed to run process for '%s'\n", _FL, p.Get());
@@ -3610,36 +3609,46 @@ bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool In
 			else
 			{
 				// Add path literal
-				Out.New() = Path;
+				out.New() = p;
 			}
-		}
-			
-		for (int i=0; i<Out.Length(); i++)
+		};
+
+		auto RelativeToFull = [&Base](LHashTbl<StrKey<char>, bool> &Map, LString &p)
 		{
-			char *Path = Out[i];
+			char *Path = p;
 			char *Full = 0, Buf[MAX_PATH_LEN];
 			if
-			(
-				*Path != '/'
-				&&
-				!(
-					IsAlpha(*Path)
+				(
+					*Path != '/'
 					&&
-					Path[1] == ':'
+					!(
+						IsAlpha(*Path)
+						&&
+						Path[1] == ':'
+					)
 				)
-			)
 			{
 				LMakePath(Buf, sizeof(Buf), Base, Path);
 				Full = Buf;
 			}
 			else
 			{
-				Full = Out[i];
+				Full = Path;
 			}
-			
+
 			if (!Map.Find(Full))
 				Map.Add(Full, true);
-		}
+		};
+		
+		for (auto &p: InProj)
+			PreProcessPath(OutProj, p);
+		for (auto &p: InSys)
+			PreProcessPath(OutSys, p);
+
+		for (auto &p: OutProj)
+			RelativeToFull(MapProj, p);
+		for (auto &p: OutSys)
+			RelativeToFull(MapSys, p);
 
 		// Add paths for the headers in the project... bit of a hack but it'll
 		// help it find them if the user doesn't specify the paths in the project.
@@ -3664,10 +3673,8 @@ bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool In
 							char *l = strrchr(p, DIR_CHAR);
 							if (l)
 								*l = 0;
-							if (!Map.Find(p))
-							{
-								Map.Add(p, true);
-							}
+							if (!MapProj.Find(p))
+								MapProj.Add(p, true);
 						}
 					}
 				}
@@ -3675,10 +3682,11 @@ bool IdeProject::BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool In
 		}
 	}
 
-	// char *p;
-	// for (bool b = Map.First(&p); b; b = Map.Next(&p))
-	for (auto p : Map)
+	for (auto p: MapProj)
 		Paths.Add(p.key);
+	auto SysTarget = SysPaths ? SysPaths : &Paths;
+	for (auto p: MapSys)
+		SysTarget->Add(p.key);
 
 	return true;
 }
@@ -3820,8 +3828,8 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, IdePlatform Platform)
 	CollectAllSource(Src, Platform);
 	
 	// Get all include paths
-	LArray<LString> IncPaths;
-	BuildIncludePaths(IncPaths, false, false, Platform);
+	LString::Array IncPaths;
+	BuildIncludePaths(IncPaths, NULL, false, false, Platform);
 	
 	// Add all source to dependencies
 	for (int i=0; i<Src.Length(); i++)
@@ -3893,7 +3901,7 @@ bool IdeProject::GetAllDependencies(LArray<char*> &Files, IdePlatform Platform)
 	return true;
 }
 
-bool IdeProject::GetDependencies(const char *InSourceFile, LArray<LString> &IncPaths, LArray<char*> &Files, IdePlatform Platform)
+bool IdeProject::GetDependencies(const char *InSourceFile, LString::Array &IncPaths, LArray<char*> &Files, IdePlatform Platform)
 {
 	LString SourceFile = InSourceFile;
 	if (!CheckExists(SourceFile))
@@ -3906,8 +3914,10 @@ bool IdeProject::GetDependencies(const char *InSourceFile, LArray<LString> &IncP
 	if (!c8)
 		return false;
 
-	LArray<char*> Headers;
-	if (!BuildHeaderList(c8, Headers, IncPaths, false))
+	LString::Array Headers;
+	LArray<LString::Array*> AllInc;
+	AllInc.Add(&IncPaths);
+	if (!BuildHeaderList(c8, Headers, AllInc, false))
 		return false;
 	
 	for (int n=0; n<Headers.Length(); n++)

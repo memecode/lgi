@@ -49,36 +49,126 @@
 
 #define IsSymbolChar(c)			( IsDigit(c) || IsAlpha(c) || strchr("-_", c) )
 
+////////////////////////////////////////////////////////////////////////
+SysIncThread::SysIncThread(	AppWnd* app,
+							IdeProject* proj,
+							std::function<void(LString::Array*)> callback) :
+	LThread("SysIncThread"),
+	App(app),
+	Callback(callback)
+{
+	auto Platform = PlatformFlagsToEnum(App->GetPlatform());
+	App->GetOptions()->GetValue(OPT_SearchSysInc, SearchSysInc);
+	if (SearchSysInc.CastInt32())
+	{
+		IdeProject* p = proj;
+		while (proj && proj->GetParentProject())
+			proj = proj->GetParentProject();
+		if (proj)
+		{
+			// Get all the nodes
+			List<IdeProject> All;
+			proj->GetChildProjects(All);
+			All.Insert(proj);
+			for (auto Cur : All)
+			{
+				if (LString Lst = Cur->GetSettings()->GetStr(ProjSystemIncludes, NULL, Platform))
+				{
+					auto Lines = Lst.Strip().SplitDelimit("\r\n");
+					for (auto path : Lines)
+					{
+						if (LIsRelativePath(path))
+						{
+							char full[MAX_PATH_LEN];
+							LMakePath(full, sizeof(full), Cur->GetFileName(), "..");
+							LMakePath(full, sizeof(full), full, path);
+							Paths.Add(full);
+						}
+						else Paths.Add(path);
+					}
+				}
+			}
+		}
+	}
+
+	Run();
+}
+
+SysIncThread::~SysIncThread()
+{
+	Cancel();
+	WaitForExit();
+}
+
+void SysIncThread::Scan(LString p)
+{
+	if (Map.Find(p))
+		return;
+	Map.Add(p, true);
+
+	LDirectory d;
+	for (auto b = d.First(p); !IsCancelled() && b; b = d.Next())
+	{
+		if (d.IsDir())
+		{
+			Scan(d.FullPath());
+		}
+		else
+		{
+			Headers.New() = d.FullPath();
+		}
+	}
+}
+
+int SysIncThread::Main()
+{
+	for (unsigned i = 0; !IsCancelled() && i < Paths.Length(); i++)
+	{
+		LString p = Paths[i];
+		if (p[0] == '`')
+		{
+			Paths.DeleteAt(i--, true);
+			auto a = p.Strip("`").SplitDelimit(" \t\r\n", 1);
+			LSubProcess sub(a[0], a[1]);
+			if (sub.Start())
+			{
+				LStringPipe out;
+				sub.Communicate(&out);
+				auto parts = out.NewLStr().SplitDelimit();
+				for (auto part : parts)
+				{
+					if (part.Find("-I") == 0)
+						Paths.Add(part(2, -1));
+				}
+			}
+			else printf("%s:%i - Error starting %s\n", _FL, p.Get());
+			continue;
+		}
+
+		printf("%s:%i SysIncThread: '%s'\n", _FL, p.Get());
+	}
+
+	for (auto &p: Paths)
+		Scan(p);
+
+	App->RunCallback([this]()
+	{
+		if (Callback)
+			Callback(&Headers);
+		return 0;
+	});
+
+	return 0;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 class FindInProject : public LDialog
 {
 	AppWnd *App = NULL;
 	LList *Lst = NULL;
 	bool SearchSysInc = false;
-
-	void SearchSystemIncludes(LString path, const char *key)
-	{
-		LDirectory dir;
-		for (int i=dir.First(path); i; i=dir.Next())
-		{
-			if (dir.IsDir())
-			{
-				SearchSystemIncludes(dir.FullPath(), key);
-			}
-			else if (Stristr(dir.GetName(), key))
-			{
-				LListItem* li = new LListItem;
-				LString Fn = dir.FullPath();
-				#ifdef WINDOWS
-				Fn = Fn.Replace("/", "\\");
-				#else
-				Fn = Fn.Replace("\\", "/");
-				#endif
-				li->SetText(Fn);
-				Lst->Insert(li);
-			}
-		}
-	}
+	static LString::Array SysHeaders;
+	LAutoPtr<SysIncThread> Thread;
 
 public:
 	FindInProject(AppWnd *app)
@@ -102,6 +192,11 @@ public:
 
 			RegisterHook(this, LKeyEvents, 0);
 		}
+	}
+
+	~FindInProject()
+	{
+		Thread.Reset();
 	}
 
 	bool OnViewKey(LView *v, LKey &k)
@@ -153,41 +248,21 @@ public:
 		
 		LArray<ProjectNode*> Matches, Nodes;
 
-		auto Platform = PlatformFlagsToEnum(App->GetPlatform());
-		LString::Array SysPaths;
+		auto Platforms = App->GetPlatform();
 		List<IdeProject> All;
 		p->GetChildProjects(All);
 		All.Insert(p);
 		for (auto p: All)
 		{
 			p->GetAllNodes(Nodes);
-
-			if (SearchSysInc)
-			{
-				LString Lst = p->GetSettings()->GetStr(ProjSystemIncludes, NULL, Platform);
-				if (!Lst)
-					continue;
-				LString::Array Paths = Lst.SplitDelimit("\r\n");
-				for (auto path: Paths)
-				{
-					if (LIsRelativePath(path))
-					{
-						char full[MAX_PATH_LEN];
-						LMakePath(full, sizeof(full), p->GetFileName(), "..");
-						LMakePath(full, sizeof(full), full, path);
-						SysPaths.Add(full);
-					}
-					else SysPaths.Add(path);
-				}
-			}
 		}
 
-		FilterFiles(Matches, Nodes, s, Platform);
+		FilterFiles(Matches, Nodes, s, Platforms);
 
 		Lst->Empty();
 		for (auto m: Matches)
 		{
-			LListItem *li = new LListItem;
+			auto li = new LListItem;
 			LString Fn = m->GetFileName();
 			#ifdef WINDOWS
 			Fn = Fn.Replace("/","\\");
@@ -199,10 +274,27 @@ public:
 			Lst->Insert(li);
 		}
 
-		if (SysPaths.Length())
+		if (SysHeaders.Length() == 0)
 		{
-			for (auto path: SysPaths)
-				SearchSystemIncludes(path, s);
+			if (!Thread)
+			{
+				Thread.Reset(new SysIncThread(App, App->RootProject(), [this](auto hdrs)
+				{
+					SysHeaders.Swap(*hdrs);
+					Search(GetCtrlName(IDC_TEXT));
+				}));
+			}
+		}
+		else
+		{
+			auto start = LCurrentTime();
+			for (auto h: SysHeaders)
+			{
+				if (Stristr(h.Get(), s))
+					Lst->Insert(new LListItem(h));
+				if (LCurrentTime() - start >= 500)
+					break;
+			}
 		}
 
 		Lst->ResizeColumnsToContent();
@@ -252,6 +344,8 @@ public:
 		return 0;
 	}
 };
+
+LString::Array FindInProject::SysHeaders;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 const char *AppName = "LgiIde";
@@ -2337,8 +2431,8 @@ int AppWnd::OnFixBuildErrors()
 									{
 										const char *SubStr[] = { ".", "lgi/common" };
 
-										LArray<LString> IncPaths;
-										if (p->BuildIncludePaths(IncPaths, true, false, PlatformCurrent))
+										LString::Array IncPaths;
+										if (p->BuildIncludePaths(IncPaths, NULL, true, false, PlatformCurrent))
 										{
 											for (auto &inc: IncPaths)
 											{
@@ -3102,10 +3196,10 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 		d->Projects.Insert(p);
 		d->OnFile(FileName, true);
 
-		LString::Array Inc;
+		LString::Array Inc, Sys;
 		auto plat = PlatformFlagsToEnum(d->Platform);
-		p->BuildIncludePaths(Inc, false, true, plat);
-		d->FindSym->SetIncludePaths(Inc);
+		p->BuildIncludePaths(Inc, &Sys, false, true, plat);
+		d->FindSym->SetIncludePaths(Inc, Sys);
 
 		if (!Dep)
 		{

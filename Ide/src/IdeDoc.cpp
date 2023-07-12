@@ -18,7 +18,6 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/PopupNotification.h"
-#include "lgi/common/SubProcess.h"
 
 #include "LgiIde.h"
 #include "ProjectNode.h"
@@ -40,7 +39,7 @@ enum
 	IDM_BROWSE
 };
 
-int FileNameSorter(char **a, char **b)
+int FileNameSorter(LString *a, LString *b)
 {
 	char *A = strrchr(*a, DIR_CHAR);
 	char *B = strrchr(*b, DIR_CHAR);
@@ -181,10 +180,10 @@ bool EditTray::Pour(LRegion &r)
 void EditTray::OnHeaderList(LMouse &m)
 {
 	// Header list button
-	LArray<LString> Paths;
+	LString::Array Paths;
 	if (Doc->BuildIncludePaths(Paths, PlatformCurrent, false))
 	{
-		LArray<char*> Headers;
+		LString::Array Headers;
 		if (Doc->BuildHeaderList(Ctrl->NameW(), Headers, Paths))
 		{
 			// Sort them..
@@ -732,96 +731,7 @@ class ProjFilePopup : public LPopupList<ProjectNode>
 	AppWnd *App;
 	LString::Array SysInc;
 	LString::Array SysHeaders;
-
-	struct SysIncThread : public LThread, public LCancel
-	{
-		ProjFilePopup *Parent;
-		LString::Array Paths;
-		LString::Array Headers;
-		LHashTbl<ConstStrKey<char,true>, bool> Map;
-		
-		SysIncThread(ProjFilePopup *parent) : LThread("SysIncThread")
-		{
-			Parent = parent;
-			for (auto p: Parent->SysInc)
-				Paths.Add(p.Get());
-			
-			Run();
-		}
-		
-		~SysIncThread()
-		{
-			Cancel();
-			WaitForExit();
-		}
-		
-		void Scan(LString p)
-		{
-			if (Map.Find(p))
-				return;
-			Map.Add(p, true);
-		
-			LDirectory d;
-			for (auto b=d.First(p); b; b=d.Next())
-			{
-				if (d.IsDir())
-				{
-					Scan(d.FullPath());
-				}
-				else
-				{
-					Headers.New() = d.FullPath();
-				}
-			}
-		}
-		
-		int Main()
-		{
-			for (unsigned i=0; i<Paths.Length(); i++)
-			{
-				LString p = Paths[i];
-				if (p[0] == '`')
-				{
-					Paths.DeleteAt(i--, true);					
-					auto a = p.Strip("`").SplitDelimit(" \t\r\n", 1);
-					LSubProcess sub(a[0], a[1]);
-					if (sub.Start())
-					{
-						LStringPipe out;
-						sub.Communicate(&out);
-						auto parts = out.NewLStr().SplitDelimit();
-						for (auto part: parts)
-						{
-							if (part.Find("-I") == 0)
-								Paths.Add(part(2,-1));
-						}
-					}
-					else printf("%s:%i - Error starting %s\n", _FL, p.Get());
-					continue;
-				}
-				
-				printf("%s:%i SysIncThread: '%s'\n", _FL, p.Get());
-			}
-			
-			for (auto &p: Paths)
-				Scan(p);
-
-			Parent->RunCallback([this]()
-			{
-				Parent->SysHeaders.Swap(Headers);
-
-				auto s = Parent->Name();
-				if (ValidStr(s))
-					Parent->Update(s);
-
-				return 0;
-			});
-
-			return 0;
-		}
-	};
 	LAutoPtr<SysIncThread> Thread;
-
 
 public:
 	LArray<ProjectNode*> Nodes;
@@ -839,8 +749,17 @@ public:
 	void SetSysInc(LString::Array sysInc)
 	{
 		SysInc = sysInc;
-		if (SysHeaders.Length() == 0)
-			Thread.Reset(new SysIncThread(this));
+		if (SysHeaders.Length() != 0)
+			return;
+
+		Thread.Reset(new SysIncThread(App, App->RootProject(), [this](auto hdrs)
+		{
+			SysHeaders.Swap(*hdrs);
+
+			auto s = Edit->Name();
+			if (ValidStr(s))
+				Update(s);
+		}));
 	}
 	
 	void OnSelect(ProjectNode *Obj)
@@ -2082,7 +2001,7 @@ LTextView3 *IdeDoc::GetEdit()
 }
 */
 
-bool IdeDoc::BuildIncludePaths(LArray<LString> &Paths, IdePlatform Platform, bool IncludeSysPaths)
+bool IdeDoc::BuildIncludePaths(LString::Array &Paths, IdePlatform Platform, bool IncludeSysPaths)
 {
 	if (!GetProject())
 	{
@@ -2090,7 +2009,7 @@ bool IdeDoc::BuildIncludePaths(LArray<LString> &Paths, IdePlatform Platform, boo
 		return false;
 	}
 
-	bool Status = GetProject()->BuildIncludePaths(Paths, true, IncludeSysPaths, Platform);
+	bool Status = GetProject()->BuildIncludePaths(Paths, NULL, true, IncludeSysPaths, Platform);
 	if (Status)
 	{
 		if (IncludeSysPaths)
@@ -2104,13 +2023,15 @@ bool IdeDoc::BuildIncludePaths(LArray<LString> &Paths, IdePlatform Platform, boo
 	return Status;
 }
 
-bool IdeDoc::BuildHeaderList(const char16 *Cpp, LArray<char*> &Headers, LArray<LString> &IncPaths)
+bool IdeDoc::BuildHeaderList(const char16 *Cpp, LString::Array &Headers, LString::Array &IncPaths)
 {
 	LAutoString c8(WideToUtf8(Cpp));
 	if (!c8)
 		return false;
 
-	return ::BuildHeaderList(c8, Headers, IncPaths, true);
+	LArray<LString::Array*> All;
+	All.Add(&IncPaths);
+	return ::BuildHeaderList(c8, Headers, All, true);
 }
 
 bool MatchSymbol(DefnInfo *Def, char16 *Symbol)
@@ -2160,7 +2081,7 @@ bool IdeDoc::FindDefn(char16 *Symbol, const char16 *Source, List<DefnInfo> &Matc
 	#endif
 
 	LString::Array Paths;
-	LArray<char*> Headers;
+	LString::Array Headers;
 
 	if (!BuildIncludePaths(Paths, PlatformCurrent, true))
 	{

@@ -161,7 +161,7 @@ public:
 	bool CreateMakefile(IdePlatform Platform, bool BuildAfterwards);
 	LString GetTargetName(IdePlatform Platform);
 	LString GetTargetFile(IdePlatform Platform);
-	bool BuildIncludePaths(LArray<LString> &Paths, bool Recurse, bool IncludeSystem, IdePlatform Platform);
+	bool BuildIncludePaths(LString::Array &Paths, LString::Array *SysPaths, bool Recurse, bool IncludeSystem, IdePlatform Platform);
 	void ShowFileProperties(const char *File);
 	bool GetExpanded(int Id);
 	void SetExpanded(int Id, bool Exp);
@@ -193,7 +193,7 @@ public:
 
 	// Dependency calculation
 	bool GetAllDependencies(LArray<char*> &Files, IdePlatform Platform);
-	bool GetDependencies(const char *SourceFile, LArray<LString> &IncPaths, LArray<char*> &Files, IdePlatform Platform);
+	bool GetDependencies(const char *SourceFile, LString::Array &IncPaths, LArray<char*> &Files, IdePlatform Platform);
 	
 	// Settings
 	IdeProjectSettings *GetSettings();

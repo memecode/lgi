@@ -1243,6 +1243,10 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 			target->OnEvent(Msg);
 	}
 
+	LMessage::Result result;
+	if (CommonEvents(result, Msg))
+		return result;
+
 	if (_View)
 	{
 		switch (Msg->m)
@@ -2106,10 +2110,6 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 			}
 		}
 	}
-
-	LMessage::Result result;
-	if (CommonEvents(result, Msg))
-		return result;
 
 	return 0;
 

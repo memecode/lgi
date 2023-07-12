@@ -56,7 +56,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	{
 		LString Path;
 		int Platforms;
-		LString::Array *Inc;
+		LString::Array *Inc = NULL, *SysInc = NULL;
 		LArray<DefnInfo> Defs;
 		bool IsSource;
 		bool IsHeader;
@@ -100,9 +100,9 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		}
 	};
 
-	int hApp;
+	int hApp = 0;
 	int MissingFiles = 0;
-	LArray<LString::Array*> IncPaths;
+	LString::Array IncPaths, SysIncPaths;
 	
 	#if USE_HASH
 	LHashTbl<ConstStrKey<char,false>, FileSyms*> Files;
@@ -197,7 +197,8 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		if (!f) return false;	
 		f->Path = Path;
 		f->Platforms = Platforms;
-		f->Inc = IncPaths.Length() ? IncPaths.Last() : NULL;
+		f->Inc = IncPaths.Length() ? &IncPaths : NULL;
+		f->SysInc = SysIncPaths.Length() ? &SysIncPaths : NULL;
 
 		#if USE_HASH
 		Files.Add(Path, f);
@@ -215,9 +216,11 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		}
 
 		LAutoString Source = Tf.Read();
-		LArray<char*> Headers;
-		LArray<LString> EmptyInc;
-		if (BuildHeaderList(Source, Headers, f->Inc ? *f->Inc : EmptyInc, false))
+		LArray<LString::Array*> AllIncludes;
+		LString::Array Headers;
+		if (f->Inc) AllIncludes.Add(f->Inc);
+		if (f->SysInc) AllIncludes.Add(f->SysInc);
+		if (BuildHeaderList(Source, Headers, AllIncludes, false))
 		{
 			for (auto h: Headers)
 				AddFile(h, 0);
@@ -246,6 +249,19 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			return false;
 
 		return AddFile(Path, Platform);
+	}
+
+	void AddPaths(LString::Array &out, LString::Array &in)
+	{
+		LHashTbl<StrKey<char>, bool> map;
+		for (auto p: out)
+			map.Add(p, true);
+		for (auto p: in)
+			if (!map.Find(p))
+			{
+				out.Add(p);
+				map.Add(p, true);
+			}
 	}
 	
 	bool RemoveFile(LString Path)
@@ -411,7 +427,11 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			{
 				LAutoPtr<LString::Array> Paths((LString::Array*)Msg->A());
 				if (Paths)
-					IncPaths.Add(Paths.Release());
+					AddPaths(IncPaths, *Paths);
+
+				LAutoPtr<LString::Array> SysPaths((LString::Array*)Msg->B());
+				if (Paths)
+					AddPaths(SysIncPaths, *SysPaths);
 				break;
 			}
 			default:
@@ -645,13 +665,11 @@ void FindSymbolSystem::OpenSearchDlg(LViewI *Parent, std::function<void(FindSymR
 	});
 }
 
-bool FindSymbolSystem::SetIncludePaths(LString::Array &Paths)
+bool FindSymbolSystem::SetIncludePaths(LString::Array &Paths, LString::Array &SysPaths)
 {
-	LString::Array *a = new LString::Array;
-	if (!a)
-		return false;
-	*a = Paths;
-	return d->PostEvent(M_FIND_SYM_INC_PATHS, (LMessage::Param)a);
+	return d->PostEvent(M_FIND_SYM_INC_PATHS,
+						(LMessage::Param)new LString::Array(Paths),
+						(LMessage::Param)new LString::Array(SysPaths));
 }
 
 bool FindSymbolSystem::OnFile(const char *Path, SymAction Action, int Platforms)

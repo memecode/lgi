@@ -1,5 +1,4 @@
-#ifndef _LGI_IDE_H_
-#define _LGI_IDE_H_
+#pragma once
 
 //
 // Compiler specific macros:
@@ -14,6 +13,7 @@
 #include "lgi/common/TextView3.h"
 #include "lgi/common/List.h"
 #include "lgi/common/Tree.h"
+#include "lgi/common/SubProcess.h"
 
 #include "resdefs.h"
 #include "FindSymbol.h"
@@ -183,8 +183,8 @@ class IdeDoc;
 class IdeProject;
 
 extern const char *AppName;
-extern char *FindHeader(char *Short, LArray<LString> &Paths);
-extern bool BuildHeaderList(char *Cpp, LArray<char*> &Headers, LArray<LString> &IncPaths, bool Recurse);
+extern LString FindHeader(char *Short, LArray<LString::Array*> &Paths);
+extern bool BuildHeaderList(const char *Cpp, LString::Array &Headers, LArray<LString::Array*> &IncPaths, bool Recurse);
 
 class NodeView;
 class NodeSource
@@ -345,4 +345,25 @@ public:
 	void OnPosChange();
 };
 
-#endif
+////////////////////////////////////////////////////////////////////////
+struct SysIncThread : public LThread, public LCancel
+{
+	AppWnd *App = NULL;
+	LVariant SearchSysInc = false;
+
+	// Output
+	std::function<void(LString::Array*)> Callback;
+
+	// Internal
+	LString::Array Paths;
+	LString::Array Headers;
+	LHashTbl<ConstStrKey<char, true>, bool> Map;
+
+	SysIncThread(AppWnd *app,
+				IdeProject *proj,
+				std::function<void(LString::Array*)> callback);
+	~SysIncThread();
+
+	void Scan(LString p);
+	int Main() override;
+};
