@@ -3976,7 +3976,6 @@ bool IdeProject::GetDependencies(const char *InSourceFile, LString::Array &IncPa
 		ToUnixPath(p);
 		Files.Add(NewStr(p));
 	}
-	Headers.DeleteArrays();
 	
 	return true;
 }
