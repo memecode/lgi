@@ -158,6 +158,7 @@ void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 		Parent &&
 		Parent->WindowHandle())
 	{
+		/*
 		#if 1
 		
 		// Keep this dialog above the parent window...
@@ -176,6 +177,7 @@ void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 		}
 		
 		#endif
+		*/
 	}
 	else LgiTrace("%s:%i - Can't set parent for modal.\n", _FL);
 
@@ -199,6 +201,7 @@ void LDialog::EndModal(int Code)
 		return;
 	}
 	
+	/*
 	if (d->ParentModal)
 	{
 		auto Wnd = dynamic_cast<LWindow*>(GetParent());
@@ -209,6 +212,7 @@ void LDialog::EndModal(int Code)
 			d->ParentModal = false;
 		}
 	}
+	*/
 
 	d->IsModal = false;
 	if (!d->ModalCb)
@@ -233,7 +237,7 @@ void LDialog::EndModal(int Code)
 		LMessage::PropCallback,
 		new LMessage::InThreadCb
 		(
-			[dlg=this,cb=d->ModalCb,code=Code]()
+			[dlg=this, cb=d->ModalCb, code=Code]()
 			{
 				// printf("%s:%i - Calling LDialog callback.. in original thread\n", _FL);
 				cb(dlg, code);

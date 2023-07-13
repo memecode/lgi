@@ -124,36 +124,6 @@ OsAppArguments &OsAppArguments::operator =(OsAppArguments &a)
 	return *this;
 }
 
-////////////////////////////////////////////////////////////////
-#if HAS_SHARED_MIME
-
-#include "GFilterUtils.h"
-#include "mime-types.h"
-
-class LSharedMime : public LLibrary
-{
-public:
-	LSharedMime() :
-		#ifdef _DEBUG
-		LLibrary("libsharedmime1d")
-		#else
-		LLibrary("libsharedmime1")
-		#endif
-	{
-	}
-	
-	DynFunc0(int, mimetypes_init);
-	DynFunc1(const char*, mimetypes_set_default_type, const char *, default_type);	
-	DynFunc2(const char*, mimetypes_get_file_type, const char*, pathname, mimetypes_flags, flags);
-	DynFunc2(const char*, mimetypes_get_data_type, const void*, data, int, length);
-	DynFunc3(bool, mimetypes_decode, const char *, type, char **, media_type, char **, sub_type);
-	DynFunc2(char *, mimetypes_convert_filename, const char *, pathname, const char *, mime_type);
-	DynFunc3(bool, mimetypes_add_mime_dir, const char *, path, bool, high_priority, bool, rescan);
-	DynFunc2(const char *, mimetypes_get_type_info, const char *, mime_type, const char *, lang);
-};
-
-#endif
-
 #if 1
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -175,16 +145,6 @@ void LgiCrashHandler(int Sig)
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-#ifndef XK_Num_Lock
-#define XK_Num_Lock						 0xff7f
-#endif
-#ifndef XK_Shift_Lock
-#define XK_Shift_Lock					 0xffe6
-#endif
-#ifndef XK_Caps_Lock
-#define XK_Caps_Lock					 0xffe5
-#endif
-
 struct Msg
 {
 	LViewI *v;

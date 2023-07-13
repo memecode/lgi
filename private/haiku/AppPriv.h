@@ -56,6 +56,11 @@ public:
 	~LAppPrivate()
 	{
 		MimeToApp.DeleteObjects();
+		
+		printf("~LAppPrivate: IsLocked()=%i\n", IsLocked());
+		printf("~LAppPrivate: CountLocks()=%i\n", CountLocks());
+		printf("~LAppPrivate: CountLockRequests()=%i\n", CountLockRequests());
+		printf("~LAppPrivate: GuiThreadId=%i LockingThread()=%i\n", GuiThreadId, LockingThread());
 	}
 
 	LJson *GetConfig();

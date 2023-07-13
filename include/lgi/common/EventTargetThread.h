@@ -336,6 +336,7 @@ public:
 	
 	int Main()
 	{
+		printf("EventTargetThread %s, thread=%i\n", LThread::GetName(), GetCurrentThreadId());
 		while (!IsCancelled())
 		{
 			int WaitLength = -1;
