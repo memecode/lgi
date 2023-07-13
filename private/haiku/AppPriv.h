@@ -56,6 +56,14 @@ public:
 	~LAppPrivate()
 	{
 		MimeToApp.DeleteObjects();
+
+		struct sem_info info;
+		auto status = _get_sem_info(Sem(), &info, sizeof(info));
+		printf("~LAppPrivate: team=%i name=%s count=%i latest=%i\n",
+				info.team,
+				info.name,
+				info.count,
+				info.latest_holder);
 		
 		printf("~LAppPrivate: IsLocked()=%i\n", IsLocked());
 		printf("~LAppPrivate: CountLocks()=%i\n", CountLocks());

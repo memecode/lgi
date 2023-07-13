@@ -244,6 +244,7 @@ public:
 	
 	virtual ~LEventTargetThread()
 	{
+		printf("~LEventTargetThread %s\n", LThread::GetName());
 		EndThread();
 	}
 	
