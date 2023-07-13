@@ -418,10 +418,16 @@ LString LClipBoard::FmtToStr(FormatType Fmt)
 				return "CF_TEXT";
 			case CF_BITMAP:
 				return "CF_BITMAP";
-			case CF_HDROP:
-				return "CF_HDROP";
 			case CF_UNICODETEXT:
 				return "CF_UNICODETEXT";
+			#ifdef CF_HDROP
+			case CF_HDROP:
+				return "CF_HDROP";
+			#endif
+			#ifdef CF_LOCALE
+			case CF_LOCALE:
+				return "CF_LOCALE";
+			#endif
 			default:
 				LAssert(!"Not impl.");
 				break;

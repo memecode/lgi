@@ -55,6 +55,8 @@ enum IdeMessages
 
 	/// Styling is finished
 	M_STYLING_DONE,
+
+	M_GET_PLATFORM_FLAGS, // A=(int)ResponseHnd, B=(int)PlatformFlags
 };
 
 #define ICON_PROJECT			0
