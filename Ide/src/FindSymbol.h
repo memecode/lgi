@@ -110,6 +110,7 @@ public:
 	FindSymbolSystem(int AppHnd);
 	~FindSymbolSystem();
 	
+	int GetAppHnd();
 	bool SetIncludePaths(LString::Array &Paths, LString::Array &SysPaths);
 	bool OnFile(const char *Path, SymAction Action, int Platforms);
 	void OpenSearchDlg(LViewI *Parent, std::function<void(FindSymResult&)> Callback);

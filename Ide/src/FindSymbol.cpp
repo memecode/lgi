@@ -20,16 +20,16 @@
 
 #define DEBUG_FIND_SYMBOL		0
 #define DEBUG_NO_THREAD			1
-#define DEBUG_FILE				"Clipboard.h"
+// #define DEBUG_FILE				"Clipboard.h"
 
 int SYM_FILE_SENT = 0;
 
 
 class FindSymbolDlg : public LDialog
 {
-	// AppWnd *App;
-	LList *Lst;
-	FindSymbolSystem *Sys;
+	LList *Lst = NULL;
+	FindSymbolSystem *Sys = NULL;
+	int PlatformFlags = -1;
 
 public:
 	FindSymResult Result;
@@ -154,9 +154,18 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 	}
 	#endif
 	
+	#define PROFILE_ADDFILE 0
+	#if PROFILE_ADDFILE
+	#define PROF(...) prof.Add(__VA_ARGS__)
+	#else
+	#define PROF(...)
+	#endif
+
 	bool AddFile(LString Path, int Platforms)
 	{
+		#if PROFILE_ADDFILE
 		LProfile prof("AddFile");
+		#endif
 		bool Debug = false;
 		#ifdef DEBUG_FILE
 		if ((Debug = Path.Find(DEBUG_FILE) >= 0))
@@ -185,7 +194,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		FileSyms *f;
 		#endif
 
-		prof.Add("exists");
+		PROF("exists");
 		if (!LFileExists(Path))
 		{
 			Log("Missing '%s'\n", Path.Get());
@@ -208,7 +217,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		Files.Add(f);
 		#endif
 		
-		prof.Add("open");
+		PROF("open");
 
 		// Parse for headers...
 		LTextFile Tf;
@@ -219,7 +228,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			return false;
 		}
 
-		prof.Add("build hdr");
+		PROF("build hdr");
 
 		LAutoString Source = Tf.Read();
 		LString::Array Headers;
@@ -237,7 +246,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		}
 		
 		// Parse for symbols...
-		prof.Add("parse");
+		PROF("parse");
 		#ifdef DEBUG_FILE
 		if (Debug)
 			LgiTrace("%s:%i - About to parse '%s'.\n", _FL, f->Path.Get());
@@ -350,6 +359,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 							(fs->Platforms & Platforms) == 0)
 						{
 							#if 1 // def DEBUG_FILE
+							if (fs->Path.Find("Widgets") >= 0)
 							LgiTrace("%s:%i - '%s' doesn't match platform: %s %s\n",
 									_FL,
 									fs->Path.Get(),
@@ -550,6 +560,15 @@ LMessage::Result FindSymbolDlg::OnEvent(LMessage *m)
 {
 	switch (m->Msg())
 	{
+		case M_GET_PLATFORM_FLAGS:
+		{
+			// Ok the app replied with the current platform flags:
+			PlatformFlags = m->B();
+
+			// Now continue the original search:
+			Sys->Search(AddDispatch(), GetCtrlName(IDC_STR), PlatformFlags);
+			break;
+		}
 		case M_FIND_SYM_REQUEST:
 		{
 			LAutoPtr<FindSymRequest> Req((FindSymRequest*)m->A());
@@ -632,8 +651,16 @@ int FindSymbolDlg::OnNotify(LViewI *v, LNotification n)
 				auto Str = v->Name();
 				if (Str && strlen(Str) > 2)
 				{
-					// Create a search
-					Sys->Search(AddDispatch(), Str, true);
+					if (PlatformFlags < 0)
+					{
+						// We don't know the currently selected platform flags yet, so ask the app for that:
+						PostThreadEvent(Sys->GetAppHnd(), M_GET_PLATFORM_FLAGS, (LMessage::Param)AddDispatch());
+					}
+					else
+					{
+						// Create a search
+						Sys->Search(AddDispatch(), Str, PlatformFlags);
+					}
 				}
 			}
 			break;
@@ -691,6 +718,11 @@ void FindSymbolSystem::OpenSearchDlg(LViewI *Parent, std::function<void(FindSymR
 			Callback(Dlg->Result);
 		delete Dlg;
 	});
+}
+
+int FindSymbolSystem::GetAppHnd()
+{
+	return d->hApp;
 }
 
 bool FindSymbolSystem::SetIncludePaths(LString::Array &Paths, LString::Array &SysPaths)

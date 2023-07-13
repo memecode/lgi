@@ -3249,6 +3249,11 @@ LMessage::Result AppWnd::OnEvent(LMessage *m)
 {
 	switch (m->Msg())
 	{
+		case M_GET_PLATFORM_FLAGS:
+		{
+			PostThreadEvent(m->A(), M_GET_PLATFORM_FLAGS, 0, GetPlatform());
+			break;
+		}
 		case M_MAKEFILES_CREATED:
 		{
 			IdeProject *p = (IdeProject*)m->A();
