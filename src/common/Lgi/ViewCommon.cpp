@@ -249,14 +249,20 @@ bool LView::CommonEvents(LMessage::Result &result, LMessage *Msg)
 		}
 		case M_THREAD_COMPLETED:
 		{
-			auto Th = (LThread*)Msg->A();
-			if (!Th)
-				break;
+			try
+			{
+				auto Th = (LThread*)Msg->A();
+				if (!Th)
+					break;
 
-			Th->OnComplete();
-			if (Th->GetDeleteOnExit())
-				delete Th;
-
+				Th->OnComplete();
+				if (Th->GetDeleteOnExit())
+					delete Th;
+			}
+			catch (...)
+			{
+				LAssert(!"M_THREAD_COMPLETED crashed");
+			}
 			return true;
 		}
 		case M_PULSE:
