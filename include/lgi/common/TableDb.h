@@ -3,8 +3,6 @@
 
 #include "lgi/common/Variant.h"
 
-#define ID(c)		c
-
 class LTableDb : public LDom
 {
 	struct GTableDbPriv *d;
@@ -14,11 +12,11 @@ public:
 
 	enum HeaderTypes
 	{
-		DbIndexHeader = ID('indx'),
-		DbFieldDef    = ID('flds'),
-		DbKeys        = ID('keys'),
-		DbRow         = ID('data'),
-		DbEmpty       = ID('empt'),
+		DbIndexHeader = Lgi4CC("indx"),
+		DbFieldDef    = Lgi4CC("flds"),
+		DbKeys        = Lgi4CC("keys"),
+		DbRow         = Lgi4CC("data"),
+		DbEmpty       = Lgi4CC("empt"),
 	};
 	
 	enum FieldFlags

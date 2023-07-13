@@ -789,8 +789,8 @@ LWindowDragDataDrop(GtkWidget *widget, GdkDragContext *context, gint x, gint y, 
 	t->Data.Length(0);
 
 	// Request the data...
-	::LArray<LDragData> Data;
-	::LString::Array Formats;
+	LArray<LDragData> Data;
+	LString::Array Formats;
 	int KeyState = 0;
 	int Flags = GetAcceptFmts(Formats, context, t, p);
 	for (auto f: Formats)

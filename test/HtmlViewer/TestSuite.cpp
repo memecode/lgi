@@ -123,7 +123,7 @@ public:
 	
 	LString GetIncludeFile(const char *FileName)
 	{
-		return NULL;
+		return LString();
 	}
 	
 	LAutoString GetDataFolder()
