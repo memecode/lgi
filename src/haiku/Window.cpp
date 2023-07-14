@@ -54,18 +54,28 @@ public:
 	LWindow *ModalDlg = NULL;
 	bool ShowTitleBar = true;
 	
+	LString MakeName(LWindow *w)
+	{
+		LString s;
+		s.Printf("%p::con::%s", w, w->GetClass());
+		// printf("%s\n", s.Get());
+		return s;
+	}
+	
 	LWindowPrivate(LWindow *wnd) :
-		Wnd(wnd),
 		BWindow(BRect(100,100,400,400),
-				"...loading...",
+				MakeName(wnd),
 				B_DOCUMENT_WINDOW_LOOK,
 				B_NORMAL_WINDOW_FEEL,
-				0)
+				0),
+		Wnd(wnd)
 	{
 	}
 
 	~LWindowPrivate()
 	{
+		// printf("%p::dest::%s sem=%i\n", Wnd, Wnd->GetClass(), Sem());
+	
 		LAssert(ModalDlg == NULL);
 		DeleteObj(Wnd->Menu);
 		if (IsMinimized())
@@ -129,7 +139,13 @@ public:
 
 	bool QuitRequested()
 	{
-		printf("%s::QuitRequested() starting.. %s\n", Wnd->GetClass(), Wnd->Pos.GetStr());
+		/*
+		printf("%p::QuitRequested() starting.. pos=%s cls=%s\n",
+			Wnd,
+			Wnd->Pos.GetStr(),
+			Wnd->GetClass());
+		*/
+			
 		auto r = Wnd->OnRequestClose(false);
 		// printf("%s::QuitRequested()=%i\n", Wnd->GetClass(), r);
 		return r;
@@ -204,7 +220,7 @@ int LWindow::WaitThread()
 			// printf("%s::~LWindow Quit finished\n", Name());
 		}
 
-		d = NULL;
+		DeleteObj(d);
 		return 0; // If we're in thread... no need to wait.
 	}
 
@@ -216,7 +232,8 @@ int LWindow::WaitThread()
 	WAIT_LOG("wait_for_thread(%u) start..\n", id);
 	wait_for_thread(id, &value);
 	WAIT_LOG("wait_for_thread(%u) end=%i\n", id, value);
-	d = NULL;
+	
+	DeleteObj(d);
 
 	return value;
 }

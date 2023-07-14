@@ -572,7 +572,7 @@ LPopup::LPopup(LView *owner)
 			if (r != B_OK)
 				printf("%s:%i - SetFeel failed.\n", _FL);
 				
-			printf("popup thread=%i\n", w->Thread());
+			// printf("popup thread=%i\n", w->Thread());
 		}
 		else printf("%s:%i - No WindowHandle()?\n", _FL);
 	#endif
@@ -702,7 +702,7 @@ bool LPopup::Attach(LViewI *p)
 	#if defined(LGI_CARBON) || defined(HAIKU)
 	
 		auto status = LWindow::Attach(NULL);
-		printf("Popup thread=%i\n", WindowHandle()->Thread());
+		// printf("Popup thread=%i\n", WindowHandle()->Thread());
 		return status;
 	
 	#else

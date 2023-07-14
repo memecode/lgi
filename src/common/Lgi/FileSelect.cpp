@@ -263,6 +263,7 @@ class LFolderDrop : public LDropDown, public LFolderView
 {
 public:
 	LFolderDrop(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy);
+	~LFolderDrop();
 
 	void OnFolder();
 
@@ -1649,6 +1650,10 @@ LFolderDrop::LFolderDrop(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int 
 	LFolderView(dlg)
 {
 	SetPopup(new LFileSystemPopup(this, dlg, cx + (dlg->Ctrl2 ? dlg->Ctrl2->X() : 0) ));
+}
+
+LFolderDrop::~LFolderDrop()
+{
 }
 
 void LFolderDrop::OnFolder()

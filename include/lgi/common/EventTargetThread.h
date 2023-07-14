@@ -244,7 +244,7 @@ public:
 	
 	virtual ~LEventTargetThread()
 	{
-		printf("~LEventTargetThread %s\n", LThread::GetName());
+		// printf("~LEventTargetThread %s\n", LThread::GetName());
 		EndThread();
 	}
 	
@@ -337,7 +337,7 @@ public:
 	
 	int Main()
 	{
-		printf("EventTargetThread %s, thread=%i\n", LThread::GetName(), GetCurrentThreadId());
+		// printf("EventTargetThread %s, thread=%i\n", LThread::GetName(), GetCurrentThreadId());
 		while (!IsCancelled())
 		{
 			int WaitLength = -1;
