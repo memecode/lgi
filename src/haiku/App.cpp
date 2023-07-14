@@ -395,11 +395,6 @@ bool LApp::Run(OnIdleProc IdleCallback, void *IdleParam)
 	return true;
 }
 
-bool LApp::Yield()
-{
-	return false;
-}
-
 void LApp::Exit(int Code)
 {
 	if (Code)

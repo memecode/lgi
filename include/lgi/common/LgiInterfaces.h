@@ -314,9 +314,6 @@ public:
 		void *IdleParam = 0
 	) = 0;
 	
-	/// Processed queued events and then return
-	virtual bool Yield() = 0;
-	
 	/// Event called to process the command line
 	virtual void OnCommandLine() = 0;
 	
@@ -386,6 +383,11 @@ public:
 
 	/// Gets the font cache
 	virtual class LFontCache *GetFontCache() = 0;
+
+	#ifndef HAIKU
+	/// Processed queued events and then return
+	virtual bool Yield() = 0;
+	#endif
 };
 
 class LEventSinkI

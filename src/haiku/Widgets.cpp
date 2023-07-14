@@ -32,20 +32,10 @@ struct LDialogPriv
 
 	/// The callback for the modal dialog:
 	LDialog::OnClose ModalCb;
-
-	/// This is set when the parent window has a pointer
-	/// to this dialog. We mustn't delete or change parent
-	/// while they have that.
-	bool ParentModal = false;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-LDialog::LDialog(LViewI *parent)
-	:
-	#ifdef __GTK_H__
-	// , LWindow(gtk_dialog_new())
-	LWindow(gtk_window_new(GTK_WINDOW_TOPLEVEL)),
-	#endif
+LDialog::LDialog(LViewI *parent) :
 	ResObject(Res_Dialog)
 {
 	d = new LDialogPriv();
@@ -56,7 +46,10 @@ LDialog::LDialog(LViewI *parent)
 
 LDialog::~LDialog()
 {
-	LAssert(!d->ParentModal);
+	if (GetModalParent())
+	{
+		LAssert(!"Parent still has us as modal.");
+	}
 	DeleteObj(d);
 }
 
@@ -159,25 +152,18 @@ void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 		Parent->WindowHandle())
 	{
 		/*
-		#if 1
+		This doesn't work with multiple nested levels of windows. But would otherwise
+		be ideal:
 		
-		// Keep this dialog above the parent window...
-		WindowHandle()->SetFeel(B_MODAL_SUBSET_WINDOW_FEEL);
-		auto result = WindowHandle()->AddToSubset(Parent->WindowHandle());
-		printf("%s:%i - %s::AddToSubset=%i\n", _FL, GetClass(), result);
-		
-		#else
+			WindowHandle()->SetFeel(B_MODAL_SUBSET_WINDOW_FEEL);
+			auto result = WindowHandle()->AddToSubset(Parent->WindowHandle());
+			
+		*/
 		
 		auto Wnd = dynamic_cast<LWindow*>(Parent);
 		LAssert(Wnd);
 		if (Wnd)
-		{
-			d->ParentModal = true;
-			Wnd->SetModalDialog(this);
-		}
-		
-		#endif
-		*/
+			SetModalParent(Wnd);
 	}
 	else LgiTrace("%s:%i - Can't set parent for modal.\n", _FL);
 
@@ -201,18 +187,7 @@ void LDialog::EndModal(int Code)
 		return;
 	}
 	
-	/*
-	if (d->ParentModal)
-	{
-		auto Wnd = dynamic_cast<LWindow*>(GetParent());
-		LAssert(Wnd);
-		if (Wnd)
-		{
-			Wnd->SetModalDialog(NULL);
-			d->ParentModal = false;
-		}
-	}
-	*/
+	SetModalParent(NULL);
 
 	d->IsModal = false;
 	if (!d->ModalCb)

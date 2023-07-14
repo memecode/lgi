@@ -17,8 +17,10 @@ typedef int							OsProcessId;
 /// of a global static class which is initialized before the main begins executing.
 #define LAppInst						(LApp::ObjInstance())
 
+#ifndef HAIKU
 /// Process any pending messages in the applications message que and then return.
 #define LYield()						LAppInst->Yield()
+#endif
 
 /// Returns a system font pointer.
 ///
@@ -230,8 +232,10 @@ public:
 		void *IdleParam = NULL
 	);
 	
+	#ifndef HAIKU
 	/// Processes any messages in the queue and then returns.
 	[[deprecated]] bool Yield();
+	#endif
 	
 	/// Event called to process the command line
 	void OnCommandLine();

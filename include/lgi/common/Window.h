@@ -297,7 +297,11 @@ public:
 
 	#if HAIKU
 	
-		void SetModalDialog(LWindow *dlg);
+		LWindow *GetModalParent();
+		bool SetModalParent(LWindow *dlg);
+
+		LWindow *GetModalChild();
+		bool SetModalChild(LWindow *dlg);
 	
 	#elif defined(LGI_SDL)
 

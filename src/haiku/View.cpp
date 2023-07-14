@@ -89,11 +89,6 @@ LInlineBmp Cursors =
 };
 
 ////////////////////////////////////////////////////////////////////////////
-void _lgi_yield()
-{
-	LAppInst->Yield();
-}
-
 void *IsAttached(BView *v)
 {
 	auto pview = v->Parent();

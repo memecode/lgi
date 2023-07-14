@@ -1333,16 +1333,18 @@ int LFileSelectDlg::OnNotify(LViewI *Ctrl, LNotification n)
 		}
 		case IDC_NEW:
 		{
-			LInput Dlg(this, "", "Create new folder:", "New Folder");
-			Dlg.DoModal([&](auto d, auto code)
+			auto Dlg = new LInput(this, "", "Create new folder:", "New Folder");
+			Dlg->DoModal([this, Dlg](auto d, auto code)
 			{
 				char New[MAX_PATH_LEN];
 				strcpy(New, GetCtrlName(IDC_PATH));
 				if (New[strlen(New)-1] != DIR_CHAR) strcat(New, DIR_STR);
-				strcat(New, Dlg.GetStr());
+				strcat(New, Dlg->GetStr());
 
 				FileDev->CreateFolder(New);
 				OnFolder();
+				
+				delete d;
 			});
 			break;
 		}

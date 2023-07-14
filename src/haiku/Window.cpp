@@ -51,7 +51,8 @@ public:
 	LWindow *Wnd;
 	bool SnapToEdge = false;
 	LArray<HookInfo> Hooks;
-	LWindow *ModalDlg = NULL;
+	LWindow *ModalParent = NULL;
+	LWindow *ModalChild = NULL;
 	bool ShowTitleBar = true;
 	
 	LString MakeName(LWindow *w)
@@ -76,7 +77,7 @@ public:
 	{
 		// printf("%p::dest::%s sem=%i\n", Wnd, Wnd->GetClass(), Sem());
 	
-		LAssert(ModalDlg == NULL);
+		LAssert(ModalChild == NULL);
 		DeleteObj(Wnd->Menu);
 		if (IsMinimized())
 			Wnd->_PrevZoom = LZoomMin;
@@ -172,6 +173,31 @@ public:
 				Wnd->OnEvent((LMessage*)message);
 		}
 	}
+	
+	void WindowActivated(bool focus)
+	{
+		// printf("%s::WindowActivated %i\n", Wnd->GetClass(), focus);
+		
+		if (ModalChild && focus)
+		{
+			printf("%s:%i - %s dropping activate, has modal: %s.\n", _FL,
+				Wnd->GetClass(),
+				ModalChild->GetClass());
+				
+			SendBehind(ModalChild->WindowHandle());
+			
+			auto w = Wnd;
+			while (auto p = w->GetModalParent())
+			{
+				p->WindowHandle()->SendBehind(w->WindowHandle());
+				w = p;
+			}
+		}
+		else
+		{
+			BWindow::WindowActivated(focus);
+		}
+	}
 };
 
 ///////////////////////////////////////////////////////////////////////
@@ -195,9 +221,76 @@ LWindow::~LWindow()
 	WaitThread();
 }
 
-void LWindow::SetModalDialog(LWindow *dlg)
+LWindow *LWindow::GetModalParent()
 {
-	d->ModalDlg = dlg;
+	return d->ModalParent;
+}
+
+bool LWindow::SetModalParent(LWindow *p)
+{
+	if (p)
+	{
+		if (d->ModalParent ||
+			p->GetModalChild())
+		{
+			LAssert(!"Already set!");
+			return false;
+		}
+		
+		d->ModalParent = p;
+		p->d->ModalChild = this;
+	}
+	else
+	{
+		if (d->ModalParent)
+		{
+			if (d->ModalParent->GetModalChild() != this)
+			{
+				LAssert(!"Wrong linkage.");
+				return false;
+			}
+			d->ModalParent->d->ModalChild = NULL;
+			d->ModalParent = NULL;
+		}
+	}
+	
+	return true;
+}
+
+LWindow *LWindow::GetModalChild()
+{
+	return d->ModalChild;
+}
+
+bool LWindow::SetModalChild(LWindow *c)
+{
+	if (c)
+	{
+		if (d->ModalChild ||
+			c->GetModalParent())
+		{
+			LAssert(!"Already set.");
+			return false;
+		}
+		
+		d->ModalChild = c;
+		c->d->ModalParent = this;
+	}
+	else
+	{
+		if (d->ModalChild)
+		{
+			if (d->ModalChild->GetModalParent() != this)
+			{
+				LAssert(!"Wrong linkage.");
+				return false;
+			}
+			d->ModalChild->d->ModalParent = NULL;
+			d->ModalChild = NULL;
+		}
+	}
+	
+	return true;
 }
 
 int LWindow::WaitThread()
@@ -407,12 +500,14 @@ bool LWindow::OnRequestClose(bool OsShuttingDown)
 
 bool LWindow::HandleViewMouse(LView *v, LMouse &m)
 {
-	if (d->ModalDlg)
+	if (d->ModalChild)
 	{
+		/*
 		printf("%s:%i - %s ignoring mouse event while %s is shown.\n",
 			_FL,
 			GetClass(),
 			d->ModalDlg->GetClass());
+		*/
 		return false;
 	}
 
@@ -474,12 +569,14 @@ bool LWindow::HandleViewKey(LView *v, LKey &k)
 	}
 	#endif
 
-	if (d->ModalDlg)
+	if (d->ModalChild)
 	{
+		/*
 		printf("%s:%i - %s ignoring key event while %s is shown.\n",
 			_FL,
 			GetClass(),
-			d->ModalDlg->GetClass());
+			d->ModalChild->GetClass());
+		*/
 		return false;
 	}
 

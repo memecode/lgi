@@ -9,7 +9,7 @@
 #include "StringList.h"
 #include "Path.h"
 
-#define _POSIX_TIMERS
+#define _POSIX_TIMERS (200809L)
 #include <time.h>
 
 #include "lgi/common/Lgi.h"
