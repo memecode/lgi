@@ -1382,9 +1382,18 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 
 				dev_t volume = dev_for_path("/boot");
 				char path[MAX_PATH_LEN] = "";
-				if (find_directory(B_USER_DIRECTORY , volume, true, path, sizeof(path)) == B_OK)
-					Path = path;
 
+				if (find_directory(B_USER_SETTINGS_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+				{
+					Path = path;
+					// printf("B_USER_SETTINGS_DIRECTORY=%s\n", Path.Get());
+				}
+				else if (find_directory(B_USER_DIRECTORY, volume, true, path, sizeof(path)) == B_OK)
+				{
+					Path.Printf("%s/config/settings", path);
+					// printf("B_USER_DIRECTORY=%s\n", Path.Get());
+				}
+					
 			#else
 
 				LAssert(0);

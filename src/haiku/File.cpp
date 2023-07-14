@@ -1136,7 +1136,7 @@ int LFile::Open(const char *File, int Mode)
 				File, 
 				Mode, 
 				d->hFile,
-				LErrorCodeToString(d->ErrorCode));
+				LErrorCodeToString(d->ErrorCode).Get());
 		}
 	}
 

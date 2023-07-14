@@ -91,6 +91,15 @@ public:
 	{
 		return LString("\n").Join(DevNotes);
 	}
+	
+	LString ToString()
+	{
+		LString s;
+		s.Printf("%i %s", Code, GetMsg().Get());
+		if (DevNotes.Length())
+			s += LString(" (") + LString(",").Join(DevNotes) + ")";
+		return s;
+	}
 };
 
 

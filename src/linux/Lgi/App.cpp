@@ -370,11 +370,11 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 		double Dpi = 96.0;
 		#endif
 
-		::LFile::Path p(LSP_APP_ROOT);
+		LFile::Path p(LSP_APP_ROOT);
 		p += "lgi-conf.json";
 		if (p.IsFile())
 		{
-			::LFile f(p, O_READ);
+			LFile f(p, O_READ);
 			LJson j(f.Read());
 			auto sDpi = j.Get("DPI");
 			if (sDpi)

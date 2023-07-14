@@ -75,12 +75,14 @@ void LFontType::DoUI(LView *Parent, std::function<void(LFontType*)> Callback)
 {
 	#if WINNATIVE
 	int bytes = sizeof(Info);
+	void *ptr = &Info;
 	#else
 	char str[256];
 	int bytes = sprintf_s(str, sizeof(str), "%s,%i", Info.Face(), Info.PointSize());
+	void *ptr = str;
 	#endif
 
-	LFontSelect *Dlg = new LFontSelect(Parent, &Info, bytes);
+	LFontSelect *Dlg = new LFontSelect(Parent, ptr, bytes);
 	Dlg->DoModal([Dlg, this, Callback](auto dlg, auto id)
 	{
 		if (id == IDOK)

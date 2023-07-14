@@ -47,13 +47,34 @@ LOptionsFile::PortableType LOptionsFile::GuessMode()
 		return UnknownMode;
 
 	#if defined(MAC)
+
 		if (a[0].Equals("Applications"))
 			return DesktopMode;
+
 	#elif defined(WINDOWS)
-		if (a.Length() > 1 && (a[1].Equals("Program Files") || a[1].Equals("Program Files (x86)")))
+
+		if
+		(
+			a.Length() > 1 &&
+			(
+				a[1].Equals("Program Files") ||
+				a[1].Equals("Program Files (x86)")
+			)
+		)
 			return DesktopMode;
+
+	#elif defined(HAIKU)
+
+		if (a.Length() > 3 &&
+			a[0].Equals("boot") &&
+			a[1].Equals("system") &&
+			a[2].Equals("apps"))
+			return DesktopMode;
+
 	#else
+
 		#warning "Impl me."
+
 	#endif
 
 	return PortableMode;
@@ -68,10 +89,22 @@ bool LOptionsFile::SetMode(PortableType mode, const char *BaseName)
 	Mode = mode;
 
 	if (!LGetSystemPath(Mode == DesktopMode ? LSP_APP_ROOT : LSP_APP_INSTALL, FullPath, sizeof(FullPath)))
+	{
+		// LgiTrace("%s:%i - LGetSystemPath failed.\n", _FL);
 		return false;
+	}
 
 	if (!LDirExists(FullPath))
-		FileDev->CreateFolder(FullPath);
+	{
+		LError err;
+		auto result = FileDev->CreateFolder(FullPath, false, &err);
+		if (!result)
+			LgiTrace("%s:%i - CreateFolder(%s)=%i %s\n", _FL, FullPath, result, err.ToString().Get());
+	}
+	else
+	{
+		// LgiTrace("%s:%i - FullPath(%s) exists\n", _FL, FullPath);
+	}
 
 	LMakePath(FullPath, sizeof(FullPath), FullPath, BaseName ? BaseName : (char*)"Options");
 	if (!LGetExtension(FullPath))

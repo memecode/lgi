@@ -288,6 +288,7 @@ bool LFontSelect::Serialize(void *Data, int DataLen, bool Write)
 				Bold?"b":"",
 				Underline?"u":"",
 				Italic?"b":"");
+		// printf("LFontSelect::Serialize -> '%s'\n", Fnt);
 
 		#endif
 	}
@@ -316,7 +317,8 @@ bool LFontSelect::Serialize(void *Data, int DataLen, bool Write)
 
 		#else
 
-		auto T = LString((char*)Data).SplitDelimit(",");
+		auto Fnt = (char*)Data;
+		auto T = LString(Fnt).SplitDelimit(",");
 		if (T[0])
 		{
 			Face = T[0];
@@ -334,6 +336,12 @@ bool LFontSelect::Serialize(void *Data, int DataLen, bool Write)
 			if (strchr(t, 'u')) Underline = true;
 			if (strchr(t, 'i')) Italic = true;
 		}
+
+		/*
+		printf("LFontSelect::Serialize(%s) -> '%s' %i %i %i %i\n",
+			Fnt,
+			Face.Get(), Size, Bold, Underline, Italic);
+		*/
 
 		#endif
 	}

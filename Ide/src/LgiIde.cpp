@@ -1274,6 +1274,8 @@ public:
 
 		SerializeStringList("RecentFiles", &RecentFiles, false);
 		SerializeStringList("RecentProjects", &RecentProjects, false);
+		
+		// printf("Options.GetFile()='%s'\n", Options.GetFile());
 	}
 	
 	~AppWndPrivate()
