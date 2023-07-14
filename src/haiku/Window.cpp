@@ -411,7 +411,6 @@ void LWindow::Visible(bool i)
 	{
 		if (d->IsHidden())
 		{
-			printf("%s show %s\n", GetClass(), GetPos().GetStr());
 			d->MoveTo(Pos.x1, Pos.y1);
 			d->ResizeTo(Pos.X(), Pos.Y());
 			d->Show();

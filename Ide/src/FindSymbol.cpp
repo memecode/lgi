@@ -468,7 +468,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 					AddPaths(IncPaths, *Paths);
 
 				LAutoPtr<LString::Array> SysPaths((LString::Array*)Msg->B());
-				if (Paths)
+				if (SysPaths)
 					AddPaths(SysIncPaths, *SysPaths);
 				break;
 			}

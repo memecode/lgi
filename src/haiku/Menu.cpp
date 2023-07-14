@@ -95,7 +95,6 @@ LSubMenu::LSubMenu(const char *name, bool Popup)
 {
 	Active.Add(this);
 	Info = new BPopUpMenu(name);
-	printf("Info=%p\n", Info);
 	if (name)
 		Name(name);
 }

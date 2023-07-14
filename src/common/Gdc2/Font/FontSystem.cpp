@@ -222,7 +222,7 @@ bool LFontSystem::EnumerateFonts(LString::Array &Fonts)
 
 		#elif defined __GTK_H__
 
-			Gtk::PangoFontFamily ** families;
+			Gtk::PangoFontFamily **families;
 			int n_families;
 			Gtk::PangoFontMap * fontmap;
 
@@ -259,6 +259,20 @@ bool LFontSystem::EnumerateFonts(LString::Array &Fonts)
 				}
 				CFRelease(fontFamilies);
 			}
+			
+		#elif HAIKU
+		
+			int32 families = count_font_families();
+			for (int32 i=0; i<families; i++)
+			{
+				font_family name;
+				uint32 flags;
+				status_t r = get_font_family(i, &name, &flags);
+				if (r == B_OK)
+				{
+					AllFonts.New() = name;
+				}
+			}			
 		
 		#endif
 
