@@ -42,6 +42,8 @@
 #ifdef HAIKU
 	#include <FindDirectory.h>
 	#include <fs_info.h>
+	#include <Roster.h>
+	#include <Path.h>
 #else
 	#include "SymLookup.h"
 #endif
@@ -2737,6 +2739,7 @@ LString LGetAppForProtocol(const char *Protocol)
 		return App;
 
 	#ifdef WINDOWS
+
 		LRegKey k(false, "HKEY_CLASSES_ROOT\\%s\\shell\\open\\command", Protocol);
 		if (k.IsOk())
 		{
@@ -2747,7 +2750,9 @@ LString LGetAppForProtocol(const char *Protocol)
 				App = a.Get();
 			}
 		}
+
 	#elif defined(LINUX)
+	
 		const char *p = NULL;
 		if (stricmp(Protocol, "mailto"))
 			p = "xdg-email";
@@ -2765,9 +2770,13 @@ LString LGetAppForProtocol(const char *Protocol)
 				break;
 			}
 		}
+	
 	#elif defined(__GTK_H__)
+	
 		LAssert(!"What to do?");
+	
 	#elif defined(MAC)
+	
 		// Get the handler type
 		LString s;
 		s.Printf("%s://domain/path", Protocol);
@@ -2787,8 +2796,27 @@ LString LGetAppForProtocol(const char *Protocol)
 				LgiTrace("%s:%i - Error: unknown protocol '%s'\n", _FL, uri.sProtocol.Get());
 		}
 		[handlerUrl release];
+	
+	#elif defined(HAIKU)
+	
+		LString mt;
+		mt.Printf("application/x-vnd.be.url.%s", Protocol);
+
+		BRoster r;
+		entry_ref app;
+		status_t s = r.FindApp(mt, &app);
+		if (s == B_OK)
+		{
+			BPath path(&app);
+			App = path.Path();
+			// printf("%s:%i - LGetAppForProtocol(%s)=%s\n", _FL, Protocol, App.Get());
+		}
+		else LgiTrace("%s:%i - LGetAppForProtocol(%s) error: no app found.\n", _FL, Protocol);
+	
 	#else
+	
 		#warning "Impl me."
+	
 	#endif
 
 	return App;

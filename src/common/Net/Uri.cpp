@@ -327,52 +327,78 @@ LProxyUri::LProxyUri()
 {
 	#if defined(WIN32)
 
-	LRegKey k(false, "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
-	if (k.IsOk())
-	{
-	    uint32_t Enabled = 0;
-	    if (k.GetInt("ProxyEnable", Enabled) && Enabled)
-	    {
-		    char *p = k.GetStr("ProxyServer");
-		    if (p)
+		LRegKey k(false, "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings");
+		if (k.IsOk())
+		{
+		    uint32_t Enabled = 0;
+		    if (k.GetInt("ProxyEnable", Enabled) && Enabled)
 		    {
-			    Set(p);
-		    }
+			    char *p = k.GetStr("ProxyServer");
+			    if (p)
+			    {
+				    Set(p);
+			    }
+			}
 		}
-	}
 
 	#elif defined LINUX
 	
-	char *HttpProxy = getenv("http_proxy");
-	if (HttpProxy)
-	{
-		Set(HttpProxy);
-	}
+		char *HttpProxy = getenv("http_proxy");
+		if (HttpProxy)
+		{
+			Set(HttpProxy);
+		}
 	
 	#elif defined MAC
 	
-//	CFDictionaryRef Proxies = SCDynamicStoreCopyProxies(0);
-//	if (!Proxies)
-//		LgiTrace("%s:%i - SCDynamicStoreCopyProxies failed.\n", _FL);
-//	else
-//	{
-//		int enable = CFNumberRefToInt((CFNumberRef) CFDictionaryGetValue(Proxies, kSCPropNetProxiesHTTPEnable));
-//		if (enable)
-//		{
-//			#ifdef LGI_COCOA
-//			LAssert(!"Fixme");
-//			#else
-//			Host = CFStringToUtf8((CFStringRef) CFDictionaryGetValue(Proxies, kSCPropNetProxiesHTTPProxy));
-//			#endif
-//			Port = CFNumberRefToInt((CFNumberRef) CFDictionaryGetValue(Proxies, kSCPropNetProxiesHTTPPort));
-//		}
-//		
-//		CFRelease(Proxies);
-//	}
+		//	CFDictionaryRef Proxies = SCDynamicStoreCopyProxies(0);
+		//	if (!Proxies)
+		//		LgiTrace("%s:%i - SCDynamicStoreCopyProxies failed.\n", _FL);
+		//	else
+		//	{
+		//		int enable = CFNumberRefToInt((CFNumberRef) CFDictionaryGetValue(Proxies, kSCPropNetProxiesHTTPEnable));
+		//		if (enable)
+		//		{
+		//			#ifdef LGI_COCOA
+		//			LAssert(!"Fixme");
+		//			#else
+		//			Host = CFStringToUtf8((CFStringRef) CFDictionaryGetValue(Proxies, kSCPropNetProxiesHTTPProxy));
+		//			#endif
+		//			Port = CFNumberRefToInt((CFNumberRef) CFDictionaryGetValue(Proxies, kSCPropNetProxiesHTTPPort));
+		//		}
+		//		
+		//		CFRelease(Proxies);
+		//	}
+
+	#elif defined(HAIKU)
+
+		// There doesn't seem to be a system wide proxy setting, so for the time being
+		// lets just put a setting in the Lgi config and use that:
+		if (!LAppInst)
+		{
+			LgiTrace("%s:%i - No LApp instance yet?\n", _FL);
+		}
+		else
+		{
+			auto p = LAppInst->GetConfig(LApp::CfgNetworkHttpProxy);
+			if (p)
+			{
+				Set(p);
+			}
+			else
+			{
+				static bool First = true;
+				if (First)
+				{
+					First = false;
+					LgiTrace("%s:%i No HTTP Proxy configured in '%s'.\n", _FL, LAppInst->GetConfigPath().Get());
+				}
+			}
+		}
 
 	#else
 
-	#warning "Impl getting OS proxy here."
+		#warning "Impl getting OS proxy here."
 
 	#endif
 }

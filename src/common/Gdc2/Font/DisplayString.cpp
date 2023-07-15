@@ -815,7 +815,7 @@ void LDisplayString::Layout(bool Debug)
 			else if (!ch || IsTabChar(ch) ^ isTab)
 			{		
 				auto &l = Info.New();
-				l.Str = start.GetPtr();
+				l.Str = (OsChar*)start.GetPtr();
 				l.Len = p.GetPtr() - start.GetPtr();
 
 				const char *strArr[] = { l.Str };

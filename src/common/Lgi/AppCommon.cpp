@@ -87,7 +87,7 @@ LJson *LAppPrivate::GetConfig()
 				if (Config->Get(var).Length() == 0) \
 					Dirty |= Config->Set(var, val);
 
-			#ifdef LINUX
+			#if defined(LINUX)
 
 				DEFAULT(LApp::CfgLinuxKeysShift, "GDK_SHIFT_MASK");
 				DEFAULT(LApp::CfgLinuxKeysCtrl, "GDK_CONTROL_MASK");
@@ -114,6 +114,12 @@ LJson *LAppPrivate::GetConfig()
 				DEFAULT(LApp::CfgLinuxMouseRight,   str(Gtk::GDK_RIGHT_BTN));
 				DEFAULT(LApp::CfgLinuxMouseBack,    str(Gtk::GDK_BACK_BTN));
 				DEFAULT(LApp::CfgLinuxMouseForward, str(Gtk::GDK_FORWARD_BTN));
+				
+			#elif defined(HAIKU)
+
+				DEFAULT(LApp::CfgNetworkHttpProxy,   "");
+				DEFAULT(LApp::CfgNetworkHttpsProxy,  "");
+				DEFAULT(LApp::CfgNetworkSocks5Proxy, "");
 
 			#endif
 

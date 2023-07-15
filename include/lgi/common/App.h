@@ -147,7 +147,7 @@ protected:
 
 public:
 	// Static publics
-	#ifdef LINUX
+	#if defined(LINUX)
 
 	constexpr static const char *CfgLinuxKeysShift       = "Linux.Keys.Shift";
 	constexpr static const char *CfgLinuxKeysCtrl        = "Linux.Keys.Ctrl";
@@ -159,6 +159,12 @@ public:
 	constexpr static const char *CfgLinuxMouseRight      = "Linux.Mouse.Right";
 	constexpr static const char *CfgLinuxMouseBack       = "Linux.Mouse.Back";
 	constexpr static const char *CfgLinuxMouseForward    = "Linux.Mouse.Forward";
+
+	#elif defined(HAIKU)
+
+	constexpr static const char *CfgNetworkHttpProxy     = "Network.HttpProxy";
+	constexpr static const char *CfgNetworkHttpsProxy    = "Network.HttpsProxy";
+	constexpr static const char *CfgNetworkSocks5Proxy   = "Network.Socks5Proxy";
 
 	#endif
 
