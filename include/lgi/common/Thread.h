@@ -29,34 +29,28 @@ public:
 	static const OsThreadId InvalidId;
 
 protected:
-	ThreadState State = THREAD_INIT;
+	ThreadState State       = THREAD_INIT;
 	ThreadPriority Priority = ThreadPriorityNormal;
-	OsThread hThread = InvalidHandle;
-	OsThreadId ThreadId = InvalidId;
-
-	int ReturnValue = -1;
+	OsThread hThread        = InvalidHandle;
+	OsThreadId ThreadId     = InvalidId;
+	int ReturnValue         = -1;
 	LString Name;
 
-	#if defined WIN32
+	/// Auto deletes the thread after ::Main has finished.
+	bool DeleteOnExit       = false;
 
+	/// Aka from LView::AddDispatch().
+	int ViewHandle          = -1;
+
+	friend bool LView::CommonEvents(LMessage::Result &result, LMessage *Msg);
+	#if defined WIN32
 		friend uint WINAPI ThreadEntryPoint(void *i);
 	    void Create(class LThread *Thread, OsThread &hThread, OsThreadId &ThreadId);
-
 	#elif defined POSIX
-
 		friend void *ThreadEntryPoint(void *i);
-
 	#else
-
 		friend int32 ThreadEntryPoint(void *i);
-
 	#endif
-
-protected:
-	/// Auto deletes the thread after ::Main has finished.
-	bool DeleteOnExit = false;
-	/// Aka from LView::AddDispatch().
-	int ViewHandle = -1;
 
 public:
 	LThread(

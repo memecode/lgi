@@ -72,10 +72,13 @@ LThread::LThread(const char *ThreadName, int viewHandle)
 
 LThread::~LThread()
 {
+	// All message processing must complete before the object is deleted.
+	// LView::CommonEvents::M_THREAD_COMPLETED will set it to -1 after it's
+	// called the OnComplete handler.
+	LAssert(ViewHandle < 0);
+
 	if (!IsExited())
-	{
 		Terminate();
-	}
 }
 
 int LThread::ExitCode()
