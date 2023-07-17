@@ -94,15 +94,6 @@ LPoint LScreenDC::GetDpi()
 	return LScreenDpi();
 }
 
-bool LScreenDC::GetClient(LRect *c)
-{
-	if (!c)
-		return false;
-
-	*c = d->Client;
-	return true;
-}
-
 LString GetClip(BView *v)
 {
 	BRegion r;
@@ -135,8 +126,8 @@ void LScreenDC::SetOrigin(int x, int y)
 		d->v->ConstrainClippingRegion(NULL);
 	}
 	
-	OriginX = x - d->Client.x1;
-	OriginY = y - d->Client.y1;
+	OriginX = x;
+	OriginY = y;
 
 	#if LOGGING
 	printf("%p.SetOrigin=%i,%i (%i,%i) = %i,%i\n",
@@ -147,8 +138,10 @@ void LScreenDC::SetOrigin(int x, int y)
 		d->Client.y1 - OriginY);
 	#endif
 	
+	/*
 	d->v->SetOrigin( d->Client.x1 - OriginX,
 					 d->Client.y1 - OriginY);
+	*/
 	
 	if (d->Client.Valid())
 	{
@@ -159,6 +152,15 @@ void LScreenDC::SetOrigin(int x, int y)
 	}
 }
 
+bool LScreenDC::GetClient(LRect *c)
+{
+	if (!c)
+		return false;
+
+	*c = d->Client;
+	return true;
+}
+
 void LScreenDC::SetClient(LRect *c)
 {
 	VIEW_CHECK()
@@ -167,13 +169,10 @@ void LScreenDC::SetClient(LRect *c)
 	{
 		d->Client = *c;
 
-		OriginX += d->Client.x1;
-		OriginY += d->Client.y1;
 		#if LOGGING
 		printf("SetClient(%s)\n", d->Client.GetStr());
 		#endif
-		d->v->SetOrigin(OriginX, OriginY);
-
+		d->v->SetOrigin(d->Client.x1, d->Client.y1);
 		auto clp = d->Client.ZeroTranslate();
 		// clp.Offset(OriginX, OriginY);
 		d->v->ClipToRect(clp);
@@ -187,9 +186,9 @@ void LScreenDC::SetClient(LRect *c)
 	}
 	else
 	{
-	    d->v->ConstrainClippingRegion(NULL);
-		d->v->SetOrigin(OriginX = 0, OriginX = 0);
 		d->Client.ZOff(-1, -1);
+	    d->v->ConstrainClippingRegion(NULL);
+		d->v->SetOrigin(0, 0);
 
 	    #if LOGGING
 		printf("SetClient()\n");
