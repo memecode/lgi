@@ -131,8 +131,17 @@ struct LBView : public Parent
 
 	void AttachedToWindow()
 	{
-		if (d)
-			d->View->OnCreate();
+		if (!d)
+			return;
+		
+		// The view position may have been set before attachment. In which case
+		// the OS view's position isn't up to date. Therefor by setting it here
+		// it's up to date.
+		auto Pos = d->View->Pos;
+		Parent::ResizeTo(Pos.X(), Pos.Y());
+		Parent::MoveTo(Pos.x1, Pos.y1);
+		
+		d->View->OnCreate();
 	}
 	
 	LKey ConvertKey(const char *bytes, int32 numBytes)
@@ -699,9 +708,11 @@ bool LView::SetPos(LRect &p, bool Repaint)
 			d->Hnd->MoveTo(Pos.x1, Pos.y1);
 			lck.Unlock();
 		}
-
+		// else printf("%s:%i - SetPos no lock: d->Hnd=%p.\n", _FL, d->Hnd);
+		
 		OnPosChange();
 	}
+	// else printf("%s:%i - SetPos noop: d->Hnd=%p.\n", _FL, d->Hnd);
 
 	return true;
 }

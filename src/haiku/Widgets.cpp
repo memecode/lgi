@@ -139,6 +139,11 @@ void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 	d->ModalStatus = -1;
 	
 	auto Parent = GetParent();
+	while (	Parent &&
+			Parent->GetParent() &&
+			!dynamic_cast<LWindow*>(Parent))
+		Parent = Parent->GetParent();
+	
 	if (Parent)
 		MoveSameScreen(Parent);
 
@@ -161,9 +166,15 @@ void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 		*/
 		
 		auto Wnd = dynamic_cast<LWindow*>(Parent);
-		LAssert(Wnd);
 		if (Wnd)
+		{
 			SetModalParent(Wnd);
+		}
+		else
+		{
+			LgiTrace("%s:%i - Parent(%s) not a LWindow.\n", _FL, Parent->GetClass());
+			LAssert(!"Parent not a LWindow");
+		}
 	}
 	else LgiTrace("%s:%i - Can't set parent for modal.\n", _FL);
 

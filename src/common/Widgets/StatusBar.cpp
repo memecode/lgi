@@ -199,6 +199,8 @@ bool LStatusPane::Name(const char *n)
 {
 	bool Status = false;
 
+	GetWindow(); // This searchs for a parent before we lock...
+
 	if (Lock(_FL))
 	{
 		auto l = Name();

@@ -1244,23 +1244,19 @@ bool LToolBar::Pour(LRegion &r)
 		if (But->Visible())
 		{
 			int Tx = 0, Ty = 0;
-			LToolButton *Btn = dynamic_cast<LToolButton*>(But);
+			auto Btn = dynamic_cast<LToolButton*>(But);
 
-			if (d->ShowTextLabels())
+			if (d->ShowTextLabels() && Btn)
 			{
-				if (Btn)
+				if (Btn->d->Text.Length() == 0)
 				{
-					if (Btn->d->Text.Length() == 0)
-					{
-						Btn->Layout();
-					}
-					
-					for (int i=0; i<Btn->d->Text.Length(); i++)
-					{
-						LDisplayString *Ds = Btn->d->Text[i];
-						Tx = MAX(Ds->X() + 4, Tx);
-						Ty += Ds->Y();
-					}
+					Btn->Layout();
+				}
+				
+				for (auto Ds: Btn->d->Text)
+				{
+					Tx = MAX(Ds->X() + 4, Tx);
+					Ty += Ds->Y();
 				}
 			}
 
@@ -1306,6 +1302,7 @@ bool LToolBar::Pour(LRegion &r)
 				MaxDim = MAX(MaxDim, ButPos.Y());
 
 			ButPos.Offset(PosX - ButPos.x1, PosY - ButPos.y1);
+			// printf("MaxDim=%i, ButPos=%s, PosX=%i\n", MaxDim, ButPos.GetStr(), PosX);
 
 			if (But->GetId() == IDM_BREAK)
 			{
@@ -1328,7 +1325,7 @@ bool LToolBar::Pour(LRegion &r)
 				else
 					PosX = ButPos.x2 + BorderSpacing;
 			}
-
+			
 			But->SetPos(ButPos);
 		}
 		else

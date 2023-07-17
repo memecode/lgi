@@ -270,6 +270,22 @@ bool LView::CommonEvents(LMessage::Result &result, LMessage *Msg)
 			OnPulse();
 			break;
 		}
+		case M_SET_CTRL_NAME:
+		{
+			LAutoPtr<LString> s((LString*)Msg->B());
+			SetCtrlName(Msg->A(), s ? s->Get() : NULL);
+			break;
+		}
+		case M_SET_CTRL_ENABLE:
+		{
+			SetCtrlEnabled(Msg->A(), Msg->B());
+			break;
+		}
+		case M_SET_CTRL_VISIBLE:
+		{
+			SetCtrlVisible(Msg->A(), Msg->B());
+			break;
+		}
 		default:
 			return false;
 	}
@@ -1891,9 +1907,11 @@ void LView::SetCtrlName(int Id, const char *s)
 	{
 		if (auto w = FindControl(Id))
 			w->Name(s);
+		// else printf("LView::SetCtrlName: No ctrl %i.\n", Id);
 	}
 	else
 	{
+		// printf("LView::SetCtrlName: Sending M_SET_CTRL_NAME %i.\n", Id);
 		PostEvent(	M_SET_CTRL_NAME,
 					(LMessage::Param)Id,
 					(LMessage::Param)new LString(s));
@@ -2212,9 +2230,7 @@ bool LView::InThread()
 
 		HWND Hnd = _View;
 		for (LViewI *p = GetParent(); p && !Hnd; p = p->GetParent())
-		{
 			Hnd = p->Handle();
-		}
 		
 		auto CurThreadId = GetCurrentThreadId();
 		auto GuiThreadId = LAppInst->GetGuiThreadId();
@@ -2223,8 +2239,17 @@ bool LView::InThread()
 	
 	#elif defined(HAIKU)
 
-		return true;
-
+		auto h = Handle();
+		if (!h)
+			return true;
+		
+		auto looper = h->Looper();
+		if (!looper)
+			return true;
+			
+		auto CurThreadId = GetCurrentThreadId();
+		return CurThreadId == looper->Thread();
+		
 	#else
 
 		OsThreadId Me = GetCurrentThreadId();
