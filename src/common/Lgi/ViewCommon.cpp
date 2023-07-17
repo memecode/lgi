@@ -273,17 +273,17 @@ bool LView::CommonEvents(LMessage::Result &result, LMessage *Msg)
 		case M_SET_CTRL_NAME:
 		{
 			LAutoPtr<LString> s((LString*)Msg->B());
-			SetCtrlName(Msg->A(), s ? s->Get() : NULL);
+			SetCtrlName((int)Msg->A(), s ? s->Get() : NULL);
 			break;
 		}
 		case M_SET_CTRL_ENABLE:
 		{
-			SetCtrlEnabled(Msg->A(), Msg->B());
+			SetCtrlEnabled((int)Msg->A(), Msg->B()!=0);
 			break;
 		}
 		case M_SET_CTRL_VISIBLE:
 		{
-			SetCtrlVisible(Msg->A(), Msg->B());
+			SetCtrlVisible((int)Msg->A(), Msg->B()!=0);
 			break;
 		}
 		default:
