@@ -67,14 +67,14 @@ struct Block : public LRect
 	}
 };
 
-struct GDisplayStringPriv
+struct LDisplayStringPriv
 {
 	LDisplayString *Ds;
 	LArray<Block> Blocks;
 	bool Debug;
 	int LastTabOffset;
 
-	GDisplayStringPriv(LDisplayString *str) : Ds(str)
+	LDisplayStringPriv(LDisplayString *str) : Ds(str)
 	{
 		#if 0
 		Debug = Stristr(Ds->Str, "(Jumping).wma") != 0;
@@ -84,7 +84,7 @@ struct GDisplayStringPriv
 		LastTabOffset = -1;
 	}
 
-	~GDisplayStringPriv()
+	~LDisplayStringPriv()
 	{
 	}
 
@@ -313,23 +313,18 @@ LDisplayString::LDisplayString(LFont *f, const char *s, ssize_t l, LSurface *pdc
 {
 	pDC = pdc;
 	Font = f;
+	LaidOut = 0;
+	AppendDots = 0;
+	VisibleTab = 0;
 	
 	#if LGI_DSP_STR_CACHE
 	StringConvert(Wide, WideWords, s, l);
 	#endif
 	StringConvert(Str, StrWords, s, l);
 	
-	x = y = 0;
-	xf = 0;
-	yf = 0;
-	DrawOffsetF = 0;
-	LaidOut = 0;
-	AppendDots = 0;
-	VisibleTab = 0;
-	
 	#if defined __GTK_H__
 	
-		d = new GDisplayStringPriv(this);
+		d = new LDisplayStringPriv(this);
 		if (Font && Str)
 		{
 			LAssert(StrWords >= 0);
@@ -359,23 +354,18 @@ LDisplayString::LDisplayString(LFont *f, const char16 *s, ssize_t l, LSurface *p
 {
 	pDC = pdc;
 	Font = f;
+	LaidOut = 0;
+	AppendDots = 0;
+	VisibleTab = 0;
 
 	#if LGI_DSP_STR_CACHE
 	StringConvert(Wide, WideWords, s, l);
 	#endif
 	StringConvert(Str, StrWords, s, l);
 	
-	x = y = 0;
-	xf = 0;
-	yf = 0;
-	DrawOffsetF = 0;
-	LaidOut = 0;
-	AppendDots = 0;
-	VisibleTab = 0;
-
 	#if defined __GTK_H__
 	
-		d = new GDisplayStringPriv(this);
+		d = new LDisplayStringPriv(this);
 		if (Font && Str && StrWords > 0)
 			d->Create(pDC ? pDC->GetPrintContext() : NULL);
 	
@@ -403,10 +393,6 @@ LDisplayString::LDisplayString(LFont *f, const uint32_t *s, ssize_t l, LSurface 
 {
 	pDC = pdc;
 	Font = f;
-	x = y = 0;
-	xf = 0;
-	yf = 0;
-	DrawOffsetF = 0;
 	LaidOut = 0;
 	AppendDots = 0;
 	VisibleTab = 0;
@@ -417,7 +403,7 @@ LDisplayString::LDisplayString(LFont *f, const uint32_t *s, ssize_t l, LSurface 
 	StringConvert(Str, StrWords, s, l);
 
 	#if defined __GTK_H__
-	d = new GDisplayStringPriv(this);
+	d = new LDisplayStringPriv(this);
 	if (Font && Str && StrWords > 0)
 		d->Create(pDC ? pDC->GetPrintContext() : NULL);
 	#endif
@@ -1738,38 +1724,50 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 			return;
 		}
 		
+		int OriginX = 0, OriginY = 0;
+		pDC->GetOrigin(OriginX, OriginY);		
+		
 		font_height height = {0};
 		fnt->GetHeight(&height);
 
-		/*
+		#if 0
+		_debug = false;
+		for (auto &i: Info)
+		{
+			if (Stristr(i.Str, "Built: "))
+				_debug = true;
+		}		
 		if (_debug)
-			printf("	trans=%i height=%g,%g,%g\n",
-				Font->Transparent(),
-				height.ascent, height.descent, height.leading);
-		*/
-
-		if (!Font->Transparent())
-		{			
-			view->SetHighColor(Font->Back());
-			if (r)
-				view->FillRect(*r);
-			else
-				view->FillRect(BRect(px, py, px+x, py+y));
-		}
+			printf("	trans=%i height=%g,%g,%g\n", Font->Transparent(), height.ascent, height.descent, height.leading);
+		#endif
 
 		auto locked = view->LockLooper();
+
+		if (!Font->Transparent())
+		{
+			view->SetHighColor(Font->Back());
+			LRect clip;			
+			if (r)
+				clip = *r;
+			else
+				clip.Set(px, py, px+x, py+y);
+			clip.Offset(-OriginX, -OriginY);
+			view->FillRect(clip);
+		}
+
 		view->SetFont(fnt);
 		view->SetHighColor(Font->Fore());
 
-		int cx = px;
+		int cx = px - OriginX;
+		int cy = py - OriginY;
 		for (auto &i: Info)
 		{
-			/*
+			#if 0
 			if (_debug)
-				printf("	info=%.*s c=%i,%i\n", i.Len, i.Str, cx, py);
-			*/
+				printf("	info=%.*s @ %i,%i\n", i.Len, i.Str, cx, cy);
+			#endif
 				
-			view->DrawString(i.Str, i.Len, BPoint(cx, py + height.ascent));
+			view->DrawString(i.Str, i.Len, BPoint(cx, cy + height.ascent));
 			
 			cx += i.X;
 		}

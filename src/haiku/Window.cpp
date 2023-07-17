@@ -233,6 +233,12 @@ bool LWindow::SetModalParent(LWindow *p)
 		if (d->ModalParent ||
 			p->GetModalChild())
 		{
+			printf("%s:%i - this=%s p=%s d->ModalParent=%s p->GetModalChild()=%s\n",
+				_FL,
+				GetClass(),
+				p?p->GetClass():NULL,
+				d->ModalParent?d->ModalParent->GetClass():NULL,
+				p->GetModalChild()?p->GetModalChild()->GetClass():NULL);
 			LAssert(!"Already set!");
 			return false;
 		}
@@ -824,15 +830,20 @@ LRect &LWindow::GetClient(bool ClientSpace)
 	LLocker lck(WindowHandle(), _FL);
 	if (lck.Lock())
 	{
-		auto br = Handle()->Bounds();
-		r = br;
+		LRect br = Handle()->Bounds();
+		if (br.Valid())
+		{
+			r = br;
 		
-		auto frm = d->Frame();
-		frm.OffsetBy(-frm.left, -frm.top);
-		// printf("Frame=%s Bounds=%s r=%s\n", ToString(frm).Get(), ToString(br).Get(), r.GetStr());
+			auto frm = d->Frame();
+			frm.OffsetBy(-frm.left, -frm.top);
+			// printf("%s:%i - LWindow::GetClient: Frame=%s Bounds=%s r=%s\n", _FL, ToString(frm).Get(), br.GetStr(), r.GetStr());
+		}
+		// else printf("%s:%i - LWindow::GetClient: Bounds not valid.\n", _FL);
 		
 		lck.Unlock();
 	}
+	// else printf("%s:%i - LWindow::GetClient: no lock.\n", _FL);
 	
 	return r;
 }

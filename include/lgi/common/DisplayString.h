@@ -33,11 +33,11 @@
 class LgiClass LDisplayString
 {
 protected:
-	LSurface *pDC;
-	LFont *Font;
-	uint32_t x, y;
-	int xf, yf;
-	int DrawOffsetF;
+	LSurface *pDC = NULL;
+	LFont *Font = NULL;
+	uint32_t x = 0, y = 0;
+	int xf = 0, yf = 0;
+	int DrawOffsetF = 0;
 	
 	// Flags
 	uint8_t LaidOut : 1;
@@ -47,16 +47,15 @@ protected:
 	/* String data:
 					Str			Wide
 		Windows:	utf-16		utf-16
-	 	MacCarbon:	utf-16		utf-32
 	 	MacCocoa:	utf-16		utf-32
 	 	Gtk3:		utf-8		utf-32
 	 	Haiku:		utf-8		utf-32
 	*/
-	OsChar *Str;
-	ssize_t StrWords;
+	OsChar *Str = NULL;
+	ssize_t StrWords = 0;
 	#if LGI_DSP_STR_CACHE
-	wchar_t *Wide;
-	ssize_t WideWords;
+	wchar_t *Wide = NULL;
+	ssize_t WideWords = 0;
 	#endif
 	
 	#if defined(LGI_SDL)
@@ -65,8 +64,8 @@ protected:
 	
 	#elif defined(__GTK_H__)
 
-	struct GDisplayStringPriv *d;
-	friend struct GDisplayStringPriv;
+	struct LDisplayStringPriv *d;
+	friend struct LDisplayStringPriv;
 	
 	#elif defined(MAC)
 	

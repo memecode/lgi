@@ -136,6 +136,8 @@ bool LDialog::OnRequestClose(bool OsClose)
 
 void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 {
+	LAssert(!d->IsModal); // Don't call DoModal twice!
+	
 	d->ModalStatus = -1;
 	
 	auto Parent = GetParent();

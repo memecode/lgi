@@ -252,6 +252,7 @@ void LMemDC::StretchBlt(LRect *d, LSurface *Src, LRect *s)
 
 void LMemDC::SetOrigin(int x, int y)
 {
+	LSurface::SetOrigin(x, y);
 }
 
 bool LMemDC::SupportsAlphaCompositing()

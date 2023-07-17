@@ -112,7 +112,7 @@ static char DefaultCss[] = {
 "menu            { margin: 1.12em 0px; }"
 "h5              { font-size: .83em; margin: 1.5em 0px; }"
 "h6              { font-size: .75em; margin: 1.67em 0px; }"
-"strike, del		{ text-decoration: line-through; }"
+"strike, del     { text-decoration: line-through; }"
 "hr              { border: 1px inset; }"
 "center          { text-align: center; }"
 "h1, h2, h3, h4,"
