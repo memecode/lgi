@@ -4953,22 +4953,13 @@ int LgiMain(OsAppArguments &AppArgs)
 	{
 		a.AppWnd = new AppWnd;
 
-		/*
 		LClipBoard c(a.AppWnd);
-		
 		LArray<LClipBoard::FormatType> Formats;
 		if (c.EnumFormats(Formats))
 		{
-			for (auto f: Formats)
-				printf("f:%s\n", f.Get());
+			for (auto s: Formats)
+				LgiTrace("Fmt:%s\n", s.Get());
 		}
-		
-		c.Files([](auto files, auto err)
-		{
-			for (auto f: files)
-				printf("File:%s\n", f.Get());
-		});
-		*/
 
 		a.Run();
 	}

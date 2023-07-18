@@ -63,13 +63,13 @@ public:
 		SizeLimit = limit;
 	}
 	
-	void OnCreate()
+	void OnCreate() override
 	{
 		TView::OnCreate();
 		TView::SetPulse(1000);
 	}
 
-	void OnPulse()
+	void OnPulse() override
 	{
 		ProcessTxt();
 		
@@ -129,7 +129,7 @@ public:
 			TView::SetCaret(TView::Size, false);
 	}
 
-	int64 SetSize(int64 s)
+	int64 SetSize(int64 s) override
 	{
 		TView::Name(0);
 		return 0;
@@ -140,7 +140,7 @@ public:
 		return Write(s.Get(), s.Length()) == s.Length();
 	}
 	
-	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0)
+	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0) override
 	{
 		LAutoWString w(Utf8ToWide((char*)Buffer, Size));
 		if (!w)
@@ -165,7 +165,7 @@ public:
 		return Size;
 	}
 
-	LMessage::Result OnEvent(LMessage *m)
+	LMessage::Result OnEvent(LMessage *m) override
 	{
 		if (m->Msg() == M_LOG_TEXT)
 		{

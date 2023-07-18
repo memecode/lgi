@@ -26,7 +26,7 @@ class LgiClass LStream : virtual public LStreamI, virtual public LDom
 public:
 	virtual ~LStream() {}
 
-	const char *GetClass() { return "LStream"; }
+	const char *GetClass() override { return "LStream"; }
 	
 	ssize_t Read(void *Ptr, ssize_t Size, int Flags = 0) override { return 0; }
 	ssize_t Write(const void *Ptr, ssize_t Size, int Flags = 0) override { return 0; }
@@ -209,10 +209,10 @@ public:
 	}
 
 	// LDomI interface:
-	const char *GetClass() { return "LProxyStream"; }
-	bool GetValue(const char *Var, LVariant &Value) { return s->GetValue(Var, Value); }
-	bool SetValue(const char *Var, LVariant &Value) { return s->SetValue(Var, Value); }
-	bool CallMethod(const char *MethodName, LScriptArguments &Args) { return s->CallMethod(MethodName, Args); }
+	const char *GetClass() override { return "LProxyStream"; }
+	bool GetValue(const char *Var, LVariant &Value) override { return s->GetValue(Var, Value); }
+	bool SetValue(const char *Var, LVariant &Value) override { return s->SetValue(Var, Value); }
+	bool CallMethod(const char *MethodName, LScriptArguments &Args) override { return s->CallMethod(MethodName, Args); }
 		
 	// LSsreamI interface:
 	int Open(const char *Str, int Int) override	{ return s->Open(Str, Int); }
