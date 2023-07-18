@@ -957,10 +957,10 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 				Gtk::pango_font_metrics_unref(m);
 
 				#if 1
-				Gtk::PangoFont *fnt = pango_font_map_load_font(Gtk::pango_cairo_font_map_get_default(), EffectiveCtx, d->hFont);
+				auto fnt = pango_font_map_load_font(Gtk::pango_cairo_font_map_get_default(), EffectiveCtx, d->hFont);
 				if (fnt)
 				{
-					Gtk::PangoCoverage *c = Gtk::pango_font_get_coverage(fnt, Gtk::pango_language_get_default());
+					auto c = Gtk::pango_font_get_coverage(fnt, Gtk::pango_language_get_default());
 					if (c)
 					{
 						uint Bytes = (MAX_UNICODE + 1) >> 3;
@@ -968,19 +968,13 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 						{
 							memset(d->GlyphMap, 0, Bytes);
 
-							try
+							for (int i=0; i<MAX_UNICODE; i++)
 							{
-								for (int i=0; i<MAX_UNICODE; i++)
-								{
-									if (pango_coverage_get(c, i))
-										d->GlyphMap[i>>3] |= 1 << (i & 0x7);
-								}
-							}
-							catch (...)
-							{
-								LgiTrace("%s:%i - Glyphmap creation crashed.\n", _FL);
+								if (pango_coverage_get(c, i))
+									d->GlyphMap[i>>3] |= 1 << (i & 0x7);
 							}
 						}
+						
 						Gtk::pango_coverage_unref(c);
 					}
 					

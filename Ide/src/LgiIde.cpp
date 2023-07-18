@@ -3959,13 +3959,17 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 					LString s = Inp->GetStr();
 					LString::Array p = s.SplitDelimit(":,");
 					
-					if (p.Length() == 2)
+					if (p.Length() == 1)
+					{
+						GotoReference(p[0], 1, false, true);
+					}
+					else if (p.Length() > 1)
 					{
 						LString file = p[0];
 						int line = (int)p[1].Int();
 						GotoReference(file, line, false, true);
 					}
-					else LgiMsg(this, "Error: Needs a file name as well.", AppName);
+					else LgiMsg(this, "Error: No filename.", AppName);
 					
 					delete dlg;
 				});

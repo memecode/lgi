@@ -260,9 +260,9 @@ private:
 }	MsgQue;
 
 /////////////////////////////////////////////////////////////////////////////
-LSkinEngine *LApp::SkinEngine = 0;
-LApp *TheApp = 0;
-LMouseHook *LApp::MouseHook = 0;
+LSkinEngine *LApp::SkinEngine = NULL;
+LApp *TheApp = NULL;
+LMouseHook *LApp::MouseHook = NULL;
 
 LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	OsApplication(AppArgs.Args, AppArgs.Arg)
@@ -315,7 +315,11 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	MouseHook = new LMouseHook;
 
 	// Setup the SIGSEGV signal to call the crash handler
-	if (!GetOption("nch"))
+	if (GetOption("nch"))
+	{
+		LgiTrace("Crash handler: disabled.\n");
+	}
+	else
 	{
 		auto programName = "crash-handler";
 		LFile::Path p(LSP_APP_INSTALL);
@@ -348,10 +352,6 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 			LgiTrace("Crash handler: No crash handler '%s' found, SIGSEGV handler not installed.\n",
 				p.GetFull().Get());
 		}
-	}
-	else
-	{
-		LgiTrace("Crash handler: disabled.\n");
 	}
 
 	d->GetConfig();
