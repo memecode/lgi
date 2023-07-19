@@ -4079,8 +4079,39 @@ bool VcFolder::Resolve(const char *Path, LvcResolve Type)
 		case VcGit:
 		{
 			LString a;
-			a.Printf("add \"%s\"", Path);
-			return StartCmd(a, &VcFolder::ParseResolve, new ParseParams(Path));
+			auto local = GetFilePart(Path);
+			LAutoPtr<ParseParams> params(new ParseParams(Path));
+
+			switch (Type)
+			{
+				case ResolveIncoming:
+					a.Printf("checkout --theirs \"%s\"", local.Get());
+					break;
+				case ResolveLocal:
+					a.Printf("checkout --ours \"%s\"", local.Get());
+					break;
+				case ResolveMark:
+					a.Printf("add \"%s\"", local.Get());
+					break;
+				default:
+					OnCmdError(Path, "No resolve type implemented.");
+					return false;
+			}
+
+			if (Type == ResolveIncoming ||
+				Type == ResolveLocal)
+			{
+				// Add the file after the resolution:
+				params->Callback = [this, local](auto str)
+				{
+					LString a;
+					a.Printf("add \"%s\"", local.Get());
+					StartCmd(a, &VcFolder::ParseAddFile);
+					Refresh();
+				};
+			}
+
+			return StartCmd(a, &VcFolder::ParseResolve, params.Release());
 		}
 		case VcHg:
 		{

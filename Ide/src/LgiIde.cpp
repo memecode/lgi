@@ -4958,7 +4958,7 @@ int LgiMain(OsAppArguments &AppArgs)
 		if (c.EnumFormats(Formats))
 		{
 			for (auto s: Formats)
-				LgiTrace("Fmt:%s\n", s.Get());
+				LgiTrace("Fmt:%s\n", c.FmtToStr(s).Get());
 		}
 
 		a.Run();
