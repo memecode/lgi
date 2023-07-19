@@ -185,7 +185,8 @@ void LgiCrashHandler(int Sig)
 		workingDir--;
 		chdir(workingDir);
 		
-		const char *args[] = { CrashHandlerApp, "--pid", pid, NULL };
+		LString pidArg = "--pid";
+		char * const args[] = { CrashHandlerApp, pidArg, pid, NULL };
 		execvp(CrashHandlerApp, args);
 		exit(0);
 	}

@@ -927,7 +927,6 @@ bool StorageKitImpl::Compact(Progress *p, bool Interactive, StorageValidator *va
 	if (p)
 	{
 		p->SetDescription("Adding objects...");
-		LYield();
 	}
 
 	StorageItemImpl *Item = (StorageItemImpl*) GetRoot();
@@ -940,7 +939,6 @@ bool StorageKitImpl::Compact(Progress *p, bool Interactive, StorageValidator *va
 		{
 			p->SetDescription("Sorting objects...");
 			p->SetLimits(0, Blocks.Length()-1);
-			LYield();
 		}
 
 		// sort the blocks
@@ -969,14 +967,12 @@ bool StorageKitImpl::Compact(Progress *p, bool Interactive, StorageValidator *va
 			if (p && Time.DoNow())
 			{
 				p->Value(Sorted.Length());
-				LYield();
 			}
 		}
 
 		if (p)
 		{
 			p->SetDescription("Removing unused space...");
-			LYield();
 		}
 
 		// remove space between blocks
@@ -1012,7 +1008,6 @@ bool StorageKitImpl::Compact(Progress *p, bool Interactive, StorageValidator *va
 			if (p && Time.DoNow())
 			{
 				p->Value(n);
-				LYield();
 			}
 		}
 	}

@@ -1394,7 +1394,6 @@ namespace Storage2
 					if (_Timer.DoNow())
 					{
 						_Ui->Value(_CompactPos);
-						LYield();
 						if (_Ui && _Ui->Cancel())
 						{
 							break;
@@ -1581,7 +1580,6 @@ namespace Storage2
 					if (_Timer.DoNow())
 					{
 						_Ui->Value(_CompactPos);
-						LYield();
 					}
 				}
 			}
@@ -1850,8 +1848,6 @@ bool StorageKitImpl::Compact(Progress *p, bool Interactive, StorageValidator *va
 			}
 
 			d->_Timer.Init(300);
-
-			LYield();
 		}
 
 		#if 1

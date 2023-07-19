@@ -506,7 +506,6 @@ public:
 							LAssert(0);
 						
 						Prog.Value(i);
-						LYield();
 					}
 					Files.DeleteArrays();
 				}
