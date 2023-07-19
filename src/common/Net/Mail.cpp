@@ -2540,21 +2540,21 @@ bool MailPop3::GetSizes(LArray<int64_t> &Sizes)
 
 int MailPop3::Sizeof(int Message)
 {
-	int Size = 0;
-	if (Socket)
-	{
-		sprintf_s(Buffer, sizeof(Buffer), "LIST %i\r\n", Message + 1);
-		VERIFY_RET_VAL(Write(NULL, true));
-		VERIFY_RET_VAL(ReadReply());
+	if (!Socket)
+		return 0;
 
-		char *s = strchr(Buffer, ' ');
+	sprintf_s(Buffer, sizeof(Buffer), "LIST %i\r\n", Message + 1);
+	VERIFY_RET_VAL(Write(NULL, true));
+	VERIFY_RET_VAL(ReadReply());
+
+	int Size = 0;
+	char *s = strchr(Buffer, ' ');
+	if (s)
+	{
+		s = strchr(s+1, ' ');
 		if (s)
 		{
-			s = strchr(s+1, ' ');
-			if (s)
-			{
-				Size = atoi(s);
-			}
+			Size = atoi(s);
 		}
 	}
 
@@ -2563,48 +2563,44 @@ int MailPop3::Sizeof(int Message)
 
 bool MailPop3::Delete(int Message)
 {
-	if (Socket)
-	{
-		sprintf_s(Buffer, sizeof(Buffer), "DELE %i\r\n", Message + 1);
-		VERIFY_RET_VAL(Write(0, true));
-		VERIFY_RET_VAL(ReadReply());
+	if (!Socket)
+		return false;
 
-		return true;
-	}
+	sprintf_s(Buffer, sizeof(Buffer), "DELE %i\r\n", Message + 1);
+	VERIFY_RET_VAL(Write(0, true));
+	VERIFY_RET_VAL(ReadReply());
 
-	return false;
+	return true;
 }
 
 bool MailPop3::GetUid(int Index, char *Id, int IdLen)
 {
-	if (Socket && Id)
-	{
-		sprintf_s(Buffer, sizeof(Buffer), "UIDL %i\r\n", Index + 1);
-		VERIFY_RET_VAL(Write(0, true));
-		VERIFY_RET_VAL(ReadReply());
+	if (!Socket || !Id)
+		return false;
 
-		char *Space = strchr(Buffer, ' ');
-		if (Space)
+	sprintf_s(Buffer, sizeof(Buffer), "UIDL %i\r\n", Index + 1);
+	VERIFY_RET_VAL(Write(0, true));
+	VERIFY_RET_VAL(ReadReply());
+
+	char *Space = strchr(Buffer, ' ');
+	if (!Space)
+		return false;
+
+	Space = strchr(Space+1, ' ');
+	if (!Space)
+		return false;
+
+	for (char *s = Space+1; *s; s++)
+	{
+		if (*s == '\r' || *s == '\n')
 		{
-			Space = strchr(Space+1, ' ');
-			if (Space)
-			{
-				for (char *s = Space+1; *s; s++)
-				{
-					if (*s == '\r' || *s == '\n')
-					{
-						*s = 0;
-						break;
-					}
-				}
-				
-				strcpy_s(Id, IdLen, Space+1);
-				return true;
-			}
+			*s = 0;
+			break;
 		}
 	}
-
-	return false;
+				
+	strcpy_s(Id, IdLen, Space+1);
+	return true;
 }
 
 bool MailPop3::GetUidList(LString::Array &Id)
@@ -2673,22 +2669,22 @@ LString MailPop3::ReadMultiLineReply()
 
 bool MailPop3::Close()
 {
-	if (Socket)
-	{
-		// logout
-		VERIFY_RET_VAL(Write("QUIT\r\n", true));
-		
-		// 2 sec timeout, we don't really care about the server's response
-		Socket->SetTimeout(2000);
-		ReadReply();
+	if (!Socket)
+		return false;
 
-		if (SocketLock.Lock(_FL))
-		{
-			Socket.Reset(0);
-			SocketLock.Unlock();
-		}
-		Messages = 0;
-		return true;
+	// logout
+	VERIFY_RET_VAL(Write("QUIT\r\n", true));
+		
+	// 2 sec timeout, we don't really care about the server's response
+	Socket->SetTimeout(2000);
+	ReadReply();
+
+	if (SocketLock.Lock(_FL))
+	{
+		Socket.Reset(0);
+		SocketLock.Unlock();
 	}
-	return false;
+	Messages = 0;
+
+	return true;
 }
