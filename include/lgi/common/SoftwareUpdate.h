@@ -39,7 +39,7 @@ public:
 		bool IncBetas = false
 	);
 
-	bool ApplyUpdate(const UpdateInfo *Info, bool DownloadOnly, LViewI *WithUi);
+	void ApplyUpdate(const UpdateInfo *Info, bool DownloadOnly, LViewI *WithUi, std::function<void(bool)> Callback);
 
 	const char *GetErrorMessage();
 };

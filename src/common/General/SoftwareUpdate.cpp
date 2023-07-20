@@ -355,107 +355,175 @@ void LSoftwareUpdate::CheckForUpdate(UpdateCb callback,
 	}
 }
 
-bool LSoftwareUpdate::ApplyUpdate(const UpdateInfo *Info, bool DownloadOnly, LViewI *WithUi)
+class ApplyUpdateState : public LProgressDlg
 {
-	if (!Info || !Info->Uri)
-		return d->SetError(L_ERROR_NO_URI, sNoUpdateUri);
+	LSoftwareUpdatePriv *d;
 
-	LUri Uri(Info->Uri);
-	if (!Uri.sPath)
-		return d->SetError(L_ERROR_URI_ERROR, "No path in URI.");
-
-	char *File = strrchr(Uri.sPath, '/');
-	if (!File) File = Uri.sPath;
-	else File++;
-
-	char Tmp[MAX_PATH_LEN];
-	if (d->TempPath)
-		LMakePath(Tmp, sizeof(Tmp), d->TempPath, File);
-	else
-		LMakePath(Tmp, sizeof(Tmp), LGetSystemPath(LSP_TEMP), File);
-
+	const LSoftwareUpdate::UpdateInfo *Info = NULL;
+	LUri Uri;
 	LFile Local;
-	if (!Local.Open(Tmp, O_WRITE))
-	{
-		d->SetError(L_ERROR_OPENING_TEMP_FILE, "Can't open local temp file.");
-		return false;
-	}
-	Local.SetSize(0);
-
-	LProgressDlg *Dlg = new LProgressDlg;
-	Dlg->SetDescription(LLoadString(L_SOFTUP_DOWNLOADING, "Downloading..."));
-	Dlg->SetType("KiB");
-	Dlg->SetScale(1.0 / 1024.0);
-
+	char *File = NULL;
+	char Tmp[MAX_PATH_LEN];
+	bool ApplyStatus = false;
+	bool DownloadOnly = false;
 	int HttpStatus = 0;
 	int64 Size = 0;
-	LUri Proxy(d->Proxy);
-	LSoftwareUpdatePriv::UpdateDownload Thread(Info, &Uri, &Proxy, &Local, &d->Error, &HttpStatus);
-	while (!Thread.IsExited())
-	{
-		LYield();
-		LSleep(50);
+	LAutoPtr<LSoftwareUpdatePriv::UpdateDownload> Thread;
 
-		if (!Size)
+	std::function<void(bool)> Callback;
+
+public:
+	ApplyUpdateState(LSoftwareUpdatePriv *priv, const LSoftwareUpdate::UpdateInfo *info, LUri uri, bool downloadOnly, std::function<void(bool)> callback) :
+		d(priv),
+		Info(info),
+		Uri(uri),
+		DownloadOnly(downloadOnly),
+		Callback(callback)
+	{
+		File = strrchr(Uri.sPath, '/');
+		if (!File) File = Uri.sPath;
+		else File++;
+
+		if (d->TempPath)
+			LMakePath(Tmp, sizeof(Tmp), d->TempPath, File);
+		else
+			LMakePath(Tmp, sizeof(Tmp), LGetSystemPath(LSP_TEMP), File);
+
+		if (!Local.Open(Tmp, O_WRITE))
 		{
-			if (Thread.Total)
-				Dlg->SetRange(Size = Thread.Total);
+			d->SetError(L_ERROR_OPENING_TEMP_FILE, "Can't open local temp file.");
+			if (Callback) Callback(false);
 		}
 		else
 		{
-			if (Thread.Progress > Dlg->Value())
-				Dlg->Value(Thread.Progress);
+			Local.SetSize(0);
+
+			SetDescription(LLoadString(L_SOFTUP_DOWNLOADING, "Downloading..."));
+			SetType("KiB");
+			SetScale(1.0 / 1024.0);
+
+			LUri Proxy(d->Proxy);
+			
+			if (!Thread.Reset(new LSoftwareUpdatePriv::UpdateDownload(Info, &Uri, &Proxy, &Local, &d->Error, &HttpStatus)))
+			{
+				d->SetError(L_ERROR_NO_MEMORY, "Alloc failed.");
+				if (Callback) Callback(false);
+				Thread.Reset(); // Just bail
+			}
 		}
 	}
-
-	Local.Close();
-	Dlg->EndModeless();
-
-	if (HttpStatus != 200)
+	
+	~ApplyUpdateState()
 	{
-		FileDev->Delete(Tmp);
-		d->SetError(L_ERROR_HTTP_FAILED, sHttpDownloadFailed);
-		return false;
+		if (Callback)
+			Callback(ApplyStatus);
 	}
 
-	if (!DownloadOnly)
+	void OnPulse()
 	{
-		char *Ext = LGetExtension(Tmp);
-		if (Ext)
+		if (Thread)
 		{
-			if (!_stricmp(Ext, "exe"))
+			if (Thread->IsExited())
 			{
-				// Execute to install...
-				LExecute(Tmp);
-				return true;
+				Thread.Reset();
+				AfterThread();
 			}
 			else
 			{
-				// Calculate the local path...
-				char Path[MAX_PATH_LEN];
-				LMakePath(Path, sizeof(Path), LGetExePath(), File);
-
-				if (!_stricmp(Ext, "dll"))
+				if (!Size)
 				{
-					// Copy to local folder...
-					LError Err;
-					if (!FileDev->Copy(Tmp, Path, &Err))
+					if (Thread->Total)
+						SetRange(Size = Thread->Total);
+				}
+				else
+				{
+					if (Thread->Progress > Value())
+						Value(Thread->Progress);
+				}
+			}
+		}
+		else
+		{
+			Quit();
+			return;
+		}
+		
+		LProgressDlg::OnPulse();
+	}
+	
+	void AfterThread()
+	{
+		Local.Close();
+		EndModeless();
+
+		if (HttpStatus != 200)
+		{
+			FileDev->Delete(Tmp);
+			d->SetError(L_ERROR_HTTP_FAILED, sHttpDownloadFailed);
+			return;
+		}
+
+		if (!DownloadOnly)
+		{
+			char *Ext = LGetExtension(Tmp);
+			if (Ext)
+			{
+				if (!_stricmp(Ext, "exe"))
+				{
+					// Execute to install...
+					LExecute(Tmp);
+					ApplyStatus = true;
+					return;
+				}
+				else
+				{
+					// Calculate the local path...
+					char Path[MAX_PATH_LEN];
+					LMakePath(Path, sizeof(Path), LGetExePath(), File);
+
+					if (!_stricmp(Ext, "dll"))
 					{
-						d->SetError(L_ERROR_COPY_FAILED, "Failed to copy file from temp folder to local folder.");
+						// Copy to local folder...
+						LError Err;
+						if (!FileDev->Copy(Tmp, Path, &Err))
+						{
+							d->SetError(L_ERROR_COPY_FAILED, "Failed to copy file from temp folder to local folder.");
+						}
 					}
-				}
-				else if (!_stricmp(Ext, "gz"))
-				{
-					// Unpack to local folder...
-				}
+					else if (!_stricmp(Ext, "gz"))
+					{
+						// Unpack to local folder...
+					}
 
-				// Cleanup
-				FileDev->Delete(Tmp);
+					// Cleanup
+					FileDev->Delete(Tmp);
+				}
 			}
 		}
 	}
+};
 
-	return false;
+void LSoftwareUpdate::ApplyUpdate(	const UpdateInfo *Info,
+									bool DownloadOnly,
+									LViewI *WithUi,
+									std::function<void(bool)> Callback)
+{
+	if (!Info || !Info->Uri)
+	{
+		d->SetError(L_ERROR_NO_URI, sNoUpdateUri);
+		if (Callback) Callback(false);
+		return;
+	}		
+
+	LUri Uri(Info->Uri);
+	if (!Uri.sPath)
+	{
+		d->SetError(L_ERROR_URI_ERROR, "No path in URI.");
+		if (Callback) Callback(false);
+		return;
+	}
+
+	new ApplyUpdateState(d, Info, Uri, DownloadOnly, Callback);
 }
 
 const char *LSoftwareUpdate::GetErrorMessage()
