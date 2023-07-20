@@ -347,7 +347,12 @@ void LItemContainer::OnColumnClick(int Col, LMouse &m)
 
 bool LItemContainer::GetColumnClickInfo(int &Col, LMouse &m)
 {
-	if (ColClick >= 0)
+	if (ColClick < 0)
+	{
+		Col = ColumnAtX(m.x);
+		return true;
+	}
+	else if (ColClick >= 0)
 	{
 		Col = ColClick;
 		m = ColMouse;

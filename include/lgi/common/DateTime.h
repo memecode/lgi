@@ -416,7 +416,7 @@ public:
 };
 
 /// A list of all known timezones.
-extern LTimeZone GTimeZones[];
+extern LTimeZone LTimeZones[];
 
 #ifdef _DEBUG
 LgiFunc bool LDateTime_Test();

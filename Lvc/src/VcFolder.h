@@ -287,6 +287,7 @@ class VcFolder : public LTreeItem
 	bool ParseUpdateSubs(int Result, LString s, ParseParams *Params);
 	bool ParseRemoteFind(int Result, LString s, ParseParams *Params);
 	bool ParseStartBranch(int Result, LString s, ParseParams *Params);
+	bool ParseSelectCommit(int Result, LString s, ParseParams *Params);
 	void DoExpand();
 	
 public:
@@ -336,6 +337,7 @@ public:
 	LString GetFilePart(const char *uri);
 	void FilterCurrentFiles();
 	void GetRemoteUrl(std::function<void(LString)> Callback);
+	void SelectCommit(LWindow *Parent, LString Commit);
 
 	void OnPulse();
 	void OnUpdate(const char *Rev);

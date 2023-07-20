@@ -241,7 +241,7 @@ class BlameUi : public LWindow
 	struct BlameUiPriv *d;
 
 public:
-	BlameUi(AppPriv *priv, VersionCtrl Vc, LString Output);
+	BlameUi(AppPriv *priv, VcFolder *folder, LString Output);
 	~BlameUi();
 };
 

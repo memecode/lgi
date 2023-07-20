@@ -591,6 +591,71 @@ void VcFolder::GetRemoteUrl(std::function<void(LString)> Callback)
 	}
 }
 
+void VcFolder::SelectCommit(LWindow *Parent, LString Commit)
+{
+	bool requireFullMatch = true;
+	if (GetType() == VcGit)
+		requireFullMatch = false;
+
+	// This function find the given commit and selects it such that the diffs are displayed in the file list
+	VcCommit *ExistingMatch = NULL;
+	for (auto c: Log)
+	{
+		char *rev = c->GetRev();
+		bool match = requireFullMatch ? Commit.Equals(rev) : Strstr(rev, Commit.Get()) != NULL;
+		if (match)
+		{
+			ExistingMatch = c;
+			break;
+		}
+	}
+	
+	if (ExistingMatch)
+	{
+		ExistingMatch->Select(true);
+	}
+	else
+	{
+		// If the commit isn't there, it's likely that the log item limit was reached before the commit was
+		// found. In which case we should go get just that commit and add it:
+		switch (GetType())
+		{
+			case VcGit:
+			{
+				LString a;
+				a.Printf("diff %s~ %s", Commit.Get(), Commit.Get());
+				StartCmd(a, &VcFolder::ParseSelectCommit);
+				break;
+			}
+			default:
+			{
+				NoImplementation(_FL);
+				break;
+			}
+		}
+		
+		// if (Parent) LgiMsg(Parent, "The commit '%s' wasn't found", AppName, MB_OK, Commit.Get());
+	}
+}
+
+bool VcFolder::ParseSelectCommit(int Result, LString s, ParseParams *Params)
+{
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			ParseDiff(Result, s, Params);
+			break;
+		}
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+	}
+	
+	return false;
+}
 
 void VcFolder::OnBranchesChange()
 {
@@ -4152,7 +4217,7 @@ bool VcFolder::Resolve(const char *Path, LvcResolve Type)
 
 bool VcFolder::ParseBlame(int Result, LString s, ParseParams *Params)
 {
-	new BlameUi(d, GetType(), s);
+	new BlameUi(d, this, s);
 	return false;
 }
 
