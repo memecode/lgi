@@ -488,13 +488,14 @@ enum LSystemPath
 	///		[Win32] = ~\..\All Users\Application Data
 	///		[Mac] = /System/Library
 	///		[Linux] = /usr
+	///		[Haiku] = /boot/system/data
 	LSP_COMMON_APP_DATA,
 
 	/// User specific application data
 	///		[Win32] = ~\Application Data
 	///		[Mac] = ~/Library
 	///		[Linux] = /usr
-	///		[Haiku] = ~/config (???)
+	///		[Haiku] = ?
 	LSP_USER_APP_DATA,
 
 	/// Machine + user specific application data (probably should not use)
@@ -515,6 +516,7 @@ enum LSystemPath
 	///		[Win]   c:\Program Files
 	///		[Mac]   /Applications
 	///		[Linux] /usr/bin
+	///		[Haiku] = /boot/system/apps
 	LSP_USER_APPS,
 
 	/// The running application's path.
@@ -535,6 +537,7 @@ enum LSystemPath
 	///		[Win32] = ~\Application Data\Roaming\$AppName
 	///		[Mac] = ~/Library/$AppName
 	///		[Linux] = ~/.$AppName
+	///		[Haiku] = ~/settings/$AppName
 	/// Where $AppName = LApp::GetName.
 	/// If the given folder doesn't exist it will be created.
 	LSP_APP_ROOT,

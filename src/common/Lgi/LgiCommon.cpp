@@ -2050,6 +2050,16 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 	#else
 	LString Exe = LGetExeFile();
 	#endif
+	
+	#if HAIKU
+	static LString AppData;
+	if (!AppData)
+	{
+		auto nm = LAppInst->Name();
+		if (nm)
+			AppData.Printf("/boot/system/data/%s", nm);
+	}
+	#endif
 
 	LOG_DEBUG("%s:%i - Exe='%s'\n", _FL, Exe.Get());
 
@@ -2076,11 +2086,14 @@ static void _LFindFile(const char *Name, LString *GStr, LAutoString *AStr)
 			// AppDir support:
 			"../..",
 			"../../usr/share/applications",
-		#elif defined(WIN32)
+		#elif defined(WINDOWS)
 			"../Debug",
 			"../Release",
 			"../../Debug",
 			"../../Release",
+		#elif defined(HAIKU)
+			// hpkg support:
+			AppData.Get(),
 		#endif
 		CurWorking,
 		0

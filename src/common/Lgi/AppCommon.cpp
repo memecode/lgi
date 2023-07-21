@@ -37,13 +37,13 @@ void LApp::CommonCleanup()
 LString LApp::GetConfigPath()
 {
 	#if defined(LINUX)
-	::LFile::Path p(LSP_HOME);
-	p += ".config";
+		LFile::Path p(LSP_HOME);
+		p += ".config";
 	#else
-	::LFile::Path p(LSP_USER_APP_DATA);
-	p += "MemecodeLgi";
-	if (!p.Exists())
-		FileDev->CreateFolder(p);
+		LFile::Path p(LSP_USER_APP_DATA);
+		p += "MemecodeLgi";
+		if (!p.Exists())
+			FileDev->CreateFolder(p);
 	#endif
 
 	if (p.Exists())
