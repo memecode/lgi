@@ -420,6 +420,8 @@ LString LClipBoard::FmtToStr(FormatType Fmt)
 				return "CF_BITMAP";
 			case CF_UNICODETEXT:
 				return "CF_UNICODETEXT";
+			case CF_OEMTEXT:
+				return "CF_OEMTEXT";
 			#ifdef CF_HDROP
 			case CF_HDROP:
 				return "CF_HDROP";
