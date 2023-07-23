@@ -3995,7 +3995,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 			LTextView3 *Doc = FocusEdit();
 			if (Doc)
 			{
-				#if 1
+				#if 0
 				
 					LClipBoard c(this);
 					LArray<LClipBoard::FormatType> Formats;

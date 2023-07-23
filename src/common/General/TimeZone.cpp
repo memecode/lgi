@@ -5,7 +5,7 @@
 
 // From HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Time Zones
 
-LTimeZone GTimeZones[] =
+LTimeZone LTimeZones[] =
 {
 	{-12.00,	"Dateline (Eniwetok, Kwajalein)"},
 	{-11.00,	"Samoa (Midway Island, Samoa)"},
