@@ -70,12 +70,12 @@ public:
 		return true;
 	}
 	
-	bool IsOpen()
+	bool IsOpen() override
 	{
 		return true;
 	}
 	
-	int Close()
+	int Close() override
 	{
 		Sz = Pos = 0;
 		a.Length(0);
@@ -83,22 +83,22 @@ public:
 		return true;
 	}
 	
-	int64 GetSize()
+	int64 GetSize() override
 	{
 		return Sz;
 	}
 	
-	int64 SetSize(int64 Size)
+	int64 SetSize(int64 Size) override
 	{
 		return Sz;
 	}
 	
-	int64 GetPos()
+	int64 GetPos() override
 	{
 		return Pos;
 	}
 	
-	int64 SetPos(int64 p)
+	int64 SetPos(int64 p) override
 	{
 		if (p < 0)
 			p = 0;
@@ -120,7 +120,7 @@ public:
 		return Pos;
 	}
 	
-	ssize_t Read(void *Buffer, ssize_t Size, int Flags = 0)
+	ssize_t Read(void *Buffer, ssize_t Size, int Flags = 0) override
 	{
 		if (Cur >= a.Length() || Size <= 0 || !Buffer)
 			return 0;
@@ -154,14 +154,14 @@ public:
 		return Rd;
 	}
 	
-	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0)
+	ssize_t Write(const void *Buffer, ssize_t Size, int Flags = 0) override
 	{
 		int Wr = 0;
 		LAssert(0);
 		return Wr;
 	}
 	
-	LStreamI *Clone()
+	LStreamI *Clone() override
 	{
 		return new LStreamConcat(*this);
 	}

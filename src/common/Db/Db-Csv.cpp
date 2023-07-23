@@ -111,10 +111,10 @@ public:
 	~SvDb();
 	
 	const char *GetClass() override { return "SvDb"; }
-	bool Connect(const char *Init);
-	bool Disconnect();
-	LDbRecordset *Open(char *Name);
-	LDbRecordset *TableAt(int i);
+	bool Connect(const char *Init) override;
+	bool Disconnect() override;
+	LDbRecordset *Open(char *Name) override;
+	LDbRecordset *TableAt(int i) override;
 	bool Tsv() { return Separator == '\t'; }
 	char GetSep() { return Separator; }
 };

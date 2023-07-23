@@ -37,7 +37,7 @@ public:
 	
 	const char *GetClass() override { return "ImageLoader"; }
 
-	void Value(int64 v)
+	void Value(int64 v) override
 	{
 		Progress::Value(v);
 
@@ -68,7 +68,7 @@ public:
 		return false;
 	}
 
-	LMessage::Result OnEvent(LMessage *Msg)
+	LMessage::Result OnEvent(LMessage *Msg) override
 	{
 		switch (Msg->Msg())
 		{

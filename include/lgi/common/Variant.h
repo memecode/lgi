@@ -119,7 +119,7 @@ protected:
     
         const char *GetClass() override { return "LCustomType.CustomField"; }
 		ssize_t Sizeof();
-		bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
+		bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 	};
 
 public:
@@ -173,9 +173,9 @@ public:
 	
 	// Dom access. However the DOM can be used to access information about the type itself.
 	// Which doesn't need a 'This' pointer.
-	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
-	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
-	bool CallMethod(const char *MethodName, LScriptArguments &Args);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
+	bool CallMethod(const char *MethodName, LScriptArguments &Args) override;
 };
 
 /// A class that can be different types

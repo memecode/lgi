@@ -63,12 +63,12 @@ public:
 
 	const char *GetClass() override { return "GdcGif"; }
 
-	Format GetFormat() { return FmtGif; }
-	int GetCapabilites() { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
-	IoStatus ReadImage(LSurface *pDC, LStream *In);
-	IoStatus WriteImage(LStream *Out, LSurface *pDC);
+	Format GetFormat() override { return FmtGif; }
+	int GetCapabilites() override { return FILTER_CAP_READ | FILTER_CAP_WRITE; }
+	IoStatus ReadImage(LSurface *pDC, LStream *In) override;
+	IoStatus WriteImage(LStream *Out, LSurface *pDC) override;
 
-	bool GetVariant(const char *n, LVariant &v, const char *a)
+	bool GetVariant(const char *n, LVariant &v, const char *a) override
 	{
 		if (!_stricmp(n, LGI_FILTER_TYPE))
 		{
