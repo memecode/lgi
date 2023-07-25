@@ -95,20 +95,25 @@ bool LClipBoard::Html(const char *doc, bool AutoEmpty)
 
 LString LClipBoard::Html()
 {
+	LString r;
 	GdkAtom format = NULL;
 	gsize length = 0;
 	auto buffer = gtk_text_buffer_new(NULL);
-	auto richText = gtk_clipboard_wait_for_rich_text(d->c,
-													buffer,
-													&format,
-													&length);
+	
+	if (gtk_clipboard_wait_is_rich_text_available(d->c, buffer))
+	{	
+		auto richText = gtk_clipboard_wait_for_rich_text(d->c,
+														buffer,
+														&format,
+														&length);
 
-	LString r;
-	if (richText)
-	{
-		r.Set((char*)richText, length);
-		g_free(richText);
+		if (richText)
+		{
+			r.Set((char*)richText, length);
+			g_free(richText);
+		}
 	}
+	
 	g_object_unref(buffer);
 	
 	return r;
