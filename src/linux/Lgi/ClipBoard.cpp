@@ -24,6 +24,7 @@ class LClipBoardPriv
 {
 public:
 	GtkClipboard *c;
+	LString::Array files;
 };
 
 static LAutoPtr<LMemDC> Img;
@@ -453,18 +454,18 @@ void LClipBoard::Files(FilesCb Callback)
 	if (!Callback)
 		return;
 		
-	gtk_clipboard_request_uris (d->c,
-							[](auto clipboard, auto uris, auto data)
-							{
-								LAutoPtr<FilesCb> cb((FilesCb*)data);
-								
-								LString::Array files;
-								for (int i=0; uris[i]; i++)
-									files.Add(uris[i]);
-								
-								(*cb)(files, LString());
-							},
-							new FilesCb(Callback));
+	gtk_clipboard_request_uris(	d->c,
+								[](auto clipboard, auto uris, auto data)
+								{
+									LAutoPtr<FilesCb> cb((FilesCb*)data);
+									
+									LString::Array files;
+									for (int i=0; uris[i]; i++)
+										files.Add(uris[i]);
+									
+									(*cb)(files, LString());
+								},
+								new FilesCb(Callback));
 }
 
 enum FilesDataType
@@ -482,6 +483,26 @@ bool LClipBoard::Files(LString::Array &a, bool AutoEmpty)
 		{ (Gtk::gchar*)"x-special/gnome-copied-files",	0, GnomeCopiedFiles },
 		{ (Gtk::gchar*)"UTF8_STRING", 					0, Utf8String },
 	};
+	
+	d->files = a;
+
+	#if 0
+
+	gtk_clipboard_request_contents(	d->c,
+                                	StrToFmt("x-special/gnome-copied-files"),
+                                	[](	GtkClipboard *clipboard,
+			                             GtkSelectionData *selection_data,
+			                             gpointer data)
+			                        {
+										auto Bytes = gtk_selection_data_get_length(selection_data);
+										auto Data = gtk_selection_data_get_data(selection_data);
+										printf("sel=%.*s\n", (int)Bytes, Data);
+			                        },
+                                	this);
+	
+	return true;
+	
+	#else
 
 	return gtk_clipboard_set_with_data(
 		d->c,
@@ -490,30 +511,77 @@ bool LClipBoard::Files(LString::Array &a, bool AutoEmpty)
 		[](	GtkClipboard *clipboard,
 			GtkSelectionData *selection_data,
 			guint info,
-			gpointer user_data_or_owner)
+			gpointer user_data)
 	   	{
 	   		auto type = (FilesDataType)info;
+			auto cb = (LClipBoard*)user_data;
+			LString data;
+			const char *atom = NULL;
 	   		switch (type)
 	   		{
 	   			case UriList:
 	   			{
+	   				for (auto a: cb->d->files)
+	   				{
+	   					LString f;
+	   					if (LFileExists(a))
+	   						f.Printf("file://%s\n", a.Get());
+	   					else
+	   						printf("%s:%i - File '%s' doesn't exist.\n", _FL, a.Get());
+	   					data += f;
+	   				}
+	   				atom = "text/uri-list";
 	   				break;
 	   			}
 	   			case GnomeCopiedFiles:
 	   			{
+	   				data = "copy";
+	   				for (auto a: cb->d->files)
+	   				{
+	   					LString f;
+	   					if (LFileExists(a))
+	   						f.Printf("\nfile://%s", a.Get());
+	   					else
+	   						printf("%s:%i - File '%s' doesn't exist.\n", _FL, a.Get());
+	   					data += f;
+	   				}
+
+	   				atom = "x-special/gnome-copied-files";
 	   				break;
 	   			}
 	   			case Utf8String:
 	   			{
+	   				data = LString("\n").Join(cb->d->files);
+	   				atom = "UTF8_STRING";
+	   				break;
+	   			}
+	   			default:
+	   			{
+	   				LAssert(!"Unexpected type.");
 	   				break;
 	   			}
 	   		}
+
+			if (data && atom)
+			{
+   				// printf("data='%s'\n", data.Get());
+   				gtk_selection_data_set(	selection_data,
+					   					StrToFmt(atom),
+										8,
+										(const guchar*) data.Get(),
+										data.Length());
+			}
+			else printf("%s:%i - No data=%p or atom=%p\n", _FL, data.Get(), atom);
 	   	},
 	   	[](	GtkClipboard *clipboard,
-		   	gpointer user_data_or_owner)
+		   	gpointer user_data)
 		{
+			auto cb = (LClipBoard*)user_data;
+			cb->Empty();
 		},
-		NULL);		
+		this);
+		
+	#endif
 }
 
 void LClipBoard::Binary(FormatType Format, BinaryCb Callback)
