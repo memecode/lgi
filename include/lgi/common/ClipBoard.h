@@ -73,6 +73,8 @@ public:
 	#elif defined(LINUX)
 		void FreeImage(unsigned char *pixels);
 	#endif
+
+	static bool UnitTests();
 };
 
 #ifdef __OBJC__

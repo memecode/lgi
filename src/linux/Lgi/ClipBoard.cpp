@@ -12,7 +12,7 @@ using namespace Gtk;
 
 struct ClipData : public LMutex
 {
-	::LVariant v[VAR_COUNT];
+	LVariant v[VAR_COUNT];
 	
 	ClipData() : LMutex("ClipData")
 	{

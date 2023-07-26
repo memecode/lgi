@@ -143,6 +143,7 @@ Source =	src/linux/Lgi/Window.cpp \
 			src/common/Lgi/DataDlg.cpp \
 			src/common/Lgi/CssTools.cpp \
 			src/common/Lgi/Css.cpp \
+			src/common/Lgi/ClipBoardCommon.cpp \
 			src/common/Lgi/AppCommon.cpp \
 			src/common/Lgi/Alert.cpp \
 			src/common/Hash/sha1/sha1.c \

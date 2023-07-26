@@ -4952,15 +4952,6 @@ int LgiMain(OsAppArguments &AppArgs)
 	if (a.IsOk())
 	{
 		a.AppWnd = new AppWnd;
-
-		LClipBoard c(a.AppWnd);
-		LArray<LClipBoard::FormatType> Formats;
-		if (c.EnumFormats(Formats))
-		{
-			for (auto s: Formats)
-				LgiTrace("Fmt:%s\n", c.FmtToStr(s).Get());
-		}
-
 		a.Run();
 	}
 
