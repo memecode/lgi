@@ -494,6 +494,9 @@
     <ClCompile Include="..\src\common\Gdc2\Rect.cpp">
       <Filter>Source Files\Graphics\Rect/Region</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\common\Lgi\ClipBoardCommon.cpp">
+      <Filter>Source Files\General\Clipboard</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\lgi\common\About.h">

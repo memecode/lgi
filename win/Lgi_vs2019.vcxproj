@@ -251,6 +251,7 @@
     <ClCompile Include="..\src\common\General\DateTime.cpp" />
     <ClCompile Include="..\src\common\Hash\md5\md5.c" />
     <ClCompile Include="..\src\common\Hash\sha1\sha1.c" />
+    <ClCompile Include="..\src\common\Lgi\ClipBoardCommon.cpp" />
     <ClCompile Include="..\src\common\Net\Base64.cpp" />
     <ClCompile Include="..\src\common\Net\Uri.cpp" />
     <ClCompile Include="..\src\common\Net\Net.cpp" />
