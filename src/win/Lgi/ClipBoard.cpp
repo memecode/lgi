@@ -560,7 +560,7 @@ ssize_t StartOfElement(LString &s, const char *elem)
 		return -1;
 	LString e;
 	e.Printf("</%s", elem);
-	return s.Find(e);
+	return s.RFind(e);
 }
 
 bool LClipBoard::Html(const char *Doc, bool AutoEmpty)
