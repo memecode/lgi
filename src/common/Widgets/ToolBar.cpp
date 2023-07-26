@@ -724,7 +724,17 @@ void LToolButton::OnPaint(LSurface *pDC)
 		}
 		else if (!BackImg)
 		{
-			Tools.PaintContent(pDC, p);
+			if (Hilight)
+			{
+				// Ideally PaintContent would handle having an overlay of hilight colour... but it
+				// doesn't so... this is a hack to make it look correct in the general non-skinned case.
+				pDC->Colour(cBack);
+				pDC->Rectangle(&p);
+			}
+			else
+			{				
+				Tools.PaintContent(pDC, p);
+			}
 		}
 
 		// Text
@@ -738,16 +748,16 @@ void LToolButton::OnPaint(LSurface *pDC)
 			if (d->Text.Length())
 			{
 				// Write each word centered on a different line
-				int Ty = Down + Par->d->By + 2;
-				LColour a = Tools.GetFore();
-				LColour b = Tools.GetBack();
+				auto Ty = Down + Par->d->By + 2;
+				auto a = Tools.GetFore();
+				auto b = Tools.GetBack();
 				if (!e)
 					a = b.Mix(a);
 
 				Par->d->Font->Colour(a, b);
 				for (int i=0; i<d->Text.Length(); i++)
 				{
-					LDisplayString *Ds = d->Text[i];
+					auto Ds = d->Text[i];
 					Ds->Draw(pDC, Down + ((X()-Ds->X())/2), Ty);
 					Ty += Ds->Y();
 				}
