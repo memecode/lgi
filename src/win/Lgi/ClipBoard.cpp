@@ -474,11 +474,8 @@ bool LClipBoard::EnumFormats(LArray<FormatType> &Formats)
 {
 	UINT Idx = 0;
 	UINT Fmt;
-	while (Fmt = EnumClipboardFormats(Idx))
-	{
+	while (Fmt = EnumClipboardFormats(Idx++))
 		Formats.Add(Fmt);
-		Idx++;
-	}
 	return Formats.Length() > 0;
 }
 
@@ -486,7 +483,6 @@ bool LClipBoard::Empty()
 {
 	d->Utf8.Empty();
 	d->Wide.Reset();
-
 	return EmptyClipboard() != 0;
 }
 
@@ -544,30 +540,83 @@ char16 *LClipBoard::TextW()
 #define CF_HTML RegisterClipboardFormatA("HTML Format")
 #endif
 
+ssize_t EndOfElement(LString &s, const char *elem)
+{
+	if (!s.Get())
+		return -1;
+	LString e;
+	e.Printf("<%s", elem);
+	auto pos = s.Find(e);
+	if (pos < 0)
+		return -1;
+	while (pos < (ssize_t)s.Length() && s(pos) != '>')
+		pos++;
+	return s(pos) == '>' ? pos+1 : -1;
+}
+
+ssize_t StartOfElement(LString &s, const char *elem)
+{
+	if (!s.Get())
+		return -1;
+	LString e;
+	e.Printf("</%s", elem);
+	return s.Find(e);
+}
+
 bool LClipBoard::Html(const char *Doc, bool AutoEmpty)
 {
 	if (!Doc)
 		return false;
 
+	// Does 'Doc' have <html> element wrapper?
+	LString content;
+	auto hasHtml = Stristr(Doc, "<html");
+	if (hasHtml)
+		content = Doc;
+	else
+		content.Printf("<html><body>\n%s\n</body></html>", Doc);
+
 	LString s;
-	s.Printf("Version:0.9\n"
-			"StartHTML:000000\n"
-			"EndHTML:000000\n"
-			"<!DOCTYPE>");
-	auto Start = s.Length();
-	s += Doc;
-	auto End = s.Length();
-	auto p = s.Split("000000", 2);
-	if (p.Length() != 3)
-		return false;
+	s.Printf("Version:0.9\r\n"
+			"StartHTML:");
+	auto startIdx = s.Length();
+	s += "00000000\r\nEndHTML:";
+	auto endIdx = s.Length();
+	s += "00000000\r\nStartFragment:";
+	auto fragmentStartIdx = s.Length();
+	s += "00000000\r\nStartEnd:";
+	auto fragmentEndIdx = s.Length();
+	s += "00000000\r\n";
+	auto contentStart = s.Length();
+	auto fragmentStart = contentStart;
+	s += content;
+	auto contentEnd = s.Length();
+	auto fragmentEnd = contentEnd;
 
-	LString n;
-	n.Printf("%06i", (int)Start);
-	s = p[0] + n;
-	n.Printf("%06i", (int)End);
-	s += p[1] + n + p[2];
+	ssize_t pos;
+	if ((pos = EndOfElement(s, "body")) >= 0)
+		fragmentStart = pos;
+	if ((pos = EndOfElement(s, "html")) >= 0)
+		fragmentStart = pos;
 
-	auto Len = Strlen(Doc);
+	if ((pos = StartOfElement(s, "body")) >= 0)
+		fragmentEnd = pos;
+	if ((pos = StartOfElement(s, "html")) >= 0)
+		fragmentEnd = pos;
+
+	auto setIndex = [&s](size_t placeholder, size_t contentIdx)
+	{
+		LString n;
+		n.Printf("%08i", (int)contentIdx);
+		memcpy(s.Get() + placeholder, n.Get(), n.Length());
+	};
+
+	setIndex(startIdx, contentStart);
+	setIndex(endIdx, contentEnd);
+	setIndex(fragmentStartIdx, fragmentStart);
+	setIndex(fragmentEndIdx, fragmentEnd);
+
+	// LgiTrace("html->clip='%s'\n", s.Get());
 	return Binary(CF_HTML, (uchar*) s.Get(), s.Length(), AutoEmpty);
 }
 
@@ -593,13 +642,17 @@ LString LClipBoard::Html()
 			Start = (ssize_t)p[1].Int();
 		else if (p[0].Equals("EndHTML"))
 			End = (ssize_t)p[1].Int();
+		
+		if (Start >= 0 && End >= 0)
+			break;
 	}
 	if (Start <= 0 || End <= 0)
 		return false;
 	
-	return Txt(Start, End).Strip();
+	// LgiTrace("Txt='%s'\n", Txt.Get());
+	auto Content = Txt(Start, End);
+	return Content.Strip();
 }
-
 
 // Bitmap
 bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)

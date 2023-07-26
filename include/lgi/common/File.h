@@ -588,6 +588,13 @@ public:
 			PopLast();
 			return *this;
 		}
+
+		Path operator / (LString seg)
+		{
+			Path p(*this);
+			p.Add(seg);
+			return p;
+		}
 		
 		operator const char *()
 		{
