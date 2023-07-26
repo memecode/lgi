@@ -664,6 +664,9 @@ bool LIsRelativePath(const char *Path)
 
 	if (*Path == '.')
 		return true;
+	
+	if (*Path == '~' && (!Path[1] || Path[1] == DIR_CHAR))
+		return false;
 
 	#ifdef WIN32
 	if (IsAlpha(Path[0]) && Path[1] == ':') // Drive letter path

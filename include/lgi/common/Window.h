@@ -92,7 +92,6 @@ protected:
 	/// The menu on the window
 	LMenu *Menu = NULL;
 
-	void SetChildDialog(LDialog *Dlg);
 	void SetDragHandlers(bool On);
 	
 	/// Haiku: This shuts down the window's thread cleanly.
@@ -295,14 +294,18 @@ public:
 
 	#endif
 
+	#if HAIKU || MAC
+
+		LWindow *GetModalChild();
+		bool SetModalChild(LWindow *dlg);
+
+	#endif
+	
 	#if HAIKU
 	
 		LWindow *GetModalParent();
 		bool SetModalParent(LWindow *dlg);
 
-		LWindow *GetModalChild();
-		bool SetModalChild(LWindow *dlg);
-	
 	#elif defined(LGI_SDL)
 
 		virtual bool PushWindow(LWindow *v);

@@ -879,7 +879,14 @@ void LPopup::Visible(bool i)
 			{
 				if (i)
 				{
+					auto parent = GetParent();
+					auto wnd = parent ? parent->GetWindow() : NULL;
+
+					if (wnd)
+						Panel.p.parentWindow = wnd->WindowHandle();
+					[Panel.p setLevel:NSPopUpMenuWindowLevel];
 					[Panel.p makeKeyAndOrderFront:NULL];
+					// [Panel.p setLevel:NSPopUpMenuWindowLevel];
 					if (!d->GotOnCreate)
 					{
 						d->GotOnCreate = true;

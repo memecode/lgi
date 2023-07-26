@@ -122,9 +122,7 @@ bool LClipBoard::TextW(const char16 *Str, bool AutoEmpty)
 	wTxt.Reset();
 	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
 	NSArray *array = [NSArray arrayWithObject:Txt.NsStr()];
-	[pasteboard writeObjects:array];
-
-	return Status;
+	return [pasteboard writeObjects:array];
 }
 
 char16 *LClipBoard::TextW()
@@ -136,33 +134,76 @@ char16 *LClipBoard::TextW()
 
 bool LClipBoard::Html(const char *doc, bool AutoEmpty)
 {
-	return false;
+	LAutoPool Ap;
+
+	if (AutoEmpty)
+		Empty();
+	
+	Txt = doc;
+	wTxt.Reset();
+	
+	auto attrStr = [[NSAttributedString alloc] initWithData:[Txt.NsStr() dataUsingEncoding:NSUTF8StringEncoding]
+												options:@{NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType,
+														  NSCharacterEncodingDocumentAttribute: @(NSUTF8StringEncoding)}
+												documentAttributes:nil error:nil];
+	
+	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
+	NSArray *array = [NSArray arrayWithObject:attrStr];
+	return [pasteboard writeObjects:array];
 }
 
 LString LClipBoard::Html()
 {
-	return LString();
+	LAutoPool Ap;
+	
+	NSArray *classes = [[NSArray alloc] initWithObjects:[NSAttributedString class], nil];
+	NSArray *copiedItems = [[NSPasteboard generalPasteboard]
+								readObjectsForClasses:classes
+								options:[NSDictionary dictionary]];
+	if (copiedItems != nil)
+	{
+		for (NSAttributedString *s in copiedItems)
+		{
+			NSDictionary *documentAttributes = @{NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType};
+			NSData *htmlData = [s dataFromRange:NSMakeRange(0, s.length) documentAttributes:documentAttributes error:NULL];
+			if (htmlData)
+			{
+				NSString *htmlString = [[NSString alloc] initWithData:htmlData encoding:NSUTF8StringEncoding];
+				if (htmlString)
+				{
+					Txt = htmlString;
+					[htmlString release];
+					break;
+				}
+			}
+		}
+	}
+	[classes release];
+
+	return Txt;
 }
 
 bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 {
-	LAssert(!"Not impl.");
 	return false;
 }
 
 void LClipBoard::Bitmap(BitmapCb Callback)
 {
-	LAssert(!"Not impl.");
+	LAutoPtr<LSurface> Img;
+	if (Callback)
+		Callback(Img, "Not implemented.");
 }
 
 void LClipBoard::Files(FilesCb Callback)
 {
-	LAssert(!"Not impl.");
+	LString::Array Files;
+	if (Callback)
+		Callback(Files, "Not implemented.");
 }
 
 bool LClipBoard::Files(LString::Array &Paths, bool AutoEmpty)
 {
-	LAssert(!"Not impl.");
 	return false;
 }
 

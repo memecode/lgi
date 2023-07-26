@@ -130,7 +130,7 @@ class LWindowPrivate
 {
 public:
 	LWindow *Wnd = NULL;
-	LDialog *ChildDlg = NULL;
+	LWindow *ChildDlg = NULL;
 	LMenu *EmptyMenu = NULL;
 	LViewI *Focus = NULL;
 	NSView *ContentCache = NULL;
@@ -641,9 +641,15 @@ void LWindow::Quit(bool DontDelete)
 	}
 }
 
-void LWindow::SetChildDialog(LDialog *Dlg)
+LWindow *LWindow::GetModalChild()
+{
+	return d->ChildDlg;
+}
+
+bool LWindow::SetModalChild(LWindow *Dlg)
 {
 	d->ChildDlg = Dlg;
+	return true;
 }
 
 bool LWindow::GetSnapToEdge()
@@ -720,6 +726,16 @@ void LWindow::SetDeleteOnClose(bool i)
 
 void LWindow::SetAlwaysOnTop(bool b)
 {
+	if (!Wnd)
+	{
+		LgiTrace("%s:%i - No window.\n", _FL);
+		return;
+	}
+	
+	if (b)
+		[Wnd.p setLevel:NSFloatingWindowLevel];
+	else
+		[Wnd.p setLevel:NSNormalWindowLevel];
 }
 
 bool LWindow::PostEvent(int Event, LMessage::Param a, LMessage::Param b, int64_t TimeoutMs)

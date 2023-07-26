@@ -133,15 +133,15 @@ void LDialog::DoModal(OnClose Callback, OsView OverideParent)
 	if (Wnd && Attach(0))
 	{
 		// LAutoPool Pool;
-		LWindow *Owner = GetParent() ? GetParent()->GetWindow() : 0;
+		auto Owner = GetParent() ? GetParent()->GetWindow() : NULL;
 		if (Owner)
 		{
 			auto Pr = Owner->GetPos();
 			auto Mr = GetPos();
-			Mr.Offset(	Pr.x1 + (Pr.X() - Mr.X()) / 2 - Mr.x1,
+			Mr.Offset(Pr.x1 + (Pr.X() - Mr.X()) / 2 - Mr.x1,
 					  Pr.y1 + (Pr.Y() - Mr.Y()) / 2 - Mr.y1);
 			SetPos(Mr);
-			Owner->SetChildDialog(this);
+			Owner->SetModalChild(this);
 		}
 		
 		d->IsModal = true;
@@ -153,12 +153,13 @@ void LDialog::DoModal(OnClose Callback, OsView OverideParent)
 		[app runModalForWindow:wnd];
 		
 		if (Owner)
-			Owner->SetChildDialog(NULL);
+			Owner->SetModalChild(NULL);
 		LWindow::Visible(false);
 	}
 	
 	if (Callback)
 	{
+		// Callback is responsible for deleting 'this'
 		Callback(this, d->ModalStatus);
 	}
 	else
@@ -175,8 +176,7 @@ void LDialog::EndModal(int Code)
 		d->IsModal = false;
 		d->ModalStatus = Code;
 		
-		NSApplication *app = LAppInst->Handle();
-		[app stopModal];
+		[LAppInst->Handle() stopModal];
 	}
 	else
 	{
@@ -208,7 +208,7 @@ LMessage::Result LDialog::OnEvent(LMessage *Msg)
 	{
 		case M_CLOSE:
 		{
-			printf("M_CLOSE received... Fixme!\n");
+			Quit();
 			break;
 		}
 	}
@@ -231,7 +231,7 @@ LMessage::Result LControl::OnEvent(LMessage *Msg)
 	switch (Msg->Msg())
 	{
 	}
-	return 0;
+	return LView::OnEvent(Msg);
 }
 
 LPoint LControl::SizeOfStr(const char *Str)
