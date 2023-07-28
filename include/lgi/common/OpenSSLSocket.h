@@ -15,6 +15,8 @@
 
 #define SslSocket_LogFile				"LogFile"
 #define SslSocket_LogFormat				"LogFmt"
+#define SslSocket_DebugLogging			"DebugLogging"
+#define SslSocket_LibInfo				"LibInfo"
 
 class SslSocket :
 	public LSocketI,

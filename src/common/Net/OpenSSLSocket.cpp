@@ -694,12 +694,41 @@ LStream *SslSocket::GetLogStream()
 
 bool SslSocket::GetVariant(const char *Name, LVariant &Val, const char *Arr)
 {
-	if (!Name)
-		return false;
-
-	if (!_stricmp(Name, "isSsl")) // Type: Bool
+	if (!Stricmp(Name, "isSsl")) // Type: Bool
 	{
 		Val = true;
+		return true;
+	}
+	else if (!Stricmp(Name, SslSocket_DebugLogging))
+	{
+		Val = DebugLogging;
+		return true;
+	}
+	else if (!Stricmp(Name, SslSocket_LibInfo))
+	{
+		#ifdef WINDOWS
+		auto eay = Library->LibEAY::GetFullPath();
+		#endif
+		auto ssl = Library->LibSSL::GetFullPath();
+
+		auto version = Library->SSLeay_version(SSLEAY_VERSION);
+		if (!version)
+			return false;
+
+		LString s;
+		s.Printf("%s\n"
+			#ifdef WINDOWS
+				"\t%s\n\t%s",
+			#else
+				"\t%s",
+			#endif
+			version,
+			#ifdef WINDOWS
+				eay.Get(),
+			#endif
+			ssl.Get());
+
+		Val = s.Get();
 		return true;
 	}
 
@@ -986,7 +1015,7 @@ bool SslSocket::SetVariant(const char *Name, LVariant &Value, const char *Arr)
 	{
 		d->LogFormat = Value.CastInt32();
 	}
-	else if (!Stricmp(Name, "DebugLogging"))
+	else if (!Stricmp(Name, SslSocket_DebugLogging))
 	{
 		DebugLogging = Value.CastInt32() != 0;
 	}
