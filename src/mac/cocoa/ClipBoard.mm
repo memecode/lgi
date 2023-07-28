@@ -113,8 +113,6 @@ char *LClipBoard::Text()
 
 bool LClipBoard::TextW(const char16 *Str, bool AutoEmpty)
 {
-	bool Status = false;
-
 	if (AutoEmpty)
 		Empty();
 	

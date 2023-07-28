@@ -209,7 +209,7 @@ protected:
 	int64 RestorePos = 0;
 	bool AbortTransfer = false;
 	
-	bool SetupData(bool Binary);
+	bool SetupData(bool Binary, bool Debug = false);
 	bool ConnectData();
 	LAutoString ToFtpCs(const char *s);
 	LAutoString FromFtpCs(const char *s);

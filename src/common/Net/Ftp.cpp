@@ -967,7 +967,7 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 			Local &&
 			Remote)
 		{
-			if (SetupData(Binary))
+			if (SetupData(Binary, true))
 			{
 				// Data command
 				auto f = ToFtpCs(Remote);
@@ -1025,6 +1025,7 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 									d->Data->SetTimeout(15 * 1000);
 									do
 									{
+										auto filePos = d->F->GetPos();
 										Len = d->F->Read(Temp, TempLen);
 										for (ssize_t i=0; i<Len; )
 										{
@@ -1035,7 +1036,8 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 											else
 												break;
 
-											// LgiTrace("Transfer %s...\n", LFormatSize(WriteLen).Get());
+											LgiTrace("data write %i, %i, %i\n", (int)filePos, (int)Len, (int)WriteLen);
+											
 											if (WriteLen > 0)
 											{
 												Processed += WriteLen;
@@ -1159,7 +1161,7 @@ bool IFtp::TransferFile(const char *Local, const char *Remote, int64 Size, bool 
 	return Status;
 }
 
-bool IFtp::SetupData(bool Binary)
+bool IFtp::SetupData(bool Binary, bool Debug)
 {
 	bool Status = false;
 	try
@@ -1190,6 +1192,12 @@ bool IFtp::SetupData(bool Binary)
 		else
 		{
 			PassiveMode = false;
+
+			if (Debug)
+			{
+				LVariant True = true;
+				d->Data->SetValue("DebugLogging", True);
+			}
 
 			if ( (Binary && d->CurMode != FT_Binary) ||
 				(!Binary && d->CurMode != FT_Ascii))

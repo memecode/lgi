@@ -576,8 +576,6 @@ struct SslSocketPriv : public LCancel
 	}
 };
 
-bool SslSocket::DebugLogging = false;
-
 SslSocket::SslSocket(LStreamI *logger, LCapabilityClient *caps, bool sslonconnect, bool RawLFCheck, bool banner) :
 	Lock("SslSocket")
 {
@@ -988,6 +986,10 @@ bool SslSocket::SetVariant(const char *Name, LVariant &Value, const char *Arr)
 	{
 		d->LogFormat = Value.CastInt32();
 	}
+	else if (!Stricmp(Name, "DebugLogging"))
+	{
+		DebugLogging = Value.CastInt32() != 0;
+	}
 	else if (!_stricmp(Name, LSocket_Protocol))
 	{
 		char *v = Value.CastString();
@@ -1106,7 +1108,13 @@ void SslSocket::IsBlocking(bool block)
 {
 	d->IsBlocking = block;
 	if (Bio)
-		Library->BIO_set_nbio(Bio, !d->IsBlocking);
+	{
+		auto r = Library->BIO_set_nbio(Bio, !d->IsBlocking);
+		if (DebugLogging)
+			printf("BIO_set_nbio(%i)=%li\n", block, r);
+	}
+	else if (DebugLogging)
+		printf("IsBlocking(%i) with no Bio.\n", block);
 }
 
 bool SslSocket::IsReadable(int TimeoutMs)
@@ -1261,7 +1269,7 @@ ssize_t SslSocket::Write(const void *Data, ssize_t Len, int Flags)
 			if (!Library)
 				break;
 			r = Library->BIO_write(Bio, Data, (int)Len);
-			DebugTrace("%s:%i - BIO_write(%p,%i)=%i\n", _FL, Data, Len, r);
+			DebugTrace("%s:%i - BIO_write(%p,%i)=%i IsBlocking=%i\n", _FL, Data, Len, r, d->IsBlocking);
 			if (r <= 0)
 			{
 				if (!Library->BIO_should_retry(Bio))
@@ -1431,7 +1439,7 @@ void SslSocket::DebugTrace(const char *fmt, ...)
 		
 		if (Ch > 0)
 		{
-			#if 0
+			#if 1
 			LgiTrace("SSL:%p: %s", this, Buffer);
 			#else
 			OnInformation(Buffer);

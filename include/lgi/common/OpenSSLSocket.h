@@ -27,6 +27,7 @@ class SslSocket :
 	BIO *Bio = NULL;
 	SSL *Ssl = NULL;
 	LString ErrMsg;
+	bool DebugLogging = false;
 
 	// Local stuff
 	virtual void Log(const char *Str, ssize_t Bytes, SocketMsgType Type);
@@ -35,7 +36,6 @@ class SslSocket :
 	void DebugTrace(const char *fmt, ...);
 
 public:
-	static bool DebugLogging;
 	static LString Random(int Len);
 
 	SslSocket(LStreamI *logger = NULL, LCapabilityClient *caps = NULL, bool SslOnConnect = false, bool RawLFCheck = false, bool banner = true);

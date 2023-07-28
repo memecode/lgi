@@ -1131,10 +1131,9 @@ void LMenu::OnActivate(LMenuItem *item)
 			break;
 		default:
 			if (Window)
-			{
-				printf("%s:%i - post M_COMMAND\n", _FL);
 				Window->PostEvent(M_COMMAND, item->Id());
-			}
+			else
+				printf("%s:%i - No window?\n", _FL);
 			break;
 	}
 }
