@@ -32,12 +32,13 @@
 #define LGI_VIEW_HANDLE				1
 #define LGI_VIEW_HASH               1
 #define LGI_HAIKU					1
-#if __INT_WIDTH__ == 32
-	#define HAIKU32					1
-	#define LGI_32BIT				1
-#elif __INT_WIDTH__ == 64
+#if __x86_64
 	#define HAIKU64					1
 	#define LGI_64BIT				1
+#elif __x86_32
+	#define HAIKU32					1
+	#define LGI_32BIT				1
+	#error "32"
 #else
 #error "Unknown Haiku word size."
 #endif
