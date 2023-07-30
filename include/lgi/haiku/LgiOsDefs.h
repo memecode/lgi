@@ -29,10 +29,18 @@
 #include <unistd.h>
 #define XP_CTRLS					1
 #define POSIX						1
-#define LGI_64BIT					1
 #define LGI_VIEW_HANDLE				1
 #define LGI_VIEW_HASH               1
 #define LGI_HAIKU					1
+#if __INT_WIDTH__ == 32
+	#define HAIKU32					1
+	#define LGI_32BIT				1
+#elif __INT_WIDTH__ == 64
+	#define HAIKU64					1
+	#define LGI_64BIT				1
+#else
+#error "Unknown Haiku word size."
+#endif
 
 #undef stricmp
 

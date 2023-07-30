@@ -1,11 +1,11 @@
 //
-//  GUnicode.h
+//  Unicode.h
 //
 //  Created by Matthew Allen on 1/08/15.
 //
 
-#ifndef _GUnicode_h
-#define _GUnicode_h
+#ifndef _LgiUnicode_h
+#define _LgiUnicode_h
 
 #include "LgiInc.h"
 
@@ -18,7 +18,9 @@ typedef unsigned char uint8_t;
 typedef signed char int8;
 typedef signed short int16;
 typedef unsigned short uint16;
+#if !HAIKU32
 typedef signed int int32;
+#endif
 typedef unsigned int uint32_t;
 #ifdef _MSC_VER
 	typedef signed __int64 int64;

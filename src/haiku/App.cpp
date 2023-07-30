@@ -318,7 +318,7 @@ LMouseHook *LApp::GetMouseHook()
 	return MouseHook;
 }
 
-int LApp::GetMetric(LSystemMetric Metric)
+int32 LApp::GetMetric(LSystemMetric Metric)
 {
 	switch (Metric)
 	{

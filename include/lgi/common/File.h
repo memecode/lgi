@@ -304,7 +304,7 @@ public:
 	bool Move(const char *OldName, const char *NewName, LError *Err = NULL);
 };
 
-#if defined(WINDOWS)
+#if defined(WINDOWS) || HAIKU32
 	#define GFileOps()			\
 		GFileOp(char)			\
 		GFileOp(int8_t)			\
@@ -319,7 +319,7 @@ public:
 		GFileOp(ulong)			\
 		GFileOp(float)			\
 		GFileOp(double)
-#elif defined(LINUX) || defined(HAIKU)
+#elif defined(LINUX) || HAIKU64
 	#define GFileOps()			\
 		GFileOp(char)			\
 		GFileOp(int8_t)			\

@@ -344,7 +344,7 @@ LVariant &LVariant::operator =(ssize_t i)
 }
 #endif
 
-LVariant &LVariant::operator =(int32 i)
+LVariant &LVariant::operator =(int32_t i)
 {
 	Empty();
 	Type = GV_INT32;
@@ -2042,9 +2042,9 @@ ssize_t LCustomType::CustomField::Sizeof()
 	switch (Type)
 	{
 		case GV_INT32:
-			return sizeof(int32);
+			return sizeof(int32_t);
 		case GV_INT64:
-			return sizeof(int64);
+			return sizeof(int64_t);
 		case GV_BOOL:
 			return sizeof(bool);
 		case GV_DOUBLE:
