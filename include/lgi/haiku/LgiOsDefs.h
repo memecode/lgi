@@ -35,12 +35,9 @@
 #if __x86_64
 	#define HAIKU64					1
 	#define LGI_64BIT				1
-#elif __x86_32
+#else
 	#define HAIKU32					1
 	#define LGI_32BIT				1
-	#error "32"
-#else
-#error "Unknown Haiku word size."
 #endif
 
 #undef stricmp
