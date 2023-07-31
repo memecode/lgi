@@ -1987,7 +1987,7 @@ public:
 		char Buf[256];
 		ssize_t Rd;
 
-		const char *Prog = "c:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\dumpbin.exe";
+		const char *Prog = "c:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\VC\\Tools\\MSVC\\14.29.30133\\bin\\Hostx64\\x64\\dumpbin.exe";
 		LSubProcess s(Prog, Args);
 		if (!s.Start(true, false))
 		{
