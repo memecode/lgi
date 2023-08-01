@@ -245,7 +245,6 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/linux/Gtk/LgiOsDefs.h \
 	../include/lgi/linux/Gtk/LgiWidget.h \
 	../include/lgi/linux/Gtk/LgiWinManGlue.h \
-	../include/lgi/linux/SymLookup.h \
 	../include/lgi/mac/cocoa/LCocoaView.h \
 	../include/lgi/mac/cocoa/LgiMac.h \
 	../include/lgi/mac/cocoa/LgiOs.h \
@@ -290,6 +289,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/common/Hash/sha1/sha1.h \
 	../src/common/Lgi/Alert.cpp \
 	../src/common/Lgi/AppCommon.cpp \
+	../src/common/Lgi/ClipBoardCommon.cpp \
 	../src/common/Lgi/Css.cpp \
 	../src/common/Lgi/CssTools.cpp \
 	../src/common/Lgi/DataDlg.cpp \
@@ -387,7 +387,7 @@ clean :
 cleanall :
 	rm -rf $(BuildDir) $(Target)
 	@echo Cleaned $(BuildDir) $(Target)
-	+make -C "../" -f "Makefile.linux" clean
+	+make -C "../" -f ./linux/Makefile.linux clean
 
 VPATH=$(BuildDir) \
 	../src/common/Widgets \

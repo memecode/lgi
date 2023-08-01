@@ -418,6 +418,7 @@
 		<Node File="./src/common/Net/Net.cpp" Type="2" Platforms="15" />
 		<Node File="./include/lgi/common/Net.h" Type="3" Platforms="15" />
 		<Node File="./src/common/Net/Uri.cpp" Type="2" Platforms="15" />
+		<Node File="./include/lgi/common/Uri.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Headers" Type="1" Platforms="15" Open="0" Id="73">
 		<Node Name="Haiku" Type="1" Platforms="15" Id="1">

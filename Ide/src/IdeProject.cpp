@@ -3563,6 +3563,44 @@ void AddAllSubFolders(LString::Array &out, LString in)
 	}
 }
 
+bool PkgConfigPaths(LString::Array &out, LString in)
+{
+	if (in(0) == '`')
+	{
+		// Run config app to get the full path list...
+		in = in.Strip("`");
+		auto a = in.Split(" ", 1);
+		LSubProcess Proc(a[0], a.Length() > 1 ? a[1].Get() : NULL);
+		if (Proc.Start())
+		{
+			LStringPipe Buf;
+			Proc.Communicate(&Buf);
+			auto lines = Buf.NewLStr().SplitDelimit(" \t\r\n");
+			for (auto line: lines)
+			{
+				char *inc = line;
+				if (inc[0] == '-' && inc[1] == 'I')
+				{
+					auto path = line(2,-1);
+					// printf("   inc='%s'\n", path.Get());
+					out.New() = path;
+				}
+			}
+		}
+		else
+		{
+			LgiTrace("%s:%i - Error: failed to run process for '%s'\n", _FL, in.Get());
+			return false;
+		}
+	}
+	else
+	{
+		out.New() = in;
+	}
+	
+	return true;
+}
+
 bool IdeProject::BuildIncludePaths(LString::Array &Paths, LString::Array *SysPaths, bool Recurse, bool IncludeSystem, IdePlatform Platform)
 {
 	List<IdeProject> Projects;
@@ -3589,7 +3627,9 @@ bool IdeProject::BuildIncludePaths(LString::Array &Paths, LString::Array *SysPat
 
 		if (IncludeSystem)
 		{
-			InSys += LString(d->Settings.GetStr(ProjSystemIncludes, NULL, Platform)).SplitDelimit(Delim);
+			auto sys = LString(d->Settings.GetStr(ProjSystemIncludes, NULL, Platform)).SplitDelimit(Delim);
+			for (auto s: sys)
+				PkgConfigPaths(InSys, s);
 
 			bool recurseSystem = true;
 			if (recurseSystem)
@@ -3597,8 +3637,9 @@ bool IdeProject::BuildIncludePaths(LString::Array &Paths, LString::Array *SysPat
 				auto sz = InSys.Length();
 				for (unsigned i=0; i<sz; i++)
 				{
-					auto &path = InSys[i];
-					if (LIsRelativePath(path))
+					auto &path = InSys[i];					
+					auto rel = LIsRelativePath(path);
+					if (rel)
 					{
 						LFile::Path full(Base.Get());
 						full += path;
@@ -3606,38 +3647,14 @@ bool IdeProject::BuildIncludePaths(LString::Array &Paths, LString::Array *SysPat
 					}
 
 					AddAllSubFolders(InSys, InSys[i]);
-				}
+				}				
 			}
 		}
 
 		auto PreProcessPath = [Platform](LString::Array &out, LString in)
 		{
 			auto p = ToPlatformPath(in, Platform);
-			if (p(0) == '`')
-			{
-				// Run config app to get the full path list...
-				p = p.Strip("`");
-				auto a = p.Split(" ", 1);
-				LSubProcess Proc(a[0], a.Length() > 1 ? a[1].Get() : NULL);
-				if (Proc.Start())
-				{
-					LStringPipe Buf;
-					Proc.Communicate(&Buf);
-					auto lines = Buf.NewLStr().Split(" \t\r\n");
-					for (auto line: lines)
-					{
-						char *inc = line;
-						if (inc[0] == '-' && inc[1] == 'I')
-							out.New() = line(2,-1);
-					}
-				}
-				else LgiTrace("%s:%i - Error: failed to run process for '%s'\n", _FL, p.Get());
-			}
-			else
-			{
-				// Add path literal
-				out.New() = p;
-			}
+			PkgConfigPaths(out, p);
 		};
 
 		auto RelativeToFull = [&Base](LHashTbl<StrKey<char>, bool> &Map, LString &p)

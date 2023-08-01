@@ -36,6 +36,7 @@ bool LClipBoard::UnitTests()
 
 	#if 1 // The 'html' tests:
 
+		/*
 		auto InDoc = "<html>\n"
 					"<body>\n"
 					"This is a <b>html</b> test.\n"
@@ -43,8 +44,8 @@ bool LClipBoard::UnitTests()
 					"</html>\n";
 		c.Html(InDoc);
 
-		/*
 		LgiMsg(parent, "Paste the test HTML somewhere that accepts rich text.", testName);
+		*/
 
 		LArray<LClipBoard::FormatType> types;
 		if (c.EnumFormats(types))
@@ -54,7 +55,7 @@ bool LClipBoard::UnitTests()
 		}
 
 		auto Html = c.Html();
-		*/
+		printf("Html=%s\n", Html.Get());
 
 	#endif
 	

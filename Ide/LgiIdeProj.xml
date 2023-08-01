@@ -142,6 +142,8 @@ WINNATIVE</Release>
 					<Debug>/home/matthew/Code/Lgi/trunk/Ide/Code/IdeProjectSettings.cpp</Debug>
 				</All>
 			</Arguments>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -202,6 +204,7 @@ gnu
 network
 be</Release>
 				</Haiku>
+				<All />
 			</Libraries>
 			<Defines>
 				<Haiku>
@@ -210,6 +213,8 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
+				<All />
+				<Linux />
 			</Defines>
 			<TargetType>
 				<All>Executable</All>
@@ -234,6 +239,11 @@ _GNU_SOURCE</Release>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
 			</SystemIncludes>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -248,6 +258,8 @@ _GNU_SOURCE</Release>
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
 		<Debug>
 			<Environment>
@@ -255,10 +267,21 @@ _GNU_SOURCE</Release>
 			</Environment>
 			<Arguments>
 				<All>
-					<Debug>/home/matthew/code/lgi/trunk/Lvc/LvcProject.xml</Debug>
+					<Debug>/home/matthew/code/lgi/trunk/Ide/LgiIdeProj.xml</Debug>
 				</All>
 			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
 		</Debug>
-		<Advanced />
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>

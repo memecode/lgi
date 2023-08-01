@@ -423,6 +423,8 @@ class Gdb : public LDebugger, public LThread, public Callback
 	
 	void OnRead(const char *Ptr, ssize_t Bytes)
 	{
+		printf("OnRead %i\n", (int)Bytes);
+	
 		// Parse output into lines
 		const char *p = Ptr;
 		const char *End = p + Bytes;
@@ -469,6 +471,8 @@ class Gdb : public LDebugger, public LThread, public Callback
 				}
 			}
 		}
+
+		printf("...OnRead\n");
 	}
 	
 	int Main()
@@ -522,7 +526,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 		if (!Sp->Start(true, true, false))
 		{
 			State = ProcessError;
-			LString ErrMsg = LErrorCodeToString(Sp->GetErrorCode());
+			auto ErrMsg = LErrorCodeToString(Sp->GetErrorCode());
 			char s[256];
 			sprintf_s(s, sizeof(s), "Failed to start gdb, error: 0x%x (%s)\n", Sp->GetErrorCode(), ErrMsg.Get());
 			Events->OnError(Sp->GetErrorCode(), s);
@@ -536,6 +540,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 
 		char Buf[513];
 		bool IsRun;
+		auto PrevTs = LCurrentTime();
 		while (State == Looping && (IsRun = Sp->IsRunning()))
 		{
 			#ifdef _DEBUG
@@ -548,7 +553,14 @@ class Gdb : public LDebugger, public LThread, public Callback
 				printf("GDB: %.*s\n", Rd, Buf);
 				#endif
 				OnRead(Buf, Rd);
-			}			
+			}
+			
+			auto Now = LCurrentTime();
+			if (Now - PrevTs >= 1000)
+			{
+				PrevTs = Now;
+				printf("Main looping...\n");
+			}
 		}
 
 		Break();
@@ -606,18 +618,26 @@ class Gdb : public LDebugger, public LThread, public Callback
 
 		return true;
 	}
+
+	#if 1
+	#define CMD_LOG(...) printf(__VA_ARGS__)
+	#else
+	#define CMD_LOG(...)
+	#endif
+
 	
 	bool Cmd(const char *c, LStream *Output = NULL, LString::Array *Arr = NULL)
 	{
 		if (!ValidStr(c))
 		{
-			LgiTrace("%s:%i - Not a valid command.\n", _FL);
+			CMD_LOG("%s:%i - Null cmd.\n", _FL);
 			LAssert(!"Not a valid command.");
 			return false;
 		}
 		
 		if (!WaitPrompt())
 		{
+			CMD_LOG("%s:%i - WaitPrompt failed.\n", _FL);
 			return false;
 		}
 
@@ -626,6 +646,8 @@ class Gdb : public LDebugger, public LThread, public Callback
 
 		#if DEBUG_SHOW_GDB_IO
 		LgiTrace("Send: '%s'\n", c);
+		#else
+		CMD_LOG("%s:%i - send '%s'.\n", _FL, c);
 		#endif
 		Events->Write(str, ch);
 		LinePtr = Line;
@@ -633,24 +655,31 @@ class Gdb : public LDebugger, public LThread, public Callback
 		OutLines = Arr;		
 		AtPrompt = false;
 
-		// uint64 Start = LCurrentTime();
+		auto Start = LCurrentTime();
 		auto Wr = Sp->Write(str, ch);
+		CMD_LOG("%s:%i - wr=%i.\n", _FL, (int)Wr);
 		if (Wr != ch)
+		{
+			CMD_LOG("%s:%i - write failed.\n", _FL);
 			return false;
+		}
 
 		if (OutStream || OutLines)
 		{	
-			/*	
-			uint64 Wait0 = LCurrentTime();
-			*/
+			auto Wait0 = LCurrentTime();
+
 			WaitPrompt();
-			/*
-			uint64 Wait1 = LCurrentTime();
-			LgiTrace("Cmd timing "LGI_PrintfInt64" "LGI_PrintfInt64"\n", Wait0-Start, Wait1-Wait0);
-			*/
+
+			auto Wait1 = LCurrentTime();
+			CMD_LOG("%s:%i - Cmd timing " LPrintfInt64 " " LPrintfInt64 "\n",
+				_FL,
+				Wait0 - Start,
+				Wait1 - Wait0);
+
 			LAssert(OutStream == NULL && OutLines == NULL);
 		}
 		
+		CMD_LOG("%s:%i - cmd success.\n", _FL);
 		return true;
 	}
 	
@@ -1158,7 +1187,7 @@ public:
 				{
 					// Is it floating point?
 					auto isFloat = strchr(val, '.') != NULL;
-					printf("numeric type for '%s' is %i\n", val, isFloat);
+					printf("isFloat for '%s' is %i\n", val, isFloat);
 					if (isFloat)
 					{
 						double tmp = atof(val);

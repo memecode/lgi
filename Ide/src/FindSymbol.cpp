@@ -20,7 +20,7 @@
 
 #define DEBUG_FIND_SYMBOL		0
 #define DEBUG_NO_THREAD			1
-// #define DEBUG_FILE				"Clipboard.h"
+#define DEBUG_FILE				"pangocairo.h"
 
 int SYM_FILE_SENT = 0;
 
@@ -280,17 +280,23 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		{
 			if (!map.Find(p))
 			{
+				// printf("add path: %s\n", p.Get());
 				out.Add(p);
 				map.Add(p, true);
 
 				LDirectory dir;
 				for (auto b=dir.First(p); b; b=dir.Next())
 				{
-					if (!dir.IsDir() &&
-						MatchStr("*.h", dir.GetName()))
-					{
+					bool willAdd = !dir.IsDir() &&
+									MatchStr("*.h", dir.GetName());
+						
+					#ifdef DEBUG_FILE
+					if (!Stricmp(dir.GetName(), DEBUG_FILE))
+						printf("!!!GOT %s willAdd=%i !!!\n", DEBUG_FILE, willAdd);
+					#endif
+					
+					if (willAdd)
 						HdrMap.Add(dir.GetName(), dir.FullPath());
-					}
 				}
 			}
 		}
@@ -727,6 +733,13 @@ int FindSymbolSystem::GetAppHnd()
 
 bool FindSymbolSystem::SetIncludePaths(LString::Array &Paths, LString::Array &SysPaths)
 {
+	#if 0
+	for (auto p: SysPaths)
+		printf("SysPath:%s\n", p.Get());
+	if (SysPaths.Length() == 0)
+		printf("NoSysPath\n");
+	#endif
+
 	return d->PostEvent(M_FIND_SYM_INC_PATHS,
 						(LMessage::Param)new LString::Array(Paths),
 						(LMessage::Param)new LString::Array(SysPaths));

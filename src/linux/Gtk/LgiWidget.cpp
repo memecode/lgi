@@ -144,19 +144,26 @@ LMouse _map_mouse_event(LView *v, int x, int y, bool Motion, bool Debug = false)
 	return m;
 }
 
+#define DEBUG_CLICK		0
+#if DEBUG_CLICK
+#define LOG(...) printf(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
 gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 {
 	LgiWidget *p = LGI_WIDGET(widget);
 	if (!p)
 	{
-		printf("%s:%i - no widget\n", _FL);
+		LOG("%s:%i - no widget\n", _FL);
 		return false;
 	}
 	
 	LView *v = dynamic_cast<LView*>(p->target);
 	if (!v)
 	{
-		printf("%s:%i - no view\n", _FL);
+		LOG("%s:%i - no view\n", _FL);
 		return false;
 	}
 	
@@ -206,14 +213,16 @@ gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 		ev->button != BtnRight &&
 		ev->button != BtnBack &&
 		ev->button != BtnForward)
-		printf("%s:%i - Unknown button: %i\n", _FL, ev->button);
+	{
+		LOG("%s:%i - Unknown button: %i\n", _FL, ev->button);
+	}
 
 	m.Ctrl  ((ev->state & GDK_CONTROL_MASK) != 0);
 	m.Shift ((ev->state & GDK_SHIFT_MASK)   != 0);
 	m.Alt   ((ev->state & GDK_MOD1_MASK)    != 0);
 	m.System((ev->state & GDK_MOD2_MASK)    != 0);
 
-	#if 0
+	#if DEBUG_CLICK
 	char s[256];
 	sprintf_s(s, sizeof(s), "%s::MouseClick", v->GetClass());
 	m.Trace(s);
@@ -221,7 +230,6 @@ gboolean lgi_widget_click(GtkWidget *widget, GdkEventButton *ev)
 	
 	v->_Mouse(m, false);
 
-	// v->GetWindow()->_Dump();
 	return true;
 }
 

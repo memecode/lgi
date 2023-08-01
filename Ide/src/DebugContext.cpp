@@ -493,6 +493,7 @@ bool LDebugContext::OnCommand(int Cmd)
 		}
 		case IDM_STEP_INTO:
 		{
+			printf("debugger IDM_STEP_INTO\n");
 			if (d->Db)
 				d->Db->StepInto();
 			break;
