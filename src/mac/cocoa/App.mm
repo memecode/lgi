@@ -505,7 +505,8 @@ bool LApp::PostEvent(LViewI *View, int Msg, LMessage::Param A, LMessage::Param B
 	auto v = w->Handle();
 	if (!v)
 	{
-		printf("%s:%i - No handle.\n", _FL);
+		// This mostly happens only when the window is shutting down.
+		// printf("%s:%i - No handle.\n", _FL);
 		return false;
 	}
 
