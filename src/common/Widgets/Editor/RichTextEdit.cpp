@@ -208,7 +208,7 @@ void LRichTextEdit::SetFont(LFont *f, bool OwnIt)
 
 void LRichTextEdit::OnFontChange()
 {
-	LAssert(!"Not impl.");
+	LgiTrace("%s:%i - LRichTextEdit::OnFontChange not impl.\n", _FL);
 }
 
 void LRichTextEdit::PourText(ssize_t Start, ssize_t Length /* == 0 means it's a delete */)
@@ -223,8 +223,39 @@ void LRichTextEdit::PourStyle(ssize_t Start, ssize_t EditSize)
 
 bool LRichTextEdit::Insert(size_t At, const char16 *Data, ssize_t Len)
 {
-	LAssert(!"Not impl.");
-	return false;
+	if (!d->Cursor || !d->Cursor->Blk)
+	{
+		LAssert(!"No cursor block.");
+		return false;
+	}
+
+	auto b = d->Cursor->Blk;
+	AutoTrans Trans(new LRichTextPriv::Transaction);						
+
+	#ifdef WINDOWS
+	// UCS2 -> UTF32
+	LAutoPtr<uint32_t,true> utf32((uint32_t*)LNewConvertCp("utf-32", Data, LGI_WideCharset, Len*sizeof(*Data)));
+	uint32_t *u32 = utf32.Get();
+	auto len = Strlen(u32);
+	#else
+	LAssert(sizeof(char16) == sizeof(uint32_t));
+	uint32_t *u32 = (uint32_t*)Data;
+	auto len = Len;
+	#endif
+
+	if (!b->AddText(Trans, d->Cursor->Offset, u32, len, NULL))
+	{
+		LAssert(!"AddText failed.");
+		return false;
+	}
+
+	d->Cursor->Set(d->Cursor->Offset + 1);
+	Invalidate();
+	SendNotify(LNotifyDocChanged);
+
+	d->AddTrans(Trans);
+
+	return true;
 }
 
 bool LRichTextEdit::Delete(size_t At, ssize_t Len)
