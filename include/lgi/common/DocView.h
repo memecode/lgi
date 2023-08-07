@@ -380,6 +380,11 @@ public:
 	/// Pastes the current contents of the clipboard into the document
 	virtual bool Paste() { return false; }
 
+	/// Insert some text at the index 'At'
+	virtual bool Insert(size_t At, const char16 *Data, ssize_t Len) { return false; }
+	/// Delete some text at the index 'At'
+	virtual bool Delete(size_t At, ssize_t Len) { return false; }
+
 	///////////////////////////////////////////////////////////////////////
 
 	/// Called when the user hits the escape key

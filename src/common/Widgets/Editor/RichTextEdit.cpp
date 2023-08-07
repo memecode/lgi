@@ -208,23 +208,28 @@ void LRichTextEdit::SetFont(LFont *f, bool OwnIt)
 
 void LRichTextEdit::OnFontChange()
 {
+	LAssert(!"Not impl.");
 }
 
 void LRichTextEdit::PourText(ssize_t Start, ssize_t Length /* == 0 means it's a delete */)
 {
+	LAssert(!"Not impl.");
 }
 
 void LRichTextEdit::PourStyle(ssize_t Start, ssize_t EditSize)
 {
+	LAssert(!"Not impl.");
 }
 
-bool LRichTextEdit::Insert(int At, char16 *Data, int Len)
+bool LRichTextEdit::Insert(size_t At, const char16 *Data, ssize_t Len)
 {
+	LAssert(!"Not impl.");
 	return false;
 }
 
-bool LRichTextEdit::Delete(int At, int Len)
+bool LRichTextEdit::Delete(size_t At, ssize_t Len)
 {
+	LAssert(!"Not impl.");
 	return false;
 }
 

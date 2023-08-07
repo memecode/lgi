@@ -3,9 +3,7 @@
 	\author Matthew Allen <fret@memecode.com>
 	\brief Simple single window wrapper around the LHtml2 control
  */
-#ifndef _GBROWSER_H_
-#define _GBROWSER_H_
-
+#pragma once
 
 class LBrowser : public LWindow
 {
@@ -36,5 +34,3 @@ public:
 	int OnNotify(LViewI *c, LNotification n);
 	LMessage::Result OnEvent(LMessage *m);
 };
-
-#endif

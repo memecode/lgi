@@ -426,8 +426,8 @@ public:
 	LCursor GetCursor(int x, int y) override;
 
 	// Virtuals
-	virtual bool Insert(size_t At, const char16 *Data, ssize_t Len);
-	virtual bool Delete(size_t At, ssize_t Len);
+	bool Insert(size_t At, const char16 *Data, ssize_t Len) override;
+	bool Delete(size_t At, ssize_t Len) override;
 	virtual void OnEnter(LKey &k) override;
 	virtual void OnUrl(char *Url) override;
 	virtual void DoContextMenu(LMouse &m);

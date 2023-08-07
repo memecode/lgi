@@ -295,8 +295,8 @@ public:
 			Store3MimeTree<TStore, TMail, TAttachment> t(Mail, Root);
 			
 			LString Src = Tests[i];
-			LString::Array Lines = Src.SplitDelimit(" \t\r\n");
-			for (unsigned ln = 0; ln < Lines.Length(); ln++)
+			auto Lines = Src.SplitDelimit(" \t\r\n");
+			for (auto &line: Lines)
 			{
 				TAttachment *a = new TAttachment(Store);
 				if (!a)
@@ -304,17 +304,19 @@ public:
 					LgiTrace("%s:%i - Alloc err\n", _FL);
 					return false;
 				}
-				a->SetStr(FIELD_MIME_TYPE, Lines[ln]);
+				a->SetStr(FIELD_MIME_TYPE, line);
 
-				if (Lines[ln].Find("multipart") >= 0)
-				{ DeleteObj(a); }// no-op
-				else if (Lines[ln].Find("application/") >= 0)
+				if (line.Find("multipart") >= 0)
+				{
+					DeleteObj(a);
+				}// no-op
+				else if (line.Find("application/") >= 0)
 					t.Attachments.Add(a);
-				else if (Lines[ln].Find("html") >= 0)
+				else if (line.Find("html") >= 0)
 					t.MsgHtml = a;
-				else if (Lines[ln].Find("plain") >= 0)
+				else if (line.Find("plain") >= 0)
 					t.MsgText = a;
-				else if (Lines[ln].Find("image") >= 0)
+				else if (line.Find("image") >= 0)
 					t.MsgHtmlRelated.Add(a);
 				else
 					DeleteObj(a)

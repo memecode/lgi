@@ -223,8 +223,8 @@ public:
 	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState);
 
 	// Virtuals
-	virtual bool Insert(int At, char16 *Data, int Len);
-	virtual bool Delete(int At, int Len);
+	bool Insert(size_t At, const char16 *Data, ssize_t Len) override;
+	bool Delete(size_t At, ssize_t Len) override;
 	virtual void OnEnter(LKey &k);
 	virtual void OnUrl(char *Url);
 	virtual void DoContextMenu(LMouse &m);
