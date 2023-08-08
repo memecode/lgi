@@ -114,6 +114,10 @@ public:
 				Related = Seg;
 			InRelated = true;					
 		}
+		else if (Seg->GetStr(FIELD_NAME))
+		{
+			Attachments.Add(Seg);
+		}
 		else if (Seg->IsPlainText())
 		{
 			if (MsgText)

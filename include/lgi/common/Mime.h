@@ -114,6 +114,7 @@ public:
 	// Simple Header Management
 	LString LGet(const char *Field, bool Short = true, const char *Default = NULL);
 	bool Set(const char *Field, const char *Value); // 'Value' has to include any subfields.
+	
 	LString LGetSub(const char *Field, const char *Sub);
 	bool SetSub(const char *Field, const char *Sub, const char *Value, const char *DefaultValue = 0);
 	
@@ -121,16 +122,26 @@ public:
 	[[deprecated]] char *GetSub(const char *Field, const char *Sub);
 
 	// Header Shortcuts (uses Get[Sub]/Set[Sub])
-	[[deprecated]] char *GetMimeType();
+	LString LGetMimeType()				{ return LGet("Content-Type", true, "text/plain"); }
 	bool SetMimeType(const char *s)		{ return Set("Content-Type", s); }
-	[[deprecated]] char *GetEncoding();
+	
+	LString LGetEncoding()				{ return LGet("Content-Transfer-Encoding"); }
 	bool SetEncoding(const char *s)		{ return Set("Content-Transfer-Encoding", s); }
-	[[deprecated]] char *GetCharset();
+	
+	LString LGetCharset()				{ return LGetSub("Content-Type", "Charset"); }
 	bool SetCharset(const char *s)		{ return SetSub("Content-Type", "Charset", s, DefaultCharset); }
-	[[deprecated]] char *GetBoundary();
+	
+	LString LGetBoundary()				{ return LGetSub("Content-Type", "Boundary"); }
 	bool SetBoundary(const char *s)		{ return SetSub("Content-Type", "Boundary", s, DefaultCharset); }
-	[[deprecated]] char *GetFileName();
+	
+	LString LGetFileName();
 	bool SetFileName(const char *s)		{ return SetSub("Content-Type", "Name", s, DefaultCharset); }
+
+	[[deprecated]] char *GetMimeType();
+	[[deprecated]] char *GetEncoding();
+	[[deprecated]] char *GetCharset();
+	[[deprecated]] char *GetBoundary();
+	[[deprecated]] char *GetFileName();
 
 	// Streaming
 	class LMimeText

@@ -642,6 +642,23 @@ char *LMime::GetBoundary()
 	return GetSub("Content-Type", "Boundary");
 }
 
+LString LMime::LGetFileName()
+{
+	auto n = LGetSub("Content-Type", "Name");
+
+	if (!n)
+		n = LGetSub("Content-Disposition", "Filename");
+
+	if (!n)
+	{
+		n = LGet("Content-Location");
+		if (n)
+			n = n.Strip("\'\"");
+	}
+
+	return n;
+}
+
 char *LMime::GetFileName()
 {
 	char *n = GetSub("Content-Type", "Name");
