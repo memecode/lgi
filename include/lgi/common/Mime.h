@@ -83,7 +83,8 @@ class LMime
 	bool Lock();
 	void Unlock();
 	bool CreateTempData();
-	char *NewValue(char *&s, bool Alloc = true);
+	[[deprecated]] char *NewValue(char *&s, bool Alloc = true);
+	LString LNewValue(char *&s, bool Alloc = true);
 	char *StartOfField(char *s, const char *Feild);
 	char *NextField(char *s);
 	char *GetTmpPath();
@@ -111,22 +112,25 @@ public:
 	bool SetData(char *Str, int Len);
 
 	// Simple Header Management
-	char *Get(const char *Field, bool Short = true, const char *Default = 0); // 'Short'=true returns the value with out subfields
+	LString LGet(const char *Field, bool Short = true, const char *Default = NULL);
 	bool Set(const char *Field, const char *Value); // 'Value' has to include any subfields.
-	char *GetSub(const char *Field, const char *Sub);
+	LString LGetSub(const char *Field, const char *Sub);
 	bool SetSub(const char *Field, const char *Sub, const char *Value, const char *DefaultValue = 0);
+	
+	[[deprecated]] char *Get(const char *Field, bool Short = true, const char *Default = NULL); // 'Short'=true returns the value with out subfields
+	[[deprecated]] char *GetSub(const char *Field, const char *Sub);
 
 	// Header Shortcuts (uses Get[Sub]/Set[Sub])
-	char *GetMimeType()				{ return Get("Content-Type", true, "text/plain"); }
-	bool SetMimeType(const char *s)	{ return Set("Content-Type", s); }
-	char *GetEncoding()				{ return Get("Content-Transfer-Encoding"); }
-	bool SetEncoding(const char *s)	{ return Set("Content-Transfer-Encoding", s); }
-	char *GetCharset()				{ return GetSub("Content-Type", "Charset"); }
-	bool SetCharset(const char *s)	{ return SetSub("Content-Type", "Charset", s, DefaultCharset); }
-	char *GetBoundary()				{ return GetSub("Content-Type", "Boundary"); }
-	bool SetBoundary(const char *s)	{ return SetSub("Content-Type", "Boundary", s, DefaultCharset); }
-	char *GetFileName();
-	bool SetFileName(const char *s)	{ return SetSub("Content-Type", "Name", s, DefaultCharset); }
+	[[deprecated]] char *GetMimeType();
+	bool SetMimeType(const char *s)		{ return Set("Content-Type", s); }
+	[[deprecated]] char *GetEncoding();
+	bool SetEncoding(const char *s)		{ return Set("Content-Transfer-Encoding", s); }
+	[[deprecated]] char *GetCharset();
+	bool SetCharset(const char *s)		{ return SetSub("Content-Type", "Charset", s, DefaultCharset); }
+	[[deprecated]] char *GetBoundary();
+	bool SetBoundary(const char *s)		{ return SetSub("Content-Type", "Boundary", s, DefaultCharset); }
+	[[deprecated]] char *GetFileName();
+	bool SetFileName(const char *s)		{ return SetSub("Content-Type", "Name", s, DefaultCharset); }
 
 	// Streaming
 	class LMimeText
