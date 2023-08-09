@@ -11,47 +11,26 @@ char HashString[] = "KLWEHGF)AS^*_GPYIOShakl;sjfhas0w89725l3jkhL:KHASFQ_DF_AS+_F
 
 LPassword::LPassword(LPassword *p)
 {
-	Data = 0;
-	Len = 0;
-
 	if (p)
-	{
 		*this = *p;
-	}
 }
 
 LPassword::~LPassword()
 {
-	DeleteArray(Data);
 }
 
 LPassword &LPassword::operator =(LPassword &p)
 {
-	if (p.Data)
-	{
-		Data = new char[p.Len];
-		if (Data)
-		{
-			memcpy(Data, p.Data, p.Len);
-			Len = p.Len;
-		}
-	}
-	
+	Data = p.Data;
 	return *this;
 }
 
 bool LPassword::operator ==(LPassword &p)
 {
-	if (Data && p.Data && Len == p.Len)
-	{
-		return memcmp(Data, p.Data, Len) == 0;
-	}
-	else if (Data == 0 && p.Data == 0)
-	{
-		return true;
-	}
+	if (Data.Length() != p.Data.Length())
+		return false;
 
-	return false;
+	return memcmp(Data.Get(), p.Data.Get(), Data.Length()) == 0;
 }
 
 void LPassword::Process(char *Out, const char *In, ssize_t Len) const
@@ -72,9 +51,9 @@ LString LPassword::Get() const
 {
 	LString p;
 	
-	p.Length(Len);
-	Process(p, Data, Len);
-	p.Get()[Len] = 0;
+	p.Length(Data.Length());
+	Process(p, Data.Get(), Data.Length());
+	p.Get()[Data.Length()] = 0;
 	
 	return p;
 }
@@ -83,53 +62,34 @@ void LPassword::Get(char *Buf) const
 {
 	if (Buf)
 	{
-		Process(Buf, Data, Len);
-		Buf[Len] = 0; // NULL terminate
+		Process(Buf, Data.Get(), Data.Length());
+		Buf[Data.Length()] = 0; // NULL terminate
 	}
 }
 
 void LPassword::Set(const char *Buf)
 {
-	DeleteArray(Data);
-	Len = 0;
-
-	if (Buf)
-	{
-		Len = (int)strlen(Buf);
-		Data = new char[Len];
-		if (Data)
-		{
-			Process(Data, Buf, Len);
-		}
-	}
+	Data.Empty();
+	auto len = strlen(Buf);
+	if (Buf && Data.Length(len))
+		Process(Data.Get(), Buf, len);
 }
 
 void LPassword::Serialize(char *Password, int Write)
 {
-	int *p = (int*)Password;
+	LPointer p;
+	p.c = Password;
 
 	if (Write)
 	{
-		if (Len > 28) Len = 28;
-
-		*p++ = (int)Len;
+		*p.u32++ = (int)Data.Length();
 		if (Data)
-		{
-			memcpy(p, Data, Len);
-		}
+			memcpy(p.c, Data.Get(), Data.Length());
 	}
 	else // read
 	{
-		Len = *p++;
-		DeleteArray(Data);
-		if (Len > 0)
-		{
-			Data = new char[Len];
-			if (Data)
-			{
-				memcpy(Data, p, Len);
-			}
-		}
+		if (Data.Length(*p.u32++))
+			memcpy(Data.Get(), p.c, Data.Length());
 	}
 }
 
@@ -141,7 +101,7 @@ bool LPassword::Serialize(LDom *Options, const char *Prop, int Write)
 		LVariant v;
 		if (Write)
 		{
-			v.SetBinary(Len, Data);
+			v.SetBinary(Data.Length(), Data.Get());
 			Status = Options->SetValue(Prop, v);
 		}
 		else // read from prop list
@@ -149,12 +109,10 @@ bool LPassword::Serialize(LDom *Options, const char *Prop, int Write)
 			if (Options->GetValue(Prop, v) &&
 				v.Type == GV_BINARY)
 			{
-				DeleteArray(Data);
-				Len = v.Value.Binary.Length;
-				Data = new char[v.Value.Binary.Length];
-				if (Data)
+				if (Data.Length(v.Value.Binary.Length))
 				{
-					memcpy(Data, v.Value.Binary.Data, Len);
+					memcpy(Data.Get(), v.Value.Binary.Data, Data.Length());
+					Data.Get()[Data.Length()] = 0;
 					Status = true;
 				}
 			}

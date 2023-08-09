@@ -7,16 +7,15 @@
 
 class LgiClass LPassword
 {
-	char *Data; // this is binary data... may contain NULL's
-	ssize_t Len;
-
+	LString Data; // this is binary data... may contain NULL's
+	
 	void Process(char *Out, const char *In, ssize_t Len) const;
 
 public:
-	LPassword(LPassword *p = 0);
+	LPassword(LPassword *p = NULL);
 	virtual ~LPassword();
 
-	bool IsValid() { return Data && Len > 0; }
+	bool IsValid() { return Data.Length() > 0; }
 	void Get(char *Buf) const;
 	LString Get() const;
 	void Set(const char *Buf);
