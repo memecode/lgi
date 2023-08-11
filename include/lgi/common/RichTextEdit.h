@@ -77,38 +77,38 @@ public:
 					LFontType *FontInfo = 0);
 	~LRichTextEdit();
 
-	const char *GetClass() { return "LRichTextEdit"; }
+	const char *GetClass() override { return "LRichTextEdit"; }
 
 	// Data
-	const char *Name();
-	bool Name(const char *s);
-	const char16 *NameW();
-	bool NameW(const char16 *s);
-	int64 Value();
-	void Value(int64 i);
-	const char *GetMimeType() { return "text/html"; }
+	const char *Name() override;
+	bool Name(const char *s) override;
+	const char16 *NameW() override;
+	bool NameW(const char16 *s) override;
+	int64 Value() override;
+	void Value(int64 i) override;
+	const char *GetMimeType() override { return "text/html"; }
 	int GetSize();
-	const char *GetCharset();
-	void SetCharset(const char *s);
+	const char *GetCharset() override;
+	void SetCharset(const char *s) override;
 
 	ssize_t HitTest(int x, int y);
 	bool DeleteSelection(char16 **Cut = 0);
 	bool SetSpellCheck(class LSpellCheck *sp);
 	
-	bool GetFormattedContent(const char *MimeType, LString &Out, LArray<ContentMedia> *Media = NULL);
+	bool GetFormattedContent(const char *MimeType, LString &Out, LArray<ContentMedia> *Media = NULL) override;
 
 	// Dom	
-	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
-	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override;
 
 	// Font
-	LFont *GetFont();
-	void SetFont(LFont *f, bool OwnIt = false);
-	void SetFixedWidthFont(bool i);
+	LFont *GetFont() override;
+	void SetFont(LFont *f, bool OwnIt = false) override;
+	void SetFixedWidthFont(bool i) override;
 
 	// Options
-	void SetTabSize(uint8_t i);
-	void SetReadOnly(bool i);
+	void SetTabSize(uint8_t i) override;
+	void SetReadOnly(bool i) override;
 	bool ShowStyleTools();
 	void ShowStyleTools(bool b);
 
@@ -141,33 +141,33 @@ public:
 	LRect GetArea(RectType Type);
 
 	/// Sets the wrapping on the control, use #L_WRAP_NONE or #L_WRAP_REFLOW
-	void SetWrapType(LDocWrapType i);
+	void SetWrapType(LDocWrapType i) override;
 	
 	// State / Selection
 	void SetCursor(int i, bool Select, bool ForceFullUpdate = false);
-	ssize_t IndexAt(int x, int y);
-	bool IsDirty();
+	ssize_t IndexAt(int x, int y) override;
+	bool IsDirty() override;
 	void IsDirty(bool d);
-	bool HasSelection();
-	void UnSelectAll();
-	void SelectWord(size_t From);
-	void SelectAll();
-	ssize_t GetCaret(bool Cursor = true);
-	bool GetLineColumnAtIndex(LPoint &Pt, ssize_t Index = -1);
-	size_t GetLines();
-	void GetTextExtent(int &x, int &y);
-	char *GetSelection();
+	bool HasSelection() override;
+	void UnSelectAll() override;
+	void SelectWord(size_t From) override;
+	void SelectAll() override;
+	ssize_t GetCaret(bool Cursor = true) override;
+	bool GetLineColumnAtIndex(LPoint &Pt, ssize_t Index = -1) override;
+	size_t GetLines() override;
+	void GetTextExtent(int &x, int &y) override;
+	char *GetSelection() override;
 	void SetStylePrefix(LString s);
 	bool IsBusy(bool Stop = false);
 
 	// File IO
-	bool Open(const char *Name, const char *Cs = 0);
-	bool Save(const char *Name, const char *Cs = 0);
+	bool Open(const char *Name, const char *Cs = 0) override;
+	bool Save(const char *Name, const char *Cs = 0) override;
 
 	// Clipboard IO
-	bool Cut();
-	bool Copy();
-	bool Paste();
+	bool Cut() override;
+	bool Copy() override;
+	bool Paste() override;
 
 	// Undo/Redo
 	void Undo();
@@ -178,28 +178,28 @@ public:
 	// Action UI
 	virtual void DoGoto(std::function<void(bool)> Callback);
 	virtual void DoCase(std::function<void(bool)> Callback, bool Upper);
-	virtual void DoFind(std::function<void(bool)> Callback);
+	virtual void DoFind(std::function<void(bool)> Callback) override;
 	virtual void DoFindNext(std::function<void(bool)> Callback);
-	virtual void DoReplace(std::function<void(bool)> Callback);
+	virtual void DoReplace(std::function<void(bool)> Callback) override;
 
 	// Action Processing	
 	bool ClearDirty(bool Ask, const char *FileName = 0);
 	void UpdateScrollBars(bool Reset = false);
 	int GetLine();
 	void SetLine(int Line);
-	LDocFindReplaceParams *CreateFindReplaceParams();
-	void SetFindReplaceParams(LDocFindReplaceParams *Params);
-	void OnAddStyle(const char *MimeType, const char *Styles);
+	LDocFindReplaceParams *CreateFindReplaceParams() override;
+	void SetFindReplaceParams(LDocFindReplaceParams *Params) override;
+	void OnAddStyle(const char *MimeType, const char *Styles) override;
 
 	// Object Events
 	bool OnFind(LFindReplaceCommon *Params);
 	bool OnReplace(LFindReplaceCommon *Params);
 	bool OnMultiLineTab(bool In);
 	void OnSetHidden(int Hidden);
-	void OnPosChange();
-	void OnCreate();
-	void OnEscape(LKey &K);
-	bool OnMouseWheel(double Lines);
+	void OnPosChange() override;
+	void OnCreate() override;
+	void OnEscape(LKey &K) override;
+	bool OnMouseWheel(double Lines) override;
 
 	// Capability target stuff
 	// bool NeedsCapability(const char *Name, const char *Param = NULL);
@@ -207,26 +207,26 @@ public:
 	// void OnCloseInstaller();
 
 	// Window Events
-	void OnFocus(bool f);
-	void OnMouseClick(LMouse &m);
-	void OnMouseMove(LMouse &m);
-	bool OnKey(LKey &k);
-	void OnPaint(LSurface *pDC);
-	LMessage::Result OnEvent(LMessage *Msg);
-	int OnNotify(LViewI *Ctrl, LNotification n);
-	void OnPulse();
-	int OnHitTest(int x, int y);
-	bool OnLayout(LViewLayoutInfo &Inf);
+	void OnFocus(bool f) override;
+	void OnMouseClick(LMouse &m) override;
+	void OnMouseMove(LMouse &m) override;
+	bool OnKey(LKey &k) override;
+	void OnPaint(LSurface *pDC) override;
+	LMessage::Result OnEvent(LMessage *Msg) override;
+	int OnNotify(LViewI *Ctrl, LNotification n) override;
+	void OnPulse() override;
+	int OnHitTest(int x, int y) override;
+	bool OnLayout(LViewLayoutInfo &Inf) override;
 
 	// D'n'd target
-	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState);
-	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState);
+	int WillAccept(LDragFormats &Formats, LPoint Pt, int KeyState) override;
+	int OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState) override;
 
 	// Virtuals
 	bool Insert(size_t At, const char16 *Data, ssize_t Len) override;
 	bool Delete(size_t At, ssize_t Len) override;
-	virtual void OnEnter(LKey &k);
-	virtual void OnUrl(char *Url);
+	virtual void OnEnter(LKey &k) override;
+	virtual void OnUrl(char *Url) override;
 	virtual void DoContextMenu(LMouse &m);
 
 	#if _DEBUG
