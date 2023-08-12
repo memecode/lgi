@@ -6,9 +6,10 @@
 
 class LgiClass LRegKey
 {
-	HKEY k, Root;
-	char s[256];
+	HKEY k = NULL, Root = NULL;
+	char s[256] = "";
 	LString KeyName;
+	LONG result = 0;
 
 public:
 	static bool AssertOnError;
@@ -19,23 +20,27 @@ public:
 		/// The access type required
 		bool WriteAccess,
 		/// The key name: you can use printf style syntax and extra arguments
-		char *Key,
+		const char *Key,
 		...
 	);
 	~LRegKey();
+
+	// Error handling
+	LONG GetErrorCode() { return result; }
+	LString GetErrorName();
 
 	/// Returns true if the key was openned
 	bool IsOk();
 	/// Creates the key if not present
 	bool Create();
 	/// Returns the key name
-	char *Name();
+	const char *Name();
 
 	/// Return a string value
 	char *GetStr
 	(
 		/// Name of the subkey or NULL for the default string.
-		const char *Name = 0
+		const char *Name = NULL
 	);
 	/// Return a string value
 	bool GetStr
@@ -54,11 +59,11 @@ public:
 	bool SetInt(const char *Name, uint32_t Value);
 
 	/// Get a binary value
-	bool GetBinary(char *Name, void *&Ptr, int &Len);
+	bool GetBinary(const char *Name, void *&Ptr, int &Len);
 	/// Set a binary value
-	bool SetBinary(char *Name, void *Ptr, int Len);
+	bool SetBinary(const char *Name, void *Ptr, int Len);
 	/// Delete a value
-	bool DeleteValue(char *Name = 0);
+	bool DeleteValue(const char *Name = NULL);
 	/// Delete a key
 	bool DeleteKey();
 

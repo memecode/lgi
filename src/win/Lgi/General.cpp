@@ -547,12 +547,10 @@ HKEY GetRootKey(char *s)
 
 bool LRegKey::AssertOnError = true;
 
-LRegKey::LRegKey(bool WriteAccess, char *Key, ...)
+LRegKey::LRegKey(bool WriteAccess, const char *Key, ...)
 {
 	char Buffer[1025];
 
-	k = 0;
-	s[0] = 0;
 	Root = (HKEY)-1;
 
 	va_list Arg;
@@ -579,8 +577,8 @@ LRegKey::LRegKey(bool WriteAccess, char *Key, ...)
 		else TestKey(HKEY_USERS, HKU)
 		else return;
 
-		LONG ret = RegOpenKeyExA(Root, SubKey, 0, WriteAccess ? KEY_ALL_ACCESS : KEY_READ, &k);
-		if (ret != ERROR_SUCCESS && ret != ERROR_FILE_NOT_FOUND)
+		result = RegOpenKeyExA(Root, SubKey, 0, WriteAccess ? KEY_ALL_ACCESS : KEY_READ, &k);
+		if (result != ERROR_SUCCESS && result != ERROR_FILE_NOT_FOUND)
 		{			
 			DWORD err = GetLastError();
 			if (AssertOnError)
@@ -592,6 +590,12 @@ LRegKey::LRegKey(bool WriteAccess, char *Key, ...)
 LRegKey::~LRegKey()
 {
 	if (k) RegCloseKey(k);
+}
+
+LString LRegKey::GetErrorName()
+{
+	LError err(result);
+	return err.GetMsg();
 }
 
 bool LRegKey::IsOk()
@@ -608,8 +612,8 @@ bool LRegKey::Create()
 		char *Sub = strchr(KeyName, '\\');
 		if (Sub)
 		{
-			LONG Ret = RegCreateKeyA(Root, Sub+1, &k);
-			if (Ret == ERROR_SUCCESS)
+			result = RegCreateKeyA(Root, Sub+1, &k);
+			if (result == ERROR_SUCCESS)
 			{
 				Status = IsOk();
 			}
@@ -625,16 +629,16 @@ bool LRegKey::Create()
 	return Status;
 }
 
-char *LRegKey::Name()
+const char *LRegKey::Name()
 {
 	return KeyName;
 }
 
-bool LRegKey::DeleteValue(char *Name)
+bool LRegKey::DeleteValue(const char *Name)
 {
 	if (k)
 	{
-		if (RegDeleteValueA(k, Name) == ERROR_SUCCESS)
+		if ((result = RegDeleteValueA(k, Name)) == ERROR_SUCCESS)
 		{
 			return true;
 		}
@@ -661,8 +665,8 @@ bool LRegKey::DeleteKey()
 			k = 0;
 
 			HKEY Root = GetRootKey(KeyName);
-			int Ret = RegDeleteKeyA(Root, n);
-			Status = Ret == ERROR_SUCCESS;
+			result = RegDeleteKeyA(Root, n);
+			Status = result == ERROR_SUCCESS;
 			if (!Status)
 			{
 				if (AssertOnError)
@@ -684,8 +688,8 @@ char *LRegKey::GetStr(const char *Name)
 	}
 
 	DWORD Size = sizeof(s), Type;
-	LONG Ret = RegQueryValueExA(k, Name, 0, &Type, (uchar*)s, &Size);
-	if (Ret != ERROR_SUCCESS)
+	result = RegQueryValueExA(k, Name, 0, &Type, (uchar*)s, &Size);
+	if (result != ERROR_SUCCESS)
 	{
 		if (AssertOnError)
 			LAssert(!"RegQueryValueEx failed.");
@@ -705,14 +709,14 @@ bool LRegKey::GetStr(const char *Name, LString &Str)
 	}
 
 	DWORD Size = 0, Type;
-	LONG Ret = RegQueryValueExA(k, Name, 0, &Type, NULL, &Size);
-	if (Ret != ERROR_SUCCESS)
+	result = RegQueryValueExA(k, Name, 0, &Type, NULL, &Size);
+	if (result != ERROR_SUCCESS)
 		goto OnError;
 
 	{
 		LString Tmp((char*)NULL, Size);
-		Ret = RegQueryValueExA(k, Name, 0, &Type, (LPBYTE)Tmp.Get(), &Size);
-		if (Ret != ERROR_SUCCESS)
+		result = RegQueryValueExA(k, Name, 0, &Type, (LPBYTE)Tmp.Get(), &Size);
+		if (result != ERROR_SUCCESS)
 			goto OnError;
 			
 		Str = Tmp;
@@ -733,9 +737,9 @@ bool LRegKey::SetStr(const char *Name, const char *Value)
 		return false;
 	}
 
-	auto r = RegSetValueExA(k, Name, 0, REG_SZ, (uchar*)Value, Value ? (DWORD)strlen(Value) : 0);
-	LOG_WRITE("RegSetValueExA(%s,%s,'%s')=%i\n", KeyName.Get(), Name, Value, r);
-	if (r != ERROR_SUCCESS)
+	result = RegSetValueExA(k, Name, 0, REG_SZ, (uchar*)Value, Value ? (DWORD)strlen(Value) : 0);
+	LOG_WRITE("RegSetValueExA(%s,%s,'%s')=%i\n", KeyName.Get(), Name, Value, result);
+	if (result != ERROR_SUCCESS)
 	{
 		if (AssertOnError)
 			LAssert(!"RegSetValueEx failed.");
@@ -749,8 +753,8 @@ bool LRegKey::GetInt(const char *Name, uint32_t &Value)
 {
 	if (!k) return false;
 	DWORD Size = sizeof(Value), Type;
-	LSTATUS r = RegQueryValueExA(k, Name, 0, &Type, (uchar*)&Value, &Size);
-	return r == ERROR_SUCCESS;
+	result = RegQueryValueExA(k, Name, 0, &Type, (uchar*)&Value, &Size);
+	return result == ERROR_SUCCESS;
 }
 
 bool LRegKey::SetInt(const char *Name, uint32_t Value)
@@ -761,29 +765,30 @@ bool LRegKey::SetInt(const char *Name, uint32_t Value)
 		return false;
 	}
 	
-	auto r = RegSetValueExA(k, Name, 0, REG_DWORD, (uchar*)&Value, sizeof(Value));
-	LOG_WRITE("RegSetValueExA(%s,%s,%i)=%i\n", KeyName.Get(), Name, Value, r);
-	if (r == ERROR_SUCCESS)
+	result = RegSetValueExA(k, Name, 0, REG_DWORD, (uchar*)&Value, sizeof(Value));
+	LOG_WRITE("RegSetValueExA(%s,%s,%i)=%i\n", KeyName.Get(), Name, Value, result);
+	if (result == ERROR_SUCCESS)
 		return true;
 
-	LgiTrace("%s:%i - RegSetValueExA(%s) returned error: %x.\n", _FL, Name, r);
+	LgiTrace("%s:%i - RegSetValueExA(%s) returned error: %x.\n", _FL, Name, result);
 	return false;
 }
 
-bool LRegKey::GetBinary(char *Name, void *&Ptr, int &Len)
+bool LRegKey::GetBinary(const char *Name, void *&Ptr, int &Len)
 {
 	DWORD Size = 0, Type;
-	if (k && RegQueryValueExA(k, Name, 0, &Type, 0, &Size) == ERROR_SUCCESS)
+	if (k && (result = RegQueryValueExA(k, Name, 0, &Type, 0, &Size)) == ERROR_SUCCESS)
 	{
 		Len = Size;
 		Ptr = new uchar[Len];
-		return RegQueryValueExA(k, Name, 0, &Type, (uchar*)Ptr, &Size) == ERROR_SUCCESS;
+		result = RegQueryValueExA(k, Name, 0, &Type, (uchar*)Ptr, &Size);
+		return result == ERROR_SUCCESS;
 	}
 
 	return false;
 }
 
-bool LRegKey::SetBinary(char *Name, void *Ptr, int Len)
+bool LRegKey::SetBinary(const char *Name, void *Ptr, int Len)
 {
 	LAssert(!"Not impl.");
 	return false;
@@ -794,8 +799,7 @@ bool LRegKey::GetKeyNames(List<char> &n)
 	FILETIME t;
 	TCHAR Buf[256];
 	DWORD Size = CountOf(Buf), i = 0;
-	LSTATUS Status;
-	while ((Status = RegEnumKeyEx(k, i++, Buf, &Size, 0, 0, 0, &t)) == ERROR_SUCCESS)
+	while ((result = RegEnumKeyEx(k, i++, Buf, &Size, 0, 0, 0, &t)) == ERROR_SUCCESS)
 	{
 		n.Insert(WideToUtf8(Buf));
 		Size = sizeof(Buf);
@@ -807,7 +811,7 @@ bool LRegKey::GetValueNames(List<char> &n)
 {
 	TCHAR Buf[256];
 	DWORD Type, Size = CountOf(Buf), i = 0;
-	while (RegEnumValue(k, i++, Buf, &Size, 0, &Type, 0, 0) == ERROR_SUCCESS)
+	while ((result = RegEnumValue(k, i++, Buf, &Size, 0, &Type, 0, 0)) == ERROR_SUCCESS)
 	{
 		n.Insert(WideToUtf8(Buf));
 		Size = sizeof(Buf);
