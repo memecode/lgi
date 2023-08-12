@@ -48,7 +48,6 @@ LThreadWorker::LThreadWorker(LThreadTarget *First, const char *ThreadName) :
 	LThread(ThreadName),
 	LMutex("LThreadWorker")
 {
-	Loop = false;
 	if (First)
 		Attach(First);
 }
@@ -60,9 +59,9 @@ LThreadWorker::~LThreadWorker()
 
 void LThreadWorker::Stop()
 {
-	if (Loop)
+	if (!IsCancelled())
 	{
-		Loop = false;
+		Cancel();
 		while (!IsExited())
 			LSleep(1);
 		if (Lock(_FL))
@@ -83,7 +82,7 @@ void LThreadWorker::Attach(LThreadTarget *o)
 		Owners.Add(o);
 		if (Owners.Length() == 1)
 		{
-			Loop = true;
+			Cancel(false);
 			Run();
 		}
 	}
@@ -116,7 +115,7 @@ void LThreadWorker::DoJob(LThreadJob *j)
 
 int LThreadWorker::Main()
 {
-	while (Loop)
+	while (!IsCancelled())
 	{
 		LAutoPtr<LThreadJob> j;
 		if (Lock(_FL))

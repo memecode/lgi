@@ -132,11 +132,13 @@ public:
 #undef AddJob
 
 /// This parent class does the actual work of processing jobs.
-class LgiClass LThreadWorker : public LThread, public LMutex
+class LgiClass LThreadWorker :
+	public LThread,
+	public LMutex,
+	public LCancel
 {
 	LArray<LThreadTarget*> Owners;
 	LArray<LThreadJob*> Jobs;
-	bool Loop;
 
 public:
 	LThreadWorker(LThreadTarget *First, const char *ThreadName);
