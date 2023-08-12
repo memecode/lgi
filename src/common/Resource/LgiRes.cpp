@@ -1490,19 +1490,28 @@ bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, LAutoStrin
 // Menus
 LStringRes *LMenuRes::GetString(LXmlTag *Tag)
 {
-	if (Tag)
+	if (!Tag)
 	{
-		char *n = Tag->GetAttr("ref");
-		if (n)
-		{
-			int Ref = atoi(n);
-			LStringRes *s = Strings.Find(Ref);
-			if (s)
-				return s;
-		}
+		LAssert(!"No tag.");
+		return NULL;
 	}
 
-	return 0;
+	auto n = Tag->GetAttr("ref");
+	if (!n)
+	{
+		LAssert(!"no ref tag.");
+		return NULL;
+	}
+
+	int Ref = atoi(n);
+	LStringRes *s = Strings.Find(Ref);
+	if (!s)
+	{
+		LAssert(!"String id not found.");
+		return NULL;
+	}
+	
+	return s;
 }
 
 bool LMenuLoader::Load(LMenuRes *MenuRes, LXmlTag *Tag, ResFileFormat Format, TagHash *TagList)
@@ -1586,7 +1595,7 @@ bool LMenuLoader::Load(LMenuRes *MenuRes, LXmlTag *Tag, ResFileFormat Format, Ta
 					}
 					else
 					{
-						LAssert(0);
+						LAssert(!"invalid string.");
 					}
 				}
 			}
