@@ -80,20 +80,21 @@ bool OsAppArguments::Get(const char *Name, const char **Val)
 	return false;
 }
 
-void OsAppArguments::Set(char *CmdLine)
+void OsAppArguments::Set(const char *CmdLine)
 {
+	LgiTrace("%s:%i - OsAppArguments::Set(%s)\n", _FL, CmdLine);
 	d->Ptr.DeleteArrays();
 	
 	if (!CmdLine)
 		return;
 	
-	for (char *s = CmdLine; *s; )
+	for (auto s = CmdLine; *s; )
 	{
 		while (*s && strchr(WhiteSpace, *s)) s++;
 		if (*s == '\'' || *s == '\"')
 		{
-			char delim = *s++;
-			char *e = strchr(s, delim);
+			auto delim = *s++;
+			auto e = strchr(s, delim);
 			if (e)
 				d->Ptr.Add(NewStr(s, e - s));
 			else
@@ -103,7 +104,7 @@ void OsAppArguments::Set(char *CmdLine)
 		}
 		else
 		{
-			char *e = s;
+			auto e = s;
 			while (*e && !strchr(WhiteSpace, *e))
 				e++;
 			d->Ptr.Add(NewStr(s, e-s));
@@ -507,9 +508,9 @@ OsAppArguments *LApp::GetAppArgs()
 void LApp::SetAppArgs(OsAppArguments &AppArgs)
 {
 	if (IsOk())
-	{
 		d->Args = AppArgs;
-	}
+	else
+		LgiTrace("%s:%i - LApp::SetAppArgs not ok.\n", _FL);
 }
 
 bool LApp::InThread()
@@ -754,9 +755,9 @@ int LApp::KeyModFlags::FlagValue(const char *Name)
 	return 0;
 }
 
-::LString LApp::KeyModFlags::FlagsToString(int s)
+LString LApp::KeyModFlags::FlagsToString(int s)
 {
-	::LString::Array a;
+	LString::Array a;
 	for (int i=0; i<32; i++)
 	{
 		if (((1 << i) & s) != 0)
@@ -777,7 +778,7 @@ const char *LApp::GetArgumentAt(int n)
 
 bool LApp::GetOption(const char *Option, char *Dest, int DestLen)
 {
-	::LString Buf;
+	LString Buf;
 	if (GetOption(Option, Buf))
 	{
 		if (Dest)
@@ -790,58 +791,64 @@ bool LApp::GetOption(const char *Option, char *Dest, int DestLen)
 		}
 		return true;
 	}
+	// else LgiTrace("%s:%i - No option '%s'.\n", _FL, Option);
+
 	return false;
 }
 
 bool LApp::GetOption(const char *Option, LString &Buf)
 {
-	if (IsOk() && Option)
+	if (!IsOk() || !Option)
 	{
-		auto OptLen = strlen(Option);
-		for (int i=1; i<d->Args.Args; i++)
+		LgiTrace("%s:%i - param err.\n", _FL);
+		return false;
+	}
+	
+	auto OptLen = strlen(Option);
+	for (int i=1; i<d->Args.Args; i++)
+	{
+		auto a = d->Args.Arg[i];
+		if (!a)
+			continue;
+
+		// LgiTrace("\topt=%s arg=%s\n", Option, a);
+		if (strchr("-/\\", a[0]))
 		{
-			auto a = d->Args.Arg[i];
-			if (!a)
-				continue;
-
-			if (strchr("-/\\", a[0]))
+			if (strnicmp(a+1, Option, OptLen) == 0)
 			{
-				if (strnicmp(a+1, Option, OptLen) == 0)
+				const char *Arg = 0;
+				if (strlen(a+1+OptLen) > 0)
 				{
-					const char *Arg = 0;
-					if (strlen(a+1+OptLen) > 0)
-					{
-						Arg = a + 1 + OptLen;
-					}
-					else if (i < d->Args.Args - 1)
-					{
-						Arg = d->Args.Arg[i + 1];
-					}
-					
-					if (Arg)
-					{
-						if (strchr("\'\"", *Arg))
-						{
-							char Delim = *Arg++;
-							char *End = strchr(Arg, Delim);
-							if (End)
-							{
-								auto Len = End-Arg;
-								if (Len > 0)
-								    Buf.Set(Arg, Len);
-								else
-								    return false;
-							}
-							else return false;
-						}
-						else
-						{
-						    Buf = Arg;
-						}
-					}
-
-					return true;
+					Arg = a + 1 + OptLen;
 				}
+				else if (i < d->Args.Args - 1)
+				{
+					Arg = d->Args.Arg[i + 1];
+				}
+				
+				if (Arg)
+				{
+					if (strchr("\'\"", *Arg))
+					{
+						char Delim = *Arg++;
+						char *End = strchr(Arg, Delim);
+						if (End)
+						{
+							auto Len = End-Arg;
+							if (Len > 0)
+							    Buf.Set(Arg, Len);
+							else
+							    return false;
+						}
+						else return false;
+					}
+					else
+					{
+					    Buf = Arg;
+					}
+				}
+
+				return true;
 			}
 		}
 	}

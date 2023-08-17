@@ -244,7 +244,7 @@ bool LView::CommonEvents(LMessage::Result &result, LMessage *Msg)
 
 			auto r = (*callback.Get())();
 			result->Reset(new int64(r));
-			printf("M_VIEW_RUN_CALLBACK is done.\n");
+			// printf("M_VIEW_RUN_CALLBACK is done.\n");
 			break;
 		}
 		case M_THREAD_COMPLETED:

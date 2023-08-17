@@ -117,7 +117,7 @@ public:
 	OsAppArguments(int args, const char **arg);
 	~OsAppArguments();
 
-	void Set(char *CmdLine);
+	void Set(const char *CmdLine);
 	bool Get(const char *Name, const char **Val = NULL);
 	OsAppArguments &operator =(OsAppArguments &a);
 };
