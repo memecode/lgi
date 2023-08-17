@@ -23,7 +23,7 @@ static const char *MimeBase64			= "base64";
 
 const char *LMime::DefaultCharset =		"text/plain";
 
-int AltScore(char *Mt)
+int AltScore(LString Mt)
 {
 	int Score = 0;
 	if (Mt)
@@ -34,14 +34,13 @@ int AltScore(char *Mt)
 			Score = 2;
 	}
 	// printf("Score '%s' = %i\n", Mt, Score);
-	DeleteArray(Mt);
 	return Score;
 }
 
 int AltSortCmp(LMime **a, LMime **b)
 {
-	int a_score = AltScore((*a)->GetMimeType());
-	int b_score = AltScore((*b)->GetMimeType());
+	int a_score = AltScore((*a)->LGetMimeType());
+	int b_score = AltScore((*b)->LGetMimeType());
 	return a_score - b_score;
 }
 
