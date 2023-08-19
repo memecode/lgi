@@ -2195,7 +2195,7 @@ int64 LView::RunCallback(std::function<int64()> Callback, int timeoutMs, LCancel
 					(LMessage::Param)new std::function<int64()>(Callback),
 					(LMessage::Param)&result))
 	{
-		LgiTrace("%s:%i - PostEvent failed.\n", _FL);
+		LgiTrace("%s:%i - RunCallback PostEvent failed.\n", _FL);
 		return -1;
 	}
 	

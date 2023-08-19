@@ -137,12 +137,6 @@ public:
 ////////////////////////////////////////////////////////////////////
 ProjectNode::ProjectNode(IdeProject *p) : IdeCommon(p)
 {
-	Platforms = PLATFORM_ALL;
-	NodeId = 0;
-	Type = NodeNone;
-	ChildCount = -1;
-	IgnoreExpand = false;
-	Dep = 0;
 	Tag = NewStr("Node");
 }
 
@@ -658,7 +652,7 @@ bool ProjectNode::Serialize(bool Write)
 		if (!Write)
 		{
 			auto Full = GetFullPath();				
-			Dep = Project->GetApp()->OpenProject(Full, Project, false, true);
+			Dep = Project->GetApp()->OpenProject(Full, Project, false, this);
 		}
 	}
 	else

@@ -212,6 +212,7 @@ public:
 	LAutoPtr<BuildThread> Thread;
 	LHashTbl<ConstStrKey<char,false>, ProjectNode*> Nodes;
 	int NextNodeId;
+	ProjectNode *DepParent = NULL;
 
 	// Threads
 	LAutoPtr<class MakefileThread> CreateMakefile;
@@ -220,9 +221,10 @@ public:
 	LString UserFile;
 	LHashTbl<IntKey<int>,int> UserNodeFlags;
 
-	IdeProjectPrivate(AppWnd *a, IdeProject *project) :
+	IdeProjectPrivate(AppWnd *a, IdeProject *project, ProjectNode *depParent) :
 		Project(project),
-		Settings(project)
+		Settings(project),
+		DepParent(depParent)
 	{
 		App = a;
 		Dirty = false;
@@ -2007,10 +2009,10 @@ int BuildThread::Main()
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-IdeProject::IdeProject(AppWnd *App) : IdeCommon(NULL)
+IdeProject::IdeProject(AppWnd *App, ProjectNode *DepParent) : IdeCommon(NULL)
 {
 	Project = this;
-	d = new IdeProjectPrivate(App, this);
+	d = new IdeProjectPrivate(App, this, DepParent);
 	Tag = NewStr("Project");
 }
 
@@ -2055,11 +2057,8 @@ bool IdeProject::OnNode(const char *Path, ProjectNode *Node, bool Add)
 void IdeProject::ShowFileProperties(const char *File)
 {
 	ProjectNode *Node = NULL;
-	// char *fp = FindFullPath(File, &Node);
 	if (Node)
-	{
 		Node->OnProperties();
-	}
 }
 
 const char *IdeProject::GetFileComment()
@@ -3223,6 +3222,7 @@ void IdeProject::OnMouseClick(LMouse &m)
 		LSubMenu Sub;
 		Sub.AppendItem("New Folder", IDM_NEW_FOLDER);
 		Sub.AppendItem("New Web Folder", IDM_WEB_FOLDER);
+		Sub.AppendItem("Delete", IDM_DELETE, GetParentProject() != NULL);
 		Sub.AppendSeparator();
 		Sub.AppendItem("Build", IDM_BUILD);
 		Sub.AppendItem("Clean Project", IDM_CLEAN_PROJECT);
@@ -3250,6 +3250,17 @@ void IdeProject::OnMouseClick(LMouse &m)
 						GetSubFolder(this, Name->GetStr(), true);
 					delete d;
 				});
+				break;
+			}
+			case IDM_DELETE:
+			{
+				if (d->DepParent)
+				{
+					d->DepParent->Delete(); // will delete 'this'
+					return;
+				}
+				else
+					LAssert(!"Should be a project node for this dependancy");
 				break;
 			}
 			case IDM_WEB_FOLDER:

@@ -285,7 +285,7 @@ public:
 	IdeDoc *OpenFile(const char *FileName, NodeSource *Src = 0);
 	IdeDoc *NewDocWnd(const char *FileName, NodeSource *Src);
 	IdeDoc *GetCurrentDoc();
-	IdeProject *OpenProject(const char *FileName, IdeProject *ParentProj, bool Create = false, bool Dep = false);
+	IdeProject *OpenProject(const char *FileName, IdeProject *ParentProj, bool Create = false, ProjectNode *DepParent = NULL);
 	IdeProject *RootProject();
 	FindSymbolSystem *GetFindSym();
 	IdeDoc *TopDoc();

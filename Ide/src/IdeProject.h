@@ -126,7 +126,7 @@ class IdeProject : public LXmlFactory, public IdeCommon
 	bool OnNode(const char *Path, class ProjectNode *Node, bool Add);
 
 public:
-	IdeProject(AppWnd *App);
+	IdeProject(AppWnd *App, ProjectNode *DepParent = NULL);
 	~IdeProject();
 
 	bool IsWeb() { return false; }

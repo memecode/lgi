@@ -28,18 +28,19 @@ class ProjectNode :
 	public FtpCallback,
 	public NodeSource
 {
-	NodeType Type;
-	int NodeId;
-	int Platforms;
+	NodeType Type = NodeNone;
+	int NodeId = 0;
+	int Platforms = PLATFORM_ALL;
 	LString sFile;
 	LString sLocalCache;
 	LString sName;
 	LString Charset;
-	bool IgnoreExpand;
-	int64 ChildCount;
+	bool IgnoreExpand = false;
+	int64 ChildCount = -1;
 	LString Label;
 
-	IdeProject *Dep;
+	IdeProject *Dep = NULL;
+	ProjectNode *DepParent = NULL;
 	int LinkAgainst = true;
 
 	// Import process

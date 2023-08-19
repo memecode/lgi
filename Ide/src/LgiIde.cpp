@@ -3187,7 +3187,7 @@ LString PlatformFlagsToStr(int flags)
 	return LString(",").Join(a);
 }
 
-IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bool Create, bool Dep)
+IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bool Create, ProjectNode *DepParent)
 {	
 	if (!FileName)
 	{
@@ -3202,7 +3202,7 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 	}
 	
 
-	IdeProject *p = new IdeProject(this);
+	IdeProject *p = new IdeProject(this, DepParent);
 	if (!p)
 	{
 		LgiTrace("%s:%i - Error: mem alloc.\n", _FL);
@@ -3217,7 +3217,7 @@ IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bo
 		d->Projects.Insert(p);
 		d->OnFile(FileName, true);
 
-		if (!Dep)
+		if (!DepParent)
 		{
 			auto d = strrchr(FileName, DIR_CHAR);
 			if (d++)

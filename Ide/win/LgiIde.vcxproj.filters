@@ -240,16 +240,16 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="..\..\src\common\Coding\ExternCall.asm">
-      <Filter>Source Files</Filter>
-    </MASM>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Makefile.windows">
       <Filter>Build</Filter>
     </None>
     <None Include="..\haiku\buildHaiku.py">
       <Filter>Build</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="..\..\src\common\Coding\ExternCall.asm">
+      <Filter>Lgi</Filter>
+    </MASM>
   </ItemGroup>
 </Project>
