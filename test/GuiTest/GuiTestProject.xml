@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Project>
+	<Node Name="Source" Type="1" Platforms="15" Id="1">
+		<Node File="../../src/common/Db/DbTable.cpp" Type="2" Platforms="15" />
+		<Node File="../../src/common/Lgi/LgiMain.cpp" Type="2" Platforms="15" />
+		<Node File="./Main.cpp" Type="2" Platforms="15" />
+	</Node>
+	<Node Name="Headers" Type="1" Platforms="15" Id="2" />
+	<Node File="../../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
+	<Settings>
+		<Editor>
+			<TabSize>
+				<All>4</All>
+			</TabSize>
+			<IndentSize>
+				<All>4</All>
+			</IndentSize>
+			<UseHardTabs>
+				<All>1</All>
+			</UseHardTabs>
+		</Editor>
+		<General>
+			<Makefile>
+				<Haiku>haiku/Makefile.haiku</Haiku>
+			</Makefile>
+			<Executable>
+				<Haiku>
+					<Debug>gui_test</Debug>
+					<Release>gui_test</Release>
+				</Haiku>
+			</Executable>
+		</General>
+		<Build>
+			<TargetType>
+				<All>Executable</All>
+			</TargetType>
+			<IncludePaths>
+				<All>
+					<Debug>../../include</Debug>
+					<Release>../../include</Release>
+				</All>
+				<Haiku>
+					<Debug>../../include/lgi/haiku</Debug>
+					<Release>../../include/lgi/haiku</Release>
+				</Haiku>
+			</IncludePaths>
+			<Defines>
+				<Haiku>
+					<Debug>_GNU_SOURCE</Debug>
+					<Release>_GNU_SOURCE</Release>
+				</Haiku>
+			</Defines>
+			<Libraries>
+				<Haiku>
+					<Debug>be
+gnu</Debug>
+					<Release>be
+gnu</Release>
+				</Haiku>
+				<All />
+			</Libraries>
+		</Build>
+		<Advanced />
+		<Debug />
+	</Settings>
+</Project>

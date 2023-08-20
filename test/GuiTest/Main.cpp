@@ -454,7 +454,7 @@ bool DbTesting()
 
 int LgiMain(OsAppArguments &AppArgs)
 {
-	LApp a(AppArgs, "Lgi Test");
+	LApp a(AppArgs, "gui_test");
 	if (a.IsOk())
 	{
 		a.AppWnd = new App;

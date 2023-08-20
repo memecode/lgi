@@ -3,7 +3,7 @@
 #include "lgi/common/SharedMemory.h"
 #include "lgi/common/Variant.h"
 
-#ifndef HAIKU // unsupported in Haik
+#ifndef HAIKU // unsupported in Haiku
 
 #ifndef WIN32
 #include <sys/types.h>

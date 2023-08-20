@@ -115,28 +115,28 @@ protected:
 	
 	#if defined LGI_SDL
 	
-	void OnSDLEvent(LMessage *m);
+		void OnSDLEvent(LMessage *m);
 	
 	#elif defined LGI_COCOA
 	
-	LAutoPtr<LMenu> Default;
+		LAutoPtr<LMenu> Default;
 	
 	#elif defined WIN32
 
-	CRITICAL_SECTION StackTraceSync;
-	friend LONG __stdcall _ExceptionFilter_Redir(LPEXCEPTION_POINTERS e);
-	LONG __stdcall _ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId);
-	friend class LWindowsClass;
-	ClassContainer *GetClasses();
+		CRITICAL_SECTION StackTraceSync;
+		friend LONG __stdcall _ExceptionFilter_Redir(LPEXCEPTION_POINTERS e);
+		LONG __stdcall _ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId);
+		friend class LWindowsClass;
+		ClassContainer *GetClasses();
 
 	#elif defined LINUX
 	
-	friend class LClipBoard;
-	
-	// virtual void OnEvents();
-	void DeleteMeLater(LViewI *v);
-	void SetClipBoardContent(OsView Hnd, LVariant &v);
-	bool GetClipBoardContent(OsView Hnd, LVariant &v, LArray<char*> &Types);
+		friend class LClipBoard;
+		
+		// virtual void OnEvents();
+		void DeleteMeLater(LViewI *v);
+		void SetClipBoardContent(OsView Hnd, LVariant &v);
+		bool GetClipBoardContent(OsView Hnd, LVariant &v, LArray<char*> &Types);
 	
 	#endif
 
@@ -149,33 +149,33 @@ public:
 	// Static publics
 	#if defined(LINUX)
 
-	constexpr static const char *CfgLinuxKeysShift       = "Linux.Keys.Shift";
-	constexpr static const char *CfgLinuxKeysCtrl        = "Linux.Keys.Ctrl";
-	constexpr static const char *CfgLinuxKeysAlt         = "Linux.Keys.Alt";
-	constexpr static const char *CfgLinuxKeysSystem      = "Linux.Keys.System";
+		constexpr static const char *CfgLinuxKeysShift       = "Linux.Keys.Shift";
+		constexpr static const char *CfgLinuxKeysCtrl        = "Linux.Keys.Ctrl";
+		constexpr static const char *CfgLinuxKeysAlt         = "Linux.Keys.Alt";
+		constexpr static const char *CfgLinuxKeysSystem      = "Linux.Keys.System";
 
-	constexpr static const char *CfgLinuxMouseLeft       = "Linux.Mouse.Left";
-	constexpr static const char *CfgLinuxMouseMiddle     = "Linux.Mouse.Middle";
-	constexpr static const char *CfgLinuxMouseRight      = "Linux.Mouse.Right";
-	constexpr static const char *CfgLinuxMouseBack       = "Linux.Mouse.Back";
-	constexpr static const char *CfgLinuxMouseForward    = "Linux.Mouse.Forward";
+		constexpr static const char *CfgLinuxMouseLeft       = "Linux.Mouse.Left";
+		constexpr static const char *CfgLinuxMouseMiddle     = "Linux.Mouse.Middle";
+		constexpr static const char *CfgLinuxMouseRight      = "Linux.Mouse.Right";
+		constexpr static const char *CfgLinuxMouseBack       = "Linux.Mouse.Back";
+		constexpr static const char *CfgLinuxMouseForward    = "Linux.Mouse.Forward";
 
 	#elif defined(HAIKU)
 
-	constexpr static const char *CfgNetworkHttpProxy     = "Network.HttpProxy";
-	constexpr static const char *CfgNetworkHttpsProxy    = "Network.HttpsProxy";
-	constexpr static const char *CfgNetworkSocks5Proxy   = "Network.Socks5Proxy";
+		constexpr static const char *CfgNetworkHttpProxy     = "Network.HttpProxy";
+		constexpr static const char *CfgNetworkHttpsProxy    = "Network.HttpsProxy";
+		constexpr static const char *CfgNetworkSocks5Proxy   = "Network.Socks5Proxy";
 
 	#endif
 
-	constexpr static const char *CfgFontsGlyphSub        = "Fonts.GlyphSub";
-	constexpr static const char *CfgFontsPointSizeOffset = "Fonts.PointSizeOffset";
-	constexpr static const char *CfgFontsSystemFont      = "Fonts.SystemFont";
-	constexpr static const char *CfgFontsBoldFont        = "Fonts.BoldFont";
-	constexpr static const char *CfgFontsMonoFont        = "Fonts.MonoFont";
-	constexpr static const char *CfgFontsSmallFont       = "Fonts.SmallFont";
-	constexpr static const char *CfgFontsCaptionFont     = "Fonts.CaptionFont";
-	constexpr static const char *CfgFontsMenuFont        = "Fonts.MenuFont";
+	constexpr static const char *CfgFontsGlyphSub            = "Fonts.GlyphSub";
+	constexpr static const char *CfgFontsPointSizeOffset     = "Fonts.PointSizeOffset";
+	constexpr static const char *CfgFontsSystemFont          = "Fonts.SystemFont";
+	constexpr static const char *CfgFontsBoldFont            = "Fonts.BoldFont";
+	constexpr static const char *CfgFontsMonoFont            = "Fonts.MonoFont";
+	constexpr static const char *CfgFontsSmallFont           = "Fonts.SmallFont";
+	constexpr static const char *CfgFontsCaptionFont         = "Fonts.CaptionFont";
+	constexpr static const char *CfgFontsMenuFont            = "Fonts.MenuFont";
 	
 	/// Use 'LAppInst' to return a pointer to the LApp object
 	static LApp *ObjInstance();
