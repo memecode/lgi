@@ -119,6 +119,7 @@ enum IdeControls
 	IDC_METHOD_SEARCH,
 	IDC_SYMBOL_SEARCH,
 	IDC_PROJECT_TREE,
+	IDC_DETAIL_TABLE
 };
 
 enum IdeMenuCmds

@@ -93,17 +93,18 @@ void LDialog::OnPosChange()
 	LWindow::OnPosChange();
     if (Children.Length() == 1)
     {
-        List<LViewI>::I it = Children.begin();
-        LTableLayout *t = dynamic_cast<LTableLayout*>((LViewI*)it);
+        auto it = Children.begin();
+		LViewI *view = *it;
+        auto t = dynamic_cast<LTableLayout*>(view);
         if (t)
         {
-            LRect r = GetClient();
+            auto r = GetClient();
             r.Inset(LTableLayout::CellSpacing, LTableLayout::CellSpacing);
             t->SetPos(r);
-
-			// _Dump();
         }
+		else printf("%s:%i - t=null cls=%s\n", _FL, view->GetClass());
     }
+	else printf("%s:%i - children=%i\n", _FL, (int)Children.Length());
 }
 
 bool LDialog::LoadFromResource(int Resource, char *TagList)

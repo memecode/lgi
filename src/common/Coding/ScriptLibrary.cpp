@@ -224,7 +224,7 @@ bool SystemFunctions::Sprintf(LScriptArguments &Args)
 	if (!Fmt)
 		return false;
 
-	#if defined(LINUX) || defined(MAC)
+	#if defined(LINUX) || defined(MAC) || defined(HAIKU)
 	
 	// No support for sprintf with generated args... hack a string up
 	// Formatting widths etc not supported.

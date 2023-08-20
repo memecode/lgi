@@ -677,6 +677,10 @@ public:
 		#else
 		#define USER_DATA_FIRST 0
 		#endif
+		
+		#if defined(HAIKU) && !defined(_GNU_SOURCE)
+		#error "_GNU_SOURCE needs to be defined in your project settings"
+		#endif
 
 		#if defined(WINDOWS)
 		/* _ACRTIMP void __cdecl qsort_s(void*   _Base,

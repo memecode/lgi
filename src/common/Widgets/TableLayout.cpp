@@ -33,7 +33,7 @@ enum CellFlag
 };
 
 #define Izza(c)				dynamic_cast<c*>(v)
-// #define DEBUG_LAYOUT		105
+#define DEBUG_LAYOUT		723
 #define DEBUG_PROFILE		0
 #define DEBUG_DRAW_CELLS	0
 // #define DEBUG_CTRL_ID		105
@@ -386,6 +386,7 @@ public:
 	LTableLayout *Ctrl;
 
 	LStream &Log() { return PrintfLogger; }
+	bool GetDebugLayout() { return DebugLayout; }
 
 	// Object
 	LTableLayoutPrivate(LTableLayout *ctrl);
@@ -2220,7 +2221,11 @@ void LTableLayout::OnPosChange()
 {
 	LRect r = GetClient();
 	bool Up = SizeChanged() || d->LayoutDirty;	
-	// LgiTrace("%s:%i - Up=%i for Id=%i\n", _FL, Up, GetId());	
+	
+	#ifdef DEBUG_LAYOUT
+	// if (GetId() == DEBUG_LAYOUT) LgiTrace("%s:%i - Up=%i for Id=%i\n", _FL, Up, GetId());
+	#endif
+
 	if (Up)
 	{
 		d->PrevSize.x = r.X();
@@ -2278,8 +2283,7 @@ void LTableLayout::InvalidateLayout()
 			PostEvent(M_TABLE_LAYOUT);
 	}
 
-	if (!IsAttached())
-		Invalidate();
+	Invalidate();
 }
 
 LMessage::Result LTableLayout::OnEvent(LMessage *m)

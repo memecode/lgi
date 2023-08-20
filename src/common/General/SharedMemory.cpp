@@ -3,7 +3,7 @@
 #include "lgi/common/SharedMemory.h"
 #include "lgi/common/Variant.h"
 
-#ifndef BEOS // unsupported in Haik
+#ifndef HAIKU // unsupported in Haik
 
 #ifndef WIN32
 #include <sys/types.h>
@@ -140,7 +140,7 @@ public:
 ///////////////////////////////////////////////////////////////////////
 LSharedMemory::LSharedMemory(const char *Name, int Size)
 {
-	#ifndef BEOS
+	#ifndef HAIKU
 	d = new LSharedMemoryPrivate(Name, Size);
 	#else
 	d = NULL;
@@ -154,7 +154,7 @@ LSharedMemory::~LSharedMemory()
 
 void *LSharedMemory::GetPtr()
 {
-	#ifndef BEOS
+	#ifndef HAIKU
 	return d->GetPtr();
 	#else
 	return NULL;
@@ -163,7 +163,7 @@ void *LSharedMemory::GetPtr()
 
 int LSharedMemory::GetSize()
 {
-	#ifndef BEOS
+	#ifndef HAIKU
 	return d->Size;
 	#else
 	return 0;
@@ -172,7 +172,7 @@ int LSharedMemory::GetSize()
 
 void LSharedMemory::Destroy()
 {
-	#ifndef BEOS
+	#ifndef HAIKU
 	d->Destroy();
 	#endif
 }

@@ -4952,7 +4952,9 @@ int LgiMain(OsAppArguments &AppArgs)
 	if (a.IsOk())
 	{
 		a.AppWnd = new AppWnd;
+
 		// LClipBoard::UnitTests();
+		
 		a.Run();
 	}
 

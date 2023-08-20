@@ -2,10 +2,6 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <sys/types.h>
-#ifndef WIN32
-#include <sys/wait.h>
-#include <unistd.h>
-#endif
 #include <ctype.h>
 
 #ifndef _GNU_SOURCE
@@ -366,11 +362,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	{
 		using namespace Gtk;
 		auto cfm = PANGO_CAIRO_FONT_MAP(fm);
-		#ifdef MAC
-		double Dpi = 80.0;
-		#else
 		double Dpi = 96.0;
-		#endif
 
 		LFile::Path p(LSP_APP_ROOT);
 		p += "lgi-conf.json";
@@ -493,11 +485,7 @@ OsThreadId LApp::GetGuiThreadId()
 
 OsProcessId LApp::GetProcessId()
 {
-    #ifdef WIN32
-	return GetCurrentProcessId();
-    #else
 	return getpid();
-	#endif
 }
 
 OsAppArguments *LApp::GetAppArgs()
@@ -658,30 +646,14 @@ bool LApp::PostEvent(LViewI *View, int Msg, LMessage::Param a, LMessage::Param b
 		if (now - prev >= 1000)
 		{
 			prev = now;
-			#if defined(WIN32)
-				char s[256];
-				sprintf_s(s, sizeof(s), 
-			#else
-				printf(
-			#endif
-				"PostEvent Que=" LPrintfSizeT " (msg=%i)\n", q->Length(), Msg);
-			#if defined(WIN32)
-				OutputDebugStringA(s);
-			#endif
+			printf("PostEvent Que=" LPrintfSizeT " (msg=%i)\n", q->Length(), Msg);
 			
-			#ifdef LINUX
 			LHashTbl<IntKey<int>, size_t> MsgCounts;
 			for (auto &msg: *q)
 				MsgCounts.Add(msg.m, MsgCounts.Find(msg.m) + 1);
 
 			for (auto c: MsgCounts)
 				printf("    %i->%i\n", c.key, (int)c.value);
-				
-			if (Msg == 916)
-			{
-				int asd=0;
-			}
-			#endif
 		}
 	}
 	#endif
@@ -1077,7 +1049,6 @@ bool LApp::GetAppsForMimeType(const char *Mime, LArray<::LAppInfo> &Apps)
 	return Apps.Length() > 0;
 }
 
-#if defined(LINUX)
 LLibrary *LApp::GetWindowManagerLib()
 {
 	if (this != NULL && !d->WmLib)
@@ -1140,7 +1111,6 @@ bool LApp::GetClipBoardContent(OsView Hnd, ::LVariant &v, ::LArray<char*> &Types
 {
 	return false;
 }
-#endif
 
 LSymLookup *LApp::GetSymLookup()
 {
@@ -1149,12 +1119,7 @@ LSymLookup *LApp::GetSymLookup()
 
 bool LApp::IsElevated()
 {
-	#ifdef WIN32
-	LAssert(!"What API works here?");
-	return false;
-	#else
 	return geteuid() == 0;
-	#endif
 }
 
 int LApp::GetCpuCount()
@@ -1169,7 +1134,6 @@ LFontCache *LApp::GetFontCache()
 	return d->FontCache;
 }
 
-#ifdef LINUX
 LApp::DesktopInfo::DesktopInfo(const char *file)
 {
 	File = file;
@@ -1273,7 +1237,7 @@ LApp::DesktopInfo::Section *LApp::DesktopInfo::GetSection(const char *Name, bool
 
 static const char *DefaultSection = "Desktop Entry";
 
-::LString LApp::DesktopInfo::Get(const char *Field, const char *Sect)
+LString LApp::DesktopInfo::Get(const char *Field, const char *Sect)
 {
 	if (Field)
 	{
@@ -1365,10 +1329,9 @@ bool LApp::SetApplicationIcon(const char *FileName)
 	di->Set("Icon", FileName);
 	return di->Update();
 }
-#endif
 
 ////////////////////////////////////////////////////////////////
-OsApplication *OsApplication::Inst = 0;
+OsApplication *OsApplication::Inst = NULL;
 
 class OsApplicationPriv
 {

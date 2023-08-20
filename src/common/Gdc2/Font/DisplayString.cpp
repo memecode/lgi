@@ -1716,8 +1716,8 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 			return;
 		}
 		
-		BFont *fnt = Font->Handle();
-		BView *view = pDC->Handle();
+		auto fnt = Font->Handle();
+		auto view = pDC->Handle();
 		if (!fnt || !view)
 		{
 			LgiTrace("%s:%i - No handle: %p/%p(%s).\n", _FL, fnt, view, pDC->GetClass());
@@ -1730,11 +1730,11 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 		font_height height = {0};
 		fnt->GetHeight(&height);
 
-		#if 0
+		#if 1
 		_debug = false;
 		for (auto &i: Info)
 		{
-			if (Stristr(i.Str, "Built: "))
+			if (Stristr(i.Str, "Arguments"))
 				_debug = true;
 		}		
 		if (_debug)
@@ -1746,7 +1746,7 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 		if (!Font->Transparent())
 		{
 			view->SetHighColor(Font->Back());
-			LRect clip;			
+			LRect clip;
 			if (r)
 				clip = *r;
 			else

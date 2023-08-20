@@ -697,6 +697,8 @@ void LView::Quit(bool DontDelete)
 
 bool LView::SetPos(LRect &p, bool Repaint)
 {
+	bool debug = GetId() == 723;
+
 	if (Pos != p)
 	{
 		Pos = p;
@@ -706,13 +708,16 @@ bool LView::SetPos(LRect &p, bool Repaint)
 		{
 			d->Hnd->ResizeTo(Pos.X(), Pos.Y());
 			d->Hnd->MoveTo(Pos.x1, Pos.y1);
+			d->Hnd->Invalidate();
 			lck.Unlock();
 		}
-		// else printf("%s:%i - SetPos no lock: d->Hnd=%p.\n", _FL, d->Hnd);
+		else if (debug)
+			printf("%s:%i - SetPos no lock: d->Hnd=%p.\n", _FL, d->Hnd);
 		
 		OnPosChange();
 	}
-	// else printf("%s:%i - SetPos noop: d->Hnd=%p.\n", _FL, d->Hnd);
+	else if (debug)
+		printf("%s:%i - SetPos noop: d->Hnd=%p.\n", _FL, d->Hnd);
 
 	return true;
 }

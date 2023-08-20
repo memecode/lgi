@@ -25,7 +25,7 @@ LString LgiArgsAppPath;
 ////////////////////////////////////////////////////////////////
 struct OsAppArgumentsPriv
 {
-	::LArray<const char*> Ptr;
+	LArray<const char*> Ptr;
 	
 	~OsAppArgumentsPriv()
 	{
@@ -145,52 +145,9 @@ void LgiCrashHandler(int Sig)
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-struct Msg
-{
-	LViewI *v;
-	int m;
-	LMessage::Param a, b;
-	
-	void Set(LViewI *V, int M, LMessage::Param A, LMessage::Param B)
-	{
-		v = V;
-		m = M;
-		a = A;
-		b = B;
-	}
-};
-
-// Out of thread messages... must lock before access.
-class LMessageQue : public LMutex
-{
-public:
-	typedef ::LArray<Msg> MsgArray;
-
-	LMessageQue() : LMutex("LMessageQue")
-	{
-	}
-
-	MsgArray *Lock(const char *file, int line)
-	{
-		if (!LMutex::Lock(file, line))
-			return NULL;
-		return &q;
-	}
-	
-	operator bool()
-	{
-		return q.Length() > 0;
-	}
-
-private:
-	MsgArray q;
-
-}	MsgQue;
-
-/////////////////////////////////////////////////////////////////////////////
 LApp *TheApp = NULL;
-LSkinEngine *LApp::SkinEngine;
-LMouseHook *LApp::MouseHook;
+LSkinEngine *LApp::SkinEngine = NULL;
+LMouseHook *LApp::MouseHook = NULL;
 
 LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	OsApplication(AppArgs.Args, AppArgs.Arg)
@@ -213,21 +170,8 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 		LgiArgsAppPath = AppPathLnk;
 
 	int WCharSz = sizeof(wchar_t);
-	#if defined(_MSC_VER)
-	LAssert(WCharSz == 2);
-	::LFile::Path Dlls(LgiArgsAppPath);
-	Dlls--;
-	SetDllDirectoryA(Dlls);
-	#else
 	LAssert(WCharSz == 4);
-	#endif
 
-	#ifdef _MSC_VER
-	SetEnvironmentVariable(_T("GTK_CSD"), _T("0"));
-	#else
-	setenv("GTK_CSD", "0", true);
-	#endif
-  	
 	// We want our printf's NOW!
 	setvbuf(stdout,(char *)NULL,_IONBF,0); // print mesgs immediately.
 
@@ -352,11 +296,7 @@ OsThreadId LApp::GetGuiThreadId()
 
 OsProcessId LApp::GetProcessId()
 {
-	#ifdef WIN32
-	return GetCurrentProcessId();
-	#else
 	return getpid();
-	#endif
 }
 
 OsAppArguments *LApp::GetAppArgs()
@@ -388,10 +328,13 @@ bool LApp::Run(OnIdleProc IdleCallback, void *IdleParam)
 		return false;
 	}
 
-	printf("Running main loop...\n");
-	d->Run();
-	printf("Main loop finished.\n");
+	if (!d->CmdLineProcessed)
+	{
+		d->CmdLineProcessed = true;
+		OnCommandLine();
+	}
 
+	d->Run();
 	return true;
 }
 
@@ -420,7 +363,7 @@ void LApp::OnUrl(const char *Url)
 		AppWnd->OnUrl(Url);
 }
 
-void LApp::OnReceiveFiles(::LArray<const char*> &Files)
+void LApp::OnReceiveFiles(LArray<const char*> &Files)
 {
 	if (AppWnd)
 		AppWnd->OnReceiveFiles(Files);
@@ -435,7 +378,7 @@ const char *LApp::GetArgumentAt(int n)
 
 bool LApp::GetOption(const char *Option, char *Dest, int DestLen)
 {
-	::LString Buf;
+	LString Buf;
 	if (GetOption(Option, Buf))
 	{
 		if (Dest)
@@ -451,7 +394,7 @@ bool LApp::GetOption(const char *Option, char *Dest, int DestLen)
 	return false;
 }
 
-bool LApp::GetOption(const char *Option, ::LString &Buf)
+bool LApp::GetOption(const char *Option, LString &Buf)
 {
 	if (IsOk() && Option)
 	{
@@ -509,7 +452,7 @@ bool LApp::GetOption(const char *Option, ::LString &Buf)
 
 void LApp::OnCommandLine()
 {
-	::LArray<const char*> Files;
+	LArray<const char*> Files;
 
 	for (int i=1; i<GetAppArgs()->Args; i++)
 	{
@@ -522,9 +465,7 @@ void LApp::OnCommandLine()
 
 	// call app
 	if (Files.Length() > 0)
-	{
 		OnReceiveFiles(Files);
-	}
 
 	// clear up
 	Files.DeleteArrays();
@@ -572,71 +513,6 @@ bool LApp::GetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps)
 	return Apps.Length() > 0;
 }
 
-#if defined(LINUX)
-LLibrary *LApp::GetWindowManagerLib()
-{
-	if (this != NULL && !d->WmLib)
-	{
-		char Lib[32];
-		WindowManager Wm = LGetWindowManager();
-		switch (Wm)
-		{
-			case WM_Kde:
-				strcpy(Lib, "liblgikde3");
-				break;
-			case WM_Gnome:
-				strcpy(Lib, "liblgignome2");
-				break;
-			default:
-				strcpy(Lib, "liblgiother");
-				break;
-		}
-		#ifdef _DEBUG
-		strcat(Lib, "d");
-		#endif
-		
-		d->WmLib = new LLibrary(Lib, true);
-		if (d->WmLib)
-		{
-			if (d->WmLib->IsLoaded())
-			{
-				Proc_LgiWmInit WmInit = (Proc_LgiWmInit) d->WmLib->GetAddress("LgiWmInit");
-				if (WmInit)
-				{
-					WmInitParams Params;
-					// Params.Dsp = XObject::XDisplay();
-					Params.Args = d->Args.Args;
-					Params.Arg = d->Args.Arg;
-					
-					WmInit(&Params);
-				}
-				// else printf("%s:%i - Failed to find method 'LgiWmInit' in WmLib.\n", __FILE__, __LINE__);
-			}
-			// else printf("%s:%i - couldn't load '%s.so'\n", __FILE__, __LINE__, Lib);
-		}
-		// else printf("%s:%i - alloc error\n", __FILE__, __LINE__);
-	}
-	
-	return d->WmLib && d->WmLib->IsLoaded() ? d->WmLib : 0;
-}
-
-void LApp::DeleteMeLater(LViewI *v)
-{
-	d->DeleteLater.Add(v);
-}
-
-void LApp::SetClipBoardContent(OsView Hnd, ::LVariant &v)
-{
-	// Store the clipboard data we will serve
-	d->ClipData = v;
-}
-
-bool LApp::GetClipBoardContent(OsView Hnd, ::LVariant &v, ::LArray<char*> &Types)
-{
-	return false;
-}
-#endif
-
 LSymLookup *LApp::GetSymLookup()
 {
 	return NULL;
@@ -644,17 +520,14 @@ LSymLookup *LApp::GetSymLookup()
 
 bool LApp::IsElevated()
 {
-	#ifdef WIN32
-	LAssert(!"What API works here?");
-	return false;
-	#else
 	return geteuid() == 0;
-	#endif
 }
 
 int LApp::GetCpuCount()
 {
-	return 1;
+	system_info info;
+	auto result = get_system_info(&info);
+	return result == B_OK ? info.cpu_count : 1;
 }
 
 LFontCache *LApp::GetFontCache()
@@ -664,206 +537,8 @@ LFontCache *LApp::GetFontCache()
 	return d->FontCache;
 }
 
-#ifdef LINUX
-LApp::DesktopInfo::DesktopInfo(const char *file)
-{
-	File = file;
-	Dirty = false;
-	if (File)
-		Serialize(false);
-}
-
-bool LApp::DesktopInfo::Serialize(bool Write)
-{
-	::LFile f;
-	
-	if (Write)
-	{
-		::LFile::Path p(File);
-		p--;
-		if (!p.Exists())
-			return false;
-	}
-	else if (!LFileExists(File))	
-		return false;
-	
-	if (!f.Open(File, Write?O_WRITE:O_READ))
-	{
-		LgiTrace("%s:%i - Failed to open '%s'\n", _FL, File.Get());
-		return false;
-	}
-
-	if (Write)
-	{
-		f.SetSize(0);
-		for (unsigned i=0; i<Data.Length(); i++)
-		{
-			Section &s = Data[i];
-			if (s.Name)
-				f.Print("[%s]\n", s.Name.Get());
-			for (unsigned n=0; n<s.Values.Length(); n++)
-			{
-				KeyPair &kp = s.Values[n];
-				f.Print("%s=%s\n", kp.Key.Get(), kp.Value.Get());
-			}
-			f.Print("\n");
-		}
-		Dirty = false;
-	}
-	else
-	{
-		::LString::Array Lines = f.Read().Split("\n");
-		Section *Cur = NULL;
-		for (unsigned i=0; i<Lines.Length(); i++)
-		{
-			::LString l = Lines[i].Strip();
-			if (l.Length() < 1)
-				continue;
-			int s = l.Find("[");
-			if (s >= 0)
-			{
-				int e = l.Find("]", ++s);
-				if (e >= 0)
-				{
-					Cur = &Data.New();
-					Cur->Name = l(s, e - s + 1);
-				}
-			}
-			else if ((s = l.Find("=")) >= 0)
-			{
-				if (!Cur)
-					Cur = &Data.New();
-				KeyPair &kp = Cur->Values.New();
-				kp.Key = l(0, s).Strip();
-				kp.Value = l(++s, -1).Strip();
-				
-				// printf("Read '%s': '%s'='%s'\n", Cur->Name.Get(), kp.Key.Get(), kp.Value.Get());
-			}
-		}
-	}
-
-	return true;
-}
-
-LApp::DesktopInfo::Section *LApp::DesktopInfo::GetSection(const char *Name, bool Create)
-{
-	for (unsigned i=0; i<Data.Length(); i++)
-	{
-		Section &s = Data[i];
-		if (s.Name && s.Name == Name)
-			return &s;
-		if (!s.Name && !Name)
-			return &s;
-	}
-	if (Create)
-	{
-		Section &s = Data.New();
-		s.Name = Name;
-		Dirty = true;
-		return &s;
-	}
-	
-	return NULL;
-}
-
-static const char *DefaultSection = "Desktop Entry";
-
-::LString LApp::DesktopInfo::Get(const char *Field, const char *Sect)
-{
-	if (Field)
-	{
-		Section *s = GetSection(Sect ? Sect : DefaultSection, false);
-		if (s)
-		{
-			KeyPair *kp = s->Get(Field, false, Dirty);
-			if (kp)
-			{
-				return kp->Value;
-			}
-		}
-	}
-	
-	return ::LString();
-}
-
-bool LApp::DesktopInfo::Set(const char *Field, const char *Value, const char *Sect)
-{
-	if (!Field)
-		return false;
-
-	Section *s = GetSection(Sect ? Sect : DefaultSection, true);
-	if (!s)
-		return false;
-
-	KeyPair *kp = s->Get(Field, true, Dirty);
-	if (!kp)
-		return false;
-
-	if (kp->Value != Value)
-	{
-		kp->Value = Value;
-		Dirty = true;
-	}
-	return true;
-}
-
-LApp::DesktopInfo *LApp::GetDesktopInfo()
-{
-	auto sExe = LGetExeFile();
-	::LFile::Path Exe(sExe);
-	::LFile::Path Desktop(LSP_HOME);
-	::LString Leaf;
-	Leaf.Printf("%s.desktop", Exe.Last().Get());
-	
-	Desktop += ".local/share/applications";
-	Desktop += Leaf;
-	
-	const char *Ex = Exe;
-	const char *Fn = Desktop;
-
-	if (d->DesktopInfo.Reset(new DesktopInfo(Desktop)))
-	{
-		// Do a sanity check...
-		::LString s = d->DesktopInfo->Get("Name");
-		if (!s && Name())
-			d->DesktopInfo->Set("Name", Name());
-		
-		s = d->DesktopInfo->Get("Exec");
-		if (!s || s != (const char*)sExe)
-			d->DesktopInfo->Set("Exec", sExe);
-		
-		s = d->DesktopInfo->Get("Type");
-		if (!s) d->DesktopInfo->Set("Type", "Application");
-
-		s = d->DesktopInfo->Get("Categories");
-		if (!s) d->DesktopInfo->Set("Categories", "Application;");
-
-		s = d->DesktopInfo->Get("Terminal");
-		if (!s) d->DesktopInfo->Set("Terminal", "false");
-		
-		d->DesktopInfo->Update();
-	}
-	
-	return d->DesktopInfo;
-}
-
-bool LApp::SetApplicationIcon(const char *FileName)
-{
-	DesktopInfo *di = GetDesktopInfo();
-	if (!di)
-		return false;
-	
-	::LString IcoPath = di->Get("Icon");
-	if (IcoPath == FileName)
-		return true;
-	
-	di->Set("Icon", FileName);
-	return di->Update();
-}
-#endif
-
 ////////////////////////////////////////////////////////////////
-OsApplication *OsApplication::Inst = 0;
+OsApplication *OsApplication::Inst = NULL;
 
 class OsApplicationPriv
 {

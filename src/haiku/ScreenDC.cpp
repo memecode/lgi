@@ -138,18 +138,20 @@ void LScreenDC::SetOrigin(int x, int y)
 		d->Client.y1 - OriginY);
 	#endif
 	
-	/*
-	d->v->SetOrigin( d->Client.x1 - OriginX,
-					 d->Client.y1 - OriginY);
-	*/
+	#if 0
+	d->v->SetOrigin( d->Client.x1 + OriginX,
+					 d->Client.y1 + OriginY);
+	#endif
 	
+	#if 1
 	if (d->Client.Valid())
 	{
 		// Reset the clipping region related to the origin.
 		auto clp = d->Client.ZeroTranslate();
-		clp.Offset(OriginX, OriginY);
+		clp.Offset(-OriginX, -OriginY);
 		d->v->ClipToRect(clp);
 	}
+	#endif
 }
 
 bool LScreenDC::GetClient(LRect *c)

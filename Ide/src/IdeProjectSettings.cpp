@@ -262,10 +262,10 @@ public:
 
 class LSettingDetail : public LLayout, public ResObject
 {
-	LTableLayout *Tbl;
-	IdeProjectSettingsPriv *d;
-	SettingInfo *Setting;
-	int Flags;
+	LTableLayout *Tbl = NULL;
+	IdeProjectSettingsPriv *d = NULL;
+	SettingInfo *Setting = NULL;
+	int Flags = 0;
 	
 	struct CtrlInfo
 	{
@@ -288,10 +288,7 @@ class LSettingDetail : public LLayout, public ResObject
 public:
 	LSettingDetail() : ResObject(Res_Custom)
 	{
-		Flags = 0;
-		d = NULL;
-		Setting = NULL;
-		AddView(Tbl = new LTableLayout);
+		AddView(Tbl = new LTableLayout(IDC_DETAIL_TABLE));
 	}
 	
 	void OnCreate()
@@ -331,7 +328,7 @@ public:
 		// Do value cell
 		c = Tbl->GetCell(0, CellY + 1);
 
-		LXmlTag *t = d->Editing.GetChildTag(Path);
+		auto t = d->Editing.GetChildTag(Path);
 		if (Setting->Type == GV_STRING)
 		{
 			Ctrls[i].Edit = new LEdit(IDC_EDIT_BASE + i, 0, 0, 60, 20);
@@ -452,14 +449,21 @@ public:
 			
 			Tbl->InvalidateLayout();
 			Tbl->AttachChildren();
-			Tbl->SetPos(GetClient());
+			auto c = GetClient();
+
+			LRect r = Tbl->Handle()->Frame();
+			printf("SettingDetail SetSetting %s id=%i r=%s\n", c.GetStr(), Tbl->GetId(), r.GetStr());
+
+			Tbl->SetPos(c);
 			Invalidate();
 		}
 	}
 	
 	void OnPosChange()
 	{
-		Tbl->SetPos(GetClient());
+		auto c = GetClient();
+		printf("SettingDetail OnPosChange %s\n", c.GetStr());
+		Tbl->SetPos(c);
 	}
 };
 
