@@ -3259,8 +3259,7 @@ void IdeProject::OnMouseClick(LMouse &m)
 					d->DepParent->Delete(); // will delete 'this'
 					return;
 				}
-				else
-					LAssert(!"Should be a project node for this dependancy");
+				else LAssert(!"Should be a project node for this dependancy");
 				break;
 			}
 			case IDM_WEB_FOLDER:

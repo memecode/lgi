@@ -24,30 +24,30 @@ const char sRelease[] = "Release";
 const char sAllPlatforms[] = "All";
 const char sCurrentPlatform[] =
 	#if defined WIN32
-	"Windows"
+		"Windows"
 	#elif defined LINUX
-	"Linux"
+		"Linux"
 	#elif defined MAC
-	"Mac"
+		"Mac"
 	#elif defined HAIKU
-	"Haiku"
+		"Haiku"
 	#else
-	#error "Not impl"
+		#error "Not impl"
 	#endif
 	;
 
 const char *sCompilers[] =
 {
 	#if defined WIN32
-	"VisualStudio",
-	"Cygwin",
-	"MingW",
-	"IAR",
+		"VisualStudio",
+		"Cygwin",
+		"MingW",
+		"IAR",
 	#elif defined MAC
-	"XCode",
+		"XCode",
 	#else
-	"gcc",
-	"cross",
+		"gcc",
+		"cross",
 	#endif
 	NULL
 };
@@ -118,40 +118,40 @@ struct SettingInfo
 
 SettingInfo AllSettings[] =
 {
-	{ProjRemoteUri,				GV_STRING,		"RemoteUri",		sRemote,	{SF_CROSSPLATFORM}},
-	{ProjRemotePass,			GV_STRING,		"RemotePass",		sRemote,	{SF_CROSSPLATFORM|SF_PASSWORD}},
+	{ProjRemoteUri,				GV_STRING,		"RemoteUri",			sRemote,	{SF_CROSSPLATFORM}},
+	{ProjRemotePass,			GV_STRING,		"RemotePass",			sRemote,	{SF_CROSSPLATFORM|SF_PASSWORD}},
 	
-	{ProjMakefile,				GV_STRING,		"Makefile",			sGeneral,	{SF_PLATFORM_SPECIFC|SF_FILE_SELECT}},
-	{ProjExe,					GV_STRING,		"Executable",		sGeneral,	{SF_PLATFORM_SPECIFC|SF_CONFIG_SPECIFIC|SF_FILE_SELECT}},
-	{ProjCompiler,				GV_INT32,		"Compiler",			sGeneral,	{SF_PLATFORM_SPECIFC|SF_ENUM}},
-	{ProjCCrossCompiler,		GV_STRING,		"CCrossCompiler",	sGeneral,	{SF_PLATFORM_SPECIFC|SF_FILE_SELECT}},
-	{ProjCppCrossCompiler,		GV_STRING,		"CppCrossCompiler",	sGeneral,	{SF_PLATFORM_SPECIFC|SF_FILE_SELECT}},
+	{ProjMakefile,				GV_STRING,		"Makefile",				sGeneral,	{SF_PLATFORM_SPECIFC|SF_FILE_SELECT}},
+	{ProjExe,					GV_STRING,		"Executable",			sGeneral,	{SF_PLATFORM_SPECIFC|SF_CONFIG_SPECIFIC|SF_FILE_SELECT}},
+	{ProjCompiler,				GV_INT32,		"Compiler",				sGeneral,	{SF_PLATFORM_SPECIFC|SF_ENUM}},
+	{ProjCCrossCompiler,		GV_STRING,		"CCrossCompiler",		sGeneral,	{SF_PLATFORM_SPECIFC|SF_FILE_SELECT}},
+	{ProjCppCrossCompiler,		GV_STRING,		"CppCrossCompiler",		sGeneral,	{SF_PLATFORM_SPECIFC|SF_FILE_SELECT}},
 
-	{ProjEnv,					GV_STRING,		"Environment",		sDebug,		{SF_CROSSPLATFORM|SF_MULTILINE}},
-	{ProjArgs,					GV_STRING,		"Arguments",		sDebug,		{SF_CROSSPLATFORM|SF_CONFIG_SPECIFIC}},
-	{ProjDebugAdmin,			GV_BOOL,		"DebugAdmin",		sDebug,		{SF_CROSSPLATFORM}},
-	{ProjInitDir,				GV_STRING,		"InitialDir",		sDebug,		{SF_CROSSPLATFORM|SF_FOLDER_SELECT}},
+	{ProjEnv,					GV_STRING,		"Environment",			sDebug,		{SF_CROSSPLATFORM|SF_MULTILINE}},
+	{ProjArgs,					GV_STRING,		"Arguments",			sDebug,		{SF_CROSSPLATFORM|SF_CONFIG_SPECIFIC}},
+	{ProjDebugAdmin,			GV_BOOL,		"DebugAdmin",			sDebug,		{SF_CROSSPLATFORM}},
+	{ProjInitDir,				GV_STRING,		"InitialDir",			sDebug,		{SF_CROSSPLATFORM|SF_FOLDER_SELECT}},
 	
-	{ProjDefines,				GV_STRING,		"Defines",			sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
-	{ProjIncludePaths,			GV_STRING,		"IncludePaths",		sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
-	{ProjSystemIncludes,		GV_STRING,		"SystemIncludes",	sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC|SF_PLATFORM_SPECIFC}},
-	{ProjLibraries,				GV_STRING,		"Libraries",		sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
-	{ProjLibraryPaths,			GV_STRING,		"LibraryPaths",		sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
-	{ProjTargetType,			GV_INT32,		"TargetType",		sBuild,		{SF_CROSSPLATFORM|SF_ENUM}},
-	{ProjTargetName,			GV_STRING,		"TargetName",		sBuild,		{SF_PLATFORM_SPECIFC|SF_CONFIG_SPECIFIC}},
-	{ProjApplicationIcon,		GV_STRING,		"ApplicationIcon",	sBuild,		{SF_PLATFORM_SPECIFC|SF_FILE_SELECT}},
+	{ProjDefines,				GV_STRING,		"Defines",				sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
+	{ProjIncludePaths,			GV_STRING,		"IncludePaths",			sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
+	{ProjSystemIncludes,		GV_STRING,		"SystemIncludes",		sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC|SF_PLATFORM_SPECIFC}},
+	{ProjLibraries,				GV_STRING,		"Libraries",			sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
+	{ProjLibraryPaths,			GV_STRING,		"LibraryPaths",			sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
+	{ProjTargetType,			GV_INT32,		"TargetType",			sBuild,		{SF_CROSSPLATFORM|SF_ENUM}},
+	{ProjTargetName,			GV_STRING,		"TargetName",			sBuild,		{SF_PLATFORM_SPECIFC|SF_CONFIG_SPECIFIC}},
+	{ProjApplicationIcon,		GV_STRING,		"ApplicationIcon",		sBuild,		{SF_PLATFORM_SPECIFC|SF_FILE_SELECT}},
 	
-	{ProjEditorTabSize,			GV_INT32,		"TabSize",			sEditor,	{SF_CROSSPLATFORM}},
-	{ProjEditorIndentSize,		GV_INT32,		"IndentSize",		sEditor,	{SF_CROSSPLATFORM}},
-	{ProjEditorShowWhiteSpace,	GV_BOOL,		"ShowWhiteSpace",	sEditor,	{SF_CROSSPLATFORM}},
-	{ProjEditorUseHardTabs,		GV_BOOL,		"UseHardTabs",		sEditor,	{SF_CROSSPLATFORM}},
-	{ProjCommentFile,			GV_STRING,		"CommentFile",		sEditor,	{SF_MULTILINE|SF_CROSSPLATFORM}},
-	{ProjCommentFunction,		GV_STRING,		"CommentFunction",	sEditor,	{SF_MULTILINE|SF_CROSSPLATFORM}},
+	{ProjEditorTabSize,			GV_INT32,		"TabSize",				sEditor,	{SF_CROSSPLATFORM}},
+	{ProjEditorIndentSize,		GV_INT32,		"IndentSize",			sEditor,	{SF_CROSSPLATFORM}},
+	{ProjEditorShowWhiteSpace,	GV_BOOL,		"ShowWhiteSpace",		sEditor,	{SF_CROSSPLATFORM}},
+	{ProjEditorUseHardTabs,		GV_BOOL,		"UseHardTabs",			sEditor,	{SF_CROSSPLATFORM}},
+	{ProjCommentFile,			GV_STRING,		"CommentFile",			sEditor,	{SF_MULTILINE|SF_CROSSPLATFORM}},
+	{ProjCommentFunction,		GV_STRING,		"CommentFunction",		sEditor,	{SF_MULTILINE|SF_CROSSPLATFORM}},
 	
-	{ProjMakefileRules,			GV_STRING,		"OtherMakefileRules", sAdvanced, {SF_MULTILINE}},
-	{ProjPostBuildCommands,		GV_STRING,		"PostBuildCommands", sAdvanced, {SF_PLATFORM_SPECIFC|SF_CONFIG_SPECIFIC|SF_MULTILINE}},
+	{ProjMakefileRules,			GV_STRING,		"OtherMakefileRules",	sAdvanced,	{SF_MULTILINE}},
+	{ProjPostBuildCommands,		GV_STRING,		"PostBuildCommands",	sAdvanced,	{SF_PLATFORM_SPECIFC|SF_CONFIG_SPECIFIC|SF_MULTILINE}},
 	
-	{ProjNone,					GV_NULL,		NULL,				NULL,		{0}},
+	{ProjNone,					GV_NULL,		NULL,					NULL,		{0}},
 };
 
 static void ClearEmptyTags(LXmlTag *t)
