@@ -451,8 +451,10 @@ public:
 			Tbl->AttachChildren();
 			auto c = GetClient();
 
+			/*
 			LRect r = Tbl->Handle()->Frame();
 			printf("SettingDetail SetSetting %s id=%i r=%s\n", c.GetStr(), Tbl->GetId(), r.GetStr());
+			*/
 
 			Tbl->SetPos(c);
 			Invalidate();

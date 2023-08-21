@@ -40,7 +40,7 @@ public:
 	int Sx, Sy;
 	bool Dynamic;
 	LKey LastKey;
-	Array<HookInfo> Hooks;
+	LArray<HookInfo> Hooks;
 	bool SnapToEdge;
 	LString Icon;
 	LRect Decor;
