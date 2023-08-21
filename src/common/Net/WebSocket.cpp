@@ -39,7 +39,7 @@ int LSelect::Select(LArray<LSocket*> &Results, bool Rd, bool Wr, int TimeoutMs)
 	// closed elsewhere we have to do something different... damn Linux,
 	// why can't you just like do the right thing?
 		
-	::LArray<struct pollfd> fds;
+	LArray<struct pollfd> fds;
 	fds.Length(s.Length());
 	for (unsigned i=0; i<s.Length(); i++)
 	{

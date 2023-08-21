@@ -21,7 +21,7 @@ using namespace Gtk;
 class LMemDCPrivate
 {
 public:
-	::LArray<LRect> Client;
+	LArray<LRect> Client;
 	// LRect Client;
 	cairo_t *cr;
 	LCairoSurfaceT Img;

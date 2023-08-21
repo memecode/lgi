@@ -24,7 +24,7 @@ using namespace Gtk;
 class LCairoSurfacePriv
 {
 public:
-	::LArray<LRect> Client;
+	LArray<LRect> Client;
 	cairo_t *cr;
 	LCairoSurfaceT Img;
 	LColourSpace CreateCs;

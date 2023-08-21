@@ -40,9 +40,9 @@ public:
 	int Sx, Sy;
 	bool Dynamic;
 	LKey LastKey;
-	::LArray<HookInfo> Hooks;
+	Array<HookInfo> Hooks;
 	bool SnapToEdge;
-	::LString Icon;
+	LString Icon;
 	LRect Decor;
 	gulong DestroySig;
 	LAutoPtr<LSurface> IconImg;
@@ -513,7 +513,7 @@ gboolean LWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 				if (k.vkey == LK_TAB || k.vkey == KEY(ISO_Left_Tab))
 				{
 					// Do tab between controls
-					::LArray<LViewI*> a;
+					LArray<LViewI*> a;
 					BuildTabStops(this, a);
 					int idx = a.IndexOf((LViewI*)v);
 					if (idx >= 0)
@@ -846,7 +846,7 @@ LWindowDragMotion(GtkWidget *widget, GdkDragContext *context, gint x, gint y, gu
 	if (!DndPointMap(v, p, t, Wnd, x, y))
 		return false;
 
-	::LString::Array Formats;
+	LString::Array Formats;
 	int Flags = GetAcceptFmts(Formats, context, t, p);
 	
 	if (Flags != DROPEFFECT_NONE)
@@ -1704,7 +1704,7 @@ static LAutoString DescribeView(LViewI *v)
 
 	char s[512];
 	int ch = 0;
-	::LArray<LViewI*> p;
+	LArray<LViewI*> p;
 	for (LViewI *i = v; i; i = i->GetParent())
 	{
 		p.Add(i);

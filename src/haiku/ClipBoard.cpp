@@ -122,7 +122,7 @@ bool LClipBoard::Empty()
 	return true;
 }
 
-bool LClipBoard::EnumFormats(::LArray<FormatType> &Formats)
+bool LClipBoard::EnumFormats(LArray<FormatType> &Formats)
 {
 	if (!d->Lock())
 	{

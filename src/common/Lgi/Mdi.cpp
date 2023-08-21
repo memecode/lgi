@@ -108,7 +108,7 @@ public:
 	bool Btn;
 	LRect Tabs;
 	LRect Content;
-	::LArray<LMdiChild*> Children;
+	LArray<LMdiChild*> Children;
 	
 	LMdiParentPrivate()
 	{
@@ -685,7 +685,7 @@ void LMdiParent::HasButton(bool b)
 		Invalidate();
 }
 
-::LArray<LMdiChild*> &LMdiParent::PrivChildren()
+LArray<LMdiChild*> &LMdiParent::PrivChildren()
 {
 	return d->Children;
 }
@@ -714,7 +714,7 @@ void LMdiParent::OnPaint(LSurface *pDC)
 	
 	int MarginPx = 10;
 	
-	::LArray<LMdiChild*> Views;
+	LArray<LMdiChild*> Views;
 	LMdiChild *Last = dynamic_cast<LMdiChild*>(d->Children.Last());
 	GetChildren(Views);
 	LColour cActive(L_WORKSPACE);
@@ -834,7 +834,7 @@ bool LMdiParent::OnViewKey(LView *View, LKey &Key)
 		#endif
 		if (Child)
 		{
-			::LArray<LMdiChild*> Views;
+			LArray<LMdiChild*> Views;
 			GetChildren(Views);
 			auto Idx = Views.IndexOf(Child);
 			int Inc = Key.Shift() ? -1 : 1;
@@ -854,7 +854,7 @@ bool LMdiParent::OnViewKey(LView *View, LKey &Key)
 
 void LMdiParent::OnMouseClick(LMouse &m)
 {
-	::LArray<LMdiChild*> Views;
+	LArray<LMdiChild*> Views;
 	if (GetChildren(Views))
 	{
 		for (int i=0; i<Views.Length(); i++)

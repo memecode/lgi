@@ -462,7 +462,7 @@ public:
 	void OnPosChange()
 	{
 		auto c = GetClient();
-		printf("SettingDetail OnPosChange %s\n", c.GetStr());
+		// printf("SettingDetail OnPosChange %s\n", c.GetStr());
 		Tbl->SetPos(c);
 	}
 };

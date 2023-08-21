@@ -23,7 +23,7 @@ void lgi_widget_remove(GtkContainer *wid, GtkWidget *child);
 
 // Other widget methods
 void lgi_widget_setpos(GtkWidget *wid, LRect rc);
-void BuildTabStops(LViewI *v, ::LArray<LViewI*> &a);
+void BuildTabStops(LViewI *v, LArray<LViewI*> &a);
 
 G_END_DECLS
 

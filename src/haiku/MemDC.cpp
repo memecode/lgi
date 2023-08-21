@@ -25,7 +25,7 @@
 class LMemDCPrivate
 {
 public:
-	::LArray<LRect> Client;
+	LArray<LRect> Client;
 	LColourSpace CreateCs = CsNone;
 	BBitmap *Bmp = NULL;
 	BView *View = NULL;

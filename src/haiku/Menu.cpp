@@ -83,7 +83,7 @@ struct MenuLock : public LLocker
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-static ::LArray<LSubMenu*> Active;
+static LArray<LSubMenu*> Active;
 
 LSubMenu::LSubMenu(OsSubMenu Hnd)
 {

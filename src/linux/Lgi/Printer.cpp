@@ -11,10 +11,10 @@ class LPrinterPrivate
 public:
 	GtkPrintOperation *Op;
 	GtkPrintSettings *Settings;
-	::LString JobName;
-	::LString Printer;
-	::LString Err;
-	::LString PrinterName;
+	LString JobName;
+	LString Printer;
+	LString Err;
+	LString PrinterName;
 	LPrintEvents *Events;
 	
 	LAutoPtr<LPrintDC> PrintDC;
@@ -52,7 +52,7 @@ bool LPrinter::Browse(LView *Parent)
 	return false;
 }
 
-bool LPrinter::Serialize(::LString &Str, bool Write)
+bool LPrinter::Serialize(LString &Str, bool Write)
 {
 	if (Write)
 		Str = d->Printer;
@@ -63,7 +63,7 @@ bool LPrinter::Serialize(::LString &Str, bool Write)
 }
 
 	
-::LString LPrinter::GetErrorMsg()
+LString LPrinter::GetErrorMsg()
 {
 	return d->Err;
 }

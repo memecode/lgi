@@ -282,10 +282,10 @@ public:
 	);
 
 	/// Return the path to the Lgi config file... (not the same as the application options, more global Lgi apps settings)
-	::LString GetConfigPath();
+	LString GetConfigPath();
 	
 	/// Gets the application conf stored in lgi.conf
-	::LString GetConfig(const char *Variable);
+	LString GetConfig(const char *Variable);
 
 	/// Sets a single tag in the config. (Not written to disk)
 	void SetConfig(const char *Variable, const char *Value);
@@ -430,7 +430,7 @@ public:
 			
 			const char *FlagName(int Flag); // Single flag to string
 			int FlagValue(const char *Name); // Single name to bitmask
-			::LString FlagsToString(int Flags); // Turn multiple flags to string
+			LString FlagsToString(int Flags); // Turn multiple flags to string
 		};	
 		
 		KeyModFlags *GetKeyModFlags();

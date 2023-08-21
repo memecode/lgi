@@ -671,7 +671,7 @@ void LApp::OnUrl(const char *Url)
 		AppWnd->OnUrl(Url);
 }
 
-void LApp::OnReceiveFiles(::LArray<const char*> &Files)
+void LApp::OnReceiveFiles(LArray<const char*> &Files)
 {
 	if (AppWnd)
 		AppWnd->OnReceiveFiles(Files);
@@ -735,7 +735,7 @@ LString LApp::KeyModFlags::FlagsToString(int s)
 		if (((1 << i) & s) != 0)
 			a.New() = FlagName(1 << i);
 	}
-	return ::LString(",").Join(a);
+	return LString(",").Join(a);
 }
 
 LApp::KeyModFlags *LApp::GetKeyModFlags()
@@ -830,7 +830,7 @@ bool LApp::GetOption(const char *Option, LString &Buf)
 
 void LApp::OnCommandLine()
 {
-	::LArray<const char*> Files;
+	LArray<const char*> Files;
 
 	for (int i=1; i<GetAppArgs()->Args; i++)
 	{
@@ -847,9 +847,9 @@ void LApp::OnCommandLine()
 	Files.DeleteArrays();
 }
 
-::LString LApp::GetFileMimeType(const char *File)
+LString LApp::GetFileMimeType(const char *File)
 {
-	::LString Status;
+	LString Status;
 	char Full[MAX_PATH_LEN] = "";
 
 	if (!LFileExists(File))
@@ -1107,7 +1107,7 @@ void LApp::SetClipBoardContent(OsView Hnd, ::LVariant &v)
 	d->ClipData = v;
 }
 
-bool LApp::GetClipBoardContent(OsView Hnd, ::LVariant &v, ::LArray<char*> &Types)
+bool LApp::GetClipBoardContent(OsView Hnd, ::LVariant &v, LArray<char*> &Types)
 {
 	return false;
 }
@@ -1181,11 +1181,11 @@ bool LApp::DesktopInfo::Serialize(bool Write)
 	}
 	else
 	{
-		::LString::Array Lines = f.Read().Split("\n");
+		LString::Array Lines = f.Read().Split("\n");
 		Section *Cur = NULL;
 		for (unsigned i=0; i<Lines.Length(); i++)
 		{
-			::LString l = Lines[i].Strip();
+			LString l = Lines[i].Strip();
 			if (l.Length() < 1)
 				continue;
 			int s = l.Find("[");
@@ -1252,7 +1252,7 @@ LString LApp::DesktopInfo::Get(const char *Field, const char *Sect)
 		}
 	}
 	
-	return ::LString();
+	return LString();
 }
 
 bool LApp::DesktopInfo::Set(const char *Field, const char *Value, const char *Sect)
@@ -1279,9 +1279,9 @@ bool LApp::DesktopInfo::Set(const char *Field, const char *Value, const char *Se
 LApp::DesktopInfo *LApp::GetDesktopInfo()
 {
 	auto sExe = LGetExeFile();
-	::LFile::Path Exe(sExe);
-	::LFile::Path Desktop(LSP_HOME);
-	::LString Leaf;
+	LFile::Path Exe(sExe);
+	LFile::Path Desktop(LSP_HOME);
+	LString Leaf;
 	Leaf.Printf("%s.desktop", Exe.Last().Get());
 	
 	Desktop += ".local/share/applications";
@@ -1293,7 +1293,7 @@ LApp::DesktopInfo *LApp::GetDesktopInfo()
 	if (d->DesktopInfo.Reset(new DesktopInfo(Desktop)))
 	{
 		// Do a sanity check...
-		::LString s = d->DesktopInfo->Get("Name");
+		LString s = d->DesktopInfo->Get("Name");
 		if (!s && Name())
 			d->DesktopInfo->Set("Name", Name());
 		

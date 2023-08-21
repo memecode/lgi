@@ -23,9 +23,9 @@ public:
 	int Sx, Sy;
 	bool Dynamic;
 	LKey LastKey;
-	::LArray<HookInfo> Hooks;
+	LArray<HookInfo> Hooks;
 	bool SnapToEdge;
-	::LString Icon;
+	LString Icon;
 	
 	// State
 	bool HadCreateEvent;
@@ -796,7 +796,7 @@ int LWindow::OnDrop(char *Format, ::LVariant *Data, LPoint Pt, int KeyState)
 	{
 		if (stricmp(Format, LGI_FileDropFormat) == 0)
 		{
-			::LArray<char*> Files;
+			LArray<char*> Files;
 			if (Data->IsBinary())
 			{
 				LToken Uri(	(char*)Data->Value.Binary.Data,
@@ -920,7 +920,7 @@ static LAutoString DescribeView(LViewI *v)
 
 	char s[512];
 	int ch = 0;
-	::LArray<LViewI*> p;
+	LArray<LViewI*> p;
 	for (LViewI *i = v; i; i = i->GetParent())
 	{
 		p.Add(i);

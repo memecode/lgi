@@ -134,9 +134,9 @@ LPoint LScreenDC::GetDpi()
 	return LScreenDpi();
 }
 
-::LString LScreenDC::Dump()
+LString LScreenDC::Dump()
 {
-	::LString s;
+	LString s;
 	s.Printf("LScreenDC size=%i,%i\n", d->x, d->y);
 	return s;
 }

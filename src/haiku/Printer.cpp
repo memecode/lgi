@@ -7,10 +7,10 @@
 class LPrinterPrivate
 {
 public:
-	::LString JobName;
-	::LString Printer;
-	::LString Err;
-	::LString PrinterName;
+	LString JobName;
+	LString Printer;
+	LString Err;
+	LString PrinterName;
 	LPrintEvents *Events;
 	
 	LAutoPtr<LPrintDC> PrintDC;

@@ -728,7 +728,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 	#else
 	
 		// Find the end of the process list
-		::LArray<LSubProcess*> p;
+		LArray<LSubProcess*> p;
 		for (LSubProcess *s=this; s; s=s->Child)
 		{
 			LAssert(!s->Child || s->Child->Parent == s);
@@ -746,7 +746,7 @@ bool LSubProcess::Start(bool ReadAccess, bool WriteAccess, bool MapStderrToStdou
 		#endif		
 		
 		#if defined(POSIX)
-		::LArray<Pipe> Pipes;
+		LArray<Pipe> Pipes;
 		Pipes.Length(Kids);
 		Pipes[0].Create(&Attr);
 		#if DEBUG_SUBPROCESS

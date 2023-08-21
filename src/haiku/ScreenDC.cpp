@@ -59,12 +59,10 @@ LScreenDC::LScreenDC(LView *view, void *param)
 
 	d->Bits = GdcD->GetBits();
 
-	/*
 	if (d->v)
-		d->Client = d->v->Frame();
+		d->Client = ((LRect)d->v->Frame()).ZeroTranslate();
 	else
 		LgiTrace("%s:%i - LScreenDC::LScreenDC - No view?\n", _FL);
-	*/
 }
 
 LScreenDC::~LScreenDC()
@@ -77,9 +75,9 @@ OsPainter LScreenDC::Handle()
 	return d->v;
 }
 
-::LString LScreenDC::Dump()
+LString LScreenDC::Dump()
 {
-	::LString s;
+	LString s;
 	s.Printf("LScreenDC size=%i,%i\n", d->x, d->y);
 	return s;
 }
@@ -138,9 +136,9 @@ void LScreenDC::SetOrigin(int x, int y)
 		d->Client.y1 - OriginY);
 	#endif
 	
-	#if 0
-	d->v->SetOrigin( d->Client.x1 + OriginX,
-					 d->Client.y1 + OriginY);
+	#if 1
+	d->v->SetOrigin( d->Client.x1 - OriginX,
+					 d->Client.y1 - OriginY);
 	#endif
 	
 	#if 1
@@ -148,7 +146,7 @@ void LScreenDC::SetOrigin(int x, int y)
 	{
 		// Reset the clipping region related to the origin.
 		auto clp = d->Client.ZeroTranslate();
-		clp.Offset(-OriginX, -OriginY);
+		clp.Offset(OriginX, OriginY);
 		d->v->ClipToRect(clp);
 	}
 	#endif

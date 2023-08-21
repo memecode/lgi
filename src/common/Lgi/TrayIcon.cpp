@@ -54,7 +54,7 @@ public:
 		int MyId;
 		NOTIFYICONDATAW	TrayIcon;
 		typedef HICON IconRef;
-		::LArray<IconRef> Icon;
+		LArray<IconRef> Icon;
 	
 	#elif LGI_COCOA
 	
@@ -65,14 +65,14 @@ public:
 
 	#elif defined(__GTK_H__)
 	
-		::LArray<LSurface*> Images;
+		LArray<LSurface*> Images;
 		#if USE_APPINDICATOR
 			AppIndicator *appind;
 		#else
 			GlibWrapper<GtkStatusIcon> tray_icon;
 		#endif
 		typedef GdkPixbuf *IconRef;
-		::LArray<IconRef> Icon;
+		LArray<IconRef> Icon;
 		uint64 LastClickTime;
 		gint DoubleClickTime;
 	
@@ -120,7 +120,7 @@ public:
 	#else
 
 		typedef LSurface *IconRef;
-		::LArray<IconRef> Icon;
+		LArray<IconRef> Icon;
 
 	#endif
 

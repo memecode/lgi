@@ -4757,7 +4757,7 @@ void AppWnd::FindSymbol(int ResultsSinkHnd, const char *Sym)
 	d->FindSym->Search(ResultsSinkHnd, Sym, d->Platform);
 }
 
-bool AppWnd::GetSystemIncludePaths(::LArray<LString> &Paths)
+bool AppWnd::GetSystemIncludePaths(LArray<LString> &Paths)
 {
 	if (d->SystemIncludePaths.Length() == 0)
 	{

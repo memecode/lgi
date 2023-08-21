@@ -25,7 +25,7 @@ using namespace Gtk;
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
-static ::LArray<LSubMenu*> Active;
+static LArray<LSubMenu*> Active;
 
 void SubMenuDestroy(LSubMenu *Item)
 {

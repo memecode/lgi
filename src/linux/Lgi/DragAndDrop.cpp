@@ -69,7 +69,7 @@ struct SignalInfo
 	gulong Sig;
 };
 
-static ::LArray<SignalInfo> ExistingSignals;
+static LArray<SignalInfo> ExistingSignals;
 
 void RemoveExistingSignals(OsView w)
 {
@@ -108,7 +108,7 @@ bool LDragDropSource::SetIcon(LSurface *Img, LRect *SubRgn)
 	return false;
 }
 
-bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, ::LString::Array &Files)
+bool LDragDropSource::CreateFileDrop(LDragData *OutputData, LMouse &m, LString::Array &Files)
 {
 	if (!OutputData || !Files.First())
 		return false;
@@ -163,7 +163,7 @@ LgiDragDataGet(GtkWidget        *widget,
 	Gtk::GList *node;
 	if (targets)
 	{
-		::LArray<LDragData> dd;
+		LArray<LDragData> dd;
 		for (node = g_list_first(targets); node != NULL; node = ((node) ? (((Gtk::GList *)(node))->next) : NULL))
         {
 			gchar *format = gdk_atom_name((GdkAtom)node->data);
@@ -268,7 +268,7 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 		return -1;
 	}
 	
-	::LArray<GtkTargetEntry> e;
+	LArray<GtkTargetEntry> e;
 	for (auto f: Formats.Formats)
 	{
 		Gtk::GtkTargetEntry &entry = e.New();

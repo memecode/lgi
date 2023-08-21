@@ -21,7 +21,7 @@ enum Ctrls
 	IDC_TXT,
 };
 
-void GStringTest()
+void LStringTest()
 {
 	LString a("This<TD>is<TD>a<TD>test");
 	a.RFind("<TD>");
@@ -36,7 +36,6 @@ void GStringTest()
 	LString left = src.LStrip();
 	LString right = src.RStrip();
 	LString both = src.Strip();
-	
 }
 
 LColourSpace RgbColourSpaces[] =
@@ -210,22 +209,53 @@ public:
 	}
 };
 
+struct OriginTest : public LView
+{
+	int offset = 0;
+
+	const char *GetClass() { return "OriginTest"; }
+
+	OriginTest(int x, int y, int off)
+	{
+		_Debug = true;
+
+		LRect r(0, 0, 99, 99);
+		r.Offset(x, y);
+		SetPos(r);
+
+		offset = off;
+	}
+
+	void OnPaint(LSurface *pDC)
+	{
+		auto c = GetClient();
+		printf("c=%s off=%i dc=%i,%i\n", GetPos().GetStr(), offset, pDC->X(), pDC->Y());
+		pDC->Colour(L_WHITE);
+		pDC->Rectangle();
+
+		pDC->SetOrigin(0, offset);
+
+		pDC->Colour(L_TEXT);
+		pDC->Box(10, 10, 30, 20);
+
+		LDisplayString ds(LSysFont, "abcdefg");
+		LSysFont->Colour(L_TEXT, L_HIGH);
+		LSysFont->Transparent(false);
+		ds.Draw(pDC, 40, 10);
+	}
+};
+
 class App : public LWindow
 {
 	LOptionsFile Opts;
-	LEdit *e;
-	LEdit *e2;
-	LTextLabel *Txt;
-	LTableLayout *Tbl;
+	LEdit *e = NULL;
+	LEdit *e2 = NULL;
+	LTextLabel *Txt = NULL;
+	LTableLayout *Tbl = NULL;
 
 public:
 	App() : Opts(LOptionsFile::PortableMode, AppName)
 	{
-		e = 0;
-		e2 = 0;
-		Txt = 0;
-		Tbl = 0;
-
 		LRect r(0, 0, 1000, 800);
 		SetPos(r);
 		Name(AppName);
@@ -239,46 +269,51 @@ public:
 		{
 			#if 1
 
-			LTabView *t = new LTabView(100);
-			t->Attach(this);
-			t->GetCss(true)->Padding("6px");
-
-			auto *tab = t->Append("First");
-			tab->GetCss(true)->FontStyle(LCss::FontStyleItalic);
-			tab->Append(new DnDtarget());
-			
-			tab = t->Append("Second");
-			tab->GetCss(true)->FontSize("14pt");
-			
-			tab = t->Append("Third");
-			tab->GetCss(true)->Color("red");
-			t->OnStyleChange();
+				AddView(new OriginTest(10, 10, 0));
+				AddView(new OriginTest(120, 10, 10));
 
 			#elif 0
 
-			AddView(Tbl = new LTableLayout(100));
-			GLayoutCell *c = Tbl->GetCell(0, 0);
+				LTabView *t = new LTabView(100);
+				t->Attach(this);
+				t->GetCss(true)->Padding("6px");
 
-			c->Add(Txt = new LTextLabel(IDC_TXT, 0, 0, -1, -1, "This is a test string. &For like\ntesting and stuff. "
-																"It has multiple\nlines to test wrapping."));
-			Txt->SetWrap(true);
-			//Txt->GetCss(true)->Color(LCss::ColorDef(LColour::Red));
-			// Txt->GetCss(true)->FontWeight(LCss::FontWeightBold);
-			// Txt->GetCss(true)->FontStyle(LCss::FontStyleItalic);
-			Txt->GetCss(true)->FontSize(LCss::Len("22pt"));
-			Txt->OnStyleChange();
-
-			c = Tbl->GetCell(1, 0);
-			c->Add(new LEdit(IDC_EDIT1, 0, 0, -1, -1));
+				auto *tab = t->Append("First");
+				tab->GetCss(true)->FontStyle(LCss::FontStyleItalic);
+				tab->Append(new DnDtarget());
+				
+				tab = t->Append("Second");
+				tab->GetCss(true)->FontSize("14pt");
+				
+				tab = t->Append("Third");
+				tab->GetCss(true)->Color("red");
+				t->OnStyleChange();
 
 			#elif 0
 
-			AddView(e = new LEdit(IDC_EDIT1, 10, 10, 200, 22));
-			AddView(e2 = new LEdit(IDC_EDIT1, 10, 50, 200, 22));
-			AddView(new LButton(IDC_BLT_TEST, 10, 200, -1, -1, "Blt Test"));
-			// e->Focus(true);
-			e->Password(true);
-			e->SetEmptyText("(this is a test)");
+				AddView(Tbl = new LTableLayout(100));
+				GLayoutCell *c = Tbl->GetCell(0, 0);
+
+				c->Add(Txt = new LTextLabel(IDC_TXT, 0, 0, -1, -1, "This is a test string. &For like\ntesting and stuff. "
+																	"It has multiple\nlines to test wrapping."));
+				Txt->SetWrap(true);
+				//Txt->GetCss(true)->Color(LCss::ColorDef(LColour::Red));
+				// Txt->GetCss(true)->FontWeight(LCss::FontWeightBold);
+				// Txt->GetCss(true)->FontStyle(LCss::FontStyleItalic);
+				Txt->GetCss(true)->FontSize(LCss::Len("22pt"));
+				Txt->OnStyleChange();
+
+				c = Tbl->GetCell(1, 0);
+				c->Add(new LEdit(IDC_EDIT1, 0, 0, -1, -1));
+
+			#elif 0
+
+				AddView(e = new LEdit(IDC_EDIT1, 10, 10, 200, 22));
+				AddView(e2 = new LEdit(IDC_EDIT1, 10, 50, 200, 22));
+				AddView(new LButton(IDC_BLT_TEST, 10, 200, -1, -1, "Blt Test"));
+				// e->Focus(true);
+				e->Password(true);
+				e->SetEmptyText("(this is a test)");
 
 			#endif
 			

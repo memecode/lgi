@@ -841,10 +841,6 @@ void LTreeItem::OnPaint(ItemPaintCtx &Ctx)
 	if (!d->Visible)
 		return;
 
-	auto debug = Stristr(GetText(), "Arguments") != NULL;
-	if (debug)
-		printf("Got debug\n");
-
 	// background up to text
 	LSurface *&pDC = Ctx.pDC;
 	pDC->Colour(Ctx.Back);
@@ -856,7 +852,7 @@ void LTreeItem::OnPaint(ItemPaintCtx &Ctx)
 
 	int x = 0;
 	LColour Ws(L_WORKSPACE);
-	LColour Lines = debug ? LColour::Red : Ws.Invert().Mix(Ws);
+	LColour Lines = Ws.Invert().Mix(Ws);
 
 	pDC->Colour(Lines);
 	if (Tree->d->JoiningLines)

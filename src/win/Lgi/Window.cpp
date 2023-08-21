@@ -176,7 +176,7 @@ static LAutoString DescribeView(LViewI *v)
 
 	char s[512];
 	int ch = 0;
-	::LArray<LViewI*> p;
+	LArray<LViewI*> p;
 	for (LViewI *i = v; i; i = i->GetParent())
 	{
 		p.Add(i);

@@ -50,7 +50,7 @@ class LMdiParent : public LLayout
 	int GetNextOrder();
 	#endif
 	LMdiChild *IsChild(LViewI *v);
-	::LArray<LMdiChild*> &PrivChildren();
+	LArray<LMdiChild*> &PrivChildren();
 	
 	bool SetScrollBars(bool x, bool y);
 
@@ -72,7 +72,7 @@ public:
 	LViewI *GetTop();
 
 	template<typename T>
-	bool GetChildren(::LArray<T*> &Views)
+	bool GetChildren(LArray<T*> &Views)
 	{
 		for (auto c : PrivChildren())
 		{

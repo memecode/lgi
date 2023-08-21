@@ -813,7 +813,7 @@ public:
 	template <class T>
 	class Iter
 	{
-		friend class ::LArray<T>;
+		friend class LArray<T>;
 		ssize_t i;
 		char each_dir;
 		LArray<T> *a;
