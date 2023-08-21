@@ -23,9 +23,9 @@
 #define IDC_HSCROLL				14001
 
 #ifdef MAC
-#define XPLATFORM_GLAYOUT		1
+#define XPLATFORM_LLAYOUT		1
 #else
-#define XPLATFORM_GLAYOUT		0
+#define XPLATFORM_LLAYOUT		0
 #endif
 
 /// \brief A LView with scroll bars
@@ -67,17 +67,17 @@ protected:
 		bool y
 	);
 	
-	#if defined(XPLATFORM_GLAYOUT)
-	void AttachScrollBars();
-	bool _SetScrollBars(bool x, bool y);
+	#if defined(XPLATFORM_LLAYOUT)
+		void AttachScrollBars();
+		bool _SetScrollBars(bool x, bool y);
 	#endif
-	#if defined(MAC) && !XPLATFORM_GLAYOUT
-	HISize Line;
-	
-	OsView RealWnd;
-	bool _OnGetInfo(HISize &size, HISize &line, HIRect &bounds, HIPoint &origin);
-	void _OnScroll(HIPoint &origin);
-	void OnScrollConfigure();
+	#if defined(MAC) && !XPLATFORM_LLAYOUT
+		HISize Line;
+		
+		OsView RealWnd;
+		bool _OnGetInfo(HISize &size, HISize &line, HIRect &bounds, HIPoint &origin);
+		void _OnScroll(HIPoint &origin);
+		void OnScrollConfigure();
 	#endif
 
 public:
@@ -118,7 +118,7 @@ public:
 		LRect &GetClient(bool InClientSpace = true) override;
 		void OnCreate() override;
 	
-		#if defined(MAC) && !XPLATFORM_GLAYOUT
+		#if defined(MAC) && !XPLATFORM_LLAYOUT
 
 			bool Invalidate(LRect *r = NULL, bool Repaint = false, bool NonClient = false) override;
 			bool Focus() override;

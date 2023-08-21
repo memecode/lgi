@@ -706,8 +706,11 @@ bool LView::SetPos(LRect &p, bool Repaint)
 		LLocker lck(d->Hnd, _FL);
 		if (lck.Lock())
 		{
+			auto p = dynamic_cast<LView*>(GetParent());
+			auto offset = p ? p->_BorderSize : 0;
+
 			d->Hnd->ResizeTo(Pos.X(), Pos.Y());
-			d->Hnd->MoveTo(Pos.x1, Pos.y1);
+			d->Hnd->MoveTo(Pos.x1+offset, Pos.y1+offset);
 			d->Hnd->Invalidate();
 			lck.Unlock();
 		}
