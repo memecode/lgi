@@ -68,8 +68,10 @@ const char *LinuxLibName()
 #if LIBPNG_SHARED
 #define LIBPNG Lib->
 const char *sLibrary =
-	#if defined(MAC) || defined(HAIKU)
+	#if defined(MAC)
 		"libpng16"
+	#elif defined(HAIKU)
+		"libpng16.so.16"
 	#elif defined(LINUX)
 		LinuxLibName()
 	#else
