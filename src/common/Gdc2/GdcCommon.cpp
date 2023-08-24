@@ -1212,6 +1212,8 @@ bool LMemDC::SwapRedAndBlue()
 		ROP(Bgra32)
 
 		default:
+			LgiTrace("%s:%i - SwapRedAndBlue not implemented for this colourspace: %s\n",
+				_FL, LColourSpaceToString(GetColourSpace()));
 			return false;
 	}
 

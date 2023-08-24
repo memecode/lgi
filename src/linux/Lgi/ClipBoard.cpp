@@ -201,7 +201,7 @@ bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 		return false;
 	}
 	
-	if (!Img->Create(pDC->X(), pDC->Y(), CsArgb32))
+	if (!Img->Create(pDC->X(), pDC->Y(), CsRgba32, LSurface::SurfaceRequireExactCs))
 	{
 		LAssert(!"Can't create surface copy...");
 		return false;
@@ -209,11 +209,7 @@ bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 	
 	// We have to create a copy to get the byte order right:
 	Img->Blt(0, 0, pDC);
-	
-	// Img->SwapRedAndBlue();
-	// Img->Colour(LColour(0xff, 0, 0));
-	// Img->Rectangle();
-	
+
 	// And also if the caller free's their copy of the image before the pixbuf is done it'll crash...	
 	auto pb = gdk_pixbuf_new_from_data(	(*Img)[0],
 										GDK_COLORSPACE_RGB,
