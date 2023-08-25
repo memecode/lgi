@@ -54,6 +54,7 @@ public:
 	LWindow *ModalParent = NULL;
 	LWindow *ModalChild = NULL;
 	bool ShowTitleBar = true;
+	bool ThreadMsgDone = false;
 	
 	LString MakeName(LWindow *w)
 	{
@@ -177,6 +178,12 @@ public:
 	void WindowActivated(bool focus)
 	{
 		// printf("%s::WindowActivated %i\n", Wnd->GetClass(), focus);
+
+		if (!ThreadMsgDone)
+		{
+			ThreadMsgDone = true;
+			printf("%s:%i window thread %i is %s/%s\n", _FL, Thread(), Wnd->GetClass(), Wnd->Name());
+		}
 		
 		if (ModalChild && focus)
 		{
@@ -943,6 +950,7 @@ bool LWindow::SetPos(LRect &p, bool Repaint)
 void LWindow::OnChildrenChanged(LViewI *Wnd, bool Attaching)
 {
 	// Force repour
+	Invalidate();
 }
 
 void LWindow::OnCreate()
@@ -1208,7 +1216,7 @@ LViewI *LWindow::GetFocus()
 		return NULL;
 		
 	LLocker lck(d, _FL);
-	if (!lck.Lock())
+	if (!lck.WaitForLock())
 		return NULL;
 
 	auto f = d->CurrentFocus();	
@@ -1221,7 +1229,7 @@ void LWindow::SetFocus(LViewI *ctrl, FocusType type)
 		return;
 		
 	LLocker lck(d, _FL);
-	if (lck.Lock())
+	if (lck.WaitForLock())
 	{
 		auto h = ctrl->Handle();
 		h->MakeFocus(type == GainFocus ? true : false);

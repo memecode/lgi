@@ -31,6 +31,7 @@ void *ThreadEntryPoint(void *i)
 
 		// Do thread's work
 		Thread->OnBeforeMain();
+		printf("%s:%i worker thread %i is '%s'\n", _FL, Thread->GetId(), Thread->GetName());
 		Thread->ReturnValue = Thread->Main();
 		Thread->OnAfterMain();
 

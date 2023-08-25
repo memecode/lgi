@@ -1238,7 +1238,10 @@ BuildThread::BuildThread(IdeProject *proj, char *makefile, bool clean, BuildConf
 			else if (!stricmp(Comp, "Cygwin"))
 				Compiler = Cygwin;
 			else
+			{
+				LgiTrace("%s:%i - Unknown compiler '%s' for makefile '%s'\n", _FL, Comp, makefile);
 				LAssert(!"Unknown compiler.");
+			}
 		}
 	}
 

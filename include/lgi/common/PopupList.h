@@ -122,32 +122,26 @@ public:
 	{
 		Lst->Empty();
 		
-		for (unsigned i=0; i<a.Length(); i++)
+		List<LListItem> ins;
+		for (auto obj: a)
 		{
-			T *obj = a[i];
-			if (obj)
+			if (!obj)
+				continue;
+			auto li = new Item(obj);
+			if (li)
 			{
-				Item *li = new Item(obj);
-				if (li)
+				LString s = ToString(obj);
+				if (s)
 				{
-					LString s = ToString(obj);
-					if (s)
-					{
-						li->SetText(s);
-						Lst->Insert(li);
-					}
-					else
-					{
-						LAssert(!"ToString failed.");
-						return false;
-					}
+					li->SetText(s);
+					ins.Insert(li);
 				}
-				else LAssert(!"Alloc failed.");
+				else LAssert(!"ToString failed.");
 			}
-			else LAssert(!"Null array entry.");
+			else LAssert(!"Alloc failed.");
 		}
 		
-		return true;
+		return Lst->Insert(ins);
 	}
 	
 	void OnPaint(LSurface *pDC)

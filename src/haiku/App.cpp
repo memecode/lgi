@@ -653,8 +653,8 @@ bool LLocker::Lock(bool debug)
 	auto looper = hnd->Looper();
 	if (!looper)
 	{
-		if (debug)
-			printf("%s:%i - Locker looper is NULL.\n", file, line);
+		// if (debug)
+		// 	printf("%s:%i - Locker looper is NULL.\n", file, line);
 		return false;
 	}
 	
@@ -700,29 +700,33 @@ bool LLocker::Lock(bool debug)
 	return locked;
 }
 
-status_t LLocker::LockWithTimeout(int64 time)
+status_t LLocker::LockWithTimeout(int64 time, bool debug)
 {
 	LAssert(!locked);
 	
 	if (!hnd)
 	{
-		// printf("%s:%i - Locker hnd is NULL.\n", file, line);
-		return false;
+		if (debug)
+			printf("%s:%i - Locker hnd is NULL.\n", file, line);
+		return B_ERROR;
 	}
 
 	auto looper = hnd->Looper();
 	if (!looper)
 	{
-		// printf("%s:%i - Locker looper is NULL %i.\n", file, line, count);
-		return false;
+		if (debug)
+			printf("%s:%i - Locker looper is NULL.\n", file, line);
+		return B_ERROR;
 	}
 	
 	thread_id threadId = looper->Thread();
 	if (threadId <= 0)
 	{
-		// printf("%s:%i - Looper has no thread?!?!\n", file, line);
+		if (debug)
+			printf("%s:%i - Looper has no thread?!?!\n", file, line);
 		noThread = true;
-		return locked = true;
+		locked = true;
+		return B_OK;
 	}
 
 	status_t result = hnd->LockLooperWithTimeout(time);
@@ -730,6 +734,38 @@ status_t LLocker::LockWithTimeout(int64 time)
 		locked = true;
 	
 	return result;
+}
+
+bool LLocker::WaitForLock(int timeout)
+{
+	auto start = LCurrentTime();
+	
+	while (true)
+	{
+		auto result = LockWithTimeout(1);
+		if (result == B_OK)
+			return true;
+		
+		if (result == B_TIMED_OUT)
+		{
+			auto now = LCurrentTime();
+			if (now - start >= timeout)
+			{
+				auto looper = hnd ? hnd->Looper() : NULL;
+				LgiTrace("%s:%i WaitForLock timing out: cur=%i, locker=%i (%s:%i)\n",
+					_FL,
+					GetCurrentThreadId(),
+					looper ? looper->LockingThread() : -1,
+					file, line);
+				return false;
+			}
+			
+			LSleep(5);
+		}
+		else break; // B_ERROR etc...
+	}
+	
+	return false;
 }
 
 void LLocker::Unlock()

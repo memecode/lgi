@@ -62,7 +62,7 @@ struct MBlock
 
 #define MTable_Size (64 << 10)
 static MInfo _Table[MTable_Size];
-GSemaphore _Lock;
+LMutex _Lock;
 
 uint _Hash(char *v)
 {

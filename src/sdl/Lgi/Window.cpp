@@ -84,7 +84,7 @@ LWindow::LWindow()
 	WndFlags |= GWND_CREATE;
 	ClearFlag(WndFlags, GWF_VISIBLE);
 
-    _Lock = new ::LMutex;
+    _Lock = new LMutex;
 }
 
 LWindow::~LWindow()

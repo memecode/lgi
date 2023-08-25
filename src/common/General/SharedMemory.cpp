@@ -149,7 +149,9 @@ LSharedMemory::LSharedMemory(const char *Name, int Size)
 
 LSharedMemory::~LSharedMemory()
 {
+	#ifndef HAIKU
 	DeleteObj(d);
+	#endif
 }
 
 void *LSharedMemory::GetPtr()

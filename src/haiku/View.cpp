@@ -937,16 +937,16 @@ bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 	m.y = Cursor.y;
 
 	// buttons
-	m.Left(TestFlag(Buttons, B_PRIMARY_MOUSE_BUTTON));
+	m.Left  (TestFlag(Buttons, B_PRIMARY_MOUSE_BUTTON));
 	m.Middle(TestFlag(Buttons, B_TERTIARY_MOUSE_BUTTON));
-	m.Right(TestFlag(Buttons, B_SECONDARY_MOUSE_BUTTON));
+	m.Right (TestFlag(Buttons, B_SECONDARY_MOUSE_BUTTON));
 
 	// key states
 	key_info KeyInfo;
 	if (get_key_info(&KeyInfo) == B_OK)
 	{
-		m.Ctrl(TestFlag(KeyInfo.modifiers, B_CONTROL_KEY));
-		m.Alt(TestFlag(KeyInfo.modifiers, B_MENU_KEY));
+		m.Ctrl (TestFlag(KeyInfo.modifiers, B_CONTROL_KEY));
+		m.Alt  (TestFlag(KeyInfo.modifiers, B_MENU_KEY));
 		m.Shift(TestFlag(KeyInfo.modifiers, B_SHIFT_KEY));
 	}
 	
@@ -958,7 +958,7 @@ bool LView::IsAttached()
 	bool attached = false;
 	
 	LLocker lck(d->Hnd, _FL);
-	if (lck.Lock())
+	if (lck.WaitForLock())
 	{
 		auto pview = d->Hnd->Parent();
 		auto pwnd = d->Hnd->Window();
