@@ -829,11 +829,11 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 		}
 		case M_CHANGE:
 		{
+			LAutoPtr<LNotification> notification((LNotification*)Msg->B());
 			LViewI *Ctrl = NULL;
-			if (GetViewById(Msg->A(), Ctrl))
+			if (GetViewById(Msg->A(), Ctrl) && notification)
 			{
-				LNotification n((LNotifyType)Msg->B());
-				return OnNotify(Ctrl, n);
+				return OnNotify(Ctrl, *notification);
 			}
 			break;
 		}

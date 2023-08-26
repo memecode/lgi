@@ -406,7 +406,7 @@ bool LWindow::SetActive()
 bool LWindow::Visible()
 {
 	LLocker lck(d, _FL);
-	if (!lck.Lock())
+	if (!lck.WaitForLock())
 		return false;	
 	return !d->IsHidden();
 }
@@ -414,7 +414,7 @@ bool LWindow::Visible()
 void LWindow::Visible(bool i)
 {
 	LLocker lck(d, _FL);
-	if (!lck.Lock())
+	if (!lck.WaitForLock())
 	{
 		printf("%s:%i - Can't lock.\n", _FL);
 		return;

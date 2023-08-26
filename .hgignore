@@ -21,14 +21,16 @@ x64Debug*
 x64Release*
 Debug
 Release
+makefile
 
 Ide/HtmlTest*.sdf
 Ide/HtmlTest*.suo
 Ide/LgiIde.xml.*
-Ide/Gtk3/build*
 Ide/lgiide
 Ide/MacCocoa/build
-Ide/haiku/haikuPassword.txt
+*/haikuPassword.txt
+Ide/makefile
+Ide/lgiide.txt
 
 Lvc/Lvc.xml
 Lvc/lvc
@@ -60,6 +62,9 @@ test/HtmlViewer/Output
 test/HtmlViewer/HtmlTestSuite
 test/HtmlEditor/testcases
 test/HtmlEditor/htmleditor
+test/GuiTest/gui_test
+test/GuiTest/gui_test.txt
+test/GuiTest/Lgi Test App.xml
 
 utils/SlogViewer/slogviewer
 
