@@ -664,7 +664,9 @@ bool LLocker::Lock(bool debug)
 		if (debug)
 			printf("%s:%i - Looper has no thread?!?!\n", file, line);
 		noThread = true;
-		return locked = true;
+		locked = true;
+		startTs = LCurrentTime();
+		return true;
 	}
 
 	while (!locked)
@@ -673,6 +675,7 @@ bool LLocker::Lock(bool debug)
 		if (result == B_OK)
 		{
 			locked = true;
+			startTs = LCurrentTime();
 			break;
 		}
 		else if (result == B_TIMED_OUT)
@@ -726,12 +729,16 @@ status_t LLocker::LockWithTimeout(int64 time, bool debug)
 			printf("%s:%i - Looper has no thread?!?!\n", file, line);
 		noThread = true;
 		locked = true;
+		startTs = LCurrentTime();
 		return B_OK;
 	}
 
 	status_t result = hnd->LockLooperWithTimeout(time);
 	if (result == B_OK)
+	{
 		locked = true;
+		startTs = LCurrentTime();
+	}
 	
 	return result;
 }
@@ -780,5 +787,10 @@ void LLocker::Unlock()
 	{
 		hnd->UnlockLooper();
 		locked = false;
+		auto now = LCurrentTime();
+		if (now - startTs >= 1000)
+		{
+			printf("%s:%i held lock for more than a second.\n", file, line);
+		}
 	}
 }

@@ -565,6 +565,7 @@ LPopup::LPopup(LView *owner)
 			Panel.p.contentView = [[LCocoaView alloc] init:this];
 		}
 	#elif defined(HAIKU)
+		_Window = this;
 		auto w = WindowHandle();
 		if (w)
 		{
@@ -590,12 +591,10 @@ LPopup::LPopup(LView *owner)
 
 	if ((Owner = owner))
 	{
-		#ifndef WIN32
+		#if WINDOWS
 			Owner->PopupChild() = this;
-		#endif
-		
-		#if !defined(MAC) && !defined(__GTK_H__)
-			_Window = Owner->GetWindow();
+			if (!_Window)
+				_Window = Owner->GetWindow();
 		#endif
 		SetNotify(Owner);
 	}
@@ -857,9 +856,7 @@ void LPopup::Visible(bool i)
 		#endif
 
 		if (!_Window && Owner)
-		{
 			_Window = Owner->GetWindow();
-		}
 		
 		AttachChildren();
 
@@ -935,13 +932,9 @@ void LPopup::Visible(bool i)
 			if (!_Window)
 			{
 				if (Owner)
-				{
 					_Window = Owner->GetWindow();
-				}
 				else if (GetParent())
-				{
 					_Window = GetParent()->GetWindow();
-				}
 			}
 		}
 		else

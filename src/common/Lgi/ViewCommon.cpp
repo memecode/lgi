@@ -369,14 +369,42 @@ LWindow *LView::GetWindow()
 		auto *w = d->GetParent();
 		for (; w; w = w->d ? w->d->GetParent() : NULL)
 		{
+			/*
+			#ifdef HAIKU
+			auto wnd = dynamic_cast<LWindow*>(w);
+			if (wnd)
+			{
+				LAssert(!_InLock);
+				_Window = wnd;
+				printf("setting wnd for %s to %s/%s\n", GetClass(), _Window->GetClass(), _Window->Name());
+				break;
+			}
+			#else
+			*/
 			if (w->_Window)
 			{
 				LAssert(!_InLock);
 				_Window = w->_Window;
 				break;
 			}
+			// #endif
 		}
 	}
+	
+	#ifdef HAIKU
+	// Check the window is the same thread as us
+	if (Handle() && _Window)
+	{
+		auto ourBWnd = Handle() ? Handle()->Window() : NULL;
+		auto ourThread = ourBWnd ? ourBWnd->Thread() : -1;
+		auto wndBWnd = _Window->Handle() ? _Window->Handle()->Window() : NULL;
+		auto wndThread = wndBWnd ? wndBWnd->Thread() : -1;
+		if (ourThread != wndThread)
+		{
+			printf("WARNING: window thread mismatch!! cls=%s us=%i, wnd=%i\n", GetClass(), ourThread, wndThread);
+		}
+	}
+	#endif
 		
 	return dynamic_cast<LWindow*>(_Window);
 }

@@ -2986,6 +2986,16 @@ IdeDoc *AppWnd::GetCurrentDoc()
 
 IdeDoc *AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithHistory)
 {
+	if (!InThread())
+	{
+		auto ptr = RunCallback([this, File=LString(File), Line, CurIp, WithHistory]()
+			{
+				return (int64) GotoReference(File, Line, CurIp, WithHistory);
+			});
+			
+		return (IdeDoc*)ptr;
+	}
+
 	if (!WithHistory)
 		d->InHistorySeek = true;
 
