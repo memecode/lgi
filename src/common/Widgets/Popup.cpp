@@ -13,12 +13,18 @@
 
 /////////////////////////////////////////////////////////////////////////////////////
 #ifndef WH_MOUSE_LL
-#define WH_MOUSE_LL        14
+	#define WH_MOUSE_LL        14
 #endif
 #if !defined(MAKELONG)
-#define MAKELONG(low, high) ( ((low) & 0xffff) | ((high) << 16) )
+	#define MAKELONG(low, high) ( ((low) & 0xffff) | ((high) << 16) )
 #endif
 #define MOUSE_POLL_MS		100
+
+#if 1
+	#define LOG(...) printf(__VA_ARGS__)
+#else
+	#define LOG(...)
+#endif
 
 #if defined(__GTK_H__)
 
@@ -546,8 +552,6 @@ LPopup::LPopup(LView *owner)
 	#endif
 {
 	d = new LPopupPrivate;
-	Start = 0;
-	Cancelled = false;
     CurrentPopups.Add(this);
 
 	#if LGI_COCOA
@@ -568,9 +572,16 @@ LPopup::LPopup(LView *owner)
 			if (r != B_OK)
 				printf("%s:%i - SetLook failed.\n", _FL);
 				
-			r = w->SetFeel(B_FLOATING_SUBSET_WINDOW_FEEL);
+			r = w->SetFeel(B_FLOATING_APP_WINDOW_FEEL);
 			if (r != B_OK)
 				printf("%s:%i - SetFeel failed.\n", _FL);
+				
+			// Lets turn on avoid focus initially to stop the popup stealing the
+			// focus and maybe switch it off after the popup is visible to allow
+			// the user to click on it and give it focus?
+			r = w->SetFlags(w->Flags() | B_AVOID_FOCUS);
+			if (r != B_OK)
+				printf("%s:%i - SetFlags failed.\n", _FL);
 				
 			// printf("popup thread=%i\n", w->Thread());
 		}
@@ -746,6 +757,7 @@ bool LPopup::Attach(LViewI *p)
 
 void LPopup::Visible(bool i)
 {
+	// LOG("%s: Visible(%i) pos=%s\n", __FUNCTION__, i, GetPos().GetStr());
 	if (i)
 	{
 		// When this popup becomes visible, hide any other visible popups...

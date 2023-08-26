@@ -34,9 +34,9 @@ class LgiClass LPopup :
 
 protected:
 	class LPopupPrivate *d;
-	bool Cancelled;
-	LView *Owner;
-	uint64 Start;
+	bool Cancelled = false;
+	LView *Owner = NULL;
+	uint64 Start = 0;
 	LRect ScreenPos;
 	
 	#if LGI_COCOA
