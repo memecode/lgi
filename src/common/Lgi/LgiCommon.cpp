@@ -1254,8 +1254,12 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#elif defined(HAIKU)
 
 				char path[MAX_PATH_LEN] = "";
-				if (find_directory(B_USER_APPS_DIRECTORY, dev_for_path("/boot"), true, path, sizeof(path)) == B_OK)
+				auto res = find_directory(B_APPS_DIRECTORY, dev_for_path("/boot"), false, path, sizeof(path));
+				if (res == B_OK)
 					Path = path;
+				else
+					Path = "/boot/system/apps";
+				// printf("%s:%i LSP_USER_APPS=%x: '%s'\n", _FL, res, Path.Get());
 			
 			#elif LGI_COCOA
 
@@ -1520,6 +1524,20 @@ LString LFile::Path::GetSystem(LSystemPath Which, int WordSize)
 			#elif defined LINUX
 
 				Path = "/tmp"; // it'll do for now...
+			
+			#elif defined HAIKU
+				
+				char p[MAX_PATH_LEN] = "";
+				auto res = find_directory(B_SYSTEM_TEMP_DIRECTORY, dev_for_path("/boot"), false, p, sizeof(p));
+				if (res == B_OK)
+				{
+					Path = p;
+				}
+				else
+				{
+					Path = "/boot/system/cache/tmp";
+					printf("%s:%i - tmp=%i\n", _FL, res);
+				}
 			
 			#else
 			
