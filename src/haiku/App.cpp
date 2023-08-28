@@ -759,10 +759,10 @@ bool LLocker::WaitForLock(int timeout)
 			if (now - start >= timeout)
 			{
 				auto looper = hnd ? hnd->Looper() : NULL;
-				LgiTrace("%s:%i WaitForLock timing out: cur=%i, locker=%i (%s:%i)\n",
+				LgiTrace("%s:%i WaitForLock timing out: cur=%i:%s, locker=%i:%s (%s:%i)\n",
 					_FL,
-					GetCurrentThreadId(),
-					looper ? looper->LockingThread() : -1,
+					GetCurrentThreadId(), LThread::GetThreadName(GetCurrentThreadId()),
+					looper ? looper->LockingThread() : -1, looper ? LThread::GetThreadName(looper->LockingThread()) : "none",
 					file, line);
 				return false;
 			}

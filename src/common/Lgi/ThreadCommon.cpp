@@ -19,6 +19,35 @@ void LThread::WaitForExit(int WarnAfterMs)
 	}
 }
 
+struct LThreadNames : public LMutex
+{
+	LHashTbl<IntKey<OsThreadId>,LString> map;
+	LThreadNames() : LMutex("LThreadNames") {}
+};
+static LThreadNames ThreadNames;
+
+void LThread::RegisterThread(OsThreadId id, LString name)
+{
+	if (ThreadNames.Lock(_FL))
+	{
+		ThreadNames.map.Add(id, name);
+		ThreadNames.Unlock();
+	}
+	
+	printf("%s:%i - RegisterThread(%i, %s)\n", _FL, id, name.Get());
+}
+
+const char *LThread::GetThreadName(OsThreadId id)
+{
+	const char *n = NULL;
+	if (ThreadNames.Lock(_FL))
+	{
+		n = ThreadNames.map.Find(id);
+		ThreadNames.Unlock();
+	}
+	return n;
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 LThreadTarget::LThreadTarget() : LMutex("LThreadTarget")
 {

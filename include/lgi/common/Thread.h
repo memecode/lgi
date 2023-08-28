@@ -89,6 +89,10 @@ public:
 	/// viewHandle to be passed to the constructor. Which can
 	/// be aquired by calling LView::AddDispatch().
 	virtual void OnComplete() {}
+
+	// Register of threadId <-> texture names
+	static void RegisterThread(OsThreadId id, LString name);
+	static const char *GetThreadName(OsThreadId id);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////

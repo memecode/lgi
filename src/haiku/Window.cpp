@@ -182,7 +182,10 @@ public:
 		if (!ThreadMsgDone)
 		{
 			ThreadMsgDone = true;
-			printf("%s:%i window thread %i is %s/%s\n", _FL, Thread(), Wnd->GetClass(), Wnd->Name());
+			
+			LString n;
+			n.Printf("%s/%s", Wnd->GetClass(), Wnd->Name());
+			LThread::RegisterThread(Thread(), n);
 		}
 		
 		if (ModalChild && focus)
