@@ -2988,12 +2988,14 @@ IdeDoc *AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithH
 {
 	if (!InThread())
 	{
-		auto ptr = RunCallback([this, File=LString(File), Line, CurIp, WithHistory]()
+		auto docPtr = RunCallback<IdeDoc*>([this, File=LString(File), Line, CurIp, WithHistory]()
 			{
-				return (int64) GotoReference(File, Line, CurIp, WithHistory);
-			});
-			
-		return (IdeDoc*)ptr;
+				return GotoReference(File, Line, CurIp, WithHistory);
+			},
+			2000 // ms timeout, ie don't hang the app indefinately.
+			);
+		
+		return docPtr ? *docPtr : NULL;
 	}
 
 	if (!WithHistory)

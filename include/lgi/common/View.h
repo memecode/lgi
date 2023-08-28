@@ -408,6 +408,49 @@ public:
 	/// to occur. Negative timeoutMs is "wait forever".
 	/// -1 return value is generally an error.
 	int64 RunCallback(std::function<int64()> Callback, int timeoutMs = -1, LCancel *cancel = NULL);
+
+	/// Run some code in the UI thread, same as RunCallback, just with a parameterized return type.
+	template<typename T>
+	LAutoPtr<T> RunCallback(std::function<T()> Callback, int timeoutMs = -1, LCancel *cancel = NULL)
+	{
+		LAutoPtr<T> result;
+		if (!Callback)
+		{
+			LgiTrace("%s:%i - No callback.\n", _FL);
+		}
+		else
+		{		
+			if (!PostEvent(	M_VIEW_RUN_CALLBACK,
+							(LMessage::Param)new std::function<int64()>
+							(
+								[Callback, &result]()
+								{
+									result.Reset(new T(Callback()));
+									return 0;
+								}
+							),
+							(LMessage::Param)&result))
+			{
+				LgiTrace("%s:%i - RunCallback PostEvent failed.\n", _FL);
+			}
+			else
+			{			
+				auto StartTs = LCurrentTime();
+				while (!result)
+				{
+					if ((timeoutMs >= 0 && (LCurrentTime()-StartTs) > timeoutMs)
+						||
+						(cancel && cancel->IsCancelled()))
+					{
+						break; // Leave the loop and return an empty auto ptr
+					}
+					LSleep(10);
+				}
+			}
+		}		
+		return result;
+	}
+
 	
 	/// \brief Asyncronously posts an event to be received by this view
 	virtual bool PostEvent
