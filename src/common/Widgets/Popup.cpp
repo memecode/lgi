@@ -591,8 +591,10 @@ LPopup::LPopup(LView *owner)
 
 	if ((Owner = owner))
 	{
-		#if WINDOWS
+		#if !WINNATIVE
 			Owner->PopupChild() = this;
+		#endif
+		#if WINDOWS
 			if (!_Window)
 				_Window = Owner->GetWindow();
 		#endif
@@ -610,10 +612,9 @@ LPopup::~LPopup()
 
 	if (Owner)
 	{
-		#ifndef WIN32
-		Owner->PopupChild() = 0;
-		#endif
-		
+		#if !WINNATIVE
+			Owner->PopupChild() = NULL;
+		#endif		
 		#ifdef MAC
 		LDropDown *dd = dynamic_cast<LDropDown*>(Owner);
 		if (dd)

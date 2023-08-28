@@ -524,24 +524,26 @@ bool LExecute(const char *File, const char *Arguments, const char *Dir, LString 
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-HKEY GetRootKey(char *s)
+HKEY GetRootKey(const char *s)
 {
 	HKEY Root = 0;
 
-	#define TestKey(Name) \
-		if (strncmp(s, #Name, strlen(#Name)) == 0) \
+	#define TestKey(Short, Name) \
+		if (!strncmp(s, #Short, strlen(#Short)) || \
+			!strncmp(s, #Name,  strlen(#Name))) \
 		{ \
 			Root = Name; \
 		}
 
-	TestKey(HKEY_CLASSES_ROOT)
-	else TestKey(HKEY_CURRENT_CONFIG)
-	else TestKey(HKEY_CURRENT_USER)
-	else TestKey(HKEY_LOCAL_MACHINE)
-	else TestKey(HKEY_USERS)
+	     TestKey(HKCR, HKEY_CLASSES_ROOT)
+	else TestKey(HKCC, HKEY_CURRENT_CONFIG)
+	else TestKey(HKCU, HKEY_CURRENT_USER)
+	else TestKey(HKLM, HKEY_LOCAL_MACHINE)
+	else TestKey(HKU, HKEY_USERS)
 
 	#undef TestKey
 
+	LAssert(Root);
 	return Root;
 }
 
@@ -654,29 +656,28 @@ bool LRegKey::DeleteValue(const char *Name)
 
 bool LRegKey::DeleteKey()
 {
-	bool Status = false;
+	auto p = KeyName.SplitDelimit("\\", 1);
+	if (p.Length() != 2)
+		return false;
 
 	if (k)
 	{
-		char *n = strchr(KeyName, '\\');
-		if (n++)
-		{
-			RegCloseKey(k);
-			k = 0;
-
-			HKEY Root = GetRootKey(KeyName);
-			result = RegDeleteKeyA(Root, n);
-			Status = result == ERROR_SUCCESS;
-			if (!Status)
-			{
-				if (AssertOnError)
-					LAssert(!"RegDeleteKey failed.");
-			}
-			KeyName.Empty();
-		}
+		RegCloseKey(k);
+		k = NULL;
 	}
+	
+	HKEY Root = GetRootKey(p[0]);
+	result = RegDeleteKeyA(Root, p[1]);
+	if (result != ERROR_SUCCESS)
+	{
+		LgiTrace("RegDeleteKeyA(%p, %s) == %i\n", Root, p[1].Get(), result);
+		if (AssertOnError)
+			LAssert(!"RegDeleteKey failed.");
+		return false;
+	}
+	KeyName.Empty();
 
-	return false;
+	return true;
 }
 
 char *LRegKey::GetStr(const char *Name)
