@@ -217,7 +217,9 @@ struct OriginTest : public LView
 
 	OriginTest(int x, int y, int off)
 	{
+		#ifdef _DEBUG
 		_Debug = true;
+		#endif
 
 		LRect r(0, 0, 99, 99);
 		r.Offset(x, y);
