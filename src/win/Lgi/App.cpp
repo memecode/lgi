@@ -828,7 +828,8 @@ bool LApp::Run(OnIdleProc IdleCallback, void *IdleParam)
 	return Msg.message != WM_QUIT;
 }
 
-bool LApp::Yield()
+// Old yield code... don't use. Just here for reference.
+bool LYield(bool &QuitReceived)
 {
 	MSG Msg = {0};
 
@@ -841,7 +842,7 @@ bool LApp::Yield()
 
 	if (Msg.message == WM_QUIT)
 	{
-		d->QuitReceived = true;
+		QuitReceived = true;
 	}
 
 	return Msg.message != WM_QUIT;
