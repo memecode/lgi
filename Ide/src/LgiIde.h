@@ -29,6 +29,8 @@
 
 #define OptFileSeparator		"\n"
 
+#define THREAD_WARNING			if (!InThread()) { LgiTrace("#### %s:%i out of thread call.\n", __FUNCTION__, __LINE__); }
+
 enum IdeMessages
 {
 	M_APPEND_TEXT = M_USER+200, // A=(char*)heapStr, B=(int)tabIndex

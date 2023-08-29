@@ -2745,6 +2745,8 @@ struct SaveState
 
 void AppWnd::SaveAll(std::function<void(bool)> Callback, bool CloseDirty)
 {
+	THREAD_WARNING
+
 	auto ss = new SaveState;	
 	ss->d = d;
 	ss->Callback = Callback;
@@ -2764,6 +2766,8 @@ void AppWnd::SaveAll(std::function<void(bool)> Callback, bool CloseDirty)
 
 void AppWnd::CloseAll()
 {
+	THREAD_WARNING
+
 	SaveAll([this](auto status)
 	{	
 		if (!status)
@@ -2954,11 +2958,15 @@ void AppWnd::OnLocationChange(const char *File, int Line)
 
 void AppWnd::OnFile(char *File, bool IsProject)
 {
+	THREAD_WARNING
+
 	d->OnFile(File, IsProject);
 }
 
 IdeDoc *AppWnd::NewDocWnd(const char *FileName, NodeSource *Src)
 {
+	THREAD_WARNING
+
 	IdeDoc *Doc = new IdeDoc(this, Src, 0);
 	if (Doc)
 	{
@@ -3052,7 +3060,9 @@ IdeDoc *AppWnd::FindOpenFile(char *FileName)
 IdeDoc *AppWnd::OpenFile(const char *FileName, NodeSource *Src)
 {
 	static bool DoingProjectFind = false;
-	IdeDoc *Doc = 0;
+	IdeDoc *Doc = NULL;
+	
+	THREAD_WARNING
 	
 	const char *File = Src ? Src->GetFileName() : FileName;
 	if (!Src && !ValidStr(File))
@@ -3201,6 +3211,8 @@ LString PlatformFlagsToStr(int flags)
 
 IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bool Create, ProjectNode *DepParent)
 {	
+	THREAD_WARNING
+
 	if (!FileName)
 	{
 		LgiTrace("%s:%i - Error: No filename.\n", _FL);
@@ -3474,6 +3486,8 @@ void AppWnd::UpdateMemoryDump()
 
 int AppWnd::OnNotify(LViewI *Ctrl, LNotification n)
 {
+	THREAD_WARNING
+
 	switch (Ctrl->GetId())
 	{
 		case IDC_PROJECT_TREE:
