@@ -10,11 +10,11 @@ class LgiClass LThread
 public:
     enum ThreadState
     {
-	    THREAD_INIT = 1,
+	    THREAD_INIT    = 1,
 	    THREAD_RUNNING = 2,
-	    THREAD_ASLEEP = 3,
-	    THREAD_EXITED = 4,
-	    THREAD_ERROR = 5
+	    THREAD_ASLEEP  = 3,
+	    THREAD_EXITED  = 4,
+	    THREAD_ERROR   = 5
     };
     
     enum ThreadPriority
@@ -25,6 +25,7 @@ public:
 		ThreadPriorityRealtime,
     };
 
+	constexpr static int InvalidViewId = -1;
 	static const OsThread InvalidHandle;
 	static const OsThreadId InvalidId;
 
@@ -40,7 +41,7 @@ protected:
 	bool DeleteOnExit       = false;
 
 	/// Aka from LView::AddDispatch().
-	int ViewHandle          = -1;
+	int ViewHandle          = InvalidViewId;
 
 	friend bool LView::CommonEvents(LMessage::Result &result, LMessage *Msg);
 	#if defined WIN32

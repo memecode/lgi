@@ -47,7 +47,7 @@ const char *CppKeywords[] = {"extern", "class", "struct", "static", "default", "
 							"switch", "new", "delete", "sizeof", "return", "enum", "else",
 							"if", "for", "while", "do", "continue", "public", "private", "virtual", 
 							"protected", "friend", "union", "template", "typedef", "dynamic_cast", "inline",
-							NULL};
+							"constexpr", NULL};
 const char *CppTypes[] = {	"int", "char", "short", "long", "signed", "unsigned", "double", "float", "bool", "const", "void",
 							"int8", "int16", "int32", "int64",
 							"uint8", "uint16", "uint32", "uint64",

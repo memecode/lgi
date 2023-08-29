@@ -43,7 +43,7 @@ void *ThreadEntryPoint(void *i)
 		// Shutdown...
 		Thread->State = LThread::THREAD_EXITED;
 		bool DelayDelete = false;
-		if (Thread->ViewHandle >= 0)
+		if (Thread->ViewHandle != LThread::InvalidViewId)
 		{
 			// If DeleteOnExit is set AND ViewHandle then the LView::OnEvent handle will
 			// process the delete... don't do it here.

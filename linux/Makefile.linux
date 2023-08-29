@@ -27,6 +27,7 @@ ifeq ($(Build),Debug)
 		-lmagic \
 		-lappindicator3 \
 		-lcrypt \
+		-lgstreamer-1.0 \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
@@ -46,6 +47,7 @@ else
 		-lmagic \
 		-lappindicator3 \
 		-lcrypt \
+		-lgstreamer-1.0 \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \

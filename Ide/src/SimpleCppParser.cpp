@@ -45,14 +45,14 @@ const char *TypeToStr(DefnType t)
 	switch (t)
 	{
 		default:
-		case DefnNone: return "DefnNone";
-		case DefnDefine: return "DefnDefine";
-		case DefnFunc: return "DefnFunc";
-		case DefnClass: return "DefnClass";
-		case DefnEnum: return "DefnEnum";
+		case DefnNone:      return "DefnNone";
+		case DefnDefine:    return "DefnDefine";
+		case DefnFunc:      return "DefnFunc";
+		case DefnClass:     return "DefnClass";
+		case DefnEnum:      return "DefnEnum";
 		case DefnEnumValue: return "DefnEnumValue";
-		case DefnTypedef: return "DefnTypedef";
-		case DefnVariable: return "DefnVariable";
+		case DefnTypedef:   return "DefnTypedef";
+		case DefnVariable:  return "DefnVariable";
 	}
 }
 

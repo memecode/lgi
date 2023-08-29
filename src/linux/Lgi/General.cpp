@@ -84,7 +84,7 @@ void LSleep(uint32_t i)
 	//printf("%i LSleep(%i)\n", LGetCurrentThread(), i);
 	while (nanosleep(&request, &remain) == -1)
 	{
-	    request = remain;
+		request = remain;
 		//printf("\t%i Resleeping=%i\n", LGetCurrentThread(), request.tv_sec*1000 + request.tv_nsec/1000);
 	}
 }
@@ -298,7 +298,7 @@ static bool XdgMimeLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 		char *Var = t[i];
 
 		#if DEBUG_GET_APPS_FOR_MIMETYPE
-		printf("    '%s'\n", Var);
+		printf("	'%s'\n", Var);
 		#endif
 		
 		if (*Var == '[')
@@ -337,7 +337,7 @@ static bool XdgMimeLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 	}
 
 	#if DEBUG_GET_APPS_FOR_MIMETYPE
-	printf("    ai='%s' '%s'\n", ai.Name.Get(), ai.Path.Get());
+	printf("	ai='%s' '%s'\n", ai.Name.Get(), ai.Path.Get());
 	#endif
 	
 	return Status;
@@ -715,7 +715,7 @@ void LFinishXWindowsStartup(LViewI *Wnd)
 		while (src != src_end)
 		{
 			char* dest = &xevent.xclient.data.b[0];
-			char* dest_end = dest + 20;        
+			char* dest_end = dest + 20;		   
 			while (dest != dest_end && src != src_end)
 			{
 				*dest++ = *src++;
@@ -736,17 +736,79 @@ void LFinishXWindowsStartup(LViewI *Wnd)
 }
 
 #if HAS_GSTREAMER
-// sudo apt-get install libgstreamer1.0-dev
-using namespace Gtk;
-#include <gst/gst.h>
+	// sudo apt-get install libgstreamer1.0-dev
+	using namespace Gtk;
+	#include <gst/gst.h>
+	static bool GstHasInit = false;
 #endif
 
 bool LPlaySound(const char *FileName, int ASync)
 {
 	#if HAS_GSTREAMER
-	#warning "Impl me."
-	return false;
+
+		if (!GstHasInit)
+		{
+			/* Initialize GStreamer */
+			auto args = LAppInst ? LAppInst->GetAppArgs() : NULL;
+			if (args)
+			{
+				GstHasInit = true;
+				gst_init(&args->Args, (char***)&args->Arg);
+			}
+			else
+			{
+				LAssert(!"No app?");
+				return false;
+			}
+		}
+
+		/* Create the elements */
+		auto source		  = gst_element_factory_make("filesrc",       NULL);
+		auto decode		  = gst_element_factory_make("decodebin",     NULL);
+		auto audioconvert = gst_element_factory_make("audioconvert",  NULL);
+		auto sink		  = gst_element_factory_make("autoaudiosink", NULL);
+		
+		// Set parameters for some elements
+		g_object_set(G_OBJECT(source),	"location", FileName, NULL);
+		
+		/* Create the empty pipeline */
+		auto pipeline = gst_pipeline_new("pipeline");
+
+		/* Build the pipeline */
+		gst_bin_add_many (GST_BIN (pipeline), source, decode, audioconvert, sink, NULL);
+
+		if (gst_element_link_many(source, decode, audioconvert, sink, NULL) != TRUE)
+		{
+			LgiTrace("%s:%i - Failed to link elements!", _FL);
+			gst_object_unref (pipeline);
+			return false;
+		}
+
+		/* Start playing */
+		gst_element_set_state(pipeline, GST_STATE_PLAYING);
+
+		auto bus = gst_element_get_bus(pipeline);
+		gst_object_unref(bus);
+
+		// Wait for the playback to complete:
+		GstState state = GST_STATE_PLAYING;
+		do
+		{
+			auto res = gst_element_get_state(pipeline, &state, NULL, GST_CLOCK_TIME_NONE);
+			printf("gst_element_get_state=%i, state=%i GST_STATE_PLAYING=%i\n", res, state, GST_STATE_PLAYING);
+			LSleep(10);
+		}
+		while (state == GST_STATE_PLAYING);
+
+		/* Free pipeline */
+		gst_element_set_state(pipeline, GST_STATE_NULL);
+		gst_object_unref(GST_OBJECT(pipeline));
+
+		return true;
+
 	#else
-	return LExecute(FileName);
+
+		return LExecute(FileName);
+
 	#endif
 }

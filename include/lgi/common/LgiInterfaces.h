@@ -29,10 +29,6 @@ class LViewI;
 class LView;
 class LScriptArguments;
 
-#ifdef Yield
-#undef Yield
-#endif
-
 // Classes
 
 class LDomI
@@ -383,11 +379,6 @@ public:
 
 	/// Gets the font cache
 	virtual class LFontCache *GetFontCache() = 0;
-
-	#ifndef HAIKU
-	/// Processed queued events and then return
-	virtual bool Yield() = 0;
-	#endif
 };
 
 class LEventSinkI

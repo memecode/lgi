@@ -478,11 +478,7 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Executable>
-				<Linux />
-			</Executable>
-			<CCrossCompiler />
-			<CppCrossCompiler />
+			<Executable />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -533,11 +529,13 @@
 					<Debug>magic
 appindicator3
 crypt
+gstreamer-1.0
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Debug>
 					<Release>magic
 appindicator3
 crypt
+gstreamer-1.0
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
@@ -551,7 +549,6 @@ gnu
 network
 be</Release>
 				</Haiku>
-				<All />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -573,39 +570,16 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
-				<Linux />
 			</Defines>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<ApplicationIcon />
+			<LibraryPaths />
 		</Build>
 		<Advanced>
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-			<OtherMakefileRules />
+			<PostBuildCommands />
 		</Advanced>
 		<Debug>
-			<Arguments>
-				<All />
-			</Arguments>
-			<Environment />
-			<DebugAdmin />
-			<InitialDir />
+			<Arguments />
 		</Debug>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
-		<Editor>
-			<TabSize />
-			<IndentSize />
-			<ShowWhiteSpace />
-			<UseHardTabs />
-			<CommentFile />
-			<CommentFunction />
-		</Editor>
+		<Remote />
+		<Editor />
 	</Settings>
 </Project>
