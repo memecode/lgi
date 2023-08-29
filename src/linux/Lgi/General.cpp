@@ -746,6 +746,10 @@ bool LPlaySound(const char *FileName, int ASync)
 {
 	#if HAS_GSTREAMER
 
+		setenv("GST_DEBUG", "4", true);
+
+		LFile::Path path(FileName);		
+
 		if (!GstHasInit)
 		{
 			/* Initialize GStreamer */
@@ -763,26 +767,43 @@ bool LPlaySound(const char *FileName, int ASync)
 		}
 
 		/* Create the elements */
-		auto source		  = gst_element_factory_make("filesrc",       NULL);
-		auto decode		  = gst_element_factory_make("decodebin",     NULL);
-		auto audioconvert = gst_element_factory_make("audioconvert",  NULL);
-		auto sink		  = gst_element_factory_make("autoaudiosink", NULL);
+		auto source		   = gst_element_factory_make("filesrc",       NULL);
+		auto decode		   = gst_element_factory_make("uridecodebin",  NULL);
+		auto audioconvert  = gst_element_factory_make("audioconvert",  NULL);
+		auto sink		   = gst_element_factory_make("autoaudiosink", NULL);
 		
 		// Set parameters for some elements
-		g_object_set(G_OBJECT(source),	"location", FileName, NULL);
+		g_object_set(G_OBJECT(source),	"location", path.Absolute().GetFull().Get(), NULL);
 		
 		/* Create the empty pipeline */
 		auto pipeline = gst_pipeline_new("pipeline");
 
 		/* Build the pipeline */
-		gst_bin_add_many (GST_BIN (pipeline), source, decode, audioconvert, sink, NULL);
+		gst_bin_add_many(GST_BIN(pipeline), source, decode, audioconvert, sink, NULL);
 
-		if (gst_element_link_many(source, decode, audioconvert, sink, NULL) != TRUE)
-		{
-			LgiTrace("%s:%i - Failed to link elements!", _FL);
-			gst_object_unref (pipeline);
-			return false;
-		}
+		#if 1
+			auto r = gst_element_link(source, decode);
+			printf("src->decode=%i\n", r);
+			if (!r)
+				return false;
+
+			r = gst_element_link(decode, audioconvert);
+			printf("decode->audioconvert=%i\n", r);
+			if (!r)
+				return false;
+
+			r = gst_element_link(audioconvert, sink);
+			printf("audioconvert->sink=%i\n", r);
+			if (!r)
+				return false;
+		#else
+			if (!gst_element_link_many(source, decode, audioconvert, sink, NULL))
+			{
+				LgiTrace("%s:%i - Failed to link elements!\n", _FL);
+				gst_object_unref (pipeline);
+				return false;
+			}
+		#endif
 
 		/* Start playing */
 		gst_element_set_state(pipeline, GST_STATE_PLAYING);

@@ -307,7 +307,7 @@ LgiFunc bool LPlaySound
 	/// File name of the sound to play
 	const char *FileName,
 	/// 0 or SND_ASYNC. If 0 the function blocks till the sound finishes.
-	int Flags
+	int Flags = 0
 );
 
 /**
