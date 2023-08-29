@@ -790,6 +790,20 @@ void LView::SetPulse(int Length)
 		d->PulseThread = new LPulseThread(this, Length);
 }
 
+void LView::HandleInThreadMessage(BMessage *Msg)
+{
+	LMessage::InThreadCb *Cb = NULL;
+	if (Msg->FindPointer(LMessage::PropCallback, (void**)&Cb) == B_OK)
+	{
+		// printf("M_HANDLE_IN_THREAD before call..\n");
+		(*Cb)();
+		// printf("M_HANDLE_IN_THREAD after call..\n");
+		delete Cb;
+		// printf("M_HANDLE_IN_THREAD after delete..\n");
+	}
+	else printf("%s:%i - No Callback.\n", _FL);
+}
+
 LMessage::Param LView::OnEvent(LMessage *Msg)
 {
 	ThreadCheck();
@@ -806,16 +820,7 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 	{
 		case M_HANDLE_IN_THREAD:
 		{
-			LMessage::InThreadCb *Cb = NULL;
-			if (Msg->FindPointer(LMessage::PropCallback, (void**)&Cb) == B_OK)
-			{
-				// printf("M_HANDLE_IN_THREAD before call..\n");
-				(*Cb)();
-				// printf("M_HANDLE_IN_THREAD after call..\n");
-				delete Cb;
-				// printf("M_HANDLE_IN_THREAD after delete..\n");
-			}
-			else printf("%s:%i - No Callback.\n", _FL);
+			HandleInThreadMessage(Msg);
 			break;
 		}
 		case M_INVALIDATE:

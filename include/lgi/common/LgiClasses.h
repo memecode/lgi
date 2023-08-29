@@ -79,6 +79,7 @@ public:
 		const char *Btn3 = NULL
 	);
 
+	const char *GetClass() override { return "LAlert"; }
     void SetAppModal();
 	int OnNotify(LViewI *Ctrl, LNotification n);
 	void SetButtonCallback(int ButtonIdx, std::function<void(int)> Callback);

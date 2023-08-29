@@ -161,6 +161,12 @@ bool LWindow::MoveSameScreen(LViewI *View)
 
 	auto Wnd = View->GetWindow();
 	LRect p = Wnd ? Wnd->GetPos() : View->GetPos();
+	if (!p.Valid())
+	{
+		LAssert(0);
+		return false;
+	}
+	
 	int cx = p.x1 + (p.X() >> 4);
 	int cy = p.y1 + (p.Y() >> 4);
 	

@@ -44,6 +44,7 @@
 	#include <fs_info.h>
 	#include <Roster.h>
 	#include <Path.h>
+	#include <sys/utsname.h>
 #else
 	#include "SymLookup.h"
 #endif
@@ -280,7 +281,39 @@ int LGetOs
 		return LGI_OS_MAC_OS_X;
 
 	#elif defined HAIKU
-	
+
+		if (Ver)
+		{
+			auto Clean = [](const char *val) -> int
+			{
+				char buf[64], *out = buf;
+				while (	*val &&
+						*val != '+' &&
+						out < buf + sizeof(buf) - 1)
+				{
+					if (IsDigit(*val))
+						*out++ = *val;
+					val++;
+				}
+				*out = 0;
+				return Atoi(buf);
+			};
+		
+			utsname name;
+			int result = uname(&name);
+			
+			#if 0
+			printf("sysname=%s\n", name.sysname);
+			printf("nodename=%s\n", name.nodename);
+			printf("release=%s\n", name.release);
+			printf("version=%s\n", name.version);
+			printf("machine=%s\n", name.machine);
+			#endif		
+			
+			Ver->Add(Clean(name.release));
+			Ver->Add(Clean(name.version));
+		}
+		
 		return LGI_OS_HAIKU;
 
 	#else

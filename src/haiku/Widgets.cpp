@@ -147,9 +147,6 @@ void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 			!dynamic_cast<LWindow*>(Parent))
 		Parent = Parent->GetParent();
 	
-	if (Parent)
-		MoveSameScreen(Parent);
-
 	d->IsModal = true;
 	d->IsModeless = false;
 	d->ModalCb = Cb;
@@ -181,9 +178,13 @@ void LDialog::DoModal(OnClose Cb, OsView OverrideParent)
 	}
 	else LgiTrace("%s:%i - Can't set parent for modal.\n", _FL);
 
-	BLooper *looper = BLooper::LooperForThread(d->CallingThread);
+	auto looper = BLooper::LooperForThread(d->CallingThread);
 	if (!looper)
-		printf("%s:%i - no looper for domodal thread.\n",_FL);
+		printf(	"%s:%i - no looper for domodal thread: %i/%s cls=%s.\n",
+				_FL,
+				d->CallingThread,
+				LThread::GetThreadName(d->CallingThread),
+				GetClass());
 
 	if (Attach(0))
 	{
@@ -211,16 +212,37 @@ void LDialog::EndModal(int Code)
 		delete this;
 		return;
 	}
-	
-	BLooper *looper = BLooper::LooperForThread(d->CallingThread);
-	if (!looper)
+
+	BLooper *looper = NULL;
+		
+	if (GetParent() &&
+		GetParent()->WindowHandle())
 	{
-		LgiTrace("%s:%i - Failed to get looper for %p\n", _FL, d->CallingThread);
-		delete this;
-		return;
+		auto parentThreadId = GetParent()->WindowHandle()->Thread();
+		if (parentThreadId != -1 &&
+			parentThreadId != d->CallingThread)
+		{
+			printf("%s:%i - Parent wnd thread (%i,%s) different to calling thread (%i,%s)\n",
+				_FL,
+				parentThreadId, LThread::GetThreadName(parentThreadId),
+				d->CallingThread, LThread::GetThreadName(d->CallingThread));
+				
+			looper = BLooper::LooperForThread(parentThreadId);
+		}
 	}
 	
-	BMessage *m = new BMessage(M_HANDLE_IN_THREAD);
+	if (!looper)
+	{
+		looper = BLooper::LooperForThread(d->CallingThread);
+		if (!looper)
+		{
+			LgiTrace("%s:%i - Failed to get looper for %p\n", _FL, d->CallingThread);
+			delete this;
+			return;
+		}
+	}
+	
+	auto m = new BMessage(M_HANDLE_IN_THREAD);
 	m->AddPointer
 	(
 		LMessage::PropCallback,

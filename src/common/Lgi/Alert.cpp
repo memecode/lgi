@@ -57,6 +57,7 @@ LAlert::LAlert(	LViewI *parent,
 	r.y2 += y;
 
 	SetPos(r);
+	
 	if (parent && parent->GetPos().Valid())
 		MoveSameScreen(parent);
 	else
@@ -66,14 +67,16 @@ LAlert::LAlert(	LViewI *parent,
 void LAlert::SetAppModal()
 {
     #if WINNATIVE
-    SetExStyle(GetExStyle() | WS_EX_TOPMOST);
+    	SetExStyle(GetExStyle() | WS_EX_TOPMOST);
 	#elif defined(LGI_CARBON)
-	if (Handle())
-	{
-		OSStatus e = HIWindowChangeClass(WindowHandle(), kMovableModalWindowClass);
-		if (e)
-			printf("%s:%i - Error: HIWindowChangeClass=%i\n", _FL, (int)e);
-	}
+		if (Handle())
+		{
+			OSStatus e = HIWindowChangeClass(WindowHandle(), kMovableModalWindowClass);
+			if (e)
+				printf("%s:%i - Error: HIWindowChangeClass=%i\n", _FL, (int)e);
+		}
+	#else
+		LgiTrace("%s:%i - SetAppModal not implemented.\n", _FL);
     #endif
 }
 

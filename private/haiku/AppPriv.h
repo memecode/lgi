@@ -57,5 +57,34 @@ public:
 
 	LJson *GetConfig();
 	bool SaveConfig();
+	
+	void MessageReceived(BMessage* message)
+	{
+		switch (message->what)
+		{
+			case M_HANDLE_IN_THREAD:
+				LView::HandleInThreadMessage(message);
+				break;
+			default:
+				printf("%s:%i Unhandled MessageReceived %i\n", _FL, message->what);
+				break;
+		}
+	
+		BApplication::MessageReceived(message);
+	}
+	
+	void RefsReceived(BMessage* message)
+	{
+		printf("%s:%i RefsReceived called... impl me!\n");
+	
+		BApplication::RefsReceived(message);
+	}
+	
+	void AboutRequested()
+	{
+		printf("%s:%i AboutRequested called... impl me!\n");
+	
+		BApplication::AboutRequested();
+	}
 };
 

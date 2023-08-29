@@ -153,6 +153,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	OsApplication(AppArgs.Args, AppArgs.Arg)
 {
 	TheApp = this;
+	LThread::RegisterThread(GetCurrentThreadId(), LString("LApp.")+name);
 	LgiArgsAppPath = AppArgs.Arg[0];
 	Name(name);
 	d = new LAppPrivate(this);
