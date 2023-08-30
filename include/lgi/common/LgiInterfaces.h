@@ -11,6 +11,7 @@
 #include "lgi/common/StringClass.h"
 #include "lgi/common/LgiUiBase.h"
 #include "lgi/common/Notifications.h"
+#include "lgi/common/TypeToString.h"
 
 // Fwd defs
 class LXmlTag;
@@ -559,7 +560,7 @@ public:
 		Ptr = dynamic_cast<T*>(Ctrl);
 		#ifdef _DEBUG
 		if (Ctrl != NULL && Ptr == NULL)
-			LgiTrace("%s:%i - Can't cast '%s' to target type.\n", _FL, Ctrl->GetClass());
+			LgiTrace("%s:%i - Can't cast '%s' to '%s'.\n", _FL, Ctrl->GetClass(), type_name<decltype(Ptr)>().c_str());
 		#endif
 		return Ptr != NULL;
 	}

@@ -2347,7 +2347,7 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 			auto threadId = bWnd->Thread();
 			if (threadId < 0)
 			{
-				printf("####### %s:%i warning, BWindow(%s) has no thread for PostEvent!?\n", _FL, GetClass());
+				// printf("####### %s:%i warning, BWindow(%s) has no thread for PostEvent!?\n", _FL, GetClass());
 			}
 			
 			r = bWnd->PostMessage(&m);

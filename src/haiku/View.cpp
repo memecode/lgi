@@ -133,13 +133,23 @@ struct LBView : public Parent
 	{
 		if (!d)
 			return;
-		
-		// The view position may have been set before attachment. In which case
-		// the OS view's position isn't up to date. Therefor by setting it here
-		// it's up to date.
-		auto Pos = d->View->Pos;
-		Parent::ResizeTo(Pos.X(), Pos.Y());
-		Parent::MoveTo(Pos.x1, Pos.y1);
+
+		auto wnd = dynamic_cast<LWindow*>(d->View);
+		if (wnd)
+		{
+			// Ignore the position of the LWindow root view.
+			// It will track the inside of the BWindow frame.
+		}
+		else
+		{		
+			// The view position may have been set before attachment. In which case
+			// the OS view's position isn't up to date. Therefor by setting it here
+			// it's up to date.
+			auto Pos = d->View->Pos;
+			Parent::ResizeTo(Pos.X(), Pos.Y());
+			// printf("%s:%i - %s::MoveTo %i,%i\n", _FL, d->View->GetClass(), Pos.x1, Pos.y1);
+			Parent::MoveTo(Pos.x1, Pos.y1);
+		}
 		
 		d->View->OnCreate();
 	}
@@ -697,7 +707,7 @@ void LView::Quit(bool DontDelete)
 
 bool LView::SetPos(LRect &p, bool Repaint)
 {
-	// bool debug = GetId() == 723;
+	bool debug = p.x1 == 513 && p.y1 == 281;
 
 	if (Pos != p)
 	{
@@ -710,6 +720,7 @@ bool LView::SetPos(LRect &p, bool Repaint)
 			auto offset = p ? p->_BorderSize : 0;
 
 			d->Hnd->ResizeTo(Pos.X(), Pos.Y());
+			// printf("%s:%i - %s::MoveTo %i,%i\n", _FL, GetClass(), Pos.x1+offset, Pos.y1+offset);
 			d->Hnd->MoveTo(Pos.x1+offset, Pos.y1+offset);
 			d->Hnd->Invalidate();
 			lck.Unlock();
@@ -1022,6 +1033,7 @@ bool LView::Attach(LViewI *parent)
 				bview->AddChild(d->Hnd);
 
 				d->Hnd->ResizeTo(Pos.X(), Pos.Y());
+				// printf("%s:%i - %s::MoveTo %i,%i\n", _FL, GetClass(), Pos.x1, Pos.y1);
 				d->Hnd->MoveTo(Pos.x1, Pos.y1);
 				
 				bool ShowView = TestFlag(GViewFlags, GWF_VISIBLE) && d->Hnd->IsHidden();
