@@ -397,11 +397,14 @@ LWindow *LView::GetWindow()
 	{
 		auto ourBWnd = Handle() ? Handle()->Window() : NULL;
 		auto ourThread = ourBWnd ? ourBWnd->Thread() : -1;
-		auto wndBWnd = _Window->Handle() ? _Window->Handle()->Window() : NULL;
-		auto wndThread = wndBWnd ? wndBWnd->Thread() : -1;
-		if (ourThread != wndThread)
+		if (ourThread >= 0)
 		{
-			printf("WARNING: window thread mismatch!! cls=%s us=%i, wnd=%i\n", GetClass(), ourThread, wndThread);
+			auto wndBWnd = _Window->Handle() ? _Window->Handle()->Window() : NULL;
+			auto wndThread = wndBWnd ? wndBWnd->Thread() : -1;
+			if (ourThread != wndThread)
+			{
+				printf("WARNING: window thread mismatch!! cls=%s us=%i, wnd=%i\n", GetClass(), ourThread, wndThread);
+			}
 		}
 	}
 	#endif
@@ -652,7 +655,7 @@ int LView::OnNotify(LViewI *Ctrl, LNotification Data)
 				bParent->Looper())
 			{
 				printf("OnNotify can't cross thread boundary!\n");
-				printf("\tthis=%s, parent=%s\n", GetClass(), d->Parent->GetClass());
+				printf("\tthis=%s/%s, parent=%s\n", GetClass(), Name(), d->Parent->GetClass());
 				return 0;
 			}
 		}
@@ -2341,6 +2344,12 @@ bool LView::PostEvent(int Cmd, LMessage::Param a, LMessage::Param b, int64_t tim
 
 		if (bWnd)
 		{
+			auto threadId = bWnd->Thread();
+			if (threadId < 0)
+			{
+				printf("####### %s:%i warning, BWindow(%s) has no thread for PostEvent!?\n", _FL, GetClass());
+			}
+			
 			r = bWnd->PostMessage(&m);
 			if (r != B_OK)
 				printf("%s:%i - PostMessage failed.\n", _FL);				

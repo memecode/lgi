@@ -833,6 +833,7 @@ public:
 		Menu(menu),
 		BMenuBar(name)
 	{
+		SetResizingMode(B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP);
 	}
 	
 	~LMenuPrivate()

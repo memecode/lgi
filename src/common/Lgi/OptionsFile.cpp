@@ -119,10 +119,12 @@ bool LOptionsFile::_OnAccess(bool Start)
 {
 	if (Start)
 	{
+		// printf("_OnAccess lock %i/%s count=%i\n", GetCurrentThreadId(), LThread::GetThreadName(GetCurrentThreadId()), GetCount());
 		return Lock(_FL);
 	}
 
 	Unlock();
+	// printf("_OnAccess unlock %i/%s count=%i\n", GetCurrentThreadId(), LThread::GetThreadName(GetCurrentThreadId()), GetCount());
 	return true;
 }
 

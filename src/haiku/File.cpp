@@ -725,8 +725,10 @@ bool LFileSystem::Move(const char *OldName, const char *NewName, LError *Err)
 {
 	if (rename(OldName, NewName))
 	{
-		printf("%s:%i - rename failed, error: %s(%i)\n",
-			_FL, LErrorCodeToString(errno), errno);
+		printf("%s:%i - rename(%s->%s) failed, error: %s(%i)\n",
+			_FL,
+			OldName, NewName,
+			LErrorCodeToString(errno).Get(), errno);
 		return false;
 	}
 	

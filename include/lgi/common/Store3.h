@@ -382,7 +382,12 @@ public:
 
 	LDataStoreI()
 	{
+		#ifdef HAIKU
+		// Could be in any thread... certainly not the LApp thread. More likely to be the
+		// main window thread.
+		#else
 		LAssert(LAppInst->InThread());
+		#endif
 		while (Map.Find(Id = LRand(1000)))
 			;
 		Map.Add(Id, this);
@@ -390,7 +395,9 @@ public:
 
 	virtual ~LDataStoreI()
 	{
+		#ifndef HAIKU
 		LAssert(LAppInst->InThread());
+		#endif
 		if (!Map.Delete(Id))
 			LAssert(!"Delete failed.");
 	}
