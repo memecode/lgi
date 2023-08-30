@@ -1454,11 +1454,8 @@ namespace Storage2
 					AddItem((StorageItemImpl*)Item->GetChild());
 					if (_Timer.DoNow())
 					{
-						LYield();
 						if (_Ui && _Ui->Cancel())
-						{
 							break;
-						}
 					}
 					if (Validator) Validator->CompactDone(Item);
 
@@ -2010,12 +2007,8 @@ bool StorageKitImpl::Compact(Progress *p, bool Interactive, StorageValidator *va
 						d->_Timer.DoNow())
 					{
 						RemoveSpace->Value(b->Start);
-						LYield();
-
 						if (p && p->Cancel())
-						{
 							break;
-						}
 					}
 				}
 			}

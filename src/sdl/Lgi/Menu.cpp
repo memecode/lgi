@@ -215,14 +215,12 @@ int LSubMenu::Float(LView *From, int x, int y, int Btns)
 			m->Visible(true);
 			
 			LgiTrace("Starting float loop...\n");
+			LAssert(!"Refactor with yield");
 			if (m->Handle())
 			{
 				// Wait for the menu to hide itself
 				while (m->Visible())
-				{
-					LYield();
 					LSleep(1);
-				}
 			}
 			LgiTrace("Finished float loop...\n");
 		}
