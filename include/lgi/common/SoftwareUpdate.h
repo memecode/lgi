@@ -23,7 +23,7 @@ public:
 
 	typedef std::function<void(UpdateInfo*,const char*)> UpdateCb;
 
-	LSoftwareUpdate(const char *SoftwareName, const char *UpdateUri, const char *ProxyUri, const char *OptionalTempPath = 0);
+	LSoftwareUpdate(const char *SoftwareName, const char *UpdateUri, const char *ProxyUri, const char *OptionalTempPath = NULL);
 	virtual ~LSoftwareUpdate();
 
 	/// This function should not be called using a stack object. Dynamically allocation the LSoftwareUpdate and it'll

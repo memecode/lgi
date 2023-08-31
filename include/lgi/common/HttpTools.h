@@ -4,7 +4,7 @@
 #include "lgi/common/Net.h"
 
 extern LXmlTag *ExtractForms(char *Html, LStream *Log);
-extern void XmlToStream(LStream *s, LXmlTag *x, char *Css = 0);
+extern void XmlToStream(LStream *s, LXmlTag *x, const char *Css = NULL);
 extern LXmlTag *GetFormField(LXmlTag *Form, char *Field);
 extern char *HtmlTidy(char *Html);
 extern LSurface *GetHttpImage(char *Uri);
@@ -17,10 +17,10 @@ struct WebPage
 	char *Charset;
 	LXmlTag *Parsed;
 
-	WebPage(char *Page, LStream *Log = 0);
+	WebPage(char *Page, LStream *Log = NULL);
 	~WebPage();
 	
-	LXmlTag *GetRoot(LStream *Log = 0);
+	LXmlTag *GetRoot(LStream *Log = NULL);
 	char *GetFormValue(char *field);
 	char *GetCharSet();
 };
@@ -40,7 +40,7 @@ struct FormPost
 	FormPost(LXmlTag *f);
 	
 	char *GetActionUri();
-	char *EncodeFields(LStream *Debug = 0, char *RealFields = 0, bool EncodePlus = false);
+	char *EncodeFields(LStream *Debug = NULL, const char *RealFields = NULL, bool EncodePlus = false);
 	FormValue *Get(char *Field, bool Create = true);
 	bool Set(char *field, char *value, LStream *Log, bool AllowCreate);
 	LXmlTag *GetField(char *n);
@@ -69,8 +69,8 @@ public:
 	~HttpTools();
 
 	void SetWnd(LViewI *i) { Wnd = i; }
-	char *Fetch(char *uri, LStream *Log, LViewI *Dump, CookieJar *Cookies = 0);
-	char *Post(char *uri, char *headers, char *body, LStream *Log = 0, LViewI *Dump = 0);
+	char *Fetch(char *uri, LStream *Log, LViewI *Dump, CookieJar *Cookies = NULL);
+	char *Post(char *uri, char *headers, char *body, LStream *Log = NULL, LViewI *Dump = NULL);
 };
 
 #endif

@@ -386,7 +386,7 @@ char *FormPost::GetActionUri()
 	return Form->GetAttr("action");
 }
 
-char *FormPost::EncodeFields(LStream *Debug, char *RealFields, bool EncodePlus)
+char *FormPost::EncodeFields(LStream *Debug, const char *RealFields, bool EncodePlus)
 {
 	LStringPipe p;
 	LHashTbl<StrKey<char,false>,bool> Done;

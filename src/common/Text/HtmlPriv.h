@@ -83,20 +83,9 @@ public:
 class LFlowRect : public LRect
 {
 public:
-	LTag *Tag;
-	char16 *Text;
-	ssize_t Len;
-
-	LFlowRect()
-	{
-		Tag = 0;
-		Text = 0;
-		Len = 0;
-	}
-
-	~LFlowRect()
-	{
-	}
+	LTag *Tag = NULL;
+	char16 *Text = NULL;
+	ssize_t Len = 0;
 
 	int Start();
 	bool OverlapX(int x) { return x >= x1 && x <= x2; }
@@ -334,7 +323,7 @@ public:
 	// Hierarchy
 	LHtml *Html = NULL;
 	bool IsBlock() { return Display() == LCss::DispBlock; }
-	LTag *GetBlockParent(ssize_t *Idx = 0);
+	LTag *GetBlockParent(ssize_t *Idx = NULL);
 	LFont *GetFont();
 
 	// Style
@@ -398,7 +387,7 @@ public:
 	bool OnClick(const LMouse &m);
 
 	// Attributes
-	bool Get(const char *attr, const char *&val) { val = Attr.Find(attr); return val != 0; }
+	bool Get(const char *attr, const char *&val) { val = Attr.Find(attr); return val != NULL; }
 	void Set(const char *attr, const char *val);
 
 	// Methods
@@ -455,8 +444,8 @@ public:
 	void CollectFormValues(LHashTbl<ConstStrKey<char,false>,char*> &f);
 
 	// GDom impl
-	bool GetVariant(const char *Name, LVariant &Value, const char *Array = 0);
-	bool SetVariant(const char *Name, LVariant &Value, const char *Array = 0);
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
 
 	// Window
 	bool OnMouseClick(LMouse &m);

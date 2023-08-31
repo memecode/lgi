@@ -298,8 +298,8 @@ protected:
 	struct LTextView4Undo *UndoCur = NULL;
 
 	// private methods
-	LArray<LTextLine*>::I GetTextLineIt(ssize_t Offset, ssize_t *Index = 0);
-	LTextLine *GetTextLine(ssize_t Offset, ssize_t *Index = 0)
+	LArray<LTextLine*>::I GetTextLineIt(ssize_t Offset, ssize_t *Index = NULL);
+	LTextLine *GetTextLine(ssize_t Offset, ssize_t *Index = NULL)
 	{
 		auto it = GetTextLineIt(Offset, Index);
 		return it != Line.end() ? *it : NULL;
@@ -360,7 +360,7 @@ public:
 	LString operator[](ssize_t LineIdx);
 
 	ssize_t HitText(int x, int y, bool Nearest);
-	void DeleteSelection(char16 **Cut = 0);
+	void DeleteSelection(char16 **Cut = NULL);
 
 	// Font
 	LFont *GetFont() override;
@@ -394,8 +394,8 @@ public:
 	LRange GetSelectionRange();
 
 	// File IO
-	bool Open(const char *Name, const char *Cs = 0) override;
-	bool Save(const char *Name, const char *Cs = 0) override;
+	bool Open(const char *Name, const char *Cs = NULL) override;
+	bool Save(const char *Name, const char *Cs = NULL) override;
 	const char *GetLastError();
 
 	// Clipboard IO
@@ -417,7 +417,7 @@ public:
 	virtual void DoReplace(std::function<void(bool)> Callback) override;
 
 	// Action Processing	
-	void ClearDirty(std::function<void(bool)> OnStatus, bool Ask, const char *FileName = 0);
+	void ClearDirty(std::function<void(bool)> OnStatus, bool Ask, const char *FileName = NULL);
 	void UpdateScrollBars(bool Reset = false);
 	ssize_t GetLine();
 	void SetLine(int64_t Line);

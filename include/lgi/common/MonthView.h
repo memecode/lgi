@@ -27,7 +27,7 @@ protected:
 public:
 	int FirstDayOfWeek = 0; // 0-sun, 1-mon etc..
 
-	MonthView(LDateTime *dt = 0);
+	MonthView(LDateTime *dt = NULL);
 
 	// Set
 	void Set(LDateTime *dt);

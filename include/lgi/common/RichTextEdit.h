@@ -74,7 +74,7 @@ public:
 					int y = 0,
 					int cx = 100,
 					int cy = 100,
-					LFontType *FontInfo = 0);
+					LFontType *FontInfo = NULL);
 	~LRichTextEdit();
 
 	const char *GetClass() override { return "LRichTextEdit"; }
@@ -92,7 +92,7 @@ public:
 	void SetCharset(const char *s) override;
 
 	ssize_t HitTest(int x, int y);
-	bool DeleteSelection(char16 **Cut = 0);
+	bool DeleteSelection(char16 **Cut = NULL);
 	bool SetSpellCheck(class LSpellCheck *sp);
 	
 	bool GetFormattedContent(const char *MimeType, LString &Out, LArray<ContentMedia> *Media = NULL) override;
@@ -161,8 +161,8 @@ public:
 	bool IsBusy(bool Stop = false);
 
 	// File IO
-	bool Open(const char *Name, const char *Cs = 0) override;
-	bool Save(const char *Name, const char *Cs = 0) override;
+	bool Open(const char *Name, const char *Cs = NULL) override;
+	bool Save(const char *Name, const char *Cs = NULL) override;
 
 	// Clipboard IO
 	bool Cut() override;
@@ -183,7 +183,7 @@ public:
 	virtual void DoReplace(std::function<void(bool)> Callback) override;
 
 	// Action Processing	
-	bool ClearDirty(bool Ask, const char *FileName = 0);
+	bool ClearDirty(bool Ask, const char *FileName = NULL);
 	void UpdateScrollBars(bool Reset = false);
 	int GetLine();
 	void SetLine(int Line);

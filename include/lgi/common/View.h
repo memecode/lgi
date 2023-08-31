@@ -141,7 +141,7 @@ protected:
 		/// \brief Creates a class to pass to CreateWindowEx(). If this methed is not
 		/// explicitly called then the string from GetClass() is used to create a class,
 		/// which is usually the name of the object.
-		LWindowsClass *CreateClassW32(const char *Class = 0, HICON Icon = 0, int AddStyles = 0);
+		LWindowsClass *CreateClassW32(const char *Class = NULL, HICON Icon = 0, int AddStyles = 0);
 
 		virtual int		SysOnNotify(int Msg, int Code) { return 0; }
 	
@@ -825,7 +825,7 @@ public:
 	virtual ~LViewFactory();
 
 	/// Create a view by name.
-	static LView *Create(const char *Class, LRect *Pos = 0, const char *Text = 0);
+	static LView *Create(const char *Class, LRect *Pos = NULL, const char *Text = NULL);
 };
 
 #define DeclFactory(CLS) \

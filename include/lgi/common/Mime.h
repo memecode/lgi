@@ -92,7 +92,7 @@ class LMime
 public:
 	static const char *DefaultCharset;
 
-	LMime(const char *TmpFileRoot = 0);
+	LMime(const char *TmpFileRoot = NULL);
 	virtual ~LMime();
 
 	// Methods
@@ -108,7 +108,7 @@ public:
 	const char *GetHeaders() { return Headers; }
 	ssize_t GetLength() { return DataSize; }
 	LStreamI *GetData(bool Detach = false);
-	bool SetData(bool OwnStream, LStreamI *Input, int RdPos = 0, int RdSize = -1, LMutex *Lock = 0);
+	bool SetData(bool OwnStream, LStreamI *Input, int RdPos = 0, int RdSize = -1, LMutex *Lock = NULL);
 	bool SetData(char *Str, int Len);
 
 	// Simple Header Management
@@ -116,7 +116,7 @@ public:
 	bool Set(const char *Field, const char *Value); // 'Value' has to include any subfields.
 	
 	LString LGetSub(const char *Field, const char *Sub);
-	bool SetSub(const char *Field, const char *Sub, const char *Value, const char *DefaultValue = 0);
+	bool SetSub(const char *Field, const char *Sub, const char *Value, const char *DefaultValue = NULL);
 	
 	[[deprecated]] char *Get(const char *Field, bool Short = true, const char *Default = NULL); // 'Short'=true returns the value with out subfields
 	[[deprecated]] char *GetSub(const char *Field, const char *Sub);
@@ -173,7 +173,7 @@ public:
 		class LMimeRead : public LPullStreamer, public LMimeAction
 		{
 		public:
-			ssize_t Pull(LStreamI *Source, LStreamEnd *End = 0);
+			ssize_t Pull(LStreamI *Source, LStreamEnd *End = NULL);
 			void Empty();
 		} Read;
 
@@ -181,7 +181,7 @@ public:
 		{
 		public:
 			int64 GetSize();
-			ssize_t Push(LStreamI *Dest, LStreamEnd *End = 0);
+			ssize_t Push(LStreamI *Dest, LStreamEnd *End = NULL);
 			void Empty();
 		} Write;
 

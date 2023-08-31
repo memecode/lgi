@@ -47,7 +47,7 @@ struct LFunc
 	LString Method;
 	bool InUse;
 
-	LFunc(const char *m = 0, LFuncType t = NullFunc)
+	LFunc(const char *m = NULL, LFuncType t = NullFunc)
 	{
 		Type = t;
 		Method = m;

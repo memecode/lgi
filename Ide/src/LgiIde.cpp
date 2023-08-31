@@ -4979,7 +4979,7 @@ int LgiMain(OsAppArguments &AppArgs)
 	{
 		a.AppWnd = new AppWnd;
 
-		// LClipBoard::UnitTests();
+		LPlaySound("~/code/mixkit-happy-bells-notification-937.wav");
 		
 		a.Run();
 	}

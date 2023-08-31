@@ -320,7 +320,7 @@ public:
 	static int SystemTimeZoneOffset();
 
 	/// Daylight savings info record
-	struct LgiClass GDstInfo
+	struct LgiClass LDstInfo
 	{
 		/// Timestamp where the DST timezone changes to 'Offset'
 		uint64 UtcTimeStamp;
@@ -338,7 +338,7 @@ public:
 	(
 		/// [Out] The array to receive DST info. At minimum one record will be returned
 		/// matching the TZ in place for the start datetime.
-		LArray<GDstInfo> &Out,
+		LArray<LDstInfo> &Out,
 		/// [In] The start date that you want DST info for.
 		LDateTime &Start,
 		/// [Optional In] The end of the period you want DST info for.
@@ -346,7 +346,7 @@ public:
 	);
 
 	/// Using the DST info this will convert 'dt' from UTC to local
-	static bool DstToLocal(LArray<GDstInfo> &Dst, LDateTime &dt);
+	static bool DstToLocal(LArray<LDstInfo> &Dst, LDateTime &dt);
 
 	/// Decodes an email date into the current instance
 	bool Decode(const char *In);

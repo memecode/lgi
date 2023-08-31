@@ -318,7 +318,7 @@ static bool ParseValue(char *s, LAutoString &var, LAutoString &val)
 
 /* Testing code...
 	LDateTime Start, End;
-	LArray<LDateTime::GDstInfo> Info;
+	LArray<LDateTime::LDstInfo> Info;
 
 	Start.Set("1/1/2010");
 	End.Set("31/12/2014");
@@ -337,7 +337,7 @@ static bool ParseValue(char *s, LAutoString &var, LAutoString &val)
 	LgiMsg(0, s, "Test");
 */
 
-LDateTime LDateTime::GDstInfo::GetLocal()
+LDateTime LDateTime::LDstInfo::GetLocal()
 {
 	LDateTime d;
 	d = UtcTimeStamp;
@@ -362,7 +362,7 @@ LString::Array Zdump;
 
 #define DEBUG_DST_INFO		0
 
-bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start, LDateTime *End)
+bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start, LDateTime *End)
 {
 	bool Status = false;
 	
@@ -603,7 +603,7 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<GDstInfo> &Info, LDateTime &Start,
 	return Status;
 }
 
-bool LDateTime::DstToLocal(LArray<GDstInfo> &Dst, LDateTime &dt)
+bool LDateTime::DstToLocal(LArray<LDstInfo> &Dst, LDateTime &dt)
 {
 	if (dt.GetTimeZone())
 	{

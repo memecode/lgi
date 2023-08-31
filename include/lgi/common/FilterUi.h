@@ -75,7 +75,7 @@ class LFilterView : public LLayout
 	class LFilterViewPrivate *d;
 
 public:
-	LFilterView(FilterUi_Menu Callback = 0, void *UserData = 0);
+	LFilterView(FilterUi_Menu Callback = NULL, void *UserData = NULL);
 	~LFilterView();
 
 	void SetDefault();

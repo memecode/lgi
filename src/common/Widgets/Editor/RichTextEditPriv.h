@@ -192,13 +192,8 @@ public:
 
 struct LNamedStyle : public LCss
 {
-	int RefCount;
+	int RefCount = 0;
 	LString Name;
-
-	LNamedStyle()
-	{
-		RefCount = 0;
-	}
 };
 
 class LCssCache

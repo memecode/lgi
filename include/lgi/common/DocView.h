@@ -70,7 +70,7 @@ LDocumentEnv : public LThreadOwner
 	LArray<LDocView*> Viewers;
 
 public:
-	LDocumentEnv(LDocView *v = 0);
+	LDocumentEnv(LDocView *v = NULL);
 	virtual ~LDocumentEnv();
 
 	enum LoadType
@@ -307,9 +307,9 @@ public:
 	const char *GetClass() { return "LDocView"; }
 
 	/// Open a file handler
-	virtual bool Open(const char *Name, const char *Cs = 0) { return false; }
+	virtual bool Open(const char *Name, const char *Cs = NULL) { return false; }
 	/// Save a file handler
-	virtual bool Save(const char *Name, const char *Cs = 0) { return false; }
+	virtual bool Save(const char *Name, const char *Cs = NULL) { return false; }
 
 	///////////////////////////////////////////////////////////////////////
 

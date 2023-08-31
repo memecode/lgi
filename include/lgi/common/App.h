@@ -266,7 +266,7 @@ public:
 		/// The option to look for.
 		const char *Option,
 		/// The buffer to receive the value of the command line parameter or NULL if you don't care.
-		char *Dst = 0,
+		char *Dst = NULL,
 		/// The buffer size in bytes
 		int DstSize = 0
 	);

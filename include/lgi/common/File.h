@@ -252,7 +252,7 @@ public:
 
 	/// Call this when the devices on the system change. For instance on windows
 	/// when you receive WM_DEVICECHANGE.
-	void OnDeviceChange(char *Reserved = 0);
+	void OnDeviceChange(char *Reserved = NULL);
 
 	/// Gets the root volume of the system.
 	LVolume *GetRootVolume();
@@ -265,11 +265,11 @@ public:
 		/// The file to copy to. Any existing file there will be overwritten without warning.
 		const char *To,
 		/// The error code or zero on success
-		LError *Status = 0,
+		LError *Status = NULL,
 		/// Optional callback when some data is copied.
-		CopyFileCallback Callback = 0,
+		CopyFileCallback Callback = NULL,
 		/// A user defined token passed to the callback function
-		void *Token = 0
+		void *Token = NULL
 	);
 
 	/// Delete file
@@ -733,7 +733,7 @@ LgiFunc bool LIsFileNameExecutable(const char *FileName);
 LgiFunc bool LIsFileExecutable(const char *FileName, LStreamI *f, int64 Start, int64 Len);
 
 /// Get information about the disk that a file resides on.
-LgiFunc bool LGetDriveInfo(char *Path, uint64 *Free, uint64 *Size = 0, uint64 *Available = 0);
+LgiFunc bool LGetDriveInfo(char *Path, uint64 *Free, uint64 *Size = NULL, uint64 *Available = NULL);
 
 /// Shows the file's properties dialog
 LgiFunc void LShowFileProperties(OsView Parent, const char *Filename);

@@ -560,7 +560,10 @@ public:
 		Ptr = dynamic_cast<T*>(Ctrl);
 		#ifdef _DEBUG
 		if (Ctrl != NULL && Ptr == NULL)
-			LgiTrace("%s:%i - Can't cast '%s' to '%s'.\n", _FL, Ctrl->GetClass(), type_name<decltype(Ptr)>().c_str());
+			LgiTrace("%s:%i - Can't cast '%s' to '%s' for CtrlId=%i.\n",
+				_FL,
+				Ctrl->GetClass(),
+				type_name<decltype(Ptr)>().c_str(), Id);
 		#endif
 		return Ptr != NULL;
 	}

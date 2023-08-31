@@ -166,7 +166,7 @@ public:
 	IStreamWrap(IStream *str) { s = str; }	
 	~IStreamWrap() { Close(); }
 
-	int Open(const char *Str = 0, int Int = 0) { return IsOpen(); }
+	int Open(const char *Str = NULL, int Int = 0) { return IsOpen(); }
 	bool IsOpen() { return s != NULL; }
 
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override
@@ -426,7 +426,7 @@ public:
 
 	T* operator->() const
 	{
-		LAssert(ptr != 0); 
+		LAssert(ptr != NULL); 
 		return ptr;
 	}
 

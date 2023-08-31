@@ -61,25 +61,19 @@ class MailProtocol;
 
 struct MailProtocolError
 {
-	int Code;
+	int Code = 0;
 	LString ErrMsg;
-
-	MailProtocolError()
-	{
-		Code = 0;
-	}
 };
 
 class MailProtocolProgress
 {
 public:
-	uint64 Start;
-	ssize_t Value;
-	ssize_t Range;
+	uint64 Start = 0;
+	ssize_t Value = 0;
+	ssize_t Range = 0;
 
 	MailProtocolProgress()
 	{
-		Empty();
 	}
 
 	void Empty()
@@ -284,7 +278,7 @@ public:
 
 	/// Write the email's contents into the LStringPipe returned from
 	/// SendStart and then call SendEnd to finish the transaction
-	virtual LStringPipe *SendStart(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err = 0) = 0;
+	virtual LStringPipe *SendStart(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err = NULL) = 0;
 	
 	/// Finishes the mail send
 	virtual bool SendEnd(LStringPipe *Sink) = 0;
@@ -307,7 +301,7 @@ struct ImapMailFlags
 		uint16 All = 0;
 	};
 
-	ImapMailFlags(char *init = 0)
+	ImapMailFlags(const char *init = NULL)
 	{
 		if (init)
 			Set(init);
@@ -517,7 +511,7 @@ public:
 class MailSmtp : public MailSink
 {
 protected:
-	bool ReadReply(const char *Str, LStringPipe *Pipe = 0, MailProtocolError *Err = 0);
+	bool ReadReply(const char *Str, LStringPipe *Pipe = NULL, MailProtocolError *Err = NULL);
 	bool WriteText(const char *Str);
 
 public:
@@ -527,10 +521,10 @@ public:
 	bool Open(LSocketI *S, const char *RemoteHost, const char *LocalDomain, const char *UserName, const char *Password, int Port = 0, int Flags = 0);
 	bool Close();
 
-	bool SendToFrom(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err = 0);
-	LStringPipe *SendData(MailProtocolError *Err = 0);
+	bool SendToFrom(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err = NULL);
+	LStringPipe *SendData(MailProtocolError *Err = NULL);
 
-	LStringPipe *SendStart(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err = 0);
+	LStringPipe *SendStart(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err = NULL);
 	bool SendEnd(LStringPipe *Sink);
 
 	// bool Send(MailMessage *Msg, bool Mime = false);
@@ -547,7 +541,7 @@ public:
 	bool Open(LSocketI *S, const char *RemoteHost, const char *LocalDomain, const char *UserName, const char *Password, int Port = 0, int Flags = 0);
 	bool Close();
 
-	LStringPipe *SendStart(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err = 0);
+	LStringPipe *SendStart(List<AddressDescriptor> &To, AddressDescriptor *From, MailProtocolError *Err = NULL);
 	bool SendEnd(LStringPipe *Sink);
 };
 
@@ -574,7 +568,7 @@ public:
 
 	// Commands available while connected
 	ssize_t GetMessages() override;
-	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0) override;
+	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = NULL) override;
 	bool Delete(int Message) override;
 	int Sizeof(int Message) override;
 	bool GetSizes(LArray<int64_t> &Sizes) override;
@@ -598,7 +592,7 @@ public:
 
 	// Commands available while connected
 	ssize_t GetMessages() override;
-	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0) override;
+	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = NULL) override;
 	bool Delete(int Message) override;
 	int Sizeof(int Message) override;
 	bool GetUid(int Message, char *Id, int IdLen) override;
@@ -623,7 +617,7 @@ public:
 
 	// Commands available while connected
 	ssize_t GetMessages() override;
-	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0) override;
+	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = NULL) override;
 	bool Delete(int Message) override;
 	int Sizeof(int Message) override;
 	bool GetSizes(LArray<int64_t> &Sizes) override;
@@ -674,9 +668,9 @@ protected:
 	void ClearDialog();
 	void ClearUid();
 	bool FillUidList();
-	bool WriteBuf(bool ObsurePass = false, const char *Buffer = 0, bool Continuation = false);
+	bool WriteBuf(bool ObsurePass = false, const char *Buffer = NULL, bool Continuation = false);
 	bool ReadResponse(int Cmd = -1, bool Plus = false);
-	bool Read(LStreamI *Out = 0, int Timeout = -1);
+	bool Read(LStreamI *Out = NULL, int Timeout = -1);
 	bool ReadLine();
 	bool IsResponse(const char *Buf, int Cmd, bool &Ok);
 	void CommandFinished();
@@ -747,7 +741,7 @@ public:
 	bool GetCapabilities(LArray<char*> &s);
 
 	// Commands available while connected
-	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = 0) override;
+	bool Receive(LArray<MailTransaction*> &Trans, MailCallbacks *Callbacks = NULL) override;
 	ssize_t GetMessages() override;
 	bool Delete(int Message) override;
 	bool Delete(bool ByUid, const char *Seq);
@@ -796,7 +790,7 @@ public:
 	);
 
 	bool GetFolders(LArray<MailImapFolder*> &Folders);
-	bool SelectFolder(const char *Path, StrMap *Values = 0);
+	bool SelectFolder(const char *Path, StrMap *Values = NULL);
 	char *GetSelectedFolder();
 	int GetMessages(const char *Path);
 	bool CreateFolder(MailImapFolder *f);
@@ -817,7 +811,7 @@ public:
 	// bool OnIdle(int Timeout, LArray<Untagged> &Resp);
 	bool OnIdle(int Timeout, LString::Array &Resp);
 	bool FinishIdle();
-	bool Poll(int *Recent = 0, LArray<LString> *New = 0);
+	bool Poll(int *Recent = NULL, LArray<LString> *New = NULL);
 	bool Status(char *Path, int *Recent);
 	bool Search(bool Uids, LArray<LString> &SeqNumbers, const char *Filter);
 

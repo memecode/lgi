@@ -7,7 +7,7 @@ class LWordStore
 	struct LWordStorePriv *d;
 
 public:
-	LWordStore(const char *file = 0);
+	LWordStore(const char *file = NULL);
 	~LWordStore();
 	
 	// Serialization
