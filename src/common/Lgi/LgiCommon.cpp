@@ -45,6 +45,7 @@
 	#include <Roster.h>
 	#include <Path.h>
 	#include <sys/utsname.h>
+	#include <os/storage/AppFileInfo.h>
 #else
 	#include "SymLookup.h"
 #endif
@@ -301,24 +302,38 @@ int LGetOs
 		
 			utsname name;
 			int result = uname(&name);
-			
-			#if 0
-			printf("sysname=%s\n", name.sysname);
-			printf("nodename=%s\n", name.nodename);
-			printf("release=%s\n", name.release);
-			printf("version=%s\n", name.version);
-			printf("machine=%s\n", name.machine);
-			#endif
 
-			/*
-			auto libbe = "/boot/system/lib/libbe.so";
-			image_info info;
-			auto img = load_add_on(libbe);
-			auto r = get_image_info(img, &info);
-			printf("r=%i api_version=%x\n", r, info.api_version);
-			*/
+			LString::Array Parts;
+
+			// the version is stored in the BEOS:APP_VERSION attribute of libbe.so
+			BPath path;
+			if (find_directory(B_BEOS_LIB_DIRECTORY, &path) == B_OK)
+			{
+				path.Append("libbe.so");
+
+				BAppFileInfo appFileInfo;
+				version_info versionInfo;
+				BFile file;
+				if (file.SetTo(path.Path(), B_READ_ONLY) == B_OK &&
+					appFileInfo.SetTo(&file) == B_OK &&
+					appFileInfo.GetVersionInfo(&versionInfo, B_APP_VERSION_KIND) == B_OK &&
+					versionInfo.short_info[0] != '\0')
+					Parts = LString(versionInfo.short_info).SplitDelimit("/");
+				else
+					printf("%s:%i - Failed to open libbe.so\n", _FL);
+			}
+			else printf("%s:%i - Failed to find B_BEOS_LIB_DIRECTORY\n", _FL);
 			
-			Ver->Add(Clean(name.release));
+			if (Parts.Length() == 2)
+			{
+				Ver->Add(Clean(Parts[0])); // e.g. R1 -> 1
+				Ver->Add(Clean(Parts[1])); // e.g. Beta4 -> 4
+			}
+			else
+			{
+				Ver->Add(Clean(name.release));
+				Ver->Add(0); // The 'beta' is unknown
+			}
 			Ver->Add(Clean(name.version));
 		}
 		

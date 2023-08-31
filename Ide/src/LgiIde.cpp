@@ -4983,8 +4983,8 @@ int LgiMain(OsAppArguments &AppArgs)
 		LArray<int> ver;
 		LGetOs(&ver);
 
-		auto testFile = "/boot/home/code/lgi/trunk/CMakeLists.txt";
-		LShowFileProperties(a.AppWnd->Handle(), testFile);
+		// auto testFile = "/boot/home/code/lgi/trunk/CMakeLists.txt";
+		// LShowFileProperties(a.AppWnd->Handle(), testFile);
 		// LBrowseToFile(testFile);
 		
 		a.Run();

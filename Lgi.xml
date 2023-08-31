@@ -520,8 +520,8 @@
 `pkg-config --cflags gstreamer-1.0`</Release>
 				</Linux>
 				<Haiku>
-					<Debug>../../../../../boot/system/develop/headers</Debug>
-					<Release>../../../../../boot/system/develop/headers</Release>
+					<Debug>../../../../system/develop/headers</Debug>
+					<Release>../../../../system/develop/headers</Release>
 				</Haiku>
 			</SystemIncludes>
 			<Libraries>
