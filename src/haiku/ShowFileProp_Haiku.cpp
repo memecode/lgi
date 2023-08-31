@@ -5,8 +5,30 @@
 
 void LShowFileProperties(OsView Parent, const char *Filename)
 {
-    // Send kGetInfo ?
-    LAssert(!"Impl me.");
+    BMessenger tracker(kTrackerSignature);
+    if (!tracker.IsValid())
+    {
+        LgiTrace("%s:%i - No tracker app '%s'\n", _FL, kTrackerSignature);
+        return;
+    }
+    
+	const uint32 kGetInfo = 'Tinf';
+    BMessage msg(kGetInfo);
+
+    BEntry entry(Filename);
+    entry_ref ref;
+    if (entry.GetRef(&ref) != B_OK)
+    {
+        LgiTrace("%s:%i - No entry for '%s'\n", _FL, Filename);
+        return;
+    }
+
+    msg.AddRef("refs", &ref);
+    auto result = tracker.SendMessage(&msg);
+    if (result != B_OK)
+    {
+        LgiTrace("%s:%i - SendMessage result: %x\n", _FL, result);
+    }
 }
 
 bool LBrowseToFile(const char *Filename)

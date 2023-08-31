@@ -4982,7 +4982,10 @@ int LgiMain(OsAppArguments &AppArgs)
 		// LPlaySound("~/code/mixkit-happy-bells-notification-937.wav");
 		LArray<int> ver;
 		LGetOs(&ver);
-		LBrowseToFile("/boot/home/code/lgi/trunk/CMakeLists.txt");
+
+		auto testFile = "/boot/home/code/lgi/trunk/CMakeLists.txt";
+		LShowFileProperties(a.AppWnd->Handle(), testFile);
+		// LBrowseToFile(testFile);
 		
 		a.Run();
 	}
