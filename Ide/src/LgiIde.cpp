@@ -4979,7 +4979,10 @@ int LgiMain(OsAppArguments &AppArgs)
 	{
 		a.AppWnd = new AppWnd;
 
-		LPlaySound("~/code/mixkit-happy-bells-notification-937.wav");
+		// LPlaySound("~/code/mixkit-happy-bells-notification-937.wav");
+		LArray<int> ver;
+		LGetOs(&ver);
+		LBrowseToFile("/boot/home/code/lgi/trunk/CMakeLists.txt");
 		
 		a.Run();
 	}

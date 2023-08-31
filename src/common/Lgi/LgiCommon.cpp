@@ -308,7 +308,15 @@ int LGetOs
 			printf("release=%s\n", name.release);
 			printf("version=%s\n", name.version);
 			printf("machine=%s\n", name.machine);
-			#endif		
+			#endif
+
+			/*
+			auto libbe = "/boot/system/lib/libbe.so";
+			image_info info;
+			auto img = load_add_on(libbe);
+			auto r = get_image_info(img, &info);
+			printf("r=%i api_version=%x\n", r, info.api_version);
+			*/
 			
 			Ver->Add(Clean(name.release));
 			Ver->Add(Clean(name.version));
