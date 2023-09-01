@@ -2927,7 +2927,7 @@ ProjectStatus IdeProject::OpenFile(const char *FileName)
 	LString::Array Inc, Sys;
 	auto plat = PlatformFlagsToEnum(d->App->GetPlatform());
 	BuildIncludePaths(Inc, &Sys, true, true, plat);
-	d->App->GetFindSym()->SetIncludePaths(Inc, Sys);
+	d->App->GetFindSym()->SetIncludePaths(Inc, Sys, d->App->GetPlatform());
 
 	Prof.Add("OnOpen");
 
@@ -3567,8 +3567,9 @@ void AddAllSubFolders(LString::Array &out, LString in)
 	for (int b=dir.First(in); b; b=dir.Next())
 	{
 		if (dir.IsDir() &&
-			Strncmp(dir.GetName(), "Qt", 2) &&
-			Strcmp(dir.GetName(), "private"))
+			Strncmp(dir.GetName(), "Qt", 2)
+			// && Strcmp(dir.GetName(), "private")
+			)
 		{
 			out.Add(dir.FullPath());
 			AddAllSubFolders(out, dir.FullPath());

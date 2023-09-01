@@ -20,10 +20,9 @@
 
 #define DEBUG_FIND_SYMBOL		0
 #define DEBUG_NO_THREAD			1
-#define DEBUG_FILE				"pangocairo.h"
+#define DEBUG_FILE				"AppFileInfo.h"
 
 int SYM_FILE_SENT = 0;
-
 
 class FindSymbolDlg : public LDialog
 {
@@ -169,7 +168,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		bool Debug = false;
 		#ifdef DEBUG_FILE
 		if ((Debug = Path.Find(DEBUG_FILE) >= 0))
-			LgiTrace("%s:%i - AddFile(%s)\n", _FL, Path.Get());
+			LgiTrace("%s:%i - AddFile(%s, %s)\n", _FL, Path.Get(), PlatformFlagsToStr(Platforms).Get());
 		#endif
 		
 		// Already added?
@@ -270,7 +269,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		return AddFile(Path, Platform);
 	}
 
-	void AddPaths(LString::Array &out, LString::Array &in)
+	void AddPaths(LString::Array &out, LString::Array &in, int Platforms)
 	{
 		LHashTbl<StrKey<char>, bool> map; // of existing scanned folders
 		for (auto p: out)
@@ -280,7 +279,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		{
 			if (!map.Find(p))
 			{
-				// printf("add path: %s\n", p.Get());
+				// LgiTrace("add path: %s\n", p.Get());
 				out.Add(p);
 				map.Add(p, true);
 
@@ -288,15 +287,18 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 				for (auto b=dir.First(p); b; b=dir.Next())
 				{
 					bool willAdd = !dir.IsDir() &&
-									MatchStr("*.h", dir.GetName());
+									MatchStr("*.h*", dir.GetName());
 						
 					#ifdef DEBUG_FILE
 					if (!Stricmp(dir.GetName(), DEBUG_FILE))
-						printf("!!!GOT %s willAdd=%i !!!\n", DEBUG_FILE, willAdd);
+						LgiTrace("!!!GOT %s willAdd=%i !!!\n", dir.FullPath(), willAdd);
 					#endif
 					
 					if (willAdd)
+					{
 						HdrMap.Add(dir.GetName(), dir.FullPath());
+						AddFile(dir.FullPath(), Platforms);
+					}
 				}
 			}
 		}
@@ -364,13 +366,13 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 						if (fs->Platforms != 0 &&
 							(fs->Platforms & Platforms) == 0)
 						{
-							#if 1 // def DEBUG_FILE
-							if (fs->Path.Find("Widgets") >= 0)
-							LgiTrace("%s:%i - '%s' doesn't match platform: %s %s\n",
-									_FL,
-									fs->Path.Get(),
-									PlatformFlagsToStr(fs->Platforms).Get(),
-									PlatformFlagsToStr(Platforms).Get());
+							#ifdef DEBUG_FILE
+							if (fs->Path.Find(DEBUG_FILE) >= 0)
+								LgiTrace("%s:%i - '%s' doesn't match platform: %s %s\n",
+										_FL,
+										fs->Path.Get(),
+										PlatformFlagsToStr(fs->Platforms).Get(),
+										PlatformFlagsToStr(Platforms).Get());
 							#endif
 							continue;
 						}
@@ -469,13 +471,11 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			}
 			case M_FIND_SYM_INC_PATHS:
 			{
-				LAutoPtr<LString::Array> Paths((LString::Array*)Msg->A());
-				if (Paths)
-					AddPaths(IncPaths, *Paths);
-
-				LAutoPtr<LString::Array> SysPaths((LString::Array*)Msg->B());
-				if (SysPaths)
-					AddPaths(SysIncPaths, *SysPaths);
+				LAutoPtr<FindSymbolSystem::SymPathParams> Params((FindSymbolSystem::SymPathParams*)Msg->A());
+				if (!Params)
+					break;
+				AddPaths(IncPaths, Params->Paths, Params->Platforms);
+				AddPaths(SysIncPaths, Params->SysPaths, Params->Platforms);
 				break;
 			}
 			default:
@@ -731,7 +731,7 @@ int FindSymbolSystem::GetAppHnd()
 	return d->hApp;
 }
 
-bool FindSymbolSystem::SetIncludePaths(LString::Array &Paths, LString::Array &SysPaths)
+bool FindSymbolSystem::SetIncludePaths(LString::Array &Paths, LString::Array &SysPaths, int Platforms)
 {
 	#if 0
 	for (auto p: SysPaths)
@@ -740,9 +740,12 @@ bool FindSymbolSystem::SetIncludePaths(LString::Array &Paths, LString::Array &Sy
 		printf("NoSysPath\n");
 	#endif
 
+	auto *params = new FindSymbolSystem::SymPathParams;
+	params->Paths = Paths;
+	params->SysPaths = SysPaths;
+	params->Platforms = Platforms;
 	return d->PostEvent(M_FIND_SYM_INC_PATHS,
-						(LMessage::Param)new LString::Array(Paths),
-						(LMessage::Param)new LString::Array(SysPaths));
+						(LMessage::Param)params);
 }
 
 bool FindSymbolSystem::OnFile(const char *Path, SymAction Action, int Platforms)

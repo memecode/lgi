@@ -107,11 +107,18 @@ public:
 		int Platforms;
 	};
 
+	struct SymPathParams
+	{
+		LString::Array Paths;
+		LString::Array SysPaths;
+		int Platforms = 0;
+	};
+
 	FindSymbolSystem(int AppHnd);
 	~FindSymbolSystem();
 	
 	int GetAppHnd();
-	bool SetIncludePaths(LString::Array &Paths, LString::Array &SysPaths);
+	bool SetIncludePaths(LString::Array &Paths, LString::Array &SysPaths, int Platforms);
 	bool OnFile(const char *Path, SymAction Action, int Platforms);
 	void OpenSearchDlg(LViewI *Parent, std::function<void(FindSymResult&)> Callback);
 	
