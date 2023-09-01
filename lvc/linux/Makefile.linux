@@ -24,8 +24,8 @@ ifeq ($(Build),Debug)
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
-		-lssh \
 		-lmagic \
+		-lssh \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
 		-pthread \
@@ -44,8 +44,8 @@ else
 	CppFlags += -s -Os
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
 	Libs =  \
-		-lssh \
 		-lmagic \
+		-lssh \
 		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0` \
 		-pthread \
@@ -231,6 +231,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/ToolTip.h \
 	../include/lgi/common/TrayIcon.h \
 	../include/lgi/common/Tree.h \
+	../include/lgi/common/TypeToString.h \
 	../include/lgi/common/Undo.h \
 	../include/lgi/common/Unicode.h \
 	../include/lgi/common/UnicodeString.h \

@@ -62,6 +62,8 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -101,10 +103,12 @@ resources
 			<Libraries>
 				<Linux>
 					<Debug>magic
+ssh
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`
 -pthread</Debug>
 					<Release>magic
+ssh
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`
 -pthread</Release>
@@ -113,20 +117,32 @@ resources
 					<Debug>gnu</Debug>
 					<Release>gnu</Release>
 				</Haiku>
+				<All />
 			</Libraries>
 			<TargetType>
 				<All>Executable</All>
 			</TargetType>
 			<Defines>
 				<All>
-					<Debug>HAS_LIBSSH=0</Debug>
-					<Release>HAS_LIBSSH=0</Release>
+					<Debug></Debug>
+					<Release></Release>
 				</All>
 				<Haiku>
-					<Debug>_GNU_SOURCE</Debug>
-					<Release>_GNU_SOURCE</Release>
+					<Debug>_GNU_SOURCE
+					HAS_LIBSSH=0</Debug>
+					<Release>_GNU_SOURCE
+					HAS_LIBSSH=0</Release>
 				</Haiku>
+				<Linux />
 			</Defines>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<TargetName>
+				<Linux />
+			</TargetName>
+			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -138,8 +154,27 @@ resources
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<ShowWhiteSpace />
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
-		<Advanced />
-		<Debug />
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>
