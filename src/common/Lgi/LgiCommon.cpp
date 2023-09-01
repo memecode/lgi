@@ -307,7 +307,7 @@ int LGetOs
 
 			// the version is stored in the BEOS:APP_VERSION attribute of libbe.so
 			BPath path;
-			if (find_directory(B_BEOS_LIB_DIRECTORY, &path) == B_OK)
+			if (find_directory(B_SYSTEM_LIB_DIRECTORY, &path) == B_OK)
 			{
 				path.Append("libbe.so");
 

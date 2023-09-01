@@ -175,7 +175,9 @@ struct AppPriv
 	}	
 	~AppPriv();
 
+	#if HAS_LIBSSH
 	SshConnection *GetConnection(const char *Uri, bool Create = true);
+	#endif
 	auto Wnd() { return Commits ? Commits->GetWindow() : LAppInst->AppWnd; }
 	
 	void ClearFiles()

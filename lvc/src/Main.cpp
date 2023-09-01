@@ -25,6 +25,7 @@ AppPriv::~AppPriv()
 		CurFolder->Empty();
 }
 	
+#if HAS_LIBSSH
 SshConnection *AppPriv::GetConnection(const char *Uri, bool Create)
 {
 	LUri u(Uri);
@@ -35,6 +36,7 @@ SshConnection *AppPriv::GetConnection(const char *Uri, bool Create)
 		Connections.Add(s, Conn = new SshConnection(Log, s, "matthew@*$ "));
 	return Conn;
 }
+#endif
 
 VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 {
@@ -43,24 +45,28 @@ VersionCtrl AppPriv::DetectVcs(VcFolder *Fld)
 
 	if (!u.IsFile() || !u.sPath)
 	{
-		auto c = GetConnection(u.ToString());
-		if (!c)
-			return VcError;
-		
-		auto type = c->Types.Find(u.sPath);
-		if (type)
-			return type;
+		#if HAS_LIBSSH
+			auto c = GetConnection(u.ToString());
+			if (!c)
+				return VcError;
+			
+			auto type = c->Types.Find(u.sPath);
+			if (type)
+				return type;
 
-		c->DetectVcs(Fld);
-		Fld->GetCss(true)->Color(LColour::Blue);
-		Fld->Update();
-		return VcPending;
+			c->DetectVcs(Fld);
+			Fld->GetCss(true)->Color(LColour::Blue);
+			Fld->Update();
+			return VcPending;
+		#else
+			return VcError;
+		#endif
 	}
 
 	auto Path = u.sPath.Get();
 	#ifdef WINDOWS
-	if (*Path == '/')
-		Path++;
+		if (*Path == '/')
+			Path++;
 	#endif
 
 	if (LMakePath(p, sizeof(p), Path, ".git") &&
@@ -1043,11 +1049,13 @@ public:
 	{
 		switch (Msg->Msg())
 		{
+			#if HAS_LIBSSH
 			case M_RESPONSE:
 			{
 				SshConnection::HandleMsg(Msg);
 				break;
 			}
+			#endif
 			case M_HANDLE_CALLBACK:
 			{
 				LAutoPtr<ProcessCallback> Pc((ProcessCallback*)Msg->A());

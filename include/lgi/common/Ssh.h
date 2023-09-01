@@ -1,5 +1,7 @@
 #pragma once
 
+#if HAS_LIBSSH
+
 // If you don't have libssh.h then you might want to:
 //		sudo apt-get install libssh-dev
 #include <libssh/libssh.h>
@@ -565,4 +567,4 @@ public:
 	}
 };
 
-
+#endif

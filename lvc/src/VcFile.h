@@ -2,6 +2,7 @@
 #define _VcFile_h_
 
 #include "lgi/common/ListItemCheckBox.h"
+#include "lgi/common/Uri.h"
 
 class VcFile : public LListItem
 {

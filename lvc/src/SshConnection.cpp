@@ -1,3 +1,4 @@
+#if HAS_LIBSSH
 #include "lgi/common/Lgi.h"
 
 #include "Lvc.h"
@@ -488,3 +489,4 @@ PROF("result wait");
 	return 0;
 }
 
+#endif
