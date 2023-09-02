@@ -423,8 +423,6 @@ class Gdb : public LDebugger, public LThread, public Callback
 	
 	void OnRead(const char *Ptr, ssize_t Bytes)
 	{
-		printf("OnRead %i\n", (int)Bytes);
-	
 		// Parse output into lines
 		const char *p = Ptr;
 		const char *End = p + Bytes;
@@ -471,8 +469,6 @@ class Gdb : public LDebugger, public LThread, public Callback
 				}
 			}
 		}
-
-		printf("...OnRead\n");
 	}
 	
 	int Main()
@@ -559,7 +555,6 @@ class Gdb : public LDebugger, public LThread, public Callback
 			if (Now - PrevTs >= 1000)
 			{
 				PrevTs = Now;
-				printf("Main looping...\n");
 			}
 		}
 
@@ -619,7 +614,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 		return true;
 	}
 
-	#if 1
+	#if 0
 	#define CMD_LOG(...) printf(__VA_ARGS__)
 	#else
 	#define CMD_LOG(...)
@@ -686,8 +681,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 	void Ungrab()
 	{
 		#if defined(LINUX)
-		// printf("%s:%i - XF86Ungrab...\n", _FL);
-		system("xdotool key XF86Ungrab");
+		// system("xdotool key XF86Ungrab");
 		#else
 		printf("%s:%i - Impl some ungrab functionality here.\n", _FL);
 		#endif
