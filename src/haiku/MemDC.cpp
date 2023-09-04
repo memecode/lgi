@@ -29,18 +29,20 @@ public:
 	LColourSpace CreateCs = CsNone;
 	BBitmap *Bmp = NULL;
 	BView *View = NULL;
+	int LockCount = 0;
 
-    LMemDCPrivate()
-    {
-    }
-
-    ~LMemDCPrivate()
-    {
-    	Empty();
+	~LMemDCPrivate()
+	{
+		Empty();
 	}
-
+	
 	void Empty()
 	{
+		if (Bmp)
+		{
+			delete Bmp;
+			Bmp = NULL;
+		}
 	}
 };
 
@@ -136,12 +138,28 @@ void LMemDC::Empty()
 
 bool LMemDC::Lock()
 {
-	return false;
+	if (!d->Bmp)
+		return false;
+	
+	auto result = d->Bmp->LockBits();
+	if (result != B_OK)
+		return false;
+
+	d->LockCount++;
+	return true;
 }
 
 bool LMemDC::Unlock()
 {
-	return false;
+	if (!d->Bmp)
+		return false;
+
+	if (d->LockCount <= 0)
+		return false;
+
+	d->LockCount--;
+	d->Bmp->UnlockBits();
+	return true;
 }
 
 bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)

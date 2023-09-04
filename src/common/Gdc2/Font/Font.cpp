@@ -175,6 +175,27 @@ LFont::~LFont()
 	DeleteObj(d);
 }
 
+#ifdef HAIKU
+bool LFont::InThread()
+{
+	auto cur = GetCurrentThreadId();
+	
+	if (d->Thread < 0)
+		return true; // Not created yet...?
+	
+	if (cur != d->Thread)
+	{
+		printf("%s:%i - Using font outside of thread: cur=%i/%s, fnt=%i/%s\n",
+			_FL,
+			cur, LThread::GetThreadName(cur),
+			d->Thread, LThread::GetThreadName(d->Thread));
+		return false;
+	}
+	
+	return true;
+}
+#endif
+
 bool LFont::CreateFromCss(const char *Css)
 {
 	if (!Css)
@@ -275,7 +296,7 @@ bool LFont::Destroy()
 			LAssert(0);
 		#endif
 		
-		d->hFont = 0;
+		d->hFont = NULL;
 	}
 	DeleteArray(d->GlyphMap);
 	
@@ -531,30 +552,27 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 		LTypeFace::d->_Size = size;
 	}
 	
+	#ifndef HAIKU
 	if ((SizeChanging || FaceChanging) && this == LSysFont && ValidInitFaceSize)
-	{
 		LgiTrace("Warning: Changing sysfont definition.\n");
-	}
-	
 	if (this == LSysFont)
-	{
 		printf("Setting sysfont up '%s' %i\n", Face(), PointSize());
-	}
+	#endif
 
 	#if LGI_SDL
 	
 		LString FaceName;
 		#if defined(WIN32)
-		const char *Ext = "ttf";
-		LString FontPath = "c:\\Windows\\Fonts";
+			const char *Ext = "ttf";
+			LString FontPath = "c:\\Windows\\Fonts";
 		#elif defined(LINUX)
-		const char *Ext = "ttf";
-		LString FontPath = "/usr/share/fonts/truetype";
+			const char *Ext = "ttf";
+			LString FontPath = "/usr/share/fonts/truetype";
 		#elif defined(MAC)
-		const char *Ext = "ttc";
-		LString FontPath = "/System/Library/Fonts";
+			const char *Ext = "ttc";
+			LString FontPath = "/System/Library/Fonts";
 		#else
-		#error "Put your font path here"
+			#error "Put your font path here"
 		#endif
 		LFile::Path p = FontPath.Get();
 		FaceName.Printf("%s.%s", Face(), Ext);
@@ -1107,6 +1125,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 	#elif defined(HAIKU)
 
 		d->hFont = new BFont();
+		d->Thread = GetCurrentThreadId();
 		d->hFont->SetSize(PointSize());
 		status_t r = d->hFont->SetFamilyAndStyle(Face(), "Regular");
 		// printf("SetFamilyAndFace(%s)=%i\n", Face(), r);
@@ -1154,7 +1173,7 @@ bool LFont::Create(LFontType *LogFont, LSurface *pSurface)
 	if (d->hFont)
 	{
 		DeleteObject(d->hFont);
-		d->hFont = 0;
+		d->hFont = NULL;
 	}
 
 	if (LogFont)

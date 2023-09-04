@@ -436,6 +436,18 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 			auto r = d->Hnd->LockLooperWithTimeout(TimeOut * 1000);
 			if (r == B_OK)
 			{
+				if (_InLock == 0)
+				{
+					LAssert(_LockingThread < 0);
+					_LockingThread = GetCurrentThreadId();
+				}
+				else if (_LockingThread != GetCurrentThreadId())
+				{
+					printf("%s:%i - relock in different thread, prev=%i/%s, cur=%i/%s\n",
+						_FL,
+						_LockingThread, LThread::GetThreadName(_LockingThread),
+						GetCurrentThreadId(), LThread::GetThreadName(GetCurrentThreadId()));
+				}
 				_InLock++;
 				if (Debug)
 					printf("%s:%p - Lock() cnt=%i par=%p.\n", GetClass(), this, _InLock, d->Hnd->Parent());
@@ -449,6 +461,18 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 		auto r = d->Hnd->LockLooper();
 		if (r)
 		{
+			if (_InLock == 0)
+			{
+				LAssert(_LockingThread < 0);
+				_LockingThread = GetCurrentThreadId();
+			}
+			else if (_LockingThread != GetCurrentThreadId())
+			{
+				printf("%s:%i - relock in different thread, prev=%i/%s, cur=%i/%s\n",
+					_FL,
+					_LockingThread, LThread::GetThreadName(_LockingThread),
+					GetCurrentThreadId(), LThread::GetThreadName(GetCurrentThreadId()));
+			}
 			_InLock++;
 			
 			if (Debug)
@@ -466,8 +490,11 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 	
 		if (Debug)
 			printf("%s:%i - Lock(%s:%i) failed.\n", _FL, file, line);
+			
 		return false;
+		
 	#else
+	
 		if (!_Window)
 			GetWindow();
 
@@ -486,12 +513,14 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 		}
 
 		return true;
+		
 	#endif
 }
 
 void LView::Unlock()
 {
 	#ifdef HAIKU
+	
 		if (!d || !d->Hnd)
 		{
 			printf("%s:%i - Unlock() error, no hnd.\n", _FL);
@@ -506,16 +535,29 @@ void LView::Unlock()
 	
 		if (_InLock > 0)
 		{
+			if (_LockingThread != GetCurrentThreadId())
+			{
+				printf("%s:%i - unlock in different thread, locker=%i/%s, unlocker=%i/%s\n",
+					_FL,
+					_LockingThread, LThread::GetThreadName(_LockingThread),
+					GetCurrentThreadId(), LThread::GetThreadName(GetCurrentThreadId()));
+			}
+		
 			// printf("%s:%p - Calling UnlockLooper: %i.\n", GetClass(), this, _InLock);
 			d->Hnd->UnlockLooper();
 			_InLock--;
 			// printf("%s:%p - UnlockLooper done: %i.\n", GetClass(), this, _InLock);
+			
+			if (_InLock <= 0)
+				_LockingThread = -1;
 		}
 		else
 		{
 			printf("%s:%i - Unlock() without lock.\n", _FL);
 		}
+		
 	#else
+	
 		if (_Window &&
 			_Window->_Lock)
 		{
@@ -523,6 +565,7 @@ void LView::Unlock()
 		}
 		_InLock--;
 		// LgiTrace("%s::%p Unlock._InLock=%i\n", GetClass(), this, _InLock);
+		
 	#endif
 }
 
@@ -651,11 +694,15 @@ int LView::OnNotify(LViewI *Ctrl, LNotification Data)
 		auto bParent = d->Parent->Handle();
 		if (bCur && bParent)
 		{
-			if (bCur->Looper() !=
-				bParent->Looper())
+			auto curThread = bCur->Looper() ? bCur->Looper()->Thread() : GetCurrentThreadId();
+			auto parThread = bParent->Looper() ? bParent->Looper()->Thread() : -1;
+			if (curThread != parThread && parThread >= 0)
 			{
-				printf("OnNotify can't cross thread boundary!\n");
-				printf("\tthis=%s/%s, parent=%s\n", GetClass(), Name(), d->Parent->GetClass());
+				printf(	"OnNotify can't cross thread boundary!\n"
+						"    this=%s/%s (thread=%i/%s)\n"
+						"    parent=%s/%s (thread=%i/%s)\n",
+						GetClass(), Name(), curThread, LThread::GetThreadName(curThread),
+						d->Parent->GetClass(), d->Parent->Name(), parThread, LThread::GetThreadName(parThread));
 				return 0;
 			}
 		}

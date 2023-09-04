@@ -21,13 +21,21 @@ typedef int							OsProcessId;
 ///
 /// \warning Don't use this before you have created your LApp object. i.e. in a constructor
 /// of a global static class which is initialized before the main begins executing.
+#ifdef HAIKU
+#define LSysFont						(LAppInst->GetFont(false))
+#else
 #define LSysFont						(LAppInst->SystemNormal)
+#endif
 
 /// Returns a bold system font pointer.
 ///
 /// \warning Don't use this before you have created your LApp object. i.e. in a constructor
 /// of a global static class which is initialized before the main begins executing.
+#ifdef HAIKU
+#define LSysBold						(LAppInst->GetFont(true))
+#else
 #define LSysBold						(LAppInst->SystemBold)
+#endif
 
 /// Exits the application right now!
 ///
@@ -177,12 +185,18 @@ public:
 	static class LSkinEngine *SkinEngine;
 
 	// public member vars
-	
-	/// The system font
-	LFont *SystemNormal = NULL;
-	
-	/// The system font in bold
-	LFont *SystemBold = NULL;
+
+	#ifdef HAIKU
+		// Due to more than one thread needing a system font, there needs
+		// to be different font instances for each thread...
+		LFont *GetFont(bool bold);
+	#else		
+		/// The system font
+		LFont *SystemNormal = NULL;
+		
+		/// The system font in bold
+		LFont *SystemBold = NULL;
+	#endif
 	
 	/// Pointer to the applications main window
 	LWindow *AppWnd = NULL;

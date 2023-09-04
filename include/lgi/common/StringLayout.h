@@ -62,15 +62,15 @@ struct LLayoutString : public LDisplayString
 class LStringLayout
 {
 protected:
-	LFontCache *FontCache;
+	LFontCache *FontCache = NULL;
 
 	// Min and max bounds (in pixels)
 	LPoint Min, Max;
-	int MinLines;
+	int MinLines = 0;
 	
 	// Setting
-	bool Wrap;
-	bool AmpersandToUnderline;
+	bool Wrap = false;
+	bool AmpersandToUnderline = false;
 
 	// Array of display strings...
 	LArray<LLayoutRun*> Text;
@@ -78,7 +78,7 @@ protected:
 	LRect Bounds;
 
 public:
-	bool Debug;
+	bool Debug = false;
 
 	LStringLayout(LFontCache *fc);	
 	~LStringLayout();
@@ -91,6 +91,8 @@ public:
 	LPoint GetMax() { return Max; }
 	LArray<LDisplayString*> *GetStrs() { return &Strs; }
 	LRect GetBounds() { return Bounds; }
+	LFontCache *GetFontCache() { return FontCache; }
+	void SetFontCache(LFontCache *cache) { FontCache = cache; }
 
 	/// Adds a run of text with the same style
 	bool Add(const char *Str, LCss *Style);

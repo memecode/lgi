@@ -30,9 +30,6 @@ void LLayoutString::Set(int LineIdx, int FixX, int YPx, LLayoutRun *Lr, ssize_t 
 LStringLayout::LStringLayout(LFontCache *fc)
 {
 	FontCache = fc;
-	Wrap = false;
-	AmpersandToUnderline = false;
-	Debug = false;
 	Empty();
 }
 	

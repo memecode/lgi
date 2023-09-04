@@ -21,22 +21,30 @@ static int MinYSize = 16;
 
 class LCheckBoxPrivate : public LMutex, public LStringLayout
 {
-	LCheckBox *Ctrl;
+	LCheckBox *Ctrl = NULL;
 	
 public:
-	int64 Val;
-	bool Over;
-	bool Three;
+	int64 Val = 0;
+	bool Over = false;
+	bool Three = false;
 	LRect ValuePos;
+	#ifdef HAIKU
+	OsThreadId CreateThread = -1;
+	#endif
 
 	LCheckBoxPrivate(LCheckBox *ctrl) :
 		LMutex("LCheckBoxPrivate"),
+		Ctrl(ctrl),
+		#ifdef HAIKU
+		// This is most likely running in the constructor of the window. Which is NOT the BWindow's thread.
+		// Therefor wait for the actually thread before getting a thread specific font cache.
+		LStringLayout(NULL),
+		CreateThread(GetCurrentThreadId())
+		#else
 		LStringLayout(LAppInst->GetFontCache())
-	{
+		#endif
+	{	
 		Ctrl = ctrl;
-		Val = 0;
-		Over = false;
-		Three = false;
 		Wrap = true;
 		AmpersandToUnderline = true;
 		ValuePos.ZOff(-1, -1);
@@ -88,11 +96,16 @@ LCheckBox::~LCheckBox()
 	DeleteObj(d);
 }
 
-#ifdef WINNATIVE
-int LCheckBox::SysOnNotify(int Msg, int Code)
-{
-	return 0;
-}
+#if defined(WINNATIVE)
+	int LCheckBox::SysOnNotify(int Msg, int Code)
+	{
+		return 0;
+	}
+#elif defined(HAIKU)
+	void LCheckBox::OnCreate()
+	{
+		d->SetFontCache(LAppInst->GetFontCache());
+	}
 #endif
 
 void LCheckBox::OnAttach()

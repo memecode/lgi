@@ -21,9 +21,12 @@ public:
 	OsThread GuiThread;
 	OsThreadId GuiThreadId;
 	bool CmdLineProcessed = false;
+
+	/// Per thread system fonts:
+	LHashTbl<IntKey<OsThreadId>,LFont*> SystemFont, BoldFont;
 	
 	/// Any fonts needed for styling the elements
-	LAutoPtr<LFontCache> FontCache;
+	LHashTbl<IntKey<OsThreadId>,LFontCache*> FontCache;
 	
 	LAppPrivate(LApp *a) :
 		BApplication(LString("application/") + a->Name()),
@@ -36,6 +39,13 @@ public:
 
 	~LAppPrivate()
 	{
+		for (auto p: SystemFont)
+			DeleteObj(p.value);
+		for (auto p: BoldFont)
+			DeleteObj(p.value);
+		for (auto p: FontCache)
+			DeleteObj(p.value);
+
 		MimeToApp.DeleteObjects();
 
 		/*
@@ -66,7 +76,7 @@ public:
 				LView::HandleInThreadMessage(message);
 				break;
 			default:
-				printf("%s:%i Unhandled MessageReceived %i\n", _FL, message->what);
+				printf("%s:%i Unhandled MessageReceived %i (%.4s)\n", _FL, message->what, &message->what);
 				break;
 		}
 	

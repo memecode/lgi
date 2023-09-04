@@ -122,6 +122,7 @@ enum LgiMessages
 		M_LWINDOW_DELETE,
 		M_LMENUITEM_ENABLE,
 		M_LSUBMENU_APPENDITEM,
+		M_ON_CREATE,
 		#endif
 	
 	#elif defined(MAC)

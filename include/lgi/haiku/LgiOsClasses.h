@@ -11,6 +11,8 @@ protected:
     bool noThread = false;
     bool attempted = false;
     uint64_t startTs = 0;
+    
+    OsThreadId lockingThread = -1;
 
 public:
     LLocker(BHandler *h, const char *File, int Line);

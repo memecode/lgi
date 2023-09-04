@@ -47,7 +47,7 @@ public:
 	LSurface *Image;
 	bool OwnImage;
 	
-	LButtonPrivate() : LStringLayout(LAppInst->GetFontCache())
+	LButtonPrivate() : LStringLayout(NULL)
 	{
 		AmpersandToUnderline = true;
 		Pressed = 0;
@@ -471,6 +471,7 @@ void LButton::Value(int64 i)
 
 void LButton::OnCreate()
 {
+	d->SetFontCache(LAppInst->GetFontCache());
 }
 
 void LButton::OnAttach()

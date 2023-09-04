@@ -882,103 +882,115 @@ public:
 
 		if (Attach(0))
 		{
-			if ((Menu = new LMenu))
-			{
-				Menu->SetPrefAndAboutItems(IDM_OPTIONS, IDM_ABOUT);
-				Menu->Attach(this);
-				Menu->Load(this, "IDM_MENU");
-			}
-
-			LBox *ToolsBox = new LBox(IDC_TOOLS_BOX, true, "ToolsBox");
-			FoldersBox = new LBox(IDC_FOLDERS_BOX, false, "FoldersBox");
-			LBox *CommitsBox = new LBox(IDC_COMMITS_BOX, true, "CommitsBox");
-
-			ToolBar *Tools = new ToolBar;
-
-			ToolsBox->Attach(this);
-			Tools->Attach(ToolsBox);
-			FoldersBox->Attach(ToolsBox);
-
-			auto FolderLayout = new LTableLayout(IDC_FOLDER_TBL);
-			auto c = FolderLayout->GetCell(0, 0, true, 2);
-				Tree = new LTree(IDC_TREE, 0, 0, 320, 200);
-				Tree->SetImageList(ImgLst, false);
-				Tree->ShowColumnHeader(true);
-				Tree->AddColumn("Folder", 250);
-				Tree->AddColumn("Counts", 50);
-				c->Add(Tree);
-			c = FolderLayout->GetCell(0, 1);
-				c->Add(new LEdit(IDC_FILTER_FOLDERS, 0, 0, -1, -1));
-			c = FolderLayout->GetCell(1, 1);
-				c->Add(new LButton(IDC_CLEAR_FILTER_FOLDERS, 0, 0, -1, -1, "x"));
-			FolderLayout->Attach(FoldersBox);
-			CommitsBox->Attach(FoldersBox);
-
-			auto CommitsLayout = new LTableLayout(IDC_COMMITS_TBL);
-			c = CommitsLayout->GetCell(0, 0, true, 2);
-				Commits = new CommitList(IDC_LIST);
-				c->Add(Commits);
-			c = CommitsLayout->GetCell(0, 1);
-				c->Add(new LEdit(IDC_FILTER_COMMITS, 0, 0, -1, -1));
-			c = CommitsLayout->GetCell(1, 1);
-				c->Add(new LButton(IDC_CLEAR_FILTER_COMMITS, 0, 0, -1, -1, "x"));
-			CommitsLayout->Attach(CommitsBox);
-			CommitsLayout->GetCss(true)->Height("40%");
-
-			LBox *FilesBox = new LBox(IDC_FILES_BOX, false);
-			FilesBox->Attach(CommitsBox);
-
-			auto FilesLayout = new LTableLayout(IDC_FILES_TBL);
-			c = FilesLayout->GetCell(0, 0, true, 2);
-				Files = new LList(IDC_FILES, 0, 0, 200, 200);
-				Files->AddColumn("[ ]", 30);
-				Files->AddColumn("State", 100);
-				Files->AddColumn("Name", 400);
-				c->Add(Files);
-			c = FilesLayout->GetCell(0, 1);
-				c->Add(new LEdit(IDC_FILTER_FILES, 0, 0, -1, -1));
-			c = FilesLayout->GetCell(1, 1);
-				c->Add(new LButton(IDC_CLEAR_FILTER_FILES, 0, 0, -1, -1, "x"));
-			FilesLayout->GetCss(true)->Width("35%");
-			FilesLayout->Attach(FilesBox);
-
-			LBox *MsgBox = new LBox(IDC_MSG_BOX, true);
-			MsgBox->Attach(FilesBox);
-			
-			CommitCtrls *Commit = new CommitCtrls;
-			Commit->Attach(MsgBox);
-			Commit->GetCss(true)->Height("25%");
-			if (Commit->GetViewById(IDC_MSG, Msg))
-			{
-				LTextView3 *Tv = dynamic_cast<LTextView3*>(Msg);
-				if (Tv)
-				{
-					Tv->Sunken(true);
-					Tv->SetWrapType(L_WRAP_NONE);
-				}
-			}
-			else LAssert(!"No ctrl?");
-
-			Tabs = new LTabView(IDC_TAB_VIEW);
-			Tabs->Attach(MsgBox);
-			const char *Style = "Padding: 0px 8px 8px 0px";
-			Tabs->GetCss(true)->Parse(Style);
-
-			LTabPage *p = Tabs->Append("Diff");
-			p->Append(Diff = new DiffView(IDC_TXT));
-			// Diff->Sunken(true);
-			Diff->SetWrapType(L_WRAP_NONE);
-
-			p = Tabs->Append("Log");
-			p->Append(Log = new LTextLog(IDC_LOG));
-			// Log->Sunken(true);
-			Log->SetWrapType(L_WRAP_NONE);
-			
-			SetCtrlValue(IDC_UPDATE, true);
-
-			AttachChildren();
+			SetPulse(200);
+			DropTarget(true);
 			Visible(true);
 		}
+	}
+
+	~App()
+	{
+		SerializeState(&Opts, "WndPos", false);
+		SaveFolders();
+	}
+	
+	void OnCreate()
+	{
+		if ((Menu = new LMenu))
+		{
+			Menu->SetPrefAndAboutItems(IDM_OPTIONS, IDM_ABOUT);
+			Menu->Attach(this);
+			Menu->Load(this, "IDM_MENU");
+		}
+
+		LBox *ToolsBox = new LBox(IDC_TOOLS_BOX, true, "ToolsBox");
+		FoldersBox = new LBox(IDC_FOLDERS_BOX, false, "FoldersBox");
+		LBox *CommitsBox = new LBox(IDC_COMMITS_BOX, true, "CommitsBox");
+
+		ToolBar *Tools = new ToolBar;
+
+		ToolsBox->Attach(this);
+		Tools->Attach(ToolsBox);
+		FoldersBox->Attach(ToolsBox);
+
+		auto FolderLayout = new LTableLayout(IDC_FOLDER_TBL);
+		auto c = FolderLayout->GetCell(0, 0, true, 2);
+			Tree = new LTree(IDC_TREE, 0, 0, 320, 200);
+			Tree->SetImageList(ImgLst, false);
+			Tree->ShowColumnHeader(true);
+			Tree->AddColumn("Folder", 250);
+			Tree->AddColumn("Counts", 50);
+			c->Add(Tree);
+		c = FolderLayout->GetCell(0, 1);
+			c->Add(new LEdit(IDC_FILTER_FOLDERS, 0, 0, -1, -1));
+		c = FolderLayout->GetCell(1, 1);
+			c->Add(new LButton(IDC_CLEAR_FILTER_FOLDERS, 0, 0, -1, -1, "x"));
+		FolderLayout->Attach(FoldersBox);
+		CommitsBox->Attach(FoldersBox);
+
+		auto CommitsLayout = new LTableLayout(IDC_COMMITS_TBL);
+		c = CommitsLayout->GetCell(0, 0, true, 2);
+			Commits = new CommitList(IDC_LIST);
+			c->Add(Commits);
+		c = CommitsLayout->GetCell(0, 1);
+			c->Add(new LEdit(IDC_FILTER_COMMITS, 0, 0, -1, -1));
+		c = CommitsLayout->GetCell(1, 1);
+			c->Add(new LButton(IDC_CLEAR_FILTER_COMMITS, 0, 0, -1, -1, "x"));
+		CommitsLayout->Attach(CommitsBox);
+		CommitsLayout->GetCss(true)->Height("40%");
+
+		LBox *FilesBox = new LBox(IDC_FILES_BOX, false);
+		FilesBox->Attach(CommitsBox);
+
+		auto FilesLayout = new LTableLayout(IDC_FILES_TBL);
+		c = FilesLayout->GetCell(0, 0, true, 2);
+			Files = new LList(IDC_FILES, 0, 0, 200, 200);
+			Files->AddColumn("[ ]", 30);
+			Files->AddColumn("State", 100);
+			Files->AddColumn("Name", 400);
+			c->Add(Files);
+		c = FilesLayout->GetCell(0, 1);
+			c->Add(new LEdit(IDC_FILTER_FILES, 0, 0, -1, -1));
+		c = FilesLayout->GetCell(1, 1);
+			c->Add(new LButton(IDC_CLEAR_FILTER_FILES, 0, 0, -1, -1, "x"));
+		FilesLayout->GetCss(true)->Width("35%");
+		FilesLayout->Attach(FilesBox);
+
+		LBox *MsgBox = new LBox(IDC_MSG_BOX, true);
+		MsgBox->Attach(FilesBox);
+		
+		CommitCtrls *Commit = new CommitCtrls;
+		Commit->Attach(MsgBox);
+		Commit->GetCss(true)->Height("25%");
+		if (Commit->GetViewById(IDC_MSG, Msg))
+		{
+			LTextView3 *Tv = dynamic_cast<LTextView3*>(Msg);
+			if (Tv)
+			{
+				Tv->Sunken(true);
+				Tv->SetWrapType(L_WRAP_NONE);
+			}
+		}
+		else LAssert(!"No ctrl?");
+
+		Tabs = new LTabView(IDC_TAB_VIEW);
+		Tabs->Attach(MsgBox);
+		const char *Style = "Padding: 0px 8px 8px 0px";
+		Tabs->GetCss(true)->Parse(Style);
+
+		LTabPage *p = Tabs->Append("Diff");
+		p->Append(Diff = new DiffView(IDC_TXT));
+		// Diff->Sunken(true);
+		Diff->SetWrapType(L_WRAP_NONE);
+
+		p = Tabs->Append("Log");
+		p->Append(Log = new LTextLog(IDC_LOG));
+		// Log->Sunken(true);
+		Log->SetWrapType(L_WRAP_NONE);
+		
+		SetCtrlValue(IDC_UPDATE, true);
+
+		AttachChildren();
 
 		LXmlTag *f = Opts.LockTag(OPT_Folders, _FL);
 		if (!f)
@@ -1015,15 +1027,6 @@ public:
             
             // new TestThread();
 		}
-		
-		SetPulse(200);
-		DropTarget(true);
-	}
-
-	~App()
-	{
-		SerializeState(&Opts, "WndPos", false);
-		SaveFolders();
 	}
 	
 	void SaveFolders()
