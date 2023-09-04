@@ -680,12 +680,6 @@ bool LApp::Run(OnIdleProc IdleCallback, void *IdleParam)
 	return true;
 }
 
-bool LApp::Yield()
-{
-	printf("%s:%i - Yield not supported.\n", _FL);
-	return false;
-}
-
 void LApp::Exit(int Code)
 {
 	#if CUSTOM_LOOP

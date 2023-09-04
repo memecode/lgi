@@ -687,6 +687,7 @@
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-Wno-nullability-completeness",
+					"-DHAS_LIBSSH=1",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.Lvc;
 				PRODUCT_NAME = Lvc;
@@ -721,6 +722,7 @@
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-Wno-nullability-completeness",
+					"-DHAS_LIBSSH=1",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.Lvc;
 				PRODUCT_NAME = Lvc;
