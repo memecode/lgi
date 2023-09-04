@@ -55,9 +55,6 @@ public:
 class LFontPrivate
 {
 public:
-	#ifdef WINDOWS
-	static LAutoPtr<LLibrary> Gdi32;
-	#endif
 
 	// Data
 	OsFont			hFont = NULL;
@@ -72,11 +69,17 @@ public:
 	uchar			*GlyphMap = NULL;
 	static class GlyphCache *Cache;
 
+	#ifdef WINDOWS
+		static LAutoPtr<LLibrary> Gdi32;
+	#endif
 	#ifdef USE_CORETEXT
-	CFDictionaryRef Attributes = NULL;
+		CFDictionaryRef Attributes = NULL;
 	#endif
 	#ifdef __GTK_H__
-	Gtk::PangoContext *PangoCtx = NULL;
+		Gtk::PangoContext *PangoCtx = NULL;
+	#endif
+	#ifdef HAIKU
+		OsThreadId	Thread = -1;
 	#endif
 
 	LFontPrivate()

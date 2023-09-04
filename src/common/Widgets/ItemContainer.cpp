@@ -25,46 +25,61 @@
 
 class LItemColumnPrivate
 {
+	LDisplayString *Txt = NULL;
+
 public:
 	LRect Pos;
-	bool Down;
-	bool Drag;
+	bool Down = false;
+	bool Drag = false;
 
 	LItemContainer *Parent;
-	char *cName;
-	LDisplayString *Txt;
-	int cWidth;
-	int cType;
-	LSurface *cIcon;
-	int cImage;
-	int cMark;
-	bool OwnIcon;
-	bool CanResize;
+	LString cName;
+	int cWidth = 0;
+	int cType = GIC_ASK_TEXT;
+	LSurface *cIcon = NULL;
+	int cImage = -1;
+	int cMark = GLI_MARK_NONE;
+	bool OwnIcon = false;
+	bool CanResize = true;
 
 	LItemColumnPrivate(LItemContainer *parent)
 	{
 		Parent = parent;
-		Txt = 0;
-		cName = 0;
-		cWidth = 0;
-		cIcon = 0;
-		cType = GIC_ASK_TEXT;
-		cImage = -1;
-		cMark = GLI_MARK_NONE;
-		Down = false;
-		OwnIcon = false;
-		CanResize = true;
-		Drag = false;
 	}
 
 	~LItemColumnPrivate()
 	{
-		DeleteArray(cName);
+		DeleteObj(Txt);
 		if (OwnIcon)
 		{
 			DeleteObj(cIcon);
 		}
+	}
+
+	void SetName(const char *n)
+	{
+		cName = n;
 		DeleteObj(Txt);
+	}
+
+	// Try and delay the creation of the display string till
+	// the code is being called from an event, and in the window's thread
+	// on Haiku. That way it gets a thread specific font handle.
+	LDisplayString *&GetDs()
+	{
+		if (!Txt)
+		{
+			auto f =	Parent &&
+						Parent->GetFont() &&
+						Parent->GetFont()->Handle()
+						?
+						Parent->GetFont()
+						:
+						LSysFont;			
+		
+			Txt = new LDisplayString(f, cName);
+		}
+		return Txt;
 	}
 };
 
@@ -668,21 +683,9 @@ void LItemColumn::SetPos(LRect &r)
 
 void LItemColumn::Name(const char *n)
 {
-	DeleteArray(d->cName);
-	DeleteObj(d->Txt);
-	d->cName = NewStr(n);
-	
-	LFont *f =	d->Parent &&
-				d->Parent->GetFont() &&
-				d->Parent->GetFont()->Handle() ?
-				d->Parent->GetFont() :
-				LSysFont;
-	
-	d->Txt = new LDisplayString(f, (char*)n);
+	d->SetName(n);
 	if (d->Parent)
-	{
 		d->Parent->Invalidate(&d->Parent->ColumnHeader);
-	}
 }
 
 char *LItemColumn::Name()
@@ -864,14 +867,16 @@ void LItemColumn::OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground)
 			Mx += d->Parent->GetImageList()->TileX() + 4;
 		}
 	}
-	else if (ValidStr(d->cName) && d->Txt)
+	else if (ValidStr(d->cName))
 	{
-		LFont *f = d->Txt->GetFont();
-		if (!f)
+		auto Ds = d->GetDs();
+		if (!Ds || !Ds->GetFont())
 		{
 			LAssert(0);
 			return;
 		}
+		
+		auto f = Ds->GetFont();
 
 		LColour cText = Fore;
 		#ifdef MAC
@@ -882,16 +887,16 @@ void LItemColumn::OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground)
 
 		f->Transparent(!FillBackground);
 		f->Colour(cText, cMed);
-		int ty = d->Txt->Y();
+		int ty = Ds->Y();
 		int ry = r.Y();
 		int y = r.y1 + ((ry - ty) >> 1);
 		
 		// d->Txt->_debug = true;
-		d->Txt->Draw(pDC, r.x1 + Off + 3, y + Off, &r);
+		Ds->Draw(pDC, r.x1 + Off + 3, y + Off, &r);
 
 		if (d->cMark)
 		{
-			Mx += d->Txt->X();
+			Mx += Ds->X();
 		}
 	}
 	else
@@ -973,7 +978,7 @@ void LItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
 				LSkinState State;
 				
 				State.pScreen	= pDC;
-				State.ptrText	= &d->Txt;
+				State.ptrText	= &d->GetDs();
 				State.Rect		= Rgn;
 				State.Value		= Value();
 				State.Enabled	= GetList()->Enabled();

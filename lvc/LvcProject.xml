@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Project>
+	<Node Name="Build" Type="1" Platforms="15" Id="1">
+		<Node File=".\haiku\buildHaiku.py" Type="8" Platforms="15" />
+		<Node File=".\haiku\Makefile.haiku" Type="9" Platforms="15" />
+	</Node>
 	<Node Name="Headers" Type="1" Platforms="15" Id="2">
 		<Node File="./resources/resdefs.h" Type="3" Platforms="15" />
+	</Node>
+	<Node Name="Resources" Type="1" Platforms="15" Id="1">
+		<Node File="./resources/icon32.png" Type="6" Platforms="15" />
+		<Node File="./installer-zip.py" Type="8" Platforms="15" />
+		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
 	</Node>
 	<Node Name="Source" Type="1" Platforms="15" Id="1">
 		<Node Name="Lgi" Type="1" Platforms="15" Id="2">
@@ -30,17 +39,13 @@
 		<Node File="./src/VcFolder.cpp" Type="2" Platforms="15" />
 		<Node File="./src/VcFolder.h" Type="3" Platforms="15" />
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
-	<Node Name="Resources" Type="1" Platforms="15" Id="1">
-		<Node File="./resources/icon32.png" Type="6" Platforms="15" />
-		<Node File="./installer-zip.py" Type="8" Platforms="15" />
-		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
-	</Node>
+	<Node File="..\Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>
 		<General>
 			<Makefile>
 				<Linux>linux/Makefile.linux</Linux>
-				<Windows>.\Lvc.sln</Windows>
+				<Windows>haiku\buildHaiku.py</Windows>
+				<Haiku>haiku/Makefile.haiku</Haiku>
 			</Makefile>
 			<Executable>
 				<Linux>
@@ -50,6 +55,10 @@
 				<Windows>
 					<Debug>.\x64Debug14\Lvc.exe</Debug>
 				</Windows>
+				<Haiku>
+					<Debug>lvc</Debug>
+					<Release>lvc</Release>
+				</Haiku>
 			</Executable>
 			<Compiler>
 				<Linux>gcc</Linux>
@@ -57,6 +66,8 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -80,6 +91,10 @@ resources
 					<Debug>../include/lgi/win</Debug>
 					<Release>../include/lgi/win</Release>
 				</Windows>
+				<Haiku>
+					<Debug>../include/lgi/haiku</Debug>
+					<Release>../include/lgi/haiku</Release>
+				</Haiku>
 			</IncludePaths>
 			<SystemIncludes>
 				<Linux>
@@ -88,26 +103,49 @@ resources
 					<Release>/usr/include/gstreamer-1.0
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
 					<Debug>magic
+ssh
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`
 -pthread</Debug>
 					<Release>magic
+ssh
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`
 -pthread</Release>
 				</Linux>
-				<All>
-					<Debug>ssh</Debug>
-					<Release>ssh</Release>
-				</All>
+				<Haiku>
+					<Debug>gnu</Debug>
+					<Release>gnu</Release>
+				</Haiku>
+				<All />
+				<Windows />
 			</Libraries>
 			<TargetType>
 				<All>Executable</All>
 			</TargetType>
+			<Defines>
+				<All />
+				<Haiku>
+					<Debug>_GNU_SOURCE
+					HAS_LIBSSH=0</Debug>
+					<Release>_GNU_SOURCE
+					HAS_LIBSSH=0</Release>
+				</Haiku>
+				<Windows />
+			</Defines>
+			<LibraryPaths>
+				<All />
+				<Windows />
+			</LibraryPaths>
+			<TargetName>
+				<Windows />
+			</TargetName>
+			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -119,8 +157,27 @@ resources
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<ShowWhiteSpace />
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
-		<Advanced />
-		<Debug />
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Windows />
+			</PostBuildCommands>
+		</Advanced>
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>

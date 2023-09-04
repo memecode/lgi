@@ -456,12 +456,14 @@ bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, L
 	}
 	else
 	{
+		#if HAS_LIBSSH
 		auto c = d->GetConnection(Uri.ToString());
 		if (!c)
 			return false;
 		
 		if (!c->Command(this, Exe, Args, Parser, Params))
 			return false;
+		#endif
 	}
 
 	Update();
@@ -2559,6 +2561,7 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 			new VcLeaf(this, Parent, u.ToString(), name, Dir.IsDir());
 		}
 	}
+	#if HAS_LIBSSH
 	else
 	{
 		auto c = d->GetConnection(ReadUri);
@@ -2575,6 +2578,7 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 		c->Command(this, "find", Args, &VcFolder::ParseRemoteFind, Params);
 		return;
 	}
+	#endif
 
 	Parent->Sort(FolderCompare);
 }
@@ -2587,6 +2591,7 @@ void VcFolder::OnVcsType(LString errorMsg)
 		return;
 	}
 
+	#if HAS_LIBSSH
 	auto c = d->GetConnection(Uri.ToString(), false);
 	if (c)
 	{
@@ -2612,6 +2617,7 @@ void VcFolder::OnVcsType(LString errorMsg)
 			}
 		}
 	}
+	#endif
 }
 
 void VcFolder::DoExpand()

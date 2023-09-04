@@ -189,33 +189,6 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 
 	d->GetConfig();
 
-	// System font setup
-	LFontType SysFontType;
-	if (SysFontType.GetSystemFont("System"))
-	{
-		SystemNormal = SysFontType.Create();
-		if (SystemNormal)
-			SystemNormal->Transparent(true);
-		
-		SystemBold = SysFontType.Create();
-		if (SystemBold)
-		{
-			SystemBold->Bold(true);
-			SystemBold->Transparent(true);
-			SystemBold->Create();
-		}
-	}
-	else
-	{
-		printf("%s:%i - Couldn't get system font setting.\n", __FILE__, __LINE__);
-	}
-
-	if (!SystemNormal)
-	{
-		LgiMsg(0, "Error: Couldn't create system font.", "Lgi Error: LApp::LApp", MB_OK);
-		LExitApp();
-	}
-	
 	if (!GetOption("noskin"))
 	{
 		extern LSkinEngine *CreateSkinEngine(LApp *App);
@@ -228,8 +201,6 @@ LApp::~LApp()
 	CommonCleanup();
 
 	DeleteObj(AppWnd);
-	DeleteObj(SystemNormal);
-	DeleteObj(SystemBold);
 	DeleteObj(SkinEngine);
 	
 	DeleteObj(MouseHook);
@@ -239,6 +210,36 @@ LApp::~LApp()
 	DeleteObj(d);
 	
 	TheApp = NULL;
+}
+
+LFont *LApp::GetFont(bool bold)
+{
+	auto cur = GetCurrentThreadId();
+
+	LHashTbl<IntKey<OsThreadId>,LFont*> &store = bold ? d->BoldFont : d->SystemFont;
+	auto sysFont = store.Find(cur);
+	if (sysFont)
+		return sysFont;
+
+	LFontType SysFontType;
+	if (SysFontType.GetSystemFont("System"))
+	{
+		sysFont = SysFontType.Create();
+		if (sysFont)
+			sysFont->Transparent(true);
+		
+		if (bold)
+			sysFont->Bold(true);
+
+		sysFont->Create();		
+		store.Add(cur, sysFont);
+	}
+	else
+	{
+		printf("%s:%i - Couldn't get system font setting.\n", __FILE__, __LINE__);
+	}
+
+	return sysFont;
 }
 
 LApp *LApp::ObjInstance()
@@ -533,9 +534,14 @@ int LApp::GetCpuCount()
 
 LFontCache *LApp::GetFontCache()
 {
-	if (!d->FontCache)
-		d->FontCache.Reset(new LFontCache(SystemNormal));
-	return d->FontCache;
+	auto cur = GetCurrentThreadId();
+	auto cache = d->FontCache.Find(cur);
+	if (!cache)
+	{
+		cache = new LFontCache(GetFont(false));
+		d->FontCache.Add(cur, cache);
+	}
+	return cache;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -660,13 +666,14 @@ bool LLocker::Lock(bool debug)
 	}
 	
 	thread_id threadId = looper->Thread();
-	if (threadId <= 0)
+	if (threadId < 0)
 	{
 		if (debug)
 			printf("%s:%i - Looper has no thread?!?!\n", file, line);
 		noThread = true;
 		locked = true;
 		startTs = LCurrentTime();
+		lockingThread = GetCurrentThreadId();
 		return true;
 	}
 
@@ -677,6 +684,7 @@ bool LLocker::Lock(bool debug)
 		{
 			locked = true;
 			startTs = LCurrentTime();
+			lockingThread = GetCurrentThreadId();
 			break;
 		}
 		else if (result == B_TIMED_OUT)
@@ -730,6 +738,7 @@ status_t LLocker::LockWithTimeout(int64 time, bool debug)
 			printf("%s:%i - Looper has no thread?!?!\n", file, line);
 		noThread = true;
 		locked = true;
+		lockingThread = GetCurrentThreadId();
 		startTs = LCurrentTime();
 		return B_OK;
 	}
@@ -738,6 +747,7 @@ status_t LLocker::LockWithTimeout(int64 time, bool debug)
 	if (result == B_OK)
 	{
 		locked = true;
+		lockingThread = GetCurrentThreadId();
 		startTs = LCurrentTime();
 	}
 	
@@ -781,11 +791,20 @@ void LLocker::Unlock()
 	if (noThread)
 	{
 		locked = false;
+		lockingThread = -1;
 		return;
 	}
 
 	if (locked)
 	{
+		if (lockingThread != GetCurrentThreadId())
+		{
+			printf("%s:%i - Lock/Unlock thread mismatch: locking=%i/%s != unlocking=%i/%s\n",
+				_FL,
+				lockingThread, LThread::GetThreadName(lockingThread),
+				GetCurrentThreadId(), LThread::GetThreadName(GetCurrentThreadId()));
+		}
+		
 		hnd->UnlockLooper();
 		locked = false;
 		auto now = LCurrentTime();

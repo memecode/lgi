@@ -151,7 +151,9 @@ struct LBView : public Parent
 			Parent::MoveTo(Pos.x1, Pos.y1);
 		}
 		
-		d->View->OnCreate();
+		// Run this event handler in the thread of the window itself:
+		d->View->PostEvent(M_ON_CREATE);
+		// d->View->OnCreate();
 	}
 	
 	LKey ConvertKey(const char *bytes, int32 numBytes)
@@ -832,6 +834,11 @@ LMessage::Param LView::OnEvent(LMessage *Msg)
 		case M_HANDLE_IN_THREAD:
 		{
 			HandleInThreadMessage(Msg);
+			break;
+		}
+		case M_ON_CREATE:
+		{
+			OnCreate();
 			break;
 		}
 		case M_INVALIDATE:

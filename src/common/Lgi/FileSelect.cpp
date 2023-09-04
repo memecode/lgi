@@ -812,6 +812,7 @@ public:
 	void OnFolder();
 	void OnFile(char *f);
 	void OnFilter(const char *Key);
+	void OnCreate();
 
 	bool OnViewKey(LView *v, LKey &k) override
 	{
@@ -875,6 +876,22 @@ LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 
 	SetPos(d->InitSize);
 
+
+}
+
+LFileSelectDlg::~LFileSelectDlg()
+{
+	UnregisterHook(this);
+	d->InitShowHiddenFiles = ShowHidden ? ShowHidden->Value() : false;
+	d->InitSize = GetPos();
+
+	auto CurPath = GetCtrlName(IDC_PATH);
+	if (ValidStr(CurPath))
+		d->InitPath = CurPath;
+}
+
+void LFileSelectDlg::OnCreate()
+{
 	int x = 0, y = 0;
 	AddView(Tbl = new LTableLayout);
 
@@ -1043,17 +1060,37 @@ LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 			ti->Expanded(true);
 		}
 	}
-}
 
-LFileSelectDlg::~LFileSelectDlg()
-{
-	UnregisterHook(this);
-	d->InitShowHiddenFiles = ShowHidden ? ShowHidden->Value() : false;
-	d->InitSize = GetPos();
-
-	auto CurPath = GetCtrlName(IDC_PATH);
-	if (ValidStr(CurPath))
-		d->InitPath = CurPath;
+	// Init names and labels for the specific dialog type:
+	switch (d->Type)
+	{
+		case TypeOpenFile:
+		{
+			Name("Open");
+			if (SaveBtn)
+				SaveBtn->Name("Open");
+			break;
+		}
+		case TypeSaveFile:
+		{
+			Name("Save As");
+			SaveBtn->Name("Save As");
+			break;
+		}
+		case TypeOpenFolder:
+		{
+			SaveBtn->Enabled(true);
+			FileNameEdit->Enabled(false);
+			Name("Open Folder");
+			SaveBtn->Name("Open");
+			break;
+		}
+		default:
+		{
+			LAssert(!"Impl me.");
+			break;
+		}
+	}
 }
 
 void LFileSelectDlg::OnFile(char *f)
@@ -2148,9 +2185,6 @@ void LFileSelect::Open(SelectCb Cb)
 	LFileSelectDlg *Dlg = new LFileSelectDlg(d);
 
 	d->Type = TypeOpenFile;
-	Dlg->Name("Open");
-	if (Dlg->SaveBtn)
-		Dlg->SaveBtn->Name("Open");
 
 	// printf("LFileSelect domodal.. thread=%p\n", LGetCurrentThread());
 	Dlg->DoModal([select=this, cb=Cb](auto dlg, auto code)
@@ -2169,10 +2203,6 @@ void LFileSelect::OpenFolder(SelectCb Cb)
 	auto Dlg = new LFileSelectDlg(d);
 
 	d->Type = TypeOpenFolder;
-	Dlg->SaveBtn->Enabled(true);
-	Dlg->FileNameEdit->Enabled(false);
-	Dlg->Name("Open Folder");
-	Dlg->SaveBtn->Name("Open");
 
 	printf("LFileSelect::OpenFolder domodal...\n");
 	Dlg->DoModal([this,Cb](auto d, auto code)
@@ -2189,8 +2219,6 @@ void LFileSelect::Save(SelectCb Cb)
 	auto *Dlg = new LFileSelectDlg(d);
 	
 	d->Type = TypeSaveFile;
-	Dlg->Name("Save As");
-	Dlg->SaveBtn->Name("Save As");
 
 	// printf("LFileSelect domodal.. thread=%u\n", GetCurrentThreadId());
 	Dlg->DoModal([this, Cb](auto dlg, auto code)

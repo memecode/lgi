@@ -22,42 +22,28 @@ ifeq ($(Build),Debug)
 	CFlags += -g
 	CppFlags += -g
 	Tag = d
-	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
+	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -DHAS_LIBSSH=0 -D_GNU_SOURCE
 	Libs =  \
-		-lssh \
-		-lmagic \
-		-static-libgcc  \
-		`pkg-config --libs gtk+-3.0` \
-		-pthread \
-		-llgi-gtk3$(Tag) \
+		-lgnu \
+		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
 		-I./src \
 		-I./resources \
-		`pkg-config --cflags gtk+-3.0` \
-		-I../../../../../../usr/include/gstreamer-1.0 \
-		-I../include/lgi/linux/Gtk \
-		-I../include/lgi/linux \
+		-I../include/lgi/haiku \
 		-I../include
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
-	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
+	Defs = -DHAIKU -D_REENTRANT -DHAS_LIBSSH=0 -D_GNU_SOURCE
 	Libs =  \
-		-lssh \
-		-lmagic \
-		-static-libgcc  \
-		`pkg-config --libs gtk+-3.0` \
-		-pthread \
-		-llgi-gtk3$(Tag) \
+		-lgnu \
+		-llgi$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
 		-I./src \
 		-I./resources \
-		`pkg-config --cflags gtk+-3.0` \
-		-I../../../../../../usr/include/gstreamer-1.0 \
-		-I../include/lgi/linux/Gtk \
-		-I../include/lgi/linux \
+		-I../include/lgi/haiku \
 		-I../include
 endif
 
@@ -97,14 +83,14 @@ $(BuildDir)/%.o: %.cpp
 
 # Target
 # Executable target
-$(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
+$(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	mkdir -p $(BuildDir)
 	@echo Linking $(Target) [$(Build)]...
 	$(CPP) -Wl,-export-dynamic,-R. -o \
 		$(Target) $(Objects) $(Libs)
 	@echo Done.
 
-../$(BuildDir)/liblgi-gtk3$(Tag).so : ../include/lgi/common/App.h \
+../$(BuildDir)/liblgi$(Tag).so : ../include/lgi/common/App.h \
 	../include/lgi/common/Array.h \
 	../include/lgi/common/AutoPtr.h \
 	../include/lgi/common/Base64.h \
@@ -231,6 +217,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/ToolTip.h \
 	../include/lgi/common/TrayIcon.h \
 	../include/lgi/common/Tree.h \
+	../include/lgi/common/TypeToString.h \
 	../include/lgi/common/Undo.h \
 	../include/lgi/common/Unicode.h \
 	../include/lgi/common/UnicodeString.h \
@@ -241,8 +228,8 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/Widgets.h \
 	../include/lgi/common/Window.h \
 	../include/lgi/common/XmlTree.h \
-	../include/lgi/linux/Gtk/LgiOsClasses.h \
-	../include/lgi/linux/Gtk/LgiOsDefs.h \
+	../include/lgi/haiku/LgiOsClasses.h \
+	../include/lgi/haiku/LgiOsDefs.h \
 	../include/lgi/linux/Gtk/LgiWidget.h \
 	../include/lgi/linux/Gtk/LgiWinManGlue.h \
 	../include/lgi/mac/cocoa/LCocoaView.h \
@@ -254,6 +241,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/mac/cocoa/SymLookup.h \
 	../private/common/FontPriv.h \
 	../private/common/ViewPriv.h \
+	../private/haiku/AppPriv.h \
 	../private/linux/AppPriv.h \
 	../src/common/Gdc2/15Bit.cpp \
 	../src/common/Gdc2/16Bit.cpp \
@@ -354,27 +342,26 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/common/Widgets/TextLabel.cpp \
 	../src/common/Widgets/ToolBar.cpp \
 	../src/common/Widgets/Tree.cpp \
-	../src/linux/General/File.cpp \
-	../src/linux/General/Mem.cpp \
-	../src/linux/General/ShowFileProp_Linux.cpp \
-	../src/linux/Gtk/Gdc2.cpp \
-	../src/linux/Gtk/LgiWidget.cpp \
-	../src/linux/Gtk/MemDC.cpp \
-	../src/linux/Gtk/PrintDC.cpp \
-	../src/linux/Gtk/ScreenDC.cpp \
-	../src/linux/Lgi/App.cpp \
-	../src/linux/Lgi/ClipBoard.cpp \
-	../src/linux/Lgi/DragAndDrop.cpp \
-	../src/linux/Lgi/General.cpp \
-	../src/linux/Lgi/Layout.cpp \
-	../src/linux/Lgi/Menu.cpp \
-	../src/linux/Lgi/Printer.cpp \
-	../src/linux/Lgi/Thread.cpp \
-	../src/linux/Lgi/View.cpp \
-	../src/linux/Lgi/Widgets.cpp \
-	../src/linux/Lgi/Window.cpp
+	../src/haiku/App.cpp \
+	../src/haiku/ClipBoard.cpp \
+	../src/haiku/DragAndDrop.cpp \
+	../src/haiku/File.cpp \
+	../src/haiku/Gdc2.cpp \
+	../src/haiku/General.cpp \
+	../src/haiku/Layout.cpp \
+	../src/haiku/Mem.cpp \
+	../src/haiku/MemDC.cpp \
+	../src/haiku/Menu.cpp \
+	../src/haiku/PrintDC.cpp \
+	../src/haiku/Printer.cpp \
+	../src/haiku/ScreenDC.cpp \
+	../src/haiku/ShowFileProp_Haiku.cpp \
+	../src/haiku/Thread.cpp \
+	../src/haiku/View.cpp \
+	../src/haiku/Widgets.cpp \
+	../src/haiku/Window.cpp
 	export Build=$(Build); \
-	$(MAKE) -C ../ -f ./linux/Makefile.linux
+	$(MAKE) -C ../ -f ./haiku/Makefile.haiku
 
 -include $(Objects:.o=.d)
 
@@ -387,7 +374,7 @@ clean :
 cleanall :
 	rm -rf $(BuildDir) $(Target)
 	@echo Cleaned $(BuildDir) $(Target)
-	+make -C "../" -f ./linux/Makefile.linux clean
+	+make -C "../" -f ./haiku/Makefile.haiku clean
 
 VPATH=$(BuildDir) \
 	../src/common/Widgets \

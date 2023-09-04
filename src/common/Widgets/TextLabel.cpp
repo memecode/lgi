@@ -20,7 +20,9 @@ public:
 	LString ThreadName;
 	int PrevX;
 
-	LTextPrivate(LTextLabel *ctrl) : LStringLayout(LAppInst->GetFontCache()), LMutex("LTextPrivate")
+	LTextPrivate(LTextLabel *ctrl) :
+		LStringLayout(NULL),
+		LMutex("LTextPrivate")
 	{
 		Ctrl = ctrl;
 		PrevX = -1;
@@ -223,6 +225,7 @@ bool LTextLabel::OnLayout(LViewLayoutInfo &Inf)
 
 void LTextLabel::OnCreate()
 {
+	d->SetFontCache(LAppInst->GetFontCache());
 	if (d->ThreadName)
 	{
 		LString s;

@@ -37,7 +37,7 @@ Known bugs:
 #include "lgi/common/DocView.h"
 #include "ParserCommon.h"
 
-// #define DEBUG_FILE		"Lvc.h"
+// #define DEBUG_FILE		"AppFileInfo.h"
 // #define DEBUG_LINE		150
 
 const char *TypeToStr(DefnType t)
@@ -881,7 +881,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 											{
 												char16 r = *Last;
 												*Last = 0;
-												Defns.New().Set(DefnClass, FileName, Start, Line + 1);
+												Defns.New().Set(DefnClass, FileName, CurClassDecl, Line + 1);
 												*Last = r;
 												SeekPtr(s, next, Line);
 											}

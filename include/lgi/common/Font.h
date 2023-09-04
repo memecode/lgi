@@ -260,7 +260,9 @@ public:
 	LAutoString ConvertToUnicode(char16 *Input, ssize_t Len = -1);
 	
 	#if USE_CORETEXT
-	CFDictionaryRef GetAttributes();
+		CFDictionaryRef GetAttributes();
+	#elif defined(HAIKU)
+		bool InThread();
 	#endif
 };
 

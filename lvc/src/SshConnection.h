@@ -1,5 +1,7 @@
 #pragma once
 
+#if HAS_LIBSSH
+
 #include "lgi/common/Ssh.h"
 #include "lgi/common/EventTargetThread.h"
 #include "lgi/common/Uri.h"
@@ -28,3 +30,4 @@ public:
 	static bool HandleMsg(LMessage *m);
 };
 
+#endif

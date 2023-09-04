@@ -87,6 +87,7 @@ private:
 
 	LRect				Pos;
 	int					_InLock = 0;
+	OsThreadId			_LockingThread = -1;
 
 protected:
 	class LViewPrivate	*d = NULL;

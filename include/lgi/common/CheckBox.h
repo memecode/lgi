@@ -80,8 +80,10 @@ public:
 	LMessage::Result OnEvent(LMessage *Msg) override;
 	int OnNotify(LViewI *Ctrl, LNotification n) override;
 
-	#ifdef WINNATIVE
-	int SysOnNotify(int Msg, int Code);
+	#if defined(WINNATIVE)
+		int SysOnNotify(int Msg, int Code);
+	#elif defined(HAIKU)
+		void OnCreate();
 	#endif	
 };
 
