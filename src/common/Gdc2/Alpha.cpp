@@ -14,6 +14,7 @@
 #include "lgi/common/Path.h"
 #include "lgi/common/PixelRops.h"
 #include "lgi/common/Palette.h"
+#include "lgi/common/Variant.h"
 
 // #define Div255(a)	DivLut[a]
 #define Div255(a)	((a)/255)
@@ -90,34 +91,27 @@ public:
 		APtr = 0;
 	}
 
-	int GetVar(int Var)
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL)
 	{
-		switch (Var)
+		if (LStringToDomProp(Name) == AppAlpha)
 		{
-			case GAPP_ALPHA_A: return alpha;
+			Value = alpha;
+			return true;
 		}
-		return 0;
+
+		return false;
 	}
 
-	int SetVar(int Var, NativeInt Value)
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL)
 	{
-		switch (Var)
+		if (LStringToDomProp(Name) == AppAlpha)
 		{
-			case GAPP_ALPHA_A:
-			{
-				int Old = alpha;
-				alpha = (uchar)Value;
-				oma = 0xFF - alpha;
-				
-				printf("GAPP_ALPHA_A=%i\n", alpha);
-				return Old;
-			}
-			case GAPP_ALPHA_PAL:
-			{
-
-			}
+			alpha = (uchar)Value.CastInt32();
+			oma = 0xFF - alpha;
+			return true;
 		}
-		return 0;
+		
+		return false;
 	}
 
 	bool SetSurface(LBmpMem *d, LPalette *p, LBmpMem *a)
@@ -188,7 +182,8 @@ class GdcApp8Alpha : public LAlphaApp
 
 public:
 	GdcApp8Alpha();
-	int SetVar(int Var, NativeInt Value);
+	
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL);
 
 	void Set();
 	void VLine(int height);
@@ -384,28 +379,33 @@ public:
 
 	const char *GetClass() { return "GdcAlpha"; }
 
-	int GetVar(int Var)
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override
 	{
-		switch (Var)
+		switch (LStringToDomProp(Name))
 		{
-			case GAPP_ALPHA_A: return alpha;
-		}
-		return 0;
-	}
-
-	int SetVar(int Var, NativeInt Value)
-	{
-		switch (Var)
-		{
-			case GAPP_ALPHA_A:
+			case AppAlpha:
 			{
-				int Old = alpha;
-				alpha = (uchar)Value;
-				one_minus_alpha = 0xFF - alpha;
-				return Old;
+				Value = alpha;
+				return true;
 			}
 		}
-		return 0;
+		
+		return false;
+	}
+
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override
+	{
+		switch (LStringToDomProp(Name))
+		{
+			case AppAlpha:
+			{
+				alpha = Value.CastInt32();
+				one_minus_alpha = 0xFF - alpha;
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	bool SetSurface(LBmpMem *d, LPalette *p = 0, LBmpMem *a = 0)
@@ -1399,15 +1399,15 @@ GdcApp8Alpha::GdcApp8Alpha()
 	DivLut = Div255Lut;
 }
 
-int GdcApp8Alpha::SetVar(int Var, NativeInt Value)
+bool GdcApp8Alpha::SetVariant(const char *Name, LVariant &Value, const char *Array)
 {
-	int Status = LAlphaApp::SetVar(Var, Value);
+	auto Status = LAlphaApp::SetVariant(Name, Value, Array);
 
-	switch (Var)
+	switch (LStringToDomProp(Name))
 	{
-		case GAPP_ALPHA_PAL:
+		case AppPalette:
 		{
-			LPalette *Pal = (LPalette*)Value;
+			LPalette *Pal = (LPalette*)Value.CastVoidPtr();
 
 			if (Pal && alpha < 255)
 			{

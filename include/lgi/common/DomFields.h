@@ -97,3 +97,10 @@ _(TableLayoutCell, "Cell")
 
 // ControlTree
 _(ControlSerialize, "Serialize")
+
+// LApplicator
+_(AppAlpha, "Alpha")			// (uint8_t)
+_(AppPalette, "Palette")		// (LPalette*)(void*)
+_(AppBackground, "Background")	// (uint32_t) rgba32
+_(AppAngle, "Angle")			// (int32_t) degrees
+_(AppBounds, "Bounds")			// (LRect*)(void*)

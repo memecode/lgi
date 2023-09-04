@@ -12,6 +12,7 @@
 
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/Palette.h"
+#include "lgi/common/Variant.h"
 
 #define BytePtr	((uint8_t*&)Ptr)
 #undef NonPreMulOver24
@@ -98,28 +99,23 @@ public:
 		PalAlpha = NULL;
 	}
 
-	int GetVar(int Var)
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL)
 	{
-		LAssert(0)
-			;
-		return 0;
-	}
-	int SetVar(int Var, NativeInt Value)
-	{
-		switch (Var)
+		switch (LStringToDomProp(Name))
 		{
-			case GAPP_ALPHA_A:
+			case AppAlpha:
 			{
-				ConstAlpha = (int)Value;
-				break;
+				ConstAlpha = Value.CastInt32();
+				return true;
 			}
-			case GAPP_ALPHA_PAL:
+			case AppPalette:
 			{
-				PalAlpha = (LPalette*)Value;
-				break;
+				PalAlpha = (LPalette*)Value.CastVoidPtr();
+				return true;
 			}
 		}
-		return 0;
+		
+		return false;
 	}
 
 	bool SetSurface(LBmpMem *d, LPalette *pal = NULL, LBmpMem *a = NULL)

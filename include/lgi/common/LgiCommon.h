@@ -281,7 +281,7 @@ LgiFunc bool LExecute
 	/// The arguments to pass to the program
 	const char *Arguments="",
 	/// The directory to run in
-	const char *Dir = 0,
+	const char *Dir = NULL,
 	/// An error message
 	LString *ErrorMsg = NULL
 );

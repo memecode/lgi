@@ -275,25 +275,25 @@ public:
 	}
 };
 
-
-#define GAPP_ALPHA_A			1
-#define GAPP_ALPHA_PAL			2
-#define GAPP_BACKGROUND			3
-#define GAPP_ANGLE				4
-#define GAPP_BOUNDS				5
+// These have moved to LDom fields:
+// GAPP_ALPHA_A	   -> AppAlpha
+// GAPP_ALPHA_PAL  -> AppPalette
+// GAPP_BACKGROUND -> AppBackground
+// GAPP_ANGLE      -> AppAngle
+// GAPP_BOUNDS     -> AppBounds
 
 /// \brief Class to draw onto a memory bitmap
 ///
 /// This class assumes that all clipping is done by the layer above.
 /// It can then implement very simple loops to do the work of filling
 /// pixels
-class LgiClass LApplicator
+class LgiClass LApplicator : public LDom
 {
 protected:
-	LBmpMem *Dest;
-	LBmpMem *Alpha;
-	LPalette *Pal;
-	int Op;
+	LBmpMem *Dest = NULL;
+	LBmpMem *Alpha = NULL;
+	LPalette *Pal = NULL;
+	int Op = 0;
 
 public:
 	union
@@ -303,16 +303,11 @@ public:
 		System32BitPixel p32;
 	};
 
-	LApplicator() { c = 0; Dest = NULL; Alpha = NULL; Pal = NULL; }
+	LApplicator() { }
 	LApplicator(COLOUR Colour) { c = Colour; }
 	virtual ~LApplicator() { }
 
 	virtual const char *GetClass() { return "LApplicator"; }
-
-	/// Get a parameter
-	virtual int GetVar(int Var) { return 0; }
-	/// Set a parameter
-	virtual int SetVar(int Var, NativeInt Value) { return 0; }
 
 	LColourSpace GetColourSpace() { return Dest ? Dest->Cs : CsNone; }
 

@@ -1922,7 +1922,10 @@ int LSurface::Op(int NewOp, NativeInt Param)
 		{
 			Colour(cCurrent);
 			if (Param >= 0)
-				pApp->SetVar(GAPP_ALPHA_A, Param);
+			{
+				LVariant v;
+				pApp->SetValue(LDomPropToString(AppAlpha), v = Param);
+			}
 		}
 		else
 		{

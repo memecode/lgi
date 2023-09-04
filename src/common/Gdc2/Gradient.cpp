@@ -1,5 +1,7 @@
 #include <math.h>
 #include "lgi/common/Gdc2.h"
+#include "lgi/common/Dom.h"
+#include "lgi/common/Variant.h"
 
 class LGradient : public LApplicator
 {
@@ -99,54 +101,55 @@ public:
 		return false;
 	}
 
-	int GetVar(int Var)
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL)
 	{
-		switch (Var)
+		switch (LStringToDomProp(Name))
 		{
-			case GAPP_ANGLE:
+			case AppAngle:
 			{
-				return Angle;
+				Value = Angle;
+				return true;
 			}
-			case GAPP_BOUNDS:
+			case AppBounds:
 			{
-				return (int)&Rect;
+				Value = &Rect;
+				return true;
 			}
-			case GAPP_BACKGROUND:
-			{
-				return Background;
+			case AppBackground:
+			{				
+				Value = Background;
+				return true;
 			}
 		}
 
 		return -1;
 	}
 
-	int SetVar(int Var, int Value)
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL)
 	{
-		int o = GetVar(Var);
-
-		switch (Var)
+		switch (LStringToDomProp(Name))
 		{
-			case GAPP_ANGLE:
+			case AppAngle:
 			{
-				Angle = Value;
+				Angle = Value.CastInt32();
 				break;
 			}
-			case GAPP_BOUNDS:
+			case AppBounds:
 			{
-				if (Value)
-				{
-					Rect = *((LRect*)Value);
-				}
-				break;
+				auto p = Value.CastVoidPtr();
+				if (!p)
+					return false;
+				Rect = *((LRect*)p);
+				return true;
 			}
-			case GAPP_BACKGROUND:
+			case AppBackground:
 			{
-				Background = Value;
-				break;
+				Background = (COLOUR)Value.CastInt32();
+				return true;
 			}
 		}
 
-		return o;
+		return false;
 	}
 };
 

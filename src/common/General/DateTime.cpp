@@ -32,8 +32,9 @@ constexpr const char *LDateTime::MonthsShort[12];
 constexpr const char *LDateTime::MonthsLong[12];
 
 #if !defined(WINDOWS)
-#define MIN_YEAR		1800
+	#define MIN_YEAR		1800
 #endif
+#define DEBUG_DST_INFO		1
 
 //////////////////////////////////////////////////////////////////////////////
 uint16 LDateTime::DefaultFormat = GDTF_DEFAULT;
@@ -360,8 +361,6 @@ struct MonthHash : public LHashTbl<ConstStrKey<char,false>,int>
 
 LString::Array Zdump;
 
-#define DEBUG_DST_INFO		0
-
 bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start, LDateTime *End)
 {
 	bool Status = false;
@@ -496,17 +495,21 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 			{
 				// /etc/localtime  Sat Oct  3 15:59:59 2037 UTC = Sun Oct  4 01:59:59 2037 EST isdst=0 gmtoff=36000
 				// 0               1   2    3 4        5    6   7 8   9    10 11      12   13  14      15
-				#if DEBUG_DST_INFO
-				printf("DST: %s\n", Line);
-				#endif				
 				
 				LDateTime Utc;
 				Utc.Year(l[5].Int());
+
+				#if DEBUG_DST_INFO
+				if (Utc.Year() < 2020)
+					continue;
+				// printf("DST: %s\n", Line.Get());
+				#endif				
+
 				auto Tm = l[4].SplitDelimit(":");
 				if (Tm.Length() != 3)
 				{
 					#if DEBUG_DST_INFO
-					printf("%s:%i - Tm '%s' has wrong parts: %s\n", _FL, l[4], Line);
+					printf("%s:%i - Tm '%s' has wrong parts: %s\n", _FL, l[4].Get(), Line.Get());
 					#endif
 					continue;
 				}
@@ -517,7 +520,7 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 				if (Utc.Minutes() < 0)
 				{
 					#if DEBUG_DST_INFO
-					printf("%s:%i - Mins is zero: %s\n", _FL, l[4]);
+					printf("%s:%i - Mins is zero: %s\n", _FL, l[4].Get());
 					#endif
 					continue;
 				}
@@ -526,7 +529,7 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 				if (!m)
 				{
 					#if DEBUG_DST_INFO
-					printf("%s:%i - Unknown month '%s'\n", _FL, l[2]);
+					printf("%s:%i - Unknown month '%s'\n", _FL, l[2].Get());
 					#endif
 					continue;
 				}
@@ -611,7 +614,9 @@ bool LDateTime::DstToLocal(LArray<LDstInfo> &Dst, LDateTime &dt)
 		return true;
 	}
 
-	// LgiTrace("DstToLocal: %s\n", dt.Get().Get());
+	#if DEBUG_DST_INFO
+	LgiTrace("DstToLocal: %s\n", dt.Get().Get());
+	#endif
 	LAssert(Dst.Length() > 1); // Needs to have at least 2 entries...?
 	for (size_t i=0; i<Dst.Length()-1; i++)
 	{
@@ -621,10 +626,17 @@ bool LDateTime::DstToLocal(LArray<LDstInfo> &Dst, LDateTime &dt)
 		start.Set(a.UtcTimeStamp);
 		end.Set(b.UtcTimeStamp);
 
-		// LgiTrace("Rng[%i]: %s -> %s\n", (int)i, start.Get().Get(), end.Get().Get());
-		if (dt >= start && dt < end)
+		auto InRange = dt >= start && dt < end;
+		if (InRange)
 		{
 			dt.SetTimeZone(a.Offset, true);
+			#if DEBUG_DST_INFO
+			LgiTrace("\tRng[%i]: %s -> %s, SetTimeZone(%g), dt=%s\n",
+				(int)i,
+				start.Get().Get(), end.Get().Get(),
+				(double)a.Offset/60.0,
+				dt.Get().Get());
+			#endif
 			return true;
 		}
 	}
@@ -640,6 +652,7 @@ bool LDateTime::DstToLocal(LArray<LDstInfo> &Dst, LDateTime &dt)
 		return true;
 	}
 
+	LgiTrace("%s:%i - No valid DST range for: %s\n", _FL, dt.Get().Get());
 	LAssert(!"No valid DST range for this date.");
 	return false;
 }
