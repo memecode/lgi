@@ -1037,7 +1037,8 @@ void CtrlTable::OnPaint(LSurface *pDC)
 				if (pDC->Applicator())
 				{
 					pDC->Colour(Blue);
-					pDC->Applicator()->SetVar(GAPP_ALPHA_A, 0x20);
+					LVariant v;
+					pDC->Applicator()->SetValue(LDomPropToString(AppAlpha), v = 0x20);
 				}
 				else
 					pDC->Colour(LColour(Blue.r(), Blue.g(), Blue.b(), 0x20));
