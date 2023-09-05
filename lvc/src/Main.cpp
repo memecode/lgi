@@ -766,50 +766,50 @@ public:
 		auto p = s.SplitDelimit();
 		switch (type)
 		{
-		case VcGit:
-		{
-			if (p.Length() > 2)
+			case VcGit:
 			{
-				ToolVersion[type] = Ver2Int(p[2]);
-				printf("Git version: %s\n", p[2].Get());
+				if (p.Length() > 2)
+				{
+					ToolVersion[type] = Ver2Int(p[2]);
+					printf("Git version: %s\n", p[2].Get());
+				}
+				else
+					LAssert(0);
+				break;
 			}
-			else
-				LAssert(0);
-			break;
-		}
-		case VcSvn:
-		{
-			if (p.Length() > 2)
+			case VcSvn:
 			{
-				ToolVersion[type] = Ver2Int(p[2]);
-				printf("Svn version: %s\n", p[2].Get());
+				if (p.Length() > 2)
+				{
+					ToolVersion[type] = Ver2Int(p[2]);
+					printf("Svn version: %s\n", p[2].Get());
+				}
+				else
+					LAssert(0);
+				break;
 			}
-			else
-				LAssert(0);
-			break;
-		}
-		case VcHg:
-		{
-			if (p.Length() >= 5)
+			case VcHg:
 			{
-				auto Ver = p[4].Strip("()");
-				ToolVersion[type] = Ver2Int(Ver);
-				printf("Hg version: %s\n", Ver.Get());
+				if (p.Length() >= 5)
+				{
+					auto Ver = p[4].Strip("()");
+					ToolVersion[type] = Ver2Int(Ver);
+					printf("Hg version: %s\n", Ver.Get());
+				}
+				break;
 			}
-			break;
-		}
-		case VcCvs:
-		{
-			if (p.Length() > 1)
+			case VcCvs:
 			{
-				auto Ver = p[2];
-				ToolVersion[type] = Ver2Int(Ver);
-				printf("Cvs version: %s\n", Ver.Get());
+				if (p.Length() > 1)
+				{
+					auto Ver = p[2];
+					ToolVersion[type] = Ver2Int(Ver);
+					printf("Cvs version: %s\n", Ver.Get());
+				}
+				break;
 			}
-			break;
-		}
-		default:
-			break;
+			default:
+				break;
 		}
 
 		return false;
@@ -1000,7 +1000,7 @@ public:
 		}
 		if (f)
 		{
-			new GetVcsVersions(this);
+			// new GetVcsVersions(this);
 
 			for (auto c: f->Children)
 			{
