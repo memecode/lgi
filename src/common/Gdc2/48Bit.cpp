@@ -11,6 +11,7 @@
 
 #include "lgi/common/Gdc2.h"
 #include "lgi/common/Palette.h"
+#include "lgi/common/Variant.h"
 
 #define BytePtr	((uint8_t*&)Ptr)
 #undef NonPreMulOver48
@@ -38,14 +39,14 @@ public:
 		PalAlpha = NULL;
 	}
 
-	int GetVar(int Var)
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array) override
 	{
-		switch (Var)
+		switch (LStringToDomProp(Name))
 		{
-			case GAPP_ALPHA_A:
+			case AppAlpha:
 			{
-				return ConstAlpha;
-				break;
+				Value = ConstAlpha;
+				return true;
 			}
 			default:
 			{
@@ -53,22 +54,23 @@ public:
 				break;
 			}
 		}
-		return 0;
+
+		return false;
 	}
 	
-	int SetVar(int Var, NativeInt Value)
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array) override
 	{
-		switch (Var)
+		switch (LStringToDomProp(Name))
 		{
-			case GAPP_ALPHA_A:
+			case AppAlpha:
 			{
-				ConstAlpha = (int)Value;
-				break;
+				ConstAlpha = Value.CastInt32();
+				return true;
 			}
-			case GAPP_ALPHA_PAL:
+			case AppPalette:
 			{
-				PalAlpha = (LPalette*)Value;
-				break;
+				PalAlpha = (LPalette*)Value.CastVoidPtr();
+				return true;
 			}
 			default:
 			{
@@ -76,10 +78,11 @@ public:
 				break;
 			}
 		}
-		return 0;
+		
+		return false;
 	}
 
-	bool SetSurface(LBmpMem *d, LPalette *pal = NULL, LBmpMem *a = NULL)
+	bool SetSurface(LBmpMem *d, LPalette *pal = NULL, LBmpMem *a = NULL) override
 	{
 		if (d && d->Cs == ColourSpace)
 		{
@@ -92,40 +95,40 @@ public:
 		return false;
 	}
 
-	void SetPtr(int x, int y)
+	void SetPtr(int x, int y) override
 	{
 		p = (Pixel*) (Dest->Base + (y * Dest->Line) + (x * sizeof(Pixel)));
 	}
 	
-	void IncX()
+	void IncX() override
 	{
 		p++;
 	}
 	
-	void IncY()
+	void IncY() override
 	{
 		u8 += Dest->Line;
 	}
 	
-	void IncPtr(int X, int Y)
+	void IncPtr(int X, int Y) override
 	{
 		p += X;
 		u8 += Y * Dest->Line;
 	}
 	
-	void Set()
+	void Set() override
 	{
 		p->r = ((uint16)p24.r << 8) | p24.r;
 		p->g = ((uint16)p24.g << 8) | p24.g;
 		p->b = ((uint16)p24.b << 8) | p24.b;
 	}
 	
-	COLOUR Get()
+	COLOUR Get() override
 	{
 		return Rgb24(p->r >> 8, p->g >> 8, p->b >> 8);
 	}
 	
-	void VLine(int height)
+	void VLine(int height) override
 	{
 		Pixel cp;
 		cp.r = ((uint16)p24.r << 8) | p24.r;
@@ -139,7 +142,7 @@ public:
 		}
 	}
 	
-	void Rectangle(int x, int y)
+	void Rectangle(int x, int y) override
 	{
 		Pixel cp;
 		cp.r = ((uint16)p24.r << 8) | p24.r;
@@ -218,7 +221,7 @@ public:
 		return true;
 	}
 	
-	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha = NULL)
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha = NULL) override
 	{
 		if (!Src)
 			return false;

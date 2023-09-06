@@ -266,9 +266,9 @@ public:
 	~LFolderDrop();
 
 	const char *GetClass() override { return "LFolderDrop"; }
-	void OnFolder();
+	void OnFolder() override;
 
-	bool OnLayout(LViewLayoutInfo &Inf)
+	bool OnLayout(LViewLayoutInfo &Inf) override
 	{
 		Inf.Width.Min = 
 			Inf.Width.Max = 18;
@@ -296,7 +296,7 @@ public:
 	
 	const char *GetClass() override { return "LIconButton"; }
 
-	void OnPaint(LSurface *pDC)
+	void OnPaint(LSurface *pDC) override
 	{
 		LRect c = GetClient();
 		LColour Background(L_MED);
@@ -319,12 +319,12 @@ public:
 		Icons->Draw(pDC, c.x1+x+Down, c.y1+y+Down, Icon, Background, !Enabled());
 	}
 
-	void OnFocus(bool f)
+	void OnFocus(bool f) override
 	{
 		Invalidate();
 	}
 
-	void OnMouseClick(LMouse &m)
+	void OnMouseClick(LMouse &m) override
 	{
 		if (Enabled())
 		{
@@ -343,7 +343,7 @@ public:
 		}
 	}
 
-	void OnMouseEnter(LMouse &m)
+	void OnMouseEnter(LMouse &m) override
 	{
 		if (IsCapturing())
 		{
@@ -352,7 +352,7 @@ public:
 		}
 	}
 
-	void OnMouseExit(LMouse &m)
+	void OnMouseExit(LMouse &m) override
 	{
 		if (IsCapturing())
 		{
@@ -361,7 +361,7 @@ public:
 		}
 	}
 
-	bool OnKey(LKey &k)
+	bool OnKey(LKey &k) override
 	{
 		if (k.c16 == ' ' || k.c16 == LK_RETURN)
 		{
@@ -383,7 +383,7 @@ public:
 		return false;
 	}
 	
-	bool OnLayout(LViewLayoutInfo &Inf)
+	bool OnLayout(LViewLayoutInfo &Inf) override
 	{
 		Inf.Width.Min = Inf.Width.Max = Icons->TileX() + 4;
 		Inf.Width.Max += 4;
@@ -402,8 +402,8 @@ public:
 
 	const char *GetClass() override { return "LFolderList"; }
 
-	void OnFolder();
-	bool OnKey(LKey &k);
+	void OnFolder() override;
+	bool OnKey(LKey &k) override;
 	void SetFilterKey(LString s) { FilterKey = s; OnFolder(); }
 };
 
@@ -817,7 +817,7 @@ public:
 	void OnFolder();
 	void OnFile(char *f);
 	void OnFilter(const char *Key);
-	void OnCreate();
+	void OnCreate() override;
 
 	bool OnViewKey(LView *v, LKey &k) override
 	{
@@ -1506,7 +1506,7 @@ public:
 
 	const char *GetClass() override { return "LFileSystemPopup"; }
 
-	void Visible(bool i)
+	void Visible(bool i) override
 	{
 		if (i && Root)
 		{
@@ -1516,7 +1516,7 @@ public:
 		LPopup::Visible(i);
 	}
 
-	void OnPaint(LSurface *pDC)
+	void OnPaint(LSurface *pDC) override
 	{
 		// Draw border
 		LRect c = GetClient();

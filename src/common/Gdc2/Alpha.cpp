@@ -377,7 +377,7 @@ public:
 		one_minus_alpha = 0;
 	}
 
-	const char *GetClass() { return "GdcAlpha"; }
+	const char *GetClass() override { return "GdcAlpha"; }
 
 	bool GetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override
 	{
@@ -388,6 +388,8 @@ public:
 				Value = alpha;
 				return true;
 			}
+			default:
+				break;
 		}
 		
 		return false;
@@ -403,12 +405,14 @@ public:
 				one_minus_alpha = 0xFF - alpha;
 				return true;
 			}
+			default:
+				break;
 		}
 		
 		return false;
 	}
 
-	bool SetSurface(LBmpMem *d, LPalette *p = 0, LBmpMem *a = 0)
+	bool SetSurface(LBmpMem *d, LPalette *p = 0, LBmpMem *a = 0) override
 	{
 		if (d && d->Cs == ColourSpace)
 		{
@@ -424,29 +428,29 @@ public:
 		return false;
 	}
 	
-	void SetPtr(int x, int y)
+	void SetPtr(int x, int y) override
 	{
 		u8 = Dest->Base + (Dest->Line * y);
 		p += x;
 	}
 	
-	void IncX()
+	void IncX() override
 	{
 		p++;
 	}
 	
-	void IncY()
+	void IncY() override
 	{
 		u8 += Dest->Line;
 	}
 	
-	void IncPtr(int X, int Y)
+	void IncPtr(int X, int Y) override
 	{
 		p += X;
 		u8 += Dest->Line * Y;
 	}
 
-	COLOUR Get()
+	COLOUR Get() override
 	{
 		return Rgb24(p->r, p->g, p->b);
 	}
@@ -1432,6 +1436,8 @@ bool GdcApp8Alpha::SetVariant(const char *Name, LVariant &Value, const char *Arr
 			}
 			break;
 		}
+		default:
+			break;
 	}
 
 	return Status;

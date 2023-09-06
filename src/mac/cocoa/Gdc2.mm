@@ -559,7 +559,11 @@ bool LGlobalColour::AddBitmap(LImageList *il)
 			{
 				s->Op(GDC_ALPHA);
 				LApplicator *pApp = s->Applicator();
-				if (pApp) pApp->SetVar(GAPP_ALPHA_A, 40);
+				if (pApp)
+				{
+					LVariant v = 40;
+					pApp->SetValue(LDomPropToString(AppAlpha), v);
+				}
 				s->Blt(0, 0, il);
 				d->Cache.Insert(s);
 			}

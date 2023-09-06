@@ -99,7 +99,7 @@ public:
 		PalAlpha = NULL;
 	}
 
-	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL)
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array = NULL) override
 	{
 		switch (LStringToDomProp(Name))
 		{
@@ -113,12 +113,17 @@ public:
 				PalAlpha = (LPalette*)Value.CastVoidPtr();
 				return true;
 			}
+			default:
+			{
+				LAssert(!"Impl me");
+				break;
+			}
 		}
 		
 		return false;
 	}
 
-	bool SetSurface(LBmpMem *d, LPalette *pal = NULL, LBmpMem *a = NULL)
+	bool SetSurface(LBmpMem *d, LPalette *pal = NULL, LBmpMem *a = NULL) override
 	{
 		if (d && d->Cs == ColourSpace)
 		{
@@ -131,40 +136,40 @@ public:
 		return false;
 	}
 
-	void SetPtr(int x, int y)
+	void SetPtr(int x, int y) override
 	{
 		p = (Pixel*) (Dest->Base + (y * Dest->Line) + (x * sizeof(Pixel)));
 	}
 	
-	void IncX()
+	void IncX() override
 	{
 		p++;
 	}
 	
-	void IncY()
+	void IncY() override
 	{
 		u8 += Dest->Line;
 	}
 	
-	void IncPtr(int X, int Y)
+	void IncPtr(int X, int Y) override
 	{
 		p += X;
 		u8 += Y * Dest->Line;
 	}
 	
-	void Set()
+	void Set() override
 	{
 		p->r = p24.r;
 		p->g = p24.g;
 		p->b = p24.b;
 	}
 	
-	COLOUR Get()
+	COLOUR Get() override
 	{
 		return Rgb24(p->r, p->g, p->b);
 	}
 	
-	void VLine(int height)
+	void VLine(int height) override
 	{
 		Pixel cp;
 		cp.r = p24.r;
@@ -178,7 +183,7 @@ public:
 		}
 	}
 	
-	void Rectangle(int x, int y)
+	void Rectangle(int x, int y) override
 	{
 		Pixel cp;
 		cp.r = p24.r;
@@ -259,7 +264,7 @@ public:
 		return true;
 	}
 	
-	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha = NULL)
+	bool Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha = NULL) override
 	{
 		if (!Src)
 			return false;

@@ -81,7 +81,7 @@ public:
 
 	const char *GetClass() override { return "LAlert"; }
     void SetAppModal();
-	int OnNotify(LViewI *Ctrl, LNotification n);
+	int OnNotify(LViewI *Ctrl, LNotification n) override;
 	void SetButtonCallback(int ButtonIdx, std::function<void(int)> Callback);
 };
 #endif
