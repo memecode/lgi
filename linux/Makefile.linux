@@ -33,12 +33,7 @@ ifeq ($(Build),Debug)
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
 		`pkg-config --cflags gstreamer-1.0` \
-		-I../../../../../usr/include/libappindicator3-0.1 \
-		-I./private/linux \
-		-I./private/common \
-		-I./include/lgi/linux/Gtk \
-		-I./include/lgi/linux \
-		-I./include
+		-I../../../../../usr/include/libappindicator3-0.1
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
