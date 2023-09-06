@@ -273,7 +273,6 @@
     <ClCompile Include="..\src\common\Lgi\Object.cpp" />
     <ClCompile Include="..\src\common\Lgi\OptionsFile.cpp" />
     <ClCompile Include="..\src\common\Lgi\Stream.cpp" />
-    <ClCompile Include="..\src\common\Lgi\SubProcess.cpp" />
     <ClCompile Include="..\src\common\Lgi\ToolTip.cpp" />
     <ClCompile Include="..\src\common\Lgi\TrayIcon.cpp" />
     <ClCompile Include="..\src\common\Lgi\Variant.cpp" />
@@ -350,6 +349,7 @@
     <ClCompile Include="..\src\win\General\Mem.cpp" />
     <ClCompile Include="..\src\win\General\ShowFileProp_Win.cpp" />
     <ClCompile Include="..\src\win\INet\MibAccess.cpp" />
+    <ClCompile Include="..\src\win\Lgi\SubProcess.cpp" />
     <ClCompile Include="..\src\win\Lgi\App.cpp" />
     <ClCompile Include="..\src\win\Lgi\ClipBoard.cpp" />
     <ClCompile Include="..\src\win\Lgi\DragAndDrop.cpp" />

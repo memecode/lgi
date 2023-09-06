@@ -771,7 +771,7 @@ public:
 				if (p.Length() > 2)
 				{
 					ToolVersion[type] = Ver2Int(p[2]);
-					printf("Git version: %s\n", p[2].Get());
+					d->Log->Print("Git version: %s\n", p[2].Get());
 				}
 				else
 					LAssert(0);
@@ -782,7 +782,7 @@ public:
 				if (p.Length() > 2)
 				{
 					ToolVersion[type] = Ver2Int(p[2]);
-					printf("Svn version: %s\n", p[2].Get());
+					d->Log->Print("Svn version: %s\n", p[2].Get());
 				}
 				else
 					LAssert(0);
@@ -794,7 +794,7 @@ public:
 				{
 					auto Ver = p[4].Strip("()");
 					ToolVersion[type] = Ver2Int(Ver);
-					printf("Hg version: %s\n", Ver.Get());
+					d->Log->Print("Hg version: %s\n", Ver.Get());
 				}
 				break;
 			}
@@ -804,7 +804,7 @@ public:
 				{
 					auto Ver = p[2];
 					ToolVersion[type] = Ver2Int(Ver);
-					printf("Cvs version: %s\n", Ver.Get());
+					d->Log->Print("Cvs version: %s\n", Ver.Get());
 				}
 				break;
 			}
