@@ -167,7 +167,7 @@ LSubProcess::~LSubProcess()
 	DeleteObj(d);
 }
 
-extern char **environ = NULL;
+extern char **environ;
 
 bool LSubProcess::GetNewGroup()
 {

@@ -284,7 +284,7 @@ $(Target) : ../../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../../src/common/Lgi/OptionsFile.cpp \
 	../../src/common/Lgi/Rand.cpp \
 	../../src/common/Lgi/Stream.cpp \
-	../../src/common/Lgi/SubProcess.cpp \
+	../../src/posix/SubProcess.cpp \
 	../../src/common/Lgi/ThreadCommon.cpp \
 	../../src/common/Lgi/ThreadEvent.cpp \
 	../../src/common/Lgi/ToolTip.cpp \
