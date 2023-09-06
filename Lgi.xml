@@ -131,7 +131,7 @@
 				<Node File=".\src\common\Lgi\MenuCommon.cpp" Type="2" Platforms="15" />
 			</Node>
 			<Node Name="Process" Type="1" Platforms="15" Open="0" Id="27">
-				<Node File="./src/common/Lgi/SubProcess.cpp" Type="2" Platforms="15" />
+				<Node File="./src/posix/SubProcess.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/SubProcess.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Resources" Type="1" Platforms="15" Open="0" Id="28">
@@ -461,8 +461,9 @@
 		<Node File="./include/lgi/common/Token.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
-		<Node File=".\haiku\Makefile.haiku" Type="9" Platforms="15" />
-		<Node File=".\linux\Makefile.linux" Type="9" Platforms="15" />
+		<Node File="./CMakeLists.txt" Type="8" Platforms="15" />
+		<Node File="./haiku/Makefile.haiku" Type="9" Platforms="15" />
+		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
 	</Node>
 	<Settings>
 		<General>

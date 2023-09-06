@@ -62,7 +62,8 @@ else
 endif
 
 # Dependencies
-Source =	src/linux/Lgi/Window.cpp \
+Source =	src/posix/SubProcess.cpp \
+			src/linux/Lgi/Window.cpp \
 			src/linux/Lgi/Widgets.cpp \
 			src/linux/Lgi/View.cpp \
 			src/linux/Lgi/Thread.cpp \
@@ -124,7 +125,6 @@ Source =	src/linux/Lgi/Window.cpp \
 			src/common/Lgi/ToolTip.cpp \
 			src/common/Lgi/ThreadEvent.cpp \
 			src/common/Lgi/ThreadCommon.cpp \
-			src/common/Lgi/SubProcess.cpp \
 			src/common/Lgi/Stream.cpp \
 			src/common/Lgi/Rand.cpp \
 			src/common/Lgi/OptionsFile.cpp \
@@ -216,6 +216,7 @@ clean :
 	@echo Cleaned $(BuildDir)
 
 VPATH=$(BuildDir) \
+	./src/posix \
 	./src/linux/Lgi \
 	./src/linux/Gtk \
 	./src/linux/General \

@@ -226,6 +226,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/ToolTip.h \
 	../include/lgi/common/TrayIcon.h \
 	../include/lgi/common/Tree.h \
+	../include/lgi/common/TypeToString.h \
 	../include/lgi/common/Undo.h \
 	../include/lgi/common/Unicode.h \
 	../include/lgi/common/UnicodeString.h \
@@ -240,7 +241,6 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/linux/Gtk/LgiOsDefs.h \
 	../include/lgi/linux/Gtk/LgiWidget.h \
 	../include/lgi/linux/Gtk/LgiWinManGlue.h \
-	../include/lgi/linux/SymLookup.h \
 	../include/lgi/mac/cocoa/LCocoaView.h \
 	../include/lgi/mac/cocoa/LgiMac.h \
 	../include/lgi/mac/cocoa/LgiOs.h \
@@ -285,6 +285,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/common/Hash/sha1/sha1.h \
 	../src/common/Lgi/Alert.cpp \
 	../src/common/Lgi/AppCommon.cpp \
+	../src/common/Lgi/ClipBoardCommon.cpp \
 	../src/common/Lgi/Css.cpp \
 	../src/common/Lgi/CssTools.cpp \
 	../src/common/Lgi/DataDlg.cpp \
@@ -305,7 +306,6 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/common/Lgi/OptionsFile.cpp \
 	../src/common/Lgi/Rand.cpp \
 	../src/common/Lgi/Stream.cpp \
-	../src/common/Lgi/SubProcess.cpp \
 	../src/common/Lgi/ThreadCommon.cpp \
 	../src/common/Lgi/ThreadEvent.cpp \
 	../src/common/Lgi/ToolTip.cpp \
@@ -367,7 +367,8 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/linux/Lgi/Thread.cpp \
 	../src/linux/Lgi/View.cpp \
 	../src/linux/Lgi/Widgets.cpp \
-	../src/linux/Lgi/Window.cpp
+	../src/linux/Lgi/Window.cpp \
+	../src/posix/SubProcess.cpp
 	export Build=$(Build); \
 	$(MAKE) -C ../ -f ./linux/Makefile.linux
 

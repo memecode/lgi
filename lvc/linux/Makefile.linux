@@ -311,7 +311,6 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/common/Lgi/OptionsFile.cpp \
 	../src/common/Lgi/Rand.cpp \
 	../src/common/Lgi/Stream.cpp \
-	../src/common/Lgi/SubProcess.cpp \
 	../src/common/Lgi/ThreadCommon.cpp \
 	../src/common/Lgi/ThreadEvent.cpp \
 	../src/common/Lgi/ToolTip.cpp \
@@ -373,7 +372,8 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/linux/Lgi/Thread.cpp \
 	../src/linux/Lgi/View.cpp \
 	../src/linux/Lgi/Widgets.cpp \
-	../src/linux/Lgi/Window.cpp
+	../src/linux/Lgi/Window.cpp \
+	../src/posix/SubProcess.cpp
 	export Build=$(Build); \
 	$(MAKE) -C ../ -f ./linux/Makefile.linux
 

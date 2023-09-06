@@ -182,7 +182,6 @@ set (CommonSource
 	include/lgi/common/OptionsFile.h
 	src/common/Lgi/OptionsFile.cpp
 	include/lgi/common/SubProcess.h
-	src/common/Lgi/SubProcess.cpp
 	include/lgi/common/Stream.h
 	src/common/Lgi/Stream.cpp
 	src/common/Lgi/MemStream.cpp
@@ -403,7 +402,13 @@ elseif (HAIKU)
 		src/haiku/Widgets.cpp
 		src/haiku/Window.cpp)
 
-endif ()
+endif()
+
+if (WIN32)
+    list(APPEND Source src/win/Lgi/SubProcess.cpp)
+else()
+    list(APPEND Source src/posix/SubProcess.cpp)
+endif()
 
 add_library(lgi SHARED ${Source})
 
@@ -479,7 +484,6 @@ if (APPLE)
 		src/common/Lgi/TrayIcon.cpp
 		src/common/Lgi/LMsg.cpp
 		src/common/Lgi/ViewCommon.cpp
-		src/common/Lgi/SubProcess.cpp
 		src/common/Lgi/AppCommon.cpp
 		src/common/Lgi/DropFiles.cpp
 		src/common/Widgets/Popup.cpp

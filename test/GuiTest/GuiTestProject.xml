@@ -18,17 +18,25 @@
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
+			<ShowWhiteSpace />
+			<CommentFile />
+			<CommentFunction />
 		</Editor>
 		<General>
 			<Makefile>
 				<Haiku>haiku/Makefile.haiku</Haiku>
+				<Linux>Makefile.linux</Linux>
 			</Makefile>
 			<Executable>
 				<Haiku>
 					<Debug>gui_test</Debug>
 					<Release>gui_test</Release>
 				</Haiku>
+				<Linux />
 			</Executable>
+			<Compiler />
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<TargetType>
@@ -43,12 +51,18 @@
 					<Debug>../../include/lgi/haiku</Debug>
 					<Release>../../include/lgi/haiku</Release>
 				</Haiku>
+				<Linux>
+					<Debug>../../include/lgi/linux/Gtk</Debug>
+					<Release>../../include/lgi/linux/Gtk</Release>
+				</Linux>
 			</IncludePaths>
 			<Defines>
 				<Haiku>
 					<Debug>_GNU_SOURCE</Debug>
 					<Release>_GNU_SOURCE</Release>
 				</Haiku>
+				<All />
+				<Linux />
 			</Defines>
 			<Libraries>
 				<Haiku>
@@ -58,9 +72,53 @@ gnu</Debug>
 gnu</Release>
 				</Haiku>
 				<All />
+				<Linux>
+					<Debug>magic
+pthread
+-static-libgcc 
+`pkg-config --libs gtk+-3.0`</Debug>
+					<Release>magic
+pthread
+-static-libgcc 
+`pkg-config --libs gtk+-3.0`</Release>
+				</Linux>
 			</Libraries>
+			<SystemIncludes>
+				<Linux>
+					<Debug>/usr/include/libappindicator3-0.1
+`pkg-config --cflags gtk+-3.0`
+`pkg-config --cflags gstreamer-1.0`</Debug>
+					<Release>/usr/include/libappindicator3-0.1
+`pkg-config --cflags gtk+-3.0`
+`pkg-config --cflags gstreamer-1.0`</Release>
+				</Linux>
+			</SystemIncludes>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<TargetName>
+				<Linux />
+			</TargetName>
+			<ApplicationIcon />
 		</Build>
-		<Advanced />
-		<Debug />
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
 	</Settings>
 </Project>
