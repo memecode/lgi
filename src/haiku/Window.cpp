@@ -76,13 +76,23 @@ public:
 
 	~LWindowPrivate()
 	{
-		// printf("%p::dest::%s sem=%i\n", Wnd, Wnd->GetClass(), Sem());
+		#if 0
+		printf("%p::~LWindowPrivate start, locking=%i, cur=%i, thread=%i\n",
+			this,
+			LockingThread(),
+			GetCurrentThreadId(),
+			Thread());
+		#endif
 	
 		LAssert(ModalChild == NULL);
 		DeleteObj(Wnd->Menu);
-		if (IsMinimized())
+		if (Thread() >= 0 && IsMinimized())
 			Wnd->_PrevZoom = LZoomMin;
 		Wnd->d = NULL;
+
+		Lock();
+
+		// printf("%p::~LWindowPrivate end\n", this);
 	}
 	
 	window_look DefaultLook()
@@ -333,14 +343,18 @@ int LWindow::WaitThread()
 		return 0; // If we're in thread... no need to wait.
 	}
 
-	// Post event to the window's thread to delete itself...
-	WAIT_LOG("%s::~LWindow posting M_LWINDOW_DELETE from th=%u\n", Name(), GetCurrentThreadId());
-	d->PostMessage(new BMessage(M_LWINDOW_DELETE));
+	status_t value = B_OK;
+	if (d->Thread() >= 0)
+	{
+		// Post event to the window's thread to delete itself...
+		WAIT_LOG("%s::~LWindow posting M_LWINDOW_DELETE from th=%u\n", Name(), GetCurrentThreadId());
+		d->PostMessage(new BMessage(M_LWINDOW_DELETE));
 
-	status_t value = 0;
-	WAIT_LOG("wait_for_thread(%u) start..\n", id);
-	wait_for_thread(id, &value);
-	WAIT_LOG("wait_for_thread(%u) end=%i\n", id, value);
+		WAIT_LOG("wait_for_thread(%u) start..\n", id);
+		wait_for_thread(id, &value);
+		WAIT_LOG("wait_for_thread(%u) end=%i\n", id, value);
+	}
+	else printf("%s:%i - No thread to wait for: %s\n", _FL, GetClass());
 	
 	DeleteObj(d);
 

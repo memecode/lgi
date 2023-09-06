@@ -36,6 +36,9 @@ public:
     void Unlock();
     
     operator bool();
+
+	// Ask LLocker to do verbose logging on:
+	static void AddWatch(BHandler *h);
 };
 
 #endif

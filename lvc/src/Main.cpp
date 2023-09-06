@@ -1000,7 +1000,7 @@ public:
 		}
 		if (f)
 		{
-			// new GetVcsVersions(this);
+			new GetVcsVersions(this);
 
 			for (auto c: f->Children)
 			{

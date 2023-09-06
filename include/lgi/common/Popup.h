@@ -47,6 +47,8 @@ public:
 	LPopup(LView *owner);
 	~LPopup();
 
+	const char *GetClass() override { return "LPopup"; }
+
 	#if LGI_COCOA
 		OsPanel Handle() { return Panel; }
 		LRect &GetPos() override;
@@ -56,7 +58,6 @@ public:
 	/// Sets whether the popup should take the focus when it's shown.
 	/// The default is 'true'
 	void TakeFocus(bool Take);
-	const char *GetClass() override { return "LPopup"; }
 	bool GetCancelled() { return Cancelled; }
 	bool Attach(LViewI *p) override;
 	void Visible(bool i) override;

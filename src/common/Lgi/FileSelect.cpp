@@ -265,6 +265,7 @@ public:
 	LFolderDrop(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy);
 	~LFolderDrop();
 
+	const char *GetClass() override { return "LFolderDrop"; }
 	void OnFolder();
 
 	bool OnLayout(LViewLayoutInfo &Inf)
@@ -292,6 +293,8 @@ public:
 		Down = false;
 		SetTabStop(true);
 	}
+	
+	const char *GetClass() override { return "LIconButton"; }
 
 	void OnPaint(LSurface *pDC)
 	{
@@ -396,6 +399,8 @@ class LFolderList : public LList, public LFolderView
 
 public:
 	LFolderList(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int cy);
+
+	const char *GetClass() override { return "LFolderList"; }
 
 	void OnFolder();
 	bool OnKey(LKey &k);
@@ -875,8 +880,6 @@ LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 	}
 
 	SetPos(d->InitSize);
-
-
 }
 
 LFileSelectDlg::~LFileSelectDlg()
@@ -1015,6 +1018,7 @@ void LFileSelectDlg::OnCreate()
 	OnFolder();
 
 	// Size/layout
+	AttachChildren();
 	SetPos(d->InitSize);
 	MoveToCenter();
 
@@ -1499,6 +1503,8 @@ public:
 	~LFileSystemPopup()
 	{
 	}
+
+	const char *GetClass() override { return "LFileSystemPopup"; }
 
 	void Visible(bool i)
 	{

@@ -620,6 +620,13 @@ bool LMessage::Send(LViewI *View)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+struct LWatchList : public LMutex
+{
+	LArray<BHandler*> Watches;
+	LWatchList() : LMutex("LWatchList") {}
+};
+static LWatchList Watch;
+
 LLocker::LLocker(BHandler *h, const char *File, int Line)
 {
 	hnd = h;
@@ -632,6 +639,13 @@ LLocker::~LLocker()
 	Unlock();
 }
 
+void LLocker::AddWatch(BHandler *h)
+{
+	LAssert(h);
+	Watch.Watches.Add(h);
+	printf("%s:%i - add watch %p\n", _FL, h);
+}
+
 LLocker::operator bool()
 {
 	if (!locked && !attempted)
@@ -642,6 +656,9 @@ LLocker::operator bool()
 
 bool LLocker::Lock(bool debug)
 {
+	if (!debug && Watch.Watches.HasItem(hnd))
+		debug = true;
+
 	if (locked)
 	{
 		printf("%s:%i - Locker already locked.\n", file, line);
@@ -685,6 +702,9 @@ bool LLocker::Lock(bool debug)
 			locked = true;
 			startTs = LCurrentTime();
 			lockingThread = GetCurrentThreadId();
+			
+			if (debug)
+				printf("%s:%i - %s:%i locked.\n", _FL, file, line);
 			break;
 		}
 		else if (result == B_TIMED_OUT)
@@ -715,6 +735,9 @@ bool LLocker::Lock(bool debug)
 status_t LLocker::LockWithTimeout(int64 time, bool debug)
 {
 	LAssert(!locked);
+
+	if (!debug && Watch.Watches.HasItem(hnd))
+		debug = true;
 	
 	if (!hnd)
 	{
@@ -740,6 +763,9 @@ status_t LLocker::LockWithTimeout(int64 time, bool debug)
 		locked = true;
 		lockingThread = GetCurrentThreadId();
 		startTs = LCurrentTime();
+
+		if (debug)
+			printf("%s:%i - %s:%i locked.\n", _FL, file, line);
 		return B_OK;
 	}
 
@@ -757,10 +783,11 @@ status_t LLocker::LockWithTimeout(int64 time, bool debug)
 bool LLocker::WaitForLock(int timeout)
 {
 	auto start = LCurrentTime();
+	bool debug = Watch.Watches.HasItem(hnd);
 	
 	while (true)
 	{
-		auto result = LockWithTimeout(1);
+		auto result = LockWithTimeout(1, debug);
 		if (result == B_OK)
 			return true;
 		
@@ -788,6 +815,8 @@ bool LLocker::WaitForLock(int timeout)
 
 void LLocker::Unlock()
 {
+	bool debug = Watch.Watches.HasItem(hnd);
+
 	if (noThread)
 	{
 		locked = false;
@@ -809,8 +838,9 @@ void LLocker::Unlock()
 		locked = false;
 		auto now = LCurrentTime();
 		if (now - startTs >= 1000)
-		{
 			printf("%s:%i held lock for more than a second.\n", file, line);
-		}
+			
+		if (debug)
+			printf("%s:%i unlock %s:%i\n", _FL, file, line);
 	}
 }

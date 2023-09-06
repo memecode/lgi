@@ -584,7 +584,12 @@ LPopup::LPopup(LView *owner)
 			if (r != B_OK)
 				printf("%s:%i - SetFlags failed.\n", _FL);
 				
-			// printf("popup thread=%i\n", w->Thread());
+			// The window starts off locked by the calling thread?
+			// So we don't want that. We need to be able to delete it later
+			// from whatever calling thread. Unlocking it here means that
+			// works.
+			if (w->IsLocked())
+				w->Unlock();
 		}
 		else printf("%s:%i - No WindowHandle()?\n", _FL);
 	#endif
@@ -600,7 +605,7 @@ LPopup::LPopup(LView *owner)
 		#endif
 		SetNotify(Owner);
 	}
-	
+
 	Name("Popup");
 	LView::Visible(false);
 }
