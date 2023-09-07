@@ -247,13 +247,13 @@ LApp *LApp::ObjInstance()
 	return TheApp;
 }
 
-bool LApp::IsOk()
+bool LApp::IsOk() const
 {
 	bool Status =
 		#ifndef __clang__
-		(this != 0) &&
+		(this != NULL) &&
 		#endif
-		(d != 0);
+		(d != NULL);
 					
 	LAssert(Status);
 	return Status;
