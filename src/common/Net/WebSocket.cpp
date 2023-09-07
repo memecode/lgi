@@ -15,113 +15,6 @@
 #define LOG_ALL 0
 
 ////////////////////////////////////////////////////////////////////////////
-LSelect::LSelect(LSocket *sock)
-{
-	if (sock)
-		*this += sock;
-}
-	
-LSelect &LSelect::operator +=(LSocket *sock)
-{
-	if (sock)
-		s.Add(sock);
-	return *this;
-}
-	
-int LSelect::Select(LArray<LSocket*> &Results, bool Rd, bool Wr, int TimeoutMs)
-{
-	if (s.Length() == 0)
-		return 0;
-
-	#ifdef LINUX
-
-	// Because Linux doesn't return from select() when the socket is
-	// closed elsewhere we have to do something different... damn Linux,
-	// why can't you just like do the right thing?
-		
-	LArray<struct pollfd> fds;
-	fds.Length(s.Length());
-	for (unsigned i=0; i<s.Length(); i++)
-	{
-		fds[i].fd = s[i]->Handle();
-		fds[i].events =	(Wr ? POLLOUT : 0) |
-						(Rd ? POLLIN : 0) |
-						POLLRDHUP |
-						POLLERR;
-		fds[i].revents = 0;
-	}
-
-	int r = poll(fds.AddressOf(), fds.Length(), TimeoutMs);
-	int Signalled = 0;
-	if (r > 0)
-	{
-		for (unsigned i=0; i<fds.Length(); i++)
-		{
-			auto &f = fds[i];
-			if (f.revents != 0)
-			{
-				Signalled++;
-								
-				if (f.fd == s[i]->Handle())
-				{
-					// printf("Poll[%i] = %x (flags=%x)\n", i, f.revents, Flags);
-					Results.Add(s[i]);
-				}
-				else LAssert(0);
-			}
-		}
-	}
-	
-	return Signalled;
-		
-	#else
-		
-	struct timeval t = {TimeoutMs / 1000, (TimeoutMs % 1000) * 1000};
-
-	fd_set r;
-	FD_ZERO(&r);
-	OsSocket Max = 0;
-	for (auto Sock : s)
-	{
-		auto h = Sock->Handle();
-		if (Max < h)
-			Max = h;
-		FD_SET(h, &r);
-	}
-		
-	int v = select(	(int)Max+1,
-					Rd ? &r : NULL,
-					Wr ? &r : NULL,
-					NULL, TimeoutMs >= 0 ? &t : NULL);
-	if (v > 0)
-	{
-		for (auto Sock : s)
-		{
-			if (FD_ISSET(Sock->Handle(), &r))
-				Results.Add(Sock);
-		}
-	}
-
-	return v;
-
-	#endif
-}
-
-LArray<LSocket*> LSelect::Readable(int TimeoutMs)
-{
-	LArray<LSocket*> r;
-	Select(r, true, false, TimeoutMs);
-	return r;
-}
-
-LArray<LSocket*> LSelect::Writeable(int TimeoutMs)
-{
-	LArray<LSocket*> r;
-	Select(r, false, true, TimeoutMs);
-	return r;
-}
-
-////////////////////////////////////////////////////////////////////////////
 enum WebSocketState
 {
 	WsReceiveHdr,
@@ -199,10 +92,10 @@ struct LWebSocketPriv
 		return CheckMsg();
 	}
 
-	void OnMsg(char *p, uint64 Len)
+	void OnMsg(char *ptr, uint64 len)
 	{
 		if (onMsg)
-			onMsg(p, Len);
+			onMsg(ptr, len);
 	}
 
 	bool CheckMsg()
@@ -467,4 +360,158 @@ bool LWebSocket::OnData()
 	}
 
 	return GotData;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+struct LWebSocketServerPriv : public LThread, public LCancel
+{
+	using Connection = LWebSocketServer::Connection;
+
+	LStream *Log = NULL;
+	int Port = 0;
+	
+	// Callbacks
+	std::function<bool(Connection*)> OnConnection;
+	LWebSocketBase::CreateSocket CreateSocket;
+	
+	// Listening:
+	LAutoPtr<LSocket> Listen;
+	uint64_t ListenTs = 0;
+	bool ListenOk = false;
+	constexpr static int LISTEN_RETRY = 10000; // 10 seconds
+
+	// Active connections	
+	LArray<Connection*> Connections;
+
+	LWebSocketServerPriv(LStream *log, int port) : LThread("LWebSocketServerPriv")
+	{
+		Log = log;
+		Port = port;
+		
+		Run();
+	}
+	
+	~LWebSocketServerPriv()
+	{
+		Cancel();
+		WaitForExit();
+	}
+	
+	LSocket *Create()
+	{
+		if (CreateSocket)
+			return CreateSocket();
+		return new LSocket;
+	}
+	
+	int Main()
+	{
+		while (!IsCancelled())
+		{
+			auto Now = LCurrentTime();
+			if (!Listen || (Now - ListenTs >= LISTEN_RETRY))
+			{
+				if (Listen.Reset(Create()))
+				{
+					Listen->IsBlocking(false);
+					Listen->Listen(Port);
+					ListenTs = Now;
+				}
+			}
+			else
+			{
+				LSelect sel;
+				LHashTbl<PtrKey<LSocket*>, Connection*> map;
+				for (auto c: Connections)
+				{
+					sel += c->sock;
+					map.Add(c->sock, c);
+				}
+				auto readable = sel.Readable(50);
+				LArray<Connection*> del;
+				for (auto r: readable)
+				{
+					auto c = map.Find(r);
+					if (c)
+					{
+						auto status = c->OnRead();
+						if (status != LWebSocketServer::ConnectOk)
+							del.Add(c);
+					}
+				}
+				for (auto d: del)
+				{
+					Connections.Delete(d);
+					delete d;
+				}
+			}
+		}
+		
+		return 0;
+	}
+};
+
+LWebSocketServer::Connection::Connection(LWebSocketServerPriv *priv, LSocket *s)
+{
+	d = priv;
+	sock.Reset(s);
+}
+
+LWebSocketServer::ConnectStatus LWebSocketServer::Connection::OnRead()
+{
+	if (used >= read.Length())
+	{
+		// Extend the size of the read buffer.
+		auto newSize = read.Length() << 1;
+		if (!read.Length(newSize))
+		{
+			d->Log->Print("%s:%i - Error: allocating space: " LPrintfSSizeT "\n", _FL);
+			return ConnectError;
+		}
+	}
+	if (!sock)
+	{
+		d->Log->Print("%s:%i - Error: no socket?\n", _FL);
+		return ConnectError;
+	}
+	
+	LAssert(used < read.Length());
+	auto rd = sock->Read(read.AddressOf(used), read.Length() - used);
+	if (rd > 0)
+	{
+		used += rd;
+		
+		// FIXME: if message complete... call MsgCb
+		// Then remove the data from the read buffer.
+	}
+	else
+	{
+		// Connection finished..
+		if (CloseCb)
+			CloseCb();
+		return ConnectClosed;
+	}
+	
+	return ConnectOk;
+}
+
+LWebSocketServer::LWebSocketServer(LStream *log, int port)
+{
+	d = new LWebSocketServerPriv(log, port);
+}
+
+LWebSocketServer::~LWebSocketServer()
+{
+	delete d;
+}
+
+void LWebSocketServer::SetCreateSocket(CreateSocket createSocketCb)
+{
+	d->CreateSocket = createSocketCb;
+}
+
+void LWebSocketServer::OnConnection(std::function<bool(Connection*)> onConnectCb)
+{
+	d->OnConnection = onConnectCb;
 }

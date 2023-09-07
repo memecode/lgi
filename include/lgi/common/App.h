@@ -202,7 +202,8 @@ public:
 	LWindow *AppWnd = NULL;
 
 	/// Returns true if the LApp object initialized correctly
-	bool IsOk();
+	bool IsOk() const;
+	operator bool() const { return IsOk(); }
 	
 	/// Returns this processes ID
 	OsProcessId GetProcessId();

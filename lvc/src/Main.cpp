@@ -620,6 +620,7 @@ class VcDiffFile : public LTreeItem
 {
 	AppPriv *d;
 	LString File;
+	uint64 modTime = 0;
 	
 public:
 	VcDiffFile(AppPriv *priv, LString file) : d(priv), File(file)
@@ -634,6 +635,51 @@ public:
 	LString StripFirst(LString s)
 	{
 		return s.Replace("\\","/").SplitDelimit("/", 1).Last();
+	}
+	
+	void Reload()
+	{
+		Select(true);
+	}
+	
+	void OnPulse()
+	{
+		LDirectory dir;
+		if (dir.First(File))
+		{
+			if (modTime)
+			{
+				if (modTime != dir.GetLastWriteTime())
+				{
+					modTime = dir.GetLastWriteTime();
+					Reload();
+				}
+			}
+			else
+			{
+				modTime = dir.GetLastWriteTime();
+			}
+		}
+		// else LgiTrace("%s:%i couldn't get stat for '%s'\n", _FL, File.Get());
+	}
+	
+	void OnMouseClick(LMouse &m)
+	{
+		if (m.IsContextMenu())
+		{
+			LSubMenu s;
+			s.AppendItem("Remove", IDM_DELETE);
+			switch (s.Float(GetTree(), m))
+			{
+				case IDM_DELETE:
+				{
+					if (LTreeItem::Select())
+						d->Files->Empty();
+					delete this;
+					return;
+				}
+			}
+		}
 	}
 
 	void Select(bool selected) override
@@ -1207,12 +1253,8 @@ public:
 
 	void OnPulse()
 	{
-		for (auto i:*Tree)
-		{
-			VcFolder *vcf = dynamic_cast<VcFolder*>(i);
-			if (vcf)
-				vcf->OnPulse();
-		}
+		for (auto i: *Tree)
+			i->OnPulse();
 	}
 
 	void OpenLocalFolder(const char *Fld = NULL)

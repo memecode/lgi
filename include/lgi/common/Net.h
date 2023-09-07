@@ -6,8 +6,7 @@
 	Copyright (C) 1998, <a href="mailto:fret@memecode.com">Matthew Allen</a>
 */
 
-#ifndef __INET_H
-#define __INET_H
+#pragma once
 
 #include "lgi/common/LgiInterfaces.h"
 #include "lgi/common/Mem.h"
@@ -499,5 +498,18 @@ public:
 	}
 };
 
-#endif
+// Select wrapper class..
+class LSelect
+{
+protected:
+	LArray<LSocket*> s;
+	int Select(LArray<LSocket*> &Results, bool Rd, bool Wr, int TimeoutMs);
 
+public:
+	LSelect(LSocket *sock = NULL);
+	
+	LSelect &operator +=(LSocket *sock);
+	
+	LArray<LSocket*> Readable(int Timeout = -1);
+	LArray<LSocket*> Writeable(int Timeout = -1);
+};

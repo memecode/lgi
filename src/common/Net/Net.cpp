@@ -2160,3 +2160,110 @@ int LSocks5Socket::Open(const char *HostAddr, int port)
 	return Status;
 }
 
+////////////////////////////////////////////////////////////////////////////
+LSelect::LSelect(LSocket *sock)
+{
+	if (sock)
+		*this += sock;
+}
+	
+LSelect &LSelect::operator +=(LSocket *sock)
+{
+	if (sock)
+		s.Add(sock);
+	return *this;
+}
+	
+int LSelect::Select(LArray<LSocket*> &Results, bool Rd, bool Wr, int TimeoutMs)
+{
+	if (s.Length() == 0)
+		return 0;
+
+	#ifdef LINUX
+
+	// Because Linux doesn't return from select() when the socket is
+	// closed elsewhere we have to do something different... damn Linux,
+	// why can't you just like do the right thing?
+		
+	LArray<struct pollfd> fds;
+	fds.Length(s.Length());
+	for (unsigned i=0; i<s.Length(); i++)
+	{
+		fds[i].fd = s[i]->Handle();
+		fds[i].events =	(Wr ? POLLOUT : 0) |
+						(Rd ? POLLIN : 0) |
+						POLLRDHUP |
+						POLLERR;
+		fds[i].revents = 0;
+	}
+
+	int r = poll(fds.AddressOf(), fds.Length(), TimeoutMs);
+	int Signalled = 0;
+	if (r > 0)
+	{
+		for (unsigned i=0; i<fds.Length(); i++)
+		{
+			auto &f = fds[i];
+			if (f.revents != 0)
+			{
+				Signalled++;
+								
+				if (f.fd == s[i]->Handle())
+				{
+					// printf("Poll[%i] = %x (flags=%x)\n", i, f.revents, Flags);
+					Results.Add(s[i]);
+				}
+				else LAssert(0);
+			}
+		}
+	}
+	
+	return Signalled;
+		
+	#else
+		
+	struct timeval t = {TimeoutMs / 1000, (TimeoutMs % 1000) * 1000};
+
+	fd_set r;
+	FD_ZERO(&r);
+	OsSocket Max = 0;
+	for (auto Sock : s)
+	{
+		auto h = Sock->Handle();
+		if (Max < h)
+			Max = h;
+		FD_SET(h, &r);
+	}
+		
+	int v = select(	(int)Max+1,
+					Rd ? &r : NULL,
+					Wr ? &r : NULL,
+					NULL, TimeoutMs >= 0 ? &t : NULL);
+	if (v > 0)
+	{
+		for (auto Sock : s)
+		{
+			if (FD_ISSET(Sock->Handle(), &r))
+				Results.Add(Sock);
+		}
+	}
+
+	return v;
+
+	#endif
+}
+
+LArray<LSocket*> LSelect::Readable(int TimeoutMs)
+{
+	LArray<LSocket*> r;
+	Select(r, true, false, TimeoutMs);
+	return r;
+}
+
+LArray<LSocket*> LSelect::Writeable(int TimeoutMs)
+{
+	LArray<LSocket*> r;
+	Select(r, false, true, TimeoutMs);
+	return r;
+}
+

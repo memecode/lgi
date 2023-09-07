@@ -81,7 +81,11 @@
 #define GtkVer(major, minor)			( (GTK_MAJOR_VERSION > major) || (GTK_MAJOR_VERSION == major && GTK_MINOR_VERSION >= minor) )
 
 namespace Gtk {
-// sudo apt-get install libmagic-dev libgtk3.0-dev libgstreamer1.0-dev
+// sudo apt-get install
+//		libmagic-dev
+//		libgtk3.0-dev -or- libgtk-3-dev
+//		libgstreamer1.0-dev
+//		libappindicator3-dev
 #include <gtk/gtk.h>
 #ifdef WIN32
 	#if GtkVer(3, 22)

@@ -284,7 +284,7 @@ public:
 	/// Destroys the object
 	virtual ~LAppI() {}
 
-	virtual bool IsOk() = 0;
+	virtual bool IsOk() const = 0;
 	
 	/// Returns this processes ID
 	virtual OsProcessId GetProcessId() = 0;

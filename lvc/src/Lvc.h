@@ -104,6 +104,7 @@ enum AppIds
 	IDM_COPY_LEAF,
 	IDM_EDIT,
 	IDM_REMOTE_URL,
+	IDM_DELETE,
 };
 
 enum AppMessages

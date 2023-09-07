@@ -1,30 +1,23 @@
-#ifndef _LWEBSOCKET_H_
-#define _LWEBSOCKET_H_
+#pragma once
 
 #include <functional>
 #include "lgi/common/Net.h"
 
-class LSelect
+class LWebSocketBase
 {
-protected:
-	LArray<LSocket*> s;
-	int Select(LArray<LSocket*> &Results, bool Rd, bool Wr, int TimeoutMs);
-
 public:
-	LSelect(LSocket *sock = NULL);
-	
-	LSelect &operator +=(LSocket *sock);
-	
-	LArray<LSocket*> Readable(int Timeout = -1);
-	LArray<LSocket*> Writeable(int Timeout = -1);
+	typedef std::function<bool(char *ptr, ssize_t len)> OnMsg;
+	typedef std::function<LSocket*()> CreateSocket;
+
+	virtual ~LWebSocketBase() {}
 };
 
-class LWebSocket : public LSocket
+// Web socket client class
+class LWebSocket : public LSocket, public LWebSocketBase
 {
 	struct LWebSocketPriv *d;
 
 public:
-	typedef std::function<bool(char *Data, uint64 Len)> OnMsg;
 	LWebSocket(bool Server = true, OnMsg onMsg = nullptr);
 	~LWebSocket();
 
@@ -35,4 +28,42 @@ public:
 	bool OnData();
 };
 
-#endif
+// Server class
+class LWebSocketServer : public LWebSocketBase
+{
+	struct LWebSocketServerPriv *d;
+
+public:
+	enum ConnectStatus
+	{
+		ConnectOk,
+		ConnectError,
+		ConnectClosed,
+	};
+
+	class Connection
+	{
+		friend struct LWebSocketServerPriv;
+		
+		LWebSocketServerPriv *d;
+		LAutoPtr<LSocket> sock;
+		ssize_t		 used = 0; // bytes in 'read' that are used
+		LArray<char> read;     // read buffer..
+		LString      write;    // write buffer...
+		
+		Connection(LWebSocketServerPriv *priv, LSocket *s);
+		ConnectStatus OnRead();
+		
+	public:
+		LString Context;
+		
+		LWebSocketBase::OnMsg MsgCb;
+		std::function<void()> CloseCb;
+	};
+
+	LWebSocketServer(LStream *log = NULL, int port = HTTPS_PORT);
+	virtual ~LWebSocketServer();
+
+	void SetCreateSocket(CreateSocket createSocketCb);
+	void OnConnection(std::function<bool(Connection*)> onConnectCb);
+};
