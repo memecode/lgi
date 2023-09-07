@@ -438,14 +438,15 @@ LApp::~LApp()
 	DeleteCriticalSection(&StackTraceSync);
 }
 
-bool LApp::IsOk()
+bool LApp::IsOk() const
 {
-	bool Status =	(this != 0) &&
-					(d != 0) &&
-					(d->FileSystem != 0) &&
-					(d->GdcSystem != 0);
+	bool Status =	(this != NULL) &&
+					(d != NULL) &&
+					(d->FileSystem != NULL) &&
+					(d->GdcSystem != NULL);
 	if (!Status)
 		LAssert(!"Hash table error");
+
 	return Status;
 }
 

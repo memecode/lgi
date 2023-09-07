@@ -3,6 +3,7 @@
 #include "lgi/common/WebSocket.h"
 #include "../Hash/sha1/sha1.h"
 #include "lgi/common/Base64.h"
+#include "lgi/common/Thread.h"
 #ifdef LINUX
 	#include <netinet/tcp.h>
 	#include <unistd.h>

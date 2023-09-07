@@ -499,7 +499,7 @@ public:
 };
 
 // Select wrapper class..
-class LSelect
+class LgiClass LSelect
 {
 protected:
 	LArray<LSocket*> s;

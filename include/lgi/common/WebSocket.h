@@ -47,7 +47,7 @@ public:
 		
 		LWebSocketServerPriv *d;
 		LAutoPtr<LSocket> sock;
-		ssize_t		 used = 0; // bytes in 'read' that are used
+		size_t		 used = 0; // bytes in 'read' that are used
 		LArray<char> read;     // read buffer..
 		LString      write;    // write buffer...
 		
