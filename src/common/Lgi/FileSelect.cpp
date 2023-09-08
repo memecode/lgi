@@ -880,6 +880,7 @@ LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 	}
 
 	SetPos(d->InitSize);
+	MoveToCenter();
 }
 
 LFileSelectDlg::~LFileSelectDlg()
@@ -1019,8 +1020,6 @@ void LFileSelectDlg::OnCreate()
 
 	// Size/layout
 	AttachChildren();
-	SetPos(d->InitSize);
-	MoveToCenter();
 
 	RegisterHook(this, LKeyEvents);
 	FileLst->Focus(true);
@@ -2188,7 +2187,7 @@ CharPropImpl(DefaultExtension, d->DefExt);
 
 void LFileSelect::Open(SelectCb Cb)
 {
-	LFileSelectDlg *Dlg = new LFileSelectDlg(d);
+	auto Dlg = new LFileSelectDlg(d);
 
 	d->Type = TypeOpenFile;
 
@@ -2210,10 +2209,10 @@ void LFileSelect::OpenFolder(SelectCb Cb)
 
 	d->Type = TypeOpenFolder;
 
-	printf("LFileSelect::OpenFolder domodal...\n");
+	// printf("LFileSelect::OpenFolder domodal...\n");
 	Dlg->DoModal([this,Cb](auto d, auto code)
 	{
-		printf("LFileSelect::OpenFolder cb, code=%i\n", code);
+		// printf("LFileSelect::OpenFolder cb, code=%i\n", code);
 		if (Cb)
 			Cb(this, code == IDOK);
 		delete d;
