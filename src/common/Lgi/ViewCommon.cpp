@@ -202,8 +202,40 @@ LView::LView(OsView view)
 	#endif
 }
 
+#ifdef HAIKU
+struct DeletedView
+{
+	uint64_t ts;
+	LView *v;
+};
+
+static LArray<DeletedView> DeletedViews;
+
+bool LView::RecentlyDeleted(LView *v)
+{
+	auto now = LCurrentTime();
+	bool status = false;
+	for (size_t i = 0; i < DeletedViews.Length(); i++)
+	{
+		auto &del = DeletedViews[i];
+		if (v == del.v)
+			status = true;
+		if (now >= del.ts + 1000)
+			DeletedViews.DeleteAt(i--);
+	}
+	
+	return status;
+}
+#endif
+
 LView::~LView()
 {
+	#ifdef HAIKU
+		auto &del = DeletedViews.New();
+		del.v = this;
+		del.ts = LCurrentTime();
+	#endif
+
 	if (d->SinkHnd >= 0)
 	{
 		LEventSinkMap::Dispatch.RemoveSink(this);
@@ -211,7 +243,7 @@ LView::~LView()
 	}
 	
 	#if LGI_VIEW_HASH
-	LockHandler(this, OpDelete);
+		LockHandler(this, OpDelete);
 	#endif
 
 	for (unsigned i=0; i<LPopup::CurrentPopups.Length(); i++)

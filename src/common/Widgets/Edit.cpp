@@ -10,17 +10,6 @@
 // Edit
 #include "lgi/common/TextView3.h"
 
-class _OsFontType : public LFontType
-{
-public:
-	LFont *Create(LSurface *pDC = NULL)
-	{
-		return LSysFont;
-	}
-};
-
-static _OsFontType SysFontType;
-
 class LEditPrivate
 {
 public:
@@ -46,7 +35,7 @@ LEdit::LEdit(int id, int x, int y, int cx, int cy, const char *name) :
 	#if WINNATIVE
 	ResObject(Res_EditBox)
 	#else
-	LTextView3(id, x, y, cx, cy, &SysFontType)
+	LTextView3(id, x, y, cx, cy)
 	#endif
 {
 	#if !WINNATIVE
@@ -54,7 +43,6 @@ LEdit::LEdit(int id, int x, int y, int cx, int cy, const char *name) :
 	SetUrlDetect(false);
 	SetWrapType(L_WRAP_NONE);
 	#endif
-	_OsFontType Type;
 	d = new LEditPrivate;
 
 	LDisplayString Ds(LSysFont, (char*)(name?name:"A"));

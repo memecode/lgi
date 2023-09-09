@@ -347,7 +347,7 @@ bool BuildCppDefnList(const char *FileName, char16 *Cpp, LArray<DefnInfo> &Defns
 						!ConditionParsingErr)
 					{
 						ConditionParsingErr = true;
-						LgiTrace("%s:%i - Error parsing pre-processor conditions: %s:%i\n", _FL, FileName, Line+1);
+						// LgiTrace("%s:%i - Error parsing pre-processor conditions: %s:%i\n", _FL, FileName, Line+1);
 					}
 
 					if (ConditionalDepth > 0)

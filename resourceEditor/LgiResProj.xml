@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Project TabSize="4" IndentSize="4" UseTabs="1" ShowWhitespace="0" Makefile="./Makefile" Exe="./lgires" TargetType="0" TargetName="lgires" IncludePaths="../include/common&#10;../include/linux/X&#10;./Code&#10;" Compiler="0">
+	<Node Name="Build" Type="1" Platforms="15" Id="1">
+		<Node File="./haiku/Makefile.haiku" Type="9" Platforms="15" />
+		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
+	</Node>
 	<Node Name="Lgi" Type="1" Open="1" Platforms="7" Id="6">
-		<Node File="../src/common/Lgi/About.cpp" Type="2" Platforms="7" />
+		<Node File="../src/common/Lgi/About.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Lgi/DocApp.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Gdc2/Filters/Gif.cpp" Type="2" Platforms="15" />
 		<Node File="../src/common/Lgi/OptionsFile.cpp" Type="2" Platforms="15" />
@@ -11,36 +15,34 @@
 	<Node Name="Objects" Type="1" Open="1" Platforms="7" Id="2">
 		<Node Name="Dialog" Type="1" Open="0" Platforms="7" Id="3">
 			<Node File="./src/LgiRes_ControlTree.cpp" Type="2" Platforms="15" />
-			<Node File="./src/LgiRes_Dialog.cpp" Type="2" Platforms="7" />
-			<Node File="./src/LgiRes_Dialog.h" Type="3" Platforms="7" />
-			<Node File="./src/LgiRes_TableLayout.cpp" Type="2" Platforms="7" />
+			<Node File="./src/LgiRes_Dialog.cpp" Type="2" Platforms="15" />
+			<Node File="./src/LgiRes_Dialog.h" Type="3" Platforms="15" />
+			<Node File="./src/LgiRes_TableLayout.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Menu" Type="1" Open="0" Platforms="7" Id="4">
-			<Node File="./src/LgiRes_Menu.cpp" Type="2" Platforms="7" />
-			<Node File="./src/LgiRes_Menu.h" Type="3" Platforms="7" />
+			<Node File="./src/LgiRes_Menu.cpp" Type="2" Platforms="15" />
+			<Node File="./src/LgiRes_Menu.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="String" Type="1" Open="0" Platforms="7" Id="5">
-			<Node File="./src/LgiRes_String.cpp" Type="2" Platforms="7" />
-			<Node File="./src/LgiRes_String.h" Type="3" Platforms="7" />
+			<Node File="./src/LgiRes_String.cpp" Type="2" Platforms="15" />
+			<Node File="./src/LgiRes_String.h" Type="3" Platforms="15" />
 		</Node>
 		<Node File="./src/LgiRes_Css.cpp" Type="2" Platforms="15" />
-		<Node File="./src/LgiResApp.cpp" Type="2" Platforms="7" />
-		<Node File="./src/LgiResEdit.h" Type="3" Platforms="7" />
-		<Node File="./src/Search.cpp" Type="2" Platforms="7" />
-		<Node File="./src/ShowLanguages.cpp" Type="2" Platforms="7" />
+		<Node File="./src/LgiResApp.cpp" Type="2" Platforms="15" />
+		<Node File="./src/LgiResEdit.h" Type="3" Platforms="15" />
+		<Node File="./src/Search.cpp" Type="2" Platforms="15" />
+		<Node File="./src/ShowLanguages.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Resources" Type="1" Open="0" Platforms="7" Id="1">
-		<Node File="./resources/lgires.lr8" Type="5" Platforms="7" />
+		<Node File="./resources/lgires.lr8" Type="5" Platforms="15" />
 	</Node>
 	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
-	<Node Name="Build" Type="1" Platforms="15" Id="1">
-		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
-	</Node>
 	<Settings>
 		<General>
 			<Makefile>
 				<Linux>linux/Makefile.linux</Linux>
 				<Windows>.\LgiRes_vs2015.sln</Windows>
+				<Haiku>haiku/Makefile.haiku</Haiku>
 			</Makefile>
 			<Executable>
 				<Linux>
@@ -57,8 +59,6 @@
 					<Release>/home/matthew/Code/MidiHw/mc4/resources/mc4.lr8</Release>
 				</All>
 			</Arguments>
-			<CCrossCompiler />
-			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -81,6 +81,10 @@ resources</Release>
 					<Debug>../include/lgi/win</Debug>
 					<Release>../include/lgi/win</Release>
 				</Windows>
+				<Haiku>
+					<Debug>../include/lgi/haiku</Debug>
+					<Release>../include/lgi/haiku</Release>
+				</Haiku>
 			</IncludePaths>
 			<TargetType>
 				<All>Executable</All>
@@ -96,7 +100,12 @@ pthread
 -static-libgcc 
 `pkg-config --libs gtk+-3.0`</Release>
 				</Linux>
-				<All />
+				<Haiku>
+					<Debug>gnu
+be</Debug>
+					<Release>gnu
+be</Release>
+				</Haiku>
 			</Libraries>
 			<SystemIncludes>
 				<Linux>
@@ -111,14 +120,11 @@ pthread
 				</Linux>
 			</TargetName>
 			<Defines>
-				<All />
-				<Linux />
+				<Haiku>
+					<Debug>_GNU_SOURCE</Debug>
+					<Release>_GNU_SOURCE</Release>
+				</Haiku>
 			</Defines>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<ApplicationIcon />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -133,26 +139,6 @@ pthread
 			<UseHardTabs>
 				<All>1</All>
 			</UseHardTabs>
-			<CommentFile />
-			<CommentFunction />
 		</Editor>
-		<Advanced>
-			<OtherMakefileRules />
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-		</Advanced>
-		<Debug>
-			<Environment />
-			<Arguments>
-				<All />
-			</Arguments>
-			<DebugAdmin />
-			<InitialDir />
-		</Debug>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
 	</Settings>
 </Project>

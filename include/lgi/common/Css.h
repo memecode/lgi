@@ -323,13 +323,11 @@ public:
 
 	struct LgiClass Len
 	{
-		LengthType Type;
-		float Value;
+		LengthType Type = LenInherit;
+		float Value = 0.0;
 
 		Len(const char *init = NULL, ParsingStyle ParseType = ParseRelaxed)
 		{
-			Type = LenInherit;
-			Value = 0.0;
 			if (init)
 				Parse(init, PropNull, ParseType);
 		}

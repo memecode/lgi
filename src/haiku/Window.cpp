@@ -179,9 +179,16 @@ public:
 			LView *view = NULL;
 			auto r = message->FindPointer(LMessage::PropView, (void**)&view);
 			if (r == B_OK)
-				view->OnEvent((LMessage*)message);
+			{
+				if (!LView::RecentlyDeleted(view))
+					view->OnEvent((LMessage*)message);
+				else
+					printf("%s:%i - Dropping message to deleted view.\n", _FL);
+			}
 			else
+			{
 				Wnd->OnEvent((LMessage*)message);
+			}
 		}
 	}
 	

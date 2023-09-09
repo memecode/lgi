@@ -23,11 +23,23 @@ LFontType::LFontType(const char *face, int pointsize)
 	#endif
 }
 
+LFontType::LFontType(const LFontType &ft)
+{
+	Info = ft.Info;
+	Buf = ft.Buf;
+}
+
 LFontType::~LFontType()
 {
 }
 
-const char *LFontType::GetFace()
+LFontType::operator bool() const
+{
+	return	GetFace() != NULL &&
+			GetPointSize() > 0;
+}
+
+const char *LFontType::GetFace() const
 {
 	#ifdef WINNATIVE
 	Buf = Info.lfFaceName;
@@ -53,7 +65,7 @@ void LFontType::SetFace(const char *Face)
 	#endif
 }
 
-int LFontType::GetPointSize()
+int LFontType::GetPointSize() const
 {
 	#ifdef WINNATIVE
 	return WinHeightToPoint(Info.lfHeight);
@@ -103,15 +115,12 @@ void LFontType::DoUI(LView *Parent, std::function<void(LFontType*)> Callback)
 	});
 }
 
-bool LFontType::GetDescription(char *Str, int SLen)
+LString LFontType::GetDescription()
 {
-	if (Str && GetFace())
-	{
-		sprintf_s(Str, SLen, "%s, %i pt", GetFace(), GetPointSize());
-		return true;
-	}
-
-	return false;
+	LString s = "noFont";
+	if (GetFace())
+		s.Printf("%s, %i pt", GetFace(), GetPointSize());
+	return s;
 }
 
 bool LFontType::Serialize(LDom *Options, const char *OptName, bool Write)

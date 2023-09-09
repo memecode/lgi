@@ -146,6 +146,7 @@ public:
 	ssize_t WordSelectMode;
 	LString Eol;
 	LString LastError;
+	LAutoPtr<LFontType> InitFontType;
 	
 	// If the scroll position is set before we get a scroll bar, store the index
 	// here and set it when the LNotifyScrollBarCreate arrives.
@@ -356,72 +357,29 @@ LTextView3::LTextView3(	int Id,
 	TabSize = TAB_SIZE;
 	IndentSize = TAB_SIZE;
 	
+	if (FontType)
+	{
+		d->InitFontType.Reset(new LFontType(*FontType));
+		printf("Saving InitFontType: %s\n", FontType->GetDescription().Get());
+	}
+	
 	// setup window
 	SetId(Id);
 
 	// default options
 	#if WINNATIVE
-	CrLf = true;
-	SetDlgCode(DLGC_WANTALLKEYS);
-	#else
+		CrLf = true;
+		SetDlgCode(DLGC_WANTALLKEYS);
 	#endif
 	d->Padding(LCss::Len(LCss::LenPx, 2));
-
-	#ifdef _DEBUG
-	// debug times
-	_PourTime = 0;
-	_StyleTime = 0;
-	_PaintTime = 0;
-	#endif
 
 	// Data
 	Alloc = ALLOC_BLOCK;
 	Text = new char16[Alloc];
-	if (Text) *Text = 0;
-	Cursor = 0;
-	Size = 0;
+	if (Text)
+		*Text = 0;
 
 	// Display
-	if (FontType)
-		Font = FontType->Create();
-	else
-	{
-		LFontType Type;
-		if (Type.GetSystemFont("Fixed"))
-			Font = Type.Create();
-		else
-			printf("%s:%i - failed to create font.\n", _FL);
-	}
-
-	if (Font)
-	{
-		SetTabStop(true);
-
-		Underline = new LFont;
-		if (Underline)
-		{
-			*Underline = *Font;
-			Underline->Underline(true);
-			if (d->UrlColour.IsValid())
-				Underline->Fore(d->UrlColour);
-			Underline->Create();
-		}
-		Bold = new LFont;
-		if (Bold)
-		{
-			*Bold = *Font;
-			Bold->Bold(true);
-			Bold->Create();
-		}
-
-		OnFontChange();
-	}
-	else
-	{
-		LgiTrace("%s:%i - Failed to create font, FontType=%p\n", _FL, FontType);
-		Font = LSysFont;
-	}
-
 	CursorPos.ZOff(1, LineY-1);
 	CursorPos.Offset(d->rPadding.x1, d->rPadding.y1);
 
@@ -560,7 +518,6 @@ void LTextView3::SetCrLf(bool crlf)
 	CrLf = crlf;
 }
 
-
 void LTextView3::SetTabSize(uint8_t i)
 {
 	TabSize = limit(i, 2, 32);
@@ -580,6 +537,55 @@ void LTextView3::SetWrapType(LDocWrapType i)
 
 LFont *LTextView3::GetFont()
 {
+	if (!Font)
+	{
+		if (d->InitFontType)
+		{
+			Font = d->InitFontType->Create();
+			printf("%s:%i getfont/type %s\n", _FL, Font?Font->ToString().Get():NULL);
+		}
+		else
+		{
+			LFontType Type;
+			if (Type.GetSystemFont("Fixed"))
+			{
+				Font = Type.Create();
+				printf("%s:%i getfont/fixed %s\n", _FL, Font?Font->ToString().Get():NULL);
+			}
+			else
+				printf("%s:%i - failed to create font.\n", _FL);
+		}
+
+		if (Font)
+		{
+			SetTabStop(true);
+
+			Underline = new LFont;
+			if (Underline)
+			{
+				*Underline = *Font;
+				Underline->Underline(true);
+				if (d->UrlColour.IsValid())
+					Underline->Fore(d->UrlColour);
+				Underline->Create();
+			}
+			Bold = new LFont;
+			if (Bold)
+			{
+				*Bold = *Font;
+				Bold->Bold(true);
+				Bold->Create();
+			}
+
+			OnFontChange();
+		}
+		else
+		{
+			LgiTrace("%s:%i - Failed to create font, FontType=%p\n", _FL, d->InitFontType.Get());
+			Font = LSysFont;
+		}
+	}
+
 	return Font;
 }
 
@@ -3393,6 +3399,7 @@ int LTextView3::OnDrop(LArray<LDragData> &Data, LPoint Pt, int KeyState)
 
 void LTextView3::OnCreate()
 {
+	GetFont();
 	SetWindow(this);
 	DropTarget(true);
 

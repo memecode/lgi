@@ -11,6 +11,12 @@ LTypeFace::~LTypeFace()
 	DeleteObj(d);
 }
 
+LTypeFace &LTypeFace::operator=(const LTypeFace &t)
+{
+	*d = *t.d;
+	return *this;
+}
+
 bool LTypeFace::operator ==(const LTypeFace &t)
 {
 	if ((Face() == 0) ^ (t.Face() == 0))
@@ -282,3 +288,11 @@ double LTypeFace::Leading() const
 	return d->_Leading;
 }
 
+LString LTypeFace::ToString() const
+{
+	LString s;
+	LStringPipe p;
+	Size().ToString(p);
+	s.Printf("%s:%s", Face(), p.NewLStr().Get());
+	return s;
+}

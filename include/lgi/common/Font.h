@@ -166,8 +166,14 @@ public:
 	/// \returns the amount of normally unused space at the top of the Ascent.
 	double Leading() const;
 
+	/// Describes the font type as a string
+	LString ToString() const;
+
 	/// \returns true if the font types are the same
 	bool operator ==(const LTypeFace &t);
+
+	// Assignment op
+	LTypeFace &operator=(const LTypeFace &t);
 
 	/// Set the foreground and background in 24-bit colour.
 	/// \sa LTypeFace::Fore() and LTypeFace::Back()
@@ -236,7 +242,7 @@ public:
 
 	/// Returns CSS styles to describe font
 	LString FontToCss();
-
+	
 	/// Clears any handles and memory associated with the object.
 	virtual bool Destroy();
 	void WarnOnDelete(bool w);
@@ -282,7 +288,10 @@ protected:
 
 public:
 	LFontType(const char *face = 0, int pointsize = 0);
+	LFontType(const LFontType &ft);
 	virtual ~LFontType();
+
+	operator bool() const;
 
 	#ifdef WINNATIVE
 	LOGFONTW *Handle() { return &Info; }
@@ -291,13 +300,13 @@ public:
 	#endif
 
 	/// Gets the type face name
-	const char *GetFace();
+	const char *GetFace() const;
 	
 	/// Sets the type face name
 	void SetFace(const char *Face);
 	
 	/// Sets the point size
-	int GetPointSize();
+	int GetPointSize() const;
 	
 	/// Sets the point size
 	void SetPointSize(int PointSize);
@@ -306,7 +315,7 @@ public:
 	void DoUI(LView *Parent, std::function<void(LFontType*)> Callback);
 	
 	/// Describe the font to the user as a string
-	bool GetDescription(char *Str, int SLen);
+	LString GetDescription();
 	
 	/// Read/Write the font def to storage
 	// bool Serialize(ObjProperties *Options, char *OptName, bool Write);

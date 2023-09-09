@@ -3421,14 +3421,9 @@ public:
 			MoveToCenter();
 			
 			if (!Font.Serialize(App->GetOptions(), OPT_EditorFont, false))
-			{
 				Font.GetSystemFont("Fixed");
-			}			
-			char s[256];
-			if (Font.GetDescription(s, sizeof(s)))
-			{
-				SetCtrlName(IDC_FONT, s);
-			}
+
+			SetCtrlName(IDC_FONT, Font.GetDescription());
 
 			LVariant v;
 			if (App->GetOptions()->GetValue(OPT_Jobs, v))
@@ -3458,11 +3453,7 @@ public:
 			{
 				Font.DoUI(this, [this](auto ui)
 				{
-					char s[256];
-					if (Font.GetDescription(s, sizeof(s)))
-					{
-						SetCtrlName(IDC_FONT, s);
-					}
+					SetCtrlName(IDC_FONT, Font.GetDescription());
 				});
 				break;
 			}

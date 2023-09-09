@@ -52,7 +52,8 @@ else
 endif
 
 # Dependencies
-Source =	src/haiku/Window.cpp \
+Source =	src/posix/SubProcess.cpp \
+			src/haiku/Window.cpp \
 			src/haiku/Widgets.cpp \
 			src/haiku/View.cpp \
 			src/haiku/Thread.cpp \
@@ -113,7 +114,6 @@ Source =	src/haiku/Window.cpp \
 			src/common/Lgi/ToolTip.cpp \
 			src/common/Lgi/ThreadEvent.cpp \
 			src/common/Lgi/ThreadCommon.cpp \
-			src/posix/SubProcess.cpp \
 			src/common/Lgi/Stream.cpp \
 			src/common/Lgi/Rand.cpp \
 			src/common/Lgi/OptionsFile.cpp \
@@ -205,8 +205,8 @@ clean :
 	@echo Cleaned $(BuildDir)
 
 VPATH=$(BuildDir) \
-	./src/haiku \
 	./src/posix \
+	./src/haiku \
 	./src/common/Widgets \
 	./src/common/Text \
 	./src/common/Skins/Gel \

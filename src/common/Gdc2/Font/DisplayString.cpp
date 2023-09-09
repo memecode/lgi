@@ -774,11 +774,13 @@ void LDisplayString::Layout(bool Debug)
 			return;
 		}
 
+		/*
 		if (!Font->InThread())
 		{
-			LAssert(!"Not in font's thread.");
+			printf("%s:%i - Not in font's thread.\n", _FL);
 			return;
 		}
+		*/
 
 		BFont *fnt = Font->Handle();
 		if (!fnt)
@@ -1722,11 +1724,13 @@ void LDisplayString::Draw(LSurface *pDC, int px, int py, LRect *r, bool Debug)
 			return;
 		}
 		
+		/*
 		if (!Font->InThread())
 		{
 			LAssert(!"Not in font's thread.");
 			return;
 		}
+		*/
 
 		auto fnt = Font->Handle();
 		auto view = pDC->Handle();

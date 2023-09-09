@@ -256,10 +256,10 @@ protected:
 	char *TextCache = NULL;
 
 	// Data
-	char16 *Text;
-	ssize_t Cursor;
-	ssize_t Size;
-	ssize_t Alloc;
+	char16 *Text = NULL;
+	ssize_t Cursor = 0;
+	ssize_t Size = 0;
+	ssize_t Alloc = 0;
 
 	// Undo stuff
 	bool UndoOn = true;
@@ -295,9 +295,9 @@ protected:
 
 	#ifdef _DEBUG
 	// debug
-	uint64 _PourTime;
-	uint64 _StyleTime;
-	uint64 _PaintTime;
+	uint64 _PourTime = 0;
+	uint64 _StyleTime = 0;
+	uint64 _PaintTime = 0;
 	#endif
 
 	void LogLines();

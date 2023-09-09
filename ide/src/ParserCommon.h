@@ -62,8 +62,10 @@ public:
 			LRange Return, Args;
 			if (!ParseFunction(Return, FnName, Args, Name))
 			{
+				/*
 				printf("%s:%i - ParseFunction failed at %s:%i, %s\n",
 					_FL, LGetLeaf(file), line, s.Get());
+				*/
 			}
 			else
 			{

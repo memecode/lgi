@@ -74,6 +74,7 @@ private:
 	#elif defined HAIKU
 	
 		template<typename Parent> friend class LBView;
+		static bool RecentlyDeleted(LView *v);
 
 	#endif
 
