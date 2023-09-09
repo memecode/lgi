@@ -365,6 +365,7 @@ LTextView3::LTextView3(	int Id,
 	
 	// setup window
 	SetId(Id);
+	GetCss(true)->FontFamily(LCss::FontFamilyMonospace);
 
 	// default options
 	#if WINNATIVE

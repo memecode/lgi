@@ -267,16 +267,16 @@ public:
 		if (!Style)
 			return NULL;
 		
-		LFont *Default = Owner->GetFont();
-		LCss::StringsDef Face = Style->FontFamily();
-		if (Face.Length() < 1 || !ValidStr(Face[0]))
+		auto Default = Owner->GetFont();
+		auto Face = Style->FontFamily();
+		if (Face.Length() < 1 || !ValidStr(Face.Names[0]))
 		{
 			Face.Empty();
 			const char *DefFace = Default->Face();
 			LAssert(ValidStr(DefFace));
-			Face.Add(NewStr(DefFace));
+			Face.Names.New() = DefFace;
 		}
-		LAssert(ValidStr(Face[0]));
+		LAssert(ValidStr(Face.Names[0]));
 		LCss::Len Size = Style->FontSize();
 		LCss::FontWeightType Weight = Style->FontWeight();
 		bool IsBold =	Weight == LCss::FontWeightBold ||
@@ -302,7 +302,7 @@ public:
 			for (auto f: Fonts)
 			{
 				if (f->Face() &&
-					_stricmp(f->Face(), Face[0]) == 0 &&
+					_stricmp(f->Face(), Face.Names[0]) == 0 &&
 					f->Bold() == IsBold &&
 					f->Italic() == IsItalic &&
 					f->Underline() == IsUnderline)
@@ -327,7 +327,7 @@ public:
 				
 				auto FntSz = f->Size();
 				if (f->Face() &&
-					_stricmp(f->Face(), Face[0]) == 0 &&
+					_stricmp(f->Face(), Face.Names[0]) == 0 &&
 					FntSz.Type == LCss::LenPt &&
 					std::abs(FntSz.Value - Pt) < FLOAT_TOLERANCE &&
 					f->Bold() == IsBold &&
@@ -391,7 +391,7 @@ public:
 		LFont *f;
 		if ((f = new LFont))
 		{
-			auto ff = ValidStr(Face[0]) ? Face[0] : Default->Face();
+			auto ff = ValidStr(Face.Names[0]) ? Face.Names[0].Get() : Default->Face();
 			f->Face(ff);
 			f->Size(Size.IsValid() ? Size : Default->Size());
 			f->Bold(IsBold);
@@ -3197,7 +3197,7 @@ void LTag::SetStyle()
 			if (Type.GetSystemFont("Fixed"))
 			{
 				LAssert(ValidStr(Type.GetFace()));
-				FontFamily(StringsDef(Type.GetFace()));
+				FontFamily(Type.GetFace());
 			}
 			break;
 		}

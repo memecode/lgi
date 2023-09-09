@@ -107,25 +107,24 @@ public:
 		if (!Style || !DefaultFont)
 			return DefaultFont;
 		
-		LCss::StringsDef Fam = Style->FontFamily();
+		auto Fam = Style->FontFamily();
 		bool FamHasDefFace = false;
-		for (unsigned i=0; i<Fam.Length(); i++)
+		for (unsigned i=0; i<Fam.Names.Length(); i++)
 		{
-			LString s = FontName.Find(Fam[i]);
+			LString s = FontName.Find(Fam.Names[i]);
 			if (s.Get())
 			{
 				// Resolve label here...
-				DeleteArray(Fam[i]);
-				Fam[i] = NewStr(s);
+				Fam.Names[i] = s;
 			}
 			
-			if (DefaultFont && Fam[i])
+			if (DefaultFont && Fam.Names[i])
 			{
-				FamHasDefFace |= !_stricmp(DefaultFont->Face(), Fam[i]);
+				FamHasDefFace |= !_stricmp(DefaultFont->Face(), Fam.Names[i]);
 			}
 		}
 		if (!FamHasDefFace)
-			Fam.Add(NewStr(DefaultFont->Face()));
+			Fam.Names.New() = DefaultFont->Face();
 		
 		LCss::Len Sz = Style->FontSize();
 		if (!Sz.IsValid())
@@ -138,9 +137,9 @@ public:
 		LCss::TextDecorType Decor = Style->TextDecoration();
 
 		LFont *f = NULL;
-		for (unsigned i = 0; !f && i<Fam.Length(); i++)
+		for (unsigned i = 0; !f && i<Fam.Names.Length(); i++)
 		{		
-			f = AddFont(Fam[i],
+			f = AddFont(Fam.Names[i],
 						Sz,
 						Weight != LCss::FontWeightInherit ? Weight : DefaultWeight,
 						FontStyle != LCss::FontStyleInherit ? FontStyle : LCss::FontStyleNormal,

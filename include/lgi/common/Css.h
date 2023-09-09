@@ -17,6 +17,27 @@
 #pragma pack(push, 1)
 #endif
 
+#define LCss_FontFamilyTypes() \
+	_(Inherit, "inherit") \
+	_(Initial, "initial") \
+	_(Revert, "revert") \
+	_(RevertLayer, "revert-layer") \
+	_(Unset, "unset") \
+	\
+	_(Serif, "serif") \
+	_(SansSerif, "sans-serif") \
+	_(Monospace, "monospace") \
+	_(Cursive, "cursive") \
+	_(Fantasy, "fantasy") \
+	_(SystemUi, "system-ui") \
+	_(UiSerif, "ui-serif") \
+	_(UiSansSerif, "ui-sans-serif") \
+	_(UiMonospace, "ui-monospace") \
+	_(UiRounded, "ui-rounded") \
+	_(Emoji, "emoji") \
+	_(Math, "math") \
+	_(Fangsong, "fangsong")
+
 /// Css property container
 class LgiClass LCss
 {
@@ -36,7 +57,7 @@ public:
 		TypeBackground,
 		TypeImage,
 		TypeBorder,
-		TypeStrings,
+		TypeFontFamilies,
 	};
 
 	/// These are all the types of CSS properties catagorised by their data type.
@@ -133,8 +154,8 @@ public:
 		PropBorderBottom,
 		PropBorderLeft,
 
-		// StringsDef based
-		PropFontFamily = TypeStrings << 8,
+		// FontFamilies based
+		PropFontFamily = TypeFontFamilies << 8,
 	};
 
 	PropTypes GetType(PropType p) { return (PropTypes) ((int)p >> 8); }
@@ -252,6 +273,15 @@ public:
 		ListArmenian,
 		ListGeorgian,
 	};
+	
+	enum FontFamilyType {
+		#define _(t, s) FontFamily##t,
+		LCss_FontFamilyTypes()
+		#undef _
+	};
+	
+	static const char *ToString(FontFamilyType t);
+	static bool ToEnum(FontFamilyType &e, const char *s);
 
 	enum FontStyleType {
 		FontStyleInherit,
@@ -560,68 +590,69 @@ public:
 		ImageDef &operator =(const ImageDef &o);
 	};
 
-	class StringsDef : public LArray<char*>
+	class FontFamilies
 	{
 	public:
-		StringsDef(const char *init = 0)
+		LString::Array Names;
+		LArray<FontFamilyType> Generic;
+
+		FontFamilies(const char *init = NULL)
 		{
 			if (ValidStr(init))
 				*this = init;
 			else
-				LAssert(init == 0);
+				LAssert(init == NULL);
 		}
-		StringsDef(const StringsDef &c)
+
+		FontFamilies(const FontFamilies &c)
 		{
 			*this = c;
 		}
-		
-		~StringsDef()
+
+		FontFamilies(FontFamilyType t)
 		{
-			Empty();
+			Generic.Add(t);
 		}
 		
-		StringsDef &operator =(const char *s)
+		~FontFamilies()
+		{
+		}
+
+		void Empty()
+		{
+			Names.Length(0);
+			Generic.Length(0);
+		}
+
+		bool IsEmpty() const
+		{
+			return	Names.Length() == 0 &&
+					Generic.Length() == 0;
+		}
+
+		size_t Length() const
+		{
+			return Names.Length() + Generic.Length();
+		}
+		
+		FontFamilies &operator =(const char *s)
 		{
 			Parse(s);
 			return *this;
 		}
 		
-		void Empty()
-		{
-			DeleteArrays();
-		}
-
-		StringsDef &operator =(const StringsDef &s)
+		FontFamilies &operator =(const FontFamilies &s)
 		{
 			Empty();
-
-			for (unsigned i=0; i<s.Length(); i++)
-			{
-				char *str = ((StringsDef&)s)[i];
-				if (ValidStr(str))
-					Add(NewStr(str));
-				else
-					LAssert(!"Not a valid string.");
-			}
-
+			Names = s.Names;
+			Generic = s.Generic;
 			return *this;			
 		}
 
-		bool operator !=(StringsDef &s)
+		bool operator !=(FontFamilies &s)
 		{
-			if (Length() != s.Length())
-				return true;
-
-			for (unsigned i=0; i<Length(); i++)
-			{
-				char *a = (*this)[i];
-				char *b = s[i];
-
-				if (_stricmp(a, b))
-					return true;
-			}
-
-			return false;
+			return	Names != s.Names ||
+					Generic != s.Generic;
 		}
 
 		bool Parse(const char *&s)
@@ -631,7 +662,9 @@ public:
 			char Delimiters[] = ";, \t\r\n";
 			while (s && *s && *s != ';')
 			{
-				while (*s && strchr(Delimiters, *s)) s++;
+				while (*s && strchr(Delimiters, *s))
+					s++;
+				
 				if (*s == '\'' || *s == '\"')
 				{
 					char Delim = *s++;
@@ -640,31 +673,30 @@ public:
 					
 					if (s > Start)
 					{
-						LAutoString n(NewStr(Start, s-Start));
-						if (ValidStr(n))
-						{
-							if (_stricmp(n, "inherit"))
-								Add(n.Release());
-						}
-						else LAssert(!"Not a valid string.");
+						LString n(Start, s-Start);
+						FontFamilyType e;
+						if (ToEnum(e, n))
+							Generic.Add(e);
+						else
+							Names.Add(n);
 					}
 
-					if (s) s++;
+					if (s) s++; // Skip end delimiter
 				}
 				else
 				{
 					const char *Start = s;
-					while (*s && !strchr(Delimiters, *s)) s++;
+					while (*s && !strchr(Delimiters, *s))
+						s++;
 
 					if (s > Start)
 					{
-						LAutoString n(NewStr(Start, s-Start));
-						if (ValidStr(n))
-						{
-							if (_stricmp(n, "inherit"))
-								Add(n.Release());
-						}
-						else LAssert(!"Not a valid string.");
+						LString n(Start, s-Start);
+						FontFamilyType e;
+						if (ToEnum(e, n))
+							Generic.Add(e);
+						else
+							Names.Add(n);
 					}
 				}
 			}
@@ -727,12 +759,12 @@ public:
 			bool IsSel()
 			{
 				return
-					Type == SelType ||
+					Type == SelType      ||
 					Type == SelUniversal ||
-					Type == SelAttrib ||
-					Type == SelClass ||
-					Type == SelMedia ||
-					Type == SelID ||
+					Type == SelAttrib    ||
+					Type == SelClass     ||
+					Type == SelMedia     ||
+					Type == SelID        ||
 					Type == SelPseudo;
 			}
 
@@ -1186,7 +1218,7 @@ public:
 	Accessor(Visibility, VisibilityType, VisibilityInherit, PropNull);
 	Accessor(ListStyleType, ListStyleTypes, ListInherit, PropNull);
 
-	Accessor(FontFamily, StringsDef, StringsDef(), PropNull);
+	Accessor(FontFamily, FontFamilies, FontFamilies(), PropNull);
 	Accessor(FontSize, Len, Len(), PropNull);
 	Accessor(FontStyle, FontStyleType, FontStyleInherit, PropNull);
 	Accessor(FontVariant, FontVariantType, FontVariantInherit, PropNull);

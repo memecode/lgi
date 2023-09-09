@@ -310,6 +310,31 @@ LCss::~LCss()
 	Empty();
 }
 
+const char *LCss::ToString(FontFamilyType t)
+{
+	switch (t)
+	{
+		#define _(t, s) case FontFamily##t: return s;
+		LCss_FontFamilyTypes()
+		#undef _
+		default:
+			break;
+	}
+
+	return NULL;
+}
+
+bool LCss::ToEnum(FontFamilyType &e, const char *str)
+{
+	if (!str)
+		return false;
+	// Fixme: this could be a hash table for O(1) lookup...
+	#define _(t, s) if (!Stricmp(str, s)) { e = FontFamily##t; return true; }
+	LCss_FontFamilyTypes()
+	#undef _
+	return false;
+}
+
 int LCss::Len::ToPx(int Box, LFont *Font, int Dpi)
 {
 	switch (Type)
@@ -761,15 +786,17 @@ LAutoString LCss::ToString()
 				p.Print(";\n");
 				break;
 			}
-			case TypeStrings:
+			case TypeFontFamilies:
 			{
-				StringsDef *s = (StringsDef*)v.value;
+				auto s = (FontFamilies*)v.value;
 				const char *Name = PropName(Prop);
 				p.Print("%s: ", Name);
-				for (int i=0; i<s->Length(); i++)
-				{
-					p.Print("%s%s", i?",":"", (*s)[i]);
-				}
+				int i=0;
+				for (auto &gen: s->Generic)
+					p.Print("%s%s", i++?",":"", ToString(gen));
+				i = 0;
+				for (auto &fnt: s->Names)
+					p.Print("%s%s", i++?",":"", fnt.Get());
 				p.Print(";\n");
 				break;
 			}
@@ -875,15 +902,15 @@ bool LCss::InheritCollect(LCss &c, PropMap &Contrib)
 				}
 				break;
 			}
-			case TypeStrings:
+			case TypeFontFamilies:
 			{
-				StringsDef *Mine = (StringsDef*)Props.Find(a.key);
-				if (!Mine || Mine->Length() == 0)
+				auto Mine = (FontFamilies*)Props.Find(a.key);
+				if (!Mine || Mine->IsEmpty())
 				{
-					StringsDef *Theirs = (StringsDef*)c.Props.Find(a.key);
+					auto Theirs = (FontFamilies*)c.Props.Find(a.key);
 					if (Theirs)
 					{
-						if (!Mine) Props.Add(a.key, Mine = new StringsDef);
+						if (!Mine) Props.Add(a.key, Mine = new FontFamilies);
 						*Mine = *Theirs;
 					}
 					else StillInherit++;
@@ -1168,7 +1195,7 @@ bool LCss::CopyStyle(const LCss &c)
 			CopyProp(TypeColor, ColorDef);
 			CopyProp(TypeImage, ImageDef);
 			CopyProp(TypeBorder, BorderDef);
-			CopyProp(TypeStrings, StringsDef);
+			CopyProp(TypeFontFamilies, FontFamilies);
 			default:
 			{
 				LAssert(!"Invalidate property type.");
@@ -1211,7 +1238,7 @@ bool LCss::operator ==(LCss &c)
 			CmpType(TypeColor, ColorDef);
 			CmpType(TypeImage, ImageDef);
 			CmpType(TypeBorder, BorderDef);
-			CmpType(TypeStrings, StringsDef);
+			CmpType(TypeFontFamilies, FontFamilies);
 			default:
 				LAssert(!"Unknown type.");
 				break;
@@ -1257,8 +1284,8 @@ void LCss::DeleteProp(PropType Prop, void *Data)
 		case TypeBorder:
 			delete ((BorderDef*)Data);
 			break;
-		case TypeStrings:
-			delete ((StringsDef*)Data);
+		case TypeFontFamilies:
+			delete ((FontFamilies*)Data);
 			break;
 		default:
 			LAssert(!"Unknown property type.");
@@ -1651,7 +1678,7 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 										 !ParseFontWeight(PropFontWeight, s))
 								{
 									// Face name...
-									LAutoPtr<StringsDef> Fam(new StringsDef);
+									LAutoPtr<FontFamilies> Fam(new FontFamilies);
 									if (Fam->Parse(s))
 										FontFamily(*Fam);
 									else
@@ -1895,12 +1922,12 @@ bool LCss::Parse(const char *&s, ParsingStyle Type)
 					LAssert(!"Parsing failed.");
 				break;
 			}
-			case TypeStrings:
+			case TypeFontFamilies:
 			{
-				LAutoPtr<StringsDef> t(new StringsDef);
+				LAutoPtr<FontFamilies> t(new FontFamilies);
 				if (t->Parse(s))
 				{
-					StringsDef *e = (StringsDef*)Props.Find(PropId);
+					auto e = (FontFamilies*)Props.Find(PropId);
 					if (e) *e = *t;
 					else Props.Add(PropId, t.Release());
 				}

@@ -211,9 +211,9 @@ bool LFont::CreateFromCss(LCss *Css)
 	if (!Css)
 		return false;
 	
-	LCss::StringsDef Fam = Css->FontFamily();
+	auto Fam = Css->FontFamily();
 	if (Fam.Length())
-		Face(Fam[0]);
+		Face(Fam.Names[0]);
 	else
 		Face(LSysFont->Face());
 
