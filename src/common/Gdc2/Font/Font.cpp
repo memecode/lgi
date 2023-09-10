@@ -211,11 +211,28 @@ bool LFont::CreateFromCss(LCss *Css)
 	if (!Css)
 		return false;
 	
+	size_t nameIdx = 0;
 	auto Fam = Css->FontFamily();
-	if (Fam.Length())
-		Face(Fam.Names[0]);
-	else
+	if (Fam.Has(LCss::FontFamilySystemUi) ||
+		Fam.Names.Length() == 0)
+	{
 		Face(LSysFont->Face());
+	}
+	else if (Fam.Has(LCss::FontFamilyMonospace))
+	{
+		LFontType type;
+		if (type.GetSystemFont("fixed"))
+			Face(type.GetFace());
+		else
+		{
+			printf("%s:%i - failed to get 'fixed' face.\n", _FL);
+			Face(LSysFont->Face());
+		}
+	}
+	else
+	{
+		Face(Fam.Names[nameIdx++]);
+	}
 
 	LCss::Len Sz = Css->FontSize();
 	switch (Sz.Type)
@@ -246,7 +263,15 @@ bool LFont::CreateFromCss(LCss *Css)
 	if (dec == LCss::TextDecorUnderline)
 		Underline(true);
 
-	return Create();
+	auto result = Create();
+	while (!result && nameIdx < Fam.Names.Length())
+	{
+		// Try some of the other face names
+		Face(Fam.Names[nameIdx++]);
+		result = Create();
+	}
+	
+	return result;
 }
 
 LString LFont::FontToCss()

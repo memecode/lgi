@@ -39,10 +39,10 @@ LEdit::LEdit(int id, int x, int y, int cx, int cy, const char *name) :
 	#endif
 {
 	#if !WINNATIVE
-	SetObjectName(Res_EditBox);
-	SetUrlDetect(false);
-	SetWrapType(L_WRAP_NONE);
-	GetCss(true)->FontFamily(LCss::FontFamilySystemUi);
+		SetObjectName(Res_EditBox);
+		SetUrlDetect(false);
+		SetWrapType(L_WRAP_NONE);
+		GetCss(true)->FontFamily(LCss::FontFamilySystemUi);
 	#endif
 	d = new LEditPrivate;
 

@@ -357,11 +357,8 @@ LTextView3::LTextView3(	int Id,
 	TabSize = TAB_SIZE;
 	IndentSize = TAB_SIZE;
 	
-	if (FontType)
-	{
+	if (FontType && *FontType)
 		d->InitFontType.Reset(new LFontType(*FontType));
-		printf("Saving InitFontType: %s\n", FontType->GetDescription().Get());
-	}
 	
 	// setup window
 	SetId(Id);
@@ -545,7 +542,13 @@ LFont *LTextView3::GetFont()
 			Font = d->InitFontType->Create();
 			printf("%s:%i getfont/type %s\n", _FL, Font?Font->ToString().Get():NULL);
 		}
-		else
+		else if (GetCss())
+		{
+			if (Font = new LFont)
+				Font->CreateFromCss(GetCss());
+		}
+		
+		if (!Font)
 		{
 			LFontType Type;
 			if (Type.GetSystemFont("Fixed"))
@@ -553,8 +556,7 @@ LFont *LTextView3::GetFont()
 				Font = Type.Create();
 				printf("%s:%i getfont/fixed %s\n", _FL, Font?Font->ToString().Get():NULL);
 			}
-			else
-				printf("%s:%i - failed to create font.\n", _FL);
+			else printf("%s:%i - failed to create font.\n", _FL);
 		}
 
 		if (Font)

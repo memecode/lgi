@@ -314,7 +314,7 @@ const char *LCss::ToString(FontFamilyType t)
 {
 	switch (t)
 	{
-		#define _(t, s) case FontFamily##t: return s;
+		#define _(t, s) case t: return s;
 		LCss_FontFamilyTypes()
 		#undef _
 		default:
@@ -329,7 +329,7 @@ bool LCss::ToEnum(FontFamilyType &e, const char *str)
 	if (!str)
 		return false;
 	// Fixme: this could be a hash table for O(1) lookup...
-	#define _(t, s) if (!Stricmp(str, s)) { e = FontFamily##t; return true; }
+	#define _(t, s) if (!Stricmp(str, s)) { e = t; return true; }
 	LCss_FontFamilyTypes()
 	#undef _
 	return false;

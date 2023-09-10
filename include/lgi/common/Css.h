@@ -18,25 +18,25 @@
 #endif
 
 #define LCss_FontFamilyTypes() \
-	_(Inherit, "inherit") \
-	_(Initial, "initial") \
-	_(Revert, "revert") \
-	_(RevertLayer, "revert-layer") \
-	_(Unset, "unset") \
+	_(FontFamilyInherit, "inherit") \
+	_(FontFamilyInitial, "initial") \
+	_(FontFamilyRevert, "revert") \
+	_(FontFamilyRevertLayer, "revert-layer") \
+	_(FontFamilyUnset, "unset") \
 	\
-	_(Serif, "serif") \
-	_(SansSerif, "sans-serif") \
-	_(Monospace, "monospace") \
-	_(Cursive, "cursive") \
-	_(Fantasy, "fantasy") \
-	_(SystemUi, "system-ui") \
-	_(UiSerif, "ui-serif") \
-	_(UiSansSerif, "ui-sans-serif") \
-	_(UiMonospace, "ui-monospace") \
-	_(UiRounded, "ui-rounded") \
-	_(Emoji, "emoji") \
-	_(Math, "math") \
-	_(Fangsong, "fangsong")
+	_(FontFamilySerif, "serif") \
+	_(FontFamilySansSerif, "sans-serif") \
+	_(FontFamilyMonospace, "monospace") \
+	_(FontFamilyCursive, "cursive") \
+	_(FontFamilyFantasy, "fantasy") \
+	_(FontFamilySystemUi, "system-ui") \
+	_(FontFamilyUiSerif, "ui-serif") \
+	_(FontFamilyUiSansSerif, "ui-sans-serif") \
+	_(FontFamilyUiMonospace, "ui-monospace") \
+	_(FontFamilyUiRounded, "ui-rounded") \
+	_(FontFamilyEmoji, "emoji") \
+	_(FontFamilyMath, "math") \
+	_(FontFamilyFangsong, "fangsong")
 
 /// Css property container
 class LgiClass LCss
@@ -275,7 +275,7 @@ public:
 	};
 	
 	enum FontFamilyType {
-		#define _(t, s) FontFamily##t,
+		#define _(t, s) t,
 		LCss_FontFamilyTypes()
 		#undef _
 	};
@@ -633,6 +633,11 @@ public:
 		size_t Length() const
 		{
 			return Names.Length() + Generic.Length();
+		}
+		
+		bool Has(FontFamilyType t)
+		{
+			return Generic.HasItem(t);
 		}
 		
 		FontFamilies &operator =(const char *s)

@@ -466,7 +466,7 @@ bool LResources::StyleElement(LViewI *v)
 		r->CssStore.Match(Selectors, &Ctx, v);
 	}
 	
-	LCss *Css = v->GetCss(true);
+	auto Css = v->GetCss(true);
 	for (auto *Sel: Selectors)
 	{
 		const char *Defs = Sel->Style;
