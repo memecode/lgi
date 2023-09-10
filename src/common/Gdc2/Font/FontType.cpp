@@ -86,12 +86,12 @@ void LFontType::SetPointSize(int PointSize)
 void LFontType::DoUI(LView *Parent, std::function<void(LFontType*)> Callback)
 {
 	#if WINNATIVE
-	int bytes = sizeof(Info);
-	void *ptr = &Info;
+		int bytes = sizeof(Info);
+		void *ptr = &Info;
 	#else
-	char str[256];
-	int bytes = sprintf_s(str, sizeof(str), "%s,%i", Info.Face(), Info.PointSize());
-	void *ptr = str;
+		char str[256];
+		int bytes = sprintf_s(str, sizeof(str), "%s,%i", Info.Face(), Info.PointSize());
+		void *ptr = str;
 	#endif
 
 	LFontSelect *Dlg = new LFontSelect(Parent, ptr, bytes);

@@ -284,7 +284,7 @@ protected:
 	#else
 	LTypeFace Info;
 	#endif
-	LString Buf;
+	mutable LString Buf;
 
 public:
 	LFontType(const char *face = 0, int pointsize = 0);
