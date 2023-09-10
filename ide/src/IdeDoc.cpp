@@ -786,15 +786,23 @@ public:
 	
 	void Update(LString InputStr)
 	{
+		auto Start = LCurrentTime();
+		
 		LArray<ProjectNode*> Matches;
 		FilterFiles(Matches, Nodes, InputStr, App->GetPlatform());
-		SetItems(Matches);
+		SetItems(Matches);		
 		
+		List<LListItem> Items;
 		for (auto &hdr: SysHeaders)
 		{
 			if (Lst && hdr.Find(InputStr) >= 0)
-				Lst->Insert(new LListItem(hdr));
+				Items.Insert(new LListItem(hdr));
+
+			if (Items.Length() % 50 == 0 &&
+				LCurrentTime() - Start > 500)
+				break;
 		}		
+		Lst->Insert(Items);
 	}
 	
 	int OnNotify(LViewI *Ctrl, LNotification n)

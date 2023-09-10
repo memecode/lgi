@@ -20,7 +20,7 @@
 
 #define DEBUG_FIND_SYMBOL		0
 #define DEBUG_NO_THREAD			1
-#define DEBUG_FILE				"AppFileInfo.h"
+// #define DEBUG_FILE				"AppFileInfo.h"
 
 int SYM_FILE_SENT = 0;
 
@@ -332,121 +332,129 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			{
 				LAutoPtr<FindSymRequest> Req((FindSymRequest*)Msg->A());
 				auto Platforms = Msg->B();
-				if (Req && Req->SinkHnd >= 0)
-				{
-					LString::Array p = Req->Str.SplitDelimit(" \t");
-					if (p.Length() == 0)
-						break;
+				if (!Req || Req->SinkHnd < 0)
+					break;
+
+				LString::Array p = Req->Str.SplitDelimit(" \t");
+				if (p.Length() == 0)
+					break;
 					
-					LArray<FindSymResult*> ClassMatches;
-					LArray<FindSymResult*> HdrMatches;
-					LArray<FindSymResult*> SrcMatches;
+				LArray<FindSymResult*> ClassMatches;
+				LArray<FindSymResult*> HdrMatches;
+				LArray<FindSymResult*> SrcMatches;
+				size_t recordsSearched = 0;
+				auto startTs = LCurrentTime();
 
-					// For each file...
-					#if USE_HASH
-					for (auto it : Files)
-					{
-						FileSyms *fs = it.value;
-					#else
-					for (unsigned f=0; f<Files.Length(); f++)
-					{
-						FileSyms *fs = Files[f];
-					#endif
-						if (!fs)
-							continue;
+				// For each file...
+				#if USE_HASH
+				for (auto it : Files)
+				{
+					FileSyms *fs = it.value;
+				#else
+				for (unsigned f=0; f<Files.Length(); f++)
+				{
+					FileSyms *fs = Files[f];
+				#endif
+					if (!fs)
+						continue;
 
-						#ifdef DEBUG_FILE
+					#ifdef DEBUG_FILE
 						bool Debug = false;
 						Debug = fs->Path.Find(DEBUG_FILE) >= 0;
 						if (Debug)
 							LgiTrace("%s:%i - Searching '%s' with %i syms...\n", _FL, fs->Path.Get(), (int)fs->Defs.Length());
-						#endif
+					#endif
 
-						// Check platforms...
-						if (fs->Platforms != 0 &&
-							(fs->Platforms & Platforms) == 0)
-						{
-							#ifdef DEBUG_FILE
+					// Check platforms...
+					if (fs->Platforms != 0 &&
+						(fs->Platforms & Platforms) == 0)
+					{
+						#ifdef DEBUG_FILE
 							if (fs->Path.Find(DEBUG_FILE) >= 0)
 								LgiTrace("%s:%i - '%s' doesn't match platform: %s %s\n",
 										_FL,
 										fs->Path.Get(),
 										PlatformFlagsToStr(fs->Platforms).Get(),
 										PlatformFlagsToStr(Platforms).Get());
-							#endif
-							continue;
-						}
+						#endif
+						continue;
+					}
 
-						// For each symbol...
-						for (unsigned i=0; i<fs->Defs.Length(); i++)
+					// For each symbol...
+					for (unsigned i=0; i<fs->Defs.Length(); i++)
+					{
+						DefnInfo &Def = fs->Defs[i];
+								
+						#ifdef DEBUG_FILE
+						if (Debug)
+							LgiTrace("%s:%i - '%s'\n", _FL, Def.Name.Get());
+						#endif
+								
+						// For each search term...
+						bool Match = true;
+						int ScoreSum = 0;
+						for (unsigned n=0; n<p.Length(); n++)
 						{
-							DefnInfo &Def = fs->Defs[i];
-								
-							#ifdef DEBUG_FILE
-							if (Debug)
-								LgiTrace("%s:%i - '%s'\n", _FL, Def.Name.Get());
-							#endif
-								
-							// For each search term...
-							bool Match = true;
-							int ScoreSum = 0;
-							for (unsigned n=0; n<p.Length(); n++)
+							const char *Part = p[n];
+							bool Not = *Part == '-';
+							if (Not)
+								Part++;
+
+							int Score = Def.Find(Part);
+							if
+							(
+								(Not && Score != 0)
+								||
+								(!Not && Score == 0)
+							)
 							{
-								const char *Part = p[n];
-								bool Not = *Part == '-';
-								if (Not)
-									Part++;
-
-								int Score = Def.Find(Part);
-								if
-								(
-									(Not && Score != 0)
-									||
-									(!Not && Score == 0)
-								)
-								{
-									Match = false;
-									break;
-								}
-
-								ScoreSum += Score;
+								Match = false;
+								break;
 							}
 
-							#ifdef DEBUG_FILE
-							if (Debug)
-								LgiTrace("	'%s' = %i\n", _FL, Def.Name.Get(), Match);
-							#endif
-								
-							if (Match)
-							{
-								// Create a result for this match...
-								FindSymResult *r = new FindSymResult();
-								if (r)
-								{
-									r->Score = ScoreSum;
-									r->File = Def.File.Get();
-									r->Symbol = Def.Name.Get();
-									r->Line = Def.Line;
+							ScoreSum += Score;
+						}
 
-									if (Def.Type == DefnClass)
-										ClassMatches.Add(r);
-									else if (fs->IsHeader)
-										HdrMatches.Add(r);
-									else
-										SrcMatches.Add(r);
-								}
+						#ifdef DEBUG_FILE
+						if (Debug)
+							LgiTrace("	'%s' = %i\n", _FL, Def.Name.Get(), Match);
+						#endif
+								
+						if (Match)
+						{
+							// Create a result for this match...
+							FindSymResult *r = new FindSymResult();
+							if (r)
+							{
+								r->Score = ScoreSum;
+								r->File = Def.File.Get();
+								r->Symbol = Def.Name.Get();
+								r->Line = Def.Line;
+
+								if (Def.Type == DefnClass)
+									ClassMatches.Add(r);
+								else if (fs->IsHeader)
+									HdrMatches.Add(r);
+								else
+									SrcMatches.Add(r);
 							}
 						}
 					}
 
-					ClassMatches.Sort(ScoreCmp);
-					Req->Results.Add(ClassMatches);
-					Req->Results.Add(HdrMatches);
-					Req->Results.Add(SrcMatches);
-					
-					int Hnd = Req->SinkHnd;
-					PostObject(Hnd, M_FIND_SYM_REQUEST, Req);
+					recordsSearched += fs->Defs.Length();
 				}
+
+				double seconds = (double)(LCurrentTime() - startTs) / 1000.0;
+				LgiTrace("%s:%i M_FIND_SYM_REQUEST searched " LPrintfSizeT " symbols in %gs\n",
+					_FL, recordsSearched, seconds);
+
+				ClassMatches.Sort(ScoreCmp);
+				Req->Results.Add(ClassMatches);
+				Req->Results.Add(HdrMatches);
+				Req->Results.Add(SrcMatches);
+					
+				int Hnd = Req->SinkHnd;
+				PostObject(Hnd, M_FIND_SYM_REQUEST, Req);
 				break;
 			}
 			case M_FIND_SYM_FILE:

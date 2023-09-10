@@ -161,58 +161,6 @@
 	height: 3em;
 }
 </style>
-	<Dialog pos="7,7,765,406" ref="239">
-		<TableLayout pos="7,7,748,356" ref="240" cols="0.500,0.500" rows="0.333,0.333,0.333">
-			<tr>
-				<td addr="0,0" colspan="2">
-					<ListView pos="14,7,706,97" ref="241">
-						<Column ref="242" width="383" />
-					</ListView>
-				</td>
-			</tr>
-			<tr>
-				<td addr="0,1">
-					<EditBox Pos="21,126,223,153" ref="249" />
-				</td>
-				<td addr="1,1">
-					<Button pos="399,126,461,146" ref="250" toggle="0" />
-				</td>
-			</tr>
-			<tr>
-				<td addr="0,2">
-					<CheckBox pos="21,245,244,265" ref="243" />
-				</td>
-				<td addr="1,2">
-					<Button pos="396,282,465,302" ref="245" toggle="0" />
-				</td>
-			</tr>
-		</TableLayout>
-	</Dialog>
-	<Dialog pos="7,7,506,406" ref="43">
-		<TableLayout pos="7,7,482,356" ref="44" cols="1.000" rows="0.250,0.250,0.250,0.250">
-			<tr>
-				<td addr="0,0">
-					<CheckBox pos="28,14,328,34" ref="48" />
-				</td>
-			</tr>
-			<tr>
-				<td addr="0,1">
-					<StaticText pos="21,91,433,160" ref="49" />
-				</td>
-			</tr>
-			<tr>
-				<td addr="0,2">
-					<EditBox Pos="14,166,405,247" MultiLine="1" ref="45" />
-				</td>
-			</tr>
-			<tr>
-				<td addr="0,3" align="Max">
-					<Button pos="168,286,209,306" ref="46" image="" toggle="0" />
-					<Button pos="238,286,300,306" ref="47" image="" toggle="0" />
-				</td>
-			</tr>
-		</TableLayout>
-	</Dialog>
 	<Dialog pos="7,7,553,426" ref="82">
 		<EditBox Pos="7,21,160,41" ref="83" />
 		<StaticText pos="7,7,104,20" ref="84" />
@@ -356,6 +304,33 @@
 				<td addr="1,5" colspan="3" align="Max">
 					<Button pos="242,131,311,151" ref="28" toggle="0" />
 					<Button pos="319,134,388,154" ref="177" toggle="0" />
+				</td>
+			</tr>
+		</TableLayout>
+	</Dialog>
+	<Dialog pos="7,7,765,406" ref="239">
+		<TableLayout pos="7,7,748,356" ref="240" cols="0.500,0.500" rows="0.333,0.333,0.333">
+			<tr>
+				<td addr="0,0" colspan="2">
+					<ListView pos="14,7,706,97" ref="241">
+						<Column ref="242" width="383" />
+					</ListView>
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,1">
+					<EditBox Pos="21,126,223,153" ref="249" />
+				</td>
+				<td addr="1,1">
+					<Button pos="399,126,461,146" ref="250" toggle="0" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,2">
+					<CheckBox pos="21,245,244,265" ref="243" />
+				</td>
+				<td addr="1,2">
+					<Button pos="396,282,465,302" ref="245" toggle="0" />
 				</td>
 			</tr>
 		</TableLayout>
@@ -566,6 +541,31 @@
 			</tr>
 		</TableLayout>
 	</Dialog>
+	<Dialog pos="7,7,506,406" ref="43">
+		<TableLayout pos="7,7,482,356" ref="44" cols="1.000" rows="0.250,0.250,0.250,0.250">
+			<tr>
+				<td addr="0,0">
+					<CheckBox pos="28,14,328,34" ref="48" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,1">
+					<StaticText pos="21,91,433,160" ref="49" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,2">
+					<EditBox Pos="14,166,405,247" MultiLine="1" ref="45" />
+				</td>
+			</tr>
+			<tr>
+				<td addr="0,3" align="Max">
+					<Button pos="168,286,209,306" ref="46" image="" toggle="0" />
+					<Button pos="238,286,300,306" ref="47" image="" toggle="0" />
+				</td>
+			</tr>
+		</TableLayout>
+	</Dialog>
 	<Dialog pos="7,7,504,246" ref="98">
 		<TableLayout pos="7,14,482,202" ref="99" cols="0.500,0.500" rows="0.143,0.143,0.143,0.143,0.143,0.143,0.143">
 			<tr>
@@ -720,7 +720,7 @@
 			<String Ref="51" Cid="587" Define="IDM_SPLIT" en="Split Selection" />
 			<String Ref="52" Cid="588" Define="IDM_JOIN" en="Join Selection" />
 			<String Ref="55" Cid="589" Define="IDM_NEW_PROJECT_TEMPLATE" en="New from &Template" />
-			<String Ref="191" Cid="590" Define="IDM_MENU_OS" en="&Os" />
+			<String Ref="191" Cid="590" Define="IDM_MENU_OS" en="Os" />
 			<String Ref="205" Cid="591" Define="IDM_WIN" en="Windows" />
 			<String Ref="210" Cid="592" Define="IDM_LINUX" en="Linux" />
 			<String Ref="246" Cid="593" Define="IDM_MAC" en="MacOSX" />
