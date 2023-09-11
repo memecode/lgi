@@ -1764,7 +1764,7 @@ bool LRichTextEdit::OnKey(LKey &k)
 
 								// Apply dirty toolbar styles...
 								if (d->StyleDirty.HasItem(FontFamilyBtn))
-									Mod->FontFamily(LCss::StringsDef(d->Values[FontFamilyBtn].Str()));
+									Mod->FontFamily(LCss::FontFamilies(d->Values[FontFamilyBtn].Str()));
 								if (d->StyleDirty.HasItem(FontSizeBtn))
 									Mod->FontSize(LCss::Len(LCss::LenPt, (float) d->Values[FontSizeBtn].CastDouble()));
 								if (d->StyleDirty.HasItem(BoldBtn))
@@ -1790,7 +1790,7 @@ bool LRichTextEdit::OnKey(LKey &k)
 							if (Mod)
 							{
 								// Apply dirty toolbar styles...
-								Mod->FontFamily(LCss::StringsDef(d->Values[FontFamilyBtn].Str()));
+								Mod->FontFamily(LCss::FontFamilies(d->Values[FontFamilyBtn].Str()));
 								Mod->FontSize(LCss::Len(LCss::LenPt, (float)d->Values[FontSizeBtn].CastDouble()));
 								Mod->FontWeight(d->Values[BoldBtn].CastInt32() ? LCss::FontWeightBold : LCss::FontWeightNormal);
 								Mod->FontStyle(d->Values[ItalicBtn].CastInt32() ? LCss::FontStyleItalic : LCss::FontStyleNormal);

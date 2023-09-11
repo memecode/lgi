@@ -1352,7 +1352,7 @@ void LRichTextPriv::OnStyleChange(LRichTextEdit::RectType t)
 	{
 		case LRichTextEdit::FontFamilyBtn:
 		{
-			LCss::StringsDef Fam(Values[t].Str());
+			LCss::FontFamilies Fam(Values[t].Str());
 			s.FontFamily(Fam);
 			if (!ChangeSelectionStyle(&s, true))
 				StyleDirty.Add(t);

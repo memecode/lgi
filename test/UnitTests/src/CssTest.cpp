@@ -132,15 +132,15 @@ public:
 						"font-weight: bold;\n"))
 		{
 			char *f;
-			LCss::StringsDef s;
+			LCss::FontFamilies s;
 			s = c.FontFamily();
 			if (s.Length() != 3)
 				return Error("Not the right number of font families.", _FL);
-			if (stricmp(f = s[0], "verdana"))
+			if (stricmp(f = s.Names[0], "verdana"))
 				return Error("Wrong font family.", _FL);
-			if (stricmp(f = s[1], "tahoma"))
+			if (stricmp(f = s.Names[1], "tahoma"))
 				return Error("Wrong font family.", _FL);
-			if (stricmp(f = s[2], "sans"))
+			if (stricmp(f = s.Names[2], "sans"))
 				return Error("Wrong font family.", _FL);
 		}
 
