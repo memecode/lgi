@@ -197,6 +197,7 @@ public:
 	DynFunc2(BIO*, BIO_new_ssl, SSL_CTX*, ctx, int, client);
 	DynFunc0(BIO_METHOD*, BIO_s_socket);
 	DynFunc0(BIO_METHOD*, BIO_s_mem);
+	DynFunc0(const BIO_METHOD *, BIO_f_ssl);
 	DynFunc1(BIO*, BIO_new_connect, char *, host_port);
 	DynFunc4(long, BIO_ctrl, BIO*, bp, int, cmd, long, larg, void*, parg);
 	DynFunc4(long, BIO_int_ctrl, BIO *, bp, int, cmd, long, larg, int, iarg);
@@ -809,7 +810,7 @@ OsSocket SslSocket::Handle(OsSocket Set)
 			return INVALID_SOCKET;
 		}
 	}
-	else if (d->ListenSocket)
+	else if (d->ListenSocket != INVALID_SOCKET)
 	{
 		h = d->ListenSocket;
 	}
@@ -1209,7 +1210,8 @@ bool SslSocket::CanAccept(int TimeoutMs)
 
 bool SslSocket::Accept(LSocketI *sock)
 {
-	if (!sock)
+	SslSocket *sslSock = dynamic_cast<SslSocket*>(sock);
+	if (!sslSock)
 	{
 		OnError(0, "No sock param.");
 		return false;
@@ -1237,15 +1239,14 @@ bool SslSocket::Accept(LSocketI *sock)
 		return false;
 	}
 	
-	Bio = Library->BIO_new_ssl(ctx, client);
-	Ssl = Library->SSL_new(ctx);
-	if (!Ssl)
+	sslSock->Ssl = Library->SSL_new(ctx);
+	if (!sslSock->Ssl)
 	{
 		OnError(0, "SSL_new failed.");
 		return false;
 	}
 	
-	if (!Library->SSL_set_fd(Ssl, client))
+	if (!Library->SSL_set_fd(sslSock->Ssl, client))
 	{
 		OnError(0, "SSL_set_fd failed.");
 		return false;
@@ -1253,16 +1254,23 @@ bool SslSocket::Accept(LSocketI *sock)
 
 	if (d->SslOnConnect)
 	{
-		auto result = Library->SSL_accept(Ssl);
+		auto result = Library->SSL_accept(sslSock->Ssl);
 		if (result <= 0)
 		{
 			char Buf[256] = "";
-			auto code = Library->SSL_get_error(Ssl, result);
+			auto code = Library->SSL_get_error(sslSock->Ssl, result);
 			OnError(code, Library->ERR_error_string(code, Buf));
 			return false;
 		}
 	}
 	
+	sslSock->Bio = Library->SSL_get_rbio(sslSock->Ssl);
+	if (!sslSock->Bio)
+	{
+		OnError(0, "SSL_get_rbio failed.");
+		return false;
+	}
+
 	return true;
 }
 

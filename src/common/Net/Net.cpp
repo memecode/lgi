@@ -2184,12 +2184,19 @@ int LSelect::Select(LArray<LSocketI*> &Results, bool Rd, bool Wr, int TimeoutMs)
 	fds.Length(s.Length());
 	for (unsigned i=0; i<s.Length(); i++)
 	{
-		fds[i].fd = s[i]->Handle();
-		fds[i].events =	(Wr ? POLLOUT : 0) |
+		auto in = s[i];
+		auto &out = fds[i];
+		out.fd = in->Handle();
+		if (out.fd < 0)
+		{
+			LgiTrace("%s:%i - Warning: invalid socket!\n", _FL);
+			out.fd = in->Handle();
+		}
+		out.events =	(Wr ? POLLOUT : 0) |
 						(Rd ? POLLIN : 0) |
 						POLLRDHUP |
 						POLLERR;
-		fds[i].revents = 0;
+		out.revents = 0;
 	}
 
 	int r = poll(fds.AddressOf(), fds.Length(), TimeoutMs);

@@ -493,7 +493,7 @@ LWebSocketServer::ConnectStatus LWebSocketServer::Connection::OnRead()
 	if (used >= read.Length())
 	{
 		// Extend the size of the read buffer.
-		auto newSize = read.Length() << 1;
+		auto newSize = read.Length() ? read.Length() << 1 : 1024;
 		if (!read.Length(newSize))
 		{
 			d->Log->Print("%s:%i - Error: allocating space: " LPrintfSSizeT "\n", _FL);
@@ -510,7 +510,10 @@ LWebSocketServer::ConnectStatus LWebSocketServer::Connection::OnRead()
 	auto rd = sock->Read(read.AddressOf(used), read.Length() - used);
 	if (rd > 0)
 	{
+		d->Log->Print("Read:%i\n", (int)rd);
+		printf("read:%.*s\n", (int)read.Length(), read.AddressOf());
 		used += rd;
+		
 		
 		// FIXME: if message complete... call MsgCb
 		// Then remove the data from the read buffer.
