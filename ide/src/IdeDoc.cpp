@@ -659,6 +659,12 @@ public:
 	}
 };
 
+#if 0
+#define LOG(...) printf(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif
+
 void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LString InputStr, int Platforms)
 {
 	LString::Array p = InputStr.SplitDelimit(" \t");
@@ -666,6 +672,8 @@ void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LSt
 	auto InputLen = InputStr.RFind(".");
 	if (InputLen < 0)
 		InputLen = InputStr.Length();
+
+	LOG("%s:%i - InputStr='%s'\n", _FL, InputStr.Get());
 
 	LArray<ProjectNode*> Partial;
 	auto Start = LCurrentTime();
@@ -680,17 +688,31 @@ void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LSt
 		if (! (Pn->GetPlatforms() & Platforms) )
 			continue;
 
-		auto Fn = Pn->GetFileName();
+		LString Fn = Pn->GetFileName();
 		if (Fn)
+			Fn = Fn.Replace("\\", "/"); // Normalize the path to unix slashes.		
+		
+		bool debug = Stristr(Fn.Get(), "FileSelect.h") != NULL;
+		if (!Fn)
 		{
-			char *Dir = strchr(Fn, '/');
-			if (!Dir) Dir = strchr(Fn, '\\');
-			auto Leaf = Dir ? strrchr(Fn, *Dir) : Fn;
-				
+			// Mostly folders... ignore.
+		}
+		else
+		{
+			const char *Dir = strrchr(Fn, '/');
+			auto Leaf = Dir ? Dir : Fn.Get();
+
 			bool Match = true;
 			for (unsigned n=0; n<p.Length(); n++)
 			{
-				if (!stristr(Leaf, p[n]))
+				auto s = stristr(p[n], Leaf);
+				
+				if (debug)
+				{
+					LOG("....'%s' '%s' = %p\n", Leaf, p[n].Get(), s);
+				}
+			
+				if (!s)
 				{
 					Match = false;
 					break;

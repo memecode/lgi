@@ -145,7 +145,7 @@ int SysIncThread::Main()
 			continue;
 		}
 
-		printf("%s:%i SysIncThread: '%s'\n", _FL, p.Get());
+		// printf("%s:%i SysIncThread: '%s'\n", _FL, p.Get());
 	}
 
 	for (auto &p: Paths)
