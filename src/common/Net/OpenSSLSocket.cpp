@@ -27,6 +27,10 @@
 
 #define PATH_OFFSET					"../"
 
+#define DEFAULT_METHOD				TLS_server_method()
+// #define DEFAULT_METHOD			SSLv23_server_method()
+// #define DEFAULT_METHOD			SSLv3_server_method()
+
 LString LibName(const char *Fmt)
 {
 	LString s;
@@ -110,6 +114,9 @@ public:
 				LMakePath(p, sizeof(p), p, SSL_LIBRARY);
 				auto loaded = Load(p);
 				FileDev->SetCurrentFolder(prev);
+			#else
+				// Try the plain name:
+				Load("libssl.so");
 			#endif
 		}
     }
@@ -126,6 +133,7 @@ public:
 		DynFunc0(int, SSL_load_error_strings);
 		DynFunc0(SSL_METHOD*, SSLv23_client_method);
 		DynFunc0(SSL_METHOD*, SSLv23_server_method);
+		DynFunc0(SSL_METHOD*, SSLv3_server_method);
 	#endif
 	DynFunc1(int, SSL_open, SSL*, s);
 	DynFunc1(int, SSL_connect, SSL*, s);
@@ -186,6 +194,7 @@ public:
 	typedef unsigned long (*id_callback)();
 
 	DynFunc1(BIO*, BIO_new, BIO_METHOD*, type);
+	DynFunc2(BIO*, BIO_new_ssl, SSL_CTX*, ctx, int, client);
 	DynFunc0(BIO_METHOD*, BIO_s_socket);
 	DynFunc0(BIO_METHOD*, BIO_s_mem);
 	DynFunc1(BIO*, BIO_new_connect, char *, host_port);
@@ -425,19 +434,19 @@ public:
 	{
 		if (!Server)
 		{
-			Server = SSL_CTX_new(SSLv23_server_method());
+			bool status = false;
+			
+			Server = SSL_CTX_new(DEFAULT_METHOD);
 			if (Server)
 			{
 				if (CertFile)
 					SSL_CTX_use_certificate_file(Server, CertFile, SSL_FILETYPE_PEM);
 				if (KeyFile)
 					SSL_CTX_use_PrivateKey_file(Server, KeyFile, SSL_FILETYPE_PEM);
-				if (!SSL_CTX_check_private_key(Server))
-				{
-					LAssert(0);
-				}
+				status = SSL_CTX_check_private_key(Server);
  			}
-			else
+
+			if (!status && sock)
 			{
 				long e = ERR_get_error();
 				char *Msg = ERR_error_string(e, 0);
@@ -447,6 +456,7 @@ public:
 				sock->DebugTrace("%s", ErrorMsg.Get());
 			}
 		}
+		
 		return Server;
 	}
 
@@ -474,7 +484,7 @@ public:
 	}
 };
 
-static OpenSSL *Library = 0;
+static OpenSSL *Library = NULL;
 
 #if 0
 #define SSL_DEBUG_LOCKING
@@ -560,6 +570,11 @@ struct SslSocketPriv : public LCancel
 	bool IsBlocking = true;
 	bool Banner = true;
 	LCancel *Cancel = NULL;
+
+	// Server:
+	LString CertFile;
+	LString KeyFile;
+	int ListenSocket = -1;
 
 	// This is just for the UI.
 	LStreamI *Logger = NULL;
@@ -794,6 +809,10 @@ OsSocket SslSocket::Handle(OsSocket Set)
 			return INVALID_SOCKET;
 		}
 	}
+	else if (d->ListenSocket)
+	{
+		h = d->ListenSocket;
+	}
 	else if (Bio)
 	{
 		int hnd = (int)INVALID_SOCKET;
@@ -1010,16 +1029,34 @@ bool SslSocket::SetVariant(const char *Name, LVariant &Value, const char *Arr)
 	if (!_stricmp(Name, SslSocket_LogFile))
 	{
 		d->LogFile = Value.Str();
+		Status = true;
 	}
 	else if (!_stricmp(Name, SslSocket_LogFormat))
 	{
 		d->LogFormat = Value.CastInt32();
+		Status = true;
 	}
 	else if (!Stricmp(Name, SslSocket_DebugLogging))
 	{
 		DebugLogging = Value.CastInt32() != 0;
+		Status = true;
 	}
-	else if (!_stricmp(Name, LSocket_Protocol))
+	else if (!Stricmp(Name, SslSocket_CertFile))
+	{
+		d->CertFile = Value.Str();
+		Status = true;
+	}
+	else if (!Stricmp(Name, SslSocket_SslOnConnect))
+	{
+		SetSslOnConnect(Value.CastInt32());
+		Status = true;
+	}
+	else if (!Stricmp(Name, SslSocket_KeyFile))
+	{
+		d->KeyFile = Value.Str();
+		Status = true;
+	}	
+	else if (!Stricmp(Name, LSocket_Protocol))
 	{
 		char *v = Value.CastString();
 		
@@ -1125,7 +1162,108 @@ int SslSocket::Close()
 
 bool SslSocket::Listen(int Port)
 {
-	return false;
+	if (!Library)
+	{
+		LgiTrace("%s:%i - No library\n", _FL);
+		return false;
+	}
+	
+	auto ctx = Library->GetServer(this, d->CertFile, d->KeyFile);
+	if (!ctx)
+	{
+		LgiTrace("%s:%i - No library\n", _FL);
+		return false;
+	}
+	
+    struct sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(Port);
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    d->ListenSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (d->ListenSocket < 0)
+    {
+        OnError(errno, "Unable to create socket");
+        return false;
+    }
+
+    if (bind(d->ListenSocket, (struct sockaddr*)&addr, sizeof(addr)) < 0)
+    {
+        OnError(errno, "Unable to bind");
+        return false;
+    }
+
+    if (listen(d->ListenSocket, 1) < 0)
+    {
+        OnError(errno, "Unable to listen");
+        return false;
+    }	
+
+	return true;
+}
+
+bool SslSocket::CanAccept(int TimeoutMs)
+{
+	return IsWritable(TimeoutMs);
+}
+
+bool SslSocket::Accept(LSocketI *sock)
+{
+	if (!sock)
+	{
+		OnError(0, "No sock param.");
+		return false;
+	}
+	
+	if (!d->ListenSocket)
+	{
+		OnError(0, "Not listening.");
+		return false;
+	}
+
+	auto ctx = Library->GetServer(this, d->CertFile, d->KeyFile);
+	if (!ctx)
+	{
+		LgiTrace("%s:%i - No library\n", _FL);
+		return false;
+	}
+
+	struct sockaddr_in addr;
+	unsigned int len = sizeof(addr);
+	auto client = accept(d->ListenSocket, (struct sockaddr*)&addr, &len);
+	if (client < 0)
+	{
+		OnError(0, "Unable to accept");
+		return false;
+	}
+	
+	Bio = Library->BIO_new_ssl(ctx, client);
+	Ssl = Library->SSL_new(ctx);
+	if (!Ssl)
+	{
+		OnError(0, "SSL_new failed.");
+		return false;
+	}
+	
+	if (!Library->SSL_set_fd(Ssl, client))
+	{
+		OnError(0, "SSL_set_fd failed.");
+		return false;
+	}
+
+	if (d->SslOnConnect)
+	{
+		auto result = Library->SSL_accept(Ssl);
+		if (result <= 0)
+		{
+			char Buf[256] = "";
+			auto code = Library->SSL_get_error(Ssl, result);
+			OnError(code, Library->ERR_error_string(code, Buf));
+			return false;
+		}
+	}
+	
+	return true;
 }
 
 bool SslSocket::IsBlocking()

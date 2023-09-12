@@ -502,14 +502,14 @@ public:
 class LgiClass LSelect
 {
 protected:
-	LArray<LSocket*> s;
-	int Select(LArray<LSocket*> &Results, bool Rd, bool Wr, int TimeoutMs);
+	LArray<LSocketI*> s;
+	int Select(LArray<LSocketI*> &Results, bool Rd, bool Wr, int TimeoutMs);
 
 public:
 	LSelect(LSocket *sock = NULL);
 	
-	LSelect &operator +=(LSocket *sock);
+	LSelect &operator +=(LSocketI *sock);
 	
-	LArray<LSocket*> Readable(int Timeout = -1);
-	LArray<LSocket*> Writeable(int Timeout = -1);
+	LArray<LSocketI*> Readable(int Timeout = -1);
+	LArray<LSocketI*> Writeable(int Timeout = -1);
 };

@@ -965,6 +965,7 @@ bool LSocket::Listen(int Port)
 {
 	if (!ValidSocket(d->Socket))
 		d->Socket = socket(AF_INET, SOCK_STREAM, 0);
+
 	if (!ValidSocket(d->Socket))
 	{
 		Error();
@@ -1007,12 +1008,6 @@ bool LSocket::Accept(LSocketI *c)
 	OsSocket NewSocket = INVALID_SOCKET;
 	sockaddr Address;
 	
-	/*
-	int Length = sizeof(Address);
-	NewSocket = accept(d->Socket, &Address, &Length);
-	*/
-	
-	// int Loop = 0;
 	socklen_t Length = sizeof(Address);
 	uint64 Start = LCurrentTime();
 	while (	!d->Cancel->IsCancelled() &&
@@ -2167,14 +2162,14 @@ LSelect::LSelect(LSocket *sock)
 		*this += sock;
 }
 	
-LSelect &LSelect::operator +=(LSocket *sock)
+LSelect &LSelect::operator +=(LSocketI *sock)
 {
 	if (sock)
 		s.Add(sock);
 	return *this;
 }
 	
-int LSelect::Select(LArray<LSocket*> &Results, bool Rd, bool Wr, int TimeoutMs)
+int LSelect::Select(LArray<LSocketI*> &Results, bool Rd, bool Wr, int TimeoutMs)
 {
 	if (s.Length() == 0)
 		return 0;
@@ -2253,16 +2248,16 @@ int LSelect::Select(LArray<LSocket*> &Results, bool Rd, bool Wr, int TimeoutMs)
 	#endif
 }
 
-LArray<LSocket*> LSelect::Readable(int TimeoutMs)
+LArray<LSocketI*> LSelect::Readable(int TimeoutMs)
 {
-	LArray<LSocket*> r;
+	LArray<LSocketI*> r;
 	Select(r, true, false, TimeoutMs);
 	return r;
 }
 
-LArray<LSocket*> LSelect::Writeable(int TimeoutMs)
+LArray<LSocketI*> LSelect::Writeable(int TimeoutMs)
 {
-	LArray<LSocket*> r;
+	LArray<LSocketI*> r;
 	Select(r, false, true, TimeoutMs);
 	return r;
 }

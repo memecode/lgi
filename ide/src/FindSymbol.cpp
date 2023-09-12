@@ -507,7 +507,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		{
 			if (DoingProgress)
 			{
-				Log("FindSym: Done.\n");
+				// Log("FindSym: Done.\n");
 				DoingProgress = false;
 			}
 			if (MissingFiles > 0)

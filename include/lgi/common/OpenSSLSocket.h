@@ -17,6 +17,9 @@
 #define SslSocket_LogFormat				"LogFmt"
 #define SslSocket_DebugLogging			"DebugLogging"
 #define SslSocket_LibInfo				"LibInfo"
+#define SslSocket_CertFile				"CertFile"
+#define SslSocket_KeyFile				"KeyFile"
+#define SslSocket_SslOnConnect			"SslOnConnect"
 
 class SslSocket :
 	public LSocketI,
@@ -56,11 +59,15 @@ public:
 	bool IsOpen() override;
 	int Open(const char *HostAddr, int Port) override;
 	int Close() override;
-	bool Listen(int Port = 0) override;
 	void OnError(int ErrorCode, const char *ErrorDescription) override;
 	void OnInformation(const char *Str) override;
 	int GetTimeout() override;
 	void SetTimeout(int ms) override;
+
+	// Server
+	bool Listen(int Port = 0) override;
+	bool CanAccept(int TimeoutMs = 0) override;
+	bool Accept(LSocketI *c) override;
 
 	ssize_t Write(const void *Data, ssize_t Len, int Flags = 0) override;
 	ssize_t Read(void *Data, ssize_t Len, int Flags = 0) override;

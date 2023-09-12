@@ -4,6 +4,8 @@
 #include "../Hash/sha1/sha1.h"
 #include "lgi/common/Base64.h"
 #include "lgi/common/Thread.h"
+#include "lgi/common/OpenSSLSocket.h"
+
 #ifdef LINUX
 	#include <netinet/tcp.h>
 	#include <unistd.h>
@@ -377,9 +379,9 @@ struct LWebSocketServerPriv : public LThread, public LCancel
 	LWebSocketBase::CreateSocket CreateSocket;
 	
 	// Listening:
-	LAutoPtr<LSocket> Listen;
+	LAutoPtr<LSocketI> Listen;
 	uint64_t ListenTs = 0;
-	bool ListenOk = false;
+	int ListenOk = false;
 	constexpr static int LISTEN_RETRY = 10000; // 10 seconds
 
 	// Active connections	
@@ -399,7 +401,7 @@ struct LWebSocketServerPriv : public LThread, public LCancel
 		WaitForExit();
 	}
 	
-	LSocket *Create()
+	LSocketI *Create()
 	{
 		if (CreateSocket)
 			return CreateSocket();
@@ -408,44 +410,71 @@ struct LWebSocketServerPriv : public LThread, public LCancel
 	
 	int Main()
 	{
+		auto Chk = LCurrentTime();
+	
 		while (!IsCancelled())
 		{
 			auto Now = LCurrentTime();
-			if (!Listen || (Now - ListenTs >= LISTEN_RETRY))
+			if (!ListenOk)
 			{
-				if (Listen.Reset(Create()))
+				// Try and setup a socket to listen...
+				if (!Listen)
 				{
-					Listen->IsBlocking(false);
-					Listen->Listen(Port);
-					ListenTs = Now;
-				}
-			}
-			else
-			{
-				LSelect sel;
-				LHashTbl<PtrKey<LSocket*>, Connection*> map;
-				for (auto c: Connections)
-				{
-					sel += c->sock;
-					map.Add(c->sock, c);
-				}
-				auto readable = sel.Readable(50);
-				LArray<Connection*> del;
-				for (auto r: readable)
-				{
-					auto c = map.Find(r);
-					if (c)
+					Log->Print("Creating listen socket...\n");
+					if (Listen.Reset(Create()))
 					{
-						auto status = c->OnRead();
-						if (status != LWebSocketServer::ConnectOk)
-							del.Add(c);
+						// Listen->IsBlocking(false);
+						ListenOk = Listen->Listen(Port);
+						Log->Print("ListenOk=%i\n", ListenOk);
 					}
 				}
-				for (auto d: del)
+			}
+			else if (Listen->CanAccept(100))
+			{
+				auto sock = Create();
+				if (sock)
 				{
-					Connections.Delete(d);
-					delete d;
+					// LVariant v;
+					// sock->SetValue(SslSocket_SslOnConnect, v=false);
+					
+					if (Listen->Accept(sock))
+					{
+						auto c = new Connection(this, sock);
+						if (c)
+						{
+							Connections.Add(c);
+							if (OnConnection)
+								OnConnection(c);
+						}
+					}
+					else Log->Print("%s:%i - accept failed.\n", _FL);
 				}
+				else Log->Print("%s:%i - failed to create socket.\n", _FL);
+			}
+
+			LSelect sel;
+			LHashTbl<PtrKey<LSocketI*>, Connection*> map;
+			for (auto c: Connections)
+			{
+				sel += c->sock;
+				map.Add(c->sock, c);
+			}
+			auto readable = sel.Readable(50);
+			LArray<Connection*> del;
+			for (auto r: readable)
+			{
+				auto c = map.Find(r);
+				if (c)
+				{
+					auto status = c->OnRead();
+					if (status != LWebSocketServer::ConnectOk)
+						del.Add(c);
+				}
+			}
+			for (auto d: del)
+			{
+				Connections.Delete(d);
+				delete d;
 			}
 		}
 		
@@ -453,7 +482,7 @@ struct LWebSocketServerPriv : public LThread, public LCancel
 	}
 };
 
-LWebSocketServer::Connection::Connection(LWebSocketServerPriv *priv, LSocket *s)
+LWebSocketServer::Connection::Connection(LWebSocketServerPriv *priv, LSocketI *s)
 {
 	d = priv;
 	sock.Reset(s);

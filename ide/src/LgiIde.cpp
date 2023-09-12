@@ -25,6 +25,7 @@
 #include "lgi/common/ToolBar.h"
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/SubProcess.h"
+#include "lgi/common/PopupNotification.h"
 
 #include "LgiIde.h"
 #include "FtpThread.h"
@@ -2996,12 +2997,14 @@ IdeDoc *AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithH
 {
 	if (!InThread())
 	{
-		auto docPtr = RunCallback<IdeDoc*>([this, File=LString(File), Line, CurIp, WithHistory]()
+		auto docPtr = RunCallback<IdeDoc*>
+		(
+			[this, File=LString(File), Line, CurIp, WithHistory]()
 			{
 				return GotoReference(File, Line, CurIp, WithHistory);
 			},
 			2000 // ms timeout, ie don't hang the app indefinately.
-			);
+		);
 		
 		return docPtr ? *docPtr : NULL;
 	}
@@ -3014,6 +3017,12 @@ IdeDoc *AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithH
 	{
 		Doc->SetLine(Line, CurIp);
 		Doc->Focus(true);
+	}
+	else
+	{
+		LString Msg;
+		Msg.Printf("Failed to find '%s'", File);
+		LPopupNotification::Message(this, Msg);
 	}
 
 	if (!WithHistory)

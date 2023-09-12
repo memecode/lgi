@@ -540,7 +540,7 @@ LFont *LTextView3::GetFont()
 		if (d->InitFontType)
 		{
 			Font = d->InitFontType->Create();
-			printf("%s:%i getfont/type %s\n", _FL, Font?Font->ToString().Get():NULL);
+			// printf("%s:%i getfont/type %s\n", _FL, Font?Font->ToString().Get():NULL);
 		}
 		else if (GetCss())
 		{
@@ -552,11 +552,9 @@ LFont *LTextView3::GetFont()
 		{
 			LFontType Type;
 			if (Type.GetSystemFont("Fixed"))
-			{
 				Font = Type.Create();
-				printf("%s:%i getfont/fixed %s\n", _FL, Font?Font->ToString().Get():NULL);
-			}
-			else printf("%s:%i - failed to create font.\n", _FL);
+			else
+				printf("%s:%i - failed to create font.\n", _FL);
 		}
 
 		if (Font)

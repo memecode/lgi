@@ -7,7 +7,7 @@ class LWebSocketBase
 {
 public:
 	typedef std::function<bool(char *ptr, ssize_t len)> OnMsg;
-	typedef std::function<LSocket*()> CreateSocket;
+	typedef std::function<LSocketI*()> CreateSocket;
 
 	virtual ~LWebSocketBase() {}
 };
@@ -46,12 +46,12 @@ public:
 		friend struct LWebSocketServerPriv;
 		
 		LWebSocketServerPriv *d;
-		LAutoPtr<LSocket> sock;
+		LAutoPtr<LSocketI> sock;
 		size_t		 used = 0; // bytes in 'read' that are used
 		LArray<char> read;     // read buffer..
 		LString      write;    // write buffer...
 		
-		Connection(LWebSocketServerPriv *priv, LSocket *s);
+		Connection(LWebSocketServerPriv *priv, LSocketI *s);
 		ConnectStatus OnRead();
 		
 	public:
