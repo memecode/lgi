@@ -40,4 +40,10 @@ LgiFunc char BinToBase64(uchar c);
 LgiFunc ssize_t ConvertBase64ToBinary(uchar *Binary, ssize_t OutBuf, const char *Base64, ssize_t InBuf);
 LgiFunc ssize_t ConvertBinaryToBase64(char *Base64, ssize_t OutBuf, const uchar *Binary, ssize_t InBuf);
 
+/// LString wrapper functions...
+LgiExtern LString LToBase64(LString bin);
+LgiExtern LString LToBase64(void *binary, size_t length);
+LgiExtern LString LToBinary(LString base64);
+LgiExtern LString LToBinary(void *base64, size_t length);
+
 #endif

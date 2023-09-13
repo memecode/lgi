@@ -12,6 +12,7 @@
 #include "lgi/common/LgiInc.h"
 #include "lgi/common/Base64.h"
 #include "lgi/common/Range.h"
+#include "lgi/common/StringClass.h"
 
 static bool HasBase64ToBinLut = false;
 static uchar Base64ToBinLut[128];
@@ -129,6 +130,22 @@ ssize_t ConvertBase64ToBinary(uchar *Binary, ssize_t OutBuf, const char *Base64,
 	return (int) (Binary - Start);
 }
 
+LString LToBinary(LString base64)
+{
+	return LToBinary(base64.Get(), base64.Length());
+}
+
+LString LToBinary(void *base64, size_t length)
+{
+	LString bin;
+	if (bin.Length(BufferLen_64ToBin(length)))
+	{
+		auto out = ConvertBase64ToBinary((uchar*)bin.Get(), bin.Length(), (char*)base64, length);
+		bin.Get()[out] = 0; // NULL term for debugging.
+	}
+	return bin;
+}
+
 ssize_t ConvertBinaryToBase64(char *Base64, ssize_t OutBuf, const uchar *Binary, ssize_t InBuf)
 {
 	char *Start = Base64;
@@ -195,3 +212,18 @@ ssize_t ConvertBinaryToBase64(char *Base64, ssize_t OutBuf, const uchar *Binary,
 	return (int) (Base64 - Start);
 }
 
+LString LToBase64(LString bin)
+{
+	return LToBase64(bin.Get(), bin.Length());
+}
+
+LString LToBase64(void *binary, size_t length)
+{
+	LString base64;
+	if (binary && base64.Length(BufferLen_BinTo64(length)))
+	{
+		auto out = ConvertBinaryToBase64(base64.Get(), base64.Length(), (uchar*)binary, length);
+		base64.Get()[out] = 0; // NULL term for debugging.
+	}
+	return base64;
+}
