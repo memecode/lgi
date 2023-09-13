@@ -31,6 +31,12 @@
 // #define DEFAULT_METHOD			SSLv23_server_method()
 // #define DEFAULT_METHOD			SSLv3_server_method()
 
+#ifdef WINDOWS
+#define SystemErrorCode				WSAGetLastError()
+#else
+#define SystemErrorCode				errno
+#endif
+
 LString LibName(const char *Fmt)
 {
 	LString s;
@@ -534,6 +540,12 @@ bool StartSSL(LString &ErrorMsg, SslSocket *sock)
 {
 	static LMutex Lock("StartSSL");
 	
+	#ifdef WINDOWS
+	{	// Make sure we call WSAStartup
+		LSocket s;
+	}
+	#endif
+
 	if (Lock.Lock(_FL))
 	{
 		if (!Library)
@@ -575,7 +587,7 @@ struct SslSocketPriv : public LCancel
 	// Server:
 	LString CertFile;
 	LString KeyFile;
-	int ListenSocket = -1;
+	OsSocket ListenSocket = INVALID_SOCKET;
 
 	// This is just for the UI.
 	LStreamI *Logger = NULL;
@@ -1184,20 +1196,23 @@ bool SslSocket::Listen(int Port)
     d->ListenSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (d->ListenSocket < 0)
     {
-        OnError(errno, "Unable to create socket");
+		LError err(SystemErrorCode);
+        OnError(err.GetCode(), err.GetMsg());
         return false;
     }
 
     if (bind(d->ListenSocket, (struct sockaddr*)&addr, sizeof(addr)) < 0)
     {
-        OnError(errno, "Unable to bind");
-        return false;
+		LError err(SystemErrorCode);
+		OnError(err.GetCode(), err.GetMsg());
+		return false;
     }
 
     if (listen(d->ListenSocket, 1) < 0)
     {
-        OnError(errno, "Unable to listen");
-        return false;
+		LError err(SystemErrorCode);
+		OnError(err.GetCode(), err.GetMsg());
+		return false;
     }	
 
 	return true;
@@ -1231,7 +1246,7 @@ bool SslSocket::Accept(LSocketI *sock)
 	}
 
 	struct sockaddr_in addr;
-	unsigned int len = sizeof(addr);
+	int len = sizeof(addr);
 	auto client = accept(d->ListenSocket, (struct sockaddr*)&addr, &len);
 	if (client < 0)
 	{
@@ -1246,7 +1261,7 @@ bool SslSocket::Accept(LSocketI *sock)
 		return false;
 	}
 	
-	if (!Library->SSL_set_fd(sslSock->Ssl, client))
+	if (!Library->SSL_set_fd(sslSock->Ssl, (int)client))
 	{
 		OnError(0, "SSL_set_fd failed.");
 		return false;
@@ -1271,6 +1286,7 @@ bool SslSocket::Accept(LSocketI *sock)
 		return false;
 	}
 
+	sslSock->d->UseSSLrw = true;
 	return true;
 }
 

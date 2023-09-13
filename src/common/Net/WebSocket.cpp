@@ -5,6 +5,8 @@
 #include "lgi/common/Base64.h"
 #include "lgi/common/Thread.h"
 #include "lgi/common/OpenSSLSocket.h"
+#include "lgi/common/Base64.h"
+#include "../Hash/sha1/sha1.h"
 
 #ifdef LINUX
 	#include <netinet/tcp.h>
@@ -197,8 +199,6 @@ struct LWebSocketPriv
 	bool SendResponse()
 	{
 		// Create the response hdr and send it...
-		static const char *Key = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-
 		LAutoString Upgrade(InetGetHeaderField(InHdr, "Upgrade", InHdr.Length()));
 		if (!Upgrade || stricmp(Upgrade, "websocket"))
 			return false;
@@ -208,7 +208,7 @@ struct LWebSocketPriv
 			return Error("No Sec-WebSocket-Key header");
 		
 		LString s = SecWebSocketKey.Get();
-		s += Key;
+		s += LWebSocketBase::Key;
 
 		SHA1Context Ctx;
 		SHA1Reset(&Ctx);
@@ -488,6 +488,57 @@ LWebSocketServer::Connection::Connection(LWebSocketServerPriv *priv, LSocketI *s
 	sock.Reset(s);
 }
 
+LString LWebSocketServer::Connection::ConsumeBytes(size_t bytes)
+{
+	if (bytes > used)
+		bytes = used;
+
+	LAssert(bytes > 0);
+	auto base = read.AddressOf();
+	LString s(base, bytes);
+	auto remaining = read.Length() - bytes;
+	if (remaining > 0)
+	{
+		memmove(base, base + bytes, remaining);
+		used -= bytes;
+	}
+
+	return s;
+}
+
+LString Indent(LString s)
+{
+	LString indent = "     ";
+	LString enc = s.Replace("\r", "\\r").Replace("\n", "\\n\n");
+	auto lines = enc.SplitDelimit("\n");
+	for (auto &l: lines)
+		l = indent + l;
+	return LString("\n").Join(lines);
+}
+
+LString LToHex(void *p, size_t len, char sep = 0)
+{
+	LString s;
+	auto charSz = sep ? 3 : 2;
+	if (s.Length(len * charSz))
+	{
+		auto out = s.Get();
+		auto in = (uint8_t*)p;
+		auto end = in + len;
+		auto hex = "0123456789abcdef";
+		while (in < end)
+		{
+			*out++ = hex[*in>>4];
+			*out++ = hex[*in&0xf];
+			if (sep)
+				*out++ = sep;
+			in++;
+		}
+		*out = 0;
+	}
+	return s;
+}
+
 LWebSocketServer::ConnectStatus LWebSocketServer::Connection::OnRead()
 {
 	if (used >= read.Length())
@@ -507,16 +558,84 @@ LWebSocketServer::ConnectStatus LWebSocketServer::Connection::OnRead()
 	}
 	
 	LAssert(used < read.Length());
-	auto rd = sock->Read(read.AddressOf(used), read.Length() - used);
+	auto remaining = read.Length() - used;
+	auto rd = sock->Read(read.AddressOf(used), remaining);
 	if (rd > 0)
 	{
-		d->Log->Print("Read:%i\n", (int)rd);
-		printf("read:%.*s\n", (int)read.Length(), read.AddressOf());
 		used += rd;
-		
-		
-		// FIXME: if message complete... call MsgCb
-		// Then remove the data from the read buffer.
+
+		if (!headers)
+		{
+			auto base = read.AddressOf();
+			auto endOfHeaders = Strnstr(base, "\r\n\r\n", used);
+			if (endOfHeaders)
+			{
+				auto hdrSize = endOfHeaders - base + 4;
+				headers = ConsumeBytes(hdrSize);
+
+				auto newLine = headers.Find("\r\n");
+				auto firstLine = headers(0, newLine);
+				auto parts = firstLine.SplitDelimit();
+				if (parts.Length() == 3)
+				{
+					method = parts[0];
+					path = parts[1];
+					protocol = parts[2];
+				}
+
+				int status = 200;
+				if (ReceiveHdrsCb)
+					status = ReceiveHdrsCb(path != NULL);
+
+				LString response;
+				response.Printf("HTTP/1.1 101 Switching Protocols\r\n"
+								"Upgrade: websocket\r\n"
+								"Connection: Upgrade\r\n");
+
+				auto SecWebSocketKey = LGetHeaderField(headers, "Sec-WebSocket-Key");
+				if (SecWebSocketKey)
+				{
+					LString raw;
+					raw.Printf("%s%s", SecWebSocketKey.Get(), LWebSocketBase::Key);
+					// d->Log->Print("raw=%s\n", raw.Get());
+
+					SHA1Context ctx;
+					SHA1Reset(&ctx);
+					SHA1Input(&ctx, (const uint8_t*)raw.Get(), (int)raw.Length());
+					int r = SHA1Result(&ctx);
+
+					// Yeah... seems to work.. but... hmmm
+					for (unsigned i=0; i<CountOf(ctx.Message_Digest); i++)
+						ctx.Message_Digest[i] = htonl(ctx.Message_Digest[i]);
+
+					// d->Log->Print("hash=%s\n", LToHex(ctx.Message_Digest, sizeof(ctx.Message_Digest), ' ').Get());
+
+					auto b64 = LToBase64(ctx.Message_Digest, sizeof(ctx.Message_Digest));
+
+					LString SecWebSocketAccept;
+					SecWebSocketAccept.Printf("Sec-WebSocket-Accept: %s\r\n", b64.Get());
+					response += SecWebSocketAccept;
+				}
+				response += "\r\n";
+
+				auto wr = sock->Write(response);
+				if (wr != response.Length())
+					d->Log->Print("%s:%i - failed to write full response. %i,%i\n", _FL, (int)wr, (int)response.Length());
+
+				#if 0
+				d->Log->Print("%s:%i got '%s', response:\n%s\n",
+					_FL,
+					path.Get(),
+					Indent(response).Get());
+				#endif
+			}
+		}
+
+		if (headers && used > 0)
+		{
+			// Check for websocket frame:
+			d->Log->Print("%s:%i have some used to look at.\n", _FL);
+		}
 	}
 	else
 	{

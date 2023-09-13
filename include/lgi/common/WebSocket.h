@@ -6,6 +6,8 @@
 class LWebSocketBase
 {
 public:
+	constexpr static const char *Key = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+
 	typedef std::function<bool(char *ptr, ssize_t len)> OnMsg;
 	typedef std::function<LSocketI*()> CreateSocket;
 
@@ -46,17 +48,25 @@ public:
 		friend struct LWebSocketServerPriv;
 		
 		LWebSocketServerPriv *d;
-		LAutoPtr<LSocketI> sock;
-		size_t		 used = 0; // bytes in 'read' that are used
+		LAutoPtr<LSocketI>	sock;
+		size_t used = 0; // bytes in 'read' that are used
 		LArray<char> read;     // read buffer..
-		LString      write;    // write buffer...
+		LString write;    // write buffer...
+		LString headers;
+		LString method, path, protocol;
 		
 		Connection(LWebSocketServerPriv *priv, LSocketI *s);
 		ConnectStatus OnRead();
+
+		LString ConsumeBytes(size_t bytes);
 		
 	public:
-		LString Context;
-		
+		// Methods
+		LString GetMethod() { return method; }
+		LString GetPath() { return path; }
+
+		// Callbacks
+		std::function<int(bool status)> ReceiveHdrsCb;
 		LWebSocketBase::OnMsg MsgCb;
 		std::function<void()> CloseCb;
 	};
