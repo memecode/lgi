@@ -152,9 +152,16 @@ void NewProjectFromTemplate(LViewI *parent)
 		#ifdef MAC
 		"../../"
 		#endif
-		"../templates";
+		"../../templates";
+	if (!p.Exists())
+	{
+		LgiMsg(parent, "The path '%s' doesn't exist.", AppName, MB_OK, p.GetFull().Get());
+		return;
+	}
+
 	TemplatesPath = p;
-	NewProjFromTemplate *Dlg = new NewProjFromTemplate(parent);
+
+	auto Dlg = new NewProjFromTemplate(parent);
 	Dlg->DoModal([Dlg](auto dlg, auto code)
 	{
 		LTree *t;

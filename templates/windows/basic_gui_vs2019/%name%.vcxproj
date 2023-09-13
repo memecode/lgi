@@ -177,7 +177,7 @@
     <Manifest Include="%lgi.folder%\src\win\General\Lgi.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="%lgi.folder%\Lgi_vs2015.vcxproj">
+    <ProjectReference Include="%lgi.folder%\win\Lgi_vs2019.vcxproj">
       <Project>{95df9ca4-6d37-4a85-a648-80c2712e0da1}</Project>
     </ProjectReference>
   </ItemGroup>

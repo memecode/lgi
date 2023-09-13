@@ -83,10 +83,10 @@ if 1:
 	parts = template_path.split(os.sep)
 	for i in range(len(parts)):
 		r = (".." + os.sep) * i
-		t = os.path.abspath(os.path.join(template_path, r, "Lgi", "trunk", "lgi_vs2015.sln"))
-		# print(i, t)
+		t = os.path.abspath(os.path.join(template_path, r, "lgi", "trunk", "win", "lgi_vs2019.sln"))
+		# print(i, t, os.path.exists(t))
 		if os.path.exists(t):
-			lgi = os.path.abspath(os.path.join(template_path, r, "Lgi", "trunk"))
+			lgi = os.path.abspath(os.path.join(template_path, r, "lgi", "trunk"))
 			rel = os.path.relpath(lgi, dest_path)
 			if rel is not None:
 				vars["lgi.folder"] = rel
