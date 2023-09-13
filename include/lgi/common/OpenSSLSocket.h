@@ -63,6 +63,7 @@ public:
 	void OnInformation(const char *Str) override;
 	int GetTimeout() override;
 	void SetTimeout(int ms) override;
+	bool GetRemoteIp(char *IpAddr) override;
 
 	// Server
 	bool Listen(int Port = 0) override;

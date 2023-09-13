@@ -27,20 +27,25 @@ enum WebSocketState
 	WsClosed,
 };
 
-enum WsOpCode
+const char *LWebSocketBase::ToString(WsOpCode op)
 {
-	WsContinue = 0,
-	WsText = 1,
-	WsBinary = 2,
-	WsClose = 8,
-	WsPing = 9,
-	WsPong = 10,
-};
+	switch (op)
+	{
+		case WsContinue: return "WsContinue";
+		case WsText: return "WsText";
+		case WsBinary: return "WsBinary";
+		case WsClose: return "WsClose";
+		case WsPing: return "WsPing";
+		case WsPong: return "WsPong";
+		default: return "#unknownOpCode";
+	}
+}
 
-struct LWebSocketPriv
+struct LWebSocketPriv : public LWebSocketBase
 {
 	LWebSocket *Ws;
-	bool Server;
+	LAutoPtr<LSocketI> Sock;
+	bool Server; // true if on the server side of the connection
 
 	WebSocketState State;
 	LString InHdr, OutHdr;
@@ -48,9 +53,11 @@ struct LWebSocketPriv
 	size_t Start, Used;
 	char Buf[512];
 	LArray<LRange> Msg;
-	LWebSocket::OnMsg onMsg;
 
-	LWebSocketPriv(LWebSocket *ws, bool server) : Ws(ws), Server(server)
+	LWebSocketPriv(LAutoPtr<LSocketI> sock, LWebSocket *ws, bool server) :
+		Sock(sock),
+		Ws(ws),
+		Server(server)
 	{
 		State = WsReceiveHdr;
 		Used = 0;
@@ -61,14 +68,76 @@ struct LWebSocketPriv
 	ssize_t Write(T *p, size_t len)
 	{
 		size_t i = 0;
-		while (i < len)
+		while (Sock && i < len)
 		{
-			auto Wr = Ws->Write(p + i, len - i);
+			auto Wr = Sock->Write(p + i, len - i);
 			if (Wr <= 0)
 				return i;
 			i += Wr;
 		}
 		return i;
+	}
+
+	LString ConsumeBytes(size_t bytes)
+	{
+		if (bytes > Used)
+			bytes = Used;
+
+		LAssert(bytes > 0);
+		auto base = Data.AddressOf();
+		LString s(base, bytes);
+		auto remaining = Data.Length() - bytes;
+		if (remaining > 0)
+		{
+			memmove(base, base + bytes, remaining);
+			Used -= bytes;
+		}
+
+		return s;
+	}
+
+	/// reads more data from 'Sock' into 'Data'
+	ssize_t Read()
+	{
+		if (!Sock)
+			return -1;
+		
+		// Check there is space to read into
+		if (Data.Length() - Used < 1024)
+		{
+			if (!Data.Length(Data.Length() ? Data.Length() << 1 : 1024))
+				return -1;
+		}
+
+		// Read data
+		auto base = Data.AddressOf();
+		auto rd = Sock->Read(base + Used, Data.Length() - Used);
+		if (rd <= 0)
+		{
+			Close();
+			return -1;
+		}
+		Used += rd;
+
+		// Process data
+		if (State == WsReceiveHdr)
+		{
+			auto end = Strnstr(base, "\r\n\r\n", Data.Length());
+			if (end)
+			{
+				InHdr = ConsumeBytes(end - base + 4);
+				State = WsMessages;
+				Ws->OnHeaders();
+			}
+		}
+
+		if (State == WsMessages)
+		{
+			while (CheckMsg())
+				;
+		}
+
+		return rd;
 	}
 
 	bool AddData(char *p, size_t Len)
@@ -94,13 +163,19 @@ struct LWebSocketPriv
 		
 		if (State != WsMessages)
 			return false;
+
 		return CheckMsg();
 	}
 
-	void OnMsg(char *ptr, uint64 len)
+	void Close()
 	{
-		if (onMsg)
-			onMsg(ptr, len);
+		State = WsClosed;
+		if (Sock)
+		{
+			Sock->Close();
+			Sock.Reset();
+			Ws->OnClose();
+		}
 	}
 
 	bool CheckMsg()
@@ -162,14 +237,15 @@ struct LWebSocketPriv
 			if (Msg.Length() == 0)
 			{
 				// Process the message
-				OnMsg((char*)p, Len);
+				if (Ws->MsgCb)
+					Ws->MsgCb(OpCode, (char*)p, Len);
 				p += Len;
 				Status = true;
 
 				// Consume the data
 				auto Remaining = End - p;
 				if (Remaining > 0)
-					memcpy(Data.AddressOf(), p, Remaining);
+					memmove(Data.AddressOf(), p, Remaining);
 				Used = Remaining;				
 			}
 			else
@@ -183,10 +259,7 @@ struct LWebSocketPriv
 		}
 
 		if (OpCode == WsClose)
-		{
-			Ws->Close();
-			State = WsClosed;
-		}
+			Close();
 
 		return Status;
 	}
@@ -196,7 +269,7 @@ struct LWebSocketPriv
 		return false;
 	}
 
-	bool SendResponse()
+	bool SendResponse(int StatusCode)
 	{
 		// Create the response hdr and send it...
 		LAutoString Upgrade(InetGetHeaderField(InHdr, "Upgrade", InHdr.Length()));
@@ -226,10 +299,12 @@ struct LWebSocketPriv
 			return Error("ConvertBinaryToBase64 failed");
 
 		B64[c] = 0;
-		OutHdr.Printf("HTTP/1.1 101 Switching Protocols\r\n"
+		OutHdr.Printf("HTTP/1.1 %i Switching Protocols\r\n"
 					"Upgrade: websocket\r\n"
 					"Connection: Upgrade\r\n"
-					"Sec-WebSocket-Accept: %s\r\n\r\n", B64);
+					"Sec-WebSocket-Accept: %s\r\n\r\n",
+					StatusCode,
+					B64);
 		auto Wr = Write(OutHdr.Get(), OutHdr.Length());
 		if (Wr != OutHdr.Length())
 			return Error("Writing HTTP response failed.");
@@ -239,11 +314,10 @@ struct LWebSocketPriv
 	}
 };
 
-LWebSocket::LWebSocket(bool Server, OnMsg onMsg)
+LWebSocket::LWebSocket(LAutoPtr<LSocketI> sock, bool Server, OnMsg onMsgCb)
 {
-	d = new LWebSocketPriv(this, Server);
-	if (onMsg)
-		ReceiveHandler(onMsg);
+	d = new LWebSocketPriv(sock, this, Server);
+	MsgCb = onMsgCb;
 }
 
 LWebSocket::~LWebSocket()
@@ -251,9 +325,9 @@ LWebSocket::~LWebSocket()
 	delete d;
 }
 
-void LWebSocket::ReceiveHandler(OnMsg onMsg)
+LSocketI *LWebSocket::GetSocket()
 {
-	d->onMsg = onMsg;
+	return d->Sock;
 }
 
 bool LWebSocket::SendMessage(char *Data, uint64 Len)
@@ -309,21 +383,27 @@ bool LWebSocket::SendMessage(char *Data, uint64 Len)
 	return true;
 }
 
-bool LWebSocket::InitFromHeaders(LString Data, OsSocket Sock)
+/*
+bool LWebSocket::InitFromHeaders(LString Data, LAutoPtr<LSocketI> Sock)
 {
 	bool HasMsg = false;
 
 	if (d->State == WsReceiveHdr)
 	{
 		d->InHdr = Data;
-		Handle(Sock);
+		d->Sock = Sock;
+		
+		// What did this do?
+		// Handle(Sock);
 
 		auto End = d->InHdr.Find("\r\n\r\n");
 		if (End >= 0)
 		{
-			if (d->InHdr.Length() > (size_t)End + 4)
+			End += 4;
+
+			if (d->InHdr.Length() > (size_t)End)
 			{
-				d->AddData(d->InHdr.Get() + End + 4, d->InHdr.Length() - End - 4);
+				d->AddData(d->InHdr.Get() + End, d->InHdr.Length() - End);
 				d->InHdr.Length(End);
 			}
 
@@ -333,12 +413,13 @@ bool LWebSocket::InitFromHeaders(LString Data, OsSocket Sock)
 
 	return HasMsg;
 }
+*/
 
 bool LWebSocket::OnData()
 {
 	bool GotData = false;
 
-	auto Rd = Read(d->Buf, sizeof(d->Buf));
+	auto Rd = d->Sock->Read(d->Buf, sizeof(d->Buf));
 	if (Rd > 0)
 	{
 		if (d->State == WsReceiveHdr)
@@ -353,7 +434,7 @@ bool LWebSocket::OnData()
 					d->InHdr.Length(End);
 				}
 
-				GotData = d->SendResponse();
+				GotData = d->SendResponse(DefaultHttpResponse);
 			}
 		}
 		else
@@ -379,7 +460,7 @@ struct LWebSocketServerPriv : public LThread, public LCancel
 	LWebSocketBase::CreateSocket CreateSocket;
 	
 	// Listening:
-	LAutoPtr<LSocketI> Listen;
+	LAutoSocket Listen;
 	uint64_t ListenTs = 0;
 	int ListenOk = false;
 	constexpr static int LISTEN_RETRY = 10000; // 10 seconds
@@ -401,11 +482,11 @@ struct LWebSocketServerPriv : public LThread, public LCancel
 		WaitForExit();
 	}
 	
-	LSocketI *Create()
+	LAutoSocket Create()
 	{
 		if (CreateSocket)
 			return CreateSocket();
-		return new LSocket;
+		return LAutoSocket(new LSocket);
 	}
 	
 	int Main()
@@ -421,7 +502,8 @@ struct LWebSocketServerPriv : public LThread, public LCancel
 				if (!Listen)
 				{
 					Log->Print("Creating listen socket...\n");
-					if (Listen.Reset(Create()))
+					Listen = Create();
+					if (Listen)
 					{
 						// Listen->IsBlocking(false);
 						ListenOk = Listen->Listen(Port);
@@ -434,9 +516,6 @@ struct LWebSocketServerPriv : public LThread, public LCancel
 				auto sock = Create();
 				if (sock)
 				{
-					// LVariant v;
-					// sock->SetValue(SslSocket_SslOnConnect, v=false);
-					
 					if (Listen->Accept(sock))
 					{
 						auto c = new Connection(this, sock);
@@ -456,8 +535,8 @@ struct LWebSocketServerPriv : public LThread, public LCancel
 			LHashTbl<PtrKey<LSocketI*>, Connection*> map;
 			for (auto c: Connections)
 			{
-				sel += c->sock;
-				map.Add(c->sock, c);
+				sel += c->GetSocket();
+				map.Add(c->GetSocket(), c);
 			}
 			auto readable = sel.Readable(50);
 			LArray<Connection*> del;
@@ -482,28 +561,17 @@ struct LWebSocketServerPriv : public LThread, public LCancel
 	}
 };
 
-LWebSocketServer::Connection::Connection(LWebSocketServerPriv *priv, LSocketI *s)
+LWebSocketServer::Connection::Connection(LWebSocketServerPriv *priv, LAutoPtr<LSocketI> s)
+	: LWebSocket(s)
 {
 	d = priv;
-	sock.Reset(s);
-}
 
-LString LWebSocketServer::Connection::ConsumeBytes(size_t bytes)
-{
-	if (bytes > used)
-		bytes = used;
-
-	LAssert(bytes > 0);
-	auto base = read.AddressOf();
-	LString s(base, bytes);
-	auto remaining = read.Length() - bytes;
-	if (remaining > 0)
+	if (LWebSocket::d->Sock)
 	{
-		memmove(base, base + bytes, remaining);
-		used -= bytes;
+		char addr[64];
+		if (LWebSocket::d->Sock->GetRemoteIp(addr))
+			ip = addr;
 	}
-
-	return s;
 }
 
 LString Indent(LString s)
@@ -539,8 +607,33 @@ LString LToHex(void *p, size_t len, char sep = 0)
 	return s;
 }
 
+void LWebSocketServer::Connection::OnHeaders()
+{
+	auto &headers = LWebSocket::d->InHdr;
+
+	auto newLine = headers.Find("\r\n");
+	auto firstLine = headers(0, newLine);
+	auto parts = firstLine.SplitDelimit();
+	if (parts.Length() == 3)
+	{
+		method = parts[0];
+		path = parts[1];
+		protocol = parts[2];
+	}
+
+	int status = DefaultHttpResponse;
+	if (ReceiveHdrsCb)
+		status = ReceiveHdrsCb(path != NULL);
+
+	LWebSocket::d->SendResponse(status);
+}
+
 LWebSocketServer::ConnectStatus LWebSocketServer::Connection::OnRead()
 {
+	auto r = LWebSocket::d->Read();
+
+
+	/*
 	if (used >= read.Length())
 	{
 		// Extend the size of the read buffer.
@@ -551,6 +644,8 @@ LWebSocketServer::ConnectStatus LWebSocketServer::Connection::OnRead()
 			return ConnectError;
 		}
 	}
+
+	auto sock = GetSocket();
 	if (!sock)
 	{
 		d->Log->Print("%s:%i - Error: no socket?\n", _FL);
@@ -571,7 +666,7 @@ LWebSocketServer::ConnectStatus LWebSocketServer::Connection::OnRead()
 			if (endOfHeaders)
 			{
 				auto hdrSize = endOfHeaders - base + 4;
-				headers = ConsumeBytes(hdrSize);
+				headers = LWebSocket::d->ConsumeBytes(hdrSize);
 
 				auto newLine = headers.Find("\r\n");
 				auto firstLine = headers(0, newLine);
@@ -635,6 +730,8 @@ LWebSocketServer::ConnectStatus LWebSocketServer::Connection::OnRead()
 		{
 			// Check for websocket frame:
 			d->Log->Print("%s:%i have some used to look at.\n", _FL);
+			
+			LWebSocket::d->CheckMsg();
 		}
 	}
 	else
@@ -644,6 +741,7 @@ LWebSocketServer::ConnectStatus LWebSocketServer::Connection::OnRead()
 			CloseCb();
 		return ConnectClosed;
 	}
+	*/
 	
 	return ConnectOk;
 }

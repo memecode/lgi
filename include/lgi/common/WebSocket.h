@@ -3,31 +3,53 @@
 #include <functional>
 #include "lgi/common/Net.h"
 
+typedef LAutoPtr<LSocketI> LAutoSocket;
+
 class LWebSocketBase
 {
 public:
 	constexpr static const char *Key = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+	constexpr static int DefaultHttpResponse = 101;
 
-	typedef std::function<bool(char *ptr, ssize_t len)> OnMsg;
-	typedef std::function<LSocketI*()> CreateSocket;
+	enum WsOpCode
+	{
+		WsContinue = 0,
+		WsText     = 1,
+		WsBinary   = 2,
+		WsClose    = 8,
+		WsPing     = 9,
+		WsPong     = 10,
+	};
+	const char *ToString(WsOpCode op);
+
+	typedef std::function<bool(WsOpCode op, char *ptr, ssize_t len)> OnMsg;
+	typedef std::function<LAutoSocket()> CreateSocket;
 
 	virtual ~LWebSocketBase() {}
 };
 
 // Web socket client class
-class LWebSocket : public LSocket, public LWebSocketBase
+class LWebSocket : public LWebSocketBase
 {
+protected:
 	struct LWebSocketPriv *d;
 
 public:
-	LWebSocket(bool Server = true, OnMsg onMsg = nullptr);
-	~LWebSocket();
+	OnMsg MsgCb;
 
-	bool InitFromHeaders(LString Data, OsSocket Sock);
-	void ReceiveHandler(OnMsg onMsg);
+	LWebSocket(LAutoSocket sock, bool Server = true, OnMsg onMsg = nullptr);
+	virtual ~LWebSocket();
+
+	LSocketI *GetSocket();
 	bool SendMessage(char *Data, uint64 Len);
 	bool SendMessage(LString s) { return SendMessage(s.Get(), s.Length()); }
 	bool OnData();
+	
+	virtual void OnClose() {}
+	virtual void OnHeaders() {};
+
+	// Not used, delete?
+	// bool InitFromHeaders(LString Data, LAutoSocket Sock);
 };
 
 // Server class
@@ -43,32 +65,30 @@ public:
 		ConnectClosed,
 	};
 
-	class Connection
+	class Connection : public LWebSocket
 	{
 		friend struct LWebSocketServerPriv;
 		
 		LWebSocketServerPriv *d;
-		LAutoPtr<LSocketI>	sock;
-		size_t used = 0; // bytes in 'read' that are used
-		LArray<char> read;     // read buffer..
-		LString write;    // write buffer...
+		size_t used = 0;	// bytes in 'read' that are used
+		LArray<char> read;	// read buffer..
+		LString write;		// write buffer...
 		LString headers;
-		LString method, path, protocol;
+		LString method, path, protocol, ip;
 		
-		Connection(LWebSocketServerPriv *priv, LSocketI *s);
-		ConnectStatus OnRead();
+		Connection(LWebSocketServerPriv *priv, LAutoSocket s);
 
-		LString ConsumeBytes(size_t bytes);
+		ConnectStatus OnRead();
+		void OnHeaders();
 		
 	public:
 		// Methods
 		LString GetMethod() { return method; }
 		LString GetPath() { return path; }
+		LString GetIp() { return ip; }
 
 		// Callbacks
 		std::function<int(bool status)> ReceiveHdrsCb;
-		LWebSocketBase::OnMsg MsgCb;
-		std::function<void()> CloseCb;
 	};
 
 	LWebSocketServer(LStream *log = NULL, int port = HTTPS_PORT);

@@ -693,6 +693,29 @@ LStreamI *SslSocket::GetLog()
 	return d->Logger;
 }
 
+bool SslSocket::GetRemoteIp(char *IpAddr)
+{
+	if (!IpAddr)
+		return false;
+
+	auto sock = Library->SSL_get_fd(Ssl);
+	if (sock == INVALID_SOCKET)
+		return false;
+
+	struct sockaddr_in a;
+	int addrlen = sizeof(a);
+	if (getpeername(sock, (sockaddr*)&a, &addrlen))
+		return false;
+
+	auto ip = ntohl(a.sin_addr.s_addr);
+	auto str = LIpToStr(ip);
+	if (!str)
+		return false;
+
+	strcpy_s(IpAddr, 32, str);
+	return true;
+}
+
 void SslSocket::SetSslOnConnect(bool b)
 {
 	d->SslOnConnect = b;
