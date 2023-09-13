@@ -28,6 +28,11 @@ public:
 	virtual ~LWebSocketBase() {}
 };
 
+class LWsApplication : public LWebSocketBase
+{
+public:
+};
+
 // Web socket client class
 class LWebSocket : public LWebSocketBase
 {
@@ -86,6 +91,10 @@ public:
 		LString GetMethod() { return method; }
 		LString GetPath() { return path; }
 		LString GetIp() { return ip; }
+		bool Send(LString msg);
+
+		// The server may attach an application object
+		LAutoPtr<LWsApplication> App;
 
 		// Callbacks
 		std::function<int(bool status)> ReceiveHdrsCb;

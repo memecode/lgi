@@ -32,12 +32,12 @@ const char *LWebSocketBase::ToString(WsOpCode op)
 	switch (op)
 	{
 		case WsContinue: return "WsContinue";
-		case WsText: return "WsText";
-		case WsBinary: return "WsBinary";
-		case WsClose: return "WsClose";
-		case WsPing: return "WsPing";
-		case WsPong: return "WsPong";
-		default: return "#unknownOpCode";
+		case WsText:     return "WsText";
+		case WsBinary:   return "WsBinary";
+		case WsClose:    return "WsClose";
+		case WsPing:     return "WsPing";
+		case WsPong:     return "WsPong";
+		default:         return "#unknownOpCode";
 	}
 }
 
@@ -448,7 +448,10 @@ bool LWebSocket::OnData()
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-struct LWebSocketServerPriv : public LThread, public LCancel
+struct LWebSocketServerPriv :
+	public LThread,
+	public LCancel,
+	public LMutex
 {
 	using Connection = LWebSocketServer::Connection;
 
@@ -467,8 +470,17 @@ struct LWebSocketServerPriv : public LThread, public LCancel
 
 	// Active connections	
 	LArray<Connection*> Connections;
+	
+	struct WriteMsg
+	{
+		Connection *connect;
+		LString msg;
+	};
+	LArray<WriteMsg> OutgoingMsgs;
 
-	LWebSocketServerPriv(LStream *log, int port) : LThread("LWebSocketServerPriv")
+	LWebSocketServerPriv(LStream *log, int port) :
+		LThread("LWebSocketServerPriv.Thread"),
+		LMutex("LWebSocketServerPriv.Lock")
 	{
 		Log = log;
 		Port = port;
@@ -480,6 +492,19 @@ struct LWebSocketServerPriv : public LThread, public LCancel
 	{
 		Cancel();
 		WaitForExit();
+	}
+
+	bool Send(Connection *c, LString msg)
+	{
+		if (!Lock(_FL))
+			return false;
+
+		auto &out = OutgoingMsgs.New();
+		out.connect = c;
+		out.msg = msg;
+		Unlock();
+		
+		return true;
 	}
 	
 	LAutoSocket Create()
@@ -531,6 +556,7 @@ struct LWebSocketServerPriv : public LThread, public LCancel
 				else Log->Print("%s:%i - failed to create socket.\n", _FL);
 			}
 
+			// Check all the connections for readability...
 			LSelect sel;
 			LHashTbl<PtrKey<LSocketI*>, Connection*> map;
 			for (auto c: Connections)
@@ -555,6 +581,18 @@ struct LWebSocketServerPriv : public LThread, public LCancel
 				Connections.Delete(d);
 				delete d;
 			}
+
+			// Also check for outgoing messages...
+			if (Lock(_FL))
+			{
+				for (auto &out: OutgoingMsgs)
+				{
+					if (Connections.HasItem(out.connect))
+						out.connect->SendMessage(out.msg);
+				}
+				OutgoingMsgs.Empty();
+				Unlock();
+			}
 		}
 		
 		return 0;
@@ -572,6 +610,11 @@ LWebSocketServer::Connection::Connection(LWebSocketServerPriv *priv, LAutoPtr<LS
 		if (LWebSocket::d->Sock->GetRemoteIp(addr))
 			ip = addr;
 	}
+}
+
+bool LWebSocketServer::Connection::Send(LString msg)
+{
+	return d->Send(this, msg);
 }
 
 LString Indent(LString s)

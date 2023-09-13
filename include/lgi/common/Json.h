@@ -87,7 +87,7 @@ class LJson
 			}
 			if (Str)
 			{
-				LString q = LString::Escape(Str, Str.Length(), "\"\\");
+				LString q = LString::Escape(Str, Str.Length(), "\"\\\n");
 				s.Printf("\"%s\"", q.Get());
 				r += s;
 			}
