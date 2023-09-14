@@ -1202,10 +1202,6 @@ int SslSocket::Close()
 		#endif
 		d->ListenSocket = INVALID_SOCKET;
 	}
-	else
-	{
-		LgiTrace("No d->ListenSocket to close\n");
-	}
 
 	d->Cancel->Cancel(Prev);
 

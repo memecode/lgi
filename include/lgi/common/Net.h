@@ -15,6 +15,7 @@
 #include "lgi/common/LgiString.h"
 #include "lgi/common/Cancel.h"
 #include "lgi/common/HashTable.h"
+#include "lgi/common/Error.h"
 
 #if defined WIN32
 	

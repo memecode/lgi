@@ -27,6 +27,13 @@ enum WebSocketState
 	WsClosed,
 };
 
+LString LWebSocketBase::ToString(uint64 i)
+{
+	LString s;
+	s.Printf(LPrintfInt64, i);
+	return s;
+}
+
 const char *LWebSocketBase::ToString(WsOpCode op)
 {
 	switch (op)
