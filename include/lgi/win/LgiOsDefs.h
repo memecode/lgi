@@ -108,6 +108,7 @@ typedef int (__stdcall *p_vscprintf)(const char *format, va_list argptr);
 class LgiClass OsAppArguments
 {
 	LAutoWString CmdLine;
+	LAutoPtr<class LString> Cache;
 
 	void _Default();
 
@@ -122,6 +123,7 @@ public:
 
 	OsAppArguments &operator =(OsAppArguments &p);
 
+	bool Get(const char *option, const char **value = NULL);
 	void Set(char *Utf);
 	void Set(int Args, const char **Arg);
 };

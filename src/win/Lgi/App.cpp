@@ -58,6 +58,45 @@ void OsAppArguments::_Default()
 	nCmdShow = SW_RESTORE;
 }
 
+bool OsAppArguments::Get(const char *option, const char **value)
+{
+	if (!lpCmdLine || !option)
+		return false;
+
+	char16 *c = lpCmdLine;
+	auto getArg = [&]() -> LString
+	{
+		while (*c && IsWhiteSpace(*c))
+			c++;
+		auto start = c;
+		while (*c && !IsWhiteSpace(*c))
+			c++;
+		return LString(start, c - start);
+	};
+
+	while (*c)
+	{
+		LString a = getArg();
+		if (a(0) == '-')
+		{
+			if (a(1, -1) == option)
+			{
+				if (value && Cache.Reset(new LString))
+				{
+					*Cache = getArg();
+					if (!Cache.Get())
+						return false;
+					*value = Cache->Get();
+				}
+			}
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void OsAppArguments::Set(int Args, const char **Arg)
 {
 	LStringPipe p;

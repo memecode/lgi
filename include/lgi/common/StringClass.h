@@ -1125,7 +1125,7 @@ public:
 		
 			while (Len-- > 0)
 			{
-				if (Ch > sizeof(Buf)-4)
+				if (Ch > sizeof(Buf)-16)
 				{
 					// Buffer full, add substring to 's'
 					Buf[Ch] = 0;
