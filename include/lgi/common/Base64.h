@@ -6,6 +6,7 @@
 #define __BASE64_H_
 
 #include "LgiDefs.h"
+#include "StringClass.h"
 
 // These buffer length macros round up to the nearest block of
 // bytes. So take the value returned by the convert routine as

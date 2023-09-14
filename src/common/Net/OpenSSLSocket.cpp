@@ -33,6 +33,7 @@
 
 #ifdef WINDOWS
 #define SystemErrorCode				WSAGetLastError()
+typedef int socklen_t;
 #else
 #define SystemErrorCode				errno
 #endif
@@ -703,7 +704,7 @@ bool SslSocket::GetRemoteIp(char *IpAddr)
 		return false;
 
 	struct sockaddr_in a;
-	int addrlen = sizeof(a);
+	socklen_t addrlen = sizeof(a);
 	if (getpeername(sock, (sockaddr*)&a, &addrlen))
 		return false;
 
@@ -1269,7 +1270,7 @@ bool SslSocket::Accept(LSocketI *sock)
 	}
 
 	struct sockaddr_in addr;
-	int len = sizeof(addr);
+	socklen_t len = sizeof(addr);
 	auto client = accept(d->ListenSocket, (struct sockaddr*)&addr, &len);
 	if (client < 0)
 	{
