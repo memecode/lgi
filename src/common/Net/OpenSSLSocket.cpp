@@ -1192,6 +1192,21 @@ int SslSocket::Close()
 	Ssl = NULL;
 	Bio = NULL;
 
+	if (d->ListenSocket != INVALID_SOCKET)
+	{
+		LgiTrace("Closing d->ListenSocket=%i\n", d->ListenSocket);
+		#if defined WIN32
+		closesocket(d->ListenSocket);
+		#else
+		close(d->ListenSocket);
+		#endif
+		d->ListenSocket = INVALID_SOCKET;
+	}
+	else
+	{
+		LgiTrace("No d->ListenSocket to close\n");
+	}
+
 	d->Cancel->Cancel(Prev);
 
 	return true;
