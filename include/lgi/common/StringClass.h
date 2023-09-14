@@ -1112,7 +1112,7 @@ public:
 		return LPrintf(*this, Fmt, Arg);
 	}
 	
-	static LString Escape(const char *In, ssize_t Len = -1, const char *Chars = "\r\n\b\\\'\"")
+	static LString Escape(const char *In, ssize_t Len = -1, const char *Chars = "\r\n\b\\\'\"", char hexMode = 'x')
 	{
 		LString s;
 	
@@ -1152,7 +1152,12 @@ public:
 						EscChar('&', '&');
 						EscChar('?', '?');
 						#undef EscChar
-						default: Ch += sprintf_s(Buf+Ch, sizeof(Buf)-Ch, "x%02x", *In); break;
+						default:
+							if (hexMode == 'u')
+								Ch += sprintf_s(Buf+Ch, sizeof(Buf)-Ch, "u%04x", *In);
+							else
+								Ch += sprintf_s(Buf+Ch, sizeof(Buf)-Ch, "x%02x", *In);
+							break;
 					}
 				}
 				else Buf[Ch++] = *In;
