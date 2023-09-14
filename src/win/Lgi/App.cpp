@@ -77,23 +77,22 @@ bool OsAppArguments::Get(const char *option, const char **value)
 	while (*c)
 	{
 		LString a = getArg();
-		if (a(0) == '-')
-		{
-			if (a(1, -1) == option)
-			{
-				if (value && Cache.Reset(new LString))
-				{
-					*Cache = getArg();
-					if (!Cache.Get())
-						return false;
-					*value = Cache->Get();
-				}
-			}
+		if (a(0) != '-')
+			continue;
 
+		if (a(1, -1) == option)
+		{
+			if (value && Cache.Reset(new LString))
+			{
+				*Cache = getArg();
+				if (!Cache.Get())
+					return false;
+				*value = Cache->Get();
+			}
 			return true;
 		}
 	}
-
+	 
 	return false;
 }
 
