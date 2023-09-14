@@ -272,11 +272,11 @@ struct LWebSocketPriv : public LWebSocketBase
 	bool SendResponse(int StatusCode)
 	{
 		// Create the response hdr and send it...
-		LAutoString Upgrade(InetGetHeaderField(InHdr, "Upgrade", InHdr.Length()));
-		if (!Upgrade || stricmp(Upgrade, "websocket"))
+		auto Upgrade = LGetHeaderField(InHdr, "Upgrade");
+		if (Upgrade != "websocket")
 			return false;
 
-		LAutoString SecWebSocketKey(InetGetHeaderField(InHdr, "Sec-WebSocket-Key", InHdr.Length()));
+		auto SecWebSocketKey = LGetHeaderField(InHdr, "Sec-WebSocket-Key");
 		if (!SecWebSocketKey)
 			return Error("No Sec-WebSocket-Key header");
 		
@@ -293,18 +293,16 @@ struct LWebSocketPriv : public LWebSocketBase
 		for (int i=0; i<CountOf(Digest); i++)
 			Digest[i] = htonl(Ctx.Message_Digest[i]);
 
-		char B64[64];
-		auto c = ConvertBinaryToBase64(B64, sizeof(B64), (uchar*) &Digest[0], sizeof(Digest));
-		if (c <= 0)
+		auto b64 = LToBase64(Digest, sizeof(Digest));
+		if (b64 <= 0)
 			return Error("ConvertBinaryToBase64 failed");
 
-		B64[c] = 0;
 		OutHdr.Printf("HTTP/1.1 %i Switching Protocols\r\n"
 					"Upgrade: websocket\r\n"
 					"Connection: Upgrade\r\n"
 					"Sec-WebSocket-Accept: %s\r\n\r\n",
 					StatusCode,
-					B64);
+					b64.Get());
 		auto Wr = Write(OutHdr.Get(), OutHdr.Length());
 		if (Wr != OutHdr.Length())
 			return Error("Writing HTTP response failed.");
@@ -330,7 +328,20 @@ LSocketI *LWebSocket::GetSocket()
 	return d->Sock;
 }
 
-bool LWebSocket::SendMessage(char *Data, uint64 Len)
+bool LWebSocket::Close()
+{
+	SendMessage(WsClose, NULL, 0);
+	
+	if (d->Sock)
+	{
+		d->Sock->Close();
+		d->Sock.Reset();
+	}
+	
+	return true;
+}
+
+bool LWebSocket::SendMessage(WsOpCode Op, char *Data, uint64 Len)
 {
 	if (d->State != WsMessages)
 		return false;
@@ -339,7 +350,7 @@ bool LWebSocket::SendMessage(char *Data, uint64 Len)
 	int8 Hdr[2 + 8 + 4];
 	LPointer p = {Hdr};
 	*p.u8++ =	0x80 | // Fin
-				WsText;
+				(int)Op;
 	if (Len < 126) // 1 byte
 	{
 		// Direct len
@@ -382,38 +393,6 @@ bool LWebSocket::SendMessage(char *Data, uint64 Len)
 
 	return true;
 }
-
-/*
-bool LWebSocket::InitFromHeaders(LString Data, LAutoPtr<LSocketI> Sock)
-{
-	bool HasMsg = false;
-
-	if (d->State == WsReceiveHdr)
-	{
-		d->InHdr = Data;
-		d->Sock = Sock;
-		
-		// What did this do?
-		// Handle(Sock);
-
-		auto End = d->InHdr.Find("\r\n\r\n");
-		if (End >= 0)
-		{
-			End += 4;
-
-			if (d->InHdr.Length() > (size_t)End)
-			{
-				d->AddData(d->InHdr.Get() + End, d->InHdr.Length() - End);
-				d->InHdr.Length(End);
-			}
-
-			HasMsg = d->SendResponse();
-		}
-	}
-
-	return HasMsg;
-}
-*/
 
 bool LWebSocket::OnData()
 {
@@ -480,7 +459,7 @@ struct LWebSocketServerPriv :
 
 	LWebSocketServerPriv(LStream *log, int port) :
 		LThread("LWebSocketServerPriv.Thread"),
-		LMutex("LWebSocketServerPriv.Lock")
+		LMutex ("LWebSocketServerPriv.Lock")
 	{
 		Log = log;
 		Port = port;
@@ -490,6 +469,11 @@ struct LWebSocketServerPriv :
 	
 	~LWebSocketServerPriv()
 	{
+		for (auto c: Connections)
+		{
+			c->Close();
+		}
+		
 		Cancel();
 		WaitForExit();
 	}
@@ -516,7 +500,7 @@ struct LWebSocketServerPriv :
 	
 	int Main()
 	{
-		auto Chk = LCurrentTime();
+		uint64_t StartListen = 0;
 	
 		while (!IsCancelled())
 		{
@@ -532,7 +516,17 @@ struct LWebSocketServerPriv :
 					{
 						// Listen->IsBlocking(false);
 						ListenOk = Listen->Listen(Port);
-						Log->Print("ListenOk=%i\n", ListenOk);
+						StartListen = LCurrentTime();
+						Log->Print("Listen(%i)=%i\n", Port, ListenOk);
+					}
+				}
+				else if (StartListen)
+				{
+					if (Now - StartListen >= 10000)
+					{
+						Listen.Reset();
+						StartListen = 0;
+						// Start again...
 					}
 				}
 			}
@@ -554,7 +548,7 @@ struct LWebSocketServerPriv :
 					else Log->Print("%s:%i - accept failed.\n", _FL);
 				}
 				else Log->Print("%s:%i - failed to create socket.\n", _FL);
-			}
+			}			
 
 			// Check all the connections for readability...
 			LSelect sel;
@@ -593,6 +587,11 @@ struct LWebSocketServerPriv :
 				OutgoingMsgs.Empty();
 				Unlock();
 			}
+		}
+		
+		if (Listen)
+		{
+			Listen->Close();
 		}
 		
 		return 0;

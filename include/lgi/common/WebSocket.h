@@ -46,15 +46,13 @@ public:
 	virtual ~LWebSocket();
 
 	LSocketI *GetSocket();
-	bool SendMessage(char *Data, uint64 Len);
-	bool SendMessage(LString s) { return SendMessage(s.Get(), s.Length()); }
+	bool SendMessage(WsOpCode Op, char *Data, uint64 Len);
+	bool SendMessage(LString s) { return SendMessage(WsText, s.Get(), s.Length()); }
+	bool Close();
 	bool OnData();
 	
 	virtual void OnClose() {}
 	virtual void OnHeaders() {};
-
-	// Not used, delete?
-	// bool InitFromHeaders(LString Data, LAutoSocket Sock);
 };
 
 // Server class

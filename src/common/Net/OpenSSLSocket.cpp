@@ -1220,6 +1220,8 @@ bool SslSocket::Listen(int Port)
     d->ListenSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (d->ListenSocket < 0)
     {
+		LgiTrace("%s:%i - socket failed\n", _FL);
+
 		LError err(SystemErrorCode);
         OnError(err.GetCode(), err.GetMsg());
         return false;
@@ -1229,16 +1231,21 @@ bool SslSocket::Listen(int Port)
     {
 		LError err(SystemErrorCode);
 		OnError(err.GetCode(), err.GetMsg());
+
+		LgiTrace("%s:%i - bind failed %i, %s\n", _FL, err.GetCode(), err.GetMsg().Get());
 		return false;
     }
 
     if (listen(d->ListenSocket, 1) < 0)
     {
+		LgiTrace("%s:%i - listen failed\n", _FL);
+
 		LError err(SystemErrorCode);
 		OnError(err.GetCode(), err.GetMsg());
 		return false;
     }	
 
+	LgiTrace("%s:%i - listen(%i) ok\n", _FL, Port);
 	return true;
 }
 

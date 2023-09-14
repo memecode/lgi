@@ -181,15 +181,15 @@
 				<Node File="./src/common/Lgi/Variant.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/Variant.h" Type="3" Platforms="15" />
 			</Node>
-			<Node File=".\src\common\Lgi\GuiUtils.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Lgi\LgiCommon.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Lgi\LMsg.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Lgi\Object.cpp" Type="2" Platforms="15" />
-			<Node File=".\include\lgi\common\StructuredIo.h" Type="3" Platforms="15" />
-			<Node File=".\include\lgi\common\StructuredLog.h" Type="3" Platforms="15" />
-			<Node File=".\src\common\Lgi\ToolTip.cpp" Type="2" Platforms="15" />
-			<Node File=".\include\lgi\common\ToolTip.h" Type="3" Platforms="15" />
-			<Node File=".\src\common\Lgi\TrayIcon.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/GuiUtils.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/LgiCommon.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/LMsg.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Lgi/Object.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/StructuredIo.h" Type="3" Platforms="15" />
+			<Node File="./include/lgi/common/StructuredLog.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Lgi/ToolTip.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/ToolTip.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Lgi/TrayIcon.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="36">
 			<Node Name="File Select Win" Type="1" Platforms="15" Open="0" Id="38">
@@ -318,6 +318,7 @@
 				<Node File=".\include\lgi\common\Mru.h" Type="3" Platforms="15" />
 			</Node>
 			<Node File="./src/common/Net/Base64.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/Base64.h" Type="3" Platforms="15" />
 			<Node File="./src/common/Lgi/OptionsFile.cpp" Type="2" Platforms="15" />
 			<Node File="./include/lgi/common/OptionsFile.h" Type="3" Platforms="15" />
 			<Node File="./src/common/Lgi/Rand.cpp" Type="2" Platforms="15" />
@@ -485,7 +486,7 @@
 				<All>0</All>
 			</DebugAdmin>
 			<Executable>
-				<Windows />
+				<Linux />
 			</Executable>
 			<CCrossCompiler />
 			<CppCrossCompiler />
@@ -533,7 +534,6 @@
 					<Debug>../../../../system/develop/headers</Debug>
 					<Release>../../../../system/develop/headers</Release>
 				</Haiku>
-				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -561,14 +561,12 @@ network
 be</Release>
 				</Haiku>
 				<All />
-				<Windows />
 			</Libraries>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-gtk3</Debug>
 					<Release>lgi-gtk3</Release>
 				</Linux>
-				<Windows />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
@@ -584,17 +582,17 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
-				<Windows />
+				<Linux />
 			</Defines>
 			<LibraryPaths>
 				<All />
-				<Windows />
+				<Linux />
 			</LibraryPaths>
 			<ApplicationIcon />
 		</Build>
 		<Advanced>
 			<PostBuildCommands>
-				<Windows />
+				<Linux />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>
