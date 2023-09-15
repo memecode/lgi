@@ -1693,7 +1693,7 @@ LVmDebuggerWnd::LVmDebuggerWnd(LView *Parent, LVmCallback *Callback, LAutoPtr<LV
 			{
 				if (!dir.IsDir())
 				{
-					char *n = dir.GetName();
+					auto n = dir.GetName();
 					if (stristr(n, ".script") &&
 						dir.Path(p, sizeof(p)))
 					{

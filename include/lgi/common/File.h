@@ -151,7 +151,7 @@ public:
 	virtual long GetAttributes() const;
 	
 	/// Gets the name of the current entry. (Doesn't include the path).
-	virtual char *GetName() const;
+	virtual const char *GetName() const;
 	virtual LString FileName() const;
 	
 	/// Gets the user id of the current entry. (Doesn't have any meaning on Win32).

@@ -405,7 +405,7 @@ LMessage::Result FindInFilesThread::OnEvent(LMessage *Msg)
 				{
 					if (Dir->IsDir())
 					{
-						char *p = Dir->GetName();
+						auto p = Dir->GetName();
 						if
 						(
 							p

@@ -24,6 +24,7 @@ public:
 	LString ToString(uint64 i);
 
 	typedef std::function<bool(WsOpCode op, char *ptr, ssize_t len)> OnMsg;
+	typedef std::function<void()> OnClose;
 	typedef std::function<LAutoSocket()> CreateSocket;
 
 	virtual ~LWebSocketBase() {}
@@ -42,17 +43,19 @@ protected:
 
 public:
 	OnMsg MsgCb;
+	OnClose CloseCb;
 
 	LWebSocket(LAutoSocket sock, bool Server = true, OnMsg onMsg = nullptr);
 	virtual ~LWebSocket();
 
+	bool Open(const char *uri, int port);
 	LSocketI *GetSocket();
 	bool SendMessage(WsOpCode Op, char *Data, uint64 Len);
 	bool SendMessage(LString s) { return SendMessage(WsText, s.Get(), s.Length()); }
 	bool Close();
-	bool OnData();
+	bool Read();
+	bool IsConnected(); // Ready to send/receive messages
 	
-	virtual void OnClose() {}
 	virtual void OnHeaders() {};
 };
 
@@ -82,7 +85,6 @@ public:
 		
 		Connection(LWebSocketServerPriv *priv, LAutoSocket s);
 
-		ConnectStatus OnRead();
 		void OnHeaders();
 		
 	public:

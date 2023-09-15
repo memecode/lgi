@@ -546,7 +546,7 @@ struct LCppParserWorker : public LCompileTools
 	LHashTbl<StrKey<char16>, KeywordType> Keywords;
 	LHashTbl<StrKey<char16>, PreprocessSymbol> PreprocessSyms;
 	
-	LHashTbl<StrKey<char,false>, char*> IncludePathFiles;
+	LHashTbl<ConstStrKey<char,false>, char*> IncludePathFiles;
 	char *FindInclude(char *file);
 	bool Preprocess(LSourceFile *sf);
 	
@@ -682,7 +682,7 @@ char *LCppParserWorker::FindInclude(char *File)
 			char p[MAX_PATH_LEN];
 			for (bool b=dir.First(w->IncludePaths[i]); b; b=dir.Next())
 			{
-				char *Leaf = dir.GetName();
+				auto Leaf = dir.GetName();
 				if (!dir.IsDir())
 				{
 					char *ext = LGetExtension(Leaf);

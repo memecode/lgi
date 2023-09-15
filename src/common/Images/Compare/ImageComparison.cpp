@@ -1003,7 +1003,7 @@ int ImageCompareDlg::OnNotify(LViewI *Ctrl, LNotification n)
 		}
 		case IDC_COMPARE:
 		{
-			LHashTbl<StrKey<char,false>, char*> Left;
+			LHashTbl<ConstStrKey<char,false>, char*> Left;
 			LDirectory LDir, RDir;
 			char p[MAX_PATH_LEN];				
 			for (bool b=LDir.First(d->l->Name()); b; b=LDir.Next())

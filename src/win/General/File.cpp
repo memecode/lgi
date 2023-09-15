@@ -1346,7 +1346,7 @@ int LDirectory::GetType() const
 	return IsDir() ? VT_FOLDER : VT_FILE;
 }
 
-char *LDirectory::GetName() const
+const char *LDirectory::GetName() const
 {
 	if (!d->Utf)
 	    d->Utf = d->Data.cFileName;

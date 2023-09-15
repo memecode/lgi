@@ -163,7 +163,7 @@ bool IdeCommon::AddFiles(AddFilesProgress *Prog, const char *Path)
 				char p[MAX_PATH_LEN];
 				if (d.Path(p, sizeof(p)))
 				{
-					char *Name = d.GetName();
+					auto Name = d.GetName();
 					char *Ext = LGetExtension(p);
 					if
 					(

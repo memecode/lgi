@@ -967,6 +967,7 @@ DebugTrace("%s:%i - open loop finished, r=%i, Cancelled=%i\n", _FL, r, d->Cancel
 							if (r == 1)
 							{
 								IsBlocking(true);
+								d->UseSSLrw = true;
 								Library->SSL_set_mode(Ssl, SSL_MODE_AUTO_RETRY);
 								Status = true;
 								// d->UseSSLrw = true;

@@ -6,6 +6,7 @@
 #include "lgi/common/Thread.h"
 #include "lgi/common/OpenSSLSocket.h"
 #include "lgi/common/Base64.h"
+#include "lgi/common/Uri.h"
 #include "../Hash/sha1/sha1.h"
 
 #ifdef LINUX
@@ -133,8 +134,28 @@ struct LWebSocketPriv : public LWebSocketBase
 			if (end)
 			{
 				InHdr = ConsumeBytes(end - base + 4);
-				State = WsMessages;
-				Ws->OnHeaders();
+				LgiTrace("InHdr=%s\n", InHdr.Get());
+
+				if (Server)
+				{
+					// Let the application have a look at the path and decide on whether to
+					// accept and move to messages mode.
+					Ws->OnHeaders();
+				}
+				else // Client
+				{					
+					auto connection = LGetHeaderField(InHdr, "Connection");
+					if (connection == "Upgrade")
+					{
+						State = WsMessages;
+						Ws->OnHeaders();
+					}
+					else
+					{
+						Close();
+					}
+				}
+
 			}
 		}
 
@@ -181,7 +202,8 @@ struct LWebSocketPriv : public LWebSocketBase
 		{
 			Sock->Close();
 			Sock.Reset();
-			Ws->OnClose();
+			if (Ws->CloseCb)
+				Ws->CloseCb();
 		}
 	}
 
@@ -278,6 +300,8 @@ struct LWebSocketPriv : public LWebSocketBase
 
 	bool SendResponse(int StatusCode)
 	{
+		LAssert(Server);
+
 		// Create the response hdr and send it...
 		auto Upgrade = LGetHeaderField(InHdr, "Upgrade");
 		if (Upgrade != "websocket")
@@ -330,6 +354,89 @@ LWebSocket::~LWebSocket()
 	delete d;
 }
 
+bool LWebSocket::Open(const char *uri, int port)
+{
+	if (!d->Sock || !uri)
+	{
+		LgiTrace("%s:%i - param error.\n", _FL);
+		return false;
+	}
+
+	LUri u(uri);
+	if (!port)
+		port = u.Port;
+	if (!port)
+	{
+		LgiTrace("%s:%i - no port.\n", _FL);
+		return false;
+	}
+
+	if (!d->Sock->Open(u.sHost, port))
+	{
+		LgiTrace("%s:%i - connect to '%s:%i' failed.\n", _FL, u.sHost.Get(), port);
+		return false;
+	}
+
+	/* E.g.
+		GET /memecodeApp HTTP/1.1
+		Host: localhost:4567
+		User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/117.0
+		Accept: * /*
+		Accept-Language: en-US,en;q=0.5
+		Accept-Encoding: gzip, deflate, br
+		Sec-WebSocket-Version: 13
+		Origin: null
+		Sec-WebSocket-Extensions: permessage-deflate
+		Sec-WebSocket-Key: Jzd4op3+h5uJ6rU+PgmPTg==
+		Connection: keep-alive, Upgrade
+		Sec-Fetch-Dest: empty
+		Sec-Fetch-Mode: websocket
+		Sec-Fetch-Site: cross-site
+		Pragma: no-cache
+		Cache-Control: no-cache
+		Upgrade: websocket	
+	*/
+
+	LString Random;
+	if (!Random.Length(16))
+		return false;
+	for (int i=0; i<16; i++)
+		Random.Get()[i] = LRand(127-32) + 32;
+
+	LString SecWebSocketKey = LToBase64(Random);
+
+	LString http;
+	http.Printf("GET %s HTTP/1.1\r\n"
+				"Host: %s:%i\r\n"
+				"Sec-WebSocket-Version: 13\r\n"
+				"Sec-WebSocket-Key: %s\r\n"
+				"Connection: keep-alive, Upgrade\r\n"
+				"Sec-Fetch-Dest: empty\r\n"
+				"Sec-Fetch-Mode: websocket\r\n"
+				"Sec-Fetch-Site: cross-site\r\n"
+				"Upgrade: websocket\r\n"
+				"\r\n",
+				u.sPath ? u.sPath.Get() : "/",
+				u.sHost.Get(),
+				port,
+				SecWebSocketKey.Get());
+
+	auto wr = d->Sock->Write(http.Get(), http.Length());
+	if (wr != http.Length())
+	{
+		LgiTrace("%s:%i - failed to write HTTP header: %i\n", _FL, (int)wr);
+		return false;
+	}
+
+	LgiTrace("WsSocket out hdr:\n%s", http.Get());
+	return true;
+}
+
+bool LWebSocket::IsConnected()
+{
+	return d->State == WsMessages;
+}
+
 LSocketI *LWebSocket::GetSocket()
 {
 	return d->Sock;
@@ -345,6 +452,9 @@ bool LWebSocket::Close()
 		d->Sock.Reset();
 	}
 	
+	if (CloseCb)
+		CloseCb();
+
 	return true;
 }
 
@@ -401,37 +511,10 @@ bool LWebSocket::SendMessage(WsOpCode Op, char *Data, uint64 Len)
 	return true;
 }
 
-bool LWebSocket::OnData()
+bool LWebSocket::Read()
 {
-	bool GotData = false;
-
-	auto Rd = d->Sock->Read(d->Buf, sizeof(d->Buf));
-	if (Rd > 0)
-	{
-		if (d->State == WsReceiveHdr)
-		{
-			d->InHdr += LString(d->Buf, Rd);
-			auto End = d->InHdr.Find("\r\n\r\n");
-			if (End >= 0)
-			{
-				if (d->InHdr.Length() > (size_t)End + 4)
-				{
-					d->AddData(d->InHdr.Get() + End + 4, d->InHdr.Length() - End - 4);
-					d->InHdr.Length(End);
-				}
-
-				GotData = d->SendResponse(DefaultHttpResponse);
-			}
-		}
-		else
-		{
-			GotData = d->AddData(d->Buf, Rd);
-		}
-	}
-
-	return GotData;
+	return d->Read();
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 struct LWebSocketServerPriv :
@@ -572,8 +655,8 @@ struct LWebSocketServerPriv :
 				auto c = map.Find(r);
 				if (c)
 				{
-					auto status = c->OnRead();
-					if (status != LWebSocketServer::ConnectOk)
+					auto status = c->Read();
+					if (!status)
 						del.Add(c);
 				}
 			}
@@ -675,124 +758,6 @@ void LWebSocketServer::Connection::OnHeaders()
 		status = ReceiveHdrsCb(path != NULL);
 
 	LWebSocket::d->SendResponse(status);
-}
-
-LWebSocketServer::ConnectStatus LWebSocketServer::Connection::OnRead()
-{
-	auto r = LWebSocket::d->Read();
-
-
-	/*
-	if (used >= read.Length())
-	{
-		// Extend the size of the read buffer.
-		auto newSize = read.Length() ? read.Length() << 1 : 1024;
-		if (!read.Length(newSize))
-		{
-			d->Log->Print("%s:%i - Error: allocating space: " LPrintfSSizeT "\n", _FL);
-			return ConnectError;
-		}
-	}
-
-	auto sock = GetSocket();
-	if (!sock)
-	{
-		d->Log->Print("%s:%i - Error: no socket?\n", _FL);
-		return ConnectError;
-	}
-	
-	LAssert(used < read.Length());
-	auto remaining = read.Length() - used;
-	auto rd = sock->Read(read.AddressOf(used), remaining);
-	if (rd > 0)
-	{
-		used += rd;
-
-		if (!headers)
-		{
-			auto base = read.AddressOf();
-			auto endOfHeaders = Strnstr(base, "\r\n\r\n", used);
-			if (endOfHeaders)
-			{
-				auto hdrSize = endOfHeaders - base + 4;
-				headers = LWebSocket::d->ConsumeBytes(hdrSize);
-
-				auto newLine = headers.Find("\r\n");
-				auto firstLine = headers(0, newLine);
-				auto parts = firstLine.SplitDelimit();
-				if (parts.Length() == 3)
-				{
-					method = parts[0];
-					path = parts[1];
-					protocol = parts[2];
-				}
-
-				int status = 200;
-				if (ReceiveHdrsCb)
-					status = ReceiveHdrsCb(path != NULL);
-
-				LString response;
-				response.Printf("HTTP/1.1 101 Switching Protocols\r\n"
-								"Upgrade: websocket\r\n"
-								"Connection: Upgrade\r\n");
-
-				auto SecWebSocketKey = LGetHeaderField(headers, "Sec-WebSocket-Key");
-				if (SecWebSocketKey)
-				{
-					LString raw;
-					raw.Printf("%s%s", SecWebSocketKey.Get(), LWebSocketBase::Key);
-					// d->Log->Print("raw=%s\n", raw.Get());
-
-					SHA1Context ctx;
-					SHA1Reset(&ctx);
-					SHA1Input(&ctx, (const uint8_t*)raw.Get(), (int)raw.Length());
-					int r = SHA1Result(&ctx);
-
-					// Yeah... seems to work.. but... hmmm
-					for (unsigned i=0; i<CountOf(ctx.Message_Digest); i++)
-						ctx.Message_Digest[i] = htonl(ctx.Message_Digest[i]);
-
-					// d->Log->Print("hash=%s\n", LToHex(ctx.Message_Digest, sizeof(ctx.Message_Digest), ' ').Get());
-
-					auto b64 = LToBase64(ctx.Message_Digest, sizeof(ctx.Message_Digest));
-
-					LString SecWebSocketAccept;
-					SecWebSocketAccept.Printf("Sec-WebSocket-Accept: %s\r\n", b64.Get());
-					response += SecWebSocketAccept;
-				}
-				response += "\r\n";
-
-				auto wr = sock->Write(response);
-				if (wr != response.Length())
-					d->Log->Print("%s:%i - failed to write full response. %i,%i\n", _FL, (int)wr, (int)response.Length());
-
-				#if 0
-				d->Log->Print("%s:%i got '%s', response:\n%s\n",
-					_FL,
-					path.Get(),
-					Indent(response).Get());
-				#endif
-			}
-		}
-
-		if (headers && used > 0)
-		{
-			// Check for websocket frame:
-			d->Log->Print("%s:%i have some used to look at.\n", _FL);
-			
-			LWebSocket::d->CheckMsg();
-		}
-	}
-	else
-	{
-		// Connection finished..
-		if (CloseCb)
-			CloseCb();
-		return ConnectClosed;
-	}
-	*/
-	
-	return ConnectOk;
 }
 
 LWebSocketServer::LWebSocketServer(LStream *log, int port)
