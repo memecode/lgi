@@ -176,7 +176,9 @@ class LJson
 		}
 		if (*e != '\"')
 			return false;
-		s.Set(c, e - c);
+		
+		s = LString::UnEscape(c, e - c);
+				
 		c = e + 1;
 		return true;
 	}

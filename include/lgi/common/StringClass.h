@@ -1191,6 +1191,27 @@ public:
 
 		auto *Out = s.Get();
 		auto *End = In + Len;
+
+		auto DoHex = [&](int chars)
+		{
+			int buf = 0;
+			for (int i=0; i<chars; i++)
+			{
+				buf = buf << 4; // shift existing data up a nibble
+				if (*In >= '0' && *In <= '9')
+					buf |= *In - '0';
+				else if (*In >= 'a' && *In <= 'f')
+					buf |= *In - 'a' + 10;
+				else if (*In >= 'A' && *In <= 'F')
+					buf |= *In - 'A' + 10;
+				else
+					return;
+				In++;
+			}
+			*Out++ = buf;
+			In--;
+		};
+
 		while (In < End)
 		{
 			if (*In == '\\')
@@ -1218,6 +1239,16 @@ public:
 						*Out++ = *In;
 						break;
 					case 0:
+						break;
+					case 'x':
+					case 'X':
+						In++; // consume the 'x'
+						DoHex(2);
+						break;
+					case 'u':
+					case 'U':
+						In++; // consume the 'u'
+						DoHex(4);
 						break;
 				}
 				if (*In)

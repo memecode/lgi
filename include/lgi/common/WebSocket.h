@@ -42,6 +42,8 @@ protected:
 	struct LWebSocketPriv *d;
 
 public:
+	bool Debug = false;
+	LStream *Log = NULL;
 	OnMsg MsgCb;
 	OnClose CloseCb;
 

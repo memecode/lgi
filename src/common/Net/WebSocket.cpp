@@ -120,6 +120,7 @@ struct LWebSocketPriv : public LWebSocketBase
 		// Read data
 		auto base = Data.AddressOf();
 		auto rd = Sock->Read(base + Used, Data.Length() - Used);
+		// LgiTrace("%s:%i - Got %i bytes\n", _FL, (int)rd);
 		if (rd <= 0)
 		{
 			Close();
@@ -134,7 +135,7 @@ struct LWebSocketPriv : public LWebSocketBase
 			if (end)
 			{
 				InHdr = ConsumeBytes(end - base + 4);
-				LgiTrace("InHdr=%s\n", InHdr.Get());
+				// LgiTrace("InHdr=%s\n", InHdr.Get());
 
 				if (Server)
 				{
@@ -460,6 +461,11 @@ bool LWebSocket::Close()
 
 bool LWebSocket::SendMessage(WsOpCode Op, char *Data, uint64 Len)
 {
+	if (Debug)
+		if (Log)
+			Log->Print("SendMessage %i\n", (int)Len);
+		else
+			LAssert(!"Setup a log handler.");
 	if (d->State != WsMessages)
 		return false;
 
@@ -501,10 +507,14 @@ bool LWebSocket::SendMessage(WsOpCode Op, char *Data, uint64 Len)
 
 	auto Sz = p.s8 - Hdr;
 	auto Wr = d->Write(Hdr, Sz);
+	if (Debug && Log)
+		Log->Print("...write1(%i)=%i\n", (int)Sz, (int)Wr);
 	if (Wr != Sz)
 		return d->Error("SendMessage.Hdr failed to write to socket");
 
 	Wr = d->Write(MaskData ? MaskData.Get() : (uint8_t*)Data, Len);
+	if (Debug && Log)
+		Log->Print("...write2(%i)=%i\n", (int)Len, (int)Wr);
 	if (Wr != Len)
 		return d->Error("SendMessage.Body failed to write to socket");
 
@@ -672,7 +682,12 @@ struct LWebSocketServerPriv :
 				for (auto &out: OutgoingMsgs)
 				{
 					if (Connections.HasItem(out.connect))
+					{
+						// out.connect->Debug = true;
+						// out.connect->Log = Log;
 						out.connect->SendMessage(out.msg);
+						// out.connect->Debug = false;
+					}
 				}
 				OutgoingMsgs.Empty();
 				Unlock();
