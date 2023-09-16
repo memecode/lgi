@@ -34,7 +34,7 @@ constexpr const char *LDateTime::MonthsLong[12];
 #if !defined(WINDOWS)
 	#define MIN_YEAR		1800
 #endif
-#define DEBUG_DST_INFO		1
+#define DEBUG_DST_INFO		0
 
 //////////////////////////////////////////////////////////////////////////////
 uint16 LDateTime::DefaultFormat = GDTF_DEFAULT;
