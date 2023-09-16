@@ -193,7 +193,7 @@ public:
 	virtual LDirectory *Clone();
 	
 	/// Gets the type code of the current entry. See the VT_?? defines for possible values.
-	virtual int GetType() const;
+	virtual LVolumeTypes GetType() const;
 
 	/// Converts a string to the 64-bit value returned from the date functions.
 	bool ConvertToTime(char *Str, int SLen, uint64 Time) const;

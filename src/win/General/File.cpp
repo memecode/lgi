@@ -1341,7 +1341,7 @@ long LDirectory::GetAttributes() const
 	return d->Data.dwFileAttributes;
 }
 
-int LDirectory::GetType() const
+LVolumeTypes LDirectory::GetType() const
 {
 	return IsDir() ? VT_FOLDER : VT_FILE;
 }
