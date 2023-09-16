@@ -1169,9 +1169,17 @@ void VcFolder::LogFile(const char *uri)
 		case VcHg:
 		case VcGit:
 		{
-			LString File = GetFilePart(uri);
+			FileToSelect = GetFilePart(uri);
+			if (!LFileExists(FileToSelect))
+			{
+				LFile::Path Abs(LocalPath());
+				Abs += FileToSelect;
+				if (Abs.Exists())
+					FileToSelect = Abs;
+			}
+
 			ParseParams *Params = new ParseParams(uri);
-			Args.Printf("log \"%s\"", File.Get());
+			Args.Printf("log \"%s\"", FileToSelect.Get());
 			IsLogging = StartCmd(Args, &VcFolder::ParseLog, Params, LogNormal);
 			break;
 		}
@@ -1918,6 +1926,7 @@ void VcFolder::InsertFiles(List<LListItem> &files)
 	d->Files->Insert(files);
 	if (FileToSelect)
 	{
+		LListItem *scroll = NULL;
 		for (auto f: files)
 		{
 			// Convert to an absolute path:
@@ -1927,7 +1936,11 @@ void VcFolder::InsertFiles(List<LListItem> &files)
 
 			bool match = p.GetFull().Equals(FileToSelect);
 			f->Select(match);
+			if (match)
+				scroll = f;
 		}
+		if (scroll)
+			scroll->ScrollTo();
 	}
 }
 
