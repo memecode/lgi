@@ -161,6 +161,7 @@ public:
 	DynFunc1(int, SSL_pending, SSL*, ssl);
 	DynFunc1(BIO *,	SSL_get_rbio, const SSL *, s);
 	DynFunc1(int, SSL_accept, SSL *, ssl);
+	DynFunc3(int, SSL_peek, SSL*, ssl, void*, buf, int, num);
 	
   	DynFunc1(SSL_CTX*, SSL_CTX_new, const SSL_METHOD*, meth);	
 	DynFunc3(int, SSL_CTX_load_verify_locations, SSL_CTX*, ctx, const char*, CAfile, const char*, CApath);
@@ -1353,6 +1354,14 @@ void SslSocket::IsBlocking(bool block)
 
 bool SslSocket::IsReadable(int TimeoutMs)
 {
+	char byte;
+	if (Ssl)
+	{
+		int peek = Library->SSL_peek(Ssl, &byte, 1);
+		if (peek > 0)
+			return true;
+	}
+
 	// Assign to local var to avoid a thread changing it
 	// on us between the validity check and the select.
 	// Which is important because a socket value of -1
@@ -1460,7 +1469,7 @@ ssize_t SslSocket::Write(const void *Data, ssize_t Len, int Flags)
 		return -1;
 	}
 
-	int r = 0;
+	int wr = 0;
 	if (d->UseSSLrw)
 	{
 		if (Ssl)
@@ -1470,8 +1479,16 @@ ssize_t SslSocket::Write(const void *Data, ssize_t Len, int Flags)
 
 			while (HasntTimedOut())
 			{
-				r = Library->SSL_write(Ssl, Data, (int)Len);
-				if (r <= 0)
+				wr = Library->SSL_write(Ssl, Data, (int)Len);
+				/*
+				if (d->Logger)
+				{
+					LString msg;
+					msg.Printf("........SSL_write(%i)=%i\n", (int)Len, (int)wr);
+					d->Logger->Write(msg.Get(), msg.Length());
+				}
+				*/
+				if (wr <= 0)
 				{
 					if (!Library->BIO_should_retry(Bio))
 						break;
@@ -1482,15 +1499,14 @@ ssize_t SslSocket::Write(const void *Data, ssize_t Len, int Flags)
 				}
 				else
 				{
-					DebugTrace("%s:%i - SSL_write(%p,%i)=%i\n", _FL, Data, Len, r);
-					OnWrite((const char*)Data, r);
+					DebugTrace("%s:%i - SSL_write(%p,%i)=%i\n", _FL, Data, Len, wr);
+					OnWrite((const char*)Data, wr);
 					break;
 				}
 			}
 		}
 		else
 		{
-			r = -1;
 			DebugTrace("%s:%i - No SSL\n", _FL);
 		}
 	}
@@ -1502,9 +1518,9 @@ ssize_t SslSocket::Write(const void *Data, ssize_t Len, int Flags)
 		{
 			if (!Library)
 				break;
-			r = Library->BIO_write(Bio, Data, (int)Len);
-			DebugTrace("%s:%i - BIO_write(%p,%i)=%i IsBlocking=%i\n", _FL, Data, Len, r, d->IsBlocking);
-			if (r <= 0)
+			wr = Library->BIO_write(Bio, Data, (int)Len);
+			DebugTrace("%s:%i - BIO_write(%p,%i)=%i IsBlocking=%i\n", _FL, Data, Len, wr, d->IsBlocking);
+			if (wr <= 0)
 			{
 				if (!Library->BIO_should_retry(Bio))
 					break;
@@ -1515,24 +1531,24 @@ ssize_t SslSocket::Write(const void *Data, ssize_t Len, int Flags)
 			}
 			else
 			{
-				OnWrite((const char*)Data, r);
+				OnWrite((const char*)Data, wr);
 				break;
 			}
 		}			
 	}
 	
-	if (r > 0)
+	if (wr > 0)
 	{
 		LStream *l = GetLogStream();
 		if (l)
-			l->Write(Data, r);
+			l->Write(Data, wr);
 	}
 	else if (Ssl)
 	{	
-		auto Err = Library->SSL_get_error(Ssl, r);
+		auto Err = Library->SSL_get_error(Ssl, wr);
 		if (Err == SSL_ERROR_ZERO_RETURN)
 		{
-			DebugTrace("%s:%i - ::Write closing %i\n", _FL, r);
+			DebugTrace("%s:%i - ::Write closing %i\n", _FL, wr);
 			Close();
 		}
 		else if (Err != SSL_ERROR_WANT_WRITE &&
@@ -1545,7 +1561,7 @@ ssize_t SslSocket::Write(const void *Data, ssize_t Len, int Flags)
 		}
 	}
 
-	return r;
+	return wr;
 }
 
 ssize_t SslSocket::Read(void *Data, ssize_t Len, int Flags)
