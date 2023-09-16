@@ -42,7 +42,7 @@ add_executable(Lvc ${APP_TYPE}
     ../src/common/Text/DeEscape.cpp
     ../src/common/Text/XmlTreeUi.cpp
     ../src/common/Widgets/ControlTree.cpp
-    Src/BlameUi.cpp
+    Src/BrowseUi.cpp
     Src/DropDownBtn.cpp
     Src/Main.cpp
     Src/SshConnection.cpp

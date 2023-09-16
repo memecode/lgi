@@ -105,6 +105,9 @@ enum AppIds
 	IDM_EDIT,
 	IDM_REMOTE_URL,
 	IDM_DELETE,
+	IDC_TABS,
+	IDC_BLAME,
+	IDC_RAW
 };
 
 enum AppMessages
@@ -239,13 +242,33 @@ struct AppPriv
 
 #include "SshConnection.h"
 
-class BlameUi : public LWindow
+struct BlameLine
 {
-	struct BlameUiPriv *d;
+	LString user;
+	LString ref;
+	LString date;
+	LString line;
+	LString src;
+
+	static bool Parse(VersionCtrl type, LArray<BlameLine> &out, LString in);
+};
+
+class BrowseUi : public LWindow
+{
+	struct BrowseUiPriv *d;
 
 public:
-	BlameUi(AppPriv *priv, VcFolder *folder, LString Output);
-	~BlameUi();
+	enum TMode
+	{
+		TBlame,
+		TLog
+	};
+
+	BrowseUi(TMode mode, AppPriv *priv, VcFolder *folder, LString Context);
+	~BrowseUi();
+
+	void ParseBlame(LArray<BlameLine> &lines, LString raw);
+	void ParseLog(LString Log);
 };
 
 class DropDownBtn : public LDropDown, public ResObject

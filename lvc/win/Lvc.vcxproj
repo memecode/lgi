@@ -176,7 +176,7 @@
     <ClCompile Include="..\..\src\common\Lgi\LgiMain.cpp" />
     <ClCompile Include="..\..\src\common\Text\DeEscape.cpp" />
     <ClCompile Include="..\..\src\common\Text\XmlTreeUi.cpp" />
-    <ClCompile Include="..\Src\BlameUi.cpp" />
+    <ClCompile Include="..\Src\BrowseUi.cpp" />
     <ClCompile Include="..\Src\DropDownBtn.cpp" />
     <ClCompile Include="..\Src\Main.cpp" />
     <ClCompile Include="..\Src\PatchViewer.cpp" />

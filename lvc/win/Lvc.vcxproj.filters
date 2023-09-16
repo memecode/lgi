@@ -20,6 +20,9 @@
     <Filter Include="Source Files\PatchViewer">
       <UniqueIdentifier>{9ebbbfd3-1106-4ecf-b05d-f0366063de49}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Browse">
+      <UniqueIdentifier>{96f59874-2e83-4564-9706-35afdc3494e2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Src\Main.cpp">
@@ -55,8 +58,8 @@
     <ClCompile Include="..\..\src\common\Text\DeEscape.cpp">
       <Filter>Source Files\Lgi</Filter>
     </ClCompile>
-    <ClCompile Include="..\Src\BlameUi.cpp">
-      <Filter>Source Files\Lgi</Filter>
+    <ClCompile Include="..\Src\BrowseUi.cpp">
+      <Filter>Source Files\Browse</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

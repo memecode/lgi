@@ -181,6 +181,7 @@ void VcFile::OnMouseClick(LMouse &m)
 			}					
 			s.AppendItem("Browse To", IDM_BROWSE, !LocalPath.IsEmpty());
 			s.AppendItem("Log", IDM_LOG_FILE);
+			s.AppendItem("Blame", IDM_BLAME);
 
 			int CurEol = LocalPath ? GetEol(LocalPath) : 0;
 			auto Ln = s.AppendSub("Line Endings");

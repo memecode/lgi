@@ -218,6 +218,11 @@ class VcFolder : public LTreeItem
 	LArray<CommitField> Fields;
 	LArray<std::function<void()>> OnVcsTypeEvents;
 
+	// This is set when a blame or log is looking at a particular file, 
+	// and wants it selected after the file list is populated
+	LString FileToSelect;
+	void InsertFiles(List<LListItem> &files);
+
 	// Git specific
 	LHashTbl<ConstStrKey<char>,LString> GitNames;
 	void AddGitName(LString Hash, LString Name);
@@ -337,7 +342,7 @@ public:
 	LString GetFilePart(const char *uri);
 	void FilterCurrentFiles();
 	void GetRemoteUrl(std::function<void(LString)> Callback);
-	void SelectCommit(LWindow *Parent, LString Commit);
+	void SelectCommit(LWindow *Parent, LString Commit, LString Path);
 
 	void OnPulse();
 	void OnUpdate(const char *Rev);

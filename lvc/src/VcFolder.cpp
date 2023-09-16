@@ -593,7 +593,7 @@ void VcFolder::GetRemoteUrl(std::function<void(LString)> Callback)
 	}
 }
 
-void VcFolder::SelectCommit(LWindow *Parent, LString Commit)
+void VcFolder::SelectCommit(LWindow *Parent, LString Commit, LString Path)
 {
 	bool requireFullMatch = true;
 	if (GetType() == VcGit)
@@ -612,6 +612,7 @@ void VcFolder::SelectCommit(LWindow *Parent, LString Commit)
 		}
 	}
 	
+	FileToSelect = Path;
 	if (ExistingMatch)
 	{
 		ExistingMatch->Select(true);
@@ -620,12 +621,21 @@ void VcFolder::SelectCommit(LWindow *Parent, LString Commit)
 	{
 		// If the commit isn't there, it's likely that the log item limit was reached before the commit was
 		// found. In which case we should go get just that commit and add it:
+		d->Files->Empty();
+
+		// Diff just that ref:
+		LString a;
 		switch (GetType())
 		{
 			case VcGit:
 			{
-				LString a;
 				a.Printf("diff %s~ %s", Commit.Get(), Commit.Get());
+				StartCmd(a, &VcFolder::ParseSelectCommit);
+				break;
+			}
+			case VcHg:
+			{
+				a.Printf("log -p -r %s", Commit.Get());
 				StartCmd(a, &VcFolder::ParseSelectCommit);
 				break;
 			}
@@ -645,6 +655,9 @@ bool VcFolder::ParseSelectCommit(int Result, LString s, ParseParams *Params)
 	switch (GetType())
 	{
 		case VcGit:
+		case VcHg:
+		case VcSvn:
+		case VcCvs:
 		{
 			ParseDiff(Result, s, Params);
 			break;
@@ -1900,6 +1913,24 @@ void VcFolder::Diff(VcFile *file)
 	}
 }
 
+void VcFolder::InsertFiles(List<LListItem> &files)
+{
+	d->Files->Insert(files);
+	if (FileToSelect)
+	{
+		for (auto f: files)
+		{
+			// Convert to an absolute path:
+			auto relPath = f->GetText(COL_FILENAME);
+			LFile::Path p(LocalPath());
+			p += relPath;
+
+			bool match = p.GetFull().Equals(FileToSelect);
+			f->Select(match);
+		}
+	}
+}
+
 bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 {
 	LAssert(IsWorking || Rev.Get() != NULL);
@@ -1908,6 +1939,7 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 	{
 		case VcGit:
 		{
+			List<LListItem> Files;
 			LString::Array a = s.Split("\n");
 			LString Diff;
 			VcFile *f = NULL;
@@ -1939,7 +1971,7 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 					f->SetText(State, COL_STATE);
 					f->SetText(Fn.Replace("\\","/"), COL_FILENAME);
 					f->GetStatus();
-					d->Files->Insert(f);
+					Files.Insert(f);
 				}
 				else if (!_strnicmp(Ln, "new file", 8))
 				{
@@ -1966,6 +1998,7 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 					Diff += a[i];
 				}
 			}
+			InsertFiles(Files);
 			if (f && Diff)
 			{
 				f->SetDiff(Diff);
@@ -2030,11 +2063,12 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 				f->SetDiff(Sep.Join(Diffs));
 				Diffs.Empty();
 			}
-			d->Files->Insert(Files);
+			InsertFiles(Files);
 			break;
 		}
 		case VcSvn:
 		{
+			List<LListItem> Files;
 			LString::Array a = s.Replace("\r").Split("\n");
 			LString Diff;
 			VcFile *f = NULL;
@@ -2063,7 +2097,7 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 					f->SetText(Fn.Replace("\\","/"), COL_FILENAME);
 					f->SetText("M", COL_STATE);
 					f->GetStatus();
-					d->Files->Insert(f);
+					Files.Insert(f);
 				}
 				else if (!_strnicmp(Ln, "------", 6))
 				{
@@ -2087,6 +2121,7 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 					}
 				}
 			}
+			InsertFiles(Files);
 			if (f && Diff)
 			{
 				f->SetDiff(Diff);
@@ -4221,9 +4256,60 @@ bool VcFolder::Resolve(const char *Path, LvcResolve Type)
 	return false;
 }
 
+bool BlameLine::Parse(VersionCtrl type, LArray<BlameLine> &out, LString in)
+{
+	auto lines = in.SplitDelimit("\n", -1, false);
+
+	switch (type)
+	{
+		case VcGit:
+		{
+			break;
+		}
+		case VcHg:
+		{
+			for (auto &ln: lines)
+			{
+				auto s = ln.Get();
+				auto eUser = strchr(s, ' ');
+				if (!eUser)
+					continue;
+				auto eRef = strchr(eUser, ':');
+				if (!eRef)
+					continue;
+				auto &o = out.New();
+				o.user.Set(s, eUser++ - s);
+				o.ref.Set(eUser, eRef - eUser);
+				o.src = eRef + 1;
+			}
+			break;
+		}
+		case VcSvn:
+		{
+			break;
+		}
+		default:
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 bool VcFolder::ParseBlame(int Result, LString s, ParseParams *Params)
 {
-	new BlameUi(d, this, s);
+	if (!Params)
+	{
+		LAssert(!"Need the path in the params.");
+		return false;
+	}
+
+	LArray<BlameLine> lines;
+	if (BlameLine::Parse(GetType(), lines, s))
+		if (auto ui = new BrowseUi(BrowseUi::TBlame, d, this, Params->Str))
+			ui->ParseBlame(lines, s);
+
 	return false;
 }
 
@@ -4232,28 +4318,31 @@ bool VcFolder::Blame(const char *Path)
 	if (!Path)
 		return false;
 
+	auto file = GetFilePart(Path);
+	LAutoPtr<ParseParams> Params(new ParseParams(file));
+
 	LUri u(Path);
 	switch (GetType())
 	{
 		case VcGit:
 		{
 			LString a;
-			a.Printf("-P blame \"%s\"", u.sPath.Get());
-			return StartCmd(a, &VcFolder::ParseBlame);
+			a.Printf("-P blame \"%s\"", file.Get());
+			return StartCmd(a, &VcFolder::ParseBlame, Params.Release());
 			break;
 		}
 		case VcHg:
 		{
 			LString a;
-			a.Printf("annotate -un \"%s\"", u.sPath.Get());
-			return StartCmd(a, &VcFolder::ParseBlame);
+			a.Printf("annotate -un \"%s\"", file.Get());
+			return StartCmd(a, &VcFolder::ParseBlame, Params.Release());
 			break;
 		}
 		case VcSvn:
 		{
 			LString a;
-			a.Printf("blame \"%s\"", u.sPath.Get());
-			return StartCmd(a, &VcFolder::ParseBlame);
+			a.Printf("blame \"%s\"", file.Get());
+			return StartCmd(a, &VcFolder::ParseBlame, Params.Release());
 			break;
 		}
 		default:
