@@ -520,7 +520,7 @@ LApp *LApp::ObjInstance()
 	return TheApp;
 }
 
-bool LApp::IsOk()
+bool LApp::IsOk() const
 {
 	bool Status =
 					#if !defined(__clang__)
