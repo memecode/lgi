@@ -904,6 +904,10 @@ int LSocket::Open(const char *HostAddr, int Port)
 							Port);
 					OnInformation(Info);
 				}
+				else
+				{
+					Error();
+				}
 			}
 
 			if (Status)
