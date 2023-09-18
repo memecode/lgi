@@ -69,7 +69,7 @@ Source =	src/VcFolder.cpp \
 			src/PatchViewer.cpp \
 			src/Main.cpp \
 			src/DropDownBtn.cpp \
-			src/BlameUi.cpp \
+			src/BrowseUi.cpp \
 			../src/common/Widgets/ControlTree.cpp \
 			../src/common/Text/XmlTreeUi.cpp \
 			../src/common/Text/DeEscape.cpp \
