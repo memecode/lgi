@@ -44,6 +44,25 @@ OsAppArguments::~OsAppArguments()
 	DeleteObj(d);
 }
 
+bool OsAppArguments::Get(const char *Option, const char **Value)
+{
+	for (int i=1; i<Args; i++)
+	{
+		if (Arg[i][0] == '-' &&
+			!Stricmp(Arg[i]+1, Option))
+		{
+			if (Value)
+			{
+				if (i+1 >= Args)
+					return false;
+				*Value = Arg[i+1];
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
 void OsAppArguments::Set(const char *CmdLine)
 {
 	d->Str.Reset();

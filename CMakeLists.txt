@@ -76,23 +76,25 @@ if (NOT EXISTS "${ICONV_PATH}/include")
 	endif()
 endif()
 
-if (HAIKU)
-	find_package(PNG REQUIRED)
-	set(LIBPNG_TARGET PNG::PNG)
-else()
-	get_filename_component(PNG_LIBRARY "${CODELIB}/libpng" ABSOLUTE)
-	if (EXISTS ${PNG_LIBRARY} AND NOT TARGET libpng16)
-		add_subdirectory(${PNG_LIBRARY} libpng)
-		set(LIBPNG_TARGET libpng16)
+if (NOT LGI_LIB_ONLY)
+	if (HAIKU)
+		find_package(PNG REQUIRED)
+		set(LIBPNG_TARGET PNG::PNG)
+	else()
+		get_filename_component(PNG_LIBRARY "${CODELIB}/libpng" ABSOLUTE)
+		if (EXISTS ${PNG_LIBRARY} AND NOT TARGET libpng16)
+			add_subdirectory(${PNG_LIBRARY} libpng)
+			set(LIBPNG_TARGET libpng16)
+		endif()
 	endif()
-endif()
 
-if (HAIKU)
-	find_package(JPEG REQUIRED)
-else()
-	get_filename_component(JPEG_LIBRARY "${CODELIB}/libjpeg-9a" ABSOLUTE)
-	if (NOT TARGET libjpeg9a)
-		add_subdirectory(${CODELIB}/libjpeg-9a libjpeg)
+	if (HAIKU)
+		find_package(JPEG REQUIRED)
+	else()
+		get_filename_component(JPEG_LIBRARY "${CODELIB}/libjpeg-9a" ABSOLUTE)
+		if (NOT TARGET libjpeg9a)
+			add_subdirectory(${CODELIB}/libjpeg-9a libjpeg)
+		endif()
 	endif()
 endif()
 
@@ -269,6 +271,7 @@ set (CommonSource
 	include/lgi/common/Slider.h
 	include/lgi/common/Progress.h
 	include/lgi/common/ClipBoard.h
+	include/lgi/common/FileSelect.h
 	)
 
 if (APPLE)
@@ -490,7 +493,8 @@ if (APPLE)
 		src/common/General/DateTime.cpp
 		src/mac/common/MemDC.cpp
 		src/mac/common/ScreenDC.cpp
-		src/mac/cocoa/General.cpp		
+		src/mac/cocoa/General.cpp
+		src/posix/SubProcess.cpp
 		)
 
 	set_source_files_properties(${OBJCPP_SOURCE} PROPERTIES 
@@ -636,11 +640,15 @@ if(LINUX)
 	add_subdirectory(src/linux/CrashHandler)
 endif()
 
-# main apps
-add_subdirectory(Ide)
-add_subdirectory(Lvc)
-add_subdirectory(ResourceEditor)
+if (LGI_LIB_ONLY)
+	message(STATUS "Skipping LGI apps, tests and utils")
+else()
+	# main apps
+	add_subdirectory(Ide)
+	add_subdirectory(Lvc)
+	add_subdirectory(ResourceEditor)
 
-# other subfolders of smaller utils and tests
-add_subdirectory(utils)
-add_subdirectory(test)
+	# other subfolders of smaller utils and tests
+	add_subdirectory(utils)
+	add_subdirectory(test)
+endif()

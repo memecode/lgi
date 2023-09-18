@@ -98,7 +98,7 @@ list(APPEND ResourceFiles
 if (APPLE)
 
 	set(MacResourceFiles
-		MacCocoa/Info.plist
+		mac/Info.plist
 		Resources/mac-icon.icns)
 	set(APP_TYPE MACOSX_BUNDLE)
 	set_source_files_properties(${MacResourceFiles} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")

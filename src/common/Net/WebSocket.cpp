@@ -326,7 +326,7 @@ struct LWebSocketPriv : public LWebSocketBase
 			Digest[i] = htonl(Ctx.Message_Digest[i]);
 
 		auto b64 = LToBase64(Digest, sizeof(Digest));
-		if (b64 <= 0)
+		if (!b64)
 			return Error("ConvertBinaryToBase64 failed");
 
 		OutHdr.Printf("HTTP/1.1 %i Switching Protocols\r\n"
@@ -382,7 +382,7 @@ bool LWebSocket::Open(const char *uri, int port)
 		GET /memecodeApp HTTP/1.1
 		Host: localhost:4567
 		User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/117.0
-		Accept: * /*
+		Accept: * *
 		Accept-Language: en-US,en;q=0.5
 		Accept-Encoding: gzip, deflate, br
 		Sec-WebSocket-Version: 13
@@ -462,10 +462,12 @@ bool LWebSocket::Close()
 bool LWebSocket::SendMessage(WsOpCode Op, char *Data, uint64 Len)
 {
 	if (Debug)
+	{
 		if (Log)
 			Log->Print("SendMessage %i\n", (int)Len);
 		else
 			LAssert(!"Setup a log handler.");
+	}
 	if (d->State != WsMessages)
 		return false;
 

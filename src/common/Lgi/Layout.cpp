@@ -263,7 +263,7 @@ LMessage::Result LLayout::OnEvent(LMessage *Msg)
         if (VScroll) VScroll->OnEvent(Msg);
         if (HScroll) HScroll->OnEvent(Msg);
     }
-	int Status = LView::OnEvent(Msg);
+	auto Status = LView::OnEvent(Msg);
 	if (Msg->Msg() == M_CHANGE &&
 		Status == -1 &&
 		GetParent())

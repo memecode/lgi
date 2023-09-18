@@ -544,7 +544,7 @@ LFont *LTextView3::GetFont()
 		}
 		else if (GetCss())
 		{
-			if (Font = new LFont)
+			if ((Font = new LFont))
 				Font->CreateFromCss(GetCss());
 		}
 		

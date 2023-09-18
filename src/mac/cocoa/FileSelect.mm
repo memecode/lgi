@@ -50,7 +50,7 @@ public:
 LString LFileSelectPrivate::InitPath;
 
 //////////////////////////////////////////////////////////////////////////
-LFileSelect::LFileSelect()
+LFileSelect::LFileSelect(LViewI *Window)
 {
 	d = new LFileSelectPrivate(this);
 }
@@ -161,7 +161,7 @@ CharPropImpl(InitialDir, d->InitPath);
 CharPropImpl(Title, d->Title);
 CharPropImpl(DefaultExtension, d->DefExt);
    
-bool LFileSelect::Open()
+void LFileSelect::Open(SelectCb Cb)
 {
 	auto openDlg = [NSOpenPanel openPanel];
 
@@ -186,7 +186,7 @@ bool LFileSelect::Open()
 	return result == NSModalResponseOK;
 }
 
-bool LFileSelect::OpenFolder()
+void LFileSelect::OpenFolder(SelectCb Cb)
 {
 	NSOpenPanel* openDlg = [NSOpenPanel openPanel];
 
@@ -210,7 +210,7 @@ bool LFileSelect::OpenFolder()
 	return result == NSModalResponseOK;
 }
 
-bool LFileSelect::Save()
+void LFileSelect::Save(SelectCb Cb)
 {
 	auto saveDlg = [NSSavePanel savePanel];
 

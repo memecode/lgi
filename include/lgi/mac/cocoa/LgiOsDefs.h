@@ -49,13 +49,14 @@ class OsAppArguments
 	struct OsAppArgumentsPriv *d;
 
 public:
-	int Args;
-	const char **Arg;
+	int Args = 0;
+	const char **Arg = NULL;
 
 	OsAppArguments(int args = 0, const char **arg = 0);
 	~OsAppArguments();
 
 	void Set(const char *CmdLine);
+	bool Get(const char *Option, const char **Value);
 	OsAppArguments &operator =(OsAppArguments &a);
 };
 
