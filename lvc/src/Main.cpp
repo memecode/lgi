@@ -6,6 +6,7 @@
 #include "lgi/common/Tree.h"
 #include "lgi/common/FileSelect.h"
 #include "lgi/common/StructuredLog.h"
+#include "lgi/common/PopupNotification.h"
 
 #include "Lvc.h"
 #include "resdefs.h"
@@ -1356,7 +1357,7 @@ public:
 		auto Load = [this](const char *Fld)
 		{
 			// Check the folder isn't already loaded...
-			bool Has = false;
+			VcFolder *Has = NULL;
 			LArray<VcFolder*> Folders;
 			Tree->GetAll(Folders);
 			for (auto f: Folders)
@@ -1364,12 +1365,17 @@ public:
 				if (f->GetUri().IsFile() &&
 					!Stricmp(f->LocalPath(), Fld))
 				{
-					Has = true;
+					Has = f;
 					break;
 				}
 			}
 
-			if (!Has)
+			if (Has)
+			{
+				Has->Select(true);
+				LPopupNotification::Message(this, LString::Fmt("'%s' is already open", Has->LocalPath()));
+			}
+			else
 			{
 				LUri u;
 				u.SetFile(Fld);
