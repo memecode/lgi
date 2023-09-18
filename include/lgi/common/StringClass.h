@@ -1105,6 +1105,17 @@ public:
 		return Bytes;
 	}
 
+	// Formats a string and returns it
+	static LString Fmt(const char *Fmt, ...)
+	{
+		LString s;
+		va_list Arg;
+		va_start(Arg, Fmt);
+		s.Printf(Arg, Fmt);
+		va_end(Arg);
+		return s;
+	}
+
 	/// Prints a varargs string
 	int Printf(va_list &Arg, const char *Fmt)
 	{

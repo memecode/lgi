@@ -175,18 +175,24 @@ bool LSocket::EnumInterfaces(LArray<Interface> &Out)
 					auto pIpAddress = &(pAdapterInfo->IpAddressList);
 					while (pIpAddress != 0)
 					{
-						auto &out = Out.New();
-						out.Ip4 = LIpToInt(pIpAddress->IpAddress.String);
-						out.Netmask4 = LIpToInt(pIpAddress->IpMask.String);
+						auto Ip4 = LIpToInt(pIpAddress->IpAddress.String);
+						auto Netmask4 = LIpToInt(pIpAddress->IpMask.String);
 
-						LString keyName;
-						keyName.Printf(	"HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Network\\{4D36E972-E325-11CE-BFC1-08002BE10318}\\%s\\Connection",
-										pAdapterInfo->AdapterName);
-						LRegKey key(false, keyName);
-						if (key.IsOk())
-							out.Name = key.GetStr("Name");
-						else
-							LgiTrace("%s:%i - Error getting '%s'\n", _FL, keyName.Get());
+						if (Ip4 && Netmask4)
+						{
+							auto &out = Out.New();
+							out.Ip4 = Ip4;
+							out.Netmask4 = Netmask4;
+
+							LString keyName;
+							keyName.Printf(	"HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Network\\{4D36E972-E325-11CE-BFC1-08002BE10318}\\%s\\Connection",
+											pAdapterInfo->AdapterName);
+							LRegKey key(false, keyName);
+							if (key.IsOk())
+								out.Name = key.GetStr("Name");
+							else
+								LgiTrace("%s:%i - Error getting '%s'\n", _FL, keyName.Get());
+						}
 
 						pIpAddress = pIpAddress->Next;
 					}
@@ -898,6 +904,10 @@ int LSocket::Open(const char *HostAddr, int Port)
 							Port);
 					OnInformation(Info);
 				}
+				else
+				{
+					Error();
+				}
 			}
 
 			if (Status)
@@ -1381,7 +1391,7 @@ void LSocket::SetBroadcast(bool isBroadcast)
 
 bool LSocket::AddMulticastMember(uint32_t MulticastIp, uint32_t LocalInterface)
 {
-	if (!MulticastIp)
+	if (!MulticastIp || !LocalInterface)
 		return false;
 
 	struct ip_mreq mreq;

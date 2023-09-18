@@ -80,7 +80,7 @@ struct BrowseItem : public LListItem
 	BrowseUiPriv *d = NULL;
 	LColour *refColour = NULL;
 	
-	BrowseItem(BrowseUiPriv *priv, BlameLine &ln, LDateTime &now, LColour *refCol) :
+	BrowseItem(BrowseUiPriv *priv, BlameLine &ln, LDateTime &now, LColour *refCol, int &lineNo) :
 		refColour(refCol)
 	{
 		d = priv;
@@ -96,8 +96,13 @@ struct BrowseItem : public LListItem
 		#endif
 			SetText(ln.date, TDate);
 
-		SetText(ln.line, TLine);
+		if (ln.line)
+			SetText(ln.line, TLine);
+		else
+			SetText(LString::Fmt("%i", lineNo), TLine);
 		SetText(ln.src, TSrc);
+
+		lineNo++;
 	}
 	
 	void OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c) override
@@ -209,13 +214,14 @@ void BrowseUi::ParseBlame(LArray<BlameLine> &lines, LString raw)
 	now.SetNow();
 
 	List<LListItem> items;
+	int lineNo = 1;
 	for (auto ln: lines)
 	{
 		auto col = d->Colours.Find(ln.ref);
 		if (!col)
 			d->Colours.Add(ln.ref, col = d->NewColour());
 
-		items.Insert(new BrowseItem(d, ln, now, col));
+		items.Insert(new BrowseItem(d, ln, now, col, lineNo));
 	}
 
 	d->Blame->Insert(items);
