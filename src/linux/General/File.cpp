@@ -1249,12 +1249,20 @@ LString LDirectory::FileName() const
 
 bool LDirectory::Path(char *s, int BufLen) const
 {
-	if (!s)
-	{
+	if (!s || BufLen <= 4)
 		return false;
-	}
 
-	return LMakePath(s, BufLen, d->BasePath, GetName());
+	// We could just do LMakePath, but then it'll expand '~' names. Which
+	// would break things.
+	// return LMakePath(s, BufLen, d->BasePath, GetName());
+	
+	auto end = s + BufLen;
+	strcpy_s(s, BufLen, d->BasePath);
+	auto c = s + strlen(s);
+	if (c > s && c[-1] != DIR_CHAR)
+		*c++ = DIR_CHAR;
+	strcpy_s(c, end - c, GetName());	
+	return true;
 }
 
 LVolumeTypes LDirectory::GetType() const
