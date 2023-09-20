@@ -369,22 +369,25 @@ bool LGetAppsForMimeType(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 						// get classes location
 						LRegKey ExtEntry(false, "HKEY_CLASSES_ROOT\\%s", Ext);
 						LRegKey TypeEntry(false, "HKEY_CLASSES_ROOT\\%s\\shell\\open\\command", ExtEntry.GetStr());
-						char *Path = TypeEntry.GetStr();
-						if (Path)
+						if (TypeEntry.IsOk())
 						{
-							const char *c = Path;
-							char *Part = LTokStr(c);
-							if (Part)
+							auto Path = TypeEntry.GetStr();
+							if (Path)
 							{
-								char AppPath[256];
-								_snprintf_s(AppPath, sizeof(AppPath), "\"%s\"", Part);
-								Status = _GetApps_Add(Apps, AppPath);
+								const char *c = Path;
+								char *Part = LTokStr(c);
+								if (Part)
+								{
+									char AppPath[256];
+									_snprintf_s(AppPath, sizeof(AppPath), "\"%s\"", Part);
+									Status = _GetApps_Add(Apps, AppPath);
 
-								DeleteArray(Part);
-							}
-							else
-							{
-								Status = _GetApps_Add(Apps, Path);
+									DeleteArray(Part);
+								}
+								else
+								{
+									Status = _GetApps_Add(Apps, Path);
+								}
 							}
 						}
 					}
