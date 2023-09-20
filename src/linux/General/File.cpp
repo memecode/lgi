@@ -535,7 +535,8 @@ struct LVolumePriv
 {
 	LVolume *Owner = NULL;
 	int64 Size = 0, Free = 0;
-	int Type = VT_NONE, Flags = 0;
+	LVolumeTypes Type = VT_NONE;
+	int Flags = 0;
 	LSystemPath SysPath = LSP_ROOT;
 	LString Name, Path;
 	LVolume *NextVol = NULL, *ChildVol = NULL;
@@ -740,7 +741,7 @@ const char *LVolume::Path() const
     return d->Path;
 }
 
-int LVolume::Type() const
+LVolumeTypes LVolume::Type() const
 {
     return d->Type;
 }
