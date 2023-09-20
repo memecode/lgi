@@ -390,7 +390,7 @@ struct LVolumePriv
 {
 	LString Name;
 	LString Path;
-	int Type = VT_NONE;
+	LVolumeTypes Type = VT_NONE;
 	int Flags = 0;	// VA_??
 	int64 Size = 0;
 	int64 Free = 0;
@@ -562,13 +562,13 @@ LVolume::~LVolume()
 	DeleteObj(d);
 }
 
-const char *LVolume::Name() const { return d->Name; }
-const char *LVolume::Path() const { return d->Path; }
-int LVolume::Type()			const { return d->Type; } // VT_??
-int LVolume::Flags()		const { return d->Flags; }
-uint64 LVolume::Size()		const { return d->Size; }
-uint64 LVolume::Free()		const { return d->Free; }
-LSurface *LVolume::Icon()	const { return d->Icon; }
+const char *LVolume::Name()		const { return d->Name; }
+const char *LVolume::Path()		const { return d->Path; }
+LVolumeTypes LVolume::Type()	const { return d->Type; } // VT_??
+int LVolume::Flags()			const { return d->Flags; }
+uint64 LVolume::Size()			const { return d->Size; }
+uint64 LVolume::Free()			const { return d->Free; }
+LSurface *LVolume::Icon()		const { return d->Icon; }
 
 bool LVolume::IsMounted() const
 {

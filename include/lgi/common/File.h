@@ -218,7 +218,7 @@ public:
 
 	const char *Name() const;
 	const char *Path() const;
-	int Type() const;
+	LVolumeTypes Type() const;
 	int Flags() const;
 	uint64 Size() const;
 	uint64 Free() const;
