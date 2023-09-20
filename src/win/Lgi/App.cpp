@@ -265,6 +265,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *AppName, LAppArguments *Opts)
 	TheApp = this;
 	LAssert(AppName != NULL);
 	Name(AppName);
+	LThread::RegisterThread(GetCurrentThreadId(), "LApp");
 
 int64 Time = LCurrentTime();
 #define DumpTime(str) /* \
@@ -293,9 +294,7 @@ DumpTime("start");
 
 	// Private data
 	d = new LAppPrivate(this);
-	char Mime[256];
-	sprintf_s(Mime, sizeof(Mime), "application/x-%s", AppName);
-	d->Mime.Reset(NewStr(Mime));
+	d->Mime.Printf("application/x-%s", AppName);
 
 DumpTime("priv");
 
@@ -315,11 +314,7 @@ DumpTime("priv");
 			ProductVer = ParseVer(pVersionResource, "StringFileInfo.0c0904b0.ProductVersion");
 		}
 		if (ProductName && ProductVer)
-		{
-			char s[256];
-			sprintf_s(s, sizeof(s), "%s-%s", ProductName.Get(), ProductVer.Get());
-			d->ProductId.Reset(NewStr(s));
-		}
+			d->ProductId.Printf("%s-%s", ProductName.Get(), ProductVer.Get());
 
 		#if !defined(_DEBUG)
 		_PrevExceptionHandler = SetUnhandledExceptionFilter(_ExceptionFilter_Redir);

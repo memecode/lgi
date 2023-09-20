@@ -16,7 +16,7 @@ public:
 	LLibrary *SkinLib = NULL;
 	OsThread GuiThread = NULL;
 	int LinuxWine = -1;
-	LAutoString Mime, ProductId;
+	LString Mime, ProductId;
 	bool ThemeAware = true;
 
 	/// Any fonts needed for styling the elements

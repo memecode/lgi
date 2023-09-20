@@ -37,7 +37,7 @@ uint WINAPI ThreadEntryPoint(void *i)
 
         while (Thread->State == LThread::THREAD_INIT)
 		{
-			LSleep(5);
+			LSleep(1);
 			if (LCurrentTime() - Start > 2000)
 			{
 				// If the thread object doesn't set the running state we're
@@ -50,6 +50,7 @@ uint WINAPI ThreadEntryPoint(void *i)
 
 		if (Thread->State == LThread::THREAD_RUNNING)
 		{
+
 			#ifdef _MSC_VER
             // Set the name if provided...
             if (Thread->Name)
@@ -57,15 +58,17 @@ uint WINAPI ThreadEntryPoint(void *i)
                 THREADNAME_INFO info;
                 info.szName = Thread->Name;
                 info.dwThreadID = Thread->ThreadId;
-                __try
+                // __try
                 {
                     RaiseException( MS_VC_EXCEPTION, 0, sizeof(info)/sizeof(ULONG_PTR), (ULONG_PTR*)&info );
                 }
-                __except(EXCEPTION_CONTINUE_EXECUTION)
+                // __except(EXCEPTION_CONTINUE_EXECUTION)
                 {
                 }
             }
             #endif
+
+			LThread::RegisterThread(GetCurrentThreadId(), Thread->Name);
 
 			// Ok now we're ready to go...
 			Thread->OnBeforeMain();

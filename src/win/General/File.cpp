@@ -1468,7 +1468,10 @@ public:
 			if (ThreadWarn)
 			{
 				ThreadWarn = false;
-				LgiTrace("%s:%i - Warning: multi-threaded file access (me=%x, user=%x).\n", _FL, Cur, UseId);
+				LgiTrace("%s:%i - Warning: multi-threaded file access (me=%i/%s, user=%i/%s).\n",
+					_FL,
+					Cur, LThread::GetThreadName(Cur),
+					UseId, LThread::GetThreadName(UseId));
 			}
 			return false;
 		}
