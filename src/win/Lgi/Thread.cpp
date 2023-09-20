@@ -25,6 +25,11 @@ struct THREADNAME_INFO
 };
 #pragma pack(pop)
 
+static void SetThreadName(const char *name)
+{
+	LThread::RegisterThread(GetCurrentThreadId(), name);
+}
+
 uint WINAPI ThreadEntryPoint(void *i)
 {
 #if defined(_MT) || defined(__MINGW32__)
@@ -58,17 +63,17 @@ uint WINAPI ThreadEntryPoint(void *i)
                 THREADNAME_INFO info;
                 info.szName = Thread->Name;
                 info.dwThreadID = Thread->ThreadId;
-                // __try
+                __try
                 {
                     RaiseException( MS_VC_EXCEPTION, 0, sizeof(info)/sizeof(ULONG_PTR), (ULONG_PTR*)&info );
                 }
-                // __except(EXCEPTION_CONTINUE_EXECUTION)
+                __except(EXCEPTION_CONTINUE_EXECUTION)
                 {
                 }
             }
             #endif
 
-			LThread::RegisterThread(GetCurrentThreadId(), Thread->Name);
+			SetThreadName(Thread->Name);
 
 			// Ok now we're ready to go...
 			Thread->OnBeforeMain();
