@@ -881,14 +881,21 @@ IdeDoc *ProjectNode::Open()
 						char Exe[MAX_PATH_LEN];
 						LMakePath(Exe, sizeof(Exe), LGetExePath(), "..");
 						#if defined WIN32
-						LMakePath(Exe, sizeof(Exe), Exe, "Debug\\LgiRes.exe");
+							LMakePath(Exe, sizeof(Exe), Exe, "Debug\\LgiRes.exe");
 						#elif defined LINUX
-						LMakePath(Exe, sizeof(Exe), Exe, "LgiRes/lgires");
+							LMakePath(Exe, sizeof(Exe), Exe, "resourceEditor/lgires");
+						#else
+							#error "Impl me?"
 						#endif
 						
 						if (LFileExists(Exe))
 						{
-							LExecute(Exe, FullPath);
+							if (!LExecute(Exe, FullPath))
+								LgiMsg(Tree, "Failed to execute '%s' with '%s'", AppName, MB_OK, Exe, FullPath.Get());
+						}
+						else
+						{
+							LgiMsg(Tree, "No resource editor '%s'", AppName, MB_OK, Exe);
 						}
 					}
 					else
