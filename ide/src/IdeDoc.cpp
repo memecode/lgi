@@ -692,7 +692,7 @@ void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LSt
 		if (Fn)
 			Fn = Fn.Replace("\\", "/"); // Normalize the path to unix slashes.		
 		
-		bool debug = Stristr(Fn.Get(), "FileSelect.h") != NULL;
+		bool debug = Stristr(Fn.Get(), "File.cpp") != NULL;
 		if (!Fn)
 		{
 			// Mostly folders... ignore.
@@ -705,7 +705,7 @@ void FilterFiles(LArray<ProjectNode*> &Perfect, LArray<ProjectNode*> &Nodes, LSt
 			bool Match = true;
 			for (unsigned n=0; n<p.Length(); n++)
 			{
-				auto s = stristr(p[n], Leaf);
+				auto s = stristr(Leaf, p[n]);
 				
 				if (debug)
 				{
@@ -765,7 +765,12 @@ public:
 
 	LString ToString(ProjectNode *Obj)
 	{
-		return LString(Obj->GetFileName());
+		LString s(Obj->GetFileName());
+		#ifdef WINDOWS
+		return s.Replace("/", "\\");
+		#else
+		return s.Replace("\\", "/");
+		#endif
 	}
 	
 	void SetSysInc(LString::Array sysInc)
