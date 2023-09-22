@@ -196,11 +196,10 @@ public:
 	/// Gets the type code of the current entry. See the VT_?? defines for possible values.
 	virtual LVolumeTypes GetType() const;
 
-	/// Converts a string to the 64-bit value returned from the date functions.
-	bool ConvertToTime(char *Str, int SLen, uint64 Time) const;
-
-	/// Converts the 64-bit value returned from the date functions to a string.
-	bool ConvertToDate(char *Str, int SLen, uint64 Time) const;
+	////////////////////////////////////////////////////////////////////////////////////////////
+	// Various time conversion functions
+	static int64_t TsToUnix(uint64_t timeStamp);
+	static class LDateTime TsToDateTime(uint64_t timeStamp);
 };
 
 /// Describes a volume connected to the system
@@ -593,7 +592,7 @@ public:
 		Path operator / (LString seg)
 		{
 			Path p(*this);
-			p.Add(seg);
+			p += seg;
 			return p;
 		}
 		

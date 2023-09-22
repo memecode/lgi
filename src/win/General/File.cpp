@@ -1064,6 +1064,7 @@ typedef struct
 } DISKIO;
 
 /////////////////////////////////////////////////////////////////////////////////
+#if 0
 bool LDirectory::ConvertToTime(char *Str, int SLen, uint64 Time) const
 {
 	if (Str)
@@ -1098,6 +1099,22 @@ bool LDirectory::ConvertToDate(char *Str, int SLen, uint64 Time) const
 		}
 	}
 	return false;
+}
+#endif
+
+int64_t LDirectory::TsToUnix(uint64_t timeStamp)
+{
+	#define WINDOWS_TICK 10000000
+	#define SEC_TO_UNIX_EPOCH 11644473600LL
+
+	return timeStamp / WINDOWS_TICK - SEC_TO_UNIX_EPOCH;
+}
+
+LDateTime LDirectory::TsToDateTime(uint64_t timeStamp)
+{
+	LDateTime dt;
+	dt.Set(timeStamp);
+	return dt;
 }
 
 /////////////////////////////////////////////////////////////////////////////////

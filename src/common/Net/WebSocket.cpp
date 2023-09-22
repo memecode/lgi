@@ -28,6 +28,13 @@ enum WebSocketState
 	WsClosed,
 };
 
+LString LWebSocketBase::TimestampString(uint64 i)
+{
+	LString s;
+	s.Printf(LPrintfInt64, LDirectory::TsToUnix(i));
+	return s;
+}
+
 LString LWebSocketBase::ToString(uint64 i)
 {
 	LString s;

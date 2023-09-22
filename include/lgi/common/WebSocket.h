@@ -22,6 +22,7 @@ public:
 	};
 	const char *ToString(WsOpCode op);
 	LString ToString(uint64 i);
+	LString TimestampString(uint64 i);
 
 	typedef std::function<bool(WsOpCode op, char *ptr, ssize_t len)> OnMsg;
 	typedef std::function<void()> OnClose;
