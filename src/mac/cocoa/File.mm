@@ -463,7 +463,7 @@ struct LVolumePriv
 {
 	LString Name;
 	LString Path;
-	int Type = VT_NONE;
+	LVolumeTypes Type = VT_NONE;
 	int Flags = 0;
 	int64 Size = 0;
 	int64 Free = 0;
@@ -545,7 +545,7 @@ const char *LVolume::Path() const
 	return d->Path;
 }
 
-int LVolume::Type() const
+LVolumeTypes LVolume::Type() const
 {
 	return d->Type;
 }
@@ -1165,33 +1165,6 @@ int LeapYear(int year)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-bool LDirectory::ConvertToTime(char *Str, int SLen, uint64 Time) const
-{
-	time_t k = Time;
-	struct tm *t = localtime(&k);
-	if (t)
-	{
-		strftime(Str, SLen, "%I:%M:%S", t);
-		return true;
-	}
-	return false;
-}
-
-bool LDirectory::ConvertToDate(char *Str, int SLen, uint64 Time) const
-{
-	time_t k = Time;
-	struct tm *t = localtime(&k);
-	if (t)
-	{
-		strftime(Str, SLen, "%d/%m/%y", t);
-		return true;
-	}
-	return false;
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// Directory //////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
 class LDirectoryPriv
 {
 public:
@@ -1521,8 +1494,18 @@ LString LDirectory::FileName() const
 	return GetName();
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// File ///////////////////////////////////////////////
+int64_t LDirectory::TsToUnix(uint64_t timeStamp)
+{
+	return timeStamp / 1000;
+}
+
+LDateTime LDirectory::TsToDateTime(uint64_t timeStamp)
+{
+	LDateTime dt;
+	dt.Set(timeStamp);
+	return dt;
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 class LFilePrivate
 {
