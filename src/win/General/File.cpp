@@ -1113,7 +1113,20 @@ int64_t LDirectory::TsToUnix(uint64_t timeStamp)
 LDateTime LDirectory::TsToDateTime(uint64_t timeStamp)
 {
 	LDateTime dt;
+	dt.SetTimeZone(0, false); // UTC
 	dt.Set(timeStamp);
+
+	LArray<LDateTime::LDstInfo> dst;
+	if (LDateTime::GetDaylightSavingsInfo(dst, dt))
+	{
+		// Convert to local using the timezone in effect at 'dt'
+		LDateTime::DstToLocal(dst, dt);
+	}
+	else
+	{
+		// Without knowing the timezone at 'dt' just leave it as UTC...
+		// The caller will have to figure it out.
+	}
 	return dt;
 }
 
