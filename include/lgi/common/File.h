@@ -199,7 +199,7 @@ public:
 	////////////////////////////////////////////////////////////////////////////////////////////
 	// Various time conversion functions
 	static int64_t TsToUnix(uint64_t timeStamp);
-	static class LDateTime TsToDateTime(uint64_t timeStamp);
+	static class LDateTime TsToDateTime(uint64_t timeStamp, bool convertToLocalTz = true);
 };
 
 /// Describes a volume connected to the system
