@@ -1077,33 +1077,6 @@ int LeapYear(int year)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-bool LDirectory::ConvertToTime(char *Str, int SLen, uint64 Time) const
-{
-	time_t k = Time;
-	struct tm *t = localtime(&k);
-	if (t)
-	{
-		strftime(Str, SLen, "%I:%M:%S", t);
-		return true;
-	}
-	return false;
-}
-
-bool LDirectory::ConvertToDate(char *Str, int SLen, uint64 Time) const
-{
-	time_t k = Time;
-	struct tm *t = localtime(&k);
-	if (t)
-	{
-		strftime(Str, SLen, "%d/%m/%y", t);
-		return true;
-	}
-	return false;
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-//////////////////////////// Directory //////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////
 struct LDirectoryPriv
 {
 	char			BasePath[MAX_PATH_LEN];
@@ -1329,6 +1302,8 @@ const char *LDirectory::GetName() const
 
 #define UNIX_TO_LGI(unixTs) \
 	(((uint64) unixTs + LDateTime::Offset1800) * LDateTime::Second64Bit)
+#define LGI_TO_UNIX(lgiTs) \
+	(((uint64) lgiTs / LDateTime::Second64Bit) - LDateTime::Offset1800)
 
 uint64 LDirectory::GetCreationTime() const
 {
@@ -1353,6 +1328,18 @@ uint64 LDirectory::GetSize() const
 int64 LDirectory::GetSizeOnDisk()
 {
 	return (uint32_t)d->Stat.st_size;
+}
+
+int64_t LDirectory::TsToUnix(uint64_t timeStamp)
+{
+	return LGI_TO_UNIX(timeStamp);
+}
+
+LDateTime LDirectory::TsToDateTime(uint64_t timeStamp)
+{
+	LDateTime dt;
+	dt.Set(timeStamp);
+	return dt;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
