@@ -1248,7 +1248,7 @@ public:
 		 	case M_SET_DICTIONARY:
 			{
 				int ResponseHnd = (int)m->A();
-				LAutoPtr<DictionaryId> Dict((DictionaryId*)m->B());
+				auto Dict = m->AutoB<DictionaryId>();
 				bool Success = false;
 				if (Dict)
 				{
@@ -1430,7 +1430,7 @@ public:
 			}
 			case M_ADD_WORD:
 			{
-				LAutoPtr<LString> Word((LString*)m->A());
+				auto Word = m->AutoA<LString>();
 				if (!Word)
 					break;
 				
