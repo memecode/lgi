@@ -1110,14 +1110,15 @@ int64_t LDirectory::TsToUnix(uint64_t timeStamp)
 	return timeStamp / WINDOWS_TICK - SEC_TO_UNIX_EPOCH;
 }
 
-LDateTime LDirectory::TsToDateTime(uint64_t timeStamp)
+LDateTime LDirectory::TsToDateTime(uint64_t timeStamp, bool convertToLocalTz)
 {
 	LDateTime dt;
 	dt.SetTimeZone(0, false); // UTC
 	dt.Set(timeStamp);
 
 	LArray<LDateTime::LDstInfo> dst;
-	if (LDateTime::GetDaylightSavingsInfo(dst, dt))
+	if (convertToLocalTz &&
+		LDateTime::GetDaylightSavingsInfo(dst, dt))
 	{
 		// Convert to local using the timezone in effect at 'dt'
 		LDateTime::DstToLocal(dst, dt);

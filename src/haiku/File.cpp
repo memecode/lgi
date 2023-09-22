@@ -994,28 +994,30 @@ int64 LDirectory::GetSizeOnDisk()
 	return d->Stat.st_size;
 }
 
-bool LDirectory::ConvertToTime(char *Str, int SLen, uint64 Time) const
+int64_t LDirectory::TsToUnix(uint64_t timeStamp)
 {
-	time_t k = Time;
-	struct tm *t = localtime(&k);
-	if (t)
-	{
-		strftime(Str, SLen, "%I:%M:%S", t);
-		return true;
-	}
-	return false;
+	return timeStamp / LDateTime::Second64Bit;
 }
 
-bool LDirectory::ConvertToDate(char *Str, int SLen, uint64 Time) const
+LDateTime LDirectory::TsToDateTime(uint64_t timeStamp, bool convertToLocalTz)
 {
-	time_t k = Time;
-	struct tm *t = localtime(&k);
-	if (t)
+	LDateTime dt;
+	dt.SetTimeZone(0, false); // UTC
+	dt.Set(timeStamp);
+
+	LArray<LDateTime::LDstInfo> dst;
+	if (convertToLocalTz &&
+		LDateTime::GetDaylightSavingsInfo(dst, dt))
 	{
-		strftime(Str, SLen, "%d/%m/%y", t);
-		return true;
+		// Convert to local using the timezone in effect at 'dt'
+		LDateTime::DstToLocal(dst, dt);
 	}
-	return false;
+	else
+	{
+		// Without knowing the timezone at 'dt' just leave it as UTC...
+		// The caller will have to figure it out.
+	}
+	return dt;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
