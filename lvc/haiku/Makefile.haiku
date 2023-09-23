@@ -22,7 +22,7 @@ ifeq ($(Build),Debug)
 	CFlags += -g
 	CppFlags += -g
 	Tag = d
-	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -DHAS_LIBSSH=0 -D_GNU_SOURCE
+	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -D_GNU_SOURCE -D					HAS_LIBSSH=0
 	Libs =  \
 		-lgnu \
 		-llgi$(Tag) \
@@ -35,7 +35,7 @@ ifeq ($(Build),Debug)
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
-	Defs = -DHAIKU -D_REENTRANT -DHAS_LIBSSH=0 -D_GNU_SOURCE
+	Defs = -DHAIKU -D_REENTRANT -D_GNU_SOURCE -D					HAS_LIBSSH=0
 	Libs =  \
 		-lgnu \
 		-llgi$(Tag) \
@@ -55,7 +55,7 @@ Source =	src/VcFolder.cpp \
 			src/PatchViewer.cpp \
 			src/Main.cpp \
 			src/DropDownBtn.cpp \
-			src/BlameUi.cpp \
+			src/BrowseUi.cpp \
 			../src/common/Widgets/ControlTree.cpp \
 			../src/common/Text/XmlTreeUi.cpp \
 			../src/common/Text/DeEscape.cpp \
@@ -298,7 +298,6 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../src/common/Lgi/OptionsFile.cpp \
 	../src/common/Lgi/Rand.cpp \
 	../src/common/Lgi/Stream.cpp \
-	../src/posix/SubProcess.cpp \
 	../src/common/Lgi/ThreadCommon.cpp \
 	../src/common/Lgi/ThreadEvent.cpp \
 	../src/common/Lgi/ToolTip.cpp \
@@ -359,7 +358,8 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../src/haiku/Thread.cpp \
 	../src/haiku/View.cpp \
 	../src/haiku/Widgets.cpp \
-	../src/haiku/Window.cpp
+	../src/haiku/Window.cpp \
+	../src/posix/SubProcess.cpp
 	export Build=$(Build); \
 	$(MAKE) -C ../ -f ./haiku/Makefile.haiku
 
