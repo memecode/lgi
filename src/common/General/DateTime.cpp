@@ -34,6 +34,9 @@ constexpr const char *LDateTime::MonthsLong[12];
 #if !defined(WINDOWS)
 	#define MIN_YEAR		1800
 #endif
+#if defined(LINUX) || defined(HAIKU)
+	#define USE_ZDUMP		1
+#endif
 #define DEBUG_DST_INFO		0
 
 //////////////////////////////////////////////////////////////////////////////
@@ -259,6 +262,7 @@ int LDateTime::SystemTimeZoneOffset()
 }
 
 #if defined WIN32
+
 LDateTime ConvertSysTime(SYSTEMTIME &st, int year)
 {
 	LDateTime n;
@@ -298,9 +302,9 @@ static int LDateCmp(LDateTime *a, LDateTime *b)
 	return a->Compare(b);
 }
 
-#elif defined(LINUX)
+#elif USE_ZDUMP
 
-static bool ParseValue(char *s, LAutoString &var, LAutoString &val)
+static bool ParseValue(char *s, LString &var, LString &val)
 {
 	if (!s)
 		return false;
@@ -309,9 +313,10 @@ static bool ParseValue(char *s, LAutoString &var, LAutoString &val)
 		return false;
 	
 	*e++ = 0;
-	var.Reset(NewStr(s));
-	val.Reset(NewStr(e));
+	var = s;
+	val = e;
 	*e = '=';
+	
 	return var != 0 && val != 0;
 }
 
@@ -463,24 +468,59 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 			startDate = next;
 		}
 	
-	#elif defined(LINUX)
+	#elif USE_ZDUMP
 
 		if (!Zdump.Length())
-		{	
-			FILE *f = popen("zdump -v /etc/localtime", "r");
+		{
+			static bool First = true;
+			
+			auto linkLoc = "/etc/localtime";
+			#if defined(LINUX)
+				auto zoneLoc = "/usr/share/zoneinfo";
+			#elif defined(HAIKU)
+				auto zoneLoc = "/boot/system/data/zoneinfo";
+			#else
+				#error "Impl me"
+			#endif
+
+			if (!LFileExists(linkLoc))
+			{
+				if (First)
+				{
+					LgiTrace("%s:%i - LDateTime::GetDaylightSavingsInfo error: '%s' doesn't exist.\n"
+							 "    It should link to something in the '%s' tree.\n",
+							 _FL,
+							 linkLoc,
+							 zoneLoc);
+					#ifdef HAIKU
+					LgiTrace("    To fix that: pkgman install timezone_data and then create the '%s' link.\n", linkLoc);
+					#endif
+				}
+				return First = false;
+			}
+
+			auto f = popen(LString::Fmt("zdump -v %s", linkLoc), "r");
 			if (f)
 			{
-				char s[256];
+				char s[1024];
 				size_t r;
 				LStringPipe p(1024);
 				while ((r = fread(s, 1, sizeof(s), f)) > 0)
-				{
 					p.Write(s, (int)r);
-				}		
+
 				fclose(f);
-				
-				LString ps = p.NewLStr();
-				Zdump = ps.Split("\n");
+				Zdump = p.NewLStr().Split("\n");
+			}
+			else
+			{
+				if (First)
+				{
+					LgiTrace("%s:%i - LDateTime::GetDaylightSavingsInfo error: zdump didn't run.\n", _FL);
+					#ifdef HAIKU
+					LgiTrace("To fix that: pkgman install timezone_data\n");
+					#endif
+				}
+				return First = false;
 			}
 		}
 			
@@ -537,9 +577,9 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 				Utc.Day(l[3].Int());
 				Utc.Month(m);
 
-				LAutoString Var, Val;
+				LString Var, Val;
 				if (!ParseValue(l[14], Var, Val) ||
-					stricmp(Var, "isdst"))
+					Var != "isdst")
 				{
 					#if DEBUG_DST_INFO
 					printf("%s:%i - Unknown value for isdst\n", _FL);
@@ -548,7 +588,7 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 				}
 				
 				if (!ParseValue(l[15], Var, Val) ||
-					stricmp(Var, "gmtoff"))
+					Var != "gmtoff")
 				{
 					#if DEBUG_DST_INFO
 					printf("%s:%i - Unknown value for isdst\n", _FL);

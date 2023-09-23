@@ -4971,6 +4971,27 @@ public:
 	}
 };
 
+void LDirTest()
+{
+	LDirectory dir;
+
+	for (auto b = dir.First(LGetSystemPath(LSP_HOME)); b; b = dir.Next())
+	{
+		bool debug = Stricmp(dir.GetName(), "restored.mp4") == 0;
+		auto modTime = dir.GetLastWriteTime();
+		if (debug)
+		{
+			int asd=0;
+		}
+		auto dt = LDirectory::TsToDateTime(modTime);
+
+		LgiTrace("%s, unix=" LPrintfInt64 ", dt=%s\n",
+			dir.GetName(),
+			LDirectory::TsToUnix(modTime),
+			dt.Get().Get());
+	}
+}
+
 int LgiMain(OsAppArguments &AppArgs)
 {
 	printf("LgiIde v%s\n", APP_VER);
@@ -4986,6 +5007,8 @@ int LgiMain(OsAppArguments &AppArgs)
 		// auto testFile = "/boot/home/code/lgi/trunk/CMakeLists.txt";
 		// LShowFileProperties(a.AppWnd->Handle(), testFile);
 		// LBrowseToFile(testFile);
+
+		LDirTest();		
 		
 		a.Run();
 	}

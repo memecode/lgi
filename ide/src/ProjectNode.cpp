@@ -880,9 +880,9 @@ IdeDoc *ProjectNode::Open()
 					{
 						char Exe[MAX_PATH_LEN];
 						LMakePath(Exe, sizeof(Exe), LGetExePath(), "..");
-						#if defined WIN32
+						#if defined(WIN32)
 							LMakePath(Exe, sizeof(Exe), Exe, "Debug\\LgiRes.exe");
-						#elif defined LINUX
+						#elif defined(LINUX) || defined(HAIKU)
 							LMakePath(Exe, sizeof(Exe), Exe, "resourceEditor/lgires");
 						#else
 							#error "Impl me?"

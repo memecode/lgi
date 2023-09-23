@@ -283,7 +283,8 @@ struct LVolumePriv
 {
 	LVolume *Owner = NULL;
 	int64 Size = 0, Free = 0;
-	int Type = VT_NONE, Flags = 0;
+	LVolumeTypes Type = VT_NONE;
+	int Flags = 0;
 	LSystemPath SysPath = LSP_ROOT;
 	LString Name, Path;
 	LVolume *NextVol = NULL, *ChildVol = NULL;
@@ -461,7 +462,7 @@ const char *LVolume::Path() const
     return d->Path;
 }
 
-int LVolume::Type() const
+LVolumeTypes LVolume::Type() const
 {
     return d->Type;
 }
@@ -908,7 +909,7 @@ bool LDirectory::Path(char *s, int BufLen) const
 	return LMakePath(s, BufLen, d->BasePath, GetName());
 }
 
-int LDirectory::GetType() const
+LVolumeTypes LDirectory::GetType() const
 {
 	return IsDir() ? VT_FOLDER : VT_FILE;
 }
@@ -964,7 +965,7 @@ long LDirectory::GetAttributes() const
 	return d->Stat.st_mode;
 }
 
-char *LDirectory::GetName() const
+const char *LDirectory::GetName() const
 {
 	return (d->De) ? d->De->d_name : NULL;
 }
