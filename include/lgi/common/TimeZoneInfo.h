@@ -2,6 +2,10 @@
 // https://www.rfc-editor.org/rfc/rfc8536.html
 
 #pragma once
+
+#ifdef HAIKU
+#include <netinet/in.h>
+#endif
 #include "lgi/common/DateTime.h"
 
 class LTimeZoneInfo
@@ -310,8 +314,33 @@ class LTimeZoneInfo
 		return true;
 	}
 
+	bool GetTransition(size_t idx, LDateTime &dt, LString &tz, int &offsetSeconds, bool &isDst)
+	{
+		if (!TransitionTimes2.IdxCheck(idx))
+			return false;
+
+		auto time = TransitionTimes2[idx];
+		auto typeIdx = TransitionTypes[idx];
+		if (!LocalTimeTypes.IdxCheck(typeIdx))
+		{
+			LAssert(!"invalid index");
+			return false;
+		}
+
+		auto &type = LocalTimeTypes[typeIdx];
+		isDst = type.IsDst;
+		tz = type.Idx < TimeZoneDesignations.Length() ? TimeZoneDesignations.Get() + type.Idx : NULL;
+
+		dt.SetTimeZone(0, false);
+		dt.SetUnix(time);
+		offsetSeconds = type.UtOffset;
+
+		return true;
+	}
+
 public:
 	using LDstInfo = LDateTime::LDstInfo;
+	constexpr static const char *DefaultFile = "/etc/localtime";
 
 	LTimeZoneInfo(const char *fileName = NULL)
 	{
@@ -330,7 +359,7 @@ public:
 		return false;
 	}
 
-	bool Read(const char *fileName)
+	bool Read(const char *fileName = DefaultFile)
 	{
 		// Read the file into memeory...
 		LFile f(fileName, O_READ);
@@ -369,36 +398,16 @@ public:
 
 		return true;
 	}
-
-	bool GetTransition(size_t idx, LDateTime &dt, LString &tz, int &offsetSeconds, bool &isDst)
-	{
-		if (!TransitionTimes2.IdxCheck(idx))
-			return false;
-
-		auto time = TransitionTimes2[idx];
-		auto typeIdx = TransitionTypes[idx];
-		if (!LocalTimeTypes.IdxCheck(typeIdx))
-		{
-			LAssert(!"invalid index");
-			return false;
-		}
-
-		auto &type = LocalTimeTypes[typeIdx];
-		isDst = type.IsDst;
-		tz = type.Idx < TimeZoneDesignations.Length() ? TimeZoneDesignations.Get() + type.Idx : NULL;
-
-		dt.SetTimeZone(0, false);
-		dt.SetUnix(time);
-		offsetSeconds = type.UtOffset;
-
-		return true;
-	}
-
+	
 	bool GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start, LDateTime *End)
 	{
 		auto InRange = [&](LDateTime &dt)
 		{
-			return dt >= Start && (!End || dt < *End);
+			if (End)
+				return dt >= Start && dt < *End;
+			
+			return	dt.Year() == (Start.Year()-1) ||
+					dt.Year() == Start.Year();
 		};
 
 		for (unsigned i=0; i<TransitionTimes2.Length(); i++)
@@ -409,22 +418,23 @@ public:
 			bool isDst;
 			if (GetTransition(i, dt, tz, offsetSeconds, isDst))
 			{
-				if (InRange(dt))
+				bool inrange = InRange(dt);
+				#if 0
+				LgiTrace("%s: UtOffset=%g, IsDst=%i, Name=%s, inrange=%i\n",
+					dt.Get().Get(),
+					(double)offsetSeconds/3600,
+					isDst,
+					tz.Get(),
+					inrange);
+				#endif
+
+				if (inrange)
 				{
 					auto &inf = Info.New();
 					inf.UtcTimeStamp = dt.Ts();
 					inf.Offset = offsetSeconds / 60;
 				}
-
-				#if 0
-				LgiTrace("%s: UtOffset=%g, IsDst=%i, Name=%s\n",
-					dt.Get().Get(),
-					(double)offsetSeconds/3600,
-					isDst,
-					tz.Get());
-				#endif
 			}
-
 		}
 
 		if (footer)
@@ -473,30 +483,36 @@ public:
 			if (parts.IdxCheck(2))
 				endTrans.Set(parts[2]);
 
-			if (End)
+			#if 0
+			printf("start=%s end=%s\n", Start.Get().Get(), End ? End->Get().Get() : NULL);
+			#endif
+
+			for (int year = Start.Year()-1; year <= (End ? End->Year() : Start.Year()); year++)
 			{
-				for (int year = Start.Year(); year < End->Year(); year++)
+				// Figure out the start and end DST for 'year'
+				int DstOffset = endTrans.OffsetSeconds(StdOffsetSeconds) / 60;
+
+				auto startDt = startTrans.Get(year);
+				startDt.SetTimeZone(StdOffsetSeconds / 60, false);
+				if (InRange(startDt))
 				{
-					// Figure out the start and end DST for 'year'
-					int DstOffset = endTrans.OffsetSeconds(StdOffsetSeconds) / 60;
+					auto &s = Info.New();
+					s.UtcTimeStamp = startDt.Ts();
+					s.Offset = DstOffset;
+				}
 
-					auto startDt = startTrans.Get(year);
-					startDt.SetTimeZone(StdOffsetSeconds / 60, false);
-					if (InRange(startDt))
-					{
-						auto &s = Info.New();
-						s.UtcTimeStamp = startDt.Ts();
-						s.Offset = DstOffset;
-					}
-
-					auto endDt = endTrans.Get(year);
-					endDt.SetTimeZone(StdOffsetSeconds / 60, false);
-					if (InRange(endDt))
-					{
-						auto &e = Info.New();
-						e.UtcTimeStamp = endDt.Ts();
-						e.Offset = StdOffsetSeconds / 60;
-					}
+				auto endDt = endTrans.Get(year);
+				endDt.SetTimeZone(StdOffsetSeconds / 60, false);
+				#if 0
+				printf("\tstart=%s %i, end=%s %i\n",
+					startDt.Get().Get(), InRange(startDt),
+					endDt.Get().Get(), InRange(endDt));
+				#endif
+				if (InRange(endDt))
+				{
+					auto &e = Info.New();
+					e.UtcTimeStamp = endDt.Ts();
+					e.Offset = StdOffsetSeconds / 60;
 				}
 			}
 		}

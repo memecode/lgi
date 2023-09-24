@@ -34,8 +34,10 @@ constexpr const char *LDateTime::MonthsLong[12];
 #if !defined(WINDOWS)
 	#define MIN_YEAR		1800
 #endif
-#if defined(LINUX) || defined(HAIKU)
+#if defined(LINUX)
 	#define USE_ZDUMP		1
+#elif defined(HAIKU)
+	#include "lgi/common/TimeZoneInfo.h"
 #endif
 #define DEBUG_DST_INFO		0
 
@@ -636,6 +638,25 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 			}
 		}
 		Status = Info.Length() > 1;
+
+	#elif defined(HAIKU)
+
+		LTimeZoneInfo tzinfo;
+		
+		if (!tzinfo.Read())
+		{
+			#if DEBUG_DST_INFO
+			LgiTrace("%s:%i - info read failed.\n", _FL);
+			#endif
+			return false;
+		}
+		
+		Status = tzinfo.GetDaylightSavingsInfo(Info, Start, End);
+		#if DEBUG_DST_INFO
+		if (!Status)
+			printf("%s:%i - GetDaylightSavingsInfo failed.\n", _FL);
+		#endif
+		
 	
 	#else
 

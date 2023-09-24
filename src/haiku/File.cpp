@@ -1002,9 +1002,10 @@ int64_t LDirectory::TsToUnix(uint64_t timeStamp)
 
 LDateTime LDirectory::TsToDateTime(uint64_t timeStamp, bool convertToLocalTz)
 {
+	auto seconds = timeStamp / LDateTime::Second64Bit;
 	LDateTime dt;
 	dt.SetTimeZone(0, false); // UTC
-	dt.Set(timeStamp);
+	dt.Set((seconds + LDateTime::Offset1800) * LDateTime::Second64Bit);
 
 	LArray<LDateTime::LDstInfo> dst;
 	if (convertToLocalTz &&

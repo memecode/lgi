@@ -34,7 +34,7 @@ void LThread::RegisterThread(OsThreadId id, LString name)
 		ThreadNames.Unlock();
 	}
 	
-	printf("%s:%i - RegisterThread(%i, %s)\n", _FL, (int)id, name.Get());
+	// printf("%s:%i - RegisterThread(%i, %s)\n", _FL, (int)id, name.Get());
 }
 
 const char *LThread::GetThreadName(OsThreadId id)

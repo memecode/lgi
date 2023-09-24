@@ -4985,13 +4985,14 @@ void LDirTest()
 		}
 		auto dt = LDirectory::TsToDateTime(modTime);
 
-		LgiTrace("%s, unix=" LPrintfInt64 ", dt=%s\n",
+		LgiTrace("%-36sunix=" LPrintfInt64 ", dt=%s\n",
 			dir.GetName(),
 			LDirectory::TsToUnix(modTime),
 			dt.Get().Get());
 	}
 }
 
+/*
 #include "lgi/common/TimeZoneInfo.h"
 void TimeZoneInfoTest()
 {
@@ -5017,6 +5018,7 @@ void TimeZoneInfoTest()
 		}
 	}
 }
+*/
 
 int LgiMain(OsAppArguments &AppArgs)
 {
@@ -5036,7 +5038,7 @@ int LgiMain(OsAppArguments &AppArgs)
 
 		// LDirTest();
 
-		TimeZoneInfoTest();
+		// TimeZoneInfoTest();
 		
 		a.Run();
 	}

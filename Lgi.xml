@@ -446,25 +446,26 @@
 		<Node Name="Win" Type="1" Platforms="15" Open="0" Id="76">
 			<Node File=".\include\lgi\win\LgiOsDefs.h" Type="3" Platforms="1" />
 		</Node>
-		<Node File="./include/lgi/common/AutoPtr.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Cancel.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Error.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Json.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Lgi.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiClasses.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiCommon.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiDefs.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiInc.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiInterfaces.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiMsgs.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/LgiUiBase.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Notifications.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Point.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/PopupNotification.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Range.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/RefCount.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/TextLog.h" Type="3" Platforms="15" />
-		<Node File="./include/lgi/common/Token.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\AutoPtr.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Cancel.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Error.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Json.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Lgi.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiClasses.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiCommon.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiDefs.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiInc.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiInterfaces.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiMsgs.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\LgiUiBase.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Notifications.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Point.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\PopupNotification.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Range.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\RefCount.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\TextLog.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\TimeZoneInfo.h" Type="3" Platforms="15" />
+		<Node File=".\include\lgi\common\Token.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
 		<Node File=".\CMakeLists.txt" Type="8" Platforms="15" />
@@ -486,7 +487,7 @@
 				<All>0</All>
 			</DebugAdmin>
 			<Executable>
-				<Linux />
+				<Windows />
 			</Executable>
 			<CCrossCompiler />
 			<CppCrossCompiler />
@@ -534,6 +535,7 @@
 					<Debug>../../../../system/develop/headers</Debug>
 					<Release>../../../../system/develop/headers</Release>
 				</Haiku>
+				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -561,12 +563,14 @@ network
 be</Release>
 				</Haiku>
 				<All />
+				<Windows />
 			</Libraries>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-gtk3</Debug>
 					<Release>lgi-gtk3</Release>
 				</Linux>
+				<Windows />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
@@ -582,17 +586,17 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
-				<Linux />
+				<Windows />
 			</Defines>
 			<LibraryPaths>
 				<All />
-				<Linux />
+				<Windows />
 			</LibraryPaths>
 			<ApplicationIcon />
 		</Build>
 		<Advanced>
 			<PostBuildCommands>
-				<Linux />
+				<Windows />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>
