@@ -120,6 +120,9 @@
     <ClInclude Include="..\src\FindSymbol.h">
       <Filter>Source Files\Search\SymbolSearch</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\lgi\common\TimeZoneInfo.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\common\Lgi\About.cpp">

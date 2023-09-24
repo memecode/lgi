@@ -889,6 +889,17 @@ uint64 LDateTime::Ts() const
 	return ts;
 }
 
+uint64_t LDateTime::GetUnix()
+{
+	uint64_t s;
+	Get(s);
+	#if defined(WINDOWS)
+	return s / LDateTime::Second64Bit / 116445168000000000LL;
+	#else
+	return s / LDateTime::Second64Bit - Offset1800;
+	#endif
+}
+
 bool LDateTime::SetUnix(uint64 s)
 {
 	#if defined(WINDOWS)

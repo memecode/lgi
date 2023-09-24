@@ -162,7 +162,7 @@ public:
 	/// Sets the timezone of this current object.in minutes (+10 = 600)
 	void SetTimeZone
 	(
-		/// The new timezone
+		/// The new timezone (in minutes, 600 = +10:00)
 		int Tz,
 		/// True if you want to convert the date and time to the new zone,
 		/// False if you want to leave the date/time as it is.
@@ -243,7 +243,11 @@ public:
 	/// Gets just the time as a LString
 	/// \sa LDateTime::GetFormat()
 	LString GetTime() const;
-	
+
+	// Unix epoch support	
+	uint64_t GetUnix();
+	bool SetUnix(uint64_t s);
+
 	/// Returns the 64bit timestamp.
 	uint64 Ts() const;
 
@@ -261,7 +265,6 @@ public:
 	bool Set(const char *Str);
 	/// Sets the date and time from a 64 bit int (os specific)
 	bool Set(uint64 s);
-	bool SetUnix(uint64 s); // Assume unix timestamp (seconds since 1/1/1970)
 	/// Sets the time from a time_t
 	bool Set(time_t tt);
 	/// Parses the date from a string
@@ -312,6 +315,8 @@ public:
 	bool AddDays(int64 Days);
 	/// Adds a number of months to the current date/time
 	void AddMonths(int64 Months);
+	/// Adds years
+	void AddYears(int yr) { _Year += yr; }
 
 	/// The system timezone including daylight savings offset in minutes, +10 would return 600
 	static int SystemTimeZone(bool ForceUpdate = false);

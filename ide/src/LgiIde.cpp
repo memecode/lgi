@@ -4992,6 +4992,32 @@ void LDirTest()
 	}
 }
 
+#include "lgi/common/TimeZoneInfo.h"
+void TimeZoneInfoTest()
+{
+	LTimeZoneInfo tzInfo;
+
+	tzInfo.Read("c:\\code\\Sydney");
+
+	LArray<LDateTime::LDstInfo> info;
+	LDateTime start, end;
+	start.SetNow();
+	start.Day(1);
+	start.Month(1);
+	end = start;
+	end.Year(start.Year()+1);
+	start.Year(2000);
+
+	if (tzInfo.GetDaylightSavingsInfo(info, start, &end))
+	{
+		for (auto &i: info)
+		{
+			LDateTime dt(i.UtcTimeStamp);
+			LgiTrace("%s = %i\n", dt.Get().Get(), i.Offset);
+		}
+	}
+}
+
 int LgiMain(OsAppArguments &AppArgs)
 {
 	printf("LgiIde v%s\n", APP_VER);
@@ -5008,7 +5034,9 @@ int LgiMain(OsAppArguments &AppArgs)
 		// LShowFileProperties(a.AppWnd->Handle(), testFile);
 		// LBrowseToFile(testFile);
 
-		LDirTest();		
+		// LDirTest();
+
+		TimeZoneInfoTest();
 		
 		a.Run();
 	}
