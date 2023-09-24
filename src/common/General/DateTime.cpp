@@ -980,8 +980,11 @@ bool LDateTime::Set(struct tm *t)
 	_Seconds   = t->tm_sec;
 	_Thousands = 0;
 	
+	#ifdef WINDOWS
+	#define timegm _mkgmtime
+	#endif
 	auto diff = timegm(t) - mktime(t);
-	_Tz = diff / 60;
+	_Tz = (int16)(diff / 60);
 
 	return true;
 }
