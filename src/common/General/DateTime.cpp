@@ -966,6 +966,26 @@ bool LDateTime::Set(uint64 s)
 	#endif
 }
 
+bool LDateTime::Set(struct tm *t)
+{
+	if (!t)
+		return false;
+		
+	_Year  = t->tm_year + 1900;
+	_Month = t->tm_mon + 1;
+	_Day   = t->tm_mday;
+
+	_Hours     = t->tm_hour;
+	_Minutes   = t->tm_min;
+	_Seconds   = t->tm_sec;
+	_Thousands = 0;
+	
+	auto diff = timegm(t) - mktime(t);
+	_Tz = diff / 60;
+
+	return true;
+}
+
 bool LDateTime::Set(time_t tt)
 {
 	struct tm *t;
@@ -980,18 +1000,7 @@ bool LDateTime::Set(time_t tt)
 	if (_localtime64_s(t = &tmp, &tt) == 0)
 #endif
 	{
-		_Year = t->tm_year + 1900;
-		_Month = t->tm_mon + 1;
-		_Day = t->tm_mday;
-
-		_Hours = t->tm_hour;
-		_Minutes = t->tm_min;
-		_Seconds = t->tm_sec;
-		_Thousands = 0;
-		
-		// _Tz = SystemTimeZone();
-
-		return true;
+		return Set(t);
 	}
 
 	return false;

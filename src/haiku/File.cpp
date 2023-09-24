@@ -1002,23 +1002,38 @@ int64_t LDirectory::TsToUnix(uint64_t timeStamp)
 
 LDateTime LDirectory::TsToDateTime(uint64_t timeStamp, bool convertToLocalTz)
 {
-	auto seconds = timeStamp / LDateTime::Second64Bit;
 	LDateTime dt;
-	dt.SetTimeZone(0, false); // UTC
-	dt.Set((seconds + LDateTime::Offset1800) * LDateTime::Second64Bit);
 
-	LArray<LDateTime::LDstInfo> dst;
-	if (convertToLocalTz &&
-		LDateTime::GetDaylightSavingsInfo(dst, dt))
-	{
-		// Convert to local using the timezone in effect at 'dt'
-		LDateTime::DstToLocal(dst, dt);
-	}
-	else
-	{
-		// Without knowing the timezone at 'dt' just leave it as UTC...
-		// The caller will have to figure it out.
-	}
+	#if 1
+
+		time_t seconds = timeStamp / LDateTime::Second64Bit;
+		struct tm out;
+		if (localtime_r(&seconds, &out))
+		{
+			dt.Set(&out);
+		}
+	
+	#else
+
+		auto seconds = timeStamp / LDateTime::Second64Bit;
+		dt.SetTimeZone(0, false); // UTC
+		dt.Set((seconds + LDateTime::Offset1800) * LDateTime::Second64Bit);
+
+		LArray<LDateTime::LDstInfo> dst;
+		if (convertToLocalTz &&
+			LDateTime::GetDaylightSavingsInfo(dst, dt))
+		{
+			// Convert to local using the timezone in effect at 'dt'
+			LDateTime::DstToLocal(dst, dt);
+		}
+		else
+		{
+			// Without knowing the timezone at 'dt' just leave it as UTC...
+			// The caller will have to figure it out.
+		}
+	
+	#endif
+	
 	return dt;
 }
 

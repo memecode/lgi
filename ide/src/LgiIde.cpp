@@ -4985,10 +4985,11 @@ void LDirTest()
 		}
 		auto dt = LDirectory::TsToDateTime(modTime);
 
-		LgiTrace("%-36sunix=" LPrintfInt64 ", dt=%s\n",
+		LgiTrace("%-36sunix=" LPrintfInt64 ", dt=%s %g\n",
 			dir.GetName(),
-			LDirectory::TsToUnix(modTime),
-			dt.Get().Get());
+			LDirectory::TsToUnix(modTime), 
+			dt.Get().Get(),
+			(double) dt.GetTimeZone() / 60.0);
 	}
 }
 
