@@ -269,6 +269,7 @@ public:
 
 	void ParseBlame(LArray<BlameLine> &lines, LString raw);
 	void ParseLog(LString Log);
+	int OnNotify(LViewI *Ctrl, LNotification n);
 };
 
 class DropDownBtn : public LDropDown, public ResObject

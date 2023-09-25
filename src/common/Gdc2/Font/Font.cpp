@@ -213,12 +213,7 @@ bool LFont::CreateFromCss(LCss *Css)
 	
 	size_t nameIdx = 0;
 	auto Fam = Css->FontFamily();
-	if (Fam.Has(LCss::FontFamilySystemUi) ||
-		Fam.Names.Length() == 0)
-	{
-		Face(LSysFont->Face());
-	}
-	else if (Fam.Has(LCss::FontFamilyMonospace))
+	if (Fam.Has(LCss::FontFamilyMonospace))
 	{
 		LFontType type;
 		if (type.GetSystemFont("fixed"))
@@ -229,6 +224,11 @@ bool LFont::CreateFromCss(LCss *Css)
 			Face(LSysFont->Face());
 		}
 	}
+	else if (Fam.Has(LCss::FontFamilySystemUi) ||
+		Fam.Names.Length() == 0)
+	{
+		Face(LSysFont->Face());
+	}	
 	else
 	{
 		Face(Fam.Names[nameIdx++]);

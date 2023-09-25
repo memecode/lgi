@@ -1,30 +1,39 @@
 
 #include "lgi/common/Lgi.h"
 #include "lgi/common/TabView.h"
+#include "lgi/common/TableLayout.h"
+#include "lgi/common/TextLabel.h"
+#include "lgi/common/Edit.h"
+#include "lgi/common/List.h"
+#include "lgi/common/TextLog.h"
 
 #include "Lvc.h"
 #include "VcFolder.h"
 
 #define OPT_WND_STATE		"BrowseUiState"
-
 #define USE_RELATIVE_TIMES	1
 
-#include "lgi/common/List.h"
-#include "lgi/common/TextLog.h"
+enum Ctrls {
+	IDC_STATIC = -1,
+	IDC_FILTER = 100,
+	IDC_TABLE,
+};
 
 struct BrowseUiPriv
 {
 	LList *Blame = NULL;
 	LList *Log = NULL;
 	LTextLog *Raw = NULL;
-
-	BrowseUi::TMode Mode;
 	LTabView *Tabs = NULL;
-	LString Output;
 	AppPriv *Priv = NULL;
 	VcFolder *Folder = NULL;
+	LTableLayout *Tbl = NULL;
+
+	BrowseUi::TMode Mode;
+	LString Output;
 	LString Path;
 	LString UserHilight;
+	LFont Mono;
 
 	LHashTbl<ConstStrKey<char>, LColour*> Colours;
 
@@ -48,6 +57,13 @@ struct BrowseUiPriv
 		Mode(mode),
 		Path(path)
 	{
+		LCss css;
+		css.FontFamily(LCss::FontFamilyMonospace);
+		auto status = Mono.CreateFromCss(&css);
+		LAssert(status);
+
+		LDisplayString ds(&Mono, "1234");
+		Mono.TabSize(ds.X());
 	}
 
 	~BrowseUiPriv()
@@ -119,8 +135,20 @@ struct BrowseItem : public LListItem
 		}
 		if (i == TLine)
 			Ctx.Align = LCss::AlignRight;
-			
-		LListItem::OnPaintColumn(Ctx, i, c);
+		
+		const char *src;
+		if (i == TSrc &&
+			(src = GetText(TSrc)) )
+		{
+			d->Mono.Transparent(false);
+			d->Mono.Colour(Ctx.Fore, Ctx.Back);
+			LDisplayString ds(&d->Mono, src);
+			ds.Draw(Ctx.pDC, Ctx.x1, Ctx.y1, &Ctx);
+		}
+		else
+		{
+			LListItem::OnPaintColumn(Ctx, i, c);
+		}
 		Ctx.Fore = old;
 	}
 	
@@ -178,7 +206,14 @@ BrowseUi::BrowseUi(TMode mode, AppPriv *priv, VcFolder *folder, LString path)
 		AddView(d->Tabs = new LTabView(IDC_TABS));
 
 		auto BlameTab = d->Tabs->Append("Blame");
-		BlameTab->Append(d->Blame = new LList(IDC_BLAME));
+		BlameTab->Append(d->Tbl = new LTableLayout(IDC_TABLE));
+		auto c = d->Tbl->GetCell(0, 0);
+		c->Add(new LTextLabel(IDC_STATIC, 0, 0, -1, -1, "Filter:"));
+		c->VerticalAlign(LCss::VerticalMiddle);
+		c = d->Tbl->GetCell(1, 0);
+		c->Add(new LEdit(IDC_FILTER, 0, 0, -1, -1));
+		c = d->Tbl->GetCell(0, 1, true, 2);
+		c->Add(d->Blame = new LList(IDC_BLAME));
 		d->Blame->AddColumn("Ref", 100);
 		d->Blame->AddColumn("User", 100);
 		d->Blame->AddColumn("Date", 100);
@@ -195,6 +230,10 @@ BrowseUi::BrowseUi(TMode mode, AppPriv *priv, VcFolder *folder, LString path)
 
 		AttachChildren();
 		Visible(true);
+
+		LView *e;
+		if (GetViewById(IDC_FILTER, e))
+			e->Focus(true);
 	}
 }
 
@@ -231,4 +270,50 @@ void BrowseUi::ParseBlame(LArray<BlameLine> &lines, LString raw)
 void BrowseUi::ParseLog(LString Content)
 {
 	d->Output = Content;
+}
+
+int BrowseUi::OnNotify(LViewI *Ctrl, LNotification n)
+{
+	switch (Ctrl->GetId())
+	{
+		case IDC_FILTER:
+		{
+			auto f = Ctrl->Name();
+			LArray<BrowseItem*> items;
+			if (!d->Blame->GetAll(items))
+				break;
+
+			auto line = Atoi(f);
+			if (line > 0 && line <= (ssize_t)items.Length())
+			{
+				for (auto i: items)
+				{
+					auto lineTxt = i->GetText(TLine);
+					auto n = Atoi(lineTxt);
+					bool match = n > 0 && n == line;
+					i->Select(match);
+					if (match)
+						i->ScrollTo();
+				}
+			}
+			else
+			{
+				bool first = true;
+				for (auto i: items)
+				{
+					auto src = i->GetText(TSrc);
+					auto match = Stristr(src, f) != NULL;
+					i->Select(match);
+					if (match && first)
+					{
+						first = false;
+						i->ScrollTo();
+					}
+				}
+			}
+			break;
+		}
+	}
+
+	return LWindow::OnNotify(Ctrl, n);
 }
