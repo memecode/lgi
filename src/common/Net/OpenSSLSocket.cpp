@@ -75,7 +75,9 @@ LString LibName(const char *Fmt)
 #define HasntTimedOut()			((To < 0) || (LCurrentTime() - Start < To))
 
 static const char*
-	MinimumVersion				= "3.0.1";
+	MinimumVersion1				= "1.1.1j";
+static const char*
+	MinimumVersion3				= "3.0.1";
 
 void
 SSL_locking_function(int mode, int n, const char *file, int line);
@@ -331,7 +333,9 @@ public:
     {
 		LStringPipe Err;
 		LArray<int> Ver;
-		LArray<int> MinimumVer = ParseSslVersion(MinimumVersion);
+		LArray<int> MinimumVer1 = ParseSslVersion(MinimumVersion1);
+		LArray<int> MinimumVer3 = ParseSslVersion(MinimumVersion3);
+		LArray<int> *MinVer = NULL;
 		LString::Array t;
 		int Len = 0;
 		const char *v = NULL;
@@ -377,7 +381,11 @@ public:
 			goto OnError;
 		}
 
-		if (Ver < MinimumVer)
+		if (Ver[0] == 1)
+			MinVer = &MinimumVer1;
+		else if (Ver[0] == 3)
+			MinVer = &MinimumVer3;
+		if (MinVer && Ver < *MinVer)
 		{
 			#if WINDOWS
 			char FileName[MAX_PATH_LEN] = "";
@@ -391,7 +399,7 @@ public:
 				,
 				_FL,
 				t[1].Get(),
-				MinimumVersion
+				*MinVer
 				#if WINDOWS
 				,FileName
 				#endif

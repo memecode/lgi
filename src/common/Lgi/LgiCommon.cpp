@@ -2844,7 +2844,7 @@ LString LGetAppForProtocol(const char *Protocol)
 	#elif defined(LINUX)
 	
 		const char *p = NULL;
-		if (stricmp(Protocol, "mailto"))
+		if (!stricmp(Protocol, "mailto"))
 			p = "xdg-email";
 		else
 			p = "xdg-open";
