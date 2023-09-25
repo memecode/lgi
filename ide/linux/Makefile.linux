@@ -251,6 +251,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/TextView3.h \
 	../include/lgi/common/Thread.h \
 	../include/lgi/common/ThreadEvent.h \
+	../include/lgi/common/TimeZoneInfo.h \
 	../include/lgi/common/Token.h \
 	../include/lgi/common/ToolBar.h \
 	../include/lgi/common/ToolTip.h \
