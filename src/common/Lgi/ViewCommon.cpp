@@ -351,6 +351,9 @@ LArray<LViewI*> LView::IterateViews()
 
 bool LView::AddView(LViewI *v, int Where)
 {
+	if (!v)
+		return false;
+
 	LAssert(!Children.HasItem(v));
 	bool Add = Children.Insert(v, Where);
 	if (Add)
@@ -370,6 +373,9 @@ bool LView::AddView(LViewI *v, int Where)
 
 bool LView::DelView(LViewI *v)
 {
+	if (!v)
+		return false;
+
 	bool Has = Children.HasItem(v);
 	bool b = Children.Delete(v);
 	if (Has)
