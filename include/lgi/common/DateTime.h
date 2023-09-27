@@ -276,7 +276,7 @@ public:
 	/// Parses the date time from a free form string
 	bool Parse(LString s);
 	/// Set to a tm struct
-	bool Set(struct tm *t);
+	bool Set(struct tm *t, bool inferTimezone);
 
 	/// Describes the perios between this and 'to' in the form:
 	/// ##d ##h ##m ##s

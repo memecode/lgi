@@ -966,7 +966,7 @@ bool LDateTime::Set(uint64 s)
 	#endif
 }
 
-bool LDateTime::Set(struct tm *t)
+bool LDateTime::Set(struct tm *t, bool inferTimezone)
 {
 	if (!t)
 		return false;
@@ -980,11 +980,14 @@ bool LDateTime::Set(struct tm *t)
 	_Seconds   = t->tm_sec;
 	_Thousands = 0;
 	
-	#ifdef WINDOWS
-	#define timegm _mkgmtime
-	#endif
-	auto diff = timegm(t) - mktime(t);
-	_Tz = (int16)(diff / 60);
+	if (inferTimezone)
+	{
+		#ifdef WINDOWS
+		#define timegm _mkgmtime
+		#endif
+		auto diff = timegm(t) - mktime(t);
+		_Tz = (int16)(diff / 60);
+	}
 
 	return true;
 }
@@ -993,17 +996,18 @@ bool LDateTime::Set(time_t tt)
 {
 	struct tm *t;
 
-#if !defined(_MSC_VER) || _MSC_VER < _MSC_VER_VS2005
 	if (_Tz)
 		tt += _Tz * 60;
+
+#if !defined(_MSC_VER) || _MSC_VER < _MSC_VER_VS2005
 	t = gmtime(&tt);
 	if (t)
 #else
 	struct tm tmp;
-	if (_localtime64_s(t = &tmp, &tt) == 0)
+	if (_gmtime64_s(t = &tmp, &tt) == 0)
 #endif
 	{
-		return Set(t);
+		return Set(t, false);
 	}
 
 	return false;
