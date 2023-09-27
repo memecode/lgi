@@ -268,7 +268,7 @@ public:
 	~BrowseUi();
 
 	void ParseBlame(LArray<BlameLine> &lines, LString raw);
-	void ParseLog(LString Log);
+	void ParseLog(LArray<VcCommit*> &commits, LString raw);
 	int OnNotify(LViewI *Ctrl, LNotification n);
 };
 

@@ -63,6 +63,7 @@ bool SshConnection::Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Pa
 	p->Params = Params;
 	p->Path = Fld->GetUri().sPath;
 
+	LgiTrace("PostObject M_RUN_CMD %s\n", Args.Get());
 	return PostObject(GetHandle(), M_RUN_CMD, p);
 }
 
@@ -431,11 +432,8 @@ SSH_LOG("detectVcs:", ls);
 #if PROFILE_OnEvent
 LProfile prof("OnEvent");
 #endif
-
-			LAutoPtr<SshParams> p;
-			if (!ReceiveA(p, Msg))
-				break;
-
+			auto p = Msg->AutoA<SshParams>();
+			LgiTrace("%s:%i - got M_RUN_CMD\n", _FL);
 PROF("get console");
 			LString path = PathFilter(p->Path);
 			LStream *con = GetConsole();
@@ -478,6 +476,7 @@ PROF("result wait");
 				Log->Print("... result=failed\n");
 
 			PostObject(GuiHnd, M_RESPONSE, p);
+			LgiTrace("%s:%i - post M_RESPONSE\n", _FL);
 			break;
 		}
 		default:

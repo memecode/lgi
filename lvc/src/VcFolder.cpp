@@ -763,21 +763,24 @@ void VcFolder::DefaultFields()
 	}
 }
 
-void VcFolder::UpdateColumns()
+void VcFolder::UpdateColumns(LList *lst)
 {
-	d->Commits->EmptyColumns();
+	if (!lst)
+		lst = d->Commits;
+	
+	lst->EmptyColumns();
 
 	for (auto c: Fields)
 	{
 		switch (c)
 		{
-			case LGraph: d->Commits->AddColumn("---", 60); break;
-			case LIndex: d->Commits->AddColumn("Index", 60); break;
-			case LBranch: d->Commits->AddColumn("Branch", 60); break;
-			case LRevision: d->Commits->AddColumn("Revision", 60); break;
-			case LAuthor: d->Commits->AddColumn("Author", 240); break;
-			case LTimeStamp: d->Commits->AddColumn("Date", 130); break;
-			case LMessageTxt: d->Commits->AddColumn("Message", 400); break;
+			case LGraph:      lst->AddColumn("---", 60); break;
+			case LIndex:      lst->AddColumn("Index", 60); break;
+			case LBranch:     lst->AddColumn("Branch", 60); break;
+			case LRevision:   lst->AddColumn("Revision", 60); break;
+			case LAuthor:     lst->AddColumn("Author", 240); break;
+			case LTimeStamp:  lst->AddColumn("Date", 130); break;
+			case LMessageTxt: lst->AddColumn("Message", 400); break;
 			default: LAssert(0); break;
 		}
 	}
@@ -1209,8 +1212,16 @@ VcLeaf *VcFolder::FindLeaf(const char *Path, bool OpenTree)
 bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 {
 	int Skipped = 0, Errors = 0;
-	VcLeaf *File = Params ? FindLeaf(Params->Str, true) : NULL;
-	LArray<VcCommit*> *Out = File ? &File->Log : &Log;
+	bool LoggingFile = Params ? Params->Str != NULL : false;
+	VcLeaf *File = LoggingFile ? FindLeaf(Params->Str, true) : NULL; // This may be NULL even if we are logging a file...
+	
+	LArray<VcCommit*> *Out, BrowseLog;
+	if (File)
+		Out = &File->Log;
+	else if (LoggingFile)
+		Out = &BrowseLog;
+	else
+		Out = &Log;
 
 	LHashTbl<StrKey<char>, VcCommit*> Map;
 	for (auto pc: *Out)
@@ -1263,10 +1274,15 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 				}
 			}
 
-			for (unsigned i=0; i<c.Length(); i++)
+			for (auto txt: c)
 			{
+				if (txt.Find("Matthew Allen") >= 0)
+				{
+					int as=0;
+				}
+
 				LAutoPtr<VcCommit> Rev(new VcCommit(d, this));
-				if (Rev->GitParse(c[i], false))
+				if (Rev->GitParse(txt, false))
 				{
 					if (!Map.Find(Rev->GetRev()))
 						Out->Add(Rev.Release());
@@ -1275,7 +1291,7 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 				}
 				else
 				{
-					LgiTrace("%s:%i - Failed:\n%s\n\n", _FL, c[i].Get());
+					LgiTrace("%s:%i - Failed:\n%s\n\n", _FL, txt.Get());
 					Errors++;
 				}
 			}
@@ -1437,7 +1453,14 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 	}
 
 	if (File)
+	{
 		File->ShowLog();
+	}
+	else if (LoggingFile)
+	{
+		if (auto ui = new BrowseUi(BrowseUi::TLog, d, this, Params->Str))
+			ui->ParseLog(BrowseLog, s);
+	}
 
 	// LgiTrace("%s:%i - ParseLog: Skip=%i, Error=%i\n", _FL, Skipped, Errors);
 	IsLogging = false;
@@ -2018,12 +2041,14 @@ bool VcFolder::ParseDiffs(LString s, LString Rev, bool IsWorking)
 					Diff += a[i];
 				}
 			}
-			InsertFiles(Files);
+
 			if (f && Diff)
 			{
 				f->SetDiff(Diff);
 				Diff.Empty();
 			}
+
+			InsertFiles(Files);
 			break;
 		}
 		case VcHg:
@@ -2699,7 +2724,7 @@ void VcFolder::ListCommit(VcCommit *c)
 		switch (GetType())
 		{
 			case VcGit:
-				Args.Printf("-P show %s", c->GetRev());
+				Args.Printf("-P show %s^..%s", c->GetRev(), c->GetRev());
 				IsFilesCmd = StartCmd(Args, &VcFolder::ParseFiles, new ParseParams(c->GetRev()));
 				break;
 			case VcSvn:
@@ -4360,6 +4385,7 @@ bool BlameLine::Parse(VersionCtrl type, LArray<BlameLine> &out, LString in)
 		*/
 		default:
 		{
+			LAssert(0);
 			return false;
 		}
 	}
@@ -4382,7 +4408,6 @@ bool VcFolder::ParseBlame(int Result, LString s, ParseParams *Params)
 			ui->ParseBlame(lines, s);
 	}
 	else NoImplementation(_FL);
-
 
 	return false;
 }

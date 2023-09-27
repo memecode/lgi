@@ -35,6 +35,7 @@ struct BrowseUiPriv
 	LString UserHilight;
 	LFont Mono;
 
+	LArray<VcCommit*> Commits;
 	LHashTbl<ConstStrKey<char>, LColour*> Colours;
 
 	int NextHue = 0;
@@ -69,6 +70,7 @@ struct BrowseUiPriv
 	~BrowseUiPriv()
 	{
 		Colours.DeleteObjects();
+		Commits.DeleteObjects();
 	}
 
 	void GotoRef(LString ref)
@@ -223,6 +225,7 @@ BrowseUi::BrowseUi(TMode mode, AppPriv *priv, VcFolder *folder, LString path)
 
 		auto LogTab = d->Tabs->Append("Log");
 		LogTab->Append(d->Log = new LList(IDC_LOG));
+		folder->UpdateColumns(d->Log);
 		d->Log->SetPourLargest(true);
 
 		auto RawTab = d->Tabs->Append("Raw");
@@ -267,9 +270,20 @@ void BrowseUi::ParseBlame(LArray<BlameLine> &lines, LString raw)
 	d->Blame->ResizeColumnsToContent(16);
 }
 
-void BrowseUi::ParseLog(LString Content)
+void BrowseUi::ParseLog(LArray<VcCommit*> &commits, LString raw)
 {
-	d->Output = Content;
+	d->Commits.Swap(commits);
+	d->Log->Empty();
+	d->Raw->Name(d->Output = raw);
+	d->Tabs->Value(1);
+
+	LDateTime now;
+	now.SetNow();
+
+	for (auto commit: d->Commits)
+		d->Log->Insert(commit);
+
+	d->Log->ResizeColumnsToContent();
 }
 
 int BrowseUi::OnNotify(LViewI *Ctrl, LNotification n)

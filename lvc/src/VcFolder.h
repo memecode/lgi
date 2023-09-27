@@ -308,7 +308,7 @@ public:
 	LUri GetUri() { return Uri; }
 	VcLeaf *FindLeaf(const char *Path, bool OpenTree);
 	void DefaultFields();
-	void UpdateColumns();
+	void UpdateColumns(LList *lst = NULL);
 	const char *GetText(int Col);
 	LArray<CommitField> &GetFields() { return Fields; }
 	bool Serialize(LXmlTag *t, bool Write);

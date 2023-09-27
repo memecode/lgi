@@ -315,11 +315,19 @@ bool VcCommit::GitParse(LString s, bool RevList)
 		{
 			LString &l = lines[ln];
 			if (ln == 0)
-				Rev = l.SplitDelimit().Last();
+			{
+				auto parts = l.SplitDelimit("()");
+				auto commit = parts[0].SplitDelimit();
+				Rev = commit.Last();
+			}
 			else if (l.Find("Author:") >= 0)
+			{
 				Author = l.Split(":", 1)[1].Strip();
+			}
 			else if (l.Find("Date:") >= 0)
+			{
 				Ts.Parse(l.Split(":", 1)[1].Strip());
+			}
 			else if (l.Strip().Length() > 0)
 			{
 				if (Msg)

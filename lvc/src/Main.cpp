@@ -371,7 +371,7 @@ LString::Array AppPriv::GetCommitRange()
 			r.Add(Sel[0]->GetRev());
 			r.Add(Sel.Last()->GetRev());
 		}
-		else
+		else if (Sel.Length() == 1)
 		{
 			r.Add(Sel[0]->GetRev());
 		}
