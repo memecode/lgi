@@ -201,17 +201,17 @@ class VcFolder : public LTreeItem
 	};
 
 	AppPriv *d;
-	VersionCtrl Type;
+	VersionCtrl Type = VcNone;
 	LUri Uri;
 	LString CurrentCommit, RepoUrl, VcCmd;
-	int64 CurrentCommitIdx;
+	int64 CurrentCommitIdx = -1;
 	LArray<VcCommit*> Log;
 	LString CurrentBranch;
 	LHashTbl<ConstStrKey<char>,VcBranch*> Branches;
 	LAutoPtr<UncommitedItem> Uncommit;
 	LString Cache, NewRev;
 	bool CommitListDirty = false;
-	int Unpushed = 0, Unpulled = 0;
+	int Unpushed = -1, Unpulled = -1;
 	LString CountCache;
 	LTreeItem *Tmp = NULL;
 	int CmdErrors = 0;
@@ -246,8 +246,9 @@ class VcFolder : public LTreeItem
 	void GitAdd();
 
 	LArray<Cmd*> Cmds;
-	bool IsLogging, IsUpdate, IsFilesCmd, IsCommit, IsUpdatingCounts;
-	LvcStatus IsBranches, IsIdent;
+	bool IsLogging = false, IsUpdate = false, IsFilesCmd = false;
+	bool IsCommit = false, IsUpdatingCounts = false;
+	LvcStatus IsBranches = StatusNone, IsIdent = StatusNone;
 
 	void Init(AppPriv *priv);
 	const char *GetVcName();
@@ -302,6 +303,7 @@ public:
 
 	VersionCtrl GetType();
 	AppPriv *GetPriv() { return d; }
+	bool IsLocal();
 	const char *LocalPath();
 	LUri GetUri() { return Uri; }
 	VcLeaf *FindLeaf(const char *Path, bool OpenTree);

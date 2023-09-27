@@ -784,6 +784,9 @@ public:
 		// Post events to the view, which will return to the OnEvent handler..
 		bool PostEvent(int Cmd, LMessage::Param a = 0, LMessage::Param b = 0, int64_t TimeoutMs = -1);
 
+		// Receive OnPulse events.
+		virtual void OnPulse() {}
+
 		// Impl LMessage::Result OnEvent(LMessage *Msg) in your subclass
 	};
 

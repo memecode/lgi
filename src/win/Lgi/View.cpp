@@ -1045,10 +1045,13 @@ void
 CALLBACK
 LView::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, uint32_t dwTime)
 {
-	LView *View = (LView*) idEvent;
+	auto View = (LView*) idEvent;
 	if (View)
 	{
 		View->OnPulse();
+
+		for (auto t: View->d->EventTargets)
+			t->OnPulse();
 	}
 }
 

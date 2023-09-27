@@ -258,20 +258,6 @@ void VcFolder::Init(AppPriv *priv)
 
 	d = priv;
 
-	IsCommit = false;
-	IsLogging = false;
-	IsUpdate = false;
-	IsFilesCmd = false;
-	CommitListDirty = false;
-	IsUpdatingCounts = false;
-	IsBranches = StatusNone;
-	IsIdent = StatusNone;
-
-	Unpushed = Unpulled = -1;
-	Type = VcNone;
-	CmdErrors = 0;
-	CurrentCommitIdx = -1;
-
 	Expanded(false);
 	Insert(Tmp = new LTreeItem);
 	Tmp->SetText("Loading...");
@@ -302,6 +288,11 @@ VersionCtrl VcFolder::GetType()
 	if (Type == VcNone)
 		Type = d->DetectVcs(this);
 	return Type;
+}
+
+bool VcFolder::IsLocal()
+{
+	return Uri.IsProtocol("file");
 }
 
 const char *VcFolder::LocalPath()
@@ -1163,14 +1154,23 @@ void VcFolder::LogFile(const char *uri)
 {
 	LString Args;
 	
+	if (IsLogging)
+	{
+		d->Log->Print("%s:%i - already logging.\n", _FL);
+		return;
+	}
+
+	const char *Page = "";
 	switch (GetType())
 	{
+		case VcGit:
+			Page = "-P ";
+			// fall through
 		case VcSvn:
 		case VcHg:
-		case VcGit:
 		{
 			FileToSelect = GetFilePart(uri);
-			if (!LFileExists(FileToSelect))
+			if (IsLocal() && !LFileExists(FileToSelect))
 			{
 				LFile::Path Abs(LocalPath());
 				Abs += FileToSelect;
@@ -1179,12 +1179,12 @@ void VcFolder::LogFile(const char *uri)
 			}
 
 			ParseParams *Params = new ParseParams(uri);
-			Args.Printf("log \"%s\"", FileToSelect.Get());
+			Args.Printf("%slog \"%s\"", Page, FileToSelect.Get());
 			IsLogging = StartCmd(Args, &VcFolder::ParseLog, Params, LogNormal);
 			break;
 		}
 		default:
-			LAssert(!"Impl me.");
+			NoImplementation(_FL);
 			break;
 	}
 }
@@ -1930,11 +1930,18 @@ void VcFolder::InsertFiles(List<LListItem> &files)
 		for (auto f: files)
 		{
 			// Convert to an absolute path:
+			bool match = false;
 			auto relPath = f->GetText(COL_FILENAME);
-			LFile::Path p(LocalPath());
-			p += relPath;
-
-			bool match = p.GetFull().Equals(FileToSelect);
+			if (IsLocal())
+			{
+				LFile::Path p(LocalPath());
+				p += relPath;
+				match = p.GetFull().Equals(FileToSelect);
+			}
+			else
+			{
+				match = !Stricmp(FileToSelect.Get(), relPath);
+			}
 			f->Select(match);
 			if (match)
 				scroll = f;
@@ -3152,6 +3159,12 @@ void VcFolder::ListWorkingFolder()
 	LString Arg;
 	switch (GetType())
 	{
+		case VcPending:
+			OnVcsTypeEvents.Add([this]()
+			{
+				ListWorkingFolder();
+			});
+			break;
 		case VcCvs:
 			if (Untracked)
 				Arg = "-qn update";
@@ -4277,6 +4290,48 @@ bool BlameLine::Parse(VersionCtrl type, LArray<BlameLine> &out, LString in)
 	{
 		case VcGit:
 		{
+			for (auto &ln: lines)
+			{
+				auto s = ln.Get();
+				auto open = ln.Find("(");
+				auto close = ln.Find(")", open);
+				if (open > 0 && close > open)
+				{
+					auto eRef = ln(0, open-1);
+					auto fields = ln(open + 1, close);
+					auto parts = fields.SplitDelimit();
+					
+					auto &o = out.New();
+					o.ref = eRef;
+					o.line = parts.Last();
+					parts.PopLast();
+
+					LString::Array name;
+					LDateTime dt;
+					for (auto p: parts)
+					{
+						auto first = p(0);
+						if (IsDigit(first))
+						{
+							if (p.Find("-") > 0)
+								dt.SetDate(p);
+							else if (p.Find(":") > 0)
+								dt.SetTime(p);
+						}
+						else if (first == '+')
+							dt.SetTimeZone((int)p.Int(), false);
+						else
+							name.Add(p);
+					}
+					o.user = LString(" ").Join(name);
+					o.date = dt.Get();
+					o.src = ln(close + 1, -1);
+				}
+				else if (ln.Length() > 0)
+				{
+					int asd=0;
+				}
+			}
 			break;
 		}
 		case VcHg:
@@ -4297,10 +4352,12 @@ bool BlameLine::Parse(VersionCtrl type, LArray<BlameLine> &out, LString in)
 			}
 			break;
 		}
+		/*
 		case VcSvn:
 		{
 			break;
 		}
+		*/
 		default:
 		{
 			return false;
@@ -4320,8 +4377,12 @@ bool VcFolder::ParseBlame(int Result, LString s, ParseParams *Params)
 
 	LArray<BlameLine> lines;
 	if (BlameLine::Parse(GetType(), lines, s))
+	{
 		if (auto ui = new BrowseUi(BrowseUi::TBlame, d, this, Params->Str))
 			ui->ParseBlame(lines, s);
+	}
+	else NoImplementation(_FL);
+
 
 	return false;
 }

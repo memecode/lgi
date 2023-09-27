@@ -1,12 +1,12 @@
 /*hdr
-**      FILE:           Png.cpp
-**      AUTHOR:         Matthew Allen
-**      DATE:           8/9/1998
-**      DESCRIPTION:    Png file filter
-**
-**      Copyright (C) 2002, Matthew Allen
-**              fret@memecode.com
-*/
+ *      FILE:           Png.cpp
+ *      AUTHOR:         Matthew Allen
+ *      DATE:           8/9/1998
+ *      DESCRIPTION:    Png file filter
+ *
+ *      Copyright (C) 2002, Matthew Allen
+ *              fret@memecode.com
+ */
 
 //
 // 'png.h' comes from libpng, which you can get from:

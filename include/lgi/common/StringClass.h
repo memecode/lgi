@@ -267,6 +267,13 @@ public:
 		if (Str)
 			Str->Refs++;
 	}
+
+	// Move constructor
+	LString(LString&& s)
+	{
+		Str = s.Str;
+		s.Str = NULL;
+	}
 	
 	~LString()
 	{
