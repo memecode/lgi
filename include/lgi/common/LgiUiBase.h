@@ -44,10 +44,10 @@ class LDialog;
 /// is to <app_name>.txt in the executables folder or $LSP_APP_ROOT\<app_name>.txt if
 /// that is not writable. If the stream is set to something then normal file output is
 /// directed to the specified stream instead.
-LgiFunc void LgiTraceSetStream(class LStreamI *stream);
+LgiFunc void LTraceSetStream(class LStreamI *stream);
 
 /// Gets the log file path
-LgiExtern LString LgiTraceGetFilePath();
+LgiExtern LString LTraceGetFilePath();
 
 /// Writes a debug statement to a output stream, or if not defined with LgiTraceSetStream
 /// then to a log file (see LgiTraceSetStream for details)

@@ -456,59 +456,106 @@ bool LRecursiveFileSearch(const char *Root,
 #define _vsnprintf vsnprintf
 #endif
 
-static LStreamI *_LgiTraceStream = NULL;
-
-void LgiTraceSetStream(LStreamI *stream)
+struct LTracingSupport : public LMutex
 {
-	_LgiTraceStream = stream;
+	LStreamI *Stream = NULL;
+	LFile f;
+	LString LogPath;
+
+	LTracingSupport() : LMutex("LTracingSupport")
+	{
+	}
+
+	LStreamI *GetStream()
+	{
+		return Stream ? Stream : &f;
+	}
+
+	bool Open()
+	{
+		if (Stream)
+			return true;
+		if (f.IsOpen())
+			return true;
+		if (!f.Open(LogPath, O_WRITE))
+			return false;
+		f.Seek(0, SEEK_END);
+		return true;
+	}
+
+	void Close()
+	{
+		if (!Stream)
+		{
+			#ifdef WINDOWS
+			// Windows can take AGES to close a file when there is anti-virus on, like 100ms.
+			// We can't afford to wait here so just keep the file open but flush the
+			// buffers if we can.
+			FlushFileBuffers(f.Handle());
+			#else
+			f.Close();
+			#endif
+		}
+	}
+
+	LString GetFilePath()
+	{
+		auto Exe = LGetExeFile();
+		if (!Exe)
+			// Well what to do now? I give up
+			return LString("trace.txt");
+
+		#ifdef MAC
+		auto Dir = strrchr(Exe, DIR_CHAR);
+		if (Dir)
+		{
+			char path[MAX_PATH_LEN];
+			LMakePath(path, sizeof(path), "~/Library/Logs", Dir+1);
+			LogPath.Printf("%s.txt", path);
+		}
+		else
+			#endif
+		{
+			auto Dot = strrchr(Exe, '.');
+			if (Dot && !strchr(Dot, DIR_CHAR))
+				LogPath.Printf("%.*s.txt", (int)(Dot - Exe.Get()), Exe.Get());
+			else
+				LogPath.Printf("%s.txt", Exe.Get());
+		}
+
+		LFile f;		
+		if (f.Open(LogPath, O_WRITE))
+		{
+			f.Close();
+		}
+		else if (auto Dir = strrchr(LogPath, DIR_CHAR))
+		{
+			LString Leaf = Dir + 1;
+			LFile::Path p(LSP_APP_ROOT);
+			if (!p.Exists())
+				FileDev->CreateFolder(p);
+			p += Leaf;
+			LogPath = p.GetFull();
+		}
+		else
+		{
+			return LString("trace.txt");
+		}	
+
+		return LogPath;
+	}
+};
+
+static LTracingSupport Trace;
+
+void LTraceSetStream(LStreamI *stream)
+{
+	Trace.Stream = stream;
 }
 
-LString LgiTraceGetFilePath()
+LString LTraceGetFilePath()
 {
-	auto Exe = LGetExeFile();
-	if (!Exe)
-		// Well what to do now? I give up
-		return LString("trace.txt");
-
-	LString LogPath;
-	#ifdef MAC
-	auto Dir = strrchr(Exe, DIR_CHAR);
-	if (Dir)
-	{
-		char path[MAX_PATH_LEN];
-		LMakePath(path, sizeof(path), "~/Library/Logs", Dir+1);
-		LogPath.Printf("%s.txt", path);
-	}
-	else
-	#endif
-	{
-		auto Dot = strrchr(Exe, '.');
-		if (Dot && !strchr(Dot, DIR_CHAR))
-			LogPath.Printf("%.*s.txt", (int)(Dot - Exe.Get()), Exe.Get());
-		else
-			LogPath.Printf("%s.txt", Exe.Get());
-	}
-
-	LFile f;		
-	if (f.Open(LogPath, O_WRITE))
-	{
-		f.Close();
-	}
-	else if (auto Dir = strrchr(LogPath, DIR_CHAR))
-	{
-		LString Leaf = Dir + 1;
-		LFile::Path p(LSP_APP_ROOT);
-		if (!p.Exists())
-			FileDev->CreateFolder(p);
-		p += Leaf;
-		LogPath = p.GetFull();
-	}
-	else
-	{
-		return LString("trace.txt");
-	}	
-		
-	return LogPath;
+	return Trace.GetFilePath();
 }
 
 void LgiTrace(const char *Msg, ...)
@@ -522,22 +569,10 @@ void LgiTrace(const char *Msg, ...)
 		return;
 
 	#ifdef WIN32
-		static LMutex Sem("LgiTrace");
-		Sem.Lock(_FL, true);
+		bool locked = Trace.Lock(_FL, true);
 	#endif
 
 	char Buffer[2049] = "";
-	#ifdef LGI_TRACE_TO_FILE
-		static LFile f;
-		static char LogPath[MAX_PATH_LEN] = "";
-	
-		if (!_LgiTraceStream && LogPath[0] == 0)
-		{
-			auto p = LgiTraceGetFilePath();
-			if (p)
-				strcpy_s(LogPath, sizeof(LogPath), p);
-		}
-	#endif
 
 	va_list Arg;
 	va_start(Arg, Msg);
@@ -548,40 +583,22 @@ void LgiTrace(const char *Msg, ...)
 	va_end(Arg);
 
 	#ifdef LGI_TRACE_TO_FILE
-		LStreamI *Output = NULL;
-		if (_LgiTraceStream)
-			Output = _LgiTraceStream;
-		else
-		{
-			if (!f.IsOpen() &&
-				f.Open(LogPath, O_WRITE))
-				f.Seek(0, SEEK_END);
-			Output = &f;
-		}
-
-		if (Output && Ch > 0)
+		LStreamI *Output = Trace.GetStream();
+		if (Output &&
+			Ch > 0 &&
+			Trace.Open())
 		{
 			Output->ChangeThread();
 			Output->Write(Buffer, Ch);
-		}
-
-		if (!_LgiTraceStream)
-		{
-			#ifdef WINDOWS
-				// Windows can take AGES to close a file when there is anti-virus on, like 100ms.
-				// We can't afford to wait here so just keep the file open but flush the
-				// buffers if we can.
-				FlushFileBuffers(f.Handle());
-			#else
-				f.Close();
-			#endif
+			Trace.Close();
 		}
 	#endif
 
 
 	#if defined WIN32
 		OutputDebugStringA(Buffer);
-		Sem.Unlock();
+		if (locked)
+			Trace.Unlock();
 	#else
 		printf("%s", Buffer);
 	#endif
@@ -605,44 +622,35 @@ void LStackTrace(const char *Msg, ...)
 		auto Frames = Lu ? Lu->BackTrace(0, 0, Stack, STACK_SIZE) : 0;
 		if (Msg)
 		{
-			#ifdef LGI_TRACE_TO_FILE
-				static LFile f;
-				static char LogPath[MAX_PATH_LEN] = "";
-		
-				if (!_LgiTraceStream)
-				{
-			 		if (LogPath[0] == 0)
-					{
-						auto p = LgiTraceGetFilePath();
-						if (p)
-							strcpy_s(LogPath, sizeof(LogPath), p);
-					}
-					if (LogPath[0])
-						f.Open(LogPath, O_WRITE);
-				}
-			#endif
-
 			va_list Arg;
 			va_start(Arg, Msg);
 			char Buffer[2049] = "";
-			auto Len = vsnprintf(Buffer, sizeof(Buffer)-1, Msg, Arg);
+			auto Ch = vsnprintf(Buffer, sizeof(Buffer)-1, Msg, Arg);
 			va_end(Arg);
+			if (Ch > 0 && Buffer[Ch-1] != '\n')
+				Buffer[Ch++] = '\n';
+			Lu->Lookup(Buffer+Ch, sizeof(Buffer)-Ch-1, Stack, Frames);
 
-			Lu->Lookup(Buffer+Len, sizeof(Buffer)-Len-1, Stack, Frames);
-
+			#ifdef WIN32
+				bool locked = Trace.Lock(_FL, true);
+			#endif
 			#ifdef LGI_TRACE_TO_FILE
-				if (f.IsOpen())
+				LStreamI *Output = Trace.GetStream();
+				if (Output &&
+					Trace.Open())
 				{
-					f.Seek(0, SEEK_END);
-					f.Write(Buffer, (int)strlen(Buffer));
-					f.Close();
+					Output->ChangeThread();
+					Output->Write(Buffer, Strlen(Buffer));
+					Trace.Close();
 				}
 			#endif
 
 			#if defined WIN32
 				OutputDebugStringA(Buffer);
+				if (locked)
+					Trace.Unlock();
 			#else
-				printf("Trace: %s", Buffer);
+				printf("StackTrace: %s", Buffer);
 			#endif
 		}
 	#endif

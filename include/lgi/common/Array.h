@@ -333,8 +333,10 @@ public:
 			fixed && ((uint32_t)i >= len)
 		)
 		{
+			#ifndef LGI_STATIC
 			if (warnResize)
-				assert(!"Attempt to enlarged fixed array.");
+				LStackTrace("%s:%i - Attempt to enlarged fixed array.", _FL);
+			#endif
 			return t;
 		}
 		
