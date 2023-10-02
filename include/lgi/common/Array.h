@@ -14,6 +14,10 @@
 #if defined(LGI_CHECK_MALLOC) && !defined(LGI_MEM_DEBUG)
 #error "Include GMem.h first"
 #endif
+#ifndef LGI_STATIC
+/// Same as LgiTrace but writes a stack trace as well.
+LgiFunc void LStackTrace(const char *Format, ...);
+#endif
 
 #if defined(PLATFORM_MINGW)
 #ifdef __cplusplus
@@ -176,8 +180,10 @@ public:
 		{
 			if (i > len && fixed)
 			{
+				#ifndef LGI_STATIC
 				if (warnResize)
-					LAssert(!"Attempt to enlarged fixed array.\n");
+					LStackTrace("Attempt to enlarged fixed array.\n");
+				#endif
 				return false;
 			}
 

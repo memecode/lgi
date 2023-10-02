@@ -774,13 +774,13 @@ void VcFolder::UpdateColumns(LList *lst)
 	{
 		switch (c)
 		{
-			case LGraph:      lst->AddColumn("---", 60); break;
-			case LIndex:      lst->AddColumn("Index", 60); break;
-			case LBranch:     lst->AddColumn("Branch", 60); break;
+			case LGraph:      lst->AddColumn("---",      60); break;
+			case LIndex:      lst->AddColumn("Index",    60); break;
+			case LBranch:     lst->AddColumn("Branch",   60); break;
 			case LRevision:   lst->AddColumn("Revision", 60); break;
-			case LAuthor:     lst->AddColumn("Author", 240); break;
-			case LTimeStamp:  lst->AddColumn("Date", 130); break;
-			case LMessageTxt: lst->AddColumn("Message", 400); break;
+			case LAuthor:     lst->AddColumn("Author",   240); break;
+			case LTimeStamp:  lst->AddColumn("Date",     130); break;
+			case LMessageTxt: lst->AddColumn("Message",  700); break;
 			default: LAssert(0); break;
 		}
 	}

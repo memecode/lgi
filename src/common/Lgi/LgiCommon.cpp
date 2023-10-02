@@ -593,58 +593,58 @@ void LgiTrace(const char *Msg, ...)
 void LStackTrace(const char *Msg, ...)
 {
 	#ifndef HAIKU
-	LSymLookup::Addr Stack[STACK_SIZE];
-	ZeroObj(Stack);
-	LSymLookup *Lu = LAppInst ? LAppInst->GetSymLookup() : NULL;
-	if (!Lu)
-	{
-		printf("%s:%i - Failed to get sym lookup object.\n", _FL);
-		return;
-	}
+		LSymLookup::Addr Stack[STACK_SIZE];
+		ZeroObj(Stack);
+		LSymLookup *Lu = LAppInst ? LAppInst->GetSymLookup() : NULL;
+		if (!Lu)
+		{
+			printf("%s:%i - Failed to get sym lookup object.\n", _FL);
+			return;
+		}
 	
-	int Frames = Lu ? Lu->BackTrace(0, 0, Stack, STACK_SIZE) : 0;
-	if (Msg)
-	{
-		#ifdef LGI_TRACE_TO_FILE
-			static LFile f;
-			static char LogPath[MAX_PATH_LEN] = "";
+		auto Frames = Lu ? Lu->BackTrace(0, 0, Stack, STACK_SIZE) : 0;
+		if (Msg)
+		{
+			#ifdef LGI_TRACE_TO_FILE
+				static LFile f;
+				static char LogPath[MAX_PATH_LEN] = "";
 		
-			if (!_LgiTraceStream)
-			{
-			 	if (LogPath[0] == 0)
+				if (!_LgiTraceStream)
 				{
-					auto p = LgiTraceGetFilePath();
-					if (p)
-						strcpy_s(LogPath, sizeof(LogPath), p);
+			 		if (LogPath[0] == 0)
+					{
+						auto p = LgiTraceGetFilePath();
+						if (p)
+							strcpy_s(LogPath, sizeof(LogPath), p);
+					}
+					if (LogPath[0])
+						f.Open(LogPath, O_WRITE);
 				}
-				if (LogPath[0])
-					f.Open(LogPath, O_WRITE);
-			}
-		#endif
+			#endif
 
-		va_list Arg;
-		va_start(Arg, Msg);
-		char Buffer[2049] = "";
-		int Len = vsnprintf(Buffer, sizeof(Buffer)-1, Msg, Arg);
-		va_end(Arg);
+			va_list Arg;
+			va_start(Arg, Msg);
+			char Buffer[2049] = "";
+			auto Len = vsnprintf(Buffer, sizeof(Buffer)-1, Msg, Arg);
+			va_end(Arg);
 
-		Lu->Lookup(Buffer+Len, sizeof(Buffer)-Len-1, Stack, Frames);
+			Lu->Lookup(Buffer+Len, sizeof(Buffer)-Len-1, Stack, Frames);
 
-		#ifdef LGI_TRACE_TO_FILE
-			if (f.IsOpen())
-			{
-				f.Seek(0, SEEK_END);
-				f.Write(Buffer, (int)strlen(Buffer));
-				f.Close();
-			}
-		#endif
+			#ifdef LGI_TRACE_TO_FILE
+				if (f.IsOpen())
+				{
+					f.Seek(0, SEEK_END);
+					f.Write(Buffer, (int)strlen(Buffer));
+					f.Close();
+				}
+			#endif
 
-		#if defined WIN32
-		OutputDebugStringA(Buffer);
-		#else
-		printf("Trace: %s", Buffer);
-		#endif
-	}
+			#if defined WIN32
+				OutputDebugStringA(Buffer);
+			#else
+				printf("Trace: %s", Buffer);
+			#endif
+		}
 	#endif
 }
 #endif
