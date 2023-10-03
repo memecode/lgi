@@ -1,5 +1,4 @@
-#ifndef _GDEBUG_CONTEXT_H_
-#define _GDEBUG_CONTEXT_H_
+#pragma once
 
 #include "lgi/common/TextLog.h"
 
@@ -8,14 +7,14 @@ class LDebugContext : public LDebugEvents
 	class LDebugContextPriv *d;
 	
 public:
-	LTree *Watch;
-	LList *Locals;
-	LList *CallStack;
-	LList *Threads;
-	LTextLog *ObjectDump;
-	LTextLog *MemoryDump;
-	LTextLog *DebuggerLog;
-	LTextLog *Registers;
+	LTree *Watch = NULL;
+	LList *Locals = NULL;
+	LList *CallStack = NULL;
+	LList *Threads = NULL;
+	LTextLog *ObjectDump = NULL;
+	LTextLog *MemoryDump = NULL;
+	LTextLog *DebuggerLog = NULL;
+	LTextLog *Registers = NULL;
 
 	// Object
 	LDebugContext(AppWnd *App, class IdeProject *Proj, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir);
@@ -46,6 +45,5 @@ public:
 	void OnFileLine(const char *File, int Line, bool CurrentIp);
 	void OnError(int Code, const char *Str);
 	void OnCrash(int Code);
+	void Ungrab();
 };
-
-#endif

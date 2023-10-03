@@ -15,6 +15,7 @@ public:
 	virtual void OnFileLine(const char *File, int Line, bool CurrentIp) = 0;
 	virtual void OnError(int Code, const char *Str) = 0;
 	virtual void OnCrash(int Code) = 0;
+	virtual void Ungrab() = 0;
 };
 
 class LDebugger

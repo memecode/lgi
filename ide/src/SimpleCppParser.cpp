@@ -37,8 +37,8 @@ Known bugs:
 #include "lgi/common/DocView.h"
 #include "ParserCommon.h"
 
-// #define DEBUG_FILE		"AppFileInfo.h"
-// #define DEBUG_LINE		150
+#define DEBUG_FILE		"server.cpp"
+#define DEBUG_LINE		17
 
 const char *TypeToStr(DefnType t)
 {

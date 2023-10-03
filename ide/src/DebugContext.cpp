@@ -4,11 +4,18 @@
 #include "LgiIde.h"
 #include "IdeProject.h"
 
+#ifdef LINUX
+namespace Gtk {
+	#include "gdk/gdkx.h"
+	#undef Bool
+}
+#endif
+
+
 enum DebugMessages
 {
 	M_RUN_STATE = M_USER + 100,
 	M_ON_CRASH,
-	M_FILE_LINE,
 };
 
 class LDebugContextPriv : public LMutex
@@ -152,13 +159,6 @@ public:
 
 LDebugContext::LDebugContext(AppWnd *App, IdeProject *Proj, const char *Exe, const char *Args, bool RunAsAdmin, const char *Env, const char *InitDir)
 {
-	Watch = NULL;
-	Locals = NULL;
-	DebuggerLog = NULL;
-	ObjectDump = NULL;
-	Registers = NULL;
-	Threads = NULL;
-
 	d = new LDebugContextPriv(this);
 	d->App = App;
 	d->Proj = Proj;
@@ -204,22 +204,6 @@ LMessage::Param LDebugContext::OnEvent(LMessage *m)
 			LgiTrace("LDebugContext::OnEvent(M_ON_CRASH)\n");
 			#endif
 			d->UpdateCallStack();
-			break;
-		}
-		case M_FILE_LINE:
-		{
-			#if DEBUG_SESSION_LOGGING
-			LgiTrace("LDebugContext::OnEvent(M_FILE_LINE)\n");
-			#endif
-			LString File;
-			{
-				LMutex::Auto a(d, _FL);
-				File = d->SeekFile;
-			}
-			
-			// printf("%s:%i - %s %i\n", _FL, File.Get(), d->SeekLine);
-			if (File && d->SeekLine > 0)
-				d->App->GotoReference(File, d->SeekLine, d->SeekCurrentIp);
 			break;
 		}
 	}
@@ -721,24 +705,8 @@ void LDebugContext::OnFileLine(const char *File, int Line, bool CurrentIp)
 		return;
 	}
 
-	if (d->App->InThread())
-	{
-		d->App->GotoReference(File, Line, CurrentIp);
-	}
-	else
-	{
-		{
-			LMutex::Auto a(d, _FL);
-			if (File)
-				d->SeekFile = File;
-			d->SeekLine = Line;
-			d->SeekCurrentIp = CurrentIp;
-			
-			// printf("%s:%i - %s %i, %i\n", _FL, d->SeekFile.Get(), d->SeekLine, d->SeekCurrentIp);
-		}
-
-		d->App->PostEvent(M_FILE_LINE);
-	}
+	// Goto reference is thread safe:
+	d->App->GotoReference(File, Line, CurrentIp);
 }
 
 ssize_t LDebugContext::Write(const void *Ptr, ssize_t Size, int Flags)
@@ -761,6 +729,11 @@ void LDebugContext::OnError(int Code, const char *Str)
 void LDebugContext::OnCrash(int Code)
 {
 	d->App->PostEvent(M_ON_CRASH);
+}
+
+void LDebugContext::Ungrab()
+{
+	// printf("LDebugContext::Ungrab: noop\n");
 }
 
 bool LDebugContext::OnBreakPoint(LDebugger::BreakPoint &b, bool Add)

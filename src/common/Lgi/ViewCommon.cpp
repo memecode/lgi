@@ -266,17 +266,7 @@ bool LView::CommonEvents(LMessage::Result &result, LMessage *Msg)
 	{
 		case M_VIEW_RUN_CALLBACK:
 		{
-			LAutoPtr<std::function<int64()>> callback((std::function<int64()>*)Msg->A());
-			auto result = (LAutoPtr<int64>*)Msg->B();
-			if (!callback || !result)
-			{
-				LgiTrace("%s:%i - M_VIEW_RUN_CALLBACK param error.\n", _FL);
-				break;
-			}
-
-			auto r = (*callback.Get())();
-			result->Reset(new int64(r));
-			// printf("M_VIEW_RUN_CALLBACK is done.\n");
+			CbStore.Call(Msg->A());
 			break;
 		}
 		case M_THREAD_COMPLETED:
@@ -2296,42 +2286,6 @@ LColour LView::StyleColour(int CssPropType, LColour Default, int Depth)
 	}
 	
 	return c;
-}
-
-int64 LView::RunCallback(std::function<int64()> Callback, int timeoutMs, LCancel *cancel)
-{
-	if (!Callback)
-	{
-		LgiTrace("%s:%i - No callback.\n", _FL);
-		return -1;
-	}
-	
-	LAutoPtr<int64> result;
-	if (!PostEvent(	M_VIEW_RUN_CALLBACK,
-					(LMessage::Param)new std::function<int64()>(Callback),
-					(LMessage::Param)&result))
-	{
-		LgiTrace("%s:%i - RunCallback PostEvent failed.\n", _FL);
-		return -1;
-	}
-	
-	auto StartTs = LCurrentTime();
-	while (!result)
-	{
-		if
-		(
-			(timeoutMs >= 0 && (LCurrentTime()-StartTs) > timeoutMs)
-			||
-			(cancel && cancel->IsCancelled())
-		)
-		{
-			return -1;
-		}
-		LSleep(10);
-	}	
-	
-	LAssert(result);
-	return *result.Get();
 }
 
 bool LView::InThread()

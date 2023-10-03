@@ -152,7 +152,9 @@ int SysIncThread::Main()
 	for (auto &p: Paths)
 		Scan(p);
 
-	App->RunCallback([this]()
+	// Can't use the async callback mode here, otherwise this thread will exit
+	// before the callback can be processed. Use the blocking form.
+	App->RunCallback<int>([this]()
 		{
 			if (Callback)
 				Callback(&Headers);
@@ -3001,7 +3003,8 @@ IdeDoc *AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithH
 		(
 			[this, File=LString(File), Line, CurIp, WithHistory]()
 			{
-				return GotoReference(File, Line, CurIp, WithHistory);
+				auto doc = GotoReference(File, Line, CurIp, WithHistory);
+				return doc;
 			},
 			2000 // ms timeout, ie don't hang the app indefinately.
 		);

@@ -407,50 +407,174 @@ public:
 	bool InThread() override;
 	
 	/// Run some code in the UI thread...
+	/// But don't wait for any sort of response.
+	/// \returns true if the callback was sent (but not necessarily processed).
+	bool RunCallback(std::function<void()> Callback)
+	{
+		if (!Callback)
+		{
+			LgiTrace("%s:%i - No callback.\n", _FL);
+			return false;
+		}
+		else
+		{
+			return PostEvent(M_VIEW_RUN_CALLBACK,
+							(LMessage::Param)new std::function<void()>(std::move(Callback)));
+		}
+	}
+
+	class CallbackStore : public LMutex
+	{
+		LHashTbl<IntKey<int>, std::function<void()>*> map;
+
+	public:
+		CallbackStore() : LMutex("CallbackStore")
+		{
+		}
+
+		int Add(std::function<void()> cb)
+		{
+			if (!LockWithTimeout(4000, _FL))
+			{
+				printf("%i: CbStore.Add lock timed out...\n", GetCurrentThreadId());
+				return -1;
+			}			
+
+			// Find a free slot...
+			int id = 0;
+			for (; map.Find(id); id++)
+				;			
+			
+			map.Add(id, new std::function<void()>(std::move(cb)));
+			printf("%i: CbStore.Add %i\n", GetCurrentThreadId(), id);
+
+			Unlock();
+			return id;
+		}
+
+		bool Call(int id)
+		{
+			if (!LockWithTimeout(4000, _FL))
+			{
+				printf("%i: CbStore.Call(%i) lock timed out...\n", GetCurrentThreadId(), id);
+				return false;
+			}			
+
+			bool status = false;
+			auto cb = map.Find(id);
+			if (cb)
+			{
+				(*cb)();
+				if (map.Delete(id))
+				{
+					delete cb;
+					status = true;
+					printf("%i: CbStore.Call %i\n", GetCurrentThreadId(), id);
+				}
+			}
+
+			Unlock();
+			return status;
+		}
+
+		bool Delete(int id)
+		{
+			if (!LockWithTimeout(4000, _FL))
+			{
+				printf("%i: CbStore.Call(%i) lock timed out...\n", GetCurrentThreadId(), id);
+				return false;
+			}			
+
+			bool status = false;
+			auto cb = map.Find(id);
+			if (cb && map.Delete(id))
+			{
+				status = true;
+				printf("%i: CbStore.Delete %i\n", GetCurrentThreadId(), id);
+				delete cb;
+			}
+
+			Unlock();
+			return status;
+		}
+
+		CallbackStore &operator =(const CallbackStore &cs)
+		{
+			return *this;
+		}
+
+	}	CbStore;
+
+	/// Run some code in the UI thread...
 	/// This will block while waiting for the UI event loop to respond or a timeout
 	/// to occur. Negative timeoutMs is "wait forever".
-	/// -1 return value is generally an error.
-	int64 RunCallback(std::function<int64()> Callback, int timeoutMs = -1, LCancel *cancel = NULL);
-
-	/// Run some code in the UI thread, same as RunCallback, just with a parameterized return type.
+	///
+	/// This code needs to handle 5 cases:
+	/// - There is a parameter error and the code returns without sending a message.
+	/// - RunCallback sends a message to the view but it's not processed. (view deleted in the meantime?)
+	/// - RunCallback sends a message, but the caller times out before it's processed.
+	/// - RunCallback sends a message, but the cancel object is set before a response happens.
+	/// - RunCallback sends a message and it's processed.
+	///
+	/// The life time of the variables accessed by the M_VIEW_RUN_CALLBACK event handler can't be on the
+	/// stack. If the timeout occurs and RunCallback exits before M_VIEW_RUN_CALLBACK is processed the
+	/// stack variable will go out of scope and crash.
+	///
+	/// So the variables are stored in the CallbackParams object on the heap.
 	template<typename T>
 	LAutoPtr<T> RunCallback(std::function<T()> Callback, int timeoutMs = -1, LCancel *cancel = NULL)
 	{
 		LAutoPtr<T> result;
+
 		if (!Callback)
 		{
 			LgiTrace("%s:%i - No callback.\n", _FL);
+			return result;
 		}
-		else
-		{		
-			if (!PostEvent(	M_VIEW_RUN_CALLBACK,
-							(LMessage::Param)new std::function<int64()>
-							(
-								[Callback, &result]()
-								{
-									result.Reset(new T(Callback()));
-									return 0;
-								}
-							),
-							(LMessage::Param)&result))
+
+		int id = CbStore.Add([Callback, &result]()
+		{
+			result.Reset(new T(Callback()));
+		});
+
+		printf("%i: post M_VIEW_RUN_CALLBACK for %i...\n", GetCurrentThreadId(), id);
+		if (!PostEvent(M_VIEW_RUN_CALLBACK, id))
+		{
+			LgiTrace("%s:%i - RunCallback PostEvent failed.\n", _FL);
+			return result;
+		}
+
+		auto StartTs = LCurrentTime();
+		auto Report = StartTs;
+		while (!result)
+		{
+			auto Now = LCurrentTime();
+
+			if (Now - Report > 500)
 			{
-				LgiTrace("%s:%i - RunCallback PostEvent failed.\n", _FL);
+				Report = Now;
+				printf("%i: Waiting for M_VIEW_RUN_CALLBACK %i\n",
+					GetCurrentThreadId(),
+					(int)(Now-StartTs));
 			}
-			else
-			{			
-				auto StartTs = LCurrentTime();
-				while (!result)
-				{
-					if ((timeoutMs >= 0 && (LCurrentTime()-StartTs) > timeoutMs)
-						||
-						(cancel && cancel->IsCancelled()))
-					{
-						break; // Leave the loop and return an empty auto ptr
-					}
-					LSleep(10);
-				}
+
+			if (timeoutMs >= 0 && (Now-StartTs) > timeoutMs)
+			{
+				printf("%i: RunCallback timed out.\n", GetCurrentThreadId());
+				break;
 			}
-		}		
+
+			if (cancel && cancel->IsCancelled())
+			{
+				printf("%i: RunCallback cancelled.\n", GetCurrentThreadId());
+				break;
+			}
+
+			LSleep(10);
+		}
+
+		printf("%i: RunCallback finished: %p\n", GetCurrentThreadId(), result.Get());
+		CbStore.Delete(id);
 		return result;
 	}
 

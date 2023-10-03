@@ -135,7 +135,11 @@ class Gdb : public LDebugger, public LThread, public Callback
 				CurLine = Line;
 			
 			if (CurFile && CurLine > 0)
+			{
+				printf("%i: OnFileLine...\n", GetCurrentThreadId());
 				Events->OnFileLine(CurFile, CurLine, CurrentIp);
+				printf("%i: OnFileLine done.\n", GetCurrentThreadId());
+			}
 			/*
 			else
 				printf("%s:%i - Error: Cur loc incomplete: %s %i.\n", _FL, CurFile.Get(), CurLine);
@@ -238,25 +242,26 @@ class Gdb : public LDebugger, public LThread, public Callback
 	
 	void OnBreakPoint(LString f)
 	{
-		Ungrab();
+		Events->Ungrab();
 		
 		if (!f.Get() || ProcessId < 0)
 		{
-			// printf("Error: Param error: %s, %i (%s:%i)\n", f.Get(), ProcessId, _FL);
+			printf("Error: Param error: %s, %i (%s:%i)\n", f.Get(), ProcessId, _FL);
 			return;
 		}
 		
 		LString File, Line;
-		LString::Array a = f.Split("at");
-		/*
-		printf("%s:%i - a.len=%i\n", _FL, a.Length());
+		LString::Array a = f.Split(" at ");
+
+		#if 0		
+		printf("%s:%i - a.len=%i\n", _FL, (int)a.Length());
 		for (unsigned n=0; n<a.Length(); n++)
 			printf("\t[%i]='%s'\n", n, a[n].Get());
-		*/
+		#endif
 		
 		if (a.Length() == 2)
 		{
-			LString k = a[1].Strip();
+			LString k = a[1].Strip();			
 			// printf("%s:%i - k='%s'\n", _FL, k.Get());
 			
 			if (k.Find("0x") == 0)
@@ -312,7 +317,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 	void OnLine(const char *Start, int Length)
 	{
 		#if DEBUG_SHOW_GDB_IO
-		LgiTrace("Receive: '%.*s' ParseState=%i, OutLine=%p, OutStream=%p\n", Length-1, Start, ParseState, OutLines, OutStream);
+		printf("Receive: '%.*s' ParseState=%i, OutLine=%p, OutStream=%p\n", Length-1, Start, ParseState, OutLines, OutStream);
 		#endif
 
 		// Send output
@@ -342,9 +347,12 @@ class Gdb : public LDebugger, public LThread, public Callback
 		{
 			if (Length > 0 && IsDigit(*Start))
 			{
-				// printf("ParsingBp.Parse=%s\n", Start);
 				LString Bp = LString(" ").Join(BreakInfo).Strip();
+				
+				printf("%i: OnBreakPoint...\n", GetCurrentThreadId());
 				OnBreakPoint(Bp);
+				printf("%i: OnBreakPoint done.\n", GetCurrentThreadId());
+
 				ParseState = ParseNone;
 				BreakInfo.Length(0);
 			}
@@ -357,16 +365,21 @@ class Gdb : public LDebugger, public LThread, public Callback
 
 		if (ParseState == ParseNone)
 		{
-			if (stristr(Start, "received signal SIGSEGV"))
+			if (Stristr(Start, "received signal SIGSEGV"))
 			{
-				Ungrab();
+				Events->Ungrab();
 				Events->OnCrash(0);
+			}
+			else if (Stristr(Start, "hit Breakpoint"))
+			{
+				ParseState = ParseBreakPoint;
+				BreakInfo.New().Set(Start, Length);
 			}
 			else if (*Start == '[')
 			{
 				if (stristr(Start, "Inferior") && stristr(Start, "exited"))
 				{
-					Ungrab();
+					Events->Ungrab();
 					OnExit();
 				}
 				else if (stristr(Start, "New Thread"))
@@ -402,17 +415,10 @@ class Gdb : public LDebugger, public LThread, public Callback
 					else LgiTrace("%s:%i - No thread id?\n", _FL);
 				}
 			}
-			else if (strncmp(Start, "Breakpoint ", 11) == 0 &&
-					IsDigit(Start[11]))
-			{
-				ParseState = ParseBreakPoint;
-				// printf("ParseState=%i\n", ParseState);
-				BreakInfo.New().Set(Start, Length);
-			}
 			else
 			{
 				// Untagged file/line?
-				Ungrab();
+				Events->Ungrab();
 				if (ParseLocation(Untagged))
 				{
 					Untagged.Length(0);
@@ -452,7 +458,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 			if (bytes == 6)
 			{
 				AtPrompt = !_strnicmp(Line, sPrompt, bytes);
-				// LgiTrace("%I64i: AtPrompt=%i\n", LCurrentTime(), AtPrompt);
+				LgiTrace("%I64i: AtPrompt=%i\n", LCurrentTime(), AtPrompt);
 				if (AtPrompt)
 				{
 					if (Running ^ !AtPrompt)
@@ -678,15 +684,6 @@ class Gdb : public LDebugger, public LThread, public Callback
 		return true;
 	}
 	
-	void Ungrab()
-	{
-		#if defined(LINUX)
-		// system("xdotool key XF86Ungrab");
-		#else
-		printf("%s:%i - Impl some ungrab functionality here.\n", _FL);
-		#endif
-	}
-	
 public:
 	Gdb(LStream *log) : LThread("Gdb"), Log(log), StateMutex("Gdb.StateMutex")
 	{
@@ -710,20 +707,17 @@ public:
 	
 	~Gdb()
 	{
-		if (State == Looping)
+		#if DEBUG_SESSION_LOGGING
+		LgiTrace("Gdb::~Gdb - waiting for thread to exit...\n");
+		#endif
+		State = Exiting;
+		while (!IsExited())
 		{
-			#if DEBUG_SESSION_LOGGING
-			LgiTrace("Gdb::~Gdb - waiting for thread to exit...\n");
-			#endif
-			State = Exiting;
-			while (!IsExited())
-			{
-				LSleep(1);
-			}
-			#if DEBUG_SESSION_LOGGING
-			LgiTrace("Gdb::~Gdb - thread has exited.\n");
-			#endif
+			LSleep(1);
 		}
+		#if DEBUG_SESSION_LOGGING
+		LgiTrace("Gdb::~Gdb - thread has exited.\n");
+		#endif
 	}
 
 	bool Load(LDebugEvents *EventHandler, const char *exe, const char *args, bool runAsAdmin, const char *initDir, const char *Env)
@@ -923,12 +917,15 @@ public:
 				bp.Symbol = "main";
 				if (SetBreakPoint(&bp))
 				{
+					printf("Set break point for main\n");
 					if (!Cmd(a))
 						return false;
 					
+					printf("Waiting for prompt\n");
 					if (!WaitPrompt())
 						return false;
-					
+
+					printf("Removing temp bp\n");
 					RemoveBreakPoint(&bp);
 					
 					LStringPipe p;
@@ -963,7 +960,8 @@ public:
 					
 					// Redetect the process id from the new threads...
 					ProcessId = -1;
-					
+
+					printf("Continue...\n");					
 					bool Status = Cmd("c"); // Continue
 					if (Status)
 						SetState(true, true);
@@ -1181,7 +1179,7 @@ public:
 				{
 					// Is it floating point?
 					auto isFloat = strchr(val, '.') != NULL;
-					printf("isFloat for '%s' is %i\n", val, isFloat);
+					// printf("isFloat for '%s' is %i\n", val, isFloat);
 					if (isFloat)
 					{
 						double tmp = atof(val);
