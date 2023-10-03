@@ -90,15 +90,12 @@
 	{
 		int Ht = 0;
 
-		HWND hDestktop = NULL;
+		GdiAutoDC localDC;
 		if (!hDC)
-			hDC = GetDC(hDestktop = GetDesktopWindow());
+			hDC = localDC.Get(GetDesktopWindow());
 		
 		if (hDC)
 			Ht = -MulDiv(Pt, GetDeviceCaps(hDC, LOGPIXELSY), 72);
-
-		if (hDestktop)
-			ReleaseDC(hDestktop, hDC);
 
 		return Ht;
 	}
@@ -107,15 +104,12 @@
 	{
 		int Pt = 0;
 
-		HWND hDestktop = NULL;
+		GdiAutoDC localDC;
 		if (!hDC)
-			hDC = GetDC(hDestktop = GetDesktopWindow());
+			hDC = localDC.Get(GetDesktopWindow());
 		
 		if (hDC)
 			Pt = -MulDiv(Ht, 72, GetDeviceCaps(hDC, LOGPIXELSY));
-
-		if (hDestktop)
-			ReleaseDC(hDestktop, hDC);
 
 		return Pt;
 	}
@@ -464,8 +458,8 @@ type_4_cmap *GetUnicodeTable(HFONT hFont, uint16_t &Length)
 	bool Status = false;
 	type_4_cmap *Table = 0;
 
-	HDC hDC = GetDC(0);
-	if (hDC)
+	GdiAutoDC hDC;
+	if (hDC.Get())
 	{
 		HFONT Old = (HFONT)SelectObject(hDC, hFont);
 
@@ -537,7 +531,6 @@ type_4_cmap *GetUnicodeTable(HFONT hFont, uint16_t &Length)
 		}
 
 		SelectObject(hDC, Old);
-		ReleaseDC(0, hDC);
 	}
 
 	if (!Status)
@@ -554,6 +547,10 @@ LSurface *LFont::GetSurface()
 {
 	return d->pSurface;
 }
+
+#ifdef WINDOWS
+
+#endif
 
 bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 {
@@ -667,7 +664,8 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 		}
 	
 		d->pSurface = pSurface;
-		HDC hDC = pSurface ? pSurface->Handle() : GetDC(0);
+		GdiAutoDC localDC;
+		HDC hDC = pSurface ? pSurface->Handle() : localDC.Get();
 		auto Sz = Size();
 		int Win32Height = 0;
 		if (Sz.Type == LCss::LenPt)
@@ -929,8 +927,6 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 
 			SelectObject(hDC, hFnt);
 		}
-
-		if (!pSurface) ReleaseDC(0, hDC);
 
 		return (d->hFont != 0);
 	

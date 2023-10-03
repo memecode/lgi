@@ -396,8 +396,8 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 			if (ColourSpace)
 			{
 				// Native colour space support...
-				HDC hDC = GetDC(NULL);
-				if (hDC)
+				GdiAutoDC hDC;
+				if (hDC.Get())
 				{
 					if (Colours > 0 && GdcD->GetBits())
 					{
@@ -443,8 +443,6 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 						#endif
 					}
 				}
-
-				ReleaseDC(NULL, hDC);
 			}
 			else
 			{

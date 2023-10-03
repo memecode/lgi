@@ -263,7 +263,9 @@ LMessage::Result LButton::OnEvent(LMessage *Msg)
 			// and the same bit depth as the screen
 			LMemDC m(c.X(), c.Y(), GdcD->GetColourSpace());
 			// Create a HDC for the bitmap
-			HDC hdc = m.StartDC();					
+			HDC hdc = m.StartDC();
+			if (!hdc)
+				break;
 			// Ask the control to draw itself into the memory bitmap
 			SendMessage(_View, WM_PRINT, (WPARAM)hdc, PRF_ERASEBKGND|PRF_CLIENT);
 			// End the HDC

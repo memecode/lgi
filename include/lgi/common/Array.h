@@ -918,11 +918,10 @@ public:
 	}
 
 	/// This requires a sorted list...
-	Type BinarySearch(std::function<int(Type&)> Compare)
+	Type BinarySearch(std::function<int(Type&)> Compare, Type notFound)
 	{
-		static Type Empty;
 		if (!Compare || len == 0)
-			return Empty;
+			return notFound;
 		
 		for (size_t s = 0, e = len - 1; s <= e; )
 		{
@@ -946,7 +945,7 @@ public:
 				e = mid - 1; // search before
 		}
 
-		return Empty;
+		return notFound;
 	}
 };
 

@@ -844,8 +844,8 @@ public:
 		GammaCorrection = 1.0;
 
 		// Get mode stuff
-		HWND hDesktop = GetDesktopWindow();
-		HDC hScreenDC = GetDC(hDesktop);
+		GdiAutoDC hScreenDC;
+		hScreenDC.Get(GetDesktopWindow());
 
 		ScrX = GetSystemMetrics(SM_CXSCREEN);
 		ScrY = GetSystemMetrics(SM_CYSCREEN);
@@ -891,8 +891,6 @@ public:
 				}
 			}
 		}
-
-		ReleaseDC(hDesktop, hScreenDC);
 
 		// Options
 		// OptVal[GDC_REDUCE_TYPE] = REDUCE_ERROR_DIFFUSION;

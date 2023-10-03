@@ -2055,6 +2055,8 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 					!TestFlag(WndFlags, GWF_SYS_BORDER))
 				{
 					HDC hDC = GetWindowDC(_View);
+					if (!hDC)
+						goto ReturnDefaultProc;
 					LScreenDC Dc(hDC, _View, true);
 					LRect p(0, 0, Dc.X()-1, Dc.Y()-1);
 					OnNcPaint(&Dc, p);

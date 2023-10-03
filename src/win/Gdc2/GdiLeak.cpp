@@ -6,7 +6,7 @@
 #if GDI_LEAK_DETECT
 
 #include "lgi/common/Mem.h"
-#include "lgi/common/Array.h"
+#include "lgi/common/StringClass.h"
 
 enum HndType
 {
@@ -26,8 +26,8 @@ enum HndType
 struct HndInfo
 {
 	HndType Type;
-	uint32 Hnd;
-	char *File;
+	HANDLE Hnd;
+	const char *File;
 	int Line;
 };
 
@@ -50,7 +50,7 @@ public:
 	}
 } Cleanup;
 
-static HndInfo *GetHandle(uint32 h)
+static HndInfo *GetHandle(HANDLE h)
 {
 	for (int i=0; i<Handles.Length(); i++)
 	{
@@ -63,45 +63,40 @@ static HndInfo *GetHandle(uint32 h)
 	return 0;
 }
 
-static void AddHandle(char *f, int l, uint32 hnd, HndType t)
+static void AddHandle(const char *f, int l, HANDLE hnd, HndType t)
 {
-	HndInfo *h = &Handles[Handles.Length()];
-	if (h)
-	{
-		h->Type = t;
-		h->File = f;
-		h->Line = l;
-		h->Hnd = hnd;
-	}
+	if (!hnd)
+		return;
+
+	auto &h = Handles.New();
+	h.Type = t;
+	h.File = f;
+	h.Line = l;
+	h.Hnd = hnd;
 }
 
-static void DeleteHandle(char *f, int l, uint32 hnd, HndType t)
+static void DeleteHandle(const char *f, int l, HANDLE hnd, HndType t)
 {
-	int i;
-	HndInfo *h = 0;
+	size_t i;
+	HndInfo *h = NULL;
 	
-	if (!&Handles[0])
+	if (!hnd || Handles.Length() == 0)
 		return;
 
 	for (i=0; i<Handles.Length(); i++)
 	{
-		HndInfo *k = &Handles[i];
-		if (k->Hnd == hnd)
+		if (Handles[i].Hnd == hnd)
 		{
-			h = k;
+			h = Handles.AddressOf(i);
 			break;
 		}
 	}
 
 	if (h)
 	{
-		if (h->Type == t OR (h->Type >= HndBrush AND t == HndAnyGdi))
+		if (h->Type == t || (h->Type >= HndBrush && t == HndAnyGdi))
 		{
-			if (Handles.Length() > 0)
-			{
-				Handles[i] = Handles[Handles.Length()-1];
-			}
-			Handles.Length(Handles.Length()-1);
+			Handles.DeleteAt(i);
 		}
 		else
 		{
@@ -116,14 +111,14 @@ static void DeleteHandle(char *f, int l, uint32 hnd, HndType t)
 	}
 }
 
-HDC Lgi_BeginPaint(char *File, int Line, HWND hWnd, LPPAINTSTRUCT lpPaint)
+HDC Lgi_BeginPaint(const char *File, int Line, HWND hWnd, LPPAINTSTRUCT lpPaint)
 {
 	#undef BeginPaint
 
 	HDC hdc = BeginPaint(hWnd, lpPaint);
 	if (hdc)
 	{
-		AddHandle(File, Line, (uint32)hdc, HndDcPaint);
+		AddHandle(File, Line, hdc, HndDcPaint);
 	}
 	else
 	{
@@ -133,24 +128,24 @@ HDC Lgi_BeginPaint(char *File, int Line, HWND hWnd, LPPAINTSTRUCT lpPaint)
 	return hdc;
 }
 
-BOOL Lgi_EndPaint(char *File, int Line, HWND hWnd, CONST PAINTSTRUCT *lpPaint)
+BOOL Lgi_EndPaint(const char *File, int Line, HWND hWnd, CONST PAINTSTRUCT *lpPaint)
 {
 	#undef EndPaint
-	DeleteHandle(File, Line, (uint32)lpPaint->hdc, HndDcPaint);
+	DeleteHandle(File, Line, lpPaint->hdc, HndDcPaint);
 
 	// LgiTrace("Handles=%i\n", Handles.Length());
 
 	return EndPaint(hWnd, lpPaint);
 }
 
-HDC Lgi_CreateCompatibleDC(char *File, int Line, HDC hInDC)
+HDC Lgi_CreateCompatibleDC(const char *File, int Line, HDC hInDC)
 {
 	#undef CreateCompatibleDC
 
 	HDC hdc = CreateCompatibleDC(hInDC);
 	if (hdc)
 	{
-		AddHandle(File, Line, (uint32)hdc, HndDcDelete);
+		AddHandle(File, Line, hdc, HndDcDelete);
 	}
 	else
 	{
@@ -160,20 +155,20 @@ HDC Lgi_CreateCompatibleDC(char *File, int Line, HDC hInDC)
 	return hdc;
 }
 
-BOOL Lgi_DeleteDC(char *File, int Line, HDC hdc)
+BOOL Lgi_DeleteDC(const char *File, int Line, HDC hdc)
 {
 	#undef DeleteDC
-	DeleteHandle(File, Line, (uint32)hdc, HndDcDelete);
+	DeleteHandle(File, Line, hdc, HndDcDelete);
 	return DeleteDC(hdc);
 }
 
-HDC Lgi_GetDC(char *File, int Line, HWND hWnd)
+HDC Lgi_GetDC(const char *File, int Line, HWND hWnd)
 {
 	#undef GetDC
 	HDC hdc = GetDC(hWnd);
 	if (hdc)
 	{
-		AddHandle(File, Line, (uint32)hdc, HndDcRelease);
+		AddHandle(File, Line, hdc, HndDcRelease);
 	}
 	else
 	{
@@ -182,13 +177,13 @@ HDC Lgi_GetDC(char *File, int Line, HWND hWnd)
 	return hdc;
 }
 
-HDC Lgi_GetWindowDC(char *File, int Line, HWND hWnd)
+HDC Lgi_GetWindowDC(const char *File, int Line, HWND hWnd)
 {
 	#undef GetWindowDC
 	HDC hdc = GetWindowDC(hWnd);
 	if (hdc)
 	{
-		AddHandle(File, Line, (uint32)hdc, HndDcRelease);
+		AddHandle(File, Line, hdc, HndDcRelease);
 	}
 	else
 	{
@@ -197,20 +192,20 @@ HDC Lgi_GetWindowDC(char *File, int Line, HWND hWnd)
 	return hdc;
 }
 
-int Lgi_ReleaseDC(char *File, int Line, HWND hWnd, HDC hDC)
+int Lgi_ReleaseDC(const char *File, int Line, HWND hWnd, HDC hDC)
 {
 	#undef ReleaseDC
-	DeleteHandle(File, Line, (uint32)hDC, HndDcRelease);
+	DeleteHandle(File, Line, hDC, HndDcRelease);
 	return ReleaseDC(hWnd, hDC);
 }
 
-HBRUSH Lgi_CreateBrushIndirect(char *File, int Line, CONST LOGBRUSH *LogBrush)
+HBRUSH Lgi_CreateBrushIndirect(const char *File, int Line, CONST LOGBRUSH *LogBrush)
 {
 	#undef CreateBrushIndirect
 	HBRUSH h = CreateBrushIndirect(LogBrush);
 	if (h)
 	{
-		AddHandle(File, Line, (uint32)h, HndBrush);
+		AddHandle(File, Line, h, HndBrush);
 	}
 	else
 	{
@@ -219,13 +214,13 @@ HBRUSH Lgi_CreateBrushIndirect(char *File, int Line, CONST LOGBRUSH *LogBrush)
 	return h;
 }
 
-HBRUSH Lgi_CreateDIBPatternBrush(char *File, int Line, HGLOBAL hglbDIBPacked, UINT fuColorSpec)
+HBRUSH Lgi_CreateDIBPatternBrush(const char *File, int Line, HGLOBAL hglbDIBPacked, UINT fuColorSpec)
 {
 	#undef CreateDIBPatternBrush
 	HBRUSH h = CreateDIBPatternBrush(hglbDIBPacked, fuColorSpec);
 	if (h)
 	{
-		AddHandle(File, Line, (uint32)h, HndBrush);
+		AddHandle(File, Line, h, HndBrush);
 	}
 	else
 	{
@@ -234,13 +229,13 @@ HBRUSH Lgi_CreateDIBPatternBrush(char *File, int Line, HGLOBAL hglbDIBPacked, UI
 	return h;
 }
 
-HBRUSH Lgi_CreateDIBPatternBrushPt(char *File, int Line, CONST VOID *lpPackedDIB, UINT iUsage)
+HBRUSH Lgi_CreateDIBPatternBrushPt(const char *File, int Line, CONST VOID *lpPackedDIB, UINT iUsage)
 {
 	#undef CreateDIBPatternBrushPt
 	HBRUSH h = CreateDIBPatternBrushPt(lpPackedDIB, iUsage);
 	if (h)
 	{
-		AddHandle(File, Line, (uint32)h, HndBrush);
+		AddHandle(File, Line, h, HndBrush);
 	}
 	else
 	{
@@ -249,13 +244,13 @@ HBRUSH Lgi_CreateDIBPatternBrushPt(char *File, int Line, CONST VOID *lpPackedDIB
 	return h;
 }
 
-HBRUSH Lgi_CreateHatchBrush(char *File, int Line, int fnStyle, COLORREF clrref)
+HBRUSH Lgi_CreateHatchBrush(const char *File, int Line, int fnStyle, COLORREF clrref)
 {
 	#undef CreateHatchBrush
 	HBRUSH h = CreateHatchBrush(fnStyle, clrref);
 	if (h)
 	{
-		AddHandle(File, Line, (uint32)h, HndBrush);
+		AddHandle(File, Line, h, HndBrush);
 	}
 	else
 	{
@@ -264,13 +259,13 @@ HBRUSH Lgi_CreateHatchBrush(char *File, int Line, int fnStyle, COLORREF clrref)
 	return h;
 }
 
-HBRUSH Lgi_CreatePatternBrush(char *File, int Line, HBITMAP hbmp)
+HBRUSH Lgi_CreatePatternBrush(const char *File, int Line, HBITMAP hbmp)
 {
 	#undef CreatePatternBrush
 	HBRUSH h = CreatePatternBrush(hbmp);
 	if (h)
 	{
-		AddHandle(File, Line, (uint32)h, HndBrush);
+		AddHandle(File, Line, h, HndBrush);
 	}
 	else
 	{
@@ -279,13 +274,13 @@ HBRUSH Lgi_CreatePatternBrush(char *File, int Line, HBITMAP hbmp)
 	return h;
 }
 
-HBRUSH Lgi_CreateSolidBrush(char *File, int Line, COLORREF crColor)
+HBRUSH Lgi_CreateSolidBrush(const char *File, int Line, COLORREF crColor)
 {
 	#undef CreateSolidBrush
 	HBRUSH h = CreateSolidBrush(crColor);
 	if (h)
 	{
-		AddHandle(File, Line, (uint32)h, HndBrush);
+		AddHandle(File, Line, h, HndBrush);
 	}
 	else
 	{
@@ -294,31 +289,20 @@ HBRUSH Lgi_CreateSolidBrush(char *File, int Line, COLORREF crColor)
 	return h;
 }
 
-HFONT Lgi_CreateFont
+HFONT Lgi_CreateFontA
 (
-	char *File,
-	int Line,
-	int nHeight,
-	int nWidth,
-	int nEscapement,
-	int nOrientation,
-	int fnWeight,
-	DWORD fdwItalic,
-	DWORD fdwUnderline,
-	DWORD fdwStrikeOut,
-	DWORD fdwCharSet,
-	DWORD fdwOutputPrecision,
-	DWORD fdwClipPrecision,
-	DWORD fdwQuality,
-	DWORD fdwPitchAndFamily,
-	LPCTSTR lpszFace
+	char *File, int Line,
+	int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight,
+	DWORD fdwItalic, DWORD fdwUnderline, DWORD fdwStrikeOut, DWORD fdwCharSet,
+	DWORD fdwOutputPrecision, DWORD fdwClipPrecision, DWORD fdwQuality,
+	DWORD fdwPitchAndFamily, LPCSTR lpszFace
 )
 {
 	#undef CreateFontA
 	HFONT h = CreateFontA(nHeight, nWidth, nEscapement, nOrientation, fnWeight, fdwItalic, fdwUnderline, fdwStrikeOut, fdwCharSet, fdwOutputPrecision, fdwClipPrecision, fdwQuality, fdwPitchAndFamily, lpszFace);
 	if (h)
 	{
-		AddHandle(File, Line, (uint32)h, HndFont);
+		AddHandle(File, Line, h, HndFont);
 	}
 	else
 	{
@@ -327,13 +311,20 @@ HFONT Lgi_CreateFont
 	return h;
 }
 
-HFONT Lgi_CreateFontIndirect(char *File, int Line, CONST LOGFONT *lplf)
+HFONT Lgi_CreateFontW
+(
+	const char *File, int Line,
+	int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight,
+	DWORD fdwItalic, DWORD fdwUnderline, DWORD fdwStrikeOut, DWORD fdwCharSet,
+	DWORD fdwOutputPrecision, DWORD fdwClipPrecision, DWORD fdwQuality, DWORD fdwPitchAndFamily,
+	LPCWSTR lpszFace
+)
 {
-	#undef CreateFontIndirectA
-	HFONT h = CreateFontIndirectA(lplf);
+	#undef CreateFontW
+	HFONT h = CreateFontW(nHeight, nWidth, nEscapement, nOrientation, fnWeight, fdwItalic, fdwUnderline, fdwStrikeOut, fdwCharSet, fdwOutputPrecision, fdwClipPrecision, fdwQuality, fdwPitchAndFamily, lpszFace);
 	if (h)
 	{
-		AddHandle(File, Line, (uint32)h, HndFont);
+		AddHandle(File, Line, h, HndFont);
 	}
 	else
 	{
@@ -342,13 +333,30 @@ HFONT Lgi_CreateFontIndirect(char *File, int Line, CONST LOGFONT *lplf)
 	return h;
 }
 
-HPEN Lgi_CreatePen(char *File, int Line, int fnPenStyle, int nWidth, COLORREF crColor)
+
+HFONT Lgi_CreateFontIndirectA(const char *File, int Line, LOGFONTA *lplf)
+{
+	#undef CreateFontIndirectA
+	HFONT hnd;
+	AddHandle(File, Line, hnd = CreateFontIndirectA(lplf), HndFont);
+	return hnd;
+}
+
+HFONT Lgi_CreateFontIndirectW(const char *File, int Line, LOGFONTW *lplf)
+{
+	#undef CreateFontIndirectW
+	HFONT hnd;
+	AddHandle(File, Line, hnd = CreateFontIndirectW(lplf), HndFont);
+	return hnd;
+}
+
+HPEN Lgi_CreatePen(const char *File, int Line, int fnPenStyle, int nWidth, COLORREF crColor)
 {
 	#undef CreatePen
 	HPEN h = CreatePen(fnPenStyle, nWidth, crColor);
 	if (h)
 	{
-		AddHandle(File, Line, (uint32)h, HndPen);
+		AddHandle(File, Line, h, HndPen);
 	}
 	else
 	{
@@ -357,13 +365,13 @@ HPEN Lgi_CreatePen(char *File, int Line, int fnPenStyle, int nWidth, COLORREF cr
 	return h;
 }
 
-HPEN Lgi_CreatePenIndirect(char *File, int Line, CONST LOGPEN *lplgpn)
+HPEN Lgi_CreatePenIndirect(const char *File, int Line, CONST LOGPEN *lplgpn)
 {
 	#undef CreatePenIndirect
 	HPEN h = CreatePenIndirect(lplgpn);
 	if (h)
 	{
-		AddHandle(File, Line, (uint32)h, HndPen);
+		AddHandle(File, Line, h, HndPen);
 	}
 	else
 	{
@@ -372,13 +380,13 @@ HPEN Lgi_CreatePenIndirect(char *File, int Line, CONST LOGPEN *lplgpn)
 	return h;
 }
 
-HPEN Lgi_ExtCreatePen(char *File, int Line, DWORD dwPenStyle, DWORD dwWidth, CONST LOGBRUSH *lplb, DWORD dwStyleCount, CONST DWORD *lpStyle)
+HPEN Lgi_ExtCreatePen(const char *File, int Line, DWORD dwPenStyle, DWORD dwWidth, CONST LOGBRUSH *lplb, DWORD dwStyleCount, CONST DWORD *lpStyle)
 {
 	#undef ExtCreatePen
 	HPEN h = ExtCreatePen(dwPenStyle, dwWidth, lplb, dwStyleCount, lpStyle);
 	if (h)
 	{
-		AddHandle(File, Line, (uint32)h, HndPen);
+		AddHandle(File, Line, h, HndPen);
 	}
 	else
 	{
@@ -387,14 +395,14 @@ HPEN Lgi_ExtCreatePen(char *File, int Line, DWORD dwPenStyle, DWORD dwWidth, CON
 	return h;
 }
 
-BOOL Lgi_DeleteObject(char *File, int Line, HGDIOBJ hObject)
+BOOL Lgi_DeleteObject(const char *File, int Line, HGDIOBJ hObject)
 {
 	#undef DeleteObject
-	DeleteHandle(File, Line, (uint32)hObject, HndAnyGdi);
+	DeleteHandle(File, Line, hObject, HndAnyGdi);
 	return DeleteObject(hObject);
 }
 
-HGDIOBJ Lgi_SelectObject(char *File, int Line, HDC hdc, HGDIOBJ hgdiobj)
+HGDIOBJ Lgi_SelectObject(const char *File, int Line, HDC hdc, HGDIOBJ hgdiobj)
 {
 	#undef SelectObject
 	HGDIOBJ h = SelectObject(hdc, hgdiobj);
@@ -402,13 +410,13 @@ HGDIOBJ Lgi_SelectObject(char *File, int Line, HDC hdc, HGDIOBJ hgdiobj)
 	return h;
 }
 
-HBITMAP Lgi_CreateDIBSection(char *File, int Line, HDC hdc, CONST BITMAPINFO *pbmi, UINT iUsage, VOID **ppvBits, HANDLE hSection, DWORD dwOffset)
+HBITMAP Lgi_CreateDIBSection(const char *File, int Line, HDC hdc, CONST BITMAPINFO *pbmi, UINT iUsage, VOID **ppvBits, HANDLE hSection, DWORD dwOffset)
 {
 	#undef CreateDIBSection
 	HBITMAP h = CreateDIBSection(hdc, pbmi, iUsage, ppvBits, hSection, dwOffset);
 	if (h)
 	{
-		AddHandle(File, Line, (uint32)h, HndBitmap);
+		AddHandle(File, Line, h, HndBitmap);
 	}
 	else
 	{
@@ -417,13 +425,13 @@ HBITMAP Lgi_CreateDIBSection(char *File, int Line, HDC hdc, CONST BITMAPINFO *pb
 	return h;
 }
 
-HRGN Lgi_CreateRectRgn(char *File, int Line, int a, int b, int c, int d)
+HRGN Lgi_CreateRectRgn(const char *File, int Line, int a, int b, int c, int d)
 {
 	#undef CreateRectRgn
 	HRGN h = CreateRectRgn(a, b, c, d);
 	if (h)
 	{
-		AddHandle(File, Line, (uint32)h, HndRegion);
+		AddHandle(File, Line, h, HndRegion);
 	}
 	else
 	{
@@ -432,13 +440,13 @@ HRGN Lgi_CreateRectRgn(char *File, int Line, int a, int b, int c, int d)
 	return h;
 }
 
-HPALETTE Lgi_CreatePalette(char *File, int Line, CONST LOGPALETTE *lplgpl)
+HPALETTE Lgi_CreatePalette(const char *File, int Line, CONST LOGPALETTE *lplgpl)
 {
 	#undef CreatePalette
 	HPALETTE h = CreatePalette(lplgpl);
 	if (h)
 	{
-		AddHandle(File, Line, (uint32)h, HndPalette);
+		AddHandle(File, Line, h, HndPalette);
 	}
 	else
 	{

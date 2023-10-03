@@ -16,6 +16,35 @@ public:
 	}
 };
 
+// Automatic HDC wrapper:
+class GdiAutoDC
+{
+	HWND hwnd = NULL;
+	HDC hdc = NULL;
+
+public:
+	HDC Get(HWND hWnd = NULL)
+	{
+		if (!hdc)
+			hdc = GetDC(hwnd = hWnd);
+		return hdc;
+	}
+
+	operator HDC()
+	{
+		return hdc;
+	}
+
+	~GdiAutoDC()
+	{
+		if (hdc)
+		{
+			ReleaseDC(hwnd, hdc);
+			hdc = NULL;
+		}
+	}
+};
+
 // Win32 Memory Handler
 class LgiClass GMem {
 
