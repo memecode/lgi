@@ -119,7 +119,7 @@ public:
 									VsVersion = YearToVer(VsYear);
 									break;
 								}
-								else if (i >= 10 && i <= 16)
+								else if (i >= 10 && i <= 23)
 								{
 									VsVersion = (double)i;
 									VsYear = VerToYear(VsVersion);

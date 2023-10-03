@@ -266,7 +266,7 @@ bool LView::CommonEvents(LMessage::Result &result, LMessage *Msg)
 	{
 		case M_VIEW_RUN_CALLBACK:
 		{
-			CbStore.Call(Msg->A());
+			CbStore.Call((int)Msg->A());
 			break;
 		}
 		case M_THREAD_COMPLETED:

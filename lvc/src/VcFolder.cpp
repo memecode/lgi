@@ -3200,9 +3200,11 @@ void VcFolder::ListWorkingFolder()
 			Arg = "status";
 			break;
 		case VcGit:
-			// Fucking git won't honour their own docs.
-			StartCmd("-P diff --diff-filter=AD --cached", &VcFolder::ParseWorking);
-			Arg = "-P diff --diff-filter=CMRTU";
+			#if 1
+				Arg = "-P status -vv";
+			#else
+				Arg = "-P diff --diff-filter=CMRTU --cached";
+			#endif
 			break;
 		case VcHg:
 			Arg = "status -mard";
