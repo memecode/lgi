@@ -921,7 +921,7 @@ public:
 	Type BinarySearch(std::function<int(Type&)> Compare)
 	{
 		static Type Empty;
-		if (!Compare)
+		if (!Compare || len == 0)
 			return Empty;
 		
 		for (size_t s = 0, e = len - 1; s <= e; )
