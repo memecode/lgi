@@ -132,7 +132,7 @@ class ToolBar : public LLayout, public LResourceLoad
 public:
 	ToolBar()
 	{
-		LAutoString Name;
+		LString Name;
 		LRect Pos;
 		if (LoadFromResource(IDD_TOOLBAR, this, &Pos, &Name))
 		{
@@ -184,7 +184,7 @@ class CommitCtrls : public LLayout, public LResourceLoad
 public:
 	CommitCtrls()
 	{
-		LAutoString Name;
+		LString Name;
 		LRect Pos;
 		if (LoadFromResource(IDD_COMMIT, this, &Pos, &Name))
 		{

@@ -52,9 +52,9 @@ LDialog::~LDialog()
     DeleteObj(d);
 }
 
-bool LDialog::LoadFromResource(int Resource, char *TagList)
+bool LDialog::LoadFromResource(int Resource, const char *TagList)
 {
-	LAutoString n;
+	LString n;
 	bool Status = LResourceLoad::LoadFromResource(Resource, this, &Pos, &n, TagList);
 	if (Status && n)
 		Name(n);

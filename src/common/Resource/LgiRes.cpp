@@ -1236,7 +1236,7 @@ bool LMenuRes::Read(LXmlTag *t, ResFileFormat Format)
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Dialog
-bool LResourceLoad::LoadFromResource(int Resource, LViewI *Parent, LRect *Pos, LAutoString *Name, char *TagList)
+bool LResourceLoad::LoadFromResource(int Resource, LViewI *Parent, LRect *Pos, LString *Name, const char *TagList)
 {
 	LgiGetResObj();
 
@@ -1378,7 +1378,7 @@ const char *LLoadString(int Res, const char *Default)
 	return Default;
 }
 
-bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, LAutoString *Name, LEventsI *Engine, char *TagList)
+bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, LString *Name, LEventsI *Engine, const char *TagList)
 {
 	bool Status = false;
 
@@ -1397,7 +1397,7 @@ bool LResources::LoadDialog(int Resource, LViewI *Parent, LRect *Pos, LAutoStrin
 				if (Dlg->Name())
 				{
 					if (Name)
-						Name->Reset(NewStr(Dlg->Name()));
+						*Name = Dlg->Name();
 					else if (Parent)
 						Parent->Name(Dlg->Name());
 				}

@@ -1492,7 +1492,7 @@ bool LTabPage::OnKey(LKey &k)
 
 bool LTabPage::LoadFromResource(int Res)
 {
-	LAutoString n;
+	LString n;
 
 	auto ch = IterateViews();
 	LViewI *v;

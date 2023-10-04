@@ -657,7 +657,7 @@ Results::Results(AppWnd *app, Search *params)
 	
 	LResourceLoad r;
 	LRect p;
-	LAutoString n;
+	LString n;
 	if (r.LoadFromResource(IDD_RESULTS, this, &p, &n))
 	{
 		SetPos(p);

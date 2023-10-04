@@ -183,7 +183,7 @@ public:
 		/// The resource ID
 		int Resource,
 		/// [Optional] tag list to exclude/include various controls via tag
-		char *TagList = 0
+		const char *TagList = NULL
 	);
 
 	/// \brief Run the dialog in modal mode.

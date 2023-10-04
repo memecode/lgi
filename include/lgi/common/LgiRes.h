@@ -50,9 +50,9 @@ public:
 		/// The size of the view in the resource
 		LRect *Pos = 0,
 		/// The name of the window
-		LAutoString *Name = 0,
+		LString *Name = 0,
 		/// [Optional] List of tags to exclude/include items
-		char *TagList = 0
+		const char *TagList = 0
 	);
 };
 
@@ -186,12 +186,12 @@ public:
 		/// [Optional] The size of the dialog if needed
 		LRect *Pos = NULL,
 		/// [Optional] The name of the window.
-		LAutoString *Name = NULL,
+		LString *Name = NULL,
 		/// [Optional] A scripting engine interface
 		LEventsI *ScriptEngine = NULL,
 		/// [Optional] The current tags list for optional 
 		/// inclusion / exclusion of controls.
-		char *Tags = 0
+		const char *Tags = 0
 	);
 	
 	/// Get a string resource object using it's reference.

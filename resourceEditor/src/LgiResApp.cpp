@@ -2045,7 +2045,7 @@ public:
 	{
 		Lst = 0;
 		LRect p;
-		LAutoString n;
+		LString n;
 
 		if (LoadFromResource(IDD_COMPARE, this, &p, &n))
 		{
