@@ -319,7 +319,7 @@ public:
 				Pixel map[256];
 				for (int i=0; i<256; i++)
 				{
-					GdcRGB *rgb = SPal ? (*SPal)[i] : NULL;
+					auto rgb = SPal ? (*SPal)[i] : NULL;
 					if (rgb)
 					{
 						map[i].r = G8bitTo16bit(rgb->r);

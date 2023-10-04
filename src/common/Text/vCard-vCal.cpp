@@ -339,7 +339,7 @@ bool VCard::Import(LDataPropI *c, LStreamI *s)
 	LString Data;
 
 	ssize_t PrefEmail = -1;
-	LArray<char*> Emails;
+	LString::Array Emails;
 
 	while (ReadField(*s, Field, &Params, Data))
 	{
@@ -427,7 +427,7 @@ bool VCard::Import(LDataPropI *c, LStreamI *s)
 					{
 						PrefEmail = Emails.Length();
 					}
-					Emails.Add(NewStr(Data));
+					Emails.Add(Data);
 				}
 				else if (IsVar(Field, "org"))
 				{
@@ -523,8 +523,8 @@ bool VCard::Import(LDataPropI *c, LStreamI *s)
 			LStringPipe p;
 			for (uint32_t i=0; i<Emails.Length(); i++)
 			{
-				if (i) p.Print(",%s", Emails[i]);
-				else p.Print("%s", Emails[i]);
+				if (i) p.Print(",%s", Emails[i].Get());
+				else p.Print("%s", Emails[i].Get());
 			}
 
 			char *v = p.NewStr();

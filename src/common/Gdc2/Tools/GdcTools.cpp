@@ -24,7 +24,7 @@ bool IsGreyScale(LSurface *pDC)
 		{
 			for (int i=0; i<Pal->GetSize(); i++)
 			{
-				GdcRGB *p = (*Pal)[i];
+				auto p = (*Pal)[i];
 				if (p)
 				{
 					int Grey = i * 255 / Pal->GetSize();
@@ -67,7 +67,7 @@ bool GreyScaleDC(LSurface *pDest, LSurface *pSrc)
 						for (int i=0; i<Pal->GetSize(); i++)
 						{
 							// Weights, r:.299, g:.587, b:.114
-							GdcRGB *n = (*Pal)[i];
+							auto n = (*Pal)[i];
 							if (n)
 							{
 								uint32_t r = ((uint32_t) n->r << 16) * FP_RED_TO_GREY;
@@ -161,13 +161,13 @@ bool GreyScaleDC(LSurface *pDest, LSurface *pSrc)
 						}
 					}
 
-					LPalette *Pal = new LPalette(0, 256);
+					auto Pal = new LPalette(0, 256);
 					if (Pal)
 					{
 						// convert palette
 						for (int i=0; i<Pal->GetSize(); i++)
 						{
-							GdcRGB *n = (*Pal)[i];
+							auto n = (*Pal)[i];
 							if (n)
 							{
 								n->r = n->g = n->b = i;
@@ -216,7 +216,7 @@ bool InvertDC(LSurface *pDC)
 					LPalette *Pal = pDC->Palette();
 					if (Pal)
 					{
-						GdcRGB *p = (*Pal)[0];
+						auto p = (*Pal)[0];
 						if (p)
 						{
 							for (int i=0; i<Pal->GetSize(); i++)
@@ -484,7 +484,7 @@ bool RemapDC(LSurface *pDC, LPalette *DestPal)
 			{
 				for (int i=0; i<Colours; i++)
 				{
-					GdcRGB *p = (*SrcPal)[i];
+					auto p = (*SrcPal)[i];
 					if (p)
 					{
 						Remap[i] = DestPal->MatchRgb(Rgb24(p->r, p->g, p->b));
@@ -630,7 +630,7 @@ bool ResampleDC(LSurface *pDest, LSurface *pSrc, LRect *FromRgn, Progress *Prog)
 		{
 			if (p && i < p->GetSize())
 			{
-				GdcRGB *rgb = (*p)[i];
+				auto rgb = (*p)[i];
 				pal8[i].r = rgb->r;
 				pal8[i].g = rgb->g;
 				pal8[i].b = rgb->b;

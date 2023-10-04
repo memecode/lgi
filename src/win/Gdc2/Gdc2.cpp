@@ -76,8 +76,11 @@ void LDrawIcon(LSurface *pDC, int Dx, int Dy, HICON ico)
 }
 
 /****************************** Classes *************************************************************************************/
+size_t LPalette::Instances = 0;
+
 LPalette::LPalette()
 {
+	Instances++;
 	Data = 0;
 	hPal = NULL;
 	Lut = 0;
@@ -85,39 +88,49 @@ LPalette::LPalette()
 
 LPalette::LPalette(LPalette *pPal)
 {
-	Data = 0;
+	Instances++;
+	Data = NULL;
 	hPal = NULL;
-	Lut = 0;
+	Lut = NULL;
 	Set(pPal);
 }
 
 LPalette::LPalette(uchar *pPal, int s)
 {
-	Data = 0;
+	Instances++;
+	Data = NULL;
 	hPal = NULL;
-	Lut = 0;
+	Lut = NULL;
 	if (pPal || s > 0)
 		Set(pPal, s);
 }
 
 LPalette::~LPalette()
 {
+	Empty();
+	Instances--;
+}
+
+void LPalette::Empty()
+{
 	DeleteArray(Lut);
 	DeleteArray(Data);
-	if (hPal) DeleteObject(hPal);
+	if (hPal)
+	{
+		DeleteObject(hPal);
+		hPal = NULL;
+	}
 }
 
 void LPalette::Set(LPalette *pPal)
 {
     if (pPal == this)
         return;
-
-	DeleteArray(Data);
-	if (hPal) DeleteObject(hPal);
-
+	
+	Empty();
 	if (pPal && pPal->Data)
 	{
-		int Len = sizeof(LOGPALETTE) + (pPal->Data->palNumEntries * sizeof(GdcRGB));
+		int Len = sizeof(LOGPALETTE) + (pPal->Data->palNumEntries * sizeof(LRgba32));
 		Data = (LOGPALETTE*) new char[Len];
 		if (Data)
 		{
@@ -129,10 +142,9 @@ void LPalette::Set(LPalette *pPal)
 
 void LPalette::Set(uchar *pPal, int s)
 {
-	DeleteArray(Data);
-	if (hPal) DeleteObject(hPal);
+	Empty();
 
-	int Len = sizeof(LOGPALETTE) + (s * sizeof(GdcRGB));
+	int Len = sizeof(LOGPALETTE) + (s * sizeof(LRgba32));
 	Data = (LOGPALETTE*) new char[Len];
 	if (Data)
 	{
@@ -151,7 +163,7 @@ void LPalette::Set(uchar *pPal, int s)
 		}
 		else
 		{
-			memset(Data->palPalEntry, 0, s * sizeof(GdcRGB));
+			memset(Data->palPalEntry, 0, s * sizeof(LRgba32));
 		}
 
 		hPal = CreatePalette(Data);
@@ -160,7 +172,7 @@ void LPalette::Set(uchar *pPal, int s)
 
 void LPalette::Set(int Index, int r, int g, int b)
 {
-	GdcRGB *rgb = (*this)[Index];
+	auto rgb = (*this)[Index];
 	if (rgb)
 	{
 		rgb->r = r;
@@ -181,7 +193,7 @@ bool LPalette::Update()
 
 bool LPalette::SetSize(int s)
 {
-	int Len = sizeof(LOGPALETTE) + (s * sizeof(GdcRGB));
+	int Len = sizeof(LOGPALETTE) + (s * sizeof(LRgba32));
 	LOGPALETTE *NewData = (LOGPALETTE*) new char[Len];
 	if (NewData)
 	{
@@ -225,7 +237,7 @@ uchar *LPalette::MakeLut(int Bits)
 	{
 		if (!Lut)
 		{
-			GdcRGB *p = (*this)[0];
+			auto p = (*this)[0];
 
 			int Size = 1 << Bits;
 			switch (Bits)
@@ -277,7 +289,7 @@ int LPalette::MatchRgb(COLOUR Rgb)
 {
 	if (Data)
 	{
-		GdcRGB *Entry = (*this)[0];
+		auto Entry = (*this)[0];
 		/*
 		int r = (R24(Rgb) & 0xF8) + 4;
 		int g = (G24(Rgb) & 0xF8) + 4;
@@ -317,7 +329,7 @@ int LPalette::MatchRgb(COLOUR Rgb)
 void LPalette::CreateGreyScale()
 {
 	SetSize(256);
-	GdcRGB *p = (*this)[0];
+	auto p = (*this)[0];
 
 	for (int i=0; i<256; i++)
 	{
@@ -332,7 +344,7 @@ void LPalette::CreateGreyScale()
 void LPalette::CreateCube()
 {
 	SetSize(216);
-	GdcRGB *p = (*this)[0];
+	auto p = (*this)[0];
 
 	for (int r=0; r<6; r++)
 	{
@@ -439,7 +451,7 @@ bool LPalette::Load(LFile &F)
 		for (int i=0; i<GetSize() && !F.Eof(); i++)
 		{
 			F.ReadStr(Buf, sizeof(Buf));
-			GdcRGB *p = (*this)[i];
+			auto p = (*this)[i];
 			if (p)
 			{
 				p->r = atoi(strtok(Buf, " "));
@@ -475,7 +487,7 @@ bool LPalette::Save(LFile &F, int Format)
 
 			for (int i=0; i<GetSize(); i++)
 			{
-				GdcRGB *p = (*this)[i];
+				auto p = (*this)[i];
 				if (p)
 				{
 					sprintf_s(Buf, sizeof(Buf), "%i %i %i\r\n", p->r, p->g, p->b);
@@ -495,8 +507,8 @@ bool LPalette::operator ==(LPalette &p)
 {
 	if (GetSize() == p.GetSize())
 	{
-		GdcRGB *a = (*this)[0];
-		GdcRGB *b = p[0];
+		auto a = (*this)[0];
+		auto b = p[0];
 
 		for (int i=0; i<GetSize(); i++)
 		{
@@ -511,10 +523,10 @@ bool LPalette::operator ==(LPalette &p)
 			b++;
 		}
 
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
 bool LPalette::operator !=(LPalette &p)
@@ -558,7 +570,7 @@ class LGlobalColourPrivate
 {
 public:
 	GlobalColourEntry c[256];
-	LPalette *Global;
+	LAutoPtr<LPalette> Global;
 	List<LSurface> Cache;
 	int FirstUnused;
 	
@@ -580,7 +592,7 @@ public:
 	LGlobalColourPrivate()
 	{
 		FirstUnused = 0;
-		Global = 0;
+
 		#ifdef WIN32
 		if (GdcD->GetBits() <= 8)
 		{
@@ -717,8 +729,7 @@ bool LGlobalColour::MakeGlobalPalette()
 {
 	if (!d->Global)
 	{
-		d->Global = new LPalette(0, 256);
-		if (d->Global)
+		if (d->Global.Reset(new LPalette(0, 256)))
 		{
 			for (auto pDC: d->Cache)
 			{
@@ -734,7 +745,7 @@ bool LGlobalColour::MakeGlobalPalette()
 
 			for (int i=0; i<256; i++)
 			{
-				GdcRGB *r = (*d->Global)[i];
+				auto r = (*d->Global)[i];
 				if (r)
 				{
 					/*
@@ -761,7 +772,7 @@ bool LGlobalColour::MakeGlobalPalette()
 		}
 	}
 
-	return d->Global != 0;
+	return d->Global != NULL;
 }
 
 LPalette *LGlobalColour::GetPalette()
@@ -878,7 +889,7 @@ public:
 		pSysPal = (ScrBits <= 8) ? new LPalette(0, Colours) : 0;
 		if (pSysPal)
 		{
-			GdcRGB *p = (*pSysPal)[0];
+			auto p = (*pSysPal)[0];
 			if (p)
 			{
 				PALETTEENTRY pal[256];
@@ -1026,7 +1037,7 @@ void GdcDevice::SetSystemPalette(int Start, int Size, LPalette *pPal)
 		uchar Pal[768];
 		uchar *Temp = Pal;
 		uchar *System = Palette + (Start * 3);
-		GdcRGB *P = (*pPal)[Start];
+		auto P = (*pPal)[Start];
 		
 		for (int i=0; i<Size; i++, P++)
 		{
@@ -1126,7 +1137,7 @@ COLOUR GdcDevice::GetColour(COLOUR Rgb24, LSurface *pDC)
 					}
 					else if (d->pSysPal)
 					{
-						GdcRGB *n = (*d->pSysPal)[Current];						
+						auto n = (*d->pSysPal)[Current];						
 						n->r = R24(Rgb24);
 						n->g = G24(Rgb24);
 						n->b = B24(Rgb24);

@@ -661,7 +661,7 @@ LFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 			LPalette *Pal = new LPalette(0, 256);
 			if (Pal)
 			{
-				GdcRGB *p = (*Pal)[0];
+				auto p = (*Pal)[0];
 				if (p)
 				{
 					for (int i=0; i<256; i++, p++)
@@ -979,7 +979,7 @@ LFilter::IoStatus GdcJpeg::_Write(LStream *Out, LSurface *pDC, int Quality, SubS
 			GreyScale = true;
 			for (int i=0; i<Pal->GetSize(); i++)
 			{
-				GdcRGB *p = (*Pal)[i];
+				auto p = (*Pal)[i];
 				if
 				(
 					p &&
@@ -1079,14 +1079,14 @@ LFilter::IoStatus GdcJpeg::_Write(LStream *Out, LSurface *pDC, int Quality, SubS
 					}
 					else if (Pal)
 					{
-						GdcRGB *p = (*Pal)[0];
+						auto p = (*Pal)[0];
 						if (p)
 						{
 						    uint8_t *c = (*pDC)[cinfo.next_scanline];
 						    uint8_t *end = c + pDC->X();
 							while (c < end)
 							{
-							    GdcRGB &rgb = p[*c++];
+								auto &rgb = p[*c++];
 								dst[0] = rgb.r;
 								dst[1] = rgb.g;
 								dst[2] = rgb.b;

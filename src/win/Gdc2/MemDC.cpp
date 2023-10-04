@@ -157,7 +157,7 @@ void LMemDC::Update(int Flags)
 {
 	if (d->Info && pPalette && (Flags & GDC_PAL_CHANGE))
 	{
-		GdcRGB *p = (*pPalette)[0];
+		auto p = (*pPalette)[0];
 		if (p)
 		{
 			for (int i=0; i<pPalette->GetSize(); i++, p++)

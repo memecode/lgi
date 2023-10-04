@@ -279,6 +279,11 @@ public:
 static LResourceContainer ResourceOwner;
 bool LResources::LoadStyles = false;
 
+void LResources::FreeAllInstances()
+{
+	ResourceOwner.DeleteObjects();
+}
+
 LResources::LResources(const char *FileName, bool Warn, const char *ThemeFolder)
 {
 	d = new LResourcesPrivate;
@@ -433,6 +438,7 @@ const char *LResources::GetThemeFolder()
 }
 
 bool LResources::DefaultColours = true;
+
 void LResources::SetThemeFolder(const char *f)
 {
 	d->ThemeFolder = f;

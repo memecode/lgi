@@ -4,18 +4,6 @@
 #include "lgi/common/ColourSpace.h"
 #include "lgi/common/File.h"
 
-#ifdef WIN32
-#pragma pack(push, before_pack)
-#pragma pack(1)
-#endif
-
-/// RGB Colour
-typedef LRgba32 GdcRGB;
-
-#ifdef WIN32
-#pragma pack(pop, before_pack)
-#endif
-
 /// Palette of colours
 class LgiClass LPalette
 {
@@ -30,8 +18,10 @@ protected:
 	uchar *Lut;
 
 public:
+	static size_t Instances;
 	LPalette();
 	virtual ~LPalette();
+	void Empty();
 
 	#if WINNATIVE
 	HPALETTE Handle() { return hPal; }
@@ -59,7 +49,7 @@ public:
 	#if WINNATIVE
 	LRgba32 *operator [](int i)
 	{
-		return (i >= 0 && i < GetSize() && Data) ? (GdcRGB*) (Data->palPalEntry + i) : NULL;
+		return (i >= 0 && i < GetSize() && Data) ? (LRgba32*) (Data->palPalEntry + i) : NULL;
 	}
 	
 	int GetSize()
@@ -69,7 +59,7 @@ public:
 	#else
 	LRgba32 *operator [](int i)
 	{
-		return (i >= 0 && i < GetSize() && Data) ? (GdcRGB*) (Data + i) : NULL;
+		return (i >= 0 && i < GetSize() && Data) ? (Data + i) : NULL;
 	}
 	
 	int GetSize()

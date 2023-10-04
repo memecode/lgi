@@ -148,7 +148,7 @@ public:
 				Pixel map[256];
 				if (SPal)
 				{
-					GdcRGB *p = (*SPal)[0];
+					auto p = (*SPal)[0];
 					for (int i=0; i<256; i++, p++)
 					{
 						map[i].r = G8bitTo5bit(p->r);

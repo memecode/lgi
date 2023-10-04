@@ -304,7 +304,7 @@ void GConvertIndexed(OutPx *out, InPx *in, int len, LColourSpace inCs, LPalette 
 			OutPx p[256];
 			for (int i=0; i<256; i++)
 			{
-				GdcRGB *rgb = pal ? (*pal)[i] : NULL;
+				auto rgb = pal ? (*pal)[i] : NULL;
 				if (rgb)
 				{
 					p[i].r = rgb->r;
@@ -696,7 +696,7 @@ bool GdcApp8Set::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 										// cube nearest colour calc
 										// *D = (IndexLookup[S[2]]*36) + (IndexLookup[S[1]]*6) + IndexLookup[S[0]];
 
-										GdcRGB *P = (*Pal)[*dst];
+										auto P = (*Pal)[*dst];
 
 										#define Diffuse(c)									\
 										{													\

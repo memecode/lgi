@@ -452,7 +452,7 @@ public:
 			LPalette *inPal = Src->Palette();
 			for (int i=0; i<256; i++)
 			{
-				GdcRGB *rgb = inPal ? (*inPal)[i] : NULL;
+				auto rgb = inPal ? (*inPal)[i] : NULL;
 				if (rgb)
 				{
 					pal[i].p32.r = rgb->r;
@@ -736,7 +736,7 @@ public:
 				LPalette *inPal = Src->Palette();
 				for (int i=0; i<256; i++)
 				{
-					GdcRGB *rgb = inPal ? (*inPal)[i] : NULL;
+					auto rgb = inPal ? (*inPal)[i] : NULL;
 					if (rgb)
 					{
 						pal[i].p32.r = rgb->r;

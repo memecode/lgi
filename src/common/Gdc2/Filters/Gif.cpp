@@ -177,9 +177,9 @@ int GdcGif::out_line(uchar *pixels, int linewidth, int interlaced, int BitDepth)
 	    }
 	    case CsBgr16:
 	    {
-	        LBgr16 *s = (LBgr16*) (*pDC)[lines];
-	        LBgr16 *e = s + pDC->X();
-        	GdcRGB *p = (*pal)[0], *pix;
+			auto s = (LBgr16*) (*pDC)[lines];
+			auto e = s + pDC->X();
+			LRgba32 *p = (*pal)[0], *pix;
         	
 	        while (s < e)
 	        {
@@ -193,9 +193,9 @@ int GdcGif::out_line(uchar *pixels, int linewidth, int interlaced, int BitDepth)
 	    }
 	    case CsRgb16:
 	    {
-	        LRgb16 *s = (LRgb16*) (*pDC)[lines];
-	        LRgb16 *e = s + pDC->X();
-        	GdcRGB *p = (*pal)[0], *pix;
+			auto s = (LRgb16*) (*pDC)[lines];
+			auto e = s + pDC->X();
+			LRgba32 *p = (*pal)[0], *pix;
         	
 	        while (s < e)
 	        {
@@ -209,9 +209,9 @@ int GdcGif::out_line(uchar *pixels, int linewidth, int interlaced, int BitDepth)
 	    }
 	    case System32BitColourSpace:
 	    {
-	        System32BitPixel *s = (System32BitPixel*) (*pDC)[lines];
-	        System32BitPixel *e = s + pDC->X();
-        	GdcRGB *p = (*pal)[0], *pix;
+	        auto s = (System32BitPixel*) (*pDC)[lines];
+			auto e = s + pDC->X();
+			LRgba32 *p = (*pal)[0], *pix;
         	
 			if (Transparent)
 			{
@@ -979,7 +979,7 @@ LFilter::IoStatus GdcGif::WriteImage(LStream *Out, LSurface *pDC)
 		int Colours = 1 << pDC->GetBits();
 		for (int i=0; i<Colours; i++)
 		{
-			GdcRGB *s = (*Pal)[i];
+			auto s = (*Pal)[i];
 			if (s)
 			{
 				*d++ = s->r;

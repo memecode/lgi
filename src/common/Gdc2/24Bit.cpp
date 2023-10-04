@@ -276,7 +276,7 @@ public:
 				Pixel map[256];
 				for (int i=0; i<256; i++)
 				{
-					GdcRGB *rgb = SPal ? (*SPal)[i] : NULL;
+					auto rgb = SPal ? (*SPal)[i] : NULL;
 					if (rgb)
 					{
 						map[i].r = rgb->r;
@@ -477,7 +477,7 @@ bool GdcApp24Set::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 
 					for (int i=0; i<256; i++)
 					{
-						GdcRGB *p = (*SPal)[i];
+						auto p = (*SPal)[i];
 						if (p)
 						{
 							c[i].r = p->r;

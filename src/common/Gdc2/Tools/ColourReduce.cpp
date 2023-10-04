@@ -370,7 +370,7 @@ public:
 			// We have enough palette entries to colour all the input colours
 			for (i=0; i<Cols; i++)
 			{
-				GdcRGB *p = (*Out)[i];
+				auto p = (*Out)[i];
 				p->r = Col[i].c[0];
 				p->g = Col[i].c[1];
 				p->b = Col[i].c[2];
@@ -487,7 +487,7 @@ public:
 			for (unsigned i=0; i<Colours.Length(); i++)
 			{
 				LColour &in = Colours[i];
-				GdcRGB *out = (*Out)[i];
+				auto out = (*Out)[i];
 				if (out)
 				{
 					out->r = in.r();

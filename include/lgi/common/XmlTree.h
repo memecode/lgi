@@ -88,6 +88,8 @@ protected:
 	char *Content;
 
 public:
+	static int Instances;
+
 	/// The parent element/tag.
 	LXmlTag *Parent;
 	/// A list of attributes that this tag has

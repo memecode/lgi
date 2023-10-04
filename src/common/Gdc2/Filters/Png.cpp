@@ -1004,7 +1004,7 @@ LFilter::IoStatus GdcPng::ReadImage(LSurface *pDeviceContext, LStream *In)
 						    {
 							    for (int i=0; i<num_pal; i++)
 							    {
-								    GdcRGB *Rgb = (*Pal)[i];
+									auto Rgb = (*Pal)[i];
 								    if (Rgb)
 								    {
 									    Rgb->r = pal[i].red;
@@ -1311,7 +1311,7 @@ LFilter::IoStatus GdcPng::WriteImage(LStream *Out, LSurface *pDC)
 							{
 							    for (int i=0; i<Colours; i++)
 							    {
-									GdcRGB *Rgb = (*Pal)[i];
+									auto Rgb = (*Pal)[i];
 									if (Rgb)
 									{
 							            PngPal[i].red = Rgb->r;

@@ -444,7 +444,7 @@ COLOUR CBit(int DstBits, COLOUR c, int SrcBits, LPalette *Pal)
 		{
 			case 8:
 			{
-				GdcRGB Grey, *p = 0;
+				LRgba32 Grey, *p = 0;
 				if (!Pal || !(p = (*Pal)[c]))
 				{
 					Grey.r = Grey.g = Grey.b = c & 0xFF;

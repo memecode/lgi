@@ -586,7 +586,7 @@ LFilter::IoStatus GdcTiff::ProcessRead(LSurface *pDC)
 				{
 					for (int i=0; i<Colours; i++)
 					{
-						GdcRGB *d = (*Pal)[i];
+						auto d = (*Pal)[i];
 						if (d)
 						{
 							d->r = s[(0*Colours)+i] >> 8;

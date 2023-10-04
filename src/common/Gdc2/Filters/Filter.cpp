@@ -324,10 +324,10 @@ LFilter::IoStatus GdcBmp::ReadImage(LSurface *pDC, LStream *In)
 		if (Palette)
 		{
 			Palette->SetSize(Colours);
-			GdcRGB *Start = (*Palette)[0];
+			auto Start = (*Palette)[0];
 			if (Start)
 			{
-				In->Read(Start, sizeof(GdcRGB)*Colours);
+				In->Read(Start, sizeof(LRgba32)*Colours);
 				Palette->SwapRAndB();
 			}
 
@@ -700,11 +700,11 @@ LFilter::IoStatus GdcBmp::WriteImage(LStream *Out, LSurface *pDC)
 
 			if (Palette)
 			{
-				GdcRGB *Start = (*Palette)[0];
+				auto Start = (*Palette)[0];
 				if (Start)
 				{
 					Palette->SwapRAndB();
-					Out->Write(Start, sizeof(GdcRGB)*Palette->GetSize());
+					Out->Write(Start, sizeof(LRgba32)*Palette->GetSize());
 					Palette->SwapRAndB();
 					Done += Palette->GetSize();
 				}
@@ -938,7 +938,7 @@ LFilter::IoStatus GdcIco::ReadImage(LSurface *pDC, LStream *In)
 		In->SetPos(ImageOffset);
 
 		BMP_WININFO	Header;
-		GdcRGB *Colours;
+		LRgba32 *Colours;
 		uchar *XorBytes = 0;
 		uchar *AndBytes = 0;
 
@@ -965,11 +965,11 @@ LFilter::IoStatus GdcIco::ReadImage(LSurface *pDC, LStream *In)
 			}
 		}
 
-		Colours = new GdcRGB[ColorCount];
+		Colours = new LRgba32[ColorCount];
 		if (Colours)
 		{
-			In->Read(Colours, sizeof(GdcRGB) * ColorCount);
-			BytesLeft -= sizeof(GdcRGB) * ColorCount;
+			In->Read(Colours, sizeof(LRgba32) * ColorCount);
+			BytesLeft -= sizeof(LRgba32) * ColorCount;
 		}
 
 		Header.Sy >>= 1;
@@ -1002,7 +1002,7 @@ LFilter::IoStatus GdcIco::ReadImage(LSurface *pDC, LStream *In)
 			BytesInRes,
 			XorSize,
 			AndSize,
-			sizeof(GdcRGB) * Cols,
+			sizeof(LRgba32) * Cols,
 			BytesLeft);
 		*/
 
@@ -1019,7 +1019,7 @@ LFilter::IoStatus GdcIco::ReadImage(LSurface *pDC, LStream *In)
 			if (Pal)
 			{
 				Pal->SetSize(ColorCount);
-				memcpy((*Pal)[0], Colours, sizeof(GdcRGB) * ColorCount);
+				memcpy((*Pal)[0], Colours, sizeof(LRgba32) * ColorCount);
 				Pal->SwapRAndB();
 				pDC->Palette(Pal, true);
 			}
@@ -1165,7 +1165,7 @@ LFilter::IoStatus GdcIco::WriteImage(LStream *Out, LSurface *pDC)
 	int Line = (ActualBits * Width) / 8;
 	int MaskLine = BMPWIDTH(Width/8);
 	int32	BytesInRes = sizeof(BMP_WININFO) +
-						(sizeof(GdcRGB) * Colours) +
+						(sizeof(LRgba32) * Colours) +
 						(Line * Height) +
 						(MaskLine * Height);
 	
@@ -1200,7 +1200,7 @@ LFilter::IoStatus GdcIco::WriteImage(LStream *Out, LSurface *pDC)
 	if (Pal)
 	{
 		Pal->SwapRAndB();
-		Out->Write((*Pal)[0], sizeof(GdcRGB) * (int)(1 << ActualBits));
+		Out->Write((*Pal)[0], sizeof(LRgba32) * (int)(1 << ActualBits));
 		Pal->SwapRAndB();
 	}
 

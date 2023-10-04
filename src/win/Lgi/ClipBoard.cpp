@@ -705,7 +705,7 @@ bool LClipBoard::Bitmap(LSurface *pDC, bool AutoEmpty)
 					RGBQUAD *Rgb = Info->bmiColors;
 					if (Pal)
 					{
-						GdcRGB *p = (*Pal)[0];
+						auto p = (*Pal)[0];
 						if (p)
 						{
 							for (int i=0; i<Colours; i++, p++, Rgb++)
@@ -814,7 +814,7 @@ LAutoPtr<LSurface> LClipBoard::ConvertFromPtr(void *Ptr)
 				LPalette *Pal = new LPalette(NULL, Colours);
 				if (Pal)
 				{
-					GdcRGB *d = (*Pal)[0];
+					auto d = (*Pal)[0];
 					RGBQUAD *s = (RGBQUAD*) Source;
 					if (d)
 					{

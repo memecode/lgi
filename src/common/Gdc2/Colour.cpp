@@ -271,7 +271,7 @@ uint32_t LColour::c24() const
 			// colour palette lookup
 			if (index < pal->GetSize())
 			{
-				GdcRGB *c = (*pal)[index];
+				auto c = (*pal)[index];
 				if (c)
 				{
 					return Rgb24(c->r, c->g, c->b);
@@ -315,7 +315,7 @@ uint32_t LColour::c32() const
 			// colour palette lookup
 			if (index < pal->GetSize())
 			{
-				GdcRGB *c = (*pal)[index];
+				auto c = (*pal)[index];
 				if (c)
 				{
 					return Rgb32(c->r, c->g, c->b);
@@ -497,7 +497,7 @@ uint32_t LColour::GetNative()
 	{
 		if (pal && index < pal->GetSize())
 		{
-			GdcRGB *c = (*pal)[index];
+			auto c = (*pal)[index];
 			if (c)
 			{
 				return RGB(c->r, c->g, c->b);

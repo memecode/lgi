@@ -28,7 +28,7 @@ void CreatePaletteLut(T *c, LPalette *Pal, int Scale = 255)
 
 		for (int i=0; i<256; i++)
 		{
-			GdcRGB *p = (Pal) ? (*Pal)[i] : 0;
+			auto p = (Pal) ? (*Pal)[i] : 0;
 			if (p)
 			{
 				c[i].r = DivLut[p->r * Scale];
@@ -47,7 +47,7 @@ void CreatePaletteLut(T *c, LPalette *Pal, int Scale = 255)
 	{
 		for (int i=0; i<256; i++)
 		{
-			GdcRGB *p = (Pal) ? (*Pal)[i] : 0;
+			auto p = (Pal) ? (*Pal)[i] : 0;
 			if (p)
 			{
 				c[i].r = p->r;
@@ -277,7 +277,7 @@ public:
 	template<typename Pixel>
 	void AlphaBlt32(LBmpMem *Src, LPalette *DPal, uchar *Lut)
 	{
-		GdcRGB *dc = (*DPal)[0];
+		auto dc = (*DPal)[0];
 		if (!Lut) Lut = DPal->MakeLut(15);
 
 		for (int y=0; y<Src->y; y++)
@@ -288,7 +288,7 @@ public:
 
 			while (d < e)
 			{
-				GdcRGB dst = dc[*d];
+				auto dst = dc[*d];
 				OverNpm32toNpm24(s, &dst);
 				*d++ = Lut[Rgb15(dst.r, dst.g, dst.b)];
 				s++;						
@@ -525,7 +525,7 @@ public:
 			Pixel map[256];
 			if (SPal)
 			{
-				GdcRGB *p = (*SPal)[0];
+				auto p = (*SPal)[0];
 				for (int i=0; i<256; i++, p++)
 				{
 					map[i].r = G8bitTo5bit(p->r);
@@ -641,7 +641,7 @@ public:
 			Pixel map[256];
 			if (SPal)
 			{
-				GdcRGB *p = (*SPal)[0];
+				auto p = (*SPal)[0];
 				for (int i=0; i<256; i++, p++)
 				{
 					map[i].r = G8bitTo5bit(p->r);
@@ -882,7 +882,7 @@ public:
 					Pixel map[256];
 					for (int i=0; i<256; i++)
 					{
-						GdcRGB *p = (SPal) ? (*SPal)[i] : NULL;
+						auto p = (SPal) ? (*SPal)[i] : NULL;
 						if (p)
 						{
 							map[i].r = p->r;
@@ -1415,8 +1415,8 @@ bool GdcApp8Alpha::SetVariant(const char *Name, LVariant &Value, const char *Arr
 
 			if (Pal && alpha < 255)
 			{
-				GdcRGB *p = (*Pal)[0];
-				GdcRGB *Col = (*Pal)[c&0xFF];
+				auto p = (*Pal)[0];
+				auto Col = (*Pal)[c&0xFF];
 
 				for (int i=0; i<Pal->GetSize(); i++)
 				{
@@ -1525,8 +1525,8 @@ bool GdcApp8Alpha::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 	if (SrcAlpha)
 	{
 		// Per pixel source alpha
-		GdcRGB *SRgb = (*SPal)[0];
-		GdcRGB *DRgb = (*DPal)[0];
+		auto SRgb = (*SPal)[0];
+		auto DRgb = (*DPal)[0];
 		if (!SRgb || !DRgb) return false;
 
 		switch (Src->Cs)
@@ -1737,8 +1737,8 @@ bool GdcApp8Alpha::Blt(LBmpMem *Src, LPalette *SPal, LBmpMem *SrcAlpha)
 	else
 	{
 		// Global alpha level
-		GdcRGB *SRgb = (*SPal)[0];
-		GdcRGB *DRgb = (*DPal)[0];
+		auto SRgb = (*SPal)[0];
+		auto DRgb = (*DPal)[0];
 		if (!SRgb || !DRgb) return false;
 
 		switch (Src->Cs)

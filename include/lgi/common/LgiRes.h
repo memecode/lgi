@@ -146,6 +146,7 @@ class LgiClass LResources : public ResFactory
 
 public:
 	static bool DefaultColours;
+	static void FreeAllInstances();
 	LHashTbl<ConstStrKey<char>, char*> LanguageNames;
 	
 	/// This is all the CSS loaded from the lr8 file (and possibly other sources as well)

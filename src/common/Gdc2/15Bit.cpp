@@ -148,7 +148,7 @@ public:
 				ZeroObj(map);
 				for (int i=0; i<256; i++)
 				{
-					GdcRGB *p = SPal ? (*SPal)[i] : NULL;
+					auto p = SPal ? (*SPal)[i] : NULL;
 					if (p)
 					{
 						map[i].r = G8bitTo5bit(p->r);

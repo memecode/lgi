@@ -59,13 +59,7 @@ LSurface::LSurface(LSurface *pDC)
 	{
 		Blt(0, 0, pDC);
 		if (pDC->Palette())
-		{
-			LPalette *Pal = new LPalette(pDC->Palette());
-			if (Pal)
-			{
-				Palette(Pal, true);
-			}
-		}
+			Palette(new LPalette(pDC->Palette()), true);
 	}
 }
 
@@ -311,7 +305,8 @@ uchar *LSurface::operator[](int y)
 void LSurface::Set(int x, int y)
 {
 	OrgXy(x, y);
-	if (x >= Clip.x1 &&
+	if (pApp &&
+		x >= Clip.x1 &&
 		y >= Clip.y1 &&
 		x <= Clip.x2 &&
 		y <= Clip.y2)
@@ -326,7 +321,8 @@ COLOUR LSurface::Get(int x, int y)
 {
 	OrgXy(x, y);
 
-	if (x >= Clip.x1 &&
+	if (pApp &&
+		x >= Clip.x1 &&
 		y >= Clip.y1 &&
 		x <= Clip.x2 &&
 		y <= Clip.y2)
@@ -346,7 +342,8 @@ void LSurface::HLine(int x1, int x2, int y)
 
 	if (x1 < Clip.x1) x1 = Clip.x1;
 	if (x2 > Clip.x2) x2 = Clip.x2;
-	if (x1 <= x2 &&
+	if (pApp &&
+		x1 <= x2 &&
 		y >= Clip.y1 &&
 		y <= Clip.y2)
 	{
@@ -382,7 +379,8 @@ void LSurface::VLine(int x, int y1, int y2)
 	if (y1 > y2) LSwap(y1, y2);
 	if (y1 < Clip.y1) y1 = Clip.y1;
 	if (y2 > Clip.y2) y2 = Clip.y2;
-	if (y1 <= y2 &&
+	if (pApp &&
+		y1 <= y2 &&
 		x >= Clip.x1 &&
 		x <= Clip.x2)
 	{
@@ -412,6 +410,9 @@ void LSurface::VLine(int x, int y1, int y2)
 
 void LSurface::Line(int x1, int y1, int x2, int y2)
 {
+	if (!pApp)
+		return;
+
 	if (x1 == x2)
 	{
 		VLine(x1, y1, y2);
@@ -807,7 +808,7 @@ void LSurface::Rectangle(LRect *a)
 	b.Normal();
 	b.Bound(&Clip);
 
-	if (b.Valid())
+	if (pApp && b.Valid())
 	{
 		pApp->SetPtr(b.x1, b.y1);
 		pApp->Rectangle(b.X(), b.Y());
@@ -1166,7 +1167,7 @@ void LSurface::Blt(int x, int y, LSurface *Src, LRect *a)
 {
 	OrgXy(x, y);
 
-	if (!Src || !Src->pMem || !Src->pMem->Base)
+	if (!pApp || !Src || !Src->pMem || !Src->pMem->Base)
 		return;
 
 	LRect S;
@@ -1781,8 +1782,16 @@ LColour LSurface::Colour(LSystemColour SysCol)
 
 LColour LSurface::Colour(LColour c)
 {
-	LAssert(pApp != NULL);
 	LColour cPrev;
+
+	if (!pApp)
+	{
+		// This seems to happen when windows runs out of handles.
+		// Maybe there is a GDI leak somewhere? IDK
+		// But at least don't crash....
+		LAssert(!"No applicator");
+		return cPrev;
+	}
 
 	uint32_t c32 = c.c32();
 	LColourSpace Cs = pApp->GetColourSpace();
@@ -1954,36 +1963,22 @@ LPalette *LSurface::Palette()
 
 void LSurface::Palette(LPalette *pPal, bool bOwnIt)
 {
+	if (pPal && bOwnIt)
+		Flags |= GDC_OWN_PALETTE;
+	else
+		Flags &= ~GDC_OWN_PALETTE;
+
 	if (pPal == pPalette)
 	{
 		LgiTrace("%s:%i - Palette setting itself.\n", _FL);
 		return;
 	}
 
-	// printf("LSurface::Palette %p %i\n", pPal, bOwnIt);
 	if (pPalette && (Flags & GDC_OWN_PALETTE) != 0)
-	{
-		// printf("\tdel=%p\n", pPalette);
 		delete pPalette;
-	}
-
 	pPalette = pPal;
-
-	if (pPal && bOwnIt)
-	{
-		Flags |= GDC_OWN_PALETTE;
-		// printf("\tp=%p own\n", pPalette);
-	}
-	else
-	{
-		Flags &= ~GDC_OWN_PALETTE;
-		// printf("\tp=%p not-own\n", pPalette);
-	}
-
 	if (pApp)
-	{
 		pApp->SetSurface(pMem, pPalette, (pAlphaDC) ? pAlphaDC->pMem : 0);
-	}
 }
 
 bool LSurface::GetVariant(const char *Name, LVariant &Dst, const char *Array)

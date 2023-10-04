@@ -334,8 +334,11 @@ char *LXmlTree::DecodeEntities(LXmlAlloc *Alloc, char *In, ssize_t Len)
 //////////////////////////////////////////////////////////////////////////////
 LAutoRefPtr<LXmlAlloc> TagHeapAllocator(new XmlNormalAlloc);
 
+int LXmlTag::Instances = 0;
+
 LXmlTag::LXmlTag(const char *tag, LXmlAlloc *alloc)
 {
+	Instances++;
 	Children.SetFixedLength(true);
 	if (alloc)
 		Allocator = alloc;
@@ -351,6 +354,7 @@ LXmlTag::LXmlTag(const char *tag, LXmlAlloc *alloc)
 
 LXmlTag::LXmlTag(const LXmlTag &t)
 {
+	Instances++;
 	Allocator = t.Allocator;
 	LAssert(Allocator != NULL);
 
@@ -366,6 +370,7 @@ LXmlTag::~LXmlTag()
 {
 	RemoveTag();
 	Empty(true);
+	Instances--;
 }
 
 void LXmlTag::EmptyAttributes()
@@ -393,6 +398,7 @@ void LXmlTag::Empty(bool Deep)
 {
 	EmptyAttributes();
 	Allocator->Free(Content);
+	Content = NULL;
 	SetTag(NULL);
 	
 	if (Deep)
@@ -681,10 +687,10 @@ bool LXmlTag::RemoveTag()
 	if (!Parent)
 		return true;
 	
-	Children.SetFixedLength(false);
+	Parent->Children.SetFixedLength(false);
 	bool Status = Parent->Children.Delete(this);
-	Children.SetFixedLength(true);
-	Parent = 0;
+	Parent->Children.SetFixedLength(true);
+	Parent = NULL;
 	return Status;
 }
 
