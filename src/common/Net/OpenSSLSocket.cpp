@@ -306,6 +306,13 @@ static const char *FileLeaf(const char *f)
 #undef _FL
 #define _FL FileLeaf(__FILE__), __LINE__
 
+LString toString(LArray<int> &a)
+{
+	LString::Array s;
+	for (auto i: a)
+		s.New().Printf("%i", i);
+	return LString(".").Join(s);
+}
 
 class OpenSSL :
 	#ifdef WINDOWS
@@ -396,10 +403,9 @@ public:
 				#if WINDOWS
 				"%s\n"
 				#endif
-				,
-				_FL,
+				, _FL,
 				t[1].Get(),
-				*MinVer
+				toString(*MinVer).Get()
 				#if WINDOWS
 				,FileName
 				#endif

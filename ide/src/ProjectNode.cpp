@@ -884,6 +884,9 @@ IdeDoc *ProjectNode::Open()
 							LMakePath(Exe, sizeof(Exe), Exe, "Debug\\LgiRes.exe");
 						#elif defined(LINUX) || defined(HAIKU)
 							LMakePath(Exe, sizeof(Exe), Exe, "resourceEditor/lgires");
+						#elif defined(MAC)
+							// Of course it's there! Lol
+							LMakePath(Exe, sizeof(Exe), Exe, "resourceEditor/mac/build/Debug/LgiRes.app/Contents/MacOS/LgiRes");
 						#else
 							#error "Impl me?"
 						#endif

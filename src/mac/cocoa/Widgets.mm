@@ -101,9 +101,9 @@ void LDialog::OnPosChange()
 	}
 }
 
-bool LDialog::LoadFromResource(int Resource, char *TagList)
+bool LDialog::LoadFromResource(int Resource, const char *TagList)
 {
-	LAutoString n;
+	LString n;
 	LRect p;
 	
 	bool Status = LResourceLoad::LoadFromResource(Resource, this, &p, &n, TagList);
