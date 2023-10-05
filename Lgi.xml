@@ -414,6 +414,7 @@
 				<Node File=".\src\common\Widgets\Progress.cpp" Type="2" Platforms="1" />
 			</Node>
 			<Node File="./include/lgi/common/DocView.h" Type="3" Platforms="15" />
+			<Node File="./include/lgi/common/ImageList.h" Type="3" Platforms="15" />
 		</Node>
 	</Node>
 	<Node Name="LgiNet" Type="1" Platforms="15" Open="0" Id="69">
