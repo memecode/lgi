@@ -259,6 +259,7 @@
     <ClCompile Include="src\RangeTest.cpp" />
     <ClCompile Include="src\StringTests.cpp" />
     <ClCompile Include="src\UnitTests.cpp" />
+    <ClCompile Include="src\XmlTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\common\GStringClass.h" />

@@ -314,7 +314,7 @@ class LgiClass LMenuItem :
 	friend class MenuItemImpl;
 	friend class MenuImpl;
 	friend class SubMenuImplPrivate;
-	friend class LMenuPrivate;
+	friend struct LMenuPrivate;
 
 private:
 	#ifdef WIN32
@@ -494,9 +494,9 @@ class LgiClass LMenu :
 	friend class LSubMenu;
 	friend class LMenuItem;
 	friend class LWindow;
-	friend class LMenuPrivate;
+	friend struct LMenuPrivate;
 
-	class LMenuPrivate *d;
+	struct LMenuPrivate *d;
 
 	#if defined WIN32
 		void OnChange();
@@ -526,7 +526,7 @@ public:
 	virtual ~LMenu();
 
 	/// Returns the font used by the menu items
-	static LFont *GetFont();
+	LFont *GetFont();
 
 	/// Returns the top level window that this menu is attached to
 	LViewI *WindowHandle() { return Window; }

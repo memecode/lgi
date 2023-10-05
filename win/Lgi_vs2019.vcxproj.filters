@@ -380,9 +380,6 @@
     <ClCompile Include="..\src\common\Gdc2\Font\StringLayout.cpp">
       <Filter>Source Files\Graphics\Font</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\common\Lgi\SubProcess.cpp">
-      <Filter>Source Files\Core\Process</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\common\Gdc2\Surface.cpp">
       <Filter>Source Files\Graphics\Surfaces</Filter>
     </ClCompile>
@@ -496,6 +493,9 @@
     </ClCompile>
     <ClCompile Include="..\src\common\Lgi\ClipBoardCommon.cpp">
       <Filter>Source Files\General\Clipboard</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\win\Lgi\SubProcess.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

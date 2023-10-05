@@ -41,7 +41,7 @@
 /// Css property container
 class LgiClass LCss
 {
-	bool ReadOnly;
+	bool ReadOnly = false;
 
 public:
 	enum ParsingStyle {
@@ -1158,7 +1158,8 @@ public:
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////
 	LCss();
 	LCss(const LCss &c);
-	void Init();
+	static void Init();
+	static void Shutdown();
 	virtual ~LCss();
 
 	#define Accessor(PropName, Type, Default, BaseProp) \

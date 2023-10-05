@@ -40,6 +40,7 @@ DECL_TEST(LRangeTest);
 DECL_TEST(JsonTest);
 DECL_TEST(LBitsTest);
 DECL_TEST(NetworkTests);
+DECL_TEST(XmlTest);
 
 class LDateTimeTest : public UnitTest
 {

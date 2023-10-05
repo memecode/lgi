@@ -95,6 +95,8 @@ public:
 		if (Attributes)
 			CFRelease(Attributes);
 		#endif
+
+		DeleteArray(GlyphMap);
 	}
 };
 

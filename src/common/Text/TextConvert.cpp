@@ -57,7 +57,7 @@ LString LDecodeBase64Str(LString Str)
 	{
 		ssize_t Converted = ConvertBase64ToBinary((uchar*)r.Get(), r.Length(), Str.Get(), Str.Length());
 		if (Converted >= 0)
-			r.Get()[Converted] = 0;
+			r.Length(Converted);
 		else
 			r.Empty();
 	}

@@ -88,7 +88,9 @@ protected:
 	char *Content;
 
 public:
+	#ifdef LGI_UNIT_TESTS
 	static int Instances;
+	#endif
 
 	/// The parent element/tag.
 	LXmlTag *Parent;

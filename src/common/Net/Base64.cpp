@@ -127,7 +127,7 @@ ssize_t ConvertBase64ToBinary(uchar *Binary, ssize_t OutBuf, const char *Base64,
 		}
 	}
 
-	return (int) (Binary - Start);
+	return Binary - Start;
 }
 
 LString LToBinary(LString base64)

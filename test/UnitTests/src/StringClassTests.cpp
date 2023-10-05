@@ -2,10 +2,6 @@
 #include "UnitTests.h"
 #include "lgi/common/StringClass.h"
 
-#ifdef LGI_UNIT_TESTS
-int32 LString::RefStrCount = 0;
-#endif
-
 class PrivLStringClassTest
 {
 public:
@@ -23,12 +19,14 @@ LStringClassTest::~LStringClassTest()
 
 bool LStringClassTest::Run()
 {
+	auto StartCount = LString_RefStrCount;
+
 	// Constructor test
 	{
 		LString a("test");
 		LString b = a;
 	}
-	if (LString::RefStrCount != 0) return FAIL(_FL, "RefStrCount mismatch");
+	if (LString_RefStrCount != StartCount) return FAIL(_FL, "RefStrCount mismatch");
 
 	// Assignment operator test
 	{
@@ -36,19 +34,19 @@ bool LStringClassTest::Run()
 		LString b;
 		b = a;
 	}
-	if (LString::RefStrCount != 0) return FAIL(_FL, "RefStrCount mismatch");
+	if (LString_RefStrCount != StartCount) return FAIL(_FL, "RefStrCount mismatch");
 
 	// Split/Join tests
 	{
 		const char *Base = "123,456,789";
 		LString a(Base);
-		if (LString::RefStrCount != 1) return FAIL(_FL, "RefStrCount mismatch");
+		if (LString_RefStrCount != StartCount+1) return FAIL(_FL, "RefStrCount mismatch");
 		LString::Array b = a.Split(",");
-		if (LString::RefStrCount != 4) return FAIL(_FL, "RefStrCount mismatch");
+		if (LString_RefStrCount != StartCount+4) return FAIL(_FL, "RefStrCount mismatch");
 		LString sep("-");
-		if (LString::RefStrCount != 5) return FAIL(_FL, "RefStrCount mismatch");
+		if (LString_RefStrCount != StartCount+5) return FAIL(_FL, "RefStrCount mismatch");
 		LString c = sep.Join(b);
-		if (LString::RefStrCount != 6) return FAIL(_FL, "RefStrCount mismatch");
+		if (LString_RefStrCount != StartCount+6) return FAIL(_FL, "RefStrCount mismatch");
 		if (c.Get() && stricmp(c.Get(), "123-456-789"))
 			return FAIL(_FL, "Joined string incorrect");
 		if (b[1].Int() != 456)
@@ -66,7 +64,7 @@ bool LStringClassTest::Run()
 		if (strcmp(Base, a))
 			return FAIL(_FL, "Original string modified");
 	}
-	if (LString::RefStrCount != 0) return FAIL(_FL, "RefStrCount mismatch");
+	if (LString_RefStrCount != StartCount) return FAIL(_FL, "RefStrCount mismatch");
 	
 	// C string assignment / cast testing
 	{
@@ -78,7 +76,7 @@ bool LStringClassTest::Run()
 		if (strcmp(cstr, a))
 			return FAIL(_FL, "Original string modified");
 	}
-	if (LString::RefStrCount != 0) return FAIL(_FL, "RefStrCount mismatch");
+	if (LString_RefStrCount != StartCount) return FAIL(_FL, "RefStrCount mismatch");
 	
 	// Upper / lower case conversion
 	{
@@ -94,7 +92,7 @@ bool LStringClassTest::Run()
 			strcmp(b, "TEST"))
 			return FAIL(_FL, "Upper failed");
 	}
-	if (LString::RefStrCount != 0) return FAIL(_FL, "RefStrCount mismatch");
+	if (LString_RefStrCount != StartCount) return FAIL(_FL, "RefStrCount mismatch");
 	
 	// Find testing
 	{
@@ -123,7 +121,7 @@ bool LStringClassTest::Run()
 		if (a.RFind(NULL) >= 0)
 			return FAIL(_FL, "RFind failed");
 	}
-	if (LString::RefStrCount != 0) return FAIL(_FL, "RefStrCount mismatch");
+	if (LString_RefStrCount != StartCount) return FAIL(_FL, "RefStrCount mismatch");
 	
 	// Substring testing
 	{
@@ -143,7 +141,7 @@ bool LStringClassTest::Run()
 		if (strcmp(Base, a))
 			return FAIL(_FL, "Original string modified");
 	}
-	if (LString::RefStrCount != 0) return FAIL(_FL, "RefStrCount mismatch");
+	if (LString_RefStrCount != StartCount) return FAIL(_FL, "RefStrCount mismatch");
 	
 	// Whitespace strip testing
 	{
@@ -158,7 +156,7 @@ bool LStringClassTest::Run()
 		if (strcmp(Base, a))
 			return FAIL(_FL, "Original string modified");
 	}
-	if (LString::RefStrCount != 0) return FAIL(_FL, "RefStrCount mismatch");
+	if (LString_RefStrCount != StartCount) return FAIL(_FL, "RefStrCount mismatch");
 
 	// Concatenation tests
 	{
@@ -181,7 +179,7 @@ bool LStringClassTest::Run()
 		if (strcmp(Base2, b))
 			return FAIL(_FL, "Original string modified");
 	}
-	if (LString::RefStrCount != 0) return FAIL(_FL, "RefStrCount mismatch");
+	if (LString_RefStrCount != StartCount) return FAIL(_FL, "RefStrCount mismatch");
 
 	return true;
 }

@@ -37,6 +37,10 @@
 
 LgiExtern int LPrintf(class LString &Str, const char *Format, va_list &Arg);
 
+#ifdef LGI_UNIT_TESTS
+LgiExtern size_t LString_RefStrCount;
+#endif
+
 /// A pythonic string class.
 class LString
 {
@@ -82,10 +86,6 @@ protected:
 	}
 
 public:
-	#ifdef LGI_UNIT_TESTS
-	static int32 RefStrCount;
-	#endif
-
 	/// A copyable array of strings
 	class Array : public LArray<LString>
 	{
@@ -294,7 +294,7 @@ public:
 		{
 			free(Str);
 			#ifdef LGI_UNIT_TESTS
-			RefStrCount--;
+			LString_RefStrCount--;
 			#endif
 		}
 		Str = NULL;
@@ -332,7 +332,7 @@ public:
 		Str->Refs = 1;
 		Str->Len = (uint32_t)bytes;
 		#ifdef LGI_UNIT_TESTS
-		RefStrCount++;
+		LString_RefStrCount++;
 		#endif
 		
 		if (str)
@@ -571,7 +571,7 @@ public:
 			rs->Refs = 1;
 			rs->Len = Len;
 			#ifdef LGI_UNIT_TESTS
-			RefStrCount++;
+			LString_RefStrCount++;
 			#endif
 			
 			char *p = rs->Str;

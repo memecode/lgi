@@ -16,9 +16,23 @@
 #include "lgi/common/DisplayString.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/ToolBar.h"
+#include "lgi/common/RefCount.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 #define LGI_OWNER_DRAW_MENUS
+
+struct LMenuFont : public LRefCount
+{
+	LAutoPtr<LFont> f;
+
+	LMenuFont()
+	{
+		LFontType Type;
+		if (Type.GetSystemFont("Menu"))
+			f.Reset(Type.Create());
+	}
+
+}	*MenuFont = NULL;
 
 LColour LGetSysColor(int nIndex)
 {
@@ -28,10 +42,10 @@ LColour LGetSysColor(int nIndex)
 	return c;
 }
 
-class LMenuPrivate
+struct LMenuPrivate
 {
-public:
 	LColour RootMenuBack;
+	bool HasFontRef = false;
 	
 	LMenuPrivate()
 	{
@@ -68,6 +82,15 @@ public:
 		{
 			RootMenuBack = LGetSysColor(COLOR_MENU);
 			// LgiTrace("9x: menu=%x\n", RootMenuBack);
+		}
+	}
+
+	~LMenuPrivate()
+	{
+		if (HasFontRef && MenuFont)
+		{
+			if (MenuFont->DecRef())
+				MenuFont = NULL;
 		}
 	}
 };
@@ -919,26 +942,26 @@ void LMenuItem::Checked(bool c)
 
 bool LMenuItem::Name(const char *Txt)
 {
-	bool Status = LBase::Name(Txt);
-	if (Status)
-	{
-		LString n = NewStr(Txt);
-		if (n)
-		{
-			// Set OS menu structure
-			Info.dwTypeData = (LPWSTR)LBase::NameW();
-			Info.cch = (UINT) StrlenW(LBase::NameW());
-			Info.fType |= MFT_STRING;
-			Info.fMask |= MIIM_TYPE | MIIM_DATA;
+	if (!LBase::Name(Txt))
+		return false;
 
-			LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : LSysFont;
-			d->UpdateStrings(Font, n);
+	LString n = Txt;
+	if (!n)
+		return false;
 
-			// Tell the OS
-			Update();
-		}
-	}
-	return Status;
+	// Set OS menu structure
+	Info.dwTypeData = (LPWSTR)LBase::NameW();
+	Info.cch = (UINT) StrlenW(LBase::NameW());
+	Info.fType |= MFT_STRING;
+	Info.fMask |= MIIM_TYPE | MIIM_DATA;
+
+	LFont *Font = Menu && Menu->GetFont() ? Menu->GetFont() : LSysFont;
+	d->UpdateStrings(Font, n);
+
+	// Tell the OS
+	Update();
+
+	return true;
 }
 
 void LMenuItem::Enabled(bool e)
@@ -1047,34 +1070,20 @@ void LMenu::OnChange()
 	}
 }
 
-struct LMenuFont
-{
-	LFont *f;
-
-	LMenuFont()
-	{
-		f = NULL;
-	}
-
-	~LMenuFont()
-	{
-		DeleteObj(f);
-	}
-}	MenuFont;
-
-
 LFont *LMenu::GetFont()
 {
-	if (!MenuFont.f)
+	if (!d->HasFontRef)
 	{
-		LFontType Type;
-		if (Type.GetSystemFont("Menu"))
-		{
-			MenuFont.f = Type.Create();
-		}
+		if (!MenuFont)
+			MenuFont = new LMenuFont;
+		if (!MenuFont)
+			return LSysFont;
+
+		MenuFont->IncRef();
+		LMenu::d->HasFontRef = true;
 	}
 
-	return MenuFont.f ? MenuFont.f : LSysFont;
+	return MenuFont && MenuFont->f ? MenuFont->f : LSysFont;
 }
 
 bool LMenu::Attach(LViewI *p)

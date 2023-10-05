@@ -462,7 +462,8 @@ LApp::~LApp()
 	DeleteObj(LFontSystem::Me);
 	DeleteObj(d->FileSystem);
 	DeleteObj(d->GdcSystem);
-	d->Classes.DeleteObjects();
+	LResources::FreeAllInstances();
+	LCss::Shutdown();
 
 	CoUninitialize();
 	OleUninitialize();

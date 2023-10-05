@@ -40,6 +40,7 @@ public:
 
 	~LAppPrivate()
 	{
+		Classes.DeleteObjects();
 		DeleteObj(SkinLib);
 		DeleteObj(SymLookup);
 	}

@@ -175,7 +175,6 @@ static char *ParseString(const char *&s)
 /////////////////////////////////////////////////////////////////////////////
 void LCss::Init()
 {
-	ReadOnly = false;
 	if (Lut.Length() == 0)
 	{
 		Lut.Add("letter-spacing", PropLetterSpacing);
@@ -292,6 +291,12 @@ void LCss::Init()
 		ParentProp.Add(PropBackgroundY, PropBackground);
 		*/
 	}
+}
+
+void LCss::Shutdown()
+{
+	Lut.Empty();
+	ParentProp.Empty();
 }
 
 LCss::LCss() : Props(32)

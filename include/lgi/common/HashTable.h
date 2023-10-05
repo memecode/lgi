@@ -348,8 +348,11 @@ public:
 	/// Deletes the hash table removing all contents from memory
 	virtual ~LHashTbl()
 	{
-		Empty();
-		DeleteArray(Table);
+		if (Table)
+		{
+			Empty();
+			DeleteArray(Table);
+		}
 	}
 
 	Key GetNullKey()
@@ -627,8 +630,10 @@ public:
 		return this->NullKey;
 	}
 
-	/// Removes all key/value pairs from memory
-	void Empty()
+	/// Removes all key/value pairs from memory and frees the table itself.
+	/// Does NOT delete any objects "owned" in the values. Use "DeleteObjects" 
+	/// for that.
+	void Empty(bool freeTable = false)
 	{
 		if (!IsOk())
 			return;
@@ -645,6 +650,11 @@ public:
 
 		Used = 0;
 		this->EmptyKeys();
+		if (freeTable)
+		{
+			Size = 0;
+			DeleteArray(Table);
+		}
 	}
 
 	/// Returns the amount of memory in use by the hash table.

@@ -137,7 +137,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\include;..\include\lgi\win;..\private\common;..\private\win;..\..\..\..\CodeLib\libiconv\include;..\..\..\scribe\libs\build-x64\libiconv-1.17\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN64;LGI_LIBRARY;_DEBUG;WINDOWS;LGI_RES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN64;LGI_LIBRARY;_DEBUG;WINDOWS;LGI_RES;LGI_UNIT_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>

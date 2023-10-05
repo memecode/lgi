@@ -56,6 +56,9 @@
     <ClCompile Include="..\..\src\common\Text\TextConvert.cpp">
       <Filter>Lgi</Filter>
     </ClCompile>
+    <ClCompile Include="src\XmlTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\common\GStringClass.h">

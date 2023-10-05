@@ -3,6 +3,10 @@
 
 #include "AppPriv.h"
 
+#ifdef LGI_UNIT_TESTS
+size_t LString_RefStrCount = 0;
+#endif
+
 #ifdef LINUX
 namespace Gtk {
 #include "LgiWidget.h"

@@ -16,6 +16,7 @@ void UnitTests()
 	Tests.Add(new LBitsTest);
 	Tests.Add(new JsonTest);
 	Tests.Add(new NetworkTests);
+	Tests.Add(new XmlTest);
 
 	for (int i=0; i<Tests.Length(); i++)
 	{
