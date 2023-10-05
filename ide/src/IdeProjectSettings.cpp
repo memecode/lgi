@@ -684,6 +684,7 @@ public:
 			InsertPath(ProjLibraries, PlatformLinux, true, "`pkg-config --libs gtk+-3.0`");
 			InsertPath(ProjLibraries, PlatformLinux, true, "-static-libgcc");
 		}
+		else LgiTrace("%s:%i - No LgiProj found.\n", _FL);
 		
 		#endif
 	}

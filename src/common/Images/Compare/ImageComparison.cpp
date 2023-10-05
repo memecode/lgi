@@ -150,8 +150,8 @@ LAutoPtr<LMemDC> CreateDiff(LViewI *Parent, LSurface *A, LSurface *B)
 					LPalette *bpal = B->Palette();
 					if (apal && bpal)
 					{
-						GdcRGB *ap = (*apal)[0];
-						GdcRGB *bp = (*bpal)[0];
+						auto ap = (*apal)[0];
+						auto bp = (*bpal)[0];
 						uint8_t *a = (*A)[y];
 						uint8_t *b = (*B)[y];
 						uint8_t *e = a + Cx;

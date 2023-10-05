@@ -190,16 +190,17 @@ class Gdb : public LDebugger, public LThread, public Callback
 			{
 				DebuggingProcess = is_debug;
 				Running = is_run;
+				printf("###### Running=%i\n", Running);
 				
 				StateMutex.Unlock();
 
 				if (Events)
 				{
-					#if DEBUG_SESSION_LOGGING
+					#if 1 // DEBUG_SESSION_LOGGING
 					LgiTrace("Gdb::SetRunState(%i,%i) calling OnState...\n", is_debug, is_run);
 					#endif
 					Events->OnState(DebuggingProcess, Running);
-					#if DEBUG_SESSION_LOGGING
+					#if 1 // DEBUG_SESSION_LOGGING
 					LgiTrace("Gdb::SetRunState(%i,%i) OnState returned.\n", is_debug, is_run);
 					#endif
 				}
@@ -453,26 +454,24 @@ class Gdb : public LDebugger, public LThread, public Callback
 
 		// Check for prompt
 		auto bytes = LinePtr - Line;
-		if (bytes > 0)
+		if (bytes == 6)
 		{
-			if (bytes == 6)
+			AtPrompt = !_strnicmp(Line, sPrompt, bytes);
+			LgiTrace("AtPrompt=%i Running=%i\n", AtPrompt, Running);
+			if (AtPrompt)
 			{
-				AtPrompt = !_strnicmp(Line, sPrompt, bytes);
-				LgiTrace("%I64i: AtPrompt=%i\n", LCurrentTime(), AtPrompt);
-				if (AtPrompt)
+				if (Running ^ !AtPrompt)
 				{
-					if (Running ^ !AtPrompt)
-					{
-						SetState(DebuggingProcess, !AtPrompt);
-					}
-					
-					if (OutStream)
-						OutStream = NULL;
-					if (OutLines)
-						OutLines = NULL;
-
-					Events->Write(Line, bytes);
+					printf("Running=%i -> %i\n", Running, !AtPrompt);
+					SetState(DebuggingProcess, !AtPrompt);
 				}
+				
+				if (OutStream)
+					OutStream = NULL;
+				if (OutLines)
+					OutLines = NULL;
+
+				Events->Write(Line, bytes);
 			}
 		}
 	}
@@ -599,16 +598,20 @@ class Gdb : public LDebugger, public LThread, public Callback
 		uint64 Start = LCurrentTime();
 		uint64 Now = Start;
 		while (!AtPrompt &&
-				Now - Start < 2000 &&
+				Now - Start < 5000 &&
 				State == Looping)
 		{
 			Now = LCurrentTime();
 			LSleep(50);
 			uint64 After = LCurrentTime();
+			printf("...wait=%i\n", (int)(After-Start));
+
+			/*
 			if (After - Now > 65)
 			{
 				printf("Sleep took=%i\n", (int)(After - Now));
 			}
+			*/
 		}
 
 		if (!AtPrompt)
@@ -920,6 +923,7 @@ public:
 					printf("Set break point for main\n");
 					if (!Cmd(a))
 						return false;
+					SetState(true, true);
 					
 					printf("Waiting for prompt\n");
 					if (!WaitPrompt())

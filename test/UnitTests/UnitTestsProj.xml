@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Project>
+	<Node Name="Source" Type="1" Platforms="15" Id="1">
+		<Node File="./src/AutoPtrTest.cpp" Type="2" Platforms="15" />
+		<Node File="./src/BitsTest.cpp" Type="2" Platforms="15" />
+		<Node File="./src/ContainerTests.cpp" Type="2" Platforms="15" />
+		<Node File="./src/CssTest.cpp" Type="2" Platforms="15" />
+		<Node File="./src/JsonTest.cpp" Type="2" Platforms="15" />
+		<Node File="./src/MatrixTest.cpp" Type="2" Platforms="15" />
+		<Node File="./src/NetworkTests.cpp" Type="2" Platforms="15" />
+		<Node File="./src/RangeTest.cpp" Type="2" Platforms="15" />
+		<Node File="./src/StringClassTests.cpp" Type="2" Platforms="15" />
+		<Node File="./src/StringTests.cpp" Type="2" Platforms="15" />
+		<Node File="./src/UnitTests.cpp" Type="2" Platforms="15" />
+	</Node>
+	<Node Name="Headers" Type="1" Platforms="15" Id="2">
+		<Node File="./src/UnitTests.h" Type="3" Platforms="15" />
+	</Node>
+	<Node File="../../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
+	<Settings>
+		<Remote />
+		<General>
+			<Makefile>
+				<Linux>linux/Makefile.linux</Linux>
+			</Makefile>
+			<Executable>
+				<Linux>
+					<Debug>unittests</Debug>
+					<Release>unittests</Release>
+				</Linux>
+			</Executable>
+		</General>
+		<Debug>
+			<Environment />
+			<Arguments />
+			<DebugAdmin>
+				<All>0</All>
+			</DebugAdmin>
+		</Debug>
+		<Build>
+			<Defines>
+				<All />
+				<Linux />
+			</Defines>
+			<IncludePaths>
+				<All />
+				<Linux />
+			</IncludePaths>
+			<SystemIncludes>
+				<Linux />
+			</SystemIncludes>
+			<Libraries />
+			<LibraryPaths />
+			<TargetType>
+				<All>Executable</All>
+			</TargetType>
+			<TargetName />
+		</Build>
+		<Editor>
+			<TabSize>
+				<All>4</All>
+			</TabSize>
+			<IndentSize>
+				<All>4</All>
+			</IndentSize>
+			<UseHardTabs>
+				<All>1</All>
+			</UseHardTabs>
+		</Editor>
+		<Advanced>
+			<PostBuildCommands />
+		</Advanced>
+	</Settings>
+</Project>

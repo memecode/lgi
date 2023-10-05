@@ -210,7 +210,7 @@
 		<Node Name="Graphics" Type="1" Platforms="15" Open="0" Id="39">
 			<Node Name="_Core" Type="1" Platforms="15" Open="0" Id="40">
 				<Node Name="Haiku" Type="1" Platforms="15" Id="2">
-					<Node File=".\src\haiku\Gdc2.cpp" Type="2" Platforms="8" />
+					<Node File="./src/haiku/Gdc2.cpp" Type="2" Platforms="8" />
 				</Node>
 				<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="42">
 					<Node File=".\src\linux\Gtk\Gdc2.cpp" Type="2" Platforms="2" />
@@ -218,16 +218,17 @@
 				<Node Name="Win" Type="1" Platforms="15" Open="0" Id="43">
 					<Node File=".\src\win\Gdc2\Gdc2.cpp" Type="2" Platforms="1" />
 				</Node>
-				<Node File=".\src\common\Gdc2\Colour.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\Colour.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Gdc2\Tools\ColourReduce.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\ColourSpace.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\common\Filter.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\common\Gdc2.h" Type="3" Platforms="15" />
-				<Node File=".\src\common\Gdc2\GdcCommon.cpp" Type="2" Platforms="15" />
-				<Node File=".\src\common\Gdc2\Tools\GdcTools.cpp" Type="2" Platforms="15" />
-				<Node File=".\include\lgi\common\GdcTools.h" Type="3" Platforms="15" />
-				<Node File=".\include\lgi\common\PixelRops.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Gdc2/Colour.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/Colour.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Gdc2/Tools/ColourReduce.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/ColourSpace.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Filter.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Gdc2.h" Type="3" Platforms="15" />
+				<Node File="./src/common/Gdc2/GdcCommon.cpp" Type="2" Platforms="15" />
+				<Node File="./src/common/Gdc2/Tools/GdcTools.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/GdcTools.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/Palette.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/PixelRops.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Font" Type="1" Platforms="15" Open="0" Id="44">
 				<Node File="./src/common/Gdc2/Font/DisplayString.cpp" Type="2" Platforms="15" />
@@ -487,7 +488,7 @@
 				<All>0</All>
 			</DebugAdmin>
 			<Executable>
-				<Windows />
+				<Linux />
 			</Executable>
 			<CCrossCompiler />
 			<CppCrossCompiler />
@@ -535,7 +536,6 @@
 					<Debug>../../../../system/develop/headers</Debug>
 					<Release>../../../../system/develop/headers</Release>
 				</Haiku>
-				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -563,14 +563,12 @@ network
 be</Release>
 				</Haiku>
 				<All />
-				<Windows />
 			</Libraries>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-gtk3</Debug>
 					<Release>lgi-gtk3</Release>
 				</Linux>
-				<Windows />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
@@ -586,17 +584,17 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
-				<Windows />
+				<Linux />
 			</Defines>
 			<LibraryPaths>
 				<All />
-				<Windows />
+				<Linux />
 			</LibraryPaths>
 			<ApplicationIcon />
 		</Build>
 		<Advanced>
 			<PostBuildCommands>
-				<Windows />
+				<Linux />
 			</PostBuildCommands>
 			<OtherMakefileRules />
 		</Advanced>
