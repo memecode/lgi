@@ -326,14 +326,6 @@ void LSplitter::OnPosChange()
 	CalcRegions(true);
 }
 
-#ifdef WIN32
-void ClipDC(HDC hDC, RECT rc)
-{
-	HRGN hRgn = CreateRectRgn(rc.left, rc.top, rc.right, rc.bottom);
-	SelectClipRgn(hDC, hRgn);
-}
-#endif
-
 void LSplitter::OnPaint(LSurface *pDC)
 {
 	LRect r = GetClient();

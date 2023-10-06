@@ -75,6 +75,19 @@ LSurface::~LSurface()
 	*/
 	#endif
 
+	#if WINNATIVE
+	if (hBmp)
+	{
+		DeleteObject(hBmp);
+		hBmp = NULL;
+	}
+	if (hDC)
+	{
+		DeleteDC(hDC);
+		hDC = NULL;
+	}
+	#endif
+
 	DrawOnAlpha(false);
 
 	DeleteObj(pMem);
@@ -104,6 +117,8 @@ Gdiplus::Graphics *LSurface::GetGfx()
 	static Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 	static ULONG_PTR gdiplusToken = 0;
 
+	#if 0
+
 	if (!gdiplusToken)
 		GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
@@ -122,6 +137,8 @@ Gdiplus::Graphics *LSurface::GetGfx()
 	GdiplusGfx->SetSmoothingMode(AntiAlias() ?
 		Gdiplus::SmoothingModeAntiAlias :
 		Gdiplus::SmoothingModeNone);
+
+	#endif
 
 	return GdiplusGfx;
 }

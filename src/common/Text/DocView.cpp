@@ -114,7 +114,7 @@ char16 *ConvertToCrLf(char16 *Text)
 
 //////////////////////////////////////////////////////////////////////////////////
 #include "lgi/common/Net.h"
-LDocumentEnv::LoadType LDefaultDocumentEnv::GetContent(LoadJob *&j)
+LDocumentEnv::LoadType LDefaultDocumentEnv::GetContent(LAutoPtr<LoadJob> &j)
 {
 	if (!j || !ValidStr(j->Uri))
 		return LoadError;

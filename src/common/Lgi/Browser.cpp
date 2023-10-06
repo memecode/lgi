@@ -230,7 +230,7 @@ public:
 		return Wnd->SetUri(Uri);
 	}
 
-	LoadType GetContent(LoadJob *&j)
+	LoadType GetContent(LAutoPtr<LoadJob> &j)
 	{
 		if (!j || !j->Uri)
 			return LoadError;

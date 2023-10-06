@@ -27,7 +27,7 @@ CreateRectRgn
 CreatePalette
 */
 
-#if 1 && defined(WIN32)
+#if false && defined(WIN32)
 #define GDI_LEAK_DETECT	1
 
 // Macros to redirect calls to our lib

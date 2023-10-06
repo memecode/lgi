@@ -189,7 +189,7 @@ LScreenDC::~LScreenDC()
 		{
 			SelectObject(hDC, d->hOldBitmap);
 			DeleteDC(hDC);
-			hDC = 0;
+			hDC = NULL;
 		}
 	}
 
@@ -202,6 +202,7 @@ LScreenDC::~LScreenDC()
 		ReleaseDC(d->hWnd, hDC);
 	}
 
+	hDC = NULL;
 	DeleteObj(d);
 }
 
@@ -219,12 +220,15 @@ void LScreenDC::SetClient(LRect *c)
 		SetWindowOrgEx(hDC, 0, 0, NULL);
 		SelectClipRgn(hDC, 0);
 		
+		#if 1
 		HRGN hRgn = CreateRectRgn(c->x1, c->y1, c->x2+1, c->y2+1);
 		if (hRgn)
 		{
+			LgiTrace("%s:%i HRGN=%p\n", _FL, hRgn);
 			SelectClipRgn(hDC, hRgn);
 			DeleteObject(hRgn);
 		}
+		#endif
 
 		SetWindowOrgEx(hDC, -c->x1, -c->y1, NULL);
 		d->Client = *c;
@@ -330,12 +334,15 @@ LRect LScreenDC::ClipRgn(LRect *Rgn)
 		if (Clip.y2 < Clip.y1)
 			Clip.y2 = Clip.y1-1;
 
+		#if 1
 		HRGN hRgn = CreateRectRgn(Clip.x1, Clip.y1, Clip.x2+1, Clip.y2+1);
 		if (hRgn)
 		{
+			LgiTrace("%s:%i HRGN=%p\n", _FL, hRgn);
 			SelectClipRgn(hDC, hRgn);
 			DeleteObject(hRgn);
 		}
+		#endif
 	}
 	else
 	{

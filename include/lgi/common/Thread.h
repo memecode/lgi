@@ -152,7 +152,7 @@ public:
 	void Stop();
 	void Attach(LThreadTarget *o);
 	void Detach(LThreadTarget *o);
-	virtual void AddJob(LThreadJob *j);
+	virtual void AddJob(LAutoPtr<LThreadJob> j);
 	virtual void DoJob(LThreadJob *j);
 	int Main();
 };

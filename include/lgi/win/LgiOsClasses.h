@@ -26,7 +26,14 @@ public:
 	HDC Get(HWND hWnd = NULL)
 	{
 		if (!hdc)
+		{
 			hdc = GetDC(hwnd = hWnd);
+			if (!hdc)
+			{
+				LError err(GetLastError());
+				LgiTrace("%s:%i - GetDC failed: %s\n", _FL, err.GetMsg().Get());
+			}
+		}
 		return hdc;
 	}
 

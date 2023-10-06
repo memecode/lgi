@@ -415,11 +415,11 @@ protected:
 	int				Flags;
 	int				PrevOp;
 	LRect			Clip;
-	LColourSpace	ColourSpace;
-	LBmpMem			*pMem;
-	LSurface		*pAlphaDC;
-	LPalette		*pPalette;
-	LApplicator		*pApp;
+	LColourSpace	ColourSpace = CsNone;
+	LBmpMem			*pMem = NULL;
+	LSurface		*pAlphaDC = NULL;
+	LPalette		*pPalette = NULL;
+	LApplicator		*pApp = NULL;
 	LApplicator		*pAppCache[GDC_CACHE_SIZE];
 	int				OriginX, OriginY;
 
@@ -430,8 +430,8 @@ protected:
 	uint32_t			LineReset;
 
 	#if WINNATIVE
-		OsPainter	hDC;
-		OsBitmap	hBmp;
+		OsPainter	hDC = NULL;
+		OsBitmap	hBmp = NULL;
 		LAutoPtr<Gdiplus::Graphics> GdiplusGfx;
 	#endif
 
@@ -959,6 +959,8 @@ protected:
 	virtual void OnCaptureScreen() {}
 
 public:
+	static size_t Instances;
+
 	/// Creates a memory bitmap
 	LMemDC
 	(

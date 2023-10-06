@@ -42,27 +42,21 @@ public:
 	}
 };
 
+size_t LMemDC::Instances = 0;
+
 LMemDC::LMemDC(int x, int y, LColourSpace cs, int Flags)
 {
+	Instances++;
 	d = new LMemDCPrivate;
-	ColourSpace = CsNone;
-	hBmp = 0;
-	hDC = 0;
-	pMem = 0;
 
 	if (x > 0 && y > 0)
-	{
 		Create(x, y, cs, Flags);
-	}
 }
 
 LMemDC::LMemDC(LSurface *pDC)
 {
+	Instances++;
 	d = new LMemDCPrivate;
-	ColourSpace = CsNone;
-	hBmp = 0;
-	hDC = 0;
-	pMem = 0;
 
 	if (pDC &&
 		Create(pDC->X(), pDC->Y(), pDC->GetColourSpace()) )
@@ -86,6 +80,7 @@ LMemDC::~LMemDC()
 {
 	Empty();
 	DeleteObj(d);
+	Instances--;
 }
 
 void LMemDC::SetClient(LRect *c)
@@ -97,12 +92,15 @@ void LMemDC::SetClient(LRect *c)
 			SetWindowOrgEx(hDC, 0, 0, NULL);
 			SelectClipRgn(hDC, 0);
 			
+			#if 1
 			HRGN hRgn = CreateRectRgn(c->x1, c->y1, c->x2+1, c->y2+1);
 			if (hRgn)
 			{
+				LgiTrace("%s:%i HRGN=%p\n", _FL, hRgn);
 				SelectClipRgn(hDC, hRgn);
 				DeleteObject(hRgn);
 			}
+			#endif
 
 			SetWindowOrgEx(hDC, -c->x1, -c->y1, NULL);
 		}
@@ -228,12 +226,15 @@ LRect LMemDC::ClipRgn(LRect *Rgn)
 		Clip.x2 = min(Rgn->x2 - Origin.x, pMem->x-1);
 		Clip.y2 = min(Rgn->y2 - Origin.y, pMem->y-1);
 
+		#if 1
 		HRGN hRgn = CreateRectRgn(Clip.x1, Clip.y1, Clip.x2+1, Clip.y2+1);
 		if (hRgn)
 		{
+			LgiTrace("%s:%i HRGN=%p\n", _FL, hRgn);
 			SelectClipRgn(hDC, hRgn);
 			DeleteObject(hRgn);
 		}
+		#endif
 	}
 	else
 	{
@@ -412,6 +413,7 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 						}
 					}
 
+					LAssert(hBmp == NULL);
 					hBmp = CreateDIBSection(hDC, d->Info, DIB_RGB_COLORS, &d->pBits, NULL, 0);
 					if (hBmp)
 					{
@@ -437,9 +439,9 @@ bool LMemDC::Create(int x, int y, LColourSpace Cs, int Flags)
 					}
 					else
 					{
-						DWORD err = GetLastError();
+						LError err(GetLastError());
 						#if 1
-						LAssert(!"Create bmp failed.");
+						LgiTrace("%s:%i - CreateDIBSection failed: %s.\n", _FL, err.GetMsg().Get());
 						#endif
 					}
 				}
@@ -526,7 +528,7 @@ void LMemDC::Empty()
 	if (hBmp)
 	{
 		DeleteObject(hBmp);
-		hBmp = 0;
+		hBmp = NULL;
 	}
 	DeleteObj(pMem);
 }

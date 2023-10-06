@@ -150,9 +150,10 @@ public:
 		}
 	};
 
-	LoadJob *NewJob()
+	LAutoPtr<LoadJob> NewJob()
 	{
-		return new LoadJob(this);
+		LAutoPtr<LoadJob> ptr(new LoadJob(this));
+		return ptr;
 	}
 
 	bool AttachView(LDocView *v)
@@ -191,7 +192,7 @@ public:
 	
 	/// Asks the env to get some data linked from the document, e.g. a css file or an iframe source etc.
 	/// If the GetContent implementation takes ownership of the job pointer then it should set 'j' to NULL.
-	virtual LoadType GetContent(LoadJob *&j) { return LoadNotImpl; }
+	virtual LoadType GetContent(LAutoPtr<LoadJob> &j) { return LoadNotImpl; }
 	/// After the env's thread loads the resource it calls this to pass it to the doc
 	void OnDone(LAutoPtr<LThreadJob> j);
 	
@@ -221,7 +222,7 @@ class LgiClass LDefaultDocumentEnv :
 	public LDocumentEnv
 {
 public:
-	LoadType GetContent(LoadJob *&j);
+	LoadType GetContent(LAutoPtr<LoadJob> &j);
 	bool OnNavigate(LDocView *Parent, const char *Uri);
 };
 

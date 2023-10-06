@@ -1370,17 +1370,17 @@ ssize_t LMime::LMimeText::LMimeDecode::Parse(LMimeBuf *Source, ParentState *Stat
 	LOG("%s:%i - Encoding=%s, MimeType=%s, Boundary=%s\n",
 		_FL, Encoding.Get(), MimeType.Get(), Boundary.Get());
 
-	LStream *Decoder = 0;
+	LAutoPtr<LStream> Decoder;
 	if (Encoding)
 	{
 		if (_stricmp(Encoding, MimeQuotedPrintable) == 0)
 		{
-			Decoder = new LMimeQuotedPrintableDecode(Mime->DataStore);
+			Decoder.Reset(new LMimeQuotedPrintableDecode(Mime->DataStore));
 			LOG("%s:%i - Using LMimeQuotedPrintableDecode\n", _FL);
 		}
 		else if (_stricmp(Encoding, MimeBase64) == 0)
 		{
-			Decoder = new LMimeBase64Decode(Mime->DataStore);
+			Decoder.Reset(new LMimeBase64Decode(Mime->DataStore));
 			LOG("%s:%i - Using LMimeBase64Decode\n", _FL);
 		}
 		else

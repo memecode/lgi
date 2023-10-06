@@ -84,6 +84,7 @@ LThreadWorker::LThreadWorker(LThreadTarget *First, const char *ThreadName) :
 LThreadWorker::~LThreadWorker()
 {
 	Stop();
+	Jobs.DeleteObjects();
 }
 
 void LThreadWorker::Stop()
@@ -124,14 +125,13 @@ void LThreadWorker::Detach(LThreadTarget *o)
 	Owners.Delete(o);
 }
 
-void LThreadWorker::AddJob(LThreadJob *j)
+void LThreadWorker::AddJob(LAutoPtr<LThreadJob> j)
 {
-	if (Lock(_FL))
+	if (j && Lock(_FL))
 	{
-		Jobs.Add(j);
-
 		if (!Owners.HasItem(j->Owner))
 			Attach(j->Owner);
+		Jobs.Add(j.Release());
 
 		Unlock();
 	}

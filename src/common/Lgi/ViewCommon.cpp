@@ -2823,33 +2823,34 @@ void LView::_Dump(int Depth)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 static LArray<LViewFactory*> *AllFactories = NULL;
 #if defined(WIN32)
-static HANDLE FactoryEvent;
+	static HANDLE FactoryEvent;
 #else
-static pthread_once_t FactoryOnce = PTHREAD_ONCE_INIT;
-static void GFactoryInitFactories()
-{
-	AllFactories = new LArray<LViewFactory*>;
-}
+	static pthread_once_t FactoryOnce = PTHREAD_ONCE_INIT;
+	static void GFactoryInitFactories()
+	{
+		AllFactories = new LArray<LViewFactory*>;
+	}
 #endif
 
 LViewFactory::LViewFactory()
 {
 	#if defined(WIN32)
-	char16 Name[64];
-	swprintf_s(Name, CountOf(Name), L"LgiFactoryEvent.%i", GetCurrentProcessId());
-	HANDLE h = CreateEventW(NULL, false, false, Name);
-	DWORD err = GetLastError();
-	if (err != ERROR_ALREADY_EXISTS)
-	{
-		FactoryEvent = h;
-		AllFactories = new LArray<LViewFactory*>;
-	}
-	else
-	{
-		LAssert(AllFactories != NULL);
-	}
+		char16 Name[64];
+		swprintf_s(Name, CountOf(Name), L"LgiFactoryEvent.%i", GetCurrentProcessId());
+		HANDLE h = CreateEventW(NULL, false, false, Name);
+		DWORD err = GetLastError();
+		if (err != ERROR_ALREADY_EXISTS)
+		{
+			FactoryEvent = h;
+			AllFactories = new LArray<LViewFactory*>;
+		}
+		else
+		{
+			LAssert(AllFactories != NULL);
+			CloseHandle(h);
+		}
 	#else
-	pthread_once(&FactoryOnce, GFactoryInitFactories);
+		pthread_once(&FactoryOnce, GFactoryInitFactories);
 	#endif
 
 	if (AllFactories)

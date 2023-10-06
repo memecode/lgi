@@ -1905,7 +1905,7 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 	pDC->Colour(LColour(255, 0, 255));
 	#else
 	LCss::ColorDef cBack = BackgroundColor();
-	// pDC->Colour(cBack.IsValid() ? (LColour)cBack : LColour(LC_WORKSPACE, 24));
+	pDC->Colour(cBack.IsValid() ? (LColour)cBack : LColour(L_WORKSPACE));
 	#endif
 	pDC->Rectangle(&r);
 	if (ExtraPx)

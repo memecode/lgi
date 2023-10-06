@@ -2543,7 +2543,7 @@ void LTag::Find(int TagType, LArray<LTag*> &Out)
 	}
 }
 
-void LTag::SetImage(const char *Uri, LSurface *Img)
+void LTag::SetImage(const char *Uri, LAutoPtr<LSurface> Img)
 {
 	if (Img)
 	{
@@ -2569,7 +2569,7 @@ void LTag::SetImage(const char *Uri, LSurface *Img)
 				}
 				else LgiTrace("%s:%i - SetImage can't promote 8bit image to 32bit.\n", _FL);
 			}
-			else Image.Reset(Img);
+			else Image = Img;
 			
 			LRect r = XSubRect();
 			if (r.Valid())
@@ -2652,7 +2652,7 @@ void LTag::LoadImage(const char *Uri)
 		return;
 	}
 
-	LDocumentEnv::LoadJob *j = Html->Environment->NewJob();
+	auto j = Html->Environment->NewJob();
 	if (j)
 	{
 		LAssert(Html != NULL);
@@ -2663,17 +2663,15 @@ void LTag::LoadImage(const char *Uri)
 
 		// LgiTrace("%s:%i - new job %p, %p\n", _FL, j, j->UserData);
 
-		LDocumentEnv::LoadType Result = Html->Environment->GetContent(j);
+		auto Result = Html->Environment->GetContent(j);
 		if (Result == LDocumentEnv::LoadImmediate)
 		{
-			SetImage(Uri, j->pDC.Release());
+			SetImage(Uri, j->pDC);
 		}
 		else if (Result == LDocumentEnv::LoadDeferred)
 		{
 			Html->d->DeferredLoads++;
 		}
-				
-		DeleteObj(j);
 	}
 	#endif
 }
@@ -2696,9 +2694,9 @@ void LTag::LoadImages()
 	}
 }
 
-void LTag::ImageLoaded(char *uri, LSurface *Img, int &Used)
+void LTag::ImageLoaded(char *uri, LAutoPtr<LSurface> Img, int &Used)
 {
-	const char *Uri = 0;
+	const char *Uri = NULL;
 	if (!Image &&
 		Get("src", Uri))
 	{
@@ -2710,7 +2708,8 @@ void LTag::ImageLoaded(char *uri, LSurface *Img, int &Used)
 			}
 			else
 			{
-				SetImage(Uri, new LMemDC(Img));
+				LAutoPtr<LSurface> Copy(new LMemDC(Img));
+				SetImage(Uri, Copy);
 			}
 			Used++;
 		}
@@ -2872,7 +2871,7 @@ void LTag::SetStyle()
 				!Stricmp(Type, "text/css") &&
 				!Html->CssHref.Find(Href))
 			{
-				LDocumentEnv::LoadJob *j = Html->Environment->NewJob();
+				auto j = Html->Environment->NewJob();
 				if (j)
 				{
 					LAssert(Html != NULL);
@@ -2905,8 +2904,6 @@ void LTag::SetStyle()
 					{
 						Html->d->DeferredLoads++;
 					}
-
-					DeleteObj(j);
 				}
 			}
 			break;
@@ -3713,6 +3710,16 @@ bool LTag::ConvertToText(TextConvertState &State)
 		case TAG_OL:
 			DepthInc = 2;
 			break;
+		case TAG_IMG:
+		{
+			const char *ImgSrc = NULL;
+			Get("src", ImgSrc);
+			if (ImgSrc)
+				State.Write(LString::Fmt("[img=%s]", ImgSrc));
+			else
+				State.Write("[img]");
+			break;
+		}
 	}
 
 	if (TagId != TAG_SCRIPT &&
@@ -7367,7 +7374,7 @@ LMessage::Result LHtml::OnEvent(LMessage *Msg)
 							{
 								if (j->pDC)
 								{
-									r->SetImage(j->Uri, j->pDC.Release());
+									r->SetImage(j->Uri, j->pDC);
 									ViewWidth = 0;
 									Update = true;
 								}
@@ -7376,7 +7383,7 @@ LMessage::Result LHtml::OnEvent(LMessage *Msg)
 									LAutoPtr<LSurface> pDC(GdcD->Load(dynamic_cast<LStream*>(j->Stream.Get())));
 									if (pDC)
 									{
-										r->SetImage(j->Uri, pDC.Release());
+										r->SetImage(j->Uri, pDC);
 										ViewWidth = 0;
 										Update = true;
 									}
@@ -8488,7 +8495,7 @@ void LHtml::OnMouseClick(LMouse &m)
 										char File[MAX_PATH_LEN] = "";
 										if (Environment)
 										{
-											LDocumentEnv::LoadJob *j = Environment->NewJob();
+											auto j = Environment->NewJob();
 											if (j)
 											{
 												j->Uri.Reset(WideToUtf8(cid));
@@ -8506,8 +8513,6 @@ void LHtml::OnMouseClick(LMouse &m)
 												{
 													d->DeferredLoads++;
 												}
-												
-												DeleteObj(j);
 											}
 										}
 										
@@ -8896,7 +8901,7 @@ bool LHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocV
 		return false;
 	}
 
-	if (!_stricmp(MimeType, "text/html"))
+	if (!Stricmp(MimeType, "text/html"))
 	{
 		// We can handle this type...
 		LArray<LTag*> Imgs;
@@ -8942,7 +8947,7 @@ bool LHtml::GetFormattedContent(const char *MimeType, LString &Out, LArray<LDocV
 		// Export the HTML, including the CID's from the first step
 		Out = Name();
 	}
-	else if (!_stricmp(MimeType, "text/plain"))
+	else if (!Stricmp(MimeType, "text/plain"))
 	{
 		// Convert DOM tree down to text instead...
 		LStringPipe p(512);

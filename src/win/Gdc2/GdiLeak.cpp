@@ -48,7 +48,19 @@ public:
 			}
 		}
 	}
-} Cleanup;
+}	Cleanup;
+
+LgiFunc uint64_t LCurrentTime();
+static void Report()
+{
+	static uint64_t ts = 0;
+	auto now = LCurrentTime();
+	if (now - ts >= 1000)
+	{
+		ts = now;
+		LgiTrace("%s:%i - GdiHandle: " LPrintfSizeT "\n", _FL, Handles.Length());
+	}
+}
 
 static HndInfo *GetHandle(HANDLE h)
 {
@@ -73,6 +85,8 @@ static void AddHandle(const char *f, int l, HANDLE hnd, HndType t)
 	h.File = f;
 	h.Line = l;
 	h.Hnd = hnd;
+
+	Report();
 }
 
 static void DeleteHandle(const char *f, int l, HANDLE hnd, HndType t)
@@ -91,6 +105,8 @@ static void DeleteHandle(const char *f, int l, HANDLE hnd, HndType t)
 			break;
 		}
 	}
+
+	Report();
 
 	if (!h)
 	{

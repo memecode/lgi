@@ -23,7 +23,9 @@ class ImageLoader : public LEventTargetThread, public Progress
 	LAutoPtr<LStream> In;
 
 public:
-	ImageLoader(LEventSinkI *s) : LEventTargetThread("ImageLoader")
+	ImageLoader(LEventSinkI *s) :
+		LEventTargetThread("ImageLoader"),
+		Sink(s)
 	{
 	}
 
@@ -461,7 +463,7 @@ bool LRichTextPriv::ImageBlock::Load(const char *Src)
 		if (!Env)
 			return false;
 		
-		LDocumentEnv::LoadJob *j = Env->NewJob();
+		auto j = Env->NewJob();
 		if (!j)
 			return false;
 		
@@ -470,7 +472,7 @@ bool LRichTextPriv::ImageBlock::Load(const char *Src)
 		j->Pref = LDocumentEnv::LoadJob::FmtStream;
 		j->UserUid = d->View->GetDocumentUid();
 
-		LDocumentEnv::LoadType Result = Env->GetContent(j);
+		auto Result = Env->GetContent(j);
 		if (Result == LDocumentEnv::LoadImmediate)
 		{
 			StreamMimeType = j->MimeType;
@@ -491,8 +493,6 @@ bool LRichTextPriv::ImageBlock::Load(const char *Src)
 		{
 			LAssert(!"Impl me?");
 		}
-		
-		DeleteObj(j);
 	}
 	else if (LFileExists(Source))
 	{
@@ -740,6 +740,7 @@ void LRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 			
 	// Paint margins, borders and padding...
 	LRect r = Pos;
+
 	r.x1 -= Margin.x1;
 	r.y1 -= Margin.y1;
 	r.x2 -= Margin.x2;
@@ -754,6 +755,8 @@ void LRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 	Ctx.DrawBox(r, Margin, Ctx.Colours[Unselected].Back);
 	Ctx.DrawBox(r, Border, BorderCol);
 	Ctx.DrawBox(r, Padding, Ctx.Colours[Unselected].Back);
+
+	LRegion unpainted(r);
 
 	if (!DisplayImg &&
 		SourceImg &&
@@ -777,10 +780,13 @@ void LRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 			Ctx.pDC->Rectangle(&Bounds);
 
 			LRect rr(0, 0, Src->X()-1, SourceValid.y2 / Scale);
-			Ctx.pDC->Blt(r.x1, r.y1, Src, &rr);
+			Ctx.pDC->Blt(ImgPos.x1, ImgPos.y1, Src, &rr);
+			rr.Offset(ImgPos.x1, ImgPos.y1);
+			unpainted.Subtract(&rr);
 		}
 		else
 		{
+			LRect rr;
 			if (Ctx.Type == LRichTextPriv::Selected)
 			{
 				if (!SelectImg &&
@@ -796,12 +802,17 @@ void LRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 					SelectImg->Op(Op);
 				}
 
-				Ctx.pDC->Blt(r.x1, r.y1, SelectImg);
+				rr = SelectImg->Bounds();
+				Ctx.pDC->Blt(ImgPos.x1, ImgPos.y1, SelectImg);
 			}
 			else
 			{
-				Ctx.pDC->Blt(r.x1, r.y1, Src);
+				rr = Src->Bounds();
+				Ctx.pDC->Blt(ImgPos.x1, ImgPos.y1, Src);
 			}
+
+			rr.Offset(ImgPos.x1, ImgPos.y1);
+			unpainted.Subtract(&rr);
 		}
 	}
 	else
@@ -828,6 +839,8 @@ void LRichTextPriv::ImageBlock::OnPaint(PaintContext &Ctx)
 		Ctx.pDC->Line(Cx + Sz, Cy - Sz, Cx - Sz, Cy + Sz);
 		Ctx.pDC->Line(Cx + Sz - 1, Cy - Sz, Cx - Sz, Cy + Sz - 1);
 		Ctx.pDC->Line(Cx + Sz, Cy - Sz + 1, Cx - Sz + 1, Cy + Sz);
+
+		unpainted.Subtract(&ImgPos);
 	}
 
 	ImgSelected = Ctx.SelectAfterPaint(this);

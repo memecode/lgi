@@ -220,6 +220,11 @@ public:
 			
 			return _Write(start, (int) (end - start));
 		}
+
+		ssize_t Write(LString s)
+		{
+			return Write(s.Get(), s.Length());
+		}
 		
 		ssize_t GetPrev()
 		{
@@ -336,10 +341,10 @@ public:
 	// Images
 	bool ImageResized = false;
 	LAutoPtr<LSurface> Image;
-	void SetImage(const char *uri, LSurface *i);
+	void SetImage(const char *uri, LAutoPtr<LSurface> Img);
 	void LoadImage(const char *Uri); // Load just this URI
 	void LoadImages(); // Recursive load all image URI's
-	void ImageLoaded(char *uri, LSurface *img, int &Used);
+	void ImageLoaded(char *uri, LAutoPtr<LSurface> Img, int &Used);
 	void ClearToolTips();
 
 	// Table stuff

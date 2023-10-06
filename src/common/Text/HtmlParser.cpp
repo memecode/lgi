@@ -999,7 +999,7 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 						LVariant Src;
 						if (Elem->GetValue("src", Src) && View && View->GetEnv())
 						{
-							LDocumentEnv::LoadJob *j = View->GetEnv()->NewJob();
+							auto j = View->GetEnv()->NewJob();
 							if (j)
 							{
 								j->Uri.Reset(Src.ReleaseStr());
@@ -1009,7 +1009,7 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 
 								// LgiTrace("%s:%i - new job %p, %p\n", _FL, j, j->UserData);
 
-								LDocumentEnv::LoadType Result = View->GetEnv()->GetContent(j);
+								auto Result = View->GetEnv()->GetContent(j);
 								if (Result == LDocumentEnv::LoadImmediate)
 								{
 									LStreamI *s = j->GetStream();
@@ -1035,7 +1035,6 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 										}
 									}
 								}
-								DeleteObj(j);
 							}
 						}
 					}

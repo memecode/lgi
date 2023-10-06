@@ -720,7 +720,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 			LStringPipe p;
 			Sz.ToString(p);
 			LgiTrace("%s:%i - Couldn't resolve css='%s' to a valid height.\n", _FL, p.NewLStr().Get());
-			LAssert(!"What now?");
+			return false;
 		}
 	
 		LTypeFace::d->IsSymbol = LTypeFace::d->_Face &&
@@ -1446,8 +1446,8 @@ void LFont::_Draw(LSurface *pDC, int x, int y, OsChar *Str, int Len, LRect *r, L
 	}
 	else
 	{
-		DWORD e = GetLastError();
-		LAssert(0);
+		LError err(GetLastError());
+		LgiTrace("%s:%i - No hOldFont? %s\n", _FL, err.GetMsg().Get());
 	}
 	pDC->EndDC();
 
