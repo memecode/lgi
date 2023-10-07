@@ -141,6 +141,7 @@ public:
 	const char *GetExeArgs();
 	const char *GetIncludePaths();
 	const char *GetPreDefinedValues();
+	const char *GetCompileOptions();
 
 	LXmlTag *Create(char *Tag);
 	void Empty();

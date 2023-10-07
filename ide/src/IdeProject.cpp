@@ -549,6 +549,12 @@ public:
 					sDefines[Cfg] += s;
 				}
 			}
+			
+			// Get the compile options:
+			auto CompileOpts = d->Settings.GetStr(ProjCompileOptions, NULL, Platform);
+			if (ValidStr(CompileOpts))
+			{
+			}
 		
 			// Collect all dependencies, output their lib names and paths
 			LString PLibPaths = d->Settings.GetStr(ProjLibraryPaths, NULL, Platform);
@@ -2642,6 +2648,11 @@ const char *IdeProject::GetIncludePaths()
 const char *IdeProject::GetPreDefinedValues()
 {
 	return d->Settings.GetStr(ProjDefines);
+}
+
+const char *IdeProject::GetCompileOptions()
+{
+	return d->Settings.GetStr(ProjCompileOptions);
 }
 
 const char *IdeProject::GetExeArgs()

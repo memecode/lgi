@@ -10,6 +10,7 @@ enum ProjSetting
 	ProjExe,
 	ProjArgs,
 	ProjDebugAdmin,
+	ProjCompileOptions,
 	ProjDefines,
 	ProjCompiler,
 	ProjCCrossCompiler,

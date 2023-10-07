@@ -133,6 +133,7 @@ SettingInfo AllSettings[] =
 	{ProjInitDir,				GV_STRING,		"InitialDir",			sDebug,		{SF_CROSSPLATFORM|SF_FOLDER_SELECT}},
 	
 	{ProjDefines,				GV_STRING,		"Defines",				sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
+	{ProjCompileOptions,		GV_STRING,		"Options",				sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
 	{ProjIncludePaths,			GV_STRING,		"IncludePaths",			sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
 	{ProjSystemIncludes,		GV_STRING,		"SystemIncludes",		sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC|SF_PLATFORM_SPECIFC}},
 	{ProjLibraries,				GV_STRING,		"Libraries",			sBuild,		{SF_MULTILINE|SF_CONFIG_SPECIFIC}},
