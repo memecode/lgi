@@ -1874,18 +1874,18 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 	
 	LRect r = Areas[LRichTextEdit::ContentArea];
 	#if defined(WINDOWS) && !DEBUG_NO_DOUBLE_BUF
-	LMemDC Mem;
-	if (!Mem.Create(r.X(), r.Y(), pDC->GetColourSpace()))
-	{
-		LAssert(!"MemDC creation failed.");
-		return;
-	}
-	LSurface *pScreen = pDC;
-	pDC = &Mem;
-	r.Offset(-r.x1, -r.y1);
+		LMemDC Mem;
+		if (!Mem.Create(r.X(), r.Y(), pDC->GetColourSpace()))
+		{
+			LAssert(!"MemDC creation failed.");
+			return;
+		}
+		LSurface *pScreen = pDC;
+		pDC = &Mem;
+		r.Offset(-r.x1, -r.y1);
 	#else
-	pDC->GetOrigin(Origin.x, Origin.y);
-	pDC->ClipRgn(&r);
+		pDC->GetOrigin(Origin.x, Origin.y);
+		pDC->ClipRgn(&r);
 	#endif
 
 	ScrollOffsetPx = ScrollY ? (int)(ScrollY->Value() * ScrollLinePx) : 0;
@@ -1896,17 +1896,20 @@ void LRichTextPriv::Paint(LSurface *pDC, LScrollBar *&ScrollY)
 
 	r.Set(0, 0, DocumentExtent.x-1, DocumentExtent.y-1);
 
-	// Fill the padding...
-	LCssTools ct(this, Font);
-	r = ct.PaintPadding(pDC, r);
-
-	// Fill the background...
+	// Background colour
 	#if DEBUG_COVERAGE_CHECK
-	pDC->Colour(LColour(255, 0, 255));
+	LColour Workspace(255, 0, 255);
 	#else
 	LCss::ColorDef cBack = BackgroundColor();
-	pDC->Colour(cBack.IsValid() ? (LColour)cBack : LColour(L_WORKSPACE));
+	LColour Workspace = cBack.IsValid() ? (LColour)cBack : LColour(L_WORKSPACE);
 	#endif
+
+	// Fill the padding...
+	LCssTools ct(this, Font);
+	r = ct.PaintPadding(pDC, r, &Workspace);
+
+	// Fill the background...
+	pDC->Colour(Workspace);
 	pDC->Rectangle(&r);
 	if (ExtraPx)
 		pDC->Rectangle(0, DocumentExtent.y, DocumentExtent.x-1, DocumentExtent.y+ExtraPx);

@@ -323,7 +323,7 @@ LRect LCssTools::PaintBorder(LSurface *pDC, LRect &in)
 	return Content;
 }
 
-LRect LCssTools::PaintPadding(LSurface *pDC, LRect &in)
+LRect LCssTools::PaintPadding(LSurface *pDC, LRect &in, LColour *DefaultColour)
 {
 	LRect Content = in;
 	if (!Css)
@@ -334,7 +334,7 @@ LRect LCssTools::PaintPadding(LSurface *pDC, LRect &in)
 	if (r != Content)
 	{
 		// Draw the padding in the background colour
-		LColour Background = GetBack();
+		LColour Background = GetBack(DefaultColour);
 		pDC->Colour(Background);
 
 		if (r.x1 > Content.x1)

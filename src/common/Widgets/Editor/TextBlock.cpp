@@ -11,10 +11,9 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 LRichTextPriv::StyleText::StyleText(const StyleText *St)
 {
-	Emoji = St->Emoji;
-	Style = NULL;
+	Emoji   = St->Emoji;
 	Element = St->Element;
-	Param = St->Param;
+	Param   = St->Param;
 	if (St->Style)
 		SetStyle(St->Style);
 	Add((uint32_t*)&St->ItemAt(0), St->Length());
@@ -23,7 +22,6 @@ LRichTextPriv::StyleText::StyleText(const StyleText *St)
 LRichTextPriv::StyleText::StyleText(const uint32_t *t, ssize_t Chars, LNamedStyle *style)
 {
 	Emoji = false;
-	Style = NULL;
 	Element = CONTENT;
 	if (style)
 		SetStyle(style);

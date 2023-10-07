@@ -150,51 +150,52 @@ inline int32 LgiUtf8To32(uint8_t *&i, ssize_t &Len)
 }
 
 /// Convert a single utf-32 char to utf-8
-inline bool LgiUtf32To8(uint32_t c, uint8_t *&i, ssize_t &Len)
+inline bool LgiUtf32To8(uint32_t u32, uint8_t *&outBuf, ssize_t &outBufSize)
 {
-	if ((c & ~0x7f) == 0)
+	if ((u32 & ~0x7f) == 0)
 	{
-		if (Len > 0)
+		if (outBufSize > 0)
 		{
-			*i++ = c;
-			Len--;
+			*outBuf++ = u32;
+			outBufSize--;
 			return true;
 		}
 	}
-	else if ((c & ~0x7ff) == 0)
+	else if ((u32 & ~0x7ff) == 0)
 	{
-		if (Len > 1)
+		if (outBufSize > 1)
 		{
-			*i++ = 0xc0 | (c >> 6);
-			*i++ = 0x80 | (c & 0x3f);
-			Len -= 2;
+			*outBuf++ = 0xc0 | (u32 >> 6);
+			*outBuf++ = 0x80 | (u32 & 0x3f);
+			outBufSize -= 2;
 			return true;
 		}
 	}
-	else if ((c & 0xffff0000) == 0)
+	else if ((u32 & 0xffff0000) == 0)
 	{
-		if (Len > 2)
+		if (outBufSize > 2)
 		{
-			*i++ = 0xe0 | (c >> 12);
-			*i++ = 0x80 | ((c & 0x0fc0) >> 6);
-			*i++ = 0x80 | (c & 0x3f);
-			Len -= 3;
+			*outBuf++ = 0xe0 | (u32 >> 12);
+			*outBuf++ = 0x80 | ((u32 & 0x0fc0) >> 6);
+			*outBuf++ = 0x80 | (u32 & 0x3f);
+			outBufSize -= 3;
 			return true;
 		}
 	}
 	else
 	{
-		if (Len > 3)
+		if (outBufSize > 3)
 		{
-			*i++ = 0xf0 | (c >> 18);
-			*i++ = 0x80 | ((c&0x3f000) >> 12);
-			*i++ = 0x80 | ((c&0xfc0) >> 6);
-			*i++ = 0x80 | (c&0x3f);
-			Len -= 4;
+			*outBuf++ = 0xf0 | (u32 >> 18);
+			*outBuf++ = 0x80 | ((u32 & 0x3f000) >> 12);
+			*outBuf++ = 0x80 | ((u32 & 0xfc0) >> 6);
+			*outBuf++ = 0x80 | (u32 & 0x3f);
+			outBufSize -= 4;
 			return true;
 		}
 	}
 
+	LAssert(!"Buffer size too small");
 	return false;
 }
 

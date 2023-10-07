@@ -435,7 +435,7 @@ public:
 	/// This is a run of text, all of the same style
 	class StyleText : public LArray<uint32_t>
 	{
-		LNamedStyle *Style; // owned by the CSS cache
+		LNamedStyle *Style = NULL; // owned by the CSS cache
 	
 	public:
 		ColourPair Colours;

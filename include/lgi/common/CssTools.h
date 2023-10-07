@@ -68,7 +68,7 @@ public:
 
 	/// Paint the CSS padding
 	/// \returns the content area within the padding
-	LRect PaintPadding(LSurface *pDC, LRect &in);
+	LRect PaintPadding(LSurface *pDC, LRect &in, LColour *DefaultColour = NULL);
 	
 	LRect PaintBorderAndPadding(LSurface *pDC, LRect &in)
 	{

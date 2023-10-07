@@ -194,11 +194,11 @@ public:
 				(wchars < 0 && utf32[i]);
 				i++)
 			{
-				uint8_t *p = utf8;
-				ssize_t in = 1;
-				if (!LgiUtf32To8(utf32[i], p, in))
+				uint8_t *out = utf8;
+				ssize_t outBufSize = sizeof(utf8);
+				if (!LgiUtf32To8(utf32[i], out, outBufSize))
 					break;
-				bytes += p - utf8;
+				bytes += out - utf8;
 			}
 			
 			// Create memory buffer:
