@@ -57,6 +57,10 @@ protected:
 		/// off the end of the structure using malloc. This must always
 		/// be the last element in the struct.
 		char Str[1];
+
+		/// Ptr to the NULL char at the end.
+		char *End() { return Str + Len; }
+
 	}	*Str;
 
 	inline void _strip(LString &ret, const char *set, bool left, bool right)
@@ -207,16 +211,17 @@ public:
 				
 			// Convert string:
 			uint8_t *p = (uint8_t*) Str->Str;
+			auto end = p + Str->Len;
 			for (ptrdiff_t i=0;
 				(wchars >= 0 && i < wchars) ||
 				(wchars < 0 && utf32[i]);
 				i++)
 			{
-				ssize_t in = 1;
-				if (!LgiUtf32To8(utf32[i], p, in))
+				ssize_t outBufSize = end - p;
+				if (!LgiUtf32To8(utf32[i], p, outBufSize))
 					break;
 			}
-			assert((char*)p == Str->Str + Str->Len);
+			assert((char*)p == Str->End());
 			*p = 0; // NULL terminate string
 		}
 		else assert(!"No valid mapping for UTF32 to char16?");
@@ -483,7 +488,7 @@ public:
 	{
 		if (Str == NULL ||
 			s < Str->Str ||
-			s > Str->Str + Str->Len)
+			s > Str->End())
 		{
 			Empty();
 			Set(s);
@@ -873,7 +878,7 @@ public:
 			}
 
 			// Copy any trailer characters
-			char *End = Str->Str + Str->Len;
+			char *End = Str->End();
 			if (In < End)
 			{
 				ptrdiff_t Bytes = End - In;
