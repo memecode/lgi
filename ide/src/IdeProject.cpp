@@ -491,6 +491,7 @@ public:
 		LString sDefines[BuildMax];
 		LString sLibs[BuildMax];
 		LString sIncludes[BuildMax];
+		LString sCompilerOpts[BuildMax];
 		const char *ExtraLinkFlags = NULL;
 		const char *ExeFlags = NULL;
 		if (Platform == PlatformWin)
@@ -551,9 +552,10 @@ public:
 			}
 			
 			// Get the compile options:
-			auto CompileOpts = d->Settings.GetStr(ProjCompileOptions, NULL, Platform);
-			if (ValidStr(CompileOpts))
+			auto compOpts = d->Settings.GetStr(ProjCompileOptions, NULL, Platform);
+			if (ValidStr(compOpts))
 			{
+				sCompilerOpts[Cfg].Printf(" %s", compOpts);
 			}
 		
 			// Collect all dependencies, output their lib names and paths
@@ -715,28 +717,32 @@ public:
 		// Debug specific
 		m.Print("\n"
 				"ifeq ($(Build),Debug)\n"
-				"	CFlags += -g\n"
-				"	CppFlags += -g\n"
+				"	CFlags += -g%s\n"
+				"	CppFlags += -g%s\n"
 				"	Tag = d\n"
 				"	Defs = -D_DEBUG %s\n"
 				"	Libs = %s\n"
 				"	Inc = %s\n",
-					CastEmpty(sDefines [BuildDebug].Get()),
-					CastEmpty(sLibs    [BuildDebug].Get()),
-					CastEmpty(sIncludes[BuildDebug].Get()));
+			CastEmpty(sCompilerOpts[BuildDebug].Get()),
+			CastEmpty(sCompilerOpts[BuildDebug].Get()),
+			CastEmpty(sDefines     [BuildDebug].Get()),
+			CastEmpty(sLibs        [BuildDebug].Get()),
+			CastEmpty(sIncludes    [BuildDebug].Get()));
 		
 		// Release specific
 		m.Print("else\n"
-				"	CFlags += -s -Os\n"
-				"	CppFlags += -s -Os\n"
+				"	CFlags += -s -Os%s\n"
+				"	CppFlags += -s -Os%s\n"
 				"	Defs = %s\n"
 				"	Libs = %s\n"
 				"	Inc = %s\n"
 				"endif\n"
 				"\n",
-					CastEmpty(sDefines [BuildRelease].Get()),
-					CastEmpty(sLibs    [BuildRelease].Get()),
-					CastEmpty(sIncludes[BuildRelease].Get()));
+			CastEmpty(sCompilerOpts[BuildRelease].Get()),
+			CastEmpty(sCompilerOpts[BuildRelease].Get()),
+			CastEmpty(sDefines     [BuildRelease].Get()),
+			CastEmpty(sLibs        [BuildRelease].Get()),
+			CastEmpty(sIncludes    [BuildRelease].Get()));
 		
 		if (Files.Length())
 		{

@@ -123,6 +123,7 @@
     <ClInclude Include="..\src\IdeDoc.h" />
     <ClInclude Include="..\src\IdeDocPrivate.h" />
     <ClInclude Include="..\src\IdeProject.h" />
+    <ClInclude Include="..\src\IdeProjectSettings.h" />
     <ClInclude Include="..\src\LgiIde.h" />
     <ClInclude Include="..\src\ProjectNode.h" />
     <ClInclude Include="..\src\PythonParser.h" />
