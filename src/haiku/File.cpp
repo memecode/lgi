@@ -1010,7 +1010,7 @@ LDateTime LDirectory::TsToDateTime(uint64_t timeStamp, bool convertToLocalTz)
 		struct tm out;
 		if (localtime_r(&seconds, &out))
 		{
-			dt.Set(&out);
+			dt.Set(&out, true);
 		}
 	
 	#else

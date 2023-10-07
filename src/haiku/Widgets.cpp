@@ -107,9 +107,9 @@ void LDialog::OnPosChange()
 	else printf("%s:%i - children=%i\n", _FL, (int)Children.Length());
 }
 
-bool LDialog::LoadFromResource(int Resource, char *TagList)
+bool LDialog::LoadFromResource(int Resource, const char *TagList)
 {
-	LAutoString n;
+	LString n;
 	LRect p;
 	LProfile Prof("LDialog::LoadFromResource");
 
