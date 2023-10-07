@@ -156,7 +156,7 @@ public:
 			LSleep(1);
 	}
 	
-	void Add(LDocumentEnv::LoadJob *j)
+	void Add(LAutoPtr<LDocumentEnv::LoadJob> j)
 	{
 		if (Lock(_FL))
 		{
@@ -264,7 +264,7 @@ class AppWnd : public LWindow, public LDefaultDocumentEnv
 	LAutoPtr<HtmlImageLoader> Worker;
 	LAutoPtr<LEmojiFont> Emoji;
 
-	LoadType GetContent(LoadJob *&j)
+	LoadType GetContent(LAutoPtr<LoadJob> &j)
 	{
 		LUri u(j->Uri);
 		if (!u.sProtocol)
@@ -299,7 +299,6 @@ class AppWnd : public LWindow, public LDefaultDocumentEnv
 		if (!Worker)
 			Worker.Reset(new HtmlImageLoader);
 		Worker->Add(j);
-		j = NULL;
 		return LoadDeferred;
 		#else
 		return LoadNotImpl; // GDefaultDocumentEnv::GetContent(j);

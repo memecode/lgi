@@ -577,7 +577,7 @@ LFilter::IoStatus GdcLibTiff::ReadImage(LSurface *pDC, LStream *In)
 									p->SetSize(256);
 									for (int i=0; i<256; i++)
 									{
-										GdcRGB *c = (*p)[i];
+										auto c = (*p)[i];
 										if (c)
 										{
 											c->r = rmap[i] >> 8;
@@ -853,7 +853,7 @@ LFilter::IoStatus GdcLibTiff::WriteImage(LStream *Out, LSurface *pDC)
 					int colours = 1 << bits;
 					for (int i=0; i<colours; i++)
 					{
-						GdcRGB *rgb = (*p)[i];
+						auto rgb = (*p)[i];
 						if (rgb)
 						{
 							rmap[i] = G8bitTo16bit(rgb->r);
