@@ -11,7 +11,7 @@ public:
 
 	virtual bool Run() = 0;
 
-	bool FAIL(char *File, int Line, char *Msg)
+	bool FAIL(const char *File, int Line, const char *Msg)
 	{
 		LAssert(0);
 		printf("%s:%i - Error in %s: %s\n", File, Line, Name(), Msg);

@@ -205,7 +205,7 @@ bool LContainers::Run()
 		}
 		IntMap.Delete(45);
 
-		LHashTbl<StrKey<char,true>,int> CaseSenMap;
+		LHashTbl<ConstStrKey<char,true>,int> CaseSenMap;
 		CaseSenMap.Add("Abc", 34);
 		CaseSenMap.Add("abc", 23);
 		if (CaseSenMap.Length() != 2)
@@ -215,7 +215,7 @@ bool LContainers::Run()
 			printf("Case: %s -> %i\n", i.key, i.value);
 		}
 
-		LHashTbl<StrKey<char,false>,int> CaseInsenMap;
+		LHashTbl<ConstStrKey<char,false>,int> CaseInsenMap;
 		CaseInsenMap.Add("Abc", 34);
 		CaseInsenMap.Add("abc", 23);
 		if (CaseInsenMap.Length() != 1)
@@ -232,7 +232,7 @@ bool LContainers::Run()
 			printf("ConstWide: %S -> %i\n", i.key, i.value);
 		}
 
-		LHashTbl<StrKeyPool<char,false>,int> PoolMap;
+		LHashTbl<ConstStrKeyPool<char,false>,int> PoolMap;
 		PoolMap.Add("Asd", 123);
 		PoolMap.Add("Def", 124);
 		for (auto i : PoolMap)

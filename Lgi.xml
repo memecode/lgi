@@ -134,9 +134,9 @@
 				<Node Name="Posix" Type="1" Platforms="15" Id="1">
 					<Node File=".\src\posix\SubProcess.cpp" Type="2" Platforms="14" />
 				</Node>
-				<Node File=".\include\lgi\common\SubProcess.h" Type="3" Platforms="15" />
+				<Node File="./include/lgi/common/SubProcess.h" Type="3" Platforms="15" />
 				<Node Name="Win" Type="1" Platforms="15" Id="2">
-					<Node File=".\src\win\Lgi\SubProcess.cpp" Type="2" Platforms="1" />
+					<Node File="./src/win/Lgi/SubProcess.cpp" Type="2" Platforms="1" />
 				</Node>
 			</Node>
 			<Node Name="Resources" Type="1" Platforms="15" Open="0" Id="28">
@@ -325,16 +325,17 @@
 			<Node File="./src/common/Lgi/Rand.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Text" Type="1" Platforms="15" Open="0" Id="61">
-			<Node File=".\src\common\Text\String.cpp" Type="2" Platforms="15" />
 			<Node File="./include/lgi/common/LgiString.h" Type="3" Platforms="15" />
-			<Node File=".\include\lgi\common\StringClass.h" Type="3" Platforms="15" />
-			<Node File=".\include\lgi\common\TextFile.h" Type="3" Platforms="15" />
-			<Node File=".\src\common\Text\Token.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Text\Unicode.cpp" Type="2" Platforms="15" />
-			<Node File=".\include\lgi\common\Unicode.h" Type="3" Platforms="15" />
-			<Node File=".\src\common\Text\Utf8.cpp" Type="2" Platforms="15" />
-			<Node File=".\src\common\Text\XmlTree.cpp" Type="2" Platforms="15" />
-			<Node File=".\include\lgi\common\XmlTree.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Text/String.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/StringClass.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Text/TextConvert.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/TextFile.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Text/Token.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Text/Unicode.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/Unicode.h" Type="3" Platforms="15" />
+			<Node File="./src/common/Text/Utf8.cpp" Type="2" Platforms="15" />
+			<Node File="./src/common/Text/XmlTree.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/XmlTree.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Widgets" Type="1" Platforms="15" Open="1" Id="62">
 			<Node Name="Common" Type="1" Platforms="15" Open="0" Id="63">
@@ -488,11 +489,7 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Executable>
-				<Linux />
-			</Executable>
-			<CCrossCompiler />
-			<CppCrossCompiler />
+			<Executable />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -563,7 +560,6 @@ gnu
 network
 be</Release>
 				</Haiku>
-				<All />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -576,8 +572,10 @@ be</Release>
 			</TargetType>
 			<Defines>
 				<All>
-					<Debug>LGI_LIBRARY</Debug>
-					<Release>LGI_LIBRARY</Release>
+					<Debug>LGI_LIBRARY
+LGI_UNIT_TESTS</Debug>
+					<Release>LGI_LIBRARY
+LGI_UNIT_TESTS</Release>
 				</All>
 				<Haiku>
 					<Debug>POSIX
@@ -585,39 +583,16 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
-				<Linux />
 			</Defines>
-			<LibraryPaths>
-				<All />
-				<Linux />
-			</LibraryPaths>
-			<ApplicationIcon />
+			<LibraryPaths />
 		</Build>
 		<Advanced>
-			<PostBuildCommands>
-				<Linux />
-			</PostBuildCommands>
-			<OtherMakefileRules />
+			<PostBuildCommands />
 		</Advanced>
 		<Debug>
-			<Arguments>
-				<All />
-			</Arguments>
-			<Environment />
-			<DebugAdmin />
-			<InitialDir />
+			<Arguments />
 		</Debug>
-		<Remote>
-			<RemoteUri />
-			<RemotePass />
-		</Remote>
-		<Editor>
-			<TabSize />
-			<IndentSize />
-			<ShowWhiteSpace />
-			<UseHardTabs />
-			<CommentFile />
-			<CommentFunction />
-		</Editor>
+		<Remote />
+		<Editor />
 	</Settings>
 </Project>

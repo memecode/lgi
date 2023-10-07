@@ -12,13 +12,14 @@
 		<Node File="./src/StringClassTests.cpp" Type="2" Platforms="15" />
 		<Node File="./src/StringTests.cpp" Type="2" Platforms="15" />
 		<Node File="./src/UnitTests.cpp" Type="2" Platforms="15" />
+		<Node File="./src/XmlTest.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Headers" Type="1" Platforms="15" Id="2">
 		<Node File="./src/UnitTests.h" Type="3" Platforms="15" />
 	</Node>
 	<Node File="../../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>
-		<Remote />
+		<Advanced />
 		<General>
 			<Makefile>
 				<Linux>linux/Makefile.linux</Linux>
@@ -31,30 +32,48 @@
 			</Executable>
 		</General>
 		<Debug>
-			<Environment />
-			<Arguments />
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
 		</Debug>
 		<Build>
 			<Defines>
-				<All />
-				<Linux />
+				<All>
+					<Debug>LGI_UNIT_TESTS</Debug>
+					<Release>LGI_UNIT_TESTS</Release>
+				</All>
 			</Defines>
 			<IncludePaths>
-				<All />
-				<Linux />
+				<All>
+					<Debug>../../include</Debug>
+					<Release>../../include</Release>
+				</All>
+				<Linux>
+					<Debug>../../include/lgi/linux
+../../include/lgi/linux/Gtk</Debug>
+					<Release>../../include/lgi/linux
+../../include/lgi/linux/Gtk</Release>
+				</Linux>
 			</IncludePaths>
 			<SystemIncludes>
-				<Linux />
+				<Linux>
+					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
+					<Release>`pkg-config --cflags gtk+-3.0`</Release>
+				</Linux>
 			</SystemIncludes>
-			<Libraries />
-			<LibraryPaths />
+			<Libraries>
+				<Linux>
+					<Debug>pthread
+`pkg-config --libs gtk+-3.0`
+-static-libgcc</Debug>
+					<Release>pthread
+`pkg-config --libs gtk+-3.0`
+-static-libgcc</Release>
+				</Linux>
+			</Libraries>
 			<TargetType>
 				<All>Executable</All>
 			</TargetType>
-			<TargetName />
 		</Build>
 		<Editor>
 			<TabSize>
@@ -67,8 +86,5 @@
 				<All>1</All>
 			</UseHardTabs>
 		</Editor>
-		<Advanced>
-			<PostBuildCommands />
-		</Advanced>
 	</Settings>
 </Project>

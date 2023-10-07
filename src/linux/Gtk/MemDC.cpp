@@ -49,6 +49,8 @@ public:
 	}
 };
 
+size_t LMemDC::Instances = 0;
+
 LMemDC::LMemDC(int x, int y, LColourSpace cs, int flags)
 {
 	d = new LMemDCPrivate;

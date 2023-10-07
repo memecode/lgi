@@ -22,7 +22,7 @@ ifeq ($(Build),Debug)
 	CFlags += -g
 	CppFlags += -g
 	Tag = d
-	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLGI_LIBRARY
+	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLGI_LIBRARY -DLGI_UNIT_TESTS
 	Libs =  \
 		-lmagic \
 		-lappindicator3 \
@@ -42,7 +42,7 @@ ifeq ($(Build),Debug)
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
-	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLGI_LIBRARY
+	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLGI_LIBRARY -DLGI_UNIT_TESTS
 	Libs =  \
 		-lmagic \
 		-lappindicator3 \
@@ -109,6 +109,7 @@ Source =	src/posix/SubProcess.cpp \
 			src/common/Text/Unicode.cpp \
 			src/common/Text/Token.cpp \
 			src/common/Text/TextView3.cpp \
+			src/common/Text/TextConvert.cpp \
 			src/common/Text/String.cpp \
 			src/common/Text/DocView.cpp \
 			src/common/Skins/Gel/Gel.cpp \

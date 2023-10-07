@@ -661,6 +661,8 @@ public:
 				}
 			}
 		}
+		
+		printf("SetDefaults() %p\n", LgiProj);
 	
 		#ifdef LINUX
 		
