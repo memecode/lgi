@@ -10,7 +10,7 @@ CC = gcc
 CPP = g++
 Target = lgi-gtk3
 ifndef Build
-	Build = Debug
+	Build = Release
 endif
 MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
@@ -19,8 +19,8 @@ CFlags = -MMD -MP -g -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++14
 
 ifeq ($(Build),Debug)
-	CFlags += -g
-	CppFlags += -g
+	CFlags += -g -Wno-format-truncation
+	CppFlags += -g -Wno-format-truncation
 	Tag = d
 	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLGI_LIBRARY -DLGI_UNIT_TESTS
 	Libs =  \
@@ -40,8 +40,8 @@ ifeq ($(Build),Debug)
 		-I./include/lgi/linux \
 		-I./include
 else
-	CFlags += -s -Os
-	CppFlags += -s -Os
+	CFlags += -s -Os -Wno-format-truncation
+	CppFlags += -s -Os -Wno-format-truncation
 	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DLGI_LIBRARY -DLGI_UNIT_TESTS
 	Libs =  \
 		-lmagic \

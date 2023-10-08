@@ -64,8 +64,6 @@ MimeBoundary IsMimeBoundary(char *Boundary, char *Line)
 
 	if (strncmp(Line + 2, Boundary, BoundaryLen) == 0)
 	{
-		printf("matched prefix: %s\n", Line);
-
 		// MIME segment boundary
 		Line += 2 + BoundaryLen;
 		if (Line[0] == '-' &&
@@ -80,7 +78,7 @@ MimeBoundary IsMimeBoundary(char *Boundary, char *Line)
 	}
 	else
 	{
-		printf("no match: line='%s' doesn't match boundry='%s'\n", Line + 2, Boundary);
+		// printf("no match: line='%s' doesn't match boundry='%s'\n", Line + 2, Boundary);
 	}
 
 	return MimeData;
