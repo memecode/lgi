@@ -41,7 +41,7 @@ LPalette::LPalette(uchar *pPal, int s)
 
 void LPalette::Set(int Idx, int r, int g, int b)
 {
-	GdcRGB *rgb = (*this)[Idx];
+	LRgba32 *rgb = (*this)[Idx];
 	if (rgb)
 	{
 		rgb->r = r;
@@ -57,10 +57,10 @@ void LPalette::Set(LPalette *pPal)
 	{
 		if (pPal->Data)
 		{
-			Data = new GdcRGB[pPal->Size];
+			Data = new LRgba32[pPal->Size];
 			if (Data)
 			{
-				memcpy(Data, pPal->Data, sizeof(GdcRGB) * pPal->Size);
+				memcpy(Data, pPal->Data, sizeof(LRgba32) * pPal->Size);
 			}
 		}
 		
@@ -72,7 +72,7 @@ void LPalette::Set(uchar *pPal, int s)
 {
 	DeleteArray(Data);
 	Size = 0;
-	Data = new GdcRGB[s];
+	Data = new LRgba32[s];
 	if (Data)
 	{
 		if (pPal)
@@ -96,13 +96,13 @@ bool LPalette::Update()
 
 bool LPalette::SetSize(int s)
 {
-	GdcRGB *New = new GdcRGB[s];
+	LRgba32 *New = new LRgba32[s];
 	if (New)
 	{
-		memset(New, 0, s * sizeof(GdcRGB));
+		memset(New, 0, s * sizeof(LRgba32));
 		if (Data)
 		{
-			memcpy(New, Data, MIN(s, Size)*sizeof(GdcRGB));
+			memcpy(New, Data, MIN(s, Size)*sizeof(LRgba32));
 		}
 		
 		DeleteArray(Data);
@@ -135,7 +135,7 @@ uchar *LPalette::MakeLut(int Bits)
 	{
 		if (!Lut)
 		{
-			// GdcRGB *p = (*this)[0];
+			// LRgba32 *p = (*this)[0];
 			
 			int Size = 1 << Bits;
 			switch (Bits)
@@ -187,7 +187,7 @@ int LPalette::MatchRgb(COLOUR Rgb)
 {
 	if (Data)
 	{
-		GdcRGB *Entry = (*this)[0];
+		LRgba32 *Entry = (*this)[0];
 		/*
 		 int r = (R24(Rgb) & 0xF8) + 4;
 		 int g = (G24(Rgb) & 0xF8) + 4;
@@ -227,7 +227,7 @@ int LPalette::MatchRgb(COLOUR Rgb)
 void LPalette::CreateGreyScale()
 {
 	SetSize(256);
-	GdcRGB *p = (*this)[0];
+	LRgba32 *p = (*this)[0];
 	
 	for (int i=0; i<256; i++)
 	{
@@ -244,7 +244,7 @@ void LPalette::CreateGreyScale()
 void LPalette::CreateCube()
 {
 	SetSize(216);
-	GdcRGB *p = (*this)[0];
+	LRgba32 *p = (*this)[0];
 	
 	for (int r=0; r<6; r++)
 	{
@@ -302,7 +302,7 @@ bool LPalette::Load(LFile &F)
 		for (int i=0; i<GetSize() && !F.Eof(); i++)
 		{
 			F.ReadStr(Buf, sizeof(Buf));
-			GdcRGB *p = (*this)[i];
+			LRgba32 *p = (*this)[i];
 			if (p)
 			{
 				p->r = atoi(strtok(Buf, " "));
@@ -337,7 +337,7 @@ bool LPalette::Save(LFile &F, int Format)
 			
 			for (int i=0; i<GetSize(); i++)
 			{
-				GdcRGB *p = (*this)[i];
+				LRgba32 *p = (*this)[i];
 				if (p)
 				{
 					auto ch = snprintf(Buf, sizeof(Buf), "%i %i %i\r\n", p->r, p->g, p->b);
@@ -357,8 +357,8 @@ bool LPalette::operator ==(LPalette &p)
 {
 	if (GetSize() == p.GetSize())
 	{
-		GdcRGB *a = (*this)[0];
-		GdcRGB *b = p[0];
+		LRgba32 *a = (*this)[0];
+		LRgba32 *b = p[0];
 		
 		for (int i=0; i<GetSize(); i++)
 		{
@@ -595,7 +595,7 @@ bool LGlobalColour::MakeGlobalPalette()
 			
 			for (int i=0; i<256; i++)
 			{
-				GdcRGB *r = (*d->Global)[i];
+				LRgba32 *r = (*d->Global)[i];
 				if (r)
 				{
 					/*
@@ -873,7 +873,7 @@ void GdcDevice::SetSystemPalette(int Start, int Size, LPalette *pPal)
 		uchar Pal[768];
 		uchar *Temp = Pal;
 		uchar *System = Palette + (Start * 3);
-		GdcRGB *P = (*pPal)[Start];
+		LRgba32 *P = (*pPal)[Start];
 		
 		for (int i=0; i<Size; i++, P++)
 		{
@@ -973,7 +973,7 @@ COLOUR GdcDevice::GetColour(COLOUR Rgb24, LSurface *pDC)
 					}
 					else
 					{
-						GdcRGB *p = (*d->pSysPal)[Current];
+						auto p = (*d->pSysPal)[Current];
 						p->r = R24(Rgb24);
 						p->g = G24(Rgb24);
 						p->b = B24(Rgb24);
