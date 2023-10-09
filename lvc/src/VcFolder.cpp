@@ -280,6 +280,9 @@ VcFolder::VcFolder(AppPriv *priv, LXmlTag *t)
 
 VcFolder::~VcFolder()
 {
+	if (d->CurFolder == this)
+		d->CurFolder = NULL;
+
 	Log.DeleteObjects();
 }
 
