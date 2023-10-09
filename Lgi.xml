@@ -490,6 +490,7 @@
 				<All>0</All>
 			</DebugAdmin>
 			<Executable>
+				<Windows />
 				<Linux />
 			</Executable>
 			<CCrossCompiler />
@@ -538,6 +539,7 @@
 					<Debug>../../../../system/develop/headers</Debug>
 					<Release>../../../../system/develop/headers</Release>
 				</Haiku>
+				<Windows />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -565,12 +567,14 @@ network
 be</Release>
 				</Haiku>
 				<All />
+				<Windows />
 			</Libraries>
 			<TargetName>
 				<Linux>
 					<Debug>lgi-gtk3</Debug>
 					<Release>lgi-gtk3</Release>
 				</Linux>
+				<Windows />
 			</TargetName>
 			<TargetType>
 				<All>DynamicLibrary</All>
@@ -588,10 +592,12 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
+				<Windows />
 				<Linux />
 			</Defines>
 			<LibraryPaths>
 				<All />
+				<Windows />
 				<Linux />
 			</LibraryPaths>
 			<Options>
@@ -605,6 +611,7 @@ _GNU_SOURCE</Release>
 		</Build>
 		<Advanced>
 			<PostBuildCommands>
+				<Windows />
 				<Linux />
 			</PostBuildCommands>
 			<OtherMakefileRules />
