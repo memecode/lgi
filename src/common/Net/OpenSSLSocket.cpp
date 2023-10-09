@@ -123,6 +123,8 @@ public:
 				LMakePath(p, sizeof(p), p, SSL_LIBRARY);
 				auto loaded = Load(p);
 				FileDev->SetCurrentFolder(prev);
+			#elif defined MAC
+				Load("/opt/local/lib/libssl.dylib");
 			#else
 				// Try the plain name:
 				Load("libssl.so");
@@ -773,6 +775,8 @@ bool SslSocket::GetVariant(const char *Name, LVariant &Val, const char *Arr)
 	}
 	else if (!Stricmp(Name, SslSocket_LibInfo))
 	{
+		if (!Library)
+			return false;
 		#ifdef WINDOWS
 		auto eay = Library->LibEAY::GetFullPath();
 		#endif
