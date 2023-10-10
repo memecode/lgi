@@ -405,24 +405,8 @@ public:
 	/// to time. On Win32 it stays the same. In any case if this function returns
 	/// true it's safe to do just about anything.
 	bool InThread() override;
-	
-	/// Run some code in the UI thread...
-	/// But don't wait for any sort of response.
-	/// \returns true if the callback was sent (but not necessarily processed).
-	bool RunCallback(std::function<void()> Callback)
-	{
-		if (!Callback)
-		{
-			LgiTrace("%s:%i - No callback.\n", _FL);
-			return false;
-		}
-		else
-		{
-			return PostEvent(M_VIEW_RUN_CALLBACK,
-							(LMessage::Param)new std::function<void()>(std::move(Callback)));
-		}
-	}
 
+protected:	
 	class CallbackStore : public LMutex
 	{
 		LHashTbl<IntKey<int>, std::function<void()>*> map;
@@ -446,7 +430,7 @@ public:
 				;			
 			
 			map.Add(id, new std::function<void()>(std::move(cb)));
-			printf("%i: CbStore.Add %i\n", GetCurrentThreadId(), id);
+			// printf("%i: CbStore.Add %i\n", GetCurrentThreadId(), id);
 
 			Unlock();
 			return id;
@@ -469,7 +453,7 @@ public:
 				{
 					delete cb;
 					status = true;
-					printf("%i: CbStore.Call %i\n", GetCurrentThreadId(), id);
+					// printf("%i: CbStore.Call %i\n", GetCurrentThreadId(), id);
 				}
 			}
 
@@ -490,7 +474,7 @@ public:
 			if (cb && map.Delete(id))
 			{
 				status = true;
-				printf("%i: CbStore.Delete %i\n", GetCurrentThreadId(), id);
+				// printf("%i: CbStore.Delete %i\n", GetCurrentThreadId(), id);
 				delete cb;
 			}
 
@@ -504,6 +488,23 @@ public:
 		}
 
 	}	CbStore;
+
+public:
+	/// Run some code in the UI thread...
+	/// But don't wait for any sort of response.
+	/// \returns true if the callback was sent (but not necessarily processed).
+	bool RunCallback(std::function<void()> Callback)
+	{
+		if (!Callback)
+		{
+			LgiTrace("%s:%i - No callback.\n", _FL);
+			return false;
+		}
+
+		int id = CbStore.Add(std::move(Callback));
+
+		return PostEvent(M_VIEW_RUN_CALLBACK, (LMessage::Param) id);
+	}
 
 	/// Run some code in the UI thread...
 	/// This will block while waiting for the UI event loop to respond or a timeout

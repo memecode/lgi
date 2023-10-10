@@ -119,8 +119,14 @@ struct LNotification
 	LNotifyType Type;
 	int64_t Int[MaxInts] = {0};
 	LString::Array Str;
+	LString Sender;
 
-	LNotification(LNotifyType type = LNotifyValueChanged) : Type(type) {}
+	LNotification(LNotifyType type = LNotifyValueChanged, const char *file = NULL, int line = 0) :
+		Type(type)
+	{
+		if (file && line)
+			SetSender(file, line);
+	}
 	
 	LNotification(const LNotification &n)
 	{
@@ -128,6 +134,12 @@ struct LNotification
 		for (int i=0; i<MaxInts; i++)
 			Int[i] = n.Int[i];
 		Str = n.Str;
+		Sender = n.Sender;
+	}
+
+	void SetSender(const char *file, int line)
+	{
+		Sender.Printf("%s:%i", file, line);
 	}
 	
 	// Mouse event encapsulation

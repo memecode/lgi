@@ -92,7 +92,7 @@ void DocEdit::DoGoto(std::function<void(bool)> Callback)
 			{
 				LString file = p[0];
 				int line = (int)p[1].Int();
-				App->GotoReference(file, line, false, true);
+				App->GotoReference(file, line, false, true, NULL);
 			}
 			else if (p.Length() == 1)
 			{
@@ -101,7 +101,7 @@ void DocEdit::DoGoto(std::function<void(bool)> Callback)
 					SetLine(line);
 				else
 					// Probably a filename with no line number..
-					App->GotoReference(p[0], 1, false, true);				
+					App->GotoReference(p[0], 1, false, true, NULL);
 			}
 		}
 

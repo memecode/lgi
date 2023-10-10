@@ -13,7 +13,7 @@
 #include "Debugger.h"
 
 #define DEBUG_STOP_ON_GTK_ERROR	0
-#define DEBUG_SHOW_GDB_IO		0
+static bool DEBUG_SHOW_GDB_IO = false;
 #define ECHO_GDB_OUTPUT			0
 
 const char sPrompt[] = "(gdb) ";
@@ -23,53 +23,6 @@ class Callback
 public:
 	virtual LString GetResponse(const char *c) = 0;
 };
-
-/*
-class Visualizer
-{
-public:
-	virtual ~Visualizer() {}
-	
-	virtual bool Match(LString s) = 0;
-	virtual bool Transform(LString name, LString val, Callback *Cb, LVariant &Value, LString &Detail) = 0;
-};
-
-class LStringVis : public Visualizer
-{
-public:
-	bool Match(LString s)
-	{
-		return s == "LString";
-	}
-	
-	bool Transform(LString name, LString val, Callback *Cb, LVariant &Value, LString &Detail)	
-	{
-		LString::Array a = val.SplitDelimit("{} \t\r\n");
-		if (a.Length() == 3 &&
-			a[1] == "=")
-		{
-			void *Ptr = (void*)htoi64(a[2].Get());
-			if (Ptr == NULL)
-			{
-				Value = "NULL";
-			}
-			else
-			{
-				LString cmd;
-				cmd.Printf("p (char*)%s.Str->Str", name.Get());
-				LString r = Cb->GetResponse(cmd);
-				auto Pos = r.Find("=");
-				if (Pos >= 0)
-					Value = r(Pos, r.Length()).Strip().Get();
-				else
-					Value = r.Get();
-			}
-		}
-		
-		return true;
-	}
-};
-*/
 
 class Gdb : public LDebugger, public LThread, public Callback
 {
@@ -88,7 +41,6 @@ class Gdb : public LDebugger, public LThread, public Callback
 	int BreakPointIdx = -1;
 	int ProcessId = -1;
 	bool SuppressNextFileLine = false;
-	// LArray<Visualizer*> Vis;
 	LStream *Log = NULL;
 
 	LMutex StateMutex;
@@ -136,9 +88,9 @@ class Gdb : public LDebugger, public LThread, public Callback
 			
 			if (CurFile && CurLine > 0)
 			{
-				printf("%i: OnFileLine...\n", GetCurrentThreadId());
+				// printf("%i: OnFileLine...\n", GetCurrentThreadId());
 				Events->OnFileLine(CurFile, CurLine, CurrentIp);
-				printf("%i: OnFileLine done.\n", GetCurrentThreadId());
+				// printf("%i: OnFileLine done.\n", GetCurrentThreadId());
 			}
 			/*
 			else
@@ -190,18 +142,16 @@ class Gdb : public LDebugger, public LThread, public Callback
 			{
 				DebuggingProcess = is_debug;
 				Running = is_run;
-				printf("###### Running=%i\n", Running);
-				
 				StateMutex.Unlock();
 
 				if (Events)
 				{
-					#if 1 // DEBUG_SESSION_LOGGING
-					LgiTrace("Gdb::SetRunState(%i,%i) calling OnState...\n", is_debug, is_run);
+					#if DEBUG_SESSION_LOGGING
+					// LgiTrace("Gdb::SetRunState(%i,%i) calling OnState...\n", is_debug, is_run);
 					#endif
 					Events->OnState(DebuggingProcess, Running);
-					#if 1 // DEBUG_SESSION_LOGGING
-					LgiTrace("Gdb::SetRunState(%i,%i) OnState returned.\n", is_debug, is_run);
+					#if DEBUG_SESSION_LOGGING
+					// LgiTrace("Gdb::SetRunState(%i,%i) OnState returned.\n", is_debug, is_run);
 					#endif
 				}
 			}
@@ -223,6 +173,9 @@ class Gdb : public LDebugger, public LThread, public Callback
 			va_end(Arg);
 			
 			Events->Write(Buf, Ch);
+
+			if (DEBUG_SHOW_GDB_IO)
+				printf("LogMsg:%s", Buf);
 		}
 	}
 	
@@ -303,10 +256,19 @@ class Gdb : public LDebugger, public LThread, public Callback
 				else printf("Error: no ':' in '%s'. (%s:%i)\n", k.Get(), _FL);
 			}
 		}
-		else printf("Error: %i parts (%s:%i).\n", (int)a.Length(), _FL);
+		else
+		{
+			printf("Error: %i parts (%s:%i).\n", (int)a.Length(), _FL);
+			int i=0;
+			for (auto part: a)
+			{
+				printf("[%i]='%s'\n", i++, part.Get());
+			}
+		}
 
 		if (File && Line.Int() > 0)
 		{
+			printf("\tBreakpoint.OnFileLine(%s,%s)\n", File.Get(), Line.Get());
 			OnFileLine(NativePath(File), (int)Line.Int(), true);
 		}
 		else
@@ -317,9 +279,10 @@ class Gdb : public LDebugger, public LThread, public Callback
 	
 	void OnLine(const char *Start, int Length)
 	{
-		#if DEBUG_SHOW_GDB_IO
-		printf("Receive: '%.*s' ParseState=%i, OutLine=%p, OutStream=%p\n", Length-1, Start, ParseState, OutLines, OutStream);
-		#endif
+		if (DEBUG_SHOW_GDB_IO)
+		{
+			// printf("Receive: '%.*s' ParseState=%i, OutLine=%p, OutStream=%p\n", Length-1, Start, ParseState, OutLines, OutStream);
+		}
 
 		// Send output
 		if (OutLines)
@@ -346,22 +309,12 @@ class Gdb : public LDebugger, public LThread, public Callback
 
 		if (ParseState == ParseBreakPoint)
 		{
-			if (Length > 0 && IsDigit(*Start))
-			{
-				LString Bp = LString(" ").Join(BreakInfo).Strip();
-				
-				printf("%i: OnBreakPoint...\n", GetCurrentThreadId());
-				OnBreakPoint(Bp);
-				printf("%i: OnBreakPoint done.\n", GetCurrentThreadId());
-
-				ParseState = ParseNone;
-				BreakInfo.Length(0);
-			}
-			else
-			{
-				// printf("ParsingBp.Add=%s\n", Start);
-				BreakInfo.New().Set(Start, Length);
-			}
+			LString s(Start, Length);
+			
+			printf("\tbreak:'%s'\n", s.Get());
+			OnBreakPoint(s);
+			ParseState = ParseNone;
+			BreakInfo.Length(0);
 		}
 
 		if (ParseState == ParseNone)
@@ -375,6 +328,8 @@ class Gdb : public LDebugger, public LThread, public Callback
 			{
 				ParseState = ParseBreakPoint;
 				BreakInfo.New().Set(Start, Length);
+				
+				printf("######## ParseBreakPoint!!!\n");
 			}
 			else if (*Start == '[')
 			{
@@ -457,12 +412,12 @@ class Gdb : public LDebugger, public LThread, public Callback
 		if (bytes == 6)
 		{
 			AtPrompt = !_strnicmp(Line, sPrompt, bytes);
-			LgiTrace("AtPrompt=%i Running=%i\n", AtPrompt, Running);
+			// LgiTrace("AtPrompt=%i Running=%i\n", AtPrompt, Running);
 			if (AtPrompt)
 			{
 				if (Running ^ !AtPrompt)
 				{
-					printf("Running=%i -> %i\n", Running, !AtPrompt);
+					// printf("Running=%i -> %i\n", Running, !AtPrompt);
 					SetState(DebuggingProcess, !AtPrompt);
 				}
 				
@@ -575,7 +530,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 		return 0;
 	}
 
-	bool WaitPrompt()
+	bool WaitPrompt(const char *file, int line)
 	{
 		if (State == Init)
 		{
@@ -604,7 +559,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 			Now = LCurrentTime();
 			LSleep(50);
 			uint64 After = LCurrentTime();
-			printf("...wait=%i\n", (int)(After-Start));
+			// printf("...wait=%i\n", (int)(After-Start));
 
 			/*
 			if (After - Now > 65)
@@ -616,7 +571,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 
 		if (!AtPrompt)
 		{
-			LogMsg("Error: Not at prompt...\n");
+			LogMsg("Error: Not at prompt (caller=%s:%i)\n", file, line);
 			return false;
 		}
 
@@ -639,7 +594,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 			return false;
 		}
 		
-		if (!WaitPrompt())
+		if (!WaitPrompt(_FL))
 		{
 			CMD_LOG("%s:%i - WaitPrompt failed.\n", _FL);
 			return false;
@@ -648,11 +603,9 @@ class Gdb : public LDebugger, public LThread, public Callback
 		char str[256];
 		int ch = sprintf_s(str, sizeof(str), "%s\n", c);
 
-		#if DEBUG_SHOW_GDB_IO
-		LgiTrace("Send: '%s'\n", c);
-		#else
+		// if (DEBUG_SHOW_GDB_IO) LgiTrace("Send: '%s'\n", c);
 		CMD_LOG("%s:%i - send '%s'.\n", _FL, c);
-		#endif
+
 		Events->Write(str, ch);
 		LinePtr = Line;
 		OutStream = Output;
@@ -672,7 +625,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 		{	
 			auto Wait0 = LCurrentTime();
 
-			WaitPrompt();
+			WaitPrompt(_FL);
 
 			auto Wait1 = LCurrentTime();
 			CMD_LOG("%s:%i - Cmd timing " LPrintfInt64 " " LPrintfInt64 "\n",
@@ -692,6 +645,13 @@ public:
 	{
 		State = Init;
 		LinePtr = Line;
+
+		LString Val;
+		if (LAppInst->GetOption("gdb", Val))
+		{
+			DEBUG_SHOW_GDB_IO = Val.Int() != 0;
+			printf("DEBUG_SHOW_GDB_IO=%i\n", DEBUG_SHOW_GDB_IO);
+		}
 		
 		LFile::Path pp(LSP_APP_INSTALL);
 		pp += "../utils/gdb-pretty-print.py";
@@ -704,8 +664,6 @@ public:
 		{
 			LgiTrace("%s:%i - Didn't find Gdb.Print='%s'\n", _FL, pp.GetFull().Get());
 		}
-		
-		// Vis.Add(new LStringVis);
 	}
 	
 	~Gdb()
@@ -926,7 +884,7 @@ public:
 					SetState(true, true);
 					
 					printf("Waiting for prompt\n");
-					if (!WaitPrompt())
+					if (!WaitPrompt(_FL))
 						return false;
 
 					printf("Removing temp bp\n");
@@ -1020,7 +978,7 @@ public:
 			
 			LString::Array Lines;
 			Ret = Cmd(cmd, NULL, &Lines);
-			WaitPrompt();
+			WaitPrompt(_FL);
 			
 			for (unsigned i=0; i<Lines.Length(); i++)
 			{
@@ -1595,7 +1553,7 @@ public:
 		if (!result)
 		{
 			// LogMsg("%s:%i - success... waiting prompt\n", _FL);
-			return WaitPrompt();
+			return WaitPrompt(_FL);
 		}
 		
 		LogMsg("%s:%i - SIGINT failed with %i(0x%x): %s (pid=%i)\n", _FL, ErrNo, ErrNo, LErrorCodeToString(ErrNo).Get(), ProcessId);

@@ -242,6 +242,12 @@ bool LDebugContext::UpdateLocals()
 	if (!Locals || !d->Db || !d->InDebugging)
 		return false;
 
+	if (d->Db->GetRunning())
+	{
+		printf("%s:%i - Debugger is running... can't update locals.\n", _FL);
+		return false;
+	}
+
 	LArray<LDebugger::Variable> Vars;
 	if (!d->Db->GetVariables(true, Vars, false))
 		return false;
@@ -706,7 +712,7 @@ void LDebugContext::OnFileLine(const char *File, int Line, bool CurrentIp)
 	}
 
 	// Goto reference is thread safe:
-	d->App->GotoReference(File, Line, CurrentIp);
+	d->App->GotoReference(File, Line, CurrentIp, false, NULL);
 }
 
 ssize_t LDebugContext::Write(const void *Ptr, ssize_t Size, int Flags)

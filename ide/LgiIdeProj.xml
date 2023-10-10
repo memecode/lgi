@@ -244,6 +244,10 @@ _GNU_SOURCE</Release>
 				<Linux />
 			</LibraryPaths>
 			<ApplicationIcon />
+			<Options>
+				<All />
+				<Linux />
+			</Options>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -267,7 +271,7 @@ _GNU_SOURCE</Release>
 			</Environment>
 			<Arguments>
 				<All>
-					<Debug>/home/matthew/code/lgi/trunk/test/UnitTests/UnitTestsProj.xml</Debug>
+					<Debug>/home/matthew/code/lgi/trunk/ide/LgiIdeProj.xml</Debug>
 				</All>
 			</Arguments>
 			<DebugAdmin />

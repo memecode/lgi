@@ -245,6 +245,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/SubProcess.h \
 	../include/lgi/common/TableLayout.h \
 	../include/lgi/common/TabView.h \
+	../include/lgi/common/TextConvert.h \
 	../include/lgi/common/TextFile.h \
 	../include/lgi/common/TextLabel.h \
 	../include/lgi/common/TextLog.h \
@@ -353,6 +354,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/common/Skins/Gel/Gel.cpp \
 	../src/common/Text/DocView.cpp \
 	../src/common/Text/String.cpp \
+	../src/common/Text/TextConvert.cpp \
 	../src/common/Text/TextView3.cpp \
 	../src/common/Text/Token.cpp \
 	../src/common/Text/Unicode.cpp \

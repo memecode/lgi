@@ -226,7 +226,7 @@ public:
 					if (i)
 					{
 						const char *Ref = i->GetText(0);
-						App->GotoReference(Ref, 1, false);
+						App->GotoReference(Ref, 1, false, true, NULL);
 					}
 					EndModal(1);
 					return true;
@@ -318,7 +318,7 @@ public:
 					LListItem *i = Lst->GetSelected();
 					if (i)
 					{
-						App->GotoReference(i->GetText(0), 1, false);
+						App->GotoReference(i->GetText(0), 1, false, true, NULL);
 						EndModal(1);
 					}
 				}
@@ -1233,7 +1233,7 @@ public:
 			{
 				HistoryLoc = Loc;
 				FileLoc &Loc = CursorHistory[HistoryLoc];
-				App->GotoReference(Loc.File, Loc.Line, false, false);
+				App->GotoReference(Loc.File, Loc.Line, false, false, NULL);
 
 				App->DumpHistory();
 			}
@@ -1390,7 +1390,7 @@ public:
 		LAutoString Full;
 		if (FindSource(Full, File, Context))
 		{
-			App->GotoReference(Full, Line, false);
+			App->GotoReference(Full, Line, false, true, NULL);
 		}
 	}
 	
@@ -2995,22 +2995,22 @@ IdeDoc *AppWnd::GetCurrentDoc()
 	return NULL;
 }
 
-IdeDoc *AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithHistory)
+void AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithHistory, std::function<void(IdeDoc*)> Callback)
 {
 	if (!InThread())
 	{
-		auto docPtr = RunCallback<IdeDoc*>
+		// printf("\tGotoReference(%s,%i,%i,%i) out of thread\n", File, Line, CurIp, WithHistory);
+		RunCallback
 		(
-			[this, File=LString(File), Line, CurIp, WithHistory]()
+			[this, File=LString(File), Line, CurIp, WithHistory, Callback]()
 			{
-				auto doc = GotoReference(File, Line, CurIp, WithHistory);
-				return doc;
-			},
-			2000 // ms timeout, ie don't hang the app indefinately.
-		);
-		
-		return docPtr ? *docPtr : NULL;
+				GotoReference(File, Line, CurIp, WithHistory, Callback);
+			}
+		);		
+		return;
 	}
+
+	// printf("\tGotoReference(%s,%i,%i,%i) in thread\n", File, Line, CurIp, WithHistory);
 
 	if (!WithHistory)
 		d->InHistorySeek = true;
@@ -3031,7 +3031,8 @@ IdeDoc *AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithH
 	if (!WithHistory)
 		d->InHistorySeek = false;
 
-	return Doc;			
+	if (Callback)
+		Callback(Doc);
 }
 
 IdeDoc *AppWnd::FindOpenFile(char *FileName)
@@ -3354,15 +3355,15 @@ LMessage::Result AppWnd::OnEvent(LMessage *m)
 
 			if (d->Running != Running)
 			{
-				bool RunToNotRun = d->Running && !Running;
+				bool Breaking = d->Running && !Running;
 				
 				d->Running = Running;
 				
-				if (RunToNotRun &&
+				if (Breaking &&
 					d->Output &&
 					d->Output->DebugTab)
 				{
-					d->Output->DebugTab->SendNotify(LNotifyValueChanged);
+					d->Output->DebugTab->SendNotify(LNotification(LNotifyValueChanged, _FL));
 				}
 			}
 			if (d->Debugging != Debugging)
@@ -3558,6 +3559,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, LNotification n)
 		{
 			if (d->DbgContext && n.Type == LNotifyValueChanged)
 			{
+				printf("IDC_DEBUG_TAB notification: %s\n", n.Sender.Get());
 				switch (Ctrl->Value())
 				{
 					case AppWnd::LocalsTab:
@@ -3635,7 +3637,7 @@ int AppWnd::OnNotify(LViewI *Ctrl, LNotification n)
 							LAutoString Full;
 							if (d->FindSource(Full, File, NULL))
 							{
-								GotoReference(Full, Line, false);
+								GotoReference(Full, Line, false, true, NULL);
 								
 								const char *sFrame = item->GetText(0);
 								if (sFrame && IsDigit(*sFrame))
@@ -3990,13 +3992,13 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 					
 					if (p.Length() == 1)
 					{
-						GotoReference(p[0], 1, false, true);
+						GotoReference(p[0], 1, false, true, NULL);
 					}
 					else if (p.Length() > 1)
 					{
 						LString file = p[0];
 						int line = (int)p[1].Int();
-						GotoReference(file, line, false, true);
+						GotoReference(file, line, false, true, NULL);
 					}
 					else LgiMsg(this, "Error: No filename.", AppName);
 					
@@ -4130,7 +4132,7 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				d->FindSym->OpenSearchDlg(this, [this](auto r)
 				{
 					if (r.File)
-						GotoReference(r.File, r.Line, false);
+						GotoReference(r.File, r.Line, false, true, NULL);
 				});
 			}
 			break;

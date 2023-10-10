@@ -2321,13 +2321,17 @@ bool LView::InThread()
 		
 		#if 0
 		if (Gui != Me)
-		    LgiTrace("%s:%i - Out of thread:"
+		    LgiTrace("%s:%i - %s Out of thread:"
 				    #ifdef LGI_COCOA
 					"%llx, %llx"
 				    #else
-					"%x, %x"
+					"%i, %i"
 					#endif
-		    		"\n", _FL, Gui, Me);
+		    		"\n",
+		    		_FL,
+		    		GetClass(),
+		    		Gui,
+		    		Me);
 		#endif
 		
 		return Gui == Me;

@@ -417,7 +417,10 @@ void LTabView::Value(int64 i)
 		}
 
 		Invalidate();
-		SendNotify(LNotifyValueChanged);
+
+		LNotification n(LNotifyValueChanged, _FL);
+		n.Int[0] = d->Current;
+		SendNotify(n);
 		
 		// GetWindow()->_Dump();
 	}
@@ -1237,13 +1240,13 @@ void LTabPage::HasButton(bool b)
 void LTabPage::OnButtonClick(LMouse &m)
 {
 	if (GetId() > 0)
-		SendNotify(LNotifyTabPageButtonClick);
+		SendNotify(LNotification(LNotifyTabPageButtonClick, _FL));
 }
 
 void LTabPage::OnTabClick(LMouse &m)
 {
 	LViewI *v = GetId() > 0 ? this : GetParent();
-	v->SendNotify(LNotifyItemClick);
+	v->SendNotify(LNotification(LNotifyItemClick, _FL));
 }
 
 void LTabPage::OnButtonPaint(LSurface *pDC)

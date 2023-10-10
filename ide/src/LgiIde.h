@@ -307,7 +307,7 @@ public:
 	LStream *GetBuildLog();
 	LStream *GetDebugLog();
 	IdeDoc *FindOpenFile(char *FileName);
-	IdeDoc *GotoReference(const char *File, int Line, bool CurIp, bool WithHistory = true);
+	void GotoReference(const char *File, int Line, bool CurIp, bool WithHistory, std::function<void(IdeDoc*)> Callback);
 	void FindSymbol(int ResultsSinkHnd, const char *Sym);
 	bool GetSystemIncludePaths(LArray<LString> &Paths);
 	bool ShowInProject(const char *Fn);

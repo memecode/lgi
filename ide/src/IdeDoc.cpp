@@ -530,7 +530,7 @@ public:
 	
 	void OnSelect(DefnInfo *Obj)
 	{
-		App->GotoReference(Obj->File, Obj->Line, false);
+		App->GotoReference(Obj->File, Obj->Line, false, true, NULL);
 	}
 	
 	bool Name(const char *s)
@@ -639,7 +639,7 @@ public:
 	
 	void OnSelect(FindSymResult *Obj)
 	{
-		App->GotoReference(Obj->File, Obj->Line, false);
+		App->GotoReference(Obj->File, Obj->Line, false, true, NULL);
 	}
 	
 	int OnNotify(LViewI *Ctrl, LNotification n)
@@ -798,17 +798,17 @@ public:
 			auto Base = Proj->GetBasePath();
 			LFile::Path p(Base);
 			p += Fn;
-			App->GotoReference(p, 1, false);			
+			App->GotoReference(p, 1, false, true, NULL);
 		}
 		else
 		{
-			App->GotoReference(Fn, 1, false);
+			App->GotoReference(Fn, 1, false, true, NULL);
 		}
 	}
 	
 	void OnSelect(LListItem *Item)
 	{
-		App->GotoReference(Item->GetText(), 1, false);
+		App->GotoReference(Item->GetText(), 1, false, true, NULL);
 	}
 	
 	void Update(LString InputStr)
