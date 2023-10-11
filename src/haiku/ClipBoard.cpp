@@ -67,9 +67,24 @@ public:
 		BString s;
 		auto result = clip->FindString(MimeType, &s);
 	    if (result)
-			printf("%s:%i - FindString=%i %s\n", _FL, result, strerror(result));
-		
-		Txt = s;
+	    {
+			const void *data = NULL;
+			ssize_t bytes;
+			result = clip->FindData(MimeType, B_MIME_TYPE, &data, &bytes);
+			if (result == B_OK)
+			{
+				Txt.Set((char*)data, bytes);
+			}
+			else
+			{
+				printf("%s:%i - FindString(%s)=%i %s\n", _FL, MimeType, result, strerror(result));
+				clip->PrintToStream();
+			}
+		}
+		else
+		{		
+			Txt = s;
+		}
 	 
 	    Unlock();
 			

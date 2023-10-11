@@ -22,7 +22,7 @@ ifeq ($(Build),Debug)
 	CFlags += -g
 	CppFlags += -g
 	Tag = d
-	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -DLGI_LIBRARY -DPOSIX -D_GNU_SOURCE
+	Defs = -D_DEBUG -DHAIKU -D_REENTRANT -DLGI_LIBRARY -DLGI_UNIT_TESTS -DPOSIX -D_GNU_SOURCE
 	Libs =  \
 		-static-libgcc \
 		-lgnu \
@@ -37,7 +37,7 @@ ifeq ($(Build),Debug)
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
-	Defs = -DHAIKU -D_REENTRANT -DLGI_LIBRARY -DPOSIX -D_GNU_SOURCE
+	Defs = -DHAIKU -D_REENTRANT -DLGI_LIBRARY -DLGI_UNIT_TESTS -DPOSIX -D_GNU_SOURCE
 	Libs =  \
 		-static-libgcc \
 		-lgnu \
@@ -98,6 +98,7 @@ Source =	src/posix/SubProcess.cpp \
 			src/common/Text/Unicode.cpp \
 			src/common/Text/Token.cpp \
 			src/common/Text/TextView3.cpp \
+			src/common/Text/TextConvert.cpp \
 			src/common/Text/String.cpp \
 			src/common/Text/DocView.cpp \
 			src/common/Skins/Gel/Gel.cpp \

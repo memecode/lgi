@@ -2721,8 +2721,6 @@ struct SaveState
 			printf("Saving proj...\n");
 			proj->SetClean([this, proj](bool ok)
 			{
-				printf("save.proj.cb ok=%i\n", ok);
-				
 				if (ok)
 					d->OnFile(proj->GetFileName(), true);
 				else
@@ -3987,20 +3985,23 @@ int AppWnd::OnCommand(int Cmd, int Event, OsView Wnd)
 				LInput *Inp = new LInput(this, NULL, LLoadString(L_TEXTCTRL_GOTO_LINE, "Goto [file:]line:"), "Goto");
 				Inp->DoModal([Inp,this](auto dlg, auto code)
 				{
-					LString s = Inp->GetStr();
-					LString::Array p = s.SplitDelimit(":,");
-					
-					if (p.Length() == 1)
+					if (code == IDOK)
 					{
-						GotoReference(p[0], 1, false, true, NULL);
+						LString s = Inp->GetStr();
+						LString::Array p = s.SplitDelimit(":,");
+						
+						if (p.Length() == 1)
+						{
+							GotoReference(p[0], 1, false, true, NULL);
+						}
+						else if (p.Length() > 1)
+						{
+							LString file = p[0];
+							int line = (int)p[1].Int();
+							GotoReference(file, line, false, true, NULL);
+						}
+						else LgiMsg(this, "Error: No filename.", AppName);
 					}
-					else if (p.Length() > 1)
-					{
-						LString file = p[0];
-						int line = (int)p[1].Int();
-						GotoReference(file, line, false, true, NULL);
-					}
-					else LgiMsg(this, "Error: No filename.", AppName);
 					
 					delete dlg;
 				});

@@ -214,7 +214,6 @@ _GNU_SOURCE</Debug>
 _GNU_SOURCE</Release>
 				</Haiku>
 				<All />
-				<Linux />
 			</Defines>
 			<TargetType>
 				<All>Executable</All>
@@ -238,15 +237,16 @@ _GNU_SOURCE</Release>
 					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Haiku />
 			</SystemIncludes>
 			<LibraryPaths>
 				<All />
-				<Linux />
+				<Haiku />
 			</LibraryPaths>
 			<ApplicationIcon />
 			<Options>
 				<All />
-				<Linux />
+				<Haiku />
 			</Options>
 		</Build>
 		<Editor>
@@ -280,7 +280,7 @@ _GNU_SOURCE</Release>
 		<Advanced>
 			<OtherMakefileRules />
 			<PostBuildCommands>
-				<Linux />
+				<Haiku />
 			</PostBuildCommands>
 		</Advanced>
 		<Remote>
