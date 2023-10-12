@@ -436,7 +436,7 @@ bool LWebSocket::Open(const char *uri, int port)
 		return false;
 	}
 
-	LgiTrace("WsSocket out hdr:\n%s", http.Get());
+	// LgiTrace("WsSocket out hdr:\n%s", http.Get());
 	return true;
 }
 

@@ -224,7 +224,7 @@ void LScreenDC::SetClient(LRect *c)
 		HRGN hRgn = CreateRectRgn(c->x1, c->y1, c->x2+1, c->y2+1);
 		if (hRgn)
 		{
-			LgiTrace("%s:%i HRGN=%p\n", _FL, hRgn);
+			// LgiTrace("%s:%i HRGN=%p\n", _FL, hRgn);
 			SelectClipRgn(hDC, hRgn);
 			DeleteObject(hRgn);
 		}
@@ -338,7 +338,7 @@ LRect LScreenDC::ClipRgn(LRect *Rgn)
 		HRGN hRgn = CreateRectRgn(Clip.x1, Clip.y1, Clip.x2+1, Clip.y2+1);
 		if (hRgn)
 		{
-			LgiTrace("%s:%i HRGN=%p\n", _FL, hRgn);
+			// LgiTrace("%s:%i HRGN=%p\n", _FL, hRgn);
 			SelectClipRgn(hDC, hRgn);
 			DeleteObject(hRgn);
 		}
