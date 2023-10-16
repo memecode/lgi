@@ -232,8 +232,6 @@ public:
 	virtual void Insert(LAutoPtr<LVolume> v);
 };
 
-typedef int (*CopyFileCallback)(void *token, int64 Done, int64 Total);
-
 /// A singleton class for accessing the file system
 class LgiClass LFileSystem
 {
@@ -267,9 +265,7 @@ public:
 		/// The error code or zero on success
 		LError *Status = NULL,
 		/// Optional callback when some data is copied.
-		CopyFileCallback Callback = NULL,
-		/// A user defined token passed to the callback function
-		void *Token = NULL
+		std::function<bool(uint64_t pos, uint64_t total)> callback = NULL
 	);
 
 	/// Delete file

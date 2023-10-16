@@ -117,7 +117,7 @@ Gdiplus::Graphics *LSurface::GetGfx()
 	static Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 	static ULONG_PTR gdiplusToken = 0;
 
-	#if 0
+	#if 1
 
 	if (!gdiplusToken)
 		GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
@@ -715,17 +715,20 @@ void LSurface::FilledCircle(double Cx, double Cy, double radius)
 		if (Op() == GDC_SET && GetBits() > 8)
 		{
 			auto g = GetGfx();
-			auto col = Colour();
-			Gdiplus::SolidBrush brush(GdiColour());
-			Gdiplus::RectF r((Gdiplus::REAL)(Cx-radius),
-							(Gdiplus::REAL)(Cy-radius),
-							(Gdiplus::REAL)(radius*2.0-1.0),
-							(Gdiplus::REAL)(radius*2.0-1.0));
-			if (!AntiAlias())
-				r.Inflate(1.0f, 1.0f);
-			auto status = g->FillEllipse(&brush, r);
-			Update(GDC_BITS_CHANGE);
-			return;
+			if (g)
+			{
+				auto col = Colour();
+				Gdiplus::SolidBrush brush(GdiColour());
+				Gdiplus::RectF r((Gdiplus::REAL)(Cx-radius),
+								(Gdiplus::REAL)(Cy-radius),
+								(Gdiplus::REAL)(radius*2.0-1.0),
+								(Gdiplus::REAL)(radius*2.0-1.0));
+				if (!AntiAlias())
+					r.Inflate(1.0f, 1.0f);
+				auto status = g->FillEllipse(&brush, r);
+				Update(GDC_BITS_CHANGE);
+				return;
+			}
 		}
 
 	#endif

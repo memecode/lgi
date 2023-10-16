@@ -652,7 +652,7 @@ LVolume *LFileSystem::GetRootVolume()
 	return Root;
 }
 
-bool LFileSystem::Copy(const char *From, const char *To, LError *ErrorCode, CopyFileCallback Callback, void *Token)
+bool LFileSystem::Copy(const char *From, const char *To, LError *ErrorCode, std::function<bool(uint64_t pos, uint64_t total)> callback)
 {
 	if (!From || !To)
 	{
@@ -715,9 +715,9 @@ bool LFileSystem::Copy(const char *From, const char *To, LError *ErrorCode, Copy
 			}
 			i += Written;
 
-			if (Callback)
+			if (callback)
 			{
-				if (!Callback(Token, i, Size))
+				if (!callback(i, Size))
 				{
 					break;
 				}
