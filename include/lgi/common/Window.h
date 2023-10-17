@@ -305,6 +305,7 @@ public:
 	
 		LWindow *GetModalParent();
 		bool SetModalParent(LWindow *dlg);
+		void UpdateRootView();
 
 	#elif defined(LGI_SDL)
 

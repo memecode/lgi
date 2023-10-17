@@ -491,6 +491,45 @@ bool DndPointMap(LViewI *&v, LPoint &p, LDragDropTarget *&t, LWindow *Wnd, int x
 	return false;
 }
 
+void LWindow::UpdateRootView()
+{
+	auto rootView = Handle();
+	if (!rootView)
+	{
+		printf("%s:%i - Can't update root view: no view handle.\n", _FL);
+		return;
+	}
+
+	auto wnd = WindowHandle();
+	auto looper = rootView->Looper();
+	auto isLocked = looper->IsLocked();
+	if (!isLocked)
+	{
+		printf("%s:%i - Can't update root view: not locked.\n", _FL);
+		return;
+	}
+
+	if (rootView->IsHidden())
+	{
+		printf("%s::UpdateRootView() curThread=%i/%s wndThread=%i/%s\n",
+			GetClass(),
+			GetCurrentThreadId(), LThread::GetThreadName(GetCurrentThreadId()),
+			wnd->Thread(), LThread::GetThreadName(wnd->Thread())
+			);
+
+		rootView->Show();
+	}
+	
+	auto menu = wnd->KeyMenuBar();
+	BRect menuPos = menu ? menu->Frame() : BRect(0, 0, 0, 0);
+	
+	auto f = wnd->Frame();
+	rootView->ResizeTo(f.Width(), f.Height() - menuPos.Height());
+	if (menu)
+		rootView->MoveTo(0, menuPos.Height());
+	rootView->SetResizingMode(B_FOLLOW_ALL_SIDES);
+}
+
 bool LWindow::Attach(LViewI *p)
 {
 	LLocker lck(d, _FL);
@@ -503,17 +542,7 @@ bool LWindow::Attach(LViewI *p)
 	if (rootView && wnd)
 	{
 		wnd->AddChild(rootView);
-		if (rootView->IsHidden())
-			rootView->Show();
-		
-		auto menu = wnd->KeyMenuBar();
-		BRect menuPos = menu ? menu->Frame() : BRect(0, 0, 0, 0);
-		
-		auto f = wnd->Frame();
-		rootView->ResizeTo(f.Width(), f.Height() - menuPos.Height());
-		if (menu)
-			rootView->MoveTo(0, menuPos.Height());
-		rootView->SetResizingMode(B_FOLLOW_ALL_SIDES);
+		UpdateRootView();
 	}
 	
 	// Setup default button...

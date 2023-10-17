@@ -550,7 +550,7 @@ LVolume *LFileSystem::GetRootVolume()
 	return Root;
 }
 
-bool LFileSystem::Copy(const char *From, const char *To, LError *Status, CopyFileCallback Callback, void *Token)
+bool LFileSystem::Copy(const char *From, const char *To, LError *Status, std::function<bool(uint64_t pos, uint64_t total)> callback)
 {
 	LArray<char> Buf;
 
@@ -590,8 +590,8 @@ bool LFileSystem::Copy(const char *From, const char *To, LError *Status, CopyFil
 				
 				r -= w;
 				Done += w;
-				if (Callback)
-					Callback(Token, Done, Size);
+				if (callback)
+					callback(Done, Size);
 			}
 			
 			if (r > 0)

@@ -717,8 +717,12 @@ bool LPopup::Attach(LViewI *p)
 {
 	#if defined(LGI_CARBON) || defined(HAIKU)
 	
+		#if defined(HAIKU)
+		auto hwnd = WindowHandle();
+		hwnd->Lock();
+		hwnd->Show();
+		#endif
 		auto status = LWindow::Attach(NULL);
-		// printf("Popup thread=%i\n", WindowHandle()->Thread());
 		return status;
 	
 	#else
