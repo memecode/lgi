@@ -3217,7 +3217,7 @@ LString PlatformFlagsToStr(int flags)
 	if (flags & PLATFORM_LINUX) a.New() = PlatformNames[PlatformLinux];
 	if (flags & PLATFORM_MAC)   a.New() = PlatformNames[PlatformMac];
 	if (flags & PLATFORM_HAIKU) a.New() = PlatformNames[PlatformHaiku];
-	return LString(",").Join(a);
+	return a.Length() ? LString(",").Join(a) : "EmptyFlags";
 }
 
 IdeProject *AppWnd::OpenProject(const char *FileName, IdeProject *ParentProj, bool Create, ProjectNode *DepParent)

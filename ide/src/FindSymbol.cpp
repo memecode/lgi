@@ -20,7 +20,7 @@
 
 #define DEBUG_FIND_SYMBOL		0
 #define DEBUG_NO_THREAD			1
-// #define DEBUG_FILE				"AppFileInfo.h"
+// #define DEBUG_FILE				"PopupNotification.h"
 
 int SYM_FILE_SENT = 0;
 
@@ -71,7 +71,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			Defs.Length(0);
 			
 			bool Status = false;
-			char *Ext = LGetExtension(Path);
+			auto Ext = LGetExtension(Path);
 			if (Ext)
 			{
 				IsSource =	!_stricmp(Ext, "c")
@@ -94,6 +94,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 				else if (IsPython)
 					Status = BuildPyDefnList(Path, Source, Defs, DefnNone, Debug);
 			}
+			else printf("%s:%i - No extension for '%s'\n", _FL, Path.Get());
 
 			return Status;
 		}
@@ -330,7 +331,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		{
 			case M_FIND_SYM_REQUEST:
 			{
-				LAutoPtr<FindSymRequest> Req((FindSymRequest*)Msg->A());
+				auto Req = Msg->AutoA<FindSymRequest>();
 				auto Platforms = Msg->B();
 				if (!Req || Req->SinkHnd < 0)
 					break;
@@ -459,19 +460,20 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			}
 			case M_FIND_SYM_FILE:
 			{
-				LAutoPtr<FindSymbolSystem::SymFileParams> Params((FindSymbolSystem::SymFileParams*)Msg->A());
-				if (Params)
+				auto Params = Msg->AutoA<FindSymbolSystem::SymFileParams>();
+				if (!Params)
+					break;
+
+				auto MimeType = LGetFileMimeType(Params->File);
+				LString::Array Parts = MimeType.Split("/");
+				if (!Parts[0].Equals("image"))
 				{
-					LString::Array Mime = LGetFileMimeType(Params->File).Split("/");
-					if (!Mime[0].Equals("image"))
-					{
-						if (Params->Action == FindSymbolSystem::FileAdd)
-							AddFile(Params->File, Params->Platforms);
-						else if (Params->Action == FindSymbolSystem::FileRemove)
-							RemoveFile(Params->File);
-						else if (Params->Action == FindSymbolSystem::FileReparse)
-							ReparseFile(Params->File);
-					}
+					if (Params->Action == FindSymbolSystem::FileAdd)
+						AddFile(Params->File, Params->Platforms);
+					else if (Params->Action == FindSymbolSystem::FileRemove)
+						RemoveFile(Params->File);
+					else if (Params->Action == FindSymbolSystem::FileReparse)
+						ReparseFile(Params->File);
 				}
 
 				SYM_FILE_SENT--;
@@ -479,7 +481,7 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 			}
 			case M_FIND_SYM_INC_PATHS:
 			{
-				LAutoPtr<FindSymbolSystem::SymPathParams> Params((FindSymbolSystem::SymPathParams*)Msg->A());
+				auto Params = Msg->AutoA<FindSymbolSystem::SymPathParams>();
 				if (!Params)
 					break;
 				AddPaths(IncPaths, Params->Paths, Params->Platforms);
@@ -758,6 +760,8 @@ bool FindSymbolSystem::SetIncludePaths(LString::Array &Paths, LString::Array &Sy
 
 bool FindSymbolSystem::OnFile(const char *Path, SymAction Action, int Platforms)
 {
+	LAssert(Platforms != 0);
+
 	if (d->Tasks == 0)
 		d->MsgTs = LCurrentTime();
 	d->Tasks++;
@@ -776,6 +780,8 @@ bool FindSymbolSystem::OnFile(const char *Path, SymAction Action, int Platforms)
 
 void FindSymbolSystem::Search(int ResultsSinkHnd, const char *SearchStr, int Platforms)
 {
+	LAssert(Platforms != 0);
+	
 	FindSymRequest *Req = new FindSymRequest(ResultsSinkHnd);
 	if (Req)
 	{

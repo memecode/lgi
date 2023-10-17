@@ -605,7 +605,7 @@ void LMessage::Set(int Msg, Param a, Param b)
 {
 	what = Msg;
 	AddInt64(PropA, a);
-	AddInt64(PropA, b);
+	AddInt64(PropB, b);
 }
 
 bool LMessage::Send(LViewI *View)

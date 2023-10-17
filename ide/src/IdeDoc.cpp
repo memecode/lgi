@@ -1654,39 +1654,22 @@ LMessage::Result IdeDoc::OnEvent(LMessage *Msg)
 	{
 		case M_FIND_SYM_REQUEST:
 		{
-			LAutoPtr<FindSymRequest> Resp((FindSymRequest*)Msg->A());
-			if (Resp && d->SymPopup)
-			{
-				LViewI *SymEd;
-				if (GetViewById(IDC_SYMBOL_SEARCH, SymEd))
-				{
-					LString Input = SymEd->Name();
-					if (Input == Resp->Str) // Is the input string still the same?
-					{
-						/*
-						The problem with this is that the user it still typing something
-						and the cursor / focus jumps to the document now they are typing
-						a search string into the document, which is not what they intended.
-						
-						if (Resp->Results.Length() == 1)
-						{
-							FindSymResult *r = Resp->Results[0];
-							d->SymPopup->Visible(false);
+			auto Resp = Msg->AutoA<FindSymRequest>();
+			if (!Resp || !d->SymPopup)
+				break;
 
-							d->App->GotoReference(r->File, r->Line, false);
-						}
-						else
-						*/
-						{
-							d->SymPopup->All = Resp->Results;
-							Resp->Results.Length(0);
-							d->SymPopup->FindCommonPathLength();
-							d->SymPopup->SetItems(d->SymPopup->All);
-							d->SymPopup->Visible(true);
-						}
-					}
-				}
-			}
+			LViewI *SymEd;
+			if (!GetViewById(IDC_SYMBOL_SEARCH, SymEd))
+				break;
+
+			LString Input = SymEd->Name();
+			if (Input != Resp->Str) // Is the input string still the same?
+				break;
+
+			d->SymPopup->All.Swap(Resp->Results);
+			d->SymPopup->FindCommonPathLength();
+			d->SymPopup->SetItems(d->SymPopup->All);
+			d->SymPopup->Visible(true);
 			break;
 		}
 	}
