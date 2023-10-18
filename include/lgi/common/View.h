@@ -420,7 +420,7 @@ protected:
 		{
 			if (!LockWithTimeout(4000, _FL))
 			{
-				printf(LPrintfInt64 ": CbStore.Add lock timed out...\n", LCurrentThreadId());
+				printf(LPrintfInt64 ": CbStore.Add lock timed out...\n", (int64_t) LCurrentThreadId());
 				return -1;
 			}			
 
@@ -440,7 +440,7 @@ protected:
 		{
 			if (!LockWithTimeout(4000, _FL))
 			{
-				printf(LPrintfInt64 ": CbStore.Call(%i) lock timed out...\n", LCurrentThreadId(), id);
+				printf(LPrintfInt64 ": CbStore.Call(%i) lock timed out...\n", (int64_t) LCurrentThreadId(), id);
 				return false;
 			}			
 
@@ -465,7 +465,7 @@ protected:
 		{
 			if (!LockWithTimeout(4000, _FL))
 			{
-				printf(LPrintfInt64 ": CbStore.Call(%i) lock timed out...\n", LCurrentThreadId(), id);
+				printf(LPrintfInt64 ": CbStore.Call(%i) lock timed out...\n", (int64_t) LCurrentThreadId(), id);
 				return false;
 			}			
 
