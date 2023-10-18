@@ -362,12 +362,12 @@ public:
 				Size.Value = MinimumPointSize;
 		}
 		else if (Size.Type == LCss::SizeXXSmall ||
-				Size.Type == LCss::SizeXSmall ||
-				Size.Type == LCss::SizeSmall ||
-				Size.Type == LCss::SizeMedium ||
-				Size.Type == LCss::SizeLarge ||
-				Size.Type == LCss::SizeXLarge ||
-				Size.Type == LCss::SizeXXLarge)
+				 Size.Type == LCss::SizeXSmall  ||
+				 Size.Type == LCss::SizeSmall   ||
+				 Size.Type == LCss::SizeMedium  ||
+				 Size.Type == LCss::SizeLarge   ||
+				 Size.Type == LCss::SizeXLarge  ||
+				 Size.Type == LCss::SizeXXLarge)
 		{
 			int Idx = Size.Type-LCss::SizeXXSmall;
 			LAssert(Idx >= 0 && Idx < CountOf(LCss::FontSizeTable));
