@@ -69,8 +69,8 @@ public:
 		, MagicLock("MagicLock")
 		#endif
 	{
-		GuiThread = LGetCurrentThread();
-		GuiThreadId = GetCurrentThreadId();
+		GuiThread = LCurrentThreadHnd();
+		GuiThreadId = LCurrentThreadId();
 		printf("GuiThread: %" PRIx64 " id=%i\n", GuiThread, GuiThreadId);
 	}
 

@@ -451,7 +451,7 @@ LViewPrivate::~LViewPrivate()
 	if (Hnd)
 	{
 		auto *bv = dynamic_cast<LBView<BView>*>(Hnd);
-		// printf("%p::~LViewPrivate View=%p bv=%p th=%u\n", this, View, bv, GetCurrentThreadId());
+		// printf("%p::~LViewPrivate View=%p bv=%p th=%u\n", this, View, bv, LCurrentThreadId());
 		if (bv)
 			bv->d = NULL;
 

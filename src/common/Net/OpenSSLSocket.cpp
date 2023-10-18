@@ -537,7 +537,7 @@ SSL_locking_function(int mode, int n, const char *file, int line)
 			TestFlag(mode, CRYPTO_WRITE),
 			mode,
 			Library->Locks[n]->GetCount(),
-			LGetCurrentThread(),
+			LCurrentThreadHnd(),
 			file, line);
 		#endif
 		
@@ -551,7 +551,7 @@ SSL_locking_function(int mode, int n, const char *file, int line)
 unsigned long
 SSL_id_function()
 {
-	return (unsigned long) GetCurrentThreadId();
+	return (unsigned long) LCurrentThreadId();
 }
 
 bool StartSSL(LString &ErrorMsg, SslSocket *sock)

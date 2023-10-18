@@ -2191,10 +2191,10 @@ void LFileSelect::Open(SelectCb Cb)
 
 	d->Type = TypeOpenFile;
 
-	// printf("LFileSelect domodal.. thread=%p\n", LGetCurrentThread());
+	// printf("LFileSelect domodal.. thread=%p\n", LCurrentThreadHnd());
 	Dlg->DoModal([select=this, cb=Cb](auto dlg, auto code)
 	{
-		// printf("LFileSelect cb.. thread=%u lock=%u\n", GetCurrentThreadId(), dlg->WindowHandle()->LockingThread());
+		// printf("LFileSelect cb.. thread=%u lock=%u\n", LCurrentThreadId(), dlg->WindowHandle()->LockingThread());
 		if (cb)
 			cb(select, code == IDOK);
 		// printf("LFileSelect deleting.. lock=%u\n", dlg->WindowHandle()->LockingThread());
@@ -2225,10 +2225,10 @@ void LFileSelect::Save(SelectCb Cb)
 	
 	d->Type = TypeSaveFile;
 
-	// printf("LFileSelect domodal.. thread=%u\n", GetCurrentThreadId());
+	// printf("LFileSelect domodal.. thread=%u\n", LCurrentThreadId());
 	Dlg->DoModal([this, Cb](auto dlg, auto code)
 	{
-		// printf("LFileSelect cb.. thread=%u, code=%i\n", GetCurrentThreadId(), code); // dlg->WindowHandle()->LockingThread());
+		// printf("LFileSelect cb.. thread=%u, code=%i\n", LCurrentThreadId(), code); // dlg->WindowHandle()->LockingThread());
 		if (Cb)
 			Cb(this, code == IDOK);
 		// printf("LFileSelect deleting.. lock=%u\n", dlg->WindowHandle()->LockingThread());

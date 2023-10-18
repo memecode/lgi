@@ -131,7 +131,7 @@ LThreadEvent::~LThreadEvent()
 		if (Sem != SEM_FAILED)
 		{
 			#if USE_NAMED_SEM
-			// printf("%s:%i - sem_close(%i) in %i\n", _FL, Sem, GetCurrentThreadId());
+			// printf("%s:%i - sem_close(%i) in %i\n", _FL, Sem, LCurrentThreadId());
 			sem_close(Sem);
 			#else
 			sem_destroy(Sem);
@@ -204,14 +204,14 @@ bool LThreadEvent::Signal()
 		#if DEBUG_THREADING
 		int val = 1111;
 		r = sem_getvalue (Sem, &val);     			
-		printf("%s:%i - calling sem_post(%i) in %i (val=%i, name=%s)\n", _FL, Sem, GetCurrentThreadId(), val, Name());
+		printf("%s:%i - calling sem_post(%i) in %i (val=%i, name=%s)\n", _FL, Sem, LCurrentThreadId(), val, Name());
 		#endif
 		
 		r = sem_post(Sem);
 		
 		#if DEBUG_THREADING
 		sem_getvalue (Sem, &val);
-		printf("%s:%i - sem_post(%i) = %i in %i (val=%i, name=%s)\n", _FL, Sem, r, GetCurrentThreadId(), val, Name());
+		printf("%s:%i - sem_post(%i) = %i in %i (val=%i, name=%s)\n", _FL, Sem, r, LCurrentThreadId(), val, Name());
 		#endif
 		
 		if (r)
@@ -319,11 +319,11 @@ LThreadEvent::WaitStatus LThreadEvent::Wait(int32 Timeout)
 		if (Timeout < 0)
 		{
 			#if DEBUG_THREADING
-			printf("%s:%i - starting sem_wait(%i) in %i (name=%s)\n", _FL, Sem, GetCurrentThreadId(), Name());
+			printf("%s:%i - starting sem_wait(%i) in %i (name=%s)\n", _FL, Sem, LCurrentThreadId(), Name());
 			#endif
 			r = sem_wait(Sem);
 			#if DEBUG_THREADING
-			printf("%s:%i - sem_wait(%i) = %i in %i (name=%s)\n", _FL, Sem, r, GetCurrentThreadId(), Name());
+			printf("%s:%i - sem_wait(%i) = %i in %i (name=%s)\n", _FL, Sem, r, LCurrentThreadId(), Name());
 			#endif
 			if (r)
 			{
@@ -341,13 +341,13 @@ LThreadEvent::WaitStatus LThreadEvent::Wait(int32 Timeout)
 			TimeoutToTimespec(to, Timeout);
 
 			#if DEBUG_THREADING
-			printf("%s:%i - starting sem_timedwait(%i) in %i\n", _FL, Sem, GetCurrentThreadId());
+			printf("%s:%i - starting sem_timedwait(%i) in %i\n", _FL, Sem, LCurrentThreadId());
 			#endif
 			r = sem_timedwait(Sem, &to);
 			int ErrCode = r ? errno : 0;
 			#if DEBUG_THREADING
 			LError Err(ErrCode);
-			printf("%s:%i - sem_timedwait(%i) = %i (in %i, errno=%s)\n", _FL, Sem, r, GetCurrentThreadId(), Err.GetMsg().Get());
+			printf("%s:%i - sem_timedwait(%i) = %i (in %i, errno=%s)\n", _FL, Sem, r, LCurrentThreadId(), Err.GetMsg().Get());
 			#endif
 			if (ErrCode == ETIMEDOUT)
 				return WaitTimeout;
@@ -373,11 +373,11 @@ LThreadEvent::WaitStatus LThreadEvent::Wait(int32 Timeout)
 			if (Timeout < 0)
 			{
 				#if DEBUG_THREADING
-				printf("%x: calling pthread_cond_wait\n", GetCurrentThreadId());
+				printf("%x: calling pthread_cond_wait\n", LCurrentThreadId());
 				#endif
 				result = pthread_cond_wait(&Cond, &Mutex);
 				#if DEBUG_THREADING
-				printf("%x: pthread_cond_wait = %i\n", GetCurrentThreadId(), result);
+				printf("%x: pthread_cond_wait = %i\n", LCurrentThreadId(), result);
 				#endif
 			}
 			else
@@ -392,11 +392,11 @@ LThreadEvent::WaitStatus LThreadEvent::Wait(int32 Timeout)
 				auto remaining_ms = Timeout - (now - start);
 				TimeoutToTimespec(to, remaining_ms);
 				#if DEBUG_THREADING
-				printf("%x: calling pthread_cond_timedwait %i\n", GetCurrentThreadId(), remaining_ms);
+				printf("%x: calling pthread_cond_timedwait %i\n", LCurrentThreadId(), remaining_ms);
 				#endif
 				result = pthread_cond_timedwait(&Cond, &Mutex, &to);
 				#if DEBUG_THREADING
-				printf("%x: pthread_cond_timedwait result = %i\n", GetCurrentThreadId(), result);
+				printf("%x: pthread_cond_timedwait result = %i\n", LCurrentThreadId(), result);
 				#endif
 			}
 		}

@@ -153,7 +153,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *name, LAppArguments *Args) :
 	OsApplication(AppArgs.Args, AppArgs.Arg)
 {
 	TheApp = this;
-	LThread::RegisterThread(GetCurrentThreadId(), LString("LApp.")+name);
+	LThread::RegisterThread(LCurrentThreadId(), LString("LApp.")+name);
 	LgiArgsAppPath = AppArgs.Arg[0];
 	Name(name);
 	d = new LAppPrivate(this);
@@ -214,7 +214,7 @@ LApp::~LApp()
 
 LFont *LApp::GetFont(bool bold)
 {
-	auto cur = GetCurrentThreadId();
+	auto cur = LCurrentThreadId();
 
 	LHashTbl<IntKey<OsThreadId>,LFont*> &store = bold ? d->BoldFont : d->SystemFont;
 	auto sysFont = store.Find(cur);
@@ -316,7 +316,7 @@ void LApp::SetAppArgs(OsAppArguments &AppArgs)
 
 bool LApp::InThread()
 {
-	OsThreadId Me = GetCurrentThreadId();
+	OsThreadId Me = LCurrentThreadId();
 	OsThreadId Gui = GetGuiThreadId();
 	// printf("Me=%i Gui=%i\n", Me, Gui);
 	return Gui == Me;
@@ -534,7 +534,7 @@ int LApp::GetCpuCount()
 
 LFontCache *LApp::GetFontCache()
 {
-	auto cur = GetCurrentThreadId();
+	auto cur = LCurrentThreadId();
 	auto cache = d->FontCache.Find(cur);
 	if (!cache)
 	{
@@ -690,7 +690,7 @@ bool LLocker::Lock(bool debug)
 		noThread = true;
 		locked = true;
 		startTs = LCurrentTime();
-		lockingThread = GetCurrentThreadId();
+		lockingThread = LCurrentThreadId();
 		return true;
 	}
 
@@ -701,7 +701,7 @@ bool LLocker::Lock(bool debug)
 		{
 			locked = true;
 			startTs = LCurrentTime();
-			lockingThread = GetCurrentThreadId();
+			lockingThread = LCurrentThreadId();
 			
 			if (debug)
 				printf("%s:%i - %s:%i locked.\n", _FL, file, line);
@@ -710,7 +710,7 @@ bool LLocker::Lock(bool debug)
 		else if (result == B_TIMED_OUT)
 		{
 			// Warn about failure to lock...
-			auto cur = GetCurrentThreadId();
+			auto cur = LCurrentThreadId();
 			auto locking = hnd->Looper()->LockingThread();
 			
 			printf("%s:%i - Warning: can't lock. cur=%i locking=%i\n",
@@ -761,7 +761,7 @@ status_t LLocker::LockWithTimeout(int64 time, bool debug)
 			printf("%s:%i - Looper has no thread?!?!\n", file, line);
 		noThread = true;
 		locked = true;
-		lockingThread = GetCurrentThreadId();
+		lockingThread = LCurrentThreadId();
 		startTs = LCurrentTime();
 
 		if (debug)
@@ -773,7 +773,7 @@ status_t LLocker::LockWithTimeout(int64 time, bool debug)
 	if (result == B_OK)
 	{
 		locked = true;
-		lockingThread = GetCurrentThreadId();
+		lockingThread = LCurrentThreadId();
 		startTs = LCurrentTime();
 	}
 	
@@ -799,7 +799,7 @@ bool LLocker::WaitForLock(int timeout)
 				auto looper = hnd ? hnd->Looper() : NULL;
 				LgiTrace("%s:%i WaitForLock timing out: cur=%i:%s, locker=%i:%s (%s:%i)\n",
 					_FL,
-					GetCurrentThreadId(), LThread::GetThreadName(GetCurrentThreadId()),
+					LCurrentThreadId(), LThread::GetThreadName(LCurrentThreadId()),
 					looper ? looper->LockingThread() : -1, looper ? LThread::GetThreadName(looper->LockingThread()) : "none",
 					file, line);
 				return false;
@@ -826,12 +826,12 @@ void LLocker::Unlock()
 
 	if (locked)
 	{
-		if (lockingThread != GetCurrentThreadId())
+		if (lockingThread != LCurrentThreadId())
 		{
 			printf("%s:%i - Lock/Unlock thread mismatch: locking=%i/%s != unlocking=%i/%s\n",
 				_FL,
 				lockingThread, LThread::GetThreadName(lockingThread),
-				GetCurrentThreadId(), LThread::GetThreadName(GetCurrentThreadId()));
+				LCurrentThreadId(), LThread::GetThreadName(LCurrentThreadId()));
 		}
 		
 		hnd->UnlockLooper();

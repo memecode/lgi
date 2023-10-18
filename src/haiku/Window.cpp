@@ -80,7 +80,7 @@ public:
 		printf("%p::~LWindowPrivate start, locking=%i, cur=%i, thread=%i\n",
 			this,
 			LockingThread(),
-			GetCurrentThreadId(),
+			LCurrentThreadId(),
 			Thread());
 		#endif
 	
@@ -167,7 +167,7 @@ public:
 	{
 		if (message->what == M_LWINDOW_DELETE)
 		{
-			// printf("Processing M_LWINDOW_DELETE th=%u\n", GetCurrentThreadId());
+			// printf("Processing M_LWINDOW_DELETE th=%u\n", LCurrentThreadId());
 			Wnd->Handle()->RemoveSelf();			
 			Quit();
 			// printf("Processed M_LWINDOW_DELETE\n");
@@ -332,9 +332,9 @@ int LWindow::WaitThread()
 		return -1;
 
 	thread_id id = d->Thread();
-	bool thisThread = id == GetCurrentThreadId();
+	bool thisThread = id == LCurrentThreadId();
 
-	WAIT_LOG("%s::~LWindow thread=%u lock=%u\n", Name(), GetCurrentThreadId(), d->LockingThread());
+	WAIT_LOG("%s::~LWindow thread=%u lock=%u\n", Name(), LCurrentThreadId(), d->LockingThread());
 	if (thisThread)
 	{
 		// We are in thread... can delete easily.
@@ -354,7 +354,7 @@ int LWindow::WaitThread()
 	if (d->Thread() >= 0)
 	{
 		// Post event to the window's thread to delete itself...
-		WAIT_LOG("%s::~LWindow posting M_LWINDOW_DELETE from th=%u\n", Name(), GetCurrentThreadId());
+		WAIT_LOG("%s::~LWindow posting M_LWINDOW_DELETE from th=%u\n", Name(), LCurrentThreadId());
 		d->PostMessage(new BMessage(M_LWINDOW_DELETE));
 
 		WAIT_LOG("wait_for_thread(%u) start..\n", id);
@@ -513,7 +513,7 @@ void LWindow::UpdateRootView()
 	{
 		printf("%s::UpdateRootView() curThread=%i/%s wndThread=%i/%s\n",
 			GetClass(),
-			GetCurrentThreadId(), LThread::GetThreadName(GetCurrentThreadId()),
+			LCurrentThreadId(), LThread::GetThreadName(LCurrentThreadId()),
 			wnd->Thread(), LThread::GetThreadName(wnd->Thread())
 			);
 

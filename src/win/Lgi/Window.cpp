@@ -386,7 +386,7 @@ void LWindow::Raise()
 	{
 		DWORD dwFGProcessId;
 		DWORD dwFGThreadId = GetWindowThreadProcessId(_View, &dwFGProcessId);
-		DWORD dwThisThreadId = GetCurrentThreadId();
+		DWORD dwThisThreadId = LCurrentThreadId();
 
 		AttachThreadInput(dwThisThreadId, dwFGThreadId, true);
 

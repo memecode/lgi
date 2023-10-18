@@ -823,7 +823,7 @@ bool MailIMap::WriteBuf(bool ObsurePass, const char *Buffer, bool Continuation)
 			}
 			else Log(Buffer, LSocketI::SocketMsgSend);
 			
-			d->InCommand = LGetCurrentThread();
+			d->InCommand = LCurrentThreadHnd();
 
 			return true;
 		}

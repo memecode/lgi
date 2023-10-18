@@ -622,7 +622,7 @@ OsThreadId LApp::GetGuiThreadId()
 
 bool LApp::InThread()
 {
-	return GetCurrentThreadId() == d->GuiThreadId;
+	return LCurrentThreadId() == d->GuiThreadId;
 }
 
 OsProcessId LApp::GetProcessId()

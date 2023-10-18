@@ -172,7 +172,7 @@ LFont::~LFont()
 #ifdef HAIKU
 bool LFont::InThread()
 {
-	auto cur = GetCurrentThreadId();
+	auto cur = LCurrentThreadId();
 	
 	if (d->Thread < 0)
 		return true; // Not created yet...?
@@ -1146,7 +1146,7 @@ bool LFont::Create(const char *face, LCss::Len size, LSurface *pSurface)
 	#elif defined(HAIKU)
 
 		d->hFont = new BFont();
-		d->Thread = GetCurrentThreadId();
+		d->Thread = LCurrentThreadId();
 		d->hFont->SetSize(PointSize());
 		status_t r = d->hFont->SetFamilyAndStyle(Face(), "Regular");
 		// printf("SetFamilyAndFace(%s)=%i\n", Face(), r);

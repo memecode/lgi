@@ -10,7 +10,7 @@
 #error "Pthreads not included"
 #endif
 
-OsThreadId GetCurrentThreadId()
+OsThreadId LCurrentThreadId()
 {
 	uint64_t tid = LThread::InvalidId;
 	pthread_threadid_np(NULL, &tid);
@@ -24,7 +24,7 @@ void *ThreadEntryPoint(void *i)
 	{
 		LThread *Thread = (LThread*) i;
 		
-		Thread->ThreadId = GetCurrentThreadId();
+		Thread->ThreadId = LCurrentThreadId();
 		
 		// Make sure we have finished executing the setup
 		while (Thread->State == LThread::THREAD_INIT)

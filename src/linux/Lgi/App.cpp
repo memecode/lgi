@@ -503,7 +503,7 @@ void LApp::SetAppArgs(OsAppArguments &AppArgs)
 
 bool LApp::InThread()
 {
-	OsThreadId Me = GetCurrentThreadId();
+	OsThreadId Me = LCurrentThreadId();
 	OsThreadId Gui = GetGuiThreadId();
 	// printf("Me=%i Gui=%i\n", Me, Gui);
 	return Gui == Me;

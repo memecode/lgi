@@ -1267,7 +1267,7 @@ void LZoomView::Update(LRect *Where)
 {
 	#if DEBUG_THREADING
 	if (!d->Dirty)
-		LgiTrace("%i setting DIRTY\n", LGetCurrentThread());
+		LgiTrace("%i setting DIRTY\n", LCurrentThreadHnd());
 	#endif
 
 	LRect w;

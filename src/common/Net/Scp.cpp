@@ -854,7 +854,7 @@ bool IScpServer::OnIdle(LSocketI *s)
 					char *Pass = d->GetStr("Pass");
 					if (User AND Pass)
 					{
-						SeshId = (int)((int64)LGetCurrentThread() ^ LCurrentTime());
+						SeshId = (int)((int64)LCurrentThreadHnd() ^ LCurrentTime());
 						bool Ok = OnLogin(User, Pass, SeshId);
 						IScpData r(SCP_RESPONSE);
 

@@ -1489,7 +1489,7 @@ public:
 
 	bool UseThreadCheck()
 	{
-		auto Cur = GetCurrentThreadId();
+		auto Cur = LCurrentThreadId();
 		if (UseId == LThread::InvalidId)
 		{
 			UseId = Cur;
@@ -1540,7 +1540,7 @@ OsFile LFile::Handle()
 
 void LFile::ChangeThread()
 {
-	d->UseId = GetCurrentThreadId();
+	d->UseId = LCurrentThreadId();
 }
 
 uint64_t LFile::GetModifiedTime()
@@ -1674,7 +1674,7 @@ int LFile::Open(const char *File, int Mode)
 
 			Status = true;
 			d->Status = true;
-			d->CreateId = GetCurrentThreadId();
+			d->CreateId = LCurrentThreadId();
 		}
 	}
 

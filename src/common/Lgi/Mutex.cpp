@@ -117,7 +117,7 @@ bool LMutex::Lock(const char *file, int line, bool NoTrace)
 {
 	auto Start = LCurrentTime();
 	bool Status = false;
-	OsThreadId CurrentThread = GetCurrentThreadId();
+	OsThreadId CurrentThread = LCurrentThreadId();
 	bool Warn = true;
 
 	LAssert(file != NULL && line != 0);
@@ -201,7 +201,7 @@ bool LMutex::LockWithTimeout(int Timeout, const char *file, int line)
 	{
 		if (_Lock())
 		{
-			OsThreadId CurrentThread = GetCurrentThreadId();
+			OsThreadId CurrentThread = LCurrentThreadId();
 			if (!_Thread ||
 				_Thread == CurrentThread)
 			{

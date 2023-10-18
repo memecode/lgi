@@ -255,7 +255,7 @@ LView::~LView()
 
 	_Delete();
 
-	// printf("%p::~LView delete %p th=%u\n", this, d, GetCurrentThreadId());
+	// printf("%p::~LView delete %p th=%u\n", this, d, LCurrentThreadId());
 	DeleteObj(d);	
 	// printf("%p::~LView\n", this);
 }
@@ -467,14 +467,14 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 				if (_InLock == 0)
 				{
 					LAssert(_LockingThread < 0);
-					_LockingThread = GetCurrentThreadId();
+					_LockingThread = LCurrentThreadId();
 				}
-				else if (_LockingThread != GetCurrentThreadId())
+				else if (_LockingThread != LCurrentThreadId())
 				{
 					printf("%s:%i - relock in different thread, prev=%i/%s, cur=%i/%s\n",
 						_FL,
 						_LockingThread, LThread::GetThreadName(_LockingThread),
-						GetCurrentThreadId(), LThread::GetThreadName(GetCurrentThreadId()));
+						LCurrentThreadId(), LThread::GetThreadName(LCurrentThreadId()));
 				}
 				_InLock++;
 				if (Debug)
@@ -492,14 +492,14 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 			if (_InLock == 0)
 			{
 				LAssert(_LockingThread < 0);
-				_LockingThread = GetCurrentThreadId();
+				_LockingThread = LCurrentThreadId();
 			}
-			else if (_LockingThread != GetCurrentThreadId())
+			else if (_LockingThread != LCurrentThreadId())
 			{
 				printf("%s:%i - relock in different thread, prev=%i/%s, cur=%i/%s\n",
 					_FL,
 					_LockingThread, LThread::GetThreadName(_LockingThread),
-					GetCurrentThreadId(), LThread::GetThreadName(GetCurrentThreadId()));
+					LCurrentThreadId(), LThread::GetThreadName(LCurrentThreadId()));
 			}
 			_InLock++;
 			
@@ -510,7 +510,7 @@ bool LView::Lock(const char *file, int line, int TimeOut)
 					GetClass(),
 					this,
 					_InLock,
-					GetCurrentThreadId(),
+					LCurrentThreadId(),
 					w ? w->Thread() : -1);
 			}
 			return true;
@@ -563,12 +563,12 @@ void LView::Unlock()
 	
 		if (_InLock > 0)
 		{
-			if (_LockingThread != GetCurrentThreadId())
+			if (_LockingThread != LCurrentThreadId())
 			{
 				printf("%s:%i - unlock in different thread, locker=%i/%s, unlocker=%i/%s\n",
 					_FL,
 					_LockingThread, LThread::GetThreadName(_LockingThread),
-					GetCurrentThreadId(), LThread::GetThreadName(GetCurrentThreadId()));
+					LCurrentThreadId(), LThread::GetThreadName(LCurrentThreadId()));
 			}
 		
 			// printf("%s:%p - Calling UnlockLooper: %i.\n", GetClass(), this, _InLock);
@@ -722,7 +722,7 @@ int LView::OnNotify(LViewI *Ctrl, LNotification Data)
 		auto bParent = d->Parent->Handle();
 		if (bCur && bParent)
 		{
-			auto curThread = bCur->Looper() ? bCur->Looper()->Thread() : GetCurrentThreadId();
+			auto curThread = bCur->Looper() ? bCur->Looper()->Thread() : LCurrentThreadId();
 			auto parThread = bParent->Looper() ? bParent->Looper()->Thread() : -1;
 			if (curThread != parThread && parThread >= 0)
 			{
@@ -2296,7 +2296,7 @@ bool LView::InThread()
 		for (LViewI *p = GetParent(); p && !Hnd; p = p->GetParent())
 			Hnd = p->Handle();
 		
-		auto CurThreadId = GetCurrentThreadId();
+		auto CurThreadId = LCurrentThreadId();
 		auto GuiThreadId = LAppInst->GetGuiThreadId();
 		DWORD ViewThread = Hnd ? GetWindowThreadProcessId(Hnd, NULL) : GuiThreadId;
 		return CurThreadId == ViewThread;
@@ -2311,12 +2311,12 @@ bool LView::InThread()
 		if (!looper)
 			return true;
 			
-		auto CurThreadId = GetCurrentThreadId();
+		auto CurThreadId = LCurrentThreadId();
 		return CurThreadId == looper->Thread();
 		
 	#else
 
-		OsThreadId Me = GetCurrentThreadId();
+		OsThreadId Me = LCurrentThreadId();
 		OsThreadId Gui = LAppInst ? LAppInst->GetGuiThreadId() : 0;
 		
 		#if 0

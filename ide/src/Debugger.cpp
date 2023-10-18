@@ -88,9 +88,9 @@ class Gdb : public LDebugger, public LThread, public Callback
 			
 			if (CurFile && CurLine > 0)
 			{
-				// printf("%i: OnFileLine...\n", GetCurrentThreadId());
+				// printf("%i: OnFileLine...\n", LCurrentThreadId());
 				Events->OnFileLine(CurFile, CurLine, CurrentIp);
-				// printf("%i: OnFileLine done.\n", GetCurrentThreadId());
+				// printf("%i: OnFileLine done.\n", LCurrentThreadId());
 			}
 			/*
 			else

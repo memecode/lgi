@@ -33,8 +33,8 @@ public:
 		Args(0, 0),
 		Owner(a)
 	{
-		GuiThread = LGetCurrentThread();
-		GuiThreadId = GetCurrentThreadId();
+		GuiThread = LCurrentThreadHnd();
+		GuiThreadId = LCurrentThreadId();
 	}
 
 	~LAppPrivate()

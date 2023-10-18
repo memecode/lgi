@@ -1002,7 +1002,7 @@ HANDLE SetHardwareBreakpoint(HANDLE hThread, HWBRK_TYPE Type, HWBRK_SIZE Size, v
 
 	if (hThread == GetCurrentThread())
 	{
-		DWORD pid = GetCurrentThreadId();
+		DWORD pid = LCurrentThreadId();
 		h->hT = OpenThread(THREAD_ALL_ACCESS,0,pid);
 	}
 
@@ -1038,7 +1038,7 @@ bool RemoveHardwareBreakpoint(HANDLE hBrk)
 	bool C = false;
 	if (h->hT == GetCurrentThread())
 	{
-		DWORD pid = GetCurrentThreadId();
+		DWORD pid = LCurrentThreadId();
 		h->hT = OpenThread(THREAD_ALL_ACCESS,0,pid);
 		C = true;
 	}

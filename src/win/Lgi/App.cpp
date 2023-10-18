@@ -265,7 +265,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *AppName, LAppArguments *Opts)
 	TheApp = this;
 	LAssert(AppName != NULL);
 	Name(AppName);
-	LThread::RegisterThread(GetCurrentThreadId(), "LApp");
+	LThread::RegisterThread(LCurrentThreadId(), "LApp");
 
 int64 Time = LCurrentTime();
 #define DumpTime(str) /* \
@@ -418,7 +418,7 @@ DumpTime("fonts");
 
 	// Other vars and init
 	hNormalCursor = LoadCursor(NULL, IDC_ARROW);
-	LRandomize((uint) (LCurrentTime()*GetCurrentThreadId()));
+	LRandomize((uint) (LCurrentTime()*LCurrentThreadId()));
 	MouseRollMsg = RegisterWindowMessage(L"MSWHEEL_ROLLMSG");
 
 DumpTime("cursor/rand/msg");
@@ -500,7 +500,7 @@ OsThread LApp::_GetGuiThread()
 bool LApp::InThread()
 {
 	auto GuiId = GetGuiThreadId();
-	auto MyId = GetCurrentThreadId();
+	auto MyId = LCurrentThreadId();
 	return GuiId == MyId;
 }
 

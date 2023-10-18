@@ -39,7 +39,7 @@ public:
 		// This is most likely running in the constructor of the window. Which is NOT the BWindow's thread.
 		// Therefor wait for the actually thread before getting a thread specific font cache.
 		LStringLayout(NULL),
-		CreateThread(GetCurrentThreadId())
+		CreateThread(LCurrentThreadId())
 		#else
 		LStringLayout(LAppInst->GetFontCache())
 		#endif

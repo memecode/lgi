@@ -300,7 +300,7 @@ typedef XWidget						*OsView;
 // Threads
 typedef pthread_t					OsThreadId;
 typedef pthread_mutex_t				OsSemaphore;
-#define LGetCurrentThread()		pthread_self()
+#define LCurrentThreadHnd()		pthread_self()
 
 // Sockets
 #define ValidSocket(s)				((s)>=0)

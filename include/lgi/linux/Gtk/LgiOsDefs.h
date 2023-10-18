@@ -173,15 +173,15 @@ public:
 	typedef HANDLE  					OsThread;
 	typedef DWORD						OsThreadId;
 	typedef CRITICAL_SECTION			OsSemaphore;
-	#define LGetCurrentThread()			GetCurrentThread()
+	#define LCurrentThreadHnd()			GetCurrentThread()
 
 #else
 
 	typedef pthread_t					OsThread;
 	typedef pid_t						OsThreadId;
 	typedef pthread_mutex_t				OsSemaphore;
-	#define LGetCurrentThread()			pthread_self()
-	LgiFunc OsThreadId					GetCurrentThreadId();
+	#define LCurrentThreadHnd()			pthread_self()
+	LgiFunc OsThreadId					LCurrentThreadId();
 
 #endif
 

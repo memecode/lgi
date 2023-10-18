@@ -37,8 +37,8 @@ public:
 		FileSystem = 0;
 		GdcSystem = 0;
 		SkinLib = 0;
-		GuiThread = LGetCurrentThread();
-		GuiThreadId = GetCurrentThreadId();
+		GuiThread = LCurrentThreadHnd();
+		GuiThreadId = LCurrentThreadId();
 	}
 	
 	~LAppPrivate()

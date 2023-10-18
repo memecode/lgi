@@ -69,7 +69,7 @@ public:
 			#if 1
 			return true;
 			#else
-			auto Cur = GetCurrentThreadId();
+			auto Cur = LCurrentThreadId();
 			bool Ok = Thread == Cur;
 			LAssert(Ok);
 			return Ok;
@@ -87,7 +87,7 @@ public:
 			i = 0;
 			Cur = 0;
 			Ver = lst->Ver;
-			Thread = GetCurrentThreadId();
+			Thread = LCurrentThreadId();
 		}
 
 		Iter(const List<T> *lst, LstBlk *item, int c)
@@ -96,7 +96,7 @@ public:
 			i = item;
 			Cur = c;
 			Ver = lst->Ver;
-			Thread = GetCurrentThreadId();
+			Thread = LCurrentThreadId();
 		}
 
 		bool operator ==(const Iter &it) const

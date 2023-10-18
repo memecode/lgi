@@ -27,7 +27,7 @@ struct THREADNAME_INFO
 
 static void SetThreadName(const char *name)
 {
-	LThread::RegisterThread(GetCurrentThreadId(), name);
+	LThread::RegisterThread(LCurrentThreadId(), name);
 }
 
 uint WINAPI ThreadEntryPoint(void *i)

@@ -212,8 +212,8 @@ public:
 	{
 		CaptureId = 0;
 		CurEvent = 0;
-		GuiThread = LGetCurrentThread();
-		GuiThreadId = GetCurrentThreadId();
+		GuiThread = LCurrentThreadHnd();
+		GuiThreadId = LCurrentThreadId();
 		FileSystem = 0;
 		GdcSystem = 0;
 		Config = 0;
@@ -401,7 +401,7 @@ OsThreadId LApp::GetGuiThreadId()
 
 bool LApp::InThread()
 {
-	return GetCurrentThreadId() == d->GuiThreadId;
+	return LCurrentThreadId() == d->GuiThreadId;
 }
 
 OsProcessId LApp::GetProcessId()

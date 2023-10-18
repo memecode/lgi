@@ -81,8 +81,8 @@ typedef int							OsProcessId;
 #define LGetCurrentProcess()		getpid()
 
 // Threads
-#define LGetCurrentThread()		pthread_self()
-LgiFunc OsThreadId					GetCurrentThreadId();
+#define LCurrentThreadHnd()		pthread_self()
+LgiFunc OsThreadId					LCurrentThreadId();
 
 // Sockets
 #define ValidSocket(s)				((s)>=0)

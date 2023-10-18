@@ -420,7 +420,7 @@ protected:
 		{
 			if (!LockWithTimeout(4000, _FL))
 			{
-				printf("%i: CbStore.Add lock timed out...\n", GetCurrentThreadId());
+				printf("%i: CbStore.Add lock timed out...\n", LCurrentThreadId());
 				return -1;
 			}			
 
@@ -430,7 +430,7 @@ protected:
 				;			
 			
 			map.Add(id, new std::function<void()>(std::move(cb)));
-			// printf("%i: CbStore.Add %i\n", GetCurrentThreadId(), id);
+			// printf("%i: CbStore.Add %i\n", LCurrentThreadId(), id);
 
 			Unlock();
 			return id;
@@ -440,7 +440,7 @@ protected:
 		{
 			if (!LockWithTimeout(4000, _FL))
 			{
-				printf("%i: CbStore.Call(%i) lock timed out...\n", GetCurrentThreadId(), id);
+				printf("%i: CbStore.Call(%i) lock timed out...\n", LCurrentThreadId(), id);
 				return false;
 			}			
 
@@ -453,7 +453,7 @@ protected:
 				{
 					delete cb;
 					status = true;
-					// printf("%i: CbStore.Call %i\n", GetCurrentThreadId(), id);
+					// printf("%i: CbStore.Call %i\n", LCurrentThreadId(), id);
 				}
 			}
 
@@ -465,7 +465,7 @@ protected:
 		{
 			if (!LockWithTimeout(4000, _FL))
 			{
-				printf("%i: CbStore.Call(%i) lock timed out...\n", GetCurrentThreadId(), id);
+				printf("%i: CbStore.Call(%i) lock timed out...\n", LCurrentThreadId(), id);
 				return false;
 			}			
 
@@ -474,7 +474,7 @@ protected:
 			if (cb && map.Delete(id))
 			{
 				status = true;
-				// printf("%i: CbStore.Delete %i\n", GetCurrentThreadId(), id);
+				// printf("%i: CbStore.Delete %i\n", LCurrentThreadId(), id);
 				delete cb;
 			}
 
@@ -538,7 +538,7 @@ public:
 			result.Reset(new T(Callback()));
 		});
 
-		printf("%i: post M_VIEW_RUN_CALLBACK for %i...\n", GetCurrentThreadId(), id);
+		printf("%i: post M_VIEW_RUN_CALLBACK for %i...\n", LCurrentThreadId(), id);
 		if (!PostEvent(M_VIEW_RUN_CALLBACK, id))
 		{
 			LgiTrace("%s:%i - RunCallback PostEvent failed.\n", _FL);
@@ -555,26 +555,26 @@ public:
 			{
 				Report = Now;
 				printf("%i: Waiting for M_VIEW_RUN_CALLBACK %i\n",
-					GetCurrentThreadId(),
+					LCurrentThreadId(),
 					(int)(Now-StartTs));
 			}
 
 			if (timeoutMs >= 0 && (Now-StartTs) > timeoutMs)
 			{
-				printf("%i: RunCallback timed out.\n", GetCurrentThreadId());
+				printf("%i: RunCallback timed out.\n", LCurrentThreadId());
 				break;
 			}
 
 			if (cancel && cancel->IsCancelled())
 			{
-				printf("%i: RunCallback cancelled.\n", GetCurrentThreadId());
+				printf("%i: RunCallback cancelled.\n", LCurrentThreadId());
 				break;
 			}
 
 			LSleep(10);
 		}
 
-		printf("%i: RunCallback finished: %p\n", GetCurrentThreadId(), result.Get());
+		printf("%i: RunCallback finished: %p\n", LCurrentThreadId(), result.Get());
 		CbStore.Delete(id);
 		return result;
 	}

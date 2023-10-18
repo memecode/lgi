@@ -74,7 +74,7 @@ HRESULT GenerateCrashDump(MINIDUMP_TYPE flags, EXCEPTION_POINTERS *seh=NULL)
 	MINIDUMP_EXCEPTION_INFORMATION *sehPtr = NULL;
 	if (seh)
 	{
-		sehInfo.ThreadId = GetCurrentThreadId();
+		sehInfo.ThreadId = LCurrentThreadId();
 		sehInfo.ExceptionPointers = seh;
 		sehInfo.ClientPointers = FALSE;
 		sehPtr = &sehInfo;
@@ -128,7 +128,7 @@ LONG __stdcall LApp::_ExceptionFilter(LPEXCEPTION_POINTERS e, char *ProductId)
 
 			ZeroObj(Info);
 
-			Info.ThreadId = GetCurrentThreadId();
+			Info.ThreadId = LCurrentThreadId();
 			Info.ExceptionPointers = e;
 			Info.ClientPointers = false;
 

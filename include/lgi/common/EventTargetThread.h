@@ -215,7 +215,7 @@ class LgiClass LEventTargetThread :
 	LString ProcessName(LString obj, const char *desc)
 	{
 		OsProcessId process = LGetCurrentProcess();
-		OsThreadId thread = GetCurrentThreadId();
+		OsThreadId thread = LCurrentThreadId();
 		LString s;
 		s.Printf("%s.%s.%i.%i", obj.Get(), desc, process, thread);
 		return s;
@@ -268,7 +268,7 @@ public:
 		// to lock to check for messages...
 		Cancel();
 			
-		if (GetCurrentThreadId() == LThread::GetId())
+		if (LCurrentThreadId() == LThread::GetId())
 		{
 			// Being called from within the thread, in which case we can't signal 
 			// the event because we'll be stuck in this loop and not waitin on it.
@@ -296,7 +296,7 @@ public:
 
 				printf("%s:%i - EndThread() hung waiting for %s to exit (caller.thread=%i, worker.thread=%i, event=%p, r=%i, val=%i).\n",
 					_FL, LThread::GetName(),
-					GetCurrentThreadId(),
+					LCurrentThreadId(),
 					GetId(),
 					Event.Handle(),
 					r,
@@ -304,7 +304,7 @@ public:
 				#else
 				printf("%s:%i - EndThread() hung waiting for %s to exit (caller.thread=0x%x, worker.thread=0x%x, event=%p).\n",
 					_FL, LThread::GetName(),
-					(int)GetCurrentThreadId(),
+					(int)LCurrentThreadId(),
 					(int)GetId(),
 					(void*)(ssize_t)Event.Handle());
 				#endif
@@ -331,13 +331,13 @@ public:
 			Msgs.Add(Msg);
 		Unlock();
 		
-		// printf("%x: PostEvent and sig %i\n", GetCurrentThreadId(), (int)Msgs.Length());
+		// printf("%x: PostEvent and sig %i\n", LCurrentThreadId(), (int)Msgs.Length());
 		return Event.Signal();
 	}
 	
 	int Main()
 	{
-		// printf("EventTargetThread %s, thread=%i\n", LThread::GetName(), GetCurrentThreadId());
+		// printf("EventTargetThread %s, thread=%i\n", LThread::GetName(), LCurrentThreadId());
 		while (!IsCancelled())
 		{
 			int WaitLength = -1;

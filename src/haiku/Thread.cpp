@@ -6,7 +6,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/EventTargetThread.h"
 
-OsThreadId GetCurrentThreadId()
+OsThreadId LCurrentThreadId()
 {
 	return find_thread(NULL);
 }
@@ -17,7 +17,7 @@ void *ThreadEntryPoint(void *i)
 	if (i)
 	{
 		LThread *Thread = (LThread*) i;
-		Thread->ThreadId = GetCurrentThreadId();
+		Thread->ThreadId = LCurrentThreadId();
 
 		// Make sure we have finished executing the setup
 		while (Thread->State == LThread::THREAD_INIT)

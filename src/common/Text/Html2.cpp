@@ -6728,7 +6728,7 @@ bool LHtml2::Name(const char *s)
 	}
 	#endif
 
-	LAssert(LAppInst->GetGuiThread() == LGetCurrentThread());
+	LAssert(LAppInst->GetGuiThread() == LCurrentThreadHnd());
 
 	_Delete();
 	_New();
