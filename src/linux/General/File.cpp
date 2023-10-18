@@ -829,7 +829,7 @@ LVolume *LFileSystem::GetRootVolume()
 	return Root;
 }
 
-bool LFileSystem::Copy(const char *From, const char *To, LError *Status, CopyFileCallback Callback, void *Token)
+bool LFileSystem::Copy(const char *From, const char *To, LError *Status, std::function<bool(uint64_t pos, uint64_t total)> callback)
 {
 	LArray<char> Buf;
 
@@ -869,8 +869,8 @@ bool LFileSystem::Copy(const char *From, const char *To, LError *Status, CopyFil
 				
 				r -= w;
 				Done += w;
-				if (Callback)
-					Callback(Token, Done, Size);
+				if (callback)
+					callback(Done, Size);
 			}
 			
 			if (r > 0)
@@ -1625,16 +1625,16 @@ int64 LFile::SetSize(int64 Size)
 	{
 		int64 Pos = GetPos();
 		
-		#if LINUX64
-		ftruncate64(d->hFile, Size);
-		#else
-		ftruncate(d->hFile, Size);
-		#endif
-		
-		if (d->hFile)
-		{
+		if (
+			#if LINUX64
+			ftruncate64(d->hFile, Size)
+			#else
+			ftruncate(d->hFile, Size)
+			#endif
+		)
+			LgiTrace("%s:%i - ftruncate64 failed: %i\n", _FL, d->ErrorCode = errno);
+		else if (d->hFile)
 			SetPos(Pos);
-		}
 	}
 
 	return GetSize();

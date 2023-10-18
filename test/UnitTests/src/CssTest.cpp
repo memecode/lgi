@@ -7,7 +7,7 @@ class PrivLCssTest
 public:
 	LCss c;
 
-	bool Error(char *Fmt, ...)
+	bool Error(const char *Fmt, ...)
 	{
 		va_list Args;
 		va_start(Args, Fmt);
@@ -32,7 +32,7 @@ public:
 
 	bool Test1()
 	{
-		char *s = "display: none;";
+		const char *s = "display: none;";
 		if (Parse(s))
 		{
 			LCss::DisplayType dt = c.Display();
@@ -102,7 +102,7 @@ public:
 
 	bool Test2()
 	{
-		char *s;
+		const char *s;
 
 		c.Empty();
 		if (Parse(s =	"width: 50%;"
