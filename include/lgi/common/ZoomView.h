@@ -12,6 +12,13 @@ class LZoomView;
 class LZoomViewCallback
 {
 public:
+	enum TTileType
+	{
+		Tile16,
+		Tile32,
+		TileCustom
+	};
+
 	#define DefOption(type, name, default) \
 		virtual type name() { return default; } \
 		virtual void name(type i) {}
@@ -19,7 +26,7 @@ public:
 	DefOption(int, DisplayGrid, false);
 	DefOption(int, GridSize, 0);
 	DefOption(int, DisplayTile, false);
-	DefOption(int, TileType, 0);
+	DefOption(TTileType, TileType, Tile16);
 	DefOption(int, TileX, 32);
 	DefOption(int, TileY, 32);
 	
