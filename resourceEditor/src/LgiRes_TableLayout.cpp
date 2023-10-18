@@ -162,7 +162,7 @@ public:
 		MoveCtrls();
 	}
 
-	bool GetVariant(const char *Name, LVariant &Value, const char *Array)
+	bool GetVariant(const char *Name, LVariant &Value, const char *Array) override
 	{
 		if (stricmp(Name, VAL_Span) == 0)
 		{
@@ -199,7 +199,7 @@ public:
 		return true;
 	}
 
-	bool SetVariant(const char *Name, LVariant &Value, const char *Array)
+	bool SetVariant(const char *Name, LVariant &Value, const char *Array) override
 	{
 		if (stricmp(Name, VAL_Span) == 0)
 		{

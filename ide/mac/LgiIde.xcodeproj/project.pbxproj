@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		34148AFC2349ECA200D5E495 /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B20D1217968820079E3C9 /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		341C7AC821A752DC0083C9CE /* About.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 341C7AC721A752DC0083C9CE /* About.cpp */; };
+		3432AF732ADFE2F40029F2D7 /* libpng16.15.29.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3414FDD82ADFE2D00092DA8F /* libpng16.15.29.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		3432AF762ADFE3120029F2D7 /* libz_local.1.2.5.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3432AF742ADFE3080029F2D7 /* libz_local.1.2.5.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		345B20D42179688E0079E3C9 /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 345B20D1217968820079E3C9 /* LgiCocoa.framework */; };
 		345B2101217969700079E3C9 /* PythonParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20D52179696B0079E3C9 /* PythonParser.cpp */; };
 		345B2102217969700079E3C9 /* MemDumpViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20DA2179696B0079E3C9 /* MemDumpViewer.cpp */; };
@@ -33,7 +35,6 @@
 		345B2117217969700079E3C9 /* DebugContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FD2179696F0079E3C9 /* DebugContext.cpp */; };
 		345B2118217969700079E3C9 /* IdeProjectSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FE217969700079E3C9 /* IdeProjectSettings.cpp */; };
 		345B2119217969700079E3C9 /* MissingFiles.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 345B20FF217969700079E3C9 /* MissingFiles.cpp */; };
-		348C6BA329A814A4002E235F /* libpng16.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 348C6BA029A8149E002E235F /* libpng16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34C4FD2A22FD7EB800C4BECB /* icons.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211D217969D30079E3C9 /* icons.png */; };
 		34C4FD2B22FD7EC100C4BECB /* LgiIde.lr8 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211C217969D30079E3C9 /* LgiIde.lr8 */; };
 		34C4FD2C22FD7EC700C4BECB /* mac-icon.icns in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345B211B217969D30079E3C9 /* mac-icon.icns */; };
@@ -54,13 +55,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		3411DB532AB851EE00CB3837 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 0C3181B520F64B15B45BE052;
-			remoteInfo = libpng16;
-		};
 		345B20D0217968820079E3C9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 345B20C3217967760079E3C9 /* LgiCocoa.xcodeproj */;
@@ -75,62 +69,6 @@
 			remoteGlobalIDString = 3477C2671CBF020F0028B84B;
 			remoteInfo = LgiCocoa;
 		};
-		348C6B9F29A8149E002E235F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 9D1B005B4C804977BD5DC316;
-			remoteInfo = libpng16;
-		};
-		348C6BA129A8149E002E235F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 5BBB106F0CF040E99654EA52;
-			remoteInfo = libpng16_static;
-		};
-		34E44DCC279FB65600855194 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 228A010349D347BEADC408F8;
-			remoteInfo = example;
-		};
-		34E44DD2279FB65600855194 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 2BAFBD9C0B06410A93146583;
-			remoteInfo = minigzip;
-		};
-		34E44DD4279FB65600855194 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 5E165C6692104427B1760FAC;
-			remoteInfo = pngtest;
-		};
-		34E44DD6279FB65600855194 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 85787DCB21984E60AFB434AC;
-			remoteInfo = zlib;
-		};
-		34E44DD8279FB65600855194 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 308342A9F1B047B0917875BB;
-			remoteInfo = zlib_static;
-		};
-		34E44DEE279FBD2700855194 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = B355D85FF4014BD190E8C1C7;
-			remoteInfo = zlib;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -140,7 +78,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				348C6BA329A814A4002E235F /* libpng16.dylib in CopyFiles */,
+				3432AF762ADFE3120029F2D7 /* libz_local.1.2.5.dylib in CopyFiles */,
+				3432AF732ADFE2F40029F2D7 /* libpng16.15.29.0.dylib in CopyFiles */,
 				34148AFC2349ECA200D5E495 /* LgiCocoa.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -163,7 +102,9 @@
 
 /* Begin PBXFileReference section */
 		3411DB712AB86D6700CB3837 /* PostBuildStep.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = PostBuildStep.py; sourceTree = "<group>"; };
+		3414FDD82ADFE2D00092DA8F /* libpng16.15.29.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.15.29.0.dylib; path = ../../../../../codelib/libpng/build/libpng16.15.29.0.dylib; sourceTree = "<group>"; };
 		341C7AC721A752DC0083C9CE /* About.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = About.cpp; path = ../../src/common/Lgi/About.cpp; sourceTree = "<group>"; };
+		3432AF742ADFE3080029F2D7 /* libz_local.1.2.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz_local.1.2.5.dylib; path = ../../../../../codelib/libpng/build/zlib_dir/libz_local.1.2.5.dylib; sourceTree = "<group>"; };
 		345B206C217965E80079E3C9 /* LgiIde.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LgiIde.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		345B2077217965EA0079E3C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		345B207A217965EA0079E3C9 /* LgiIde.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LgiIde.entitlements; sourceTree = "<group>"; };
@@ -212,7 +153,6 @@
 		345B211B217969D30079E3C9 /* mac-icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = "mac-icon.icns"; path = "../Resources/mac-icon.icns"; sourceTree = "<group>"; };
 		345B211C217969D30079E3C9 /* LgiIde.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = LgiIde.lr8; path = ../Resources/LgiIde.lr8; sourceTree = "<group>"; };
 		345B211D217969D30079E3C9 /* icons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icons.png; path = ../Resources/icons.png; sourceTree = "<group>"; };
-		346A86722325CBA000FBC545 /* libpng.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libpng.xcodeproj; path = ../../../../../codelib/libpng/build/libpng.xcodeproj; sourceTree = "<group>"; };
 		34C4FD3222FDB50D00C4BECB /* cmds-16px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cmds-16px.png"; sourceTree = "<group>"; };
 		34C4FD3322FDB50D00C4BECB /* cmds-32px.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cmds-32px.png"; sourceTree = "<group>"; };
 		34C75D9223A0D89A006DE6D1 /* NewProjectFromTemplate.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = NewProjectFromTemplate.cpp; path = ../src/NewProjectFromTemplate.cpp; sourceTree = "<group>"; };
@@ -282,7 +222,8 @@
 		345B20CB217967B70079E3C9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				346A86722325CBA000FBC545 /* libpng.xcodeproj */,
+				3414FDD82ADFE2D00092DA8F /* libpng16.15.29.0.dylib */,
+				3432AF742ADFE3080029F2D7 /* libz_local.1.2.5.dylib */,
 				345B20C3217967760079E3C9 /* LgiCocoa.xcodeproj */,
 			);
 			name = Frameworks;
@@ -401,20 +342,6 @@
 			name = Lgi;
 			sourceTree = "<group>";
 		};
-		34E44DBF279FB65600855194 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				34E44DCD279FB65600855194 /* example */,
-				348C6BA029A8149E002E235F /* libpng16.dylib */,
-				348C6BA229A8149E002E235F /* libpng16_static.a */,
-				34E44DD3279FB65600855194 /* minigzip */,
-				34E44DD5279FB65600855194 /* pngtest */,
-				34E44DD7279FB65600855194 /* libz_local.dylib */,
-				34E44DD9279FB65600855194 /* libzlib_static.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -431,8 +358,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				3411DB542AB851EE00CB3837 /* PBXTargetDependency */,
-				34E44DEF279FBD2700855194 /* PBXTargetDependency */,
 				345B20D3217968890079E3C9 /* PBXTargetDependency */,
 			);
 			name = LgiIde;
@@ -476,10 +401,6 @@
 					ProductGroup = 345B20CD217968820079E3C9 /* Products */;
 					ProjectRef = 345B20C3217967760079E3C9 /* LgiCocoa.xcodeproj */;
 				},
-				{
-					ProductGroup = 34E44DBF279FB65600855194 /* Products */;
-					ProjectRef = 346A86722325CBA000FBC545 /* libpng.xcodeproj */;
-				},
 			);
 			projectRoot = "";
 			targets = (
@@ -494,57 +415,6 @@
 			fileType = wrapper.framework;
 			path = LgiCocoa.framework;
 			remoteRef = 345B20D0217968820079E3C9 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		348C6BA029A8149E002E235F /* libpng16.dylib */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.dylib";
-			name = libpng16.dylib;
-			path = libpng16.15.29.0.dylib;
-			remoteRef = 348C6B9F29A8149E002E235F /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		348C6BA229A8149E002E235F /* libpng16_static.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libpng16_static.a;
-			remoteRef = 348C6BA129A8149E002E235F /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		34E44DCD279FB65600855194 /* example */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = example;
-			remoteRef = 34E44DCC279FB65600855194 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		34E44DD3279FB65600855194 /* minigzip */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = minigzip;
-			remoteRef = 34E44DD2279FB65600855194 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		34E44DD5279FB65600855194 /* pngtest */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = pngtest;
-			remoteRef = 34E44DD4279FB65600855194 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		34E44DD7279FB65600855194 /* libz_local.dylib */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.dylib";
-			name = libz_local.dylib;
-			path = libz_local.1.2.5.dylib;
-			remoteRef = 34E44DD6279FB65600855194 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		34E44DD9279FB65600855194 /* libzlib_static.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libzlib_static.a;
-			remoteRef = 34E44DD8279FB65600855194 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -616,20 +486,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		3411DB542AB851EE00CB3837 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = libpng16;
-			targetProxy = 3411DB532AB851EE00CB3837 /* PBXContainerItemProxy */;
-		};
 		345B20D3217968890079E3C9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = LgiCocoa;
 			targetProxy = 345B20D2217968890079E3C9 /* PBXContainerItemProxy */;
-		};
-		34E44DEF279FBD2700855194 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = zlib;
-			targetProxy = 34E44DEE279FBD2700855194 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

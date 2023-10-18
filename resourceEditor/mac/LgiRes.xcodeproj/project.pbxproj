@@ -7,12 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3432AF7D2ADFE35C0029F2D7 /* libpng16.15.29.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3432AF7B2ADFE34B0029F2D7 /* libpng16.15.29.0.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		3432AF7E2ADFE3610029F2D7 /* libz_local.1.2.5.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3432AF792ADFE3450029F2D7 /* libz_local.1.2.5.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		343FB8952386621600797ABC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 343FB8942386621600797ABC /* Assets.xcassets */; };
 		343FB8AB238662C500797ABC /* LgiMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8AA238662C500797ABC /* LgiMain.cpp */; };
 		343FB8C62386638C00797ABC /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 343FB8A92386627A00797ABC /* LgiCocoa.framework */; };
 		343FB8C82386639C00797ABC /* LgiCocoa.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 343FB8A92386627A00797ABC /* LgiCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		343FB8DC2386642A00797ABC /* OptionsFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 343FB8DB2386642A00797ABC /* OptionsFile.cpp */; };
-		347A9B582970B8C200D57A0B /* libpng16.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 347A9B552970B8BD00D57A0B /* libpng16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		34CC002823AAD2A100CCAAEA /* Search.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC001B23AAD2A100CCAAEA /* Search.cpp */; };
 		34CC002923AAD2A100CCAAEA /* LgiRes_ControlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC001C23AAD2A100CCAAEA /* LgiRes_ControlTree.cpp */; };
 		34CC002A23AAD2A100CCAAEA /* LgiRes_TableLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34CC001E23AAD2A100CCAAEA /* LgiRes_TableLayout.cpp */; };
@@ -53,55 +54,6 @@
 			remoteGlobalIDString = 3477C2671CBF020F0028B84B;
 			remoteInfo = LgiCocoa;
 		};
-		347A9B542970B8BD00D57A0B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 34CC004323AAD57F00CCAAEA /* libpng.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 9D1B005B4C804977BD5DC316;
-			remoteInfo = libpng16;
-		};
-		347A9B562970B8BD00D57A0B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 34CC004323AAD57F00CCAAEA /* libpng.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 5BBB106F0CF040E99654EA52;
-			remoteInfo = libpng16_static;
-		};
-		34CC005123AAD57F00CCAAEA /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 34CC004323AAD57F00CCAAEA /* libpng.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = E5FD78A808A24711B59ED1F2;
-			remoteInfo = example;
-		};
-		34CC005723AAD57F00CCAAEA /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 34CC004323AAD57F00CCAAEA /* libpng.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 787EECA18CBC4D4FB4E389EA;
-			remoteInfo = minigzip;
-		};
-		34CC005923AAD57F00CCAAEA /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 34CC004323AAD57F00CCAAEA /* libpng.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 480BA9D67D004C9FB7A41391;
-			remoteInfo = pngtest;
-		};
-		34CC005B23AAD57F00CCAAEA /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 34CC004323AAD57F00CCAAEA /* libpng.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = C246F8AB721C4E3383C137C4;
-			remoteInfo = zlib;
-		};
-		34CC005D23AAD57F00CCAAEA /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 34CC004323AAD57F00CCAAEA /* libpng.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = FE658531E3604B19A40B327E;
-			remoteInfo = zlib_static;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -111,7 +63,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				347A9B582970B8C200D57A0B /* libpng16.dylib in CopyFiles */,
+				3432AF7E2ADFE3610029F2D7 /* libz_local.1.2.5.dylib in CopyFiles */,
+				3432AF7D2ADFE35C0029F2D7 /* libpng16.15.29.0.dylib in CopyFiles */,
 				343FB8C82386639C00797ABC /* LgiCocoa.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -119,6 +72,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3432AF792ADFE3450029F2D7 /* libz_local.1.2.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz_local.1.2.5.dylib; path = ../../../../../codelib/libpng/build/zlib_dir/libz_local.1.2.5.dylib; sourceTree = "<group>"; };
+		3432AF7B2ADFE34B0029F2D7 /* libpng16.15.29.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.15.29.0.dylib; path = ../../../../../codelib/libpng/build/libpng16.15.29.0.dylib; sourceTree = "<group>"; };
 		343FB88E2386621400797ABC /* LgiRes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LgiRes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		343FB8942386621600797ABC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		343FB8992386621600797ABC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -147,7 +102,6 @@
 		34CC003B23AAD33500CCAAEA /* lgires.lr8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = lgires.lr8; path = ../Resources/lgires.lr8; sourceTree = "<group>"; };
 		34CC003E23AAD34600CCAAEA /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		34CC004123AAD54200CCAAEA /* Png.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Png.cpp; path = ../../src/common/Gdc2/Filters/Png.cpp; sourceTree = "<group>"; };
-		34CC004323AAD57F00CCAAEA /* libpng.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libpng.xcodeproj; path = ../../../../../CodeLib/libpng/build/libpng.xcodeproj; sourceTree = "<group>"; };
 		34CC006223AAD5DB00CCAAEA /* _StringIcons.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = _StringIcons.gif; path = ../resources/_StringIcons.gif; sourceTree = "<group>"; };
 		34CC006323AAD5DB00CCAAEA /* _DialogIcons.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = _DialogIcons.gif; path = ../resources/_DialogIcons.gif; sourceTree = "<group>"; };
 		34CC006423AAD5DB00CCAAEA /* _MenuIcons.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; name = _MenuIcons.gif; path = ../resources/_MenuIcons.gif; sourceTree = "<group>"; };
@@ -212,7 +166,6 @@
 				343FB8AA238662C500797ABC /* LgiMain.cpp */,
 				34CC004123AAD54200CCAAEA /* Png.cpp */,
 				343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */,
-				34CC004323AAD57F00CCAAEA /* libpng.xcodeproj */,
 			);
 			name = Lgi;
 			sourceTree = "<group>";
@@ -248,6 +201,8 @@
 		343FB8C52386638C00797ABC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3432AF7B2ADFE34B0029F2D7 /* libpng16.15.29.0.dylib */,
+				3432AF792ADFE3450029F2D7 /* libz_local.1.2.5.dylib */,
 				34CC003E23AAD34600CCAAEA /* Cocoa.framework */,
 			);
 			name = Frameworks;
@@ -264,20 +219,6 @@
 				34CC003A23AAD33500CCAAEA /* mac-icon.icns */,
 			);
 			name = Resources;
-			sourceTree = "<group>";
-		};
-		34CC004423AAD57F00CCAAEA /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				34CC005223AAD57F00CCAAEA /* example */,
-				347A9B552970B8BD00D57A0B /* libpng16.dylib */,
-				347A9B572970B8BD00D57A0B /* libpng16_static.a */,
-				34CC005823AAD57F00CCAAEA /* minigzip */,
-				34CC005A23AAD57F00CCAAEA /* pngtest */,
-				34CC005C23AAD57F00CCAAEA /* libz_local.dylib */,
-				34CC005E23AAD57F00CCAAEA /* libzlib_static.a */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -333,10 +274,6 @@
 					ProductGroup = 343FB8A52386627A00797ABC /* Products */;
 					ProjectRef = 343FB8A42386627A00797ABC /* LgiCocoa.xcodeproj */;
 				},
-				{
-					ProductGroup = 34CC004423AAD57F00CCAAEA /* Products */;
-					ProjectRef = 34CC004323AAD57F00CCAAEA /* libpng.xcodeproj */;
-				},
 			);
 			projectRoot = "";
 			targets = (
@@ -351,57 +288,6 @@
 			fileType = wrapper.framework;
 			path = LgiCocoa.framework;
 			remoteRef = 343FB8A82386627A00797ABC /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		347A9B552970B8BD00D57A0B /* libpng16.dylib */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.dylib";
-			name = libpng16.dylib;
-			path = libpng16.15.29.0.dylib;
-			remoteRef = 347A9B542970B8BD00D57A0B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		347A9B572970B8BD00D57A0B /* libpng16_static.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libpng16_static.a;
-			remoteRef = 347A9B562970B8BD00D57A0B /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		34CC005223AAD57F00CCAAEA /* example */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = example;
-			remoteRef = 34CC005123AAD57F00CCAAEA /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		34CC005823AAD57F00CCAAEA /* minigzip */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = minigzip;
-			remoteRef = 34CC005723AAD57F00CCAAEA /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		34CC005A23AAD57F00CCAAEA /* pngtest */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = pngtest;
-			remoteRef = 34CC005923AAD57F00CCAAEA /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		34CC005C23AAD57F00CCAAEA /* libz_local.dylib */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.dylib";
-			name = libz_local.dylib;
-			path = libz_local.1.2.5.dylib;
-			remoteRef = 34CC005B23AAD57F00CCAAEA /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		34CC005E23AAD57F00CCAAEA /* libzlib_static.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libzlib_static.a;
-			remoteRef = 34CC005D23AAD57F00CCAAEA /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
