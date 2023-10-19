@@ -1174,6 +1174,7 @@ public:
 						EscChar('\"', '\"');
 						EscChar('&', '&');
 						EscChar('?', '?');
+						EscChar(' ', ' ');
 						#undef EscChar
 						default:
 							if (hexMode == 'u')

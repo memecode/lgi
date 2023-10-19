@@ -594,7 +594,8 @@ bool LExecute(const char *File, const char *Args, const char *Dir, LString *Erro
 			a += " > /dev/null 2> /dev/null &";
 
 			int e;
-			if (Dir) chdir(Dir);
+			if (Dir)
+				chdir(Dir);
 			printf("a=\n%s\n", a.Get());
 			if (e = system(a))
 			{
