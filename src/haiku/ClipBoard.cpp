@@ -41,7 +41,8 @@ public:
 			return false;
 	    }
 
-	    auto result = clip->AddString(MimeType, BString(Str));
+		auto result = clip->AddData("text/plain", B_MIME_TYPE, Str, Strlen(Str));
+	    // auto result = clip->AddString(MimeType, BString(Str));
 	    if (result)
 			printf("%s:%i - AddString=%i %s\n", _FL, result, strerror(result));
 	 

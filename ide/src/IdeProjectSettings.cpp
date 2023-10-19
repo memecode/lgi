@@ -1049,7 +1049,7 @@ const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default,
 				Bytes += strlen(t->GetContent()) + 1;
 			}
 		}
-		else LgiTrace("%s:%i - no key '%s' in '%s'\n", _FL, path, d->Project->GetFileName());
+		// else LgiTrace("%s:%i - no key '%s' in '%s'\n", _FL, path, d->Project->GetFileName());
 	}
 	if (!s->Flag.CrossPlatform)
 	{
@@ -1063,7 +1063,7 @@ const char *IdeProjectSettings::GetStr(ProjSetting Setting, const char *Default,
 				Bytes += strlen(t->GetContent()) + 1;
 			}
 		}
-		else LgiTrace("%s:%i - no key '%s' in '%s'\n", _FL, path, d->Project->GetFileName());
+		// else LgiTrace("%s:%i - no key '%s' in '%s'\n", _FL, path, d->Project->GetFileName());
 	}
 	
 	if (Strs.Length() == 0)

@@ -442,7 +442,7 @@ public:
 		
 		if (IsExecutableTarget)
 		{
-			LString Exe = Proj->GetExecutable(Platform);
+			auto Exe = Proj->GetExecutable(Platform);
 			if (Exe)
 			{
 				if (LIsRelativePath(Exe))
@@ -2491,12 +2491,17 @@ bool IdeProject::IsMakefileUpToDate()
 			dir.Close();
 		}
 
-		// printf("Proj=%s - Timestamps " LGI_PrintfInt64 " - " LGI_PrintfInt64 "\n", Proj.Get(), ProjModTime, MakeModTime);
+		printf("IsMakefileUpToDate: Proj=%s - Timestamps " LPrintfInt64 " - " LPrintfInt64 "\n",
+			Proj.Get(),
+			ProjModTime,
+			MakeModTime);
+			
 		if (ProjModTime != 0 &&
 			MakeModTime != 0 &&
 			ProjModTime > MakeModTime)
 		{
 			// Need to rebuild the makefile...
+			printf("Out of date.\n");
 			return false;
 		}
 	}
@@ -2613,8 +2618,11 @@ void IdeProject::Build(bool All, BuildConfig Config)
 			return;
 
 		if (!IsMakefileUpToDate())
+		{
 			CreateMakefile(GetCurrentPlatform(), true);
+		}
 		else
+		{
 			// Start the build thread...
 			d->Thread.Reset
 			(
@@ -2628,6 +2636,7 @@ void IdeProject::Build(bool All, BuildConfig Config)
 					sizeof(size_t)*8
 				)
 			);
+		}
 	});
 }
 
@@ -2738,11 +2747,7 @@ LString IdeProject::GetExecutable(IdePlatform Platform)
 		char Path[MAX_PATH_LEN];
 		LMakePath(Path, sizeof(Path), Base, Name);
 		LMakePath(Path, sizeof(Path), Path, Bin);
-		if (LFileExists(Path))
-			Bin = Path;
-		else
-			printf("%s:%i - '%s' doesn't exist.\n", _FL, Path);
-		
+		Bin = Path; // This doesn't need to exist
 		
 		return Bin;
 	}
