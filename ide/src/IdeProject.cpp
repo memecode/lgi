@@ -2491,10 +2491,12 @@ bool IdeProject::IsMakefileUpToDate()
 			dir.Close();
 		}
 
+		#if 0
 		printf("IsMakefileUpToDate: Proj=%s - Timestamps " LPrintfInt64 " - " LPrintfInt64 "\n",
 			Proj.Get(),
 			ProjModTime,
 			MakeModTime);
+		#endif
 			
 		if (ProjModTime != 0 &&
 			MakeModTime != 0 &&

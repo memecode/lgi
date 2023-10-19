@@ -718,9 +718,13 @@ bool LPopup::Attach(LViewI *p)
 	#if defined(LGI_CARBON) || defined(HAIKU)
 	
 		#if defined(HAIKU)
-		auto hwnd = WindowHandle();
-		hwnd->Lock();
-		hwnd->Show();
+
+			// This gets the thread started but doesn't show the window yet...
+			// Allowing other configuration like position etc to work.		
+			auto hwnd = WindowHandle();
+			hwnd->Lock();
+			hwnd->Run();
+			
 		#endif
 		auto status = LWindow::Attach(NULL);
 		return status;

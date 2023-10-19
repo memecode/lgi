@@ -147,6 +147,7 @@ public:
 	LString Eol;
 	LString LastError;
 	LAutoPtr<LFontType> InitFontType;
+	uint64_t ActionTs = 0;
 	
 	// If the scroll position is set before we get a scroll bar, store the index
 	// here and set it when the LNotifyScrollBarCreate arrives.
@@ -198,6 +199,27 @@ public:
 		}
 		
 		DeleteArray(MapBuf);
+	}
+	
+	bool DoAction()
+	{
+		auto Now = LCurrentTime();
+
+		#ifdef HAIKU
+		#ifdef _DEBUG
+		// if (ActionTs) printf("DoAction %i since last action.\n", (int)(Now - ActionTs));
+		#endif
+		
+		// Haiku seems to send menu shortcuts and yet still send the keyboard event
+		// to the view with focus. So you get 2 events for things like copy, paste,
+		// undo and redo. Not ideal.
+		if (Now - ActionTs < 350/*ms*/)
+			// Duplicate action from menu shortcut vs local OnKey handler?
+			return false;
+		#endif
+		
+		ActionTs = Now;
+		return true;
 	}
 	
 	void SetDirty(ssize_t Start, ssize_t Len = 0)
@@ -2211,8 +2233,11 @@ void LTextView3::SetBorder(int b)
 bool LTextView3::Cut()
 {
 	bool Status = false;
-	char16 *Txt16 = 0;
 	
+	if (!d->DoAction())
+		return false;
+	
+	char16 *Txt16 = NULL;	
 	DeleteSelection(&Txt16);
 	if (Txt16)
 	{
@@ -2236,6 +2261,9 @@ bool LTextView3::Cut()
 bool LTextView3::Copy()
 {
 	bool Status = true;
+
+	if (!d->DoAction())
+		return false;
 
 	if (SelStart >= 0)
 	{
@@ -2267,18 +2295,23 @@ bool LTextView3::Copy()
 
 bool LTextView3::Paste()
 {
+	if (!d->DoAction())
+		return false;
+
 	LClipBoard Clip(this);
 
 	LAutoWString Mem;
 	char16 *t = Clip.TextW();
-	if (!t) // ala Win9x
+	if (!t)
 	{
-		char *s = Clip.Text();
+		#ifndef HAIKU // If the wide version failed, this will too...
+		auto s = Clip.Text();
 		if (s)
 		{
 			Mem.Reset(Utf8ToWide(s));
 			t = Mem;
 		}
+		#endif
 	}
 	
 	if (!t)
@@ -3500,6 +3533,9 @@ ssize_t LTextView3::HitText(int x, int y, bool Nearest)
 
 void LTextView3::Undo()
 {
+	if (!d->DoAction())
+		return;	
+
 	int Old = UndoQue.GetPos();
 	UndoQue.Undo();
 	if (Old && !UndoQue.GetPos())
@@ -3511,6 +3547,9 @@ void LTextView3::Undo()
 
 void LTextView3::Redo()
 {
+	if (!d->DoAction())
+		return;	
+
 	UndoQue.Redo();
 }
 
@@ -4661,7 +4700,11 @@ bool LTextView3::OnKey(LKey &k)
 								return false;
 							
 							if (k.Down())
+							{
+								printf("key copy\n");
 								Copy();
+							}
+							
 							return true;
 							break;
 						}
