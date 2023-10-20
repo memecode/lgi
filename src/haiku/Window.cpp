@@ -182,8 +182,10 @@ public:
 			{
 				if (!LView::RecentlyDeleted(view))
 					view->OnEvent((LMessage*)message);
+				/*
 				else
 					printf("%s:%i - Dropping message to deleted view.\n", _FL);
+				*/
 			}
 			else
 			{

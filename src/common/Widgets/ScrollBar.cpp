@@ -487,6 +487,7 @@ LScrollBar::LScrollBar(int id, int x, int y, int cx, int cy, const char *name)
 
 LScrollBar::~LScrollBar()
 {
+	printf("%s:%i - %p::~LScrollBar\n", _FL, this);
 	DeleteObj(d);
 }
 

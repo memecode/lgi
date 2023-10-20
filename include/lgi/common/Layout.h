@@ -42,21 +42,20 @@ class LgiClass LLayout : public LView
 	friend class LView;
 
 	// Private variables
-	bool			_SettingScrollBars;
-	bool			_PourLargest;
+	bool			_SettingScrollBars = false;
+	bool			_PourLargest = false;
 	struct LayoutScroll
 	{
 		bool			SentMsg = 0;
 		int				x = 0, y = 0;
 	}					_SetScroll;
-	bool			WantX, WantY;
 
 protected:
 	/// The vertical scroll bar
-	LScrollBar		*VScroll;
+	LScrollBar		*VScroll = NULL;
 
 	/// The horizontal scroll bar
-	LScrollBar		*HScroll;
+	LScrollBar		*HScroll = NULL;
 
 	/// Sets which of the scroll bars is visible
 	virtual bool SetScrollBars

@@ -947,6 +947,8 @@ bool LView::GetMouse(LMouse &m, bool ScreenCoords)
 	if (!Locker.Lock())
 		return false;
 
+	m.Target = this;
+
 	// get mouse state
 	BPoint Cursor;
 	uint32 Buttons;

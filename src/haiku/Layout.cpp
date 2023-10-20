@@ -16,13 +16,11 @@
 //////////////////////////////////////////////////////////////////////////////
 LLayout::LLayout()
 {
-	_PourLargest = false;
-	VScroll = 0;
-	HScroll = 0;
 }
 
 LLayout::~LLayout()
 {
+	printf("%s:%i - %p::~Layout %p,%p\n", _FL, this, HScroll, VScroll);
 	DeleteObj(HScroll);
 	DeleteObj(VScroll);
 }
