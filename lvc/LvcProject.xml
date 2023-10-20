@@ -103,6 +103,7 @@ resources
 					<Release>/usr/include/gstreamer-1.0
 `pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
+				<Haiku />
 			</SystemIncludes>
 			<Libraries>
 				<Linux>
@@ -134,16 +135,21 @@ ssh
 					<Release>_GNU_SOURCE
 					HAS_LIBSSH=0</Release>
 				</Haiku>
-				<Linux />
 			</Defines>
 			<LibraryPaths>
 				<All />
-				<Linux />
+				<Haiku />
 			</LibraryPaths>
 			<TargetName>
-				<Linux />
+				<Haiku />
 			</TargetName>
-			<ApplicationIcon />
+			<ApplicationIcon>
+				<Haiku>./resources/icon.hvif</Haiku>
+			</ApplicationIcon>
+			<Options>
+				<All />
+				<Haiku />
+			</Options>
 		</Build>
 		<Editor>
 			<TabSize>
@@ -162,7 +168,7 @@ ssh
 		<Advanced>
 			<OtherMakefileRules />
 			<PostBuildCommands>
-				<Linux />
+				<Haiku />
 			</PostBuildCommands>
 		</Advanced>
 		<Debug>
