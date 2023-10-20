@@ -120,6 +120,10 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	@echo Linking $(Target) [$(Build)]...
 	$(CPP) -Wl,-export-dynamic,-R. -o \
 		$(Target) $(Objects) $(Libs)
+	/boot/home/code/lgi/trunk/src/haiku/hvif_to_rdef.py ./resources/icon.hvif $(Build)/lgiide.rdef lgiide
+	rc $(Build)/lgiide.rdef
+	resattr -o $(Target) $(Build)/lgiide.rsrc
+	xres -o $(Target) $(Build)/lgiide.rsrc
 	@echo Done.
 
 ../$(BuildDir)/liblgi$(Tag).so : ../include/lgi/common/App.h \

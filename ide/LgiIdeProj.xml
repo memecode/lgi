@@ -243,7 +243,9 @@ _GNU_SOURCE</Release>
 				<All />
 				<Haiku />
 			</LibraryPaths>
-			<ApplicationIcon />
+			<ApplicationIcon>
+				<Haiku>./resources/icon.hvif</Haiku>
+			</ApplicationIcon>
 			<Options>
 				<All />
 				<Haiku />

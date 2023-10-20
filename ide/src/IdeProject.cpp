@@ -303,6 +303,72 @@ public:
 		HasError = true;
 	}
 	
+	void EmbedAppIcon(LStream &m)
+	{
+		// Is there an application icon configured?
+		auto AppIcon = d->Settings.GetStr(ProjApplicationIcon, NULL, Platform);
+		if (!AppIcon)
+			return;
+
+		if (Platform == PlatformHaiku)
+		{
+			bool showDebugLogging = false;
+			
+			// Find hvif_to_rdef.py
+			LFile::Path scriptPath(LSP_APP_INSTALL);
+			scriptPath += "../src/haiku/hvif_to_rdef.py";
+			auto script = scriptPath.GetFull();
+			if (!scriptPath.Exists())
+			{
+				Log->Print("%s:%i - Failed to find '%s'\n", _FL, script.Get());
+				return;
+			}
+			
+			// Create a path for the rdef file
+			auto Exe = Proj->GetExecutable(Platform);
+			auto appName = LGetLeaf(Exe);
+			LString rdefPath;
+			rdefPath.Printf("$(Build)/%s.rdef", appName);
+			
+			LString rsrcPath = rdefPath.Replace(".rdef", ".rsrc");
+				
+			auto Ext = LGetExtension(AppIcon);
+			if (!Stricmp(Ext, "hvif"))
+			{
+				// Convert 'hvif' to 'rdef'
+				m.Print("	%s %s %s %s\n",
+					script.Get(),
+					AppIcon,
+					rdefPath.Get(),
+					appName);
+				
+				// Convert from .rdef to .rsrc using 'rc'
+				m.Print("	rc %s\n", rdefPath.Get());
+					
+				if (showDebugLogging)
+					m.Print("	ls -l %s\n", rsrcPath.Get());
+			
+				// Embed in binary using 'resattr'
+				m.Print("	resattr -o $(Target) %s\n"
+						"	xres -o $(Target) %s\n",
+					rsrcPath.Get(),
+					rsrcPath.Get());
+					
+				if (showDebugLogging)
+					// Print result:
+					m.Print("	xres -l $(Target)\n");
+			}
+			else
+			{
+				Log->Print("%s:%i - No handler '%s' file type.\n", _FL, Ext);
+			}
+		}
+		else
+		{
+			Log->Print("%s:%i - No handler for app icon embedding.\n", _FL);
+		}
+	}
+	
 	int Main()
 	{
 		const char *PlatformName = PlatformNames[Platform];
@@ -937,16 +1003,8 @@ public:
 							ExtraLinkFlags,
 							ExeFlags,
 							ValidStr(LinkerFlags) ? "-Wl" : "", LinkerFlags.Get());
-
-					if (Platform == PlatformHaiku)
-					{
-						// Is there an application icon configured?
-						const char *AppIcon = d->Settings.GetStr(ProjApplicationIcon, NULL, Platform);
-						if (AppIcon)
-						{
-							m.Print("	addattr -f %s -t \"'VICN'\" \"BEOS:ICON\" $(Target)\n", AppIcon);
-						}							
-					}
+					
+					EmbedAppIcon(m);
 					
 					LString PostBuildCmds = d->Settings.GetStr(ProjPostBuildCommands, NULL, Platform);
 					if (ValidStr(PostBuildCmds))
