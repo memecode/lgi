@@ -593,7 +593,7 @@ bool TableCell::GetVariant(const char *Name, LVariant &Value, const char *Array)
 		{
 			LStringPipe p(128);
 			if (VerticalAlign().ToString(p))
-				Value.OwnStr(ToString());
+				Value.OwnStr(p.NewStr());
 			else
 				return false;
 			break;
@@ -605,7 +605,7 @@ bool TableCell::GetVariant(const char *Name, LVariant &Value, const char *Array)
 		}
 		case ObjStyle: // Type: String
 		{
-			Value.OwnStr(ToString());
+			Value.OwnStr(ToAutoString().Release());
 			break;
 		}
 		case ObjDebug: // Type: Boolean

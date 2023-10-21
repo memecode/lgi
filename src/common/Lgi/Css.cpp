@@ -511,12 +511,22 @@ const char *LCss::ToString(DisplayType dt)
 	}
 }
 
-LString LCss::ToString2()
+LString LCss::ToLString()
 {
 	LStringPipe p;
+	ToStringPipe(p);
+	return p.NewLStr();
+}
 
-	// PropType Prop;
-	// for (void *v = Props.First((int*)&Prop); v; v = Props.Next((int*)&Prop))
+LAutoString LCss::ToAutoString()
+{
+	LStringPipe p;
+	ToStringPipe(p);
+	return LAutoString(p.NewStr());
+}
+
+void LCss::ToStringPipe(LStringPipe &p)
+{
 	for (auto v : Props)
 	{
 		PropType Prop = (PropType) v.key;
@@ -812,8 +822,6 @@ LString LCss::ToString2()
 			}
 		}
 	}
-
-	return p.NewLStr();
 }
 
 bool LCss::InheritCollect(LCss &c, PropMap &Contrib)

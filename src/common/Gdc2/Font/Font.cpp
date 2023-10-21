@@ -277,8 +277,7 @@ LString LFont::FontToCss()
 		c.FontWeight(LCss::FontWeightBold);
 	if (Italic())
 		c.FontStyle(LCss::FontStyleItalic);
-	auto aStr = c.ToString();
-	return aStr.Get();
+	return c.ToLString();
 }
 
 void LFont::WarnOnDelete(bool w)

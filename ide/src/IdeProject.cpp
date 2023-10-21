@@ -778,7 +778,7 @@ public:
 			}
 		}
 
-		// Output the defs section for Debug and Release		
+		// Output the defs section for Debug and Release
 
 		// Debug specific
 		m.Print("\n"
