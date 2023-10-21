@@ -106,7 +106,7 @@ public:
 		if (!Style || !DefaultFont)
 			return DefaultFont;
 		
-		
+		printf("%s:%i - GetFont() %s\n", _FL, Style->ToLString().Get());
 		
 		
 		auto Fam = Style->FontFamily();

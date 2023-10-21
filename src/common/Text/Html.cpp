@@ -1606,11 +1606,11 @@ bool LTag::CreateSource(LStringPipe &p, int Depth, bool LastWasBlock)
 			}
 			
 			// Convert CSS props to a string and emit them...
-			auto s = Css->ToString();
+			auto s = Css->ToLString();
 			if (ValidStr(s))
 			{			
 				// Clean off any trailing whitespace...
-				char *e = s ? s + strlen(s) : NULL;
+				char *e = s ? s.Get() + s.Length() : NULL;
 				while (e && strchr(WhiteSpace, e[-1]))
 					*--e = 0;
 				
@@ -2082,7 +2082,7 @@ bool LTag::OnMouseClick(LMouse &m)
 		#ifdef _DEBUG
 		if (m.Ctrl())
 		{
-			auto Style = ToString();
+			auto Style = ToLString();
 			LStringPipe p(256);
 			p.Print("Tag: %s\n", Tag ? Tag.Get() : "CONTENT");
 			if (Class.Length())
@@ -2101,7 +2101,7 @@ bool LTag::OnMouseClick(LMouse &m)
 			p.Print("Pos: %i,%i   Size: %i,%i\n\n", Pos.x, Pos.y, Size.x, Size.y);
 			p.Print("Style:\n", Style.Get());
 			
-			auto s = LString(Style).SplitDelimit("\n");
+			auto s = Style.SplitDelimit("\n");
 			for (unsigned i=0; i<s.Length(); i++)
 				p.Print("    %s\n", s[i].Get());
 			
@@ -5142,7 +5142,7 @@ bool LTag::Serialize(LXmlTag *t, bool Write)
 		}
 		if (Props.Length())
 		{
-			auto CssStyles = ToString();
+			auto CssStyles = ToLString();
 			LAssert(!strchr(CssStyles, '\"'));
 			t->SetAttr("style", CssStyles);
 		}
