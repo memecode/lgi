@@ -2090,10 +2090,10 @@ LFont *LView::GetFont()
 		d->Css &&
 		LResources::GetLoadStyles())
 	{
-		LFontCache *fc = LAppInst->GetFontCache();
+		auto fc = LAppInst->GetFontCache();
 		if (fc)
 		{
-			LFont *f = fc->GetFont(d->Css);
+			auto f = fc->GetFont(d->Css);
 			if (f)
 			{
 				if (d->FontOwnType == GV_FontOwned)

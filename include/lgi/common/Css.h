@@ -1255,7 +1255,7 @@ public:
 	LCss &operator +=(const LCss &c) { CopyStyle(c); return *this; }
 	LCss &operator -=(const LCss &c);
 	void *PropAddress(PropType p) { return Props.Find(p); }
-	LAutoString ToString();
+	LString ToString2();
 	const char *ToString(DisplayType dt);
 	bool HasFontStyle();
 	void FontBold(bool b) { FontWeight(b ? FontWeightBold : FontWeightNormal); }

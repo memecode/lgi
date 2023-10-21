@@ -55,11 +55,10 @@ public:
 		// Matching existing fonts...
 		for (unsigned i=0; i<Fonts.Length(); i++)
 		{
-			LFont *f = Fonts[i];
+			auto f = Fonts[i];
 			if
 			(
-				f->Face() &&
-				Face &&
+				f->Face() && Face &&
 				!_stricmp(f->Face(), Face) &&
 				f->Size() == Size &&
 				f->Bold() == (Weight == LCss::FontWeightBold) &&
@@ -70,7 +69,7 @@ public:
 		}
 		
 		// No matching font... create a new one
-		LFont *f = new LFont;
+		auto f = new LFont;
 		if (f)
 		{
 			f->Bold(Weight == LCss::FontWeightBold);
@@ -106,6 +105,9 @@ public:
 	{
 		if (!Style || !DefaultFont)
 			return DefaultFont;
+		
+		
+		
 		
 		auto Fam = Style->FontFamily();
 		bool FamHasDefFace = false;

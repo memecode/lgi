@@ -13,17 +13,11 @@
 class LEditPrivate
 {
 public:
-	bool FocusOnCreate;
-	bool Multiline;
-	bool Password;
-	bool NotificationProcessed;
-	LAutoString EmptyTxt;
-	
-	LEditPrivate()
-	{
-		FocusOnCreate = false;
-		NotificationProcessed = false;
-	}
+	bool FocusOnCreate = false;
+	bool Multiline = false;
+	bool Password = false;
+	bool NotificationProcessed = false;
+	LString EmptyTxt;
 };
 
 void LEdit::KeyProcessed()
@@ -68,7 +62,7 @@ LEdit::~LEdit()
 
 void LEdit::SetEmptyText(const char *EmptyText)
 {
-	d->EmptyTxt.Reset(NewStr(EmptyText));
+	d->EmptyTxt = EmptyText;
 	Invalidate();
 }
 

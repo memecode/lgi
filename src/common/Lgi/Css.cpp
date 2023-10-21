@@ -511,7 +511,7 @@ const char *LCss::ToString(DisplayType dt)
 	}
 }
 
-LAutoString LCss::ToString()
+LString LCss::ToString2()
 {
 	LStringPipe p;
 
@@ -813,7 +813,7 @@ LAutoString LCss::ToString()
 		}
 	}
 
-	return LAutoString(p.NewStr());
+	return p.NewLStr();
 }
 
 bool LCss::InheritCollect(LCss &c, PropMap &Contrib)
