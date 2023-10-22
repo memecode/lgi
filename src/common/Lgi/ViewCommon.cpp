@@ -2093,6 +2093,7 @@ LFont *LView::GetFont()
 		auto fc = LAppInst->GetFontCache();
 		if (fc)
 		{
+			printf("%s::GetFont from cache\n", GetClass());
 			auto f = fc->GetFont(d->Css);
 			if (f)
 			{
@@ -2126,7 +2127,7 @@ void LView::SetFont(LFont *Font, bool OwnIt)
 			SendMessage(_View, WM_SETFONT, (WPARAM) (Font ? Font->Handle() : 0), 0);
 		#endif
 
-		for (LViewI *p = GetParent(); p; p = p->GetParent())
+		for (LViewI *p = GetParent(); Font && p; p = p->GetParent())
 		{
 			LTableLayout *Tl = dynamic_cast<LTableLayout*>(p);
 			if (Tl)

@@ -106,8 +106,12 @@ public:
 		if (!Style || !DefaultFont)
 			return DefaultFont;
 		
-		printf("%s:%i - GetFont() %s\n", _FL, Style->ToLString().Get());
-		
+		#if 0
+		printf("%s:%i - GetFont() %i %s\n",
+			_FL,
+			(int)Style->Length(),
+			Style->ToLString().Get());
+		#endif
 		
 		auto Fam = Style->FontFamily();
 		bool FamHasDefFace = false;

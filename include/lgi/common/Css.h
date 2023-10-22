@@ -38,6 +38,94 @@
 	_(FontFamilyMath, "math") \
 	_(FontFamilyFangsong, "fangsong")
 
+#define LCss_PropTypes() \
+	_(TypeEnum) \
+	_(TypeLen) \
+	_(TypeGRect) \
+	_(TypeColor) \
+	_(TypeBackground) \
+	_(TypeImage) \
+	_(TypeBorder) \
+	_(TypeFontFamilies)
+
+#define LCss_PropType() \
+	_(PropNull) \
+	_(PropDisplay) \
+	_(PropFloat) \
+	_(PropPosition) \
+	_(PropOverflow) \
+	_(PropVisibility) \
+	_(PropFontStyle) \
+	_(PropFontVariant) \
+	_(PropFontWeight) \
+	_(PropBackgroundRepeat) \
+	_(PropBackgroundAttachment) \
+	_(PropTextDecoration) \
+	_(PropWordWrap) \
+	_(PropListStyleType) \
+	_(PropLetterSpacing) \
+	_(PropFont) \
+	_(PropListStyle) \
+	_(PropBorderCollapse) \
+	_(PropBorderTopStyle) \
+	_(PropBorderRightStyle) \
+	_(PropBorderBottomStyle) \
+	_(PropBorderLeftStyle) \
+	_(PropZIndex) \
+	_(PropWidth) \
+	_(PropMinWidth) \
+	_(PropMaxWidth) \
+	_(PropHeight) \
+	_(PropMinHeight) \
+	_(PropMaxHeight) \
+	_(PropTop) \
+	_(PropRight) \
+	_(PropBottom) \
+	_(PropLeft) \
+	_(PropMargin) \
+	_(PropMarginTop) \
+	_(PropMarginRight) \
+	_(PropMarginBottom) \
+	_(PropMarginLeft) \
+	_(PropPadding) \
+	_(PropPaddingTop) \
+	_(PropPaddingRight) \
+	_(PropPaddingBottom) \
+	_(PropPaddingLeft) \
+	_(PropLineHeight) \
+	_(PropVerticalAlign) \
+	_(PropFontSize) \
+	_(PropBackgroundX) \
+	_(PropBackgroundY) \
+	_(PropBackgroundPos) \
+	_(PropTextAlign) \
+	_(PropBorderSpacing) \
+	_(PropBorderLeftWidth) \
+	_(PropBorderTopWidth) \
+	_(PropBorderRightWidth) \
+	_(PropBorderBottomWidth) \
+	_(PropBorderRadius) \
+	_(Prop_CellPadding) \
+	_(PropClip) \
+	_(PropXSubRect) \
+	_(PropBackground) \
+	_(PropColor) \
+	_(PropBackgroundColor) \
+	_(PropNoPaintColor) \
+	_(PropBorderTopColor) \
+	_(PropBorderRightColor) \
+	_(PropBorderBottomColor) \
+	_(PropBorderLeftColor) \
+	_(PropBackgroundImage) \
+	_(PropBorder) \
+	_(PropBorderStyle) \
+	_(PropBorderColor) \
+	_(PropBorderTop) \
+	_(PropBorderRight) \
+	_(PropBorderBottom) \
+	_(PropBorderLeft) \
+	_(PropFontFamily)
+
 /// Css property container
 class LgiClass LCss
 {
@@ -59,6 +147,7 @@ public:
 		TypeBorder,
 		TypeFontFamilies,
 	};
+	const char *ToString(PropTypes type);
 
 	/// These are all the types of CSS properties catagorised by their data type.
 	/// The enum value of the prop is encoded in the bottom 8 bits, the data type of 
@@ -157,6 +246,7 @@ public:
 		// FontFamilies based
 		PropFontFamily = TypeFontFamilies << 8,
 	};
+	const char *ToString(PropType prop);
 
 	PropTypes GetType(PropType p) { return (PropTypes) ((int)p >> 8); }
 

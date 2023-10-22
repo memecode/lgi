@@ -315,6 +315,28 @@ LCss::~LCss()
 	Empty();
 }
 
+const char *LCss::ToString(PropTypes type)
+{
+	switch (type)
+	{
+		#define _(t) case t: return #t;
+		LCss_PropTypes()
+		#undef _
+	}
+	return NULL;
+}
+
+const char *LCss::ToString(PropType prop)
+{
+	switch (prop)
+	{
+		#define _(t) case t: return #t;
+		LCss_PropType()
+		#undef _
+	}
+	return NULL;
+}
+
 const char *LCss::ToString(FontFamilyType t)
 {
 	switch (t)

@@ -51,17 +51,18 @@
 			<Node File="./src/SimpleCppParser.cpp" Type="2" Platforms="15" />
 		</Node>
 		<Node Name="Source Code" Type="1" Platforms="15" Open="1" Id="6">
-			<Node File="../src/common/Coding/LexCpp.cpp" Type="2" Platforms="15" />
-			<Node File="../src/common/Coding/ParseCpp.cpp" Type="2" Platforms="15" />
-			<Node File="./src/SysCharSupport.cpp" Type="2" Platforms="15" />
+			<Node File="..\src\common\Coding\LexCpp.cpp" Type="2" Platforms="15" />
+			<Node File="..\include\lgi\common\LexCpp.h" Type="3" Platforms="15" />
+			<Node File="..\src\common\Coding\ParseCpp.cpp" Type="2" Platforms="15" />
+			<Node File=".\src\SysCharSupport.cpp" Type="2" Platforms="15" />
 		</Node>
-		<Node File="./src/IdeCommon.cpp" Type="2" Platforms="15" />
-		<Node File="./src/LgiIde.cpp" Type="2" Platforms="15" />
-		<Node File="./src/LgiIde.h" Type="3" Platforms="15" />
-		<Node File="./src/LgiUtils.cpp" Type="2" Platforms="15" />
-		<Node File="./src/MemDumpViewer.cpp" Type="2" Platforms="15" />
-		<Node File="./src/SpaceTabConv.h" Type="3" Platforms="15" />
-		<Node File="./src/SpaceTabConv.cpp" Type="2" Platforms="15" />
+		<Node File=".\src\IdeCommon.cpp" Type="2" Platforms="15" />
+		<Node File=".\src\LgiIde.cpp" Type="2" Platforms="15" />
+		<Node File=".\src\LgiIde.h" Type="3" Platforms="15" />
+		<Node File=".\src\LgiUtils.cpp" Type="2" Platforms="15" />
+		<Node File=".\src\MemDumpViewer.cpp" Type="2" Platforms="15" />
+		<Node File=".\src\SpaceTabConv.h" Type="3" Platforms="15" />
+		<Node File=".\src\SpaceTabConv.cpp" Type="2" Platforms="15" />
 	</Node>
 	<Node Name="Lgi" Type="1" Platforms="15" Open="1" Id="7">
 		<Node Name="Html" Type="1" Platforms="15" Id="1">
@@ -88,14 +89,14 @@
 		<Node File="..\include\lgi\common\TrayIcon.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Resources" Type="1" Platforms="15" Open="1" Id="8">
-		<Node File="./resources/resource.h" Type="3" Platforms="15" />
-		<Node File="./haiku/buildHaiku.py" Type="8" Platforms="15" />
-		<Node File="./CMakeLists.txt" Type="8" Platforms="15" />
-		<Node File="./haiku/Makefile.haiku" Type="9" Platforms="15" />
-		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
-		<Node File="./win/Makefile.windows" Type="9" Platforms="15" />
+		<Node File=".\resources\resource.h" Type="3" Platforms="15" />
+		<Node File=".\haiku\buildHaiku.py" Type="8" Platforms="15" />
+		<Node File=".\CMakeLists.txt" Type="8" Platforms="15" />
+		<Node File=".\haiku\Makefile.haiku" Type="9" Platforms="15" />
+		<Node File=".\linux\Makefile.linux" Type="9" Platforms="15" />
+		<Node File=".\win\Makefile.windows" Type="9" Platforms="15" />
 	</Node>
-	<Node File="../Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
+	<Node File="..\Lgi.xml" Type="4" Platforms="15" LinkAgainst="1" />
 	<Settings>
 		<General>
 			<Makefile>
@@ -214,6 +215,7 @@ _GNU_SOURCE</Debug>
 _GNU_SOURCE</Release>
 				</Haiku>
 				<All />
+				<Windows />
 			</Defines>
 			<TargetType>
 				<All>Executable</All>
@@ -237,18 +239,18 @@ _GNU_SOURCE</Release>
 					<Debug>`pkg-config --cflags gtk+-3.0`</Debug>
 					<Release>`pkg-config --cflags gtk+-3.0`</Release>
 				</Linux>
-				<Haiku />
+				<Windows />
 			</SystemIncludes>
 			<LibraryPaths>
 				<All />
-				<Haiku />
+				<Windows />
 			</LibraryPaths>
 			<ApplicationIcon>
 				<Haiku>./resources/icon.hvif</Haiku>
 			</ApplicationIcon>
 			<Options>
 				<All />
-				<Haiku />
+				<Windows />
 			</Options>
 		</Build>
 		<Editor>
@@ -282,7 +284,7 @@ _GNU_SOURCE</Release>
 		<Advanced>
 			<OtherMakefileRules />
 			<PostBuildCommands>
-				<Haiku />
+				<Windows />
 			</PostBuildCommands>
 		</Advanced>
 		<Remote>

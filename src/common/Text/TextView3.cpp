@@ -135,15 +135,16 @@ public:
 
 class LTextView3Private : public LCss, public LMutex
 {
+	LAutoPtr<LRect> rPadding;
+
 public:
 	LTextView3 *View;
-	LRect rPadding;
-	int PourX;
-	bool LayoutDirty;
-	ssize_t DirtyStart, DirtyLen;
+	int PourX = -1;
+	bool LayoutDirty = true;
+	ssize_t DirtyStart = 0, DirtyLen = 0;
 	LColour UrlColour;
-	bool CenterCursor;
-	ssize_t WordSelectMode;
+	bool CenterCursor = false;
+	ssize_t WordSelectMode = -1;
 	LString Eol;
 	LString LastError;
 	LAutoPtr<LFontType> InitFontType;
@@ -151,15 +152,14 @@ public:
 	
 	// If the scroll position is set before we get a scroll bar, store the index
 	// here and set it when the LNotifyScrollBarCreate arrives.
-	ssize_t VScrollCache;
+	ssize_t VScrollCache = -1;
 
 	// Find/Replace Params
-	bool OwnFindReplaceParams;
-	LDocFindReplaceParams3 *FindReplaceParams;
+	bool OwnFindReplaceParams = true;
+	LDocFindReplaceParams3 *FindReplaceParams = NULL;
 
 	// Map buffer
-	ssize_t MapLen;
-	char16 *MapBuf;
+	LArray<char16> MapBuf;
 
 	// <RequiresLocking>
 		// Thread safe Name(char*) impl
@@ -170,24 +170,12 @@ public:
 	LString PourLog;
 	#endif
 
-	LTextView3Private(LTextView3 *view) : LMutex("LTextView3Private")
+	LTextView3Private(LTextView3 *view) :
+		LMutex("LTextView3Private"),
+		View(view)
 	{
-		View = view;
-		WordSelectMode = -1;
-		PourX = -1;
-		VScrollCache = -1;
-		DirtyStart = DirtyLen = 0;
 		UrlColour.Rgb(0, 0, 255);		
 		LColour::GetConfigColour("colour.L_URL", UrlColour);
-
-		CenterCursor = false;
-		
-		LayoutDirty = true;
-		rPadding.ZOff(0, 0);
-		MapBuf = 0;
-		MapLen = 0;
-		
-		OwnFindReplaceParams = true;
 		FindReplaceParams = new LDocFindReplaceParams3;
 	}
 	
@@ -197,8 +185,6 @@ public:
 		{
 			DeleteObj(FindReplaceParams);
 		}
-		
-		DeleteArray(MapBuf);
 	}
 	
 	bool DoAction()
@@ -231,16 +217,36 @@ public:
 
 	void OnChange(PropType Prop)
 	{
+		// printf("TextView3 OnCssProp: %s\n", ToString(Prop));
+		
 		if (Prop == LCss::PropPadding ||
 			Prop == LCss::PropPaddingLeft ||
 			Prop == LCss::PropPaddingRight ||
 			Prop == LCss::PropPaddingTop ||
 			Prop == LCss::PropPaddingBottom)
 		{
-			LCssTools t(this, View->GetFont());
-			rPadding.ZOff(0, 0);
-			rPadding = t.ApplyPadding(rPadding);
+			rPadding.Reset();
 		}
+		else if (Prop == LCss::PropFontFamily)
+		{
+			// Force the font to update...
+			View->SetFont(NULL);
+		}
+	}
+	
+	LRect &GetPadding()
+	{
+		if (!rPadding)
+		{
+			LCssTools t(this, View->GetFont());
+			if (rPadding.Reset(new LRect(0, 0, 0, 0)))
+				*rPadding = t.ApplyPadding(*rPadding);
+		}
+		
+		if (rPadding)
+			return *rPadding;
+		static LRect null(0, 0, 0, 0);
+		return null;
 	}
 };
 
@@ -401,7 +407,7 @@ LTextView3::LTextView3(	int Id,
 
 	// Display
 	CursorPos.ZOff(1, LineY-1);
-	CursorPos.Offset(d->rPadding.x1, d->rPadding.y1);
+	// CursorPos.Offset(d->rPadding.x1, d->rPadding.y1);
 
 	LRect r;
 	r.ZOff(cx-1, cy-1);
@@ -432,14 +438,10 @@ char16 *LTextView3::MapText(char16 *Str, ssize_t Len, bool RtlTrailingSpace)
 {
 	if (ObscurePassword /*|| ShowWhiteSpace*/ || RtlTrailingSpace)
 	{
-		if (Len > d->MapLen)
-		{
-			DeleteArray(d->MapBuf);
-			d->MapBuf = new char16[Len + RtlTrailingSpace];
-			d->MapLen = Len;
-		}
+		if (Len > d->MapBuf.Length())
+			d->MapBuf.Length(Len + RtlTrailingSpace);
 
-		if (d->MapBuf)
+		if (d->MapBuf.Length() > 0)
 		{
 			int n = 0;
 
@@ -479,7 +481,7 @@ char16 *LTextView3::MapText(char16 *Str, ssize_t Len, bool RtlTrailingSpace)
 			}
 			*/			
 
-			return d->MapBuf;
+			return d->MapBuf.AddressOf();
 		}
 	}
 
@@ -850,8 +852,9 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 	LAssert(InThread());
 	#endif
 
+	LRect rPadding = d->GetPadding();
 	LRect Client = GetClient();
-	int Mx = Client.X() - d->rPadding.x1 - d->rPadding.x2;
+	int Mx = Client.X() - rPadding.x1 - rPadding.x2;
 	int Cy = 0;
 	MaxX = 0;
 
@@ -931,7 +934,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 			{
 				LDisplayString ds(Font, Text + l->Start, l->Len);
 
-				l->r.x1 = d->rPadding.x1;
+				l->r.x1 = rPadding.x1;
 				l->r.x2 = l->r.x1 + ds.X();
 
 				MaxX = MAX(MaxX, l->r.X());
@@ -964,7 +967,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 			Log.Printf("	[%i] new: start=" LPrintfSSizeT ", len=" LPrintfSSizeT "\n", Idx, l->Start, l->Len);
 			#endif
 
-			l->r.x1 = d->rPadding.x1;
+			l->r.x1 = rPadding.x1;
 			l->r.y1 = Cy;
 			l->r.y2 = l->r.y1 + LineY - 1;
 			if (l->Len)
@@ -1125,7 +1128,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 			{
 				l->Start = i;
 				l->Len = e - i;
-				l->r.x1 = d->rPadding.x1;
+				l->r.x1 = rPadding.x1;
 				l->r.x2 = l->r.x1 + Width - 1;
 
 				l->r.y1 = Cy;
@@ -1193,7 +1196,7 @@ void LTextView3::PourText(size_t Start, ssize_t Length /* == 0 means it's a dele
 			{
 				l->Start = Size;
 				l->Len = 0;
-				l->r.x1 = l->r.x2 = d->rPadding.x1;
+				l->r.x1 = l->r.x2 = rPadding.x1;
 				l->r.y1 = Cy;
 				l->r.y2 = l->r.y1 + LineY - 1;
 
@@ -1990,7 +1993,7 @@ void LTextView3::GetTextExtent(int &x, int &y)
 {
 	PourText(0, Size);
 
-	x = MaxX + d->rPadding.x1;
+	x = MaxX + d->GetPadding().x1;
 	y = (int)(Line.Length() * LineY);
 }
 
@@ -2201,7 +2204,7 @@ void LTextView3::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 
 		// update the line the cursor moved to
 		LRect r = To->r;
-		r.Offset(-ScrollX, d->rPadding.y1-DocOffset);
+		r.Offset(-ScrollX, d->GetPadding().y1-DocOffset);
 		r.x2 = X();
 		Invalidate(&r);
 
@@ -2210,7 +2213,7 @@ void LTextView3::SetCaret(size_t i, bool Select, bool ForceFullUpdate)
 			// update the line the cursor came from,
 			// if it's a different line from the "to"
 			r = From->r;
-			r.Offset(-ScrollX, d->rPadding.y1-DocOffset);
+			r.Offset(-ScrollX, d->GetPadding().y1-DocOffset);
 			r.x2 = X();
 			Invalidate(&r);
 		}
@@ -4852,7 +4855,7 @@ int LTextView3::ScrollYPixel()
 
 LRect LTextView3::DocToScreen(LRect r)
 {
-	r.Offset(0, d->rPadding.y1 - ScrollYPixel());
+	r.Offset(0, d->GetPadding().y1 - ScrollYPixel());
 	return r;
 }
 
@@ -4898,6 +4901,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 	#endif
 		
 		LRect r = GetClient();
+		auto &rPadding = d->GetPadding();
 		r.x2 += ScrollX;
 
 		int Ox, Oy;
@@ -4956,10 +4960,10 @@ void LTextView3::OnPaint(LSurface *pDC)
 			// draw margins
 			pDC->Colour(PAINT_BORDER);
 			// top margin
-			pDC->Rectangle(0, 0, r.x2, d->rPadding.y1-1);
+			pDC->Rectangle(0, 0, r.x2, rPadding.y1-1);
 			// left margin
 			{
-				LRect LeftMargin(0, d->rPadding.y1, d->rPadding.x1-1, r.y2);
+				LRect LeftMargin(0, rPadding.y1, rPadding.x1-1, r.y2);
 				OnPaintLeftMargin(pDC, LeftMargin, PAINT_BORDER);
 			}
 		
@@ -4993,7 +4997,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 	Prof.Add("foreach Line loop");
 	#endif
 			// loop through all visible lines
-			int y = d->rPadding.y1;
+			int y = rPadding.y1;
 			while ((l = *It) &&
 					l->r.y1+Dy < r.Y())
 			{
@@ -5026,7 +5030,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 										NextSelection < l->Start + l->Len;
 
 				// Fractional pixels we have moved so far:
-				int MarginF = d->rPadding.x1 << LDisplayString::FShift;
+				int MarginF = rPadding.x1 << LDisplayString::FShift;
 				int FX = MarginF;
 				int FY = Tr.y1 << LDisplayString::FShift;
 				
@@ -5198,7 +5202,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 						LDisplayString Ds(Font, MapText(Text+l->Start, At), At);
 						Ds.ShowVisibleTab(ShowWhiteSpace);
 						int CursorX = Ds.X();
-						CursorPos.Offset(d->rPadding.x1 + CursorX, Tr.y1);
+						CursorPos.Offset(rPadding.x1 + CursorX, Tr.y1);
 						
 						if (CanScrollX)
 						{
@@ -5268,7 +5272,7 @@ void LTextView3::OnPaint(LSurface *pDC)
 			{
 				pDC->Colour(Back);
 				// pDC->Colour(LColour(255, 0, 255));
-				pDC->Rectangle(d->rPadding.x1, y, r.x2, r.y2);
+				pDC->Rectangle(rPadding.x1, y, r.x2, r.y2);
 			}
 		}
 		else
@@ -5488,4 +5492,4 @@ class LTextView3_Factory : public LViewFactory
 
 		return 0;
 	}
-} TextView3_Factory;
+}	TextView3_Factory;
