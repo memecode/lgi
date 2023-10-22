@@ -46,23 +46,23 @@
 #endif
 
 #ifdef _MSC_VER
-#ifdef _DEBUG
-	#ifdef DEBUG_LOG
-		#define PathAssert(b)			if (!(b)) { Log.Close(); \
+	#ifdef _DEBUG
+		#ifdef DEBUG_LOG
+			#define PathAssert(b)		if (!(b)) { Log.Close(); \
 											_asm int 3 \
-											}
+										}
+		#else
+			#ifdef _WIN64
+				#define PathAssert(b)	LAssert(b)
+			#else
+				#define PathAssert(b)	if (!(b)) _asm int 3
+			#endif
+		#endif
 	#else
-		#ifdef _WIN64
-            #define PathAssert(b)			LAssert(b)
-        #else
-            #define PathAssert(b)			if (!(b)) _asm int 3
-        #endif
+		#define PathAssert(b)
 	#endif
 #else
-	#define PathAssert(b)
-#endif
-#else
-	#define PathAssert(b)
+	#define PathAssert(b)				LAssert(b)
 #endif
 
 

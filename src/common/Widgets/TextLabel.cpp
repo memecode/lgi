@@ -27,6 +27,7 @@ public:
 		Ctrl = ctrl;
 		PrevX = -1;
 		AmpersandToUnderline = true;
+		SetFontCache(LAppInst->GetFontCache());
 	}
 
 	bool PreLayout(int32 &Min, int32 &Max)

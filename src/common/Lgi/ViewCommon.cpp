@@ -2093,7 +2093,7 @@ LFont *LView::GetFont()
 		auto fc = LAppInst->GetFontCache();
 		if (fc)
 		{
-			printf("%s::GetFont from cache\n", GetClass());
+			// printf("%s::GetFont from cache\n", GetClass());
 			auto f = fc->GetFont(d->Css);
 			if (f)
 			{

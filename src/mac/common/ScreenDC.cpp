@@ -118,12 +118,14 @@ public:
 LScreenDC::LScreenDC()
 {
 	d = new LScreenPrivate;
+	ColourSpace = System32BitColourSpace;
 }
 
 LScreenDC::LScreenDC(LPrintDcParams *Params)
 {
 	d = new LScreenPrivate;
-	
+	ColourSpace = System32BitColourSpace;
+
 	#if LGI_COCOA
 	#else
 	d->Ctx = Params->Ctx;
@@ -142,12 +144,14 @@ LScreenDC::LScreenDC(LPrintDcParams *Params)
 LScreenDC::LScreenDC(LWindow *w, void *param)
 {
 	d = new LScreenPrivate(w, param);
+	ColourSpace = System32BitColourSpace;
 	d->Wnd = w;
 }
 
 LScreenDC::LScreenDC(LView *v, void *param)
 {
 	d = new LScreenPrivate(v, param);
+	ColourSpace = System32BitColourSpace;
 }
 
 LScreenDC::~LScreenDC()

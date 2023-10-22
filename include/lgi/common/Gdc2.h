@@ -1173,6 +1173,7 @@ public:
 			if (Sub)
 				pDC->SetOrigin(Sub->x1, Sub->y1);
 		}
+		else LAssert(!"Failed to create memory context");
 	}
 	
 	~LDoubleBuffer()

@@ -37,27 +37,21 @@ LPoint LButton::Overhead =
 class LButtonPrivate : public LStringLayout
 {
 public:
-	int Pressed;
-	bool KeyDown;
-	bool Over;
-	bool WantsDefault;
-	bool Toggle;
+	int Pressed = 0;
+	bool KeyDown = false;
+	bool Over = false;
+	bool WantsDefault = false;
+	bool Toggle = false;
 	
 	LRect TxtSz;
-	LSurface *Image;
-	bool OwnImage;
+	LSurface *Image = NULL;
+	bool OwnImage = false;
 	
 	LButtonPrivate() : LStringLayout(NULL)
 	{
 		AmpersandToUnderline = true;
-		Pressed = 0;
-		KeyDown = false;
-		Toggle = false;
-		Over = 0;
-		WantsDefault = false;
-		Image = NULL;
-		OwnImage = false;
 		SetWrap(false);
+		SetFontCache(LAppInst->GetFontCache());
 	}
 
 	~LButtonPrivate()
@@ -184,6 +178,8 @@ bool LButton::SetImage(LSurface *Img, bool OwnIt)
 
 void LButton::OnStyleChange()
 {
+	SetFont(NULL);
+	GetFont();
 	d->Layout(GetCss(true), LBase::Name());
 }
 
@@ -203,10 +199,12 @@ bool LButton::NameW(const char16 *n)
 
 void LButton::SetFont(LFont *Fnt, bool OwnIt)
 {
-	LAssert(Fnt && Fnt->Handle());
 	LView::SetFont(Fnt, OwnIt);
-	OnStyleChange();
-	Invalidate();
+	if (Fnt)
+	{
+		OnStyleChange();
+		Invalidate();
+	}
 }
 
 LMessage::Result LButton::OnEvent(LMessage *Msg)

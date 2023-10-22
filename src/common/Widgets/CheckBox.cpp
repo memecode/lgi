@@ -48,6 +48,7 @@ public:
 		Wrap = true;
 		AmpersandToUnderline = true;
 		ValuePos.ZOff(-1, -1);
+		SetFontCache(LAppInst->GetFontCache());
 	}
 
 	bool PreLayout(int32 &Min, int32 &Max)

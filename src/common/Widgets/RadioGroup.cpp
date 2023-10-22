@@ -35,6 +35,7 @@ public:
 		Val = 0;
 		MaxLayoutWidth = 0;
 		AmpersandToUnderline = true;
+		SetFontCache(LAppInst->GetFontCache());
 	}
 
 	~LRadioGroupPrivate()
@@ -381,6 +382,7 @@ public:
 		Val = 0;
 		Over = 0;
 		AmpersandToUnderline = true;
+		SetFontCache(LAppInst->GetFontCache());
 	}
 
 	~LRadioButtonPrivate()

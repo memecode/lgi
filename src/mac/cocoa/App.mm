@@ -391,7 +391,7 @@ LApp::LApp(OsAppArguments &AppArgs, const char *AppName, LAppArguments *ObjArgs)
 	if (LIsRelativePath(AppArgs.Arg[0]))
 	{
 		char wd[MAX_PATH_LEN] = {};
-		auto r = getcwd(wd, sizeof(wd));
+		getcwd(wd, sizeof(wd));
 		
 		char exe[MAX_PATH_LEN];
 		if (LMakePath(exe, sizeof(exe), wd, AppArgs.Arg[0]))
