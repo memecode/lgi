@@ -150,7 +150,7 @@ void NewProjectFromTemplate(LViewI *parent)
 	LFile::Path p(LSP_APP_INSTALL);
 	p +=
 		#ifdef MAC
-		"../../"
+		"../../../../"
 		#endif
 		"../../templates";
 	if (!p.Exists())

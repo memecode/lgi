@@ -233,7 +233,7 @@ pascal OSErr AppEventHandler(const AppleEvent *ae, AppleEvent *reply, SRefCon ha
 }
 #endif
 
-int main(int Args, char **Arg)
+int main(int Args, const char **Arg)
 {
 	int Status = 0;
 
@@ -241,7 +241,7 @@ int main(int Args, char **Arg)
 	Gtk::gtk_init(&Args, &Arg);
 	#endif
 
-	OsAppArguments AppArgs(Args, (const char**)Arg);
+	OsAppArguments AppArgs(Args, Arg);
 	
 	#ifdef MAC
 	

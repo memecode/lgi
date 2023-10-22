@@ -15,6 +15,7 @@ Lib
 *.xcbkptlist
 xcschememanagement.plist
 contents.xcworkspacedata
+*/IDEWorkspaceChecks.plist
 
 x64ReleaseNoOptimize*
 x64Debug*
@@ -22,22 +23,22 @@ x64Release*
 Debug
 Release
 makefile
+src/mac/cocoa/DerivedData
 
-Ide/HtmlTest*.sdf
-Ide/HtmlTest*.suo
-Ide/LgiIde.xml.*
-Ide/lgiide
-Ide/MacCocoa/build
 */haikuPassword.txt
-Ide/makefile
-Ide/lgiide.txt
+ide/makefile
+ide/lgiide.txt
+ide/mac/build
+ide/mac/DerivedData
 
-Lvc/Lvc.xml
-Lvc/lvc
-Lvc/mac/build/*
+rvc/Lvc.xml
+rvc/lvc
+rvc/mac/build
+lvc/mac/DerivedData
 
-ResourceEditor/mac/build
-ResourceEditor/lgires
+resourceEditor/mac/build
+resourceEditor/lgires
+resourceEditor/mac/DerivedData
 
 ScriptingUnitTests/Win32*
 ScriptingUnitTests/x64*
@@ -60,11 +61,14 @@ tests/x64
 test/HtmlViewer/Files
 test/HtmlViewer/Output
 test/HtmlViewer/HtmlTestSuite
+test/HtmlViewer/mac/DerivedData
 test/HtmlEditor/testcases
 test/HtmlEditor/htmleditor
 test/GuiTest/gui_test
 test/GuiTest/gui_test.txt
 test/GuiTest/Lgi Test App.xml
+test/GuiTest/Mac/DerivedData
+test/GuiTest/Mac/build
 
 utils/SlogViewer/slogviewer
 

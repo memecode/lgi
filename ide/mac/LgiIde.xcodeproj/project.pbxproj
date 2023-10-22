@@ -202,16 +202,15 @@
 		345B206E217965E80079E3C9 /* LgiIde */ = {
 			isa = PBXGroup;
 			children = (
-				345B20F62179696E0079E3C9 /* LgiIde.cpp */,
-				345B20F52179696E0079E3C9 /* LgiUtils.cpp */,
-				34C75D9223A0D89A006DE6D1 /* NewProjectFromTemplate.cpp */,
-				345B207A217965EA0079E3C9 /* LgiIde.entitlements */,
-				345B20F92179696F0079E3C9 /* LgiIde.h */,
-				345B2077217965EA0079E3C9 /* Info.plist */,
-				3411DB712AB86D6700CB3837 /* PostBuildStep.py */,
 				345B212421796A1E0079E3C9 /* Debugging */,
 				345B212221796A040079E3C9 /* Docs */,
+				345B2077217965EA0079E3C9 /* Info.plist */,
 				34D21CD621797809003D1EA6 /* Lgi */,
+				345B20F62179696E0079E3C9 /* LgiIde.cpp */,
+				345B20F92179696F0079E3C9 /* LgiIde.h */,
+				345B20F52179696E0079E3C9 /* LgiUtils.cpp */,
+				34C75D9223A0D89A006DE6D1 /* NewProjectFromTemplate.cpp */,
+				3411DB712AB86D6700CB3837 /* PostBuildStep.py */,
 				345B2121217969F10079E3C9 /* Projects */,
 				345B212521796A2D0079E3C9 /* Search */,
 				345B212321796A180079E3C9 /* Ui */,
@@ -240,6 +239,7 @@
 		345B211A217969C50079E3C9 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				345B207A217965EA0079E3C9 /* LgiIde.entitlements */,
 				34C4FD3222FDB50D00C4BECB /* cmds-16px.png */,
 				34C4FD3322FDB50D00C4BECB /* cmds-32px.png */,
 				345B211D217969D30079E3C9 /* icons.png */,

@@ -83,19 +83,19 @@ public:
 	LString ToString();
 
 	// Data access
-	bool CopyProps(LDataPropI &p);
-	const char *GetStr(int id);
-	Store3Status SetStr(int id, const char *str);
-	int64 GetInt(int id);
-	Store3Status SetInt(int id, int64 i);
-	const LDateTime *GetDate(int id);
-	Store3Status SetDate(int id, const LDateTime *i);
-	LVariant *GetVar(int id);
-	Store3Status SetVar(int id, LVariant *i);
-	LDataPropI *GetObj(int id);
-	Store3Status SetObj(int id, LDataPropI *i);
-	LDataIt GetList(int id);
-	Store3Status SetRfc822(LStreamI *Rfc822Msg);
+	bool CopyProps(LDataPropI &p) override;
+	const char *GetStr(int id) override;
+	Store3Status SetStr(int id, const char *str) override;
+	int64 GetInt(int id) override;
+	Store3Status SetInt(int id, int64 i) override;
+	const LDateTime *GetDate(int id) override;
+	Store3Status SetDate(int id, const LDateTime *i) override;
+	LVariant *GetVar(int id) override;
+	Store3Status SetVar(int id, LVariant *i) override;
+	LDataPropI *GetObj(int id) override;
+	Store3Status SetObj(int id, LDataPropI *i) override;
+	LDataIt GetList(int id) override;
+	Store3Status SetRfc822(LStreamI *Rfc822Msg) override;
 };
 
 class DbIndex

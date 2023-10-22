@@ -76,7 +76,7 @@ struct LMidiPriv
 		LString Mod = pModel;
 
 		char s[256];
-		sprintf(s, "%s, %s, %s, %x", Name.Get(), Man.Get(), Mod.Get(), (uint32)Id);
+		snprintf(s, sizeof(s), "%s, %s, %s, %x", Name.Get(), Man.Get(), Mod.Get(), (uint32_t)Id);
 		printf("%s\n", s);
 
 		CFRelease(pName);
@@ -124,7 +124,7 @@ struct LMidiPriv
 				// Remove the message from the buffer
 				if (d->Length() > Len)
 				{
-					int Remaining = d->Length() - Len;
+					auto Remaining = d->Length() - Len;
 					if (Remaining > 0)
 					{
 						memmove(&(*d)[0], &d[Len], Remaining);
@@ -142,7 +142,7 @@ struct LMidiPriv
 
 	void LMidi::OnMidiNotify(const MIDINotification *message)
 	{
-		printf("MIDI notify: %li\n", message->messageID);
+		printf("MIDI notify: %i\n", (int)message->messageID);
 	}
 
 #elif defined(WINDOWS)
@@ -283,23 +283,23 @@ LMidi::LMidi() : LMutex("LMidi")
 
 	#if defined(MAC)
 
-		int Devs = MIDIGetNumberOfDevices();
+		auto Devs = MIDIGetNumberOfDevices();
 		for (int i = 0; i < Devs; i++)
 		{
 			MIDIDeviceRef dev = MIDIGetDevice(i);
 			d->Devs[i] = dev;
 			LAutoString a = PrintMIDIObjectInfo(dev);
-			In.New().Reset(NewStr(a));
-			Out.New().Reset(NewStr(a));
+			In.New() = a;
+			Out.New() = a;
 
-			int nEnt = MIDIDeviceGetNumberOfEntities(dev);
+			auto nEnt = MIDIDeviceGetNumberOfEntities(dev);
 			// printf("Device %d has %d entities:\n", i, nEnt);
 			for (int n = 0; n < nEnt; ++n)
 			{
 				MIDIEntityRef ent = MIDIDeviceGetEntity(dev, n);
 				// printf("	 ");
 				// PrintMIDIObjectInfo(ent);
-				int nSources = MIDIEntityGetNumberOfSources(ent);
+				auto nSources = MIDIEntityGetNumberOfSources(ent);
 				// printf("	 Entity %d has %d source endpoints:\n", n, nSources);
 				for (int k = 0; k < nSources; ++k)
 				{
@@ -309,7 +309,7 @@ LMidi::LMidi() : LMutex("LMidi")
 					// PrintMIDIObjectInfo(sep);
 				}
 
-				int nDestinations = MIDIEntityGetNumberOfDestinations(ent);
+				auto nDestinations = MIDIEntityGetNumberOfDestinations(ent);
 				// printf("	 Entity %d has %d destination endpoints:\n", i, nDestinations);
 				for (int l = 0; l < nDestinations; ++l)
 				{

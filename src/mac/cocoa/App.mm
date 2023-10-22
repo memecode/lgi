@@ -381,7 +381,7 @@ LApp *TheApp = 0;
 LMouseHook *LApp::MouseHook = 0;
 
 LApp::LApp(OsAppArguments &AppArgs, const char *AppName, LAppArguments *ObjArgs) :
-OsApplication(AppArgs.Args, AppArgs.Arg)
+	OsApplication(AppArgs.Args, AppArgs.Arg)
 {
 	TheApp = this;
 	d = new LAppPrivate(this);
@@ -390,9 +390,11 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	Name(AppName);
 	if (LIsRelativePath(AppArgs.Arg[0]))
 	{
-		char wd[MAX_PATH_LEN];
+		char wd[MAX_PATH_LEN] = {};
+		auto r = getcwd(wd, sizeof(wd));
+		
 		char exe[MAX_PATH_LEN];
-		if (LMakePath(exe, sizeof(exe), getcwd(wd, sizeof(wd)), AppArgs.Arg[0]))
+		if (LMakePath(exe, sizeof(exe), wd, AppArgs.Arg[0]))
 			LgiArgsAppPath = exe;
 		else
 			printf("%s:%i - LMakePath for Exe failed.\n", _FL);
@@ -400,7 +402,7 @@ OsApplication(AppArgs.Args, AppArgs.Arg)
 	else
 		LgiArgsAppPath = AppArgs.Arg[0];
 	
-	// printf("%s:%i - LgiArgsAppPath='%s'\n", _FL, LgiArgsAppPath.Get());
+	printf("%s:%i - LgiArgsAppPath='%s'\n", _FL, LgiArgsAppPath.Get());
 	
 	// Catch and ignore SIGPIPE
 	signal(SIGPIPE, OnSigPipe);
