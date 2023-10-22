@@ -121,8 +121,7 @@ bool LCssCache::OutputStyles(LStream &s, int TabDepth)
 		{
 			s.Print("%s.%s {\n", Tabs, ns->Name.Get());
 				
-			LAutoString a = ns->ToString();
-			LString all = a.Get();
+			LString all = ns->ToLString();
 			LString::Array lines = all.Split("\n");
 			for (unsigned n=0; n<lines.Length(); n++)
 			{

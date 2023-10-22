@@ -540,7 +540,7 @@ LString LCss::ToLString()
 	return p.NewLStr();
 }
 
-LAutoString LCss::ToAutoString()
+[[deprecated]] LAutoString LCss::ToAutoString()
 {
 	LStringPipe p;
 	ToStringPipe(p);
