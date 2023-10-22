@@ -21,8 +21,6 @@ LLayout::LLayout()
 	_PourLargest = false;
 	VScroll = 0;
 	HScroll = 0;
-	WantX = false;
-	WantY = false;
 }
 
 LLayout::~LLayout()
@@ -158,8 +156,6 @@ bool LLayout::SetScrollBars(bool x, bool y)
 		
 		if (!PostEvent(M_SET_SCROLL, x, y))
 		{
-			WantX = x;
-			WantY = y;
 			return false;
 		}
 	}
