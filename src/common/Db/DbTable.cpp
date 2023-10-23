@@ -2,8 +2,6 @@
 #include "lgi/common/DbTable.h"
 
 ///////////////////////////////////////////////////////////////////
-#define MAGIC(v) LgiSwap32(v)
-
 #define OBJ_HEAD(magic) \
 	char *Start = p.c; \
 	uint32_t *Sz = NULL; \
@@ -60,9 +58,9 @@ enum OffType
 
 enum DbMagic
 {
-	TableMagic = MAGIC('tbl\0'),
-	FieldMagic = MAGIC('fld\0'),
-	RowMagic = MAGIC('row\0'),
+	TableMagic = Lgi4CC("tbl\0"),
+	FieldMagic = Lgi4CC("fld\0"),
+	RowMagic = Lgi4CC("row\0"),
 };
 
 ///////////////////////////////////////////////////////////////////
