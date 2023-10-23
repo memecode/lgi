@@ -26,19 +26,25 @@ public:
 	}
 };
 
-class CtNode : public LTreeItem
+class CtNode :
+	public LTreeItem,
+	public ResourceView
 {
 	CtrlControlTreePriv *d;
 
 public:
-	ResString *Str;
+	ResString *Str = NULL;
 	LAutoString Type;
 	LAutoString Tag;
 
-	CtNode(CtrlControlTreePriv *priv, LView *update, int StringRef)
+	void UpdateView()
+	{
+		Update();
+	}
+
+	CtNode(CtrlControlTreePriv *priv, int StringRef)
 	{
 		d = priv;
-		Str = 0;
 
 		if (d->Dlg)
 		{
@@ -53,7 +59,7 @@ public:
 			}
 
 			if (Str)
-				Str->UpdateWnd = update;
+				Str->AddView(this);
 		}
 	}
 
@@ -150,15 +156,19 @@ public:
 				switch (Cmd)
 				{
 					case IDM_UP:
+					{
 						Move(-1);
 						break;
+					}
 					case IDM_DOWN:
+					{
 						Move(1);
 						break;
+					}
 					case IDM_NEW_CHILD:
 					{
 						// Insert at the start... user can use "next" for positions other than the start.
-						Insert(new CtNode(d, Str->UpdateWnd, 0), 0);
+						Insert(new CtNode(d, 0), 0);
 						Expanded(true);
 						break;
 					}
@@ -169,14 +179,14 @@ public:
 						{
 							if (Idx >= 0)
 							{
-								GetParent()->Insert(new CtNode(d, Str->UpdateWnd, 0), Idx+1);
+								GetParent()->Insert(new CtNode(d, 0), Idx+1);
 							}
 						}
 						else
 						{
 							if (Idx >= 0)
 							{
-								GetTree()->Insert(new CtNode(d, Str->UpdateWnd, 0), Idx+1);
+								GetTree()->Insert(new CtNode(d, 0), Idx+1);
 							}
 						}
 						break;
@@ -215,7 +225,7 @@ CtrlControlTree::CtrlControlTree(ResDialog *dlg, LXmlTag *load) :
 
 	if (!load)
 	{
-		Insert(new CtNode(d, this, 0));
+		Insert(new CtNode(d, 0));
 	}
 }
 
@@ -320,7 +330,7 @@ bool CtrlControlTree::GetVariant(const char *Name, LVariant &Value, const char *
 	return true;
 }
 
-void ReadTree(LXmlTag *t, LTreeNode *n, CtrlControlTreePriv *d, LView *v)
+void ReadTree(LXmlTag *t, LTreeNode *n, CtrlControlTreePriv *d)
 {
 	CtNode *ct = dynamic_cast<CtNode*>(n);
 	if (ct && ct->Str)
@@ -332,8 +342,8 @@ void ReadTree(LXmlTag *t, LTreeNode *n, CtrlControlTreePriv *d, LView *v)
 	for (auto c: t->Children)
 	{
 		int StrRef = c->GetAsInt("ref");
-		CtNode *nw = new CtNode(d, v, StrRef);
-		ReadTree(c, nw, d, v);
+		CtNode *nw = new CtNode(d, StrRef);
+		ReadTree(c, nw, d);
 		n->Insert(nw);
 
 		LTreeItem *it = dynamic_cast<LTreeItem*>(n);
@@ -357,7 +367,7 @@ bool CtrlControlTree::SetVariant(const char *Name, LVariant &Value, const char *
 		if (!x)
 			LAssert(!"Not the right object.");
 		else
-			ReadTree(x, this, d, this);
+			ReadTree(x, this, d);
 	}
 	else return false;
 

@@ -17,8 +17,10 @@
 #include "lgi/common/Combo.h"
 
 ////////////////////////////////////////////////////////////////
+class ResString;
 class ResStringGroup;
 class ResStringUi;
+class ResDialogCtrl;
 
 ////////////////////////////////////////////////////////////////
 class StrLang
@@ -40,27 +42,28 @@ public:
 	bool operator !=(LLanguageId LangId);
 };
 
-class ResString : public LListItem, public FieldSource
+class ResString :
+	public LListItem,
+	public FieldSource,
+	public ResourceItem
 {
 	friend class ResStringGroup;
 	friend class ResStringView;
 
 protected:
-	ResStringGroup *Group;
+	ResStringGroup *Group = NULL;
 
 	char RefStr[16];
 	char IdStr[16];
 	char **GetIndex(int i);
 	StrLang *GetLang(LLanguageId i);
-	LAutoString Define;		// #define used in code to reference
-	int Ref;			// globally unique
-	int Id;				// numerical value used in code to reference
+	LString Define;			// #define used in code to reference
+	int Ref = 0;			// globally unique
+	int Id = 0;				// numerical value used in code to reference
 
 public:
-	char *Tag;			// Optional component tag, for turning off features.
+	char *Tag = NULL;			// Optional component tag, for turning off features.
 	List<StrLang> Items;
-	LArray<class ResDialogCtrl*> Refs;
-	LView *UpdateWnd;
 
 	ResString(ResStringGroup *group, int init_ref = -1);
 	~ResString();
@@ -81,7 +84,7 @@ public:
 	void PasteText();
 	char *GetDefine() { return Define; }
 	void SetDefine(const char *s);
-
+	
 	// Item
 	int GetCols();
 	const char *GetText(int i);

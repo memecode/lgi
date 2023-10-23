@@ -516,7 +516,10 @@ bool LButton::OnLayout(LViewLayoutInfo &Inf)
 		Dpi = Wnd->GetDpi();
 	double Scale = (double)Dpi.x / 96.0;
 
-	LRect DefaultPad(Scale*Overhead.x/2, Scale*Overhead.y/2, Scale*Overhead.x/2, Scale*Overhead.y/2);
+	LRect DefaultPad((int)(Scale*Overhead.x/2),
+					 (int)(Scale*Overhead.y/2),
+					 (int)(Scale*Overhead.x/2),
+					 (int)(Scale*Overhead.y/2));
 	LRect Pad = Tools.GetPadding(c, &DefaultPad), Border = Tools.GetBorder(c);
 
 	if (!Inf.Width.Min)

@@ -438,7 +438,7 @@ char16 *LTextView3::MapText(char16 *Str, ssize_t Len, bool RtlTrailingSpace)
 {
 	if (ObscurePassword /*|| ShowWhiteSpace*/ || RtlTrailingSpace)
 	{
-		if (Len > d->MapBuf.Length())
+		if (Len > (ssize_t)d->MapBuf.Length())
 			d->MapBuf.Length(Len + RtlTrailingSpace);
 
 		if (d->MapBuf.Length() > 0)

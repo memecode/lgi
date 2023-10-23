@@ -254,6 +254,57 @@ char *DecodeXml(const char *Str, int Len)
 }
 
 //////////////////////////////////////////////////////////////////////////////
+ResourceItem::~ResourceItem()
+{
+	for (auto v: views)
+	{
+		LAssert(v->item == this);
+		v->item = NULL;
+	}
+}
+
+void ResourceItem::AddView(ResourceView *v)
+{
+	if (v)
+	{
+		LAssert(v->item == NULL);
+		v->item = this;
+		if (!views.HasItem(v))
+			views.Add(v);
+	}
+}
+
+void ResourceItem::RemoveView(ResourceView *v)
+{
+	if (v)
+	{
+		LAssert(v->item == this);
+		if (v->item == this)
+		{
+			LAssert(views.HasItem(v));
+			v->item = NULL;
+			views.Delete(v);			
+		}
+	}
+}
+
+void ResourceItem::UpdateAllViews()
+{
+	for (auto v: views)
+		v->UpdateView();
+}
+
+ResourceView::~ResourceView()
+{
+	if (item)
+	{
+		LAssert(item->views.HasItem(this));
+		item->views.Delete(this);
+		item = NULL;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
 Resource::Resource(AppWnd *w, int t, bool enabled)
 {
 	AppWindow = w;
@@ -3738,7 +3789,7 @@ void AppWnd::LoadWin32(const char *FileName)
 							{
 								if (T.Length() >= 7)
 								{
-									CtrlText *Ctrl = new CtrlText(Dialog, 0);
+									auto Ctrl = new CtrlText(Dialog, 0);
 									if (Ctrl)
 									{
 										Ctrl->GetStr()->Set(T[1], LanguageId);

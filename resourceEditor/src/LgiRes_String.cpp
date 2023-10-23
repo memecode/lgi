@@ -134,9 +134,7 @@ ResString::ResString(ResStringGroup *grp, int init_ref)
 {
 	Ref = init_ref;
 	Group = grp;
-	Id = 0;
-	Tag = 0;
-	UpdateWnd = 0;
+	LAssert(Group);
 	IdStr[0] = 0;
 	RefStr[0] = 0;
 
@@ -157,12 +155,6 @@ ResString::ResString(ResStringGroup *grp, int init_ref)
 
 ResString::~ResString()
 {
-	while (Refs.Length() != 0)
-	{
-		auto r = Refs[0];
-		r->SetStr(NULL);
-	}
-
 	if (Group)
 	{
 		Group->App()->OnObjDelete(this);
@@ -190,10 +182,7 @@ int ResString::SetRef(int r)
 		Ref = r;
 
 		Update();
-		if (UpdateWnd)
-		{
-			UpdateWnd->Invalidate();
-		}
+		UpdateAllViews();
 	}	
 
 	return Ref;
@@ -207,17 +196,14 @@ int ResString::SetId(int id)
 		Id = id;
 
 		Update();
-		if (UpdateWnd)
-		{
-			UpdateWnd->Invalidate();
-		}
+		UpdateAllViews();
 	}
 	return Id;
 }
 
 void ResString::SetDefine(const char *s)
 {
-	Define.Reset(NewStr(s));
+	Define = s;
 }
 
 ResString &ResString::operator =(ResString &s)
@@ -295,10 +281,7 @@ void ResString::Set(const char *p, LLanguageId Lang)
 		s->SetStr(p);
 
 		Update();
-		if (UpdateWnd)
-		{
-			UpdateWnd->Invalidate();
-		}
+		UpdateAllViews();
 	}
 	else
 	{
@@ -1108,7 +1091,7 @@ void ResStringGroup::RemoveUnReferenced()
 	for (auto It = Strs.begin(); It != Strs.end(); )
 	{
 		auto s = *It;
-		if (!s->UpdateWnd)
+		if (!s->HasViews())
 		{
 			s->Group = NULL;
 			Strs.Delete(It);

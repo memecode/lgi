@@ -428,36 +428,20 @@ bool ResDialogCtrl::SetStr(ResString *s)
 	if (_Str == s)
 	{
 		if (_Str)
-			LAssert(_Str->Refs.HasItem(this));
+			LAssert(_Str->HasView(this));
 		return true;
 	}
 
 	if (_Str)
 	{
-		if (!_Str->Refs.HasItem(this))
-		{
-			LAssert(!"Refs incorrect.");
-			return false;
-		}
-
-		_Str->Refs.Delete(this);
+		_Str->RemoveView(this);
 	}
 
 	_Str = s;
 
 	if (_Str)
 	{
-		if (_Str->Refs.HasItem(this))
-		{
-			LAssert(!"Refs already has us.");
-			return false;
-		}
-
-		_Str->Refs.Add(this);
-	}
-	else
-	{
-		// LgiTrace("%s:%i - %p::SetStr(NULL)\n", _FL, this);
+		_Str->AddView(this);
 	}
 
 	return true;
@@ -520,9 +504,6 @@ void ResDialogCtrl::StrFromRef(int Ref)
 	// duplicate the pointer to the string if we let
 	// it go by
 	// LAssert(Str->UpdateWnd == 0);
-
-	// set the string's control to us
-	GetStr()->UpdateWnd = View();
 
 	// make the strings refid unique
 	GetStr()->UnDuplicate();
@@ -986,7 +967,6 @@ CtrlDlg::CtrlDlg(ResDialog *dlg, LXmlTag *load) :
 {
 	Movable = false;
 	AcceptChildren = true;
-	GetStr()->UpdateWnd = View();
 	View()->Name("CtrlDlg");
 }
 
@@ -1374,7 +1354,7 @@ void CtrlRadio::OnPaint(LSurface *pDC)
 CtrlTab::CtrlTab(ResDialog *dlg, LXmlTag *load) :
 	ResDialogCtrl(dlg, Res_Tab, load)
 {
-	GetStr()->UpdateWnd = this;
+	GetStr()->AddView(GetResourceView());
 }
 
 IMPL_DIALOG_CTRL(CtrlTab)
@@ -3480,11 +3460,6 @@ ResDialogCtrl *ResDialog::CreateCtrl(int Tool, LXmlTag *load)
 		}
 	}
 
-	if (Ctrl && Ctrl->GetStr())
-	{
-		Ctrl->GetStr()->UpdateWnd = Ctrl->View();
-	}
-
 	return Ctrl;
 }
 
@@ -3814,7 +3789,7 @@ void ResDialog::CleanSymbols()
 	}
 
 	// re-ID duplicate entries
-	ResDialogCtrl *Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
+	auto Ctrl = dynamic_cast<ResDialogCtrl*>(Children[0]);
 	if (Ctrl)
 	{
 		// list all the entries
@@ -3825,8 +3800,15 @@ void ResDialog::CleanSymbols()
 		// remove duplicate string entries
 		for (auto c: l)
 		{
-			LAssert(c->GetStr());
-			c->GetStr()->UnDuplicate();
+			if (c->GetStr())
+			{
+				c->GetStr()->UnDuplicate();
+			}
+			else
+			{
+				LAssert(!"No string?");
+				c->SetStr(Symbols->CreateStr());
+			}
 		}
 	}
 

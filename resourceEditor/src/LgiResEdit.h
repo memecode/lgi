@@ -171,6 +171,35 @@ struct SerialiseContext
 	void PostLoad(AppWnd *App);
 };
 
+class ResourceView;
+
+// Items can notify views that need updating
+class ResourceItem
+{
+	friend class ResourceView;
+	LArray<ResourceView*> views;
+
+public:
+	virtual ~ResourceItem();
+	void AddView(ResourceView *v);
+	void RemoveView(ResourceView *v);
+	void UpdateAllViews();
+	bool HasViews() { return views.Length() > 0; }
+	bool HasView(ResourceView *v) { return views.HasItem(v); }
+};
+
+// Views have to delete their references in the item
+class ResourceView
+{
+	friend class ResourceItem;
+	ResourceItem *item = NULL;
+
+public:
+	virtual ~ResourceView();
+	virtual void UpdateView() = 0;
+};
+
+
 class Resource
 {
 	friend class AppWnd;

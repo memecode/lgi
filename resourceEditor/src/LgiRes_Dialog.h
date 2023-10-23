@@ -51,7 +51,8 @@ extern int GOOBER_BORDER;
 	LView *View() { return this; } \
 	void OnMouseClick(LMouse &m); \
 	void OnMouseMove(LMouse &m); \
-	void OnPaint(LSurface *pDC);
+	void OnPaint(LSurface *pDC); \
+	void UpdateView() { Invalidate(); }
 
 #define IMPL_DIALOG_CTRL(cls)	 \
 	void cls::OnMouseClick(LMouse &m) { ResDialogCtrl::OnMouseClick(m); } \
@@ -64,7 +65,10 @@ enum DlgSelectMode
 	SelAdd,
 };
 
-class ResDialogCtrl : public FieldSource, public ResObject
+class ResDialogCtrl :
+	public FieldSource,
+	public ResObject,
+	public ResourceView
 {
 	friend class ResDialog;
 
@@ -104,6 +108,7 @@ public:
 
 	const char *GetClass() { return "ResDialogCtrl"; }
 	virtual LView *View() = 0;
+	virtual ResourceView *GetResourceView() { return dynamic_cast<ResourceView*>(View()); }
 	ResDialogCtrl *ParentCtrl() { return dynamic_cast<ResDialogCtrl*>(View()->GetParent()); }
 	ResDialog *GetDlg() { return Dlg; }
 	ResString *GetStr() { return _Str; }
@@ -500,7 +505,10 @@ public:
 	bool Serialize(FieldTree &Fields);
 };
 
-class CtrlControlTree : public ResDialogCtrl, public LTree, public LDom
+class CtrlControlTree :
+	public ResDialogCtrl,
+	public LTree,
+	public LDom
 {
 	class CtrlControlTreePriv *d;
 
