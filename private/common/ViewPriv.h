@@ -147,6 +147,7 @@ public:
 
 	// Hierarchy
 	LViewI			*ParentI = NULL;
+	LViewI			*ParentI2 = NULL;
 	LView			*Parent = NULL;
 	LViewI			*Notify = NULL;
 
@@ -233,9 +234,18 @@ public:
 			return Parent;
 		
 		if (ParentI)
+		{
+			#if defined(HAIKU) || defined(MAC)
+			if (LView::RecentlyDeleted(ParentI) ||
+				ParentI != ParentI2)
+			{
+				return NULL;
+			}
+			#endif
 			return ParentI->GetGView();
+		}
 
-		return 0;
+		return NULL;
 	}
 };
 

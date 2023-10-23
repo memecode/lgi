@@ -70,11 +70,13 @@ private:
 			friend OSStatus LgiViewDndHandler(EventHandlerCallRef inHandlerCallRef, EventRef inEvent, void *inUserData);
 
 		#endif
+
+	#endif
 	
-	#elif defined HAIKU
+	#if defined(HAIKU) || defined(MAC)
 	
 		template<typename Parent> friend class LBView;
-		static bool RecentlyDeleted(LView *v);
+		static bool RecentlyDeleted(LViewI *v);
 
 	#endif
 

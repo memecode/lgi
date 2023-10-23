@@ -48,7 +48,6 @@
 
 - (void)activate
 {
-	printf("activate\n");
 	self.item->OnActivate(self.item);
 }
 

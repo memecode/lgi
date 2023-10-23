@@ -232,11 +232,11 @@
 			<String Ref="48" Cid="528" Define="IDM_SHOW_SHORTCUTS" en="Show Shortcuts" />
 		</string-group>
 		<submenu Ref="15">
-			<menuitem Ref="44" Shortcut="Ctrl+X" />
-			<menuitem Ref="45" Shortcut="Ctrl+C" />
-			<menuitem Ref="46" Shortcut="Ctrl+V" />
+			<menuitem Ref="44" Shortcut="CtrlCmd+X" />
+			<menuitem Ref="45" Shortcut="CtrlCmd+C" />
+			<menuitem Ref="46" Shortcut="CtrlCmd+V" />
 			<menuitem Sep="1" />
-			<menuitem Ref="17" Shortcut="Ctrl+F" />
+			<menuitem Ref="17" Shortcut="CtrlCmd+F" />
 			<menuitem Ref="30" Shortcut="F3" />
 		</submenu>
 		<submenu Ref="32">

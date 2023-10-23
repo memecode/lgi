@@ -202,16 +202,16 @@ LView::LView(OsView view)
 	#endif
 }
 
-#ifdef HAIKU
+#if defined(HAIKU) || defined(MAC)
 struct DeletedView
 {
 	uint64_t ts;
-	LView *v;
+	LViewI *v;
 };
 
 static LArray<DeletedView> DeletedViews;
 
-bool LView::RecentlyDeleted(LView *v)
+bool LView::RecentlyDeleted(LViewI *v)
 {
 	auto now = LCurrentTime();
 	bool status = false;
@@ -230,7 +230,7 @@ bool LView::RecentlyDeleted(LView *v)
 
 LView::~LView()
 {
-	#ifdef HAIKU
+	#if defined(HAIKU) || defined(MAC)
 		auto &del = DeletedViews.New();
 		del.v = this;
 		del.ts = LCurrentTime();
@@ -984,6 +984,7 @@ void LView::SetParent(LViewI *p)
 	ThreadCheck();
 	d->Parent = p ? p->GetGView() : NULL;
 	d->ParentI = p;
+	d->ParentI2 = p;
 }
 
 void LView::SendNotify(LNotification note)

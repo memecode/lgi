@@ -519,7 +519,7 @@ bool LApp::PostEvent(LViewI *View, int Msg, LMessage::Param A, LMessage::Param B
 	LWindow *w = View->GetWindow();
 	if (!w)
 	{
-		printf("%s:%i - No window.\n", _FL);
+		// printf("%s:%i - No window.\n", _FL);
 		return false;
 	}
 	

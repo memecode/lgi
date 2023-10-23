@@ -209,7 +209,6 @@ bool LFont::CreateFromCss(LCss *Css)
 	auto Fam = Css->FontFamily();
 	if (Fam.Has(LCss::FontFamilyMonospace))
 	{
-		printf("CreateFromCss mono.\n");
 		LFontType type;
 		if (type.GetSystemFont("fixed"))
 			Face(type.GetFace());
@@ -222,7 +221,6 @@ bool LFont::CreateFromCss(LCss *Css)
 	else if (Fam.Has(LCss::FontFamilySystemUi) ||
 		Fam.Names.Length() == 0)
 	{
-		printf("CreateFromCss system.\n");
 		Face(LSysFont->Face());
 	}	
 	else

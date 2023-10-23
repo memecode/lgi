@@ -118,14 +118,8 @@ bool LMountVolume(char *Name)
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-#if 0
-bool LViewPrivate::CursorSet = false;
-LView *LViewPrivate::LastCursor = 0;
-#endif
-
 LViewPrivate::LViewPrivate(LView *view) : View(view)
 {
-	TabStop = false;
 	AttachEvent = false;
 }
 	
@@ -859,6 +853,7 @@ bool LView::_Attach(LViewI *parent)
 	d->ClassName = GetClass();
 	
 	d->ParentI = parent;
+	d->ParentI2 = parent;
 	d->Parent = d->ParentI ? parent->GetGView() : NULL;
 
 	LAssert(!_InLock);

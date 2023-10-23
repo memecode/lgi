@@ -2831,10 +2831,12 @@ void ResDialog::Copy(bool Delete)
 			{
 				LClipBoard Clip(Ui);
 
+				#ifndef MAC
 				char16 *w = Utf8ToWide(s);
 				Clip.TextW(w);
 				Status = Clip.Text(s, false);
 				DeleteObj(w);
+				#endif
 			}
 
 			DeleteArray(s);
