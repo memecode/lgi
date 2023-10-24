@@ -624,7 +624,7 @@ const char *ResString::GetText(int i)
 	{
 		case 0:
 		{
-			return (Define)?Define:(char*)"";
+			return Define ? Define : "";
 		}
 		case 1:
 		{
@@ -927,7 +927,7 @@ int ResString::Compare(LListItem *li, ssize_t Column)
 		{
 			case 0:
 			{
-				return stricmp(Define?Define:Empty, r->Define?r->Define:Empty) * Mod;
+				return stricmp(Define ? Define.Get() : Empty, r->Define ? r->Define.Get() : Empty) * Mod;
 				break;
 			}
 			case 1:

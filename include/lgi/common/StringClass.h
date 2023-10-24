@@ -1197,6 +1197,11 @@ public:
 		return s;
 	}
 
+	LString Escape()
+	{
+		return LString::Escape(Get(), Length());
+	}
+
 	template<typename T>
 	static LString UnEscape(const T *In, ssize_t Len = -1)
 	{
