@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef MIME_USE_DEPRECATED
+#define MIME_USE_DEPRECATED 0
+#endif
+
 #include "lgi/common/Stream.h"
 
 extern void CreateMimeBoundary(char *Buf, int BufLen);
@@ -83,7 +87,9 @@ class LMime
 	bool Lock();
 	void Unlock();
 	bool CreateTempData();
+	#if MIME_USE_DEPRECATED
 	[[deprecated]] char *NewValue(char *&s, bool Alloc = true);
+	#endif
 	LString LNewValue(char *&s, bool Alloc = true);
 	char *StartOfField(char *s, const char *Feild);
 	char *NextField(char *s);
@@ -118,8 +124,10 @@ public:
 	LString LGetSub(const char *Field, const char *Sub);
 	bool SetSub(const char *Field, const char *Sub, const char *Value, const char *DefaultValue = NULL);
 	
+	#if MIME_USE_DEPRECATED
 	[[deprecated]] char *Get(const char *Field, bool Short = true, const char *Default = NULL); // 'Short'=true returns the value with out subfields
 	[[deprecated]] char *GetSub(const char *Field, const char *Sub);
+	#endif
 
 	// Header Shortcuts (uses Get[Sub]/Set[Sub])
 	LString LGetMimeType()				{ return LGet("Content-Type", true, "text/plain"); }
@@ -137,11 +145,13 @@ public:
 	LString LGetFileName();
 	bool SetFileName(const char *s)		{ return SetSub("Content-Type", "Name", s, DefaultCharset); }
 
+	#if MIME_USE_DEPRECATED
 	[[deprecated]] char *GetMimeType();
 	[[deprecated]] char *GetEncoding();
 	[[deprecated]] char *GetCharset();
 	[[deprecated]] char *GetBoundary();
 	[[deprecated]] char *GetFileName();
+	#endif
 
 	// Streaming
 	class LMimeText

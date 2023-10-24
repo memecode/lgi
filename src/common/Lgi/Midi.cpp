@@ -263,7 +263,7 @@ struct LMidiPriv
 		{
 			while (d->Hnd >= 0 && loop)
 			{
-				char buf[128];
+				uint8_t buf[128];
 				int rd = read(d->Hnd, buf, sizeof(buf));
 				if (rd > 0)
 				{
@@ -354,7 +354,7 @@ LMidi::LMidi() : LMutex("LMidi")
 			{
 				char Full[128];
 				LMakePath(Full, sizeof(Full), Path, Dir.GetName());
-				printf("Midi[%i] = %s\n", In.Length(), Full);
+				printf("Midi[" LPrintfSizeT "] = %s\n", In.Length(), Full);
 				In.New() = Full;
 				Out.New() = Full;
 			}
@@ -720,9 +720,9 @@ void LMidi::SendMidi(uint8_t *ptr, size_t len, bool quiet)
 
 		if (IsMidiOpen())
 		{
-			int wr = write(d->Hnd, ptr, len);
+			auto wr = write(d->Hnd, ptr, len);
 			if (wr < len)
-				printf("%s:%i - Warning: failed to write all bytes %i %i\n", _FL, len, wr);
+				printf("%s:%i - Warning: failed to write all bytes " LPrintfSizeT " " LPrintfSizeT "\n", _FL, len, wr);
 			if (wr > 0 && !quiet)
 				OnMidiOut(ptr, wr);
 		}

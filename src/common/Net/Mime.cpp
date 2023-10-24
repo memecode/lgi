@@ -619,6 +619,7 @@ LMime::~LMime()
 	DeleteArray(TmpPath);
 }
 
+#if MIME_USE_DEPRECATED
 char *LMime::GetMimeType()
 {
 	return Get("Content-Type", true, "text/plain");
@@ -639,23 +640,6 @@ char *LMime::GetBoundary()
 	return GetSub("Content-Type", "Boundary");
 }
 
-LString LMime::LGetFileName()
-{
-	auto n = LGetSub("Content-Type", "Name");
-
-	if (!n)
-		n = LGetSub("Content-Disposition", "Filename");
-
-	if (!n)
-	{
-		n = LGet("Content-Location");
-		if (n)
-			n = n.Strip("\'\"");
-	}
-
-	return n;
-}
-
 char *LMime::GetFileName()
 {
 	char *n = GetSub("Content-Type", "Name");
@@ -674,6 +658,24 @@ char *LMime::GetFileName()
 			}
 		}
 	}
+	return n;
+}
+#endif
+
+LString LMime::LGetFileName()
+{
+	auto n = LGetSub("Content-Type", "Name");
+
+	if (!n)
+		n = LGetSub("Content-Disposition", "Filename");
+
+	if (!n)
+	{
+		n = LGet("Content-Location");
+		if (n)
+			n = n.Strip("\'\"");
+	}
+
 	return n;
 }
 
@@ -896,6 +898,7 @@ LString LMime::LNewValue(char *&s, bool Alloc)
 	return Status;
 }
 
+#if MIME_USE_DEPRECATED
 char *LMime::NewValue(char *&s, bool Alloc)
 {
 	char *Status = 0;
@@ -930,6 +933,94 @@ char *LMime::NewValue(char *&s, bool Alloc)
 
 	return Status;
 }
+
+char *LMime::Get(const char *Name, bool Short, const char *Default)
+{
+	char *Status = NULL;
+
+	if (Name && Headers)
+	{
+		auto s = StartOfField(Headers, Name);
+		if (s)
+		{
+			s = strchr(s, ':');
+			if (s)
+			{
+				s++;
+				SkipWs(s);
+				if (Short)
+				{
+					Status = NewValue(s);
+				}
+				else
+				{
+					auto e = NextField(s);
+					while (strchr(MimeWs, e[-1]))
+						e--;
+					Status = NewStr(s, e-s);
+				}
+			}
+		}
+
+		if (!Status && Default)
+		{
+			Status = NewStr(Default);
+		}
+	}
+
+	return Status;
+}
+
+
+char *LMime::GetSub(const char *Field, const char *Sub)
+{
+	if (!Field || !Sub)
+		return NULL;
+
+	auto v = Get(Field, false);
+	if (!v)
+		return NULL;
+
+	auto SubLen = strlen(Sub);
+	char *Status = NULL;
+
+	// Move past the field value into the sub fields
+	char *s = v;
+	
+	SkipWs(s);
+	while (*s && *s != ';' && !strchr(MimeWs, *s))
+		s++;
+	
+	SkipWs(s);
+		
+	while (s && *s++ == ';')
+	{
+		// Parse each name=value pair
+		SkipWs(s);
+		auto Name = s;		
+		while (*s && *s != '=' && !strchr(MimeWs, *s))
+			s++;
+
+		auto NameLen = s - Name;
+		SkipWs(s);
+		
+		// printf("found field '%.*s'\n", (int)NameLen, Name);
+		if (*s++ == '=')
+		{
+			bool Found = SubLen == NameLen && _strnicmp(Name, Sub, NameLen) == 0;
+			SkipWs(s);
+			Status = NewValue(s, Found);
+			if (Found)
+				break;
+		}
+		else break;
+	}
+
+	DeleteArray(v);
+
+	return Status;
+}
+#endif
 
 char *LMime::StartOfField(char *s, const char *Field)
 {
@@ -1021,43 +1112,6 @@ LString LMime::LGet(const char *Field, bool Short, const char *Default)
 
 		if (!Status && Default)
 			Status = Default;
-	}
-
-	return Status;
-}
-
-char *LMime::Get(const char *Name, bool Short, const char *Default)
-{
-	char *Status = NULL;
-
-	if (Name && Headers)
-	{
-		auto s = StartOfField(Headers, Name);
-		if (s)
-		{
-			s = strchr(s, ':');
-			if (s)
-			{
-				s++;
-				SkipWs(s);
-				if (Short)
-				{
-					Status = NewValue(s);
-				}
-				else
-				{
-					auto e = NextField(s);
-					while (strchr(MimeWs, e[-1]))
-						e--;
-					Status = NewStr(s, e-s);
-				}
-			}
-		}
-
-		if (!Status && Default)
-		{
-			Status = NewStr(Default);
-		}
 	}
 
 	return Status;
@@ -1161,55 +1215,6 @@ LString LMime::LGetSub(const char *Field, const char *Sub)
 		}
 		else break;
 	}
-
-	return Status;
-}
-
-char *LMime::GetSub(const char *Field, const char *Sub)
-{
-	if (!Field || !Sub)
-		return NULL;
-
-	auto v = Get(Field, false);
-	if (!v)
-		return NULL;
-
-	auto SubLen = strlen(Sub);
-	char *Status = NULL;
-
-	// Move past the field value into the sub fields
-	char *s = v;
-	
-	SkipWs(s);
-	while (*s && *s != ';' && !strchr(MimeWs, *s))
-		s++;
-	
-	SkipWs(s);
-		
-	while (s && *s++ == ';')
-	{
-		// Parse each name=value pair
-		SkipWs(s);
-		auto Name = s;		
-		while (*s && *s != '=' && !strchr(MimeWs, *s))
-			s++;
-
-		auto NameLen = s - Name;
-		SkipWs(s);
-		
-		// printf("found field '%.*s'\n", (int)NameLen, Name);
-		if (*s++ == '=')
-		{
-			bool Found = SubLen == NameLen && _strnicmp(Name, Sub, NameLen) == 0;
-			SkipWs(s);
-			Status = NewValue(s, Found);
-			if (Found)
-				break;
-		}
-		else break;
-	}
-
-	DeleteArray(v);
 
 	return Status;
 }
@@ -1362,9 +1367,9 @@ ssize_t LMime::LMimeText::LMimeDecode::Parse(LMimeBuf *Source, ParentState *Stat
 	LOG("%s:%i - Mime->Headers=%i\n", _FL, Mime->Headers?(int)Mime->Headers.Length():-1);
 
 	// Get various bits out of the header
-	LAutoString Encoding(Mime->GetEncoding());
-	LAutoString Boundary(Mime->GetBoundary());
-	LAutoString MimeType(Mime->GetMimeType());
+	auto Encoding = Mime->LGetEncoding();
+	auto Boundary = Mime->LGetBoundary();
+	auto MimeType = Mime->LGetMimeType();
 	LOG("%s:%i - Encoding=%s, MimeType=%s, Boundary=%s\n",
 		_FL, Encoding.Get(), MimeType.Get(), Boundary.Get());
 
@@ -1386,7 +1391,7 @@ ssize_t LMime::LMimeText::LMimeDecode::Parse(LMimeBuf *Source, ParentState *Stat
 			LOG("%s:%i - Unknown encoding '%s'\n", _FL, Encoding);
 		}
 	}
-	Encoding.Reset();
+	Encoding.Empty();
 
 	// Read in the rest of the MIME segment
 	bool Done = false;
@@ -1513,7 +1518,7 @@ ssize_t LMime::LMimeText::LMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 		int Ch;
 
 		// Check boundary
-		char *Boundary = Mime->GetBoundary();
+		auto Boundary = Mime->LGetBoundary();
 		if (Mime->Children.Length())
 		{
 			// Boundary required
@@ -1523,7 +1528,7 @@ ssize_t LMime::LMimeText::LMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 				char b[256];
 				CreateMimeBoundary(b, sizeof(b));
 				Mime->SetBoundary(b);
-				Boundary = Mime->GetBoundary();
+				Boundary = Mime->LGetBoundary();
 			}
 		}
 		else if (Boundary)
@@ -1534,7 +1539,7 @@ ssize_t LMime::LMimeText::LMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 		}
 
 		// Check encoding
-		char *Encoding = Mime->GetEncoding();
+		auto Encoding = Mime->LGetEncoding();
 		if (!Encoding)
 		{
 			// Detect an appropriate encoding
@@ -1653,7 +1658,7 @@ ssize_t LMime::LMimeText::LMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 		// Write children
 		if (Mime->Children.Length() && Boundary)
 		{
-			LAutoString Mt(Mime->GetMimeType());
+			auto Mt = Mime->LGetMimeType();
 			if (Mt && !_stricmp(Mt, "multipart/alternative"))
 			{
 				// Sort the children to order richer content at the bottom...
@@ -1662,7 +1667,7 @@ ssize_t LMime::LMimeText::LMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 			
 			for (unsigned i=0; i<Mime->Children.Length(); i++)
 			{
-				Ch = sprintf_s(Buf, sizeof(Buf), "--%s\r\n", Boundary);
+				Ch = sprintf_s(Buf, sizeof(Buf), "--%s\r\n", Boundary.Get());
 				Dest->Write(Buf, Ch);
 
 				if (!Mime->Children[i]->Text.Encode.Push(Dest, End))
@@ -1673,7 +1678,7 @@ ssize_t LMime::LMimeText::LMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 				Status = 1;
 			}
 
-			Ch = sprintf_s(Buf, sizeof(Buf), "--%s--\r\n", Boundary);
+			Ch = sprintf_s(Buf, sizeof(Buf), "--%s--\r\n", Boundary.Get());
 			Dest->Write(Buf, Ch);
 		}
 
