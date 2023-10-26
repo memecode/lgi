@@ -9,6 +9,8 @@
 #include "lgi/common/Variant.h"
 
 /////////////////////////////////////////////////////////////////////////////////
+LFileSystem *LFileSystem::Instance = NULL;
+
 bool LFileSystem::SetCurrentFolder(const char *PathName)
 {
 	#ifdef WINDOWS
@@ -37,6 +39,43 @@ LString LFileSystem::GetCurrentFolder()
 	#endif
 
 	return Cwd;
+}
+
+void LFileSystem::OnDeviceChange(char *Reserved)
+{
+	DeleteObj(Root);
+}
+
+LVolume *LFileSystem::GetRootVolume()
+{
+	if (!Root)
+		Root = new LVolume(LSP_DESKTOP, "Desktop");
+
+	return Root;
+}
+
+LAutoPtr<LDirectory> LFileSystem::GetDir(const char *Path)
+{
+	LAutoPtr<LDirectory> dir(new LDirectory);
+	if (dir && !dir->First(Path))
+		dir.Reset();
+	return dir;
+}
+
+bool LFileSystem::Delete(const char *FileName, LError *Error, bool ToTrash)
+{
+	if (!FileName)
+		return false;
+		
+	LArray<const char*> f;
+	LArray<LError> err;
+	f.Add(FileName);
+		
+	auto status = Delete(f, &err, ToTrash);
+	if (Error)
+		*Error = err[0];
+		
+	return status;
 }
 
 /////////////////////////////////////////////////////////////////////////////////

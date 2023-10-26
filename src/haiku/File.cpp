@@ -525,8 +525,6 @@ LDirectory *LVolume::GetContents()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-LFileSystem *LFileSystem::Instance = 0;
-
 LFileSystem::LFileSystem()
 {
 	Instance = this;
@@ -536,18 +534,6 @@ LFileSystem::LFileSystem()
 LFileSystem::~LFileSystem()
 {
 	DeleteObj(Root);
-}
-
-void LFileSystem::OnDeviceChange(char *Reserved)
-{
-}
-
-LVolume *LFileSystem::GetRootVolume()
-{
-	if (!Root)
-		Root = new LVolume(LSP_DESKTOP, "Desktop");
-
-	return Root;
 }
 
 bool LFileSystem::Copy(const char *From, const char *To, LError *Status, std::function<bool(uint64_t pos, uint64_t total)> callback)
@@ -647,17 +633,6 @@ bool LFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, boo
 	}
 	
 	return !Error;
-}
-
-bool LFileSystem::Delete(const char *FileName, bool ToTrash)
-{
-	if (FileName)
-	{
-		LArray<const char*> f;
-		f.Add(FileName);
-		return Delete(f, 0, ToTrash);
-	}
-	return false;
 }
 
 bool LFileSystem::CreateFolder(const char *PathName, bool CreateParentTree, LError *ErrorCode)

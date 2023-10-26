@@ -21,7 +21,7 @@ Versions[] =
 	{2013, _MSC_VER_VS2013,	12.0, false}
 };
 
-VsInfo *GetVsInfo(int VsYear)
+VsInfo *GetVsInfo(int64 VsYear)
 {
 	for (int i=0; i<CountOf(Versions); i++)
 	{
