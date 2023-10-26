@@ -879,67 +879,10 @@ ExitCopyLoop:
 	else
 	{
 		Out.Close();
-		Delete(To, false);
+		Delete(To, NULL, false);
 	}
 	
 	return i == Size;
-	
-	/*
-	 bool Status = false;
-	 
-	 if (From AND To)
-	 {
-		LFile In, Out;
-		if (In.Open(From, O_READ) AND
-	 Out.Open(To, O_WRITE))
-		{
-	 Out.SetSize(0);
-	 int64 Size = In.GetSize();
-	 int64 Block = min((1 << 20), Size);
-	 char *Buf = new char[Block];
-	 if (Buf)
-	 {
-	 int64 i = 0;
-	 while (i < Size)
-	 {
-	 int r = In.Read(Buf, Block);
-	 if (r > 0)
-	 {
-	 int Written = 0;
-	 while (Written < r)
-	 {
-	 int w = Out.Write(Buf + Written, r - Written);
-	 if (w > 0)
-	 {
-	 Written += w;
-	 }
-	 else goto ExitCopyLoop;
-	 }
-	 i += Written;
-	 if (Callback)
-	 {
-	 if (!Callback(Token, i, Size))
-	 {
-	 break;
-	 }
-	 }
-	 }
-	 else break;
-	 }
-	 
-	 ExitCopyLoop:
-	 DeleteArray(Buf);
-	 Status = i == Size;
-	 if (!Status)
-	 {
-	 Delete(To, false);
-	 }
-	 }
-		}
-	 }
-	 
-	 return Status;
-	 */
 }
 
 bool LFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, bool ToTrash)
@@ -1096,7 +1039,7 @@ bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse)
 				}
 				else
 				{
-					Delete(Str, false);
+					Delete(Str, NULL, false);
 				}
 			}
 			while (Dir.Next());
