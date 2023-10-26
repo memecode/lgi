@@ -821,6 +821,16 @@ void LFileSystem::OnDeviceChange(char *Reserved)
 {
 }
 
+LAutoPtr<LDirectory> LFileSystem::GetDir(const char *Path)
+{
+	LAutoPtr<LDirectory> dir(new LDirectory);
+	
+	if (dir && !dir->First(Path))
+		dir.Reset();
+	
+	return dir;
+}
+
 LVolume *LFileSystem::GetRootVolume()
 {
 	if (!Root)
@@ -932,15 +942,19 @@ bool LFileSystem::Delete(LArray<const char*> &Files, LArray<LError> *Status, boo
 	return !Error;
 }
 
-bool LFileSystem::Delete(const char *FileName, bool ToTrash)
+bool LFileSystem::Delete(const char *FileName, LError *Error, bool ToTrash)
 {
-	if (FileName)
-	{
-		LArray<const char*> f;
-		f.Add(FileName);
-		return Delete(f, 0, ToTrash);
-	}
-	return false;
+	if (!FileName)
+		return false;
+		
+	LArray<const char*> f;
+	LArray<LError> err;
+	f.Add(FileName);
+		
+	auto status = Delete(f, &err, ToTrash);
+	if (Error)
+		*Error = err[0];
+	return status;
 }
 
 bool LFileSystem::CreateFolder(const char *PathName, bool CreateParentTree, LError *ErrorCode)
@@ -999,7 +1013,8 @@ bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse)
 				}
 				else
 				{
-					Delete(Str, false);
+					LError err;
+					Delete(Str, &err, false);
 				}
 			}
 			while (Dir->Next());

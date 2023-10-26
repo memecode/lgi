@@ -233,7 +233,7 @@ public:
 };
 
 /// A singleton class for accessing the file system
-class LgiClass LFileSystem
+class LgiClass LFileSystem : public LFileSystemI
 {
 	friend class LFile;
 	static LFileSystem *Instance;
@@ -250,10 +250,13 @@ public:
 
 	/// Call this when the devices on the system change. For instance on windows
 	/// when you receive WM_DEVICECHANGE.
-	void OnDeviceChange(char *Reserved = NULL);
+	void OnDeviceChange(char *Reserved = NULL) override;
 
 	/// Gets the root volume of the system.
-	LVolume *GetRootVolume();
+	LVolume *GetRootVolume() override;
+
+	/// Iterate over a folder on this file system:
+	LAutoPtr<LDirectory> GetDir(const char *Path) override;
 	
 	/// Copies a file
 	bool Copy
@@ -266,10 +269,11 @@ public:
 		LError *Status = NULL,
 		/// Optional callback when some data is copied.
 		std::function<bool(uint64_t pos, uint64_t total)> callback = NULL
-	);
+	)	override;
 
 	/// Delete file
-	bool Delete(const char *FileName, bool ToTrash = true);
+	bool Delete(const char *FileName, LError *err = NULL, bool ToTrash = true) override;
+	
 	/// Delete files
 	bool Delete
 	(
@@ -279,10 +283,10 @@ public:
 		LArray<LError> *Status = NULL,
 		/// true if you want the files moved to the trash folder, false if you want them deleted directly
 		bool ToTrash = true
-	);
+	)	override;
 	
 	/// Create a directory
-	bool CreateFolder(const char *PathName, bool CreateParentFoldersIfNeeded = false, LError *Err = NULL);
+	bool CreateFolder(const char *PathName, bool CreateParentFoldersIfNeeded = false, LError *Err = NULL) override;
 	
 	/// Remove's a directory	
 	bool RemoveFolder
@@ -291,13 +295,13 @@ public:
 		const char *PathName,
 		/// True if you want this function to recursively delete all contents of the path passing in.
 		bool Recurse = false
-	);
+	)	override;
 	
-	LString GetCurrentFolder();
-	bool SetCurrentFolder(const char *PathName);
+	LString GetCurrentFolder() override;
+	bool SetCurrentFolder(const char *PathName) override;
 
 	/// Moves a file to a new location. Only works on the same device.
-	bool Move(const char *OldName, const char *NewName, LError *Err = NULL);
+	bool Move(const char *OldName, const char *NewName, LError *Err = NULL) override;
 };
 
 #if defined(WINDOWS) || HAIKU32

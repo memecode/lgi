@@ -174,24 +174,24 @@ struct FindSymbolSystemPriv : public LEventTargetThread
 		
 		// Already added?
 		#if USE_HASH
-		FileSyms *f = Files.Find(Path);
-		if (f)
-		{
-			if (Platforms && f->Platforms == 0)
-				f->Platforms = Platforms;
-			return true;
-		}
+			FileSyms *f = Files.Find(Path);
+			if (f)
+			{
+				if (Platforms && f->Platforms == 0)
+					f->Platforms = Platforms;
+				return true;
+			}
 		#else
-		int Idx = GetFileIndex(Path);
+			int Idx = GetFileIndex(Path);
 
-		if (Idx >= 0)
-		{
-			if (Platforms && Files[Idx]->Platforms == 0)
-				Files[Idx]->Platforms = Platforms;
-			return true;
-		}
+			if (Idx >= 0)
+			{
+				if (Platforms && Files[Idx]->Platforms == 0)
+					Files[Idx]->Platforms = Platforms;
+				return true;
+			}
 
-		FileSyms *f;
+			FileSyms *f;
 		#endif
 
 		PROF("exists");

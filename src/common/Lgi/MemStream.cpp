@@ -315,7 +315,9 @@ void LTempStream::Empty()
 		char s[MAX_PATH_LEN];
 		strcpy_s(s, sizeof(s), Tmp->GetName());
 		DeleteObj(Tmp);
-		FileDev->Delete(s, false);
+		
+		LError err;
+		FileDev->Delete(s, &err, false);
 	}
 	s = 0;
 }
@@ -362,7 +364,7 @@ ssize_t LTempStream::Write(const void *Buffer, ssize_t Size, int Flags)
 				{
 					// Copy failed... fall back to mem
 					DeleteObj(Tmp);
-					FileDev->Delete(c, false);
+					FileDev->Delete(c, NULL, false);
 				}
 				else
 				{
