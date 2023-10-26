@@ -913,7 +913,7 @@ public:
 
 				if (Rd >= 0)
 				{
-					FileDev->Delete(File, false);
+					FileDev->Delete(File, NULL, false);
 					File = OutPath;
 					return true;
 				}
@@ -933,7 +933,7 @@ public:
 					}
 					
 					In.Close();
-					FileDev->Delete(File, false);
+					FileDev->Delete(File, NULL, false);
 				}
 			}
 			else if (!_stricmp(Ext, "cwl"))
@@ -1053,8 +1053,8 @@ public:
 				}
 				
 				// Delete temp files...
-				FileDev->Delete(p, false);
-				FileDev->Delete(Decomp, false);
+				FileDev->Delete(p, NULL, false);
+				FileDev->Delete(Decomp, NULL, false);
 			}
 		}
 

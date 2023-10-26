@@ -1786,7 +1786,7 @@ public:
 		{
 			if (m->Delete)
 			{
-				FileDev->Delete(m->File, false);
+				FileDev->Delete(m->File, NULL, false);
 			}
 		}
 

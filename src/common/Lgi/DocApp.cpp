@@ -207,7 +207,7 @@ LDocApp<OptionsFmt>::LDocApp(const char *appname, LIcon icon, char *optsname)
 		else
 		{
 			f.Close();
-			FileDev->Delete(p, false);
+			FileDev->Delete(p, NULL, false);
 		}
 	}
 

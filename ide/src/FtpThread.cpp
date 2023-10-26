@@ -334,7 +334,7 @@ int FtpThread::Main()
 							LMakePath(r, sizeof(r), LGetSystemPath(LSP_TEMP), d + 1);
 							if (LFileExists(r))
 							{
-								FileDev->Delete(r, false);
+								FileDev->Delete(r, NULL, false);
 							}
 							
 							IFtpEntry e;

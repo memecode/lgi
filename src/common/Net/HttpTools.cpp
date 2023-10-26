@@ -1130,7 +1130,7 @@ LSurface *GetHttpImage(char *Uri)
 						}
 						else LgiTrace("%s:%i - Failed to read image '%s'\n", _FL, n);
 
-						FileDev->Delete(n, false);
+						FileDev->Delete(n, NULL, false);
 					}
 					else LgiTrace("%s:%i - Failed to open '%s'\n", _FL, n);
 				}

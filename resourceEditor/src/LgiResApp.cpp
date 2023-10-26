@@ -3155,7 +3155,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 		{
 			strcpy(e, "bak");
 			if (LFileExists(Bak))
-				FileDev->Delete(Bak, false);
+				FileDev->Delete(Bak, NULL, false);
 
 			FileDev->Move(FileName, Bak);
 		}
