@@ -1001,53 +1001,14 @@ bool LFileSystem::Move(const char *OldName, const char *NewName, LError *Err)
 }
 
 
-/*
-bool Match(char *Name, char *Mask)
-{
-	strupr(Name);
-	strupr(Mask);
-
-	while (*Name && *Mask)
-	{
-		if (*Mask == '*')
-		{
-			if (*Name == *(Mask+1))
-			{
-				Mask++;
-			}
-			else
-			{
-				Name++;
-			}
-		}
-		else if (*Mask == '?' || *Mask == *Name)
-		{
-			Mask++;
-			Name++;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	while (*Mask && ((*Mask == '*') || (*Mask == '.'))) Mask++;
-
-	return (*Name == 0 && *Mask == 0);
-}
-*/
-
 short DaysInMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 int LeapYear(int year)
 {
 	if (year & 3)
-	{
 		return 0;
-	}
+
 	if ((year % 100 == 0) && !(year % 400 == 0))
-	{
 		return 0;
-	}
 	
 	return 1;
 }
@@ -1055,32 +1016,28 @@ int LeapYear(int year)
 /////////////////////////////////////////////////////////////////////////////////
 struct LDirectoryPriv
 {
-	char			BasePath[MAX_PATH_LEN];
-	DIR				*Dir;
-	struct dirent	*De;
-	struct stat		Stat;
-	LString			Pattern;
-
-	LDirectoryPriv()
-	{	
-		Dir = 0;
-		De = 0;
-		BasePath[0] = 0;
-	}
+	char			path[MAX_PATH_LEN] = {};
+	char			*end = NULL;
 	
+	DIR				*dir    = NULL;
+	struct dirent	*entry  = NULL;
+	struct stat		stat;
+	
+	LString			pattern;
+
 	bool Ignore()
 	{
-		return	De
+		return	entry
 				&&
 				(
-					strcmp(De->d_name, ".") == 0
+					strcmp(entry->d_name, ".") == 0
 					||
-					strcmp(De->d_name, "..") == 0
+					strcmp(entry->d_name, "..") == 0
 					||
 					(
-						Pattern
+						pattern
 						&&
-						!MatchStr(Pattern, De->d_name)
+						!MatchStr(pattern, entry->d_name)
 					)
 				);
 	}
@@ -1109,57 +1066,58 @@ int LDirectory::First(const char *Name, const char *Pattern)
 	if (!Name)
 		return 0;
 
-	strcpy_s(d->BasePath, sizeof(d->BasePath), Name);
+	strcpy_s(d->path, sizeof(d->path), Name);
 	if (!Pattern || stricmp(Pattern, LGI_ALL_FILES) == 0)
 	{
 		struct stat S;
 		if (lstat(Name, &S) == 0)
 		{
-			if (S_ISREG(S.st_mode))
+			if (S_ISREG(S.st_mode)) // If it's a file...
 			{
-				char *Dir = strrchr(d->BasePath, DIR_CHAR);
+				auto Dir = strrchr(d->path, DIR_CHAR);
 				if (Dir)
 				{
-					*Dir++ = 0;
-					d->Pattern = Dir;
+					*Dir++ = 0; // Go up one level and make the file name 
+					d->pattern = Dir; // The search pattern.
 				}
 			}
 		}
 	}
 	else
 	{
-		d->Pattern = Pattern;
+		d->pattern = Pattern;
 	}
 	
-	d->Dir = opendir(d->BasePath);
-	if (d->Dir)
+	d->end = d->path + strlen(d->path);	
+	d->dir = opendir(d->path);
+	if (d->dir)
 	{
-		d->De = readdir(d->Dir);
-		if (d->De)
+		d->entry = readdir(d->dir);
+		if (d->entry)
 		{
 			char s[MaxPathLen];
-			LMakePath(s, sizeof(s), d->BasePath, GetName());
-			lstat(s, &d->Stat);
+			LMakePath(s, sizeof(s), d->path, GetName());
+			lstat(s, &d->stat);
 
 			if (d->Ignore() && !Next())
 				return false;
 		}
 	}
 
-	return d->Dir != NULL && d->De != NULL;
+	return d->dir != NULL && d->entry != NULL;
 }
 
 int LDirectory::Next()
 {
 	int Status = false;
 
-	while (d->Dir && d->De)
+	while (d->dir && d->entry)
 	{
-		if ((d->De = readdir(d->Dir)))
+		if ((d->entry = readdir(d->dir)))
 		{
 			char s[MaxPathLen];
-			LMakePath(s, sizeof(s), d->BasePath, GetName());			
-			lstat(s, &d->Stat);
+			LMakePath(s, sizeof(s), d->path, GetName());			
+			lstat(s, &d->stat);
 
 			if (!d->Ignore())
 			{
@@ -1174,22 +1132,31 @@ int LDirectory::Next()
 
 int LDirectory::Close()
 {
-	if (d->Dir)
+	if (d->dir)
 	{
-		closedir(d->Dir);
-		d->Dir = 0;
+		closedir(d->dir);
+		d->dir = NULL;
 	}
-	d->De = 0;
+	d->entry = NULL;
 
 	return true;
 }
 
 const char *LDirectory::FullPath()
 {
-	static char s[MAX_PATH_LEN];
-	#warning this should really be optimized, and thread safe...
-	Path(s, sizeof(s));
-	return s;
+	if (!d->entry || !d->end)
+	{
+		LAssert(!"missing param.");
+		return NULL;
+	}	
+
+	auto e = d->end;
+	if (e[-1] != DIR_CHAR)
+		*e++ = DIR_CHAR;
+	auto remainingBuf = sizeof(d->path) - (e - d->path) - 1;
+	strcpy_s(e, remainingBuf, d->entry->d_name);
+	
+	return d->path;
 }
 
 LString LDirectory::FileName() const
@@ -1207,7 +1174,7 @@ bool LDirectory::Path(char *s, int BufLen) const
 	// return LMakePath(s, BufLen, d->BasePath, GetName());
 	
 	auto end = s + BufLen;
-	strcpy_s(s, BufLen, d->BasePath);
+	strcpy_s(s, BufLen, d->path);
 	auto c = s + strlen(s);
 	if (c > s && c[-1] != DIR_CHAR)
 		*c++ = DIR_CHAR;
@@ -1224,22 +1191,22 @@ int LDirectory::GetUser(bool Group) const
 {
 	if (Group)
 	{
-		return d->Stat.st_gid;
+		return d->stat.st_gid;
 	}
 	else
 	{
-		return d->Stat.st_uid;
+		return d->stat.st_uid;
 	}
 }
 
 bool LDirectory::IsReadOnly() const
 {
-	if (getuid() == d->Stat.st_uid)
+	if (getuid() == d->stat.st_uid)
 	{
 		// Check user perms
 		return !TestFlag(GetAttributes(), S_IWUSR);
 	}
-	else if (getgid() == d->Stat.st_gid)
+	else if (getgid() == d->stat.st_gid)
 	{
 		// Check group perms
 		return !TestFlag(GetAttributes(), S_IWGRP);
@@ -1268,12 +1235,12 @@ bool LDirectory::IsSymLink() const
 
 long LDirectory::GetAttributes() const
 {
-	return d->Stat.st_mode;
+	return d->stat.st_mode;
 }
 
 const char *LDirectory::GetName() const
 {
-	return (d->De) ? d->De->d_name : NULL;
+	return d->entry ? d->entry->d_name : NULL;
 }
 
 #define UNIX_TO_LGI(unixTs) \
@@ -1283,27 +1250,27 @@ const char *LDirectory::GetName() const
 
 uint64 LDirectory::GetCreationTime() const
 {
-	return UNIX_TO_LGI(d->Stat.st_ctime);
+	return UNIX_TO_LGI(d->stat.st_ctime);
 }
 
 uint64 LDirectory::GetLastAccessTime() const
 {
-	return UNIX_TO_LGI(d->Stat.st_atime);
+	return UNIX_TO_LGI(d->stat.st_atime);
 }
 
 uint64 LDirectory::GetLastWriteTime() const
 {
-	return UNIX_TO_LGI(d->Stat.st_mtime);
+	return UNIX_TO_LGI(d->stat.st_mtime);
 }
 
 uint64 LDirectory::GetSize() const
 {
-	return (uint32_t)d->Stat.st_size;
+	return d->stat.st_size;
 }
 
 int64 LDirectory::GetSizeOnDisk()
 {
-	return (uint32_t)d->Stat.st_size;
+	return d->stat.st_size;
 }
 
 int64_t LDirectory::TsToUnix(uint64_t timeStamp)
