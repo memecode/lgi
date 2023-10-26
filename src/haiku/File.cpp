@@ -688,7 +688,7 @@ bool LFileSystem::RemoveFolder(const char *PathName, bool Recurse)
 				if (Dir.IsDir())
 					RemoveFolder(Str, Recurse);
 				else
-					Delete(Str, false);
+					Delete(Str, NULL, false);
 			}
 			while (Dir.Next());
 		}
