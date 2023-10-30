@@ -150,7 +150,7 @@ inline int32 LgiUtf8To32(uint8_t *&i, ssize_t &Len)
 }
 
 /// Convert a single utf-32 char to utf-8
-inline bool LgiUtf32To8(uint32_t u32, uint8_t *&outBuf, ssize_t &outBufSize)
+inline bool LgiUtf32To8(uint32_t u32, uint8_t *&outBuf, ssize_t &outBufSize, bool warn = true)
 {
 	if ((u32 & ~0x7f) == 0)
 	{
@@ -195,7 +195,8 @@ inline bool LgiUtf32To8(uint32_t u32, uint8_t *&outBuf, ssize_t &outBufSize)
 		}
 	}
 
-	LAssert(!"Buffer size too small");
+	if (warn)
+		LAssert(!"Buffer size too small");
 	return false;
 }
 

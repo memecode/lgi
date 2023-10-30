@@ -1008,7 +1008,7 @@ ssize_t LBufConvertCp(void *Out, const char *OutCp, ssize_t OutLen, const void *
 						case CpUtf8:
 						{
 							// uchar *PrevOut8 = Out8;
-							if (!LgiUtf32To8(Utf32, (uint8_t*&) Out8, OutLen))
+							if (!LgiUtf32To8(Utf32, (uint8_t*&) Out8, OutLen, false /* we do handle errors ok */ ))
 							{
 								// Not enough buffer to encode the character
 								In8 = RewindIn;
