@@ -1275,12 +1275,9 @@ bool LMime::SetSub(const char *Field, const char *Sub, const char *Value, const 
 					p.Push(Buf);
 				}
 
-				char *Data = p.NewStr();
+				auto Data = p.NewLStr();
 				if (Data)
-				{
 					Set(Field, Data);
-					DeleteArray(Data);
-				}
 			}
 		}
 		else if (DefaultValue)
@@ -1535,7 +1532,6 @@ ssize_t LMime::LMimeText::LMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 		{
 			// Remove boundary
 			Mime->SetBoundary(0);
-			DeleteArray(Boundary);
 		}
 
 		// Check encoding
@@ -1681,10 +1677,6 @@ ssize_t LMime::LMimeText::LMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 			Ch = sprintf_s(Buf, sizeof(Buf), "--%s--\r\n", Boundary.Get());
 			Dest->Write(Buf, Ch);
 		}
-
-		// Clean up
-		DeleteArray(Encoding);
-		DeleteArray(Boundary);
 	}
 
 	return Status;
