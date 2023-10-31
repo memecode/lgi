@@ -258,7 +258,7 @@ md4_process_bytes (const void *buffer, size_t len, struct md4_ctx *ctx)
   /* Move remaining bytes in internal buffer.  */
   if (len > 0)
     {
-      size_t left_over = ctx->buflen;
+      uint32_t left_over = ctx->buflen;
 
       memcpy (&((char*)ctx->buffer)[left_over], buffer, len);
       left_over += len;

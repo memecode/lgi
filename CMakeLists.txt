@@ -462,7 +462,6 @@ if (APPLE)
 	set_target_properties(lgi PROPERTIES FRAMEWORK true)
 	set_target_properties(lgi PROPERTIES
 		XCODE_ATTRIBUTE_INSTALL_PATH @executable_path/../Frameworks/)
-
 	target_include_directories(lgi
 		PUBLIC
 			include/lgi/mac/cocoa
@@ -470,12 +469,31 @@ if (APPLE)
 		PRIVATE
 			private/mac
 			)
-
+	target_compile_definitions(lgi
+		PUBLIC
+			MAC
+			LGI_COCOA
+		)
 	target_link_libraries(lgi
 		PUBLIC
 			${EXTRA_LIBS})
-
 	target_compile_options(lgi
+		PUBLIC
+			-Wno-nullability-completeness)
+
+	# lgi stub settings
+	target_include_directories(lgi-stub
+		PUBLIC
+			include/lgi/mac/cocoa
+			/opt/local/include
+		PRIVATE
+			private/mac)
+	target_compile_definitions(lgi-stub
+		PUBLIC
+			MAC
+			LGI_COCOA
+		)
+	target_compile_options(lgi-stub
 		PUBLIC
 			-Wno-nullability-completeness)
 
@@ -502,11 +520,7 @@ if (APPLE)
 	set_source_files_properties(${OBJCPP_SOURCE} PROPERTIES 
                             COMPILE_FLAGS "-x objective-c++")
 
-	target_compile_definitions(lgi
-		PUBLIC
-			MAC
-			LGI_COCOA
-		)
+
 
 elseif (LINUX)
 
@@ -637,7 +651,6 @@ target_include_directories(lgi
 
 set_target_properties(lgi PROPERTIES LINKER_LANGUAGE CXX)
 
-add_subdirectory(src/common/Net/libntlm-0.4.2)
 if(LINUX)
 	add_subdirectory(src/linux/CrashHandler)
 endif()
@@ -646,11 +659,12 @@ if (LGI_LIB_ONLY)
 	message(STATUS "Skipping LGI apps, tests and utils")
 else()
 	# main apps
-	add_subdirectory(Ide)
-	add_subdirectory(Lvc)
-	add_subdirectory(ResourceEditor)
+	add_subdirectory(ide)
+	add_subdirectory(lvc)
+	add_subdirectory(resourceEditor)
 
 	# other subfolders of smaller utils and tests
 	add_subdirectory(utils)
 	add_subdirectory(test)
-endif()
+	add_subdirectory(src/common/Net/libntlm-0.4.2)
+	endif()

@@ -15,6 +15,8 @@ if (APPLE)
 
     macDefaultSigningId()
 
+    message("CODE_SIGN_IDENTITY=${CODE_SIGN_IDENTITY}")
+
     # Scan all the deps and copy them into the app bundle:
     function(macCopyDeps topTarget target)
 
