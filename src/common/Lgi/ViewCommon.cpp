@@ -2812,7 +2812,8 @@ void LView::_Dump(int Depth)
 
 	#elif defined(__GTK_H__)
 
-		// DumpGtk(_View);
+		auto wid = GtkCast(WindowHandle(), gtk_widget, GtkWidget);
+		DumpGtk(wid);
 	
 	#elif !defined(MAC)
 	

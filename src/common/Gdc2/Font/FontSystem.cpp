@@ -462,7 +462,7 @@ ssize_t LFontSystem::IconvConvert(const char *OutCs, char *Out, ssize_t OutLen, 
 
 	// Iconv conversion
 	iconv_t Conv;
-	if ((Conv = d->libiconv_open(OutCs, InCs)) >= 0)
+	if ((Conv = d->libiconv_open(OutCs, InCs)) != NULL)
 	{
 		size_t InSz = InLen;
 		size_t OutSz = OutLen;

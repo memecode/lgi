@@ -132,13 +132,14 @@ LMouse _map_mouse_event(LView *v, int x, int y, bool Motion, bool Debug = false)
 	m.y = y - Offset.y;
 	m.Target = View;
 
-	#if 0
-	LgiTrace("Widget%s %i,%i on %s -> offset: %i,%i -> %i,%i on %s, FoundParent=%i\n",
-		Motion ? "Motion" : "Click",
-		x, y, v?v->GetClass():"NULL",
-		Offset.x, Offset.y,
-		m.x, m.y, m.Target?m.Target->GetClass():"NULL",
-		FoundParent);
+	#if 1
+	if (!Motion)
+		LgiTrace("Widget%s %i,%i on %s -> offset: %i,%i -> %i,%i on %s, FoundParent=%i\n",
+			Motion ? "Motion" : "Click",
+			x, y, v?v->GetClass():"NULL",
+			Offset.x, Offset.y,
+			m.x, m.y, m.Target?m.Target->GetClass():"NULL",
+			FoundParent);
 	#endif
 
 	return m;

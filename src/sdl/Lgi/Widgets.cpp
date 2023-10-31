@@ -18,27 +18,19 @@
 #include "LDisplayString.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-struct GDialogPriv
+struct LDialogPriv
 {
-	int ModalStatus;
-	bool IsModal;
-	bool Resizable;
-	LWindow *PrevWindow;
-	
-	GDialogPriv()
-	{
-		PrevWindow = NULL;
-		IsModal = true;
-		Resizable = true;
-		ModalStatus = 0;
-	}
+	int ModalStatus = 0;
+	bool IsModal = true;
+	bool Resizable = true;
+	LWindow *PrevWindow = NULL;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 LDialog::LDialog()
 	: ResObject(Res_Dialog)
 {
-	d = new GDialogPriv();
+	d = new LDialogPriv();
 	Name("Dialog");
 	_View = 0;
 	_SetDynamic(false);

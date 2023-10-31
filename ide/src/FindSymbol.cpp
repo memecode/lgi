@@ -760,7 +760,11 @@ bool FindSymbolSystem::SetIncludePaths(LString::Array &Paths, LString::Array &Sy
 
 bool FindSymbolSystem::OnFile(const char *Path, SymAction Action, int Platforms)
 {
-	LAssert(Platforms != 0);
+	if (Platforms == 0)
+	{
+		printf("%s:%i - Can't add '%s' with no platforms.\n", _FL, Path);
+		return false;
+	}
 
 	if (d->Tasks == 0)
 		d->MsgTs = LCurrentTime();

@@ -24,8 +24,8 @@ using namespace Gtk;
 
 #define DEBUG_MOUSE_EVENTS			0
 
-#if 0
-#define DEBUG_INVALIDATE(...)		printf(__VA_ARGS__)
+#if 1
+#define DEBUG_INVALIDATE(...)		if (_Debug) printf(__VA_ARGS__)
 #else
 #define DEBUG_INVALIDATE(...)
 #endif

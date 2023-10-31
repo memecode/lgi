@@ -52,6 +52,8 @@
 	LgiExtern class LString WinGetSpecialFolderPath(int Id);
 
 #else
+	#include <type_traits>
+	#include <errno.h>
 	#include <unistd.h>
 	#define _MULTI_THREADED
 	#include <pthread.h>

@@ -4128,6 +4128,7 @@ void IdeProject::OnMakefileCreated()
 IdeTree::IdeTree() : LTree(IDC_PROJECT_TREE, 0, 0, 100, 100)
 {
 	Hit = 0;
+	_Debug = true;
 	MultiSelect(true);
 }
 

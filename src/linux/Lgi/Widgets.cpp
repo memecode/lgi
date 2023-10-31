@@ -26,26 +26,16 @@ using namespace Gtk;
 
 struct LDialogPriv
 {
-	int ModalStatus;
-	int BtnId;
-	bool IsModal, IsModeless;
-	bool Resizable;
-	
-	LDialogPriv()
-	{
-		IsModal = false;
-		IsModeless = false;
-		Resizable = true;
-		ModalStatus = 0;
-		BtnId = -1;
-	}
+	int ModalStatus = 0;
+	int BtnId = -1;
+	bool IsModal = false, IsModeless = false;
+	bool Resizable = true;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 LDialog::LDialog(LViewI *parent)
 	:
 	#ifdef __GTK_H__
-	// , LWindow(gtk_dialog_new())
 	LWindow(gtk_window_new(GTK_WINDOW_TOPLEVEL)),
 	#endif
 	ResObject(Res_Dialog)
@@ -75,7 +65,7 @@ int LDialog::GetButtonId()
 
 int LDialog::OnNotify(LViewI *Ctrl, LNotification n)
 {
-	LButton *b = dynamic_cast<LButton*>(Ctrl);
+	auto b = dynamic_cast<LButton*>(Ctrl);
 	if (b)
 	{
 		d->BtnId = b->GetId();
