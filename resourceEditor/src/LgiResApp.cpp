@@ -265,13 +265,15 @@ ResourceItem::~ResourceItem()
 
 void ResourceItem::AddView(ResourceView *v)
 {
-	if (v)
-	{
-		LAssert(v->item == NULL);
-		v->item = this;
-		if (!views.HasItem(v))
-			views.Add(v);
-	}
+	if (!v)
+		return;
+	if (v->item == this)
+		return;
+
+	LAssert(v->item == NULL);
+	v->item = this;
+	if (!views.HasItem(v))
+		views.Add(v);
 }
 
 void ResourceItem::RemoveView(ResourceView *v)
