@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <string.h>
+#include <ctype.h>
 
 #define LAssert assert
 

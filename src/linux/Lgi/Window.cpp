@@ -118,6 +118,7 @@ LWindow::LWindow(GtkWidget *w) : LView(0)
 	}
 	
 	_Root = NULL;
+	_RootAlloc.ZOff(0, 0);
 	_MenuBar = NULL;
 	_VBox = NULL;
 	_Default = 0;
@@ -549,7 +550,7 @@ gboolean LWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 		{
 			GdkEventConfigure *c = &event->configure;
 			Pos.Set(c->x, c->y, c->x+c->width-1, c->y+c->height-1);
-			// printf("%s::GDK_CONFIGURE %s\n", GetClass(), Pos.GetStr());
+			printf("%s::GDK_CONFIGURE %s\n", GetClass(), Pos.GetStr());
 			OnPosChange();
 			return FALSE;
 			break;
@@ -669,13 +670,16 @@ GtkWindowRealize(GtkWidget *widget, LWindow *This)
 	This->OnGtkRealize();
 }
 
-static
 void
-GtkRootResize(GtkWidget *widget, GdkRectangle *alloc, LView *This)
+GtkRootResize(GtkWidget *widget, GdkRectangle *r, LView *This)
 {
 	LWindow *w = This->GetWindow();
 	if (w)
+	{
+		if (r)
+			w->_RootAlloc = *r;
 		w->PourAll();
+	}
 }
 
 void
@@ -894,7 +898,7 @@ bool LWindow::Attach(LViewI *p)
 		g_signal_connect(Obj, "unmap-event",			G_CALLBACK(GtkViewCallback), i);
 		g_signal_connect(Obj, "visibility-notify-event",G_CALLBACK(GtkViewCallback), i);
 
-		g_signal_connect(Obj, "realize",				G_CALLBACK(GtkWindowRealize), i);							
+		g_signal_connect(Obj, "realize",				G_CALLBACK(GtkWindowRealize), i);
 		g_signal_connect(Obj, "unrealize",				G_CALLBACK(LWindowUnrealize), i);
 
 		g_signal_connect(Obj, "drag-begin",				G_CALLBACK(LWindowDragBegin), i);
@@ -932,6 +936,8 @@ bool LWindow::Attach(LViewI *p)
 			GtkContainer *AttachPoint = NULL;
 			if (GTK_IS_DIALOG(Wnd))
 			{
+				// This should never happen, not using GtkDialog any more
+				LAssert(!"Not using GtkDialog");
 				auto content = gtk_dialog_get_content_area(GTK_DIALOG(Wnd));
 				if (!content)
 				{
@@ -1378,6 +1384,10 @@ LPointF LWindow::GetDpiScale()
 LRect &LWindow::GetClient(bool ClientSpace)
 {
 	static LRect r;
+	
+	#if 1
+	r = _RootAlloc;	
+	#else
 	r = LView::GetClient(ClientSpace);
 
 	if (Wnd)
@@ -1392,6 +1402,7 @@ LRect &LWindow::GetClient(bool ClientSpace)
 				r.y1 += p.Menu.Y();
 		}
 	}
+	#endif
 
 	return r;
 }

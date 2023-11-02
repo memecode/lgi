@@ -66,8 +66,10 @@ protected:
 
 		friend class LMenu;
 		friend void lgi_widget_size_allocate(Gtk::GtkWidget *widget, Gtk::GtkAllocation *allocation);
+		friend void GtkRootResize(Gtk::GtkWidget *widget, Gtk::GdkRectangle *r, LView *This);
 	
 		Gtk::GtkWidget *_Root, *_VBox, *_MenuBar;
+		LRect _RootAlloc;
 		void OnGtkDelete();
 		Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
 

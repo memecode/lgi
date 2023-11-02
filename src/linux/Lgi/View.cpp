@@ -657,7 +657,8 @@ bool LView::Invalidate(LRect *rc, bool Repaint, bool Frame)
 				(h = gtk_widget_get_window(w)))
 			{
 				GdkRectangle grc = r;
-				DEBUG_INVALIDATE("	gdk_window_invalidate_rect %i,%i %i,%i\n", grc.x, grc.y, grc.width, grc.height);
+				DEBUG_INVALIDATE("	gdk_window_invalidate_rect %i,%i %i,%i\n",
+					grc.x, grc.y, grc.width, grc.height);
 				gdk_window_invalidate_rect(h, &grc, true);
 			}
 			else
