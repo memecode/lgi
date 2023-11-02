@@ -742,12 +742,15 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 	g_return_if_fail(allocation != NULL);
 	LgiWidget *w = LGI_WIDGET(widget);
 
-	printf("%s::lgi_widget_size_allocate %i,%i-%i,%i\n",
-			w->target->GetClass(),
-			allocation->x,
-			allocation->y,
-			allocation->width,
-			allocation->height);
+	#if 0
+	if (is_debug(w))
+		printf("%s::lgi_widget_size_allocate %i,%i-%i,%i\n",
+				w->target->GetClass(),
+				allocation->x,
+				allocation->y,
+				allocation->width,
+				allocation->height);
+	#endif
 	if (allocation->x < 0 ||
 		allocation->x > 10000)
 	{
@@ -755,7 +758,7 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 		return;
 	}
 
-	gtk_widget_set_allocation (widget, allocation);
+	gtk_widget_set_allocation(widget, allocation);
 	if (gtk_widget_get_has_window(widget) && gtk_widget_get_realized(widget))
 	{
 		gdk_window_move_resize(gtk_widget_get_window(widget),
@@ -765,14 +768,11 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 				allocation->height);
 	}
 
-	#if 0
-	if (w->pour_largest)
-	{
-		LgiTrace("lgi_widget_size_allocate(%s) %i,%i-%i,%i\n",
-					w->target->GetClass(),
-					allocation->x, allocation->y,
-					allocation->width, allocation->height);
-	}
+	#if 1
+	if (is_debug(w))
+		printf("%s::lgi_widget_size_allocate %s\n",
+				w->target->GetClass(),
+				GtkGetPos(widget).GetStr());
 	#endif
 
 	w->target->OnPosChange();
@@ -788,7 +788,7 @@ lgi_widget_realize(GtkWidget *widget)
 
 	LgiWidget *w = LGI_WIDGET(widget);
 
-	gtk_widget_set_realized (widget, TRUE);
+	gtk_widget_set_realized(widget, TRUE);
 
 	attributes.window_type = GDK_WINDOW_CHILD;
 	auto pos = GtkGetPos(widget);
@@ -796,12 +796,9 @@ lgi_widget_realize(GtkWidget *widget)
 	attributes.y = pos.x1;
 	attributes.width = pos.X();
 	attributes.height = pos.Y();
-	#if 0
+	#if 1
 	if (is_debug(w))
-	{
-		LgiTrace("lgi_widget_realize(%s) gtk=%i,%i-%i,%i\n", w->target->GetClass(),
-			pos.x1, pos.y1, pos.X(), pos.Y());
-	}
+		LgiTrace("%s::lgi_widget_realize gtk=%s\n", w->target->GetClass(), GtkGetPos(widget).GetStr());
 	#endif
 	attributes.wclass = GDK_INPUT_OUTPUT;
 	attributes.event_mask = gtk_widget_get_events(widget) |
@@ -911,6 +908,9 @@ lgi_widget_get_preferred_height(GtkWidget *widget, gint *minimum_height, gint *n
 			*minimum_height = p->pour_largest ? 10 : p->target->Y();
 		if (natural_height)
 			*natural_height = p->pour_largest ? MAX(10, p->target->Y()) : p->target->Y();
+
+		if (is_debug(p))
+			printf("%s::lgi_widget_get_preferred_height = %i\n", p->target->GetClass(), *natural_height);
 	}
 	else LAssert(0);
 }
@@ -925,6 +925,9 @@ lgi_widget_get_preferred_width(GtkWidget *widget, gint *minimum_width, gint *nat
 			*minimum_width = p->pour_largest ? 10 : p->target->X();
 		if (natural_width)
 			*natural_width = p->pour_largest ? MAX(10, p->target->X()) : p->target->X();
+
+		if (is_debug(p))
+			printf("%s::lgi_widget_get_preferred_width = %i\n", p->target->GetClass(), *natural_width);
 	}
 	else LAssert(0);
 }
@@ -968,7 +971,7 @@ lgi_widget_map(GtkWidget *widget)
 
 	if (is_debug(p))
 	{
-		LgiTrace("lgi_widget_map(%s) %s\n",
+		LgiTrace("%s::lgi_widget_map %s\n",
 			p->target->GetClass(),
 			GtkGetPos(widget).GetStr());
 	}
@@ -998,6 +1001,15 @@ lgi_widget_setpos(GtkWidget *widget, LRect rc)
 		a.y = rc.y1;
 		a.width = MAX(rc.X(), 1);
 		a.height = MAX(rc.Y(), 1);
+
+		LgiWidget *p = LGI_WIDGET(widget);
+		if (is_debug(p))
+		{
+			LgiTrace("%s::lgi_widget_setpos(%s)\n",
+				p->target->GetClass(),
+				rc.GetStr());
+		}
+
 		gtk_widget_size_allocate(widget, &a);
 		gtk_widget_queue_draw(widget);
 	}

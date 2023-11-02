@@ -657,7 +657,7 @@ GtkRootResize(GtkWidget *widget, GdkRectangle *r, LView *This)
 			w->_RootAlloc = *r;
 			#ifdef _DEBUG
 			if (w->_Debug)
-				printf("%s got root alloc: %s\n", w->GetClass(), w->_RootAlloc.GetStr());
+				printf("%s got root alloc: %s\n", w->GetClass(), GtkGetPos(widget).GetStr());
 			#endif
 		}
 		else LgiTrace("%s:%i - no alloc rect param?\n", _FL);
@@ -865,7 +865,6 @@ bool LWindow::Attach(LViewI *p)
 		LView *i = this;
 		if (Pos.X() > 0 && Pos.Y() > 0)
 			gtk_window_resize(Wnd, Pos.X(), Pos.Y());
-		gtk_window_move(Wnd, Pos.x1, Pos.y1);
 		
 		auto Obj = G_OBJECT(Wnd);
 		g_object_set_data(Obj, "LViewI", (LViewI*)this);
@@ -913,45 +912,21 @@ bool LWindow::Attach(LViewI *p)
 
 		// g_action_map_add_action_entries (G_ACTION_MAP(Wnd), app_entries, G_N_ELEMENTS (app_entries), Wnd);
 
+		// This call sets up the GdkWindow handle
+		gtk_widget_realize(Widget);
+		gtk_window_move(Wnd, Pos.x1, Pos.y1);
+		
+
 		if ((_Root = lgi_widget_new(this, true)))
         {
 			g_signal_connect(_Root, "size-allocate",	G_CALLBACK(GtkRootResize), i);
 
-			GtkContainer *AttachPoint = NULL;
-			if (GTK_IS_DIALOG(Wnd))
-			{
-				// This should never happen, not using GtkDialog any more
-				LAssert(!"Not using GtkDialog");
-				auto content = gtk_dialog_get_content_area(GTK_DIALOG(Wnd));
-				if (!content)
-				{
-					LAssert(!"No content area");
-					return false;
-				}
-				AttachPoint = GTK_CONTAINER(content);
-			}
-			else
-			{
-				AttachPoint = GTK_CONTAINER(Wnd);
-			}
-
-			LAssert(AttachPoint != NULL);
-			gtk_container_add(AttachPoint, _Root);
-
-			// Check it actually worked... (would a return value kill you GTK? no it would not)
-			auto p = gtk_widget_get_parent(_Root);
-			if (!p)
-			{
-				LAssert(!"Add failed");
-				return false;
-			}
-
+			auto container = GTK_CONTAINER(Wnd);
+			LAssert(container != NULL);
+			gtk_container_add(container, _Root);
             gtk_widget_show(_Root);
         }
 
-		// This call sets up the GdkWindow handle
-		gtk_widget_realize(Widget);
-		
 		// Do a rough layout of child windows
 		PourAll();
 
