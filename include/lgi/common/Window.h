@@ -68,7 +68,7 @@ protected:
 		friend void lgi_widget_size_allocate(Gtk::GtkWidget *widget, Gtk::GtkAllocation *allocation);
 		friend void GtkRootResize(Gtk::GtkWidget *widget, Gtk::GdkRectangle *r, LView *This);
 	
-		Gtk::GtkWidget *_Root, *_VBox, *_MenuBar;
+		Gtk::GtkWidget *_Root = NULL, *_VBox = NULL, *_MenuBar = NULL;
 		LRect _RootAlloc;
 		void OnGtkDelete();
 		Gtk::gboolean OnGtkEvent(Gtk::GtkWidget *widget, Gtk::GdkEvent *event);
@@ -322,7 +322,6 @@ public:
 		LRect *GetDecorSize();
 		bool TranslateMouse(LMouse &m);
 		LViewI *WindowFromPoint(int x, int y, bool Debug = false);
-		void _SetDynamic(bool b);
 		void _OnViewDelete();
 		void SetParent(LViewI *p) override;
 	

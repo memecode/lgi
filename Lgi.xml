@@ -404,7 +404,7 @@
 			<Node Name="Linux" Type="1" Platforms="15" Open="0" Id="66">
 				<Node File="./include/lgi/common/Dialog.h" Type="3" Platforms="15" />
 				<Node File="./src/linux/Lgi/Layout.cpp" Type="2" Platforms="2" />
-				<Node File="./src/linux/Lgi/Widgets.cpp" Type="2" Platforms="2" />
+				<Node File="./src/linux/Lgi/Dialog.cpp" Type="2" Platforms="2" />
 				<Node File="./include/lgi/common/Widgets.h" Type="3" Platforms="15" />
 			</Node>
 			<Node Name="Win" Type="1" Platforms="15" Open="0" Id="67">
@@ -472,9 +472,9 @@
 		<Node File="./include/lgi/common/Token.h" Type="3" Platforms="15" />
 	</Node>
 	<Node Name="Build" Type="1" Platforms="15" Id="1">
-		<Node File=".\CMakeLists.txt" Type="8" Platforms="15" />
-		<Node File=".\haiku\Makefile.haiku" Type="9" Platforms="15" />
-		<Node File=".\linux\Makefile.linux" Type="9" Platforms="15" />
+		<Node File="./CMakeLists.txt" Type="8" Platforms="15" />
+		<Node File="./haiku/Makefile.haiku" Type="9" Platforms="15" />
+		<Node File="./linux/Makefile.linux" Type="9" Platforms="15" />
 	</Node>
 	<Settings>
 		<General>

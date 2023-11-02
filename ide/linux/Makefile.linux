@@ -400,7 +400,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/linux/Lgi/Printer.cpp \
 	../src/linux/Lgi/Thread.cpp \
 	../src/linux/Lgi/View.cpp \
-	../src/linux/Lgi/Widgets.cpp \
+	../src/linux/Lgi/Dialog.cpp \
 	../src/linux/Lgi/Window.cpp \
 	../src/posix/SubProcess.cpp
 	export Build=$(Build); \

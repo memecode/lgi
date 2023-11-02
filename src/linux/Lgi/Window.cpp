@@ -37,43 +37,32 @@ enum LAttachState
 class LWindowPrivate
 {
 public:
-	int Sx, Sy;
-	bool Dynamic;
+	int Sx = 0, Sy = 0;
 	LKey LastKey;
 	LArray<HookInfo> Hooks;
-	bool SnapToEdge;
+	bool SnapToEdge = false;
 	LString Icon;
 	LRect Decor;
-	gulong DestroySig;
+	gulong DestroySig = 0;
 	LAutoPtr<LSurface> IconImg;
-	LAttachState AttachState;
+	LAttachState AttachState = LUnattached;
 	bool ShowTitleBar = true;
 	bool WillFocus = true;
 	
 	// State
 	GdkWindowState State;
-	bool HadCreateEvent;
+	bool HadCreateEvent = false;
 	
 	// Focus stuff
-	OsView FirstFocus;
-	LViewI *Focus;
-	bool Active;
+	OsView FirstFocus = NULL;
+	LViewI *Focus = NULL;
+	bool Active = false;
 
 	LWindowPrivate()
 	{
-		AttachState = LUnattached;
-		DestroySig = 0;
 		Decor.ZOff(-1, -1);
-		FirstFocus = NULL;
-		Focus = NULL;
-		Active = false;
 		State = (Gtk::GdkWindowState)0;
-		HadCreateEvent = false;
 		
-		Sx = Sy = 0;
-		Dynamic = true;
-		SnapToEdge = false;
-
 		LastKey.vkey = 0;
 		LastKey.c16 = 0;
 		LastKey.Data = 0;
@@ -109,7 +98,6 @@ LWindow::LWindow(GtkWidget *w) : LView(0)
 {
 	d = new LWindowPrivate;
 	_QuitOnClose = false;
-	Menu = NULL;
 	Wnd = GTK_WINDOW(w);
 	if (Wnd)
 	{
@@ -117,11 +105,7 @@ LWindow::LWindow(GtkWidget *w) : LView(0)
 		g_object_set_data(G_OBJECT(Wnd), "LViewI", (LViewI*)this);
 	}
 	
-	_Root = NULL;
 	_RootAlloc.ZOff(0, 0);
-	_MenuBar = NULL;
-	_VBox = NULL;
-	_Default = 0;
 	_Window = this;
 	WndFlags |= GWND_CREATE;
 	ClearFlag(WndFlags, GWF_VISIBLE);
@@ -255,17 +239,9 @@ bool LWindow::Obscured()
 			d->State == GDK_WINDOW_STATE_ICONIFIED;
 }
 
-void LWindow::_SetDynamic(bool i)
-{
-	d->Dynamic = i;
-}
-
 void LWindow::_OnViewDelete()
 {
-	if (d->Dynamic)
-	{
-		delete this;
-	}
+	delete this;
 }
 
 void LWindow::OnGtkRealize()
@@ -550,7 +526,7 @@ gboolean LWindow::OnGtkEvent(GtkWidget *widget, GdkEvent *event)
 		{
 			GdkEventConfigure *c = &event->configure;
 			Pos.Set(c->x, c->y, c->x+c->width-1, c->y+c->height-1);
-			printf("%s::GDK_CONFIGURE %s\n", GetClass(), Pos.GetStr());
+			// printf("%s::GDK_CONFIGURE %s\n", GetClass(), Pos.GetStr());
 			OnPosChange();
 			return FALSE;
 			break;
@@ -677,7 +653,13 @@ GtkRootResize(GtkWidget *widget, GdkRectangle *r, LView *This)
 	if (w)
 	{
 		if (r)
+		{
 			w->_RootAlloc = *r;
+			if (w->_Debug)
+				printf("%s got root alloc: %s\n", w->GetClass(), w->_RootAlloc.GetStr());
+		}
+		else LgiTrace("%s:%i - no alloc rect param?\n", _FL);
+		
 		w->PourAll();
 	}
 }
@@ -1386,22 +1368,25 @@ LRect &LWindow::GetClient(bool ClientSpace)
 	static LRect r;
 	
 	#if 1
-	r = _RootAlloc;	
+		if (ClientSpace)
+			r = _RootAlloc.ZeroTranslate();
+		else
+			r = _RootAlloc;
 	#else
-	r = LView::GetClient(ClientSpace);
+		r = LView::GetClient(ClientSpace);
 
-	if (Wnd)
-	{
-		CallbackParams p;
-		gtk_container_forall(GTK_CONTAINER(Wnd), (GtkCallback)ClientCallback, &p);
-		if (p.Menu.Valid())
+		if (Wnd)
 		{
-			if (ClientSpace)
-				r.y2 -= p.Menu.Y();
-			else
-				r.y1 += p.Menu.Y();
+			CallbackParams p;
+			gtk_container_forall(GTK_CONTAINER(Wnd), (GtkCallback)ClientCallback, &p);
+			if (p.Menu.Valid())
+			{
+				if (ClientSpace)
+					r.y2 -= p.Menu.Y();
+				else
+					r.y1 += p.Menu.Y();
+			}
 		}
-	}
 	#endif
 
 	return r;

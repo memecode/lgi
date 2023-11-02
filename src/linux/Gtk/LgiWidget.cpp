@@ -132,7 +132,7 @@ LMouse _map_mouse_event(LView *v, int x, int y, bool Motion, bool Debug = false)
 	m.y = y - Offset.y;
 	m.Target = View;
 
-	#if 1
+	#if 0
 	if (!Motion)
 		LgiTrace("Widget%s %i,%i on %s -> offset: %i,%i -> %i,%i on %s, FoundParent=%i\n",
 			Motion ? "Motion" : "Click",
@@ -741,6 +741,19 @@ lgi_widget_size_allocate(GtkWidget *widget, GtkAllocation *allocation)
 	g_return_if_fail(LGI_IS_WIDGET(widget));
 	g_return_if_fail(allocation != NULL);
 	LgiWidget *w = LGI_WIDGET(widget);
+
+	printf("%s::lgi_widget_size_allocate %i,%i-%i,%i\n",
+			w->target->GetClass(),
+			allocation->x,
+			allocation->y,
+			allocation->width,
+			allocation->height);
+	if (allocation->x < 0 ||
+		allocation->x > 10000)
+	{
+		printf("WEIRD !! lgi_widget_size_allocate\n");
+		return;
+	}
 
 	gtk_widget_set_allocation (widget, allocation);
 	if (gtk_widget_get_has_window(widget) && gtk_widget_get_realized(widget))

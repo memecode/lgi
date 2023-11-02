@@ -42,7 +42,6 @@ LDialog::LDialog(LViewI *parent)
 {
 	d = new LDialogPriv();
 	Name("Dialog");
-	_SetDynamic(false);
 	
 	if (parent)
 		SetParent(parent);

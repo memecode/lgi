@@ -207,7 +207,7 @@ public:
 
 class IdeTree : public LTree, public LDragDropTarget
 {
-	LTreeItem *Hit;
+	LTreeItem *Hit = NULL;
 
 public:
 	IdeTree();

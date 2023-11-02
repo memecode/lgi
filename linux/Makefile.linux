@@ -33,7 +33,6 @@ ifeq ($(Build),Debug)
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
 		`pkg-config --cflags gstreamer-1.0` \
-		-I../../../../../usr/include/libappindicator3-0.1 \
 		-I./private/linux \
 		-I./private/common \
 		-I./include/lgi/linux/Gtk \
@@ -53,7 +52,6 @@ else
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
 		`pkg-config --cflags gstreamer-1.0` \
-		-I../../../../../usr/include/libappindicator3-0.1 \
 		-I./private/linux \
 		-I./private/common \
 		-I./include/lgi/linux/Gtk \
@@ -64,7 +62,6 @@ endif
 # Dependencies
 Source =	src/posix/SubProcess.cpp \
 			src/linux/Lgi/Window.cpp \
-			src/linux/Lgi/Widgets.cpp \
 			src/linux/Lgi/View.cpp \
 			src/linux/Lgi/Thread.cpp \
 			src/linux/Lgi/Printer.cpp \
@@ -72,6 +69,7 @@ Source =	src/posix/SubProcess.cpp \
 			src/linux/Lgi/Layout.cpp \
 			src/linux/Lgi/General.cpp \
 			src/linux/Lgi/DragAndDrop.cpp \
+			src/linux/Lgi/Dialog.cpp \
 			src/linux/Lgi/ClipBoard.cpp \
 			src/linux/Lgi/App.cpp \
 			src/linux/Gtk/ScreenDC.cpp \
