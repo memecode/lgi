@@ -913,17 +913,19 @@ bool LWindow::Attach(LViewI *p)
 		// g_action_map_add_action_entries (G_ACTION_MAP(Wnd), app_entries, G_N_ELEMENTS (app_entries), Wnd);
 
 		// This call sets up the GdkWindow handle
-		gtk_widget_realize(Widget);
-		gtk_window_move(Wnd, Pos.x1, Pos.y1);
+		_Root = lgi_widget_new(this, true);
 		
+		gtk_widget_realize(Widget);
+		gtk_window_move(Wnd, Pos.x1, Pos.y1);		
 
-		if ((_Root = lgi_widget_new(this, true)))
+		if (_Root)
         {
 			g_signal_connect(_Root, "size-allocate",	G_CALLBACK(GtkRootResize), i);
 
 			auto container = GTK_CONTAINER(Wnd);
 			LAssert(container != NULL);
-			gtk_container_add(container, _Root);
+			if (!gtk_widget_get_parent(_Root))
+				gtk_container_add(container, _Root);
             gtk_widget_show(_Root);
         }
 

@@ -1960,7 +1960,7 @@ const char* toString(VersionCtrl v)
 		case VcCvs: return "VcCvs";
 		case VcSvn: return "VcSvn";
 		case VcGit: return "VcGit";
-		case VcHg: return "VcHg";
+		case VcHg:  return "VcHg";
 
 		case VcPending: return "VcPending";
 		case VcError: return "VcError";

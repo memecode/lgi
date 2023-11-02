@@ -1364,18 +1364,25 @@ bool LMenu::Attach(LViewI *p)
 		LAssert(!"Already has a menu");
 		return false;
 	}
-
 	
-	Gtk::GtkWidget *menubar = GTK_WIDGET(Info.obj);
+	if (!Wnd->_Root)
+	{
+		LAssert(!"No root view?");
+		return false;
+	}
+	
+	auto menubar = GTK_WIDGET(Info.obj);
 
 	Wnd->_VBox = Gtk::gtk_box_new(Gtk::GTK_ORIENTATION_VERTICAL, 0);
 
-	Gtk::GtkBox *vbox = GTK_BOX(Wnd->_VBox);
-	Gtk::GtkContainer *wndcontainer = GTK_CONTAINER(Wnd->Wnd);
+	auto vbox = GTK_BOX(Wnd->_VBox);
+	auto wndcontainer = GTK_CONTAINER(Wnd->Wnd);
 
 	g_object_ref(Wnd->_Root);
 
-	gtk_container_remove(wndcontainer, Wnd->_Root);
+	if (gtk_widget_get_parent(Wnd->_Root))
+		gtk_container_remove(wndcontainer, Wnd->_Root);
+		
 	gtk_box_pack_start(vbox, menubar, false, false, 0);
 	gtk_box_pack_end(vbox, Wnd->_Root, true, true, 0);
 	gtk_container_add(wndcontainer, Wnd->_VBox);
@@ -1386,12 +1393,8 @@ bool LMenu::Attach(LViewI *p)
 
 	gtk_window_add_accel_group(Wnd->Wnd, AccelGrp);
 	
-	#if 0
-	gtk_widget_queue_resize(GTK_WIDGET(vbox));
-	#else
 	GdkRectangle allocation = Wnd->GetClient();
 	g_signal_emit_by_name(G_OBJECT(vbox), "size-allocate", GTK_WIDGET(vbox), &allocation, NULL, NULL);
-	#endif
 	
 	return true;
 }

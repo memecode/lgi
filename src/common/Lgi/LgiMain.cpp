@@ -238,7 +238,26 @@ int main(int Args, const char **Arg)
 	int Status = 0;
 
 	#ifdef __GTK_H__
+
+	#if 0 && defined(_DEBUG)
+	
+		// This turns on fatal GKT warnings all the time... 
+		// Useful for debugging.
+		LArray<const char*> a;
+		
+		for (int i=0; i<Args; i++)
+			a[i] = Arg[i];
+		a.Add("--g-fatal-warnings");
+		if (1)
+			a.Add("--sync");
+		
+		Arg = a.AddressOf();
+		Args = a.Length();
+
+	#endif
+
 	Gtk::gtk_init(&Args, (char***)&Arg);
+
 	#endif
 
 	OsAppArguments AppArgs(Args, Arg);
@@ -263,19 +282,6 @@ int main(int Args, const char **Arg)
 		if (e) LgiTrace("%s:%i - AEInstallEventHandler error %i\n", _FL, e);
 		#endif
 	
-	#elif 0 && defined(__GTK_H__) && defined(_DEBUG)
-	
-		// This turns on fatal GKT warnings all the time... 
-		// Useful for debugging.
-		LArray<const char*> a;
-		for (int i=0; i<AppArgs.Args; i++)
-			a[i] = AppArgs.Arg[i];
-		a.Add("--g-fatal-warnings");
-		if (1)
-			a.Add("--sync");
-		AppArgs.Arg = &a[0];
-		AppArgs.Args = a.Length();
-		
 	#endif
 	
 	if (_BuildCheck())
