@@ -655,8 +655,10 @@ GtkRootResize(GtkWidget *widget, GdkRectangle *r, LView *This)
 		if (r)
 		{
 			w->_RootAlloc = *r;
+			#ifdef _DEBUG
 			if (w->_Debug)
 				printf("%s got root alloc: %s\n", w->GetClass(), w->_RootAlloc.GetStr());
+			#endif
 		}
 		else LgiTrace("%s:%i - no alloc rect param?\n", _FL);
 		
