@@ -1417,12 +1417,20 @@ int LFile::Open(const char *File, int Mode)
 			}
 			#endif
 
-			printf("LFile::Open failed\n\topen(%s,%8.8x) = %i\n\terrno=%s (%s)\n",
-				File, 
-				Mode, 
-				d->hFile,
-				GetErrorName(d->ErrorCode),
-				GetErrorDesc(d->ErrorCode));
+			if (onErrorCb)
+			{
+				LError err(d->ErrorCode);
+				onErrorCb(err);
+			}
+			else
+			{
+				printf("LFile::Open failed\n\topen(%s,%8.8x) = %i\n\terrno=%s (%s)\n",
+					File, 
+					Mode, 
+					d->hFile,
+					GetErrorName(d->ErrorCode),
+					GetErrorDesc(d->ErrorCode));
+			}
 		}
 	}
 

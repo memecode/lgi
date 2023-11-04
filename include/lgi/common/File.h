@@ -366,6 +366,7 @@ public:
 	LFile(const char *Path = NULL, int Mode = O_READ);
 	virtual ~LFile();
 
+	std::function<void(LError&)> onErrorCb;
 	OsFile Handle();
 	void ChangeThread() override;
 	operator bool() { return IsOpen(); }

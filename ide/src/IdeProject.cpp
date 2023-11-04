@@ -375,7 +375,7 @@ public:
 		const char *PlatformLibraryExt = NULL;
 		const char *PlatformStaticLibExt = NULL;
 		const char *PlatformExeExt = "";
-		const char *CCompilerFlags = "-MMD -MP -g -fPIC -fno-inline";
+		const char *CCompilerFlags = "-MMD -MP -fPIC -fno-inline";
 		const char *CppCompilerFlags = "$(CFlags) -fpermissive -std=c++14";
 		const char *TargetType = d->Settings.GetStr(ProjTargetType, NULL, Platform);
 		const char *CompilerName = d->Settings.GetStr(ProjCompiler);

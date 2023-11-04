@@ -15,7 +15,7 @@ endif
 MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
 
-CFlags = -MMD -MP -g -fPIC -fno-inline
+CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++14
 
 ifeq ($(Build),Debug)
@@ -27,7 +27,6 @@ ifeq ($(Build),Debug)
 		-lmagic \
 		-lpthread \
 		`pkg-config --libs gtk+-3.0` \
-		-static-libgcc \
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
@@ -36,8 +35,7 @@ ifeq ($(Build),Debug)
 		-I./resources \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
-		-I../include \
-		-I../../../../codelib/openssl/include
+		-I../include
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -46,7 +44,6 @@ else
 		-lmagic \
 		-lpthread \
 		`pkg-config --libs gtk+-3.0` \
-		-static-libgcc \
 		-llgi-gtk3$(Tag) \
 		-L../$(BuildDir)
 	Inc =  \
@@ -55,8 +52,7 @@ else
 		-I./resources \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
-		-I../include \
-		-I../../../../codelib/openssl/include
+		-I../include
 endif
 
 # Dependencies
@@ -393,6 +389,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/linux/Gtk/ScreenDC.cpp \
 	../src/linux/Lgi/App.cpp \
 	../src/linux/Lgi/ClipBoard.cpp \
+	../src/linux/Lgi/Dialog.cpp \
 	../src/linux/Lgi/DragAndDrop.cpp \
 	../src/linux/Lgi/General.cpp \
 	../src/linux/Lgi/Layout.cpp \
@@ -400,7 +397,6 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/linux/Lgi/Printer.cpp \
 	../src/linux/Lgi/Thread.cpp \
 	../src/linux/Lgi/View.cpp \
-	../src/linux/Lgi/Dialog.cpp \
 	../src/linux/Lgi/Window.cpp \
 	../src/posix/SubProcess.cpp
 	export Build=$(Build); \

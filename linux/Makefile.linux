@@ -15,7 +15,7 @@ endif
 MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
 
-CFlags = -MMD -MP -g -fPIC -fno-inline
+CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++14
 
 ifeq ($(Build),Debug)
@@ -28,7 +28,6 @@ ifeq ($(Build),Debug)
 		-lappindicator3 \
 		-lcrypt \
 		-lgstreamer-1.0 \
-		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
@@ -47,7 +46,6 @@ else
 		-lappindicator3 \
 		-lcrypt \
 		-lgstreamer-1.0 \
-		-static-libgcc  \
 		`pkg-config --libs gtk+-3.0`
 	Inc =  \
 		`pkg-config --cflags gtk+-3.0` \
