@@ -1,7 +1,6 @@
 /// \file
 /// \author Matthew Allen
-#ifndef _GSYMLOOKUP_H_
-#define _GSYMLOOKUP_H_
+#pragma once
 
 #include "execinfo.h"
 #include "lgi/common/SubProcess.h"
@@ -56,7 +55,7 @@ public:
 			{
 				LStringPipe un;
 				un.Write(Sym[i], s - Sym[i] - 1);
-				un.Write((void*)" (", 2);
+				un.Write((void*)" (" 2);
 
 				char *man = NewStr(s, e - s);
 				if (man)
@@ -87,7 +86,7 @@ public:
 			else
 			*/
 			{
-				int CopyLen = strlen(Sym[i]);
+				auto CopyLen = strlen(Sym[i]);
 				strcpy_s(buf, buflen, Sym[i]);
 				buflen -= CopyLen;
 				buf += CopyLen;
@@ -110,5 +109,3 @@ public:
 		return backtrace((void**)addr, len);
 	}
 };
-
-#endif

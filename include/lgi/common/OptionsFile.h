@@ -53,8 +53,8 @@ public:
 	bool SetMode(PortableType mode, const char *BaseName = NULL);
 
 	bool IsValid();
-	char *GetFile() { return File; }
-	char *GetError() { return Error; }
+	const char *GetFile() { return File; }
+	const char *GetError() { return Error; }
 	bool SerializeFile(bool Write);
 	bool DeleteValue(const char *Name);
 

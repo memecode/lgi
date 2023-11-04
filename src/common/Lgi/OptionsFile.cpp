@@ -174,6 +174,7 @@ bool LOptionsFile::SerializeFile(bool Write)
 	#endif
 
 	LXmlTree Tree(GXT_PRETTY_WHITESPACE);
+
 	if (Write)
 	{
 		LAssert(Tag != NULL);
@@ -216,6 +217,13 @@ bool LOptionsFile::SerializeFile(bool Write)
 					LgiTrace("%s\n", Error.Get());
 					return false;
 				}
+			}
+			else
+			{
+				// Close and delete the file...
+				f.Close();
+				FileDev->Delete(File, NULL, false);
+				return false;
 			}
 		}
 		

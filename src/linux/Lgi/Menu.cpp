@@ -1373,16 +1373,23 @@ bool LMenu::Attach(LViewI *p)
 	Gtk::GtkBox *vbox = GTK_BOX(Wnd->_VBox);
 	Gtk::GtkContainer *wndcontainer = GTK_CONTAINER(Wnd->Wnd);
 
-	g_object_ref(Wnd->_Root);
-
-	gtk_container_remove(wndcontainer, Wnd->_Root);
+	if (Wnd->_Root) // may not exist yet...
+	{
+		g_object_ref(Wnd->_Root);
+		gtk_container_remove(wndcontainer, Wnd->_Root);
+	}
+	
 	gtk_box_pack_start(vbox, menubar, false, false, 0);
-	gtk_box_pack_end(vbox, Wnd->_Root, true, true, 0);
+
+	if (Wnd->_Root)
+		gtk_box_pack_end(vbox, Wnd->_Root, true, true, 0);
+
 	gtk_container_add(wndcontainer, Wnd->_VBox);
 
 	gtk_widget_show_all(GTK_WIDGET(Wnd->Wnd));
 
-	g_object_unref(Wnd->_Root);
+	if (Wnd->_Root)
+		g_object_unref(Wnd->_Root);
 
 	gtk_window_add_accel_group(Wnd->Wnd, AccelGrp);
 	

@@ -918,14 +918,24 @@ bool LWindow::Attach(LViewI *p)
 		
 
 		if ((_Root = lgi_widget_new(this, true)))
-        {
+		{
 			g_signal_connect(_Root, "size-allocate",	G_CALLBACK(GtkRootResize), i);
 
-			auto container = GTK_CONTAINER(Wnd);
-			LAssert(container != NULL);
-			gtk_container_add(container, _Root);
-            gtk_widget_show(_Root);
-        }
+			if (_VBox)
+			{
+				// Has a menu already...
+				auto vbox = GTK_BOX(_VBox);
+				LAssert(vbox != NULL);
+				gtk_box_pack_end(vbox, _Root, true, true, 0);
+			}
+			else
+			{
+				auto container = GTK_CONTAINER(Wnd);
+				LAssert(container != NULL);
+				gtk_container_add(container, _Root);
+			}
+			gtk_widget_show(_Root);
+		}
 
 		// Do a rough layout of child windows
 		PourAll();
