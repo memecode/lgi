@@ -1103,7 +1103,9 @@ void LFilterItem::OptionsMenu()
 
 	LRect r = d->Btns[d->Node == LNODE_NEW ? IconNewCond : IconOptions];
 	r.Offset(Pos->x1 + Client.x1, Pos->y1 + Client.y1);
+	
 	LPoint p(r.x1, r.y2+1);
+	p -= _ScrollPos();
 	GetTree()->PointToScreen(p);
 
 	int Cmd = s.Float(GetTree(), p.x, p.y, true);
