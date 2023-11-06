@@ -1,7 +1,6 @@
 /// \file
 /// \author Matthew Allen
-#ifndef _GFILTER_UI_H_
-#define _GFILTER_UI_H_
+#pragma once
 
 #include "lgi/common/Tree.h"
 
@@ -21,6 +20,21 @@ enum LFilterMenu
 	FMENU_FIELD,
 	FMENU_OP,
 	FMENU_VALUE
+};
+
+enum FilterIcon
+{
+	IconNewCond,
+	IconNewAnd,
+	IconNewOr,
+	IconDelete,
+	IconMoveUp,
+	IconMoveDown,
+	IconOptions,
+	IconDropDown,
+	IconBoolFalse,
+	IconBoolTrue,
+	IconMax,
 };
 
 class LFilterView;
@@ -88,6 +102,6 @@ public:
 	void OnPaint(LSurface *pDC);
 	void OnPosChange();
 	void OnCreate();
-};
 
-#endif
+	static LAutoPtr<LImageList> CreateIcons();
+};

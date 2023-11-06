@@ -12,8 +12,6 @@
 #define FILTER_DRAG_FORMAT	"Scribe.FilterItem"
 #define IconSize			15
 static LColour TransparentBlk(0, 0, 0, 0);
-static LColour White(255, 255, 255);
-static LColour Black(0, 0, 0);
 static LColour ContentColour(0, 0, 0, 160);
 
 // Field size
@@ -26,35 +24,20 @@ static LColour ContentColour(0, 0, 0, 160);
 #endif
 #define SIZE_VALUE			150
 
-enum FilterIcon
-{
-	IconNewCond,
-	IconNewAnd,
-	IconNewOr,
-	IconDelete,
-	IconMoveUp,
-	IconMoveDown,
-	IconOptions,
-	IconDropDown,
-	IconBoolFalse,
-	IconBoolTrue,
-	IconMax,
-};
-
 #define IconAlpha	255
 
 static LColour IconColour[IconMax] =
 {
 	LColour(192, 192, 192, IconAlpha), // new condition
 	LColour(118, 160, 230, IconAlpha), // new and
-	LColour(32, 224, 32, IconAlpha), // new or
-	LColour(230, 90, 65, IconAlpha), // delete
+	LColour(32, 224, 32,   IconAlpha), // new or
+	LColour(230, 90, 65,   IconAlpha), // delete
 	LColour(192, 192, 192, IconAlpha), // up
 	LColour(192, 192, 192, IconAlpha), // down
 	LColour(192, 192, 192, IconAlpha), // options
 	LColour(192, 192, 192, IconAlpha), // drop down
-	LColour(255, 192, 0, IconAlpha), // bool false
-	LColour(255, 192, 0, IconAlpha), // bool true
+	LColour(255, 192, 0,   IconAlpha), // bool false
+	LColour(255, 192, 0,   IconAlpha), // bool true
 };
 
 static const char *IconName[IconMax];
@@ -182,16 +165,249 @@ void HalveAlpha(T *p, int width)
 	}
 }
 
+static void Draw(LSurface *pDC, int xPos, LColour c, FilterIcon Icon)
+{
+	pDC->SetOrigin(-xPos, 0);
+
+	// Clear to transparent black
+	pDC->Colour(TransparentBlk);
+	pDC->Rectangle();
+
+	// Draw the icon backrgound
+	double n = IconSize - 2;
+	LPointF Ctr(n/2, n), Rim(n/2, 0);
+
+	if (1)
+	{
+		// Shadow
+		LPath p;
+		double z = (((double)IconSize)-0.5) / 2;
+		p.Circle(z, z, z);
+		LSolidBrush b(Rgba32(0, 0, 0, 40));
+		p.Fill(pDC, b);
+	}
+
+	if (1)
+	{
+		LPath p;
+		p.Circle(n/2, n/2, n/2);
+
+		LBlendStop r[] =
+		{
+			{0.0, LColour::White.Mix(c, 0.1f).c32()},
+			{0.3, LColour::White.Mix(c, 0.3f).c32()},
+			{0.6, c.c32()},
+			{1.0, LColour::Black.Mix(c, 0.8f).c32()},
+		};
+
+		LRadialBlendBrush b(Ctr, Rim, CountOf(r), r);
+		p.Fill(pDC, b);
+	}
+
+	if (1)
+	{
+		// Draw the highlight
+		LPath p;
+		p.Circle(n/2, n/2, n/2);
+		LBlendStop Highlight[] =
+		{
+			{0.0, TransparentBlk.c32()},
+			{0.7, TransparentBlk.c32()},
+			{0.9, LColour::White.c32()},
+		};
+
+		LLinearBlendBrush b2(Ctr, Rim, CountOf(Highlight), Highlight);
+		p.Fill(pDC, b2);
+	}
+
+	double k[4] =
+	{
+		n * 3 / 14,
+		n * 3 / 7,
+		n * 4 / 7,
+		n * 11 / 14
+	};
+
+	int Plus[][2] =
+	{
+		{0, 1}, {0, 2}, {1, 2}, {1, 3}, {2, 3}, {2, 2}, {3, 2},
+		{3, 1}, {2, 1}, {2, 0}, {1, 0}, {1, 1}, {0, 1}
+	};
+
+	// Draw the icon content
+	switch (Icon)
+	{
+		default: break;
+		case IconNewCond:
+		case IconBoolTrue:
+		{
+			LPath p;
+			p.Circle(n/2, n/2, n/6);
+			LSolidBrush b(ContentColour);
+			p.Fill(pDC, b);
+			break;
+		}
+		case IconNewAnd:
+		case IconDelete:
+		{
+			LPath p;
+			LPointF Ctr(n/2, n/2);
+			for (int i=0; i<CountOf(Plus); i++)
+			{
+				LPointF pt(k[Plus[i][0]], k[Plus[i][1]]);
+				pt = pt - Ctr;
+				pt.Rotate(LGI_DegToRad(45));
+				pt = pt + Ctr;					
+				if (i) p.LineTo(pt.x, pt.y);
+				else p.MoveTo(pt.x, pt.y);
+			}
+
+			LSolidBrush b(ContentColour);
+			p.Fill(pDC, b);
+			break;
+		}
+		case IconNewOr:
+		{
+			LPath p;
+			for (int i=0; i<CountOf(Plus); i++)
+			{
+				if (i) p.LineTo(k[Plus[i][0]], k[Plus[i][1]]);
+				else p.MoveTo(k[Plus[i][0]], k[Plus[i][1]]);
+			}
+			LSolidBrush b(ContentColour);
+			p.Fill(pDC, b);
+			break;
+		}
+		case IconMoveUp:
+		case IconMoveDown:
+		{
+			int Pt[][2] =
+			{
+				{(int)(n/2), (int)(k[0])},
+				{(int)(k[0]), (int)(k[1])},
+				{(int)(k[1]), (int)(k[1])},
+				{(int)(k[1]), (int)(k[3])},
+				{(int)(k[2]), (int)(k[3])},
+				{(int)(k[2]), (int)(k[1])},
+				{(int)(k[3]), (int)(k[1])},
+				{(int)(n/2), (int)(k[0])},
+			};
+
+			LPath p;
+			for (int i=0; i<CountOf(Pt); i++)
+			{
+				LPointF m(Pt[i][0]+0.5, Pt[i][1]+0.5);
+				if (Icon == IconMoveDown)
+					m.y = k[3] - (m.y - k[0]);
+				if (i) p.LineTo(m.x, m.y);
+				else p.MoveTo(m.x, m.y);
+			}
+			LSolidBrush b(ContentColour);
+			p.Fill(pDC, b);
+			break;
+		}
+		case IconOptions:
+		{
+			LPath p;
+			for (int i=0; i<3; i++)
+			{
+				LPointF c(n * (1+i) / 4, n / 2);
+				p.Circle(c, n/10);
+			}
+
+			LSolidBrush b(ContentColour);
+			p.Fill(pDC, b);
+			break;
+		}
+		case IconDropDown:
+		{
+			double x[3] =
+			{
+				n * 1 / 4,
+				n * 2 / 4,
+				n * 3 / 4,
+			};
+			double y[3] =
+			{
+				n * 2 / 6,
+				n * 3 / 6,
+				n * 4 / 6,
+			};
+			LPath p;
+			p.MoveTo(x[0], y[0]+0.5);
+			p.LineTo(x[1], y[2]+0.5);
+			p.LineTo(x[2], y[0]+0.5);
+			p.LineTo(x[0], y[0]+0.5);
+
+			LSolidBrush b(ContentColour);
+			p.Fill(pDC, b);
+			break;
+		}
+	}
+
+	if (1)
+	{
+		// Draw the outline
+		LPath p;
+		p.Circle(n/2, n/2, n/2);
+		p.Circle(n/2, n/2, n/2 - 1);
+		LSolidBrush b(Rgba32(64, 64, 64, 255));
+		p.Fill(pDC, b);
+	}
+
+	if (1)
+	{
+		int xOff = xPos * (pDC->GetBits() / 8);
+		switch (Icon)
+		{
+			default:
+				break;
+			// Make new icons translucent
+			case IconNewCond:
+			case IconNewAnd:
+			case IconNewOr:
+			{
+				for (int y=0; y<pDC->Y(); y++)
+				{
+					switch (pDC->GetColourSpace())
+					{
+						#define HalveAlphaCase(name) \
+									case Cs##name: HalveAlpha((L##name*)(*pDC)[y] + xOff, IconSize); break
+
+						HalveAlphaCase(Rgba32);
+						HalveAlphaCase(Bgra32);
+						HalveAlphaCase(Argb32);
+						HalveAlphaCase(Abgr32);
+					default:
+						LAssert(pDC->GetBits() < 32);
+						break;
+					}
+				}
+				break;
+			}
+		}
+	}
+
+	pDC->SetOrigin(0, 0);
+}
+
+static void PostProcessIcons(LSurface *pDC)
+{
+	if (pDC &&
+		pDC->IsPreMultipliedAlpha())
+		pDC->ConvertPreMulAlpha(true);
+}
+
 class LFilterViewPrivate
 {
 public:
 	LFilterView *View;
 	LAutoPtr<LFilterTree> Tree;
-	bool ShowLegend;
+	bool ShowLegend = true;
 	LRect Info;
 	LArray<LSurface*> Icons;
-	FilterUi_Menu Callback;
-	void *CallbackData;
+	FilterUi_Menu Callback = NULL;
+	void *CallbackData = NULL;
 	LAutoPtr<LDisplayString> dsNot;
 	LAutoPtr<LDisplayString> dsAnd;
 	LAutoPtr<LDisplayString> dsOr;
@@ -203,22 +419,19 @@ public:
 	{
 		View = v;
 
-		dsNot.Reset(new LDisplayString(LSysFont, (char*)LLoadString(L_FUI_NOT, "Not")));
-		dsNew.Reset(new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_NEW, "New")));
-		dsAnd.Reset(new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_AND, "And")));
-		dsOr.Reset(new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_OR, "Or")));
+		dsNot.Reset   (new LDisplayString(LSysFont, (char*)LLoadString(L_FUI_NOT, "Not")));
+		dsNew.Reset   (new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_NEW, "New")));
+		dsAnd.Reset   (new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_AND, "And")));
+		dsOr.Reset    (new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_OR, "Or")));
 		dsLegend.Reset(new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_LEGEND, "Legend:")));
 		
-		ShowLegend = true;
-		Callback = 0;
-		CallbackData = 0;
-
 		for (int i=0; i<IconMax; i++)
 		{
 			Icons[i] = new LMemDC;
 			if (Icons[i] && Icons[i]->Create(IconSize, IconSize, System32BitColourSpace))
 			{
-				Draw(Icons[i], IconColour[i], (FilterIcon)i);
+				Draw(Icons[i], 0, IconColour[i], (FilterIcon)i);
+				PostProcessIcons(Icons[i]);
 			}
 		}
 	}
@@ -229,230 +442,6 @@ public:
 		OpNames.DeleteArrays();
 	}
 
-	void Draw(LSurface *pDC, LColour c, FilterIcon Icon)
-	{
-		// Clear to transparent black
-		pDC->Colour(TransparentBlk);
-		pDC->Rectangle();
-
-		// Draw the icon backrgound
-		double n = pDC->X() - 2;
-		LPointF Ctr(n/2, n), Rim(n/2, 0);
-
-		if (1)
-		{
-			// Shadow
-			LPath p;
-			double z = ((double)pDC->X()-0.5) / 2;
-			p.Circle(z, z, z);
-			LSolidBrush b(Rgba32(0, 0, 0, 40));
-			p.Fill(pDC, b);
-		}
-
-		if (1)
-		{
-			LPath p;
-			p.Circle(n/2, n/2, n/2);
-
-			LBlendStop r[] =
-			{
-				{0.0, White.Mix(c, 0.1f).c32()},
-				{0.3, White.Mix(c, 0.3f).c32()},
-				{0.6, c.c32()},
-				{1.0, Black.Mix(c, 0.8f).c32()},
-			};
-
-			LRadialBlendBrush b(Ctr, Rim, CountOf(r), r);
-			p.Fill(pDC, b);
-		}
-
-		if (1)
-		{
-			// Draw the highlight
-			LPath p;
-			p.Circle(n/2, n/2, n/2);
-			LBlendStop Highlight[] =
-			{
-				{0.0, TransparentBlk.c32()},
-				{0.7, TransparentBlk.c32()},
-				{0.9, White.c32()},
-			};
-
-			LLinearBlendBrush b2(Ctr, Rim, CountOf(Highlight), Highlight);
-			p.Fill(pDC, b2);
-		}
-
-		double k[4] =
-		{
-			n * 3 / 14,
-			n * 3 / 7,
-			n * 4 / 7,
-			n * 11 / 14
-		};
-
-		int Plus[][2] =
-		{
-			{0, 1}, {0, 2}, {1, 2}, {1, 3}, {2, 3}, {2, 2}, {3, 2},
-			{3, 1}, {2, 1}, {2, 0}, {1, 0}, {1, 1}, {0, 1}
-		};
-
-		// Draw the icon content
-		switch (Icon)
-		{
-			default: break;
-			case IconNewCond:
-			case IconBoolTrue:
-			{
-				LPath p;
-				p.Circle(n/2, n/2, n/6);
-				LSolidBrush b(ContentColour);
-				p.Fill(pDC, b);
-				break;
-			}
-			case IconNewAnd:
-			case IconDelete:
-			{
-				LPath p;
-				LPointF Ctr(n/2, n/2);
-				for (int i=0; i<CountOf(Plus); i++)
-				{
-					LPointF pt(k[Plus[i][0]], k[Plus[i][1]]);
-					pt = pt - Ctr;
-					pt.Rotate(LGI_DegToRad(45));
-					pt = pt + Ctr;					
-					if (i) p.LineTo(pt.x, pt.y);
-					else p.MoveTo(pt.x, pt.y);
-				}
-
-				LSolidBrush b(ContentColour);
-				p.Fill(pDC, b);
-				break;
-			}
-			case IconNewOr:
-			{
-				LPath p;
-				for (int i=0; i<CountOf(Plus); i++)
-				{
-					if (i) p.LineTo(k[Plus[i][0]], k[Plus[i][1]]);
-					else p.MoveTo(k[Plus[i][0]], k[Plus[i][1]]);
-				}
-				LSolidBrush b(ContentColour);
-				p.Fill(pDC, b);
-				break;
-			}
-			case IconMoveUp:
-			case IconMoveDown:
-			{
-				int Pt[][2] =
-				{
-					{(int)(n/2), (int)(k[0])},
-					{(int)(k[0]), (int)(k[1])},
-					{(int)(k[1]), (int)(k[1])},
-					{(int)(k[1]), (int)(k[3])},
-					{(int)(k[2]), (int)(k[3])},
-					{(int)(k[2]), (int)(k[1])},
-					{(int)(k[3]), (int)(k[1])},
-					{(int)(n/2), (int)(k[0])},
-				};
-
-				LPath p;
-				for (int i=0; i<CountOf(Pt); i++)
-				{
-					LPointF m(Pt[i][0]+0.5, Pt[i][1]+0.5);
-					if (Icon == IconMoveDown)
-						m.y = k[3] - (m.y - k[0]);
-					if (i) p.LineTo(m.x, m.y);
-					else p.MoveTo(m.x, m.y);
-				}
-				LSolidBrush b(ContentColour);
-				p.Fill(pDC, b);
-				break;
-			}
-			case IconOptions:
-			{
-				LPath p;
-				for (int i=0; i<3; i++)
-				{
-					LPointF c(n * (1+i) / 4, n / 2);
-					p.Circle(c, n/10);
-				}
-				
-				LSolidBrush b(ContentColour);
-				p.Fill(pDC, b);
-				break;
-			}
-			case IconDropDown:
-			{
-				double x[3] =
-				{
-					n * 1 / 4,
-					n * 2 / 4,
-					n * 3 / 4,
-				};
-				double y[3] =
-				{
-					n * 2 / 6,
-					n * 3 / 6,
-					n * 4 / 6,
-				};
-				LPath p;
-				p.MoveTo(x[0], y[0]+0.5);
-				p.LineTo(x[1], y[2]+0.5);
-				p.LineTo(x[2], y[0]+0.5);
-				p.LineTo(x[0], y[0]+0.5);
-				
-				LSolidBrush b(ContentColour);
-				p.Fill(pDC, b);
-				break;
-			}
-		}
-
-		if (1)
-		{
-			// Draw the outline
-			LPath p;
-			p.Circle(n/2, n/2, n/2);
-			p.Circle(n/2, n/2, n/2 - 1);
-			LSolidBrush b(Rgba32(64, 64, 64, 255));
-			p.Fill(pDC, b);
-		}
-
-		if (1)
-		{
-			// Make new icons transparent
-			switch (Icon)
-			{
-				default: break;
-				case IconNewCond:
-				case IconNewAnd:
-				case IconNewOr:
-				{
-					for (int y=0; y<pDC->Y(); y++)
-					{
-						switch (pDC->GetColourSpace())
-						{
-							#define HalveAlphaCase(name) \
-								case Cs##name: HalveAlpha((L##name*)(*pDC)[y], pDC->X()); break
-							
-							HalveAlphaCase(Rgba32);
-							HalveAlphaCase(Bgra32);
-							HalveAlphaCase(Argb32);
-							HalveAlphaCase(Abgr32);
-							default:
-								LAssert(pDC->GetBits() < 32);
-								break;
-						}
-					}
-					break;
-				}
-			}
-		}
-		
-		if (pDC->IsPreMultipliedAlpha())
-		{
-			pDC->ConvertPreMulAlpha(true);
-		}
-	}
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -652,7 +641,7 @@ void LFilterItem::_PaintText(LItem::ItemPaintCtx &Ctx)
 			break;
 		case LNODE_AND:
 		case LNODE_OR:
-			BackCol = White.Mix(IconColour[d->Node], 0.3f);
+			BackCol = LColour::White.Mix(IconColour[d->Node], 0.3f);
 			break;
 	}
 
@@ -1286,3 +1275,19 @@ void LFilterView::Empty()
 	d->Tree->Empty();
 }
 
+LAutoPtr<LImageList> LFilterView::CreateIcons()
+{
+	LAutoPtr<LImageList> icons(new LImageList(IconSize, IconSize));
+
+	if (icons->Create(IconMax * IconSize, IconSize, System32BitColourSpace))
+	{
+		for (int i=0; i<IconMax; i++)
+			Draw(icons, i * IconSize, IconColour[i], (FilterIcon)i);
+
+		PostProcessIcons(icons);
+	}
+
+	// GdcD->Save("D:\\temp\\icons.bmp", icons);
+
+	return icons;
+}

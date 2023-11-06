@@ -1547,7 +1547,9 @@ void LList::OnMouseClick(LMouse &m)
 					//
 					// However we also do not want this to select items after the
 					// contents of the list box have changed since the down click
-					LListItem *Item = Items.ItemAt(d->DragData);
+					if (d->DragData >= Items.Length())
+						break;
+					auto Item = Items.ItemAt(d->DragData);
 					if (Item)
 					{
 						bool Change = false;
@@ -1873,7 +1875,9 @@ void LList::OnMouseMove(LMouse &m)
 		}
 		case CLICK_ITEM:
 		{
-			LListItem *Cur = Items.ItemAt(d->DragData);
+			if (d->DragData >= Items.Length())
+				break;
+			auto Cur = Items.ItemAt(d->DragData);
 			if (Cur)
 			{
 				Cur->OnMouseMove(m);
