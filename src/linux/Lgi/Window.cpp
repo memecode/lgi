@@ -227,6 +227,9 @@ void LWindow::Visible(bool i)
 	ThreadCheck();
 
 	auto w = GTK_WIDGET(Wnd);
+	if (!w)
+		return;
+
 	if (i)
 		gtk_widget_show(w);
 	else

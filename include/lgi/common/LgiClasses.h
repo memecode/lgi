@@ -44,7 +44,6 @@ public:
 };
 
 
-#include "lgi/common/TrayIcon.h"
 #include "lgi/common/Input.h"
 
 #ifndef LGI_STATIC

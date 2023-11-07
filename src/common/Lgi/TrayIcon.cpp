@@ -1,4 +1,5 @@
 #include "lgi/common/Lgi.h"
+#include "lgi/common/TrayIcon.h"
 
 #define SYSTEM_TRAY_REQUEST_DOCK    0
 #define SYSTEM_TRAY_BEGIN_MESSAGE   1
@@ -18,7 +19,7 @@
 
 #elif defined __GTK_H__
 
-	#define USE_APPINDICATOR	0
+	#define USE_APPINDICATOR	1
 
 	// Change to use:
 	// AppIndicator* appind = app_indicator_new("appname", "appname", APP_INDICATOR_CATEGORY_HARDWARE);
@@ -28,8 +29,8 @@
 		#include <glib.h>
 		#include <gdk-pixbuf/gdk-pixbuf.h>
 		#if USE_APPINDICATOR
-			// sudo apt-get install libappindicator3-dev
-			#include <libappindicator/app-indicator.h>
+			// sudo apt-get install libayatana-appindicator3-dev
+			#include <libayatana-appindicator/app-indicator.h>
 		#endif
 	}
 	using namespace Gtk;
@@ -67,11 +68,12 @@ public:
 	
 		LArray<LSurface*> Images;
 		#if USE_APPINDICATOR
-			AppIndicator *appind;
+			GlibWrapper<AppIndicator> appind;
+			typedef LString IconRef; // path to file?
 		#else
 			GlibWrapper<GtkStatusIcon> tray_icon;
+			typedef GdkPixbuf *IconRef;
 		#endif
-		typedef GdkPixbuf *IconRef;
 		LArray<IconRef> Icon;
 		uint64 LastClickTime;
 		gint DoubleClickTime;
@@ -79,30 +81,40 @@ public:
 		void OnClick()
 		{
 			#if USE_APPINDICATOR
-			if (!appind)
-				return;
-				
-			LAssert(!"Impl me.");
+				if (!appind)
+					return;
+					
+				LAssert(!"Impl me.");
 			#else
-			if (!tray_icon)
-				return;
+				if (!tray_icon)
+					return;
 
-			uint64 Now = LCurrentTime();
-			GdkScreen *s = gtk_status_icon_get_screen(tray_icon);
-			GdkDisplay *dsp = gdk_screen_get_display(s);
-			gint x, y;
-			GdkModifierType mask;
-			gdk_display_get_pointer(dsp, &s, &x, &y, &mask);
-			
-			LMouse m;
-			m.x = x;
-			m.y = y;
-			m.SetModifer(mask);
-			m.Left(true);
-			m.Down(true);
-			m.Double(Now - LastClickTime < DoubleClickTime);
-			Parent->OnTrayClick(m);
-			LastClickTime = Now;
+				uint64 Now = LCurrentTime();
+				GdkModifierType mask;
+				gint x, y;
+				
+				#if 0
+					GdkScreen *s = gtk_status_icon_get_screen(tray_icon);
+					GdkDisplay *dsp = gdk_screen_get_display(s);
+					gdk_display_get_pointer(dsp, &s, &x, &y, &mask);
+				#else
+					auto display = gdk_display_get_default();
+					auto seat = gdk_display_get_default_seat(display);
+					auto device = gdk_seat_get_pointer(seat);
+					gdk_device_get_position (device, NULL, &x, &y);
+					gdouble axes[5] = {0};
+					gdk_device_get_state(device, gdk_get_default_root_window(), axes, &mask);
+				#endif
+				
+				LMouse m;
+				m.x = x;
+				m.y = y;
+				m.SetModifer(mask);
+				m.Left(true);
+				m.Down(true);
+				m.Double(Now - LastClickTime < DoubleClickTime);
+				Parent->OnTrayClick(m);
+				LastClickTime = Now;
 			#endif
 		}
 	
@@ -161,9 +173,7 @@ public:
 
 			LastClickTime = 0;
 			#if USE_APPINDICATOR
-				auto name = LAppInst->Name();
-				LAssert(name != NULL);
-				appind = app_indicator_new(name, name, APP_INDICATOR_CATEGORY_COMMUNICATIONS);
+				// Wait for icons to be loaded before creating...
 			#else
 				tray_icon = Gtk::gtk_status_icon_new();
 				if (tray_icon)
@@ -191,8 +201,11 @@ public:
 		
 		#elif defined(__GTK_H__)
 		
-			for (int n=0; n<Icon.Length(); n++)
-				g_object_unref(Icon[n]);
+			#if USE_APPINDICATOR
+			#else
+				for (int n=0; n<Icon.Length(); n++)
+					g_object_unref(Icon[n]);
+			#endif
 			Images.DeleteObjects();
 		
 		#else
@@ -291,22 +304,30 @@ bool LTrayIcon::Load(const TCHAR *Str)
 			return false;
 		}
 
-		LAutoPtr<LSurface> Ico(GdcD->Load(File));
-		if (!Ico)
-		{
-			LgiTrace("%s:%i - Failed to load '%s'\n", _FL, sStr.Get());
-			return false;
-		}
+		#if USE_APPINDICATOR
 
-		Gtk::GdkPixbuf *Pb = Ico->CreatePixBuf();
-		if (!Pb)
-		{
-			LgiTrace("%s:%i - Failed to CreatePixBuf '%s'\n", _FL, sStr.Get());
-			return false;
-		}
+			d->Icon.Add(File);		
+		
+		#else
 
-		d->Icon.Add(Pb);
-		d->Images.Add(Ico.Release());
+			LAutoPtr<LSurface> Ico(GdcD->Load(File));
+			if (!Ico)
+			{
+				LgiTrace("%s:%i - Failed to load '%s'\n", _FL, sStr.Get());
+				return false;
+			}
+
+			Gtk::GdkPixbuf *Pb = Ico->CreatePixBuf();
+			if (!Pb)
+			{
+				LgiTrace("%s:%i - Failed to CreatePixBuf '%s'\n", _FL, sStr.Get());
+				return false;
+			}
+
+			d->Icon.Add(Pb);
+			d->Images.Add(Ico.Release());
+			
+		#endif
 	
 	#else
 	
@@ -383,10 +404,44 @@ void LTrayIcon::Visible(bool v)
 			
 			#elif USE_APPINDICATOR
 				
+				if (!d->Icon.IdxCheck(d->Val))
+				{
+					// Create create an app indicator without icon...?
+					LAssert(!"No icon for app indicator?");
+					return;
+				}
+				
+				auto &iconRef = d->Icon[d->Val];
+				auto name = LAppInst->Name();
+				LAssert(name != NULL);
+
+				if (!d->appind)
+				{
+					static int count = 0;
+					
+					auto id = LString::Fmt("%s-appindicator-%d", name, count++);
+					d->appind = app_indicator_new(id, iconRef, APP_INDICATOR_CATEGORY_COMMUNICATIONS);
+					printf("%s:%i - app_indicator_new(%s, %s) = %p\n",
+						_FL,
+						id.Get(),
+						iconRef.Get(),
+						d->appind.obj);
+				}
+				else
+				{
+					app_indicator_set_icon(d->appind, iconRef);
+				}
+				
 				if (d->appind)
 				{
-					LAssert(!"Impl me.");
+					app_indicator_set_title(d->appind, name);
+					app_indicator_set_status(d->appind, APP_INDICATOR_STATUS_ACTIVE);
+					printf("%s:%i - app_indicator_set_status(ACTIVE) called: %i, %s\n",
+						_FL,
+						app_indicator_get_status(d->appind),
+						app_indicator_get_icon(d->appind));
 				}
+				else printf("%s:%i - No app ind.\n", _FL);
 				
 			#elif defined(__GTK_H__)
 
@@ -399,9 +454,10 @@ void LTrayIcon::Visible(bool v)
 						LTrayIconPrivate::IconRef Ref = d->Icon[d->Val];
 						if (Ref)
 						{
+							Gtk::gtk_status_icon_set_visible(d->tray_icon, true);
+
 							Gtk::gtk_status_icon_set_from_pixbuf(d->tray_icon, Ref);
 							Gtk::gtk_status_icon_set_tooltip_text(d->tray_icon, LBase::Name());
-							Gtk::gtk_status_icon_set_visible(d->tray_icon, true);
 						}
 					}
 					else LgiTrace("%s:%i - No icon to show in tray.\n", _FL);
@@ -450,8 +506,13 @@ void LTrayIcon::Visible(bool v)
 				
 				if (d->appind)
 				{
-					LAssert(!"Impl me.");
+					app_indicator_set_status(d->appind, APP_INDICATOR_STATUS_PASSIVE);
+					printf("%s:%i - app_indicator_set_status(PASSIVE) called: %i, %s\n",
+						_FL,
+						app_indicator_get_status(d->appind),
+						app_indicator_get_icon(d->appind));
 				}
+				else printf("%s:%i Error: no app indicator.\n", _FL);
 				
 			#elif defined(__GTK_H__)
 

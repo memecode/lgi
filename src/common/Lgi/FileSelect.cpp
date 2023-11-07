@@ -868,10 +868,6 @@ public:
 
 LFileSelectDlg::LFileSelectDlg(LFileSelectPrivate *select)
 {
-	#ifdef _DEBUG
-	_Debug = true;
-	#endif
-
 	d = select;
 	SetParent(d->Parent);
 	MinSize.ZOff(450, 300);

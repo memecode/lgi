@@ -113,7 +113,6 @@ bool LDialog::LoadFromResource(int Resource, const char *TagList)
 	bool Status = LResourceLoad::LoadFromResource(Resource, this, &p, &n, TagList);
 	if (Status)
 	{
-		// Prof.Add("Name.");
 		Name(n);
 		SetPos(p);
 	}
@@ -171,7 +170,8 @@ void LDialog::DoModal(OnClose Callback, OsView OverrideParent)
 	if (Parent)
 	{
 		gtk_window_set_transient_for(GTK_WINDOW(Wnd), Parent->WindowHandle());
-		MoveSameScreen(Parent);
+		gtk_window_set_position(GTK_WINDOW(Wnd), GTK_WIN_POS_CENTER_ON_PARENT);
+		printf("%s center on parent %s\n", GetClass(), Parent->GetClass());
 	}
 
 	d->IsModal = true;

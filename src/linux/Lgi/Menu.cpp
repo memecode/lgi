@@ -1378,9 +1378,11 @@ bool LMenu::Attach(LViewI *p)
 	auto vbox = GTK_BOX(Wnd->_VBox);
 	auto wndcontainer = GTK_CONTAINER(Wnd->Wnd);
 
-	if (Wnd->_Root) // may not exist yet...
+	bool unrefRoot = false;
+	if (Wnd->_Root && gtk_widget_get_parent(Wnd->_Root)) // may not exist yet...
 	{
 		g_object_ref(Wnd->_Root);
+		unrefRoot = true;
 		gtk_container_remove(wndcontainer, Wnd->_Root);
 	}
 	
@@ -1397,7 +1399,7 @@ bool LMenu::Attach(LViewI *p)
 
 	gtk_widget_show_all(GTK_WIDGET(Wnd->Wnd));
 
-	if (Wnd->_Root)
+	if (Wnd->_Root && unrefRoot)
 		g_object_unref(Wnd->_Root);
 
 	gtk_window_add_accel_group(Wnd->Wnd, AccelGrp);

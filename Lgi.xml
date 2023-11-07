@@ -190,6 +190,7 @@
 			<Node File="./src/common/Lgi/ToolTip.cpp" Type="2" Platforms="15" />
 			<Node File="./include/lgi/common/ToolTip.h" Type="3" Platforms="15" />
 			<Node File="./src/common/Lgi/TrayIcon.cpp" Type="2" Platforms="15" />
+			<Node File="./include/lgi/common/TrayIcon.h" Type="3" Platforms="15" />
 		</Node>
 		<Node Name="Dialogs" Type="1" Platforms="15" Open="0" Id="36">
 			<Node Name="File Select Win" Type="1" Platforms="15" Open="0" Id="38">
@@ -490,7 +491,6 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
-			<Executable />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -503,11 +503,12 @@
 				<Linux>
 					<Debug>./include/lgi/linux
 ./include/lgi/linux/Gtk
-./private/linux</Debug>
+./private/linux
+/usr/include/libayatana-appindicator3-0.1</Debug>
 					<Release>./include/lgi/linux
 ./include/lgi/linux/Gtk
 ./private/linux
-</Release>
+/usr/include/libayatana-appindicator3-0.1</Release>
 				</Linux>
 				<Windows>
 					<Debug>./include/lgi/win
@@ -583,7 +584,6 @@ _GNU_SOURCE</Debug>
 _GNU_SOURCE</Release>
 				</Haiku>
 			</Defines>
-			<LibraryPaths />
 			<Options>
 				<Linux>
 					<Debug>-Wno-format-truncation</Debug>
@@ -591,13 +591,5 @@ _GNU_SOURCE</Release>
 				</Linux>
 			</Options>
 		</Build>
-		<Advanced>
-			<PostBuildCommands />
-		</Advanced>
-		<Debug>
-			<Arguments />
-		</Debug>
-		<Remote />
-		<Editor />
 	</Settings>
 </Project>

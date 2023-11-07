@@ -5,7 +5,6 @@
 /// Put an icon in the system tray
 class LgiClass LTrayIcon :
 	public LBase
-	// public GFlags
 {
 	class LTrayIconPrivate *d;
 
