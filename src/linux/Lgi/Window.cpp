@@ -105,7 +105,7 @@ LWindow::LWindow(GtkWidget *w) : LView(0)
 		g_object_set_data(G_OBJECT(Wnd), "LViewI", (LViewI*)this);
 	}
 	
-	_RootAlloc.ZOff(0, 0);
+	_RootAlloc.ZOff(-1, -1);
 	_Window = this;
 	WndFlags |= GWND_CREATE;
 	ClearFlag(WndFlags, GWF_VISIBLE);
@@ -659,8 +659,7 @@ GtkRootResize(GtkWidget *widget, GdkRectangle *r, LView *This)
 		{
 			w->_RootAlloc = *r;
 			#ifdef _DEBUG
-			if (w->_Debug)
-				printf("%s got root alloc: %s\n", w->GetClass(), GtkGetPos(widget).GetStr());
+			// printf("%s got root alloc: %s\n", w->GetClass(), w->_RootAlloc.GetStr());
 			#endif
 		}
 		else LgiTrace("%s:%i - no alloc rect param?\n", _FL);
@@ -1349,26 +1348,32 @@ LRect &LWindow::GetClient(bool ClientSpace)
 {
 	static LRect r;
 	
-	#if 1
+	if (_RootAlloc.Valid())
+	{	
 		if (ClientSpace)
 			r = _RootAlloc.ZeroTranslate();
 		else
 			r = _RootAlloc;
-	#else
+	}
+	else
+	{
+		// Use something vaguely plausible before we're mapped
 		r = LView::GetClient(ClientSpace);
+	}
 
-		if (Wnd)
+	#if 0
+	if (Wnd)
+	{
+		CallbackParams p;
+		gtk_container_forall(GTK_CONTAINER(Wnd), (GtkCallback)ClientCallback, &p);
+		if (p.Menu.Valid())
 		{
-			CallbackParams p;
-			gtk_container_forall(GTK_CONTAINER(Wnd), (GtkCallback)ClientCallback, &p);
-			if (p.Menu.Valid())
-			{
-				if (ClientSpace)
-					r.y2 -= p.Menu.Y();
-				else
-					r.y1 += p.Menu.Y();
-			}
+			if (ClientSpace)
+				r.y2 -= p.Menu.Y();
+			else
+				r.y1 += p.Menu.Y();
 		}
+	}
 	#endif
 
 	return r;

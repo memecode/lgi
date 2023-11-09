@@ -1898,6 +1898,14 @@ AppWnd::AppWnd()
 		LCss::Len y(LCss::LenPx, (float)MAX(Px, 120));
 		d->Output->GetCss(true)->Height(y);
 	}
+	#if 0
+	else
+	{
+		printf("load outPx: not enough space %i > %i, cli=%s, pos=%s\n",
+			c.Y(), OutPx.CastInt32(),
+			c.GetStr(), GetPos().GetStr());
+	}
+	#endif
 
 	AttachChildren();
 	OnPosChange();
@@ -1921,10 +1929,12 @@ AppWnd::AppWnd()
 
 AppWnd::~AppWnd()
 {
+	// Everything needs to be clean BEFORE we get here... because we can't show
+	// any async UI to select save locations or anything.
 	LAssert(IsClean());
-	#ifdef HAIKU
+	
+	// Haiku: wait for the window thread to shutdown cleanly.
 	WaitThread();
-	#endif
 
 	LVariant v;
 	if (d->HBox)

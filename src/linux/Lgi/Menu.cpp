@@ -1277,28 +1277,20 @@ int LMenuItem::Icon()
 ///////////////////////////////////////////////////////////////////////////////////////////////
 struct LMenuFont
 {
-	LFont *f;
+	LAutoPtr<LFont> f;
 
-	LMenuFont()
-	{
-		f = NULL;
-	}
-
-	~LMenuFont()
-	{
-		DeleteObj(f);
-	}
 }	MenuFont;
 
 class LMenuPrivate
 {
 public:
+	GdkRectangle allocation;
 };
 
 LMenu::LMenu(const char *AppName) : LSubMenu("", false)
 {
 	Menu = this;
-	d = NULL;
+	d = new LMenuPrivate;
 	AccelGrp = Gtk::gtk_accel_group_new();
 	Info = GtkCast(Gtk::gtk_menu_bar_new(), gtk_menu_shell, GtkMenuShell);
 }
@@ -1306,6 +1298,7 @@ LMenu::LMenu(const char *AppName) : LSubMenu("", false)
 LMenu::~LMenu()
 {
 	Accel.DeleteObjects();
+	DeleteObj(d);
 }
 
 LFont *LMenu::GetFont()
@@ -1315,12 +1308,7 @@ LFont *LMenu::GetFont()
 		LFontType Type;
 		if (Type.GetSystemFont("Menu"))
 		{
-			MenuFont.f = Type.Create();
-			if (MenuFont.f)
-			{
-				// MenuFont.f->CodePage(LSysFont->CodePage());
-			}
-			else
+			if (!MenuFont.f.Reset(Type.Create()))
 			{
 				LOG("LMenu::GetFont Couldn't create menu font.\n");
 			}
@@ -1330,14 +1318,9 @@ LFont *LMenu::GetFont()
 			LOG("LMenu::GetFont Couldn't get menu typeface.\n");
 		}
 
-		if (!MenuFont.f)
-		{
-			MenuFont.f = new LFont;
-			if (MenuFont.f)
-			{
-				*MenuFont.f = *LSysFont;
-			}
-		}
+		if (!MenuFont.f &&
+			MenuFont.f.Reset(new LFont))
+			*MenuFont.f = *LSysFont;
 	}
 
 	return MenuFont.f ? MenuFont.f : LSysFont;
@@ -1404,8 +1387,11 @@ bool LMenu::Attach(LViewI *p)
 
 	gtk_window_add_accel_group(Wnd->Wnd, AccelGrp);
 	
-	GdkRectangle allocation = Wnd->GetClient();
-	g_signal_emit_by_name(G_OBJECT(vbox), "size-allocate", GTK_WIDGET(vbox), &allocation, NULL, NULL);
+	#if 0	// This no longer seems necessary. In fact it breaks the allocation passed to the
+			// window itself.
+	d->allocation = Wnd->GetClient();
+	g_signal_emit_by_name(G_OBJECT(vbox), "size-allocate", GTK_WIDGET(vbox), &d->allocation, NULL, NULL);
+	#endif
 	
 	return true;
 }
