@@ -3050,7 +3050,7 @@ bool VcFolder::UpdateSubs()
 		case VcCvs:
 			return false;
 		case VcGit:
-			Arg = "submodule update --init";
+			Arg = "submodule update --init --recursive";
 			break;
 	}
 
