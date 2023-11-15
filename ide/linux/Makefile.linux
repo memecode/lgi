@@ -33,6 +33,7 @@ ifeq ($(Build),Debug)
 		`pkg-config --cflags gtk+-3.0` \
 		-I./src \
 		-I./resources \
+		-I../private/common \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
 		-I../include
@@ -50,6 +51,7 @@ else
 		`pkg-config --cflags gtk+-3.0` \
 		-I./src \
 		-I./resources \
+		-I../private/common \
 		-I../include/lgi/linux/Gtk \
 		-I../include/lgi/linux \
 		-I../include
@@ -81,6 +83,7 @@ Source =	src/WebFldDlg.cpp \
 			src/Debugger.cpp \
 			src/DebugContext.cpp \
 			src/AddFtpFile.cpp \
+			../src/common/Text/TextView4.cpp \
 			../src/common/Text/TextConvert.cpp \
 			../src/common/Text/HtmlParser.cpp \
 			../src/common/Text/HtmlCommon.cpp \
@@ -398,7 +401,8 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/linux/Lgi/Thread.cpp \
 	../src/linux/Lgi/View.cpp \
 	../src/linux/Lgi/Window.cpp \
-	../src/posix/SubProcess.cpp
+	../src/posix/SubProcess.cpp \
+	../../../../../../usr/include/libayatana-appindicator3-0.1/libayatana-appindicator/app-indicator.h
 	export Build=$(Build); \
 	$(MAKE) -C ../ -f ./linux/Makefile.linux
 

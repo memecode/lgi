@@ -13,7 +13,7 @@ public:
 	LList *Threads = NULL;
 	LTextLog *ObjectDump = NULL;
 	LTextLog *MemoryDump = NULL;
-	LTextLog *DebuggerLog = NULL;
+	LStream *DebuggerLog = NULL;
 	LTextLog *Registers = NULL;
 
 	// Object

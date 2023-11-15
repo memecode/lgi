@@ -11,6 +11,7 @@
 #include "lgi/common/TabView.h"
 #include "lgi/common/ClipBoard.h"
 #include "lgi/common/Box.h"
+#include "lgi/common/TextView4.h"
 #include "lgi/common/TextLog.h"
 #include "lgi/common/Edit.h"
 #include "lgi/common/TableLayout.h"
@@ -38,8 +39,6 @@
 #define IDM_RECENT_PROJECT		1100
 #define IDM_WINDOWS				1200
 #define IDM_MAKEFILE_BASE		1300
-
-#define USE_HAIKU_PULSE_HACK	0
 
 #define OPT_ENTIRE_SOLUTION		"SearchSolution"
 #define OPT_SPLIT_PX			"SplitPos"
@@ -589,17 +588,18 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////
-class DebugTextLog : public LTextLog
+#define TextLogCls LTextLog4
+class DebugTextLog : public TextLogCls
 {
 public:
-	DebugTextLog(int id) : LTextLog(id)
+	DebugTextLog(int id) : TextLogCls(id)
 	{
 	}
 	
 	void PourText(size_t Start, ssize_t Len) override
 	{
 		auto Ts = LCurrentTime();
-		LTextView3::PourText(Start, Len);
+		TextLogCls::PourText(Start, Len);
 		auto Dur = LCurrentTime() - Ts;
 		if (Dur > 1500)
 		{
@@ -715,46 +715,31 @@ public:
 class IdeOutput : public LTabView
 {
 public:
-	AppWnd *App;
-	LTabPage *Build;
-	LTabPage *Output;
-	LTabPage *Debug;
-	LTabPage *Find;
-	LTabPage *Ftp;
-	LList *FtpLog;
-	LTextLog *Txt[AppWnd::Channels::ChannelMax];
+	AppWnd *App = NULL;
+	LTabPage *Build = NULL;
+	LTabPage *Output = NULL;
+	LTabPage *Debug = NULL;
+	LTabPage *Find = NULL;
+	LTabPage *Ftp = NULL;
+	LList *FtpLog = NULL;
+	LTextLog *Txt[AppWnd::Channels::ChannelMax] = {};
 	LArray<char> Buf[AppWnd::Channels::ChannelMax];
 	LFont Small;
 	LFont Fixed;
 
-	LTabView *DebugTab;
-	LBox *DebugBox;
-	LBox *DebugLog;
-	LList *Locals, *CallStack, *Threads;
-	LTree *Watch;
-	LTextLog *ObjectDump, *MemoryDump, *Registers;
-	LTableLayout *MemTable;
-	LEdit *DebugEdit;
-	LTextLog *DebuggerLog;
+	LTabView *DebugTab = NULL;
+	LBox *DebugBox = NULL;
+	LBox *DebugLog = NULL;
+	LList *Locals = NULL, *CallStack = NULL, *Threads = NULL;
+	LTree *Watch = NULL;
+	LTextLog *ObjectDump = NULL, *MemoryDump = NULL, *Registers = NULL;
+	LTableLayout *MemTable = NULL;
+	LEdit *DebugEdit = NULL;
+	DebugTextLog *DebuggerLog = NULL;
 
 	IdeOutput(AppWnd *app)
 	{
-		ZeroObj(Txt);
 		App = app;
-		Build = Output = Debug = Find = Ftp = 0;
-		FtpLog = 0;
-		DebugBox = NULL;
-		Locals = NULL;
-		Watch = NULL;
-		DebugLog = NULL;
-		DebugEdit = NULL;
-		DebuggerLog = NULL;
-		CallStack = NULL;
-		ObjectDump = NULL;
-		MemoryDump = NULL;
-		MemTable = NULL;
-		Threads = NULL;
-		Registers = NULL;
 
 		Small = *LSysFont;
 		Small.PointSize(Small.PointSize()-1);
@@ -861,9 +846,7 @@ public:
 								for (auto c: w->Children)
 								{
 									if (c->IsTag("watch"))
-									{
 										Watch->Insert(new WatchItem(this, c->GetContent()));
-									}
 								}
 									
 								App->GetOptions()->Unlock();
@@ -1919,11 +1902,6 @@ AppWnd::AppWnd()
 	
 	#ifdef LINUX
 	LFinishXWindowsStartup(this);
-	#endif
-	
-	#if USE_HAIKU_PULSE_HACK
-	if (d->Output)
-		d->Output->SetPulse(1000);
 	#endif
 }
 
