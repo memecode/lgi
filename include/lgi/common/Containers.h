@@ -270,9 +270,9 @@ public:
 	// typedef int (*CompareFn)(T *a, T *b, NativeInt data);
 
 protected:
-	size_t Items;
-	int Ver;
-	LstBlk *FirstObj, *LastObj;
+	size_t Items = 0;
+	int Ver = 0;
+	LstBlk *FirstObj = NULL, *LastObj = NULL;
 
 	bool ValidBlock(LstBlk *b) const
 	{
@@ -309,8 +309,8 @@ protected:
 		else
 		{
 			// First object
-			LAssert(FirstObj == 0);
-			LAssert(LastObj == 0);
+			LAssert(FirstObj == NULL);
+			LAssert(LastObj == NULL);
 			FirstObj = LastObj = i;
 		}
 
@@ -442,9 +442,30 @@ protected:
 public:
 	List<T>()
 	{
-		FirstObj = LastObj = NULL;
-		Items = 0;
-		Ver = 0;
+	}
+
+	template<typename Type>
+	List<T>(LArray<Type*> &init)
+	{
+		if (init.Length() == 0)
+			return;
+		
+		auto base = init.AddressOf();
+		if (!base)
+			return;
+
+		for (size_t i = 0; i < init.Length();)
+		{
+			auto blk = NewBlock(LastObj);
+			if (!blk)
+				return;
+			auto remaining = init.Length() - i;
+			auto cpy = MIN(remaining, ITEM_PTRS);
+			Items += cpy;
+
+			for (size_t n = 0; n < cpy; n++)
+				blk->Ptr[blk->Count++] = base[i++];
+		}
 	}
 
 	~List<T>()

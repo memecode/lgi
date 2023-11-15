@@ -468,7 +468,7 @@ PROF("result wait");
 			pr = WaitPrompt(con, &result, Debug?"Echo":NULL);
 			if (pr)
 			{
-				p->ExitCode = (int)result.Int();
+				p->ExitCode = (int)result.Strip().Int();
 				if (Log)
 					Log->Print("... result=%i\n", p->ExitCode);
 			}

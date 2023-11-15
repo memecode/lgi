@@ -339,11 +339,12 @@ public:
 	bool GetBranches(ParseParams *Params = NULL);
 	void GetCurrentRevision(ParseParams *Params = NULL);
 	void CountToTip();
-	bool UpdateSubs(); // Clone/checkout any sub-repositries.
+	bool UpdateSubs(); // Clone/checkout any sub-repositories.
+	void LogFilter(const char *Filter);
 	void LogFile(const char *Path);
 	LString GetFilePart(const char *uri);
 	void FilterCurrentFiles();
-	void GetRemoteUrl(std::function<void(LString)> Callback);
+	void GetRemoteUrl(std::function<void(int32_t, LString)> Callback);
 	void SelectCommit(LWindow *Parent, LString Commit, LString Path);
 
 	void OnPulse();

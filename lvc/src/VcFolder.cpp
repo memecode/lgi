@@ -560,7 +560,7 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 	return false;
 }
 
-void VcFolder::GetRemoteUrl(std::function<void(LString)> Callback)
+void VcFolder::GetRemoteUrl(std::function<void(int32_t, LString)> Callback)
 {
 	LAutoPtr<ParseParams> p(new ParseParams);
 	p->Callback = Callback;
@@ -943,31 +943,9 @@ void VcFolder::Select(bool b)
 				}
 			}
 
-			bool Add = !d->CommitFilter;
-			if (d->CommitFilter)
-			{
-				const char *s = l->GetRev();
-				if (s && strstr(s, d->CommitFilter) != NULL)
-					Add = true;
-
-				s = l->GetAuthor();
-				if (s && stristr(s, d->CommitFilter) != NULL)
-					Add = true;
-				
-				s = l->GetMsg();
-				if (s && stristr(s, d->CommitFilter) != NULL)
-					Add = true;
-				
-			}
-
 			LList *CurOwner = l->GetList();
-			if (Add ^ (CurOwner != NULL))
-			{
-				if (Add)
-					Ls.Insert(l);
-				else
-					d->Commits->Remove(l);
-			}
+			if (!CurOwner)
+				Ls.Insert(l);
 		}
 
 		PROF("Ls Ins");
@@ -1156,6 +1134,54 @@ LString VcFolder::GetFilePart(const char *uri)
 	return File;
 }
 
+void VcFolder::LogFilter(const char *Filter)
+{
+	if (!Filter)
+	{
+		LAssert(!"No filter.");
+		return;
+	}
+
+	switch (GetType())
+	{
+		case VcGit:
+		{
+			// See if 'Filter' is a commit id?
+			LString args;
+			args.Printf("show %s", Filter);
+			ParseParams *params = new ParseParams;
+			params->Callback = [this, Filter=LString(Filter)](auto code, auto str)
+			{
+				if (code == 0 && str.Find(Filter) >= 0)
+				{
+					// Found the commit...
+					Uncommit.Reset();
+					Log.DeleteObjects();
+					d->Commits->Empty();
+					CurrentCommit = NULL;
+
+					ParseLog(code, str, NULL);
+					d->Commits->Insert(Log);
+				}
+				else
+				{
+					// Not a commit ref...?
+					LString args;
+					args.Printf("log --grep \"%s\"", Filter.Get());
+					IsLogging = StartCmd(args, &VcFolder::ParseLog);
+				}
+			};
+			StartCmd(args, NULL, params);
+			break;
+		}
+		default:
+		{
+			NoImplementation(_FL);
+			break;
+		}
+	}
+}
+
 void VcFolder::LogFile(const char *uri)
 {
 	LString Args;
@@ -1258,7 +1284,8 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 				return false;
 			}
 
-			for (char *i = s.Get(); *i; )
+			char *i = s.Get();
+			while (*i)
 			{				
 				if (!strnicmp(i, "commit ", 7))
 				{
@@ -1276,14 +1303,14 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 						break;
 				}
 			}
+			if (prev && i > prev)
+			{
+				// Last one...
+				c.New().Set(prev, i - prev);
+			}
 
 			for (auto txt: c)
 			{
-				if (txt.Find("Matthew Allen") >= 0)
-				{
-					int as=0;
-				}
-
 				LAutoPtr<VcCommit> Rev(new VcCommit(d, this));
 				if (Rev->GitParse(txt, false))
 				{
@@ -2229,7 +2256,7 @@ void VcFolder::OnSshCmd(SshParams *p)
 	if (p->Params &&
 		p->Params->Callback)
 	{
-		p->Params->Callback(s);
+		p->Params->Callback(Result, s);
 	}
 }
 
@@ -2293,7 +2320,7 @@ void VcFolder::OnPulse()
 				if (c->Params &&
 					c->Params->Callback)
 				{
-					c->Params->Callback(s);
+					c->Params->Callback(Result, s);
 				}
 					
 				Cmds.DeleteAt(i--, true);
@@ -2481,7 +2508,7 @@ void VcFolder::OnMouseClick(LMouse &m)
 			}
 			case IDM_REMOTE_URL:
 			{
-				GetRemoteUrl([this](auto str)
+				GetRemoteUrl([this](auto code, auto str)
 				{
 					LString Url = str.Strip();
 					if (Url)
@@ -4264,7 +4291,7 @@ bool VcFolder::Resolve(const char *Path, LvcResolve Type)
 				Type == ResolveLocal)
 			{
 				// Add the file after the resolution:
-				params->Callback = [this, local](auto str)
+				params->Callback = [this, local](auto code, auto str)
 				{
 					LString a;
 					a.Printf("add \"%s\"", local.Get());

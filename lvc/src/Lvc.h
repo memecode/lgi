@@ -141,7 +141,7 @@ struct ParseParams
 	class VcLeaf *Leaf = NULL;
 	bool IsWorking = false;;
 	bool Debug = false;
-	std::function<void(LString)> Callback;
+	std::function<void(int32_t, LString)> Callback;
 
 	ParseParams(const char *str = NULL)
 	{

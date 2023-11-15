@@ -415,6 +415,12 @@ public:
 		/// then you should pass false here and then update just once at the end of the insertions.
 		bool Update = true
 	);
+	template<class T>
+	bool Insert(LArray<T*> &items, int Index = -1, bool Update = true)
+	{
+		List<LListItem> lst(items);
+		return Insert(lst, Index, Update);
+	}
 	/// Insert a list of item
 	virtual bool Insert
 	(

@@ -1440,9 +1440,12 @@ public:
 
 	void OnFilterCommits()
 	{
-		if (!Commits)
+		if (!Commits || !CommitFilter)
 			return;
-			
+
+		CurFolder->LogFilter(CommitFilter);
+
+		/*			
 		LArray<LListItem*> a;
 		if (!Commits->GetAll(a))
 			return;
@@ -1462,6 +1465,7 @@ public:
 
 		Commits->UpdateAllItems();
 		Commits->Invalidate();
+		*/
 	}
 
 	void OnFilterFiles()
