@@ -84,7 +84,7 @@ public:
 				if (!appind)
 					return;
 					
-				LAssert(!"Impl me.");
+				// LAssert(!"Impl me.");
 			#else
 				if (!tray_icon)
 					return;

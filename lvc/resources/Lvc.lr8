@@ -34,8 +34,8 @@
 		<String Ref="38" Cid="38" Define="IDC_UNTRACKED" en="Show untracked files" />
 		<String Ref="39" Cid="39" Define="IDC_PULL_ALL" en="*" />
 		<String Ref="40" Cid="40" Define="IDC_STATUS" en="Status" />
-		<String Ref="44" Cid="-1" Define="IDC_STATIC" en="Head revisions:" />
-		<String Ref="45" Cid="45" Define="IDC_HEADS" />
+		<String Ref="44" Cid="-1" Define="IDC_STATIC" en="Branches:" />
+		<String Ref="45" Cid="45" Define="IDC_BRANCHES" />
 		<String Ref="48" Cid="41" Define="IDC_UPDATE" en="Update" />
 		<String Ref="50" Cid="47" Define="IDC_BUILD_FIX" en="BuildFix" />
 		<String Ref="61" Cid="61" Define="IDD_REMOTE_FOLDER" en="Remote Folder" />
@@ -244,7 +244,7 @@
 		</TableLayout>
 	</Dialog>
 	<Dialog pos="7,7,998,136" ref="1">
-		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" cols="0.128,0.133,0.124,0.085,0.063,0.210,0.128,0.128" rows="1.000">
+		<TableLayout pos="7,7,972,97" ref="2" Style="padding-top: 3px;" CellStyle="padding-right: 1em;" cols="0.128,0.133,0.124,0.085,0.063,0.210,0.128,0.128" rows="1.000">
 			<tr>
 				<td addr="0,0" valign="Center" style="padding-left: 4px;&#10;padding-right: 1em;">
 					<Button pos="7,21,71,48" ref="18" toggle="0" />
@@ -262,7 +262,7 @@
 				<td addr="4,0" valign="Center" style="padding-right: 1em;">
 					<Button pos="446,14,486,41" ref="40" toggle="0" />
 				</td>
-				<td addr="5,0" valign="Center">
+				<td addr="5,0" valign="Center" style="padding-right: 1em;">
 					<CheckBox pos="512,21,574,41" ref="38" />
 				</td>
 				<td addr="6,0" valign="Center">

@@ -20,7 +20,7 @@
 #define IDC_PULL_ALL							39
 #define IDC_STATUS								40
 #define IDC_UPDATE								41
-#define IDC_HEADS								45
+#define IDC_BRANCHES							45
 #define IDC_BUILD_FIX							47
 #define IDD_REMOTE_FOLDER						61
 #define IDC_62									62

@@ -2985,7 +2985,7 @@ void AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithHist
 {
 	if (!InThread())
 	{
-		// printf("\tGotoReference(%s,%i,%i,%i) out of thread\n", File, Line, CurIp, WithHistory);
+		printf("\tGotoReference(%s,%i,%i,%i) out of thread\n", File, Line, CurIp, WithHistory);
 		RunCallback
 		(
 			[this, File=LString(File), Line, CurIp, WithHistory, Callback]()
@@ -2996,7 +2996,7 @@ void AppWnd::GotoReference(const char *File, int Line, bool CurIp, bool WithHist
 		return;
 	}
 
-	// printf("\tGotoReference(%s,%i,%i,%i) in thread\n", File, Line, CurIp, WithHistory);
+	printf("\tGotoReference(%s,%i,%i,%i) in thread\n", File, Line, CurIp, WithHistory);
 
 	if (!WithHistory)
 		d->InHistorySeek = true;

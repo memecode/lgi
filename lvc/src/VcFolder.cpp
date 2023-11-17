@@ -481,6 +481,12 @@ int LogDateCmp(LListItem *a, LListItem *b, NativeInt Data)
 
 void VcFolder::AddGitName(LString Hash, LString Name)
 {
+	if (!Hash || !Name)
+	{
+		LAssert(!"Param error");
+		return;
+	}
+
 	LString Existing = GitNames.Find(Hash);
 	if (Existing)
 		GitNames.Add(Hash, Existing + "," + Name);
@@ -505,11 +511,13 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 			{
 				LString::Array c;
 				char *s = l.Get();
-				while (*s && IsWhiteSpace(*s)) s++;
+				while (*s && IsWhiteSpace(*s))
+					s++;
 				bool IsCur = *s == '*';
 				if (IsCur)
 					s++;
-				while (*s && IsWhiteSpace(*s)) s++;
+				while (*s && IsWhiteSpace(*s))
+					s++;
 				if (*s == '(')
 				{
 					s++;
@@ -524,6 +532,12 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 				else
 				{
 					c = LString(s).SplitDelimit(" \t");
+				}
+				
+				if (c.Length() < 1)
+				{
+					d->Log->Print("%s:%i - Too few parts in line '%s'\n", _FL, l.Get());
+					continue;
 				}
 
 				if (IsCur)
@@ -1053,7 +1067,7 @@ bool VcFolder::GetBranches(ParseParams *Params)
 	switch (GetType())
 	{
 		case VcGit:
-			if (StartCmd("-P branch -a -v", &VcFolder::ParseBranches, Params))
+			if (StartCmd("-P branch -v", &VcFolder::ParseBranches, Params))
 				IsBranches = StatusActive;
 			break;
 		case VcSvn:
@@ -1158,7 +1172,7 @@ void VcFolder::LogFilter(const char *Filter)
 					Uncommit.Reset();
 					Log.DeleteObjects();
 					d->Commits->Empty();
-					CurrentCommit = NULL;
+					CurrentCommit.Empty();
 
 					ParseLog(code, str, NULL);
 					d->Commits->Insert(Log);
@@ -1681,25 +1695,22 @@ void VcFolder::LinkParents()
 
 	// Find all the "heads", i.e. a commit without any children
 	PROF("Find heads.");
-	LCombo *Heads;
-	if (d->Wnd()->GetViewById(IDC_HEADS, Heads))
+	LCombo *Cbo;
+	if (d->Wnd()->GetViewById(IDC_BRANCHES, Cbo))
 	{
-		Heads->Empty();
-		for (auto c:Log)
+		Cbo->Empty();
+		
+		int64 select = -1;
+		for (auto b: Branches)
 		{
-			bool Has = false;
-			for (auto e:c->Edges)
-			{
-				if (e->Parent == c)
-				{
-					Has = true;
-					break;
-				}
-			}
-			if (!Has)
-				Heads->Insert(c->GetRev());
+			if (CurrentBranch && CurrentBranch == b.key)
+				select = Cbo->Length();
+			Cbo->Insert(b.key);
 		}
-		Heads->SendNotify(LNotifyTableLayoutRefresh);
+		if (select >= 0)
+			Cbo->Value(select);
+
+		Cbo->SendNotify(LNotifyTableLayoutRefresh);
 	}
 }
 

@@ -1698,15 +1698,19 @@ public:
 				}
 				break;
 			}
-			case IDC_HEADS:
+			case IDC_BRANCHES:
 			{
 				if (n.Type == LNotifyValueChanged)
 				{
-					auto Revs = LString(c->Name()).SplitDelimit();
-
-					CommitList *cl;
-					if (GetViewById(IDC_LIST, cl))
-						cl->SelectRevisions(Revs);
+					VcFolder *f = dynamic_cast<VcFolder*>(Tree->Selection());
+					auto branch = c->Name();
+					if (!f || !branch)
+					{
+						Log->Print("%s:%i - Missing param: %p %p\n", _FL, f, branch);
+						break;
+					}
+					
+					f->OnUpdate(branch);
 				}
 				break;
 			}
