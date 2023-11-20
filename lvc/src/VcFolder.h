@@ -263,6 +263,7 @@ class VcFolder : public LTreeItem
 	void LinkParents();
 	void CurrentRev(std::function<void(LString)> Callback);
 	LColour BranchColour(const char *Name);
+	void UpdateBranchUi();
 
 	bool ParseDiffs(LString s, LString Rev, bool IsWorking);
 	
@@ -271,7 +272,7 @@ class VcFolder : public LTreeItem
 	bool ParseInfo(int Result, LString s, ParseParams *Params);
 	bool ParseFiles(int Result, LString s, ParseParams *Params);
 	bool ParseWorking(int Result, LString s, ParseParams *Params);
-	bool ParseUpdate(int Result, LString s, ParseParams *Params);
+	bool ParseCheckout(int Result, LString s, ParseParams *Params);
 	bool ParseCommit(int Result, LString s, ParseParams *Params);
 	bool ParseGitAdd(int Result, LString s, ParseParams *Params);
 	bool ParsePush(int Result, LString s, ParseParams *Params);
@@ -312,6 +313,7 @@ public:
 	const char *GetText(int Col);
 	LArray<CommitField> &GetFields() { return Fields; }
 	bool Serialize(LXmlTag *t, bool Write);
+	LString &GetCurrentBranch();
 	LXmlTag *Save();
 	void Empty();
 	void Select(bool b);
@@ -346,9 +348,9 @@ public:
 	void FilterCurrentFiles();
 	void GetRemoteUrl(std::function<void(int32_t, LString)> Callback);
 	void SelectCommit(LWindow *Parent, LString Commit, LString Path);
+	void Checkout(const char *Rev, bool isBranch);
 
 	void OnPulse();
-	void OnUpdate(const char *Rev);
 	void OnMouseClick(LMouse &m);
 	void OnRemove();
 	void OnExpand(bool b);

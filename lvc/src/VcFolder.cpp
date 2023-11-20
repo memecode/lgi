@@ -713,31 +713,7 @@ void VcFolder::OnBranchesChange()
 		}
 	}
 
-	DropDownBtn *dd;
-	if (w->GetViewById(IDC_BRANCH_DROPDOWN, dd))
-	{
-		LString::Array a;
-		for (auto b: Branches)
-			a.Add(b.key);
-
-		dd->SetList(IDC_BRANCH, a);
-	}
-
-	LViewI *b;
-	if (Branches.Length() > 0 &&
-		w->GetViewById(IDC_BRANCH, b))
-	{
-		if (CurrentBranch)
-		{
-			b->Name(CurrentBranch);
-		}
-		else
-		{
-			auto it = Branches.begin();
-			if (it != Branches.end())
-				b->Name((*it).key);
-		}
-	}
+	UpdateBranchUi();
 }
 
 void VcFolder::DefaultFields()
@@ -1692,14 +1668,42 @@ void VcFolder::LinkParents()
 			}
 		}
 	}
+}
 
-	// Find all the "heads", i.e. a commit without any children
-	PROF("Find heads.");
+void VcFolder::UpdateBranchUi()
+{
+	auto w = d->Wnd();
+	DropDownBtn *dd;
+	if (w->GetViewById(IDC_BRANCH_DROPDOWN, dd))
+	{
+		LString::Array a;
+		for (auto b: Branches)
+			a.Add(b.key);
+
+		dd->SetList(IDC_BRANCH, a);
+	}
+
+	LViewI *b;
+	if (Branches.Length() > 0 &&
+		w->GetViewById(IDC_BRANCH, b))
+	{
+		if (CurrentBranch)
+		{
+			b->Name(CurrentBranch);
+		}
+		else
+		{
+			auto it = Branches.begin();
+			if (it != Branches.end())
+				b->Name((*it).key);
+		}
+	}
+
 	LCombo *Cbo;
-	if (d->Wnd()->GetViewById(IDC_BRANCHES, Cbo))
+	if (w->GetViewById(IDC_BRANCHES, Cbo))
 	{
 		Cbo->Empty();
-		
+
 		int64 select = -1;
 		for (auto b: Branches)
 		{
@@ -1830,13 +1834,17 @@ bool VcFolder::ParseInfo(int Result, LString s, ParseParams *Params)
 	return true;
 }
 
-bool VcFolder::ParseUpdate(int Result, LString s, ParseParams *Params)
+bool VcFolder::ParseCheckout(int Result, LString s, ParseParams *Params)
 {
 	if (Result == 0)
 	{
-		CurrentCommit = NewRev;
-	}
-	
+		if (Params && Params->Str.Equals("Branch"))
+			CurrentBranch = NewRev;
+		else
+			CurrentCommit = NewRev;
+	}	
+
+	NewRev.Empty();		
 	IsUpdate = false;
 	return true;
 }
@@ -2545,35 +2553,39 @@ void VcFolder::OnMouseClick(LMouse &m)
 	}
 }
 
-void VcFolder::OnUpdate(const char *Rev)
+LString &VcFolder::GetCurrentBranch()
 {
-	if (!Rev)
+	return CurrentBranch;
+}
+
+void VcFolder::Checkout(const char *Rev, bool isBranch)
+{
+	if (!Rev || IsUpdate)
 		return;
 	
-	if (!IsUpdate)
-	{
-		LString Args;
+	LString Args;
 
-		NewRev = Rev;
-		switch (GetType())
+	LAutoPtr<ParseParams> params(new ParseParams(isBranch ? "Branch" : "Rev"));
+
+	NewRev = Rev;
+	switch (GetType())
+	{
+		case VcGit:
+			Args.Printf("checkout %s", Rev);
+			IsUpdate = StartCmd(Args, &VcFolder::ParseCheckout, params.Release(), LogNormal);
+			break;
+		case VcSvn:
+			Args.Printf("up -r %s", Rev);
+			IsUpdate = StartCmd(Args, &VcFolder::ParseCheckout, params.Release(), LogNormal);
+			break;
+		case VcHg:
+			Args.Printf("update -r %s", Rev);
+			IsUpdate = StartCmd(Args, &VcFolder::ParseCheckout, params.Release(), LogNormal);
+			break;
+		default:
 		{
-			case VcGit:
-				Args.Printf("checkout %s", Rev);
-				IsUpdate = StartCmd(Args, &VcFolder::ParseUpdate, NULL, LogNormal);
-				break;
-			case VcSvn:
-				Args.Printf("up -r %s", Rev);
-				IsUpdate = StartCmd(Args, &VcFolder::ParseUpdate, NULL, LogNormal);
-				break;
-			case VcHg:
-				Args.Printf("update -r %s", Rev);
-				IsUpdate = StartCmd(Args, &VcFolder::ParseUpdate, NULL, LogNormal);
-				break;
-			default:
-			{
-				LAssert(!"Impl me.");
-				break;
-			}
+			NoImplementation(_FL);
+			break;
 		}
 	}
 }

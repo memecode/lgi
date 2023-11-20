@@ -1710,7 +1710,8 @@ public:
 						break;
 					}
 					
-					f->OnUpdate(branch);
+					if (f->GetCurrentBranch() != branch)
+						f->Checkout(branch, true);
 				}
 				break;
 			}
@@ -1734,7 +1735,7 @@ public:
 
 						LArray<VcCommit*> s;
 						if (Commits->GetSelection(s) && s.Length() == 1)
-							f->OnUpdate(s[0]->GetRev());
+							f->Checkout(s[0]->GetRev(), false);
 						break;
 					}
 					default:

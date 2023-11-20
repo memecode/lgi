@@ -528,7 +528,7 @@ void VcCommit::OnMouseClick(LMouse &m)
 					break;
 				}
 
-				f->OnUpdate(Rev);
+				f->Checkout(Rev, false);
 				break;
 			}
 			case IDM_COPY_REV:
