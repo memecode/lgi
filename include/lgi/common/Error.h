@@ -25,6 +25,7 @@ enum LErrorCodes
 	LErrorTooManyFiles	= ERROR_NO_MORE_FILES,
 	LErrorFileExists	= ERROR_FILE_EXISTS,
 	LErrorPathNotFound	= ERROR_PATH_NOT_FOUND,
+	LErrorReadOnly		= ERROR_WRITE_FAULT,
 #elif defined(POSIX)
 	LErrorNone = 0,
 	LErrorAccessDenied	= EACCES,
@@ -33,6 +34,7 @@ enum LErrorCodes
 	LErrorTooManyFiles	= EMFILE,
 	LErrorFileExists	= EEXIST,
 	LErrorPathNotFound	= ENOTDIR,
+	LErrorReadOnly		= EROFS,
 #else
 	#warning "Impl me."
 #endif

@@ -4,8 +4,8 @@
 
 class LgiClass LPopupNotification : public LWindow
 {
-	constexpr static int Border = 10; // px
-	constexpr static int ShowMs = 3000; // milliseconds
+	constexpr static int Border = 10;	// px
+	constexpr static int ShowMs = 4000; // milliseconds
 
 	LColour cBack, cBorder, cFore;
 	LWindow *RefWnd = NULL;

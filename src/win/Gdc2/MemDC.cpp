@@ -230,7 +230,7 @@ LRect LMemDC::ClipRgn(LRect *Rgn)
 		HRGN hRgn = CreateRectRgn(Clip.x1, Clip.y1, Clip.x2+1, Clip.y2+1);
 		if (hRgn)
 		{
-			LgiTrace("%s:%i HRGN=%p\n", _FL, hRgn);
+			// LgiTrace("%s:%i HRGN=%p\n", _FL, hRgn);
 			SelectClipRgn(hDC, hRgn);
 			DeleteObject(hRgn);
 		}
