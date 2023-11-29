@@ -34,7 +34,8 @@ ifeq ($(Build),Debug)
 		-I./src \
 		-I./resources \
 		-I../include/lgi/haiku \
-		-I../include
+		-I../include \
+		-I../private/common
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -50,7 +51,8 @@ else
 		-I./src \
 		-I./resources \
 		-I../include/lgi/haiku \
-		-I../include
+		-I../include \
+		-I../private/common
 endif
 
 # Dependencies
@@ -82,6 +84,7 @@ Source =	src/WebFldDlg.cpp \
 			../src/common/Text/HtmlParser.cpp \
 			../src/common/Text/HtmlCommon.cpp \
 			../src/common/Text/Html.cpp \
+			../src/common/Text/TextView4.cpp \
 			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
 			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
 			../src/common/Text/DocView.cpp \
