@@ -4639,7 +4639,7 @@ void FindMenuKeys(LList *out, ResMenu *menu)
 			item->SetText(ref, ColRefId);
 			item->SetText(ctrl, ColCtrlId);
 			item->SetText(i->GetStr()->Get(), ColName);
-			item->_UserPtr = i;
+			item->_UserPtr = static_cast<FieldSource*>(i);
 
 			out->Insert(item);
 		}
@@ -4673,7 +4673,7 @@ void FindShortCuts(LList *Out, LViewI *In)
 				li->SetText(ctrl, ColCtrlId);
 				li->SetText(rdc->GetClass(), ColName);
 				
-				li->_UserPtr = rdc;
+				li->_UserPtr = static_cast<FieldSource*>(rdc);
 				
 				Out->Insert(li);
 			}
@@ -4697,7 +4697,7 @@ int ShortCutView::OnNotify(LViewI *Ctrl, LNotification n)
 
 				LString s = li->GetText(1);
 
-				ResObject *c = (ResObject*) li->_UserPtr;
+				auto c = (FieldSource*) li->_UserPtr;
 				if (!c)
 					break;
 

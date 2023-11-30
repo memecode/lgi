@@ -2138,7 +2138,7 @@ extern void DeNullText(char *in, int &len);
 
 int MailIMap::Fetch(bool ByUid,
 					const char *Seq,
-					const char *Parts,
+					const char *RequestParts,
 					FetchCallback Callback,
 					void *UserData,
 					LStreamI *RawCopy,
@@ -2148,11 +2148,11 @@ int MailIMap::Fetch(bool ByUid,
 	LError Local;
 	if (!Error) Error = &Local;
 		
-	if (!Parts || !Callback || !Seq)
+	if (!RequestParts || !Callback || !Seq)
 	{
 		LgiTrace("%s:%i - Invalid FETCH argument.\n", _FL);
 		Error->Set(EINVAL);
-		Error->AddNote(_FL, "Invalid arg: %p,%p,%p.", Parts, Callback, Seq);
+		Error->AddNote(_FL, "Invalid arg: %p,%p,%p.", RequestParts, Callback, Seq);
 		return false;
 	}
 
@@ -2169,7 +2169,7 @@ int MailIMap::Fetch(bool ByUid,
 	LStringPipe p(256);
 	p.Print("A%4.4i %sFETCH ", Cmd, ByUid ? "UID " : "");
 	p.Write(Seq, strlen(Seq));
-	p.Print(" (%s)\r\n", Parts);
+	p.Print(" (%s)\r\n", RequestParts);
 	LAutoString WrBuf(p.NewStr());
 	if (!WriteBuf(false, WrBuf))
 	{
