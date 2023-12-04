@@ -568,8 +568,7 @@ bool TableCell::GetVariant(const char *Name, LVariant &Value, const char *Array)
 				LVariant *v = new LVariant;
 				if (v)
 				{
-					v->Type = GV_GVIEW;
-					v->Value.View = c.View;
+					*v = c.View;
 					Value.Value.Lst->Insert(v);
 				}
 			}

@@ -110,6 +110,7 @@
 				<td>
 					<a href="#add">obj.Add</a><br>
 					<a href="#haskey">obj.HasKey</a><br>
+					<a href="#hasitem">obj.HasItem</a><br>
 					<a href="#objDelete">obj.Delete</a><br>
 					<a href="#objSort">obj.Sort</a><br>
 				<td>
@@ -493,7 +494,7 @@ Print(c.Length, "\n");</pre>
 
 		<h4>bool <a name="haskey">obj.HasKey</a>(key);</h4>
 			<div>
-				Returns true of the container has something stored at 'key':
+				Returns true if the container has something stored at 'key':
 				<br>
 				Arguments:
 				<ul>
@@ -517,6 +518,21 @@ Print(c.HasKey("asd"), "\n");
 Print(c.HasKey("first"), "\n");</pre>
 				<pre class=output>0
 1</pre>
+			</div>
+
+		<h4>bool <a name="hasitem">obj.HasItem</a>(item);</h4>
+			<div>
+				Returns true if the container has the value 'item':
+				<br>
+				Arguments:
+				<ul>
+					<li> item - the item to look for.
+				</ul>
+				<br>
+				Returns:
+				<ul>
+					<li> TRUE if the container has the item.
+				</ul>
 			</div>
 
 		<h4>void <a name="objDelete">obj.Delete</a>(key);</h4>

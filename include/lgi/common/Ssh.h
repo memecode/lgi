@@ -370,7 +370,10 @@ public:
 		{
 			r = ssh_userauth_password(Ssh, Username, Password);
 		}
-		else Log->Print("%s:%i - No username and password.\n", _FL);
+		else
+		{
+			Log->Print("%s:%i - No username and password.\n", _FL);
+		}
 
 		if (r != S_OK)
 			return false;

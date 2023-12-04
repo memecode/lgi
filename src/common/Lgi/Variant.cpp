@@ -24,7 +24,7 @@ const char *LVariant::TypeToString(LVariantType t)
 		case GV_OPERATOR:	return "Operator";
 		case GV_CUSTOM:		return "Custom";
 		case GV_WSTRING:	return "WString";
-		case GV_GVIEW:		return "View";
+		case GV_LVIEW:		return "View";
 		case GV_STREAM:		return "Stream";
 		case GV_LSURFACE:	return "Surface";
 		case GV_LMOUSE:		return "MouseEvent";
@@ -258,7 +258,7 @@ bool LVariant::operator ==(LVariant &v)
 			return Value.Custom == v.Value.Custom;
 		case GV_LSURFACE:
 			return Value.Surface.Ptr == v.Value.Surface.Ptr;
-		case GV_GVIEW:
+		case GV_LVIEW:
 			return Value.View == v.Value.View;
 		/*
 		case GV_GFILE:
@@ -442,7 +442,7 @@ LVariant &LVariant::operator =(LView *p)
 	Empty();
 	if (p)
 	{
-		Type = GV_GVIEW;
+		Type = GV_LVIEW;
 		Value.View = p;
 		// if (Dirty) *Dirty = true;
 	}
@@ -547,7 +547,7 @@ LVariant &LVariant::operator =(LVariant const &i)
 			break;
 		}
 		case GV_VOID_PTR:
-		case GV_GVIEW:
+		case GV_LVIEW:
 		case GV_LMOUSE:
 		case GV_LKEY:
 		{
@@ -986,7 +986,7 @@ int64 LVariant::Length()
 			}
 			return Sz;
 		}
-		case GV_GVIEW:
+		case GV_LVIEW:
 			return sizeof(LView);
 		case GV_LMOUSE:
 			return sizeof(LMouse);
@@ -1147,7 +1147,7 @@ void *LVariant::CastVoidPtr() const
 			return Value.WString;
 		case GV_LSURFACE:
 			return Value.Surface.Ptr;
-		case GV_GVIEW:
+		case GV_LVIEW:
 			return Value.View;
 		case GV_LMOUSE:
 			return Value.Mouse;
@@ -1206,7 +1206,7 @@ bool LVariant::CastBool() const
 			return Value.DomRef.Dom != NULL;
 		case GV_VOID_PTR:
 			return Value.Ptr != NULL;
-		case GV_GVIEW:
+		case GV_LVIEW:
 			return Value.View != NULL;
 		case GV_LMOUSE:
 			return Value.Mouse != NULL;
@@ -1320,7 +1320,7 @@ int32 LVariant::CastInt32() const
 			return Value.Hash != NULL;
 		case GV_LSURFACE:
 			return Value.Surface.Ptr != NULL;
-		case GV_GVIEW:
+		case GV_LVIEW:
 			return Value.View != NULL;
 		case GV_LMOUSE:
 			return Value.Mouse != NULL;
@@ -1819,10 +1819,10 @@ LString LVariant::ToString()
 			s.Printf("(list[%i])%p", Value.Lst?Value.Lst->Length():0, Value.Lst);
 			break;
 		case GV_DOM:
-			s.Printf("(dom)%p", Value.Dom);
+			s.Printf("(LDom)%p", Value.Dom);
 			break;
 		case GV_DOMREF:
-			s.Printf("(dom)%p.%s", Value.DomRef.Dom, Value.DomRef.Name);
+			s.Printf("(LDom)%p.%s", Value.DomRef.Dom, Value.DomRef.Name);
 			break;
 		case GV_VOID_PTR:
 			s.Printf("(void*)%p", Value.Ptr);
@@ -1831,35 +1831,35 @@ LString LVariant::ToString()
 		{
 			char dt[64];
 			Value.Date->Get(dt, sizeof(dt));
-			s.Printf("(datetime)%s", dt);
+			s.Printf("(LDateTime)%s", dt);
 			break;
 		}
 		case GV_HASHTABLE:
-			s.Printf("(hashtbl)%p", Value.Hash);
+			s.Printf("(LHashTbl)%p", Value.Hash);
 			break;
 		case GV_OPERATOR:
-			s.Printf("(operator)%s", OperatorToString(Value.Op));
+			s.Printf("(LOperator)%s", OperatorToString(Value.Op));
 			break;
 		case GV_CUSTOM:
-			s.Printf("(custom.%s)%p", Value.Custom.Dom->GetName(), Value.Custom.Data);
+			s.Printf("(LCustom.%s)%p", Value.Custom.Dom->GetName(), Value.Custom.Data);
 			break;
 		case GV_WSTRING:
-			s.Printf("(wstring)\"%S\"", Value.WString);
+			s.Printf("(wchar_t*)\"%S\"", Value.WString);
 			break;
 		case GV_LSURFACE:
-			s.Printf("(gsurface)%p", Value.Surface.Ptr);
+			s.Printf("(LSurface)%p", Value.Surface.Ptr);
 			break;
-		case GV_GVIEW:
-			s.Printf("(gview)%p", Value.View);
+		case GV_LVIEW:
+			s.Printf("(LView)%p", Value.View);
 			break;
 		case GV_LMOUSE:
-			s.Printf("(gmouse)%p", Value.Mouse);
+			s.Printf("(LMouse)%p", Value.Mouse);
 			break;
 		case GV_LKEY:
-			s.Printf("(gkey)%p", Value.Key);
+			s.Printf("(LKey)%p", Value.Key);
 			break;
 		case GV_STREAM:
-			s.Printf("(stream)%p", Value.Stream.Ptr);
+			s.Printf("(LStream)%p", Value.Stream.Ptr);
 			break;
 		default:
 			s = "(unknown)NULL";

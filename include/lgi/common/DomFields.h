@@ -11,7 +11,7 @@ _(ObjField, "Field")
 _(ObjDebug, "Debug")
 _(ObjTextContent, "textContent")
 _(ObjInnerHtml, "innerHTML")
-	
+
 // Types
 _(TypeList, "List")
 _(TypeHashTable, "HashTable")
@@ -60,6 +60,7 @@ _(SurfaceIncludeCursor, "IncludeCursor")
 _(ContainerAdd, "Add")
 _(ContainerDelete, "Delete")
 _(ContainerHasKey, "HasKey")
+_(ContainerHasItem, "HasItem")
 _(ContainerSort, "Sort")
 _(ContainerChildren, "Children")
 _(ContainerSpan, "Span")

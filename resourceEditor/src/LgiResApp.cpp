@@ -4695,8 +4695,6 @@ int ShortCutView::OnNotify(LViewI *Ctrl, LNotification n)
 				if (!li)
 					break;
 
-				LString s = li->GetText(1);
-
 				auto c = (FieldSource*) li->_UserPtr;
 				if (!c)
 					break;

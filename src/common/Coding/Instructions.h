@@ -1570,6 +1570,24 @@ case IDomCall:
 						}
 						break;
 					}
+					case ContainerHasItem:
+					{
+						bool found = false;
+						if (Arg.Length() > 0 && Arg[0])
+						{
+							auto item = Arg[0];
+							for (auto v: *Dom->Value.Lst)
+							{
+								if (*v == *item)
+								{
+									found = true;
+									break;
+								}
+							}
+						}
+						*Dst = found;
+						break;
+					}
 					case ContainerSort:
 					{
 						LVariant *Param = Arg.Length() > 0 ? Arg[0] : NULL;
@@ -1644,6 +1662,24 @@ case IDomCall:
 						{
 							*Dst = false;
 						}
+						break;
+					}
+					case ContainerHasItem:
+					{
+						bool found = false;
+						if (Arg.Length() > 0 && Arg[0])
+						{
+							auto item = Arg[0];
+							for (auto p: *Dom->Value.Hash)
+							{
+								if (*p.value == *item)
+								{
+									found = true;
+									break;
+								}
+							}
+						}
+						*Dst = found;
 						break;
 					}
 					default:

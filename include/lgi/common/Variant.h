@@ -63,7 +63,7 @@ enum LVariantType
 	// LSurface ptr (16)
 	GV_LSURFACE,
 	/// Pointer to LView (17)
-	GV_GVIEW,
+	GV_LVIEW,
 	/// Pointer to LMouse (18)
 	GV_LMOUSE,
 	/// Pointer to LKey (19)
@@ -411,7 +411,7 @@ public:
 	/// Casts to a DOM ptr
 	LDom *CastDom() const;
 	/// Casts to a boolean. You probably DON'T want to use this function. The
-	/// behaviour for strings -> bool is such that if the string is value it
+	/// behavior for strings -> bool is such that if the string is value it
 	/// always evaluates to true, and false if it's not a valid string. Commonly
 	/// what you want is to evaluate whether the string is zero or non-zero in
 	/// which cast you should use "CastInt32() != 0" instead.
@@ -419,7 +419,7 @@ public:
 	/// Returns the pointer if available.
 	void *CastVoidPtr() const;
 	/// Returns a LView
-	LView *CastView() const { return Type == GV_GVIEW ? Value.View : NULL; }
+	LView *CastView() const { return Type == GV_LVIEW ? Value.View : NULL; }
 
 	/// List insert
 	bool Add(LVariant *v, int Where = -1);	

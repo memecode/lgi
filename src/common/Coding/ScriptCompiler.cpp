@@ -443,7 +443,7 @@ public:
 		Types.Add("LDateTime", GV_DATETIME);
 		Types.Add("GHashTable", GV_HASHTABLE);
 		Types.Add("LOperator", GV_OPERATOR);
-		Types.Add("LView", GV_GVIEW);
+		Types.Add("LView", GV_LVIEW);
 		Types.Add("LMouse", GV_LMOUSE);
 		Types.Add("LKey", GV_LKEY);
 		Types.Add("LVariant", GV_VARIANT);

@@ -418,7 +418,7 @@ LView *SystemFunctions::CastLView(LVariant &v)
 		default: break;
 		case GV_DOM:
 			return dynamic_cast<LView*>(v.Value.Dom);
-		case GV_GVIEW:
+		case GV_LVIEW:
 			return v.Value.View;
 	}
 	return 0;
@@ -601,50 +601,34 @@ bool SystemFunctions::Print(LScriptArguments &Args)
 			continue;
 
 		LVariant v = *Args[n];
-		char *f = v.CastString();
-		if (!f)
+		switch (v.Type)
 		{
-			Out->Write("NULL", 4);
-			continue;
-		}
-
-		#if 1
-			size_t Len = strlen(f);
-			Out->Write(f, Len);
-		#else
-			char *i = f, *o = f;
-			for (; *i; i++)
+			case GV_DOM:
+			case GV_DOMREF:
+			case GV_VOID_PTR:
+			case GV_LVIEW:
+			case GV_LMOUSE:
+			case GV_LKEY:
+			case GV_STREAM:
 			{
-				if (*i == '\\')
+				Out->Print("%s", v.ToString().Get());
+				break;
+			}
+			default:
+			{
+				auto f = v.CastString();
+				if (f)
 				{
-					i++;
-					switch (*i)
-					{
-						case 'n':
-							*o++ = '\n';
-							break;
-						case 'r':
-							*o++ = '\r';
-							break;
-						case 't':
-							*o++ = '\t';
-							break;
-						case '\\':
-							*o++ = '\\';
-							break;
-						case '0':
-							*o++ = 0;
-							break;
-					}
+					size_t Len = strlen(f);
+					Out->Write(f, Len);
 				}
 				else
 				{
-					*o++ = *i;
+					Out->Write("NULL", 4);
 				}
+				break;
 			}
-			*o = 0;
-			Out->Write(f, o - f);
-		#endif
+		}
 	}
 
 	return true;
@@ -1125,7 +1109,7 @@ bool SystemFunctions::GetViewById(LScriptArguments &Args)
 
 	if (Parent->GetViewById(Id, Args.GetReturn()->Value.View))
 	{
-		Args.GetReturn()->Type = GV_GVIEW;
+		Args.GetReturn()->Type = GV_LVIEW;
 	}
 
 	return true;
