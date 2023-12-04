@@ -205,7 +205,7 @@ public:
 		char16 *WString;
 		/// Valid when Type == #GV_DOM
 		LDom *Dom;
-		/// Valid when Type is #GV_VOID_PTR, #GV_GVIEW, #GV_LMOUSE or #GV_LKEY
+		/// Valid when Type is #GV_VOID_PTR, #GV_LVIEW, #GV_LMOUSE or #GV_LKEY
 		void *Ptr;
 		/// Valid when Type == #GV_BINARY
 	    struct _Binary
@@ -267,7 +267,7 @@ public:
 				return p;
 			}
 		} Stream;
-		/// Valid when Type == #GV_GVIEW
+		/// Valid when Type == #GV_LVIEW
 		class LView *View;
 		/// Valid when Type == #GV_LMOUSE
 		class LMouse *Mouse;

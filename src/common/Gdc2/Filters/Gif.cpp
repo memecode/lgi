@@ -881,7 +881,7 @@ LFilter::IoStatus GdcGif::WriteImage(LStream *Out, LSurface *pDC)
 			Back = v.CastInt32();
 		}
 
-		if (Parent.Type == GV_GVIEW)
+		if (Parent.Type == GV_LVIEW)
 		{
 		    // If the source document has an alpha channel then we use 
 		    // that to create transparent pixels in the output, otherwise
