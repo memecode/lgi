@@ -841,14 +841,14 @@ bool LApp::Run(OnIdleProc IdleCallback, void *IdleParam)
 	{	
 		while (!d->QuitReceived && GetMessage(&Msg, NULL, 0, 0) > 0)
 		{
-			#ifdef _DEBUG
+			#if 0 // def _DEBUG
 			int64 Last = LCurrentTime();
 			#endif
 				
 			TranslateMessage(&Msg);
 			DispatchMessage(&Msg);
 
-			#ifdef _DEBUG
+			#if 0 // def _DEBUG
 			int64 Now = LCurrentTime();
 			if (Now - Last > 1000)
 			{
