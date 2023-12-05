@@ -4186,6 +4186,10 @@ bool VcFolder::Revert(LString::Array &Uris, const char *Revision)
 		{
 			LStringPipe p;
 			p.Print("checkout");
+			
+			if (Revision)
+				p.Print(" %s", Revision);
+			
 			for (auto u: Uris)
 			{
 				auto Path = GetFilePart(u);

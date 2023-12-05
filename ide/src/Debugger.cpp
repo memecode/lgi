@@ -277,7 +277,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 		}
 	}
 	
-	void OnLine(const char *Start, int Length)
+	void OnLine(const char *Start, ptrdiff_t Length)
 	{
 		if (DEBUG_SHOW_GDB_IO)
 		{
@@ -395,7 +395,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 			{
 				*LinePtr++ = *p;
 				*LinePtr = 0;
-				OnLine(Line, (int) (LinePtr - Line));
+				OnLine(Line, LinePtr - Line);
 				LinePtr = Line;
 			}
 			else if (LinePtr < LineEnd)
