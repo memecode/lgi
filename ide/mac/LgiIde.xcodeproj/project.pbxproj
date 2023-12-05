@@ -624,7 +624,7 @@
 					../../include/lgi/mac/cocoa,
 					../../../../../codelib/libpng,
 					../../../../../codelib/libpng/build,
-					../../../../../codelib/openssl/include,
+					/opt/local/libexec/openssl3/include,
 				);
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -662,7 +662,7 @@
 					../../include/lgi/mac/cocoa,
 					../../../../../codelib/libpng,
 					../../../../../codelib/libpng/build,
-					../../../../../codelib/openssl/include,
+					/opt/local/libexec/openssl3/include,
 				);
 				INFOPLIST_FILE = Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";

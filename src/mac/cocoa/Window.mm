@@ -430,6 +430,11 @@ LWindow::~LWindow()
 	DeleteObj(_Lock);
 }
 
+int LWindow::WaitThread()
+{
+	return 0;
+}
+
 NSView *LWindow::Handle()
 {
     if (!InThread())
