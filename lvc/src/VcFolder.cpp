@@ -2943,11 +2943,11 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 		}
 		case VcGit:
 		{
-			LString::Array Lines = s.SplitDelimit("\r\n");
+			auto Lines = s.SplitDelimit("\r\n");
 			int Fmt = ToolVersion[VcGit] >= Ver2Int("2.8.0") ? 2 : 1;
 			for (auto Ln : Lines)
 			{
-				char Type = Ln(0);
+				auto Type = Ln(0);
 				if (Ln.Lower().Find("error:") >= 0)
 				{
 				}
@@ -2967,9 +2967,16 @@ bool VcFolder::ParseStatus(int Result, LString s, ParseParams *Params)
 							d->Log->Print("%s:%i - Error: not enough tokens: '%s'\n", _FL, Ln.Get());
 						else
 						{
-							f = new VcFile(d, this, p[6], IsWorking);
-							f->SetText(p[1].Strip("."), COL_STATE);
+							auto path = p[6];
+							f = new VcFile(d, this, path, IsWorking);
+							auto state = p[1].Strip(".");
+							auto pos = p[1].Find(state);
+							
+							d->Log->Print("%s state='%s' pos=%i\n", path.Get(), state.Get(), (int)pos);
+							
+							f->SetText(state, COL_STATE);
 							f->SetText(p.Last(), COL_FILENAME);
+							f->SetStaged(pos == 0);
 						}
 					}
 					else if (Fmt == 1)
@@ -4184,20 +4191,40 @@ bool VcFolder::Revert(LString::Array &Uris, const char *Revision)
 	{
 		case VcGit:
 		{
-			LStringPipe p;
-			p.Print("checkout");
-			
+			LStringPipe cmd, paths;
+			LAutoPtr<ParseParams> params;
 			if (Revision)
-				p.Print(" %s", Revision);
+			{
+				cmd.Print("checkout %s", Revision);
+			}
+			else
+			{
+				// Unstage the file...
+				cmd.Print("reset");
+			}
 			
 			for (auto u: Uris)
 			{
 				auto Path = GetFilePart(u);
-				p.Print(" \"%s\"", Path.Get());
+				paths.Print(" \"%s\"", Path.Get());
+			}
+			auto p = paths.NewLStr();
+			cmd.Write(p);
+			
+			if (!Revision)
+			{
+				if (params.Reset(new ParseParams))
+				{
+					params->Callback = [this, p](auto code, auto str)
+					{
+						LString c;
+						c.Printf("checkout %s", p.Get());
+						StartCmd(c, &VcFolder::ParseRevert);
+					};
+				}
 			}
 			
-			auto a = p.NewLStr();			
-			return StartCmd(a, &VcFolder::ParseRevert);
+			return StartCmd(cmd.NewLStr(), &VcFolder::ParseRevert, params.Release());
 			break;
 		}
 		case VcHg:

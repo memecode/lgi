@@ -128,8 +128,14 @@ void VcFile::OnMouseClick(LMouse &m)
 		LArray<VcFile*> Files;
 		GetList()->GetSelection(Files);
 		LString::Array Uris;
+		int Staged = 0;
+		
 		for (auto f: Files)
+		{
 			Uris.New() = f->GetUri();
+			if (f->GetStaged())
+				Staged++;
+		}
 
 		GetStatus();
 		if (Revision)
@@ -149,7 +155,10 @@ void VcFile::OnMouseClick(LMouse &m)
 				case SAdded:
 				case SDeleted:
 				{
-					s.AppendItem("Revert Changes", IDM_REVERT);
+					LString label = "Revert Changes";
+					if (Staged > 0)
+						label += LString::Fmt(" (%i)", Staged);
+					s.AppendItem(label, IDM_REVERT);
 					break;
 				}
 				case SConflicted:

@@ -29,6 +29,7 @@ private:
 	LUri Uri;
 	LListItemCheckBox *Chk = NULL;
 	FileStatus Status = SUnknown;
+	bool Staged = false;
 
 public:
 	VcFile(AppPriv *priv, VcFolder *owner, LString revision, bool working = false);
@@ -39,11 +40,13 @@ public:
 	const char *GetDiff() { return Diff; }
 	const char *GetFileName() { return GetText(COL_FILENAME); }
 	FileStatus GetStatus();
+	bool GetStaged() { return Staged; }
 	LString GetUri();
 	void SetUri(LString uri);
 	void SetStatus(FileStatus s) { Status = s; Update(); }
 	
 	void SetDiff(LString d);
+	void SetStaged(bool staged) { Staged = staged; }
 	void Select(bool b);
 	void OnMouseClick(LMouse &m);
 };
