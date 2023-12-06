@@ -14,7 +14,7 @@ class LHttp
 	
 	LAutoPtr<LSocketI> Socket;	// commands
 	size_t ResumeFrom;
-	LAutoString FileLocation;
+	LString FileLocation;
 	char *Headers;
 	bool NoCache;
 	LString AuthUser, AuthPassword;

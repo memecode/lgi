@@ -904,10 +904,10 @@ public:
 	}
 
 	/// Convert to integer
-	int64 Int(int Base = 10)
+	int64 Int(int Base = 10, int64 Default = -1)
 	{
 		if (!Str)
-			return -1;
+			return Default;
 
 		if
 		(
@@ -919,7 +919,7 @@ public:
 			)
 		)
 		{
-			return Atoi(Str->Str+2, 16);
+			return Atoi(Str->Str + 2, 16);
 		}
 
 		return Atoi(Str->Str, Base);

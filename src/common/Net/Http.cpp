@@ -314,27 +314,27 @@ bool LHttp::Request
 			}
 
 			// Process output
-			LAutoString h(Headers.NewStr());
+			auto h = Headers.NewLStr();
 			if (h)
 			{
 				#if DEBUG_LOGGING
 				Log.Print("HTTP res.hdrs=%s\n-------------------------------------\nHTTP res.body=", h);
 				#endif
 
-				LAutoString sContentLen(InetGetHeaderField(h, "Content-Length"));
-				int64 ContentLen = sContentLen ? atoi64(sContentLen) : -1;
+				auto sContentLen = LGetHeaderField(h, "Content-Length");
+				auto ContentLen = sContentLen.Int(10, 0);
 				bool IsChunked = false;
 				if (ContentLen > 0)
 					Out->SetSize(ContentLen);
 				else
 				{
-					LAutoString sTransferEncoding(InetGetHeaderField(h, "Transfer-Encoding"));
-					IsChunked = sTransferEncoding && !_stricmp(sTransferEncoding, "chunked");
+					auto sTransferEncoding = LGetHeaderField(h, "Transfer-Encoding");
+					IsChunked = sTransferEncoding && sTransferEncoding.Equals("chunked");
 					Out->SetSize(0);
 				}
-				LAutoString sContentEncoding(InetGetHeaderField(h, "Content-Encoding"));
+				auto sContentEncoding = LGetHeaderField(h, "Content-Encoding");
 				ContentEncoding Encoding = EncodeRaw;
-				if (sContentEncoding && !_stricmp(sContentEncoding, "gzip"))
+				if (sContentEncoding && sContentEncoding.Equals("gzip"))
 					Encoding = EncodeGZip;
 				if (OutEncoding)
 					*OutEncoding = Encoding;
@@ -342,19 +342,15 @@ bool LHttp::Request
 				int HttpStatus = 0;
 				if (_strnicmp(h, "HTTP/", 5) == 0)
 				{
-					HttpStatus = atoi(h + 9);
+					HttpStatus = (int)Atoi(h.Get() + 9);
 					if (ProtocolStatus)
 						*ProtocolStatus = HttpStatus;
 				}				
 				if (HttpStatus / 100 == 3)
-				{
-					FileLocation.Reset(InetGetHeaderField(h, "Location"));
-				}
+					FileLocation = LGetHeaderField(h, "Location");
 				
 				if (OutHeaders)
-				{
-					OutHeaders->Write(h, strlen(h));
-				}
+					OutHeaders->Write(h.Get(), h.Length());
 
 				if (IsChunked)
 				{
@@ -534,7 +530,7 @@ bool LHttp::Request
 					Status = Written == ContentLen;
 					if (Written != ContentLen)
 					{
-						LgiTrace("%s:%i - HTTP length not reached.\n", _FL);
+						LgiTrace("%s:%i - HTTP length not reached: written=" LPrintfInt64 " content=" LPrintfInt64 "\n", _FL, Written, ContentLen);
 					}
 					#if DEBUG_LOGGING
 					Log.Print("\n---------------------------------------------\n");

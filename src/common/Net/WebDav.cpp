@@ -214,7 +214,11 @@ bool LWebdav::Delete(const char *Resource)
 
 	if (r.ProtocolStatus / 100 != 2)
 	{
-		LgiTrace("DeleteFailed: %i\n%s\n%s\n", r.ProtocolStatus, r.OutHdrs.Get(), r.OutBody.Get());
+		LgiTrace("DeleteFailed: %s = %i\n%s\n%s\n", 
+			Resource,
+			r.ProtocolStatus,
+			r.OutHdrs.Get(),
+			r.OutBody.Get());
 		return false;
 	}
 

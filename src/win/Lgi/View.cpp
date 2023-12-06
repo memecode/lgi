@@ -2119,11 +2119,11 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 	return 0;
 
 ReturnDefaultProc:
-	#ifdef _DEBUG
+	#if 0 // def _DEBUG
 	uint64 start = LCurrentTime();
 	#endif
 	LRESULT r = DefWindowProcW(_View, Msg->m, Msg->a, Msg->b);
-	#ifdef _DEBUG
+	#if 0 // def _DEBUG
 	uint64 now = LCurrentTime();
 	if (now - start > 1000)
 	{
