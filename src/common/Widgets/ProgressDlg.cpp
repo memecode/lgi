@@ -108,7 +108,6 @@ LProgressPane::LProgressPane(LProgressDlg *dlg) : Dlg(dlg)
 	SetPos(r);
 	Name(LLoadString(L_PROGRESSDLG_PROGRESS, "Progress"));
 	SetId(IDC_PANE);
-	Ref = 0;
 
 	if (AddView(t = new LTableLayout(IDC_TABLE)))
 	{
@@ -381,8 +380,34 @@ LProgressDlg::~LProgressDlg()
 		EndModeless(true);
 }
 
+///////////////////////////////////////////////////////////////
+// See the detailed comment in the header about this function
+///////////////////////////////////////////////////////////////
 bool LProgressDlg::OnRequestClose(bool OsClose)
 {
+	// If already cancelled, allow quit to happen
+	bool cancelled = IsCancelled();
+	if (cancelled)
+		return true;
+		
+	// If any of the panes are not complete... cancel them and stop the window quitting
+	// This give the app time to clean up...
+	bool unfinished = false;
+	for (auto p: Panes)
+	{
+		if (!p->IsFinished())
+		{
+			unfinished = true;
+			break;
+		}
+	}
+	if (!unfinished)
+	{
+		// All tasks completed... so allow quit to happen
+		return true;
+	}
+		
+	// Otherwise cancel the tasks but let the app quit the window later.
 	for (auto p: Panes)
 		p->Cancel(true);
 		

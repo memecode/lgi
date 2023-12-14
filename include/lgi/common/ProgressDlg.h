@@ -22,7 +22,7 @@ class LgiClass LProgressPane : public Progress, public LLayout
 protected:
 	LTableLayout *t = NULL;
 	LTextLabel *Desc = NULL, *ValText = NULL, *Rate = NULL, *Remaining = NULL;
-	LProgressView *Bar;
+	LProgressView *Bar = NULL;
 	LButton *But = NULL;
 	bool UiDirty = false;
 
@@ -112,8 +112,20 @@ public:
 	void OnPaint(LSurface *pDC) override;
 	void OnCreate() override;
 	void OnPosChange() override;
-	bool OnRequestClose(bool OsClose) override;
 	void OnPulse() override;
+
+	// This can be called in 2 contexts...
+	//
+	// 1) The tasks are still happening and the user is trying to cancel them.
+	// 2) The tasks are complete and the app or user is closing the progress dialog.
+	//
+	// In the first case the panes are marked as cancelled but the dialog doesn't
+	// quit immediately. This allows the app to clean things up and exit it's loop.
+	// Potentially in threads...
+	//
+	// In the second case this function returns true to the caller to allow the dialog
+	// to close and the OS to clean up the window.
+	bool OnRequestClose(bool OsClose) override;
 };
 
 #endif

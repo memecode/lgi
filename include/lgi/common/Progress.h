@@ -42,6 +42,7 @@ public:
 	virtual void SetType(const char *t);
 	
 	Progress &operator =(Progress &p);
+	bool IsFinished() { return Val >= High; }
 };
 
 #endif
