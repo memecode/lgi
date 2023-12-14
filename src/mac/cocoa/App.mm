@@ -950,7 +950,9 @@ bool LApp::IsElevated()
 
 int LApp::GetCpuCount()
 {
-	return (int) [NSProcessInfo processInfo].processorCount;
+	auto info = [NSProcessInfo processInfo];
+	auto cpus = info.processorCount;
+	return (int) cpus;
 }
 
 LFontCache *LApp::GetFontCache()

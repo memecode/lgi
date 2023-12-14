@@ -20,6 +20,9 @@
 		3457FE4E2081CB3D00014BE4 /* VcFolder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE472081CB3D00014BE4 /* VcFolder.cpp */; };
 		3457FE502081CBE500014BE4 /* SubProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3457FE4F2081CBE500014BE4 /* SubProcess.cpp */; };
 		3457FE522081CC4800014BE4 /* Lvc.lr8 in Resources */ = {isa = PBXBuildFile; fileRef = 3457FE512081CC4800014BE4 /* Lvc.lr8 */; };
+		3465A78E2B2AB0B500084F66 /* libpng16.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 344B4F042A46573E00E93D57 /* libpng16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		3465A7E32B2AB1BF00084F66 /* PostBuildStep.py in Resources */ = {isa = PBXBuildFile; fileRef = 3465A7E22B2AB1BF00084F66 /* PostBuildStep.py */; };
+		3465A8032B2AB24200084F66 /* libz_local.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 344B4F0C2A46573E00E93D57 /* libz_local.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		347D1489252D453300422DA9 /* DeEscape.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 347D1488252D453300422DA9 /* DeEscape.cpp */; };
 		3485E7F5294F13F70020C14D /* PatchViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3485E7F4294F13F70020C14D /* PatchViewer.cpp */; };
 		34BD35B120C5484A0001838A /* ControlTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34BD35B020C5484A0001838A /* ControlTree.cpp */; };
@@ -82,6 +85,20 @@
 			proxyType = 2;
 			remoteGlobalIDString = 8E62A1F64D42476991F59E11;
 			remoteInfo = zlib_static;
+		};
+		3465A7E42B2AB1D600084F66 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = FD9FB6E80A1B4F12B0F0F6C6;
+			remoteInfo = libpng16;
+		};
+		3465A8012B2AB1FE00084F66 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 34CE07112327B3F900807DCB /* libpng.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 162C48FD66FC4F0EAFBB1A61;
+			remoteInfo = zlib;
 		};
 		347D146D252D44EE00422DA9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -183,6 +200,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				3465A8032B2AB24200084F66 /* libz_local.dylib in CopyFiles */,
+				3465A78E2B2AB0B500084F66 /* libpng16.dylib in CopyFiles */,
 				3443DE7E2A46583600973376 /* libssh.dylib in CopyFiles */,
 				34C032BE2319CEF200470DF2 /* LgiCocoa.framework in CopyFiles */,
 			);
@@ -208,6 +227,7 @@
 		3457FE482081CB3D00014BE4 /* VcFolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VcFolder.h; path = ../Src/VcFolder.h; sourceTree = "<group>"; };
 		3457FE4F2081CBE500014BE4 /* SubProcess.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = SubProcess.cpp; path = ../../src/posix/SubProcess.cpp; sourceTree = "<group>"; };
 		3457FE512081CC4800014BE4 /* Lvc.lr8 */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; name = Lvc.lr8; path = ../Resources/Lvc.lr8; sourceTree = "<group>"; };
+		3465A7E22B2AB1BF00084F66 /* PostBuildStep.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = PostBuildStep.py; sourceTree = "<group>"; };
 		347D145B252D44EE00422DA9 /* libssh.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libssh.xcodeproj; path = ../../../../../CodeLib/libssh/build/libssh.xcodeproj; sourceTree = "<group>"; };
 		347D1488252D453300422DA9 /* DeEscape.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DeEscape.cpp; path = ../../src/common/Text/DeEscape.cpp; sourceTree = "<group>"; };
 		3485E7F4294F13F70020C14D /* PatchViewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PatchViewer.cpp; path = ../Src/PatchViewer.cpp; sourceTree = "<group>"; };
@@ -279,6 +299,7 @@
 		20286C2CFDCF999611CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				3465A7E22B2AB1BF00084F66 /* PostBuildStep.py */,
 				3457FE422081CB3D00014BE4 /* resdefs.h */,
 				34E1910B20B1898E00005243 /* image-list.png */,
 				3448F8C52081D2500038AE76 /* mac-icon.icns */,
@@ -391,10 +412,13 @@
 				8D0C4E910486CD37000505A6 /* Frameworks */,
 				34640D3212D5D8AB00B207F4 /* CopyFiles */,
 				347D148F252D51F300422DA9 /* ShellScript */,
+				3465A7C82B2AB1A600084F66 /* ShellScript */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				3465A8022B2AB1FE00084F66 /* PBXTargetDependency */,
+				3465A7E52B2AB1D600084F66 /* PBXTargetDependency */,
 				347D1482252D44F900422DA9 /* PBXTargetDependency */,
 				34C032C02319CF1A00470DF2 /* PBXTargetDependency */,
 			);
@@ -584,12 +608,30 @@
 				34E1910C20B1898E00005243 /* image-list.png in Resources */,
 				8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */,
 				3448F8C62081D2500038AE76 /* mac-icon.icns in Resources */,
+				3465A7E32B2AB1BF00084F66 /* PostBuildStep.py in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		3465A7C82B2AB1A600084F66 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\npython3 ${PROJECT_DIR}/PostBuildStep.py ${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}\n";
+		};
 		347D148F252D51F300422DA9 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -635,6 +677,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		3465A7E52B2AB1D600084F66 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = libpng16;
+			targetProxy = 3465A7E42B2AB1D600084F66 /* PBXContainerItemProxy */;
+		};
+		3465A8022B2AB1FE00084F66 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = zlib;
+			targetProxy = 3465A8012B2AB1FE00084F66 /* PBXContainerItemProxy */;
+		};
 		347D1482252D44F900422DA9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = ssh_shared;

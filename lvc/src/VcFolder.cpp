@@ -2299,21 +2299,21 @@ void VcFolder::OnPulse()
 				continue;
 			}
 
-			// printf("c->Rd->GetState()=%i\n", c->Rd->GetState());
+			// printf("[%i] GetState()=%i\n", i, c->Rd->GetState());
 			if (c->Rd->GetState() == LThread::THREAD_INIT)
 			{
 				if (CmdActiveThreads < CmdMaxThreads)
 				{
 					c->Rd->Run();
 					CmdActiveThreads++;
-					// LgiTrace("CmdActiveThreads++ = %i\n", CmdActiveThreads);
+					// printf("CmdActiveThreads++ = %i\n", CmdActiveThreads);
 				}
-				// else printf("Too many active threads.");
+				// else printf("Too many active threads.\n");
 			}
 			else if (c->Rd->IsExited())
 			{
 				CmdActiveThreads--;
-				// LgiTrace("CmdActiveThreads-- = %i\n", CmdActiveThreads);
+				// printf("CmdActiveThreads-- = %i\n", CmdActiveThreads);
 
 				LString s = c->GetBuf();
 				int Result = c->Rd->ExitCode();
