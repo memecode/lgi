@@ -424,14 +424,15 @@ bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, L
 			return false;
 
 		Process->SetInitFolder(Params && Params->AltInitPath ? Params->AltInitPath.Get() : LocalPath());
-		#ifdef MAC
-		// Mac GUI apps don't share the terminal path, so this overrides that and make it work
-		auto Path = LGetPath();
-		if (Path.Length())
-		{
-			LString Tmp = LString(LGI_PATH_SEPARATOR).Join(Path);
-			Process->SetEnvironment("PATH", Tmp);
-		}
+		#if 0//def MAC
+			// Mac GUI apps don't share the terminal path, so this overrides that and make it work
+			auto Path = LGetPath();
+			if (Path.Length())
+			{
+				LString Tmp = LString(LGI_PATH_SEPARATOR).Join(Path);
+				printf("Tmp='%s'\n", Tmp.Get());
+				Process->SetEnvironment("PATH", Tmp);
+			}
 		#endif
 
 		LString::Array Ctx;
