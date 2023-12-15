@@ -542,7 +542,7 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 				}
 
 				if (IsCur)
-					CurrentBranch = c[0];
+					SetCurrentBranch(c[0]);
 
 				AddGitName(c[1], c[0]);
 				Branches.Add(c[0], new VcBranch(c[0], c[1]));
@@ -552,12 +552,19 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 		case VcHg:
 		{
 			auto a = s.SplitDelimit("\r\n");
-			Branches.DeleteObjects();
 			for (auto b: a)
 			{
-				if (!CurrentBranch)
-					 CurrentBranch = b;
-				Branches.Add(b, new VcBranch(b));
+				if (b.Find("inactive") > 0)
+					continue;
+			
+				auto name = b(0, 28).Strip();
+				auto refs = b(28, -1).SplitDelimit()[0].SplitDelimit(":");
+
+				auto branch = Branches.Find(name);
+				if (branch)
+					branch->Hash = refs.Last();
+				else
+					Branches.Add(name, new VcBranch(name, refs.Last()));
 			}
 
 			if (Params && Params->Str.Equals("CountToTip"))
@@ -1052,9 +1059,18 @@ bool VcFolder::GetBranches(ParseParams *Params)
 			OnBranchesChange();
 			break;
 		case VcHg:
-			if (StartCmd("branch", &VcFolder::ParseBranches, Params))
+		{
+			if (StartCmd("branches", &VcFolder::ParseBranches, Params))
 				IsBranches = StatusActive;
+			
+			auto p = new ParseParams;
+			p->Callback = [this](auto code, auto str)
+			{
+				SetCurrentBranch(str.Strip());
+			};
+			StartCmd("branch", NULL, p);
 			break;
+		}
 		case VcCvs:
 			break;
 		default:
@@ -1840,7 +1856,7 @@ bool VcFolder::ParseCheckout(int Result, LString s, ParseParams *Params)
 	if (Result == 0)
 	{
 		if (Params && Params->Str.Equals("Branch"))
-			CurrentBranch = NewRev;
+			SetCurrentBranch(NewRev);
 		else
 			CurrentCommit = NewRev;
 	}	
@@ -2557,6 +2573,15 @@ void VcFolder::OnMouseClick(LMouse &m)
 LString &VcFolder::GetCurrentBranch()
 {
 	return CurrentBranch;
+}
+
+void VcFolder::SetCurrentBranch(LString name)
+{
+	if (CurrentBranch != name)
+	{
+		CurrentBranch = name;
+		UpdateBranchUi();
+	}
 }
 
 void VcFolder::Checkout(const char *Rev, bool isBranch)
@@ -3968,7 +3993,6 @@ LColour VcFolder::BranchColour(const char *Name)
 	auto b = Branches.Find(Name);
 	if (!b) // Must be a new one?
 	{
-
 		int i = 1;
 		for (auto b: Branches)
 		{
@@ -3981,6 +4005,7 @@ LColour VcFolder::BranchColour(const char *Name)
 					v->Colour = GetPaletteColour(i++);
 			}
 		}
+		
 		Branches.Add(Name, b = new VcBranch(Name));
 		b->Colour = GetPaletteColour((int)Branches.Length());
 	}

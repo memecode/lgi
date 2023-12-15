@@ -108,21 +108,16 @@ struct VcBranch : public LString
 
 struct SshParams
 {
-	SshConnection *c;
-	VcFolder *f;
+	SshConnection *c = NULL;
+	VcFolder *f = NULL;
 	LString Exe, Args, Path, Output;
-	VersionCtrl Vcs;
-	ParseFn Parser;
-	ParseParams *Params;
-	int ExitCode;
+	VersionCtrl Vcs = VcNone;
+	ParseFn Parser = NULL;
+	ParseParams *Params = NULL;
+	int ExitCode = -1;
 
 	SshParams(SshConnection *con) : c(con)
 	{
-		f = NULL;
-		Parser = NULL;
-		Params = NULL;
-		Vcs = VcNone;
-		ExitCode = -1;
 	}
 };
 
@@ -314,6 +309,7 @@ public:
 	LArray<CommitField> &GetFields() { return Fields; }
 	bool Serialize(LXmlTag *t, bool Write);
 	LString &GetCurrentBranch();
+	void SetCurrentBranch(LString name);
 	LXmlTag *Save();
 	void Empty();
 	void Select(bool b);
