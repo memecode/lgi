@@ -72,7 +72,11 @@ LString LibName(const char *Fmt)
 	#define SSL_LIBRARY			LibName("libssl.%i")
 #endif
 
-#define HasntTimedOut()			((To < 0) || (LCurrentTime() - Start < To))
+#define HasntTimedOut()			( \
+									(To < 0) || (LCurrentTime() - Start < To) \
+									&& \
+									!d->Cancel->IsCancelled() \
+								)
 
 static const char*
 	MinimumVersion1				= "1.1.1j";
@@ -1627,8 +1631,8 @@ DebugTrace("%s:%i - Ssl is NULL\n", _FL);
 		}
 		else
 		{
-			uint64 Start = LCurrentTime();
-			int To = GetTimeout();
+			auto Start = LCurrentTime();
+			auto To = GetTimeout();
 			while (HasntTimedOut())
 			{
 				r = Library->BIO_read(Bio, Data, (int)Len);
