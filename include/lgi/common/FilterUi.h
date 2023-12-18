@@ -103,5 +103,5 @@ public:
 	void OnPosChange();
 	void OnCreate();
 
-	static LAutoPtr<LImageList> CreateIcons();
+	static LAutoPtr<LImageList> CreateIcons(LWindow *wnd);
 };

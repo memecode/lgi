@@ -10,7 +10,7 @@
 #include "lgi/common/Menu.h"
 
 #define FILTER_DRAG_FORMAT	"Scribe.FilterItem"
-#define IconSize			15
+#define BaseIconSize		15
 static LColour TransparentBlk(0, 0, 0, 0);
 static LColour ContentColour(0, 0, 0, 160);
 
@@ -165,7 +165,7 @@ void HalveAlpha(T *p, int width)
 	}
 }
 
-static void Draw(LSurface *pDC, int xPos, LColour c, FilterIcon Icon)
+static void Draw(LSurface *pDC, int xPos, LColour c, FilterIcon Icon, int px)
 {
 	pDC->SetOrigin(-xPos, 0);
 
@@ -174,14 +174,14 @@ static void Draw(LSurface *pDC, int xPos, LColour c, FilterIcon Icon)
 	pDC->Rectangle();
 
 	// Draw the icon backrgound
-	double n = IconSize - 2;
+	double n = px - 2;
 	LPointF Ctr(n/2, n), Rim(n/2, 0);
 
 	if (1)
 	{
 		// Shadow
 		LPath p;
-		double z = (((double)IconSize)-0.5) / 2;
+		double z = (((double)px)-0.5) / 2;
 		p.Circle(z, z, z);
 		LSolidBrush b(Rgba32(0, 0, 0, 40));
 		p.Fill(pDC, b);
@@ -372,7 +372,7 @@ static void Draw(LSurface *pDC, int xPos, LColour c, FilterIcon Icon)
 					switch (pDC->GetColourSpace())
 					{
 						#define HalveAlphaCase(name) \
-									case Cs##name: HalveAlpha((L##name*)(*pDC)[y] + xOff, IconSize); break
+									case Cs##name: HalveAlpha((L##name*)(*pDC)[y] + xOff, px); break
 
 						HalveAlphaCase(Rgba32);
 						HalveAlphaCase(Bgra32);
@@ -419,18 +419,20 @@ public:
 	{
 		View = v;
 
-		dsNot.Reset   (new LDisplayString(LSysFont, (char*)LLoadString(L_FUI_NOT, "Not")));
-		dsNew.Reset   (new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_NEW, "New")));
-		dsAnd.Reset   (new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_AND, "And")));
-		dsOr.Reset    (new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_OR, "Or")));
+		dsNot.Reset   (new LDisplayString(LSysFont, (char*)LLoadString(L_FUI_NOT,    "Not")));
+		dsNew.Reset   (new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_NEW,    "New")));
+		dsAnd.Reset   (new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_AND,    "And")));
+		dsOr.Reset    (new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_OR,     "Or")));
 		dsLegend.Reset(new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_LEGEND, "Legend:")));
 		
+		auto Scale = View->GetWindow()->GetDpiScale();
+		int IconSize = (int) (Scale.x * BaseIconSize);
 		for (int i=0; i<IconMax; i++)
 		{
 			Icons[i] = new LMemDC;
 			if (Icons[i] && Icons[i]->Create(IconSize, IconSize, System32BitColourSpace))
 			{
-				Draw(Icons[i], 0, IconColour[i], (FilterIcon)i);
+				Draw(Icons[i], 0, IconColour[i], (FilterIcon)i, IconSize);
 				PostProcessIcons(Icons[i]);
 			}
 		}
@@ -680,6 +682,7 @@ void LFilterItem::_PaintText(LItem::ItemPaintCtx &Ctx)
 	d->EmptyRects();
 
 	// Draw the content
+	int IconSize = d->Data->Icons[0]->Y();
 	int IconY = (int)(oy + r) - (IconSize / 2);
 	switch (d->Node)
 	{
@@ -1275,14 +1278,16 @@ void LFilterView::Empty()
 	d->Tree->Empty();
 }
 
-LAutoPtr<LImageList> LFilterView::CreateIcons()
+LAutoPtr<LImageList> LFilterView::CreateIcons(LWindow *wnd)
 {
-	LAutoPtr<LImageList> icons(new LImageList(IconSize, IconSize));
+	LPointF scale = wnd->GetDpiScale();
+	auto Px = (int)(scale.x * BaseIconSize + 0.5);
+	LAutoPtr<LImageList> icons(new LImageList(Px, Px));
 
-	if (icons->Create(IconMax * IconSize, IconSize, System32BitColourSpace))
+	if (icons->Create(IconMax * Px, Px, System32BitColourSpace))
 	{
 		for (int i=0; i<IconMax; i++)
-			Draw(icons, i * IconSize, IconColour[i], (FilterIcon)i);
+			Draw(icons, i * Px, IconColour[i], (FilterIcon)i, Px);
 
 		PostProcessIcons(icons);
 	}
