@@ -293,6 +293,9 @@ public:
 	const char *operator [](ssize_t Tok)
 	{
 		Range *r = NULL;
+
+		if (Ranges.Length() == 0)
+			return "#errNoRanges";
 		
 		for (unsigned i=0; i<Ranges.Length(); i++)
 		{
