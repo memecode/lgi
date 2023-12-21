@@ -257,4 +257,69 @@ public:
 	}
 };
 
+
+/// Tee stream that writes to multiple child streams.
+class LgiClass LStreamTee : public LStreamI
+{
+protected:
+	LArray<LStreamI*> streams;
+
+	bool NotImpl()
+	{
+		LAssert(!"Not impl.");
+		return false;
+	}
+
+public:
+	LStreamTee(LStreamI *a, LStreamI *b = NULL)
+	{
+		if (a)
+			streams.Add(a);
+		if (b)
+			streams.Add(b);
+	}
+
+	const char *GetClass() override { return "LStreamTee"; }
+		
+	bool IsOpen() override
+	{
+		for (auto s: streams)
+			if (!s->IsOpen())
+				return false;
+		return true;
+	}
+	
+	int Close() override
+	{
+		int val = 0;
+		for (auto s: streams)
+			val = s->Close();
+		return val;
+	}
+
+	ssize_t Write(const void *b, ssize_t l, int f = 0) override
+	{
+		ssize_t val = -1;
+		for (auto s: streams)
+		{
+			auto v = s->Write(b, l, f);
+			if (v > val)
+				val = v;
+		}
+		return val;
+	}
+	
+	// Not impl stubs
+	int Open(const char *Str, int Int) override	{ return NotImpl(); }
+	bool GetValue(const char *Var, LVariant &Value) override { return NotImpl(); }
+	bool SetValue(const char *Var, LVariant &Value) override { return NotImpl(); }
+	bool CallMethod(const char *MethodName, LScriptArguments &Args) override { return NotImpl(); }
+	int64 GetSize() override { return NotImpl(); }	
+	int64 SetSize(int64 Size) override { return NotImpl(); }	
+	int64 GetPos() override { return NotImpl(); }	
+	int64 SetPos(int64 Pos) override { return NotImpl(); }
+	ssize_t Read(void *b, ssize_t l, int f = 0) override { return NotImpl(); }
+	LStreamI *Clone() override { NotImpl(); return NULL; }
+};
+
 #endif
