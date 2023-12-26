@@ -40,12 +40,11 @@ enum FilterIcon
 class LFilterView;
 class LFilterItem;
 
-typedef int (*FilterUi_Menu)(LFilterView *View,
-							 LFilterItem *Item,
-							 LFilterMenu Menu,
-							 LRect &r,
-							 LArray<char*> *GetList,
-							 void *UserData);
+typedef std::function<int(	LFilterView *View,
+							LFilterItem *Item,
+							LFilterMenu Menu,
+							LRect &r,
+							LString::Array *GetList)> FilterUi_Menu;
 
 class LFilterItem : public LTreeItem, public LDragDropSource
 {
@@ -89,7 +88,7 @@ class LFilterView : public LLayout
 	class LFilterViewPrivate *d;
 
 public:
-	LFilterView(FilterUi_Menu Callback = NULL, void *UserData = NULL);
+	LFilterView(LWindow *wnd, FilterUi_Menu Callback = NULL);
 	~LFilterView();
 
 	void SetDefault();

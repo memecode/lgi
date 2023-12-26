@@ -407,15 +407,14 @@ public:
 	LRect Info;
 	LArray<LSurface*> Icons;
 	FilterUi_Menu Callback = NULL;
-	void *CallbackData = NULL;
 	LAutoPtr<LDisplayString> dsNot;
 	LAutoPtr<LDisplayString> dsAnd;
 	LAutoPtr<LDisplayString> dsOr;
 	LAutoPtr<LDisplayString> dsNew;
 	LAutoPtr<LDisplayString> dsLegend;
-	LArray<char*> OpNames;
+	LString::Array OpNames;
 
-	LFilterViewPrivate(LFilterView *v)
+	LFilterViewPrivate(LFilterView *v, LWindow *wnd)
 	{
 		View = v;
 
@@ -425,7 +424,11 @@ public:
 		dsOr.Reset    (new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_OR,     "Or")));
 		dsLegend.Reset(new LDisplayString(LSysBold, (char*)LLoadString(L_FUI_LEGEND, "Legend:")));
 		
-		auto Scale = View->GetWindow()->GetDpiScale();
+		LPointF Scale(1.0f, 1.0f);
+		if (wnd)
+			Scale = wnd->GetDpiScale();
+		else
+			LAssert(!"No window");
 		int IconSize = (int) (Scale.x * BaseIconSize);
 		for (int i=0; i<IconMax; i++)
 		{
@@ -441,7 +444,6 @@ public:
 	~LFilterViewPrivate()
 	{
 		Icons.DeleteObjects();
-		OpNames.DeleteArrays();
 	}
 
 };
@@ -866,18 +868,15 @@ void LFilterItem::ShowControls(bool s)
 		
 		if (d->OpCbo && !d->OpCbo->Length())
 		{
-			LArray<char*> Ops;
+			LString::Array Ops;
 			if (d->Data->Callback(	(LFilterView*) GetTree(),
 									this,
 									FMENU_OP,
 									d->OpBtn,
-									&Ops,
-									d->Data->CallbackData) > 0)
+									&Ops) > 0)
 			{
-				for (unsigned i=0; i<Ops.Length(); i++)
-					d->OpCbo->Insert(Ops[i]);
-
-				Ops.DeleteArrays();
+				for (auto op: Ops)
+					d->OpCbo->Insert(op);
 			}
 
 			if (d->Op)
@@ -1005,8 +1004,7 @@ void LFilterItem::OnMouseClick(LMouse &m)
 									this,
 									FMENU_FIELD,
 									Rc,
-									0,
-									d->Data->CallbackData);
+									0);
 			}
 			else if (d->OpDropBtn.Overlap(m.x - Pos->x1, m.y - Pos->y1))
 			{
@@ -1016,8 +1014,7 @@ void LFilterItem::OnMouseClick(LMouse &m)
 									this,
 									FMENU_OP,
 									Rc,
-									0,
-									d->Data->CallbackData);
+									0);
 			}
 		}
 
@@ -1145,11 +1142,10 @@ void LFilterItem::SetNode(LFilterNode n)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-LFilterView::LFilterView(FilterUi_Menu Callback, void *Data)
+LFilterView::LFilterView(LWindow *wnd, FilterUi_Menu Callback)
 {
-	d = new LFilterViewPrivate(this);
+	d = new LFilterViewPrivate(this, wnd);
 	d->Callback = Callback;
-	d->CallbackData = Data;
 	d->Tree.Reset(new LFilterTree);
 	Sunken(true);
 
@@ -1160,8 +1156,7 @@ LFilterView::LFilterView(FilterUi_Menu Callback, void *Data)
 					0,
 					FMENU_OP,
 					r,
-					&d->OpNames,
-					d->CallbackData);
+					&d->OpNames);
 	}
 
 	d->Tree->Sunken(false);
