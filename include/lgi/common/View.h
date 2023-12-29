@@ -540,7 +540,7 @@ public:
 			result.Reset(new T(Callback()));
 		});
 
-		printf("%i: post M_VIEW_RUN_CALLBACK for %i...\n", LCurrentThreadId(), id);
+		printf(LPrintfThreadId ": post M_VIEW_RUN_CALLBACK for %i...\n", LCurrentThreadId(), id);
 		if (!PostEvent(M_VIEW_RUN_CALLBACK, id))
 		{
 			LgiTrace("%s:%i - RunCallback PostEvent failed.\n", _FL);
@@ -556,27 +556,27 @@ public:
 			if (Now - Report > 500)
 			{
 				Report = Now;
-				printf("%i: Waiting for M_VIEW_RUN_CALLBACK %i\n",
+				printf(LPrintfThreadId  ": Waiting for M_VIEW_RUN_CALLBACK %i\n",
 					LCurrentThreadId(),
 					(int)(Now-StartTs));
 			}
 
 			if (timeoutMs >= 0 && (Now-StartTs) > timeoutMs)
 			{
-				printf("%i: RunCallback timed out.\n", LCurrentThreadId());
+				printf(LPrintfThreadId ": RunCallback timed out.\n", LCurrentThreadId());
 				break;
 			}
 
 			if (cancel && cancel->IsCancelled())
 			{
-				printf("%i: RunCallback cancelled.\n", LCurrentThreadId());
+				printf(LPrintfThreadId ": RunCallback cancelled.\n", LCurrentThreadId());
 				break;
 			}
 
 			LSleep(10);
 		}
 
-		printf("%i: RunCallback finished: %p\n", LCurrentThreadId(), result.Get());
+		printf(LPrintfThreadId ": RunCallback finished: %p\n", LCurrentThreadId(), result.Get());
 		CbStore.Delete(id);
 		return result;
 	}

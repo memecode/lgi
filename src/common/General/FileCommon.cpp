@@ -432,3 +432,30 @@ LString LGetPhysicalDevice(const char *Path)
 	return Ph;
 }
 
+char *LReadTextFile(const char *File)
+{
+	char *s = NULL;
+	
+	LFile f;
+	if (File && f.Open(File, O_READ))
+	{
+		auto Len = f.GetSize();
+		s = new char[Len+1];
+		if (s)
+		{
+			ssize_t Read = f.Read(s, Len);
+			s[Read] = 0;
+		}
+	}
+	
+	return s;
+}
+
+
+LString LReadFile(const char *File)
+{
+	LFile f(File, O_READ);
+	if (f)
+		return f.Read();
+	return LString();
+}

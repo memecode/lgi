@@ -141,12 +141,11 @@ public:
 		
 		if (IsFile)
 		{
-			LAutoString txt(LReadTextFile(u.sPath));
+			auto txt = LReadFile(u.sPath);
 			if (txt)
-			{
 				Html->Name(txt);
-			}
-			else return false;
+			else
+				return false;
 		}
 		else if (IsHttp)
 		{

@@ -66,8 +66,7 @@ public:
 
 				for (auto i: Sel)
 				{
-					LListItemColumn *c = GetItemCol(i, GetColumn());
-					if (c)
+					if (auto c = GetItemCol(i, GetColumn()))
 						c->Value(v);
 				}
 

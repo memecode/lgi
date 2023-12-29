@@ -99,6 +99,7 @@ LgiFunc void LSleep(uint32_t i);
 #define LGI_WideCharset				"utf-32"
 #define LPrintfInt64				"%lli"
 #define LPrintfUInt64				"%llu"
+#define LPrintfThreadId				"%llu"
 #define LPrintfHex64				"%llx"
 #define LPrintfSizeT				"%zu"
 #define LPrintfSSizeT				"%zi"
