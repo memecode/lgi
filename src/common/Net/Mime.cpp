@@ -1143,7 +1143,11 @@ bool LMime::Set(const char *Name, const char *Value)
 			}
 
 			// 'Name' doesn't exist, push out all the headers
-			p.Push(Headers);
+			size_t HdrLen = Headers.Length();
+			while (HdrLen > 0 && IsWhiteSpace(h[HdrLen-1]))
+				HdrLen--;
+			p.Write(Headers, HdrLen);
+			p.Write("\r\n", 2);
 			h = NULL;
 		}
 	}
@@ -1607,22 +1611,16 @@ ssize_t LMime::LMimeText::LMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 		Dest->Write(MimeEol, 2);
 
 		// Write data
-		LStream *Encoder = 0;
+		LAutoPtr<LStream> Encoder;
 		if (Encoding)
 		{
 			if (_stricmp(Encoding, MimeQuotedPrintable) == 0)
-			{
-				Encoder = new LMimeQuotedPrintableEncode(Dest);
-			}
+				Encoder.Reset(new LMimeQuotedPrintableEncode(Dest));
 			else if (_stricmp(Encoding, MimeBase64) == 0)
-			{
-				Encoder = new LMimeBase64Encode(Dest);
-			}
+				Encoder.Reset(new LMimeBase64Encode(Dest));
 		}
 		if (!Encoder)
-		{
-			Encoder = new LMimeTextEncode(Dest);
-		}
+			Encoder.Reset(new LMimeTextEncode(Dest));
 
 		if (Mime->DataStore)
 		{
@@ -1649,7 +1647,7 @@ ssize_t LMime::LMimeText::LMimeEncode::Push(LStreamI *Dest, LStreamEnd *End)
 			Status = true;
 		}
 
-		DeleteObj(Encoder);
+		Encoder.Reset();
 
 		// Write children
 		if (Mime->Children.Length() && Boundary)

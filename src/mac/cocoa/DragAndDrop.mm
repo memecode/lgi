@@ -513,7 +513,7 @@ int LDragDropSource::Drag(LView *SourceWnd, OsEvent Event, int Effect, LSurface 
 					drag_item.draggingFrame = NSMakeRect(floor(position.x), floor(position.y), 32, 32);
 					[drag_items addObject:drag_item];
 
-					printf("Adding binary '%s' to drag...\n", dd.Format.Get());
+					// printf("Adding binary '%s' to drag...\n", dd.Format.Get());
 					
 					#if 1
 					__weak NSPasteboardItem *weak_pb_item = item;

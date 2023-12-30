@@ -141,7 +141,7 @@ struct DndEvent
 			{
 				auto f = [type UTF8String];
 				InputFmts.Supports(f);
-				printf("Drop has type '%s'\n", f);
+				// printf("Drop has type '%s'\n", f);
 			}
 		}
 	}

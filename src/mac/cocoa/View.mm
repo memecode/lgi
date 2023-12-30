@@ -462,9 +462,6 @@ LMessage::Result LView::OnEvent(LMessage *Msg)
 		}
 		case M_COMMAND:
 		{
-			static int count = 0;
-			if (++count == 2)
-				printf("%s:%i - M_COMMAND\n", _FL);
 			return OnCommand((int)Msg->A(), 0, (OsView)Msg->B());
 		}
 		case M_INVALIDATE:
