@@ -491,6 +491,11 @@
 			<DebugAdmin>
 				<All>0</All>
 			</DebugAdmin>
+			<Executable>
+				<Linux />
+			</Executable>
+			<CCrossCompiler />
+			<CppCrossCompiler />
 		</General>
 		<Build>
 			<IncludePaths>
@@ -525,10 +530,10 @@
 			</IncludePaths>
 			<SystemIncludes>
 				<Linux>
-					<Debug>/usr/include/libappindicator3-0.1
+					<Debug>libappindicator3-0.1
 `pkg-config --cflags gtk+-3.0`
 `pkg-config --cflags gstreamer-1.0`</Debug>
-					<Release>/usr/include/libappindicator3-0.1
+					<Release>libappindicator3-0.1
 `pkg-config --cflags gtk+-3.0`
 `pkg-config --cflags gstreamer-1.0`</Release>
 				</Linux>
@@ -560,6 +565,7 @@ gnu
 network
 be</Release>
 				</Haiku>
+				<All />
 			</Libraries>
 			<TargetName>
 				<Linux>
@@ -583,13 +589,46 @@ _GNU_SOURCE</Debug>
 					<Release>POSIX
 _GNU_SOURCE</Release>
 				</Haiku>
+				<Linux />
 			</Defines>
 			<Options>
 				<Linux>
 					<Debug>-Wno-format-truncation</Debug>
 					<Release>-Wno-format-truncation</Release>
 				</Linux>
+				<All />
 			</Options>
+			<LibraryPaths>
+				<All />
+				<Linux />
+			</LibraryPaths>
+			<ApplicationIcon />
 		</Build>
+		<Remote>
+			<RemoteUri />
+			<RemotePass />
+		</Remote>
+		<Debug>
+			<Environment />
+			<Arguments>
+				<All />
+			</Arguments>
+			<DebugAdmin />
+			<InitialDir />
+		</Debug>
+		<Editor>
+			<TabSize />
+			<IndentSize />
+			<ShowWhiteSpace />
+			<UseHardTabs />
+			<CommentFile />
+			<CommentFunction />
+		</Editor>
+		<Advanced>
+			<OtherMakefileRules />
+			<PostBuildCommands>
+				<Linux />
+			</PostBuildCommands>
+		</Advanced>
 	</Settings>
 </Project>

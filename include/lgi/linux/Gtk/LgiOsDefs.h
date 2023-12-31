@@ -264,6 +264,7 @@ LgiFunc void LSleep(uint32_t i);
 	#define LPrintfHex64			"%" PRIx64
 	#define LPrintfSizeT			"%zu"
 	#define LPrintfSSizeT			"%zi"
+	#define LPrintfThreadId			"%u"
 #endif
 
 #ifndef SND_ASYNC

@@ -309,23 +309,6 @@ const char *GetErrorDesc(int e)
 }
 
 /****************************** Helper Functions **************************/
-char *LReadTextFile(const char *File)
-{
-	char *s = 0;
-	LFile f;
-	if (File && f.Open(File, O_READ))
-	{
-		int Len = f.GetSize();
-		s = new char[Len+1];
-		if (s)
-		{
-			int Read = f.Read(s, Len);
-			s[Read] = 0;
-		}
-	}
-	return s;
-}
-
 int64 LFileSize(const char *FileName)
 {
 	struct stat64 s;
