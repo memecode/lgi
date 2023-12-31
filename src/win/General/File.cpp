@@ -46,22 +46,7 @@ bool LFile::Path::FixCase()
 	return true;
 }
 
-char *LReadTextFile(const char *File)
-{
-	char *s = 0;
-	LFile f;
-	if (File && f.Open(File, O_READ))
-	{
-		auto Len = f.GetSize();
-		s = new char[Len+1];
-		if (s)
-		{
-			auto Read = f.Read(s, Len);
-			s[Read] = 0;
-		}
-	}
-	return s;
-}
+
 
 int64 LFileSize(const char *FileName)
 {

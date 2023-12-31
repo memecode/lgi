@@ -704,7 +704,7 @@ LgiFunc bool LDirExists(const char *Dir, char *CorrectCase = NULL);
 LgiFunc bool LResolveShortcut(const char *LinkFile, char *Path, ssize_t Len);
 
 /// Reads in a text file to a dynamically allocated string
-[[deprecated]] LgiFunc char *LReadTextFile(const char *File);
+[[deprecated]] LgiExtern char *LReadTextFile(const char *File);
 
 /// Reads in a text file to a LString
 LgiExtern LString LReadFile(const char *File);

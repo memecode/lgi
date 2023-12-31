@@ -209,6 +209,7 @@ typedef SOCKET							OsSocket;
 #define LPrintfInt64					"%I64i"
 #define LPrintfUInt64					"%I64u"
 #define LPrintfHex64					"%I64x"
+#define LPrintfThreadId					"%u"
 
 #if LGI_64BIT
 	#define LPrintfSizeT				"%I64u"
