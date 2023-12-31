@@ -1904,7 +1904,7 @@ int BuildThread::Main()
 				{
 					int ws = 0;
 					for (int i=0; i<l.Length(); i++)
-						if (IsWhiteSpace(l(i))) ws++;
+						if (IsWhite(l(i))) ws++;
 						else break;
 					if (l.Find(key)>=0)
 						inKey = ws;

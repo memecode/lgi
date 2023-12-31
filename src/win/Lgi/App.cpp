@@ -66,10 +66,10 @@ bool OsAppArguments::Get(const char *option, const char **value)
 	char16 *c = lpCmdLine;
 	auto getArg = [&]() -> LString
 	{
-		while (*c && IsWhiteSpace(*c))
+		while (*c && IsWhite(*c))
 			c++;
 		auto start = c;
-		while (*c && !IsWhiteSpace(*c))
+		while (*c && !IsWhite(*c))
 			c++;
 		return LString(start, c - start);
 	};
@@ -527,7 +527,7 @@ const char *LApp::GetArgumentAt(int n)
 		for (int i=0; i<=n; i++)
 		{
 			char16 *e = 0;
-			while (*s && strchr(WhiteSpace, *s)) s++;
+			while (*s && strchr(LWhiteSpace, *s)) s++;
 			if (*s == '\'' || *s == '\"')
 			{
 				char16 Delim = *s++;
@@ -535,7 +535,7 @@ const char *LApp::GetArgumentAt(int n)
 			}
 			else
 			{
-				for (e = s; *e && !strchr(WhiteSpace, *e); e++)
+				for (e = s; *e && !strchr(LWhiteSpace, *e); e++)
 					;
 			}
 
@@ -578,7 +578,7 @@ bool LApp::GetOption(const char *Option, LString &Buf)
 				if (*c)
 				{
 					// skip leading whitespace
-					while (*c && strchr(WhiteSpace, *c))
+					while (*c && strchr(LWhiteSpace, *c))
 					{
 						c++;
 					}

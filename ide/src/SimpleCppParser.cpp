@@ -109,7 +109,7 @@ bool ParseFunction(LRange &Return, LRange &Name, LRange &Args, const char *Defn)
 	Args.Len = c - Last;
 
 	while (Last > Defn &&
-		IsWhiteSpace(Last[-1]))
+		IsWhite(Last[-1]))
 		Last--;
 
 	while (Last > Defn &&

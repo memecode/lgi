@@ -23,8 +23,6 @@ enum LDocWrapType
 
 // Util macros
 
-/// Returns true if 'c' is whitespace
-#define IsWhiteSpace(c)				((c) < 126 && strchr(LDocView::WhiteSpace, c) != 0)
 /// Returns true if 'c' is a delimiter
 #define IsDelimiter(c)				((c) < 126 && strchr(LDocView::Delimiters, c) != 0)
 /// Returns true if 'c' is a letter or number

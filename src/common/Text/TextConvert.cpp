@@ -184,7 +184,7 @@ static void DecodeRfc2047_Impl(char *Str, std::function<void(LStringPipe&)> Outp
 				break;
 			}
 
-			if (!strchr(WhiteSpace, *e))
+			if (!strchr(LWhiteSpace, *e))
 				nonWhitespace = true;
 
 			e++;
@@ -268,7 +268,7 @@ static void DecodeRfc2047_Impl(char *Str, std::function<void(LStringPipe&)> Outp
 					if (*s == '\n')
 					{
 						s++;
-						while (*s && strchr(WhiteSpace, *s)) s++;
+						while (*s && strchr(LWhiteSpace, *s)) s++;
 					}
 					
 					Encoded = true;

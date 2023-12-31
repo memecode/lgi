@@ -103,7 +103,7 @@ class Gdb : public LDebugger, public LThread, public Callback
 	{
 		for (int i=0; i<p.Length(); i++)
 		{
-			LString::Array a = p[i].SplitDelimit(WhiteSpace);
+			LString::Array a = p[i].SplitDelimit(LWhiteSpace);
 			if (a.Length() > 0)
 			{
 				int At = 0;
@@ -722,14 +722,14 @@ public:
 			if (i == 0)
 				continue;
 			
-			while (*l && IsWhiteSpace(*l))
+			while (*l && IsWhite(*l))
 				l++;
 			
 			bool Current = *l == '*';
 			if (Current)
 			{
 				l++;
-				while (*l && IsWhiteSpace(*l))
+				while (*l && IsWhite(*l))
 					l++;
 			}
 			
@@ -773,7 +773,7 @@ public:
 				// Append to the last line..
 				LAutoString &Prev = Stack.Last();
 				char *End = Prev + strlen(Prev);
-				while (End > Prev && strchr(WhiteSpace, End[-1]))
+				while (End > Prev && strchr(LWhiteSpace, End[-1]))
 					*(--End) = 0;
 				
 				LString s;
@@ -1116,7 +1116,7 @@ public:
 		{
 			CurLine = t[i];
 			while (	i < t.Length() - 1 &&
-					strchr(WhiteSpace, t[i+1][0]))
+					strchr(LWhiteSpace, t[i+1][0]))
 			{
 				CurLine += t[++i];
 				continue;
@@ -1127,7 +1127,7 @@ public:
 			{
 				char *end = NULL;
 				char *val = CurLine.Get() + EqPos + 1;
-				while (*val && strchr(WhiteSpace, *val)) val++;
+				while (*val && strchr(LWhiteSpace, *val)) val++;
 				
 				Variable &v = vars.New();
 				v.Scope = scope;
@@ -1206,8 +1206,8 @@ public:
 								continue;
 							}						
 							
-							s = LSkipDelim(s, WhiteSpace, true);
-							s = LSkipDelim(s, WhiteSpace);						
+							s = LSkipDelim(s, LWhiteSpace, true);
+							s = LSkipDelim(s, LWhiteSpace);						
 						}
 					}
 				}
@@ -1368,7 +1368,7 @@ public:
 				if (Start) \
 				{ \
 					auto bytes = s - Start; \
-					char *last = s-1; while (last > Start && strchr(WhiteSpace, *last)) last--; \
+					char *last = s-1; while (last > Start && strchr(LWhiteSpace, *last)) last--; \
 					Output->Print("%.*s%.*s%s\n", Depth<<IndentShift, Spaces, bytes, Start, *last == '=' ? "" : ";"); \
 					Start = NULL; \
 				}
@@ -1392,7 +1392,7 @@ public:
 				{
 					Emit();
 				}
-				else if (!strchr(WhiteSpace, *s))
+				else if (!strchr(LWhiteSpace, *s))
 				{
 					if (Start == NULL)
 						Start = s;
@@ -1486,10 +1486,10 @@ public:
 			s++;
 			while (*s)
 			{
-				while (*s && strchr(WhiteSpace, *s)) s++;
+				while (*s && strchr(LWhiteSpace, *s)) s++;
 				uint32_t word = atoi(s);
 				*ptr++ = word;
-				while (*s && !strchr(WhiteSpace, *s)) s++;
+				while (*s && !strchr(LWhiteSpace, *s)) s++;
 				
 				if (ptr >= end)
 					break;

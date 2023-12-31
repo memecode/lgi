@@ -1299,10 +1299,10 @@ public:
 					continue;
 				}
 				
-				if (IsWhiteSpace(*s))
+				if (IsWhite(*s))
 				{
 					Buf[Used++] = ' ';
-					while (s < e && IsWhiteSpace(*s))
+					while (s < e && IsWhite(*s))
 						s++;
 				}
 				else
@@ -1313,7 +1313,7 @@ public:
 					#else
 					Buf[Used++] = *s++;
 					#endif
-					while (s < e && !IsWhiteSpace(*s))
+					while (s < e && !IsWhite(*s))
 					{
 						#ifdef WINDOWS
 						Len = s[0] && s[1] ? 4 : (s[0] ? 2 : 0);

@@ -4,7 +4,6 @@
 
 #define DEBUG_CSS_LOGGING		0
 
-#define IsWhite(s)				((s) && strchr(WhiteSpace, (s)) != NULL)
 #define SkipWhite(s) 			while (IsWhite(*s)) s++;
 
 #undef IsNumeric
@@ -2434,7 +2433,7 @@ bool LCss::BorderDef::Parse(LCss *Css, const char *&s)
 			continue;
 
 		// Unknown token... try and parse over it?
-		while (*s && *s != ';' && !strchr(WhiteSpace, *s))
+		while (*s && *s != ';' && !strchr(LWhiteSpace, *s))
 			s++;
 	}
 

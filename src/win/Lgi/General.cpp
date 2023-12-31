@@ -128,7 +128,7 @@ bool _GetApps_Add(LArray<LAppInfo> &Apps, char *In)
 
 	if (!In)
 		return false;
-	while (*In && strchr(WhiteSpace, *In))
+	while (*In && strchr(LWhiteSpace, *In))
 		In++;
 	if (!*In)
 		return false;
@@ -144,7 +144,7 @@ bool _GetApps_Add(LArray<LAppInfo> &Apps, char *In)
 			In = end + (*end != 0);
 			break;
 		}
-		else if (!*i || strchr(WhiteSpace, *i))
+		else if (!*i || strchr(LWhiteSpace, *i))
 		{
 			char old = *i;
 			*i = 0;

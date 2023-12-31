@@ -81,9 +81,9 @@ bool JsonDecode(LXmlTag &t, const char *s)
 }
 */
 
-#define SkipWhite(s)		while (*s && strchr(WhiteSpace, *s)) s++
+#define SkipWhite(s)		while (*s && strchr(LWhiteSpace, *s)) s++
 #define SkipSpaces(s)		while (*s && strchr(" \t", *s)) s++
-#define SkipNonWhite(s)		while (*s && !strchr(WhiteSpace, *s)) s++;
+#define SkipNonWhite(s)		while (*s && !strchr(LWhiteSpace, *s)) s++;
 #define ExpectChar(ch)		if (*s != ch) return 0; s++
 
 ssize_t MailIMap::ParseImapResponse(char *Buffer, ssize_t BufferLen, LArray<StrRange> &Ranges, int Names)
@@ -229,7 +229,7 @@ ssize_t MailIMap::ParseImapResponse(char *Buffer, ssize_t BufferLen, LArray<StrR
 					Start = s;
 					while (*s)
 					{
-						if (strchr(WhiteSpace, *s) || *s == ')')
+						if (strchr(LWhiteSpace, *s) || *s == ')')
 							break;
 
 						s++;
@@ -350,7 +350,7 @@ LAutoString ImapBasicTokenize(char *&s)
 {
 	if (s)
 	{
-		while (*s && strchr(WhiteSpace, *s)) s++;
+		while (*s && strchr(LWhiteSpace, *s)) s++;
 		
 		char start = 0, end = 0;
 		if (*s == '\'' || *s == '\"') start = end = *s;
@@ -372,7 +372,7 @@ LAutoString ImapBasicTokenize(char *&s)
 		else
 		{
 			char *e = s;
-			while (*e && !strchr(WhiteSpace, *e)) e++;
+			while (*e && !strchr(LWhiteSpace, *e)) e++;
 			if (e > s)
 			{
 				char *n = NewStr(s, e - s);
@@ -390,7 +390,7 @@ char *Tok(char *&s)
 {
 	char *Ret = 0;
 
-	while (*s && strchr(WhiteSpace, *s))
+	while (*s && strchr(LWhiteSpace, *s))
 		s++;
 
 	if (*s == '=' || *s == ',')
@@ -880,7 +880,7 @@ bool MailIMap::Read(LStreamI *Out, int Timeout)
 			{
 				// Trim trailing whitespace
 				char *e = Buffer + strlen(Buffer) - 1;
-				while (e > Buffer && strchr(WhiteSpace, *e))
+				while (e > Buffer && strchr(LWhiteSpace, *e))
 					*e-- = 0;
 
 				Lines++;
@@ -1443,7 +1443,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 												if (_strnicmp(start, "WEBALERT", 8) == 0)
 												{
 													start += 8;
-													while (*start && strchr(WhiteSpace, *start))
+													while (*start && strchr(LWhiteSpace, *start))
 														start++;
 													
 													d->WebLoginUri.Set(start, end - start);
@@ -1786,7 +1786,7 @@ bool MailIMap::Open(LSocketI *s, const char *RemoteHost, int Port, const char *U
 									if (*l == '+')
 									{
 										l++;
-										while (*l && strchr(WhiteSpace, *l))
+										while (*l && strchr(LWhiteSpace, *l))
 											l++;
 										s = l;
 										UnBase64Str(s);

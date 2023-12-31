@@ -890,7 +890,7 @@ static bool ParseDistance(char *s, float &d, char *units = 0)
 	if (!s)
 		return false;
 
-	while (*s && IsWhiteSpace(*s)) s++;
+	while (*s && IsWhite(*s)) s++;
 
 	if (!IsDigit(*s) && !strchr("-.", *s))
 		return false;
@@ -898,7 +898,7 @@ static bool ParseDistance(char *s, float &d, char *units = 0)
 	d = (float)atof(s);
 
 	while (*s && (IsDigit(*s) || strchr("-.", *s))) s++;
-	while (*s && IsWhiteSpace(*s)) s++;
+	while (*s && IsWhite(*s)) s++;
 	
 	char _units[128];
 	char *o = units = units ? units : _units;
@@ -1611,7 +1611,7 @@ bool LTag::CreateSource(LStringPipe &p, int Depth, bool LastWasBlock)
 			{			
 				// Clean off any trailing whitespace...
 				char *e = s ? s.Get() + s.Length() : NULL;
-				while (e && strchr(WhiteSpace, e[-1]))
+				while (e && strchr(LWhiteSpace, e[-1]))
 					*--e = 0;
 				
 				// Print them to the tags attributes...
@@ -3306,7 +3306,7 @@ void LTag::SetStyle()
 				for (auto *c = s; *c; c++)
 				{
 					if (IsDigit(*c) || *c == '-') Digit = true;
-					else if (!IsWhiteSpace(*c)) NonW = true;
+					else if (!IsWhite(*c)) NonW = true;
 				}
 				if (Digit && !NonW)
 				{
@@ -3568,7 +3568,7 @@ char16 *LTag::CleanText(const char *s, ssize_t Len, const char *SourceCs,  bool 
 						*o++ = ' ';
 
 						// Skip furthur whitespace
-						while (i[1] && IsWhiteSpace(i[1]))
+						while (i[1] && IsWhite(i[1]))
 						{
 							i++;
 						}
@@ -9010,14 +9010,14 @@ bool LHtml::EvaluateCondition(const char *Cond)
 		{
 			Str.Add(LTokStr(c));
 		}
-		else if (IsWhiteSpace(*c))
+		else if (IsWhite(*c))
 		{
 			c++;
 		}
 		else
 		{
 			const char *e = c;
-			while (*e && !IsWhiteSpace(*e) && !IsAlpha(*e))
+			while (*e && !IsWhite(*e) && !IsAlpha(*e))
 				e++;
 			Str.Add(NewStr(c, e - c));
 			LAssert(e > c);

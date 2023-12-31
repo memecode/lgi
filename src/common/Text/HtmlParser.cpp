@@ -225,7 +225,7 @@ char *LHtmlParser::ParsePropValue(char *s, char16 *&Value)
 		else
 		{
 			char *Start = s;
-			while (*s && !IsWhiteSpace(*s) && *s != '>')
+			while (*s && !IsWhite(*s) && *s != '>')
 				s++;
 			Value = DecodeEntities(Start, s - Start);
 		}
@@ -307,7 +307,7 @@ char *LHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 {
 	while (s && *s)
 	{
-		while (*s && IsWhiteSpace(*s))
+		while (*s && IsWhite(*s))
 			s++;
 		
 		if (*s == '/')
@@ -329,14 +329,14 @@ char *LHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 		else
 			s = n;
 
-		while (*s && IsWhiteSpace(*s))
+		while (*s && IsWhite(*s))
 			s++;
 
 		if (*s == '=')
 		{
 			// get value
 			s++;
-			while (*s && IsWhiteSpace(*s))
+			while (*s && IsWhite(*s))
 				s++;
 
 			char16 *Value = 0;
@@ -358,7 +358,7 @@ char *LHtmlParser::ParsePropList(char *s, LHtmlElement *Obj, bool &Closed)
 
 		DeleteArray(Name);
 
-		while (*s && IsWhiteSpace(*s))
+		while (*s && IsWhite(*s))
 			s++;
 		if (!*s || *s == '<')
 			return s;
@@ -449,7 +449,7 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 				
 				// Process dynamic section
 				s += 2;
-				while (*s && IsWhiteSpace(*s)) s++;
+				while (*s && IsWhite(*s)) s++;
 
 				if (_strnicmp(s, "xml:namespace", 13) == 0)
 				{
@@ -496,7 +496,7 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 							View && View->GetEnv())
 						{
 							char *e = s - 1;
-							while (e > Start && IsWhiteSpace(*e)) e--;
+							while (e > Start && IsWhite(*e)) e--;
 							e++;
 							LString Code(Start, e - Start);
 							if (Code)
@@ -1095,7 +1095,7 @@ char *LHtmlParser::ParseHtml(LHtmlElement *Elem, char *Doc, int Depth, bool InPr
 				if (EndBracket)
 				{
 					char *e = EndBracket;
-					while (e > s && strchr(WhiteSpace, e[-1]))
+					while (e > s && strchr(LWhiteSpace, e[-1]))
 						e--;
 					LAutoString Name(NewStr(s, e - s));
 					LHtmlElement *Open = GetOpenTag(Name);					
@@ -1461,7 +1461,7 @@ char16 *LHtmlParser::CleanText(const char *s, ssize_t Len, bool ConversionAllowe
 							*o++ = ' ';
 
 							// Skip furthur whitespace
-							while (i[1] && IsWhiteSpace(i[1]))
+							while (i[1] && IsWhite(i[1]))
 							{
 								i++;
 							}

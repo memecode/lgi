@@ -1328,7 +1328,7 @@ ParsingStart:
 					(!InTypeDef || *t != ']')
 				)
 				{
-					if (!strchr(WhiteSpace, *t))
+					if (!strchr(LWhiteSpace, *t))
 						ContentIsWhite = false;
 					t++;
 				}

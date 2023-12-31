@@ -1941,7 +1941,7 @@ case IDomCall:
 						{
 							const char *Delimit = Arg.Length() > 0 ? Arg[0]->Str() : NULL;
 							if (!Delimit)
-								Delimit = WhiteSpace;
+								Delimit = LWhiteSpace;
 
 							auto start = s;
 							auto end = s + Strlen(s);

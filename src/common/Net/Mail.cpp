@@ -173,7 +173,7 @@ void TokeniseStrList(char *Str, List<char> &Output, const char *Delim)
 		char *s = Str;
 		while (*s)
 		{
-		    while (*s && strchr(WhiteSpace, *s))
+		    while (*s && strchr(LWhiteSpace, *s))
 		        s++;
 
 			char *e = s;
@@ -191,7 +191,7 @@ void TokeniseStrList(char *Str, List<char> &Output, const char *Delim)
 				}
 				else
 				{
-					while (*e && *e != '<' && !IsWhiteSpace(*e) && !strchr(Delim, *e))
+					while (*e && *e != '<' && !IsWhite(*e) && !strchr(Delim, *e))
 						e++;
 				}
 
@@ -267,7 +267,7 @@ struct MailAddrPart
 	    char *s = Str;
 	    if (Len < 0)
 	        Len = strlen(s);
-	    while (*s && strchr(WhiteSpace, *s))
+	    while (*s && strchr(LWhiteSpace, *s))
 	    {
 	        s++;
 	        Len--;
@@ -284,7 +284,7 @@ struct MailAddrPart
 	        e += Len;
 
 	    // Seek back over any trailing whitespace
-	    while (e > s && strchr(WhiteSpace, e[-1]))
+	    while (e > s && strchr(LWhiteSpace, e[-1]))
 		    e--;
 
 	    for (CharPair *p = Pairs; (*p)[0]; p++)
@@ -317,7 +317,7 @@ struct MailAddrPart
         {
 		    if (len < 0)
 		        len = strlen(s);
-		    while (strchr(WhiteSpace, *s) && len > 0)
+		    while (strchr(LWhiteSpace, *s) && len > 0)
 		    {
 			    s++;
 			    len--;
@@ -398,7 +398,7 @@ void DecodeAddrName(const char *Str, std::function<void(LString,LString)> Cb, co
 		}	
 		if (!email)
 		{
-			a = s.SplitDelimit(WhiteSpace);
+			a = s.SplitDelimit(LWhiteSpace);
 			non.Empty();
 			for (unsigned i=0; i<a.Length(); i++)
 			{

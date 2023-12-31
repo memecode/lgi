@@ -6,7 +6,7 @@
 
 extern char16 LHtmlListItem[];
 
-#define SkipWhiteSpace(s)			while (*s && IsWhiteSpace(*s)) s++;
+#define SkipWhiteSpace(s)			while (*s && IsWhite(*s)) s++;
 
 enum HtmlTag
 {

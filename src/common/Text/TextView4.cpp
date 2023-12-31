@@ -4227,10 +4227,10 @@ bool LTextView4::OnKey(LKey &k)
 						if (k.Down())
 						{
 							ssize_t Start = Cursor;
-							while (IsWhiteSpace(Text[Cursor-1]) && Cursor > 0)
+							while (IsWhite(Text[Cursor-1]) && Cursor > 0)
 								Cursor--;
 
-							while (!IsWhiteSpace(Text[Cursor-1]) && Cursor > 0)
+							while (!IsWhite(Text[Cursor-1]) && Cursor > 0)
 								Cursor--;
 
 							Delete(Cursor, Start - Cursor);
@@ -4276,8 +4276,8 @@ bool LTextView4::OnKey(LKey &k)
 						#endif
 						{
 							// word move/select
-							bool StartWhiteSpace = IsWhiteSpace(Text[n]);
-							bool LeftWhiteSpace = n > 0 && IsWhiteSpace(Text[n-1]);
+							bool StartWhiteSpace = IsWhite(Text[n]);
+							bool LeftWhiteSpace = n > 0 && IsWhite(Text[n-1]);
 
 							if (!StartWhiteSpace ||
 								Text[n] == '\n')
@@ -4304,7 +4304,7 @@ bool LTextView4::OnKey(LKey &k)
 									for (; n > 0; n--)
 									{
 										//IsWordBoundry(Text[n])
-										if (IsWhiteSpace(Text[n]) ||
+										if (IsWhite(Text[n]) ||
 											IsDelimiter(Text[n]))
 										{
 											break;
@@ -4350,9 +4350,9 @@ bool LTextView4::OnKey(LKey &k)
 						#endif
 						{
 							// word move/select
-							if (IsWhiteSpace(Text[n]))
+							if (IsWhite(Text[n]))
 							{
-								for (; n<Size && IsWhiteSpace(Text[n]); n++);
+								for (; n<Size && IsWhite(Text[n]); n++);
 							}
 							else
 							{
@@ -4367,7 +4367,7 @@ bool LTextView4::OnKey(LKey &k)
 								{
 									for (; n<Size; n++)
 									{
-										if (IsWhiteSpace(Text[n]) ||
+										if (IsWhite(Text[n]) ||
 											IsDelimiter(Text[n]))
 										{
 											break;
@@ -4378,7 +4378,7 @@ bool LTextView4::OnKey(LKey &k)
 								if (n < Size &&
 									Text[n] != '\n')
 								{
-									if (IsWhiteSpace(Text[n]))
+									if (IsWhite(Text[n]))
 									{
 										n++;
 									}

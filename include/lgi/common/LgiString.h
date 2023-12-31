@@ -10,9 +10,6 @@
 /////////////////////////////////////////////////////////////////////
 // Strings
 
-// Externs
-LgiExtern char WhiteSpace[];
-
 // Defines
 template<typename C>
 C ToUpper(C c)

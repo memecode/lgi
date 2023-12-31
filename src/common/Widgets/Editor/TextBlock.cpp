@@ -1865,12 +1865,12 @@ void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, LRange
 	// Link detection...
 	
 	// Extend the range to include whole words
-	while (r.Start > 0 && !IsWhiteSpace(Text[r.Start]))
+	while (r.Start > 0 && !IsWhite(Text[r.Start]))
 	{
 		r.Start--;
 		r.Len++;
 	}
-	while (r.End() < (ssize_t)Text.Length() && !IsWhiteSpace(Text[r.End()]))
+	while (r.End() < (ssize_t)Text.Length() && !IsWhite(Text[r.End()]))
 		r.Len++;
 
 	// Create array of words...
@@ -1878,7 +1878,7 @@ void LRichTextPriv::TextBlock::UpdateSpellingAndLinks(Transaction *Trans, LRange
 	bool Ws = true;
 	for (int i = 0; i < r.Len; i++)
 	{
-		bool w = IsWhiteSpace(Text[r.Start + i]);
+		bool w = IsWhite(Text[r.Start + i]);
 		if (w ^ Ws)
 		{
 			Ws = w;

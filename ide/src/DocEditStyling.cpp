@@ -253,7 +253,7 @@ void DocEditStyling::StyleCpp(StylingParams &p)
 				bool IsWhite = true;
 				for (char16 *w = s - 1; w >= Text && *w != '\n'; w--)
 				{
-					if (!IsWhiteSpace(*w))
+					if (!IsWhite(*w))
 					{
 						IsWhite = false;
 						break;
@@ -279,7 +279,7 @@ void DocEditStyling::StyleCpp(StylingParams &p)
 							(*s == '/' && s[1] == '*')
 						)
 							break;
-						if (!IsWhiteSpace(*s))
+						if (!IsWhite(*s))
 							LastNonWhite = *s;
 						s++;
 					}
@@ -982,7 +982,7 @@ void DocEditStyling::StyleHtml(StylingParams &p)
 						!Strnicmp(tag, L ## #name, tmp))
 				#define SCAN_TAG() \
 					char16 *tag = s + 1; \
-					while (tag < e && strchr(WhiteSpace, *tag)) tag++; \
+					while (tag < e && strchr(LWhiteSpace, *tag)) tag++; \
 					char16 *c = tag; \
 					while (c < e && (IsAlpha(*c) || strchr("!_/0123456789", *c))) c++; \
 					size_t len = c - tag, tmp;

@@ -291,7 +291,7 @@ bool VcCommit::GitParse(LString s, bool RevList)
 
 		for (auto Ln: lines)
 		{
-			if (IsWhiteSpace(Ln(0)))
+			if (IsWhite(Ln(0)))
 			{
 				if (Msg)
 					Msg += "\n";

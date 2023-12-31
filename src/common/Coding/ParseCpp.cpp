@@ -1218,7 +1218,6 @@ int LCppParserWorker::Evaluate(LArray<char16*> &Exp)
 	return Values.Length() == 1 ? Values[0].CastInt32() : 0;
 }
 
-#define IsWhite(c)		(  (c) == ' ' || (c) == '\t' )
 #define SkipNewLine(Cur) \
 	if (Cur[0] == '\r' && Cur[1] == '\n') \
 		Cur += 2; \
@@ -1965,7 +1964,7 @@ char16 *FindEol(char16 *s)
 	char16 *LastNonWhite = NULL;
 	while (*s)
 	{
-		if (!strchr(WhiteSpace, *s))
+		if (!strchr(LWhiteSpace, *s))
 			LastNonWhite = s;
 		else if (*s == '\n')
 		{

@@ -4,7 +4,7 @@
 #include "lgi/common/LexCpp.h"
 
 #define isword(s)				(s && (isdigit(s) || isalpha(s) || (s) == '_') )
-#define iswhite(s)				(s && strchr(WhiteSpace, s) != 0)
+#define iswhite(s)				(s && strchr(LWhiteSpace, s) != 0)
 #define skipws(s)				while (iswhite(*s)) s++;
 #define defnskipws(s)			while (iswhite(*s)) { if (*s == '\n') Line++; s++; }
 #define defnskipsym(s)			while (IsAlpha(*s) || IsDigit(*s) || strchr("_:.~", *s)) { s++; }

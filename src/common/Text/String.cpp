@@ -7,7 +7,7 @@
 #include "lgi/common/Containers.h"
 #include "lgi/common/LgiCommon.h"
 
-char WhiteSpace[] = " \t\r\n";
+const char LWhiteSpace[] = " \t\r\n";
 
 #if !defined(_MSC_VER)
 char *strncpy_s(char *dest, size_t dest_size, const char *src, size_t src_size)

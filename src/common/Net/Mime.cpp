@@ -1144,7 +1144,7 @@ bool LMime::Set(const char *Name, const char *Value)
 
 			// 'Name' doesn't exist, push out all the headers
 			size_t HdrLen = Headers.Length();
-			while (HdrLen > 0 && IsWhiteSpace(h[HdrLen-1]))
+			while (HdrLen > 0 && IsWhite(h[HdrLen-1]))
 				HdrLen--;
 			p.Write(Headers, HdrLen);
 			p.Write("\r\n", 2);

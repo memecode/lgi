@@ -200,6 +200,12 @@ inline T ABS(T v)
 #define ABS(v) ((v) < 0 ? -(v) : (v))
 #endif
 
+/// The white space characters as a string
+LgiExtern const char LWhiteSpace[];
+
+/// Returns true if 'c' is a white space character.
+#define IsWhite(c)						((c) && strchr(LWhiteSpace, (c)) != NULL)
+
 /// Returns true if 'c' is an ascii character
 #define IsAlpha(c)					    (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z'))
 

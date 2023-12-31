@@ -790,12 +790,12 @@ public:
 					if (Name && IsAlpha(*Name))
 					{
 						char16 *Start = s;
-						while (*Start && strchr(WhiteSpace, *Start))
+						while (*Start && strchr(LWhiteSpace, *Start))
 							Start++;
 						char16 *Eol = StrchrW(Start, '\n');
 						if (!Eol)
 							Eol = Start + StrlenW(Start);
-						while (Eol > Start && strchr(WhiteSpace, Eol[-1]))
+						while (Eol > Start && strchr(LWhiteSpace, Eol[-1]))
 							Eol--;
 						
 						LAutoWString Value(NewStrW(Start, Eol - Start));

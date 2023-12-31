@@ -512,12 +512,12 @@ bool VcFolder::ParseBranches(int Result, LString s, ParseParams *Params)
 			{
 				LString::Array c;
 				char *s = l.Get();
-				while (*s && IsWhiteSpace(*s))
+				while (*s && IsWhite(*s))
 					s++;
 				bool IsCur = *s == '*';
 				if (IsCur)
 					s++;
-				while (*s && IsWhiteSpace(*s))
+				while (*s && IsWhite(*s))
 					s++;
 				if (*s == '(')
 				{

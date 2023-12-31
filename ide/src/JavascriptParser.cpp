@@ -19,7 +19,7 @@ Known bugs:
 #define IsBracket(c) \
 	((c) == '{' || (c) == '}')
 #define SkipWs(c) \
-	while (*c && strchr(WhiteSpace, *c)) \
+	while (*c && strchr(LWhiteSpace, *c)) \
 	{ \
 		if (*c == '\n') \
 			Line++; \
@@ -95,7 +95,7 @@ bool BuildJsDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Def
 					{
 						Start++;
 
-						while (*Start && strchr(WhiteSpace, *Start))
+						while (*Start && strchr(LWhiteSpace, *Start))
 						{
 							if (*Start == '\n') LocalLine++;
 							Start++;
@@ -119,7 +119,7 @@ bool BuildJsDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Def
 				break;
 			case 'c':
 				if (!Strncmp(c, L"class", 5) &&
-					IsWhiteSpace(c[5]))
+					IsWhite(c[5]))
 				{
 					c += 5;
 					SkipWs(c);
@@ -136,7 +136,7 @@ bool BuildJsDefnList(const char *FileName, char16 *Source, LArray<DefnInfo> &Def
 				break;
 			case 'f':
 				if (!Strncmp(c, L"function", 8) &&
-					IsWhiteSpace(c[8]))
+					IsWhite(c[8]))
 				{
 					c += 8;
 
