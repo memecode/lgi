@@ -67,7 +67,7 @@ bool BuildHeaderList(const char *Cpp, LString::Array &Headers, bool Recurse, std
 								if (Recurse)
 								{
 									// Recursively add includes...
-									LAutoString c8(LReadTextFile(File));
+									auto c8 = LReadFile(File);
 									if (c8)
 										BuildHeaderList(c8, Headers, Recurse, LookupHdr);
 								}

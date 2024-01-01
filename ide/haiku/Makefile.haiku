@@ -15,7 +15,7 @@ endif
 MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
 
-CFlags = -MMD -MP -g -fPIC -fno-inline
+CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++14
 
 ifeq ($(Build),Debug)
@@ -33,9 +33,9 @@ ifeq ($(Build),Debug)
 	Inc =  \
 		-I./src \
 		-I./resources \
+		-I../private/common \
 		-I../include/lgi/haiku \
-		-I../include \
-		-I../private/common
+		-I../include
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
@@ -50,9 +50,9 @@ else
 	Inc =  \
 		-I./src \
 		-I./resources \
+		-I../private/common \
 		-I../include/lgi/haiku \
-		-I../include \
-		-I../private/common
+		-I../include
 endif
 
 # Dependencies
@@ -80,11 +80,11 @@ Source =	src/WebFldDlg.cpp \
 			src/DocEdit.cpp \
 			src/DebugContext.cpp \
 			src/AddFtpFile.cpp \
+			../src/common/Text/TextView4.cpp \
 			../src/common/Text/TextConvert.cpp \
 			../src/common/Text/HtmlParser.cpp \
 			../src/common/Text/HtmlCommon.cpp \
 			../src/common/Text/Html.cpp \
-			../src/common/Text/TextView4.cpp \
 			../src/common/Text/Homoglyphs/HomoglyphsTable.cpp \
 			../src/common/Text/Homoglyphs/Homoglyphs.cpp \
 			../src/common/Text/DocView.cpp \
@@ -235,6 +235,7 @@ $(Target) : ../$(BuildDir)/liblgi$(Tag).so $(Objects)
 	../include/lgi/common/SkinEngine.h \
 	../include/lgi/common/Slider.h \
 	../include/lgi/common/Splitter.h \
+	../include/lgi/common/Stat.h \
 	../include/lgi/common/StatusBar.h \
 	../include/lgi/common/Store3Defs.h \
 	../include/lgi/common/Stream.h \
