@@ -78,7 +78,7 @@ char *ArgTok(const char *&s)
 {
 	if (!s || !*s)
 		return NULL;
-	while (*s && strchr(WhiteSpace, *s))
+	while (*s && strchr(LWhiteSpace, *s))
 		s++;
 	if (*s == '\'' || *s == '\"')
 	{
@@ -94,7 +94,7 @@ char *ArgTok(const char *&s)
 	else
 	{
 		const char *start = s;
-		while (*s && !strchr(WhiteSpace, *s))
+		while (*s && !strchr(LWhiteSpace, *s))
 			s++;
 		return NewStr(start, s - start);
 	}

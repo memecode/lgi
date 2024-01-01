@@ -86,7 +86,7 @@ void OsAppArguments::Set(const char *CmdLine)
 	
 	for (auto s = CmdLine; *s; )
 	{
-		while (*s && strchr(WhiteSpace, *s)) s++;
+		while (*s && strchr(LWhiteSpace, *s)) s++;
 		if (*s == '\'' || *s == '\"')
 		{
 			auto delim = *s++;
@@ -101,7 +101,7 @@ void OsAppArguments::Set(const char *CmdLine)
 		else
 		{
 			auto e = s;
-			while (*e && !strchr(WhiteSpace, *e))
+			while (*e && !strchr(LWhiteSpace, *e))
 				e++;
 			d->Ptr.Add(NewStr(s, e-s));
 			s = e;
