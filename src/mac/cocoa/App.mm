@@ -87,7 +87,7 @@ void OsAppArguments::Set(const char *CmdLine)
 	{
 		for (auto s = CmdLine; *s; )
 		{
-			while (*s && strchr(WhiteSpace, *s)) s++;
+			while (*s && strchr(LWhiteSpace, *s)) s++;
 			const char *e;
 			if (*s == '\'' || *s == '\"')
 			{
@@ -103,7 +103,7 @@ void OsAppArguments::Set(const char *CmdLine)
 			else
 			{
 				Offsets.Add(Raw.Length());
-				for (e = s; *e && !strchr(WhiteSpace, *e); e++)
+				for (e = s; *e && !strchr(LWhiteSpace, *e); e++)
 				{
 					Raw.Add(*e);
 				}

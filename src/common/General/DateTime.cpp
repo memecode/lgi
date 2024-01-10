@@ -445,17 +445,21 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 	
 	#elif defined(MAC)
 	
-		LDateTime Before = Start;
-		Before.AddMonths(-6);
+		LDateTime From = Start;
+		From.AddMonths(-6);
+		LDateTime To = End ? *End : Start;
+		To.AddMonths(6);
+		auto ToUnix = To.GetUnix();
 
-		NSTimeZone *tz = [NSTimeZone systemTimeZone];
-		NSDate *startDate = [[NSDate alloc] initWithTimeIntervalSince1970:(Before.Ts() / Second64Bit) - Offset1800];
-		for (int n=0; n<6; n++)
+		auto tz = [NSTimeZone systemTimeZone];
+		auto startDate = [[NSDate alloc] initWithTimeIntervalSince1970:(From.Ts() / Second64Bit) - Offset1800];
+		while (startDate)
 		{
-			NSDate *next = [tz nextDaylightSavingTimeTransitionAfterDate:startDate];
+			auto next = [tz nextDaylightSavingTimeTransitionAfterDate:startDate];
 			auto &i = Info.New();
 			
-			i.UtcTimeStamp = ([next timeIntervalSince1970] + Offset1800) * Second64Bit;
+			auto nextTs = [next timeIntervalSince1970];
+			i.UtcTimeStamp = (nextTs + Offset1800) * Second64Bit;
 			i.Offset = (int)([tz secondsFromGMTForDate:[next dateByAddingTimeInterval:60]]/60);
 			
 			#if DEBUG_DST_INFO
@@ -465,11 +469,16 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 				LgiTrace("%s:%i - Ts=%s Off=%i\n", _FL, dt.Get().Get(), i.Offset);
 			}
 			#endif
-			
+
+			if (nextTs >= ToUnix)
+				break;
+
 			[startDate release];
 			startDate = next;
 		}
-	
+		if (startDate)
+			[startDate release];
+
 	#elif USE_ZDUMP
 
 		if (!Zdump.Length())
@@ -713,6 +722,10 @@ bool LDateTime::DstToLocal(LArray<LDstInfo> &Dst, LDateTime &dt)
 		return true;
 	}
 
+	#if DEBUG_DST_INFO
+	for (auto d: Dst)
+		LgiTrace("Dst: %s = %i\n", d.GetLocal().Get().Get(), d.Offset);
+	#endif
 	LgiTrace("%s:%i - No valid DST range for: %s\n", _FL, dt.Get().Get());
 	LAssert(!"No valid DST range for this date.");
 	return false;
