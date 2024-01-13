@@ -1008,6 +1008,10 @@ LFilter::IoStatus GdcIco::ReadImage(LSurface *pDC, LStream *In)
 
 		if (Colours &&
 			XorBytes &&
+			Width > 0 &&
+			Height > 0 &&
+			Header.Bits > 0 &&
+			Header.Bits <= 64 &&
 			(Header.Bits > MyBits || Width > pDC->X() || Height > pDC->Y()) &&
 			pDC->Create(Width, Height, LBitsToColourSpace(MAX(8, Header.Bits)) ))
 		{

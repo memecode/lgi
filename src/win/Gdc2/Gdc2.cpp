@@ -300,7 +300,7 @@ int LPalette::MatchRgb(COLOUR Rgb)
 		int b = B24(Rgb);
 		ulong *squares = GdcD->GetCharSquares();
 		ulong mindist = 200000;
-		ulong bestcolor;
+		ulong bestcolor = 0;
 		ulong curdist;
 		long rdist;
 		long gdist;
