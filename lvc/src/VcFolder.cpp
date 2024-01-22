@@ -1868,6 +1868,8 @@ bool VcFolder::ParseCheckout(int Result, LString s, ParseParams *Params)
 
 bool VcFolder::ParseWorking(int Result, LString s, ParseParams *Params)
 {
+	IsListingWorking = false;
+
 	switch (GetType())
 	{
 		case VcSvn:
@@ -3263,6 +3265,9 @@ bool VcFolder::ParseCountToTip(int Result, LString s, ParseParams *Params)
 
 void VcFolder::ListWorkingFolder()
 {
+	if (IsListingWorking)
+		return;
+
 	d->ClearFiles();
 		
 	bool Untracked = d->IsMenuChecked(IDM_UNTRACKED);
@@ -3299,7 +3304,7 @@ void VcFolder::ListWorkingFolder()
 			return;
 	}
 
-	StartCmd(Arg, &VcFolder::ParseWorking);
+	IsListingWorking = StartCmd(Arg, &VcFolder::ParseWorking);
 }
 
 void VcFolder::GitAdd()

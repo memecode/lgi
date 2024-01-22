@@ -243,6 +243,7 @@ class VcFolder : public LTreeItem
 	LArray<Cmd*> Cmds;
 	bool IsLogging = false, IsUpdate = false, IsFilesCmd = false;
 	bool IsCommit = false, IsUpdatingCounts = false;
+	bool IsListingWorking = false;
 	LvcStatus IsBranches = StatusNone, IsIdent = StatusNone;
 
 	void Init(AppPriv *priv);
