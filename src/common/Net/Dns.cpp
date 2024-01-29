@@ -55,18 +55,14 @@ bool GetDnsServers(LArray<char*> &Servers)
 	
 	#else
 
-	char *s = LReadTextFile("/etc/resolv.conf");
-	if (s)
+	auto lines = LReadTextFile("/etc/resolv.conf").SplitDelimit("\r\n");
+	for (auto line: lines)
 	{
-		LToken t(s, "\r\n");
-		for (int i=0; i<t.Length(); i++)
+		auto s = line.SplitDelimit(" ");
+		if (s.Length() == 2 && !stricmp(s[0], "nameserver"))
 		{
-			LToken s(t[i], " ");
-			if (s.Length() == 2 && !stricmp(s[0], "nameserver"))
-			{
-				Servers.Add(NewStr(s[1]));
-				Status = true;
-			}
+			Servers.Add(NewStr(s[1]));
+			Status = true;
 		}
 	}
 	

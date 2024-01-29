@@ -3248,7 +3248,7 @@ bool AppWnd::SaveLgi(const char *FileName)
 				{
 					// Also write the header... but only if it's changed...
 					auto DefsContent = Defs.NewLStr();
-					LAutoString OldDefsContent(LReadTextFile(DefsName));
+					auto OldDefsContent = LReadFile(DefsName);
 					if (Strcmp(DefsContent.Get(), OldDefsContent.Get()))
 					{
 						LFile DefsFile;
@@ -3560,11 +3560,10 @@ void AppWnd::LoadWin32(const char *FileName)
 		Progress.SetType("K");
 		Progress.SetScale(1.0/1024.0);
 
-		char *FileTxt = LReadTextFile(FileName);
+		auto FileTxt = LReadFile(FileName);
 		if (FileTxt)
 		{
-			LToken Lines(FileTxt, "\r\n");
-			DeleteArray(FileTxt);
+			auto Lines = FileTxt.SplitDelimit("\r\n");
 
 			DefineList Defines;
 			ResStringGroup *String = new ResStringGroup(this);

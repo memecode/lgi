@@ -99,7 +99,7 @@ public:
 		LScriptEngine Eng(NULL, NULL, this);
 		Eng.SetConsole(&Log);
 
-		LAutoString Src(::LReadTextFile(SrcFile));
+		auto Src = LReadFile(SrcFile);
 		if (!Src)
 		{
 			printf("Error: Failed to read '%s'.\n", SrcFile.Get());
@@ -141,7 +141,7 @@ public:
 			if (Idx > 0)
 			{
 				f = f(0, Idx) + ".asm";
-				LAutoString a(LReadTextFile(f));
+				auto a = LReadTextFile(f);
 				if (a)
 				{
 					printf("%s\n", a.Get());

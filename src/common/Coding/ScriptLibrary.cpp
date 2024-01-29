@@ -368,8 +368,24 @@ bool SystemFunctions::ReadTextFile(LScriptArguments &Args)
 	if (Args.Length() == 1 &&
 		LFileExists(Args[0]->CastString()))
 	{
-		if (Args.GetReturn()->OwnStr(::LReadTextFile(Args[0]->CastString())))
-			return true;
+		LFile f(Args[0]->CastString(), O_READ);
+		if (!f)
+			return false;
+		auto sz = f.GetSize();
+		if (sz < 0)
+			return false;
+		char *txt = new char[sz+1];
+		if (!txt)
+			return false;
+
+		auto rd = f.Read(txt, sz);
+		if (rd >= 0)
+		{
+			txt[rd] = 0;
+			Args.GetReturn()->OwnStr(txt);
+		}
+		delete [] txt;
+		return rd == sz;
 	}
 
 	return false;

@@ -2273,18 +2273,17 @@ bool LgiGetUsersLinks(LArray<LString> &Links)
 		if (!LFileExists(p))
 			return false;
 			
-		LAutoString Txt(LReadTextFile(p));
+		auto Txt = LReadFile(p);
 		if (!Txt)
 		{
 			LgiTrace("%s:%i - failed to read '%s'\n", _FL, p);
 			return false;
 		}
 
-		LString s = Txt.Get();
-		LString::Array a = s.Split("\n");
-		for (unsigned i=0; i<a.Length(); i++)
+		auto lines = Txt.SplitDelimit("\r\n");
+		for (auto line: lines)
 		{
-			LUri u(a[i]);
+			LUri u(line);
 			if (u.sProtocol.Equals("file"))
 				Links.New() = u.sPath;
 		}

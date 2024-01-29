@@ -474,7 +474,7 @@ public:
 					for (int i=0; i<Files.Length() && !Prog.IsCancelled(); i++)
 					{
 						char *File = Files[i];
-						LAutoString Content(LReadTextFile(File));
+						auto Content = LReadFile(File);
 						if (!Content)
 						{
 							LAssert(0);
@@ -551,12 +551,11 @@ public:
 						LMakePath(p, sizeof(p), Base, s->GetText(0));
 						if (LFileExists(p))
 						{
-							char *h = LReadTextFile(p);
+							auto h = LReadFile(p);
 							if (h)
 							{
 								if (Html)
 									Html->Name(h);
-								DeleteArray(h);
 							}
 						}
 					}

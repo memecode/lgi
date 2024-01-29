@@ -1332,7 +1332,7 @@ LLanguage *LGetLanguageId()
 	if (LgiGetSystemPath(LSP_HOME, Path, sizeof(Path)))
 	{
 		LMakePath(Path, sizeof(Path), Path, ".kde/share/config/kdeglobals");
-		char *Txt = LReadTextFile(Path);
+		auto Txt = LReadFile(Path);
 
 		if (Txt)
 		{
@@ -1350,7 +1350,6 @@ LLanguage *LGetLanguageId()
 					}
 				}
 			}
-			DeleteArray(Txt);
 			if (Ret)
 			{
 				return Ret;

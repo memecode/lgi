@@ -340,37 +340,30 @@ bool LFontType::GetSystemFont(const char *Which)
 			LMakePath(p, sizeof(p), p, ".lgi.conf");
 			if (LFileExists(p))
 			{
-				LAutoString a(LReadTextFile(p));
-				if (a)
+				auto Lines = LReadFile(p).SplitDelimit("\r\n");
+				for (auto line: Lines)
 				{
-					LString s;
-					s = a.Get();
-					LString::Array Lines = s.Split("\n");
-					for (int i=0; i<Lines.Length(); i++)
+					if (line.Find("=") >= 0)
 					{
-						if (Lines[i].Find("=")>=0)
+						LString::Array p = line.Split("=", 1);
+						if (!_stricmp(p[0].Lower(), "font"))
 						{
-							LString::Array p = Lines[i].Split("=", 1);
-							if (!_stricmp(p[0].Lower(), "font"))
+							LString::Array d = p[1].Split(":");
+							if (d.Length() > 1)
 							{
-								LString::Array d = p[1].Split(":");
-								if (d.Length() > 1)
+								strcpy_s(DefFont, sizeof(DefFont), d[0]);
+								int PtSize = d[1].Int();
+								if (PtSize > 0)
 								{
-									strcpy_s(DefFont, sizeof(DefFont), d[0]);
-									int PtSize = d[1].Int();
-									if (PtSize > 0)
-									{
-										DefSize = PtSize;
-										ConfigFontUsed = true;
-										
-										printf("Config font %s : %i\n", DefFont, DefSize);
-									}
+									DefSize = PtSize;
+									ConfigFontUsed = true;
+									
+									printf("Config font %s : %i\n", DefFont, DefSize);
 								}
 							}
 						}
 					}
 				}
-				else printf("Can't read '%s'\n", p);
 			}
 			
 			if (!ConfigFontUsed)
