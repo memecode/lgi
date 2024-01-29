@@ -2130,11 +2130,10 @@ bool IdeDoc::FindDefn(char16 *Symbol, const char16 *Source, List<DefnInfo> &Matc
 		for (int i=0; i<Headers.Length(); i++)
 		{
 			char *h = Headers[i];
-			char *c8 = LReadTextFile(h);
+			auto c8 = LReadFile(h);
 			if (c8)
 			{
-				char16 *c16 = Utf8ToWide(c8);
-				DeleteArray(c8);
+				LAutoWString c16(Utf8ToWide(c8));
 				if (c16)
 				{
 					LArray<DefnInfo> Defns;
@@ -2156,8 +2155,6 @@ bool IdeDoc::FindDefn(char16 *Symbol, const char16 *Source, List<DefnInfo> &Matc
 							Dbg.Print("Not in '%s'\n", h);
 						#endif
 					}
-					
-					DeleteArray(c16);
 				}
 			}
 		}

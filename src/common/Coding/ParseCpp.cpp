@@ -335,7 +335,7 @@ struct LSourceFile
 		if (!Path.Reset(NewStr(path)))
 			return false;
 		
-		LAutoString f(LReadTextFile(Path));
+		auto f = LReadFile(Path);
 		if (!f)
 			return false;
 

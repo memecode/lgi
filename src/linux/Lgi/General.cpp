@@ -243,12 +243,12 @@ static bool XdgMimeLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 	if (proc.Start())
 	{
 		NoXdgMime = true;
-		LgiTrace("%s:%i - Failed to execute xdg-mime\n", _FL);
+		LgiTrace("%s:%i - Failed to execute xdg-mime %s\n", _FL, Args);
 		return false;
 	}
 
 	proc.Communicate(&Output);
-	LAutoString o(Output.NewStr());
+	auto o = Output.NewLStr();
 
 	#if DEBUG_GET_APPS_FOR_MIMETYPE
 	printf("Output:\n%s\n", o.Get());
@@ -259,12 +259,8 @@ static bool XdgMimeLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 		return false;
 	}
 
-	char *e = o + strlen(o);
-	while (e > o && strchr(" \t\r\n", e[-1]))
-		*(--e) = 0;
-	
 	char p[MAX_PATH_LEN];
-	if (LMakePath(p, sizeof(p), "/usr/share/applications", o))
+	if (LMakePath(p, sizeof(p), "/usr/share/applications", o.Strip()))
 	{
 		LgiTrace("%s:%i - Failed to create path.\n", _FL);
 		return false;
@@ -276,8 +272,8 @@ static bool XdgMimeLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 		return false;
 	}
 
-	LAutoString txt(LReadTextFile(p));
-	LAutoString Section;
+	auto txt = LReadFile(p);
+	LString Section;
 
 	#if DEBUG_GET_APPS_FOR_MIMETYPE
 	printf("Reading '%s', got %i bytes\n", p, strlen(txt));
@@ -292,11 +288,11 @@ static bool XdgMimeLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 	auto &ai = Apps.New();
 	bool Status = false;
 	
-	LToken t(txt, "\n");
-	for (int i=0; i<t.Length(); i++)
+	auto t = txt.SplitDelimit("\r\n");
+	for (auto line: t)
 	{
-		char *Var = t[i];
-
+		char *Var = line;
+		
 		#if DEBUG_GET_APPS_FOR_MIMETYPE
 		printf("	'%s'\n", Var);
 		#endif
@@ -304,13 +300,11 @@ static bool XdgMimeLookup(const char *Mime, LArray<LAppInfo> &Apps, int Limit)
 		if (*Var == '[')
 		{
 			Var++;
-			char *End = strchr(Var, ']');
+			auto End = strchr(Var, ']');
 			if (End)
-			{
-				Section.Reset(NewStr(Var, End - Var));
-			}							
+				Section.Set(Var, End - Var);
 		}
-		else if (!Section || !stricmp(Section, "Desktop Entry"))
+		else if (Section.Equals("Desktop Entry"))
 		{
 			char *Value = strchr(Var, '=');
 			if (Value)

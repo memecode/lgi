@@ -3562,10 +3562,10 @@ void IdeProject::ImportDsp(const char *File)
 		strcpy(Base, File);
 		LTrimDir(Base);
 		
-		char *Dsp = LReadTextFile(File);
+		auto Dsp = LReadFile(File);
 		if (Dsp)
 		{
-			LToken Lines(Dsp, "\r\n");
+			auto Lines = Dsp.SplitDelimit("\r\n");
 			IdeCommon *Current = this;
 			bool IsSource = false;
 			for (int i=0; i<Lines.Length(); i++)
@@ -3630,8 +3630,6 @@ void IdeProject::ImportDsp(const char *File)
 					}
 				}
 			}
-			
-			DeleteArray(Dsp);
 		}
 	}
 }
@@ -4064,7 +4062,7 @@ bool IdeProject::GetDependencies(const char *InSourceFile, LString::Array &IncPa
 		return false;
 	}
 
-	LAutoString c8(LReadTextFile(SourceFile));
+	auto c8 = LReadFile(SourceFile);
 	if (!c8)
 		return false;
 
