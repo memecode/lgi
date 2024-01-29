@@ -37,7 +37,7 @@ void LWebdav::PrettyPrint(LXmlTag &x)
 bool LWebdav::Request(Req &r, const char *Name, LString Resource)
 {
 	auto sock = GetSocket();
-	LHttp http;
+	LHttp http(Cancel);
 	LUri u(EndPoint);
 	if (!http.Open(sock, u.sHost, u.Port ? u.Port : HTTPS_PORT))
 	{

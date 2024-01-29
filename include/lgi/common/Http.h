@@ -6,17 +6,18 @@
 
 class LHttp
 {
-	char *Proxy;
-	int ProxyPort;
+	LString Proxy;
+	int ProxyPort = 0;
 
-	int BufferLen;
-	char *Buffer;
+	int BufferLen = 16 << 10;
+	char *Buffer = NULL;
 	
+	LCancel *Cancel = NULL;
 	LAutoPtr<LSocketI> Socket;	// commands
-	size_t ResumeFrom;
+	size_t ResumeFrom = 0;
 	LString FileLocation;
-	char *Headers;
-	bool NoCache;
+	char *Headers = NULL;
+	bool NoCache = false;
 	LString AuthUser, AuthPassword;
 	LString ErrorMsg;
 
@@ -28,9 +29,9 @@ public:
 		EncodeGZip,
 	};
 
-	Progress *Meter;
+	Progress *Meter = NULL;
 
-	LHttp();
+	LHttp(LCancel *cancel = NULL);
 	virtual ~LHttp();
 
 	void SetResume(size_t i) { ResumeFrom = i; }

@@ -52,30 +52,22 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////
-LHttp::LHttp()
+LHttp::LHttp(LCancel *cancel)
 {
-	Meter = 0;
-	ResumeFrom = 0;
-	Proxy = 0;
-	ProxyPort = 0;
-	Headers = 0;
-	NoCache = false;
-	BufferLen = 16 << 10;
+	Cancel = cancel;
 	Buffer = new char[BufferLen];
 }
 
 LHttp::~LHttp()
 {
 	Close();
-	DeleteArray(Proxy);
 	DeleteArray(Headers);
 	DeleteArray(Buffer);
 }
 
 void LHttp::SetProxy(char *p, int Port)
 {
-	DeleteArray(Proxy);
-	Proxy = NewStr(p);
+	Proxy = p;
 	ProxyPort = Port;
 }
 
@@ -95,6 +87,9 @@ bool LHttp::Open(LAutoPtr<LSocketI> S, const char *RemoteHost, int Port)
 		RemoteHost = Proxy;
 		Port = ProxyPort;
 	}
+
+	if (Socket && Cancel)
+		Socket->SetCancel(Cancel);
 	
 	if (RemoteHost)
 	{
