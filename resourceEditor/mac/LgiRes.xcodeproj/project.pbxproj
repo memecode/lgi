@@ -72,8 +72,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		3432AF792ADFE3450029F2D7 /* libz_local.1.2.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz_local.1.2.5.dylib; path = ../../../../../codelib/libpng/build/zlib_dir/libz_local.1.2.5.dylib; sourceTree = "<group>"; };
-		3432AF7B2ADFE34B0029F2D7 /* libpng16.15.29.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.15.29.0.dylib; path = ../../../../../codelib/libpng/build/libpng16.15.29.0.dylib; sourceTree = "<group>"; };
+		3432AF792ADFE3450029F2D7 /* libz_local.1.2.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz_local.1.2.5.dylib; path = ../../../../../codelib/libpng/build/release/zlib_dir/libz_local.1.2.5.dylib; sourceTree = "<group>"; };
+		3432AF7B2ADFE34B0029F2D7 /* libpng16.15.29.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.15.29.0.dylib; path = ../../../../../codelib/libpng/build/release/libpng16.15.29.0.dylib; sourceTree = "<group>"; };
 		343FB88E2386621400797ABC /* LgiRes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LgiRes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		343FB8942386621600797ABC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		343FB8992386621600797ABC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -475,7 +475,7 @@
 					../../include/lgi/mac/cocoa,
 					../src,
 					../resources,
-					../../../../../CodeLib/libpng/build,
+					../../../../../CodeLib/libpng/build/release,
 					../../../../../CodeLib/libpng,
 				);
 				INFOPLIST_FILE = Info.plist;
@@ -507,7 +507,7 @@
 					../../include/lgi/mac/cocoa,
 					../src,
 					../resources,
-					../../../../../CodeLib/libpng/build,
+					../../../../../CodeLib/libpng/build/release,
 					../../../../../CodeLib/libpng,
 				);
 				INFOPLIST_FILE = Info.plist;

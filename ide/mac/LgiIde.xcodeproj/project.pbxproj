@@ -102,9 +102,9 @@
 
 /* Begin PBXFileReference section */
 		3411DB712AB86D6700CB3837 /* PostBuildStep.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = PostBuildStep.py; sourceTree = "<group>"; };
-		3414FDD82ADFE2D00092DA8F /* libpng16.15.29.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.15.29.0.dylib; path = ../../../../../codelib/libpng/build/libpng16.15.29.0.dylib; sourceTree = "<group>"; };
+		3414FDD82ADFE2D00092DA8F /* libpng16.15.29.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.15.29.0.dylib; path = ../../../../../codelib/libpng/build/release/libpng16.15.29.0.dylib; sourceTree = "<group>"; };
 		341C7AC721A752DC0083C9CE /* About.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = About.cpp; path = ../../src/common/Lgi/About.cpp; sourceTree = "<group>"; };
-		3432AF742ADFE3080029F2D7 /* libz_local.1.2.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz_local.1.2.5.dylib; path = ../../../../../codelib/libpng/build/zlib_dir/libz_local.1.2.5.dylib; sourceTree = "<group>"; };
+		3432AF742ADFE3080029F2D7 /* libz_local.1.2.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz_local.1.2.5.dylib; path = ../../../../../codelib/libpng/build/release/zlib_dir/libz_local.1.2.5.dylib; sourceTree = "<group>"; };
 		345B206C217965E80079E3C9 /* LgiIde.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LgiIde.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		345B2077217965EA0079E3C9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		345B207A217965EA0079E3C9 /* LgiIde.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LgiIde.entitlements; sourceTree = "<group>"; };
@@ -623,7 +623,7 @@
 					../../include,
 					../../include/lgi/mac/cocoa,
 					../../../../../codelib/libpng,
-					../../../../../codelib/libpng/build,
+					../../../../../codelib/libpng/build/release,
 					/opt/local/libexec/openssl3/include,
 				);
 				INFOPLIST_FILE = Info.plist;
@@ -661,7 +661,7 @@
 					../../include,
 					../../include/lgi/mac/cocoa,
 					../../../../../codelib/libpng,
-					../../../../../codelib/libpng/build,
+					../../../../../codelib/libpng/build/release,
 					/opt/local/libexec/openssl3/include,
 				);
 				INFOPLIST_FILE = Info.plist;
