@@ -55,7 +55,20 @@ public:
 bool TerminalAt(LString Path)
 {
 	#if defined(MAC)
-		return LExecute("/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal", Path);
+		const char *Locations[] = {
+			"/System/Applications/Utilities/Terminal.app",
+			"/Applications/Utilities/Terminal.app",
+			NULL
+		};
+		for (size_t i=0; Locations[i]; i++)
+		{
+			if (LFileExists(Locations[i]))
+			{
+				LString term;
+				term.Printf("%s/Contents/MacOS/Terminal", Locations[i]);
+				return LExecute(term, Path);
+			}
+		}
 	#elif defined(WINDOWS)
 		TCHAR w[MAX_PATH_LEN];
 		auto r = GetWindowsDirectory(w, CountOf(w));
