@@ -19,12 +19,19 @@ class SshConnection : public LSsh, public LEventTargetThread
 	bool WaitPrompt(LStream *c, LString *Data = NULL, const char *Debug = NULL);
 
 public:
+	enum LoggingType
+	{
+		LogNone,
+		LogInfo,
+		LogDebug
+	};
+
 	LHashTbl<StrKey<char,false>,VersionCtrl> Types;
 	LArray<VcFolder*> TypeNotify;
 	
 	SshConnection(LTextLog *log, const char *uri, const char *prompt);
 	bool DetectVcs(VcFolder *Fld);
-	bool Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Parser, ParseParams *Params);
+	bool Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Parser, ParseParams *Params, LoggingType Logging);
 	
 	// This is the GUI thread message handler
 	static bool HandleMsg(LMessage *m);

@@ -419,6 +419,19 @@ bool VcFolder::RunCmd(const char *Args, LoggingType Logging, std::function<void(
 	return true;
 }
 
+SshConnection::LoggingType Convert(LoggingType t)
+{
+	switch (t)
+	{
+		case LogNormal:
+		case LogSilo:
+			return SshConnection::LogInfo;
+		case LogDebug:
+			return SshConnection::LogDebug;
+	}
+	return SshConnection::LogNone;
+}
+
 bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, LoggingType Logging)
 {
 	const char *Exe = GetVcName();
@@ -469,7 +482,7 @@ bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, L
 		if (!c)
 			return false;
 		
-		if (!c->Command(this, Exe, Args, Parser, Params))
+		if (!c->Command(this, Exe, Args, Parser, Params, Convert(Logging)))
 			return false;
 		#endif
 	}
@@ -1168,7 +1181,7 @@ void VcFolder::LogFilter(const char *Filter)
 		{
 			// See if 'Filter' is a commit id?
 			LString args;
-			args.Printf("show %s", Filter);
+			args.Printf("-P show %s", Filter);
 			ParseParams *params = new ParseParams;
 			params->Callback = [this, Filter=LString(Filter)](auto code, auto str)
 			{
@@ -2749,7 +2762,7 @@ void VcFolder::ReadDir(LTreeItem *Parent, const char *ReadUri)
 		auto *Params = new ParseParams(ReadUri);
 		Params->Leaf = dynamic_cast<VcLeaf*>(Parent);
 
-		c->Command(this, "find", Args, &VcFolder::ParseRemoteFind, Params);
+		c->Command(this, "find", Args, &VcFolder::ParseRemoteFind, Params, SshConnection::LogNone);
 		return;
 	}
 	#endif

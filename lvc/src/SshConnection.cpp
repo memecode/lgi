@@ -46,7 +46,7 @@ bool SshConnection::DetectVcs(VcFolder *Fld)
 	return PostObject(GetHandle(), M_DETECT_VCS, p);
 }
 
-bool SshConnection::Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Parser, ParseParams *Params)
+bool SshConnection::Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Parser, ParseParams *Params, LoggingType LogType)
 {
 	bool HasCallback = Params && Params->Callback;
 	if (!Fld || !Exe || (!Parser && !HasCallback))
@@ -61,6 +61,7 @@ bool SshConnection::Command(VcFolder *Fld, LString Exe, LString Args, ParseFn Pa
 	p->Args = Args;
 	p->Parser = Parser;
 	p->Params = Params;
+	p->LogType = LogType;
 	p->Path = Fld->GetUri().sPath;
 
 	LgiTrace("PostObject M_RUN_CMD %s\n", Args.Get());
@@ -440,7 +441,7 @@ PROF("get console");
 			if (!con)
 				break;
 
-			auto Debug = p->Params && p->Params->Debug;
+			auto Debug = p->Params && p->LogType == LogDebug;
 
 PROF("cd");
 			LString cmd;

@@ -28,9 +28,6 @@
     <ClCompile Include="..\Src\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Src\SshConnection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\Src\VcCommit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -60,6 +57,9 @@
     </ClCompile>
     <ClCompile Include="..\Src\BrowseUi.cpp">
       <Filter>Source Files\Browse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Src\SshConnection.cpp">
+      <Filter>Source Files\Ssh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

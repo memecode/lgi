@@ -1440,32 +1440,10 @@ public:
 
 	void OnFilterCommits()
 	{
-		if (!Commits || !CommitFilter)
+		if (!Commits || !CommitFilter || !CurFolder)
 			return;
 
 		CurFolder->LogFilter(CommitFilter);
-
-		/*			
-		LArray<LListItem*> a;
-		if (!Commits->GetAll(a))
-			return;
-		
-		auto cols = Commits->GetColumns();	
-		for (auto i: a)
-		{
-			bool vis = !CommitFilter;
-			for (int c=1; !vis && c<cols; c++)
-			{
-				auto txt = i->GetText(c);
-				if (Stristr(txt, CommitFilter.Get()))
-					vis = true;
-			}
-			i->GetCss(true)->Display(vis ? LCss::DispBlock : LCss::DispNone);
-		}
-
-		Commits->UpdateAllItems();
-		Commits->Invalidate();
-		*/
 	}
 
 	void OnFilterFiles()

@@ -140,7 +140,6 @@ struct ParseParams
 	LString AltInitPath;
 	class VcLeaf *Leaf = NULL;
 	bool IsWorking = false;;
-	bool Debug = false;
 	std::function<void(int32_t, LString)> Callback;
 
 	ParseParams(const char *str = NULL)

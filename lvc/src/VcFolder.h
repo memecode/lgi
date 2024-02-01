@@ -13,6 +13,7 @@ enum LoggingType
 	LogNone,	// No output from cmd
 	LogNormal,	// Output appears as it's available
 	LogSilo,	// Output appears after cmd finished (keeps it non-interleaved with other log msgs)
+	LogDebug,	// Debug log level
 };
 
 enum LvcError
@@ -114,6 +115,7 @@ struct SshParams
 	VersionCtrl Vcs = VcNone;
 	ParseFn Parser = NULL;
 	ParseParams *Params = NULL;
+	SshConnection::LoggingType LogType = SshConnection::LogNone;
 	int ExitCode = -1;
 
 	SshParams(SshConnection *con) : c(con)
