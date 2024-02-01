@@ -1,6 +1,7 @@
 #include "lgi/common/Lgi.h"
 #include "lgi/common/DeEscape.h"
 
+// Skip over ANSI escape codes
 char *SkipEscape(char *c)
 {
 	if (*c != 0x1b)
@@ -9,6 +10,7 @@ char *SkipEscape(char *c)
 		return NULL;
 	}
 
+	char *Start = c;
 	c++;
 
 	if (*c == ']')
@@ -29,7 +31,7 @@ char *SkipEscape(char *c)
 	if (*c != '[')
 	{
 		LgiTrace("%s:%i - Error: Expecting bracket.\n", _FL);
-		return c;
+		return ++c;
 	}
 
 	c++;

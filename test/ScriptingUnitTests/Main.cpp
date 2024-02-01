@@ -141,7 +141,7 @@ public:
 			if (Idx > 0)
 			{
 				f = f(0, Idx) + ".asm";
-				auto a = LReadTextFile(f);
+				auto a = LReadFile(f);
 				if (a)
 				{
 					printf("%s\n", a.Get());
