@@ -279,14 +279,20 @@ bool LCombo::Insert(const char *p, int Index)
 	{
 		LAutoWString n(Utf8ToWide(p));
 		if (!n)
+		{
+			LAssert("Utf8ToWide failed.");
 			return false;
+		}
 
 		if (Index < 0)
 			Index = (int)d->Len;
 
 		LRESULT r = SendMessage(Handle(), CB_INSERTSTRING, Index, (LPARAM)n.Get());
 		if (r == CB_ERR)
+		{
+			LAssert("CB_INSERTSTRING failed.");
 			return false;
+		}
 			
 		d->Len++;
 	}
@@ -450,6 +456,7 @@ void LCombo::Empty()
 		SendMessage(_View, CB_RESETCONTENT, 0, 0);
 
 	d->Strs.Length(0);
+	d->Len = 0;
 }
 
 bool LCombo::OnKey(LKey &k)

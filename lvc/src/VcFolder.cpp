@@ -1758,6 +1758,7 @@ void VcFolder::UpdateBranchUi()
 			Cbo->Value(select);
 
 		Cbo->SendNotify(LNotifyTableLayoutRefresh);
+		LgiTrace("%s:%i - Branches len=%i->%i\n", _FL, (int)Branches.Length(), (int)Cbo->Length());
 	}
 }
 
