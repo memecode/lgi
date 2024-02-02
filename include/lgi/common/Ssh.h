@@ -259,6 +259,13 @@ public:
 		r = ssh_options_set(Ssh, SSH_OPTIONS_PORT, &Port);
 		r = ssh_options_set(Ssh, SSH_OPTIONS_TIMEOUT, &Timeout);
 
+		if (Cancel)
+		{
+			// If the user can cancel we need to go into non-blocking mode and poll 
+			// the cancel object:
+			ssh_set_blocking(Ssh, true);
+		}
+
 		// Check for a config entry...
 		auto c = ConfigHostLookup(Host);
 		if (c.HostName)
@@ -271,7 +278,22 @@ public:
 				Username = c.User;
 		}
 
-		r = ssh_connect(Ssh);
+		if (Cancel)
+		{
+			while (!Cancel->IsCancelled())
+			{
+				r = ssh_connect(Ssh);
+				LgiTrace("ssh_connect=%i\n", r);
+				if (r != SSH_AGAIN)
+					break;
+			}
+		}
+		else
+		{
+			// Blocking connect:
+			r = ssh_connect(Ssh);
+		}
+
 		if (r != SSH_OK)
 		{
 			ssh_free(Ssh);
