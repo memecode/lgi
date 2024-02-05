@@ -15,14 +15,14 @@ endif
 MakeDir := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BuildDir = $(Build)
 
-CFlags = -MMD -MP -g -fPIC -fno-inline
+CFlags = -MMD -MP -fPIC -fno-inline
 CppFlags = $(CFlags) -fpermissive -std=c++14
 
 ifeq ($(Build),Debug)
 	CFlags += -g
 	CppFlags += -g
 	Tag = d
-	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
+	Defs = -D_DEBUG -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DHAS_LIBSSH
 	Libs =  \
 		-lmagic \
 		-lssh \
@@ -42,7 +42,7 @@ ifeq ($(Build),Debug)
 else
 	CFlags += -s -Os
 	CppFlags += -s -Os
-	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX
+	Defs = -DLINUX -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DPOSIX -DHAS_LIBSSH
 	Libs =  \
 		-lmagic \
 		-lssh \
@@ -210,6 +210,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/SkinEngine.h \
 	../include/lgi/common/Slider.h \
 	../include/lgi/common/Splitter.h \
+	../include/lgi/common/Stat.h \
 	../include/lgi/common/StatusBar.h \
 	../include/lgi/common/Store3Defs.h \
 	../include/lgi/common/Stream.h \
@@ -220,12 +221,14 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../include/lgi/common/SubProcess.h \
 	../include/lgi/common/TableLayout.h \
 	../include/lgi/common/TabView.h \
+	../include/lgi/common/TextConvert.h \
 	../include/lgi/common/TextFile.h \
 	../include/lgi/common/TextLabel.h \
 	../include/lgi/common/TextLog.h \
 	../include/lgi/common/TextView3.h \
 	../include/lgi/common/Thread.h \
 	../include/lgi/common/ThreadEvent.h \
+	../include/lgi/common/TimeZoneInfo.h \
 	../include/lgi/common/Token.h \
 	../include/lgi/common/ToolBar.h \
 	../include/lgi/common/ToolTip.h \
@@ -327,6 +330,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/common/Skins/Gel/Gel.cpp \
 	../src/common/Text/DocView.cpp \
 	../src/common/Text/String.cpp \
+	../src/common/Text/TextConvert.cpp \
 	../src/common/Text/TextView3.cpp \
 	../src/common/Text/Token.cpp \
 	../src/common/Text/Unicode.cpp \
@@ -364,6 +368,7 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/linux/Gtk/ScreenDC.cpp \
 	../src/linux/Lgi/App.cpp \
 	../src/linux/Lgi/ClipBoard.cpp \
+	../src/linux/Lgi/Dialog.cpp \
 	../src/linux/Lgi/DragAndDrop.cpp \
 	../src/linux/Lgi/General.cpp \
 	../src/linux/Lgi/Layout.cpp \
@@ -371,9 +376,9 @@ $(Target) : ../$(BuildDir)/liblgi-gtk3$(Tag).so $(Objects)
 	../src/linux/Lgi/Printer.cpp \
 	../src/linux/Lgi/Thread.cpp \
 	../src/linux/Lgi/View.cpp \
-	../src/linux/Lgi/Dialog.cpp \
 	../src/linux/Lgi/Window.cpp \
-	../src/posix/SubProcess.cpp
+	../src/posix/SubProcess.cpp \
+	../../../../../../usr/include/libayatana-appindicator3-0.1/libayatana-appindicator/app-indicator.h
 	export Build=$(Build); \
 	$(MAKE) -C ../ -f ./linux/Makefile.linux
 

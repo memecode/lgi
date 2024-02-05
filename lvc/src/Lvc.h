@@ -149,7 +149,6 @@ struct ParseParams
 };
 
 typedef bool (VcFolder::*ParseFn)(int, LString, ParseParams*);
-class SshConnection;
 
 struct AppPriv
 {
@@ -169,7 +168,9 @@ struct AppPriv
 	// Filtering
 	LString			FolderFilter, CommitFilter, FileFilter;
 
-	LHashTbl<StrKey<char,false>,SshConnection*> Connections;
+	#if HAS_LIBSSH
+	LHashTbl<StrKey<char,false>,class SshConnection*> Connections;
+	#endif
 	
 	AppPriv() :
 		Opts(LOptionsFile::DesktopMode, AppName),

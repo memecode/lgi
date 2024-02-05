@@ -37,4 +37,6 @@ public:
 	static bool HandleMsg(LMessage *m);
 };
 
+#else
+#warning "Building without libssh."
 #endif

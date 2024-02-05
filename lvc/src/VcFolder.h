@@ -1,10 +1,12 @@
 #ifndef _VcFolder_h_
 #define _VcFolder_h_
 
+#include <functional>
+
 #include "lgi/common/SubProcess.h"
 #include "lgi/common/Uri.h"
 
-#include <functional>
+#include "SshConnection.h"
 
 class VcLeaf;
 
@@ -107,21 +109,23 @@ struct VcBranch : public LString
 	}
 };
 
+#if HAS_LIBSSH
 struct SshParams
 {
 	SshConnection *c = NULL;
+	SshConnection::LoggingType LogType = SshConnection::LogNone;
 	VcFolder *f = NULL;
 	LString Exe, Args, Path, Output;
 	VersionCtrl Vcs = VcNone;
 	ParseFn Parser = NULL;
 	ParseParams *Params = NULL;
-	SshConnection::LoggingType LogType = SshConnection::LogNone;
 	int ExitCode = -1;
 
 	SshParams(SshConnection *con) : c(con)
 	{
 	}
 };
+#endif
 
 class VcFolder : public LTreeItem
 {
@@ -354,7 +358,9 @@ public:
 	void OnRemove();
 	void OnExpand(bool b);
 	void OnVcsType(LString errorMsg);
+	#if HAS_LIBSSH
 	void OnSshCmd(SshParams *p);
+	#endif
 };
 
 class VcLeaf : public LTreeItem

@@ -419,6 +419,7 @@ bool VcFolder::RunCmd(const char *Args, LoggingType Logging, std::function<void(
 	return true;
 }
 
+#if HAS_LIBSSH
 SshConnection::LoggingType Convert(LoggingType t)
 {
 	switch (t)
@@ -431,6 +432,7 @@ SshConnection::LoggingType Convert(LoggingType t)
 	}
 	return SshConnection::LogNone;
 }
+#endif
 
 bool VcFolder::StartCmd(const char *Args, ParseFn Parser, ParseParams *Params, LoggingType Logging)
 {
@@ -2294,6 +2296,7 @@ bool VcFolder::ParseFiles(int Result, LString s, ParseParams *Params)
 	return false;
 }
 
+#if HAS_LIBSSH
 void VcFolder::OnSshCmd(SshParams *p)
 {
 	if (!p || !p->f)
@@ -2324,6 +2327,7 @@ void VcFolder::OnSshCmd(SshParams *p)
 		p->Params->Callback(Result, s);
 	}
 }
+#endif
 
 void VcFolder::OnPulse()
 {
