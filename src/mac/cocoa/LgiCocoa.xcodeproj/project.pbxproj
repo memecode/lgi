@@ -34,7 +34,6 @@
 		345920FF1F25649000098DFD /* Font.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FC1F25649000098DFD /* Font.h */; };
 		345921001F25649000098DFD /* FontCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FD1F25649000098DFD /* FontCache.h */; };
 		345921011F25649000098DFD /* FontSelect.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FE1F25649000098DFD /* FontSelect.h */; };
-		345BABCF2B78952D005795A0 /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3477C2681CBF020F0028B84B /* LgiCocoa.framework */; };
 		345EB84E235C6C01007D05DB /* Popup.h in Headers */ = {isa = PBXBuildFile; fileRef = 345EB84D235C6C01007D05DB /* Popup.h */; };
 		346DDEC1240C882900751380 /* RadioGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = 346DDEC0240C882900751380 /* RadioGroup.h */; };
 		346FACE71D3C720B00FFEBCE /* Message.h in Headers */ = {isa = PBXBuildFile; fileRef = 346FACE61D3C720B00FFEBCE /* Message.h */; };
@@ -346,7 +345,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				3477C3501CC0C3D60028B84B /* Cocoa.framework in Frameworks */,
-				345BABCF2B78952D005795A0 /* LgiCocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
