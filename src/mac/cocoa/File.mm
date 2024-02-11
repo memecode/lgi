@@ -582,17 +582,27 @@ LVolume *LVolume::First()
 		auto items = LSSharedFileListCopySnapshot( sflRef, &seed );
 		for( size_t i = 0; i < CFArrayGetCount(items); i++ )
 		{
-			auto item = (LSSharedFileListItemRef)CFArrayGetValueAtIndex(items, i);
+			auto item = (LSSharedFileListItemRef) CFArrayGetValueAtIndex(items, i);
 			if( !item )
 				continue;
-			auto outURL = LSSharedFileListItemCopyResolvedURL(item,kLSSharedFileListNoUserInteraction, NULL);
+			
+			auto displayName = LSSharedFileListItemCopyDisplayName(item);
+			
+			auto outURL = LSSharedFileListItemCopyResolvedURL(item, kLSSharedFileListNoUserInteraction, NULL);
 			if( !outURL )
 				continue;
-			
-			CFStringRef itemPath = CFURLCopyFileSystemPath(outURL,kCFURLPOSIXPathStyle);
+							
+			auto itemPath = CFURLCopyFileSystemPath(outURL, kCFURLPOSIXPathStyle);
 			LString s = itemPath;
 
-			if (!s.Equals(DesktopPath)) // This is the root item, don't duplicate
+			// If no URL, try the display name...
+			if (!s && displayName)
+				s = displayName;
+				
+			// If no display name either then just skip it...
+			// This seems to happen with 'AirDrop' sometimes.
+			if (s &&
+				!s.Equals(DesktopPath)) // This is the root item, don't duplicate
 			{
 				v = new LVolume();
 				if (v)
@@ -600,6 +610,8 @@ LVolume *LVolume::First()
 					v->d->Path = s;
 					v->d->Name = LGetLeaf(s);
 					v->d->Type = VT_FOLDER;
+					
+					printf("Vol: %s -> %s\n", s.Get(), v->d->Name.Get());
 
 					auto IcoRef = LSSharedFileListItemCopyIconRef(item);
 					if (IcoRef)
