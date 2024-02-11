@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -34,6 +34,7 @@
 		345920FF1F25649000098DFD /* Font.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FC1F25649000098DFD /* Font.h */; };
 		345921001F25649000098DFD /* FontCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FD1F25649000098DFD /* FontCache.h */; };
 		345921011F25649000098DFD /* FontSelect.h in Headers */ = {isa = PBXBuildFile; fileRef = 345920FE1F25649000098DFD /* FontSelect.h */; };
+		345BABCF2B78952D005795A0 /* LgiCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3477C2681CBF020F0028B84B /* LgiCocoa.framework */; };
 		345EB84E235C6C01007D05DB /* Popup.h in Headers */ = {isa = PBXBuildFile; fileRef = 345EB84D235C6C01007D05DB /* Popup.h */; };
 		346DDEC1240C882900751380 /* RadioGroup.h in Headers */ = {isa = PBXBuildFile; fileRef = 346DDEC0240C882900751380 /* RadioGroup.h */; };
 		346FACE71D3C720B00FFEBCE /* Message.h in Headers */ = {isa = PBXBuildFile; fileRef = 346FACE61D3C720B00FFEBCE /* Message.h */; };
@@ -345,6 +346,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3477C3501CC0C3D60028B84B /* Cocoa.framework in Frameworks */,
+				345BABCF2B78952D005795A0 /* LgiCocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -360,6 +362,13 @@
 				3477C2C41CC046310028B84B /* TextView3.cpp */,
 			);
 			name = TextCtrls;
+			sourceTree = "<group>";
+		};
+		345BABCE2B78952D005795A0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		346FACE81D3C723700FFEBCE /* Resources */ = {
@@ -378,6 +387,7 @@
 				3477C29A1CBF0A700028B84B /* Headers */,
 				3477C34E1CC0C3A30028B84B /* Link */,
 				3477C2691CBF020F0028B84B /* Products */,
+				345BABCE2B78952D005795A0 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -807,7 +817,7 @@
 				};
 			};
 			buildConfigurationList = 3477C2621CBF020F0028B84B /* Build configuration list for PBXProject "LgiCocoa" */;
-			compatibilityVersion = "Xcode 10.0";
+			compatibilityVersion = "Xcode 12.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
