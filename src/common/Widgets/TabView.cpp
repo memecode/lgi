@@ -773,12 +773,10 @@ void LTabView::OnStyleChange()
 
 void LTabView::OnPaint(LSurface *pDC)
 {
-	/*
 	#ifdef WINDOWS
 	// FIXME: looks like crap but doesn't flicker.
 	LDoubleBuffer Dbl(pDC);
 	#endif
-	*/
 
 	if (!d->cBack.IsValid())
 		OnStyleChange();

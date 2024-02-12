@@ -1440,10 +1440,21 @@ public:
 
 	void OnFilterCommits()
 	{
-		if (!Commits || !CommitFilter || !CurFolder)
+		if (!Commits || !CurFolder)
 			return;
 
-		CurFolder->LogFilter(CommitFilter);
+		if (CommitFilter)
+		{
+			// Filtered logging:
+			CurFolder->LogFilter(CommitFilter);
+		}
+		else
+		{
+			// Regular full logging:
+			CurFolder->ClearLog();
+			CurFolder->Select(true);
+		}
+			
 	}
 
 	void OnFilterFiles()

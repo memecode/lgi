@@ -347,6 +347,7 @@ public:
 	bool UpdateSubs(); // Clone/checkout any sub-repositories.
 	void LogFilter(const char *Filter);
 	void LogFile(const char *Path);
+	void ClearLog();
 	LString GetFilePart(const char *uri);
 	void FilterCurrentFiles();
 	void GetRemoteUrl(std::function<void(int32_t, LString)> Callback);

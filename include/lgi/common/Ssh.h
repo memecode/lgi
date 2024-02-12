@@ -58,7 +58,7 @@ protected:
 	struct IoProgress
 	{
 		LSsh *s;
-		uint64_t Start;
+		uint64_t Start, UpdateTs = 0;
 		uint64_t Pos, Length;
 
 		IoProgress(LSsh *ssh)
@@ -91,30 +91,35 @@ protected:
 			Pos = i;
 			if (s->TxtLabel)
 			{
-				double Sec = (double)(LCurrentTime()-Start)/1000.0;
-				double Rate = (double)i / Sec;
-				double TotalTime = Length / MAX(Rate, 1);
-				double RemainingTime = TotalTime - Sec;
-				int Remain = (int)RemainingTime;
-				int Hrs = Remain / 3600;
-				Remain -= Hrs * 3600;
-				int Mins = Remain / 60;
-				Remain -= Mins * 60;
-				int Secs = Remain;
+				auto Now = LCurrentTime();
+				if (Now - UpdateTs >= 500)
+				{
+					double Sec = (double)(LCurrentTime()-Start)/1000.0;
+					double Rate = (double)i / Sec;
+					double TotalTime = Length / MAX(Rate, 1);
+					double RemainingTime = TotalTime - Sec;
+					int Remain = (int)RemainingTime;
+					int Hrs = Remain / 3600;
+					Remain -= Hrs * 3600;
+					int Mins = Remain / 60;
+					Remain -= Mins * 60;
+					int Secs = Remain;
 
-				LString Msg, Time;
-				if (!Hrs)
-					Time.Printf("%im %is", Mins, Secs);
-				else
-					Time.Printf("%ih %im %is", Hrs, Mins, Secs);
+					LString Msg, Time;
+					if (!Hrs)
+						Time.Printf("%im %is", Mins, Secs);
+					else
+						Time.Printf("%ih %im %is", Hrs, Mins, Secs);
 
-				Msg.Printf(	"%s of %s\n"
-							"%.1f%%, %s/s, %s",
-							LFormatSize(i).Get(), LFormatSize(Length).Get(),
-							(double)i * 100.0 / Length,
-							LFormatSize((uint64_t)Rate).Get(),
-							Time.Get());
-				s->TxtLabel->Name(Msg);
+					Msg.Printf(	"%s of %s\n"
+								"%.1f%%, %s/s, %s",
+								LFormatSize(i).Get(), LFormatSize(Length).Get(),
+								(double)i * 100.0 / Length,
+								LFormatSize((uint64_t)Rate).Get(),
+								Time.Get());
+					s->TxtLabel->Name(Msg);
+					UpdateTs = Now;
+				}
 			}
 			if (s->Prog)
 				s->Prog->Value(i);

@@ -1169,6 +1169,13 @@ LString VcFolder::GetFilePart(const char *uri)
 	return File;
 }
 
+
+void VcFolder::ClearLog()
+{
+	Uncommit.Reset();
+	Log.DeleteObjects();
+}
+
 void VcFolder::LogFilter(const char *Filter)
 {
 	if (!Filter)
@@ -1187,11 +1194,11 @@ void VcFolder::LogFilter(const char *Filter)
 			ParseParams *params = new ParseParams;
 			params->Callback = [this, Filter=LString(Filter)](auto code, auto str)
 			{
+				ClearLog();
+
 				if (code == 0 && str.Find(Filter) >= 0)
 				{
 					// Found the commit...
-					Uncommit.Reset();
-					Log.DeleteObjects();
 					d->Commits->Empty();
 					CurrentCommit.Empty();
 
