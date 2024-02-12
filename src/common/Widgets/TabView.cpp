@@ -405,7 +405,7 @@ void LTabView::Value(int64 i)
 		OnPosChange();
 
 		LTabPage *p = it[d->Current];
-		if (p)
+		if (p && IsAttached())
 		{
 			if (!p->IsAttached())
 			{
