@@ -240,7 +240,7 @@ const char *VcCommit::GetFieldText(CommitField Fld)
 			break;
 		case LAuthor:
 			return Author;
-		case LTimeStamp:
+		case LTime:
 			if (!sTimeStamp)
 				sTimeStamp = Ts.Get();
 			return sTimeStamp;
@@ -346,9 +346,9 @@ bool VcCommit::CvsParse(LDateTime &Dt, LString Auth, LString Message)
 	Ts = Dt;
 	Ts.ToLocal();
 	
-	uint64 i;
+	LTimeStamp i;
 	if (Ts.Get(i))
-		Rev.Printf(LPrintfInt64, i);
+		Rev.Printf(LPrintfInt64, i.Get());
 	Author = Auth;
 	Msg = Message;
 

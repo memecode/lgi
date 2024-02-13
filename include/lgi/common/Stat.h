@@ -13,16 +13,6 @@ struct LStat :
 	public stat
 	#endif
 {
-	constexpr static uint64_t WINDOWS_TICK = 10000000;
-	constexpr static uint64_t SEC_TO_UNIX_EPOCH = 11644473600LL;
-	uint64_t UnixToNative(uint64_t ts) const
-	{
-		#if defined(WINDOWS)
-		return (ts + SEC_TO_UNIX_EPOCH) * WINDOWS_TICK;
-		#else
-		return ts;
-		#endif
-	}
 	int Result = 0;
 
 	LStat(const char *path)
@@ -66,11 +56,11 @@ struct LStat :
 	int64_t Size() const { return st_size; }	
 
 	uint64_t GetCreationTime() const { return st_ctime; }
-	LDateTime GetCreation() const { return LDateTime(UnixToNative(st_ctime)); }
+	LDateTime GetCreation() const { return LDateTime(LTimeStamp(st_ctime)); }
 
 	uint64_t GetLastAccessTime() const { return st_atime; }
-	LDateTime GetLastAccess() const { return LDateTime(UnixToNative(st_atime)); }
+	LDateTime GetLastAccess() const { return LDateTime(LTimeStamp(st_atime)); }
 
 	uint64_t GetLastWriteTime() const { return st_mtime; }
-	LDateTime GetLastWrite() const { return LDateTime(UnixToNative(st_mtime)); }
+	LDateTime GetLastWrite() const { return LDateTime(LTimeStamp(st_mtime)); }
 };

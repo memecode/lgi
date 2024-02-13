@@ -50,16 +50,45 @@
 /// \ingroup Time
 #define GDTF_MONTH_LEADINGZ			0x200
 
+class LgiClass LTimeStamp
+{
+	uint64_t ts = 0;
+	
+public:
+	constexpr static uint64_t WINDOWS_TICK = 10000000;
+	constexpr static uint64_t SEC_TO_UNIX_EPOCH = 11644473600LL;
+	
+	LTimeStamp(time_t unixTime = 0)
+	{
+		if (unixTime)
+			*this = unixTime;
+	}
+
+	uint64_t &Get()
+	{
+		return ts;
+	}
+	
+	// Convert from unit time to LGI time stamp
+	LTimeStamp &operator =(const time_t unixTime);
+	
+	// Convert from LGI time stamp to unix time
+	operator time_t() const;
+};
+
+
 /// A date/time class
 ///
 /// This class interacts with system times represented as 64bit ints. The various OS support different
-/// formats for that 64bit int values. On windows the system times are in 100-nanosecond intervals since 
-/// January 1, 1601 (UTC), as per the FILETIME structure, on Posix systems (Linux/Mac) the 64bit values
-/// are in milliseconds since January 1, 1970 UTC. This is just unix time * 1000. If you are serializing
-/// these 64bit values you should take that into account, they are NOT cross platform. The LDirectory class
-/// uses the same 64bit values as accepted here for the file's last modified timestamp etc. To convert the
-/// 64bit values to seconds, divide by LDateTime::Second64Bit, useful for calculating the time in seconds
-/// between 2 LDateTime objects.
+/// formats for that 64bit int values.
+///     - On windows the system times are in 100-nanosecond intervals since 
+///       January 1, 1601 (UTC), as per the FILETIME structure.
+///     - On Posix systems (Linux/Mac) the 64bit values are in milliseconds since January 1, 1800 UTC.
+///       This is just (unixTime + Offset1800) * 1000.
+/// If you are serializing these 64bit values you should take that into account, they are NOT cross platform.
+/// The LDirectory class uses the same 64bit values as accepted here for the file's last modified timestamp 
+/// etc. To convert the 64bit values to seconds, divide by LDateTime::Second64Bit, useful for calculating 
+/// the time in seconds between 2 LDateTime objects.
 ///
 /// \ingroup Time
 class LgiClass LDateTime // This class can't have a virtual table, because it's used in 
@@ -93,7 +122,8 @@ class LgiClass LDateTime // This class can't have a virtual table, because it's 
 
 public:
 	LDateTime(const char *Init = NULL);
-	LDateTime(uint64 Ts);
+	LDateTime(time_t unixTime);
+	LDateTime(const LTimeStamp &Ts);
 	LDateTime(const LDateTime &dt) { *this = dt; }
 	~LDateTime();
 
@@ -228,7 +258,7 @@ public:
 	/// \sa LDateTime::GetFormat()
 	void Get(char *Str, size_t SLen) const;
 	/// Gets the data and time as a 64 bit int (os specific)
-	bool Get(uint64 &s) const;
+	bool Get(LTimeStamp &s) const;
 	/// Gets just the date as a string
 	/// \sa LDateTime::GetFormat()
 	/// \returns The number of characters written to 'Str'
@@ -248,7 +278,7 @@ public:
 	uint64_t GetUnix();
 	bool SetUnix(uint64_t s);
 
-	/// Returns the 64bit timestamp.
+	/// Returns the 64bit LTimeStamp.
 	uint64 Ts() const;
 
 	/// Get the timestamp in a format compatible with the current operating system APIs.
@@ -264,8 +294,8 @@ public:
 	/// \sa LDateTime::GetFormat()
 	bool Set(const char *Str);
 	/// Sets the date and time from a 64 bit int (os specific)
-	bool Set(uint64 s);
-	/// Sets the time from a time_t
+	bool Set(const LTimeStamp &s);
+	/// Sets the time from a unit time_t
 	bool Set(time_t tt);
 	/// Parses the date from a string
 	/// \sa LDateTime::GetFormat()
@@ -331,7 +361,7 @@ public:
 	struct LgiClass LDstInfo
 	{
 		/// Timestamp where the DST timezone changes to 'Offset'
-		uint64 UtcTimeStamp;
+		LTimeStamp Utc;
 		/// The new offset in minutes (e.g. 600 = +10 hours)
 		int Offset;
 
@@ -379,19 +409,6 @@ public:
 	LDateTime operator -(const LDateTime &dt);
 	LDateTime operator +(const LDateTime &dt);
 	int DiffMonths(const LDateTime &dt);
-
-	operator uint64()
-	{
-		uint64 ts = 0;
-		Get(ts);
-		return ts;
-	}
-
-	LDateTime &operator =(uint64 ts)
-	{
-		Set(ts);
-		return *this;
-	}
 
 	LDateTime &operator =(struct tm *t);
 	LDateTime &operator =(const LDateTime &t);

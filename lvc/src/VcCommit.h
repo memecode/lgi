@@ -12,7 +12,7 @@ enum CommitField
 	LIndex,
 	LBranch,
 	LAuthor,
-	LTimeStamp,
+	LTime,
 	LMessageTxt,
 	LParents,
 };

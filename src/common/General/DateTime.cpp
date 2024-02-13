@@ -117,11 +117,18 @@ LDateTime::LDateTime(const char *Init)
 		Set(Init);
 }
 
-LDateTime::LDateTime(uint64 Ts)
+LDateTime::LDateTime(time_t unixTime)
 {
 	Empty();
-	if (Ts)
-		Set(Ts);
+	if (unixTime)
+		Set(unixTime);
+}
+
+LDateTime::LDateTime(const LTimeStamp &lgiTime)
+{
+	Empty();
+	if (lgiTime)
+		Set(lgiTime);
 }
 
 LDateTime::~LDateTime()
@@ -348,7 +355,7 @@ static bool ParseValue(char *s, LString &var, LString &val)
 LDateTime LDateTime::LDstInfo::GetLocal()
 {
 	LDateTime d;
-	d = UtcTimeStamp;
+	d.Set(Utc);
 	d.SetTimeZone(0, false);
 	d.SetTimeZone(Offset, true);
 	return d;
@@ -618,7 +625,7 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 				{
 					// Emit initial entry for 'start'
 					auto &inf = Info.New();
-					inf.UtcTimeStamp = Prev;
+					Prev.Get(inf.Utc);
 					inf.Offset = PrevOff;
 					#if DEBUG_DST_INFO
 					printf("Info: Start=%s %i\n", Prev.Get().Get(), inf.Offset);
@@ -629,7 +636,7 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 				{
 					// Emit furthur entries for DST events between start and end.
 					auto &inf = Info.New();
-					inf.UtcTimeStamp = Utc;
+					Utc.Get(inf.Utc);
 					inf.Offset = Off;
 					#if DEBUG_DST_INFO
 					printf("Info: Next=%s %i\n", Utc.Get().Get(), inf.Offset);
@@ -693,8 +700,8 @@ bool LDateTime::DstToLocal(LArray<LDstInfo> &Dst, LDateTime &dt)
 		auto &a = Dst[i];
 		auto &b = Dst[i+1];
 		LDateTime start, end;
-		start.Set(a.UtcTimeStamp);
-		end.Set(b.UtcTimeStamp);
+		start.Set(a.Utc);
+		end.Set(b.Utc);
 
 		auto InRange = dt >= start && dt < end;
 		if (InRange)
@@ -713,7 +720,7 @@ bool LDateTime::DstToLocal(LArray<LDstInfo> &Dst, LDateTime &dt)
 
 	auto Last = Dst.Last();
 	LDateTime d;
-	d.Set(Last.UtcTimeStamp);
+	d.Set(Last.Utc);
 	if (dt >= d && dt.Year() == d.Year())
 	{
 		// If it's after the last DST change but in the same year... it's ok...
@@ -918,19 +925,19 @@ int LDateTime::GetTime(char *Str, size_t SLen) const
 
 uint64 LDateTime::Ts() const
 {
-	uint64 ts = 0;
+	LTimeStamp ts;
 	Get(ts);
-	return ts;
+	return ts.Get();
 }
 
 uint64_t LDateTime::GetUnix()
 {
-	uint64_t s;
+	LTimeStamp s;
 	Get(s);
 	#if defined(WINDOWS)
-	return s / LDateTime::Second64Bit / 116445168000000000LL;
+	return s.Get() / LDateTime::Second64Bit / 116445168000000000LL;
 	#else
-	return s / LDateTime::Second64Bit - Offset1800;
+	return s.Get() / LDateTime::Second64Bit - Offset1800;
 	#endif
 }
 
@@ -943,7 +950,7 @@ bool LDateTime::SetUnix(uint64 s)
 	#endif
 }
 
-bool LDateTime::Set(uint64 s)
+bool LDateTime::Set(const LTimeStamp &s)
 {
 	#if defined WIN32
 
@@ -951,7 +958,7 @@ bool LDateTime::Set(uint64 s)
 		SYSTEMTIME System;
 
 		// Adjust to the desired timezone
-		uint64 u = s + ((int64)_Tz * 60 * Second64Bit);
+		uint64 u = s.Get() + ((int64)_Tz * 60 * Second64Bit);
 
 		Utc.dwHighDateTime = u >> 32;
 		Utc.dwLowDateTime = u & 0xffffffff;
@@ -971,7 +978,7 @@ bool LDateTime::Set(uint64 s)
 
 	#else
 
-		time_t t = (time_t) (((int64)(s / Second64Bit)) - Offset1800);
+		time_t t = s;
 		Set(t);
 		_Thousands = s % Second64Bit;
 		return true;
@@ -1096,7 +1103,7 @@ bool LDateTime::OsTime(uint64_t ts)
 	return Set((time_t)ts);
 }
 
-bool LDateTime::Get(uint64 &s) const
+bool LDateTime::Get(LTimeStamp &s) const
 {
 	#ifdef WINDOWS
 	
@@ -1616,7 +1623,7 @@ int LDateTime::DiffMonths(const LDateTime &dt)
 
 LDateTime LDateTime::operator -(const LDateTime &dt)
 {
-    uint64 a, b;
+    LTimeStamp a, b;
     Get(a);
     dt.Get(b);
 
@@ -1626,7 +1633,7 @@ LDateTime LDateTime::operator -(const LDateTime &dt)
     int64 Hr = 60 * Min;
     int64 Day = 24 * Hr;
     
-    int64 d = (int64)a - (int64)b;
+    int64 d = (int64)a.Get() - (int64)b.Get();
     LDateTime r;
     r._Day = (int16) (d / Day);
     d -= r._Day * Day;
@@ -1758,38 +1765,31 @@ int LDateTime::DaysInMonth() const
 
 void LDateTime::AddSeconds(int64 Seconds)
 {
-	uint64 i;
+	LTimeStamp i;
 	if (Get(i))
 	{
-		i += Seconds * Second64Bit;
+		i.Get() += Seconds * Second64Bit;
 		Set(i);
 	}
 }
 
 void LDateTime::AddMinutes(int64 Minutes)
 {
-	uint64 i;
+	LTimeStamp i;
 	if (Get(i))
 	{
 		int64 delta = Minutes * 60 * Second64Bit;
-		uint64 n = i + delta;
-		// printf("AddMin " LPrintfInt64 " + " LPrintfInt64 " = " LPrintfInt64 "\n", i, delta, n);
-		Set(n);
-		
-		#if 0
-		uint64 i2;
-		Get(i2);
-		int64 diff = (int64)i2-(int64)i;
-		#endif
+		i.Get() += delta;
+		Set(i);
 	}
 }
 
 void LDateTime::AddHours(int64 Hours)
 {
-	uint64 i;
+	LTimeStamp i;
 	if (Get(i))
 	{
-		i += Hours * LDateTime::HourLength * Second64Bit;
+		i.Get() += Hours * HourLength * Second64Bit;
 		Set(i);
 	}
 }
@@ -1799,11 +1799,11 @@ bool LDateTime::AddDays(int64 Days)
 	if (!Days)
 		return true;
 
-	uint64 Ts;
+	LTimeStamp Ts;
 	if (!Get(Ts))
 		return false;
 
-	Ts += Days * LDateTime::DayLength * Second64Bit;
+	Ts.Get() += Days * LDateTime::DayLength * Second64Bit;
 	bool b = Set(Ts);
 	return b;
 }
@@ -2181,9 +2181,9 @@ bool LDateTime::GetVariant(const char *Name, LVariant &Dst, char *Array)
 		case TypeInt: // Type: Int64
 		case DateTimestamp: // Type: Int64
 		{
-			uint64 i = 0;
-			Get(i);
-			Dst = (int64)i;
+			LTimeStamp i;
+			if (Get(i))
+				Dst = (int64)i.Get();
 			break;
 		}
 		case DateSecond64Bit:
@@ -2289,7 +2289,7 @@ bool LDateTime_Test()
 {
 	// Check 64bit get/set
 	LDateTime t("1/1/2017 0:0:0");
-	uint64 i;
+	LTimeStamp i;
 	DATE_ASSERT(t.Get(i));
 	LgiTrace("Get='%s'\n", t.Get().Get());
 	uint64 i2 = i + (24ULL * 60 * 60 * LDateTime::Second64Bit);
@@ -2313,3 +2313,25 @@ bool LDateTime_Test()
 	return true;
 }
 #endif
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+LTimeStamp &LTimeStamp::operator =(const time_t unixTime)
+{
+	#if defined(WINDOWS)
+	ts = (unixTime + SEC_TO_UNIX_EPOCH) * WINDOWS_TICK;
+	#else
+	ts = (unixTime + LDateTime::Offset1800) * LDateTime::Second64Bit;
+	#endif
+
+	return *this;
+}
+
+LTimeStamp::operator time_t() const
+{
+	#if defined(WINDOWS)
+	#else
+	#endif
+
+	return 0;
+}

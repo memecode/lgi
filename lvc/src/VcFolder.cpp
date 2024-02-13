@@ -765,7 +765,7 @@ void VcFolder::DefaultFields()
 				Fields.Add(LRevision);
 				Fields.Add(LBranch);
 				Fields.Add(LAuthor);
-				Fields.Add(LTimeStamp);
+				Fields.Add(LTime);
 				Fields.Add(LMessageTxt);
 				break;
 			}
@@ -775,7 +775,7 @@ void VcFolder::DefaultFields()
 				Fields.Add(LRevision);
 				Fields.Add(LBranch);
 				Fields.Add(LAuthor);
-				Fields.Add(LTimeStamp);
+				Fields.Add(LTime);
 				Fields.Add(LMessageTxt);
 				break;
 			}
@@ -784,7 +784,7 @@ void VcFolder::DefaultFields()
 				Fields.Add(LGraph);
 				Fields.Add(LRevision);
 				Fields.Add(LAuthor);
-				Fields.Add(LTimeStamp);
+				Fields.Add(LTime);
 				Fields.Add(LMessageTxt);
 				break;
 			}
@@ -808,7 +808,7 @@ void VcFolder::UpdateColumns(LList *lst)
 			case LBranch:     lst->AddColumn("Branch",   60); break;
 			case LRevision:   lst->AddColumn("Revision", 60); break;
 			case LAuthor:     lst->AddColumn("Author",   240); break;
-			case LTimeStamp:  lst->AddColumn("Date",     130); break;
+			case LTime:       lst->AddColumn("Date",     130); break;
 			case LMessageTxt: lst->AddColumn("Message",  700); break;
 			default: LAssert(0); break;
 		}
@@ -1037,10 +1037,10 @@ int CommitIndexCmp(VcCommit **a, VcCommit **b)
 
 int CommitDateCmp(VcCommit **a, VcCommit **b)
 {
-	uint64 ats, bts;
+	LTimeStamp ats, bts;
 	(*a)->GetTs().Get(ats);
 	(*b)->GetTs().Get(bts);
-	int64 diff = (int64)bts - ats;
+	int64 diff = (int64)bts.Get() - ats.Get();
 	if (diff < 0) return -1;
 	return (diff > 0) ? 1 : 0;
 }
@@ -1498,10 +1498,10 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 							
 							if (Dt.Parse(Date))
 							{
-								uint64 Ts;
+								LTimeStamp Ts;
 								if (Dt.Get(Ts))
 								{
-									VcCommit *Cc = Map.Find(Ts);
+									VcCommit *Cc = Map.Find(Ts.Get());
 									if (!Cc)
 									{
 										Map.Add(Ts, Cc = new VcCommit(d, this));

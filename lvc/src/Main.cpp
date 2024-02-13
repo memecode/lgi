@@ -567,7 +567,7 @@ int LstCmp(LListItem *a, LListItem *b, int Col)
 		case LMessageTxt:
 			return Stricmp(A->GetFieldText(fld), B->GetFieldText(fld));
 
-		case LTimeStamp:
+		case LTime:
 			return B->GetTs().Compare(&A->GetTs());
 	}
 
