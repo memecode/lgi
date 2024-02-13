@@ -201,7 +201,7 @@ struct LGraphPriv
 		{
 			case GV_DATETIME:
 			{
-				uint64 Min, Max;
+				LTimeStamp Min, Max;
 				min.Value.Date->Get(Min);
 				max.Value.Date->Get(Max);				
 				
@@ -251,7 +251,7 @@ struct LGraphPriv
 		{
 			case GV_DATETIME:
 			{
-				uint64 Min, Max, Val;
+				LTimeStamp Min, Max, Val;
 				min.Value.Date->Get(Min);
 				max.Value.Date->Get(Max);
 				v.Value.Date->Get(Val);
@@ -370,7 +370,7 @@ struct LGraphPriv
 				{
 					if (First)
 					{
-						uint64 s, e;
+						LTimeStamp s, e;
 						min.Value.Date->Get(s);
 						max.Value.Date->Get(e);
 						int64 period = e - s;

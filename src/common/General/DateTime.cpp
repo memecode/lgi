@@ -400,7 +400,7 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 				LDateTime tmp = d;
 				i->Offset = -(Tzi.Bias + Tzi.DaylightBias);
 				tmp.AddMinutes(-i->Offset);
-				i->UtcTimeStamp = tmp.Ts();
+				i->Utc = tmp;
 			}
 			else
 			{
@@ -408,7 +408,7 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 				LDateTime tmp = s;
 				i->Offset = -(Tzi.Bias + Tzi.StandardBias);
 				tmp.AddMinutes(-i->Offset);
-				i->UtcTimeStamp = tmp.Ts();;
+				i->Utc = tmp;
 			}
 				
 			for (auto y=Start.Year(); y<=(End?End->Year():Start.Year()); y++)
@@ -420,14 +420,14 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 					auto tmp = ConvertSysTime(Tzi.StandardDate, y);
 					i->Offset = -(Tzi.Bias + Tzi.StandardBias);
 					tmp.AddMinutes(-i->Offset);
-					i->UtcTimeStamp = tmp.Ts();
+					i->Utc = tmp;
 
 					// Cur year, second event: start of DST
 					i = &Info.New();
 					tmp = ConvertSysTime(Tzi.DaylightDate, y);
 					i->Offset = -(Tzi.Bias + Tzi.DaylightBias);
 					tmp.AddMinutes(-i->Offset);
-					i->UtcTimeStamp = tmp.Ts();
+					i->Utc = tmp;
 				}
 				else
 				{
@@ -436,14 +436,14 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 					auto tmp = ConvertSysTime(Tzi.DaylightDate, Start.Year());
 					i->Offset = -(Tzi.Bias + Tzi.DaylightBias);
 					tmp.AddMinutes(-i->Offset);
-					i->UtcTimeStamp = tmp.Ts();
+					i->Utc = tmp;
 
 					// Cur year, second event: end of DST
 					i = &Info.New();
 					tmp = ConvertSysTime(Tzi.StandardDate, Start.Year());
 					i->Offset = -(Tzi.Bias + Tzi.StandardBias);
 					tmp.AddMinutes(-i->Offset);
-					i->UtcTimeStamp = tmp.Ts();
+					i->Utc = tmp;
 				}
 			}
 
@@ -830,7 +830,7 @@ LDateTime &LDateTime::SetNow()
 		GetSystemTime(&stNow);
 		SystemTimeToFileTime(&stNow, &ftNow);
 		uint64 i64 = ((uint64)ftNow.dwHighDateTime << 32) | ftNow.dwLowDateTime;
-		Set(i64);
+		OsTime(i64);
     
     #else
 
@@ -923,11 +923,11 @@ int LDateTime::GetTime(char *Str, size_t SLen) const
 	return Ch;
 }
 
-uint64 LDateTime::Ts() const
+LTimeStamp LDateTime::Ts() const
 {
 	LTimeStamp ts;
 	Get(ts);
-	return ts.Get();
+	return ts;
 }
 
 uint64_t LDateTime::GetUnix()
@@ -950,7 +950,7 @@ bool LDateTime::SetUnix(uint64 s)
 	#endif
 }
 
-bool LDateTime::Set(const LTimeStamp &s)
+bool LDateTime::Set(LTimeStamp &s)
 {
 	#if defined WIN32
 
@@ -1113,7 +1113,7 @@ bool LDateTime::Get(LTimeStamp &s) const
 			return false;
 		}
 
-		s = OsTime();
+		s.Get() = OsTime();
 		if (!s)
 			return false;
 
@@ -1569,9 +1569,14 @@ int LDateTime::Compare(const LDateTime *Date) const
 	auto ThisTs = IsValid() ? Ts() : 0;
 	auto DateTs = Date->IsValid() ? Date->Ts() : 0;
 
+	if (ThisTs.Get() & 0x800000000000000)
+	{
+		Get(ThisTs);
+	}
+
 	// If these ever fire, the cast to int64_t will overflow
-	LAssert((ThisTs & 0x800000000000000) == 0);
-	LAssert((DateTs & 0x800000000000000) == 0);
+	LAssert((ThisTs.Get() & 0x800000000000000) == 0);
+	LAssert((DateTs.Get() & 0x800000000000000) == 0);
 
 	int64_t Diff = (int64_t)ThisTs - DateTs;
 	if (Diff < 0)
@@ -2327,11 +2332,17 @@ LTimeStamp &LTimeStamp::operator =(const time_t unixTime)
 	return *this;
 }
 
-LTimeStamp::operator time_t() const
+LTimeStamp &LTimeStamp::operator =(const LDateTime &dt)
+{
+	dt.Get(*this);
+	return *this;
+}
+
+time_t LTimeStamp::Unix() const
 {
 	#if defined(WINDOWS)
+	return (ts / WINDOWS_TICK) - SEC_TO_UNIX_EPOCH;
 	#else
+	return (ts / LDateTime::Second64Bit) - LDateTime::Offset1800;
 	#endif
-
-	return 0;
 }

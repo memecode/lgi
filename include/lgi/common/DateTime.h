@@ -50,6 +50,8 @@
 /// \ingroup Time
 #define GDTF_MONTH_LEADINGZ			0x200
 
+class LDateTime;
+
 class LgiClass LTimeStamp
 {
 	uint64_t ts = 0;
@@ -71,9 +73,24 @@ public:
 	
 	// Convert from unit time to LGI time stamp
 	LTimeStamp &operator =(const time_t unixTime);
+	// Convert from LDateTime
+	LTimeStamp &operator =(const LDateTime &dt);
 	
 	// Convert from LGI time stamp to unix time
-	operator time_t() const;
+	time_t Unix() const;
+
+	operator bool() const
+	{
+		return ts != 0;
+	}
+
+	bool operator <(const LTimeStamp &b) const { return ts < b.ts; }
+	bool operator <=(const LTimeStamp &b) const { return ts <= b.ts; }
+	bool operator >(const LTimeStamp &b) const { return ts > b.ts; }
+	bool operator >=(const LTimeStamp &b) const { return ts >= b.ts; }
+	int64_t operator -(const LTimeStamp &b) const { return (int64_t)ts - (int64_t)b.ts; }
+	LTimeStamp &operator +=(int64_t i) { ts += i; return *this; }
+	LTimeStamp &operator -=(int64_t i) { ts -= i; return *this; }
 };
 
 
@@ -279,7 +296,7 @@ public:
 	bool SetUnix(uint64_t s);
 
 	/// Returns the 64bit LTimeStamp.
-	uint64 Ts() const;
+	LTimeStamp Ts() const;
 
 	/// Get the timestamp in a format compatible with the current operating system APIs.
 	/// \returns the timestamp or zero on error.
@@ -294,7 +311,7 @@ public:
 	/// \sa LDateTime::GetFormat()
 	bool Set(const char *Str);
 	/// Sets the date and time from a 64 bit int (os specific)
-	bool Set(const LTimeStamp &s);
+	bool Set(LTimeStamp &s);
 	/// Sets the time from a unit time_t
 	bool Set(time_t tt);
 	/// Parses the date from a string

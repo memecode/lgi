@@ -333,7 +333,7 @@ bool DbArrayIndex::Sort(LDbField *fld, bool ascend)
 					return 0;
 				}
 
-				uint64 UtcA, UtcB;
+				LTimeStamp UtcA, UtcB;
 				if (!A->Get(UtcA) ||
 					!B->Get(UtcB))
 				{
