@@ -66,10 +66,8 @@ public:
 			*this = unixTime;
 	}
 
-	uint64_t &Get()
-	{
-		return ts;
-	}
+	uint64_t Get() const { return ts; }
+	uint64_t &Ref() { return ts; }
 	
 	// Convert from unit time to LGI time stamp
 	LTimeStamp &operator =(const time_t unixTime);
@@ -311,7 +309,7 @@ public:
 	/// \sa LDateTime::GetFormat()
 	bool Set(const char *Str);
 	/// Sets the date and time from a 64 bit int (os specific)
-	bool Set(LTimeStamp &s);
+	bool Set(const LTimeStamp &s);
 	/// Sets the time from a unit time_t
 	bool Set(time_t tt);
 	/// Parses the date from a string

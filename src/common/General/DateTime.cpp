@@ -975,7 +975,7 @@ bool LDateTime::SetUnix(uint64 s)
 	#endif
 }
 
-bool LDateTime::Set(LTimeStamp &s)
+bool LDateTime::Set(const LTimeStamp &s)
 {
 	#if defined WIN32
 
@@ -1003,9 +1003,8 @@ bool LDateTime::Set(LTimeStamp &s)
 
 	#else
 
-		time_t t = s;
-		Set(t);
-		_Thousands = s % Second64Bit;
+		Set(s.Unix());
+		_Thousands = s.Get() % Second64Bit;
 		return true;
 	
 	#endif
@@ -1149,8 +1148,8 @@ bool LDateTime::Get(LTimeStamp &s) const
 		if (_Year < MIN_YEAR)
 			return false;
 
-		auto sec = OsTime();				
-		s = (uint64)(sec + Offset1800) * Second64Bit + _Thousands;
+		auto sec = OsTime();
+		s.Ref() = (uint64)(sec + Offset1800) * Second64Bit + _Thousands;
 		
 		return true;
 	
@@ -1798,7 +1797,7 @@ void LDateTime::AddSeconds(int64 Seconds)
 	LTimeStamp i;
 	if (Get(i))
 	{
-		i.Get() += Seconds * Second64Bit;
+		i.Ref() += Seconds * Second64Bit;
 		Set(i);
 	}
 }
@@ -1809,7 +1808,7 @@ void LDateTime::AddMinutes(int64 Minutes)
 	if (Get(i))
 	{
 		int64 delta = Minutes * 60 * Second64Bit;
-		i.Get() += delta;
+		i.Ref() += delta;
 		Set(i);
 	}
 }
@@ -1819,7 +1818,7 @@ void LDateTime::AddHours(int64 Hours)
 	LTimeStamp i;
 	if (Get(i))
 	{
-		i.Get() += Hours * HourLength * Second64Bit;
+		i.Ref() += Hours * HourLength * Second64Bit;
 		Set(i);
 	}
 }
@@ -1833,7 +1832,7 @@ bool LDateTime::AddDays(int64 Days)
 	if (!Get(Ts))
 		return false;
 
-	Ts.Get() += Days * LDateTime::DayLength * Second64Bit;
+	Ts.Ref() += Days * LDateTime::DayLength * Second64Bit;
 	bool b = Set(Ts);
 	return b;
 }
