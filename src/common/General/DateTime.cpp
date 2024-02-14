@@ -825,12 +825,37 @@ LDateTime &LDateTime::SetNow()
     #ifdef WIN32
 
 		SYSTEMTIME stNow;
-		FILETIME ftNow;
+		auto sysTz = SystemTimeZone();
 
-		GetSystemTime(&stNow);
-		SystemTimeToFileTime(&stNow, &ftNow);
-		uint64 i64 = ((uint64)ftNow.dwHighDateTime << 32) | ftNow.dwLowDateTime;
-		OsTime(i64);
+		if (_Tz == sysTz)
+			GetLocalTime(&stNow);
+		else
+			GetSystemTime(&stNow);
+
+		#if 1
+			_Day   = stNow.wDay;
+			_Month = stNow.wMonth;
+			_Year  = stNow.wYear;
+
+			_Hours     = stNow.wHour;
+			_Minutes   = stNow.wMinute;
+			_Seconds   = stNow.wSecond;
+			_Thousands = stNow.wMilliseconds;
+			if (_Tz && _Tz != sysTz)
+			{
+				// Adjust to this objects timezone...
+				auto tz = _Tz;
+				_Tz = 0;
+				SetTimeZone(tz, true);
+			}
+
+		#else
+			// This is actually less efficient.
+			FILETIME ftNow;
+			SystemTimeToFileTime(&stNow, &ftNow);
+			uint64 i64 = ((uint64)ftNow.dwHighDateTime << 32) | ftNow.dwLowDateTime;
+			OsTime(i64);
+		#endif
     
     #else
 

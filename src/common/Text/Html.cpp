@@ -2554,7 +2554,7 @@ void LTag::SetImage(const char *Uri, LAutoPtr<LSurface> Img)
 			{
 				Def->Type = ImageOwn;
 				DeleteObj(Def->Img);
-				Def->Img = Img;
+				Def->Img = Img.Release();
 			}
 		}
 		else
