@@ -1058,7 +1058,7 @@ public:
 		auto c = FolderLayout->GetCell(0, 0, true, 2);
 			Tree = new LTree(IDC_TREE, 0, 0, 320, 200);
 			Tree->SetImageList(ImgLst, false);
-			Tree->ShowColumnHeader(true);
+			Tree->ColumnHeaders(true);
 			Tree->AddColumn("Folder", 250);
 			Tree->AddColumn("Counts", 50);
 			c->Add(Tree);

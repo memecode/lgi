@@ -453,7 +453,7 @@ void LListItem::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 		LColour Background = Ctx.Back;
 
 		if (Parent->GetMode() == LListDetails &&
-			(c && c->Mark()) &&
+			(c && c->HasSort()) &&
 			!d->Selected)
 		{
 			Background = GdcMixColour(LColour(0, 24), Background, (double)1/32);
@@ -465,9 +465,9 @@ void LListItem::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 			ng.y2--;
 		}
 
-		if (!c || c->Type() == GIC_ASK_TEXT)
+		if (!c || !c->HasImage())
 		{
-			LDisplayString *Ds = GetDs(i, Ctx.X());
+			auto Ds = GetDs(i, Ctx.X());
 			if (Ds)
 			{
 				Ds->GetFont()->TabSize(0);
@@ -498,8 +498,7 @@ void LListItem::OnPaintColumn(LItem::ItemPaintCtx &Ctx, int i, LItemColumn *c)
 			pDC->Colour(Background);
 			pDC->Rectangle(&ng);
 
-			if ((c && c->Type() == GIC_ASK_IMAGE) &&
-				Parent->GetImageList())
+			if (Parent->GetImageList())
 			{
 				int Img = GetImage();
 				if (Img >= 0)
@@ -1214,11 +1213,11 @@ bool LList::OnKey(LKey &k)
 								bool Ascend = true;
 								for (int i=0; i<Columns.Length(); i++)
 								{
-									LItemColumn *c = Columns[i];
-									if (c->Mark())
+									auto c = Columns[i];
+									if (c->HasSort())
 									{
 										Col = i;
-										if (c->Mark() == GLI_MARK_UP_ARROW)
+										if (c->UpArrow())
 										{
 											Ascend = false;
 										}
@@ -1288,7 +1287,7 @@ void LList::OnMouseClick(LMouse &m)
 			d->DragStart.x = m.x;
 			d->DragStart.y = m.y;
 
-			if (ColumnHeaders &&
+			if (ColumnHeaders() &&
 				ColumnHeader.Overlap(m.x, m.y))
 			{
 				// Clicked on a column heading
@@ -2305,7 +2304,7 @@ void LList::PourAll()
 	
 	if (d->Mode == LListDetails)
 	{
-		if (ColumnHeaders)
+		if (ColumnHeaders())
 		{
 			ColumnHeader = Client;
 			ColumnHeader.y2 = ColumnHeader.y1 + Font->GetHeight() + 4;
@@ -2532,7 +2531,7 @@ void LList::OnPaint(LSurface *pDC)
 		if (IconCol)
 		{
 			IconCol->Resizable(false);
-			IconCol->Type(GIC_ASK_IMAGE);
+			IconCol->HasImage(true);
 		}
 	}
 	else if (!AskImage())
@@ -2714,7 +2713,7 @@ int LList::GetContentSize(int Index)
 	if (f)
 	{
 		LDisplayString h(f, Col->Name());
-		int Hx = h.X() + (Col->Mark() ? 10 : 0);
+		int Hx = h.X() + (Col->HasSort() ? 10 : 0);
 		Max = MAX(Max, Hx);
 	}
 

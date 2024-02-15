@@ -1096,7 +1096,7 @@ LTree::LTree(int id, int x, int y, int cx, int cy, const char *name) :
 	Buttons = true;
 	LinesAtRoot = true;
 	EditLabels = false;
-	ColumnHeaders = false;
+	ColumnHeaders(false);
 	rItems.ZOff(-1, -1);
 
 	#if WINNATIVE
@@ -1619,7 +1619,7 @@ void LTree::OnMouseClick(LMouse &m)
 	{
 		DragMode = DRAG_NONE;
 
-		if (ColumnHeaders &&
+		if (ColumnHeaders() &&
 			ColumnHeader.Overlap(m.x, m.y))
 		{
 			d->DragStart.x = m.x;
@@ -1787,7 +1787,7 @@ void LTree::OnPaint(LSurface *pDC)
 
 	rItems = GetClient();
 	LFont *f = GetFont();
-	if (ShowColumnHeader())
+	if (ColumnHeaders())
 	{
 		ColumnHeader.ZOff(rItems.X()-1, f->GetHeight() + 4);
 		PaintColumnHeadings(pDC);

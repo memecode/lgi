@@ -32,13 +32,15 @@ public:
 	bool Down = false;
 	bool Drag = false;
 
-	LItemContainer *Parent;
+	#define _(name) bool name = false;
+	COLUMN_FLAGS()
+	#undef _
+
+	LItemContainer *Parent = NULL;
 	LString cName;
 	int cWidth = 0;
-	int cType = GIC_ASK_TEXT;
 	LSurface *cIcon = NULL;
 	int cImage = -1;
-	int cMark = GLI_MARK_NONE;
 	bool OwnIcon = false;
 	bool CanResize = true;
 
@@ -113,14 +115,8 @@ static void FillStops(LArray<LColourStop> &Stops, LRect &r, bool Active)
 //////////////////////////////////////////////////////////////////////////////////////
 LItemContainer::LItemContainer()
 {
-	Flags = 0;
-	DragMode = 0;
-	DragCol = NULL;
-	ColClick = -1;
-	ColumnHeaders = true;
 	ColumnHeader.ZOff(-1, -1);
 	Columns.SetFixedLength(true);
-	ItemEdit = NULL;
 }
 
 LItemContainer::~LItemContainer()
@@ -133,7 +129,7 @@ LItemContainer::~LItemContainer()
 void LItemContainer::PaintColumnHeadings(LSurface *pDC)
 {
 	// Draw column headings
-	if (!ColumnHeaders || !ColumnHeader.Valid())
+	if (!ColumnHeaders() || !ColumnHeader.Valid())
 		return;
 
 	LSurface *ColDC = pDC;
@@ -285,7 +281,7 @@ void LItemContainer::DragColumn(int Index)
 
 int LItemContainer::ColumnAtX(int x, LItemColumn **Col, int *Offset)
 {
-	LItemColumn *Column = 0;
+	LItemColumn *Column = NULL;
 	if (!Col) Col = &Column;
 
 	int Cx = GetImageList() ? 16 : 0;
@@ -319,7 +315,7 @@ int LItemContainer::HitColumn(int x, int y, LItemColumn *&Resize, LItemColumn *&
 	Resize = 0;
 	Over = 0;
 
-	if (ColumnHeaders &&
+	if (ColumnHeaders() &&
 		ColumnHeader.Overlap(x, y))
 	{
 		// Clicked on a column heading
@@ -399,6 +395,19 @@ void LItemContainer::GetColumnSizes(ColSizes &cs)
 		{
 			cs.FixedPx += c->Width();
 		}
+	}
+}
+
+void LItemContainer::SetSortingMark(int ColIdx, bool Up)
+{
+	for (int i=0; i<GetColumns(); i++)
+	{
+		auto c = ColumnAt(i);
+		if (!c)
+			continue;
+
+		c->UpArrow(ColIdx == i && Up);
+		c->DownArrow(ColIdx == i && !Up);
 	}
 }
 
@@ -747,33 +756,20 @@ int LItemColumn::Width()
 	return d->cWidth;
 }
 
-void LItemColumn::Mark(int i)
-{
-	d->cMark = i;
-	if (d->Parent)
-	{
-		d->Parent->Invalidate(&d->Parent->ColumnHeader);
-	}
+#define _(name) \
+bool LItemColumn::name() \
+{ \
+	return d->name; \
+} \
+\
+void LItemColumn::name(bool b) \
+{ \
+	d->name = b; \
+	if (d->Parent) \
+		d->Parent->Invalidate(&d->Parent->ColumnHeader); \
 }
-
-int LItemColumn::Mark()
-{
-	return d->cMark;
-}
-
-void LItemColumn::Type(int i)
-{
-	d->cType = i;
-	if (d->Parent)
-	{
-		d->Parent->Invalidate(&d->Parent->ColumnHeader);
-	}
-}
-
-int LItemColumn::Type()
-{
-	return d->cType;
-}
+COLUMN_FLAGS()
+#undef _
 
 void LItemColumn::Icon(LSurface *i, bool Own)
 {
@@ -829,7 +825,7 @@ void LItemColumn::OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground)
 					r.y1 + ((r.Y()-d->cIcon->Y())/2) + Off,
 					d->cIcon);
 
-		if (d->cMark)
+		if (HasSort())
 		{
 			Mx += x + d->cIcon->X() + 4;
 		}
@@ -862,7 +858,7 @@ void LItemColumn::OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground)
 											Background);
 		}
 
-		if (d->cMark)
+		if (HasSort())
 		{
 			Mx += d->Parent->GetImageList()->TileX() + 4;
 		}
@@ -894,7 +890,7 @@ void LItemColumn::OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground)
 		// d->Txt->_debug = true;
 		Ds->Draw(pDC, r.x1 + Off + 3, y + Off, &r);
 
-		if (d->cMark)
+		if (HasSort())
 		{
 			Mx += Ds->X();
 		}
@@ -913,28 +909,23 @@ void LItemColumn::OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground)
 	Mx += Off;
 	My += Off - 1;
 
-	switch (d->cMark)
+	if (UpArrow())
 	{
-		case GLI_MARK_UP_ARROW:
-		{
-			pDC->Line(Mx + 2, My, Mx + 2, My + ARROW_SIZE - 1);
-			pDC->Line(Mx, My + 2, Mx + 2, My);
-			pDC->Line(Mx + 2, My, Mx + 4, My + 2);
-			break;
-		}
-		case GLI_MARK_DOWN_ARROW:
-		{
-			pDC->Line(Mx + 2, My, Mx + 2, My + ARROW_SIZE - 1);
-			pDC->Line(	Mx,
-						My + ARROW_SIZE - 3,
-						Mx + 2,
-						My + ARROW_SIZE - 1);
-			pDC->Line(	Mx + 2,
-						My + ARROW_SIZE - 1,
-						Mx + 4,
-						My + ARROW_SIZE - 3);
-			break;
-		}
+		pDC->Line(Mx + 2, My, Mx + 2, My + ARROW_SIZE - 1);
+		pDC->Line(Mx, My + 2, Mx + 2, My);
+		pDC->Line(Mx + 2, My, Mx + 4, My + 2);
+	}
+	else if (DownArrow())
+	{
+		pDC->Line(Mx + 2, My, Mx + 2, My + ARROW_SIZE - 1);
+		pDC->Line(	Mx,
+					My + ARROW_SIZE - 3,
+					Mx + 2,
+					My + ARROW_SIZE - 1);
+		pDC->Line(	Mx + 2,
+					My + ARROW_SIZE - 1,
+					Mx + 4,
+					My + ARROW_SIZE - 3);
 	}
 }
 

@@ -489,7 +489,7 @@ public:
 			AddView(box = new LBox(IDC_BOX));
 			box->AddView(log = new LList(IDC_LOG, 0, 0, 200, 200));
 			log->GetCss(true)->Width("40%");
-			log->ShowColumnHeader(false);
+			log->ColumnHeaders(false);
 			log->AddColumn("Items", 1000);
 
 			box->AddView(tabs = new LTabView(IDC_TABS));

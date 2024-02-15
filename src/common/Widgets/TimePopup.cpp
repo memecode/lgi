@@ -169,7 +169,7 @@ LTimePopup::LTimePopup(LView *owner) : LPopup(owner)
 	if (Times)
 	{
 		Times->Sunken(false);
-		Times->ShowColumnHeader(false);
+		Times->ColumnHeaders(false);
 		Times->AddColumn("");
 		Times->MultiSelect(false);
 

@@ -827,7 +827,7 @@ public:
 						if ((Watch = new LTree(IDC_WATCH_LIST, 0, 0, 100, 100, "Watch List")))
 						{
 							Watch->SetFont(&Small);
-							Watch->ShowColumnHeader(true);
+							Watch->ColumnHeaders(true);
 							Watch->AddColumn("Watch", 80);
 							Watch->AddColumn("Type", 100);
 							Watch->AddColumn("Value", 600);
@@ -985,7 +985,7 @@ public:
 			FtpLog->SetPourLargest(true);
 			FtpLog->Sunken(true);
 			FtpLog->AddColumn("Entry", 1000);
-			FtpLog->ShowColumnHeader(false);
+			FtpLog->ColumnHeaders(false);
 		}
 
 		for (int n=0; n<CountOf(Txt); n++)

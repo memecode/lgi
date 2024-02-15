@@ -155,17 +155,6 @@ public:
 	void OnFocus(bool f);
 };
 
-
-/// No marking
-/// \sa LItemColumn::Mark
-#define GLI_MARK_NONE				0
-/// Up arrow mark
-/// \sa LItemColumn::Mark
-#define GLI_MARK_UP_ARROW			1
-/// Down arrow mark
-/// \sa LItemColumn::Mark
-#define GLI_MARK_DOWN_ARROW			2
-
 /// Item container column
 class LgiClass LItemColumn :
 	public ResObject,
@@ -189,24 +178,32 @@ public:
 	void Name(const char *n);
 	/// Gets the text
 	char *Name();
+
 	/// Sets the width
 	void Width(int i);
 	/// Gets the width
 	int Width();
-	/// Sets the type of content in the header. Use one of #GIC_ASK_TEXT, #GIC_OWNER_DRAW, #GIC_ASK_IMAGE.
-	///
-	/// Is this used??
-	void Type(int i);
-	/// Gets the type of content.
-	int Type();
-	/// Sets the marking, one of #GLI_MARK_NONE, #GLI_MARK_UP_ARROW or #GLI_MARK_DOWN_ARROW
-	void Mark(int i);
-	/// Gets the marking, one of #GLI_MARK_NONE, #GLI_MARK_UP_ARROW or #GLI_MARK_DOWN_ARROW
-	int Mark();
+
+	//////////////////////////////////////////////////////
+	#define COLUMN_FLAGS() \
+		_(HasText)  \
+		_(HasImage) \
+		_(UpArrow)  \
+		_(DownArrow)
+	#define _(name) \
+		bool name(); \
+		void name(bool b);
+	COLUMN_FLAGS()
+	#undef _
+	bool HasSort()   { return UpArrow() | DownArrow(); }
+
+	//////////////////////////////////////////////////////
+
 	/// Sets the icon to display
 	void Icon(LSurface *i, bool Own = true);
 	/// Gets the icon displayed
 	LSurface *Icon();
+
 	/// True if clicked
 	bool Value();
 	/// Set clicked
@@ -216,6 +213,7 @@ public:
 	void Image(int i);
 	/// Gets the index into the parent containers LImageList
 	int Image();
+
 	/// true if resizable
 	bool Resizable();
 	/// Sets whether the user can resize the column
@@ -230,31 +228,10 @@ public:
 
 	/// Paint the column header.
 	void OnPaint(LSurface *pDC, LRect &r);
-
 	/// Draws the just the icon, text and mark.
 	void OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground); 
 };
 
-/// Client draws the content.
-#define GIC_OWNER_DRAW				0x01
-/// Column header is text.
-#define GIC_ASK_TEXT				0x02
-/// Column header is an image.
-#define GIC_ASK_IMAGE				0x04
-/// Not used.
-#define GIC_OWN_LIST				0x08
-/// Drag is over the control
-#define GIC_IN_DRAG_OP				0x10
-/// Multiple item select allowed
-#define GIC_MULTI_SELECT			0x20
-
-#define DRAG_NONE					0
-#define SELECT_ITEMS				1
-#define RESIZE_COLUMN				2
-#define DRAG_COLUMN					3
-#define CLICK_COLUMN				4
-#define TOGGLE_ITEMS				5
-#define CLICK_ITEM					6
 #define DEFAULT_COLUMN_SPACING		12
 
 class LgiClass LItemContainer :
@@ -280,18 +257,28 @@ public:
 		int ResizePx;
 	};
 	
+	enum ContainerDragMode
+	{
+		DRAG_NONE,
+		SELECT_ITEMS,
+		RESIZE_COLUMN,
+		DRAG_COLUMN,
+		CLICK_COLUMN,
+		TOGGLE_ITEMS,
+		CLICK_ITEM,
+	};
+	
 protected:
-	int Flags;
-	int DragMode;
-	bool ColumnHeaders;
+	ContainerDragMode DragMode = DRAG_NONE;
+	
 	LRect ColumnHeader;
-	int ColClick;
+	int ColClick = -1;
 	LMouse ColMouse;
-	LItemEdit *ItemEdit;
+	LItemEdit *ItemEdit = NULL;
 
 	LArray<LItemColumn*> Columns;
 	LAutoPtr<LItemColumn> IconCol;
-	class LDragColumn *DragCol;
+	class LDragColumn *DragCol = NULL;
 
 	/// Returns size information for columns
 	void GetColumnSizes(ColSizes &cs);
@@ -306,27 +293,25 @@ public:
 	LItemContainer();
 	virtual ~LItemContainer();
 
+	#define DEFINE_FLAG(name, default) \
+		private: \
+			bool b##name = default; \
+		public: \
+			bool name() { return b##name; } \
+			void name(bool b) { b##name = b; }
+
+
 	// Props
-	bool OwnerDraw() { return TestFlag(Flags, GIC_OWNER_DRAW); }
-	void OwnerDraw(bool b) { if (b) SetFlag(Flags, GIC_OWNER_DRAW); else ClearFlag(Flags, GIC_OWNER_DRAW); }
-	bool AskText() { return TestFlag(Flags, GIC_ASK_TEXT); }
-	void AskText(bool b) { if (b) SetFlag(Flags, GIC_ASK_TEXT); else ClearFlag(Flags, GIC_ASK_TEXT); }
-	bool AskImage() { return TestFlag(Flags, GIC_ASK_IMAGE); }
-	void AskImage(bool b) { if (b) SetFlag(Flags, GIC_ASK_IMAGE); else ClearFlag(Flags, GIC_ASK_IMAGE); }
-	bool InsideDragOp() { return TestFlag(Flags, GIC_IN_DRAG_OP); }
-	void InsideDragOp(bool b) { if (b) SetFlag(Flags, GIC_IN_DRAG_OP); else ClearFlag(Flags, GIC_IN_DRAG_OP); }
+	DEFINE_FLAG(AskText, false)
+	DEFINE_FLAG(AskImage, false)
+	DEFINE_FLAG(OwnList, false)
+	DEFINE_FLAG(InDragOp, false)
+	DEFINE_FLAG(MultiSelect, false)
+	DEFINE_FLAG(InsideDragOp, false)
+	DEFINE_FLAG(DropOnItem, false)
+	DEFINE_FLAG(DropBetweenItems, false)
+	DEFINE_FLAG(ColumnHeaders, true)
 
-	/// Returns whether the user can select multiple items at the same time
-	bool MultiSelect() { return TestFlag(Flags, GIC_MULTI_SELECT); }
-	/// Sets whether the user can select multiple items at the same time
-	void MultiSelect(bool b) { if (b) SetFlag(Flags, GIC_MULTI_SELECT); else ClearFlag(Flags, GIC_MULTI_SELECT); }
-
-	/// Returns whether display of column headers is switched on
-	bool ShowColumnHeader() { return ColumnHeaders; }
-
-	/// Turns on display of column headers
-	void ShowColumnHeader(bool Show) { ColumnHeaders = Show; }
-		
 	/// Adds a column to the list
 	LItemColumn *AddColumn
 	(
@@ -370,6 +355,13 @@ public:
 	bool GetColumnClickInfo(int &Col, LMouse &m);
 
 	int HitColumn(int x, int y, LItemColumn *&Resize, LItemColumn *&Over);
+
+	/// Sets/clears the sorting mark
+	void SetSortingMark(
+		/// Index of the column, or -1 to unset
+		int ColIdx = -1,
+		/// Which mark to set
+		bool Up = true);
 
 	/// Called when a column is clicked
 	virtual void OnColumnClick

@@ -64,7 +64,7 @@ public:
 		AddView(Lst = new LList(IDC_BROWSE_LIST, r.x1+1, r.y1+1, r.X()-3, r.Y()-3));
 		Lst->Sunken(false);
 		Lst->AddColumn("Name", r.X());
-		Lst->ShowColumnHeader(false);
+		Lst->ColumnHeaders(false);
 		Lst->MultiSelect(false);
 		
 		// Set default border style...

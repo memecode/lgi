@@ -21,7 +21,7 @@ public:
 		if (Lst)
 		{
 			Lst->MultiSelect(false);
-			Lst->ShowColumnHeader(false);
+			Lst->ColumnHeaders(false);
 			Lst->Sunken(false);
 			Lst->AddColumn("", 1000);
 		}

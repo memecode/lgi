@@ -1898,7 +1898,7 @@ LFolderList::LFolderList(LFileSelectDlg *dlg, int Id, int x, int y, int cx, int 
 	LFolderView(dlg)
 {
 	SetImageList(Dlg->d->BtnIcons, false);
-	ShowColumnHeader(false);
+	ColumnHeaders(false);
 	AddColumn("Name", cx-20);
 	SetMode(LListColumns);
 }

@@ -37,7 +37,7 @@ public:
 		SetPos(r);
 		AddView(Lst = new LList(10));
 		Lst->Sunken(false);
-		Lst->ShowColumnHeader(false);
+		Lst->ColumnHeaders(false);
 		Lst->AddColumn("", x);
 	}
 
