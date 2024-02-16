@@ -205,7 +205,7 @@ struct LGraphPriv
 				min.Value.Date->Get(Min);
 				max.Value.Date->Get(Max);				
 				
-				uint64 ts = Min + ( ((uint64)coord * (Max - Min)) / pixels); 
+				auto ts = Min + ( ((uint64)coord * (Max - Min)) / pixels); 
 				LDateTime dt;
 				dt.Set(ts);
 

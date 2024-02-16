@@ -109,7 +109,7 @@ LHistoryPopup::LHistoryPopup(LHistory *h) : LPopup(h)
 	r.Inset(1, 1);
 	AddView(Lst = new LList(100, r.x1, r.y1, r.X()-1, r.Y()-1));
 	Lst->Sunken(false);
-	Lst->ShowColumnHeader(false);
+	Lst->ColumnHeaders(false);
 	
 	for (int i=0; i<History->Strs.Length(); i++)
 	{

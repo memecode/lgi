@@ -127,7 +127,7 @@ LDateTime::LDateTime(time_t unixTime)
 LDateTime::LDateTime(const LTimeStamp &lgiTime)
 {
 	Empty();
-	if (lgiTime)
+	if (lgiTime.Valid())
 		Set(lgiTime);
 }
 
@@ -1137,8 +1137,8 @@ bool LDateTime::Get(LTimeStamp &s) const
 			return false;
 		}
 
-		s.Get() = OsTime();
-		if (!s)
+		s.Ref() = OsTime();
+		if (!s.Valid())
 			return false;
 
 		return true;
@@ -1602,7 +1602,7 @@ int LDateTime::Compare(const LDateTime *Date) const
 	LAssert((ThisTs.Get() & 0x800000000000000) == 0);
 	LAssert((DateTs.Get() & 0x800000000000000) == 0);
 
-	int64_t Diff = (int64_t)ThisTs - DateTs;
+	auto Diff = ThisTs - DateTs;
 	if (Diff < 0)
 		return -1;
 
@@ -2321,7 +2321,7 @@ bool LDateTime_Test()
 	LTimeStamp i;
 	DATE_ASSERT(t.Get(i));
 	LgiTrace("Get='%s'\n", t.Get().Get());
-	uint64 i2 = i + (24ULL * 60 * 60 * LDateTime::Second64Bit);
+	auto i2 = i + (24ULL * 60 * 60 * LDateTime::Second64Bit);
 	LDateTime t2;
 	t2.SetFormat(GDTF_DAY_MONTH_YEAR);
 	t2.Set(i2);

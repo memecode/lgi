@@ -1504,7 +1504,7 @@ bool VcFolder::ParseLog(int Result, LString s, ParseParams *Params)
 									VcCommit *Cc = Map.Find(Ts.Get());
 									if (!Cc)
 									{
-										Map.Add(Ts, Cc = new VcCommit(d, this));
+										Map.Add(Ts.Get(), Cc = new VcCommit(d, this));
 										Out->Add(Cc);
 										Cc->CvsParse(Dt, Author, Msg);
 									}

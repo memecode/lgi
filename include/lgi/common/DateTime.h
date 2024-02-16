@@ -77,11 +77,10 @@ public:
 	// Convert from LGI time stamp to unix time
 	time_t Unix() const;
 
-	operator bool() const
-	{
-		return ts != 0;
-	}
+	// operator bool() const { return ts != 0; }
+	bool Valid() const { return ts != 0; }
 
+	LTimeStamp operator +(uint64_t offset) { LTimeStamp t; t.Ref() = ts + offset; return t; }
 	bool operator <(const LTimeStamp &b) const { return ts < b.ts; }
 	bool operator <=(const LTimeStamp &b) const { return ts <= b.ts; }
 	bool operator >(const LTimeStamp &b) const { return ts > b.ts; }
