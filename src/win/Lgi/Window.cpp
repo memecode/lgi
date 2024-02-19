@@ -1161,7 +1161,7 @@ LMessage::Result LWindow::OnEvent(LMessage *Msg)
 	return Status;
 }
 
-LPoint LWindow::GetDpi()
+LPoint LWindow::GetDpi() const
 {
 	if (!d->Dpi.x)
 		d->Dpi = LGetDpiForWindow(_View);

@@ -262,7 +262,7 @@ public:
 	bool SetActive();
 	LRect &GetPos() override;
 	void SetDecor(bool Visible);
-	LPoint GetDpi();
+	LPoint GetDpi() const;
 	LPointF GetDpiScale();
 	void ScaleSizeToDpi();
 	
