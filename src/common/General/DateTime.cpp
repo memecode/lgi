@@ -616,7 +616,7 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 				
 				int Off = atoi(Val) / 60;
 
-				if (Utc.Ts() == 0)
+				if (Utc.Ts().Valid() == 0)
 					continue;
 
 				if (Prev.Year() &&

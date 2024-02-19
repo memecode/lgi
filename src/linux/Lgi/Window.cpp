@@ -1333,7 +1333,7 @@ void ClientCallback(GtkWidget *w, CallbackParams *p)
 	}
 }
 
-LPoint LWindow::GetDpi()
+LPoint LWindow::GetDpi() const
 {
 	return LScreenDpi();
 }

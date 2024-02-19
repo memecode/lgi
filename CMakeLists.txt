@@ -329,8 +329,8 @@ elseif (LINUX)
 		src/linux/Lgi/Printer.cpp
 		src/linux/Lgi/Thread.cpp
 		src/linux/Lgi/View.cpp
-		src/linux/Lgi/Widgets.cpp
 		src/linux/Lgi/Window.cpp
+		src/linux/Lgi/Dialog.cpp
 		src/common/Lgi/FileSelect.cpp
 		src/common/Widgets/CheckBox.cpp
 		src/common/Widgets/Edit.cpp
@@ -437,6 +437,7 @@ add_library(lgi-stub STATIC
 target_compile_definitions(lgi-stub
 	PRIVATE
 		LGI_LIBRARY
+	PUBLIC
 		LGI_STATIC)
 
 target_include_directories(lgi-stub
@@ -554,6 +555,18 @@ elseif (LINUX)
 			${GST_LIBRARIES}
 			magic
 		)
+
+	target_include_directories(lgi-stub
+		PUBLIC
+			include/lgi/linux/Gtk
+			include/lgi/linux
+			${GTK3_INCLUDE_DIRS}
+			${GST_INCLUDE_DIRS}
+		PRIVATE
+			private/linux)
+	target_compile_definitions(lgi-stub
+		PUBLIC
+			LINUX)
 
 elseif (MSVC)
 

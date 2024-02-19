@@ -10,6 +10,9 @@ add_executable(crash-handler
 target_include_directories(crash-handler
     PRIVATE
         ../../../include)
+target_compile_definitions(crash-handler
+    PRIVATE
+        LGI_STATIC)
 
 if (LINUX)
     target_include_directories(crash-handler

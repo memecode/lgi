@@ -56,6 +56,16 @@ protected:
 			LgiTrace("%s:%i - failed to create font(%s,%i)\n", _FL, faceName, size);
 		fontMap.Add(hnd, fnt);
 
+		if (fm)
+		{
+			LDisplayString ds(fnt, "x");
+			fm->height = fnt->GetHeight();
+			fm->ascent = fnt->Ascent();
+			fm->descent = fnt->Descent();
+			fm->x_height = ds.Y();
+			fm->draw_spaces = false;
+		}
+
 		return hnd;
 	}
 
@@ -121,8 +131,7 @@ protected:
 		{
 			case litehtml::list_style_type_disc:
 			{
-				LDisplayString ds(Fnt ? Fnt : LSysFont, "o");
-				ds.Draw(pDC, marker.pos.x, marker.pos.y);
+				pDC->FilledCircle(marker.pos.x, marker.pos.y, 3);
 				break;
 			}
 			default:
@@ -302,9 +311,11 @@ public:
 
 	int OnNotify(LViewI *c, LNotification n)
 	{
+		// printf("OnNotify %i=%i, %i=%i\n", c->GetId(), IDC_VSCROLL, n.Type, LNotifyValueChanged);
 		if (c->GetId() == IDC_VSCROLL &&
 			n.Type == LNotifyValueChanged)
 		{
+			// printf("Inval\n");
 			Invalidate();
 		}
 
@@ -339,9 +350,17 @@ public:
 		}
 	}
 
+	void SetUrl(LString s)
+	{
+		if (location)
+			location->Name(s);
+		if (browser)
+			browser->SetUrl(s);
+	}
+
 	void OnReceiveFiles(LArray<const char *> &Files)
 	{
-		browser->SetUrl(Files[0]);
+		SetUrl(Files[0]);
 	}
 };
 
