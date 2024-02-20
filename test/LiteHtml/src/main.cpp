@@ -18,7 +18,9 @@ enum Ctrls
 	IDC_BROWSER,
 };
 
-#define NOT_IMPL LAssert(!"not impl");
+#define NOT_IMPL \
+	printf("%s:%i - %s not impl.\n", _FL, __func__); \
+	LAssert(!"not impl");
 
 class HtmlView :
 	public LLayout,
@@ -29,6 +31,7 @@ class HtmlView :
 protected:
 	LWindow *wnd = NULL;
 	LRect client;
+	LString cursorName;
 	LHashTbl<IntKey<litehtml::uint_ptr>, LFont*> fontMap;
 
 	LColour Convert(const litehtml::web_color &c)
@@ -185,7 +188,7 @@ protected:
 
 	void set_cursor(const char* cursor)
 	{
-		NOT_IMPL
+		cursorName = cursor;
 	}
 
 	void transform_text(litehtml::string& text, litehtml::text_transform tt)
@@ -255,6 +258,14 @@ public:
 		wnd = GetWindow();
 	}
 
+	LCursor GetCursor(int x, int y) override
+	{
+		if (cursorName == "pointer")
+			return LCUR_PointingHand;
+		
+		return LCUR_Normal;
+	}
+
 	bool SetUrl(LString url)
 	{
 		if (LFileExists(url))
@@ -320,6 +331,41 @@ public:
 		}
 
 		return LLayout::OnNotify(c, n);
+	}
+
+	/*
+		bool							on_mouse_over(int x, int y, int client_x, int client_y, position::vector& redraw_boxes);
+		bool							on_lbutton_down(int x, int y, int client_x, int client_y, position::vector& redraw_boxes);
+		bool							on_lbutton_up(int x, int y, int client_x, int client_y, position::vector& redraw_boxes);
+		bool							on_mouse_leave(position::vector& redraw_boxes);
+	*/
+
+	void OnMouseClick(LMouse &m)
+	{
+		if (!doc)
+			return;
+
+		int64_t sx, sy;
+		GetScrollPos(sx, sy);
+		litehtml::position::vector redraw_boxes;
+		if (m.Left())
+		{
+			if (m.Down())
+				doc->on_lbutton_down(m.x+sx, m.y+sy, m.x, m.y, redraw_boxes);
+			else
+				doc->on_lbutton_up(m.x+sx, m.y+sy, m.x, m.y, redraw_boxes);
+		}
+	}
+
+	void OnMouseMove(LMouse &m)
+	{
+		if (!doc)
+			return;
+
+		int64_t sx, sy;
+		GetScrollPos(sx, sy);
+		litehtml::position::vector redraw_boxes;
+		doc->on_mouse_over(m.x+sx, m.y+sy, m.x, m.y, redraw_boxes);
 	}
 };
 
