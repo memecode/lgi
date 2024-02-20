@@ -39,6 +39,12 @@ protected:
 		return LColour(c.red, c.green, c.blue, c.alpha);
 	}
 
+	LRect Convert(const litehtml::position &p)
+	{
+		LRect r(p.x, p.y, p.x + p.width - 1, p.y + p.height - 1);
+		return r;
+	}
+
 	litehtml::uint_ptr create_font(	const char* faceName,
 									int size,
 									int weight,
@@ -114,7 +120,7 @@ protected:
 
 	int get_default_font_size() const
 	{
-		return 12; // LSysFont->PointSize();
+		return 13; // LSysFont->PointSize();
 	}
 
 	const char *get_default_font_name() const
@@ -155,15 +161,37 @@ protected:
 		NOT_IMPL
 	}
 
-	void draw_background(litehtml::uint_ptr hdc, const std::vector<litehtml::background_paint> &bg)
+	void draw_background(litehtml::uint_ptr hdc, const std::vector<litehtml::background_paint> &background)
 	{
-		NOT_IMPL
+		auto pDC = (LSurface*)hdc;
+		for (auto b: background)
+		{
+			pDC->Colour(Convert(b.color));
+			auto rc = Convert(b.border_box);
+			pDC->Rectangle(&rc);
+		}
 	}
 
 	void draw_borders(litehtml::uint_ptr hdc, const litehtml::borders& borders, const litehtml::position& draw_pos, bool root)
 	{
 		auto pDC = (LSurface*)hdc;
-		NOT_IMPL
+		auto drawEdge = [&](const litehtml::border &b, int x, int y, int dx, int dy, int ix, int iy)
+		{
+			pDC->Colour(Convert(b.color));
+			for (int i=0; i<b.width; i++)
+			{
+				pDC->Line(x, y, x+dx, y+dy);
+				x += ix;
+				y += iy;
+			}
+		};
+
+		int x2 = draw_pos.width - 1;
+		int y2 = draw_pos.height - 1;
+		drawEdge(borders.left,   draw_pos.x,    draw_pos.y,    0,  y2, 1,  0);
+		drawEdge(borders.top,    draw_pos.x,    draw_pos.y,    x2, 0,  0,  1);
+		drawEdge(borders.right,  draw_pos.x+x2, draw_pos.y,    0,  y2, -1, 0);
+		drawEdge(borders.bottom, draw_pos.x,    draw_pos.y+y2, x2, 0,  0, -1);
 	}
 
 	void set_caption(const char* caption)
