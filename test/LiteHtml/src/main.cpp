@@ -16,6 +16,21 @@ enum Ctrls
 	IDC_BROWSER,
 };
 
+class AppLiteHtmlView : public LiteHtmlView
+{
+public:
+	AppLiteHtmlView(int id) : LiteHtmlView(id)
+	{
+
+	}
+
+	void OnNavigate(LString url) override
+	{
+		GetWindow()->SetCtrlName(IDC_LOCATION, url);
+		LiteHtmlView::OnNavigate(url);
+	}
+};
+
 class App : public LWindow
 {
 	LBox *box = NULL;
@@ -35,7 +50,7 @@ public:
 		{
 			AddView(box = new LBox(IDC_BOX, true));
 			box->AddView(location = new LEdit(IDC_LOCATION, 0, 0, 100, 20));
-			box->AddView(browser = new LiteHtmlView(IDC_BROWSER));
+			box->AddView(browser = new AppLiteHtmlView(IDC_BROWSER));
 			box->Value(LSysFont->GetHeight() + 8);
 			AttachChildren();
 			location->Focus(true);

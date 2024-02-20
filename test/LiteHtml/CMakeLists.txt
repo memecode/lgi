@@ -9,6 +9,8 @@ add_subdirectory(../../../../../codelib/litehtml litehtml)
 set(SRC
     src/main.cpp
     ../../src/common/LiteHtml/LiteHtmlView.cpp
+    ../../src/common/Net/Http.cpp
+    ../../src/common/Net/OpenSSLSocket.cpp
     ../../src/common/Lgi/LgiMain.cpp)
 
 if(WIN32)

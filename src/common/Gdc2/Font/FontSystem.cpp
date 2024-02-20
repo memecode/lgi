@@ -745,7 +745,7 @@ LFont *LFontSystem::GetGlyph(uint32_t u, LFont *UserFont)
 				}
 			}
 
-			LgiTrace("Loaded %i fonts for glyph sub.\n", d->Used - Used);
+			// LgiTrace("Loaded %i fonts for glyph sub.\n", d->Used - Used);
 
 		#if LGI_EXCEPTIONS
 		}

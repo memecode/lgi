@@ -12,6 +12,9 @@ public:
 
 	bool SetUrl(LString url);
 
+	// Events:
+	virtual void OnNavigate(LString url);
+
 	// LLayout impl
 	void OnAttach() override;
 	LCursor GetCursor(int x, int y) override;
