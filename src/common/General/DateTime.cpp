@@ -982,14 +982,66 @@ bool LDateTime::Set(const LTimeStamp &s)
 		FILETIME Utc;
 		SYSTEMTIME System;
 
-		// Adjust to the desired timezone
-		uint64 u = s.Get() + ((int64)_Tz * 60 * Second64Bit);
+		// Compare the non-year parts of the SYSTEMTIMEs
+		auto SysCmp = [](SYSTEMTIME &a, SYSTEMTIME &b)
+		{
+			#define CMP(name) if (auto d = a.name - b.name) return d;
+			CMP(wMonth); CMP(wDay); CMP(wHour); CMP(wMinute); CMP(wSecond); CMP(wMilliseconds);
+			return 0;
+		};
 
+		// Adjust to the desired timezone
+		uint64 u = s.Get();
 		Utc.dwHighDateTime = u >> 32;
 		Utc.dwLowDateTime = u & 0xffffffff;
+
 		if (!FileTimeToSystemTime(&Utc, &System))
 			return false;
 			
+		// this is current in 'UTC' but we the local version of the time,
+		// not so much in the _Tz timezone, but the effective timezone for that
+		// actual datetime in question, which could have a different DST offset.
+		TIME_ZONE_INFORMATION tzi = {};
+		if (GetTimeZoneInformationForYear(System.wYear, NULL, &tzi))
+		{
+			auto order = SysCmp(tzi.DaylightDate, tzi.StandardDate);
+			// order > 0 = DaylightDate is after StandardDate
+			// order < 0 = DaylightDate is before StandardDate
+			LAssert(order != 0);
+
+			auto a = SysCmp(System, tzi.StandardDate);
+			// a > 0 = System is after StandardDate
+			// a < 0 = System is before StandardDate
+
+			auto b = SysCmp(System, tzi.DaylightDate);
+			// b > 0 = System is after DaylightDate
+			// b < 0 = System is before DaylightDate
+
+			_Tz = (int16)-tzi.Bias;
+			if (order > 0)
+			{
+				// year is: DST -> Normal -> DST
+				if (a < 0 || b > 0)
+					_Tz -= (int16)tzi.DaylightBias;
+			}
+			else
+			{
+				// year is: Normal -> DST -> Normal
+				if (a < 0 && b > 0)
+					_Tz -= (int16)tzi.DaylightBias;
+			}
+
+			u += _Tz * 60 * Second64Bit;
+			Utc.dwHighDateTime = u >> 32;
+			Utc.dwLowDateTime = u & 0xffffffff;
+			if (!FileTimeToSystemTime(&Utc, &System))
+				return false;
+		}
+		else
+		{
+			_Tz = 0; // Can't convert to localtime...
+		}
+
 		_Year = System.wYear;
 		_Month = System.wMonth;
 		_Day = System.wDay;
