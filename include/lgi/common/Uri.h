@@ -10,7 +10,7 @@ public:
 	LString sUser;
 	LString sPass;
 	LString sHost;
-	int Port;
+	int Port = 0;
 	LString sPath;
 	LString sAnchor;
 
@@ -18,7 +18,17 @@ public:
 	LUri
 	(
 		/// Optional URI to start parsing
-		const char *uri = 0
+		const char *uri = NULL
+	);
+	LUri
+	(
+		const char *proto,
+		const char *user,
+		const char *pass,
+		const char *host,
+		int port,
+		const char *path,
+		const char *anchor = NULL
 	);
 	~LUri();
 
@@ -57,6 +67,9 @@ public:
 	LUri &operator =(const LUri &u);
 	LUri &operator =(const char *s) { Set(s); return *this; }
 	LUri &operator +=(const char *s);
+
+	// Unit testing...
+	static bool UnitTests();
 };
 
 /// Proxy settings lookup

@@ -6,6 +6,7 @@
 #include "lgi/common/ScrollBar.h"
 #include "lgi/common/Menu.h"
 #include "lgi/common/LiteHtmlView.h"
+#include "lgi/common/Uri.h"
 
 const char *AppName = "LgiLiteHtml";
 
@@ -77,7 +78,17 @@ int LgiMain(OsAppArguments &AppArgs)
 	LApp app(AppArgs, "application/x-lgi-litehtml");
 	if (app.IsOk())
 	{
-		app.AppWnd = new App;
+		auto result = LUri::UnitTests();
+
+		App *a = new App;
+		app.AppWnd = a;
+
+		LString cmdLine(AppArgs.lpCmdLine);
+		LUri u(cmdLine);
+		if (u.IsProtocol("http") ||
+			u.IsProtocol("https"))
+			a->SetUrl(cmdLine);
+
 		app.Run();
 	}
 	return 0;

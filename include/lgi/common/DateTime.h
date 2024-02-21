@@ -60,6 +60,11 @@ public:
 	constexpr static uint64_t WINDOWS_TICK = 10000000;
 	constexpr static uint64_t SEC_TO_UNIX_EPOCH = 11644473600LL;
 	
+	LTimeStamp(uint64_t sysTime)
+	{
+		ts = sysTime;
+	}
+
 	LTimeStamp(time_t unixTime = 0)
 	{
 		if (unixTime)

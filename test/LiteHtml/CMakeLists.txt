@@ -11,7 +11,9 @@ set(SRC
     ../../src/common/LiteHtml/LiteHtmlView.cpp
     ../../src/common/Net/Http.cpp
     ../../src/common/Net/OpenSSLSocket.cpp
-    ../../src/common/Lgi/LgiMain.cpp)
+    ../../src/common/Lgi/LgiMain.cpp
+    ../../src/common/Gdc2/Filters/Png.cpp
+    ../../src/common/Gdc2/Filters/Jpeg.cpp)
 
 if(WIN32)
     set(APP_TYPE WIN32)
@@ -21,3 +23,13 @@ endif()
 
 add_executable(LgiLiteHtml ${APP_TYPE} ${SRC})
 target_link_libraries(LgiLiteHtml PUBLIC lgi litehtml)
+if(WIN32)
+    target_include_directories(LgiLiteHtml
+        PRIVATE
+            "c:/Program Files/OpenSSL-Win64/include"
+            ${CODELIB}/zlib
+            ${CODELIB}/zlib/build64
+            ${CODELIB}/libpng
+            ${CODELIB}/libpng/build64
+            ${CODELIB}/libjpeg-9a)
+endif()

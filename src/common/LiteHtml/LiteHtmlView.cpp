@@ -9,14 +9,14 @@
 #include "lgi/common/LiteHtmlView.h"
 #include "lgi/common/Thread.h"
 #include "lgi/common/Http.h"
+#include "lgi/common/PopupNotification.h"
 
 #undef min
 #undef max
 #include "litehtml/html.h"
 
 #define NOT_IMPL \
-	LgiTrace("%s:%i - %s not impl.\n", _FL, __func__); \
-	LAssert(!"not impl");
+	LgiTrace("%s:%i - %s not impl.\n", _FL, __func__);
 
 struct LiteHtmlViewPriv :
 	public litehtml::document_container,
@@ -192,7 +192,7 @@ struct LiteHtmlViewPriv :
 
 	int get_default_font_size() const
 	{
-		return 13; // LSysFont->PointSize();
+		return 12; // LSysFont->PointSize();
 	}
 
 	const char *get_default_font_name() const
@@ -210,29 +210,53 @@ struct LiteHtmlViewPriv :
 		pDC->Colour(Convert(marker.color));
 		switch (marker.marker_type)
 		{
+			case litehtml::list_style_type_none:
+				break;
+			case litehtml::list_style_type_circle:
+				pDC->Circle(marker.pos.x, marker.pos.y, 3);
+				break;
 			case litehtml::list_style_type_disc:
-			{
 				pDC->FilledCircle(marker.pos.x, marker.pos.y, 3);
 				break;
-			}
+			case litehtml::list_style_type_square:
+				pDC->Box(marker.pos.x-2, marker.pos.y-2, marker.pos.x+2, marker.pos.y+2);
+				break;
 			default:
-			{
 				LgiTrace("%s:%i - draw_list_marker %i not impl\n", marker.marker_type);
 				break;
-			}
 		}
+	}
+
+	LString FullUri(const char *src, const char *baseurl)
+	{
+		LUri s(src);
+		if (s.sProtocol)
+			return src;
+
+		if (s.sPath)
+		{
+			LUri c(currentUrl);
+			c += s.sPath;
+			return c.ToString();
+		}
+
+		return LString();
 	}
 
 	void load_image(const char *src, const char *baseurl, bool redraw_on_ready)
 	{
-		if (!imageCache.Find(src))
+		auto absUri = FullUri(src, baseurl);
+		if (!absUri)
+			return;
+
+		if (!imageCache.Find(absUri))
 		{
-			LgiTrace("load_image(%s,%s)\n", src, baseurl);
+			LgiTrace("load_image(%s) %s + %s\n", absUri.Get(), currentUrl.Get(), src);
 			if (auto i = new Image)
 			{
-				i->uri = src;
-				imageCache.Add(src, i);
-				threads.Add(new NetworkThread(view, src, [i, this](auto status, auto data)
+				i->uri = absUri;
+				imageCache.Add(absUri, i);
+				threads.Add(new NetworkThread(view, absUri, [i, this, redraw_on_ready](auto status, auto data)
 				{
 					auto leaf = i->uri.SplitDelimit("/").Last();
 					if (status)
@@ -240,14 +264,14 @@ struct LiteHtmlViewPriv :
 						LMemStream s(data.Get(), data.Length(), false);
 						i->status = i->img.Reset(GdcD->Load(&s, leaf));
 						LgiTrace("load_image(%s) load status=%i\n", i->uri.Get(), i->status);
+						if (i->status && redraw_on_ready)
+							view->Invalidate();
 					}
 					else
 					{
 						i->status = false;
 						LgiTrace("load_image(%s) network status=%i\n", i->uri.Get(), i->status);
 					}
-
-					view->Invalidate();
 				}));
 			}
 		}
@@ -255,7 +279,11 @@ struct LiteHtmlViewPriv :
 
 	void get_image_size(const char *src, const char *baseurl, litehtml::size &sz)
 	{
-		if (auto i = imageCache.Find(src))
+		auto absUri = FullUri(src, baseurl);
+		if (!absUri)
+			return;
+
+		if (auto i = imageCache.Find(absUri))
 		{
 			if (i->img)
 			{
@@ -273,11 +301,14 @@ struct LiteHtmlViewPriv :
 			auto rc = Convert(b.border_box);
 			if (!b.image.empty())
 			{
-				if (auto i = imageCache.Find(b.image.c_str()	))
+				auto absUri = FullUri(b.image.c_str(), b.baseurl.c_str());
+				if (auto i = imageCache.Find(absUri))
 				{
 					if (i->img)
 					{
+						auto op = pDC->Op(GDC_ALPHA);
 						pDC->Blt(b.position_x, b.position_y, i->img);
+						pDC->Op(op);
 					}
 					else LgiTrace("%s:%i - draw_background(img=%s) img no surface\n", _FL, b.image.c_str());
 				}
@@ -320,7 +351,7 @@ struct LiteHtmlViewPriv :
 
 	void set_base_url(const char* base_url)
 	{
-		NOT_IMPL
+		currentUrl = base_url;
 	}
 
 	void link(const std::shared_ptr<litehtml::document>& doc, const litehtml::element::ptr& el)
@@ -335,10 +366,15 @@ struct LiteHtmlViewPriv :
 
 		threads.Add(new NetworkThread(view, url, [this, url=LString(url)](auto status, auto data)
 		{
-			currentUrl = url;
-			doc = litehtml::document::createFromString(data, this);
-			view->OnNavigate(url);
-			view->Invalidate();
+			if (data)
+			{
+				currentUrl = url;
+				doc = litehtml::document::createFromString(data, this);
+				view->OnNavigate(url);
+				view->Invalidate();
+			}
+			else LPopupNotification::Message(wnd, LString::Fmt("No data for '%s'", url.Get()));
+
 		}));
 	}
 
@@ -460,7 +496,9 @@ void LiteHtmlView::OnNavigate(LString url)
 
 bool LiteHtmlView::SetUrl(LString url)
 {
-	if (LFileExists(url))
+	LUri u(url);
+	if (u.IsProtocol("file") ||
+		(!u.sProtocol && LFileExists(url)))
 	{
 		auto html_text = LReadFile(url);
 		if (html_text)
@@ -470,6 +508,11 @@ bool LiteHtmlView::SetUrl(LString url)
 			OnNavigate(url);
 			return d->doc != NULL;
 		}
+	}
+	else
+	{
+		litehtml::element::ptr elem;
+		d->on_anchor_click(url, elem);
 	}
 	
 	return false;

@@ -9,9 +9,28 @@ static const char *Ws = " \t\r\n";
 
 LUri::LUri(const char *uri)
 {
-	Port = 0;
 	if (uri)
 		Set(uri);
+}
+
+LUri::LUri
+(
+	const char *proto,
+	const char *user,
+	const char *pass,
+	const char *host,
+	int port,
+	const char *path,
+	const char *anchor
+)
+{
+	sProtocol = proto;
+	sUser = user;
+	sPass = pass;
+	sHost = host;
+	Port = port;
+	sPath = path;
+	sAnchor = anchor;
 }
 
 LUri::~LUri()
@@ -22,27 +41,26 @@ LUri::~LUri()
 LUri &LUri::operator +=(const char *s)
 {
 	// Add segment to path
-	if (!sPath.Length() || sPath(-1) != '/')
-		sPath += IsFile() ? DIR_STR : "/";
+	if (!s)
+		return *this;
 
-	auto len = sPath.Length();
-	sPath += s;
+	if (*s == '/')
+		sPath.Empty(); // reset
 
-	if (IsFile())
+	auto parts = sPath.SplitDelimit("/\\");
+	parts.SetFixedLength(false);
+
+	for (auto p: LString(s).SplitDelimit("/\\"))
 	{
-		char *c = sPath.Get();
-		#if DIR_CHAR == '/'
-		char from = '\\';
-		#else
-		char from = '/';
-		#endif
-		for (size_t i=len; c && i<sPath.Length(); i++)
-		{
-			if (c[i] == from)
-				c[i] = DIR_CHAR;
-		}
+		if (p.Equals(".."))
+			parts.PopLast();
+		else if (p.Equals("."))
+			;
+		else
+			parts.Add(p);
 	}
 
+	sPath = LString(IsFile() ? DIR_STR : "/").Join(parts);
 	return *this;
 }
 
@@ -128,116 +146,98 @@ bool LUri::Set(const char *uri)
 	SkipWs(s);
 
 	// Scan ahead and check for protocol...
-	const char *p = s;
-	while (*s && IsAlpha(*s)) s++;
-	if (s[0] == ':' &&
-		(s - p) > 1 &&
-		s[1] == '/' &&
-		s[2] == '/')
+	const char *hasProto = NULL;
+	const char *hasAt = NULL;
+	const char *hasPath = NULL;
+	const char *hasColon = NULL;
+
+	for (auto c = s; *c; c++)
 	{
-		sProtocol.Set(p, s - p);
-		s += 3;
+		if (c[0] == ':' &&
+			c[1] == '/' &&
+			c[2] == '/')
+		{
+			if (!hasProto)
+			{
+				hasProto = c;
+				c += 2;
+			}
+		}
+		else if (c[0] == '@' && !hasAt)
+		{
+			hasAt = c; // keep the first '@'
+		}
+		else if (c[0] == ':')
+		{
+			hasColon = c;
+		}
+		else if ((c[0] == '/' || c[0] == '\\') && !hasPath)
+		{
+			hasPath = c;
+			break; // anything after this is path...
+		}
+	}
+
+	if (hasProto)
+	{
+		sProtocol.Set(s, hasProto - s);
+		s = hasProto + 3;
+	}
+	
+	if (hasAt)
+	{
+		if (hasAt >= s)
+		{
+			auto p = LString(s, hasAt - s).SplitDelimit(":", 1);
+			if (p.Length() == 2)
+			{
+				sUser = DecodeStr(p[0]);
+				sPass = DecodeStr(p[1]);
+			}
+			else if (p.Length() == 1)
+			{
+				sUser = DecodeStr(p[0]);
+			}
+
+			s = hasAt + 1;
+		}
+		else LAssert(!"hasAt should be > s");
+	}
+
+	bool hasHost = hasProto || hasAt || hasColon || !hasPath;
+	if (hasHost)
+	{
+		auto p = LString(s, hasPath ? hasPath - s : -1).SplitDelimit(":", 1);
+		if (p.Length() == 2)
+		{
+			sHost = p[0];
+			Port = p[1].Int();
+		}
+		else if (p.Length() == 1)
+		{
+			sHost = p[0];
+		}
 	}
 	else
 	{
-		// No protocol, so assume it's a host name or path
-		s = p;
+		hasPath = s;
 	}
 
-	// Check for path
-	bool HasPath = false;
-	if
-	(
-		(s[0] && s[1] == ':')
-		||
-		(s[0] == '/')
-		||
-		(s[0] == '\\')
-	)
+	if (hasPath)
 	{
-		HasPath = true;
-	}
-	else
-	{
-		// Scan over the host name
-		p = s;
-		while (	*s &&
-				*s > ' ' &&
-				*s < 127 &&
-				*s != '/' &&
-				*s != '\\')
-		{
-			s++;
-		}
-
-		sHost.Set(p, s - p);
-		if (sHost)
-		{
-			char *At = strchr(sHost, '@');
-			if (At)
-			{
-				*At++ = 0;
-				char *Col = strchr(sHost, ':');
-				if (Col)
-				{
-					*Col++ = 0;
-					sPass = DecodeStr(Col);
-				}
-
-				sUser = DecodeStr(sHost);
-				sHost = At;
-			}
-
-			char *Col = strchr(sHost, ':');
-			if (Col)
-			{
-				Port = atoi(Col+1);
-				sHost.Length(Col-sHost.Get());
-			}
-		}
-
-		HasPath = *s == '/';
+		sPath = hasPath;
 	}
 
-	if (HasPath)
+	if (sPath)
 	{
-		const char *Start = s;
-		while (*s && *s != '#')
-			s++;
-
-		if (*s)
+		auto anchor = sPath.Find("#");
+		if (anchor >= 0)
 		{
-			sPath.Set(Start, s - Start);
-			sAnchor = s + 1;
+			sAnchor = sPath(anchor, -1);
+			sPath.Length(anchor);
 		}
-		else
-		{
-			sPath = Start;
-		}
+	}
 		
-		#if 0
-		// This decodes the path from %## encoding to raw characters.
-		// However sometimes we need the encoded form. So instead of
-		// doing the conversion here the caller has to do it now.
-		char *i = Path, *o = Path;
-		while (*i)
-		{
-			if (*i == '%' && i[1] && i[2])
-			{
-				char h[3] = {i[1], i[2], 0};
-				*o++ = htoi(h);
-				i+=2;
-			}
-			else
-			{
-				*o++ = *i;
-			}
-			i++;
-		}
-		*o = 0;
-		#endif
-	}
-
 	return sHost || sPath;
 }
 
@@ -310,6 +310,39 @@ LString LUri::DecodeStr(const char *s)
 	return p.NewLStr();
 }
 
+struct UriUnitCase
+{
+	const char *str;
+	LUri uri;
+};
+
+bool LUri::UnitTests()
+{
+	UriUnitCase Parse[] = {
+		{"http://user:pass@host:1234/somePath/seg/file.png", LUri("http", "user", "pass", "host", 1234, "somePath/seg/file.png")},
+		{"user:pass@host:1234/somePath/seg/file.png",        LUri(NULL, "user", "pass", "host", 1234, "somePath/seg/file.png")  },
+		{"user@host:1234/somePath/seg/file.png",             LUri(NULL, "user", NULL, "host", 1234, "somePath/seg/file.png")    },
+		{"user@host/somePath/seg/file.png",                  LUri(NULL, "user", NULL, "host", 0, "somePath/seg/file.png")       },
+		{"user@host",                                        LUri(NULL, "user", NULL, "host", 0, NULL)                          },
+		{"host",                                             LUri(NULL, NULL, NULL, "host", 0, NULL)                            },
+		{"host:1234",                                        LUri(NULL, NULL, NULL, "host", 1234, NULL)                         },
+		{"somePath/seg/file.png",                            LUri(NULL, NULL, NULL, NULL, 0, "somePath/seg/file.png")           },
+	};
+
+	for (auto &test: Parse)
+	{
+		LUri u(test.str);
+		if (u != test.uri)
+		{
+			LAssert(!"test failed");
+			return false;
+		}
+	}
+
+	return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 #if defined LGI_CARBON
 int CFNumberRefToInt(CFNumberRef r, int Default = 0)
 {
