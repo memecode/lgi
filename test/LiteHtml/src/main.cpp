@@ -83,7 +83,13 @@ int LgiMain(OsAppArguments &AppArgs)
 		App *a = new App;
 		app.AppWnd = a;
 
+		#ifdef WINDOWS
 		LString cmdLine(AppArgs.lpCmdLine);
+		#else
+		LString cmdLine;
+		if (AppArgs.Args > 1)
+			cmdLine = AppArgs.Arg[1];
+		#endif
 		LUri u(cmdLine);
 		if (u.IsProtocol("http") ||
 			u.IsProtocol("https"))

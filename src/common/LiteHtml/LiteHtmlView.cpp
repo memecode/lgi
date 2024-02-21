@@ -132,20 +132,40 @@ struct LiteHtmlViewPriv :
 		}
 		while (fontMap.Find(hnd) != NULL);
 
+		auto faceNames = LString(faceName).SplitDelimit(",");
+
+		printf("create_font('%s', %i, %i, %i, %i)\n",
+			faceName,
+			size,
+			weight,
+			italic,
+			decoration);
+
 		LFont *fnt = new LFont;
-		bool status = fnt->Create(faceName, LCss::Len(LCss::LenPt, size) );
-		if (!status)
+		fnt->Bold(weight > 400);
+		if (italic == litehtml::font_style_italic)
+			fnt->Italic(true);
+
+		for (auto face: faceNames)
+		{
+			bool status = fnt->Create(face, LCss::Len(LCss::LenPt, size) );
+			if (status)
+				break;
 			LgiTrace("%s:%i - failed to create font(%s,%i)\n", _FL, faceName, size);
+		}
 		fontMap.Add(hnd, fnt);
 
 		if (fm)
 		{
 			LDisplayString ds(fnt, "x");
 			fm->height = fnt->GetHeight();
-			fm->ascent = fnt->Ascent();
-			fm->descent = fnt->Descent();
+			fm->ascent = ceil(fnt->Ascent());
+			fm->descent = ceil(fnt->Descent());
 			fm->x_height = ds.Y();
 			fm->draw_spaces = false;
+
+			printf("\tht=%i as=%i de=%i x=%i\n", 
+				fm->height, fm->ascent, fm->descent, fm->x_height);
 		}
 
 		return hnd;
@@ -193,7 +213,7 @@ struct LiteHtmlViewPriv :
 
 	int get_default_font_size() const
 	{
-		return 12; // LSysFont->PointSize();
+		return LSysFont->PointSize() * 1.1;
 	}
 
 	const char *get_default_font_name() const
@@ -317,7 +337,7 @@ struct LiteHtmlViewPriv :
 			}
 			else if (!b.gradient.is_empty())
 			{
-				if (b.gradient.m_type == litehtml::gradient::linear_gradient &&
+				if (b.gradient.m_type == litehtml::web_gradient::linear_gradient &&
 					b.gradient.m_colors.size() == 2)
 				{
 					LMemDC mem(rc.X(), rc.Y(), System32BitColourSpace);
@@ -383,16 +403,18 @@ struct LiteHtmlViewPriv :
 		if (!url)
 			return;
 
-		threads.Add(new NetworkThread(view, url, [this, url=LString(url)](auto status, auto data)
+		auto full = FullUri(url, NULL);
+
+		threads.Add(new NetworkThread(view, full, [this, full](auto status, auto data)
 		{
 			if (data)
 			{
-				currentUrl = url;
+				currentUrl = full;
 				doc = litehtml::document::createFromString(data, this);
-				view->OnNavigate(url);
+				view->OnNavigate(full);
 				view->Invalidate();
 			}
-			else LPopupNotification::Message(wnd, LString::Fmt("No data for '%s'", url.Get()));
+			else LPopupNotification::Message(wnd, LString::Fmt("No data for '%s'", full.Get()));
 
 		}));
 	}
