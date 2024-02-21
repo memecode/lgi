@@ -998,48 +998,51 @@ bool LDateTime::Set(const LTimeStamp &s)
 		if (!FileTimeToSystemTime(&Utc, &System))
 			return false;
 			
-		// this is current in 'UTC' but we the local version of the time,
-		// not so much in the _Tz timezone, but the effective timezone for that
-		// actual datetime in question, which could have a different DST offset.
-		TIME_ZONE_INFORMATION tzi = {};
-		if (GetTimeZoneInformationForYear(System.wYear, NULL, &tzi))
+		if (_Tz)
 		{
-			auto order = SysCmp(tzi.DaylightDate, tzi.StandardDate);
-			// order > 0 = DaylightDate is after StandardDate
-			// order < 0 = DaylightDate is before StandardDate
-			LAssert(order != 0);
-
-			auto a = SysCmp(System, tzi.StandardDate);
-			// a > 0 = System is after StandardDate
-			// a < 0 = System is before StandardDate
-
-			auto b = SysCmp(System, tzi.DaylightDate);
-			// b > 0 = System is after DaylightDate
-			// b < 0 = System is before DaylightDate
-
-			_Tz = (int16)-tzi.Bias;
-			if (order > 0)
+			// 'System' is currently in 'UTC' but we want the local version of the time,
+			// not in the _Tz timezone, but the effective timezone for that
+			// actual moment in question, which could have a different DST offset.
+			TIME_ZONE_INFORMATION tzi = {};
+			if (GetTimeZoneInformationForYear(System.wYear, NULL, &tzi))
 			{
-				// year is: DST -> Normal -> DST
-				if (a < 0 || b > 0)
-					_Tz -= (int16)tzi.DaylightBias;
+				auto order = SysCmp(tzi.DaylightDate, tzi.StandardDate);
+				// order > 0 = DaylightDate is after StandardDate
+				// order < 0 = DaylightDate is before StandardDate
+				LAssert(order != 0);
+
+				auto a = SysCmp(System, tzi.StandardDate);
+				// a > 0 = System is after StandardDate
+				// a < 0 = System is before StandardDate
+
+				auto b = SysCmp(System, tzi.DaylightDate);
+				// b > 0 = System is after DaylightDate
+				// b < 0 = System is before DaylightDate
+
+				_Tz = (int16)-tzi.Bias;
+				if (order > 0)
+				{
+					// year is: DST -> Normal -> DST
+					if (a < 0 || b > 0)
+						_Tz -= (int16)tzi.DaylightBias;
+				}
+				else
+				{
+					// year is: Normal -> DST -> Normal
+					if (a < 0 && b > 0)
+						_Tz -= (int16)tzi.DaylightBias;
+				}
+
+				u += _Tz * 60 * Second64Bit;
+				Utc.dwHighDateTime = u >> 32;
+				Utc.dwLowDateTime = u & 0xffffffff;
+				if (!FileTimeToSystemTime(&Utc, &System))
+					return false;
 			}
 			else
 			{
-				// year is: Normal -> DST -> Normal
-				if (a < 0 && b > 0)
-					_Tz -= (int16)tzi.DaylightBias;
+				_Tz = 0; // Can't convert to localtime...
 			}
-
-			u += _Tz * 60 * Second64Bit;
-			Utc.dwHighDateTime = u >> 32;
-			Utc.dwLowDateTime = u & 0xffffffff;
-			if (!FileTimeToSystemTime(&Utc, &System))
-				return false;
-		}
-		else
-		{
-			_Tz = 0; // Can't convert to localtime...
 		}
 
 		_Year = System.wYear;
