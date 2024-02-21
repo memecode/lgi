@@ -262,7 +262,7 @@ class LgiClass LLinearBlendBrush : public LBlendBrush
 	void Rop(LRopArgs &Args);
 
 public:
-	LLinearBlendBrush(LPointF a, LPointF b, int stops = 0, LBlendStop *stop = 0) :
+	LLinearBlendBrush(LPointF a, LPointF b, int stops = 0, LBlendStop *stop = NULL) :
 		LBlendBrush(stops, stop)
 	{
 		p[0] = a;

@@ -10,6 +10,7 @@
 #include "lgi/common/Thread.h"
 #include "lgi/common/Http.h"
 #include "lgi/common/PopupNotification.h"
+#include "lgi/common/Path.h"
 
 #undef min
 #undef max
@@ -313,6 +314,24 @@ struct LiteHtmlViewPriv :
 					else LgiTrace("%s:%i - draw_background(img=%s) img no surface\n", _FL, b.image.c_str());
 				}
 				else LgiTrace("%s:%i - draw_background(img=%s) img not found\n", _FL, b.image.c_str());
+			}
+			else if (!b.gradient.is_empty())
+			{
+				if (b.gradient.m_type == litehtml::gradient::linear_gradient &&
+					b.gradient.m_colors.size() == 2)
+				{
+					LMemDC mem(rc.X(), rc.Y(), System32BitColourSpace);
+					LBlendStop stops[2] = {
+						{0.0, Convert(b.gradient.m_colors[0]).c32()},
+						{1.0, Convert(b.gradient.m_colors[1]).c32()}
+					};
+					LLinearBlendBrush brush(LPointF(0.0, 0.0), LPointF(0.0, rc.Y()), 2, stops);
+					LPath path;
+					path.Rectangle(0.0, 0.0, mem.X(), mem.Y());
+					path.Fill(&mem, brush);
+					pDC->Blt(rc.x1, rc.y1, &mem);
+				}
+				else LgiTrace("%s:%i - Invalid gradient.\n", _FL);
 			}
 			else
 			{
