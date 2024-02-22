@@ -19,6 +19,12 @@
 #define NOT_IMPL \
 	LgiTrace("%s:%i - %s not impl.\n", _FL, __func__);
 
+enum Messages
+{
+	M_LOAD_URI = M_USER + 100,
+};
+
+
 struct LiteHtmlViewPriv :
 	public litehtml::document_container,
 	public LCancel
@@ -77,9 +83,12 @@ struct LiteHtmlViewPriv :
 	litehtml::document::ptr doc;
 	LRect client;
 	LString cursorName;
-	LString currentUrl;
 	LHashTbl<IntKey<litehtml::uint_ptr>, LFont*> fontMap;
 	LHashTbl<ConstStrKey<char, false>, Image*> imageCache;
+
+	// Url history state
+	LString::Array history;
+	int historyPos = 0;
 
 	LiteHtmlViewPriv(LiteHtmlView *v) : view(v)
 	{
@@ -87,7 +96,13 @@ struct LiteHtmlViewPriv :
 
 	~LiteHtmlViewPriv()
 	{
-		Cancel();
+		Empty();
+	}
+
+	void Empty()
+	{
+		// Clean up threads...
+		Cancel(true);
 		threads.DeleteObjects();
 
 		// Do this before releasing other owned objects, like the fontMap.
@@ -96,6 +111,14 @@ struct LiteHtmlViewPriv :
 		// Clean up caches
 		imageCache.DeleteObjects();
 		fontMap.DeleteObjects();
+
+		// Reset to go state...
+		Cancel(false);
+	}
+
+	LString CurrentUrl()
+	{
+		return history[historyPos];
 	}
 
 	LColour Convert(const litehtml::web_color &c)
@@ -213,7 +236,7 @@ struct LiteHtmlViewPriv :
 
 	int get_default_font_size() const
 	{
-		return LSysFont->PointSize() * 1.1;
+		return LSysFont->PointSize() * 1.3;
 	}
 
 	const char *get_default_font_name() const
@@ -256,7 +279,7 @@ struct LiteHtmlViewPriv :
 
 		if (s.sPath)
 		{
-			LUri c(currentUrl);
+			LUri c(CurrentUrl());
 			c += s.sPath;
 			return c.ToString();
 		}
@@ -272,7 +295,7 @@ struct LiteHtmlViewPriv :
 
 		if (!imageCache.Find(absUri))
 		{
-			LgiTrace("load_image(%s) %s + %s\n", absUri.Get(), currentUrl.Get(), src);
+			// LgiTrace("load_image(%s) %s + %s\n", absUri.Get(), currentUrl.Get(), src);
 			if (auto i = new Image)
 			{
 				i->uri = absUri;
@@ -284,14 +307,14 @@ struct LiteHtmlViewPriv :
 					{
 						LMemStream s(data.Get(), data.Length(), false);
 						i->status = i->img.Reset(GdcD->Load(&s, leaf));
-						LgiTrace("load_image(%s) load status=%i\n", i->uri.Get(), i->status);
+						// LgiTrace("load_image(%s) load status=%i\n", i->uri.Get(), i->status);
 						if (i->status && redraw_on_ready)
 							view->Invalidate();
 					}
 					else
 					{
 						i->status = false;
-						LgiTrace("load_image(%s) network status=%i\n", i->uri.Get(), i->status);
+						// LgiTrace("load_image(%s) network status=%i\n", i->uri.Get(), i->status);
 					}
 				}));
 			}
@@ -390,7 +413,7 @@ struct LiteHtmlViewPriv :
 
 	void set_base_url(const char* base_url)
 	{
-		currentUrl = base_url;
+		history[historyPos] = base_url;
 	}
 
 	void link(const std::shared_ptr<litehtml::document>& doc, const litehtml::element::ptr& el)
@@ -398,25 +421,13 @@ struct LiteHtmlViewPriv :
 		NOT_IMPL
 	}
 
-	void on_anchor_click(const char* url, const litehtml::element::ptr& el)
+	void on_anchor_click(const char *url, const litehtml::element::ptr &el)
 	{
 		if (!url)
 			return;
 
 		auto full = FullUri(url, NULL);
-
-		threads.Add(new NetworkThread(view, full, [this, full](auto status, auto data)
-		{
-			if (data)
-			{
-				currentUrl = full;
-				doc = litehtml::document::createFromString(data, this);
-				view->OnNavigate(full);
-				view->Invalidate();
-			}
-			else LPopupNotification::Message(wnd, LString::Fmt("No data for '%s'", full.Get()));
-
-		}));
+		view->PostEvent(M_LOAD_URI, new LString(full));
 	}
 
 	void set_cursor(const char* cursor)
@@ -431,7 +442,7 @@ struct LiteHtmlViewPriv :
 
 	void import_css(litehtml::string& text, const litehtml::string& url, litehtml::string& baseurl)
 	{
-		LUri cur(currentUrl);
+		LUri cur(CurrentUrl());
 		LUri u(url.c_str());
 		LString newUri;
 
@@ -458,7 +469,7 @@ struct LiteHtmlViewPriv :
 				text = out.NewLStr().Get();
 			}
 			else LgiTrace("%s:%i - error: LgiGetUri(%s)=%s (currentUrl=%s)\n",
-				_FL, newUri.Get(), err.Get(), currentUrl.Get());
+				_FL, newUri.Get(), err.Get(), CurrentUrl().Get());
 		}
 		else LgiTrace("%s:%i - error: no uri for loading css.\n", _FL);
 	}
@@ -531,32 +542,76 @@ LCursor LiteHtmlView::GetCursor(int x, int y)
 
 void LiteHtmlView::OnNavigate(LString url)
 {
-	d->currentUrl = url;
 	Invalidate();
 }
 
-bool LiteHtmlView::SetUrl(LString url)
+void LiteHtmlView::HistoryBack()
 {
+	if (d->historyPos > 0)
+	{
+		d->historyPos--;
+		LoadCurrent();
+	}
+}
+
+void LiteHtmlView::HistoryForward()
+{
+	if (d->historyPos < d->history.Length() - 1)
+	{
+		d->historyPos++;
+		LoadCurrent();
+	}
+}
+
+bool LiteHtmlView::LoadCurrent()
+{
+	OnHistory(d->historyPos > 0, d->historyPos < d->history.Length() - 1);
+
+	// Create the document...
+	auto url = d->CurrentUrl();
 	LUri u(url);
 	if (u.IsProtocol("file") ||
 		(!u.sProtocol && LFileExists(url)))
 	{
 		auto html_text = LReadFile(url);
-		if (html_text)
-		{
-			d->currentUrl = url;
-			d->doc = litehtml::document::createFromString(html_text, d);
-			OnNavigate(url);
-			return d->doc != NULL;
-		}
+		if (!html_text)
+			return false;
+
+		d->doc = litehtml::document::createFromString(html_text, d);
+		if (!d->doc)
+			return false;
+
+		OnNavigate(url);
 	}
 	else
 	{
-		litehtml::element::ptr elem;
-		d->on_anchor_click(url, elem);
+		d->threads.Add(new LiteHtmlViewPriv::NetworkThread(this, url, [this, url](auto status, auto data)
+			{
+				if (data)
+				{
+					d->doc = litehtml::document::createFromString(data, d);
+					OnNavigate(url);
+					Invalidate();
+				}
+				else LPopupNotification::Message(GetWindow(), LString::Fmt("No data for '%s'", url.Get()));
+
+			}));
 	}
-	
-	return false;
+
+	return true;
+}
+
+bool LiteHtmlView::SetUrl(LString url)
+{
+	d->Empty();
+
+	// Update history and current doc
+	if (d->history.Length())
+		d->historyPos++;
+	d->history.Length(d->historyPos);
+	d->history[d->historyPos] = url;
+
+	return LoadCurrent();
 }
 
 void LiteHtmlView::OnPaint(LSurface *pDC)
@@ -610,6 +665,14 @@ int LiteHtmlView::OnNotify(LViewI *c, LNotification n)
 	return LLayout::OnNotify(c, n);
 }
 
+bool LiteHtmlView::OnMouseWheel(double Lines)
+{
+	if (!VScroll)
+		return false;
+	VScroll->Value(VScroll->Value() + (Lines * LSysFont->GetHeight()));
+	return true;
+}
+
 void LiteHtmlView::OnMouseClick(LMouse &m)
 {
 	if (!d->doc)
@@ -647,4 +710,20 @@ void LiteHtmlView::OnMouseMove(LMouse &m)
 	d->doc->on_mouse_over(m.x+sx, m.y+sy, m.x, m.y, redraw_boxes);
 
 	d->UpdateScreen(redraw_boxes);
+}
+
+LMessage::Result LiteHtmlView::OnEvent(LMessage *Msg)
+{
+	switch (Msg->Msg())
+	{
+		case M_LOAD_URI:
+		{
+			auto url = Msg->AutoA<LString>();
+			if (url)
+				SetUrl(*url);
+			break;
+		}
+	}
+
+	return LLayout::OnEvent(Msg);
 }

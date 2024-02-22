@@ -7,14 +7,18 @@
 #include "lgi/common/Menu.h"
 #include "lgi/common/LiteHtmlView.h"
 #include "lgi/common/Uri.h"
+#include "lgi/common/Button.h"
 
 const char *AppName = "LgiLiteHtml";
 
 enum Ctrls
 {
 	IDC_BOX = 100,
+	IDC_CTRLS,
 	IDC_LOCATION,
 	IDC_BROWSER,
+	IDC_BACK,
+	IDC_FORWARD,
 };
 
 class AppLiteHtmlView : public LiteHtmlView
@@ -30,13 +34,23 @@ public:
 		GetWindow()->SetCtrlName(IDC_LOCATION, url);
 		LiteHtmlView::OnNavigate(url);
 	}
+
+	void OnHistory(bool hasBack, bool hasForward)
+	{
+		auto wnd = GetWindow();
+		wnd->SetCtrlEnabled(IDC_BACK, hasBack);
+		wnd->SetCtrlEnabled(IDC_FORWARD, hasForward);
+	}
 };
 
 class App : public LWindow
 {
 	LBox *box = NULL;
+	LBox *ctrls = NULL;
 	LEdit *location = NULL;
 	LiteHtmlView *browser = NULL;
+	LButton *back = NULL;
+	LButton *forward = NULL;
 
 public:
 	App()
@@ -50,9 +64,18 @@ public:
 		if (Attach(0))
 		{
 			AddView(box = new LBox(IDC_BOX, true));
-			box->AddView(location = new LEdit(IDC_LOCATION, 0, 0, 100, 20));
+			box->AddView(ctrls = new LBox(IDC_CTRLS, false));
+			ctrls->AddView(back = new LButton(IDC_BACK, 0, 0, -1, -1, "<"));
+			back->GetCss(true)->Width("2em");
+			back->Enabled(false);
+			ctrls->AddView(forward = new LButton(IDC_FORWARD, 0, 0, -1, -1, ">"));
+			forward->GetCss(true)->Width("2em");
+			forward->Enabled(false);
+			ctrls->AddView(location = new LEdit(IDC_LOCATION, 0, 0, 100, 20));
+			
 			box->AddView(browser = new AppLiteHtmlView(IDC_BROWSER));
 			box->Value(LSysFont->GetHeight() + 8);
+			
 			AttachChildren();
 			location->Focus(true);
 			Visible(true);
@@ -61,8 +84,6 @@ public:
 
 	void SetUrl(LString s)
 	{
-		if (location)
-			location->Name(s);
 		if (browser)
 			browser->SetUrl(s);
 	}
@@ -70,6 +91,25 @@ public:
 	void OnReceiveFiles(LArray<const char *> &Files)
 	{
 		SetUrl(Files[0]);
+	}
+
+	int OnNotify(LViewI *Ctrl, LNotification n)
+	{
+		switch (Ctrl->GetId())
+		{
+			case IDC_BACK:
+				browser->HistoryBack();
+				break;
+			case IDC_FORWARD:
+				browser->HistoryForward();
+				break;
+			case IDC_LOCATION:
+				if (n.Type == LNotifyReturnKey)
+					browser->SetUrl(Ctrl->Name());
+				break;
+		}
+
+		return LWindow::OnNotify(Ctrl, n);
 	}
 };
 
@@ -93,7 +133,7 @@ int LgiMain(OsAppArguments &AppArgs)
 		LUri u(cmdLine);
 		if (u.IsProtocol("http") ||
 			u.IsProtocol("https"))
-			a->SetUrl(cmdLine);
+			a->SetUrl(cmdLine.Strip());
 
 		app.Run();
 	}
