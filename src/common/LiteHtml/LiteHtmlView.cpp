@@ -277,14 +277,15 @@ struct LiteHtmlViewPriv :
 		if (s.sProtocol)
 			return src;
 
+		LUri c(CurrentUrl());
 		if (s.sPath)
 		{
-			LUri c(CurrentUrl());
 			c += s.sPath;
 			return c.ToString();
 		}
 
-		return LString();
+		c += src;
+		return c.ToString();
 	}
 
 	void load_image(const char *src, const char *baseurl, bool redraw_on_ready)
@@ -442,34 +443,17 @@ struct LiteHtmlViewPriv :
 
 	void import_css(litehtml::string& text, const litehtml::string& url, litehtml::string& baseurl)
 	{
-		LUri cur(CurrentUrl());
-		LUri u(url.c_str());
-		LString newUri;
-
-		if (u.sProtocol && u.sHost)
-		{
-			// Absolute URI
-			newUri = url.c_str();
-		}
-		else if (char *s = u.sPath.Get())
-		{
-			// Relative URI
-			if (*s == '/')
-				cur.sPath.Empty();
-			cur.sPath = u.sPath;
-			newUri = cur.ToString();
-		}
-
-		if (newUri)
+		auto cssUrl = FullUri(url.c_str(), baseurl.c_str());
+		if (cssUrl)
 		{
 			LStringPipe out;
 			LString err;			
-			if (LgiGetUri(this, &out, &err, newUri))
+			if (LgiGetUri(this, &out, &err, cssUrl))
 			{
 				text = out.NewLStr().Get();
 			}
 			else LgiTrace("%s:%i - error: LgiGetUri(%s)=%s (currentUrl=%s)\n",
-				_FL, newUri.Get(), err.Get(), CurrentUrl().Get());
+				_FL, cssUrl.Get(), err.Get(), CurrentUrl().Get());
 		}
 		else LgiTrace("%s:%i - error: no uri for loading css.\n", _FL);
 	}
