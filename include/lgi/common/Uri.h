@@ -36,7 +36,7 @@ public:
 	bool IsHttp() { return sProtocol.Equals("http") || sProtocol.Equals("https"); }
 	bool IsFile() { return sProtocol.Equals("file"); }
 	void SetFile(LString Path) { Empty(); sProtocol = "file"; sPath = Path; }
-	const char *LocalPath();
+	LString LocalPath();
 	operator bool();
 
 	/// Parse a URI into it's sub fields...

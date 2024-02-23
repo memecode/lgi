@@ -93,18 +93,18 @@ LUri::operator bool()
 	return IsFile() ? !sPath.IsEmpty() : !sHost.IsEmpty();
 }
 
-const char *LUri::LocalPath()
+LString LUri::LocalPath()
 {
 	if (!IsFile())
 		return NULL;
-	auto s = sPath.Get();
-	if (!s)
-		return NULL;
+
 	#ifdef WINDOWS
-	if (*s == '/')
-		s++;
+	if (sPath.Length() > 0 &&
+		sPath(0) == '/')
+		return sPath(1, -1).Replace("/", DIR_STR);
 	#endif
-	return s;
+
+	return sPath.Replace("/", DIR_STR);
 }
 
 LString LUri::ToString()

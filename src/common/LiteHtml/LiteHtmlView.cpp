@@ -82,6 +82,8 @@ struct LiteHtmlViewPriv :
 	LWindow *wnd = NULL;
 	litehtml::document::ptr doc;
 	LRect client;
+	LRect clip;
+	bool clipSet = false; // Need to update the clipping region on the DC
 	LString cursorName;
 	LHashTbl<IntKey<litehtml::uint_ptr>, LFont*> fontMap;
 	LHashTbl<ConstStrKey<char, false>, Image*> imageCache;
@@ -132,12 +134,26 @@ struct LiteHtmlViewPriv :
 		return r;
 	}
 
+	LSurface *Convert(litehtml::uint_ptr hdc)
+	{
+		auto pdc = (LSurface*)hdc;
+		if (clipSet)
+		{
+			if (clip.Valid())
+				pdc->ClipRgn(&clip);
+			else
+				pdc->ClipRgn(NULL);
+			clipSet = false;
+		}
+		return pdc;
+	}
+
 	void UpdateScreen(litehtml::position::vector &redraw)
 	{
-		if (redraw.size() > 0)
+		for (auto &r: redraw)
 		{
-			// FIXME: should invalidate just the dirty regions...
-			view->Invalidate();
+			auto rect = Convert(r);
+			view->Invalidate(&rect);
 		}
 	}
 
@@ -216,7 +232,13 @@ struct LiteHtmlViewPriv :
 	
 	void draw_text(litehtml::uint_ptr hdc, const char* text, litehtml::uint_ptr hFont, litehtml::web_color color, const litehtml::position& pos)
 	{
-		auto pDC = (LSurface*)hdc;
+		bool debug = Stricmp(text, "Open") == 0;
+		if (debug)
+		{
+			int asd=0;
+		}
+
+		auto pDC = Convert(hdc);
 		auto Fnt = fontMap.Find(hFont);
 		if (!pDC || !Fnt)
 			return;
@@ -246,7 +268,7 @@ struct LiteHtmlViewPriv :
 
 	void draw_list_marker(litehtml::uint_ptr hdc, const litehtml::list_marker &marker)
 	{
-		auto pDC = (LSurface*)hdc;
+		auto pDC = Convert(hdc);
 		auto Fnt = fontMap.Find(marker.font);
 		if (!pDC)
 			return;
@@ -277,8 +299,16 @@ struct LiteHtmlViewPriv :
 		if (s.sProtocol)
 			return src;
 
-		LUri c(CurrentUrl());
-		if (s.sPath)
+		auto cur = CurrentUrl();
+		LUri c(cur);
+		if (c.IsFile())
+		{
+			LFile::Path p(c.LocalPath());
+			p = p / ".." / src;
+			c.sPath = p.GetFull().Replace(DIR_STR, "/");
+			return c.ToString();
+		}
+		else if (s.sPath)
 		{
 			c += s.sPath;
 			return c.ToString();
@@ -301,23 +331,36 @@ struct LiteHtmlViewPriv :
 			{
 				i->uri = absUri;
 				imageCache.Add(absUri, i);
-				threads.Add(new NetworkThread(view, absUri, [i, this, redraw_on_ready](auto status, auto data)
+
+				LUri u(absUri);
+				if (u.IsFile())
 				{
-					auto leaf = i->uri.SplitDelimit("/").Last();
-					if (status)
+					auto path = u.LocalPath();
+					LFile in(path, O_READ);
+					i->status = i->img.Reset(GdcD->Load(&in, LGetLeaf(path)));
+					if (i->status && redraw_on_ready)
+						view->Invalidate();
+				}
+				else
+				{
+					threads.Add(new NetworkThread(view, absUri, [i, this, redraw_on_ready](auto status, auto data)
 					{
-						LMemStream s(data.Get(), data.Length(), false);
-						i->status = i->img.Reset(GdcD->Load(&s, leaf));
-						// LgiTrace("load_image(%s) load status=%i\n", i->uri.Get(), i->status);
-						if (i->status && redraw_on_ready)
-							view->Invalidate();
-					}
-					else
-					{
-						i->status = false;
-						// LgiTrace("load_image(%s) network status=%i\n", i->uri.Get(), i->status);
-					}
-				}));
+						auto leaf = i->uri.SplitDelimit("/").Last();
+						if (status)
+						{
+							LMemStream s(data.Get(), data.Length(), false);
+							i->status = i->img.Reset(GdcD->Load(&s, leaf));
+							// LgiTrace("load_image(%s) load status=%i\n", i->uri.Get(), i->status);
+							if (i->status && redraw_on_ready)
+								view->Invalidate();
+						}
+						else
+						{
+							i->status = false;
+							// LgiTrace("load_image(%s) network status=%i\n", i->uri.Get(), i->status);
+						}
+					}));
+				}
 			}
 		}
 	}
@@ -340,7 +383,7 @@ struct LiteHtmlViewPriv :
 
 	void draw_background(litehtml::uint_ptr hdc, const std::vector<litehtml::background_paint> &background)
 	{
-		auto pDC = (LSurface*)hdc;
+		auto pDC = Convert(hdc);
 		for (auto b: background)
 		{
 			auto rc = Convert(b.border_box);
@@ -387,7 +430,7 @@ struct LiteHtmlViewPriv :
 
 	void draw_borders(litehtml::uint_ptr hdc, const litehtml::borders& borders, const litehtml::position& draw_pos, bool root)
 	{
-		auto pDC = (LSurface*)hdc;
+		auto pDC = Convert(hdc);
 		auto drawEdge = [&](const litehtml::border &b, int x, int y, int dx, int dy, int ix, int iy)
 		{
 			pDC->Colour(Convert(b.color));
@@ -446,26 +489,42 @@ struct LiteHtmlViewPriv :
 		auto cssUrl = FullUri(url.c_str(), baseurl.c_str());
 		if (cssUrl)
 		{
-			LStringPipe out;
-			LString err;			
-			if (LgiGetUri(this, &out, &err, cssUrl))
+			LUri u(cssUrl);
+			if (u.IsFile())
 			{
-				text = out.NewLStr().Get();
+				auto path = u.LocalPath();
+				LFile in(path, O_READ);
+				if (in)
+				{
+					text = in.Read().Get();
+				}
+				else LgiTrace("%s:%i - error: failed to open '%s' for reading.\n", _FL, path.Get());
 			}
-			else LgiTrace("%s:%i - error: LgiGetUri(%s)=%s (currentUrl=%s)\n",
-				_FL, cssUrl.Get(), err.Get(), CurrentUrl().Get());
+			else
+			{
+				LStringPipe out;
+				LString err;			
+				if (LgiGetUri(this, &out, &err, cssUrl))
+				{
+					text = out.NewLStr().Get();
+				}
+				else LgiTrace("%s:%i - error: LgiGetUri(%s)=%s (currentUrl=%s)\n",
+					_FL, cssUrl.Get(), err.Get(), CurrentUrl().Get());
+			}
 		}
 		else LgiTrace("%s:%i - error: no uri for loading css.\n", _FL);
 	}
 
 	void set_clip(const litehtml::position& pos, const litehtml::border_radiuses& bdr_radius)
 	{
-		// NOT_IMPL
+		clip = Convert(pos);
+		clipSet = true;
 	}
 
 	void del_clip()
 	{
-		// NOT_IMPL
+		clip.ZOff(-1, -1);
+		clipSet = true;
 	}
 
 	void get_client_rect(litehtml::position &out) const
@@ -480,9 +539,17 @@ struct LiteHtmlViewPriv :
 		return NULL;
 	}
 
-	void get_media_features(litehtml::media_features& media) const
+	void get_media_features(litehtml::media_features &media) const
 	{
-		// NOT_IMPL
+		media.type = litehtml::media_type_screen;
+		media.width = client.X();
+		media.height = client.Y();
+		media.device_width = GdcD->X();
+		media.device_height = GdcD->Y();
+		media.color = GdcD->GetBits();
+		media.color_index = 0;
+		media.monochrome = false;
+		media.resolution = LScreenDpi().x;
 	}
 
 	void get_language(litehtml::string& language, litehtml::string& culture) const
@@ -554,13 +621,22 @@ bool LiteHtmlView::LoadCurrent()
 	// Create the document...
 	auto url = d->CurrentUrl();
 	LUri u(url);
-	if (u.IsProtocol("file") ||
-		(!u.sProtocol && LFileExists(url)))
+	if (!u.sProtocol && LFileExists(url))
 	{
-		auto html_text = LReadFile(url);
+		// Rewrite to 'file' url
+		u.sProtocol = "file";
+		u.sHost.Empty();
+		u.sPath = url.Replace(DIR_STR, "/");
+		d->history[d->historyPos] = url = u.ToString();
+	}
+
+	if (u.IsProtocol("file"))
+	{
+		auto html_text = LReadFile(u.LocalPath());
 		if (!html_text)
 			return false;
 
+		d->client = GetClient();
 		d->doc = litehtml::document::createFromString(html_text, d);
 		if (!d->doc)
 			return false;
