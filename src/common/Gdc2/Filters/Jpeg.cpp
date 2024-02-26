@@ -541,6 +541,8 @@ LFilter::IoStatus GdcJpeg::ReadImage(LSurface *pDC, LStream *In)
 	LVariant v;
 	
 	#if LIBJPEG_SHARED
+	if (!d)
+		return IoError;
 	if (!d->IsLoaded() &&
 		!d->Load(sLibrary)
 		#ifdef WIN32

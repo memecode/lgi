@@ -111,49 +111,102 @@ LBitmap::~LBitmap()
 		DeleteObj(pThread);
 	}
 	#endif
-	DeleteObj(pDC);
+	Empty();
 }
 
-void LBitmap::SetDC(LSurface *pNewDC)
+void LBitmap::Empty()
 {
-	DeleteObj(pDC);
-	if (pNewDC)
+	if (ownDC)
 	{
-		pDC = new LMemDC;
-		if (pDC && pDC->Create(pNewDC->X(), pNewDC->Y(), GdcD->GetColourSpace()))
+		DeleteObj(pDC);
+	}
+	else pDC = NULL;
+}
+
+bool LBitmap::OnLayout(LViewLayoutInfo &Inf)
+{
+	if (Inf.Width.Min)
+	{
+		// Height
+		if (pDC)
 		{
-			LColour Bk = LColour(L_WORKSPACE);
-			if (GetCss())
-			{
-				LCss::ColorDef b = GetCss()->BackgroundColor();
-				if (b.IsValid())
-					Bk = b;
-			}
-
-			pDC->Colour(Bk);
-			pDC->Rectangle();
-
-			pDC->Op(GDC_ALPHA);
-			pDC->Blt(0, 0, pNewDC);
-
-			LRect r = GetPos();
-			r.SetSize(pDC->X() + 4, pDC->Y() + 4);
-			SetPos(r);
-			Invalidate();
-
-			for (LViewI *p = GetParent(); p; p = p->GetParent())
-			{
-				LTableLayout *Tl = dynamic_cast<LTableLayout*>(p);
-				if (Tl)
-				{
-					Tl->InvalidateLayout();
-					break;
-				}
-			}
-			
-			SendNotify(LNotifyTableLayoutRefresh);
+			Inf.Height.Min = pDC->Y();
+			Inf.Height.Max = pDC->Y();
+		}
+		else
+		{
+			Inf.Height.Min = 32;
+			Inf.Height.Max = 32;
 		}
 	}
+	else
+	{
+		// Width
+		if (pDC)
+		{
+			Inf.Width.Min = pDC->X();
+			Inf.Width.Max = pDC->X();
+		}
+		else
+		{
+			Inf.Width.Min = 32;
+			Inf.Width.Max = 32;
+		}
+	}
+		
+	return true;
+}
+
+void LBitmap::SetDC(LSurface *pNewDC, bool owndc)
+{
+	Empty();
+	ownDC = owndc;
+	if (pNewDC)
+	{
+		if (ownDC)
+		{		
+			pDC = new LMemDC;
+			if (pDC && pDC->Create(pNewDC->X(), pNewDC->Y(), GdcD->GetColourSpace()))
+			{
+				LColour Bk = LColour(L_WORKSPACE);
+				if (GetCss())
+				{
+					LCss::ColorDef b = GetCss()->BackgroundColor();
+					if (b.IsValid())
+						Bk = b;
+				}
+
+				pDC->Colour(Bk);
+				pDC->Rectangle();
+
+				pDC->Op(GDC_ALPHA);
+				pDC->Blt(0, 0, pNewDC);
+
+				LRect r = GetPos();
+				r.SetSize(pDC->X() + 4, pDC->Y() + 4);
+				SetPos(r);
+				Invalidate();
+
+				for (LViewI *p = GetParent(); p; p = p->GetParent())
+				{
+					LTableLayout *Tl = dynamic_cast<LTableLayout*>(p);
+					if (Tl)
+					{
+						Tl->InvalidateLayout();
+						break;
+					}
+				}
+				
+			}
+		}
+		else
+		{
+			pDC = pNewDC;
+		}
+
+		SendNotify(LNotifyTableLayoutRefresh);
+	}
+	Invalidate();
 }
 
 LSurface *LBitmap::GetSurface()

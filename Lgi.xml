@@ -341,6 +341,7 @@
 		<Node Name="Widgets" Type="1" Platforms="15" Open="1" Id="62">
 			<Node Name="Common" Type="1" Platforms="15" Open="0" Id="63">
 				<Node File="./src/common/Widgets/Bitmap.cpp" Type="2" Platforms="15" />
+				<Node File="./include/lgi/common/Bitmap.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/Button.cpp" Type="2" Platforms="15" />
 				<Node File="./include/lgi/common/Button.h" Type="3" Platforms="15" />
 				<Node File="./src/common/Widgets/CheckBox.cpp" Type="2" Platforms="15" />

@@ -9,7 +9,8 @@ class LgiClass LBitmap :
 	public LControl,
 	public ResObject
 {
-	LSurface *pDC;
+	LSurface *pDC = NULL;
+	bool ownDC = true;
 	class LThread *pThread;
 
 public:
@@ -18,11 +19,14 @@ public:
 	~LBitmap();
 
 	/// Sets the surface to display in the control
-	virtual void SetDC(LSurface *pDC = 0);
+	virtual void SetDC(LSurface *pDC = NULL, bool owndc = true);
 	/// Gets the surface being displayed
 	virtual LSurface *GetSurface();
 
-	LMessage::Result OnEvent(LMessage *Msg);
-	void OnPaint(LSurface *pDC);
-	void OnMouseClick(LMouse &m);
+    void Empty();
+    
+	LMessage::Result OnEvent(LMessage *Msg) override;
+	void OnPaint(LSurface *pDC) override;
+	void OnMouseClick(LMouse &m) override;
+	bool OnLayout(LViewLayoutInfo &Inf) override;
 };
