@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
-  <Type Name="GString">
+  <Type Name="LString">
 	  <DisplayString Condition="Str == 0">(empty)</DisplayString>
 	  <DisplayString>{Str->Str,s} ({Str->Len})</DisplayString>
   </Type>
-  <Type Name="GAutoPtr&lt;char,1&gt;">
+  <Type Name="LAutoPtr&lt;char,1&gt;">
 	  <DisplayString Condition="Ptr == 0">(empty)</DisplayString>
 	  <DisplayString>{Ptr,s}</DisplayString>
   </Type>
-  <Type Name="GAutoPtr&lt;wchar_t,1&gt;">
+  <Type Name="LAutoPtr&lt;wchar_t,1&gt;">
 	  <DisplayString Condition="Ptr == 0">(empty)</DisplayString>
 	  <DisplayString>{Ptr,su}</DisplayString>
+  </Type>
+  <Type Name="LDateTime">
+	  <DisplayString>datetime({_Year,su}/{_Month,su}/{_Day,su} {_Hours,su}:{_Minutes,su}:{_Seconds,su} tz:{_Tz,su})</DisplayString>
   </Type>
 </AutoVisualizer>

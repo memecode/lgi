@@ -619,6 +619,9 @@
     <ClInclude Include="..\src\common\Hash\sha1\sha1.h" />
     <ClInclude Include="..\src\win\INet\MibAccess.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\src\win\Lgi.natvis" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

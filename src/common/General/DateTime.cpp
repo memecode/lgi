@@ -156,25 +156,115 @@ void LDateTime::Empty()
 #define InRange(v, low, high) ((v) >= low && (v) <= high)
 bool LDateTime::IsValid() const
 {
-	return	InRange(_Day, 1, 31) &&
-			InRange(_Year, 1600, 2100) &&
-			InRange(_Thousands, 0, 999) &&
-			InRange(_Month, 1, 12) &&
-			InRange(_Seconds, 0, 59) &&
-			InRange(_Minutes, 0, 59) &&
-			InRange(_Hours, 0, 23) &&
-			InRange(_Tz, -780, 780);
+	return	InRange(_Day,       1,    31  ) &&
+			InRange(_Year,      1600, 2100) &&
+			InRange(_Thousands, 0,    999 ) &&
+			InRange(_Month,     1,    12  ) &&
+			InRange(_Seconds,   0,    59  ) &&
+			InRange(_Minutes,   0,    59  ) &&
+			InRange(_Hours,     0,    23  ) &&
+			InRange(_Tz,        -780, 780 );
 }
 
 void LDateTime::SetTimeZone(int NewTz, bool ConvertTime)
 {
 	if (ConvertTime && NewTz != _Tz)
-	{
-		// printf("SetTimeZone: %i\n", NewTz - _Tz);
 		AddMinutes(NewTz - _Tz);
-	}
 
 	_Tz = NewTz;
+}
+
+#ifdef WINDOWS
+LDateTime::operator SYSTEMTIME() const
+{
+	SYSTEMTIME System = {};
+
+	System.wYear         = _Year;
+	System.wMonth        = limit(_Month,     1, 12);
+	System.wDay          = limit(_Day,       1, 31);
+	System.wHour         = limit(_Hours,     0, 23);
+	System.wMinute       = limit(_Minutes,   0, 59);
+	System.wSecond       = limit(_Seconds,   0, 59);
+	System.wMilliseconds = limit(_Thousands, 0, 999);
+	System.wDayOfWeek    = DayOfWeek();
+
+	return System;
+}
+
+LDateTime &LDateTime::operator =(const SYSTEMTIME &st)
+{
+	_Year      = st.wYear;
+	_Month     = st.wMonth;
+	_Day       = st.wDay;
+	_Hours     = st.wHour;
+	_Minutes   = st.wMinute;
+	_Seconds   = st.wSecond;
+	_Thousands = st.wMilliseconds;
+
+	return *this;
+}
+#endif
+
+bool LDateTime::InferTimeZone(bool ConvertTime)
+{
+	#ifdef WINDOWS
+
+		SYSTEMTIME System = *this;
+
+		// Compare the non-year parts of the SYSTEMTIMEs
+		auto SysCmp = [](SYSTEMTIME &a, SYSTEMTIME &b)
+		{
+			#define CMP(name) if (auto d = a.name - b.name) return d;
+			CMP(wMonth); CMP(wDay); CMP(wHour); CMP(wMinute); CMP(wSecond); CMP(wMilliseconds);
+			return 0;
+		};
+
+		// 'System' is currently in 'UTC' but we want the local version of the time,
+		// not in the _Tz timezone, but the effective timezone for that
+		// actual moment in question, which could have a different DST offset.
+		TIME_ZONE_INFORMATION tzi = {};
+		if (!GetTimeZoneInformationForYear(_Year, NULL, &tzi))
+			return false;
+
+		auto order = SysCmp(tzi.DaylightDate, tzi.StandardDate);
+		// order > 0 = DaylightDate is after StandardDate
+		// order < 0 = DaylightDate is before StandardDate
+		LAssert(order != 0);
+
+		auto a = SysCmp(System, tzi.StandardDate);
+		// a > 0 = System is after StandardDate
+		// a < 0 = System is before StandardDate
+
+		auto b = SysCmp(System, tzi.DaylightDate);
+		// b > 0 = System is after DaylightDate
+		// b < 0 = System is before DaylightDate
+
+		int tz = (int16)-tzi.Bias;
+		if (order > 0)
+		{
+			// year is: DST -> Normal -> DST
+			if (a < 0 || b > 0)
+				tz -= (int16)tzi.DaylightBias;
+		}
+		else
+		{
+			// year is: Normal -> DST -> Normal
+			if (a < 0 && b > 0)
+				tz -= (int16)tzi.DaylightBias;
+		}
+
+		if (ConvertTime)
+			SetTimeZone(tz -_Tz, true);
+
+		return true;
+
+	#else
+
+		#warning "Impl me."
+
+	#endif
+
+	return false;
 }
 
 int LDateTime::SystemTimeZone(bool ForceUpdate)
@@ -833,14 +923,8 @@ LDateTime &LDateTime::SetNow()
 			GetSystemTime(&stNow);
 
 		#if 1
-			_Day   = stNow.wDay;
-			_Month = stNow.wMonth;
-			_Year  = stNow.wYear;
-
-			_Hours     = stNow.wHour;
-			_Minutes   = stNow.wMinute;
-			_Seconds   = stNow.wSecond;
-			_Thousands = stNow.wMilliseconds;
+			
+			*this = stNow;
 			if (_Tz && _Tz != sysTz)
 			{
 				// Adjust to this objects timezone...
@@ -982,14 +1066,6 @@ bool LDateTime::Set(const LTimeStamp &s)
 		FILETIME Utc;
 		SYSTEMTIME System;
 
-		// Compare the non-year parts of the SYSTEMTIMEs
-		auto SysCmp = [](SYSTEMTIME &a, SYSTEMTIME &b)
-		{
-			#define CMP(name) if (auto d = a.name - b.name) return d;
-			CMP(wMonth); CMP(wDay); CMP(wHour); CMP(wMinute); CMP(wSecond); CMP(wMilliseconds);
-			return 0;
-		};
-
 		// Adjust to the desired timezone
 		uint64 u = s.Get();
 		Utc.dwHighDateTime = u >> 32;
@@ -997,63 +1073,8 @@ bool LDateTime::Set(const LTimeStamp &s)
 
 		if (!FileTimeToSystemTime(&Utc, &System))
 			return false;
-			
-		if (_Tz)
-		{
-			// 'System' is currently in 'UTC' but we want the local version of the time,
-			// not in the _Tz timezone, but the effective timezone for that
-			// actual moment in question, which could have a different DST offset.
-			TIME_ZONE_INFORMATION tzi = {};
-			if (GetTimeZoneInformationForYear(System.wYear, NULL, &tzi))
-			{
-				auto order = SysCmp(tzi.DaylightDate, tzi.StandardDate);
-				// order > 0 = DaylightDate is after StandardDate
-				// order < 0 = DaylightDate is before StandardDate
-				LAssert(order != 0);
 
-				auto a = SysCmp(System, tzi.StandardDate);
-				// a > 0 = System is after StandardDate
-				// a < 0 = System is before StandardDate
-
-				auto b = SysCmp(System, tzi.DaylightDate);
-				// b > 0 = System is after DaylightDate
-				// b < 0 = System is before DaylightDate
-
-				_Tz = (int16)-tzi.Bias;
-				if (order > 0)
-				{
-					// year is: DST -> Normal -> DST
-					if (a < 0 || b > 0)
-						_Tz -= (int16)tzi.DaylightBias;
-				}
-				else
-				{
-					// year is: Normal -> DST -> Normal
-					if (a < 0 && b > 0)
-						_Tz -= (int16)tzi.DaylightBias;
-				}
-
-				u += _Tz * 60 * Second64Bit;
-				Utc.dwHighDateTime = u >> 32;
-				Utc.dwLowDateTime = u & 0xffffffff;
-				if (!FileTimeToSystemTime(&Utc, &System))
-					return false;
-			}
-			else
-			{
-				_Tz = 0; // Can't convert to localtime...
-			}
-		}
-
-		_Year = System.wYear;
-		_Month = System.wMonth;
-		_Day = System.wDay;
-
-		_Hours = System.wHour;
-		_Minutes = System.wMinute;
-		_Seconds = System.wSecond;
-		_Thousands = System.wMilliseconds;
-
+		*this = System;
 		return true;
 
 	#else
@@ -1117,16 +1138,7 @@ uint64_t LDateTime::OsTime() const
 	#ifdef WINDOWS
 	
 		FILETIME Utc;
-		SYSTEMTIME System;
-
-		System.wYear			= _Year;
-		System.wMonth			= limit(_Month, 1, 12);
-		System.wDay				= limit(_Day, 1, 31);
-		System.wHour			= limit(_Hours, 0, 23);
-		System.wMinute			= limit(_Minutes, 0, 59);
-		System.wSecond			= limit(_Seconds, 0, 59);
-		System.wMilliseconds	= limit(_Thousands, 0, 999);
-		System.wDayOfWeek		= DayOfWeek();
+		SYSTEMTIME System = *this;
 
 		if (SystemTimeToFileTime(&System, &Utc))
 		{

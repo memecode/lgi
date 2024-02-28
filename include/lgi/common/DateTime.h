@@ -217,6 +217,10 @@ public:
 		/// False if you want to leave the date/time as it is.
 		bool ConvertTime
 	);
+	/// Figure out the right TZ offset for a given date according to the DST
+	/// rules for the current timezone.
+	bool InferTimeZone(bool ConvertTime = true);
+
 	/// Set this object to UTC timezone, changing the other members as
 	/// needed
 	LDateTime &ToUtc(bool AssumeLocal = false)
@@ -447,6 +451,11 @@ public:
 	bool GetVariant(const char *Name, class LVariant &Value, char *Array = NULL);
 	bool SetVariant(const char *Name, class LVariant &Value, char *Array = NULL);
 	bool CallMethod(const char *Name, class LVariant *ReturnValue, LArray<class LVariant*> &Args);
+
+	#ifdef WINDOWS
+	operator SYSTEMTIME() const;
+	LDateTime &operator =(const SYSTEMTIME &st);
+	#endif
 };
 
 /// Time zone information

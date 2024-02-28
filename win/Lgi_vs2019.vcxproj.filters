@@ -495,7 +495,7 @@
       <Filter>Source Files\General\Clipboard</Filter>
     </ClCompile>
     <ClCompile Include="..\src\win\Lgi\SubProcess.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Core\Process</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1222,5 +1222,10 @@
     <ClInclude Include="..\include\lgi\common\Array.h">
       <Filter>Source Files\Core\Memory Subsystem</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\src\win\Lgi.natvis">
+      <Filter>Source Files</Filter>
+    </Natvis>
   </ItemGroup>
 </Project>
