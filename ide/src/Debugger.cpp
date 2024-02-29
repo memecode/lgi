@@ -287,6 +287,10 @@ class Gdb : public LDebugger, public LThread, public Callback
 		// Send output
 		if (OutLines)
 		{
+			if (Length <= 1)
+			{
+				printf("%s:%i - Warning: OnLine str='%.*s' len=%i\n", _FL, (int)Length, Start, (int)Length);
+			}
 			OutLines->New().Set(Start, Length - 1);
 			return;
 		}
@@ -764,6 +768,8 @@ public:
 		for (int i=0; i<Bt.Length(); i++)
 		{
 			char *l = Bt[i];
+			if (!l)
+				continue;
 			if (*l == '#')
 			{
 				Stack.New().Reset(NewStr(l));

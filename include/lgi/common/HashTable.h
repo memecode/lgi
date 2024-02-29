@@ -412,6 +412,7 @@ public:
 			Used = 0;
 			if (MaxSize && NewSize > MaxSize)
 			{
+				LgiTrace("%s:%i - MaxSize=" LPrintfSizeT "\n", _FL, MaxSize);
 				LAssert(!"Max size reached.");
 				return false;
 			}
