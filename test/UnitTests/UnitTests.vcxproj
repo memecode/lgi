@@ -251,6 +251,7 @@
     <ClCompile Include="src\AutoPtrTest.cpp" />
     <ClCompile Include="src\ContainerTests.cpp" />
     <ClCompile Include="src\CssTest.cpp" />
+    <ClCompile Include="src\DateTime.cpp" />
     <ClCompile Include="src\JsonTest.cpp" />
     <ClCompile Include="src\MatrixTest.cpp" />
     <ClCompile Include="src\NetworkTests.cpp" />

@@ -298,8 +298,8 @@ public:
 	LString GetTime() const;
 
 	// Unix epoch support	
-	uint64_t GetUnix();
-	bool SetUnix(uint64_t s);
+	time_t GetUnix();
+	bool SetUnix(time_t tt);
 
 	/// Returns the 64bit LTimeStamp.
 	LTimeStamp Ts() const;
@@ -318,8 +318,6 @@ public:
 	bool Set(const char *Str);
 	/// Sets the date and time from a 64 bit int (os specific)
 	bool Set(const LTimeStamp &s);
-	/// Sets the time from a unit time_t
-	bool Set(time_t tt);
 	/// Parses the date from a string
 	/// \sa LDateTime::GetFormat()
 	bool SetDate(const char *Str);
@@ -456,6 +454,11 @@ public:
 	operator SYSTEMTIME() const;
 	LDateTime &operator =(const SYSTEMTIME &st);
 	#endif
+	operator struct tm() const;
+
+	#ifdef _DEBUG
+	static bool UnitTests();
+	#endif
 };
 
 /// Time zone information
@@ -470,9 +473,5 @@ public:
 
 /// A list of all known timezones.
 extern LTimeZone LTimeZones[];
-
-#ifdef _DEBUG
-LgiFunc bool LDateTime_Test();
-#endif
 
 #endif

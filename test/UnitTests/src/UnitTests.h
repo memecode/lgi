@@ -50,7 +50,7 @@ public:
 	bool Run()
 	{
 		#ifdef _DEBUG
-		return LDateTime_Test();
+		return LDateTime::UnitTests();
 		#else
 		#error "Requires _DEBUG"
 		#endif
