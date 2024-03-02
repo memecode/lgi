@@ -1619,6 +1619,8 @@ void LList::OnMouseClick(LMouse &m)
 					Invalidate();
 					break;
 				}
+				default:
+					break;
 			}
 
 			LListItem *Item = HitItem(m.x, m.y);
@@ -1735,6 +1737,8 @@ void LList::OnPulse()
 					}
 					break;
 				}
+				default:
+					break;
 			}
 		}
 	}

@@ -318,7 +318,17 @@ bool LDateTime::InferTimeZone(bool ConvertTime)
 
 	#else
 
-		#warning "Impl me."
+		auto tt = GetUnix();
+		auto local = localtime(&tt);
+		if (!local)
+			return false;
+		
+		auto tz = local->tm_gmtoff / 60;
+		if (ConvertTime)
+			SetTimeZone(tz - _Tz, true);
+		else
+			_Tz = (int16)tz;
+		return true;
 
 	#endif
 
@@ -607,14 +617,14 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 		auto ToUnix = To.GetUnix();
 
 		auto tz = [NSTimeZone systemTimeZone];
-		auto startDate = [[NSDate alloc] initWithTimeIntervalSince1970:(From.Ts() / Second64Bit) - Offset1800];
+		auto startDate = [[NSDate alloc] initWithTimeIntervalSince1970:(From.Ts().Get() / Second64Bit) - Offset1800];
 		while (startDate)
 		{
 			auto next = [tz nextDaylightSavingTimeTransitionAfterDate:startDate];
 			auto &i = Info.New();
 			
 			auto nextTs = [next timeIntervalSince1970];
-			i.UtcTimeStamp = (nextTs + Offset1800) * Second64Bit;
+			i.Utc = (nextTs + Offset1800) * Second64Bit;
 			i.Offset = (int)([tz secondsFromGMTForDate:[next dateByAddingTimeInterval:60]]/60);
 			
 			#if DEBUG_DST_INFO
@@ -1154,7 +1164,7 @@ bool LDateTime::Set(const LTimeStamp &s)
 
 	#else
 
-		Set(s.Unix());
+		SetUnix(s.Unix());
 		_Thousands = s.Get() % Second64Bit;
 		return true;
 	
@@ -2528,12 +2538,12 @@ bool LDateTime::UnitTests()
 
 		// Now try something right on the edge of the DST change... just before...
 		t.SetUnix(1712412000); // 7/4/2024 1:00:00 +1100
-		t.SetTimeZone(0, false);
+		t.SetTimeZone(0, true);
 		DATE_ASSERT(t.InferTimeZone(false));
 		DATE_ASSERT(t.GetTimeZone() == 660);
 		// Just after...		
 		t.SetUnix(1712426400); // 7/4/2024 4:00:00 +1000
-		t.SetTimeZone(0, false);
+		t.SetTimeZone(0, true);
 		DATE_ASSERT(t.InferTimeZone(false));
 		DATE_ASSERT(t.GetTimeZone() == 600);
 

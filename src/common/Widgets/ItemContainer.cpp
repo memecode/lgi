@@ -877,7 +877,7 @@ void LItemColumn::OnPaint_Content(LSurface *pDC, LRect &r, bool FillBackground)
 		LColour cText = Fore;
 		#ifdef MAC
 		// Contrast check
-		if (d->cMark && (cText - cActiveCol) < 64)
+		if (HasSort() && (cText - cActiveCol) < 64)
 			cText = cText.Invert();
 		#endif
 
@@ -949,9 +949,9 @@ void LItemColumn::OnPaint(LSurface *pDC, LRect &Rgn)
 
 			LArray<LColourStop> Stops;
 			LRect j(r.x1, r.y1, r.x2-1, r.y2-1);
-			FillStops(Stops, j, d->cMark != 0);
+			FillStops(Stops, j, HasSort());
 			LFillGradient(pDC, j, true, Stops);
-			if (d->cMark)
+			if (HasSort())
 				pDC->Colour(Rgb24(0x66, 0x93, 0xc0), 24);
 			else
 				pDC->Colour(Rgb24(178, 178, 178), 24);
