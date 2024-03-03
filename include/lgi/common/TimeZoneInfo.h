@@ -431,7 +431,7 @@ public:
 				if (inrange)
 				{
 					auto &inf = Info.New();
-					inf.UtcTimeStamp = dt.Ts();
+					inf.Utc = dt.Ts();
 					inf.Offset = offsetSeconds / 60;
 				}
 			}
@@ -497,7 +497,7 @@ public:
 				if (InRange(startDt))
 				{
 					auto &s = Info.New();
-					s.UtcTimeStamp = startDt.Ts();
+					s.Utc = startDt.Ts();
 					s.Offset = DstOffset;
 				}
 
@@ -511,7 +511,7 @@ public:
 				if (InRange(endDt))
 				{
 					auto &e = Info.New();
-					e.UtcTimeStamp = endDt.Ts();
+					e.Utc = endDt.Ts();
 					e.Offset = StdOffsetSeconds / 60;
 				}
 			}

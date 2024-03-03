@@ -96,7 +96,7 @@ LUri::operator bool()
 LString LUri::LocalPath()
 {
 	if (!IsFile())
-		return NULL;
+		return LString();
 
 	#ifdef WINDOWS
 	if (sPath.Length() > 0 &&
