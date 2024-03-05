@@ -872,7 +872,7 @@ const char *LWindow::Name()
 	return LBase::Name();
 }
 
-LPoint LWindow::GetDpi()
+LPoint LWindow::GetDpi() const
 {
 	return LPoint(96, 96);
 }

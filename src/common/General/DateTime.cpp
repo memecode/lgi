@@ -20,6 +20,7 @@
 #endif
 #ifdef WINDOWS
 #include <tchar.h>
+#define timegm _mkgmtime
 #endif
 
 #include "lgi/common/Lgi.h"
@@ -121,7 +122,7 @@ LDateTime::LDateTime(time_t unixTime)
 {
 	Empty();
 	if (unixTime)
-		Set(unixTime);
+		SetUnix(unixTime);
 }
 
 LDateTime::LDateTime(const LTimeStamp &lgiTime)
@@ -174,6 +175,21 @@ void LDateTime::SetTimeZone(int NewTz, bool ConvertTime)
 	_Tz = NewTz;
 }
 
+LDateTime::operator struct tm() const
+{
+	struct tm t = {};
+
+	t.tm_year	= _Year - 1900;
+	t.tm_mon	= _Month - 1;
+	t.tm_mday	= _Day;
+	t.tm_hour	= _Hours;
+	t.tm_min	= _Minutes;
+	t.tm_sec	= _Seconds;
+	t.tm_isdst	= -1;
+
+	return t;
+}
+
 #ifdef WINDOWS
 LDateTime::operator SYSTEMTIME() const
 {
@@ -219,12 +235,52 @@ bool LDateTime::InferTimeZone(bool ConvertTime)
 			return 0;
 		};
 
+		auto MakeAbsolute = [this](SYSTEMTIME &s)
+		{
+			if (s.wYear == 0)
+			{
+				// Convert from relative to absolute...
+				LDateTime dt = *this;
+				dt.Month(s.wMonth);
+				int days = dt.DaysInMonth();
+				if (s.wDay == 5)
+				{
+					// Use the final day of the month
+					for (int day = days; day > 0; day--)
+					{
+						dt.Day(day);
+						if (dt.DayOfWeek() == s.wDayOfWeek)
+							break;
+					}
+					s.wDay = dt.Day();
+				}
+				else if (s.wDay > 0)
+				{
+					// Find the 'wDay'th instance of 'wDayOfWeek'
+					int week = 1;
+					for (int day = 1; day <= days; day++)
+					{
+						dt.Day(day);
+						if (dt.DayOfWeek() == s.wDayOfWeek)
+						{
+							if (week++ == s.wDay)
+								break;
+						}
+					}
+					s.wDay = dt.Day();
+				}
+				else LAssert(!"unexpected relative date");
+			}
+		};
+
 		// 'System' is currently in 'UTC' but we want the local version of the time,
 		// not in the _Tz timezone, but the effective timezone for that
 		// actual moment in question, which could have a different DST offset.
 		TIME_ZONE_INFORMATION tzi = {};
 		if (!GetTimeZoneInformationForYear(_Year, NULL, &tzi))
 			return false;
+		MakeAbsolute(tzi.StandardDate);
+		MakeAbsolute(tzi.DaylightDate);
 
 		auto order = SysCmp(tzi.DaylightDate, tzi.StandardDate);
 		// order > 0 = DaylightDate is after StandardDate
@@ -254,13 +310,25 @@ bool LDateTime::InferTimeZone(bool ConvertTime)
 		}
 
 		if (ConvertTime)
-			SetTimeZone(tz -_Tz, true);
+			SetTimeZone(tz - _Tz, true);
+		else
+			_Tz = tz;
 
 		return true;
 
 	#else
 
-		#warning "Impl me."
+		auto tt = GetUnix();
+		auto local = localtime(&tt);
+		if (!local)
+			return false;
+		
+		auto tz = local->tm_gmtoff / 60;
+		if (ConvertTime)
+			SetTimeZone(tz - _Tz, true);
+		else
+			_Tz = (int16)tz;
+		return true;
 
 	#endif
 
@@ -549,14 +617,14 @@ bool LDateTime::GetDaylightSavingsInfo(LArray<LDstInfo> &Info, LDateTime &Start,
 		auto ToUnix = To.GetUnix();
 
 		auto tz = [NSTimeZone systemTimeZone];
-		auto startDate = [[NSDate alloc] initWithTimeIntervalSince1970:(From.Ts() / Second64Bit) - Offset1800];
+		auto startDate = [[NSDate alloc] initWithTimeIntervalSince1970:(From.Ts().Get() / Second64Bit) - Offset1800];
 		while (startDate)
 		{
 			auto next = [tz nextDaylightSavingTimeTransitionAfterDate:startDate];
 			auto &i = Info.New();
 			
 			auto nextTs = [next timeIntervalSince1970];
-			i.UtcTimeStamp = (nextTs + Offset1800) * Second64Bit;
+			i.Utc = (nextTs + Offset1800) * Second64Bit;
 			i.Offset = (int)([tz secondsFromGMTForDate:[next dateByAddingTimeInterval:60]]/60);
 			
 			#if DEBUG_DST_INFO
@@ -960,7 +1028,7 @@ LDateTime &LDateTime::SetNow()
 	return *this;
 }
 
-#define Convert24HrTo12Hr(h)			( (h) == 0 ? 12 : (h) > 12 ? (h) % 12 : (h) )
+#define Convert24HrTo12Hr(h)		( (h) == 0 ? 12 : (h) > 12 ? (h) % 12 : (h) )
 #define Convert24HrToAmPm(h)		( (h) >= 12 ? "p" : "a" )
 
 LString LDateTime::GetDate() const
@@ -1039,8 +1107,9 @@ LTimeStamp LDateTime::Ts() const
 	return ts;
 }
 
-uint64_t LDateTime::GetUnix()
+time_t LDateTime::GetUnix()
 {
+	/* This isn't unit time?
 	LTimeStamp s;
 	Get(s);
 	#if defined(WINDOWS)
@@ -1048,38 +1117,54 @@ uint64_t LDateTime::GetUnix()
 	#else
 	return s.Get() / LDateTime::Second64Bit - Offset1800;
 	#endif
+	*/
+
+	struct tm t = *this;	
+	time_t tt = timegm(&t);
+	if (_Tz)
+		tt -= _Tz * 60;
+
+	return tt;
 }
 
-bool LDateTime::SetUnix(uint64 s)
+bool LDateTime::SetUnix(time_t tt)
 {
+	/* This isn't unit time?
 	#if defined(WINDOWS)
 	return Set(s * LDateTime::Second64Bit + 116445168000000000LL);
 	#else
 	return Set((s + Offset1800) * LDateTime::Second64Bit);
 	#endif
+	*/
+
+	struct tm *t;
+
+	if (_Tz)
+		tt += _Tz * 60;
+
+	#if !defined(_MSC_VER) || _MSC_VER < _MSC_VER_VS2005
+		t = gmtime(&tt);
+		if (t)
+	#else
+		struct tm tmp;
+		if (_gmtime64_s(t = &tmp, &tt) == 0)
+	#endif
+	{
+		return Set(t, false);
+	}
+
+	return false;
 }
 
 bool LDateTime::Set(const LTimeStamp &s)
 {
 	#if defined WIN32
 
-		FILETIME Utc;
-		SYSTEMTIME System;
-
-		// Adjust to the desired timezone
-		uint64 u = s.Get();
-		Utc.dwHighDateTime = u >> 32;
-		Utc.dwLowDateTime = u & 0xffffffff;
-
-		if (!FileTimeToSystemTime(&Utc, &System))
-			return false;
-
-		*this = System;
-		return true;
+		return OsTime(s.Get());
 
 	#else
 
-		Set(s.Unix());
+		SetUnix(s.Unix());
 		_Thousands = s.Get() % Second64Bit;
 		return true;
 	
@@ -1102,35 +1187,11 @@ bool LDateTime::Set(struct tm *t, bool inferTimezone)
 	
 	if (inferTimezone)
 	{
-		#ifdef WINDOWS
-		#define timegm _mkgmtime
-		#endif
 		auto diff = timegm(t) - mktime(t);
 		_Tz = (int16)(diff / 60);
 	}
 
 	return true;
-}
-
-bool LDateTime::Set(time_t tt)
-{
-	struct tm *t;
-
-	if (_Tz)
-		tt += _Tz * 60;
-
-#if !defined(_MSC_VER) || _MSC_VER < _MSC_VER_VS2005
-	t = gmtime(&tt);
-	if (t)
-#else
-	struct tm tmp;
-	if (_gmtime64_s(t = &tmp, &tt) == 0)
-#endif
-	{
-		return Set(t, false);
-	}
-
-	return false;
 }
 
 uint64_t LDateTime::OsTime() const
@@ -1191,7 +1252,32 @@ uint64_t LDateTime::OsTime() const
 
 bool LDateTime::OsTime(uint64_t ts)
 {
-	return Set((time_t)ts);
+	#ifdef WINDOWS
+
+		if (_Tz)
+			// Adjust for timezone
+			ts += (int64)_Tz * 60 * Second64Bit;
+
+		FILETIME Utc;
+		Utc.dwHighDateTime = ts >> 32;
+		Utc.dwLowDateTime = ts & 0xffffffff;
+
+		SYSTEMTIME System;
+		if (!FileTimeToSystemTime(&Utc, &System))
+		{
+			DWORD Err = GetLastError();
+			LAssert(!"FileTimeToSystemTime failed.");
+			return false;
+		}
+
+		*this = System;
+		return true;
+
+	#else
+		
+		return SetUnix((time_t)ts);
+		
+	#endif
 }
 
 bool LDateTime::Get(LTimeStamp &s) const
@@ -2381,31 +2467,87 @@ bool LDateTime::CallMethod(const char *Name, LVariant *ReturnValue, LArray<LVari
 		return false; \
 	}
 
-bool LDateTime_Test()
+static bool CompareDateStr(LString a, LString b)
 {
+	auto delim = "/: ap";
+	auto aParts = a.SplitDelimit(delim);
+	auto bParts = a.SplitDelimit(delim);
+	if (aParts.Length() != 6 ||
+		bParts.Length() != 6)
+		return false;
+	for (int i=0; i<aParts.Length(); i++)
+		if (aParts[i].Int() != bParts[i].Int())
+			return false;
+	return true;
+}
+
+// Note: these unit tests kinda assume that the user's computer has it's
+// timezone set to Australia/Sydney... so YMMV in other timezones.
+bool LDateTime::UnitTests()
+{
+	auto Jan1 = "1/1/2024 0:0:0a";
+
+	// Only allow 64bit time_t
+		time_t tt;
+		DATE_ASSERT(sizeof(tt) >= 8);
+
 	// Check 64bit get/set
-	LDateTime t("1/1/2017 0:0:0");
-	LTimeStamp i;
-	DATE_ASSERT(t.Get(i));
-	LgiTrace("Get='%s'\n", t.Get().Get());
-	auto i2 = i + (24ULL * 60 * 60 * LDateTime::Second64Bit);
-	LDateTime t2;
-	t2.SetFormat(GDTF_DAY_MONTH_YEAR);
-	t2.Set(i2);
-	LString s = t2.Get();
-	LgiTrace("Set='%s'\n", s.Get());
-	DATE_ASSERT(!stricmp(s, "2/1/2017 12:00:00a") ||
-				!stricmp(s, "2/01/2017 12:00:00a"));
+		LDateTime t("1/1/2017 0:0:0"), t2;
+		LTimeStamp i;
+		DATE_ASSERT(t.Get(i));
+		// LgiTrace("Get='%s'\n", t.Get().Get());
+		auto i2 = i + (24ULL * 60 * 60 * LDateTime::Second64Bit);
+		t2.SetFormat(GDTF_DAY_MONTH_YEAR);
+		t2.Set(i2);
+		LString s = t2.Get();
+		// LgiTrace("Set='%s'\n", s.Get());
+		DATE_ASSERT(CompareDateStr(s, "2/1/2017 12:00:00a"));
 	
-	t.SetNow();
-	LgiTrace("Now.Local=%s Tz=%.2f\n", t.Get().Get(), t.GetTimeZoneHours());
-	t2 = t;
-	t2.ToUtc();
-	LgiTrace("Now.Utc=%s Tz=%.2f\n", t2.Get().Get(), t2.GetTimeZoneHours());
-	t2.ToLocal();
-	LgiTrace("Now.Local=%s Tz=%.2f\n", t2.Get().Get(), t2.GetTimeZoneHours());
-	DATE_ASSERT(t == t2);
+		t.SetNow();
+		// LgiTrace("Now.Local=%s Tz=%.2f\n", t.Get().Get(), t.GetTimeZoneHours());
+		t2 = t;
+		t2.ToUtc();
+		// LgiTrace("Now.Utc=%s Tz=%.2f\n", t2.Get().Get(), t2.GetTimeZoneHours());
+		t2.ToLocal();
+		// LgiTrace("Now.Local=%s Tz=%.2f\n", t2.Get().Get(), t2.GetTimeZoneHours());
+		DATE_ASSERT(t == t2);
 	
+	// Check get/set Unix time
+		t.ToUtc();
+		t.SetUnix(tt = 1704067200);
+		s = t.Get();
+		DATE_ASSERT(CompareDateStr(s, Jan1));
+		auto new_tt = t.GetUnix();
+		DATE_ASSERT(new_tt == tt);
+		// Now do it with a timezone set...
+		t.SetTimeZone(t.SystemTimeZone(), false);
+		t.SetUnix(tt);
+		DATE_ASSERT(CompareDateStr(s, Jan1));
+		new_tt = t.GetUnix();
+		DATE_ASSERT(new_tt == tt);
+
+	// Check various Add### functions
+
+
+	// Check infer timezone
+		t.Empty();
+		t.Set(Jan1);
+		DATE_ASSERT(t.InferTimeZone(false));
+		DATE_ASSERT(t.GetTimeZone() == 660);
+		t.SetTimeZone(660, false);
+
+		// Now try something right on the edge of the DST change... just before...
+		t.SetUnix(1712412000); // 7/4/2024 1:00:00 +1100
+		t.SetTimeZone(0, true);
+		DATE_ASSERT(t.InferTimeZone(false));
+		DATE_ASSERT(t.GetTimeZone() == 660);
+		// Just after...		
+		t.SetUnix(1712426400); // 7/4/2024 4:00:00 +1000
+		t.SetTimeZone(0, true);
+		DATE_ASSERT(t.InferTimeZone(false));
+		DATE_ASSERT(t.GetTimeZone() == 600);
+
+
 	return true;
 }
 #endif

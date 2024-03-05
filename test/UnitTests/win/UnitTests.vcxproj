@@ -97,7 +97,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WINDOWS;LGI_UNIT_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -137,7 +137,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\include;..\..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;..\..\..\include\lgi\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WINDOWS;LGI_UNIT_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -246,30 +246,31 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\common\General\New.cpp" />
-    <ClCompile Include="..\..\src\common\Text\TextConvert.cpp" />
-    <ClCompile Include="src\AutoPtrTest.cpp" />
-    <ClCompile Include="src\ContainerTests.cpp" />
-    <ClCompile Include="src\CssTest.cpp" />
-    <ClCompile Include="src\JsonTest.cpp" />
-    <ClCompile Include="src\MatrixTest.cpp" />
-    <ClCompile Include="src\NetworkTests.cpp" />
-    <ClCompile Include="src\StringClassTests.cpp" />
-    <ClCompile Include="src\BitsTest.cpp" />
-    <ClCompile Include="src\RangeTest.cpp" />
-    <ClCompile Include="src\StringTests.cpp" />
-    <ClCompile Include="src\UnitTests.cpp" />
-    <ClCompile Include="src\XmlTest.cpp" />
+    <ClCompile Include="..\..\..\src\common\General\New.cpp" />
+    <ClCompile Include="..\..\..\src\common\Text\TextConvert.cpp" />
+    <ClCompile Include="..\src\AutoPtrTest.cpp" />
+    <ClCompile Include="..\src\ContainerTests.cpp" />
+    <ClCompile Include="..\src\CssTest.cpp" />
+    <ClCompile Include="..\src\DateTime.cpp" />
+    <ClCompile Include="..\src\JsonTest.cpp" />
+    <ClCompile Include="..\src\MatrixTest.cpp" />
+    <ClCompile Include="..\src\NetworkTests.cpp" />
+    <ClCompile Include="..\src\StringClassTests.cpp" />
+    <ClCompile Include="..\src\BitsTest.cpp" />
+    <ClCompile Include="..\src\RangeTest.cpp" />
+    <ClCompile Include="..\src\StringTests.cpp" />
+    <ClCompile Include="..\src\UnitTests.cpp" />
+    <ClCompile Include="..\src\XmlTest.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\common\GStringClass.h" />
-    <ClInclude Include="..\..\include\common\LHashTable.h" />
-    <ClInclude Include="..\..\include\common\LUnrolledList.h" />
-    <ClInclude Include="..\..\include\lgi\common\TextConvert.h" />
-    <ClInclude Include="src\UnitTests.h" />
+    <ClInclude Include="..\..\..\include\common\GStringClass.h" />
+    <ClInclude Include="..\..\..\include\common\LHashTable.h" />
+    <ClInclude Include="..\..\..\include\common\LUnrolledList.h" />
+    <ClInclude Include="..\..\..\include\lgi\common\TextConvert.h" />
+    <ClInclude Include="..\src\UnitTests.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\win\Lgi_vs2019.vcxproj">
+    <ProjectReference Include="..\..\..\win\Lgi_vs2019.vcxproj">
       <Project>{95df9ca4-6d37-4a85-a648-80c2712e0da1}</Project>
     </ProjectReference>
   </ItemGroup>

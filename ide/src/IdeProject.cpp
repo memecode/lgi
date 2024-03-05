@@ -872,6 +872,8 @@ public:
 				m.Print("%s", src.Get());
 			}
 
+			const char *TargetPattern = Platform == PlatformHaiku ? "$(abspath $<)" : "$<";
+
 			m.Print("\n"
 					"\n"
 					"SourceC    := $(filter %%.c,$(Source))\n"
@@ -885,13 +887,14 @@ public:
 					"$(BuildDir)/%%.o: %%.c\n"
 					"	mkdir -p $(@D)\n"
 					"	echo $(notdir $<) [$(Build)]\n"
-					"	$(CC) $(Inc) $(CFlags) $(Defs) -c $< -o $@\n"
+					"	$(CC) $(Inc) $(CFlags) $(Defs) -c %s -o $@\n"
 					"\n"
 					"$(BuildDir)/%%.o: %%.cpp\n"
 					"	mkdir -p $(@D)\n"
 					"	echo $(notdir $<) [$(Build)]\n"
-					"	$(CPP) $(Inc) $(CppFlags) $(Defs) -c $< -o $@\n"
-					"\n");
+					"	$(CPP) $(Inc) $(CppFlags) $(Defs) -c %s -o $@\n"
+					"\n",
+					TargetPattern, TargetPattern);
 
 			// Write out the target stuff
 			m.Print("# Target\n");

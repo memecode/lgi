@@ -173,7 +173,7 @@ void _lgi_assert(bool b, const char *test, const char *file, int line)
             [ca release];
         }
 #else
-		GAlert a(0, "Assert Failed", Assert.Msg, "Abort", "Debug", "Ignore");
+		LAlert a(0, "Assert Failed", Assert.Msg, "Abort", "Debug", "Ignore");
 		Result = a.DoModal();
 #endif
 		

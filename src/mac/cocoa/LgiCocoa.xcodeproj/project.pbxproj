@@ -150,6 +150,7 @@
 		348CD46A25C63E56001AA32B /* AppCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 348CD46925C63E56001AA32B /* AppCommon.cpp */; };
 		348E99CE2876850F0067E92A /* ObjCWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 348E99CD2876850F0067E92A /* ObjCWrapper.h */; };
 		3491A28523678DB800604C29 /* DropFiles.h in Headers */ = {isa = PBXBuildFile; fileRef = 3491A28423678DB700604C29 /* DropFiles.h */; };
+		349F939E2B92CBAD002410A2 /* TextConvert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 349F939D2B92CBAD002410A2 /* TextConvert.cpp */; };
 		34A3ACE820568D5800B1D62A /* StringLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A3ACE720568D5800B1D62A /* StringLayout.cpp */; };
 		34A3ACEA20568D9700B1D62A /* MenuCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34A3ACE920568D9700B1D62A /* MenuCommon.cpp */; };
 		34B14E3426951C6E004C22CC /* Slider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 34B14E3326951C6E004C22CC /* Slider.cpp */; };
@@ -318,6 +319,7 @@
 		348CD46925C63E56001AA32B /* AppCommon.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = AppCommon.cpp; path = ../../common/Lgi/AppCommon.cpp; sourceTree = SOURCE_ROOT; };
 		348E99CD2876850F0067E92A /* ObjCWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ObjCWrapper.h; path = ../../../include/lgi/mac/cocoa/ObjCWrapper.h; sourceTree = "<group>"; };
 		3491A28423678DB700604C29 /* DropFiles.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = DropFiles.h; path = ../../../include/lgi/common/DropFiles.h; sourceTree = SOURCE_ROOT; };
+		349F939D2B92CBAD002410A2 /* TextConvert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TextConvert.cpp; path = ../../../common/Text/TextConvert.cpp; sourceTree = "<group>"; };
 		34A3ACE720568D5800B1D62A /* StringLayout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StringLayout.cpp; path = ../../common/Gdc2/Font/StringLayout.cpp; sourceTree = SOURCE_ROOT; };
 		34A3ACE920568D9700B1D62A /* MenuCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MenuCommon.cpp; path = ../../common/Lgi/MenuCommon.cpp; sourceTree = SOURCE_ROOT; };
 		34B14E3326951C6E004C22CC /* Slider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Slider.cpp; path = ../../common/Widgets/Slider.cpp; sourceTree = SOURCE_ROOT; };
@@ -601,6 +603,7 @@
 		3477C2BF1CBF99F00028B84B /* Text */ = {
 			isa = PBXGroup;
 			children = (
+				349F939D2B92CBAD002410A2 /* TextConvert.cpp */,
 				3477C30E1CC04C790028B84B /* Css.cpp */,
 				3477C30F1CC04C790028B84B /* CssTools.cpp */,
 				3477C2C01CBF9A040028B84B /* String.cpp */,
@@ -847,6 +850,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				349F939E2B92CBAD002410A2 /* TextConvert.cpp in Sources */,
 				3477C2CE1CC047BE0028B84B /* Charset.cpp in Sources */,
 				3477C3111CC04C790028B84B /* CssTools.cpp in Sources */,
 				34A3ACE820568D5800B1D62A /* StringLayout.cpp in Sources */,
@@ -1112,6 +1116,7 @@
 					"-DLGI_COCOA=1",
 					"-DLGI_LIBRARY",
 					"-D_DEBUG",
+					"-DLGI_UNIT_TESTS",
 				);
 				OTHER_CODE_SIGN_FLAGS = "--timestamp --deep";
 				OTHER_CPLUSPLUSFLAGS = (
@@ -1119,6 +1124,7 @@
 					"-DLGI_COCOA=1",
 					"-DLGI_LIBRARY",
 					"-D_DEBUG",
+					"-DLGI_UNIT_TESTS",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.memecode.Lgi;
 				PRODUCT_NAME = LgiCocoa;

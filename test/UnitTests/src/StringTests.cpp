@@ -1,4 +1,4 @@
-﻿#include "lgi/common/Lgi.h"
+#include "lgi/common/Lgi.h"
 #include "lgi/common/TextConvert.h"
 
 #include "UnitTests.h"
@@ -48,7 +48,11 @@ bool LStringTests::Run()
 	// No prefered charset testing:
 	LAutoString result1( EncodeRfc2047(NewStr(Rfc2047Input), Charset) );
 	if (Stricmp(result1.Get(), EncodeResult1))
+	{
+		printf("result1='%s'\n", result1.Get());
+		printf("EncodeResult1='%s'\n", EncodeResult1);
 		return FAIL(_FL, "EncodeRfc2047");
+	}
 	LAutoString decode1( DecodeRfc2047(NewStr(result1)) );
 	if (Strcmp(UtfInput, decode1.Get()))
 		return FAIL(_FL, "DecodeRfc2047");
