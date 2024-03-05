@@ -211,7 +211,7 @@ bool LUri::Set(const char *uri)
 		if (p.Length() == 2)
 		{
 			sHost = p[0];
-			Port = p[1].Int();
+			Port = (int)p[1].Int();
 		}
 		else if (p.Length() == 1)
 		{

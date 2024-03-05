@@ -6,6 +6,7 @@
 #include "lgi/common/Edit.h"
 #include "lgi/common/List.h"
 #include "lgi/common/TextLog.h"
+#include "lgi/common/ClipBoard.h"
 
 #include "Lvc.h"
 #include "VcFolder.h"
@@ -13,10 +14,14 @@
 #define OPT_WND_STATE		"BrowseUiState"
 #define USE_RELATIVE_TIMES	1
 
-enum Ctrls {
+enum Ids {
 	IDC_STATIC = -1,
 	IDC_FILTER = 100,
 	IDC_TABLE,
+
+	IDM_COPY_USER,
+	IDM_COPY_REF,
+	IDM_GOTO_LINE
 };
 
 struct BrowseUiPriv
@@ -79,9 +84,7 @@ struct BrowseUiPriv
 		Folder->SelectCommit(wnd, ref, Path);
 	}
 
-	void GotoSource(const char *line)
-	{
-	}
+	void GotoLine(const char *line);
 };
 
 enum LineIdx
@@ -159,8 +162,42 @@ struct BrowseItem : public LListItem
 		int Col = -1;
 		GetList()->GetColumnClickInfo(Col, m);
 		
-		if (m.Down() &&
-			m.Double())
+		if (m.IsContextMenu())
+		{
+			LSubMenu sub;
+			sub.AppendItem("Copy user", IDM_COPY_USER);
+			sub.AppendItem("Copy ref", IDM_COPY_REF);
+			sub.AppendItem("Goto line..", IDM_GOTO_LINE);
+
+			switch (sub.Float(GetList(), m))
+			{
+				case IDM_COPY_USER:
+				{
+					LClipBoard c(GetList());
+					c.Text(GetText(TUser));
+					break;
+				}
+				case IDM_COPY_REF:
+				{
+					LClipBoard c(GetList());
+					c.Text(GetText(TRef));
+					break;
+				}
+				case IDM_GOTO_LINE:
+				{
+					auto input = new LInput(GetList(), "", "Goto line:", AppName);
+					input->DoModal([this, input](auto dlg, auto code)
+					{
+						if (code)
+							d->GotoLine(input->GetStr());
+						delete dlg;
+					});
+					break;
+				}
+			}
+		}
+		else if (m.Down() &&
+				 m.Double())
 		{
 			LAssert(d->Folder);
 			switch (Col)
@@ -179,7 +216,7 @@ struct BrowseItem : public LListItem
 				}
 				case TSrc:
 				{
-					d->GotoSource(GetText(TLine));
+					d->GotoLine(GetText(TLine));
 					break;
 				}
 			}
@@ -188,6 +225,22 @@ struct BrowseItem : public LListItem
 		LListItem::OnMouseClick(m);
 	}
 };
+
+void BrowseUiPriv::GotoLine(const char *line)
+{
+	LArray<BrowseItem*> all;
+	if (Blame->GetAll(all))
+	{
+		for (auto b: all)
+		{
+			auto ln = b->GetText(TLine);
+			auto match = !Stricmp(ln, line);
+			b->Select(match);
+			if (match)
+				b->ScrollTo();
+		}
+	}
+}
 
 BrowseUi::BrowseUi(TMode mode, AppPriv *priv, VcFolder *folder, LString path)
 {

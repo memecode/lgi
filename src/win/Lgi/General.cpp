@@ -106,7 +106,7 @@ LString LGetFileMimeType(const char *File)
 					// This is a hack to get around file types without a MIME database entry
 					// but do have a .ext entry. LGetAppsForMimeType knows about the hack too.
 					LString MimeType;	
-					MimeType.Printf("application/%s", Dot);
+					MimeType.Printf("application/%s", Dot+1);
 					return MimeType;
 				}
 			}
